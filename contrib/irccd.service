@@ -1,0 +1,10 @@
+[Unit]
+Description=IRC Client Daemon
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=@PATH@
+
+[Install]
+WantedBy=multi-user.target

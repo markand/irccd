@@ -1,0 +1,219 @@
+.\"
+.\" Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @MONTH@ @DAY@, @YEAR@
+.Dt IRCCD.CONF 5
+.Os
+.Sh NAME
+.Nm irccd.conf
+.Nd irccd configuration file
+.Sh DESCRIPTION
+The file
+.Nm irccd.conf
+contains all parameters for the application
+.Nm irccd .
+.Pp
+The irccd.conf file is .ini based syntax, with some extensions.
+.\" SYNTAX
+.Sh SYNTAX
+The usual syntax is:
+.Bd -literal -offset indent
+[foo]
+option = value
+
+[bar]
+name = "long string enclosed between quotes"
+
+[lists]
+servers = ( "server1", "server2" )
+.Pp
+.Ed
+Comments start with # and continue to the end of the line.
+.Pp
+Note that quotes are needed if the value has more that one word, if not the
+value will be truncated at the first space found.
+.\" CONFIGURATION
+.Sh CONFIGURATION
+This section shows all available sections with the options allowed for them.
+.\" GENERAL
+.Ss general
+This section covers general options.
+.Pp
+.Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
+.It uid
+(string or number) the user id to use (Optional, default: none),
+.It gid
+(string or number) the group id to use (Optional, default: none),
+.It foreground
+(bool) set to true to not daemonize (Optional, default: false)
+.It pidfile
+(string) path to a file where to store the irccd pid (Optional, default: none).
+.El
+.\" LOGS
+.Ss logs
+This section can let you configure how irccd should log the messages.
+.Pp
+.Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
+.It verbose
+(bool) be verbose (Optional, default: false),
+.It type
+(string) which kind of logging, console, file or syslog (Optional, default: console).
+.El
+.Pp
+The following parameters are available for type "file":
+.Pp
+.Bl -tag -width PARAMETERXXX -compact -offset indent
+.It path-logs
+(string) path to the normal messages,
+.It path-errors
+(string) path to the error messages.
+.El
+.\" IDENTITY
+.Ss identity
+This section is completely optional, if you don't provide one, irccd will use
+a default identity with irccd as nickname and username. This section is
+redefinable, you can create one or more.
+.Pp
+.Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
+.It name
+(id) the identity unique id.
+.It nickname
+(string) the nickname (Optional, default: irccd).
+.It realname
+(string) the realname (Optional, default: IRC Client daemon).
+.It username
+(string) the username name (Optional, default: irccd).
+.It ctcp-version
+(string) what version to respond to CTCP VERSION (Optional, default: IRC Client Daemon).
+.It ctcp-autoreply
+(bool) enable auto CTCP VERSION reply, (Optional, default: true).
+.El
+.\" SERVER
+.Ss server
+This section is used to connect to one or more server. Thus, this section is also redefinable.
+.Pp
+.Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
+.It name
+(id) the unique id.
+.It host
+(string) the server address.
+.It port
+(int) the server port.
+.It identity
+(string) an identity to use (Optional, default: irccd's default).
+.It password
+(string) an optional password (Optional, default: none).
+.It auto-rejoin
+(bool) auto rejoin a channel after being kicked (Optional, default: false),
+.It join-invite
+(bool) join channels upon invitation (Optional, default: false).
+.It channels
+(list) list of channels to auto join, (Optional, default: empty).
+.It command-char
+(string) the prefix for invoking special commands (Optional, default: !).
+.It ssl
+(bool) enable or disable SSL (Optional, default: false).
+.It ssl-verify
+(bool) verify the SSL certificates (Optional, default: true).
+.It reconnect
+(bool) enable reconnection after failure (Optional, default: true).
+.It reconnect-tries
+(int) number of tries before giving up. A value of 0 means indefinitely (Optional, default: 0).
+.It reconnect-timeout
+(int) number of seconds to wait before retrying (Optional, default: 30).
+.El
+.\" PLUGINS
+.Ss plugins
+This section is used to load plugins.
+.Pp
+Just add any key you like to load a plugin. If the value is not specified, the plugin is searched through the standard
+directories, otherwise, provide the full path (including the .js extension).
+.Pp
+Example
+.Bd -literal
+[plugins]
+hangman = ""
+.Ed
+.\" TRANSPORT
+.Ss transport
+This section defines transports, you may use sockets to do a basic IPC system within irccd.
+.Pp
+With transports, you can may ask `irccd` to send a message, a notice or even kicking someone from a channel. Irccd
+will also notify all clients connected to this transport on IRC events.
+.Pp
+There are two type of listeners availables:
+.Bl -enum -offset 2n
+.It
+Internet sockets, IPv4 and IPv6
+.It
+Unix sockets, based on files (not available on Windows)
+.El
+.Pp
+.Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
+.It
+(string) type of listener "ip" or "unix"
+.El
+.Pp
+The following parameters are available for type "ip":
+.Pp
+.Bl -tag -width PARAMETERXXX -compact -offset indent
+.It port
+(int) port number.
+.It address
+(string) address to bind or "*" for any (Optional, default: *).
+.It familty
+(list) ipv6, ipv4. Both are accepted (Optional, default: ipv4)
+.El
+.Pp
+The following parameters are available for type "unix":
+.Pp
+.Bl -tag -width PARAMETERXXX -compact -offset indent
+.It path
+(string) the file path to the socket.
+.El
+.\" RULE
+.Ss rule
+The rule section is one of the most powerful within irccd configuration.
+.Pp
+It let you enable or disable plugins and IRC events for specific criterias. For
+instance, you may want to disable a plugin only for a specific channel on a
+specific server. And because rules are evaluated in the order they are defined,
+you can override rules.
+.Pp
+.Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
+.It servers
+(list) a list of servers that will match the rule (Optional, default: empty),
+.It channels
+(list) a list of channel (Optional, default: empty),
+.It plugins
+(list) which plugins (Optional, default: empty),
+.It events
+(list) which events (e.g onCommand, onMessage, ...) (Optional, default: empty),
+.It action
+(string) set to **accept** or **drop**.
+.\" FILES
+.Sh FILES
+The default config file is located at
+.Em @CMAKE_INSTALL_PREFIX@/@WITH_ETCDIR@/irccd.conf
+.Pp
+The user defined file follow the XDG standard and is usually
+.Em $HOME/.config/irccd/irccd.conf .
+If the XDG variable is not set, we use that path.
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd 1
+.\" AUTHORS
+.Sh AUTHORS
+irccd was written by David Demelier <markand@malikania.fr>

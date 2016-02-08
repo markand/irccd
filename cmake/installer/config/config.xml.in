@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<Installer>
+	<Name>IRC Client Daemon</Name>
+	<Version>@IRCCD_VERSION@</Version>
+	<Title>IRC Client Daemon Setup</Title>
+	<Publisher>Malikania Projects</Publisher>
+	<ProductUrl>http://projects.malikania.fr/irccd</ProductUrl>
+	<StartMenuDir>Irccd</StartMenuDir>
+	<AllowNonAsciiCharacters>true</AllowNonAsciiCharacters>
+	<TargetDir>@CMAKE_INSTALL_PREFIX@</TargetDir>
+</Installer>

@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<Package>
+	<DisplayName>Documentation</DisplayName>
+	<Description>Install documentation</Description>
+	<Version>@IRCCD_VERSION@</Version>
+	<ReleaseDate>@IRCCD_RELEASE_DATE@</ReleaseDate>
+	<Default>true</Default>
+	<SortingPriority>95</SortingPriority>
+</Package>

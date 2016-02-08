@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<Package>
+	<DisplayName>@IRCCD_PLUGIN_NAME@.js</DisplayName>
+	<Description>Install @IRCCD_PLUGIN_NAME@.js</Description>
+	<Version>@IRCCD_VERSION@</Version>
+	<ReleaseDate>@IRCCD_RELEASE_DATE@</ReleaseDate>
+	<Default>true</Default>
+</Package>
