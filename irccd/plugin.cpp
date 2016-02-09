@@ -467,7 +467,7 @@ namespace js {
 
 void TypeInfo<PluginInfo>::push(Context &ctx, const PluginInfo &info)
 {
-	js::StackAssert sa(ctx);
+	js::StackAssert sa(ctx, 1);
 
 	ctx.push(js::Object{});
 	ctx.putProperty(-1, "name", info.name);
