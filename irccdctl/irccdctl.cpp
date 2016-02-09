@@ -17,6 +17,7 @@
  */
 
 #include <algorithm>
+#include <cassert>
 #include <iterator>
 #include <memory>
 #include <string>
@@ -349,7 +350,7 @@ void Irccdctl::exec(const Alias &alias, std::vector<std::string> argsCopy)
 	for (const AliasCommand &cmd : alias) {
 		std::vector<std::string> args(argsCopy);
 		std::vector<std::string> cmdArgs;
-		std::vector<std::string>::difference_type toremove = 0;
+		std::vector<std::string>::size_type toremove = 0;
 
 		/* 1. Append command name before */
 		cmdArgs.push_back(cmd.command());
@@ -362,11 +363,13 @@ void Irccdctl::exec(const Alias &alias, std::vector<std::string> argsCopy)
 				cmdArgs.push_back(args[arg.index()]);
 
 				if (arg.index() + 1 > toremove)
-					toremove += 1;
+					toremove = arg.index() + 1;
 			} else {
 				cmdArgs.push_back(arg.value());
 			}
 		}
+
+		assert(toremove <= args.size());
 
 		/* 2. Remove the arguments that been placed in placeholders */
 		args.erase(args.begin(), args.begin() + toremove);
