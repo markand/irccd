@@ -24,11 +24,11 @@ When you're ready, extract the **irccd-x.y.z.tar.gz** where **x.y.z** is the cur
 then type the following commands:
 
 ````
-markand@localhost [irccd-2.0.0] $ mkdir _build_
-markand@localhost [irccd-2.0.0] $ cd _build_
-markand@localhost [irccd-2.0.0/_build_] $ cmake ..
-markand@localhost [irccd-2.0.0/_build_] $ make
-markand@localhost [irccd-2.0.0/_build_] $ sudo make install
+$ mkdir _build_
+$ cd _build_
+$ cmake ..
+$ make
+$ sudo make install
 ````
 
 This is the quick way of compiling and installing. It's also possible to set some options to customize the build.
