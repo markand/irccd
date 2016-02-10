@@ -35,6 +35,7 @@ set(
 set(
 	JS_FILES
 	js/bootstrap.min.js
+	js/highlight.js
 	js/jquery.min.js
 )
 
