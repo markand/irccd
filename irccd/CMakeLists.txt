@@ -119,6 +119,10 @@ if (WITH_JS)
 	list(APPEND LIBRARIES extern-duktape)
 endif ()
 
+if (IRCCD_SYSTEM_MAC)
+	list(APPEND LIBRARIES resolv)
+endif ()
+
 irccd_define_executable(
 	TARGET irccd
 	INSTALL
