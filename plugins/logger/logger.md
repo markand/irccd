@@ -74,6 +74,6 @@ Example:
 
 ````ini
 [plugin.logger]
-path = "/var/logs/irccd/#{server}/%y/%m/%d/#{source}.txt
+path = "/var/logs/irccd/#{server}/%y/%m/%d/#{source}.txt"
 format-join = "user #{nickname} joined #{channel}"
 ````
