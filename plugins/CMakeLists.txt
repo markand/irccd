@@ -23,6 +23,10 @@ add_custom_target(
 	COMMENT "Irccd plugins"
 )
 
+if (WITH_WEB)
+	set(ARGS web:1)
+endif ()
+
 foreach (plugin ${IRCCD_PLUGINS})
 	string(TOUPPER ${plugin} optname)
 
@@ -48,7 +52,7 @@ foreach (plugin ${IRCCD_PLUGINS})
 					${resources_SOURCE_DIR}/template.html
 					docs-resources
 				ARGS -Vguide
-				VARIABLE baseurl:${baseurl}
+				VARIABLE baseurl:${baseurl} doc:1 ${ARGS}
 				FROM markdown TO html5
 				STANTALONE MAKE_DIRECTORY TOC
 			)

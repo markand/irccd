@@ -54,6 +54,12 @@
 # WITH_TEST_IRCPORT	Which IRC server port to use for tests (default: 6667)
 #
 
+#
+# Options for developers:
+#
+# WITH_WEB		Set to true to use the HTML template for official irccd website.
+#
+
 # Manual pages on Windows are pretty useless.
 if (WIN32)
 	set(DEFAULT_MAN "No")
@@ -91,6 +97,8 @@ endforeach ()
 
 set(WITH_TEST_IRCHOST "127.0.0.1" CACHE STRING "IRC host for tests")
 set(WITH_TEST_IRCPORT 6667 CACHE STRING "IRC port for test")
+
+option(WITH_WEB "Use HTML template for official website" Off)
 
 # ---------------------------------------------------------
 # Installation paths

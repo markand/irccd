@@ -22,70 +22,44 @@ project(resources)
 # Install HTML resources
 # -------------------------------------------------------------------
 #
-# ${DOC_OUTPUT}/css/bootstrap.css
-# ${DOC_OUTPUT}/css/doc.css
-# ${DOC_OUTPUT}/js/bootstrap.min.js
-# ${DOC_OUTPUT}/js/jquery.min.js
-#
 
 set(
-	FILES
-	${resources_SOURCE_DIR}/css/bootstrap.css
-	${resources_SOURCE_DIR}/css/doc.css
-	${resources_SOURCE_DIR}/css/doc-guide.css
-	${resources_SOURCE_DIR}/js/bootstrap.min.js
-	${resources_SOURCE_DIR}/js/jquery.min.js
+	CSS_FILES
+	css/bootstrap.min.css
+	css/doc.css
+	css/doc-guide.css
+	css/irccd.css
+	css/tomorrow.css
 )
 
+set(
+	JS_FILES
+	js/bootstrap.min.js
+	js/jquery.min.js
+)
+
+foreach (f ${CSS_FILES} ${JS_FILES})
+	get_filename_component(base ${f} DIRECTORY)
+	get_filename_component(name ${f} NAME)
+	list(APPEND OUTPUTS ${DOC_OUTPUT}/${base}/${name})
+	list(APPEND SOURCES ${resources_SOURCE_DIR}/${f})
+	list(APPEND COMMANDS COMMAND ${CMAKE_COMMAND} -E copy ${resources_SOURCE_DIR}/${f} ${DOC_OUTPUT}/${base})
+	install(FILES ${resources_SOURCE_DIR}/${f} DESTINATION ${WITH_DOCDIR}/${base})
+endforeach ()
+
 add_custom_command(
-	OUTPUT
-		${DOC_OUTPUT}/css/bootstrap.css
-		${DOC_OUTPUT}/css/doc.css
-		${DOC_OUTPUT}/css/doc-guide.css
-		${DOC_OUTPUT}/js/bootstrap.min.js
-		${DOC_OUTPUT}/js/jquery.min.js
-	COMMAND
-		${CMAKE_COMMAND} -E make_directory ${DOC_OUTPUT}/css
-	COMMAND
-		${CMAKE_COMMAND} -E copy ${resources_SOURCE_DIR}/css/bootstrap.css ${DOC_OUTPUT}/css/bootstrap.css
-	COMMAND
-		${CMAKE_COMMAND} -E copy ${resources_SOURCE_DIR}/css/doc.css ${DOC_OUTPUT}/css/doc.css
-	COMMAND
-		${CMAKE_COMMAND} -E copy ${resources_SOURCE_DIR}/css/doc-guide.css ${DOC_OUTPUT}/css/doc-guide.css
-	COMMAND
-		${CMAKE_COMMAND} -E copy ${resources_SOURCE_DIR}/js/bootstrap.min.js ${DOC_OUTPUT}/js/bootstrap.min.js
-	COMMAND
-		${CMAKE_COMMAND} -E copy ${resources_SOURCE_DIR}/js/jquery.min.js ${DOC_OUTPUT}/js/jquery.min.js
-	DEPENDS ${FILES}
-	COMMENT "Copying HTML resources..."
+	OUTPUT ${OUTPUTS}
+	DEPENDS ${SOURCES}
+	COMMENT "Copying HTML resources"
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${DOC_OUTPUT}/css
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${DOC_OUTPUT}/js
+	${COMMANDS}
 )
 
 add_custom_target(
 	docs-resources
-	SOURCES
-		${FILES}
-		${resources_SOURCE_DIR}/template.html
-	DEPENDS
-		${DOC_OUTPUT}/css/bootstrap.css
-		${DOC_OUTPUT}/css/doc.css
-		${DOC_OUTPUT}/css/doc-guide.css
-		${DOC_OUTPUT}/js/bootstrap.min.js
-		${DOC_OUTPUT}/js/jquery.min.js
-)
-
-install(
-	FILES
-		${resources_SOURCE_DIR}/css/bootstrap.css
-		${resources_SOURCE_DIR}/css/doc.css
-		${resources_SOURCE_DIR}/css/doc-guide.css
-	DESTINATION ${WITH_DOCDIR}/css
-)
-
-install(
-	FILES
-		${resources_SOURCE_DIR}/js/bootstrap.min.js
-		${resources_SOURCE_DIR}/js/jquery.min.js
-	DESTINATION ${WITH_DOCDIR}/js
+	SOURCES ${SOURCES}
+	DEPENDS ${OUTPUTS}
 )
 
 add_dependencies(docs docs-resources)

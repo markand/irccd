@@ -5,27 +5,25 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="">
-    <meta name="author" content="">
+    <meta name="description" content="IRC Client Daemon">
+    <meta name="author" content="David Demelier">
 
     <title>$title$</title>
 
-    <!-- Bootstrap core CSS -->
-    <link href="$baseurl$css/bootstrap.css" rel="stylesheet">
+    <!-- CSS -->
+    <link href="$baseurl$/css/bootstrap.min.css" rel="stylesheet">
+    <link href="$baseurl$/css/tomorrow.css" rel="stylesheet">
 
-    <!-- Custom styles for this template -->
-    <link href="$baseurl$css/doc.css" rel="stylesheet">
-
-    <!-- Overrides for guide -->
-$if(guide)$
-    <link href="$baseurl$css/doc-guide.css" rel="stylesheet">
+$if(web)$
+    <link href="$baseurl$/css/irccd.css" rel="stylesheet">
 $endif$
 
-    <!-- Pandoc highlighting -->
-$if(highlighting-css)$
-    <style type="text/css">
-$highlighting-css$
-    </style>
+$if(doc)$
+    <link href="$baseurl$/css/doc.css" rel="stylesheet">
+$endif$
+
+$if(guide)$
+    <link href="$baseurl$/css/doc-guide.css" rel="stylesheet">
 $endif$
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -36,146 +34,195 @@ $endif$
   </head>
 
   <body>
-    <div class="container-fluid">
-      <div class="row">
-	<!-- Side bar -->
-	<div class="col-sm-1 col-md-2 sidebar">
-	<!-- Side bar for JavaScript -->
-$if(js)$
-	  <a href="$baseurl$api/index.html"><h3>Home</h3></a>
-	  <h3>Events</h3>
-	  <ul class="nav nav-sidebar sidebar-list">
-	    <li><a href="$baseurl$api/event/onChannelMode.html">onChannelMode</a></li>
-	    <li><a href="$baseurl$api/event/onChannelNotice.html">onChannelNotice</a></li>
-	    <li><a href="$baseurl$api/event/onCommand.html">onCommand</a></li>
-	    <li><a href="$baseurl$api/event/onConnect.html">onConnect</a></li>
-	    <li><a href="$baseurl$api/event/onInvite.html">onInvite</a></li>
-	    <li><a href="$baseurl$api/event/onJoin.html">onJoin</a></li>
-	    <li><a href="$baseurl$api/event/onKick.html">onKick</a></li>
-	    <li><a href="$baseurl$api/event/onLoad.html">onLoad</a></li>
-	    <li><a href="$baseurl$api/event/onMe.html">onMe</a></li>
-	    <li><a href="$baseurl$api/event/onMessage.html">onMessage</a></li>
-	    <li><a href="$baseurl$api/event/onMode.html">onMode</a></li>
-	    <li><a href="$baseurl$api/event/onNames.html">onNames</a></li>
-	    <li><a href="$baseurl$api/event/onNick.html">onNick</a></li>
-	    <li><a href="$baseurl$api/event/onNotice.html">onNotice</a></li>
-	    <li><a href="$baseurl$api/event/onPart.html">onPart</a></li>
-	    <li><a href="$baseurl$api/event/onQuery.html">onQuery</a></li>
-	    <li><a href="$baseurl$api/event/onQueryCommand.html">onQueryCommand</a></li>
-	    <li><a href="$baseurl$api/event/onReload.html">onReload</a></li>
-	    <li><a href="$baseurl$api/event/onTopic.html">onTopic</a></li>
-	    <li><a href="$baseurl$api/event/onUnload.html">onUnload</a></li>
-	    <li><a href="$baseurl$api/event/onWhois.html">onWhois</a></li>
-	  </ul>
-	  <h3>Modules</h3>
-	  <ul class="nav nav-sidebar sidebar-list">
-	    <li><a href="$baseurl$api/module/Irccd/index.html">Irccd</a></li>
-	    <li><a href="$baseurl$api/module/Irccd.Directory/index.html">Irccd.Directory</a></li>
-	    <li><a href="$baseurl$api/module/Irccd.ElapsedTimer/index.html">Irccd.ElapsedTimer</a></li>
-	    <li><a href="$baseurl$api/module/Irccd.File/index.html">Irccd.File</a></li>
-	    <li><a href="$baseurl$api/module/Irccd.Logger/index.html">Irccd.Logger</a></li>
-	    <li><a href="$baseurl$api/module/Irccd.Plugin/index.html">Irccd.Plugin</a></li>
-	    <li><a href="$baseurl$api/module/Irccd.Server/index.html">Irccd.Server</a></li>
-	    <li><a href="$baseurl$api/module/Irccd.System/index.html">Irccd.System</a></li>
-	    <li><a href="$baseurl$api/module/Irccd.Timer/index.html">Irccd.Timer</a></li>
-	    <li><a href="$baseurl$api/module/Irccd.Unicode/index.html">Irccd.Unicode</a></li>
-	    <li><a href="$baseurl$api/module/Irccd.Util/index.html">Irccd.Util</a></li>
-	  </ul>
-$endif$<!-- js -->
+$if(web)$
+    <nav class="navbar navbar-fixed-top navbar-inverse">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="$baseurl$/index.html">irccd</a>
+        </div><!-- navbar-header -->
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="$baseurl$/about.html">About</a></li>
+            <li><a href="$baseurl$/documentation.html">Documentation</a></li>
+            <li><a href="$baseurl$/download.html">Download</a></li>
+            <li><a href="$baseurl$/contribute.html">Contribute</a></li>
+            <li><a href="$baseurl$/support.html">Support</a></li>
+          </ul>
+          <p id="joke" class="navbar-text navbar-right">The definitive bot</p>
+        </div><!-- !navbar -->
+      </div><!-- !container -->
+    </nav>
 
-	<!-- Side bar for guide -->
+$if(home)$
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+     <div class="container">
+      <h1>IRC Client Daemon</h1>
+      <p>Irccd is an IRC bot written in C++14 and Javascript. It is fast, light, powerful, scalable.</p>
+      <p><a class="btn btn-primary btn-lg" href="#" role="button">Download now &raquo;</a></p>
+     </div>
+    </div>
+$endif$ <!-- ! endif home -->
+$endif$ <!-- ! endif web -->
+
+$if(doc)$
+<div class="container-fluid">
+$endif$
+$if(general)$
+<div class="container">
+$endif$
+
+$if(doc)$
+  <div class="row">
+    <!-- Side bar -->
+    <div class="col-sm-1 col-md-2 sidebar">
+    <!-- Side bar for JavaScript -->
+$if(js)$
+      <a href="$baseurl$api/index.html"><h3>Home</h3></a>
+      <h3>Events</h3>
+      <ul class="nav nav-sidebar sidebar-list">
+        <li><a href="$baseurl$api/event/onChannelMode.html">onChannelMode</a></li>
+        <li><a href="$baseurl$api/event/onChannelNotice.html">onChannelNotice</a></li>
+        <li><a href="$baseurl$api/event/onCommand.html">onCommand</a></li>
+        <li><a href="$baseurl$api/event/onConnect.html">onConnect</a></li>
+        <li><a href="$baseurl$api/event/onInvite.html">onInvite</a></li>
+        <li><a href="$baseurl$api/event/onJoin.html">onJoin</a></li>
+        <li><a href="$baseurl$api/event/onKick.html">onKick</a></li>
+        <li><a href="$baseurl$api/event/onLoad.html">onLoad</a></li>
+        <li><a href="$baseurl$api/event/onMe.html">onMe</a></li>
+        <li><a href="$baseurl$api/event/onMessage.html">onMessage</a></li>
+        <li><a href="$baseurl$api/event/onMode.html">onMode</a></li>
+        <li><a href="$baseurl$api/event/onNames.html">onNames</a></li>
+        <li><a href="$baseurl$api/event/onNick.html">onNick</a></li>
+        <li><a href="$baseurl$api/event/onNotice.html">onNotice</a></li>
+        <li><a href="$baseurl$api/event/onPart.html">onPart</a></li>
+        <li><a href="$baseurl$api/event/onQuery.html">onQuery</a></li>
+        <li><a href="$baseurl$api/event/onQueryCommand.html">onQueryCommand</a></li>
+        <li><a href="$baseurl$api/event/onReload.html">onReload</a></li>
+        <li><a href="$baseurl$api/event/onTopic.html">onTopic</a></li>
+        <li><a href="$baseurl$api/event/onUnload.html">onUnload</a></li>
+        <li><a href="$baseurl$api/event/onWhois.html">onWhois</a></li>
+      </ul>
+      <h3>Modules</h3>
+      <ul class="nav nav-sidebar sidebar-list">
+        <li><a href="$baseurl$api/module/Irccd/index.html">Irccd</a></li>
+        <li><a href="$baseurl$api/module/Irccd.Directory/index.html">Irccd.Directory</a></li>
+        <li><a href="$baseurl$api/module/Irccd.ElapsedTimer/index.html">Irccd.ElapsedTimer</a></li>
+        <li><a href="$baseurl$api/module/Irccd.File/index.html">Irccd.File</a></li>
+        <li><a href="$baseurl$api/module/Irccd.Logger/index.html">Irccd.Logger</a></li>
+        <li><a href="$baseurl$api/module/Irccd.Plugin/index.html">Irccd.Plugin</a></li>
+        <li><a href="$baseurl$api/module/Irccd.Server/index.html">Irccd.Server</a></li>
+        <li><a href="$baseurl$api/module/Irccd.System/index.html">Irccd.System</a></li>
+        <li><a href="$baseurl$api/module/Irccd.Timer/index.html">Irccd.Timer</a></li>
+        <li><a href="$baseurl$api/module/Irccd.Unicode/index.html">Irccd.Unicode</a></li>
+        <li><a href="$baseurl$api/module/Irccd.Util/index.html">Irccd.Util</a></li>
+      </ul>
+$endif$ <!-- endif js -->
+
+    <!-- Side bar for guide -->
 $if(guide)$
 $toc$
-$endif$
-	</div><!-- Side bar -->
+$endif$ <!-- endif guide -->
+    </div><!-- Side bar -->
 
-	<div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-	<!-- Page body for JavaScript -->
+    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+    <!-- Page body for JavaScript -->
 $if(js)$
-	<!-- Page header, may be: event | module | function | method -->
-	<!-- Event -->
-	$if(event)$
-	<h1 class="page-header">Event: $event$</h1>
-	$endif$
+    <!-- Page header, may be: event | module | function | method -->
+    <!-- Event -->
+    $if(event)$
+    <h1 class="page-header">Event: $event$</h1>
+    $endif$
 
-	<!-- Module -->
-	$if(module)$
-	<h1 class="page-header">Module: $module$</h1>
-	$endif$
+    <!-- Module -->
+    $if(module)$
+    <h1 class="page-header">Module: $module$</h1>
+    $endif$
 
-	<!-- Function -->
-	$if(function)$
-	<h1 class="page-header">Function: $function$</h1>
-	$endif$
+    <!-- Function -->
+    $if(function)$
+    <h1 class="page-header">Function: $function$</h1>
+    $endif$
 
-	<!-- Method -->
-	$if(method)$
-	<h1 class="page-header">Method: $method$</h1>
-	$endif$
-	<!-- End of page header -->
+    <!-- Method -->
+    $if(method)$
+    <h1 class="page-header">Method: $method$</h1>
+    $endif$
+    <!-- End of page header -->
 
-	<div class="table-responsive">
-	  <!-- Summary -->
+    <div class="table-responsive">
 $summary$
-	    <!-- !Summary -->
 
-	    <!-- Synopsis -->
 $if(synopsis)$
-	    <h2>Synopsis</h2>
+        <h2>Synopsis</h2>
 
-	    <!-- Javascript function signature -->
-	    <pre class="sourceCode javascript">$synopsis$</pre>
-$endif$
-	    <!-- !Synopsis -->
+        <!-- Javascript function signature -->
+        <pre class="sourceCode javascript">$synopsis$</pre>
+$endif$ <!-- endif synopsis -->
 
-	    <!-- Arguments -->
+        <!-- Arguments -->
 $if(arguments)$
-	    <h2>Arguments</h2>
-	    <ul>
+        <h2>Arguments</h2>
+        <ul>
 $for(arguments)$
-	      <li>$arguments$</li>
+          <li>$arguments$</li>
 $endfor$
-	    </ul>
-$endif$
-	    <!-- !Arguments -->
+        </ul>
+$endif$ <!-- endif arguments -->
 
-	    <!-- Returns -->
 $if(returns)$
-	    <h2>Returns</h2>
-	    <p>$returns$</p>
-$endif$
-	    <!-- !Returns -->
+        <h2>Returns</h2>
+        <p>$returns$</p>
+$endif$ <!-- endif returns -->
 
-	    <!-- Body -->
 $body$
-	    <!-- !Body -->
-	</div><!-- !table-responsive -->
-$endif$
+        <!-- !Body -->
+    </div><!-- !table-responsive -->
+$endif$ <!-- endif js -->
 
-	<!-- Page body for guide -->
+    <!-- Page body for guide -->
 $if(guide)$
-	<div class="table-responsive">
-	<!-- Generic header -->
-	$if(header)$
-	<h1 class="page-header">$header$</h1>
-	$endif$
+    <div class="table-responsive">
+    <!-- Generic header -->
+    $if(header)$
+    <h1 class="page-header">$header$</h1>
+    $endif$
 
 $body$
-	</div><!-- !table-responsive -->
+    </div><!-- !table-responsive -->
+$endif$ <!-- endif guide -->
+    </div><!-- !column -->
+  </div><!-- !row -->
 $endif$
-	</div><!-- !column -->
-      </div><!-- !row -->
-    </div><!-- !container-fluid -->
+
+$if(general)$
+$body$
+$endif$ <!-- endif general -->
+
+  <hr>
+  <footer>
+    <p>&copy; 2013-2016 David Demelier.</p>
+  </footer>
+</div> <!-- !container -->
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="$baseurl$js/jquery.min.js"></script>
-    <script src="$baseurl$js/bootstrap.min.js"></script>
+    <script src="$baseurl$/js/jquery.min.js"></script>
+    <script src="$baseurl$/js/bootstrap.min.js"></script>
 
-    <!-- Bootstrapify what is compiled by pandoc and not automatically managed by bootstrap -->
-    <script>
-    jQuery("table").addClass("table");
-    </script>
+$if(web)$
+    <script src="$baseurl$/js/joke.js"></script>
+$endif$
+
+    <script src="$baseurl$/js/highlight.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+    <script>jQuery("table").addClass("table");</script>
   </body>
 </html>
