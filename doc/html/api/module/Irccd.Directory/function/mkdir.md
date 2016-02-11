@@ -4,6 +4,6 @@ summary: "Create a directory specified by path. It will create needed subdirecto
 synopsis: "Irccd.Directory.mkdir(path, mode = 0700)"
 arguments:
   - "path, the path to the directory,"
-  - "mode, the mode, not available on all platforms"
+  - "mode, the mode, not available on all platforms."
 throws: "Any exception on error."
 ---

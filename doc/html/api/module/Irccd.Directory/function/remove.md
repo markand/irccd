@@ -8,6 +8,8 @@ arguments:
 throws: "Any exception on error."
 ---
 
-<div class="alert alert-warning" role="alert">
-**Warning**: use this function with care!
+## Remarks
+
+<div class="alert alert-danger" role="alert">
+**Danger**: use this function with care!
 </div>

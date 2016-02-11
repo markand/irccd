@@ -9,6 +9,8 @@ This class and functions are available for opening and writing files on the disk
 
 For convenience, some functions are available as free-functions and some as object methods.
 
+## Remarks
+
 <div class="alert alert-warning" role="alert">
 **Warning**: the stat function and method are optional and may not be available on your system.
 </div>

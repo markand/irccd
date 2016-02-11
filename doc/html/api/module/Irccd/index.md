@@ -21,8 +21,9 @@ The following properties are defined:
 var Logger = Irccd.Logger;
 
 function onLoad()
+{
 	Logger.info("Major: " + Irccd.version.major);
 	Logger.info("Minor: " + Irccd.version.minor);
 	Logger.info("Patch: " + Irccd.version.patch);
-end
+}
 ````

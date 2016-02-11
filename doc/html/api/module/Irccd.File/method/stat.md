@@ -1,10 +1,12 @@
 ---
 method: stat
-summary: "Synonym of [File.stat](@baseurl@/api/module/Irccd.File/function/stat.html) but with the path from the file."
+summary: "Synonym of [Irccd.File.stat](@baseurl@/api/module/Irccd.File/function/stat.html) but with the path from the file."
 synopsis: "File.prototype.stat()"
-returns: "The stat information"
-throws: "Any exception on error"
+returns: "The stat information."
+throws: "Any exception on error."
 ---
+
+## Remarks
 
 <div class="alert alert-warning" role="alert">
 **Warning**: this method is optional and may not be available on your system.

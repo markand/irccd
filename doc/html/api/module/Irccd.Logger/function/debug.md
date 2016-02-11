@@ -6,4 +6,6 @@ arguments:
   - "message, the message."
 ---
 
+## Remarks
+
 This function targets irccd developers, the end user should not use it.

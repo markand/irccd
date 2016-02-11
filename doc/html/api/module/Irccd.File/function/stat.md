@@ -4,13 +4,9 @@ summary: "Get file information at the specified path."
 synopsis: "info = Irccd.File.stat(path)"
 arguments:
   - "path, the path to the file."
-returns: "The stats information"
+returns: "The stat information."
 throws: "Any exception on error."
 ---
-
-<div class="alert alert-warning" role="alert">
-**Warning**: this function is optional and may not be available on your system.
-</div>
 
 The returned object may have the following properties if they are available on your system:
 
@@ -27,3 +23,9 @@ The returned object may have the following properties if they are available on y
   - **rdev**: (int),
   - **size**: (int) the file size,
   - **uid**: (int) the user.
+
+## Remarks
+
+<div class="alert alert-warning" role="alert">
+**Warning**: this function is optional and may not be available on your system.
+</div>

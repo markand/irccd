@@ -181,6 +181,16 @@ $if(returns)$
         <p>$returns$</p>
 $endif$ <!-- endif returns -->
 
+        <!-- Throws -->
+$if(throws)$
+        <h2>Throws</h2>
+        <ul>
+$for(throws)$
+          <li>$throws$</li>
+$endfor$
+        </ul>
+$endif$ <!-- endif throws -->
+
 $body$
         <!-- !Body -->
     </div><!-- !table-responsive -->

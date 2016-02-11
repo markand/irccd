@@ -5,7 +5,7 @@ synopsis: "table = Irccd.Server.list()"
 returns: "the table of all servers."
 ---
 
-Example:
+## Example
 
 ````javascript
 var table = Irccd.Server.list();

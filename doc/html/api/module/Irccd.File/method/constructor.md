@@ -4,14 +4,13 @@ summary: "Open a file specified by path with the specified mode."
 synopsis: "Irccd.File(path, mode) /* constructor */"
 arguments:
   - "path, the path to the file,"
-  - "mode, the mode, can be one of [abrwt]"
-throws: "Any exception on error"
+  - "mode, the mode string."
+throws: "Any exception on error."
 ---
 
-The mode string understands the following characters:
+## Mode
 
-  - **a**: append to the end of file,
-  - **b**: open in binary mode,
-  - **r**: open for reading,
-  - **w**: open for writing,
-  - **t**: truncate the file.
+The mode is the same as the `fopen(3)`, see the documentation of [std::fopen(3)][fopen] for more information
+about the mode string.
+
+[fopen]: http://en.cppreference.com/w/cpp/io/c/fopen

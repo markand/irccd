@@ -4,7 +4,7 @@ summary: "Open a directory."
 synopsis: "Irccd.Directory(path, flags) /* constructor */"
 arguments:
   - "path, the path to the directory,"
-  - "flags, the OR'ed flags: Irccd.Directory.Dot, Irccd.Directory.DotDot (Optional, default: none)"
+  - "flags, the OR'ed flags: `Irccd.Directory.Dot`, `Irccd.Directory.DotDot` (Optional, default: none)"
 throws: "Any exception on error."
 ---
 
@@ -22,11 +22,9 @@ When constructed successfully, the object has the following properties:
 try {
   var d = new Irccd.Directory("/usr/share/games");
 
-  for (var i = 0; i < d.count; ++i) {
-    if (d.entries[i].type == Irccd.Directory.TypeFile) {
+  for (var i = 0; i < d.count; ++i)
+    if (d.entries[i].type == Irccd.Directory.TypeFile)
       // use d.entries[i].name which is a file.
-    }
-  }
 } catch (e) {
   // Use the error
 }

@@ -5,8 +5,9 @@ summary: >
   specification.
 synopsis: "str = Irccd.Util.format(input, params)"
 arguments:
-  - "input, the text to update"
-  - "params, the parameters"
+  - "input, the text to update,"
+  - "params, the parameters."
+returns: "The converted text."
 ---
 
 
@@ -25,27 +26,34 @@ function onMessage(server, channel, origin, message)
 
 Be very careful when you use this function with untrusted input.
 
-<div class="alert alert-danger" role="alert">
-**Bad code**: Do never pass untrusted content (e.g. user message) as input parameter. For example, the following code is terribly dangerous:
-</div>
-
+<div class="panel panel-danger">
+ <div class="panel-heading">
+**Bad code:** Do never pass untrusted content (e.g. user message) as input parameter. For example, the following code
+is terribly dangerous:
+ </div>
+ <div class="panel-body">
 ````javascript
 function onMessage(server, channel, origin, message)
 {
-    server.message(channel, Irccd.Util.format("%{red}" + input %{}");
+	server.message(channel, Irccd.Util.format("@{red}" + message + "@{}");
 }
 ````
 
-If a user write a message like `${HOME}`, it will prints the user home directory, which is a high security issue
+If a user sends a message like `${HOME}`, it will prints the user home directory, which is a high security issue
 if you have environment variables with passwords.
-
-<div class="alert alert-success">
-**Correct code**: Instead, always use a literal string using a replacement with the user input
+ </div>
 </div>
 
+<div class="panel panel-success">
+ <div class="panel-heading">
+**Correct code**: Instead, always use a literal string using a replacement with the user input:
+ </div>
+ <div class="panel-body">
 ````javascript
 function onMessage(server, channel, origin, message)
 {
-    server.message(channel, Irccd.Util.format("%{red}#{message}%{}", { message: message });
+	server.message(channel, Irccd.Util.format("@{red}#{message}@{}", { message: message });
 }
 ````
+ </div>
+</div>
