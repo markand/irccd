@@ -60,6 +60,7 @@ private:
 	void readConnectIp(const ini::Section &sc);
 	void readConnectUnix(const ini::Section &sc);
 	void readConnect(const ini::Section &sc);
+	void readGeneral(const ini::Section &sc);
 	void readAliases(const ini::Section &sc);
 	void read(const std::string &path, const parser::Result &options);
 

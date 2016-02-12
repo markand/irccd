@@ -34,6 +34,7 @@
 #include <path.h>
 #include <sockets.h>
 #include <system.h>
+#include <util.h>
 
 #include "irccdctl.h"
 
@@ -185,6 +186,14 @@ void Irccdctl::readConnect(const ini::Section &sc)
 		throw std::invalid_argument("invalid type given: " + it->value());
 }
 
+void Irccdctl::readGeneral(const ini::Section &sc)
+{
+	auto verbose = sc.find("verbose");
+
+	if (verbose != sc.end())
+		log::setVerbose(util::isBoolean(verbose->value()));
+}
+
 void Irccdctl::readAliases(const ini::Section &sc)
 {
 	for (const ini::Option &option : sc) {
@@ -234,6 +243,8 @@ void Irccdctl::read(const std::string &path, const parser::Result &options)
 	/* Do not try to read [connect] if specified at command line */
 	if (it != doc.end() && options.count("-t") == 0 && options.count("--type") == 0)
 		readConnect(*it);
+	if ((it = doc.find("general")) != doc.end())
+		readGeneral(*it);
 	if ((it = doc.find("alias")) != doc.end())
 		readAliases(*it);
 }
