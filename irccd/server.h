@@ -140,7 +140,7 @@ public:
 
 	ServerChannels channels;		//!< List of channel to join
 	std::string command{"!"};		//!< The command character to trigger plugin command
-	std::int8_t recotries{3};		//!< Number of tries to reconnect before giving up
+	std::int8_t recotries{-1};		//!< Number of tries to reconnect before giving up
 	std::uint16_t recotimeout{30};		//!< Number of seconds to wait before trying to connect
 	std::uint8_t flags{0};			//!< Optional flags
 

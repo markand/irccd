@@ -130,7 +130,7 @@ This section is used to connect to one or more server. Thus, this section is als
 .It reconnect
 (bool) enable reconnection after failure (Optional, default: true).
 .It reconnect-tries
-(int) number of tries before giving up. A value of 0 means indefinitely (Optional, default: 0).
+(int) number of tries before giving up. A value of -1 means indefinitely (Optional, default: -1).
 .It reconnect-timeout
 (int) number of seconds to wait before retrying (Optional, default: 30).
 .El

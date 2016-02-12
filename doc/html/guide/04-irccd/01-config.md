@@ -121,7 +121,7 @@ The available options:
   - **ssl**: (bool) enable or disable SSL (Optional, default: false),
   - **ssl-verify**: (bool) verify the SSL certificates (Optional, default: true),
   - **reconnect**: (bool) enable reconnection after failure (Optional, default: true),
-  - **reconnect-tries**: (int) number of tries before giving up. A value of 0 means indefinitely (Optional, default: 0),
+  - **reconnect-tries**: (int) number of tries before giving up. A value of -1 means indefinitely (Optional, default: -1),
   - **reconnect-timeout**: (int) number of seconds to wait before retrying (Optional, default: 30).
 
 <div class="alert alert-info" role="alert">

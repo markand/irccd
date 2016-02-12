@@ -90,10 +90,8 @@ void ServerState::prepareConnecting(Server &server, fd_set &setinput, fd_set &se
 	 * It returns success if the connection was successful but it does not
 	 * mean that connection is established.
 	 *
-	 * Because this function will be called repeatidly from the
-	 * ServerManager, if the connection was started and we're still not
-	 * connected in the specified timeout time, we mark the server
-	 * as disconnected.
+	 * Because this function will be called repeatidly, the connection was started and we're still not
+	 * connected in the specified timeout time, we mark the server as disconnected.
 	 *
 	 * Otherwise, the libircclient event_connect will change the state.
 	 */
@@ -106,12 +104,11 @@ void ServerState::prepareConnecting(Server &server, fd_set &setinput, fd_set &se
 			log::warning() << "server " << info.name << ": timeout while connecting" << std::endl;
 			server.next(ServerState::Disconnected);
 		} else if (!irc_is_connected(server.session())) {
-			log::warning() << "server " << info.name << ": error while connecting: "
-					  << irc_strerror(irc_errno(server.session())) << std::endl;
+			log::warning() << "server " << info.name << ": error while connecting: ";
+			log::warning() << irc_strerror(irc_errno(server.session())) << std::endl;
 
-			if (settings.recotimeout > 0) {
+			if (settings.recotries != 0)
 				log::warning() << "server " << info.name << ": retrying in " << settings.recotimeout << " seconds" << std::endl;
-			}
 
 			server.next(ServerState::Disconnected);
 		} else {
@@ -144,11 +141,10 @@ void ServerState::prepareDisconnected(Server &server, fd_set &, fd_set &, net::H
 	const ServerInfo &info = server.info();
 	ServerSettings &settings = server.settings();
 
-	/* if ServerSettings::recotries it set to -1, reconnection is completely disabled. */
-	if (settings.recotries < 0) {
+	if (settings.recotries == 0) {
 		log::warning() << "server " << info.name << ": reconnection disabled, skipping" << std::endl;
 		server.onDie();
-	} else if ((settings.recocurrent + 1) > settings.recotries) {
+	} else if (settings.recotries > 0 && settings.recocurrent > settings.recotries) {
 		log::warning() << "server " << info.name << ": giving up" << std::endl;
 		server.onDie();
 	} else {
