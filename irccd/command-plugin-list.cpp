@@ -46,6 +46,9 @@ void PluginList::exec(Irccd &irccd, TransportClient &tc, const json::Value &) co
 
 	tc.send(oss.str());
 #else
+	(void)irccd;
+	(void)tc;
+
 	throw std::runtime_error("JavaScript disabled");
 #endif
 }

@@ -32,7 +32,10 @@
 #include <logger.h>
 #include <sockets.h>
 
-#include "plugin.h"
+#if defined(WITH_JS)
+#  include "plugin.h"
+#endif
+
 #include "rule.h"
 #include "server.h"
 #include "transport-command.h"
@@ -40,6 +43,7 @@
 
 namespace irccd {
 
+class Plugin;
 class TransportCommand;
 
 /**
@@ -74,8 +78,10 @@ public:
 	std::string origin;
 	std::string target;
 	std::string json;
+#if defined(WITH_JS)
 	std::function<std::string (Plugin &)> name;
 	std::function<void (Plugin &)> exec;
+#endif
 };
 
 class TransportEvent {

@@ -72,7 +72,10 @@ add_subdirectory(doc)
 add_subdirectory(irccd)
 add_subdirectory(irccdctl)
 add_subdirectory(contrib)
-add_subdirectory(plugins)
+
+if (WITH_JS)
+	add_subdirectory(plugins)
+endif ()
 
 # Platform specific.
 if (WIN32)

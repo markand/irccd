@@ -155,6 +155,7 @@ void Config::loadLogs(const ini::Document &config) const
 
 void Config::loadPlugins(Irccd &irccd, const ini::Section &sc) const
 {
+#if defined(WITH_JS)
 	for (const ini::Option &option : sc) {
 		try {
 			if (option.value().empty())
@@ -165,20 +166,31 @@ void Config::loadPlugins(Irccd &irccd, const ini::Section &sc) const
 			log::warning() << "plugin " << option.key() << ": " << ex.what() << std::endl;
 		}
 	}
+#else
+	(void)irccd;
+	(void)sc;
+#endif
 }
 
 void Config::loadPluginConfig(Irccd &irccd, const ini::Section &sc, string name) const
 {
+#if defined(WITH_JS)
 	PluginConfig config;
 
 	for (const ini::Option &option : sc)
 		config.emplace(option.key(), option.value());
 
 	irccd.addPluginConfig(std::move(name), std::move(config));
+#else
+	(void)irccd;
+	(void)sc;
+	(void)name;
+#endif
 }
 
 void Config::loadPlugins(Irccd &irccd, const ini::Document &config) const
 {
+#if defined(WITH_JS)
 	std::regex regex("^plugin\\.([A-Za-z0-9-_]+)$");
 	std::smatch match;
 
@@ -194,6 +206,12 @@ void Config::loadPlugins(Irccd &irccd, const ini::Document &config) const
 
 	if (it != config.end())
 		loadPlugins(irccd, *it);
+#else
+	(void)irccd;
+	(void)config;
+
+	log::warning() << "irccd: JavaScript disabled, ignoring plugins" << std::endl;
+#endif
 }
 
 void Config::loadServer(Irccd &irccd, const ini::Section &sc) const

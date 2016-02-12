@@ -32,6 +32,10 @@ void PluginLoad::exec(Irccd &irccd, TransportClient &tc, const json::Value &obje
 	irccd.loadPlugin(name, name, true);
 	tc.ok("plugin-load");
 #else
+	(void)irccd;
+	(void)tc;
+	(void)object;
+
 	throw std::runtime_error("JavaScript disabled");
 #endif
 }
