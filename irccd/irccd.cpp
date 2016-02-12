@@ -785,7 +785,20 @@ std::shared_ptr<Server> Irccd::requireServer(const std::string &name) const
 
 void Irccd::removeServer(const std::string &name)
 {
-	m_servers.erase(name);
+	auto it = m_servers.find(name);
+
+	if (it != m_servers.end()) {
+		it->second->disconnect();
+		m_servers.erase(it);
+	}
+}
+
+void Irccd::clearServers() noexcept
+{
+	for (auto &pair : m_servers)
+		pair.second->disconnect();
+
+	m_servers.clear();
 }
 
 void Irccd::addTransport(shared_ptr<TransportServer> ts)

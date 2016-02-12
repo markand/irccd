@@ -344,17 +344,18 @@ public:
 	/**
 	 * Remove a server from the irccd instance.
 	 *
+	 * The server if any, will be disconnected.
+	 *
 	 * @param name the server name
 	 */
 	void removeServer(const std::string &name);
 
 	/**
 	 * Remove all servers.
+	 *
+	 * All servers will be disconnected.
 	 */
-	inline void clearServers() noexcept
-	{
-		m_servers.clear();
-	}
+	void clearServers() noexcept;
 
 	/*
 	 * Transport management
