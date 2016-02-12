@@ -224,17 +224,17 @@ void Config::loadServer(Irccd &irccd, const ini::Section &sc) const
 	ini::Section::const_iterator it;
 
 	if ((it = sc.find("name")) == sc.end()) 
-		throw invalid_argument("missing name");
+		throw std::invalid_argument("server: missing name");
 	else if (!util::isIdentifierValid(it->value()))
-		throw invalid_argument("name is not valid");
+		throw std::invalid_argument("server " + it->value() + ": name is not valid");
 	else if (irccd.hasServer(it->value()))
-		throw invalid_argument("server already exists");
+		throw std::invalid_argument("server " + it->value() + ": already exists");
 
 	info.name = it->value();
 
 	/* Host */
 	if ((it = sc.find("host")) == sc.end())
-		throw invalid_argument("missing host");
+		throw std::invalid_argument("server " + info.name + ": missing host");
 
 	info.host = it->value();
 
@@ -245,9 +245,9 @@ void Config::loadServer(Irccd &irccd, const ini::Section &sc) const
 	/* Optional port */
 	if ((it = sc.find("port")) != sc.end()) {
 		try {
-			info.port = stoi(it->value());
+			info.port = std::stoi(it->value());
 		} catch (const std::exception &) {
-			log::warning() << "irccd: invalid port number: " << it->value() << std::endl;
+			throw std::invalid_argument("server " + info.name + ": invalid port number: " + it->value());
 		}
 	}
 
@@ -258,10 +258,21 @@ void Config::loadServer(Irccd &irccd, const ini::Section &sc) const
 	/* Optional flags */
 	if ((it = sc.find("ipv6")) != sc.end() && util::isBoolean(it->value()))
 		info.flags |= ServerInfo::Ipv6;
-	if ((it = sc.find("ssl")) != sc.end() && util::isBoolean(it->value()))
-		info.flags |= ServerInfo::Ssl;
-	if ((it = sc.find("ssl-verify")) != sc.end() && util::isBoolean(it->value()))
-		info.flags |= ServerInfo::SslVerify;
+	if ((it = sc.find("ssl")) != sc.end())
+		if (util::isBoolean(it->value()))
+#if defined(WITH_SSL)
+			info.flags |= ServerInfo::Ssl;
+#else
+			throw std::invalid_argument("server " + info.name + ": ssl is disabled");
+#endif
+
+	if ((it = sc.find("ssl-verify")) != sc.end())
+		if (util::isBoolean(it->value()))
+#if defined(WITH_SSL)
+			info.flags |= ServerInfo::SslVerify;
+#else
+			throw std::invalid_argument("server " + info.name + ": ssl is disabled");
+#endif
 
 	/* Options */
 	if ((it = sc.find("auto-rejoin")) != sc.end() && util::isBoolean(it->value()))
@@ -271,17 +282,17 @@ void Config::loadServer(Irccd &irccd, const ini::Section &sc) const
 
 	/* Channels */
 	if ((it = sc.find("channels")) != sc.end()) {
-		for (const string &s : *it) {
+		for (const std::string &s : *it) {
 			ServerChannel channel;
 
-			if (auto pos = s.find(":") != string::npos) {
+			if (auto pos = s.find(":") != std::string::npos) {
 				channel.name = s.substr(0, pos);
 				channel.password = s.substr(pos + 1);
 			} else {
 				channel.name = s;
 			}
 
-			settings.channels.push_back(move(channel));
+			settings.channels.push_back(std::move(channel));
 		}
 	}
 	if ((it = sc.find("command-char")) != sc.end())
@@ -290,14 +301,14 @@ void Config::loadServer(Irccd &irccd, const ini::Section &sc) const
 	/* Reconnect */
 	try {
 		if ((it = sc.find("reconnect-tries")) != sc.end())
-			settings.recotries = stoi(it->value());
+			settings.recotries = std::stoi(it->value());
 		if ((it = sc.find("reconnect-timeout")) != sc.end())
-			settings.recotimeout = stoi(it->value());
+			settings.recotimeout = std::stoi(it->value());
 	} catch (const std::exception &) {
-		log::warning() << "irccd: invalid number for " << it->key() << ": " << it->value() << std::endl;
+		throw std::invalid_argument("server " + info.name + ": invalid number for " + it->key() + ": " + it->value());
 	}
 
-	irccd.addServer(make_shared<Server>(move(info), move(identity), move(settings)));
+	irccd.addServer(std::make_shared<Server>(std::move(info), std::move(identity), std::move(settings)));
 }
 
 void Config::loadServers(Irccd &irccd, const ini::Document &config) const
@@ -307,7 +318,7 @@ void Config::loadServers(Irccd &irccd, const ini::Document &config) const
 			try {
 				loadServer(irccd, section);
 			} catch (const exception &ex) {
-				log::warning() << "server: " << ex.what() << endl;
+				log::warning() << ex.what() << endl;
 			}
 		}
 	}

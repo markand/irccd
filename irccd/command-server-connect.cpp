@@ -76,7 +76,12 @@ ServerInfo readInfo(const json::Value &object)
 	info.port = readInfoPort(object);
 
 	if (object.valueOr("ssl", json::Type::Boolean, false).toBool())
+#if defined(WITH_SSL)
 		info.flags |= ServerInfo::Ssl;
+#else
+		throw std::invalid_argument("ssl is disabled");
+#endif
+
 	if (object.valueOr("sslVerify", json::Type::Boolean, false).toBool())
 		info.flags |= ServerInfo::SslVerify;
 

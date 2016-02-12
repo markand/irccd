@@ -41,10 +41,12 @@ bool ServerState::connect(Server &server)
 	int code;
 
 	/* libircclient requires # for SSL connection */
+#if defined(WITH_SSL)
 	if (info.flags & ServerInfo::Ssl)
 		host.insert(0, 1, '#');
 	if (!(info.flags & ServerInfo::SslVerify))
 		irc_option_set(server.session(), LIBIRC_OPTION_SSL_NO_VERIFY);
+#endif
 
 	if (info.flags & ServerInfo::Ipv6) {
 		code = irc_connect6(server.session(), host.c_str(), info.port, password,
