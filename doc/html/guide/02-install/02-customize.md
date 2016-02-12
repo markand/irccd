@@ -6,7 +6,7 @@ You can configure some features when compiling irccd.
 
 You can disable JavaScript support.
 
-````
+````nohighlight
 $ cmake .. -DWITH_JS=Off
 ````
 
@@ -18,7 +18,7 @@ You can disable OpenSSL support, it is automatically unset if OpenSSL is not fou
 **Warning**: this is not recommended.
 </div>
 
-````
+````nohighlight
 $ cmake .. -DWITH_SSL=Off
 ````
 
@@ -26,7 +26,7 @@ $ cmake .. -DWITH_SSL=Off
 
 You can disable all the documentation.
 
-````
+````nohighlight
 $ cmake .. -DWITH_DOCS=Off
 ````
 
@@ -36,7 +36,7 @@ See below to disable only specific parts of the documentation.
 
 By default if Pandoc is available, the HTML documentation is built, you can disable it.
 
-````
+````nohighlight
 $ cmake .. -DWITH_HTML=Off
 ````
 
@@ -44,7 +44,7 @@ $ cmake .. -DWITH_HTML=Off
 
 You can disable installation of manuals.
 
-````
+````nohighlight
 $ cmake .. -DWITH_MAN=Off
 ````
 
@@ -57,7 +57,7 @@ On Unix systems, it's usually **/usr/local** and **C:/Program Files/Irccd** on W
 
 To change this, use the following:
 
-````
+````nohighlight
 $ cmake .. -DCMAKE_INSTALL_PREFIX=/opt/some/directory
 ````
 
@@ -67,6 +67,6 @@ By default, irccd use **${CMAKE_INSTALL_PREFIX}/share/man** for manual pages. So
 
 For example, on FreeBSD the typical use would be:
 
-````
+````nohighlight
 $ cmake .. -DWITH_MANDIR=/usr/local/man
 ````

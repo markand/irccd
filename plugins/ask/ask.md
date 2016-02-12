@@ -20,8 +20,10 @@ The plugin **ask** reacts to special command, you just need to do `!ask the ques
 
 Example:
 
-    markand: !ask will I be rich?
-    irccd: markand, No.
+````nohighlight
+markand: !ask will I be rich?
+irccd: markand, No.
+````
 
 ## Configuration
 
@@ -32,6 +34,8 @@ Just add one line per answer like this:
 
 **~/.local/config/irccd/plugin/ask/answers.txt**:
 
-    Stop dreaming,
-    Definitely sure!
-    Maybe
+````nohighlight
+Stop dreaming,
+Definitely sure!
+Maybe
+````

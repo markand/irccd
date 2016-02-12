@@ -36,6 +36,6 @@ function onCommand()
 
 This will output to the irccd log something like:
 
-````
+````nohighlight
 plugin foo: error condition
 ````

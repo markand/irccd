@@ -23,7 +23,7 @@ To build from sources, you need the following installed on your system:
 When you're ready, extract the **irccd-x.y.z.tar.gz** where **x.y.z** is the current version. Go to that directory,
 then type the following commands:
 
-````
+````nohighlight
 $ mkdir _build_
 $ cd _build_
 $ cmake ..

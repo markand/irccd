@@ -8,13 +8,13 @@ Get the help.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl help subject
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl help server-message
 ````
 
@@ -24,13 +24,13 @@ Get plugin information.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl plugin-info name
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl plugin-info ask
 ````
 
@@ -40,7 +40,7 @@ Get the list of all loaded plugins.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl plugin-list
 ````
 
@@ -50,13 +50,13 @@ Load a plugin into the irccd instance.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl plugin-load plugin
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl load ask
 ````
 
@@ -68,13 +68,13 @@ The plugin must be loaded.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl plugin-reload name
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl plugin-reload logger
 ````
 
@@ -84,13 +84,13 @@ Unload a loaded plugin from the irccd instance.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl plugin-unload name
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl plugin-unload logger
 ````
 
@@ -100,13 +100,13 @@ Change the mode of the specified channel.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl server-cmode server channel mode
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl server-cmode freenode #staff +t
 ````
 
@@ -116,13 +116,13 @@ Send a notice to a public channel. This is a notice that everyone will be notifi
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl server-cnotice server channel message
 ````
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl server-cnotice freenode #staff "Don't flood"
 ````
 
@@ -132,7 +132,7 @@ Connect to a new IRC server.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl server-connect [options] name host port
 ````
 
@@ -147,7 +147,7 @@ Available options:
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl server-connect wanadoo chat.wanadoo.fr 6667
 $ irccdctl server-connect -s -S -n "undead" wanadoo chat.wanadoo.fr 6697
 ````
@@ -158,13 +158,13 @@ Disconnect from a connected server.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl server-disconnect name
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl server-disconnect wanadoo
 ````
 
@@ -174,13 +174,13 @@ Invite someone to a channel, needed for channel with mode +i
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl server-invite server nickname channel
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl server-invite freenode xorg62 #staff
 ````
 
@@ -190,13 +190,13 @@ Join the specified channel, the password is optional.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl server-join server channel [password]
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl server-join freenode #staff
 ````
 
@@ -206,13 +206,13 @@ Kick the specified target from the channel, the reason is optional.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl server-kick server target channel [reason]
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl kick freenode jean #staff "Stop flooding"
 ````
 
@@ -222,7 +222,7 @@ Get the list of all connected servers.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl server-list
 ````
 
@@ -232,13 +232,13 @@ Send an action emote.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl server-me server target message
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl server-me freenode #staff "going back soon"
 ````
 
@@ -248,13 +248,13 @@ Send a message to the specified target or channel.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl server-message server target message
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl server-message freenode #staff "Hello from irccd"
 ````
 
@@ -264,13 +264,13 @@ Set the irccd's user mode.
 
 **Usage**
 
-````
+````nohighlight
 $ server-mode server mode
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl server-mode +i
 ````
 
@@ -280,13 +280,13 @@ Change irccd's nickname.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl server-nick server nickname
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl server-nick freenode david
 ````
 
@@ -296,13 +296,13 @@ Send a private notice to the specified target.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl server-notice server target message
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl server-notice freenode jean "I know you are here."
 ````
 
@@ -316,13 +316,13 @@ Leave the specified channel, the reason is optional.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl server-part server channel [reason]
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl server-part freenode #staff
 $ irccdctl server-part freenode #botwar "too noisy"
 ````
@@ -335,13 +335,13 @@ If server is not specified, all servers will try to reconnect.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl server-reconnect [server]
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl server-reconnect
 $ irccdctl server-reconnect wanadoo
 ````
@@ -352,13 +352,13 @@ Change the topic of the specified channel.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl server-topic server channel topic
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl server-topic freenode #wmfs "This is the best channel"
 ````
 
@@ -369,13 +369,13 @@ formatted json.
 
 **Usage**
 
-````
+````nohighlight
 $ irccdctl watch [-f|--format native|json]
 ````
 
 **Example**
 
-````
+````nohighlight
 $ irccdctl watch
 $ irccdctl watch -f json
 ````

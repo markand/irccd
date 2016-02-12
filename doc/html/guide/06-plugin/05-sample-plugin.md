@@ -31,10 +31,10 @@ function onMessage(server, origin, channel, message)
 
 The parameters are defined as following:
 
-- **server**, on which server the message happened
-- **origin**, who emit the message (full nickname with host)
-- **channel**, on which channel
-- **message**, and the message content
+  - **server**, on which server the message happened
+  - **origin**, who emit the message (full nickname with host)
+  - **channel**, on which channel
+  - **message**, and the message content
 
 #### Send the response
 

@@ -12,9 +12,9 @@ reasons, it has been replaced with JavaScript.
 
 However, many aspects between Lua and JavaScript are similar:
 
-- Both languages are extremly small with very light API,
-- It is easy to sandbox the interpreter for security reasons,
-- It is very easy to implement your own API from C++ code.
+  - Both languages are extremly small with very light API,
+  - It is easy to sandbox the interpreter for security reasons,
+  - It is very easy to implement your own API from C++ code.
 
 The current JavaScript interpreter is powered by [Duktape][duktape].
 

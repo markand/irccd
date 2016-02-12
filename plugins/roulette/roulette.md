@@ -20,12 +20,14 @@ The plugin **roulette** just reacts to the special command.
 
 Example:
 
-    markand: !roulette
-    irccd: markand, you're lucky this time
-    markand: !roulette
-    irccd: markand, you're lucky this time
-    markand: !roulette
-    markand was kicked by irccd [markand, HEADSHOT]
+````nohighlight
+markand: !roulette
+irccd: markand, you're lucky this time
+markand: !roulette
+irccd: markand, you're lucky this time
+markand: !roulette
+markand was kicked by irccd [markand, HEADSHOT]
+````
 
 ## Configuration
 

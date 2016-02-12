@@ -31,7 +31,7 @@ There are two ways for proposing a response to the game. You can either just ask
 
 When asking a letter, the message must just be one letter.
 
-````
+````nohighlight
 markand: c
 irccd: markand, nice! the word is now c _ _ _ _
 jean: k
@@ -42,7 +42,7 @@ irccd: markand, there is no 'k'.
 
 When asking by a word, just put one word as command.
 
-````
+````nohighlight
 markand: !hangman couch
 irccd: markand, this is not the word.
 jean: !hangman candy
@@ -96,7 +96,7 @@ The database file must contains one word per line.
 
 Example:
 
-````
+````nohighlight
 $ cat ~/.config/irccd/plugin/hangman/words.conf
 sky
 irccd

@@ -24,10 +24,12 @@ The plugin **history** only reacts to the special command. It understands `seen`
 
 Example:
 
-    markand: !history seen jean
-    irccd: markand, the last time I've seen jean was on 18/01/1989 at 20:55
-    markand: !history said jean
-    irccd: markand, the last thing that jean said was: hello world
+````nohighlight
+markand: !history seen jean
+irccd: markand, the last time I've seen jean was on 18/01/1989 at 20:55
+markand: !history said jean
+irccd: markand, the last thing that jean said was: hello world
+````
 
 ## Configuration
 
