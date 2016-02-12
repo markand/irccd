@@ -62,6 +62,7 @@
 #define WITH_CACHEDIR		"@WITH_CACHEDIR@"
 
 #cmakedefine WITH_JS
+#cmakedefine WITH_SSL
 
 /* --------------------------------------------------------
  * IRC tests
