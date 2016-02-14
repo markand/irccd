@@ -84,13 +84,6 @@ public:
 #endif
 };
 
-class TransportEvent {
-public:
-	std::string name;
-	std::weak_ptr<TransportClient> client;
-	std::function<std::string ()> exec;
-};
-
 /**
  * Map of servers.
  */

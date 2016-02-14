@@ -51,12 +51,12 @@ const std::unordered_set<std::string> validEvents{
 
 namespace irccd {
 
-bool Rule::solve(const vector<Rule> &rules,
-		 const string &server,
-		 const string &channel,
-		 const string &origin,
-		 const string &plugin,
-		 const string &event) noexcept
+bool Rule::solve(const std::vector<Rule> &rules,
+		 const std::string &server,
+		 const std::string &channel,
+		 const std::string &origin,
+		 const std::string &plugin,
+		 const std::string &event) noexcept
 {
 	bool result = true;
 
@@ -84,7 +84,7 @@ bool Rule::solve(const vector<Rule> &rules,
 	return result;
 }
 
-bool Rule::matchMap(const RuleSet &map, const string &value) const noexcept
+bool Rule::matchMap(const RuleSet &map, const std::string &value) const noexcept
 {
 	return value.empty() || map.empty() || map.count(value) == 1;
 }
@@ -102,11 +102,11 @@ Rule::Rule(RuleSet servers, RuleSet channels, RuleSet origins, RuleSet plugins, 
 			throw std::invalid_argument(n + " is not a valid event name");
 }
 
-bool Rule::match(const string &server,
-		 const string &channel,
-		 const string &nick,
-		 const string &plugin,
-		 const string &event) const noexcept
+bool Rule::match(const std::string &server,
+		 const std::string &channel,
+		 const std::string &nick,
+		 const std::string &plugin,
+		 const std::string &event) const noexcept
 {
 	return matchMap(m_servers, server) &&
 	       matchMap(m_channels, channel) &&

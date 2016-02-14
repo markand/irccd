@@ -52,9 +52,9 @@ public:
 	 * @param arg the argument missing
 	 */
 	inline InvalidOption(std::string arg)
-		: argument{std::move(arg)}
+		: argument(std::move(arg))
 	{
-		message = std::string{"invalid option: "} + argument;
+		message = std::string("invalid option: ") + argument;
 	}
 
 	/**
@@ -88,9 +88,9 @@ public:
 	 * @param arg the argument that requires a value
 	 */
 	inline MissingValue(std::string arg)
-		: argument{std::move(arg)}
+		: argument(std::move(arg))
 	{
-		message = std::string{"missing argument for: "} + argument;
+		message = std::string("missing argument for: ") + argument;
 	}
 
 	/**

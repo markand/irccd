@@ -80,11 +80,11 @@ public:
 	 * @param position the position
 	 */
 	inline Error(std::string text, std::string source, int line, int column, int position) noexcept
-		: m_text{std::move(text)}
-		, m_source{std::move(source)}
-		, m_line{line}
-		, m_column{column}
-		, m_position{position}
+		: m_text(std::move(text))
+		, m_source(std::move(source))
+		, m_line(line)
+		, m_column(column)
+		, m_position(position)
 	{
 	}
 
@@ -208,11 +208,10 @@ private:
 
 		inline void increment()
 		{
-			if (m_value.isObject()) {
+			if (m_value.isObject())
 				m_itm++;
-			} else {
+			else
 				m_ita++;
-			}
 		}
 
 		BaseIterator(ValueType &value, ObjectIteratorType it)
@@ -379,7 +378,7 @@ public:
 	 * Construct a null value.
 	 */
 	inline Value(std::nullptr_t) noexcept
-		: m_type{Type::Null}
+		: m_type(Type::Null)
 	{
 	}
 
@@ -389,8 +388,8 @@ public:
 	 * @param value the boolean value
 	 */
 	inline Value(bool value) noexcept
-		: m_type{Type::Boolean}
-		, m_boolean{value}
+		: m_type(Type::Boolean)
+		, m_boolean(value)
 	{
 	}
 
@@ -400,8 +399,8 @@ public:
 	 * @param value the value
 	 */
 	inline Value(int value) noexcept
-		: m_type{Type::Int}
-		, m_integer{value}
+		: m_type(Type::Int)
+		, m_integer(value)
 	{
 	}
 
@@ -411,9 +410,9 @@ public:
 	 * @param value the C-string
 	 */
 	inline Value(const char *value)
-		: m_type{Type::String}
+		: m_type(Type::String)
 	{
-		new (&m_string) std::string{value ? value : ""};
+		new (&m_string) std::string(value ? value : "");
 	}
 
 	/**
@@ -422,8 +421,8 @@ public:
 	 * @param value the real value
 	 */
 	inline Value(double value) noexcept
-		: m_type{Type::Real}
-		, m_number{value}
+		: m_type(Type::Real)
+		, m_number(value)
 	{
 	}
 
@@ -433,9 +432,9 @@ public:
 	 * @param value the string
 	 */
 	inline Value(std::string value) noexcept
-		: m_type{Type::String}
+		: m_type(Type::String)
 	{
-		new (&m_string) std::string{std::move(value)};
+		new (&m_string) std::string(std::move(value));
 	}
 
 	/**
@@ -445,11 +444,10 @@ public:
 	 * @see fromObject
 	 */
 	inline Value(std::map<std::string, Value> values)
-		: Value{Type::Object}
+		: Value(Type::Object)
 	{
-		for (const auto &pair : values) {
+		for (const auto &pair : values)
 			insert(pair.first, pair.second);
-		}
 	}
 
 	/**
@@ -459,11 +457,10 @@ public:
 	 * @see fromArray
 	 */
 	inline Value(std::vector<Value> values)
-		: Value{Type::Array}
+		: Value(Type::Array)
 	{
-		for (Value value : values) {
+		for (Value value : values)
 			append(std::move(value));
-		}
 	}
 
 	/**
@@ -741,9 +738,8 @@ public:
 	{
 		assert(isArray() || isObject());
 
-		if (m_type == Type::Object) {
+		if (m_type == Type::Object)
 			return m_object.size();
-		}
 
 		return m_array.size();
 	}
@@ -757,11 +753,10 @@ public:
 	{
 		assert(isArray() || isObject());
 
-		if (m_type == Type::Array) {
+		if (m_type == Type::Array)
 			m_array.clear();
-		} else {
+		else
 			m_object.clear();
-		}
 	}
 
 	/*
@@ -779,9 +774,8 @@ public:
 	template <typename DefaultValue>
 	inline Value valueOr(unsigned position, DefaultValue &&defaultValue) const
 	{
-		if (m_type != Type::Array || position >= m_array.size()) {
+		if (m_type != Type::Array || position >= m_array.size())
 			return defaultValue;
-		}
 
 		return m_array[position];
 	}
@@ -797,9 +791,8 @@ public:
 	template <typename DefaultValue>
 	inline Value valueOr(unsigned position, Type type, DefaultValue &&defaultValue) const
 	{
-		if (m_type != Type::Array || position >= m_array.size() || m_array[position].typeOf() != type) {
+		if (m_type != Type::Array || position >= m_array.size() || m_array[position].typeOf() != type)
 			return defaultValue;
-		}
 
 		return m_array[position];
 	}
@@ -980,15 +973,13 @@ public:
 	template <typename DefaultValue>
 	Value valueOr(const std::string &name, DefaultValue &&defaultValue) const
 	{
-		if (m_type != Type::Object) {
+		if (m_type != Type::Object)
 			return defaultValue;
-		}
 
 		auto it = m_object.find(name);
 
-		if (it == m_object.end()) {
+		if (it == m_object.end())
 			return defaultValue;
-		}
 
 		return it->second;
 	}
@@ -1004,15 +995,13 @@ public:
 	template <typename DefaultValue>
 	Value valueOr(const std::string &name, Type type, DefaultValue &&defaultValue) const
 	{
-		if (m_type != Type::Object) {
+		if (m_type != Type::Object)
 			return defaultValue;
-		}
 
 		auto it = m_object.find(name);
 
-		if (it == m_object.end() || it->second.typeOf() != type) {
+		if (it == m_object.end() || it->second.typeOf() != type)
 			return defaultValue;
-		}
 
 		return it->second;
 	}

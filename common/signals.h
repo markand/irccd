@@ -50,7 +50,7 @@ public:
 	 * @param id the id
 	 */
 	inline SignalConnection(unsigned id) noexcept
-		: m_id{id}
+		: m_id(id)
 	{
 	}
 
@@ -164,9 +164,8 @@ public:
 		for (unsigned i : ids) {
 			auto it = m_functions.find(i);
 
-			if (it != m_functions.end()) {
+			if (it != m_functions.end())
 				it->second(args...);
-			}
 		}
 	}
 };

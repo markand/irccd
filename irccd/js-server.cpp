@@ -399,7 +399,7 @@ int constructor(js::Context &ctx)
 	try {
 		ctx.construct(js::Shared<Server>{std::make_shared<Server>(std::move(info), std::move(identity), std::move(settings))});
 	} catch (const std::exception &ex) {
-		ctx.raise(js::Error{ex.what()});
+		ctx.raise(js::Error(ex.what()));
 	}
 
 	return 0;

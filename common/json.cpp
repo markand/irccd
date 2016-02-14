@@ -33,37 +33,32 @@ void readArray(Value &parent, json_t *array);
 
 Value readValue(json_t *v)
 {
-	if (json_is_null(v)) {
-		return Value{nullptr};
-	}
-	if (json_is_string(v)) {
-		return Value{json_string_value(v)};
-	}
-	if (json_is_real(v)) {
-		return Value{json_number_value(v)};
-	}
-	if (json_is_integer(v)) {
-		return Value{static_cast<int>(json_integer_value(v))};
-	}
-	if (json_is_boolean(v)) {
-		return Value{json_boolean_value(v)};
-	}
+	if (json_is_null(v))
+		return Value(nullptr);
+	if (json_is_string(v))
+		return Value(json_string_value(v));
+	if (json_is_real(v))
+		return Value(json_number_value(v));
+	if (json_is_integer(v))
+		return Value(static_cast<int>(json_integer_value(v)));
+	if (json_is_boolean(v))
+		return Value(json_boolean_value(v));
 	if (json_is_object(v)) {
-		Value object{Type::Object};
+		Value object(Type::Object);
 
 		readObject(object, v);
 
 		return object;
 	}
 	if (json_is_array(v)) {
-		Value array{Type::Array};
+		Value array(Type::Array);
 
 		readArray(array, v);
 
 		return array;
 	}
 
-	return Value{};
+	return Value();
 }
 
 void readObject(Value &parent, json_t *object)
@@ -71,9 +66,8 @@ void readObject(Value &parent, json_t *object)
 	const char *key;
 	json_t *value;
 
-	json_object_foreach(object, key, value) {
+	json_object_foreach(object, key, value)
 		parent.insert(key, readValue(value));
-	}
 }
 
 void readArray(Value &parent, json_t *array)
@@ -81,9 +75,8 @@ void readArray(Value &parent, json_t *array)
 	size_t index;
 	json_t *value;
 
-	json_array_foreach(array, index, value) {
+	json_array_foreach(array, index, value)
 		parent.append(readValue(value));
-	}
 }
 
 template <typename Func, typename... Args>
@@ -92,17 +85,16 @@ Value convert(Func fn, Args&&... args)
 	json_error_t error;
 	json_t *json = fn(std::forward<Args>(args)..., &error);
 
-	if (json == nullptr) {
-		throw Error{error.text, error.source, error.line, error.column, error.position};
-	}
+	if (json == nullptr)
+		throw Error(error.text, error.source, error.line, error.column, error.position);
 
 	Value value;
 
 	if (json_is_object(json)) {
-		value = Value{Type::Object};
+		value = Value(Type::Object);
 		readObject(value, json);
 	} else {
-		value = Value{Type::Array};
+		value = Value(Type::Array);
 		readArray(value, json);
 	}
 
@@ -115,11 +107,10 @@ std::string indent(int param, int level)
 {
 	std::string str;
 
-	if (param < 0) {
+	if (param < 0)
 		str = std::string(level, '\t');
-	} else if (param > 0) {
+	else if (param > 0)
 		str = std::string(param * level, ' ');
-	}
 
 	return str;
 }
@@ -183,7 +174,7 @@ void Value::move(Value &&other)
 }
 
 Value::Value(Type type)
-	: m_type{type}
+	: m_type(type)
 {
 	switch (m_type) {
 	case Type::Array:
@@ -228,27 +219,24 @@ Value::~Value()
 
 bool Value::toBool() const noexcept
 {
-	if (m_type != Type::Boolean) {
+	if (m_type != Type::Boolean)
 		return false;
-	}
 
 	return m_boolean;
 }
 
 double Value::toReal() const noexcept
 {
-	if (m_type != Type::Real) {
+	if (m_type != Type::Real)
 		return 0;
-	}
 
 	return m_number;
 }
 
 int Value::toInt() const noexcept
 {
-	if (m_type != Type::Int) {
+	if (m_type != Type::Int)
 		return 0;
-	}
 
 	return m_integer;
 }
@@ -257,11 +245,10 @@ std::string Value::toString(bool coerce) const noexcept
 {
 	std::string result;
 
-	if (m_type == Type::String) {
+	if (m_type == Type::String)
 		result = m_string;
-	} else if (coerce) {
+	else if (coerce)
 		result = toJson();
-	}
 
 	return result;
 }

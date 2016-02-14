@@ -56,7 +56,7 @@ public:
 	 * @param level the level
 	 */
 	inline Buffer(Level level) noexcept
-		: m_level{level}
+		: m_level(level)
 	{
 	}
 
@@ -126,17 +126,17 @@ namespace {
 std::unique_ptr<Interface> iface;
 
 /* Internal buffers */
-Buffer bufferInfo{Level::Info};
-Buffer bufferWarning{Level::Warning};
-Buffer bufferDebug{Level::Debug};
+Buffer bufferInfo(Level::Info);
+Buffer bufferWarning(Level::Warning);
+Buffer bufferDebug(Level::Debug);
 
 /* Stream outputs */
-std::ostream streamInfo{&bufferInfo};
-std::ostream streamWarning{&bufferWarning};
-std::ostream streamDebug{&bufferDebug};
+std::ostream streamInfo(&bufferInfo);
+std::ostream streamWarning(&bufferWarning);
+std::ostream streamDebug(&bufferDebug);
 
 /* Options */
-bool verbose{false};
+bool verbose(false);
 
 } // !namespace
 
@@ -157,8 +157,8 @@ void Console::write(Level level, const std::string &line) noexcept
  * -------------------------------------------------------- */
 
 File::File(std::string normal, std::string errors)
-	: m_outputNormal{std::move(normal)}
-	, m_outputError{std::move(errors)}
+	: m_outputNormal(std::move(normal))
+	, m_outputError(std::move(errors))
 {
 }
 

@@ -176,7 +176,7 @@ std::string version()
 	struct utsname uts;
 
 	if (uname(&uts) < 0)
-		throw std::runtime_error(strerror(errno));
+		throw std::runtime_error(std::strerror(errno));
 
 	return std::string(uts.release);
 #endif
@@ -190,7 +190,7 @@ uint64_t uptime()
 	struct sysinfo info;
 
 	if (sysinfo(&info) < 0)
-		throw std::runtime_error(strerror(errno));
+		throw std::runtime_error(std::strerror(errno));
 
 	return info.uptime;
 #elif defined(IRCCD_SYSTEM_MAC)
@@ -199,7 +199,7 @@ uint64_t uptime()
 	int mib[2] = { CTL_KERN, KERN_BOOTTIME };
 
 	if (sysctl(mib, 2, &boottime, &length, nullptr, 0) < 0)
-		throw std::runtime_error(strerror(errno));
+		throw std::runtime_error(std::strerror(errno));
 
 	time_t bsec = boottime.tv_sec, csec = time(nullptr);
 
@@ -209,7 +209,7 @@ uint64_t uptime()
 	struct timespec ts;
 
 	if (clock_gettime(CLOCK_UPTIME, &ts) < 0)
-		throw std::runtime_error(strerror(errno));
+		throw std::runtime_error(std::strerror(errno));
 
 	return ts.tv_sec;
 #endif

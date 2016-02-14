@@ -75,7 +75,7 @@ int format(js::Context &ctx)
 	try {
 		ctx.push(util::format(ctx.get<std::string>(0), ctx.get<util::Substitution>(1)));
 	} catch (const std::exception &ex) {
-		ctx.raise(js::SyntaxError{ex.what()});
+		ctx.raise(js::SyntaxError(ex.what()));
 	}
 
 	return 1;
@@ -98,7 +98,7 @@ int splituser(js::Context &ctx)
 	char nick[32] = {0};
 
 	irc_target_get_nick(target, nick, sizeof (nick) -1);
-	ctx.push(std::string{nick});
+	ctx.push(std::string(nick));
 
 	return 1;
 }
@@ -120,7 +120,7 @@ int splithost(js::Context &ctx)
 	char host[32] = {0};
 
 	irc_target_get_host(target, host, sizeof (host) -1);
-	ctx.push(std::string{host});
+	ctx.push(std::string(host));
 
 	return 1;
 }

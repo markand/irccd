@@ -37,7 +37,7 @@ void Timer::run()
 			continue;
 
 		/* Wait the timer delay or the interrupt */
-		m_condition.wait_for(lock, std::chrono::milliseconds{m_delay}, [&] () {
+		m_condition.wait_for(lock, std::chrono::milliseconds(m_delay), [&] () {
 			return m_state != Running;
 		});
 

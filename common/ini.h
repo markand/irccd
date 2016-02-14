@@ -58,9 +58,9 @@ public:
 	 * @param m the message
 	 */
 	inline Error(int l, int c, std::string m) noexcept
-		: m_line{l}
-		, m_column{c}
-		, m_message{std::move(m)}
+		: m_line(l)
+		, m_column(c)
+		, m_message(std::move(m))
 	{
 	}
 
@@ -135,9 +135,9 @@ public:
 	 * @param value the value
 	 */
 	Token(Type type, int line, int column, std::string value = "") noexcept
-		: m_type{type}
-		, m_line{line}
-		, m_column{column}
+		: m_type(type)
+		, m_line(line)
+		, m_column(column)
 	{
 		switch (type) {
 		case Include:
@@ -228,8 +228,8 @@ public:
 	 * @param value the value
 	 */
 	inline Option(std::string key) noexcept
-		: std::vector<std::string>{}
-		, m_key{std::move(key)}
+		: std::vector<std::string>()
+		, m_key(std::move(key))
 	{
 	}
 
@@ -240,7 +240,7 @@ public:
 	 * @param value the value
 	 */
 	inline Option(std::string key, std::string value) noexcept
-		: m_key{std::move(key)}
+		: m_key(std::move(key))
 	{
 		push_back(std::move(value));
 	}
@@ -252,8 +252,8 @@ public:
 	 * @param values the values
 	 */
 	inline Option(std::string key, std::vector<std::string> values) noexcept
-		: std::vector<std::string>{std::move(values)}
-		, m_key{std::move(key)}
+		: std::vector<std::string>(std::move(values))
+		, m_key(std::move(key))
 	{
 	}
 
@@ -295,7 +295,7 @@ public:
 	 * @param key the key
 	 */
 	inline Section(std::string key) noexcept
-		: m_key{std::move(key)}
+		: m_key(std::move(key))
 	{
 	}
 

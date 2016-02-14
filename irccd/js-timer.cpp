@@ -108,7 +108,7 @@ int constructor(js::Context &ctx)
 
 	/* Now store the JavaScript function to call */
 	ctx.dup(2);
-	ctx.putGlobal("\xff""\xff""timer-" + std::to_string(reinterpret_cast<intptr_t>(timer.get())));
+	ctx.putGlobal("\xff""\xff""timer-" + std::to_string(reinterpret_cast<std::intptr_t>(timer.get())));
 
 	return 0;
 }

@@ -477,7 +477,7 @@ int constructor(js::Context &ctx)
 	std::string mode = ctx.require<std::string>(1);
 
 	try {
-		ctx.construct(js::Pointer<File>{new File{path, mode}});
+		ctx.construct(js::Pointer<File>{new File(path, mode)});
 	} catch (const std::exception &) {
 		ctx.raise(SystemError());
 	}
@@ -580,7 +580,7 @@ int functionStat(js::Context &ctx)
 	struct stat st;
 
 	if (::stat(ctx.require<std::string>(0).c_str(), &st) < 0)
-		ctx.raise(SystemError{});
+		ctx.raise(SystemError());
 
 	ctx.push(st);
 

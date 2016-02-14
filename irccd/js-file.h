@@ -166,7 +166,7 @@ public:
 	 */
 	static inline void prototype(js::Context &ctx)
 	{
-		js::StackAssert checker{ctx, 1};
+		js::StackAssert sa(ctx, 1);
 
 		ctx.getGlobal<void>("Irccd");
 		ctx.getProperty<void>(-1, "File");

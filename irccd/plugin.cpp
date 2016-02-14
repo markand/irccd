@@ -75,17 +75,17 @@ void Plugin::putVars()
 	m_context.putGlobal("\xff""\xff""parent", m_info.parent);
 }
 
-void Plugin::putPath(const string &varname, const string &append, path::Path type)
+void Plugin::putPath(const std::string &varname, const std::string &append, path::Path type)
 {
 	js::StackAssert sa(m_context);
 
 	bool found = true;
-	string foundpath;
+	std::string foundpath;
 
 	/*
 	 * Use the first existing directory available.
 	 */
-	for (const string &p : path::list(type)) {
+	for (const std::string &p : path::list(type)) {
 		foundpath = path::clean(p + append);
 
 		if (fs::exists(foundpath)) {
@@ -250,7 +250,7 @@ void Plugin::removeTimer(const std::shared_ptr<Timer> &timer) noexcept
 	m_timers.erase(timer);
 }
 
-void Plugin::onChannelMode(shared_ptr<Server> server, string origin, string channel, string mode, string arg)
+void Plugin::onChannelMode(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string mode, std::string arg)
 {
 	js::StackAssert sa(m_context);
 
@@ -262,7 +262,7 @@ void Plugin::onChannelMode(shared_ptr<Server> server, string origin, string chan
 	call("onChannelMode", 5);
 }
 
-void Plugin::onChannelNotice(shared_ptr<Server> server, string origin, string channel, string notice)
+void Plugin::onChannelNotice(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string notice)
 {
 	js::StackAssert sa(m_context);
 
@@ -273,7 +273,7 @@ void Plugin::onChannelNotice(shared_ptr<Server> server, string origin, string ch
 	call("onChannelNotice", 4);
 }
 
-void Plugin::onCommand(shared_ptr<Server> server, string origin, string channel, string message)
+void Plugin::onCommand(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message)
 {
 	js::StackAssert sa(m_context);
 
@@ -284,7 +284,7 @@ void Plugin::onCommand(shared_ptr<Server> server, string origin, string channel,
 	call("onCommand", 4);
 }
 
-void Plugin::onConnect(shared_ptr<Server> server)
+void Plugin::onConnect(std::shared_ptr<Server> server)
 {
 	js::StackAssert sa(m_context);
 
@@ -292,7 +292,7 @@ void Plugin::onConnect(shared_ptr<Server> server)
 	call("onConnect", 1);
 }
 
-void Plugin::onInvite(shared_ptr<Server> server, string origin, string channel)
+void Plugin::onInvite(std::shared_ptr<Server> server, std::string origin, std::string channel)
 {
 	js::StackAssert sa(m_context);
 
@@ -302,7 +302,7 @@ void Plugin::onInvite(shared_ptr<Server> server, string origin, string channel)
 	call("onInvite", 3);
 }
 
-void Plugin::onJoin(shared_ptr<Server> server, string origin, string channel)
+void Plugin::onJoin(std::shared_ptr<Server> server, std::string origin, std::string channel)
 {
 	js::StackAssert sa(m_context);
 
@@ -312,7 +312,7 @@ void Plugin::onJoin(shared_ptr<Server> server, string origin, string channel)
 	call("onJoin", 3);
 }
 
-void Plugin::onKick(shared_ptr<Server> server, string origin, string channel, string target, string reason)
+void Plugin::onKick(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target, std::string reason)
 {
 	js::StackAssert sa(m_context);
 
@@ -331,7 +331,7 @@ void Plugin::onLoad()
 	call("onLoad", 0);
 }
 
-void Plugin::onMessage(shared_ptr<Server> server, string origin, string channel, string message)
+void Plugin::onMessage(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message)
 {
 	js::StackAssert sa(m_context);
 
@@ -342,7 +342,7 @@ void Plugin::onMessage(shared_ptr<Server> server, string origin, string channel,
 	call("onMessage", 4);
 }
 
-void Plugin::onMe(shared_ptr<Server> server, string origin, string channel, string message)
+void Plugin::onMe(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message)
 {
 	js::StackAssert sa(m_context);
 
@@ -353,7 +353,7 @@ void Plugin::onMe(shared_ptr<Server> server, string origin, string channel, stri
 	call("onMe", 4);
 }
 
-void Plugin::onMode(shared_ptr<Server> server, string origin, string mode)
+void Plugin::onMode(std::shared_ptr<Server> server, std::string origin, std::string mode)
 {
 	js::StackAssert sa(m_context);
 
@@ -363,7 +363,7 @@ void Plugin::onMode(shared_ptr<Server> server, string origin, string mode)
 	call("onMode", 3);
 }
 
-void Plugin::onNames(shared_ptr<Server> server, string channel, vector<string> names)
+void Plugin::onNames(std::shared_ptr<Server> server, std::string channel, std::vector<std::string> names)
 {
 	js::StackAssert sa(m_context);
 
@@ -373,7 +373,7 @@ void Plugin::onNames(shared_ptr<Server> server, string channel, vector<string> n
 	call("onNames", 3);
 }
 
-void Plugin::onNick(shared_ptr<Server> server, string oldnick, string newnick)
+void Plugin::onNick(std::shared_ptr<Server> server, std::string oldnick, std::string newnick)
 {
 	js::StackAssert sa(m_context);
 
@@ -383,7 +383,7 @@ void Plugin::onNick(shared_ptr<Server> server, string oldnick, string newnick)
 	call("onNick", 3);
 }
 
-void Plugin::onNotice(shared_ptr<Server> server, string origin, string notice)
+void Plugin::onNotice(std::shared_ptr<Server> server, std::string origin, std::string notice)
 {
 	js::StackAssert sa(m_context);
 
@@ -393,7 +393,7 @@ void Plugin::onNotice(shared_ptr<Server> server, string origin, string notice)
 	call("onNotice", 3);
 }
 
-void Plugin::onPart(shared_ptr<Server> server, string origin, string channel, string reason)
+void Plugin::onPart(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string reason)
 {
 	js::StackAssert sa(m_context);
 
@@ -404,7 +404,7 @@ void Plugin::onPart(shared_ptr<Server> server, string origin, string channel, st
 	call("onPart", 4);
 }
 
-void Plugin::onQuery(shared_ptr<Server> server, string origin, string message)
+void Plugin::onQuery(std::shared_ptr<Server> server, std::string origin, std::string message)
 {
 	js::StackAssert sa(m_context);
 
@@ -414,7 +414,7 @@ void Plugin::onQuery(shared_ptr<Server> server, string origin, string message)
 	call("onQuery", 3);
 }
 
-void Plugin::onQueryCommand(shared_ptr<Server> server, string origin, string message)
+void Plugin::onQueryCommand(std::shared_ptr<Server> server, std::string origin, std::string message)
 {
 	js::StackAssert sa(m_context);
 
@@ -431,7 +431,7 @@ void Plugin::onReload()
 	call("onReload");
 }
 
-void Plugin::onTopic(shared_ptr<Server> server, string origin, string channel, string topic)
+void Plugin::onTopic(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string topic)
 {
 	js::StackAssert sa(m_context);
 
@@ -449,7 +449,7 @@ void Plugin::onUnload()
 	call("onUnload");
 }
 
-void Plugin::onWhois(shared_ptr<Server> server, ServerWhois whois)
+void Plugin::onWhois(std::shared_ptr<Server> server, ServerWhois whois)
 {
 	js::StackAssert sa(m_context);
 

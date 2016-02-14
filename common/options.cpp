@@ -54,15 +54,13 @@ void parseLongOption(Result &result, Args &args, Iterator &it, Iterator &end, co
 	auto arg = *it++;
 	auto opt = definition.find(arg);
 
-	if (opt == definition.end()) {
-		throw InvalidOption{arg};
-	}
+	if (opt == definition.end())
+		throw InvalidOption(arg);
 
 	/* Need argument? */
 	if (opt->second) {
-		if (it == end || isOption(*it)) {
-			throw MissingValue{arg};
-		}
+		if (it == end || isOption(*it))
+			throw MissingValue(arg);
 
 		result.insert(std::make_pair(arg, *it++));
 		it = args.erase(args.begin(), it);
@@ -86,15 +84,13 @@ void parseShortOption(Result &result, Args &args, Iterator &it, Iterator &end, c
 		auto arg = *it++;
 		auto opt = definition.find(arg);
 
-		if (opt == definition.end()) {
-			throw InvalidOption{arg};
-		}
+		if (opt == definition.end())
+			throw InvalidOption(arg);
 
 		/* Need argument? */
 		if (opt->second) {
-			if (it == end || isOption(*it)) {
-				throw MissingValue{arg};
-			}
+			if (it == end || isOption(*it))
+				throw MissingValue(arg);
 
 			result.insert(std::make_pair(arg, *it++));
 			it = args.erase(args.begin(), it);
@@ -120,16 +116,14 @@ void parseShortOption(Result &result, Args &args, Iterator &it, Iterator &end, c
 			auto arg = std::string{'-'} + value[i];
 			auto opt = definition.find(arg);
 
-			if (opt == definition.end()) {
-				throw InvalidOption{arg};
-			}
+			if (opt == definition.end())
+				throw InvalidOption(arg);
 
 			if (opt->second) {
 				if (i == (len - 1)) {
 					/* End of string, get the next argument (see 2.) */
-					if (++it == end || isOption(*it)) {
-						throw MissingValue{arg};
-					}
+					if (++it == end || isOption(*it))
+						throw MissingValue(arg);
 
 					result.insert(std::make_pair(arg, *it));
 					toremove += 1;
@@ -157,15 +151,13 @@ Result read(std::vector<std::string> &args, const Options &definition)
 	auto end = args.end();
 
 	while (it != end) {
-		if (!isOption(*it)) {
+		if (!isOption(*it))
 			break;
-		}
 
-		if (isLongOption(*it)) {
+		if (isLongOption(*it))
 			parseLongOption(result, args, it, end, definition);
-		} else {
+		else
 			parseShortOption(result, args, it, end, definition);
-		}
 	}
 
 	return result;
@@ -175,9 +167,8 @@ Result read(int &argc, char **&argv, const Options &definition)
 {
 	std::vector<std::string> args;
 
-	for (int i = 0; i < argc; ++i) {
+	for (int i = 0; i < argc; ++i)
 		args.push_back(argv[i]);
-	}
 
 	auto before = args.size();
 	auto result = read(args, definition);

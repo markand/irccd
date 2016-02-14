@@ -330,9 +330,9 @@ void Config::loadIdentity(Irccd &irccd, const ini::Section &sc) const
 	ini::Section::const_iterator it;
 
 	if ((it = sc.find("name")) == sc.end()) {
-		throw invalid_argument{"missing name"};
+		throw invalid_argument("missing name");
 	} else if (!util::isIdentifierValid(it->value())) {
-		throw invalid_argument{"identity name not valid"};
+		throw invalid_argument("identity name not valid");
 	}
 
 	identity.name = it->value();
@@ -371,7 +371,7 @@ void Config::loadRule(Irccd &irccd, const ini::Section &sc) const
 {
 	/* Simple converter from std::vector to std::unordered_set */
 	auto toSet = [] (const std::vector<std::string> &v) -> std::unordered_set<std::string> {
-		return std::unordered_set<std::string>{v.begin(), v.end()};
+		return std::unordered_set<std::string>(v.begin(), v.end());
 	};
 
 	RuleSet servers, channels, origins, plugins, events;

@@ -57,7 +57,7 @@ std::string systemError()
 	return errmsg;
 }
 
-}
+} // !namespace
 
 void Directory::systemLoad(const std::string &path, int flags)
 {
@@ -108,7 +108,7 @@ void Directory::systemLoad(const std::string &path, int flags)
 	struct dirent *ent;
 
 	if ((dp = opendir(path.c_str())) == nullptr)
-		throw std::runtime_error(strerror(errno));
+		throw std::runtime_error(std::strerror(errno));
 
 	while ((ent = readdir(dp)) != nullptr) {
 		DirectoryEntry entry;

@@ -127,8 +127,8 @@ void ServerState::prepareConnecting(Server &server, fd_set &setinput, fd_set &se
 		log::info() << "server " << info.name << ": trying to connect to " << info.host << ", port " << info.port << std::endl;
 
 		if (!connect(server)) {
-			log::warning() << "server " << info.name << ": disconnected while connecting: "
-					  << irc_strerror(irc_errno(server.session())) << std::endl;
+			log::warning() << "server " << info.name << ": disconnected while connecting: ";
+			log::warning() << irc_strerror(irc_errno(server.session())) << std::endl;
 			server.next(ServerState::Disconnected);
 		} else {
 			m_started = true;

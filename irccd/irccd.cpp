@@ -17,7 +17,6 @@
  */
 
 #include <algorithm>
-#include <cassert>
 #include <stdexcept>
 
 #include <filesystem.h>
@@ -329,7 +328,7 @@ void Irccd::handleServerNames(std::weak_ptr<Server> ptr, std::string channel, st
 	log::debug() << "  channel: " << channel << "\n";
 	log::debug() << "  names: " << util::join(nicknames.begin(), nicknames.end(), ", ") << std::endl;
 
-	json::Value names(std::vector<json::Value>{nicknames.begin(), nicknames.end()});
+	json::Value names(std::vector<json::Value>(nicknames.begin(), nicknames.end()));
 	json::Value json = json::object({
 		{ "event",	"onNames"		},
 		{ "server",	server->info().name	},
@@ -638,8 +637,8 @@ void Irccd::processTransportServers(fd_set &input)
 		client->send(object.toJson(0));
 
 		/* Connect signals */
-		client->onCommand.connect(bind(&Irccd::handleTransportCommand, this, ptr, _1));
-		client->onDie.connect(bind(&Irccd::handleTransportDie, this, ptr));
+		client->onCommand.connect(std::bind(&Irccd::handleTransportCommand, this, ptr, _1));
+		client->onDie.connect(std::bind(&Irccd::handleTransportDie, this, ptr));
 
 		/* Register it */
 		m_lookupTransportClients.emplace(client->handle(), move(client));
@@ -733,22 +732,22 @@ void Irccd::addServer(shared_ptr<Server> server) noexcept
 
 	std::weak_ptr<Server> ptr(server);
 
-	server->onChannelMode.connect(bind(&Irccd::handleServerChannelMode, this, ptr, _1, _2, _3, _4));
-	server->onChannelNotice.connect(bind(&Irccd::handleServerChannelNotice, this, ptr, _1, _2, _3));
-	server->onConnect.connect(bind(&Irccd::handleServerConnect, this, ptr));
-	server->onInvite.connect(bind(&Irccd::handleServerInvite, this, ptr, _1, _2, _3));
-	server->onJoin.connect(bind(&Irccd::handleServerJoin, this, ptr, _1, _2));
-	server->onKick.connect(bind(&Irccd::handleServerKick, this, ptr, _1, _2, _3, _4));
-	server->onMessage.connect(bind(&Irccd::handleServerMessage, this, ptr, _1, _2, _3));
-	server->onMe.connect(bind(&Irccd::handleServerMe, this, ptr, _1, _2, _3));
-	server->onMode.connect(bind(&Irccd::handleServerMode, this, ptr, _1, _2));
-	server->onNames.connect(bind(&Irccd::handleServerNames, this, ptr, _1, _2));
-	server->onNick.connect(bind(&Irccd::handleServerNick, this, ptr, _1, _2));
-	server->onNotice.connect(bind(&Irccd::handleServerNotice, this, ptr, _1, _2));
-	server->onPart.connect(bind(&Irccd::handleServerPart, this, ptr, _1, _2, _3));
-	server->onQuery.connect(bind(&Irccd::handleServerQuery, this, ptr, _1, _2));
-	server->onTopic.connect(bind(&Irccd::handleServerTopic, this, ptr, _1, _2, _3));
-	server->onWhois.connect(bind(&Irccd::handleServerWhois, this, ptr, _1));
+	server->onChannelMode.connect(std::bind(&Irccd::handleServerChannelMode, this, ptr, _1, _2, _3, _4));
+	server->onChannelNotice.connect(std::bind(&Irccd::handleServerChannelNotice, this, ptr, _1, _2, _3));
+	server->onConnect.connect(std::bind(&Irccd::handleServerConnect, this, ptr));
+	server->onInvite.connect(std::bind(&Irccd::handleServerInvite, this, ptr, _1, _2, _3));
+	server->onJoin.connect(std::bind(&Irccd::handleServerJoin, this, ptr, _1, _2));
+	server->onKick.connect(std::bind(&Irccd::handleServerKick, this, ptr, _1, _2, _3, _4));
+	server->onMessage.connect(std::bind(&Irccd::handleServerMessage, this, ptr, _1, _2, _3));
+	server->onMe.connect(std::bind(&Irccd::handleServerMe, this, ptr, _1, _2, _3));
+	server->onMode.connect(std::bind(&Irccd::handleServerMode, this, ptr, _1, _2));
+	server->onNames.connect(std::bind(&Irccd::handleServerNames, this, ptr, _1, _2));
+	server->onNick.connect(std::bind(&Irccd::handleServerNick, this, ptr, _1, _2));
+	server->onNotice.connect(std::bind(&Irccd::handleServerNotice, this, ptr, _1, _2));
+	server->onPart.connect(std::bind(&Irccd::handleServerPart, this, ptr, _1, _2, _3));
+	server->onQuery.connect(std::bind(&Irccd::handleServerQuery, this, ptr, _1, _2));
+	server->onTopic.connect(std::bind(&Irccd::handleServerTopic, this, ptr, _1, _2, _3));
+	server->onWhois.connect(std::bind(&Irccd::handleServerWhois, this, ptr, _1));
 	server->onDie.connect([this, ptr] () {
 		post([=] () {
 			auto server = ptr.lock();
@@ -763,7 +762,7 @@ void Irccd::addServer(shared_ptr<Server> server) noexcept
 	m_servers.emplace(server->info().name, move(server));
 }
 
-std::shared_ptr<Server> Irccd::getServer(const string &name) const noexcept
+std::shared_ptr<Server> Irccd::getServer(const std::string &name) const noexcept
 {
 	auto it = m_servers.find(name);
 
@@ -801,14 +800,14 @@ void Irccd::clearServers() noexcept
 	m_servers.clear();
 }
 
-void Irccd::addTransport(shared_ptr<TransportServer> ts)
+void Irccd::addTransport(std::shared_ptr<TransportServer> ts)
 {
 	m_lookupTransportServers.emplace(ts->handle(), ts);
 }
 
 #if defined(WITH_JS)
 
-std::shared_ptr<Plugin> Irccd::getPlugin(const string &name) const noexcept
+std::shared_ptr<Plugin> Irccd::getPlugin(const std::string &name) const noexcept
 {
 	auto it = m_plugins.find(name);
 
@@ -832,8 +831,8 @@ void Irccd::addPlugin(std::shared_ptr<Plugin> plugin)
 {
 	std::weak_ptr<Plugin> ptr(plugin);
 
-	plugin->onTimerSignal.connect(bind(&Irccd::handleTimerSignal, this, ptr, _1));
-	plugin->onTimerEnd.connect(bind(&Irccd::handleTimerEnd, this, ptr, _1));
+	plugin->onTimerSignal.connect(std::bind(&Irccd::handleTimerSignal, this, ptr, _1));
+	plugin->onTimerEnd.connect(std::bind(&Irccd::handleTimerEnd, this, ptr, _1));
 
 	/* Store reference to irccd */
 	plugin->context().putGlobal("\xff""\xff""irccd", js::RawPointer<Irccd>{this});
@@ -910,7 +909,7 @@ void Irccd::unloadPlugin(const std::string &name)
 
 #if defined(WITH_JS)
 
-void Irccd::handleTimerSignal(weak_ptr<Plugin> ptr, shared_ptr<Timer> timer)
+void Irccd::handleTimerSignal(std::weak_ptr<Plugin> ptr, std::shared_ptr<Timer> timer)
 {
 	post([this, ptr, timer] () {
 		auto plugin = ptr.lock();
@@ -920,10 +919,10 @@ void Irccd::handleTimerSignal(weak_ptr<Plugin> ptr, shared_ptr<Timer> timer)
 
 		auto &ctx = plugin->context();
 
-		js::StackAssert sa{ctx};
+		js::StackAssert sa(ctx);
 
 		try {
-			ctx.getGlobal<void>("\xff""\xff""timer-" + std::to_string(reinterpret_cast<intptr_t>(timer.get())));
+			ctx.getGlobal<void>("\xff""\xff""timer-" + std::to_string(reinterpret_cast<std::intptr_t>(timer.get())));
 			ctx.pcall(0);
 			ctx.pop();
 		} catch (const std::exception &) {
@@ -932,7 +931,7 @@ void Irccd::handleTimerSignal(weak_ptr<Plugin> ptr, shared_ptr<Timer> timer)
 	});
 }
 
-void Irccd::handleTimerEnd(weak_ptr<Plugin> ptr, shared_ptr<Timer> timer)
+void Irccd::handleTimerEnd(std::weak_ptr<Plugin> ptr, std::shared_ptr<Timer> timer)
 {
 	post([this, ptr, timer] () {
 		auto plugin = ptr.lock();
@@ -1017,10 +1016,10 @@ void Irccd::dispatch()
 	 * Make a copy because the events can add other events while we are iterating it. Also lock because the timers
 	 * may alter these events too.
 	 */
-	vector<Event> copy;
+	std::vector<Event> copy;
 
 	{
-		lock_guard<mutex> lock(m_mutex);
+		std::lock_guard<mutex> lock(m_mutex);
 
 		copy = move(m_events);
 

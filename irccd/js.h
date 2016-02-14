@@ -345,7 +345,7 @@ public:
 	 * Create default context.
 	 */
 	inline Context()
-		: m_handle{duk_create_heap_default(), duk_destroy_heap}
+		: m_handle(duk_create_heap_default(), duk_destroy_heap)
 	{
 	}
 
@@ -355,7 +355,7 @@ public:
 	 * @param ctx the pointer to duk_context
 	 */
 	inline Context(ContextPtr ctx) noexcept
-		: m_handle{ctx, [] (ContextPtr) {}}
+		: m_handle(ctx, [] (ContextPtr) {})
 	{
 	}
 
@@ -1077,9 +1077,9 @@ public:
 	 */
 	inline StackAssert(Context &ctx, unsigned expected = 0) noexcept
 #if !defined(NDEBUG)
-		: m_context{ctx}
-		, m_expected{expected}
-		, m_begin{static_cast<unsigned>(m_context.top())}
+		: m_context(ctx)
+		, m_expected(expected)
+		, m_begin(static_cast<unsigned>(m_context.top()))
 #endif
 	{
 #if defined(NDEBUG)
@@ -1122,8 +1122,8 @@ protected:
 	 * @param message the message
 	 */
 	inline Error(std::string name, std::string message) noexcept
-		: m_name{std::move(name)}
-		, m_message{std::move(message)}
+		: m_name(std::move(name))
+		, m_message(std::move(message))
 	{
 	}
 
@@ -1134,8 +1134,8 @@ public:
 	 * @param message the message
 	 */
 	inline Error(std::string message) noexcept
-		: m_name{"Error"}
-		, m_message{std::move(message)}
+		: m_name("Error")
+		, m_message(std::move(message))
 	{
 	}
 
@@ -1177,7 +1177,7 @@ public:
 	 * @param message the message
 	 */
 	inline EvalError(std::string message) noexcept
-		: Error{"EvalError", std::move(message)}
+		: Error("EvalError", std::move(message))
 	{
 	}
 };
@@ -1194,7 +1194,7 @@ public:
 	 * @param message the message
 	 */
 	inline RangeError(std::string message) noexcept
-		: Error{"RangeError", std::move(message)}
+		: Error("RangeError", std::move(message))
 	{
 	}
 };
@@ -1211,7 +1211,7 @@ public:
 	 * @param message the message
 	 */
 	inline ReferenceError(std::string message) noexcept
-		: Error{"ReferenceError", std::move(message)}
+		: Error("ReferenceError", std::move(message))
 	{
 	}
 };
@@ -1228,7 +1228,7 @@ public:
 	 * @param message the message
 	 */
 	inline SyntaxError(std::string message) noexcept
-		: Error{"SyntaxError", std::move(message)}
+		: Error("SyntaxError", std::move(message))
 	{
 	}
 };
@@ -1245,7 +1245,7 @@ public:
 	 * @param message the message
 	 */
 	inline TypeError(std::string message) noexcept
-		: Error{"TypeError", std::move(message)}
+		: Error("TypeError", std::move(message))
 	{
 	}
 };
@@ -1262,7 +1262,7 @@ public:
 	 * @param message the message
 	 */
 	inline URIError(std::string message) noexcept
-		: Error{"URIError", std::move(message)}
+		: Error("URIError", std::move(message))
 	{
 	}
 };
@@ -1314,9 +1314,8 @@ public:
 	 */
 	static inline int optional(Context &ctx, int index, int defaultValue)
 	{
-		if (!duk_is_number(ctx, index)) {
+		if (!duk_is_number(ctx, index))
 			return defaultValue;
-		}
 
 		return duk_get_int(ctx, index);
 	}
@@ -1388,9 +1387,8 @@ public:
 	 */
 	static inline bool optional(Context &ctx, int index, bool defaultValue)
 	{
-		if (!duk_is_boolean(ctx, index)) {
+		if (!duk_is_boolean(ctx, index))
 			return defaultValue;
-		}
 
 		return duk_get_boolean(ctx, index);
 	}
@@ -1462,9 +1460,8 @@ public:
 	 */
 	static inline double optional(Context &ctx, int index, double defaultValue)
 	{
-		if (!duk_is_number(ctx, index)) {
+		if (!duk_is_number(ctx, index))
 			return defaultValue;
-		}
 
 		return duk_get_number(ctx, index);
 	}
@@ -1541,9 +1538,8 @@ public:
 	 */
 	static inline std::string optional(Context &ctx, int index, std::string defaultValue)
 	{
-		if (!duk_is_string(ctx, index)) {
+		if (!duk_is_string(ctx, index))
 			return defaultValue;
-		}
 
 		return get(ctx, index);
 	}
@@ -1618,9 +1614,8 @@ public:
 	 */
 	static inline const char *optional(Context &ctx, int index, const char *defaultValue)
 	{
-		if (!duk_is_string(ctx, index)) {
+		if (!duk_is_string(ctx, index))
 			return defaultValue;
-		}
 
 		return duk_get_string(ctx, index);
 	}
@@ -1691,9 +1686,8 @@ public:
 	 */
 	static inline T *optional(Context &ctx, int index, RawPointer<T> defaultValue)
 	{
-		if (!duk_is_pointer(ctx, index)) {
+		if (!duk_is_pointer(ctx, index))
 			return defaultValue.object;
-		}
 
 		return static_cast<T *>(duk_to_pointer(ctx, index));
 	}
@@ -1760,9 +1754,8 @@ public:
 	 */
 	static inline void push(Context &ctx, const FunctionMap &map)
 	{
-		for (const auto &entry : map) {
+		for (const auto &entry : map)
 			ctx.putProperty(-1, entry.first, entry.second);
-		}
 	}
 };
 
@@ -1978,14 +1971,12 @@ public:
 	{
 		std::vector<T> result;
 
-		if (!duk_is_array(ctx, -1)) {
+		if (!duk_is_array(ctx, -1))
 			return result;
-		}
 
 		int total = duk_get_length(ctx, index);
-		for (int i = 0; i < total; ++i) {
+		for (int i = 0; i < total; ++i)
 			result.push_back(ctx.getProperty<T>(index, i));
-		}
 
 		return result;
 	}
@@ -2061,7 +2052,7 @@ public:
 	 */
 	static void push(Context &ctx, Shared<T> value)
 	{
-		js::StackAssert sa{ctx, 1};
+		js::StackAssert sa(ctx, 1);
 
 		duk_push_object(ctx);
 		value.object->prototype(ctx);
@@ -2149,7 +2140,7 @@ public:
 	 */
 	static void push(Context &ctx, Pointer<T> value)
 	{
-		js::StackAssert sa{ctx, 1};
+		js::StackAssert sa(ctx, 1);
 
 		duk_push_object(ctx);
 		apply(ctx, value.object);

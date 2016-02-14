@@ -42,15 +42,15 @@ namespace irccd {
 namespace fs {
 
 #if defined(IRCCD_SYSTEM_WINDOWS)
-const char Separator{'\\'};
+const char Separator('\\');
 #else
-const char Separator{'/'};
+const char Separator('/');
 #endif
 
 std::string baseName(std::string path)
 {
 #if defined(IRCCD_SYSTEM_WINDOWS)
-	size_t pos;
+	std::size_t pos;
 
 	pos = path.find_last_of('\\');
 	if (pos == std::string::npos)
@@ -129,7 +129,7 @@ void mkdir(const std::string &dir, int mode)
 
 	oss << "mkdir: ";
 
-	for (size_t i = 0; i < dir.length(); ++i) {
+	for (std::size_t i = 0; i < dir.length(); ++i) {
 		if (dir[i] != '/' && dir[i] != '\\')
 			continue;
 

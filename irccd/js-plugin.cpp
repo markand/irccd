@@ -38,9 +38,9 @@ int wrap(js::Context &ctx, int nret, Func &&func)
 	try {
 		func(*ctx.getGlobal<js::RawPointer<Irccd>>("\xff""\xff""irccd"), name);
 	} catch (const std::out_of_range &ex) {
-		ctx.raise(js::ReferenceError{ex.what()});
+		ctx.raise(js::ReferenceError(ex.what()));
 	} catch (const std::exception &ex) {
-		ctx.raise(js::Error{ex.what()});
+		ctx.raise(js::Error(ex.what()));
 	}
 
 	return nret;

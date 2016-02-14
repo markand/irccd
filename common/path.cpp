@@ -91,7 +91,7 @@ std::string executablePath()
 	result.resize(size);
 	
 	if (!(size = GetModuleFileNameA(nullptr, &result[0], size)))
-		throw std::runtime_error{"GetModuleFileName error"};
+		throw std::runtime_error("GetModuleFileName error");
 	
 	result.resize(size);
 	
@@ -109,7 +109,7 @@ std::string executablePath()
 	auto size = readlink("/proc/self/exe", &result[0], 2048);
 	
 	if (size < 0)
-		throw std::invalid_argument{std::strerror(errno)};
+		throw std::invalid_argument(std::strerror(errno));
 	
 	result.resize(size);
 	
@@ -127,7 +127,7 @@ std::string executablePath()
 	result.resize(size);
 	
 	if (sysctl(mib.data(), 4, &result[0], &size, nullptr, 0) < 0)
-		throw std::runtime_error{std::strerror(errno)};
+		throw std::runtime_error(std::strerror(errno));
 	
 	result.resize(size);
 	
@@ -144,7 +144,7 @@ std::string executablePath()
 	result.resize(size);
 	
 	if ((size = proc_pidpath(getpid(), &result[0], size)) == 0)
-		throw std::runtime_error{std::strerror(errno)};
+		throw std::runtime_error(std::strerror(errno));
 	
 	result.resize(size);
 	
@@ -381,9 +381,9 @@ std::string userPlugins()
 } // !namespace
 
 #if defined(IRCCD_SYSTEM_WINDOWS)
-const char Separator{';'};
+const char Separator(';');
 #else
-const char Separator{':'};
+const char Separator(':');
 #endif
 
 void setApplicationPath(const std::string &argv0)
@@ -424,9 +424,8 @@ void setApplicationPath(const std::string &argv0)
 			}
 
 			/* Not found in PATH? add dummy value */
-			if (base.empty()) {
+			if (base.empty())
 				base = std::string(".") + fs::Separator + WITH_BINDIR + fs::Separator + "dummy";
-			}
 		}
 	}
 

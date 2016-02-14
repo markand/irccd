@@ -63,7 +63,7 @@ void TypeInfo<Function>::push(Context &ctx, Function fn)
 {
 	/* 1. Push function wrapper */
 	duk_push_c_function(ctx, [] (duk_context *ctx) -> duk_ret_t {
-		Context context{ctx};
+		Context context(ctx);
 
 		duk_push_current_function(ctx);
 		duk_get_prop_string(ctx, -1, "\xff""\xff""js-func");

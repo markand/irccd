@@ -307,7 +307,7 @@ MessagePair parseMessage(std::string message, const std::string &cc, const std::
 		}
 	}
 
-	return MessagePair{result, ((iscommand) ? MessageType::Command : MessageType::Message)};
+	return MessagePair(result, ((iscommand) ? MessageType::Command : MessageType::Message));
 }
 
 bool isBoolean(std::string value) noexcept
