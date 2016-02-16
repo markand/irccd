@@ -25,8 +25,8 @@ namespace command {
 void PluginReload::usage(Irccdctl &) const
 {
 	log::warning() << "usage: " << sys::programName() << " plugin-reload name\n\n";
-	log::warning() << "Reload a plugin, parameter name is the plugin to reload.\n";
-	log::warning() << "The plugin must be loaded.\n\n";
+	log::warning() << "Reload a plugin by calling the appropriate onReload event, the plugin is not\n";
+	log::warning() << "unloaded and must be already loaded.\n\n";
 	log::warning() << "Example:\n";
 	log::warning() << "\t" << sys::programName() << " plugin-reload logger" << std::endl;
 }

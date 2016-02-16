@@ -62,9 +62,7 @@ $ irccdctl load ask
 
 ### plugin-reload
 
-Reload a plugin, parameter name is the plugin to reload.
-
-The plugin must be loaded.
+Reload a plugin by calling the appropriate onReload event, the plugin is not unloaded and must be already loaded.
 
 **Usage**
 
