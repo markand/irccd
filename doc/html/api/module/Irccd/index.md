@@ -15,6 +15,10 @@ The following properties are defined:
     - **minor**: (int) the minor irccd version,
     - **patch**: (int) the patch irccd version.
 
+## Types
+
+  - **SystemError**: (function) an exception inheriting `Error` thrown by some functions.
+
 ## Example
 
 ````javascript
