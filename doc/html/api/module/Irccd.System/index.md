@@ -5,8 +5,6 @@ summary: "System inspection."
 
 ## Usage
 
-System inspection.
-
 Use this module if you want to inspect the system independently.
 
 ## Functions

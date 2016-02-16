@@ -3,8 +3,8 @@ method: constructor
 summary: "Open a file specified by path with the specified mode."
 synopsis: "Irccd.File(path, mode) /* constructor */"
 arguments:
-  - "path, the path to the file,"
-  - "mode, the mode string."
+  - "**path**: the path to the file,"
+  - "**mode**: the mode string."
 throws: "Any exception on error."
 ---
 

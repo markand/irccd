@@ -3,7 +3,7 @@ function: info
 summary: "Get information about a plugin."
 synopsis: "Irccd.Plugin.info(name)"
 arguments:
-  - "name, the plugin identifier, if not specified the current plugin is selected."
+  - "**name**: the plugin identifier, if not specified the current plugin is selected."
 returns: "The plugin information or undefined if the plugin was not found."
 ---
 

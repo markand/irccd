@@ -5,11 +5,10 @@ summary: >
   specification.
 synopsis: "str = Irccd.Util.format(input, params)"
 arguments:
-  - "input, the text to update,"
-  - "params, the parameters."
+  - "**input**: the text to update,"
+  - "**params**: the parameters."
 returns: "The converted text."
 ---
-
 
 ## Example
 

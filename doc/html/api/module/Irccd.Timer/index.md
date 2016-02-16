@@ -10,11 +10,11 @@ Create repetitive or one-shot timers.
 
 The following properties are defined:
 
-  - **Single**, (int) the timer is single-shot,
-  - **Repeat**, (int) the timer is looping.
+  - **Single**: (int) the timer is single-shot,
+  - **Repeat**: (int) the timer is looping.
 
 ## Methods
 
-- [(constructor)](method/constructor.html)
-- [start](method/start.html)
-- [stop](method/stop.html)
+  - [(constructor)](method/constructor.html)
+  - [start](method/start.html)
+  - [stop](method/stop.html)

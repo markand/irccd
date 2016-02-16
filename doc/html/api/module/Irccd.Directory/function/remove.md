@@ -3,8 +3,8 @@ function: remove
 summary: "Remove the directory optionally recursively."
 synopsis: "Irccd.Directory.remove(path, recursive)"
 arguments:
-  - "path, the path to the directory,"
-  - "recursive, recursively or not (Optional, default: false)."
+  - "**path**: the path to the directory,"
+  - "**recursive**: recursively or not (Optional, default: false)."
 throws: "Any exception on error."
 ---
 

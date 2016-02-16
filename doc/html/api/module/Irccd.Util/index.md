@@ -8,6 +8,6 @@ Various utilities.
 
 ## Functions
 
-- [format](function/format.html)
-- [splituser](function/splituser.html)
-- [splithost](function/splithost.html)
+  - [format](function/format.html)
+  - [splituser](function/splituser.html)
+  - [splithost](function/splithost.html)

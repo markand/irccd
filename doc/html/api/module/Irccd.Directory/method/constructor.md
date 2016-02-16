@@ -3,8 +3,8 @@ method: constructor
 summary: "Open a directory."
 synopsis: "Irccd.Directory(path, flags) /* constructor */"
 arguments:
-  - "path, the path to the directory,"
-  - "flags, the OR'ed flags: `Irccd.Directory.Dot`, `Irccd.Directory.DotDot` (Optional, default: none)"
+  - "**path**: the path to the directory,"
+  - "**flags**: the OR'ed flags: `Irccd.Directory.Dot`, `Irccd.Directory.DotDot` (Optional, default: none)."
 throws: "Any exception on error."
 ---
 

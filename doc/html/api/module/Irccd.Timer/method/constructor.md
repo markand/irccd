@@ -3,9 +3,9 @@ method: constructor
 summary: "Create a new timer object."
 synopsis: "Irccd.Timer(type, delay, callback) /* constructor */"
 arguments:
-  - "type, type of timer (`Irccd.Timer.Repeat` or `Irccd.Timer.Single`),"
-  - "delay, the interval in milliseconds,"
-  - "callback, the function to call."
+  - "**type**: type of timer (`Irccd.Timer.Repeat` or `Irccd.Timer.Single`),"
+  - "**delay**: the interval in milliseconds,"
+  - "**callback**: the function to call."
 ---
 
 ## Example

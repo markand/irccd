@@ -3,7 +3,7 @@ function: stat
 summary: "Get file information at the specified path."
 synopsis: "info = Irccd.File.stat(path)"
 arguments:
-  - "path, the path to the file."
+  - "**path**: the path to the file."
 returns: "The stat information."
 throws: "Any exception on error."
 ---
