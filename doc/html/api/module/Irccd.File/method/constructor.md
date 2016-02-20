@@ -5,7 +5,7 @@ synopsis: "Irccd.File(path, mode) /* constructor */"
 arguments:
   - "**path**: the path to the file,"
   - "**mode**: the mode string."
-throws: "Any exception on error."
+throws: "An [Irccd.SystemError](@baseurl@/api/module/Irccd/index.html#types) on failures."
 ---
 
 ## Mode
