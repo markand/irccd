@@ -3,7 +3,7 @@ title: "Ask plugin"
 header: "Ask plugin"
 ---
 
-The plugin **ask** is funny script that help you in your life. It will tell you if you will be rich, famous and so on.
+The plugin **ask** is funny script that helps you in your life. It will tells you if you will be rich, famous and so on.
 
 ## Installation
 
@@ -18,7 +18,7 @@ ask = ""
 
 The plugin **ask** reacts to special command, you just need to do `!ask the question` and it will give you a response.
 
-Example:
+## Example
 
 ````nohighlight
 markand: !ask will I be rich?
@@ -32,10 +32,13 @@ located in the ask configuration directory.
 
 Just add one line per answer like this:
 
-**~/.local/config/irccd/plugin/ask/answers.txt**:
-
+<div class="panel panel-info">
+ <div class="panel-heading">~/.config/irccd/plugin/ask/answers.conf</div>
+ <div class="panel-body">
 ````nohighlight
 Stop dreaming,
 Definitely sure!
 Maybe
 ````
+ </div>
+</div>
