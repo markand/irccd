@@ -49,8 +49,13 @@ The following keywords are supported:
 
 Example:
 
+<div class="panel panel-info">
+ <div class="panel-heading">~/.config/irccd/irccd.conf</div>
+ <div class="panel-body">
 ````ini
 [plugin.roulette]
 format-lucky = "#{nickname} you're gonna get shot"
 format-shot = "BIM"
 ````
+ </div>
+</div>
