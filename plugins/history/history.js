@@ -54,8 +54,8 @@ function path(server, channel)
 {
 	var p;
 
-	if (Plugin.config["path"] !== undefined) {
-		p = Util.format(Plugin.config["path"], {
+	if (Plugin.config["file"] !== undefined) {
+		p = Util.format(Plugin.config["file"], {
 			"server":	server.toString(),
 			"channel":	channel
 		});

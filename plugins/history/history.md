@@ -37,12 +37,22 @@ You can use different formats.
 
 The following options are available under the `[plugin.history]` section:
 
-  - **path**: (string) path to the JSON file for saving information (Optional, default to cache directory).
+  - **file**: (string) path to the JSON file for saving information (Optional, default to cache directory).
   - **format-error**: (string) format when an internal error occured,
   - **format-seen**: (string) format for showing last seen,
   - **format-said**: (string) format for showing the last message,
   - **format-unknown**: (string) format when the user has never been seen,
   - **format-usage**: (strnig) format to show the plugin usage.
+
+<div class="panel panel-warning">
+ <div class="panel-heading">If you don't want to specify the **file** parameter, irccd will try to use the plugin cache
+ path, you must create it.</div>
+ <div class="panel-body">
+````nohighlight
+$ mkdir -p ~/.cache/irccd/plugin/history
+````
+ </div>
+</div>
 
 ### Keywords supported
 
@@ -51,14 +61,19 @@ The following keywords are supported:
 | Format                  | Keywords                          | Notes                           |
 |-------------------------|-----------------------------------|---------------------------------|
 | (any)                   | server, channel, nickname, origin |                                 |
-| **path**                | server, channel                   | does not support (any)          |
+| **file**                | server, channel                   | does not support (any)          |
 | **format-seen**         | target, (date)                    | target is the specified nick    |
 | **format-said**         | target, message, (date)           |                                 |
 | **format-unknown**      | target                            |                                 |
 
 Example:
 
+<div class="panel panel-info">
+ <div class="panel-heading">~/.config/irccd/irccd.conf</div>
+ <div class="panel-body">
 ````ini
 [plugin.history]
 format-seen = "#{target} has been seen on #{channel} the last time on: %d/%m/%Y %H:%M"
 ````
+ </div>
+</div>
