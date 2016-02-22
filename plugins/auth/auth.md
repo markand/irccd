@@ -35,6 +35,9 @@ You must replace **server** with one defined in a `[server]` section.
 
 Example:
 
+<div class="panel panel-info">
+ <div class="panel-heading">~/.config/irccd/irccd.conf</div>
+ <div class="panel-body">
 ````ini
 [plugin.auth]
 freenode.type = "nickserv"
@@ -44,3 +47,5 @@ freenode.username = "jeanfrancois"
 wanadoo.type = "nickserv"
 wanadoo.password = "wanadoo is dead"
 ````
+ </div>
+</div>
