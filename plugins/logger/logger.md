@@ -36,7 +36,7 @@ The plugin **logger** can be configured to format logs and to use different log 
 
 The following options are available under the `[plugin.logger]` section:
 
-  - **path**: (string) the path to the file where to store logs,
+  - **file**: (string) the path to the file where to store logs,
   - **cmode**: (string) format for channel mode change,
   - **cnotice**: (string) format for channel notices,
   - **join**: (string) format when someone joins a channel,
@@ -72,8 +72,13 @@ The **source** keyword is specially designed to use a generic path for the path 
 
 Example:
 
+<div class="panel panel-info">
+ <div class="panel-heading">~/.config/irccd/irccd.conf</div>
+ <div class="panel-body">
 ````ini
 [plugin.logger]
-path = "/var/logs/irccd/#{server}/%y/%m/%d/#{source}.txt"
+file = "/var/log/irccd/#{server}/%y/%m/%d/#{source}.txt"
 format-join = "user #{nickname} joined #{channel}"
 ````
+ </div>
+</div>
