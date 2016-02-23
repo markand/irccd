@@ -80,7 +80,7 @@ option(WITH_TESTS "Enable unit testing" Off)
 option(WITH_SYSTEMD "Install systemd service" ${DEFAULT_SYSTEMD})
 option(WITH_DOCS "Enable building of all documentation" On)
 option(WITH_HTML "Enable building of HTML documentation" On)
-option(WITH_DOXYGEN "Enable doxygen" On)
+option(WITH_DOXYGEN "Enable doxygen" Off)
 option(WITH_MAN "Install man pages" ${DEFAULT_MAN})
 
 # Build options for all plugins.
