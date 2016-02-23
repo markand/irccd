@@ -13,14 +13,7 @@
     <!-- CSS -->
     <link href="$baseurl$/css/bootstrap.min.css" rel="stylesheet">
     <link href="$baseurl$/css/tomorrow.css" rel="stylesheet">
-
-$if(web)$
-    <link href="$baseurl$/css/irccd.css" rel="stylesheet">
-$endif$
-
-$if(doc)$
     <link href="$baseurl$/css/doc.css" rel="stylesheet">
-$endif$
 
 $if(guide)$
     <link href="$baseurl$/css/doc-guide.css" rel="stylesheet">
@@ -34,51 +27,8 @@ $endif$
   </head>
 
   <body>
-$if(web)$
-    <nav class="navbar navbar-fixed-top navbar-inverse">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="$baseurl$/index.html">irccd</a>
-        </div><!-- navbar-header -->
-        <div id="navbar" class="navbar-collapse collapse">
-          <ul class="nav navbar-nav">
-            <li><a href="$baseurl$/about.html">About</a></li>
-            <li><a href="$baseurl$/documentation.html">Documentation</a></li>
-            <li><a href="$baseurl$/download.html">Download</a></li>
-            <li><a href="$baseurl$/contribute.html">Contribute</a></li>
-            <li><a href="$baseurl$/support.html">Support</a></li>
-          </ul>
-          <p id="joke" class="navbar-text navbar-right">The definitive bot</p>
-        </div><!-- !navbar -->
-      </div><!-- !container -->
-    </nav>
+  <div class="container-fluid">
 
-$if(home)$
-    <!-- Main jumbotron for a primary marketing message or call to action -->
-    <div class="jumbotron">
-     <div class="container">
-      <h1>IRC Client Daemon</h1>
-      <p>Irccd is an IRC bot written in C++14 and Javascript. It is fast, light, powerful, scalable.</p>
-      <p><a class="btn btn-primary btn-lg" href="#" role="button">Download now &raquo;</a></p>
-     </div>
-    </div>
-$endif$ <!-- ! endif home -->
-$endif$ <!-- ! endif web -->
-
-$if(doc)$
-<div class="container-fluid">
-$endif$
-$if(general)$
-<div class="container">
-$endif$
-
-$if(doc)$
   <div class="row">
     <!-- Side bar -->
     <div class="col-sm-1 col-md-2 sidebar">
@@ -129,6 +79,7 @@ $endif$ <!-- endif js -->
 $if(guide)$
 $toc$
 $endif$ <!-- endif guide -->
+
     </div><!-- Side bar -->
 
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
@@ -209,11 +160,6 @@ $body$
 $endif$ <!-- endif guide -->
     </div><!-- !column -->
   </div><!-- !row -->
-$endif$
-
-$if(general)$
-$body$
-$endif$ <!-- endif general -->
 
   <hr>
   <footer>
@@ -226,10 +172,6 @@ $endif$ <!-- endif general -->
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="$baseurl$/js/jquery.min.js"></script>
     <script src="$baseurl$/js/bootstrap.min.js"></script>
-
-$if(web)$
-    <script src="$baseurl$/js/joke.js"></script>
-$endif$
 
     <script src="$baseurl$/js/highlight.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
