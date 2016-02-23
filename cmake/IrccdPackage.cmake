@@ -28,6 +28,12 @@ set(CPACK_SOURCE_IGNORE_FILES .hg .hgignore)
 if (WIN32)
 	set(PKGSYS "Windows")
 	set(PKGSUFFIX "exe")
+
+	if (IRCCD_64BITS)
+		set(PKGTARGETDIR "C:/Program Files/irccd-${IRCCD_VERSION}")
+	else ()
+		set(PKGTARGETDIR "C:/Program Files (x86)/irccd-${IRCCD_VERSION}")
+	endif ()
 endif ()
 
 if (IRCCD_64BITS)
