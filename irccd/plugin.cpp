@@ -1,5 +1,5 @@
 /*
- * plugin.cpp -- irccd Lua plugin interface
+ * plugin.cpp -- irccd JavaScript plugin interface
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
