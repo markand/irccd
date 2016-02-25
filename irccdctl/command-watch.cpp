@@ -41,7 +41,7 @@ void onChannelNotice(const json::Value &v)
 	std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
 	std::cout << "origin:      " << v.valueOr("origin", "").toString() << "\n";
 	std::cout << "channel:     " << v.valueOr("channel", "").toString() << "\n";
-	std::cout << "notice:      " << v.valueOr("notice", "").toString() << "\n";
+	std::cout << "message:     " << v.valueOr("message", "").toString() << "\n";
 }
 
 void onConnect(const json::Value &v)
@@ -123,7 +123,7 @@ void onNotice(const json::Value &v)
 	std::cout << "event:       onNotice\n";
 	std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
 	std::cout << "origin:      " << v.valueOr("origin", "").toString() << "\n";
-	std::cout << "notice:      " << v.valueOr("notice", "").toString() << "\n";
+	std::cout << "message:      " << v.valueOr("message", "").toString() << "\n";
 }
 
 void onPart(const json::Value &v)
