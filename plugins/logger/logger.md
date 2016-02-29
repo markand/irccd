@@ -55,14 +55,14 @@ The following keywords are supported:
 
 | Format                  | Keywords                          | Notes                           |
 |-------------------------|-----------------------------------|---------------------------------|
-| (any)                   | server, nickname, origin, source  | source is the channel or nick   |
+| (any)                   | nickname, origin, server, source  | source is the channel or nick   |
 | **format-cmode**        | arg, channel, mode,               | the mode and its arguments      |
 | **format-cnotice**      | channel, message                  | the message notice              |
 | **format-join**         | channel                           |                                 |
 | **format-kick**         | channel, reason, target           |                                 |
 | **format-me**           | channel, message                  | message is the emote action     |
 | **format-message**      | channel, message                  |                                 |
-| **format-mode**         | mode, arg                         | the mode and its arguments      |
+| **format-mode**         | arg, mode                         | the mode and its arguments      |
 | **format-notice**       | message                           | the notice message              |
 | **format-part**         | channel, reason                   |                                 |
 | **format-query**        | message                           |                                 |
