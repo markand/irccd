@@ -42,10 +42,10 @@ The following options are available under the `[plugin.roulette]` section:
 
 The following keywords are supported:
 
-| Format           | Keywords                          | Notes                             |
-|------------------|-----------------------------------|-----------------------------------|
-| (any)            | server, channel, nickname, origin | all formats                       |
-| **format-lucky** | count                             | the number of cylinder count left |
+| Format           | Keywords                                           | Notes                             |
+|------------------|----------------------------------------------------|-----------------------------------|
+| (any)            | channel, command, nickname, origin, plugin, server | all formats                       |
+| **format-lucky** | count                                              | the number of cylinder count left |
 
 Example:
 
