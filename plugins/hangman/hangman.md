@@ -70,16 +70,16 @@ The following options are available under the `[plugin.hangman]` section:
 
 The following keywords are supported:
 
-| Format                  | Keywords                          | Notes                           |
-|-------------------------|-----------------------------------|---------------------------------|
-| (any)                   | server, channel, nickname, origin | all formats                     |
-| **format-asked**        | letter                            | the letter proposal             |
-| **format-dead**         | word                              | the word to find                |
-| **format-found**        | word                              | the hidden word                 |
-| **format-start**        | word                              | the hidden word                 |
-| **format-win**          | word                              | the word to find                |
-| **format-wrong-word**   | word                              | the invalid word proposal       |
-| **format-wrong-letter** | letter                            | the letter proposal             |
+| Format                  | Keywords                                           | Notes                           |
+|-------------------------|----------------------------------------------------|---------------------------------|
+| (any)                   | channel, command, nickname, origin, plugin, server | all formats                     |
+| **format-asked**        | letter                                             | the letter proposal             |
+| **format-dead**         | word                                               | the word to find                |
+| **format-found**        | word                                               | the hidden word                 |
+| **format-start**        | word                                               | the hidden word                 |
+| **format-win**          | word                                               | the word to find                |
+| **format-wrong-word**   | word                                               | the invalid word proposal       |
+| **format-wrong-letter** | letter                                             | the letter proposal             |
 
 Example:
 
