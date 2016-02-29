@@ -94,7 +94,7 @@ int format(js::Context &ctx)
  */
 int splituser(js::Context &ctx)
 {
-	const char *target = ctx.get<const char *>(0);
+	const char *target = ctx.require<const char *>(0);
 	char nick[32] = {0};
 
 	irc_target_get_nick(target, nick, sizeof (nick) -1);
@@ -116,7 +116,7 @@ int splituser(js::Context &ctx)
  */
 int splithost(js::Context &ctx)
 {
-	const char *target = ctx.get<const char *>(0);
+	const char *target = ctx.require<const char *>(0);
 	char host[32] = {0};
 
 	irc_target_get_host(target, host, sizeof (host) -1);
