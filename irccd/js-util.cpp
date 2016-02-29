@@ -63,12 +63,16 @@ public:
 namespace {
 
 /*
- * Function: format(text, parameters)
+ * Function: Irccd.Util.format(text, parameters)
  * --------------------------------------------------------
  *
  * Format a string with templates.
  *
- * TODO: document
+ * Arguments:
+ *   - input, the text to update,
+ *   - params, the parameters.
+ * Returns:
+ *   The converted text.
  */
 int format(js::Context &ctx)
 {
@@ -82,15 +86,15 @@ int format(js::Context &ctx)
 }
 
 /*
- * Function: splituser(ident)
+ * Function: Irccd.Util.splituser(ident)
  * --------------------------------------------------------
  *
  * Return the nickname part from a full username.
  *
  * Arguments:
- *   - ident, the full identity
+ *   - ident, the full identity.
  * Returns:
- *   - The nickname part
+ *   The nickname.
  */
 int splituser(js::Context &ctx)
 {
@@ -104,15 +108,15 @@ int splituser(js::Context &ctx)
 }
 
 /*
- * Function: splithost(ident)
+ * Function: Irccd.Util.splithost(ident)
  * --------------------------------------------------------
  *
  * Return the hostname part from a full username.
  *
  * Arguments:
- *   - ident, the full identity
+ *   - ident, the full identity.
  * Returns:
- *   - The hostname part
+ *   The hostname.
  */
 int splithost(js::Context &ctx)
 {

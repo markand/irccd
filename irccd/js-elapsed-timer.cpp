@@ -80,7 +80,7 @@ int restart(js::Context &ctx)
  * Get the number of elapsed milliseconds.
  *
  * Returns:
- *   - The time elapsed
+ *   The time elapsed.
  */
 int elapsed(js::Context &ctx)
 {

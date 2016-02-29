@@ -34,8 +34,8 @@ namespace {
  * Change a channel mode.
  *
  * Arguments:
- *   - channel, the channel
- *   - mode, the mode
+ *   - channel, the channel,
+ *   - mode, the mode.
  */
 int cmode(js::Context &ctx)
 {
@@ -51,8 +51,8 @@ int cmode(js::Context &ctx)
  * Send a channel notice.
  *
  * Arguments:
- *   - channel, the channel
- *   - message, the message
+ *   - channel, the channel,
+ *   - message, the message.
  */
 int cnotice(js::Context &ctx)
 {
@@ -108,8 +108,8 @@ int info(js::Context &ctx)
  * Invite someone to a channel.
  *
  * Arguments:
- *   - target, the target to invite
- *   - channel, the channel
+ *   - target, the target to invite,
+ *   - channel, the channel.
  */
 int invite(js::Context &ctx)
 {
@@ -125,8 +125,8 @@ int invite(js::Context &ctx)
  * Join a channel with an optional password.
  *
  * Arguments:
- *   - channel, the channel to join
- *   - password, the password or undefined to not use
+ *   - channel, the channel to join,
+ *   - password, the password or undefined to not use.
  */
 int join(js::Context &ctx)
 {
@@ -142,9 +142,9 @@ int join(js::Context &ctx)
  * Kick someone from a channel.
  *
  * Arguments:
- *   - target, the target to kick
- *   - channel, the channel
- *   - reason, the optional reason or undefined to not set
+ *   - target, the target to kick,
+ *   - channel, the channel,
+ *   - reason, the optional reason or undefined to not set.
  */
 int kick(js::Context &ctx)
 {
@@ -164,8 +164,8 @@ int kick(js::Context &ctx)
  * Send a CTCP Action.
  *
  * Arguments:
- *   - target, the target or a channel
- *   - message, the message
+ *   - target, the target or a channel,
+ *   - message, the message.
  */
 int me(js::Context &ctx)
 {
@@ -181,8 +181,8 @@ int me(js::Context &ctx)
  * Send a message.
  *
  * Arguments:
- *   - target, the target or a channel
- *   - message, the message
+ *   - target, the target or a channel,
+ *   - message, the message.
  */
 int message(js::Context &ctx)
 {
@@ -198,7 +198,7 @@ int message(js::Context &ctx)
  * Change your mode.
  *
  * Arguments:
- *   - mode, the new mode
+ *   - mode, the new mode.
  */
 int mode(js::Context &ctx)
 {
@@ -214,7 +214,7 @@ int mode(js::Context &ctx)
  * Get the list of names from a channel.
  *
  * Arguments:
- *   - channel, the channel
+ *   - channel, the channel.
  */
 int names(js::Context &ctx)
 {
@@ -230,7 +230,7 @@ int names(js::Context &ctx)
  * Change the nickname.
  *
  * Arguments:
- *   - nickname, the nickname
+ *   - nickname, the nickname.
  */
 int nick(js::Context &ctx)
 {
@@ -246,8 +246,8 @@ int nick(js::Context &ctx)
  * Send a private notice.
  *
  * Arguments:
- *   - target, the target
- *   - message, the notice message
+ *   - target, the target,
+ *   - message, the notice message.
  */
 int notice(js::Context &ctx)
 {
@@ -263,8 +263,8 @@ int notice(js::Context &ctx)
  * Leave a channel.
  *
  * Arguments:
- *   - channel, the channel to leave
- *   - reason, the optional reason, keep undefined for portability
+ *   - channel, the channel to leave,
+ *   - reason, the optional reason, keep undefined for portability.
  */
 int part(js::Context &ctx)
 {
@@ -280,7 +280,7 @@ int part(js::Context &ctx)
  * Send a raw message to the IRC server.
  *
  * Arguments:
- *   - raw, the raw message (without terminators)
+ *   - raw, the raw message (without terminators).
  */
 int send(js::Context &ctx)
 {
@@ -296,8 +296,8 @@ int send(js::Context &ctx)
  * Change a channel topic.
  *
  * Arguments:
- *   - channel, the channel
- *   - topic, the new topic
+ *   - channel, the channel,
+ *   - topic, the new topic.
  */
 int topic(js::Context &ctx)
 {
@@ -313,7 +313,7 @@ int topic(js::Context &ctx)
  * Get whois information.
  *
  * Arguments:
- *   - target, the target
+ *   - target, the target.
  */
 int whois(js::Context &ctx)
 {
@@ -330,7 +330,7 @@ int whois(js::Context &ctx)
  * as property key.
  *
  * Returns:
- *   - the server name (unique)
+ *   The server name (unique).
  */
 int toString(js::Context &ctx)
 {
@@ -412,7 +412,7 @@ int constructor(js::Context &ctx)
  * Register a new server to the irccd instance.
  *
  * Arguments:
- *   - s, the server to add
+ *   - s, the server to add.
  */
 int add(js::Context &ctx)
 {
@@ -433,7 +433,7 @@ int add(js::Context &ctx)
  * Arguments:
  *   - name, the server name
  * Returns:
- *   - the server object or undefined if not found
+ *   The server object or undefined if not found.
  */
 int find(js::Context &ctx)
 {
@@ -456,7 +456,7 @@ int find(js::Context &ctx)
  * Get the map of all loaded servers.
  *
  * Returns:
- *   - an object with string-to-servers pairs.
+ *   An object with string-to-servers pairs.
  */
 int list(js::Context &ctx)
 {
@@ -475,7 +475,7 @@ int list(js::Context &ctx)
  * Remove a server from the irccd instance. You can pass the server object since it's coercible to a string.
  *
  * Arguments:
- *   - name the server name
+ *   - name the server name.
  */
 int remove(js::Context &ctx)
 {

@@ -197,17 +197,17 @@ int remove(js::Context &ctx, const std::string &path, bool recursive)
 }
 
 /*
- * Method: Directory.prototype.find(pattern, recursive)
+ * Method: Directory.find(pattern, recursive)
  * --------------------------------------------------------
  *
  * Synonym of Directory.find(path, pattern, recursive) but the path is taken
  * from the directory object.
  *
  * Arguments:
- *   - pattern, the regular expression or file name
- *   - recursive, set to true to search recursively (default: false)
+ *   - pattern, the regular expression or file name,
+ *   - recursive, set to true to search recursively (default: false).
  * Returns:
- *   - the path to the file or undefined on errors or not found
+ *   The path to the file or undefined on errors or not found
  */
 int methodFind(js::Context &ctx)
 {
@@ -215,16 +215,16 @@ int methodFind(js::Context &ctx)
 }
 
 /*
- * Method: Directory.prototype.remove(recursive)
+ * Method: Directory.remove(recursive)
  * --------------------------------------------------------
  *
  * Synonym of Directory.remove(recursive) but the path is taken from the
  * directory object.
  *
  * Arguments:
- *   - recursive, recursively or not (default: false)
+ *   - recursive, recursively or not (default: false).
  * Throws:
- *   Any exception on error
+ *   - Any exception on error.
  */
 int methodRemove(js::Context &ctx)
 {
@@ -247,8 +247,8 @@ const js::FunctionMap methods{
  * Opens and read the directory at the specified path.
  *
  * Arguments:
- *   - path, the path to the directory
- *   - flags, the optional flags (default: 0)
+ *   - path, the path to the directory,
+ *   - flags, the optional flags (default: 0).
  * Throws:
  *   - Any exception on error
  */
@@ -296,11 +296,11 @@ int constructor(js::Context &ctx)
  * Find an entry by a pattern or a regular expression.
  *
  * Arguments:
- *   - path, the base path
- *   - pattern, the regular expression or file name
- *   - recursive, set to true to search recursively (default: false)
+ *   - path, the base path,
+ *   - pattern, the regular expression or file name,
+ *   - recursive, set to true to search recursively (default: false).
  * Returns:
- *   - the path to the file or undefined on errors or not found
+ *   The path to the file or undefined on errors or not found.
  */
 int funcFind(js::Context &ctx)
 {
@@ -314,10 +314,10 @@ int funcFind(js::Context &ctx)
  * Remove the directory optionally recursively.
  *
  * Arguments:
- *   - path, the path to the directory
- *   - recursive, recursively or not (default: false)
+ *   - path, the path to the directory,
+ *   - recursive, recursively or not (default: false).
  * Throws:
- *   Any exception on error
+ *   - Any exception on error.
  */
 int funcRemove(js::Context &ctx)
 {
@@ -332,10 +332,10 @@ int funcRemove(js::Context &ctx)
  * just like you have invoked mkdir -p.
  *
  * Arguments:
- *   - path, the path to the directory
- *   - mode, the mode, not available on all platforms
+ *   - path, the path to the directory,
+ *   - mode, the mode, not available on all platforms.
  * Throws:
- *   - Any exception on error
+ *   - Any exception on error.
  */
 int funcMkdir(js::Context &ctx)
 {

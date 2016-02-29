@@ -29,9 +29,9 @@ namespace {
  * --------------------------------------------------------
  *
  * Arguments:
- *   - code, the code point
+ *   - code, the code point.
  * Returns:
- *   - true if the code is in the digit category
+ *   True if the code is in the digit category.
  */
 int isDigit(js::Context &ctx)
 {
@@ -45,9 +45,9 @@ int isDigit(js::Context &ctx)
  * --------------------------------------------------------
  *
  * Arguments:
- *   - code, the code point
+ *   - code, the code point.
  * Returns:
- *   - true if the code is in the letter category
+ *   True if the code is in the letter category.
  */
 int isLetter(js::Context &ctx)
 {
@@ -61,9 +61,9 @@ int isLetter(js::Context &ctx)
  * --------------------------------------------------------
  *
  * Arguments:
- *   - code, the code point
+ *   - code, the code point.
  * Returns:
- *   - true if the code is lower case
+ *   True if the code is lower case.
  */
 int isLower(js::Context &ctx)
 {
@@ -77,9 +77,9 @@ int isLower(js::Context &ctx)
  * --------------------------------------------------------
  *
  * Arguments:
- *   - code, the code point
+ *   - code, the code point.
  * Returns:
- *   - true if the code is in the space category
+ *   True if the code is in the space category.
  */
 int isSpace(js::Context &ctx)
 {
@@ -89,13 +89,13 @@ int isSpace(js::Context &ctx)
 }
 
 /*
- * Function: Unicode.isTitle(code)
+ * Function: Irccd.Unicode.isTitle(code)
  * --------------------------------------------------------
  *
  * Arguments:
- *   - code, the code point
+ *   - code, the code point.
  * Returns:
- *   - true if the code is title case
+ *   True if the code is title case.
  */
 int isTitle(js::Context &ctx)
 {
@@ -109,9 +109,9 @@ int isTitle(js::Context &ctx)
  * --------------------------------------------------------
  *
  * Arguments:
- *   - code, the code point
+ *   - code, the code point.
  * Returns:
- *   - true if the code is upper case
+ *   True if the code is upper case.
  */
 int isUpper(js::Context &ctx)
 {

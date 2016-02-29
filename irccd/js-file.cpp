@@ -202,13 +202,13 @@ namespace {
  * -------------------------------------------------------- */
 
 /*
- * Method: File.prototype.basename()
+ * Method: File.basename()
  * --------------------------------------------------------
  *
  * Synonym of `Irccd.File.basename(path)` but with the path from the file.
  *
  * Returns:
- *   The base file name
+ *   The base name.
  */
 int methodBasename(js::Context &ctx)
 {
@@ -218,7 +218,7 @@ int methodBasename(js::Context &ctx)
 }
 
 /*
- * Method: File.prototype.close()
+ * Method: File.close()
  * --------------------------------------------------------
  *
  * Force close of the file, automatically called when object is collected.
@@ -231,13 +231,13 @@ int methodClose(js::Context &ctx)
 }
 
 /*
- * Method: File.prototype.dirname()
+ * Method: File.dirname()
  * --------------------------------------------------------
  *
  * Synonym of `Irccd.File.dirname(path)` but with the path from the file.
  *
  * Returns:
- *   The base directory name
+ *   The directory name.
  */
 int methodDirname(js::Context &ctx)
 {
@@ -247,19 +247,17 @@ int methodDirname(js::Context &ctx)
 }
 
 /*
- * Method: File.prototype.read(amount)
+ * Method: File.read(amount)
  * --------------------------------------------------------
  *
  * Read the specified amount of characters or the whole file.
  *
  * Arguments:
- *   - amount, the amount of characters or -1 to read all (Optional, default: -1)
- *
+ *   - amount, the amount of characters or -1 to read all (Optional, default: -1).
  * Returns:
- *   - The string
- *
+ *   The string.
  * Throws:
- *   - Any exception on error
+ *   - Any exception on error.
  */
 int methodRead(js::Context &ctx)
 {
@@ -279,15 +277,15 @@ int methodRead(js::Context &ctx)
 }
 
 /*
- * Method: File.prototype.readline()
+ * Method: File.readline()
  * --------------------------------------------------------
  *
  * Read the next line available.
  *
  * Returns:
- *   - The next line or undefined if eof
+ *   The next line or undefined if eof.
  * Throws:
- *   - Any exception on error
+ *   - Any exception on error.
  */
 int methodReadline(js::Context &ctx)
 {
@@ -306,13 +304,13 @@ int methodReadline(js::Context &ctx)
 }
 
 /*
- * Method: File.prototype.remove()
+ * Method: File.remove()
  * --------------------------------------------------------
  *
  * Synonym of File.remove(path) but with the path from the file.
  *
  * Throws:
- *   - Any exception on error
+ *   - Any exception on error.
  */
 int methodRemove(js::Context &ctx)
 {
@@ -323,16 +321,16 @@ int methodRemove(js::Context &ctx)
 }
 
 /*
- * Method: File.prototype.seek(type, amount)
+ * Method: File.seek(type, amount)
  * --------------------------------------------------------
  *
  * Sets the position in the file.
  *
  * Arguments:
- *   - type, the type of setting (File.SeekSet, File.SeekCur, File.SeekSet)
- *   - amount, the new offset
+ *   - type, the type of setting (File.SeekSet, File.SeekCur, File.SeekSet),
+ *   - amount, the new offset.
  * Throws:
- *   - Any exception on error
+ *   - Any exception on error.
  */
 int methodSeek(js::Context &ctx)
 {
@@ -355,15 +353,15 @@ int methodSeek(js::Context &ctx)
 #if defined(HAVE_STAT)
 
 /*
- * Method: File.prototype.stat() [optional]
+ * Method: File.stat() [optional]
  * --------------------------------------------------------
  *
  * Synonym of File.stat(path) but with the path from the file.
  *
  * Returns:
- *   - The stat information
+ *   The stat information.
  * Throws:
- *   - Any exception on error
+ *   - Any exception on error.
  */
 int methodStat(js::Context &ctx)
 {
@@ -384,15 +382,15 @@ int methodStat(js::Context &ctx)
 #endif // !HAVE_STAT
 
 /*
- * Method: File.prototype.tell()
+ * Method: File.tell()
  * --------------------------------------------------------
  *
  * Get the actual position in the file.
  *
  * Returns:
- *   - The position
+ *   The position.
  * Throws:
- *   - Any exception on error
+ *   - Any exception on error.
  */
 int methodTell(js::Context &ctx)
 {
@@ -411,15 +409,15 @@ int methodTell(js::Context &ctx)
 }
 
 /*
- * Method: File.prototype.write(data)
+ * Method: File.write(data)
  * --------------------------------------------------------
  *
  * Write some characters to the file.
  *
  * Arguments:
- *   - data, the character to write
+ *   - data, the character to write.
  * Throws:
- *   - Any exception on error
+ *   - Any exception on error.
  */
 int methodWrite(js::Context &ctx)
 {
@@ -463,10 +461,10 @@ const js::FunctionMap methods{
  * Open a file specified by path with the specified mode.
  *
  * Arguments:
- *   - path, the path to the file
- *   - mode, the mode, can be one of [abrwt]
+ *   - path, the path to the file,
+ *   - mode, the mode string.
  * Throws:
- *   - Any exception on error
+ *   - Any exception on error.
  */
 int constructor(js::Context &ctx)
 {
@@ -492,9 +490,9 @@ int constructor(js::Context &ctx)
  * Return the file basename as specified in `basename(3)` C function.
  *
  * Arguments:
- *   - path, the path to the file
+ *   - path, the path to the file.
  * Returns:
- *   - the base name
+ *   The base name.
  */
 int functionBasename(js::Context &ctx)
 {
@@ -510,9 +508,9 @@ int functionBasename(js::Context &ctx)
  * Return the file directory name as specified in `dirname(3)` C function.
  *
  * Arguments:
- *   - path, the path to the file
+ *   - path, the path to the file.
  * Returns:
- *   - the directory name
+ *   The directory name.
  */
 int functionDirname(js::Context &ctx)
 {
@@ -528,11 +526,11 @@ int functionDirname(js::Context &ctx)
  * Check if the file exists.
  *
  * Arguments:
- *   - path, the path to the file
+ *   - path, the path to the file.
  * Returns:
- *   - true if exists
+ *   True if exists.
  * Throws:
- *   - Any exception if we don't have access
+ *   - Any exception if we don't have access.
  */
 int functionExists(js::Context &ctx)
 {
@@ -548,9 +546,9 @@ int functionExists(js::Context &ctx)
  * Remove the file at the specified path.
  *
  * Arguments:
- *   - path, the path to the file
+ *   - path, the path to the file.
  * Throws:
- *   - Any exception on error
+ *   - Any exception on error.
  */
 int functionRemove(js::Context &ctx)
 {
@@ -569,11 +567,11 @@ int functionRemove(js::Context &ctx)
  * Get file information at the specified path.
  *
  * Arguments:
- *   - path, the path to the file
+ *   - path, the path to the file.
  * Returns:
- *   - the stats information
+ *   The stat information.
  * Throws:
- *   - Any exception on error
+ *   - Any exception on error.
  */
 int functionStat(js::Context &ctx)
 {
