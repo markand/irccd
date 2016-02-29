@@ -32,20 +32,20 @@ The features are listed below:
 .It
 Connect to one or more servers,
 .It
-Use different identities for each servers,
+Use different identities for each server,
 .It
-Manageable by UNIX or Internet sockets (both TCP and UDP),
+Manageable with UNIX or Internet sockets,
 .It
-Highly extensible with Lua plugins,
+Highly extensible with JavaScript plugins,
 .El
 .Pp
-The application run as daemon and wait for events in both IRC servers
+The application runs as daemon and waits for events in both IRC servers
 or from the irccdctl(1) utility.
 .Pp
-For instance, when IRC events happen, it calls Lua functions from plugins to
+For instance, when IRC events happen, it calls JavaScript functions from plugins to
 execute specific actions. Example: someone join the channel, the
 .Nm irccd
-daemon will notify all plugins that a specific user joined.
+daemon will notify all plugins that a user joined.
 .Pp
 But it is also possible to use irccdctl(1) to control
 .Nm irccd .

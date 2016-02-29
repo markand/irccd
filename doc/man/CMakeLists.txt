@@ -21,9 +21,9 @@
 # -------------------------------------------------------------------
 
 # Update man pages date
-set(MONTH "March")
-set(DAY 09)
-set(YEAR 2015)
+set(MONTH "February")
+set(DAY 29)
+set(YEAR 2016)
 
 irccd_define_man(irccd.1 man1)
 irccd_define_man(irccd.conf.5 man5)
