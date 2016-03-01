@@ -18,7 +18,7 @@
 
 set(CPACK_SOURCE_PACKAGE_FILE_NAME "irccd-${IRCCD_VERSION}")
 set(CPACK_SOURCE_GENERATOR TXZ ZIP)
-set(CPACK_SOURCE_IGNORE_FILES "/[.]hg")
+set(CPACK_SOURCE_IGNORE_FILES "/[.]hg" "/CMakeLists[.]txt[.]user")
 
 #
 # Define the binary package name.
