@@ -44,7 +44,7 @@ int print(js::Context &ctx, std::ostream &out)
  * Write a verbose message.
  *
  * Arguments:
- *   - message, the message
+ *   - message, the message.
  */
 int info(js::Context &ctx)
 {
@@ -58,7 +58,7 @@ int info(js::Context &ctx)
  * Write a warning message.
  *
  * Arguments:
- *   - message, the warning
+ *   - message, the warning.
  */
 int warning(js::Context &ctx)
 {
@@ -72,7 +72,7 @@ int warning(js::Context &ctx)
  * Write a debug message, only shown if irccd is compiled in debug.
  *
  * Arguments:
- *   - message, the message
+ *   - message, the message.
  */
 int debug(js::Context &ctx)
 {

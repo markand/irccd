@@ -54,12 +54,6 @@
 # WITH_TEST_IRCPORT	Which IRC server port to use for tests (default: 6667)
 #
 
-#
-# Options for developers:
-#
-# WITH_WEB		Set to true to use the HTML template for official irccd website.
-#
-
 # Manual pages on Windows are pretty useless.
 if (WIN32)
 	set(DEFAULT_MAN "No")
@@ -80,7 +74,7 @@ option(WITH_TESTS "Enable unit testing" Off)
 option(WITH_SYSTEMD "Install systemd service" ${DEFAULT_SYSTEMD})
 option(WITH_DOCS "Enable building of all documentation" On)
 option(WITH_HTML "Enable building of HTML documentation" On)
-option(WITH_DOXYGEN "Enable doxygen" On)
+option(WITH_DOXYGEN "Enable doxygen" Off)
 option(WITH_MAN "Install man pages" ${DEFAULT_MAN})
 
 # Build options for all plugins.
@@ -97,8 +91,6 @@ endforeach ()
 
 set(WITH_TEST_IRCHOST "127.0.0.1" CACHE STRING "IRC host for tests")
 set(WITH_TEST_IRCPORT 6667 CACHE STRING "IRC port for test")
-
-option(WITH_WEB "Use HTML template for official website" Off)
 
 # ---------------------------------------------------------
 # Installation paths

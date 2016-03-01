@@ -38,8 +38,8 @@ The following options are available under the `[plugin.plugin]` section:
 
 The following keywords are supported:
 
-| Format                  | Keywords                                | Notes                                       |
-|-------------------------|-----------------------------------------|---------------------------------------------|
-| (any)                   | command, nickname, origin, server       | the command is the plugin invocation prefix |
-| **format-info**         | author, license, name, summary, version | the plugin information                      |
-| **format-not-found**    | name                                    | the plugin name                             |
+| Format                  | Keywords                                           | Notes                                       |
+|-------------------------|----------------------------------------------------|---------------------------------------------|
+| (any)                   | channel, command, nickname, origin, plugin, server |                                             |
+| **format-info**         | author, license, name, summary, version            | the plugin information                      |
+| **format-not-found**    | name                                               | the plugin name                             |

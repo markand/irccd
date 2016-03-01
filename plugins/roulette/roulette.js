@@ -121,7 +121,7 @@ function onCommand(server, origin, channel)
 		command: server.info().commandChar + Plugin.info().name,
 		nickname: Util.splituser(origin),
 		origin: origin,
-		server: server,
+		server: server.toString(),
 		plugin: Plugin.info().name
 	};
 
@@ -134,7 +134,7 @@ function onCommand(server, origin, channel)
 		server.kick(Util.splituser(origin), channel, Util.format(Gun.formats["shot"], kw));
 		Gun.remove(game);
 	} else {
-		kw.count = game.index;
+		kw.count = (6 - game.index).toString();
 		server.message(channel, Util.format(Gun.formats["lucky"], kw));
 	}
 }

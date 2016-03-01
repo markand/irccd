@@ -136,11 +136,12 @@ function onCommand(server, origin, channel, message)
 {
 	var args = message.trim().split(" ");
 	var kw = {
-		"server":	server.toString(),
-		"channel":	channel,
-		"origin":	origin,
-		"nickname":	Util.splituser(origin),
-		"plugin":	command(server),
+		channel: channel,
+		command: command(server),
+		nickname: Util.splituser(origin),
+		origin: origin,
+		plugin: Plugin.info().name,
+		server: server.toString()
 	};
 
 	if (args.length !== 2 || args[0].length === 0 || args[1].length === 0) {

@@ -63,10 +63,6 @@ function(irccd_define_html)
 		set(base ${CMAKE_BINARY_DIR}/docs)
 	endif ()
 
-	if (WITH_WEB)
-		set(ARGS web:1)
-	endif ()
-
 	if (HTML_OUTPUT)
 		#
 		# First signature.
@@ -98,7 +94,7 @@ function(irccd_define_html)
 				${resources_SOURCE_DIR}/template.html
 				docs-resources
 			ARGS ${HTML_ARGS}
-			VARIABLE baseurl:${baseurl} doc:1 ${ARGS}
+			VARIABLE baseurl:${baseurl}
 			FROM markdown TO html5
 			STANTALONE MAKE_DIRECTORY
 		)
@@ -132,7 +128,7 @@ function(irccd_define_html)
 					${resources_SOURCE_DIR}/template.html
 					docs-resources
 				ARGS ${HTML_ARGS}
-				VARIABLE baseurl:${baseurl} standalone:1 doc:1 ${ARGS}
+				VARIABLE baseurl:${baseurl}
 				FROM markdown TO html5
 				STANTALONE MAKE_DIRECTORY
 			)

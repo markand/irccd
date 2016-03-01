@@ -58,13 +58,13 @@ $ mkdir -p ~/.cache/irccd/plugin/history
 
 The following keywords are supported:
 
-| Format                  | Keywords                          | Notes                           |
-|-------------------------|-----------------------------------|---------------------------------|
-| (any)                   | server, channel, nickname, origin |                                 |
-| **file**                | server, channel                   | does not support (any)          |
-| **format-seen**         | target, (date)                    | target is the specified nick    |
-| **format-said**         | target, message, (date)           |                                 |
-| **format-unknown**      | target                            |                                 |
+| Format                  | Keywords                                           | Notes                           |
+|-------------------------|----------------------------------------------------|---------------------------------|
+| (any)                   | channel, command, nickname, origin, plugin, server |                                 |
+| **file**                | channel, server                                    | does not support (any)          |
+| **format-seen**         | target, (date)                                     | target is the specified nick    |
+| **format-said**         | message, target, (date)                            |                                 |
+| **format-unknown**      | target                                             |                                 |
 
 Example:
 

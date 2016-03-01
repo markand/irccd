@@ -28,7 +28,6 @@ set(
 	css/bootstrap.min.css
 	css/doc.css
 	css/doc-guide.css
-	css/irccd.css
 	css/tomorrow.css
 )
 

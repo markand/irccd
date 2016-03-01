@@ -63,7 +63,7 @@ int wrap(js::Context &ctx, int nret, Func &&func)
  * Arguments:
  *   - name, the plugin identifier, if not specified the current plugin is selected.
  * Returns:
- *   - The plugin information or undefined if the plugin was not found.
+ *   The plugin information or undefined if the plugin was not found.
  */
 int info(js::Context &ctx)
 {
@@ -87,7 +87,7 @@ int info(js::Context &ctx)
  * Get the list of plugins, the array returned contains all plugin names.
  *
  * Returns:
- *   - The list of all plugin names.
+ *   The list of all plugin names.
  */
 int list(js::Context &ctx)
 {
