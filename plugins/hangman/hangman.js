@@ -291,7 +291,7 @@ function propose(server, channel, origin, game, proposition)
 		nickname: Util.splituser(origin),
 		origin: origin,
 		plugin: Plugin.info().name,
-		server: server
+		server: server.toString()
 	};
 
 	var st = game.propose(proposition, kw.nickname);

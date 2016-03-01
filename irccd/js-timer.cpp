@@ -80,15 +80,15 @@ const js::FunctionMap methods{
 };
 
 /*
- * Function: Timer(type, delay) [constructor]
+ * Function: Irccd.Timer(type, delay, callback) [constructor]
  * --------------------------------------------------------
  *
- * Create a new timer, the timer is not created automatically and the function
- * can be set by assigning to the onTimeout property.
+ * Create a new timer object.
  *
  * Arguments:
- *   - type, the type (Timer.Single or Timer.Repeat)
- *   - delay, the delay in milliseconds
+ *   - type, the type of timer (Irccd.Timer.Single or Irccd.Timer.Repeat),
+ *   - delay, the interval in milliseconds,
+ *   - callback, the function to call.
  */
 int constructor(js::Context &ctx)
 {

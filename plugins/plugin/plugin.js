@@ -50,9 +50,10 @@ var commands = {
 		}
 	},
 	
-	keywords: function (server, origin)
+	keywords: function (server, channel, origin)
 	{
 		return {
+			channel: channel,
 			command: server.info().commandChar + Plugin.info().name,
 			nickname: Util.splituser(origin),
 			origin: origin,
@@ -63,7 +64,7 @@ var commands = {
 
 	list: function (server, origin, target, query)
 	{
-		var kw = commands.keywords(server, origin);
+		var kw = commands.keywords(server, target, origin);
 		var list = Plugin.list();
 		var str;
 
@@ -77,7 +78,7 @@ var commands = {
 
 	info: function (server, origin, target, name)
 	{
-		var kw = commands.keywords(server, origin);
+		var kw = commands.keywords(server, target, origin);
 		var info = Plugin.info(name);
 		var str;
 

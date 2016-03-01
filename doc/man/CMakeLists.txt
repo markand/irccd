@@ -20,11 +20,30 @@
 # Install manuals
 # -------------------------------------------------------------------
 
-# Update man pages date
-set(MONTH "March")
-set(DAY 09)
-set(YEAR 2015)
+set(
+	MONTHS
+	January
+	February
+	March
+	April
+	May
+	June
+	July
+	August
+	September
+	October
+	November
+	December
+)
 
+# Get month as name.
+math(EXPR INDEX "${IRCCD_RELEASE_DATE_MONTH} - 1")
+list(GET MONTHS ${INDEX} MONTH)
+
+set(YEAR ${IRCCD_RELEASE_DATE_YEAR})
+set(DAY ${IRCCD_RELEASE_DATE_DAY})
+
+# Update man pages date
 irccd_define_man(irccd.1 man1)
 irccd_define_man(irccd.conf.5 man5)
 irccd_define_man(irccdctl.1 man1)

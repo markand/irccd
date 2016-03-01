@@ -49,6 +49,7 @@ void Irccd::handleServerChannelMode(std::weak_ptr<Server> ptr, std::string origi
 		{ "event",	"onChannelMode"		},
 		{ "server",	server->info().name	},
 		{ "origin",	origin			},
+		{ "channel",	channel			},
 		{ "mode",	mode			},
 		{ "argument",	arg			}
 	});
@@ -65,7 +66,7 @@ void Irccd::handleServerChannelMode(std::weak_ptr<Server> ptr, std::string origi
 	});
 }
 
-void Irccd::handleServerChannelNotice(std::weak_ptr<Server> ptr, std::string origin, std::string channel, std::string notice)
+void Irccd::handleServerChannelNotice(std::weak_ptr<Server> ptr, std::string origin, std::string channel, std::string message)
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
@@ -75,14 +76,14 @@ void Irccd::handleServerChannelNotice(std::weak_ptr<Server> ptr, std::string ori
 	log::debug() << "server " << server->info().name << ": event onChannelNotice:\n";
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  channel: " << channel << "\n";
-	log::debug() << "  notice: " << notice << std::endl;
+	log::debug() << "  message: " << message << std::endl;
 
 	json::Value json = json::object({
 		{ "event",	"onChannelNotice"	},
 		{ "server",	server->info().name	},
 		{ "origin",	origin			},
 		{ "channel",	channel			},
-		{ "notice",	notice			}
+		{ "message",	message			}
 	});
 
 	postServerEvent({server->info().name, origin, channel, json.toJson(0)
@@ -91,7 +92,7 @@ void Irccd::handleServerChannelNotice(std::weak_ptr<Server> ptr, std::string ori
 			return "onChannelNotice";
 		}
 		, [=] (Plugin &plugin) {
-			plugin.onChannelNotice(std::move(server), std::move(origin), std::move(channel), std::move(notice));
+			plugin.onChannelNotice(std::move(server), std::move(origin), std::move(channel), std::move(message));
 		}
 #endif
 	});
@@ -393,7 +394,7 @@ void Irccd::handleServerNotice(std::weak_ptr<Server> ptr, std::string origin, st
 		{ "event",	"onNotice"		},
 		{ "server",	server->info().name	},
 		{ "origin",	origin			},
-		{ "notice",	message			}
+		{ "message",	message			}
 	});
 
 	postServerEvent({server->info().name, origin, /* channel */ "", json.toJson(0)
@@ -526,8 +527,7 @@ void Irccd::handleServerWhois(std::weak_ptr<Server> ptr, ServerWhois whois)
 		{ "nickname",	whois.nick		},
 		{ "username",	whois.user		},
 		{ "host",	whois.host		},
-		{ "realname",	whois.realname		},
-		{ "channels",	""			}
+		{ "realname",	whois.realname		}
 	});
 
 	postServerEvent({server->info().name, /* origin */ "", /* channel */ "", object.toJson(-1)

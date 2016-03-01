@@ -44,9 +44,9 @@ namespace {
  * Get an environment system variable.
  *
  * Arguments:
- *   - key, the environment variable
+ *   - key, the environment variable.
  * Returns:
- *   - The value
+ *   The value.
  */
 int env(js::Context &ctx)
 {
@@ -62,7 +62,7 @@ int env(js::Context &ctx)
  * Execute a system command.
  *
  * Arguments:
- *   - cmd, the command to execute
+ *   - cmd, the command to execute.
  */
 int exec(js::Context &ctx)
 {
@@ -78,7 +78,7 @@ int exec(js::Context &ctx)
  * Get the operating system user's home.
  *
  * Returns:
- *   - The user home directory
+ *   The user home directory.
  */
 int home(js::Context &ctx)
 {
@@ -94,7 +94,7 @@ int home(js::Context &ctx)
  * Get the operating system name.
  *
  * Returns:
- *   - The system name
+ *   The system name.
  */
 int name(js::Context &ctx)
 {
@@ -115,9 +115,9 @@ int name(js::Context &ctx)
  *   - cmd, the command to execute,
  *   - mode, the mode (e.g. "r").
  * Returns:
- *   - A Irccd.File object
+ *   A Irccd.File object.
  * Throws
- *   - Irccd.SystemError on failures
+ *   - Irccd.SystemError on failures.
  */
 int popen(js::Context &ctx)
 {
@@ -153,7 +153,7 @@ int sleep(js::Context &ctx)
  * Get the number of milliseconds since irccd was started.
  *
  * Returns:
- *   - The number of milliseconds
+ *   The number of milliseconds.
  */
 int ticks(js::Context &ctx)
 {
@@ -163,7 +163,7 @@ int ticks(js::Context &ctx)
 }
 
 /*
- * Function: System.usleep(delay)
+ * Function: Irccd.System.usleep(delay)
  * ------------------------------------------------------------------
  *
  * Sleep the main loop for the specific delay in microseconds.
@@ -176,13 +176,13 @@ int usleep(js::Context &ctx)
 }
 
 /*
- * Function: System.uptime()
+ * Function: Irccd.System.uptime()
  * ------------------------------------------------------------------
  *
  * Get the system uptime.
  *
  * Returns:
- *   - The system uptime
+ *   The system uptime.
  */
 int uptime(js::Context &ctx)
 {
@@ -192,13 +192,13 @@ int uptime(js::Context &ctx)
 }
 
 /*
- * Function: System.version()
+ * Function: Irccd.System.version()
  * ------------------------------------------------------------------
  *
  * Get the operating system version.
  *
  * Returns:
- *   - The system version
+ *   The system version.
  */
 int version(js::Context &ctx)
 {

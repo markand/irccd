@@ -21,7 +21,19 @@ set(IRCCD_VERSION_MAJOR "2")
 set(IRCCD_VERSION_MINOR "0")
 set(IRCCD_VERSION_PATCH "0")
 set(IRCCD_VERSION "${IRCCD_VERSION_MAJOR}.${IRCCD_VERSION_MINOR}.${IRCCD_VERSION_PATCH}")
-set(IRCCD_RELEASE_DATE "2015-12-17")
+
+#
+# Irccd release date.
+# -------------------------------------------------------------------
+#
+# IRCCD_RELEASE_DATE_YEAR	4 digits
+# IRCCD_RELEASE_DATE_MONTH	2 digits (01 = January)
+# IRCCD_RELEASE_DATE_DAY	2 digits (01 = first day of month)
+#
+set(IRCCD_RELEASE_DATE_YEAR 2016)
+set(IRCCD_RELEASE_DATE_MONTH 03)
+set(IRCCD_RELEASE_DATE_DAY 01)
+set(IRCCD_RELEASE_DATE "${IRCCD_RELEASE_DATE_YEAR}-${IRCCD_RELEASE_DATE_MONTH}-${IRCCD_RELEASE_DATE_DAY}")
 
 # All plugins.
 set(
