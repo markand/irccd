@@ -73,9 +73,9 @@ int info(js::Context &ctx)
 		} catch (...) {
 			ctx.push(js::Undefined{});
 		}
+	} else {
+		ctx.push(ctx.getGlobal<js::RawPointer<Plugin>>("\xff""\xff""plugin")->info());
 	}
-
-	ctx.push(ctx.getGlobal<js::RawPointer<Plugin>>("\xff""\xff""plugin")->info());
 
 	return 1;
 }
