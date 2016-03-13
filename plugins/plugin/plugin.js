@@ -100,7 +100,7 @@ var commands = {
 
 	usage: function (server, origin, target)
 	{
-		server.message(target, Util.format(formats["usage"], commands.keywords(server, origin)));
+		server.message(target, Util.format(formats["usage"], commands.keywords(server, target, origin)));
 	},
 
 	execute: function (server, origin, target, message, query)
@@ -124,6 +124,7 @@ var commands = {
 			commands.list(server, origin, target, query);
 			break;
 		default:
+			commands.usage(server, origin, target);
 			break;
 		}
 	}
