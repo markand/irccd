@@ -134,6 +134,10 @@ irccd_define_executable(
 		common
 )
 
+if (IRCCD_SYSTEM_MAC)
+	target_compile_options(irccd PRIVATE -Wno-deprecated-declarations)
+endif ()
+
 if (UNIX)
 	set_target_properties(irccd PROPERTIES LINK_FLAGS "-pthread")
 endif ()
