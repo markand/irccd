@@ -1,5 +1,5 @@
 /*
- * main.cpp -- irccd controller main
+ * server-list.cpp -- implementation of server-list transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,29 +16,45 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/irccdctl.h>
-#include <irccd/logger.h>
-#include <irccd/path.h>
+#include <iostream>
 
-using namespace irccd;
+#include <irccd/irccd.h>
 
-int main(int argc, char **argv)
+#include "server-list.h"
+
+namespace irccd {
+
+namespace command {
+
+ServerList::ServerList()
+	: RemoteCommand("server-list", "Server")
 {
-	// TODO: move to Application
-	sys::setProgramName("irccdctl");
-	path::setApplicationPath(argv[0]);
-	log::setInterface(std::make_unique<log::Console>());
-	log::setVerbose(false);
-	net::init();
-
-	try {
-		Irccdctl ctl;
-
-		ctl.run(--argc, ++argv);
-	} catch (const std::exception &ex) {
-		log::warning() << sys::programName() << ": " << ex.what() << std::endl;
-		std::exit(1);
-	}
-
-	return 0;
 }
+
+std::string ServerList::help() const
+{
+	return "";
+}
+
+json::Value ServerList::exec(Irccd &irccd, const json::Value &) const
+{
+	auto json = json::object({});
+	auto list = json::array({});
+
+	for (const auto &pair : irccd.servers())
+		list.append(pair.first);
+
+	json.insert("list", std::move(list));
+
+	return json;
+}
+
+void ServerList::result(Irccdctl &, const json::Value &response) const
+{
+	for (const auto &n : response.valueOr("list", json::Type::Array, json::array({})))
+		std::cout << n.toString() << std::endl;
+}
+
+} // !command
+
+} // !irccd

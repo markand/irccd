@@ -1,5 +1,5 @@
 /*
- * main.cpp -- irccd controller main
+ * server-nick.cpp -- implementation of server-nick transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,29 +16,47 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/irccdctl.h>
-#include <irccd/logger.h>
-#include <irccd/path.h>
+#include <irccd/irccd.h>
 
-using namespace irccd;
+#include "server-nick.h"
 
-int main(int argc, char **argv)
+namespace irccd {
+
+namespace command {
+
+ServerNick::ServerNick()
+	: RemoteCommand("server-nick", "Server")
 {
-	// TODO: move to Application
-	sys::setProgramName("irccdctl");
-	path::setApplicationPath(argv[0]);
-	log::setInterface(std::make_unique<log::Console>());
-	log::setVerbose(false);
-	net::init();
-
-	try {
-		Irccdctl ctl;
-
-		ctl.run(--argc, ++argv);
-	} catch (const std::exception &ex) {
-		log::warning() << sys::programName() << ": " << ex.what() << std::endl;
-		std::exit(1);
-	}
-
-	return 0;
 }
+
+std::string ServerNick::help() const
+{
+	return "";
+}
+
+RemoteCommandArgs ServerNick::args() const
+{
+	return RemoteCommandArgs{
+		{ "server", true },
+		{ "nickname", true }
+	};
+}
+
+json::Value ServerNick::request(Irccdctl &, const RemoteCommandRequest &args) const
+{
+	return json::object({
+		{ "server", args.arg(0) },
+		{ "nickname", args.arg(1) }
+	});
+}
+
+json::Value ServerNick::exec(Irccd &irccd, const json::Value &object) const
+{
+	irccd.requireServer(object.at("server").toString())->nick(object.at("nickname").toString());
+
+	return nullptr;
+}
+
+} // !command
+
+} // !irccd

@@ -1,5 +1,5 @@
 /*
- * main.cpp -- irccd controller main
+ * command-server-disconnect.cpp -- implementation of server-disconnect transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,29 +16,43 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/irccdctl.h>
-#include <irccd/logger.h>
-#include <irccd/path.h>
+#include <irccd/irccd.h>
 
-using namespace irccd;
+#include "server-disconnect.h"
 
-int main(int argc, char **argv)
+namespace irccd {
+
+namespace command {
+
+ServerDisconnect::ServerDisconnect()
+	: RemoteCommand("server-disconnect", "Server")
 {
-	// TODO: move to Application
-	sys::setProgramName("irccdctl");
-	path::setApplicationPath(argv[0]);
-	log::setInterface(std::make_unique<log::Console>());
-	log::setVerbose(false);
-	net::init();
-
-	try {
-		Irccdctl ctl;
-
-		ctl.run(--argc, ++argv);
-	} catch (const std::exception &ex) {
-		log::warning() << sys::programName() << ": " << ex.what() << std::endl;
-		std::exit(1);
-	}
-
-	return 0;
 }
+
+std::string ServerDisconnect::help() const
+{
+	return "";
+}
+
+RemoteCommandArgs ServerDisconnect::args() const
+{
+	return RemoteCommandArgs{
+		{ "server", false }
+	};
+}
+
+json::Value ServerDisconnect::exec(Irccd &irccd, const json::Value &request) const
+{
+	auto it = request.find("server");
+
+	if (it == request.end())
+		irccd.clearServers();
+	else
+		irccd.removeServer(it->toString());
+
+	return RemoteCommand::exec(irccd, request);
+}
+
+} // !command
+
+} // !irccd

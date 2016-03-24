@@ -19,6 +19,7 @@
 project(duktape)
 
 irccd_define_library(
+	LOCAL
 	TARGET extern-duktape
 	SOURCES
 		duk_config.h

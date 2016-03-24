@@ -1,0 +1,55 @@
+include(${CMAKE_CURRENT_LIST_DIR}/command/CMakeSources.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/js/CMakeSources.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/private/CMakeSources.cmake)
+
+set(
+	HEADERS
+	${COMMAND_HEADERS}
+	${JS_HEADERS}
+	${PRIVATE_HEADERS}
+	${CMAKE_CURRENT_LIST_DIR}/alias.h
+	${CMAKE_CURRENT_LIST_DIR}/application.h
+	${CMAKE_CURRENT_LIST_DIR}/config.h
+	${CMAKE_CURRENT_LIST_DIR}/irccd.h
+	${CMAKE_CURRENT_LIST_DIR}/irccdctl.h
+	${CMAKE_CURRENT_LIST_DIR}/json.h
+	${CMAKE_CURRENT_LIST_DIR}/logger.h
+	${CMAKE_CURRENT_LIST_DIR}/options.h
+	${CMAKE_CURRENT_LIST_DIR}/path.h
+	${CMAKE_CURRENT_LIST_DIR}/plugin.h
+	${CMAKE_CURRENT_LIST_DIR}/rule.h
+	${CMAKE_CURRENT_LIST_DIR}/server.h
+	${CMAKE_CURRENT_LIST_DIR}/server-state.h
+	${CMAKE_CURRENT_LIST_DIR}/system.h
+	${CMAKE_CURRENT_LIST_DIR}/timer.h
+	${CMAKE_CURRENT_LIST_DIR}/transport-client.h
+	${CMAKE_CURRENT_LIST_DIR}/transport-server.h
+	${CMAKE_CURRENT_LIST_DIR}/unicode.h
+	${CMAKE_CURRENT_LIST_DIR}/util.h
+)
+
+set(
+	SOURCES
+	${COMMAND_SOURCES}
+	${JS_SOURCES}
+	${PRIVATE_SOURCES}
+	${CMAKE_CURRENT_LIST_DIR}/alias.cpp
+	${CMAKE_CURRENT_LIST_DIR}/application.cpp
+	${CMAKE_CURRENT_LIST_DIR}/config.cpp
+	${CMAKE_CURRENT_LIST_DIR}/irccd.cpp
+	${CMAKE_CURRENT_LIST_DIR}/irccdctl.cpp
+	${CMAKE_CURRENT_LIST_DIR}/json.cpp
+	${CMAKE_CURRENT_LIST_DIR}/logger.cpp
+	${CMAKE_CURRENT_LIST_DIR}/options.cpp
+	${CMAKE_CURRENT_LIST_DIR}/path.cpp
+	${CMAKE_CURRENT_LIST_DIR}/plugin.cpp
+	${CMAKE_CURRENT_LIST_DIR}/rule.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-state.cpp
+	${CMAKE_CURRENT_LIST_DIR}/system.cpp
+	${CMAKE_CURRENT_LIST_DIR}/timer.cpp
+	${CMAKE_CURRENT_LIST_DIR}/transport-client.cpp
+	${CMAKE_CURRENT_LIST_DIR}/transport-server.cpp
+	${CMAKE_CURRENT_LIST_DIR}/unicode.cpp
+	${CMAKE_CURRENT_LIST_DIR}/util.cpp
+)

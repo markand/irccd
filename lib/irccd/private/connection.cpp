@@ -1,5 +1,5 @@
 /*
- * main.cpp -- irccd controller main
+ * connection.cpp -- value wrapper for connecting to irccd
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,29 +16,33 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/irccdctl.h>
 #include <irccd/logger.h>
-#include <irccd/path.h>
 
-using namespace irccd;
+#include "connection.h"
 
-int main(int argc, char **argv)
+namespace irccd {
+
+json::Value Connection::next(const std::string &name, int timeout)
 {
-	// TODO: move to Application
-	sys::setProgramName("irccdctl");
-	path::setApplicationPath(argv[0]);
-	log::setInterface(std::make_unique<log::Console>());
-	log::setVerbose(false);
-	net::init();
+	m_timer.reset();
 
-	try {
-		Irccdctl ctl;
+	while (isConnected()) {
+		json::Value object = next(clamp(timeout));
 
-		ctl.run(--argc, ++argv);
-	} catch (const std::exception &ex) {
-		log::warning() << sys::programName() << ": " << ex.what() << std::endl;
-		std::exit(1);
+		if (object.isObject() && object["response"].toString() == name)
+			return object;
 	}
 
-	return 0;
+	throw std::runtime_error("connection lost");
 }
+
+void Connection::verify(const std::string &name, int timeout)
+{
+	auto object = next(name, timeout);
+	auto value = object.at("status").toString();
+
+	if (!value.empty() && value != "ok")
+		throw std::runtime_error(object.at("error").toString());
+}
+
+} // !irccd

@@ -1,5 +1,5 @@
 /*
- * main.cpp -- irccd controller main
+ * plugin-unload.cpp -- implementation of plugin-unload transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,29 +16,46 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/irccdctl.h>
-#include <irccd/logger.h>
-#include <irccd/path.h>
+#include <irccd-config.h>
+#include <irccd/irccd.h>
+#include <irccd/command/plugin-unload.h>
 
-using namespace irccd;
+namespace irccd {
 
-int main(int argc, char **argv)
+namespace command {
+
+PluginUnload::PluginUnload()
+	: RemoteCommand("plugin-unload", "Plugins")
 {
-	// TODO: move to Application
-	sys::setProgramName("irccdctl");
-	path::setApplicationPath(argv[0]);
-	log::setInterface(std::make_unique<log::Console>());
-	log::setVerbose(false);
-	net::init();
-
-	try {
-		Irccdctl ctl;
-
-		ctl.run(--argc, ++argv);
-	} catch (const std::exception &ex) {
-		log::warning() << sys::programName() << ": " << ex.what() << std::endl;
-		std::exit(1);
-	}
-
-	return 0;
 }
+
+std::string PluginUnload::help() const
+{
+	return "Unload a plugin.";
+}
+
+RemoteCommandArgs PluginUnload::args() const
+{
+	return RemoteCommandArgs{
+		{ "plugin", true }
+	};
+}
+
+json::Value PluginUnload::exec(Irccd &irccd, const json::Value &request) const
+{
+#if defined(WITH_JS)
+	irccd.unloadPlugin(request.at("plugin").toString());
+
+	return RemoteCommand::exec(irccd, request);
+#else
+	(void)irccd;
+	(void)tc;
+	(void)object;
+
+	throw std::runtime_error("JavaScript disabled");
+#endif
+}
+
+} // !command
+
+} // !irccd

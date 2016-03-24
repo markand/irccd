@@ -1,5 +1,5 @@
 /*
- * main.cpp -- irccd controller main
+ * command-server-mode.cpp -- implementation of server-mode transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,29 +16,47 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/irccdctl.h>
-#include <irccd/logger.h>
-#include <irccd/path.h>
+#include <irccd/irccd.h>
 
-using namespace irccd;
+#include "server-mode.h"
 
-int main(int argc, char **argv)
+namespace irccd {
+
+namespace command {
+
+ServerMode::ServerMode()
+	: RemoteCommand("server-mode", "Server")
 {
-	// TODO: move to Application
-	sys::setProgramName("irccdctl");
-	path::setApplicationPath(argv[0]);
-	log::setInterface(std::make_unique<log::Console>());
-	log::setVerbose(false);
-	net::init();
-
-	try {
-		Irccdctl ctl;
-
-		ctl.run(--argc, ++argv);
-	} catch (const std::exception &ex) {
-		log::warning() << sys::programName() << ": " << ex.what() << std::endl;
-		std::exit(1);
-	}
-
-	return 0;
 }
+
+std::string ServerMode::help() const
+{
+	return "";
+}
+
+RemoteCommandArgs ServerMode::args() const
+{
+	return RemoteCommandArgs{
+		{ "server", true },
+		{ "mode", true }
+	};
+}
+
+json::Value ServerMode::request(Irccdctl &, const RemoteCommandRequest &args) const
+{
+	return json::object({
+		{ "server", args.arg(0) },
+		{ "mode", args.arg(1) }
+	});
+}
+
+json::Value ServerMode::exec(Irccd &irccd, const json::Value &request) const
+{
+	irccd.requireServer(request.at("server").toString())->mode(request.at("mode").toString());
+
+	return nullptr;
+}
+
+} // !command
+
+} // !irccd

@@ -20,35 +20,13 @@
 
 #include <irccd-config.h>
 
-#include <logger.h>
-#include <options.h>
-#include <path.h>
-#include <system.h>
+#include <irccd/logger.h>
+#include <irccd/options.h>
+#include <irccd/path.h>
+#include <irccd/system.h>
 
-#include "command-plugin-info.h"
-#include "command-plugin-list.h"
-#include "command-plugin-load.h"
-#include "command-plugin-reload.h"
-#include "command-plugin-unload.h"
-#include "command-server-cmode.h"
-#include "command-server-cnotice.h"
-#include "command-server-connect.h"
-#include "command-server-disconnect.h"
-#include "command-server-info.h"
-#include "command-server-invite.h"
-#include "command-server-join.h"
-#include "command-server-kick.h"
-#include "command-server-list.h"
-#include "command-server-me.h"
-#include "command-server-message.h"
-#include "command-server-mode.h"
-#include "command-server-nick.h"
-#include "command-server-notice.h"
-#include "command-server-part.h"
-#include "command-server-reconnect.h"
-#include "command-server-topic.h"
-#include "config.h"
-#include "irccd.h"
+#include <irccd/config.h>
+#include <irccd/irccd.h>
 
 using namespace irccd;
 
@@ -63,6 +41,8 @@ void stop(int)
 
 void init(int &argc, char **&argv)
 {
+	// MOVE THIS IN Application
+
 	/* Needed for some components */
 	sys::setProgramName("irccd");
 	path::setApplicationPath(argv[0]);
@@ -128,28 +108,7 @@ int main(int argc, char **argv)
 	}
 
 	instance = std::make_unique<Irccd>();
-	instance->addTransportCommand<command::PluginInfo>("plugin-info");
-	instance->addTransportCommand<command::PluginList>("plugin-list");
-	instance->addTransportCommand<command::PluginLoad>("plugin-load");
-	instance->addTransportCommand<command::PluginReload>("plugin-reload");
-	instance->addTransportCommand<command::PluginUnload>("plugin-unload");
-	instance->addTransportCommand<command::ServerChannelMode>("server-cmode");
-	instance->addTransportCommand<command::ServerChannelNotice>("server-cnotice");
-	instance->addTransportCommand<command::ServerConnect>("server-connect");
-	instance->addTransportCommand<command::ServerDisconnect>("server-disconnect");
-	instance->addTransportCommand<command::ServerInfo>("server-info");
-	instance->addTransportCommand<command::ServerInvite>("server-invite");
-	instance->addTransportCommand<command::ServerJoin>("server-join");
-	instance->addTransportCommand<command::ServerKick>("server-kick");
-	instance->addTransportCommand<command::ServerList>("server-list");
-	instance->addTransportCommand<command::ServerMe>("server-me");
-	instance->addTransportCommand<command::ServerMessage>("server-message");
-	instance->addTransportCommand<command::ServerMode>("server-mode");
-	instance->addTransportCommand<command::ServerNick>("server-nick");
-	instance->addTransportCommand<command::ServerNotice>("server-notice");
-	instance->addTransportCommand<command::ServerPart>("server-part");
-	instance->addTransportCommand<command::ServerReconnect>("server-reconnect");
-	instance->addTransportCommand<command::ServerTopic>("server-topic");
+
 	instance->load(Config{result});
 	instance->run();
 

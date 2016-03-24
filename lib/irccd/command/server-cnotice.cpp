@@ -1,5 +1,5 @@
 /*
- * main.cpp -- irccd controller main
+ * server-cnotice.cpp -- implementation of server-cnotice transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,29 +16,43 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/irccdctl.h>
-#include <irccd/logger.h>
-#include <irccd/path.h>
+#include <irccd/irccd.h>
 
-using namespace irccd;
+#include "server-cnotice.h"
 
-int main(int argc, char **argv)
+namespace irccd {
+
+namespace command {
+
+ServerChannelNotice::ServerChannelNotice()
+	: RemoteCommand("server-cnotice", "Server")
 {
-	// TODO: move to Application
-	sys::setProgramName("irccdctl");
-	path::setApplicationPath(argv[0]);
-	log::setInterface(std::make_unique<log::Console>());
-	log::setVerbose(false);
-	net::init();
-
-	try {
-		Irccdctl ctl;
-
-		ctl.run(--argc, ++argv);
-	} catch (const std::exception &ex) {
-		log::warning() << sys::programName() << ": " << ex.what() << std::endl;
-		std::exit(1);
-	}
-
-	return 0;
 }
+
+std::string ServerChannelNotice::help() const
+{
+	return "";
+}
+
+RemoteCommandArgs ServerChannelNotice::args() const
+{
+	return RemoteCommandArgs{
+		{ "server", true },
+		{ "channel", true },
+		{ "message", true }
+	};
+}
+
+json::Value ServerChannelNotice::exec(Irccd &irccd, const json::Value &request) const
+{
+	irccd.requireServer(request.at("server").toString())->cnotice(
+		request.at("channel").toString(),
+		request.at("message").toString()
+	);
+
+	return RemoteCommand::exec(irccd, request);
+}
+
+} // !command
+
+} // !irccd

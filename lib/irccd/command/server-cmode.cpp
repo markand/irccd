@@ -1,5 +1,5 @@
 /*
- * main.cpp -- irccd controller main
+ * server-cmode.cpp -- implementation of server-cmode transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,29 +16,43 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/irccdctl.h>
-#include <irccd/logger.h>
-#include <irccd/path.h>
+#include <irccd/irccd.h>
+#include <irccd/command/server-cmode.h>
 
-using namespace irccd;
+namespace irccd {
 
-int main(int argc, char **argv)
+namespace command {
+
+ServerChannelMode::ServerChannelMode()
+	: RemoteCommand("server-cmode", "Server")
 {
-	// TODO: move to Application
-	sys::setProgramName("irccdctl");
-	path::setApplicationPath(argv[0]);
-	log::setInterface(std::make_unique<log::Console>());
-	log::setVerbose(false);
-	net::init();
-
-	try {
-		Irccdctl ctl;
-
-		ctl.run(--argc, ++argv);
-	} catch (const std::exception &ex) {
-		log::warning() << sys::programName() << ": " << ex.what() << std::endl;
-		std::exit(1);
-	}
-
-	return 0;
 }
+
+std::string ServerChannelMode::help() const
+{
+	return "";
+}
+
+RemoteCommandArgs ServerChannelMode::args() const
+{
+	return RemoteCommandArgs{
+		{ "server", true },
+		{ "channel", true },
+		{ "mode", true }
+	};
+}
+
+json::Value ServerChannelMode::exec(Irccd &irccd, const json::Value &request) const
+{
+	irccd.requireServer(request.at("server").toString())->cmode(
+		request.at("channel").toString(),
+		request.at("mode").toString()
+	);
+
+	return RemoteCommand::exec(irccd, request);
+}
+
+} // !command
+
+} // !irccd
+

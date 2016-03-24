@@ -1,5 +1,5 @@
 /*
- * main.cpp -- irccd controller main
+ * server-list.h -- implementation of server-list transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,29 +16,40 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/irccdctl.h>
-#include <irccd/logger.h>
-#include <irccd/path.h>
+#ifndef _IRCCD_COMMAND_SERVER_LIST_H_
+#define _IRCCD_COMMAND_SERVER_LIST_H_
 
-using namespace irccd;
+/**
+ * @file command-server-list.h
+ * @brief Implementation of server-list transport command.
+ */
 
-int main(int argc, char **argv)
-{
-	// TODO: move to Application
-	sys::setProgramName("irccdctl");
-	path::setApplicationPath(argv[0]);
-	log::setInterface(std::make_unique<log::Console>());
-	log::setVerbose(false);
-	net::init();
+#include "command.h"
 
-	try {
-		Irccdctl ctl;
+namespace irccd {
 
-		ctl.run(--argc, ++argv);
-	} catch (const std::exception &ex) {
-		log::warning() << sys::programName() << ": " << ex.what() << std::endl;
-		std::exit(1);
-	}
+namespace command {
 
-	return 0;
-}
+/**
+ * @class ServerList
+ * @brief Implementation of server-list transport command.
+ */
+class ServerList : public RemoteCommand {
+public:
+	ServerList();
+
+	/**
+	 * @copydoc RemoteCommand::help
+	 */
+	std::string help() const override;
+
+	json::Value exec(Irccd &irccd, const json::Value &request) const override;
+
+	void result(Irccdctl &irccdctl, const json::Value &response) const override;
+};
+
+} // !command
+
+} // !irccd
+
+#endif // !_IRCCD_COMMAND_SERVER_LIST_H_

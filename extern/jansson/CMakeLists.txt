@@ -265,6 +265,7 @@ set(
 )
 
 irccd_define_library(
+	LOCAL
 	TARGET extern-jansson
 	SOURCES
 		${JANSSON_SRC}

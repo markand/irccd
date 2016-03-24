@@ -35,7 +35,7 @@
 
 function(irccd_define_executable)
 	set(options INSTALL PRIVATE)
-	set(oneValueArgs TARGET INSTALL)
+	set(oneValueArgs TARGET)
 	set(multiValueArgs SOURCES FLAGS LIBRARIES INCLUDES)
 
 	cmake_parse_arguments(EXE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})

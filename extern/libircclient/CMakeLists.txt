@@ -47,6 +47,7 @@ if (WITH_IPV6)
 endif ()
 
 irccd_define_library(
+	LOCAL
 	TARGET extern-ircclient
 	SOURCES src/libircclient.c
 	FLAGS ${FLAGS}

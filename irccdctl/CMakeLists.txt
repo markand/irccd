@@ -21,63 +21,6 @@ project(irccdctl)
 irccd_define_executable(
 	TARGET irccdctl
 	INSTALL
-	SOURCES
-		CMakeLists.txt
-		alias.cpp
-		alias.h
-		command.h
-		command-help.cpp
-		command-help.h
-		command-plugin-info.cpp
-		command-plugin-info.h
-		command-plugin-list.cpp
-		command-plugin-list.h
-		command-plugin-load.cpp
-		command-plugin-load.h
-		command-plugin-reload.cpp
-		command-plugin-reload.h
-		command-plugin-unload.cpp
-		command-plugin-unload.h
-		command-server-cmode.cpp
-		command-server-cmode.h
-		command-server-cnotice.cpp
-		command-server-cnotice.h
-		command-server-connect.cpp
-		command-server-connect.h
-		command-server-disconnect.cpp
-		command-server-disconnect.h
-		command-server-info.cpp
-		command-server-info.h
-		command-server-invite.cpp
-		command-server-invite.h
-		command-server-join.cpp
-		command-server-join.h
-		command-server-kick.cpp
-		command-server-kick.h
-		command-server-list.cpp
-		command-server-list.h
-		command-server-me.cpp
-		command-server-me.h
-		command-server-message.cpp
-		command-server-message.h
-		command-server-mode.cpp
-		command-server-mode.h
-		command-server-nick.cpp
-		command-server-nick.h
-		command-server-notice.cpp
-		command-server-notice.h
-		command-server-part.cpp
-		command-server-part.h
-		command-server-reconnect.cpp
-		command-server-reconnect.h
-		command-server-topic.cpp
-		command-server-topic.h
-		command-watch.cpp
-		command-watch.h
-		connection.cpp
-		connection.h
-		irccdctl.cpp
-		irccdctl.h
-		main.cpp
-	LIBRARIES common
+	SOURCES CMakeLists.txt main.cpp
+	LIBRARIES libirccd
 )

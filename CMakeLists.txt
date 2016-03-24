@@ -34,11 +34,11 @@
 #
 # Build system is then processed in different directories:
 #
-# common			- Static common library between irccd and irccdctl.
 # contrib			- User contributions not maintained by irccd authors.
 # doc				- The documentation process.
 # extern			- External libraries.
-# irccd				- The main irccd executable.
+# lib				- The irccd library
+# irccd				- The irccd executable.
 # irccdctl			- The irccdctl utility.
 # plugins			- Official irccd plugins.
 # tests				- The unit tests.
@@ -67,8 +67,8 @@ include(cmake/IrccdSystem.cmake)
 
 add_subdirectory(extern/libircclient)
 add_subdirectory(extern/jansson)
-add_subdirectory(common)
 add_subdirectory(doc)
+add_subdirectory(lib)
 add_subdirectory(irccd)
 add_subdirectory(irccdctl)
 add_subdirectory(contrib)
@@ -122,20 +122,20 @@ endforeach ()
 message("")
 
 # CPack (only for package_source, package_ifw is home made).
-include(cmake/IrccdPackage.cmake)
-include(CPack)
+#include(cmake/IrccdPackage.cmake)
+#include(CPack)
 
 # Meta release target.
-if (IRCCD_PACKAGE)
-	add_custom_target(
-		release
-		COMMENT "Releasing irccd ${IRCCD_VERSION}"
-		COMMAND
-			${CMAKE_MAKE_PROGRAM} package_source
-	)
-
-	add_dependencies(release package_ifw)
-endif ()
+#if (IRCCD_PACKAGE)
+#	add_custom_target(
+#		release
+#		COMMENT "Releasing irccd ${IRCCD_VERSION}"
+#		COMMAND
+#			${CMAKE_MAKE_PROGRAM} package_source
+#	)
+#
+#	add_dependencies(release package_ifw)
+#endif ()
 
 # Show warnings about non-relocatable irccd.
 if (NOT IRCCD_RELOCATABLE)

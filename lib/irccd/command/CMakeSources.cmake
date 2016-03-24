@@ -1,0 +1,57 @@
+set(
+	COMMAND_HEADERS
+	${CMAKE_CURRENT_LIST_DIR}/command.h
+	${CMAKE_CURRENT_LIST_DIR}/help.h
+	${CMAKE_CURRENT_LIST_DIR}/plugin-info.h
+	${CMAKE_CURRENT_LIST_DIR}/plugin-list.h
+	${CMAKE_CURRENT_LIST_DIR}/plugin-load.h
+	${CMAKE_CURRENT_LIST_DIR}/plugin-reload.h
+	${CMAKE_CURRENT_LIST_DIR}/plugin-unload.h
+	${CMAKE_CURRENT_LIST_DIR}/server-cmode.h
+	${CMAKE_CURRENT_LIST_DIR}/server-cnotice.h
+	${CMAKE_CURRENT_LIST_DIR}/server-connect.h
+	${CMAKE_CURRENT_LIST_DIR}/server-disconnect.h
+	${CMAKE_CURRENT_LIST_DIR}/server-info.h
+	${CMAKE_CURRENT_LIST_DIR}/server-invite.h
+	${CMAKE_CURRENT_LIST_DIR}/server-join.h
+	${CMAKE_CURRENT_LIST_DIR}/server-kick.h
+	${CMAKE_CURRENT_LIST_DIR}/server-list.h
+	${CMAKE_CURRENT_LIST_DIR}/server-me.h
+	${CMAKE_CURRENT_LIST_DIR}/server-message.h
+	${CMAKE_CURRENT_LIST_DIR}/server-mode.h
+	${CMAKE_CURRENT_LIST_DIR}/server-nick.h
+	${CMAKE_CURRENT_LIST_DIR}/server-notice.h
+	${CMAKE_CURRENT_LIST_DIR}/server-part.h
+	${CMAKE_CURRENT_LIST_DIR}/server-reconnect.h
+	${CMAKE_CURRENT_LIST_DIR}/server-topic.h
+	${CMAKE_CURRENT_LIST_DIR}/watch.h
+)
+
+set(
+	COMMAND_SOURCES
+	${CMAKE_CURRENT_LIST_DIR}/command.cpp
+	${CMAKE_CURRENT_LIST_DIR}/help.cpp
+	${CMAKE_CURRENT_LIST_DIR}/plugin-info.cpp
+	${CMAKE_CURRENT_LIST_DIR}/plugin-list.cpp
+	${CMAKE_CURRENT_LIST_DIR}/plugin-load.cpp
+	${CMAKE_CURRENT_LIST_DIR}/plugin-reload.cpp
+	${CMAKE_CURRENT_LIST_DIR}/plugin-unload.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-cmode.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-cnotice.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-connect.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-disconnect.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-info.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-invite.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-join.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-kick.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-list.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-me.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-message.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-mode.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-nick.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-notice.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-part.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-reconnect.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-topic.cpp
+	${CMAKE_CURRENT_LIST_DIR}/watch.cpp
+)

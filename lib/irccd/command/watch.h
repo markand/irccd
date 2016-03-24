@@ -1,5 +1,5 @@
 /*
- * main.cpp -- irccd controller main
+ * command-watch.h -- implementation of irccdctl watch
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,29 +16,36 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/irccdctl.h>
-#include <irccd/logger.h>
-#include <irccd/path.h>
+#ifndef _IRCCDCTL_COMMAND_WATCH_H_
+#define _IRCCDCTL_COMMAND_WATCH_H_
 
-using namespace irccd;
+/**
+ * @file command-watch.h
+ * @brief Implementation of irccdctl watch.
+ */
 
-int main(int argc, char **argv)
-{
-	// TODO: move to Application
-	sys::setProgramName("irccdctl");
-	path::setApplicationPath(argv[0]);
-	log::setInterface(std::make_unique<log::Console>());
-	log::setVerbose(false);
-	net::init();
+#include "command.h"
 
-	try {
-		Irccdctl ctl;
+namespace irccd {
 
-		ctl.run(--argc, ++argv);
-	} catch (const std::exception &ex) {
-		log::warning() << sys::programName() << ": " << ex.what() << std::endl;
-		std::exit(1);
-	}
+namespace command {
 
-	return 0;
-}
+/**
+ * @class Watch
+ * @brief Implementation of irccdctl watch.
+ */
+class Watch : public RemoteCommand {
+public:
+	Watch();
+
+	/**
+	 * @copydoc RemoteCommand::help
+	 */
+	std::string help() const override;
+};
+
+} // !command
+
+} // !irccd
+
+#endif // !_IRCCDCTL_COMMAND_WATCH_H_

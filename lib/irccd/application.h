@@ -1,5 +1,5 @@
 /*
- * main.cpp -- irccd controller main
+ * application.h -- super base class to create irccd front ends
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,29 +16,40 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/irccdctl.h>
-#include <irccd/logger.h>
-#include <irccd/path.h>
+#ifndef IRCCD_APPLICATION_H
+#define IRCCD_APPLICATION_H
 
-using namespace irccd;
+#include <cassert>
+#include <memory>
+#include <unordered_map>
 
-int main(int argc, char **argv)
-{
-	// TODO: move to Application
-	sys::setProgramName("irccdctl");
-	path::setApplicationPath(argv[0]);
-	log::setInterface(std::make_unique<log::Console>());
-	log::setVerbose(false);
-	net::init();
+#include "command/command.h"
 
-	try {
-		Irccdctl ctl;
+namespace irccd {
 
-		ctl.run(--argc, ++argv);
-	} catch (const std::exception &ex) {
-		log::warning() << sys::programName() << ": " << ex.what() << std::endl;
-		std::exit(1);
+using RemoteCommands = std::unordered_map<std::string, std::unique_ptr<RemoteCommand>>;
+
+class Application {
+protected:
+	RemoteCommands m_commands;
+
+public:
+	Application();
+
+	inline const RemoteCommands &commands() const noexcept
+	{
+		return m_commands;
 	}
 
-	return 0;
-}
+	inline void addCommand(std::unique_ptr<RemoteCommand> command)
+	{
+		assert(command);
+		assert(m_commands.count(command->name()) == 0);
+
+		m_commands.emplace(command->name(), std::move(command));
+	}
+};
+
+} // !irccd
+
+#endif // !_IRCCD_APPLICATION_H_
