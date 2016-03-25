@@ -34,9 +34,9 @@ std::string ServerJoin::help() const
 	return "";
 }
 
-RemoteCommandArgs ServerJoin::args() const
+std::vector<RemoteCommand::Arg> ServerJoin::args() const
 {
-	return RemoteCommandArgs{
+	return {
 		{ "server", true },
 		{ "channel", true },
 		{ "password", false }

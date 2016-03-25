@@ -46,7 +46,7 @@ public:
 	 */
 	std::string help() const override;
 
-	RemoteCommandArgs args() const override;
+	std::vector<Arg> args() const override;
 
 	/**
 	 * @copydoc TransportCommand::exec

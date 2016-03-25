@@ -34,11 +34,9 @@ std::string ServerDisconnect::help() const
 	return "";
 }
 
-RemoteCommandArgs ServerDisconnect::args() const
+std::vector<RemoteCommand::Arg> ServerDisconnect::args() const
 {
-	return RemoteCommandArgs{
-		{ "server", false }
-	};
+	return {{ "server", false }};
 }
 
 json::Value ServerDisconnect::exec(Irccd &irccd, const json::Value &request) const

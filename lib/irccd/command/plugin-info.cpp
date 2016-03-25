@@ -37,9 +37,9 @@ std::string PluginInfo::help() const
 	return "Get plugin information.";
 }
 
-RemoteCommandArgs PluginInfo::args() const
+std::vector<RemoteCommand::Arg> PluginInfo::args() const
 {
-	return { { "plugin", true } };
+	return {{ "plugin", true }};
 }
 
 json::Value PluginInfo::request(Irccdctl &, const RemoteCommandRequest &args) const
@@ -71,11 +71,13 @@ void PluginInfo::result(Irccdctl &irccdctl, const json::Value &result) const
 	RemoteCommand::result(irccdctl, result);
 
 	/* Plugin information */
-	std::cout << std::boolalpha;
-	std::cout << "Author         : " << result.valueOr("author", "").toString(true) << std::endl;
-	std::cout << "License        : " << result.valueOr("license", "").toString(true) << std::endl;
-	std::cout << "Summary        : " << result.valueOr("summary", "").toString(true) << std::endl;
-	std::cout << "Version        : " << result.valueOr("version", "").toString(true) << std::endl;
+	if (result.valueOr("status", false).toBool()) {
+		std::cout << std::boolalpha;
+		std::cout << "Author         : " << result.valueOr("author", "").toString(true) << std::endl;
+		std::cout << "License        : " << result.valueOr("license", "").toString(true) << std::endl;
+		std::cout << "Summary        : " << result.valueOr("summary", "").toString(true) << std::endl;
+		std::cout << "Version        : " << result.valueOr("version", "").toString(true) << std::endl;
+	}
 }
 
 } // !command

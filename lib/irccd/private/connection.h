@@ -49,6 +49,16 @@ protected:
 
 public:
 	/**
+	 * Default constructor.
+	 */
+	Connection() = default;
+
+	/**
+	 * Default destructor.
+	 */
+	virtual ~Connection() = default;
+
+	/**
 	 * Wait for the next requested response.
 	 *
 	 * @param name the response name

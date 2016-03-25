@@ -1,3 +1,23 @@
+/*
+ * command.cpp -- remote command
+ *
+ * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+#include <algorithm>
+#include <iomanip>
 #include <sstream>
 
 #include <irccd/logger.h>
@@ -5,74 +25,70 @@
 
 #include "command.h"
 
+using namespace std::string_literals;
+
 namespace irccd {
-
-/*
- * RemoteCommandRequest
- * ------------------------------------------------------------------
- */
-
-const std::string &RemoteCommandRequest::arg(unsigned index) const noexcept
-{
-	assert(index < m_args.size());
-
-	return m_args[index];
-}
-
-std::string RemoteCommandRequest::argOr(unsigned index, std::string defaultValue) const noexcept
-{
-	return index < m_args.size() ? m_args[index] : defaultValue;
-}
-
-const std::string &RemoteCommandRequest::option(const std::string &key) const noexcept
-{
-	assert(m_options.count(key) != 0);
-
-	return m_options.find(key)->second;
-}
-
-std::string RemoteCommandRequest::optionOr(const std::string &key, std::string defaultValue) const noexcept
-{
-	auto it = m_options.find(key);
-
-	if (it == m_options.end())
-		return defaultValue;
-
-	return it->second;
-}
-
-/*
- * RemoteCommand
- * ------------------------------------------------------------------
- */
 
 std::string RemoteCommand::usage() const
 {
 	std::ostringstream oss;
 
-	oss << "usage: sys::programName()";
+	oss << "usage: " << sys::programName() << " " << m_name;
 
 	/* Options summary */
 	if (options().size() > 0)
 		oss << " [options...]";
 
-	/* Arguments */
-	for (const RemoteCommandArg &arg : args()) {
-		if (!arg.second)
-			oss << "[";
+	/* Arguments summary */
+	if (args().size() > 0) {
+		oss << " ";
 
-		oss << arg.first;
+		for (const auto &arg : args())
+			oss << (arg.required() ? "" : "[") << arg.name() << (arg.required() ? "" : "]") << " ";
+	}
 
-		if (!arg.second)
-			oss << "]";
+	/* Description */
+	oss << "\n\n" << help() << "\n\n";
+
+	/* Options */
+	if (options().size() > 0) {
+		oss << "Options:\n";
+
+		for (const auto &opt : options()) {
+			std::ostringstream optoss;
+
+			/* Construct the line for the option in a single string to pad it correctly */
+			optoss << "  ";
+			optoss << (!opt.simpleKey().empty() ? ("-"s + opt.simpleKey() + " ") : "   ");
+			optoss << (!opt.longKey().empty() ? ("--"s + opt.longKey() + " "s) : "");
+			optoss << opt.arg();
+
+			/* Add it padded with spaces */
+			oss << std::left << std::setw(28) << optoss.str();
+			oss << opt.description() << "\n";
+		}
 	}
 
 	return oss.str();
 }
 
+unsigned RemoteCommand::min() const noexcept
+{
+	auto list = args();
+
+	return std::accumulate(list.begin(), list.end(), 0U, [] (unsigned i, const auto &arg) noexcept -> unsigned {
+		return i + (arg.required() ? 1 : 0);
+	});
+}
+
+unsigned RemoteCommand::max() const noexcept
+{
+	return (unsigned)args().size();
+}
+
 json::Value RemoteCommand::request(Irccdctl &, const RemoteCommandRequest &) const
 {
-	return nullptr;
+	return json::object({});
 }
 
 json::Value RemoteCommand::exec(Irccd &, const json::Value &) const

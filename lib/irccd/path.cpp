@@ -53,7 +53,7 @@
 #    include <libproc.h>
 #  endif
 
-#  include <xdg.h>
+#  include "private/xdg.h"
 #endif
 
 #include "private/filesystem.h"

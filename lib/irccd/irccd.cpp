@@ -571,7 +571,7 @@ void Irccd::handleTransportCommand(std::weak_ptr<TransportClient> ptr, const jso
 		}
 
 		/* 3. Try to execute it */
-		json::Value response;
+		json::Value response = json::object({});
 
 		try {
 			response = it->second->exec(*this, object);
@@ -580,14 +580,16 @@ void Irccd::handleTransportCommand(std::weak_ptr<TransportClient> ptr, const jso
 			if (!response.isObject())
 				response = json::object({});
 			
-			response.insert("command", it->first);
-			response.insert("status", "true");
+			response.insert("status", true);
 		} catch (const std::exception &ex) {
-			response.insert("status", "false");
+			response.insert("status", false);
 			response.insert("error", ex.what());
 		}
 
-		/* 4. Send the result */
+		/* 4. Store the command name result */
+		response.insert("response", it->first);
+
+		/* 5. Send the result */
 		tc->send(response.toJson(0));
 	});
 }

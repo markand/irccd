@@ -38,10 +38,17 @@ class Help : public RemoteCommand {
 public:
 	Help();
 
+	std::vector<Arg> args() const override;
+
 	/**
 	 * @copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
+
+	/**
+	 * @copydoc RemoteCommand::request
+	 */
+	json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const override;
 };
 
 } // !command

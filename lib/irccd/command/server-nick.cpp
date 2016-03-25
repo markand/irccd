@@ -34,9 +34,9 @@ std::string ServerNick::help() const
 	return "";
 }
 
-RemoteCommandArgs ServerNick::args() const
+std::vector<RemoteCommand::Arg> ServerNick::args() const
 {
-	return RemoteCommandArgs{
+	return {
 		{ "server", true },
 		{ "nickname", true }
 	};

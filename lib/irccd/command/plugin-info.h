@@ -49,7 +49,7 @@ public:
 	/**
 	 * @copydoc RemoteCommand::args
 	 */
-	RemoteCommandArgs args() const;
+	std::vector<Arg> args() const override;
 
 	/**
 	 * @copydoc RemoteCommand::request

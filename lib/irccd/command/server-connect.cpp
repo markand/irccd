@@ -122,24 +122,24 @@ ServerConnect::ServerConnect()
 
 std::string ServerConnect::help() const
 {
-	return "";
+	return "Connect to a server.";
 }
 
-RemoteCommandOptions ServerConnect::options() const
+std::vector<RemoteCommand::Option> ServerConnect::options() const
 {
-	return RemoteCommandOptions{
-		{ "command", "-c", "--command", "command character to use" },
-		{ "nickname", "-n", "--nickname", "nickname to use" },
-		{ "realname", "-r", "--realname", "realname to use" },
-		{ "sslverify", "-S", "--ssl-verify", "verify SSL" },
-		{ "ssl", "-s", "--ssl", "connect with SSL" },
-		{ "username", "-u", "--username", "username to use" }
+	return {
+		{ "command", "c", "command", "char", "command character to use" },
+		{ "nickname", "n", "nickname", "nickname", "nickname to use" },
+		{ "realname", "r", "realname", "realname", "realname to use" },
+		{ "sslverify", "S", "ssl-verify", "", "verify SSL" },
+		{ "ssl", "s", "ssl", "", "connect with SSL" },
+		{ "username", "u", "username", "", "username to use" },
 	};
 }
 
-RemoteCommandArgs ServerConnect::args() const
+std::vector<RemoteCommand::Arg> ServerConnect::args() const
 {
-	return RemoteCommandArgs{
+	return {
 		{ "id", true },
 		{ "host", true },
 		{ "port", false }

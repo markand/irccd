@@ -34,9 +34,9 @@ std::string ServerChannelNotice::help() const
 	return "";
 }
 
-RemoteCommandArgs ServerChannelNotice::args() const
+std::vector<RemoteCommand::Arg> ServerChannelNotice::args() const
 {
-	return RemoteCommandArgs{
+	return {
 		{ "server", true },
 		{ "channel", true },
 		{ "message", true }

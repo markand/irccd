@@ -48,6 +48,7 @@ namespace irccd {
 Application::Application()
 {
 	/* Register all commands */
+	addCommand(std::make_unique<command::Help>());
 	addCommand(std::make_unique<command::PluginInfo>());
 	addCommand(std::make_unique<command::PluginList>());
 	addCommand(std::make_unique<command::PluginLoad>());
@@ -70,6 +71,7 @@ Application::Application()
 	addCommand(std::make_unique<command::ServerPart>());
 	addCommand(std::make_unique<command::ServerReconnect>());
 	addCommand(std::make_unique<command::ServerTopic>());
+	addCommand(std::make_unique<command::Watch>());
 }
 
 } // !irccd

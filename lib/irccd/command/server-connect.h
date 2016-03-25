@@ -49,12 +49,12 @@ public:
 	/**
 	 * @copydoc TransportCommand::options
 	 */
-	RemoteCommandOptions options() const override;
+	std::vector<Option> options() const override;
 
 	/**
 	 * @copydoc TransportCommand::args
 	 */
-	RemoteCommandArgs args() const override;
+	std::vector<Arg> args() const override;
 
 	/**
 	 * @copydoc TransportCommand::exec

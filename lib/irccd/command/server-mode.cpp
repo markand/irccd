@@ -34,9 +34,9 @@ std::string ServerMode::help() const
 	return "";
 }
 
-RemoteCommandArgs ServerMode::args() const
+std::vector<RemoteCommand::Arg> ServerMode::args() const
 {
-	return RemoteCommandArgs{
+	return {
 		{ "server", true },
 		{ "mode", true }
 	};

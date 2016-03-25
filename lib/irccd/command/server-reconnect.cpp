@@ -34,11 +34,9 @@ std::string ServerReconnect::help() const
 	return "";
 }
 
-RemoteCommandArgs ServerReconnect::args() const
+std::vector<RemoteCommand::Arg> ServerReconnect::args() const
 {
-	return RemoteCommandArgs{
-		{ "server", false }
-	};
+	return {{ "server", false }};
 }
 
 json::Value ServerReconnect::request(Irccdctl &, const RemoteCommandRequest &args) const

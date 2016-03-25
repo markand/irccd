@@ -34,9 +34,9 @@ std::string ServerMe::help() const
 	return "";
 }
 
-RemoteCommandArgs ServerMe::args() const
+std::vector<RemoteCommand::Arg> ServerMe::args() const
 {
-	return RemoteCommandArgs{
+	return {
 		{ "server", true },
 		{ "target", true },
 		{ "message", true }

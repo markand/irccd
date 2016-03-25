@@ -34,9 +34,9 @@ std::string ServerKick::help() const
 	return "";
 }
 
-RemoteCommandArgs ServerKick::args() const
+std::vector<RemoteCommand::Arg> ServerKick::args() const
 {
-	return RemoteCommandArgs{
+	return {
 		{ "server", true },
 		{ "target", true },
 		{ "channel", true },

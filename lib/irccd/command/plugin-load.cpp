@@ -34,11 +34,9 @@ std::string PluginLoad::help() const
 	return "Load a plugin.";
 }
 
-RemoteCommandArgs PluginLoad::args() const
+std::vector<RemoteCommand::Arg> PluginLoad::args() const
 {
-	return RemoteCommandArgs{
-		{ "plugin", true }
-	};
+	return {{ "plugin", true }};
 }
 
 json::Value PluginLoad::exec(Irccd &irccd, const json::Value &request) const

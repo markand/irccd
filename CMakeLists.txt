@@ -49,6 +49,7 @@ cmake_minimum_required(VERSION 3.0)
 project(irccd)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${irccd_SOURCE_DIR}/cmake/packages)
+set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
 include(CMakeParseArguments)
 

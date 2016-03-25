@@ -34,11 +34,9 @@ std::string PluginUnload::help() const
 	return "Unload a plugin.";
 }
 
-RemoteCommandArgs PluginUnload::args() const
+std::vector<RemoteCommand::Arg> PluginUnload::args() const
 {
-	return RemoteCommandArgs{
-		{ "plugin", true }
-	};
+	return {{ "plugin", true }};
 }
 
 json::Value PluginUnload::exec(Irccd &irccd, const json::Value &request) const

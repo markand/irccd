@@ -46,7 +46,7 @@ public:
 	/**
 	 * @copydoc TransportCommand::args
 	 */
-	RemoteCommandArgs args() const override;
+	std::vector<Arg> args() const override;
 
 	json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const override;
 

@@ -34,9 +34,9 @@ std::string ServerInvite::help() const
 	return "";
 }
 
-RemoteCommandArgs ServerInvite::args() const
+std::vector<RemoteCommand::Arg> ServerInvite::args() const
 {
-	return RemoteCommandArgs{
+	return {
 		{ "server", true },
 		{ "nickname", true },
 		{ "channel", true }

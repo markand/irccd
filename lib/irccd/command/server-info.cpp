@@ -36,11 +36,9 @@ std::string ServerInfo::help() const
 	return "";
 }
 
-RemoteCommandArgs ServerInfo::args() const
+std::vector<RemoteCommand::Arg> ServerInfo::args() const
 {
-	return RemoteCommandArgs{
-		{ "server", true },
-	};
+	return {{ "server", true }};
 }
 
 json::Value ServerInfo::request(Irccdctl &, const RemoteCommandRequest &args) const

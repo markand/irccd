@@ -34,11 +34,9 @@ std::string PluginReload::help() const
 	return "Reload a plugin.";
 }
 
-RemoteCommandArgs PluginReload::args() const
+std::vector<RemoteCommand::Arg> PluginReload::args() const
 {
-	return RemoteCommandArgs{
-		{ "plugin", true }
-	};
+	return {{ "plugin", true }};
 }
 
 json::Value PluginReload::exec(Irccd &irccd, const json::Value &request) const

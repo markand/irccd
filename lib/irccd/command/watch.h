@@ -38,10 +38,17 @@ class Watch : public RemoteCommand {
 public:
 	Watch();
 
+	std::vector<Option> options() const override;
+
 	/**
 	 * @copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
+
+	/**
+	 * @copydoc RemoteCommand::request
+	 */
+	json::Value request(Irccdctl &ctl, const RemoteCommandRequest &request) const override;
 };
 
 } // !command

@@ -16,6 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/irccdctl.h>
+#include <irccd/logger.h>
+
 #include "help.h"
 
 namespace irccd {
@@ -27,9 +30,26 @@ Help::Help()
 {
 }
 
+std::vector<RemoteCommand::Arg> Help::args() const
+{
+	return {{ "command", true }};
+}
+
 std::string Help::help() const
 {
-	return "";
+	return "Get help about a command.";
+}
+
+json::Value Help::request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const
+{
+	auto it = irccdctl.commands().find(args.arg(0U));
+
+	if (it == irccdctl.commands().end())
+		log::warning() << "there is no command named: " << args.arg(0U) << std::endl;
+	else
+		log::warning() << it->second->usage() << std::flush;
+
+	return nullptr;
 }
 
 } // !command

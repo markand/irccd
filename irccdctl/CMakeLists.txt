@@ -24,3 +24,7 @@ irccd_define_executable(
 	SOURCES CMakeLists.txt main.cpp
 	LIBRARIES libirccd
 )
+
+if (UNIX)
+	set_target_properties(irccdctl PROPERTIES LINK_FLAGS -pthread)
+endif ()

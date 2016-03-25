@@ -48,6 +48,7 @@ using namespace net::protocol;
 
 using namespace std::placeholders;
 using namespace std::chrono_literals;
+using namespace std::string_literals;
 
 /*
  * Config file format
@@ -75,6 +76,7 @@ using namespace std::chrono_literals;
 
 void Irccdctl::usage() const
 {
+	// TODO: CHANGE
 	log::warning() << "usage: " << sys::programName() << " [options...] <command> [command-options...] [command-args...]\n\n";
 	log::warning() << "General options:\n";
 	log::warning() << "\tc, --config file\tspecify the configuration file\n";
@@ -354,7 +356,48 @@ parser::Result Irccdctl::parse(int &argc, char **&argv) const
 
 void Irccdctl::exec(const RemoteCommand &cmd, std::vector<std::string> args)
 {
-	
+	/* 1. Build options from command line arguments. */
+	parser::Options def;
+
+	for (const auto &opt : cmd.options()) {
+		/* parser::read needs '-' and '--' so add them */
+		if (!opt.simpleKey().empty())
+			def.emplace("-"s + opt.simpleKey(), !opt.arg().empty());
+		if (!opt.longKey().empty())
+			def.emplace("--"s + opt.longKey(), !opt.arg().empty());
+	}
+
+	/* 2. Parse them, remove them from args (in parser::read) and build the map with id. */
+	RemoteCommandRequest::Options requestOptions;
+
+	for (const auto &pair : parser::read(args, def)) {
+		auto options = cmd.options();
+		auto it = std::find_if(options.begin(), options.end(), [&] (const auto &opt) {
+			return ("-"s + opt.simpleKey()) == pair.first || ("--"s + opt.longKey()) == pair.first;
+		});
+
+		requestOptions.emplace(it->id(), pair.second);
+	}
+
+	/* 3. Check number of arguments. */
+	if (args.size() < cmd.min())
+		throw std::runtime_error("too few arguments");
+	if (args.size() > cmd.max())
+		throw std::runtime_error("too many arguments");
+
+	/* 4. Construct the request, if the returned value is not an object, do not send anything (e.g. help). */
+	json::Value request = cmd.request(*this, RemoteCommandRequest(std::move(requestOptions), std::move(args)));
+
+	if (!request.isObject())
+		return;
+
+	request.insert("command", cmd.name());
+
+	/* 5. Send the command */
+	m_connection->send(request.toJson(0), 30000);
+
+	/* 6. Parse the result */
+	cmd.result(*this, m_connection->next(cmd.name(), 30000));
 }
 
 void Irccdctl::exec(const Alias &alias, std::vector<std::string> argsCopy)

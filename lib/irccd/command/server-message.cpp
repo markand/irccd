@@ -34,9 +34,9 @@ std::string ServerMessage::help() const
 	return "";
 }
 
-RemoteCommandArgs ServerMessage::args() const
+std::vector<RemoteCommand::Arg> ServerMessage::args() const
 {
-	return RemoteCommandArgs{
+	return {
 		{ "server", true },
 		{ "target", true },
 		{ "message", true }

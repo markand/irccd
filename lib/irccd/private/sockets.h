@@ -2506,7 +2506,7 @@ public:
 	template <typename Address>
 	inline void create(Socket<Address, Tls> &sc)
 	{
-		auto method = (m_method == ssl::Tlsv1) ? TLSv1_method() : SSLv3_method();
+		auto method = (m_method == ssl::Tlsv1) ? TLSv1_method() : SSLv23_method();
 
 		m_context = {SSL_CTX_new(method), SSL_CTX_free};
 		m_ssl = {SSL_new(m_context.get()), SSL_free};

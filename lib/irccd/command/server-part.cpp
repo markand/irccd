@@ -34,9 +34,9 @@ std::string ServerPart::help() const
 	return "";
 }
 
-RemoteCommandArgs ServerPart::args() const
+std::vector<RemoteCommand::Arg> ServerPart::args() const
 {
-	return RemoteCommandArgs{
+	return {
 		{ "server", true },
 		{ "channel", true },
 		{ "reason", false }

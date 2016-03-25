@@ -34,9 +34,9 @@ std::string ServerTopic::help() const
 	return "";
 }
 
-RemoteCommandArgs ServerTopic::args() const
+std::vector<RemoteCommand::Arg> ServerTopic::args() const
 {
-	return RemoteCommandArgs{
+	return {
 		{ "server", true },
 		{ "channel", true },
 		{ "topic", true }
