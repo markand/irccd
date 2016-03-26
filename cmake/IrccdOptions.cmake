@@ -24,9 +24,10 @@
 # WITH_TESTS		Enable unit testing (default: off)
 # WITH_SYSTEMD		Install systemd service (default: off)
 # WITH_DOCS		Enable building of all documentation (default: on)
-# WITH_DOXYGEN	Enable internal irccd documentation (default: on)
-# WITH_HTML	Enable HTML documentation
+# WITH_DOXYGEN		Enable internal irccd documentation (default: on)
+# WITH_HTML		Enable HTML documentation
 # WITH_MAN		Install manpages (default: on, off for Windows)
+# WITH_PKGCONFIG	Install pkg-config files (default: on, off for Windows (except MinGW))
 # WITH_PLUGIN_<NAME>	Enable or disable the specified plugin (default: on)
 #
 # Note: the option() commands for WITH_PLUGIN_<name> variables are defined automatically from the IRCCD_PLUGINS
@@ -45,6 +46,7 @@
 # WITH_MANDIR		Path where to install manuals
 # WITH_CONFDIR		Path where to search configuration files
 # WITH_CACHEDIR		Path where to store temporary files
+# WITH_PKGCONFIGDIR	Path where to install pkg-config files
 #
 
 #
@@ -68,6 +70,13 @@ else ()
 	set(DEFAULT_SYSTEMD "No")
 endif ()
 
+# pkg-config is only relevant on UNIX or MinGW
+if (MINGW OR UNIX)
+	set(DEFAULT_PKGCONFIG "Yes")
+else ()
+	set(DEFAULT_PKGCONFIG "No")
+endif ()
+
 option(WITH_SSL "Enable SSL" On)
 option(WITH_JS "Enable embedded Duktape" On)
 option(WITH_TESTS "Enable unit testing" Off)
@@ -76,6 +85,7 @@ option(WITH_DOCS "Enable building of all documentation" On)
 option(WITH_HTML "Enable building of HTML documentation" On)
 option(WITH_DOXYGEN "Enable doxygen" Off)
 option(WITH_MAN "Install man pages" ${DEFAULT_MAN})
+option(WITH_PKGCONFIG "Enable pkg-config file" ${DEFAULT_PKGCONFIG})
 
 # Build options for all plugins.
 foreach (plugin ${IRCCD_PLUGINS})
@@ -99,6 +109,7 @@ set(WITH_TEST_IRCPORT 6667 CACHE STRING "IRC port for test")
 set(WITH_BINDIR "bin" CACHE STRING "Binary directory")
 set(WITH_MANDIR "share/man" CACHE STRING "Man directory")
 set(WITH_CONFDIR "etc" CACHE STRING "Configuration directory")
+set(WITH_PKGCONFIGDIR "lib/pkgconfig" CACHE STRING "Directory for pkg-config file")
 
 #
 # On Windows, we install the applcation like C:/Program Files/irccd so do not append irccd to the
