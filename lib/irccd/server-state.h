@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_SERVER_STATE_H_
-#define _IRCCD_SERVER_STATE_H_
+#ifndef IRCCD_SERVER_STATE_H
+#define IRCCD_SERVER_STATE_H
 
 #include <irccd-config.h>
 
@@ -73,5 +73,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_SERVER_STATE_H_
-
+#endif // !IRCCD_SERVER_STATE_H

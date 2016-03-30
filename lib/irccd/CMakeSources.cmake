@@ -57,6 +57,7 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/plugin.h
 	${CMAKE_CURRENT_LIST_DIR}/rule.h
 	${CMAKE_CURRENT_LIST_DIR}/server.h
+	${CMAKE_CURRENT_LIST_DIR}/server-private.h
 	${CMAKE_CURRENT_LIST_DIR}/server-state.h
 	${CMAKE_CURRENT_LIST_DIR}/sockets.h
 	${CMAKE_CURRENT_LIST_DIR}/system.h

@@ -1,5 +1,5 @@
 /*
- * js-server.h -- Irccd.Server API
+ * server-private.h -- libircclient bridge
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,44 +16,49 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_SERVER_H
-#define IRCCD_JS_SERVER_H
+#ifndef IRCCD_SERVER_PRIVATE_H
+#define IRCCD_SERVER_PRIVATE_H
 
-#include <irccd/server.h>
+#include <memory>
 
-#include "js.h"
+#include <libircclient.h>
+
+#include "server.h"
 
 namespace irccd {
 
-void loadJsServer(duk::ContextPtr ctx);
-
-namespace duk {
-
-template <>
-class TypeTraits<irccd::Server> {
+/**
+ * @brief Bridge for libircclient
+ */
+class Server::Session {
 public:
-	static inline void prototype(ContextPtr ctx)
+	using Handle = std::unique_ptr<irc_session_t, void (*)(irc_session_t *)>;
+
+private:
+	Handle m_handle;
+
+public:
+	inline Session()
+		: m_handle(nullptr, nullptr)
 	{
-		getGlobal<void>(ctx, "Irccd");
-		getProperty<void>(ctx, -1, "Server");
-		getProperty<void>(ctx, -1, "prototype");
-		remove(ctx, -2);
-		remove(ctx, -2);
 	}
 
-	static inline std::string name()
+	inline operator const irc_session_t *() const noexcept
 	{
-		return "\xff""\xff""Server";
+		return m_handle.get();
 	}
 
-	static inline std::vector<std::string> inherits()
+	inline operator irc_session_t *() noexcept
 	{
-		return {};
+		return m_handle.get();
+	}
+
+	inline Handle &handle() noexcept
+	{
+		return m_handle;
 	}
 };
 
-} // !duk
-
 } // !irccd
 
-#endif // !IRCCD_JS_SERVER_H
+#endif // !IRCCD_SERVER_PRIVATE_H

@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_SERVER_H_
-#define _IRCCD_SERVER_H_
+#ifndef IRCCD_SERVER_H
+#define IRCCD_SERVER_H
 
 #include <cstdint>
 #include <functional>
@@ -30,8 +30,6 @@
 #include <utility>
 #include <vector>
 
-#include <libircclient.h>
-
 #include <irccd-config.h>
 
 #include "logger.h"
@@ -39,12 +37,6 @@
 #include "signals.h"
 
 namespace irccd {
-
-namespace js {
-
-class Context;
-
-} // !js
 
 /**
  * @class ServerIdentity
@@ -171,6 +163,11 @@ using ServerCommand = std::function<bool ()>;
  */
 class Server {
 public:
+	/**
+	 * Bridge for libircclient.
+	 */
+	class Session;
+
 	/**
 	 * Signal: onChannelMode
 	 * ------------------------------------------------
@@ -380,7 +377,7 @@ public:
 	Signal<ServerWhois> onWhois;
 
 private:
-	using Session = std::unique_ptr<irc_session_t, void (*)(irc_session_t *)>;
+	using SessionPtr = std::unique_ptr<Session>;
 	using Queue = std::queue<ServerCommand>;
 
 	/**
@@ -397,7 +394,7 @@ private:
 	ServerInfo m_info;
 	ServerSettings m_settings;
 	ServerIdentity m_identity;
-	Session m_session;
+	SessionPtr m_session;
 	ServerState m_state;
 	ServerState m_next;
 	Queue m_queue;
@@ -489,13 +486,7 @@ public:
 	 * @see Irccd::serverDisconnect
 	 * @note Thread-safe
 	 */
-	inline void disconnect() noexcept
-	{
-		using namespace std::placeholders;
-
-		irc_disconnect(m_session.get());
-		onDie();
-	}
+	void disconnect() noexcept;
 
 	/**
 	 * Asks for a reconnection. This function does not notify the
@@ -504,11 +495,7 @@ public:
 	 * @see Irccd::serverReconnect
 	 * @note Thread-safe
 	 */
-	inline void reconnect() noexcept
-	{
-		irc_disconnect(m_session.get());
-		next(ServerState::Type::Connecting);
-	}
+	void reconnect() noexcept;
 
 	/**
 	 * Flush the pending commands if possible. This function will send
@@ -621,14 +608,13 @@ public:
 	}
 
 	/**
-	 * Get the libircclient session.
+	 * Get the private session.
 	 *
-	 * @warning Do not use this function, it is only required for ServerState's
 	 * @return the session
 	 */
-	inline irc_session_t *session() noexcept
+	inline Session &session() noexcept
 	{
-		return m_session.get();
+		return *m_session;
 	}
 
 	/**
@@ -638,12 +624,7 @@ public:
 	 * @param mode the new mode
 	 * @note Thread-safe
 	 */
-	inline void cmode(std::string channel, std::string mode)
-	{
-		m_queue.push([=] () {
-			return irc_cmd_channel_mode(m_session.get(), channel.c_str(), mode.c_str()) == 0;
-		});
-	}
+	void cmode(std::string channel, std::string mode);
 
 	/**
 	 * Send a channel notice.
@@ -652,12 +633,7 @@ public:
 	 * @param message message notice
 	 * @note Thread-safe
 	 */
-	inline void cnotice(std::string channel, std::string message) noexcept
-	{
-		m_queue.push([=] () {
-			return irc_cmd_notice(this->m_session.get(), channel.c_str(), message.c_str()) == 0;
-		});
-	}
+	void cnotice(std::string channel, std::string message) noexcept;
 
 	/**
 	 * Invite a user to a channel.
@@ -666,12 +642,7 @@ public:
 	 * @param channel the channel
 	 * @note Thread-safe
 	 */
-	inline void invite(std::string target, std::string channel) noexcept
-	{
-		m_queue.push([=] () {
-			return irc_cmd_invite(this->m_session.get(), target.c_str(), channel.c_str()) == 0;
-		});
-	}
+	void invite(std::string target, std::string channel) noexcept;
 
 	/**
 	 * Join a channel, the password is optional and can be kept empty.
@@ -680,14 +651,7 @@ public:
 	 * @param password the optional password
 	 * @note Thread-safe
 	 */
-	inline void join(std::string channel, std::string password = "") noexcept
-	{
-		m_queue.push([=] () {
-			const char *ptr = password.empty() ? nullptr : password.c_str();
-
-			return irc_cmd_join(this->m_session.get(), channel.c_str(), ptr) == 0;
-		});
-	}
+	void join(std::string channel, std::string password = "") noexcept;
 
 	/**
 	 * Kick someone from the channel. Please be sure to have the rights
@@ -698,12 +662,7 @@ public:
 	 * @param reason the optional reason
 	 * @note Thread-safe
 	 */
-	inline void kick(std::string target, std::string channel, std::string reason = "") noexcept
-	{
-		m_queue.push([=] () {
-			return irc_cmd_kick(this->m_session.get(), target.c_str(), channel.c_str(), reason.c_str()) == 0;
-		});
-	}
+	void kick(std::string target, std::string channel, std::string reason = "") noexcept;
 
 	/**
 	 * Send a CTCP Action as known as /me. The target may be either a
@@ -713,12 +672,7 @@ public:
 	 * @param message the message
 	 * @note Thread-safe
 	 */
-	inline void me(std::string target, std::string message)
-	{
-		m_queue.push([=] () {
-			return irc_cmd_me(m_session.get(), target.c_str(), message.c_str()) == 0;
-		});
-	}
+	void me(std::string target, std::string message);
 
 	/**
 	 * Send a message to the specified target or channel.
@@ -727,12 +681,7 @@ public:
 	 * @param message the message
 	 * @note Thread-safe
 	 */
-	inline void message(std::string target, std::string message)
-	{
-		m_queue.push([=] () {
-			return irc_cmd_msg(m_session.get(), target.c_str(), message.c_str()) == 0;
-		});
-	}
+	void message(std::string target, std::string message);
 
 	/**
 	 * Change your user mode.
@@ -740,12 +689,7 @@ public:
 	 * @param mode the mode
 	 * @note Thread-safe
 	 */
-	inline void mode(std::string mode)
-	{
-		m_queue.push([=] () {
-			return irc_cmd_user_mode(m_session.get(), mode.c_str()) == 0;
-		});
-	}
+	void mode(std::string mode);
 
 	/**
 	 * Request the list of names.
@@ -753,12 +697,7 @@ public:
 	 * @param channel the channel
 	 * @note Thread-safe
 	 */
-	inline void names(std::string channel)
-	{
-		m_queue.push([=] () {
-			return irc_cmd_names(m_session.get(), channel.c_str()) == 0;
-		});
-	}
+	void names(std::string channel);
 
 	/**
 	 * Change your nickname.
@@ -766,12 +705,7 @@ public:
 	 * @param newnick the new nickname to use
 	 * @note Thread-safe
 	 */
-	inline void nick(std::string newnick)
-	{
-		m_queue.push([=] () {
-			return irc_cmd_nick(m_session.get(), newnick.c_str()) == 0;
-		});
-	}
+	void nick(std::string newnick);
 
 	/**
 	 * Send a private notice.
@@ -780,12 +714,7 @@ public:
 	 * @param message the notice message
 	 * @note Thread-safe
 	 */
-	inline void notice(std::string target, std::string message)
-	{
-		m_queue.push([=] () {
-			return irc_cmd_notice(m_session.get(), target.c_str(), message.c_str()) == 0;
-		});
-	}
+	void notice(std::string target, std::string message);
 
 	/**
 	 * Part from a channel.
@@ -796,15 +725,7 @@ public:
 	 * @param reason the optional reason
 	 * @note Thread-safe
 	 */
-	inline void part(std::string channel, std::string reason = "")
-	{
-		m_queue.push([=] () -> bool {
-			if (reason.empty())
-				return irc_cmd_part(m_session.get(), channel.c_str()) == 0;
-
-			return irc_send_raw(m_session.get(), "PART %s :%s", channel.c_str(), reason.c_str());
-		});
-	}
+	void part(std::string channel, std::string reason = "");
 
 	/**
 	 * Send a raw message to the IRC server. You don't need to add
@@ -814,12 +735,7 @@ public:
 	 * @param raw the raw message (without \r\n\r\n)
 	 * @note Thread-safe
 	 */
-	inline void send(std::string raw)
-	{
-		m_queue.push([=] () {
-			return irc_send_raw(m_session.get(), raw.c_str()) == 0;
-		});
-	}
+	void send(std::string raw);
 
 	/**
 	 * Change the channel topic.
@@ -828,12 +744,7 @@ public:
 	 * @param topic the desired topic
 	 * @note Thread-safe
 	 */
-	inline void topic(std::string channel, std::string topic)
-	{
-		m_queue.push([=] () {
-			return irc_cmd_topic(m_session.get(), channel.c_str(), topic.c_str()) == 0;
-		});
-	}
+	void topic(std::string channel, std::string topic);
 
 	/**
 	 * Request for whois information.
@@ -841,33 +752,9 @@ public:
 	 * @param target the target nickname
 	 * @note Thread-safe
 	 */
-	inline void whois(std::string target)
-	{
-		m_queue.push([=] () {
-			return irc_cmd_whois(this->m_session.get(), target.c_str()) == 0;
-		});
-	}
-
-#if defined(WITH_JS)
-	/**
-	 * Get the object signature.
-	 *
-	 * @return the signature
-	 */
-	static inline const char *name() noexcept
-	{
-		return "\xff""\xff""Server";
-	}
-
-	/**
-	 * Push the JavaScript prototype for a Server.
-	 *
-	 * @param ctx the context
-	 */
-	void prototype(js::Context &ctx);
-#endif
+	void whois(std::string target);
 };
 
 } // !irccd
 
-#endif // !_IRCCD_SERVER_H_
+#endif // !IRCCD_SERVER_H

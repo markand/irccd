@@ -24,7 +24,7 @@
 #include <libirc_rfcnumeric.h>
 
 #include "logger.h"
-#include "server.h"
+#include "server-private.h"
 #include "util.h"
 
 namespace irccd {
@@ -310,7 +310,7 @@ Server::Server(ServerInfo info, ServerIdentity identity, ServerSettings settings
 	: m_info(std::move(info))
 	, m_settings(std::move(settings))
 	, m_identity(std::move(identity))
-	, m_session(nullptr, nullptr)
+	, m_session(std::make_unique<Session>())
 	, m_state(ServerState::Connecting)
 	, m_next(ServerState::Undefined)
 {
@@ -374,16 +374,16 @@ Server::Server(ServerInfo info, ServerIdentity identity, ServerSettings settings
 		static_cast<Server *>(irc_get_ctx(session))->handleMode(orig, params);
 	};
 
-	m_session = Session{irc_create_session(&callbacks), irc_destroy_session};
+	m_session->handle() = Session::Handle{irc_create_session(&callbacks), irc_destroy_session};
 
 	/* Save this to the session */
-	irc_set_ctx(m_session.get(), this);
-	irc_set_ctcp_version(m_session.get(), m_identity.ctcpversion.c_str());
+	irc_set_ctx(*m_session, this);
+	irc_set_ctcp_version(*m_session, m_identity.ctcpversion.c_str());
 }
 
 Server::~Server()
 {
-	irc_disconnect(m_session.get());
+	irc_disconnect(*m_session);
 }
 
 void Server::update() noexcept
@@ -410,6 +410,20 @@ void Server::update() noexcept
 	}
 }
 
+void Server::disconnect() noexcept
+{
+	using namespace std::placeholders;
+
+	irc_disconnect(*m_session);
+	onDie();
+}
+
+void Server::reconnect() noexcept
+{
+	irc_disconnect(*m_session);
+	next(ServerState::Type::Connecting);
+}
+
 void Server::sync(fd_set &setinput, fd_set &setoutput) noexcept
 {
 	/*
@@ -428,7 +442,117 @@ void Server::sync(fd_set &setinput, fd_set &setoutput) noexcept
 	}
 
 	/* 2. Read data */
-	irc_process_select_descriptors(m_session.get(), &setinput, &setoutput);
+	irc_process_select_descriptors(*m_session, &setinput, &setoutput);
+}
+
+void Server::cmode(std::string channel, std::string mode)
+{
+	m_queue.push([=] () {
+		return irc_cmd_channel_mode(*m_session, channel.c_str(), mode.c_str()) == 0;
+	});
+}
+
+void Server::cnotice(std::string channel, std::string message) noexcept
+{
+	m_queue.push([=] () {
+		return irc_cmd_notice(*m_session, channel.c_str(), message.c_str()) == 0;
+	});
+}
+
+void Server::invite(std::string target, std::string channel) noexcept
+{
+	m_queue.push([=] () {
+		return irc_cmd_invite(*m_session, target.c_str(), channel.c_str()) == 0;
+	});
+}
+
+void Server::join(std::string channel, std::string password) noexcept
+{
+	m_queue.push([=] () {
+		const char *ptr = password.empty() ? nullptr : password.c_str();
+
+		return irc_cmd_join(*m_session, channel.c_str(), ptr) == 0;
+	});
+}
+
+void Server::kick(std::string target, std::string channel, std::string reason) noexcept
+{
+	m_queue.push([=] () {
+		return irc_cmd_kick(*m_session, target.c_str(), channel.c_str(), reason.c_str()) == 0;
+	});
+}
+
+void Server::me(std::string target, std::string message)
+{
+	m_queue.push([=] () {
+		return irc_cmd_me(*m_session, target.c_str(), message.c_str()) == 0;
+	});
+}
+
+void Server::message(std::string target, std::string message)
+{
+	m_queue.push([=] () {
+		return irc_cmd_msg(*m_session, target.c_str(), message.c_str()) == 0;
+	});
+}
+
+void Server::mode(std::string mode)
+{
+	m_queue.push([=] () {
+		return irc_cmd_user_mode(*m_session, mode.c_str()) == 0;
+	});
+}
+
+void Server::names(std::string channel)
+{
+	m_queue.push([=] () {
+		return irc_cmd_names(*m_session, channel.c_str()) == 0;
+	});
+}
+
+void Server::nick(std::string newnick)
+{
+	m_queue.push([=] () {
+		return irc_cmd_nick(*m_session, newnick.c_str()) == 0;
+	});
+}
+
+void Server::notice(std::string target, std::string message)
+{
+	m_queue.push([=] () {
+		return irc_cmd_notice(*m_session, target.c_str(), message.c_str()) == 0;
+	});
+}
+
+void Server::part(std::string channel, std::string reason)
+{
+	m_queue.push([=] () -> bool {
+		if (reason.empty())
+			return irc_cmd_part(*m_session, channel.c_str()) == 0;
+
+		return irc_send_raw(*m_session, "PART %s :%s", channel.c_str(), reason.c_str());
+	});
+}
+
+void Server::send(std::string raw)
+{
+	m_queue.push([=] () {
+		return irc_send_raw(*m_session, raw.c_str()) == 0;
+	});
+}
+
+void Server::topic(std::string channel, std::string topic)
+{
+	m_queue.push([=] () {
+		return irc_cmd_topic(*m_session, channel.c_str(), topic.c_str()) == 0;
+	});
+}
+
+void Server::whois(std::string target)
+{
+	m_queue.push([=] () {
+		return irc_cmd_whois(*m_session, target.c_str()) == 0;
+	});
 }
 
 } // !irccd

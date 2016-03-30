@@ -28,7 +28,7 @@
 #endif
 
 #include "server-state.h"
-#include "server.h"
+#include "server-private.h"
 
 namespace irccd {
 
