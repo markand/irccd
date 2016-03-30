@@ -16,9 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cerrno>
-#include <cstring>
-#include <fstream>
+#include <array>
+#include <vector>
 
 #include <irccd-config.h>
 
@@ -34,105 +33,6 @@
 #if defined(HAVE_STAT)
 
 namespace irccd {
-
-/*
- * duk::File object for Javascript I/O
- * ------------------------------------------------------------------
- */
-
-File::File(std::string path, const std::string &mode)
-	: m_path(std::move(path))
-	, m_destructor([] (std::FILE *fp) { std::fclose(fp); })
-{
-	if ((m_stream = std::fopen(m_path.c_str(), mode.c_str())) == nullptr)
-		throw std::runtime_error(std::strerror(errno));
-}
-
-File::File(std::FILE *fp, std::function<void (std::FILE *)> destructor) noexcept
-	: m_stream(fp)
-	, m_destructor(std::move(destructor))
-{
-	assert(m_destructor != nullptr);
-}
-
-File::~File() noexcept
-{
-	close();
-}
-
-void File::close() noexcept
-{
-	if (m_stream) {
-		m_destructor(m_stream);
-		m_stream = nullptr;
-	}
-}
-
-bool File::isClosed() noexcept
-{
-	return m_stream == nullptr;
-}
-
-void File::seek(long amount, long dir)
-{
-	if (std::fseek(m_stream, amount, dir) != 0)
-		throw std::runtime_error(std::strerror(errno));
-}
-
-unsigned File::tell()
-{
-	long pos = std::ftell(m_stream);
-
-	if (pos == -1L)
-		throw std::runtime_error(std::strerror(errno));
-
-	return pos;
-}
-
-std::string File::readline()
-{
-	std::string result;
-	int ch;
-
-	while ((ch = std::fgetc(m_stream)) != EOF && ch != '\n')
-		result += ch;
-
-	if (ch == EOF && std::ferror(m_stream))
-		throw std::runtime_error(std::strerror(errno));
-
-	return result;
-}
-
-std::string File::read(int amount)
-{
-	assert(amount != 0);
-
-	std::string result;
-	int ch;
-
-	for (int i = 0; (ch = std::fgetc(m_stream)) != EOF; ) {
-		result += ch;
-
-		if (amount > 0 && ++i == amount)
-			break;
-	}
-
-	if (ch == EOF && std::ferror(m_stream))
-		throw std::runtime_error(std::strerror(errno));
-
-	return result;
-}
-
-void File::write(const std::string &data)
-{
-	if (std::fwrite(data.c_str(), data.length(), 1, m_stream) != 1)
-		throw std::runtime_error(std::strerror(errno));
-}
-
-bool File::eof() const noexcept
-{
-	return std::feof(m_stream);
-}
 
 /*
  * duk::TypeInfo specialization for struct stat
@@ -196,9 +96,10 @@ public:
 
 namespace {
 
-/* --------------------------------------------------------
- * File methods
- * -------------------------------------------------------- */
+/*
+ * Anonymous helpers.
+ * ------------------------------------------------------------------
+ */
 
 /* Remove trailing \r for CRLF line style */
 inline std::string clearCr(std::string input)
@@ -208,6 +109,11 @@ inline std::string clearCr(std::string input)
 
 	return input;
 }
+
+/*
+ * File methods.
+ * ------------------------------------------------------------------
+ */
 
 /*
  * Method: File.basename()
@@ -271,17 +177,16 @@ duk::Ret methodLines(duk::ContextPtr ctx)
 
 	std::FILE *fp = duk::self<duk::Pointer<File>>(ctx)->handle();
 	std::string buffer;
+	std::array<char, 128> data;
+	std::int32_t i = 0;
 
-	char data[128];
-	int total = 0;
-
-	while (std::fgets(data, sizeof (data), fp) != nullptr) {
-		buffer += data;
+	while (std::fgets(&data[0], data.size(), fp) != nullptr) {
+		buffer += data.data();
 
 		auto pos = buffer.find('\n');
 
 		if (pos != std::string::npos) {
-			duk::putProperty(ctx, -1, total++, clearCr(buffer.substr(0, pos)));
+			duk::putProperty(ctx, -1, i++, clearCr(buffer.substr(0, pos)));
 			buffer.erase(0, pos + 1);
 		}
 	}
@@ -292,7 +197,7 @@ duk::Ret methodLines(duk::ContextPtr ctx)
 
 	/* Missing '\n' in end of file */
 	if (!buffer.empty())
-		duk::putProperty(ctx, -1, total++, clearCr(buffer));
+		duk::putProperty(ctx, -1, i++, clearCr(buffer));
 
 	return 1;
 }
@@ -313,13 +218,33 @@ duk::Ret methodLines(duk::ContextPtr ctx)
 duk::Ret methodRead(duk::ContextPtr ctx)
 {
 	auto amount = duk::optional<int>(ctx, 0, -1);
-	auto self = duk::self<duk::Pointer<File>>(ctx);
+	auto file = duk::self<duk::Pointer<File>>(ctx);
 
-	if (amount == 0 || self->isClosed())
+	if (amount == 0 || file->handle() == nullptr)
 		return 0;
 
 	try {
-		duk::push(ctx, self->read(amount));
+		std::string data;
+		std::size_t total = 0;
+
+		if (amount < 0) {
+			std::array<char, 128> buffer;
+			std::size_t nread;
+
+			while ((nread = std::fread(&buffer[0], sizeof (buffer[0]), buffer.size(), file->handle())) > 0) {
+				data += std::string(buffer.data(), nread);
+				total += nread;
+			}
+		} else {
+			data.resize((std::size_t)amount);
+			total = std::fread(&data[0], sizeof (data[0]), (std::size_t)amount, file->handle());
+			data.resize(total);
+		}
+
+		if (std::ferror(file->handle()))
+			duk::raise(ctx, SystemError());
+
+		duk::push(ctx, std::string(data.data(), total));
 	} catch (const std::exception &) {
 		duk::raise(ctx, SystemError());
 	}
@@ -340,16 +265,19 @@ duk::Ret methodRead(duk::ContextPtr ctx)
  */
 duk::Ret methodReadline(duk::ContextPtr ctx)
 {
-	try {
-		auto file = duk::self<duk::Pointer<File>>(ctx);
+	std::FILE *fp = duk::self<duk::Pointer<File>>(ctx)->handle();
+	std::string result;
 
-		if (file->isClosed() || file->eof())
-			return 0;
+	if (fp == nullptr || std::feof(fp))
+		return 0;
 
-		duk::push(ctx, clearCr(file->readline()));
-	} catch (const std::exception &) {
+	for (int ch; (ch = std::fgetc(fp)) != EOF && ch != '\n'; )
+		result += (char)ch;
+
+	if (std::ferror(fp))
 		duk::raise(ctx, SystemError());
-	}
+
+	duk::push(ctx, clearCr(result));
 
 	return 1;
 }
@@ -387,16 +315,10 @@ duk::Ret methodSeek(duk::ContextPtr ctx)
 {
 	auto type = duk::require<int>(ctx, 0);
 	auto amount = duk::require<int>(ctx, 1);
-	auto file = duk::self<duk::Pointer<File>>(ctx);
+	auto fp = duk::self<duk::Pointer<File>>(ctx)->handle();
 
-	if (file->isClosed())
-		return 0;
-
-	try {
-		file->seek(amount, type);
-	} catch (const std::exception &) {
+	if (fp != nullptr && std::fseek(fp, amount, type) != 0)
 		duk::raise(ctx, SystemError());
-	}
 
 	return 0;
 }
@@ -419,13 +341,10 @@ duk::Ret methodStat(duk::ContextPtr ctx)
 	struct stat st;
 	auto file = duk::self<duk::Pointer<File>>(ctx);
 
-	if (file->isClosed())
-		return 0;
-
-	if (::stat(file->path().c_str(), &st) < 0)
+	if (file->handle() == nullptr && ::stat(file->path().c_str(), &st) < 0)
 		duk::raise(ctx, SystemError());
-
-	duk::push(ctx, st);
+	else
+		duk::push(ctx, st);
 
 	return 1;
 }
@@ -445,16 +364,16 @@ duk::Ret methodStat(duk::ContextPtr ctx)
  */
 duk::Ret methodTell(duk::ContextPtr ctx)
 {
-	auto file = duk::self<duk::Pointer<File>>(ctx);
+	auto fp = duk::self<duk::Pointer<File>>(ctx)->handle();
+	long pos;
 
-	if (file->isClosed())
+	if (fp == nullptr)
 		return 0;
 
-	try {
-		duk::push(ctx, static_cast<int>(file->tell()));
-	} catch (const std::exception &) {
+	if ((pos = std::ftell(fp)) == -1L)
 		duk::raise(ctx, SystemError());
-	}
+	else
+		duk::push(ctx, (int)pos);
 
 	return 1;
 }
@@ -467,23 +386,27 @@ duk::Ret methodTell(duk::ContextPtr ctx)
  *
  * Arguments:
  *   - data, the character to write.
+ * Returns:
+ *   The number of bytes written.
  * Throws:
  *   - Any exception on error.
  */
 duk::Ret methodWrite(duk::ContextPtr ctx)
 {
-	auto file = duk::self<duk::Pointer<File>>(ctx);
+	std::FILE *fp = duk::self<duk::Pointer<File>>(ctx)->handle();
+	std::string data = duk::require<std::string>(ctx, 0);
 
-	if (file->isClosed())
+	if (fp == nullptr)
 		return 0;
 
-	try {
-		file->write(duk::require<std::string>(ctx, 0));
-	} catch (const std::exception &) {
-		duk::raise(ctx, SystemError());
-	}
+	std::size_t nwritten = std::fwrite(data.c_str(), 1, data.length(), fp);
 
-	return 0;
+	if (std::ferror(fp))
+		duk::raise(ctx, SystemError());
+
+	duk::push(ctx, (int)nwritten);
+
+	return 1;
 }
 
 const duk::FunctionMap methods{
@@ -502,9 +425,10 @@ const duk::FunctionMap methods{
 	{ "write",	{ methodWrite,		1	} },
 };
 
-/* --------------------------------------------------------
+/*
  * File "static" functions
- * -------------------------------------------------------- */
+ * ------------------------------------------------------------------
+ */
 
 /*
  * Function: Irccd.File(path, mode) [constructor]
@@ -650,9 +574,9 @@ const duk::FunctionMap functions{
 };
 
 const duk::Map<int> constants{
-	{ "SeekCur",	static_cast<int>(std::fstream::cur)	},
-	{ "SeekEnd",	static_cast<int>(std::fstream::end)	},
-	{ "SeekSet",	static_cast<int>(std::fstream::beg)	},
+	{ "SeekCur",	SEEK_CUR },
+	{ "SeekEnd",	SEEK_END },
+	{ "SeekSet",	SEEK_SET },
 };
 
 } // !namespace

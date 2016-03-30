@@ -19,7 +19,13 @@
 #ifndef IRCCD_JS_FILE_H
 #define IRCCD_JS_FILE_H
 
+#include <cassert>
+#include <cerrno>
 #include <cstdio>
+#include <cstring>
+#include <functional>
+#include <stdexcept>
+#include <string>
 
 #include "js.h"
 
@@ -57,7 +63,13 @@ public:
 	 * @param mode the mode string (for std::fopen)
 	 * @throw std::runtime_error on failures
 	 */
-	File(std::string path, const std::string &mode);
+	inline File(std::string path, const std::string &mode)
+		: m_path(std::move(path))
+		, m_destructor([] (std::FILE *fp) { std::fclose(fp); })
+	{
+		if ((m_stream = std::fopen(m_path.c_str(), mode.c_str())) == nullptr)
+			throw std::runtime_error(std::strerror(errno));
+	}
 
 	/**
 	 * Construct a file from a already created FILE pointer (e.g. popen).
@@ -67,12 +79,20 @@ public:
 	 * @pre destructor must not be null
 	 * @param fp the file pointer
 	 */
-	File(std::FILE *fp, std::function<void (std::FILE *)> destructor) noexcept;
+	inline File(std::FILE *fp, std::function<void (std::FILE *)> destructor) noexcept
+		: m_stream(fp)
+		, m_destructor(std::move(destructor))
+	{
+		assert(m_destructor != nullptr);
+	}
 
 	/**
 	 * Closes the file.
 	 */
-	virtual ~File() noexcept;
+	virtual ~File() noexcept
+	{
+		close();
+	}
 
 	/**
 	 * Get the path.
@@ -85,6 +105,11 @@ public:
 		return m_path;
 	}
 
+	/**
+	 * Get the handle.
+	 *
+	 * @return the handle or nullptr if the stream was closed
+	 */
 	inline std::FILE *handle() noexcept
 	{
 		return m_stream;
@@ -93,66 +118,13 @@ public:
 	/**
 	 * Force close, can be safely called multiple times.
 	 */
-	void close() noexcept;
-
-	/**
-	 * Tells if the file was closed.
-	 *
-	 * @return true if closed
-	 */
-	bool isClosed() noexcept;
-
-	/**
-	 * std::fseek wrapper.
-	 *
-	 * @param offset the offset
-	 * @param origin the origin (SEEK_SET, *)
-	 * @throw std::runtime_error on failure
-	 */
-	void seek(long offset, long origin);
-
-	/**
-	 * std::ftell wrapper.
-	 *
-	 * @return the position
-	 * @throw std::runtime_error on failure
-	 */
-	unsigned tell();
-
-	/**
-	 * Read until the next line and discards the \\n character.
-	 *
-	 * @return the next line or empty if EOF
-	 * @throw std::runtime_error on failure
-	 */
-	std::string readline();
-
-	/**
-	 * Read the specified amount of characters.
-	 *
-	 * If amount is less than 0, the maximum is read.
-	 *
-	 * @pre amount != 0
-	 * @param amount the number of characters to read
-	 * @return the read string
-	 * @throw std::runtime_error on failure
-	 */
-	std::string read(int amount = -1);
-
-	/**
-	 * Write the string to the file.
-	 *
-	 * @param data the data to write
-	 * @throw std::runtime_error on failure
-	 */
-	void write(const std::string &data);
-
-	/**
-	 * Check if the file reached the end.
-	 *
-	 * @return true if eof
-	 */
-	bool eof() const noexcept;
+	inline void close() noexcept
+	{
+		if (m_stream) {
+			m_destructor(m_stream);
+			m_stream = nullptr;
+		}
+	}
 };
 
 namespace duk {
