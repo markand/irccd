@@ -46,6 +46,10 @@ if (WITH_IPV6)
 	list(APPEND FLAGS "ENABLE_IPV6")
 endif ()
 
+if (WIN32)
+	list(APPEND LIBRARIES ws2_32)
+endif ()
+
 irccd_define_library(
 	LOCAL
 	TARGET extern-ircclient

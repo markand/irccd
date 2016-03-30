@@ -39,8 +39,7 @@ elseif (IRCCD_SYSTEM_MAC)
 	list(APPEND LIBRARIES resolv)
 endif ()
 
-target_link_libraries(libirccd PRIVATE extern-duktape extern-ircclient extern-jansson)
-target_link_libraries(libirccd ${LIBRARIES})
+target_link_libraries(libirccd extern-duktape extern-ircclient extern-jansson ${LIBRARIES})
 
 set_target_properties(
 	libirccd
@@ -53,49 +52,49 @@ set_target_properties(
 
 install(
 	TARGETS libirccd
-	EXPORT Irccd2Targets
+#	EXPORT Irccd2Targets
 	RUNTIME DESTINATION bin
 	LIBRARY DESTINATION lib
 	ARCHIVE DESTINATION lib
 )
 
-# CMake target exports.
-export(
-	EXPORT Irccd2Targets
-	FILE "${CMAKE_BINARY_DIR}/Irccd2Targets.cmake"
-	NAMESPACE Irccd2::
-)
+# # CMake target exports.
+# export(
+# 	EXPORT Irccd2Targets
+# 	FILE "${CMAKE_BINARY_DIR}/Irccd2Targets.cmake"
+# 	NAMESPACE Irccd2::
+# )
 
 # CMake version file.
-include(CMakePackageConfigHelpers)
+# include(CMakePackageConfigHelpers)
 
-write_basic_package_version_file(
-	"${CMAKE_CURRENT_BINARY_DIR}/Irccd2ConfigVersion.cmake"
-	VERSION ${IRCCD_VERSION}
-	COMPATIBILITY AnyNewerVersion
-)
+# write_basic_package_version_file(
+# 	"${CMAKE_CURRENT_BINARY_DIR}/Irccd2ConfigVersion.cmake"
+# 	VERSION ${IRCCD_VERSION}
+# 	COMPATIBILITY AnyNewerVersion
+# )
 
 # Irccd main module file.
-configure_file(
-	"${CMAKE_SOURCE_DIR}/cmake/internal/Irccd2Config.cmake.in"
-	"${CMAKE_BINARY_DIR}/Irccd2Config.cmake"
-	COPYONLY
-)
+# configure_file(
+# 	"${CMAKE_SOURCE_DIR}/cmake/internal/Irccd2Config.cmake.in"
+# 	"${CMAKE_BINARY_DIR}/Irccd2Config.cmake"
+# 	COPYONLY
+# )
 
 # Install all CMake stuff.
-install(
-	EXPORT Irccd2Targets
-	FILE Irccd2Targets.cmake
-	NAMESPACE Irccd2::
-	DESTINATION ${WITH_CMAKEDIR}/Irccd2
-)
-
-install(
-	FILES
-		"${CMAKE_BINARY_DIR}/Irccd2Config.cmake"
-		"${CMAKE_BINARY_DIR}/Irccd2ConfigVersion.cmake"
-	DESTINATION ${WITH_CMAKEDIR}/Irccd2
-)
+# install(
+# 	EXPORT Irccd2Targets
+# 	FILE Irccd2Targets.cmake
+# 	NAMESPACE Irccd2::
+# 	DESTINATION ${WITH_CMAKEDIR}/Irccd2
+# )
+# 
+# install(
+# 	FILES
+# 		"${CMAKE_BINARY_DIR}/Irccd2Config.cmake"
+# 		"${CMAKE_BINARY_DIR}/Irccd2ConfigVersion.cmake"
+# 	DESTINATION ${WITH_CMAKEDIR}/Irccd2
+# )
 
 # pkg-config
 if (WITH_PKGCONFIG)
