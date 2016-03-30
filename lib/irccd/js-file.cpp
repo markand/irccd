@@ -200,6 +200,15 @@ namespace {
  * File methods
  * -------------------------------------------------------- */
 
+/* Remove trailing \r for CRLF line style */
+inline std::string clearCr(std::string input)
+{
+	if (input.length() > 0 && input.back() == '\r')
+		input.pop_back();
+
+	return input;
+}
+
 /*
  * Method: File.basename()
  * --------------------------------------------------------
@@ -241,6 +250,49 @@ duk::Ret methodClose(duk::ContextPtr ctx)
 duk::Ret methodDirname(duk::ContextPtr ctx)
 {
 	duk::push(ctx, fs::dirName(duk::self<duk::Pointer<File>>(ctx)->path()));
+
+	return 1;
+}
+
+/*
+ * Method: File.lines()
+ * --------------------------------------------------------
+ *
+ * Read all lines and return an array.
+ *
+ * Returns:
+ *   An array with all lines.
+ * Throws
+ *   - Any exception on error.
+ */
+duk::Ret methodLines(duk::ContextPtr ctx)
+{
+	duk::push(ctx, duk::Array{});
+
+	std::FILE *fp = duk::self<duk::Pointer<File>>(ctx)->handle();
+	std::string buffer;
+
+	char data[128];
+	int total = 0;
+
+	while (std::fgets(data, sizeof (data), fp) != nullptr) {
+		buffer += data;
+
+		auto pos = buffer.find('\n');
+
+		if (pos != std::string::npos) {
+			duk::putProperty(ctx, -1, total++, clearCr(buffer.substr(0, pos)));
+			buffer.erase(0, pos + 1);
+		}
+	}
+
+	/* Maybe an error in the stream */
+	if (std::ferror(fp))
+		duk::raise(ctx, SystemError());
+
+	/* Missing '\n' in end of file */
+	if (!buffer.empty())
+		duk::putProperty(ctx, -1, total++, clearCr(buffer));
 
 	return 1;
 }
@@ -294,7 +346,7 @@ duk::Ret methodReadline(duk::ContextPtr ctx)
 		if (file->isClosed() || file->eof())
 			return 0;
 
-		duk::push(ctx, file->readline());
+		duk::push(ctx, clearCr(file->readline()));
 	} catch (const std::exception &) {
 		duk::raise(ctx, SystemError());
 	}
@@ -438,6 +490,7 @@ const duk::FunctionMap methods{
 	{ "basename",	{ methodBasename,	0	} },
 	{ "close",	{ methodClose,		0	} },
 	{ "dirname",	{ methodDirname,	0	} },
+	{ "lines",	{ methodLines,		0	} },
 	{ "read",	{ methodRead,		1	} },
 	{ "readline",	{ methodReadline,	0	} },
 	{ "remove",	{ methodRemove,		0	} },

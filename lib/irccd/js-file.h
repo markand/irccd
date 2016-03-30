@@ -85,6 +85,11 @@ public:
 		return m_path;
 	}
 
+	inline std::FILE *handle() noexcept
+	{
+		return m_stream;
+	}
+
 	/**
 	 * Force close, can be safely called multiple times.
 	 */

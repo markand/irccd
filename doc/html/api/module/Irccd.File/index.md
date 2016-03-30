@@ -37,6 +37,7 @@ The following properties are defined:
   - [basename](method/basename.html)
   - [close](method/close.html)
   - [dirname](method/dirname.html)
+  - [lines](method/lines.html)
   - [read](method/read.html)
   - [readline](method/readline.html)
   - [remove](method/remove.html)

@@ -213,6 +213,31 @@ TEST(TestJsFile, methodDirnameClosed)
 	}
 }
 
+TEST(TestJsFile, methodLines)
+{
+	duk::Context ctx;
+
+	loadJsIrccd(ctx);
+	loadJsFile(ctx);
+
+	try {
+		duk::putGlobal(ctx, "directory", IRCCD_TESTS_DIRECTORY);
+
+		auto ret = duk::pevalString(ctx,
+			"lines = new Irccd.File(directory + '/lines.txt', 'r').lines();"
+		);
+
+		if (ret != 0)
+			throw duk::error(ctx, -1);
+
+		std::vector<std::string> expected{"a", "b", "c"};
+
+		ASSERT_EQ(expected, duk::getGlobal<std::vector<std::string>>(ctx, "lines"));
+	} catch (const std::exception &ex) {
+		FAIL() << ex.what();
+	}
+}
+
 TEST(TestJsFile, methodSeek1)
 {
 	duk::Context ctx;

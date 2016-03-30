@@ -28,6 +28,7 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/method/close.md
 	${CMAKE_CURRENT_LIST_DIR}/method/constructor.md
 	${CMAKE_CURRENT_LIST_DIR}/method/dirname.md
+	${CMAKE_CURRENT_LIST_DIR}/method/lines.md
 	${CMAKE_CURRENT_LIST_DIR}/method/read.md
 	${CMAKE_CURRENT_LIST_DIR}/method/readline.md
 	${CMAKE_CURRENT_LIST_DIR}/method/remove.md
