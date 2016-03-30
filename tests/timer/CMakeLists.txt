@@ -18,9 +18,6 @@
 
 irccd_define_test(
 	NAME timer
-	SOURCES
-		${irccd_SOURCE_DIR}/timer.cpp
-		${irccd_SOURCE_DIR}/timer.h
-		main.cpp
-	LIBRARIES common
+	SOURCES main.cpp
+	LIBRARIES libirccd
 )

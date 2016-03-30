@@ -23,7 +23,7 @@
 #include <memory>
 #include <unordered_map>
 
-#include "command/command.h"
+#include "command.h"
 
 namespace irccd {
 

@@ -24,10 +24,9 @@
 #include <memory>
 #include <string>
 
-#include "private/connection.h"
-
 #include "alias.h"
 #include "application.h"
+#include "connection.h"
 #include "options.h"
 
 namespace irccd {

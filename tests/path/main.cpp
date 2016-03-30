@@ -20,8 +20,8 @@
 
 #include <irccd-config.h>
 
-#include <logger.h>
-#include <path.h>
+#include <irccd/logger.h>
+#include <irccd/path.h>
 
 namespace irccd {
 

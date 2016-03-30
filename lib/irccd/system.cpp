@@ -67,8 +67,7 @@
 #  include <pwd.h>
 #endif
 
-#include "private/filesystem.h"
-
+#include "filesystem.h"
 #include "logger.h"
 #include "system.h"
 #include "util.h"

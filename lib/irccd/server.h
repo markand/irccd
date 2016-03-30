@@ -34,10 +34,9 @@
 
 #include <irccd-config.h>
 
-#include <irccd/private/signals.h>
-
 #include "logger.h"
 #include "server-state.h"
+#include "signals.h"
 
 namespace irccd {
 

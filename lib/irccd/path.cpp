@@ -53,10 +53,10 @@
 #    include <libproc.h>
 #  endif
 
-#  include "private/xdg.h"
+#  include "xdg.h"
 #endif
 
-#include "private/filesystem.h"
+#include "filesystem.h"
 #include "path.h"
 #include "system.h"
 #include "util.h"

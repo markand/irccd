@@ -24,13 +24,8 @@
 #include <libirc_rfcnumeric.h>
 
 #include "logger.h"
-#include "util.h"
-
 #include "server.h"
-
-#if defined(WITH_JS)
-#  include "js/js.h"
-#endif
+#include "util.h"
 
 namespace irccd {
 
@@ -435,14 +430,5 @@ void Server::sync(fd_set &setinput, fd_set &setoutput) noexcept
 	/* 2. Read data */
 	irc_process_select_descriptors(m_session.get(), &setinput, &setoutput);
 }
-
-#if defined(WITH_JS)
-
-void Server::prototype(js::Context &ctx)
-{
-	ctx.getGlobal<void>("\xff""\xff""Server-proto");
-}
-
-#endif
 
 } // !irccd

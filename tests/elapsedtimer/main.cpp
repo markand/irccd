@@ -20,7 +20,7 @@
 
 #include <gtest/gtest.h>
 
-#include <elapsed-timer.h>
+#include <irccd/elapsed-timer.h>
 
 using namespace irccd;
 using namespace std::chrono_literals;

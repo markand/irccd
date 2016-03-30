@@ -20,22 +20,23 @@
 
 #include <gtest/gtest.h>
 
-#include <js-file.h>
-#include <js-irccd.h>
+#include <irccd/js-file.h>
+#include <irccd/js-irccd.h>
 
 using namespace irccd;
 
 TEST(TestJsFile, functionBasename)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsFile(ctx);
 
 	try {
-		ctx.peval(js::Script{"result = Irccd.File.basename('/usr/local/etc/irccd.conf');"});
+		if (duk::pevalString(ctx, "result = Irccd.File.basename('/usr/local/etc/irccd.conf');") != 0)
+			throw duk::error(ctx, -1);
 
-		ASSERT_EQ("irccd.conf", ctx.getGlobal<std::string>("result"));
+		ASSERT_EQ("irccd.conf", duk::getGlobal<std::string>(ctx, "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -43,15 +44,15 @@ TEST(TestJsFile, functionBasename)
 
 TEST(TestJsFile, functionDirname)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsFile(ctx);
 
 	try {
-		ctx.peval(js::Script{"result = Irccd.File.dirname('/usr/local/etc/irccd.conf');"});
+		duk::pevalString(ctx, "result = Irccd.File.dirname('/usr/local/etc/irccd.conf');");
 
-		ASSERT_EQ("/usr/local/etc", ctx.getGlobal<std::string>("result"));
+		ASSERT_EQ("/usr/local/etc", duk::getGlobal<std::string>(ctx,"result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -59,16 +60,16 @@ TEST(TestJsFile, functionDirname)
 
 TEST(TestJsFile, functionExists)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsFile(ctx);
 
 	try {
-		ctx.putGlobal("directory", IRCCD_TESTS_DIRECTORY);
-		ctx.peval(js::Script{"result = Irccd.File.exists(directory + '/file.txt')"});
+		duk::putGlobal(ctx, "directory", IRCCD_TESTS_DIRECTORY);
+		duk::pevalString(ctx, "result = Irccd.File.exists(directory + '/file.txt')");
 
-		ASSERT_TRUE(ctx.getGlobal<bool>("result"));
+		ASSERT_TRUE(duk::getGlobal<bool>(ctx,"result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -76,15 +77,15 @@ TEST(TestJsFile, functionExists)
 
 TEST(TestJsFile, functionExists2)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsFile(ctx);
 
 	try {
-		ctx.peval(js::Script{"result = Irccd.File.exists('file_which_does_not_exist.txt')"});
+		duk::pevalString(ctx, "result = Irccd.File.exists('file_which_does_not_exist.txt')");
 
-		ASSERT_FALSE(ctx.getGlobal<bool>("result"));
+		ASSERT_FALSE(duk::getGlobal<bool>(ctx,"result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -97,13 +98,14 @@ TEST(TestJsFile, functionRemove)
 		std::ofstream out("test-js-fs.remove");
 	}
 
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsFile(ctx);
 
 	try {
-		ctx.peval(js::Script{"Irccd.File.remove('test-js-fs.remove');"});
+		if (duk::pevalString(ctx, "Irccd.File.remove('test-js-fs.remove');") != 0)
+			throw duk::error(ctx, -1);
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -115,19 +117,23 @@ TEST(TestJsFile, functionRemove)
 
 TEST(TestJsFile, methodBasename)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsFile(ctx);
 
 	try {
-		ctx.putGlobal("directory", IRCCD_TESTS_DIRECTORY);
-		ctx.peval(js::Script{
+		duk::putGlobal(ctx,"directory", IRCCD_TESTS_DIRECTORY);
+
+		auto ret = duk::pevalString(ctx,
 			"f = new Irccd.File(directory + '/level-1/file-1.txt', 'r');"
 			"result = f.basename();"
-		});
+		);
 
-		ASSERT_EQ("file-1.txt", ctx.getGlobal<std::string>("result"));
+		if (ret != 0)
+			throw duk::error(ctx, -1);
+
+		ASSERT_EQ("file-1.txt", duk::getGlobal<std::string>(ctx,"result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -135,20 +141,24 @@ TEST(TestJsFile, methodBasename)
 
 TEST(TestJsFile, methodBasenameClosed)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsFile(ctx);
 
 	try {
-		ctx.putGlobal("directory", IRCCD_TESTS_DIRECTORY);
-		ctx.peval(js::Script{
+		duk::putGlobal(ctx,"directory", IRCCD_TESTS_DIRECTORY);
+
+		auto ret = duk::pevalString(ctx,
 			"f = new Irccd.File(directory + '/level-1/file-1.txt', 'r');"
 			"f.close();"
 			"result = f.basename();"
-		});
+		);
 
-		ASSERT_EQ("file-1.txt", ctx.getGlobal<std::string>("result"));
+		if (ret != 0)
+			throw duk::error(ctx, -1);
+
+		ASSERT_EQ("file-1.txt", duk::getGlobal<std::string>(ctx,"result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -156,19 +166,23 @@ TEST(TestJsFile, methodBasenameClosed)
 
 TEST(TestJsFile, methodDirname)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsFile(ctx);
 
 	try {
-		ctx.putGlobal("directory", IRCCD_TESTS_DIRECTORY);
-		ctx.peval(js::Script{
+		duk::putGlobal(ctx,"directory", IRCCD_TESTS_DIRECTORY);
+
+		auto ret = duk::pevalString(ctx,
 			"f = new Irccd.File(directory + '/level-1/file-1.txt', 'r');"
 			"result = f.dirname();"
-		});
+		);
 
-		ASSERT_EQ(std::string{IRCCD_TESTS_DIRECTORY "/level-1"}, ctx.getGlobal<std::string>("result"));
+		if (ret != 0)
+			throw duk::error(ctx, -1);
+
+		ASSERT_EQ(std::string{IRCCD_TESTS_DIRECTORY "/level-1"}, duk::getGlobal<std::string>(ctx, "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -176,20 +190,24 @@ TEST(TestJsFile, methodDirname)
 
 TEST(TestJsFile, methodDirnameClosed)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsFile(ctx);
 
 	try {
-		ctx.putGlobal("directory", IRCCD_TESTS_DIRECTORY);
-		ctx.peval(js::Script{
+		duk::putGlobal(ctx, "directory", IRCCD_TESTS_DIRECTORY);
+
+		auto ret = duk::pevalString(ctx,
 			"f = new Irccd.File(directory + '/level-1/file-1.txt', 'r');"
 			"f.close();"
 			"result = f.dirname();"
-		});
+		);
 
-		ASSERT_EQ(std::string{IRCCD_TESTS_DIRECTORY "/level-1"}, ctx.getGlobal<std::string>("result"));
+		if (ret != 0)
+			throw duk::error(ctx, -1);
+
+		ASSERT_EQ(std::string{IRCCD_TESTS_DIRECTORY "/level-1"}, duk::getGlobal<std::string>(ctx, "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -197,20 +215,24 @@ TEST(TestJsFile, methodDirnameClosed)
 
 TEST(TestJsFile, methodSeek1)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsFile(ctx);
 
 	try {
-		ctx.putGlobal("directory", IRCCD_TESTS_DIRECTORY);
-		ctx.peval(js::Script{
+		duk::putGlobal(ctx, "directory", IRCCD_TESTS_DIRECTORY);
+
+		auto ret = duk::pevalString(ctx,
 			"f = new Irccd.File(directory + '/file.txt', 'r');"
 			"f.seek(Irccd.File.SeekSet, 4);"
 			"result = f.read(1);"
-		});
+		);
 
-		ASSERT_EQ(".", ctx.getGlobal<std::string>("result"));
+		if (ret != 0)
+			throw duk::error(ctx, -1);
+
+		ASSERT_EQ(".", duk::getGlobal<std::string>(ctx, "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -219,22 +241,27 @@ TEST(TestJsFile, methodSeek1)
 
 TEST(TestJsFile, methodSeek1Closed)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsFile(ctx);
 
 	try {
-		ctx.putGlobal("directory", IRCCD_TESTS_DIRECTORY);
-		ctx.peval(js::Script{
+		duk::putGlobal(ctx, "directory", IRCCD_TESTS_DIRECTORY);
+
+		auto ret = duk::pevalString(ctx,
 			"f = new Irccd.File(directory + '/file.txt', 'r');"
 			"f.close();"
 			"f.seek(Irccd.File.SeekSet, 4);"
 			"result = f.read(1);"
 			"result = typeof (result) === \"undefined\";"
-		});
+		);
 
-		ASSERT_TRUE(ctx.getGlobal<bool>("result"));
+
+		if (ret != 0)
+			throw duk::error(ctx, -1);
+
+		ASSERT_TRUE(duk::getGlobal<bool>(ctx, "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -242,21 +269,26 @@ TEST(TestJsFile, methodSeek1Closed)
 
 TEST(TestJsFile, methodSeek2)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsFile(ctx);
 
 	try {
-		ctx.putGlobal("directory", IRCCD_TESTS_DIRECTORY);
-		ctx.peval(js::Script{
+		duk::putGlobal(ctx, "directory", IRCCD_TESTS_DIRECTORY);
+
+		auto ret = duk::pevalString(ctx,
 			"f = new Irccd.File(directory + '/file.txt', 'r');"
 			"f.seek(Irccd.File.SeekSet, 2);"
 			"f.seek(Irccd.File.SeekCur, 2);"
 			"result = f.read(1);"
-		});
+		);
 
-		ASSERT_EQ(".", ctx.getGlobal<std::string>("result"));
+
+		if (ret != 0)
+			throw duk::error(ctx, -1);
+
+		ASSERT_EQ(".", duk::getGlobal<std::string>(ctx, "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -264,23 +296,28 @@ TEST(TestJsFile, methodSeek2)
 
 TEST(TestJsFile, methodSeek2Closed)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsFile(ctx);
 
 	try {
-		ctx.putGlobal("directory", IRCCD_TESTS_DIRECTORY);
-		ctx.peval(js::Script{
+		duk::putGlobal(ctx, "directory", IRCCD_TESTS_DIRECTORY);
+
+		auto ret = duk::pevalString(ctx,
 			"f = new Irccd.File(directory + '/file.txt', 'r');"
 			"f.close();"
 			"f.seek(Irccd.File.SeekSet, 2);"
 			"f.seek(Irccd.File.SeekCur, 2);"
 			"result = f.read(1);"
 			"result = typeof (result) === \"undefined\";"
-		});
+		);
 
-		ASSERT_TRUE(ctx.getGlobal<bool>("result"));
+
+		if (ret != 0)
+			throw duk::error(ctx, -1);
+
+		ASSERT_TRUE(duk::getGlobal<bool>(ctx, "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -288,20 +325,25 @@ TEST(TestJsFile, methodSeek2Closed)
 
 TEST(TestJsFile, methodSeek3)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsFile(ctx);
 
 	try {
-		ctx.putGlobal("directory", IRCCD_TESTS_DIRECTORY);
-		ctx.peval(js::Script{
+		duk::putGlobal(ctx, "directory", IRCCD_TESTS_DIRECTORY);
+
+		auto ret = duk::pevalString(ctx,
 			"f = new Irccd.File(directory + '/file.txt', 'r');"
 			"f.seek(Irccd.File.SeekEnd, -2);"
 			"result = f.read(1);"
-		});
+		);
 
-		ASSERT_EQ("x", ctx.getGlobal<std::string>("result"));
+
+		if (ret != 0)
+			throw duk::error(ctx, -1);
+
+		ASSERT_EQ("x", duk::getGlobal<std::string>(ctx, "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -309,22 +351,27 @@ TEST(TestJsFile, methodSeek3)
 
 TEST(TestJsFile, methodSeek3Closed)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsFile(ctx);
 
 	try {
-		ctx.putGlobal("directory", IRCCD_TESTS_DIRECTORY);
-		ctx.peval(js::Script{
+		duk::putGlobal(ctx, "directory", IRCCD_TESTS_DIRECTORY);
+
+		auto ret = duk::pevalString(ctx,
 			"f = new Irccd.File(directory + '/file.txt', 'r');"
 			"f.close();"
 			"f.seek(Irccd.File.SeekEnd, -2);"
 			"result = f.read(1);"
 			"result = typeof (result) === \"undefined\";"
-		});
+		);
 
-		ASSERT_TRUE(ctx.getGlobal<bool>("result"));
+
+		if (ret != 0)
+			throw duk::error(ctx, -1);
+
+		ASSERT_TRUE(duk::getGlobal<bool>(ctx, "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -332,24 +379,28 @@ TEST(TestJsFile, methodSeek3Closed)
 
 TEST(TestJsFile, methodReadline)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsFile(ctx);
 
 	try {
-		ctx.putGlobal("directory", IRCCD_TESTS_DIRECTORY);
-		ctx.peval(js::Script{
+		duk::putGlobal(ctx, "directory", IRCCD_TESTS_DIRECTORY);
+
+		auto ret = duk::pevalString(ctx,
 			"lines = [];"
 			"f = new Irccd.File(directory + '/lines.txt', 'r');"
 			"for (var s; s = f.readline(); ) {"
 			"  lines.push(s);"
 			"}"
-		});
+		);
+
+		if (ret != 0)
+			throw duk::error(ctx, -1);
 
 		std::vector<std::string> expected{"a", "b", "c"};
 
-		ASSERT_EQ(expected, ctx.getGlobal<std::vector<std::string>>("lines"));
+		ASSERT_EQ(expected, duk::getGlobal<std::vector<std::string>>(ctx, "lines"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -357,25 +408,29 @@ TEST(TestJsFile, methodReadline)
 
 TEST(TestJsFile, methodReadlineClosed)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsFile(ctx);
 
 	try {
-		ctx.putGlobal("directory", IRCCD_TESTS_DIRECTORY);
-		ctx.peval(js::Script{
+		duk::putGlobal(ctx, "directory", IRCCD_TESTS_DIRECTORY);
+
+		auto ret = duk::pevalString(ctx,
 			"lines = [];"
 			"f = new Irccd.File(directory + '/lines.txt', 'r');"
 			"f.close();"
 			"for (var s; s = f.readline(); ) {"
 			"  lines.push(s);"
 			"}"
-		});
+		);
+
+		if (ret != 0)
+			throw duk::error(ctx, -1);
 
 		std::vector<std::string> expected;
 
-		ASSERT_EQ(expected, ctx.getGlobal<std::vector<std::string>>("lines"));
+		ASSERT_EQ(expected, duk::getGlobal<std::vector<std::string>>(ctx, "lines"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}

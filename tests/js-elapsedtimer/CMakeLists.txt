@@ -18,14 +18,7 @@
 
 irccd_define_test(
 	NAME js-elapsedtimer
-	SOURCES
-		${irccd_SOURCE_DIR}/js.cpp
-		${irccd_SOURCE_DIR}/js.cpp
-		${irccd_SOURCE_DIR}/js-irccd.cpp
-		${irccd_SOURCE_DIR}/js-irccd.h
-		${irccd_SOURCE_DIR}/js-elapsed-timer.cpp
-		${irccd_SOURCE_DIR}/js-elapsed-timer.h
-		main.cpp
-	LIBRARIES common extern-duktape
+	SOURCES main.cpp
+	LIBRARIES libirccd
 )
 

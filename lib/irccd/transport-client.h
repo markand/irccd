@@ -29,10 +29,9 @@
 #include <stdexcept>
 #include <string>
 
-#include <irccd/private/signals.h>
-#include <irccd/private/sockets.h>
-
 #include "server.h"
+#include "signals.h"
+#include "sockets.h"
 
 namespace irccd {
 

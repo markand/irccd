@@ -28,8 +28,8 @@
 #include <string>
 
 #include <irccd-config.h>
-#include <irccd/private/sockets.h>
 
+#include "sockets.h"
 #include "transport-client.h"
 
 namespace irccd {

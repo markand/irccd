@@ -25,19 +25,17 @@
 
 #include <irccd-config.h>
 
-#include <irccd/private/elapsed-timer.h>
-#include <irccd/private/filesystem.h>
-#include <irccd/private/ini.h>
-#include <irccd/private/sockets.h>
-
-#include <irccd/json.h>
-#include <irccd/logger.h>
-#include <irccd/options.h>
-#include <irccd/path.h>
-#include <irccd/system.h>
-#include <irccd/util.h>
-
+#include "elapsed-timer.h"
+#include "filesystem.h"
+#include "ini.h"
 #include "irccdctl.h"
+#include "json.h"
+#include "logger.h"
+#include "options.h"
+#include "path.h"
+#include "sockets.h"
+#include "system.h"
+#include "util.h"
 
 namespace irccd {
 

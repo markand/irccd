@@ -18,8 +18,8 @@
 
 #include <gtest/gtest.h>
 
-#include <util.h>
-#include <system.h>
+#include <irccd/util.h>
+#include <irccd/system.h>
 
 namespace irccd {
 

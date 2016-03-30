@@ -18,13 +18,6 @@
 
 irccd_define_test(
 	NAME js-util
-	SOURCES
-		${irccd_SOURCE_DIR}/js.cpp
-		${irccd_SOURCE_DIR}/js.cpp
-		${irccd_SOURCE_DIR}/js-irccd.cpp
-		${irccd_SOURCE_DIR}/js-irccd.h
-		${irccd_SOURCE_DIR}/js-util.cpp
-		${irccd_SOURCE_DIR}/js-util.h
-		main.cpp
-	LIBRARIES common extern-duktape extern-ircclient
+	SOURCES main.cpp
+	LIBRARIES libirccd
 )

@@ -109,6 +109,7 @@ set(WITH_TEST_IRCPORT 6667 CACHE STRING "IRC port for test")
 set(WITH_BINDIR "bin" CACHE STRING "Binary directory")
 set(WITH_MANDIR "share/man" CACHE STRING "Man directory")
 set(WITH_CONFDIR "etc" CACHE STRING "Configuration directory")
+set(WITH_CMAKEDIR "lib/cmake" CACHE STRING "Directory for CMake modules")
 set(WITH_PKGCONFIGDIR "lib/pkgconfig" CACHE STRING "Directory for pkg-config file")
 
 #

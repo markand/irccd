@@ -30,7 +30,7 @@
 #include <mutex>
 #include <thread>
 
-#include <irccd/private/signals.h>
+#include "signals.h"
 
 namespace irccd {
 
@@ -124,7 +124,6 @@ public:
 	/**
 	 * Stop the timer, may be used by the user to stop it.
 	 *
-	 * @pre isRunning() must return true
 	 * @note Thread-safe
 	 */
 	void stop();

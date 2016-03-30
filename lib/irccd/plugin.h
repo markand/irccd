@@ -30,11 +30,9 @@
 #include <unordered_set>
 #include <vector>
 
-#include <irccd/path.h>
-#include <irccd/private/signals.h>
-
-#include "js/js.h"
-
+#include "js.h"
+#include "path.h"
+#include "signals.h"
 #include "timer.h"
 
 namespace irccd {
@@ -102,7 +100,7 @@ public:
 
 private:
 	/* JavaScript context */
-	js::Context m_context;
+	duk::Context m_context;
 
 	/* Plugin info and its timers */
 	PluginInfo m_info;
@@ -125,6 +123,11 @@ public:
 	 * @throws std::runtime_error on errors
 	 */
 	Plugin(std::string name, std::string path, const PluginConfig &config = PluginConfig());
+
+	/**
+	 * Temporary, close all timers.
+	 */
+	~Plugin();
 
 	/**
 	 * Get the plugin information.
@@ -150,7 +153,7 @@ public:
 	 *
 	 * @return the context
 	 */
-	inline js::Context &context() noexcept
+	inline duk::Context &context() noexcept
 	{
 		return m_context;
 	}
@@ -342,15 +345,15 @@ public:
 	void onWhois(std::shared_ptr<Server> server, ServerWhois info);
 };
 
-namespace js {
+namespace duk {
 
 template <>
-class TypeInfo<PluginInfo> {
+class TypeTraits<irccd::PluginInfo> {
 public:
-	static void push(Context &ctx, const PluginInfo &info);
+	static void push(ContextPtr ctx, const irccd::PluginInfo &info);
 };
 
-} // !js
+} // !duk
 
 } // !irccd
 

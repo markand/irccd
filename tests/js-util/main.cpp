@@ -18,23 +18,25 @@
 
 #include <gtest/gtest.h>
 
-#include <js-irccd.h>
-#include <js-util.h>
+#include <irccd/js-irccd.h>
+#include <irccd/js-util.h>
 
 using namespace irccd;
 
 TEST(TestJsUtil, formatSimple)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsUtil(ctx);
 
 	try {
-		ctx.peval(js::Script{
+		auto ret = duk::pevalString(ctx,
 			"result = Irccd.Util.format(\"#{target}\", { target: \"markand\" })"
-		});
+		);
 
+		if (ret != 0)
+			throw duk::error(ctx, -1);
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -42,15 +44,16 @@ TEST(TestJsUtil, formatSimple)
 
 TEST(TestJsUtil, splituser)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsUtil(ctx);
 
 	try {
-		ctx.peval(js::Script{"result = Irccd.Util.splituser(\"user!~user@hyper/super/host\");"});
+		if (duk::pevalString(ctx, "result = Irccd.Util.splituser(\"user!~user@hyper/super/host\");") != 0)
+			throw duk::error(ctx, -1);
 
-		ASSERT_EQ("user", ctx.getGlobal<std::string>("result"));
+		ASSERT_EQ("user", duk::getGlobal<std::string>(ctx, "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -58,15 +61,16 @@ TEST(TestJsUtil, splituser)
 
 TEST(TestJsUtil, splithost)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsUtil(ctx);
 
 	try {
-		ctx.peval(js::Script{"result = Irccd.Util.splithost(\"user!~user@hyper/super/host\");"});
+		if (duk::pevalString(ctx, "result = Irccd.Util.splithost(\"user!~user@hyper/super/host\");") != 0)
+			throw duk::error(ctx, -1);
 
-		ASSERT_EQ("!~user@hyper/super/host", ctx.getGlobal<std::string>("result"));
+		ASSERT_EQ("!~user@hyper/super/host", duk::getGlobal<std::string>(ctx, "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}

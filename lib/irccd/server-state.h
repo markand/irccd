@@ -21,8 +21,8 @@
 
 #include <irccd-config.h>
 
-#include <irccd/private/elapsed-timer.h>
-#include <irccd/private/sockets.h>
+#include "elapsed-timer.h"
+#include "sockets.h"
 
 namespace irccd {
 

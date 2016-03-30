@@ -18,24 +18,23 @@
 
 #include <gtest/gtest.h>
 
-#include <system.h>
-
-#include <js-irccd.h>
-#include <js-system.h>
+#include <irccd/js-irccd.h>
+#include <irccd/js-system.h>
+#include <irccd/system.h>
 
 using namespace irccd;
 
 TEST(TestJsSystem, home)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsSystem(ctx);
 
 	try {
-		ctx.peval(js::Script{"result = Irccd.System.home();"});
+		duk::pevalString(ctx, "result = Irccd.System.home();");
 
-		ASSERT_EQ(sys::home(), ctx.getGlobal<std::string>("result"));
+		ASSERT_EQ(sys::home(), duk::getGlobal<std::string>(ctx, "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}

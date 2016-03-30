@@ -29,7 +29,7 @@
 
 #include <irccd-config.h>
 
-#include <irccd/private/sockets.h>
+#include "sockets.h"
 
 #if defined(WITH_JS)
 #  include "plugin.h"

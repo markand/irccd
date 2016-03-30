@@ -19,9 +19,8 @@
 #include <algorithm>
 #include <stdexcept>
 
-#include "private/filesystem.h"
-
 #include "irccd.h"
+#include "filesystem.h"
 #include "logger.h"
 #include "path.h"
 #include "util.h"
@@ -698,7 +697,7 @@ void Irccd::postServerEvent(ServerEvent event) noexcept
 
 			try {
 				event.exec(*pair.second);
-			} catch (const js::ErrorInfo &info) {
+			} catch (const duk::ErrorInfo &info) {
 				log::warning() << "plugin " << pair.second->info().name << ": error: " << info.what() << std::endl;
 
 				if (!info.fileName.empty())
@@ -850,7 +849,7 @@ void Irccd::addPlugin(std::shared_ptr<Plugin> plugin)
 	plugin->onTimerEnd.connect(std::bind(&Irccd::handleTimerEnd, this, ptr, _1));
 
 	/* Store reference to irccd */
-	plugin->context().putGlobal("\xff""\xff""irccd", js::RawPointer<Irccd>{this});
+	duk::putGlobal(plugin->context(), "\xff""\xff""irccd", duk::RawPointer<Irccd>{this});
 
 	/* Initial load now */
 	try {
@@ -934,12 +933,12 @@ void Irccd::handleTimerSignal(std::weak_ptr<Plugin> ptr, std::shared_ptr<Timer> 
 
 		auto &ctx = plugin->context();
 
-		js::StackAssert sa(ctx);
+		duk::StackAssert sa(ctx);
 
 		try {
-			ctx.getGlobal<void>("\xff""\xff""timer-" + std::to_string(reinterpret_cast<std::intptr_t>(timer.get())));
-			ctx.pcall(0);
-			ctx.pop();
+			duk::getGlobal<void>(ctx, "\xff""\xff""timer-" + std::to_string(reinterpret_cast<std::intptr_t>(timer.get())));
+			duk::pcall(ctx, 0);
+			duk::pop(ctx);
 		} catch (const std::exception &) {
 			log::info() << "failure" << std::endl;
 		}

@@ -20,8 +20,8 @@
 
 #include <thread>
 
-#include <js-irccd.h>
-#include <js-elapsed-timer.h>
+#include <irccd/js-irccd.h>
+#include <irccd/js-elapsed-timer.h>
 
 using namespace irccd;
 using namespace std::chrono_literals;
@@ -33,7 +33,7 @@ static constexpr int margin = 30;
 
 class TestElapsedTimer : public testing::Test {
 protected:
-	js::Context m_context;
+	duk::Context m_context;
 
 	TestElapsedTimer()
 	{
@@ -50,62 +50,93 @@ protected:
 
 TEST_F(TestElapsedTimer, standard)
 {
-	m_context.peval(js::Script{"timer = new Irccd.ElapsedTimer();"});
+	try {
+		if (duk::pevalString(m_context, "timer = new Irccd.ElapsedTimer();") != 0)
+			throw duk::error(m_context, -1);
 
-	std::this_thread::sleep_for(300ms);
+		std::this_thread::sleep_for(300ms);
 
-	m_context.peval(js::Script{"result = timer.elapsed();"});
-	assertRange(m_context.getGlobal<int>("result"), 300);
+		if (duk::pevalString(m_context, "result = timer.elapsed();") != 0)
+			throw duk::error(m_context, -1);
+
+		assertRange(duk::getGlobal<int>(m_context, "result"), 300);
+	} catch (const std::exception &ex) {
+		FAIL() << ex.what();
+	}
 }
 
 TEST_F(TestElapsedTimer, reset)
 {
-	m_context.peval(js::Script{"timer = new Irccd.ElapsedTimer();"});
+	try {
+		if (duk::pevalString(m_context, "timer = new Irccd.ElapsedTimer();") != 0)
+			throw duk::error(m_context, -1);
 
-	std::this_thread::sleep_for(300ms);
+		std::this_thread::sleep_for(300ms);
 
-	m_context.peval(js::Script{"timer.reset(); result = timer.elapsed();"});
-	assertRange(m_context.getGlobal<int>("result"), 0);
+		if (duk::pevalString(m_context, "timer.reset(); result = timer.elapsed();") != 0)
+			throw duk::error(m_context, -1);
+
+		assertRange(duk::getGlobal<int>(m_context, "result"), 0);
+	} catch (const std::exception &ex) {
+		FAIL() << ex.what();
+	}
 }
 
 TEST_F(TestElapsedTimer, pause)
 {
-	m_context.peval(js::Script{"timer = new Irccd.ElapsedTimer();"});
+	try {
+		if (duk::pevalString(m_context, "timer = new Irccd.ElapsedTimer();") != 0)
+			throw duk::error(m_context, -1);
 
-	/*
-	 * Simulate a pause in the game like this:
-	 *
-	 * start     pause restart elapsed
-	 * |   10ms   |.5ms.| 6ms  |
-	 *
-	 * Since the game was paused, the 5ms must not be totalized.
-	 */
-	std::this_thread::sleep_for(10ms);
+		/*
+		 * Simulate a pause in the game like this:
+		 *
+		 * start     pause restart elapsed
+		 * |   10ms   |.5ms.| 6ms  |
+		 *
+		 * Since the game was paused, the 5ms must not be totalized.
+		 */
+		std::this_thread::sleep_for(10ms);
 
-	m_context.peval(js::Script{"timer.pause();"});
+		if (duk::pevalString(m_context, "timer.pause();") != 0)
+			throw duk::error(m_context, -1);
 
-	std::this_thread::sleep_for(5ms);
+		std::this_thread::sleep_for(5ms);
 
-	m_context.peval(js::Script{"timer.restart();"});
+		if (duk::pevalString(m_context, "timer.restart();") != 0)
+			throw duk::error(m_context, -1);
 
-	std::this_thread::sleep_for(6ms);
+		std::this_thread::sleep_for(6ms);
 
-	m_context.peval(js::Script{"result = timer.elapsed()"});
-	assertRange(m_context.getGlobal<int>("result"), 16);
+		if (duk::pevalString(m_context, "result = timer.elapsed()") != 0)
+			throw duk::error(m_context, -1);
+
+		assertRange(duk::getGlobal<int>(m_context, "result"), 16);
+	} catch (const std::exception &ex) {
+		FAIL() << ex.what();
+	}
 }
 
 TEST_F(TestElapsedTimer, doublecheck)
 {
-	m_context.peval(js::Script{"timer = new Irccd.ElapsedTimer();"});
+	try {
+		if (duk::pevalString(m_context, "timer = new Irccd.ElapsedTimer();") != 0)
+			throw duk::error(m_context, -1);
 
-	std::this_thread::sleep_for(50ms);
+		std::this_thread::sleep_for(50ms);
 
-	m_context.peval(js::Script{"result = timer.elapsed()"});
+		if (duk::pevalString(m_context, "result = timer.elapsed()") != 0)
+			throw duk::error(m_context, -1);
 
-	std::this_thread::sleep_for(50ms);
+		std::this_thread::sleep_for(50ms);
 
-	m_context.peval(js::Script{"result = timer.elapsed()"});
-	assertRange(m_context.getGlobal<int>("result"), 100);
+		if (duk::pevalString(m_context, "result = timer.elapsed()") != 0)
+			throw duk::error(m_context, -1);
+
+		assertRange(duk::getGlobal<int>(m_context, "result"), 100);
+	} catch (const std::exception &ex) {
+		FAIL() << ex.what();
+	}
 }
 
 int main(int argc, char **argv)

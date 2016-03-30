@@ -20,28 +20,30 @@
 
 #include <irccd-config.h>
 
-#include <logger.h>
-
-#include <js-irccd.h>
+#include <irccd/js-irccd.h>
+#include <irccd/logger.h>
 
 using namespace irccd;
 
 TEST(TestJsIrccd, version)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 
 	try {
-		ctx.peval(js::Script{
+		auto ret = duk::pevalString(ctx,
 			"major = Irccd.version.major;"
 			"minor = Irccd.version.minor;"
 			"patch = Irccd.version.patch;"
-		});
+		);
 
-		ASSERT_EQ(IRCCD_VERSION_MAJOR, ctx.getGlobal<int>("major"));
-		ASSERT_EQ(IRCCD_VERSION_MINOR, ctx.getGlobal<int>("minor"));
-		ASSERT_EQ(IRCCD_VERSION_PATCH, ctx.getGlobal<int>("patch"));
+		if (ret != 0)
+			throw duk::error(ctx, -1);
+
+		ASSERT_EQ(IRCCD_VERSION_MAJOR, duk::getGlobal<int>(ctx, "major"));
+		ASSERT_EQ(IRCCD_VERSION_MINOR, duk::getGlobal<int>(ctx, "minor"));
+		ASSERT_EQ(IRCCD_VERSION_PATCH, duk::getGlobal<int>(ctx, "patch"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}

@@ -18,16 +18,7 @@
 
 irccd_define_test(
 	NAME js-system
-	SOURCES
-		${irccd_SOURCE_DIR}/js.cpp
-		${irccd_SOURCE_DIR}/js.h
-		${irccd_SOURCE_DIR}/js-file.cpp
-		${irccd_SOURCE_DIR}/js-file.h
-		${irccd_SOURCE_DIR}/js-irccd.cpp
-		${irccd_SOURCE_DIR}/js-irccd.h
-		${irccd_SOURCE_DIR}/js-system.cpp
-		${irccd_SOURCE_DIR}/js-system.h
-		main.cpp
-	LIBRARIES common extern-duktape
+	SOURCES main.cpp
+	LIBRARIES libirccd
 )
 

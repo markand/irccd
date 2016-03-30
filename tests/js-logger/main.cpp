@@ -20,10 +20,9 @@
 
 #include <irccd-config.h>
 
-#include <logger.h>
-
-#include <js-irccd.h>
-#include <js-logger.h>
+#include <irccd/js-irccd.h>
+#include <irccd/js-logger.h>
+#include <irccd/logger.h>
 
 using namespace irccd;
 
@@ -57,14 +56,16 @@ public:
 
 TEST(TestJsLogger, info)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsLogger(ctx);
 
 	try {
-		ctx.putGlobal("\xff""\xff""name", "test");
-		ctx.peval(js::Script{"Irccd.Logger.info(\"hello!\");"});
+		duk::putGlobal(ctx, "\xff""\xff""name", "test");
+
+		if (duk::pevalString(ctx, "Irccd.Logger.info(\"hello!\");") != 0)
+			throw duk::error(ctx, -1);
 
 		ASSERT_EQ("plugin test: hello!", lineInfo);
 	} catch (const std::exception &ex) {
@@ -74,14 +75,16 @@ TEST(TestJsLogger, info)
 
 TEST(TestJsLogger, warning)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsLogger(ctx);
 
 	try {
-		ctx.putGlobal("\xff""\xff""name", "test");
-		ctx.peval(js::Script{"Irccd.Logger.warning(\"FAIL!\");"});
+		duk::putGlobal(ctx, "\xff""\xff""name", "test");
+
+		if (duk::pevalString(ctx, "Irccd.Logger.warning(\"FAIL!\");") != 0)
+			throw duk::error(ctx, -1);
 
 		ASSERT_EQ("plugin test: FAIL!", lineWarning);
 	} catch (const std::exception &ex) {
@@ -93,14 +96,16 @@ TEST(TestJsLogger, warning)
 
 TEST(TestJsLogger, debug)
 {
-	js::Context ctx;
+	duk::Context ctx;
 
 	loadJsIrccd(ctx);
 	loadJsLogger(ctx);
 
 	try {
-		ctx.putGlobal("\xff""\xff""name", "test");
-		ctx.peval(js::Script{"Irccd.Logger.debug(\"starting\");"});
+		duk::putGlobal(ctx, "\xff""\xff""name", "test");
+
+		if (duk::pevalString(ctx, "Irccd.Logger.debug(\"starting\");") != 0)
+			throw duk::error(ctx, -1);
 
 		ASSERT_EQ("plugin test: starting", lineDebug);
 	} catch (const std::exception &ex) {

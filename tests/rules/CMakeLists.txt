@@ -18,9 +18,6 @@
 
 irccd_define_test(
 	NAME rules
-	SOURCES
-		${irccd_SOURCE_DIR}/rule.cpp
-		${irccd_SOURCE_DIR}/rule.h
-		main.cpp
-	LIBRARIES common
+	SOURCES main.cpp
+	LIBRARIES libirccd
 )

@@ -1,7 +1,3 @@
-include(${CMAKE_CURRENT_LIST_DIR}/command/CMakeSources.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/js/CMakeSources.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/private/CMakeSources.cmake)
-
 set(
 	HEADERS
 	${COMMAND_HEADERS}
@@ -9,10 +5,52 @@ set(
 	${PRIVATE_HEADERS}
 	${CMAKE_CURRENT_LIST_DIR}/alias.h
 	${CMAKE_CURRENT_LIST_DIR}/application.h
+	${CMAKE_CURRENT_LIST_DIR}/connection.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-help.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-plugin-info.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-plugin-list.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-plugin-load.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-plugin-reload.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-plugin-unload.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-cmode.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-cnotice.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-connect.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-disconnect.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-info.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-invite.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-join.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-kick.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-list.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-me.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-message.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-mode.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-nick.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-notice.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-part.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-reconnect.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-topic.h
+	${CMAKE_CURRENT_LIST_DIR}/cmd-watch.h
+	${CMAKE_CURRENT_LIST_DIR}/command.h
 	${CMAKE_CURRENT_LIST_DIR}/config.h
+	${CMAKE_CURRENT_LIST_DIR}/directory.h
+	${CMAKE_CURRENT_LIST_DIR}/elapsed-timer.h
+	${CMAKE_CURRENT_LIST_DIR}/filesystem.h
+	${CMAKE_CURRENT_LIST_DIR}/ini.h
 	${CMAKE_CURRENT_LIST_DIR}/irccd.h
 	${CMAKE_CURRENT_LIST_DIR}/irccdctl.h
+	${CMAKE_CURRENT_LIST_DIR}/js.h
 	${CMAKE_CURRENT_LIST_DIR}/json.h
+	${CMAKE_CURRENT_LIST_DIR}/js-directory.h
+	${CMAKE_CURRENT_LIST_DIR}/js-elapsed-timer.h
+	${CMAKE_CURRENT_LIST_DIR}/js-file.h
+	${CMAKE_CURRENT_LIST_DIR}/js-irccd.h
+	${CMAKE_CURRENT_LIST_DIR}/js-logger.h
+	${CMAKE_CURRENT_LIST_DIR}/js-plugin.h
+	${CMAKE_CURRENT_LIST_DIR}/js-server.h
+	${CMAKE_CURRENT_LIST_DIR}/js-system.h
+	${CMAKE_CURRENT_LIST_DIR}/js-timer.h
+	${CMAKE_CURRENT_LIST_DIR}/js-unicode.h
+	${CMAKE_CURRENT_LIST_DIR}/js-util.h
 	${CMAKE_CURRENT_LIST_DIR}/logger.h
 	${CMAKE_CURRENT_LIST_DIR}/options.h
 	${CMAKE_CURRENT_LIST_DIR}/path.h
@@ -20,6 +58,7 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/rule.h
 	${CMAKE_CURRENT_LIST_DIR}/server.h
 	${CMAKE_CURRENT_LIST_DIR}/server-state.h
+	${CMAKE_CURRENT_LIST_DIR}/sockets.h
 	${CMAKE_CURRENT_LIST_DIR}/system.h
 	${CMAKE_CURRENT_LIST_DIR}/timer.h
 	${CMAKE_CURRENT_LIST_DIR}/transport-client.h
@@ -30,15 +69,53 @@ set(
 
 set(
 	SOURCES
-	${COMMAND_SOURCES}
-	${JS_SOURCES}
-	${PRIVATE_SOURCES}
 	${CMAKE_CURRENT_LIST_DIR}/alias.cpp
 	${CMAKE_CURRENT_LIST_DIR}/application.cpp
+	${CMAKE_CURRENT_LIST_DIR}/connection.cpp
 	${CMAKE_CURRENT_LIST_DIR}/config.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-help.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-plugin-info.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-plugin-list.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-plugin-load.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-plugin-reload.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-plugin-unload.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-cmode.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-cnotice.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-connect.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-disconnect.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-info.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-invite.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-join.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-kick.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-list.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-me.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-message.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-mode.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-nick.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-notice.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-part.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-reconnect.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-server-topic.cpp
+	${CMAKE_CURRENT_LIST_DIR}/cmd-watch.cpp
+	${CMAKE_CURRENT_LIST_DIR}/command.cpp
+	${CMAKE_CURRENT_LIST_DIR}/directory.cpp
+	${CMAKE_CURRENT_LIST_DIR}/elapsed-timer.cpp
+	${CMAKE_CURRENT_LIST_DIR}/filesystem.cpp
+	${CMAKE_CURRENT_LIST_DIR}/ini.cpp
 	${CMAKE_CURRENT_LIST_DIR}/irccd.cpp
 	${CMAKE_CURRENT_LIST_DIR}/irccdctl.cpp
 	${CMAKE_CURRENT_LIST_DIR}/json.cpp
+	${CMAKE_CURRENT_LIST_DIR}/js-directory.cpp
+	${CMAKE_CURRENT_LIST_DIR}/js-elapsed-timer.cpp
+	${CMAKE_CURRENT_LIST_DIR}/js-file.cpp
+	${CMAKE_CURRENT_LIST_DIR}/js-irccd.cpp
+	${CMAKE_CURRENT_LIST_DIR}/js-logger.cpp
+	${CMAKE_CURRENT_LIST_DIR}/js-plugin.cpp
+	${CMAKE_CURRENT_LIST_DIR}/js-server.cpp
+	${CMAKE_CURRENT_LIST_DIR}/js-system.cpp
+	${CMAKE_CURRENT_LIST_DIR}/js-timer.cpp
+	${CMAKE_CURRENT_LIST_DIR}/js-unicode.cpp
+	${CMAKE_CURRENT_LIST_DIR}/js-util.cpp
 	${CMAKE_CURRENT_LIST_DIR}/logger.cpp
 	${CMAKE_CURRENT_LIST_DIR}/options.cpp
 	${CMAKE_CURRENT_LIST_DIR}/path.cpp
@@ -46,6 +123,7 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/rule.cpp
 	${CMAKE_CURRENT_LIST_DIR}/server.cpp
 	${CMAKE_CURRENT_LIST_DIR}/server-state.cpp
+	${CMAKE_CURRENT_LIST_DIR}/sockets.cpp
 	${CMAKE_CURRENT_LIST_DIR}/system.cpp
 	${CMAKE_CURRENT_LIST_DIR}/timer.cpp
 	${CMAKE_CURRENT_LIST_DIR}/transport-client.cpp
@@ -53,3 +131,8 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/unicode.cpp
 	${CMAKE_CURRENT_LIST_DIR}/util.cpp
 )
+
+if (NOT IRCCD_SYSTEM_WINDOWS)
+	list(APPEND HEADERS ${CMAKE_CURRENT_LIST_DIR}/xdg.h)
+	list(APPEND SOURCES ${CMAKE_CURRENT_LIST_DIR}/xdg.cpp)
+endif ()

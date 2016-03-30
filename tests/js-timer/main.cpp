@@ -18,9 +18,9 @@
 
 #include <gtest/gtest.h>
 
-#include <irccd.h>
-#include <elapsed-timer.h>
-#include <system.h>
+#include <irccd/elapsed-timer.h>
+#include <irccd/irccd.h>
+#include <irccd/system.h>
 
 using namespace irccd;
 
@@ -38,7 +38,7 @@ TEST(Basic, single)
 		irccd.dispatch();
 	}
 
-	ASSERT_EQ(1, plugin->context().getGlobal<int>("count"));
+	ASSERT_EQ(1, duk::getGlobal<int>(plugin->context(), "count"));
 }
 
 TEST(Basic, repeat)
@@ -55,7 +55,7 @@ TEST(Basic, repeat)
 		irccd.dispatch();
 	}
 
-	ASSERT_GE(plugin->context().getGlobal<int>("count"), 5);
+	ASSERT_GE(duk::getGlobal<int>(plugin->context(), "count"), 5);
 }
 
 #if 0

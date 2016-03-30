@@ -30,15 +30,13 @@
 #  include <cstdlib>
 #endif
 
-#include <irccd/private/ini.h>
-
-#include <irccd/logger.h>
-#include <irccd/path.h>
-#include <irccd/private/sockets.h>
-#include <irccd/system.h>
-#include <irccd/util.h>
-
 #include "config.h"
+#include "ini.h"
+#include "logger.h"
+#include "path.h"
+#include "sockets.h"
+#include "system.h"
+#include "util.h"
 #include "irccd.h"
 
 using namespace std;

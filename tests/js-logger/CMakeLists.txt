@@ -18,13 +18,6 @@
 
 irccd_define_test(
 	NAME js-logger
-	SOURCES
-		${irccd_SOURCE_DIR}/js.cpp
-		${irccd_SOURCE_DIR}/js.cpp
-		${irccd_SOURCE_DIR}/js-irccd.cpp
-		${irccd_SOURCE_DIR}/js-irccd.h
-		${irccd_SOURCE_DIR}/js-logger.cpp
-		${irccd_SOURCE_DIR}/js-logger.h
-		main.cpp
-	LIBRARIES common extern-duktape
+	SOURCES main.cpp
+	LIBRARIES libirccd
 )
