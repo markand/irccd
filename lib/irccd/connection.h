@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_CONNECTION_H_
-#define _IRCCD_CONNECTION_H_
+#ifndef IRCCD_CONNECTION_H
+#define IRCCD_CONNECTION_H
 
 #include <cassert>
 #include <stdexcept>
@@ -235,4 +235,4 @@ json::Value ConnectionBase<Address>::next(int timeout)
 
 } // !irccd
 
-#endif // !_IRCCD_CONNECTION_H_
+#endif // !IRCCD_CONNECTION_H

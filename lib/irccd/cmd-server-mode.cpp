@@ -1,5 +1,5 @@
 /*
- * command-server-mode.cpp -- implementation of server-mode transport command
+ * cmd-server-mode.cpp -- implementation of server-mode transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

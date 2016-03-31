@@ -1,5 +1,5 @@
 /*
- * plugin-info.h -- implementation of plugin-info command
+ * cmd-plugin-info.h -- implementation of plugin-info command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_PLUGIN_INFO_H_
-#define _IRCCD_PLUGIN_INFO_H_
+#ifndef IRCCD_CMD_PLUGIN_INFO_H
+#define IRCCD_CMD_PLUGIN_INFO_H
 
 /**
- * @file plugin-info.h
+ * @file cmd-plugin-info.h
  * @brief Implementation of plugin-info transport command.
  */
 
@@ -71,4 +71,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_PLUGIN_INFO_H_
+#endif // !IRCCD_CMD_PLUGIN_INFO_H

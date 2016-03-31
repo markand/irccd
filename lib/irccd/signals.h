@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_SIGNALS_H_
-#define _IRCCD_SIGNALS_H_
+#ifndef IRCCD_SIGNALS_H
+#define IRCCD_SIGNALS_H
 
 #include <functional>
 #include <stack>
@@ -25,7 +25,7 @@
 #include <vector>
 
 /**
- * @file Signals.h
+ * @file signals.h
  * @brief Similar Qt signal subsystem for irccd
  */
 
@@ -172,4 +172,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_SIGNALS_H_
+#endif // !IRCCD_SIGNALS_H

@@ -1,5 +1,5 @@
 /*
- * server-reconnect.h -- implementation of server-reconnect transport command
+ * cmd-server-reconnect.h -- implementation of server-reconnect transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_COMMAND_SERVER_RECONNECT_H_
-#define _IRCCD_COMMAND_SERVER_RECONNECT_H_
+#ifndef IRCCD_CMD_SERVER_RECONNECT_H
+#define IRCCD_CMD_SERVER_RECONNECT_H
 
 /**
- * @file server-reconnect.h
+ * @file cmd-server-reconnect.h
  * @brief Implementation of server-reconnect transport command.
  */
 
@@ -63,4 +63,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_COMMAND_SERVER_RECONNECT_H_
+#endif // !IRCCD_CMD_SERVER_RECONNECT_H

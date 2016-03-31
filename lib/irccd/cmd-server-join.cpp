@@ -1,5 +1,5 @@
 /*
- * server-join.cpp -- implementation of server-join transport command
+ * cmd-server-join.cpp -- implementation of server-join transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

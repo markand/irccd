@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCDCTL_H_
-#define _IRCCDCTL_H_
+#ifndef IRCCD_IRCCDCTL_H
+#define IRCCD_IRCCDCTL_H
 
 #include <cassert>
 #include <map>
@@ -108,4 +108,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCDCTL_H_
+#endif // !IRCCD_IRCCDCTL_H

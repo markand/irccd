@@ -27,5 +27,5 @@ void loadJsDirectory(duk::ContextPtr ctx) noexcept;
 
 } // !irccd
 
-#endif // !_IRCCD_JS_DIRECTORY_H_
+#endif // !IRCCD_JS_DIRECTORY_H
 

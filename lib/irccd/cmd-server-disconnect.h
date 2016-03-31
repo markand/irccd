@@ -1,5 +1,5 @@
 /*
- * server-disconnect.h -- implementation of server-disconnect transport command
+ * cmd-server-disconnect.h -- implementation of server-disconnect transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_COMMAND_SERVER_DISCONNECT_H_
-#define _IRCCD_COMMAND_SERVER_DISCONNECT_H_
+#ifndef IRCCD_CMD_SERVER_DISCONNECT_H
+#define IRCCD_CMD_SERVER_DISCONNECT_H
 
 /**
- * @file server-disconnect.h
+ * @file cmd-server-disconnect.h
  * @brief Implementation of server-disconnect transport command.
  */
 
@@ -58,4 +58,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_COMMAND_SERVER_DISCONNECT_H_
+#endif // !IRCCD_CMD_SERVER_DISCONNECT_H

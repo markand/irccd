@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_TIMER_H_
-#define _IRCCD_TIMER_H_
+#ifndef IRCCD_TIMER_H
+#define IRCCD_TIMER_H
 
 /**
- * @file Timer.h
+ * @file timer.h
  * @brief Provides interval based timers for JavaScript
  */
 
@@ -152,4 +152,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_TIMER_H_
+#endif // !IRCCD_TIMER_H

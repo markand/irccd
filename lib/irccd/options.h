@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _OPTION_PARSER_H_
-#define _OPTION_PARSER_H_
+#ifndef IRCCD_OPTION_PARSER_H
+#define IRCCD_OPTION_PARSER_H
 
 #include <exception>
 #include <map>
@@ -142,4 +142,4 @@ Result read(int &argc, char **&argv, const Options &definition);
 
 } // !irccd
 
-#endif // !_OPTION_PARSER_H_
+#endif // !IRCCD_OPTION_PARSER_H

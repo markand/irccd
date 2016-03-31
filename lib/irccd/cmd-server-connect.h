@@ -1,5 +1,5 @@
 /*
- * server-connect.h -- implementation of server-connect transport command
+ * cmd-server-connect.h -- implementation of server-connect transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_COMMAND_SERVER_CONNECT_H_
-#define _IRCCD_COMMAND_SERVER_CONNECT_H_
+#ifndef IRCCD_CMD_SERVER_CONNECT_H
+#define IRCCD_CMD_SERVER_CONNECT_H
 
 /**
- * @file server-connect.h
+ * @file cmd-server-connect.h
  * @brief Implementation of server-connect transport command.
  */
 
@@ -66,4 +66,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_COMMAND_SERVER_CONNECT_H_
+#endif // !IRCCD_CMD_SERVER_CONNECT_H

@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_RULE_H_
-#define _IRCCD_RULE_H_
+#ifndef IRCCD_RULE_H
+#define IRCCD_RULE_H
 
 /**
- * @file Rule.h
+ * @file rule.h
  * @brief Rule description
  */
 
@@ -163,4 +163,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_RULE_H_
+#endif // !IRCCD_RULE_H

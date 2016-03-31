@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_H_
-#define _IRCCD_H_
+#ifndef IRCCD_H
+#define IRCCD_H
 
 #include <atomic>
 #include <cassert>
@@ -533,4 +533,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_H_
+#endif // !IRCCD_H

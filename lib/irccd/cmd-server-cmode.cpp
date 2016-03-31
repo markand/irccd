@@ -1,5 +1,5 @@
 /*
- * server-cmode.cpp -- implementation of server-cmode transport command
+ * cmd-server-cmode.cpp -- implementation of server-cmode transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

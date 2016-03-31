@@ -1,5 +1,5 @@
 /*
- * plugin-unload.h -- implementation of plugin-unload transport command
+ * cmd-plugin-unload.h -- implementation of plugin-unload transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_COMMAND_PLUGIN_UNLOAD_H_
-#define _IRCCD_COMMAND_PLUGIN_UNLOAD_H_
+#ifndef IRCCD_CMD_PLUGIN_UNLOAD_H
+#define IRCCD_CMD_PLUGIN_UNLOAD_H
 
 /**
- * @file plugin-unload.h
+ * @file cmd-plugin-unload.h
  * @brief Implementation of plugin-unload transport command.
  */
 
@@ -61,4 +61,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_COMMAND_PLUGIN_UNLOAD_H_
+#endif // !IRCCD_CMD_PLUGIN_UNLOAD_H

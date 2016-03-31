@@ -1,5 +1,5 @@
 /*
- * command-server-info.cpp -- implementation of server-info transport command
+ * cmd-server-info.cpp -- implementation of server-info transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

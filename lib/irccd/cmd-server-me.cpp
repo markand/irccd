@@ -1,5 +1,5 @@
 /*
- * server-me.cpp -- implementation of server-me transport command
+ * cmd-server-me.cpp -- implementation of server-me transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

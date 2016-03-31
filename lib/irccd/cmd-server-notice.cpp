@@ -1,5 +1,5 @@
 /*
- * server-notice.cpp -- implementation of server-notice transport command
+ * cmd-server-notice.cpp -- implementation of server-notice transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -64,4 +64,3 @@ json::Value ServerNotice::exec(Irccd &irccd, const json::Value &request) const
 } // !command
 
 } // !irccd
-

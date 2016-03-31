@@ -1,5 +1,5 @@
 /*
- * command-plugin-list.cpp -- implementation of plugin-list transport command
+ * cmd-plugin-list.cpp -- implementation of plugin-list transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

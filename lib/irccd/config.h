@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_CONFIG_LOADER_H_
-#define _IRCCD_CONFIG_LOADER_H_
+#ifndef IRCCD_CONFIG_H
+#define IRCCD_CONFIG_H
 
 /**
- * @file Config.h
+ * @file config.h
  * @brief Read .ini configuration file for irccd
  */
 
@@ -82,4 +82,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_CONFIG_LOADER_H_
+#endif // !IRCCD_CONFIG_H

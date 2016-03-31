@@ -1,5 +1,5 @@
 /*
- * command-plugin-list.h -- implementation of plugin-list transport command
+ * cmd-plugin-list.h -- implementation of plugin-list transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_COMMAND_PLUGIN_LIST_H_
-#define _IRCCD_COMMAND_PLUGIN_LIST_H_
+#ifndef IRCCD_CMD_PLUGIN_LIST_H
+#define IRCCD_CMD_PLUGIN_LIST_H
 
 /**
- * @file command-plugin-list.h
+ * @file cmd-plugin-list.h
  * @brief Implementation of plugin-list transport command.
  */
 
@@ -61,4 +61,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_COMMAND_PLUGIN_LIST_H_
+#endif // !IRCCD_CMD_PLUGIN_LIST_H

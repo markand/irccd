@@ -1,5 +1,5 @@
 /*
- * server-part.cpp -- implementation of server-part transport command
+ * cmd-server-part.cpp -- implementation of server-part transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

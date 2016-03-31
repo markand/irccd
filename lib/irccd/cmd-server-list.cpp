@@ -1,5 +1,5 @@
 /*
- * server-list.cpp -- implementation of server-list transport command
+ * cmd-server-list.cpp -- implementation of server-list transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

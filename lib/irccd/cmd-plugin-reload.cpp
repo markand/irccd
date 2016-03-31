@@ -1,5 +1,5 @@
 /*
- * command-plugin-reload.cpp -- implementation of plugin-reload transport command
+ * cmd-plugin-reload.cpp -- implementation of plugin-reload transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

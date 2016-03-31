@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_UNICODE_H_
-#define _IRCCD_UNICODE_H_
+#ifndef IRCCD_UNICODE_H
+#define IRCCD_UNICODE_H
 
 /**
- * @file Unicode.h
+ * @file unicode.h
  * @brief UTF-8 to UTF-32 conversions
  */
 
@@ -238,4 +238,4 @@ inline std::string tolower(const std::string &str)
 
 } // !irccd
 
-#endif // !_UTF8_H_
+#endif // !IRCCD_UNICODE_H

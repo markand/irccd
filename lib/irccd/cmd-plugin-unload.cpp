@@ -1,5 +1,5 @@
 /*
- * plugin-unload.cpp -- implementation of plugin-unload transport command
+ * cmd-plugin-unload.cpp -- implementation of plugin-unload transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

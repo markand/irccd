@@ -1,5 +1,5 @@
 /*
- * command-plugin-load.h -- implementation of plugin-load transport command
+ * cmd-plugin-load.h -- implementation of plugin-load transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_COMMAND_PLUGIN_LOAD_H_
-#define _IRCCD_COMMAND_PLUGIN_LOAD_H_
+#ifndef IRCCD_CMD_PLUGIN_LOAD_H
+#define IRCCD_CMD_PLUGIN_LOAD_H
 
 /**
- * @file plugin-load.h
+ * @file cmd-plugin-load.h
  * @brief Implementation of plugin-load transport command.
  */
 
@@ -61,4 +61,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_COMMAND_PLUGIN_LOAD_H_
+#endif // !IRCCD_CMD_PLUGIN_LOAD_H

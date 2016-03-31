@@ -1,5 +1,5 @@
 /*
- * Xdg.cpp -- XDG directory specifications
+ * xdg.cpp -- XDG directory specifications
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *

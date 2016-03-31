@@ -1,5 +1,5 @@
 /*
- * command-watch.cpp -- implementation of irccdctl watch
+ * cmd-watch.cpp -- implementation of irccdctl watch
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

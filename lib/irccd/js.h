@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef JS_H
-#define JS_H
+#ifndef IRCCD_JS_H
+#define IRCCD_JS_H
 
 /**
  * @file js.h
@@ -2378,4 +2378,4 @@ public:
 
 } // !irccd
 
-#endif // !JS_H
+#endif // !IRCCD_JS_H

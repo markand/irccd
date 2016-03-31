@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_UTIL_H_
-#define _IRCCD_UTIL_H_
+#ifndef IRCCD_UTIL_H
+#define IRCCD_UTIL_H
 
 #include <ctime>
 #include <initializer_list>
@@ -243,4 +243,4 @@ std::string nextNetwork(std::string &input);
 
 } // !irccd
 
-#endif // !_IRCCD_UTIL_H_
+#endif // !IRCCD_UTIL_H

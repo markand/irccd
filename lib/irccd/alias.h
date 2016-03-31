@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCDCTL_ALIAS_H_
-#define _IRCCDCTL_ALIAS_H_
+#ifndef IRCCD_ALIAS_H
+#define IRCCD_ALIAS_H
 
 #include <ostream>
 #include <string>
@@ -157,4 +157,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCDCTL_ALIAS_H_
+#endif // !IRCCD_ALIAS_H

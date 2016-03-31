@@ -1,5 +1,5 @@
 /*
- * server-join.h -- implementation of server-join transport command
+ * cmd-server-join.h -- implementation of server-join transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_COMMAND_SERVER_JOIN_H_
-#define _IRCCD_COMMAND_SERVER_JOIN_H_
+#ifndef IRCCD_CMD_SERVER_JOIN_H
+#define IRCCD_CMD_SERVER_JOIN_H
 
 /**
- * @file server-join.h
+ * @file cmd-server-join.h
  * @brief Implementation of server-join transport command.
  */
 
@@ -63,4 +63,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_COMMAND_SERVER_JOIN_H_
+#endif // !IRCCD_CMD_SERVER_JOIN_H

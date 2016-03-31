@@ -1,5 +1,5 @@
 /*
- * js-logger.h -- Irccd.Logger API
+ * js-logger.cpp -- Irccd.Logger API
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

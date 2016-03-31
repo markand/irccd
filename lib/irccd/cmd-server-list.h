@@ -1,5 +1,5 @@
 /*
- * server-list.h -- implementation of server-list transport command
+ * cmd-server-list.h -- implementation of server-list transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_COMMAND_SERVER_LIST_H_
-#define _IRCCD_COMMAND_SERVER_LIST_H_
+#ifndef IRCCD_CMD_SERVER_LIST_H
+#define IRCCD_CMD_SERVER_LIST_H
 
 /**
- * @file command-server-list.h
+ * @file cmd-server-list.h
  * @brief Implementation of server-list transport command.
  */
 
@@ -52,4 +52,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_COMMAND_SERVER_LIST_H_
+#endif // !IRCCD_CMD_SERVER_LIST_H

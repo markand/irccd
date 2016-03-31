@@ -1,5 +1,5 @@
 /*
- * plugin-info.cpp -- implementation of plugin-info command
+ * cmd-plugin-info.cpp -- implementation of plugin-info command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

@@ -1,5 +1,5 @@
 /*
- * server-nick.cpp -- implementation of server-nick transport command
+ * cmd-server-nick.cpp -- implementation of server-nick transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

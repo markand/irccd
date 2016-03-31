@@ -1,5 +1,5 @@
 /*
- * command-plugin-load.cpp -- implementation of plugin-load transport command
+ * cmd-plugin-load.cpp -- implementation of plugin-load transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

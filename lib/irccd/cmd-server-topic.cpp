@@ -1,5 +1,5 @@
 /*
- * command-server-topic.cpp -- implementation of server-topic transport command
+ * cmd-server-topic.cpp -- implementation of server-topic transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

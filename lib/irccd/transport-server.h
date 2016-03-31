@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_TRANSPORT_SERVER_H_
-#define _IRCCD_TRANSPORT_SERVER_H_
+#ifndef IRCCD_TRANSPORT_SERVER_H
+#define IRCCD_TRANSPORT_SERVER_H
 
 /**
  * @file transport-server.h
@@ -153,4 +153,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_TRANSPORT_SERVER_H_
+#endif // !IRCCD_TRANSPORT_SERVER_H

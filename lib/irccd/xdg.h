@@ -1,5 +1,5 @@
 /*
- * Xdg.h -- XDG directory specifications
+ * xdg.h -- XDG directory specifications
  *
  * Copyright (c) 2013, 2014, 2015 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_XDG_H_
-#define _IRCCD_XDG_H_
+#ifndef IRCCD_XDG_H
+#define IRCCD_XDG_H
 
 /**
- * @file Xdg.h
+ * @file xdg.h
  * @brief Read XDG standard specifications
  */
 
@@ -109,4 +109,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_XDG_H_
+#endif // !IRCCD_XDG_H

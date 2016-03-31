@@ -1,5 +1,5 @@
 /*
- * command-help.h -- implementation of irccdctl help
+ * cmd-help.h -- implementation of irccdctl help
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCDCTL_COMMAND_HELP_H_
-#define _IRCCDCTL_COMMAND_HELP_H_
+#ifndef IRCCD_CMD_HELP_H
+#define IRCCD_CMD_HELP_H
 
 /**
- * @file command-help.h
+ * @file cmd-help.h
  * @brief Implementation of irccdctl help.
  */
 
@@ -55,4 +55,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCDCTL_COMMAND_HELP_H_
+#endif // !IRCCD_CMD_HELP_H

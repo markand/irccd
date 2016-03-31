@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _INI_H_
-#define _INI_H_
+#ifndef IRCCD_INI_H
+#define IRCCD_INI_H
 
 /**
- * @file Ini.h
+ * @file ini.h
  * @brief Configuration file parser.
  */
 
@@ -535,4 +535,4 @@ public:
 
 } // !irccd
 
-#endif // !_INI_H_
+#endif // !IRCCD_INI_H

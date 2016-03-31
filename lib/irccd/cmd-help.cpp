@@ -1,5 +1,5 @@
 /*
- * command-help.cpp -- implementation of irccdctl help
+ * cmd-help.cpp -- implementation of irccdctl help
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

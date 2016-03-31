@@ -1,5 +1,5 @@
 /*
- * server-kick.h -- implementation of server-kick transport command
+ * cmd-server-kick.h -- implementation of server-kick transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_COMMAND_SERVER_KICK_H_
-#define _IRCCD_COMMAND_SERVER_KICK_H_
+#ifndef IRCCD_CMD_SERVER_KICK_H
+#define IRCCD_CMD_SERVER_KICK_H
 
 /**
- * @file server-kick.h
+ * @file cmd-server-kick.h
  * @brief Implementation of server-kick transport command.
  */
 
@@ -63,4 +63,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_COMMAND_SERVER_KICK_H_
+#endif // !IRCCD_CMD_SERVER_KICK_H

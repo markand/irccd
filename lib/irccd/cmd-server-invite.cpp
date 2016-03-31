@@ -1,5 +1,5 @@
 /*
- * command-server-invite.cpp -- implementation of server-invite transport command
+ * cmd-server-invite.cpp -- implementation of server-invite transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

@@ -1,5 +1,5 @@
 /*
- * server-mode.h -- implementation of server-mode transport command
+ * cmd-server-mode.h -- implementation of server-mode transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_COMMAND_SERVER_MODE_H_
-#define _IRCCD_COMMAND_SERVER_MODE_H_
+#ifndef IRCCD_CMD_SERVER_MODE_H
+#define IRCCD_CMD_SERVER_MODE_H
 
 /**
- * @file server-mode.h
+ * @file cmd-server-mode.h
  * @brief Implementation of server-mode transport command.
  */
 
@@ -63,4 +63,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_COMMAND_SERVER_MODE_H_
+#endif // !IRCCD_CMD_SERVER_MODE_H

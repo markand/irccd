@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_ELAPSED_TIMER_H_
-#define _IRCCD_ELAPSED_TIMER_H_
+#ifndef IRCCD_ELAPSED_TIMER_H
+#define IRCCD_ELAPSED_TIMER_H
 
 /**
- * @file ElapsedTimer.h
+ * @file elapsed-timer.h
  * @brief Measure elapsed time
  */
 
@@ -83,4 +83,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_ELAPSED_TIMER_H_
+#endif // !IRCCD_ELAPSED_TIMER_H

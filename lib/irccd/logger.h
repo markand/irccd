@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_LOGGER_H_
-#define _IRCCD_LOGGER_H_
+#ifndef IRCCD_LOGGER_H
+#define IRCCD_LOGGER_H
 
 #include <irccd-config.h>
 
@@ -214,4 +214,4 @@ void setVerbose(bool mode) noexcept;
 
 } // !irccd
 
-#endif // !_IRCCD_LOGGER_H_
+#endif // !IRCCD_LOGGER_H

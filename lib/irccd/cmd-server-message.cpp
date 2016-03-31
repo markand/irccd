@@ -1,5 +1,5 @@
 /*
- * server-message.cpp -- implementation of server-message transport command
+ * cmd-server-message.cpp -- implementation of server-message transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

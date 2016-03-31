@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_TRANSPORT_CLIENT_H_
-#define _IRCCD_TRANSPORT_CLIENT_H_
+#ifndef IRCCD_TRANSPORT_CLIENT_H
+#define IRCCD_TRANSPORT_CLIENT_H
 
 /**
- * @file TransportClient.h
+ * @file transport-client.h
  * @brief Client connected to irccd
  */
 
@@ -205,4 +205,4 @@ void TransportClientBase<Address>::send()
 
 } // !irccd
 
-#endif // !_IRCCD_TRANSPORT_CLIENT_H_
+#endif // !IRCCD_TRANSPORT_CLIENT_H

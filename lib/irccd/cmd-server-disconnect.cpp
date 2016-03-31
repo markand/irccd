@@ -1,5 +1,5 @@
 /*
- * command-server-disconnect.cpp -- implementation of server-disconnect transport command
+ * cmd-server-disconnect.cpp -- implementation of server-disconnect transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

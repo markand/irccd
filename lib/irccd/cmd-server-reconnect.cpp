@@ -1,5 +1,5 @@
 /*
- * command-server-reconnect.cpp -- implementation of server-reconnect transport command
+ * cmd-server-reconnect.cpp -- implementation of server-reconnect transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

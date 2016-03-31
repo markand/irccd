@@ -1,5 +1,5 @@
 /*
- * server-cnotice.cpp -- implementation of server-cnotice transport command
+ * cmd-server-cnotice.cpp -- implementation of server-cnotice transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_SYSTEM_H_
-#define _IRCCD_SYSTEM_H_
+#ifndef IRCCD_SYSTEM_H
+#define IRCCD_SYSTEM_H
 
 /**
  * @file system.h
@@ -116,4 +116,4 @@ void setGid(const std::string &value);
 
 } // !irccd
 
-#endif // !_IRCCD_SYSTEM_H_
+#endif // !IRCCD_SYSTEM_H

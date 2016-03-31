@@ -1,5 +1,5 @@
 /*
- * server-part.h -- implementation of server-part transport command
+ * cmd-server-part.h -- implementation of server-part transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_COMMAND_SERVER_PART_H_
-#define _IRCCD_COMMAND_SERVER_PART_H_
+#ifndef IRCCD_CMD_SERVER_PART_H
+#define IRCCD_CMD_SERVER_PART_H
 
 /**
- * @file server-part.h
+ * @file cmd-server-part.h
  * @brief Implementation of server-part transport command.
  */
 
@@ -63,4 +63,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_COMMAND_SERVER_PART_H_
+#endif // !IRCCD_CMD_SERVER_PART_H

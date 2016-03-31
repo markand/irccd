@@ -1,5 +1,5 @@
 /*
- * command-watch.h -- implementation of irccdctl watch
+ * cmd-watch.h -- implementation of irccdctl watch
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCDCTL_COMMAND_WATCH_H_
-#define _IRCCDCTL_COMMAND_WATCH_H_
+#ifndef IRCCD_CMD_WATCH_H
+#define IRCCD_CMD_WATCH_H
 
 /**
- * @file command-watch.h
+ * @file cmd-watch.h
  * @brief Implementation of irccdctl watch.
  */
 
@@ -55,4 +55,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCDCTL_COMMAND_WATCH_H_
+#endif // !IRCCD_CMD_WATCH_H

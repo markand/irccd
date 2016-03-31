@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _JSON_H_
-#define _JSON_H_
+#ifndef IRCCD_JSON_H
+#define IRCCD_JSON_H
 
 /**
  * @file json.h
@@ -1180,4 +1180,4 @@ inline Value object(std::initializer_list<std::pair<std::string, Value>> values)
 
 } // !irccd
 
-#endif // !_JSON_H_
+#endif // !IRCCD_JSON_H

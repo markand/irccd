@@ -1,5 +1,5 @@
 /*
- * server-topic.h -- implementation of server-topic transport command
+ * cmd-server-topic.h -- implementation of server-topic transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_COMMAND_SERVER_TOPIC_H_
-#define _IRCCD_COMMAND_SERVER_TOPIC_H_
+#ifndef IRCCD_CMD_SERVER_TOPIC_H
+#define IRCCD_CMD_SERVER_TOPIC_H
 
 /**
- * @file server-topic.h
+ * @file cmd-server-topic.h
  * @brief Implementation of server-topic transport command.
  */
 
@@ -63,4 +63,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_COMMAND_SERVER_TOPIC_H_
+#endif // !IRCCD_CMD_SERVER_TOPIC_H

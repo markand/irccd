@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_PATH_H_
-#define _IRCCD_PATH_H_
+#ifndef IRCCD_PATH_H
+#define IRCCD_PATH_H
 
 #include <string>
 #include <vector>
@@ -97,4 +97,4 @@ std::vector<std::string> list(Path path);
 
 } // !irccd
 
-#endif // !_IRCCD_PATH_H_
+#endif // !IRCCD_PATH_H

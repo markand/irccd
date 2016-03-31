@@ -1,5 +1,5 @@
 /*
- * server-me.h -- implementation of server-me transport command
+ * cmd-server-me.h -- implementation of server-me transport command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_COMMAND_SERVER_ME_H_
-#define _IRCCD_COMMAND_SERVER_ME_H_
+#ifndef IRCCD_CMD_SERVER_ME_H
+#define IRCCD_CMD_SERVER_ME_H
 
 /**
- * @file command-.h
- * @brief Implementation of  transport command.
+ * @file command-server-me.h
+ * @brief Implementation of server-me transport command.
  */
 
 #include "command.h"
@@ -63,4 +63,4 @@ public:
 
 } // !irccd
 
-#endif // !_IRCCD_COMMAND_SERVER_ME_H_
+#endif // !IRCCD_CMD_SERVER_ME_H

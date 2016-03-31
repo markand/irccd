@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _SOCKETS_H_
-#define _SOCKETS_H_
+#ifndef IRCCD_SOCKETS_H
+#define IRCCD_SOCKETS_H
 
 /**
- * @file Sockets.h
+ * @file sockets.h
  * @brief Portable socket abstraction
  *
  * # Introduction
@@ -4075,4 +4075,4 @@ public:
 
 } // !irccd
 
-#endif // !_SOCKETS_H_
+#endif // !IRCCD_SOCKETS_H
