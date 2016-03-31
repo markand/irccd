@@ -36,12 +36,15 @@ SystemError::SystemError(int e, std::string message)
 
 void SystemError::raise(duk::ContextPtr ctx) const
 {
+	duk::StackAssert sa(ctx, 1);
+
 	duk::getGlobal<void>(ctx, "Irccd");
 	duk::getProperty<void>(ctx, -1, "SystemError");
+	duk::remove(ctx, -2);
 	duk::push(ctx, m_errno);
 	duk::push(ctx, m_message);
 	duk::create(ctx, 2);
-	duk::remove(ctx, -2);
+	duk::raise(ctx);
 }
 
 duk::Ret constructor(duk::ContextPtr ctx)
@@ -71,15 +74,12 @@ void loadJsIrccd(duk::Context &ctx)
 
 	/* Create the SystemError that inherits from Error */
 	duk::push(ctx, duk::Function{constructor, 2});
+	duk::push(ctx, duk::Object{});
 	duk::getGlobal<void>(ctx, "Error");
-	duk::push(ctx, duk::Function{[] (duk::ContextPtr) -> duk::Ret { return 0; }});
-	duk::getProperty<void>(ctx, -2, "prototype");
+	duk::getProperty<void>(ctx, -1, "prototype");
+	duk::remove(ctx, -2);
+	duk::setPrototype(ctx, -2);
 	duk::putProperty(ctx, -2, "prototype");
-	duk::create(ctx, 0);
-	duk::putProperty(ctx, -3, "prototype");
-	duk::pop(ctx);
-	duk::dup(ctx, -1);
-	duk::putProperty(ctx, -2, "constructor");
 	duk::putProperty(ctx, -2, "SystemError");
 
 	/* Set Irccd as global */
