@@ -26,7 +26,7 @@
 #  include <cstring>
 #endif
 
-#include "filesystem.h"
+#include "fs.h"
 #include "js-directory.h"
 #include "js-elapsed-timer.h"
 #include "js-file.h"

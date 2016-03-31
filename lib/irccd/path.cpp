@@ -56,7 +56,7 @@
 #  include "xdg.h"
 #endif
 
-#include "filesystem.h"
+#include "fs.h"
 #include "path.h"
 #include "system.h"
 #include "util.h"
@@ -185,7 +185,7 @@ std::string systemConfig()
 
 	return base + WITH_CONFDIR;
 #else
-	return fs::isAbsolute(WITH_CONFDIR) ? WITH_CONFDIR : std::string(PREFIX) + fs::Separator + WITH_CONFDIR;
+	return fs::isAbsolute(WITH_CONFDIR) ? WITH_CONFDIR : std::string(PREFIX) + fs::separator() + WITH_CONFDIR;
 #endif
 }
 
@@ -196,7 +196,7 @@ std::string systemData()
 
 	return base + WITH_DATADIR;
 #else
-	return fs::isAbsolute(WITH_DATADIR) ? WITH_CONFDIR : std::string(PREFIX) + fs::Separator + WITH_DATADIR;
+	return fs::isAbsolute(WITH_DATADIR) ? WITH_CONFDIR : std::string(PREFIX) + fs::separator() + WITH_DATADIR;
 #endif
 }
 
@@ -207,7 +207,7 @@ std::string systemCache()
 
 	return base + WITH_CACHEDIR;
 #else
-	return fs::isAbsolute(WITH_CACHEDIR) ? WITH_CACHEDIR : std::string(PREFIX) + fs::Separator + WITH_CACHEDIR;
+	return fs::isAbsolute(WITH_CACHEDIR) ? WITH_CACHEDIR : std::string(PREFIX) + fs::separator() + WITH_CACHEDIR;
 #endif
 }
 
@@ -218,7 +218,7 @@ std::string systemPlugins()
 
 	return base + WITH_PLUGINDIR;
 #else
-	return fs::isAbsolute(WITH_PLUGINDIR) ? WITH_PLUGINDIR : std::string(PREFIX) + fs::Separator + WITH_PLUGINDIR;
+	return fs::isAbsolute(WITH_PLUGINDIR) ? WITH_PLUGINDIR : std::string(PREFIX) + fs::separator() + WITH_PLUGINDIR;
 #endif
 }
 
@@ -415,7 +415,7 @@ void setApplicationPath(const std::string &argv0)
 			std::string name = fs::baseName(argv0);
 
 			for (const auto &dir : util::split(sys::env("PATH"), std::string(1, Separator))) {
-				std::string path = dir + fs::Separator + name;
+				std::string path = dir + fs::separator() + name;
 
 				if (fs::exists(path)) {
 					base = path;
@@ -425,12 +425,12 @@ void setApplicationPath(const std::string &argv0)
 
 			/* Not found in PATH? add dummy value */
 			if (base.empty())
-				base = std::string(".") + fs::Separator + WITH_BINDIR + fs::Separator + "dummy";
+				base = std::string(".") + fs::separator() + WITH_BINDIR + fs::separator() + "dummy";
 		}
 	}
 
 	/* Find bin/<progname> */
-	auto pos = base.rfind(std::string(WITH_BINDIR) + fs::Separator + fs::baseName(base));
+	auto pos = base.rfind(std::string(WITH_BINDIR) + fs::separator() + fs::baseName(base));
 
 	if (pos != std::string::npos)
 		base.erase(pos);
@@ -457,7 +457,7 @@ std::string clean(std::string input)
 	/* Add a trailing / or \\ */
 	char c = input[input.length() - 1];
 	if (c != '/' && c != '\\')
-		input += fs::Separator;
+		input += fs::separator();
 
 	/* Now converts all / to \\ for Windows and the opposite for Unix */
 #if defined(IRCCD_SYSTEM_WINDOWS)

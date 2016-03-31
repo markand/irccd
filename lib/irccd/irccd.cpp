@@ -20,7 +20,7 @@
 #include <stdexcept>
 
 #include "irccd.h"
-#include "filesystem.h"
+#include "fs.h"
 #include "logger.h"
 #include "path.h"
 #include "util.h"

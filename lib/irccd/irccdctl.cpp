@@ -26,7 +26,7 @@
 #include <irccd-config.h>
 
 #include "elapsed-timer.h"
-#include "filesystem.h"
+#include "fs.h"
 #include "ini.h"
 #include "irccdctl.h"
 #include "json.h"

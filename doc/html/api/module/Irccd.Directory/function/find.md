@@ -6,5 +6,7 @@ arguments:
   - "**path**: the base path,"
   - "**pattern**: the regular expression or file name,"
   - "**recursive**: set to true to search recursively (Optional, default: false)."
-returns: "The path to the file or undefined on errors or not found."
+returns: "The path to the file or undefined if not found."
+throws:
+  - "Any exception on error."
 ---

@@ -32,9 +32,8 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/cmd-watch.h
 	${CMAKE_CURRENT_LIST_DIR}/command.h
 	${CMAKE_CURRENT_LIST_DIR}/config.h
-	${CMAKE_CURRENT_LIST_DIR}/directory.h
 	${CMAKE_CURRENT_LIST_DIR}/elapsed-timer.h
-	${CMAKE_CURRENT_LIST_DIR}/filesystem.h
+	${CMAKE_CURRENT_LIST_DIR}/fs.h
 	${CMAKE_CURRENT_LIST_DIR}/ini.h
 	${CMAKE_CURRENT_LIST_DIR}/irccd.h
 	${CMAKE_CURRENT_LIST_DIR}/irccdctl.h
@@ -99,9 +98,8 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/cmd-server-topic.cpp
 	${CMAKE_CURRENT_LIST_DIR}/cmd-watch.cpp
 	${CMAKE_CURRENT_LIST_DIR}/command.cpp
-	${CMAKE_CURRENT_LIST_DIR}/directory.cpp
 	${CMAKE_CURRENT_LIST_DIR}/elapsed-timer.cpp
-	${CMAKE_CURRENT_LIST_DIR}/filesystem.cpp
+	${CMAKE_CURRENT_LIST_DIR}/fs.cpp
 	${CMAKE_CURRENT_LIST_DIR}/ini.cpp
 	${CMAKE_CURRENT_LIST_DIR}/irccd.cpp
 	${CMAKE_CURRENT_LIST_DIR}/irccdctl.cpp

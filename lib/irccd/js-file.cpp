@@ -26,13 +26,13 @@
 #  include <sys/stat.h>
 #endif
 
-#include "filesystem.h"
+#include "fs.h"
 #include "js-irccd.h"
 #include "js-file.h"
 
-#if defined(HAVE_STAT)
-
 namespace irccd {
+
+#if defined(HAVE_STAT)
 
 /*
  * duk::TypeInfo specialization for struct stat

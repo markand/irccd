@@ -26,8 +26,7 @@
 
 #include <irccd-config.h>
 
-#include "directory.h"
-#include "filesystem.h"
+#include "fs.h"
 #include "js.h"
 #include "js-irccd.h"
 #include "path.h"
@@ -71,18 +70,18 @@ std::string findPath(const std::string &base, bool recursive, Pred pred)
 	 * not directories to avoid going deeper recursively if the requested
 	 * file is in the current directory.
 	 */
-	Directory directory(base);
+	auto entries = fs::readdir(base);
 
-	for (const DirectoryEntry &entry : directory)
-		if (entry.type != DirectoryEntry::Dir && pred(entry.name))
+	for (const auto &entry : entries)
+		if (entry.type != fs::Entry::Dir && pred(entry.name))
 			return base + entry.name;
 
 	if (!recursive)
-		throw std::out_of_range("entry not found");
+		return "";
 
-	for (const DirectoryEntry &entry : directory) {
-		if (entry.type == DirectoryEntry::Dir) {
-			std::string next = base + entry.name + fs::Separator;
+	for (const auto &entry : entries) {
+		if (entry.type == fs::Entry::Dir) {
+			std::string next = base + entry.name + fs::separator();
 			std::string path = findPath(next, true, pred);
 
 			if (!path.empty())
@@ -166,26 +165,17 @@ duk::Ret find(duk::ContextPtr ctx, std::string base, bool recursive, int pattern
  */
 duk::Ret remove(duk::ContextPtr ctx, const std::string &path, bool recursive)
 {
+	if (!fs::isDirectory(path))
+		duk::raise(ctx, SystemError(EINVAL, "not a directory"));
+
 	if (!recursive) {
+#if defined(_WIN32)
+		::RemoveDirectory(path.c_str());
+#else
 		::remove(path.c_str());
+#endif
 	} else {
-		try {
-			Directory directory(path);
-
-			for (const DirectoryEntry &entry : directory) {
-				if (entry.type == DirectoryEntry::Dir) {
-					(void)remove(ctx, path + fs::Separator + entry.name, true);
-				} else {
-					std::string filename = path + fs::Separator + entry.name;
-
-					::remove(filename.c_str());
-				}
-			}
-
-			::remove(path.c_str());
-		} catch (const std::exception &) {
-			// TODO: put the error in a log.
-		}
+		fs::rmdir(path.c_str());
 	}
 
 	return 0;
@@ -202,7 +192,9 @@ duk::Ret remove(duk::ContextPtr ctx, const std::string &path, bool recursive)
  *   - pattern, the regular expression or file name,
  *   - recursive, set to true to search recursively (default: false).
  * Returns:
- *   The path to the file or undefined on errors or not found
+ *   The path to the file or undefined if not found.
+ * Throws:
+ *   - Any exception on error.
  */
 duk::Ret methodFind(duk::ContextPtr ctx)
 {
@@ -253,24 +245,29 @@ duk::Ret constructor(duk::ContextPtr ctx)
 		return 0;
 
 	try {
-		Directory directory(duk::require<std::string>(ctx, 0), duk::optional<int>(ctx, 1, 0));
+		std::string path = duk::require<std::string>(ctx, 0);
+		std::int8_t flags = duk::optional<int>(ctx, 1, 0);
+
+		if (!fs::isDirectory(path))
+			duk::raise(ctx, SystemError(EINVAL, "not a directory"));
+
+		std::vector<fs::Entry> list = fs::readdir(path, flags);
 
 		duk::push(ctx, duk::This{});
 		duk::push(ctx, "count");
-		duk::push(ctx, directory.count());
+		duk::push(ctx, (int)list.size());
 		duk::defineProperty(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
 		duk::push(ctx, "path");
-		duk::push(ctx, duk::require<std::string>(ctx, 0));
+		duk::push(ctx, path);
 		duk::defineProperty(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
 		duk::push(ctx, "entries");
 		duk::push(ctx, duk::Array{});
 
-		int i = 0;
-		for (const DirectoryEntry &entry : directory) {
+		for (unsigned i = 0; i < list.size(); ++i) {
 			duk::push(ctx, duk::Object{});
-			duk::putProperty(ctx, -1, "name", entry.name);
-			duk::putProperty(ctx, -1, "type", static_cast<int>(entry.type));
-			duk::putProperty(ctx, -2, i++);
+			duk::putProperty(ctx, -1, "name", list[i].name);
+			duk::putProperty(ctx, -1, "type", static_cast<int>(list[i].type));
+			duk::putProperty(ctx, -2, (int)i);
 		}
 
 		duk::defineProperty(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
@@ -347,12 +344,12 @@ const duk::FunctionMap functions{
 };
 
 const duk::Map<int> constants{
-	{ "Dot",		static_cast<int>(Directory::Dot)		},
-	{ "DotDot",		static_cast<int>(Directory::DotDot)		},
-	{ "TypeUnknown",	static_cast<int>(DirectoryEntry::Unknown)	},
-	{ "TypeDir",		static_cast<int>(DirectoryEntry::Dir)		},
-	{ "TypeFile",		static_cast<int>(DirectoryEntry::File)		},
-	{ "TypeLink",		static_cast<int>(DirectoryEntry::Link)		}
+	{ "Dot",		static_cast<int>(fs::Dot)			},
+	{ "DotDot",		static_cast<int>(fs::DotDot)			},
+	{ "TypeUnknown",	static_cast<int>(fs::Entry::Unknown)		},
+	{ "TypeDir",		static_cast<int>(fs::Entry::Dir)		},
+	{ "TypeFile",		static_cast<int>(fs::Entry::File)		},
+	{ "TypeLink",		static_cast<int>(fs::Entry::Link)		}
 };
 
 } // !namespace
@@ -365,7 +362,7 @@ void loadJsDirectory(duk::ContextPtr ctx) noexcept
 	duk::push(ctx, duk::Function{constructor, 2});
 	duk::push(ctx, constants);
 	duk::push(ctx, functions);
-	duk::putProperty(ctx, -1, "separator", std::string{fs::Separator});
+	duk::putProperty(ctx, -1, "separator", std::string{fs::separator()});
 	duk::push(ctx, duk::Object{});
 	duk::push(ctx, methods);
 	duk::putProperty(ctx, -2, "prototype");
