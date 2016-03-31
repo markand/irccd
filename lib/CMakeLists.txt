@@ -101,7 +101,7 @@ if (WITH_PKGCONFIG)
 	# Configure the pkg-config file.
 	configure_file(
 		${CMAKE_SOURCE_DIR}/cmake/internal/irccd2.pc.in
-		${CMAKE_BINARY_DIR}/irccd2.pc.tmp
+		${CMAKE_BINARY_DIR}/irccd2.pc
 		@ONLY
 	)
 
@@ -109,7 +109,7 @@ if (WITH_PKGCONFIG)
 	file(
 		GENERATE
 		OUTPUT ${CMAKE_BINARY_DIR}/irccd2.pc
-		INPUT ${CMAKE_BINARY_DIR}/irccd2.pc.tmp
+		INPUT ${CMAKE_BINARY_DIR}/irccd2.pc
 	)
 
 	install(FILES ${CMAKE_BINARY_DIR}/irccd2.pc DESTINATION ${WITH_PKGCONFIGDIR})
