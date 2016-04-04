@@ -20,7 +20,7 @@
 #include <ctime>
 #include <stdexcept>
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #if defined(HAVE_SETPROGNAME)
 #  include <cstdlib>

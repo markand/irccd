@@ -27,7 +27,7 @@
 #include <mutex>
 #include <vector>
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #include "sockets.h"
 

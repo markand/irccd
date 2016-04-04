@@ -21,7 +21,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #if defined(IRCCD_SYSTEM_WINDOWS)
 #  include <Windows.h>

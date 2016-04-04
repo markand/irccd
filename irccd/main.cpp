@@ -18,7 +18,7 @@
 
 #include <csignal>
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #include <irccd/logger.h>
 #include <irccd/options.h>

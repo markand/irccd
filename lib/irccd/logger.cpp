@@ -23,7 +23,7 @@
 #include <stdexcept>
 #include <streambuf>
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #if defined(HAVE_SYSLOG)
 #  include <syslog.h>

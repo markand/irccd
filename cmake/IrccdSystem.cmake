@@ -104,9 +104,9 @@ if (NOT HAVE_STDINT_H)
 endif ()
 
 #
-# Where any of these function / feature is required, include the <irccd-config.h> file.
+# Where any of these function / feature is required, include the <irccd/sysconfig.h> file.
 #
-# The following variables are defined in irccd-config.h
+# The following variables are defined in irccd/sysconfig.h
 #
 # HAVE_ACCESS		- True if has access(2) function (and sys/types.h and sys/stat.h),
 # HAVE_DAEMON		- True if daemon(3),
@@ -249,8 +249,23 @@ check_struct_has_member("struct stat" st_rdev sys/stat.h HAVE_STAT_ST_RDEV)
 check_struct_has_member("struct stat" st_size sys/stat.h HAVE_STAT_ST_SIZE)
 check_struct_has_member("struct stat" st_uid sys/stat.h HAVE_STAT_ST_UID)
 
-# Configuration file
+# Configuration file.
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/irccd)
+
 configure_file(
-	${CMAKE_CURRENT_LIST_DIR}/internal/irccd-config.h.in
-	${CMAKE_BINARY_DIR}/irccd-config.h
+	${CMAKE_CURRENT_LIST_DIR}/internal/sysconfig.h.in
+	${CMAKE_BINARY_DIR}/irccd/sysconfig.h
 )
+
+install(
+	FILES ${CMAKE_BINARY_DIR}/irccd/sysconfig.h
+	DESTINATION include/irccd
+)
+
+# Also copy to fakedir if possible
+if (IRCCD_RELOCATABLE)
+	file(
+		COPY ${CMAKE_BINARY_DIR}/irccd/sysconfig.h
+		DESTINATION ${IRCCD_FAKEDIR}/include/irccd
+	)
+endif ()

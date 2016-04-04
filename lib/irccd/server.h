@@ -30,7 +30,7 @@
 #include <utility>
 #include <vector>
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #include "logger.h"
 #include "server-state.h"

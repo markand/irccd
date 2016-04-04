@@ -19,7 +19,7 @@
 #include <array>
 #include <vector>
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #if defined(HAVE_STAT)
 #  include <sys/types.h>

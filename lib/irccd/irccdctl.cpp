@@ -23,7 +23,7 @@
 #include <string>
 #include <unordered_map>
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #include "elapsed-timer.h"
 #include "fs.h"

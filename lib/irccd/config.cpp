@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #if defined(HAVE_GETPID)
 #  include <sys/types.h>

@@ -18,7 +18,7 @@
 
 #include <iostream>
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #include "cmd-plugin-list.h"
 #include "irccd.h"

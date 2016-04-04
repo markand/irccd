@@ -27,7 +27,7 @@
 #include <memory>
 #include <string>
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #include "sockets.h"
 #include "transport-client.h"

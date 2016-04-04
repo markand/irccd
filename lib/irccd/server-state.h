@@ -19,7 +19,7 @@
 #ifndef IRCCD_SERVER_STATE_H
 #define IRCCD_SERVER_STATE_H
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #include "elapsed-timer.h"
 #include "sockets.h"

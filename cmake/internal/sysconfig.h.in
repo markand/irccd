@@ -1,5 +1,5 @@
 /*
- * irccd-config.h -- configuration for irccd
+ * sysconfig.h -- configuration for irccd
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef _IRCCD_CONFIG_H_
-#define _IRCCD_CONFIG_H_
+#ifndef IRCCD_SYSCONFIG_H
+#define IRCCD_SYSCONFIG_H
 
 /*
  * Fix annoying "Please include winsock2.h before windows.h"
@@ -27,9 +27,10 @@
 #  include <windows.h>
 #endif
 
-/* --------------------------------------------------------
- * Auto generated from CMake
- * -------------------------------------------------------- */
+/*
+ * Auto generated from CMake.
+ * ------------------------------------------------------------------
+ */
 
 #define PREFIX			"@CMAKE_INSTALL_PREFIX@"
 
@@ -39,9 +40,10 @@
 
 #cmakedefine IRCCD_RELOCATABLE
 
-/* --------------------------------------------------------
- * System identification
- * -------------------------------------------------------- */
+/*
+ * System identification.
+ * ------------------------------------------------------------------
+ */
 
 #cmakedefine IRCCD_SYSTEM_WINDOWS
 #cmakedefine IRCCD_SYSTEM_MAC
@@ -51,9 +53,10 @@
 #cmakedefine IRCCD_SYSTEM_LINUX
 #cmakedefine IRCCD_SYSTEM_UNKNOWN
 
-/* --------------------------------------------------------
- * User definable options
- * -------------------------------------------------------- */
+/*
+ * User definable options.
+ * ------------------------------------------------------------------
+ */
 
 #define WITH_BINDIR		"@WITH_BINDIR@"
 #define WITH_DATADIR		"@WITH_DATADIR@"
@@ -64,16 +67,10 @@
 #cmakedefine WITH_JS
 #cmakedefine WITH_SSL
 
-/* --------------------------------------------------------
- * IRC tests
- * -------------------------------------------------------- */
-
-#define WITH_TEST_IRCHOST	"@WITH_TEST_IRCHOST@"
-#define WITH_TEST_IRCPORT	@WITH_TEST_IRCPORT@
-
-/* --------------------------------------------------------
- * Platform checks
- * -------------------------------------------------------- */
+/*
+ * Platform checks.
+ * ------------------------------------------------------------------
+ */
 
 #cmakedefine HAVE_ACCESS
 #cmakedefine HAVE_DAEMON
@@ -99,4 +96,4 @@
 #cmakedefine HAVE_STAT_ST_UID
 #cmakedefine HAVE_SYSLOG
 
-#endif // !_IRCCD_CONFIG_H_
+#endif // !IRCCD_SYSCONFIG_H

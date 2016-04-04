@@ -29,7 +29,7 @@
 # cmake/check			- Platform checks in separate files.
 # cmake/function		- Custom functions.
 # cmake/installer		- Some files for the QtIFW installer.
-# cmake/internal		- Some internal files (e.g. the irccd-config.h)
+# cmake/internal		- Some internal files (e.g. the sysconfig.h)
 # cmake/packages		- Additional find_package modules.
 #
 # Build system is then processed in different directories:

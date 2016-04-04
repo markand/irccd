@@ -19,7 +19,7 @@
 #ifndef IRCCD_LOGGER_H
 #define IRCCD_LOGGER_H
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #include <memory>
 #include <sstream>

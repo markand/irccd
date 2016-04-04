@@ -24,7 +24,7 @@
 #include <stdexcept>
 #include <string>
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #include "fs.h"
 #include "js.h"

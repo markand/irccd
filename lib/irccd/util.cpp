@@ -24,7 +24,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #include "util.h"
 #include "unicode.h"

@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #include <irccd/js-irccd.h>
 #include <irccd/logger.h>

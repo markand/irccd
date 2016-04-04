@@ -18,7 +18,7 @@
 
 #include <stdexcept>
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #if defined(HAVE_STAT)
 #  include <sys/stat.h>

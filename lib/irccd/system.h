@@ -24,7 +24,7 @@
  * @brief System dependant functions
  */
 
-#include <irccd-config.h>
+#include <irccd/sysconfig.h>
 
 #include <cstdint>
 #include <string>
