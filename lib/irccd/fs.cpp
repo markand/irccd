@@ -29,9 +29,6 @@
 #else
 #  include <sys/types.h>
 #  include <dirent.h>
-#endif
-
-#if defined(HAVE_ACCESS)
 #  include <unistd.h>
 #endif
 
@@ -324,10 +321,10 @@ void mkdir(const std::string &path, int mode)
 #if defined(_WIN32)
 			(void)mode;
 
-			if (_mkdir(part.c_str()) < 0 && errno != EEXIST)
+			if (::_mkdir(part.c_str()) < 0 && errno != EEXIST)
 				throw std::runtime_error(std::strerror(errno));
 #else
-			if (mkdir(part.c_str(), mode) < 0 && errno != EEXIST)
+			if (::mkdir(part.c_str(), mode) < 0 && errno != EEXIST)
 				throw std::runtime_error(std::strerror(errno));
 #endif
 		}
