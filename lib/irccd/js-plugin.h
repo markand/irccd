@@ -19,10 +19,20 @@
 #ifndef IRCCD_JS_PLUGIN_H
 #define IRCCD_JS_PLUGIN_H
 
+/**
+ * @file js-plugin.h
+ * @brief Irccd.Plugin JavaScript API.
+ */
+
 #include "js.h"
 
 namespace irccd {
 
+/**
+ * Load the module.
+ *
+ * @param ctx the context.
+ */
 void loadJsPlugin(duk::Context &ctx) noexcept;
 
 } // !irccd

@@ -137,7 +137,6 @@ public:
 };
 
 /**
- * @class TransportClient
  * @brief Template class for Tcp and Ssl sockets
  */
 template <typename Address>
@@ -153,7 +152,7 @@ public:
 	/**
 	 * Create a client.
 	 *
-	 * @param sock the socket
+	 * @param socket the socket
 	 */
 	inline TransportClientBase(net::SocketTcp<Address> socket)
 		: m_socket(std::move(socket))

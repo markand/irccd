@@ -19,10 +19,20 @@
 #ifndef IRCCD_JS_ELAPSED_TIMER_H
 #define IRCCD_JS_ELAPSED_TIMER_H
 
+/**
+ * @file js-elapsed-timer.h
+ * @brief Irccd.ElapsedTimer JavaScript API.
+ */
+
 #include "js.h"
 
 namespace irccd {
 
+/**
+ * Load the module.
+ *
+ * @param ctx the context.
+ */
 void loadJsElapsedTimer(duk::ContextPtr ctx) noexcept;
 
 } // !irccd

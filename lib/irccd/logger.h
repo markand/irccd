@@ -19,6 +19,11 @@
 #ifndef IRCCD_LOGGER_H
 #define IRCCD_LOGGER_H
 
+/**
+ * @file logger.h
+ * @brief Logging facilities.
+ */
+
 #include <irccd/sysconfig.h>
 
 #include <memory>

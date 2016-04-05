@@ -54,7 +54,7 @@ public:
 	/**
 	 * @copydoc RemoteCommand::result
 	 */
-	void result(Irccdctl &irccdctl, const json::Value &object) const override;
+	void result(Irccdctl &irccdctl, const json::Value &response) const override;
 };
 
 } // !command

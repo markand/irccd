@@ -19,6 +19,11 @@
 #ifndef IRCCD_SERVER_H
 #define IRCCD_SERVER_H
 
+/**
+ * @file server.h
+ * @brief IRC Server.
+ */
+
 #include <cstdint>
 #include <functional>
 #include <map>
@@ -365,7 +370,7 @@ public:
 	 */
 	Signal<std::string, std::string, std::string> onTopic;
 
-	/*
+	/**
 	 * Signal: onWhois
 	 * ------------------------------------------------
 	 *
@@ -732,7 +737,7 @@ public:
 	 * message terminators.
 	 *
 	 * @warning Use this function with care
-	 * @param raw the raw message (without \r\n\r\n)
+	 * @param raw the raw message (without `\r\n\r\n`)
 	 * @note Thread-safe
 	 */
 	void send(std::string raw);

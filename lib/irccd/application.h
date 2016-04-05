@@ -19,6 +19,11 @@
 #ifndef IRCCD_APPLICATION_H
 #define IRCCD_APPLICATION_H
 
+/**
+ * @file application.h
+ * @brief Base class for irccd and irccdctl.
+ */
+
 #include <cassert>
 #include <memory>
 #include <unordered_map>
@@ -27,20 +32,44 @@
 
 namespace irccd {
 
+/**
+ * Map of commands.
+ */
 using RemoteCommands = std::unordered_map<std::string, std::unique_ptr<RemoteCommand>>;
 
+/**
+ * @brief Base class for creating irccd front ends.
+ */
 class Application {
 protected:
+	/**
+	 * Map of commands.
+	 */
 	RemoteCommands m_commands;
 
 public:
+	/**
+	 * Create the application and fill the commands with predefined commands.
+	 */
 	Application();
 
+	/**
+	 * Access the remote commands.
+	 *
+	 * @return the commands
+	 */
 	inline const RemoteCommands &commands() const noexcept
 	{
 		return m_commands;
 	}
 
+	/**
+	 * Add a new command.
+	 *
+	 * @pre command must not be null
+	 * @pre the command must not exist
+	 * @param command the command
+	 */
 	inline void addCommand(std::unique_ptr<RemoteCommand> command)
 	{
 		assert(command);

@@ -19,19 +19,30 @@
 #ifndef IRCCD_JS_SERVER_H
 #define IRCCD_JS_SERVER_H
 
+/**
+ * @file js-server.h
+ * @brief Irccd.Server JavaScript API.
+ */
+
 #include <irccd/server.h>
 
 #include "js.h"
 
 namespace irccd {
 
-void loadJsServer(duk::ContextPtr ctx);
-
 namespace duk {
 
+/**
+ * @brief JavaScript binding for Server.
+ */
 template <>
 class TypeTraits<irccd::Server> {
 public:
+	/**
+	 * Push the Server prototype.
+	 *
+	 * @param ctx the context
+	 */
 	static inline void prototype(ContextPtr ctx)
 	{
 		getGlobal<void>(ctx, "Irccd");
@@ -41,11 +52,21 @@ public:
 		remove(ctx, -2);
 	}
 
+	/**
+	 * Get the Server signature.
+	 *
+	 * @return Server
+	 */
 	static inline std::string name()
 	{
 		return "\xff""\xff""Server";
 	}
 
+	/**
+	 * Get the inheritance list.
+	 *
+	 * @return empty
+	 */
 	static inline std::vector<std::string> inherits()
 	{
 		return {};
@@ -53,6 +74,13 @@ public:
 };
 
 } // !duk
+
+/**
+ * Load the module.
+ *
+ * @param ctx the context.
+ */
+void loadJsServer(duk::ContextPtr ctx);
 
 } // !irccd
 

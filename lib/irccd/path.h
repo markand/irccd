@@ -19,6 +19,11 @@
 #ifndef IRCCD_PATH_H
 #define IRCCD_PATH_H
 
+/**
+ * @file path.h
+ * @brief Path management.
+ */
+
 #include <string>
 #include <vector>
 

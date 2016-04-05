@@ -19,10 +19,20 @@
 #ifndef IRCCD_JS_UTIL_H
 #define IRCCD_JS_UTIL_H
 
+/**
+ * @file js-util.h
+ * @brief Irccd.Util JavaScript API.
+ */
+
 #include "js.h"
 
 namespace irccd {
 
+/**
+ * Load the module.
+ *
+ * @param ctx the context.
+ */
 void loadJsUtil(duk::ContextPtr ctx);
 
 } // !irccd

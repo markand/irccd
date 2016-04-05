@@ -19,10 +19,20 @@
 #ifndef IRCCD_JS_LOGGER_H
 #define IRCCD_JS_LOGGER_H
 
+/**
+ * @file js-logger.h
+ * @brief Irccd.Logger JavaScript API.
+ */
+
 #include "js.h"
 
 namespace irccd {
 
+/**
+ * Load the module.
+ *
+ * @param ctx the context.
+ */
 void loadJsLogger(duk::ContextPtr ctx);
 
 } // !irccd

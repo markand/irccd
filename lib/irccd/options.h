@@ -19,6 +19,11 @@
 #ifndef IRCCD_OPTION_PARSER_H
 #define IRCCD_OPTION_PARSER_H
 
+/**
+ * @file options.h
+ * @brief Basic options parsing.
+ */
+
 #include <exception>
 #include <map>
 #include <string>

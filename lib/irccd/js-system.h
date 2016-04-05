@@ -19,10 +19,20 @@
 #ifndef IRCCD_JS_SYSTEM_H
 #define IRCCD_JS_SYSTEM_H
 
+/**
+ * @file js-system.h
+ * @brief Irccd.System JavaScript API.
+ */
+
 #include "js.h"
 
 namespace irccd {
 
+/**
+ * Load the module.
+ *
+ * @param ctx the context.
+ */
 void loadJsSystem(duk::ContextPtr ctx);
 
 } // !irccd

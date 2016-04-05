@@ -19,6 +19,11 @@
 #ifndef IRCCD_H
 #define IRCCD_H
 
+/**
+ * @file irccd.h
+ * @brief Base class for irccd front end.
+ */
+
 #include <atomic>
 #include <cassert>
 #include <condition_variable>
@@ -74,13 +79,13 @@ using Rules = std::vector<Rule>;
  */
 class ServerEvent {
 public:
-	std::string server;
-	std::string origin;
-	std::string target;
-	std::string json;
+	std::string server;					//!< the server
+	std::string origin;					//!< the originator
+	std::string target;					//!< the target
+	std::string json;					//!< the JSON message
 #if defined(WITH_JS)
-	std::function<std::string (Plugin &)> name;
-	std::function<void (Plugin &)> exec;
+	std::function<std::string (Plugin &)> name;		//!< the function to event name
+	std::function<void (Plugin &)> exec;			//!< the plugin function to call
 #endif
 };
 
@@ -239,11 +244,13 @@ public:
 	 */
 	void post(Event ev) noexcept;
 
-	/*
+	/**
 	 * This function wraps post() to iterate over all plugins to call the function and to send to all
 	 * connected transport the event.
+	 *
+	 * @param ev the event
 	 */
-	void postServerEvent(ServerEvent) noexcept;
+	void postServerEvent(ServerEvent ev) noexcept;
 
 	/*
 	 * Identity management
@@ -500,7 +507,7 @@ public:
 	/**
 	 * Remove a new rule from the specified position.
 	 *
-	 * @param rule the rule
+	 * @pre position must be valid
 	 * @param position the position
 	 */
 	inline void removeRule(unsigned position)

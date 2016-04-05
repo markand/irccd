@@ -19,6 +19,11 @@
 #ifndef IRCCD_CONNECTION_H
 #define IRCCD_CONNECTION_H
 
+/**
+ * @file connection.h
+ * @brief Connection to irccd instance.
+ */
+
 #include <cassert>
 #include <stdexcept>
 
@@ -37,6 +42,9 @@ namespace irccd {
  */
 class Connection {
 protected:
+	/**
+	 * Timer to track elapsed time.
+	 */
 	ElapsedTimer m_timer;
 
 	/**
@@ -92,7 +100,7 @@ public:
 	virtual void connect(int timeout = 30000) = 0;
 
 	/**
-	 * Try to send the message in 30 seconds. The message must not end with \r\n\r\n, it is added automatically.
+	 * Try to send the message in 30 seconds. The message must not end with \\r\\n\\r\\n, it is added automatically.
 	 *
 	 * @pre msg must not be empty
 	 * @param msg the message to send

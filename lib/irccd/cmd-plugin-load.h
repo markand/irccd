@@ -42,19 +42,19 @@ public:
 	PluginLoad();
 
 	/**
-	 * @copydoc TransportCommand::help
+	 * @copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
 
 	/**
-	 * @copydoc TransportCommand::args
+	 * @copydoc RemoteCommand::args
 	 */
 	std::vector<Arg> args() const override;
 
 	/**
-	 * @copydoc TransportCommand::exec
+	 * @copydoc RemoteCommand::exec
 	 */
-	json::Value exec(Irccd &irccd, const json::Value &object) const override;
+	json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };
 
 } // !command

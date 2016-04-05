@@ -19,6 +19,11 @@
 #ifndef IRCCD_COMMAND_H
 #define IRCCD_COMMAND_H
 
+/**
+ * @file command.h
+ * @brief Remote commands.
+ */
+
 #include <cassert>
 #include <map>
 #include <vector>
@@ -37,7 +42,14 @@ class Irccdctl;
  */
 class RemoteCommandRequest {
 public:
+	/**
+	 * The options given by command line.
+	 */
 	using Options = std::multimap<std::string, std::string>;
+
+	/**
+	 * Command line arguments in the same order.
+	 */
 	using Args = std::vector<std::string>;
 
 private:
@@ -142,6 +154,7 @@ public:
 	 * Get the given option by its id or defaultValue if not found.
 	 *
 	 * @param key the option id
+	 * @param defaultValue the value replacement
 	 * @return the option
 	 */
 	inline std::string optionOr(const std::string &key, std::string defaultValue) const noexcept
@@ -194,6 +207,15 @@ private:
 	bool m_visible;
 
 public:
+	/**
+	 * Create the remote command.
+	 *
+	 * @pre name must not be empty
+	 * @pre category must not be empty
+	 * @param name the command name (e.g. server-list)
+	 * @param category the category (e.g. Server)
+	 * @param visible true if the command should be visible without verbosity
+	 */
 	inline RemoteCommand(std::string name, std::string category, bool visible = true) noexcept
 		: m_name(std::move(name))
 		, m_category(std::move(category))
@@ -323,8 +345,8 @@ public:
 	 *
 	 * This default implementation just check for an error string and shows it if any.
 	 * 
-	 * @param irccdctl the irccdctl instane
-	 * @param object the result
+	 * @param irccdctl the irccdctl instan e
+	 * @param response the JSON response
 	 */
 	virtual void result(Irccdctl &irccdctl, const json::Value &response) const;
 };
@@ -351,9 +373,11 @@ public:
 	 * @pre id must not be empty
 	 * @pre at least simpleKey or longKey must not be empty
 	 * @pre description must not be empty
-	 * @param key the key the option key
+	 * @param id the option id
+	 * @param simpleKey the key the option key
+	 * @param longKey the long option name
+	 * @param arg the argument name if needed
 	 * @param description the description
-	 * @param flags the optional flags
 	 */
 	inline Option(std::string id,
 		      std::string simpleKey,

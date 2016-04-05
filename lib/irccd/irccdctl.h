@@ -19,6 +19,11 @@
 #ifndef IRCCD_IRCCDCTL_H
 #define IRCCD_IRCCDCTL_H
 
+/**
+ * @file irccdctl.h
+ * @brief Base class for irccdctl front end.
+ */
+
 #include <cassert>
 #include <map>
 #include <memory>
@@ -39,6 +44,9 @@ class Section;
 
 } // !ini
 
+/**
+ * @brief Main irccdctl class.
+ */
 class Irccdctl : public Application {
 private:
 	/* Irccd's information */
@@ -103,6 +111,12 @@ public:
 		return *m_connection;
 	}
 
+	/**
+	 * Run the irccdctl front end.
+	 *
+	 * @param argc the number of arguments
+	 * @param argv the arguments
+	 */
 	void run(int argc, char **argv);
 };
 

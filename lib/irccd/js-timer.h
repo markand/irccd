@@ -19,10 +19,20 @@
 #ifndef IRCCD_JS_TIMER_H
 #define IRCCD_JS_TIMER_H
 
+/**
+ * @file js-timer.h
+ * @brief Irccd.Timer JavaScript API.
+ */
+
 #include "js.h"
 
 namespace irccd {
 
+/**
+ * Load the module.
+ *
+ * @param ctx the context.
+ */
 void loadJsTimer(duk::ContextPtr ctx) noexcept;
 
 } // !irccd

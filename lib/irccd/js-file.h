@@ -19,6 +19,11 @@
 #ifndef IRCCD_JS_FILE_H
 #define IRCCD_JS_FILE_H
 
+/**
+ * @file js-file.h
+ * @brief Irccd.File JavaScript API.
+ */
+
 #include <cassert>
 #include <cerrno>
 #include <cstdio>
@@ -50,7 +55,7 @@ private:
 	File(File &&) = delete;
 	File &operator=(File &&) = delete;
 
-protected:
+private:
 	std::string m_path;
 	std::FILE *m_stream;
 	std::function<void (std::FILE *)> m_destructor;
@@ -78,6 +83,7 @@ public:
 	 *
 	 * @pre destructor must not be null
 	 * @param fp the file pointer
+	 * @param destructor the function to close fp (e.g. std::fclose)
 	 */
 	inline File(std::FILE *fp, std::function<void (std::FILE *)> destructor) noexcept
 		: m_stream(fp)
@@ -129,9 +135,17 @@ public:
 
 namespace duk {
 
+/**
+ * @brief JavaScript binding for File.
+ */
 template <>
 class TypeTraits<File> {
 public:
+	/**
+	 * Push the File prototype.
+	 *
+	 * @param ctx the context
+	 */
 	static inline void prototype(ContextPtr ctx)
 	{
 		getGlobal<void>(ctx, "Irccd");
@@ -141,11 +155,21 @@ public:
 		remove(ctx, -2);
 	}
 
+	/**
+	 * Get the File signature.
+	 *
+	 * @return File
+	 */
 	static inline std::string name()
 	{
 		return "\xff""\xff""File";
 	}
 
+	/**
+	 * Get the inheritance list.
+	 *
+	 * @return empty
+	 */
 	static inline std::vector<std::string> inherits()
 	{
 		return {};
@@ -154,6 +178,11 @@ public:
 
 } // !duk
 
+/**
+ * Load the module.
+ *
+ * @param ctx the context.
+ */
 void loadJsFile(duk::ContextPtr ctx);
 
 } // !irccd

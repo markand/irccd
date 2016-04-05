@@ -19,10 +19,20 @@
 #ifndef IRCCD_JS_DIRECTORY_H
 #define IRCCD_JS_DIRECTORY_H
 
+/**
+ * @file js-directory.h
+ * @brief Irccd.Directory JavaScript API.
+ */
+
 #include "js.h"
 
 namespace irccd {
 
+/**
+ * Load the module.
+ *
+ * @param ctx the context.
+ */
 void loadJsDirectory(duk::ContextPtr ctx) noexcept;
 
 } // !irccd

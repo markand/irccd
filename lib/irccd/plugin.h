@@ -20,7 +20,7 @@
 #define IRCCD_PLUGIN_H
 
 /**
- * @file Plugin.h
+ * @file plugin.h
  * @brief Irccd plugins
  */
 
@@ -347,10 +347,19 @@ public:
 
 namespace duk {
 
+/**
+ * @brief Push plugin information.
+ */
 template <>
 class TypeTraits<irccd::PluginInfo> {
 public:
-	static void push(ContextPtr ctx, const irccd::PluginInfo &info);
+	/**
+	 * Push the plugin information as JavaScript object.
+	 *
+	 * @param ctx the context
+	 * @param info the plugin information
+	 */
+	static void push(ContextPtr ctx, const PluginInfo &info);
 };
 
 } // !duk

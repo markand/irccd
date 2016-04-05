@@ -32,27 +32,44 @@ namespace irccd {
  */
 class Server::Session {
 public:
+	/**
+	 * libircclient handle.
+	 */
 	using Handle = std::unique_ptr<irc_session_t, void (*)(irc_session_t *)>;
 
 private:
 	Handle m_handle;
 
 public:
+	/**
+	 * Create a null session.
+	 */
 	inline Session()
 		: m_handle(nullptr, nullptr)
 	{
 	}
 
+	/**
+	 * Convert the libircclient session.
+	 */
 	inline operator const irc_session_t *() const noexcept
 	{
 		return m_handle.get();
 	}
 
+	/**
+	 * Overloaded function.
+	 */
 	inline operator irc_session_t *() noexcept
 	{
 		return m_handle.get();
 	}
 
+	/**
+	 * Get the handle.
+	 *
+	 * @return the handle
+	 */
 	inline Handle &handle() noexcept
 	{
 		return m_handle;

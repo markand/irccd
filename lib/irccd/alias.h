@@ -19,6 +19,11 @@
 #ifndef IRCCD_ALIAS_H
 #define IRCCD_ALIAS_H
 
+/**
+ * @file alias.h
+ * @brief Create irccdctl aliases.
+ */
+
 #include <ostream>
 #include <string>
 #include <vector>
@@ -74,6 +79,12 @@ public:
 	 */
 	const std::string &value() const noexcept;
 
+	/**
+	 * Output the alias to the stream.
+	 *
+	 * @param out the output stream
+	 * @return out
+	 */
 	friend std::ostream &operator<<(std::ostream &out, const AliasArg &);
 };
 

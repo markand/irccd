@@ -19,6 +19,11 @@
 #ifndef IRCCD_SERVER_STATE_H
 #define IRCCD_SERVER_STATE_H
 
+/**
+ * @file server-state.h
+ * @brief Server state.
+ */
+
 #include <irccd/sysconfig.h>
 
 #include "elapsed-timer.h"
@@ -61,10 +66,29 @@ private:
 	void prepareDisconnected(Server &, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd);
 
 public:
+	/**
+	 * Create the server state.
+	 *
+	 * @pre type must be valid
+	 * @param type the type
+	 */
 	ServerState(Type type);
 
+	/**
+	 * Prepare the state.
+	 *
+	 * @param server the server
+	 * @param setinput the read set
+	 * @param setoutput the write set
+	 * @param maxfd the maximum fd
+	 */
 	void prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd);
 
+	/**
+	 * Get the state type.
+	 *
+	 * @return the type
+	 */
 	inline Type type() const noexcept
 	{
 		return m_type;

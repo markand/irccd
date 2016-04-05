@@ -19,10 +19,20 @@
 #ifndef IRCCD_JS_UNICODE_H
 #define IRCCD_JS_UNICODE_H
 
+/**
+ * @file js-unicode.h
+ * @brief Irccd.Unicode JavaScript API.
+ */
+
 #include "js.h"
 
 namespace irccd {
 
+/**
+ * Load the module.
+ *
+ * @param ctx the context.
+ */
 void loadJsUnicode(duk::ContextPtr ctx);
 
 } // !irccd

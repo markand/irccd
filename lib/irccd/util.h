@@ -19,6 +19,11 @@
 #ifndef IRCCD_UTIL_H
 #define IRCCD_UTIL_H
 
+/**
+ * @file util.h
+ * @brief Utilities.
+ */
+
 #include <ctime>
 #include <initializer_list>
 #include <regex>
@@ -70,52 +75,47 @@ public:
 /**
  * Format a string and update all templates.
  *
- * Syntax
- * ======
+ * ## Syntax
  *
- * The syntax is ?{} where ? is replaced by one of the token defined below. Braces are mandatory and cannot be ommited.
+ * The syntax is <strong>?{}</strong> where <strong>?</strong> is replaced by one of the token defined below. Braces
+ * are mandatory and cannot be ommited.
+ *
  * To write a literal template construct, prepend the token twice.
  *
- * Availables templates
- * ====================
+ * ## Availables templates
  *
  * The following templates are available:
  *
- * - #{name}, name will be substituted from the keywords in params
- * - ${name}, name will be substituted from the environment variable
- * - @{attributes}, the attributes will be substituted to IRC colors (see below)
- * - %, any format accepted by strftime(3)
+ * - <strong>\#{name}</strong>: name will be substituted from the keywords in params,
+ * - <strong>\${name}</strong>: name will be substituted from the environment variable,
+ * - <strong>\@{attributes}</strong>: the attributes will be substituted to IRC colors (see below),
+ * - <strong>%</strong>, any format accepted by strftime(3).
  *
- * Attributes
- * ==========
+ * ## Attributes
  *
  * The attribute format is composed of three parts, foreground, background and modifiers, each separated by a comma.
  *
  * **Note:** you cannot omit parameters, to specify the background, you must specify the foreground.
  *
- * Examples
- * ========
+ * ## Examples
  *
- * Valid constructs
- * ----------------
+ * ### Valid constructs
  *
- * - `#{target}, welcome`: if target is set to "irccd", becomes "irccd, welcome",
- * - `@{red}#{target}`: if target is specified, it is written in red,
+ *   - <strong>\#{target}, welcome</strong>: if target is set to "irccd", becomes "irccd, welcome",
+ *   - <strong>\@{red}\#{target}</strong>: if target is specified, it is written in red,
  *
- * Invalid or literals constructs
- * ------------------------------
+ * ### Invalid or literals constructs
  *
- * - `##{target}`: will output "#{target}",
- * - `##`: will output "##",
- * - `#target`: will output "#target",
- * - `#{target`: will throw std::invalid_argument.
+ *   - <strong>\#\#{target}</strong>: will output "\#{target}",
+ *   - <strong>\#\#</strong>: will output "\#\#",
+ *   - <strong>\#target</strong>: will output "\#target",
+ *   - <strong>\#{target</strong>: will throw std::invalid_argument.
  *
- * Colors & attributes
- * -------------------
+ * ### Colors & attributes
  *
- * - `@{red,blue}`: will write text red on blue background,
- * - `@{default,yellow}`: will write default color text on yellow background
- * - `@{white,black,bold,underline}`: will write white text on black in both bold and underline
+ *   - <strong>\@{red,blue}</strong>: will write text red on blue background,
+ *   - <strong>\@{default,yellow}</strong>: will write default color text on yellow background,
+ *   - <strong>\@{white,black,bold,underline}</strong>: will write white text on black in both bold and underline.
  */
 std::string format(std::string text, const Substitution &params = {});
 
@@ -131,7 +131,7 @@ std::string strip(std::string str);
  * Split a string by delimiters.
  *
  * @param list the string to split
- * @param delimiter a list of delimiters
+ * @param delimiters a list of delimiters
  * @param max max number of split
  * @return a list of string splitted
  */

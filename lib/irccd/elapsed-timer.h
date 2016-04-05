@@ -39,10 +39,9 @@ namespace irccd {
  * milliseconds only.
  */
 class ElapsedTimer {
-public:
+private:
 	using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
-private:
 	TimePoint m_last;
 	bool m_paused{false};
 	unsigned m_elapsed{0};

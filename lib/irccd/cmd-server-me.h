@@ -20,7 +20,7 @@
 #define IRCCD_CMD_SERVER_ME_H
 
 /**
- * @file command-server-me.h
+ * @file cmd-server-me.h
  * @brief Implementation of server-me transport command.
  */
 
