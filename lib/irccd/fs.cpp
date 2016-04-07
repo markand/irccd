@@ -133,9 +133,9 @@ std::string baseName(std::string path)
 	auto pos = path.find_last_of("\\/");
 
 	if (pos != std::string::npos)
-		path = path.substr(0, pos + 1);
+		path = path.substr(pos + 1);
 
-	return path.substr(pos + 1);
+	return path;
 }
 
 std::string dirName(std::string path)
