@@ -16,7 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <algorithm>
 #include <array>
+#include <iterator>
 #include <vector>
 
 #include <irccd/sysconfig.h>
@@ -231,20 +233,26 @@ duk::Ret methodRead(duk::ContextPtr ctx)
 			std::array<char, 128> buffer;
 			std::size_t nread;
 
-			while ((nread = std::fread(&buffer[0], sizeof (buffer[0]), buffer.size(), file->handle())) > 0) {
-				data += std::string(buffer.data(), nread);
+			while (!std::feof(file->handle())) {
+				nread = std::fread(&buffer[0], sizeof (buffer[0]), buffer.size(), file->handle());
+
+				if (std::ferror(file->handle()))
+					duk::raise(ctx, SystemError());
+
+				std::copy(buffer.begin(), buffer.begin() + nread, std::back_inserter(data));
 				total += nread;
 			}
 		} else {
 			data.resize((std::size_t)amount);
 			total = std::fread(&data[0], sizeof (data[0]), (std::size_t)amount, file->handle());
+
+			if (std::ferror(file->handle()))
+				duk::raise(ctx, SystemError());
+
 			data.resize(total);
 		}
 
-		if (std::ferror(file->handle()))
-			duk::raise(ctx, SystemError());
-
-		duk::push(ctx, std::string(data.data(), total));
+		duk::push(ctx, data);
 	} catch (const std::exception &) {
 		duk::raise(ctx, SystemError());
 	}
