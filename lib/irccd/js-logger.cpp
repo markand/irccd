@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "js-logger.h"
-#include "logger.h"
+#include "js-logger.hpp"
+#include "logger.hpp"
 
 namespace irccd {
 

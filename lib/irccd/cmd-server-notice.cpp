@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "cmd-server-notice.h"
-#include "irccd.h"
+#include "cmd-server-notice.hpp"
+#include "irccd.hpp"
 
 namespace irccd {
 

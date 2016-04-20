@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "cmd-server-disconnect.h"
-#include "irccd.h"
+#include "cmd-server-disconnect.hpp"
+#include "irccd.hpp"
 
 namespace irccd {
 

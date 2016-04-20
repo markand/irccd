@@ -21,8 +21,8 @@
 #include <sstream>
 #include <unordered_map>
 
-#include "cmd-watch.h"
-#include "irccdctl.h"
+#include "cmd-watch.hpp"
+#include "irccdctl.hpp"
 
 namespace irccd {
 

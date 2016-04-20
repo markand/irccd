@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "unicode.h"
+#include "unicode.hpp"
 
 /*
  * The following code has been generated from Go mkrunetype adapted to our

@@ -21,7 +21,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <irccd/sysconfig.h>
+#include <irccd/sysconfig.hpp>
 
 #if defined(IRCCD_SYSTEM_WINDOWS)
 #  include <Windows.h>
@@ -53,13 +53,13 @@
 #    include <libproc.h>
 #  endif
 
-#  include "xdg.h"
+#  include "xdg.hpp"
 #endif
 
-#include "fs.h"
-#include "path.h"
-#include "system.h"
-#include "util.h"
+#include "fs.hpp"
+#include "path.hpp"
+#include "system.hpp"
+#include "util.hpp"
 
 namespace irccd {
 

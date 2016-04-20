@@ -16,9 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/irccdctl.h>
-#include <irccd/logger.h>
-#include <irccd/path.h>
+#include <irccd/irccdctl.hpp>
+#include <irccd/logger.hpp>
+#include <irccd/path.hpp>
 
 using namespace irccd;
 

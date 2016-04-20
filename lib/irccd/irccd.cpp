@@ -19,11 +19,11 @@
 #include <algorithm>
 #include <stdexcept>
 
-#include "irccd.h"
-#include "fs.h"
-#include "logger.h"
-#include "path.h"
-#include "util.h"
+#include "irccd.hpp"
+#include "fs.hpp"
+#include "logger.hpp"
+#include "path.hpp"
+#include "util.hpp"
 
 using namespace std;
 using namespace std::placeholders;

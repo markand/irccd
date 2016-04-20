@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "js.h"
-#include "unicode.h"
+#include "js.hpp"
+#include "unicode.hpp"
 
 namespace irccd {
 

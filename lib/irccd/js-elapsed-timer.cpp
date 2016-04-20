@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "elapsed-timer.h"
-#include "js.h"
+#include "elapsed-timer.hpp"
+#include "js.hpp"
 
 namespace irccd {
 

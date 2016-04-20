@@ -20,8 +20,8 @@
 
 #include <thread>
 
-#include <irccd/js-irccd.h>
-#include <irccd/js-elapsed-timer.h>
+#include <irccd/js-irccd.hpp>
+#include <irccd/js-elapsed-timer.hpp>
 
 using namespace irccd;
 using namespace std::chrono_literals;

@@ -29,7 +29,7 @@
 #  include <Shlwapi.h>	// for PathIsRelative
 #endif
 
-#include "ini.h"
+#include "ini.hpp"
 
 namespace {
 

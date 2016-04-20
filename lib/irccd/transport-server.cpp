@@ -22,7 +22,7 @@
 
 #include <sstream>
 
-#include "transport-server.h"
+#include "transport-server.hpp"
 
 namespace irccd {
 

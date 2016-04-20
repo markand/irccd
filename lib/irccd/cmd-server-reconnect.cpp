@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "cmd-server-reconnect.h"
-#include "irccd.h"
+#include "cmd-server-reconnect.hpp"
+#include "irccd.hpp"
 
 namespace irccd {
 

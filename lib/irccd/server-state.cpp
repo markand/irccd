@@ -18,7 +18,7 @@
 
 #include <cassert>
 
-#include <irccd/sysconfig.h>
+#include <irccd/sysconfig.hpp>
 
 #if !defined(_WIN32)
 #  include <sys/types.h>
@@ -27,8 +27,8 @@
 #  include <resolv.h>
 #endif
 
-#include "server-state.h"
-#include "server-private.h"
+#include "server-state.hpp"
+#include "server-private.hpp"
 
 namespace irccd {
 

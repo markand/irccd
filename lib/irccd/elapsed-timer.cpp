@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "elapsed-timer.h"
+#include "elapsed-timer.hpp"
 
 using std::chrono::duration_cast;
 using std::chrono::high_resolution_clock;

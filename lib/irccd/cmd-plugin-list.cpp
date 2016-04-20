@@ -18,10 +18,10 @@
 
 #include <iostream>
 
-#include <irccd/sysconfig.h>
+#include <irccd/sysconfig.hpp>
 
-#include "cmd-plugin-list.h"
-#include "irccd.h"
+#include "cmd-plugin-list.hpp"
+#include "irccd.hpp"
 
 namespace irccd {
 

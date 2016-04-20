@@ -18,8 +18,8 @@
 
 #include <gtest/gtest.h>
 
-#include <irccd/js-irccd.h>
-#include <irccd/js-util.h>
+#include <irccd/js-irccd.hpp>
+#include <irccd/js-util.hpp>
 
 using namespace irccd;
 

@@ -20,7 +20,7 @@
 
 #include <sstream>
 
-#include "json.h"
+#include "json.hpp"
 
 namespace irccd {
 

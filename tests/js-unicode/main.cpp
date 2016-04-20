@@ -22,8 +22,8 @@
 
 #include <gtest/gtest.h>
 
-#include <irccd/js-irccd.h>
-#include <irccd/js-unicode.h>
+#include <irccd/js-irccd.hpp>
+#include <irccd/js-unicode.hpp>
 
 using namespace irccd;
 

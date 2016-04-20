@@ -24,10 +24,10 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <irccd/sysconfig.h>
+#include <irccd/sysconfig.hpp>
 
-#include "util.h"
-#include "unicode.h"
+#include "util.hpp"
+#include "unicode.hpp"
 
 using namespace std::string_literals;
 

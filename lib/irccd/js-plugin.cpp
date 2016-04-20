@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "irccd.h"
-#include "js-plugin.h"
+#include "irccd.hpp"
+#include "js-plugin.hpp"
 
 namespace irccd {
 

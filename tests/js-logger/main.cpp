@@ -18,11 +18,11 @@
 
 #include <gtest/gtest.h>
 
-#include <irccd/sysconfig.h>
+#include <irccd/sysconfig.hpp>
 
-#include <irccd/js-irccd.h>
-#include <irccd/js-logger.h>
-#include <irccd/logger.h>
+#include <irccd/js-irccd.hpp>
+#include <irccd/js-logger.hpp>
+#include <irccd/logger.hpp>
 
 using namespace irccd;
 

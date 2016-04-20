@@ -18,8 +18,8 @@
 
 #include <gtest/gtest.h>
 
-#include <irccd/elapsed-timer.h>
-#include <irccd/timer.h>
+#include <irccd/elapsed-timer.hpp>
+#include <irccd/timer.hpp>
 
 using namespace irccd;
 using namespace std::chrono_literals;

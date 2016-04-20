@@ -23,19 +23,19 @@
 #include <string>
 #include <unordered_map>
 
-#include <irccd/sysconfig.h>
+#include <irccd/sysconfig.hpp>
 
-#include "elapsed-timer.h"
-#include "fs.h"
-#include "ini.h"
-#include "irccdctl.h"
-#include "json.h"
-#include "logger.h"
-#include "options.h"
-#include "path.h"
-#include "sockets.h"
-#include "system.h"
-#include "util.h"
+#include "elapsed-timer.hpp"
+#include "fs.hpp"
+#include "ini.hpp"
+#include "irccdctl.hpp"
+#include "json.hpp"
+#include "logger.hpp"
+#include "options.hpp"
+#include "path.hpp"
+#include "sockets.hpp"
+#include "system.hpp"
+#include "util.hpp"
 
 namespace irccd {
 

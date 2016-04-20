@@ -19,8 +19,8 @@
 #include <cassert>
 #include <cstdint>
 
-#include "js.h"
-#include "plugin.h"
+#include "js.hpp"
+#include "plugin.hpp"
 
 namespace irccd {
 

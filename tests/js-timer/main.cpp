@@ -18,9 +18,9 @@
 
 #include <gtest/gtest.h>
 
-#include <irccd/elapsed-timer.h>
-#include <irccd/irccd.h>
-#include <irccd/system.h>
+#include <irccd/elapsed-timer.hpp>
+#include <irccd/irccd.hpp>
+#include <irccd/system.hpp>
 
 using namespace irccd;
 

@@ -16,10 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/sysconfig.h>
+#include <irccd/sysconfig.hpp>
 
-#include "cmd-plugin-reload.h"
-#include "irccd.h"
+#include "cmd-plugin-reload.hpp"
+#include "irccd.hpp"
 
 namespace irccd {
 

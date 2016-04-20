@@ -18,7 +18,7 @@
 
 #include <gtest/gtest.h>
 
-#include <irccd/rule.h>
+#include <irccd/rule.hpp>
 
 namespace irccd {
 

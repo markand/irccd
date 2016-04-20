@@ -18,7 +18,7 @@
 
 #include <stdexcept>
 
-#include <irccd/sysconfig.h>
+#include <irccd/sysconfig.hpp>
 
 #if defined(HAVE_STAT)
 #  include <sys/stat.h>
@@ -26,22 +26,22 @@
 #  include <cstring>
 #endif
 
-#include "fs.h"
-#include "js-directory.h"
-#include "js-elapsed-timer.h"
-#include "js-file.h"
-#include "js-irccd.h"
-#include "js-logger.h"
-#include "js-plugin.h"
-#include "js-server.h"
-#include "js-system.h"
-#include "js-timer.h"
-#include "js-unicode.h"
-#include "js-util.h"
-#include "path.h"
-#include "plugin.h"
-#include "server.h"
-#include "util.h"
+#include "fs.hpp"
+#include "js-directory.hpp"
+#include "js-elapsed-timer.hpp"
+#include "js-file.hpp"
+#include "js-irccd.hpp"
+#include "js-logger.hpp"
+#include "js-plugin.hpp"
+#include "js-server.hpp"
+#include "js-system.hpp"
+#include "js-timer.hpp"
+#include "js-unicode.hpp"
+#include "js-util.hpp"
+#include "path.hpp"
+#include "plugin.hpp"
+#include "server.hpp"
+#include "util.hpp"
 
 using namespace std;
 

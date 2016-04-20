@@ -16,9 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "json.h"
-#include "logger.h"
-#include "transport-client.h"
+#include "json.hpp"
+#include "logger.hpp"
+#include "transport-client.hpp"
 
 namespace irccd {
 

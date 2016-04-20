@@ -18,9 +18,9 @@
 
 #include <gtest/gtest.h>
 
-#include <irccd/js-irccd.h>
-#include <irccd/js-system.h>
-#include <irccd/system.h>
+#include <irccd/js-irccd.hpp>
+#include <irccd/js-system.hpp>
+#include <irccd/system.hpp>
 
 using namespace irccd;
 

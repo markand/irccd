@@ -23,7 +23,7 @@
 #include <cstring>
 #include <mutex>
 
-#include "sockets.h"
+#include "sockets.hpp"
 
 namespace irccd {
 

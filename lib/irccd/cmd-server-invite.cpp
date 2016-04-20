@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "cmd-server-invite.h"
-#include "irccd.h"
+#include "cmd-server-invite.hpp"
+#include "irccd.hpp"
 
 namespace irccd {
 

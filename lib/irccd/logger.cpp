@@ -23,14 +23,14 @@
 #include <stdexcept>
 #include <streambuf>
 
-#include <irccd/sysconfig.h>
+#include <irccd/sysconfig.hpp>
 
 #if defined(HAVE_SYSLOG)
 #  include <syslog.h>
 #endif // !HAVE_SYSLOG
 
-#include "logger.h"
-#include "system.h"
+#include "logger.hpp"
+#include "system.hpp"
 
 namespace irccd {
 

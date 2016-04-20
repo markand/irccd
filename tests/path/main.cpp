@@ -18,10 +18,10 @@
 
 #include <gtest/gtest.h>
 
-#include <irccd/sysconfig.h>
+#include <irccd/sysconfig.hpp>
 
-#include <irccd/logger.h>
-#include <irccd/path.h>
+#include <irccd/logger.hpp>
+#include <irccd/path.hpp>
 
 namespace irccd {
 

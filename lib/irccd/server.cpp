@@ -23,9 +23,9 @@
 
 #include <libirc_rfcnumeric.h>
 
-#include "logger.h"
-#include "server-private.h"
-#include "util.h"
+#include "logger.hpp"
+#include "server-private.hpp"
+#include "util.hpp"
 
 namespace irccd {
 

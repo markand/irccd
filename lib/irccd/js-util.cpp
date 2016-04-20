@@ -18,8 +18,8 @@
 
 #include <libircclient.h>
 
-#include "js-util.h"
-#include "util.h"
+#include "js-util.hpp"
+#include "util.hpp"
 
 namespace irccd {
 

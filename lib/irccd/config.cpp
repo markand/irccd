@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/sysconfig.h>
+#include <irccd/sysconfig.hpp>
 
 #if defined(HAVE_GETPID)
 #  include <sys/types.h>
@@ -30,14 +30,14 @@
 #  include <cstdlib>
 #endif
 
-#include "config.h"
-#include "ini.h"
-#include "logger.h"
-#include "path.h"
-#include "sockets.h"
-#include "system.h"
-#include "util.h"
-#include "irccd.h"
+#include "config.hpp"
+#include "ini.hpp"
+#include "logger.hpp"
+#include "path.hpp"
+#include "sockets.hpp"
+#include "system.hpp"
+#include "util.hpp"
+#include "irccd.hpp"
 
 using namespace std;
 using namespace std::string_literals;

@@ -32,7 +32,7 @@
 #  include <unistd.h>
 #endif
 
-#include "fs.h"
+#include "fs.hpp"
 
 namespace irccd {
 

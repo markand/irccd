@@ -18,10 +18,10 @@
 
 #include <limits>
 
-#include "cmd-server-connect.h"
-#include "irccd.h"
-#include "server.h"
-#include "util.h"
+#include "cmd-server-connect.hpp"
+#include "irccd.hpp"
+#include "server.hpp"
+#include "util.hpp"
 
 namespace irccd {
 

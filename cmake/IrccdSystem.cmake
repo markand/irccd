@@ -253,19 +253,19 @@ check_struct_has_member("struct stat" st_uid sys/stat.h HAVE_STAT_ST_UID)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/irccd)
 
 configure_file(
-	${CMAKE_CURRENT_LIST_DIR}/internal/sysconfig.h.in
-	${CMAKE_BINARY_DIR}/irccd/sysconfig.h
+	${CMAKE_CURRENT_LIST_DIR}/internal/sysconfig.hpp.in
+	${CMAKE_BINARY_DIR}/irccd/sysconfig.hpp
 )
 
 install(
-	FILES ${CMAKE_BINARY_DIR}/irccd/sysconfig.h
+	FILES ${CMAKE_BINARY_DIR}/irccd/sysconfig.hpp
 	DESTINATION include/irccd
 )
 
 # Also copy to fakedir if possible
 if (IRCCD_RELOCATABLE)
 	file(
-		COPY ${CMAKE_BINARY_DIR}/irccd/sysconfig.h
+		COPY ${CMAKE_BINARY_DIR}/irccd/sysconfig.hpp
 		DESTINATION ${IRCCD_FAKEDIR}/include/irccd
 	)
 endif ()

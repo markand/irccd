@@ -18,7 +18,7 @@
 
 #include <cassert>
 
-#include "options.h"
+#include "options.hpp"
 
 namespace irccd {
 

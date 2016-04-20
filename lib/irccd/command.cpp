@@ -20,10 +20,10 @@
 #include <iomanip>
 #include <sstream>
 
-#include <irccd/logger.h>
-#include <irccd/system.h>
+#include <irccd/logger.hpp>
+#include <irccd/system.hpp>
 
-#include "command.h"
+#include "command.hpp"
 
 using namespace std::string_literals;
 

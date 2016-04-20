@@ -20,7 +20,7 @@
 #include <ctime>
 #include <stdexcept>
 
-#include <irccd/sysconfig.h>
+#include <irccd/sysconfig.hpp>
 
 #if defined(HAVE_SETPROGNAME)
 #  include <cstdlib>
@@ -43,7 +43,6 @@
 #  include <sys/utsname.h>
 #  include <sys/time.h>
 #  include <sys/types.h>
-
 #  include <unistd.h>
 
 #  include <cerrno>
@@ -67,10 +66,10 @@
 #  include <pwd.h>
 #endif
 
-#include "fs.h"
-#include "logger.h"
-#include "system.h"
-#include "util.h"
+#include "fs.hpp"
+#include "logger.hpp"
+#include "system.hpp"
+#include "util.hpp"
 
 namespace irccd {
 

@@ -18,9 +18,9 @@
 
 #include <stdexcept>
 
-#include "logger.h"
-#include "rule.h"
-#include "util.h"
+#include "logger.hpp"
+#include "rule.hpp"
+#include "util.hpp"
 
 using namespace std;
 

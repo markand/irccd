@@ -19,9 +19,9 @@
 #include <sstream>
 #include <unordered_map>
 
-#include "irccd.h"
-#include "js-server.h"
-#include "server.h"
+#include "irccd.hpp"
+#include "js-server.hpp"
+#include "server.hpp"
 
 namespace irccd {
 

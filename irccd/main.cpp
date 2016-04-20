@@ -18,15 +18,15 @@
 
 #include <csignal>
 
-#include <irccd/sysconfig.h>
+#include <irccd/sysconfig.hpp>
 
-#include <irccd/logger.h>
-#include <irccd/options.h>
-#include <irccd/path.h>
-#include <irccd/system.h>
+#include <irccd/logger.hpp>
+#include <irccd/options.hpp>
+#include <irccd/path.hpp>
+#include <irccd/system.hpp>
 
-#include <irccd/config.h>
-#include <irccd/irccd.h>
+#include <irccd/config.hpp>
+#include <irccd/irccd.hpp>
 
 using namespace irccd;
 

@@ -21,16 +21,16 @@
 #include <iterator>
 #include <vector>
 
-#include <irccd/sysconfig.h>
+#include <irccd/sysconfig.hpp>
 
 #if defined(HAVE_STAT)
 #  include <sys/types.h>
 #  include <sys/stat.h>
 #endif
 
-#include "fs.h"
-#include "js-irccd.h"
-#include "js-file.h"
+#include "fs.hpp"
+#include "js-irccd.hpp"
+#include "js-file.hpp"
 
 namespace irccd {
 

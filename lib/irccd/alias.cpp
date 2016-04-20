@@ -19,7 +19,7 @@
 #include <cassert>
 #include <regex>
 
-#include "alias.h"
+#include "alias.hpp"
 
 namespace irccd {
 

@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/sysconfig.h>
+#include <irccd/sysconfig.hpp>
 
 #include <chrono>
 
@@ -27,10 +27,10 @@
 #include <cstdlib>
 #include <thread>
 
-#include "js-file.h"
-#include "js-irccd.h"
-#include "js-system.h"
-#include "system.h"
+#include "js-file.hpp"
+#include "js-irccd.hpp"
+#include "js-system.hpp"
+#include "system.hpp"
 
 namespace irccd {
 

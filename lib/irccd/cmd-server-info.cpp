@@ -18,8 +18,8 @@
 
 #include <iostream>
 
-#include "cmd-server-info.h"
-#include "irccd.h"
+#include "cmd-server-info.hpp"
+#include "irccd.hpp"
 
 namespace irccd {
 

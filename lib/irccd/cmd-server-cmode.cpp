@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "cmd-server-cmode.h"
-#include "irccd.h"
+#include "cmd-server-cmode.hpp"
+#include "irccd.hpp"
 
 namespace irccd {
 
