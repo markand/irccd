@@ -20,8 +20,8 @@
 #define IRCCD_APPLICATION_HPP
 
 /**
- * @file application.hpp
- * @brief Base class for irccd and irccdctl.
+ * \file application.hpp
+ * \brief Base class for irccd and irccdctl.
  */
 
 #include <cassert>
@@ -38,7 +38,7 @@ namespace irccd {
 using RemoteCommands = std::unordered_map<std::string, std::unique_ptr<RemoteCommand>>;
 
 /**
- * @brief Base class for creating irccd front ends.
+ * \brief Base class for creating irccd front ends.
  */
 class Application {
 protected:
@@ -56,7 +56,7 @@ public:
 	/**
 	 * Access the remote commands.
 	 *
-	 * @return the commands
+	 * \return the commands
 	 */
 	inline const RemoteCommands &commands() const noexcept
 	{
@@ -66,9 +66,9 @@ public:
 	/**
 	 * Add a new command.
 	 *
-	 * @pre command must not be null
-	 * @pre the command must not exist
-	 * @param command the command
+	 * \pre command must not be null
+	 * \pre the command must not exist
+	 * \param command the command
 	 */
 	inline void addCommand(std::unique_ptr<RemoteCommand> command)
 	{

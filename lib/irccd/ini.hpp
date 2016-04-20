@@ -20,8 +20,8 @@
 #define IRCCD_INI_HPP
 
 /**
- * @file ini.hpp
- * @brief Configuration file parser.
+ * \file ini.hpp
+ * \brief Configuration file parser.
  */
 
 #include <algorithm>
@@ -40,8 +40,8 @@ namespace ini {
 class Document;
 
 /**
- * @class Error
- * @brief Error in a file
+ * \class Error
+ * \brief Error in a file
  */
 class Error : public std::exception {
 private:
@@ -53,9 +53,9 @@ public:
 	/**
 	 * Constructor.
 	 *
-	 * @param l the line
-	 * @param c the column
-	 * @param m the message
+	 * \param l the line
+	 * \param c the column
+	 * \param m the message
 	 */
 	inline Error(int l, int c, std::string m) noexcept
 		: m_line(l)
@@ -67,7 +67,7 @@ public:
 	/**
 	 * Get the line number.
 	 *
-	 * @return the line
+	 * \return the line
 	 */
 	inline int line() const noexcept
 	{
@@ -77,7 +77,7 @@ public:
 	/**
 	 * Get the column number.
 	 *
-	 * @return the column
+	 * \return the column
 	 */
 	inline int column() const noexcept
 	{
@@ -87,7 +87,7 @@ public:
 	/**
 	 * Return the raw error message (no line and column shown).
 	 *
-	 * @return the error message
+	 * \return the error message
 	 */
 	const char *what() const noexcept override
 	{
@@ -96,17 +96,17 @@ public:
 };
 
 /**
- * @class Token
- * @brief Describe a token read in the .ini source
+ * \class Token
+ * \brief Describe a token read in the .ini source
  *
  * This class can be used when you want to parse a .ini file yourself.
  *
- * @see Document::analyze
+ * \see Document::analyze
  */
 class Token {
 public:
 	/**
-	 * @brief Token type
+	 * \brief Token type
 	 */
 	enum Type {
 		Include,	//!< include statement
@@ -129,10 +129,10 @@ public:
 	/**
 	 * Construct a token.
 	 *
-	 * @param type the type
-	 * @param line the line
-	 * @param column the column
-	 * @param value the value
+	 * \param type the type
+	 * \param line the line
+	 * \param column the column
+	 * \param value the value
 	 */
 	Token(Type type, int line, int column, std::string value = "") noexcept
 		: m_type(type)
@@ -168,7 +168,7 @@ public:
 	/**
 	 * Get the type.
 	 *
-	 * @return the type
+	 * \return the type
 	 */
 	inline Type type() const noexcept
 	{
@@ -178,7 +178,7 @@ public:
 	/**
 	 * Get the line.
 	 *
-	 * @return the line
+	 * \return the line
 	 */
 	inline int line() const noexcept
 	{
@@ -188,7 +188,7 @@ public:
 	/**
 	 * Get the column.
 	 *
-	 * @return the column
+	 * \return the column
 	 */
 	inline int column() const noexcept
 	{
@@ -199,7 +199,7 @@ public:
 	 * Get the value. For words, quoted words and section, the value is the content. Otherwise it's the
 	 * characters parsed.
 	 *
-	 * @return the value
+	 * \return the value
 	 */
 	inline const std::string &value() const noexcept
 	{
@@ -213,8 +213,8 @@ public:
 using Tokens = std::vector<Token>;
 
 /**
- * @class Option
- * @brief Option definition.
+ * \class Option
+ * \brief Option definition.
  */
 class Option : public std::vector<std::string> {
 private:
@@ -224,8 +224,8 @@ public:
 	/**
 	 * Construct an empty option.
 	 *
-	 * @param key the key
-	 * @param value the value
+	 * \param key the key
+	 * \param value the value
 	 */
 	inline Option(std::string key) noexcept
 		: std::vector<std::string>()
@@ -236,8 +236,8 @@ public:
 	/**
 	 * Construct a single option.
 	 *
-	 * @param key the key
-	 * @param value the value
+	 * \param key the key
+	 * \param value the value
 	 */
 	inline Option(std::string key, std::string value) noexcept
 		: m_key(std::move(key))
@@ -248,8 +248,8 @@ public:
 	/**
 	 * Construct a list option.
 	 *
-	 * @param key the key
-	 * @param values the values
+	 * \param key the key
+	 * \param values the values
 	 */
 	inline Option(std::string key, std::vector<std::string> values) noexcept
 		: std::vector<std::string>(std::move(values))
@@ -260,7 +260,7 @@ public:
 	/**
 	 * Get the option key.
 	 *
-	 * @return the key
+	 * \return the key
 	 */
 	inline const std::string &key() const noexcept
 	{
@@ -270,7 +270,7 @@ public:
 	/**
 	 * Get the option value.
 	 *
-	 * @return the value
+	 * \return the value
 	 */
 	inline const std::string &value() const noexcept
 	{
@@ -281,8 +281,8 @@ public:
 };
 
 /**
- * @class Section
- * @brief Section that contains one or more options.
+ * \class Section
+ * \brief Section that contains one or more options.
  */
 class Section : public std::vector<Option> {
 private:
@@ -292,7 +292,7 @@ public:
 	/**
 	 * Construct a section with its name.
 	 *
-	 * @param key the key
+	 * \param key the key
 	 */
 	inline Section(std::string key) noexcept
 		: m_key(std::move(key))
@@ -302,7 +302,7 @@ public:
 	/**
 	 * Get the section key.
 	 *
-	 * @return the key
+	 * \return the key
 	 */
 	inline const std::string &key() const noexcept
 	{
@@ -312,8 +312,8 @@ public:
 	/**
 	 * Check if the section contains a specific option.
 	 *
-	 * @param key the option key
-	 * @return true if the option exists
+	 * \param key the option key
+	 * \return true if the option exists
 	 */
 	inline bool contains(const std::string &key) const noexcept
 	{
@@ -323,9 +323,9 @@ public:
 	/**
 	 * Access an option at the specified key.
 	 *
-	 * @param key the key
-	 * @return the option
-	 * @throw std::out_of_range if the key does not exist
+	 * \param key the key
+	 * \return the option
+	 * \throw std::out_of_range if the key does not exist
 	 */
 	inline Option &operator[](const std::string &key)
 	{
@@ -335,9 +335,9 @@ public:
 	/**
 	 * Access an option at the specified key.
 	 *
-	 * @param key the key
-	 * @return the option
-	 * @throw std::out_of_range if the key does not exist
+	 * \param key the key
+	 * \return the option
+	 * \throw std::out_of_range if the key does not exist
 	 */
 	inline const Option &operator[](const std::string &key) const
 	{
@@ -347,8 +347,8 @@ public:
 	/**
 	 * Find an option by key and return an iterator.
 	 *
-	 * @param key the key
-	 * @return the iterator or end() if not found
+	 * \param key the key
+	 * \return the iterator or end() if not found
 	 */
 	inline iterator find(const std::string &key) noexcept
 	{
@@ -360,8 +360,8 @@ public:
 	/**
 	 * Find an option by key and return an iterator.
 	 *
-	 * @param key the key
-	 * @return the iterator or end() if not found
+	 * \param key the key
+	 * \return the iterator or end() if not found
 	 */
 	inline const_iterator find(const std::string &key) const noexcept
 	{
@@ -377,8 +377,8 @@ public:
 };
 
 /**
- * @class File
- * @brief Source for reading .ini files.
+ * \class File
+ * \brief Source for reading .ini files.
  */
 class File {
 public:
@@ -389,9 +389,9 @@ public:
 };
 
 /**
- * @class Buffer
- * @brief Source for reading ini from text.
- * @note the include statement is not supported with buffers.
+ * \class Buffer
+ * \brief Source for reading ini from text.
+ * \note the include statement is not supported with buffers.
  */
 class Buffer {
 public:
@@ -402,8 +402,8 @@ public:
 };
 
 /**
- * @class Document
- * @brief Ini config file loader
+ * \class Document
+ * \brief Ini config file loader
  */
 class Document : public std::vector<Section> {
 private:
@@ -417,48 +417,48 @@ public:
 	 * For example, this class does not allow adding options under no sections and this function will not
 	 * detect that issue.
 	 *
-	 * @param file the file to read
-	 * @return the list of tokens
-	 * @throws Error on errors
+	 * \param file the file to read
+	 * \return the list of tokens
+	 * \throws Error on errors
 	 */
 	static Tokens analyze(const File &file);
 
 	/**
 	 * Overloaded function for buffers.
 	 *
-	 * @param buffer the buffer to read
-	 * @return the list of tokens
-	 * @throws Error on errors
+	 * \param buffer the buffer to read
+	 * \return the list of tokens
+	 * \throws Error on errors
 	 */
 	static Tokens analyze(const Buffer &buffer);
 
 	/**
 	 * Show all tokens and their description.
 	 *
-	 * @param tokens the tokens
+	 * \param tokens the tokens
 	 */
 	static void dump(const Tokens &tokens);
 
 	/**
 	 * Construct a document from a file.
 	 *
-	 * @param file the file to read
-	 * @throws Error on errors
+	 * \param file the file to read
+	 * \throws Error on errors
 	 */
 	Document(const File &file);
 
 	/**
 	 * Overloaded constructor for buffers.
 	 *
-	 * @param buffer the buffer to read
-	 * @throws Error on errors
+	 * \param buffer the buffer to read
+	 * \throws Error on errors
 	 */
 	Document(const Buffer &buffer);
 
 	/**
 	 * Get the current document path, only useful when constructed from File source.
 	 *
-	 * @return the path
+	 * \return the path
 	 */
 	inline const std::string &path() const noexcept
 	{
@@ -468,7 +468,7 @@ public:
 	/**
 	 * Check if a document has a specific section.
 	 *
-	 * @param key the key
+	 * \param key the key
 	 */
 	inline bool contains(const std::string &key) const noexcept
 	{
@@ -478,9 +478,9 @@ public:
 	/**
 	 * Access a section at the specified key.
 	 *
-	 * @param key the key
-	 * @return the section
-	 * @throw std::out_of_range if the key does not exist
+	 * \param key the key
+	 * \return the section
+	 * \throw std::out_of_range if the key does not exist
 	 */
 	inline Section &operator[](const std::string &key)
 	{
@@ -490,9 +490,9 @@ public:
 	/**
 	 * Access a section at the specified key.
 	 *
-	 * @param key the key
-	 * @return the section
-	 * @throw std::out_of_range if the key does not exist
+	 * \param key the key
+	 * \return the section
+	 * \throw std::out_of_range if the key does not exist
 	 */
 	inline const Section &operator[](const std::string &key) const
 	{
@@ -502,8 +502,8 @@ public:
 	/**
 	 * Find a section by key and return an iterator.
 	 *
-	 * @param key the key
-	 * @return the iterator or end() if not found
+	 * \param key the key
+	 * \return the iterator or end() if not found
 	 */
 	inline iterator find(const std::string &key) noexcept
 	{
@@ -515,8 +515,8 @@ public:
 	/**
 	 * Find a section by key and return an iterator.
 	 *
-	 * @param key the key
-	 * @return the iterator or end() if not found
+	 * \param key the key
+	 * \return the iterator or end() if not found
 	 */
 	inline const_iterator find(const std::string &key) const noexcept
 	{

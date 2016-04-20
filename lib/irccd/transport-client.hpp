@@ -20,8 +20,8 @@
 #define IRCCD_TRANSPORT_CLIENT_HPP
 
 /**
- * @file transport-client.hpp
- * @brief Client connected to irccd
+ * \file transport-client.hpp
+ * \brief Client connected to irccd
  */
 
 #include <functional>
@@ -42,8 +42,8 @@ class Value;
 } // !json
 
 /**
- * @class TransportClient
- * @brief Client connected to irccd.
+ * \class TransportClient
+ * \brief Client connected to irccd.
  *
  * This class emits a warning upon clients request through onCommand signal.
  */
@@ -86,8 +86,8 @@ public:
 	/**
 	 * Send or receive data, called after a select.
 	 *
-	 * @param setinput the input fd_set
-	 * @param setoutput the output fd_set
+	 * \param setinput the input fd_set
+	 * \param setoutput the output fd_set
 	 */
 	void sync(fd_set &setinput, fd_set &setoutput);
 
@@ -95,15 +95,15 @@ public:
 	/**
 	 * Notify the client that the command succeeded.
 	 *
-	 * @param command the command name
+	 * \param command the command name
 	 */
 	void ok(const std::string &command);
 
 	/**
 	 * Send an error message to the client.
 	 *
-	 * @param command the command name
-	 * @param message the error message
+	 * \param command the command name
+	 * \param message the error message
 	 */
 	void error(const std::string &command, std::string message);
 #endif
@@ -114,14 +114,14 @@ public:
 	 * This function appends "\r\n\r\n" after the message so you don't have
 	 * to do it manually.
 	 *
-	 * @param message the message
+	 * \param message the message
 	 */
 	void send(std::string message);
 
 	/**
 	 * Tell if the client has data pending for output.
 	 *
-	 * @return true if has pending data to write
+	 * \return true if has pending data to write
 	 */
 	inline bool hasOutput() const noexcept
 	{
@@ -131,13 +131,13 @@ public:
 	/**
 	 * Get the underlying socket handle.
 	 *
-	 * @return the socket
+	 * \return the socket
 	 */
 	virtual net::Handle handle() noexcept = 0;
 };
 
 /**
- * @brief Template class for Tcp and Ssl sockets
+ * \brief Template class for Tcp and Ssl sockets
  */
 template <typename Address>
 class TransportClientBase : public TransportClient {
@@ -152,7 +152,7 @@ public:
 	/**
 	 * Create a client.
 	 *
-	 * @param socket the socket
+	 * \param socket the socket
 	 */
 	inline TransportClientBase(net::SocketTcp<Address> socket)
 		: m_socket(std::move(socket))
@@ -160,7 +160,7 @@ public:
 	}
 
 	/**
-	 * @copydoc TransportClient::handle
+	 * \copydoc TransportClient::handle
 	 */
 	net::Handle handle() noexcept override
 	{

@@ -20,8 +20,8 @@
 #define IRCCD_CMD_SERVER_CNOTICE_HPP
 
 /**
- * @file cmd-server-cnotice.hpp
- * @brief Implementation of server-cnotice transport command.
+ * \file cmd-server-cnotice.hpp
+ * \brief Implementation of server-cnotice transport command.
  */
 
 #include "command.hpp"
@@ -31,8 +31,8 @@ namespace irccd {
 namespace command {
 
 /**
- * @class ServerChannelNotice
- * @brief Implementation of server-cnotice transport command.
+ * \class ServerChannelNotice
+ * \brief Implementation of server-cnotice transport command.
  *
  * Send a channel notice to the specified channel.
  *
@@ -51,17 +51,17 @@ public:
 	ServerChannelNotice();
 
 	/**
-	 * @copydoc RemoteCommand::help
+	 * \copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
 
 	/**
-	 * @copydoc RemoteCommand::args
+	 * \copydoc RemoteCommand::args
 	 */
 	std::vector<Arg> args() const override;
 
 	/**
-	 * @copydoc RemoteCommand::exec
+	 * \copydoc RemoteCommand::exec
 	 */
 	json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };

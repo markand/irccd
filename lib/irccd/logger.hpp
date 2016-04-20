@@ -20,8 +20,8 @@
 #define IRCCD_LOGGER_HPP
 
 /**
- * @file logger.hpp
- * @brief Logging facilities.
+ * \file logger.hpp
+ * \brief Logging facilities.
  */
 
 #include <irccd/sysconfig.hpp>
@@ -35,8 +35,8 @@ namespace irccd {
 namespace log {
 
 /**
- * @enum Level
- * @brief Which level of warning
+ * \enum Level
+ * \brief Which level of warning
  */
 enum class Level {
 	Info,			//!< Standard information (disabled if verbose is false)
@@ -49,16 +49,16 @@ enum class Level {
  * -------------------------------------------------------- */
 
 /**
- * @class Interface
- * @brief Interface to implement new logger mechanisms
+ * \class Interface
+ * \brief Interface to implement new logger mechanisms
  *
  * Derive from this class and use Logger::setInterface() to change logging
  * system.
  *
- * @see File
- * @see Console
- * @see Syslog
- * @see Silent
+ * \see File
+ * \see Console
+ * \see Syslog
+ * \see Silent
  */
 class Interface {
 public:
@@ -66,8 +66,8 @@ public:
 	 * Write the line to the logs. The line to write will never contains
 	 * trailing new line character.
 	 *
-	 * @param level the level
-	 * @param line the line without trailing \n
+	 * \param level the level
+	 * \param line the line without trailing \n
 	 */	
 	virtual void write(Level level, const std::string &line) noexcept = 0;
 };
@@ -77,13 +77,13 @@ public:
  * -------------------------------------------------------- */
 
 /**
- * @class Console
- * @brief Logger implementation for console output
+ * \class Console
+ * \brief Logger implementation for console output
  */
 class Console : public Interface {
 public:
 	/**
-	 * @copydoc Interface::write
+	 * \copydoc Interface::write
 	 */
 	void write(Level level, const std::string &line) noexcept override;
 };
@@ -93,8 +93,8 @@ public:
  * -------------------------------------------------------- */
 
 /**
- * @class File
- * @brief Output to a file
+ * \class File
+ * \brief Output to a file
  */
 class File : public Interface {
 private:
@@ -108,13 +108,13 @@ public:
 	 *
 	 * The same path can be used for all levels.
 	 *
-	 * @param normal the path to the normal logs
-	 * @param errors the path to the errors logs
+	 * \param normal the path to the normal logs
+	 * \param errors the path to the errors logs
 	 */
 	File(std::string normal, std::string errors);
 
 	/**
-	 * @copydoc Interface::write
+	 * \copydoc Interface::write
 	 */
 	void write(Level level, const std::string &line) noexcept override;
 };
@@ -124,15 +124,15 @@ public:
  * -------------------------------------------------------- */
 
 /**
- * @class Silent
- * @brief Use to disable logs
+ * \class Silent
+ * \brief Use to disable logs
  *
  * Useful for unit tests when some classes may emits log.
  */
 class Silent : public Interface {
 public:
 	/**
-	 * @copydoc Interface::write
+	 * \copydoc Interface::write
 	 */
 	void write(Level level, const std::string &line) noexcept override;
 };
@@ -144,8 +144,8 @@ public:
 #if defined(HAVE_SYSLOG)
 
 /**
- * @class Syslog
- * @brief Implements logger into syslog
+ * \class Syslog
+ * \brief Implements logger into syslog
  */
 class Syslog : public Interface {
 public:
@@ -160,7 +160,7 @@ public:
 	~Syslog();
 
 	/**
-	 * @copydoc Interface::write
+	 * \copydoc Interface::write
 	 */
 	void write(Level level, const std::string &line) noexcept override;
 };
@@ -174,44 +174,44 @@ public:
 /**
  * Update the logger interface.
  *
- * @param iface the new interface
+ * \param iface the new interface
  */
 void setInterface(std::unique_ptr<Interface> iface) noexcept;
 
 /**
  * Get the stream for informational messages.
  *
- * @return the stream
- * @note Has no effect if verbose is set to false.
+ * \return the stream
+ * \note Has no effect if verbose is set to false.
  */
 std::ostream &info() noexcept;
 
 /**
  * Get the stream for warnings.
  *
- * @return the stream
+ * \return the stream
  */
 std::ostream &warning() noexcept;
 
 /**
  * Get the stream for debug messages.
  *
- * @return the stream
- * @note Has no effect if compiled in release mode.
+ * \return the stream
+ * \note Has no effect if compiled in release mode.
  */
 std::ostream &debug() noexcept;
 
 /**
  * Tells if verbose is enabled.
  *
- * @return true if enabled
+ * \return true if enabled
  */
 bool isVerbose() noexcept;
 
 /**
  * Set the verbosity mode.
  *
- * @param mode the new mode
+ * \param mode the new mode
  */
 void setVerbose(bool mode) noexcept;
 

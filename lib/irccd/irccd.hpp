@@ -20,8 +20,8 @@
 #define IRCCD_HPP
 
 /**
- * @file irccd.hpp
- * @brief Base class for irccd front end.
+ * \file irccd.hpp
+ * \brief Base class for irccd front end.
  */
 
 #include <atomic>
@@ -72,8 +72,8 @@ using Identities = std::unordered_map<std::string, ServerIdentity>;
 using Rules = std::vector<Rule>;
 
 /**
- * @class ServerEvent
- * @brief Structure that owns several informations about an IRC event
+ * \class ServerEvent
+ * \brief Structure that owns several informations about an IRC event
  *
  * This structure is used to dispatch the IRC event to the plugins and the transports.
  */
@@ -114,8 +114,8 @@ using PluginConfigs = std::unordered_map<std::string, PluginConfig>;
 #endif
 
 /**
- * @class Irccd
- * @brief Irccd main instance
+ * \class Irccd
+ * \brief Irccd main instance
  *
  * This class is used as the main application event loop, it stores servers, plugins and transports.
  *
@@ -227,7 +227,7 @@ public:
 	/**
 	 * Load a configuration into irccd. Added as convenience to allow expressions like `irccd.load(Config{"foo"})`.
 	 *
-	 * @param config the configuration loader
+	 * \param config the configuration loader
 	 */
 	template <typename T>
 	inline void load(T &&config)
@@ -239,8 +239,8 @@ public:
 	 * Add an event to the queue. This will immediately signals the event loop to interrupt itself to dispatch
 	 * the pending events.
 	 *
-	 * @param ev the event
-	 * @note Thread-safe
+	 * \param ev the event
+	 * \note Thread-safe
 	 */
 	void post(Event ev) noexcept;
 
@@ -248,7 +248,7 @@ public:
 	 * This function wraps post() to iterate over all plugins to call the function and to send to all
 	 * connected transport the event.
 	 *
-	 * @param ev the event
+	 * \param ev the event
 	 */
 	void postServerEvent(ServerEvent ev) noexcept;
 
@@ -262,8 +262,8 @@ public:
 	/**
 	 * Add an identity.
 	 *
-	 * @param identity the identity
-	 * @note If the identity already exists, it is overriden
+	 * \param identity the identity
+	 * \note If the identity already exists, it is overriden
 	 */
 	inline void addIdentity(ServerIdentity identity) noexcept
 	{
@@ -273,8 +273,8 @@ public:
 	/**
 	 * Get an identity, if not found, the default one is used.
 	 *
-	 * @param name the identity name
-	 * @return the identity or default one
+	 * \param name the identity name
+	 * \return the identity or default one
 	 */
 	inline ServerIdentity findIdentity(const std::string &name) const noexcept
 	{
@@ -295,8 +295,8 @@ public:
 	/**
 	 * Check if a server exists.
 	 *
-	 * @param name the name
-	 * @return true if exists
+	 * \param name the name
+	 * \return true if exists
 	 */
 	inline bool hasServer(const std::string &name) const noexcept
 	{
@@ -306,32 +306,32 @@ public:
 	/**
 	 * Add a new server to the application.
 	 *
-	 * @pre hasServer must return false
-	 * @param sv the server
+	 * \pre hasServer must return false
+	 * \param sv the server
 	 */
 	void addServer(std::shared_ptr<Server> sv) noexcept;
 
 	/**
 	 * Get a server or empty one if not found
 	 *
-	 * @param name the server name
-	 * @return the server or empty one if not found
+	 * \param name the server name
+	 * \return the server or empty one if not found
 	 */
 	std::shared_ptr<Server> getServer(const std::string &name) const noexcept;
 
 	/**
 	 * Find a server by name.
 	 *
-	 * @param name the server name
-	 * @return the server
-	 * @throw std::out_of_range if the server does not exist
+	 * \param name the server name
+	 * \return the server
+	 * \throw std::out_of_range if the server does not exist
 	 */
 	std::shared_ptr<Server> requireServer(const std::string &name) const;
 
 	/**
 	 * Get the map of loaded servers.
 	 *
-	 * @return the servers
+	 * \return the servers
 	 */
 	inline const Servers &servers() const noexcept
 	{
@@ -343,7 +343,7 @@ public:
 	 *
 	 * The server if any, will be disconnected.
 	 *
-	 * @param name the server name
+	 * \param name the server name
 	 */
 	void removeServer(const std::string &name);
 
@@ -364,7 +364,7 @@ public:
 	/**
 	 * Add a transport server.
 	 *
-	 * @param ts the transport server
+	 * \param ts the transport server
 	 */
 	void addTransport(std::shared_ptr<TransportServer> ts);
 
@@ -379,8 +379,8 @@ public:
 	/**
 	 * Check if a plugin is loaded.
 	 *
-	 * @param name the plugin id
-	 * @return true if has plugin
+	 * \param name the plugin id
+	 * \return true if has plugin
 	 */
 	inline bool hasPlugin(const std::string &name) const noexcept
 	{
@@ -390,25 +390,25 @@ public:
 	/**
 	 * Get a plugin or empty one if not found.
 	 *
-	 * @param name the plugin id
-	 * @return the plugin or empty one if not found
+	 * \param name the plugin id
+	 * \return the plugin or empty one if not found
 	 */
 	std::shared_ptr<Plugin> getPlugin(const std::string &name) const noexcept;
 
 	/**
 	 * Find a plugin.
 	 *
-	 * @param name the plugin id
-	 * @return the plugin
-	 * @throws std::out_of_range if not found
+	 * \param name the plugin id
+	 * \return the plugin
+	 * \throws std::out_of_range if not found
 	 */
 	std::shared_ptr<Plugin> requirePlugin(const std::string &name) const;
 
 	/**
 	 * Add plugin configuration for the specified plugin.
 	 *
-	 * @param name
-	 * @param config
+	 * \param name
+	 * \param config
 	 */
 	inline void addPluginConfig(std::string name, PluginConfig config)
 	{
@@ -421,8 +421,8 @@ public:
 	 * Plugins signals will be connected to the irccd main loop. The onLoad function will also be called and the
 	 * plugin is not added on errors.
 	 *
-	 * @pre plugin must not be empty
-	 * @param plugin the plugin
+	 * \pre plugin must not be empty
+	 * \param plugin the plugin
 	 */
 	void addPlugin(std::shared_ptr<Plugin> plugin);
 
@@ -431,30 +431,30 @@ public:
 	 *
 	 * TODO: Move this somewhere else (e.g. Plugin::find).
 	 *
-	 * @param source the path or the plugin id to search
-	 * @param find set to true for searching by id
+	 * \param source the path or the plugin id to search
+	 * \param find set to true for searching by id
 	 */
 	void loadPlugin(std::string name, const std::string &source, bool find);
 
 	/**
 	 * Unload a plugin and remove it.
 	 *
-	 * @param name the plugin id
+	 * \param name the plugin id
 	 */
 	void unloadPlugin(const std::string &name);
 
 	/**
 	 * Reload a plugin by calling onReload.
 	 *
-	 * @param name the plugin name
-	 * @throw std::exception on failures
+	 * \param name the plugin name
+	 * \throw std::exception on failures
 	 */
 	void reloadPlugin(const std::string &name);
 
 	/**
 	 * Get the map of plugins.
 	 *
-	 * @return the map of plugins
+	 * \return the map of plugins
 	 */
 	inline const Plugins &plugins() const noexcept
 	{
@@ -474,7 +474,7 @@ public:
 	/**
 	 * Append a rule.
 	 *
-	 * @param rule the rule to append
+	 * \param rule the rule to append
 	 */
 	inline void addRule(Rule rule)
 	{
@@ -484,8 +484,8 @@ public:
 	/**
 	 * Insert a new rule at the specified position.
 	 *
-	 * @param rule the rule
-	 * @param position the position
+	 * \param rule the rule
+	 * \param position the position
 	 */
 	inline void insertRule(Rule rule, unsigned position)
 	{
@@ -497,7 +497,7 @@ public:
 	/**
 	 * Get the list of rules.
 	 *
-	 * @return the list of rules
+	 * \return the list of rules
 	 */
 	inline const std::vector<Rule> &rules() const noexcept
 	{
@@ -507,8 +507,8 @@ public:
 	/**
 	 * Remove a new rule from the specified position.
 	 *
-	 * @pre position must be valid
-	 * @param position the position
+	 * \pre position must be valid
+	 * \param position the position
 	 */
 	inline void removeRule(unsigned position)
 	{

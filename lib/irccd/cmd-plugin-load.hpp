@@ -20,8 +20,8 @@
 #define IRCCD_CMD_PLUGIN_LOAD_HPP
 
 /**
- * @file cmd-plugin-load.hpp
- * @brief Implementation of plugin-load transport command.
+ * \file cmd-plugin-load.hpp
+ * \brief Implementation of plugin-load transport command.
  */
 
 #include "command.hpp"
@@ -31,8 +31,8 @@ namespace irccd {
 namespace command {
 
 /**
- * @class PluginLoad
- * @brief Implementation of plugin-load transport command.
+ * \class PluginLoad
+ * \brief Implementation of plugin-load transport command.
  */
 class PluginLoad : public RemoteCommand {
 public:
@@ -42,17 +42,17 @@ public:
 	PluginLoad();
 
 	/**
-	 * @copydoc RemoteCommand::help
+	 * \copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
 
 	/**
-	 * @copydoc RemoteCommand::args
+	 * \copydoc RemoteCommand::args
 	 */
 	std::vector<Arg> args() const override;
 
 	/**
-	 * @copydoc RemoteCommand::exec
+	 * \copydoc RemoteCommand::exec
 	 */
 	json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };

@@ -20,8 +20,8 @@
 #define IRCCD_CMD_PLUGIN_UNLOAD_HPP
 
 /**
- * @file cmd-plugin-unload.hpp
- * @brief Implementation of plugin-unload transport command.
+ * \file cmd-plugin-unload.hpp
+ * \brief Implementation of plugin-unload transport command.
  */
 
 #include "command.hpp"
@@ -31,8 +31,8 @@ namespace irccd {
 namespace command {
 
 /**
- * @class PluginUnload
- * @brief Implementation of plugin-unload transport command.
+ * \class PluginUnload
+ * \brief Implementation of plugin-unload transport command.
  */
 class PluginUnload : public RemoteCommand {
 public:
@@ -42,17 +42,17 @@ public:
 	PluginUnload();
 
 	/**
-	 * @copydoc RemoteCommand::help
+	 * \copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
 
 	/**
-	 * @copydoc RemoteCommand::args
+	 * \copydoc RemoteCommand::args
 	 */
 	std::vector<Arg> args() const override;
 
 	/**
-	 * @copydoc RemoteCommand::exec
+	 * \copydoc RemoteCommand::exec
 	 */
 	json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };

@@ -20,8 +20,8 @@
 #define IRCCD_UTIL_HPP
 
 /**
- * @file util.hpp
- * @brief Utilities.
+ * \file util.hpp
+ * \brief Utilities.
  */
 
 #include <ctime>
@@ -37,8 +37,8 @@ namespace irccd {
 namespace util {
 
 /**
- * @enum MessageType
- * @brief Describe which type of message has been received
+ * \enum MessageType
+ * \brief Describe which type of message has been received
  *
  * On channels and queries, you may have a special command or a standard message depending on the
  * beginning of the message.
@@ -51,13 +51,13 @@ enum class MessageType {
 };
 
 /**
- * @brief Combine the type of message and its content.
+ * \brief Combine the type of message and its content.
  */
 using MessagePair = std::pair<std::string, MessageType>;
 
 /**
- * @class Substitution
- * @brief Used for format() function.
+ * \class Substitution
+ * \brief Used for format() function.
  */
 class Substitution {
 public:
@@ -122,27 +122,27 @@ std::string format(std::string text, const Substitution &params = {});
 /**
  * Remove leading and trailing spaces.
  *
- * @param str the string
- * @return the removed white spaces
+ * \param str the string
+ * \return the removed white spaces
  */
 std::string strip(std::string str);
 
 /**
  * Split a string by delimiters.
  *
- * @param list the string to split
- * @param delimiters a list of delimiters
- * @param max max number of split
- * @return a list of string splitted
+ * \param list the string to split
+ * \param delimiters a list of delimiters
+ * \param max max number of split
+ * \return a list of string splitted
  */
 std::vector<std::string> split(const std::string &list, const std::string &delimiters, int max = -1);
 
 /**
  * Join values by a separator and return a string.
  *
- * @param first the first iterator
- * @param last the last iterator
- * @param delim the optional delimiter
+ * \param first the first iterator
+ * \param last the last iterator
+ * \param delim the optional delimiter
  */
 template <typename InputIt, typename DelimType = char>
 std::string join(InputIt first, InputIt last, DelimType delim = ':')
@@ -162,9 +162,9 @@ std::string join(InputIt first, InputIt last, DelimType delim = ':')
 /**
  * Convenient overload.
  *
- * @param list the initializer list
- * @param delim the delimiter
- * @return the string
+ * \param list the initializer list
+ * \param delim the delimiter
+ * \return the string
  */
 template <typename T, typename DelimType = char>
 inline std::string join(std::initializer_list<T> list, DelimType delim = ':')
@@ -175,10 +175,10 @@ inline std::string join(std::initializer_list<T> list, DelimType delim = ':')
 /**
  * Parse IRC message and determine if it's a command or a simple message.
  *
- * @param message the message line
- * @param commandChar the command char (e.g '!')
- * @param plugin the plugin name
- * @return the pair
+ * \param message the message line
+ * \param commandChar the command char (e.g '!')
+ * \param plugin the plugin name
+ * \return the pair
  */
 MessagePair parseMessage(std::string message, const std::string &commandChar, const std::string &plugin);
 
@@ -186,8 +186,8 @@ MessagePair parseMessage(std::string message, const std::string &commandChar, co
  * Server and identities must have strict names. This function can
  * be used to ensure that they are valid.
  *
- * @param name the identifier name
- * @return true if is valid
+ * \param name the identifier name
+ * \return true if is valid
  */
 inline bool isIdentifierValid(const std::string &name)
 {
@@ -197,34 +197,34 @@ inline bool isIdentifierValid(const std::string &name)
 /**
  * Check if the value is a boolean, 1, yes and true are accepted.
  *
- * @param value the value
- * @return true if is boolean
- * @note this function is case-insensitive
+ * \param value the value
+ * \return true if is boolean
+ * \note this function is case-insensitive
  */
 bool isBoolean(std::string value) noexcept;
 
 /**
  * Check if the string is an integer.
  *
- * @param value the input
- * @param base the optional base
- * @return true if integer
+ * \param value the input
+ * \param base the optional base
+ * \return true if integer
  */
 bool isInt(const std::string &value, int base = 10) noexcept;
 
 /**
  * Check if the string is real.
  *
- * @param value the value
- * @return true if real
+ * \param value the value
+ * \return true if real
  */
 bool isReal(const std::string &value) noexcept;
 
 /**
  * Check if the string is a number.
  *
- * @param value the value
- * @return true if it is a number
+ * \param value the value
+ * \return true if it is a number
  */
 inline bool isNumber(const std::string &value) noexcept
 {
@@ -234,8 +234,8 @@ inline bool isNumber(const std::string &value) noexcept
 /**
  * Parse a network message from an input buffer and remove it from it.
  *
- * @param input the buffer, will be updated
- * @return the message or empty string if there is nothing
+ * \param input the buffer, will be updated
+ * \return the message or empty string if there is nothing
  */
 std::string nextNetwork(std::string &input);
 

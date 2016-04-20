@@ -20,8 +20,8 @@
 #define IRCCD_PATH_HPP
 
 /**
- * @file path.hpp
- * @brief Path management.
+ * \file path.hpp
+ * \brief Path management.
  */
 
 #include <string>
@@ -37,8 +37,8 @@ namespace path {
 extern const char Separator;
 
 /**
- * @enum Path
- * @brief Which special path to get
+ * \enum Path
+ * \brief Which special path to get
  */
 enum Path {
 	PathConfig,			//!< Configuration files
@@ -48,8 +48,8 @@ enum Path {
 };
 
 /**
- * @enum Owner
- * @brief For paths, get the installation path or the user ones
+ * \enum Owner
+ * \brief For paths, get the installation path or the user ones
  */
 enum Owner {
 	OwnerSystem,			//!< System wide
@@ -62,15 +62,15 @@ enum Owner {
  * It use system dependant program path lookup if available and fallbacks to the path given as argument if any failure
  * was encoutered.
  *
- * @param argv0 the path to the executable (argv[0])
+ * \param argv0 the path to the executable (argv[0])
  */
 void setApplicationPath(const std::string &argv0);
 
 /**
  * Clean a path by removing any extra / or \ and add a trailing one.
  *
- * @param path the path
- * @return the updated path
+ * \param path the path
+ * \return the updated path
  */
 std::string clean(std::string path);
 
@@ -79,10 +79,10 @@ std::string clean(std::string path);
  *
  * The path is always terminated by a trailing / or \\.
  *
- * @pre setApplicationPath must have been called
- * @param path the type of path
- * @param owner system or user wide
- * @return the path
+ * \pre setApplicationPath must have been called
+ * \param path the type of path
+ * \param owner system or user wide
+ * \return the path
  */
 std::string get(Path path, Owner owner);
 
@@ -92,9 +92,9 @@ std::string get(Path path, Owner owner);
  * This function will add more directories than pathSystem*() and pathUser*() functions, for example
  * it will add some path if irccd is relocatable.
  *
- * @pre setApplicationPath must have been called
- * @param path the type of path
- * @return the list of preferred directories in order
+ * \pre setApplicationPath must have been called
+ * \param path the type of path
+ * \return the list of preferred directories in order
  */
 std::vector<std::string> list(Path path);
 

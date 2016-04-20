@@ -20,8 +20,8 @@
 #define IRCCD_ELAPSED_TIMER_HPP
 
 /**
- * @file elapsed-timer.hpp
- * @brief Measure elapsed time
+ * \file elapsed-timer.hpp
+ * \brief Measure elapsed time
  */
 
 #include <chrono>
@@ -29,8 +29,8 @@
 namespace irccd {
 
 /**
- * @class ElapsedTimer
- * @brief Measure elapsed time
+ * \class ElapsedTimer
+ * \brief Measure elapsed time
  *
  * This class provides an abstraction to measure elapsed time since the
  * construction of the object.
@@ -75,7 +75,7 @@ public:
 	/**
 	 * Get the number of elapsed milliseconds.
 	 *
-	 * @return the milliseconds
+	 * \return the milliseconds
 	 */
 	unsigned elapsed() noexcept;
 };

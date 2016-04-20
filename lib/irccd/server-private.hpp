@@ -28,7 +28,7 @@
 namespace irccd {
 
 /**
- * @brief Bridge for libircclient
+ * \brief Bridge for libircclient
  */
 class Server::Session {
 public:
@@ -68,7 +68,7 @@ public:
 	/**
 	 * Get the handle.
 	 *
-	 * @return the handle
+	 * \return the handle
 	 */
 	inline Handle &handle() noexcept
 	{

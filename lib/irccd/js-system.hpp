@@ -20,8 +20,8 @@
 #define IRCCD_JS_SYSTEM_HPP
 
 /**
- * @file js-system.hpp
- * @brief Irccd.System JavaScript API.
+ * \file js-system.hpp
+ * \brief Irccd.System JavaScript API.
  */
 
 #include "js.hpp"
@@ -31,7 +31,7 @@ namespace irccd {
 /**
  * Load the module.
  *
- * @param ctx the context.
+ * \param ctx the context.
  */
 void loadJsSystem(duk::ContextPtr ctx);
 

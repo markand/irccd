@@ -20,8 +20,8 @@
 #define IRCCD_XDG_H
 
 /**
- * @file xdg.h
- * @brief Read XDG standard specifications
+ * \file xdg.h
+ * \brief Read XDG standard specifications
  */
 
 #include <vector>
@@ -30,8 +30,8 @@
 namespace irccd {
 
 /**
- * @class Xdg
- * @brief XDG specifications
+ * \class Xdg
+ * \brief XDG specifications
  *
  * Read and get XDG directories. This file contains exports thingies so it can
  * compiles successfully on Windows but its usage is discouraged.
@@ -55,28 +55,28 @@ public:
 	/**
 	 * Open an xdg instance and load directories.
 	 *
-	 * @throw std::runtime_error on failures
+	 * \throw std::runtime_error on failures
 	 */
 	Xdg();
 
 	/**
 	 * Get the config directory. ${XDG_CONFIG_HOME} or ${HOME}/.config
 	 *
-	 * @return the config directory
+	 * \return the config directory
 	 */
 	const std::string &configHome() const noexcept;
 
 	/**
 	 * Get the data directory. ${XDG_DATA_HOME} or ${HOME}/.local/share
 	 *
-	 * @return the data directory
+	 * \return the data directory
 	 */
 	const std::string &dataHome() const noexcept;
 
 	/**
 	 * Get the cache directory. ${XDG_CACHE_HOME} or ${HOME}/.cache
 	 *
-	 * @return the cache directory
+	 * \return the cache directory
 	 */
 	const std::string &cacheHome() const noexcept;
 
@@ -87,22 +87,22 @@ public:
 	 * The XDG standard says that application should handle XDG_RUNTIME_DIR by
 	 * themselves.
 	 *
-	 * @return the runtime directory
-	 * @throw std::runtime_error on error
+	 * \return the runtime directory
+	 * \throw std::runtime_error on error
 	 */
 	const std::string &runtimeDir() const;
 
 	/**
 	 * Get the standard config directories. ${XDG_CONFIG_DIRS} or { "/etc/xdg" }
 	 *
-	 * @return the list of config directories
+	 * \return the list of config directories
 	 */
 	const List &configDirs() const noexcept;
 
 	/**
 	 * Get the data directories. ${XDG_DATA_DIRS} or { "/usr/local/share", "/usr/share" }
 	 *
-	 * @return the list of data directories
+	 * \return the list of data directories
 	 */
 	const List &dataDirs() const noexcept;
 };

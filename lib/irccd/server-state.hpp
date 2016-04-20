@@ -20,8 +20,8 @@
 #define IRCCD_SERVER_STATE_HPP
 
 /**
- * @file server-state.hpp
- * @brief Server state.
+ * \file server-state.hpp
+ * \brief Server state.
  */
 
 #include <irccd/sysconfig.hpp>
@@ -34,14 +34,14 @@ namespace irccd {
 class Server;
 
 /**
- * @class ServerState
- * @brief Server current state.
+ * \class ServerState
+ * \brief Server current state.
  */
 class ServerState {
 public:
 	/**
-	 * @enum Type
-	 * @brief Server state
+	 * \enum Type
+	 * \brief Server state
 	 */
 	enum Type {
 		Undefined,	//!< Not defined yet
@@ -69,25 +69,25 @@ public:
 	/**
 	 * Create the server state.
 	 *
-	 * @pre type must be valid
-	 * @param type the type
+	 * \pre type must be valid
+	 * \param type the type
 	 */
 	ServerState(Type type);
 
 	/**
 	 * Prepare the state.
 	 *
-	 * @param server the server
-	 * @param setinput the read set
-	 * @param setoutput the write set
-	 * @param maxfd the maximum fd
+	 * \param server the server
+	 * \param setinput the read set
+	 * \param setoutput the write set
+	 * \param maxfd the maximum fd
 	 */
 	void prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd);
 
 	/**
 	 * Get the state type.
 	 *
-	 * @return the type
+	 * \return the type
 	 */
 	inline Type type() const noexcept
 	{

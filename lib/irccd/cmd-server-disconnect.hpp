@@ -20,8 +20,8 @@
 #define IRCCD_CMD_SERVER_DISCONNECT_HPP
 
 /**
- * @file cmd-server-disconnect.hpp
- * @brief Implementation of server-disconnect transport command.
+ * \file cmd-server-disconnect.hpp
+ * \brief Implementation of server-disconnect transport command.
  */
 
 #include "command.hpp"
@@ -31,8 +31,8 @@ namespace irccd {
 namespace command {
 
 /**
- * @class ServerDisconnect
- * @brief Implementation of server-disconnect transport command.
+ * \class ServerDisconnect
+ * \brief Implementation of server-disconnect transport command.
  */
 class ServerDisconnect : public RemoteCommand {
 public:
@@ -42,19 +42,19 @@ public:
 	ServerDisconnect();
 
 	/**
-	 * @copydoc RemoteCommand::help
+	 * \copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
 
 	/**
 	 * Get list of arguments required.
 	 *
-	 * @return the arguments required
+	 * \return the arguments required
 	 */
 	std::vector<Arg> args() const override;
 
 	/**
-	 * @copydoc RemoteCommand::exec
+	 * \copydoc RemoteCommand::exec
 	 */
 	json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };

@@ -20,8 +20,8 @@
 #define IRCCD_IRCCDCTL_HPP
 
 /**
- * @file irccdctl.hpp
- * @brief Base class for irccdctl front end.
+ * \file irccdctl.hpp
+ * \brief Base class for irccdctl front end.
  */
 
 #include <cassert>
@@ -45,7 +45,7 @@ class Section;
 } // !ini
 
 /**
- * @brief Main irccdctl class.
+ * \brief Main irccdctl class.
  */
 class Irccdctl : public Application {
 private:
@@ -81,30 +81,30 @@ public:
 	/**
 	 * Execute the given command and wait for its result.
 	 *
-	 * @param cmd the command
-	 * @param args the arguments
+	 * \param cmd the command
+	 * \param args the arguments
 	 */
 	void exec(const RemoteCommand &cmd, std::vector<std::string> args);
 
 	/**
 	 * Execute the given alias.
 	 *
-	 * @param alias the alias
-	 * @param args the arguments
+	 * \param alias the alias
+	 * \param args the arguments
 	 */
 	void exec(const Alias &alias, std::vector<std::string> args);
 
 	/**
 	 * Resolve the command line arguments.
 	 *
-	 * @param args the main arguments
+	 * \param args the main arguments
 	 */
 	void exec(std::vector<std::string> args);
 
 	/**
 	 * Get the connection.
 	 *
-	 * @return the connection
+	 * \return the connection
 	 */
 	inline Connection &connection() noexcept
 	{
@@ -114,8 +114,8 @@ public:
 	/**
 	 * Run the irccdctl front end.
 	 *
-	 * @param argc the number of arguments
-	 * @param argv the arguments
+	 * \param argc the number of arguments
+	 * \param argv the arguments
 	 */
 	void run(int argc, char **argv);
 };

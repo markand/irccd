@@ -20,8 +20,8 @@
 #define IRCCD_JS_FILE_HPP
 
 /**
- * @file js-file.hpp
- * @brief Irccd.File JavaScript API.
+ * \file js-file.hpp
+ * \brief Irccd.File JavaScript API.
  */
 
 #include <cassert>
@@ -37,8 +37,8 @@
 namespace irccd {
 
 /**
- * @class File
- * @brief Object for Javascript to perform I/O.
+ * \class File
+ * \brief Object for Javascript to perform I/O.
  *
  * This class can be constructed to Javascript.
  *
@@ -64,9 +64,9 @@ public:
 	/**
 	 * Construct a file specified by path
 	 *
-	 * @param path the path
-	 * @param mode the mode string (for std::fopen)
-	 * @throw std::runtime_error on failures
+	 * \param path the path
+	 * \param mode the mode string (for std::fopen)
+	 * \throw std::runtime_error on failures
 	 */
 	inline File(std::string path, const std::string &mode)
 		: m_path(std::move(path))
@@ -81,9 +81,9 @@ public:
 	 *
 	 * The class takes ownership of fp and will close it.
 	 *
-	 * @pre destructor must not be null
-	 * @param fp the file pointer
-	 * @param destructor the function to close fp (e.g. std::fclose)
+	 * \pre destructor must not be null
+	 * \param fp the file pointer
+	 * \param destructor the function to close fp (e.g. std::fclose)
 	 */
 	inline File(std::FILE *fp, std::function<void (std::FILE *)> destructor) noexcept
 		: m_stream(fp)
@@ -103,8 +103,8 @@ public:
 	/**
 	 * Get the path.
 	 *
-	 * @return the path
-	 * @warning empty when constructed from the FILE constructor
+	 * \return the path
+	 * \warning empty when constructed from the FILE constructor
 	 */
 	inline const std::string &path() const noexcept
 	{
@@ -114,7 +114,7 @@ public:
 	/**
 	 * Get the handle.
 	 *
-	 * @return the handle or nullptr if the stream was closed
+	 * \return the handle or nullptr if the stream was closed
 	 */
 	inline std::FILE *handle() noexcept
 	{
@@ -136,7 +136,7 @@ public:
 namespace duk {
 
 /**
- * @brief JavaScript binding for File.
+ * \brief JavaScript binding for File.
  */
 template <>
 class TypeTraits<File> {
@@ -144,7 +144,7 @@ public:
 	/**
 	 * Push the File prototype.
 	 *
-	 * @param ctx the context
+	 * \param ctx the context
 	 */
 	static inline void prototype(ContextPtr ctx)
 	{
@@ -158,7 +158,7 @@ public:
 	/**
 	 * Get the File signature.
 	 *
-	 * @return File
+	 * \return File
 	 */
 	static inline std::string name()
 	{
@@ -168,7 +168,7 @@ public:
 	/**
 	 * Get the inheritance list.
 	 *
-	 * @return empty
+	 * \return empty
 	 */
 	static inline std::vector<std::string> inherits()
 	{
@@ -181,7 +181,7 @@ public:
 /**
  * Load the module.
  *
- * @param ctx the context.
+ * \param ctx the context.
  */
 void loadJsFile(duk::ContextPtr ctx);
 

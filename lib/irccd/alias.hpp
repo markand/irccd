@@ -20,8 +20,8 @@
 #define IRCCD_ALIAS_HPP
 
 /**
- * @file alias.hpp
- * @brief Create irccdctl aliases.
+ * \file alias.hpp
+ * \brief Create irccdctl aliases.
  */
 
 #include <ostream>
@@ -31,8 +31,8 @@
 namespace irccd {
 
 /**
- * @class AliasArg
- * @brief Describe an alias argument.
+ * \class AliasArg
+ * \brief Describe an alias argument.
  *
  * When the user specify arguments, it can precise an applied argument or a placeholder that will be substituted
  * during command line invocation.
@@ -48,15 +48,15 @@ public:
 	/**
 	 * Construct an argument.
 	 *
-	 * @pre value must not be empty
-	 * @param value the value
+	 * \pre value must not be empty
+	 * \param value the value
 	 */
 	AliasArg(std::string value);
 
 	/**
 	 * Check if the argument is a placeholder.
 	 *
-	 * @return true if the argument is a placeholder
+	 * \return true if the argument is a placeholder
 	 */
 	inline bool isPlaceholder() const noexcept
 	{
@@ -66,31 +66,31 @@ public:
 	/**
 	 * Get the placeholder index (e.g %0 returns 0)
 	 *
-	 * @pre isPlaceholder() must return true
-	 * @return the position
+	 * \pre isPlaceholder() must return true
+	 * \return the position
 	 */
 	unsigned index() const noexcept;
 
 	/**
 	 * Get the real value.
 	 *
-	 * @pre isPlaceholder() must return false
-	 * @return the value
+	 * \pre isPlaceholder() must return false
+	 * \return the value
 	 */
 	const std::string &value() const noexcept;
 
 	/**
 	 * Output the alias to the stream.
 	 *
-	 * @param out the output stream
-	 * @return out
+	 * \param out the output stream
+	 * \return out
 	 */
 	friend std::ostream &operator<<(std::ostream &out, const AliasArg &);
 };
 
 /**
- * @class AliasCommand
- * @brief Describe a user-provided alias command.
+ * \class AliasCommand
+ * \brief Describe a user-provided alias command.
  *
  * An alias command is just a command with a set of applied or placeholders arguments.
  */
@@ -103,8 +103,8 @@ public:
 	/**
 	 * Create an alias command.
 	 *
-	 * @param command the command
-	 * @param args the arguments
+	 * \param command the command
+	 * \param args the arguments
 	 */
 	inline AliasCommand(std::string command, std::vector<AliasArg> args = {}) noexcept
 		: m_command(std::move(command))
@@ -115,7 +115,7 @@ public:
 	/**
 	 * Get the command to execute.
 	 *
-	 * @return the command name
+	 * \return the command name
 	 */
 	inline const std::string &command() const noexcept
 	{
@@ -125,7 +125,7 @@ public:
 	/**
 	 * Get the arguments.
 	 *
-	 * @return the arguments
+	 * \return the arguments
 	 */
 	inline const std::vector<AliasArg> &args() const noexcept
 	{
@@ -134,8 +134,8 @@ public:
 };
 
 /**
- * @class Alias
- * @brief A set of commands to execute with their arguments.
+ * \class Alias
+ * \brief A set of commands to execute with their arguments.
  *
  * An alias is a composition of AliasCommand, typically, the user is able to set an alias that execute a list of
  * specified commands in order they are defined.
@@ -148,7 +148,7 @@ public:
 	/**
 	 * Create an alias.
 	 *
-	 * @param name the alias name
+	 * \param name the alias name
 	 */
 	inline Alias(std::string name) noexcept
 		: m_name(std::move(name))
@@ -158,7 +158,7 @@ public:
 	/**
 	 * Get the alias name.
 	 *
-	 * @return the name
+	 * \return the name
 	 */
 	inline const std::string &name() const noexcept
 	{

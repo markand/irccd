@@ -20,8 +20,8 @@
 #define IRCCD_CMD_SERVER_CMODE_HPP
 
 /**
- * @file cmd-server-cmode.hpp
- * @brief Implementation of server-cmode transport command.
+ * \file cmd-server-cmode.hpp
+ * \brief Implementation of server-cmode transport command.
  */
 
 #include "command.hpp"
@@ -31,8 +31,8 @@ namespace irccd {
 namespace command {
 
 /**
- * @class ServerChannelMode
- * @brief Implementation of server-cmode transport command.
+ * \class ServerChannelMode
+ * \brief Implementation of server-cmode transport command.
  */
 class ServerChannelMode : public RemoteCommand {
 public:
@@ -42,17 +42,17 @@ public:
 	ServerChannelMode();
 
 	/**
-	 * @copydoc RemoteCommand::help
+	 * \copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
 	 
 	/**
-	 * @copydoc RemoteCommand::args
+	 * \copydoc RemoteCommand::args
 	 */
 	std::vector<Arg> args() const override;
 
 	/**
-	 * @copydoc RemoteCommand::exec
+	 * \copydoc RemoteCommand::exec
 	 */
 	json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };

@@ -20,8 +20,8 @@
 #define IRCCD_RULE_HPP
 
 /**
- * @file rule.hpp
- * @brief Rule description
+ * \file rule.hpp
+ * \brief Rule description
  */
 
 #include <sstream>
@@ -38,8 +38,8 @@ namespace irccd {
 using RuleSet = std::unordered_set<std::string>;
 
 /**
- * @enum RuleAction
- * @brief Rule action
+ * \enum RuleAction
+ * \brief Rule action
  */
 enum class RuleAction {
 	Accept,			//!< The event is accepted (default)
@@ -47,8 +47,8 @@ enum class RuleAction {
 };
 
 /**
- * @class Rule
- * @brief Manage rule to activate or deactive events.
+ * \class Rule
+ * \brief Manage rule to activate or deactive events.
  */
 class Rule final {
 private:
@@ -69,13 +69,13 @@ public:
 	/**
 	 * Resolve the action to execute with the specified list of rules.
 	 *
-	 * @param rules the list of rules
-	 * @param server the server name
-	 * @param channel the channel name
-	 * @param origin the origin
-	 * @param plugin the plugin name
-	 * @param event the event name (e.g onKick)
-	 * @return true if the plugin must be called
+	 * \param rules the list of rules
+	 * \param server the server name
+	 * \param channel the channel name
+	 * \param origin the origin
+	 * \param plugin the plugin name
+	 * \param event the event name (e.g onKick)
+	 * \return true if the plugin must be called
 	 */
 	static bool solve(const std::vector<Rule> &rules,
 			  const std::string &server,
@@ -87,13 +87,13 @@ public:
 	/**
 	 * Rule constructor.
 	 *
-	 * @param servers the server list
-	 * @param channels the channels
-	 * @param nicknames the nicknames
-	 * @param plugins the plugins
-	 * @param events the events
-	 * @param action the rule action
-	 * @throw std::invalid_argument if events are invalid
+	 * \param servers the server list
+	 * \param channels the channels
+	 * \param nicknames the nicknames
+	 * \param plugins the plugins
+	 * \param events the events
+	 * \param action the rule action
+	 * \throw std::invalid_argument if events are invalid
 	 */
 	Rule(RuleSet servers = RuleSet{},
 	     RuleSet channels = RuleSet{},
@@ -105,12 +105,12 @@ public:
 	/**
 	 * Check if that rule apply for the given criterias.
 	 *
-	 * @param server the server
-	 * @param channel the channel
-	 * @param nick the origin
-	 * @param plugin the plugin
-	 * @param event the event
-	 * @return true if match
+	 * \param server the server
+	 * \param channel the channel
+	 * \param nick the origin
+	 * \param plugin the plugin
+	 * \param event the event
+	 * \return true if match
 	 */
 	bool match(const std::string &server,
 		   const std::string &channel,
@@ -121,42 +121,42 @@ public:
 	/**
 	 * Get the action.
 	 *
-	 * @return the action
+	 * \return the action
 	 */
 	RuleAction action() const noexcept;
 
 	/**
 	 * Get the servers.
 	 *
-	 * @return the servers
+	 * \return the servers
 	 */
 	const RuleSet &servers() const noexcept;
 
 	/**
 	 * Get the channels.
 	 *
-	 * @return the channels
+	 * \return the channels
 	 */
 	const RuleSet &channels() const noexcept;
 
 	/**
 	 * Get the origins.
 	 *
-	 * @return the origins
+	 * \return the origins
 	 */
 	const RuleSet &origins() const noexcept;
 
 	/**
 	 * Get the plugins.
 	 *
-	 * @return the plugins
+	 * \return the plugins
 	 */
 	const RuleSet &plugins() const noexcept;
 
 	/**
 	 * Get the events.
 	 *
-	 * @return the events
+	 * \return the events
 	 */
 	const RuleSet &events() const noexcept;
 };

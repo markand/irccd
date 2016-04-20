@@ -20,8 +20,8 @@
 #define IRCCD_TRANSPORT_SERVER_HPP
 
 /**
- * @file transport-server.hpp
- * @brief Transports for irccd
+ * \file transport-server.hpp
+ * \brief Transports for irccd
  */
 
 #include <memory>
@@ -35,8 +35,8 @@
 namespace irccd {
 
 /**
- * @class TransportServer
- * @brief Bring networking between irccd and irccdctl
+ * \class TransportServer
+ * \brief Bring networking between irccd and irccdctl
  *
  * This class contains a master sockets for listening to TCP connections, it is then processed by irccd.
  *
@@ -71,21 +71,21 @@ public:
 	/**
 	 * Retrieve the underlying socket handle.
 	 *
-	 * @return the socket
+	 * \return the socket
 	 */
 	virtual net::Handle handle() noexcept = 0;
 
 	/**
 	 * Accept a new client depending on the domain.
 	 *
-	 * @return the new client
+	 * \return the new client
 	 */
 	virtual std::shared_ptr<TransportClient> accept() = 0;
 };
 
 /**
- * @class TransportServerIp
- * @brief Base class for both IPv4 and IPv6 servers.
+ * \class TransportServerIp
+ * \brief Base class for both IPv4 and IPv6 servers.
  */
 class TransportServerIp : public TransportServer {
 protected:
@@ -95,21 +95,21 @@ public:
 	/**
 	 * Create a IP transport, use IPv6 or IPv4 address.
 	 *
-	 * @param domain AF_INET or AF_INET6
-	 * @param address the address or "*" for any
-	 * @param port the port number
-	 * @param ipv6only set to true to disable IPv4
-	 * @throw net::Error on failures
+	 * \param domain AF_INET or AF_INET6
+	 * \param address the address or "*" for any
+	 * \param port the port number
+	 * \param ipv6only set to true to disable IPv4
+	 * \throw net::Error on failures
 	 */
 	TransportServerIp(int domain, const std::string &address, int port, bool ipv6only = true);
 
 	/**
-	 * @copydoc TransportServer::socket
+	 * \copydoc TransportServer::socket
 	 */
 	net::Handle handle() noexcept override;
 
 	/**
-	 * @copydoc TransportServer::accept
+	 * \copydoc TransportServer::accept
 	 */
 	std::shared_ptr<TransportClient> accept() override;
 };
@@ -117,8 +117,8 @@ public:
 #if !defined(IRCCD_SYSTEM_WINDOWS)
 
 /**
- * @class TransportServerUnix
- * @brief Implementation of transports for Unix sockets.
+ * \class TransportServerUnix
+ * \brief Implementation of transports for Unix sockets.
  */
 class TransportServerUnix : public TransportServer {
 private:
@@ -129,7 +129,7 @@ public:
 	/**
 	 * Create a Unix transport.
 	 *
-	 * @param path the path
+	 * \param path the path
 	 */
 	TransportServerUnix(std::string path);
 
@@ -139,12 +139,12 @@ public:
 	~TransportServerUnix();
 
 	/**
-	 * @copydoc TransportServer::socket
+	 * \copydoc TransportServer::socket
 	 */
 	net::Handle handle() noexcept override;
 
 	/**
-	 * @copydoc TransportServer::accept
+	 * \copydoc TransportServer::accept
 	 */
 	std::shared_ptr<TransportClient> accept() override;
 };

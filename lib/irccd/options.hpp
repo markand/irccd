@@ -20,8 +20,8 @@
 #define IRCCD_OPTION_PARSER_HPP
 
 /**
- * @file options.hpp
- * @brief Basic options parsing.
+ * \file options.hpp
+ * \brief Basic options parsing.
  */
 
 #include <exception>
@@ -38,8 +38,8 @@ namespace irccd {
 namespace parser {
 
 /**
- * @class InvalidOption
- * @brief This exception is thrown when an invalid option has been found.
+ * \class InvalidOption
+ * \brief This exception is thrown when an invalid option has been found.
  */
 class InvalidOption : public std::exception {
 private:
@@ -54,7 +54,7 @@ public:
 	/**
 	 * Construct the exception.
 	 *
-	 * @param arg the argument missing
+	 * \param arg the argument missing
 	 */
 	inline InvalidOption(std::string arg)
 		: argument(std::move(arg))
@@ -65,7 +65,7 @@ public:
 	/**
 	 * Get the error message.
 	 *
-	 * @return the error message
+	 * \return the error message
 	 */
 	const char *what() const noexcept override
 	{
@@ -74,8 +74,8 @@ public:
 };
 
 /**
- * @class MissingValue
- * @brief This exception is thrown when an option requires a value and no value has been given
+ * \class MissingValue
+ * \brief This exception is thrown when an option requires a value and no value has been given
  */
 class MissingValue : public std::exception {
 private:
@@ -90,7 +90,7 @@ public:
 	/**
 	 * Construct the exception.
 	 *
-	 * @param arg the argument that requires a value
+	 * \param arg the argument that requires a value
 	 */
 	inline MissingValue(std::string arg)
 		: argument(std::move(arg))
@@ -101,7 +101,7 @@ public:
 	/**
 	 * Get the error message.
 	 *
-	 * @return the error message
+	 * \return the error message
 	 */
 	const char *what() const noexcept override
 	{
@@ -122,24 +122,24 @@ using Options = std::map<std::string, bool>;
 /**
  * Extract the command line options and return a result.
  *
- * @param args the arguments
- * @param definition
- * @warning the arguments vector is modified in place to remove parsed options
- * @throw MissingValue
- * @throw InvalidOption
+ * \param args the arguments
+ * \param definition
+ * \warning the arguments vector is modified in place to remove parsed options
+ * \throw MissingValue
+ * \throw InvalidOption
  */
 Result read(std::vector<std::string> &args, const Options &definition);
 
 /**
  * Overloaded function for usage with main() arguments.
  *
- * @param argc the number of arguments
- * @param argv the argument vector
- * @param definition
- * @note don't forget to remove the first argv[0] argument
- * @warning the argc and argv are modified in place to remove parsed options
- * @throw MissingValue
- * @throw InvalidOption
+ * \param argc the number of arguments
+ * \param argv the argument vector
+ * \param definition
+ * \note don't forget to remove the first argv[0] argument
+ * \warning the argc and argv are modified in place to remove parsed options
+ * \throw MissingValue
+ * \throw InvalidOption
  */
 Result read(int &argc, char **&argv, const Options &definition);
 

@@ -20,8 +20,8 @@
 #define IRCCD_CONNECTION_HPP
 
 /**
- * @file connection.hpp
- * @brief Connection to irccd instance.
+ * \file connection.hpp
+ * \brief Connection to irccd instance.
  */
 
 #include <cassert>
@@ -37,8 +37,8 @@
 namespace irccd {
 
 /**
- * @class Connection
- * @brief Abstract class for connecting to irccd from Ip or Local addresses.
+ * \class Connection
+ * \brief Abstract class for connecting to irccd from Ip or Local addresses.
  */
 class Connection {
 protected:
@@ -69,43 +69,43 @@ public:
 	/**
 	 * Wait for the next requested response.
 	 *
-	 * @param name the response name
-	 * @param timeout the optional timeout
-	 * @return the object
-	 * @throw net::Error on errors or on timeout
+	 * \param name the response name
+	 * \param timeout the optional timeout
+	 * \return the object
+	 * \throw net::Error on errors or on timeout
 	 */
 	json::Value next(const std::string &name, int timeout = 30000);
 
 	/**
 	 * Just wait if the operation succeeded.
 	 *
-	 * @param name the response name
-	 * @param timeout the timeout
+	 * \param name the response name
+	 * \param timeout the timeout
 	 */
 	void verify(const std::string &name, int timeout = 30000);
 
 	/**
 	 * Check if the socket is still connected.
 	 *
-	 * @return true if connected
+	 * \return true if connected
 	 */
 	virtual bool isConnected() const noexcept = 0;
 
 	/**
 	 * Try to connect to the host.
 	 *
-	 * @param timeout the maximum time in milliseconds
-	 * @throw net::Error on errors or timeout
+	 * \param timeout the maximum time in milliseconds
+	 * \throw net::Error on errors or timeout
 	 */
 	virtual void connect(int timeout = 30000) = 0;
 
 	/**
 	 * Try to send the message in 30 seconds. The message must not end with \\r\\n\\r\\n, it is added automatically.
 	 *
-	 * @pre msg must not be empty
-	 * @param msg the message to send
-	 * @param timeout the maximum time in milliseconds
-	 * @throw net::Error on errors
+	 * \pre msg must not be empty
+	 * \param msg the message to send
+	 * \param timeout the maximum time in milliseconds
+	 * \throw net::Error on errors
 	 */
 	virtual void send(std::string msg, int timeout = 30000) = 0;
 
@@ -114,16 +114,16 @@ public:
 	 *
 	 * This functions throws if the connection is lost.
 	 *
-	 * @param timeout the maximum time in milliseconds
-	 * @return the next event
-	 * @throw net::Error on errors or disconnection
+	 * \param timeout the maximum time in milliseconds
+	 * \return the next event
+	 * \throw net::Error on errors or disconnection
 	 */
 	virtual json::Value next(int timeout = 30000) = 0;
 };
 
 /**
- * @class ConnectionBase
- * @brief Implementation for Ip or Local.
+ * \class ConnectionBase
+ * \brief Implementation for Ip or Local.
  */
 template <typename Address>
 class ConnectionBase : public Connection {
@@ -139,7 +139,7 @@ public:
 	/**
 	 * Construct the socket but do not connect immediately.
 	 *
-	 * @param address the address
+	 * \param address the address
 	 */
 	ConnectionBase(Address address)
 		: m_address(std::move(address))
@@ -149,7 +149,7 @@ public:
 	}
 
 	/**
-	 * @copydoc Connection::isConnected
+	 * \copydoc Connection::isConnected
 	 */
 	bool isConnected() const noexcept override
 	{
@@ -157,17 +157,17 @@ public:
 	}
 
 	/**
-	 * @copydoc Connection::connect
+	 * \copydoc Connection::connect
 	 */
 	void connect(int timeout) override;
 
 	/**
-	 * @copydoc Connection::send
+	 * \copydoc Connection::send
 	 */
 	void send(std::string msg, int timeout) override;
 
 	/**
-	 * @copydoc Connection::next
+	 * \copydoc Connection::next
 	 */
 	json::Value next(int timeout) override;
 };

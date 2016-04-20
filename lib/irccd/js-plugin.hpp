@@ -20,8 +20,8 @@
 #define IRCCD_JS_PLUGIN_HPP
 
 /**
- * @file js-plugin.hpp
- * @brief Irccd.Plugin JavaScript API.
+ * \file js-plugin.hpp
+ * \brief Irccd.Plugin JavaScript API.
  */
 
 #include "js.hpp"
@@ -31,7 +31,7 @@ namespace irccd {
 /**
  * Load the module.
  *
- * @param ctx the context.
+ * \param ctx the context.
  */
 void loadJsPlugin(duk::Context &ctx) noexcept;
 

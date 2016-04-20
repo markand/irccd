@@ -20,8 +20,8 @@
 #define IRCCD_CMD_PLUGIN_RELOAD_HPP
 
 /**
- * @file cmd-plugin-reload.hpp
- * @brief Implementation of plugin-reload transport command.
+ * \file cmd-plugin-reload.hpp
+ * \brief Implementation of plugin-reload transport command.
  */
 
 #include "command.hpp"
@@ -31,8 +31,8 @@ namespace irccd {
 namespace command {
 
 /**
- * @class PluginReload
- * @brief Implementation of plugin-reload transport command.
+ * \class PluginReload
+ * \brief Implementation of plugin-reload transport command.
  */
 class PluginReload : public RemoteCommand {
 public:
@@ -42,17 +42,17 @@ public:
 	PluginReload();
 
 	/**
-	 * @copydoc RemoteCommand::help
+	 * \copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
 
 	/**
-	 * @copydoc RemoteCommand::args
+	 * \copydoc RemoteCommand::args
 	 */
 	std::vector<Arg> args() const override;
 
 	/**
-	 * @copydoc RemoteCommand::exec
+	 * \copydoc RemoteCommand::exec
 	 */
 	json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };

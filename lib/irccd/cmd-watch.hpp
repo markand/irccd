@@ -20,8 +20,8 @@
 #define IRCCD_CMD_WATCH_HPP
 
 /**
- * @file cmd-watch.hpp
- * @brief Implementation of irccdctl watch.
+ * \file cmd-watch.hpp
+ * \brief Implementation of irccdctl watch.
  */
 
 #include "command.hpp"
@@ -31,8 +31,8 @@ namespace irccd {
 namespace command {
 
 /**
- * @class Watch
- * @brief Implementation of irccdctl watch.
+ * \class Watch
+ * \brief Implementation of irccdctl watch.
  */
 class Watch : public RemoteCommand {
 public:
@@ -41,12 +41,12 @@ public:
 	std::vector<Option> options() const override;
 
 	/**
-	 * @copydoc RemoteCommand::help
+	 * \copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
 
 	/**
-	 * @copydoc RemoteCommand::request
+	 * \copydoc RemoteCommand::request
 	 */
 	json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &request) const override;
 };

@@ -20,8 +20,8 @@
 #define IRCCD_SERVER_HPP
 
 /**
- * @file server.hpp
- * @brief IRC Server.
+ * \file server.hpp
+ * \brief IRC Server.
  */
 
 #include <cstdint>
@@ -44,8 +44,8 @@
 namespace irccd {
 
 /**
- * @class ServerIdentity
- * @brief Identity to use when connecting
+ * \class ServerIdentity
+ * \brief Identity to use when connecting
  */
 class ServerIdentity {
 public:
@@ -57,8 +57,8 @@ public:
 };
 
 /**
- * @class ServerChannel
- * @brief A channel to join with an optional password
+ * \class ServerChannel
+ * \brief A channel to join with an optional password
  */
 class ServerChannel {
 public:
@@ -72,8 +72,8 @@ public:
 using ServerChannels = std::vector<ServerChannel>;
 
 /**
- * @enum ServerChanMode
- * @brief Prefixes for nicknames
+ * \enum ServerChanMode
+ * \brief Prefixes for nicknames
  */
 enum class ServerChanMode {
 	Creator		= 'O',			//!< Channel creator
@@ -84,8 +84,8 @@ enum class ServerChanMode {
 };
 
 /**
- * @class ServerWhois
- * @brief Describe a whois information
+ * \class ServerWhois
+ * \brief Describe a whois information
  *
  * This is provided when whois command was requested.
  */
@@ -99,8 +99,8 @@ public:
 };
 
 /**
- * @class ServerInfo
- * @brief Server information
+ * \class ServerInfo
+ * \brief Server information
  *
  * This class contains everything needed to connect to a server.
  */
@@ -121,8 +121,8 @@ public:
 };
 
 /**
- * @class ServerSettings
- * @brief Contains settings to tweak the server
+ * \class ServerSettings
+ * \brief Contains settings to tweak the server
  *
  * This class contains additional settings that tweaks the
  * server operations.
@@ -153,8 +153,8 @@ public:
 using ServerCommand = std::function<bool ()>;
 
 /**
- * @class Server
- * @brief The class that connect to a IRC server
+ * \class Server
+ * \brief The class that connect to a IRC server
  *
  * The server is a class that stores callbacks which will be called on IRC events. It is the lowest part of the
  * connection to a server, it can be used directly by the user to connect to a server.
@@ -441,17 +441,17 @@ public:
 	/**
 	 * Split a channel from the form channel:password into a ServerChannel object.
 	 *
-	 * @param value the value
-	 * @return a channel
+	 * \param value the value
+	 * \return a channel
 	 */
 	static ServerChannel splitChannel(const std::string &value);
 
 	/**
 	 * Construct a server.
 	 *
-	 * @param info the information
-	 * @param identity the identity
-	 * @param settings the settings
+	 * \param info the information
+	 * \param identity the identity
+	 * \param settings the settings
 	 */
 	Server(ServerInfo info, ServerIdentity identity = {}, ServerSettings settings = {});
 
@@ -467,8 +467,8 @@ public:
 	 * If the server is installed into the ServerManager, it is called
 	 * automatically.
 	 *
-	 * @param type the new state type
-	 * @warning Not thread-safe
+	 * \param type the new state type
+	 * \warning Not thread-safe
 	 */
 	inline void next(ServerState::Type type)
 	{
@@ -480,7 +480,7 @@ public:
 	 *
 	 * If the server is installed into irccd, it is called automatically.
 	 *
-	 * @warning Not thread-safe
+	 * \warning Not thread-safe
 	 */
 	void update() noexcept;
 
@@ -488,8 +488,8 @@ public:
 	 * Request to disconnect. This function does not notify the
 	 * ServerService.
 	 *
-	 * @see Irccd::serverDisconnect
-	 * @note Thread-safe
+	 * \see Irccd::serverDisconnect
+	 * \note Thread-safe
 	 */
 	void disconnect() noexcept;
 
@@ -497,8 +497,8 @@ public:
 	 * Asks for a reconnection. This function does not notify the
 	 * ServerService.
 	 *
-	 * @see Irccd::serverReconnect
-	 * @note Thread-safe
+	 * \see Irccd::serverReconnect
+	 * \note Thread-safe
 	 */
 	void reconnect() noexcept;
 
@@ -509,7 +509,7 @@ public:
 	 * If the server is installed into the ServerManager, it is called
 	 * automatically.
 	 *
-	 * @note Thread-safe
+	 * \note Thread-safe
 	 */
 	void flush() noexcept;
 
@@ -519,7 +519,7 @@ public:
 	 * If the server is installed into the ServerManager, it is called
 	 * automatically.
 	 *
-	 * @warning Not thread-safe
+	 * \warning Not thread-safe
 	 */
 	inline void prepare(fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) noexcept
 	{
@@ -532,18 +532,18 @@ public:
 	 * If the server is installed into the ServerManager, it is called
 	 * automatically.
 	 *
-	 * @param setinput
-	 * @param setoutput
-	 * @throw any exception that have been throw from user functions
+	 * \param setinput
+	 * \param setoutput
+	 * \throw any exception that have been throw from user functions
 	 */
 	void sync(fd_set &setinput, fd_set &setoutput) noexcept;
 
 	/**
 	 * Get the server information.
 	 *
-	 * @warning This overload should not be used by the user, it is required to
+	 * \warning This overload should not be used by the user, it is required to
 	 *          update the nickname.
-	 * @return the server information
+	 * \return the server information
 	 */
 	inline ServerInfo &info() noexcept
 	{
@@ -553,7 +553,7 @@ public:
 	/**
 	 * Get the server information.
 	 *
-	 * @return the server information
+	 * \return the server information
 	 */
 	inline const ServerInfo &info() const noexcept
 	{
@@ -563,9 +563,9 @@ public:
 	/**
 	 * Get the server settings.
 	 *
-	 * @warning This overload should not be used by the user, it is required to
+	 * \warning This overload should not be used by the user, it is required to
 	 *          update the reconnection information.
-	 * @return the settings
+	 * \return the settings
 	 */
 	inline ServerSettings &settings() noexcept
 	{
@@ -575,7 +575,7 @@ public:
 	/**
 	 * Get the server settings.
 	 *
-	 * @return the settings
+	 * \return the settings
 	 */
 	inline const ServerSettings &settings() const noexcept
 	{
@@ -585,7 +585,7 @@ public:
 	/**
 	 * Get the identity.
 	 *
-	 * @return the identity
+	 * \return the identity
 	 */
 	inline ServerIdentity &identity() noexcept
 	{
@@ -595,7 +595,7 @@ public:
 	/**
 	 * Overloaded function
 	 *
-	 * @return the identity
+	 * \return the identity
 	 */
 	inline const ServerIdentity &identity() const noexcept
 	{
@@ -605,7 +605,7 @@ public:
 	/**
 	 * Get the current state identifier. Should not be used by user code.
 	 *
-	 * @note Thread-safe but the state may change just after the call
+	 * \note Thread-safe but the state may change just after the call
 	 */
 	inline ServerState::Type type() const noexcept
 	{
@@ -615,7 +615,7 @@ public:
 	/**
 	 * Get the private session.
 	 *
-	 * @return the session
+	 * \return the session
 	 */
 	inline Session &session() noexcept
 	{
@@ -625,36 +625,36 @@ public:
 	/**
 	 * Change the channel mode.
 	 *
-	 * @param channel the channel
-	 * @param mode the new mode
-	 * @note Thread-safe
+	 * \param channel the channel
+	 * \param mode the new mode
+	 * \note Thread-safe
 	 */
 	void cmode(std::string channel, std::string mode);
 
 	/**
 	 * Send a channel notice.
 	 *
-	 * @param channel the channel
-	 * @param message message notice
-	 * @note Thread-safe
+	 * \param channel the channel
+	 * \param message message notice
+	 * \note Thread-safe
 	 */
 	void cnotice(std::string channel, std::string message) noexcept;
 
 	/**
 	 * Invite a user to a channel.
 	 *
-	 * @param target the target nickname
-	 * @param channel the channel
-	 * @note Thread-safe
+	 * \param target the target nickname
+	 * \param channel the channel
+	 * \note Thread-safe
 	 */
 	void invite(std::string target, std::string channel) noexcept;
 
 	/**
 	 * Join a channel, the password is optional and can be kept empty.
 	 *
-	 * @param channel the channel to join
-	 * @param password the optional password
-	 * @note Thread-safe
+	 * \param channel the channel to join
+	 * \param password the optional password
+	 * \note Thread-safe
 	 */
 	void join(std::string channel, std::string password = "") noexcept;
 
@@ -662,10 +662,10 @@ public:
 	 * Kick someone from the channel. Please be sure to have the rights
 	 * on that channel because errors won't be reported.
 	 *
-	 * @param target the target to kick
-	 * @param channel from which channel
-	 * @param reason the optional reason
-	 * @note Thread-safe
+	 * \param target the target to kick
+	 * \param channel from which channel
+	 * \param reason the optional reason
+	 * \note Thread-safe
 	 */
 	void kick(std::string target, std::string channel, std::string reason = "") noexcept;
 
@@ -673,51 +673,51 @@ public:
 	 * Send a CTCP Action as known as /me. The target may be either a
 	 * channel or a nickname.
 	 *
-	 * @param target the nickname or the channel
-	 * @param message the message
-	 * @note Thread-safe
+	 * \param target the nickname or the channel
+	 * \param message the message
+	 * \note Thread-safe
 	 */
 	void me(std::string target, std::string message);
 
 	/**
 	 * Send a message to the specified target or channel.
 	 *
-	 * @param target the target
-	 * @param message the message
-	 * @note Thread-safe
+	 * \param target the target
+	 * \param message the message
+	 * \note Thread-safe
 	 */
 	void message(std::string target, std::string message);
 
 	/**
 	 * Change your user mode.
 	 *
-	 * @param mode the mode
-	 * @note Thread-safe
+	 * \param mode the mode
+	 * \note Thread-safe
 	 */
 	void mode(std::string mode);
 
 	/**
 	 * Request the list of names.
 	 *
-	 * @param channel the channel
-	 * @note Thread-safe
+	 * \param channel the channel
+	 * \note Thread-safe
 	 */
 	void names(std::string channel);
 
 	/**
 	 * Change your nickname.
 	 *
-	 * @param newnick the new nickname to use
-	 * @note Thread-safe
+	 * \param newnick the new nickname to use
+	 * \note Thread-safe
 	 */
 	void nick(std::string newnick);
 
 	/**
 	 * Send a private notice.
 	 *
-	 * @param target the target
-	 * @param message the notice message
-	 * @note Thread-safe
+	 * \param target the target
+	 * \param message the notice message
+	 * \note Thread-safe
 	 */
 	void notice(std::string target, std::string message);
 
@@ -726,9 +726,9 @@ public:
 	 *
 	 * Please note that the reason is not supported on all servers so if you want portability, don't provide it.
 	 *
-	 * @param channel the channel to leave
-	 * @param reason the optional reason
-	 * @note Thread-safe
+	 * \param channel the channel to leave
+	 * \param reason the optional reason
+	 * \note Thread-safe
 	 */
 	void part(std::string channel, std::string reason = "");
 
@@ -736,26 +736,26 @@ public:
 	 * Send a raw message to the IRC server. You don't need to add
 	 * message terminators.
 	 *
-	 * @warning Use this function with care
-	 * @param raw the raw message (without `\r\n\r\n`)
-	 * @note Thread-safe
+	 * \warning Use this function with care
+	 * \param raw the raw message (without `\r\n\r\n`)
+	 * \note Thread-safe
 	 */
 	void send(std::string raw);
 
 	/**
 	 * Change the channel topic.
 	 *
-	 * @param channel the channel
-	 * @param topic the desired topic
-	 * @note Thread-safe
+	 * \param channel the channel
+	 * \param topic the desired topic
+	 * \note Thread-safe
 	 */
 	void topic(std::string channel, std::string topic);
 
 	/**
 	 * Request for whois information.
 	 *
-	 * @param target the target nickname
-	 * @note Thread-safe
+	 * \param target the target nickname
+	 * \note Thread-safe
 	 */
 	void whois(std::string target);
 };

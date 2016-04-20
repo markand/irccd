@@ -20,8 +20,8 @@
 #define IRCCD_JS_LOGGER_HPP
 
 /**
- * @file js-logger.hpp
- * @brief Irccd.Logger JavaScript API.
+ * \file js-logger.hpp
+ * \brief Irccd.Logger JavaScript API.
  */
 
 #include "js.hpp"
@@ -31,7 +31,7 @@ namespace irccd {
 /**
  * Load the module.
  *
- * @param ctx the context.
+ * \param ctx the context.
  */
 void loadJsLogger(duk::ContextPtr ctx);
 

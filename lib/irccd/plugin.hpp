@@ -20,8 +20,8 @@
 #define IRCCD_PLUGIN_HPP
 
 /**
- * @file plugin.hpp
- * @brief Irccd plugins
+ * \file plugin.hpp
+ * \brief Irccd plugins
  */
 
 #include <memory>
@@ -41,8 +41,8 @@ class Server;
 class ServerWhois;
 
 /**
- * @class PluginInfo
- * @brief Plugin information
+ * \class PluginInfo
+ * \brief Plugin information
  */
 class PluginInfo {
 public:
@@ -68,8 +68,8 @@ using PluginConfig = std::unordered_map<std::string, std::string>;
 using PluginTimers = std::unordered_set<std::shared_ptr<Timer>>;
 
 /**
- * @class Plugin
- * @brief JavaScript plugin
+ * \class Plugin
+ * \brief JavaScript plugin
  *
  * A plugin is identified by name and can be loaded and unloaded
  * at runtime.
@@ -117,10 +117,10 @@ public:
 	/**
 	 * Correct constructor.
 	 *
-	 * @param name the plugin id
-	 * @param path the fully resolved path to the plugin
-	 * @param config the plugin configuration
-	 * @throws std::runtime_error on errors
+	 * \param name the plugin id
+	 * \param path the fully resolved path to the plugin
+	 * \param config the plugin configuration
+	 * \throws std::runtime_error on errors
 	 */
 	Plugin(std::string name, std::string path, const PluginConfig &config = PluginConfig());
 
@@ -137,21 +137,21 @@ public:
 	/**
 	 * Add a timer to the plugin.
 	 *
-	 * @param timer the timer to add
+	 * \param timer the timer to add
 	 */
 	void addTimer(std::shared_ptr<Timer> timer) noexcept;
 
 	/**
 	 * Remove a timer from a plugin.
 	 *
-	 * @param timer
+	 * \param timer
 	 */
 	void removeTimer(const std::shared_ptr<Timer> &timer) noexcept;
 
 	/**
 	 * Access the Duktape context.
 	 *
-	 * @return the context
+	 * \return the context
 	 */
 	inline duk::Context &context() noexcept
 	{
@@ -163,67 +163,67 @@ public:
 	 * onCommand if the messages starts with the command character
 	 * plus the plugin name.
 	 *
-	 * @param server the server
-	 * @param origin the user who sent the message
-	 * @param channel the channel
-	 * @param message the message or command
+	 * \param server the server
+	 * \param origin the user who sent the message
+	 * \param channel the channel
+	 * \param message the message or command
 	 */
 	void onCommand(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message);
 
 	/**
 	 * On successful connection.
 	 *
-	 * @param server the server
+	 * \param server the server
 	 */
 	void onConnect(std::shared_ptr<Server> server);
 
 	/**
 	 * On channel mode.
 	 *
-	 * @param server the server
-	 * @param origin the ouser who has changed the mode
-	 * @param channel the channel
-	 * @param mode the mode
-	 * @param arg the optional mode argument
+	 * \param server the server
+	 * \param origin the ouser who has changed the mode
+	 * \param channel the channel
+	 * \param mode the mode
+	 * \param arg the optional mode argument
 	 */
 	void onChannelMode(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string mode, std::string arg);
 
 	/**
 	 * On a channel notice.
 	 *
-	 * @param server the server
-	 * @param origin the user who sent the notice
-	 * @param channel on which channel
-	 * @param notice the message
+	 * \param server the server
+	 * \param origin the user who sent the notice
+	 * \param channel on which channel
+	 * \param notice the message
 	 */
 	void onChannelNotice(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string notice);
 
 	/**
 	 * On invitation.
 	 *
-	 * @param server the server
-	 * @param origin the user who invited you
-	 * @param channel the channel
+	 * \param server the server
+	 * \param origin the user who invited you
+	 * \param channel the channel
 	 */
 	void onInvite(std::shared_ptr<Server> server, std::string origin, std::string channel);
 
 	/**
 	 * On join.
 	 *
-	 * @param server the server
-	 * @param origin the user who joined
-	 * @param channel the channel
+	 * \param server the server
+	 * \param origin the user who joined
+	 * \param channel the channel
 	 */
 	void onJoin(std::shared_ptr<Server> server, std::string origin, std::string channel);
 
 	/**
 	 * On kick.
 	 *
-	 * @param server the server
-	 * @param origin the user who kicked the target
-	 * @param channel the channel
-	 * @param target the kicked target
-	 * @param reason the optional reason
+	 * \param server the server
+	 * \param origin the user who kicked the target
+	 * \param channel the channel
+	 * \param target the kicked target
+	 * \param reason the optional reason
 	 */
 	void onKick(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target, std::string reason);
 
@@ -235,84 +235,84 @@ public:
 	/**
 	 * On channel message.
 	 *
-	 * @param server the server
-	 * @param origin the user who sent the message
-	 * @param channel the channel
-	 * @param message the message or command
+	 * \param server the server
+	 * \param origin the user who sent the message
+	 * \param channel the channel
+	 * \param message the message or command
 	 */
 	void onMessage(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message);
 
 	/**
 	 * On CTCP Action.
 	 *
-	 * @param server the server
-	 * @param origin the user who sent the message
-	 * @param channel the channel (may also be your nickname)
-	 * @param message the message
+	 * \param server the server
+	 * \param origin the user who sent the message
+	 * \param channel the channel (may also be your nickname)
+	 * \param message the message
 	 */
 	void onMe(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message);
 
 	/**
 	 * On user mode change.
 	 *
-	 * @param server the server
-	 * @param origin the person who changed the mode
-	 * @param mode the new mode
+	 * \param server the server
+	 * \param origin the person who changed the mode
+	 * \param mode the new mode
 	 */
 	void onMode(std::shared_ptr<Server> server, std::string origin, std::string mode);
 
 	/**
 	 * On names listing.
 	 *
-	 * @param server the server
-	 * @param channel the channel
-	 * @param list the list of nicknames
+	 * \param server the server
+	 * \param channel the channel
+	 * \param list the list of nicknames
 	 */
 	void onNames(std::shared_ptr<Server> server, std::string channel, std::vector<std::string> list);
 
 	/**
 	 * On nick change.
 	 *
-	 * @param server the server
-	 * @param origin the user that changed its nickname
-	 * @param nick the new nickname
+	 * \param server the server
+	 * \param origin the user that changed its nickname
+	 * \param nick the new nickname
 	 */
 	void onNick(std::shared_ptr<Server> server, std::string origin, std::string nick);
 
 	/**
 	 * On user notice.
 	 *
-	 * @param server the server
-	 * @param origin the user who sent the notice
-	 * @param notice the notice
+	 * \param server the server
+	 * \param origin the user who sent the notice
+	 * \param notice the notice
 	 */
 	void onNotice(std::shared_ptr<Server> server, std::string origin, std::string notice);
 
 	/**
 	 * On part.
 	 *
-	 * @param server the server
-	 * @param origin the user who left
-	 * @param channel the channel
-	 * @param reason the optional reason
+	 * \param server the server
+	 * \param origin the user who left
+	 * \param channel the channel
+	 * \param reason the optional reason
 	 */
 	void onPart(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string reason);
 
 	/**
 	 * On user query.
 	 *
-	 * @param server the server
-	 * @param origin the user who sent the query
-	 * @param message the message
+	 * \param server the server
+	 * \param origin the user who sent the query
+	 * \param message the message
 	 */
 	void onQuery(std::shared_ptr<Server> server, std::string origin, std::string message);
 
 	/**
 	 * On user query command.
 	 *
-	 * @param server the server
-	 * @param origin the user who sent the query
-	 * @param message the message
+	 * \param server the server
+	 * \param origin the user who sent the query
+	 * \param message the message
 	 */
 	void onQueryCommand(std::shared_ptr<Server> server, std::string origin, std::string message);
 
@@ -324,10 +324,10 @@ public:
 	/**
 	 * On topic change.
 	 *
-	 * @param server the server
-	 * @param origin the user who sent the topic
-	 * @param channel the channel
-	 * @param topic the new topic
+	 * \param server the server
+	 * \param origin the user who sent the topic
+	 * \param channel the channel
+	 * \param topic the new topic
 	 */
 	void onTopic(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string topic);
 
@@ -339,8 +339,8 @@ public:
 	/**
 	 * On whois information.
 	 *
-	 * @param server the server
-	 * @param info the info
+	 * \param server the server
+	 * \param info the info
 	 */
 	void onWhois(std::shared_ptr<Server> server, ServerWhois info);
 };
@@ -348,7 +348,7 @@ public:
 namespace duk {
 
 /**
- * @brief Push plugin information.
+ * \brief Push plugin information.
  */
 template <>
 class TypeTraits<irccd::PluginInfo> {
@@ -356,8 +356,8 @@ public:
 	/**
 	 * Push the plugin information as JavaScript object.
 	 *
-	 * @param ctx the context
-	 * @param info the plugin information
+	 * \param ctx the context
+	 * \param info the plugin information
 	 */
 	static void push(ContextPtr ctx, const PluginInfo &info);
 };

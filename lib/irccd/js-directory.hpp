@@ -20,8 +20,8 @@
 #define IRCCD_JS_DIRECTORY_HPP
 
 /**
- * @file js-directory.hpp
- * @brief Irccd.Directory JavaScript API.
+ * \file js-directory.hpp
+ * \brief Irccd.Directory JavaScript API.
  */
 
 #include "js.hpp"
@@ -31,7 +31,7 @@ namespace irccd {
 /**
  * Load the module.
  *
- * @param ctx the context.
+ * \param ctx the context.
  */
 void loadJsDirectory(duk::ContextPtr ctx) noexcept;
 

@@ -20,8 +20,8 @@
 #define IRCCD_JS_UTIL_HPP
 
 /**
- * @file js-util.hpp
- * @brief Irccd.Util JavaScript API.
+ * \file js-util.hpp
+ * \brief Irccd.Util JavaScript API.
  */
 
 #include "js.hpp"
@@ -31,7 +31,7 @@ namespace irccd {
 /**
  * Load the module.
  *
- * @param ctx the context.
+ * \param ctx the context.
  */
 void loadJsUtil(duk::ContextPtr ctx);
 

@@ -20,8 +20,8 @@
 #define IRCCD_JS_UNICODE_HPP
 
 /**
- * @file js-unicode.hpp
- * @brief Irccd.Unicode JavaScript API.
+ * \file js-unicode.hpp
+ * \brief Irccd.Unicode JavaScript API.
  */
 
 #include "js.hpp"
@@ -31,7 +31,7 @@ namespace irccd {
 /**
  * Load the module.
  *
- * @param ctx the context.
+ * \param ctx the context.
  */
 void loadJsUnicode(duk::ContextPtr ctx);
 

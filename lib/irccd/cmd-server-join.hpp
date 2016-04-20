@@ -20,8 +20,8 @@
 #define IRCCD_CMD_SERVER_JOIN_HPP
 
 /**
- * @file cmd-server-join.hpp
- * @brief Implementation of server-join transport command.
+ * \file cmd-server-join.hpp
+ * \brief Implementation of server-join transport command.
  */
 
 #include "command.hpp"
@@ -31,30 +31,30 @@ namespace irccd {
 namespace command {
 
 /**
- * @class ServerJoin
- * @brief Implementation of server-join transport command.
+ * \class ServerJoin
+ * \brief Implementation of server-join transport command.
  */
 class ServerJoin : public RemoteCommand {
 public:
 	ServerJoin();
 
 	/**
-	 * @copydoc RemoteCommand::help
+	 * \copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
 
 	/**
-	 * @copydoc RemoteCommand::args
+	 * \copydoc RemoteCommand::args
 	 */
 	std::vector<Arg> args() const override;
 
 	/**
-	 * @copydoc RemoteCommand::request
+	 * \copydoc RemoteCommand::request
 	 */
 	json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const override;
 
 	/**
-	 * @copydoc RemoteCommand::exec
+	 * \copydoc RemoteCommand::exec
 	 */
 	json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };

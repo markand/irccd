@@ -20,8 +20,8 @@
 #define IRCCD_CMD_SERVER_PART_HPP
 
 /**
- * @file cmd-server-part.hpp
- * @brief Implementation of server-part transport command.
+ * \file cmd-server-part.hpp
+ * \brief Implementation of server-part transport command.
  */
 
 #include "command.hpp"
@@ -31,30 +31,30 @@ namespace irccd {
 namespace command {
 
 /**
- * @class ServerPart
- * @brief Implementation of server-part transport command.
+ * \class ServerPart
+ * \brief Implementation of server-part transport command.
  */
 class ServerPart : public RemoteCommand {
 public:
 	ServerPart();
 
 	/**
-	 * @copydoc RemoteCommand::help
+	 * \copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
 
 	/**
-	 * @copydoc RemoteCommand::args
+	 * \copydoc RemoteCommand::args
 	 */
 	std::vector<Arg> args() const override;
 
 	/**
-	 * @copydoc RemoteCommand::request
+	 * \copydoc RemoteCommand::request
 	 */
 	json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const override;
 
 	/**
-	 * @copydoc RemoteCommand::exec
+	 * \copydoc RemoteCommand::exec
 	 */
 	json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };

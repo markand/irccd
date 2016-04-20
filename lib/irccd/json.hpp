@@ -20,8 +20,8 @@
 #define IRCCD_JSON_HPP
 
 /**
- * @file json.hpp
- * @brief Jansson C++14 wrapper
+ * \file json.hpp
+ * \brief Jansson C++14 wrapper
  *
  * These classes can be used to build or parse JSON documents using jansson library. It is designed to be safe
  * and explicit. It does not implement implicit sharing like jansson so when you access (e.g. Value::toObject) values
@@ -44,8 +44,8 @@ namespace irccd {
 namespace json {
 
 /**
- * @enum Type
- * @brief Type of Value.
+ * \enum Type
+ * \brief Type of Value.
  */
 enum class Type {
 	Array,		//!< Value is an array []
@@ -58,8 +58,8 @@ enum class Type {
 };
 
 /**
- * @class Error
- * @brief Error description.
+ * \class Error
+ * \brief Error description.
  */
 class Error : public std::exception {
 private:
@@ -73,11 +73,11 @@ public:
 	/**
 	 * Create the error.
 	 *
-	 * @param text the text message
-	 * @param source the source (e.g. file name)
-	 * @param line the line number
-	 * @param column the column number
-	 * @param position the position
+	 * \param text the text message
+	 * \param source the source (e.g. file name)
+	 * \param line the line number
+	 * \param column the column number
+	 * \param position the position
 	 */
 	inline Error(std::string text, std::string source, int line, int column, int position) noexcept
 		: m_text(std::move(text))
@@ -91,7 +91,7 @@ public:
 	/**
 	 * Get the error message.
 	 *
-	 * @return the text
+	 * \return the text
 	 */
 	inline const std::string &text() const noexcept
 	{
@@ -101,7 +101,7 @@ public:
 	/**
 	 * Get the source (e.g. a file name).
 	 *
-	 * @return the source
+	 * \return the source
 	 */
 	inline const std::string &source() const noexcept
 	{
@@ -111,7 +111,7 @@ public:
 	/**
 	 * Get the line.
 	 *
-	 * @return the line
+	 * \return the line
 	 */
 	inline int line() const noexcept
 	{
@@ -121,7 +121,7 @@ public:
 	/**
 	 * Get the column.
 	 *
-	 * @return the column
+	 * \return the column
 	 */
 	inline int column() const noexcept
 	{
@@ -131,7 +131,7 @@ public:
 	/**
 	 * Get the position.
 	 *
-	 * @return the position
+	 * \return the position
 	 */
 	inline int position() const noexcept
 	{
@@ -141,7 +141,7 @@ public:
 	/**
 	 * Get the error message.
 	 *
-	 * @return the message
+	 * \return the message
 	 */
 	const char *what() const noexcept override
 	{
@@ -150,8 +150,8 @@ public:
 };
 
 /**
- * @class Buffer
- * @brief Open JSON document from text.
+ * \class Buffer
+ * \brief Open JSON document from text.
  */
 class Buffer {
 public:
@@ -159,8 +159,8 @@ public:
 };
 
 /**
- * @class File
- * @brief Open JSON document from a file.
+ * \class File
+ * \brief Open JSON document from a file.
  */
 class File {
 public:
@@ -168,8 +168,8 @@ public:
 };
 
 /**
- * @class Value
- * @brief Generic JSON value wrapper.
+ * \class Value
+ * \brief Generic JSON value wrapper.
  */
 class Value {
 private:
@@ -189,8 +189,8 @@ private:
 	std::string toJson(int indent, int current) const;
 
 	/**
-	 * @class BaseIterator
-	 * @brief This is the base class for iterator and const_iterator
+	 * \class BaseIterator
+	 * \brief This is the base class for iterator and const_iterator
 	 *
 	 * This iterator works for both arrays and objects. Because of that purpose, it is only available
 	 * as forward iterator.
@@ -230,9 +230,9 @@ private:
 		/**
 		 * Get the iterator key (for objects).
 		 *
-		 * @pre iterator must be dereferenceable
-		 * @pre iterator must come from object
-		 * @return the key
+		 * \pre iterator must be dereferenceable
+		 * \pre iterator must come from object
+		 * \return the key
 		 */
 		inline const std::string &key() const noexcept
 		{
@@ -245,9 +245,9 @@ private:
 		/**
 		 * Get the iterator position (for arrays).
 		 *
-		 * @pre iterator must be dereferenceable
-		 * @pre iterator must come from arrays
-		 * @return the index
+		 * \pre iterator must be dereferenceable
+		 * \pre iterator must come from arrays
+		 * \return the index
 		 */
 		inline unsigned index() const noexcept
 		{
@@ -260,8 +260,8 @@ private:
 		/**
 		 * Dereference the iterator.
 		 *
-		 * @pre iterator be dereferenceable
-		 * @return the value
+		 * \pre iterator be dereferenceable
+		 * \return the value
 		 */
 		inline ValueType &operator*() noexcept
 		{
@@ -274,8 +274,8 @@ private:
 		/**
 		 * Dereference the iterator as a pointer.
 		 *
-		 * @pre iterator must be dereferenceable
-		 * @return the value
+		 * \pre iterator must be dereferenceable
+		 * \return the value
 		 */
 		inline ValueType *operator->() noexcept
 		{
@@ -288,8 +288,8 @@ private:
 		/**
 		 * Increment the iterator. (Prefix version).
 		 *
-		 * @pre iterator must be dereferenceable
-		 * @return *this;
+		 * \pre iterator must be dereferenceable
+		 * \return *this;
 		 */
 		inline BaseIterator &operator++() noexcept
 		{
@@ -304,8 +304,8 @@ private:
 		/**
 		 * Increment the iterator. (Postfix version).
 		 *
-		 * @pre iterator must be dereferenceable
-		 * @return *this;
+		 * \pre iterator must be dereferenceable
+		 * \return *this;
 		 */
 		inline BaseIterator &operator++(int) noexcept
 		{
@@ -320,9 +320,9 @@ private:
 		/**
 		 * Compare two iterators.
 		 *
-		 * @param it1 the first iterator
-		 * @param it2 the second iterator
-		 * @return true if they are same
+		 * \param it1 the first iterator
+		 * \param it2 the second iterator
+		 * \return true if they are same
 		 */
 		bool operator==(const BaseIterator &it) const noexcept
 		{
@@ -337,8 +337,8 @@ private:
 		/**
 		 * Test if the iterator is different.
 		 *
-		 * @param it the iterator
-		 * @return true if they are different
+		 * \param it the iterator
+		 * \return true if they are different
 		 */
 		inline bool operator!=(const BaseIterator &it) const noexcept
 		{
@@ -370,7 +370,7 @@ public:
 	 *
 	 * For any other types, initialize with sane default value.
 	 *
-	 * @param type the type
+	 * \param type the type
 	 */
 	Value(Type type);
 
@@ -385,7 +385,7 @@ public:
 	/**
 	 * Construct a boolean value.
 	 *
-	 * @param value the boolean value
+	 * \param value the boolean value
 	 */
 	inline Value(bool value) noexcept
 		: m_type(Type::Boolean)
@@ -396,7 +396,7 @@ public:
 	/**
 	 * Create value from integer.
 	 *
-	 * @param value the value
+	 * \param value the value
 	 */
 	inline Value(int value) noexcept
 		: m_type(Type::Int)
@@ -407,7 +407,7 @@ public:
 	/**
 	 * Construct a value from a C-string.
 	 *
-	 * @param value the C-string
+	 * \param value the C-string
 	 */
 	inline Value(const char *value)
 		: m_type(Type::String)
@@ -418,7 +418,7 @@ public:
 	/**
 	 * Construct a number value.
 	 *
-	 * @param value the real value
+	 * \param value the real value
 	 */
 	inline Value(double value) noexcept
 		: m_type(Type::Real)
@@ -429,7 +429,7 @@ public:
 	/**
 	 * Construct a string value.
 	 *
-	 * @param value the string
+	 * \param value the string
 	 */
 	inline Value(std::string value) noexcept
 		: m_type(Type::String)
@@ -440,8 +440,8 @@ public:
 	/**
 	 * Create an object from a map.
 	 *
-	 * @param values the values
-	 * @see fromObject
+	 * \param values the values
+	 * \see fromObject
 	 */
 	inline Value(std::map<std::string, Value> values)
 		: Value(Type::Object)
@@ -453,8 +453,8 @@ public:
 	/**
 	 * Create an array from a vector.
 	 *
-	 * @param values the values
-	 * @see fromArray
+	 * \param values the values
+	 * \see fromArray
 	 */
 	inline Value(std::vector<Value> values)
 		: Value(Type::Array)
@@ -466,23 +466,23 @@ public:
 	/**
 	 * Construct a value from a buffer.
 	 *
-	 * @param buffer the text
-	 * @throw Error on errors
+	 * \param buffer the text
+	 * \throw Error on errors
 	 */
 	Value(const Buffer &buffer);
 
 	/**
 	 * Construct a value from a file.
 	 *
-	 * @param file the file
-	 * @throw Error on errors
+	 * \param file the file
+	 * \throw Error on errors
 	 */
 	Value(const File &file);
 
 	/**
 	 * Move constructor.
 	 *
-	 * @param other the value to move from
+	 * \param other the value to move from
 	 */
 	inline Value(Value &&other)
 	{
@@ -492,7 +492,7 @@ public:
 	/**
 	 * Copy constructor.
 	 *
-	 * @param other the value to copy from
+	 * \param other the value to copy from
 	 */
 	inline Value(const Value &other)
 	{
@@ -502,8 +502,8 @@ public:
 	/**
 	 * Copy operator.
 	 *
-	 * @param other the value to copy from
-	 * @return *this
+	 * \param other the value to copy from
+	 * \return *this
 	 */
 	inline Value &operator=(const Value &other)
 	{
@@ -515,7 +515,7 @@ public:
 	/**
 	 * Move operator.
 	 *
-	 * @param other the value to move from
+	 * \param other the value to move from
 	 */
 	inline Value &operator=(Value &&other)
 	{
@@ -532,8 +532,8 @@ public:
 	/**
 	 * Get an iterator to the beginning.
 	 *
-	 * @pre must be an array or object
-	 * @return the iterator
+	 * \pre must be an array or object
+	 * \return the iterator
 	 */
 	inline iterator begin() noexcept
 	{
@@ -545,8 +545,8 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @pre must be an array or object
-	 * @return the iterator
+	 * \pre must be an array or object
+	 * \return the iterator
 	 */
 	inline const_iterator begin() const noexcept
 	{
@@ -558,8 +558,8 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @pre must be an array or object
-	 * @return the iterator
+	 * \pre must be an array or object
+	 * \return the iterator
 	 */
 	inline const_iterator cbegin() const noexcept
 	{
@@ -571,8 +571,8 @@ public:
 	/**
 	 * Get an iterator to the end.
 	 *
-	 * @pre must be an array or object
-	 * @return the iterator
+	 * \pre must be an array or object
+	 * \return the iterator
 	 */
 	inline iterator end() noexcept
 	{
@@ -584,8 +584,8 @@ public:
 	/**
 	 * Get an iterator to the end.
 	 *
-	 * @pre must be an array or object
-	 * @return the iterator
+	 * \pre must be an array or object
+	 * \return the iterator
 	 */
 	inline const_iterator end() const noexcept
 	{
@@ -597,8 +597,8 @@ public:
 	/**
 	 * Get an iterator to the end.
 	 *
-	 * @pre must be an array or object
-	 * @return the iterator
+	 * \pre must be an array or object
+	 * \return the iterator
 	 */
 	inline const_iterator cend() const noexcept
 	{
@@ -610,7 +610,7 @@ public:
 	/**
 	 * Get the value type.
 	 *
-	 * @return the type
+	 * \return the type
 	 */
 	inline Type typeOf() const noexcept
 	{
@@ -620,36 +620,36 @@ public:
 	/**
 	 * Get the value as boolean.
 	 *
-	 * @return the value or false if not a boolean
+	 * \return the value or false if not a boolean
 	 */
 	bool toBool() const noexcept;
 
 	/**
 	 * Get the value as integer.
 	 *
-	 * @return the value or 0 if not a integer
+	 * \return the value or 0 if not a integer
 	 */
 	int toInt() const noexcept;
 
 	/**
 	 * Get the value as real.
 	 *
-	 * @return the value or 0 if not a real
+	 * \return the value or 0 if not a real
 	 */
 	double toReal() const noexcept;
 
 	/**
 	 * Get the value as string.
 	 *
-	 * @param coerce set to true to coerce the value if not a string
-	 * @return the value or empty string if not a string
+	 * \param coerce set to true to coerce the value if not a string
+	 * \return the value or empty string if not a string
 	 */
 	std::string toString(bool coerce = false) const noexcept;
 
 	/**
 	 * Check if the value is boolean type.
 	 *
-	 * @return true if boolean
+	 * \return true if boolean
 	 */
 	inline bool isBool() const noexcept
 	{
@@ -659,7 +659,7 @@ public:
 	/**
 	 * Check if the value is integer type.
 	 *
-	 * @return true if integer
+	 * \return true if integer
 	 */
 	inline bool isInt() const noexcept
 	{
@@ -669,7 +669,7 @@ public:
 	/**
 	 * Check if the value is object type.
 	 *
-	 * @return true if object
+	 * \return true if object
 	 */
 	inline bool isObject() const noexcept
 	{
@@ -679,7 +679,7 @@ public:
 	/**
 	 * Check if the value is array type.
 	 *
-	 * @return true if array
+	 * \return true if array
 	 */
 	inline bool isArray() const noexcept
 	{
@@ -689,9 +689,9 @@ public:
 	/**
 	 * Check if the value is integer or real type.
 	 *
-	 * @return true if integer or real
-	 * @see toInt
-	 * @see toReal
+	 * \return true if integer or real
+	 * \see toInt
+	 * \see toReal
 	 */
 	inline bool isNumber() const noexcept
 	{
@@ -701,7 +701,7 @@ public:
 	/**
 	 * Check if the value is real type.
 	 *
-	 * @return true if real
+	 * \return true if real
 	 */
 	inline bool isReal() const noexcept
 	{
@@ -711,7 +711,7 @@ public:
 	/**
 	 * Check if the value is null type.
 	 *
-	 * @return true if null
+	 * \return true if null
 	 */
 	inline bool isNull() const noexcept
 	{
@@ -721,7 +721,7 @@ public:
 	/**
 	 * Check if the value is string type.
 	 *
-	 * @return true if string
+	 * \return true if string
 	 */
 	inline bool isString() const noexcept
 	{
@@ -731,8 +731,8 @@ public:
 	/**
 	 * Get the array or object size.
 	 *
-	 * @pre must be an array or object
-	 * @return the size
+	 * \pre must be an array or object
+	 * \return the size
 	 */
 	inline unsigned size() const noexcept
 	{
@@ -747,7 +747,7 @@ public:
 	/**
 	 * Remove all the values.
 	 *
-	 * @pre must be an array or an object
+	 * \pre must be an array or an object
 	 */
 	inline void clear() noexcept
 	{
@@ -767,9 +767,9 @@ public:
 	/**
 	 * Get the value at the specified position or the defaultValue if position is out of bounds.
 	 *
-	 * @param position the position
-	 * @param defaultValue the value replacement
-	 * @return the value or defaultValue
+	 * \param position the position
+	 * \param defaultValue the value replacement
+	 * \return the value or defaultValue
 	 */
 	template <typename DefaultValue>
 	inline Value valueOr(unsigned position, DefaultValue &&defaultValue) const
@@ -783,10 +783,10 @@ public:
 	/**
 	 * Overloaded function with type check.
 	 *
-	 * @param position the position
-	 * @param type the requested type
-	 * @param defaultValue the value replacement
-	 * @return the value or defaultValue
+	 * \param position the position
+	 * \param type the requested type
+	 * \param defaultValue the value replacement
+	 * \return the value or defaultValue
 	 */
 	template <typename DefaultValue>
 	inline Value valueOr(unsigned position, Type type, DefaultValue &&defaultValue) const
@@ -800,10 +800,10 @@ public:
 	/**
 	 * Get a value at the specified index.
 	 *
-	 * @pre must be an array
-	 * @param position the position
-	 * @return the value
-	 * @throw std::out_of_range if out of bounds
+	 * \pre must be an array
+	 * \param position the position
+	 * \return the value
+	 * \throw std::out_of_range if out of bounds
 	 */
 	inline const Value &at(unsigned position) const
 	{
@@ -815,10 +815,10 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @pre must be an array
-	 * @param position the position
-	 * @return the value
-	 * @throw std::out_of_range if out of bounds
+	 * \pre must be an array
+	 * \param position the position
+	 * \return the value
+	 * \throw std::out_of_range if out of bounds
 	 */
 	inline Value &at(unsigned position)
 	{
@@ -830,10 +830,10 @@ public:
 	/**
 	 * Get a value at the specified index.
 	 *
-	 * @pre must be an array
-	 * @pre position must be valid
-	 * @param position the position
-	 * @return the value
+	 * \pre must be an array
+	 * \pre position must be valid
+	 * \param position the position
+	 * \return the value
 	 */
 	inline const Value &operator[](unsigned position) const
 	{
@@ -846,10 +846,10 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @pre must be an array
-	 * @pre position must be valid
-	 * @param position the position
-	 * @return the value
+	 * \pre must be an array
+	 * \pre position must be valid
+	 * \param position the position
+	 * \return the value
 	 */
 	inline Value &operator[](unsigned position)
 	{
@@ -862,8 +862,8 @@ public:
 	/**
 	 * Push a value to the beginning of the array.
 	 *
-	 * @pre must be an array
-	 * @param value the value to push
+	 * \pre must be an array
+	 * \param value the value to push
 	 */
 	inline void push(const Value &value)
 	{
@@ -875,8 +875,8 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @pre must be an array
-	 * @param value the value to push
+	 * \pre must be an array
+	 * \param value the value to push
 	 */
 	inline void push(Value &&value)
 	{
@@ -888,10 +888,10 @@ public:
 	/**
 	 * Insert a value at the specified position.
 	 *
-	 * @pre must be an array
-	 * @pre position must be valid
-	 * @param position the position
-	 * @param value the value to push
+	 * \pre must be an array
+	 * \pre position must be valid
+	 * \param position the position
+	 * \param value the value to push
 	 */
 	inline void insert(unsigned position, const Value &value)
 	{
@@ -904,10 +904,10 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @pre must be an array
-	 * @pre position must be valid
-	 * @param position the position
-	 * @param value the value to push
+	 * \pre must be an array
+	 * \pre position must be valid
+	 * \param position the position
+	 * \param value the value to push
 	 */
 	inline void insert(unsigned position, Value &&value)
 	{
@@ -920,8 +920,8 @@ public:
 	/**
 	 * Add a new value to the end.
 	 *
-	 * @pre must be an array
-	 * @param value the value to append
+	 * \pre must be an array
+	 * \param value the value to append
 	 */
 	inline void append(const Value &value)
 	{
@@ -933,8 +933,8 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @pre must be an array
-	 * @param value the value to append
+	 * \pre must be an array
+	 * \param value the value to append
 	 */
 	inline void append(Value &&value)
 	{
@@ -946,9 +946,9 @@ public:
 	/**
 	 * Remove a value at the specified position.
 	 *
-	 * @pre must be an array
-	 * @pre position must be valid
-	 * @param position the position
+	 * \pre must be an array
+	 * \pre position must be valid
+	 * \param position the position
 	 */
 	inline void erase(unsigned position)
 	{
@@ -966,9 +966,9 @@ public:
 	/**
 	 * Get the value at the specified key or the defaultValue if key is absent.
 	 *
-	 * @param name the name
-	 * @param defaultValue the value replacement
-	 * @return the value or defaultValue
+	 * \param name the name
+	 * \param defaultValue the value replacement
+	 * \return the value or defaultValue
 	 */
 	template <typename DefaultValue>
 	Value valueOr(const std::string &name, DefaultValue &&defaultValue) const
@@ -987,10 +987,10 @@ public:
 	/**
 	 * Overloaded function with type check.
 	 *
-	 * @param name the name
-	 * @param type the requested type
-	 * @param defaultValue the value replacement
-	 * @return the value or defaultValue
+	 * \param name the name
+	 * \param type the requested type
+	 * \param defaultValue the value replacement
+	 * \return the value or defaultValue
 	 */
 	template <typename DefaultValue>
 	Value valueOr(const std::string &name, Type type, DefaultValue &&defaultValue) const
@@ -1009,10 +1009,10 @@ public:
 	/**
 	 * Get a value from the object.
 	 *
-	 * @pre must be an object
-	 * @param name the value key
-	 * @return the value
-	 * @throw std::out_of_range if not found
+	 * \pre must be an object
+	 * \param name the value key
+	 * \return the value
+	 * \throw std::out_of_range if not found
 	 */
 	inline const Value &at(const std::string &name) const
 	{
@@ -1024,10 +1024,10 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @pre must be an object
-	 * @param name the value key
-	 * @return the value
-	 * @throw std::out_of_range if not found
+	 * \pre must be an object
+	 * \param name the value key
+	 * \return the value
+	 * \throw std::out_of_range if not found
 	 */
 	inline Value &at(const std::string &name)
 	{
@@ -1039,9 +1039,9 @@ public:
 	/**
 	 * Get a value from the object.
 	 *
-	 * @pre must be an object
-	 * @param name the value key
-	 * @return the value
+	 * \pre must be an object
+	 * \param name the value key
+	 * \return the value
 	 */
 	inline Value &operator[](const std::string &name)
 	{
@@ -1053,9 +1053,9 @@ public:
 	/**
 	 * Find a value by key.
 	 *
-	 * @pre must be an object
-	 * @param key the property key
-	 * @return the iterator or past the end if not found
+	 * \pre must be an object
+	 * \param key the property key
+	 * \return the iterator or past the end if not found
 	 */
 	inline iterator find(const std::string &key)
 	{
@@ -1067,9 +1067,9 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @pre must be an object
-	 * @param key the property key
-	 * @return the iterator or past the end if not found
+	 * \pre must be an object
+	 * \param key the property key
+	 * \return the iterator or past the end if not found
 	 */
 	inline const_iterator find(const std::string &key) const
 	{
@@ -1081,9 +1081,9 @@ public:
 	/**
 	 * Insert a new value.
 	 *
-	 * @pre must be an object
-	 * @param name the key
-	 * @param value the value
+	 * \pre must be an object
+	 * \param name the key
+	 * \param value the value
 	 */
 	inline void insert(std::string name, const Value &value)
 	{
@@ -1095,9 +1095,9 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @pre must be an object
-	 * @param name the key
-	 * @param value the value
+	 * \pre must be an object
+	 * \param name the key
+	 * \param value the value
 	 */
 	inline void insert(std::string name, Value &&value)
 	{
@@ -1109,9 +1109,9 @@ public:
 	/**
 	 * Check if a value exists.
 	 *
-	 * @pre must be an object
-	 * @param key the key value
-	 * @return true if exists
+	 * \pre must be an object
+	 * \param key the key value
+	 * \return true if exists
 	 */
 	inline bool contains(const std::string &key) const noexcept
 	{
@@ -1123,8 +1123,8 @@ public:
 	/**
 	 * Remove a value of the specified key.
 	 *
-	 * @pre must be an object
-	 * @param key the value key
+	 * \pre must be an object
+	 * \param key the value key
 	 */
 	inline void erase(const std::string &key)
 	{
@@ -1136,9 +1136,9 @@ public:
 	/**
 	 * Return this value as JSon representation.
 	 *
-	 * @param indent, the indentation to use (0 == compact, < 0 == tabs, > 0 == number of spaces)
-	 * @param tabs, use tabs or not
-	 * @return the string
+	 * \param indent, the indentation to use (0 == compact, < 0 == tabs, > 0 == number of spaces)
+	 * \param tabs, use tabs or not
+	 * \return the string
 	 */
 	inline std::string toJson(int indent = 2) const
 	{
@@ -1149,16 +1149,16 @@ public:
 /**
  * Escape the input.
  *
- * @param input the input
- * @return the escaped string
+ * \param input the input
+ * \return the escaped string
  */
 std::string escape(const std::string &input);
 
 /**
  * Convenient function for creating array from initializer list.
  *
- * @param values the values
- * @return the array
+ * \param values the values
+ * \return the array
  */
 inline Value array(std::initializer_list<Value> values)
 {
@@ -1168,8 +1168,8 @@ inline Value array(std::initializer_list<Value> values)
 /**
  * Convenient function for creating object from initializer list.
  *
- * @param values the values
- * @return the object
+ * \param values the values
+ * \return the object
  */
 inline Value object(std::initializer_list<std::pair<std::string, Value>> values)
 {

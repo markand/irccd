@@ -20,8 +20,8 @@
 #define IRCCD_UNICODE_HPP
 
 /**
- * @file unicode.hpp
- * @brief UTF-8 to UTF-32 conversions
+ * \file unicode.hpp
+ * \brief UTF-8 to UTF-32 conversions
  */
 
 #include <stdexcept>
@@ -41,25 +41,25 @@ void decode(char32_t &c, const char *res) noexcept;
  * This can be used to iterate a valid UTF-8 string to jump to the next
  * real character.
  *
- * @param c the first multi byte character
- * @return the number of bytes [1-4]
+ * \param c the first multi byte character
+ * \return the number of bytes [1-4]
  */
 int nbytesUtf8(char c) noexcept;
 
 /**
  * Get the number of bytes for the unicode point.
  *
- * @param point the unicode point
- * @return the number of bytes [1-4] or -1 on invalid
+ * \param point the unicode point
+ * \return the number of bytes [1-4] or -1 on invalid
  */
 int nbytesPoint(char32_t point) noexcept;
 
 /**
  * Get real number of character in a string.
  *
- * @param str the string
- * @return the length
- * @throw std::invalid_argument on invalid sequence
+ * \param str the string
+ * \return the length
+ * \throw std::invalid_argument on invalid sequence
  */
 int length(const std::string &str);
 
@@ -69,8 +69,8 @@ int length(const std::string &str);
  * The function must have the following signature:
  *	void f(char ch)
  *
- * @param str the UTF-8 string
- * @throw std::invalid_argument on invalid sequence
+ * \param str the UTF-8 string
+ * \throw std::invalid_argument on invalid sequence
  */
 template <typename Func>
 void forEach(const std::string &str, Func function)
@@ -93,98 +93,98 @@ void forEach(const std::string &str, Func function)
 /**
  * Convert a UTF-32 string to UTF-8 string.
  *
- * @param array the UTF-32 string
- * @return the UTF-8 string
- * @throw std::invalid_argument on invalid sequence
+ * \param array the UTF-32 string
+ * \return the UTF-8 string
+ * \throw std::invalid_argument on invalid sequence
  */
 std::string toUtf8(const std::u32string &array);
 
 /**
  * Convert a UTF-8 string to UTF-32 string.
  *
- * @param str the UTF-8 string
- * @return the UTF-32 string
- * @throw std::invalid_argument on invalid sequence
+ * \param str the UTF-8 string
+ * \return the UTF-32 string
+ * \throw std::invalid_argument on invalid sequence
  */
 std::u32string toUtf32(const std::string &str);
 
 /**
  * Check if the unicode character is space.
  *
- * @param c the character
- * @return true if space
+ * \param c the character
+ * \return true if space
  */
 bool isspace(char32_t c) noexcept;
 
 /**
  * Check if the unicode character is digit.
  *
- * @param c the character
- * @return true if digit
+ * \param c the character
+ * \return true if digit
  */
 bool isdigit(char32_t c) noexcept;
 
 /**
  * Check if the unicode character is alpha category.
  *
- * @param c the character
- * @return true if alpha
+ * \param c the character
+ * \return true if alpha
  */
 bool isalpha(char32_t c) noexcept;
 
 /**
  * Check if the unicode character is upper case.
  *
- * @param c the character
- * @return true if upper case
+ * \param c the character
+ * \return true if upper case
  */
 bool isupper(char32_t c) noexcept;
 
 /**
  * Check if the unicode character is lower case.
  *
- * @param c the character
- * @return true if lower case
+ * \param c the character
+ * \return true if lower case
  */
 bool islower(char32_t c) noexcept;
 
 /**
  * Check if the unicode character is title case.
  *
- * @param c the character
- * @return true if title case
+ * \param c the character
+ * \return true if title case
  */
 bool istitle(char32_t c) noexcept;
 
 /**
  * Convert to upper case.
  *
- * @param c the character
- * @return the upper case character
+ * \param c the character
+ * \return the upper case character
  */
 char32_t toupper(char32_t c) noexcept;
 
 /**
  * Convert to lower case.
  *
- * @param c the character
- * @return the lower case character
+ * \param c the character
+ * \return the lower case character
  */
 char32_t tolower(char32_t c) noexcept;
 
 /**
  * Convert to title case.
  *
- * @param c the character
- * @return the title case character
+ * \param c the character
+ * \return the title case character
  */
 char32_t totitle(char32_t c) noexcept;
 
 /**
  * Convert the UTF-32 string to upper case.
  *
- * @param str the str
- * @return the upper case string
+ * \param str the str
+ * \return the upper case string
  */
 inline std::u32string toupper(std::u32string str)
 {
@@ -198,9 +198,9 @@ inline std::u32string toupper(std::u32string str)
 /**
  * Convert the UTF-8 string to upper case.
  *
- * @param str the str
- * @return the upper case string
- * @warning very slow at the moment
+ * \param str the str
+ * \return the upper case string
+ * \warning very slow at the moment
  */
 inline std::string toupper(const std::string &str)
 {
@@ -210,8 +210,8 @@ inline std::string toupper(const std::string &str)
 /**
  * Convert the UTF-32 string to lower case.
  *
- * @param str the str
- * @return the lower case string
+ * \param str the str
+ * \return the lower case string
  */
 inline std::u32string tolower(std::u32string str)
 {
@@ -225,9 +225,9 @@ inline std::u32string tolower(std::u32string str)
 /**
  * Convert the UTF-8 string to lower case.
  *
- * @param str the str
- * @return the lower case string
- * @warning very slow at the moment
+ * \param str the str
+ * \return the lower case string
+ * \warning very slow at the moment
  */
 inline std::string tolower(const std::string &str)
 {

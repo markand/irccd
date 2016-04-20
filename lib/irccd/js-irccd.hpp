@@ -20,8 +20,8 @@
 #define IRCCD_JS_IRCCD_HPP
 
 /**
- * @file js-irccd.hpp
- * @brief Irccd.Irccd JavaScript API.
+ * \file js-irccd.hpp
+ * \brief Irccd.Irccd JavaScript API.
  */
 
 #include <cerrno>
@@ -32,7 +32,7 @@
 namespace irccd {
 
 /**
- * @brief Custom JavaScript exception for system error.
+ * \brief Custom JavaScript exception for system error.
  */
 class SystemError {
 private:
@@ -48,15 +48,15 @@ public:
 	/**
 	 * Create a system error with the given errno and message.
 	 *
-	 * @param e the errno number
-	 * @param message the message
+	 * \param e the errno number
+	 * \param message the message
 	 */
 	SystemError(int e, std::string message);
 
 	/**
 	 * Raise the SystemError.
 	 *
-	 * @param ctx the context
+	 * \param ctx the context
 	 */
 	void raise(duk::ContextPtr ctx) const;
 };
@@ -64,7 +64,7 @@ public:
 /**
  * Load the module.
  *
- * @param ctx the context.
+ * \param ctx the context.
  */
 void loadJsIrccd(duk::Context &ctx);
 

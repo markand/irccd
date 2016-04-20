@@ -20,8 +20,8 @@
 #define IRCCD_CONFIG_HPP
 
 /**
- * @file config.hpp
- * @brief Read .ini configuration file for irccd
+ * \file config.hpp
+ * \brief Read .ini configuration file for irccd
  */
 
 #include <irccd/options.hpp>
@@ -38,8 +38,8 @@ class Section;
 class Irccd;
 
 /**
- * @class Config
- * @brief Read .ini configuration file for irccd
+ * \class Config
+ * \brief Read .ini configuration file for irccd
  */
 class Config {
 private:
@@ -68,14 +68,14 @@ public:
 	 * Construct the configuration file loader. If path is empty, then the configuration file is searched through
 	 * the standard directories.
 	 *
-	 * @param options the option parsed at command line
+	 * \param options the option parsed at command line
 	 */
 	Config(parser::Result options) noexcept;
 
 	/**
 	 * Load the config into irccd.
 	 *
-	 * @param irccd the irccd instance
+	 * \param irccd the irccd instance
 	 */
 	void load(Irccd &irccd);
 };

@@ -20,8 +20,8 @@
 #define IRCCD_CMD_SERVER_CONNECT_HPP
 
 /**
- * @file cmd-server-connect.hpp
- * @brief Implementation of server-connect transport command.
+ * \file cmd-server-connect.hpp
+ * \brief Implementation of server-connect transport command.
  */
 
 #include "command.hpp"
@@ -31,8 +31,8 @@ namespace irccd {
 namespace command {
 
 /**
- * @class ServerConnect
- * @brief Implementation of server-connect transport command.
+ * \class ServerConnect
+ * \brief Implementation of server-connect transport command.
  */
 class ServerConnect : public RemoteCommand {
 public:
@@ -42,22 +42,22 @@ public:
 	ServerConnect();
 
 	/**
-	 * @copydoc RemoteCommand::help
+	 * \copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
 
 	/**
-	 * @copydoc RemoteCommand::options
+	 * \copydoc RemoteCommand::options
 	 */
 	std::vector<Option> options() const override;
 
 	/**
-	 * @copydoc RemoteCommand::args
+	 * \copydoc RemoteCommand::args
 	 */
 	std::vector<Arg> args() const override;
 
 	/**
-	 * @copydoc RemoteCommand::exec
+	 * \copydoc RemoteCommand::exec
 	 */
 	json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };

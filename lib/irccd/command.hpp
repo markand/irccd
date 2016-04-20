@@ -20,8 +20,8 @@
 #define IRCCD_COMMAND_HPP
 
 /**
- * @file command.hpp
- * @brief Remote commands.
+ * \file command.hpp
+ * \brief Remote commands.
  */
 
 #include <cassert>
@@ -36,7 +36,7 @@ class Irccd;
 class Irccdctl;
 
 /**
- * @brief Command line arguments to irccdctl.
+ * \brief Command line arguments to irccdctl.
  *
  * This class contains the resolved arguments from command line that can apply to the command.
  */
@@ -60,8 +60,8 @@ public:
 	/**
 	 * Construct the request.
 	 *
-	 * @param options the options
-	 * @param args the arguments
+	 * \param options the options
+	 * \param args the arguments
 	 */
 	inline RemoteCommandRequest(Options options, Args args) noexcept
 		: m_options(std::move(options))
@@ -72,7 +72,7 @@ public:
 	/**
 	 * Get the arguments.
 	 *
-	 * @return the arguments
+	 * \return the arguments
 	 */
 	inline const Args &args() const noexcept
 	{
@@ -82,7 +82,7 @@ public:
 	/**
 	 * Get the options.
 	 *
-	 * @return the options
+	 * \return the options
 	 */
 	inline const Options &options() const noexcept
 	{
@@ -92,7 +92,7 @@ public:
 	/**
 	 * Get the number of arguments.
 	 *
-	 * @return the number of arguments
+	 * \return the number of arguments
 	 */
 	inline unsigned length() const noexcept
 	{
@@ -102,8 +102,8 @@ public:
 	/**
 	 * Check if the request has the given option id.
 	 *
-	 * @param option the option id
-	 * @return true if the option is available
+	 * \param option the option id
+	 * \return true if the option is available
 	 */
 	inline bool has(const std::string &option) const noexcept
 	{
@@ -113,9 +113,9 @@ public:
 	/**
 	 * Get the argument at the specified index.
 	 *
-	 * @pre index < length()
-	 * @param index the argument index
-	 * @return the argument
+	 * \pre index < length()
+	 * \param index the argument index
+	 * \return the argument
 	 */
 	inline const std::string &arg(unsigned index) const noexcept
 	{
@@ -127,9 +127,9 @@ public:
 	/**
 	 * Get the argument or default value if not available.
 	 *
-	 * @param index the index
-	 * @param defaultValue the value if index is out of range
-	 * @return the argument
+	 * \param index the index
+	 * \param defaultValue the value if index is out of range
+	 * \return the argument
 	 */
 	inline std::string argOr(unsigned index, std::string defaultValue) const noexcept
 	{
@@ -139,9 +139,9 @@ public:
 	/**
 	 * Get the given option by its id.
 	 *
-	 * @pre has(key)
-	 * @param key the option id
-	 * @return the option
+	 * \pre has(key)
+	 * \param key the option id
+	 * \return the option
 	 */
 	inline const std::string &option(const std::string &key) const noexcept
 	{
@@ -153,9 +153,9 @@ public:
 	/**
 	 * Get the given option by its id or defaultValue if not found.
 	 *
-	 * @param key the option id
-	 * @param defaultValue the value replacement
-	 * @return the option
+	 * \param key the option id
+	 * \param defaultValue the value replacement
+	 * \return the option
 	 */
 	inline std::string optionOr(const std::string &key, std::string defaultValue) const noexcept
 	{
@@ -169,7 +169,7 @@ public:
 };
 
 /**
- * @brief Invokable command.
+ * \brief Invokable command.
  *
  * A remote command is a invokable command in the irccd daemon. You can register dynamically any remote command you
  * like using Application::addCommand.
@@ -192,12 +192,12 @@ public:
 class RemoteCommand {
 public:
 	/**
-	 * @brief Defines available options for this command.
+	 * \brief Defines available options for this command.
 	 */
 	class Option;
 
 	/**
-	 * @brief Defines available arguments for this command.
+	 * \brief Defines available arguments for this command.
 	 */
 	class Arg;
 
@@ -210,11 +210,11 @@ public:
 	/**
 	 * Create the remote command.
 	 *
-	 * @pre name must not be empty
-	 * @pre category must not be empty
-	 * @param name the command name (e.g. server-list)
-	 * @param category the category (e.g. Server)
-	 * @param visible true if the command should be visible without verbosity
+	 * \pre name must not be empty
+	 * \pre category must not be empty
+	 * \param name the command name (e.g. server-list)
+	 * \param category the category (e.g. Server)
+	 * \param visible true if the command should be visible without verbosity
 	 */
 	inline RemoteCommand(std::string name, std::string category, bool visible = true) noexcept
 		: m_name(std::move(name))
@@ -233,7 +233,7 @@ public:
 	/**
 	 * Return the command name, must not have spaces.
 	 *
-	 * @return the command name
+	 * \return the command name
 	 */
 	inline const std::string &name() const noexcept
 	{
@@ -245,7 +245,7 @@ public:
 	 *
 	 * Irccdctl will sort commands by categories.
 	 *
-	 * @return the category
+	 * \return the category
 	 */
 	inline const std::string &category() const noexcept
 	{
@@ -255,7 +255,7 @@ public:
 	/**
 	 * Hide the command in non-verbose mode.
 	 *
-	 * @return true if the command should be visible in non-verbose mode
+	 * \return true if the command should be visible in non-verbose mode
 	 */
 	inline bool visible() const noexcept
 	{
@@ -265,21 +265,21 @@ public:
 	/**
 	 * Return the command documentation usage.
 	 *
-	 * @return the usage
+	 * \return the usage
 	 */
 	std::string usage() const;
 
 	/**
 	 * Return the help message.
 	 *
-	 * @return the help message
+	 * \return the help message
 	 */
 	virtual std::string help() const = 0;
 
 	/**
 	 * Get the supported irccdctl options.
 	 *
-	 * @return the options
+	 * \return the options
 	 */
 	virtual std::vector<Option> options() const
 	{
@@ -289,7 +289,7 @@ public:
 	/**
 	 * Get the supported arguments.
 	 *
-	 * @return the arguments
+	 * \return the arguments
 	 */
 	virtual std::vector<Arg> args() const
 	{
@@ -299,14 +299,14 @@ public:
 	/**
 	 * Get the minimum number of arguments required.
 	 *
-	 * @return the minimum
+	 * \return the minimum
 	 */
 	unsigned min() const noexcept;
 
 	/**
 	 * Get the maximum number of arguments required.
 	 *
-	 * @return the maximum
+	 * \return the maximum
 	 */
 	unsigned max() const noexcept;
 
@@ -317,10 +317,10 @@ public:
 	 *
 	 * The default implementation just send the command name with no arguments.
 	 *
-	 * @param irccdctl the irccdctl instance
-	 * @param args the command line arguments and options
-	 * @return the JSON object to send to the daemon
-	 * @post the returned JSON value must be an object
+	 * \param irccdctl the irccdctl instance
+	 * \param args the command line arguments and options
+	 * \return the JSON object to send to the daemon
+	 * \post the returned JSON value must be an object
 	 */
 	virtual json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const;
 
@@ -334,9 +334,9 @@ public:
 	 *
 	 * If any exception is thrown from this function, it is forwarded to the client as error status.
 	 *
-	 * @param irccd the instance
-	 * @param request the JSON request
-	 * @return the response
+	 * \param irccd the instance
+	 * \param request the JSON request
+	 * \return the response
 	 */
 	virtual json::Value exec(Irccd &irccd, const json::Value &request) const;
 
@@ -345,14 +345,14 @@ public:
 	 *
 	 * This default implementation just check for an error string and shows it if any.
 	 * 
-	 * @param irccdctl the irccdctl instan e
-	 * @param response the JSON response
+	 * \param irccdctl the irccdctl instan e
+	 * \param response the JSON response
 	 */
 	virtual void result(Irccdctl &irccdctl, const json::Value &response) const;
 };
 
 /**
- * @brief Option description for a command.
+ * \brief Option description for a command.
  */
 class RemoteCommand::Option {
 private:
@@ -370,14 +370,14 @@ public:
 	 *
 	 * If arg is not empty, the option takes an argument.
 	 *
-	 * @pre id must not be empty
-	 * @pre at least simpleKey or longKey must not be empty
-	 * @pre description must not be empty
-	 * @param id the option id
-	 * @param simpleKey the key the option key
-	 * @param longKey the long option name
-	 * @param arg the argument name if needed
-	 * @param description the description
+	 * \pre id must not be empty
+	 * \pre at least simpleKey or longKey must not be empty
+	 * \pre description must not be empty
+	 * \param id the option id
+	 * \param simpleKey the key the option key
+	 * \param longKey the long option name
+	 * \param arg the argument name if needed
+	 * \param description the description
 	 */
 	inline Option(std::string id,
 		      std::string simpleKey,
@@ -398,7 +398,7 @@ public:
 	/**
 	 * Get the id.
 	 *
-	 * @return the id
+	 * \return the id
 	 */
 	inline const std::string &id() const noexcept
 	{
@@ -408,7 +408,7 @@ public:
 	/**
 	 * Get the option key.
 	 *
-	 * @return the key
+	 * \return the key
 	 */
 	inline const std::string &simpleKey() const noexcept
 	{
@@ -418,7 +418,7 @@ public:
 	/**
 	 * Get the long option.
 	 *
-	 * @return the long option
+	 * \return the long option
 	 */
 	inline const std::string &longKey() const noexcept
 	{
@@ -428,7 +428,7 @@ public:
 	/**
 	 * Get the option description.
 	 *
-	 * @return the description
+	 * \return the description
 	 */
 	inline const std::string &description() const noexcept
 	{
@@ -438,7 +438,7 @@ public:
 	/**
 	 * Get the option argument name.
 	 *
-	 * @return the argument name if any
+	 * \return the argument name if any
 	 */
 	inline const std::string &arg() const noexcept
 	{
@@ -447,7 +447,7 @@ public:
 };
 
 /**
- * @brief Argument description for command.
+ * \brief Argument description for command.
  */
 class RemoteCommand::Arg {
 private:
@@ -458,8 +458,8 @@ public:
 	/**
 	 * Construct an argument.
 	 *
-	 * @param name the name
-	 * @param required true if the argument is required
+	 * \param name the name
+	 * \param required true if the argument is required
 	 */
 	inline Arg(std::string name, bool required) noexcept
 		: m_name(std::move(name))
@@ -470,7 +470,7 @@ public:
 	/**
 	 * Get the argument name.
 	 *
-	 * @return the name
+	 * \return the name
 	 */
 	inline const std::string &name() const noexcept
 	{
@@ -480,7 +480,7 @@ public:
 	/**
 	 * Tells if the argument is required.
 	 *
-	 * @return true if required
+	 * \return true if required
 	 */
 	inline bool required() const noexcept
 	{

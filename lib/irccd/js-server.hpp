@@ -20,8 +20,8 @@
 #define IRCCD_JS_SERVER_HPP
 
 /**
- * @file js-server.hpp
- * @brief Irccd.Server JavaScript API.
+ * \file js-server.hpp
+ * \brief Irccd.Server JavaScript API.
  */
 
 #include <irccd/server.hpp>
@@ -33,7 +33,7 @@ namespace irccd {
 namespace duk {
 
 /**
- * @brief JavaScript binding for Server.
+ * \brief JavaScript binding for Server.
  */
 template <>
 class TypeTraits<irccd::Server> {
@@ -41,7 +41,7 @@ public:
 	/**
 	 * Push the Server prototype.
 	 *
-	 * @param ctx the context
+	 * \param ctx the context
 	 */
 	static inline void prototype(ContextPtr ctx)
 	{
@@ -55,7 +55,7 @@ public:
 	/**
 	 * Get the Server signature.
 	 *
-	 * @return Server
+	 * \return Server
 	 */
 	static inline std::string name()
 	{
@@ -65,7 +65,7 @@ public:
 	/**
 	 * Get the inheritance list.
 	 *
-	 * @return empty
+	 * \return empty
 	 */
 	static inline std::vector<std::string> inherits()
 	{
@@ -78,7 +78,7 @@ public:
 /**
  * Load the module.
  *
- * @param ctx the context.
+ * \param ctx the context.
  */
 void loadJsServer(duk::ContextPtr ctx);
 

@@ -20,8 +20,8 @@
 #define IRCCD_JS_TIMER_HPP
 
 /**
- * @file js-timer.hpp
- * @brief Irccd.Timer JavaScript API.
+ * \file js-timer.hpp
+ * \brief Irccd.Timer JavaScript API.
  */
 
 #include "js.hpp"
@@ -31,7 +31,7 @@ namespace irccd {
 /**
  * Load the module.
  *
- * @param ctx the context.
+ * \param ctx the context.
  */
 void loadJsTimer(duk::ContextPtr ctx) noexcept;
 

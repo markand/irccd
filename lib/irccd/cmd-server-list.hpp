@@ -20,8 +20,8 @@
 #define IRCCD_CMD_SERVER_LIST_HPP
 
 /**
- * @file cmd-server-list.hpp
- * @brief Implementation of server-list transport command.
+ * \file cmd-server-list.hpp
+ * \brief Implementation of server-list transport command.
  */
 
 #include "command.hpp"
@@ -31,15 +31,15 @@ namespace irccd {
 namespace command {
 
 /**
- * @class ServerList
- * @brief Implementation of server-list transport command.
+ * \class ServerList
+ * \brief Implementation of server-list transport command.
  */
 class ServerList : public RemoteCommand {
 public:
 	ServerList();
 
 	/**
-	 * @copydoc RemoteCommand::help
+	 * \copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
 

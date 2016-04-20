@@ -20,8 +20,8 @@
 #define IRCCD_CMD_HPPELP_HPP
 
 /**
- * @file cmd-help.hpp
- * @brief Implementation of irccdctl help.
+ * \file cmd-help.hpp
+ * \brief Implementation of irccdctl help.
  */
 
 #include "command.hpp"
@@ -31,8 +31,8 @@ namespace irccd {
 namespace command {
 
 /**
- * @class Help
- * @brief Implementation of irccdctl help.
+ * \class Help
+ * \brief Implementation of irccdctl help.
  */
 class Help : public RemoteCommand {
 public:
@@ -41,12 +41,12 @@ public:
 	std::vector<Arg> args() const override;
 
 	/**
-	 * @copydoc RemoteCommand::help
+	 * \copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
 
 	/**
-	 * @copydoc RemoteCommand::request
+	 * \copydoc RemoteCommand::request
 	 */
 	json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const override;
 };

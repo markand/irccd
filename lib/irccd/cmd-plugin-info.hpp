@@ -20,8 +20,8 @@
 #define IRCCD_CMD_PLUGIN_INFO_HPP
 
 /**
- * @file cmd-plugin-info.hpp
- * @brief Implementation of plugin-info transport command.
+ * \file cmd-plugin-info.hpp
+ * \brief Implementation of plugin-info transport command.
  */
 
 #include "command.hpp"
@@ -31,8 +31,8 @@ namespace irccd {
 namespace command {
 
 /**
- * @class PluginInfo
- * @brief Implementation of plugin-info transport command.
+ * \class PluginInfo
+ * \brief Implementation of plugin-info transport command.
  */
 class PluginInfo : public RemoteCommand {
 public:
@@ -42,27 +42,27 @@ public:
 	PluginInfo();
 
 	/**
-	 * @copydoc RemoteCommand::help
+	 * \copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
 
 	/**
-	 * @copydoc RemoteCommand::args
+	 * \copydoc RemoteCommand::args
 	 */
 	std::vector<Arg> args() const override;
 
 	/**
-	 * @copydoc RemoteCommand::request
+	 * \copydoc RemoteCommand::request
 	 */
 	json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const override;
 
 	/**
-	 * @copydoc RemoteCommand::exec
+	 * \copydoc RemoteCommand::exec
 	 */
 	json::Value exec(Irccd &irccd, const json::Value &request) const override;
 
 	/**
-	 * @copydoc RemoteCommand::result
+	 * \copydoc RemoteCommand::result
 	 */
 	void result(Irccdctl &irccdctl, const json::Value &response) const override;
 };

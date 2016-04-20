@@ -20,8 +20,8 @@
 #define IRCCD_CMD_SERVER_MESSAGE_HPP
 
 /**
- * @file cmd-server-message.hpp
- * @brief Implementation of server-message transport command.
+ * \file cmd-server-message.hpp
+ * \brief Implementation of server-message transport command.
  */
 
 #include "command.hpp"
@@ -31,30 +31,30 @@ namespace irccd {
 namespace command {
 
 /**
- * @class ServerMessage
- * @brief Implementation of server-message transport command.
+ * \class ServerMessage
+ * \brief Implementation of server-message transport command.
  */
 class ServerMessage : public RemoteCommand {
 public:
 	ServerMessage();
 
 	/**
-	 * @copydoc RemoteCommand::help
+	 * \copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
 
 	/**
-	 * @copydoc RemoteCommand::args
+	 * \copydoc RemoteCommand::args
 	 */
 	std::vector<Arg> args() const override;
 
 	/**
-	 * @copydoc RemoteCommand::request
+	 * \copydoc RemoteCommand::request
 	 */
 	json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const override;
 
 	/**
-	 * @copydoc RemoteCommand::exec
+	 * \copydoc RemoteCommand::exec
 	 */
 	json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };

@@ -20,8 +20,8 @@
 #define IRCCD_JS_ELAPSED_TIMER_HPP
 
 /**
- * @file js-elapsed-timer.hpp
- * @brief Irccd.ElapsedTimer JavaScript API.
+ * \file js-elapsed-timer.hpp
+ * \brief Irccd.ElapsedTimer JavaScript API.
  */
 
 #include "js.hpp"
@@ -31,7 +31,7 @@ namespace irccd {
 /**
  * Load the module.
  *
- * @param ctx the context.
+ * \param ctx the context.
  */
 void loadJsElapsedTimer(duk::ContextPtr ctx) noexcept;
 

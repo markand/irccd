@@ -20,8 +20,8 @@
 #define IRCCD_FS_HPP
 
 /**
- * @file fs.hpp
- * @brief Filesystem operations made easy.
+ * \file fs.hpp
+ * \brief Filesystem operations made easy.
  *
  * The following options can be set by the user:
  *
@@ -41,8 +41,8 @@ namespace irccd {
 namespace fs {
 
 /**
- * @enum Flags
- * @brief Flags for readdir.
+ * \enum Flags
+ * \brief Flags for readdir.
  */
 enum Flags {
 	Dot	= (1 << 0),	//!< if set, also lists "."
@@ -50,13 +50,13 @@ enum Flags {
 };
 
 /**
- * @class Entry
- * @brief Entry in the directory list.
+ * \class Entry
+ * \brief Entry in the directory list.
  */
 class Entry {
 public:
 	/**
-	 * @brief Describe the type of an entry
+	 * \brief Describe the type of an entry
 	 */
 	enum Type : char {
 		Unknown,	//!< File type is unknown,
@@ -72,25 +72,25 @@ public:
 /**
  * Check if two entries are identical.
  *
- * @param e1 the first entry
- * @param e2 the second entry
- * @return true if they are identical
+ * \param e1 the first entry
+ * \param e2 the second entry
+ * \return true if they are identical
  */
 bool operator==(const Entry &e1, const Entry &e2) noexcept;
 
 /**
  * Check if two entries are different.
  *
- * @param e1 the first entry
- * @param e2 the second entry
- * @return true if they are different
+ * \param e1 the first entry
+ * \param e2 the second entry
+ * \return true if they are different
  */
 bool operator!=(const Entry &e1, const Entry &e2) noexcept;
 
 /**
  * Get the separator for that system.
  *
- * @return \ on Windows and / otherwise
+ * \return \ on Windows and / otherwise
  */
 inline char separator() noexcept
 {
@@ -104,8 +104,8 @@ inline char separator() noexcept
 /**
  * Clean a path by removing any extra / or \ and add a trailing one.
  *
- * @param path the path
- * @return the updated path
+ * \param path the path
+ * \return the updated path
  */
 std::string clean(std::string path);
 
@@ -114,8 +114,8 @@ std::string clean(std::string path);
  *
  * Example, baseName("/etc/foo.conf") // foo.conf
  *
- * @param path the path
- * @return the base name
+ * \param path the path
+ * \return the base name
  */
 std::string baseName(std::string path);
 
@@ -124,17 +124,17 @@ std::string baseName(std::string path);
  *
  * Example, dirName("/etc/foo.conf") // /etc
  *
- * @param path the path
- * @return the parent directory
+ * \param path the path
+ * \return the parent directory
  */
 std::string dirName(std::string path);
 
 /**
  * Get stat information.
  *
- * @param path the path
- * @return the stat information
- * @throw std::runtime_error on failure
+ * \param path the path
+ * \return the stat information
+ * \throw std::runtime_error on failure
  */
 struct stat stat(const std::string &path);
 
@@ -143,84 +143,84 @@ struct stat stat(const std::string &path);
  *
  * If HAVE_ACCESS is defined, the function access is used, otherwise stat is used.
  *
- * @param path the path to check
- * @return true if the path exists
+ * \param path the path to check
+ * \return true if the path exists
  */
 bool exists(const std::string &path) noexcept;
 
 /**
  * Check if the path is absolute.
  *
- * @param path the path
- * @return true if the path is absolute
+ * \param path the path
+ * \return true if the path is absolute
  */
 bool isAbsolute(const std::string &path) noexcept;
 
 /**
  * Check if the path is relative.
  *
- * @param path the path
- * @return true if the path is absolute
+ * \param path the path
+ * \return true if the path is absolute
  */
 bool isRelative(const std::string &path) noexcept;
 
 /**
  * Check if the file is readable.
  *
- * @param path the path
- * @return true if has read access
+ * \param path the path
+ * \return true if has read access
  */
 bool isReadable(const std::string &path) noexcept;
 
 /**
  * Check if the file is writable.
  *
- * @param path the path
- * @return true if has write access
+ * \param path the path
+ * \return true if has write access
  */
 bool isWritable(const std::string &path) noexcept;
 
 /**
  * Check if the file is a regular file.
  *
- * @param path the path
- * @return true if it is a file and false if not or not readable
+ * \param path the path
+ * \return true if it is a file and false if not or not readable
  */
 bool isFile(const std::string &path) noexcept;
 
 /**
  * Check if the file is a directory.
  *
- * @param path the path
- * @return true if it is a directory and false if not or not readable
+ * \param path the path
+ * \return true if it is a directory and false if not or not readable
  */
 bool isDirectory(const std::string &path) noexcept;
 
 /**
  * Check if the file is a symbolic link.
  *
- * @param path the path
- * @return true if it is a symbolic link and false if not or not readable
+ * \param path the path
+ * \return true if it is a symbolic link and false if not or not readable
  */
 bool isSymlink(const std::string &path) noexcept;
 
 /**
  * Read a directory and return a list of entries (not recursive).
  *
- * @param path the directory path
- * @param flags the optional flags (see Flags)
- * @return the list of entries
- * @throw std::runtime_error on failure
+ * \param path the directory path
+ * \param flags the optional flags (see Flags)
+ * \return the list of entries
+ * \throw std::runtime_error on failure
  */
 std::vector<Entry> readdir(const std::string &path, int flags = 0);
 
 /**
  * Create a directory recursively.
  *
- * @param path the path
- * @param mode the optional mode (not always supported)
- * @throw std::runtime_error on failure
- * @post all intermediate directories are created
+ * \param path the path
+ * \param mode the optional mode (not always supported)
+ * \throw std::runtime_error on failure
+ * \post all intermediate directories are created
  */
 void mkdir(const std::string &path, int mode = 0700);
 
@@ -229,7 +229,7 @@ void mkdir(const std::string &path, int mode = 0700);
  *
  * If errors happens, they are silently discarded to remove as much as possible.
  *
- * @param path the path
+ * \param path the path
  */
 void rmdir(const std::string &path) noexcept;
 
@@ -243,10 +243,10 @@ void rmdir(const std::string &path) noexcept;
  *   - base is the current parent directory in the tree
  *   - entry is the current entry
  *
- * @param base the base directory
- * @param predicate the predicate
- * @return the full path name to the file or empty string if never found
- * @throw std::runtime_error on read errors
+ * \param base the base directory
+ * \param predicate the predicate
+ * \return the full path name to the file or empty string if never found
+ * \throw std::runtime_error on read errors
  */
 template <typename Predicate>
 std::string findIf(const std::string &base, Predicate &&predicate)
@@ -282,10 +282,10 @@ std::string findIf(const std::string &base, Predicate &&predicate)
 /**
  * Find a file by name recursively.
  *
- * @param base the base directory
- * @param name the file name
- * @return the full path name to the file or empty string if never found
- * @throw std::runtime_error on read errors
+ * \param base the base directory
+ * \param name the file name
+ * \return the full path name to the file or empty string if never found
+ * \throw std::runtime_error on read errors
  */
 inline std::string find(const std::string &base, const std::string &name)
 {
@@ -295,10 +295,10 @@ inline std::string find(const std::string &base, const std::string &name)
 /**
  * Overload by regular expression.
  *
- * @param base the base directory
- * @param regex the regular expression
- * @return the full path name to the file or empty string if never found
- * @throw std::runtime_error on read errors
+ * \param base the base directory
+ * \param regex the regular expression
+ * \return the full path name to the file or empty string if never found
+ * \throw std::runtime_error on read errors
  */
 inline std::string find(const std::string &base, const std::regex &regex)
 {
@@ -308,8 +308,8 @@ inline std::string find(const std::string &base, const std::regex &regex)
 /**
  * Get the current working directory.
  *
- * @return the current working directory
- * @throw std::runtime_error on failure
+ * \return the current working directory
+ * \throw std::runtime_error on failure
  */
 std::string cwd();
 

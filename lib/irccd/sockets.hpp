@@ -20,8 +20,8 @@
 #define IRCCD_SOCKETS_HPP
 
 /**
- * @file sockets.hpp
- * @brief Portable socket abstraction
+ * \file sockets.hpp
+ * \brief Portable socket abstraction
  *
  * # Introduction
  *
@@ -91,7 +91,7 @@
 /**
  * Defines the default Listener backend to use.
  *
- * @note Do not rely on the value shown in doxygen.
+ * \note Do not rely on the value shown in doxygen.
  */
 #if defined(_WIN32)
 #  if !defined(SOCKET_DEFAULT_BACKEND)
@@ -268,8 +268,8 @@ extern const int Failure;
 namespace ssl {
 
 /**
- * @enum Method
- * @brief Which OpenSSL method to use.
+ * \enum Method
+ * \brief Which OpenSSL method to use.
  */
 enum Method {
 	Tlsv1,		//!< TLS v1.2 (recommended)
@@ -328,15 +328,15 @@ void finish() noexcept;
  * Get the last socket system error. The error is set from errno or from
  * WSAGetLastError on Windows.
  *
- * @return a string message
+ * \return a string message
  */
 std::string error();
 
 /**
  * Get the last system error.
  *
- * @param errn the error number (errno or WSAGetLastError)
- * @return the error
+ * \param errn the error number (errno or WSAGetLastError)
+ * \return the error
  */
 std::string error(int errn);
 
@@ -352,14 +352,14 @@ std::string error(int errn);
 /* {{{ Error */
 
 /**
- * @class Error
- * @brief Base class for sockets error
+ * \class Error
+ * \brief Base class for sockets error
  */
 class Error : public std::exception {
 public:
 	/**
-	 * @enum Code
-	 * @brief Which kind of error
+	 * \enum Code
+	 * \brief Which kind of error
 	 */
 	enum Code {
 		Timeout,		///!< The action did timeout
@@ -376,33 +376,33 @@ public:
 	/**
 	 * Constructor that use the last system error.
 	 *
-	 * @param code which kind of error
-	 * @param function the function name
+	 * \param code which kind of error
+	 * \param function the function name
 	 */
 	Error(Code code, std::string function);
 
 	/**
 	 * Constructor that use the system error set by the user.
 	 *
-	 * @param code which kind of error
-	 * @param function the function name
-	 * @param error the error
+	 * \param code which kind of error
+	 * \param function the function name
+	 * \param error the error
 	 */
 	Error(Code code, std::string function, int error);
 
 	/**
 	 * Constructor that set the error specified by the user.
 	 *
-	 * @param code which kind of error
-	 * @param function the function name
-	 * @param error the error
+	 * \param code which kind of error
+	 * \param function the function name
+	 * \param error the error
 	 */
 	Error(Code code, std::string function, std::string error);
 
 	/**
 	 * Get which function has triggered the error.
 	 *
-	 * @return the function name (e.g connect)
+	 * \return the function name (e.g connect)
 	 */
 	inline const std::string &function() const noexcept
 	{
@@ -412,7 +412,7 @@ public:
 	/**
 	 * The error code.
 	 *
-	 * @return the code
+	 * \return the code
 	 */
 	inline Code code() const noexcept
 	{
@@ -422,7 +422,7 @@ public:
 	/**
 	 * Get the error (only the error content).
 	 *
-	 * @return the error
+	 * \return the error
 	 */
 	const char *what() const noexcept
 	{
@@ -442,8 +442,8 @@ public:
 /* {{{ State */
 
 /**
- * @enum State
- * @brief Current socket state.
+ * \enum State
+ * \brief Current socket state.
  */
 enum class State {
 	Open,			//!< Socket is open
@@ -468,8 +468,8 @@ enum class State {
 /* {{{ Action */
 
 /**
- * @enum Action
- * @brief Define the current operation that must complete.
+ * \enum Action
+ * \brief Define the current operation that must complete.
  *
  * Some operations like accept, connect, recv or send must sometimes do several round-trips to complete and the socket
  * action is set with that enumeration. The user is responsible of calling accept, connect send or recv until the
@@ -501,8 +501,8 @@ enum class Action {
 /* {{{ Condition */
 
 /**
- * @enum Condition
- * @brief Define the required condition for the socket.
+ * \enum Condition
+ * \brief Define the required condition for the socket.
  *
  * As explained in Action enumeration, some operations required to be called several times, before calling these
  * operations, the user must wait the socket to be readable or writable. This can be checked with Socket::condition.
@@ -516,9 +516,9 @@ enum class Condition {
 /**
  * Apply bitwise XOR.
  *
- * @param v1 the first value
- * @param v2 the second value
- * @return the new value
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
  */
 constexpr Condition operator^(Condition v1, Condition v2) noexcept
 {
@@ -528,9 +528,9 @@ constexpr Condition operator^(Condition v1, Condition v2) noexcept
 /**
  * Apply bitwise AND.
  *
- * @param v1 the first value
- * @param v2 the second value
- * @return the new value
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
  */
 constexpr Condition operator&(Condition v1, Condition v2) noexcept
 {
@@ -540,9 +540,9 @@ constexpr Condition operator&(Condition v1, Condition v2) noexcept
 /**
  * Apply bitwise OR.
  *
- * @param v1 the first value
- * @param v2 the second value
- * @return the new value
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
  */
 constexpr Condition operator|(Condition v1, Condition v2) noexcept
 {
@@ -552,8 +552,8 @@ constexpr Condition operator|(Condition v1, Condition v2) noexcept
 /**
  * Apply bitwise NOT.
  *
- * @param v the value
- * @return the complement
+ * \param v the value
+ * \return the complement
  */
 constexpr Condition operator~(Condition v) noexcept
 {
@@ -563,9 +563,9 @@ constexpr Condition operator~(Condition v) noexcept
 /**
  * Assign bitwise OR.
  *
- * @param v1 the first value
- * @param v2 the second value
- * @return the new value
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
  */
 inline Condition &operator|=(Condition &v1, Condition v2) noexcept
 {
@@ -577,9 +577,9 @@ inline Condition &operator|=(Condition &v1, Condition v2) noexcept
 /**
  * Assign bitwise AND.
  *
- * @param v1 the first value
- * @param v2 the second value
- * @return the new value
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
  */
 inline Condition &operator&=(Condition &v1, Condition v2) noexcept
 {
@@ -591,9 +591,9 @@ inline Condition &operator&=(Condition &v1, Condition v2) noexcept
 /**
  * Assign bitwise XOR.
  *
- * @param v1 the first value
- * @param v2 the second value
- * @return the new value
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
  */
 inline Condition &operator^=(Condition &v1, Condition v2) noexcept
 {
@@ -615,15 +615,15 @@ inline Condition &operator^=(Condition &v1, Condition v2) noexcept
 /* {{{ Socket */
 
 /**
- * @class Socket
- * @brief Base socket class for socket operations.
+ * \class Socket
+ * \brief Base socket class for socket operations.
  *
  * **Important:** When using non-blocking sockets, some considerations must be taken. See the implementation of the
  * underlying protocol for more details.
  *
- * @see protocol::Tls
- * @see protocol::Tcp
- * @see protocol::Udp
+ * \see protocol::Tls
+ * \see protocol::Tcp
+ * \see protocol::Udp
  */
 template <typename Address, typename Protocol>
 class Socket {
@@ -646,13 +646,13 @@ public:
 	 * This is the primary function and the only one that creates the socket handle, all other constructors
 	 * are just overloaded functions.
 	 *
-	 * @param domain the domain AF_*
-	 * @param type the type SOCK_*
-	 * @param protocol the protocol
-	 * @param iface the implementation
-	 * @throw net::Error on errors
-	 * @post state is set to Open
-	 * @post handle is not set to Invalid
+	 * \param domain the domain AF_*
+	 * \param type the type SOCK_*
+	 * \param protocol the protocol
+	 * \param iface the implementation
+	 * \throw net::Error on errors
+	 * \post state is set to Open
+	 * \post handle is not set to Invalid
 	 */
 	Socket(int domain, int type, int protocol, Protocol iface = {})
 		: m_proto(std::move(iface))
@@ -677,9 +677,9 @@ public:
 	 *
 	 * Domain and type are determined by the Address and Protocol object.
 	 *
-	 * @param protocol the protocol
-	 * @param address which type of address
-	 * @throw net::Error on errors
+	 * \param protocol the protocol
+	 * \param address which type of address
+	 * \throw net::Error on errors
 	 */
 	explicit inline Socket(Protocol protocol = {}, const Address &address = {})
 		: Socket{address.domain(), protocol.type(), 0, std::move(protocol)}
@@ -689,11 +689,11 @@ public:
 	/**
 	 * Construct a socket with an already created descriptor.
 	 *
-	 * @param handle the native descriptor
-	 * @param state specify the socket state
-	 * @param protocol the type of socket implementation
-	 * @post action is set to None
-	 * @post condition is set to None
+	 * \param handle the native descriptor
+	 * \param state specify the socket state
+	 * \param protocol the type of socket implementation
+	 * \post action is set to None
+	 * \post condition is set to None
 	 */
 	explicit inline Socket(Handle handle, State state = State::Closed, Protocol protocol = {}) noexcept
 		: m_proto(std::move(protocol))
@@ -720,7 +720,7 @@ public:
 	/**
 	 * Transfer ownership from other to this.
 	 *
-	 * @param other the other socket
+	 * \param other the other socket
 	 */
 	inline Socket(Socket &&other) noexcept
 		: m_proto(std::move(other.m_proto))
@@ -747,8 +747,8 @@ public:
 	/**
 	 * Access the implementation.
 	 *
-	 * @return the implementation
-	 * @warning use this function with care
+	 * \return the implementation
+	 * \warning use this function with care
 	 */
 	inline const Protocol &protocol() const noexcept
 	{
@@ -758,7 +758,7 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @return the implementation
+	 * \return the implementation
 	 */
 	inline Protocol &protocol() noexcept
 	{
@@ -768,7 +768,7 @@ public:
 	/**
 	 * Get the current socket state.
 	 *
-	 * @return the state
+	 * \return the state
 	 */
 	inline State state() const noexcept
 	{
@@ -778,8 +778,8 @@ public:
 	/**
 	 * Change the current socket state.
 	 *
-	 * @param state the new state
-	 * @warning only implementations should call this function
+	 * \param state the new state
+	 * \warning only implementations should call this function
 	 */
 	inline void setState(State state) noexcept
 	{
@@ -789,8 +789,8 @@ public:
 	/**
 	 * Get the pending operation.
 	 *
-	 * @return the action to complete before continuing
-	 * @note usually only needed in non-blocking sockets
+	 * \return the action to complete before continuing
+	 * \note usually only needed in non-blocking sockets
 	 */
 	inline Action action() const noexcept
 	{
@@ -800,8 +800,8 @@ public:
 	/**
 	 * Change the pending operation.
 	 *
-	 * @param action the action
-	 * @warning you should not call this function yourself
+	 * \param action the action
+	 * \warning you should not call this function yourself
 	 */
 	inline void setAction(Action action) noexcept
 	{
@@ -811,7 +811,7 @@ public:
 	/**
 	 * Get the condition to wait for.
 	 *
-	 * @return the condition
+	 * \return the condition
 	 */
 	inline Condition condition() const noexcept
 	{
@@ -821,8 +821,8 @@ public:
 	/**
 	 * Change the condition required.
 	 *
-	 * @param condition the condition
-	 * @warning you should not call this function yourself
+	 * \param condition the condition
+	 * \warning you should not call this function yourself
 	 */
 	inline void setCondition(Condition condition) noexcept
 	{
@@ -832,10 +832,10 @@ public:
 	/**
 	 * Set an option for the socket. Wrapper of setsockopt(2).
 	 *
-	 * @param level the setting level
-	 * @param name the name
-	 * @param arg the value
-	 * @throw net::Error on errors
+	 * \param level the setting level
+	 * \param name the name
+	 * \param arg the value
+	 * \throw net::Error on errors
 	 */
 	template <typename Argument>
 	void set(int level, int name, const Argument &arg)
@@ -850,8 +850,8 @@ public:
 	 *
 	 * The object must have `set(Socket<Address, Protocol> &) const`.
 	 *
-	 * @param option the option
-	 * @throw net::Error on errors
+	 * \param option the option
+	 * \throw net::Error on errors
 	 */
 	template <typename Option>
 	inline void set(const Option &option)
@@ -862,9 +862,9 @@ public:
 	/**
 	 * Get an option for the socket. Wrapper of getsockopt(2).
 	 *
-	 * @param level the setting level
-	 * @param name the name
-	 * @throw net::Error on errors
+	 * \param level the setting level
+	 * \param name the name
+	 * \throw net::Error on errors
 	 */
 	template <typename Argument>
 	Argument get(int level, int name)
@@ -887,8 +887,8 @@ public:
 	 * The object must have `T get(Socket<Address, Protocol> &) const`, T can be any type and it is the value
 	 * returned from this function.
 	 *
-	 * @return the same value as get() in the option
-	 * @throw net::Error on errors
+	 * \return the same value as get() in the option
+	 * \throw net::Error on errors
 	 */
 	template <typename Option>
 	inline auto get() -> decltype(std::declval<Option>().get(*this))
@@ -899,8 +899,8 @@ public:
 	/**
 	 * Get the native handle.
 	 *
-	 * @return the handle
-	 * @warning Not portable
+	 * \return the handle
+	 * \warning Not portable
 	 */
 	inline Handle handle() const noexcept
 	{
@@ -910,10 +910,10 @@ public:
 	/**
 	 * Bind using a native address.
 	 *
-	 * @param address the address
-	 * @param length the size
-	 * @pre state must not be Bound
-	 * @throw net::Error on errors
+	 * \param address the address
+	 * \param length the size
+	 * \pre state must not be Bound
+	 * \throw net::Error on errors
 	 */
 	void bind(const sockaddr *address, socklen_t length)
 	{
@@ -929,8 +929,8 @@ public:
 	/**
 	 * Overload that takes an address.
 	 *
-	 * @param address the address
-	 * @throw net::Error on errors
+	 * \param address the address
+	 * \throw net::Error on errors
 	 */
 	inline void bind(const Address &address)
 	{
@@ -940,9 +940,9 @@ public:
 	/**
 	 * Listen for pending connection.
 	 *
-	 * @param max the maximum number
-	 * @pre state must be Bound
-	 * @throw net::Error on errors
+	 * \param max the maximum number
+	 * \pre state must be Bound
+	 * \throw net::Error on errors
 	 */
 	inline void listen(int max = 128)
 	{
@@ -959,12 +959,12 @@ public:
 	 * If connection cannot be established immediately, connect with no argument must be called again. See
 	 * the underlying protocol for more information.
 	 *
-	 * @pre state must be State::Open
-	 * @param address the address
-	 * @param length the the address length
-	 * @throw net::Error on errors
-	 * @post state is set to State::Connecting or State::Connected
-	 * @note For non-blocking sockets, see the underlying protocol function for more details
+	 * \pre state must be State::Open
+	 * \param address the address
+	 * \param length the the address length
+	 * \throw net::Error on errors
+	 * \post state is set to State::Connecting or State::Connected
+	 * \note For non-blocking sockets, see the underlying protocol function for more details
 	 */
 	void connect(const sockaddr *address, socklen_t length)
 	{
@@ -984,7 +984,7 @@ public:
 	 *
 	 * Effectively call connect(address.address(), address.length());
 	 *
-	 * @param address the address
+	 * \param address the address
 	 */
 	inline void connect(const Address &address)
 	{
@@ -994,8 +994,8 @@ public:
 	/**
 	 * Continue the connection, only required with non-blocking sockets.
 	 *
-	 * @pre state must be State::Connecting
-	 * @throw net::Error on errors
+	 * \pre state must be State::Connecting
+	 * \throw net::Error on errors
 	 */
 	void connect()
 	{
@@ -1016,12 +1016,12 @@ public:
 	 * If the client cannot be accepted immediately, the client is returned and accept with no arguments
 	 * must be called on it. See the underlying protocol for more information.
 	 *
-	 * @pre state must be State::Bound
-	 * @param info the address where to store client's information (optional)
-	 * @return the new socket
-	 * @throw Error on errors
-	 * @post returned client's state is set to State::Accepting or State::Accepted
-	 * @note For non-blocking sockets, see the underlying protocol function for more details
+	 * \pre state must be State::Bound
+	 * \param info the address where to store client's information (optional)
+	 * \return the new socket
+	 * \throw Error on errors
+	 * \post returned client's state is set to State::Accepting or State::Accepted
+	 * \note For non-blocking sockets, see the underlying protocol function for more details
 	 */
 	Socket<Address, Protocol> accept(Address *info)
 	{
@@ -1057,10 +1057,10 @@ public:
 	 * Continue the accept process on this client. This function must be called only when the socket is
 	 * ready to be readable or writable! (see condition).
 	 *
-	 * @pre state must be State::Accepting
-	 * @throw Error on errors
-	 * @post if connection is complete, state is changed to State::Accepted, action and condition are unset
-	 * @post if connection is still in progress, condition is set
+	 * \pre state must be State::Accepting
+	 * \throw Error on errors
+	 * \post if connection is complete, state is changed to State::Accepted, action and condition are unset
+	 * \post if connection is still in progress, condition is set
 	 */
 	void accept()
 	{
@@ -1080,9 +1080,9 @@ public:
 	/**
 	 * Get the local name. This is a wrapper of getsockname().
 	 *
-	 * @return the address
-	 * @throw Error on failures
-	 * @pre state() must not be State::Closed
+	 * \return the address
+	 * \throw Error on failures
+	 * \pre state() must not be State::Closed
 	 */
 	Address address() const
 	{
@@ -1106,12 +1106,12 @@ public:
 	 *
 	 * If action is set to Action::None and result is set to 0, disconnection occured.
 	 *
-	 * @param data the destination buffer
-	 * @param length the buffer length
-	 * @pre action must not be Action::Send
-	 * @return the number of bytes received or 0
-	 * @throw Error on error
-	 * @note For non-blocking sockets, see the underlying protocol function for more details
+	 * \param data the destination buffer
+	 * \param length the buffer length
+	 * \pre action must not be Action::Send
+	 * \return the number of bytes received or 0
+	 * \throw Error on error
+	 * \note For non-blocking sockets, see the underlying protocol function for more details
 	 */
 	unsigned recv(void *data, unsigned length)
 	{
@@ -1128,9 +1128,9 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @param count the number of bytes to receive
-	 * @return the string
-	 * @throw Error on error
+	 * \param count the number of bytes to receive
+	 * \return the string
+	 * \throw Error on error
 	 */
 	inline std::string recv(unsigned count)
 	{
@@ -1149,12 +1149,12 @@ public:
 	 * If the operation cannot be complete immediately, 0 is returned and user must call the function
 	 * again when ready. See the underlying protocol for more information.
 	 *
-	 * @param data the data buffer
-	 * @param length the buffer length
-	 * @return the number of bytes sent or 0
-	 * @pre action() must not be Flag::Receive
-	 * @throw Error on error
-	 * @note For non-blocking sockets, see the underlying protocol function for more details
+	 * \param data the data buffer
+	 * \param length the buffer length
+	 * \return the number of bytes sent or 0
+	 * \pre action() must not be Flag::Receive
+	 * \throw Error on error
+	 * \note For non-blocking sockets, see the underlying protocol function for more details
 	 */
 	unsigned send(const void *data, unsigned length)
 	{
@@ -1174,9 +1174,9 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @param data the string to send
-	 * @return the number of bytes sent
-	 * @throw Error on error
+	 * \param data the string to send
+	 * \return the number of bytes sent
+	 * \throw Error on error
 	 */
 	inline unsigned send(const std::string &data)
 	{
@@ -1189,13 +1189,13 @@ public:
 	 * If the operation cannot be complete immediately, 0 is returned and user must call the function
 	 * again when ready. See the underlying protocol for more information.
 	 *
-	 * @param data the buffer
-	 * @param length the buffer length
-	 * @param address the client address
-	 * @param addrlen the address length
-	 * @return the number of bytes sent
-	 * @throw net::Error on errors
-	 * @note For non-blocking sockets, see the underlying protocol function for more details
+	 * \param data the buffer
+	 * \param length the buffer length
+	 * \param address the client address
+	 * \param addrlen the address length
+	 * \return the number of bytes sent
+	 * \throw net::Error on errors
+	 * \note For non-blocking sockets, see the underlying protocol function for more details
 	 */
 	inline unsigned sendto(const void *data, unsigned length, const sockaddr *address, socklen_t addrlen)
 	{
@@ -1205,11 +1205,11 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @param data the buffer
-	 * @param length the buffer length
-	 * @param address the destination
-	 * @return the number of bytes sent
-	 * @throw net::Error on errors
+	 * \param data the buffer
+	 * \param length the buffer length
+	 * \param address the destination
+	 * \return the number of bytes sent
+	 * \throw net::Error on errors
 	 */
 	inline unsigned sendto(const void *data, unsigned length, const Address &address)
 	{
@@ -1219,10 +1219,10 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @param data the data
-	 * @param address the address
-	 * @return the number of bytes sent
-	 * @throw net:;Error on errors
+	 * \param data the data
+	 * \param address the address
+	 * \return the number of bytes sent
+	 * \throw net:;Error on errors
 	 */
 	inline unsigned sendto(const std::string &data, const Address &address)
 	{
@@ -1235,13 +1235,13 @@ public:
 	 * If the operation cannot be complete immediately, 0 is returned and user must call the function
 	 * again when ready. See the underlying protocol for more information.
 	 *
-	 * @param data the destination buffer
-	 * @param length the buffer length
-	 * @param address the address destination
-	 * @param addrlen the address length (in/out)
-	 * @return the number of bytes received
-	 * @throw net::Error on errors
-	 * @note For non-blocking sockets, see the underlying protocol function for more details
+	 * \param data the destination buffer
+	 * \param length the buffer length
+	 * \param address the address destination
+	 * \param addrlen the address length (in/out)
+	 * \return the number of bytes received
+	 * \throw net::Error on errors
+	 * \note For non-blocking sockets, see the underlying protocol function for more details
 	 */
 	inline unsigned recvfrom(void *data, unsigned length, sockaddr *address, socklen_t *addrlen)
 	{
@@ -1251,11 +1251,11 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @param data the destination buffer
-	 * @param length the buffer length
-	 * @param info the address destination
-	 * @return the number of bytes received
-	 * @throw net::Error on errors
+	 * \param data the destination buffer
+	 * \param length the buffer length
+	 * \param info the address destination
+	 * \return the number of bytes received
+	 * \throw net::Error on errors
 	 */
 	inline unsigned recvfrom(void *data, unsigned length, Address *info = nullptr)
 	{
@@ -1274,10 +1274,10 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @param count the maximum number of bytes to receive
-	 * @param info the client information
-	 * @return the string
-	 * @throw net::Error on errors
+	 * \param count the maximum number of bytes to receive
+	 * \param info the client information
+	 * \return the string
+	 * \throw net::Error on errors
 	 */
 	std::string recvfrom(unsigned count, Address *info = nullptr)
 	{
@@ -1314,7 +1314,7 @@ public:
 	/**
 	 * Assignment operator forbidden.
 	 *
-	 * @return *this
+	 * \return *this
 	 */
 	Socket &operator=(const Socket &) = delete;
 
@@ -1322,8 +1322,8 @@ public:
 	 * Transfer ownership from other to this. The other socket is left
 	 * invalid and will not be closed.
 	 *
-	 * @param other the other socket
-	 * @return this
+	 * \param other the other socket
+	 * \return this
 	 */
 	Socket &operator=(Socket &&other) noexcept
 	{
@@ -1346,9 +1346,9 @@ public:
 /**
  * Compare two sockets.
  *
- * @param s1 the first socket
- * @param s2 the second socket
- * @return true if they equals
+ * \param s1 the first socket
+ * \param s2 the second socket
+ * \return true if they equals
  */
 template <typename Address, typename Protocol>
 bool operator==(const Socket<Address, Protocol> &s1, const Socket<Address, Protocol> &s2)
@@ -1359,9 +1359,9 @@ bool operator==(const Socket<Address, Protocol> &s1, const Socket<Address, Proto
 /**
  * Compare two sockets.
  *
- * @param s1 the first socket
- * @param s2 the second socket
- * @return true if they are different
+ * \param s1 the first socket
+ * \param s2 the second socket
+ * \return true if they are different
  */
 template <typename Address, typename Protocol>
 bool operator!=(const Socket<Address, Protocol> &s1, const Socket<Address, Protocol> &s2)
@@ -1372,9 +1372,9 @@ bool operator!=(const Socket<Address, Protocol> &s1, const Socket<Address, Proto
 /**
  * Compare two sockets.
  *
- * @param s1 the first socket
- * @param s2 the second socket
- * @return true if s1 < s2
+ * \param s1 the first socket
+ * \param s2 the second socket
+ * \return true if s1 < s2
  */
 template <typename Address, typename Protocol>
 bool operator<(const Socket<Address, Protocol> &s1, const Socket<Address, Protocol> &s2)
@@ -1385,9 +1385,9 @@ bool operator<(const Socket<Address, Protocol> &s1, const Socket<Address, Protoc
 /**
  * Compare two sockets.
  *
- * @param s1 the first socket
- * @param s2 the second socket
- * @return true if s1 > s2
+ * \param s1 the first socket
+ * \param s2 the second socket
+ * \return true if s1 > s2
  */
 template <typename Address, typename Protocol>
 bool operator>(const Socket<Address, Protocol> &s1, const Socket<Address, Protocol> &s2)
@@ -1398,9 +1398,9 @@ bool operator>(const Socket<Address, Protocol> &s1, const Socket<Address, Protoc
 /**
  * Compare two sockets.
  *
- * @param s1 the first socket
- * @param s2 the second socket
- * @return true if s1 <= s2
+ * \param s1 the first socket
+ * \param s2 the second socket
+ * \return true if s1 <= s2
  */
 template <typename Address, typename Protocol>
 bool operator<=(const Socket<Address, Protocol> &s1, const Socket<Address, Protocol> &s2)
@@ -1411,9 +1411,9 @@ bool operator<=(const Socket<Address, Protocol> &s1, const Socket<Address, Proto
 /**
  * Compare two sockets.
  *
- * @param s1 the first socket
- * @param s2 the second socket
- * @return true if s1 >= s2
+ * \param s1 the first socket
+ * \param s2 the second socket
+ * \return true if s1 >= s2
  */
 template <typename Address, typename Protocol>
 bool operator>=(const Socket<Address, Protocol> &s1, const Socket<Address, Protocol> &s2)
@@ -1443,9 +1443,9 @@ namespace option {
 /* {{{ Options for socket */
 
 /**
- * @class SockBlockMode
- * @brief Set or get the blocking-mode for a socket.
- * @warning On Windows, it's not possible to check if the socket is blocking or not.
+ * \class SockBlockMode
+ * \brief Set or get the blocking-mode for a socket.
+ * \warning On Windows, it's not possible to check if the socket is blocking or not.
  */
 class SockBlockMode {
 public:
@@ -1457,8 +1457,8 @@ public:
 	/**
 	 * Set the option.
 	 *
-	 * @param sc the socket
-	 * @throw Error on errors
+	 * \param sc the socket
+	 * \throw Error on errors
 	 */
 	template <typename Address, typename Protocol>
 	void set(Socket<Address, Protocol> &sc) const
@@ -1491,8 +1491,8 @@ public:
 	/**
 	 * Get the option.
 	 *
-	 * @return the value
-	 * @throw Error on errors
+	 * \return the value
+	 * \throw Error on errors
 	 */
 	template <typename Address, typename Protocol>
 	bool get(Socket<Address, Protocol> &sc) const
@@ -1512,8 +1512,8 @@ public:
 };
 
 /**
- * @class SockReuseAddress
- * @brief Reuse address, must be used before calling Socket::bind
+ * \class SockReuseAddress
+ * \brief Reuse address, must be used before calling Socket::bind
  */
 class SockReuseAddress {
 public:
@@ -1525,8 +1525,8 @@ public:
 	/**
 	 * Set the option.
 	 *
-	 * @param sc the socket
-	 * @throw Error on errors
+	 * \param sc the socket
+	 * \throw Error on errors
 	 */
 	template <typename Address, typename Protocol>
 	inline void set(Socket<Address, Protocol> &sc) const
@@ -1537,8 +1537,8 @@ public:
 	/**
 	 * Get the option.
 	 *
-	 * @return the value
-	 * @throw Error on errors
+	 * \return the value
+	 * \throw Error on errors
 	 */
 	template <typename Address, typename Protocol>
 	inline bool get(Socket<Address, Protocol> &sc) const
@@ -1548,8 +1548,8 @@ public:
 };
 
 /**
- * @class SockSendBuffer
- * @brief Set or get the output buffer.
+ * \class SockSendBuffer
+ * \brief Set or get the output buffer.
  */
 class SockSendBuffer {
 public:
@@ -1561,8 +1561,8 @@ public:
 	/**
 	 * Set the option.
 	 *
-	 * @param sc the socket
-	 * @throw Error on errors
+	 * \param sc the socket
+	 * \throw Error on errors
 	 */
 	template <typename Address, typename Protocol>
 	inline void set(Socket<Address, Protocol> &sc) const
@@ -1573,8 +1573,8 @@ public:
 	/**
 	 * Get the option.
 	 *
-	 * @return the value
-	 * @throw Error on errors
+	 * \return the value
+	 * \throw Error on errors
 	 */
 	template <typename Address, typename Protocol>
 	inline int get(Socket<Address, Protocol> &sc) const
@@ -1584,8 +1584,8 @@ public:
 };
 
 /**
- * @class SockReceiveBuffer
- * @brief Set or get the input buffer.
+ * \class SockReceiveBuffer
+ * \brief Set or get the input buffer.
  */
 class SockReceiveBuffer {
 public:
@@ -1597,8 +1597,8 @@ public:
 	/**
 	 * Set the option.
 	 *
-	 * @param sc the socket
-	 * @throw Error on errors
+	 * \param sc the socket
+	 * \throw Error on errors
 	 */
 	template <typename Address, typename Protocol>
 	inline void set(Socket<Address, Protocol> &sc) const
@@ -1609,8 +1609,8 @@ public:
 	/**
 	 * Get the option.
 	 *
-	 * @return the value
-	 * @throw Error on errors
+	 * \return the value
+	 * \throw Error on errors
 	 */
 	template <typename Address, typename Protocol>
 	inline int get(Socket<Address, Protocol> &sc) const
@@ -1622,8 +1622,8 @@ public:
 /* }}} */
 
 /**
- * @class TcpNoDelay
- * @brief Set this option if you want to disable nagle's algorithm.
+ * \class TcpNoDelay
+ * \brief Set this option if you want to disable nagle's algorithm.
  */
 class TcpNoDelay {
 public:
@@ -1635,8 +1635,8 @@ public:
 	/**
 	 * Set the option.
 	 *
-	 * @param sc the socket
-	 * @throw Error on errors
+	 * \param sc the socket
+	 * \throw Error on errors
 	 */
 	template <typename Address, typename Protocol>
 	inline void set(Socket<Address, Protocol> &sc) const
@@ -1647,8 +1647,8 @@ public:
 	/**
 	 * Get the option.
 	 *
-	 * @return the value
-	 * @throw Error on errors
+	 * \return the value
+	 * \throw Error on errors
 	 */
 	template <typename Address, typename Protocol>
 	inline bool get(Socket<Address, Protocol> &sc) const
@@ -1658,8 +1658,8 @@ public:
 };
 
 /**
- * @class Ipv6Only
- * @brief Control IPPROTO_IPV6/IPV6_V6ONLY
+ * \class Ipv6Only
+ * \brief Control IPPROTO_IPV6/IPV6_V6ONLY
  *
  * Note: some systems may or not set this option by default so it's a good idea to set it in any case to either
  * false or true if portability is a concern.
@@ -1674,8 +1674,8 @@ public:
 	/**
 	 * Set the option.
 	 *
-	 * @param sc the socket
-	 * @throw Error on errors
+	 * \param sc the socket
+	 * \throw Error on errors
 	 */
 	template <typename Address, typename Protocol>
 	inline void set(Socket<Address, Protocol> &sc) const
@@ -1686,8 +1686,8 @@ public:
 	/**
 	 * Get the option.
 	 *
-	 * @return the value
-	 * @throw Error on errors
+	 * \return the value
+	 * \throw Error on errors
 	 */
 	template <typename Address, typename Protocol>
 	inline bool get(Socket<Address, Protocol> &sc) const
@@ -1716,14 +1716,14 @@ public:
 namespace address {
 
 /**
- * @class Ip
- * @brief Base class for IPv6 and IPv4, you can use it if you don't know in advance if you'll use IPv6 or IPv4.
+ * \class Ip
+ * \brief Base class for IPv6 and IPv4, you can use it if you don't know in advance if you'll use IPv6 or IPv4.
  */
 class Ip {
 public:
 	/**
-	 * @enum Type
-	 * @brief Type of ip address.
+	 * \enum Type
+	 * \brief Type of ip address.
 	 */
 	enum Type {
 		v4 = AF_INET,		//!< AF_INET
@@ -1750,7 +1750,7 @@ public:
 	/**
 	 * Set the default domain to use when using default Ip constructor. By default, AF_INET is used.
 	 *
-	 * @pre domain must be Type::v4 or Type::v6
+	 * \pre domain must be Type::v4 or Type::v6
 	 */
 	static inline void setDefault(Type domain) noexcept
 	{
@@ -1770,35 +1770,35 @@ public:
 	/**
 	 * Default initialize the Ip domain.
 	 *
-	 * @pre domain must be AF_INET or AF_INET6 only
-	 * @param domain the domain (AF_INET or AF_INET6)
+	 * \pre domain must be AF_INET or AF_INET6 only
+	 * \param domain the domain (AF_INET or AF_INET6)
 	 */
 	Ip(Type domain) noexcept;
 
 	/**
 	 * Construct an address suitable for bind() or connect().
 	 *
-	 * @pre domain must be Type::v4 or Type::v6
-	 * @param domain the domain (AF_INET or AF_INET6)
-	 * @param host the host (* for any)
-	 * @param port the port number
-	 * @throw Error on errors
+	 * \pre domain must be Type::v4 or Type::v6
+	 * \param domain the domain (AF_INET or AF_INET6)
+	 * \param host the host (* for any)
+	 * \param port the port number
+	 * \throw Error on errors
 	 */
 	Ip(const std::string &host, int port, Type domain = v4);
 
 	/**
 	 * Construct an address from a storage.
 	 *
-	 * @pre storage's domain must be AF_INET or AF_INET6 only
-	 * @param ss the storage
-	 * @param length the length
+	 * \pre storage's domain must be AF_INET or AF_INET6 only
+	 * \param ss the storage
+	 * \param length the length
 	 */
 	Ip(const sockaddr_storage *ss, socklen_t length) noexcept;
 
 	/**
 	 * Get the domain (AF_INET or AF_INET6).
 	 *
-	 * @return the domain
+	 * \return the domain
 	 */
 	inline int domain() const noexcept
 	{
@@ -1808,7 +1808,7 @@ public:
 	/**
 	 * Return the underlying address, either sockaddr_in6 or sockaddr_in.
 	 *
-	 * @return the address
+	 * \return the address
 	 */
 	inline const sockaddr *address() const noexcept
 	{
@@ -1822,7 +1822,7 @@ public:
 	/**
 	 * Return the underlying address length.
 	 *
-	 * @return the length
+	 * \return the length
 	 */
 	inline socklen_t length() const noexcept
 	{
@@ -1832,7 +1832,7 @@ public:
 	/**
 	 * Get the port.
 	 *
-	 * @return the port
+	 * \return the port
 	 */
 	inline int port() const noexcept
 	{
@@ -1847,8 +1847,8 @@ public:
 #if !defined(_WIN32)
 
 /**
- * @class Local
- * @brief unix family sockets
+ * \class Local
+ * \brief unix family sockets
  *
  * Create an address to a specific path. Only available on Unix.
  */
@@ -1861,7 +1861,7 @@ public:
 	/**
 	 * Get the domain AF_LOCAL.
 	 *
-	 * @return AF_LOCAL
+	 * \return AF_LOCAL
 	 */
 	inline int domain() const noexcept
 	{
@@ -1876,24 +1876,24 @@ public:
 	/**
 	 * Construct an address to a path.
 	 *
-	 * @param path the path
-	 * @param rm remove the file before (default: false)
+	 * \param path the path
+	 * \param rm remove the file before (default: false)
 	 */
 	Local(std::string path, bool rm = false) noexcept;
 
 	/**
 	 * Construct an unix address from a storage address.
 	 *
-	 * @pre storage's domain must be AF_LOCAL
-	 * @param ss the storage
-	 * @param length the length
+	 * \pre storage's domain must be AF_LOCAL
+	 * \param ss the storage
+	 * \param length the length
 	 */
 	Local(const sockaddr_storage *ss, socklen_t length) noexcept;
 
 	/**
 	 * Get the sockaddr_un.
 	 *
-	 * @return the address
+	 * \return the address
 	 */
 	inline const sockaddr *address() const noexcept
 	{
@@ -1903,7 +1903,7 @@ public:
 	/**
 	 * Get the address length.
 	 *
-	 * @return the length
+	 * \return the length
 	 */
 	inline socklen_t length() const noexcept
 	{
@@ -1940,8 +1940,8 @@ namespace protocol {
 /* {{{ Tcp */
 
 /**
- * @class Tcp
- * @brief Clear TCP implementation.
+ * \class Tcp
+ * \brief Clear TCP implementation.
  *
  * This is the basic TCP protocol that implements recv, send, connect and accept as wrappers of the usual
  * C functions.
@@ -1951,7 +1951,7 @@ public:
 	/**
 	 * Socket type.
 	 *
-	 * @return SOCK_STREAM
+	 * \return SOCK_STREAM
 	 */
 	inline int type() const noexcept
 	{
@@ -1985,11 +1985,11 @@ public:
 	 * that case state is either set to State::Connected or State::Disconnected but action and condition are
 	 * not set.
 	 *
-	 * @param sc the socket
-	 * @param address the address
-	 * @param length the length
-	 * @throw net::Error on errors
-	 * @note Wrapper of connect(2)
+	 * \param sc the socket
+	 * \param address the address
+	 * \param length the length
+	 * \throw net::Error on errors
+	 * \note Wrapper of connect(2)
 	 */
 	template <typename Address, typename Protocol>
 	void connect(Socket<Address, Protocol> &sc, const sockaddr *address, socklen_t length)
@@ -2034,8 +2034,8 @@ public:
 	 * If the connection is complete, status is set to State::Connected, otherwise it is set to
 	 * State::Disconnected. In both cases, action and condition are not set.
 	 *
-	 * @param sc the socket
-	 * @throw net::Error on errors
+	 * \param sc the socket
+	 * \throw net::Error on errors
 	 */
 	template <typename Address, typename Protocol>
 	void connect(Socket<Address, Protocol> &sc)
@@ -2064,12 +2064,12 @@ public:
 	 *
 	 * In any case, action and condition of this socket are not set.
 	 *
-	 * @param sc the socket
-	 * @param address the address destination
-	 * @param length the address length
-	 * @return the socket
-	 * @throw net::Error on errors
-	 * @note Wrapper of accept(2)
+	 * \param sc the socket
+	 * \param address the address destination
+	 * \param length the address length
+	 * \return the socket
+	 * \throw net::Error on errors
+	 * \note Wrapper of accept(2)
 	 */
 	template <typename Address, typename Protocol>
 	Socket<Address, Protocol> accept(Socket<Address, Protocol> &sc, sockaddr *address, socklen_t *length)
@@ -2105,12 +2105,12 @@ public:
 	 *
 	 * In any case, action is never set.
 	 *
-	 * @param sc the socket
-	 * @param data the destination
-	 * @param length the destination length
-	 * @return the number of bytes read
-	 * @throw Error on errors
-	 * @note Wrapper of recv(2)
+	 * \param sc the socket
+	 * \param data the destination
+	 * \param length the destination length
+	 * \return the number of bytes read
+	 * \throw Error on errors
+	 * \note Wrapper of recv(2)
 	 */
 	template <typename Address>
 	unsigned recv(Socket<Address, Tcp> &sc, void *data, unsigned length)
@@ -2153,12 +2153,12 @@ public:
 	 *
 	 * On any other errors, this function throw net::Error.
 	 *
-	 * @param sc the socket
-	 * @param data the buffer to send
-	 * @param length the buffer length
-	 * @return the number of bytes sent
-	 * @throw net::Error on errors
-	 * @note Wrapper of send(2)
+	 * \param sc the socket
+	 * \param data the buffer to send
+	 * \param length the buffer length
+	 * \return the number of bytes sent
+	 * \throw net::Error on errors
+	 * \note Wrapper of send(2)
 	 */
 	template <typename Address>
 	unsigned send(Socket<Address, Tcp> &sc, const void *data, unsigned length)
@@ -2196,8 +2196,8 @@ public:
 /* {{{ Udp */
 
 /**
- * @class Udp
- * @brief Clear UDP type.
+ * \class Udp
+ * \brief Clear UDP type.
  *
  * This class is the basic implementation of UDP sockets.
  */
@@ -2206,7 +2206,7 @@ public:
 	/**
 	 * Socket type.
 	 *
-	 * @return SOCK_DGRAM
+	 * \return SOCK_DGRAM
 	 */
 	inline int type() const noexcept
 	{
@@ -2230,13 +2230,13 @@ public:
 	 *
 	 * If the socket is blocking, this functions blocks until some data is available or if an error occurs.
 	 *
-	 * @param sc the socket
-	 * @param data the destination buffer
-	 * @param length the buffer length
-	 * @param address the address
-	 * @param addrlen the initial address length
-	 * @return the number of bytes received
-	 * @throw Error on error
+	 * \param sc the socket
+	 * \param data the destination buffer
+	 * \param length the buffer length
+	 * \param address the address
+	 * \param addrlen the initial address length
+	 * \return the number of bytes received
+	 * \throw Error on error
 	 */
 	template <typename Address>
 	unsigned recvfrom(Socket<Address, Udp> &sc, void *data, unsigned length, sockaddr *address, socklen_t *addrlen)
@@ -2276,13 +2276,13 @@ public:
 	 *
 	 * If the socket is blocking, this functions blocks until the data has been sent.
 	 *
-	 * @param sc the socket
-	 * @param data the buffer
-	 * @param length the buffer length
-	 * @param address the client address
-	 * @param addrlen the adderss length
-	 * @return the number of bytes sent
-	 * @throw Error on error
+	 * \param sc the socket
+	 * \param data the buffer
+	 * \param length the buffer length
+	 * \param address the client address
+	 * \param addrlen the adderss length
+	 * \return the number of bytes sent
+	 * \throw Error on error
 	 */
 	template <typename Address>
 	unsigned sendto(Socket<Address, Udp> &sc, const void *data, unsigned length, const sockaddr *address, socklen_t addrlen)
@@ -2321,17 +2321,17 @@ public:
 #if !defined(SOCKET_NO_SSL)
 
 /**
- * @class Tls
- * @brief OpenSSL secure layer for TCP.
+ * \class Tls
+ * \brief OpenSSL secure layer for TCP.
  *
  * **Note:** This protocol is much more difficult to use with non-blocking sockets, if some operations would block, the
  * user is responsible of calling the function again by waiting for the appropriate condition. See the functions for
  * more details.
  *
- * @see Tls::accept
- * @see Tls::connect
- * @see Tls::recv
- * @see Tls::send
+ * \see Tls::accept
+ * \see Tls::connect
+ * \see Tls::recv
+ * \see Tls::send
  */
 class Tls : private Tcp {
 private:
@@ -2436,7 +2436,7 @@ private:
 
 public:
 	/**
-	 * @copydoc Tcp::type
+	 * \copydoc Tcp::type
 	 */
 	inline int type() const noexcept
 	{
@@ -2456,8 +2456,8 @@ public:
 	/**
 	 * Set the method.
 	 *
-	 * @param method the method
-	 * @pre the socket must not be already created
+	 * \param method the method
+	 * \pre the socket must not be already created
 	 */
 	inline void setMethod(ssl::Method method) noexcept
 	{
@@ -2470,7 +2470,7 @@ public:
 	/**
 	 * Use the specified private key file.
 	 *
-	 * @param file the path to the private key
+	 * \param file the path to the private key
 	 */
 	inline void setPrivateKey(std::string file) noexcept
 	{
@@ -2480,7 +2480,7 @@ public:
 	/**
 	 * Use the specified certificate file.
 	 *
-	 * @param file the path to the file
+	 * \param file the path to the file
 	 */
 	inline void setCertificate(std::string file) noexcept
 	{
@@ -2490,7 +2490,7 @@ public:
 	/**
 	 * Set to true if we must verify the certificate and private key.
 	 *
-	 * @param verify the mode
+	 * \param verify the mode
 	 */
 	inline void setVerify(bool verify = true) noexcept
 	{
@@ -2500,8 +2500,8 @@ public:
 	/**
 	 * Initialize the SSL objects after have created.
 	 *
-	 * @param sc the socket
-	 * @throw net::Error on errors
+	 * \param sc the socket
+	 * \throw net::Error on errors
 	 */
 	template <typename Address>
 	inline void create(Socket<Address, Tls> &sc)
@@ -2536,10 +2536,10 @@ public:
 	 *
 	 * If the connection was completed correctly the state is set to State::Connected.
 	 *
-	 * @param sc the socket
-	 * @param address the address
-	 * @param length the address length
-	 * @throw net::Error on errors
+	 * \param sc the socket
+	 * \param address the address
+	 * \param length the address length
+	 * \throw net::Error on errors
 	 */
 	template <typename Address, typename Protocol>
 	void connect(Socket<Address, Protocol> &sc, const sockaddr *address, socklen_t length)
@@ -2560,8 +2560,8 @@ public:
 	 * This function must be called when the socket is ready for reading or writing (check with Socket::condition),
 	 * the state may change exactly like the initial connect call.
 	 *
-	 * @param sc the socket
-	 * @throw net::Error on errors
+	 * \param sc the socket
+	 * \throw net::Error on errors
 	 */
 	template <typename Address, typename Protocol>
 	void connect(Socket<Address, Protocol> &sc)
@@ -2589,11 +2589,11 @@ public:
 	 *
 	 * If the client is accepted correctly, its state is set to State::Accepted. This instance does not change.
 	 *
-	 * @param sc the socket
-	 * @param address the address destination
-	 * @param length the address length
-	 * @return the client
-	 * @throw net::Error on errors
+	 * \param sc the socket
+	 * \param address the address destination
+	 * \param length the address length
+	 * \return the client
+	 * \throw net::Error on errors
 	 */
 	template <typename Address>
 	Socket<Address, Tls> accept(Socket<Address, Tls> &sc, sockaddr *address, socklen_t *length)
@@ -2621,8 +2621,8 @@ public:
 	 *
 	 * Like accept or connect, user is responsible of calling this function until the connection is complete.
 	 *
-	 * @param sc the socket
-	 * @throw net::Error on errors
+	 * \param sc the socket
+	 * \throw net::Error on errors
 	 */
 	template <typename Address, typename Protocol>
 	inline void accept(Socket<Address, Protocol> &sc)
@@ -2638,11 +2638,11 @@ public:
 	 * is set to Condition::Readable or Condition::Writable. The user must wait that the condition is met and
 	 * call this function again.
 	 *
-	 * @param sc the socket
-	 * @param data the destination
-	 * @param len the buffer length
-	 * @return the number of bytes read
-	 * @throw net::Error on errors
+	 * \param sc the socket
+	 * \param data the destination
+	 * \param len the buffer length
+	 * \return the number of bytes read
+	 * \throw net::Error on errors
 	 */
 	template <typename Address>
 	unsigned recv(Socket<Address, Tls> &sc, void *data, unsigned len)
@@ -2669,11 +2669,11 @@ public:
 	 * Like recv, if the socket is marked non-blocking and no data can be sent or a negociation is required,
 	 * condition and action are set. See receive for more details
 	 *
-	 * @param sc the socket
-	 * @param data the data to send
-	 * @param len the buffer length
-	 * @return the number of bytes sent
-	 * @throw net::Error on errors
+	 * \param sc the socket
+	 * \param data the data to send
+	 * \param len the buffer length
+	 * \return the number of bytes sent
+	 * \throw net::Error on errors
 	 */
 	template <typename Address>
 	unsigned send(Socket<Address, Tls> &sc, const void *data, unsigned len)
@@ -2772,8 +2772,8 @@ using SocketTlsIp = Socket<address::Ip, protocol::Tls>;
 /* {{{ Listener */
 
 /**
- * @class ListenerStatus
- * @brief Result of polling
+ * \class ListenerStatus
+ * \brief Result of polling
  *
  * Result of a select call, returns the first ready socket found with its
  * flags.
@@ -2791,8 +2791,8 @@ public:
 using ListenerTable = std::map<Handle, Condition>;
 
 /**
- * @class Select
- * @brief Implements select(2)
+ * \class Select
+ * \brief Implements select(2)
  *
  * This class is the fallback of any other method, it is not preferred at all for many reasons.
  */
@@ -2825,8 +2825,8 @@ public:
 #if defined(SOCKET_HAVE_POLL)
 
 /**
- * @class Poll
- * @brief Implements poll(2).
+ * \class Poll
+ * \brief Implements poll(2).
  *
  * Poll is widely supported and is better than select(2). It is still not the
  * best option as selecting the sockets is O(n).
@@ -2868,8 +2868,8 @@ public:
 #if defined(SOCKET_HAVE_EPOLL)
 
 /**
- * @class Epoll
- * @brief Linux's epoll.
+ * \class Epoll
+ * \brief Linux's epoll.
  */
 class Epoll {
 private:
@@ -2925,8 +2925,8 @@ public:
 #if defined(SOCKET_HAVE_KQUEUE)
 
 /**
- * @class Kqueue
- * @brief Implements kqueue(2).
+ * \class Kqueue
+ * \brief Implements kqueue(2).
  *
  * This implementation is available on all BSD and Mac OS X. It is better than
  * poll(2) because it's O(1), however it's a bit more memory consuming.
@@ -2981,8 +2981,8 @@ public:
 #endif
 
 /**
- * @class Listener
- * @brief Synchronous multiplexing
+ * \class Listener
+ * \brief Synchronous multiplexing
  *
  * Convenient wrapper around the select() system call.
  *
@@ -2999,9 +2999,9 @@ public:
  *
  * ### Set
  *
- * @code
+ * \code
  * void set(const ListenerTable &, Handle sc, Condition condition, bool add);
- * @endcode
+ * \endcode
  *
  * This function, takes the socket to be added and the flags. The condition is
  * always guaranteed to be correct and the function will never be called twice
@@ -3013,9 +3013,9 @@ public:
  *
  * ### Unset
  *
- * @code
+ * \code
  * void unset(const ListenerTable &, Handle sc, Condition condition, bool remove);
- * @endcode
+ * \endcode
  *
  * Like set, this function is only called if the condition is actually set and will
  * not be called multiple times.
@@ -3025,18 +3025,18 @@ public:
  *
  * ### Wait
  *
- * @code
+ * \code
  * std::vector<ListenerStatus> wait(const ListenerTable &, int ms);
- * @endcode
+ * \endcode
  *
  * Wait for the sockets to be ready with the specified milliseconds. Must return a list of ListenerStatus,
  * may throw any exceptions.
  *
  * ### Name
  *
- * @code
+ * \code
  * inline const char *name() const noexcept
- * @endcode
+ * \endcode
  *
  * Returns the backend name. Usually the class in lower case.
  */
@@ -3055,7 +3055,7 @@ public:
 	/**
 	 * Get the backend.
 	 *
-	 * @return the backend
+	 * \return the backend
 	 */
 	inline const Backend &backend() const noexcept
 	{
@@ -3065,7 +3065,7 @@ public:
 	/**
 	 * Get the non-modifiable table.
 	 *
-	 * @return the table
+	 * \return the table
 	 */
 	inline const ListenerTable &table() const noexcept
 	{
@@ -3075,7 +3075,7 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @return the iterator
+	 * \return the iterator
 	 */
 	inline ListenerTable::const_iterator begin() const noexcept
 	{
@@ -3085,7 +3085,7 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @return the iterator
+	 * \return the iterator
 	 */
 	inline ListenerTable::const_iterator cbegin() const noexcept
 	{
@@ -3095,7 +3095,7 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @return the iterator
+	 * \return the iterator
 	 */
 	inline ListenerTable::const_iterator end() const noexcept
 	{
@@ -3105,7 +3105,7 @@ public:
 	/**
 	 * Overloaded function.
 	 *
-	 * @return the iterator
+	 * \return the iterator
 	 */
 	inline ListenerTable::const_iterator cend() const noexcept
 	{
@@ -3120,9 +3120,9 @@ public:
 	 *
 	 * If incorrect flags are passed, the function does nothing.
 	 *
-	 * @param sc the socket
-	 * @param condition the condition (may be OR'ed)
-	 * @throw Error if the backend failed to set
+	 * \param sc the socket
+	 * \param condition the condition (may be OR'ed)
+	 * \throw Error if the backend failed to set
 	 */
 	void set(Handle sc, Condition condition)
 	{
@@ -3165,9 +3165,9 @@ public:
 	 * For example, if you added a socket for both reading and writing,
 	 * unsetting the write flags will keep the socket for reading.
 	 *
-	 * @param sc the socket
-	 * @param condition the condition (may be OR'ed)
-	 * @see remove
+	 * \param sc the socket
+	 * \param condition the condition (may be OR'ed)
+	 * \see remove
 	 */
 	void unset(Handle sc, Condition condition)
 	{
@@ -3209,7 +3209,7 @@ public:
 	 *
 	 * It is a shorthand for unset(sc, Condition::Readable | Condition::Writable);
 	 *
-	 * @param sc the socket
+	 * \param sc the socket
 	 */
 	inline void remove(Handle sc)
 	{
@@ -3237,8 +3237,8 @@ public:
 	/**
 	 * Select a socket. Waits for a specific amount of time specified as the duration.
 	 *
-	 * @param duration the duration
-	 * @return the socket ready
+	 * \param duration the duration
+	 * \return the socket ready
 	 */
 	template <typename Rep, typename Ratio>
 	inline ListenerStatus wait(const std::chrono::duration<Rep, Ratio> &duration)
@@ -3253,8 +3253,8 @@ public:
 	/**
 	 * Overload with milliseconds.
 	 *
-	 * @param timeout the optional timeout in milliseconds
-	 * @return the socket ready
+	 * \param timeout the optional timeout in milliseconds
+	 * \return the socket ready
 	 */
 	inline ListenerStatus wait(int timeout = -1)
 	{
@@ -3264,8 +3264,8 @@ public:
 	/**
 	 * Select multiple sockets.
 	 *
-	 * @param duration the duration
-	 * @return the socket ready
+	 * \param duration the duration
+	 * \return the socket ready
 	 */
 	template <typename Rep, typename Ratio>
 	inline std::vector<ListenerStatus> waitMultiple(const std::chrono::duration<Rep, Ratio> &duration)
@@ -3280,7 +3280,7 @@ public:
 	/**
 	 * Overload with milliseconds.
 	 *
-	 * @return the socket ready
+	 * \return the socket ready
 	 */
 	inline std::vector<ListenerStatus> waitMultiple(int timeout = -1)
 	{
@@ -3300,8 +3300,8 @@ public:
 /* {{{ Callback */
 
 /**
- * @class Callback
- * @brief Convenient signal owner that checks if the target is valid.
+ * \class Callback
+ * \brief Convenient signal owner that checks if the target is valid.
  *
  * This class also catch all errors thrown from signals to avoid interfering with our process.
  */
@@ -3339,8 +3339,8 @@ public:
 /* {{{ StreamConnection */
 
 /**
- * @class StreamConnection
- * @brief Connected client on the server side.
+ * \class StreamConnection
+ * \brief Connected client on the server side.
  *
  * This object is created from StreamServer when a new client is connected, it is the higher
  * level object of sockets and completely asynchronous.
@@ -3365,7 +3365,7 @@ public:
 	/**
 	 * Create the connection.
 	 *
-	 * @param s the socket
+	 * \param s the socket
 	 */
 	StreamConnection(Socket<Address, Protocol> s)
 		: m_socket{std::move(s)}
@@ -3376,8 +3376,8 @@ public:
 	/**
 	 * Access the underlying socket.
 	 *
-	 * @return the socket
-	 * @warning use with care
+	 * \return the socket
+	 * \warning use with care
 	 */
 	inline Socket<Address, Protocol> &socket() noexcept
 	{
@@ -3387,7 +3387,7 @@ public:
 	/**
 	 * Access the current output.
 	 *
-	 * @return the output
+	 * \return the output
 	 */
 	inline const std::string &output() const noexcept
 	{
@@ -3397,8 +3397,8 @@ public:
 	/**
 	 * Overloaded function
 	 *
-	 * @return the output
-	 * @warning use with care, avoid modifying the output if you don't know what you're doing
+	 * \return the output
+	 * \warning use with care, avoid modifying the output if you don't know what you're doing
 	 */
 	inline std::string &output() noexcept
 	{
@@ -3408,7 +3408,7 @@ public:
 	/**
 	 * Post some data to be sent asynchronously.
 	 *
-	 * @param str the data to append
+	 * \param str the data to append
 	 */
 	inline void send(std::string str)
 	{
@@ -3428,8 +3428,8 @@ public:
 	 * Set the write handler, the signal is emitted when the output has changed so that the StreamServer owner
 	 * knows that there are some data to send.
 	 *
-	 * @param handler the handler
-	 * @warning you usually never need to set this yourself
+	 * \param handler the handler
+	 * \warning you usually never need to set this yourself
 	 */
 	inline void setWriteHandler(WriteHandler handler)
 	{
@@ -3449,8 +3449,8 @@ public:
 /* {{{ StreamServer */
 
 /**
- * @class StreamServer
- * @brief Convenient stream server for TCP and TLS.
+ * \class StreamServer
+ * \brief Convenient stream server for TCP and TLS.
  *
  * This class does all the things for you as accepting new clients, listening for it and sending data. It works
  * asynchronously without blocking to let you control your process workflow.
@@ -3665,10 +3665,10 @@ public:
 	/**
 	 * Create a stream server with the specified address to bind.
 	 *
-	 * @param protocol the protocol (Tcp or Tls)
-	 * @param address the address to bind
-	 * @param max the max number to listen
-	 * @throw Error on errors
+	 * \param protocol the protocol (Tcp or Tls)
+	 * \param address the address to bind
+	 * \param max the max number to listen
+	 * \throw Error on errors
 	 */
 	StreamServer(Protocol protocol, const Address &address, int max = 128)
 		: m_master{std::move(protocol), address}
@@ -3683,7 +3683,7 @@ public:
 	/**
 	 * Set the connection handler, called when a new client is connected.
 	 *
-	 * @param handler the handler
+	 * \param handler the handler
 	 */
 	inline void setConnectionHandler(ConnectionHandler handler)
 	{
@@ -3693,7 +3693,7 @@ public:
 	/**
 	 * Set the disconnection handler, called when a client died.
 	 *
-	 * @param handler the handler
+	 * \param handler the handler
 	 */
 	inline void setDisconnectionHandler(DisconnectionHandler handler)
 	{
@@ -3703,7 +3703,7 @@ public:
 	/**
 	 * Set the receive handler, called when a client has sent something.
 	 *
-	 * @param handler the handler
+	 * \param handler the handler
 	 */
 	inline void setReadHandler(ReadHandler handler)
 	{
@@ -3713,7 +3713,7 @@ public:
 	/**
 	 * Set the writing handler, called when some data has been sent to a client.
 	 *
-	 * @param handler the handler
+	 * \param handler the handler
 	 */
 	inline void setWriteHandler(WriteHandler handler)
 	{
@@ -3723,7 +3723,7 @@ public:
 	/**
 	 * Set the error handler, called when unrecoverable error has occured.
 	 *
-	 * @param handler the handler
+	 * \param handler the handler
 	 */
 	inline void setErrorHandler(ErrorHandler handler)
 	{
@@ -3733,7 +3733,7 @@ public:
 	/**
 	 * Set the timeout handler, called when the selection has timeout.
 	 *
-	 * @param handler the handler
+	 * \param handler the handler
 	 */
 	inline void setTimeoutHandler(TimeoutHandler handler)
 	{
@@ -3743,8 +3743,8 @@ public:
 	/**
 	 * Poll for the next event.
 	 *
-	 * @param timeout the timeout (-1 for indefinitely)
-	 * @throw Error on errors
+	 * \param timeout the timeout (-1 for indefinitely)
+	 * \throw Error on errors
 	 */
 	void poll(int timeout = -1)
 	{
@@ -3784,8 +3784,8 @@ public:
 /* {{{ StreamClient */
 
 /**
- * @class StreamClient
- * @brief Client side connection to a server.
+ * \class StreamClient
+ * \brief Client side connection to a server.
  *
  * This class is not thread safe and you must not call any of the functions from different threads.
  */
@@ -3951,9 +3951,9 @@ public:
 	/**
 	 * Create a client. The client is automatically marked as non-blocking.
 	 *
-	 * @param protocol the protocol (Tcp or Tls)
-	 * @param address the optional address
-	 * @throw net::Error on failures
+	 * \param protocol the protocol (Tcp or Tls)
+	 * \param address the optional address
+	 * \throw net::Error on failures
 	 */
 	StreamClient(Protocol protocol = {}, const Address &address = {})
 		: m_socket{std::move(protocol), address}
@@ -3965,7 +3965,7 @@ public:
 	/**
 	 * Set the connection handler, called when the connection succeed.
 	 *
-	 * @param handler the handler
+	 * \param handler the handler
 	 */
 	inline void setConnectionHandler(ConnectionHandler handler)
 	{
@@ -3975,7 +3975,7 @@ public:
 	/**
 	 * Set the disconnection handler, called when the server closed the connection.
 	 *
-	 * @param handler the handler
+	 * \param handler the handler
 	 */
 	inline void setDisconnectionHandler(DisconnectionHandler handler)
 	{
@@ -3985,7 +3985,7 @@ public:
 	/**
 	 * Set the read handler, called when we received something.
 	 *
-	 * @param handler the handler
+	 * \param handler the handler
 	 */
 	inline void setReadHandler(ReadHandler handler)
 	{
@@ -3995,7 +3995,7 @@ public:
 	/**
 	 * Set the write handler, called when we successfully sent data.
 	 *
-	 * @param handler the handler
+	 * \param handler the handler
 	 */
 	inline void setWriteHandler(WriteHandler handler)
 	{
@@ -4005,7 +4005,7 @@ public:
 	/**
 	 * Set the error handler, called when unexpected error occurs.
 	 *
-	 * @param handler the handler
+	 * \param handler the handler
 	 */
 	inline void setErrorHandler(ErrorHandler handler)
 	{
@@ -4016,7 +4016,7 @@ public:
 	 * Connect to a server, this function may connect immediately or not in any case the connection handler
 	 * will be called when the connection completed.
 	 *
-	 * @param address the address to connect to
+	 * \param address the address to connect to
 	 */
 	void connect(const Address &address) noexcept
 	{
@@ -4028,7 +4028,7 @@ public:
 	/**
 	 * Asynchronously send data to the server.
 	 *
-	 * @param str the data to append
+	 * \param str the data to append
 	 */
 	void send(std::string str)
 	{
@@ -4043,8 +4043,8 @@ public:
 	/**
 	 * Wait for the next event.
 	 *
-	 * @param timeout the time to wait in milliseconds
-	 * @throw Error on errors
+	 * \param timeout the time to wait in milliseconds
+	 * \throw Error on errors
 	 */
 	void poll(int timeout = -1) noexcept
 	{

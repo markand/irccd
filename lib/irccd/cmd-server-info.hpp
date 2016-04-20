@@ -20,8 +20,8 @@
 #define IRCCD_CMD_SERVER_INFO_HPP
 
 /**
- * @file cmd-server-info.hpp
- * @brief Implementation of server-info transport command.
+ * \file cmd-server-info.hpp
+ * \brief Implementation of server-info transport command.
  */
 
 #include "command.hpp"
@@ -31,35 +31,35 @@ namespace irccd {
 namespace command {
 
 /**
- * @class ServerInfo
- * @brief Implementation of server-info transport command.
+ * \class ServerInfo
+ * \brief Implementation of server-info transport command.
  */
 class ServerInfo : public RemoteCommand {
 public:
 	ServerInfo();
 
 	/**
-	 * @copydoc RemoteCommand::help
+	 * \copydoc RemoteCommand::help
 	 */
 	std::string help() const override;
 
 	/**
-	 * @copydoc RemoteCommand::args
+	 * \copydoc RemoteCommand::args
 	 */
 	std::vector<Arg> args() const override;
 
 	/**
-	 * @copydoc RemoteCommand::request
+	 * \copydoc RemoteCommand::request
 	 */
 	json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const override;
 
 	/**
-	 * @copydoc RemoteCommand::exec
+	 * \copydoc RemoteCommand::exec
 	 */
 	json::Value exec(Irccd &irccd, const json::Value &request) const override;
 
 	/**
-	 * @copydoc RemoteCommand::result
+	 * \copydoc RemoteCommand::result
 	 */
 	void result(Irccdctl &irccdctl, const json::Value &response) const override;
 };
