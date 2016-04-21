@@ -20,7 +20,7 @@
 #include <stdexcept>
 #include <sstream>
 
-#include "xdg.h"
+#include "xdg.hpp"
 
 namespace irccd {
 
