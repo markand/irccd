@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "sysconfig.h"
+#include "sysconfig.hpp"
 
 #if !defined(IRCCD_SYSTEM_WINDOWS)
 #  include <cstdio>
