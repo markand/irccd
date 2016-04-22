@@ -20,10 +20,9 @@
 #include <numeric>
 #include <sstream>
 
-#include <irccd/logger.hpp>
-#include <irccd/system.hpp>
-
 #include "command.hpp"
+#include "logger.hpp"
+#include "system.hpp"
 
 using namespace std::string_literals;
 

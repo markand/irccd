@@ -24,12 +24,11 @@
 #include <stdexcept>
 #include <string>
 
-#include <irccd/sysconfig.hpp>
-
 #include "fs.hpp"
 #include "js.hpp"
 #include "js-irccd.hpp"
 #include "path.hpp"
+#include "sysconfig.hpp"
 
 namespace irccd {
 

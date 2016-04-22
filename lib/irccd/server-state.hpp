@@ -24,10 +24,9 @@
  * \brief Server state.
  */
 
-#include <irccd/sysconfig.hpp>
-
 #include "elapsed-timer.hpp"
 #include "sockets.hpp"
+#include "sysconfig.hpp"
 
 namespace irccd {
 

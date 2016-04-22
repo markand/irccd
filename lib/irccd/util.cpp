@@ -24,8 +24,7 @@
 #include <sstream>
 #include <stdexcept>
 
-#include <irccd/sysconfig.hpp>
-
+#include "sysconfig.hpp"
 #include "util.hpp"
 #include "unicode.hpp"
 

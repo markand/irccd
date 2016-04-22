@@ -24,10 +24,10 @@
  * \brief System dependant functions
  */
 
-#include <irccd/sysconfig.hpp>
-
 #include <cstdint>
 #include <string>
+
+#include "sysconfig.hpp"
 
 namespace irccd {
 

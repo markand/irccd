@@ -27,9 +27,8 @@
 #include <memory>
 #include <string>
 
-#include <irccd/sysconfig.hpp>
-
 #include "sockets.hpp"
+#include "sysconfig.hpp"
 #include "transport-client.hpp"
 
 namespace irccd {

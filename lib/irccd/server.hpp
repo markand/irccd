@@ -35,11 +35,10 @@
 #include <utility>
 #include <vector>
 
-#include <irccd/sysconfig.hpp>
-
 #include "logger.hpp"
 #include "server-state.hpp"
 #include "signals.hpp"
+#include "sysconfig.hpp"
 
 namespace irccd {
 

@@ -24,7 +24,7 @@
  * \brief Logging facilities.
  */
 
-#include <irccd/sysconfig.hpp>
+#include "sysconfig.hpp"
 
 #include <memory>
 #include <sstream>

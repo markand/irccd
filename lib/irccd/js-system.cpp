@@ -16,16 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/sysconfig.hpp>
-
 #include <chrono>
+#include <cstdlib>
+#include <thread>
+
+#include "sysconfig.hpp"
 
 #if defined(HAVE_POPEN)
 #  include <cstdio>
 #endif
-
-#include <cstdlib>
-#include <thread>
 
 #include "js-file.hpp"
 #include "js-irccd.hpp"

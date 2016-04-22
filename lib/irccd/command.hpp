@@ -28,7 +28,7 @@
 #include <map>
 #include <vector>
 
-#include <irccd/json.hpp>
+#include "json.hpp"
 
 namespace irccd {
 

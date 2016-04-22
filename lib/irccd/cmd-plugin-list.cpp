@@ -18,10 +18,9 @@
 
 #include <iostream>
 
-#include <irccd/sysconfig.hpp>
-
 #include "cmd-plugin-list.hpp"
 #include "irccd.hpp"
+#include "sysconfig.hpp"
 
 namespace irccd {
 

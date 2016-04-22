@@ -24,7 +24,7 @@
  * \brief Read .ini configuration file for irccd
  */
 
-#include <irccd/options.hpp>
+#include "options.hpp"
 
 namespace irccd {
 

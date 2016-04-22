@@ -32,9 +32,8 @@
 #include <mutex>
 #include <vector>
 
-#include <irccd/sysconfig.hpp>
-
 #include "sockets.hpp"
+#include "sysconfig.hpp"
 
 #if defined(WITH_JS)
 #  include "plugin.hpp"

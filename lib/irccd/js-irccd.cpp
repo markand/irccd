@@ -16,9 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/sysconfig.hpp>
-
 #include "js-irccd.hpp"
+#include "sysconfig.hpp"
 
 namespace irccd {
 

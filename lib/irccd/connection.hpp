@@ -27,12 +27,11 @@
 #include <cassert>
 #include <stdexcept>
 
-#include <irccd/json.hpp>
-#include <irccd/system.hpp>
-#include <irccd/util.hpp>
-
 #include "elapsed-timer.hpp"
+#include "json.hpp"
 #include "sockets.hpp"
+#include "system.hpp"
+#include "util.hpp"
 
 namespace irccd {
 

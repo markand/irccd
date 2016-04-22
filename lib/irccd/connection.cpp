@@ -16,9 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/logger.hpp>
-
 #include "connection.hpp"
+#include "logger.hpp"
 
 namespace irccd {
 

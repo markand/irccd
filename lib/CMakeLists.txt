@@ -27,6 +27,7 @@ target_include_directories(
 	PUBLIC
 		$<BUILD_INTERFACE:${duktape_SOURCE_DIR}>
 		$<BUILD_INTERFACE:${extern-libircclient_SOURCE_DIR}/include>
+		$<BUILD_INTERFACE:${irccd_BINARY_DIR}/irccd>
 		$<BUILD_INTERFACE:${irccd_BINARY_DIR}>
 		$<BUILD_INTERFACE:${lib_SOURCE_DIR}>
 		$<INSTALL_INTERFACE:include>

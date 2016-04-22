@@ -18,7 +18,7 @@
 
 #include <cassert>
 
-#include <irccd/sysconfig.hpp>
+#include "sysconfig.hpp"
 
 #if !defined(_WIN32)
 #  include <sys/types.h>

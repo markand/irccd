@@ -24,9 +24,8 @@
  * \brief Irccd.Server JavaScript API.
  */
 
-#include <irccd/server.hpp>
-
 #include "js.hpp"
+#include "server.hpp"
 
 namespace irccd {
 

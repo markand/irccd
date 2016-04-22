@@ -19,8 +19,8 @@
 #include <algorithm>
 #include <stdexcept>
 
-#include "irccd.hpp"
 #include "fs.hpp"
+#include "irccd.hpp"
 #include "logger.hpp"
 #include "path.hpp"
 #include "util.hpp"

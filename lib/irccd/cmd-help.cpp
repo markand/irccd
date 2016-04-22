@@ -16,10 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/irccdctl.hpp>
-#include <irccd/logger.hpp>
-
 #include "cmd-help.hpp"
+#include "irccdctl.hpp"
+#include "logger.hpp"
 
 namespace irccd {
 

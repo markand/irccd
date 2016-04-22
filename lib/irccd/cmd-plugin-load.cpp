@@ -16,10 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/sysconfig.hpp>
-
 #include "cmd-plugin-load.hpp"
 #include "irccd.hpp"
+#include "sysconfig.hpp"
 
 namespace irccd {
 

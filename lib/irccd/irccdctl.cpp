@@ -23,8 +23,6 @@
 #include <string>
 #include <unordered_map>
 
-#include <irccd/sysconfig.hpp>
-
 #include "elapsed-timer.hpp"
 #include "fs.hpp"
 #include "ini.hpp"
@@ -34,6 +32,7 @@
 #include "options.hpp"
 #include "path.hpp"
 #include "sockets.hpp"
+#include "sysconfig.hpp"
 #include "system.hpp"
 #include "util.hpp"
 
