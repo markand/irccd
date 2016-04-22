@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <algorithm>
 #include <iomanip>
+#include <numeric>
 #include <sstream>
 
 #include <irccd/logger.hpp>
