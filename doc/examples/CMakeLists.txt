@@ -18,32 +18,30 @@
 
 project(examples)
 
-if (IRCCD_RELOCATABLE)
-	add_custom_command(
-		OUTPUT
-			${CMAKE_BINARY_DIR}/fakeroot/${WITH_CONFDIR}/irccd.conf.sample
-			${CMAKE_BINARY_DIR}/fakeroot/${WITH_CONFDIR}/irccdctl.conf.sample
-		COMMAND
-			${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/irccd.conf ${CMAKE_BINARY_DIR}/fakeroot/${WITH_CONFDIR}/irccd.conf.sample
-		COMMAND
-			${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/irccdctl.conf ${CMAKE_BINARY_DIR}/fakeroot/${WITH_CONFDIR}/irccdctl.conf.sample
-		DEPENDS
-			${CMAKE_CURRENT_SOURCE_DIR}/irccd.conf
-			${CMAKE_CURRENT_SOURCE_DIR}/irccdctl.conf
-	)
+add_custom_command(
+	OUTPUT
+		${IRCCD_FAKEROOTDIR}/${WITH_CONFDIR}/irccd.conf.sample
+		${IRCCD_FAKEROOTDIR}/${WITH_CONFDIR}/irccdctl.conf.sample
+	COMMAND
+		${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/irccd.conf ${IRCCD_FAKEROOTDIR}/${WITH_CONFDIR}/irccd.conf.sample
+	COMMAND
+		${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/irccdctl.conf ${IRCCD_FAKEROOTDIR}/${WITH_CONFDIR}/irccdctl.conf.sample
+	DEPENDS
+		${CMAKE_CURRENT_SOURCE_DIR}/irccd.conf
+		${CMAKE_CURRENT_SOURCE_DIR}/irccdctl.conf
+)
 
-	add_custom_target(
-		docs-examples
-		DEPENDS
-			${CMAKE_BINARY_DIR}/fakeroot/${WITH_CONFDIR}/irccd.conf.sample
-			${CMAKE_BINARY_DIR}/fakeroot/${WITH_CONFDIR}/irccdctl.conf.sample
-		SOURCES
-			${CMAKE_CURRENT_SOURCE_DIR}/irccd.conf
-			${CMAKE_CURRENT_SOURCE_DIR}/irccdctl.conf
-	)
+add_custom_target(
+	docs-examples
+	DEPENDS
+		${IRCCD_FAKEROOTDIR}/${WITH_CONFDIR}/irccd.conf.sample
+		${IRCCD_FAKEROOTDIR}/${WITH_CONFDIR}/irccdctl.conf.sample
+	SOURCES
+		${CMAKE_CURRENT_SOURCE_DIR}/irccd.conf
+		${CMAKE_CURRENT_SOURCE_DIR}/irccdctl.conf
+)
 
-	add_dependencies(docs docs-examples)
-endif ()
+add_dependencies(docs docs-examples)
 
 install(
 	FILES irccdctl.conf

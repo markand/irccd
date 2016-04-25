@@ -57,11 +57,7 @@ function(irccd_define_html)
 		message(FATAL_ERROR "Please specify a target")
 	endif ()
 
-	if (IRCCD_RELOCATABLE)
-		set(base ${CMAKE_BINARY_DIR}/fakeroot/${WITH_DOCDIR})
-	else ()
-		set(base ${CMAKE_BINARY_DIR}/docs)
-	endif ()
+	set(base ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR})
 
 	if (HTML_OUTPUT)
 		#

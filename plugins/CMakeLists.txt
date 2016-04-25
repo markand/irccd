@@ -32,11 +32,7 @@ foreach (plugin ${IRCCD_PLUGINS})
 
 		# 2. Build documentation.
 		if (WITH_HTML)
-			if (IRCCD_RELOCATABLE)
-				set(basedocdir ${CMAKE_BINARY_DIR}/fakeroot/${WITH_DOCDIR})
-			else ()
-				set(basedocdir ${CMAKE_BINARY_DIR}/docs)
-			endif ()
+			set(basedocdir ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR})
 
 			file(RELATIVE_PATH baseurl ${basedocdir}/plugin ${basedocdir})
 	

@@ -56,24 +56,9 @@ function(irccd_define_executable)
 	target_compile_definitions(${EXE_TARGET} PRIVATE ${EXE_FLAGS})
 	target_link_libraries(${EXE_TARGET} ${EXE_LIBRARIES})
 
-	# use fakeroot if relocatable for public executables.
-	if (IRCCD_RELOCATABLE AND NOT EXE_PRIVATE)
-		file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/fakeroot/${WITH_BINDIR})
-
-		set_target_properties(
-			${EXE_TARGET}
-			PROPERTIES
-				RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/fakeroot/${WITH_BINDIR}
-				RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/fakeroot/${WITH_BINDIR}
-				RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/fakeroot/${WITH_BINDIR}
-		)
-	endif ()
-
-	# Install the target.
-	if (EXE_INSTALL)
-		install(
-			TARGETS ${EXE_TARGET}
-			RUNTIME DESTINATION ${WITH_BINDIR}
-		)
+	# use fakeroot for public executables.
+	if (NOT EXE_PRIVATE)
+		set_target_properties(${EXE_TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR})
+		install(TARGETS ${EXE_TARGET} RUNTIME DESTINATION ${WITH_BINDIR})
 	endif ()
 endfunction()

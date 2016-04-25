@@ -28,16 +28,9 @@
 
 function(irccd_define_man file man)
 	if (WITH_MAN)
-		set(path ${doc_SOURCE_DIR}/man/${file}.in)
-
-		# install to fakeroot if applicable.
-		if (IRCCD_RELOCATABLE)
-			set(output ${CMAKE_BINARY_DIR}/fakeroot/${WITH_MANDIR}/${man}/${file})
-		else ()
-			set(output ${CMAKE_BINARY_DIR}/docs/man/${man}/${file})
-		endif ()
-
-		configure_file(${path} ${output} @ONLY)
+		set(input ${doc_SOURCE_DIR}/man/${file}.in)
+		set(output ${IRCCD_FAKEROOTDIR}/${WITH_MANDIR}/${man}/${file})
+		configure_file(${input} ${output} @ONLY)
 		install(FILES ${output} DESTINATION ${WITH_MANDIR}/${man})
 	endif ()
 endfunction()

@@ -71,13 +71,10 @@ namespace {
  * Base program directory
  * ------------------------------------------------------------------
  *
- * This variable stores the program base directory. It is only enabled when irccd is relocatable because we can
- * retrieve the base directory by removing WITH_BINDIR.
+ * This variable stores the program base directory.
  *
  * If it is empty, the program was not able to detect it (e.g. error, not supported).
  */
-
-#if defined(IRCCD_RELOCATABLE)
 
 std::string base;
 
@@ -167,8 +164,6 @@ std::string executablePath()
 
 #endif
 
-#endif // !IRCCD_RELOCATABLE
-
 /*
  * System paths
  * ------------------------------------------------------------------
@@ -180,46 +175,30 @@ std::string executablePath()
 
 std::string systemConfig()
 {
-#if defined(IRCCD_RELOCATABLE)
 	assert(!base.empty());
 
 	return base + WITH_CONFDIR;
-#else
-	return fs::isAbsolute(WITH_CONFDIR) ? WITH_CONFDIR : std::string(PREFIX) + fs::separator() + WITH_CONFDIR;
-#endif
 }
 
 std::string systemData()
 {
-#if defined(IRCCD_RELOCATABLE)
 	assert(!base.empty());
 
 	return base + WITH_DATADIR;
-#else
-	return fs::isAbsolute(WITH_DATADIR) ? WITH_CONFDIR : std::string(PREFIX) + fs::separator() + WITH_DATADIR;
-#endif
 }
 
 std::string systemCache()
 {
-#if defined(IRCCD_RELOCATABLE)
 	assert(!base.empty());
 
 	return base + WITH_CACHEDIR;
-#else
-	return fs::isAbsolute(WITH_CACHEDIR) ? WITH_CACHEDIR : std::string(PREFIX) + fs::separator() + WITH_CACHEDIR;
-#endif
 }
 
 std::string systemPlugins()
 {
-#if defined(IRCCD_RELOCATABLE)
 	assert(!base.empty());
 
 	return base + WITH_PLUGINDIR;
-#else
-	return fs::isAbsolute(WITH_PLUGINDIR) ? WITH_PLUGINDIR : std::string(PREFIX) + fs::separator() + WITH_PLUGINDIR;
-#endif
 }
 
 /*
@@ -388,7 +367,6 @@ const char Separator(':');
 
 void setApplicationPath(const std::string &argv0)
 {
-#if defined(IRCCD_RELOCATABLE)
 	try {
 		base = executablePath();
 	} catch (const std::exception &) {
@@ -439,9 +417,6 @@ void setApplicationPath(const std::string &argv0)
 	base = clean(base);
 
 	assert(!base.empty());
-#else
-	(void)argv0;
-#endif
 }
 
 std::string clean(std::string input)

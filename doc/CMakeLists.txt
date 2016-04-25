@@ -31,20 +31,6 @@ add_custom_target(
 		${doc_SOURCE_DIR}/procs/60.new-command.md
 )
 
-#
-# Set the DOC_OUTPUT variable to where files will be installed
-# -------------------------------------------------------------------
-#
-# Depending if irccd is relocatable or not, documentation generated will be in a different folder, either
-# in the real fakeroot documentation directory or not.
-#
-
-if (IRCCD_RELOCATABLE)
-	set(DOC_OUTPUT ${CMAKE_BINARY_DIR}/fakeroot/${WITH_DOCDIR})
-else ()
-	set(DOC_OUTPUT ${CMAKE_BINARY_DIR}/docs)
-endif ()
-
 # Needed for fakeroot
 if (WITH_DOXYGEN)
 	add_subdirectory(doxygen)

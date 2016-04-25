@@ -27,12 +27,7 @@
 #
 macro(irccd_define_plugin file)
 	get_filename_component(name ${file} NAME)
-
-	if (IRCCD_RELOCATABLE)
-		set(base ${CMAKE_BINARY_DIR}/fakeroot/${WITH_PLUGINDIR})
-	else ()
-		set(base ${CMAKE_BINARY_DIR}/plugin)
-	endif ()
+	set(base ${IRCCD_FAKEROOTDIR}/${WITH_PLUGINDIR})
 
 	# Substitude variables in the JavaScript file.
 	configure_file(${file} ${base}/${name})

@@ -41,9 +41,9 @@ set(
 foreach (f ${CSS_FILES} ${JS_FILES})
 	get_filename_component(base ${f} DIRECTORY)
 	get_filename_component(name ${f} NAME)
-	list(APPEND OUTPUTS ${DOC_OUTPUT}/${base}/${name})
+	list(APPEND OUTPUTS ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/${base}/${name})
 	list(APPEND SOURCES ${resources_SOURCE_DIR}/${f})
-	list(APPEND COMMANDS COMMAND ${CMAKE_COMMAND} -E copy ${resources_SOURCE_DIR}/${f} ${DOC_OUTPUT}/${base})
+	list(APPEND COMMANDS COMMAND ${CMAKE_COMMAND} -E copy ${resources_SOURCE_DIR}/${f} ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/${base})
 	install(FILES ${resources_SOURCE_DIR}/${f} DESTINATION ${WITH_DOCDIR}/${base})
 endforeach ()
 
@@ -51,8 +51,8 @@ add_custom_command(
 	OUTPUT ${OUTPUTS}
 	DEPENDS ${SOURCES}
 	COMMENT "Copying HTML resources"
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${DOC_OUTPUT}/css
-	COMMAND ${CMAKE_COMMAND} -E make_directory ${DOC_OUTPUT}/js
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/css
+	COMMAND ${CMAKE_COMMAND} -E make_directory ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/js
 	${COMMANDS}
 )
 

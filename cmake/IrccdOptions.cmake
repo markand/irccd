@@ -37,9 +37,6 @@
 #
 # Options that controls both installations and the irccd runtime:
 #
-# Note: it is allowed to use absolute path but it's *strongly* recommended to
-#       use relative paths if you want to keep irccd relocatable.
-#
 # WITH_BINDIR		Binary directory for irccd, irccdctl
 # WITH_PLUGINDIR	Path where plugins must be installed
 # WITH_DOCDIR		Path where to install documentation
@@ -129,21 +126,13 @@ else ()
 endif ()
 
 #
-# Check if any of these path is absolute and mark irccd relocatable
-# only if all paths are relative
+# Check if any of these path is absolute and raise an error if true.
 #
-set(IRCCD_RELOCATABLE TRUE)
-
 foreach (d WITH_BINDIR WITH_CACHEDIR WITH_DATADIR WITH_CONFDIR WITH_PLUGINDIR)
 	if (IS_ABSOLUTE ${${d}})
-		list(APPEND IRCCD_ABSOLUTE_PATHS ${d})
-		set(IRCCD_RELOCATABLE FALSE)
+		message(FATAL_ERROR "${d} can not be absolute (${${d}} given)")
 	endif ()
 endforeach ()
-
-if (IRCCD_RELOCATABLE)
-	set(IRCCD_FAKEDIR ${CMAKE_BINARY_DIR}/fakeroot)
-endif ()
 
 # ---------------------------------------------------------
 # Internal dependencies
@@ -222,9 +211,7 @@ find_package(QtIFW)
 
 set(IRCCD_PACKAGE FALSE)
 
-if (NOT IRCCD_RELOCATABLE)
-	set(IRCCD_PACKAGE_MSG "No (irccd not relocatable)")
-elseif (NOT WITH_HTML)
+if (NOT WITH_HTML)
 	set(IRCCD_PACKAGE_MSG "No (HTML documentation disabled)")
 elseif (NOT WIN32)
 	set(IRCCD_PACKAGE_MSG "No (only for Windows)")

@@ -137,23 +137,3 @@ message("")
 #
 #	add_dependencies(release package_ifw)
 #endif ()
-
-# Show warnings about non-relocatable irccd.
-if (NOT IRCCD_RELOCATABLE)
-	message("Note: irccd is not relocatable, the following paths are absolute:")
-	message("")
-
-	foreach (path ${IRCCD_ABSOLUTE_PATHS})
-		message("    ${path} is set to ${${path}}")
-	endforeach ()
-
-	message("")
-	message("You can still use irccd, but you won't be able to move the application to a")
-	message("different directory.")
-	message("")
-	message("This may be an issue with some packages manager which allows relocating")
-	message("application in different directories.")
-	message("")
-	message("Set to relative paths if this is a concern.")
-	message("")
-endif ()

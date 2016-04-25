@@ -89,8 +89,7 @@ std::string get(Path path, Owner owner);
 /**
  * Generic function for multiple paths.
  *
- * This function will add more directories than pathSystem*() and pathUser*() functions, for example
- * it will add some path if irccd is relocatable.
+ * This function will add more directories than pathSystem*() and pathUser*() functions.
  *
  * \pre setApplicationPath must have been called
  * \param path the type of path
