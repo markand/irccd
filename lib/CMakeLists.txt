@@ -40,7 +40,7 @@ elseif (IRCCD_SYSTEM_MAC)
 	list(APPEND LIBRARIES resolv)
 endif ()
 
-target_link_libraries(libirccd extern-duktape extern-ircclient extern-jansson ${LIBRARIES})
+target_link_libraries(libirccd extern-duktape extern-ircclient extern-jansson cppformat ${LIBRARIES})
 
 set_target_properties(
 	libirccd

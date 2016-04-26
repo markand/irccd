@@ -66,6 +66,7 @@ include(cmake/IrccdVersion.cmake)
 include(cmake/IrccdOptions.cmake)
 include(cmake/IrccdSystem.cmake)
 
+add_subdirectory(extern/cppformat)
 add_subdirectory(extern/libircclient)
 add_subdirectory(extern/jansson)
 add_subdirectory(doc)
