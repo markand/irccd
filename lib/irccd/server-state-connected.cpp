@@ -33,15 +33,15 @@ void Connected::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net
 	if (!irc_is_connected(server.session())) {
 		log::warning() << "server " << info.name << ": disconnected" << std::endl;
 
-		if (settings.recotimeout > 0) {
+		if (settings.reconnect_timeout > 0) {
 			log::warning() << "server " << info.name << ": retrying in "
-				       << settings.recotimeout << " seconds" << std::endl;
+				       << settings.reconnect_timeout << " seconds" << std::endl;
 		}
 
 		server.next(std::make_unique<state::Disconnected>());
-	} else if (server.pingTimer().elapsed() >= settings.ping_timeout * 1000) {
+	} else if (server.cache().ping_timer.elapsed() >= settings.ping_timeout * 1000) {
 		log::warning() << "server " << info.name << ": ping timeout after "
-			       << (server.pingTimer().elapsed() / 1000) << " seconds" << std::endl;
+			       << (server.cache().ping_timer.elapsed() / 1000) << " seconds" << std::endl;
 		server.next(std::make_unique<state::Disconnected>());
 	} else {
 		irc_add_select_descriptors(server.session(), &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));

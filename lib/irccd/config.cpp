@@ -300,9 +300,9 @@ void Config::loadServer(Irccd &irccd, const ini::Section &sc) const
 	/* Reconnect */
 	try {
 		if ((it = sc.find("reconnect-tries")) != sc.end())
-			settings.recotries = std::stoi(it->value());
+			settings.reconnect_tries = std::stoi(it->value());
 		if ((it = sc.find("reconnect-timeout")) != sc.end())
-			settings.recotimeout = std::stoi(it->value());
+			settings.reconnect_timeout = std::stoi(it->value());
 		if ((it = sc.find("ping-timeout")) != sc.end())
 			settings.ping_timeout = std::stoi(it->value());
 	} catch (const std::exception &) {

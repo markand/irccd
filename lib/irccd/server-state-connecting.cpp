@@ -87,15 +87,16 @@ void Connecting::prepare(Server &server, fd_set &setinput, fd_set &setoutput, ne
 	if (m_started) {
 		const ServerSettings &settings = server.settings();
 
-		if (m_timer.elapsed() > static_cast<unsigned>(settings.recotimeout * 1000)) {
+		if (m_timer.elapsed() > static_cast<unsigned>(settings.reconnect_timeout * 1000)) {
 			log::warning() << "server " << info.name << ": timeout while connecting" << std::endl;
 			server.next(std::make_unique<state::Disconnected>());
 		} else if (!irc_is_connected(server.session())) {
 			log::warning() << "server " << info.name << ": error while connecting: ";
 			log::warning() << irc_strerror(irc_errno(server.session())) << std::endl;
 
-			if (settings.recotries != 0)
-				log::warning() << "server " << info.name << ": retrying in " << settings.recotimeout << " seconds" << std::endl;
+			if (settings.reconnect_tries != 0)
+				log::warning() << "server " << info.name << ": retrying in "
+					       << settings.reconnect_timeout << " seconds" << std::endl;
 
 			server.next(std::make_unique<state::Disconnected>());
 		} else {

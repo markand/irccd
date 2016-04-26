@@ -106,8 +106,8 @@ ServerSettings readSettings(const json::Value &object)
 	ServerSettings settings;
 
 	settings.command = object.valueOr("commandChar", json::Type::String, settings.command).toString();
-	settings.recotries = object.valueOr("reconnectTries", json::Type::Int, settings.recotries).toInt();
-	settings.recotimeout = object.valueOr("reconnectTimeout", json::Type::Int, settings.recotimeout).toInt();
+	settings.reconnect_tries = object.valueOr("reconnectTries", json::Type::Int, settings.reconnect_tries).toInt();
+	settings.reconnect_timeout = object.valueOr("reconnectTimeout", json::Type::Int, settings.reconnect_timeout).toInt();
 
 	return settings;
 }

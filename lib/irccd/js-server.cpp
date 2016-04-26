@@ -388,8 +388,8 @@ duk::Ret constructor(duk::ContextPtr ctx)
 	for (const auto &chan: duk::getProperty<std::vector<std::string>>(ctx, 0, "channels"))
 		settings.channels.push_back(Server::splitChannel(chan));
 
-	settings.recotries = duk::optionalProperty<int>(ctx, 0, "recoTries", (int)settings.recotries);
-	settings.recotimeout = duk::optionalProperty<int>(ctx, 0, "recoTimeout", (int)settings.recotimeout);
+	settings.reconnect_tries = duk::optionalProperty<int>(ctx, 0, "recoTries", (int)settings.reconnect_tries);
+	settings.reconnect_timeout = duk::optionalProperty<int>(ctx, 0, "recoTimeout", (int)settings.reconnect_timeout);
 
 	if (duk::optionalProperty<bool>(ctx, 0, "joinInvite", false))
 		settings.flags |= ServerSettings::JoinInvite;

@@ -29,18 +29,19 @@ void Disconnected::prepare(Server &server, fd_set &, fd_set &, net::Handle &)
 {
 	const ServerInfo &info = server.info();
 	ServerSettings &settings = server.settings();
+	ServerCache &cache = server.cache();
 
-	if (settings.recotries == 0) {
+	if (settings.reconnect_tries == 0) {
 		log::warning() << "server " << info.name << ": reconnection disabled, skipping" << std::endl;
 		server.onDie();
-	} else if (settings.recotries > 0 && settings.recocurrent > settings.recotries) {
+	} else if (settings.reconnect_tries > 0 && cache.reconnect_current > settings.reconnect_tries) {
 		log::warning() << "server " << info.name << ": giving up" << std::endl;
 		server.onDie();
 	} else {
-		if (m_timer.elapsed() > static_cast<unsigned>(settings.recotimeout * 1000)) {
+		if (m_timer.elapsed() > static_cast<unsigned>(settings.reconnect_timeout * 1000)) {
 			irc_disconnect(server.session());
 
-			settings.recocurrent ++;
+			server.cache().reconnect_current ++;
 			server.next(std::make_unique<state::Connecting>());
 		}
 	}

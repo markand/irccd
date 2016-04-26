@@ -136,14 +136,36 @@ public:
 
 	ServerChannels channels;		//!< List of channel to join
 	std::string command{"!"};		//!< The command character to trigger plugin command
-	std::int8_t recotries{-1};		//!< Number of tries to reconnect before giving up
-	std::uint16_t recotimeout{30};		//!< Number of seconds to wait before trying to connect
+	std::int8_t reconnect_tries{-1};		//!< Number of tries to reconnect before giving up
+	std::uint16_t reconnect_timeout{30};		//!< Number of seconds to wait before trying to connect
 	std::uint8_t flags{0};			//!< Optional flags
+	std::uint16_t ping_timeout{300};	//!< Time in seconds before ping timeout is announced
+};
 
-	std::uint16_t ping_timeout{300};	//!< Ping timeout in milliseconds
+/**
+ * \brief Some variables that are needed in many places internally.
+ */
+class ServerCache {
+public:
+	/**
+	 * Track elapsed time for ping timeout.
+	 */
+	ElapsedTimer ping_timer;
 
-	/* Private */
-	std::int8_t recocurrent{1};		//!< number of tries tested
+	/**
+	 * Number of reconnection already tested.
+	 */
+	std::int8_t reconnect_current{1};
+
+	/**
+	 * Map of names being build by channels.
+	 */
+	std::map<std::string, std::set<std::string>> names_map;
+
+	/**
+	 * Map of whois being build by nicknames.
+	 */
+	std::map<std::string, ServerWhois> whois_map;
 };
 
 /**
@@ -387,48 +409,17 @@ private:
 	using SessionPtr = std::unique_ptr<Session>;
 	using Queue = std::queue<ServerCommand>;
 
-	/**
-	 * List of NAMES being built.
-	 */
-	using NamesMap = std::unordered_map<std::string, std::set<std::string>>;
-
-	/**
-	 * List of WHOIS being built.
-	 */
-	using WhoisMap	= std::unordered_map<std::string, ServerWhois>;
-
 private:
 	ServerInfo m_info;
 	ServerSettings m_settings;
 	ServerIdentity m_identity;
+	ServerCache m_cache;
 	SessionPtr m_session;
 	Queue m_queue;
 
 	/* States */
 	std::unique_ptr<ServerState> m_state;
 	std::unique_ptr<ServerState> m_state_next;
-
-	/*
-	 * Detect timeout from server.
-	 */
-	ElapsedTimer m_ping_timer;
-
-	/*
-	 * The names map is being built by a successive call to handleNumeric so we need to store a temporary
-	 * map by channels to list of names. Then, when we receive the end of names listing, we remove the
-	 * temporary set of names and calls the appropriate signal.
-	 */
-	NamesMap m_namesMap;
-	WhoisMap m_whoisMap;
-
-	bool isSelf(const std::string &nick) const noexcept;
-	void extractPrefixes(const std::string &line);
-	std::string cleanPrefix(std::string nickname) const noexcept;
-
-	inline std::string strify(const char *s)
-	{
-		return (s == nullptr) ? "" : std::string(s);
-	}
 
 	void handleChannel(const char *, const char **) noexcept;
 	void handleChannelMode(const char *, const char **) noexcept;
@@ -475,19 +466,9 @@ public:
 	 *
 	 * \param state the new state
 	 */
-	inline void next(std::unique_ptr<ServerState> state)
+	inline void next(std::unique_ptr<ServerState> state) noexcept
 	{
 		m_state_next = std::move(state);
-	}
-
-	/**
-	 * Get the ping timer.
-	 *
-	 * \return the ping timer
-	 */
-	inline ElapsedTimer &pingTimer() noexcept
-	{
-		return m_ping_timer;
 	}
 
 	/**
@@ -573,6 +554,17 @@ public:
 	}
 
 	/**
+	 * Access the cache.
+	 *
+	 * \return the cache
+	 * \warning use with care
+	 */
+	inline ServerCache &cache() noexcept
+	{
+		return m_cache;
+	}
+
+	/**
 	 * Get the server settings.
 	 *
 	 * \warning This overload should not be used by the user, it is required to
@@ -625,6 +617,14 @@ public:
 	}
 
 	/**
+	 * Determine if the nickname is the bot itself.
+	 *
+	 * \param nick the nickname to check
+	 * \return true if it is the bot
+	 */
+	bool isSelf(const std::string &nick) const noexcept;
+
+	/**
 	 * Change the channel mode.
 	 *
 	 * \param channel the channel
@@ -640,7 +640,7 @@ public:
 	 * \param message message notice
 	 * \note Thread-safe
 	 */
-	void cnotice(std::string channel, std::string message) noexcept;
+	void cnotice(std::string channel, std::string message);
 
 	/**
 	 * Invite a user to a channel.
@@ -649,7 +649,7 @@ public:
 	 * \param channel the channel
 	 * \note Thread-safe
 	 */
-	void invite(std::string target, std::string channel) noexcept;
+	void invite(std::string target, std::string channel);
 
 	/**
 	 * Join a channel, the password is optional and can be kept empty.
@@ -658,7 +658,7 @@ public:
 	 * \param password the optional password
 	 * \note Thread-safe
 	 */
-	void join(std::string channel, std::string password = "") noexcept;
+	void join(std::string channel, std::string password = "");
 
 	/**
 	 * Kick someone from the channel. Please be sure to have the rights
@@ -669,7 +669,7 @@ public:
 	 * \param reason the optional reason
 	 * \note Thread-safe
 	 */
-	void kick(std::string target, std::string channel, std::string reason = "") noexcept;
+	void kick(std::string target, std::string channel, std::string reason = "");
 
 	/**
 	 * Send a CTCP Action as known as /me. The target may be either a

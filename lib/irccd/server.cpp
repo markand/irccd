@@ -31,66 +31,91 @@
 
 namespace irccd {
 
-bool Server::isSelf(const std::string &nick) const noexcept
+namespace {
+
+/*
+ * strify
+ * ------------------------------------------------------------------
+ *
+ * Make sure to build a C++ string with a not-null C string.
+ */
+inline std::string strify(const char *s)
 {
-	char target[32]{0};
-
-	irc_target_get_nick(nick.c_str(), target, sizeof (target));
-
-	return m_identity.nickname == target;
+	return (s == nullptr) ? "" : std::string(s);
 }
 
-void Server::extractPrefixes(const std::string &line)
+/*
+ * cleanPrefix
+ * ------------------------------------------------------------------
+ *
+ * Remove the user prefix only if it is present in the mode table, for example removes @ from @irccd if and only if
+ * @ is a character mode (e.g. operator).
+ */
+std::string cleanPrefix(const ServerInfo &info, std::string nickname)
+{
+	if (nickname.length() > 0) {
+		for (const auto &pair : info.modes) {
+			if (nickname[0] == pair.second) {
+				nickname.erase(0, 1);
+			}
+		}
+	}
+
+	return nickname;
+}
+
+/*
+ * extractPrefixes
+ * ------------------------------------------------------------------
+ *
+ * Read modes from the IRC event numeric.
+ */
+std::map<ServerChanMode, char> extractPrefixes(const std::string &line)
 {
 	std::pair<char, char> table[16];
 	std::string buf = line.substr(7);
+	std::map<ServerChanMode, char> modes;
 
 	for (int i = 0; i < 16; ++i)
 		table[i] = std::make_pair(-1, -1);
 
 	int j = 0;
-	bool readModes = true;
+	bool read_modes = true;
 	for (size_t i = 0; i < buf.size(); ++i) {
 		if (buf[i] == '(')
 			continue;
 		if (buf[i] == ')') {
 			j = 0;
-			readModes = false;
+			read_modes = false;
 			continue;
 		}
 
-		if (readModes)
+		if (read_modes)
 			table[j++].first = buf[i];
 		else
 			table[j++].second = buf[i];
 	}
 
-	// Put these as a map of mode to prefix
+	/* Put these as a map of mode to prefix */
 	for (int i = 0; i < 16; ++i) {
 		auto key = static_cast<ServerChanMode>(table[i].first);
 		auto value = table[i].second;
 
-		m_info.modes.emplace(key, value);
+		modes.emplace(key, value);
 	}
+
+	return modes;
 }
 
-std::string Server::cleanPrefix(std::string nickname) const noexcept
-{
-	if (nickname.length() > 0)
-		for (const auto &pair : m_info.modes)
-			if (nickname[0] == pair.second)
-				nickname.erase(0, 1);
-
-	return nickname;
-}
+} // !namespace
 
 void Server::handleConnect(const char *, const char **) noexcept
 {
 	/* Reset the number of tried reconnection. */
-	m_settings.recocurrent = 0;
+	m_cache.reconnect_current = 0;
 
 	/* Reset the timer. */
-	m_ping_timer.reset();
+	m_cache.ping_timer.reset();
 
 	/* Don't forget to change state and notify. */
 	next(std::make_unique<state::Connected>());
@@ -193,7 +218,7 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 
 		/* The listing may add some prefixes, remove them if needed */
 		for (std::string u : users)
-			m_namesMap[params[2]].insert(cleanPrefix(u));
+			m_cache.names_map[params[2]].insert(cleanPrefix(m_info, u));
 	} else if (event == LIBIRC_RFC_RPL_ENDOFNAMES) {
 		/*
 		 * Called when end of name listing has finished on a channel.
@@ -206,12 +231,12 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 		if (c < 3 || params[1] == nullptr)
 			return;
 
-		auto it = m_namesMap.find(params[1]);
-		if (it != m_namesMap.end()) {
+		auto it = m_cache.names_map.find(params[1]);
+		if (it != m_cache.names_map.end()) {
 			onNames(params[1], it->second);
 
 			/* Don't forget to remove the list */
-			m_namesMap.erase(it);
+			m_cache.names_map.erase(it);
 		}
 	} else if (event == LIBIRC_RFC_RPL_WHOISUSER) {
 		/*
@@ -234,7 +259,7 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 		info.host = strify(params[3]);
 		info.realname = strify(params[5]);
 
-		m_whoisMap.emplace(info.nick, info);
+		m_cache.whois_map.emplace(info.nick, info);
 	} else if (event == LIBIRC_RFC_RPL_WHOISCHANNELS) {
 		/*
 		 * Called when we have received channels for one user.
@@ -246,13 +271,13 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 		if (c < 3 || !params[1] || !params[2])
 			return;
 
-		auto it = m_whoisMap.find(params[1]);
-		if (it != m_whoisMap.end()) {
+		auto it = m_cache.whois_map.find(params[1]);
+		if (it != m_cache.whois_map.end()) {
 			std::vector<std::string> channels = util::split(params[2], " \t");
 
 			/* Clean their prefixes */
 			for (auto &s : channels)
-				s = cleanPrefix(s);
+				s = cleanPrefix(m_info, s);
 
 			/* Insert */
 			it->second.channels = std::move(channels);
@@ -266,12 +291,12 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 		 * params[2] == End of WHOIS list
 		 */
 
-		auto it = m_whoisMap.find(params[1]);
-		if (it != m_whoisMap.end()) {
+		auto it = m_cache.whois_map.find(params[1]);
+		if (it != m_cache.whois_map.end()) {
 			onWhois(it->second);
 
 			/* Don't forget to remove */
-			m_whoisMap.erase(it);
+			m_cache.whois_map.erase(it);
 		}
 	} else if (event == /* RPL_BOUNCE */ 5) {
 		/*
@@ -279,7 +304,7 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 		 */
 		for (unsigned int i = 0; i < c; ++i) {
 			if (strncmp(params[i], "PREFIX", 6) == 0) {
-				extractPrefixes(params[i]);
+				m_info.modes = extractPrefixes(params[i]);
 				break;
 			}
 		}
@@ -294,7 +319,7 @@ void Server::handlePart(const char *orig, const char **params) noexcept
 void Server::handlePing(const char *, const char **params) noexcept
 {
 	/* Reset the timer to detect disconnection. */
-	m_ping_timer.reset();
+	m_cache.ping_timer.reset();
 
 	/* Don't forget to respond */
 	send(params[0]);
@@ -448,6 +473,15 @@ void Server::sync(fd_set &setinput, fd_set &setoutput) noexcept
 	irc_process_select_descriptors(*m_session, &setinput, &setoutput);
 }
 
+bool Server::isSelf(const std::string &nick) const noexcept
+{
+	char target[32]{0};
+
+	irc_target_get_nick(nick.c_str(), target, sizeof (target));
+
+	return m_identity.nickname == target;
+}
+
 void Server::cmode(std::string channel, std::string mode)
 {
 	m_queue.push([=] () {
@@ -455,21 +489,21 @@ void Server::cmode(std::string channel, std::string mode)
 	});
 }
 
-void Server::cnotice(std::string channel, std::string message) noexcept
+void Server::cnotice(std::string channel, std::string message)
 {
 	m_queue.push([=] () {
 		return irc_cmd_notice(*m_session, channel.c_str(), message.c_str()) == 0;
 	});
 }
 
-void Server::invite(std::string target, std::string channel) noexcept
+void Server::invite(std::string target, std::string channel)
 {
 	m_queue.push([=] () {
 		return irc_cmd_invite(*m_session, target.c_str(), channel.c_str()) == 0;
 	});
 }
 
-void Server::join(std::string channel, std::string password) noexcept
+void Server::join(std::string channel, std::string password)
 {
 	m_queue.push([=] () {
 		const char *ptr = password.empty() ? nullptr : password.c_str();
@@ -478,7 +512,7 @@ void Server::join(std::string channel, std::string password) noexcept
 	});
 }
 
-void Server::kick(std::string target, std::string channel, std::string reason) noexcept
+void Server::kick(std::string target, std::string channel, std::string reason)
 {
 	m_queue.push([=] () {
 		return irc_cmd_kick(*m_session, target.c_str(), channel.c_str(), reason.c_str()) == 0;
