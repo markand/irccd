@@ -1,5 +1,5 @@
 /*
- * server-state.cpp -- server current state
+ * server-state-connecting.cpp -- connecting state
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,23 +16,26 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cassert>
-
+#include "server-state-connecting.hpp"
+#include "server-state-connected.hpp"
+#include "server-state-disconnected.hpp"
+#include "server-private.hpp"
 #include "sysconfig.hpp"
 
-#if !defined(_WIN32)
+#if !defined(IRCCD_SYSTEM_WINDOWS)
 #  include <sys/types.h>
 #  include <netinet/in.h>
 #  include <arpa/nameser.h>
 #  include <resolv.h>
 #endif
 
-#include "server-state.hpp"
-#include "server-private.hpp"
-
 namespace irccd {
 
-bool ServerState::connect(Server &server)
+namespace state {
+
+namespace {
+
+bool connect(Server &server)
 {
 	const ServerInfo &info = server.info();
 	const ServerIdentity &identity = server.identity();
@@ -63,25 +66,9 @@ bool ServerState::connect(Server &server)
 	return code == 0;
 }
 
-void ServerState::prepareConnected(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
-{
-	if (!irc_is_connected(server.session())) {
-		const ServerSettings &settings = server.settings();
+} // !namespace
 
-		log::warning() << "server " << server.info().name << ": disconnected" << std::endl;
-
-		if (settings.recotimeout > 0) {
-			log::warning() << "server " << server.info().name << ": retrying in "
-					  << settings.recotimeout << " seconds" << std::endl;
-		}
-
-		server.next(ServerState::Disconnected);
-	} else {
-		irc_add_select_descriptors(server.session(), &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
-	}
-}
-
-void ServerState::prepareConnecting(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
+void Connecting::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
 {
 	/*
 	 * The connect function will either fail if the hostname wasn't resolved
@@ -102,7 +89,7 @@ void ServerState::prepareConnecting(Server &server, fd_set &setinput, fd_set &se
 
 		if (m_timer.elapsed() > static_cast<unsigned>(settings.recotimeout * 1000)) {
 			log::warning() << "server " << info.name << ": timeout while connecting" << std::endl;
-			server.next(ServerState::Disconnected);
+			server.next(std::make_unique<state::Disconnected>());
 		} else if (!irc_is_connected(server.session())) {
 			log::warning() << "server " << info.name << ": error while connecting: ";
 			log::warning() << irc_strerror(irc_errno(server.session())) << std::endl;
@@ -110,7 +97,7 @@ void ServerState::prepareConnecting(Server &server, fd_set &setinput, fd_set &se
 			if (settings.recotries != 0)
 				log::warning() << "server " << info.name << ": retrying in " << settings.recotimeout << " seconds" << std::endl;
 
-			server.next(ServerState::Disconnected);
+			server.next(std::make_unique<state::Disconnected>());
 		} else {
 			irc_add_select_descriptors(server.session(), &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
 		}
@@ -121,7 +108,7 @@ void ServerState::prepareConnecting(Server &server, fd_set &setinput, fd_set &se
 		 *
 		 * For more information see bug #190.
 		 */
-#if !defined(_WIN32)
+#if !defined(IRCCD_SYSTEM_WINDOWS)
 		(void)res_init();
 #endif
 		log::info() << "server " << info.name << ": trying to connect to " << info.host << ", port " << info.port << std::endl;
@@ -129,56 +116,18 @@ void ServerState::prepareConnecting(Server &server, fd_set &setinput, fd_set &se
 		if (!connect(server)) {
 			log::warning() << "server " << info.name << ": disconnected while connecting: ";
 			log::warning() << irc_strerror(irc_errno(server.session())) << std::endl;
-			server.next(ServerState::Disconnected);
+			server.next(std::make_unique<state::Disconnected>());
 		} else {
 			m_started = true;
 		}
 	}
 }
 
-void ServerState::prepareDisconnected(Server &server, fd_set &, fd_set &, net::Handle &)
+std::string Connecting::ident() const
 {
-	const ServerInfo &info = server.info();
-	ServerSettings &settings = server.settings();
-
-	if (settings.recotries == 0) {
-		log::warning() << "server " << info.name << ": reconnection disabled, skipping" << std::endl;
-		server.onDie();
-	} else if (settings.recotries > 0 && settings.recocurrent > settings.recotries) {
-		log::warning() << "server " << info.name << ": giving up" << std::endl;
-		server.onDie();
-	} else {
-		if (m_timer.elapsed() > static_cast<unsigned>(settings.recotimeout * 1000)) {
-			irc_disconnect(server.session());
-
-			settings.recocurrent ++;
-			server.next(ServerState::Connecting);
-		}
-	}
+	return "Connecting";
 }
 
-ServerState::ServerState(Type type)
-	: m_type(type)
-{
-	assert(static_cast<int>(m_type) >= static_cast<int>(ServerState::Undefined));
-	assert(static_cast<int>(m_type) <= static_cast<int>(ServerState::Disconnected));
-}
-
-void ServerState::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
-{
-	switch (m_type) {
-	case Connecting:
-		prepareConnecting(server, setinput, setoutput, maxfd);
-		break;
-	case Connected:
-		prepareConnected(server, setinput, setoutput, maxfd);
-		break;
-	case Disconnected:
-		prepareDisconnected(server, setinput, setoutput, maxfd);
-		break;
-	default:
-		break;
-	}
-}
+} // !state
 
 } // !irccd

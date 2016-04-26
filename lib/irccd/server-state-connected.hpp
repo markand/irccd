@@ -1,5 +1,5 @@
 /*
- * server-state.hpp -- server current state
+ * server-state-connected.hpp -- connected state
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,56 +16,38 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_SERVER_STATE_HPP
-#define IRCCD_SERVER_STATE_HPP
+#ifndef IRCCD_SERVER_STATE_CONNECTED_HPP
+#define IRCCD_SERVER_STATE_CONNECTED_HPP
 
 /**
- * \file server-state.hpp
- * \brief Server state.
+ * \file server-state-connected.hpp
+ * \brief Connected state.
  */
 
-#include "elapsed-timer.hpp"
-#include "sockets.hpp"
-#include "sysconfig.hpp"
+#include "server-state.hpp"
 
 namespace irccd {
 
-class Server;
+namespace state {
 
 /**
- * \class ServerState
- * \brief Server current state.
+ * \brief Connected state.
  */
-class ServerState {
+class Connected : public ServerState {
 public:
 	/**
-	 * Default constructor.
+	 * \copydoc ServerState::prepare
 	 */
-	ServerState() = default;
+	void prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) override;
 
 	/**
-	 * Virtual default destructor.
+	 * \copydoc ServerState::ident
 	 */
-	virtual ~ServerState() = default;
-
-	/**
-	 * Prepare the state.
-	 *
-	 * \param server the server
-	 * \param setinput the read set
-	 * \param setoutput the write set
-	 * \param maxfd the maximum fd
-	 */
-	virtual void prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) = 0;
-
-	/**
-	 * Return the state identifier, only for information purposes.
-	 *
-	 * \return the identifier
-	 */
-	virtual std::string ident() const = 0;
+	std::string ident() const override;
 };
+
+} // !state
 
 } // !irccd
 
-#endif // !IRCCD_SERVER_STATE_HPP
+#endif // !IRCCD_SERVER_STATE_CONNECTED_HPP

@@ -25,6 +25,8 @@
 
 #include "logger.hpp"
 #include "server-private.hpp"
+#include "server-state-connected.hpp"
+#include "server-state-connecting.hpp"
 #include "util.hpp"
 
 namespace irccd {
@@ -87,8 +89,11 @@ void Server::handleConnect(const char *, const char **) noexcept
 	/* Reset the number of tried reconnection. */
 	m_settings.recocurrent = 0;
 
+	/* Reset the timer. */
+	m_ping_timer.reset();
+
 	/* Don't forget to change state and notify. */
-	next(ServerState::Connected);
+	next(std::make_unique<state::Connected>());
 	onConnect();
 
 	/* Auto join listed channels. */
@@ -286,6 +291,15 @@ void Server::handlePart(const char *orig, const char **params) noexcept
 	onPart(strify(orig), strify(params[0]), strify(params[1]));
 }
 
+void Server::handlePing(const char *, const char **params) noexcept
+{
+	/* Reset the timer to detect disconnection. */
+	m_ping_timer.reset();
+
+	/* Don't forget to respond */
+	send(params[0]);
+}
+
 void Server::handleQuery(const char *orig, const char **params) noexcept
 {
 	onQuery(strify(orig), strify(params[1]));
@@ -311,8 +325,7 @@ Server::Server(ServerInfo info, ServerIdentity identity, ServerSettings settings
 	, m_settings(std::move(settings))
 	, m_identity(std::move(identity))
 	, m_session(std::make_unique<Session>())
-	, m_state(ServerState::Connecting)
-	, m_next(ServerState::Undefined)
+	, m_state(std::make_unique<state::Connecting>())
 {
 	irc_callbacks_t callbacks;
 
@@ -364,6 +377,9 @@ Server::Server(ServerInfo info, ServerIdentity identity, ServerSettings settings
 	callbacks.event_part = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
 		static_cast<Server *>(irc_get_ctx(session))->handlePart(orig, params);
 	};
+	callbacks.event_ping = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
+		static_cast<Server *>(irc_get_ctx(session))->handlePing(orig, params);
+	};
 	callbacks.event_privmsg = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
 		static_cast<Server *>(irc_get_ctx(session))->handleQuery(orig, params);
 	};
@@ -388,25 +404,12 @@ Server::~Server()
 
 void Server::update() noexcept
 {
-	if (m_next.type() != ServerState::Undefined) {
-		log::debug() << "server " << m_info.name << ": switching to state ";
+	if (m_state_next) {
+		log::debug() << "server " << m_info.name << ": switching state "
+			     << m_state->ident() << " -> " << m_state_next->ident() << std::endl;
 
-		switch (m_next.type()) {
-		case ServerState::Connecting:
-			log::debug() << "\"Connecting\"" << std::endl;
-			break;
-		case ServerState::Connected:
-			log::debug() << "\"Connected\"" << std::endl;
-			break;
-		case ServerState::Disconnected:
-			log::debug() << "\"Disconnected\"" << std::endl;
-			break;
-		default:
-			break;
-		}
-
-		m_state = std::move(m_next);
-		m_next = ServerState::Undefined;
+		m_state = std::move(m_state_next);
+		m_state_next = nullptr;
 	}
 }
 
@@ -421,14 +424,14 @@ void Server::disconnect() noexcept
 void Server::reconnect() noexcept
 {
 	irc_disconnect(*m_session);
-	next(ServerState::Type::Connecting);
+	next(std::make_unique<state::Connecting>());
 }
 
 void Server::sync(fd_set &setinput, fd_set &setoutput) noexcept
 {
 	/*
-	 * 1. Send maximum of command possible if available for write */
-	/*
+	 * 1. Send maximum of command possible if available for write
+	 *
 	 * Break on the first failure to avoid changing the order of the
 	 * commands if any of them fails.
 	 */

@@ -35,6 +35,7 @@
 #include <utility>
 #include <vector>
 
+#include "elapsed-timer.hpp"
 #include "logger.hpp"
 #include "server-state.hpp"
 #include "signals.hpp"
@@ -138,6 +139,8 @@ public:
 	std::int8_t recotries{-1};		//!< Number of tries to reconnect before giving up
 	std::uint16_t recotimeout{30};		//!< Number of seconds to wait before trying to connect
 	std::uint8_t flags{0};			//!< Optional flags
+
+	std::uint16_t ping_timeout{300};	//!< Ping timeout in milliseconds
 
 	/* Private */
 	std::int8_t recocurrent{1};		//!< number of tries tested
@@ -399,9 +402,16 @@ private:
 	ServerSettings m_settings;
 	ServerIdentity m_identity;
 	SessionPtr m_session;
-	ServerState m_state;
-	ServerState m_next;
 	Queue m_queue;
+
+	/* States */
+	std::unique_ptr<ServerState> m_state;
+	std::unique_ptr<ServerState> m_state_next;
+
+	/*
+	 * Detect timeout from server.
+	 */
+	ElapsedTimer m_ping_timer;
 
 	/*
 	 * The names map is being built by a successive call to handleNumeric so we need to store a temporary
@@ -433,6 +443,7 @@ private:
 	void handleNotice(const char *, const char **) noexcept;
 	void handleNumeric(unsigned int, const char **, unsigned int) noexcept;
 	void handlePart(const char *, const char **) noexcept;
+	void handlePing(const char *, const char **) noexcept;
 	void handleQuery(const char *, const char **) noexcept;
 	void handleTopic(const char *, const char **) noexcept;
 
@@ -460,18 +471,23 @@ public:
 	virtual ~Server();
 
 	/**
-	 * Set the next state to be used. This function is thread safe because
-	 * the server manager may set the next state to the current state.
+	 * Set the next state, it is not changed immediately but on next iteration.
 	 *
-	 * If the server is installed into the ServerManager, it is called
-	 * automatically.
-	 *
-	 * \param type the new state type
-	 * \warning Not thread-safe
+	 * \param state the new state
 	 */
-	inline void next(ServerState::Type type)
+	inline void next(std::unique_ptr<ServerState> state)
 	{
-		m_next = ServerState(type);
+		m_state_next = std::move(state);
+	}
+
+	/**
+	 * Get the ping timer.
+	 *
+	 * \return the ping timer
+	 */
+	inline ElapsedTimer &pingTimer() noexcept
+	{
+		return m_ping_timer;
 	}
 
 	/**
@@ -513,16 +529,13 @@ public:
 	void flush() noexcept;
 
 	/**
-	 * Prepare the IRC Session to the socket.
-	 *
-	 * If the server is installed into the ServerManager, it is called
-	 * automatically.
+	 * Prepare the IRC session.
 	 *
 	 * \warning Not thread-safe
 	 */
 	inline void prepare(fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) noexcept
 	{
-		m_state.prepare(*this, setinput, setoutput, maxfd);
+		m_state->prepare(*this, setinput, setoutput, maxfd);
 	}
 
 	/**
@@ -599,16 +612,6 @@ public:
 	inline const ServerIdentity &identity() const noexcept
 	{
 		return m_identity;
-	}
-
-	/**
-	 * Get the current state identifier. Should not be used by user code.
-	 *
-	 * \note Thread-safe but the state may change just after the call
-	 */
-	inline ServerState::Type type() const noexcept
-	{
-		return m_state.type();
 	}
 
 	/**

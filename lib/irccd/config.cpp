@@ -303,6 +303,8 @@ void Config::loadServer(Irccd &irccd, const ini::Section &sc) const
 			settings.recotries = std::stoi(it->value());
 		if ((it = sc.find("reconnect-timeout")) != sc.end())
 			settings.recotimeout = std::stoi(it->value());
+		if ((it = sc.find("ping-timeout")) != sc.end())
+			settings.ping_timeout = std::stoi(it->value());
 	} catch (const std::exception &) {
 		throw std::invalid_argument("server " + info.name + ": invalid number for " + it->key() + ": " + it->value());
 	}

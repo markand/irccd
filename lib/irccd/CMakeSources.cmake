@@ -58,6 +58,9 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/server.hpp
 	${CMAKE_CURRENT_LIST_DIR}/server-private.hpp
 	${CMAKE_CURRENT_LIST_DIR}/server-state.hpp
+	${CMAKE_CURRENT_LIST_DIR}/server-state-connected.hpp
+	${CMAKE_CURRENT_LIST_DIR}/server-state-connecting.hpp
+	${CMAKE_CURRENT_LIST_DIR}/server-state-disconnected.hpp
 	${CMAKE_CURRENT_LIST_DIR}/sockets.hpp
 	${CMAKE_CURRENT_LIST_DIR}/system.hpp
 	${CMAKE_CURRENT_LIST_DIR}/timer.hpp
@@ -121,7 +124,9 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/plugin.cpp
 	${CMAKE_CURRENT_LIST_DIR}/rule.cpp
 	${CMAKE_CURRENT_LIST_DIR}/server.cpp
-	${CMAKE_CURRENT_LIST_DIR}/server-state.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-state-connected.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-state-connecting.cpp
+	${CMAKE_CURRENT_LIST_DIR}/server-state-disconnected.cpp
 	${CMAKE_CURRENT_LIST_DIR}/sockets.cpp
 	${CMAKE_CURRENT_LIST_DIR}/system.cpp
 	${CMAKE_CURRENT_LIST_DIR}/timer.cpp
