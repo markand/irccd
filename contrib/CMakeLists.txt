@@ -19,8 +19,6 @@
 project(contrib)
 
 if (WITH_SYSTEMD)
-	# Directory for systemd
-	set(WITH_SYSTEMDDIR "/usr/lib/systemd/system" CACHE STRING "Absolute path where to install systemd files")
 	set(PATH "${CMAKE_INSTALL_PREFIX}/${WITH_BINDIR}/irccd")
 
 	configure_file(

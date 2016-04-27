@@ -22,7 +22,7 @@
 # WITH_SSL		Enable OpenSSL (default: on)
 # WITH_JS		Enable JavaScript (default: on)
 # WITH_TESTS		Enable unit testing (default: off)
-# WITH_SYSTEMD		Install systemd service (default: off)
+# WITH_SYSTEMD		Install systemd service (default: on for Linux)
 # WITH_DOCS		Enable building of all documentation (default: on)
 # WITH_DOXYGEN		Enable internal irccd documentation (default: on)
 # WITH_HTML		Enable HTML documentation
@@ -44,6 +44,7 @@
 # WITH_CONFDIR		Path where to search configuration files
 # WITH_CACHEDIR		Path where to store temporary files
 # WITH_PKGCONFIGDIR	Path where to install pkg-config files
+# WITH_SYSTEMDDIR	Path where to install systemd unit file
 #
 
 #
@@ -108,6 +109,7 @@ set(WITH_MANDIR "share/man" CACHE STRING "Man directory")
 set(WITH_CONFDIR "etc" CACHE STRING "Configuration directory")
 set(WITH_CMAKEDIR "lib/cmake" CACHE STRING "Directory for CMake modules")
 set(WITH_PKGCONFIGDIR "lib/pkgconfig" CACHE STRING "Directory for pkg-config file")
+set(WITH_SYSTEMDDIR "/usr/lib/systemd/system" CACHE STRING "Absolute path where to install systemd files")
 
 #
 # On Windows, we install the applcation like C:/Program Files/irccd so do not append irccd to the
