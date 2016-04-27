@@ -47,13 +47,14 @@
 
 namespace irccd {
 
+class Irccd;
 class Plugin;
 class TransportCommand;
 
 /**
  * Event to execute after the poll.
  */
-using Event = std::function<void ()>;
+using Event = std::function<void (Irccd &)>;
 
 /**
  * List of events.
@@ -69,24 +70,6 @@ using Identities = std::unordered_map<std::string, ServerIdentity>;
  * List of rules.
  */
 using Rules = std::vector<Rule>;
-
-/**
- * \class ServerEvent
- * \brief Structure that owns several informations about an IRC event
- *
- * This structure is used to dispatch the IRC event to the plugins and the transports.
- */
-class ServerEvent {
-public:
-	std::string server;					//!< the server
-	std::string origin;					//!< the originator
-	std::string target;					//!< the target
-	std::string json;					//!< the JSON message
-#if defined(WITH_JS)
-	std::function<std::string (Plugin &)> name;		//!< the function to event name
-	std::function<void (Plugin &)> exec;			//!< the plugin function to call
-#endif
-};
 
 /**
  * Map of servers.
@@ -111,6 +94,8 @@ using Plugins = std::unordered_map<std::string, std::shared_ptr<Plugin>>;
 using PluginConfigs = std::unordered_map<std::string, PluginConfig>;
 
 #endif
+
+class ServerEvent;
 
 /**
  * \class Irccd
@@ -241,15 +226,7 @@ public:
 	 * \param ev the event
 	 * \note Thread-safe
 	 */
-	void post(Event ev) noexcept;
-
-	/**
-	 * This function wraps post() to iterate over all plugins to call the function and to send to all
-	 * connected transport the event.
-	 *
-	 * \param ev the event
-	 */
-	void postServerEvent(ServerEvent ev) noexcept;
+	void post(std::function<void (Irccd &)> ev) noexcept;
 
 	/*
 	 * Identity management
@@ -366,6 +343,13 @@ public:
 	 * \param ts the transport server
 	 */
 	void addTransport(std::shared_ptr<TransportServer> ts);
+
+	/**
+	 * Send data to all clients.
+	 *
+	 * \param data the data
+	 */
+	void broadcast(std::string data);
 
 	/*
 	 * Plugin management
