@@ -57,8 +57,16 @@ void Plugin::call(const string &name, unsigned nargs)
 	} else {
 		/* Call the function and discard the result */
 		duk::insert(m_context, -nargs - 1);
-		duk::pcall(m_context, nargs);
-		duk::pop(m_context);
+
+		if (duk::pcall(m_context, nargs) != 0) {
+			auto error = duk::error(m_context, -1);
+
+			duk::pop(m_context);
+
+			throw error;
+		} else {
+			duk::pop(m_context);
+		}
 	}
 }
 
