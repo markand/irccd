@@ -39,13 +39,15 @@ std::string path(duk::ContextPtr ctx)
 	duk::push(ctx, duk::This{});
 	duk::getProperty<void>(ctx, -1, "path");
 
-	if (duk::type(ctx, -1) != DUK_TYPE_STRING)
+	if (duk::type(ctx, -1) != DUK_TYPE_STRING) {
 		duk::raise(ctx, duk::TypeError("invalid this binding"));
+	}
 
 	std::string ret = duk::get<std::string>(ctx, -1);
 
-	if (ret.empty())
+	if (ret.empty()) {
 		duk::raise(ctx, duk::TypeError("invalid directory with empty path"));
+	}
 
 	duk::pop(ctx, 2);
 
@@ -71,20 +73,24 @@ std::string findPath(const std::string &base, bool recursive, Pred pred)
 	 */
 	auto entries = fs::readdir(base);
 
-	for (const auto &entry : entries)
-		if (entry.type != fs::Entry::Dir && pred(entry.name))
+	for (const auto &entry : entries) {
+		if (entry.type != fs::Entry::Dir && pred(entry.name)) {
 			return base + entry.name;
+		}
+	}
 
-	if (!recursive)
+	if (!recursive) {
 		return "";
+	}
 
 	for (const auto &entry : entries) {
 		if (entry.type == fs::Entry::Dir) {
 			std::string next = base + entry.name + fs::separator();
 			std::string path = findPath(next, true, pred);
 
-			if (!path.empty())
+			if (!path.empty()) {
 				return path;
+			}
 		}
 	}
 
@@ -139,14 +145,16 @@ duk::Ret find(duk::ContextPtr ctx, std::string base, bool recursive, int pattern
 
 			duk::pop(ctx);
 
-			if (isRegex)
+			if (isRegex) {
 				path = findRegex(base, duk::getProperty<std::string>(ctx, patternIndex, "source"), recursive);
-			else
+			} else {
 				duk::raise(ctx, duk::TypeError("pattern must be a string or a regex expression"));
+			}
 		}
 
-		if (path.empty())
+		if (path.empty()) {
 			return 0;
+		}
 
 		duk::push(ctx, path);
 	} catch (const std::exception &ex) {
@@ -164,8 +172,9 @@ duk::Ret find(duk::ContextPtr ctx, std::string base, bool recursive, int pattern
  */
 duk::Ret remove(duk::ContextPtr ctx, const std::string &path, bool recursive)
 {
-	if (!fs::isDirectory(path))
+	if (!fs::isDirectory(path)) {
 		duk::raise(ctx, SystemError(EINVAL, "not a directory"));
+	}
 
 	if (!recursive) {
 #if defined(_WIN32)
@@ -240,15 +249,17 @@ const duk::FunctionMap methods{
  */
 duk::Ret constructor(duk::ContextPtr ctx)
 {
-	if (!duk_is_constructor_call(ctx))
+	if (!duk_is_constructor_call(ctx)) {
 		return 0;
+	}
 
 	try {
 		std::string path = duk::require<std::string>(ctx, 0);
 		std::int8_t flags = duk::optional<int>(ctx, 1, 0);
 
-		if (!fs::isDirectory(path))
+		if (!fs::isDirectory(path)) {
 			duk::raise(ctx, SystemError(EINVAL, "not a directory"));
+		}
 
 		std::vector<fs::Entry> list = fs::readdir(path, flags);
 

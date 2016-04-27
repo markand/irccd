@@ -95,8 +95,6 @@ using PluginConfigs = std::unordered_map<std::string, PluginConfig>;
 
 #endif
 
-class ServerEvent;
-
 /**
  * \class Irccd
  * \brief Irccd main instance

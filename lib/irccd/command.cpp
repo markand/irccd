@@ -35,15 +35,17 @@ std::string RemoteCommand::usage() const
 	oss << "usage: " << sys::programName() << " " << m_name;
 
 	/* Options summary */
-	if (options().size() > 0)
+	if (options().size() > 0) {
 		oss << " [options...]";
+	}
 
 	/* Arguments summary */
 	if (args().size() > 0) {
 		oss << " ";
 
-		for (const auto &arg : args())
+		for (const auto &arg : args()) {
 			oss << (arg.required() ? "" : "[") << arg.name() << (arg.required() ? "" : "]") << " ";
+		}
 	}
 
 	/* Description */
@@ -99,8 +101,9 @@ void RemoteCommand::result(Irccdctl &, const json::Value &response) const
 {
 	auto it = response.find("error");
 
-	if (it != response.end() && it->isString())
+	if (it != response.end() && it->isString()) {
 		log::warning() << "irccdctl: " << it->toString() << std::endl;
+	}
 }
 
 } // !irccd

@@ -74,23 +74,27 @@ void Config::loadGeneral(const ini::Document &config) const
 	if (daemonize && sc != config.end()) {
 		it = sc->find("foreground");
 
-		if (it != sc->end())
+		if (it != sc->end()) {
 			daemonize = !util::isBoolean(it->value());
+		}
 	}
 
-	if (daemonize)
+	if (daemonize) {
 		daemon(1, 0);
+	}
 #endif
 
 	if (sc != config.end()) {
 		try {
 #if defined(HAVE_SETGID)
-			if ((it = sc->find("gid")) != sc->end())
+			if ((it = sc->find("gid")) != sc->end()) {
 				sys::setGid(it->value());
+			}
 #endif
 #if defined(HAVE_SETUID)
-			if ((it = sc->find("uid")) != sc->end())
+			if ((it = sc->find("uid")) != sc->end()) {
 				sys::setUid(it->value());
+			}
 #endif
 		} catch (const std::exception &ex) {
 			log::warning() << "irccd: could not set " << it->key() << ": " << ex.what() << std::endl;
@@ -113,10 +117,12 @@ void Config::loadLogFile(const ini::Section &sc) const
 
 	ini::Section::const_iterator it;
 
-	if ((it = sc.find("path-logs")) != sc.end())
+	if ((it = sc.find("path-logs")) != sc.end()) {
 		normal = it->value();
-	if ((it = sc.find("path-errors")) != sc.end())
+	}
+	if ((it = sc.find("path-errors")) != sc.end()) {
 		errors = it->value();
+	}
 
 	log::setInterface(make_unique<log::File>(move(normal), move(errors)));
 }
@@ -134,21 +140,24 @@ void Config::loadLogs(const ini::Document &config) const
 {
 	ini::Document::const_iterator sc = config.find("logs");
 
-	if (sc == config.end())
+	if (sc == config.end()) {
 		return;
+	}
 
 	ini::Section::const_iterator it;
 
-	if ((it = sc->find("verbose")) != sc->end() && m_options.count("-v") == 0 && m_options.count("--verbose"))
+	if ((it = sc->find("verbose")) != sc->end() && m_options.count("-v") == 0 && m_options.count("--verbose")) {
 		log::setVerbose(util::isBoolean(it->value()));
+	}
 	if ((it = sc->find("type")) != sc->end()) {
 		/* Console is the default, no test case */
-		if (it->value() == "file")
+		if (it->value() == "file") {
 			loadLogFile(*sc);
-		else if (it->value() == "syslog")
+		} else if (it->value() == "syslog") {
 			loadLogSyslog();
-		else
+		} else {
 			log::warning() << "irccd: unknown log type: " << it->value() << std::endl;
+		}
 	}
 }
 
@@ -157,10 +166,11 @@ void Config::loadPlugins(Irccd &irccd, const ini::Section &sc) const
 #if defined(WITH_JS)
 	for (const ini::Option &option : sc) {
 		try {
-			if (option.value().empty())
+			if (option.value().empty()) {
 				irccd.loadPlugin(option.key(), option.key(), true);
-			else
+			} else {
 				irccd.loadPlugin(option.key(), option.value(), false);
+			}
 		} catch (const std::exception &ex) {
 			log::warning() << "plugin " << option.key() << ": " << ex.what() << std::endl;
 		}
@@ -176,8 +186,9 @@ void Config::loadPluginConfig(Irccd &irccd, const ini::Section &sc, string name)
 #if defined(WITH_JS)
 	PluginConfig config;
 
-	for (const ini::Option &option : sc)
+	for (const ini::Option &option : sc) {
 		config.emplace(option.key(), option.value());
+	}
 
 	irccd.addPluginConfig(std::move(name), std::move(config));
 #else
@@ -197,14 +208,17 @@ void Config::loadPlugins(Irccd &irccd, const ini::Document &config) const
 	 * Load plugin configurations before we load plugins since we use them
 	 * when we load the plugin itself.
 	 */
-	for (const ini::Section &section : config)
-		if (regex_match(section.key(), match, regex))
+	for (const ini::Section &section : config) {
+		if (regex_match(section.key(), match, regex)) {
 			loadPluginConfig(irccd, section, match[1]);
+		}
+	}
 
 	ini::Document::const_iterator it = config.find("plugins");
 
-	if (it != config.end())
+	if (it != config.end()) {
 		loadPlugins(irccd, *it);
+	}
 #else
 	(void)irccd;
 	(void)config;
@@ -222,24 +236,27 @@ void Config::loadServer(Irccd &irccd, const ini::Section &sc) const
 	/* Name */
 	ini::Section::const_iterator it;
 
-	if ((it = sc.find("name")) == sc.end()) 
+	if ((it = sc.find("name")) == sc.end()) {
 		throw std::invalid_argument("server: missing name");
-	else if (!util::isIdentifierValid(it->value()))
+	} else if (!util::isIdentifierValid(it->value())) {
 		throw std::invalid_argument("server " + it->value() + ": name is not valid");
-	else if (irccd.hasServer(it->value()))
+	} else if (irccd.hasServer(it->value())) {
 		throw std::invalid_argument("server " + it->value() + ": already exists");
+	}
 
 	info.name = it->value();
 
 	/* Host */
-	if ((it = sc.find("host")) == sc.end())
+	if ((it = sc.find("host")) == sc.end()) {
 		throw std::invalid_argument("server " + info.name + ": missing host");
+	}
 
 	info.host = it->value();
 
 	/* Optional identity */
-	if ((it = sc.find("identity")) != sc.end())
+	if ((it = sc.find("identity")) != sc.end()) {
 		identity = irccd.findIdentity(it->value());
+	}
 
 	/* Optional port */
 	if ((it = sc.find("port")) != sc.end()) {
@@ -251,33 +268,39 @@ void Config::loadServer(Irccd &irccd, const ini::Section &sc) const
 	}
 
 	/* Optional password */
-	if ((it = sc.find("password")) != sc.end())
+	if ((it = sc.find("password")) != sc.end()) {
 		info.password = it->value();
+	}
 
 	/* Optional flags */
-	if ((it = sc.find("ipv6")) != sc.end() && util::isBoolean(it->value()))
+	if ((it = sc.find("ipv6")) != sc.end() && util::isBoolean(it->value())) {
 		info.flags |= ServerInfo::Ipv6;
-	if ((it = sc.find("ssl")) != sc.end())
-		if (util::isBoolean(it->value()))
+	}
+	if ((it = sc.find("ssl")) != sc.end()) {
+		if (util::isBoolean(it->value())) {
 #if defined(WITH_SSL)
 			info.flags |= ServerInfo::Ssl;
 #else
 			throw std::invalid_argument("server " + info.name + ": ssl is disabled");
 #endif
-
-	if ((it = sc.find("ssl-verify")) != sc.end())
-		if (util::isBoolean(it->value()))
+		}
+	}
+	if ((it = sc.find("ssl-verify")) != sc.end()) {
+		if (util::isBoolean(it->value())) {
 #if defined(WITH_SSL)
 			info.flags |= ServerInfo::SslVerify;
 #else
 			throw std::invalid_argument("server " + info.name + ": ssl is disabled");
 #endif
-
+		}
+	}
 	/* Options */
-	if ((it = sc.find("auto-rejoin")) != sc.end() && util::isBoolean(it->value()))
+	if ((it = sc.find("auto-rejoin")) != sc.end() && util::isBoolean(it->value())) {
 		settings.flags |= ServerSettings::AutoRejoin;
-	if ((it = sc.find("join-invite")) != sc.end() && util::isBoolean(it->value()))
+	}
+	if ((it = sc.find("join-invite")) != sc.end() && util::isBoolean(it->value())) {
 		settings.flags |= ServerSettings::JoinInvite;
+	}
 
 	/* Channels */
 	if ((it = sc.find("channels")) != sc.end()) {
@@ -294,17 +317,21 @@ void Config::loadServer(Irccd &irccd, const ini::Section &sc) const
 			settings.channels.push_back(std::move(channel));
 		}
 	}
-	if ((it = sc.find("command-char")) != sc.end())
+	if ((it = sc.find("command-char")) != sc.end()) {
 		settings.command = it->value();
+	}
 
 	/* Reconnect */
 	try {
-		if ((it = sc.find("reconnect-tries")) != sc.end())
+		if ((it = sc.find("reconnect-tries")) != sc.end()) {
 			settings.reconnect_tries = std::stoi(it->value());
-		if ((it = sc.find("reconnect-timeout")) != sc.end())
+		}
+		if ((it = sc.find("reconnect-timeout")) != sc.end()) {
 			settings.reconnect_timeout = std::stoi(it->value());
-		if ((it = sc.find("ping-timeout")) != sc.end())
+		}
+		if ((it = sc.find("ping-timeout")) != sc.end()) {
 			settings.ping_timeout = std::stoi(it->value());
+		}
 	} catch (const std::exception &) {
 		throw std::invalid_argument("server " + info.name + ": invalid number for " + it->key() + ": " + it->value());
 	}
@@ -339,14 +366,18 @@ void Config::loadIdentity(Irccd &irccd, const ini::Section &sc) const
 	identity.name = it->value();
 
 	/* Optional stuff */
-	if ((it = sc.find("username")) != sc.end())
+	if ((it = sc.find("username")) != sc.end()) {
 		identity.username = it->value();
-	if ((it = sc.find("realname")) != sc.end())
+	}
+	if ((it = sc.find("realname")) != sc.end()) {
 		identity.realname = it->value();
-	if ((it = sc.find("nickname")) != sc.end())
+	}
+	if ((it = sc.find("nickname")) != sc.end()) {
 		identity.nickname = it->value();
-	if ((it = sc.find("ctcp-version")) != sc.end())
+	}
+	if ((it = sc.find("ctcp-version")) != sc.end()) {
 		identity.ctcpversion = it->value();
+	}
 
 	log::debug() << "identity " << identity.name << ": ";
 	log::debug() << "nickname=" << identity.nickname << ", username=" << identity.username << ", ";
@@ -381,26 +412,33 @@ void Config::loadRule(Irccd &irccd, const ini::Section &sc) const
 	/* Get the sets */
 	ini::Section::const_iterator it;
 
-	if ((it = sc.find("servers")) != sc.end())
+	if ((it = sc.find("servers")) != sc.end()) {
 		servers = toSet(*it);
-	if ((it = sc.find("channels")) != sc.end())
+	}
+	if ((it = sc.find("channels")) != sc.end()) {
 		channels = toSet(*it);
-	if ((it = sc.find("origins")) != sc.end())
+	}
+	if ((it = sc.find("origins")) != sc.end()) {
 		origins = toSet(*it);
-	if ((it = sc.find("plugins")) != sc.end())
+	}
+	if ((it = sc.find("plugins")) != sc.end()) {
 		plugins = toSet(*it);
-	if ((it = sc.find("channels")) != sc.end())
+	}
+	if ((it = sc.find("channels")) != sc.end()) {
 		channels = toSet(*it);
+	}
 
 	/* Get the action */
-	if ((it = sc.find("action")) == sc.end())
+	if ((it = sc.find("action")) == sc.end()) {
 		throw std::invalid_argument("missing action parameter");
-	if (it->value() == "drop")
+	}
+	if (it->value() == "drop") {
 		action = RuleAction::Drop;
-	else if (it->value() == "accept")
+	} else if (it->value() == "accept") {
 		action = RuleAction::Accept;
-	else
+	} else {
 		throw std::invalid_argument("invalid action given: " + it->value());
+	}
 
 	irccd.addRule(Rule(move(servers), move(channels), move(origins), move(plugins), move(events), action));
 }
@@ -428,8 +466,9 @@ void Config::loadTransportIp(Irccd &irccd, const ini::Section &sc) const
 	/* Port */
 	int port;
 
-	if ((it = sc.find("port")) == sc.end())
+	if ((it = sc.find("port")) == sc.end()) {
 		throw invalid_argument("missing port");
+	}
 
 	try {
 		port = stoi(it->value());
@@ -440,8 +479,9 @@ void Config::loadTransportIp(Irccd &irccd, const ini::Section &sc) const
 	/* Address*/
 	std::string address = "*";
 
-	if ((it = sc.find("address")) != sc.end())
+	if ((it = sc.find("address")) != sc.end()) {
 		address = it->value();
+	}
 
 	/* Domain */
 	if ((it = sc.find("domain")) != sc.end()) {
@@ -449,19 +489,22 @@ void Config::loadTransportIp(Irccd &irccd, const ini::Section &sc) const
 		ipv4 = false;
 
 		for (const string &v : *it) {
-			if (v == "ipv4")
+			if (v == "ipv4") {
 				ipv4 = true;
-			if (v == "ipv6")
+			}
+			if (v == "ipv6") {
 				ipv6 = true;
+			}
 		}
 	}
 
-	if (ipv6)
+	if (ipv6) {
 		irccd.addTransport(std::make_shared<TransportServerIp>(AF_INET6, move(address), port, !ipv4));
-	else if (ipv4)
+	} else if (ipv4) {
 		irccd.addTransport(std::make_shared<TransportServerIp>(AF_INET, move(address), port));
-	else
+	} else {
 		throw std::invalid_argument("domain must at least have ipv4 or ipv6");
+	}
 }
 
 void Config::loadTransportUnix(Irccd &irccd, const ini::Section &sc) const
@@ -492,14 +535,15 @@ void Config::loadTransports(Irccd &irccd, const ini::Document &config) const
 			try {
 				ini::Section::const_iterator it = sc.find("type");
 
-				if (it == sc.end())
+				if (it == sc.end()) {
 					log::warning() << "transport: missing type parameter" << std::endl;
-				else if (it->value() == "ip")
+				} else if (it->value() == "ip") {
 					loadTransportIp(irccd, sc);
-				else if (it->value() == "unix")
+				} else if (it->value() == "unix") {
 					loadTransportUnix(irccd, sc);
-				else
+				} else {
 					log::warning() << "transport: invalid type given: " << std::endl;
+				}
 			} catch (const net::Error &error) {
 				log::warning() << "transport: " << error.function() << ": " << error.what() << std::endl;
 			} catch (const exception &ex) {
@@ -545,11 +589,11 @@ void Config::load(Irccd &irccd)
 	auto it = m_options.find("-c");
 	auto found = false;
 
-	if (it != m_options.end())
+	if (it != m_options.end()) {
 		found = openConfig(irccd, it->second);
-	else if ((it = m_options.find("--config")) != m_options.end())
+	} else if ((it = m_options.find("--config")) != m_options.end()) {
 		found = openConfig(irccd, it->second);
-	else {
+	} else {
 		/* Search for a configuration file */
 		for (const string &path : path::list(path::PathConfig)) {
 			string fullpath = path + "irccd.conf";

@@ -35,8 +35,9 @@ TEST(TestJsUtil, formatSimple)
 			"result = Irccd.Util.format(\"#{target}\", { target: \"markand\" })"
 		);
 
-		if (ret != 0)
+		if (ret != 0) {
 			throw duk::error(ctx, -1);
+		}
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -50,8 +51,9 @@ TEST(TestJsUtil, splituser)
 	loadJsUtil(ctx);
 
 	try {
-		if (duk::pevalString(ctx, "result = Irccd.Util.splituser(\"user!~user@hyper/super/host\");") != 0)
+		if (duk::pevalString(ctx, "result = Irccd.Util.splituser(\"user!~user@hyper/super/host\");") != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_EQ("user", duk::getGlobal<std::string>(ctx, "result"));
 	} catch (const std::exception &ex) {
@@ -67,8 +69,9 @@ TEST(TestJsUtil, splithost)
 	loadJsUtil(ctx);
 
 	try {
-		if (duk::pevalString(ctx, "result = Irccd.Util.splithost(\"user!~user@hyper/super/host\");") != 0)
+		if (duk::pevalString(ctx, "result = Irccd.Util.splithost(\"user!~user@hyper/super/host\");") != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_EQ("!~user@hyper/super/host", duk::getGlobal<std::string>(ctx, "result"));
 	} catch (const std::exception &ex) {

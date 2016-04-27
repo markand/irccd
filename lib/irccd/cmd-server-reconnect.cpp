@@ -47,11 +47,13 @@ json::Value ServerReconnect::exec(Irccd &irccd, const json::Value &request) cons
 {
 	auto server = request.find("server");
 
-	if (server != request.end() && server->isString())
+	if (server != request.end() && server->isString()) {
 		irccd.requireServer(server->toString())->reconnect();
-	else
-		for (auto &pair : irccd.servers())
+	} else {
+		for (auto &pair : irccd.servers()) {
 			pair.second->reconnect();
+		}
+	}
 
 	return nullptr;
 }

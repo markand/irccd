@@ -91,23 +91,6 @@ public:
 	 */
 	void sync(fd_set &setinput, fd_set &setoutput);
 
-#if 0
-	/**
-	 * Notify the client that the command succeeded.
-	 *
-	 * \param command the command name
-	 */
-	void ok(const std::string &command);
-
-	/**
-	 * Send an error message to the client.
-	 *
-	 * \param command the command name
-	 * \param message the error message
-	 */
-	void error(const std::string &command, std::string message);
-#endif
-
 	/**
 	 * Send some data, it will be pushed to the outgoing buffer.
 	 *
@@ -174,8 +157,9 @@ void TransportClientBase<Address>::receive()
 	try {
 		auto message = m_socket.recv(512);
 
-		if (message.empty())
+		if (message.empty()) {
 			onDie();
+		}
 
 		m_input += message;
 	} catch (const std::exception &) {

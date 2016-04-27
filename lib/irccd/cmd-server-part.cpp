@@ -49,8 +49,9 @@ json::Value ServerPart::request(Irccdctl &, const RemoteCommandRequest &args) co
 		{ "channel", args.arg(1) }
 	});
 
-	if (args.length() == 3)
+	if (args.length() == 3) {
 		req.insert("reason", args.arg(2));
+	}
 
 	return req;
 }

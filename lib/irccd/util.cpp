@@ -89,8 +89,9 @@ std::string substituteKeywords(const std::string &content, const Substitution &p
 {
 	auto value = params.keywords.find(content);
 
-	if (value != params.keywords.end())
+	if (value != params.keywords.end()) {
 		return value->second;
+	}
 
 	return "";
 }
@@ -99,8 +100,9 @@ std::string substituteEnv(const std::string &content)
 {
 	auto value = std::getenv(content.c_str());
 
-	if (value != nullptr)
+	if (value != nullptr) {
 		return value;
+	}
 
 	return "";
 }
@@ -115,8 +117,9 @@ std::string substituteAttributes(const std::string &content)
 		oss << attributesTable.at("reset");
 	} else {
 		/* Remove useless spaces */
-		for (auto &a : list)
+		for (auto &a : list) {
 			a = strip(a);
+		}
 
 		/*
 		 * 0: foreground
@@ -130,19 +133,22 @@ std::string substituteAttributes(const std::string &content)
 
 			/* Foreground */
 			auto it = colorTable.find(foreground);
-			if (it != colorTable.end())
+			if (it != colorTable.end()) {
 				oss << it->second;
+			}
 
 			/* Background */
-			if (list.size() >= 2 && (it = colorTable.find(list[1])) != colorTable.end())
+			if (list.size() >= 2 && (it = colorTable.find(list[1])) != colorTable.end()) {
 				oss << "," << it->second;
+			}
 
 			/* Attributes */
 			for (std::size_t i = 2; i < list.size(); ++i) {
 				auto attribute = attributesTable.find(list[i]);
 
-				if (attribute != attributesTable.end())
+				if (attribute != attributesTable.end()) {
 					oss << attribute->second;
+				}
 			}
 		}
 	}
@@ -154,14 +160,17 @@ std::string substitute(std::string::const_iterator &it, std::string::const_itera
 {
 	std::string content, value;
 
-	if (it == end)
+	if (it == end) {
 		return "";
+	}
 
-	while (it != end && *it != '}')
+	while (it != end && *it != '}') {
 		content += *it++;
+	}
 
-	if (*it != '}' || it == end)
+	if (*it != '}' || it == end) {
 		throw std::invalid_argument("unclosed "s + token + " construct"s);
+	}
 
 	it++;
 
@@ -216,11 +225,13 @@ std::string format(std::string text, const Substitution &params)
 				oss << token;
 
 				/* Do we have a double token followed by a { for escaping? */
-				if (++it == end)
+				if (++it == end) {
 					continue;
+				}
 
-				if (*it != '{')
+				if (*it != '{') {
 					oss << token;
+				}
 			} else {
 				oss << *it++;
 			}
@@ -249,8 +260,9 @@ std::vector<std::string> split(const std::string &list, const std::string &delim
 	int count = 1;
 	bool finished = false;
 
-	if (list.empty())
+	if (list.empty()) {
 		return result;
+	}
 
 	do {
 		std::string val;
@@ -289,20 +301,22 @@ MessagePair parseMessage(std::string message, const std::string &cc, const std::
 		 * is a space, we check until we find a space, if not
 		 * typing "!foo123123" will trigger foo plugin.
 		 */
-		if (pos == std::string::npos)
+		if (pos == std::string::npos) {
 			iscommand = result == fullcommand;
-		else
+		} else {
 			iscommand = result.length() >= fullcommand.length() && result.compare(0, pos, fullcommand) == 0;
+		}
 
 		if (iscommand) {
 			/*
 			 * If no space is found we just set the message to "" otherwise
 			 * the plugin name will be passed through onCommand
 			 */
-			if (pos == std::string::npos)
+			if (pos == std::string::npos) {
 				result = "";
-			else
+			} else {
 				result = message.substr(pos + 1);
+			}
 		}
 	}
 
@@ -316,8 +330,9 @@ bool isBoolean(std::string value) noexcept
 
 bool isInt(const std::string &str, int base) noexcept
 {
-	if (str.empty())
+	if (str.empty()) {
 		return false;
+	}
 	
 	char *ptr;
 	
@@ -328,8 +343,9 @@ bool isInt(const std::string &str, int base) noexcept
 
 bool isReal(const std::string &str) noexcept
 {
-	if (str.empty())
+	if (str.empty()) {
 		return false;
+	}
 	
 	char *ptr;
 	

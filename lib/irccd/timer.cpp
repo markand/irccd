@@ -33,8 +33,9 @@ void Timer::run()
 			return m_state != Paused;
 		});
 
-		if (m_state != Running)
+		if (m_state != Running) {
 			continue;
+		}
 
 		/* Wait the timer delay or the interrupt */
 		m_condition.wait_for(lock, std::chrono::milliseconds(m_delay), [&] () {
@@ -45,8 +46,9 @@ void Timer::run()
 			/* Signal process */
 			onSignal();
 
-			if (m_type == TimerType::Single)
+			if (m_type == TimerType::Single) {
 				m_state = Stopped;
+			}
 		}
 	}
 

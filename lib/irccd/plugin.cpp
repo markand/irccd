@@ -101,8 +101,9 @@ void Plugin::putPath(const std::string &varname, const std::string &append, path
 	}
 
 	/* Use the system as default */
-	if (!found)
+	if (!found) {
 		foundpath = path::clean(path::get(type, path::OwnerSystem) + append);
+	}
 
 	duk::getGlobal<void>(m_context, "Irccd");
 	duk::getProperty<void>(m_context, -1, "Plugin");
@@ -139,8 +140,9 @@ void Plugin::putConfig(const PluginConfig &config)
 		duk::push(m_context, duk::Object{});
 	}
 
-	for (const auto &pair : config)
+	for (const auto &pair : config) {
 		duk::putProperty(m_context, -1, pair.first, pair.second);
+	}
 
 	duk::putProperty(m_context, -2, "config");
 	duk::pop(m_context, 2);
@@ -160,8 +162,9 @@ Plugin::Plugin(std::string name, std::string path, const PluginConfig &config)
 #if defined(HAVE_STAT)
 	struct stat st;
 
-	if (stat(m_info.path.c_str(), &st) < 0)
+	if (stat(m_info.path.c_str(), &st) < 0) {
 		throw std::runtime_error(std::strerror(errno));
+	}
 #endif
 
 	/*
@@ -172,10 +175,11 @@ Plugin::Plugin(std::string name, std::string path, const PluginConfig &config)
 	 * If path is absolute, the parent is the directory name, otherwise
 	 * we use the current working directory (needed for some tests).
 	 */
-	if (fs::isAbsolute(m_info.path))
+	if (fs::isAbsolute(m_info.path)) {
 		m_info.parent = fs::dirName(m_info.path);
-	else
+	} else {
 		m_info.parent = fs::cwd();
+	}
 
 	/* Load standard irccd API */
 	loadJsIrccd(m_context);
@@ -194,8 +198,9 @@ Plugin::Plugin(std::string name, std::string path, const PluginConfig &config)
 	putPaths();
 
 	/* Try to load the file (does not call onLoad yet) */
-	if (duk::pevalFile(m_context, m_info.path) != 0)
+	if (duk::pevalFile(m_context, m_info.path) != 0) {
 		throw duk::error(m_context, -1);
+	}
 
 	duk::pop(m_context);
 
@@ -223,8 +228,9 @@ Plugin::Plugin(std::string name, std::string path, const PluginConfig &config)
 
 Plugin::~Plugin()
 {
-	for (auto &timer : m_timers)
+	for (auto &timer : m_timers) {
 		timer->stop();
+	}
 }
 
 const PluginInfo &Plugin::info() const
@@ -243,14 +249,16 @@ void Plugin::addTimer(std::shared_ptr<Timer> timer) noexcept
 	timer->onSignal.connect([this, ptr] () {
 		auto timer = ptr.lock();
 
-		if (timer)
+		if (timer) {
 			onTimerSignal(move(timer));
+		}
 	});
 	timer->onEnd.connect([this, ptr] () {
 		auto timer = ptr.lock();
 
-		if (timer)
+		if (timer) {
 			onTimerEnd(move(timer));
+		}
 	});
 
 	m_timers.insert(move(timer));

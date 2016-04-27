@@ -152,8 +152,9 @@ std::string join(InputIt first, InputIt last, DelimType delim = ':')
 	if (first != last) {
 		oss << *first;
 
-		while (++first != last)
+		while (++first != last) {
 			oss << delim << *first;
+		}
 	}
 
 	return oss.str();

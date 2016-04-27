@@ -26,8 +26,9 @@ void TransportClient::parse(const std::string &message)
 {
 	json::Value document(json::Buffer{message});
 
-	if (!document.isObject())
+	if (!document.isObject()) {
 		throw std::invalid_argument("the message is not a valid JSON object");
+	}
 
 	onCommand(document);
 }
@@ -43,27 +44,6 @@ void TransportClient::sync(fd_set &setinput, fd_set &setoutput)
 		send();
 	}
 }
-
-#if 0
-
-void TransportClient::ok(const std::string &command)
-{
-	m_output += "{";
-	m_output += "\"response\":\"" + command + "\",";
-	m_output += "\"status\":\"ok\"";
-	m_output += "}\r\n\r\n";
-}
-
-void TransportClient::error(const std::string &command, std::string message)
-{
-	m_output += "{";
-	m_output += "\"response\":\"" + command + "\",";
-	m_output += "\"status\":\"error\",";
-	m_output += "\"error\": \"" + json::escape(message) + "\"";
-	m_output += "}\r\n\r\n";
-}
-
-#endif
 
 void TransportClient::send(std::string message)
 {

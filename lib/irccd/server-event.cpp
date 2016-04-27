@@ -53,10 +53,12 @@ void ServerEvent::operator()(Irccd &irccd) const
 		} catch (const duk::ErrorInfo &info) {
 			log::warning() << "plugin " << pair.second->info().name << ": error: " << info.what() << std::endl;
 
-			if (!info.fileName.empty())
+			if (!info.fileName.empty()) {
 				log::warning() << "    " << info.fileName << ":" << info.lineNumber << std::endl;
-			if (!info.stack.empty())
+			}
+			if (!info.stack.empty()) {
 				log::warning() << "    " << info.stack << std::endl;
+			}
 		}
 	}
 }

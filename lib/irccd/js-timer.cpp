@@ -55,8 +55,9 @@ duk::Ret start(duk::ContextPtr ctx)
 {
 	auto timer = duk::self<duk::Shared<Timer>>(ctx);
 
-	if (!timer->isRunning())
+	if (!timer->isRunning()) {
 		timer->start();
+	}
 
 	return 0;
 }
@@ -71,8 +72,9 @@ duk::Ret stop(duk::ContextPtr ctx)
 {
 	auto timer = duk::self<duk::Shared<Timer>>(ctx);
 
-	if (timer->isRunning())
+	if (timer->isRunning()) {
 		timer->stop();
+	}
 
 	return 0;
 }
@@ -98,8 +100,9 @@ duk::Ret constructor(duk::ContextPtr ctx)
 	int type = duk::require<int>(ctx, 0);
 	int delay = duk::require<int>(ctx, 1);
 
-	if (!duk::is<duk::Function>(ctx, 2))
+	if (!duk::is<duk::Function>(ctx, 2)) {
 		duk::raise(ctx, duk::TypeError("missing callback function"));
+	}
 
 	auto timer = std::make_shared<Timer>(static_cast<TimerType>(type), delay);
 

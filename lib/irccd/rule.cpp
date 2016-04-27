@@ -76,8 +76,9 @@ bool Rule::solve(const std::vector<Rule> &rules,
 			     << "    events: " << util::join(rule.m_events.begin(), rule.m_events.end()) << "\n"
 			     << "    action: " << ((rule.m_action == RuleAction::Accept) ? "accept" : "drop") << std::endl;
 
-		if (rule.match(server, channel, origin, plugin, event))
+		if (rule.match(server, channel, origin, plugin, event)) {
 			result = rule.action() == RuleAction::Accept;
+		}
 	}
 
 	return result;
@@ -96,9 +97,11 @@ Rule::Rule(RuleSet servers, RuleSet channels, RuleSet origins, RuleSet plugins, 
 	, m_events(std::move(events))
 	, m_action(action)
 {
-	for (const std::string &n : m_events)
-		if (validEvents.count(n) == 0)
+	for (const std::string &n : m_events) {
+		if (validEvents.count(n) == 0) {
 			throw std::invalid_argument(n + " is not a valid event name");
+		}
+	}
 }
 
 bool Rule::match(const std::string &server,

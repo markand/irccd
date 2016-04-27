@@ -87,8 +87,9 @@ std::string executablePath()
 	
 	result.resize(size);
 	
-	if (!(size = GetModuleFileNameA(nullptr, &result[0], size)))
+	if (!(size = GetModuleFileNameA(nullptr, &result[0], size))) {
 		throw std::runtime_error("GetModuleFileName error");
+	}
 	
 	result.resize(size);
 	
@@ -105,8 +106,9 @@ std::string executablePath()
 	
 	auto size = readlink("/proc/self/exe", &result[0], 2048);
 	
-	if (size < 0)
+	if (size < 0) {
 		throw std::invalid_argument(std::strerror(errno));
+	}
 	
 	result.resize(size);
 	
@@ -123,8 +125,9 @@ std::string executablePath()
 	
 	result.resize(size);
 	
-	if (sysctl(mib.data(), 4, &result[0], &size, nullptr, 0) < 0)
+	if (sysctl(mib.data(), 4, &result[0], &size, nullptr, 0) < 0) {
 		throw std::runtime_error(std::strerror(errno));
+	}
 	
 	result.resize(size);
 	
@@ -140,8 +143,9 @@ std::string executablePath()
 	
 	result.resize(size);
 	
-	if ((size = proc_pidpath(getpid(), &result[0], size)) == 0)
+	if ((size = proc_pidpath(getpid(), &result[0], size)) == 0) {
 		throw std::runtime_error(std::strerror(errno));
+	}
 	
 	result.resize(size);
 	
@@ -245,8 +249,9 @@ std::string userConfig()
 	} catch (const std::exception &) {
 		const char *home = getenv("HOME");
 
-		if (home != nullptr)
+		if (home != nullptr) {
 			oss << home;
+		}
 
 		oss << "/.config/irccd/";
 	}
@@ -277,9 +282,9 @@ std::string userData()
 #if defined(IRCCD_SYSTEM_WINDOWS)
 	char path[MAX_PATH];
 
-	if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, path) != S_OK)
+	if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, path) != S_OK) {
 		oss << "";
-	else {
+	} else {
 		oss << path;
 		oss << "\\irccd\\share";
 	}
@@ -292,8 +297,9 @@ std::string userData()
 	} catch (const std::exception &) {
 		const char *home = getenv("HOME");
 
-		if (home != nullptr)
+		if (home != nullptr) {
 			oss << home;
+		}
 
 		oss << "/.local/share/irccd/";
 	}
@@ -336,8 +342,9 @@ std::string userCache()
 	} catch (const std::exception &) {
 		const char *home = getenv("HOME");
 
-		if (home != nullptr)
+		if (home != nullptr) {
 			oss << home;
+		}
 
 		oss << "/.cache/irccd/";
 	}
@@ -402,16 +409,18 @@ void setApplicationPath(const std::string &argv0)
 			}
 
 			/* Not found in PATH? add dummy value */
-			if (base.empty())
+			if (base.empty()) {
 				base = std::string(".") + fs::separator() + WITH_BINDIR + fs::separator() + "dummy";
+			}
 		}
 	}
 
 	/* Find bin/<progname> */
 	auto pos = base.rfind(std::string(WITH_BINDIR) + fs::separator() + fs::baseName(base));
 
-	if (pos != std::string::npos)
+	if (pos != std::string::npos) {
 		base.erase(pos);
+	}
 
 	/* Add trailing / or \\ for convenience */
 	base = clean(base);
@@ -421,8 +430,9 @@ void setApplicationPath(const std::string &argv0)
 
 std::string clean(std::string input)
 {
-	if (input.empty())
+	if (input.empty()) {
 		return input;
+	}
 
 	/* First, remove any duplicates */
 	input.erase(std::unique(input.begin(), input.end(), [&] (char c1, char c2) {
@@ -431,8 +441,9 @@ std::string clean(std::string input)
 
 	/* Add a trailing / or \\ */
 	char c = input[input.length() - 1];
-	if (c != '/' && c != '\\')
+	if (c != '/' && c != '\\') {
 		input += fs::separator();
+	}
 
 	/* Now converts all / to \\ for Windows and the opposite for Unix */
 #if defined(IRCCD_SYSTEM_WINDOWS)

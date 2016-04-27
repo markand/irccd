@@ -45,10 +45,12 @@ bool connect(Server &server)
 
 	/* libircclient requires # for SSL connection */
 #if defined(WITH_SSL)
-	if (info.flags & ServerInfo::Ssl)
+	if (info.flags & ServerInfo::Ssl) {
 		host.insert(0, 1, '#');
-	if (!(info.flags & ServerInfo::SslVerify))
+	}
+	if (!(info.flags & ServerInfo::SslVerify)) {
 		irc_option_set(server.session(), LIBIRC_OPTION_SSL_NO_VERIFY);
+	}
 #endif
 
 	if (info.flags & ServerInfo::Ipv6) {
@@ -94,9 +96,10 @@ void Connecting::prepare(Server &server, fd_set &setinput, fd_set &setoutput, ne
 			log::warning() << "server " << info.name << ": error while connecting: ";
 			log::warning() << irc_strerror(irc_errno(server.session())) << std::endl;
 
-			if (settings.reconnect_tries != 0)
+			if (settings.reconnect_tries != 0) {
 				log::warning() << "server " << info.name << ": retrying in "
 					       << settings.reconnect_timeout << " seconds" << std::endl;
+			}
 
 			server.next(std::make_unique<state::Disconnected>());
 		} else {

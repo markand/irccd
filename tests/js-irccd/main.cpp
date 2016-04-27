@@ -38,8 +38,9 @@ TEST(TestJsIrccd, version)
 			"patch = Irccd.version.patch;"
 		);
 
-		if (ret != 0)
+		if (ret != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_EQ(IRCCD_VERSION_MAJOR, duk::getGlobal<int>(ctx, "major"));
 		ASSERT_EQ(IRCCD_VERSION_MINOR, duk::getGlobal<int>(ctx, "minor"));
@@ -68,8 +69,9 @@ TEST(SystemError, fromJavascript)
 			"}"
 		);
 
-		if (ret != 0)
+		if (ret != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_EQ(1, duk::getGlobal<int>(ctx, "errno"));
 		ASSERT_EQ("SystemError", duk::getGlobal<std::string>(ctx, "name"));
@@ -108,8 +110,9 @@ TEST(SystemError, fromNative)
 			"}"
 		);
 
-		if (ret != 0)
+		if (ret != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_EQ(EINVAL, duk::getGlobal<int>(ctx, "errno"));
 		ASSERT_EQ("SystemError", duk::getGlobal<std::string>(ctx, "name"));

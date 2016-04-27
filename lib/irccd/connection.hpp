@@ -205,8 +205,9 @@ void ConnectionBase<Address>::send(std::string msg, int timeout)
 	}
 
 	/* Timeout? */
-	if (!msg.empty())
+	if (!msg.empty()) {
 		throw std::runtime_error("operation timed out while sending to irccd");
+	}
 }
 
 template <typename Address>
@@ -229,13 +230,15 @@ json::Value ConnectionBase<Address>::next(int timeout)
 		buffer = util::nextNetwork(m_input);
 	}
 
-	if (!isConnected())
+	if (!isConnected()) {
 		throw std::runtime_error("connection lost");
+	}
 
 	json::Value value(json::Buffer{buffer});
 
-	if (!value.isObject())
+	if (!value.isObject()) {
 		throw std::invalid_argument("invalid message received");
+	}
 
 	return value;
 }

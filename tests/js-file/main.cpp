@@ -33,8 +33,9 @@ TEST(TestJsFile, functionBasename)
 	loadJsFile(ctx);
 
 	try {
-		if (duk::pevalString(ctx, "result = Irccd.File.basename('/usr/local/etc/irccd.conf');") != 0)
+		if (duk::pevalString(ctx, "result = Irccd.File.basename('/usr/local/etc/irccd.conf');") != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_EQ("irccd.conf", duk::getGlobal<std::string>(ctx, "result"));
 	} catch (const std::exception &ex) {
@@ -94,9 +95,7 @@ TEST(TestJsFile, functionExists2)
 TEST(TestJsFile, functionRemove)
 {
 	// First create a dummy file
-	{
-		std::ofstream out("test-js-fs.remove");
-	}
+	std::ofstream("test-js-fs.remove");
 
 	duk::Context ctx;
 
@@ -104,8 +103,9 @@ TEST(TestJsFile, functionRemove)
 	loadJsFile(ctx);
 
 	try {
-		if (duk::pevalString(ctx, "Irccd.File.remove('test-js-fs.remove');") != 0)
+		if (duk::pevalString(ctx, "Irccd.File.remove('test-js-fs.remove');") != 0) {
 			throw duk::error(ctx, -1);
+		}
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -130,8 +130,9 @@ TEST(TestJsFile, methodBasename)
 			"result = f.basename();"
 		);
 
-		if (ret != 0)
+		if (ret != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_EQ("file-1.txt", duk::getGlobal<std::string>(ctx,"result"));
 	} catch (const std::exception &ex) {
@@ -155,8 +156,9 @@ TEST(TestJsFile, methodBasenameClosed)
 			"result = f.basename();"
 		);
 
-		if (ret != 0)
+		if (ret != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_EQ("file-1.txt", duk::getGlobal<std::string>(ctx,"result"));
 	} catch (const std::exception &ex) {
@@ -179,8 +181,9 @@ TEST(TestJsFile, methodDirname)
 			"result = f.dirname();"
 		);
 
-		if (ret != 0)
+		if (ret != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_EQ(std::string{IRCCD_TESTS_DIRECTORY "/level-1"}, duk::getGlobal<std::string>(ctx, "result"));
 	} catch (const std::exception &ex) {
@@ -204,8 +207,9 @@ TEST(TestJsFile, methodDirnameClosed)
 			"result = f.dirname();"
 		);
 
-		if (ret != 0)
+		if (ret != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_EQ(std::string{IRCCD_TESTS_DIRECTORY "/level-1"}, duk::getGlobal<std::string>(ctx, "result"));
 	} catch (const std::exception &ex) {
@@ -227,8 +231,9 @@ TEST(TestJsFile, methodLines)
 			"lines = new Irccd.File(directory + '/lines.txt', 'r').lines();"
 		);
 
-		if (ret != 0)
+		if (ret != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		std::vector<std::string> expected{"a", "b", "c"};
 
@@ -254,15 +259,15 @@ TEST(TestJsFile, methodSeek1)
 			"result = f.read(1);"
 		);
 
-		if (ret != 0)
+		if (ret != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_EQ(".", duk::getGlobal<std::string>(ctx, "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
 }
-
 
 TEST(TestJsFile, methodSeek1Closed)
 {
@@ -282,9 +287,9 @@ TEST(TestJsFile, methodSeek1Closed)
 			"result = typeof (result) === \"undefined\";"
 		);
 
-
-		if (ret != 0)
+		if (ret != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_TRUE(duk::getGlobal<bool>(ctx, "result"));
 	} catch (const std::exception &ex) {
@@ -310,8 +315,9 @@ TEST(TestJsFile, methodSeek2)
 		);
 
 
-		if (ret != 0)
+		if (ret != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_EQ(".", duk::getGlobal<std::string>(ctx, "result"));
 	} catch (const std::exception &ex) {
@@ -338,9 +344,9 @@ TEST(TestJsFile, methodSeek2Closed)
 			"result = typeof (result) === \"undefined\";"
 		);
 
-
-		if (ret != 0)
+		if (ret != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_TRUE(duk::getGlobal<bool>(ctx, "result"));
 	} catch (const std::exception &ex) {
@@ -364,9 +370,9 @@ TEST(TestJsFile, methodSeek3)
 			"result = f.read(1);"
 		);
 
-
-		if (ret != 0)
+		if (ret != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_EQ("x", duk::getGlobal<std::string>(ctx, "result"));
 	} catch (const std::exception &ex) {
@@ -392,9 +398,9 @@ TEST(TestJsFile, methodSeek3Closed)
 			"result = typeof (result) === \"undefined\";"
 		);
 
-
-		if (ret != 0)
+		if (ret != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_TRUE(duk::getGlobal<bool>(ctx, "result"));
 	} catch (const std::exception &ex) {
@@ -420,8 +426,9 @@ TEST(TestJsFile, methodReadline)
 			"}"
 		);
 
-		if (ret != 0)
+		if (ret != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		std::vector<std::string> expected{"a", "b", "c"};
 
@@ -450,8 +457,9 @@ TEST(TestJsFile, methodReadlineClosed)
 			"}"
 		);
 
-		if (ret != 0)
+		if (ret != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		std::vector<std::string> expected;
 

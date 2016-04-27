@@ -62,8 +62,9 @@ TEST(TestJsLogger, info)
 	try {
 		duk::putGlobal(ctx, "\xff""\xff""name", "test");
 
-		if (duk::pevalString(ctx, "Irccd.Logger.info(\"hello!\");") != 0)
+		if (duk::pevalString(ctx, "Irccd.Logger.info(\"hello!\");") != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_EQ("plugin test: hello!", lineInfo);
 	} catch (const std::exception &ex) {
@@ -81,8 +82,9 @@ TEST(TestJsLogger, warning)
 	try {
 		duk::putGlobal(ctx, "\xff""\xff""name", "test");
 
-		if (duk::pevalString(ctx, "Irccd.Logger.warning(\"FAIL!\");") != 0)
+		if (duk::pevalString(ctx, "Irccd.Logger.warning(\"FAIL!\");") != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_EQ("plugin test: FAIL!", lineWarning);
 	} catch (const std::exception &ex) {
@@ -102,8 +104,9 @@ TEST(TestJsLogger, debug)
 	try {
 		duk::putGlobal(ctx, "\xff""\xff""name", "test");
 
-		if (duk::pevalString(ctx, "Irccd.Logger.debug(\"starting\");") != 0)
+		if (duk::pevalString(ctx, "Irccd.Logger.debug(\"starting\");") != 0) {
 			throw duk::error(ctx, -1);
+		}
 
 		ASSERT_EQ("plugin test: starting", lineDebug);
 	} catch (const std::exception &ex) {

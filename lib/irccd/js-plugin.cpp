@@ -94,8 +94,9 @@ duk::Ret list(duk::ContextPtr ctx)
 	duk::push(ctx, duk::Array{});
 
 	int i = 0;
-	for (const auto &pair : duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->plugins())
+	for (const auto &pair : duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->plugins()) {
 		duk::putProperty(ctx, -1, i++, pair.first);
+	}
 
 	return 1;
 }

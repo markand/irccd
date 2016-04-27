@@ -38,8 +38,9 @@ void Irccd::handleServerChannelMode(std::weak_ptr<Server> ptr, std::string origi
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server)
+	if (!server) {
 		return;
+	}
 
 	log::debug() << "server " << server->info().name << ": event onChannelMode:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -72,8 +73,9 @@ void Irccd::handleServerChannelNotice(std::weak_ptr<Server> ptr, std::string ori
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server)
+	if (!server) {
 		return;
+	}
 
 	log::debug() << "server " << server->info().name << ": event onChannelNotice:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -104,8 +106,9 @@ void Irccd::handleServerConnect(std::weak_ptr<Server> ptr)
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server)
+	if (!server) {
 		return;
+	}
 
 	log::debug() << "server " << server->info().name << ": event onConnect" << std::endl;
 
@@ -130,8 +133,9 @@ void Irccd::handleServerInvite(std::weak_ptr<Server> ptr, std::string origin, st
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server)
+	if (!server) {
 		return;
+	}
 
 	log::debug() << "server " << server->info().name << ": event onInvite:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -161,8 +165,9 @@ void Irccd::handleServerJoin(std::weak_ptr<Server> ptr, std::string origin, std:
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server)
+	if (!server) {
 		return;
+	}
 
 	log::debug() << "server " << server->info().name << ": event onJoin:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -191,8 +196,9 @@ void Irccd::handleServerKick(std::weak_ptr<Server> ptr, std::string origin, std:
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server)
+	if (!server) {
 		return;
+	}
 
 	log::debug() << "server " << server->info().name << ": event onKick:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -225,8 +231,9 @@ void Irccd::handleServerMessage(std::weak_ptr<Server> ptr, std::string origin, s
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server)
+	if (!server) {
 		return;
+	}
 
 	log::debug() << "server " << server->info().name << ": event onMessage:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -262,8 +269,9 @@ void Irccd::handleServerMe(std::weak_ptr<Server> ptr, std::string origin, std::s
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server)
+	if (!server) {
 		return;
+	}
 
 	log::debug() << "server " << server->info().name << ": event onMe:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -294,8 +302,9 @@ void Irccd::handleServerMode(std::weak_ptr<Server> ptr, std::string origin, std:
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server)
+	if (!server) {
 		return;
+	}
 
 	log::debug() << "server " << server->info().name << ": event onMode\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -324,8 +333,9 @@ void Irccd::handleServerNames(std::weak_ptr<Server> ptr, std::string channel, st
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server)
+	if (!server) {
 		return;
+	}
 
 	log::debug() << "server " << server->info().name << ": event onNames:\n";
 	log::debug() << "  channel: " << channel << "\n";
@@ -356,8 +366,9 @@ void Irccd::handleServerNick(std::weak_ptr<Server> ptr, std::string origin, std:
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server)
+	if (!server) {
 		return;
+	}
 
 	log::debug() << "server " << server->info().name << ": event onNick:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -386,8 +397,9 @@ void Irccd::handleServerNotice(std::weak_ptr<Server> ptr, std::string origin, st
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server)
+	if (!server) {
 		return;
+	}
 
 	log::debug() << "server " << server->info().name << ": event onNotice:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -416,8 +428,9 @@ void Irccd::handleServerPart(std::weak_ptr<Server> ptr, std::string origin, std:
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server)
+	if (!server) {
 		return;
+	}
 
 	log::debug() << "server " << server->info().name << ": event onPart:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -448,8 +461,9 @@ void Irccd::handleServerQuery(std::weak_ptr<Server> ptr, std::string origin, std
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server)
+	if (!server) {
 		return;
+	}
 
 	log::debug() << "server " << server->info().name << ": event onQuery:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -483,8 +497,9 @@ void Irccd::handleServerTopic(std::weak_ptr<Server> ptr, std::string origin, std
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server)
+	if (!server) {
 		return;
+	}
 
 	log::debug() << "server " << server->info().name << ": event onTopic:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -515,8 +530,9 @@ void Irccd::handleServerWhois(std::weak_ptr<Server> ptr, ServerWhois whois)
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server)
+	if (!server) {
 		return;
+	}
 
 	log::debug() << "server " << server->info().name << ": event onWhois\n";
 	log::debug() << "  nickname: " << whois.nick << "\n";
@@ -553,8 +569,9 @@ void Irccd::handleTransportCommand(std::weak_ptr<TransportClient> ptr, const jso
 		/* 0. Be sure the object still exists */
 		auto tc = ptr.lock();
 
-		if (!tc)
+		if (!tc) {
 			return;
+		}
 
 		/* 1. Check if the Json object is valid */
 		auto name = object.find("command");
@@ -580,8 +597,9 @@ void Irccd::handleTransportCommand(std::weak_ptr<TransportClient> ptr, const jso
 			response = it->second->exec(*this, object);
 
 			/* Adjust if command has returned something else */
-			if (!response.isObject())
+			if (!response.isObject()) {
 				response = json::object({});
+			}
 			
 			response.insert("status", true);
 		} catch (const std::exception &ex) {
@@ -604,8 +622,9 @@ void Irccd::handleTransportDie(std::weak_ptr<TransportClient> ptr)
 
 		auto tc = ptr.lock();
 
-		if (tc)
+		if (tc) {
 			m_lookupTransportClients.erase(tc->handle());
+		}
 	});
 }
 
@@ -622,15 +641,17 @@ void Irccd::processIpc(fd_set &input)
 
 void Irccd::processTransportClients(fd_set &input, fd_set &output)
 {
-	for (auto &pair : m_lookupTransportClients)
+	for (auto &pair : m_lookupTransportClients) {
 		pair.second->sync(input, output);
+	}
 }
 
 void Irccd::processTransportServers(fd_set &input)
 {
 	for (auto &pair : m_lookupTransportServers) {
-		if (!FD_ISSET(pair.second->handle(), &input))
+		if (!FD_ISSET(pair.second->handle(), &input)) {
 			continue;
+		}
 
 		log::debug("transport: new client connected");
 
@@ -665,8 +686,9 @@ void Irccd::processTransportServers(fd_set &input)
 
 void Irccd::processServers(fd_set &input, fd_set &output)
 {
-	for (auto &pair : m_servers)
+	for (auto &pair : m_servers) {
 		pair.second->sync(input, output);
+	}
 }
 
 void Irccd::process(fd_set &setinput, fd_set &setoutput)
@@ -750,8 +772,9 @@ std::shared_ptr<Server> Irccd::getServer(const std::string &name) const noexcept
 {
 	auto it = m_servers.find(name);
 
-	if (it == m_servers.end())
+	if (it == m_servers.end()) {
 		return nullptr;
+	}
 
 	return it->second;
 }
@@ -760,8 +783,9 @@ std::shared_ptr<Server> Irccd::requireServer(const std::string &name) const
 {
 	auto it = m_servers.find(name);
 
-	if (it == m_servers.end())
+	if (it == m_servers.end()) {
 		throw std::invalid_argument("server " + name + " not found");
+	}
 
 	return it->second;
 }
@@ -778,8 +802,9 @@ void Irccd::removeServer(const std::string &name)
 
 void Irccd::clearServers() noexcept
 {
-	for (auto &pair : m_servers)
+	for (auto &pair : m_servers) {
 		pair.second->disconnect();
+	}
 
 	m_servers.clear();
 }
@@ -803,8 +828,9 @@ std::shared_ptr<Plugin> Irccd::getPlugin(const std::string &name) const noexcept
 {
 	auto it = m_plugins.find(name);
 
-	if (it == m_plugins.end())
+	if (it == m_plugins.end()) {
 		return nullptr;
+	}
 
 	return it->second;
 }
@@ -813,8 +839,9 @@ std::shared_ptr<Plugin> Irccd::requirePlugin(const std::string &name) const
 {
 	auto it = m_plugins.find(name);
 
-	if (it == m_plugins.end())
+	if (it == m_plugins.end()) {
 		throw std::out_of_range(std::string("plugin ") + name + " not found");
+	}
 
 	return it->second;
 }
@@ -846,11 +873,13 @@ void Irccd::loadPlugin(std::string name, const std::string &source, bool find)
 	std::vector<string> paths;
 	std::shared_ptr<Plugin> plugin;
 
-	if (find)
-		for (const std::string &dir : path::list(path::PathPlugins))
+	if (find) {
+		for (const std::string &dir : path::list(path::PathPlugins)) {
 			paths.push_back(dir + source + ".js");
-	else
+		}
+	} else {
 		paths.push_back(source);
+	}
 
 	/* Iterate over all paths */
 	log::info(fmt::format("plugin {}: trying to load:", name));
@@ -866,18 +895,20 @@ void Irccd::loadPlugin(std::string name, const std::string &source, bool find)
 		}
 	}
 
-	if (plugin)
+	if (plugin) {
 		addPlugin(std::move(plugin));
-	else
+	} else {
 		throw std::runtime_error("no suitable plugin found");
+	}
 }
 
 void Irccd::reloadPlugin(const std::string &name)
 {
 	auto plugin = getPlugin(name);
 
-	if (plugin)
+	if (plugin) {
 		plugin->onReload();
+	}
 }
 
 void Irccd::unloadPlugin(const std::string &name)
@@ -906,8 +937,9 @@ void Irccd::handleTimerSignal(std::weak_ptr<Plugin> ptr, std::shared_ptr<Timer> 
 	post([this, ptr, timer] (Irccd &) {
 		auto plugin = ptr.lock();
 
-		if (!plugin)
+		if (!plugin) {
 			return;
+		}
 
 		auto &ctx = plugin->context();
 
@@ -978,8 +1010,9 @@ void Irccd::poll()
 	}
 
 	/* 4. Add transport servers */
-	for (auto &pair : m_lookupTransportServers)
+	for (auto &pair : m_lookupTransportServers) {
 		set(setinput, pair.first);
+	}
 
 	/* 5. Do the selection */
 	struct timeval tv;
@@ -990,8 +1023,9 @@ void Irccd::poll()
 	int error = select(max + 1, &setinput, &setoutput, nullptr, &tv);
 
 	/* Skip anyway */
-	if (!m_running)
+	if (!m_running) {
 		return;
+	}
 
 	/* Skip on error */
 	if (error < 0 && errno != EINTR) {
@@ -1019,11 +1053,13 @@ void Irccd::dispatch()
 		m_events.clear();
 	}
 
-	if (copy.size() > 0)
+	if (copy.size() > 0) {
 		log::debug() << "irccd: dispatching " << copy.size() << " event" << (copy.size() > 1 ? "s" : "") << endl;
+	}
 
-	for (auto &ev : copy)
+	for (auto &ev : copy) {
 		ev(*this);
+	}
 }
 
 void Irccd::stop()

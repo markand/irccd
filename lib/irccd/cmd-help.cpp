@@ -43,10 +43,11 @@ json::Value Help::request(Irccdctl &irccdctl, const RemoteCommandRequest &args) 
 {
 	auto it = irccdctl.commands().find(args.arg(0U));
 
-	if (it == irccdctl.commands().end())
+	if (it == irccdctl.commands().end()) {
 		log::warning() << "there is no command named: " << args.arg(0U) << std::endl;
-	else
+	} else {
 		log::warning() << it->second->usage() << std::flush;
+	}
 
 	return nullptr;
 }

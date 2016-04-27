@@ -42,8 +42,9 @@ json::Value PluginList::exec(Irccd &irccd, const json::Value &request) const
 	json::Value response = RemoteCommand::exec(irccd, request);
 	json::Value list = json::array({});
 
-	for (const auto &plugin : irccd.plugins())
+	for (const auto &plugin : irccd.plugins()) {
 		list.append(plugin.first);
+	}
 
 	response.insert("list", std::move(list));
 
@@ -60,8 +61,9 @@ void PluginList::result(Irccdctl &irccdctl, const json::Value &object) const
 {
 	RemoteCommand::result(irccdctl, object);
 
-	for (const auto &n : object.valueOr("list", json::Type::Array, json::array({})))
+	for (const auto &n : object.valueOr("list", json::Type::Array, json::array({}))) {
 		std::cout << n.toString() << std::endl;
+	}
 }
 
 } // !command

@@ -39,8 +39,9 @@ TransportServerIp::TransportServerIp(int domain, const std::string &address, int
 	m_socket.set(net::option::SockReuseAddress{true});
 
 	/* Disable or enable IPv4 when using IPv6 */
-	if (domain == AF_INET6)
+	if (domain == AF_INET6) {
 		m_socket.set(net::option::Ipv6Only{ipv6only});
+	}
 
 	m_socket.bind(net::address::Ip{address, port, static_cast<net::address::Ip::Type>(domain)});
 	m_socket.listen();

@@ -33,10 +33,12 @@ std::string readInfoName(const json::Value &object)
 {
 	auto it = object.find("name");
 
-	if (it == object.end())
+	if (it == object.end()) {
 		throw std::invalid_argument("missing 'name' property");
-	if (!it->isString() || !util::isIdentifierValid(it->toString()))
+	}
+	if (!it->isString() || !util::isIdentifierValid(it->toString())) {
 		throw std::invalid_argument("invalid server name");
+	}
 
 	return it->toString();
 }
@@ -45,10 +47,12 @@ std::string readInfoHost(const json::Value &object)
 {
 	auto it = object.find("host");
 
-	if (it == object.end())
+	if (it == object.end()) {
 		throw std::invalid_argument("missing 'host' property");
-	if (!it->isString())
+	}
+	if (!it->isString()) {
 		throw std::invalid_argument("invalid host");
+	}
 
 	return it->toString();
 }
@@ -58,9 +62,11 @@ std::uint16_t readInfoPort(const json::Value &object)
 	auto it = object.find("port");
 	uint16_t port = 6667;
 
-	if (it != object.end())
-		if (it->isInt() && it->toInt() >= 0 && it->toInt() <= std::numeric_limits<std::uint16_t>::max())
+	if (it != object.end()) {
+		if (it->isInt() && it->toInt() >= 0 && it->toInt() <= std::numeric_limits<std::uint16_t>::max()) {
 			port = static_cast<std::uint16_t>(it->toInt());
+		}
+	}
 
 	return port;
 }
@@ -83,8 +89,9 @@ ServerInfo readInfo(const json::Value &object)
 		throw std::invalid_argument("ssl is disabled");
 #endif
 
-	if (object.valueOr("sslVerify", json::Type::Boolean, false).toBool())
+	if (object.valueOr("sslVerify", json::Type::Boolean, false).toBool()) {
 		info.flags |= ServerInfo::SslVerify;
+	}
 
 	return info;
 }
@@ -149,8 +156,9 @@ json::Value ServerConnect::exec(Irccd &irccd, const json::Value &request) const
 {
 	auto server = std::make_shared<Server>(readInfo(request), readIdentity(request), readSettings(request));
 
-	if (irccd.hasServer(server->info().name))
+	if (irccd.hasServer(server->info().name)) {
 		throw std::invalid_argument("server '" + server->info().name + "' already exists");
+	}
 
 	irccd.addServer(std::move(server));
 

@@ -43,14 +43,16 @@ public:
 	{
 		util::Substitution params;
 
-		if (!duk::is<Object>(ctx, index))
+		if (!duk::is<Object>(ctx, index)) {
 			return params;
+		}
 
 		duk::enumerate(ctx, index, 0, true, [&] (ContextPtr) {
-			if (duk::get<std::string>(ctx, -2) == "date")
+			if (duk::get<std::string>(ctx, -2) == "date") {
 				params.time = static_cast<time_t>(duk::get<double>(ctx, -1) / 1000);
-			else
+			} else {
 				params.keywords.insert({duk::get<std::string>(ctx, -2), duk::get<std::string>(ctx, -1)});
+			}
 		});
 
 		return params;

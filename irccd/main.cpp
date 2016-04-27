@@ -95,12 +95,14 @@ int main(int argc, char **argv)
 		result = parser::read(argc, argv, options);
 
 		for (const auto &pair : result) {
-			if (pair.first == "--help")
+			if (pair.first == "--help") {
 				usage();
 				// NOTREACHED
+			}
 	
-			if (pair.first == "-v" || pair.first == "--verbose")
+			if (pair.first == "-v" || pair.first == "--verbose") {
 				log::setVerbose(true);
+			}
 		}
 	} catch (const std::exception &ex) {
 		log::warning() << sys::programName() << ": " << ex.what() << std::endl;
@@ -108,7 +110,6 @@ int main(int argc, char **argv)
 	}
 
 	instance = std::make_unique<Irccd>();
-
 	instance->load(Config{result});
 	instance->run();
 

@@ -40,8 +40,9 @@ json::Value ServerList::exec(Irccd &irccd, const json::Value &) const
 	auto json = json::object({});
 	auto list = json::array({});
 
-	for (const auto &pair : irccd.servers())
+	for (const auto &pair : irccd.servers()) {
 		list.append(pair.first);
+	}
 
 	json.insert("list", std::move(list));
 
@@ -50,8 +51,9 @@ json::Value ServerList::exec(Irccd &irccd, const json::Value &) const
 
 void ServerList::result(Irccdctl &, const json::Value &response) const
 {
-	for (const auto &n : response.valueOr("list", json::Type::Array, json::array({})))
+	for (const auto &n : response.valueOr("list", json::Type::Array, json::array({}))) {
 		std::cout << n.toString() << std::endl;
+	}
 }
 
 } // !command
