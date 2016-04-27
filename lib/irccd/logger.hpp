@@ -52,6 +52,16 @@ namespace log {
 class Interface {
 public:
 	/**
+	 * Default constructor.
+	 */
+	Interface() = default;
+
+	/**
+	 * Virtual destructor defaulted.
+	 */
+	virtual ~Interface() = default;
+
+	/**
 	 * Write a information message.
 	 *
 	 * The function is called only if verbose is true.
