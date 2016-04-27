@@ -64,9 +64,12 @@ Timer::~Timer()
 {
 	assert(m_state != Running);
 
-	m_state = Stopped;
-	m_condition.notify_one();
-	m_thread.join();
+	try {
+		m_state = Stopped;
+		m_condition.notify_one();
+		m_thread.join();
+	} catch (...) {
+	}
 }
 
 void Timer::start()

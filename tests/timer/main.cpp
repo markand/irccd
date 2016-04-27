@@ -43,7 +43,9 @@ TEST(Basic, single)
 
 	std::this_thread::sleep_for(3s);
 
-	ASSERT_TRUE(count >= 950 && count <= 1050);
+	ASSERT_GE(count, 900);
+	ASSERT_LE(count, 1100);
+
 }
 
 TEST(Basic, repeat)
@@ -60,7 +62,7 @@ TEST(Basic, repeat)
 	// Should be at least 5
 	std::this_thread::sleep_for(3s);
 
-	ASSERT_TRUE(max >= 5);
+	ASSERT_GE(max, 5);
 
 	timer.stop();
 }
