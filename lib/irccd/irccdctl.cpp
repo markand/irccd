@@ -23,6 +23,8 @@
 #include <string>
 #include <unordered_map>
 
+#include <format.h>
+
 #include "elapsed-timer.hpp"
 #include "fs.hpp"
 #include "ini.hpp"
@@ -37,6 +39,8 @@
 #include "util.hpp"
 
 namespace irccd {
+
+using namespace fmt::literals;
 
 using namespace net;
 using namespace net::address;
@@ -224,11 +228,10 @@ void Irccdctl::readAliases(const ini::Section &sc)
 		}
 
 		/* Show for debugging purpose */
-		log::debug() << "alias " << option.key() << ":" << std::endl;
+		log::debug("alias {}:"_format(option.key()));
 
 		for (const auto &cmd : alias) {
-			log::debug() << "  " << cmd.command() << " ";
-			log::debug() << util::join(cmd.args().begin(), cmd.args().end(), ' ') << std::endl;
+			log::debug("  {} {}"_format(cmd.command(), util::join(cmd.args().begin(), cmd.args().end(), ' ')));
 		}
 
 		m_aliases.emplace(option.key(), std::move(alias));
@@ -344,7 +347,7 @@ parser::Result Irccdctl::parse(int &argc, char **&argv) const
 		if (result.count("-v") != 0 || result.count("--verbose") != 0)
 			log::setVerbose(true);
 	} catch (const std::exception &ex) {
-		log::warning() << sys::programName() << ": " << ex.what() << std::endl;
+		log::warning("{}: {}"_format(sys::programName(), ex.what()));
 		usage();
 	}
 
@@ -458,7 +461,7 @@ void Irccdctl::exec(std::vector<std::string> args)
 
 void Irccdctl::connect()
 {
-	log::info() << sys::programName() << ": connecting to irccd..." << std::endl;
+	log::info("{}: connecting to irccd..."_format(sys::programName()));
 
 	/* Try to connect */
 	m_connection->connect(30000);
@@ -477,8 +480,8 @@ void Irccdctl::connect()
 	m_ssl = object.valueOr("ssl", json::Type::Boolean, false).toBool();
 
 	log::info() << std::boolalpha;
-	log::info() << sys::programName() << ": connected to irccd " << m_major << "." << m_minor << "." << m_patch << std::endl;
-	log::info() << sys::programName() << ": javascript: " << m_javascript << ", ssl supported: " << m_ssl << std::endl;
+	log::info("{}: connected to irccd {}.{}.{}"_format(sys::programName(), m_major, m_minor, m_patch));
+	log::info("{}: javascript: {}, ssl support: {}"_format(sys::programName(), m_javascript, m_ssl));
 }
 
 void Irccdctl::run(int argc, char **argv)
@@ -512,7 +515,7 @@ void Irccdctl::run(int argc, char **argv)
 			}
 		}
 	} catch (const std::exception &ex) {
-		log::warning() << sys::programName() << ": " << ex.what() << std::endl;
+		log::warning("{}: {}"_format(sys::programName(), ex.what()));
 		std::exit(1);
 	}
 
@@ -524,7 +527,7 @@ void Irccdctl::run(int argc, char **argv)
 	/* help does not require connection */
 	if (std::strcmp(argv[0], "help") != 0) {
 		if (!m_connection) {
-			log::warning() << sys::programName() << ": no connection specified" << std::endl;
+			log::warning("{}: no connection specified"_format(sys::programName()));
 			std::exit(1);
 		}
 

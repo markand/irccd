@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <stdexcept>
 
+#include <format.h>
+
 #include "fs.hpp"
 #include "irccd.hpp"
 #include "logger.hpp"
@@ -558,7 +560,7 @@ void Irccd::handleTransportCommand(std::weak_ptr<TransportClient> ptr, const jso
 		auto name = object.find("command");
 		if (name == object.end() || name->typeOf() != json::Type::String) {
 			// TODO: send error
-			log::warning() << "invalid command object" << std::endl;
+			log::warning("invalid command object");
 			return;
 		}
 
@@ -567,7 +569,7 @@ void Irccd::handleTransportCommand(std::weak_ptr<TransportClient> ptr, const jso
 
 		if (it == m_commands.end()) {
 			// TODO: send error again
-			log::warning() << "command does not exists" << std::endl;
+			log::warning("command does not exists");
 			return;
 		}
 
@@ -598,7 +600,7 @@ void Irccd::handleTransportCommand(std::weak_ptr<TransportClient> ptr, const jso
 void Irccd::handleTransportDie(std::weak_ptr<TransportClient> ptr)
 {
 	post([=] (Irccd &) {
-		log::info() << "transport: client disconnected" << std::endl;
+		log::info("transport: client disconnected");
 
 		auto tc = ptr.lock();
 
@@ -630,7 +632,7 @@ void Irccd::processTransportServers(fd_set &input)
 		if (!FD_ISSET(pair.second->handle(), &input))
 			continue;
 
-		log::debug() << "transport: new client connected" << endl;
+		log::debug("transport: new client connected");
 
 		std::shared_ptr<TransportClient> client = pair.second->accept();
 		std::weak_ptr<TransportClient> ptr(client);
@@ -735,7 +737,7 @@ void Irccd::addServer(shared_ptr<Server> server) noexcept
 			auto server = ptr.lock();
 
 			if (server) {
-				log::info() << "server " << server->info().name << ": removed" << std::endl;
+				log::info(fmt::format("server {}: removed", server->info().name));
 				m_servers.erase(server->info().name);
 			}
 		});
@@ -832,7 +834,7 @@ void Irccd::addPlugin(std::shared_ptr<Plugin> plugin)
 		plugin->onLoad();
 		m_plugins.insert({plugin->info().name, plugin});
 	} catch (const std::exception &ex) {
-		log::info() << "plugin " << plugin->info().name << ": " << ex.what() << std::endl;
+		log::warning(fmt::format("plugin {}: {}", plugin->info().name, ex.what()));
 	}
 }
 
@@ -851,16 +853,16 @@ void Irccd::loadPlugin(std::string name, const std::string &source, bool find)
 		paths.push_back(source);
 
 	/* Iterate over all paths */
-	log::info() << "plugin " << name << ": trying to load:" << std::endl;
+	log::info(fmt::format("plugin {}: trying to load:", name));
 
 	for (const auto &path : paths) {
-		log::info() << "  from " << path << std::endl;
+		log::info(fmt::format("  from ", path));
 
 		try {
 			plugin = std::make_shared<Plugin>(name, path, m_pluginConf[name]);
 			break;
 		} catch (const std::exception &ex) {
-			log::info() << "    error: " << ex.what() << std::endl;
+			log::info(fmt::format("    error: {}", ex.what()));
 		}
 	}
 
@@ -911,12 +913,12 @@ void Irccd::handleTimerSignal(std::weak_ptr<Plugin> ptr, std::shared_ptr<Timer> 
 
 		duk::StackAssert sa(ctx);
 
+		// TODO: improve this
 		try {
 			duk::getGlobal<void>(ctx, "\xff""\xff""timer-" + std::to_string(reinterpret_cast<std::intptr_t>(timer.get())));
 			duk::pcall(ctx, 0);
 			duk::pop(ctx);
 		} catch (const std::exception &) {
-			log::info() << "failure" << std::endl;
 		}
 	});
 }
