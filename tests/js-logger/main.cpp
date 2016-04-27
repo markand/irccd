@@ -36,21 +36,19 @@ std::string lineDebug;
 
 class TestLogger : public log::Interface {
 public:
-	void write(log::Level level, const std::string &line) noexcept override
+	void info(const std::string &line) override
 	{
-		switch (level) {
-		case log::Level::Info:
-			lineInfo = line;
-			break;
-		case log::Level::Warning:
-			lineWarning = line;
-			break;
-		case log::Level::Debug:
-			lineDebug = line;
-			break;
-		default:
-			break;
-		}
+		lineInfo = line;
+	}
+
+	void warning(const std::string &line) override
+	{
+		lineWarning = line;
+	}
+
+	void debug(const std::string &line) override
+	{
+		lineDebug = line;
 	}
 };
 

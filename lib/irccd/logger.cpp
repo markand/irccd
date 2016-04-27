@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <atomic>
+#include <cassert>
 #include <cerrno>
 #include <cstring>
 #include <fstream>
@@ -34,67 +36,67 @@ namespace irccd {
 
 namespace log {
 
-/* --------------------------------------------------------
- * Buffer -- output buffer (private)
- * -------------------------------------------------------- */
+namespace {
 
-/**
- * @class LoggerBuffer
- * @brief This class is a internal buffer for the Logger streams
+/*
+ * User definable options.
+ * ------------------------------------------------------------------
  */
+
+std::atomic<bool> verbose{false};
+std::unique_ptr<Interface> iface{new Console};
+
+/*
+ * Buffer -- output buffer.
+ * ------------------------------------------------------------------
+ *
+ * This class inherits from std::stringbuf and writes the messages to the specified interface function which is one of
+ * info, warning and debug.
+ */
+
 class Buffer : public std::stringbuf {
+public:
+	enum Level {
+		Debug,
+		Info,
+		Warning
+	};
+
 private:
-	Interface *m_interface{nullptr};
 	Level m_level;
 
+	void debug(const std::string &line)
+	{
+	/* Print only in debug mode, the buffer is flushed anyway */
+#if !defined(NDEBUG)
+		iface->debug(line);
+#else
+		(void)line;
+#endif
+	}
+
+	void info(const std::string &line)
+	{
+		/* Print only if verbose, the buffer will be flushed anyway. */
+		if (verbose) {
+			iface->info(line);
+		}
+	}
+
+	void warning(const std::string &line)
+	{
+		iface->warning(line);
+	}
+
 public:
-	/**
-	 * Create the buffer with the specified level.
-	 *
-	 * @param level the level
-	 */
 	inline Buffer(Level level) noexcept
 		: m_level(level)
 	{
+		assert(level >= Debug && level <= Warning);
 	}
 
-	/**
-	 * Update the underlying interface.
-	 *
-	 * @param iface is a non-owning pointer to the new interface
-	 */
-	inline void setInterface(Interface *iface) noexcept
-	{
-		m_interface = iface;
-	}
-
-	/**
-	 * Sync the buffer by calling the interface if set.
-	 *
-	 * This function split the buffer line per line and remove it before
-	 * calling the appropriate interface function.
-	 */
 	virtual int sync() override
 	{
-#if defined(NDEBUG)
-		/*
-		 * Debug is disabled, don't call interface->write() but don't
-		 * forget to flush the buffer.
-		 */
-		if (m_level == Level::Debug) {
-			str("");
-
-			return 0;
-		}
-#endif
-
-		/* Verbose is disabled? Don't show and flush the buffer too. */
-		if (m_level == Level::Info && !isVerbose()) {
-			str("");
-
-			return 0;
-		}
-
 		std::string buffer = str();
 		std::string::size_type pos;
 
@@ -104,8 +106,19 @@ public:
 			/* Remove this line */
 			buffer.erase(buffer.begin(), buffer.begin() + pos + 1);
 
-			if (m_interface)
-				m_interface->write(m_level, line);
+			switch (m_level) {
+			case Level::Debug:
+				debug(line);
+				break;
+			case Level::Info:
+				info(line);
+				break;
+			case Level::Warning:
+				warning(line);
+				break;
+			default:
+				break;
+			}
 		}
 
 		str(buffer);
@@ -114,71 +127,94 @@ public:
 	}
 };
 
-/* --------------------------------------------------------
- * Local variables
- * -------------------------------------------------------- */
+/*
+ * Local variables.
+ * ------------------------------------------------------------------
+ */
 
-namespace {
+/* Information buffer */
+Buffer buffer_info{Buffer::Info};
 
-/* Generic interface for all outputs */
-std::unique_ptr<Interface> iface;
+/* Warning buffer */
+Buffer buffer_warning{Buffer::Warning};
 
-/* Internal buffers */
-Buffer bufferInfo(Level::Info);
-Buffer bufferWarning(Level::Warning);
-Buffer bufferDebug(Level::Debug);
+/* Debug buffer */
+Buffer buffer_debug{Buffer::Debug};
 
-/* Stream outputs */
-std::ostream streamInfo(&bufferInfo);
-std::ostream streamWarning(&bufferWarning);
-std::ostream streamDebug(&bufferDebug);
-
-/* Options */
-bool verbose(false);
+/* Stream outputs. */
+std::ostream stream_info(&buffer_info);
+std::ostream stream_warning(&buffer_warning);
+std::ostream stream_debug(&buffer_debug);
 
 } // !namespace
 
-/* --------------------------------------------------------
+/*
  * Console
- * -------------------------------------------------------- */
+ * ------------------------------------------------------------------
+ */
 
-void Console::write(Level level, const std::string &line) noexcept
+void Console::info(const std::string &line)
 {
-	if (level == Level::Warning)
-		std::cerr << line << std::endl;
-	else
-		std::cout << line << std::endl;
+	std::cout << line << std::endl;
 }
 
-/* --------------------------------------------------------
+void Console::warning(const std::string &line)
+{
+	std::cerr << line << std::endl;
+}
+
+void Console::debug(const std::string &line)
+{
+	std::cout << line << std::endl;
+}
+
+/*
  * File
- * -------------------------------------------------------- */
+ * ------------------------------------------------------------------
+ */
 
 File::File(std::string normal, std::string errors)
-	: m_outputNormal(std::move(normal))
-	, m_outputError(std::move(errors))
+	: m_output_normal(std::move(normal))
+	, m_output_error(std::move(errors))
 {
 }
 
-void File::write(Level level, const std::string &line) noexcept
+void File::info(const std::string &line)
 {
-	std::string &path = (level == Level::Warning) ? m_outputError : m_outputNormal;
-	std::ofstream output(path, std::ofstream::out | std::ofstream::app);
-
-	output << line << std::endl;
+	std::ofstream(m_output_normal, std::ofstream::out | std::ofstream::app) << line << std::endl;
 }
 
-/* --------------------------------------------------------
+void File::warning(const std::string &line)
+{
+	std::ofstream(m_output_error, std::ofstream::out | std::ofstream::app) << line << std::endl;
+}
+
+void File::debug(const std::string &line)
+{
+	std::ofstream(m_output_normal, std::ofstream::out | std::ofstream::app) << line << std::endl;
+}
+
+/*
  * Silent
- * -------------------------------------------------------- */
+ * ------------------------------------------------------------------
+ */
 
-void Silent::write(Level, const std::string &) noexcept
+void Silent::info(const std::string &)
 {
 }
 
-/* --------------------------------------------------------
+void Silent::warning(const std::string &)
+{
+}
+
+void Silent::debug(const std::string &)
+{
+}
+
+/*
  * Syslog
- * -------------------------------------------------------- */
+ * ------------------------------------------------------------------
+ */
 
 #if defined(HAVE_SYSLOG)
 
@@ -192,54 +228,60 @@ Syslog::~Syslog()
 	closelog();
 }
 
-void Syslog::write(Level level, const std::string &line) noexcept
+void Syslog::info(const std::string &line)
 {
-	int syslogLevel;
+	syslog(LOG_INFO | LOG_USER, "%s", line.c_str());
+}
 
-	switch (level) {
-	case Level::Warning:
-		syslogLevel = LOG_WARNING;
-		break;
-	case Level::Debug:
-		syslogLevel = LOG_DEBUG;
-		break;
-	case Level::Info:
-		/* FALLTHROUGH */
-	default:
-		syslogLevel = LOG_INFO;
-		break;
-	}
+void Syslog::warning(const std::string &line)
+{
+	syslog(LOG_WARNING | LOG_USER, "%s", line.c_str());
+}
 
-	syslog(syslogLevel | LOG_USER, "%s", line.c_str());
+void Syslog::debug(const std::string &line)
+{
+	syslog(LOG_DEBUG | LOG_USER, "%s", line.c_str());
 }
 
 #endif // !HAVE_SYSLOG
 
-/* --------------------------------------------------------
+/*
  * Functions
- * -------------------------------------------------------- */
+ * ------------------------------------------------------------------
+ */
 
-void setInterface(std::unique_ptr<Interface> ifaceValue) noexcept
+void setInterface(std::unique_ptr<Interface> newiface) noexcept
 {
-	iface = std::move(ifaceValue);
-	bufferInfo.setInterface(iface.get());
-	bufferWarning.setInterface(iface.get());
-	bufferDebug.setInterface(iface.get());
+	assert(newiface);
+
+	iface = std::move(newiface);
 }
 
-std::ostream &info() noexcept
+std::ostream &info(const std::string &message)
 {
-	return streamInfo;
+	if (!message.empty()) {
+		stream_info << message << std::endl;
+	}
+
+	return stream_info;
 }
 
-std::ostream &warning() noexcept
+std::ostream &warning(const std::string &message)
 {
-	return streamWarning;
+	if (!message.empty()) {
+		stream_warning << message << std::endl;
+	}
+
+	return stream_warning;
 }
 
-std::ostream &debug() noexcept
+std::ostream &debug(const std::string &message)
 {
-	return streamDebug;
+	if (!message.empty()) {
+		stream_debug << message << std::endl;
+	}
+
+	return stream_debug;
 }
 
 bool isVerbose() noexcept

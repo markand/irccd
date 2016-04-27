@@ -34,26 +34,15 @@ namespace irccd {
 
 namespace log {
 
-/**
- * \enum Level
- * \brief Which level of warning
- */
-enum class Level {
-	Info,			//!< Standard information (disabled if verbose is false)
-	Warning,		//!< Warning (always shown)
-	Debug			//!< Debug message (only if compiled in debug mode)
-};
-
-/* --------------------------------------------------------
+/*
  * Interface -- abstract logging interface
- * -------------------------------------------------------- */
+ * ------------------------------------------------------------------
+ */
 
 /**
- * \class Interface
- * \brief Interface to implement new logger mechanisms
+ * \brief Interface to implement new logger mechanisms.
  *
- * Derive from this class and use Logger::setInterface() to change logging
- * system.
+ * Derive from this class and use log::setInterface() to change logging system.
  *
  * \see File
  * \see Console
@@ -63,50 +52,78 @@ enum class Level {
 class Interface {
 public:
 	/**
-	 * Write the line to the logs. The line to write will never contains
-	 * trailing new line character.
+	 * Write a information message.
 	 *
-	 * \param level the level
-	 * \param line the line without trailing \n
-	 */	
-	virtual void write(Level level, const std::string &line) noexcept = 0;
+	 * The function is called only if verbose is true.
+	 *
+	 * \param data the data
+	 * \see log::info
+	 */
+	virtual void info(const std::string &line) = 0;
+
+	/**
+	 * Write an error message.
+	 *
+	 * This function is always called.
+	 *
+	 * \param data the data
+	 * \see log::warning
+	 */
+	virtual void warning(const std::string &line) = 0;
+
+	/**
+	 * Write a debug message.
+	 *
+	 * This function is called only if NDEBUG is not defined.
+	 *
+	 * \param data the data
+	 * \see log::debug
+	 */
+	virtual void debug(const std::string &line) = 0;
 };
 
-/* --------------------------------------------------------
+/*
  * Console -- logs to console
- * -------------------------------------------------------- */
+ * ------------------------------------------------------------------
+ */
 
 /**
- * \class Console
- * \brief Logger implementation for console output
+ * \brief Logger implementation for console output using std::cout and std::cerr.
  */
 class Console : public Interface {
 public:
 	/**
-	 * \copydoc Interface::write
+	 * \copydoc Interface::info
 	 */
-	void write(Level level, const std::string &line) noexcept override;
+	void info(const std::string &line) override;
+
+	/**
+	 * \copydoc Interface::warning
+	 */
+	void warning(const std::string &line) override;
+
+	/**
+	 * \copydoc Interface::debug
+	 */
+	void debug(const std::string &line) override;
 };
 
-/* --------------------------------------------------------
+/*
  * File -- logs to a file
- * -------------------------------------------------------- */
+ * ------------------------------------------------------------------
+ */
 
 /**
- * \class File
- * \brief Output to a file
+ * \brief Output to a files.
  */
 class File : public Interface {
 private:
-	std::string m_outputNormal;
-	std::string m_outputError;
+	std::string m_output_normal;
+	std::string m_output_error;
 
 public:
 	/**
-	 * Outputs to files. Info and Debug are written in normal and Warnings
-	 * in errors.
-	 *
-	 * The same path can be used for all levels.
+	 * Outputs to files.
 	 *
 	 * \param normal the path to the normal logs
 	 * \param errors the path to the errors logs
@@ -114,38 +131,58 @@ public:
 	File(std::string normal, std::string errors);
 
 	/**
-	 * \copydoc Interface::write
+	 * \copydoc Interface::info
 	 */
-	void write(Level level, const std::string &line) noexcept override;
+	void info(const std::string &line) override;
+
+	/**
+	 * \copydoc Interface::warning
+	 */
+	void warning(const std::string &line) override;
+
+	/**
+	 * \copydoc Interface::debug
+	 */
+	void debug(const std::string &line) override;
 };
 
-/* --------------------------------------------------------
+/*
  * Silent -- disable all logs
- * -------------------------------------------------------- */
+ * ------------------------------------------------------------------
+ */
 
 /**
- * \class Silent
- * \brief Use to disable logs
+ * \brief Use to disable logs.
  *
  * Useful for unit tests when some classes may emits log.
  */
 class Silent : public Interface {
 public:
 	/**
-	 * \copydoc Interface::write
+	 * \copydoc Interface::info
 	 */
-	void write(Level level, const std::string &line) noexcept override;
+	void info(const std::string &line) override;
+
+	/**
+	 * \copydoc Interface::warning
+	 */
+	void warning(const std::string &line) override;
+
+	/**
+	 * \copydoc Interface::debug
+	 */
+	void debug(const std::string &line) override;
 };
 
-/* --------------------------------------------------------
+/*
  * Syslog -- system logger
- * -------------------------------------------------------- */
+ * ------------------------------------------------------------------
+ */
 
 #if defined(HAVE_SYSLOG)
 
 /**
- * \class Syslog
- * \brief Implements logger into syslog
+ * \brief Implements logger into syslog.
  */
 class Syslog : public Interface {
 public:
@@ -160,16 +197,27 @@ public:
 	~Syslog();
 
 	/**
-	 * \copydoc Interface::write
+	 * \copydoc Interface::info
 	 */
-	void write(Level level, const std::string &line) noexcept override;
+	void info(const std::string &line) override;
+
+	/**
+	 * \copydoc Interface::warning
+	 */
+	void warning(const std::string &line) override;
+
+	/**
+	 * \copydoc Interface::debug
+	 */
+	void debug(const std::string &line) override;
 };
 
 #endif // !HAVE_SYSLOG
 
-/* --------------------------------------------------------
+/*
  * Functions
- * -------------------------------------------------------- */
+ * ------------------------------------------------------------------
+ */
 
 /**
  * Update the logger interface.
@@ -181,25 +229,34 @@ void setInterface(std::unique_ptr<Interface> iface) noexcept;
 /**
  * Get the stream for informational messages.
  *
+ * If message is specified, a new line character is appended.
+ *
+ * \param message the optional message to write
  * \return the stream
  * \note Has no effect if verbose is set to false.
  */
-std::ostream &info() noexcept;
+std::ostream &info(const std::string &message = "");
 
 /**
  * Get the stream for warnings.
  *
+ * If message is specified, a new line character is appended.
+ *
+ * \param message the optional message to write
  * \return the stream
  */
-std::ostream &warning() noexcept;
+std::ostream &warning(const std::string &message = "");
 
 /**
  * Get the stream for debug messages.
  *
+ * If message is specified, a new line character is appended.
+ *
+ * \param message the optional message to write
  * \return the stream
  * \note Has no effect if compiled in release mode.
  */
-std::ostream &debug() noexcept;
+std::ostream &debug(const std::string &message = "");
 
 /**
  * Tells if verbose is enabled.
