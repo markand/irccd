@@ -16,10 +16,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <format.h>
+
 #include "logger.hpp"
 #include "server-state-connected.hpp"
 #include "server-state-disconnected.hpp"
 #include "server-private.hpp"
+
+using namespace fmt::literals;
 
 namespace irccd {
 
@@ -33,15 +37,14 @@ void Connected::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net
 	if (!irc_is_connected(server.session())) {
 		log::warning() << "server " << info.name << ": disconnected" << std::endl;
 
-		if (settings.reconnect_timeout > 0) {
-			log::warning() << "server " << info.name << ": retrying in "
-				       << settings.reconnect_timeout << " seconds" << std::endl;
+		if (settings.reconnectDelay > 0) {
+			log::warning("server {}: retrying in {} seconds"_format(info.name, settings.reconnectDelay));
 		}
 
 		server.next(std::make_unique<state::Disconnected>());
-	} else if (server.cache().ping_timer.elapsed() >= settings.ping_timeout * 1000) {
+	} else if (server.cache().pingTimer.elapsed() >= settings.pingTimeout * 1000) {
 		log::warning() << "server " << info.name << ": ping timeout after "
-			       << (server.cache().ping_timer.elapsed() / 1000) << " seconds" << std::endl;
+			       << (server.cache().pingTimer.elapsed() / 1000) << " seconds" << std::endl;
 		server.next(std::make_unique<state::Disconnected>());
 	} else {
 		irc_add_select_descriptors(server.session(), &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));

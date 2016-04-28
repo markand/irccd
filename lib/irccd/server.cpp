@@ -21,6 +21,8 @@
 #include <cstring>
 #include <stdexcept>
 
+#include <format.h>
+
 #include <libirc_rfcnumeric.h>
 
 #include "logger.hpp"
@@ -28,6 +30,8 @@
 #include "server-state-connected.hpp"
 #include "server-state-connecting.hpp"
 #include "util.hpp"
+
+using namespace fmt::literals;
 
 namespace irccd {
 
@@ -81,18 +85,18 @@ std::map<ServerChanMode, char> extractPrefixes(const std::string &line)
 	}
 
 	int j = 0;
-	bool read_modes = true;
+	bool readModes = true;
 	for (size_t i = 0; i < buf.size(); ++i) {
 		if (buf[i] == '(') {
 			continue;
 		}
 		if (buf[i] == ')') {
 			j = 0;
-			read_modes = false;
+			readModes = false;
 			continue;
 		}
 
-		if (read_modes) {
+		if (readModes) {
 			table[j++].first = buf[i];
 		} else {
 			table[j++].second = buf[i];
@@ -115,10 +119,10 @@ std::map<ServerChanMode, char> extractPrefixes(const std::string &line)
 void Server::handleConnect(const char *, const char **) noexcept
 {
 	/* Reset the number of tried reconnection. */
-	m_cache.reconnect_current = 0;
+	m_cache.reconnectCurrent = 0;
 
 	/* Reset the timer. */
-	m_cache.ping_timer.reset();
+	m_cache.pingTimer.reset();
 
 	/* Don't forget to change state and notify. */
 	next(std::make_unique<state::Connected>());
@@ -225,7 +229,7 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 
 		/* The listing may add some prefixes, remove them if needed */
 		for (std::string u : users) {
-			m_cache.names_map[params[2]].insert(cleanPrefix(m_info, u));
+			m_cache.namesMap[params[2]].insert(cleanPrefix(m_info, u));
 		}
 	} else if (event == LIBIRC_RFC_RPL_ENDOFNAMES) {
 		/*
@@ -240,12 +244,12 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 			return;
 		}
 
-		auto it = m_cache.names_map.find(params[1]);
-		if (it != m_cache.names_map.end()) {
+		auto it = m_cache.namesMap.find(params[1]);
+		if (it != m_cache.namesMap.end()) {
 			onNames(params[1], it->second);
 
 			/* Don't forget to remove the list */
-			m_cache.names_map.erase(it);
+			m_cache.namesMap.erase(it);
 		}
 	} else if (event == LIBIRC_RFC_RPL_WHOISUSER) {
 		/*
@@ -269,7 +273,7 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 		info.host = strify(params[3]);
 		info.realname = strify(params[5]);
 
-		m_cache.whois_map.emplace(info.nick, info);
+		m_cache.whoisMap.emplace(info.nick, info);
 	} else if (event == LIBIRC_RFC_RPL_WHOISCHANNELS) {
 		/*
 		 * Called when we have received channels for one user.
@@ -282,8 +286,8 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 			return;
 		}
 
-		auto it = m_cache.whois_map.find(params[1]);
-		if (it != m_cache.whois_map.end()) {
+		auto it = m_cache.whoisMap.find(params[1]);
+		if (it != m_cache.whoisMap.end()) {
 			std::vector<std::string> channels = util::split(params[2], " \t");
 
 			/* Clean their prefixes */
@@ -303,12 +307,12 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 		 * params[2] == End of WHOIS list
 		 */
 
-		auto it = m_cache.whois_map.find(params[1]);
-		if (it != m_cache.whois_map.end()) {
+		auto it = m_cache.whoisMap.find(params[1]);
+		if (it != m_cache.whoisMap.end()) {
 			onWhois(it->second);
 
 			/* Don't forget to remove */
-			m_cache.whois_map.erase(it);
+			m_cache.whoisMap.erase(it);
 		}
 	} else if (event == /* RPL_BOUNCE */ 5) {
 		/*
@@ -331,10 +335,10 @@ void Server::handlePart(const char *orig, const char **params) noexcept
 void Server::handlePing(const char *, const char **params) noexcept
 {
 	/* Reset the timer to detect disconnection. */
-	m_cache.ping_timer.reset();
+	m_cache.pingTimer.reset();
 
 	/* Don't forget to respond */
-	send(params[0]);
+	send("PONG {}"_format(params[0]));
 }
 
 void Server::handleQuery(const char *orig, const char **params) noexcept
@@ -442,12 +446,11 @@ Server::~Server()
 
 void Server::update() noexcept
 {
-	if (m_state_next) {
-		log::debug() << "server " << m_info.name << ": switching state "
-			     << m_state->ident() << " -> " << m_state_next->ident() << std::endl;
+	if (m_stateNext) {
+		log::debug("server {}: switch state {} -> {}"_format(m_info.name, m_state->ident(), m_stateNext->ident()));
 
-		m_state = std::move(m_state_next);
-		m_state_next = nullptr;
+		m_state = std::move(m_stateNext);
+		m_stateNext = nullptr;
 	}
 }
 
@@ -465,7 +468,7 @@ void Server::reconnect() noexcept
 	next(std::make_unique<state::Connecting>());
 }
 
-void Server::sync(fd_set &setinput, fd_set &setoutput) noexcept
+void Server::sync(fd_set &setinput, fd_set &setoutput)
 {
 	/*
 	 * 1. Send maximum of command possible if available for write

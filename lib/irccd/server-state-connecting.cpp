@@ -16,6 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <format.h>
+
+#include "logger.hpp"
 #include "server-state-connecting.hpp"
 #include "server-state-connected.hpp"
 #include "server-state-disconnected.hpp"
@@ -28,6 +31,8 @@
 #  include <arpa/nameser.h>
 #  include <resolv.h>
 #endif
+
+using namespace fmt::literals;
 
 namespace irccd {
 
@@ -73,11 +78,10 @@ bool connect(Server &server)
 void Connecting::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
 {
 	/*
-	 * The connect function will either fail if the hostname wasn't resolved
-	 * or if any of the internal functions fail.
+	 * The connect function will either fail if the hostname wasn't resolved or if any of the internal functions
+	 * fail.
 	 *
-	 * It returns success if the connection was successful but it does not
-	 * mean that connection is established.
+	 * It returns success if the connection was successful but it does not mean that connection is established.
 	 *
 	 * Because this function will be called repeatidly, the connection was started and we're still not
 	 * connected in the specified timeout time, we mark the server as disconnected.
@@ -89,16 +93,15 @@ void Connecting::prepare(Server &server, fd_set &setinput, fd_set &setoutput, ne
 	if (m_started) {
 		const ServerSettings &settings = server.settings();
 
-		if (m_timer.elapsed() > static_cast<unsigned>(settings.reconnect_timeout * 1000)) {
+		if (m_timer.elapsed() > static_cast<unsigned>(settings.reconnectDelay * 1000)) {
 			log::warning() << "server " << info.name << ": timeout while connecting" << std::endl;
 			server.next(std::make_unique<state::Disconnected>());
 		} else if (!irc_is_connected(server.session())) {
 			log::warning() << "server " << info.name << ": error while connecting: ";
 			log::warning() << irc_strerror(irc_errno(server.session())) << std::endl;
 
-			if (settings.reconnect_tries != 0) {
-				log::warning() << "server " << info.name << ": retrying in "
-					       << settings.reconnect_timeout << " seconds" << std::endl;
+			if (settings.reconnectTries != 0) {
+				log::warning("server {}: retrying in {} seconds"_format(info.name, settings.reconnectDelay));
 			}
 
 			server.next(std::make_unique<state::Disconnected>());

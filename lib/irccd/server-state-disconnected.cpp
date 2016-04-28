@@ -31,17 +31,17 @@ void Disconnected::prepare(Server &server, fd_set &, fd_set &, net::Handle &)
 	ServerSettings &settings = server.settings();
 	ServerCache &cache = server.cache();
 
-	if (settings.reconnect_tries == 0) {
+	if (settings.reconnectTries == 0) {
 		log::warning() << "server " << info.name << ": reconnection disabled, skipping" << std::endl;
 		server.onDie();
-	} else if (settings.reconnect_tries > 0 && cache.reconnect_current > settings.reconnect_tries) {
+	} else if (settings.reconnectTries > 0 && cache.reconnectCurrent > settings.reconnectTries) {
 		log::warning() << "server " << info.name << ": giving up" << std::endl;
 		server.onDie();
 	} else {
-		if (m_timer.elapsed() > static_cast<unsigned>(settings.reconnect_timeout * 1000)) {
+		if (m_timer.elapsed() > static_cast<unsigned>(settings.reconnectDelay * 1000)) {
 			irc_disconnect(server.session());
 
-			server.cache().reconnect_current ++;
+			server.cache().reconnectCurrent ++;
 			server.next(std::make_unique<state::Connecting>());
 		}
 	}

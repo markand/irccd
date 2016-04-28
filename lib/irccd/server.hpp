@@ -36,16 +36,13 @@
 #include <vector>
 
 #include "elapsed-timer.hpp"
-#include "logger.hpp"
 #include "server-state.hpp"
 #include "signals.hpp"
-#include "sysconfig.hpp"
 
 namespace irccd {
 
 /**
- * \class ServerIdentity
- * \brief Identity to use when connecting
+ * \brief Identity to use when connecting.
  */
 class ServerIdentity {
 public:
@@ -57,8 +54,7 @@ public:
 };
 
 /**
- * \class ServerChannel
- * \brief A channel to join with an optional password
+ * \brief A channel to join with an optional password.
  */
 class ServerChannel {
 public:
@@ -67,39 +63,29 @@ public:
 };
 
 /**
- * List of channels.
- */
-using ServerChannels = std::vector<ServerChannel>;
-
-/**
- * \enum ServerChanMode
- * \brief Prefixes for nicknames
+ * \brief Prefixes for nicknames.
  */
 enum class ServerChanMode {
-	Creator		= 'O',			//!< Channel creator
-	HalfOperator	= 'h',			//!< Half operator
-	Operator	= 'o',			//!< Channel operator
-	Protection	= 'a',			//!< Unkillable
-	Voiced		= 'v'			//!< Voice power
+	Creator		= 'O',				//!< Channel creator
+	HalfOperator	= 'h',				//!< Half operator
+	Operator	= 'o',				//!< Channel operator
+	Protection	= 'a',				//!< Unkillable
+	Voiced		= 'v'				//!< Voice power
 };
 
 /**
- * \class ServerWhois
- * \brief Describe a whois information
- *
- * This is provided when whois command was requested.
+ * \brief Describe a whois information.
  */
 class ServerWhois {
 public:
-	std::string nick;			//!< user's nickname
-	std::string user;			//!< user's user
-	std::string host;			//!< hostname
-	std::string realname;			//!< realname
-	std::vector<std::string> channels;	//!< the channels where the user is
+	std::string nick;				//!< user's nickname
+	std::string user;				//!< user's user
+	std::string host;				//!< hostname
+	std::string realname;				//!< realname
+	std::vector<std::string> channels;		//!< the channels where the user is
 };
 
 /**
- * \class ServerInfo
  * \brief Server information
  *
  * This class contains everything needed to connect to a server.
@@ -107,39 +93,37 @@ public:
 class ServerInfo {
 public:
 	enum {
-		Ipv6		= (1 << 0),	//!< Connect using IPv6
-		Ssl		= (1 << 1),	//!< Use SSL
-		SslVerify	= (1 << 2)	//!< Verify SSL
+		Ipv6		= (1 << 0),		//!< Connect using IPv6
+		Ssl		= (1 << 1),		//!< Use SSL
+		SslVerify	= (1 << 2)		//!< Verify SSL
 	};
 
-	std::string name;			//!< Server's name
-	std::string host;			//!< Hostname
-	std::string password;			//!< Optional server password
-	std::uint16_t port{6667};		//!< Server's port
-	std::uint8_t flags{0};			//!< Optional flags
-	std::map<ServerChanMode, char> modes;	//!< IRC modes (e.g. @~)
+	std::string name;				//!< Server's name
+	std::string host;				//!< Hostname
+	std::string password;				//!< Optional server password
+	std::uint16_t port{6667};			//!< Server's port
+	std::uint8_t flags{0};				//!< Optional flags
+	std::map<ServerChanMode, char> modes;		//!< IRC modes (e.g. @~)
 };
 
 /**
- * \class ServerSettings
  * \brief Contains settings to tweak the server
  *
- * This class contains additional settings that tweaks the
- * server operations.
+ * This class contains additional settings that tweaks the server operations.
  */
 class ServerSettings {
 public:
 	enum {
-		AutoRejoin	= (1 << 0),	//!< Auto rejoin a channel after being kicked
-		JoinInvite	= (1 << 1)	//!< Join a channel on invitation
+		AutoRejoin	= (1 << 0),		//!< Auto rejoin a channel after being kicked
+		JoinInvite	= (1 << 1)		//!< Join a channel on invitation
 	};
 
-	ServerChannels channels;		//!< List of channel to join
-	std::string command{"!"};		//!< The command character to trigger plugin command
-	std::int8_t reconnect_tries{-1};		//!< Number of tries to reconnect before giving up
-	std::uint16_t reconnect_timeout{30};		//!< Number of seconds to wait before trying to connect
-	std::uint8_t flags{0};			//!< Optional flags
-	std::uint16_t ping_timeout{300};	//!< Time in seconds before ping timeout is announced
+	std::vector<ServerChannel> channels;		//!< List of channel to join
+	std::string command{"!"};			//!< The command character to trigger plugin command
+	std::int8_t reconnectTries{-1};			//!< Number of tries to reconnect before giving up
+	std::uint16_t reconnectDelay{30};		//!< Number of seconds to wait before trying to connect
+	std::uint8_t flags{0};				//!< Optional flags
+	std::uint16_t pingTimeout{300};			//!< Time in seconds before ping timeout is announced
 };
 
 /**
@@ -147,37 +131,21 @@ public:
  */
 class ServerCache {
 public:
-	/**
-	 * Track elapsed time for ping timeout.
-	 */
-	ElapsedTimer ping_timer;
-
-	/**
-	 * Number of reconnection already tested.
-	 */
-	std::int8_t reconnect_current{1};
+	ElapsedTimer pingTimer;				//!< Track elapsed time for ping timeout.
+	std::int8_t reconnectCurrent{1};		//!< Number of reconnection already tested.
 
 	/**
 	 * Map of names being build by channels.
 	 */
-	std::map<std::string, std::set<std::string>> names_map;
+	std::map<std::string, std::set<std::string>> namesMap;
 
 	/**
 	 * Map of whois being build by nicknames.
 	 */
-	std::map<std::string, ServerWhois> whois_map;
+	std::map<std::string, ServerWhois> whoisMap;
 };
 
 /**
- * Deferred command to send to the server.
- *
- * If the command returns true, it has been correctly buffered for outgoing
- * and removed from the queue.
- */
-using ServerCommand = std::function<bool ()>;
-
-/**
- * \class Server
  * \brief The class that connect to a IRC server
  *
  * The server is a class that stores callbacks which will be called on IRC events. It is the lowest part of the
@@ -199,34 +167,34 @@ public:
 
 	/**
 	 * Signal: onChannelMode
-	 * ------------------------------------------------
+	 * ----------------------------------------------------------
 	 *
 	 * Triggered when someone changed the channel mode.
 	 *
 	 * Arguments:
-	 * - the origin
-	 * - the channel
-	 * - the mode
-	 * - the optional mode argument
+	 * - the origin,
+	 * - the channel,
+	 * - the mode,
+	 * - the optional mode argument.
 	 */
 	Signal<std::string, std::string, std::string, std::string> onChannelMode;
 
 	/**
 	 * Signal: onChannelNotice
-	 * ------------------------------------------------
+	 * ----------------------------------------------------------
 	 *
 	 * Triggered when a notice has been sent on a channel.
 	 *
 	 * Arguments:
-	 * - the origin (the nickname who has sent the notice)
-	 * - the channel name
-	 * - the notice message
+	 *   - the origin (the nickname who has sent the notice),
+	 *   - the channel name,
+	 *   - the notice message.
 	 */
 	Signal<std::string, std::string, std::string> onChannelNotice;
 
 	/**
 	 * Signal: onConnect
-	 * ------------------------------------------------
+	 * ----------------------------------------------------------
 	 *
 	 * Triggered when the server is successfully connected.
 	 */
@@ -242,185 +210,185 @@ public:
 
 	/**
 	 * Signal: onInvite
-	 * ------------------------------------------------
+	 * ----------------------------------------------------------
 	 *
 	 * Triggered when an invite has been sent to you (the bot).
 	 *
 	 * Arguments:
-	 * - the origin
-	 * - the channel
-	 * - your nickname
+	 *   - the origin,
+	 *   - the channel,
+	 *   - your nickname.
 	 */
 	Signal<std::string, std::string, std::string> onInvite;
 
 	/**
 	 * Signal: onJoin
-	 * ------------------------------------------------
+	 * ----------------------------------------------------------
 	 *
 	 * Triggered when a user has joined the channel, it also includes you.
 	 *
 	 * Arguments:
-	 * - the origin (may be you)
-	 * - the channel
+	 *   - the origin (may be you),
+	 *   - the channel.
 	 */
 	Signal<std::string, std::string> onJoin;
 
 	/**
 	 * Signal: onKick
-	 * ------------------------------------------------
+	 * ----------------------------------------------------------
 	 *
 	 * Triggered when someone has been kicked from a channel.
 	 *
 	 * Arguments:
-	 * - the origin
-	 * - the channel
-	 * - the target who has been kicked
-	 * - the optional reason
+	 *   - the origin,
+	 *   - the channel,
+	 *   - the target who has been kicked,
+	 *   - the optional reason.
 	 */
 	Signal<std::string, std::string, std::string, std::string> onKick;
 
 	/**
 	 * ServerEvent: onMessage
-	 * ------------------------------------------------
+	 * ----------------------------------------------------------
 	 *
 	 * Triggered when a message on a channel has been sent.
 	 *
 	 * Arguments:
-	 * - the origin
-	 * - the channel
-	 * - the message
+	 *   - the origin,
+	 *   - the channel,
+	 *   - the message.
 	 */
 	Signal<std::string, std::string, std::string> onMessage;
 
 	/**
 	 * Signal: onMe
-	 * ------------------------------------------------
+	 * ----------------------------------------------------------
 	 *
 	 * Triggered on a CTCP Action.
 	 *
-	 * This is both used in a channel and in a private message so the target
-	 * may be a channel or your nickname.
+	 * This is both used in a channel and in a private message so the target may be a channel or your nickname.
 	 *
 	 * Arguments:
-	 * - the origin
-	 * - the target
-	 * - the message
+	 *   - the origin,
+	 *   - the target,
+	 *   - the message.
 	 */
 	Signal<std::string, std::string, std::string> onMe;
 
 	/**
 	 * Signal: onMode
-	 * ------------------------------------------------
+	 * ----------------------------------------------------------
 	 *
 	 * Triggered when the server changed your user mode.
 	 *
 	 * Arguments:
-	 * - the origin
-	 * - the mode (e.g +i)
+	 *   - the origin,
+	 *   - the mode (e.g +i).
 	 */
 	Signal<std::string, std::string> onMode;
 
 	/**
 	 * Signal: onNames
-	 * ------------------------------------------------
+	 * ----------------------------------------------------------
 	 *
 	 * Triggered when names listing has finished on a channel.
 	 *
 	 * Arguments:
-	 * - the channel
-	 * - the ordered list of names
+	 *   - the channel,
+	 *   - the ordered list of names.
 	 */
 	Signal<std::string, std::set<std::string>> onNames;
 
 	/**
 	 * Signal: onNick
-	 * ------------------------------------------------
+	 * ----------------------------------------------------------
 	 *
 	 * Triggered when someone changed its nickname, it also includes you.
 	 *
 	 * Arguments:
-	 * - the old nickname (may be you)
-	 * - the new nickname
+	 *   - the old nickname (may be you),
+	 *   - the new nickname.
 	 */
 	Signal<std::string, std::string> onNick;
 
 	/**
 	 * Signal: onNotice
-	 * ------------------------------------------------
+	 * ----------------------------------------------------------
 	 *
 	 * Triggered when someone has sent a notice to you.
 	 *
 	 * Arguments:
-	 * - the origin
-	 * - the notice message
+	 *   - the origin,
+	 *   - the notice message.
 	 */
 	Signal<std::string, std::string> onNotice;
 
 	/**
 	 * Signal: onPart
-	 * ------------------------------------------------
+	 * ----------------------------------------------------------
 	 *
 	 * Triggered when someone has left the channel.
 	 *
 	 * Arguments:
-	 * - the origin
-	 * - the channel that the nickname has left
-	 * - the optional reason
+	 *   - the origin,
+	 *   - the channel that the nickname has left,
+	 *   - the optional reason.
 	 */
 	Signal<std::string, std::string, std::string> onPart;
 
 	/**
 	 * Signal: onQuery
-	 * ------------------------------------------------
+	 * ----------------------------------------------------------
 	 *
 	 * Triggered when someone has sent you a private message.
 	 *
 	 * Arguments:
-	 * - the origin
-	 * - the message
+	 *   - the origin,
+	 *   - the message.
 	 */
 	Signal<std::string, std::string> onQuery;
 
 	/**
 	 * Signal: onTopic
-	 * ------------------------------------------------
+	 * ----------------------------------------------------------
 	 *
 	 * Triggered when someone changed the channel topic.
 	 *
 	 * Arguments:
-	 * - the origin
-	 * - the channel
-	 * - the new topic
+	 *   - the origin,
+	 *   - the channel,
+	 *   - the new topic.
 	 */
 	Signal<std::string, std::string, std::string> onTopic;
 
 	/**
 	 * Signal: onWhois
-	 * ------------------------------------------------
+	 * ----------------------------------------------------------
 	 *
 	 * Triggered when whois information has been received.
 	 *
 	 * Arguments:
-	 * - the whois object
+	 *   - the whois object.
 	 */
 	Signal<ServerWhois> onWhois;
-
-private:
-	using SessionPtr = std::unique_ptr<Session>;
-	using Queue = std::queue<ServerCommand>;
 
 private:
 	ServerInfo m_info;
 	ServerSettings m_settings;
 	ServerIdentity m_identity;
 	ServerCache m_cache;
-	SessionPtr m_session;
-	Queue m_queue;
+
+	/* queue of requests to send */
+	std::queue<std::function<bool ()>> m_queue;
+
+	/* libircclient session (bridge) */
+	std::unique_ptr<Session> m_session;
 
 	/* States */
 	std::unique_ptr<ServerState> m_state;
-	std::unique_ptr<ServerState> m_state_next;
+	std::unique_ptr<ServerState> m_stateNext;
 
+	/* Handle libircclient callbacks */
 	void handleChannel(const char *, const char **) noexcept;
 	void handleChannelMode(const char *, const char **) noexcept;
 	void handleChannelNotice(const char *, const char **) noexcept;
@@ -462,88 +430,6 @@ public:
 	virtual ~Server();
 
 	/**
-	 * Set the next state, it is not changed immediately but on next iteration.
-	 *
-	 * \param state the new state
-	 */
-	inline void next(std::unique_ptr<ServerState> state) noexcept
-	{
-		m_state_next = std::move(state);
-	}
-
-	/**
-	 * Switch to next state if it has.
-	 *
-	 * If the server is installed into irccd, it is called automatically.
-	 *
-	 * \warning Not thread-safe
-	 */
-	void update() noexcept;
-
-	/**
-	 * Request to disconnect. This function does not notify the
-	 * ServerService.
-	 *
-	 * \see Irccd::serverDisconnect
-	 * \note Thread-safe
-	 */
-	void disconnect() noexcept;
-
-	/**
-	 * Asks for a reconnection. This function does not notify the
-	 * ServerService.
-	 *
-	 * \see Irccd::serverReconnect
-	 * \note Thread-safe
-	 */
-	void reconnect() noexcept;
-
-	/**
-	 * Flush the pending commands if possible. This function will send
-	 * as much as possible commands.
-	 *
-	 * If the server is installed into the ServerManager, it is called
-	 * automatically.
-	 *
-	 * \note Thread-safe
-	 */
-	void flush() noexcept;
-
-	/**
-	 * Prepare the IRC session.
-	 *
-	 * \warning Not thread-safe
-	 */
-	inline void prepare(fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) noexcept
-	{
-		m_state->prepare(*this, setinput, setoutput, maxfd);
-	}
-
-	/**
-	 * Process incoming/outgoing data after selection.
-	 *
-	 * If the server is installed into the ServerManager, it is called
-	 * automatically.
-	 *
-	 * \param setinput
-	 * \param setoutput
-	 * \throw any exception that have been throw from user functions
-	 */
-	void sync(fd_set &setinput, fd_set &setoutput) noexcept;
-
-	/**
-	 * Get the server information.
-	 *
-	 * \warning This overload should not be used by the user, it is required to
-	 *          update the nickname.
-	 * \return the server information
-	 */
-	inline ServerInfo &info() noexcept
-	{
-		return m_info;
-	}
-
-	/**
 	 * Get the server information.
 	 *
 	 * \return the server information
@@ -554,21 +440,9 @@ public:
 	}
 
 	/**
-	 * Access the cache.
-	 *
-	 * \return the cache
-	 * \warning use with care
-	 */
-	inline ServerCache &cache() noexcept
-	{
-		return m_cache;
-	}
-
-	/**
 	 * Get the server settings.
 	 *
-	 * \warning This overload should not be used by the user, it is required to
-	 *          update the reconnection information.
+	 * \note some settings will be used only after the next reconnection
 	 * \return the settings
 	 */
 	inline ServerSettings &settings() noexcept
@@ -587,23 +461,24 @@ public:
 	}
 
 	/**
-	 * Get the identity.
-	 *
-	 * \return the identity
-	 */
-	inline ServerIdentity &identity() noexcept
-	{
-		return m_identity;
-	}
-
-	/**
-	 * Overloaded function
+	 * Access the identity.
 	 *
 	 * \return the identity
 	 */
 	inline const ServerIdentity &identity() const noexcept
 	{
 		return m_identity;
+	}
+
+	/**
+	 * Access the cache.
+	 *
+	 * \return the cache
+	 * \warning use with care
+	 */
+	inline ServerCache &cache() noexcept
+	{
+		return m_cache;
 	}
 
 	/**
@@ -615,6 +490,50 @@ public:
 	{
 		return *m_session;
 	}
+
+	/**
+	 * Set the next state, it is not changed immediately but on next iteration.
+	 *
+	 * \param state the new state
+	 */
+	inline void next(std::unique_ptr<ServerState> state) noexcept
+	{
+		m_stateNext = std::move(state);
+	}
+
+	/**
+	 * Switch to next state if it has.
+	 */
+	void update() noexcept;
+
+	/**
+	 * Force disconnection.
+	 */
+	void disconnect() noexcept;
+
+	/**
+	 * Asks for a reconnection.
+	 */
+	void reconnect() noexcept;
+
+	/**
+	 * Prepare the IRC session.
+	 *
+	 * \warning Not thread-safe
+	 */
+	inline void prepare(fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) noexcept
+	{
+		m_state->prepare(*this, setinput, setoutput, maxfd);
+	}
+
+	/**
+	 * Process incoming/outgoing data after selection.
+	 *
+	 * \param setinput
+	 * \param setoutput
+	 * \throw any exception that have been throw from user functions
+	 */
+	void sync(fd_set &setinput, fd_set &setoutput);
 
 	/**
 	 * Determine if the nickname is the bot itself.
@@ -629,7 +548,6 @@ public:
 	 *
 	 * \param channel the channel
 	 * \param mode the new mode
-	 * \note Thread-safe
 	 */
 	void cmode(std::string channel, std::string mode);
 
@@ -638,7 +556,6 @@ public:
 	 *
 	 * \param channel the channel
 	 * \param message message notice
-	 * \note Thread-safe
 	 */
 	void cnotice(std::string channel, std::string message);
 
@@ -647,7 +564,6 @@ public:
 	 *
 	 * \param target the target nickname
 	 * \param channel the channel
-	 * \note Thread-safe
 	 */
 	void invite(std::string target, std::string channel);
 
@@ -656,7 +572,6 @@ public:
 	 *
 	 * \param channel the channel to join
 	 * \param password the optional password
-	 * \note Thread-safe
 	 */
 	void join(std::string channel, std::string password = "");
 
@@ -667,7 +582,6 @@ public:
 	 * \param target the target to kick
 	 * \param channel from which channel
 	 * \param reason the optional reason
-	 * \note Thread-safe
 	 */
 	void kick(std::string target, std::string channel, std::string reason = "");
 
@@ -677,7 +591,6 @@ public:
 	 *
 	 * \param target the nickname or the channel
 	 * \param message the message
-	 * \note Thread-safe
 	 */
 	void me(std::string target, std::string message);
 
@@ -686,7 +599,6 @@ public:
 	 *
 	 * \param target the target
 	 * \param message the message
-	 * \note Thread-safe
 	 */
 	void message(std::string target, std::string message);
 
@@ -694,7 +606,6 @@ public:
 	 * Change your user mode.
 	 *
 	 * \param mode the mode
-	 * \note Thread-safe
 	 */
 	void mode(std::string mode);
 
@@ -702,7 +613,6 @@ public:
 	 * Request the list of names.
 	 *
 	 * \param channel the channel
-	 * \note Thread-safe
 	 */
 	void names(std::string channel);
 
@@ -710,7 +620,6 @@ public:
 	 * Change your nickname.
 	 *
 	 * \param newnick the new nickname to use
-	 * \note Thread-safe
 	 */
 	void nick(std::string newnick);
 
@@ -719,7 +628,6 @@ public:
 	 *
 	 * \param target the target
 	 * \param message the notice message
-	 * \note Thread-safe
 	 */
 	void notice(std::string target, std::string message);
 
@@ -730,7 +638,6 @@ public:
 	 *
 	 * \param channel the channel to leave
 	 * \param reason the optional reason
-	 * \note Thread-safe
 	 */
 	void part(std::string channel, std::string reason = "");
 
@@ -740,7 +647,6 @@ public:
 	 *
 	 * \warning Use this function with care
 	 * \param raw the raw message (without `\r\n\r\n`)
-	 * \note Thread-safe
 	 */
 	void send(std::string raw);
 
@@ -749,7 +655,6 @@ public:
 	 *
 	 * \param channel the channel
 	 * \param topic the desired topic
-	 * \note Thread-safe
 	 */
 	void topic(std::string channel, std::string topic);
 
@@ -757,7 +662,6 @@ public:
 	 * Request for whois information.
 	 *
 	 * \param target the target nickname
-	 * \note Thread-safe
 	 */
 	void whois(std::string target);
 };

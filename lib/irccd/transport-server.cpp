@@ -24,6 +24,7 @@
 
 #include <sstream>
 
+#include "logger.hpp"
 #include "transport-server.hpp"
 
 namespace irccd {

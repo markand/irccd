@@ -38,6 +38,7 @@
 #include "js-timer.hpp"
 #include "js-unicode.hpp"
 #include "js-util.hpp"
+#include "logger.hpp"
 #include "path.hpp"
 #include "plugin.hpp"
 #include "server.hpp"

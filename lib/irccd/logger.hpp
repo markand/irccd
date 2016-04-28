@@ -128,8 +128,8 @@ public:
  */
 class File : public Interface {
 private:
-	std::string m_output_normal;
-	std::string m_output_error;
+	std::string m_outputNormal;
+	std::string m_outputError;
 
 public:
 	/**

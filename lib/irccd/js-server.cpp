@@ -391,8 +391,8 @@ duk::Ret constructor(duk::ContextPtr ctx)
 		settings.channels.push_back(Server::splitChannel(chan));
 	}
 
-	settings.reconnect_tries = duk::optionalProperty<int>(ctx, 0, "recoTries", (int)settings.reconnect_tries);
-	settings.reconnect_timeout = duk::optionalProperty<int>(ctx, 0, "recoTimeout", (int)settings.reconnect_timeout);
+	settings.reconnectTries = duk::optionalProperty<int>(ctx, 0, "recoTries", (int)settings.reconnectTries);
+	settings.reconnectDelay = duk::optionalProperty<int>(ctx, 0, "recoTimeout", (int)settings.reconnectDelay);
 
 	if (duk::optionalProperty<bool>(ctx, 0, "joinInvite", false)) {
 		settings.flags |= ServerSettings::JoinInvite;

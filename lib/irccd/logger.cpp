@@ -133,18 +133,18 @@ public:
  */
 
 /* Information buffer */
-Buffer buffer_info{Buffer::Info};
+Buffer bufferInfo{Buffer::Info};
 
 /* Warning buffer */
-Buffer buffer_warning{Buffer::Warning};
+Buffer bufferWarning{Buffer::Warning};
 
 /* Debug buffer */
-Buffer buffer_debug{Buffer::Debug};
+Buffer bufferDebug{Buffer::Debug};
 
 /* Stream outputs. */
-std::ostream stream_info(&buffer_info);
-std::ostream stream_warning(&buffer_warning);
-std::ostream stream_debug(&buffer_debug);
+std::ostream streamInfo(&bufferInfo);
+std::ostream streamWarning(&bufferWarning);
+std::ostream streamDebug(&bufferDebug);
 
 } // !namespace
 
@@ -174,24 +174,24 @@ void Console::debug(const std::string &line)
  */
 
 File::File(std::string normal, std::string errors)
-	: m_output_normal(std::move(normal))
-	, m_output_error(std::move(errors))
+	: m_outputNormal(std::move(normal))
+	, m_outputError(std::move(errors))
 {
 }
 
 void File::info(const std::string &line)
 {
-	std::ofstream(m_output_normal, std::ofstream::out | std::ofstream::app) << line << std::endl;
+	std::ofstream(m_outputNormal, std::ofstream::out | std::ofstream::app) << line << std::endl;
 }
 
 void File::warning(const std::string &line)
 {
-	std::ofstream(m_output_error, std::ofstream::out | std::ofstream::app) << line << std::endl;
+	std::ofstream(m_outputError, std::ofstream::out | std::ofstream::app) << line << std::endl;
 }
 
 void File::debug(const std::string &line)
 {
-	std::ofstream(m_output_normal, std::ofstream::out | std::ofstream::app) << line << std::endl;
+	std::ofstream(m_outputNormal, std::ofstream::out | std::ofstream::app) << line << std::endl;
 }
 
 /*
@@ -260,28 +260,28 @@ void setInterface(std::unique_ptr<Interface> newiface) noexcept
 std::ostream &info(const std::string &message)
 {
 	if (!message.empty()) {
-		stream_info << message << std::endl;
+		streamInfo << message << std::endl;
 	}
 
-	return stream_info;
+	return streamInfo;
 }
 
 std::ostream &warning(const std::string &message)
 {
 	if (!message.empty()) {
-		stream_warning << message << std::endl;
+		streamWarning << message << std::endl;
 	}
 
-	return stream_warning;
+	return streamWarning;
 }
 
 std::ostream &debug(const std::string &message)
 {
 	if (!message.empty()) {
-		stream_debug << message << std::endl;
+		streamDebug << message << std::endl;
 	}
 
-	return stream_debug;
+	return streamDebug;
 }
 
 bool isVerbose() noexcept
