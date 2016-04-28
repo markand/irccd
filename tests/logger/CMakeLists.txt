@@ -16,27 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# Project
-project(tests)
-
-if (WITH_TESTS)
-	# Misc
-	add_subdirectory(elapsedtimer)
-	add_subdirectory(logger)
-	add_subdirectory(path)
-	add_subdirectory(rules)
-	add_subdirectory(timer)
-	add_subdirectory(util)
-
-	# JS API
-	if (WITH_JS)
-		add_subdirectory(js-elapsedtimer)
-		add_subdirectory(js-file)
-		add_subdirectory(js-irccd)
-		add_subdirectory(js-logger)
-		add_subdirectory(js-system)
-		add_subdirectory(js-timer)
-		add_subdirectory(js-unicode)
-		add_subdirectory(js-util)
-	endif ()
-endif ()
+irccd_define_test(
+	NAME logger
+	SOURCES main.cpp
+	LIBRARIES libirccd
+)

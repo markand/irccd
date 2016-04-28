@@ -62,6 +62,16 @@ public:
 	virtual ~Interface() = default;
 
 	/**
+	 * Write a debug message.
+	 *
+	 * This function is called only if NDEBUG is not defined.
+	 *
+	 * \param data the data
+	 * \see log::debug
+	 */
+	virtual void debug(const std::string &line) = 0;
+
+	/**
 	 * Write a information message.
 	 *
 	 * The function is called only if verbose is true.
@@ -80,16 +90,62 @@ public:
 	 * \see log::warning
 	 */
 	virtual void warning(const std::string &line) = 0;
+};
+
+/*
+ * Filter -- modify messages before printing
+ * ------------------------------------------------------------------
+ */
+
+/**
+ * \brief Filter messages before printing them.
+ *
+ * Derive from this class and use log::setFilter.
+ */
+class Filter {
+public:
+	/**
+	 * Default constructor.
+	 */
+	Filter() = default;
 
 	/**
-	 * Write a debug message.
-	 *
-	 * This function is called only if NDEBUG is not defined.
-	 *
-	 * \param data the data
-	 * \see log::debug
+	 * Virtual destructor defaulted.
 	 */
-	virtual void debug(const std::string &line) = 0;
+	virtual ~Filter() = default;
+
+	/**
+	 * Update the debug message.
+	 *
+	 * \param input the message
+	 * \return the updated message
+	 */
+	virtual std::string preDebug(std::string input) const
+	{
+		return input;
+	}
+
+	/**
+	 * Update the information message.
+	 *
+	 * \param input the message
+	 * \return the updated message
+	 */
+	virtual std::string preInfo(std::string input) const
+	{
+		return input;
+	}
+
+	/**
+	 * Update the warning message.
+	 *
+	 * \param input the message
+	 * \return the updated message
+	 */
+	virtual std::string preWarning(std::string input) const
+	{
+		return input;
+	}
 };
 
 /*
@@ -103,6 +159,11 @@ public:
 class Console : public Interface {
 public:
 	/**
+	 * \copydoc Interface::debug
+	 */
+	void debug(const std::string &line) override;
+
+	/**
 	 * \copydoc Interface::info
 	 */
 	void info(const std::string &line) override;
@@ -111,11 +172,6 @@ public:
 	 * \copydoc Interface::warning
 	 */
 	void warning(const std::string &line) override;
-
-	/**
-	 * \copydoc Interface::debug
-	 */
-	void debug(const std::string &line) override;
 };
 
 /*
@@ -141,6 +197,11 @@ public:
 	File(std::string normal, std::string errors);
 
 	/**
+	 * \copydoc Interface::debug
+	 */
+	void debug(const std::string &line) override;
+
+	/**
 	 * \copydoc Interface::info
 	 */
 	void info(const std::string &line) override;
@@ -149,11 +210,6 @@ public:
 	 * \copydoc Interface::warning
 	 */
 	void warning(const std::string &line) override;
-
-	/**
-	 * \copydoc Interface::debug
-	 */
-	void debug(const std::string &line) override;
 };
 
 /*
@@ -169,6 +225,11 @@ public:
 class Silent : public Interface {
 public:
 	/**
+	 * \copydoc Interface::debug
+	 */
+	void debug(const std::string &line) override;
+
+	/**
 	 * \copydoc Interface::info
 	 */
 	void info(const std::string &line) override;
@@ -177,11 +238,6 @@ public:
 	 * \copydoc Interface::warning
 	 */
 	void warning(const std::string &line) override;
-
-	/**
-	 * \copydoc Interface::debug
-	 */
-	void debug(const std::string &line) override;
 };
 
 /*
@@ -207,6 +263,11 @@ public:
 	~Syslog();
 
 	/**
+	 * \copydoc Interface::debug
+	 */
+	void debug(const std::string &line) override;
+
+	/**
 	 * \copydoc Interface::info
 	 */
 	void info(const std::string &line) override;
@@ -215,11 +276,6 @@ public:
 	 * \copydoc Interface::warning
 	 */
 	void warning(const std::string &line) override;
-
-	/**
-	 * \copydoc Interface::debug
-	 */
-	void debug(const std::string &line) override;
 };
 
 #endif // !HAVE_SYSLOG
@@ -232,9 +288,18 @@ public:
 /**
  * Update the logger interface.
  *
+ * \pre iface must not be null
  * \param iface the new interface
  */
 void setInterface(std::unique_ptr<Interface> iface) noexcept;
+
+/**
+ * Set an optional filter.
+ *
+ * \pre filter must not be null
+ * \param filter the filter
+ */
+void setFilter(std::unique_ptr<Filter> filter) noexcept;
 
 /**
  * Get the stream for informational messages.

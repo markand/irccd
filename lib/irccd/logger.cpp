@@ -45,6 +45,7 @@ namespace {
 
 std::atomic<bool> verbose{false};
 std::unique_ptr<Interface> iface{new Console};
+std::unique_ptr<Filter> filter{new Filter};
 
 /*
  * Buffer -- output buffer.
@@ -65,27 +66,27 @@ public:
 private:
 	Level m_level;
 
-	void debug(const std::string &line)
+	void debug(std::string line)
 	{
 	/* Print only in debug mode, the buffer is flushed anyway */
 #if !defined(NDEBUG)
-		iface->debug(line);
+		iface->debug(filter->preDebug(std::move(line)));
 #else
 		(void)line;
 #endif
 	}
 
-	void info(const std::string &line)
+	void info(std::string line)
 	{
 		/* Print only if verbose, the buffer will be flushed anyway. */
 		if (verbose) {
-			iface->info(line);
+			iface->info(filter->preInfo(std::move(line)));
 		}
 	}
 
-	void warning(const std::string &line)
+	void warning(std::string line)
 	{
-		iface->warning(line);
+		iface->warning(filter->preWarning(std::move(line)));
 	}
 
 public:
@@ -108,13 +109,13 @@ public:
 
 			switch (m_level) {
 			case Level::Debug:
-				debug(line);
+				debug(std::move(line));
 				break;
 			case Level::Info:
-				info(line);
+				info(std::move(line));
 				break;
 			case Level::Warning:
-				warning(line);
+				warning(std::move(line));
 				break;
 			default:
 				break;
@@ -255,6 +256,13 @@ void setInterface(std::unique_ptr<Interface> newiface) noexcept
 	assert(newiface);
 
 	iface = std::move(newiface);
+}
+
+void setFilter(std::unique_ptr<Filter> newfilter) noexcept
+{
+	assert(filter);
+
+	filter = std::move(newfilter);
 }
 
 std::ostream &info(const std::string &message)
