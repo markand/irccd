@@ -32,6 +32,8 @@ using namespace std;
 using namespace std::placeholders;
 using namespace std::string_literals;
 
+using namespace fmt::literals;
+
 namespace irccd {
 
 void Irccd::handleServerChannelMode(std::weak_ptr<Server> ptr, std::string origin, std::string channel, std::string mode, std::string arg)
@@ -867,8 +869,9 @@ void Irccd::addPlugin(std::shared_ptr<Plugin> plugin)
 
 void Irccd::loadPlugin(std::string name, const std::string &source, bool find)
 {
-	if (m_plugins.count(name) > 0)
+	if (m_plugins.count(name) > 0) {
 		throw std::invalid_argument("plugin already loaded");
+	}
 
 	std::vector<string> paths;
 	std::shared_ptr<Plugin> plugin;
@@ -882,10 +885,10 @@ void Irccd::loadPlugin(std::string name, const std::string &source, bool find)
 	}
 
 	/* Iterate over all paths */
-	log::info(fmt::format("plugin {}: trying to load:", name));
+	log::info("plugin {}: trying to load:"_format(name));
 
 	for (const auto &path : paths) {
-		log::info(fmt::format("  from ", path));
+		log::info() << "  from " << path << std::endl;
 
 		try {
 			plugin = std::make_shared<Plugin>(name, path, m_pluginConf[name]);
