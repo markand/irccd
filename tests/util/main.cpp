@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cstdint>
+
 #include <gtest/gtest.h>
 
 #include <irccd/util.hpp>
@@ -315,6 +317,48 @@ TEST(IsNumber, incorrect)
 {
 	ASSERT_FALSE(util::isNumber("lol"));
 	ASSERT_FALSE(util::isNumber("this is not a number"));
+}
+
+/*
+ * util::toNumber function
+ * ------------------------------------------------------------------
+ */
+
+TEST(ToNumber, correct)
+{
+	/* unsigned */
+	ASSERT_EQ(50u, util::toNumber<std::uint8_t>("50"));
+	ASSERT_EQ(5000u, util::toNumber<std::uint16_t>("5000"));
+	ASSERT_EQ(50000u, util::toNumber<std::uint32_t>("50000"));
+	ASSERT_EQ(500000u, util::toNumber<std::uint64_t>("500000"));
+
+	/* signed */
+	ASSERT_EQ(-50, util::toNumber<std::int8_t>("-50"));
+	ASSERT_EQ(-500, util::toNumber<std::int16_t>("-500"));
+	ASSERT_EQ(-5000, util::toNumber<std::int32_t>("-5000"));
+	ASSERT_EQ(-50000, util::toNumber<std::int64_t>("-50000"));
+}
+
+TEST(ToNumber, incorrect)
+{
+	/* unsigned */
+	ASSERT_THROW(util::toNumber<std::uint8_t>("300"), std::out_of_range);
+	ASSERT_THROW(util::toNumber<std::uint16_t>("80000"), std::out_of_range);
+	ASSERT_THROW(util::toNumber<std::uint8_t>("-125"), std::out_of_range);
+	ASSERT_THROW(util::toNumber<std::uint16_t>("-25000"), std::out_of_range);
+
+	/* signed */
+	ASSERT_THROW(util::toNumber<std::int8_t>("300"), std::out_of_range);
+	ASSERT_THROW(util::toNumber<std::int16_t>("80000"), std::out_of_range);
+	ASSERT_THROW(util::toNumber<std::int8_t>("-300"), std::out_of_range);
+	ASSERT_THROW(util::toNumber<std::int16_t>("-80000"), std::out_of_range);
+
+	/* not numbers */
+	ASSERT_THROW(util::toNumber<std::uint8_t>("nonono"), std::invalid_argument);
+
+	/* custom ranges */
+	ASSERT_THROW(util::toNumber<std::uint8_t>("50", 0, 10), std::out_of_range);
+	ASSERT_THROW(util::toNumber<std::int8_t>("-50", -10, 10), std::out_of_range);
 }
 
 } // !irccd

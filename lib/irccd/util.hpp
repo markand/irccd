@@ -26,9 +26,12 @@
 
 #include <ctime>
 #include <initializer_list>
+#include <limits>
 #include <regex>
 #include <sstream>
+#include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <vector>
 
@@ -230,6 +233,43 @@ bool isReal(const std::string &value) noexcept;
 inline bool isNumber(const std::string &value) noexcept
 {
 	return isInt(value) || isReal(value);
+}
+
+/**
+ * Try to convert the string into number.
+ *
+ * This function will try to convert the string to number in the limits of T.
+ *
+ * If the string is not a number or if the converted value is out of range than specified boundaries, an exception is
+ * thrown.
+ *
+ * By default, the function will use numeric limits from T.
+ *
+ * \param number the string to convert
+ * \param min the minimum (defaults to T minimum)
+ * \param max the maximum (defaults to T maximum)
+ * \return the converted value
+ * \throw std::invalid_argument if number is not a string
+ * \throw std::out_of_range if the number is not between min and max
+ */
+template <typename T>
+inline T toNumber(const std::string &number, T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max())
+{
+	static_assert(std::is_integral<T>::value, "T must be integer type");
+
+	std::conditional_t<std::is_unsigned<T>::value, unsigned long long, long long> value;
+
+	if (std::is_unsigned<T>::value) {
+		value = std::stoull(number);
+	} else {
+		value = std::stoll(number);
+	}
+
+	if (value < min || value > max) {
+		throw std::out_of_range("out of range");
+	}
+
+	return static_cast<T>(value);
 }
 
 /**
