@@ -37,6 +37,25 @@ TEST(Format, nothing)
 	ASSERT_EQ(expected, result);
 }
 
+TEST(Format, escape)
+{
+	util::Substitution params;
+
+	params.keywords.emplace("target", "hello");
+
+	ASSERT_EQ("$@#", util::format("$@#"));
+	ASSERT_EQ(" $ @ # ", util::format(" $ @ # "));
+	ASSERT_EQ("#", util::format("#"));
+	ASSERT_EQ(" # ", util::format(" # "));
+	ASSERT_EQ("#@", util::format("#@"));
+	ASSERT_EQ("##", util::format("##"));
+	ASSERT_EQ("#!", util::format("#!"));
+	ASSERT_EQ("#{target}", util::format("##{target}"));
+	ASSERT_EQ("@hello", util::format("@#{target}", params));
+	ASSERT_EQ("hello#", util::format("#{target}#", params));
+	ASSERT_ANY_THROW(util::format("#{failure"));
+}
+
 TEST(Format, keywordSimple)
 {
 	util::Substitution params;

@@ -65,6 +65,11 @@ const std::unordered_map<std::string, char> attributesTable{
 	{ "reverse",	'\x16'	}
 };
 
+inline bool isReserved(char token) noexcept
+{
+	return token == '#' || token == '@' || token == '$';
+}
+
 std::string substituteDate(const std::string &text, const Substitution &params)
 {
 	std::ostringstream oss;
@@ -195,48 +200,58 @@ std::string substitute(std::string::const_iterator &it, std::string::const_itera
 
 std::string format(std::string text, const Substitution &params)
 {
-	std::ostringstream oss;
-
 	/*
 	 * Change the date format before anything else to avoid interpolation with keywords and
 	 * user input.
 	 */
 	text = substituteDate(text, params);
 
-	std::string::const_iterator it = text.begin();
-	std::string::const_iterator end = text.end();
+	std::ostringstream oss;
 
-	while (it != end) {
+	for (auto it = text.cbegin(), end = text.cend(); it != end; ) {
 		auto token = *it;
 
-		if (token == '#' || token == '@' || token == '$') {
-			++ it;
-
-			if (it == end) {
-				oss << token;
-				continue;
-			}
-
-			if (*it == '{') {
-				/* Do we have a variable? */
-				oss << substitute(++it, end, token, params);
-			} else if (*it == token) {
-				/* Need one for sure */
-				oss << token;
-
-				/* Do we have a double token followed by a { for escaping? */
-				if (++it == end) {
-					continue;
-				}
-
-				if (*it != '{') {
-					oss << token;
-				}
-			} else {
-				oss << *it++;
-			}
-		} else {
+		/* Is the current character a reserved token or not? */
+		if (!isReserved(token)) {
 			oss << *it++;
+			continue;
+		}
+
+		/* The token was at the end, just write it and return now. */
+		if (++it == end) {
+			oss << token;
+			continue;
+		}
+
+		/* The token is declaring a template variable, substitute it. */
+		if (*it == '{') {
+			oss << substitute(++it, end, token, params);
+			continue;
+		}
+
+		/*
+		 * If the next token is different from the previous one, just let the next iteration parse the string because
+		 * we can have the following constructs.
+		 *
+		 * "@#{var}" -> "@value"
+		 */
+		if (*it != token) {
+			oss << token;
+			continue;
+		}
+
+		/*
+		 * Write the token only if it's not a variable because at this step we may have the following
+		 * constructs.
+		 *
+		 * "##" -> "##"
+		 * "##hello" -> "##hello"
+		 * "##{hello}" -> "#{hello}"
+		 */
+		if (++it == end) {
+			oss << token << token;
+		} else if (*it == '{') {
+			oss << token;
 		}
 	}
 
