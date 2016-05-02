@@ -56,6 +56,34 @@ TEST(Format, escape)
 	ASSERT_ANY_THROW(util::format("#{failure"));
 }
 
+TEST(Format, disableDate)
+{
+	util::Substitution params;
+
+	params.flags &= ~(util::Substitution::Date);
+
+	ASSERT_EQ("%H:%M", util::format("%H:%M", params));
+}
+
+TEST(Format, disableKeywords)
+{
+	util::Substitution params;
+
+	params.keywords.emplace("target", "hello");
+	params.flags &= ~(util::Substitution::Keywords);
+
+	ASSERT_EQ("#{target}", util::format("#{target}", params));
+}
+
+TEST(Format, disableEnv)
+{
+	util::Substitution params;
+
+	params.flags &= ~(util::Substitution::Env);
+
+	ASSERT_EQ("${HOME}", util::format("${HOME}", params));
+}
+
 TEST(Format, keywordSimple)
 {
 	util::Substitution params;

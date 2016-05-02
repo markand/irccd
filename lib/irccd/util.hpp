@@ -65,6 +65,18 @@ using MessagePair = std::pair<std::string, MessageType>;
 class Substitution {
 public:
 	/**
+	 * \brief Disable or enable some features.
+	 */
+	enum Flags {
+		Date		= (1 << 0),	//!< date templates
+		Keywords	= (1 << 1),	//!< keywords
+		Env		= (1 << 2),	//!< environment variables
+		IrcAttrs	= (1 << 3),	//!< IRC escape codes
+	};
+
+	std::uint8_t flags{Date | Keywords | Env | IrcAttrs};
+
+	/**
 	 * Fill that field if you want a date.
 	 */
 	std::time_t time{std::time(nullptr)};

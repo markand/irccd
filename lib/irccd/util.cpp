@@ -17,6 +17,7 @@
  */
 
 #include <algorithm>
+#include <cassert>
 #include <cctype>
 #include <cstdlib>
 #include <ctime>
@@ -119,41 +120,39 @@ std::string substituteAttributes(const std::string &content)
 
 	/* @{} means reset */
 	if (list.empty()) {
-		oss << attributesTable.at("reset");
-	} else {
-		/* Remove useless spaces */
-		for (auto &a : list) {
-			a = strip(a);
+		return std::string(1, attributesTable.at("reset"));
+	}
+
+	/* Remove useless spaces */
+	std::transform(list.begin(), list.end(), list.begin(), strip);
+
+	/*
+	 * 0: foreground
+	 * 1: background
+	 * 2-n: attributes
+	 */
+	auto foreground = list[0];
+	if (!foreground.empty() || list.size() >= 2) {
+		/* Color sequence */
+		oss << '\x03';
+
+		/* Foreground */
+		auto it = colorTable.find(foreground);
+		if (it != colorTable.end()) {
+			oss << it->second;
 		}
 
-		/*
-		 * 0: foreground
-		 * 1: background
-		 * 2-n: attributes
-		 */
-		auto foreground = list[0];
-		if (!foreground.empty() || list.size() >= 2) {
-			/* Color sequence */
-			oss << '\x03';
+		/* Background */
+		if (list.size() >= 2 && (it = colorTable.find(list[1])) != colorTable.end()) {
+			oss << "," << it->second;
+		}
 
-			/* Foreground */
-			auto it = colorTable.find(foreground);
-			if (it != colorTable.end()) {
-				oss << it->second;
-			}
+		/* Attributes */
+		for (std::size_t i = 2; i < list.size(); ++i) {
+			auto attribute = attributesTable.find(list[i]);
 
-			/* Background */
-			if (list.size() >= 2 && (it = colorTable.find(list[1])) != colorTable.end()) {
-				oss << "," << it->second;
-			}
-
-			/* Attributes */
-			for (std::size_t i = 2; i < list.size(); ++i) {
-				auto attribute = attributesTable.find(list[i]);
-
-				if (attribute != attributesTable.end()) {
-					oss << attribute->second;
-				}
+			if (attribute != attributesTable.end()) {
+				oss << attribute->second;
 			}
 		}
 	}
@@ -163,6 +162,8 @@ std::string substituteAttributes(const std::string &content)
 
 std::string substitute(std::string::const_iterator &it, std::string::const_iterator &end, char token, const Substitution &params)
 {
+	assert(isReserved(token));
+
 	std::string content, value;
 
 	if (it == end) {
@@ -173,24 +174,33 @@ std::string substitute(std::string::const_iterator &it, std::string::const_itera
 		content += *it++;
 	}
 
-	if (*it != '}' || it == end) {
+	if (it == end || *it != '}') {
 		throw std::invalid_argument("unclosed "s + token + " construct"s);
 	}
 
 	it++;
 
+	/* Create default original value if flag is disabled */
+	value = std::string(1, token) + "{"s + content + "}"s;
+
 	switch (token) {
 	case '#':
-		value = substituteKeywords(content, params);
+		if (params.flags & Substitution::Keywords) {
+			value = substituteKeywords(content, params);
+		}
 		break;
 	case '$':
-		value = substituteEnv(content);
+		if (params.flags & Substitution::Env) {
+			value = substituteEnv(content);
+		}
 		break;
 	case '@':
-		value = substituteAttributes(content);
+		if (params.flags & Substitution::IrcAttrs) {
+			substituteAttributes(content);
+		}
 		break;
 	default:
-		throw std::invalid_argument("unknown "s + token + " construct");
+		break;
 	}
 
 	return value;
@@ -204,7 +214,9 @@ std::string format(std::string text, const Substitution &params)
 	 * Change the date format before anything else to avoid interpolation with keywords and
 	 * user input.
 	 */
-	text = substituteDate(text, params);
+	if (params.flags & Substitution::Date) {
+		text = substituteDate(text, params);
+	}
 
 	std::ostringstream oss;
 
