@@ -253,10 +253,10 @@ void Irccd::handleServerMessage(std::weak_ptr<Server> ptr, std::string origin, s
 #if defined(WITH_JS)
 	post(ServerEvent(server->info().name, origin, channel,
 		[=] (Plugin &plugin) -> std::string {
-			return util::parseMessage(message, server->settings().command, plugin.info().name).second == util::MessageType::Command ? "onCommand" : "onMessage";
+			return util::parseMessage(message, server->settings().command, plugin.name()).second == util::MessageType::Command ? "onCommand" : "onMessage";
 		},
 		[=] (Plugin &plugin) {
-			util::MessagePair pack = util::parseMessage(message, server->settings().command, plugin.info().name);
+			util::MessagePair pack = util::parseMessage(message, server->settings().command, plugin.name());
 
 			if (pack.second == util::MessageType::Command)
 				plugin.onCommand(std::move(server), std::move(origin), std::move(channel), std::move(pack.first));
@@ -481,10 +481,10 @@ void Irccd::handleServerQuery(std::weak_ptr<Server> ptr, std::string origin, std
 #if defined(WITH_JS)
 	post(ServerEvent(server->info().name, origin, /* channel */ "",
 		[=] (Plugin &plugin) -> std::string {
-			return util::parseMessage(message, server->settings().command, plugin.info().name).second == util::MessageType::Command ? "onQueryCommand" : "onQuery";
+			return util::parseMessage(message, server->settings().command, plugin.name()).second == util::MessageType::Command ? "onQueryCommand" : "onQuery";
 		},
 		[=] (Plugin &plugin) {
-			util::MessagePair pack = util::parseMessage(message, server->settings().command, plugin.info().name);
+			util::MessagePair pack = util::parseMessage(message, server->settings().command, plugin.name());
 
 			if (pack.second == util::MessageType::Command)
 				plugin.onQueryCommand(std::move(server), std::move(origin), std::move(pack.first));
@@ -861,9 +861,9 @@ void Irccd::addPlugin(std::shared_ptr<Plugin> plugin)
 	/* Initial load now */
 	try {
 		plugin->onLoad();
-		m_plugins.insert({plugin->info().name, plugin});
+		m_plugins.insert({plugin->name(), plugin});
 	} catch (const std::exception &ex) {
-		log::warning(fmt::format("plugin {}: {}", plugin->info().name, ex.what()));
+		log::warning(fmt::format("plugin {}: {}", plugin->name(), ex.what()));
 	}
 }
 
@@ -964,7 +964,7 @@ void Irccd::handleTimerEnd(std::weak_ptr<Plugin> ptr, std::shared_ptr<Timer> tim
 		auto plugin = ptr.lock();
 
 		if (plugin) {
-			log::debug() << "timer: finished, removing from plugin `" << plugin->info().name << "'" << std::endl;
+			log::debug() << "timer: finished, removing from plugin `" << plugin->name() << "'" << std::endl;
 			plugin->removeTimer(timer);
 		}
 	});

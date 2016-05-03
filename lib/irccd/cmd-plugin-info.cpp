@@ -52,10 +52,10 @@ json::Value PluginInfo::exec(Irccd &irccd, const json::Value &request) const
 	auto plugin = irccd.requirePlugin(request.at("plugin").toString());
 	
 	return json::object({
-		{ "author",	plugin->info().author	},
-		{ "license",	plugin->info().license	},
-		{ "summary",	plugin->info().summary	},
-		{ "version",	plugin->info().version	}
+		{ "author",	plugin->author()	},
+		{ "license",	plugin->license()	},
+		{ "summary",	plugin->summary()	},
+		{ "version",	plugin->version()	}
 	});
 #else
 	(void)irccd;

@@ -73,13 +73,12 @@ void Plugin::call(const string &name, unsigned nargs)
 
 void Plugin::putVars()
 {
-	duk::StackAssert sa{m_context};
+	duk::StackAssert sa(m_context);
 
 	/* Save a reference to this */
 	duk::putGlobal(m_context, "\xff""\xff""plugin", duk::RawPointer<Plugin>{this});
-	duk::putGlobal(m_context, "\xff""\xff""name", m_info.name);
-	duk::putGlobal(m_context, "\xff""\xff""path", m_info.path);
-	duk::putGlobal(m_context, "\xff""\xff""parent", m_info.parent);
+	duk::putGlobal(m_context, "\xff""\xff""name", m_name);
+	duk::putGlobal(m_context, "\xff""\xff""path", m_path);
 }
 
 void Plugin::putPath(const std::string &varname, const std::string &append, path::Path type)
@@ -120,9 +119,9 @@ void Plugin::putPaths()
 	 * dataPath: DATA + plugin/name (e.g ~/.local/share/irccd/plugins/<name>/)
 	 * configPath: CONFIG + plugin/name (e.g ~/.config/irccd/plugin/<name>/)
 	 */
-	putPath("dataPath", "plugin/" + m_info.name, path::PathData);
-	putPath("configPath", "plugin/" + m_info.name, path::PathConfig);
-	putPath("cachePath", "plugin/" + m_info.name, path::PathCache);
+	putPath("dataPath", "plugin/" + m_name, path::PathData);
+	putPath("configPath", "plugin/" + m_name, path::PathConfig);
+	putPath("cachePath", "plugin/" + m_name, path::PathCache);
 }
 
 void Plugin::putConfig(const PluginConfig &config)
@@ -150,11 +149,10 @@ void Plugin::putConfig(const PluginConfig &config)
 }
 
 Plugin::Plugin(std::string name, std::string path, const PluginConfig &config)
+	: m_name(std::move(name))
+	, m_path(std::move(path))
 {
 	duk::StackAssert sa(m_context);
-
-	m_info.name = std::move(name);
-	m_info.path = std::move(path);
 
 	/*
 	 * Duktape currently emit useless warnings when a file do
@@ -163,10 +161,13 @@ Plugin::Plugin(std::string name, std::string path, const PluginConfig &config)
 #if defined(HAVE_STAT)
 	struct stat st;
 
-	if (stat(m_info.path.c_str(), &st) < 0) {
+	if (stat(m_path.c_str(), &st) < 0) {
 		throw std::runtime_error(std::strerror(errno));
 	}
 #endif
+
+#if 0
+	// TODO: not enabled now
 
 	/*
 	 * Store the base path to the plugin, it is required for
@@ -181,6 +182,7 @@ Plugin::Plugin(std::string name, std::string path, const PluginConfig &config)
 	} else {
 		m_info.parent = fs::cwd();
 	}
+#endif
 
 	/* Load standard irccd API */
 	loadJsIrccd(m_context);
@@ -199,7 +201,7 @@ Plugin::Plugin(std::string name, std::string path, const PluginConfig &config)
 	putPaths();
 
 	/* Try to load the file (does not call onLoad yet) */
-	if (duk::pevalFile(m_context, m_info.path) != 0) {
+	if (duk::pevalFile(m_context, m_path) != 0) {
 		throw duk::error(m_context, -1);
 	}
 
@@ -212,19 +214,19 @@ Plugin::Plugin(std::string name, std::string path, const PluginConfig &config)
 	duk::getGlobal<void>(m_context, "info");
 
 	if (duk::type(m_context, -1) == DUK_TYPE_OBJECT) {
-		m_info.author = duk::optionalProperty<std::string>(m_context, -1, "author", "unknown");
-		m_info.license = duk::optionalProperty<std::string>(m_context, -1, "license", "unknown");
-		m_info.summary = duk::optionalProperty<std::string>(m_context, -1, "summary", "unknown");
-		m_info.version = duk::optionalProperty<std::string>(m_context, -1, "version", "unknown");
+		m_author = duk::optionalProperty<std::string>(m_context, -1, "author", m_author);
+		m_license = duk::optionalProperty<std::string>(m_context, -1, "license", m_license);
+		m_summary = duk::optionalProperty<std::string>(m_context, -1, "summary", m_summary);
+		m_version = duk::optionalProperty<std::string>(m_context, -1, "version", m_version);
 	}
 
 	duk::pop(m_context);
 
-	log::debug() << "plugin " << m_info.name << ": " << std::endl;
-	log::debug() << "  author:  " << m_info.author << std::endl;
-	log::debug() << "  license: " << m_info.license << std::endl;
-	log::debug() << "  summary: " << m_info.summary << std::endl;
-	log::debug() << "  version: " << m_info.version << std::endl;
+	log::debug() << "plugin " << m_name << ": " << std::endl;
+	log::debug() << "  author:  " << m_author << std::endl;
+	log::debug() << "  license: " << m_license << std::endl;
+	log::debug() << "  summary: " << m_summary << std::endl;
+	log::debug() << "  version: " << m_version << std::endl;
 }
 
 Plugin::~Plugin()
@@ -232,11 +234,6 @@ Plugin::~Plugin()
 	for (auto &timer : m_timers) {
 		timer->stop();
 	}
-}
-
-const PluginInfo &Plugin::info() const
-{
-	return m_info;
 }
 
 void Plugin::addTimer(std::shared_ptr<Timer> timer) noexcept
@@ -489,21 +486,5 @@ void Plugin::onWhois(std::shared_ptr<Server> server, ServerWhois whois)
 	duk::putProperty(m_context, 1, "channels", whois.channels);
 	call("onWhois", 2);
 }
-
-namespace duk {
-
-void TypeTraits<irccd::PluginInfo>::push(ContextPtr ctx, const PluginInfo &info)
-{
-	duk::StackAssert sa(ctx, 1);
-
-	duk::push(ctx, duk::Object{});
-	duk::putProperty(ctx, -1, "name", info.name);
-	duk::putProperty(ctx, -1, "author", info.author);
-	duk::putProperty(ctx, -1, "license", info.license);
-	duk::putProperty(ctx, -1, "summary", info.summary);
-	duk::putProperty(ctx, -1, "version", info.version);
-}
-
-} // !js
 
 } // !irccd

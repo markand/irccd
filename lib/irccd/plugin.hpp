@@ -41,23 +41,6 @@ class Server;
 class ServerWhois;
 
 /**
- * \class PluginInfo
- * \brief Plugin information
- */
-class PluginInfo {
-public:
-	std::string name;		//!< plugin name (from file on disk)
-	std::string parent;		//!< parent directory
-	std::string path;		//!< full path to the plugin file
-
-	/* Metadata */
-	std::string author{"unknown"};	//!< plugin author
-	std::string license{"unknown"};	//!< plugin license
-	std::string summary{"unknown"};	//!< short plugin description
-	std::string version{"unknown"};	//!< plugin version
-};
-
-/**
  * Configuration map extract from config file.
  */
 using PluginConfig = std::unordered_map<std::string, std::string>;
@@ -99,14 +82,23 @@ public:
 	Signal<std::shared_ptr<Timer>> onTimerEnd;
 
 private:
-	/* JavaScript context */
+	// Plugin information
+	std::string m_name;
+	std::string m_path;
+
+	// Metadata
+	std::string m_author{"unknown"};
+	std::string m_license{"unknown"};
+	std::string m_summary{"unknown"};
+	std::string m_version{"unknown"};
+
+	// JavaScript context
 	duk::Context m_context;
 
-	/* Plugin info and its timers */
-	PluginInfo m_info;
+	// Plugin info and its timers
 	PluginTimers m_timers;
 
-	/* Private helpers */
+	// Private helpers
 	void call(const std::string &name, unsigned nargs = 0);
 	void putVars();
 	void putPath(const std::string &varname, const std::string &append, path::Path type);
@@ -115,7 +107,7 @@ private:
 
 public:
 	/**
-	 * Correct constructor.
+	 * Constructor.
 	 *
 	 * \param name the plugin id
 	 * \param path the fully resolved path to the plugin
@@ -130,9 +122,105 @@ public:
 	~Plugin();
 
 	/**
-	 * Get the plugin information.
+	 * Get the plugin name.
+	 *
+	 * \return the plugin name
 	 */
-	const PluginInfo &info() const;
+	inline const std::string &name() const noexcept
+	{
+		return m_name;
+	}
+
+	/**
+	 * Get the plugin path.
+	 *
+	 * \return the plugin path
+	 * \note some plugins may not exist on the disk
+	 */
+	inline const std::string &path() const noexcept
+	{
+		return m_path;
+	}
+
+	/**
+	 * Get the author.
+	 *
+	 * \return the author
+	 */
+	inline const std::string &author() const noexcept
+	{
+		return m_author;
+	}
+
+	/**
+	 * Set the author.
+	 *
+	 * \param author the author
+	 */
+	inline void setAuthor(std::string author) noexcept
+	{
+		m_author = std::move(author);
+	}
+
+	/**
+	 * Get the license.
+	 *
+	 * \return the license
+	 */
+	inline const std::string &license() const noexcept
+	{
+		return m_license;
+	}
+
+	/**
+	 * Set the license.
+	 *
+	 * \param license the license
+	 */
+	inline void setLicense(std::string license) noexcept
+	{
+		m_license = std::move(license);
+	}
+
+	/**
+	 * Get the summary.
+	 *
+	 * \return the summary
+	 */
+	inline const std::string &summary() const noexcept
+	{
+		return m_summary;
+	}
+
+	/**
+	 * Set the summary.
+	 *
+	 * \param summary the summary
+	 */
+	inline void setSummary(std::string summary) noexcept
+	{
+		m_summary = std::move(summary);
+	}
+
+	/**
+	 * Get the version.
+	 *
+	 * \return the version
+	 */
+	inline const std::string &version() const noexcept
+	{
+		return m_version;
+	}
+
+	/**
+	 * Set the version.
+	 *
+	 * \param version the version
+	 */
+	inline void setVersion(std::string version) noexcept
+	{
+		m_version = std::move(version);
+	}
 
 	/**
 	 * Add a timer to the plugin.
@@ -344,25 +432,6 @@ public:
 	 */
 	void onWhois(std::shared_ptr<Server> server, ServerWhois info);
 };
-
-namespace duk {
-
-/**
- * \brief Push plugin information.
- */
-template <>
-class TypeTraits<irccd::PluginInfo> {
-public:
-	/**
-	 * Push the plugin information as JavaScript object.
-	 *
-	 * \param ctx the context
-	 * \param info the plugin information
-	 */
-	static void push(ContextPtr ctx, const PluginInfo &info);
-};
-
-} // !duk
 
 } // !irccd
 

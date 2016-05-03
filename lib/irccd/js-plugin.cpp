@@ -67,15 +67,24 @@ duk::Ret wrap(duk::ContextPtr ctx, int nret, Func &&func)
  */
 duk::Ret info(duk::ContextPtr ctx)
 {
+	Plugin *plugin = nullptr;
+
 	if (duk::top(ctx) >= 1) {
-		try {
-			duk::push(ctx, duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->requirePlugin(duk::require<std::string>(ctx, 0))->info());
-		} catch (...) {
-			duk::push(ctx, duk::Undefined{});
-		}
+		plugin = duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->getPlugin(duk::require<std::string>(ctx, 0)).get();
 	} else {
-		duk::push(ctx, duk::getGlobal<duk::RawPointer<Plugin>>(ctx, "\xff""\xff""plugin")->info());
+		plugin = duk::getGlobal<duk::RawPointer<Plugin>>(ctx, "\xff""\xff""plugin");
 	}
+
+	if (!plugin) {
+		return 0;
+	}
+
+	duk::push(ctx, duk::Object{});
+	duk::putProperty(ctx, -1, "name", plugin->name());
+	duk::putProperty(ctx, -1, "author", plugin->author());
+	duk::putProperty(ctx, -1, "license", plugin->license());
+	duk::putProperty(ctx, -1, "summary", plugin->summary());
+	duk::putProperty(ctx, -1, "version", plugin->version());
 
 	return 1;
 }

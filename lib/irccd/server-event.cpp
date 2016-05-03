@@ -51,7 +51,7 @@ void ServerEvent::operator()(Irccd &irccd) const
 		try {
 			m_plugin_exec(*pair.second);
 		} catch (const duk::ErrorInfo &info) {
-			log::warning() << "plugin " << pair.second->info().name << ": error: " << info.what() << std::endl;
+			log::warning() << "plugin " << pair.second->name() << ": error: " << info.what() << std::endl;
 
 			if (!info.fileName.empty()) {
 				log::warning() << "    " << info.fileName << ":" << info.lineNumber << std::endl;
