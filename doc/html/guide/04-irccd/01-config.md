@@ -73,6 +73,31 @@ path-logs = "/var/log/irccd/log.txt"
 path-errors = "/var/log/irccd/errors.txt"
 ````
 
+### The format section
+
+The format section let you change the irccd's output. It uses the [common patterns](#common-patterns-and-formatting).
+
+Only one keyword is defined, `message` which contains the message that irccd wants to output.
+
+<div class="alert alert-info" role="alert">
+**Note:** the colors and attributes are not supported.
+</div>
+
+The available options:
+
+  - **debug**: (string) template to use to format debug messages (Optional, default: none),
+  - **info**: (string) template to use to format information messages (Optional, default: none),
+  - **warning**: (string) template to use to format warnings (Optional, default: none).
+
+**Example**
+
+````ini
+[format]
+debug = "%H:%M debug: #{message}"
+info = "%H:%M info: #{message}"
+warning = "%H:%M warning: #{message}"
+````
+
 ### The identity section
 
 This section is completely optional, if you don't provide one, irccd will use a default identity with **irccd** as

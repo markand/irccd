@@ -46,6 +46,7 @@ private:
 	parser::Result m_options;
 
 	void loadGeneral(const ini::Document &config) const;
+	void loadFormats(const ini::Document &config) const;
 	void loadLogFile(const ini::Section &sc) const;
 	void loadLogSyslog() const;
 	void loadLogs(const ini::Document &config) const;

@@ -44,6 +44,47 @@ using namespace std::string_literals;
 
 namespace irccd {
 
+namespace {
+
+class IrccdLogFilter : public log::Filter {
+private:
+	std::string convert(const std::string &tmpl, std::string input) const
+	{
+		if (tmpl.empty()) {
+			return input;
+		}
+
+		util::Substitution params;
+
+		params.flags &= ~(util::Substitution::IrcAttrs);
+		params.keywords.emplace("message", std::move(input));
+
+		return util::format(tmpl, params);
+	}
+
+public:
+	std::string m_debug;
+	std::string m_info;
+	std::string m_warning;
+
+	std::string preDebug(std::string input) const override
+	{
+		return convert(m_debug, std::move(input));
+	}
+
+	std::string preInfo(std::string input) const override
+	{
+		return convert(m_info, std::move(input));
+	}
+
+	std::string preWarning(std::string input) const override
+	{
+		return convert(m_warning, std::move(input));
+	}
+};
+
+} // !namespace
+
 void Config::loadGeneral(const ini::Document &config) const
 {
 	ini::Document::const_iterator sc = config.find("general");
@@ -100,6 +141,30 @@ void Config::loadGeneral(const ini::Document &config) const
 			log::warning() << "irccd: could not set " << it->key() << ": " << ex.what() << std::endl;
 		}
 	}
+}
+
+void Config::loadFormats(const ini::Document &config) const
+{
+	ini::Document::const_iterator sc = config.find("format");
+
+	if (sc == config.end()) {
+		return;
+	}
+
+	ini::Section::const_iterator it;
+	std::unique_ptr<IrccdLogFilter> filter = std::make_unique<IrccdLogFilter>();
+
+	if ((it = sc->find("debug")) != sc->cend()) {
+		filter->m_debug = it->value();
+	}
+	if ((it = sc->find("info")) != sc->cend()) {
+		filter->m_info = it->value();
+	}
+	if ((it = sc->find("warning")) != sc->cend()) {
+		filter->m_warning = it->value();
+	}
+
+	log::setFilter(std::move(filter));
 }
 
 void Config::loadLogFile(const ini::Section &sc) const
@@ -563,6 +628,7 @@ bool Config::openConfig(Irccd &irccd, const string &path) const
 
 		loadGeneral(config);
 		loadLogs(config);
+		loadFormats(config);
 		loadIdentities(irccd, config);
 		loadServers(irccd, config);
 		loadRules(irccd, config);
