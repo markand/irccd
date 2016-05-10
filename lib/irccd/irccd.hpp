@@ -51,6 +51,7 @@ namespace irccd {
 class InterruptService;
 class Irccd;
 class Plugin;
+class ServerService;
 class Service;
 class TransportCommand;
 
@@ -75,9 +76,6 @@ private:
 	std::mutex m_mutex;
 	std::vector<std::function<void (Irccd &)>> m_events;
 
-	// Servers.
-	std::vector<std::shared_ptr<Server>> m_servers;
-
 	// Optional plugins.
 #if defined(WITH_JS)
 	std::vector<std::shared_ptr<Plugin>> m_plugins;
@@ -92,29 +90,8 @@ private:
 
 	// Services
 	std::shared_ptr<InterruptService> m_interruptService;
+	std::shared_ptr<ServerService> m_serverService;
 	std::vector<std::shared_ptr<Service>> m_services;
-
-	/*
-	 * Server slots
-	 * ----------------------------------------------------------
-	 */
-
-	void handleServerChannelMode(std::weak_ptr<Server> server, std::string origin, std::string channel, std::string mode, std::string arg);
-	void handleServerChannelNotice(std::weak_ptr<Server> server, std::string origin, std::string channel, std::string notice);
-	void handleServerConnect(std::weak_ptr<Server> server);
-	void handleServerInvite(std::weak_ptr<Server> server, std::string origin, std::string channel, std::string target);
-	void handleServerJoin(std::weak_ptr<Server> server, std::string origin, std::string channel);
-	void handleServerKick(std::weak_ptr<Server> server, std::string origin, std::string channel, std::string target, std::string reason);
-	void handleServerMessage(std::weak_ptr<Server> server, std::string origin, std::string channel, std::string message);
-	void handleServerMe(std::weak_ptr<Server> server, std::string origin, std::string target, std::string message);
-	void handleServerMode(std::weak_ptr<Server> server, std::string origin, std::string mode);
-	void handleServerNames(std::weak_ptr<Server> server, std::string channel, std::set<std::string> nicknames);
-	void handleServerNick(std::weak_ptr<Server> server, std::string origin, std::string nickname);
-	void handleServerNotice(std::weak_ptr<Server> server, std::string origin, std::string message);
-	void handleServerPart(std::weak_ptr<Server> server, std::string origin, std::string channel, std::string reason);
-	void handleServerQuery(std::weak_ptr<Server> server, std::string origin, std::string message);
-	void handleServerTopic(std::weak_ptr<Server> server, std::string origin, std::string channel, std::string topic);
-	void handleServerWhois(std::weak_ptr<Server> server, ServerWhois whois);
 
 	/*
 	 * Transport clients slots
@@ -144,8 +121,13 @@ private:
 
 	void processTransportClients(fd_set &input, fd_set &output);
 	void processTransportServers(fd_set &input);
-	void processServers(fd_set &input, fd_set &output);
 	void process(fd_set &setinput, fd_set &setoutput);
+
+	Irccd(const Irccd &) = delete;
+	Irccd(Irccd &&) = delete;
+
+	Irccd &operator=(const Irccd &) = delete;
+	Irccd &operator=(Irccd &&) = delete;
 
 public:
 	/**
@@ -162,6 +144,16 @@ public:
 	}
 
 	/**
+	 * Access the server service.
+	 *
+	 * \return the service
+	 */
+	inline ServerService &serverService() noexcept
+	{
+		return *m_serverService;
+	}
+
+	/**
 	 * Add an event to the queue. This will immediately signals the event loop to interrupt itself to dispatch
 	 * the pending events.
 	 *
@@ -169,79 +161,6 @@ public:
 	 * \note Thread-safe
 	 */
 	void post(std::function<void (Irccd &)> ev) noexcept;
-
-	/*
-	 * Server management
-	 * ----------------------------------------------------------
-	 *
-	 * Functions to get or create new servers.
-	 *
-	 * Servers that are added to this instance are automatically polled when run() is called.
-	 */
-
-	/**
-	 * Check if a server exists.
-	 *
-	 * \param name the name
-	 * \return true if exists
-	 */
-	inline bool hasServer(const std::string &name) const noexcept
-	{
-		return std::count_if(m_servers.cbegin(), m_servers.end(), [&] (const auto &sv) {
-			return sv->info().name == name;
-		}) > 0;
-	}
-
-	/**
-	 * Add a new server to the application.
-	 *
-	 * \pre hasServer must return false
-	 * \param sv the server
-	 */
-	void addServer(std::shared_ptr<Server> sv) noexcept;
-
-	/**
-	 * Get a server or empty one if not found
-	 *
-	 * \param name the server name
-	 * \return the server or empty one if not found
-	 */
-	std::shared_ptr<Server> getServer(const std::string &name) const noexcept;
-
-	/**
-	 * Find a server by name.
-	 *
-	 * \param name the server name
-	 * \return the server
-	 * \throw std::out_of_range if the server does not exist
-	 */
-	std::shared_ptr<Server> requireServer(const std::string &name) const;
-
-	/**
-	 * Get the list of servers
-	 *
-	 * \return the servers
-	 */
-	inline const std::vector<std::shared_ptr<Server>> &servers() const noexcept
-	{
-		return m_servers;
-	}
-
-	/**
-	 * Remove a server from the irccd instance.
-	 *
-	 * The server if any, will be disconnected.
-	 *
-	 * \param name the server name
-	 */
-	void removeServer(const std::string &name);
-
-	/**
-	 * Remove all servers.
-	 *
-	 * All servers will be disconnected.
-	 */
-	void clearServers() noexcept;
 
 	/*
 	 * Transport management

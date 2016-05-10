@@ -18,6 +18,7 @@
 
 #include "cmd-server-invite.hpp"
 #include "irccd.hpp"
+#include "service-server.hpp"
 
 namespace irccd {
 
@@ -53,7 +54,7 @@ json::Value ServerInvite::request(Irccdctl &, const RemoteCommandRequest &args) 
 
 json::Value ServerInvite::exec(Irccd &irccd, const json::Value &request) const
 {
-	irccd.requireServer(
+	irccd.serverService().requireServer(
 		request.at("server").toString())->invite(
 		request.at("target").toString(),
 		request.at("channel").toString()

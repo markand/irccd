@@ -18,6 +18,7 @@
 
 #include "cmd-server-cnotice.hpp"
 #include "irccd.hpp"
+#include "service-server.hpp"
 
 namespace irccd {
 
@@ -44,7 +45,7 @@ std::vector<RemoteCommand::Arg> ServerChannelNotice::args() const
 
 json::Value ServerChannelNotice::exec(Irccd &irccd, const json::Value &request) const
 {
-	irccd.requireServer(request.at("server").toString())->cnotice(
+	irccd.serverService().requireServer(request.at("server").toString())->cnotice(
 		request.at("channel").toString(),
 		request.at("message").toString()
 	);

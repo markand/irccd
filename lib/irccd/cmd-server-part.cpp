@@ -18,6 +18,7 @@
 
 #include "cmd-server-part.hpp"
 #include "irccd.hpp"
+#include "service-server.hpp"
 
 namespace irccd {
 
@@ -58,7 +59,7 @@ json::Value ServerPart::request(Irccdctl &, const RemoteCommandRequest &args) co
 
 json::Value ServerPart::exec(Irccd &irccd, const json::Value &request) const
 {
-	irccd.requireServer(request.at("server").toString())->part(
+	irccd.serverService().requireServer(request.at("server").toString())->part(
 		request.at("channel").toString(),
 		request.valueOr("reason", "").toString()
 	);

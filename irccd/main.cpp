@@ -37,6 +37,7 @@
 #include <irccd/logger.hpp>
 #include <irccd/options.hpp>
 #include <irccd/path.hpp>
+#include <irccd/service-server.hpp>
 #include <irccd/system.hpp>
 #include <irccd/config.hpp>
 #include <irccd/irccd.hpp>
@@ -232,7 +233,7 @@ void load(const Config &config, const parser::Result &options)
 
 	// [server] section.
 	for (const auto &server : config.loadServers()) {
-		instance->addServer(server);
+		instance->serverService().addServer(server);
 	}
 
 	// [rule] section.

@@ -22,6 +22,7 @@
 #include "irccd.hpp"
 #include "js-server.hpp"
 #include "server.hpp"
+#include "service-server.hpp"
 
 namespace irccd {
 
@@ -424,7 +425,7 @@ duk::Ret add(duk::ContextPtr ctx)
 	auto server = duk::get<duk::Shared<Server>>(ctx, 0);
 
 	if (server) {
-		duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->addServer(server);
+		duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->serverService().addServer(server);
 	}
 
 	return 0;
@@ -447,7 +448,7 @@ duk::Ret find(duk::ContextPtr ctx)
 	const auto irccd = duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd");
 
 	try {
-		duk::push(ctx, duk::Shared<Server>{irccd->requireServer(name)});
+		duk::push(ctx, duk::Shared<Server>{irccd->serverService().requireServer(name)});
 	} catch (...) {
 		return 0;
 	}
@@ -468,7 +469,7 @@ duk::Ret list(duk::ContextPtr ctx)
 {
 	duk::push(ctx, duk::Object{});
 
-	for (const auto &server : duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->servers()) {
+	for (const auto &server : duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->serverService().servers()) {
 		duk::putProperty(ctx, -1, server->info().name, duk::Shared<Server>{server});
 	}
 
@@ -486,7 +487,7 @@ duk::Ret list(duk::ContextPtr ctx)
  */
 duk::Ret remove(duk::ContextPtr ctx)
 {
-	duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->removeServer(duk::require<std::string>(ctx, 0));
+	duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->serverService().removeServer(duk::require<std::string>(ctx, 0));
 
 	return 0;
 }

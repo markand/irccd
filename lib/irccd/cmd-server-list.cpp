@@ -20,6 +20,7 @@
 
 #include "cmd-server-list.hpp"
 #include "irccd.hpp"
+#include "service-server.hpp"
 
 namespace irccd {
 
@@ -40,7 +41,7 @@ json::Value ServerList::exec(Irccd &irccd, const json::Value &) const
 	auto json = json::object({});
 	auto list = json::array({});
 
-	for (const auto &server : irccd.servers()) {
+	for (const auto &server : irccd.serverService().servers()) {
 		list.append(server->info().name);
 	}
 

@@ -18,6 +18,7 @@
 
 #include "cmd-server-disconnect.hpp"
 #include "irccd.hpp"
+#include "service-server.hpp"
 
 namespace irccd {
 
@@ -43,9 +44,9 @@ json::Value ServerDisconnect::exec(Irccd &irccd, const json::Value &request) con
 	auto it = request.find("server");
 
 	if (it == request.end()) {
-		irccd.clearServers();
+		irccd.serverService().clearServers();
 	} else {
-		irccd.removeServer(it->toString());
+		irccd.serverService().removeServer(it->toString());
 	}
 
 	return RemoteCommand::exec(irccd, request);

@@ -18,6 +18,7 @@
 
 #include "cmd-server-join.hpp"
 #include "irccd.hpp"
+#include "service-server.hpp"
 
 namespace irccd {
 
@@ -58,7 +59,7 @@ json::Value ServerJoin::request(Irccdctl &, const RemoteCommandRequest &args) co
 
 json::Value ServerJoin::exec(Irccd &irccd, const json::Value &request) const
 {
-	irccd.requireServer(
+	irccd.serverService().requireServer(
 		request.at("server").toString())->join(
 		request.at("channel").toString(),
 		request.valueOr("password", json::Type::String, "").toString()

@@ -21,6 +21,7 @@
 #include "cmd-server-connect.hpp"
 #include "irccd.hpp"
 #include "server.hpp"
+#include "service-server.hpp"
 #include "util.hpp"
 
 namespace irccd {
@@ -156,11 +157,11 @@ json::Value ServerConnect::exec(Irccd &irccd, const json::Value &request) const
 {
 	auto server = std::make_shared<Server>(readInfo(request), readIdentity(request), readSettings(request));
 
-	if (irccd.hasServer(server->info().name)) {
+	if (irccd.serverService().hasServer(server->info().name)) {
 		throw std::invalid_argument("server '" + server->info().name + "' already exists");
 	}
 
-	irccd.addServer(std::move(server));
+	irccd.serverService().addServer(std::move(server));
 
 	return RemoteCommand::exec(irccd, request);
 }

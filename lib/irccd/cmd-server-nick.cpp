@@ -18,6 +18,7 @@
 
 #include "cmd-server-nick.hpp"
 #include "irccd.hpp"
+#include "service-server.hpp"
 
 namespace irccd {
 
@@ -51,7 +52,7 @@ json::Value ServerNick::request(Irccdctl &, const RemoteCommandRequest &args) co
 
 json::Value ServerNick::exec(Irccd &irccd, const json::Value &object) const
 {
-	irccd.requireServer(object.at("server").toString())->nick(object.at("nickname").toString());
+	irccd.serverService().requireServer(object.at("server").toString())->nick(object.at("nickname").toString());
 
 	return nullptr;
 }
