@@ -26,6 +26,7 @@
 #include "logger.hpp"
 #include "path.hpp"
 #include "server-event.hpp"
+#include "service-interrupt.hpp"
 #include "util.hpp"
 
 using namespace std;
@@ -630,17 +631,6 @@ void Irccd::handleTransportDie(std::weak_ptr<TransportClient> ptr)
 	});
 }
 
-void Irccd::processIpc(fd_set &input)
-{
-	if (FD_ISSET(m_socketServer.handle(), &input)) {
-		try {
-			(void)m_socketServer.recv(8);
-		} catch (const exception &) {
-			// TODO: think what we can do here
-		}
-	}
-}
-
 void Irccd::processTransportClients(fd_set &input, fd_set &output)
 {
 	for (auto &client : m_transportClients) {
@@ -695,8 +685,10 @@ void Irccd::processServers(fd_set &input, fd_set &output)
 
 void Irccd::process(fd_set &setinput, fd_set &setoutput)
 {
-	/* 1. May be IPC */
-	processIpc(setinput);
+	// TODO: create services for servers and transports
+	for (const auto &service : m_services) {
+		service->sync(setinput, setoutput);
+	}
 
 	/* 2. Check for transport clients */
 	processTransportClients(setinput, setoutput);
@@ -709,16 +701,9 @@ void Irccd::process(fd_set &setinput, fd_set &setoutput)
 }
 
 Irccd::Irccd()
+	: m_interruptService(std::make_shared<InterruptService>())
 {
-	/* Bind a socket to any port */
-	m_socketServer.set(net::option::SockReuseAddress{true});
-	m_socketServer.bind(net::address::Ip{"*", 0});
-	m_socketServer.listen(1);
-
-	/* Do the socket pair */
-	m_socketClient.connect(net::address::Ip{"127.0.0.1", m_socketServer.address().port()});
-	m_socketServer = m_socketServer.accept(nullptr);
-	m_socketClient.set(net::option::SockBlockMode{false});
+	m_services.push_back(m_interruptService);
 }
 
 void Irccd::post(std::function<void (Irccd &)> ev) noexcept
@@ -726,12 +711,7 @@ void Irccd::post(std::function<void (Irccd &)> ev) noexcept
 	std::lock_guard<mutex> lock(m_mutex);
 
 	m_events.push_back(move(ev));
-
-	/* Silently discard */
-	try {
-		m_socketClient.send(" ");
-	} catch (...) {
-	}
+	m_interruptService->interrupt();
 }
 
 void Irccd::addServer(shared_ptr<Server> server) noexcept
@@ -999,7 +979,8 @@ void Irccd::poll()
 {
 	fd_set setinput;
 	fd_set setoutput;
-	auto max = m_socketServer.handle();
+	net::Handle max = 0;
+
 	auto set = [&] (fd_set &set, net::Handle handle) {
 		FD_SET(handle, &set);
 
@@ -1010,8 +991,10 @@ void Irccd::poll()
 	FD_ZERO(&setinput);
 	FD_ZERO(&setoutput);
 
-	/* 1. Add master socket */
-	FD_SET(m_socketServer.handle(), &setinput);
+	// TODO: create services for servers and transports
+	for (const auto &service : m_services) {
+		service->prepare(setinput, setoutput, max);
+	}
 
 	/* 2. Add servers */
 	for (auto &server : m_servers) {
@@ -1036,7 +1019,7 @@ void Irccd::poll()
 	/* 5. Do the selection */
 	struct timeval tv;
 
-	tv.tv_sec = 0;
+	tv.tv_sec = 5;
 	tv.tv_usec = 250000;
 
 	int error = select(max + 1, &setinput, &setoutput, nullptr, &tv);

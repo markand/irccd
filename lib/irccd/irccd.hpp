@@ -48,8 +48,10 @@
 
 namespace irccd {
 
+class InterruptService;
 class Irccd;
 class Plugin;
+class Service;
 class TransportCommand;
 
 /**
@@ -73,10 +75,6 @@ private:
 	std::mutex m_mutex;
 	std::vector<std::function<void (Irccd &)>> m_events;
 
-	// IPC.
-	net::SocketTcp<net::address::Ip> m_socketServer;
-	net::SocketTcp<net::address::Ip> m_socketClient;
-
 	// Servers.
 	std::vector<std::shared_ptr<Server>> m_servers;
 
@@ -91,6 +89,10 @@ private:
 	// Transports.
 	std::vector<std::shared_ptr<TransportClient>> m_transportClients;
 	std::vector<std::shared_ptr<TransportServer>> m_transportServers;
+
+	// Services
+	std::shared_ptr<InterruptService> m_interruptService;
+	std::vector<std::shared_ptr<Service>> m_services;
 
 	/*
 	 * Server slots
@@ -140,7 +142,6 @@ private:
 	 * These functions are called after polling which sockets are ready for reading/writing.
 	 */
 
-	void processIpc(fd_set &input);
 	void processTransportClients(fd_set &input, fd_set &output);
 	void processTransportServers(fd_set &input);
 	void processServers(fd_set &input, fd_set &output);
@@ -148,9 +149,17 @@ private:
 
 public:
 	/**
-	 * Constructor that instanciate IPC.
+	 * Prepare standard services.
 	 */
 	Irccd();
+
+	/**
+	 * Add a generic service.
+	 */
+	inline void addService(std::shared_ptr<Service> service)
+	{
+		m_services.push_back(std::move(service));
+	}
 
 	/**
 	 * Add an event to the queue. This will immediately signals the event loop to interrupt itself to dispatch
