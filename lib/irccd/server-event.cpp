@@ -37,9 +37,9 @@ ServerEvent::ServerEvent(std::string server,
 
 void ServerEvent::operator()(Irccd &irccd) const
 {
-	for (auto &pair : irccd.plugins()) {
-		auto name = m_plugin_function_name(*pair.second);
-		auto allowed = Rule::solve(irccd.rules(), m_server, m_target, m_origin, pair.first, name);
+	for (auto &plugin : irccd.plugins()) {
+		auto eventname = m_plugin_function_name(*plugin);
+		auto allowed = Rule::solve(irccd.rules(), m_server, m_target, m_origin, plugin->name(), eventname);
 
 		if (!allowed) {
 			log::debug() << "rule: event skipped on match" << std::endl;
@@ -49,9 +49,9 @@ void ServerEvent::operator()(Irccd &irccd) const
 		}
 
 		try {
-			m_plugin_exec(*pair.second);
+			m_plugin_exec(*plugin);
 		} catch (const duk::ErrorInfo &info) {
-			log::warning() << "plugin " << pair.second->name() << ": error: " << info.what() << std::endl;
+			log::warning() << "plugin " << plugin->name() << ": error: " << info.what() << std::endl;
 
 			if (!info.fileName.empty()) {
 				log::warning() << "    " << info.fileName << ":" << info.lineNumber << std::endl;

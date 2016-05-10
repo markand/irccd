@@ -43,7 +43,7 @@ json::Value PluginList::exec(Irccd &irccd, const json::Value &request) const
 	json::Value list = json::array({});
 
 	for (const auto &plugin : irccd.plugins()) {
-		list.append(plugin.first);
+		list.append(plugin->name());
 	}
 
 	response.insert("list", std::move(list));
@@ -68,4 +68,4 @@ void PluginList::result(Irccdctl &irccdctl, const json::Value &object) const
 
 } // !command
 
-}
+} // !irccd

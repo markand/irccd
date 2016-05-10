@@ -1,5 +1,5 @@
 /*
- * ini.hpp -- .ini file parsing
+ * ini.hpp -- extended .ini file parser
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -21,10 +21,90 @@
 
 /**
  * \file ini.hpp
- * \brief Configuration file parser.
+ * \brief Extended .ini file parser.
+ * \author David Demelier <markand@malikania.fr>
+ */
+
+/**
+ * \page Ini Ini
+ * \brief Extended .ini file parser.
+ *
+ *   - \subpage ini-syntax
+ */
+
+/**
+ * \page ini-syntax Syntax
+ * \brief File syntax.
+ *
+ * The syntax is similar to most of `.ini` implementations as:
+ *
+ *   - a section is delimited by `[name]` can be redefined multiple times,
+ *   - an option **must** always be defined in a section,
+ *   - empty options must be surrounded by quotes,
+ *   - lists can not includes trailing commas,
+ *   - include statement must always be at the beginning of files (in no sections),
+ *   - comments starts with # until the end of line,
+ *   - options with spaces **must** use quotes.
+ *
+ * # Basic file
+ *
+ * ````ini
+ * # This is a comment.
+ * [section]
+ * option1 = value1
+ * option2 = "value 2 with spaces"    # comment is also allowed here
+ * ````
+ *
+ * # Redefinition
+ *
+ * Sections can be redefined multiple times and are kept the order they are seen.
+ *
+ * ````ini
+ * [section]
+ * value = "1"
+ * 
+ * [section]
+ * value = "2"
+ * ````
+ *
+ * The ini::Document object will contains two ini::Section.
+ *
+ * # Lists
+ *
+ * Lists are defined using `()` and commas, like values, they may have quotes.
+ *
+ * ````ini
+ * [section]
+ * names = ( "x1", "x2" )
+ *
+ * # This is also allowed
+ * biglist = (
+ *   "abc",
+ *   "def"
+ * )
+ * ````
+ *
+ * # Include statement
+ *
+ * You can split a file into several pieces, if the include statement contains a relative path, the path will be relative
+ * to the current file being parsed.
+ *
+ * You **must** use the include statement before any section.
+ *
+ * If the file contains spaces, use quotes.
+ *
+ * ````ini
+ * # main.conf
+ * @include "foo.conf"
+ *
+ * # foo.conf
+ * [section]
+ * option1 = value1
+ * ````
  */
 
 #include <algorithm>
+#include <cassert>
 #include <exception>
 #include <stdexcept>
 #include <string>
@@ -41,7 +121,7 @@ class Document;
 
 /**
  * \class Error
- * \brief Error in a file
+ * \brief Error in a file.
  */
 class Error : public std::exception {
 private:
@@ -53,14 +133,14 @@ public:
 	/**
 	 * Constructor.
 	 *
-	 * \param l the line
-	 * \param c the column
-	 * \param m the message
+	 * \param line the line
+	 * \param column the column
+	 * \param msg the message
 	 */
-	inline Error(int l, int c, std::string m) noexcept
-		: m_line(l)
-		, m_column(c)
-		, m_message(std::move(m))
+	inline Error(int line, int column, std::string msg) noexcept
+		: m_line(line)
+		, m_column(column)
+		, m_message(std::move(msg))
 	{
 	}
 
@@ -97,16 +177,16 @@ public:
 
 /**
  * \class Token
- * \brief Describe a token read in the .ini source
+ * \brief Describe a token read in the .ini source.
  *
  * This class can be used when you want to parse a .ini file yourself.
  *
- * \see Document::analyze
+ * \see analyze
  */
 class Token {
 public:
 	/**
-	 * \brief Token type
+	 * \brief Token type.
 	 */
 	enum Type {
 		Include,	//!< include statement
@@ -224,30 +304,35 @@ public:
 	/**
 	 * Construct an empty option.
 	 *
+	 * \pre key must not be empty
 	 * \param key the key
-	 * \param value the value
 	 */
 	inline Option(std::string key) noexcept
 		: std::vector<std::string>()
 		, m_key(std::move(key))
 	{
+		assert(!m_key.empty());
 	}
 
 	/**
 	 * Construct a single option.
 	 *
+	 * \pre key must not be empty
 	 * \param key the key
 	 * \param value the value
 	 */
 	inline Option(std::string key, std::string value) noexcept
 		: m_key(std::move(key))
 	{
+		assert(!m_key.empty());
+
 		push_back(std::move(value));
 	}
 
 	/**
 	 * Construct a list option.
 	 *
+	 * \pre key must not be empty
 	 * \param key the key
 	 * \param values the values
 	 */
@@ -255,6 +340,7 @@ public:
 		: std::vector<std::string>(std::move(values))
 		, m_key(std::move(key))
 	{
+		assert(!m_key.empty());
 	}
 
 	/**
@@ -292,11 +378,13 @@ public:
 	/**
 	 * Construct a section with its name.
 	 *
+	 * \pre key must not be empty
 	 * \param key the key
 	 */
 	inline Section(std::string key) noexcept
 		: m_key(std::move(key))
 	{
+		assert(!m_key.empty());
 	}
 
 	/**
@@ -321,30 +409,6 @@ public:
 	}
 
 	/**
-	 * Access an option at the specified key.
-	 *
-	 * \param key the key
-	 * \return the option
-	 * \throw std::out_of_range if the key does not exist
-	 */
-	inline Option &operator[](const std::string &key)
-	{
-		return *find(key);
-	}
-
-	/**
-	 * Access an option at the specified key.
-	 *
-	 * \param key the key
-	 * \return the option
-	 * \throw std::out_of_range if the key does not exist
-	 */
-	inline const Option &operator[](const std::string &key) const
-	{
-		return *find(key);
-	}
-
-	/**
 	 * Find an option by key and return an iterator.
 	 *
 	 * \param key the key
@@ -368,6 +432,34 @@ public:
 		return std::find_if(cbegin(), cend(), [&] (const auto &o) {
 			return o.key() == key;
 		});
+	}
+
+	/**
+	 * Access an option at the specified key.
+	 *
+	 * \param key the key
+	 * \return the option
+	 * \pre contains(key) must return true
+	 */
+	inline Option &operator[](const std::string &key)
+	{
+		assert(contains(key));
+
+		return *find(key);
+	}
+
+	/**
+	 * Overloaded function.
+	 *
+	 * \param key the key
+	 * \return the option
+	 * \pre contains(key) must return true
+	 */
+	inline const Option &operator[](const std::string &key) const
+	{
+		assert(contains(key));
+
+		return *find(key);
 	}
 
 	/**
@@ -377,126 +469,22 @@ public:
 };
 
 /**
- * \class File
- * \brief Source for reading .ini files.
- */
-class File {
-public:
-	/**
-	 * Path to the file.
-	 */
-	std::string path;
-};
-
-/**
- * \class Buffer
- * \brief Source for reading ini from text.
- * \note the include statement is not supported with buffers.
- */
-class Buffer {
-public:
-	/**
-	 * The ini content.
-	 */
-	std::string text;
-};
-
-/**
  * \class Document
- * \brief Ini config file loader
+ * \brief Ini document description.
+ * \see readFile
+ * \see readString
  */
 class Document : public std::vector<Section> {
-private:
-	std::string m_path;
-
 public:
-	/**
-	 * Analyze a file and extract tokens. If the function succeeds, that does not mean the content is valid,
-	 * it just means that there are no syntax error.
-	 *
-	 * For example, this class does not allow adding options under no sections and this function will not
-	 * detect that issue.
-	 *
-	 * \param file the file to read
-	 * \return the list of tokens
-	 * \throws Error on errors
-	 */
-	static Tokens analyze(const File &file);
-
-	/**
-	 * Overloaded function for buffers.
-	 *
-	 * \param buffer the buffer to read
-	 * \return the list of tokens
-	 * \throws Error on errors
-	 */
-	static Tokens analyze(const Buffer &buffer);
-
-	/**
-	 * Show all tokens and their description.
-	 *
-	 * \param tokens the tokens
-	 */
-	static void dump(const Tokens &tokens);
-
-	/**
-	 * Construct a document from a file.
-	 *
-	 * \param file the file to read
-	 * \throws Error on errors
-	 */
-	Document(const File &file);
-
-	/**
-	 * Overloaded constructor for buffers.
-	 *
-	 * \param buffer the buffer to read
-	 * \throws Error on errors
-	 */
-	Document(const Buffer &buffer);
-
-	/**
-	 * Get the current document path, only useful when constructed from File source.
-	 *
-	 * \return the path
-	 */
-	inline const std::string &path() const noexcept
-	{
-		return m_path;
-	}
-
 	/**
 	 * Check if a document has a specific section.
 	 *
 	 * \param key the key
+	 * \return true if the document contains the section
 	 */
 	inline bool contains(const std::string &key) const noexcept
 	{
 		return std::find_if(begin(), end(), [&] (const auto &sc) { return sc.key() == key; }) != end();
-	}
-
-	/**
-	 * Access a section at the specified key.
-	 *
-	 * \param key the key
-	 * \return the section
-	 * \throw std::out_of_range if the key does not exist
-	 */
-	inline Section &operator[](const std::string &key)
-	{
-		return *find(key);
-	}
-
-	/**
-	 * Access a section at the specified key.
-	 *
-	 * \param key the key
-	 * \return the section
-	 * \throw std::out_of_range if the key does not exist
-	 */
-	inline const Section &operator[](const std::string &key) const
-	{
-		return *find(key);
 	}
 
 	/**
@@ -526,10 +514,98 @@ public:
 	}
 
 	/**
+	 * Access a section at the specified key.
+	 *
+	 * \param key the key
+	 * \return the section
+	 * \pre contains(key) must return true
+	 */
+	inline Section &operator[](const std::string &key)
+	{
+		assert(contains(key));
+
+		return *find(key);
+	}
+
+	/**
+	 * Overloaded function.
+	 *
+	 * \param key the key
+	 * \return the section
+	 * \pre contains(key) must return true
+	 */
+	inline const Section &operator[](const std::string &key) const
+	{
+		assert(contains(key));
+
+		return *find(key);
+	}
+
+	/**
 	 * Inherited operators.
 	 */
 	using std::vector<Section>::operator[];
 };
+
+/**
+ * Analyse a stream and detect potential syntax errors. This does not parse the file like including other
+ * files in include statement.
+ *
+ * It does only analysis, for example if an option is defined under no section, this does not trigger an
+ * error while it's invalid.
+ *
+ * \param it the iterator
+ * \param end where to stop
+ * \return the list of tokens
+ * \throws Error on errors
+ */
+Tokens analyse(std::istreambuf_iterator<char> it, std::istreambuf_iterator<char> end);
+
+/**
+ * Overloaded function for stream.
+ *
+ * \param stream the stream
+ * \return the list of tokens
+ * \throws Error on errors
+ */
+Tokens analyse(std::istream &stream);
+
+/**
+ * Parse the produced tokens.
+ *
+ * \param tokens the tokens
+ * \param path the parent path
+ * \return the document
+ * \throw Error on errors
+ */
+Document parse(const Tokens &tokens, const std::string &path = ".");
+
+/**
+ * Parse a file.
+ *
+ * \param filename the file name
+ * \return the document
+ * \throw Error on errors
+ */
+Document readFile(const std::string &filename);
+
+/**
+ * Parse a string.
+ *
+ * If the string contains include statements, they are relative to the current working directory.
+ *
+ * \param buffer the buffer
+ * \return the document
+ * \throw Error on errors
+ */
+Document readString(const std::string &buffer);
+
+/**
+ * Show all tokens and their description.
+ *
+ * \param tokens the tokens
+ */
+void dump(const Tokens &tokens);
 
 } // !ini
 

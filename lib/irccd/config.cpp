@@ -16,31 +16,20 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "sysconfig.hpp"
+#include <cassert>
 
-#if defined(HAVE_GETPID)
-#  include <sys/types.h>
-#  include <unistd.h>
-#  include <cerrno>
-#  include <cstring>
-#  include <fstream>
-#endif
-
-#if defined(HAVE_DAEMON)
-#  include <cstdlib>
-#endif
+#include <format.h>
 
 #include "config.hpp"
-#include "ini.hpp"
-#include "logger.hpp"
-#include "path.hpp"
-#include "sockets.hpp"
-#include "system.hpp"
-#include "util.hpp"
+#include "fs.hpp"
 #include "irccd.hpp"
+#include "path.hpp"
+#include "rule.hpp"
+#include "server.hpp"
+#include "sysconfig.hpp"
+#include "util.hpp"
 
-using namespace std;
-using namespace std::string_literals;
+using namespace fmt::literals;
 
 namespace irccd {
 
@@ -83,354 +72,36 @@ public:
 	}
 };
 
-} // !namespace
-
-void Config::loadGeneral(const ini::Document &config) const
+std::string get(const ini::Document &doc, const std::string &section, const std::string &key)
 {
-	ini::Document::const_iterator sc = config.find("general");
-	ini::Section::const_iterator it;
+	auto its = doc.find(section);
 
-#if defined(HAVE_GETPID)
-	if (sc != config.end()) {
-		it = sc->find("pidfile");
-
-		if (it != sc->end() && !it->value().empty()) {
-			std::string path = it->value();
-			std::ofstream out(path, std::ofstream::trunc);
-
-			if (!out) {
-				log::warning() << "irccd: could not open pidfile " << path << ": " << std::strerror(errno) << std::endl;
-			} else {
-				log::debug() << "irccd: pid written in " << path << std::endl;
-				out << getpid();
-			}
-		}
-	}
-#endif
-
-#if defined(HAVE_DAEMON)
-	/* CLI priority is higher */
-	bool daemonize = m_options.count("-f") == 0 && m_options.count("--foreground") == 0;
-
-	if (daemonize && sc != config.end()) {
-		it = sc->find("foreground");
-
-		if (it != sc->end()) {
-			daemonize = !util::isBoolean(it->value());
-		}
+	if (its == doc.end()) {
+		return "";
 	}
 
-	if (daemonize) {
-		daemon(1, 0);
-	}
-#endif
+	auto ito = its->find(key);
 
-	if (sc != config.end()) {
-		try {
-#if defined(HAVE_SETGID)
-			if ((it = sc->find("gid")) != sc->end()) {
-				sys::setGid(it->value());
-			}
-#endif
-#if defined(HAVE_SETUID)
-			if ((it = sc->find("uid")) != sc->end()) {
-				sys::setUid(it->value());
-			}
-#endif
-		} catch (const std::exception &ex) {
-			log::warning() << "irccd: could not set " << it->key() << ": " << ex.what() << std::endl;
-		}
+	if (ito == its->end()) {
+		return "";
 	}
+
+	return ito->value();
 }
 
-void Config::loadFormats(const ini::Document &config) const
+ServerIdentity loadIdentity(const ini::Section &sc)
 {
-	ini::Document::const_iterator sc = config.find("format");
+	assert(sc.key() == "identity");
+	assert(sc.contains("name") && util::isIdentifierValid(sc["name"].value()));
 
-	if (sc == config.end()) {
-		return;
-	}
-
-	ini::Section::const_iterator it;
-	std::unique_ptr<IrccdLogFilter> filter = std::make_unique<IrccdLogFilter>();
-
-	if ((it = sc->find("debug")) != sc->cend()) {
-		filter->m_debug = it->value();
-	}
-	if ((it = sc->find("info")) != sc->cend()) {
-		filter->m_info = it->value();
-	}
-	if ((it = sc->find("warning")) != sc->cend()) {
-		filter->m_warning = it->value();
-	}
-
-	log::setFilter(std::move(filter));
-}
-
-void Config::loadLogFile(const ini::Section &sc) const
-{
-	/*
-	 * TODO: improve that with CMake options.
-	 */
-#if defined(IRCCD_SYSTEM_WINDOWS)
-	string normal = "log.txt";
-	string errors = "errors.txt";
-#else
-	string normal = "/var/log/irccd/log.txt";
-	string errors = "/var/log/irccd/errors.txt";
-#endif
-
-	ini::Section::const_iterator it;
-
-	if ((it = sc.find("path-logs")) != sc.end()) {
-		normal = it->value();
-	}
-	if ((it = sc.find("path-errors")) != sc.end()) {
-		errors = it->value();
-	}
-
-	log::setInterface(make_unique<log::File>(move(normal), move(errors)));
-}
-
-void Config::loadLogSyslog() const
-{
-#if defined(HAVE_SYSLOG)
-	log::setInterface(make_unique<log::Syslog>());
-#else
-	log::warning() << "irccd: syslog is not available on this platform" << endl;
-#endif // !HAVE_SYSLOG
-}
-
-void Config::loadLogs(const ini::Document &config) const
-{
-	ini::Document::const_iterator sc = config.find("logs");
-
-	if (sc == config.end()) {
-		return;
-	}
-
-	ini::Section::const_iterator it;
-
-	if ((it = sc->find("verbose")) != sc->end() && m_options.count("-v") == 0 && m_options.count("--verbose")) {
-		log::setVerbose(util::isBoolean(it->value()));
-	}
-	if ((it = sc->find("type")) != sc->end()) {
-		/* Console is the default, no test case */
-		if (it->value() == "file") {
-			loadLogFile(*sc);
-		} else if (it->value() == "syslog") {
-			loadLogSyslog();
-		} else {
-			log::warning() << "irccd: unknown log type: " << it->value() << std::endl;
-		}
-	}
-}
-
-void Config::loadPlugins(Irccd &irccd, const ini::Section &sc) const
-{
-#if defined(WITH_JS)
-	for (const ini::Option &option : sc) {
-		try {
-			if (option.value().empty()) {
-				irccd.loadPlugin(option.key(), option.key(), true);
-			} else {
-				irccd.loadPlugin(option.key(), option.value(), false);
-			}
-		} catch (const std::exception &ex) {
-			log::warning() << "plugin " << option.key() << ": " << ex.what() << std::endl;
-		}
-	}
-#else
-	(void)irccd;
-	(void)sc;
-#endif
-}
-
-void Config::loadPluginConfig(Irccd &irccd, const ini::Section &sc, string name) const
-{
-#if defined(WITH_JS)
-	PluginConfig config;
-
-	for (const ini::Option &option : sc) {
-		config.emplace(option.key(), option.value());
-	}
-
-	irccd.addPluginConfig(std::move(name), std::move(config));
-#else
-	(void)irccd;
-	(void)sc;
-	(void)name;
-#endif
-}
-
-void Config::loadPlugins(Irccd &irccd, const ini::Document &config) const
-{
-#if defined(WITH_JS)
-	std::regex regex("^plugin\\.([A-Za-z0-9-_]+)$");
-	std::smatch match;
-
-	/*
-	 * Load plugin configurations before we load plugins since we use them
-	 * when we load the plugin itself.
-	 */
-	for (const ini::Section &section : config) {
-		if (regex_match(section.key(), match, regex)) {
-			loadPluginConfig(irccd, section, match[1]);
-		}
-	}
-
-	ini::Document::const_iterator it = config.find("plugins");
-
-	if (it != config.end()) {
-		loadPlugins(irccd, *it);
-	}
-#else
-	(void)irccd;
-	(void)config;
-
-	log::warning() << "irccd: JavaScript disabled, ignoring plugins" << std::endl;
-#endif
-}
-
-void Config::loadServer(Irccd &irccd, const ini::Section &sc) const
-{
-	ServerInfo info;
 	ServerIdentity identity;
-	ServerSettings settings;
 
-	/* Name */
+	// Mandatory stuff.
+	identity.name = sc["name"].value();
+
+	// Optional stuff.
 	ini::Section::const_iterator it;
 
-	if ((it = sc.find("name")) == sc.end()) {
-		throw std::invalid_argument("server: missing name");
-	} else if (!util::isIdentifierValid(it->value())) {
-		throw std::invalid_argument("server " + it->value() + ": name is not valid");
-	} else if (irccd.hasServer(it->value())) {
-		throw std::invalid_argument("server " + it->value() + ": already exists");
-	}
-
-	info.name = it->value();
-
-	/* Host */
-	if ((it = sc.find("host")) == sc.end()) {
-		throw std::invalid_argument("server " + info.name + ": missing host");
-	}
-
-	info.host = it->value();
-
-	/* Optional identity */
-	if ((it = sc.find("identity")) != sc.end()) {
-		identity = irccd.findIdentity(it->value());
-	}
-
-	/* Optional port */
-	if ((it = sc.find("port")) != sc.end()) {
-		try {
-			info.port = std::stoi(it->value());
-		} catch (const std::exception &) {
-			throw std::invalid_argument("server " + info.name + ": invalid port number: " + it->value());
-		}
-	}
-
-	/* Optional password */
-	if ((it = sc.find("password")) != sc.end()) {
-		info.password = it->value();
-	}
-
-	/* Optional flags */
-	if ((it = sc.find("ipv6")) != sc.end() && util::isBoolean(it->value())) {
-		info.flags |= ServerInfo::Ipv6;
-	}
-	if ((it = sc.find("ssl")) != sc.end()) {
-		if (util::isBoolean(it->value())) {
-#if defined(WITH_SSL)
-			info.flags |= ServerInfo::Ssl;
-#else
-			throw std::invalid_argument("server " + info.name + ": ssl is disabled");
-#endif
-		}
-	}
-	if ((it = sc.find("ssl-verify")) != sc.end()) {
-		if (util::isBoolean(it->value())) {
-#if defined(WITH_SSL)
-			info.flags |= ServerInfo::SslVerify;
-#else
-			throw std::invalid_argument("server " + info.name + ": ssl is disabled");
-#endif
-		}
-	}
-	/* Options */
-	if ((it = sc.find("auto-rejoin")) != sc.end() && util::isBoolean(it->value())) {
-		settings.flags |= ServerSettings::AutoRejoin;
-	}
-	if ((it = sc.find("join-invite")) != sc.end() && util::isBoolean(it->value())) {
-		settings.flags |= ServerSettings::JoinInvite;
-	}
-
-	/* Channels */
-	if ((it = sc.find("channels")) != sc.end()) {
-		for (const std::string &s : *it) {
-			ServerChannel channel;
-
-			if (auto pos = s.find(":") != std::string::npos) {
-				channel.name = s.substr(0, pos);
-				channel.password = s.substr(pos + 1);
-			} else {
-				channel.name = s;
-			}
-
-			settings.channels.push_back(std::move(channel));
-		}
-	}
-	if ((it = sc.find("command-char")) != sc.end()) {
-		settings.command = it->value();
-	}
-
-	/* Reconnect */
-	try {
-		if ((it = sc.find("reconnect-tries")) != sc.end()) {
-			settings.reconnectTries = std::stoi(it->value());
-		}
-		if ((it = sc.find("reconnect-timeout")) != sc.end()) {
-			settings.reconnectDelay = std::stoi(it->value());
-		}
-		if ((it = sc.find("ping-timeout")) != sc.end()) {
-			settings.pingTimeout = std::stoi(it->value());
-		}
-	} catch (const std::exception &) {
-		throw std::invalid_argument("server " + info.name + ": invalid number for " + it->key() + ": " + it->value());
-	}
-
-	irccd.addServer(std::make_shared<Server>(std::move(info), std::move(identity), std::move(settings)));
-}
-
-void Config::loadServers(Irccd &irccd, const ini::Document &config) const
-{
-	for (const ini::Section &section : config) {
-		if (section.key() == "server") {
-			try {
-				loadServer(irccd, section);
-			} catch (const exception &ex) {
-				log::warning() << ex.what() << endl;
-			}
-		}
-	}
-}
-
-void Config::loadIdentity(Irccd &irccd, const ini::Section &sc) const
-{
-	ServerIdentity identity;
-	ini::Section::const_iterator it;
-
-	if ((it = sc.find("name")) == sc.end()) {
-		throw invalid_argument("missing name");
-	} else if (!util::isIdentifierValid(it->value())) {
-		throw invalid_argument("identity name not valid");
-	}
-
-	identity.name = it->value();
-
-	/* Optional stuff */
 	if ((it = sc.find("username")) != sc.end()) {
 		identity.username = it->value();
 	}
@@ -444,29 +115,156 @@ void Config::loadIdentity(Irccd &irccd, const ini::Section &sc) const
 		identity.ctcpversion = it->value();
 	}
 
-	log::debug() << "identity " << identity.name << ": ";
-	log::debug() << "nickname=" << identity.nickname << ", username=" << identity.username << ", ";
-	log::debug() << "realname=" << identity.realname << ", ctcp-version=" << identity.ctcpversion << endl;
-
-	irccd.addIdentity(move(identity));
+	return identity;
 }
 
-void Config::loadIdentities(Irccd &irccd, const ini::Document &config) const
+PluginConfig loadPluginConfig(const ini::Section &sc)
 {
-	for (const ini::Section &section : config) {
-		if (section.key() == "identity") {
-			try {
-				loadIdentity(irccd, section);
-			} catch (const exception &ex) {
-				log::warning() << "identity: " << ex.what() << endl;
+	PluginConfig config;
+
+	for (const auto &option : sc) {
+		config.emplace(option.key(), option.value());
+	}
+
+	return config;
+}
+
+std::unique_ptr<log::Interface> loadLogFile(const ini::Section &sc)
+{
+	/*
+	 * TODO: improve that with CMake options.
+	 */
+#if defined(IRCCD_SYSTEM_WINDOWS)
+	std::string normal = "log.txt";
+	std::string errors = "errors.txt";
+#else
+	std::string normal = "/var/log/irccd/log.txt";
+	std::string errors = "/var/log/irccd/errors.txt";
+#endif
+
+	ini::Section::const_iterator it;
+
+	if ((it = sc.find("path-logs")) != sc.end()) {
+		normal = it->value();
+	}
+	if ((it = sc.find("path-errors")) != sc.end()) {
+		errors = it->value();
+	}
+
+	return std::make_unique<log::File>(std::move(normal), std::move(errors));
+}
+
+std::unique_ptr<log::Interface> loadLogSyslog()
+{
+#if defined(HAVE_SYSLOG)
+	return std::make_unique<log::Syslog>();
+#else
+	throw std::runtime_error("logs: syslog is not available on this platform");
+#endif // !HAVE_SYSLOG
+}
+
+std::shared_ptr<TransportServer> loadTransportIp(const ini::Section &sc)
+{
+	assert(sc.key() == "transport");
+
+	std::shared_ptr<TransportServer> transport;
+	ini::Section::const_iterator it;
+
+	// Port
+	int port;
+
+	if ((it = sc.find("port")) == sc.cend()) {
+		throw std::invalid_argument("transport: missing 'port' parameter");
+	}
+
+	try {
+		port = util::toNumber<std::uint16_t>(it->value());
+	} catch (const std::exception &) {
+		throw std::invalid_argument("transport: invalid port number: {}"_format(it->value()));
+	}
+
+	// Address
+	std::string address = "*";
+
+	if ((it = sc.find("address")) != sc.end()) {
+		address = it->value();
+	}
+
+	// Domain
+	bool ipv6 = true;
+	bool ipv4 = true;
+
+	if ((it = sc.find("domain")) != sc.end()) {
+		ipv6 = false;
+		ipv4 = false;
+
+		for (const auto &v : *it) {
+			if (v == "ipv4") {
+				ipv4 = true;
+			}
+			if (v == "ipv6") {
+				ipv6 = true;
 			}
 		}
 	}
+
+	if (ipv6) {
+		transport = std::make_shared<TransportServerIp>(AF_INET6, move(address), port, !ipv4);
+	} else if (ipv4) {
+		transport = std::make_shared<TransportServerIp>(AF_INET, move(address), port);
+	} else {
+		throw std::invalid_argument("transport: domain must at least have ipv4 or ipv6");
+	}
+
+	return transport;
 }
 
-void Config::loadRule(Irccd &irccd, const ini::Section &sc) const
+std::shared_ptr<TransportServer> loadTransportUnix(const ini::Section &sc)
 {
-	/* Simple converter from std::vector to std::unordered_set */
+	assert(sc.key() == "transport");
+
+#if !defined(IRCCD_SYSTEM_WINDOWS)
+	ini::Section::const_iterator it = sc.find("path");
+
+	if (it == sc.end()) {
+		throw std::invalid_argument("transport: missing 'path' parameter");
+	}
+
+	return std::make_shared<TransportServerUnix>(it->value());
+#else
+	(void)sc;
+
+	throw std::invalid_argument("transport: unix transport not supported on on this platform");
+#endif
+}
+
+std::shared_ptr<TransportServer> loadTransport(const ini::Section &sc)
+{
+	assert(sc.key() == "transport");
+
+	std::shared_ptr<TransportServer> transport;
+	ini::Section::const_iterator it = sc.find("type");
+
+	if (it == sc.end()) {
+		throw std::invalid_argument("transport: missing 'type' parameter");
+	}
+
+	if (it->value() == "ip") {
+		transport = loadTransportIp(sc);
+	} else if (it->value() == "unix") {
+		transport = loadTransportUnix(sc);
+	} else {
+		throw std::invalid_argument("transport: invalid type given: {}"_format(it->value()));
+	}
+
+	return transport;
+}
+
+Rule loadRule(const ini::Section &sc)
+{
+	assert(sc.key() == "rule");
+
+	// Simple converter from std::vector to std::unordered_set
 	auto toSet = [] (const std::vector<std::string> &v) -> std::unordered_set<std::string> {
 		return std::unordered_set<std::string>(v.begin(), v.end());
 	};
@@ -474,7 +272,7 @@ void Config::loadRule(Irccd &irccd, const ini::Section &sc) const
 	RuleSet servers, channels, origins, plugins, events;
 	RuleAction action = RuleAction::Accept;
 
-	/* Get the sets */
+	// Get the sets
 	ini::Section::const_iterator it;
 
 	if ((it = sc.find("servers")) != sc.end()) {
@@ -493,190 +291,354 @@ void Config::loadRule(Irccd &irccd, const ini::Section &sc) const
 		channels = toSet(*it);
 	}
 
-	/* Get the action */
+	// Get the action
 	if ((it = sc.find("action")) == sc.end()) {
-		throw std::invalid_argument("missing action parameter");
+		throw std::invalid_argument("rule: missing 'action'' parameter");
 	}
+
 	if (it->value() == "drop") {
 		action = RuleAction::Drop;
 	} else if (it->value() == "accept") {
 		action = RuleAction::Accept;
 	} else {
-		throw std::invalid_argument("invalid action given: " + it->value());
+		throw std::invalid_argument("rule: invalid action given: {}"_format(it->value()));
 	}
 
-	irccd.addRule(Rule(move(servers), move(channels), move(origins), move(plugins), move(events), action));
+	return Rule(std::move(servers),
+		    std::move(channels),
+		    std::move(origins),
+		    std::move(plugins),
+		    std::move(events),
+		    action);
 }
 
-void Config::loadRules(Irccd &irccd, const ini::Document &config) const
+std::shared_ptr<Server> loadServer(const ini::Section &sc, const Config &config)
 {
-	for (const ini::Section &sc : config) {
-		if (sc.key() == "rule") {
-			try {
-				loadRule(irccd, sc);
-			} catch (const std::exception &ex) {
-				log::warning() << "rule: " << ex.what() << std::endl;
-			}
+	assert(sc.key() == "server");
+
+	ServerInfo info;
+	ServerIdentity identity;
+	ServerSettings settings;
+
+	// Name
+	ini::Section::const_iterator it;
+
+	if ((it = sc.find("name")) == sc.end()) {
+		throw std::invalid_argument("server: missing 'name' parameter");
+	} else if (!util::isIdentifierValid(it->value())) {
+		throw std::invalid_argument("server: invalid identifier: {}"_format(it->value()));
+	}
+
+	info.name = it->value();
+
+	// Host
+	if ((it = sc.find("host")) == sc.end()) {
+		throw std::invalid_argument("server {}: missing host"_format(it->value()));
+	}
+
+	info.host = it->value();
+
+	// Optional identity
+	if ((it = sc.find("identity")) != sc.end()) {
+		identity = config.findIdentity(it->value());
+	}
+
+	// Optional port
+	if ((it = sc.find("port")) != sc.end()) {
+		try {
+			info.port = util::toNumber<std::uint16_t>(it->value());
+		} catch (const std::exception &) {
+			throw std::invalid_argument("server {}: invalid number for {}: {}"_format(info.name, it->key(), it->value()));
 		}
 	}
+
+	// Optional password
+	if ((it = sc.find("password")) != sc.end()) {
+		info.password = it->value();
+	}
+
+	// Optional flags
+	if ((it = sc.find("ipv6")) != sc.end() && util::isBoolean(it->value())) {
+		info.flags |= ServerInfo::Ipv6;
+	}
+	if ((it = sc.find("ssl")) != sc.end()) {
+		if (util::isBoolean(it->value())) {
+			info.flags |= ServerInfo::Ssl;
+		}
+	}
+	if ((it = sc.find("ssl-verify")) != sc.end()) {
+		if (util::isBoolean(it->value())) {
+			info.flags |= ServerInfo::SslVerify;
+		}
+	}
+
+	// Options
+	if ((it = sc.find("auto-rejoin")) != sc.end() && util::isBoolean(it->value())) {
+		settings.flags |= ServerSettings::AutoRejoin;
+	}
+	if ((it = sc.find("join-invite")) != sc.end() && util::isBoolean(it->value())) {
+		settings.flags |= ServerSettings::JoinInvite;
+	}
+
+	// Channels
+	if ((it = sc.find("channels")) != sc.end()) {
+		for (const std::string &s : *it) {
+			ServerChannel channel;
+
+			if (auto pos = s.find(":") != std::string::npos) {
+				channel.name = s.substr(0, pos);
+				channel.password = s.substr(pos + 1);
+			} else {
+				channel.name = s;
+			}
+
+			settings.channels.push_back(std::move(channel));
+		}
+	}
+	if ((it = sc.find("command-char")) != sc.end()) {
+		settings.command = it->value();
+	}
+
+	// Reconnect and ping timeout
+	try {
+		if ((it = sc.find("reconnect-tries")) != sc.end()) {
+			settings.reconnectTries = util::toNumber<std::int8_t>(it->value());
+		}
+		if ((it = sc.find("reconnect-timeout")) != sc.end()) {
+			settings.reconnectDelay = util::toNumber<std::uint16_t>(it->value());
+		}
+		if ((it = sc.find("ping-timeout")) != sc.end()) {
+			settings.pingTimeout = util::toNumber<std::uint16_t>(it->value());
+		}
+	} catch (const std::exception &) {
+		log::warning("server {}: invalid number for {}: {}"_format(info.name, it->key(), it->value()));
+	}
+
+	return std::make_shared<Server>(std::move(info), std::move(identity), std::move(settings));
 }
 
-void Config::loadTransportIp(Irccd &irccd, const ini::Section &sc) const
+} // !namespace
+
+Config Config::find()
 {
-	bool ipv6 = true;
-	bool ipv4 = true;
+	for (const auto &path : path::list(path::PathConfig)) {
+		std::string fullpath = path + "irccd.conf";
+
+		if (!fs::isReadable(fullpath)) {
+			continue;
+		}
+
+		try {
+			return Config(fullpath);
+		} catch (const std::exception &ex) {
+			throw std::runtime_error("{}: {}"_format(fullpath, ex.what()));
+		}
+	}
+
+	throw std::runtime_error("no configuration file found");
+}
+
+ServerIdentity Config::findIdentity(const std::string &name) const
+{
+	assert(util::isIdentifierValid(name));
+
+	for (const auto &section : m_document) {
+		if (section.key() != "identity") {
+			continue;
+		}
+
+		auto it = section.find("name");
+
+		if (it == section.end()) {
+			log::warning("identity: missing 'name' property");
+			continue;
+		}
+		if (!util::isIdentifierValid(it->value())) {
+			log::warning("identity: invalid identifier: {}"_format(it->value()));
+			continue;
+		}
+		if (it->value() != name) {
+			continue;
+		}
+
+		return loadIdentity(section);
+	}
+
+	return ServerIdentity();
+}
+
+PluginConfig Config::findPluginConfig(const std::string &name) const
+{
+	assert(util::isIdentifierValid(name));
+
+	std::string fullname = std::string("plugin.") + name;
+
+	for (const auto &section : m_document) {
+		if (section.key() != fullname) {
+			continue;
+		}
+
+		return loadPluginConfig(section);
+	}
+
+	return PluginConfig();
+}
+
+bool Config::isVerbose() const noexcept
+{
+	return util::isBoolean(get(m_document, "logs", "verbose"));
+}
+
+bool Config::isForeground() const noexcept
+{
+	return util::isBoolean(get(m_document, "general", "foreground"));
+}
+
+std::string Config::pidfile() const
+{
+	return get(m_document, "general", "pidfile");
+}
+
+std::string Config::uid() const
+{
+	return get(m_document, "general", "uid");
+}
+
+std::string Config::gid() const
+{
+	return get(m_document, "general", "gid");
+}
+
+void Config::loadLogs() const
+{
+	ini::Document::const_iterator sc = m_document.find("logs");
+
+	if (sc == m_document.end()) {
+		return;
+	}
 
 	ini::Section::const_iterator it;
 
-	/* Port */
-	int port;
+	if ((it = sc->find("type")) != sc->end()) {
+		std::unique_ptr<log::Interface> iface;
 
-	if ((it = sc.find("port")) == sc.end()) {
-		throw invalid_argument("missing port");
-	}
-
-	try {
-		port = stoi(it->value());
-	} catch (const std::exception &) {
-		throw std::invalid_argument("invalid port number: " + it->value());
-	}
-
-	/* Address*/
-	std::string address = "*";
-
-	if ((it = sc.find("address")) != sc.end()) {
-		address = it->value();
-	}
-
-	/* Domain */
-	if ((it = sc.find("domain")) != sc.end()) {
-		ipv6 = false;
-		ipv4 = false;
-
-		for (const string &v : *it) {
-			if (v == "ipv4") {
-				ipv4 = true;
-			}
-			if (v == "ipv6") {
-				ipv6 = true;
-			}
+		/* Console is the default, no test case */
+		if (it->value() == "file") {
+			iface = loadLogFile(*sc);
+		} else if (it->value() == "syslog") {
+			iface = loadLogSyslog();
+		} else {
+			throw std::runtime_error("logs: unknown log type: {}"_format(it->value()));
 		}
-	}
 
-	if (ipv6) {
-		irccd.addTransport(std::make_shared<TransportServerIp>(AF_INET6, move(address), port, !ipv4));
-	} else if (ipv4) {
-		irccd.addTransport(std::make_shared<TransportServerIp>(AF_INET, move(address), port));
-	} else {
-		throw std::invalid_argument("domain must at least have ipv4 or ipv6");
-	}
-}
-
-void Config::loadTransportUnix(Irccd &irccd, const ini::Section &sc) const
-{
-#if !defined(IRCCD_SYSTEM_WINDOWS)
-	/* Path */
-	ini::Section::const_iterator it = sc.find("path");
-
-	if (it == sc.end()) {
-		throw std::invalid_argument("missing path parameter");
-	} else {
-		string path = sc["path"].value();
-
-		irccd.addTransport(std::make_shared<TransportServerUnix>(move(path)));
-	}
-#else
-	(void)irccd;
-	(void)sc;
-
-	throw std::invalid_argument("local transport not supported on on this platform");
-#endif
-}
-
-void Config::loadTransports(Irccd &irccd, const ini::Document &config) const
-{
-	for (const ini::Section &sc : config) {
-		if (sc.key() == "transport") {
-			try {
-				ini::Section::const_iterator it = sc.find("type");
-
-				if (it == sc.end()) {
-					log::warning() << "transport: missing type parameter" << std::endl;
-				} else if (it->value() == "ip") {
-					loadTransportIp(irccd, sc);
-				} else if (it->value() == "unix") {
-					loadTransportUnix(irccd, sc);
-				} else {
-					log::warning() << "transport: invalid type given: " << std::endl;
-				}
-			} catch (const net::Error &error) {
-				log::warning() << "transport: " << error.function() << ": " << error.what() << std::endl;
-			} catch (const exception &ex) {
-				log::warning() << "transport: error: " << ex.what() << endl;
-			}
+		if (iface) {
+			log::setInterface(std::move(iface));
 		}
 	}
 }
 
-bool Config::openConfig(Irccd &irccd, const string &path) const
+void Config::loadFormats() const
 {
-	try {
-		/*
-		 * Order matters, take care when you change this.
-		 */
-		ini::Document config(ini::File{path});
+	ini::Document::const_iterator sc = m_document.find("format");
 
-		loadGeneral(config);
-		loadLogs(config);
-		loadFormats(config);
-		loadIdentities(irccd, config);
-		loadServers(irccd, config);
-		loadRules(irccd, config);
-		loadPlugins(irccd, config);
-		loadTransports(irccd, config);
-	} catch (const ini::Error &ex) {
-		log::warning() << sys::programName() << ": " << path << ":" << ex.line() << ":" << ex.column() << ": " << ex.what() << std::endl;
-		return false;
-	} catch (const std::exception &ex) {
-		log::warning() << sys::programName() << ": " << path << ": " << ex.what() << std::endl;
-		return false;
+	if (sc == m_document.end()) {
+		return;
 	}
 
-	return true;
+	std::unique_ptr<IrccdLogFilter> filter = std::make_unique<IrccdLogFilter>();
+	ini::Section::const_iterator it;
+
+	if ((it = sc->find("debug")) != sc->cend()) {
+		filter->m_debug = it->value();
+	}
+	if ((it = sc->find("info")) != sc->cend()) {
+		filter->m_info = it->value();
+	}
+	if ((it = sc->find("warning")) != sc->cend()) {
+		filter->m_warning = it->value();
+	}
+
+	log::setFilter(std::move(filter));
 }
 
-Config::Config(parser::Result options) noexcept
-	: m_options(move(options))
+std::vector<std::shared_ptr<TransportServer>> Config::loadTransports() const
 {
-}
+	std::vector<std::shared_ptr<TransportServer>> transports;
 
-void Config::load(Irccd &irccd)
-{
-	auto it = m_options.find("-c");
-	auto found = false;
-
-	if (it != m_options.end()) {
-		found = openConfig(irccd, it->second);
-	} else if ((it = m_options.find("--config")) != m_options.end()) {
-		found = openConfig(irccd, it->second);
-	} else {
-		/* Search for a configuration file */
-		for (const string &path : path::list(path::PathConfig)) {
-			string fullpath = path + "irccd.conf";
-
-			log::info() << "irccd: trying " << fullpath << endl;
-
-			if (openConfig(irccd, fullpath)) {
-				found = true;
-				break;
-			}
+	for (const auto &section : m_document) {
+		if (section.key() == "transport") {
+			transports.push_back(loadTransport(section));
 		}
 	}
 
-	if (!found) {
-		log::warning() << "irccd: no configuration file could be found, exiting" << endl;
-		exit(1);
+	return transports;
+}
+
+std::vector<Rule> Config::loadRules() const
+{
+	std::vector<Rule> rules;
+
+	for (const auto &section : m_document) {
+		if (section.key() == "rule") {
+			rules.push_back(loadRule(section));
+		}
 	}
+
+	return rules;
+}
+
+std::vector<std::shared_ptr<Server>> Config::loadServers() const
+{
+	std::vector<std::shared_ptr<Server>> servers;
+
+	for (const auto &section : m_document) {
+		if (section.key() != "server") {
+			continue;
+		}
+
+		try {
+			servers.push_back(loadServer(section, *this));
+		} catch (const std::exception &ex) {
+			log::warning(ex.what());
+		}
+	}
+
+	return servers;
+}
+
+std::vector<std::shared_ptr<Plugin>> Config::loadPlugins() const
+{
+	std::vector<std::shared_ptr<Plugin>> plugins;
+
+	// Plugins are defined in only one section.
+	auto it = m_document.find("plugins");
+
+	if (it == m_document.end()) {
+		return plugins;
+	}
+
+	for (const auto &option : *it) {
+		std::string name = option.key();
+		std::string path = option.value();
+
+		try {
+			log::info("plugin {}: loading"_format(name));
+
+			if (path.empty()) {
+				plugins.push_back(Plugin::find(name, findPluginConfig(name)));
+			} else {
+				log::info("plugin {}: trying {}"_format(name, path));
+				plugins.push_back(std::make_shared<Plugin>(name, path, findPluginConfig(name)));
+			}
+		} catch (const duk::ErrorInfo &ex) {
+			log::warning("plugin {}: {}"_format(option.key(), ex.what()));
+			log::warning("plugin {}: {}"_format(option.key(), ex.stack));
+		} catch (const std::exception &ex) {
+			log::warning("plugin {}: {}"_format(option.key(), ex.what()));
+		}
+	}
+
+	return plugins;
 }
 
 } // !irccd

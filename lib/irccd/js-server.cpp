@@ -468,8 +468,8 @@ duk::Ret list(duk::ContextPtr ctx)
 {
 	duk::push(ctx, duk::Object{});
 
-	for (const auto &pair : duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->servers()) {
-		duk::putProperty(ctx, -1, pair.first, duk::Shared<Server>{pair.second});
+	for (const auto &server : duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->servers()) {
+		duk::putProperty(ctx, -1, server->info().name, duk::Shared<Server>{server});
 	}
 
 	return 1;

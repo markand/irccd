@@ -18,6 +18,8 @@
 
 #include <stdexcept>
 
+#include <format.h>
+
 #include "sysconfig.hpp"
 
 #if defined(HAVE_STAT)
@@ -46,9 +48,11 @@
 
 using namespace std;
 
+using namespace fmt::literals;
+
 namespace irccd {
 
-void Plugin::call(const string &name, unsigned nargs)
+void Plugin::call(const std::string &name, unsigned nargs)
 {
 	duk::getGlobal<void>(m_context, name);
 
@@ -146,6 +150,29 @@ void Plugin::putConfig(const PluginConfig &config)
 
 	duk::putProperty(m_context, -2, "config");
 	duk::pop(m_context, 2);
+}
+
+std::shared_ptr<Plugin> Plugin::find(const std::string &name, const PluginConfig &config)
+{
+	log::info("plugin {}: searching {}.js"_format(name, name));
+
+	for (const auto &path : path::list(path::PathPlugins)) {
+		std::string fullpath = path + name + ".js";
+
+		if (!fs::isReadable(fullpath)) {
+			continue;
+		}
+
+		log::info("plugin {}: trying {}"_format(name, fullpath));
+
+		try {
+			return std::make_shared<Plugin>(name, fullpath, config);
+		} catch (const std::exception &ex) {
+			throw std::runtime_error("{}: {}"_format(fullpath, ex.what()));
+		}
+	}
+
+	throw std::runtime_error("no suitable plugin found");
 }
 
 Plugin::Plugin(std::string name, std::string path, const PluginConfig &config)

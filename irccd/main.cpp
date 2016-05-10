@@ -16,23 +16,50 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/sysconfig.hpp>
+
+#if defined(HAVE_GETPID)
+#  include <sys/types.h>
+#  include <unistd.h>
+#  include <cerrno>
+#  include <cstring>
+#  include <fstream>
+#endif
+
+#if defined(HAVE_DAEMON)
+#  include <cstdlib>
+#endif
+
 #include <csignal>
 
-#include <irccd/sysconfig.hpp>
+#include <format.h>
 
 #include <irccd/logger.hpp>
 #include <irccd/options.hpp>
 #include <irccd/path.hpp>
 #include <irccd/system.hpp>
-
 #include <irccd/config.hpp>
 #include <irccd/irccd.hpp>
+
+using namespace fmt::literals;
 
 using namespace irccd;
 
 namespace {
 
 std::unique_ptr<Irccd> instance;
+
+void usage()
+{
+	log::warning() << "usage: " << sys::programName() << " [options...]\n\n";
+	log::warning() << "Available options:\n";
+	log::warning() << "  -c, --config file       specify the configuration file\n";
+	log::warning() << "  -f, --foreground        do not run as a daemon\n";
+	log::warning() << "      --help              show this help\n";
+	log::warning() << "  -p, --plugin name       load a specific plugin\n";
+	log::warning() << "  -v, --verbose           be verbose" << std::endl;
+	std::exit(1);
+}
 
 void stop(int)
 {
@@ -41,16 +68,15 @@ void stop(int)
 
 void init(int &argc, char **&argv)
 {
-	// MOVE THIS IN Application
-
-	/* Needed for some components */
+	// Needed for some components.
 	sys::setProgramName("irccd");
 	path::setApplicationPath(argv[0]);
 
-	/* Default logging to console */
+	// Default logging to console.
 	log::setVerbose(false);
 	log::setInterface(std::make_unique<log::Console>());
 
+	// Register some signals.
 	signal(SIGINT, stop);
 	signal(SIGTERM, stop);
 
@@ -58,25 +84,9 @@ void init(int &argc, char **&argv)
 	++ argv;
 }
 
-void usage()
+parser::Result parse(int &argc, char **&argv)
 {
-	log::warning() << "usage: " << sys::programName() << " [options...]\n\n";
-	log::warning() << "Available options:\n";
-	log::warning() << "  -c, --config file       specify the configuration file\n";
-	log::warning() << "  -f, --foreground        do not run as a daemon\n";
-	log::warning() << "  --help                  show this help\n";
-	log::warning() << "  -p, --plugin name       load a specific plugin\n";
-	log::warning() << "  -v, --verbose           be verbose" << std::endl;
-	std::exit(1);
-}
-
-} // !namespace
-
-int main(int argc, char **argv)
-{
-	init(argc, argv);
-
-	/* Parse command line options */
+	// Parse command line options.
 	parser::Result result;
 
 	try {
@@ -99,7 +109,7 @@ int main(int argc, char **argv)
 				usage();
 				// NOTREACHED
 			}
-	
+
 			if (pair.first == "-v" || pair.first == "--verbose") {
 				log::setVerbose(true);
 			}
@@ -109,8 +119,153 @@ int main(int argc, char **argv)
 		usage();
 	}
 
+	return result;
+}
+
+Config open(const parser::Result &result)
+{
+	auto it = result.find("-c");
+
+	if (it != result.end() || (it = result.find("--config")) != result.end()) {
+		try {
+			return Config(it->second);
+		} catch (const std::exception &ex) {
+			throw std::runtime_error("{}: {}"_format(it->second, ex.what()));
+		}
+	}
+
+	return Config::find();
+}
+
+void loadPid(const std::string &path)
+{
+	if (path.empty()) {
+		return;
+	}
+
+	try {
+#if defined(HAVE_GETPID)
+		std::ofstream out(path, std::ofstream::trunc);
+
+		if (!out) {
+			throw std::runtime_error("irccd: could not open pidfile {}: {}"_format(path, std::strerror(errno)));
+		}
+
+		log::debug() << "irccd: pid written in " << path << std::endl;
+		out << getpid() << std::endl;
+#else
+		throw std::runtime_error("irccd: pidfile option not supported on this platform");
+#endif
+	} catch (const std::exception &ex) {
+		log::warning() << "irccd: " << ex.what() << std::endl;
+	}
+}
+
+void loadGid(const std::string gid)
+{
+	try {
+		if (!gid.empty()) {
+#if defined(HAVE_SETGID)
+			sys::setGid(gid);
+#else
+			throw std::runtime_error("irccd: gid option not supported on this platform");
+#endif
+		}
+	} catch (const std::exception &ex) {
+		log::warning() << "irccd: " << ex.what() << std::endl;
+	}
+}
+
+void loadUid(const std::string &uid)
+{
+	try {
+		if (!uid.empty()) {
+#if defined(HAVE_SETUID)
+			sys::setUid(uid);
+#else
+			throw std::runtime_error("irccd: uid option not supported on this platform");
+#endif
+		}
+	} catch (const std::exception &ex) {
+		log::warning() << "irccd: " << ex.what() << std::endl;
+	}
+}
+
+void loadForeground(bool foreground, const parser::Result &options)
+{
+	try {
+#if defined(HAVE_DAEMON)
+		if (options.count("-f") == 0 && options.count("--foreground") == 0 && !foreground) {
+			daemon(1, 0);
+		}
+#endif
+	} catch (const std::exception &ex) {
+		log::warning() << "irccd: " << ex.what() << std::endl;
+	}
+}
+
+void load(const Config &config, const parser::Result &options)
+{
+	/*
+	 * Order matters, please be careful when changing this.
+	 *
+	 * 1. Open logs as early as possible to use the defined outputs on any loading errors.
+	 */
+
+	// [logs] and [format] sections.
+	config.loadLogs();
+	config.loadFormats();
+
+	// Show message here to use the formats.
+	log::info() << "irccd: using " << config.path() << std::endl;
+
+	// [general] section.
+	loadPid(config.pidfile());
+	loadGid(config.gid());
+	loadUid(config.uid());
+	loadForeground(config.isForeground(), options);
+
+	// [transport]
+	for (const auto &transport : config.loadTransports()) {
+		instance->addTransport(transport);
+	}
+
+	// [server] section.
+	for (const auto &server : config.loadServers()) {
+		instance->addServer(server);
+	}
+
+	// [rule] section.
+	for (const auto &rule : config.loadRules()) {
+		instance->addRule(rule);
+	}
+
+	// [plugin] section.
+	for (const auto &plugin : config.loadPlugins()) {
+		instance->addPlugin(plugin);
+	}
+}
+
+} // !namespace
+
+int main(int argc, char **argv)
+{
+	init(argc, argv);
+
+	parser::Result options = parse(argc, argv);
+
+	// Find configuration file.
 	instance = std::make_unique<Irccd>();
-	instance->load(Config{result});
+
+	try {
+		Config cfg = open(options);
+
+		load(cfg, options);
+	} catch (const std::exception &ex) {
+		log::warning() << "irccd: " << ex.what() << std::endl;
+		return 1;
+	}
+
 	instance->run();
 
 	return 0;

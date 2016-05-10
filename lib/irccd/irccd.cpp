@@ -625,7 +625,7 @@ void Irccd::handleTransportDie(std::weak_ptr<TransportClient> ptr)
 		auto tc = ptr.lock();
 
 		if (tc) {
-			m_lookupTransportClients.erase(tc->handle());
+			m_transportClients.erase(std::find(m_transportClients.begin(), m_transportClients.end(), tc));
 		}
 	});
 }
@@ -643,21 +643,21 @@ void Irccd::processIpc(fd_set &input)
 
 void Irccd::processTransportClients(fd_set &input, fd_set &output)
 {
-	for (auto &pair : m_lookupTransportClients) {
-		pair.second->sync(input, output);
+	for (auto &client : m_transportClients) {
+		client->sync(input, output);
 	}
 }
 
 void Irccd::processTransportServers(fd_set &input)
 {
-	for (auto &pair : m_lookupTransportServers) {
-		if (!FD_ISSET(pair.second->handle(), &input)) {
+	for (auto &transport : m_transportServers) {
+		if (!FD_ISSET(transport->handle(), &input)) {
 			continue;
 		}
 
 		log::debug("transport: new client connected");
 
-		std::shared_ptr<TransportClient> client = pair.second->accept();
+		std::shared_ptr<TransportClient> client = transport->accept();
 		std::weak_ptr<TransportClient> ptr(client);
 
 		/* Send some information */
@@ -682,14 +682,14 @@ void Irccd::processTransportServers(fd_set &input)
 		client->onDie.connect(std::bind(&Irccd::handleTransportDie, this, ptr));
 
 		/* Register it */
-		m_lookupTransportClients.emplace(client->handle(), move(client));
+		m_transportClients.push_back(std::move(client));
 	}
 }
 
 void Irccd::processServers(fd_set &input, fd_set &output)
 {
-	for (auto &pair : m_servers) {
-		pair.second->sync(input, output);
+	for (auto &server : m_servers) {
+		server->sync(input, output);
 	}
 }
 
@@ -736,7 +736,9 @@ void Irccd::post(std::function<void (Irccd &)> ev) noexcept
 
 void Irccd::addServer(shared_ptr<Server> server) noexcept
 {
+#if 0
 	assert(m_servers.count(server->info().name) == 0);
+#endif
 
 	std::weak_ptr<Server> ptr(server);
 
@@ -762,50 +764,54 @@ void Irccd::addServer(shared_ptr<Server> server) noexcept
 
 			if (server) {
 				log::info(fmt::format("server {}: removed", server->info().name));
-				m_servers.erase(server->info().name);
+				m_servers.erase(std::find(m_servers.begin(), m_servers.end(), server));
 			}
 		});
 	});
 
-	m_servers.emplace(server->info().name, move(server));
+	m_servers.push_back(std::move(server));
 }
 
 std::shared_ptr<Server> Irccd::getServer(const std::string &name) const noexcept
 {
-	auto it = m_servers.find(name);
+	auto it = std::find_if(m_servers.begin(), m_servers.end(), [&] (const auto &server) {
+		return server->info().name == name;
+	});
 
 	if (it == m_servers.end()) {
 		return nullptr;
 	}
 
-	return it->second;
+	return *it;
 }
 
 std::shared_ptr<Server> Irccd::requireServer(const std::string &name) const
 {
-	auto it = m_servers.find(name);
+	auto server = getServer(name);
 
-	if (it == m_servers.end()) {
-		throw std::invalid_argument("server " + name + " not found");
+	if (!server) {
+		throw std::invalid_argument("server {} not found"_format(name));
 	}
 
-	return it->second;
+	return server;
 }
 
 void Irccd::removeServer(const std::string &name)
 {
-	auto it = m_servers.find(name);
+	auto it = std::find_if(m_servers.begin(), m_servers.end(), [&] (const auto &server) {
+		return server->info().name == name;
+	});
 
 	if (it != m_servers.end()) {
-		it->second->disconnect();
+		(*it)->disconnect();
 		m_servers.erase(it);
 	}
 }
 
 void Irccd::clearServers() noexcept
 {
-	for (auto &pair : m_servers) {
-		pair.second->disconnect();
+	for (auto &server : m_servers) {
+		server->disconnect();
 	}
 
 	m_servers.clear();
@@ -813,14 +819,14 @@ void Irccd::clearServers() noexcept
 
 void Irccd::addTransport(std::shared_ptr<TransportServer> ts)
 {
-	m_lookupTransportServers.emplace(ts->handle(), ts);
+	m_transportServers.push_back(std::move(ts));
 }
 
 void Irccd::broadcast(std::string data)
 {
-	/* Asynchronous send */
-	for (auto &pair : m_lookupTransportClients) {
-		pair.second->send(data);
+	// Asynchronous send.
+	for (auto &client : m_transportClients) {
+		client->send(data);
 	}
 }
 
@@ -828,24 +834,26 @@ void Irccd::broadcast(std::string data)
 
 std::shared_ptr<Plugin> Irccd::getPlugin(const std::string &name) const noexcept
 {
-	auto it = m_plugins.find(name);
+	auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (const auto &plugin) {
+		return plugin->name() == name;
+	});
 
 	if (it == m_plugins.end()) {
 		return nullptr;
 	}
 
-	return it->second;
+	return *it;
 }
 
 std::shared_ptr<Plugin> Irccd::requirePlugin(const std::string &name) const
 {
-	auto it = m_plugins.find(name);
+	auto plugin = getPlugin(name);
 
-	if (it == m_plugins.end()) {
-		throw std::out_of_range(std::string("plugin ") + name + " not found");
+	if (!plugin) {
+		throw std::invalid_argument("plugin {} not found"_format(name));
 	}
 
-	return it->second;
+	return plugin;
 }
 
 void Irccd::addPlugin(std::shared_ptr<Plugin> plugin)
@@ -861,15 +869,20 @@ void Irccd::addPlugin(std::shared_ptr<Plugin> plugin)
 	/* Initial load now */
 	try {
 		plugin->onLoad();
-		m_plugins.insert({plugin->name(), plugin});
+		m_plugins.push_back(std::move(plugin));
 	} catch (const std::exception &ex) {
-		log::warning(fmt::format("plugin {}: {}", plugin->name(), ex.what()));
+		log::warning("plugin {}: {}"_format(plugin->name(), ex.what()));
 	}
 }
 
 void Irccd::loadPlugin(std::string name, const std::string &source, bool find)
 {
-	if (m_plugins.count(name) > 0) {
+	// TODO: change with Plugin::find
+	auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (const auto &plugin) {
+		return plugin->name() == name;
+	});
+
+	if (it != m_plugins.end()) {
 		throw std::invalid_argument("plugin already loaded");
 	}
 
@@ -891,7 +904,7 @@ void Irccd::loadPlugin(std::string name, const std::string &source, bool find)
 		log::info() << "  from " << path << std::endl;
 
 		try {
-			plugin = std::make_shared<Plugin>(name, path, m_pluginConf[name]);
+			plugin = std::make_shared<Plugin>(name, path /*, m_pluginConf[name] */);
 			break;
 		} catch (const std::exception &ex) {
 			log::info(fmt::format("    error: {}", ex.what()));
@@ -916,11 +929,13 @@ void Irccd::reloadPlugin(const std::string &name)
 
 void Irccd::unloadPlugin(const std::string &name)
 {
-	auto plugin = getPlugin(name);
+	auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (const auto &plugin) {
+		return plugin->name() == name;
+	});
 
-	if (plugin) {
-		plugin->onUnload();
-		m_plugins.erase(name);
+	if (it != m_plugins.end()) {
+		(*it)->onUnload();
+		m_plugins.erase(it);
 	}
 }
 
@@ -999,22 +1014,23 @@ void Irccd::poll()
 	FD_SET(m_socketServer.handle(), &setinput);
 
 	/* 2. Add servers */
-	for (auto &pair : m_servers) {
-		pair.second->update();
-		pair.second->prepare(setinput, setoutput, max);
+	for (auto &server : m_servers) {
+		server->update();
+		server->prepare(setinput, setoutput, max);
 	}
 
 	/* 3. Add transports clients */
-	for (auto &pair : m_lookupTransportClients) {
-		set(setinput, pair.first);
+	for (auto &client : m_transportClients) {
+		set(setinput, client->handle());
 
-		if (pair.second->hasOutput())
-			set(setoutput, pair.first);
+		if (client->hasOutput()) {
+			set(setoutput, client->handle());
+		}
 	}
 
 	/* 4. Add transport servers */
-	for (auto &pair : m_lookupTransportServers) {
-		set(setinput, pair.first);
+	for (auto &transport : m_transportServers) {
+		set(setinput, transport->handle());
 	}
 
 	/* 5. Do the selection */
@@ -1045,7 +1061,7 @@ void Irccd::dispatch()
 	 * Make a copy because the events can add other events while we are iterating it. Also lock because the timers
 	 * may alter these events too.
 	 */
-	std::vector<Event> copy;
+	std::vector<std::function<void (Irccd &)>> copy;
 
 	{
 		std::lock_guard<mutex> lock(m_mutex);

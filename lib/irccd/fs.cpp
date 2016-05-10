@@ -67,11 +67,14 @@ std::string error()
 bool can(const std::string &path, const std::string &mode)
 {
 	auto fp = std::fopen(path.c_str(), mode.c_str());
-	auto result = fp != nullptr;
+
+	if (fp == nullptr) {
+		return false;
+	}
 
 	std::fclose(fp);
 
-	return result;
+	return true;
 }
 
 #if defined(_WIN32)

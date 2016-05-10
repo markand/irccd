@@ -24,6 +24,7 @@
  * \brief Base class for irccd front end.
  */
 
+#include <algorithm>
 #include <atomic>
 #include <cassert>
 #include <condition_variable>
@@ -52,50 +53,6 @@ class Plugin;
 class TransportCommand;
 
 /**
- * Event to execute after the poll.
- */
-using Event = std::function<void (Irccd &)>;
-
-/**
- * List of events.
- */
-using Events = std::vector<Event>;
-
-/**
- * Map of identities.
- */
-using Identities = std::unordered_map<std::string, ServerIdentity>;
-
-/**
- * List of rules.
- */
-using Rules = std::vector<Rule>;
-
-/**
- * Map of servers.
- */
-using Servers = std::unordered_map<std::string, std::shared_ptr<Server>>;
-
-/**
- * Map of transport command handlers.
- */
-using TransportCommands = std::unordered_map<std::string, std::unique_ptr<TransportCommand>>;
-
-#if defined(WITH_JS)
-
-/**
- * Map of plugins.
- */
-using Plugins = std::unordered_map<std::string, std::shared_ptr<Plugin>>;
-
-/**
- * Map of plugin configurations.
- */
-using PluginConfigs = std::unordered_map<std::string, PluginConfig>;
-
-#endif
-
-/**
  * \class Irccd
  * \brief Irccd main instance
  *
@@ -111,40 +68,29 @@ using PluginConfigs = std::unordered_map<std::string, PluginConfig>;
  */
 class Irccd : public Application {
 private:
-	template <typename T>
-	using LookupTable = std::unordered_map<net::Handle, std::shared_ptr<T>>;
-
-	/* Main loop */
+	// Main loop stuff.
 	std::atomic<bool> m_running{true};
-
-	/* Mutex for post() */
 	std::mutex m_mutex;
+	std::vector<std::function<void (Irccd &)>> m_events;
 
-	/* IPC */
+	// IPC.
 	net::SocketTcp<net::address::Ip> m_socketServer;
 	net::SocketTcp<net::address::Ip> m_socketClient;
 
-	/* Event loop */
-	Events m_events;
+	// Servers.
+	std::vector<std::shared_ptr<Server>> m_servers;
 
-	/* Servers */
-	Servers m_servers;
-
-	/* Optional JavaScript plugins */
+	// Optional plugins.
 #if defined(WITH_JS)
-	Plugins m_plugins;
-	PluginConfigs m_pluginConf;
+	std::vector<std::shared_ptr<Plugin>> m_plugins;
 #endif
 
-	/* Identities */
-	Identities m_identities;
+	// Rules.
+	std::vector<Rule> m_rules;
 
-	/* Rules */
-	Rules m_rules;
-
-	/* Lookup tables */
-	LookupTable<TransportClient> m_lookupTransportClients;
-	LookupTable<TransportServer> m_lookupTransportServers;
+	// Transports.
+	std::vector<std::shared_ptr<TransportClient>> m_transportClients;
+	std::vector<std::shared_ptr<TransportServer>> m_transportServers;
 
 	/*
 	 * Server slots
@@ -207,17 +153,6 @@ public:
 	Irccd();
 
 	/**
-	 * Load a configuration into irccd. Added as convenience to allow expressions like `irccd.load(Config{"foo"})`.
-	 *
-	 * \param config the configuration loader
-	 */
-	template <typename T>
-	inline void load(T &&config)
-	{
-		config.load(*this);
-	}
-
-	/**
 	 * Add an event to the queue. This will immediately signals the event loop to interrupt itself to dispatch
 	 * the pending events.
 	 *
@@ -225,37 +160,6 @@ public:
 	 * \note Thread-safe
 	 */
 	void post(std::function<void (Irccd &)> ev) noexcept;
-
-	/*
-	 * Identity management
-	 * ----------------------------------------------------------
-	 *
-	 * Functions to get or add new identities.
-	 */
-
-	/**
-	 * Add an identity.
-	 *
-	 * \param identity the identity
-	 * \note If the identity already exists, it is overriden
-	 */
-	inline void addIdentity(ServerIdentity identity) noexcept
-	{
-		m_identities.emplace(identity.name, std::move(identity));
-	}
-
-	/**
-	 * Get an identity, if not found, the default one is used.
-	 *
-	 * \param name the identity name
-	 * \return the identity or default one
-	 */
-	inline ServerIdentity findIdentity(const std::string &name) const noexcept
-	{
-		auto it = m_identities.find(name);
-
-		return it == m_identities.end() ? ServerIdentity() : it->second;
-	}
 
 	/*
 	 * Server management
@@ -274,7 +178,9 @@ public:
 	 */
 	inline bool hasServer(const std::string &name) const noexcept
 	{
-		return m_servers.count(name) > 0;
+		return std::count_if(m_servers.cbegin(), m_servers.end(), [&] (const auto &sv) {
+			return sv->info().name == name;
+		}) > 0;
 	}
 
 	/**
@@ -303,11 +209,11 @@ public:
 	std::shared_ptr<Server> requireServer(const std::string &name) const;
 
 	/**
-	 * Get the map of loaded servers.
+	 * Get the list of servers
 	 *
 	 * \return the servers
 	 */
-	inline const Servers &servers() const noexcept
+	inline const std::vector<std::shared_ptr<Server>> &servers() const noexcept
 	{
 		return m_servers;
 	}
@@ -365,7 +271,9 @@ public:
 	 */
 	inline bool hasPlugin(const std::string &name) const noexcept
 	{
-		return m_plugins.count(name) > 0;
+		return std::count_if(m_plugins.cbegin(), m_plugins.cend(), [&] (const auto &plugin) {
+			return plugin->name() == name;
+		}) > 0;
 	}
 
 	/**
@@ -384,17 +292,6 @@ public:
 	 * \throws std::out_of_range if not found
 	 */
 	std::shared_ptr<Plugin> requirePlugin(const std::string &name) const;
-
-	/**
-	 * Add plugin configuration for the specified plugin.
-	 *
-	 * \param name
-	 * \param config
-	 */
-	inline void addPluginConfig(std::string name, PluginConfig config)
-	{
-		m_pluginConf.emplace(std::move(name), std::move(config));
-	}
 
 	/**
 	 * Add a loaded plugin.
@@ -437,7 +334,7 @@ public:
 	 *
 	 * \return the map of plugins
 	 */
-	inline const Plugins &plugins() const noexcept
+	inline const std::vector<std::shared_ptr<Plugin>> &plugins() const noexcept
 	{
 		return m_plugins;
 	}

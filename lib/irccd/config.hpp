@@ -24,18 +24,21 @@
  * \brief Read .ini configuration file for irccd
  */
 
-#include "options.hpp"
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "ini.hpp"
+#include "plugin.hpp"
 
 namespace irccd {
 
-namespace ini {
+class Rule;
 
-class Document;
-class Section;
+class Server;
+class ServerIdentity;
 
-} // !ini
-
-class Irccd;
+class TransportServer;
 
 /**
  * \class Config
@@ -43,42 +46,127 @@ class Irccd;
  */
 class Config {
 private:
-	parser::Result m_options;
-
-	void loadGeneral(const ini::Document &config) const;
-	void loadFormats(const ini::Document &config) const;
-	void loadLogFile(const ini::Section &sc) const;
-	void loadLogSyslog() const;
-	void loadLogs(const ini::Document &config) const;
-	void loadPlugins(Irccd &irccd, const ini::Section &sc) const;
-	void loadPluginConfig(Irccd &irccd, const ini::Section &sc, std::string name) const;
-	void loadPlugins(Irccd &irccd, const ini::Document &config) const;
-	void loadServer(Irccd &irccd, const ini::Section &sc) const;
-	void loadServers(Irccd &irccd, const ini::Document &config) const;
-	void loadIdentity(Irccd &irccd, const ini::Section &sc) const;
-	void loadIdentities(Irccd &irccd, const ini::Document &config) const;
-	void loadRule(Irccd &irccd, const ini::Section &sc) const;
-	void loadRules(Irccd &irccd, const ini::Document &config) const;
-	void loadTransportIp(Irccd &irccd, const ini::Section &sc) const;
-	void loadTransportUnix(Irccd &irccd, const ini::Section &sc) const;
-	void loadTransports(Irccd &irccd, const ini::Document &config) const;
-	bool openConfig(Irccd &irccd, const std::string &path) const;
+	std::string m_path;
+	ini::Document m_document;
 
 public:
 	/**
-	 * Construct the configuration file loader. If path is empty, then the configuration file is searched through
-	 * the standard directories.
+	 * Search the configuration file into the standard defined paths.
 	 *
-	 * \param options the option parsed at command line
+	 * \return the config
+	 * \throw std::exception on errors or if no config could be found
 	 */
-	Config(parser::Result options) noexcept;
+	static Config find();
 
 	/**
-	 * Load the config into irccd.
+	 * Load the configuration from the specified path.
 	 *
-	 * \param irccd the irccd instance
+	 * \param path the path
 	 */
-	void load(Irccd &irccd);
+	inline Config(std::string path)
+		: m_path(std::move(path))
+		, m_document(ini::readFile(m_path))
+	{
+	}
+
+	/**
+	 * Get the path to the configuration file.
+	 *
+	 * \return the path
+	 */
+	inline const std::string &path() const noexcept
+	{
+		return m_path;
+	}
+
+	/**
+	 * Find an entity if defined in the configuration file.
+	 *
+	 * \pre util::isValidIdentifier(name)
+	 * \return default identity if cannot be found
+	 */
+	ServerIdentity findIdentity(const std::string &name) const;
+
+	/**
+	 * Find a plugin configuration if defined in the configuration file.
+	 *
+	 * \pre util::isValidIdentifier(name)
+	 * \return the configuration or empty if not found
+	 */
+	PluginConfig findPluginConfig(const std::string &name) const;
+
+	/**
+	 * Get the path to the pidfile.
+	 *
+	 * \return the path or empty if not defined
+	 */
+	std::string pidfile() const;
+
+	/**
+	 * Get the uid.
+	 *
+	 * \return the uid or empty one if no one is set
+	 */
+	std::string uid() const;
+
+	/**
+	 * Get the gid.
+	 *
+	 * \return the gid or empty one if no one is set
+	 */
+	std::string gid() const;
+
+	/**
+	 * Check if verbosity is enabled.
+	 *
+	 * \return true if verbosity was requested
+	 */
+	bool isVerbose() const noexcept;
+
+	/**
+	 * Check if foreground is specified (= no daemonize).
+	 *
+	 * \return true if foreground was requested
+	 */
+	bool isForeground() const noexcept;
+
+	/**
+	 * Load logging interface.
+	 */
+	void loadLogs() const;
+
+	/**
+	 * Load formats for logging.
+	 */
+	void loadFormats() const;
+
+	/**
+	 * Load transports.
+	 *
+	 * \return the set of transports
+	 */
+	std::vector<std::shared_ptr<TransportServer>> loadTransports() const;
+
+	/**
+	 * Load rules.
+	 *
+	 * \return the rules
+	 */
+	std::vector<Rule> loadRules() const;
+
+	/**
+	 * Get the list of servers defined.
+	 *
+	 * \return the list of servers
+	 */
+	std::vector<std::shared_ptr<Server>> loadServers() const;
+
+	/**
+	 * Get the list of defined plugins.
+	 *
+	 * \return the list of plugins
+	 */
+	std::vector<std::shared_ptr<Plugin>> loadPlugins() const;
 };
 
 } // !irccd

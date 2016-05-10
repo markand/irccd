@@ -107,6 +107,14 @@ private:
 
 public:
 	/**
+	 * Find plugin in standard paths.
+	 *
+	 * \param name the plugin name
+	 * \param config the optional configuration
+	 */
+	static std::shared_ptr<Plugin> find(const std::string &name, const PluginConfig &config = PluginConfig());
+
+	/**
 	 * Constructor.
 	 *
 	 * \param name the plugin id

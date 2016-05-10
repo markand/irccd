@@ -250,7 +250,7 @@ void Irccdctl::readAliases(const ini::Section &sc)
 
 void Irccdctl::read(const std::string &path, const parser::Result &options)
 {
-	ini::Document doc(ini::File{path});
+	ini::Document doc = ini::readFile(path);
 	ini::Document::const_iterator it = doc.find("connect");
 
 	/* Do not try to read [connect] if specified at command line */

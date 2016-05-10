@@ -1,5 +1,5 @@
 /*
- * ini.cpp -- .ini file parsing
+ * ini.cpp -- extended .ini file parser
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,7 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cassert>
 #include <cctype>
 #include <cstring>
 #include <iostream>
@@ -25,16 +24,18 @@
 #include <sstream>
 #include <stdexcept>
 
+/* for PathIsRelative */
 #if defined(_WIN32)
-#  include <Shlwapi.h>	// for PathIsRelative
+#  include <Shlwapi.h>
 #endif
 
 #include "ini.hpp"
 
+namespace irccd {
+
 namespace {
 
-using namespace irccd;
-using namespace irccd::ini;
+using namespace ini;
 
 using StreamIterator = std::istreambuf_iterator<char>;
 using TokenIterator = std::vector<Token>::const_iterator;
@@ -69,7 +70,7 @@ inline bool isReserved(char c) noexcept
 	return isList(c) || isQuote(c) || c == '[' || c == ']' || c == '@' || c == '#' || c == '=';
 }
 
-void analyzeLine(int &line, int &column, StreamIterator &it) noexcept
+void analyseLine(int &line, int &column, StreamIterator &it) noexcept
 {
 	assert(*it == '\n');
 
@@ -78,7 +79,7 @@ void analyzeLine(int &line, int &column, StreamIterator &it) noexcept
 	column = 0;
 }
 
-void analyzeComment(int &column, StreamIterator &it, StreamIterator end) noexcept
+void analyseComment(int &column, StreamIterator &it, StreamIterator end) noexcept
 {
 	assert(*it == '#');
 
@@ -88,7 +89,7 @@ void analyzeComment(int &column, StreamIterator &it, StreamIterator end) noexcep
 	}
 }
 
-void analyzeSpaces(int &column, StreamIterator &it, StreamIterator end) noexcept
+void analyseSpaces(int &column, StreamIterator &it, StreamIterator end) noexcept
 {
 	assert(isSpace(*it));
 
@@ -98,7 +99,7 @@ void analyzeSpaces(int &column, StreamIterator &it, StreamIterator end) noexcept
 	}
 }
 
-void analyzeList(Tokens &list, int line, int &column, StreamIterator &it) noexcept
+void analyseList(Tokens &list, int line, int &column, StreamIterator &it) noexcept
 {
 	assert(isList(*it));
 
@@ -117,7 +118,7 @@ void analyzeList(Tokens &list, int line, int &column, StreamIterator &it) noexce
 	}
 }
 
-void analyzeSection(Tokens &list, int &line, int &column, StreamIterator &it, StreamIterator end)
+void analyseSection(Tokens &list, int &line, int &column, StreamIterator &it, StreamIterator end)
 {
 	assert(*it == '[');
 
@@ -127,16 +128,23 @@ void analyzeSection(Tokens &list, int &line, int &column, StreamIterator &it, St
 	/* Read section name */
 	++ it;
 	while (it != end && *it != ']') {
-		if (*it == '\n')
+		if (*it == '\n') {
 			throw Error(line, column, "section not terminated, missing ']'");
-		if (isReserved(*it))
+		}
+		if (isReserved(*it)) {
 			throw Error(line, column, "section name expected after '[', got '" + std::string(1, *it) + "'");
+		}
+
 		++ column;
 		value += *it++;
 	}
 
-	if (it == end)
+	if (it == end) {
 		throw Error(line, column, "section name expected after '[', got <EOF>");
+	}
+	if (value.empty()) {
+		throw Error(line, column, "empty section name");
+	}
 
 	/* Remove ']' */
 	++ it;
@@ -144,7 +152,7 @@ void analyzeSection(Tokens &list, int &line, int &column, StreamIterator &it, St
 	list.emplace_back(Token::Section, line, save, std::move(value));
 }
 
-void analyzeAssign(Tokens &list, int &line, int &column, StreamIterator &it)
+void analyseAssign(Tokens &list, int &line, int &column, StreamIterator &it)
 {
 	assert(*it == '=');
 
@@ -152,7 +160,7 @@ void analyzeAssign(Tokens &list, int &line, int &column, StreamIterator &it)
 	++ it;
 }
 
-void analyzeQuotedWord(Tokens &list, int &line, int &column, StreamIterator &it, StreamIterator end)
+void analyseQuotedWord(Tokens &list, int &line, int &column, StreamIterator &it, StreamIterator end)
 {
 	std::string value;
 	int save = column;
@@ -164,8 +172,9 @@ void analyzeQuotedWord(Tokens &list, int &line, int &column, StreamIterator &it,
 		value += *it++;
 	}
 
-	if (it == end)
+	if (it == end) {
 		throw Error(line, column, "undisclosed '" + std::string(1, quote) + "', got <EOF>");
+	}
 
 	/* Remove quote */
 	++ it;
@@ -173,7 +182,7 @@ void analyzeQuotedWord(Tokens &list, int &line, int &column, StreamIterator &it,
 	list.push_back({ Token::QuotedWord, line, save, std::move(value) });
 }
 
-void analyzeWord(Tokens &list, int &line, int &column, StreamIterator &it, StreamIterator end)
+void analyseWord(Tokens &list, int &line, int &column, StreamIterator &it, StreamIterator end)
 {
 	assert(!isReserved(*it));
 
@@ -188,7 +197,7 @@ void analyzeWord(Tokens &list, int &line, int &column, StreamIterator &it, Strea
 	list.push_back({ Token::Word, line, save, std::move(value) });
 }
 
-void analyzeInclude(Tokens &list, int &line, int &column, StreamIterator &it, StreamIterator end)
+void analyseInclude(Tokens &list, int &line, int &column, StreamIterator &it, StreamIterator end)
 {
 	assert(*it == '@');
 
@@ -202,40 +211,11 @@ void analyzeInclude(Tokens &list, int &line, int &column, StreamIterator &it, St
 		include += *it++;
 	}
 
-	if (include != "include")
+	if (include != "include") {
 		throw Error(line, column, "expected include after '@' token");
-
-	list.push_back({ Token::Include, line, save });
-}
-
-Tokens analyze(StreamIterator &it, StreamIterator end)
-{
-	Tokens list;
-	int line = 1;
-	int column = 0;
-
-	while (it != end) {
-		if (*it == '\n')
-			analyzeLine(line, column, it);
-		else if (*it == '#')
-			analyzeComment(column, it, end);
-		else if (*it == '[')
-			analyzeSection(list, line, column, it, end);
-		else if (*it == '=')
-			analyzeAssign(list, line, column, it);
-		else if (isSpace(*it))
-			analyzeSpaces(column, it, end);
-		else if (*it == '@')
-			analyzeInclude(list, line, column, it, end);
-		else if (isQuote(*it))
-			analyzeQuotedWord(list, line, column, it, end);
-		else if (isList(*it))
-			analyzeList(list, line, column, it);
-		else
-			analyzeWord(list, line, column, it, end);
 	}
 
-	return list;
+	list.push_back({ Token::Include, line, save });
 }
 
 void parseOptionValueSimple(Option &option, TokenIterator &it)
@@ -270,8 +250,9 @@ void parseOptionValueList(Option &option, TokenIterator &it, TokenIterator end)
 		}
 	}
 
-	if (it == end)
+	if (it == end) {
 		throw Error(save->line(), save->column(), "unterminated list construct");
+	}
 
 	/* Remove ) */
 	++ it;
@@ -284,50 +265,53 @@ void parseOption(Section &sc, TokenIterator &it, TokenIterator end)
 	TokenIterator save = it;
 
 	/* No '=' or something else? */
-	if (++it == end)
+	if (++it == end) {
 		throw Error(save->line(), save->column(), "expected '=' assignment, got <EOF>");
-	if (it->type() != Token::Assign)
+	}
+	if (it->type() != Token::Assign) {
 		throw Error(it->line(), it->column(), "expected '=' assignment, got " + it->value());
+	}
 
 	/* Empty options are allowed so just test for words */
 	if (++it != end) {
-		if (it->type() == Token::Word || it->type() == Token::QuotedWord)
+		if (it->type() == Token::Word || it->type() == Token::QuotedWord) {
 			parseOptionValueSimple(option, it);
-		else if (it->type() == Token::ListBegin)
+		} else if (it->type() == Token::ListBegin) {
 			parseOptionValueList(option, it, end);
+		}
 	}
 
 	sc.push_back(std::move(option));
 }
 
-void parseInclude(Document &doc, TokenIterator &it, TokenIterator end)
+void parseInclude(Document &doc, const std::string &path, TokenIterator &it, TokenIterator end)
 {
 	TokenIterator save = it;
 
-	if (++it == end)
+	if (++it == end) {
 		throw Error(save->line(), save->column(), "expected file name after '@include' statement, got <EOF>");
-	if (it->type() != Token::Word && it->type() != Token::QuotedWord)
+	}
+
+	if (it->type() != Token::Word && it->type() != Token::QuotedWord) {
 		throw Error(it->line(), it->column(), "expected file name after '@include' statement, got " + it->value());
-	if (doc.path().empty())
-		throw Error(it->line(), it->column(), "'@include' statement invalid with buffer documents");
+	}
 
 	std::string value = (it++)->value();
 	std::string file;
 
 	if (!isAbsolute(value)) {
 #if defined(_WIN32)
-		file = doc.path() + "\\" + value;
+		file = path + "\\" + value;
 #else
-		file = doc.path() + "/" + value;
+		file = path + "/" + value;
 #endif
 	} else {
 		file = value;
 	}
 
-	Document child(File{file});
-
-	for (const auto &sc : child)
+	for (const auto &sc : readFile(file)) {
 		doc.push_back(sc);
+	}
 }
 
 void parseSection(Document &doc, TokenIterator &it, TokenIterator end)
@@ -339,8 +323,9 @@ void parseSection(Document &doc, TokenIterator &it, TokenIterator end)
 
 	/* Read until next section */
 	while (it != end && it->type() != Token::Section) {
-		if (it->type() != Token::Word)
+		if (it->type() != Token::Word) {
 			throw Error(it->line(), it->column(), "unexpected token '" + it->value() + "' in section definition");
+		}
 
 		parseOption(sc, it, end);
 	}
@@ -348,16 +333,56 @@ void parseSection(Document &doc, TokenIterator &it, TokenIterator end)
 	doc.push_back(std::move(sc));
 }
 
-void parse(Document &doc, const Tokens &tokens)
+} // !namespace
+
+namespace ini {
+
+Tokens analyse(std::istreambuf_iterator<char> it, std::istreambuf_iterator<char> end)
 {
+	Tokens list;
+	int line = 1;
+	int column = 0;
+
+	while (it != end) {
+		if (*it == '\n') {
+			analyseLine(line, column, it);
+		} else if (*it == '#') {
+			analyseComment(column, it, end);
+		} else if (*it == '[') {
+			analyseSection(list, line, column, it, end);
+		} else if (*it == '=') {
+			analyseAssign(list, line, column, it);
+		} else if (isSpace(*it)) {
+			analyseSpaces(column, it, end);
+		} else if (*it == '@') {
+			analyseInclude(list, line, column, it, end);
+		} else if (isQuote(*it)) {
+			analyseQuotedWord(list, line, column, it, end);
+		} else if (isList(*it)) {
+			analyseList(list, line, column, it);
+		} else {
+			analyseWord(list, line, column, it, end);
+		}
+	}
+
+	return list;
+}
+
+Tokens analyse(std::istream &stream)
+{
+	return analyse(std::istreambuf_iterator<char>(stream), {});
+}
+
+Document parse(const Tokens &tokens, const std::string &path)
+{
+	Document doc;
 	TokenIterator it = tokens.cbegin();
 	TokenIterator end = tokens.cend();
 
 	while (it != end) {
-		/* Just ignore this */
 		switch (it->type()) {
 		case Token::Include:
-			parseInclude(doc, it, end);
+			parseInclude(doc, path, it, end);
 			break;
 		case Token::Section:
 			parseSection(doc, it, end);
@@ -366,60 +391,44 @@ void parse(Document &doc, const Tokens &tokens)
 			throw Error(it->line(), it->column(), "unexpected '" + it->value() + "' on root document");
 		}
 	}
+
+	return doc;
 }
 
-} // !namespace
-
-namespace irccd {
-
-namespace ini {
-
-Tokens Document::analyze(const File &file)
+Document readFile(const std::string &filename)
 {
-	std::fstream stream(file.path);
+	/* Get parent path */
+	auto parent = filename;
+	auto pos = parent.find_last_of("/\\");
 
-	if (!stream)
-		throw std::runtime_error(std::strerror(errno));
+	if (pos != std::string::npos) {
+		parent.erase(pos);
+	} else {
+		parent = ".";
+	}
 
-	std::istreambuf_iterator<char> it(stream);
-	std::istreambuf_iterator<char> end;
+	std::ifstream input(filename);
 
-	return ::analyze(it, end);
+	if (!input) {
+		throw Error(0, 0, std::strerror(errno));
+	}
+
+	return parse(analyse(input), parent);
 }
 
-Tokens Document::analyze(const Buffer &buffer)
+Document readString(const std::string &buffer)
 {
-	std::istringstream stream(buffer.text);
-	std::istreambuf_iterator<char> it(stream);
-	std::istreambuf_iterator<char> end;
+	std::istringstream iss(buffer);
 
-	return ::analyze(it, end);
+	return parse(analyse(iss));
 }
 
-Document::Document(const File &file)
-	: m_path(file.path)
+void dump(const Tokens &tokens)
 {
-	/* Update path */
-	auto pos = m_path.find_last_of("/\\");
-
-	if (pos != std::string::npos)
-		m_path.erase(pos);
-	else
-		m_path = ".";
-
-	parse(*this, analyze(file));
-}
-
-Document::Document(const Buffer &buffer)
-{
-	parse(*this, analyze(buffer));
-}
-
-void Document::dump(const Tokens &tokens)
-{
-	for (const Token &token: tokens)
+	for (const Token &token: tokens) {
 		// TODO: add better description
 		std::cout << token.line() << ":" << token.column() << ": " << token.value() << std::endl;
+	}
 }
 
 } // !ini
