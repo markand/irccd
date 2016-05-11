@@ -20,6 +20,8 @@
 
 #include "cmd-plugin-info.hpp"
 #include "irccd.hpp"
+#include "plugin.hpp"
+#include "service-plugin.hpp"
 #include "sysconfig.hpp"
 
 namespace irccd {
@@ -49,7 +51,7 @@ json::Value PluginInfo::request(Irccdctl &, const RemoteCommandRequest &args) co
 json::Value PluginInfo::exec(Irccd &irccd, const json::Value &request) const
 {
 #if defined(WITH_JS)
-	auto plugin = irccd.requirePlugin(request.at("plugin").toString());
+	auto plugin = irccd.pluginService().require(request.at("plugin").toString());
 	
 	return json::object({
 		{ "author",	plugin->author()	},

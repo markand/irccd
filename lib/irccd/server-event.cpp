@@ -18,7 +18,9 @@
 
 #include "irccd.hpp"
 #include "logger.hpp"
+#include "plugin.hpp"
 #include "server-event.hpp"
+#include "service-plugin.hpp"
 #include "service-rule.hpp"
 
 namespace irccd {
@@ -38,7 +40,7 @@ ServerEvent::ServerEvent(std::string server,
 
 void ServerEvent::operator()(Irccd &irccd) const
 {
-	for (auto &plugin : irccd.plugins()) {
+	for (auto &plugin : irccd.pluginService().plugins()) {
 		auto eventname = m_plugin_function_name(*plugin);
 		auto allowed = irccd.ruleService().solve(m_server, m_target, m_origin, plugin->name(), eventname);
 

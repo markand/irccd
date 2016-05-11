@@ -20,6 +20,8 @@
 
 #include "cmd-plugin-list.hpp"
 #include "irccd.hpp"
+#include "plugin.hpp"
+#include "service-plugin.hpp"
 #include "sysconfig.hpp"
 
 namespace irccd {
@@ -42,7 +44,7 @@ json::Value PluginList::exec(Irccd &irccd, const json::Value &request) const
 	json::Value response = RemoteCommand::exec(irccd, request);
 	json::Value list = json::array({});
 
-	for (const auto &plugin : irccd.plugins()) {
+	for (const auto &plugin : irccd.pluginService().plugins()) {
 		list.append(plugin->name());
 	}
 

@@ -17,6 +17,8 @@
  */
 
 #include "irccd.hpp"
+#include "plugin.hpp"
+#include "service-plugin.hpp"
 #include "js-plugin.hpp"
 
 namespace irccd {
@@ -70,7 +72,7 @@ duk::Ret info(duk::ContextPtr ctx)
 	Plugin *plugin = nullptr;
 
 	if (duk::top(ctx) >= 1) {
-		plugin = duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->getPlugin(duk::require<std::string>(ctx, 0)).get();
+		plugin = duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->pluginService().get(duk::require<std::string>(ctx, 0)).get();
 	} else {
 		plugin = duk::getGlobal<duk::RawPointer<Plugin>>(ctx, "\xff""\xff""plugin");
 	}
@@ -103,7 +105,7 @@ duk::Ret list(duk::ContextPtr ctx)
 	duk::push(ctx, duk::Array{});
 
 	int i = 0;
-	for (const auto &plugin : duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->plugins()) {
+	for (const auto &plugin : duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->pluginService().plugins()) {
 		duk::putProperty(ctx, -1, i++, plugin->name());
 	}
 
@@ -125,7 +127,7 @@ duk::Ret list(duk::ContextPtr ctx)
 duk::Ret load(duk::ContextPtr ctx)
 {
 	return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
-		irccd.loadPlugin(name, name, true);
+		irccd.pluginService().load(name, name, true);
 	});
 }
 
@@ -144,7 +146,7 @@ duk::Ret load(duk::ContextPtr ctx)
 duk::Ret reload(duk::ContextPtr ctx)
 {
 	return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
-		irccd.reloadPlugin(name);
+		irccd.pluginService().reload(name);
 	});
 }
 
@@ -163,7 +165,7 @@ duk::Ret reload(duk::ContextPtr ctx)
 duk::Ret unload(duk::ContextPtr ctx)
 {
 	return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
-		irccd.unloadPlugin(name);
+		irccd.pluginService().unload(name);
 	});
 }
 

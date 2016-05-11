@@ -18,6 +18,7 @@
 
 #include "cmd-plugin-load.hpp"
 #include "irccd.hpp"
+#include "service-plugin.hpp"
 #include "sysconfig.hpp"
 
 namespace irccd {
@@ -44,7 +45,7 @@ json::Value PluginLoad::exec(Irccd &irccd, const json::Value &request) const
 #if defined(WITH_JS)
 	auto name = request.at("plugin").toString();
 
-	irccd.loadPlugin(name, name, true);
+	irccd.pluginService().load(name, name, true);
 
 	return RemoteCommand::exec(irccd, request);
 #else

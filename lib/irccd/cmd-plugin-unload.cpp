@@ -18,6 +18,7 @@
 
 #include "cmd-plugin-unload.hpp"
 #include "irccd.hpp"
+#include "service-plugin.hpp"
 #include "sysconfig.hpp"
 
 namespace irccd {
@@ -42,7 +43,7 @@ std::vector<RemoteCommand::Arg> PluginUnload::args() const
 json::Value PluginUnload::exec(Irccd &irccd, const json::Value &request) const
 {
 #if defined(WITH_JS)
-	irccd.unloadPlugin(request.at("plugin").toString());
+	irccd.pluginService().unload(request.at("plugin").toString());
 
 	return RemoteCommand::exec(irccd, request);
 #else

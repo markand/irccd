@@ -21,6 +21,8 @@
 #include <irccd/elapsed-timer.hpp>
 #include <irccd/irccd.hpp>
 #include <irccd/logger.hpp>
+#include <irccd/plugin.hpp>
+#include <irccd/service-plugin.hpp>
 #include <irccd/system.hpp>
 
 using namespace irccd;
@@ -32,7 +34,7 @@ TEST(Basic, single)
 
 	auto plugin = std::make_shared<Plugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-single.js");
 
-	irccd.addPlugin(plugin);
+	irccd.pluginService().add(plugin);
 
 	while (timer.elapsed() < 3000) {
 		irccd.poll();
@@ -49,7 +51,7 @@ TEST(Basic, repeat)
 
 	auto plugin = std::make_shared<Plugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-repeat.js");
 
-	irccd.addPlugin(plugin);
+	irccd.pluginService().add(plugin);
 
 	while (timer.elapsed() < 3000) {
 		irccd.poll();

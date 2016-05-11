@@ -22,6 +22,7 @@
 
 #include "irccd.hpp"
 #include "logger.hpp"
+#include "plugin.hpp"
 #include "server.hpp"
 #include "server-event.hpp"
 #include "service-server.hpp"

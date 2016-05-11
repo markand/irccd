@@ -18,6 +18,8 @@
 
 #include "cmd-plugin-reload.hpp"
 #include "irccd.hpp"
+#include "plugin.hpp"
+#include "service-plugin.hpp"
 #include "sysconfig.hpp"
 
 namespace irccd {
@@ -42,7 +44,7 @@ std::vector<RemoteCommand::Arg> PluginReload::args() const
 json::Value PluginReload::exec(Irccd &irccd, const json::Value &request) const
 {
 #if defined(WITH_JS)
-	irccd.requirePlugin(request.at("plugin").toString())->onReload();
+	irccd.pluginService().require(request.at("plugin").toString())->onReload();
 
 	return RemoteCommand::exec(irccd, request);
 #else
