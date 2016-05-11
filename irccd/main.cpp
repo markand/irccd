@@ -38,6 +38,7 @@
 #include <irccd/options.hpp>
 #include <irccd/path.hpp>
 #include <irccd/service-server.hpp>
+#include <irccd/service-transport.hpp>
 #include <irccd/system.hpp>
 #include <irccd/config.hpp>
 #include <irccd/irccd.hpp>
@@ -228,7 +229,7 @@ void load(const Config &config, const parser::Result &options)
 
 	// [transport]
 	for (const auto &transport : config.loadTransports()) {
-		instance->addTransport(transport);
+		instance->transportService().add(transport);
 	}
 
 	// [server] section.

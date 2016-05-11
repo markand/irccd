@@ -27,6 +27,7 @@
 #include "rule.hpp"
 #include "server.hpp"
 #include "sysconfig.hpp"
+#include "transport-server.hpp"
 #include "util.hpp"
 
 using namespace fmt::literals;

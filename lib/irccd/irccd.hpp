@@ -33,7 +33,6 @@
 #include <mutex>
 #include <vector>
 
-#include "sockets.hpp"
 #include "sysconfig.hpp"
 
 #if defined(WITH_JS)
@@ -43,8 +42,6 @@
 #include "application.hpp"
 #include "logger.hpp"
 #include "rule.hpp"
-#include "server.hpp"
-#include "transport-server.hpp"
 
 namespace irccd {
 
@@ -53,21 +50,11 @@ class Irccd;
 class Plugin;
 class ServerService;
 class Service;
-class TransportCommand;
+class TransportService;
 
 /**
  * \class Irccd
- * \brief Irccd main instance
- *
- * This class is used as the main application event loop, it stores servers, plugins and transports.
- *
- * In a general manner, no code in irccd is thread-safe because irccd is mono-threaded except the JavaScript timer
- * API.
- *
- * If you plan to add more threads to irccd, then the simpliest and safest way to execute thread-safe code is to
- * register an event using Irccd::post function which will be called during the event loop dispatching.
- *
- * Thus, except noticed as thread-safe, no function is assumed to be.
+ * \brief Irccd main instance.
  */
 class Irccd : public Application {
 private:
@@ -84,21 +71,11 @@ private:
 	// Rules.
 	std::vector<Rule> m_rules;
 
-	// Transports.
-	std::vector<std::shared_ptr<TransportClient>> m_transportClients;
-	std::vector<std::shared_ptr<TransportServer>> m_transportServers;
-
-	// Services
+	// Services.
 	std::shared_ptr<InterruptService> m_interruptService;
 	std::shared_ptr<ServerService> m_serverService;
+	std::shared_ptr<TransportService> m_transportService;
 	std::vector<std::shared_ptr<Service>> m_services;
-
-	/*
-	 * Transport clients slots
-	 * ----------------------------------------------------------
-	 */
-	void handleTransportCommand(std::weak_ptr<TransportClient>, const json::Value &);
-	void handleTransportDie(std::weak_ptr<TransportClient>);
 
 	/*
 	 * Plugin timers slots
@@ -112,17 +89,7 @@ private:
 	void handleTimerEnd(std::weak_ptr<Plugin>, std::shared_ptr<Timer>);
 #endif
 
-	/*
-	 * Process the socket sets.
-	 * ----------------------------------------------------------
-	 *
-	 * These functions are called after polling which sockets are ready for reading/writing.
-	 */
-
-	void processTransportClients(fd_set &input, fd_set &output);
-	void processTransportServers(fd_set &input);
-	void process(fd_set &setinput, fd_set &setoutput);
-
+	// Not copyable and not movable because services has references to irccd.
 	Irccd(const Irccd &) = delete;
 	Irccd(Irccd &&) = delete;
 
@@ -137,6 +104,8 @@ public:
 
 	/**
 	 * Add a generic service.
+	 *
+	 * \param service the service
 	 */
 	inline void addService(std::shared_ptr<Service> service)
 	{
@@ -154,6 +123,16 @@ public:
 	}
 
 	/**
+	 * Access the transport service.
+	 *
+	 * \return the service
+	 */
+	inline TransportService &transportService() noexcept
+	{
+		return *m_transportService;
+	}
+
+	/**
 	 * Add an event to the queue. This will immediately signals the event loop to interrupt itself to dispatch
 	 * the pending events.
 	 *
@@ -161,27 +140,6 @@ public:
 	 * \note Thread-safe
 	 */
 	void post(std::function<void (Irccd &)> ev) noexcept;
-
-	/*
-	 * Transport management
-	 * ----------------------------------------------------------
-	 *
-	 * Functions for adding new transport servers.
-	 */
-
-	/**
-	 * Add a transport server.
-	 *
-	 * \param ts the transport server
-	 */
-	void addTransport(std::shared_ptr<TransportServer> ts);
-
-	/**
-	 * Send data to all clients.
-	 *
-	 * \param data the data
-	 */
-	void broadcast(std::string data);
 
 	/*
 	 * Plugin management

@@ -20,6 +20,7 @@
 
 #include "cmd-server-info.hpp"
 #include "irccd.hpp"
+#include "server.hpp"
 #include "service-server.hpp"
 
 namespace irccd {

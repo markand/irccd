@@ -22,8 +22,10 @@
 
 #include "irccd.hpp"
 #include "logger.hpp"
+#include "server.hpp"
 #include "server-event.hpp"
 #include "service-server.hpp"
+#include "service-transport.hpp"
 #include "sysconfig.hpp"
 #include "util.hpp"
 
@@ -45,7 +47,7 @@ void ServerService::handleChannelMode(std::weak_ptr<Server> ptr, std::string ori
 	log::debug() << "  mode: " << mode << "\n";
 	log::debug() << "  argument: " << arg << std::endl;
 
-	m_irccd.broadcast(json::object({
+	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onChannelMode"		},
 		{ "server",	server->info().name	},
 		{ "origin",	origin			},
@@ -79,7 +81,7 @@ void ServerService::handleChannelNotice(std::weak_ptr<Server> ptr, std::string o
 	log::debug() << "  channel: " << channel << "\n";
 	log::debug() << "  message: " << message << std::endl;
 
-	m_irccd.broadcast(json::object({
+	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onChannelNotice"	},
 		{ "server",	server->info().name	},
 		{ "origin",	origin			},
@@ -109,7 +111,7 @@ void ServerService::handleConnect(std::weak_ptr<Server> ptr)
 
 	log::debug() << "server " << server->info().name << ": event onConnect" << std::endl;
 
-	m_irccd.broadcast(json::object({
+	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onConnect"		},
 		{ "server",	server->info().name	}
 	}).toJson(0));
@@ -139,7 +141,7 @@ void ServerService::handleInvite(std::weak_ptr<Server> ptr, std::string origin, 
 	log::debug() << "  channel: " << channel << "\n";
 	log::debug() << "  target: " << target << std::endl;
 
-	m_irccd.broadcast(json::object({
+	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onInvite"		},
 		{ "server",	server->info().name	},
 		{ "origin",	origin			},
@@ -170,7 +172,7 @@ void ServerService::handleJoin(std::weak_ptr<Server> ptr, std::string origin, st
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  channel: " << channel << std::endl;
 
-	m_irccd.broadcast(json::object({
+	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onJoin"		},
 		{ "server",	server->info().name	},
 		{ "origin",	origin			},
@@ -203,7 +205,7 @@ void ServerService::handleKick(std::weak_ptr<Server> ptr, std::string origin, st
 	log::debug() << "  target: " << target << "\n";
 	log::debug() << "  reason: " << reason << std::endl;
 
-	m_irccd.broadcast(json::object({
+	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onKick"		},
 		{ "server",	server->info().name	},
 		{ "origin",	origin			},
@@ -237,7 +239,7 @@ void ServerService::handleMessage(std::weak_ptr<Server> ptr, std::string origin,
 	log::debug() << "  channel: " << channel << "\n";
 	log::debug() << "  message: " << message << std::endl;
 
-	m_irccd.broadcast(json::object({
+	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onMessage"		},
 		{ "server",	server->info().name	},
 		{ "origin",	origin			},
@@ -275,7 +277,7 @@ void ServerService::handleMe(std::weak_ptr<Server> ptr, std::string origin, std:
 	log::debug() << "  target: " << target << "\n";
 	log::debug() << "  message: " << message << std::endl;
 
-	m_irccd.broadcast(json::object({
+	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onMe"			},
 		{ "server",	server->info().name	},
 		{ "origin",	origin			},
@@ -307,7 +309,7 @@ void ServerService::handleMode(std::weak_ptr<Server> ptr, std::string origin, st
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  mode: " << mode << std::endl;
 
-	m_irccd.broadcast(json::object({
+	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onMode"		},
 		{ "server",	server->info().name	},
 		{ "origin",	origin			},
@@ -340,7 +342,7 @@ void ServerService::handleNames(std::weak_ptr<Server> ptr, std::string channel, 
 
 	json::Value names(std::vector<json::Value>(nicknames.begin(), nicknames.end()));
 
-	m_irccd.broadcast(json::object({
+	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onNames"		},
 		{ "server",	server->info().name	},
 		{ "channel",	channel			},
@@ -371,7 +373,7 @@ void ServerService::handleNick(std::weak_ptr<Server> ptr, std::string origin, st
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  nickname: " << nickname << std::endl;
 
-	m_irccd.broadcast(json::object({
+	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onNick"		},
 		{ "server",	server->info().name	},
 		{ "origin",	origin			},
@@ -402,7 +404,7 @@ void ServerService::handleNotice(std::weak_ptr<Server> ptr, std::string origin, 
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  message: " << message << std::endl;
 
-	m_irccd.broadcast(json::object({
+	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onNotice"		},
 		{ "server",	server->info().name	},
 		{ "origin",	origin			},
@@ -434,7 +436,7 @@ void ServerService::handlePart(std::weak_ptr<Server> ptr, std::string origin, st
 	log::debug() << "  channel: " << channel << "\n";
 	log::debug() << "  reason: " << reason << std::endl;
 
-	m_irccd.broadcast(json::object({
+	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onPart"		},
 		{ "server",	server->info().name	},
 		{ "origin",	origin			},
@@ -466,7 +468,7 @@ void ServerService::handleQuery(std::weak_ptr<Server> ptr, std::string origin, s
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  message: " << message << std::endl;
 
-	m_irccd.broadcast(json::object({
+	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onQuery"		},
 		{ "server",	server->info().name	},
 		{ "origin",	origin			},
@@ -503,7 +505,7 @@ void ServerService::handleTopic(std::weak_ptr<Server> ptr, std::string origin, s
 	log::debug() << "  channel: " << channel << "\n";
 	log::debug() << "  topic: " << topic << std::endl;
 
-	m_irccd.broadcast(json::object({
+	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onTopic"		},
 		{ "server",	server->info().name	},
 		{ "origin",	origin			},
@@ -538,7 +540,7 @@ void ServerService::handleWhois(std::weak_ptr<Server> ptr, ServerWhois whois)
 	log::debug() << "  realname: " << whois.realname << "\n";
 	log::debug() << "  channels: " << util::join(whois.channels.begin(), whois.channels.end()) << std::endl;
 
-	m_irccd.broadcast(json::object({
+	m_irccd.transportService().broadcast(json::object({
 		{ "server",	server->info().name	},
 		{ "nickname",	whois.nick		},
 		{ "username",	whois.user		},
