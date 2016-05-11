@@ -50,7 +50,7 @@ enum class RuleAction {
  * \class Rule
  * \brief Manage rule to activate or deactive events.
  */
-class Rule final {
+class Rule {
 private:
 	RuleSet m_servers;
 	RuleSet m_channels;
@@ -66,24 +66,6 @@ private:
 	bool matchMap(const RuleSet &map, const std::string &value) const noexcept;
 
 public:
-	/**
-	 * Resolve the action to execute with the specified list of rules.
-	 *
-	 * \param rules the list of rules
-	 * \param server the server name
-	 * \param channel the channel name
-	 * \param origin the origin
-	 * \param plugin the plugin name
-	 * \param event the event name (e.g onKick)
-	 * \return true if the plugin must be called
-	 */
-	static bool solve(const std::vector<Rule> &rules,
-			  const std::string &server,
-			  const std::string &channel,
-			  const std::string &origin,
-			  const std::string &plugin,
-			  const std::string &event) noexcept;
-
 	/**
 	 * Rule constructor.
 	 *

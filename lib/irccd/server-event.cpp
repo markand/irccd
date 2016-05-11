@@ -17,8 +17,9 @@
  */
 
 #include "irccd.hpp"
+#include "logger.hpp"
 #include "server-event.hpp"
-#include "rule.hpp"
+#include "service-rule.hpp"
 
 namespace irccd {
 
@@ -39,7 +40,7 @@ void ServerEvent::operator()(Irccd &irccd) const
 {
 	for (auto &plugin : irccd.plugins()) {
 		auto eventname = m_plugin_function_name(*plugin);
-		auto allowed = Rule::solve(irccd.rules(), m_server, m_target, m_origin, plugin->name(), eventname);
+		auto allowed = irccd.ruleService().solve(m_server, m_target, m_origin, plugin->name(), eventname);
 
 		if (!allowed) {
 			log::debug() << "rule: event skipped on match" << std::endl;

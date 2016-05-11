@@ -23,6 +23,7 @@
 #include "config.hpp"
 #include "fs.hpp"
 #include "irccd.hpp"
+#include "logger.hpp"
 #include "path.hpp"
 #include "rule.hpp"
 #include "server.hpp"

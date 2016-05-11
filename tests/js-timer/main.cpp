@@ -20,6 +20,7 @@
 
 #include <irccd/elapsed-timer.hpp>
 #include <irccd/irccd.hpp>
+#include <irccd/logger.hpp>
 #include <irccd/system.hpp>
 
 using namespace irccd;

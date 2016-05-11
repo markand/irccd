@@ -50,40 +50,6 @@ const std::unordered_set<std::string> validEvents{
 
 namespace irccd {
 
-bool Rule::solve(const std::vector<Rule> &rules,
-		 const std::string &server,
-		 const std::string &channel,
-		 const std::string &origin,
-		 const std::string &plugin,
-		 const std::string &event) noexcept
-{
-	bool result = true;
-
-	log::debug() << "rule: solving for:\n"
-		     << "  server: " << server << "\n"
-		     << "  channel: " << channel << "\n"
-		     << "  origin: " << origin << "\n"
-		     << "  plugin: " << plugin << "\n"
-		     << "  event: " << event << std::endl;
-
-	int i = 0;
-	for (const Rule &rule : rules) {
-		log::debug() << "  candidate " << i++ << ":\n"
-			     << "    servers: " << util::join(rule.m_servers.begin(), rule.m_servers.end()) << "\n"
-			     << "    channels: " << util::join(rule.m_channels.begin(), rule.m_channels.end()) << "\n"
-			     << "    origins: " << util::join(rule.m_origins.begin(), rule.m_origins.end()) << "\n"
-			     << "    plugins: " << util::join(rule.m_plugins.begin(), rule.m_plugins.end()) << "\n"
-			     << "    events: " << util::join(rule.m_events.begin(), rule.m_events.end()) << "\n"
-			     << "    action: " << ((rule.m_action == RuleAction::Accept) ? "accept" : "drop") << std::endl;
-
-		if (rule.match(server, channel, origin, plugin, event)) {
-			result = rule.action() == RuleAction::Accept;
-		}
-	}
-
-	return result;
-}
-
 bool Rule::matchMap(const RuleSet &map, const std::string &value) const noexcept
 {
 	return value.empty() || map.empty() || map.count(value) == 1;

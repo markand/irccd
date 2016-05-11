@@ -17,6 +17,7 @@
  */
 
 #include "irccd.hpp"
+#include "logger.hpp"
 #include "service-transport.hpp"
 #include "transport-client.hpp"
 #include "transport-server.hpp"

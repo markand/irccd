@@ -19,6 +19,7 @@
 #include <gtest/gtest.h>
 
 #include <irccd/rule.hpp>
+#include <irccd/service-rule.hpp>
 
 namespace irccd {
 
@@ -64,13 +65,13 @@ namespace irccd {
  */
 class RulesTest : public testing::Test {
 protected:
-	std::vector<Rule> m_rules;
+	RuleService m_rules;
 
 	RulesTest()
 	{
 		// #1
 		{
-			m_rules.push_back({
+			m_rules.add({
 				RuleSet{		},	// Servers
 				RuleSet{ "#staff"	},	// Channels
 				RuleSet{		},	// Origins
@@ -82,7 +83,7 @@ protected:
 
 		// #2
 		{
-			m_rules.push_back({
+			m_rules.add({
 				RuleSet{ "unsafe"	},
 				RuleSet{ "#staff"	},
 				RuleSet{		},
@@ -94,7 +95,7 @@ protected:
 
 		// #3-1
 		{
-			m_rules.push_back({
+			m_rules.add({
 				RuleSet{},
 				RuleSet{},
 				RuleSet{},
@@ -106,7 +107,7 @@ protected:
 
 		// #3-2
 		{
-			m_rules.push_back({
+			m_rules.add({
 				RuleSet{ "malikania", "localhost"	},
 				RuleSet{ "#games"			},
 				RuleSet{ 				},
@@ -115,11 +116,6 @@ protected:
 				RuleAction::Accept
 			});
 		}
-	}
-
-	~RulesTest()
-	{
-		m_rules.clear();
 	}
 };
 
@@ -196,40 +192,40 @@ TEST_F(RulesTest, complexMatch1)
 TEST_F(RulesTest, basicSolve)
 {
 	/* Allowed */
-	ASSERT_TRUE(Rule::solve(m_rules, "malikania", "#staff", "", "a", "onMessage"));
+	ASSERT_TRUE(m_rules.solve("malikania", "#staff", "", "a", "onMessage"));
 
 	/* Allowed */
-	ASSERT_TRUE(Rule::solve(m_rules, "freenode", "#staff", "", "b", "onTopic"));
+	ASSERT_TRUE(m_rules.solve("freenode", "#staff", "", "b", "onTopic"));
 
 	/* Not allowed */
-	ASSERT_FALSE(Rule::solve(m_rules, "malikania", "#staff", "", "", "onCommand"));
+	ASSERT_FALSE(m_rules.solve("malikania", "#staff", "", "", "onCommand"));
 
 	/* Not allowed */
-	ASSERT_FALSE(Rule::solve(m_rules, "freenode", "#staff", "", "c", "onCommand"));
+	ASSERT_FALSE(m_rules.solve("freenode", "#staff", "", "c", "onCommand"));
 
 	/* Allowed */
-	ASSERT_TRUE(Rule::solve(m_rules, "unsafe", "#staff", "", "c", "onCommand"));
+	ASSERT_TRUE(m_rules.solve("unsafe", "#staff", "", "c", "onCommand"));
 }
 
 TEST_F(RulesTest, gamesSolve)
 {
 	/* Allowed */
-	ASSERT_TRUE(Rule::solve(m_rules, "malikania", "#games", "", "game", "onMessage"));
+	ASSERT_TRUE(m_rules.solve("malikania", "#games", "", "game", "onMessage"));
 
 	/* Allowed */
-	ASSERT_TRUE(Rule::solve(m_rules, "localhost", "#games", "", "game", "onMessage"));
+	ASSERT_TRUE(m_rules.solve("localhost", "#games", "", "game", "onMessage"));
 
 	/* Allowed */
-	ASSERT_TRUE(Rule::solve(m_rules, "malikania", "#games", "", "game", "onCommand"));
+	ASSERT_TRUE(m_rules.solve("malikania", "#games", "", "game", "onCommand"));
 
 	/* Not allowed */
-	ASSERT_FALSE(Rule::solve(m_rules, "malikania", "#games", "", "game", "onQuery"));
+	ASSERT_FALSE(m_rules.solve("malikania", "#games", "", "game", "onQuery"));
 
 	/* Not allowed */
-	ASSERT_FALSE(Rule::solve(m_rules, "freenode", "#no", "", "game", "onMessage"));
+	ASSERT_FALSE(m_rules.solve("freenode", "#no", "", "game", "onMessage"));
 
 	/* Not allowed */
-	ASSERT_FALSE(Rule::solve(m_rules, "malikania", "#test", "", "game", "onMessage"));
+	ASSERT_FALSE(m_rules.solve("malikania", "#test", "", "game", "onMessage"));
 }
 
 } // !irccd

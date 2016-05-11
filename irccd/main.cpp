@@ -37,6 +37,7 @@
 #include <irccd/logger.hpp>
 #include <irccd/options.hpp>
 #include <irccd/path.hpp>
+#include <irccd/service-rule.hpp>
 #include <irccd/service-server.hpp>
 #include <irccd/service-transport.hpp>
 #include <irccd/system.hpp>
@@ -239,7 +240,7 @@ void load(const Config &config, const parser::Result &options)
 
 	// [rule] section.
 	for (const auto &rule : config.loadRules()) {
-		instance->addRule(rule);
+		instance->ruleService().add(rule);
 	}
 
 	// [plugin] section.

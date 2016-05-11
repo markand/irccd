@@ -26,8 +26,6 @@
 
 #include <algorithm>
 #include <atomic>
-#include <cassert>
-#include <condition_variable>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -40,14 +38,13 @@
 #endif
 
 #include "application.hpp"
-#include "logger.hpp"
-#include "rule.hpp"
 
 namespace irccd {
 
 class InterruptService;
 class Irccd;
 class Plugin;
+class RuleService;
 class ServerService;
 class Service;
 class TransportService;
@@ -68,13 +65,11 @@ private:
 	std::vector<std::shared_ptr<Plugin>> m_plugins;
 #endif
 
-	// Rules.
-	std::vector<Rule> m_rules;
-
 	// Services.
 	std::shared_ptr<InterruptService> m_interruptService;
 	std::shared_ptr<ServerService> m_serverService;
 	std::shared_ptr<TransportService> m_transportService;
+	std::shared_ptr<RuleService> m_ruleService;
 	std::vector<std::shared_ptr<Service>> m_services;
 
 	/*
@@ -130,6 +125,16 @@ public:
 	inline TransportService &transportService() noexcept
 	{
 		return *m_transportService;
+	}
+
+	/**
+	 * Access the rule service.
+	 *
+	 * \return the service
+	 */
+	inline RuleService &ruleService() noexcept
+	{
+		return *m_ruleService;
 	}
 
 	/**
@@ -226,60 +231,6 @@ public:
 	}
 
 #endif // !WITH_JS
-
-	/*
-	 * Rule management
-	 * ----------------------------------------------------------
-	 *
-	 * Functions for adding, creating new rules that are used to filter IRC events before being processed
-	 * by JavaScript plugins.
-	 */
-
-	/**
-	 * Append a rule.
-	 *
-	 * \param rule the rule to append
-	 */
-	inline void addRule(Rule rule)
-	{
-		m_rules.push_back(std::move(rule));
-	}
-
-	/**
-	 * Insert a new rule at the specified position.
-	 *
-	 * \param rule the rule
-	 * \param position the position
-	 */
-	inline void insertRule(Rule rule, unsigned position)
-	{
-		assert(position <= m_rules.size());
-
-		m_rules.insert(m_rules.begin() + position, std::move(rule));
-	}
-
-	/**
-	 * Get the list of rules.
-	 *
-	 * \return the list of rules
-	 */
-	inline const std::vector<Rule> &rules() const noexcept
-	{
-		return m_rules;
-	}
-
-	/**
-	 * Remove a new rule from the specified position.
-	 *
-	 * \pre position must be valid
-	 * \param position the position
-	 */
-	inline void removeRule(unsigned position)
-	{
-		assert(position < m_rules.size());
-
-		m_rules.erase(m_rules.begin() + position);
-	}
 
 	/**
 	 * Loop forever by calling poll() and dispatch() indefinitely.

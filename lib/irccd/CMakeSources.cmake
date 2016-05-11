@@ -64,6 +64,7 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/server-state-disconnected.hpp
 	${CMAKE_CURRENT_LIST_DIR}/service.hpp
 	${CMAKE_CURRENT_LIST_DIR}/service-interrupt.hpp
+	${CMAKE_CURRENT_LIST_DIR}/service-rule.hpp
 	${CMAKE_CURRENT_LIST_DIR}/service-server.hpp
 	${CMAKE_CURRENT_LIST_DIR}/service-transport.hpp
 	${CMAKE_CURRENT_LIST_DIR}/sockets.hpp
@@ -134,6 +135,7 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/server-state-connecting.cpp
 	${CMAKE_CURRENT_LIST_DIR}/server-state-disconnected.cpp
 	${CMAKE_CURRENT_LIST_DIR}/service-interrupt.cpp
+	${CMAKE_CURRENT_LIST_DIR}/service-rule.cpp
 	${CMAKE_CURRENT_LIST_DIR}/service-server.cpp
 	${CMAKE_CURRENT_LIST_DIR}/service-transport.cpp
 	${CMAKE_CURRENT_LIST_DIR}/sockets.cpp
