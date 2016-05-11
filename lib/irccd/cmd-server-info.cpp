@@ -57,7 +57,7 @@ json::Value ServerInfo::exec(Irccd &irccd, const json::Value &request) const
 	auto response = RemoteCommand::exec(irccd, request);
 
 	/* General stuff */
-	response.insert("name", server->info().name);
+	response.insert("name", server->name());
 	response.insert("host", server->info().host);
 	response.insert("port", server->info().port);
 	response.insert("nickname", server->identity().nickname);

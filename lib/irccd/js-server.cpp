@@ -80,7 +80,7 @@ duk::Ret info(duk::ContextPtr ctx)
 	auto server = duk::self<duk::Shared<Server>>(ctx);
 
 	duk::push(ctx, duk::Object{});
-	duk::putProperty(ctx, -1, "name", server->info().name);
+	duk::putProperty(ctx, -1, "name", server->name());
 	duk::putProperty(ctx, -1, "host", server->info().host);
 	duk::putProperty<int>(ctx, -1, "port", server->info().port);
 	duk::putProperty<bool>(ctx, -1, "ssl", server->info().flags & ServerInfo::Ssl);
@@ -336,7 +336,7 @@ duk::Ret whois(duk::ContextPtr ctx)
  */
 duk::Ret toString(duk::ContextPtr ctx)
 {
-	duk::push(ctx, duk::self<duk::Shared<Server>>(ctx)->info().name);
+	duk::push(ctx, duk::self<duk::Shared<Server>>(ctx)->name());
 
 	return 1;
 }
@@ -367,12 +367,13 @@ duk::Ret constructor(duk::ContextPtr ctx)
 	if (!duk_is_constructor_call(ctx))
 		return 0;
 
+	std::string name;
 	ServerInfo info;
 	ServerIdentity identity;
 	ServerSettings settings;
 
-	/* Information part */
-	info.name = duk::getProperty<std::string>(ctx, 0, "name");
+	// Information part.
+	name = duk::getProperty<std::string>(ctx, 0, "name");
 	info.host = duk::getProperty<std::string>(ctx, 0, "host");
 	info.port = duk::optionalProperty<int>(ctx, 0, "port", (int)info.port);
 	info.password = duk::optionalProperty<std::string>(ctx, 0, "password", "");
@@ -381,13 +382,13 @@ duk::Ret constructor(duk::ContextPtr ctx)
 		info.flags |= ServerInfo::Ipv6;
 	}
 
-	/* Identity part */
+	// Identity part.
 	identity.nickname = duk::optionalProperty<std::string>(ctx, 0, "nickname", identity.nickname);
 	identity.username = duk::optionalProperty<std::string>(ctx, 0, "username", identity.username);
 	identity.realname = duk::optionalProperty<std::string>(ctx, 0, "realname", identity.realname);
 	identity.ctcpversion = duk::optionalProperty<std::string>(ctx, 0, "version", identity.ctcpversion);
 
-	/* Settings part */
+	// Settings part.
 	for (const auto &chan: duk::getProperty<std::vector<std::string>>(ctx, 0, "channels")) {
 		settings.channels.push_back(Server::splitChannel(chan));
 	}
@@ -403,7 +404,8 @@ duk::Ret constructor(duk::ContextPtr ctx)
 	}
 
 	try {
-		duk::construct(ctx, duk::Shared<Server>{std::make_shared<Server>(std::move(info), std::move(identity), std::move(settings))});
+		duk::construct(ctx, duk::Shared<Server>{std::make_shared<Server>(std::move(name), std::move(info),
+							std::move(identity), std::move(settings))});
 	} catch (const std::exception &ex) {
 		duk::raise(ctx, duk::Error(ex.what()));
 	}
@@ -470,7 +472,7 @@ duk::Ret list(duk::ContextPtr ctx)
 	duk::push(ctx, duk::Object{});
 
 	for (const auto &server : duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->serverService().servers()) {
-		duk::putProperty(ctx, -1, server->info().name, duk::Shared<Server>{server});
+		duk::putProperty(ctx, -1, server->name(), duk::Shared<Server>{server});
 	}
 
 	return 1;

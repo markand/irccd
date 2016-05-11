@@ -130,7 +130,7 @@ void Server::handleConnect(const char *, const char **) noexcept
 
 	/* Auto join listed channels. */
 	for (const ServerChannel &channel : m_settings.channels) {
-		log::info() << "server " << m_info.name << ": auto joining " << channel.name << std::endl;
+		log::info() << "server " << m_name << ": auto joining " << channel.name << std::endl;
 		join(channel.name, channel.password);
 	}
 }
@@ -362,8 +362,9 @@ ServerChannel Server::splitChannel(const std::string &value)
 	return ServerChannel{value, ""};
 }
 
-Server::Server(ServerInfo info, ServerIdentity identity, ServerSettings settings)
-	: m_info(std::move(info))
+Server::Server(std::string name, ServerInfo info, ServerIdentity identity, ServerSettings settings)
+	: m_name(std::move(name))
+	, m_info(std::move(info))
 	, m_settings(std::move(settings))
 	, m_identity(std::move(identity))
 	, m_session(std::make_unique<Session>())
@@ -447,7 +448,7 @@ Server::~Server()
 void Server::update() noexcept
 {
 	if (m_stateNext) {
-		log::debug("server {}: switch state {} -> {}"_format(m_info.name, m_state->ident(), m_stateNext->ident()));
+		log::debug("server {}: switch state {} -> {}"_format(m_name, m_state->ident(), m_stateNext->ident()));
 
 		m_state = std::move(m_stateNext);
 		m_stateNext = nullptr;

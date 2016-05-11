@@ -98,7 +98,6 @@ public:
 		SslVerify	= (1 << 2)		//!< Verify SSL
 	};
 
-	std::string name;				//!< Server's name
 	std::string host;				//!< Hostname
 	std::string password;				//!< Optional server password
 	std::uint16_t port{6667};			//!< Server's port
@@ -373,22 +372,26 @@ public:
 	Signal<ServerWhois> onWhois;
 
 private:
+	// Identifier.
+	std::string m_name;
+
+	// Various settings.
 	ServerInfo m_info;
 	ServerSettings m_settings;
 	ServerIdentity m_identity;
 	ServerCache m_cache;
 
-	/* queue of requests to send */
+	// Queue of requests to send.
 	std::queue<std::function<bool ()>> m_queue;
 
-	/* libircclient session (bridge) */
+	// libircclient session (bridge).
 	std::unique_ptr<Session> m_session;
 
-	/* States */
+	// States.
 	std::unique_ptr<ServerState> m_state;
 	std::unique_ptr<ServerState> m_stateNext;
 
-	/* Handle libircclient callbacks */
+	// Handle libircclient callbacks.
 	void handleChannel(const char *, const char **) noexcept;
 	void handleChannelMode(const char *, const char **) noexcept;
 	void handleChannelNotice(const char *, const char **) noexcept;
@@ -418,16 +421,27 @@ public:
 	/**
 	 * Construct a server.
 	 *
+	 * \param name the identifier
 	 * \param info the information
 	 * \param identity the identity
 	 * \param settings the settings
 	 */
-	Server(ServerInfo info, ServerIdentity identity = {}, ServerSettings settings = {});
+	Server(std::string name, ServerInfo info, ServerIdentity identity = {}, ServerSettings settings = {});
 
 	/**
 	 * Destructor. Close the connection if needed.
 	 */
 	virtual ~Server();
+
+	/**
+	 * Get the server identifier.
+	 *
+	 * \return the id
+	 */
+	inline const std::string &name() const noexcept
+	{
+		return m_name;
+	}
 
 	/**
 	 * Get the server information.

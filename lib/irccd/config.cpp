@@ -318,6 +318,7 @@ std::shared_ptr<Server> loadServer(const ini::Section &sc, const Config &config)
 {
 	assert(sc.key() == "server");
 
+	std::string name;
 	ServerInfo info;
 	ServerIdentity identity;
 	ServerSettings settings;
@@ -331,11 +332,11 @@ std::shared_ptr<Server> loadServer(const ini::Section &sc, const Config &config)
 		throw std::invalid_argument("server: invalid identifier: {}"_format(it->value()));
 	}
 
-	info.name = it->value();
+	name = it->value();
 
 	// Host
 	if ((it = sc.find("host")) == sc.end()) {
-		throw std::invalid_argument("server {}: missing host"_format(it->value()));
+		throw std::invalid_argument("server {}: missing host"_format(name));
 	}
 
 	info.host = it->value();
@@ -350,7 +351,7 @@ std::shared_ptr<Server> loadServer(const ini::Section &sc, const Config &config)
 		try {
 			info.port = util::toNumber<std::uint16_t>(it->value());
 		} catch (const std::exception &) {
-			throw std::invalid_argument("server {}: invalid number for {}: {}"_format(info.name, it->key(), it->value()));
+			throw std::invalid_argument("server {}: invalid number for {}: {}"_format(name, it->key(), it->value()));
 		}
 	}
 
@@ -413,10 +414,10 @@ std::shared_ptr<Server> loadServer(const ini::Section &sc, const Config &config)
 			settings.pingTimeout = util::toNumber<std::uint16_t>(it->value());
 		}
 	} catch (const std::exception &) {
-		log::warning("server {}: invalid number for {}: {}"_format(info.name, it->key(), it->value()));
+		log::warning("server {}: invalid number for {}: {}"_format(name, it->key(), it->value()));
 	}
 
-	return std::make_shared<Server>(std::move(info), std::move(identity), std::move(settings));
+	return std::make_shared<Server>(std::move(name), std::move(info), std::move(identity), std::move(settings));
 }
 
 } // !namespace

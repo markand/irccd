@@ -94,14 +94,14 @@ void Connecting::prepare(Server &server, fd_set &setinput, fd_set &setoutput, ne
 		const ServerSettings &settings = server.settings();
 
 		if (m_timer.elapsed() > static_cast<unsigned>(settings.reconnectDelay * 1000)) {
-			log::warning() << "server " << info.name << ": timeout while connecting" << std::endl;
+			log::warning() << "server " << server.name() << ": timeout while connecting" << std::endl;
 			server.next(std::make_unique<state::Disconnected>());
 		} else if (!irc_is_connected(server.session())) {
-			log::warning() << "server " << info.name << ": error while connecting: ";
+			log::warning() << "server " << server.name() << ": error while connecting: ";
 			log::warning() << irc_strerror(irc_errno(server.session())) << std::endl;
 
 			if (settings.reconnectTries != 0) {
-				log::warning("server {}: retrying in {} seconds"_format(info.name, settings.reconnectDelay));
+				log::warning("server {}: retrying in {} seconds"_format(server.name(), settings.reconnectDelay));
 			}
 
 			server.next(std::make_unique<state::Disconnected>());
@@ -118,10 +118,10 @@ void Connecting::prepare(Server &server, fd_set &setinput, fd_set &setoutput, ne
 #if !defined(IRCCD_SYSTEM_WINDOWS)
 		(void)res_init();
 #endif
-		log::info() << "server " << info.name << ": trying to connect to " << info.host << ", port " << info.port << std::endl;
+		log::info("server {}: trying to connect to {}, port {}"_format(server.name(), info.host, info.port));
 
 		if (!connect(server)) {
-			log::warning() << "server " << info.name << ": disconnected while connecting: ";
+			log::warning() << "server " << server.name() << ": disconnected while connecting: ";
 			log::warning() << irc_strerror(irc_errno(server.session())) << std::endl;
 			server.next(std::make_unique<state::Disconnected>());
 		} else {

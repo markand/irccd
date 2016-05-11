@@ -31,19 +31,18 @@ namespace state {
 
 void Connected::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
 {
-	const ServerInfo &info = server.info();
 	const ServerSettings &settings = server.settings();
 
 	if (!irc_is_connected(server.session())) {
-		log::warning() << "server " << info.name << ": disconnected" << std::endl;
+		log::warning() << "server " << server.name() << ": disconnected" << std::endl;
 
 		if (settings.reconnectDelay > 0) {
-			log::warning("server {}: retrying in {} seconds"_format(info.name, settings.reconnectDelay));
+			log::warning("server {}: retrying in {} seconds"_format(server.name(), settings.reconnectDelay));
 		}
 
 		server.next(std::make_unique<state::Disconnected>());
 	} else if (server.cache().pingTimer.elapsed() >= settings.pingTimeout * 1000) {
-		log::warning() << "server " << info.name << ": ping timeout after "
+		log::warning() << "server " << server.name() << ": ping timeout after "
 			       << (server.cache().pingTimer.elapsed() / 1000) << " seconds" << std::endl;
 		server.next(std::make_unique<state::Disconnected>());
 	} else {

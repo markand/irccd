@@ -43,7 +43,7 @@ json::Value ServerList::exec(Irccd &irccd, const json::Value &) const
 	auto list = json::array({});
 
 	for (const auto &server : irccd.serverService().servers()) {
-		list.append(server->info().name);
+		list.append(server->name());
 	}
 
 	json.insert("list", std::move(list));

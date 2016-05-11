@@ -42,7 +42,7 @@ void ServerService::handleChannelMode(std::weak_ptr<Server> ptr, std::string ori
 		return;
 	}
 
-	log::debug() << "server " << server->info().name << ": event onChannelMode:\n";
+	log::debug() << "server " << server->name() << ": event onChannelMode:\n";
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  channel: " << channel << "\n";
 	log::debug() << "  mode: " << mode << "\n";
@@ -50,7 +50,7 @@ void ServerService::handleChannelMode(std::weak_ptr<Server> ptr, std::string ori
 
 	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onChannelMode"		},
-		{ "server",	server->info().name	},
+		{ "server",	server->name()		},
 		{ "origin",	origin			},
 		{ "channel",	channel			},
 		{ "mode",	mode			},
@@ -58,7 +58,7 @@ void ServerService::handleChannelMode(std::weak_ptr<Server> ptr, std::string ori
 	}).toJson(0));
 
 #if defined(WITH_JS)
-	m_irccd.post(ServerEvent(server->info().name, origin, channel,
+	m_irccd.post(ServerEvent(server->name(), origin, channel,
 		[=] (Plugin &) -> std::string {
 			return "onChannelMode";
 		},
@@ -77,21 +77,21 @@ void ServerService::handleChannelNotice(std::weak_ptr<Server> ptr, std::string o
 		return;
 	}
 
-	log::debug() << "server " << server->info().name << ": event onChannelNotice:\n";
+	log::debug() << "server " << server->name() << ": event onChannelNotice:\n";
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  channel: " << channel << "\n";
 	log::debug() << "  message: " << message << std::endl;
 
 	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onChannelNotice"	},
-		{ "server",	server->info().name	},
+		{ "server",	server->name()		},
 		{ "origin",	origin			},
 		{ "channel",	channel			},
 		{ "message",	message			}
 	}).toJson(0));
 
 #if defined(WITH_JS)
-	m_irccd.post(ServerEvent(server->info().name, origin, channel,
+	m_irccd.post(ServerEvent(server->name(), origin, channel,
 		[=] (Plugin &) -> std::string {
 			return "onChannelNotice";
 		},
@@ -110,15 +110,15 @@ void ServerService::handleConnect(std::weak_ptr<Server> ptr)
 		return;
 	}
 
-	log::debug() << "server " << server->info().name << ": event onConnect" << std::endl;
+	log::debug() << "server " << server->name() << ": event onConnect" << std::endl;
 
 	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onConnect"		},
-		{ "server",	server->info().name	}
+		{ "server",	server->name()		}
 	}).toJson(0));
 
 #if defined(WITH_JS)
-	m_irccd.post(ServerEvent(server->info().name, /* origin */ "", /* channel */ "",
+	m_irccd.post(ServerEvent(server->name(), /* origin */ "", /* channel */ "",
 		[=] (Plugin &) -> std::string {
 			return "onConnect";
 		},
@@ -137,20 +137,20 @@ void ServerService::handleInvite(std::weak_ptr<Server> ptr, std::string origin, 
 		return;
 	}
 
-	log::debug() << "server " << server->info().name << ": event onInvite:\n";
+	log::debug() << "server " << server->name() << ": event onInvite:\n";
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  channel: " << channel << "\n";
 	log::debug() << "  target: " << target << std::endl;
 
 	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onInvite"		},
-		{ "server",	server->info().name	},
+		{ "server",	server->name()		},
 		{ "origin",	origin			},
 		{ "channel",	channel			}
 	}).toJson(0));
 
 #if defined(WITH_JS)
-	m_irccd.post(ServerEvent(server->info().name, origin, channel,
+	m_irccd.post(ServerEvent(server->name(), origin, channel,
 		[=] (Plugin &) -> std::string {
 			return "onInvite";
 		},
@@ -169,19 +169,19 @@ void ServerService::handleJoin(std::weak_ptr<Server> ptr, std::string origin, st
 		return;
 	}
 
-	log::debug() << "server " << server->info().name << ": event onJoin:\n";
+	log::debug() << "server " << server->name() << ": event onJoin:\n";
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  channel: " << channel << std::endl;
 
 	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onJoin"		},
-		{ "server",	server->info().name	},
+		{ "server",	server->name()		},
 		{ "origin",	origin			},
 		{ "channel",	channel			}
 	}).toJson(0));
 
 #if defined(WITH_JS)
-	m_irccd.post(ServerEvent(server->info().name, origin, channel,
+	m_irccd.post(ServerEvent(server->name(), origin, channel,
 		[=] (Plugin &) -> std::string {
 			return "onJoin";
 		},
@@ -200,7 +200,7 @@ void ServerService::handleKick(std::weak_ptr<Server> ptr, std::string origin, st
 		return;
 	}
 
-	log::debug() << "server " << server->info().name << ": event onKick:\n";
+	log::debug() << "server " << server->name() << ": event onKick:\n";
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  channel: " << channel << "\n";
 	log::debug() << "  target: " << target << "\n";
@@ -208,7 +208,7 @@ void ServerService::handleKick(std::weak_ptr<Server> ptr, std::string origin, st
 
 	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onKick"		},
-		{ "server",	server->info().name	},
+		{ "server",	server->name()		},
 		{ "origin",	origin			},
 		{ "channel",	channel			},
 		{ "target",	target			},
@@ -216,7 +216,7 @@ void ServerService::handleKick(std::weak_ptr<Server> ptr, std::string origin, st
 	}).toJson(0));
 
 #if defined(WITH_JS)
-	m_irccd.post(ServerEvent(server->info().name, origin, channel,
+	m_irccd.post(ServerEvent(server->name(), origin, channel,
 		[=] (Plugin &) -> std::string {
 			return "onKick";
 		},
@@ -235,21 +235,21 @@ void ServerService::handleMessage(std::weak_ptr<Server> ptr, std::string origin,
 		return;
 	}
 
-	log::debug() << "server " << server->info().name << ": event onMessage:\n";
+	log::debug() << "server " << server->name() << ": event onMessage:\n";
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  channel: " << channel << "\n";
 	log::debug() << "  message: " << message << std::endl;
 
 	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onMessage"		},
-		{ "server",	server->info().name	},
+		{ "server",	server->name()		},
 		{ "origin",	origin			},
 		{ "channel",	channel			},
 		{ "message",	message			}
 	}).toJson(0));
 
 #if defined(WITH_JS)
-	m_irccd.post(ServerEvent(server->info().name, origin, channel,
+	m_irccd.post(ServerEvent(server->name(), origin, channel,
 		[=] (Plugin &plugin) -> std::string {
 			return util::parseMessage(message, server->settings().command, plugin.name()).second == util::MessageType::Command ? "onCommand" : "onMessage";
 		},
@@ -273,21 +273,21 @@ void ServerService::handleMe(std::weak_ptr<Server> ptr, std::string origin, std:
 		return;
 	}
 
-	log::debug() << "server " << server->info().name << ": event onMe:\n";
+	log::debug() << "server " << server->name() << ": event onMe:\n";
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  target: " << target << "\n";
 	log::debug() << "  message: " << message << std::endl;
 
 	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onMe"			},
-		{ "server",	server->info().name	},
+		{ "server",	server->name()		},
 		{ "origin",	origin			},
 		{ "target",	target			},
 		{ "message",	message			}
 	}).toJson(0));
 
 #if defined(WITH_JS)
-	m_irccd.post(ServerEvent(server->info().name, origin, target,
+	m_irccd.post(ServerEvent(server->name(), origin, target,
 		[=] (Plugin &) -> std::string {
 			return "onMe";
 		},
@@ -306,19 +306,19 @@ void ServerService::handleMode(std::weak_ptr<Server> ptr, std::string origin, st
 		return;
 	}
 
-	log::debug() << "server " << server->info().name << ": event onMode\n";
+	log::debug() << "server " << server->name() << ": event onMode\n";
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  mode: " << mode << std::endl;
 
 	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onMode"		},
-		{ "server",	server->info().name	},
+		{ "server",	server->name()		},
 		{ "origin",	origin			},
 		{ "mode",	mode			}
 	}).toJson(0));
 
 #if defined(WITH_JS)
-	m_irccd.post(ServerEvent(server->info().name, origin, /* channel */ "",
+	m_irccd.post(ServerEvent(server->name(), origin, /* channel */ "",
 		[=] (Plugin &) -> std::string {
 			return "onMode";
 		},
@@ -337,7 +337,7 @@ void ServerService::handleNames(std::weak_ptr<Server> ptr, std::string channel, 
 		return;
 	}
 
-	log::debug() << "server " << server->info().name << ": event onNames:\n";
+	log::debug() << "server " << server->name() << ": event onNames:\n";
 	log::debug() << "  channel: " << channel << "\n";
 	log::debug() << "  names: " << util::join(nicknames.begin(), nicknames.end(), ", ") << std::endl;
 
@@ -345,13 +345,13 @@ void ServerService::handleNames(std::weak_ptr<Server> ptr, std::string channel, 
 
 	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onNames"		},
-		{ "server",	server->info().name	},
+		{ "server",	server->name()		},
 		{ "channel",	channel			},
 		{ "names",	std::move(names)	}
 	}).toJson(0));
 
 #if defined(WITH_JS)
-	m_irccd.post(ServerEvent(server->info().name, /* origin */ "", channel,
+	m_irccd.post(ServerEvent(server->name(), /* origin */ "", channel,
 		[=] (Plugin &) -> std::string {
 			return "onNames";
 		},
@@ -370,19 +370,19 @@ void ServerService::handleNick(std::weak_ptr<Server> ptr, std::string origin, st
 		return;
 	}
 
-	log::debug() << "server " << server->info().name << ": event onNick:\n";
+	log::debug() << "server " << server->name() << ": event onNick:\n";
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  nickname: " << nickname << std::endl;
 
 	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onNick"		},
-		{ "server",	server->info().name	},
+		{ "server",	server->name()		},
 		{ "origin",	origin			},
 		{ "nickname",	nickname		}
 	}).toJson(0));
 
 #if defined(WITH_JS)
-	m_irccd.post(ServerEvent(server->info().name, origin, /* channel */ "",
+	m_irccd.post(ServerEvent(server->name(), origin, /* channel */ "",
 		[=] (Plugin &) -> std::string {
 			return "onNick";
 		},
@@ -401,19 +401,19 @@ void ServerService::handleNotice(std::weak_ptr<Server> ptr, std::string origin, 
 		return;
 	}
 
-	log::debug() << "server " << server->info().name << ": event onNotice:\n";
+	log::debug() << "server " << server->name() << ": event onNotice:\n";
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  message: " << message << std::endl;
 
 	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onNotice"		},
-		{ "server",	server->info().name	},
+		{ "server",	server->name()		},
 		{ "origin",	origin			},
 		{ "message",	message			}
 	}).toJson(0));
 
 #if defined(WITH_JS)
-	m_irccd.post(ServerEvent(server->info().name, origin, /* channel */ "",
+	m_irccd.post(ServerEvent(server->name(), origin, /* channel */ "",
 		[=] (Plugin &) -> std::string {
 			return "onNotice";
 		},
@@ -432,21 +432,21 @@ void ServerService::handlePart(std::weak_ptr<Server> ptr, std::string origin, st
 		return;
 	}
 
-	log::debug() << "server " << server->info().name << ": event onPart:\n";
+	log::debug() << "server " << server->name() << ": event onPart:\n";
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  channel: " << channel << "\n";
 	log::debug() << "  reason: " << reason << std::endl;
 
 	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onPart"		},
-		{ "server",	server->info().name	},
+		{ "server",	server->name()		},
 		{ "origin",	origin			},
 		{ "channel",	channel			},
 		{ "reason",	reason			}
 	}).toJson(0));
 
 #if defined(WITH_JS)
-	m_irccd.post(ServerEvent(server->info().name, origin, channel,
+	m_irccd.post(ServerEvent(server->name(), origin, channel,
 		[=] (Plugin &) -> std::string {
 			return "onPart";
 		},
@@ -465,19 +465,19 @@ void ServerService::handleQuery(std::weak_ptr<Server> ptr, std::string origin, s
 		return;
 	}
 
-	log::debug() << "server " << server->info().name << ": event onQuery:\n";
+	log::debug() << "server " << server->name() << ": event onQuery:\n";
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  message: " << message << std::endl;
 
 	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onQuery"		},
-		{ "server",	server->info().name	},
+		{ "server",	server->name()		},
 		{ "origin",	origin			},
 		{ "message",	message			}
 	}).toJson(0));
 
 #if defined(WITH_JS)
-	m_irccd.post(ServerEvent(server->info().name, origin, /* channel */ "",
+	m_irccd.post(ServerEvent(server->name(), origin, /* channel */ "",
 		[=] (Plugin &plugin) -> std::string {
 			return util::parseMessage(message, server->settings().command, plugin.name()).second == util::MessageType::Command ? "onQueryCommand" : "onQuery";
 		},
@@ -501,21 +501,21 @@ void ServerService::handleTopic(std::weak_ptr<Server> ptr, std::string origin, s
 		return;
 	}
 
-	log::debug() << "server " << server->info().name << ": event onTopic:\n";
+	log::debug() << "server " << server->name() << ": event onTopic:\n";
 	log::debug() << "  origin: " << origin << "\n";
 	log::debug() << "  channel: " << channel << "\n";
 	log::debug() << "  topic: " << topic << std::endl;
 
 	m_irccd.transportService().broadcast(json::object({
 		{ "event",	"onTopic"		},
-		{ "server",	server->info().name	},
+		{ "server",	server->name()		},
 		{ "origin",	origin			},
 		{ "channel",	channel			},
 		{ "topic",	topic			}
 	}).toJson(0));
 
 #if defined(WITH_JS)
-	m_irccd.post(ServerEvent(server->info().name, origin, channel,
+	m_irccd.post(ServerEvent(server->name(), origin, channel,
 		[=] (Plugin &) -> std::string {
 			return "onTopic";
 		},
@@ -534,7 +534,7 @@ void ServerService::handleWhois(std::weak_ptr<Server> ptr, ServerWhois whois)
 		return;
 	}
 
-	log::debug() << "server " << server->info().name << ": event onWhois\n";
+	log::debug() << "server " << server->name() << ": event onWhois\n";
 	log::debug() << "  nickname: " << whois.nick << "\n";
 	log::debug() << "  username: " << whois.user << "\n";
 	log::debug() << "  host: " << whois.host << "\n";
@@ -542,7 +542,7 @@ void ServerService::handleWhois(std::weak_ptr<Server> ptr, ServerWhois whois)
 	log::debug() << "  channels: " << util::join(whois.channels.begin(), whois.channels.end()) << std::endl;
 
 	m_irccd.transportService().broadcast(json::object({
-		{ "server",	server->info().name	},
+		{ "server",	server->name()		},
 		{ "nickname",	whois.nick		},
 		{ "username",	whois.user		},
 		{ "host",	whois.host		},
@@ -550,7 +550,7 @@ void ServerService::handleWhois(std::weak_ptr<Server> ptr, ServerWhois whois)
 	}).toJson(0));
 
 #if defined(WITH_JS)
-	m_irccd.post(ServerEvent(server->info().name, /* origin */ "", /* channel */ "",
+	m_irccd.post(ServerEvent(server->name(), /* origin */ "", /* channel */ "",
 		[=] (Plugin &) -> std::string {
 			return "onWhois";
 		},
@@ -583,14 +583,14 @@ void ServerService::sync(fd_set &in, fd_set &out)
 
 bool ServerService::hasServer(const std::string &name) const noexcept
 {
-	return std::count_if(m_servers.cbegin(), m_servers.end(), [&] (const auto &sv) {
-		return sv->info().name == name;
+	return std::count_if(m_servers.cbegin(), m_servers.end(), [&] (const auto &server) {
+		return server->name() == name;
 	}) > 0;
 }
 
 void ServerService::addServer(std::shared_ptr<Server> server) noexcept
 {
-	assert(!hasServer(server->info().name));
+	assert(!hasServer(server->name()));
 
 	using namespace std::placeholders;
 
@@ -617,7 +617,7 @@ void ServerService::addServer(std::shared_ptr<Server> server) noexcept
 			auto server = ptr.lock();
 
 			if (server) {
-				log::info("server {}: removed"_format(server->info().name));
+				log::info("server {}: removed"_format(server->name()));
 				m_servers.erase(std::find(m_servers.begin(), m_servers.end(), server));
 			}
 		});
@@ -629,7 +629,7 @@ void ServerService::addServer(std::shared_ptr<Server> server) noexcept
 std::shared_ptr<Server> ServerService::getServer(const std::string &name) const noexcept
 {
 	auto it = std::find_if(m_servers.begin(), m_servers.end(), [&] (const auto &server) {
-		return server->info().name == name;
+		return server->name() == name;
 	});
 
 	if (it == m_servers.end()) {
@@ -653,7 +653,7 @@ std::shared_ptr<Server> ServerService::requireServer(const std::string &name) co
 void ServerService::removeServer(const std::string &name)
 {
 	auto it = std::find_if(m_servers.begin(), m_servers.end(), [&] (const auto &server) {
-		return server->info().name == name;
+		return server->name() == name;
 	});
 
 	if (it != m_servers.end()) {

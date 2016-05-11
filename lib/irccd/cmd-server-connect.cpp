@@ -18,11 +18,15 @@
 
 #include <limits>
 
+#include <format.h>
+
 #include "cmd-server-connect.hpp"
 #include "irccd.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
 #include "util.hpp"
+
+using namespace fmt::literals;
 
 namespace irccd {
 
@@ -76,11 +80,7 @@ ServerInfo readInfo(const json::Value &object)
 {
 	ServerInfo info;
 
-	/* Mandatory */
-	info.name = readInfoName(object);
 	info.host = readInfoHost(object);
-
-	/* Optional */
 	info.port = readInfoPort(object);
 
 	if (object.valueOr("ssl", json::Type::Boolean, false).toBool())
@@ -155,10 +155,11 @@ std::vector<RemoteCommand::Arg> ServerConnect::args() const
 
 json::Value ServerConnect::exec(Irccd &irccd, const json::Value &request) const
 {
-	auto server = std::make_shared<Server>(readInfo(request), readIdentity(request), readSettings(request));
+	auto server = std::make_shared<Server>(readInfoName(request), readInfo(request), readIdentity(request),
+					       readSettings(request));
 
-	if (irccd.serverService().hasServer(server->info().name)) {
-		throw std::invalid_argument("server '" + server->info().name + "' already exists");
+	if (irccd.serverService().hasServer(server->name())) {
+		throw std::invalid_argument("server '{}' already exists"_format(server->name()));
 	}
 
 	irccd.serverService().addServer(std::move(server));
