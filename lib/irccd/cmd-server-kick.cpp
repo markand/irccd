@@ -62,7 +62,7 @@ json::Value ServerKick::request(Irccdctl &, const RemoteCommandRequest &args) co
 
 json::Value ServerKick::exec(Irccd &irccd, const json::Value &request) const
 {
-	irccd.serverService().requireServer(request.at("server").toString())->kick(
+	irccd.serverService().require(request.at("server").toString())->kick(
 		request.at("target").toString(),
 		request.at("channel").toString(),
 		request.valueOr("reason", json::Type::String, "").toString()

@@ -53,7 +53,7 @@ json::Value ServerMode::request(Irccdctl &, const RemoteCommandRequest &args) co
 
 json::Value ServerMode::exec(Irccd &irccd, const json::Value &request) const
 {
-	irccd.serverService().requireServer(request.at("server").toString())->mode(request.at("mode").toString());
+	irccd.serverService().require(request.at("server").toString())->mode(request.at("mode").toString());
 
 	return nullptr;
 }

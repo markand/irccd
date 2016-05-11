@@ -60,7 +60,7 @@ json::Value ServerPart::request(Irccdctl &, const RemoteCommandRequest &args) co
 
 json::Value ServerPart::exec(Irccd &irccd, const json::Value &request) const
 {
-	irccd.serverService().requireServer(request.at("server").toString())->part(
+	irccd.serverService().require(request.at("server").toString())->part(
 		request.at("channel").toString(),
 		request.valueOr("reason", "").toString()
 	);

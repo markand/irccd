@@ -53,7 +53,7 @@ json::Value ServerInfo::request(Irccdctl &, const RemoteCommandRequest &args) co
 
 json::Value ServerInfo::exec(Irccd &irccd, const json::Value &request) const
 {
-	auto server = irccd.serverService().requireServer(request.at("server").toString());
+	auto server = irccd.serverService().require(request.at("server").toString());
 	auto response = RemoteCommand::exec(irccd, request);
 
 	/* General stuff */

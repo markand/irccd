@@ -55,7 +55,7 @@ json::Value ServerTopic::request(Irccdctl &, const RemoteCommandRequest &args) c
 
 json::Value ServerTopic::exec(Irccd &irccd, const json::Value &request) const
 {
-	irccd.serverService().requireServer(request.at("server").toString())->topic(
+	irccd.serverService().require(request.at("server").toString())->topic(
 		request.at("channel").toString(),
 		request.at("topic").toString()
 	);

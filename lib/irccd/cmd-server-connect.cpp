@@ -158,11 +158,11 @@ json::Value ServerConnect::exec(Irccd &irccd, const json::Value &request) const
 	auto server = std::make_shared<Server>(readInfoName(request), readInfo(request), readIdentity(request),
 					       readSettings(request));
 
-	if (irccd.serverService().hasServer(server->name())) {
+	if (irccd.serverService().has(server->name())) {
 		throw std::invalid_argument("server '{}' already exists"_format(server->name()));
 	}
 
-	irccd.serverService().addServer(std::move(server));
+	irccd.serverService().add(std::move(server));
 
 	return RemoteCommand::exec(irccd, request);
 }

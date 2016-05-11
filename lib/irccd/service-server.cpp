@@ -581,16 +581,16 @@ void ServerService::sync(fd_set &in, fd_set &out)
 	}
 }
 
-bool ServerService::hasServer(const std::string &name) const noexcept
+bool ServerService::has(const std::string &name) const noexcept
 {
 	return std::count_if(m_servers.cbegin(), m_servers.end(), [&] (const auto &server) {
 		return server->name() == name;
 	}) > 0;
 }
 
-void ServerService::addServer(std::shared_ptr<Server> server) noexcept
+void ServerService::add(std::shared_ptr<Server> server)
 {
-	assert(!hasServer(server->name()));
+	assert(!has(server->name()));
 
 	using namespace std::placeholders;
 
@@ -626,7 +626,7 @@ void ServerService::addServer(std::shared_ptr<Server> server) noexcept
 	m_servers.push_back(std::move(server));
 }
 
-std::shared_ptr<Server> ServerService::getServer(const std::string &name) const noexcept
+std::shared_ptr<Server> ServerService::get(const std::string &name) const noexcept
 {
 	auto it = std::find_if(m_servers.begin(), m_servers.end(), [&] (const auto &server) {
 		return server->name() == name;
@@ -639,9 +639,9 @@ std::shared_ptr<Server> ServerService::getServer(const std::string &name) const 
 	return *it;
 }
 
-std::shared_ptr<Server> ServerService::requireServer(const std::string &name) const
+std::shared_ptr<Server> ServerService::require(const std::string &name) const
 {
-	auto server = getServer(name);
+	auto server = get(name);
 
 	if (!server) {
 		throw std::invalid_argument("server {} not found"_format(name));
@@ -650,7 +650,7 @@ std::shared_ptr<Server> ServerService::requireServer(const std::string &name) co
 	return server;
 }
 
-void ServerService::removeServer(const std::string &name)
+void ServerService::remove(const std::string &name)
 {
 	auto it = std::find_if(m_servers.begin(), m_servers.end(), [&] (const auto &server) {
 		return server->name() == name;
@@ -662,7 +662,7 @@ void ServerService::removeServer(const std::string &name)
 	}
 }
 
-void ServerService::clearServers() noexcept
+void ServerService::clear() noexcept
 {
 	for (auto &server : m_servers) {
 		server->disconnect();

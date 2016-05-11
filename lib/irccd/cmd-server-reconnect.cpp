@@ -50,7 +50,7 @@ json::Value ServerReconnect::exec(Irccd &irccd, const json::Value &request) cons
 	auto server = request.find("server");
 
 	if (server != request.end() && server->isString()) {
-		irccd.serverService().requireServer(server->toString())->reconnect();
+		irccd.serverService().require(server->toString())->reconnect();
 	} else {
 		for (auto &server : irccd.serverService().servers()) {
 			server->reconnect();

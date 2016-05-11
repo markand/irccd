@@ -236,7 +236,7 @@ void load(const Config &config, const parser::Result &options)
 
 	// [server] section.
 	for (const auto &server : config.loadServers()) {
-		instance->serverService().addServer(server);
+		instance->serverService().add(server);
 	}
 
 	// [rule] section.

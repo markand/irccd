@@ -78,39 +78,6 @@ public:
 	void sync(fd_set &in, fd_set &out) override;
 
 	/**
-	 * Check if a server exists.
-	 *
-	 * \param name the name
-	 * \return true if exists
-	 */
-	bool hasServer(const std::string &name) const noexcept;
-
-	/**
-	 * Add a new server to the application.
-	 *
-	 * \pre hasServer must return false
-	 * \param sv the server
-	 */
-	void addServer(std::shared_ptr<Server> sv) noexcept;
-
-	/**
-	 * Get a server or empty one if not found
-	 *
-	 * \param name the server name
-	 * \return the server or empty one if not found
-	 */
-	std::shared_ptr<Server> getServer(const std::string &name) const noexcept;
-
-	/**
-	 * Find a server by name.
-	 *
-	 * \param name the server name
-	 * \return the server
-	 * \throw std::out_of_range if the server does not exist
-	 */
-	std::shared_ptr<Server> requireServer(const std::string &name) const;
-
-	/**
 	 * Get the list of servers
 	 *
 	 * \return the servers
@@ -121,20 +88,54 @@ public:
 	}
 
 	/**
+	 * Check if a server exists.
+	 *
+	 * \param name the name
+	 * \return true if exists
+	 */
+	bool has(const std::string &name) const noexcept;
+
+	/**
+	 * Add a new server to the application.
+	 *
+	 * \pre hasServer must return false
+	 * \param sv the server
+	 */
+	void add(std::shared_ptr<Server> sv);
+
+	/**
+	 * Get a server or empty one if not found
+	 *
+	 * \param name the server name
+	 * \return the server or empty one if not found
+	 */
+	std::shared_ptr<Server> get(const std::string &name) const noexcept;
+
+	/**
+	 * Find a server by name.
+	 *
+	 * \param name the server name
+	 * \return the server
+	 * \throw std::out_of_range if the server does not exist
+	 */
+	std::shared_ptr<Server> require(const std::string &name) const;
+
+
+	/**
 	 * Remove a server from the irccd instance.
 	 *
 	 * The server if any, will be disconnected.
 	 *
 	 * \param name the server name
 	 */
-	void removeServer(const std::string &name);
+	void remove(const std::string &name);
 
 	/**
 	 * Remove all servers.
 	 *
 	 * All servers will be disconnected.
 	 */
-	void clearServers() noexcept;
+	void clear() noexcept;
 };
 
 } // !irccd

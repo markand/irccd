@@ -46,7 +46,7 @@ std::vector<RemoteCommand::Arg> ServerChannelNotice::args() const
 
 json::Value ServerChannelNotice::exec(Irccd &irccd, const json::Value &request) const
 {
-	irccd.serverService().requireServer(request.at("server").toString())->cnotice(
+	irccd.serverService().require(request.at("server").toString())->cnotice(
 		request.at("channel").toString(),
 		request.at("message").toString()
 	);

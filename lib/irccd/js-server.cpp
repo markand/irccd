@@ -427,7 +427,7 @@ duk::Ret add(duk::ContextPtr ctx)
 	auto server = duk::get<duk::Shared<Server>>(ctx, 0);
 
 	if (server) {
-		duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->serverService().addServer(server);
+		duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->serverService().add(server);
 	}
 
 	return 0;
@@ -450,7 +450,7 @@ duk::Ret find(duk::ContextPtr ctx)
 	const auto irccd = duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd");
 
 	try {
-		duk::push(ctx, duk::Shared<Server>{irccd->serverService().requireServer(name)});
+		duk::push(ctx, duk::Shared<Server>{irccd->serverService().require(name)});
 	} catch (...) {
 		return 0;
 	}
@@ -489,7 +489,7 @@ duk::Ret list(duk::ContextPtr ctx)
  */
 duk::Ret remove(duk::ContextPtr ctx)
 {
-	duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->serverService().removeServer(duk::require<std::string>(ctx, 0));
+	duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->serverService().remove(duk::require<std::string>(ctx, 0));
 
 	return 0;
 }

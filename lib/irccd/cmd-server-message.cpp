@@ -55,7 +55,7 @@ json::Value ServerMessage::request(Irccdctl &, const RemoteCommandRequest &args)
 
 json::Value ServerMessage::exec(Irccd &irccd, const json::Value &request) const
 {
-	irccd.serverService().requireServer(request.at("server").toString())->me(
+	irccd.serverService().require(request.at("server").toString())->me(
 		request.at("target").toString(),
 		request.at("message").toString()
 	);

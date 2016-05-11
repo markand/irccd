@@ -53,7 +53,7 @@ json::Value ServerNick::request(Irccdctl &, const RemoteCommandRequest &args) co
 
 json::Value ServerNick::exec(Irccd &irccd, const json::Value &object) const
 {
-	irccd.serverService().requireServer(object.at("server").toString())->nick(object.at("nickname").toString());
+	irccd.serverService().require(object.at("server").toString())->nick(object.at("nickname").toString());
 
 	return nullptr;
 }

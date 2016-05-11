@@ -46,7 +46,7 @@ std::vector<RemoteCommand::Arg> ServerChannelMode::args() const
 
 json::Value ServerChannelMode::exec(Irccd &irccd, const json::Value &request) const
 {
-	irccd.serverService().requireServer(request.at("server").toString())->cmode(
+	irccd.serverService().require(request.at("server").toString())->cmode(
 		request.at("channel").toString(),
 		request.at("mode").toString()
 	);
