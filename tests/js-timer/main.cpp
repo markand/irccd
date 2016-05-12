@@ -21,7 +21,7 @@
 #include <irccd/elapsed-timer.hpp>
 #include <irccd/irccd.hpp>
 #include <irccd/logger.hpp>
-#include <irccd/plugin.hpp>
+#include <irccd/plugin-js.hpp>
 #include <irccd/service-plugin.hpp>
 #include <irccd/system.hpp>
 
@@ -32,7 +32,7 @@ TEST(Basic, single)
 	Irccd irccd;
 	ElapsedTimer timer;
 
-	auto plugin = std::make_shared<Plugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-single.js");
+	auto plugin = std::make_shared<JsPlugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-single.js");
 
 	irccd.pluginService().add(plugin);
 
@@ -49,7 +49,7 @@ TEST(Basic, repeat)
 	Irccd irccd;
 	ElapsedTimer timer;
 
-	auto plugin = std::make_shared<Plugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-repeat.js");
+	auto plugin = std::make_shared<JsPlugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-repeat.js");
 
 	irccd.pluginService().add(plugin);
 

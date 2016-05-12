@@ -20,7 +20,7 @@
 #include <cstdint>
 
 #include "js.hpp"
-#include "plugin.hpp"
+#include "plugin-js.hpp"
 
 namespace irccd {
 
@@ -107,7 +107,7 @@ duk::Ret constructor(duk::ContextPtr ctx)
 	auto timer = std::make_shared<Timer>(static_cast<TimerType>(type), delay);
 
 	/* Add this timer to the underlying plugin */
-	duk::getGlobal<duk::RawPointer<Plugin>>(ctx, "\xff""\xff""plugin")->addTimer(timer);
+	duk::getGlobal<duk::RawPointer<JsPlugin>>(ctx, "\xff""\xff""plugin")->addTimer(timer);
 
 	/* Construct object */
 	duk::construct(ctx, duk::Shared<Timer>{timer});

@@ -31,6 +31,7 @@ namespace irccd {
 
 class Irccd;
 class Plugin;
+class JsPlugin;
 class Timer;
 
 /**
@@ -42,8 +43,8 @@ private:
 	std::vector<std::shared_ptr<Plugin>> m_plugins;
 
 	// TODO: get rid of this with future JavaScript modules.
-	void handleTimerSignal(std::weak_ptr<Plugin>, std::shared_ptr<Timer>);
-	void handleTimerEnd(std::weak_ptr<Plugin>, std::shared_ptr<Timer>);
+	void handleTimerSignal(std::weak_ptr<JsPlugin>, std::shared_ptr<Timer>);
+	void handleTimerEnd(std::weak_ptr<JsPlugin>, std::shared_ptr<Timer>);
 
 public:
 	/**

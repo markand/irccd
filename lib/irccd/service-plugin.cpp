@@ -25,6 +25,7 @@
 #include "irccd.hpp"
 #include "logger.hpp"
 #include "plugin.hpp"
+#include "plugin-js.hpp"
 #include "service-plugin.hpp"
 
 using namespace fmt::literals;
@@ -71,13 +72,18 @@ void PluginService::add(std::shared_ptr<Plugin> plugin)
 {
 	using namespace std::placeholders;
 
-	std::weak_ptr<Plugin> ptr(plugin);
+	// TODO: REMOVE WHEN WE GET THE JAVASCRIPT MODULES
+	std::shared_ptr<JsPlugin> jsp = std::dynamic_pointer_cast<JsPlugin>(plugin);
 
-	plugin->onTimerSignal.connect(std::bind(&PluginService::handleTimerSignal, this, ptr, _1));
-	plugin->onTimerEnd.connect(std::bind(&PluginService::handleTimerEnd, this, ptr, _1));
+	if (jsp) {
+		std::weak_ptr<JsPlugin> ptr(jsp);
 
-	// Store reference to irccd.
-	duk::putGlobal(plugin->context(), "\xff""\xff""irccd", duk::RawPointer<Irccd>{&m_irccd});
+		jsp->onTimerSignal.connect(std::bind(&PluginService::handleTimerSignal, this, ptr, _1));
+		jsp->onTimerEnd.connect(std::bind(&PluginService::handleTimerEnd, this, ptr, _1));
+
+		// Store reference to irccd.
+		duk::putGlobal(jsp->context(), "\xff""\xff""irccd", duk::RawPointer<Irccd>{&m_irccd});
+	}
 
 	// Initial load now.
 	try {
@@ -152,7 +158,7 @@ void PluginService::unload(const std::string &name)
 	}
 }
 
-void PluginService::handleTimerSignal(std::weak_ptr<Plugin> ptr, std::shared_ptr<Timer> timer)
+void PluginService::handleTimerSignal(std::weak_ptr<JsPlugin> ptr, std::shared_ptr<Timer> timer)
 {
 	m_irccd.post([this, ptr, timer] (Irccd &) {
 		auto plugin = ptr.lock();
@@ -175,7 +181,7 @@ void PluginService::handleTimerSignal(std::weak_ptr<Plugin> ptr, std::shared_ptr
 	});
 }
 
-void PluginService::handleTimerEnd(std::weak_ptr<Plugin> ptr, std::shared_ptr<Timer> timer)
+void PluginService::handleTimerEnd(std::weak_ptr<JsPlugin> ptr, std::shared_ptr<Timer> timer)
 {
 	m_irccd.post([this, ptr, timer] (Irccd &) {
 		auto plugin = ptr.lock();

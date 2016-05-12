@@ -51,6 +51,7 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/options.hpp
 	${CMAKE_CURRENT_LIST_DIR}/path.hpp
 	${CMAKE_CURRENT_LIST_DIR}/plugin.hpp
+	${CMAKE_CURRENT_LIST_DIR}/plugin-js.hpp
 	${CMAKE_CURRENT_LIST_DIR}/rule.hpp
 	${CMAKE_CURRENT_LIST_DIR}/server.hpp
 	${CMAKE_CURRENT_LIST_DIR}/server-event.hpp
@@ -126,6 +127,7 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/options.cpp
 	${CMAKE_CURRENT_LIST_DIR}/path.cpp
 	${CMAKE_CURRENT_LIST_DIR}/plugin.cpp
+	${CMAKE_CURRENT_LIST_DIR}/plugin-js.cpp
 	${CMAKE_CURRENT_LIST_DIR}/rule.cpp
 	${CMAKE_CURRENT_LIST_DIR}/server.cpp
 	${CMAKE_CURRENT_LIST_DIR}/server-event.cpp

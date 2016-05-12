@@ -25,6 +25,7 @@
 #include "irccd.hpp"
 #include "logger.hpp"
 #include "path.hpp"
+#include "plugin-js.hpp"
 #include "rule.hpp"
 #include "server.hpp"
 #include "sysconfig.hpp"
@@ -631,7 +632,7 @@ std::vector<std::shared_ptr<Plugin>> Config::loadPlugins() const
 				plugins.push_back(Plugin::find(name, findPluginConfig(name)));
 			} else {
 				log::info("plugin {}: trying {}"_format(name, path));
-				plugins.push_back(std::make_shared<Plugin>(name, path, findPluginConfig(name)));
+				plugins.push_back(std::make_shared<JsPlugin>(name, path, findPluginConfig(name)));
 			}
 		} catch (const duk::ErrorInfo &ex) {
 			log::warning("plugin {}: {}"_format(option.key(), ex.what()));

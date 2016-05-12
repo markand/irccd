@@ -46,11 +46,6 @@ class ServerWhois;
 using PluginConfig = std::unordered_map<std::string, std::string>;
 
 /**
- * Timers that a plugin owns.
- */
-using PluginTimers = std::unordered_set<std::shared_ptr<Timer>>;
-
-/**
  * \class Plugin
  * \brief JavaScript plugin
  *
@@ -58,29 +53,6 @@ using PluginTimers = std::unordered_set<std::shared_ptr<Timer>>;
  * at runtime.
  */
 class Plugin {
-public:
-	/**
-	 * Signal: onTimerSignal
-	 * ------------------------------------------------
-	 *
-	 * When a timer expires.
-	 *
-	 * Arguments:
-	 * - the timer object
-	 */
-	Signal<std::shared_ptr<Timer>> onTimerSignal;
-
-	/**
-	 * Signal: onTimerEnd
-	 * ------------------------------------------------
-	 *
-	 * When a timer is finished.
-	 *
-	 * Arguments:
-	 * - the timer object
-	 */
-	Signal<std::shared_ptr<Timer>> onTimerEnd;
-
 private:
 	// Plugin information
 	std::string m_name;
@@ -92,18 +64,7 @@ private:
 	std::string m_summary{"unknown"};
 	std::string m_version{"unknown"};
 
-	// JavaScript context
-	duk::Context m_context;
-
-	// Plugin info and its timers
-	PluginTimers m_timers;
-
-	// Private helpers
-	void call(const std::string &name, unsigned nargs = 0);
-	void putVars();
-	void putPath(const std::string &varname, const std::string &append, path::Path type);
-	void putPaths();
-	void putConfig(const PluginConfig &config);
+	PluginConfig m_config;
 
 public:
 	/**
@@ -122,12 +83,17 @@ public:
 	 * \param config the plugin configuration
 	 * \throws std::runtime_error on errors
 	 */
-	Plugin(std::string name, std::string path, const PluginConfig &config = PluginConfig());
+	inline Plugin(std::string name, std::string path, PluginConfig config = PluginConfig()) noexcept
+		: m_name(std::move(name))
+		, m_path(std::move(path))
+		, m_config(std::move(config))
+	{
+	}
 
 	/**
 	 * Temporary, close all timers.
 	 */
-	~Plugin();
+	virtual ~Plugin() = default;
 
 	/**
 	 * Get the plugin name.
@@ -231,30 +197,6 @@ public:
 	}
 
 	/**
-	 * Add a timer to the plugin.
-	 *
-	 * \param timer the timer to add
-	 */
-	void addTimer(std::shared_ptr<Timer> timer) noexcept;
-
-	/**
-	 * Remove a timer from a plugin.
-	 *
-	 * \param timer
-	 */
-	void removeTimer(const std::shared_ptr<Timer> &timer) noexcept;
-
-	/**
-	 * Access the Duktape context.
-	 *
-	 * \return the context
-	 */
-	inline duk::Context &context() noexcept
-	{
-		return m_context;
-	}
-
-	/**
 	 * On channel message. This event will call onMessage or
 	 * onCommand if the messages starts with the command character
 	 * plus the plugin name.
@@ -264,14 +206,26 @@ public:
 	 * \param channel the channel
 	 * \param message the message or command
 	 */
-	void onCommand(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message);
+	virtual void onCommand(const std::shared_ptr<Server> &server,
+			       const std::string &origin,
+			       const std::string &channel,
+			       const std::string &message)
+	{
+		(void)server;
+		(void)origin;
+		(void)channel;
+		(void)message;
+	}
 
 	/**
 	 * On successful connection.
 	 *
 	 * \param server the server
 	 */
-	void onConnect(std::shared_ptr<Server> server);
+	virtual void onConnect(const std::shared_ptr<Server> &server)
+	{
+		(void)server;
+	}
 
 	/**
 	 * On channel mode.
@@ -282,7 +236,18 @@ public:
 	 * \param mode the mode
 	 * \param arg the optional mode argument
 	 */
-	void onChannelMode(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string mode, std::string arg);
+	virtual void onChannelMode(const std::shared_ptr<Server> &server,
+				   const std::string &origin,
+				   const std::string &channel,
+				   const std::string &mode,
+				   const std::string &arg)
+	{
+		(void)server;
+		(void)origin;
+		(void)channel;
+		(void)mode;
+		(void)arg;
+	}
 
 	/**
 	 * On a channel notice.
@@ -292,7 +257,16 @@ public:
 	 * \param channel on which channel
 	 * \param notice the message
 	 */
-	void onChannelNotice(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string notice);
+	virtual void onChannelNotice(const std::shared_ptr<Server> &server,
+				     const std::string &origin,
+				     const std::string &channel,
+				     const std::string &notice)
+	{
+		(void)server;
+		(void)origin;
+		(void)channel;
+		(void)notice;
+	}
 
 	/**
 	 * On invitation.
@@ -301,7 +275,12 @@ public:
 	 * \param origin the user who invited you
 	 * \param channel the channel
 	 */
-	void onInvite(std::shared_ptr<Server> server, std::string origin, std::string channel);
+	virtual void onInvite(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel)
+	{
+		(void)server;
+		(void)origin;
+		(void)channel;
+	}
 
 	/**
 	 * On join.
@@ -310,7 +289,12 @@ public:
 	 * \param origin the user who joined
 	 * \param channel the channel
 	 */
-	void onJoin(std::shared_ptr<Server> server, std::string origin, std::string channel);
+	virtual void onJoin(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel)
+	{
+		(void)server;
+		(void)origin;
+		(void)channel;
+	}
 
 	/**
 	 * On kick.
@@ -321,12 +305,25 @@ public:
 	 * \param target the kicked target
 	 * \param reason the optional reason
 	 */
-	void onKick(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string target, std::string reason);
+	virtual void onKick(const std::shared_ptr<Server> &server,
+			    const std::string &origin,
+			    const std::string &channel,
+			    const std::string &target,
+			    const std::string &reason)
+	{
+		(void)server;
+		(void)origin;
+		(void)channel;
+		(void)target;
+		(void)reason;
+	}
 
 	/**
 	 * On load.
 	 */
-	void onLoad();
+	virtual void onLoad()
+	{
+	}
 
 	/**
 	 * On channel message.
@@ -336,7 +333,16 @@ public:
 	 * \param channel the channel
 	 * \param message the message or command
 	 */
-	void onMessage(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message);
+	virtual void onMessage(const std::shared_ptr<Server> &server,
+			       const std::string &origin,
+			       const std::string &channel,
+			       const std::string &message)
+	{
+		(void)server;
+		(void)origin;
+		(void)channel;
+		(void)message;
+	}
 
 	/**
 	 * On CTCP Action.
@@ -346,7 +352,16 @@ public:
 	 * \param channel the channel (may also be your nickname)
 	 * \param message the message
 	 */
-	void onMe(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string message);
+	virtual void onMe(const std::shared_ptr<Server> &server,
+			  const std::string &origin,
+			  const std::string &channel,
+			  const std::string &message)
+	{
+		(void)server;
+		(void)origin;
+		(void)channel;
+		(void)message;
+	}
 
 	/**
 	 * On user mode change.
@@ -355,7 +370,12 @@ public:
 	 * \param origin the person who changed the mode
 	 * \param mode the new mode
 	 */
-	void onMode(std::shared_ptr<Server> server, std::string origin, std::string mode);
+	virtual void onMode(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &mode)
+	{
+		(void)server;
+		(void)origin;
+		(void)mode;
+	}
 
 	/**
 	 * On names listing.
@@ -364,7 +384,12 @@ public:
 	 * \param channel the channel
 	 * \param list the list of nicknames
 	 */
-	void onNames(std::shared_ptr<Server> server, std::string channel, std::vector<std::string> list);
+	virtual void onNames(const std::shared_ptr<Server> &server, const std::string &channel, const std::vector<std::string> &list)
+	{
+		(void)server;
+		(void)channel;
+		(void)list;
+	}
 
 	/**
 	 * On nick change.
@@ -373,7 +398,12 @@ public:
 	 * \param origin the user that changed its nickname
 	 * \param nick the new nickname
 	 */
-	void onNick(std::shared_ptr<Server> server, std::string origin, std::string nick);
+	virtual void onNick(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &nick)
+	{
+		(void)server;
+		(void)origin;
+		(void)nick;
+	}
 
 	/**
 	 * On user notice.
@@ -382,7 +412,12 @@ public:
 	 * \param origin the user who sent the notice
 	 * \param notice the notice
 	 */
-	void onNotice(std::shared_ptr<Server> server, std::string origin, std::string notice);
+	virtual void onNotice(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &notice)
+	{
+		(void)server;
+		(void)origin;
+		(void)notice;
+	}
 
 	/**
 	 * On part.
@@ -392,7 +427,16 @@ public:
 	 * \param channel the channel
 	 * \param reason the optional reason
 	 */
-	void onPart(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string reason);
+	virtual void onPart(const std::shared_ptr<Server> &server,
+			    const std::string &origin,
+			    const std::string &channel,
+			    const std::string &reason)
+	{
+		(void)server;
+		(void)origin;
+		(void)channel;
+		(void)reason;
+	}
 
 	/**
 	 * On user query.
@@ -401,7 +445,12 @@ public:
 	 * \param origin the user who sent the query
 	 * \param message the message
 	 */
-	void onQuery(std::shared_ptr<Server> server, std::string origin, std::string message);
+	virtual void onQuery(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &message)
+	{
+		(void)server;
+		(void)origin;
+		(void)message;
+	}
 
 	/**
 	 * On user query command.
@@ -410,12 +459,19 @@ public:
 	 * \param origin the user who sent the query
 	 * \param message the message
 	 */
-	void onQueryCommand(std::shared_ptr<Server> server, std::string origin, std::string message);
+	virtual void onQueryCommand(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &message)
+	{
+		(void)server;
+		(void)origin;
+		(void)message;
+	}
 
 	/**
 	 * On reload.
 	 */
-	void onReload();
+	virtual void onReload()
+	{
+	}
 
 	/**
 	 * On topic change.
@@ -425,12 +481,23 @@ public:
 	 * \param channel the channel
 	 * \param topic the new topic
 	 */
-	void onTopic(std::shared_ptr<Server> server, std::string origin, std::string channel, std::string topic);
+	virtual void onTopic(const std::shared_ptr<Server> &server,
+			     const std::string &origin,
+			     const std::string &channel,
+			     const std::string &topic)
+	{
+		(void)server;
+		(void)origin;
+		(void)channel;
+		(void)topic;
+	}
 
 	/**
 	 * On unload.
 	 */
-	void onUnload();
+	virtual void onUnload()
+	{
+	}
 
 	/**
 	 * On whois information.
@@ -438,7 +505,11 @@ public:
 	 * \param server the server
 	 * \param info the info
 	 */
-	void onWhois(std::shared_ptr<Server> server, ServerWhois info);
+	virtual void onWhois(const std::shared_ptr<Server> &server, const ServerWhois &info)
+	{
+		(void)server;
+		(void)info;
+	}
 };
 
 } // !irccd
