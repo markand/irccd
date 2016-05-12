@@ -152,13 +152,13 @@ void loadPid(const std::string &path)
 		std::ofstream out(path, std::ofstream::trunc);
 
 		if (!out) {
-			throw std::runtime_error("irccd: could not open pidfile {}: {}"_format(path, std::strerror(errno)));
+			throw std::runtime_error("could not open pidfile {}: {}"_format(path, std::strerror(errno)));
 		}
 
 		log::debug() << "irccd: pid written in " << path << std::endl;
 		out << getpid() << std::endl;
 #else
-		throw std::runtime_error("irccd: pidfile option not supported on this platform");
+		throw std::runtime_error("pidfile option not supported on this platform");
 #endif
 	} catch (const std::exception &ex) {
 		log::warning() << "irccd: " << ex.what() << std::endl;
@@ -172,7 +172,7 @@ void loadGid(const std::string gid)
 #if defined(HAVE_SETGID)
 			sys::setGid(gid);
 #else
-			throw std::runtime_error("irccd: gid option not supported on this platform");
+			throw std::runtime_error(" gid option not supported on this platform");
 #endif
 		}
 	} catch (const std::exception &ex) {
@@ -187,7 +187,7 @@ void loadUid(const std::string &uid)
 #if defined(HAVE_SETUID)
 			sys::setUid(uid);
 #else
-			throw std::runtime_error("irccd: uid option not supported on this platform");
+			throw std::runtime_error("uid option not supported on this platform");
 #endif
 		}
 	} catch (const std::exception &ex) {
@@ -202,6 +202,10 @@ void loadForeground(bool foreground, const parser::Result &options)
 		if (options.count("-f") == 0 && options.count("--foreground") == 0 && !foreground) {
 			daemon(1, 0);
 		}
+#else
+		(void)foreground;
+		(void)options;
+		throw std::runtime_error("foreground option not supported on this platform");
 #endif
 	} catch (const std::exception &ex) {
 		log::warning() << "irccd: " << ex.what() << std::endl;
