@@ -24,9 +24,17 @@
  * \brief JavaScript plugins for irccd.
  */
 
+#include <unordered_set>
+
+#include "js.hpp"
+#include "path.hpp"
 #include "plugin.hpp"
+#include "signals.hpp"
 
 namespace irccd {
+
+class Module;
+class Timer;
 
 /**
  * \brief Timers that a plugin owns.
@@ -116,216 +124,149 @@ public:
 	}
 
 	/**
-	 * On channel message. This event will call onMessage or
-	 * onCommand if the messages starts with the command character
-	 * plus the plugin name.
-	 *
-	 * \param server the server
-	 * \param origin the user who sent the message
-	 * \param channel the channel
-	 * \param message the message or command
+	 * \copydoc Plugin::onCommand
 	 */
-	void onCommand(const std::shared_ptr<Server> &server,
+	void onCommand(Irccd &irccd,
+		       const std::shared_ptr<Server> &server,
 		       const std::string &origin,
 		       const std::string &channel,
 		       const std::string &message) override;
 
 	/**
-	 * On successful connection.
-	 *
-	 * \param server the server
+	 * \copydoc Plugin::onConnect
 	 */
-	void onConnect(const std::shared_ptr<Server> &server) override;
+	void onConnect(Irccd &irccd, const std::shared_ptr<Server> &server) override;
 
 	/**
-	 * On channel mode.
-	 *
-	 * \param server the server
-	 * \param origin the ouser who has changed the mode
-	 * \param channel the channel
-	 * \param mode the mode
-	 * \param arg the optional mode argument
+	 * \copydoc Plugin::onChannelMode
 	 */
-	void onChannelMode(const std::shared_ptr<Server> &server,
+	void onChannelMode(Irccd &irccd,
+			   const std::shared_ptr<Server> &server,
 			   const std::string &origin,
 			   const std::string &channel,
 			   const std::string &mode,
 			   const std::string &arg) override;
 
 	/**
-	 * On a channel notice.
-	 *
-	 * \param server the server
-	 * \param origin the user who sent the notice
-	 * \param channel on which channel
-	 * \param notice the message
+	 * \copydoc Plugin::onChannelNotice
 	 */
-	void onChannelNotice(const std::shared_ptr<Server> &server,
+	void onChannelNotice(Irccd &irccd,
+			     const std::shared_ptr<Server> &server,
 			     const std::string &origin,
 			     const std::string &channel,
 			     const std::string &notice) override;
 
 	/**
-	 * On invitation.
-	 *
-	 * \param server the server
-	 * \param origin the user who invited you
-	 * \param channel the channel
+	 * \copydoc Plugin::onInvite
 	 */
-	void onInvite(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel) override;
+	void onInvite(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel) override;
 
 	/**
-	 * On join.
-	 *
-	 * \param server the server
-	 * \param origin the user who joined
-	 * \param channel the channel
+	 * \copydoc Plugin::onJoin
 	 */
-	void onJoin(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel) override;
+	void onJoin(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel) override;
 
 	/**
-	 * On kick.
-	 *
-	 * \param server the server
-	 * \param origin the user who kicked the target
-	 * \param channel the channel
-	 * \param target the kicked target
-	 * \param reason the optional reason
+	 * \copydoc Plugin::onKick
 	 */
-	void onKick(const std::shared_ptr<Server> &server,
+	void onKick(Irccd &irccd,
+		    const std::shared_ptr<Server> &server,
 		    const std::string &origin,
 		    const std::string &channel,
 		    const std::string &target,
 		    const std::string &reason) override;
 
 	/**
-	 * On load.
+	 * \copydoc Plugin::onLoad
 	 */
-	void onLoad() override;
+	void onLoad(Irccd &irccd) override;
 
 	/**
-	 * On channel message.
-	 *
-	 * \param server the server
-	 * \param origin the user who sent the message
-	 * \param channel the channel
-	 * \param message the message or command
+	 * \copydoc Plugin::onMessage
 	 */
-	void onMessage(const std::shared_ptr<Server> &server,
-			       const std::string &origin,
-			       const std::string &channel,
-			       const std::string &message) override;
+	void onMessage(Irccd &irccd,
+		       const std::shared_ptr<Server> &server,
+		       const std::string &origin,
+		       const std::string &channel,
+		       const std::string &message) override;
 
 	/**
-	 * On CTCP Action.
-	 *
-	 * \param server the server
-	 * \param origin the user who sent the message
-	 * \param channel the channel (may also be your nickname)
-	 * \param message the message
+	 * \copydoc Plugin::onMe
 	 */
-	void onMe(const std::shared_ptr<Server> &server,
+	void onMe(Irccd &irccd,
+		  const std::shared_ptr<Server> &server,
 		  const std::string &origin,
 		  const std::string &channel,
 		  const std::string &message) override;
 
 	/**
-	 * On user mode change.
-	 *
-	 * \param server the server
-	 * \param origin the person who changed the mode
-	 * \param mode the new mode
+	 * \copydoc Plugin::onMode
 	 */
-	void onMode(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &mode) override;
+	void onMode(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &mode) override;
 
 	/**
-	 * On names listing.
-	 *
-	 * \param server the server
-	 * \param channel the channel
-	 * \param list the list of nicknames
+	 * \copydoc Plugin::onNames
 	 */
-	void onNames(const std::shared_ptr<Server> &server, const std::string &channel, const std::vector<std::string> &list) override;
+	void onNames(Irccd &irccd,
+		     const std::shared_ptr<Server> &server,
+		     const std::string &channel,
+		     const std::vector<std::string> &list) override;
 
 	/**
-	 * On nick change.
-	 *
-	 * \param server the server
-	 * \param origin the user that changed its nickname
-	 * \param nick the new nickname
+	 * \copydoc Plugin::onNick
 	 */
-	void onNick(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &nick) override;
+	void onNick(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &nick) override;
 
 	/**
-	 * On user notice.
-	 *
-	 * \param server the server
-	 * \param origin the user who sent the notice
-	 * \param notice the notice
+	 * \copydoc Plugin::onNotice
 	 */
-	void onNotice(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &notice) override;
+	void onNotice(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &notice) override;
 
 	/**
-	 * On part.
-	 *
-	 * \param server the server
-	 * \param origin the user who left
-	 * \param channel the channel
-	 * \param reason the optional reason
+	 * \copydoc Plugin::onPart
 	 */
-	void onPart(const std::shared_ptr<Server> &server,
+	void onPart(Irccd &irccd,
+		    const std::shared_ptr<Server> &server,
 		    const std::string &origin,
 		    const std::string &channel,
 		    const std::string &reason) override;
 
 	/**
-	 * On user query.
-	 *
-	 * \param server the server
-	 * \param origin the user who sent the query
-	 * \param message the message
+	 * \copydoc Plugin::onQuery
 	 */
-	void onQuery(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &message) override;
+	void onQuery(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &message) override;
 
 	/**
-	 * On user query command.
-	 *
-	 * \param server the server
-	 * \param origin the user who sent the query
-	 * \param message the message
+	 * \copydoc Plugin::onQueryCommand
 	 */
-	void onQueryCommand(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &message) override;
+	void onQueryCommand(Irccd &irccd,
+			    const std::shared_ptr<Server> &server,
+			    const std::string &origin,
+			    const std::string &message) override;
 
 	/**
-	 * On reload.
+	 * \copydoc Plugin::onReload
 	 */
-	void onReload() override;
+	void onReload(Irccd &irccd) override;
 
 	/**
-	 * On topic change.
-	 *
-	 * \param server the server
-	 * \param origin the user who sent the topic
-	 * \param channel the channel
-	 * \param topic the new topic
+	 * \copydoc Plugin::onTopic
 	 */
-	void onTopic(const std::shared_ptr<Server> &server,
+	void onTopic(Irccd &irccd,
+		     const std::shared_ptr<Server> &server,
 		     const std::string &origin,
 		     const std::string &channel,
 		     const std::string &topic) override;
 
 	/**
-	 * On unload.
+	 * \copydoc Plugin::onUnload
 	 */
-	void onUnload() override;
+	void onUnload(Irccd &irccd) override;
 
 	/**
-	 * On whois information.
-	 *
-	 * \param server the server
-	 * \param info the info
+	 * \copydoc Plugin::onWhois
 	 */
-	void onWhois(const std::shared_ptr<Server> &server, const ServerWhois &info) override;
+	void onWhois(Irccd &irccd, const std::shared_ptr<Server> &server, const ServerWhois &info) override;
 };
 
 } // !irccd

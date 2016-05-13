@@ -126,7 +126,6 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/logger.cpp
 	${CMAKE_CURRENT_LIST_DIR}/options.cpp
 	${CMAKE_CURRENT_LIST_DIR}/path.cpp
-	${CMAKE_CURRENT_LIST_DIR}/plugin.cpp
 	${CMAKE_CURRENT_LIST_DIR}/plugin-js.cpp
 	${CMAKE_CURRENT_LIST_DIR}/rule.cpp
 	${CMAKE_CURRENT_LIST_DIR}/server.cpp

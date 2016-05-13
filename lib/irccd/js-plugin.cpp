@@ -127,7 +127,7 @@ duk::Ret list(duk::ContextPtr ctx)
 duk::Ret load(duk::ContextPtr ctx)
 {
 	return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
-		irccd.pluginService().load(name, name, true);
+		irccd.pluginService().load(name);
 	});
 }
 

@@ -44,7 +44,7 @@ std::vector<RemoteCommand::Arg> PluginReload::args() const
 json::Value PluginReload::exec(Irccd &irccd, const json::Value &request) const
 {
 #if defined(WITH_JS)
-	irccd.pluginService().require(request.at("plugin").toString())->onReload();
+	irccd.pluginService().require(request.at("plugin").toString())->onReload(irccd);
 
 	return RemoteCommand::exec(irccd, request);
 #else

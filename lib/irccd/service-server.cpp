@@ -63,7 +63,8 @@ void ServerService::handleChannelMode(std::weak_ptr<Server> ptr, std::string ori
 			return "onChannelMode";
 		},
 		[=] (Plugin &plugin) {
-			plugin.onChannelMode(std::move(server), std::move(origin), std::move(channel), std::move(mode), std::move(arg));
+			plugin.onChannelMode(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(mode),
+					     std::move(arg));
 		}
 	));
 #endif
@@ -96,7 +97,7 @@ void ServerService::handleChannelNotice(std::weak_ptr<Server> ptr, std::string o
 			return "onChannelNotice";
 		},
 		[=] (Plugin &plugin) {
-			plugin.onChannelNotice(std::move(server), std::move(origin), std::move(channel), std::move(message));
+			plugin.onChannelNotice(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(message));
 		}
 	));
 #endif
@@ -123,7 +124,7 @@ void ServerService::handleConnect(std::weak_ptr<Server> ptr)
 			return "onConnect";
 		},
 		[=] (Plugin &plugin) {
-			plugin.onConnect(std::move(server));
+			plugin.onConnect(m_irccd, std::move(server));
 		}
 	));
 #endif
@@ -155,7 +156,7 @@ void ServerService::handleInvite(std::weak_ptr<Server> ptr, std::string origin, 
 			return "onInvite";
 		},
 		[=] (Plugin &plugin) {
-			plugin.onInvite(std::move(server), std::move(origin), std::move(channel));
+			plugin.onInvite(m_irccd, std::move(server), std::move(origin), std::move(channel));
 		}
 	));
 #endif
@@ -186,7 +187,7 @@ void ServerService::handleJoin(std::weak_ptr<Server> ptr, std::string origin, st
 			return "onJoin";
 		},
 		[=] (Plugin &plugin) {
-			plugin.onJoin(std::move(server), std::move(origin), std::move(channel));
+			plugin.onJoin(m_irccd, std::move(server), std::move(origin), std::move(channel));
 		}
 	));
 #endif
@@ -221,7 +222,7 @@ void ServerService::handleKick(std::weak_ptr<Server> ptr, std::string origin, st
 			return "onKick";
 		},
 		[=] (Plugin &plugin) {
-			plugin.onKick(std::move(server), std::move(origin), std::move(channel), std::move(target), std::move(reason));
+			plugin.onKick(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(target), std::move(reason));
 		}
 	));
 #endif
@@ -257,9 +258,9 @@ void ServerService::handleMessage(std::weak_ptr<Server> ptr, std::string origin,
 			util::MessagePair pack = util::parseMessage(message, server->settings().command, plugin.name());
 
 			if (pack.second == util::MessageType::Command)
-				plugin.onCommand(std::move(server), std::move(origin), std::move(channel), std::move(pack.first));
+				plugin.onCommand(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(pack.first));
 			else
-				plugin.onMessage(std::move(server), std::move(origin), std::move(channel), std::move(pack.first));
+				plugin.onMessage(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(pack.first));
 		}
 	));
 #endif
@@ -292,7 +293,7 @@ void ServerService::handleMe(std::weak_ptr<Server> ptr, std::string origin, std:
 			return "onMe";
 		},
 		[=] (Plugin &plugin) {
-			plugin.onMe(std::move(server), std::move(origin), std::move(target), std::move(message));
+			plugin.onMe(m_irccd, std::move(server), std::move(origin), std::move(target), std::move(message));
 		}
 	));
 #endif
@@ -323,7 +324,7 @@ void ServerService::handleMode(std::weak_ptr<Server> ptr, std::string origin, st
 			return "onMode";
 		},
 		[=] (Plugin &plugin) {
-			plugin.onMode(std::move(server), std::move(origin), std::move(mode));
+			plugin.onMode(m_irccd, std::move(server), std::move(origin), std::move(mode));
 		}
 	));
 #endif
@@ -356,7 +357,7 @@ void ServerService::handleNames(std::weak_ptr<Server> ptr, std::string channel, 
 			return "onNames";
 		},
 		[=] (Plugin &plugin) {
-			plugin.onNames(std::move(server), std::move(channel), std::vector<std::string>(nicknames.begin(), nicknames.end()));
+			plugin.onNames(m_irccd, std::move(server), std::move(channel), std::vector<std::string>(nicknames.begin(), nicknames.end()));
 		}
 	));
 #endif
@@ -387,7 +388,7 @@ void ServerService::handleNick(std::weak_ptr<Server> ptr, std::string origin, st
 			return "onNick";
 		},
 		[=] (Plugin &plugin) {
-			plugin.onNick(std::move(server), std::move(origin), std::move(nickname));
+			plugin.onNick(m_irccd, std::move(server), std::move(origin), std::move(nickname));
 		}
 	));
 #endif
@@ -418,7 +419,7 @@ void ServerService::handleNotice(std::weak_ptr<Server> ptr, std::string origin, 
 			return "onNotice";
 		},
 		[=] (Plugin &plugin) {
-			plugin.onNotice(std::move(server), std::move(origin), std::move(message));
+			plugin.onNotice(m_irccd, std::move(server), std::move(origin), std::move(message));
 		}
 	));
 #endif
@@ -451,7 +452,7 @@ void ServerService::handlePart(std::weak_ptr<Server> ptr, std::string origin, st
 			return "onPart";
 		},
 		[=] (Plugin &plugin) {
-			plugin.onPart(std::move(server), std::move(origin), std::move(channel), std::move(reason));
+			plugin.onPart(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(reason));
 		}
 	));
 #endif
@@ -485,9 +486,9 @@ void ServerService::handleQuery(std::weak_ptr<Server> ptr, std::string origin, s
 			util::MessagePair pack = util::parseMessage(message, server->settings().command, plugin.name());
 
 			if (pack.second == util::MessageType::Command)
-				plugin.onQueryCommand(std::move(server), std::move(origin), std::move(pack.first));
+				plugin.onQueryCommand(m_irccd, std::move(server), std::move(origin), std::move(pack.first));
 			else
-				plugin.onQuery(std::move(server), std::move(origin), std::move(pack.first));
+				plugin.onQuery(m_irccd, std::move(server), std::move(origin), std::move(pack.first));
 		}
 	));
 #endif
@@ -520,7 +521,7 @@ void ServerService::handleTopic(std::weak_ptr<Server> ptr, std::string origin, s
 			return "onTopic";
 		},
 		[=] (Plugin &plugin) {
-			plugin.onTopic(std::move(server), std::move(origin), std::move(channel), std::move(topic));
+			plugin.onTopic(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(topic));
 		}
 	));
 #endif
@@ -555,7 +556,7 @@ void ServerService::handleWhois(std::weak_ptr<Server> ptr, ServerWhois whois)
 			return "onWhois";
 		},
 		[=] (Plugin &plugin) {
-			plugin.onWhois(std::move(server), std::move(whois));
+			plugin.onWhois(m_irccd, std::move(server), std::move(whois));
 		}
 	));
 #endif

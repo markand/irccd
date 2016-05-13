@@ -45,7 +45,7 @@ json::Value PluginLoad::exec(Irccd &irccd, const json::Value &request) const
 #if defined(WITH_JS)
 	auto name = request.at("plugin").toString();
 
-	irccd.pluginService().load(name, name, true);
+	irccd.pluginService().load(name);
 
 	return RemoteCommand::exec(irccd, request);
 #else

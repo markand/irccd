@@ -629,7 +629,7 @@ std::vector<std::shared_ptr<Plugin>> Config::loadPlugins() const
 			log::info("plugin {}: loading"_format(name));
 
 			if (path.empty()) {
-				plugins.push_back(Plugin::find(name, findPluginConfig(name)));
+				// plugins.push_back(Plugin::find(name, findPluginConfig(name)));
 			} else {
 				log::info("plugin {}: trying {}"_format(name, path));
 				plugins.push_back(std::make_shared<JsPlugin>(name, path, findPluginConfig(name)));

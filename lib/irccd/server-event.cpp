@@ -18,7 +18,7 @@
 
 #include "irccd.hpp"
 #include "logger.hpp"
-#include "plugin.hpp"
+#include "plugin-js.hpp"
 #include "server-event.hpp"
 #include "service-plugin.hpp"
 #include "service-rule.hpp"
@@ -51,6 +51,7 @@ void ServerEvent::operator()(Irccd &irccd) const
 			log::debug() << "rule: event allowed" << std::endl;
 		}
 
+		// TODO: server-event must not know which type of plugin
 		try {
 			m_plugin_exec(*plugin);
 		} catch (const duk::ErrorInfo &info) {

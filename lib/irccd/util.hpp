@@ -292,6 +292,14 @@ inline T toNumber(const std::string &number, T min = std::numeric_limits<T>::min
  */
 std::string nextNetwork(std::string &input);
 
+/**
+ * Use arguments to avoid compiler warnings about unused parameters.
+ */
+template <typename... Args>
+inline void unused(Args&&...) noexcept
+{
+}
+
 } // !util
 
 } // !irccd

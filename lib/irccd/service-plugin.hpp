@@ -27,12 +27,11 @@
 #include <memory>
 #include <vector>
 
+#include "plugin-js.hpp"
+
 namespace irccd {
 
 class Irccd;
-class Plugin;
-class JsPlugin;
-class Timer;
 
 /**
  * \brief Manage plugins.
@@ -40,6 +39,7 @@ class Timer;
 class PluginService {
 private:
 	Irccd &m_irccd;
+	std::vector<std::shared_ptr<Module>> m_modules;
 	std::vector<std::shared_ptr<Plugin>> m_plugins;
 
 	// TODO: get rid of this with future JavaScript modules.
@@ -65,6 +65,14 @@ public:
 	}
 
 	/**
+	 * Add an API module for JavaScript plugins.
+	 *
+	 * \pre module is not null
+	 * \param module the module
+	 */
+	void addModule(std::shared_ptr<Module> module);
+
+	/**
 	 * Check if a plugin is loaded.
 	 *
 	 * \param name the plugin id
@@ -73,7 +81,7 @@ public:
 	bool has(const std::string &name) const noexcept;
 
 	/**
-	 * Get a plugin or empty one if not found.
+	 * Get a loaded plugin or null if not found.
 	 *
 	 * \param name the plugin id
 	 * \return the plugin or empty one if not found
@@ -81,7 +89,7 @@ public:
 	std::shared_ptr<Plugin> get(const std::string &name) const noexcept;
 
 	/**
-	 * Find a plugin.
+	 * Find a loaded plugin.
 	 *
 	 * \param name the plugin id
 	 * \return the plugin
@@ -89,24 +97,11 @@ public:
 	 */
 	std::shared_ptr<Plugin> require(const std::string &name) const;
 
-	/**
-	 * Add a loaded plugin.
-	 *
-	 * Plugins signals will be connected to the irccd main loop. The onLoad function will also be called and the
-	 * plugin is not added on errors.
-	 *
-	 * \pre plugin must not be empty
-	 * \param plugin the plugin
-	 */
 	void add(std::shared_ptr<Plugin> plugin);
 
-	/**
-	 * Load a plugin by path or by searching through directories.
-	 *
-	 * \param source the path or the plugin id to search
-	 * \param find set to true for searching by id
-	 */
-	void load(std::string name, const std::string &source, bool find);
+	std::shared_ptr<Plugin> find(std::string name, PluginConfig config = PluginConfig());
+
+	void load(std::string name, std::string path = "");
 
 	/**
 	 * Unload a plugin and remove it.

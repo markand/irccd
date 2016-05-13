@@ -22,6 +22,8 @@
 
 #include <format.h>
 
+#include "config.hpp"
+#include "fs.hpp"
 #include "irccd.hpp"
 #include "logger.hpp"
 #include "plugin.hpp"
@@ -35,6 +37,13 @@ namespace irccd {
 PluginService::PluginService(Irccd &irccd) noexcept
 	: m_irccd(irccd)
 {
+}
+
+void PluginService::addModule(std::shared_ptr<Module> module)
+{
+	assert(module);
+
+	m_modules.push_back(std::move(module));
 }
 
 bool PluginService::has(const std::string &name) const noexcept
@@ -86,17 +95,34 @@ void PluginService::add(std::shared_ptr<Plugin> plugin)
 	}
 
 	// Initial load now.
+	// TODO: not responsible of this.
 	try {
-		plugin->onLoad();
+		plugin->onLoad(m_irccd);
 		m_plugins.push_back(std::move(plugin));
 	} catch (const std::exception &ex) {
 		log::warning("plugin {}: {}"_format(plugin->name(), ex.what()));
 	}
 }
 
-void PluginService::load(std::string name, const std::string &source, bool find)
+std::shared_ptr<Plugin> PluginService::find(std::string name, PluginConfig config)
 {
-	// TODO: change with Plugin::find
+	for (const auto &path : path::list(path::PathPlugins)) {
+		std::string fullpath = path + name + ".js";
+
+		if (!fs::isReadable(fullpath)) {
+			continue;
+		}
+
+		log::info("plugin {}: trying {}"_format(name, fullpath));
+
+		return std::make_shared<JsPlugin>(std::move(name), std::move(fullpath), std::move(config));
+	}
+
+	throw std::runtime_error("no suitable plugin found");
+}
+
+void PluginService::load(std::string name, std::string path)
+{
 	auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (const auto &plugin) {
 		return plugin->name() == name;
 	});
@@ -105,35 +131,18 @@ void PluginService::load(std::string name, const std::string &source, bool find)
 		throw std::invalid_argument("plugin already loaded");
 	}
 
-	std::vector<std::string> paths;
+	// TODO: LOAD CONFIG
 	std::shared_ptr<Plugin> plugin;
 
-	if (find) {
-		for (const std::string &dir : path::list(path::PathPlugins)) {
-			paths.push_back(dir + source + ".js");
+	try {
+		if (path.empty()) {
+			plugin = find(std::move(name), PluginConfig());
+		} else {
+			// TODO: DYNLIB BASED PLUGINS
+			plugin = std::make_shared<JsPlugin>(std::move(name), std::move(path));
 		}
-	} else {
-		paths.push_back(source);
-	}
-
-	// Iterate over all paths.
-	log::info("plugin {}: trying to load:"_format(name));
-
-	for (const auto &path : paths) {
-		log::info() << "  from " << path << std::endl;
-
-		try {
-			plugin = std::make_shared<Plugin>(name, path /*, m_pluginConf[name] */);
-			break;
-		} catch (const std::exception &ex) {
-			log::info(fmt::format("    error: {}", ex.what()));
-		}
-	}
-
-	if (plugin) {
-		add(std::move(plugin));
-	} else {
-		throw std::runtime_error("no suitable plugin found");
+	} catch (const std::exception &ex) {
+		log::warning("plugin {}: {}"_format(ex.what()));
 	}
 }
 
@@ -142,7 +151,7 @@ void PluginService::reload(const std::string &name)
 	auto plugin = get(name);
 
 	if (plugin) {
-		plugin->onReload();
+		plugin->onReload(m_irccd);
 	}
 }
 
@@ -153,7 +162,7 @@ void PluginService::unload(const std::string &name)
 	});
 
 	if (it != m_plugins.end()) {
-		(*it)->onUnload();
+		(*it)->onUnload(m_irccd);
 		m_plugins.erase(it);
 	}
 }

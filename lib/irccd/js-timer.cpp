@@ -21,6 +21,7 @@
 
 #include "js.hpp"
 #include "plugin-js.hpp"
+#include "timer.hpp"
 
 namespace irccd {
 

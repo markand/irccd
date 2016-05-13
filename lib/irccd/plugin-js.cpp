@@ -38,6 +38,7 @@
 #include "js-util.hpp"
 #include "logger.hpp"
 #include "plugin-js.hpp"
+#include "timer.hpp"
 
 namespace irccd {
 
@@ -168,8 +169,8 @@ JsPlugin::JsPlugin(std::string name, std::string path, const PluginConfig &confi
 	loadJsPlugin(m_context);
 	loadJsServer(m_context);
 	loadJsSystem(m_context);
-	loadJsTimer(m_context);
 	loadJsUnicode(m_context);
+	loadJsTimer(m_context);
 	loadJsUtil(m_context);
 
 	putVars();
@@ -249,7 +250,8 @@ void JsPlugin::removeTimer(const std::shared_ptr<Timer> &timer) noexcept
 	m_timers.erase(timer);
 }
 
-void JsPlugin::onChannelMode(const std::shared_ptr<Server> &server,
+void JsPlugin::onChannelMode(Irccd &,
+			     const std::shared_ptr<Server> &server,
 			     const std::string &origin,
 			     const std::string &channel,
 			     const std::string &mode,
@@ -265,7 +267,8 @@ void JsPlugin::onChannelMode(const std::shared_ptr<Server> &server,
 	call("onChannelMode", 5);
 }
 
-void JsPlugin::onChannelNotice(const std::shared_ptr<Server> &server,
+void JsPlugin::onChannelNotice(Irccd &,
+			       const std::shared_ptr<Server> &server,
 			       const std::string &origin,
 			       const std::string &channel,
 			       const std::string &notice)
@@ -279,7 +282,8 @@ void JsPlugin::onChannelNotice(const std::shared_ptr<Server> &server,
 	call("onChannelNotice", 4);
 }
 
-void JsPlugin::onCommand(const std::shared_ptr<Server> &server,
+void JsPlugin::onCommand(Irccd &,
+			 const std::shared_ptr<Server> &server,
 			 const std::string &origin,
 			 const std::string &channel,
 			 const std::string &message)
@@ -293,7 +297,7 @@ void JsPlugin::onCommand(const std::shared_ptr<Server> &server,
 	call("onCommand", 4);
 }
 
-void JsPlugin::onConnect(const std::shared_ptr<Server> &server)
+void JsPlugin::onConnect(Irccd &, const std::shared_ptr<Server> &server)
 {
 	duk::StackAssert sa(m_context);
 
@@ -301,7 +305,7 @@ void JsPlugin::onConnect(const std::shared_ptr<Server> &server)
 	call("onConnect", 1);
 }
 
-void JsPlugin::onInvite(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel)
+void JsPlugin::onInvite(Irccd &, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel)
 {
 	duk::StackAssert sa(m_context);
 
@@ -311,7 +315,7 @@ void JsPlugin::onInvite(const std::shared_ptr<Server> &server, const std::string
 	call("onInvite", 3);
 }
 
-void JsPlugin::onJoin(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel)
+void JsPlugin::onJoin(Irccd &, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel)
 {
 	duk::StackAssert sa(m_context);
 
@@ -321,7 +325,8 @@ void JsPlugin::onJoin(const std::shared_ptr<Server> &server, const std::string &
 	call("onJoin", 3);
 }
 
-void JsPlugin::onKick(const std::shared_ptr<Server> &server,
+void JsPlugin::onKick(Irccd &,
+		      const std::shared_ptr<Server> &server,
 		      const std::string &origin,
 		      const std::string &channel,
 		      const std::string &target,
@@ -337,14 +342,15 @@ void JsPlugin::onKick(const std::shared_ptr<Server> &server,
 	call("onKick", 5);
 }
 
-void JsPlugin::onLoad()
+void JsPlugin::onLoad(Irccd &)
 {
 	duk::StackAssert sa(m_context);
 
 	call("onLoad", 0);
 }
 
-void JsPlugin::onMessage(const std::shared_ptr<Server> &server,
+void JsPlugin::onMessage(Irccd &,
+			 const std::shared_ptr<Server> &server,
 			 const std::string &origin,
 			 const std::string &channel,
 			 const std::string &message)
@@ -358,7 +364,8 @@ void JsPlugin::onMessage(const std::shared_ptr<Server> &server,
 	call("onMessage", 4);
 }
 
-void JsPlugin::onMe(const std::shared_ptr<Server> &server,
+void JsPlugin::onMe(Irccd &,
+		    const std::shared_ptr<Server> &server,
 		    const std::string &origin,
 		    const std::string &channel,
 		    const std::string &message)
@@ -372,7 +379,7 @@ void JsPlugin::onMe(const std::shared_ptr<Server> &server,
 	call("onMe", 4);
 }
 
-void JsPlugin::onMode(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &mode)
+void JsPlugin::onMode(Irccd &, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &mode)
 {
 	duk::StackAssert sa(m_context);
 
@@ -382,7 +389,7 @@ void JsPlugin::onMode(const std::shared_ptr<Server> &server, const std::string &
 	call("onMode", 3);
 }
 
-void JsPlugin::onNames(const std::shared_ptr<Server> &server, const std::string &channel, const std::vector<std::string> &names)
+void JsPlugin::onNames(Irccd &, const std::shared_ptr<Server> &server, const std::string &channel, const std::vector<std::string> &names)
 {
 	duk::StackAssert sa(m_context);
 
@@ -392,7 +399,7 @@ void JsPlugin::onNames(const std::shared_ptr<Server> &server, const std::string 
 	call("onNames", 3);
 }
 
-void JsPlugin::onNick(const std::shared_ptr<Server> &server, const std::string &oldnick, const std::string &newnick)
+void JsPlugin::onNick(Irccd &, const std::shared_ptr<Server> &server, const std::string &oldnick, const std::string &newnick)
 {
 	duk::StackAssert sa(m_context);
 
@@ -402,7 +409,7 @@ void JsPlugin::onNick(const std::shared_ptr<Server> &server, const std::string &
 	call("onNick", 3);
 }
 
-void JsPlugin::onNotice(const std::shared_ptr<Server> &server, const std::string &origin, const std::string &notice)
+void JsPlugin::onNotice(Irccd &, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &notice)
 {
 	duk::StackAssert sa(m_context);
 
@@ -412,7 +419,8 @@ void JsPlugin::onNotice(const std::shared_ptr<Server> &server, const std::string
 	call("onNotice", 3);
 }
 
-void JsPlugin::onPart(const std::shared_ptr<Server> &server,
+void JsPlugin::onPart(Irccd &,
+		      const std::shared_ptr<Server> &server,
 		      const std::string &origin,
 		      const std::string &channel,
 		      const std::string &reason)
@@ -426,7 +434,8 @@ void JsPlugin::onPart(const std::shared_ptr<Server> &server,
 	call("onPart", 4);
 }
 
-void JsPlugin::onQuery(const std::shared_ptr<Server> &server,
+void JsPlugin::onQuery(Irccd &,
+		       const std::shared_ptr<Server> &server,
 		       const std::string &origin,
 		       const std::string &message)
 {
@@ -438,7 +447,8 @@ void JsPlugin::onQuery(const std::shared_ptr<Server> &server,
 	call("onQuery", 3);
 }
 
-void JsPlugin::onQueryCommand(const std::shared_ptr<Server> &server,
+void JsPlugin::onQueryCommand(Irccd &,
+			      const std::shared_ptr<Server> &server,
 			      const std::string &origin,
 			      const std::string &message)
 {
@@ -450,14 +460,15 @@ void JsPlugin::onQueryCommand(const std::shared_ptr<Server> &server,
 	call("onQueryCommand", 3);
 }
 
-void JsPlugin::onReload()
+void JsPlugin::onReload(Irccd &)
 {
 	duk::StackAssert sa(m_context);
 
 	call("onReload");
 }
 
-void JsPlugin::onTopic(const std::shared_ptr<Server> &server,
+void JsPlugin::onTopic(Irccd &,
+		       const std::shared_ptr<Server> &server,
 		       const std::string &origin,
 		       const std::string &channel,
 		       const std::string &topic)
@@ -471,14 +482,14 @@ void JsPlugin::onTopic(const std::shared_ptr<Server> &server,
 	call("onTopic", 4);
 }
 
-void JsPlugin::onUnload()
+void JsPlugin::onUnload(Irccd &)
 {
 	duk::StackAssert sa(m_context);
 
 	call("onUnload");
 }
 
-void JsPlugin::onWhois(const std::shared_ptr<Server> &server, const ServerWhois &whois)
+void JsPlugin::onWhois(Irccd &, const std::shared_ptr<Server> &server, const ServerWhois &whois)
 {
 	duk::StackAssert sa(m_context);
 
