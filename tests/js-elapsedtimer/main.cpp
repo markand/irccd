@@ -21,7 +21,7 @@
 #include <thread>
 
 #include <irccd/js-irccd.hpp>
-#include <irccd/js-elapsed-timer.hpp>
+#include <irccd/mod-elapsed-timer.hpp>
 
 using namespace irccd;
 using namespace std::chrono_literals;

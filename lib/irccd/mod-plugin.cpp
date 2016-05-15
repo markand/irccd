@@ -17,9 +17,9 @@
  */
 
 #include "irccd.hpp"
-#include "plugin.hpp"
+#include "plugin-js.hpp"
 #include "service-plugin.hpp"
-#include "js-plugin.hpp"
+#include "mod-plugin.hpp"
 
 namespace irccd {
 
@@ -179,17 +179,22 @@ const duk::FunctionMap functions{
 
 } // !namespace
 
-void loadJsPlugin(duk::Context &ctx) noexcept
+PluginModule::PluginModule() noexcept
+	: Module("Irccd.Plugin")
 {
-	duk::StackAssert sa(ctx);
+}
 
-	duk::getGlobal<void>(ctx, "Irccd");
-	duk::push(ctx, duk::Object{});
-	duk::push(ctx, functions);
-	duk::push(ctx, duk::Object{});
-	duk::putProperty(ctx, -2, "config");
-	duk::putProperty(ctx, -2, "Plugin");
-	duk::pop(ctx);
+void PluginModule::load(Irccd &, JsPlugin &plugin)
+{
+	duk::StackAssert sa(plugin.context());
+
+	duk::getGlobal<void>(plugin.context(), "Irccd");
+	duk::push(plugin.context(), duk::Object{});
+	duk::push(plugin.context(), functions);
+	duk::push(plugin.context(), duk::Object{});
+	duk::putProperty(plugin.context(), -2, "config");
+	duk::putProperty(plugin.context(), -2, "Plugin");
+	duk::pop(plugin.context());
 }
 
 } // !irccd

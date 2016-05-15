@@ -29,8 +29,9 @@
 #endif
 
 #include "fs.hpp"
-#include "js-irccd.hpp"
-#include "js-file.hpp"
+#include "mod-file.hpp"
+#include "mod-irccd.hpp"
+#include "plugin-js.hpp"
 
 namespace irccd {
 
@@ -608,19 +609,24 @@ const duk::Map<int> constants{
 
 } // !namespace
 
-void loadJsFile(duk::ContextPtr ctx)
+FileModule::FileModule() noexcept
+	: Module("Irccd.File")
 {
-	duk::StackAssert sa(ctx);
+}
 
-	duk::getGlobal<void>(ctx, "Irccd");
-	duk::push(ctx, duk::Function{constructor, 2});
-	duk::push(ctx, constants);
-	duk::push(ctx, functions);
-	duk::push(ctx, duk::Object{});
-	duk::push(ctx, methods);
-	duk::putProperty(ctx, -2, "prototype");
-	duk::putProperty(ctx, -2, "File");
-	duk::pop(ctx);
+void FileModule::load(Irccd &, JsPlugin &plugin)
+{
+	duk::StackAssert sa(plugin.context());
+
+	duk::getGlobal<void>(plugin.context(), "Irccd");
+	duk::push(plugin.context(), duk::Function{constructor, 2});
+	duk::push(plugin.context(), constants);
+	duk::push(plugin.context(), functions);
+	duk::push(plugin.context(), duk::Object{});
+	duk::push(plugin.context(), methods);
+	duk::putProperty(plugin.context(), -2, "prototype");
+	duk::putProperty(plugin.context(), -2, "File");
+	duk::pop(plugin.context());
 }
 
 } // !irccd

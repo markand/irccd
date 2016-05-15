@@ -26,9 +26,10 @@
 #  include <cstdio>
 #endif
 
-#include "js-file.hpp"
-#include "js-irccd.hpp"
-#include "js-system.hpp"
+#include "mod-file.hpp"
+#include "mod-irccd.hpp"
+#include "mod-system.hpp"
+#include "plugin-js.hpp"
 #include "system.hpp"
 
 namespace irccd {
@@ -223,15 +224,20 @@ const duk::FunctionMap functions{
 
 } // !namespace
 
-void loadJsSystem(duk::ContextPtr ctx)
+SystemModule::SystemModule() noexcept
+	: Module("Irccd.System")
 {
-	duk::StackAssert sa(ctx);
+}
 
-	duk::getGlobal<void>(ctx, "Irccd");
-	duk::push(ctx, duk::Object{});
-	duk::push(ctx, functions);
-	duk::putProperty(ctx, -2, "System");
-	duk::pop(ctx);
+void SystemModule::load(Irccd &, JsPlugin &plugin)
+{
+	duk::StackAssert sa(plugin.context());
+
+	duk::getGlobal<void>(plugin.context(), "Irccd");
+	duk::push(plugin.context(), duk::Object{});
+	duk::push(plugin.context(), functions);
+	duk::putProperty(plugin.context(), -2, "System");
+	duk::pop(plugin.context());
 }
 
 } // !irccd

@@ -26,8 +26,10 @@
 
 #include "fs.hpp"
 #include "js.hpp"
-#include "js-irccd.hpp"
+#include "mod-directory.hpp"
+#include "mod-irccd.hpp"
 #include "path.hpp"
+#include "plugin-js.hpp"
 #include "sysconfig.hpp"
 
 namespace irccd {
@@ -364,20 +366,25 @@ const duk::Map<int> constants{
 
 } // !namespace
 
-void loadJsDirectory(duk::ContextPtr ctx) noexcept
+DirectoryModule::DirectoryModule() noexcept
+	: Module("Irccd.Directory")
 {
-	duk::StackAssert sa(ctx);
+}
 
-	duk::getGlobal<void>(ctx, "Irccd");
-	duk::push(ctx, duk::Function{constructor, 2});
-	duk::push(ctx, constants);
-	duk::push(ctx, functions);
-	duk::putProperty(ctx, -1, "separator", std::string{fs::separator()});
-	duk::push(ctx, duk::Object{});
-	duk::push(ctx, methods);
-	duk::putProperty(ctx, -2, "prototype");
-	duk::putProperty(ctx, -2, "Directory");
-	duk::pop(ctx);
+void DirectoryModule::load(Irccd &, JsPlugin &plugin)
+{
+	duk::StackAssert sa(plugin.context());
+
+	duk::getGlobal<void>(plugin.context(), "Irccd");
+	duk::push(plugin.context(), duk::Function{constructor, 2});
+	duk::push(plugin.context(), constants);
+	duk::push(plugin.context(), functions);
+	duk::putProperty(plugin.context(), -1, "separator", std::string{fs::separator()});
+	duk::push(plugin.context(), duk::Object{});
+	duk::push(plugin.context(), methods);
+	duk::putProperty(plugin.context(), -2, "prototype");
+	duk::putProperty(plugin.context(), -2, "Directory");
+	duk::pop(plugin.context());
 }
 
 } // !irccd

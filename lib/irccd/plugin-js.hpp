@@ -77,11 +77,14 @@ private:
 	// Plugin info and its timers
 	PluginTimers m_timers;
 
+	// Store loaded modules.
+	std::vector<std::shared_ptr<Module>> m_modules;
+
 	// Private helpers
 	void call(const std::string &name, unsigned nargs = 0);
+	void putModules(Irccd &irccd);
 	void putVars();
 	void putPath(const std::string &varname, const std::string &append, path::Path type);
-	void putPaths();
 	void putConfig(const PluginConfig &config);
 
 public:

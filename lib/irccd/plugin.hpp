@@ -185,6 +185,16 @@ public:
 		m_version = std::move(version);
 	}
 
+	inline const PluginConfig &config() const noexcept
+	{
+		return m_config;
+	}
+
+	inline PluginConfig &config() noexcept
+	{
+		return m_config;
+	}
+
 	/**
 	 * On channel message. This event will call onMessage or
 	 * onCommand if the messages starts with the command character

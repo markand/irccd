@@ -249,9 +249,7 @@ void load(const Config &config, const parser::Result &options)
 	}
 
 	// [plugin] section.
-	for (const auto &plugin : config.loadPlugins()) {
-		instance->pluginService().add(plugin);
-	}
+	config.loadPlugins(*instance);
 }
 
 } // !namespace
@@ -266,9 +264,7 @@ int main(int argc, char **argv)
 	instance = std::make_unique<Irccd>();
 
 	try {
-		Config cfg = open(options);
-
-		load(cfg, options);
+		load(open(options), options);
 	} catch (const std::exception &ex) {
 		log::warning() << "irccd: " << ex.what() << std::endl;
 		return 1;

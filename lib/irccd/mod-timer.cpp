@@ -19,7 +19,7 @@
 #include <cassert>
 #include <cstdint>
 
-#include "js.hpp"
+#include "mod-timer.hpp"
 #include "plugin-js.hpp"
 #include "timer.hpp"
 
@@ -127,18 +127,23 @@ const duk::Map<int> constants{
 
 } // !namespace
 
-void loadJsTimer(duk::ContextPtr ctx) noexcept
+TimerModule::TimerModule() noexcept
+	: Module("Irccd.Timer")
 {
-	duk::StackAssert sa(ctx);
+}
 
-	duk::getGlobal<void>(ctx, "Irccd");
-	duk::push(ctx, duk::Function{constructor, 3});
-	duk::push(ctx, constants);
-	duk::push(ctx, duk::Object{});
-	duk::push(ctx, methods);
-	duk::putProperty(ctx, -2, "prototype");
-	duk::putProperty(ctx, -2, "Timer");
-	duk::pop(ctx);
+void TimerModule::load(Irccd &, JsPlugin &plugin)
+{
+	duk::StackAssert sa(plugin.context());
+
+	duk::getGlobal<void>(plugin.context(), "Irccd");
+	duk::push(plugin.context(), duk::Function{constructor, 3});
+	duk::push(plugin.context(), constants);
+	duk::push(plugin.context(), duk::Object{});
+	duk::push(plugin.context(), methods);
+	duk::putProperty(plugin.context(), -2, "prototype");
+	duk::putProperty(plugin.context(), -2, "Timer");
+	duk::pop(plugin.context());
 }
 
 } // !irccd

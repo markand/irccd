@@ -1,5 +1,5 @@
 /*
- * js-logger.hpp -- Irccd.Logger API
+ * mod-directory.hpp -- Irccd.Directory API
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,25 +16,36 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_LOGGER_HPP
-#define IRCCD_JS_LOGGER_HPP
+#ifndef IRCCD_MOD_DIRECTORY_HPP
+#define IRCCD_MOD_DIRECTORY_HPP
 
 /**
- * \file js-logger.hpp
- * \brief Irccd.Logger JavaScript API.
+ * \file mod-directory.hpp
+ * \brief Irccd.Directory JavaScript API.
  */
 
-#include "js.hpp"
+#include "module.hpp"
 
 namespace irccd {
 
+class Irccd;
+
 /**
- * Load the module.
- *
- * \param ctx the context.
+ * \brief Irccd.Directory JavaScript API.
  */
-void loadJsLogger(duk::ContextPtr ctx);
+class DirectoryModule : public Module {
+public:
+	/**
+	 * Irccd.Directory.
+	 */
+	DirectoryModule() noexcept;
+
+	/**
+	 * \copydoc Module::load
+	 */
+	virtual void load(Irccd &irccd, JsPlugin &plugin);
+};
 
 } // !irccd
 
-#endif // !IRCCD_JS_LOGGER_HPP
+#endif // !IRCCD_MOD_DIRECTORY_HPP

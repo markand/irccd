@@ -33,11 +33,10 @@
 
 namespace irccd {
 
+class Irccd;
 class Rule;
-
 class Server;
 class ServerIdentity;
-
 class TransportServer;
 
 /**
@@ -164,9 +163,10 @@ public:
 	/**
 	 * Get the list of defined plugins.
 	 *
+	 * \param irccd the irccd instance
 	 * \return the list of plugins
 	 */
-	std::vector<std::shared_ptr<Plugin>> loadPlugins() const;
+	void loadPlugins(Irccd &irccd) const;
 };
 
 } // !irccd

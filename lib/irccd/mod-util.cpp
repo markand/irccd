@@ -18,7 +18,8 @@
 
 #include <libircclient.h>
 
-#include "js-util.hpp"
+#include "mod-util.hpp"
+#include "plugin-js.hpp"
 #include "util.hpp"
 
 namespace irccd {
@@ -138,15 +139,20 @@ const duk::FunctionMap functions{
 
 } // !namespace
 
-void loadJsUtil(duk::ContextPtr ctx)
+UtilModule::UtilModule() noexcept
+	: Module("Irccd.Util")
 {
-	duk::StackAssert sa(ctx);
+}
 
-	duk::getGlobal<void>(ctx, "Irccd");
-	duk::push(ctx, duk::Object{});
-	duk::push(ctx, functions);
-	duk::putProperty(ctx, -2, "Util");
-	duk::pop(ctx);
+void UtilModule::load(Irccd &, JsPlugin &plugin)
+{
+	duk::StackAssert sa(plugin.context());
+
+	duk::getGlobal<void>(plugin.context(), "Irccd");
+	duk::push(plugin.context(), duk::Object{});
+	duk::push(plugin.context(), functions);
+	duk::putProperty(plugin.context(), -2, "Util");
+	duk::pop(plugin.context());
 }
 
 } // !irccd

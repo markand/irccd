@@ -28,6 +28,7 @@
 #include "plugin-js.hpp"
 #include "rule.hpp"
 #include "server.hpp"
+#include "service-plugin.hpp"
 #include "sysconfig.hpp"
 #include "transport-server.hpp"
 #include "util.hpp"
@@ -610,39 +611,20 @@ std::vector<std::shared_ptr<Server>> Config::loadServers() const
 	return servers;
 }
 
-std::vector<std::shared_ptr<Plugin>> Config::loadPlugins() const
+void Config::loadPlugins(Irccd &irccd) const
 {
-	std::vector<std::shared_ptr<Plugin>> plugins;
-
-	// Plugins are defined in only one section.
 	auto it = m_document.find("plugins");
 
-	if (it == m_document.end()) {
-		return plugins;
-	}
-
-	for (const auto &option : *it) {
-		std::string name = option.key();
-		std::string path = option.value();
-
-		try {
-			log::info("plugin {}: loading"_format(name));
-
-			if (path.empty()) {
-				// plugins.push_back(Plugin::find(name, findPluginConfig(name)));
-			} else {
-				log::info("plugin {}: trying {}"_format(name, path));
-				plugins.push_back(std::make_shared<JsPlugin>(name, path, findPluginConfig(name)));
+	if (it != m_document.end()) {
+		for (const auto &option : *it) {
+			if (!util::isIdentifierValid(option.key())) {
+				continue;
 			}
-		} catch (const duk::ErrorInfo &ex) {
-			log::warning("plugin {}: {}"_format(option.key(), ex.what()));
-			log::warning("plugin {}: {}"_format(option.key(), ex.stack));
-		} catch (const std::exception &ex) {
-			log::warning("plugin {}: {}"_format(option.key(), ex.what()));
+
+			irccd.pluginService().configure(option.key(), findPluginConfig(option.key()));
+			irccd.pluginService().load(option.key(), option.value());
 		}
 	}
-
-	return plugins;
 }
 
 } // !irccd

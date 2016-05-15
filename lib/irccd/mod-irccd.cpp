@@ -16,7 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "js-irccd.hpp"
+#include "mod-irccd.hpp"
+#include "plugin-js.hpp"
 #include "sysconfig.hpp"
 
 namespace irccd {
@@ -57,32 +58,37 @@ duk::Ret constructor(duk::ContextPtr ctx)
 	return 0;
 }
 
-void loadJsIrccd(duk::Context &ctx)
+IrccdModule::IrccdModule() noexcept
+	: Module("Irccd")
 {
-	duk::StackAssert sa(ctx);
+}
 
-	/* Irccd */
-	duk::push(ctx, duk::Object{});
+void IrccdModule::load(Irccd &, JsPlugin &plugin)
+{
+	duk::StackAssert sa(plugin.context());
 
-	/* Version */
-	duk::push(ctx, duk::Object{});
-	duk::putProperty(ctx, -1, "major", IRCCD_VERSION_MAJOR);
-	duk::putProperty(ctx, -1, "minor", IRCCD_VERSION_MINOR);
-	duk::putProperty(ctx, -1, "patch", IRCCD_VERSION_PATCH);
-	duk::putProperty(ctx, -2, "version");
+	// Irccd.
+	duk::push(plugin.context(), duk::Object{});
 
-	/* Create the SystemError that inherits from Error */
-	duk::push(ctx, duk::Function{constructor, 2});
-	duk::push(ctx, duk::Object{});
-	duk::getGlobal<void>(ctx, "Error");
-	duk::getProperty<void>(ctx, -1, "prototype");
-	duk::remove(ctx, -2);
-	duk::setPrototype(ctx, -2);
-	duk::putProperty(ctx, -2, "prototype");
-	duk::putProperty(ctx, -2, "SystemError");
+	// Version.
+	duk::push(plugin.context(), duk::Object{});
+	duk::putProperty(plugin.context(), -1, "major", IRCCD_VERSION_MAJOR);
+	duk::putProperty(plugin.context(), -1, "minor", IRCCD_VERSION_MINOR);
+	duk::putProperty(plugin.context(), -1, "patch", IRCCD_VERSION_PATCH);
+	duk::putProperty(plugin.context(), -2, "version");
 
-	/* Set Irccd as global */
-	duk::putGlobal(ctx, "Irccd");
+	// Create the SystemError that inherits from Error.
+	duk::push(plugin.context(), duk::Function{constructor, 2});
+	duk::push(plugin.context(), duk::Object{});
+	duk::getGlobal<void>(plugin.context(), "Error");
+	duk::getProperty<void>(plugin.context(), -1, "prototype");
+	duk::remove(plugin.context(), -2);
+	duk::setPrototype(plugin.context(), -2);
+	duk::putProperty(plugin.context(), -2, "prototype");
+	duk::putProperty(plugin.context(), -2, "SystemError");
+
+	// Set Irccd as global.
+	duk::putGlobal(plugin.context(), "Irccd");
 }
 
 } // !irccd

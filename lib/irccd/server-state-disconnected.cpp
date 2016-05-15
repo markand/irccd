@@ -27,7 +27,6 @@ namespace state {
 
 void Disconnected::prepare(Server &server, fd_set &, fd_set &, net::Handle &)
 {
-	const ServerInfo &info = server.info();
 	ServerSettings &settings = server.settings();
 	ServerCache &cache = server.cache();
 

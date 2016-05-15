@@ -1,5 +1,5 @@
 /*
- * js-file.hpp -- Irccd.File API
+ * mod-file.hpp -- Irccd.File API
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_FILE_HPP
-#define IRCCD_JS_FILE_HPP
+#ifndef IRCCD_MOD_FILE_HPP
+#define IRCCD_MOD_FILE_HPP
 
 /**
- * \file js-file.hpp
+ * \file mod-file.hpp
  * \brief Irccd.File JavaScript API.
  */
 
@@ -33,8 +33,11 @@
 #include <string>
 
 #include "js.hpp"
+#include "module.hpp"
 
 namespace irccd {
+
+class Irccd;
 
 /**
  * \class File
@@ -179,13 +182,21 @@ public:
 } // !duk
 
 /**
- * Load the module.
- *
- * \param ctx the context.
+ * \brief Irccd.File JavaScript API.
  */
-void loadJsFile(duk::ContextPtr ctx);
+class FileModule : public Module {
+public:
+	/**
+	 * Irccd.File.
+	 */
+	FileModule() noexcept;
+
+	/**
+	 * \copydoc Module::load
+	 */
+	void load(Irccd &irccd, JsPlugin &plugin) override;
+};
 
 } // !irccd
 
-#endif // !IRCCD_JS_FILE_HPP
-
+#endif // !IRCCD_MOD_FILE_HPP

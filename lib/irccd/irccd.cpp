@@ -19,6 +19,7 @@
 #include "irccd.hpp"
 #include "logger.hpp"
 #include "service-interrupt.hpp"
+#include "service-module.hpp"
 #include "service-plugin.hpp"
 #include "service-rule.hpp"
 #include "service-server.hpp"
@@ -36,6 +37,7 @@ Irccd::Irccd()
 	, m_serverService(std::make_shared<ServerService>(*this))
 	, m_transportService(std::make_shared<TransportService>(*this))
 	, m_ruleService(std::make_shared<RuleService>())
+	, m_moduleService(std::make_shared<ModuleService>())
 	, m_pluginService(std::make_shared<PluginService>(*this))
 {
 	m_services.push_back(m_interruptService);

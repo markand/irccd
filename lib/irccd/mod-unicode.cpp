@@ -17,6 +17,8 @@
  */
 
 #include "js.hpp"
+#include "mod-unicode.hpp"
+#include "plugin-js.hpp"
 #include "unicode.hpp"
 
 namespace irccd {
@@ -130,15 +132,20 @@ const duk::FunctionMap functions{
 
 } // !namespace
 
-void loadJsUnicode(duk::ContextPtr ctx)
+UnicodeModule::UnicodeModule() noexcept
+	: Module("Irccd.Unicode")
 {
-	duk::StackAssert sa(ctx);
+}
 
-	duk::getGlobal<void>(ctx, "Irccd");
-	duk::push(ctx, duk::Object{});
-	duk::push(ctx, functions);
-	duk::putProperty(ctx, -2, "Unicode");
-	duk::pop(ctx);
+void UnicodeModule::load(Irccd &, JsPlugin &plugin)
+{
+	duk::StackAssert sa(plugin.context());
+
+	duk::getGlobal<void>(plugin.context(), "Irccd");
+	duk::push(plugin.context(), duk::Object{});
+	duk::push(plugin.context(), functions);
+	duk::putProperty(plugin.context(), -2, "Unicode");
+	duk::pop(plugin.context());
 }
 
 } // !irccd

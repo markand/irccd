@@ -37,6 +37,7 @@ namespace irccd {
 
 class InterruptService;
 class Irccd;
+class ModuleService;
 class PluginService;
 class RuleService;
 class ServerService;
@@ -59,6 +60,7 @@ private:
 	std::shared_ptr<ServerService> m_serverService;
 	std::shared_ptr<TransportService> m_transportService;
 	std::shared_ptr<RuleService> m_ruleService;
+	std::shared_ptr<ModuleService> m_moduleService;
 	std::shared_ptr<PluginService> m_pluginService;
 	std::vector<std::shared_ptr<Service>> m_services;
 
@@ -113,6 +115,16 @@ public:
 	inline RuleService &ruleService() noexcept
 	{
 		return *m_ruleService;
+	}
+
+	/**
+	 * Access the module service.
+	 *
+	 * \return the service
+	 */
+	inline ModuleService &moduleService() noexcept
+	{
+		return *m_moduleService;
 	}
 
 	/**

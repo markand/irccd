@@ -20,7 +20,8 @@
 #include <unordered_map>
 
 #include "irccd.hpp"
-#include "js-server.hpp"
+#include "mod-server.hpp"
+#include "plugin-js.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
 
@@ -523,18 +524,23 @@ const duk::FunctionMap functions{
 
 } // !namespace
 
-void loadJsServer(duk::ContextPtr ctx)
+ServerModule::ServerModule() noexcept
+	: Module("Irccd.Server")
 {
-	duk::StackAssert sa(ctx);
+}
 
-	duk::getGlobal<void>(ctx, "Irccd");
-	duk::push(ctx, duk::Function{constructor, 1});
-	duk::push(ctx, functions);
-	duk::push(ctx, duk::Object());
-	duk::push(ctx, methods);
-	duk::putProperty(ctx, -2, "prototype");
-	duk::putProperty(ctx, -2, "Server");
-	duk::pop(ctx);
+void ServerModule::load(Irccd &, JsPlugin &plugin)
+{
+	duk::StackAssert sa(plugin.context());
+
+	duk::getGlobal<void>(plugin.context(), "Irccd");
+	duk::push(plugin.context(), duk::Function{constructor, 1});
+	duk::push(plugin.context(), functions);
+	duk::push(plugin.context(), duk::Object());
+	duk::push(plugin.context(), methods);
+	duk::putProperty(plugin.context(), -2, "prototype");
+	duk::putProperty(plugin.context(), -2, "Server");
+	duk::pop(plugin.context());
 }
 
 } // !irccd

@@ -1,5 +1,5 @@
 /*
- * js-elapsed-timer.hpp -- Irccd.ElapsedTimer API
+ * mod-logger.hpp -- Irccd.Logger API
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,26 +16,34 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_ELAPSED_TIMER_HPP
-#define IRCCD_JS_ELAPSED_TIMER_HPP
+#ifndef IRCCD_MOD_LOGGER_HPP
+#define IRCCD_MOD_LOGGER_HPP
 
 /**
- * \file js-elapsed-timer.hpp
- * \brief Irccd.ElapsedTimer JavaScript API.
+ * \file mod-logger.hpp
+ * \brief Irccd.Logger JavaScript API.
  */
 
-#include "js.hpp"
+#include "module.hpp"
 
 namespace irccd {
 
 /**
- * Load the module.
- *
- * \param ctx the context.
+ * \brief Irccd.Logger JavaScript API.
  */
-void loadJsElapsedTimer(duk::ContextPtr ctx) noexcept;
+class LoggerModule : public Module {
+public:
+	/**
+	 * Irccd.Logger.
+	 */
+	LoggerModule() noexcept;
+
+	/**
+	 * \copydoc Module::load
+	 */
+	void load(Irccd &irccd, JsPlugin &plugin) override;
+};
 
 } // !irccd
 
-#endif // !IRCCD_JS_ELAPSED_TIMER_HPP
-
+#endif // !IRCCD_MOD_LOGGER_HPP

@@ -1,5 +1,5 @@
 /*
- * js-logger.cpp -- Irccd.Logger API
+ * mod-logger.cpp -- Irccd.Logger API
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,8 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "js-logger.hpp"
+#include "mod-logger.hpp"
 #include "logger.hpp"
+#include "plugin-js.hpp"
 
 namespace irccd {
 
@@ -85,15 +86,20 @@ const duk::FunctionMap functions{
 
 } // !namespace
 
-void loadJsLogger(duk::ContextPtr ctx)
+LoggerModule::LoggerModule() noexcept
+	: Module("Irccd.Logger")
 {
-	duk::StackAssert sa(ctx);
+}
 
-	duk::getGlobal<void>(ctx, "Irccd");
-	duk::push(ctx, duk::Object{});
-	duk::push(ctx, functions);
-	duk::putProperty(ctx, -2, "Logger");
-	duk::pop(ctx);
+void LoggerModule::load(Irccd &, JsPlugin &plugin)
+{
+	duk::StackAssert sa(plugin.context());
+
+	duk::getGlobal<void>(plugin.context(), "Irccd");
+	duk::push(plugin.context(), duk::Object{});
+	duk::push(plugin.context(), functions);
+	duk::putProperty(plugin.context(), -2, "Logger");
+	duk::pop(plugin.context());
 }
 
 } // !irccd

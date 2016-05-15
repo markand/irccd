@@ -39,13 +39,6 @@ PluginService::PluginService(Irccd &irccd) noexcept
 {
 }
 
-void PluginService::addModule(std::shared_ptr<Module> module)
-{
-	assert(module);
-
-	m_modules.push_back(std::move(module));
-}
-
 bool PluginService::has(const std::string &name) const noexcept
 {
 	return std::count_if(m_plugins.cbegin(), m_plugins.cend(), [&] (const auto &plugin) {
@@ -93,19 +86,12 @@ void PluginService::add(std::shared_ptr<Plugin> plugin)
 		// Store reference to irccd.
 		duk::putGlobal(jsp->context(), "\xff""\xff""irccd", duk::RawPointer<Irccd>{&m_irccd});
 	}
-
-	// Initial load now.
-	// TODO: not responsible of this.
-	try {
-		plugin->onLoad(m_irccd);
-		m_plugins.push_back(std::move(plugin));
-	} catch (const std::exception &ex) {
-		log::warning("plugin {}: {}"_format(plugin->name(), ex.what()));
-	}
 }
 
-std::shared_ptr<Plugin> PluginService::find(std::string name, PluginConfig config)
+std::shared_ptr<Plugin> PluginService::find(std::string name)
 {
+	PluginConfig config = m_config[name];
+
 	for (const auto &path : path::list(path::PathPlugins)) {
 		std::string fullpath = path + name + ".js";
 
@@ -121,6 +107,22 @@ std::shared_ptr<Plugin> PluginService::find(std::string name, PluginConfig confi
 	throw std::runtime_error("no suitable plugin found");
 }
 
+void PluginService::configure(const std::string &name, PluginConfig config)
+{
+	m_config.emplace(name, std::move(config));
+}
+
+PluginConfig PluginService::config(const std::string &name) const
+{
+	auto it = m_config.find(name);
+
+	if (it != m_config.end()) {
+		return it->second;
+	}
+
+	return PluginConfig();
+}
+
 void PluginService::load(std::string name, std::string path)
 {
 	auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (const auto &plugin) {
@@ -128,19 +130,21 @@ void PluginService::load(std::string name, std::string path)
 	});
 
 	if (it != m_plugins.end()) {
-		throw std::invalid_argument("plugin already loaded");
+		return;
 	}
 
-	// TODO: LOAD CONFIG
-	std::shared_ptr<Plugin> plugin;
-
 	try {
+		std::shared_ptr<Plugin> plugin;
+
 		if (path.empty()) {
-			plugin = find(std::move(name), PluginConfig());
+			plugin = find(std::move(name));
 		} else {
 			// TODO: DYNLIB BASED PLUGINS
 			plugin = std::make_shared<JsPlugin>(std::move(name), std::move(path));
 		}
+
+		plugin->onLoad(m_irccd);
+		add(std::move(plugin));
 	} catch (const std::exception &ex) {
 		log::warning("plugin {}: {}"_format(ex.what()));
 	}

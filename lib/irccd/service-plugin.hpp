@@ -24,6 +24,7 @@
  * \brief Manage plugins.
  */
 
+#include <unordered_map>
 #include <memory>
 #include <vector>
 
@@ -39,8 +40,8 @@ class Irccd;
 class PluginService {
 private:
 	Irccd &m_irccd;
-	std::vector<std::shared_ptr<Module>> m_modules;
 	std::vector<std::shared_ptr<Plugin>> m_plugins;
+	std::unordered_map<std::string, PluginConfig> m_config;
 
 	// TODO: get rid of this with future JavaScript modules.
 	void handleTimerSignal(std::weak_ptr<JsPlugin>, std::shared_ptr<Timer>);
@@ -63,14 +64,6 @@ public:
 	{
 		return m_plugins;
 	}
-
-	/**
-	 * Add an API module for JavaScript plugins.
-	 *
-	 * \pre module is not null
-	 * \param module the module
-	 */
-	void addModule(std::shared_ptr<Module> module);
 
 	/**
 	 * Check if a plugin is loaded.
@@ -97,10 +90,50 @@ public:
 	 */
 	std::shared_ptr<Plugin> require(const std::string &name) const;
 
+	/**
+	 * Add the specified plugin to the registry.
+	 *
+	 * \pre plugin != nullptr
+	 * \param plugin the plugin
+	 * \note the plugin is only added to the list, no action is performed on it
+	 */
 	void add(std::shared_ptr<Plugin> plugin);
 
-	std::shared_ptr<Plugin> find(std::string name, PluginConfig config = PluginConfig());
+	/**
+	 * Search a plugin through the predefined directories.
+	 *
+	 * \param name the plugin name (without any extension)
+	 * \return the plugin if found
+	 * \throw std::exception on any errors
+	 */
+	std::shared_ptr<Plugin> find(std::string name);
 
+	/**
+	 * Configure a plugin.
+	 *
+	 * If the plugin is already loaded, its configuration is updated.
+	 *
+	 * \param name the plugin name
+	 * \param config the new configuration
+	 */
+	void configure(const std::string &name, PluginConfig config);
+
+	/**
+	 * Get a configuration for a plugin.
+	 *
+	 * \param name the plugin name
+	 * \return the configuration or default one if not found
+	 */
+	PluginConfig config(const std::string &name) const;
+
+	/**
+	 * Convenient wrapper that loads a plugin, call onLoad and add it to the registry.
+	 *
+	 * Any errors are printed using logger.
+	 *
+	 * \param name the name
+	 * \param path the optional path (searched if empty)
+	 */
 	void load(std::string name, std::string path = "");
 
 	/**

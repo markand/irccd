@@ -1,5 +1,5 @@
 /*
- * js-timer.hpp -- Irccd.Timer API
+ * mod-plugin.hpp -- Irccd.Plugin API
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,26 +16,34 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_TIMER_HPP
-#define IRCCD_JS_TIMER_HPP
+#ifndef IRCCD_MOD_PLUGIN_HPP
+#define IRCCD_MOD_PLUGIN_HPP
 
 /**
- * \file js-timer.hpp
- * \brief Irccd.Timer JavaScript API.
+ * \file mod-plugin.hpp
+ * \brief Irccd.Plugin JavaScript API.
  */
 
-#include "js.hpp"
+#include "module.hpp"
 
 namespace irccd {
 
 /**
- * Load the module.
- *
- * \param ctx the context.
+ * \brief Irccd.Plugin JavaScript API.
  */
-void loadJsTimer(duk::ContextPtr ctx) noexcept;
+class PluginModule : public Module {
+public:
+	/**
+	 * Irccd.Plugin.
+	 */
+	PluginModule() noexcept;
+
+	/**
+	 * \copydoc Module::load
+	 */
+	virtual void load(Irccd &irccd, JsPlugin &plugin);
+};
 
 } // !irccd
 
-#endif // !IRCCD_JS_TIMER_HPP
-
+#endif // !IRCCD_MOD_PLUGIN_HPP

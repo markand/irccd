@@ -1,5 +1,5 @@
 /*
- * js-unicode.cpp -- Irccd.Unicode API
+ * mod-unicode.cpp -- Irccd.Unicode API
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,25 +16,34 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_UNICODE_HPP
-#define IRCCD_JS_UNICODE_HPP
+#ifndef IRCCD_MOD_UNICODE_HPP
+#define IRCCD_MOD_UNICODE_HPP
 
 /**
- * \file js-unicode.hpp
+ * \file mod-unicode.hpp
  * \brief Irccd.Unicode JavaScript API.
  */
 
-#include "js.hpp"
+#include "module.hpp"
 
 namespace irccd {
 
 /**
- * Load the module.
- *
- * \param ctx the context.
+ * \brief Irccd.Unicode JavaScript API.
  */
-void loadJsUnicode(duk::ContextPtr ctx);
+class UnicodeModule : public Module {
+public:
+	/**
+	 * Irccd.Unicode.
+	 */
+	UnicodeModule() noexcept;
+
+	/**
+	 * \copydoc Module::load
+	 */
+	void load(Irccd &irccd, JsPlugin &plugin) override;
+};
 
 } // !irccd
 
-#endif // !IRCCD_JS_UNICODE_HPP
+#endif // !IRCCD_MOD_UNICODE_HPP

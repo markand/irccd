@@ -25,19 +25,11 @@
 #endif
 
 #include "fs.hpp"
-#include "js-directory.hpp"
-#include "js-elapsed-timer.hpp"
-#include "js-file.hpp"
-#include "js-irccd.hpp"
-#include "js-logger.hpp"
-#include "js-plugin.hpp"
-#include "js-server.hpp"
-#include "js-system.hpp"
-#include "js-timer.hpp"
-#include "js-unicode.hpp"
-#include "js-util.hpp"
+#include "irccd.hpp"
 #include "logger.hpp"
+#include "mod-server.hpp"
 #include "plugin-js.hpp"
+#include "service-module.hpp"
 #include "timer.hpp"
 
 namespace irccd {
@@ -69,7 +61,6 @@ void JsPlugin::putVars()
 {
 	duk::StackAssert sa(m_context);
 
-	/* Save a reference to this */
 	duk::putGlobal(m_context, "\xff""\xff""plugin", duk::RawPointer<JsPlugin>{this});
 	duk::putGlobal(m_context, "\xff""\xff""name", name());
 	duk::putGlobal(m_context, "\xff""\xff""path", path());
@@ -82,10 +73,8 @@ void JsPlugin::putPath(const std::string &varname, const std::string &append, pa
 	bool found = true;
 	std::string foundpath;
 
-	/*
-	 * Use the first existing directory available.
-	 */
-	for (const std::string &p : path::list(type)) {
+	// Use the first existing directory available.
+	for (const auto &p : path::list(type)) {
 		foundpath = path::clean(p + append);
 
 		if (fs::exists(foundpath)) {
@@ -94,7 +83,7 @@ void JsPlugin::putPath(const std::string &varname, const std::string &append, pa
 		}
 	}
 
-	/* Use the system as default */
+	// Use the system as default.
 	if (!found) {
 		foundpath = path::clean(path::get(type, path::OwnerSystem) + append);
 	}
@@ -103,19 +92,6 @@ void JsPlugin::putPath(const std::string &varname, const std::string &append, pa
 	duk::getProperty<void>(m_context, -1, "Plugin");
 	duk::putProperty(m_context, -1, varname, foundpath);
 	duk::pop(m_context, 2);
-}
-
-void JsPlugin::putPaths()
-{
-	duk::StackAssert sa(m_context);
-
-	/*
-	 * dataPath: DATA + plugin/name (e.g ~/.local/share/irccd/plugins/<name>/)
-	 * configPath: CONFIG + plugin/name (e.g ~/.config/irccd/plugin/<name>/)
-	 */
-	putPath("dataPath", "plugin/" + name(), path::PathData);
-	putPath("configPath", "plugin/" + name(), path::PathConfig);
-	putPath("cachePath", "plugin/" + name(), path::PathCache);
 }
 
 void JsPlugin::putConfig(const PluginConfig &config)
@@ -145,64 +121,6 @@ void JsPlugin::putConfig(const PluginConfig &config)
 JsPlugin::JsPlugin(std::string name, std::string path, const PluginConfig &config)
 	: Plugin(name, path, config)
 {
-	duk::StackAssert sa(m_context);
-
-	/*
-	 * Duktape currently emit useless warnings when a file do
-	 * not exists so we do a homemade access.
-	 */
-#if defined(HAVE_STAT)
-	struct stat st;
-
-	if (::stat(path.c_str(), &st) < 0) {
-		throw std::runtime_error(std::strerror(errno));
-	}
-#endif
-
-	// TODO: change with future modules
-	// Load standard irccd API.
-	loadJsIrccd(m_context);
-	loadJsDirectory(m_context);
-	loadJsElapsedTimer(m_context);
-	loadJsFile(m_context);
-	loadJsLogger(m_context);
-	loadJsPlugin(m_context);
-	loadJsServer(m_context);
-	loadJsSystem(m_context);
-	loadJsUnicode(m_context);
-	loadJsTimer(m_context);
-	loadJsUtil(m_context);
-
-	putVars();
-	putPaths();
-
-	/* Try to load the file (does not call onLoad yet) */
-	if (duk::pevalFile(m_context, path) != 0) {
-		throw duk::error(m_context, -1);
-	}
-
-	duk::pop(m_context);
-
-	/* Initialize user defined options after loading to allow the plugin to define default values */
-	putConfig(config);
-
-	/* Read metadata */
-	duk::getGlobal<void>(m_context, "info");
-
-	if (duk::type(m_context, -1) == DUK_TYPE_OBJECT) {
-		setAuthor(duk::optionalProperty<std::string>(m_context, -1, "author", author()));
-		setLicense(duk::optionalProperty<std::string>(m_context, -1, "license", license()));
-		setSummary(duk::optionalProperty<std::string>(m_context, -1, "summary", summary()));
-		setVersion(duk::optionalProperty<std::string>(m_context, -1, "version", version()));
-	}
-
-	duk::pop(m_context);
-
-	log::debug() << "plugin " << name << ": " << std::endl;
-	log::debug() << "  author:  " << author() << std::endl;
-	log::debug() << "  license: " << license() << std::endl;
-	log::debug() << "  summary: " << summary() << std::endl;
-	log::debug() << "  version: " << version() << std::endl;
 }
 
 JsPlugin::~JsPlugin()
@@ -342,9 +260,59 @@ void JsPlugin::onKick(Irccd &,
 	call("onKick", 5);
 }
 
-void JsPlugin::onLoad(Irccd &)
+void JsPlugin::putModules(Irccd &irccd)
+{
+	for (const auto &module : irccd.moduleService().modules()) {
+		module->load(irccd, *this);
+	}
+}
+
+void JsPlugin::onLoad(Irccd &irccd)
 {
 	duk::StackAssert sa(m_context);
+
+	/*
+	 * Duktape currently emit useless warnings when a file do
+	 * not exists so we do a homemade access.
+	 */
+#if defined(HAVE_STAT)
+	struct stat st;
+
+	if (::stat(path().c_str(), &st) < 0) {
+		throw std::runtime_error(std::strerror(errno));
+	}
+#endif
+
+	/*
+	 * dataPath: DATA + plugin/name (e.g ~/.local/share/irccd/plugins/<name>/)
+	 * configPath: CONFIG + plugin/name (e.g ~/.config/irccd/plugin/<name>/)
+	 */
+	putModules(irccd);
+	putVars();
+	putPath("dataPath", "plugin/" + name(), path::PathData);
+	putPath("configPath", "plugin/" + name(), path::PathConfig);
+	putPath("cachePath", "plugin/" + name(), path::PathCache);
+
+	/* Try to load the file (does not call onLoad yet) */
+	if (duk::pevalFile(m_context, path()) != 0) {
+		throw duk::error(m_context, -1);
+	}
+
+	duk::pop(m_context);
+
+	putConfig(config());
+
+	/* Read metadata */
+	duk::getGlobal<void>(m_context, "info");
+
+	if (duk::type(m_context, -1) == DUK_TYPE_OBJECT) {
+		setAuthor(duk::optionalProperty<std::string>(m_context, -1, "author", author()));
+		setLicense(duk::optionalProperty<std::string>(m_context, -1, "license", license()));
+		setSummary(duk::optionalProperty<std::string>(m_context, -1, "summary", summary()));
+		setVersion(duk::optionalProperty<std::string>(m_context, -1, "version", version()));
+	}
+
+	duk::pop(m_context);
 
 	call("onLoad", 0);
 }

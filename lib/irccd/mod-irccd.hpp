@@ -1,5 +1,5 @@
 /*
- * js-irccd.hpp -- Irccd API
+ * mod-irccd.hpp -- Irccd API
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,20 +16,24 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_IRCCD_HPP
-#define IRCCD_JS_IRCCD_HPP
+#ifndef IRCCD_MOD_IRCCD_HPP
+#define IRCCD_MOD_IRCCD_HPP
 
 /**
- * \file js-irccd.hpp
- * \brief Irccd.Irccd JavaScript API.
+ * \file mod-irccd.hpp
+ * \brief Irccd JavaScript API.
  */
 
 #include <cerrno>
 #include <cstring>
+#include <string>
 
 #include "js.hpp"
+#include "module.hpp"
 
 namespace irccd {
+
+class Irccd;
 
 /**
  * \brief Custom JavaScript exception for system error.
@@ -62,12 +66,21 @@ public:
 };
 
 /**
- * Load the module.
- *
- * \param ctx the context.
+ * Irccd JavaScript API.
  */
-void loadJsIrccd(duk::Context &ctx);
+class IrccdModule : public Module {
+public:
+	/**
+	 * Irccd.
+	 */
+	IrccdModule() noexcept;
+
+	/**
+	 * \copydoc Module::load
+	 */
+	void load(Irccd &irccd, JsPlugin &plugin) override;
+};
 
 } // !irccd
 
-#endif // !IRCCD_JS_IRCCD_HPP
+#endif // !IRCCD_MOD_IRCCD_HPP

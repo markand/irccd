@@ -17,7 +17,8 @@
  */
 
 #include "elapsed-timer.hpp"
-#include "js.hpp"
+#include "mod-elapsed-timer.hpp"
+#include "plugin-js.hpp"
 
 namespace irccd {
 
@@ -118,17 +119,22 @@ const duk::FunctionMap methods{
 
 } // !namespace
 
-void loadJsElapsedTimer(duk::ContextPtr ctx) noexcept
+ElapsedTimerModule::ElapsedTimerModule() noexcept
+	: Module("Irccd.ElapsedTimer")
 {
-	duk::StackAssert sa(ctx);
+}
 
-	duk::getGlobal<void>(ctx, "Irccd");
-	duk::push(ctx, duk::Function{constructor, 0});
-	duk::push(ctx, duk::Object{});
-	duk::push(ctx, methods);
-	duk::putProperty(ctx, -2, "prototype");
-	duk::putProperty(ctx, -2, "ElapsedTimer");
-	duk::pop(ctx);
+void ElapsedTimerModule::load(Irccd &, JsPlugin &plugin)
+{
+	duk::StackAssert sa(plugin.context());
+
+	duk::getGlobal<void>(plugin.context(), "Irccd");
+	duk::push(plugin.context(), duk::Function{constructor, 0});
+	duk::push(plugin.context(), duk::Object{});
+	duk::push(plugin.context(), methods);
+	duk::putProperty(plugin.context(), -2, "prototype");
+	duk::putProperty(plugin.context(), -2, "ElapsedTimer");
+	duk::pop(plugin.context());
 }
 
 } // !irccd

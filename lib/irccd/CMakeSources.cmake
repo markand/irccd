@@ -36,18 +36,19 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/irccdctl.hpp
 	${CMAKE_CURRENT_LIST_DIR}/js.hpp
 	${CMAKE_CURRENT_LIST_DIR}/json.hpp
-	${CMAKE_CURRENT_LIST_DIR}/js-directory.hpp
-	${CMAKE_CURRENT_LIST_DIR}/js-elapsed-timer.hpp
-	${CMAKE_CURRENT_LIST_DIR}/js-file.hpp
-	${CMAKE_CURRENT_LIST_DIR}/js-irccd.hpp
-	${CMAKE_CURRENT_LIST_DIR}/js-logger.hpp
-	${CMAKE_CURRENT_LIST_DIR}/js-plugin.hpp
-	${CMAKE_CURRENT_LIST_DIR}/js-server.hpp
-	${CMAKE_CURRENT_LIST_DIR}/js-system.hpp
-	${CMAKE_CURRENT_LIST_DIR}/js-timer.hpp
-	${CMAKE_CURRENT_LIST_DIR}/js-unicode.hpp
-	${CMAKE_CURRENT_LIST_DIR}/js-util.hpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-directory.hpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-elapsed-timer.hpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-file.hpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-irccd.hpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-logger.hpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-plugin.hpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-server.hpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-system.hpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-timer.hpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-unicode.hpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-util.hpp
 	${CMAKE_CURRENT_LIST_DIR}/logger.hpp
+	${CMAKE_CURRENT_LIST_DIR}/module.hpp
 	${CMAKE_CURRENT_LIST_DIR}/options.hpp
 	${CMAKE_CURRENT_LIST_DIR}/path.hpp
 	${CMAKE_CURRENT_LIST_DIR}/plugin.hpp
@@ -62,6 +63,7 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/server-state-disconnected.hpp
 	${CMAKE_CURRENT_LIST_DIR}/service.hpp
 	${CMAKE_CURRENT_LIST_DIR}/service-interrupt.hpp
+	${CMAKE_CURRENT_LIST_DIR}/service-module.hpp
 	${CMAKE_CURRENT_LIST_DIR}/service-plugin.hpp
 	${CMAKE_CURRENT_LIST_DIR}/service-rule.hpp
 	${CMAKE_CURRENT_LIST_DIR}/service-server.hpp
@@ -112,17 +114,17 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/irccd.cpp
 	${CMAKE_CURRENT_LIST_DIR}/irccdctl.cpp
 	${CMAKE_CURRENT_LIST_DIR}/json.cpp
-	${CMAKE_CURRENT_LIST_DIR}/js-directory.cpp
-	${CMAKE_CURRENT_LIST_DIR}/js-elapsed-timer.cpp
-	${CMAKE_CURRENT_LIST_DIR}/js-file.cpp
-	${CMAKE_CURRENT_LIST_DIR}/js-irccd.cpp
-	${CMAKE_CURRENT_LIST_DIR}/js-logger.cpp
-	${CMAKE_CURRENT_LIST_DIR}/js-plugin.cpp
-	${CMAKE_CURRENT_LIST_DIR}/js-server.cpp
-	${CMAKE_CURRENT_LIST_DIR}/js-system.cpp
-	${CMAKE_CURRENT_LIST_DIR}/js-timer.cpp
-	${CMAKE_CURRENT_LIST_DIR}/js-unicode.cpp
-	${CMAKE_CURRENT_LIST_DIR}/js-util.cpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-directory.cpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-elapsed-timer.cpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-file.cpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-irccd.cpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-logger.cpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-plugin.cpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-server.cpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-system.cpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-timer.cpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-unicode.cpp
+	${CMAKE_CURRENT_LIST_DIR}/mod-util.cpp
 	${CMAKE_CURRENT_LIST_DIR}/logger.cpp
 	${CMAKE_CURRENT_LIST_DIR}/options.cpp
 	${CMAKE_CURRENT_LIST_DIR}/path.cpp
@@ -134,6 +136,7 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/server-state-connecting.cpp
 	${CMAKE_CURRENT_LIST_DIR}/server-state-disconnected.cpp
 	${CMAKE_CURRENT_LIST_DIR}/service-interrupt.cpp
+	${CMAKE_CURRENT_LIST_DIR}/service-module.cpp
 	${CMAKE_CURRENT_LIST_DIR}/service-plugin.cpp
 	${CMAKE_CURRENT_LIST_DIR}/service-rule.cpp
 	${CMAKE_CURRENT_LIST_DIR}/service-server.cpp
