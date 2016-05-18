@@ -43,10 +43,6 @@ private:
 	std::vector<std::shared_ptr<Plugin>> m_plugins;
 	std::unordered_map<std::string, PluginConfig> m_config;
 
-	// TODO: get rid of this with future JavaScript modules.
-	void handleTimerSignal(std::weak_ptr<JsPlugin>, std::shared_ptr<Timer>);
-	void handleTimerEnd(std::weak_ptr<JsPlugin>, std::shared_ptr<Timer>);
-
 public:
 	/**
 	 * Create the plugin service.
@@ -54,6 +50,11 @@ public:
 	 * \param irccd the irccd instance
 	 */
 	PluginService(Irccd &irccd) noexcept;
+
+	/**
+	 * Destroy plugins.
+	 */
+	~PluginService();
 
 	/**
 	 * Get the list of plugins.

@@ -49,7 +49,7 @@ using PluginConfig = std::unordered_map<std::string, std::string>;
  * A plugin is identified by name and can be loaded and unloaded
  * at runtime.
  */
-class Plugin {
+class Plugin : public std::enable_shared_from_this<Plugin> {
 private:
 	// Plugin information
 	std::string m_name;
@@ -185,11 +185,21 @@ public:
 		m_version = std::move(version);
 	}
 
+	/**
+	 * Access the plugin configuration.
+	 *
+	 * \return the config
+	 */
 	inline const PluginConfig &config() const noexcept
 	{
 		return m_config;
 	}
 
+	/**
+	 * Overloaded function.
+	 *
+	 * \return the config
+	 */
 	inline PluginConfig &config() noexcept
 	{
 		return m_config;

@@ -63,7 +63,7 @@ IrccdModule::IrccdModule() noexcept
 {
 }
 
-void IrccdModule::load(Irccd &, JsPlugin &plugin)
+void IrccdModule::load(Irccd &irccd, JsPlugin &plugin)
 {
 	duk::StackAssert sa(plugin.context());
 
@@ -89,6 +89,9 @@ void IrccdModule::load(Irccd &, JsPlugin &plugin)
 
 	// Set Irccd as global.
 	duk::putGlobal(plugin.context(), "Irccd");
+
+	// Store global instance.
+	duk::putGlobal(plugin.context(), "\xff""\xff""irccd", duk::RawPointer<Irccd>{&irccd});
 }
 
 } // !irccd

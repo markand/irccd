@@ -123,51 +123,6 @@ JsPlugin::JsPlugin(std::string name, std::string path, const PluginConfig &confi
 {
 }
 
-JsPlugin::~JsPlugin()
-{
-	for (auto &timer : m_timers) {
-		timer->stop();
-	}
-}
-
-void JsPlugin::addTimer(std::shared_ptr<Timer> timer) noexcept
-{
-	std::weak_ptr<Timer> ptr(timer);
-
-	/*
-	 * These signals are called from the Timer thread and are transmitted to irccd so that it can
-	 * calls appropriate timer functions.
-	 */
-	timer->onSignal.connect([this, ptr] () {
-		auto timer = ptr.lock();
-
-		if (timer) {
-			onTimerSignal(move(timer));
-		}
-	});
-	timer->onEnd.connect([this, ptr] () {
-		auto timer = ptr.lock();
-
-		if (timer) {
-			onTimerEnd(move(timer));
-		}
-	});
-
-	m_timers.insert(move(timer));
-}
-
-void JsPlugin::removeTimer(const std::shared_ptr<Timer> &timer) noexcept
-{
-	duk::StackAssert sa(m_context);
-
-	/* Remove the JavaScript function */
-	duk::push(m_context, duk::Null{});
-	duk::putGlobal(m_context, "\xff""\xff""timer-" + std::to_string(reinterpret_cast<std::intptr_t>(timer.get())));
-
-	/* Remove from list */
-	m_timers.erase(timer);
-}
-
 void JsPlugin::onChannelMode(Irccd &,
 			     const std::shared_ptr<Server> &server,
 			     const std::string &origin,
@@ -450,11 +405,15 @@ void JsPlugin::onTopic(Irccd &,
 	call("onTopic", 4);
 }
 
-void JsPlugin::onUnload(Irccd &)
+void JsPlugin::onUnload(Irccd &irccd)
 {
 	duk::StackAssert sa(m_context);
 
 	call("onUnload");
+
+	for (const auto &module : irccd.moduleService().modules()) {
+		module->unload(irccd, *this);
+	}
 }
 
 void JsPlugin::onWhois(Irccd &, const std::shared_ptr<Server> &server, const ServerWhois &whois)

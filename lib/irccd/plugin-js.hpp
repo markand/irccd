@@ -24,8 +24,6 @@
  * \brief JavaScript plugins for irccd.
  */
 
-#include <unordered_set>
-
 #include "js.hpp"
 #include "path.hpp"
 #include "plugin.hpp"
@@ -34,48 +32,14 @@
 namespace irccd {
 
 class Module;
-class Timer;
-
-/**
- * \brief Timers that a plugin owns.
- */
-using PluginTimers = std::unordered_set<std::shared_ptr<Timer>>;
 
 /**
  * \brief JavaScript plugins for irccd.
  */
 class JsPlugin : public Plugin {
-public:
-	// TODO: remove with future modules
-
-	/**
-	 * Signal: onTimerSignal
-	 * ------------------------------------------------
-	 *
-	 * When a timer expires.
-	 *
-	 * Arguments:
-	 * - the timer object
-	 */
-	Signal<std::shared_ptr<Timer>> onTimerSignal;
-
-	/**
-	 * Signal: onTimerEnd
-	 * ------------------------------------------------
-	 *
-	 * When a timer is finished.
-	 *
-	 * Arguments:
-	 * - the timer object
-	 */
-	Signal<std::shared_ptr<Timer>> onTimerEnd;
-
 private:
 	// JavaScript context
 	duk::Context m_context;
-
-	// Plugin info and its timers
-	PluginTimers m_timers;
 
 	// Store loaded modules.
 	std::vector<std::shared_ptr<Module>> m_modules;
@@ -97,24 +61,10 @@ public:
 	 */
 	JsPlugin(std::string name, std::string path, const PluginConfig &config = PluginConfig());
 
-	/**
-	 * Close timers.
-	 */
-	~JsPlugin();
-
-	/**
-	 * Add a timer to the plugin.
-	 *
-	 * \param timer the timer to add
-	 */
-	void addTimer(std::shared_ptr<Timer> timer) noexcept;
-
-	/**
-	 * Remove a timer from a plugin.
-	 *
-	 * \param timer
-	 */
-	void removeTimer(const std::shared_ptr<Timer> &timer) noexcept;
+	~JsPlugin()
+	{
+		puts("~JsPlugin");
+	}
 
 	/**
 	 * Access the Duktape context.

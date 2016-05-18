@@ -16,12 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cassert>
-#include <cstdint>
+#include <format.h>
 
+#include "irccd.hpp"
+#include "logger.hpp"
 #include "mod-timer.hpp"
 #include "plugin-js.hpp"
 #include "timer.hpp"
+
+using namespace fmt::literals;
 
 namespace irccd {
 
@@ -30,7 +33,7 @@ namespace duk {
 template <>
 class TypeTraits<Timer> {
 public:
-	static std::string name()
+	static std::string name() noexcept
 	{
 		return "\xff""\xff""Timer";
 	}
@@ -45,12 +48,42 @@ public:
 
 namespace {
 
+const std::string CallbackTable{"\xff""\xff""irccd-timer-callbacks"};
+
+void handleSignal(std::weak_ptr<JsPlugin> ptr, std::string key)
+{
+	auto plugin = ptr.lock();
+
+	if (!plugin) {
+		return;
+	}
+
+	auto irccd = duk::getGlobal<duk::RawPointer<Irccd>>(plugin->context(), "\xff""\xff""irccd");
+
+	irccd->post([plugin, key] (Irccd &) {
+		duk::StackAssert sa(plugin->context());
+
+		duk::getGlobal<void>(plugin->context(), CallbackTable);
+		duk::getProperty<void>(plugin->context(), -1, key);
+		duk::remove(plugin->context(), -2);
+
+		if (duk::is<duk::Function>(plugin->context(), -1)) {
+			if (duk::pcall(plugin->context()) != 0) {
+				log::warning("plugin {}: {}"_format(plugin->name(), duk::error(plugin->context(), -1).stack));
+			}
+
+			duk::pop(plugin->context());
+		} else {
+			duk::pop(plugin->context());
+		}
+	});
+}
+
 /*
  * Method: Timer.start()
  * --------------------------------------------------------
  *
- * Start the timer. If the timer is already started the method
- * is a no-op.
+ * Start the timer. If the timer is already started the method is a no-op.
  */
 duk::Ret start(duk::ContextPtr ctx)
 {
@@ -98,24 +131,49 @@ const duk::FunctionMap methods{
  */
 duk::Ret constructor(duk::ContextPtr ctx)
 {
-	int type = duk::require<int>(ctx, 0);
-	int delay = duk::require<int>(ctx, 1);
+	// Check parameters.
+	auto type = duk::require<int>(ctx, 0);
+	auto delay = duk::require<int>(ctx, 1);
 
+	if (type < static_cast<int>(TimerType::Single) || type > static_cast<int>(TimerType::Repeat)) {
+		duk::raise(ctx, DUK_ERR_TYPE_ERROR, "invalid timer type");
+	}
+	if (delay < 0) {
+		duk::raise(ctx, DUK_ERR_TYPE_ERROR, "negative delay given");
+	}
 	if (!duk::is<duk::Function>(ctx, 2)) {
-		duk::raise(ctx, duk::TypeError("missing callback function"));
+		duk::raise(ctx, DUK_ERR_TYPE_ERROR, "missing callback function");
 	}
 
+	// Construct the timer in 'this'.
 	auto timer = std::make_shared<Timer>(static_cast<TimerType>(type), delay);
+	auto plugin = std::static_pointer_cast<JsPlugin>(duk::getGlobal<duk::RawPointer<Plugin>>(ctx, "\xff""\xff""plugin")->shared_from_this());
+	auto hash = std::to_string(reinterpret_cast<std::uintptr_t>(timer.get()));
 
-	/* Add this timer to the underlying plugin */
-	duk::getGlobal<duk::RawPointer<JsPlugin>>(ctx, "\xff""\xff""plugin")->addTimer(timer);
+	timer->onSignal.connect(std::bind(handleSignal, std::weak_ptr<JsPlugin>(plugin), hash));
 
-	/* Construct object */
+	// Set a finalizer that closes the timer.
 	duk::construct(ctx, duk::Shared<Timer>{timer});
+	duk::push(ctx, duk::This());
+	duk::putProperty(ctx, -1, "\xff""\xff""timer-key", hash);
+	duk::push(ctx, duk::Function{[] (duk::ContextPtr ctx) -> duk::Ret {
+		duk::StackAssert sa(ctx);
 
-	/* Now store the JavaScript function to call */
+		duk::get<duk::Shared<Timer>>(ctx, 0)->stop();
+		duk::getGlobal<void>(ctx, CallbackTable);
+		duk::deleteProperty(ctx, -1, duk::getProperty<std::string>(ctx, 0, "\xff""\xff""timer-key"));
+		duk::pop(ctx);
+		log::debug("plugin: timer destroyed");
+
+		return 0;
+	}, 1});
+	duk::setFinalizer(ctx, -2);
+
+	// Save a callback function into the callback table.
+	duk::getGlobal<void>(ctx, CallbackTable);
 	duk::dup(ctx, 2);
-	duk::putGlobal(ctx, "\xff""\xff""timer-" + std::to_string(reinterpret_cast<std::intptr_t>(timer.get())));
+	duk::putProperty(ctx, -2, hash);
+	duk::pop(ctx);
 
 	return 0;
 }
@@ -144,6 +202,7 @@ void TimerModule::load(Irccd &, JsPlugin &plugin)
 	duk::putProperty(plugin.context(), -2, "prototype");
 	duk::putProperty(plugin.context(), -2, "Timer");
 	duk::pop(plugin.context());
+	duk::putGlobal(plugin.context(), CallbackTable, duk::Object{});
 }
 
 } // !irccd

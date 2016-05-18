@@ -22,11 +22,9 @@
 
 #include <format.h>
 
-#include "config.hpp"
 #include "fs.hpp"
 #include "irccd.hpp"
 #include "logger.hpp"
-#include "plugin.hpp"
 #include "plugin-js.hpp"
 #include "service-plugin.hpp"
 
@@ -37,6 +35,13 @@ namespace irccd {
 PluginService::PluginService(Irccd &irccd) noexcept
 	: m_irccd(irccd)
 {
+}
+
+PluginService::~PluginService()
+{
+	for (const auto &plugin : m_plugins) {
+		plugin->onUnload(m_irccd);
+	}
 }
 
 bool PluginService::has(const std::string &name) const noexcept
@@ -72,20 +77,7 @@ std::shared_ptr<Plugin> PluginService::require(const std::string &name) const
 
 void PluginService::add(std::shared_ptr<Plugin> plugin)
 {
-	using namespace std::placeholders;
-
-	// TODO: REMOVE WHEN WE GET THE JAVASCRIPT MODULES
-	std::shared_ptr<JsPlugin> jsp = std::dynamic_pointer_cast<JsPlugin>(plugin);
-
-	if (jsp) {
-		std::weak_ptr<JsPlugin> ptr(jsp);
-
-		jsp->onTimerSignal.connect(std::bind(&PluginService::handleTimerSignal, this, ptr, _1));
-		jsp->onTimerEnd.connect(std::bind(&PluginService::handleTimerEnd, this, ptr, _1));
-
-		// Store reference to irccd.
-		duk::putGlobal(jsp->context(), "\xff""\xff""irccd", duk::RawPointer<Irccd>{&m_irccd});
-	}
+	m_plugins.push_back(std::move(plugin));
 }
 
 std::shared_ptr<Plugin> PluginService::find(std::string name)
@@ -169,41 +161,6 @@ void PluginService::unload(const std::string &name)
 		(*it)->onUnload(m_irccd);
 		m_plugins.erase(it);
 	}
-}
-
-void PluginService::handleTimerSignal(std::weak_ptr<JsPlugin> ptr, std::shared_ptr<Timer> timer)
-{
-	m_irccd.post([this, ptr, timer] (Irccd &) {
-		auto plugin = ptr.lock();
-
-		if (!plugin) {
-			return;
-		}
-
-		auto &ctx = plugin->context();
-
-		duk::StackAssert sa(ctx);
-
-		// TODO: improve this
-		try {
-			duk::getGlobal<void>(ctx, "\xff""\xff""timer-" + std::to_string(reinterpret_cast<std::intptr_t>(timer.get())));
-			duk::pcall(ctx, 0);
-			duk::pop(ctx);
-		} catch (const std::exception &) {
-		}
-	});
-}
-
-void PluginService::handleTimerEnd(std::weak_ptr<JsPlugin> ptr, std::shared_ptr<Timer> timer)
-{
-	m_irccd.post([this, ptr, timer] (Irccd &) {
-		auto plugin = ptr.lock();
-
-		if (plugin) {
-			log::debug() << "timer: finished, removing from plugin `" << plugin->name() << "'" << std::endl;
-			plugin->removeTimer(timer);
-		}
-	});
 }
 
 } // !irccd

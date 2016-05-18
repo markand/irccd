@@ -821,6 +821,17 @@ inline void replace(ContextPtr ctx, Index index)
 }
 
 /**
+ * Wrapper for [duk_set_finalizer](http://duktape.org/api.html#duk_set_finalizer).
+ *
+ * \param ctx the context
+ * \param index the object index
+ */
+inline void setFinalizer(ContextPtr ctx, Index index)
+{
+	duk_set_finalizer(ctx, index);
+}
+
+/**
  * Wrapper for [duk_set_prototype](http://duktape.org/api.html#duk_set_prototype).
  *
  * \param ctx the context
