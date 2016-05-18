@@ -101,15 +101,6 @@ public:
 	void add(std::shared_ptr<Plugin> plugin);
 
 	/**
-	 * Search a plugin through the predefined directories.
-	 *
-	 * \param name the plugin name (without any extension)
-	 * \return the plugin if found
-	 * \throw std::exception on any errors
-	 */
-	std::shared_ptr<Plugin> find(std::string name);
-
-	/**
 	 * Configure a plugin.
 	 *
 	 * If the plugin is already loaded, its configuration is updated.

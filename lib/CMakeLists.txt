@@ -38,6 +38,8 @@ if (IRCCD_SYSTEM_WINDOWS)
 	list(APPEND LIBRARIES ws2_32 shlwapi)
 elseif (IRCCD_SYSTEM_MAC)
 	list(APPEND LIBRARIES resolv)
+elseif (IRCCD_SYSTEM_LINUX)
+	list(APPEND LIBRARIES dl)
 endif ()
 
 target_link_libraries(libirccd extern-duktape extern-ircclient extern-jansson cppformat ${LIBRARIES})
