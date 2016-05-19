@@ -134,6 +134,21 @@ PluginConfig PluginService::config(const std::string &name) const
 	return PluginConfig();
 }
 
+void PluginService::setFormats(const std::string &name, PluginFormats formats)
+{
+	m_formats.emplace(name, std::move(formats));
+}
+
+PluginFormats PluginService::formats(const std::string &name) const
+{
+	auto it = m_formats.find(name);
+
+	if (it != m_formats.end())
+		return it->second;
+
+	return PluginFormats();
+}
+
 void PluginService::load(std::string name, std::string path)
 {
 	auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (const auto &plugin) {
@@ -151,6 +166,7 @@ void PluginService::load(std::string name, std::string path)
 		else
 			plugin = open(std::move(name), std::move(path));
 
+		plugin->setFormats(m_formats[plugin->name()]);
 		plugin->onLoad(m_irccd);
 		add(std::move(plugin));
 	} catch (const std::exception &ex) {

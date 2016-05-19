@@ -38,11 +38,11 @@ void JsPlugin::call(const std::string &name, unsigned nargs)
 {
 	duk::getGlobal<void>(m_context, name);
 
-	if (duk::type(m_context, -1) == DUK_TYPE_UNDEFINED) {
-		/* Function not defined, remove the undefined value and all arguments */
+	if (duk::type(m_context, -1) == DUK_TYPE_UNDEFINED)
+		// Function not defined, remove the undefined value and all arguments.
 		duk::pop(m_context, nargs + 1);
-	} else {
-		/* Call the function and discard the result */
+	else {
+		// Call the function and discard the result.
 		duk::insert(m_context, -nargs - 1);
 
 		if (duk::pcall(m_context, nargs) != 0) {
@@ -51,10 +51,15 @@ void JsPlugin::call(const std::string &name, unsigned nargs)
 			duk::pop(m_context);
 
 			throw error;
-		} else {
+		} else
 			duk::pop(m_context);
-		}
 	}
+}
+
+void JsPlugin::putModules(Irccd &irccd)
+{
+	for (const auto &module : irccd.moduleService().modules())
+		module->load(irccd, *this);
 }
 
 void JsPlugin::putVars()
@@ -84,9 +89,8 @@ void JsPlugin::putPath(const std::string &varname, const std::string &append, pa
 	}
 
 	// Use the system as default.
-	if (!found) {
+	if (!found)
 		foundpath = path::clean(path::get(type, path::OwnerSystem) + append);
-	}
 
 	duk::getGlobal<void>(m_context, "Irccd");
 	duk::getProperty<void>(m_context, -1, "Plugin");
@@ -98,24 +102,33 @@ void JsPlugin::putConfig(const PluginConfig &config)
 {
 	duk::StackAssert sa(m_context);
 
-	// TODO: override dataPath, configPath, cachePath
+	// TODO: override dataPath, configPath, cachePath.
+	// TODO: verify more that these values still exist.
 
-	/* Store plugin configuration into Irccd.Plugin.config */
+	// Store plugin configuration into Irccd.Plugin.config.
 	duk::getGlobal<void>(m_context, "Irccd");
 	duk::getProperty<void>(m_context, -1, "Plugin");
 	duk::getProperty<void>(m_context, -1, "config");
 
-	if (duk::type(m_context, -1) != DUK_TYPE_OBJECT) {
-		duk::pop(m_context);
-		duk::push(m_context, duk::Object{});
-	}
-
-	for (const auto &pair : config) {
+	for (const auto &pair : config)
 		duk::putProperty(m_context, -1, pair.first, pair.second);
-	}
 
 	duk::putProperty(m_context, -2, "config");
 	duk::pop(m_context, 2);
+}
+
+void JsPlugin::putFormats()
+{
+	duk::StackAssert sa(m_context);
+
+	duk::getGlobal<void>(m_context, "Irccd");
+	duk::getProperty<void>(m_context, -1, "Plugin");
+	duk::getProperty<void>(m_context, -1, "format");
+
+	for (const auto &pair : formats())
+		duk::putProperty(m_context, -1, pair.first, pair.second);
+
+	duk::pop(m_context, 3);
 }
 
 JsPlugin::JsPlugin(std::string name, std::string path, const PluginConfig &config)
@@ -215,13 +228,6 @@ void JsPlugin::onKick(Irccd &,
 	call("onKick", 5);
 }
 
-void JsPlugin::putModules(Irccd &irccd)
-{
-	for (const auto &module : irccd.moduleService().modules()) {
-		module->load(irccd, *this);
-	}
-}
-
 void JsPlugin::onLoad(Irccd &irccd)
 {
 	duk::StackAssert sa(m_context);
@@ -248,16 +254,16 @@ void JsPlugin::onLoad(Irccd &irccd)
 	putPath("configPath", "plugin/" + name(), path::PathConfig);
 	putPath("cachePath", "plugin/" + name(), path::PathCache);
 
-	/* Try to load the file (does not call onLoad yet) */
-	if (duk::pevalFile(m_context, path()) != 0) {
+	// Try to load the file (does not call onLoad yet).
+	if (duk::pevalFile(m_context, path()) != 0)
 		throw duk::error(m_context, -1);
-	}
 
 	duk::pop(m_context);
 
 	putConfig(config());
+	putFormats();
 
-	/* Read metadata */
+	// Read metadata .
 	duk::getGlobal<void>(m_context, "info");
 
 	if (duk::type(m_context, -1) == DUK_TYPE_OBJECT) {
@@ -411,9 +417,8 @@ void JsPlugin::onUnload(Irccd &irccd)
 
 	call("onUnload");
 
-	for (const auto &module : irccd.moduleService().modules()) {
+	for (const auto &module : irccd.moduleService().modules())
 		module->unload(irccd, *this);
-	}
 }
 
 void JsPlugin::onWhois(Irccd &, const std::shared_ptr<Server> &server, const ServerWhois &whois)

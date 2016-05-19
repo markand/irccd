@@ -95,6 +95,14 @@ public:
 	PluginConfig findPluginConfig(const std::string &name) const;
 
 	/**
+	 * Find plugin formats if defined.
+	 *
+	 * \pre util::isValidIdentifier(name)
+	 * \return the formats or empty one if not found
+	 */
+	PluginFormats findPluginFormats(const std::string &name) const;
+
+	/**
 	 * Get the path to the pidfile.
 	 *
 	 * \return the path or empty if not defined

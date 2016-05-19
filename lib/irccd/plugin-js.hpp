@@ -50,6 +50,7 @@ private:
 	void putVars();
 	void putPath(const std::string &varname, const std::string &append, path::Path type);
 	void putConfig(const PluginConfig &config);
+	void putFormats();
 
 public:
 	/**
@@ -60,11 +61,6 @@ public:
 	 * \param config the configuration
 	 */
 	JsPlugin(std::string name, std::string path, const PluginConfig &config = PluginConfig());
-
-	~JsPlugin()
-	{
-		puts("~JsPlugin");
-	}
 
 	/**
 	 * Access the Duktape context.

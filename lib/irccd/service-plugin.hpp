@@ -42,6 +42,7 @@ private:
 	Irccd &m_irccd;
 	std::vector<std::shared_ptr<Plugin>> m_plugins;
 	std::unordered_map<std::string, PluginConfig> m_config;
+	std::unordered_map<std::string, PluginFormats> m_formats;
 
 public:
 	/**
@@ -117,6 +118,22 @@ public:
 	 * \return the configuration or default one if not found
 	 */
 	PluginConfig config(const std::string &name) const;
+
+	/**
+	 * Add formatting for a plugin.
+	 *
+	 * \param name the plugin name
+	 * \param formats the formats
+	 */
+	void setFormats(const std::string &name, PluginFormats formats);
+
+	/**
+	 * Get formats for a plugin.
+	 *
+	 * \param name the plugin name
+	 * \return the formats
+	 */
+	PluginFormats formats(const std::string &name) const;
 
 	/**
 	 * Convenient wrapper that loads a plugin, call onLoad and add it to the registry.

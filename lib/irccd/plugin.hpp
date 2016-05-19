@@ -38,9 +38,14 @@ class Server;
 class ServerWhois;
 
 /**
- * Configuration map extract from config file.
+ * \brief Configuration map extract from config file.
  */
 using PluginConfig = std::unordered_map<std::string, std::string>;
+
+/**
+ * \brief Formats for plugins.
+ */
+using PluginFormats = std::unordered_map<std::string, std::string>;
 
 /**
  * \class Plugin
@@ -61,7 +66,9 @@ private:
 	std::string m_summary{"unknown"};
 	std::string m_version{"unknown"};
 
+	// Configuration and formats.
 	PluginConfig m_config;
+	PluginFormats m_formats;
 
 public:
 	/**
@@ -203,6 +210,36 @@ public:
 	inline PluginConfig &config() noexcept
 	{
 		return m_config;
+	}
+
+	/**
+	 * Access the plugin formats.
+	 *
+	 * \return the format
+	 */
+	inline const PluginFormats &formats() const noexcept
+	{
+		return m_formats;
+	}
+
+	/**
+	 * Overloaded function.
+	 *
+	 * \return the formats
+	 */
+	inline PluginFormats &formats() noexcept
+	{
+		return m_formats;
+	}
+
+	/**
+	 * Set the formats.
+	 *
+	 * \param formats the formats
+	 */
+	inline void setFormats(PluginFormats formats) noexcept
+	{
+		m_formats = std::move(formats);
 	}
 
 	/**

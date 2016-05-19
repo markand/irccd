@@ -193,6 +193,8 @@ void PluginModule::load(Irccd &, JsPlugin &plugin)
 	duk::push(plugin.context(), functions);
 	duk::push(plugin.context(), duk::Object{});
 	duk::putProperty(plugin.context(), -2, "config");
+	duk::push(plugin.context(), duk::Object{});
+	duk::putProperty(plugin.context(), -2, "format");
 	duk::putProperty(plugin.context(), -2, "Plugin");
 	duk::pop(plugin.context());
 }

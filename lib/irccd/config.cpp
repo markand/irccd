@@ -489,6 +489,23 @@ PluginConfig Config::findPluginConfig(const std::string &name) const
 	return PluginConfig();
 }
 
+PluginFormats Config::findPluginFormats(const std::string &name) const
+{
+	assert(util::isIdentifierValid(name));
+
+	auto section = m_document.find(std::string("format.") + name);
+
+	if (section == m_document.end())
+		return PluginFormats();
+
+	PluginFormats formats;
+
+	for (const auto &opt : *section)
+		formats.emplace(opt.key(), opt.value());
+
+	return formats;
+}
+
 bool Config::isVerbose() const noexcept
 {
 	return util::isBoolean(get(m_document, "logs", "verbose"));
@@ -622,6 +639,7 @@ void Config::loadPlugins(Irccd &irccd) const
 			}
 
 			irccd.pluginService().configure(option.key(), findPluginConfig(option.key()));
+			irccd.pluginService().setFormats(option.key(), findPluginFormats(option.key()));
 			irccd.pluginService().load(option.key(), option.value());
 		}
 	}
