@@ -16,14 +16,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* Modules */
+// Modules.
 var Directory	= Irccd.Directory;
 var File	= Irccd.File;
 var Logger	= Irccd.Logger;
 var Plugin	= Irccd.Plugin;
 var Util	= Irccd.Util;
 
-/* Plugin information */
+// Plugin information.
 info = {
 	author: "David Demelier <markand@malikania.fr>",
 	license: "ISC",
@@ -34,7 +34,7 @@ info = {
 /**
  * All available formats.
  */
-var formats = {
+Plugin.format = {
 	"cmode":	"%H:%M:%S :: #{nickname} changed the mode to: #{mode} #{arg}",
 	"cnotice":	"%H:%M:%S :: [notice] (#{channel}) #{nickname}: #{message}",
 	"join":		"%H:%M:%S >> #{nickname} joined #{channel}",
@@ -53,7 +53,16 @@ var formats = {
  */
 function loadFormats()
 {
-	for (var key in formats) {
+	// --- DEPRECATED ------------------------------------------
+	//
+	// This code will be removed.
+	//
+	// Since:	2.1.0
+	// Until:	3.0.0
+	// Reason:	new [format] section replaces it.
+	//
+	// ----------------------------------------------------------
+	for (var key in Plugin.format) {
 		var optname = "format-" + key;
 
 		if (typeof (Plugin.config[optname]) !== "string")
@@ -62,7 +71,7 @@ function loadFormats()
 		if (Plugin.config[optname].length === 0)
 			Logger.warning("skipping empty '" + optname + "' format");
 		else
-			formats[key] = Plugin.config[optname];
+			Plugin.format[key] = Plugin.config[optname];
 	}
 }
 
@@ -94,7 +103,7 @@ function write(fmt, args)
 
 	Logger.debug("opening: " + path);
 
-	var str = Util.format(formats[fmt], args);
+	var str = Util.format(Plugin.format[fmt], args);
 	var file = new File(path, "wa");
 
 	file.write(str + "\n");
@@ -104,6 +113,13 @@ function onLoad()
 {
 	if (Plugin.config["path"] === undefined)
 		throw new Error("Missing 'path' option");
+
+	loadFormats();
+}
+
+function onReload()
+{
+	loadFormats();
 }
 
 function onChannelMode(server, origin, channel, mode, arg)
