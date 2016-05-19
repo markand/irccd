@@ -33,16 +33,35 @@ irccd: markand, the last thing that jean said was: hello world
 
 ## Configuration
 
-You can use different formats.
-
 The following options are available under the `[plugin.history]` section:
 
   - **file**: (string) path to the JSON file for saving information (Optional, default to cache directory).
-  - **format-error**: (string) format when an internal error occured,
-  - **format-seen**: (string) format for showing last seen,
-  - **format-said**: (string) format for showing the last message,
-  - **format-unknown**: (string) format when the user has never been seen,
-  - **format-usage**: (strnig) format to show the plugin usage.
+
+**Deprecated in irccd 2.1.0:**
+
+  - **format-error**: Use `[format.history] error` instead,
+  - **format-seen**: Use `[format.history] seen` instead,
+  - **format-said**: Use `[format.history] said` instead,
+  - **format-unknown**: Use `[format.history] unknown` instead,
+  - **format-usage**: Use `[format.history] usage` instead.
+
+### Keywords supported
+
+The following keywords are supported:
+
+| Parameter | Keywords        |
+|-----------|-----------------|
+| **file**  | channel, server |
+
+## Formats
+
+The **history** plugin supports the following formats in `[format.history]` section:
+
+  - **error**: (string) format when an internal error occured,
+  - **seen**: (string) format for showing last seen,
+  - **said**: (string) format for showing the last message,
+  - **unknown**: (string) format when the user has never been seen,
+  - **usage**: (strnig) format to show the plugin usage.
 
 <div class="panel panel-warning">
  <div class="panel-heading">If you don't want to specify the **file** parameter, irccd will try to use the plugin cache
@@ -58,13 +77,12 @@ $ mkdir -p ~/.cache/irccd/plugin/history
 
 The following keywords are supported:
 
-| Format                  | Keywords                                           | Notes                           |
-|-------------------------|----------------------------------------------------|---------------------------------|
-| (any)                   | channel, command, nickname, origin, plugin, server |                                 |
-| **file**                | channel, server                                    | does not support (any)          |
-| **format-seen**         | target, (date)                                     | target is the specified nick    |
-| **format-said**         | message, target, (date)                            |                                 |
-| **format-unknown**      | target                                             |                                 |
+| Format      | Keywords                                           | Notes                        |
+|-------------|----------------------------------------------------|------------------------------|
+| (any)       | channel, command, nickname, origin, plugin, server |                              |
+| **seen**    | target, (date)                                     | target is the specified nick |
+| **said**    | message, target, (date)                            |                              |
+| **unknown** | target                                             |                              |
 
 Example:
 
@@ -72,8 +90,8 @@ Example:
  <div class="panel-heading">~/.config/irccd/irccd.conf</div>
  <div class="panel-body">
 ````ini
-[plugin.history]
-format-seen = "#{target} has been seen on #{channel} the last time on: %d/%m/%Y %H:%M"
+[format.history]
+seen = "#{target} has been seen on #{channel} the last time on: %d/%m/%Y %H:%M"
 ````
  </div>
 </div>

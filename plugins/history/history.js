@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* Modules */
+// Modules.
 var Directory	= Irccd.Directory;
 var File	= Irccd.File;
 var Logger	= Irccd.Logger;
@@ -24,7 +24,7 @@ var Plugin	= Irccd.Plugin;
 var Server	= Irccd.Server;
 var Util	= Irccd.Util;
 
-/* Plugin information */
+// Plugin information.
 info = {
 	author: "David Demelier <markand@malikania.fr>",
 	license: "ISC",
@@ -32,7 +32,7 @@ info = {
 	version: "@IRCCD_VERSION@"
 };
 
-var formats = {
+Plugin.format = {
 	"error":	"#{nickname}, I'm sorry, something went wrong.",
 	"seen":		"#{nickname}, I've seen #{target} for the last time the %d-%m-%Y %H:%M",
 	"said":		"#{nickname}, #{target} said on %d-%m-%Y %H:%M: #{message}",
@@ -59,9 +59,8 @@ function path(server, channel)
 			"server":	server.toString(),
 			"channel":	channel
 		});
-	} else {
+	} else
 		p = Plugin.cachePath + "db.json";
-	}
 
 	return p;
 }
@@ -119,7 +118,16 @@ function find(server, channel, target)
 
 function loadFormats()
 {
-	for (var key in formats) {
+	// --- DEPRECATED ------------------------------------------
+	//
+	// This code will be removed.
+	//
+	// Since:	2.1.0
+	// Until:	3.0.0
+	// Reason:	new [format] section replaces it.
+	//
+	// ----------------------------------------------------------
+	for (var key in Plugin.format) {
 		var optname = "format-" + key;
 
 		if (typeof (Plugin.config[optname]) !== "string")
@@ -128,7 +136,7 @@ function loadFormats()
 		if (Plugin.config[optname].length === 0)
 			Logger.warning("skipping empty '" + optname + "' format");
 		else
-			formats[key] = Plugin.config[optname];
+			Plugin.format[key] = Plugin.config[optname];
 	}
 }
 
@@ -145,12 +153,12 @@ function onCommand(server, origin, channel, message)
 	};
 
 	if (args.length !== 2 || args[0].length === 0 || args[1].length === 0) {
-		server.message(channel, Util.format(formats.usage, kw));
+		server.message(channel, Util.format(Plugin.format.usage, kw));
 		return;
 	}
 
 	if (args[0] !== "seen" && args[0] !== "said") {
-		server.message(channel, Util.format(formats.usage, kw));
+		server.message(channel, Util.format(Plugin.format.usage, kw));
 		return;
 	}
 
@@ -163,14 +171,14 @@ function onCommand(server, origin, channel, message)
 		kw.target = args[1];
 
 		if (!info) {
-			server.message(channel, Util.format(formats.unknown, kw));
+			server.message(channel, Util.format(Plugin.format.unknown, kw));
 			return;
 		}
 
 		kw.date = info.timestamp;
 		kw.message = info.message ? info.message : "";
 
-		server.message(channel, Util.format(formats[args[0] == "seen" ? "seen" : "said"], kw));
+		server.message(channel, Util.format(Plugin.format[args[0] == "seen" ? "seen" : "said"], kw));
 	} catch (e) {
 		server.message(channel, Util.format(kw));
 	}
