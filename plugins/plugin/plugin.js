@@ -16,10 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// Modules.
 var Util = Irccd.Util;
 var Plugin = Irccd.Plugin;
 
-/* Plugin information */
+// Plugin information.
 info = {
 	author: "David Demelier <markand@malikania.fr>",
 	license: "ISC",
@@ -27,7 +28,7 @@ info = {
 	version: "@IRCCD_VERSION@"
 };
 
-var formats = {
+Plugin.format = {
 	"usage":	"#{nickname}, usage: #{command} list | info plugin",
 	"info":		"#{nickname}, #{name}: #{summary}, version #{version} by #{author} (#{license} license).",
 	"not-found":	"#{nickname}, plugin #{name} does not exist.",
@@ -37,7 +38,16 @@ var formats = {
 var commands = {
 	loadFormats: function ()
 	{
-		for (var key in formats) {
+		// --- DEPRECATED -----------------------------------
+		//
+		// This code will be removed.
+		//
+		// Since:	2.1.0
+		// Until:	3.0.0
+		// Reason:	new [format] section replaces it.
+		//
+		// --------------------------------------------------
+		for (var key in Plugin.format) {
 			var optname = "format-" + key;
 	
 			if (typeof (Plugin.config[optname]) !== "string")
@@ -46,7 +56,7 @@ var commands = {
 			if (Plugin.config[optname].length === 0)
 				Logger.warning("skipping empty '" + optname + "' format");
 			else
-				formats[key] = Plugin.config[optname];
+				Plugin.format[key] = Plugin.config[optname];
 		}
 	},
 	
@@ -69,7 +79,7 @@ var commands = {
 		var str;
 
 		if (!query && list.length >= 16)
-			str = Util.format(formats["too-long"], kw);
+			str = Util.format(Plugin.format["too-long"], kw);
 		else
 			str = list.join(" ");
 
@@ -90,17 +100,16 @@ var commands = {
 			kw.summary = info.summary;
 			kw.version = info.version;
 	
-			str = Util.format(formats["info"], kw);
-		} else {
-			str = Util.format(formats["not-found"], kw);
-		}
+			str = Util.format(Plugin.format["info"], kw);
+		} else
+			str = Util.format(Plugin.format["not-found"], kw);
 	
 		server.message(target, str);
 	},
 
 	usage: function (server, origin, target)
 	{
-		server.message(target, Util.format(formats["usage"], commands.keywords(server, target, origin)));
+		server.message(target, Util.format(Plugin.format["usage"], commands.keywords(server, target, origin)));
 	},
 
 	execute: function (server, origin, target, message, query)
