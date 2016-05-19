@@ -16,17 +16,26 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+// Modules.
 var Logger = Irccd.Logger;
 var Plugin = Irccd.Plugin;
 var Server = Irccd.Server;
 var Util = Irccd.Util;
 
-/* Plugin information */
+// Plugin information.
 info = {
 	author: "David Demelier <markand@malikania.fr>",
 	license: "ISC",
 	summary: "A russian roulette for IRC",
 	version: "@IRCCD_VERSION@"
+};
+
+/**
+ * Formats for writing.
+ */
+Plugin.format = {
+	"lucky":	"#{nickname}, you're lucky this time",
+	"shot":		"HEADSHOT"
 };
 
 function Gun(server, channel)
@@ -41,14 +50,6 @@ function Gun(server, channel)
  * Map of games.
  */
 Gun.map = {};
-
-/**
- * Formats for writing.
- */
-Gun.formats = {
-	"lucky":	"#{nickname}, you're lucky this time",
-	"shot":		"HEADSHOT"
-};
 
 /**
  * Search for an existing game.
@@ -89,7 +90,16 @@ Gun.remove = function (game)
  */
 Gun.loadFormats = function ()
 {
-	for (var key in Gun.formats) {
+	// --- DEPRECATED ------------------------------------------
+	//
+	// This code will be removed.
+	//
+	// Since:	2.1.0
+	// Until:	3.0.0
+	// Reason:	new [format] section replaces it.
+	//
+	// ----------------------------------------------------------
+	for (var key in Plugin.format) {
 		var optname = "format-" + key;
 
 		if (typeof (Plugin.config[optname]) !== "string")
@@ -98,7 +108,7 @@ Gun.loadFormats = function ()
 		if (Plugin.config[optname].length === 0)
 			Logger.warning("skipping empty '" + optname + "' format");
 		else
-			Gun.formats[key] = Plugin.config[optname];
+			Plugin.format[key] = Plugin.config[optname];
 	}
 }
 
@@ -131,10 +141,10 @@ function onCommand(server, origin, channel)
 		game = Gun.create(server, channel);
 
 	if (game.shot()) {
-		server.kick(Util.splituser(origin), channel, Util.format(Gun.formats["shot"], kw));
+		server.kick(Util.splituser(origin), channel, Util.format(Plugin.format["shot"], kw));
 		Gun.remove(game);
 	} else {
 		kw.count = (6 - game.index).toString();
-		server.message(channel, Util.format(Gun.formats["lucky"], kw));
+		server.message(channel, Util.format(Plugin.format["lucky"], kw));
 	}
 }
