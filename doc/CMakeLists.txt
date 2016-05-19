@@ -20,7 +20,7 @@ project(doc)
 
 # Meta targets `docs`
 add_custom_target(
-	docs ALL
+	all-docs ALL
 	COMMENT "Building irccd documentation"
 	SOURCES
 		${doc_SOURCE_DIR}/procs/README.md
@@ -31,7 +31,12 @@ add_custom_target(
 		${doc_SOURCE_DIR}/procs/60.new-command.md
 )
 
-# Needed for fakeroot
+set_target_properties(
+	all-docs
+	PROPERTIES
+		FOLDER meta
+)
+
 if (WITH_DOXYGEN)
 	add_subdirectory(doxygen)
 endif ()

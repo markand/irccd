@@ -59,3 +59,10 @@ irccd_define_library(
 	PUBLIC_INCLUDES "${extern-libircclient_SOURCE_DIR}/include"
 	LOCAL_INCLUDES ${INCLUDES}
 )
+
+set_target_properties(
+	extern-ircclient
+	PROPERTIES
+		PROJECT_LABEL libircclient
+		FOLDER extern
+)

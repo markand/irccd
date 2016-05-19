@@ -42,7 +42,7 @@ elseif (IRCCD_SYSTEM_LINUX)
 	list(APPEND LIBRARIES dl)
 endif ()
 
-target_link_libraries(libirccd extern-duktape extern-ircclient extern-jansson cppformat ${LIBRARIES})
+target_link_libraries(libirccd extern-duktape extern-ircclient extern-jansson extern-cppformat ${LIBRARIES})
 
 set_target_properties(
 	libirccd

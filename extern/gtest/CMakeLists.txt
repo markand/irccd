@@ -28,3 +28,10 @@ irccd_define_library(
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
 	target_compile_options(extern-gtest PRIVATE -Wno-missing-field-initializers)
 endif ()
+
+set_target_properties(
+	extern-gtest
+	PROPERTIES
+		PROJECT_LABEL gtest
+		FOLDER extern
+)

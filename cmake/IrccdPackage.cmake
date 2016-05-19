@@ -76,7 +76,7 @@ if (IRCCD_PACKAGE)
 	configure_file(cmake/installer/packages/docs.xml.in ${PKGDIR}/docs/meta/package.xml)
 
 	# Main dependencies.
-	set(dependencies irccd irccdctl docs)
+	set(dependencies irccd irccdctl all-docs)
 
 	# Build commands for plugins.
 	foreach (plugin ${IRCCD_PLUGINS})

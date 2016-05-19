@@ -27,3 +27,10 @@ irccd_define_library(
 		duktape.h
 	PUBLIC_INCLUDES ${duktape_SOURCE_DIR}
 )
+
+set_target_properties(
+	extern-duktape
+	PROPERTIES
+		PROJECT_LABEL duktape
+		FOLDER extern
+)

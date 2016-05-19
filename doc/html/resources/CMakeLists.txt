@@ -62,4 +62,11 @@ add_custom_target(
 	DEPENDS ${OUTPUTS}
 )
 
-add_dependencies(docs docs-resources)
+set_target_properties(
+	docs-resources
+	PROPERTIES
+		PROJECT_LABEL resources
+		FOLDER docs
+)
+
+add_dependencies(all-docs docs-resources)

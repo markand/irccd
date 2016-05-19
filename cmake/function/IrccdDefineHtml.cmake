@@ -142,5 +142,5 @@ function(irccd_define_html)
 		)
 	endif ()
 
-	add_dependencies(docs ${HTML_TARGET})
+	add_dependencies(all-docs ${HTML_TARGET})
 endfunction()

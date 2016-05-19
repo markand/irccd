@@ -57,3 +57,10 @@ irccd_define_html(
 	TARGET docs-api
 	ARGS -Vjs
 )
+
+set_target_properties(
+	docs-api
+	PROPERTIES
+		PROJECT_LABEL api
+		FOLDER docs
+)

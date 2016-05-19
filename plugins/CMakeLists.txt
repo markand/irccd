@@ -19,8 +19,14 @@
 project(plugins)
 
 add_custom_target(
-	plugins ALL
+	all-plugins ALL
 	COMMENT "Irccd plugins"
+)
+
+set_target_properties(
+	all-plugins
+	PROPERTIES
+		FOLDER meta
 )
 
 foreach (plugin ${IRCCD_PLUGINS})
@@ -61,6 +67,13 @@ foreach (plugin ${IRCCD_PLUGINS})
 				${plugin}/${plugin}.md
 		)
 
-		add_dependencies(plugins plugin-${plugin})
+		set_target_properties(
+			plugin-${plugin}
+			PROPERTIES
+				PROJECT_LABEL ${plugin}
+				FOLDER plugins
+		)
+
+		add_dependencies(all-plugins plugin-${plugin})
 	endif ()
 endforeach ()

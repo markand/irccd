@@ -43,3 +43,10 @@ irccd_define_html(
 	SOURCES ${SOURCES}
 	ARGS --toc --toc-depth=2 -Vguide
 )
+
+set_target_properties(
+	docs-guide
+	PROPERTIES
+		PROJECT_LABEL guide
+		FOLDER docs
+)

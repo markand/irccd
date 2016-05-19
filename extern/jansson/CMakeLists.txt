@@ -275,3 +275,10 @@ irccd_define_library(
 		"${jansson_SOURCE_DIR}/include"
 		"${jansson_BINARY_DIR}/include"
 )
+
+set_target_properties(
+	extern-jansson
+	PROPERTIES
+		PROJECT_LABEL jansson
+		FOLDER extern
+)

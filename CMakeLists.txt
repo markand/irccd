@@ -51,6 +51,8 @@ project(irccd)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${irccd_SOURCE_DIR}/cmake/packages)
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+
 include(CMakeParseArguments)
 
 include(cmake/function/IrccdDefineExecutable.cmake)

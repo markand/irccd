@@ -41,7 +41,14 @@ add_custom_target(
 		${CMAKE_CURRENT_SOURCE_DIR}/irccdctl.conf
 )
 
-add_dependencies(docs docs-examples)
+set_target_properties(
+	docs-examples
+	PROPERTIES
+		PROJECT_LABEL examples
+		FOLDER docs
+)
+
+add_dependencies(all-docs docs-examples)
 
 install(
 	FILES irccdctl.conf
