@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* Modules */
+// Modules.
 var Logger = Irccd.Logger;
 var File = Irccd.File;
 var Plugin = Irccd.Plugin;
@@ -24,7 +24,7 @@ var Server = Irccd.Server;
 var Unicode = Irccd.Unicode
 var Util = Irccd.Util;
 
-/* Plugin information */
+// Plugin information.
 info = {
 	author: "David Demelier <markand@malikania.fr>",
 	license: "ISC",
@@ -32,8 +32,21 @@ info = {
 	version: "@IRCCD_VERSION@"
 };
 
-/* Default options */
+// Default options.
 Plugin.config["collaborative"] = "true";
+
+// Formats.
+Plugin.format = {
+	"asked":	"#{nickname}, '#{letter}' was already asked.",
+	"dead":		"#{nickname}, fail the word was: #{word}.",
+	"found":	"#{nickname}, nice! the word is now #{word}",
+	"running":	"#{nickname}, the game is already running.",
+	"start":	"#{nickname}, the game is started, the word to find is: #{word}",
+	"win":		"#{nickname}, congratulations, the word is #{word}.",
+	"wrong-word":	"#{nickname}, this is not the word.",
+	"wrong-player":	"#{nickname}, please wait until someone else proposes.",
+	"wrong-letter":	"#{nickname}, there is no '#{letter}'."
+};
 
 function Hangman(server, channel)
 {
@@ -52,21 +65,6 @@ Hangman.map = {};
  * List of words
  */
 Hangman.words = [];
-
-/**
- * Formats for writing.
- */
-Hangman.formats = {
-	"asked":	"#{nickname}, '#{letter}' was already asked.",
-	"dead":		"#{nickname}, fail the word was: #{word}.",
-	"found":	"#{nickname}, nice! the word is now #{word}",
-	"running":	"#{nickname}, the game is already running.",
-	"start":	"#{nickname}, the game is started, the word to find is: #{word}",
-	"win":		"#{nickname}, congratulations, the word is #{word}.",
-	"wrong-word":	"#{nickname}, this is not the word.",
-	"wrong-player":	"#{nickname}, please wait until someone else proposes.",
-	"wrong-letter":	"#{nickname}, there is no '#{letter}'."
-};
 
 /**
  * Search for an existing game.
@@ -157,7 +155,16 @@ Hangman.loadWords = function ()
  */
 Hangman.loadFormats = function ()
 {
-	for (var key in Hangman.formats) {
+	// --- DEPRECATED ------------------------------------------
+	//
+	// This code will be removed.
+	//
+	// Since:	2.1.0
+	// Until:	3.0.0
+	// Reason:	new [format] section replaces it.
+	//
+	// ----------------------------------------------------------
+	for (var key in Plugin.format) {
 		var optname = "format-" + key;
 
 		if (typeof (Plugin.config[optname]) !== "string")
@@ -166,7 +173,7 @@ Hangman.loadFormats = function ()
 		if (Plugin.config[optname].length === 0)
 			Logger.warning("skipping empty '" + optname + "' format");
 		else
-			Hangman.formats[key] = Plugin.config[optname];
+			Plugin.format[key] = Plugin.config[optname];
 	}
 }
 
@@ -242,17 +249,15 @@ Hangman.prototype.propose = function (ch, nickname)
 			if (this.table[ch]) {
 				this.tries -= 1;
 				status = "asked";
-			} else {
+			} else
 				this.table[ch] = true;
-			}
 		}
 	} else {
 		if (this.word != ch) {
 			this.tries -= 1;
 			status = "wrong-word";
-		} else {
+		} else
 			status = "win";
-		}
 	}
 
 	/* Check if dead */
@@ -299,21 +304,21 @@ function propose(server, channel, origin, game, proposition)
 	switch (st) {
 	case "found":
 		kw.word = game.formatWord();
-		server.message(channel, Util.format(Hangman.formats["found"], kw));
+		server.message(channel, Util.format(Plugin.format["found"], kw));
 		break;
 	case "wrong-letter":
 	case "wrong-player":
 	case "wrong-word":
 	case "asked":
 		kw.letter = String.fromCharCode(proposition);
-		server.message(channel, Util.format(Hangman.formats[st], kw));
+		server.message(channel, Util.format(Plugin.format[st], kw));
 		break;
 	case "dead":
 	case "win":
 		kw.word = game.word;
-		server.message(channel, Util.format(Hangman.formats[st], kw));
+		server.message(channel, Util.format(Plugin.format[st], kw));
 
-		/* Remove the game */
+		// Remove the game.
 		Hangman.remove(game);
 		break;
 	default:
@@ -336,9 +341,9 @@ function onCommand(server, origin, channel, message)
 	if (game) {
 		var list = message.split(" \t");
 
-		if (list.length === 0 || String(list[0]).length === 0) {
-			server.message(channel, Util.format(Hangman.formats["running"], kw));
-		} else {
+		if (list.length === 0 || String(list[0]).length === 0)
+			server.message(channel, Util.format(Plugin.format["running"], kw));
+		else {
 			var word = String(list[0]);
 
 			if (Hangman.isWord(word))
@@ -347,7 +352,7 @@ function onCommand(server, origin, channel, message)
 	} else {
 		game = Hangman.create(server, channel);
 		kw.word = game.formatWord();
-		server.message(channel, Util.format(Hangman.formats["start"], kw));
+		server.message(channel, Util.format(Plugin.format["start"], kw));
 	}
 }
 
