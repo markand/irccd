@@ -48,14 +48,12 @@ bool connect(Server &server)
 	std::string host = info.host;
 	int code;
 
-	/* libircclient requires # for SSL connection */
+	// libircclient requires # for SSL connection.
 #if defined(WITH_SSL)
-	if (info.flags & ServerInfo::Ssl) {
+	if (info.flags & ServerInfo::Ssl)
 		host.insert(0, 1, '#');
-	}
-	if (!(info.flags & ServerInfo::SslVerify)) {
+	if (!(info.flags & ServerInfo::SslVerify))
 		irc_option_set(server.session(), LIBIRC_OPTION_SSL_NO_VERIFY);
-	}
 #endif
 
 	if (info.flags & ServerInfo::Ipv6) {
@@ -100,18 +98,15 @@ void Connecting::prepare(Server &server, fd_set &setinput, fd_set &setoutput, ne
 			log::warning() << "server " << server.name() << ": error while connecting: ";
 			log::warning() << irc_strerror(irc_errno(server.session())) << std::endl;
 
-			if (settings.reconnectTries != 0) {
+			if (settings.reconnectTries != 0)
 				log::warning("server {}: retrying in {} seconds"_format(server.name(), settings.reconnectDelay));
-			}
 
 			server.next(std::make_unique<state::Disconnected>());
-		} else {
+		} else
 			irc_add_select_descriptors(server.session(), &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
-		}
 	} else {
 		/*
-		 * This is needed if irccd is started before DHCP or if
-		 * DNS cache is outdated.
+		 * This is needed if irccd is started before DHCP or if DNS cache is outdated.
 		 *
 		 * For more information see bug #190.
 		 */
@@ -126,6 +121,9 @@ void Connecting::prepare(Server &server, fd_set &setinput, fd_set &setoutput, ne
 			server.next(std::make_unique<state::Disconnected>());
 		} else {
 			m_started = true;
+
+			if (irc_is_connected(server.session()))
+				irc_add_select_descriptors(server.session(), &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
 		}
 	}
 }
