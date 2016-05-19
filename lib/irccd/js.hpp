@@ -196,6 +196,11 @@ public:
 	 * The object.
 	 */
 	T *object{nullptr};
+
+	Pointer(T *o)
+		: object(o)
+	{
+	}
 };
 
 /**
@@ -215,6 +220,12 @@ public:
 	 * Number of args that the function takes
 	 */
 	duk_idx_t nargs{0};
+
+	Function(duk_c_function f, duk_idx_t n)
+		: function(f)
+		, nargs(n)
+	{
+	}
 };
 
 /**

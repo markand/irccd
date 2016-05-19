@@ -20,6 +20,7 @@
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
+#include <sstream>
 #include <stdexcept>
 
 #if defined(_WIN32)
@@ -212,7 +213,7 @@ struct stat stat(const std::string &path)
 {
 	struct stat st;
 
-	if (stat(path.c_str(), &st) < 0)
+	if (::stat(path.c_str(), &st) < 0)
 		throw std::runtime_error(std::strerror(errno));
 
 	return st;

@@ -36,7 +36,7 @@ SystemError::SystemError(int e, std::string message)
 
 void SystemError::raise(duk::ContextPtr ctx) const
 {
-	duk::StackAssert sa(ctx, 1);
+	duk::StackAssert sa(ctx, 0);
 
 	duk::getGlobal<void>(ctx, "Irccd");
 	duk::getProperty<void>(ctx, -1, "SystemError");

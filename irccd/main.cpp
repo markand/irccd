@@ -203,9 +203,8 @@ void loadForeground(bool foreground, const parser::Result &options)
 			daemon(1, 0);
 		}
 #else
-		(void)foreground;
-		(void)options;
-		throw std::runtime_error("foreground option not supported on this platform");
+		if (options.count("-f") > 0 || options.count("--foreground") > 0 || foreground)
+			throw std::runtime_error("foreground option not supported on this platform");
 #endif
 	} catch (const std::exception &ex) {
 		log::warning() << "irccd: " << ex.what() << std::endl;

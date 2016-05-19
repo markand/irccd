@@ -83,7 +83,7 @@ std::string base;
 std::string executablePath()
 {
 	std::string result;
-	std::size_t size = PATH_MAX;
+	std::size_t size = MAX_PATH;
 	
 	result.resize(size);
 	

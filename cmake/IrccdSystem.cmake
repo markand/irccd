@@ -58,8 +58,10 @@ else ()
 	message(WARNING "Unsupported ${CMAKE_CXX_COMPILER_ID}, may not build correctly.")
 endif ()
 
-if (WIN32)
+if (MINGW)
 	set(CMAKE_CXX_FLAGS "-D_WIN32_WINNT=0x0600 ${CMAKE_CXX_FLAGS}")
+elseif (MSVC)
+	set(CMAKE_CXX_FLAGS "/DWIN32_LEAN_AND_MEAN /DNOMINMAX /D_CRT_SECURE_NO_WARNINGS /EHsc")
 endif ()
 
 if (CMAKE_SIZEOF_VOID_P MATCHES "8")

@@ -83,7 +83,7 @@ duk::Ret info(duk::ContextPtr ctx)
 	duk::push(ctx, duk::Object{});
 	duk::putProperty(ctx, -1, "name", server->name());
 	duk::putProperty(ctx, -1, "host", server->info().host);
-	duk::putProperty<int>(ctx, -1, "port", server->info().port);
+	duk::putProperty(ctx, -1, "port", static_cast<int>(server->info().port));
 	duk::putProperty<bool>(ctx, -1, "ssl", server->info().flags & ServerInfo::Ssl);
 	duk::putProperty<bool>(ctx, -1, "sslVerify", server->info().flags & ServerInfo::SslVerify);
 	duk::putProperty(ctx, -1, "commandChar", server->settings().command);

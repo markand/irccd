@@ -1454,6 +1454,11 @@ public:
 	 */
 	bool value{false};
 
+	SockBlockMode(bool v)
+		: value(v)
+	{
+	}
+
 	/**
 	 * Set the option.
 	 *
@@ -1521,6 +1526,11 @@ public:
 	 * Set to true if you want to set the SOL_SOCKET/SO_REUSEADDR option.
 	 */
 	bool value{true};
+
+	SockReuseAddress(bool v)
+		: value(v)
+	{
+	}
 
 	/**
 	 * Set the option.
@@ -1670,6 +1680,11 @@ public:
 	 * Set this to use only IPv6.
 	 */
 	bool value{true};
+
+	Ipv6Only(bool v)
+		: value(v)
+	{
+	}
 
 	/**
 	 * Set the option.
