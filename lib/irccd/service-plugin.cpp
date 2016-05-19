@@ -162,15 +162,15 @@ void PluginService::load(std::string name, std::string path)
 		std::shared_ptr<Plugin> plugin;
 
 		if (path.empty())
-			plugin = find(m_config, std::move(name));
+			plugin = find(m_config, name);
 		else
-			plugin = open(std::move(name), std::move(path));
+			plugin = open(name, std::move(path));
 
-		plugin->setFormats(m_formats[plugin->name()]);
+		plugin->setFormats(m_formats[name]);
 		plugin->onLoad(m_irccd);
 		add(std::move(plugin));
 	} catch (const std::exception &ex) {
-		log::warning("plugin {}: {}"_format(ex.what()));
+		log::warning("plugin {}: {}"_format(name, ex.what()));
 	}
 }
 
