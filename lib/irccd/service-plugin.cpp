@@ -36,16 +36,14 @@ namespace irccd {
 
 namespace {
 
-std::shared_ptr<Plugin> find(std::unordered_map<std::string, PluginConfig> &configs, std::string name)
+std::shared_ptr<Plugin> find(std::string name)
 {
-	PluginConfig config = configs[name];
-
 	for (const auto &path : path::list(path::PathPlugins)) {
 		std::string jspath = path + name + ".js";
 		std::string dynlibpath = path + name + DYNLIB_SUFFIX;
 
 		if (fs::isReadable(jspath))
-			return std::make_shared<JsPlugin>(std::move(name), std::move(jspath), std::move(config));
+			return std::make_shared<JsPlugin>(std::move(name), std::move(jspath));
 		if (fs::isReadable(dynlibpath))
 			return std::make_shared<DynlibPlugin>(std::move(name), std::move(dynlibpath));
 	}
@@ -60,9 +58,7 @@ std::shared_ptr<Plugin> open(std::string name, std::string path)
 	std::shared_ptr<Plugin> plugin;
 
 	if (std::regex_match(path, match, regex)) {
-		std::string extension = match[1];
-
-		if (extension == DYNLIB_SUFFIX)
+		if (match[1] == DYNLIB_SUFFIX)
 			plugin = std::make_shared<DynlibPlugin>(name, path);
 		else
 			plugin = std::make_shared<JsPlugin>(name, path);
@@ -162,10 +158,11 @@ void PluginService::load(std::string name, std::string path)
 		std::shared_ptr<Plugin> plugin;
 
 		if (path.empty())
-			plugin = find(m_config, name);
+			plugin = find(name);
 		else
 			plugin = open(name, std::move(path));
 
+		plugin->setConfig(m_config[name]);
 		plugin->setFormats(m_formats[name]);
 		plugin->onLoad(m_irccd);
 		add(std::move(plugin));

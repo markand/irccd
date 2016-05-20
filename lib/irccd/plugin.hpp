@@ -213,6 +213,16 @@ public:
 	}
 
 	/**
+	 * Set the configuration.
+	 *
+	 * \param config the configuration
+	 */
+	inline void setConfig(PluginConfig config) noexcept
+	{
+		m_config = std::move(config);
+	}
+
+	/**
 	 * Access the plugin formats.
 	 *
 	 * \return the format
