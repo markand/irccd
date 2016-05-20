@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* Plugin information */
+// Plugin information.
 info = {
 	author: "David Demelier <markand@malikania.fr>",
 	license: "ISC",
@@ -24,7 +24,7 @@ info = {
 	version: "@IRCCD_VERSION@"
 };
 
-/* Modules */
+// Modules.
 var Logger = Irccd.Logger;
 var Plugin = Irccd.Plugin;
 var Server = Irccd.Server;
@@ -47,10 +47,10 @@ function authenticateQuakenet(server, password)
 {
 	var username = Plugin.config[server.toString() + ".username"];
 
-	if (!username) {
+	if (!username)
 		Logger.warning("missing username for quakenet backend on " + server.toString());
-	} else {
-		Logger.log("authenticating to Q on " + server.toString());
+	else {
+		Logger.info("authenticating to Q on " + server.toString());
 		server.message("Q@CServe.quakenet.org", Util.format("AUTH #{username} #{password}", {
 			"username": username,
 			"password": password
@@ -63,7 +63,7 @@ function onConnect(server)
 	var type = Plugin.config[server.toString() + ".type"];
 
 	if (type) {
-		/* Password is mandatory */
+		// Password is mandatory.
 		var password = Plugin.config[server.toString() + ".password"];
 
 		if (!password)
