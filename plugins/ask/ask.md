@@ -25,10 +25,10 @@ markand: !ask will I be rich?
 irccd: markand, No.
 ````
 
-## Configuration
+## File
 
-By default, **ask** will only answer yes or no. It's possible to add any answers you want in the file **answers.conf**
-located in the ask configuration directory.
+By default, **ask** will only answer yes or no. It's possible to add any answers you want in the file **answers.conf** located in the ask
+configuration directory.
 
 Just add one line per answer like this:
 
@@ -42,3 +42,9 @@ Maybe
 ````
  </div>
 </div>
+
+## Configuration
+
+The following options are available under the `[plugin.ask]` section:
+
+  - **file**: (string) the path to the database file (Optional, default: **answers.conf** in configuration directory).

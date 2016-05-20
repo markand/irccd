@@ -16,19 +16,19 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* Modules */
-var File	= Irccd.File;
-var Logger	= Irccd.Logger;
-var Plugin	= Irccd.Plugin;
-var Util	= Irccd.Util;
-
-/* Plugin information */
+// Plugin information.
 info = {
 	author: "David Demelier <markand@malikania.fr>",
 	license: "ISC",
 	summary: "Crazy module for asking a medium",
 	version: "@IRCCD_VERSION@"
 };
+
+// Modules.
+var File = Irccd.File;
+var Logger = Irccd.Logger;
+var Plugin = Irccd.Plugin;
+var Util = Irccd.Util;
 
 /* List of answers */
 var answers = [
@@ -39,15 +39,20 @@ var answers = [
 function onLoad()
 {
 	try {
-		var path = Plugin.configPath + "answers.conf";
+		// User specified file?
+		if (Plugin.config["file"])
+			path = Plugin.config["file"];
+		else
+			path = Plugin.configPath + "answers.conf";
+
 		var file = new File(path, "r");
 		var line;
 
-		/* Reset */
+		// Reset.
 		answers = [];
 
 		while ((line = file.readline()))
-			/* Skip empty lines */
+			// Skip empty lines.
 			if (line.length > 0)
 				answers.push(line);
 	} catch (e) {
