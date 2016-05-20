@@ -563,7 +563,7 @@ public:
 	 * \param channel the channel
 	 * \param mode the new mode
 	 */
-	void cmode(std::string channel, std::string mode);
+	virtual void cmode(std::string channel, std::string mode);
 
 	/**
 	 * Send a channel notice.
@@ -571,7 +571,7 @@ public:
 	 * \param channel the channel
 	 * \param message message notice
 	 */
-	void cnotice(std::string channel, std::string message);
+	virtual void cnotice(std::string channel, std::string message);
 
 	/**
 	 * Invite a user to a channel.
@@ -579,7 +579,7 @@ public:
 	 * \param target the target nickname
 	 * \param channel the channel
 	 */
-	void invite(std::string target, std::string channel);
+	virtual void invite(std::string target, std::string channel);
 
 	/**
 	 * Join a channel, the password is optional and can be kept empty.
@@ -587,7 +587,7 @@ public:
 	 * \param channel the channel to join
 	 * \param password the optional password
 	 */
-	void join(std::string channel, std::string password = "");
+	virtual void join(std::string channel, std::string password = "");
 
 	/**
 	 * Kick someone from the channel. Please be sure to have the rights
@@ -597,7 +597,7 @@ public:
 	 * \param channel from which channel
 	 * \param reason the optional reason
 	 */
-	void kick(std::string target, std::string channel, std::string reason = "");
+	virtual void kick(std::string target, std::string channel, std::string reason = "");
 
 	/**
 	 * Send a CTCP Action as known as /me. The target may be either a
@@ -606,7 +606,7 @@ public:
 	 * \param target the nickname or the channel
 	 * \param message the message
 	 */
-	void me(std::string target, std::string message);
+	virtual void me(std::string target, std::string message);
 
 	/**
 	 * Send a message to the specified target or channel.
@@ -614,28 +614,28 @@ public:
 	 * \param target the target
 	 * \param message the message
 	 */
-	void message(std::string target, std::string message);
+	virtual void message(std::string target, std::string message);
 
 	/**
 	 * Change your user mode.
 	 *
 	 * \param mode the mode
 	 */
-	void mode(std::string mode);
+	virtual void mode(std::string mode);
 
 	/**
 	 * Request the list of names.
 	 *
 	 * \param channel the channel
 	 */
-	void names(std::string channel);
+	virtual void names(std::string channel);
 
 	/**
 	 * Change your nickname.
 	 *
 	 * \param newnick the new nickname to use
 	 */
-	void nick(std::string newnick);
+	virtual void nick(std::string newnick);
 
 	/**
 	 * Send a private notice.
@@ -643,7 +643,7 @@ public:
 	 * \param target the target
 	 * \param message the notice message
 	 */
-	void notice(std::string target, std::string message);
+	virtual void notice(std::string target, std::string message);
 
 	/**
 	 * Part from a channel.
@@ -653,7 +653,7 @@ public:
 	 * \param channel the channel to leave
 	 * \param reason the optional reason
 	 */
-	void part(std::string channel, std::string reason = "");
+	virtual void part(std::string channel, std::string reason = "");
 
 	/**
 	 * Send a raw message to the IRC server. You don't need to add
@@ -662,7 +662,7 @@ public:
 	 * \warning Use this function with care
 	 * \param raw the raw message (without `\r\n\r\n`)
 	 */
-	void send(std::string raw);
+	virtual void send(std::string raw);
 
 	/**
 	 * Change the channel topic.
@@ -670,14 +670,14 @@ public:
 	 * \param channel the channel
 	 * \param topic the desired topic
 	 */
-	void topic(std::string channel, std::string topic);
+	virtual void topic(std::string channel, std::string topic);
 
 	/**
 	 * Request for whois information.
 	 *
 	 * \param target the target nickname
 	 */
-	void whois(std::string target);
+	virtual void whois(std::string target);
 };
 
 } // !irccd
