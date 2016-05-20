@@ -25,6 +25,7 @@
 #	SOURCES the sources files
 #	LIBRARIES (Optional) libraries to link
 #	RESOURCES (Optional) some resources file to copy
+#	FLAGS (Optional) compilation flags
 # )
 #
 # Create a unit test named test-${NAME}
@@ -34,7 +35,7 @@
 
 function(irccd_define_test)
 	set(oneValueArgs NAME)
-	set(multiValueArgs SOURCES LIBRARIES RESOURCES)
+	set(multiValueArgs SOURCES LIBRARIES RESOURCES FLAGS)
 
 	cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -74,6 +75,8 @@ function(irccd_define_test)
 	target_compile_definitions(
 		test-${TEST_NAME}
 		PRIVATE
+			${TEST_FLAGS}
+			SOURCEDIR="${CMAKE_CURRENT_SOURCE_DIR}"
 			IRCCD_TESTS_DIRECTORY="${CMAKE_BINARY_DIR}/tests"
 	)
 
