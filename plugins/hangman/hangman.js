@@ -16,14 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-// Modules.
-var Logger = Irccd.Logger;
-var File = Irccd.File;
-var Plugin = Irccd.Plugin;
-var Server = Irccd.Server;
-var Unicode = Irccd.Unicode
-var Util = Irccd.Util;
-
 // Plugin information.
 info = {
 	author: "David Demelier <markand@malikania.fr>",
@@ -31,6 +23,14 @@ info = {
 	summary: "A hangman game for IRC",
 	version: "@IRCCD_VERSION@"
 };
+
+// Modules.
+var Logger = Irccd.Logger;
+var File = Irccd.File;
+var Plugin = Irccd.Plugin;
+var Server = Irccd.Server;
+var Unicode = Irccd.Unicode
+var Util = Irccd.Util;
 
 // Default options.
 Plugin.config["collaborative"] = "true";
@@ -125,7 +125,7 @@ Hangman.loadWords = function ()
 {
 	var path;
 
-	/* User specified file? */
+	// User specified file?
 	if (Plugin.config["file"])
 		path = Plugin.config["file"];
 	else
@@ -155,7 +155,7 @@ Hangman.loadWords = function ()
  */
 Hangman.loadFormats = function ()
 {
-	// --- DEPRECATED ------------------------------------------
+	// --- DEPRECATED -------------------------------------------
 	//
 	// This code will be removed.
 	//
@@ -182,7 +182,7 @@ Hangman.loadFormats = function ()
  */
 Hangman.prototype.select = function ()
 {
-	/* Reload the words if empty */
+	// Reload the words if empty.
 	if (!this.words || this.words.length === 0)
 		this.words = Hangman.words.slice(0);
 
@@ -191,7 +191,7 @@ Hangman.prototype.select = function ()
 	this.word = this.words[i];
 	this.words.splice(i, 1);
 
-	/* Fill table */
+	// Fill table.
 	this.table = {};
 
 	for (var j = 0; j < this.word.length; ++j)
@@ -233,7 +233,7 @@ Hangman.prototype.propose = function (ch, nickname)
 {
 	var status = "found";
 
-	/* Check for collaborative mode */
+	// Check for collaborative mode.
 	if (Plugin.config["collaborative"] === "true") {
 		if (this.last !== undefined && this.last === nickname)
 			return "wrong-player";
@@ -260,11 +260,11 @@ Hangman.prototype.propose = function (ch, nickname)
 			status = "win";
 	}
 
-	/* Check if dead */
-	if (this.tries < 0)
+	// Check if dead.
+	if (this.tries <= 0)
 		status = "dead";
 
-	/* Check if win */
+	// Check if win.
 	var win = true;
 
 	for (var i = 0; i < this.word.length; ++i) {
@@ -292,7 +292,7 @@ function propose(server, channel, origin, game, proposition)
 {
 	var kw = {
 		channel: channel,
-		command: server.info().commandChar,
+		command: server.info().commandChar + Plugin.info().name,
 		nickname: Util.splituser(origin),
 		origin: origin,
 		plugin: Plugin.info().name,
@@ -309,6 +309,7 @@ function propose(server, channel, origin, game, proposition)
 	case "wrong-letter":
 	case "wrong-player":
 	case "wrong-word":
+		kw.word = proposition;
 	case "asked":
 		kw.letter = String.fromCharCode(proposition);
 		server.message(channel, Util.format(Plugin.format[st], kw));
@@ -331,11 +332,11 @@ function onCommand(server, origin, channel, message)
 	var game = Hangman.find(server, channel);
 	var kw = {
 		channel: channel,
-		command: server.info().commandChar,
+		command: server.info().commandChar + Plugin.info().name,
 		nickname: Util.splituser(origin),
 		origin: origin,
 		plugin: Plugin.info().name,
-		server: server
+		server: server.toString()
 	};
 
 	if (game) {
