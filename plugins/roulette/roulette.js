@@ -16,12 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-// Modules.
-var Logger = Irccd.Logger;
-var Plugin = Irccd.Plugin;
-var Server = Irccd.Server;
-var Util = Irccd.Util;
-
 // Plugin information.
 info = {
 	author: "David Demelier <markand@malikania.fr>",
@@ -29,6 +23,12 @@ info = {
 	summary: "A russian roulette for IRC",
 	version: "@IRCCD_VERSION@"
 };
+
+// Modules.
+var Logger = Irccd.Logger;
+var Plugin = Irccd.Plugin;
+var Server = Irccd.Server;
+var Util = Irccd.Util;
 
 /**
  * Formats for writing.
