@@ -180,7 +180,7 @@ function onCommand(server, origin, channel, message)
 
 		server.message(channel, Util.format(Plugin.format[args[0] == "seen" ? "seen" : "said"], kw));
 	} catch (e) {
-		server.message(channel, Util.format(kw));
+		server.message(channel, Util.format(Plugin.format["error"], kw));
 	}
 }
 
