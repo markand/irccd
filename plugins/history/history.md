@@ -61,7 +61,7 @@ The **history** plugin supports the following formats in `[format.history]` sect
   - **seen**: (string) format for showing last seen,
   - **said**: (string) format for showing the last message,
   - **unknown**: (string) format when the user has never been seen,
-  - **usage**: (strnig) format to show the plugin usage.
+  - **usage**: (string) format to show the plugin usage.
 
 <div class="panel panel-warning">
  <div class="panel-heading">If you don't want to specify the **file** parameter, irccd will try to use the plugin cache
