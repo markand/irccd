@@ -16,14 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-// Modules.
-var Directory	= Irccd.Directory;
-var File	= Irccd.File;
-var Logger	= Irccd.Logger;
-var Plugin	= Irccd.Plugin;
-var Server	= Irccd.Server;
-var Util	= Irccd.Util;
-
 // Plugin information.
 info = {
 	author: "David Demelier <markand@malikania.fr>",
@@ -31,6 +23,14 @@ info = {
 	summary: "track nickname's history",
 	version: "@IRCCD_VERSION@"
 };
+
+// Modules.
+var Directory	= Irccd.Directory;
+var File	= Irccd.File;
+var Logger	= Irccd.Logger;
+var Plugin	= Irccd.Plugin;
+var Server	= Irccd.Server;
+var Util	= Irccd.Util;
 
 Plugin.format = {
 	"error":	"#{nickname}, I'm sorry, something went wrong.",
@@ -77,7 +77,7 @@ function read(server, channel, nickname)
 		db = JSON.parse(str);
 	}
 
-	/* Complete if needed */
+	// Complete if needed.
 	if (!db[server])
 		db[server] = {};
 	if (!db[server][channel])
@@ -118,7 +118,7 @@ function find(server, channel, target)
 
 function loadFormats()
 {
-	// --- DEPRECATED ------------------------------------------
+	// --- DEPRECATED -------------------------------------------
 	//
 	// This code will be removed.
 	//
