@@ -93,120 +93,120 @@ public:
 	/**
 	 * \copydoc Plugin::onCommand
 	 */
-	void onCommand(Irccd &irccd,
-		       const std::shared_ptr<Server> &server,
-		       const std::string &origin,
-		       const std::string &channel,
-		       const std::string &message) override;
+	IRCCD_EXPORT void onCommand(Irccd &irccd,
+				    const std::shared_ptr<Server> &server,
+				    const std::string &origin,
+				    const std::string &channel,
+				    const std::string &message) override;
 
 	/**
 	 * \copydoc Plugin::onConnect
 	 */
-	void onConnect(Irccd &irccd, const std::shared_ptr<Server> &server) override;
+	IRCCD_EXPORT void onConnect(Irccd &irccd, const std::shared_ptr<Server> &server) override;
 
 	/**
 	 * \copydoc Plugin::onChannelMode
 	 */
-	void onChannelMode(Irccd &irccd,
-			   const std::shared_ptr<Server> &server,
-			   const std::string &origin,
-			   const std::string &channel,
-			   const std::string &mode,
-			   const std::string &arg) override;
+	IRCCD_EXPORT void onChannelMode(Irccd &irccd,
+					const std::shared_ptr<Server> &server,
+					const std::string &origin,
+					const std::string &channel,
+					const std::string &mode,
+					const std::string &arg) override;
 
 	/**
 	 * \copydoc Plugin::onChannelNotice
 	 */
-	void onChannelNotice(Irccd &irccd,
-			     const std::shared_ptr<Server> &server,
-			     const std::string &origin,
-			     const std::string &channel,
-			     const std::string &notice) override;
+	IRCCD_EXPORT void onChannelNotice(Irccd &irccd,
+					  const std::shared_ptr<Server> &server,
+					  const std::string &origin,
+					  const std::string &channel,
+					  const std::string &notice) override;
 
 	/**
 	 * \copydoc Plugin::onInvite
 	 */
-	void onInvite(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel) override;
+	IRCCD_EXPORT void onInvite(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel) override;
 
 	/**
 	 * \copydoc Plugin::onJoin
 	 */
-	void onJoin(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel) override;
+	IRCCD_EXPORT void onJoin(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel) override;
 
 	/**
 	 * \copydoc Plugin::onKick
 	 */
-	void onKick(Irccd &irccd,
-		    const std::shared_ptr<Server> &server,
-		    const std::string &origin,
-		    const std::string &channel,
-		    const std::string &target,
-		    const std::string &reason) override;
+	IRCCD_EXPORT void onKick(Irccd &irccd,
+				 const std::shared_ptr<Server> &server,
+				 const std::string &origin,
+				 const std::string &channel,
+				 const std::string &target,
+				 const std::string &reason) override;
 
 	/**
 	 * \copydoc Plugin::onLoad
 	 */
-	void onLoad(Irccd &irccd) override;
+	IRCCD_EXPORT void onLoad(Irccd &irccd) override;
 
 	/**
 	 * \copydoc Plugin::onMessage
 	 */
-	void onMessage(Irccd &irccd,
-		       const std::shared_ptr<Server> &server,
-		       const std::string &origin,
-		       const std::string &channel,
-		       const std::string &message) override;
+	IRCCD_EXPORT void onMessage(Irccd &irccd,
+				    const std::shared_ptr<Server> &server,
+				    const std::string &origin,
+				    const std::string &channel,
+				    const std::string &message) override;
 
 	/**
 	 * \copydoc Plugin::onMe
 	 */
-	void onMe(Irccd &irccd,
-		  const std::shared_ptr<Server> &server,
-		  const std::string &origin,
-		  const std::string &channel,
-		  const std::string &message) override;
+	IRCCD_EXPORT void onMe(Irccd &irccd,
+			       const std::shared_ptr<Server> &server,
+			       const std::string &origin,
+			       const std::string &channel,
+			       const std::string &message) override;
 
 	/**
 	 * \copydoc Plugin::onMode
 	 */
-	void onMode(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &mode) override;
+	IRCCD_EXPORT void onMode(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &mode) override;
 
 	/**
 	 * \copydoc Plugin::onNames
 	 */
-	void onNames(Irccd &irccd,
-		     const std::shared_ptr<Server> &server,
-		     const std::string &channel,
-		     const std::vector<std::string> &list) override;
+	IRCCD_EXPORT void onNames(Irccd &irccd,
+				  const std::shared_ptr<Server> &server,
+				  const std::string &channel,
+				  const std::vector<std::string> &list) override;
 
 	/**
 	 * \copydoc Plugin::onNick
 	 */
-	void onNick(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &nick) override;
+	IRCCD_EXPORT void onNick(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &nick) override;
 
 	/**
 	 * \copydoc Plugin::onNotice
 	 */
-	void onNotice(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &notice) override;
+	IRCCD_EXPORT void onNotice(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &notice) override;
 
 	/**
 	 * \copydoc Plugin::onPart
 	 */
-	void onPart(Irccd &irccd,
-		    const std::shared_ptr<Server> &server,
-		    const std::string &origin,
-		    const std::string &channel,
-		    const std::string &reason) override;
+	IRCCD_EXPORT void onPart(Irccd &irccd,
+				 const std::shared_ptr<Server> &server,
+				 const std::string &origin,
+				 const std::string &channel,
+				 const std::string &reason) override;
 
 	/**
 	 * \copydoc Plugin::onQuery
 	 */
-	void onQuery(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &message) override;
+	IRCCD_EXPORT void onQuery(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &message) override;
 
 	/**
 	 * \copydoc Plugin::onQueryCommand
 	 */
-	void onQueryCommand(Irccd &irccd,
+	IRCCD_EXPORT void onQueryCommand(Irccd &irccd,
 			    const std::shared_ptr<Server> &server,
 			    const std::string &origin,
 			    const std::string &message) override;
@@ -214,26 +214,26 @@ public:
 	/**
 	 * \copydoc Plugin::onReload
 	 */
-	void onReload(Irccd &irccd) override;
+	IRCCD_EXPORT void onReload(Irccd &irccd) override;
 
 	/**
 	 * \copydoc Plugin::onTopic
 	 */
-	void onTopic(Irccd &irccd,
-		     const std::shared_ptr<Server> &server,
-		     const std::string &origin,
-		     const std::string &channel,
-		     const std::string &topic) override;
+	IRCCD_EXPORT void onTopic(Irccd &irccd,
+				  const std::shared_ptr<Server> &server,
+				  const std::string &origin,
+				  const std::string &channel,
+				  const std::string &topic) override;
 
 	/**
 	 * \copydoc Plugin::onUnload
 	 */
-	void onUnload(Irccd &irccd) override;
+	IRCCD_EXPORT void onUnload(Irccd &irccd) override;
 
 	/**
 	 * \copydoc Plugin::onWhois
 	 */
-	void onWhois(Irccd &irccd, const std::shared_ptr<Server> &server, const ServerWhois &info) override;
+	IRCCD_EXPORT void onWhois(Irccd &irccd, const std::shared_ptr<Server> &server, const ServerWhois &info) override;
 };
 
 } // !irccd

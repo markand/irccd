@@ -38,6 +38,7 @@
 #include "elapsed-timer.hpp"
 #include "server-state.hpp"
 #include "signals.hpp"
+#include "sysconfig.hpp"
 
 namespace irccd {
 
@@ -416,7 +417,7 @@ public:
 	 * \param value the value
 	 * \return a channel
 	 */
-	static ServerChannel splitChannel(const std::string &value);
+	IRCCD_EXPORT static ServerChannel splitChannel(const std::string &value);
 
 	/**
 	 * Construct a server.
@@ -426,12 +427,12 @@ public:
 	 * \param identity the identity
 	 * \param settings the settings
 	 */
-	Server(std::string name, ServerInfo info, ServerIdentity identity = {}, ServerSettings settings = {});
+	IRCCD_EXPORT Server(std::string name, ServerInfo info, ServerIdentity identity = {}, ServerSettings settings = {});
 
 	/**
 	 * Destructor. Close the connection if needed.
 	 */
-	virtual ~Server();
+	IRCCD_EXPORT virtual ~Server();
 
 	/**
 	 * Get the server identifier.
@@ -518,17 +519,17 @@ public:
 	/**
 	 * Switch to next state if it has.
 	 */
-	void update() noexcept;
+	IRCCD_EXPORT void update() noexcept;
 
 	/**
 	 * Force disconnection.
 	 */
-	void disconnect() noexcept;
+	IRCCD_EXPORT void disconnect() noexcept;
 
 	/**
 	 * Asks for a reconnection.
 	 */
-	void reconnect() noexcept;
+	IRCCD_EXPORT void reconnect() noexcept;
 
 	/**
 	 * Prepare the IRC session.
@@ -547,7 +548,7 @@ public:
 	 * \param setoutput
 	 * \throw any exception that have been throw from user functions
 	 */
-	void sync(fd_set &setinput, fd_set &setoutput);
+	IRCCD_EXPORT void sync(fd_set &setinput, fd_set &setoutput);
 
 	/**
 	 * Determine if the nickname is the bot itself.
@@ -555,7 +556,7 @@ public:
 	 * \param nick the nickname to check
 	 * \return true if it is the bot
 	 */
-	bool isSelf(const std::string &nick) const noexcept;
+	IRCCD_EXPORT bool isSelf(const std::string &nick) const noexcept;
 
 	/**
 	 * Change the channel mode.
@@ -563,7 +564,7 @@ public:
 	 * \param channel the channel
 	 * \param mode the new mode
 	 */
-	virtual void cmode(std::string channel, std::string mode);
+	IRCCD_EXPORT virtual void cmode(std::string channel, std::string mode);
 
 	/**
 	 * Send a channel notice.
@@ -571,7 +572,7 @@ public:
 	 * \param channel the channel
 	 * \param message message notice
 	 */
-	virtual void cnotice(std::string channel, std::string message);
+	IRCCD_EXPORT virtual void cnotice(std::string channel, std::string message);
 
 	/**
 	 * Invite a user to a channel.
@@ -579,7 +580,7 @@ public:
 	 * \param target the target nickname
 	 * \param channel the channel
 	 */
-	virtual void invite(std::string target, std::string channel);
+	IRCCD_EXPORT virtual void invite(std::string target, std::string channel);
 
 	/**
 	 * Join a channel, the password is optional and can be kept empty.
@@ -587,7 +588,7 @@ public:
 	 * \param channel the channel to join
 	 * \param password the optional password
 	 */
-	virtual void join(std::string channel, std::string password = "");
+	IRCCD_EXPORT virtual void join(std::string channel, std::string password = "");
 
 	/**
 	 * Kick someone from the channel. Please be sure to have the rights
@@ -597,7 +598,7 @@ public:
 	 * \param channel from which channel
 	 * \param reason the optional reason
 	 */
-	virtual void kick(std::string target, std::string channel, std::string reason = "");
+	IRCCD_EXPORT virtual void kick(std::string target, std::string channel, std::string reason = "");
 
 	/**
 	 * Send a CTCP Action as known as /me. The target may be either a
@@ -606,7 +607,7 @@ public:
 	 * \param target the nickname or the channel
 	 * \param message the message
 	 */
-	virtual void me(std::string target, std::string message);
+	IRCCD_EXPORT virtual void me(std::string target, std::string message);
 
 	/**
 	 * Send a message to the specified target or channel.
@@ -614,28 +615,28 @@ public:
 	 * \param target the target
 	 * \param message the message
 	 */
-	virtual void message(std::string target, std::string message);
+	IRCCD_EXPORT virtual void message(std::string target, std::string message);
 
 	/**
 	 * Change your user mode.
 	 *
 	 * \param mode the mode
 	 */
-	virtual void mode(std::string mode);
+	IRCCD_EXPORT virtual void mode(std::string mode);
 
 	/**
 	 * Request the list of names.
 	 *
 	 * \param channel the channel
 	 */
-	virtual void names(std::string channel);
+	IRCCD_EXPORT virtual void names(std::string channel);
 
 	/**
 	 * Change your nickname.
 	 *
 	 * \param newnick the new nickname to use
 	 */
-	virtual void nick(std::string newnick);
+	IRCCD_EXPORT virtual void nick(std::string newnick);
 
 	/**
 	 * Send a private notice.
@@ -643,7 +644,7 @@ public:
 	 * \param target the target
 	 * \param message the notice message
 	 */
-	virtual void notice(std::string target, std::string message);
+	IRCCD_EXPORT virtual void notice(std::string target, std::string message);
 
 	/**
 	 * Part from a channel.
@@ -653,7 +654,7 @@ public:
 	 * \param channel the channel to leave
 	 * \param reason the optional reason
 	 */
-	virtual void part(std::string channel, std::string reason = "");
+	IRCCD_EXPORT virtual void part(std::string channel, std::string reason = "");
 
 	/**
 	 * Send a raw message to the IRC server. You don't need to add
@@ -662,7 +663,7 @@ public:
 	 * \warning Use this function with care
 	 * \param raw the raw message (without `\r\n\r\n`)
 	 */
-	virtual void send(std::string raw);
+	IRCCD_EXPORT virtual void send(std::string raw);
 
 	/**
 	 * Change the channel topic.
@@ -670,14 +671,14 @@ public:
 	 * \param channel the channel
 	 * \param topic the desired topic
 	 */
-	virtual void topic(std::string channel, std::string topic);
+	IRCCD_EXPORT virtual void topic(std::string channel, std::string topic);
 
 	/**
 	 * Request for whois information.
 	 *
 	 * \param target the target nickname
 	 */
-	virtual void whois(std::string target);
+	IRCCD_EXPORT virtual void whois(std::string target);
 };
 
 } // !irccd

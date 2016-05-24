@@ -36,12 +36,12 @@ public:
 	/**
 	 * Irccd.Timer.
 	 */
-	TimerModule() noexcept;
+	IRCCD_EXPORT TimerModule() noexcept;
 
 	/**
 	 * \copydoc Module::load
 	 */
-	void load(Irccd &irccd, JsPlugin &plugin) override;
+	IRCCD_EXPORT void load(Irccd &irccd, JsPlugin &plugin) override;
 };
 
 } // !irccd

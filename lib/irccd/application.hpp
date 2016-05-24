@@ -29,6 +29,7 @@
 #include <unordered_map>
 
 #include "command.hpp"
+#include "sysconfig.hpp"
 
 namespace irccd {
 
@@ -51,7 +52,7 @@ public:
 	/**
 	 * Create the application and fill the commands with predefined commands.
 	 */
-	Application();
+	IRCCD_EXPORT Application();
 
 	/**
 	 * Access the remote commands.

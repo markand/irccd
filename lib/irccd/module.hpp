@@ -26,6 +26,7 @@
 
 #include <cassert>
 
+#include "sysconfig.hpp"
 #include "util.hpp"
 
 namespace irccd {

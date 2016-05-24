@@ -42,7 +42,7 @@ public:
 	/**
 	 * Construct the service and predefined irccd API.
 	 */
-	ModuleService();
+	IRCCD_EXPORT ModuleService();
 
 	/**
 	 * Get all modules.
@@ -59,7 +59,7 @@ public:
 	 *
 	 * \param name the name
 	 */
-	bool contains(const std::string &name) const;
+	IRCCD_EXPORT bool contains(const std::string &name) const;
 
 	/**
 	 * Add a JavaScript API module.
@@ -68,7 +68,7 @@ public:
 	 * \pre !contains(module)
 	 * \param module the module
 	 */
-	void add(std::shared_ptr<Module> module);
+	IRCCD_EXPORT void add(std::shared_ptr<Module> module);
 };
 
 } // !irccd

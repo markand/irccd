@@ -122,9 +122,8 @@ int popen(duk::ContextPtr ctx)
 {
 	auto fp = ::popen(duk::require<const char *>(ctx, 0), duk::require<const char *>(ctx, 1));
 
-	if (fp == nullptr) {
+	if (fp == nullptr)
 		duk::raise(ctx, SystemError{});
-	}
 
 	duk::push(ctx, duk::Pointer<File>{new File(fp, [] (std::FILE *fp) { ::pclose(fp); })});
 

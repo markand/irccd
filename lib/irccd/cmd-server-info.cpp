@@ -64,23 +64,19 @@ json::Value ServerInfo::exec(Irccd &irccd, const json::Value &request) const
 	response.insert("username", server->identity().username);
 	response.insert("realname", server->identity().realname);
 
-	/* Optional stuff */
-	if (server->info().flags & irccd::ServerInfo::Ipv6) {
+	// Optional stuff.
+	if (server->info().flags & irccd::ServerInfo::Ipv6)
 		response.insert("ipv6", true);
-	}
-	if (server->info().flags & irccd::ServerInfo::Ssl) {
+	if (server->info().flags & irccd::ServerInfo::Ssl)
 		response.insert("ssl", true);
-	}
-	if (server->info().flags & irccd::ServerInfo::SslVerify) {
+	if (server->info().flags & irccd::ServerInfo::SslVerify)
 		response.insert("sslVerify", true);
-	}
 
 	/* Channel list */
 	auto channels = json::array({});
 
-	for (const auto &c : server->settings().channels) {
+	for (const auto &c : server->settings().channels)
 		channels.append(c.name);
-	}
 
 	response.insert("channels", std::move(channels));
 
@@ -91,7 +87,7 @@ void ServerInfo::result(Irccdctl &irccdctl, const json::Value &response) const
 {
 	RemoteCommand::result(irccdctl, response);
 
-	/* Server information */
+	// Server information.
 	std::cout << std::boolalpha;
 	std::cout << "Name           : " << response.valueOr("name", "").toString(true) << std::endl;
 	std::cout << "Host           : " << response.valueOr("host", "").toString(true) << std::endl;
@@ -100,16 +96,15 @@ void ServerInfo::result(Irccdctl &irccdctl, const json::Value &response) const
 	std::cout << "SSL            : " << response.valueOr("ssl", "").toString(true) << std::endl;
 	std::cout << "SSL verified   : " << response.valueOr("sslVerify", "").toString(true) << std::endl;
 
-	/* Channels */
+	// Channels.
 	std::cout << "Channels       : ";
 
-	for (const json::Value &v : response.valueOr("channels", json::Type::Array, json::array({}))) {
+	for (const json::Value &v : response.valueOr("channels", json::Type::Array, json::array({})))
 		std::cout << v.toString() << " ";
-	}
 
 	std::cout << std::endl;
 
-	/* Identity */
+	// Identity.
 	std::cout << "Nickname       : " << response.valueOr("nickname", "").toString(true) << std::endl;
 	std::cout << "User name      : " << response.valueOr("username", "").toString(true) << std::endl;
 	std::cout << "Real name      : " << response.valueOr("realname", "").toString(true) << std::endl;

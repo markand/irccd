@@ -63,7 +63,7 @@ public:
 	 *
 	 * \param rule the rule to append
 	 */
-	void add(Rule rule);
+	IRCCD_EXPORT void add(Rule rule);
 
 	/**
 	 * Insert a new rule at the specified position.
@@ -71,7 +71,7 @@ public:
 	 * \param rule the rule
 	 * \param position the position
 	 */
-	void insert(Rule rule, unsigned position);
+	IRCCD_EXPORT void insert(Rule rule, unsigned position);
 
 	/**
 	 * Remove a new rule from the specified position.
@@ -79,7 +79,7 @@ public:
 	 * \pre position must be valid
 	 * \param position the position
 	 */
-	void remove(unsigned position);
+	IRCCD_EXPORT void remove(unsigned position);
 
 	/**
 	 * Resolve the action to execute with the specified list of rules.
@@ -91,11 +91,11 @@ public:
 	 * \param event the event name (e.g onKick)
 	 * \return true if the plugin must be called
 	 */
-	bool solve(const std::string &server,
-		   const std::string &channel,
-		   const std::string &origin,
-		   const std::string &plugin,
-		   const std::string &event) noexcept;
+	IRCCD_EXPORT bool solve(const std::string &server,
+				const std::string &channel,
+				const std::string &origin,
+				const std::string &plugin,
+				const std::string &event) noexcept;
 };
 
 } // !irccd

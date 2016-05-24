@@ -35,6 +35,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "sysconfig.hpp"
+
 namespace irccd {
 
 namespace util {
@@ -132,7 +134,7 @@ public:
  *   - <strong>\@{default,yellow}</strong>: will write default color text on yellow background,
  *   - <strong>\@{white,black,bold,underline}</strong>: will write white text on black in both bold and underline.
  */
-std::string format(std::string text, const Substitution &params = {});
+IRCCD_EXPORT std::string format(std::string text, const Substitution &params = {});
 
 /**
  * Remove leading and trailing spaces.
@@ -140,7 +142,7 @@ std::string format(std::string text, const Substitution &params = {});
  * \param str the string
  * \return the removed white spaces
  */
-std::string strip(std::string str);
+IRCCD_EXPORT std::string strip(std::string str);
 
 /**
  * Split a string by delimiters.
@@ -150,7 +152,7 @@ std::string strip(std::string str);
  * \param max max number of split
  * \return a list of string splitted
  */
-std::vector<std::string> split(const std::string &list, const std::string &delimiters, int max = -1);
+IRCCD_EXPORT std::vector<std::string> split(const std::string &list, const std::string &delimiters, int max = -1);
 
 /**
  * Join values by a separator and return a string.
@@ -167,9 +169,8 @@ std::string join(InputIt first, InputIt last, DelimType delim = ':')
 	if (first != last) {
 		oss << *first;
 
-		while (++first != last) {
+		while (++first != last)
 			oss << delim << *first;
-		}
 	}
 
 	return oss.str();
@@ -196,7 +197,7 @@ inline std::string join(std::initializer_list<T> list, DelimType delim = ':')
  * \param plugin the plugin name
  * \return the pair
  */
-MessagePair parseMessage(std::string message, const std::string &commandChar, const std::string &plugin);
+IRCCD_EXPORT MessagePair parseMessage(std::string message, const std::string &commandChar, const std::string &plugin);
 
 /**
  * Server and identities must have strict names. This function can
@@ -217,7 +218,7 @@ inline bool isIdentifierValid(const std::string &name)
  * \return true if is boolean
  * \note this function is case-insensitive
  */
-bool isBoolean(std::string value) noexcept;
+IRCCD_EXPORT bool isBoolean(std::string value) noexcept;
 
 /**
  * Check if the string is an integer.
@@ -226,7 +227,7 @@ bool isBoolean(std::string value) noexcept;
  * \param base the optional base
  * \return true if integer
  */
-bool isInt(const std::string &value, int base = 10) noexcept;
+IRCCD_EXPORT bool isInt(const std::string &value, int base = 10) noexcept;
 
 /**
  * Check if the string is real.
@@ -234,7 +235,7 @@ bool isInt(const std::string &value, int base = 10) noexcept;
  * \param value the value
  * \return true if real
  */
-bool isReal(const std::string &value) noexcept;
+IRCCD_EXPORT bool isReal(const std::string &value) noexcept;
 
 /**
  * Check if the string is a number.
@@ -271,15 +272,13 @@ inline T toNumber(const std::string &number, T min = std::numeric_limits<T>::min
 
 	std::conditional_t<std::is_unsigned<T>::value, unsigned long long, long long> value;
 
-	if (std::is_unsigned<T>::value) {
+	if (std::is_unsigned<T>::value)
 		value = std::stoull(number);
-	} else {
+	else
 		value = std::stoll(number);
-	}
 
-	if (value < min || value > max) {
+	if (value < min || value > max)
 		throw std::out_of_range("out of range");
-	}
 
 	return static_cast<T>(value);
 }
@@ -290,7 +289,7 @@ inline T toNumber(const std::string &number, T min = std::numeric_limits<T>::min
  * \param input the buffer, will be updated
  * \return the message or empty string if there is nothing
  */
-std::string nextNetwork(std::string &input);
+IRCCD_EXPORT std::string nextNetwork(std::string &input);
 
 /**
  * Use arguments to avoid compiler warnings about unused parameters.

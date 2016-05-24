@@ -38,9 +38,8 @@ void InterruptService::prepare(fd_set &in, fd_set &, net::Handle &max)
 {
 	FD_SET(m_in.handle(), &in);
 
-	if (m_in.handle() > max) {
+	if (m_in.handle() > max)
 		max = m_in.handle();
-	}
 }
 
 void InterruptService::sync(fd_set &in, fd_set &)

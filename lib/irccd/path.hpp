@@ -27,6 +27,8 @@
 #include <string>
 #include <vector>
 
+#include "sysconfig.hpp"
+
 namespace irccd {
 
 namespace path {
@@ -64,7 +66,7 @@ enum Owner {
  *
  * \param argv0 the path to the executable (argv[0])
  */
-void setApplicationPath(const std::string &argv0);
+IRCCD_EXPORT void setApplicationPath(const std::string &argv0);
 
 /**
  * Clean a path by removing any extra / or \ and add a trailing one.
@@ -72,7 +74,7 @@ void setApplicationPath(const std::string &argv0);
  * \param path the path
  * \return the updated path
  */
-std::string clean(std::string path);
+IRCCD_EXPORT std::string clean(std::string path);
 
 /**
  * Generic function for path retrievement.
@@ -84,7 +86,7 @@ std::string clean(std::string path);
  * \param owner system or user wide
  * \return the path
  */
-std::string get(Path path, Owner owner);
+IRCCD_EXPORT std::string get(Path path, Owner owner);
 
 /**
  * Generic function for multiple paths.
@@ -95,7 +97,7 @@ std::string get(Path path, Owner owner);
  * \param path the type of path
  * \return the list of preferred directories in order
  */
-std::vector<std::string> list(Path path);
+IRCCD_EXPORT std::vector<std::string> list(Path path);
 
 } // !path
 

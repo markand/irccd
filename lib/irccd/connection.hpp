@@ -30,6 +30,7 @@
 #include "elapsed-timer.hpp"
 #include "json.hpp"
 #include "sockets.hpp"
+#include "sysconfig.hpp"
 #include "system.hpp"
 #include "util.hpp"
 
@@ -73,7 +74,7 @@ public:
 	 * \return the object
 	 * \throw net::Error on errors or on timeout
 	 */
-	json::Value next(const std::string &name, int timeout = 30000);
+	IRCCD_EXPORT json::Value next(const std::string &name, int timeout = 30000);
 
 	/**
 	 * Just wait if the operation succeeded.
@@ -81,7 +82,7 @@ public:
 	 * \param name the response name
 	 * \param timeout the timeout
 	 */
-	void verify(const std::string &name, int timeout = 30000);
+	IRCCD_EXPORT void verify(const std::string &name, int timeout = 30000);
 
 	/**
 	 * Check if the socket is still connected.
@@ -131,7 +132,7 @@ private:
 	net::Listener<> m_listener;
 	Address m_address;
 
-	/* Input buffer */
+	// Input buffer.
 	std::string m_input;
 
 public:
@@ -140,7 +141,7 @@ public:
 	 *
 	 * \param address the address
 	 */
-	ConnectionBase(Address address)
+	inline ConnectionBase(Address address)
 		: m_address(std::move(address))
 	{
 		m_socket.set(net::option::SockBlockMode{false});
@@ -150,7 +151,7 @@ public:
 	/**
 	 * \copydoc Connection::isConnected
 	 */
-	bool isConnected() const noexcept override
+	inline bool isConnected() const noexcept override
 	{
 		return m_socket.state() == net::State::Connected;
 	}
@@ -189,7 +190,7 @@ void ConnectionBase<Address>::send(std::string msg, int timeout)
 {
 	assert(!msg.empty());
 
-	/* Add termination */
+	// Add termination.
 	msg += "\r\n\r\n";
 
 	m_listener.remove(m_socket.handle());
@@ -197,48 +198,45 @@ void ConnectionBase<Address>::send(std::string msg, int timeout)
 	m_timer.reset();
 
 	while (!msg.empty()) {
-		/* Do not wait the time that is already passed */
+		// Do not wait the time that is already passed.
 		m_listener.wait(clamp(timeout));
 
-		/* Try to send at most as possible */
+		// Try to send at most as possible.
 		msg.erase(0, m_socket.send(msg));
 	}
 
-	/* Timeout? */
-	if (!msg.empty()) {
+	// Timeout?
+	if (!msg.empty())
 		throw std::runtime_error("operation timed out while sending to irccd");
-	}
 }
 
 template <typename Address>
 json::Value ConnectionBase<Address>::next(int timeout)
 {
-	/* Maybe there is already something */
+	// Maybe there is already something.
 	std::string buffer = util::nextNetwork(m_input);
 
 	m_listener.remove(m_socket.handle());
 	m_listener.set(m_socket.handle(), net::Condition::Readable);
 	m_timer.reset();
 
-	/* Read if there is nothing */
+	// Read if there is nothing.
 	while (buffer.empty() && isConnected()) {
-		/* Wait and read */
+		// Wait and read.
 		m_listener.wait(clamp(timeout));
 		m_input += m_socket.recv(512);
 
-		/* Finally try */
+		// Finally try.
 		buffer = util::nextNetwork(m_input);
 	}
 
-	if (!isConnected()) {
+	if (!isConnected())
 		throw std::runtime_error("connection lost");
-	}
 
 	json::Value value(json::Buffer{buffer});
 
-	if (!value.isObject()) {
+	if (!value.isObject())
 		throw std::invalid_argument("invalid message received");
-	}
 
 	return value;
 }

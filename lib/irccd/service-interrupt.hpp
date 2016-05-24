@@ -42,22 +42,22 @@ public:
 	 *
 	 * \throw std::runtime_error on errors
 	 */
-	InterruptService();
+	IRCCD_EXPORT InterruptService();
 
 	/**
 	 * \copydoc Service::prepare
 	 */
-	void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
+	IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
 
 	/**
 	 * \copydoc Service::sync
 	 */
-	void sync(fd_set &in, fd_set &out) override;
+	IRCCD_EXPORT void sync(fd_set &in, fd_set &out) override;
 
 	/**
 	 * Request interruption.
 	 */
-	void interrupt() noexcept;
+	IRCCD_EXPORT void interrupt() noexcept;
 };
 
 } // !irccd

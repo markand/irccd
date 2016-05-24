@@ -124,21 +124,19 @@ void Irccdctl::readConnectIp(const ini::Section &sc)
 {
 	ini::Section::const_iterator it;
 
-	/* host */
+	// Host.
 	std::string host;
 
-	if ((it = sc.find("host")) == sc.end()) {
+	if ((it = sc.find("host")) == sc.end())
 		throw std::invalid_argument("missing host parameter");
-	}
 
 	host = it->value();
 
-	/* port */
+	// Port.
 	int port;
 
-	if ((it = sc.find("port")) == sc.end()) {
+	if ((it = sc.find("port")) == sc.end())
 		throw std::invalid_argument("missing port parameter");
-	}
 
 	try {
 		port = std::stoi(it->value());
@@ -146,17 +144,16 @@ void Irccdctl::readConnectIp(const ini::Section &sc)
 		throw std::invalid_argument("invalid port number: " + it->value());
 	}
 
-	/* domain */
+	// Domain.
 	Ip::Type domain{Ip::v4};
 
 	if ((it = sc.find("domain")) != sc.end()) {
-		if (it->value() == "ipv6") {
+		if (it->value() == "ipv6")
 			domain = Ip::v6;
-		} else if (it->value() == "ipv4") {
+		else if (it->value() == "ipv4")
 			domain = Ip::v4;
-		} else {
+		else
 			throw std::invalid_argument("invalid domain: " + it->value());
-		}
 	}
 
 	m_connection = std::make_unique<ConnectionBase<Ip>>(Ip{host, port, domain});
@@ -183,66 +180,59 @@ void Irccdctl::readConnect(const ini::Section &sc)
 {
 	auto it = sc.find("type");
 
-	if (it == sc.end()) {
+	if (it == sc.end())
 		throw std::invalid_argument("missing type parameter");
-	}
 
-	if (it->value() == "ip") {
+	if (it->value() == "ip")
 		readConnectIp(sc);
-	} else if (it->value() == "unix") {
+	else if (it->value() == "unix")
 		readConnectUnix(sc);
-	} else {
+	else
 		throw std::invalid_argument("invalid type given: " + it->value());
-	}
 }
 
 void Irccdctl::readGeneral(const ini::Section &sc)
 {
 	auto verbose = sc.find("verbose");
 
-	if (verbose != sc.end()) {
+	if (verbose != sc.end())
 		log::setVerbose(util::isBoolean(verbose->value()));
-	}
 }
 
 void Irccdctl::readAliases(const ini::Section &sc)
 {
 	for (const ini::Option &option : sc) {
-		/* This is the alias name */
+		// This is the alias name.
 		Alias alias(option.key());
 
-		if (m_commands.count(option.key()) > 0) {
+		if (m_commands.count(option.key()) > 0)
 			throw std::invalid_argument("there is already a command named " + option.key());
-		}
 
-		/* Iterate over the list of commands to execute for this alias */
+		// Iterate over the list of commands to execute for this alias.
 		for (const std::string &repl : option) {
-			/* This is the alias split string */
+			// This is the alias split string.
 			std::vector<std::string> list = util::split(repl, " \t");
 
-			if (list.size() < 1) {
+			if (list.size() < 1)
 				throw std::invalid_argument("alias require at least one argument");
-			}
 
-			/* First argument is the command/alias to execute */
+			// First argument is the command/alias to execute.
 			std::string command = list[0];
 
-			/* This is the alias arguments */
+			// This is the alias arguments.
 			std::vector<AliasArg> args;
 
-			for (auto it = list.begin() + 1; it != list.end(); ++it) {
+			for (auto it = list.begin() + 1; it != list.end(); ++it)
 				args.push_back(std::move(*it));
-			}
 
 			alias.push_back({std::move(command), std::move(args)});
 		}
 
-		/* Show for debugging purpose */
+		// Show for debugging purpose.
 		log::debug("alias {}:"_format(option.key()));
 
-		for (const auto &cmd : alias) {
+		for (const auto &cmd : alias)
 			log::debug("  {} {}"_format(cmd.command(), util::join(cmd.args().begin(), cmd.args().end(), ' ')));
-		}
 
 		m_aliases.emplace(option.key(), std::move(alias));
 	}
@@ -253,20 +243,17 @@ void Irccdctl::read(const std::string &path, const parser::Result &options)
 	ini::Document doc = ini::readFile(path);
 	ini::Document::const_iterator it = doc.find("connect");
 
-	/* Do not try to read [connect] if specified at command line */
-	if (it != doc.end() && options.count("-t") == 0 && options.count("--type") == 0) {
+	// Do not try to read [connect] if specified at command line.
+	if (it != doc.end() && options.count("-t") == 0 && options.count("--type") == 0)
 		readConnect(*it);
-	}
-	if ((it = doc.find("general")) != doc.end()) {
+	if ((it = doc.find("general")) != doc.end())
 		readGeneral(*it);
-	}
-	if ((it = doc.find("alias")) != doc.end()) {
+	if ((it = doc.find("alias")) != doc.end())
 		readAliases(*it);
-	}
 }
 
 /*
- * Initialize a connection from the command line
+ * Initialize a connection from the command line.
  * ------------------------------------------------------------------
  */
 
@@ -274,21 +261,19 @@ void Irccdctl::parseConnectIp(const parser::Result &options, bool ipv6)
 {
 	parser::Result::const_iterator it;
 
-	/* host (-h or --host) */
+	// Host (-h or --host).
 	std::string host;
 
-	if ((it = options.find("-h")) == options.end() && (it = options.find("--host")) == options.end()) {
+	if ((it = options.find("-h")) == options.end() && (it = options.find("--host")) == options.end())
 		throw std::invalid_argument("missing host argument (-h or --host)");
-	}
 
 	host = it->second;
 
-	/* port (-p or --port) */
+	// Port (-p or --port).
 	int port;
 
-	if ((it = options.find("-p")) == options.end() && (it = options.find("--port")) == options.end()) {
+	if ((it = options.find("-p")) == options.end() && (it = options.find("--port")) == options.end())
 		throw std::invalid_argument("missing port argument (-p or --port)");
-	}
 
 	try {
 		port = std::stoi(it->second);
@@ -304,9 +289,8 @@ void Irccdctl::parseConnectUnix(const parser::Result &options)
 #if !defined(IRCCD_SYSTEM_WINDOWS)
 	parser::Result::const_iterator it;
 
-	if ((it = options.find("-P")) == options.end() && (it = options.find("--path")) == options.end()) {
+	if ((it = options.find("-P")) == options.end() && (it = options.find("--path")) == options.end())
 		throw std::invalid_argument("missing path parameter (-P or --path)");
-	}
 
 	m_connection = std::make_unique<ConnectionBase<Local>>(Local{it->second, false});
 #else
@@ -322,22 +306,19 @@ void Irccdctl::parseConnect(const parser::Result &options)
 
 	auto it = options.find("-t");
 
-	if (it == options.end()) {
+	if (it == options.end())
 		it = options.find("--type");
-	}
-	if (it->second == "ip" || it->second == "ipv6") {
+	if (it->second == "ip" || it->second == "ipv6")
 		return parseConnectIp(options, it->second == "ipv6");
-	}
-	if (it->second == "unix") {
+	if (it->second == "unix")
 		return parseConnectUnix(options);
-	}
 
 	throw std::invalid_argument("invalid type given: " + it->second);
 }
 
 parser::Result Irccdctl::parse(int &argc, char **&argv) const
 {
-	/* 1. Parse command line options */
+	// 1. Parse command line options.
 	parser::Options def{
 		{ "-c",		true	},
 		{ "--config",	true	},
@@ -364,9 +345,8 @@ parser::Result Irccdctl::parse(int &argc, char **&argv) const
 			// NOTREACHED
 		}
 
-		if (result.count("-v") != 0 || result.count("--verbose") != 0) {
+		if (result.count("-v") != 0 || result.count("--verbose") != 0)
 			log::setVerbose(true);
-		}
 	} catch (const std::exception &ex) {
 		log::warning("{}: {}"_format(sys::programName(), ex.what()));
 		usage();
@@ -377,20 +357,18 @@ parser::Result Irccdctl::parse(int &argc, char **&argv) const
 
 void Irccdctl::exec(const RemoteCommand &cmd, std::vector<std::string> args)
 {
-	/* 1. Build options from command line arguments. */
+	// 1. Build options from command line arguments.
 	parser::Options def;
 
 	for (const auto &opt : cmd.options()) {
-		/* parser::read needs '-' and '--' so add them */
-		if (!opt.simpleKey().empty()) {
+		// parser::read needs '-' and '--' so add them.
+		if (!opt.simpleKey().empty())
 			def.emplace("-"s + opt.simpleKey(), !opt.arg().empty());
-		}
-		if (!opt.longKey().empty()) {
+		if (!opt.longKey().empty())
 			def.emplace("--"s + opt.longKey(), !opt.arg().empty());
-		}
 	}
 
-	/* 2. Parse them, remove them from args (in parser::read) and build the map with id. */
+	// 2. Parse them, remove them from args (in parser::read) and build the map with id.
 	RemoteCommandRequest::Options requestOptions;
 
 	for (const auto &pair : parser::read(args, def)) {
@@ -402,27 +380,24 @@ void Irccdctl::exec(const RemoteCommand &cmd, std::vector<std::string> args)
 		requestOptions.emplace(it->id(), pair.second);
 	}
 
-	/* 3. Check number of arguments. */
-	if (args.size() < cmd.min()) {
+	// 3. Check number of arguments.
+	if (args.size() < cmd.min())
 		throw std::runtime_error("too few arguments");
-	}
-	if (args.size() > cmd.max()) {
+	if (args.size() > cmd.max())
 		throw std::runtime_error("too many arguments");
-	}
 
-	/* 4. Construct the request, if the returned value is not an object, do not send anything (e.g. help). */
+	// 4. Construct the request, if the returned value is not an object, do not send anything (e.g. help).
 	json::Value request = cmd.request(*this, RemoteCommandRequest(std::move(requestOptions), std::move(args)));
 
-	if (!request.isObject()) {
+	if (!request.isObject())
 		return;
-	}
 
 	request.insert("command", cmd.name());
 
-	/* 5. Send the command */
+	// 5. Send the command.
 	m_connection->send(request.toJson(0), 30000);
 
-	/* 6. Parse the result */
+	// 6. Parse the result.
 	cmd.result(*this, m_connection->next(cmd.name(), 30000));
 }
 
@@ -433,34 +408,31 @@ void Irccdctl::exec(const Alias &alias, std::vector<std::string> argsCopy)
 		std::vector<std::string> cmdArgs;
 		std::vector<std::string>::size_type toremove = 0;
 
-		/* 1. Append command name before */
+		// 1. Append command name before.
 		cmdArgs.push_back(cmd.command());
 
 		for (const AliasArg &arg : cmd.args()) {
 			if (arg.isPlaceholder()) {
-				if (args.size() < arg.index() + 1) {
+				if (args.size() < arg.index() + 1)
 					throw std::invalid_argument("missing argument for placeholder %" + std::to_string(arg.index()));
-				}
 
 				cmdArgs.push_back(args[arg.index()]);
 
-				if (arg.index() + 1 > toremove) {
+				if (arg.index() + 1 > toremove)
 					toremove = arg.index() + 1;
-				}
-			} else {
+			} else
 				cmdArgs.push_back(arg.value());
-			}
 		}
 
 		assert(toremove <= args.size());
 
-		/* 2. Remove the arguments that been placed in placeholders */
+		// 2. Remove the arguments that been placed in placeholders.
 		args.erase(args.begin(), args.begin() + toremove);
 
-		/* 3. Now append the rest of arguments */
+		// 3. Now append the rest of arguments.
 		std::copy(args.begin(), args.end(), std::back_inserter(cmdArgs));
 
-		/* 4. Finally try to execute */
+		// 4. Finally try to execute.
 		exec(cmdArgs);
 	}
 }
@@ -472,19 +444,18 @@ void Irccdctl::exec(std::vector<std::string> args)
 	auto name = args[0];
 	auto alias = m_aliases.find(name);
 
-	/* Remove name */
+	// Remove name.
 	args.erase(args.begin());
 
-	if (alias != m_aliases.end()) {
+	if (alias != m_aliases.end())
 		exec(alias->second, args);
-	} else {
+	else {
 		auto cmd = m_commands.find(name);
 
-		if (cmd != m_commands.end()) {
+		if (cmd != m_commands.end())
 			exec(*cmd->second, args);
-		} else {
+		else
 			throw std::invalid_argument("no alias or command named " + name);
-		}
 	}
 }
 
@@ -492,17 +463,16 @@ void Irccdctl::connect()
 {
 	log::info("{}: connecting to irccd..."_format(sys::programName()));
 
-	/* Try to connect */
+	// Try to connect.
 	m_connection->connect(30000);
 
-	/* Get irccd information */
+	// Get irccd information.
 	json::Value object = m_connection->next(30000);
 
-	if (!object.contains("program") || object.at("program").toString() != "irccd") {
+	if (!object.contains("program") || object.at("program").toString() != "irccd")
 		throw std::runtime_error("not an irccd server");
-	}
 
-	/* Get values */
+	// Get values.
 	m_major = object.at("major").toInt();
 	m_minor = object.at("minor").toInt();
 	m_patch = object.at("patch").toInt();
@@ -516,7 +486,7 @@ void Irccdctl::connect()
 
 void Irccdctl::run(int argc, char **argv)
 {
-	/* 1. Read command line arguments */
+	// 1. Read command line arguments.
 	parser::Result result = parse(argc, argv);
 
 	/*
@@ -529,21 +499,19 @@ void Irccdctl::run(int argc, char **argv)
 	 * 3. From the configuration file searched through directories
 	 */
 	try {
-		if (result.count("-t") > 0 || result.count("--type") > 0) {
+		if (result.count("-t") > 0 || result.count("--type") > 0)
 			parseConnect(result);
-		}
 
 		auto it = result.find("-c");
 
-		if (it != result.end() || (it = result.find("--config")) != result.end()) {
+		if (it != result.end() || (it = result.find("--config")) != result.end())
 			read(it->second, result);
-		} else {
+		else {
 			for (const std::string &dir : path::list(path::PathConfig)) {
 				std::string path = dir + "irccdctl.conf";
 
-				if (fs::exists(path)) {
+				if (fs::exists(path))
 					read(path, result);
-				}
 			}
 		}
 	} catch (const std::exception &ex) {
@@ -556,7 +524,7 @@ void Irccdctl::run(int argc, char **argv)
 		// NOTREACHED
 	}
 
-	/* help does not require connection */
+	// Help does not require connection.
 	if (std::strcmp(argv[0], "help") != 0) {
 		if (!m_connection) {
 			log::warning("{}: no connection specified"_format(sys::programName()));
@@ -566,12 +534,11 @@ void Irccdctl::run(int argc, char **argv)
 		connect();
 	}
 
-	/* Build a vector of arguments */
+	// Build a vector of arguments.
 	std::vector<std::string> args;
 
-	for (int i = 0; i < argc; ++i) {
+	for (int i = 0; i < argc; ++i)
 		args.push_back(argv[i]);
-	}
 
 	exec(args);
 }

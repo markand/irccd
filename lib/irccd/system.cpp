@@ -52,14 +52,14 @@
 
 #endif
 
-/* For sys::setGid */
+// For sys::setGid.
 #if defined(HAVE_SETGID)
 #  include <sys/types.h>
 #  include <unistd.h>
 #  include <grp.h>
 #endif
 
-/* For sys::setUid */
+// For sys::setUid.
 #if defined(HAVE_SETGID)
 #  include <sys/types.h>
 #  include <unistd.h>
@@ -100,9 +100,9 @@ void setHelper(const std::string &typeName, const std::string &value, LookupFunc
 {
 	IntType id;
 
-	if (util::isNumber(value)) {
+	if (util::isNumber(value))
 		id = std::stoi(value);
-	} else {
+	else {
 		auto info = lookup(value.c_str());
 
 		if (info == nullptr) {
@@ -110,16 +110,14 @@ void setHelper(const std::string &typeName, const std::string &value, LookupFunc
 			return;
 		} else {
 			id = getter(info);
-
 			log::debug() << "irccd: " << typeName << " " << value << " resolved to: " << id << std::endl;
 		}
 	}
 
-	if (setter(id) < 0) {
+	if (setter(id) < 0)
 		log::warning() << "irccd: could not set " << typeName << ": " << std::strerror(errno) << std::endl;
-	} else {
+	else
 		log::info() << "irccd: setting " << typeName << " to " << value << std::endl;
-	}
 }
 
 /*
@@ -175,9 +173,8 @@ std::string version()
 #else
 	struct utsname uts;
 
-	if (uname(&uts) < 0) {
+	if (uname(&uts) < 0)
 		throw std::runtime_error(std::strerror(errno));
-	}
 
 	return std::string(uts.release);
 #endif
@@ -190,9 +187,8 @@ uint64_t uptime()
 #elif defined(IRCCD_SYSTEM_LINUX)
 	struct sysinfo info;
 
-	if (sysinfo(&info) < 0) {
+	if (sysinfo(&info) < 0)
 		throw std::runtime_error(std::strerror(errno));
-	}
 
 	return info.uptime;
 #elif defined(IRCCD_SYSTEM_MAC)
@@ -200,20 +196,18 @@ uint64_t uptime()
 	size_t length = sizeof (boottime);
 	int mib[2] = { CTL_KERN, KERN_BOOTTIME };
 
-	if (sysctl(mib, 2, &boottime, &length, nullptr, 0) < 0) {
+	if (sysctl(mib, 2, &boottime, &length, nullptr, 0) < 0)
 		throw std::runtime_error(std::strerror(errno));
-	}
 
 	time_t bsec = boottime.tv_sec, csec = time(nullptr);
 
 	return difftime(csec, bsec);
 #else
-	/* BSD */
+	// BSD.
 	struct timespec ts;
 
-	if (clock_gettime(CLOCK_UPTIME, &ts) < 0) {
+	if (clock_gettime(CLOCK_UPTIME, &ts) < 0)
 		throw std::runtime_error(std::strerror(errno));
-	}
 
 	return ts.tv_sec;
 #endif
@@ -241,9 +235,8 @@ std::string home()
 #if defined(IRCCD_SYSTEM_WINDOWS)
 	char path[MAX_PATH];
 
-	if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, path) != S_OK) {
+	if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, path) != S_OK)
 		return "";
-	}
 
 	return std::string(path);
 #else
@@ -255,9 +248,8 @@ std::string env(const std::string &var)
 {
 	auto value = std::getenv(var.c_str());
 
-	if (value == nullptr) {
+	if (value == nullptr)
 		return "";
-	}
 
 	return value;
 }

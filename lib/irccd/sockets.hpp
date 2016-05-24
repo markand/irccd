@@ -63,6 +63,8 @@
  * | Mac OS X      | kqueue(2)               | Kqueue       |
  */
 
+#include "sysconfig.hpp"
+
 #if defined(_WIN32)
 #  if _WIN32_WINNT >= 0x0600 && !defined(SOCKET_HAVE_POLL)
 #    define SOCKET_HAVE_POLL
@@ -295,12 +297,12 @@ enum Method {
  * Initialize the socket library. Except if you defined SOCKET_NO_AUTO_INIT, you don't need to call this
  * function manually.
  */
-void init() noexcept;
+IRCCD_EXPORT void init() noexcept;
 
 /**
  * Close the socket library.
  */
-void finish() noexcept;
+IRCCD_EXPORT void finish() noexcept;
 
 #if !defined(SOCKET_NO_SSL)
 
@@ -313,12 +315,12 @@ namespace ssl {
  * Initialize the OpenSSL library. Except if you defined SOCKET_NO_AUTO_SSL_INIT, you don't need to call this function
  * manually.
  */
-void init() noexcept;
+IRCCD_EXPORT void init() noexcept;
 
 /**
  * Close the OpenSSL library.
  */
-void finish() noexcept;
+IRCCD_EXPORT void finish() noexcept;
 
 } // !ssl
 
@@ -330,7 +332,7 @@ void finish() noexcept;
  *
  * \return a string message
  */
-std::string error();
+IRCCD_EXPORT std::string error();
 
 /**
  * Get the last system error.
@@ -338,7 +340,7 @@ std::string error();
  * \param errn the error number (errno or WSAGetLastError)
  * \return the error
  */
-std::string error(int errn);
+IRCCD_EXPORT std::string error(int errn);
 
 /* }}} */
 
@@ -379,7 +381,7 @@ public:
 	 * \param code which kind of error
 	 * \param function the function name
 	 */
-	Error(Code code, std::string function);
+	IRCCD_EXPORT Error(Code code, std::string function);
 
 	/**
 	 * Constructor that use the system error set by the user.
@@ -388,7 +390,7 @@ public:
 	 * \param function the function name
 	 * \param error the error
 	 */
-	Error(Code code, std::string function, int error);
+	IRCCD_EXPORT Error(Code code, std::string function, int error);
 
 	/**
 	 * Constructor that set the error specified by the user.
@@ -397,7 +399,7 @@ public:
 	 * \param function the function name
 	 * \param error the error
 	 */
-	Error(Code code, std::string function, std::string error);
+	IRCCD_EXPORT Error(Code code, std::string function, std::string error);
 
 	/**
 	 * Get which function has triggered the error.
@@ -2826,7 +2828,7 @@ public:
 	/**
 	 * Return the sockets
 	 */
-	std::vector<ListenerStatus> wait(const ListenerTable &table, int ms);
+	IRCCD_EXPORT std::vector<ListenerStatus> wait(const ListenerTable &table, int ms);
 
 	/**
 	 * Backend identifier
@@ -2857,17 +2859,17 @@ public:
 	/**
 	 * Set the handle.
 	 */
-	void set(const ListenerTable &, Handle, Condition, bool);
+	IRCCD_EXPORT void set(const ListenerTable &, Handle, Condition, bool);
 
 	/**
 	 * Unset the handle.
 	 */
-	void unset(const ListenerTable &, Handle, Condition, bool);
+	IRCCD_EXPORT void unset(const ListenerTable &, Handle, Condition, bool);
 
 	/**
 	 * Wait for events.
 	 */
-	std::vector<ListenerStatus> wait(const ListenerTable &, int ms);
+	IRCCD_EXPORT std::vector<ListenerStatus> wait(const ListenerTable &, int ms);
 
 	/**
 	 * Backend identifier
@@ -2904,27 +2906,27 @@ public:
 	/**
 	 * Construct the epoll instance.
 	 */
-	Epoll();
+	IRCCD_EXPORT Epoll();
 
 	/**
 	 * Close the epoll instance.
 	 */
-	~Epoll();
+	IRCCD_EXPORT ~Epoll();
 
 	/**
 	 * Set the handle.
 	 */
-	void set(const ListenerTable &, Handle, Condition, bool);
+	IRCCD_EXPORT void set(const ListenerTable &, Handle, Condition, bool);
 
 	/**
 	 * Unset the handle.
 	 */
-	void unset(const ListenerTable &, Handle, Condition, bool);
+	IRCCD_EXPORT void unset(const ListenerTable &, Handle, Condition, bool);
 
 	/**
 	 * Wait for events.
 	 */
-	std::vector<ListenerStatus> wait(const ListenerTable &, int);
+	IRCCD_EXPORT std::vector<ListenerStatus> wait(const ListenerTable &, int);
 
 	/**
 	 * Backend identifier
@@ -2962,27 +2964,27 @@ public:
 	/**
 	 * Construct the kqueue instance.
 	 */
-	Kqueue();
+	IRCCD_EXPORT Kqueue();
 
 	/**
 	 * Destroy the kqueue instance.
 	 */
-	~Kqueue();
+	IRCCD_EXPORT ~Kqueue();
 
 	/**
 	 * Set the handle.
 	 */
-	void set(const ListenerTable &, Handle, Condition, bool);
+	IRCCD_EXPORT void set(const ListenerTable &, Handle, Condition, bool);
 
 	/**
 	 * Unset the handle.
 	 */
-	void unset(const ListenerTable &, Handle, Condition, bool);
+	IRCCD_EXPORT void unset(const ListenerTable &, Handle, Condition, bool);
 
 	/**
 	 * Wait for events.
 	 */
-	std::vector<ListenerStatus> wait(const ListenerTable &, int);
+	IRCCD_EXPORT std::vector<ListenerStatus> wait(const ListenerTable &, int);
 
 	/**
 	 * Backend identifier
@@ -3302,789 +3304,6 @@ public:
 		return waitMultiple(std::chrono::milliseconds(timeout));
 	}
 };
-
-/* }}} */
-
-/*
- * Callback
- * ------------------------------------------------------------------
- *
- * Function owner with tests.
- */
-
-/* {{{ Callback */
-
-/**
- * \class Callback
- * \brief Convenient signal owner that checks if the target is valid.
- *
- * This class also catch all errors thrown from signals to avoid interfering with our process.
- */
-template <typename... Args>
-class Callback : public std::function<void (Args...)> {
-public:
-	/**
-	 * Inherited constructors.
-	 */
-	using std::function<void (Args...)>::function;
-
-	/**
-	 * Execute the callback only if a target is set.
-	 */
-	void operator()(Args... args) const
-	{
-		if (*this) {
-			try {
-				std::function<void (Args...)>::operator()(args...);
-			} catch (...) {
-			}
-		}
-	}
-};
-
-/* }}} */
-
-/*
- * StreamConnection
- * ------------------------------------------------------------------
- *
- * Client connected on the server side.
- */
-
-/* {{{ StreamConnection */
-
-/**
- * \class StreamConnection
- * \brief Connected client on the server side.
- *
- * This object is created from StreamServer when a new client is connected, it is the higher
- * level object of sockets and completely asynchronous.
- */
-template <typename Address, typename Protocol>
-class StreamConnection {
-public:
-	/**
-	 * Called when the output has changed.
-	 */
-	using WriteHandler = Callback<>;
-
-private:
-	/* Signals */
-	WriteHandler m_onWrite;
-
-	/* Sockets and output buffer */
-	Socket<Address, Protocol> m_socket;
-	std::string m_output;
-
-public:
-	/**
-	 * Create the connection.
-	 *
-	 * \param s the socket
-	 */
-	StreamConnection(Socket<Address, Protocol> s)
-		: m_socket{std::move(s)}
-	{
-		m_socket.set(net::option::SockBlockMode{false});
-	}
-
-	/**
-	 * Access the underlying socket.
-	 *
-	 * \return the socket
-	 * \warning use with care
-	 */
-	inline Socket<Address, Protocol> &socket() noexcept
-	{
-		return m_socket;
-	}
-
-	/**
-	 * Access the current output.
-	 *
-	 * \return the output
-	 */
-	inline const std::string &output() const noexcept
-	{
-		return m_output;
-	}
-
-	/**
-	 * Overloaded function
-	 *
-	 * \return the output
-	 * \warning use with care, avoid modifying the output if you don't know what you're doing
-	 */
-	inline std::string &output() noexcept
-	{
-		return m_output;
-	}
-
-	/**
-	 * Post some data to be sent asynchronously.
-	 *
-	 * \param str the data to append
-	 */
-	inline void send(std::string str)
-	{
-		m_output += str;
-		m_onWrite();
-	}
-
-	/**
-	 * Kill the client.
-	 */
-	inline void close()
-	{
-		m_socket.close();
-	}
-
-	/**
-	 * Set the write handler, the signal is emitted when the output has changed so that the StreamServer owner
-	 * knows that there are some data to send.
-	 *
-	 * \param handler the handler
-	 * \warning you usually never need to set this yourself
-	 */
-	inline void setWriteHandler(WriteHandler handler)
-	{
-		m_onWrite = std::move(handler);
-	}
-};
-
-/* }}} */
-
-/*
- * StreamServer
- * ------------------------------------------------------------------
- *
- * Convenient stream oriented server.
- */
-
-/* {{{ StreamServer */
-
-/**
- * \class StreamServer
- * \brief Convenient stream server for TCP and TLS.
- *
- * This class does all the things for you as accepting new clients, listening for it and sending data. It works
- * asynchronously without blocking to let you control your process workflow.
- *
- * This class is not thread safe and you must not call any of the functions from different threads.
- */
-template <typename Address, typename Protocol>
-class StreamServer {
-public:
-	/**
-	 * Handler when a new client is connected.
-	 */
-	using ConnectionHandler = Callback<const std::shared_ptr<StreamConnection<Address, Protocol>> &>;
-
-	/**
-	 * Handler when a client is disconnected.
-	 */
-	using DisconnectionHandler = Callback<const std::shared_ptr<StreamConnection<Address, Protocol>> &>;
-
-	/**
-	 * Handler when data has been received from a client.
-	 */
-	using ReadHandler = Callback<const std::shared_ptr<StreamConnection<Address, Protocol>> &, const std::string &>;
-
-	/**
-	 * Handler when data has been correctly sent to a client.
-	 */
-	using WriteHandler = Callback<const std::shared_ptr<StreamConnection<Address, Protocol>> &, const std::string &>;
-
-	/**
-	 * Handler when an error occured.
-	 */
-	using ErrorHandler = Callback<const Error &>;
-
-	/**
-	 * Handler when there was a timeout.
-	 */
-	using TimeoutHandler = Callback<>;
-
-private:
-	using ClientMap = std::map<Handle, std::shared_ptr<StreamConnection<Address, Protocol>>>;
-
-	/* Signals */
-	ConnectionHandler m_onConnection;
-	DisconnectionHandler m_onDisconnection;
-	ReadHandler m_onRead;
-	WriteHandler m_onWrite;
-	ErrorHandler m_onError;
-	TimeoutHandler m_onTimeout;
-
-	/* Sockets */
-	Socket<Address, Protocol> m_master;
-	Listener<> m_listener;
-	ClientMap m_clients;
-
-	/*
-	 * Update flags depending on the required condition.
-	 */
-	void updateFlags(std::shared_ptr<StreamConnection<Address, Protocol>> &client)
-	{
-		assert(client->socket().action() != Action::None);
-
-		m_listener.remove(client->socket().handle());
-		m_listener.set(client->socket().handle(), client->socket().condition());
-	}
-
-	/*
-	 * Continue accept process.
-	 */
-	template <typename AcceptCall>
-	void processAccept(std::shared_ptr<StreamConnection<Address, Protocol>> &client, const AcceptCall &acceptFunc)
-	{
-		try {
-			/* Do the accept */
-			acceptFunc();
-
-			/* 1. First remove completely the client */
-			m_listener.remove(client->socket().handle());
-
-			/* 2. If accept is not finished, wait for the appropriate condition */
-			if (client->socket().state() == State::Accepted) {
-				/* 3. Client is accepted, notify the user */
-				m_listener.set(client->socket().handle(), Condition::Readable);
-				m_onConnection(client);
-			} else {
-				/* Operation still in progress */
-				updateFlags(client);
-			}
-		} catch (const Error &error) {
-			m_clients.erase(client->socket().handle());
-			m_listener.remove(client->socket().handle());
-			m_onError(error);
-		}
-	}
-
-	/*
-	 * Process initial accept of master socket, this is the initial accepting process. Except on errors, the
-	 * socket is stored but the user will be notified only once the socket is completely accepted.
-	 */
-	void processInitialAccept()
-	{
-		// TODO: store address too.
-		std::shared_ptr<StreamConnection<Address, Protocol>> client = std::make_shared<StreamConnection<Address, Protocol>>(m_master.accept(nullptr));
-		std::weak_ptr<StreamConnection<Address, Protocol>> ptr{client};
-
-		/* 1. Register output changed to update listener */
-		client->setWriteHandler([this, ptr] () {
-			auto client = ptr.lock();
-
-			/* Do not update the listener immediately if an action is pending */
-			if (client && client->socket().action() == Action::None && !client->output().empty()) {
-				m_listener.set(client->socket().handle(), Condition::Writable);
-			}
-		});
-
-		/* 2. Add the client */
-		m_clients.insert(std::make_pair(client->socket().handle(), client));
-
-		/*
-		 * 2. Do an initial check to set the listener flags, at this moment the socket may or not be
-		 *    completely accepted.
-		 */
-		processAccept(client, [&] () {});
-	}
-
-	/*
-	 * Read or complete the read operation.
-	 */
-	void processRead(std::shared_ptr<StreamConnection<Address, Protocol>> &client)
-	{
-		/*
-		 * Read because there is something to read or because the pending operation is
-		 * read and must complete.
-		 */
-		auto buffer = client->socket().recv(512);
-
-		/*
-		 * Now the receive operation may be completed, in that case, two possibilities:
-		 *
-		 * 1. The action is set to None (completed)
-		 * 2. The action is still not complete, update the flags
-		 */
-		if (client->socket().action() == Action::None) {
-			/* Empty mean normal disconnection */
-			if (buffer.empty()) {
-				m_listener.remove(client->socket().handle());
-				m_clients.erase(client->socket().handle());
-				m_onDisconnection(client);
-			} else {
-				/*
-				 * At this step, it is possible that we were completing a receive operation, in this
-				 * case the write flag may be removed, add it if required.
-				 */
-				if (!client->output().empty()) {
-					m_listener.set(client->socket().handle(), Condition::Writable);
-				}
-
-				m_onRead(client, buffer);
-			}
-		} else {
-			/* Operation in progress */
-			updateFlags(client);
-		}
-	}
-
-	/*
-	 * Flush the output buffer.
-	 */
-	void processWrite(std::shared_ptr<StreamConnection<Address, Protocol>> &client)
-	{
-		auto &output = client->output();
-		auto nsent = client->socket().send(output);
-
-		if (client->socket().action() == Action::None) {
-			/* 1. Create a copy of content that has been sent */
-			auto sent = output.substr(0, nsent);
-
-			/* 2. Erase the content sent */
-			output.erase(0, nsent);
-
-			/* 3. Update listener */
-			if (output.empty()) {
-				m_listener.unset(client->socket().handle(), Condition::Writable);
-			}
-
-			/* 4. Notify user */
-			m_onWrite(client, sent);
-		} else {
-			updateFlags(client);
-		}
-	}
-
-	void processSync(std::shared_ptr<StreamConnection<Address, Protocol>> &client, Condition flags)
-	{
-		try {
-			auto action = client->socket().action();
-
-			if (action == Action::Receive ||
-			    (action == Action::None && (flags & Condition::Readable) == Condition::Readable)) {
-				processRead(client);
-			} else if ((flags & Condition::Writable) == Condition::Writable) {
-				processWrite(client);
-			}
-		} catch (const Error &error) {
-			m_onDisconnection(client);
-			m_listener.remove(client->socket().handle());
-			m_clients.erase(client->socket().handle());
-		}
-	}
-
-public:
-	/**
-	 * Create a stream server with the specified address to bind.
-	 *
-	 * \param protocol the protocol (Tcp or Tls)
-	 * \param address the address to bind
-	 * \param max the max number to listen
-	 * \throw Error on errors
-	 */
-	StreamServer(Protocol protocol, const Address &address, int max = 128)
-		: m_master{std::move(protocol), address}
-	{
-		// TODO: m_onError
-		m_master.set(SOL_SOCKET, SO_REUSEADDR, 1);
-		m_master.bind(address);
-		m_master.listen(max);
-		m_listener.set(m_master.handle(), Condition::Readable);
-	}
-
-	/**
-	 * Set the connection handler, called when a new client is connected.
-	 *
-	 * \param handler the handler
-	 */
-	inline void setConnectionHandler(ConnectionHandler handler)
-	{
-		m_onConnection = std::move(handler);
-	}
-
-	/**
-	 * Set the disconnection handler, called when a client died.
-	 *
-	 * \param handler the handler
-	 */
-	inline void setDisconnectionHandler(DisconnectionHandler handler)
-	{
-		m_onDisconnection = std::move(handler);
-	}
-
-	/**
-	 * Set the receive handler, called when a client has sent something.
-	 *
-	 * \param handler the handler
-	 */
-	inline void setReadHandler(ReadHandler handler)
-	{
-		m_onRead = std::move(handler);
-	}
-
-	/**
-	 * Set the writing handler, called when some data has been sent to a client.
-	 *
-	 * \param handler the handler
-	 */
-	inline void setWriteHandler(WriteHandler handler)
-	{
-		m_onWrite = std::move(handler);
-	}
-
-	/**
-	 * Set the error handler, called when unrecoverable error has occured.
-	 *
-	 * \param handler the handler
-	 */
-	inline void setErrorHandler(ErrorHandler handler)
-	{
-		m_onError = std::move(handler);
-	}
-
-	/**
-	 * Set the timeout handler, called when the selection has timeout.
-	 *
-	 * \param handler the handler
-	 */
-	inline void setTimeoutHandler(TimeoutHandler handler)
-	{
-		m_onTimeout = std::move(handler);
-	}
-
-	/**
-	 * Poll for the next event.
-	 *
-	 * \param timeout the timeout (-1 for indefinitely)
-	 * \throw Error on errors
-	 */
-	void poll(int timeout = -1)
-	{
-		try {
-			auto st = m_listener.wait(timeout);
-
-			if (st.socket == m_master.handle()) {
-				/* New client */
-				processInitialAccept();
-			} else {
-				/* Recv / Send / Accept on a client */
-				auto client = m_clients[st.socket];
-
-				if (client->socket().state() == State::Accepted) {
-					processSync(client, st.flags);
-				} else {
-					processAccept(client, [&] () { client->socket().accept(); });
-				}
-			}
-		} catch (const Error &error) {
-			if (error.code() == Error::Timeout) {
-				m_onTimeout();
-			} else {
-				m_onError(error);
-			}
-		}
-	}
-};
-
-/* }}} */
-
-/*
- * StreamClient
- * ------------------------------------------------------------------
- */
-
-/* {{{ StreamClient */
-
-/**
- * \class StreamClient
- * \brief Client side connection to a server.
- *
- * This class is not thread safe and you must not call any of the functions from different threads.
- */
-template <typename Address, typename Protocol>
-class StreamClient {
-public:
-	/**
-	 * Handler when connection is complete.
-	 */
-	using ConnectionHandler = Callback<>;
-
-	/**
-	 * Handler when data has been received.
-	 */
-	using ReadHandler = Callback<const std::string &>;
-
-	/**
-	 * Handler when data has been sent correctly.
-	 */
-	using WriteHandler = Callback<const std::string &>;
-
-	/**
-	 * Handler when disconnected.
-	 */
-	using DisconnectionHandler = Callback<>;
-
-	/**
-	 * Handler on unrecoverable error.
-	 */
-	using ErrorHandler = Callback<const Error &>;
-
-	/**
-	 * Handler when timeout occured.
-	 */
-	using TimeoutHandler = Callback<>;
-
-private:
-	/* Signals */
-	ConnectionHandler m_onConnection;
-	ReadHandler m_onRead;
-	WriteHandler m_onWrite;
-	DisconnectionHandler m_onDisconnection;
-	ErrorHandler m_onError;
-	TimeoutHandler m_onTimeout;
-
-	/* Socket */
-	Socket<Address, Protocol> m_socket;
-	Listener<> m_listener;
-
-	/* Output buffer */
-	std::string m_output;
-
-	/*
-	 * Update the flags after an uncompleted operation. This function must only be called when the operation
-	 * has not complete (e.g. connect, recv, send).
-	 */
-	void updateFlags()
-	{
-		assert(m_socket.action() != Action::None);
-
-		m_listener.remove(m_socket.handle());
-		m_listener.set(m_socket.handle(), m_socket.condition());
-	}
-
-	/*
-	 * This is the generic connect helper, it will be used to both initiate the connection or to continue the
-	 * connection process if needed.
-	 *
-	 * Thus the template parameter is the appropriate function to call either, m_socket.connect(address) or
-	 * m_socket.connect().
-	 *
-	 * See poll() and connect() to understand.
-	 */
-	template <typename ConnectCall>
-	void processConnect(const ConnectCall &connectFunc)
-	{
-		/* Call m_socket.connect() or m_socket.connect(address) */
-		connectFunc();
-
-		/* Remove entirely */
-		m_listener.remove(m_socket.handle());
-
-		if (m_socket.state() == State::Connected) {
-			m_onConnection();
-			m_listener.set(m_socket.handle(), Condition::Readable);
-		} else {
-			/* Connection still in progress */
-			updateFlags();
-		}
-	}
-
-	/*
-	 * Receive or complete the receive command, if the command is not complete, the listener is updated
-	 * accordingly.
-	 */
-	void processRead()
-	{
-		auto received = m_socket.recv(512);
-
-		if (m_socket.action() == Action::None) {
-			/* 0 means disconnection */
-			if (received.empty()) {
-				m_onDisconnection();
-			} else {
-				/*
-				 * At this step, it is possible that we were completing a receive operation, in this
-				 * case the write flag may be removed, add it if required.
-				 */
-				if (m_output.empty()) {
-					m_listener.unset(m_socket.handle(), Condition::Writable);
-				}
-
-				m_onRead(received);
-			}
-		} else {
-			/* Receive operation in progress */
-			updateFlags();
-		}
-	}
-
-	/*
-	 * Send or complete the send command, if the command is not complete, the listener is updated
-	 * accordingly.
-	 */
-	void processWrite()
-	{
-		auto nsent = m_socket.send(m_output);
-
-		if (m_socket.action() == Action::None) {
-			/* 1. Make a copy of what has been sent */
-			auto sent = m_output.substr(0, nsent);
-
-			/* 2. Erase sent content */
-			m_output.erase(0, nsent);
-
-			/* 3. Update flags if needed */
-			if (m_output.empty()) {
-				m_listener.unset(m_socket.handle(), Condition::Writable);
-			}
-
-			/* 4. Notify user */
-			m_onWrite(sent);
-		} else {
-			/* Send operation in progress */
-			updateFlags();
-		}
-	}
-
-	/*
-	 * Receive or send.
-	 */
-	void processSync(Condition condition)
-	{
-		if ((m_socket.action() == Action::Receive) ||
-		    (m_socket.action() == Action::None && (condition & Condition::Readable) == Condition::Readable)) {
-			processRead();
-		} else {
-			processWrite();
-		}
-	}
-
-public:
-	/**
-	 * Create a client. The client is automatically marked as non-blocking.
-	 *
-	 * \param protocol the protocol (Tcp or Tls)
-	 * \param address the optional address
-	 * \throw net::Error on failures
-	 */
-	StreamClient(Protocol protocol = {}, const Address &address = {})
-		: m_socket{std::move(protocol), address}
-	{
-		m_socket.set(net::option::SockBlockMode{false});
-		m_listener.set(m_socket.handle(), Condition::Readable);
-	}
-
-	/**
-	 * Set the connection handler, called when the connection succeed.
-	 *
-	 * \param handler the handler
-	 */
-	inline void setConnectionHandler(ConnectionHandler handler)
-	{
-		m_onConnection = std::move(handler);
-	}
-
-	/**
-	 * Set the disconnection handler, called when the server closed the connection.
-	 *
-	 * \param handler the handler
-	 */
-	inline void setDisconnectionHandler(DisconnectionHandler handler)
-	{
-		m_onDisconnection = std::move(handler);
-	}
-
-	/**
-	 * Set the read handler, called when we received something.
-	 *
-	 * \param handler the handler
-	 */
-	inline void setReadHandler(ReadHandler handler)
-	{
-		m_onRead = std::move(handler);
-	}
-
-	/**
-	 * Set the write handler, called when we successfully sent data.
-	 *
-	 * \param handler the handler
-	 */
-	inline void setWriteHandler(WriteHandler handler)
-	{
-		m_onWrite = std::move(handler);
-	}
-
-	/**
-	 * Set the error handler, called when unexpected error occurs.
-	 *
-	 * \param handler the handler
-	 */
-	inline void setErrorHandler(ErrorHandler handler)
-	{
-		m_onError = std::move(handler);
-	}
-
-	/**
-	 * Connect to a server, this function may connect immediately or not in any case the connection handler
-	 * will be called when the connection completed.
-	 *
-	 * \param address the address to connect to
-	 */
-	void connect(const Address &address) noexcept
-	{
-		assert(m_socket.state() == State::Open);
-
-		processConnect([&] () { m_socket.connect(address); });
-	}
-
-	/**
-	 * Asynchronously send data to the server.
-	 *
-	 * \param str the data to append
-	 */
-	void send(std::string str)
-	{
-		m_output += str;
-
-		/* Don't update the listener if there is a pending operation */
-		if (m_socket.state() == State::Connected && m_socket.action() == Action::None && !m_output.empty()) {
-			m_listener.set(m_socket.handle(), Condition::Writable);
-		}
-	}
-
-	/**
-	 * Wait for the next event.
-	 *
-	 * \param timeout the time to wait in milliseconds
-	 * \throw Error on errors
-	 */
-	void poll(int timeout = -1) noexcept
-	{
-		try {
-			auto st = m_listener.wait(timeout);
-
-			if (m_socket.state() != State::Connected) {
-				/* Continue the connection */
-				processConnect([&] () { m_socket.connect(); });
-			} else {
-				/* Read / Write */
-				processSync(st.flags);
-			}
-		} catch (const Error &error) {
-			if (error.code() == Error::Timeout) {
-				m_onTimeout();
-			} else {
-				m_listener.remove(m_socket.handle());
-				m_onError(error);
-			}
-		}
-	}
-};
-
-/* }}} */
 
 } // !net
 

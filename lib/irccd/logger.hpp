@@ -24,11 +24,11 @@
  * \brief Logging facilities.
  */
 
-#include "sysconfig.hpp"
-
 #include <memory>
 #include <sstream>
 #include <utility>
+
+#include "sysconfig.hpp"
 
 namespace irccd {
 
@@ -161,17 +161,17 @@ public:
 	/**
 	 * \copydoc Interface::debug
 	 */
-	void debug(const std::string &line) override;
+	IRCCD_EXPORT void debug(const std::string &line) override;
 
 	/**
 	 * \copydoc Interface::info
 	 */
-	void info(const std::string &line) override;
+	IRCCD_EXPORT void info(const std::string &line) override;
 
 	/**
 	 * \copydoc Interface::warning
 	 */
-	void warning(const std::string &line) override;
+	IRCCD_EXPORT void warning(const std::string &line) override;
 };
 
 /*
@@ -194,22 +194,22 @@ public:
 	 * \param normal the path to the normal logs
 	 * \param errors the path to the errors logs
 	 */
-	File(std::string normal, std::string errors);
+	IRCCD_EXPORT File(std::string normal, std::string errors);
 
 	/**
 	 * \copydoc Interface::debug
 	 */
-	void debug(const std::string &line) override;
+	IRCCD_EXPORT void debug(const std::string &line) override;
 
 	/**
 	 * \copydoc Interface::info
 	 */
-	void info(const std::string &line) override;
+	IRCCD_EXPORT void info(const std::string &line) override;
 
 	/**
 	 * \copydoc Interface::warning
 	 */
-	void warning(const std::string &line) override;
+	IRCCD_EXPORT void warning(const std::string &line) override;
 };
 
 /*
@@ -227,17 +227,17 @@ public:
 	/**
 	 * \copydoc Interface::debug
 	 */
-	void debug(const std::string &line) override;
+	IRCCD_EXPORT void debug(const std::string &line) override;
 
 	/**
 	 * \copydoc Interface::info
 	 */
-	void info(const std::string &line) override;
+	IRCCD_EXPORT void info(const std::string &line) override;
 
 	/**
 	 * \copydoc Interface::warning
 	 */
-	void warning(const std::string &line) override;
+	IRCCD_EXPORT void warning(const std::string &line) override;
 };
 
 /*
@@ -255,27 +255,27 @@ public:
 	/**
 	 * Open the syslog.
 	 */
-	Syslog();
+	IRCCD_EXPORT Syslog();
 
 	/**
 	 * Close the syslog.
 	 */
-	~Syslog();
+	IRCCD_EXPORT ~Syslog();
 
 	/**
 	 * \copydoc Interface::debug
 	 */
-	void debug(const std::string &line) override;
+	IRCCD_EXPORT void debug(const std::string &line) override;
 
 	/**
 	 * \copydoc Interface::info
 	 */
-	void info(const std::string &line) override;
+	IRCCD_EXPORT void info(const std::string &line) override;
 
 	/**
 	 * \copydoc Interface::warning
 	 */
-	void warning(const std::string &line) override;
+	IRCCD_EXPORT void warning(const std::string &line) override;
 };
 
 #endif // !HAVE_SYSLOG
@@ -291,7 +291,7 @@ public:
  * \pre iface must not be null
  * \param iface the new interface
  */
-void setInterface(std::unique_ptr<Interface> iface) noexcept;
+IRCCD_EXPORT void setInterface(std::unique_ptr<Interface> iface) noexcept;
 
 /**
  * Set an optional filter.
@@ -299,7 +299,7 @@ void setInterface(std::unique_ptr<Interface> iface) noexcept;
  * \pre filter must not be null
  * \param filter the filter
  */
-void setFilter(std::unique_ptr<Filter> filter) noexcept;
+IRCCD_EXPORT void setFilter(std::unique_ptr<Filter> filter) noexcept;
 
 /**
  * Get the stream for informational messages.
@@ -310,7 +310,7 @@ void setFilter(std::unique_ptr<Filter> filter) noexcept;
  * \return the stream
  * \note Has no effect if verbose is set to false.
  */
-std::ostream &info(const std::string &message = "");
+IRCCD_EXPORT std::ostream &info(const std::string &message = "");
 
 /**
  * Get the stream for warnings.
@@ -320,7 +320,7 @@ std::ostream &info(const std::string &message = "");
  * \param message the optional message to write
  * \return the stream
  */
-std::ostream &warning(const std::string &message = "");
+IRCCD_EXPORT std::ostream &warning(const std::string &message = "");
 
 /**
  * Get the stream for debug messages.
@@ -331,21 +331,21 @@ std::ostream &warning(const std::string &message = "");
  * \return the stream
  * \note Has no effect if compiled in release mode.
  */
-std::ostream &debug(const std::string &message = "");
+IRCCD_EXPORT std::ostream &debug(const std::string &message = "");
 
 /**
  * Tells if verbose is enabled.
  *
  * \return true if enabled
  */
-bool isVerbose() noexcept;
+IRCCD_EXPORT bool isVerbose() noexcept;
 
 /**
  * Set the verbosity mode.
  *
  * \param mode the new mode
  */
-void setVerbose(bool mode) noexcept;
+IRCCD_EXPORT void setVerbose(bool mode) noexcept;
 
 } // !log
 

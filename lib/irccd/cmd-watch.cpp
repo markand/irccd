@@ -212,23 +212,21 @@ json::Value Watch::request(Irccdctl &ctl, const RemoteCommandRequest &request) c
 {
 	std::string format = request.optionOr("format", "native");
 
-	if (format != "native" && format != "json") {
+	if (format != "native" && format != "json")
 		throw std::invalid_argument("invalid format given: " + format);
-	}
 
 	while (ctl.connection().isConnected()) {
 		try {
 			auto object = ctl.connection().next(-1);
 			auto it = events.find(object.valueOr("event", "").toString());
 
-			/* Silently ignore to avoid breaking user output */
-			if (it == events.end()) {
+			// Silently ignore to avoid breaking user output.
+			if (it == events.end())
 				continue;
-			}
 
-			if (format == "json") {
+			if (format == "json")
 				std::cout << object.toJson() << std::endl;
-			} else {
+			else {
 				it->second(object);
 				std::cout << std::endl;
 			}

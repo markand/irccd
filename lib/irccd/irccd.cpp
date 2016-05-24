@@ -70,9 +70,8 @@ void Irccd::poll()
 	FD_ZERO(&setinput);
 	FD_ZERO(&setoutput);
 
-	for (const auto &service : m_services) {
+	for (const auto &service : m_services)
 		service->prepare(setinput, setoutput, max);
-	}
 
 	// Do the selection.
 	struct timeval tv;
@@ -83,9 +82,8 @@ void Irccd::poll()
 	int error = select(max + 1, &setinput, &setoutput, nullptr, &tv);
 
 	// Skip anyway if requested to stop
-	if (!m_running) {
+	if (!m_running)
 		return;
-	}
 
 	// Skip on error.
 	if (error < 0 && errno != EINTR) {
@@ -94,9 +92,8 @@ void Irccd::poll()
 	}
 
 	// Process after selection.
-	for (const auto &service : m_services) {
+	for (const auto &service : m_services)
 		service->sync(setinput, setoutput);
-	}
 }
 
 void Irccd::dispatch()
@@ -114,13 +111,11 @@ void Irccd::dispatch()
 		m_events.clear();
 	}
 
-	if (copy.size() > 0) {
+	if (copy.size() > 0)
 		log::debug() << "irccd: dispatching " << copy.size() << " event" << (copy.size() > 1 ? "s" : "") << endl;
-	}
 
-	for (auto &ev : copy) {
+	for (auto &ev : copy)
 		ev(*this);
-	}
 }
 
 void Irccd::stop()

@@ -65,17 +65,17 @@ public:
 	/**
 	 * Create the server service.
 	 */
-	ServerService(Irccd &instance);
+	IRCCD_EXPORT ServerService(Irccd &instance);
 
 	/**
 	 * \copydoc Service::prepare
 	 */
-	void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
+	IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
 
 	/**
 	 * \copydoc Service::sync
 	 */
-	void sync(fd_set &in, fd_set &out) override;
+	IRCCD_EXPORT void sync(fd_set &in, fd_set &out) override;
 
 	/**
 	 * Get the list of servers
@@ -93,7 +93,7 @@ public:
 	 * \param name the name
 	 * \return true if exists
 	 */
-	bool has(const std::string &name) const noexcept;
+	IRCCD_EXPORT bool has(const std::string &name) const noexcept;
 
 	/**
 	 * Add a new server to the application.
@@ -101,7 +101,7 @@ public:
 	 * \pre hasServer must return false
 	 * \param sv the server
 	 */
-	void add(std::shared_ptr<Server> sv);
+	IRCCD_EXPORT void add(std::shared_ptr<Server> sv);
 
 	/**
 	 * Get a server or empty one if not found
@@ -109,7 +109,7 @@ public:
 	 * \param name the server name
 	 * \return the server or empty one if not found
 	 */
-	std::shared_ptr<Server> get(const std::string &name) const noexcept;
+	IRCCD_EXPORT std::shared_ptr<Server> get(const std::string &name) const noexcept;
 
 	/**
 	 * Find a server by name.
@@ -118,8 +118,7 @@ public:
 	 * \return the server
 	 * \throw std::out_of_range if the server does not exist
 	 */
-	std::shared_ptr<Server> require(const std::string &name) const;
-
+	IRCCD_EXPORT std::shared_ptr<Server> require(const std::string &name) const;
 
 	/**
 	 * Remove a server from the irccd instance.
@@ -128,14 +127,14 @@ public:
 	 *
 	 * \param name the server name
 	 */
-	void remove(const std::string &name);
+	IRCCD_EXPORT void remove(const std::string &name);
 
 	/**
 	 * Remove all servers.
 	 *
 	 * All servers will be disconnected.
 	 */
-	void clear() noexcept;
+	IRCCD_EXPORT void clear() noexcept;
 };
 
 } // !irccd

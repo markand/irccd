@@ -31,6 +31,7 @@
 #include <thread>
 
 #include "signals.hpp"
+#include "sysconfig.hpp"
 
 namespace irccd {
 
@@ -102,14 +103,14 @@ public:
 	 * \param delay the delay in milliseconds
 	 * \post isRunning() returns false
 	 */
-	Timer(TimerType type, unsigned delay) noexcept;
+	IRCCD_EXPORT Timer(TimerType type, unsigned delay) noexcept;
 
 	/**
 	 * Destructor, closes the thread.
 	 *
 	 * \pre stop() must have been called.
 	 */
-	virtual ~Timer();
+	IRCCD_EXPORT virtual ~Timer();
 
 	/**
 	 * Start the thread.
@@ -119,14 +120,14 @@ public:
 	 * \pre onEnd() must have been called
 	 * \note Thread-safe
 	 */
-	void start();
+	IRCCD_EXPORT void start();
 
 	/**
 	 * Stop the timer, may be used by the user to stop it.
 	 *
 	 * \note Thread-safe
 	 */
-	void stop();
+	IRCCD_EXPORT void stop();
 
 	/**
 	 * Get the type of timer.

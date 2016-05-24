@@ -36,27 +36,27 @@ namespace command {
  */
 class ServerNick : public RemoteCommand {
 public:
-	ServerNick();
+	IRCCD_EXPORT ServerNick();
 
 	/**
 	 * \copydoc RemoteCommand::help
 	 */
-	std::string help() const override;
+	IRCCD_EXPORT std::string help() const override;
 
 	/**
 	 * \copydoc RemoteCommand::args
 	 */
-	std::vector<Arg> args() const override;
+	IRCCD_EXPORT std::vector<Arg> args() const override;
 
 	/**
 	 * \copydoc RemoteCommand::request
 	 */
-	json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const override;
+	IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const override;
 
 	/**
 	 * \copydoc RemoteCommand::exec
 	 */
-	json::Value exec(Irccd &irccd, const json::Value &request) const override;
+	IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };
 
 } // !command

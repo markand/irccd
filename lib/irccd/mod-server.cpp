@@ -91,13 +91,12 @@ duk::Ret info(duk::ContextPtr ctx)
 	duk::putProperty(ctx, -1, "nickname", server->identity().nickname);
 	duk::putProperty(ctx, -1, "username", server->identity().username);
 
-	/* Channels */
+	// Channels.
 	duk::push(ctx, duk::Array{});
 
 	int i = 0;
-	for (const auto &channel : server->settings().channels) {
+	for (const auto &channel : server->settings().channels)
 		duk::putProperty(ctx, -1, i++, channel.name);
-	}
 
 	duk::putProperty(ctx, -2, "channels");
 
@@ -390,19 +389,16 @@ duk::Ret constructor(duk::ContextPtr ctx)
 	identity.ctcpversion = duk::optionalProperty<std::string>(ctx, 0, "version", identity.ctcpversion);
 
 	// Settings part.
-	for (const auto &chan: duk::getProperty<std::vector<std::string>>(ctx, 0, "channels")) {
+	for (const auto &chan: duk::getProperty<std::vector<std::string>>(ctx, 0, "channels"))
 		settings.channels.push_back(Server::splitChannel(chan));
-	}
 
 	settings.reconnectTries = duk::optionalProperty<int>(ctx, 0, "recoTries", (int)settings.reconnectTries);
 	settings.reconnectDelay = duk::optionalProperty<int>(ctx, 0, "recoTimeout", (int)settings.reconnectDelay);
 
-	if (duk::optionalProperty<bool>(ctx, 0, "joinInvite", false)) {
+	if (duk::optionalProperty<bool>(ctx, 0, "joinInvite", false))
 		settings.flags |= ServerSettings::JoinInvite;
-	}
-	if (duk::optionalProperty<bool>(ctx, 0, "autoRejoin", false)) {
+	if (duk::optionalProperty<bool>(ctx, 0, "autoRejoin", false))
 		settings.flags |= ServerSettings::AutoRejoin;
-	}
 
 	try {
 		duk::construct(ctx, duk::Shared<Server>{std::make_shared<Server>(std::move(name), std::move(info),
@@ -427,9 +423,8 @@ duk::Ret add(duk::ContextPtr ctx)
 {
 	auto server = duk::get<duk::Shared<Server>>(ctx, 0);
 
-	if (server) {
+	if (server)
 		duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->serverService().add(server);
-	}
 
 	return 0;
 }
@@ -472,9 +467,8 @@ duk::Ret list(duk::ContextPtr ctx)
 {
 	duk::push(ctx, duk::Object{});
 
-	for (const auto &server : duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->serverService().servers()) {
+	for (const auto &server : duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->serverService().servers())
 		duk::putProperty(ctx, -1, server->name(), duk::Shared<Server>{server});
-	}
 
 	return 1;
 }

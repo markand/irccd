@@ -26,6 +26,8 @@
 
 #include <chrono>
 
+#include "sysconfig.hpp"
+
 namespace irccd {
 
 /**
@@ -50,7 +52,7 @@ public:
 	/**
 	 * Construct the elapsed timer, start counting.
 	 */
-	ElapsedTimer() noexcept;
+	IRCCD_EXPORT ElapsedTimer() noexcept;
 
 	/**
 	 * Virtual destructor defaulted.
@@ -60,24 +62,24 @@ public:
 	/**
 	 * Put the timer on pause, the already elapsed time is stored.
 	 */
-	void pause() noexcept;
+	IRCCD_EXPORT void pause() noexcept;
 
 	/**
 	 * Restart the timer, does not reset it.
 	 */
-	void restart() noexcept;
+	IRCCD_EXPORT void restart() noexcept;
 
 	/**
 	 * Reset the timer to 0.
 	 */
-	void reset() noexcept;
+	IRCCD_EXPORT void reset() noexcept;
 
 	/**
 	 * Get the number of elapsed milliseconds.
 	 *
 	 * \return the milliseconds
 	 */
-	unsigned elapsed() noexcept;
+	IRCCD_EXPORT unsigned elapsed() noexcept;
 };
 
 } // !irccd

@@ -71,7 +71,7 @@ void PluginInfo::result(Irccdctl &irccdctl, const json::Value &result) const
 {
 	RemoteCommand::result(irccdctl, result);
 
-	/* Plugin information */
+	// Plugin information.
 	if (result.valueOr("status", false).toBool()) {
 		std::cout << std::boolalpha;
 		std::cout << "Author         : " << result.valueOr("author", "").toString(true) << std::endl;

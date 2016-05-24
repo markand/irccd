@@ -36,12 +36,12 @@ public:
 	/**
 	 * Irccd.Plugin.
 	 */
-	PluginModule() noexcept;
+	IRCCD_EXPORT PluginModule() noexcept;
 
 	/**
 	 * \copydoc Module::load
 	 */
-	virtual void load(Irccd &irccd, JsPlugin &plugin);
+	IRCCD_EXPORT virtual void load(Irccd &irccd, JsPlugin &plugin);
 };
 
 } // !irccd

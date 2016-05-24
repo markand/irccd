@@ -189,12 +189,12 @@ public:
 	/**
 	 * Irccd.File.
 	 */
-	FileModule() noexcept;
+	IRCCD_EXPORT FileModule() noexcept;
 
 	/**
 	 * \copydoc Module::load
 	 */
-	void load(Irccd &irccd, JsPlugin &plugin) override;
+	IRCCD_EXPORT void load(Irccd &irccd, JsPlugin &plugin) override;
 };
 
 } // !irccd

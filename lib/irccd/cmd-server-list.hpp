@@ -36,16 +36,16 @@ namespace command {
  */
 class ServerList : public RemoteCommand {
 public:
-	ServerList();
+	IRCCD_EXPORT ServerList();
 
 	/**
 	 * \copydoc RemoteCommand::help
 	 */
-	std::string help() const override;
+	IRCCD_EXPORT std::string help() const override;
 
-	json::Value exec(Irccd &irccd, const json::Value &request) const override;
+	IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
 
-	void result(Irccdctl &irccdctl, const json::Value &response) const override;
+	IRCCD_EXPORT void result(Irccdctl &irccdctl, const json::Value &response) const override;
 };
 
 } // !command

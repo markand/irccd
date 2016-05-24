@@ -54,9 +54,8 @@ void handleSignal(std::weak_ptr<JsPlugin> ptr, std::string key)
 {
 	auto plugin = ptr.lock();
 
-	if (!plugin) {
+	if (!plugin)
 		return;
-	}
 
 	auto irccd = duk::getGlobal<duk::RawPointer<Irccd>>(plugin->context(), "\xff""\xff""irccd");
 
@@ -68,14 +67,12 @@ void handleSignal(std::weak_ptr<JsPlugin> ptr, std::string key)
 		duk::remove(plugin->context(), -2);
 
 		if (duk::is<duk::Function>(plugin->context(), -1)) {
-			if (duk::pcall(plugin->context()) != 0) {
+			if (duk::pcall(plugin->context()) != 0)
 				log::warning("plugin {}: {}"_format(plugin->name(), duk::error(plugin->context(), -1).stack));
-			}
 
 			duk::pop(plugin->context());
-		} else {
+		} else
 			duk::pop(plugin->context());
-		}
 	});
 }
 
@@ -89,9 +86,8 @@ duk::Ret start(duk::ContextPtr ctx)
 {
 	auto timer = duk::self<duk::Shared<Timer>>(ctx);
 
-	if (!timer->isRunning()) {
+	if (!timer->isRunning())
 		timer->start();
-	}
 
 	return 0;
 }
@@ -106,9 +102,8 @@ duk::Ret stop(duk::ContextPtr ctx)
 {
 	auto timer = duk::self<duk::Shared<Timer>>(ctx);
 
-	if (timer->isRunning()) {
+	if (timer->isRunning())
 		timer->stop();
-	}
 
 	return 0;
 }
@@ -135,15 +130,12 @@ duk::Ret constructor(duk::ContextPtr ctx)
 	auto type = duk::require<int>(ctx, 0);
 	auto delay = duk::require<int>(ctx, 1);
 
-	if (type < static_cast<int>(TimerType::Single) || type > static_cast<int>(TimerType::Repeat)) {
+	if (type < static_cast<int>(TimerType::Single) || type > static_cast<int>(TimerType::Repeat))
 		duk::raise(ctx, DUK_ERR_TYPE_ERROR, "invalid timer type");
-	}
-	if (delay < 0) {
+	if (delay < 0)
 		duk::raise(ctx, DUK_ERR_TYPE_ERROR, "negative delay given");
-	}
-	if (!duk::is<duk::Function>(ctx, 2)) {
+	if (!duk::is<duk::Function>(ctx, 2))
 		duk::raise(ctx, DUK_ERR_TYPE_ERROR, "missing callback function");
-	}
 
 	// Construct the timer in 'this'.
 	auto timer = std::make_shared<Timer>(static_cast<TimerType>(type), delay);

@@ -51,9 +51,8 @@ json::Value ServerJoin::request(Irccdctl &, const RemoteCommandRequest &args) co
 		{ "channel", args.args()[1] }
 	});
 
-	if (args.length() == 3) {
+	if (args.length() == 3)
 		req.insert("password", args.args()[2]);
-	}
 
 	return req;
 }

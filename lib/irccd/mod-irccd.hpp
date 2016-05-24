@@ -47,7 +47,7 @@ public:
 	/**
 	 * Create a system error from the current errno value.
 	 */
-	SystemError();
+	IRCCD_EXPORT SystemError();
 
 	/**
 	 * Create a system error with the given errno and message.
@@ -55,14 +55,14 @@ public:
 	 * \param e the errno number
 	 * \param message the message
 	 */
-	SystemError(int e, std::string message);
+	IRCCD_EXPORT SystemError(int e, std::string message);
 
 	/**
 	 * Raise the SystemError.
 	 *
 	 * \param ctx the context
 	 */
-	void raise(duk::ContextPtr ctx) const;
+	IRCCD_EXPORT void raise(duk::ContextPtr ctx) const;
 };
 
 /**
@@ -73,12 +73,12 @@ public:
 	/**
 	 * Irccd.
 	 */
-	IrccdModule() noexcept;
+	IRCCD_EXPORT IrccdModule() noexcept;
 
 	/**
 	 * \copydoc Module::load
 	 */
-	void load(Irccd &irccd, JsPlugin &plugin) override;
+	IRCCD_EXPORT void load(Irccd &irccd, JsPlugin &plugin) override;
 };
 
 } // !irccd

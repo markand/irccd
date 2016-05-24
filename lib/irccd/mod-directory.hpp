@@ -38,12 +38,12 @@ public:
 	/**
 	 * Irccd.Directory.
 	 */
-	DirectoryModule() noexcept;
+	IRCCD_EXPORT DirectoryModule() noexcept;
 
 	/**
 	 * \copydoc Module::load
 	 */
-	virtual void load(Irccd &irccd, JsPlugin &plugin);
+	IRCCD_EXPORT void load(Irccd &irccd, JsPlugin &plugin) override;
 };
 
 } // !irccd

@@ -36,19 +36,19 @@ namespace command {
  */
 class Watch : public RemoteCommand {
 public:
-	Watch();
+	IRCCD_EXPORT Watch();
 
-	std::vector<Option> options() const override;
+	IRCCD_EXPORT std::vector<Option> options() const override;
 
 	/**
 	 * \copydoc RemoteCommand::help
 	 */
-	std::string help() const override;
+	IRCCD_EXPORT std::string help() const override;
 
 	/**
 	 * \copydoc RemoteCommand::request
 	 */
-	json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &request) const override;
+	IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &request) const override;
 };
 
 } // !command

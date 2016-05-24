@@ -26,9 +26,8 @@ void TransportClient::parse(const std::string &message)
 {
 	json::Value document(json::Buffer{message});
 
-	if (!document.isObject()) {
+	if (!document.isObject())
 		throw std::invalid_argument("the message is not a valid JSON object");
-	}
 
 	onCommand(document);
 }

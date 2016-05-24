@@ -68,9 +68,8 @@ bool RuleService::solve(const std::string &server,
 			     << "    events: " << util::join(rule.events().begin(), rule.events().end()) << "\n"
 			     << "    action: " << ((rule.action() == RuleAction::Accept) ? "accept" : "drop") << std::endl;
 
-		if (rule.match(server, channel, origin, plugin, event)) {
+		if (rule.match(server, channel, origin, plugin, event))
 			result = rule.action() == RuleAction::Accept;
-		}
 	}
 
 	return result;

@@ -107,9 +107,8 @@ namespace {
 /* Remove trailing \r for CRLF line style */
 inline std::string clearCr(std::string input)
 {
-	if (input.length() > 0 && input.back() == '\r') {
+	if (input.length() > 0 && input.back() == '\r')
 		input.pop_back();
-	}
 
 	return input;
 }
@@ -195,15 +194,13 @@ duk::Ret methodLines(duk::ContextPtr ctx)
 		}
 	}
 
-	/* Maybe an error in the stream */
-	if (std::ferror(fp)) {
+	// Maybe an error in the stream.
+	if (std::ferror(fp))
 		duk::raise(ctx, SystemError());
-	}
 
-	/* Missing '\n' in end of file */
-	if (!buffer.empty()) {
+	// Missing '\n' in end of file.
+	if (!buffer.empty())
 		duk::putProperty(ctx, -1, i++, clearCr(buffer));
-	}
 
 	return 1;
 }
@@ -226,9 +223,8 @@ duk::Ret methodRead(duk::ContextPtr ctx)
 	auto amount = duk::optional<int>(ctx, 0, -1);
 	auto file = duk::self<duk::Pointer<File>>(ctx);
 
-	if (amount == 0 || file->handle() == nullptr) {
+	if (amount == 0 || file->handle() == nullptr)
 		return 0;
-	}
 
 	try {
 		std::string data;
@@ -241,9 +237,8 @@ duk::Ret methodRead(duk::ContextPtr ctx)
 			while (!std::feof(file->handle())) {
 				nread = std::fread(&buffer[0], sizeof (buffer[0]), buffer.size(), file->handle());
 
-				if (std::ferror(file->handle())) {
+				if (std::ferror(file->handle()))
 					duk::raise(ctx, SystemError());
-				}
 
 				std::copy(buffer.begin(), buffer.begin() + nread, std::back_inserter(data));
 				total += nread;
@@ -252,9 +247,8 @@ duk::Ret methodRead(duk::ContextPtr ctx)
 			data.resize((std::size_t)amount);
 			total = std::fread(&data[0], sizeof (data[0]), (std::size_t)amount, file->handle());
 
-			if (std::ferror(file->handle())) {
+			if (std::ferror(file->handle()))
 				duk::raise(ctx, SystemError());
-			}
 
 			data.resize(total);
 		}
@@ -283,17 +277,12 @@ duk::Ret methodReadline(duk::ContextPtr ctx)
 	std::FILE *fp = duk::self<duk::Pointer<File>>(ctx)->handle();
 	std::string result;
 
-	if (fp == nullptr || std::feof(fp)) {
+	if (fp == nullptr || std::feof(fp))
 		return 0;
-	}
-
-	for (int ch; (ch = std::fgetc(fp)) != EOF && ch != '\n'; ) {
+	for (int ch; (ch = std::fgetc(fp)) != EOF && ch != '\n'; )
 		result += (char)ch;
-	}
-
-	if (std::ferror(fp)) {
+	if (std::ferror(fp))
 		duk::raise(ctx, SystemError());
-	}
 
 	duk::push(ctx, clearCr(result));
 
@@ -311,9 +300,8 @@ duk::Ret methodReadline(duk::ContextPtr ctx)
  */
 duk::Ret methodRemove(duk::ContextPtr ctx)
 {
-	if (::remove(duk::self<duk::Pointer<File>>(ctx)->path().c_str()) < 0) {
+	if (::remove(duk::self<duk::Pointer<File>>(ctx)->path().c_str()) < 0)
 		duk::raise(ctx, SystemError());
-	}
 
 	return 0;
 }
@@ -336,9 +324,8 @@ duk::Ret methodSeek(duk::ContextPtr ctx)
 	auto amount = duk::require<int>(ctx, 1);
 	auto fp = duk::self<duk::Pointer<File>>(ctx)->handle();
 
-	if (fp != nullptr && std::fseek(fp, amount, type) != 0) {
+	if (fp != nullptr && std::fseek(fp, amount, type) != 0)
 		duk::raise(ctx, SystemError());
-	}
 
 	return 0;
 }
@@ -361,11 +348,10 @@ duk::Ret methodStat(duk::ContextPtr ctx)
 	struct stat st;
 	auto file = duk::self<duk::Pointer<File>>(ctx);
 
-	if (file->handle() == nullptr && ::stat(file->path().c_str(), &st) < 0) {
+	if (file->handle() == nullptr && ::stat(file->path().c_str(), &st) < 0)
 		duk::raise(ctx, SystemError());
-	} else {
+	else
 		duk::push(ctx, st);
-	}
 
 	return 1;
 }
@@ -388,15 +374,13 @@ duk::Ret methodTell(duk::ContextPtr ctx)
 	auto fp = duk::self<duk::Pointer<File>>(ctx)->handle();
 	long pos;
 
-	if (fp == nullptr) {
+	if (fp == nullptr)
 		return 0;
-	}
 
-	if ((pos = std::ftell(fp)) == -1L) {
+	if ((pos = std::ftell(fp)) == -1L)
 		duk::raise(ctx, SystemError());
-	} else {
+	else
 		duk::push(ctx, (int)pos);
-	}
 
 	return 1;
 }
@@ -419,15 +403,13 @@ duk::Ret methodWrite(duk::ContextPtr ctx)
 	std::FILE *fp = duk::self<duk::Pointer<File>>(ctx)->handle();
 	std::string data = duk::require<std::string>(ctx, 0);
 
-	if (fp == nullptr) {
+	if (fp == nullptr)
 		return 0;
-	}
 
 	std::size_t nwritten = std::fwrite(data.c_str(), 1, data.length(), fp);
 
-	if (std::ferror(fp)) {
+	if (std::ferror(fp))
 		duk::raise(ctx, SystemError());
-	}
 
 	duk::push(ctx, (int)nwritten);
 
@@ -469,9 +451,8 @@ const duk::FunctionMap methods{
  */
 duk::Ret constructor(duk::ContextPtr ctx)
 {
-	if (!duk_is_constructor_call(ctx)) {
+	if (!duk_is_constructor_call(ctx))
 		return 0;
-	}
 
 	std::string path = duk::require<std::string>(ctx, 0);
 	std::string mode = duk::require<std::string>(ctx, 1);
@@ -554,9 +535,8 @@ duk::Ret functionExists(duk::ContextPtr ctx)
  */
 duk::Ret functionRemove(duk::ContextPtr ctx)
 {
-	if (::remove(duk::require<std::string>(ctx, 0).c_str()) < 0) {
+	if (::remove(duk::require<std::string>(ctx, 0).c_str()) < 0)
 		duk::raise(ctx, SystemError());
-	}
 
 	return 0;
 }
@@ -580,9 +560,8 @@ duk::Ret functionStat(duk::ContextPtr ctx)
 {
 	struct stat st;
 
-	if (::stat(duk::require<std::string>(ctx, 0).c_str(), &st) < 0) {
+	if (::stat(duk::require<std::string>(ctx, 0).c_str(), &st) < 0)
 		duk::raise(ctx, SystemError());
-	}
 
 	duk::push(ctx, st);
 

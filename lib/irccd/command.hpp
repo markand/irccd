@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "json.hpp"
+#include "sysconfig.hpp"
 
 namespace irccd {
 
@@ -267,7 +268,7 @@ public:
 	 *
 	 * \return the usage
 	 */
-	std::string usage() const;
+	IRCCD_EXPORT std::string usage() const;
 
 	/**
 	 * Return the help message.
@@ -301,14 +302,14 @@ public:
 	 *
 	 * \return the minimum
 	 */
-	unsigned min() const noexcept;
+	IRCCD_EXPORT unsigned min() const noexcept;
 
 	/**
 	 * Get the maximum number of arguments required.
 	 *
 	 * \return the maximum
 	 */
-	unsigned max() const noexcept;
+	IRCCD_EXPORT unsigned max() const noexcept;
 
 	/**
 	 * Prepare a JSON request to the daemon.
@@ -322,7 +323,7 @@ public:
 	 * \return the JSON object to send to the daemon
 	 * \post the returned JSON value must be an object
 	 */
-	virtual json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const;
+	IRCCD_EXPORT virtual json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const;
 
 	/**
 	 * Execute the command in the daemon.
@@ -338,7 +339,7 @@ public:
 	 * \param request the JSON request
 	 * \return the response
 	 */
-	virtual json::Value exec(Irccd &irccd, const json::Value &request) const;
+	IRCCD_EXPORT virtual json::Value exec(Irccd &irccd, const json::Value &request) const;
 
 	/**
 	 * What to do when receiving the response from irccd.
@@ -348,7 +349,7 @@ public:
 	 * \param irccdctl the irccdctl instan e
 	 * \param response the JSON response
 	 */
-	virtual void result(Irccdctl &irccdctl, const json::Value &response) const;
+	IRCCD_EXPORT virtual void result(Irccdctl &irccdctl, const json::Value &response) const;
 };
 
 /**

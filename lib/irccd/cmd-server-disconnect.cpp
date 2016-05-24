@@ -44,11 +44,10 @@ json::Value ServerDisconnect::exec(Irccd &irccd, const json::Value &request) con
 {
 	auto it = request.find("server");
 
-	if (it == request.end()) {
+	if (it == request.end())
 		irccd.serverService().clear();
-	} else {
+	else
 		irccd.serverService().remove(it->toString());
-	}
 
 	return RemoteCommand::exec(irccd, request);
 }

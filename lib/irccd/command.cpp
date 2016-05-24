@@ -34,37 +34,35 @@ std::string RemoteCommand::usage() const
 
 	oss << "usage: " << sys::programName() << " " << m_name;
 
-	/* Options summary */
-	if (options().size() > 0) {
+	// Options summary.
+	if (options().size() > 0)
 		oss << " [options...]";
-	}
 
-	/* Arguments summary */
+	// Arguments summary.
 	if (args().size() > 0) {
 		oss << " ";
 
-		for (const auto &arg : args()) {
+		for (const auto &arg : args())
 			oss << (arg.required() ? "" : "[") << arg.name() << (arg.required() ? "" : "]") << " ";
-		}
 	}
 
-	/* Description */
+	// Description.
 	oss << "\n\n" << help() << "\n\n";
 
-	/* Options */
+	// Options.
 	if (options().size() > 0) {
 		oss << "Options:\n";
 
 		for (const auto &opt : options()) {
 			std::ostringstream optoss;
 
-			/* Construct the line for the option in a single string to pad it correctly */
+			// Construct the line for the option in a single string to pad it correctly.
 			optoss << "  ";
 			optoss << (!opt.simpleKey().empty() ? ("-"s + opt.simpleKey() + " ") : "   ");
 			optoss << (!opt.longKey().empty() ? ("--"s + opt.longKey() + " "s) : "");
 			optoss << opt.arg();
 
-			/* Add it padded with spaces */
+			// Add it padded with spaces.
 			oss << std::left << std::setw(28) << optoss.str();
 			oss << opt.description() << "\n";
 		}
@@ -101,9 +99,8 @@ void RemoteCommand::result(Irccdctl &, const json::Value &response) const
 {
 	auto it = response.find("error");
 
-	if (it != response.end() && it->isString()) {
+	if (it != response.end() && it->isString())
 		log::warning() << "irccdctl: " << it->toString() << std::endl;
-	}
 }
 
 } // !irccd

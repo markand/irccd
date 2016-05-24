@@ -25,6 +25,8 @@
  */
 
 #include "sockets.hpp"
+#include "sysconfig.hpp"
+#include "util.hpp"
 
 namespace irccd {
 
@@ -60,9 +62,7 @@ public:
 	 */
 	virtual void prepare(fd_set &in, fd_set &out, net::Handle &max)
 	{
-		(void)in;
-		(void)out;
-		(void)max;
+		util::unused(in, out, max);
 	}
 
 	/**
@@ -73,8 +73,7 @@ public:
 	 */
 	virtual void sync(fd_set &in, fd_set &out)
 	{
-		(void)in;
-		(void)out;
+		util::unused(in, out);
 	}
 };
 

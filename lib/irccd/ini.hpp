@@ -110,6 +110,8 @@
 #include <string>
 #include <vector>
 
+#include "sysconfig.hpp"
+
 namespace irccd {
 
 /**
@@ -559,7 +561,7 @@ public:
  * \return the list of tokens
  * \throws Error on errors
  */
-Tokens analyse(std::istreambuf_iterator<char> it, std::istreambuf_iterator<char> end);
+IRCCD_EXPORT Tokens analyse(std::istreambuf_iterator<char> it, std::istreambuf_iterator<char> end);
 
 /**
  * Overloaded function for stream.
@@ -568,7 +570,7 @@ Tokens analyse(std::istreambuf_iterator<char> it, std::istreambuf_iterator<char>
  * \return the list of tokens
  * \throws Error on errors
  */
-Tokens analyse(std::istream &stream);
+IRCCD_EXPORT Tokens analyse(std::istream &stream);
 
 /**
  * Parse the produced tokens.
@@ -578,7 +580,7 @@ Tokens analyse(std::istream &stream);
  * \return the document
  * \throw Error on errors
  */
-Document parse(const Tokens &tokens, const std::string &path = ".");
+IRCCD_EXPORT Document parse(const Tokens &tokens, const std::string &path = ".");
 
 /**
  * Parse a file.
@@ -587,7 +589,7 @@ Document parse(const Tokens &tokens, const std::string &path = ".");
  * \return the document
  * \throw Error on errors
  */
-Document readFile(const std::string &filename);
+IRCCD_EXPORT Document readFile(const std::string &filename);
 
 /**
  * Parse a string.
@@ -598,14 +600,14 @@ Document readFile(const std::string &filename);
  * \return the document
  * \throw Error on errors
  */
-Document readString(const std::string &buffer);
+IRCCD_EXPORT Document readString(const std::string &buffer);
 
 /**
  * Show all tokens and their description.
  *
  * \param tokens the tokens
  */
-void dump(const Tokens &tokens);
+IRCCD_EXPORT void dump(const Tokens &tokens);
 
 } // !ini
 

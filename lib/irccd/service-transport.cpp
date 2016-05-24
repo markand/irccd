@@ -32,9 +32,8 @@ void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const j
 		// 0. Be sure the object still exists.
 		auto tc = ptr.lock();
 
-		if (!tc) {
+		if (!tc)
 			return;
-		}
 
 		// 1. Check if the Json object is valid.
 		auto name = object.find("command");
@@ -85,9 +84,8 @@ void TransportService::handleDie(std::weak_ptr<TransportClient> ptr)
 
 		auto tc = ptr.lock();
 
-		if (tc) {
+		if (tc)
 			m_clients.erase(std::find(m_clients.begin(), m_clients.end(), tc));
-		}
 	});
 }
 
@@ -102,21 +100,18 @@ void TransportService::prepare(fd_set &in, fd_set &out, net::Handle &max)
 	for (const auto &transport : m_servers) {
 		FD_SET(transport->handle(), &in);
 
-		if (transport->handle() > max) {
+		if (transport->handle() > max)
 			max = transport->handle();
-		}
 	}
 
 	// Transport clients.
 	for (const auto &client : m_clients) {
 		FD_SET(client->handle(), &in);
 
-		if (client->hasOutput()) {
+		if (client->hasOutput())
 			FD_SET(client->handle(), &out);
-		}
-		if (client->handle() > max) {
+		if (client->handle() > max)
 			max = client->handle();
-		}
 	}
 }
 
@@ -126,9 +121,8 @@ void TransportService::sync(fd_set &in, fd_set &out)
 
 	// Transport servers.
 	for (const auto &transport : m_servers) {
-		if (!FD_ISSET(transport->handle(), &in)) {
+		if (!FD_ISSET(transport->handle(), &in))
 			continue;
-		}
 
 		log::debug("transport: new client connected");
 
@@ -174,9 +168,8 @@ void TransportService::add(std::shared_ptr<TransportServer> ts)
 void TransportService::broadcast(std::string data)
 {
 	// Asynchronous send.
-	for (const auto &client : m_clients) {
+	for (const auto &client : m_clients)
 		client->send(data);
-	}
 }
 
 } // !irccd

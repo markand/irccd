@@ -27,11 +27,10 @@ AliasArg::AliasArg(std::string value)
 {
 	assert(!value.empty());
 
-	if ((m_isPlaceholder = std::regex_match(value, std::regex("^%\\d+$")))) {
+	if ((m_isPlaceholder = std::regex_match(value, std::regex("^%\\d+$")))) 
 		m_value = value.substr(1);
-	} else {
+	else
 		m_value = std::move(value);
-	}
 }
 
 unsigned AliasArg::index() const noexcept
@@ -50,11 +49,10 @@ const std::string &AliasArg::value() const noexcept
 
 std::ostream &operator<<(std::ostream &out, const AliasArg &arg)
 {
-	if (arg.m_isPlaceholder) {
+	if (arg.m_isPlaceholder)
 		out << "%" << arg.m_value;
-	} else {
+	else
 		out << arg.m_value;
-	}
 
 	return out;
 }

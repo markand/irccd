@@ -38,9 +38,8 @@ void ServerService::handleChannelMode(std::weak_ptr<Server> ptr, std::string ori
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server) {
+	if (!server)
 		return;
-	}
 
 	log::debug() << "server " << server->name() << ": event onChannelMode:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -74,9 +73,8 @@ void ServerService::handleChannelNotice(std::weak_ptr<Server> ptr, std::string o
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server) {
+	if (!server)
 		return;
-	}
 
 	log::debug() << "server " << server->name() << ": event onChannelNotice:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -107,9 +105,8 @@ void ServerService::handleConnect(std::weak_ptr<Server> ptr)
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server) {
+	if (!server)
 		return;
-	}
 
 	log::debug() << "server " << server->name() << ": event onConnect" << std::endl;
 
@@ -134,9 +131,8 @@ void ServerService::handleInvite(std::weak_ptr<Server> ptr, std::string origin, 
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server) {
+	if (!server)
 		return;
-	}
 
 	log::debug() << "server " << server->name() << ": event onInvite:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -166,9 +162,8 @@ void ServerService::handleJoin(std::weak_ptr<Server> ptr, std::string origin, st
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server) {
+	if (!server)
 		return;
-	}
 
 	log::debug() << "server " << server->name() << ": event onJoin:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -197,9 +192,8 @@ void ServerService::handleKick(std::weak_ptr<Server> ptr, std::string origin, st
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server) {
+	if (!server)
 		return;
-	}
 
 	log::debug() << "server " << server->name() << ": event onKick:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -232,9 +226,8 @@ void ServerService::handleMessage(std::weak_ptr<Server> ptr, std::string origin,
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server) {
+	if (!server)
 		return;
-	}
 
 	log::debug() << "server " << server->name() << ": event onMessage:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -270,9 +263,8 @@ void ServerService::handleMe(std::weak_ptr<Server> ptr, std::string origin, std:
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server) {
+	if (!server)
 		return;
-	}
 
 	log::debug() << "server " << server->name() << ": event onMe:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -303,9 +295,8 @@ void ServerService::handleMode(std::weak_ptr<Server> ptr, std::string origin, st
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server) {
+	if (!server)
 		return;
-	}
 
 	log::debug() << "server " << server->name() << ": event onMode\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -334,9 +325,8 @@ void ServerService::handleNames(std::weak_ptr<Server> ptr, std::string channel, 
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server) {
+	if (!server)
 		return;
-	}
 
 	log::debug() << "server " << server->name() << ": event onNames:\n";
 	log::debug() << "  channel: " << channel << "\n";
@@ -367,9 +357,8 @@ void ServerService::handleNick(std::weak_ptr<Server> ptr, std::string origin, st
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server) {
+	if (!server)
 		return;
-	}
 
 	log::debug() << "server " << server->name() << ": event onNick:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -398,9 +387,8 @@ void ServerService::handleNotice(std::weak_ptr<Server> ptr, std::string origin, 
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server) {
+	if (!server)
 		return;
-	}
 
 	log::debug() << "server " << server->name() << ": event onNotice:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -429,9 +417,8 @@ void ServerService::handlePart(std::weak_ptr<Server> ptr, std::string origin, st
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server) {
+	if (!server)
 		return;
-	}
 
 	log::debug() << "server " << server->name() << ": event onPart:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -462,9 +449,8 @@ void ServerService::handleQuery(std::weak_ptr<Server> ptr, std::string origin, s
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server) {
+	if (!server)
 		return;
-	}
 
 	log::debug() << "server " << server->name() << ": event onQuery:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -498,9 +484,8 @@ void ServerService::handleTopic(std::weak_ptr<Server> ptr, std::string origin, s
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server) {
+	if (!server)
 		return;
-	}
 
 	log::debug() << "server " << server->name() << ": event onTopic:\n";
 	log::debug() << "  origin: " << origin << "\n";
@@ -531,9 +516,8 @@ void ServerService::handleWhois(std::weak_ptr<Server> ptr, ServerWhois whois)
 {
 	std::shared_ptr<Server> server = ptr.lock();
 
-	if (!server) {
+	if (!server)
 		return;
-	}
 
 	log::debug() << "server " << server->name() << ": event onWhois\n";
 	log::debug() << "  nickname: " << whois.nick << "\n";
@@ -577,9 +561,8 @@ void ServerService::prepare(fd_set &in, fd_set &out, net::Handle &max)
 
 void ServerService::sync(fd_set &in, fd_set &out)
 {
-	for (auto &server : m_servers) {
+	for (auto &server : m_servers)
 		server->sync(in, out);
-	}
 }
 
 bool ServerService::has(const std::string &name) const noexcept
@@ -633,9 +616,8 @@ std::shared_ptr<Server> ServerService::get(const std::string &name) const noexce
 		return server->name() == name;
 	});
 
-	if (it == m_servers.end()) {
+	if (it == m_servers.end())
 		return nullptr;
-	}
 
 	return *it;
 }
@@ -644,9 +626,8 @@ std::shared_ptr<Server> ServerService::require(const std::string &name) const
 {
 	auto server = get(name);
 
-	if (!server) {
+	if (!server)
 		throw std::invalid_argument("server {} not found"_format(name));
-	}
 
 	return server;
 }
@@ -665,9 +646,8 @@ void ServerService::remove(const std::string &name)
 
 void ServerService::clear() noexcept
 {
-	for (auto &server : m_servers) {
+	for (auto &server : m_servers)
 		server->disconnect();
-	}
 
 	m_servers.clear();
 }

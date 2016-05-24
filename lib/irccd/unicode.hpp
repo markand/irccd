@@ -27,12 +27,14 @@
 #include <stdexcept>
 #include <string>
 
+#include "sysconfig.hpp"
+
 namespace irccd {
 
 namespace unicode {
 
-void encode(char32_t point, char res[5]) noexcept;
-void decode(char32_t &c, const char *res) noexcept;
+IRCCD_EXPORT void encode(char32_t point, char res[5]) noexcept;
+IRCCD_EXPORT void decode(char32_t &c, const char *res) noexcept;
 
 /**
  * Get the number of bytes for the first multi byte character from a
@@ -44,7 +46,7 @@ void decode(char32_t &c, const char *res) noexcept;
  * \param c the first multi byte character
  * \return the number of bytes [1-4]
  */
-int nbytesUtf8(char c) noexcept;
+IRCCD_EXPORT int nbytesUtf8(char c) noexcept;
 
 /**
  * Get the number of bytes for the unicode point.
@@ -52,7 +54,7 @@ int nbytesUtf8(char c) noexcept;
  * \param point the unicode point
  * \return the number of bytes [1-4] or -1 on invalid
  */
-int nbytesPoint(char32_t point) noexcept;
+IRCCD_EXPORT int nbytesPoint(char32_t point) noexcept;
 
 /**
  * Get real number of character in a string.
@@ -61,7 +63,7 @@ int nbytesPoint(char32_t point) noexcept;
  * \return the length
  * \throw std::invalid_argument on invalid sequence
  */
-int length(const std::string &str);
+IRCCD_EXPORT int length(const std::string &str);
 
 /**
  * Iterate over all real characters in the UTF-8 string.
@@ -97,7 +99,7 @@ void forEach(const std::string &str, Func function)
  * \return the UTF-8 string
  * \throw std::invalid_argument on invalid sequence
  */
-std::string toUtf8(const std::u32string &array);
+IRCCD_EXPORT std::string toUtf8(const std::u32string &array);
 
 /**
  * Convert a UTF-8 string to UTF-32 string.
@@ -106,7 +108,7 @@ std::string toUtf8(const std::u32string &array);
  * \return the UTF-32 string
  * \throw std::invalid_argument on invalid sequence
  */
-std::u32string toUtf32(const std::string &str);
+IRCCD_EXPORT std::u32string toUtf32(const std::string &str);
 
 /**
  * Check if the unicode character is space.
@@ -114,7 +116,7 @@ std::u32string toUtf32(const std::string &str);
  * \param c the character
  * \return true if space
  */
-bool isspace(char32_t c) noexcept;
+IRCCD_EXPORT bool isspace(char32_t c) noexcept;
 
 /**
  * Check if the unicode character is digit.
@@ -122,7 +124,7 @@ bool isspace(char32_t c) noexcept;
  * \param c the character
  * \return true if digit
  */
-bool isdigit(char32_t c) noexcept;
+IRCCD_EXPORT bool isdigit(char32_t c) noexcept;
 
 /**
  * Check if the unicode character is alpha category.
@@ -130,7 +132,7 @@ bool isdigit(char32_t c) noexcept;
  * \param c the character
  * \return true if alpha
  */
-bool isalpha(char32_t c) noexcept;
+IRCCD_EXPORT bool isalpha(char32_t c) noexcept;
 
 /**
  * Check if the unicode character is upper case.
@@ -138,7 +140,7 @@ bool isalpha(char32_t c) noexcept;
  * \param c the character
  * \return true if upper case
  */
-bool isupper(char32_t c) noexcept;
+IRCCD_EXPORT bool isupper(char32_t c) noexcept;
 
 /**
  * Check if the unicode character is lower case.
@@ -146,7 +148,7 @@ bool isupper(char32_t c) noexcept;
  * \param c the character
  * \return true if lower case
  */
-bool islower(char32_t c) noexcept;
+IRCCD_EXPORT bool islower(char32_t c) noexcept;
 
 /**
  * Check if the unicode character is title case.
@@ -154,7 +156,7 @@ bool islower(char32_t c) noexcept;
  * \param c the character
  * \return true if title case
  */
-bool istitle(char32_t c) noexcept;
+IRCCD_EXPORT bool istitle(char32_t c) noexcept;
 
 /**
  * Convert to upper case.
@@ -162,7 +164,7 @@ bool istitle(char32_t c) noexcept;
  * \param c the character
  * \return the upper case character
  */
-char32_t toupper(char32_t c) noexcept;
+IRCCD_EXPORT char32_t toupper(char32_t c) noexcept;
 
 /**
  * Convert to lower case.
@@ -170,7 +172,7 @@ char32_t toupper(char32_t c) noexcept;
  * \param c the character
  * \return the lower case character
  */
-char32_t tolower(char32_t c) noexcept;
+IRCCD_EXPORT char32_t tolower(char32_t c) noexcept;
 
 /**
  * Convert to title case.
@@ -178,7 +180,7 @@ char32_t tolower(char32_t c) noexcept;
  * \param c the character
  * \return the title case character
  */
-char32_t totitle(char32_t c) noexcept;
+IRCCD_EXPORT char32_t totitle(char32_t c) noexcept;
 
 /**
  * Convert the UTF-32 string to upper case.

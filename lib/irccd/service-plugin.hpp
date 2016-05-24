@@ -50,12 +50,12 @@ public:
 	 *
 	 * \param irccd the irccd instance
 	 */
-	PluginService(Irccd &irccd) noexcept;
+	IRCCD_EXPORT PluginService(Irccd &irccd) noexcept;
 
 	/**
 	 * Destroy plugins.
 	 */
-	~PluginService();
+	IRCCD_EXPORT ~PluginService();
 
 	/**
 	 * Get the list of plugins.
@@ -73,7 +73,7 @@ public:
 	 * \param name the plugin id
 	 * \return true if has plugin
 	 */
-	bool has(const std::string &name) const noexcept;
+	IRCCD_EXPORT bool has(const std::string &name) const noexcept;
 
 	/**
 	 * Get a loaded plugin or null if not found.
@@ -81,7 +81,7 @@ public:
 	 * \param name the plugin id
 	 * \return the plugin or empty one if not found
 	 */
-	std::shared_ptr<Plugin> get(const std::string &name) const noexcept;
+	IRCCD_EXPORT std::shared_ptr<Plugin> get(const std::string &name) const noexcept;
 
 	/**
 	 * Find a loaded plugin.
@@ -90,7 +90,7 @@ public:
 	 * \return the plugin
 	 * \throws std::out_of_range if not found
 	 */
-	std::shared_ptr<Plugin> require(const std::string &name) const;
+	IRCCD_EXPORT std::shared_ptr<Plugin> require(const std::string &name) const;
 
 	/**
 	 * Add the specified plugin to the registry.
@@ -99,7 +99,7 @@ public:
 	 * \param plugin the plugin
 	 * \note the plugin is only added to the list, no action is performed on it
 	 */
-	void add(std::shared_ptr<Plugin> plugin);
+	IRCCD_EXPORT void add(std::shared_ptr<Plugin> plugin);
 
 	/**
 	 * Configure a plugin.
@@ -109,7 +109,7 @@ public:
 	 * \param name the plugin name
 	 * \param config the new configuration
 	 */
-	void configure(const std::string &name, PluginConfig config);
+	IRCCD_EXPORT void configure(const std::string &name, PluginConfig config);
 
 	/**
 	 * Get a configuration for a plugin.
@@ -117,7 +117,7 @@ public:
 	 * \param name the plugin name
 	 * \return the configuration or default one if not found
 	 */
-	PluginConfig config(const std::string &name) const;
+	IRCCD_EXPORT PluginConfig config(const std::string &name) const;
 
 	/**
 	 * Add formatting for a plugin.
@@ -125,7 +125,7 @@ public:
 	 * \param name the plugin name
 	 * \param formats the formats
 	 */
-	void setFormats(const std::string &name, PluginFormats formats);
+	IRCCD_EXPORT void setFormats(const std::string &name, PluginFormats formats);
 
 	/**
 	 * Get formats for a plugin.
@@ -133,7 +133,7 @@ public:
 	 * \param name the plugin name
 	 * \return the formats
 	 */
-	PluginFormats formats(const std::string &name) const;
+	IRCCD_EXPORT PluginFormats formats(const std::string &name) const;
 
 	/**
 	 * Convenient wrapper that loads a plugin, call onLoad and add it to the registry.
@@ -143,14 +143,14 @@ public:
 	 * \param name the name
 	 * \param path the optional path (searched if empty)
 	 */
-	void load(std::string name, std::string path = "");
+	IRCCD_EXPORT void load(std::string name, std::string path = "");
 
 	/**
 	 * Unload a plugin and remove it.
 	 *
 	 * \param name the plugin id
 	 */
-	void unload(const std::string &name);
+	IRCCD_EXPORT void unload(const std::string &name);
 
 	/**
 	 * Reload a plugin by calling onReload.
@@ -158,7 +158,7 @@ public:
 	 * \param name the plugin name
 	 * \throw std::exception on failures
 	 */
-	void reload(const std::string &name);
+	IRCCD_EXPORT void reload(const std::string &name);
 };
 
 } // !irccd

@@ -36,6 +36,8 @@
 #include <string>
 #include <vector>
 
+#include "sysconfig.hpp"
+
 namespace irccd {
 
 namespace fs {
@@ -70,24 +72,6 @@ public:
 };
 
 /**
- * Check if two entries are identical.
- *
- * \param e1 the first entry
- * \param e2 the second entry
- * \return true if they are identical
- */
-bool operator==(const Entry &e1, const Entry &e2) noexcept;
-
-/**
- * Check if two entries are different.
- *
- * \param e1 the first entry
- * \param e2 the second entry
- * \return true if they are different
- */
-bool operator!=(const Entry &e1, const Entry &e2) noexcept;
-
-/**
  * Get the separator for that system.
  *
  * \return \ on Windows and / otherwise
@@ -107,7 +91,7 @@ inline char separator() noexcept
  * \param path the path
  * \return the updated path
  */
-std::string clean(std::string path);
+IRCCD_EXPORT std::string clean(std::string path);
 
 /**
  * Get the base name from a path.
@@ -117,7 +101,7 @@ std::string clean(std::string path);
  * \param path the path
  * \return the base name
  */
-std::string baseName(std::string path);
+IRCCD_EXPORT std::string baseName(std::string path);
 
 /**
  * Get the parent directory from a path.
@@ -127,7 +111,7 @@ std::string baseName(std::string path);
  * \param path the path
  * \return the parent directory
  */
-std::string dirName(std::string path);
+IRCCD_EXPORT std::string dirName(std::string path);
 
 /**
  * Get stat information.
@@ -136,7 +120,7 @@ std::string dirName(std::string path);
  * \return the stat information
  * \throw std::runtime_error on failure
  */
-struct stat stat(const std::string &path);
+IRCCD_EXPORT struct stat stat(const std::string &path);
 
 /**
  * Check if a file exists.
@@ -146,7 +130,7 @@ struct stat stat(const std::string &path);
  * \param path the path to check
  * \return true if the path exists
  */
-bool exists(const std::string &path) noexcept;
+IRCCD_EXPORT bool exists(const std::string &path) noexcept;
 
 /**
  * Check if the path is absolute.
@@ -154,7 +138,7 @@ bool exists(const std::string &path) noexcept;
  * \param path the path
  * \return true if the path is absolute
  */
-bool isAbsolute(const std::string &path) noexcept;
+IRCCD_EXPORT bool isAbsolute(const std::string &path) noexcept;
 
 /**
  * Check if the path is relative.
@@ -162,7 +146,7 @@ bool isAbsolute(const std::string &path) noexcept;
  * \param path the path
  * \return true if the path is absolute
  */
-bool isRelative(const std::string &path) noexcept;
+IRCCD_EXPORT bool isRelative(const std::string &path) noexcept;
 
 /**
  * Check if the file is readable.
@@ -170,7 +154,7 @@ bool isRelative(const std::string &path) noexcept;
  * \param path the path
  * \return true if has read access
  */
-bool isReadable(const std::string &path) noexcept;
+IRCCD_EXPORT bool isReadable(const std::string &path) noexcept;
 
 /**
  * Check if the file is writable.
@@ -178,7 +162,7 @@ bool isReadable(const std::string &path) noexcept;
  * \param path the path
  * \return true if has write access
  */
-bool isWritable(const std::string &path) noexcept;
+IRCCD_EXPORT bool isWritable(const std::string &path) noexcept;
 
 /**
  * Check if the file is a regular file.
@@ -186,7 +170,7 @@ bool isWritable(const std::string &path) noexcept;
  * \param path the path
  * \return true if it is a file and false if not or not readable
  */
-bool isFile(const std::string &path) noexcept;
+IRCCD_EXPORT bool isFile(const std::string &path) noexcept;
 
 /**
  * Check if the file is a directory.
@@ -194,7 +178,7 @@ bool isFile(const std::string &path) noexcept;
  * \param path the path
  * \return true if it is a directory and false if not or not readable
  */
-bool isDirectory(const std::string &path) noexcept;
+IRCCD_EXPORT bool isDirectory(const std::string &path) noexcept;
 
 /**
  * Check if the file is a symbolic link.
@@ -202,7 +186,7 @@ bool isDirectory(const std::string &path) noexcept;
  * \param path the path
  * \return true if it is a symbolic link and false if not or not readable
  */
-bool isSymlink(const std::string &path) noexcept;
+IRCCD_EXPORT bool isSymlink(const std::string &path) noexcept;
 
 /**
  * Read a directory and return a list of entries (not recursive).
@@ -212,7 +196,7 @@ bool isSymlink(const std::string &path) noexcept;
  * \return the list of entries
  * \throw std::runtime_error on failure
  */
-std::vector<Entry> readdir(const std::string &path, int flags = 0);
+IRCCD_EXPORT std::vector<Entry> readdir(const std::string &path, int flags = 0);
 
 /**
  * Create a directory recursively.
@@ -222,7 +206,7 @@ std::vector<Entry> readdir(const std::string &path, int flags = 0);
  * \throw std::runtime_error on failure
  * \post all intermediate directories are created
  */
-void mkdir(const std::string &path, int mode = 0700);
+IRCCD_EXPORT void mkdir(const std::string &path, int mode = 0700);
 
 /**
  * Remove a directory recursively.
@@ -231,7 +215,7 @@ void mkdir(const std::string &path, int mode = 0700);
  *
  * \param path the path
  */
-void rmdir(const std::string &path) noexcept;
+IRCCD_EXPORT void rmdir(const std::string &path) noexcept;
 
 /**
  * Search an item recursively.
@@ -311,7 +295,7 @@ inline std::string find(const std::string &base, const std::regex &regex)
  * \return the current working directory
  * \throw std::runtime_error on failure
  */
-std::string cwd();
+IRCCD_EXPORT std::string cwd();
 
 } // !fs
 

@@ -49,12 +49,12 @@ class Section;
  */
 class Irccdctl : public Application {
 private:
-	/* Irccd's information */
+	// Irccd's information.
 	unsigned short m_major{0};
 	unsigned short m_minor{0};
 	unsigned short m_patch{0};
 
-	/* Irccd's compilation option */
+	// Irccd's compilation option.
 	bool m_javascript{true};
 	bool m_ssl{true};
 
@@ -84,7 +84,7 @@ public:
 	 * \param cmd the command
 	 * \param args the arguments
 	 */
-	void exec(const RemoteCommand &cmd, std::vector<std::string> args);
+	IRCCD_EXPORT void exec(const RemoteCommand &cmd, std::vector<std::string> args);
 
 	/**
 	 * Execute the given alias.
@@ -92,14 +92,14 @@ public:
 	 * \param alias the alias
 	 * \param args the arguments
 	 */
-	void exec(const Alias &alias, std::vector<std::string> args);
+	IRCCD_EXPORT void exec(const Alias &alias, std::vector<std::string> args);
 
 	/**
 	 * Resolve the command line arguments.
 	 *
 	 * \param args the main arguments
 	 */
-	void exec(std::vector<std::string> args);
+	IRCCD_EXPORT void exec(std::vector<std::string> args);
 
 	/**
 	 * Get the connection.
@@ -117,7 +117,7 @@ public:
 	 * \param argc the number of arguments
 	 * \param argv the arguments
 	 */
-	void run(int argc, char **argv);
+	IRCCD_EXPORT void run(int argc, char **argv);
 };
 
 } // !irccd

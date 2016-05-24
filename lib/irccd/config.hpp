@@ -30,6 +30,7 @@
 
 #include "ini.hpp"
 #include "plugin.hpp"
+#include "sysconfig.hpp"
 
 namespace irccd {
 
@@ -55,7 +56,7 @@ public:
 	 * \return the config
 	 * \throw std::exception on errors or if no config could be found
 	 */
-	static Config find();
+	IRCCD_EXPORT static Config find();
 
 	/**
 	 * Load the configuration from the specified path.
@@ -84,7 +85,7 @@ public:
 	 * \pre util::isValidIdentifier(name)
 	 * \return default identity if cannot be found
 	 */
-	ServerIdentity findIdentity(const std::string &name) const;
+	IRCCD_EXPORT ServerIdentity findIdentity(const std::string &name) const;
 
 	/**
 	 * Find a plugin configuration if defined in the configuration file.
@@ -92,7 +93,7 @@ public:
 	 * \pre util::isValidIdentifier(name)
 	 * \return the configuration or empty if not found
 	 */
-	PluginConfig findPluginConfig(const std::string &name) const;
+	IRCCD_EXPORT PluginConfig findPluginConfig(const std::string &name) const;
 
 	/**
 	 * Find plugin formats if defined.
@@ -100,73 +101,73 @@ public:
 	 * \pre util::isValidIdentifier(name)
 	 * \return the formats or empty one if not found
 	 */
-	PluginFormats findPluginFormats(const std::string &name) const;
+	IRCCD_EXPORT PluginFormats findPluginFormats(const std::string &name) const;
 
 	/**
 	 * Get the path to the pidfile.
 	 *
 	 * \return the path or empty if not defined
 	 */
-	std::string pidfile() const;
+	IRCCD_EXPORT std::string pidfile() const;
 
 	/**
 	 * Get the uid.
 	 *
 	 * \return the uid or empty one if no one is set
 	 */
-	std::string uid() const;
+	IRCCD_EXPORT std::string uid() const;
 
 	/**
 	 * Get the gid.
 	 *
 	 * \return the gid or empty one if no one is set
 	 */
-	std::string gid() const;
+	IRCCD_EXPORT std::string gid() const;
 
 	/**
 	 * Check if verbosity is enabled.
 	 *
 	 * \return true if verbosity was requested
 	 */
-	bool isVerbose() const noexcept;
+	IRCCD_EXPORT bool isVerbose() const noexcept;
 
 	/**
 	 * Check if foreground is specified (= no daemonize).
 	 *
 	 * \return true if foreground was requested
 	 */
-	bool isForeground() const noexcept;
+	IRCCD_EXPORT bool isForeground() const noexcept;
 
 	/**
 	 * Load logging interface.
 	 */
-	void loadLogs() const;
+	IRCCD_EXPORT void loadLogs() const;
 
 	/**
 	 * Load formats for logging.
 	 */
-	void loadFormats() const;
+	IRCCD_EXPORT void loadFormats() const;
 
 	/**
 	 * Load transports.
 	 *
 	 * \return the set of transports
 	 */
-	std::vector<std::shared_ptr<TransportServer>> loadTransports() const;
+	IRCCD_EXPORT std::vector<std::shared_ptr<TransportServer>> loadTransports() const;
 
 	/**
 	 * Load rules.
 	 *
 	 * \return the rules
 	 */
-	std::vector<Rule> loadRules() const;
+	IRCCD_EXPORT std::vector<Rule> loadRules() const;
 
 	/**
 	 * Get the list of servers defined.
 	 *
 	 * \return the list of servers
 	 */
-	std::vector<std::shared_ptr<Server>> loadServers() const;
+	IRCCD_EXPORT std::vector<std::shared_ptr<Server>> loadServers() const;
 
 	/**
 	 * Get the list of defined plugins.
@@ -174,7 +175,7 @@ public:
 	 * \param irccd the irccd instance
 	 * \return the list of plugins
 	 */
-	void loadPlugins(Irccd &irccd) const;
+	IRCCD_EXPORT void loadPlugins(Irccd &irccd) const;
 };
 
 } // !irccd

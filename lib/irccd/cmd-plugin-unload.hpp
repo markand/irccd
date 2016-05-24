@@ -39,22 +39,22 @@ public:
 	/**
 	 * Constructor.
 	 */
-	PluginUnload();
+	IRCCD_EXPORT PluginUnload();
 
 	/**
 	 * \copydoc RemoteCommand::help
 	 */
-	std::string help() const override;
+	IRCCD_EXPORT std::string help() const override;
 
 	/**
 	 * \copydoc RemoteCommand::args
 	 */
-	std::vector<Arg> args() const override;
+	IRCCD_EXPORT std::vector<Arg> args() const override;
 
 	/**
 	 * \copydoc RemoteCommand::exec
 	 */
-	json::Value exec(Irccd &irccd, const json::Value &request) const override;
+	IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };
 
 } // !command

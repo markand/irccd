@@ -95,9 +95,8 @@ std::string substituteKeywords(const std::string &content, const Substitution &p
 {
 	auto value = params.keywords.find(content);
 
-	if (value != params.keywords.end()) {
+	if (value != params.keywords.end())
 		return value->second;
-	}
 
 	return "";
 }
@@ -106,9 +105,8 @@ std::string substituteEnv(const std::string &content)
 {
 	auto value = std::getenv(content.c_str());
 
-	if (value != nullptr) {
+	if (value != nullptr)
 		return value;
-	}
 
 	return "";
 }
@@ -118,12 +116,11 @@ std::string substituteAttributes(const std::string &content)
 	std::stringstream oss;
 	std::vector<std::string> list = split(content, ",");
 
-	/* @{} means reset */
-	if (list.empty()) {
+	// @{} means reset.
+	if (list.empty())
 		return std::string(1, attributesTable.at("reset"));
-	}
 
-	/* Remove useless spaces */
+	// Remove useless spaces.
 	std::transform(list.begin(), list.end(), list.begin(), strip);
 
 	/*
@@ -133,27 +130,24 @@ std::string substituteAttributes(const std::string &content)
 	 */
 	auto foreground = list[0];
 	if (!foreground.empty() || list.size() >= 2) {
-		/* Color sequence */
+		// Color sequence.
 		oss << '\x03';
 
-		/* Foreground */
+		// Foreground.
 		auto it = colorTable.find(foreground);
-		if (it != colorTable.end()) {
+		if (it != colorTable.end())
 			oss << it->second;
-		}
 
-		/* Background */
-		if (list.size() >= 2 && (it = colorTable.find(list[1])) != colorTable.end()) {
+		// Background.
+		if (list.size() >= 2 && (it = colorTable.find(list[1])) != colorTable.end())
 			oss << "," << it->second;
-		}
 
-		/* Attributes */
+		// Attributes.
 		for (std::size_t i = 2; i < list.size(); ++i) {
 			auto attribute = attributesTable.find(list[i]);
 
-			if (attribute != attributesTable.end()) {
+			if (attribute != attributesTable.end())
 				oss << attribute->second;
-			}
 		}
 	}
 
@@ -166,38 +160,32 @@ std::string substitute(std::string::const_iterator &it, std::string::const_itera
 
 	std::string content, value;
 
-	if (it == end) {
+	if (it == end)
 		return "";
-	}
 
-	while (it != end && *it != '}') {
+	while (it != end && *it != '}')
 		content += *it++;
-	}
 
-	if (it == end || *it != '}') {
+	if (it == end || *it != '}')
 		throw std::invalid_argument("unclosed "s + token + " construct"s);
-	}
 
 	it++;
 
-	/* Create default original value if flag is disabled */
+	// Create default original value if flag is disabled.
 	value = std::string(1, token) + "{"s + content + "}"s;
 
 	switch (token) {
 	case '#':
-		if (params.flags & Substitution::Keywords) {
+		if (params.flags & Substitution::Keywords)
 			value = substituteKeywords(content, params);
-		}
 		break;
 	case '$':
-		if (params.flags & Substitution::Env) {
+		if (params.flags & Substitution::Env)
 			value = substituteEnv(content);
-		}
 		break;
 	case '@':
-		if (params.flags & Substitution::IrcAttrs) {
+		if (params.flags & Substitution::IrcAttrs)
 			substituteAttributes(content);
-		}
 		break;
 	default:
 		break;
@@ -214,9 +202,8 @@ std::string format(std::string text, const Substitution &params)
 	 * Change the date format before anything else to avoid interpolation with keywords and
 	 * user input.
 	 */
-	if (params.flags & Substitution::Date) {
+	if (params.flags & Substitution::Date)
 		text = substituteDate(text, params);
-	}
 
 	std::ostringstream oss;
 
@@ -260,11 +247,10 @@ std::string format(std::string text, const Substitution &params)
 		 * "##hello" -> "##hello"
 		 * "##{hello}" -> "#{hello}"
 		 */
-		if (++it == end) {
+		if (++it == end)
 			oss << token << token;
-		} else if (*it == '{') {
+		else if (*it == '{')
 			oss << token;
-		}
 	}
 
 	return oss.str();
@@ -287,9 +273,8 @@ std::vector<std::string> split(const std::string &list, const std::string &delim
 	int count = 1;
 	bool finished = false;
 
-	if (list.empty()) {
+	if (list.empty())
 		return result;
-	}
 
 	do {
 		std::string val;
@@ -297,7 +282,7 @@ std::vector<std::string> split(const std::string &list, const std::string &delim
 		current = next + 1;
 		next = list.find_first_of(delimiters, current);
 
-		// split max, get until the end
+		// split max, get until the end.
 		if (max >= 0 && count++ >= max) {
 			val = list.substr(current, std::string::npos);
 			finished = true;
@@ -328,22 +313,20 @@ MessagePair parseMessage(std::string message, const std::string &cc, const std::
 		 * is a space, we check until we find a space, if not
 		 * typing "!foo123123" will trigger foo plugin.
 		 */
-		if (pos == std::string::npos) {
+		if (pos == std::string::npos)
 			iscommand = result == fullcommand;
-		} else {
+		else
 			iscommand = result.length() >= fullcommand.length() && result.compare(0, pos, fullcommand) == 0;
-		}
 
 		if (iscommand) {
 			/*
 			 * If no space is found we just set the message to "" otherwise
 			 * the plugin name will be passed through onCommand
 			 */
-			if (pos == std::string::npos) {
+			if (pos == std::string::npos)
 				result = "";
-			} else {
+			else
 				result = message.substr(pos + 1);
-			}
 		}
 	}
 
@@ -357,9 +340,8 @@ bool isBoolean(std::string value) noexcept
 
 bool isInt(const std::string &str, int base) noexcept
 {
-	if (str.empty()) {
+	if (str.empty())
 		return false;
-	}
 	
 	char *ptr;
 	
@@ -370,9 +352,8 @@ bool isInt(const std::string &str, int base) noexcept
 
 bool isReal(const std::string &str) noexcept
 {
-	if (str.empty()) {
+	if (str.empty())
 		return false;
-	}
 	
 	char *ptr;
 	

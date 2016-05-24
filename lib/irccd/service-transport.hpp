@@ -56,31 +56,31 @@ public:
 	 *
 	 * \param irccd the irccd instance
 	 */
-	TransportService(Irccd &irccd) noexcept;
+	IRCCD_EXPORT TransportService(Irccd &irccd) noexcept;
 
 	/**
 	 * \copydoc Service::prepare
 	 */
-	void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
+	IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
 
 	/**
 	 * \copydoc Service::sync
 	 */
-	void sync(fd_set &in, fd_set &out) override;
+	IRCCD_EXPORT void sync(fd_set &in, fd_set &out) override;
 
 	/**
 	 * Add a transport server.
 	 *
 	 * \param ts the transport server
 	 */
-	void add(std::shared_ptr<TransportServer> ts);
+	IRCCD_EXPORT void add(std::shared_ptr<TransportServer> ts);
 
 	/**
 	 * Send data to all clients.
 	 *
 	 * \param data the data
 	 */
-	void broadcast(std::string data);
+	IRCCD_EXPORT void broadcast(std::string data);
 
 };
 

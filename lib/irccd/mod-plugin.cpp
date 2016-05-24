@@ -71,15 +71,13 @@ duk::Ret info(duk::ContextPtr ctx)
 {
 	Plugin *plugin = nullptr;
 
-	if (duk::top(ctx) >= 1) {
+	if (duk::top(ctx) >= 1)
 		plugin = duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->pluginService().get(duk::require<std::string>(ctx, 0)).get();
-	} else {
+	else
 		plugin = duk::getGlobal<duk::RawPointer<Plugin>>(ctx, "\xff""\xff""plugin");
-	}
 
-	if (!plugin) {
+	if (!plugin)
 		return 0;
-	}
 
 	duk::push(ctx, duk::Object{});
 	duk::putProperty(ctx, -1, "name", plugin->name());
@@ -105,9 +103,8 @@ duk::Ret list(duk::ContextPtr ctx)
 	duk::push(ctx, duk::Array{});
 
 	int i = 0;
-	for (const auto &plugin : duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->pluginService().plugins()) {
+	for (const auto &plugin : duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->pluginService().plugins())
 		duk::putProperty(ctx, -1, i++, plugin->name());
-	}
 
 	return 1;
 }

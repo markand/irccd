@@ -38,35 +38,35 @@ namespace sys {
  *
  * \param name the program name
  */
-void setProgramName(std::string name) noexcept;
+IRCCD_EXPORT void setProgramName(std::string name) noexcept;
 
 /**
  * Get the program name.
  *
  * \return the program name
  */
-const std::string &programName() noexcept;
+IRCCD_EXPORT const std::string &programName() noexcept;
 
 /**
  * Get the system name.
  *
  * \return the name
  */
-std::string name();
+IRCCD_EXPORT std::string name();
 
 /**
  * Get the system version.
  *
  * \return the version
  */
-std::string version();
+IRCCD_EXPORT std::string version();
 
 /**
  * Get the number of seconds elapsed since the boottime.
  *
  * \return the number of seconds
  */
-uint64_t uptime();
+IRCCD_EXPORT uint64_t uptime();
 
 /**
  * Get the milliseconds elapsed since the application
@@ -74,21 +74,21 @@ uint64_t uptime();
  *
  * \return the milliseconds
  */
-uint64_t ticks();
+IRCCD_EXPORT uint64_t ticks();
 
 /**
  * Get an environment variable.
  *
  * \return the value or empty string
  */
-std::string env(const std::string &var);
+IRCCD_EXPORT std::string env(const std::string &var);
 
 /**
  * Get home directory usually /home/foo
  *
  * \return the home directory
  */
-std::string home();
+IRCCD_EXPORT std::string home();
 
 #if defined(HAVE_SETUID)
 
@@ -97,7 +97,7 @@ std::string home();
  *
  * \param value the value
  */
-void setUid(const std::string &value);
+IRCCD_EXPORT void setUid(const std::string &value);
 
 #endif
 
@@ -108,7 +108,7 @@ void setUid(const std::string &value);
  *
  * \param value the value
  */
-void setGid(const std::string &value);
+IRCCD_EXPORT void setGid(const std::string &value);
 
 #endif
 

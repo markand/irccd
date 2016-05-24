@@ -29,6 +29,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "sysconfig.hpp"
 #include "util.hpp"
 
 namespace irccd {

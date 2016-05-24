@@ -32,6 +32,7 @@
 #include "server.hpp"
 #include "signals.hpp"
 #include "sockets.hpp"
+#include "sysconfig.hpp"
 
 namespace irccd {
 
@@ -89,7 +90,7 @@ public:
 	 * \param setinput the input fd_set
 	 * \param setoutput the output fd_set
 	 */
-	void sync(fd_set &setinput, fd_set &setoutput);
+	IRCCD_EXPORT void sync(fd_set &setinput, fd_set &setoutput);
 
 	/**
 	 * Send some data, it will be pushed to the outgoing buffer.
@@ -99,7 +100,7 @@ public:
 	 *
 	 * \param message the message
 	 */
-	void send(std::string message);
+	IRCCD_EXPORT void send(std::string message);
 
 	/**
 	 * Tell if the client has data pending for output.
@@ -157,9 +158,8 @@ void TransportClientBase<Address>::receive()
 	try {
 		auto message = m_socket.recv(512);
 
-		if (message.empty()) {
+		if (message.empty())
 			onDie();
-		}
 
 		m_input += message;
 	} catch (const std::exception &) {

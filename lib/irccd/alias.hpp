@@ -28,6 +28,8 @@
 #include <string>
 #include <vector>
 
+#include "sysconfig.hpp"
+
 namespace irccd {
 
 /**
@@ -51,7 +53,7 @@ public:
 	 * \pre value must not be empty
 	 * \param value the value
 	 */
-	AliasArg(std::string value);
+	IRCCD_EXPORT AliasArg(std::string value);
 
 	/**
 	 * Check if the argument is a placeholder.
@@ -69,7 +71,7 @@ public:
 	 * \pre isPlaceholder() must return true
 	 * \return the position
 	 */
-	unsigned index() const noexcept;
+	IRCCD_EXPORT unsigned index() const noexcept;
 
 	/**
 	 * Get the real value.
@@ -77,7 +79,7 @@ public:
 	 * \pre isPlaceholder() must return false
 	 * \return the value
 	 */
-	const std::string &value() const noexcept;
+	IRCCD_EXPORT const std::string &value() const noexcept;
 
 	/**
 	 * Output the alias to the stream.
@@ -85,7 +87,7 @@ public:
 	 * \param out the output stream
 	 * \return out
 	 */
-	friend std::ostream &operator<<(std::ostream &out, const AliasArg &);
+	IRCCD_EXPORT friend std::ostream &operator<<(std::ostream &out, const AliasArg &);
 };
 
 /**

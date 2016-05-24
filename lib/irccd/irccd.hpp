@@ -32,6 +32,7 @@
 #include <vector>
 
 #include "application.hpp"
+#include "sysconfig.hpp"
 
 namespace irccd {
 
@@ -75,7 +76,7 @@ public:
 	/**
 	 * Prepare standard services.
 	 */
-	Irccd();
+	IRCCD_EXPORT Irccd();
 
 	/**
 	 * Add a generic service.
@@ -144,27 +145,27 @@ public:
 	 * \param ev the event
 	 * \note Thread-safe
 	 */
-	void post(std::function<void (Irccd &)> ev) noexcept;
+	IRCCD_EXPORT void post(std::function<void (Irccd &)> ev) noexcept;
 
 	/**
 	 * Loop forever by calling poll() and dispatch() indefinitely.
 	 */
-	void run();
+	IRCCD_EXPORT void run();
 
 	/**
 	 * Poll the next events without blocking (250 ms max).
 	 */
-	void poll();
+	IRCCD_EXPORT void poll();
 
 	/**
 	 * Dispatch the pending events, usually after calling poll().
 	 */
-	void dispatch();
+	IRCCD_EXPORT void dispatch();
 
 	/**
 	 * Request to stop, usually from a signal.
 	 */
-	void stop();
+	IRCCD_EXPORT void stop();
 };
 
 } // !irccd

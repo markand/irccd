@@ -36,12 +36,12 @@ public:
 	/**
 	 * Irccd.ElapsedTimer.
 	 */
-	ElapsedTimerModule() noexcept;
+	IRCCD_EXPORT ElapsedTimerModule() noexcept;
 
 	/**
 	 * \copydoc Module::load
 	 */
-	virtual void load(Irccd &irccd, JsPlugin &plugin);
+	IRCCD_EXPORT virtual void load(Irccd &irccd, JsPlugin &plugin);
 };
 
 } // !irccd

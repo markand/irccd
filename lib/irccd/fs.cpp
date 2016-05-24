@@ -69,9 +69,8 @@ bool can(const std::string &path, const std::string &mode)
 {
 	auto fp = std::fopen(path.c_str(), mode.c_str());
 
-	if (fp == nullptr) {
+	if (fp == nullptr)
 		return false;
-	}
 
 	std::fclose(fp);
 
@@ -112,17 +111,17 @@ std::string clean(std::string input)
 	if (input.empty())
 		return input;
 
-	/* First, remove any duplicates */
+	// First, remove any duplicates.
 	input.erase(std::unique(input.begin(), input.end(), [&] (char c1, char c2) {
 		return c1 == c2 && (c1 == '/' || c1 == '\\');
 	}), input.end());
 
-	/* Add a trailing / or \\ */
+	// Add a trailing / or \\.
 	char c = input[input.length() - 1];
 	if (c != '/' && c != '\\')
 		input += separator();
 
-	/* Now converts all / to \\ for Windows and the opposite for Unix */
+	// Now converts all / to \\ for Windows and the opposite for Unix.
 #if defined(_WIN32)
 	std::replace(input.begin(), input.end(), '/', '\\');
 #else

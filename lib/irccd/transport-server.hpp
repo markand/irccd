@@ -100,17 +100,17 @@ public:
 	 * \param ipv6only set to true to disable IPv4
 	 * \throw net::Error on failures
 	 */
-	TransportServerIp(int domain, const std::string &address, int port, bool ipv6only = true);
+	IRCCD_EXPORT TransportServerIp(int domain, const std::string &address, int port, bool ipv6only = true);
 
 	/**
 	 * \copydoc TransportServer::socket
 	 */
-	net::Handle handle() noexcept override;
+	IRCCD_EXPORT net::Handle handle() noexcept override;
 
 	/**
 	 * \copydoc TransportServer::accept
 	 */
-	std::shared_ptr<TransportClient> accept() override;
+	IRCCD_EXPORT std::shared_ptr<TransportClient> accept() override;
 };
 
 #if !defined(IRCCD_SYSTEM_WINDOWS)
@@ -130,22 +130,22 @@ public:
 	 *
 	 * \param path the path
 	 */
-	TransportServerUnix(std::string path);
+	IRCCD_EXPORT TransportServerUnix(std::string path);
 
 	/**
 	 * Destroy the transport and remove the file.
 	 */
-	~TransportServerUnix();
+	IRCCD_EXPORT ~TransportServerUnix();
 
 	/**
 	 * \copydoc TransportServer::socket
 	 */
-	net::Handle handle() noexcept override;
+	IRCCD_EXPORT net::Handle handle() noexcept override;
 
 	/**
 	 * \copydoc TransportServer::accept
 	 */
-	std::shared_ptr<TransportClient> accept() override;
+	IRCCD_EXPORT std::shared_ptr<TransportClient> accept() override;
 };
 
 #endif // !_WIN32

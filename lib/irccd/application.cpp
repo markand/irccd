@@ -46,7 +46,7 @@ namespace irccd {
 
 Application::Application()
 {
-	/* Register all commands */
+	// Register all commands.
 	addCommand(std::make_unique<command::Help>());
 	addCommand(std::make_unique<command::PluginInfo>());
 	addCommand(std::make_unique<command::PluginList>());

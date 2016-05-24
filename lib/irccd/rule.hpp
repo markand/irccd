@@ -30,6 +30,8 @@
 #include <utility>
 #include <vector>
 
+#include "sysconfig.hpp"
+
 namespace irccd {
 
 /**
@@ -77,12 +79,12 @@ public:
 	 * \param action the rule action
 	 * \throw std::invalid_argument if events are invalid
 	 */
-	Rule(RuleSet servers = RuleSet{},
-	     RuleSet channels = RuleSet{},
-	     RuleSet nicknames = RuleSet{},
-	     RuleSet plugins = RuleSet{},
-	     RuleSet events = RuleSet{},
-	     RuleAction action = RuleAction::Accept);
+	IRCCD_EXPORT Rule(RuleSet servers = RuleSet{},
+			  RuleSet channels = RuleSet{},
+			  RuleSet nicknames = RuleSet{},
+			  RuleSet plugins = RuleSet{},
+			  RuleSet events = RuleSet{},
+			  RuleAction action = RuleAction::Accept);
 
 	/**
 	 * Check if that rule apply for the given criterias.
@@ -94,53 +96,53 @@ public:
 	 * \param event the event
 	 * \return true if match
 	 */
-	bool match(const std::string &server,
-		   const std::string &channel,
-		   const std::string &nick,
-		   const std::string &plugin,
-		   const std::string &event) const noexcept;
+	IRCCD_EXPORT bool match(const std::string &server,
+				const std::string &channel,
+				const std::string &nick,
+				const std::string &plugin,
+				const std::string &event) const noexcept;
 
 	/**
 	 * Get the action.
 	 *
 	 * \return the action
 	 */
-	RuleAction action() const noexcept;
+	IRCCD_EXPORT RuleAction action() const noexcept;
 
 	/**
 	 * Get the servers.
 	 *
 	 * \return the servers
 	 */
-	const RuleSet &servers() const noexcept;
+	IRCCD_EXPORT const RuleSet &servers() const noexcept;
 
 	/**
 	 * Get the channels.
 	 *
 	 * \return the channels
 	 */
-	const RuleSet &channels() const noexcept;
+	IRCCD_EXPORT const RuleSet &channels() const noexcept;
 
 	/**
 	 * Get the origins.
 	 *
 	 * \return the origins
 	 */
-	const RuleSet &origins() const noexcept;
+	IRCCD_EXPORT const RuleSet &origins() const noexcept;
 
 	/**
 	 * Get the plugins.
 	 *
 	 * \return the plugins
 	 */
-	const RuleSet &plugins() const noexcept;
+	IRCCD_EXPORT const RuleSet &plugins() const noexcept;
 
 	/**
 	 * Get the events.
 	 *
 	 * \return the events
 	 */
-	const RuleSet &events() const noexcept;
+	IRCCD_EXPORT const RuleSet &events() const noexcept;
 };
 
 } // !irccd

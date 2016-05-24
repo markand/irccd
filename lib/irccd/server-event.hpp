@@ -47,8 +47,8 @@ private:
 	std::string m_server;
 	std::string m_origin;
 	std::string m_target;
-	std::function<std::string (Plugin &)> m_plugin_function_name;
-	std::function<void (Plugin &)> m_plugin_exec;
+	std::function<std::string (Plugin &)> m_functionName;
+	std::function<void (Plugin &)> m_exec;
 
 public:
 	/**
@@ -57,21 +57,21 @@ public:
 	 * \param server the server name
 	 * \param origin the origin
 	 * \param target the target (channel or nickname)
-	 * \param plugin_function_name the JavaScript function to call (only for rules)
-	 * \param plugin_exec the plugin executor
+	 * \param functionName the function to call (only for rules)
+	 * \param exec the plugin executor
 	 */
-	ServerEvent(std::string server,
-		    std::string origin,
-		    std::string target,
-		    std::function<std::string (Plugin &)> plugin_function_name,
-		    std::function<void (Plugin &)> plugin_exec);
+	IRCCD_EXPORT ServerEvent(std::string server,
+				 std::string origin,
+				 std::string target,
+				 std::function<std::string (Plugin &)> functionName,
+				 std::function<void (Plugin &)> exec);
 
 	/**
 	 * Execute the event.
 	 *
 	 * \param irccd the irccd instance
 	 */
-	void operator()(Irccd &irccd) const;
+	IRCCD_EXPORT void operator()(Irccd &irccd) const;
 };
 
 } // !irccd

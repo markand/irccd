@@ -36,6 +36,8 @@
 #include <utility>
 #include <vector>
 
+#include "sysconfig.hpp"
+
 namespace irccd {
 
 /**
@@ -372,7 +374,7 @@ public:
 	 *
 	 * \param type the type
 	 */
-	Value(Type type);
+	IRCCD_EXPORT Value(Type type);
 
 	/**
 	 * Construct a null value.
@@ -469,7 +471,7 @@ public:
 	 * \param buffer the text
 	 * \throw Error on errors
 	 */
-	Value(const Buffer &buffer);
+	IRCCD_EXPORT Value(const Buffer &buffer);
 
 	/**
 	 * Construct a value from a file.
@@ -477,7 +479,7 @@ public:
 	 * \param file the file
 	 * \throw Error on errors
 	 */
-	Value(const File &file);
+	IRCCD_EXPORT Value(const File &file);
 
 	/**
 	 * Move constructor.
@@ -527,7 +529,7 @@ public:
 	/**
 	 * Destructor.
 	 */
-	~Value();
+	IRCCD_EXPORT ~Value();
 
 	/**
 	 * Get an iterator to the beginning.
@@ -622,21 +624,21 @@ public:
 	 *
 	 * \return the value or false if not a boolean
 	 */
-	bool toBool() const noexcept;
+	IRCCD_EXPORT bool toBool() const noexcept;
 
 	/**
 	 * Get the value as integer.
 	 *
 	 * \return the value or 0 if not a integer
 	 */
-	int toInt() const noexcept;
+	IRCCD_EXPORT int toInt() const noexcept;
 
 	/**
 	 * Get the value as real.
 	 *
 	 * \return the value or 0 if not a real
 	 */
-	double toReal() const noexcept;
+	IRCCD_EXPORT double toReal() const noexcept;
 
 	/**
 	 * Get the value as string.
@@ -1152,7 +1154,7 @@ public:
  * \param input the input
  * \return the escaped string
  */
-std::string escape(const std::string &input);
+IRCCD_EXPORT std::string escape(const std::string &input);
 
 /**
  * Convenient function for creating array from initializer list.
