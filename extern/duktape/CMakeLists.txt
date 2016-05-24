@@ -21,9 +21,10 @@ project(duktape)
 irccd_define_library(
 	LOCAL
 	TARGET extern-duktape
+	FLAGS DUK_OPT_CPP_EXCEPTIONS
 	SOURCES
 		duk_config.h
-		duktape.c
+		duktape.cpp
 		duktape.h
 	PUBLIC_INCLUDES ${duktape_SOURCE_DIR}
 )
