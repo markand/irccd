@@ -1,5 +1,5 @@
 /*
- * application.cpp -- super base class to create irccd front ends
+ * service-command.cpp -- store remote commands
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,7 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "application.hpp"
+#include <algorithm>
+
 #include "cmd-help.hpp"
 #include "cmd-plugin-info.hpp"
 #include "cmd-plugin-list.hpp"
@@ -41,36 +42,52 @@
 #include "cmd-server-reconnect.hpp"
 #include "cmd-server-topic.hpp"
 #include "cmd-watch.hpp"
+#include "service-command.hpp"
 
 namespace irccd {
 
-Application::Application()
+CommandService::CommandService()
+	: m_commands{
+		std::make_shared<command::Help>(),
+		std::make_shared<command::PluginInfo>(),
+		std::make_shared<command::PluginList>(),
+		std::make_shared<command::PluginLoad>(),
+		std::make_shared<command::PluginReload>(),
+		std::make_shared<command::PluginUnload>(),
+		std::make_shared<command::ServerChannelMode>(),
+		std::make_shared<command::ServerChannelNotice>(),
+		std::make_shared<command::ServerConnect>(),
+		std::make_shared<command::ServerDisconnect>(),
+		std::make_shared<command::ServerInfo>(),
+		std::make_shared<command::ServerInvite>(),
+		std::make_shared<command::ServerJoin>(),
+		std::make_shared<command::ServerKick>(),
+		std::make_shared<command::ServerList>(),
+		std::make_shared<command::ServerMe>(),
+		std::make_shared<command::ServerMessage>(),
+		std::make_shared<command::ServerMode>(),
+		std::make_shared<command::ServerNick>(),
+		std::make_shared<command::ServerNotice>(),
+		std::make_shared<command::ServerPart>(),
+		std::make_shared<command::ServerReconnect>(),
+		std::make_shared<command::ServerTopic>(),
+		std::make_shared<command::Watch>(),
+	}
 {
-	// Register all commands.
-	addCommand(std::make_unique<command::Help>());
-	addCommand(std::make_unique<command::PluginInfo>());
-	addCommand(std::make_unique<command::PluginList>());
-	addCommand(std::make_unique<command::PluginLoad>());
-	addCommand(std::make_unique<command::PluginReload>());
-	addCommand(std::make_unique<command::PluginUnload>());
-	addCommand(std::make_unique<command::ServerChannelMode>());
-	addCommand(std::make_unique<command::ServerChannelNotice>());
-	addCommand(std::make_unique<command::ServerConnect>());
-	addCommand(std::make_unique<command::ServerDisconnect>());
-	addCommand(std::make_unique<command::ServerInfo>());
-	addCommand(std::make_unique<command::ServerInvite>());
-	addCommand(std::make_unique<command::ServerJoin>());
-	addCommand(std::make_unique<command::ServerKick>());
-	addCommand(std::make_unique<command::ServerList>());
-	addCommand(std::make_unique<command::ServerMe>());
-	addCommand(std::make_unique<command::ServerMessage>());
-	addCommand(std::make_unique<command::ServerMode>());
-	addCommand(std::make_unique<command::ServerNick>());
-	addCommand(std::make_unique<command::ServerNotice>());
-	addCommand(std::make_unique<command::ServerPart>());
-	addCommand(std::make_unique<command::ServerReconnect>());
-	addCommand(std::make_unique<command::ServerTopic>());
-	addCommand(std::make_unique<command::Watch>());
+}
+
+bool CommandService::contains(const std::string &name) const noexcept
+{
+	return find(name) != nullptr;
+}
+
+std::shared_ptr<RemoteCommand> CommandService::find(const std::string &name) const noexcept
+{
+	auto it = std::find_if(m_commands.begin(), m_commands.end(), [&] (const auto &cmd) {
+		return cmd->name() == name;
+	});
+
+	return it == m_commands.end() ? nullptr : *it;
 }
 
 } // !irccd

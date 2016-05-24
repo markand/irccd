@@ -25,6 +25,7 @@
 
 #include <format.h>
 
+#include "command.hpp"
 #include "elapsed-timer.hpp"
 #include "fs.hpp"
 #include "ini.hpp"
@@ -205,7 +206,7 @@ void Irccdctl::readAliases(const ini::Section &sc)
 		// This is the alias name.
 		Alias alias(option.key());
 
-		if (m_commands.count(option.key()) > 0)
+		if (m_commandService.contains(option.key()))
 			throw std::invalid_argument("there is already a command named " + option.key());
 
 		// Iterate over the list of commands to execute for this alias.
@@ -450,10 +451,10 @@ void Irccdctl::exec(std::vector<std::string> args)
 	if (alias != m_aliases.end())
 		exec(alias->second, args);
 	else {
-		auto cmd = m_commands.find(name);
+		auto cmd = m_commandService.find(name);
 
-		if (cmd != m_commands.end())
-			exec(*cmd->second, args);
+		if (cmd)
+			exec(*cmd, args);
 		else
 			throw std::invalid_argument("no alias or command named " + name);
 	}

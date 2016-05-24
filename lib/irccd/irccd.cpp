@@ -18,6 +18,7 @@
 
 #include "irccd.hpp"
 #include "logger.hpp"
+#include "service-command.hpp"
 #include "service-interrupt.hpp"
 #include "service-module.hpp"
 #include "service-plugin.hpp"
@@ -33,7 +34,8 @@ using namespace std::string_literals;
 namespace irccd {
 
 Irccd::Irccd()
-	: m_interruptService(std::make_shared<InterruptService>())
+	: m_commandService(std::make_shared<CommandService>())
+	, m_interruptService(std::make_shared<InterruptService>())
 	, m_serverService(std::make_shared<ServerService>(*this))
 	, m_transportService(std::make_shared<TransportService>(*this))
 	, m_ruleService(std::make_shared<RuleService>())

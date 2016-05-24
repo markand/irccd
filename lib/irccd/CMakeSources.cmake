@@ -1,7 +1,6 @@
 set(
 	HEADERS
 	${CMAKE_CURRENT_LIST_DIR}/alias.hpp
-	${CMAKE_CURRENT_LIST_DIR}/application.hpp
 	${CMAKE_CURRENT_LIST_DIR}/connection.hpp
 	${CMAKE_CURRENT_LIST_DIR}/cmd-help.hpp
 	${CMAKE_CURRENT_LIST_DIR}/cmd-plugin-info.hpp
@@ -63,6 +62,7 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/server-state-connecting.hpp
 	${CMAKE_CURRENT_LIST_DIR}/server-state-disconnected.hpp
 	${CMAKE_CURRENT_LIST_DIR}/service.hpp
+	${CMAKE_CURRENT_LIST_DIR}/service-command.hpp
 	${CMAKE_CURRENT_LIST_DIR}/service-interrupt.hpp
 	${CMAKE_CURRENT_LIST_DIR}/service-module.hpp
 	${CMAKE_CURRENT_LIST_DIR}/service-plugin.hpp
@@ -81,7 +81,6 @@ set(
 set(
 	SOURCES
 	${CMAKE_CURRENT_LIST_DIR}/alias.cpp
-	${CMAKE_CURRENT_LIST_DIR}/application.cpp
 	${CMAKE_CURRENT_LIST_DIR}/connection.cpp
 	${CMAKE_CURRENT_LIST_DIR}/config.cpp
 	${CMAKE_CURRENT_LIST_DIR}/cmd-help.cpp
@@ -137,6 +136,7 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/server-state-connected.cpp
 	${CMAKE_CURRENT_LIST_DIR}/server-state-connecting.cpp
 	${CMAKE_CURRENT_LIST_DIR}/server-state-disconnected.cpp
+	${CMAKE_CURRENT_LIST_DIR}/service-command.cpp
 	${CMAKE_CURRENT_LIST_DIR}/service-interrupt.cpp
 	${CMAKE_CURRENT_LIST_DIR}/service-module.cpp
 	${CMAKE_CURRENT_LIST_DIR}/service-plugin.cpp

@@ -31,13 +31,12 @@
 #include <mutex>
 #include <vector>
 
-#include "application.hpp"
 #include "sysconfig.hpp"
 
 namespace irccd {
 
+class CommandService;
 class InterruptService;
-class Irccd;
 class ModuleService;
 class PluginService;
 class RuleService;
@@ -49,7 +48,7 @@ class TransportService;
  * \class Irccd
  * \brief Irccd main instance.
  */
-class Irccd : public Application {
+class Irccd {
 private:
 	// Main loop stuff.
 	std::atomic<bool> m_running{true};
@@ -57,6 +56,7 @@ private:
 	std::vector<std::function<void (Irccd &)>> m_events;
 
 	// Services.
+	std::shared_ptr<CommandService> m_commandService;
 	std::shared_ptr<InterruptService> m_interruptService;
 	std::shared_ptr<ServerService> m_serverService;
 	std::shared_ptr<TransportService> m_transportService;
@@ -86,6 +86,16 @@ public:
 	inline void addService(std::shared_ptr<Service> service)
 	{
 		m_services.push_back(std::move(service));
+	}
+
+	/**
+	 * Access the command service.
+	 *
+	 * \return the service
+	 */
+	inline CommandService &commandService() noexcept
+	{
+		return *m_commandService;
 	}
 
 	/**

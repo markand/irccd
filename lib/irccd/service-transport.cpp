@@ -16,8 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "command.hpp"
 #include "irccd.hpp"
+#include "json.hpp"
 #include "logger.hpp"
+#include "service-command.hpp"
 #include "service-transport.hpp"
 #include "transport-client.hpp"
 #include "transport-server.hpp"
@@ -44,9 +47,9 @@ void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const j
 		}
 
 		// 2. Search for a command
-		auto it = m_irccd.commands().find(name->toString());
+		auto cmd = m_irccd.commandService().find(name->toString());
 
-		if (it == m_irccd.commands().end()) {
+		if (!cmd) {
 			// TODO: send error again
 			log::warning("command does not exists");
 			return;
@@ -56,12 +59,11 @@ void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const j
 		json::Value response = json::object({});
 
 		try {
-			response = it->second->exec(m_irccd, object);
+			response = cmd->exec(m_irccd, object);
 
 			// Adjust if command has returned something else.
-			if (!response.isObject()) {
+			if (!response.isObject())
 				response = json::object({});
-			}
 
 			response.insert("status", true);
 		} catch (const std::exception &ex) {
@@ -70,7 +72,7 @@ void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const j
 		}
 
 		// 4. Store the command name result.
-		response.insert("response", it->first);
+		response.insert("response", name->toString());
 
 		// 5. Send the result.
 		tc->send(response.toJson(0));

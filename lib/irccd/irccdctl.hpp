@@ -30,9 +30,9 @@
 #include <string>
 
 #include "alias.hpp"
-#include "application.hpp"
 #include "connection.hpp"
 #include "options.hpp"
+#include "service-command.hpp"
 
 namespace irccd {
 
@@ -47,7 +47,7 @@ class Section;
 /**
  * \brief Main irccdctl class.
  */
-class Irccdctl : public Application {
+class Irccdctl {
 private:
 	// Irccd's information.
 	unsigned short m_major{0};
@@ -57,6 +57,9 @@ private:
 	// Irccd's compilation option.
 	bool m_javascript{true};
 	bool m_ssl{true};
+
+	// Commands.
+	CommandService m_commandService;
 
 	std::unique_ptr<Connection> m_connection;
 	std::unordered_map<std::string, Alias> m_aliases;
@@ -78,6 +81,16 @@ private:
 	void connect();
 
 public:
+	/**
+	 * Get the command service.
+	 *
+	 * \return the command service
+	 */
+	inline CommandService &commandService() noexcept
+	{
+		return m_commandService;
+	}
+
 	/**
 	 * Execute the given command and wait for its result.
 	 *

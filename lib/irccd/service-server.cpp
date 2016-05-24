@@ -21,6 +21,7 @@
 #include <format.h>
 
 #include "irccd.hpp"
+#include "json.hpp"
 #include "logger.hpp"
 #include "plugin.hpp"
 #include "server.hpp"
