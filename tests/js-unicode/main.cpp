@@ -22,60 +22,62 @@
 
 #include <gtest/gtest.h>
 
-#include <irccd/js-irccd.hpp>
-#include <irccd/js-unicode.hpp>
+#include <irccd/irccd.hpp>
+#include <irccd/mod-irccd.hpp>
+#include <irccd/mod-unicode.hpp>
+#include <irccd/plugin-js.hpp>
+#include <irccd/service-module.hpp>
+#include <irccd/system.hpp>
 
 using namespace irccd;
 
-TEST(TestJsUnicode, isLetter)
+class TestJsUnicode : public testing::Test {
+protected:
+	Irccd m_irccd;
+	std::shared_ptr<JsPlugin> m_plugin;
+
+	TestJsUnicode()
+		: m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
+	{
+		m_irccd.moduleService().get("Irccd")->load(m_irccd, *m_plugin);
+		m_irccd.moduleService().get("Irccd.Unicode")->load(m_irccd, *m_plugin);
+	}
+};
+
+TEST_F(TestJsUnicode, isLetter)
 {
-	duk::Context ctx;
-
-	loadJsIrccd(ctx);
-	loadJsUnicode(ctx);
-
 	try {
-		duk::pevalString(ctx, "result = Irccd.Unicode.isLetter(String('é').charCodeAt(0));");
-		ASSERT_TRUE(duk::getGlobal<bool>(ctx, "result"));
+		duk::pevalString(m_plugin->context(), "result = Irccd.Unicode.isLetter(String('é').charCodeAt(0));");
+		ASSERT_TRUE(duk::getGlobal<bool>(m_plugin->context(), "result"));
 
-		duk::pevalString(ctx, "result = Irccd.Unicode.isLetter(String('€').charCodeAt(0));");
-		ASSERT_FALSE(duk::getGlobal<bool>(ctx, "result"));
+		duk::pevalString(m_plugin->context(), "result = Irccd.Unicode.isLetter(String('€').charCodeAt(0));");
+		ASSERT_FALSE(duk::getGlobal<bool>(m_plugin->context(), "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
 }
 
-TEST(TestJsUnicode, isLower)
+TEST_F(TestJsUnicode, isLower)
 {
-	duk::Context ctx;
-
-	loadJsIrccd(ctx);
-	loadJsUnicode(ctx);
-
 	try {
-		duk::pevalString(ctx, "result = Irccd.Unicode.isLower(String('é').charCodeAt(0));");
-		ASSERT_TRUE(duk::getGlobal<bool>(ctx, "result"));
+		duk::pevalString(m_plugin->context(), "result = Irccd.Unicode.isLower(String('é').charCodeAt(0));");
+		ASSERT_TRUE(duk::getGlobal<bool>(m_plugin->context(), "result"));
 
-		duk::pevalString(ctx, "result = Irccd.Unicode.isLower(String('É').charCodeAt(0));");
-		ASSERT_FALSE(duk::getGlobal<bool>(ctx, "result"));
+		duk::pevalString(m_plugin->context(), "result = Irccd.Unicode.isLower(String('É').charCodeAt(0));");
+		ASSERT_FALSE(duk::getGlobal<bool>(m_plugin->context(), "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
 }
 
-TEST(TestJsUnicode, isUpper)
+TEST_F(TestJsUnicode, isUpper)
 {
-	duk::Context ctx;
-
-	loadJsIrccd(ctx);
-	loadJsUnicode(ctx);
-
 	try {
-		duk::pevalString(ctx, "result = Irccd.Unicode.isUpper(String('É').charCodeAt(0));");
-		ASSERT_TRUE(duk::getGlobal<bool>(ctx, "result"));
+		duk::pevalString(m_plugin->context(), "result = Irccd.Unicode.isUpper(String('É').charCodeAt(0));");
+		ASSERT_TRUE(duk::getGlobal<bool>(m_plugin->context(), "result"));
 
-		duk::pevalString(ctx, "result = Irccd.Unicode.isUpper(String('é').charCodeAt(0));");
-		ASSERT_FALSE(duk::getGlobal<bool>(ctx, "result"));
+		duk::pevalString(m_plugin->context(), "result = Irccd.Unicode.isUpper(String('é').charCodeAt(0));");
+		ASSERT_FALSE(duk::getGlobal<bool>(m_plugin->context(), "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
