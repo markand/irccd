@@ -41,9 +41,9 @@ TransportServerIp::TransportServerIp(int domain, const std::string &address, int
 
 	// Disable or enable IPv4 when using IPv6.
 	if (domain == AF_INET6)
-		m_socket.set(net::option::Ipv6Only{ipv6only});
+		m_socket.set(net::option::Ipv6Only(ipv6only));
 
-	m_socket.bind(net::address::Ip{address, port, static_cast<net::address::Ip::Type>(domain)});
+	m_socket.bind(net::address::Ip(address, port, domain));
 	m_socket.listen();
 
 	log::info() << "transport: listening on " << address << ", port " << port << std::endl;
@@ -56,7 +56,7 @@ net::Handle TransportServerIp::handle() noexcept
 
 std::shared_ptr<TransportClient> TransportServerIp::accept()
 {
-	return std::make_shared<TransportClientBase<net::address::Ip>>(m_socket.accept(nullptr));
+	return std::make_shared<TransportClientBase<net::address::Ip>>(m_socket.accept());
 }
 
 /*
@@ -87,7 +87,7 @@ net::Handle TransportServerUnix::handle() noexcept
 
 std::shared_ptr<TransportClient> TransportServerUnix::accept()
 {
-	return std::make_shared<TransportClientBase<net::address::Local>>(m_socket.accept(nullptr));
+	return std::make_shared<TransportClientBase<net::address::Local>>(m_socket.accept());
 }
 
 #endif

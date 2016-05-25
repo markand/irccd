@@ -24,7 +24,7 @@
  * \brief Selectable service.
  */
 
-#include "sockets.hpp"
+#include "net.hpp"
 #include "sysconfig.hpp"
 #include "util.hpp"
 

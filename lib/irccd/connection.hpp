@@ -29,7 +29,7 @@
 
 #include "elapsed-timer.hpp"
 #include "json.hpp"
-#include "sockets.hpp"
+#include "net.hpp"
 #include "sysconfig.hpp"
 #include "system.hpp"
 #include "util.hpp"
@@ -83,13 +83,6 @@ public:
 	 * \param timeout the timeout
 	 */
 	IRCCD_EXPORT void verify(const std::string &name, int timeout = 30000);
-
-	/**
-	 * Check if the socket is still connected.
-	 *
-	 * \return true if connected
-	 */
-	virtual bool isConnected() const noexcept = 0;
 
 	/**
 	 * Try to connect to the host.
@@ -149,14 +142,6 @@ public:
 	}
 
 	/**
-	 * \copydoc Connection::isConnected
-	 */
-	inline bool isConnected() const noexcept override
-	{
-		return m_socket.state() == net::State::Connected;
-	}
-
-	/**
 	 * \copydoc Connection::connect
 	 */
 	void connect(int timeout) override;
@@ -175,14 +160,22 @@ public:
 template <typename Address>
 void ConnectionBase<Address>::connect(int timeout)
 {
-	m_socket.connect(m_address);
+	net::Condition cond;
 
-	if (m_socket.state() == net::State::Connecting) {
-		m_listener.set(m_socket.handle(), net::Condition::Writable);
-		m_listener.wait(timeout);
-		m_socket.connect();
-		m_listener.unset(m_socket.handle(), net::Condition::Writable);
+	m_socket.connect(m_address, cond);
+	m_timer.reset();
+
+	while (cond != net::Condition::None) {
+		if (timeout >= 0 && m_timer.elapsed() >= static_cast<unsigned>(timeout))
+			throw std::runtime_error("timeout while connecting");
+
+		m_listener.remove(m_socket.handle());
+		m_listener.set(m_socket.handle(), cond);
+		m_listener.wait(timeout - m_timer.elapsed());
+		m_socket.resumeConnect(cond);
 	}
+
+	m_listener.set(m_socket.handle(), net::Condition::Readable);
 }
 
 template <typename Address>
@@ -221,7 +214,7 @@ json::Value ConnectionBase<Address>::next(int timeout)
 	m_timer.reset();
 
 	// Read if there is nothing.
-	while (buffer.empty() && isConnected()) {
+	while (buffer.empty()) {
 		// Wait and read.
 		m_listener.wait(clamp(timeout));
 		m_input += m_socket.recv(512);
@@ -229,9 +222,6 @@ json::Value ConnectionBase<Address>::next(int timeout)
 		// Finally try.
 		buffer = util::nextNetwork(m_input);
 	}
-
-	if (!isConnected())
-		throw std::runtime_error("connection lost");
 
 	json::Value value = json::fromString(buffer);
 

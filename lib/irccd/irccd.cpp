@@ -18,6 +18,7 @@
 
 #include "irccd.hpp"
 #include "logger.hpp"
+#include "net.hpp"
 #include "service-command.hpp"
 #include "service-interrupt.hpp"
 #include "service-module.hpp"
@@ -25,7 +26,6 @@
 #include "service-rule.hpp"
 #include "service-server.hpp"
 #include "service-transport.hpp"
-#include "sockets.hpp"
 
 using namespace std;
 using namespace std::placeholders;

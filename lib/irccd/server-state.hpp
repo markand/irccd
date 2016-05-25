@@ -25,7 +25,7 @@
  */
 
 #include "elapsed-timer.hpp"
-#include "sockets.hpp"
+#include "net.hpp"
 #include "sysconfig.hpp"
 
 namespace irccd {

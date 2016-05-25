@@ -25,7 +25,7 @@ json::Value Connection::next(const std::string &name, int timeout)
 {
 	m_timer.reset();
 
-	while (isConnected()) {
+	for (;;) {
 		json::Value object = next(clamp(timeout));
 
 		if (object.isObject() && object["response"].toString() == name)

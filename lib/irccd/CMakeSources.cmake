@@ -46,6 +46,7 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/mod-timer.hpp
 	${CMAKE_CURRENT_LIST_DIR}/mod-unicode.hpp
 	${CMAKE_CURRENT_LIST_DIR}/mod-util.hpp
+	${CMAKE_CURRENT_LIST_DIR}/net.hpp
 	${CMAKE_CURRENT_LIST_DIR}/logger.hpp
 	${CMAKE_CURRENT_LIST_DIR}/module.hpp
 	${CMAKE_CURRENT_LIST_DIR}/options.hpp
@@ -69,7 +70,6 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/service-rule.hpp
 	${CMAKE_CURRENT_LIST_DIR}/service-server.hpp
 	${CMAKE_CURRENT_LIST_DIR}/service-transport.hpp
-	${CMAKE_CURRENT_LIST_DIR}/sockets.hpp
 	${CMAKE_CURRENT_LIST_DIR}/system.hpp
 	${CMAKE_CURRENT_LIST_DIR}/timer.hpp
 	${CMAKE_CURRENT_LIST_DIR}/transport-client.hpp
@@ -143,7 +143,6 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/service-rule.cpp
 	${CMAKE_CURRENT_LIST_DIR}/service-server.cpp
 	${CMAKE_CURRENT_LIST_DIR}/service-transport.cpp
-	${CMAKE_CURRENT_LIST_DIR}/sockets.cpp
 	${CMAKE_CURRENT_LIST_DIR}/system.cpp
 	${CMAKE_CURRENT_LIST_DIR}/timer.cpp
 	${CMAKE_CURRENT_LIST_DIR}/transport-client.cpp

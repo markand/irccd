@@ -29,9 +29,9 @@
 #include <stdexcept>
 #include <string>
 
+#include "net.hpp"
 #include "server.hpp"
 #include "signals.hpp"
-#include "sockets.hpp"
 #include "sysconfig.hpp"
 
 namespace irccd {

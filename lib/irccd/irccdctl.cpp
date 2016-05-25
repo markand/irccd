@@ -31,10 +31,10 @@
 #include "ini.hpp"
 #include "irccdctl.hpp"
 #include "json.hpp"
+#include "net.hpp"
 #include "logger.hpp"
 #include "options.hpp"
 #include "path.hpp"
-#include "sockets.hpp"
 #include "sysconfig.hpp"
 #include "system.hpp"
 #include "util.hpp"
@@ -134,7 +134,7 @@ void Irccdctl::readConnectIp(const ini::Section &sc)
 	host = it->value();
 
 	// Port.
-	int port;
+	std::uint16_t port;
 
 	if ((it = sc.find("port")) == sc.end())
 		throw std::invalid_argument("missing port parameter");
@@ -146,18 +146,18 @@ void Irccdctl::readConnectIp(const ini::Section &sc)
 	}
 
 	// Domain.
-	Ip::Type domain{Ip::v4};
+	int domain = AF_INET;
 
 	if ((it = sc.find("domain")) != sc.end()) {
 		if (it->value() == "ipv6")
-			domain = Ip::v6;
+			domain = AF_INET6;
 		else if (it->value() == "ipv4")
-			domain = Ip::v4;
+			domain = AF_INET;
 		else
 			throw std::invalid_argument("invalid domain: " + it->value());
 	}
 
-	m_connection = std::make_unique<ConnectionBase<Ip>>(Ip{host, port, domain});
+	m_connection =  std::make_unique<ConnectionBase<Ip>>(Ip::resolve(host, std::to_string(port), domain));
 }
 
 void Irccdctl::readConnectUnix(const ini::Section &sc)
@@ -165,9 +165,8 @@ void Irccdctl::readConnectUnix(const ini::Section &sc)
 #if !defined(IRCCD_SYSTEM_WINDOWS)
 	auto it = sc.find("path");
 
-	if (it == sc.end()) {
+	if (it == sc.end())
 		throw std::invalid_argument("missing path parameter");
-	}
 
 	m_connection = std::make_unique<ConnectionBase<Local>>(Local{it->value(), false});
 #else
@@ -271,18 +270,21 @@ void Irccdctl::parseConnectIp(const parser::Result &options, bool ipv6)
 	host = it->second;
 
 	// Port (-p or --port).
-	int port;
+	std::uint16_t port;
 
 	if ((it = options.find("-p")) == options.end() && (it = options.find("--port")) == options.end())
 		throw std::invalid_argument("missing port argument (-p or --port)");
 
 	try {
-		port = std::stoi(it->second);
+		port = util::toNumber<std::uint16_t>(it->second);
 	} catch (...) {
 		throw std::invalid_argument("invalid port number: " + it->second);
 	}
 
-	m_connection =  std::make_unique<ConnectionBase<Ip>>(Ip{host, port, (ipv6) ? Ip::v6 : Ip::v4});
+	// Domain
+	int domain = (ipv6) ? AF_INET6 : AF_INET;
+
+	m_connection =  std::make_unique<ConnectionBase<Ip>>(Ip::resolve(host, std::to_string(port), domain, SOCK_STREAM));
 }
 
 void Irccdctl::parseConnectUnix(const parser::Result &options)
