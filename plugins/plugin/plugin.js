@@ -16,10 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-// Modules.
-var Util = Irccd.Util;
-var Plugin = Irccd.Plugin;
-
 // Plugin information.
 info = {
 	author: "David Demelier <markand@malikania.fr>",
@@ -27,6 +23,10 @@ info = {
 	summary: "A plugin to inspect plugins",
 	version: "@IRCCD_VERSION@"
 };
+
+// Modules.
+var Util = Irccd.Util;
+var Plugin = Irccd.Plugin;
 
 Plugin.format = {
 	"usage":	"#{nickname}, usage: #{command} list | info plugin",
