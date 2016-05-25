@@ -18,23 +18,34 @@
 
 #include <gtest/gtest.h>
 
-#include <irccd/js-irccd.hpp>
-#include <irccd/js-system.hpp>
+#include <irccd/irccd.hpp>
+#include <irccd/mod-irccd.hpp>
+#include <irccd/mod-system.hpp>
+#include <irccd/plugin-js.hpp>
+#include <irccd/service-module.hpp>
 #include <irccd/system.hpp>
 
 using namespace irccd;
 
-TEST(TestJsSystem, home)
+class TestJsSystem : public testing::Test {
+protected:
+	Irccd m_irccd;
+	std::shared_ptr<JsPlugin> m_plugin;
+
+	TestJsSystem()
+		: m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
+	{
+		m_irccd.moduleService().get("Irccd")->load(m_irccd, *m_plugin);
+		m_irccd.moduleService().get("Irccd.System")->load(m_irccd, *m_plugin);
+	}
+};
+
+TEST_F(TestJsSystem, home)
 {
-	duk::Context ctx;
-
-	loadJsIrccd(ctx);
-	loadJsSystem(ctx);
-
 	try {
-		duk::pevalString(ctx, "result = Irccd.System.home();");
+		duk::pevalString(m_plugin->context(), "result = Irccd.System.home();");
 
-		ASSERT_EQ(sys::home(), duk::getGlobal<std::string>(ctx, "result"));
+		ASSERT_EQ(sys::home(), duk::getGlobal<std::string>(m_plugin->context(), "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
