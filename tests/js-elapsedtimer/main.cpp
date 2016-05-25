@@ -20,38 +20,41 @@
 
 #include <thread>
 
-#include <irccd/js-irccd.hpp>
+#include <irccd/irccd.hpp>
+#include <irccd/mod-irccd.hpp>
 #include <irccd/mod-elapsed-timer.hpp>
+#include <irccd/plugin-js.hpp>
+#include <irccd/service-module.hpp>
 
 using namespace irccd;
 using namespace std::chrono_literals;
 
 class TestElapsedTimer : public testing::Test {
 protected:
-	duk::Context m_context;
+	Irccd m_irccd;
+	std::shared_ptr<JsPlugin> m_plugin;
 
 	TestElapsedTimer()
+		: m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
 	{
-		loadJsIrccd(m_context);
-		loadJsElapsedTimer(m_context);
+		m_irccd.moduleService().get("Irccd")->load(m_irccd, *m_plugin);
+		m_irccd.moduleService().get("Irccd.ElapsedTimer")->load(m_irccd, *m_plugin);
 	}
 };
 
 TEST_F(TestElapsedTimer, standard)
 {
 	try {
-		if (duk::pevalString(m_context, "timer = new Irccd.ElapsedTimer();") != 0) {
-			throw duk::error(m_context, -1);
-		}
+		if (duk::pevalString(m_plugin->context(), "timer = new Irccd.ElapsedTimer();") != 0)
+			throw duk::error(m_plugin->context(), -1);
 
 		std::this_thread::sleep_for(300ms);
 
-		if (duk::pevalString(m_context, "result = timer.elapsed();") != 0) {
-			throw duk::error(m_context, -1);
-		}
+		if (duk::pevalString(m_plugin->context(), "result = timer.elapsed();") != 0)
+			throw duk::error(m_plugin->context(), -1);
 
-		ASSERT_GE(duk::getGlobal<int>(m_context, "result"), 250);
-		ASSERT_LE(duk::getGlobal<int>(m_context, "result"), 350);
+		ASSERT_GE(duk::getGlobal<int>(m_plugin->context(), "result"), 250);
+		ASSERT_LE(duk::getGlobal<int>(m_plugin->context(), "result"), 350);
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -60,17 +63,15 @@ TEST_F(TestElapsedTimer, standard)
 TEST_F(TestElapsedTimer, reset)
 {
 	try {
-		if (duk::pevalString(m_context, "timer = new Irccd.ElapsedTimer();") != 0) {
-			throw duk::error(m_context, -1);
-		}
+		if (duk::pevalString(m_plugin->context(), "timer = new Irccd.ElapsedTimer();") != 0)
+			throw duk::error(m_plugin->context(), -1);
 
 		std::this_thread::sleep_for(300ms);
 
-		if (duk::pevalString(m_context, "timer.reset(); result = timer.elapsed();") != 0) {
-			throw duk::error(m_context, -1);
-		}
+		if (duk::pevalString(m_plugin->context(), "timer.reset(); result = timer.elapsed();") != 0)
+			throw duk::error(m_plugin->context(), -1);
 
-		ASSERT_LE(duk::getGlobal<int>(m_context, "result"), 100);
+		ASSERT_LE(duk::getGlobal<int>(m_plugin->context(), "result"), 100);
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}

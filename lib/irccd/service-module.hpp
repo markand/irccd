@@ -27,6 +27,8 @@
 #include <memory>
 #include <vector>
 
+#include "sysconfig.hpp"
+
 namespace irccd {
 
 class Module;
@@ -53,6 +55,14 @@ public:
 	{
 		return m_modules;
 	}
+
+	/**
+	 * Get a module.
+	 *
+	 * \param name the module name
+	 * \return the module or empty if not found
+	 */
+	IRCCD_EXPORT std::shared_ptr<Module> get(const std::string &name) const noexcept;
 
 	/**
 	 * Tells if a module exist.

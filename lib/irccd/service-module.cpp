@@ -62,6 +62,16 @@ ModuleService::ModuleService()
 	m_modules.push_back(std::make_shared<UtilModule>());
 }
 
+std::shared_ptr<Module> ModuleService::get(const std::string &name) const noexcept
+{
+	auto it = find(m_modules, name);
+
+	if (it == m_modules.end())
+		return nullptr;
+
+	return *it;
+}
+
 bool ModuleService::contains(const std::string &name) const
 {
 	return find(m_modules, name) != m_modules.end();
