@@ -18,62 +18,61 @@
 
 #include <gtest/gtest.h>
 
-#include <irccd/js-irccd.hpp>
-#include <irccd/js-util.hpp>
+#include <irccd/irccd.hpp>
+#include <irccd/mod-irccd.hpp>
+#include <irccd/mod-util.hpp>
+#include <irccd/plugin-js.hpp>
+#include <irccd/service-module.hpp>
+#include <irccd/system.hpp>
 
 using namespace irccd;
 
-TEST(TestJsUtil, formatSimple)
+class TestJsUtil : public testing::Test {
+protected:
+	Irccd m_irccd;
+	std::shared_ptr<JsPlugin> m_plugin;
+
+	TestJsUtil()
+		: m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
+	{
+		m_irccd.moduleService().get("Irccd")->load(m_irccd, *m_plugin);
+		m_irccd.moduleService().get("Irccd.Util")->load(m_irccd, *m_plugin);
+	}
+};
+
+TEST_F(TestJsUtil, formatSimple)
 {
-	duk::Context ctx;
-
-	loadJsIrccd(ctx);
-	loadJsUtil(ctx);
-
 	try {
-		auto ret = duk::pevalString(ctx,
+		auto ret = duk::pevalString(m_plugin->context(),
 			"result = Irccd.Util.format(\"#{target}\", { target: \"markand\" })"
 		);
 
-		if (ret != 0) {
-			throw duk::error(ctx, -1);
-		}
+		if (ret != 0)
+			throw duk::error(m_plugin->context(), -1);
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
 }
 
-TEST(TestJsUtil, splituser)
+TEST_F(TestJsUtil, splituser)
 {
-	duk::Context ctx;
-
-	loadJsIrccd(ctx);
-	loadJsUtil(ctx);
-
 	try {
-		if (duk::pevalString(ctx, "result = Irccd.Util.splituser(\"user!~user@hyper/super/host\");") != 0) {
-			throw duk::error(ctx, -1);
-		}
+		if (duk::pevalString(m_plugin->context(), "result = Irccd.Util.splituser(\"user!~user@hyper/super/host\");") != 0)
+			throw duk::error(m_plugin->context(), -1);
 
-		ASSERT_EQ("user", duk::getGlobal<std::string>(ctx, "result"));
+		ASSERT_EQ("user", duk::getGlobal<std::string>(m_plugin->context(), "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
 }
 
-TEST(TestJsUtil, splithost)
+TEST_F(TestJsUtil, splithost)
 {
-	duk::Context ctx;
-
-	loadJsIrccd(ctx);
-	loadJsUtil(ctx);
-
 	try {
-		if (duk::pevalString(ctx, "result = Irccd.Util.splithost(\"user!~user@hyper/super/host\");") != 0) {
-			throw duk::error(ctx, -1);
-		}
+		if (duk::pevalString(m_plugin->context(), "result = Irccd.Util.splithost(\"user!~user@hyper/super/host\");") != 0)
+			throw duk::error(m_plugin->context(), -1);
 
-		ASSERT_EQ("!~user@hyper/super/host", duk::getGlobal<std::string>(ctx, "result"));
+		ASSERT_EQ("!~user@hyper/super/host", duk::getGlobal<std::string>(m_plugin->context(), "result"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
