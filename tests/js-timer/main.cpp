@@ -34,6 +34,7 @@ TEST(Basic, single)
 
 	auto plugin = std::make_shared<JsPlugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-single.js");
 
+	plugin->onLoad(irccd);
 	irccd.pluginService().add(plugin);
 
 	while (timer.elapsed() < 3000) {
@@ -51,6 +52,7 @@ TEST(Basic, repeat)
 
 	auto plugin = std::make_shared<JsPlugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-repeat.js");
 
+	plugin->onLoad(irccd);
 	irccd.pluginService().add(plugin);
 
 	while (timer.elapsed() < 3000) {
@@ -88,10 +90,10 @@ TEST(Basic, pending)
 
 int main(int argc, char **argv)
 {
-	/* Needed for some components */
+	// Needed for some components.
 	sys::setProgramName("irccd");
 	path::setApplicationPath(argv[0]);
-	log::setInterface(std::make_unique<log::Console>());
+	log::setInterface(std::make_unique<log::Silent>());
 	log::setVerbose(true);
 	testing::InitGoogleTest(&argc, argv);
 
