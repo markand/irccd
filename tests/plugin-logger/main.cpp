@@ -1,5 +1,5 @@
 /*
- * main.cpp -- test hangman plugin
+ * main.cpp -- test logger plugin
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
