@@ -18,46 +18,50 @@
 
 #include <gtest/gtest.h>
 
+#include <irccd/irccd.hpp>
+#include <irccd/mod-irccd.hpp>
+#include <irccd/plugin-js.hpp>
+#include <irccd/service-module.hpp>
 #include <irccd/sysconfig.hpp>
-
-#include <irccd/js-irccd.hpp>
-#include <irccd/logger.hpp>
 
 using namespace irccd;
 
-TEST(TestJsIrccd, version)
+class TestJsIrccd : public testing::Test {
+protected:
+	Irccd m_irccd;
+	std::shared_ptr<JsPlugin> m_plugin;
+
+	TestJsIrccd()
+		: m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
+	{
+		m_irccd.moduleService().get("Irccd")->load(m_irccd, *m_plugin);
+	}
+};
+
+TEST_F(TestJsIrccd, version)
 {
-	duk::Context ctx;
-
-	loadJsIrccd(ctx);
-
 	try {
-		auto ret = duk::pevalString(ctx,
+		auto ret = duk::pevalString(m_plugin->context(),
 			"major = Irccd.version.major;"
 			"minor = Irccd.version.minor;"
 			"patch = Irccd.version.patch;"
 		);
 
-		if (ret != 0) {
-			throw duk::error(ctx, -1);
-		}
+		if (ret != 0)
+			throw duk::error(m_plugin->context(), -1);
 
-		ASSERT_EQ(IRCCD_VERSION_MAJOR, duk::getGlobal<int>(ctx, "major"));
-		ASSERT_EQ(IRCCD_VERSION_MINOR, duk::getGlobal<int>(ctx, "minor"));
-		ASSERT_EQ(IRCCD_VERSION_PATCH, duk::getGlobal<int>(ctx, "patch"));
+		ASSERT_EQ(IRCCD_VERSION_MAJOR, duk::getGlobal<int>(m_plugin->context(), "major"));
+		ASSERT_EQ(IRCCD_VERSION_MINOR, duk::getGlobal<int>(m_plugin->context(), "minor"));
+		ASSERT_EQ(IRCCD_VERSION_PATCH, duk::getGlobal<int>(m_plugin->context(), "patch"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
 }
 
-TEST(SystemError, fromJavascript)
+TEST_F(TestJsIrccd, fromJavascript)
 {
-	duk::Context ctx;
-
-	loadJsIrccd(ctx);
-
 	try {
-		auto ret = duk::pevalString(ctx,
+		auto ret = duk::pevalString(m_plugin->context(),
 			"try {"
 			"  throw new Irccd.SystemError(1, 'test');"
 			"} catch (e) {"
@@ -69,36 +73,31 @@ TEST(SystemError, fromJavascript)
 			"}"
 		);
 
-		if (ret != 0) {
-			throw duk::error(ctx, -1);
-		}
+		if (ret != 0)
+			throw duk::error(m_plugin->context(), -1);
 
-		ASSERT_EQ(1, duk::getGlobal<int>(ctx, "errno"));
-		ASSERT_EQ("SystemError", duk::getGlobal<std::string>(ctx, "name"));
-		ASSERT_EQ("test", duk::getGlobal<std::string>(ctx, "message"));
-		ASSERT_TRUE(duk::getGlobal<bool>(ctx, "v1"));
-		ASSERT_TRUE(duk::getGlobal<bool>(ctx, "v2"));
+		ASSERT_EQ(1, duk::getGlobal<int>(m_plugin->context(), "errno"));
+		ASSERT_EQ("SystemError", duk::getGlobal<std::string>(m_plugin->context(), "name"));
+		ASSERT_EQ("test", duk::getGlobal<std::string>(m_plugin->context(), "message"));
+		ASSERT_TRUE(duk::getGlobal<bool>(m_plugin->context(), "v1"));
+		ASSERT_TRUE(duk::getGlobal<bool>(m_plugin->context(), "v2"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
 }
 
-TEST(SystemError, fromNative)
+TEST_F(TestJsIrccd, fromNative)
 {
-	duk::Context ctx;
-
-	loadJsIrccd(ctx);
-
 	try {
-		duk::push(ctx, duk::Function{[] (duk::ContextPtr ctx) -> duk::Ret {
+		duk::push(m_plugin->context(), duk::Function{[] (duk::ContextPtr ctx) -> duk::Ret {
 			duk::raise(ctx, SystemError{EINVAL, "hey"});
 
 			return 0;
 		}});
 
-		duk::putGlobal(ctx, "f");
+		duk::putGlobal(m_plugin->context(), "f");
 
-		auto ret = duk::pevalString(ctx,
+		auto ret = duk::pevalString(m_plugin->context(),
 			"try {"
 			"  f();"
 			"} catch (e) {"
@@ -110,15 +109,14 @@ TEST(SystemError, fromNative)
 			"}"
 		);
 
-		if (ret != 0) {
-			throw duk::error(ctx, -1);
-		}
+		if (ret != 0)
+			throw duk::error(m_plugin->context(), -1);
 
-		ASSERT_EQ(EINVAL, duk::getGlobal<int>(ctx, "errno"));
-		ASSERT_EQ("SystemError", duk::getGlobal<std::string>(ctx, "name"));
-		ASSERT_EQ("hey", duk::getGlobal<std::string>(ctx, "message"));
-		ASSERT_TRUE(duk::getGlobal<bool>(ctx, "v1"));
-		ASSERT_TRUE(duk::getGlobal<bool>(ctx, "v2"));
+		ASSERT_EQ(EINVAL, duk::getGlobal<int>(m_plugin->context(), "errno"));
+		ASSERT_EQ("SystemError", duk::getGlobal<std::string>(m_plugin->context(), "name"));
+		ASSERT_EQ("hey", duk::getGlobal<std::string>(m_plugin->context(), "message"));
+		ASSERT_TRUE(duk::getGlobal<bool>(m_plugin->context(), "v1"));
+		ASSERT_TRUE(duk::getGlobal<bool>(m_plugin->context(), "v2"));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}

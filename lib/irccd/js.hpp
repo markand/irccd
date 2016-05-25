@@ -221,7 +221,7 @@ public:
 	 */
 	duk_idx_t nargs{0};
 
-	Function(duk_c_function f, duk_idx_t n)
+	Function(duk_c_function f, duk_idx_t n = 0)
 		: function(f)
 		, nargs(n)
 	{
