@@ -233,7 +233,7 @@ json::Value ConnectionBase<Address>::next(int timeout)
 	if (!isConnected())
 		throw std::runtime_error("connection lost");
 
-	json::Value value(json::Buffer{buffer});
+	json::Value value = json::fromString(buffer);
 
 	if (!value.isObject())
 		throw std::invalid_argument("invalid message received");

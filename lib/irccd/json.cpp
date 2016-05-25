@@ -1,7 +1,7 @@
 /*
- * json.cpp -- C++14 JSON manipulation using jansson parser
+ * json.cpp -- C++14 JSON manipulation using jansson
  *
- * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2015-2016 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -217,31 +217,7 @@ Value::~Value()
 	}
 }
 
-bool Value::toBool() const noexcept
-{
-	if (m_type != Type::Boolean)
-		return false;
-
-	return m_boolean;
-}
-
-double Value::toReal() const noexcept
-{
-	if (m_type != Type::Real)
-		return 0;
-
-	return m_number;
-}
-
-int Value::toInt() const noexcept
-{
-	if (m_type != Type::Int)
-		return 0;
-
-	return m_integer;
-}
-
-std::string Value::toString(bool coerce) const noexcept
+std::string Value::toString(bool coerce) const
 {
 	std::string result;
 
@@ -251,16 +227,6 @@ std::string Value::toString(bool coerce) const noexcept
 		result = toJson();
 
 	return result;
-}
-
-Value::Value(const Buffer &buffer)
-{
-	*this = convert(json_loads, buffer.text.c_str(), 0);
-}
-
-Value::Value(const File &file)
-{
-	*this = convert(json_load_file, file.path.c_str(), 0);
 }
 
 std::string Value::toJson(int level, int current) const
@@ -299,13 +265,13 @@ std::string Value::toJson(int level, int current) const
 		for (const auto &pair : m_object) {
 			oss << indent(level, current + 1);
 
-			/* Key and : */
+			// Key and :.
 			oss << "\"" << pair.first << "\":" << (level != 0 ? " " : "");
 
-			/* Value */
+			// Value.
 			oss << pair.second.toJson(level, current + 1);
 
-			/* Comma, new line if needed */
+			// Comma, new line if needed.
 			oss << (++i < total ? "," : "") << (level != 0 ? "\n" : "");
 		}
 
@@ -362,6 +328,16 @@ std::string escape(const std::string &value)
 	}
 
 	return result;
+}
+
+Value fromString(const std::string &buffer)
+{
+	return convert(json_loads, buffer.c_str(), 0);
+}
+
+Value fromFile(const std::string &path)
+{
+	return convert(json_load_file, path.c_str(), 0);
 }
 
 } // !json

@@ -1,7 +1,7 @@
 /*
- * json.hpp -- C++14 JSON manipulation using jansson parser
+ * json.hpp -- C++14 JSON manipulation using jansson
  *
- * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2015-2016 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,16 +16,49 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JSON_HPP
-#define IRCCD_JSON_HPP
+#ifndef JSON_HPP
+#define JSON_HPP
 
 /**
  * \file json.hpp
- * \brief Jansson C++14 wrapper
+ * \brief C++14 JSON manipulation using jansson.
+ * \author David Demelier <markand@malikania.fr>
+ */
+
+/**
+ * \page Json Json
+ * \brief C++14 JSON manipulation using jansson.
  *
- * These classes can be used to build or parse JSON documents using jansson library. It is designed to be safe
- * and explicit. It does not implement implicit sharing like jansson so when you access (e.g. Value::toObject) values
- * you get real copies, thus when you read big documents it can has a performance cost.
+ * This library uses Jansson for parsing files only. It then converts the structure into internal storage.
+ *
+ * ## Creating objects and arrays
+ *
+ * The following code shows how you can easily create objects or arrays.
+ *
+ * ````cpp
+ * auto object = json::object({
+ *   { "x", 1 },
+ *   { "y", 2 }
+ * });
+ *
+ * auto array = json::array({ 123, 456, "hello" });
+ * ````
+ *
+ * ## Reading sources
+ *
+ * You can use json::fromFile and json::fromString to load JSON documents.
+ *
+ * ````cpp
+ * #include <iostream>
+ *
+ * #include "json.h"
+ *
+ * try {
+ *   auto value = json::fromFile("foo.json");
+ * } catch (const std::exception &ex) {
+ *   std::cerr << ex.what() << std::endl;
+ * }
+ * ````
  */
 
 #include <cassert>
@@ -35,8 +68,6 @@
 #include <string>
 #include <utility>
 #include <vector>
-
-#include "sysconfig.hpp"
 
 namespace irccd {
 
@@ -152,21 +183,166 @@ public:
 };
 
 /**
- * \class Buffer
- * \brief Open JSON document from text.
+ * \class Iterator
+ * \brief This is the base class for iterator and const_iterator
+ *
+ * This iterator works for both arrays and objects. Because of that purpose, it is only available
+ * as forward iterator.
+ *
+ * When iterator comes from an object, you can use key() otherwise you can use index().
  */
-class Buffer {
-public:
-	std::string text;	//!< The JSON text
-};
+template <typename ValueType, typename ArrayIteratorType, typename ObjectIteratorType>
+class Iterator : public std::iterator<std::forward_iterator_tag, ValueType> {
+private:
+	friend class Value;
 
-/**
- * \class File
- * \brief Open JSON document from a file.
- */
-class File {
+	ValueType *m_parent{nullptr};
+	ArrayIteratorType m_ita;
+	ObjectIteratorType m_itm;
+
+	inline void increment()
+	{
+		if (m_parent->isObject())
+			m_itm++;
+		else
+			m_ita++;
+	}
+
+	inline Iterator(ValueType *parent, ObjectIteratorType it)
+		: m_parent(parent)
+		, m_itm(it)
+	{
+		assert(parent);
+	}
+
+	inline Iterator(ValueType *parent, ArrayIteratorType it)
+		: m_parent(parent)
+		, m_ita(it)
+	{
+		assert(parent);
+	}
+
 public:
-	std::string path;	//!< The path to the file
+	/**
+	 * Default constructor.
+	 */
+	Iterator() = default;
+
+	/**
+	 * Get the iterator key (for objects).
+	 *
+	 * \pre iterator must be dereferenceable
+	 * \pre iterator must come from object
+	 * \return the key
+	 */
+	inline const std::string &key() const noexcept
+	{
+		assert(m_parent && m_parent->isObject());
+		assert(m_itm != m_parent->m_object.end());
+
+		return m_itm->first;
+	}
+
+	/**
+	 * Get the iterator position (for arrays).
+	 *
+	 * \pre iterator must be dereferenceable
+	 * \pre iterator must come from arrays
+	 * \return the index
+	 */
+	inline unsigned index() const noexcept
+	{
+		assert(m_parent && m_parent->isArray());
+		assert(m_ita != m_parent->m_array.end());
+
+		return std::distance(m_parent->m_array.begin(), m_ita);
+	}
+
+	/**
+	 * Dereference the iterator.
+	 *
+	 * \pre iterator be dereferenceable
+	 * \return the value
+	 */
+	inline ValueType &operator*() noexcept
+	{
+		assert(m_parent);
+		assert((m_parent->isArray()  && m_ita != m_parent->m_array.end()) ||
+		       (m_parent->isObject() && m_itm != m_parent->m_object.end()));
+
+		return (m_parent->m_type == Type::Object) ? m_itm->second : *m_ita;
+	}
+
+	/**
+	 * Dereference the iterator as a pointer.
+	 *
+	 * \pre iterator must be dereferenceable
+	 * \return the value
+	 */
+	inline ValueType *operator->() noexcept
+	{
+		assert(m_parent);
+		assert((m_parent->isArray()  && m_ita != m_parent->m_array.end()) ||
+		       (m_parent->isObject() && m_itm != m_parent->m_object.end()));
+
+		return (m_parent->m_type == Type::Object) ? &m_itm->second : &(*m_ita);
+	}
+
+	/**
+	 * Increment the iterator. (Prefix version).
+	 *
+	 * \pre iterator must be dereferenceable
+	 * \return *this;
+	 */
+	inline Iterator &operator++() noexcept
+	{
+		assert(m_parent);
+		assert((m_parent->isArray()  && m_ita != m_parent->m_array.end()) ||
+		       (m_parent->isObject() && m_itm != m_parent->m_object.end()));
+
+		increment();
+
+		return *this;
+	}
+
+	/**
+	 * Increment the iterator. (Postfix version).
+	 *
+	 * \pre iterator must be dereferenceable
+	 * \return *this;
+	 */
+	inline Iterator &operator++(int) noexcept
+	{
+		assert(m_parent);
+		assert((m_parent->isArray()  && m_ita != m_parent->m_array.end()) ||
+		       (m_parent->isObject() && m_itm != m_parent->m_object.end()));
+
+		increment();
+
+		return *this;
+	}
+
+	/**
+	 * Compare two iterators.
+	 *
+	 * \param it the first iterator
+	 * \return true if they are same
+	 */
+	bool operator==(const Iterator &it) const noexcept
+	{
+		return m_parent == it.m_parent && m_itm == it.m_itm && m_ita == it.m_ita;
+	}
+
+	/**
+	 * Test if the iterator is different.
+	 *
+	 * \param it the iterator
+	 * \return true if they are different
+	 */
+	inline bool operator!=(const Iterator &it) const noexcept
+	{
+		return !(*this == it);
+	}
 };
 
 /**
@@ -190,179 +366,24 @@ private:
 	void move(Value &&);
 	std::string toJson(int indent, int current) const;
 
-	/**
-	 * \class BaseIterator
-	 * \brief This is the base class for iterator and const_iterator
-	 *
-	 * This iterator works for both arrays and objects. Because of that purpose, it is only available
-	 * as forward iterator.
-	 *
-	 * When iterator comes from an object, you can use key() otherwise you can use index().
-	 */
-	template <typename ValueType, typename ArrayIteratorType, typename ObjectIteratorType>
-	class BaseIterator : public std::iterator<std::forward_iterator_tag, ValueType> {
-	private:
-		friend class Value;
-
-		ValueType &m_value;
-		ArrayIteratorType m_ita;
-		ObjectIteratorType m_itm;
-
-		inline void increment()
-		{
-			if (m_value.isObject())
-				m_itm++;
-			else
-				m_ita++;
-		}
-
-		BaseIterator(ValueType &value, ObjectIteratorType it)
-			: m_value(value)
-			, m_itm(it)
-		{
-		}
-
-		BaseIterator(ValueType &value, ArrayIteratorType it)
-			: m_value(value)
-			, m_ita(it)
-		{
-		}
-
-	public:
-		/**
-		 * Get the iterator key (for objects).
-		 *
-		 * \pre iterator must be dereferenceable
-		 * \pre iterator must come from object
-		 * \return the key
-		 */
-		inline const std::string &key() const noexcept
-		{
-			assert(m_value.isObject());
-			assert(m_itm != m_value.m_object.end());
-
-			return m_itm->first;
-		}
-
-		/**
-		 * Get the iterator position (for arrays).
-		 *
-		 * \pre iterator must be dereferenceable
-		 * \pre iterator must come from arrays
-		 * \return the index
-		 */
-		inline unsigned index() const noexcept
-		{
-			assert(m_value.isArray());
-			assert(m_ita != m_value.m_array.end());
-
-			return std::distance(m_value.m_array.begin(), m_ita);
-		}
-
-		/**
-		 * Dereference the iterator.
-		 *
-		 * \pre iterator be dereferenceable
-		 * \return the value
-		 */
-		inline ValueType &operator*() noexcept
-		{
-			assert((m_value.isArray()  && m_ita != m_value.m_array.end()) ||
-			       (m_value.isObject() && m_itm != m_value.m_object.end()));
-
-			return (m_value.m_type == Type::Object) ? m_itm->second : *m_ita;
-		}
-
-		/**
-		 * Dereference the iterator as a pointer.
-		 *
-		 * \pre iterator must be dereferenceable
-		 * \return the value
-		 */
-		inline ValueType *operator->() noexcept
-		{
-			assert((m_value.isArray()  && m_ita != m_value.m_array.end()) ||
-			       (m_value.isObject() && m_itm != m_value.m_object.end()));
-
-			return (m_value.m_type == Type::Object) ? &m_itm->second : &(*m_ita);
-		}
-
-		/**
-		 * Increment the iterator. (Prefix version).
-		 *
-		 * \pre iterator must be dereferenceable
-		 * \return *this;
-		 */
-		inline BaseIterator &operator++() noexcept
-		{
-			assert((m_value.isArray()  && m_ita != m_value.m_array.end()) ||
-			       (m_value.isObject() && m_itm != m_value.m_object.end()));
-
-			increment();
-
-			return *this;
-		}
-
-		/**
-		 * Increment the iterator. (Postfix version).
-		 *
-		 * \pre iterator must be dereferenceable
-		 * \return *this;
-		 */
-		inline BaseIterator &operator++(int) noexcept
-		{
-			assert((m_value.isArray()  && m_ita != m_value.m_array.end()) ||
-			       (m_value.isObject() && m_itm != m_value.m_object.end()));
-
-			increment();
-
-			return *this;
-		}
-
-		/**
-		 * Compare two iterators.
-		 *
-		 * \param it1 the first iterator
-		 * \param it2 the second iterator
-		 * \return true if they are same
-		 */
-		bool operator==(const BaseIterator &it) const noexcept
-		{
-			if (m_value.isObject() && it.m_value.isObject())
-				return m_itm == it.m_itm;
-			if (m_value.isArray() && it.m_value.isArray())
-				return m_ita == it.m_ita;
-
-			return false;
-		}
-
-		/**
-		 * Test if the iterator is different.
-		 *
-		 * \param it the iterator
-		 * \return true if they are different
-		 */
-		inline bool operator!=(const BaseIterator &it) const noexcept
-		{
-			return !(*this == it);
-		}
-	};
+	friend class Iterator<Value, typename std::vector<Value>::iterator, typename std::map<std::string, Value>::iterator>;
+	friend class Iterator<const Value, typename std::vector<Value>::const_iterator, typename std::map<std::string, Value>::const_iterator>;
 
 public:
 	/**
 	 * Forward iterator.
 	 */
-	using iterator = BaseIterator<Value, typename std::vector<Value>::iterator, typename std::map<std::string, Value>::iterator>;
+	using iterator = Iterator<Value, typename std::vector<Value>::iterator, typename std::map<std::string, Value>::iterator>;
 
 	/**
 	 * Const forward iterator.
 	 */
-	using const_iterator = BaseIterator<const Value, typename std::vector<Value>::const_iterator, typename std::map<std::string, Value>::const_iterator>;
+	using const_iterator = Iterator<const Value, typename std::vector<Value>::const_iterator, typename std::map<std::string, Value>::const_iterator>;
 
 	/**
 	 * Construct a null value.
 	 */
-	inline Value()
+	inline Value() noexcept
 	{
 	}
 
@@ -374,7 +395,7 @@ public:
 	 *
 	 * \param type the type
 	 */
-	IRCCD_EXPORT Value(Type type);
+	Value(Type type);
 
 	/**
 	 * Construct a null value.
@@ -414,7 +435,7 @@ public:
 	inline Value(const char *value)
 		: m_type(Type::String)
 	{
-		new (&m_string) std::string(value ? value : "");
+		new (&m_string) std::string{value ? value : ""};
 	}
 
 	/**
@@ -466,22 +487,6 @@ public:
 	}
 
 	/**
-	 * Construct a value from a buffer.
-	 *
-	 * \param buffer the text
-	 * \throw Error on errors
-	 */
-	IRCCD_EXPORT Value(const Buffer &buffer);
-
-	/**
-	 * Construct a value from a file.
-	 *
-	 * \param file the file
-	 * \throw Error on errors
-	 */
-	IRCCD_EXPORT Value(const File &file);
-
-	/**
 	 * Move constructor.
 	 *
 	 * \param other the value to move from
@@ -518,6 +523,7 @@ public:
 	 * Move operator.
 	 *
 	 * \param other the value to move from
+	 * \return this
 	 */
 	inline Value &operator=(Value &&other)
 	{
@@ -529,7 +535,7 @@ public:
 	/**
 	 * Destructor.
 	 */
-	IRCCD_EXPORT ~Value();
+	~Value();
 
 	/**
 	 * Get an iterator to the beginning.
@@ -541,7 +547,7 @@ public:
 	{
 		assert(isArray() || isObject());
 
-		return m_type == Type::Object ? iterator(*this, m_object.begin()) : iterator(*this, m_array.begin());
+		return m_type == Type::Object ? iterator(this, m_object.begin()) : iterator(this, m_array.begin());
 	}
 
 	/**
@@ -554,7 +560,7 @@ public:
 	{
 		assert(isArray() || isObject());
 
-		return m_type == Type::Object ? const_iterator(*this, m_object.begin()) : const_iterator(*this, m_array.begin());
+		return m_type == Type::Object ? const_iterator(this, m_object.begin()) : const_iterator(this, m_array.begin());
 	}
 
 	/**
@@ -567,7 +573,7 @@ public:
 	{
 		assert(isArray() || isObject());
 
-		return m_type == Type::Object ? const_iterator(*this, m_object.cbegin()) : const_iterator(*this, m_array.cbegin());
+		return m_type == Type::Object ? const_iterator(this, m_object.cbegin()) : const_iterator(this, m_array.cbegin());
 	}
 
 	/**
@@ -580,7 +586,7 @@ public:
 	{
 		assert(isArray() || isObject());
 
-		return m_type == Type::Object ? iterator(*this, m_object.end()) : iterator(*this, m_array.end());
+		return m_type == Type::Object ? iterator(this, m_object.end()) : iterator(this, m_array.end());
 	}
 
 	/**
@@ -593,7 +599,7 @@ public:
 	{
 		assert(isArray() || isObject());
 
-		return m_type == Type::Object ? const_iterator(*this, m_object.end()) : const_iterator(*this, m_array.end());
+		return m_type == Type::Object ? const_iterator(this, m_object.end()) : const_iterator(this, m_array.end());
 	}
 
 	/**
@@ -606,7 +612,7 @@ public:
 	{
 		assert(isArray() || isObject());
 
-		return m_type == Type::Object ? const_iterator(*this, m_object.cend()) : const_iterator(*this, m_array.cend());
+		return m_type == Type::Object ? const_iterator(this, m_object.cend()) : const_iterator(this, m_array.cend());
 	}
 
 	/**
@@ -624,21 +630,30 @@ public:
 	 *
 	 * \return the value or false if not a boolean
 	 */
-	IRCCD_EXPORT bool toBool() const noexcept;
+	inline bool toBool() const noexcept
+	{
+		return m_type != Type::Boolean ? false : m_boolean;
+	}
 
 	/**
 	 * Get the value as integer.
 	 *
 	 * \return the value or 0 if not a integer
 	 */
-	IRCCD_EXPORT int toInt() const noexcept;
+	inline int toInt() const noexcept
+	{
+		return m_type != Type::Int ? 0 : m_integer;
+	}
 
 	/**
 	 * Get the value as real.
 	 *
 	 * \return the value or 0 if not a real
 	 */
-	IRCCD_EXPORT double toReal() const noexcept;
+	inline double toReal() const noexcept
+	{
+		return m_type != Type::Real ? 0 : m_number;
+	}
 
 	/**
 	 * Get the value as string.
@@ -646,7 +661,7 @@ public:
 	 * \param coerce set to true to coerce the value if not a string
 	 * \return the value or empty string if not a string
 	 */
-	std::string toString(bool coerce = false) const noexcept;
+	std::string toString(bool coerce = false) const;
 
 	/**
 	 * Check if the value is boolean type.
@@ -762,7 +777,7 @@ public:
 	}
 
 	/*
-	 * Array functions
+	 * Array functions.
 	 * ----------------------------------------------------------
 	 */
 
@@ -961,7 +976,7 @@ public:
 	}
 
 	/*
-	 * Object functions
+	 * Object functions.
 	 * ----------------------------------------------------------
 	 */
 
@@ -1063,7 +1078,7 @@ public:
 	{
 		assert(isObject());
 
-		return iterator(*this, m_object.find(key));
+		return iterator(this, m_object.find(key));
 	}
 
 	/**
@@ -1077,7 +1092,7 @@ public:
 	{
 		assert(isObject());
 
-		return const_iterator(*this, m_object.find(key));
+		return const_iterator(this, m_object.find(key));
 	}
 
 	/**
@@ -1138,8 +1153,7 @@ public:
 	/**
 	 * Return this value as JSon representation.
 	 *
-	 * \param indent, the indentation to use (0 == compact, < 0 == tabs, > 0 == number of spaces)
-	 * \param tabs, use tabs or not
+	 * \param indent the indentation to use (0 == compact, < 0 == tabs, > 0 == number of spaces)
 	 * \return the string
 	 */
 	inline std::string toJson(int indent = 2) const
@@ -1154,7 +1168,17 @@ public:
  * \param input the input
  * \return the escaped string
  */
-IRCCD_EXPORT std::string escape(const std::string &input);
+std::string escape(const std::string &input);
+
+/**
+ * Convenient function to create an empty array.
+ *
+ * \return an empty array
+ */
+inline Value array()
+{
+	return Value(Type::Array);
+}
 
 /**
  * Convenient function for creating array from initializer list.
@@ -1168,6 +1192,16 @@ inline Value array(std::initializer_list<Value> values)
 }
 
 /**
+ * Convenient function to create an empty object.
+ *
+ * \return an empty object
+ */
+inline Value object()
+{
+	return Value(Type::Object);
+}
+
+/**
  * Convenient function for creating object from initializer list.
  *
  * \param values the values
@@ -1178,8 +1212,26 @@ inline Value object(std::initializer_list<std::pair<std::string, Value>> values)
 	return Value(std::map<std::string, Value>(values.begin(), values.end()));
 }
 
+/**
+ * Construct a value from a buffer.
+ *
+ * \param data the JSON data
+ * \return the parsed value
+ * \throw Error on errors
+ */
+Value fromString(const std::string &data);
+
+/**
+ * Construct a value from a file.
+ *
+ * \param path the path to the file
+ * \return the parsed value
+ * \throw Error on errors
+ */
+Value fromFile(const std::string &path);
+
 } // !json
 
 } // !irccd
 
-#endif // !IRCCD_JSON_HPP
+#endif // !JSON_HPP

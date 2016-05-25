@@ -24,7 +24,7 @@ namespace irccd {
 
 void TransportClient::parse(const std::string &message)
 {
-	json::Value document(json::Buffer{message});
+	json::Value document = json::fromString(message);
 
 	if (!document.isObject())
 		throw std::invalid_argument("the message is not a valid JSON object");
