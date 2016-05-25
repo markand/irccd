@@ -16,13 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-// Modules.
-var Directory	= Irccd.Directory;
-var File	= Irccd.File;
-var Logger	= Irccd.Logger;
-var Plugin	= Irccd.Plugin;
-var Util	= Irccd.Util;
-
 // Plugin information.
 info = {
 	author: "David Demelier <markand@malikania.fr>",
@@ -30,6 +23,13 @@ info = {
 	summary: "A plugin to log everything",
 	version: "@IRCCD_VERSION@"
 };
+
+// Modules.
+var Directory	= Irccd.Directory;
+var File	= Irccd.File;
+var Logger	= Irccd.Logger;
+var Plugin	= Irccd.Plugin;
+var Util	= Irccd.Util;
 
 /**
  * All available formats.
@@ -53,7 +53,7 @@ Plugin.format = {
  */
 function loadFormats()
 {
-	// --- DEPRECATED ------------------------------------------
+	// --- DEPRECATED -------------------------------------------
 	//
 	// This code will be removed.
 	//
@@ -95,7 +95,7 @@ function write(fmt, args)
 	var path = Util.format(Plugin.config["path"], args);
 	var directory = File.dirname(path);
 
-	/* Try to create the directory */
+	// Try to create the directory.
 	if (!File.exists(directory)) {
 		Logger.debug("creating directory: " + directory);
 		Directory.mkdir(directory);
