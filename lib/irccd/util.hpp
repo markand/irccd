@@ -73,7 +73,8 @@ public:
 		Date		= (1 << 0),	//!< date templates
 		Keywords	= (1 << 1),	//!< keywords
 		Env		= (1 << 2),	//!< environment variables
-		IrcAttrs	= (1 << 3),	//!< IRC escape codes
+		Shell		= (1 << 3),	//!< command line command
+		IrcAttrs	= (1 << 4)	//!< IRC escape codes
 	};
 
 	std::uint8_t flags{Date | Keywords | Env | IrcAttrs};

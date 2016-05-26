@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "sysconfig.hpp"
+
 #include <algorithm>
 #include <cassert>
 #include <cctype>
@@ -25,7 +27,14 @@
 #include <sstream>
 #include <stdexcept>
 
-#include "sysconfig.hpp"
+#if defined(HAVE_POPEN)
+#include <array>
+#include <cerrno>
+#include <cstring>
+#include <functional>
+#include <memory>
+#endif
+
 #include "util.hpp"
 #include "unicode.hpp"
 
@@ -68,7 +77,7 @@ const std::unordered_map<std::string, char> attributesTable{
 
 inline bool isReserved(char token) noexcept
 {
-	return token == '#' || token == '@' || token == '$';
+	return token == '#' || token == '@' || token == '$' || token == '!';
 }
 
 std::string substituteDate(const std::string &text, const Substitution &params)
@@ -154,6 +163,34 @@ std::string substituteAttributes(const std::string &content)
 	return oss.str();
 }
 
+std::string substituteShell(const std::string &command)
+{
+#if defined(HAVE_POPEN)
+	std::unique_ptr<std::FILE, std::function<void (std::FILE *)>> fp(popen(command.c_str(), "r"), pclose);
+
+	if (fp == nullptr)
+		throw std::runtime_error(std::strerror(errno));
+
+	std::string result;
+	std::array<char, 128> buffer;
+	std::size_t n;
+
+	while ((n = std::fread(buffer.data(), 1, 128, fp.get())) > 0)
+		result.append(buffer.data(), n);
+	if (std::ferror(fp.get()))
+		throw std::runtime_error(std::strerror(errno));
+
+	// Erase final '\n'.
+	auto it = result.find('\n');
+	if (it != std::string::npos)
+		result.erase(it);
+
+	return result;
+#else
+	throw std::runtime_error("shell template not available");
+#endif
+}
+
 std::string substitute(std::string::const_iterator &it, std::string::const_iterator &end, char token, const Substitution &params)
 {
 	assert(isReserved(token));
@@ -185,7 +222,11 @@ std::string substitute(std::string::const_iterator &it, std::string::const_itera
 		break;
 	case '@':
 		if (params.flags & Substitution::IrcAttrs)
-			substituteAttributes(content);
+			value = substituteAttributes(content);
+		break;
+	case '!':
+		if (params.flags & Substitution::Shell)
+			value = substituteShell(content);
 		break;
 	default:
 		break;
