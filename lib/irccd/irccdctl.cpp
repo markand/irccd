@@ -140,7 +140,7 @@ void Irccdctl::readConnectIp(const ini::Section &sc)
 		throw std::invalid_argument("missing port parameter");
 
 	try {
-		port = std::stoi(it->value());
+		port = util::toNumber<std::uint16_t>(it->value());
 	} catch (...) {
 		throw std::invalid_argument("invalid port number: " + it->value());
 	}
