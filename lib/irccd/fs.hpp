@@ -22,15 +22,32 @@
 /**
  * \file fs.hpp
  * \brief Filesystem operations made easy.
+ */
+
+/**
+ * \page filesystem Filesystem
+ * \brief Filesystem support
  *
  * The following options can be set by the user:
  *
-  * - **HAVE_ACCESS**: (bool) Set to true if unistd.h file and access(2) function are available.
- *
- * On Windows, you must link to shlwapi library.
+ *   - **FS_HAVE_STAT**: (bool) Set to true if sys/stat.h and stat function are available, automatically detected.
  */
 
-#include <sys/stat.h>
+#if !defined(FS_HAVE_STAT)
+#  if defined(_WIN32)
+#    define FS_HAVE_STAT
+#  elif defined(__linux__)
+#    define FS_HAVE_STAT
+#  elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
+#    define FS_HAVE_STAT
+#  elif defined(__APPLE__)
+#    define FS_HAVE_STAT
+#  endif
+#endif
+
+#if defined(FS_HAVE_STAT)
+#  include <sys/stat.h>
+#endif
 
 #include <regex>
 #include <string>
@@ -40,6 +57,9 @@
 
 namespace irccd {
 
+/**
+ * \brief Filesystem namespace.
+ */
 namespace fs {
 
 /**
@@ -70,6 +90,30 @@ public:
 	std::string name;	//!< name of entry (base name)
 	Type type{Unknown};	//!< type of file
 };
+
+/**
+ * Check if two entries are identical.
+ *
+ * \param e1 the first entry
+ * \param e2 the second entry
+ * \return true if they are identical
+ */
+inline bool operator==(const Entry &e1, const Entry &e2) noexcept
+{
+	return e1.name == e2.name && e1.type == e2.type;
+}
+
+/**
+ * Check if two entries are different.
+ *
+ * \param e1 the first entry
+ * \param e2 the second entry
+ * \return true if they are different
+ */
+inline bool operator!=(const Entry &e1, const Entry &e2) noexcept
+{
+	return !(e1 == e2);
+}
 
 /**
  * Get the separator for that system.
@@ -113,6 +157,8 @@ IRCCD_EXPORT std::string baseName(std::string path);
  */
 IRCCD_EXPORT std::string dirName(std::string path);
 
+#if defined(FS_HAVE_STAT)
+
 /**
  * Get stat information.
  *
@@ -121,6 +167,8 @@ IRCCD_EXPORT std::string dirName(std::string path);
  * \throw std::runtime_error on failure
  */
 IRCCD_EXPORT struct stat stat(const std::string &path);
+
+#endif // !HAVE_STAT
 
 /**
  * Check if a file exists.
@@ -169,24 +217,27 @@ IRCCD_EXPORT bool isWritable(const std::string &path) noexcept;
  *
  * \param path the path
  * \return true if it is a file and false if not or not readable
+ * \throw std::runtime_error if the operation is not supported
  */
-IRCCD_EXPORT bool isFile(const std::string &path) noexcept;
+IRCCD_EXPORT bool isFile(const std::string &path);
 
 /**
  * Check if the file is a directory.
  *
  * \param path the path
  * \return true if it is a directory and false if not or not readable
+ * \throw std::runtime_error if the operation is not supported
  */
-IRCCD_EXPORT bool isDirectory(const std::string &path) noexcept;
+IRCCD_EXPORT bool isDirectory(const std::string &path);
 
 /**
  * Check if the file is a symbolic link.
  *
  * \param path the path
  * \return true if it is a symbolic link and false if not or not readable
+ * \throw std::runtime_error if the operation is not supported
  */
-IRCCD_EXPORT bool isSymlink(const std::string &path) noexcept;
+IRCCD_EXPORT bool isSymlink(const std::string &path);
 
 /**
  * Read a directory and return a list of entries (not recursive).
@@ -249,15 +300,17 @@ std::string findIf(const std::string &base, Predicate &&predicate)
 		}
 	}
 
-	if (path.empty()) {
-		for (const auto &entry : entries) {
-			if (entry.type == Entry::Dir) {
-				path = findIf(base + separator() + entry.name, std::forward<Predicate>(predicate));
+	if (!path.empty())
+		return path;
 
-				if (!path.empty())
-					break;
-			}
-		}
+	for (const auto &entry : entries) {
+		if (entry.type != Entry::Dir)
+			continue;
+
+		path = findIf(base + separator() + entry.name, std::forward<Predicate>(predicate));
+
+		if (!path.empty())
+			break;
 	}
 
 	return path;

@@ -16,7 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#if defined(_WIN32)
+#  define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <algorithm>
+#include <cassert>
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
@@ -41,6 +46,12 @@ namespace fs {
 
 namespace {
 
+/*
+ * error.
+ * ------------------------------------------------------------------
+ *
+ * Function to retrieve system error in Windows API.
+ */
 #if defined(_WIN32)
 
 std::string error()
@@ -65,8 +76,17 @@ std::string error()
 
 #endif
 
-bool can(const std::string &path, const std::string &mode)
+/*
+ * hasAccess.
+ * ------------------------------------------------------------------
+ *
+ * Check if we have access to the file specified, mode is the same used as std::fopen.
+ */
+bool hasAccess(const std::string &path, const std::string &mode)
 {
+	assert(mode.length() == 1);
+	assert(mode[0] == 'r' || mode[0] == 'w');
+
 	auto fp = std::fopen(path.c_str(), mode.c_str());
 
 	if (fp == nullptr)
@@ -77,22 +97,33 @@ bool can(const std::string &path, const std::string &mode)
 	return true;
 }
 
+/*
+ * typeOf.
+ * ------------------------------------------------------------------
+ *
+ * Get the type of the specified file.
+ *
+ * Use GetFileAttributesA on Windows and stat if available.
+ *
+ * Receives the object as predicate parameter and return true on success.
+ */
 #if defined(_WIN32)
 
-bool is(const std::string &path, DWORD flags)
+template <typename Predicate>
+bool typeOf(const std::string &path, Predicate &&predicate)
 {
-	DWORD result = GetFileAttributes(path.c_str());
+	DWORD result = GetFileAttributesA(path.c_str());
 
 	if (result == INVALID_FILE_ATTRIBUTES)
 		return false;
 
-	return result & flags;
+	return predicate(result);
 }
 
-#else
+#elif defined(FS_HAVE_STAT)
 
 template <typename Predicate>
-bool is(const std::string &path, Predicate &&predicate) noexcept
+bool typeOf(const std::string &path, Predicate &&predicate) noexcept
 {
 	struct stat st;
 
@@ -102,26 +133,39 @@ bool is(const std::string &path, Predicate &&predicate) noexcept
 	return predicate(st);
 }
 
+#else
+
+template <typename Predicate>
+bool typeOf(const std::string &path, Predicate &&predicate) noexcept
+{
+	throw std::runtime_error(std::strerror(ENOSYS));
+}
+
 #endif
 
 } // !namespace
 
+/*
+ * clean.
+ * ------------------------------------------------------------------
+ */
 std::string clean(std::string input)
 {
 	if (input.empty())
 		return input;
 
-	// First, remove any duplicates.
+	/* First, remove any duplicates */
 	input.erase(std::unique(input.begin(), input.end(), [&] (char c1, char c2) {
 		return c1 == c2 && (c1 == '/' || c1 == '\\');
 	}), input.end());
 
-	// Add a trailing / or \\.
+	/* Add a trailing / or \\ */
 	char c = input[input.length() - 1];
+
 	if (c != '/' && c != '\\')
 		input += separator();
 
-	// Now converts all / to \\ for Windows and the opposite for Unix.
+	/* Now converts all / to \\ for Windows and the opposite for Unix */
 #if defined(_WIN32)
 	std::replace(input.begin(), input.end(), '/', '\\');
 #else
@@ -131,6 +175,10 @@ std::string clean(std::string input)
 	return input;
 }
 
+/*
+ * baseName.
+ * ------------------------------------------------------------------
+ */
 std::string baseName(std::string path)
 {
 	auto pos = path.find_last_of("\\/");
@@ -141,11 +189,15 @@ std::string baseName(std::string path)
 	return path;
 }
 
+/*
+ * dirName.
+ * ------------------------------------------------------------------
+ */
 std::string dirName(std::string path)
 {
 	auto pos = path.find_last_of("\\/");
 
-	if (pos == std::string::npos) 
+	if (pos == std::string::npos)
 		path = ".";
 	else
 		path = path.substr(0, pos);
@@ -153,6 +205,10 @@ std::string dirName(std::string path)
 	return path;
 }
 
+/*
+ * isAbsolute.
+ * ------------------------------------------------------------------
+ */
 bool isAbsolute(const std::string &path) noexcept
 {
 #if defined(_WIN32)
@@ -162,51 +218,87 @@ bool isAbsolute(const std::string &path) noexcept
 #endif
 }
 
+/*
+ * isRelative.
+ * ------------------------------------------------------------------
+ */
 bool isRelative(const std::string &path) noexcept
 {
 #if defined(_WIN32)
-	return PathIsRelativeA(path.c_str());
+	return PathIsRelativeA(path.c_str()) == 1;
 #else
 	return !isAbsolute(path);
 #endif
 }
 
+/*
+ * isReadable.
+ * ------------------------------------------------------------------
+ */
 bool isReadable(const std::string &path) noexcept
 {
-	return can(path, "r");
+	return hasAccess(path, "r");
 }
 
+/*
+ * isWritable.
+ * ------------------------------------------------------------------
+ */
 bool isWritable(const std::string &path) noexcept
 {
-	return can(path, "w");
+	return hasAccess(path, "w");
 }
 
-bool isFile(const std::string &path) noexcept
+/*
+ * isFile.
+ * ------------------------------------------------------------------
+ */
+bool isFile(const std::string &path)
 {
+	return typeOf(path, [] (const auto &object) {
 #if defined(_WIN32)
-	return is(path, FILE_ATTRIBUTE_ARCHIVE);
-#else
-	return is(path, [] (const struct stat &st) { return S_ISREG(st.st_mode); });
+		return (object & FILE_ATTRIBUTE_ARCHIVE) == FILE_ATTRIBUTE_ARCHIVE;
+#elif defined(FS_HAVE_STAT)
+		return S_ISREG(object.st_mode);
 #endif
+	});
 }
 
-bool isDirectory(const std::string &path) noexcept
+/*
+ * isDirectory.
+ * ------------------------------------------------------------------
+ */
+bool isDirectory(const std::string &path)
 {
+	return typeOf(path, [] (const auto &object) {
 #if defined(_WIN32)
-	return is(path, FILE_ATTRIBUTE_DIRECTORY);
-#else
-	return is(path, [] (const struct stat &st) { return S_ISDIR(st.st_mode); });
+		return (object & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY;
+#elif defined(FS_HAVE_STAT)
+		return S_ISDIR(object.st_mode);
 #endif
+	});
 }
 
-bool isSymlink(const std::string &path) noexcept
+/*
+ * isSymlink.
+ * ------------------------------------------------------------------
+ */
+bool isSymlink(const std::string &path)
 {
+	return typeOf(path, [] (const auto &object) {
 #if defined(_WIN32)
-	return is(path, FILE_ATTRIBUTE_REPARSE_POINT);
-#else
-	return is(path, [] (const struct stat &st) { return S_ISLNK(st.st_mode); });
+		return (object & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT;
+#elif defined(FS_HAVE_STAT)
+		return S_ISLNK(object.st_mode);
 #endif
+	});
 }
+
+/*
+ * stat.
+ * ------------------------------------------------------------------
+ */
+#if defined(FS_HAVE_STAT)
 
 struct stat stat(const std::string &path)
 {
@@ -218,17 +310,27 @@ struct stat stat(const std::string &path)
 	return st;
 }
 
+#endif
+
+/*
+ * exists.
+ * ------------------------------------------------------------------
+ */
 bool exists(const std::string &path) noexcept
 {
-#if defined(HAVE_ACCESS)
-	return ::access(path.c_str(), F_OK) == 0;
-#else
+#if defined(FS_HAVE_STAT)
 	struct stat st;
 
 	return ::stat(path.c_str(), &st) == 0;
+#else
+	return  hasAccess(path, "r");
 #endif
 }
 
+/*
+ * readdir.
+ * ------------------------------------------------------------------
+ */
 std::vector<Entry> readdir(const std::string &path, int flags)
 {
 	std::vector<Entry> entries;
@@ -242,7 +344,7 @@ std::vector<Entry> readdir(const std::string &path, int flags)
 	handle = FindFirstFile(oss.str().c_str(), &fdata);
 
 	if (handle == nullptr)
-		throw std::runtime_error{error()};
+		throw std::runtime_error(error());
 
 	do {
 		Entry entry;
@@ -311,6 +413,10 @@ std::vector<Entry> readdir(const std::string &path, int flags)
 	return entries;
 }
 
+/*
+ * mkdir.
+ * ------------------------------------------------------------------
+ */
 void mkdir(const std::string &path, int mode)
 {
 	std::string::size_type next = 0;
@@ -337,6 +443,10 @@ void mkdir(const std::string &path, int mode)
 	}
 }
 
+/*
+ * rmdir.
+ * ------------------------------------------------------------------
+ */
 void rmdir(const std::string &base) noexcept
 {
 	try {
@@ -346,25 +456,29 @@ void rmdir(const std::string &base) noexcept
 			if (entry.type == Entry::Dir)
 				rmdir(path);
 			else
-				(void)::remove(path.c_str());
+				remove(path.c_str());
 		}
 	} catch (...) {
 	}
 
 #if defined(_WIN32)
-	RemoveDirectory(base.c_str());
+	RemoveDirectoryA(base.c_str());
 #else
-	(void)::remove(base.c_str());
+	remove(base.c_str());
 #endif
 }
 
+/*
+ * cwd.
+ * ------------------------------------------------------------------
+ */
 std::string cwd()
 {
 #if defined(_WIN32)
 	char path[MAX_PATH];
 
 	if (!GetCurrentDirectoryA(sizeof (path), path))
-		throw std::runtime_error{"failed to get current working directory"};
+		throw std::runtime_error("failed to get current working directory");
 
 	return path;
 #else
