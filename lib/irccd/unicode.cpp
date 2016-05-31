@@ -29,9 +29,11 @@ namespace unicode {
 
 #define nelem(x) (sizeof (x) / sizeof ((x)[0]))
 
-char32_t *rbsearch(char32_t c, char32_t *t, int n, int ne) noexcept
+namespace {
+
+const char32_t *rbsearch(char32_t c, const char32_t *t, int n, int ne) noexcept
 {
-	char32_t *p;
+	const char32_t *p;
 	int m;
 
 	while (n > 1) {
@@ -41,9 +43,8 @@ char32_t *rbsearch(char32_t c, char32_t *t, int n, int ne) noexcept
 		if (c >= p[0]) {
 			t = p;
 			n = n - m;
-		} else {
+		} else
 			n = m;
-		}
 	}
 
 	if (n && c >= t[0])
@@ -52,7 +53,11 @@ char32_t *rbsearch(char32_t c, char32_t *t, int n, int ne) noexcept
 	return nullptr;
 }
 
-static char32_t isspacer[] = {
+} // !namespace
+
+namespace {
+
+const char32_t isspacer[] = {
 	0x0009, 0x000d,
 	0x0020, 0x0020,
 	0x0085, 0x0085,
@@ -66,18 +71,23 @@ static char32_t isspacer[] = {
 	0xfeff, 0xfeff,
 };
 
+} // !namespace
+
 bool isspace(char32_t c) noexcept
 {
-	char32_t *p;
+	const char32_t *p;
 
 	p = rbsearch(c, isspacer, nelem (isspacer)/2, 2);
+
 	if (p && c >= p[0] && c <= p[1])
 		return true;
 
 	return false;
 }
 
-static char32_t isdigitr[] = {
+namespace {
+
+const char32_t isdigitr[] = {
 	0x0030, 0x0039,
 	0x0660, 0x0669,
 	0x06f0, 0x06f9,
@@ -130,18 +140,23 @@ static char32_t isdigitr[] = {
 	0x1d7ce, 0x1d7ff,
 };
 
+} // !namespace
+
 bool isdigit(char32_t c) noexcept
 {
-	char32_t *p;
+	const char32_t *p;
 
 	p = rbsearch(c, isdigitr, nelem (isdigitr)/2, 2);
+
 	if (p && c >= p[0] && c <= p[1])
 		return true;
 
 	return false;
 }
 
-static char32_t isalphar[] = {
+namespace {
+
+const char32_t isalphar[] = {
 	0x0041, 0x005a,
 	0x0061, 0x007a,
 	0x00c0, 0x00d6,
@@ -572,7 +587,11 @@ static char32_t isalphar[] = {
 	0x2f800, 0x2fa1d,
 };
 
-static char32_t isalphas[] = {
+} // !namespace
+
+namespace {
+
+const char32_t isalphas[] = {
 	0x00aa,
 	0x00b5,
 	0x00ba,
@@ -684,22 +703,28 @@ static char32_t isalphas[] = {
 	0x1ee7e,
 };
 
+} // !namespace
+
 bool isalpha(char32_t c) noexcept
 {
-	char32_t *p;
+	const char32_t *p;
 
 	p = rbsearch(c, isalphar, nelem (isalphar)/2, 2);
+
 	if (p && c >= p[0] && c <= p[1])
 		return true;
 
 	p = rbsearch(c, isalphas, nelem (isalphas), 1);
+
 	if (p && c == p[0])
 		return true;
 
 	return false;
 }
 
-static char32_t isupperr[] = {
+namespace {
+
+const char32_t isupperr[] = {
 	0x0041, 0x005a,
 	0x00c0, 0x00d6,
 	0x00d8, 0x00de,
@@ -791,7 +816,11 @@ static char32_t isupperr[] = {
 	0x1d790, 0x1d7a8,
 };
 
-static char32_t isuppers[] = {
+} // !namespace
+
+namespace {
+
+const char32_t isuppers[] = {
 	0x0100,
 	0x0102,
 	0x0104,
@@ -1332,22 +1361,28 @@ static char32_t isuppers[] = {
 	0x1d7ca,
 };
 
+} // !namespace
+
 bool isupper(char32_t c) noexcept
 {
-	char32_t *p;
+	const char32_t *p;
 
 	p = rbsearch(c, isupperr, nelem (isupperr)/2, 2);
+
 	if (p && c >= p[0] && c <= p[1])
 		return true;
 
 	p = rbsearch(c, isuppers, nelem (isuppers), 1);
+
 	if (p && c == p[0])
 		return true;
 
 	return false;
 }
 
-static char32_t islowerr[] = {
+namespace {
+
+const char32_t islowerr[] = {
 	0x0061, 0x007a,
 	0x00df, 0x00f6,
 	0x00f8, 0x00ff,
@@ -1447,7 +1482,11 @@ static char32_t islowerr[] = {
 	0x1d7c4, 0x1d7c9,
 };
 
-static char32_t islowers[] = {
+} // !namespace
+
+namespace {
+
+const char32_t islowers[] = {
 	0x00b5,
 	0x0101,
 	0x0103,
@@ -1980,22 +2019,28 @@ static char32_t islowers[] = {
 	0x1d7cb,
 };
 
+} // !namespace
+
 bool islower(char32_t c) noexcept
 {
-	char32_t *p;
+	const char32_t *p;
 
 	p = rbsearch(c, islowerr, nelem (islowerr)/2, 2);
+
 	if (p && c >= p[0] && c <= p[1])
 		return true;
 
 	p = rbsearch(c, islowers, nelem (islowers), 1);
+
 	if (p && c == p[0])
 		return true;
 
 	return false;
 }
 
-static char32_t istitler[] = {
+namespace {
+
+const char32_t istitler[] = {
 	0x0041, 0x005a,
 	0x00c0, 0x00d6,
 	0x00d8, 0x00de,
@@ -2053,7 +2098,11 @@ static char32_t istitler[] = {
 	0x118a0, 0x118bf,
 };
 
-static char32_t istitles[] = {
+} // !namespace
+
+namespace {
+
+const char32_t istitles[] = {
 	0x0100,
 	0x0102,
 	0x0104,
@@ -2581,22 +2630,28 @@ static char32_t istitles[] = {
 	0xa7a8,
 };
 
+} // !namespace
+
 bool istitle(char32_t c) noexcept
 {
-	char32_t *p;
+	const char32_t *p;
 
 	p = rbsearch(c, istitler, nelem (istitler)/2, 2);
+
 	if (p && c >= p[0] && c <= p[1])
 		return true;
 
 	p = rbsearch(c, istitles, nelem (istitles), 1);
+
 	if (p && c == p[0])
 		return true;
 
 	return false;
 }
 
-char32_t toupperr[] = {
+namespace {
+
+const char32_t toupperr[] = {
 	0x0061, 0x007a, 1048544,
 	0x00e0, 0x00f6, 1048544,
 	0x00f8, 0x00fe, 1048544,
@@ -2638,7 +2693,11 @@ char32_t toupperr[] = {
 	0x118c0, 0x118df, 1048544,
 };
 
-static char32_t touppers[] = {
+} // !namespace
+
+namespace {
+
+const char32_t touppers[] = {
 	0x00b5, 1049319,
 	0x00ff, 1048697,
 	0x0101, 1048575,
@@ -3246,22 +3305,28 @@ static char32_t touppers[] = {
 	0xa7a9, 1048575,
 };
 
+} // !namespace
+
 char32_t toupper(char32_t c) noexcept
 {
-	char32_t *p;
+	const char32_t *p;
 
 	p = rbsearch(c, toupperr, nelem (toupperr)/3, 3);
+
 	if (p && c >= p[0] && c <= p[1])
 		return c + p[2] - 1048576;
 
 	p = rbsearch(c, touppers, nelem (touppers)/2, 2);
+
 	if (p && c == p[0])
 		return c + p[1] - 1048576;
 
 	return c;
 }
 
-char32_t tolowerr[] = {
+namespace {
+
+const char32_t tolowerr[] = {
 	0x0041, 0x005a, 1048608,
 	0x00c0, 0x00d6, 1048608,
 	0x00d8, 0x00de, 1048608,
@@ -3303,7 +3368,11 @@ char32_t tolowerr[] = {
 	0x118a0, 0x118bf, 1048608,
 };
 
-static char32_t tolowers[] = {
+} // !namespace
+
+namespace {
+
+const char32_t tolowers[] = {
 	0x0100, 1048577,
 	0x0102, 1048577,
 	0x0104, 1048577,
@@ -3903,22 +3972,28 @@ static char32_t tolowers[] = {
 	0xa7b1, 1006294,
 };
 
+} // !namespace
+
 char32_t tolower(char32_t c) noexcept
 {
-	char32_t *p;
+	const char32_t *p;
 
 	p = rbsearch(c, tolowerr, nelem (tolowerr)/3, 3);
+
 	if (p && c >= p[0] && c <= p[1])
 		return c + p[2] - 1048576;
 
 	p = rbsearch(c, tolowers, nelem (tolowers)/2, 2);
+
 	if (p && c == p[0])
 		return c + p[1] - 1048576;
 
 	return c;
 }
 
-char32_t totitler[] = {
+namespace {
+
+const char32_t totitler[] = {
 	0x0061, 0x007a, 1048544,
 	0x00e0, 0x00f6, 1048544,
 	0x00f8, 0x00fe, 1048544,
@@ -3960,7 +4035,11 @@ char32_t totitler[] = {
 	0x118c0, 0x118df, 1048544,
 };
 
-static char32_t totitles[] = {
+} // !namespace
+
+namespace {
+
+const char32_t totitles[] = {
 	0x00b5, 1049319,
 	0x00ff, 1048697,
 	0x0101, 1048575,
@@ -4568,15 +4647,19 @@ static char32_t totitles[] = {
 	0xa7a9, 1048575,
 };
 
+} // !namespace
+
 char32_t totitle(char32_t c) noexcept
 {
-	char32_t *p;
+	const char32_t *p;
 
 	p = rbsearch(c, totitler, nelem (totitler)/3, 3);
+
 	if (p && c >= p[0] && c <= p[1])
 		return c + p[2] - 1048576;
 
 	p = rbsearch(c, totitles, nelem (totitles)/2, 2);
+
 	if (p && c == p[0])
 		return c + p[1] - 1048576;
 
@@ -4587,7 +4670,7 @@ void encode(char32_t c, char res[5]) noexcept
 {
 	switch (nbytesPoint(c)) {
 	case 1:
-		res[0] = c;
+		res[0] = static_cast<char>(c);
 		res[1] = '\0';
 		break;
 	case 2:
@@ -4642,6 +4725,8 @@ void decode(char32_t &c, const char *res) noexcept
 
 int nbytesUtf8(char c) noexcept
 {
+	if (static_cast<unsigned char>(c) <= 127)
+		return 1;
 	if ((c & 0xE0) == 0xC0)
 		return 2;
 	if ((c & 0xF0) == 0xE0)
@@ -4649,7 +4734,7 @@ int nbytesUtf8(char c) noexcept
 	if ((c & 0xF8) == 0xF0)
 		return 4;
 
-	return 1;
+	return -1;
 }
 
 int nbytesPoint(char32_t c) noexcept
@@ -4666,9 +4751,9 @@ int nbytesPoint(char32_t c) noexcept
 	return -1;
 }
 
-int length(const std::string &str)
+unsigned length(const std::string &str)
 {
-	int total = 0;
+	unsigned total = 0;
 
 	forEach(str, [&] (char32_t) {
 		++ total;
@@ -4685,9 +4770,8 @@ std::string toUtf8(const std::u32string &array)
 		char tmp[5];
 		int size = nbytesPoint(array[i]);
 
-		if (size < 0) {
+		if (size < 0)
 			throw std::invalid_argument("invalid sequence");
-		}
 
 		encode(array[i], tmp);
 		res.insert(res.length(), tmp);

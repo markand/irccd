@@ -22,19 +22,35 @@
 /**
  * \file unicode.hpp
  * \brief UTF-8 to UTF-32 conversions
+ * \author David Demelier <markand@malikania.fr>
+ * \warning These files are auto-generated!
  */
 
 #include <stdexcept>
 #include <string>
 
-#include "sysconfig.hpp"
-
 namespace irccd {
 
+/**
+ * \brief Unicode namespace.
+ */
 namespace unicode {
 
-IRCCD_EXPORT void encode(char32_t point, char res[5]) noexcept;
-IRCCD_EXPORT void decode(char32_t &c, const char *res) noexcept;
+/**
+ * Encode the unicode code point into multibyte string.
+ *
+ * \param point the unicode code point
+ * \param res the output buffer
+ */
+void encode(char32_t point, char res[5]) noexcept;
+
+/**
+ * Decode the multibyte buffer into an unicode code point.
+ *
+ * \param c the code point destination
+ * \param res the multibyte string.
+ */
+void decode(char32_t &c, const char *res) noexcept;
 
 /**
  * Get the number of bytes for the first multi byte character from a
@@ -44,17 +60,17 @@ IRCCD_EXPORT void decode(char32_t &c, const char *res) noexcept;
  * real character.
  *
  * \param c the first multi byte character
- * \return the number of bytes [1-4]
+ * \return the number of bytes [1-4] or -1 if invalid
  */
-IRCCD_EXPORT int nbytesUtf8(char c) noexcept;
+int nbytesUtf8(char c) noexcept;
 
 /**
  * Get the number of bytes for the unicode point.
  *
  * \param point the unicode point
- * \return the number of bytes [1-4] or -1 on invalid
+ * \return the number of bytes [1-4] or -1 if invalid
  */
-IRCCD_EXPORT int nbytesPoint(char32_t point) noexcept;
+int nbytesPoint(char32_t point) noexcept;
 
 /**
  * Get real number of character in a string.
@@ -63,7 +79,7 @@ IRCCD_EXPORT int nbytesPoint(char32_t point) noexcept;
  * \return the length
  * \throw std::invalid_argument on invalid sequence
  */
-IRCCD_EXPORT int length(const std::string &str);
+unsigned length(const std::string &str);
 
 /**
  * Iterate over all real characters in the UTF-8 string.
@@ -72,6 +88,7 @@ IRCCD_EXPORT int length(const std::string &str);
  *	void f(char ch)
  *
  * \param str the UTF-8 string
+ * \param function the function callback
  * \throw std::invalid_argument on invalid sequence
  */
 template <typename Func>
@@ -81,9 +98,8 @@ void forEach(const std::string &str, Func function)
 		char32_t point = 0;
 		int size = nbytesUtf8(str[i]);
 
-		if (size < 0) {
+		if (size < 0)
 			throw std::invalid_argument("invalid sequence");
-		}
 
 		decode(point, str.data() + i);
 		function(point);
@@ -99,7 +115,7 @@ void forEach(const std::string &str, Func function)
  * \return the UTF-8 string
  * \throw std::invalid_argument on invalid sequence
  */
-IRCCD_EXPORT std::string toUtf8(const std::u32string &array);
+std::string toUtf8(const std::u32string &array);
 
 /**
  * Convert a UTF-8 string to UTF-32 string.
@@ -108,7 +124,7 @@ IRCCD_EXPORT std::string toUtf8(const std::u32string &array);
  * \return the UTF-32 string
  * \throw std::invalid_argument on invalid sequence
  */
-IRCCD_EXPORT std::u32string toUtf32(const std::string &str);
+std::u32string toUtf32(const std::string &str);
 
 /**
  * Check if the unicode character is space.
@@ -116,7 +132,7 @@ IRCCD_EXPORT std::u32string toUtf32(const std::string &str);
  * \param c the character
  * \return true if space
  */
-IRCCD_EXPORT bool isspace(char32_t c) noexcept;
+bool isspace(char32_t c) noexcept;
 
 /**
  * Check if the unicode character is digit.
@@ -124,7 +140,7 @@ IRCCD_EXPORT bool isspace(char32_t c) noexcept;
  * \param c the character
  * \return true if digit
  */
-IRCCD_EXPORT bool isdigit(char32_t c) noexcept;
+bool isdigit(char32_t c) noexcept;
 
 /**
  * Check if the unicode character is alpha category.
@@ -132,7 +148,7 @@ IRCCD_EXPORT bool isdigit(char32_t c) noexcept;
  * \param c the character
  * \return true if alpha
  */
-IRCCD_EXPORT bool isalpha(char32_t c) noexcept;
+bool isalpha(char32_t c) noexcept;
 
 /**
  * Check if the unicode character is upper case.
@@ -140,7 +156,7 @@ IRCCD_EXPORT bool isalpha(char32_t c) noexcept;
  * \param c the character
  * \return true if upper case
  */
-IRCCD_EXPORT bool isupper(char32_t c) noexcept;
+bool isupper(char32_t c) noexcept;
 
 /**
  * Check if the unicode character is lower case.
@@ -148,7 +164,7 @@ IRCCD_EXPORT bool isupper(char32_t c) noexcept;
  * \param c the character
  * \return true if lower case
  */
-IRCCD_EXPORT bool islower(char32_t c) noexcept;
+bool islower(char32_t c) noexcept;
 
 /**
  * Check if the unicode character is title case.
@@ -156,7 +172,7 @@ IRCCD_EXPORT bool islower(char32_t c) noexcept;
  * \param c the character
  * \return true if title case
  */
-IRCCD_EXPORT bool istitle(char32_t c) noexcept;
+bool istitle(char32_t c) noexcept;
 
 /**
  * Convert to upper case.
@@ -164,7 +180,7 @@ IRCCD_EXPORT bool istitle(char32_t c) noexcept;
  * \param c the character
  * \return the upper case character
  */
-IRCCD_EXPORT char32_t toupper(char32_t c) noexcept;
+char32_t toupper(char32_t c) noexcept;
 
 /**
  * Convert to lower case.
@@ -172,7 +188,7 @@ IRCCD_EXPORT char32_t toupper(char32_t c) noexcept;
  * \param c the character
  * \return the lower case character
  */
-IRCCD_EXPORT char32_t tolower(char32_t c) noexcept;
+char32_t tolower(char32_t c) noexcept;
 
 /**
  * Convert to title case.
@@ -180,7 +196,7 @@ IRCCD_EXPORT char32_t tolower(char32_t c) noexcept;
  * \param c the character
  * \return the title case character
  */
-IRCCD_EXPORT char32_t totitle(char32_t c) noexcept;
+char32_t totitle(char32_t c) noexcept;
 
 /**
  * Convert the UTF-32 string to upper case.
@@ -190,9 +206,8 @@ IRCCD_EXPORT char32_t totitle(char32_t c) noexcept;
  */
 inline std::u32string toupper(std::u32string str)
 {
-	for (size_t i = 0; i < str.size(); ++i) {
+	for (size_t i = 0; i < str.size(); ++i)
 		str[i] = toupper(str[i]);
-	}
 
 	return str;
 }
@@ -206,7 +221,15 @@ inline std::u32string toupper(std::u32string str)
  */
 inline std::string toupper(const std::string &str)
 {
-	return toUtf8(toupper(toUtf32(str)));
+	std::string result;
+	char buffer[5];
+
+	forEach(str, [&] (char32_t code) {
+		encode(toupper(code), buffer);
+		result += buffer;
+	});
+
+	return result;
 }
 
 /**
@@ -217,9 +240,8 @@ inline std::string toupper(const std::string &str)
  */
 inline std::u32string tolower(std::u32string str)
 {
-	for (size_t i = 0; i < str.size(); ++i) {
+	for (size_t i = 0; i < str.size(); ++i)
 		str[i] = tolower(str[i]);
-	}
 
 	return str;
 }
@@ -233,7 +255,15 @@ inline std::u32string tolower(std::u32string str)
  */
 inline std::string tolower(const std::string &str)
 {
-	return toUtf8(tolower(toUtf32(str)));
+	std::string result;
+	char buffer[5];
+
+	forEach(str, [&] (char32_t code) {
+		encode(tolower(code), buffer);
+		result += buffer;
+	});
+
+	return result;
 }
 
 } // !unicode
