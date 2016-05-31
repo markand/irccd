@@ -51,6 +51,7 @@ public:
 
 /**
  * \brief Irccd.Plugin JavaScript API.
+ * \ingroup modules
  */
 class PluginModule : public Module {
 public:

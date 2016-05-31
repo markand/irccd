@@ -36,8 +36,14 @@ namespace command {
  */
 class Watch : public RemoteCommand {
 public:
+	/**
+	 * Constructor.
+	 */
 	IRCCD_EXPORT Watch();
 
+	/**
+	 * \copydoc RemoteCommand::options
+	 */
 	IRCCD_EXPORT std::vector<Option> options() const override;
 
 	/**
@@ -48,7 +54,7 @@ public:
 	/**
 	 * \copydoc RemoteCommand::request
 	 */
-	IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &request) const override;
+	IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const override;
 };
 
 } // !command

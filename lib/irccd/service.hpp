@@ -24,6 +24,11 @@
  * \brief Selectable service.
  */
 
+/**
+ * \defgroup services Irccd services
+ * \brief Irccd services.
+ */
+
 #include "net.hpp"
 #include "sysconfig.hpp"
 #include "util.hpp"

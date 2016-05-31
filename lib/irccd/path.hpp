@@ -31,10 +31,13 @@
 
 namespace irccd {
 
+/**
+ * \brief Namespace for paths.
+ */
 namespace path {
 
 /**
- * PATH separator, either : or ;.
+ * brief PATH separator, either : or ;.
  */
 extern const char Separator;
 

@@ -33,6 +33,7 @@ namespace state {
 
 /**
  * \brief Connecting state.
+ * \ingroup states
  */
 class Connecting : public ServerState {
 private:

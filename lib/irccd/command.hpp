@@ -37,6 +37,12 @@ class Irccd;
 class Irccdctl;
 
 /**
+ * \brief Namespace for remote commands.
+ */
+namespace command {
+}
+
+/**
  * \brief Command line arguments to irccdctl.
  *
  * This class contains the resolved arguments from command line that can apply to the command.
@@ -346,7 +352,7 @@ public:
 	 *
 	 * This default implementation just check for an error string and shows it if any.
 	 * 
-	 * \param irccdctl the irccdctl instan e
+	 * \param irccdctl the irccdctl instance
 	 * \param response the JSON response
 	 */
 	IRCCD_EXPORT virtual void result(Irccdctl &irccdctl, const json::Value &response) const;

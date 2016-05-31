@@ -68,14 +68,24 @@ public:
 	Signal<> onDie;
 
 protected:
-	std::string m_input;
-	std::string m_output;
+	std::string m_input;	//!< input buffer
+	std::string m_output;	//!< output buffer
 
-	/* Parse input buffer */
-	void parse(const std::string &);
+	/**
+	 * Parse input buffer.
+	 *
+	 * \param buffer the buffer.
+	 */
+	void parse(const std::string &buffer);
 
-	/* Do I/O */
+	/**
+	 * Start receiving data.
+	 */
 	virtual void receive() = 0;
+
+	/**
+	 * Start sending data.
+	 */
 	virtual void send() = 0;
 
 public:

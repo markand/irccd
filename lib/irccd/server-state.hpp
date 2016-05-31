@@ -24,6 +24,11 @@
  * \brief Server state.
  */
 
+/**
+ * \defgroup states Server states
+ * \brief States for Server class.
+ */
+
 #include "elapsed-timer.hpp"
 #include "net.hpp"
 #include "sysconfig.hpp"
@@ -31,6 +36,12 @@
 namespace irccd {
 
 class Server;
+
+/**
+ * \brief Namespace for server states.
+ */
+namespace state {
+}
 
 /**
  * \class ServerState

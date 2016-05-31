@@ -36,6 +36,9 @@ namespace command {
  */
 class ServerMe : public RemoteCommand {
 public:
+	/**
+	 * Constructor.
+	 */
 	IRCCD_EXPORT ServerMe();
 
 	/**

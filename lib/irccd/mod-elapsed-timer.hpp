@@ -30,6 +30,7 @@ namespace irccd {
 
 /**
  * \brief Irccd.ElapsedTimer JavaScript API.
+ * \ingroup modules
  */
 class ElapsedTimerModule : public Module {
 public:

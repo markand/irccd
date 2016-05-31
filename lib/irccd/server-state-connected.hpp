@@ -32,6 +32,7 @@ namespace state {
 
 /**
  * \brief Connected state.
+ * \ingroup states
  */
 class Connected : public ServerState {
 public:

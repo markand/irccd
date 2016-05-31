@@ -33,6 +33,9 @@
 
 #include "sysconfig.hpp"
 
+/**
+ * \brief Main irccd namespace
+ */
 namespace irccd {
 
 class CommandService;

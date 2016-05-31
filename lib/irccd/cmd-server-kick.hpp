@@ -36,6 +36,9 @@ namespace command {
  */
 class ServerKick : public RemoteCommand {
 public:
+	/**
+	 * Constructor.
+	 */
 	IRCCD_EXPORT ServerKick();
 
 	/**

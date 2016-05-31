@@ -32,6 +32,7 @@ namespace irccd {
 
 /**
  * \brief Store and solve rules.
+ * \ingroup services
  */
 class RuleService {
 private:

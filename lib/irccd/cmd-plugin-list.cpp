@@ -23,6 +23,7 @@
 #include "plugin.hpp"
 #include "service-plugin.hpp"
 #include "sysconfig.hpp"
+#include "util.hpp"
 
 namespace irccd {
 
@@ -51,8 +52,7 @@ json::Value PluginList::exec(Irccd &irccd, const json::Value &request) const
 
 	return response;
 #else
-	(void)irccd;
-	(void)tc;
+	util::unused(irccd, tc);
 
 	throw std::runtime_error("JavaScript disabled");
 #endif

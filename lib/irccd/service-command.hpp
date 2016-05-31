@@ -35,6 +35,7 @@ class RemoteCommand;
 
 /**
  * \brief Store remote commands.
+ * \ingroup services
  */
 class CommandService {
 private:

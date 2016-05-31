@@ -30,6 +30,7 @@ namespace irccd {
 
 /**
  * \brief Irccd.Timer JavaScript API.
+ * \ingroup modules
  */
 class TimerModule : public Module {
 public:

@@ -20,7 +20,7 @@
 #define IRCCD_PLUGIN_JS_HPP
 
 /**
- * \file plugin-hs.hpp
+ * \file plugin-js.hpp
  * \brief JavaScript plugins for irccd.
  */
 
@@ -35,6 +35,7 @@ class Module;
 
 /**
  * \brief JavaScript plugins for irccd.
+ * \ingroup plugins
  */
 class JsPlugin : public Plugin {
 private:

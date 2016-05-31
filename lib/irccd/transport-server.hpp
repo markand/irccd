@@ -88,6 +88,9 @@ public:
  */
 class TransportServerIp : public TransportServer {
 protected:
+	/**
+	 * The TCP/IP socket.
+	 */
 	net::SocketTcp<net::address::Ip> m_socket;
 
 public:
@@ -103,7 +106,7 @@ public:
 	IRCCD_EXPORT TransportServerIp(int domain, const std::string &address, int port, bool ipv6only = true);
 
 	/**
-	 * \copydoc TransportServer::socket
+	 * \copydoc TransportServer::handle
 	 */
 	IRCCD_EXPORT net::Handle handle() noexcept override;
 
@@ -138,7 +141,7 @@ public:
 	IRCCD_EXPORT ~TransportServerUnix();
 
 	/**
-	 * \copydoc TransportServer::socket
+	 * \copydoc TransportServer::handle
 	 */
 	IRCCD_EXPORT net::Handle handle() noexcept override;
 

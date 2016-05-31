@@ -30,6 +30,7 @@ namespace irccd {
 
 /**
  * \brief Irccd.Unicode JavaScript API.
+ * \ingroup modules
  */
 class UnicodeModule : public Module {
 public:

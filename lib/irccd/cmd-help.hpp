@@ -36,8 +36,14 @@ namespace command {
  */
 class Help : public RemoteCommand {
 public:
+	/**
+	 * Constructor.
+	 */
 	IRCCD_EXPORT Help();
 
+	/**
+	 * \copydoc RemoteCommand::args
+	 */
 	IRCCD_EXPORT std::vector<Arg> args() const override;
 
 	/**

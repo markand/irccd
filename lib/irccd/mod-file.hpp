@@ -175,6 +175,7 @@ public:
 
 /**
  * \brief Irccd.File JavaScript API.
+ * \ingroup modules
  */
 class FileModule : public Module {
 public:

@@ -24,6 +24,11 @@
  * \brief JavaScript API module.
  */
 
+/**
+ * \defgroup modules JavaScript modules
+ * \brief Modules for the JavaScript API.
+ */
+
 #include <cassert>
 
 #include "sysconfig.hpp"

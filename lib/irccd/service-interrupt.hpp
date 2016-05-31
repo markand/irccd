@@ -30,6 +30,7 @@ namespace irccd {
 
 /**
  * \brief Interrupt irccd event loop.
+ * \ingroup services
  */
 class InterruptService : public Service {
 private:

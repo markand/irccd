@@ -33,6 +33,7 @@ namespace state {
 
 /**
  * \brief Disconnected state.
+ * \ingroup states
  */
 class Disconnected : public ServerState {
 private:

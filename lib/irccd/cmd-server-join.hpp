@@ -36,6 +36,9 @@ namespace command {
  */
 class ServerJoin : public RemoteCommand {
 public:
+	/**
+	 * Constructor.
+	 */
 	IRCCD_EXPORT ServerJoin();
 
 	/**

@@ -39,6 +39,9 @@
 
 namespace irccd {
 
+/**
+ * \brief Namespace for utilities.
+ */
 namespace util {
 
 /**
@@ -77,6 +80,9 @@ public:
 		IrcAttrs	= (1 << 4)	//!< IRC escape codes
 	};
 
+	/**
+	 * Flags for selecting templates.
+	 */
 	std::uint8_t flags{Date | Keywords | Env | IrcAttrs};
 
 	/**

@@ -25,15 +25,15 @@
 #include <vector>
 
 /**
- * @file signals.h
- * @brief Similar Qt signal subsystem for irccd
+ * \file signals.hpp
+ * \brief Similar Qt signal subsystem for irccd
  */
 
 namespace irccd {
 
 /**
- * @class SignalConnection
- * @brief Stores the reference to the callable
+ * \class SignalConnection
+ * \brief Stores the reference to the callable
  *
  * This class can be stored to remove a registered function from a Signal, be
  * careful to not mix connections between different signals as they are just
@@ -47,7 +47,7 @@ public:
 	/**
 	 * Create a signal connection.
 	 *
-	 * @param id the id
+	 * \param id the id
 	 */
 	inline SignalConnection(unsigned id) noexcept
 		: m_id(id)
@@ -57,7 +57,7 @@ public:
 	/**
 	 * Get the reference object.
 	 *
-	 * @return the id
+	 * \return the id
 	 */
 	inline unsigned id() const noexcept
 	{
@@ -66,8 +66,8 @@ public:
 };
 
 /**
- * @class Signal
- * @brief Stores and call registered functions
+ * \class Signal
+ * \brief Stores and call registered functions
  *
  * This class is intended to be use as a public field in the desired object.
  *
@@ -94,8 +94,8 @@ public:
 	/**
 	 * Register a new function to the signal.
 	 *
-	 * @param function the function
-	 * @return the connection in case you want to remove it
+	 * \param function the function
+	 * \return the connection in case you want to remove it
 	 */
 	inline SignalConnection connect(Function function) noexcept
 	{
@@ -104,9 +104,8 @@ public:
 		if (!m_stack.empty()) {
 			id = m_stack.top();
 			m_stack.pop();
-		} else {
+		} else
 			id = m_max ++;
-		}
 
 		m_functions.emplace(id, std::move(function));
 
@@ -116,8 +115,8 @@ public:
 	/**
 	 * Disconnect a connection.
 	 *
-	 * @param connection the connection
-	 * @warning Be sure that the connection belongs to that signal
+	 * \param connection the connection
+	 * \warning Be sure that the connection belongs to that signal
 	 */
 	inline void disconnect(const SignalConnection &connection) noexcept
 	{
@@ -144,7 +143,7 @@ public:
 	/**
 	 * Call every functions.
 	 *
-	 * @param args the arguments to pass to the signal
+	 * \param args the arguments to pass to the signal
 	 */
 	void operator()(Args... args) const
 	{

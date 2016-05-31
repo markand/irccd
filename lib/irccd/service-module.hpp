@@ -35,6 +35,7 @@ class Module;
 
 /**
  * \brief Store and manage JavaScript modules.
+ * \ingroup services
  */
 class ModuleService {
 private:

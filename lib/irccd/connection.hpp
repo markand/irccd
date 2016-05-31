@@ -152,7 +152,7 @@ public:
 	void send(std::string msg, int timeout) override;
 
 	/**
-	 * \copydoc Connection::next
+	 * \copydoc Connection::next(int)
 	 */
 	json::Value next(int timeout) override;
 };

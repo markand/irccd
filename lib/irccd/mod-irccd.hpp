@@ -66,7 +66,8 @@ public:
 };
 
 /**
- * Irccd JavaScript API.
+ * \brief Irccd JavaScript API.
+ * \ingroup modules
  */
 class IrccdModule : public Module {
 public:

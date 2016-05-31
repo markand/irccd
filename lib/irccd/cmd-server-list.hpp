@@ -36,6 +36,9 @@ namespace command {
  */
 class ServerList : public RemoteCommand {
 public:
+	/**
+	 * Constructor.
+	 */
 	IRCCD_EXPORT ServerList();
 
 	/**
@@ -43,8 +46,14 @@ public:
 	 */
 	IRCCD_EXPORT std::string help() const override;
 
+	/**
+	 * \copydoc RemoteCommand::exec
+	 */
 	IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
 
+	/**
+	 * \copydoc RemoteCommand::result
+	 */
 	IRCCD_EXPORT void result(Irccdctl &irccdctl, const json::Value &response) const override;
 };
 

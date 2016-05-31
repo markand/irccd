@@ -66,7 +66,7 @@ public:
 	 *
 	 * This function is called only if NDEBUG is not defined.
 	 *
-	 * \param data the data
+	 * \param line the data
 	 * \see log::debug
 	 */
 	virtual void debug(const std::string &line) = 0;
@@ -76,7 +76,7 @@ public:
 	 *
 	 * The function is called only if verbose is true.
 	 *
-	 * \param data the data
+	 * \param line the data
 	 * \see log::info
 	 */
 	virtual void info(const std::string &line) = 0;
@@ -86,7 +86,7 @@ public:
 	 *
 	 * This function is always called.
 	 *
-	 * \param data the data
+	 * \param line the data
 	 * \see log::warning
 	 */
 	virtual void warning(const std::string &line) = 0;

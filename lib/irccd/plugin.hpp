@@ -24,6 +24,11 @@
  * \brief Irccd plugins
  */
 
+/**
+ * \defgroup plugins Plugins
+ * \brief Plugin management.
+ */
+
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -49,11 +54,10 @@ using PluginConfig = std::unordered_map<std::string, std::string>;
 using PluginFormats = std::unordered_map<std::string, std::string>;
 
 /**
- * \class Plugin
- * \brief JavaScript plugin
+ * \ingroup plugins
+ * \brief Abstract plugin.
  *
- * A plugin is identified by name and can be loaded and unloaded
- * at runtime.
+ * A plugin is identified by name and can be loaded and unloaded at runtime.
  */
 class Plugin : public std::enable_shared_from_this<Plugin> {
 private:
@@ -276,6 +280,7 @@ public:
 	/**
 	 * On successful connection.
 	 *
+	 * \param irccd the irccd instance
 	 * \param server the server
 	 */
 	virtual void onConnect(Irccd &irccd, const std::shared_ptr<Server> &server)

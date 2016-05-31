@@ -30,6 +30,7 @@ namespace irccd {
 
 /**
  * \brief Irccd.Util JavaScript API.
+ * \ingroup modules
  */
 class UtilModule : public Module {
 public:

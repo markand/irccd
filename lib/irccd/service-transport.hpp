@@ -39,6 +39,7 @@ class Value;
 
 /**
  * \brief manage transport servers and clients.
+ * \ingroup services
  */
 class TransportService : public Service {
 private:

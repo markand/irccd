@@ -32,6 +32,7 @@ class Irccd;
 
 /**
  * \brief Irccd.Directory JavaScript API.
+ * \ingroup modules
  */
 class DirectoryModule : public Module {
 public:

@@ -36,6 +36,7 @@ class Irccd;
 
 /**
  * \brief Manage plugins.
+ * \ingroup services
  */
 class PluginService {
 private:

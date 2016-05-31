@@ -38,6 +38,7 @@ class ServerWhois;
 
 /**
  * \brief Manage IRC servers.
+ * \ingroup services
  */
 class ServerService : public Service {
 private:

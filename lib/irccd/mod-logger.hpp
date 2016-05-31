@@ -30,6 +30,7 @@ namespace irccd {
 
 /**
  * \brief Irccd.Logger JavaScript API.
+ * \ingroup modules
  */
 class LoggerModule : public Module {
 public:

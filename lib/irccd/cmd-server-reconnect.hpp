@@ -36,6 +36,9 @@ namespace command {
  */
 class ServerReconnect : public RemoteCommand {
 public:
+	/**
+	 * Constructor.
+	 */
 	IRCCD_EXPORT ServerReconnect();
 
 	/**

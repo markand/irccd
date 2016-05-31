@@ -20,7 +20,7 @@
 #define IRCCD_XDG_H
 
 /**
- * \file xdg.h
+ * \file xdg.hpp
  * \brief Read XDG standard specifications
  */
 

@@ -31,6 +31,9 @@
 
 namespace irccd {
 
+/**
+ * \brief Namespace for system functions.
+ */
 namespace sys {
 
 /**

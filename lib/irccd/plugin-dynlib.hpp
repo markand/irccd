@@ -31,6 +31,7 @@ namespace irccd {
 
 /**
  * \brief Dynlib based plugin.
+ * \ingroup plugins
  */
 class DynlibPlugin : public Plugin {
 private:

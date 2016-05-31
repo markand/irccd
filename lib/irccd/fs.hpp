@@ -67,8 +67,8 @@ public:
 		Link		//!< File is link
 	};
 
-	std::string name;	//! name of entry (base name)
-	Type type{Unknown};	//! type of file
+	std::string name;	//!< name of entry (base name)
+	Type type{Unknown};	//!< type of file
 };
 
 /**
