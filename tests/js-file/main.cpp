@@ -45,7 +45,7 @@ TEST_F(TestJsFile, functionBasename)
 {
 	try {
 		if (duk::pevalString(m_plugin->context(), "result = Irccd.File.basename('/usr/local/etc/irccd.conf');") != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		ASSERT_EQ("irccd.conf", duk::getGlobal<std::string>(m_plugin->context(), "result"));
 	} catch (const std::exception &ex) {
@@ -94,7 +94,7 @@ TEST_F(TestJsFile, functionRemove)
 
 	try {
 		if (duk::pevalString(m_plugin->context(), "Irccd.File.remove('test-js-fs.remove');") != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -115,7 +115,7 @@ TEST_F(TestJsFile, methodBasename)
 		);
 
 		if (ret != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		ASSERT_EQ("file-1.txt", duk::getGlobal<std::string>(m_plugin->context(),"result"));
 	} catch (const std::exception &ex) {
@@ -135,7 +135,7 @@ TEST_F(TestJsFile, methodBasenameClosed)
 		);
 
 		if (ret != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		ASSERT_EQ("file-1.txt", duk::getGlobal<std::string>(m_plugin->context(),"result"));
 	} catch (const std::exception &ex) {
@@ -154,7 +154,7 @@ TEST_F(TestJsFile, methodDirname)
 		);
 
 		if (ret != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		ASSERT_EQ(std::string{IRCCD_TESTS_DIRECTORY "/level-1"}, duk::getGlobal<std::string>(m_plugin->context(), "result"));
 	} catch (const std::exception &ex) {
@@ -174,7 +174,7 @@ TEST_F(TestJsFile, methodDirnameClosed)
 		);
 
 		if (ret != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		ASSERT_EQ(std::string{IRCCD_TESTS_DIRECTORY "/level-1"}, duk::getGlobal<std::string>(m_plugin->context(), "result"));
 	} catch (const std::exception &ex) {
@@ -192,7 +192,7 @@ TEST_F(TestJsFile, methodLines)
 		);
 
 		if (ret != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		std::vector<std::string> expected{"a", "b", "c"};
 
@@ -214,7 +214,7 @@ TEST_F(TestJsFile, methodSeek1)
 		);
 
 		if (ret != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		ASSERT_EQ(".", duk::getGlobal<std::string>(m_plugin->context(), "result"));
 	} catch (const std::exception &ex) {
@@ -236,7 +236,7 @@ TEST_F(TestJsFile, methodSeek1Closed)
 		);
 
 		if (ret != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		ASSERT_TRUE(duk::getGlobal<bool>(m_plugin->context(), "result"));
 	} catch (const std::exception &ex) {
@@ -257,7 +257,7 @@ TEST_F(TestJsFile, methodSeek2)
 		);
 
 		if (ret != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		ASSERT_EQ(".", duk::getGlobal<std::string>(m_plugin->context(), "result"));
 	} catch (const std::exception &ex) {
@@ -280,7 +280,7 @@ TEST_F(TestJsFile, methodSeek2Closed)
 		);
 
 		if (ret != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		ASSERT_TRUE(duk::getGlobal<bool>(m_plugin->context(), "result"));
 	} catch (const std::exception &ex) {
@@ -300,7 +300,7 @@ TEST_F(TestJsFile, methodSeek3)
 		);
 
 		if (ret != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		ASSERT_EQ("x", duk::getGlobal<std::string>(m_plugin->context(), "result"));
 	} catch (const std::exception &ex) {
@@ -322,7 +322,7 @@ TEST_F(TestJsFile, methodSeek3Closed)
 		);
 
 		if (ret != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		ASSERT_TRUE(duk::getGlobal<bool>(m_plugin->context(), "result"));
 	} catch (const std::exception &ex) {
@@ -344,7 +344,7 @@ TEST_F(TestJsFile, methodReadline)
 		);
 
 		if (ret != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		std::vector<std::string> expected{"a", "b", "c"};
 
@@ -369,7 +369,7 @@ TEST_F(TestJsFile, methodReadlineClosed)
 		);
 
 		if (ret != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		std::vector<std::string> expected;
 

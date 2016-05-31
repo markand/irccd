@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cassert>
 #include <sstream>
 #include <unordered_map>
 
@@ -29,6 +30,9 @@ namespace irccd {
 
 namespace {
 
+const std::string Signature("\xff""\xff""irccd-server-ptr");
+const std::string Prototype("\xff""\xff""irccd-server-prototype");
+
 /*
  * Method: Server.cmode(channel, mode)
  * ------------------------------------------------------------------
@@ -39,9 +43,9 @@ namespace {
  *   - channel, the channel,
  *   - mode, the mode.
  */
-duk::Ret cmode(duk::ContextPtr ctx)
+duk::Ret cmode(duk::Context *ctx)
 {
-	duk::self<duk::Shared<Server>>(ctx)->cmode(duk::require<std::string>(ctx, 0), duk::require<std::string>(ctx, 1));
+	duk::self<std::shared_ptr<Server>>(ctx)->cmode(duk::require<std::string>(ctx, 0), duk::require<std::string>(ctx, 1));
 
 	return 0;
 }
@@ -56,9 +60,9 @@ duk::Ret cmode(duk::ContextPtr ctx)
  *   - channel, the channel,
  *   - message, the message.
  */
-duk::Ret cnotice(duk::ContextPtr ctx)
+duk::Ret cnotice(duk::Context *ctx)
 {
-	duk::self<duk::Shared<Server>>(ctx)->cnotice(duk::require<std::string>(ctx, 0), duk::require<std::string>(ctx, 1));
+	duk::self<std::shared_ptr<Server>>(ctx)->cnotice(duk::require<std::string>(ctx, 0), duk::require<std::string>(ctx, 1));
 
 	return 0;
 }
@@ -76,9 +80,9 @@ duk::Ret cnotice(duk::ContextPtr ctx)
  * sslVerify: true if ssl was verified
  * channels: an array of all channels
  */
-duk::Ret info(duk::ContextPtr ctx)
+duk::Ret info(duk::Context *ctx)
 {
-	auto server = duk::self<duk::Shared<Server>>(ctx);
+	auto server = duk::self<std::shared_ptr<Server>>(ctx);
 
 	duk::push(ctx, duk::Object{});
 	duk::putProperty(ctx, -1, "name", server->name());
@@ -113,9 +117,9 @@ duk::Ret info(duk::ContextPtr ctx)
  *   - target, the target to invite,
  *   - channel, the channel.
  */
-duk::Ret invite(duk::ContextPtr ctx)
+duk::Ret invite(duk::Context *ctx)
 {
-	duk::self<duk::Shared<Server>>(ctx)->invite(duk::require<std::string>(ctx, 0), duk::require<std::string>(ctx, 1));
+	duk::self<std::shared_ptr<Server>>(ctx)->invite(duk::require<std::string>(ctx, 0), duk::require<std::string>(ctx, 1));
 
 	return 0;
 }
@@ -130,9 +134,9 @@ duk::Ret invite(duk::ContextPtr ctx)
  *   - channel, the channel to join,
  *   - password, the password or undefined to not use.
  */
-duk::Ret join(duk::ContextPtr ctx)
+duk::Ret join(duk::Context *ctx)
 {
-	duk::self<duk::Shared<Server>>(ctx)->join(duk::require<std::string>(ctx, 0), duk::optional<std::string>(ctx, 1, ""));
+	duk::self<std::shared_ptr<Server>>(ctx)->join(duk::require<std::string>(ctx, 0), duk::optional<std::string>(ctx, 1, ""));
 
 	return 0;
 }
@@ -148,9 +152,9 @@ duk::Ret join(duk::ContextPtr ctx)
  *   - channel, the channel,
  *   - reason, the optional reason or undefined to not set.
  */
-duk::Ret kick(duk::ContextPtr ctx)
+duk::Ret kick(duk::Context *ctx)
 {
-	duk::self<duk::Shared<Server>>(ctx)->kick(
+	duk::self<std::shared_ptr<Server>>(ctx)->kick(
 		duk::require<std::string>(ctx, 0),
 		duk::require<std::string>(ctx, 1),
 		duk::optional<std::string>(ctx, 2, "")
@@ -169,9 +173,9 @@ duk::Ret kick(duk::ContextPtr ctx)
  *   - target, the target or a channel,
  *   - message, the message.
  */
-duk::Ret me(duk::ContextPtr ctx)
+duk::Ret me(duk::Context *ctx)
 {
-	duk::self<duk::Shared<Server>>(ctx)->me(duk::require<std::string>(ctx, 0), duk::require<std::string>(ctx, 1));
+	duk::self<std::shared_ptr<Server>>(ctx)->me(duk::require<std::string>(ctx, 0), duk::require<std::string>(ctx, 1));
 
 	return 0;
 }
@@ -186,9 +190,9 @@ duk::Ret me(duk::ContextPtr ctx)
  *   - target, the target or a channel,
  *   - message, the message.
  */
-duk::Ret message(duk::ContextPtr ctx)
+duk::Ret message(duk::Context *ctx)
 {
-	duk::self<duk::Shared<Server>>(ctx)->message(duk::require<std::string>(ctx, 0), duk::require<std::string>(ctx, 1));
+	duk::self<std::shared_ptr<Server>>(ctx)->message(duk::require<std::string>(ctx, 0), duk::require<std::string>(ctx, 1));
 
 	return 0;
 }
@@ -202,9 +206,9 @@ duk::Ret message(duk::ContextPtr ctx)
  * Arguments:
  *   - mode, the new mode.
  */
-duk::Ret mode(duk::ContextPtr ctx)
+duk::Ret mode(duk::Context *ctx)
 {
-	duk::self<duk::Shared<Server>>(ctx)->mode(duk::require<std::string>(ctx, 0));
+	duk::self<std::shared_ptr<Server>>(ctx)->mode(duk::require<std::string>(ctx, 0));
 
 	return 0;
 }
@@ -218,9 +222,9 @@ duk::Ret mode(duk::ContextPtr ctx)
  * Arguments:
  *   - channel, the channel.
  */
-duk::Ret names(duk::ContextPtr ctx)
+duk::Ret names(duk::Context *ctx)
 {
-	duk::self<duk::Shared<Server>>(ctx)->names(duk::require<std::string>(ctx, 0));
+	duk::self<std::shared_ptr<Server>>(ctx)->names(duk::require<std::string>(ctx, 0));
 
 	return 0;
 }
@@ -234,9 +238,9 @@ duk::Ret names(duk::ContextPtr ctx)
  * Arguments:
  *   - nickname, the nickname.
  */
-duk::Ret nick(duk::ContextPtr ctx)
+duk::Ret nick(duk::Context *ctx)
 {
-	duk::self<duk::Shared<Server>>(ctx)->nick(duk::require<std::string>(ctx, 0));
+	duk::self<std::shared_ptr<Server>>(ctx)->nick(duk::require<std::string>(ctx, 0));
 
 	return 0;
 }
@@ -251,9 +255,9 @@ duk::Ret nick(duk::ContextPtr ctx)
  *   - target, the target,
  *   - message, the notice message.
  */
-duk::Ret notice(duk::ContextPtr ctx)
+duk::Ret notice(duk::Context *ctx)
 {
-	duk::self<duk::Shared<Server>>(ctx)->notice(duk::require<std::string>(ctx, 0), duk::require<std::string>(ctx, 1));
+	duk::self<std::shared_ptr<Server>>(ctx)->notice(duk::require<std::string>(ctx, 0), duk::require<std::string>(ctx, 1));
 
 	return 0;
 }
@@ -268,9 +272,9 @@ duk::Ret notice(duk::ContextPtr ctx)
  *   - channel, the channel to leave,
  *   - reason, the optional reason, keep undefined for portability.
  */
-duk::Ret part(duk::ContextPtr ctx)
+duk::Ret part(duk::Context *ctx)
 {
-	duk::self<duk::Shared<Server>>(ctx)->part(duk::require<std::string>(ctx, 0), duk::optional<std::string>(ctx, 1, ""));
+	duk::self<std::shared_ptr<Server>>(ctx)->part(duk::require<std::string>(ctx, 0), duk::optional<std::string>(ctx, 1, ""));
 
 	return 0;
 }
@@ -284,9 +288,9 @@ duk::Ret part(duk::ContextPtr ctx)
  * Arguments:
  *   - raw, the raw message (without terminators).
  */
-duk::Ret send(duk::ContextPtr ctx)
+duk::Ret send(duk::Context *ctx)
 {
-	duk::self<duk::Shared<Server>>(ctx)->send(duk::require<std::string>(ctx, 0));
+	duk::self<std::shared_ptr<Server>>(ctx)->send(duk::require<std::string>(ctx, 0));
 
 	return 0;
 }
@@ -301,9 +305,9 @@ duk::Ret send(duk::ContextPtr ctx)
  *   - channel, the channel,
  *   - topic, the new topic.
  */
-duk::Ret topic(duk::ContextPtr ctx)
+duk::Ret topic(duk::Context *ctx)
 {
-	duk::self<duk::Shared<Server>>(ctx)->topic(duk::require<std::string>(ctx, 0), duk::require<std::string>(ctx, 1));
+	duk::self<std::shared_ptr<Server>>(ctx)->topic(duk::require<std::string>(ctx, 0), duk::require<std::string>(ctx, 1));
 
 	return 0;
 }
@@ -317,9 +321,9 @@ duk::Ret topic(duk::ContextPtr ctx)
  * Arguments:
  *   - target, the target.
  */
-duk::Ret whois(duk::ContextPtr ctx)
+duk::Ret whois(duk::Context *ctx)
 {
-	duk::self<duk::Shared<Server>>(ctx)->whois(duk::require<std::string>(ctx, 0));
+	duk::self<std::shared_ptr<Server>>(ctx)->whois(duk::require<std::string>(ctx, 0));
 
 	return 0;
 }
@@ -334,9 +338,9 @@ duk::Ret whois(duk::ContextPtr ctx)
  * Returns:
  *   The server name (unique).
  */
-duk::Ret toString(duk::ContextPtr ctx)
+duk::Ret toString(duk::Context *ctx)
 {
-	duk::push(ctx, duk::self<duk::Shared<Server>>(ctx)->name());
+	duk::push(ctx, duk::self<std::shared_ptr<Server>>(ctx)->name());
 
 	return 1;
 }
@@ -362,9 +366,9 @@ duk::Ret toString(duk::ContextPtr ctx)
  * realname: "real name",	(Optional, default: IRC Client Daemon)
  * commandChar: "!",		(Optional, the command char, default: "!")
  */
-duk::Ret constructor(duk::ContextPtr ctx)
+duk::Ret constructor(duk::Context *ctx)
 {
-	if (!duk_is_constructor_call(ctx))
+	if (!duk::isConstructorCall(ctx))
 		return 0;
 
 	std::string name;
@@ -375,12 +379,11 @@ duk::Ret constructor(duk::ContextPtr ctx)
 	// Information part.
 	name = duk::getProperty<std::string>(ctx, 0, "name");
 	info.host = duk::getProperty<std::string>(ctx, 0, "host");
-	info.port = duk::optionalProperty<int>(ctx, 0, "port", (int)info.port);
+	info.port = duk::optionalProperty<int>(ctx, 0, "port", static_cast<int>(info.port));
 	info.password = duk::optionalProperty<std::string>(ctx, 0, "password", "");
 
-	if (duk::optionalProperty<bool>(ctx, 0, "ipv6", false)) {
+	if (duk::optionalProperty<bool>(ctx, 0, "ipv6", false))
 		info.flags |= ServerInfo::Ipv6;
-	}
 
 	// Identity part.
 	identity.nickname = duk::optionalProperty<std::string>(ctx, 0, "nickname", identity.nickname);
@@ -401,14 +404,29 @@ duk::Ret constructor(duk::ContextPtr ctx)
 		settings.flags |= ServerSettings::AutoRejoin;
 
 	try {
-		duk::construct(ctx, duk::Shared<Server>{std::make_shared<Server>(std::move(name), std::move(info),
-							std::move(identity), std::move(settings))});
+		duk::construct(ctx, std::make_shared<Server>(std::move(name), std::move(info), std::move(identity), std::move(settings)));
 	} catch (const std::exception &ex) {
 		duk::raise(ctx, duk::Error(ex.what()));
 	}
 
 	return 0;
 }
+
+/*
+ * Function: Irccd.Server() [destructor]
+ * ------------------------------------------------------------------
+ *
+ * Delete the property.
+ */
+duk::Ret destructor(duk::Context *ctx)
+{
+	delete static_cast<std::shared_ptr<Server> *>(duk::getProperty<void *>(ctx, 0, Signature));
+
+	duk::deleteProperty(ctx, 0, Signature);
+
+	return 0;
+}
+
 
 /*
  * Function: Irccd.Server.add(s)
@@ -419,12 +437,9 @@ duk::Ret constructor(duk::ContextPtr ctx)
  * Arguments:
  *   - s, the server to add.
  */
-duk::Ret add(duk::ContextPtr ctx)
+duk::Ret add(duk::Context *ctx)
 {
-	auto server = duk::get<duk::Shared<Server>>(ctx, 0);
-
-	if (server)
-		duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->serverService().add(server);
+	duk::getGlobal<Irccd *>(ctx, "\xff""\xff""irccd")->serverService().add(duk::require<std::shared_ptr<Server>>(ctx, 0));
 
 	return 0;
 }
@@ -440,13 +455,13 @@ duk::Ret add(duk::ContextPtr ctx)
  * Returns:
  *   The server object or undefined if not found.
  */
-duk::Ret find(duk::ContextPtr ctx)
+duk::Ret find(duk::Context *ctx)
 {
 	const auto name = duk::require<std::string>(ctx, 0);
-	const auto irccd = duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd");
+	const auto irccd = duk::getGlobal<Irccd *>(ctx, "\xff""\xff""irccd");
 
 	try {
-		duk::push(ctx, duk::Shared<Server>{irccd->serverService().require(name)});
+		duk::push(ctx, irccd->serverService().require(name));
 	} catch (...) {
 		return 0;
 	}
@@ -463,12 +478,12 @@ duk::Ret find(duk::ContextPtr ctx)
  * Returns:
  *   An object with string-to-servers pairs.
  */
-duk::Ret list(duk::ContextPtr ctx)
+duk::Ret list(duk::Context *ctx)
 {
 	duk::push(ctx, duk::Object{});
 
-	for (const auto &server : duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->serverService().servers())
-		duk::putProperty(ctx, -1, server->name(), duk::Shared<Server>{server});
+	for (const auto &server : duk::getGlobal<Irccd *>(ctx, "\xff""\xff""irccd")->serverService().servers())
+		duk::putProperty(ctx, -1, server->name(), server);
 
 	return 1;
 }
@@ -482,9 +497,9 @@ duk::Ret list(duk::ContextPtr ctx)
  * Arguments:
  *   - name the server name.
  */
-duk::Ret remove(duk::ContextPtr ctx)
+duk::Ret remove(duk::Context *ctx)
 {
-	duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->serverService().remove(duk::require<std::string>(ctx, 0));
+	duk::getGlobal<Irccd *>(ctx, "\xff""\xff""irccd")->serverService().remove(duk::require<std::string>(ctx, 0));
 
 	return 0;
 }
@@ -518,6 +533,43 @@ const duk::FunctionMap functions{
 
 } // !namespace
 
+namespace duk {
+
+void TypeTraits<std::shared_ptr<Server>>::construct(Context *ctx, std::shared_ptr<Server> server)
+{
+	assert(server);
+
+	duk::StackAssert sa(ctx);
+
+	duk::push(ctx, This());
+	duk::putProperty(ctx, -1, Signature, new std::shared_ptr<Server>(std::move(server)));
+	duk::pop(ctx);
+}
+
+void TypeTraits<std::shared_ptr<Server>>::push(Context *ctx, std::shared_ptr<Server> server)
+{
+	assert(server);
+
+	duk::StackAssert sa(ctx, 1);
+
+	duk::push(ctx, Object());
+	duk::putProperty(ctx, -1, Signature, new std::shared_ptr<Server>(std::move(server)));
+	duk::getGlobal<void>(ctx, Prototype);
+	duk::setPrototype(ctx, -2);
+}
+
+std::shared_ptr<Server> TypeTraits<std::shared_ptr<Server>>::require(Context *ctx, Index index)
+{
+	auto ptr = getProperty<std::shared_ptr<Server> *>(ctx, index, Signature);
+
+	if (!ptr)
+		duk::raise(ctx, DUK_ERR_TYPE_ERROR, "not a Server object");
+
+	return *ptr;
+}
+
+} // !duk
+
 ServerModule::ServerModule() noexcept
 	: Module("Irccd.Server")
 {
@@ -528,10 +580,14 @@ void ServerModule::load(Irccd &, JsPlugin &plugin)
 	duk::StackAssert sa(plugin.context());
 
 	duk::getGlobal<void>(plugin.context(), "Irccd");
-	duk::push(plugin.context(), duk::Function{constructor, 1});
-	duk::push(plugin.context(), functions);
+	duk::push(plugin.context(), duk::Function(constructor, 1));
+	duk::put(plugin.context(), functions);
 	duk::push(plugin.context(), duk::Object());
-	duk::push(plugin.context(), methods);
+	duk::put(plugin.context(), methods);
+	duk::push(plugin.context(), duk::Function(destructor, 1));
+	duk::setFinalizer(plugin.context(), -2);
+	duk::dup(plugin.context());
+	duk::putGlobal(plugin.context(), Prototype);
 	duk::putProperty(plugin.context(), -2, "prototype");
 	duk::putProperty(plugin.context(), -2, "Server");
 	duk::pop(plugin.context());

@@ -31,6 +31,7 @@
 #endif
 
 #include <csignal>
+#include <iostream>
 
 #include <format.h>
 
@@ -61,7 +62,8 @@ void usage()
 	log::warning() << "  -f, --foreground        do not run as a daemon\n";
 	log::warning() << "      --help              show this help\n";
 	log::warning() << "  -p, --plugin name       load a specific plugin\n";
-	log::warning() << "  -v, --verbose           be verbose" << std::endl;
+	log::warning() << "  -v, --verbose           be verbose\n";
+	log::warning() << "      --version           show the version\n";
 	std::exit(1);
 }
 
@@ -103,20 +105,22 @@ parser::Result parse(int &argc, char **&argv)
 			{ "-p",			true	},
 			{ "--plugin",		true	},
 			{ "-v",			false	},
-			{ "--verbose",		false	}
+			{ "--verbose",		false	},
+			{ "--version",		false	}
 		};
 
 		result = parser::read(argc, argv, options);
 
 		for (const auto &pair : result) {
-			if (pair.first == "--help") {
+			if (pair.first == "--help")
 				usage();
 				// NOTREACHED
+			if (pair.first == "--version") {
+				std::cout << IRCCD_VERSION << std::endl;
+				std::exit(1);
 			}
-
-			if (pair.first == "-v" || pair.first == "--verbose") {
+			if (pair.first == "-v" || pair.first == "--verbose")
 				log::setVerbose(true);
-			}
 		}
 	} catch (const std::exception &ex) {
 		log::warning() << sys::programName() << ": " << ex.what() << std::endl;
@@ -143,17 +147,15 @@ Config open(const parser::Result &result)
 
 void loadPid(const std::string &path)
 {
-	if (path.empty()) {
+	if (path.empty())
 		return;
-	}
 
 	try {
 #if defined(HAVE_GETPID)
 		std::ofstream out(path, std::ofstream::trunc);
 
-		if (!out) {
+		if (!out)
 			throw std::runtime_error("could not open pidfile {}: {}"_format(path, std::strerror(errno)));
-		}
 
 		log::debug() << "irccd: pid written in " << path << std::endl;
 		out << getpid() << std::endl;
@@ -168,13 +170,12 @@ void loadPid(const std::string &path)
 void loadGid(const std::string gid)
 {
 	try {
-		if (!gid.empty()) {
+		if (!gid.empty())
 #if defined(HAVE_SETGID)
 			sys::setGid(gid);
 #else
 			throw std::runtime_error(" gid option not supported on this platform");
 #endif
-		}
 	} catch (const std::exception &ex) {
 		log::warning() << "irccd: " << ex.what() << std::endl;
 	}
@@ -183,13 +184,12 @@ void loadGid(const std::string gid)
 void loadUid(const std::string &uid)
 {
 	try {
-		if (!uid.empty()) {
+		if (!uid.empty())
 #if defined(HAVE_SETUID)
 			sys::setUid(uid);
 #else
 			throw std::runtime_error("uid option not supported on this platform");
 #endif
-		}
 	} catch (const std::exception &ex) {
 		log::warning() << "irccd: " << ex.what() << std::endl;
 	}
@@ -199,9 +199,8 @@ void loadForeground(bool foreground, const parser::Result &options)
 {
 	try {
 #if defined(HAVE_DAEMON)
-		if (options.count("-f") == 0 && options.count("--foreground") == 0 && !foreground) {
+		if (options.count("-f") == 0 && options.count("--foreground") == 0 && !foreground)
 			daemon(1, 0);
-		}
 #else
 		if (options.count("-f") > 0 || options.count("--foreground") > 0 || foreground)
 			throw std::runtime_error("foreground option not supported on this platform");
@@ -233,19 +232,16 @@ void load(const Config &config, const parser::Result &options)
 	loadForeground(config.isForeground(), options);
 
 	// [transport]
-	for (const auto &transport : config.loadTransports()) {
+	for (const auto &transport : config.loadTransports())
 		instance->transportService().add(transport);
-	}
 
 	// [server] section.
-	for (const auto &server : config.loadServers()) {
+	for (const auto &server : config.loadServers())
 		instance->serverService().add(server);
-	}
 
 	// [rule] section.
-	for (const auto &rule : config.loadRules()) {
+	for (const auto &rule : config.loadRules())
 		instance->ruleService().add(rule);
-	}
 
 	// [plugin] section.
 	config.loadPlugins(*instance);

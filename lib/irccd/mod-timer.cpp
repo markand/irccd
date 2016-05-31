@@ -21,6 +21,7 @@
 #include "irccd.hpp"
 #include "logger.hpp"
 #include "mod-timer.hpp"
+#include "mod-plugin.hpp"
 #include "plugin-js.hpp"
 #include "timer.hpp"
 
@@ -28,27 +29,41 @@ using namespace fmt::literals;
 
 namespace irccd {
 
+namespace {
+
+const std::string Signature{"\xff""\xff""irccd-timer-ptr"};
+const std::string CallbackTable{"\xff""\xff""irccd-timer-callbacks"};
+
+} // !namespace
+
 namespace duk {
 
 template <>
-class TypeTraits<Timer> {
+class TypeTraits<std::shared_ptr<Timer>> {
 public:
-	static std::string name() noexcept
+	static inline void construct(duk::Context *ctx, std::shared_ptr<Timer> timer)
 	{
-		return "\xff""\xff""Timer";
+		duk::StackAssert sa(ctx);
+
+		duk::push(ctx, duk::This());
+		duk::putProperty<void *>(ctx, -1, Signature, new std::shared_ptr<Timer>(std::move(timer)));
+		duk::pop(ctx);
 	}
 
-	static std::vector<std::string> inherits()
+	static inline std::shared_ptr<Timer> require(duk::Context *ctx, duk::Index index)
 	{
-		return {};
+		auto ptr = static_cast<std::shared_ptr<Timer> *>(duk::getProperty<void *>(ctx, index, Signature));
+
+		if (!ptr)
+			duk::raise(ctx, DUK_ERR_TYPE_ERROR, "not a Timer object");
+
+		return *ptr;
 	}
 };
 
 } // !duk
 
 namespace {
-
-const std::string CallbackTable{"\xff""\xff""irccd-timer-callbacks"};
 
 void handleSignal(std::weak_ptr<JsPlugin> ptr, std::string key)
 {
@@ -57,7 +72,7 @@ void handleSignal(std::weak_ptr<JsPlugin> ptr, std::string key)
 	if (!plugin)
 		return;
 
-	auto irccd = duk::getGlobal<duk::RawPointer<Irccd>>(plugin->context(), "\xff""\xff""irccd");
+	auto irccd = duk::getGlobal<Irccd *>(plugin->context(), "\xff""\xff""irccd");
 
 	irccd->post([plugin, key] (Irccd &) {
 		duk::StackAssert sa(plugin->context());
@@ -68,9 +83,9 @@ void handleSignal(std::weak_ptr<JsPlugin> ptr, std::string key)
 
 		if (duk::is<duk::Function>(plugin->context(), -1)) {
 			if (duk::pcall(plugin->context()) != 0)
-				log::warning("plugin {}: {}"_format(plugin->name(), duk::error(plugin->context(), -1).stack));
-
-			duk::pop(plugin->context());
+				log::warning("plugin {}: {}"_format(plugin->name(), duk::exception(plugin->context(), -1).stack));
+			else
+				duk::pop(plugin->context());
 		} else
 			duk::pop(plugin->context());
 	});
@@ -82,9 +97,9 @@ void handleSignal(std::weak_ptr<JsPlugin> ptr, std::string key)
  *
  * Start the timer. If the timer is already started the method is a no-op.
  */
-duk::Ret start(duk::ContextPtr ctx)
+duk::Ret start(duk::Context *ctx)
 {
-	auto timer = duk::self<duk::Shared<Timer>>(ctx);
+	auto timer = duk::self<std::shared_ptr<Timer>>(ctx);
 
 	if (!timer->isRunning())
 		timer->start();
@@ -98,9 +113,9 @@ duk::Ret start(duk::ContextPtr ctx)
  *
  * Stop the timer.
  */
-duk::Ret stop(duk::ContextPtr ctx)
+duk::Ret stop(duk::Context *ctx)
 {
-	auto timer = duk::self<duk::Shared<Timer>>(ctx);
+	auto timer = duk::self<std::shared_ptr<Timer>>(ctx);
 
 	if (timer->isRunning())
 		timer->stop();
@@ -124,7 +139,7 @@ const duk::FunctionMap methods{
  *   - delay, the interval in milliseconds,
  *   - callback, the function to call.
  */
-duk::Ret constructor(duk::ContextPtr ctx)
+duk::Ret constructor(duk::Context *ctx)
 {
 	// Check parameters.
 	auto type = duk::require<int>(ctx, 0);
@@ -139,19 +154,20 @@ duk::Ret constructor(duk::ContextPtr ctx)
 
 	// Construct the timer in 'this'.
 	auto timer = std::make_shared<Timer>(static_cast<TimerType>(type), delay);
-	auto plugin = std::static_pointer_cast<JsPlugin>(duk::getGlobal<duk::RawPointer<Plugin>>(ctx, "\xff""\xff""plugin")->shared_from_this());
+	auto plugin = duk::TypeTraits<std::shared_ptr<JsPlugin>>::get(ctx);
 	auto hash = std::to_string(reinterpret_cast<std::uintptr_t>(timer.get()));
 
 	timer->onSignal.connect(std::bind(handleSignal, std::weak_ptr<JsPlugin>(plugin), hash));
 
 	// Set a finalizer that closes the timer.
-	duk::construct(ctx, duk::Shared<Timer>{timer});
+	duk::construct(ctx, std::shared_ptr<Timer>(std::move(timer)));
 	duk::push(ctx, duk::This());
 	duk::putProperty(ctx, -1, "\xff""\xff""timer-key", hash);
-	duk::push(ctx, duk::Function{[] (duk::ContextPtr ctx) -> duk::Ret {
+	duk::push(ctx, duk::Function{[] (duk::Context *ctx) -> duk::Ret {
 		duk::StackAssert sa(ctx);
 
-		duk::get<duk::Shared<Timer>>(ctx, 0)->stop();
+		duk::require<std::shared_ptr<Timer>>(ctx, 0)->stop();
+		delete static_cast<std::shared_ptr<Timer> *>(duk::getProperty<void *>(ctx, 0, Signature));
 		duk::getGlobal<void>(ctx, CallbackTable);
 		duk::deleteProperty(ctx, -1, duk::getProperty<std::string>(ctx, 0, "\xff""\xff""timer-key"));
 		duk::pop(ctx);
@@ -188,9 +204,9 @@ void TimerModule::load(Irccd &, JsPlugin &plugin)
 
 	duk::getGlobal<void>(plugin.context(), "Irccd");
 	duk::push(plugin.context(), duk::Function{constructor, 3});
-	duk::push(plugin.context(), constants);
+	duk::put(plugin.context(), constants);
 	duk::push(plugin.context(), duk::Object{});
-	duk::push(plugin.context(), methods);
+	duk::put(plugin.context(), methods);
 	duk::putProperty(plugin.context(), -2, "prototype");
 	duk::putProperty(plugin.context(), -2, "Timer");
 	duk::pop(plugin.context());

@@ -34,7 +34,7 @@ SystemError::SystemError(int e, std::string message)
 {
 }
 
-void SystemError::raise(duk::ContextPtr ctx) const
+void SystemError::raise(duk::Context *ctx) const
 {
 	duk::StackAssert sa(ctx, 0);
 
@@ -47,7 +47,7 @@ void SystemError::raise(duk::ContextPtr ctx) const
 	duk::raise(ctx);
 }
 
-duk::Ret constructor(duk::ContextPtr ctx)
+duk::Ret constructor(duk::Context *ctx)
 {
 	duk::push(ctx, duk::This{});
 	duk::putProperty(ctx, -1, "errno", duk::require<int>(ctx, 0));
@@ -91,7 +91,7 @@ void IrccdModule::load(Irccd &irccd, JsPlugin &plugin)
 	duk::putGlobal(plugin.context(), "Irccd");
 
 	// Store global instance.
-	duk::putGlobal(plugin.context(), "\xff""\xff""irccd", duk::RawPointer<Irccd>{&irccd});
+	duk::putGlobal(plugin.context(), "\xff""\xff""irccd",&irccd);
 }
 
 } // !irccd

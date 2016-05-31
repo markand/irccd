@@ -25,6 +25,8 @@ namespace irccd {
 
 namespace {
 
+const std::string PluginGlobal{"\xff""\xff""irccd-plugin-ptr"};
+
 /*
  * Wrap function for these functions because they all takes the same arguments.
  *
@@ -33,12 +35,12 @@ namespace {
  * - unload.
  */
 template <typename Func>
-duk::Ret wrap(duk::ContextPtr ctx, int nret, Func &&func)
+duk::Ret wrap(duk::Context *ctx, int nret, Func &&func)
 {
 	std::string name = duk::require<std::string>(ctx, 0);
 
 	try {
-		func(*duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd"), name);
+		func(*duk::getGlobal<Irccd *>(ctx, "\xff""\xff""irccd"), name);
 	} catch (const std::out_of_range &ex) {
 		duk::raise(ctx, duk::ReferenceError(ex.what()));
 	} catch (const std::exception &ex) {
@@ -67,14 +69,14 @@ duk::Ret wrap(duk::ContextPtr ctx, int nret, Func &&func)
  * Returns:
  *   The plugin information or undefined if the plugin was not found.
  */
-duk::Ret info(duk::ContextPtr ctx)
+duk::Ret info(duk::Context *ctx)
 {
 	Plugin *plugin = nullptr;
 
 	if (duk::top(ctx) >= 1)
-		plugin = duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->pluginService().get(duk::require<std::string>(ctx, 0)).get();
+		plugin = duk::getGlobal<Irccd *>(ctx, "\xff""\xff""irccd")->pluginService().get(duk::require<std::string>(ctx, 0)).get();
 	else
-		plugin = duk::getGlobal<duk::RawPointer<Plugin>>(ctx, "\xff""\xff""plugin");
+		plugin = duk::getGlobal<Plugin *>(ctx, "\xff""\xff""plugin");
 
 	if (!plugin)
 		return 0;
@@ -98,12 +100,12 @@ duk::Ret info(duk::ContextPtr ctx)
  * Returns:
  *   The list of all plugin names.
  */
-duk::Ret list(duk::ContextPtr ctx)
+duk::Ret list(duk::Context *ctx)
 {
 	duk::push(ctx, duk::Array{});
 
 	int i = 0;
-	for (const auto &plugin : duk::getGlobal<duk::RawPointer<Irccd>>(ctx, "\xff""\xff""irccd")->pluginService().plugins())
+	for (const auto &plugin : duk::getGlobal<Irccd *>(ctx, "\xff""\xff""irccd")->pluginService().plugins())
 		duk::putProperty(ctx, -1, i++, plugin->name());
 
 	return 1;
@@ -121,7 +123,7 @@ duk::Ret list(duk::ContextPtr ctx)
  *   - Error on errors,
  *   - ReferenceError if the plugin was not found.
  */
-duk::Ret load(duk::ContextPtr ctx)
+duk::Ret load(duk::Context *ctx)
 {
 	return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
 		irccd.pluginService().load(name);
@@ -140,7 +142,7 @@ duk::Ret load(duk::ContextPtr ctx)
  *   - Error on errors,
  *   - ReferenceError if the plugin was not found.
  */
-duk::Ret reload(duk::ContextPtr ctx)
+duk::Ret reload(duk::Context *ctx)
 {
 	return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
 		irccd.pluginService().reload(name);
@@ -159,7 +161,7 @@ duk::Ret reload(duk::ContextPtr ctx)
  *   - Error on errors,
  *   - ReferenceError if the plugin was not found.
  */
-duk::Ret unload(duk::ContextPtr ctx)
+duk::Ret unload(duk::Context *ctx)
 {
 	return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
 		irccd.pluginService().unload(name);
@@ -176,6 +178,15 @@ const duk::FunctionMap functions{
 
 } // !namespace
 
+namespace duk {
+
+std::shared_ptr<JsPlugin> TypeTraits<std::shared_ptr<JsPlugin>>::get(duk::Context *ctx)
+{
+	return std::static_pointer_cast<JsPlugin>(static_cast<Plugin *>(duk::getGlobal<void *>(ctx, PluginGlobal))->shared_from_this());
+}
+
+} // !duk
+
 PluginModule::PluginModule() noexcept
 	: Module("Irccd.Plugin")
 {
@@ -185,9 +196,10 @@ void PluginModule::load(Irccd &, JsPlugin &plugin)
 {
 	duk::StackAssert sa(plugin.context());
 
+	duk::putGlobal<void *>(plugin.context(), PluginGlobal, &plugin);
 	duk::getGlobal<void>(plugin.context(), "Irccd");
 	duk::push(plugin.context(), duk::Object{});
-	duk::push(plugin.context(), functions);
+	duk::put(plugin.context(), functions);
 	duk::push(plugin.context(), duk::Object{});
 	duk::putProperty(plugin.context(), -2, "config");
 	duk::push(plugin.context(), duk::Object{});

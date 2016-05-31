@@ -22,6 +22,7 @@
 /**
  * \file js.hpp
  * \brief Bring JavaScript using Duktape.
+ * \author David Demelier <markand@malikania.fr>
  *
  * This file provides usual Duktape function renamed and placed into `duk` namespace. It also replaces error
  * code with exceptions when possible.
@@ -29,7 +30,435 @@
  * For convenience, this file also provides templated functions, overloads and much more.
  */
 
+/**
+ * \page js JavaScript binding
+ * \brief JavaScript binding using Duktape
+ *
+ * This page will show you how to setup this module to host JavaScript environment into your C++ application.
+ *
+ * ## Duktape
+ *
+ * Duktape is a C library designed for performance, small footprint and conformance. This wrapper is built top of it and
+ * requires it at build and runtime.
+ *
+ * It is highly recommended that you read the [Duktape guide](http://duktape.org/guide.html) before continuing because
+ * a lot of concepts are kept as-is.
+ *
+ * ## Installation
+ *
+ * You need the Duktape source amalgamation, it is provided with this module.
+ *
+ * When compiling, be sure to enable `-DDUK_OPT_CPP_EXCEPTIONS` and that Duktape source file has **cpp** extension.
+ *
+ * Just copy the **js.hpp** file and include it into your project. The header depends on **duktape.h** so be sure to
+ * provide it when compiling.
+ *
+ *   - \subpage js-init
+ *   - \subpage js-types
+ *   - \subpage js-basics
+ *   - \subpage js-more
+ */
+
+/**
+ * \page js-init Initialization
+ * \brief Context initialization.
+ *
+ * To host JavaScript, you need a context. Usually one is sufficient but you can create as many as you want but they
+ * won't share any resource.
+ *
+ * \code
+ * #include "js.hpp"
+ *
+ * int main()
+ * {
+ *   duk::UniqueContext ctx;
+ *
+ *   return 0;
+ * }
+ * \endcode
+ *
+ * The duk::UniqueContext class is a RAII based wrapper around the native duk_context structure. It is automatically created and closed
+ * in the destructor.
+ *
+ * Be sure to not keep any pointer to it.
+ */
+
+/**
+ * \page js-types Predefined types
+ * \brief Default duk::TypeTraits specializations
+ *
+ * The following specializations are provided with libjs.
+ *
+ * ## Primitive types
+ *
+ * | Type           | Support                          | Remarks                               |
+ * |----------------|----------------------------------|---------------------------------------|
+ * | `int`          | get, is, optional, push, require |                                       |
+ * | `bool`         | get, is, optional, push, require |                                       |
+ * | `double`       | get, is, optional, push, require |                                       |
+ * | `std::string`  | get, is, optional, push, require | can contain '\0' and binary data      |
+ * | `const char *` | get, is, optional, push, require |                                       |
+ * | `unsigned`     | get, is, optional, push, require |                                       |
+ * | T *            | get, is, optional, push, require | raw pointer, never deleted by Duktape |
+ *
+ * ## Special JavaScript types
+ *
+ * The following types are used to create or inspect JavaScript types.
+ *
+ * | Type             | Support  | Remarks                                |
+ * |------------------|----------|----------------------------------------|
+ * | duk::Array       | is, push |                                        |
+ * | duk::Function    | is, push | is just check if the value is callable |
+ * | duk::FunctionMap | put      |                                        |
+ * | duk::Global      | push     |                                        |
+ * | duk::Null        | is, push |                                        |
+ * | duk::Object      | is, push |                                        |
+ * | duk::This        | push     |                                        |
+ * | duk::Undefined   | is, push |                                        |
+ *
+ * ## Partial specializations
+ *
+ * These partial specializations will use complete specialization for T.
+ *
+ * | Type                               | Support   | Remarks                |
+ * |------------------------------------|-----------|------------------------|
+ * | std::unordered_map<std::string, T> | push, put | push or put properties |
+ * | std::vector<T>                     | push, put | push array of values   |
+ */
+
+/**
+ * \page js-basics Basics
+ * \brief Basics use case.
+ *
+ * The following topics are sample use case of the C++ front end. It does not use extended features that this module
+ * provides.
+ *
+ *   - \subpage js-basics-t1
+ *   - \subpage js-basics-t2
+ *   - \subpage js-basics-t3
+ */
+
+/**
+ * \page js-basics-t1 Example 1: call JavaScript code from C++
+ * \brief Evaluate JavaScript code from C++.
+ *
+ * Let use JavaScript to compute a simple expression.
+ *
+ * \code
+ * #include "js.hpp"
+ *
+ * int main()
+ * {
+ *   duk::UniqueContext ctx;
+ *
+ *   duk::pevalString(ctx, "1 + 1");
+ *   std::cout << duk::get<int>(ctx -1) << std::endl;
+ *
+ *   return 0;
+ * }
+ * \endcode
+ */
+
+/**
+ * \page js-basics-t2 Example 2: call C++ code from JavaScript
+ * \brief Evaluate a function from JavaScript.
+ *
+ * In that example, we will add a C++ function to JavaScript and call it from the script. The function just compute the
+ * two arguments that are passed through the function and return the result.
+ *
+ * We take the benefits of C++11 to map the function. The lambda can not have a capture because Duktape use raw C
+ * function pointers and this module keep them.
+ *
+ * \code
+ * #include "js.hpp"
+ *
+ * int main()
+ * {
+ *   duk::UniqueContext ctx;
+ *
+ *   // Push a function as global "add"
+ *   duk::putGlobal(ctx, "add", duk::Function{[] (duk::Context *ctx) -> duk::Ret {
+ *     int x = duk::require<int>(ctx, 0);
+ *     int y = duk::require<int>(ctx, 1);
+ *
+ *     duk::push(ctx, x + y);
+ *
+ *     return 1;
+ *   }, 2});
+ *
+ *   // Evaluate from JavaScript
+ *   duk::pevalString(ctx, "add(1, 2)");
+ *
+ *   return 0;
+ * }
+ * \endcode
+ *
+ * Please note the **2** at end of lambda which indicates that the function takes 2 arguments. If number of arguments
+ * is variadic, pass DUK_VARARGS there.
+ */
+
+/**
+ * \page js-basics-t3 Example 3: pushing and getting values
+ * \brief Manage values between JavaScript and C++.
+ *
+ * As you have seen in the previous examples, we were pushing some values to the Duktape context.
+ *
+ * With the C Duktape frontend, you usually use duk_push_int, duk_push_string and all other related functions. The libjs
+ * module provides an uniform and convenient way for sharing values with the same functions.
+ *
+ * See the description of duk::TypeTraits to see the supported types.
+ *
+ * ## Push
+ *
+ * The duk::push function is a template that accept most of the primitives types. It uses the specializations of the
+ * duk::TypeTraits class (described later).
+ *
+ * Example of code
+ *
+ * \code
+ * duk::push(ctx, 123); // an integer
+ * duk::push(ctx, true); // a boolean
+ * \endcode
+ *
+ * The push function add a new value to the stack for any specialization of TypeTraits provided by libjs.
+ *
+ * ## Get
+ *
+ * The duk::get function is similar to duk_get_ functions. It usually does not check the value and return a sane default
+ * value.
+ *
+ * This template function does not take the template argument so it can't be deduced and must be specified explicitly.
+ *
+ * \code
+ * duk::get<int>(ctx, 0) // get an int at index 0
+ * duk::get<std::string>(ctx, 1) // get a std::string at index 1
+ * \endcode
+ *
+ * ## Require
+ *
+ * The duk::require function is similar to duk_require functions. It requires the exact type at the given index. If the
+ * value is invalid a JavaScript error is propagated.
+ *
+ * \code
+ * duk::require<int>(ctx, 0) // require an int at index 0 or raise an error
+ * \endcode
+ *
+ * ## Put
+ *
+ * This special function is similar to push except that it applies to the existing object at the top of the stack. It
+ * is usually implemented for map and vector.
+ *
+ * \code
+ * // Fill the object at the top of the stack with this map
+ * std:unordered_map<std::string, int> map{
+ *   { "value1", 1 },
+ *   { "value2", 2 }
+ * };
+ *
+ * duk::put(ctx, map);
+ * \endcode
+ *
+ * ## Is
+ *
+ * This function duk::is checks if the value at the given index is of the given type and return true.
+ *
+ * Just like duk::get, this function need the explicit template parameter.
+ *
+ * \code
+ * duk::push(ctx, 1);
+ * duk::is<int>(ctx, -1); // true
+ * \endcode
+ *
+ * ## Optional
+ *
+ * The duk::optional function has no equivalent in Duktape C API. It is a convenient way to get values with a default
+ * replacement is not available.
+ *
+ * The common implementation uses duk::is and then duk::get.
+ *
+ * \code
+ * duk::optional<int>(ctx, -1, 123); // 123 is -1 has no value or is not an int
+ * \endcode
+ */
+
+/**
+ * \page js-more Extensions and advanced features.
+ * \brief Evolved extensions provided by libjs.
+ *
+ * The following topics are provided by libjs and have no equivalent in Duktape C API.
+ *
+ * \subpage js-more-t1
+ */
+
+/**
+ * \page js-more-t1 Advanced 1: adding your own types to TypeTraits
+ * \brief How to specialize duk::TypeTraits structure.
+ *
+ * This topic shows how you can specialize the duk::TypeTraits structure to add more types.
+ *
+ * Specializing the duk::TypeTraits is usually only needed when you want to convert a C++ object into JavaScript.
+ *
+ * In this example we will convert a C++ small structure containing two integers to JavaScript.
+ *
+ * \note It is not required to implement all functions from duk::TypeTraits. Just provide which one you need.
+ *
+ * ## The C++ structure
+ *
+ * The point does not have any methods, it just a description of two integers.
+ *
+ * \code
+ * struct Point {
+ *   int x;
+ *   int y;
+ * };
+ * \endcode
+ *
+ * ## The push function
+ *
+ * Let's add a push function that will create a JavaScript object with **x** and **y** properties.
+ *
+ * \code
+ * namespace duk {
+ *
+ * template <>
+ * class TypeTraits<Point> {
+ * public:
+ *   static void push(Context *ctx, const Point &point)
+ *   {
+ *     // Create an object
+ *     push(ctx, Object());
+ *
+ *     // Set x
+ *     putProperty(ctx, -1, "x", point.x);
+ *
+ *     // Set y
+ *     putProperty(ctx, -1, "y", point.y);
+ *   }
+ * };
+ *
+ * }
+ * \endcode
+ *
+ * You can safely use different type of reference as second argument.
+ *
+ * That's it, you can now safely invoke `duk::push(ctx, Point{100, 200});`.
+ *
+ * ## The get function
+ *
+ * The get function usually return a new object. The recommandation is to provide sane defaults except if you have any
+ * reason to not do so.
+ *
+ * \code
+ * namespace duk {
+ *
+ * template <>
+ * class TypeTraits<Point> {
+ * public:
+ *   static Point get(Context *ctx, Index index)
+ *   {
+ *     Point point{0, 0};
+ *
+ *     if (is<Object>(ctx, index)) {
+ *       point.x = getProperty<int>(ctx, index, "x");
+ *       point.y = getProperty<int>(ctx, index, "y");
+ *     }
+ *
+ *     return point;
+ *   }
+ * };
+ *
+ * }
+ * \endcode
+ *
+ * Now you can invoke `duk::get<Point>(ctx, 0)` to convert a JavaScript object to the Point structure.
+ *
+ * ## The require function
+ *
+ * The require function has the same signature as get. It's up to you to decide which criterias makes the object not
+ * suitable for conversion.
+ *
+ * In that example, we will require that object at the index is a JavaScript object and that **x**, **y** are present.
+ *
+ * \code
+ * namespace duk {
+ *
+ * template <>
+ * class TypeTraits<Point> {
+ * public:
+ *   static Point require(Context *ctx, Index index)
+ *   {
+ *     Point point;
+ *
+ *     // Raise an error if not object
+ *     if (!is<Object>(ctx, index))
+ *       duk::raise(ctx, TypeError("object required"));
+ *
+ *     // Get x, for simplicity we just check that x and y exist.
+ *     if (!hasProperty(ctx, index, "x"))
+ *       duk::raise(ctx, TypeError("property x missing"));
+ *
+ *     // Get y
+ *     if (!hasProperty(ctx, index, "y"))
+ *       duk::raise(ctx, TypeError("property y missing"));
+ *
+ *     // Note: if you need more security, check that types are integers too.
+ *     point.x = duk::getProperty<int>(ctx, index, "x");
+ *     point.y = duk::getProperty<int>(ctx, index, "y");
+ *
+ *     return point;
+ *   }
+ * };
+ *
+ * }
+ * \endcode
+ *
+ * ## The is function
+ *
+ * The is function returns a boolean. Again, you decide when the value is appropriate.
+ *
+ * \code
+ *
+ * namespace duk {
+ *
+ * template <>
+ * class TypeTraits<Point> {
+ * public:
+ *   static bool is(Context *ctx, Index index)
+ *   {
+ *     return is<Object>(ctx, index) && hasProperty(ctx, index, "x") && hasProperty(ctx, index, "y");
+ *   }
+ * };
+ *
+ * }
+ *
+ * \endcode
+ *
+ * ## The optional function
+ *
+ * The optional function is like get, you should return a value when it is appropriate for conversion. The
+ * recommandation is to return the default value **only if** there is no value at the given index or it it not
+ * the correct type.
+ *
+ * Usual implementation looks like this:
+ *
+ * \code
+ * namespace duk {
+ *
+ * template <>
+ * class TypeTraits<Point> {
+ * public:
+ *   static Point optional(Context *ctx, Index index, Point def)
+ *   {
+ *     return is(ctx, index) ? get(ctx, index) : def;
+ *   }
+ * };
+ *
+ * }
+ * \endcode
+ */
+
 #include <cassert>
+#include <cstdio>
 #include <functional>
 #include <memory>
 #include <string>
@@ -47,13 +476,40 @@ namespace irccd {
  */
 namespace duk {
 
-class Context;
+/**
+ * \brief Typedef without pointer.
+ */
+using Context = ::duk_context;
 
-using CodePoint = duk_codepoint_t;
-using ContextPtr = duk_context *;
-using Index = duk_idx_t;
-using Ret = duk_ret_t;
-using Size = duk_size_t;
+/**
+ * \brief Typedef for duk_double_t.
+ */
+using Double = ::duk_double_t;
+
+/**
+ * \brief Typedef for duk_idx_t.
+ */
+using Index = ::duk_idx_t;
+
+/**
+ * \brief Typedef for duk_ret_t.
+ */
+using Ret = ::duk_ret_t;
+
+/**
+ * \brief Typedef for duk_size_t.
+ */
+using Size = ::duk_size_t;
+
+/**
+ * \brief Typedef for duk_int_t.
+ */
+using Int = ::duk_int_t;
+
+/**
+ * \brief Typedef for duk_uint_t;
+ */
+using Uint = ::duk_uint_t;
 
 /**
  * \class StackAssert
@@ -69,7 +525,7 @@ using Size = duk_size_t;
 class StackAssert {
 #if !defined(NDEBUG)
 private:
-	ContextPtr m_context;
+	Context *m_context;
 	unsigned m_expected;
 	unsigned m_begin;
 #endif
@@ -83,7 +539,7 @@ public:
 	 * \param ctx the context
 	 * \param expected the size expected relative to the already existing values
 	 */
-	inline StackAssert(ContextPtr ctx, unsigned expected = 0) noexcept
+	inline StackAssert(Context *ctx, unsigned expected = 0) noexcept
 #if !defined(NDEBUG)
 		: m_context(ctx)
 		, m_expected(expected)
@@ -104,103 +560,126 @@ public:
 	inline ~StackAssert() noexcept
 	{
 #if !defined(NDEBUG)
-		assert((unsigned)duk_get_top(m_context) - m_begin == m_expected);
+		if (static_cast<unsigned>(duk_get_top(m_context)) - m_begin != m_expected) {
+			std::fprintf(stderr, "Corrupt stack detection in StackAssert:\n");
+			std::fprintf(stderr, "  Size at start:            %u\n", m_begin);
+			std::fprintf(stderr, "  Size at end:              %d\n", duk_get_top(m_context));
+			std::fprintf(stderr, "  Expected (user):          %u\n", m_expected);
+			std::fprintf(stderr, "  Expected (adjusted):      %u\n", m_expected + m_begin);
+			std::fprintf(stderr, "  Number of stale values:   %u\n", duk_get_top(m_context) - m_begin - m_expected);
+			std::abort();
+		}
 #endif
 	}
 };
 
 /**
+ * \class TypeTraits
+ * \brief Type information to implement new types in JavaScript's context.
+ *
+ * %This class depending on your needs may have the following functions:
+ *
+ * ## Construct
+ *
+ * Used by duk::construct, the function must place the value as this binding when the Duktape C function is
+ * new-constructed.
+ *
+ * \code
+ * static void construct(Context *ctx, Type value);
+ * \endcode
+ *
+ * ## Get
+ *
+ * Convert the value at the given index and return it. Should return default object if value is invalid.
+ *
+ * \code
+ * static Type get(Context *ctx, int index);
+ * \endcode
+ *
+ * ## Is
+ *
+ * Tells if the value at given index is of the requested type.
+ *
+ * \code
+ * static bool is(Context *ctx, int index);
+ * \endcode
+ *
+ * ## Optional
+ *
+ * Get the value at the given index or return the defaultValue.
+ *
+ * \code
+ * static Type optional(Context *ctx, int index, Type defaultValue);
+ * \endcode
+ *
+ * ## Push
+ *
+ * Push the value into the stack.
+ *
+ * \code
+ * static void push(Context *ctx, Type value);
+ * \endcode
+ *
+ * ## Put
+ *
+ * Apply the value to the object at the top of the stack.
+ *
+ * \code
+ * static void put(Context *ctx, Type value);
+ * \endcode
+ *
+ * ## Require
+ *
+ * Require a value at the given index.
+ *
+ * \code
+ * static Type require(Context *ctx, int index);
+ * \endcode
+ *
+ */
+template <typename Type>
+class TypeTraits;
+
+/**
  * \class Object
- * \brief Empty class tag for push() function.
+ * \brief Special type for duk::TypeTraits.
  */
 class Object {
 };
 
 /**
  * \class Array
- * \brief Empty class tag for push() function.
+ * \brief Special type for duk::TypeTraits.
  */
 class Array {
 };
 
 /**
  * \class Global
- * \brief Empty class tag to push the global object.
+ * \brief Special type for duk::TypeTraits.
  */
 class Global {
 };
 
 /**
  * \class Undefined
- * \brief Empty class tag to push undefined to the stack.
+ * \brief Special type for duk::TypeTraits.
  */
 class Undefined {
 };
 
 /**
  * \class Null
- * \brief Empty class tag to push null to the stack.
+ * \brief Special type for duk::TypeTraits.
  */
 class Null {
 };
 
 /**
  * \class This
- * \brief Empty class tag to push this binding to the stack.
+ * \brief Special type for duk::TypeTraits.
  */
 class This {
-};
-
-/**
- * \class RawPointer
- * \brief Push a non-managed pointer to Duktape, the pointer will never be deleted.
- * \note For a managed pointer with prototype, see Pointer
- */
-template <typename T>
-class RawPointer {
-public:
-	/**
-	 * The pointer to push.
-	 */
-	T *object;
-};
-
-/**
- * \brief Manage shared_ptr from C++ and JavaScript
- *
- * This class allowed you to push and retrieve shared_ptr from C++ and JavaScript without taking care of ownership
- * and deletion.
- *
- */
-template <typename T>
-class Shared {
-public:
-	/**
-	 * The shared object.
-	 */
-	std::shared_ptr<T> object;
-};
-
-/**
- * \brief Manage pointers from C++ and JavaScript
- *
- * This class allowed you to push and retrieve C++ pointers from C++ and JavaScript. The object will be deleted when
- * the JavaScript garbage collectors collect them so never store a pointer created with this.
- *
- * The only requirement is to have the function `void prototype(Context &ctx)` in your class T.
- */
-template <typename T>
-class Pointer {
-public:
-	/**
-	 * The object.
-	 */
-	T *object{nullptr};
-
-	Pointer(T *o)
-		: object(o)
-	{
-	}
 };
 
 /**
@@ -221,7 +700,13 @@ public:
 	 */
 	duk_idx_t nargs{0};
 
-	Function(duk_c_function f, duk_idx_t n = 0)
+	/**
+	 * Constructor for compatibility.
+	 *
+	 * \param f the function
+	 * \param n the number of arguments
+	 */
+	inline Function(duk_c_function f, duk_idx_t n = 0) noexcept
 		: function(f)
 		, nargs(n)
 	{
@@ -229,23 +714,23 @@ public:
 };
 
 /**
- * Map of functions to set on an object.
+ * \brief Map of functions.
  */
 using FunctionMap = std::unordered_map<std::string, Function>;
 
 /**
- * Map of string to type, ideal for setting constants like enums.
+ * \brief Map of any type.
  */
-template <typename Type>
-using Map = std::unordered_map<std::string, Type>;
+template <typename T>
+using Map = std::unordered_map<std::string, T>;
 
 /**
- * \class ErrorInfo
+ * \class Exception
  * \brief Error description.
  *
  * This class fills the fields got in an Error object.
  */
-class ErrorInfo : public std::exception {
+class Exception : public std::exception {
 public:
 	std::string name;		//!< name of error
 	std::string message;		//!< error message
@@ -265,67 +750,33 @@ public:
 };
 
 /**
- * \class TypeTraits
- * \brief Type information to implement new types in JavaScript's context.
- *
- * This class depending on your needs may have the following functions:
- *
- * - `static void construct(Context &ctx, Type value)`
- * - `static Type get(Context &ctx, int index)`
- * - `static bool is(Context &ctx, int index)`
- * - `static Type optional(Context &ctx, int index, Type defaultValue)`
- * - `static void push(Context &ctx, Type value)`
- * - `static Type require(Context &ctx, int index)`
- *
- * The `construct` function is used in Context::construct to build a new value as this (e.g. constructors).
- *
- * The `get` function is used in Context::get, Context::getProperty, Context::getGlobal to retrieve a value from the
- * stack.
- *
- * The `is` function is used in Context::is to check if the value on the stack is of type `Type`.
- *
- * The `optional` function is used in Context::optional to get a value or a replacement if not applicable.
- *
- * The `push` function is used in Context::push to usually create a new value on the stack but some specializations
- * may not (e.g. FunctionMap).
- *
- * The `require` function is used in Context::require to get a value from the stack or raise a JavaScript exception if
- * not applicable.
- *
- * This class is fully specialized for: `bool`, `const char *`, `double`, `int`, `std::string`.
- *
- * It is also partially specialized for : `Global`, `Object`, `Array`, `Undefined`, `Null`, `std::vector<Type>`.
- */
-template <typename Type>
-class TypeTraits {
-};
-
-/**
- * \class Context
  * \brief RAII based Duktape handler.
  *
  * This class is implicitly convertible to duk_context for convenience.
  */
-class Context {
+class UniqueContext {
 private:
 	using Deleter = void (*)(duk_context *);
 	using Handle = std::unique_ptr<duk_context, Deleter>;
 
 	Handle m_handle;
 
-	Context(const Context &) = delete;
-	Context &operator=(const Context &) = delete;
-	Context(const Context &&) = delete;
-	Context &operator=(const Context &&) = delete;
+	UniqueContext(const UniqueContext &) = delete;
+	UniqueContext &operator=(const UniqueContext &) = delete;
 
 public:
 	/**
 	 * Create default context.
 	 */
-	inline Context()
+	inline UniqueContext()
 		: m_handle(duk_create_heap_default(), duk_destroy_heap)
 	{
 	}
+
+	/**
+	 * Default move constructor.
+	 */
+	UniqueContext(UniqueContext &&) noexcept = default;
 
 	/**
 	 * Convert the context to the native Duktape/C type.
@@ -346,34 +797,48 @@ public:
 	{
 		return m_handle.get();
 	}
+
+	/**
+	 * Default move assignment operator.
+	 *
+	 * \return this
+	 */
+	UniqueContext &operator=(Context &&) noexcept = delete;
 };
 
 /**
- * Get the error object when a JavaScript error has been thrown (e.g. eval failure).
+ * \name Duktape C functions
+ * \brief The following functions are wrappers on top of the Duktape C functions.
+ *
+ * They are as close as possible to the original functions.
+ */
+
+/**
+ * \{
+ */
+
+/**
+ * Wrapper for [duk_allow](http://duktape.org/api.html#duk_allow).
  *
  * \param ctx the context
- * \param index the index
- * \return the information
+ * \param size the requested size
+ * \return the pointer
  */
-inline ErrorInfo error(ContextPtr ctx, int index)
+inline void *alloc(Context *ctx, Size size)
 {
-	ErrorInfo error;
+	return duk_alloc(ctx, size);
+}
 
-	index = duk_normalize_index(ctx, index);
-
-	duk_get_prop_string(ctx, index, "name");
-	error.name = duk_to_string(ctx, -1);
-	duk_get_prop_string(ctx, index, "message");
-	error.message = duk_to_string(ctx, -1);
-	duk_get_prop_string(ctx, index, "fileName");
-	error.fileName = duk_to_string(ctx, -1);
-	duk_get_prop_string(ctx, index, "lineNumber");
-	error.lineNumber = duk_to_int(ctx, -1);
-	duk_get_prop_string(ctx, index, "stack");
-	error.stack = duk_to_string(ctx, -1);
-	duk_pop_n(ctx, 5);
-
-	return error;
+/**
+ * Wrapper for [duk_allow_raw](http://duktape.org/api.html#duk_allow_raw).
+ *
+ * \param ctx the context
+ * \param size the requested size
+ * \return the pointer
+ */
+inline void *allocRaw(Context *ctx, Size size)
+{
+	return duk_alloc_raw(ctx, size);
 }
 
 /**
@@ -382,7 +847,7 @@ inline ErrorInfo error(ContextPtr ctx, int index)
  * \param ctx the context
  * \param index the index
  */
-inline void base64Decode(ContextPtr ctx, Index index)
+inline void base64Decode(Context *ctx, Index index)
 {
 	duk_base64_decode(ctx, index);
 }
@@ -392,10 +857,11 @@ inline void base64Decode(ContextPtr ctx, Index index)
  *
  * \param ctx the context
  * \param index the index
+ * \return the base64 string
  */
-inline void base64Encode(ContextPtr ctx, Index index)
+inline std::string base64Encode(Context *ctx, Index index)
 {
-	duk_base64_encode(ctx, index);
+	return duk_base64_encode(ctx, index);
 }
 
 /**
@@ -404,7 +870,7 @@ inline void base64Encode(ContextPtr ctx, Index index)
  * \param ctx the context
  * \param nargs the number of arguments
  */
-inline void call(ContextPtr ctx, Index nargs = 0)
+inline void call(Context *ctx, Index nargs = 0)
 {
 	duk_call(ctx, nargs);
 }
@@ -415,7 +881,7 @@ inline void call(ContextPtr ctx, Index nargs = 0)
  * \param ctx the context
  * \param nargs the number of arguments
  */
-inline void callMethod(ContextPtr ctx, Index nargs = 0)
+inline void callMethod(Context *ctx, Index nargs = 0)
 {
 	duk_call_method(ctx, nargs);
 }
@@ -427,7 +893,7 @@ inline void callMethod(ContextPtr ctx, Index nargs = 0)
  * \param index the object index
  * \param nargs the number of arguments
  */
-inline void callProperty(ContextPtr ctx, Index index, Index nargs = 0)
+inline void callProperty(Context *ctx, Index index, Index nargs = 0)
 {
 	duk_call_prop(ctx, index, nargs);
 }
@@ -438,8 +904,9 @@ inline void callProperty(ContextPtr ctx, Index index, Index nargs = 0)
  * \param ctx the context
  * \param index the index
  * \param charOffset the offset
+ * \return the code point
  */
-inline CodePoint charCodeAt(ContextPtr ctx, Index index, Size charOffset)
+inline duk_codepoint_t charCodeAt(Context *ctx, Index index, duk_size_t charOffset)
 {
 	return duk_char_code_at(ctx, index, charOffset);
 }
@@ -451,9 +918,9 @@ inline CodePoint charCodeAt(ContextPtr ctx, Index index, Size charOffset)
  * \param extra the extra space
  * \return true if space is available
  */
-inline bool checkStack(ContextPtr ctx, Index extra)
+inline bool checkStack(Context *ctx, Index extra)
 {
-	return duk_check_stack(ctx, extra);
+	return duk_check_stack(ctx, extra) != 0;
 }
 
 /**
@@ -463,9 +930,9 @@ inline bool checkStack(ContextPtr ctx, Index extra)
  * \param top the extra space
  * \return true if space is available
  */
-inline bool checkStackTop(ContextPtr ctx, Index top)
+inline bool checkStackTop(Context *ctx, Index top)
 {
-	return duk_check_stack_top(ctx, top);
+	return duk_check_stack_top(ctx, top) != 0;
 }
 
 /**
@@ -476,9 +943,9 @@ inline bool checkStackTop(ContextPtr ctx, Index top)
  * \param type the desired type
  * \return true if object is given type
  */
-inline bool checkType(ContextPtr ctx, Index index, int type)
+inline bool checkType(Context *ctx, Index index, int type)
 {
-	return duk_check_type(ctx, index, type);
+	return duk_check_type(ctx, index, type) != 0;
 }
 
 /**
@@ -489,9 +956,9 @@ inline bool checkType(ContextPtr ctx, Index index, int type)
  * \param mask the desired mask
  * \return true if object is one of the type
  */
-inline bool checkTypeMask(ContextPtr ctx, Index index, unsigned mask)
+inline bool checkTypeMask(Context *ctx, Index index, unsigned mask)
 {
-	return duk_check_type_mask(ctx, index, mask);
+	return duk_check_type_mask(ctx, index, mask) != 0;
 }
 
 /**
@@ -500,7 +967,7 @@ inline bool checkTypeMask(ContextPtr ctx, Index index, unsigned mask)
  * \param ctx the context
  * \param objIndex the object index
  */
-inline void compact(ContextPtr ctx, Index objIndex)
+inline void compact(Context *ctx, Index objIndex)
 {
 	duk_compact(ctx, objIndex);
 }
@@ -511,7 +978,7 @@ inline void compact(ContextPtr ctx, Index objIndex)
  * \param ctx the context
  * \param count the number of values
  */
-inline void concat(ContextPtr ctx, Index count)
+inline void concat(Context *ctx, Index count)
 {
 	duk_concat(ctx, count);
 }
@@ -519,21 +986,34 @@ inline void concat(ContextPtr ctx, Index count)
 /**
  * Wrapper for [duk_copy](http://duktape.org/api.html#duk_copy).
  *
+ * \param ctx the context
  * \param from the from index
  * \param to the destination
  */
-inline void copy(ContextPtr ctx, Index from, Index to)
+inline void copy(Context *ctx, Index from, Index to)
 {
 	duk_copy(ctx, from, to);
 }
 
 /**
+ * Wrapper for [duk_new](http://duktape.org/api.html#duk_new).
+ *
+ * \param ctx the context
+ * \param nargs the number of arguments
+ */
+inline void create(Context *ctx, int nargs = 0)
+{
+	duk_new(ctx, nargs);
+}
+
+/**
  * Wrapper for [duk_def_prop](http://duktape.org/api.html#duk_def_prop).
  *
+ * \param ctx the context
  * \param index the object index
  * \param flags the flags
  */
-inline void defineProperty(ContextPtr ctx, Index index, unsigned flags)
+inline void defineProperty(Context *ctx, Index index, unsigned flags)
 {
 	duk_def_prop(ctx, index, flags);
 }
@@ -541,44 +1021,48 @@ inline void defineProperty(ContextPtr ctx, Index index, unsigned flags)
 /**
  * Wrapper for [duk_del_prop](http://duktape.org/api.html#duk_del_prop).
  *
+ * \param ctx the context
  * \param index the object index
  * \return true if deleted
  */
-inline bool deleteProperty(ContextPtr ctx, Index index)
+inline bool deleteProperty(Context *ctx, Index index)
 {
-	return duk_del_prop(ctx, index);
+	return duk_del_prop(ctx, index) != 0;
 }
 
 /**
  * Wrapper for [duk_del_prop](http://duktape.org/api.html#duk_del_prop).
  *
+ * \param ctx the context
  * \param index the object index
  * \param position the property index
  * \return true if deleted
  */
-inline bool deleteProperty(ContextPtr ctx, Index index, unsigned position)
+inline bool deleteProperty(Context *ctx, Index index, unsigned position)
 {
-	return duk_del_prop_index(ctx, index, position);
+	return duk_del_prop_index(ctx, index, position) != 0;
 }
 
 /**
  * Wrapper for [duk_del_prop](http://duktape.org/api.html#duk_del_prop).
  *
+ * \param ctx the context
  * \param index the object index
  * \param name the property name
  * \return true if deleted
  */
-inline bool deleteProperty(ContextPtr ctx, Index index, const std::string &name)
+inline bool deleteProperty(Context *ctx, Index index, const std::string &name)
 {
-	return duk_del_prop_string(ctx, index, name.c_str());
+	return duk_del_prop_string(ctx, index, name.c_str()) != 0;
 }
 
 /**
  * Wrapper for [duk_dup](http://duktape.org/api.html#duk_dup).
  *
+ * \param ctx the context
  * \param index the value to copy
  */
-inline void dup(ContextPtr ctx, int index = -1)
+inline void dup(Context *ctx, int index = -1)
 {
 	duk_dup(ctx, index);
 }
@@ -591,9 +1075,9 @@ inline void dup(ContextPtr ctx, int index = -1)
  * \param index2 the second value
  * \return true if they equal
  */
-inline bool equals(ContextPtr ctx, Index index1, Index index2)
+inline bool equals(Context *ctx, Index index1, Index index2)
 {
-	return duk_equals(ctx, index1, index2);
+	return duk_equals(ctx, index1, index2) != 0;
 }
 
 /**
@@ -601,7 +1085,7 @@ inline bool equals(ContextPtr ctx, Index index1, Index index2)
  *
  * \param ctx the context
  */
-inline void eval(ContextPtr ctx)
+inline void eval(Context *ctx)
 {
 	duk_eval(ctx);
 }
@@ -613,12 +1097,9 @@ inline void eval(ContextPtr ctx)
  * \param path the path
  * \param result true to get the result at the top of the stack
  */
-inline void evalFile(ContextPtr ctx, const std::string &path, bool result = true)
+inline void evalFile(Context *ctx, const std::string &path, bool result = true)
 {
-	if (result)
-		duk_eval_file(ctx, path.c_str());
-	else
-		duk_eval_file_noresult(ctx, path.c_str());
+	return result ? duk_eval_file(ctx, path.c_str()) : duk_eval_file_noresult(ctx, path.c_str());
 }
 
 /**
@@ -628,12 +1109,9 @@ inline void evalFile(ContextPtr ctx, const std::string &path, bool result = true
  * \param src the source script
  * \param result true to get the result at the top of the stack
  */
-inline void evalString(ContextPtr ctx, const std::string &src, bool result = true)
+inline void evalString(Context *ctx, const std::string &src, bool result = true)
 {
-	if (result)
-		duk_eval_string(ctx, src.c_str());
-	else
-		duk_eval_string_noresult(ctx, src.c_str());
+	return result ? duk_eval_string(ctx, src.c_str()) : duk_eval_string_noresult(ctx, src.c_str());
 }
 /**
  * Wrapper for [duk_gc](http://duktape.org/api.html#duk_gc).
@@ -641,7 +1119,7 @@ inline void evalString(ContextPtr ctx, const std::string &src, bool result = tru
  * \param ctx the context
  * \param flags the flags
  */
-inline void gc(ContextPtr ctx, unsigned flags = 0)
+inline void gc(Context *ctx, unsigned flags = 0)
 {
 	duk_gc(ctx, flags);
 }
@@ -653,9 +1131,9 @@ inline void gc(ContextPtr ctx, unsigned flags = 0)
  * \param index the object index
  * \return true if has
  */
-inline bool hasProperty(ContextPtr ctx, Index index)
+inline bool hasProperty(Context *ctx, Index index)
 {
-	return duk_has_prop(ctx, index);
+	return duk_has_prop(ctx, index) != 0;
 }
 
 /**
@@ -666,9 +1144,9 @@ inline bool hasProperty(ContextPtr ctx, Index index)
  * \param position the property index
  * \return true if has
  */
-inline bool hasProperty(ContextPtr ctx, Index index, unsigned position)
+inline bool hasProperty(Context *ctx, Index index, unsigned position)
 {
-	return duk_has_prop_index(ctx, index, position);
+	return duk_has_prop_index(ctx, index, position) != 0;
 }
 
 /**
@@ -679,9 +1157,9 @@ inline bool hasProperty(ContextPtr ctx, Index index, unsigned position)
  * \param name the property name
  * \return true if has
  */
-inline bool hasProperty(ContextPtr ctx, int index, const std::string &name)
+inline bool hasProperty(Context *ctx, int index, const std::string &name)
 {
-	return duk_has_prop_string(ctx, index, name.c_str());
+	return duk_has_prop_string(ctx, index, name.c_str()) != 0;
 }
 
 /**
@@ -691,7 +1169,7 @@ inline bool hasProperty(ContextPtr ctx, int index, const std::string &name)
  * \param to the destination
  * \note Wrapper of duk_insert
  */
-inline void insert(ContextPtr ctx, Index to)
+inline void insert(Context *ctx, Index to)
 {
 	duk_insert(ctx, to);
 }
@@ -704,9 +1182,20 @@ inline void insert(ContextPtr ctx, Index to)
  * \param idx2 the instance requested
  * \return true if idx1 is instance of idx2
  */
-inline bool instanceof(ContextPtr ctx, Index idx1, Index idx2)
+inline bool instanceof(Context *ctx, Index idx1, Index idx2)
 {
-	return duk_instanceof(ctx, idx1, idx2);
+	return duk_instanceof(ctx, idx1, idx2) != 0;
+}
+
+/**
+ * Wrapper for [duk_is_constructor_call](http://duktape.org/api.html#duk_is_constructor_call).
+ *
+ * \param ctx the context
+ * \return true if it's a constructor call (new operator)
+ */
+inline bool isConstructorCall(Context *ctx)
+{
+	return duk_is_constructor_call(ctx) != 0;
 }
 
 /**
@@ -715,7 +1204,7 @@ inline bool instanceof(ContextPtr ctx, Index idx1, Index idx2)
  * \param ctx the context
  * \param count the number of values
  */
-inline void join(ContextPtr ctx, Index count)
+inline void join(Context *ctx, Index count)
 {
 	duk_join(ctx, count);
 }
@@ -726,7 +1215,7 @@ inline void join(ContextPtr ctx, Index count)
  * \param ctx the context
  * \param index the index
  */
-inline void jsonDecode(ContextPtr ctx, Index index)
+inline void jsonDecode(Context *ctx, Index index)
 {
 	duk_json_decode(ctx, index);
 }
@@ -736,10 +1225,11 @@ inline void jsonDecode(ContextPtr ctx, Index index)
  *
  * \param ctx the context
  * \param index the index
+ * \return the JSON string
  */
-inline void jsonEncode(ContextPtr ctx, Index index)
+inline std::string jsonEncode(Context *ctx, Index index)
 {
-	duk_json_encode(ctx, index);
+	return duk_json_encode(ctx, index);
 }
 
 /**
@@ -747,8 +1237,9 @@ inline void jsonEncode(ContextPtr ctx, Index index)
  *
  * \param ctx the context
  * \param index the index
+ * \return the absolute index
  */
-inline Index normalizeIndex(ContextPtr ctx, Index index)
+inline Index normalizeIndex(Context *ctx, Index index)
 {
 	return duk_normalize_index(ctx, index);
 }
@@ -758,18 +1249,45 @@ inline Index normalizeIndex(ContextPtr ctx, Index index)
  *
  * \param ctx the context
  * \param nargs the number of arguments
+ * \return non zero on failure
  */
-inline int pcall(ContextPtr ctx, Index nargs = 0)
+inline int pcall(Context *ctx, Index nargs = 0)
 {
 	return duk_pcall(ctx, nargs);
+}
+
+/**
+ * Wrapper for [duk_pcall_method](http://duktape.org/api.html#duk_pcall_method).
+ *
+ * \param ctx the context
+ * \param nargs the number of arguments
+ * \return non zero on failure
+ */
+inline int pcallMethod(Context *ctx, Index nargs = 0)
+{
+	return duk_pcall_method(ctx, nargs);
+}
+
+/**
+ * Wrapper for [duk_pcall_prop](http://duktape.org/api.html#duk_pcall_prop).
+ *
+ * \param ctx the context
+ * \param index the object index
+ * \param nargs the number of arguments
+ * \return non zero on failure
+ */
+inline int pcallProperty(Context *ctx, Index index, Index nargs = 0)
+{
+	return duk_pcall_prop(ctx, index, nargs);
 }
 
 /**
  * Wrapper for [duk_peval](http://duktape.org/api.html#duk_peval).
  *
  * \param ctx the context
+ * \return non zero on failure
  */
-inline int peval(ContextPtr ctx)
+inline int peval(Context *ctx)
 {
 	return duk_peval(ctx);
 }
@@ -780,8 +1298,9 @@ inline int peval(ContextPtr ctx)
  * \param ctx the context
  * \param path the path
  * \param result true to get the result at the top of the stack
+ * \return non zero on failure
  */
-inline int pevalFile(ContextPtr ctx, const std::string &path, bool result = true)
+inline int pevalFile(Context *ctx, const std::string &path, bool result = true)
 {
 	return result ? duk_peval_file(ctx, path.c_str()) : duk_peval_file_noresult(ctx, path.c_str());
 }
@@ -792,8 +1311,9 @@ inline int pevalFile(ContextPtr ctx, const std::string &path, bool result = true
  * \param ctx the context
  * \param src the source script
  * \param result true to get the result at the top of the stack
+ * \return non zero on failure
  */
-inline int pevalString(ContextPtr ctx, const std::string &src, bool result = true)
+inline int pevalString(Context *ctx, const std::string &src, bool result = true)
 {
 	return result ? duk_peval_string(ctx, src.c_str()) : duk_peval_string_noresult(ctx, src.c_str());
 }
@@ -804,9 +1324,44 @@ inline int pevalString(ContextPtr ctx, const std::string &src, bool result = tru
  * \param ctx the context
  * \param count the number of values to pop
  */
-inline void pop(ContextPtr ctx, Index count = 1)
+inline void pop(Context *ctx, Index count = 1)
 {
 	duk_pop_n(ctx, count);
+}
+
+/**
+ * Wrapper for [duk_put_prop](http://duktape.org/api.html#duk_put_prop).
+ *
+ * \param ctx the context
+ * \param index the object index
+ */
+inline void putProperty(Context *ctx, Index index)
+{
+	duk_put_prop(ctx, index);
+}
+
+/**
+ * Wrapper for [duk_put_prop_string](http://duktape.org/api.html#duk_put_prop_string).
+ *
+ * \param ctx the context
+ * \param index the object index
+ * \param name the property name
+ */
+inline void putProperty(Context *ctx, Index index, const std::string &name)
+{
+	duk_put_prop_string(ctx, index, name.c_str());
+}
+
+/**
+ * Wrapper for [duk_put_prop_index](http://duktape.org/api.html#duk_put_prop_index).
+ *
+ * \param ctx the context
+ * \param index the object index
+ * \param position the array position
+ */
+inline void putProperty(Context *ctx, Index index, unsigned position)
+{
+	duk_put_prop_index(ctx, index, position);
 }
 
 /**
@@ -815,7 +1370,7 @@ inline void pop(ContextPtr ctx, Index count = 1)
  * \param ctx the context
  * \param index the value to remove
  */
-inline void remove(ContextPtr ctx, Index index)
+inline void remove(Context *ctx, Index index)
 {
 	duk_remove(ctx, index);
 }
@@ -826,7 +1381,7 @@ inline void remove(ContextPtr ctx, Index index)
  * \param ctx the context
  * \param index the value to replace by the value at the top of the stack
  */
-inline void replace(ContextPtr ctx, Index index)
+inline void replace(Context *ctx, Index index)
 {
 	duk_replace(ctx, index);
 }
@@ -835,9 +1390,9 @@ inline void replace(ContextPtr ctx, Index index)
  * Wrapper for [duk_set_finalizer](http://duktape.org/api.html#duk_set_finalizer).
  *
  * \param ctx the context
- * \param index the object index
+ * \param index the value index
  */
-inline void setFinalizer(ContextPtr ctx, Index index)
+inline void setFinalizer(Context *ctx, Index index)
 {
 	duk_set_finalizer(ctx, index);
 }
@@ -848,7 +1403,7 @@ inline void setFinalizer(ContextPtr ctx, Index index)
  * \param ctx the context
  * \param index the value index
  */
-inline void setPrototype(ContextPtr ctx, Index index)
+inline void setPrototype(Context *ctx, Index index)
 {
 	duk_set_prototype(ctx, index);
 }
@@ -860,7 +1415,7 @@ inline void setPrototype(ContextPtr ctx, Index index)
  * \param index1 the first index
  * \param index2 the second index
  */
-inline void swap(ContextPtr ctx, Index index1, Index index2)
+inline void swap(Context *ctx, Index index1, Index index2)
 {
 	duk_swap(ctx, index1, index2);
 }
@@ -871,7 +1426,7 @@ inline void swap(ContextPtr ctx, Index index1, Index index2)
  * \param ctx the context
  * \param index the index
  */
-inline void swapTop(ContextPtr ctx, Index index)
+inline void swapTop(Context *ctx, Index index)
 {
 	duk_swap_top(ctx, index);
 }
@@ -882,50 +1437,127 @@ inline void swapTop(ContextPtr ctx, Index index)
  * \param ctx the context
  * \return the stack size
  */
-inline int top(ContextPtr ctx) noexcept
+inline int top(Context *ctx)
 {
 	return duk_get_top(ctx);
+}
+
+/**
+ * Wrapper for [duk_throw](http://duktape.org/api.html#duk_throw).
+ *
+ * \param ctx the context
+ */
+inline void raise(Context *ctx)
+{
+	duk_throw(ctx);
+}
+
+/**
+ *Wrapper for [duk_error](http://duktape.org/api.html#duk_error).
+ *
+ * \param ctx the context
+ * \param type the error type (e.g. DUK_ERR_REFERENCE_ERROR)
+ * \param fmt the format string
+ * \param args the arguments
+ */
+template <typename... Args>
+inline void raise(Context *ctx, int type, const char *fmt, Args&&... args)
+{
+	duk_error(ctx, type, fmt, std::forward<Args>(args)...);
 }
 
 /**
  * Wrapper for [duk_get_type](http://duktape.org/api.html#duk_get_type).
  *
  * \param ctx the context
- * \param index the idnex
+ * \param index the index
  * \return the type
  */
-inline int type(ContextPtr ctx, Index index) noexcept
+inline int type(Context *ctx, Index index)
 {
 	return duk_get_type(ctx, index);
 }
 
-/*
- * Push / Get / Require / Is / Optional
- * ----------------------------------------------------------
- *
- * The following functions are used to push, get or check values from the stack. They use specialization
- * of TypeTraits class.
+/**
+ * \}
  */
 
 /**
- * Push a value into the stack. Calls TypeTraits<T>::push(*this, value);
+ * \name Extended functions
+ * \brief Extended functions for libjs.
  *
+ * The following functions are largely modified or extensions to Duktape.
+ */
+
+/**
+ * \{
+ */
+
+/**
+ * Get the error object when a JavaScript error has been thrown (e.g. eval failure).
+ *
+ * \param ctx the context
+ * \param index the index
+ * \param pop if true, also remove the exception from the stack
+ * \return the information
+ */
+inline Exception exception(Context *ctx, int index, bool pop = true)
+{
+	Exception ex;
+
+	index = duk_normalize_index(ctx, index);
+
+	duk_get_prop_string(ctx, index, "name");
+	ex.name = duk_to_string(ctx, -1);
+	duk_get_prop_string(ctx, index, "message");
+	ex.message = duk_to_string(ctx, -1);
+	duk_get_prop_string(ctx, index, "fileName");
+	ex.fileName = duk_to_string(ctx, -1);
+	duk_get_prop_string(ctx, index, "lineNumber");
+	ex.lineNumber = duk_to_int(ctx, -1);
+	duk_get_prop_string(ctx, index, "stack");
+	ex.stack = duk_to_string(ctx, -1);
+	duk_pop_n(ctx, 5);
+
+	if (pop)
+		duk_remove(ctx, index);
+
+	return ex;
+}
+
+/**
+ * Push a value into the stack. Calls TypeTraits<T>::push(ctx, value);
+ *
+ * \param ctx the context
  * \param value the value to forward
  */
 template <typename Type>
-inline void push(ContextPtr ctx, Type &&value)
+inline void push(Context *ctx, Type &&value)
 {
 	TypeTraits<std::decay_t<Type>>::push(ctx, std::forward<Type>(value));
 }
 
 /**
+ * Put the value to the object at the top of the stack. Calls TypeTraits<T>::put(ctx, value);
+ *
+ * \param ctx the context
+ * \param value the value to apply
+ */
+template <typename Type>
+inline void put(Context *ctx, Type &&value)
+{
+	TypeTraits<std::decay_t<Type>>::put(ctx, std::forward<Type>(value));
+}
+
+/**
  * Generic template function to get a value from the stack.
  *
+ * \param ctx the context
  * \param index the index
  * \return the value
  */
 template <typename Type>
-inline auto get(ContextPtr ctx, int index) -> decltype(TypeTraits<Type>::get(ctx, 0))
+inline auto get(Context *ctx, int index) -> decltype(TypeTraits<Type>::get(ctx, 0))
 {
 	return TypeTraits<Type>::get(ctx, index);
 }
@@ -933,11 +1565,12 @@ inline auto get(ContextPtr ctx, int index) -> decltype(TypeTraits<Type>::get(ctx
 /**
  * Require a type at the specified index.
  *
+ * \param ctx the context
  * \param index the index
  * \return the value
  */
 template <typename Type>
-inline auto require(ContextPtr ctx, int index) -> decltype(TypeTraits<Type>::require(ctx, 0))
+inline auto require(Context *ctx, int index) -> decltype(TypeTraits<Type>::require(ctx, 0))
 {
 	return TypeTraits<Type>::require(ctx, index);
 }
@@ -947,11 +1580,12 @@ inline auto require(ContextPtr ctx, int index) -> decltype(TypeTraits<Type>::req
  *
  * The TypeTraits<T> must have `static bool is(ContextPtr ptr, int index)`.
  *
+ * \param ctx the context
  * \param index the value index
  * \return true if is the type
  */
 template <typename T>
-inline bool is(ContextPtr ctx, int index)
+inline bool is(Context *ctx, int index)
 {
 	return TypeTraits<T>::is(ctx, index);
 }
@@ -962,33 +1596,28 @@ inline bool is(ContextPtr ctx, int index)
  *
  * The TypeTraits<T> must have `static T optional(Context &, int index, T &&defaultValue)`.
  *
+ * \param ctx the context
  * \param index the value index
  * \param defaultValue the value replacement
  * \return the value or defaultValue
  */
 template <typename Type>
-inline auto optional(ContextPtr ctx, int index, Type &&defaultValue)
+inline auto optional(Context *ctx, int index, Type &&defaultValue)
 {
 	return TypeTraits<std::decay_t<Type>>::optional(ctx, index, std::forward<Type>(defaultValue));
 }
 
-/*
- * Properties management
- * ----------------------------------------------------------
- *
- * The following functions are used to read or set properties on objects or globals also using TypeTraits.
- */
-
 /**
  * Get the property `name' as value from the object at the specified index.
  *
+ * \param ctx the context
  * \param index the object index
  * \param name the property name
  * \return the value
  * \note The stack is unchanged
  */
 template <typename Type, typename std::enable_if_t<!std::is_void<Type>::value> * = nullptr>
-inline auto getProperty(ContextPtr ctx, int index, const std::string &name) -> decltype(get<Type>(ctx, 0))
+inline auto getProperty(Context *ctx, int index, const std::string &name) -> decltype(get<Type>(ctx, 0))
 {
 	duk_get_prop_string(ctx, index, name.c_str());
 	decltype(get<Type>(ctx, 0)) value = get<Type>(ctx, -1);
@@ -1000,13 +1629,14 @@ inline auto getProperty(ContextPtr ctx, int index, const std::string &name) -> d
 /**
  * Get a property by index, for arrays.
  *
+ * \param ctx the context
  * \param index the object index
  * \param position the position int the object
  * \return the value
  * \note The stack is unchanged
  */
 template <typename Type, typename std::enable_if_t<!std::is_void<Type>::value> * = nullptr>
-inline auto getProperty(ContextPtr ctx, int index, int position) -> decltype(get<Type>(ctx, 0))
+inline auto getProperty(Context *ctx, int index, int position) -> decltype(get<Type>(ctx, 0))
 {
 	duk_get_prop_index(ctx, index, position);
 	decltype(get<Type>(ctx, 0)) value = get<Type>(ctx, -1);
@@ -1018,12 +1648,13 @@ inline auto getProperty(ContextPtr ctx, int index, int position) -> decltype(get
 /**
  * Get the property `name' and push it to the stack from the object at the specified index.
  *
+ * \param ctx the context
  * \param index the object index
  * \param name the property name
  * \note The stack contains the property value
  */
 template <typename Type, typename std::enable_if_t<std::is_void<Type>::value> * = nullptr>
-inline void getProperty(ContextPtr ctx, int index, const std::string &name)
+inline void getProperty(Context *ctx, int index, const std::string &name)
 {
 	duk_get_prop_string(ctx, index, name.c_str());
 }
@@ -1031,12 +1662,13 @@ inline void getProperty(ContextPtr ctx, int index, const std::string &name)
 /**
  * Get the property by index and push it to the stack from the object at the specified index.
  *
+ * \param ctx the context
  * \param index the object index
  * \param position the position in the object
  * \note The stack contains the property value
  */
 template <typename Type, typename std::enable_if_t<std::is_void<Type>::value> * = nullptr>
-inline void getProperty(ContextPtr ctx, int index, int position)
+inline void getProperty(Context *ctx, int index, int position)
 {
 	duk_get_prop_index(ctx, index, position);
 }
@@ -1044,6 +1676,7 @@ inline void getProperty(ContextPtr ctx, int index, int position)
 /**
  * Get an optional property `name` from the object at the specified index.
  *
+ * \param ctx the context
  * \param index the object index
  * \param name the property name
  * \param def the default value
@@ -1051,7 +1684,7 @@ inline void getProperty(ContextPtr ctx, int index, int position)
  * \note The stack is unchanged
  */
 template <typename Type, typename DefaultValue>
-inline auto optionalProperty(ContextPtr ctx, int index, const std::string &name, DefaultValue &&def) -> decltype(optional(ctx, 0, std::forward<DefaultValue>(def)))
+inline auto optionalProperty(Context *ctx, int index, const std::string &name, DefaultValue &&def) -> decltype(optional(ctx, 0, std::forward<DefaultValue>(def)))
 {
 	duk_get_prop_string(ctx, index, name.c_str());
 	decltype(optional(ctx, 0, std::forward<DefaultValue>(def))) value = optional(ctx, -1, std::forward<DefaultValue>(def));
@@ -1063,6 +1696,7 @@ inline auto optionalProperty(ContextPtr ctx, int index, const std::string &name,
 /**
  * Get an optional property by index, for arrays
  *
+ * \param ctx the context
  * \param index the object index
  * \param position the position int the object
  * \param def the default value
@@ -1070,7 +1704,7 @@ inline auto optionalProperty(ContextPtr ctx, int index, const std::string &name,
  * \note The stack is unchanged
  */
 template <typename Type, typename DefaultValue>
-inline auto optionalProperty(ContextPtr ctx, int index, int position, DefaultValue &&def) -> decltype(optional(ctx, 0, std::forward<DefaultValue>(def)))
+inline auto optionalProperty(Context *ctx, int index, int position, DefaultValue &&def) -> decltype(optional(ctx, 0, std::forward<DefaultValue>(def)))
 {
 	duk_get_prop_index(ctx, index, position);
 	decltype(optional(ctx, 0, std::forward<DefaultValue>(def))) value = optional(ctx, -1, std::forward<DefaultValue>(def));
@@ -1082,13 +1716,14 @@ inline auto optionalProperty(ContextPtr ctx, int index, int position, DefaultVal
 /**
  * Set a property to the object at the specified index.
  *
+ * \param ctx the context
  * \param index the object index
  * \param name the property name
  * \param value the value to forward
  * \note The stack is unchanged
  */
 template <typename Type>
-void putProperty(ContextPtr ctx, int index, const std::string &name, Type &&value)
+void putProperty(Context *ctx, int index, const std::string &name, Type &&value)
 {
 	index = duk_normalize_index(ctx, index);
 
@@ -1099,13 +1734,14 @@ void putProperty(ContextPtr ctx, int index, const std::string &name, Type &&valu
 /**
  * Set a property by index, for arrays.
  *
+ * \param ctx the context
  * \param index the object index
  * \param position the position in the object
  * \param value the value to forward
  * \note The stack is unchanged
  */
 template <typename Type>
-void putProperty(ContextPtr ctx, int index, int position, Type &&value)
+void putProperty(Context *ctx, int index, int position, Type &&value)
 {
 	index = duk_normalize_index(ctx, index);
 
@@ -1114,35 +1750,14 @@ void putProperty(ContextPtr ctx, int index, int position, Type &&value)
 }
 
 /**
- * Put the value that is at the top of the stack as property to the object.
- *
- * \param index the object index
- * \param name the property name
- */
-inline void putProperty(ContextPtr ctx, int index, const std::string &name)
-{
-	duk_put_prop_string(ctx, index, name.c_str());
-}
-
-/**
- * Put the value that is at the top of the stack to the object as index.
- *
- * \param index the object index
- * \param position the position in the object
- */
-inline void putProperty(ContextPtr ctx, int index, int position)
-{
-	duk_put_prop_index(ctx, index, position);
-}
-
-/**
  * Get a global value.
  *
+ * \param ctx the context
  * \param name the name of the global variable
  * \return the value
  */
 template <typename Type>
-inline auto getGlobal(ContextPtr ctx, const std::string &name, std::enable_if_t<!std::is_void<Type>::value> * = nullptr) -> decltype(get<Type>(ctx, 0))
+inline auto getGlobal(Context *ctx, const std::string &name, std::enable_if_t<!std::is_void<Type>::value> * = nullptr) -> decltype(get<Type>(ctx, 0))
 {
 	duk_get_global_string(ctx, name.c_str());
 	decltype(get<Type>(ctx, 0)) value = get<Type>(ctx, -1);
@@ -1153,9 +1768,12 @@ inline auto getGlobal(ContextPtr ctx, const std::string &name, std::enable_if_t<
 
 /**
  * Overload that push the value at the top of the stack instead of returning it.
+ *
+ * \param ctx the context
+ * \param name the name of the global variable
  */
 template <typename Type>
-inline void getGlobal(ContextPtr ctx, const std::string &name, std::enable_if_t<std::is_void<Type>::value> * = nullptr) noexcept
+inline void getGlobal(Context *ctx, const std::string &name, std::enable_if_t<std::is_void<Type>::value> * = nullptr)
 {
 	duk_get_global_string(ctx, name.c_str());
 }
@@ -1163,11 +1781,12 @@ inline void getGlobal(ContextPtr ctx, const std::string &name, std::enable_if_t<
 /**
  * Set a global variable.
  *
+ * \param ctx the context
  * \param name the name of the global variable
  * \param type the value to set
  */
 template <typename Type>
-inline void putGlobal(ContextPtr ctx, const std::string &name, Type&& type)
+inline void putGlobal(Context *ctx, const std::string &name, Type&& type)
 {
 	push(ctx, std::forward<Type>(type));
 	duk_put_global_string(ctx, name.c_str());
@@ -1176,30 +1795,25 @@ inline void putGlobal(ContextPtr ctx, const std::string &name, Type&& type)
 /**
  * Put the value at the top of the stack as global property.
  *
+ * \param ctx the context
  * \param name the property name
  */
-inline void putGlobal(ContextPtr ctx, const std::string &name)
+inline void putGlobal(Context *ctx, const std::string &name)
 {
 	duk_put_global_string(ctx, name.c_str());
 }
 
-/*
- * Extra functions
- * ----------------------------------------------------------
- *
- * The following functions are implemented for convenience and do not exists in the native Duktape API.
- */
-
 /**
  * Enumerate an object or an array at the specified index.
  *
+ * \param ctx the context
  * \param index the object or array index
  * \param flags the optional flags to pass to duk_enum
  * \param getvalue set to true if you want to extract the value
  * \param func the function to call for each properties
  */
 template <typename Func>
-void enumerate(ContextPtr ctx, int index, duk_uint_t flags, duk_bool_t getvalue, Func &&func)
+void enumerate(Context *ctx, int index, duk_uint_t flags, duk_bool_t getvalue, Func &&func)
 {
 	duk_enum(ctx, index, flags);
 
@@ -1214,13 +1828,14 @@ void enumerate(ContextPtr ctx, int index, duk_uint_t flags, duk_bool_t getvalue,
 /**
  * Return the this binding of the current function.
  *
+ * \param ctx the context
  * \return the this binding as the template given
  */
 template <typename T>
-inline auto self(ContextPtr ctx) -> decltype(TypeTraits<T>::get(ctx, 0))
+inline auto self(Context *ctx) -> decltype(TypeTraits<T>::require(ctx, 0))
 {
 	duk_push_this(ctx);
-	decltype(TypeTraits<T>::get(ctx, 0)) value = TypeTraits<T>::get(ctx, -1);
+	decltype(TypeTraits<T>::require(ctx, 0)) value = TypeTraits<T>::require(ctx, -1);
 	duk_pop(ctx);
 
 	return value;
@@ -1229,47 +1844,13 @@ inline auto self(ContextPtr ctx) -> decltype(TypeTraits<T>::get(ctx, 0))
 /**
  * Throw an ECMAScript exception.
  *
+ * \param ctx the context
  * \param ex the exception
  */
 template <typename Exception>
-void raise(ContextPtr ctx, const Exception &ex)
+void raise(Context *ctx, const Exception &ex)
 {
 	ex.raise(ctx);
-}
-
-/**
- * Wrapper for duk_throw.
- *
- * \param ctx the context
- */
-inline void raise(ContextPtr ctx)
-{
-	duk_throw(ctx);
-}
-
-/**
- * Wrapper for duk_error.
- *
- * \param ctx the context
- * \param type the error type (e.g. DUK_ERR_REFERENCE_ERROR)
- * \param fmt the format string
- * \param args the arguments
- */
-template <typename... Args>
-inline void raise(ContextPtr ctx, int type, const char *fmt, Args&&... args)
-{
-	duk_error(ctx, type, fmt, std::forward<Args>(args)...);
-}
-
-/**
- * Wrapper for duk_new.
- *
- * \param ctx the context
- * \param nargs the number of arguments
- */
-inline void create(ContextPtr ctx, int nargs = 0)
-{
-	duk_new(ctx, nargs);
 }
 
 /**
@@ -1279,73 +1860,19 @@ inline void create(ContextPtr ctx, int nargs = 0)
  *
  * - static void construct(Context &, T): must update this with the value and keep the stack unchanged
  *
+ * \param ctx the context
  * \param value the value to forward
  * \see self
  */
 template <typename T>
-inline void construct(ContextPtr ctx, T &&value)
+inline void construct(Context *ctx, T &&value)
 {
 	TypeTraits<std::decay_t<T>>::construct(ctx, std::forward<T>(value));
 }
 
 /**
- * Sign the given object with the name from T.
- *
- * This is automatically done for when constructing/pushing object with Shared and Pointer helpers, however you need
- * to manually add it when using inheritance.
+ * \}
  */
-template <typename T>
-inline void sign(ContextPtr ctx, Index index)
-{
-	StackAssert sa(ctx, 0);
-
-	index = duk_normalize_index(ctx, index);
-
-	duk_push_string(ctx, TypeTraits<T>::name().c_str());
-	duk_push_boolean(ctx, true);
-	duk_def_prop(ctx, index < 0 ? index : index, DUK_DEFPROP_HAVE_VALUE);
-
-	/* Do for inherited classes */
-	for (const std::string &parent : TypeTraits<T>::inherits()) {
-		duk_push_string(ctx, parent.c_str());
-		duk_push_boolean(ctx, true);
-		duk_def_prop(ctx, index < 0 ? index : index, DUK_DEFPROP_HAVE_VALUE);
-	}
-}
-
-/**
- * Check if the object at the given index is signed by T or raise TypeError if not.
- *
- * \param ctx the context
- * \param index the index
- * \see sign
- */
-template <typename T>
-inline void checkSignature(ContextPtr ctx, Index index)
-{
-	StackAssert sa(ctx, 0);
-
-	if (!is<Object>(ctx, index) || !getProperty<bool>(ctx, index, TypeTraits<T>::name()))
-		raise(ctx, DUK_ERR_TYPE_ERROR, "invalid this binding");
-}
-
-/**
- * Tells if the object at the specified index is of type T.
- *
- * \param ctx the context
- * \param index the index
- */
-template <typename T>
-inline bool isSigned(ContextPtr ctx, Index index)
-{
-	StackAssert sa(ctx, 0);
-
-	return is<Object>(ctx, index) && getProperty<bool>(ctx, index, TypeTraits<T>::name());
-}
-
-/* ------------------------------------------------------------------
- * Exception handling
- * ------------------------------------------------------------------ */
 
 /**
  * \class Error
@@ -1387,7 +1914,7 @@ public:
 	 * \note the default implementation search for the global variables
 	 * \param ctx the context
 	 */
-	virtual void raise(ContextPtr ctx) const noexcept
+	virtual void raise(Context *ctx) const
 	{
 		duk_error(ctx, m_type, "%s", m_message.c_str());
 	}
@@ -1495,10 +2022,6 @@ public:
 	}
 };
 
-/* ------------------------------------------------------------------
- * Standard overloads for TypeTraits<T>
- * ------------------------------------------------------------------ */
-
 /**
  * \class TypeTraits<int>
  * \brief Default implementation for int.
@@ -1515,7 +2038,7 @@ public:
 	 * \param index the index
 	 * \return the integer
 	 */
-	static inline int get(ContextPtr ctx, int index)
+	static inline int get(Context *ctx, int index)
 	{
 		return duk_get_int(ctx, index);
 	}
@@ -1527,9 +2050,9 @@ public:
 	 * \param index the index
 	 * \return true if integer
 	 */
-	static inline bool is(ContextPtr ctx, int index)
+	static inline bool is(Context *ctx, int index)
 	{
-		return duk_is_number(ctx, index);
+		return duk_is_number(ctx, index) != 0;
 	}
 
 	/**
@@ -1540,7 +2063,7 @@ public:
 	 * \param defaultValue the defaultValue
 	 * \return the integer or defaultValue
 	 */
-	static inline int optional(ContextPtr ctx, int index, int defaultValue)
+	static inline int optional(Context *ctx, int index, int defaultValue)
 	{
 		return is(ctx, index) ? get(ctx, index) : defaultValue;
 	}
@@ -1551,7 +2074,7 @@ public:
 	 * \param ctx the context
 	 * \param value the value
 	 */
-	static inline void push(ContextPtr ctx, int value)
+	static inline void push(Context *ctx, int value)
 	{
 		duk_push_int(ctx, value);
 	}
@@ -1563,7 +2086,7 @@ public:
 	 * \param index the index
 	 * \return the integer
 	 */
-	static inline int require(ContextPtr ctx, int index)
+	static inline int require(Context *ctx, int index)
 	{
 		return duk_require_int(ctx, index);
 	}
@@ -1585,9 +2108,9 @@ public:
 	 * \param index the index
 	 * \return the boolean
 	 */
-	static inline bool get(ContextPtr ctx, int index)
+	static inline bool get(Context *ctx, int index)
 	{
-		return duk_get_boolean(ctx, index);
+		return duk_get_boolean(ctx, index) != 0;
 	}
 
 	/**
@@ -1597,9 +2120,9 @@ public:
 	 * \param index the index
 	 * \return true if boolean
 	 */
-	static inline bool is(ContextPtr ctx, int index)
+	static inline bool is(Context *ctx, int index)
 	{
-		return duk_is_boolean(ctx, index);
+		return duk_is_boolean(ctx, index) != 0;
 	}
 
 	/**
@@ -1610,7 +2133,7 @@ public:
 	 * \param defaultValue the defaultValue
 	 * \return the boolean or defaultValue
 	 */
-	static inline bool optional(ContextPtr ctx, int index, bool defaultValue)
+	static inline bool optional(Context *ctx, int index, bool defaultValue)
 	{
 		return is(ctx, index) ? get(ctx, index) : defaultValue;
 	}
@@ -1621,7 +2144,7 @@ public:
 	 * \param ctx the context
 	 * \param value the value
 	 */
-	static inline void push(ContextPtr ctx, bool value)
+	static inline void push(Context *ctx, bool value)
 	{
 		duk_push_boolean(ctx, value);
 	}
@@ -1633,9 +2156,9 @@ public:
 	 * \param index the index
 	 * \return the boolean
 	 */
-	static inline bool require(ContextPtr ctx, int index)
+	static inline bool require(Context *ctx, int index)
 	{
-		return duk_require_boolean(ctx, index);
+		return duk_require_boolean(ctx, index) != 0;
 	}
 };
 
@@ -1655,7 +2178,7 @@ public:
 	 * \param index the index
 	 * \return the double
 	 */
-	static inline double get(ContextPtr ctx, int index)
+	static inline double get(Context *ctx, int index)
 	{
 		return duk_get_number(ctx, index);
 	}
@@ -1667,9 +2190,9 @@ public:
 	 * \param index the index
 	 * \return true if double
 	 */
-	static inline bool is(ContextPtr ctx, int index)
+	static inline bool is(Context *ctx, int index)
 	{
-		return duk_is_number(ctx, index);
+		return duk_is_number(ctx, index) != 0;
 	}
 
 	/**
@@ -1680,7 +2203,7 @@ public:
 	 * \param defaultValue the defaultValue
 	 * \return the double or defaultValue
 	 */
-	static inline double optional(ContextPtr ctx, int index, double defaultValue)
+	static inline double optional(Context *ctx, int index, double defaultValue)
 	{
 		return is(ctx, index) ? get(ctx, index) : defaultValue;
 	}
@@ -1691,7 +2214,7 @@ public:
 	 * \param ctx the context
 	 * \param value the value
 	 */
-	static inline void push(ContextPtr ctx, double value)
+	static inline void push(Context *ctx, double value)
 	{
 		duk_push_number(ctx, value);
 	}
@@ -1703,7 +2226,7 @@ public:
 	 * \param index the index
 	 * \return the double
 	 */
-	static inline double require(ContextPtr ctx, int index)
+	static inline double require(Context *ctx, int index)
 	{
 		return duk_require_number(ctx, index);
 	}
@@ -1727,7 +2250,7 @@ public:
 	 * \param index the index
 	 * \return the string
 	 */
-	static inline std::string get(ContextPtr ctx, int index)
+	static inline std::string get(Context *ctx, int index)
 	{
 		duk_size_t size;
 		const char *text = duk_get_lstring(ctx, index, &size);
@@ -1742,9 +2265,9 @@ public:
 	 * \param index the index
 	 * \return true if string
 	 */
-	static inline bool is(ContextPtr ctx, int index)
+	static inline bool is(Context *ctx, int index)
 	{
-		return duk_is_string(ctx, index);
+		return duk_is_string(ctx, index) != 0;
 	}
 
 	/**
@@ -1755,7 +2278,7 @@ public:
 	 * \param defaultValue the defaultValue
 	 * \return the string or defaultValue
 	 */
-	static inline std::string optional(ContextPtr ctx, int index, std::string defaultValue)
+	static inline std::string optional(Context *ctx, int index, std::string defaultValue)
 	{
 		return is(ctx, index) ? get(ctx, index) : defaultValue;
 	}
@@ -1766,7 +2289,7 @@ public:
 	 * \param ctx the context
 	 * \param value the value
 	 */
-	static inline void push(ContextPtr ctx, const std::string &value)
+	static inline void push(Context *ctx, const std::string &value)
 	{
 		duk_push_lstring(ctx, value.c_str(), value.length());
 	}
@@ -1778,7 +2301,7 @@ public:
 	 * \param index the index
 	 * \return the string
 	 */
-	static inline std::string require(ContextPtr ctx, int index)
+	static inline std::string require(Context *ctx, int index)
 	{
 		duk_size_t size;
 		const char *text = duk_require_lstring(ctx, index, &size);
@@ -1803,7 +2326,7 @@ public:
 	 * \param index the index
 	 * \return the string
 	 */
-	static inline const char *get(ContextPtr ctx, int index)
+	static inline const char *get(Context *ctx, int index)
 	{
 		return duk_get_string(ctx, index);
 	}
@@ -1815,9 +2338,9 @@ public:
 	 * \param index the index
 	 * \return true if string
 	 */
-	static inline bool is(ContextPtr ctx, int index)
+	static inline bool is(Context *ctx, int index)
 	{
-		return duk_is_string(ctx, index);
+		return duk_is_string(ctx, index) != 0;
 	}
 
 	/**
@@ -1828,7 +2351,7 @@ public:
 	 * \param defaultValue the defaultValue
 	 * \return the integer or defaultValue
 	 */
-	static inline const char *optional(ContextPtr ctx, int index, const char *defaultValue)
+	static inline const char *optional(Context *ctx, int index, const char *defaultValue)
 	{
 		return is(ctx, index) ? get(ctx, index) : defaultValue;
 	}
@@ -1839,7 +2362,7 @@ public:
 	 * \param ctx the context
 	 * \param value the value
 	 */
-	static inline void push(ContextPtr ctx, const char *value)
+	static inline void push(Context *ctx, const char *value)
 	{
 		duk_push_string(ctx, value);
 	}
@@ -1851,9 +2374,79 @@ public:
 	 * \param index the index
 	 * \return the string
 	 */
-	static inline const char *require(ContextPtr ctx, int index)
+	static inline const char *require(Context *ctx, int index)
 	{
 		return duk_require_string(ctx, index);
+	}
+};
+
+/**
+ * \class TypeTraits<unsigned>
+ * \brief Default implementation for unsigned.
+ *
+ * Provides: get, is, optional, push, require.
+ */
+template <>
+class TypeTraits<unsigned> {
+public:
+	/**
+	 * Get an integer, return 0 if not an integer.
+	 *
+	 * \param ctx the context
+	 * \param index the index
+	 * \return the integer
+	 */
+	static inline unsigned get(Context *ctx, int index)
+	{
+		return duk_get_uint(ctx, index);
+	}
+
+	/**
+	 * Check if value is an integer.
+	 *
+	 * \param ctx the context
+	 * \param index the index
+	 * \return true if integer
+	 */
+	static inline bool is(Context *ctx, int index)
+	{
+		return duk_is_number(ctx, index) != 0;
+	}
+
+	/**
+	 * Get an integer, return defaultValue if the value is not an integer.
+	 *
+	 * \param ctx the context
+	 * \param index the index
+	 * \param defaultValue the defaultValue
+	 * \return the integer or defaultValue
+	 */
+	static inline unsigned optional(Context *ctx, int index, unsigned defaultValue)
+	{
+		return is(ctx, index) ? get(ctx, index) : defaultValue;
+	}
+
+	/**
+	 * Push an integer.
+	 *
+	 * \param ctx the context
+	 * \param value the value
+	 */
+	static inline void push(Context *ctx, unsigned value)
+	{
+		duk_push_uint(ctx, value);
+	}
+
+	/**
+	 * Require an integer, throws a JavaScript exception if not an integer.
+	 *
+	 * \param ctx the context
+	 * \param index the index
+	 * \return the integer
+	 */
+	static inline unsigned require(Context *ctx, int index)
+	{
+		return duk_require_uint(ctx, index);
 	}
 };
 
@@ -1863,7 +2456,7 @@ public:
  * Provides: get, is, optional, push, require.
  */
 template <typename T>
-class TypeTraits<RawPointer<T>> {
+class TypeTraits<T *> {
 public:
 	/**
 	 * Get a pointer, return nullptr if not a pointer.
@@ -1872,7 +2465,7 @@ public:
 	 * \param index the index
 	 * \return the pointer
 	 */
-	static inline T *get(ContextPtr ctx, int index)
+	static inline T *get(Context *ctx, int index)
 	{
 		return static_cast<T *>(duk_to_pointer(ctx, index));
 	}
@@ -1884,9 +2477,9 @@ public:
 	 * \param index the index
 	 * \return true if pointer
 	 */
-	static inline bool is(ContextPtr ctx, int index)
+	static inline bool is(Context *ctx, int index)
 	{
-		return duk_is_pointer(ctx, index);
+		return duk_is_pointer(ctx, index) != 0;
 	}
 
 	/**
@@ -1897,9 +2490,9 @@ public:
 	 * \param defaultValue the defaultValue
 	 * \return the pointer or defaultValue
 	 */
-	static inline T *optional(ContextPtr ctx, int index, RawPointer<T> defaultValue)
+	static inline T *optional(Context *ctx, int index, T *defaultValue)
 	{
-		return is(ctx, index) ? get(ctx, index) : defaultValue.object;
+		return is(ctx, index) ? get(ctx, index) : defaultValue;
 	}
 
 	/**
@@ -1908,9 +2501,9 @@ public:
 	 * \param ctx the context
 	 * \param value the value
 	 */
-	static inline void push(ContextPtr ctx, const RawPointer<T> &value)
+	static inline void push(Context *ctx, T *value)
 	{
-		duk_push_pointer(ctx, value.object);
+		duk_push_pointer(ctx, value);
 	}
 
 	/**
@@ -1920,7 +2513,7 @@ public:
 	 * \param index the index
 	 * \return the pointer
 	 */
-	static inline T *require(ContextPtr ctx, int index)
+	static inline T *require(Context *ctx, int index)
 	{
 		return static_cast<T *>(duk_require_pointer(ctx, index));
 	}
@@ -1944,9 +2537,9 @@ public:
 	 * \param index the value index
 	 * \return true if the value is callable
 	 */
-	static bool is(ContextPtr ctx, Index index)
+	static bool is(Context *ctx, Index index)
 	{
-		return duk_is_callable(ctx, index);
+		return duk_is_callable(ctx, index) != 0;
 	}
 
 	/**
@@ -1956,7 +2549,7 @@ public:
 	 * \param ctx the context
 	 * \param fn the function
 	 */
-	static void push(ContextPtr ctx, Function fn)
+	static void push(Context *ctx, Function fn)
 	{
 		duk_push_c_function(ctx, fn.function, fn.nargs);
 	}
@@ -1966,7 +2559,7 @@ public:
  * \class TypeTraits<FunctionMap>
  * \brief Put the functions to the object at the top of the stack.
  *
- * Provides: push.
+ * Provides: put.
  */
 template <>
 class TypeTraits<FunctionMap> {
@@ -1977,7 +2570,7 @@ public:
 	 * \param ctx the context
 	 * \param map the map of function
 	 */
-	static inline void push(ContextPtr ctx, const FunctionMap &map)
+	static void put(Context *ctx, const FunctionMap &map)
 	{
 		StackAssert sa(ctx, 0);
 
@@ -2004,9 +2597,9 @@ public:
 	 * \param index the index
 	 * \return true if object
 	 */
-	static inline bool is(ContextPtr ctx, int index)
+	static inline bool is(Context *ctx, int index)
 	{
-		return duk_is_object(ctx, index);
+		return duk_is_object(ctx, index) != 0;
 	}
 
 	/**
@@ -2014,7 +2607,7 @@ public:
 	 *
 	 * \param ctx the context
 	 */
-	static inline void push(ContextPtr ctx, const Object &)
+	static inline void push(Context *ctx, const Object &)
 	{
 		duk_push_object(ctx);
 	}
@@ -2036,9 +2629,9 @@ public:
 	 * \param index the index
 	 * \return true if array
 	 */
-	static inline bool is(ContextPtr ctx, int index)
+	static inline bool is(Context *ctx, int index)
 	{
-		return duk_is_array(ctx, index);
+		return duk_is_array(ctx, index) != 0;
 	}
 
 	/**
@@ -2046,7 +2639,7 @@ public:
 	 *
 	 * \param ctx the context
 	 */
-	static inline void push(ContextPtr ctx, const Array &)
+	static inline void push(Context *ctx, const Array &)
 	{
 		duk_push_array(ctx);
 	}
@@ -2068,9 +2661,9 @@ public:
 	 * \param index the index
 	 * \return true if undefined
 	 */
-	static inline bool is(ContextPtr ctx, int index)
+	static inline bool is(Context *ctx, int index)
 	{
-		return duk_is_undefined(ctx, index);
+		return duk_is_undefined(ctx, index) != 0;
 	}
 
 	/**
@@ -2078,7 +2671,7 @@ public:
 	 *
 	 * \param ctx the context
 	 */
-	static inline void push(ContextPtr ctx, const Undefined &)
+	static inline void push(Context *ctx, const Undefined &)
 	{
 		duk_push_undefined(ctx);
 	}
@@ -2100,9 +2693,9 @@ public:
 	 * \param index the index
 	 * \return true if null
 	 */
-	static inline bool is(ContextPtr ctx, int index)
+	static inline bool is(Context *ctx, int index)
 	{
-		return duk_is_null(ctx, index);
+		return duk_is_null(ctx, index) != 0;
 	}
 
 	/**
@@ -2110,7 +2703,7 @@ public:
 	 *
 	 * \param ctx the context
 	 */
-	static inline void push(ContextPtr ctx, const Null &)
+	static inline void push(Context *ctx, const Null &)
 	{
 		duk_push_null(ctx);
 	}
@@ -2129,7 +2722,7 @@ public:
 	 *
 	 * \param ctx the context
 	 */
-	static inline void push(ContextPtr ctx, const This &)
+	static inline void push(Context *ctx, const This &)
 	{
 		duk_push_this(ctx);
 	}
@@ -2149,7 +2742,7 @@ public:
 	 *
 	 * \param ctx the context
 	 */
-	static inline void push(ContextPtr ctx, const Global &)
+	static inline void push(Context *ctx, const Global &)
 	{
 		duk_push_global_object(ctx);
 	}
@@ -2158,7 +2751,7 @@ public:
 /**
  * \brief Push a map of key-value pair as objects.
  *
- * Provides: push.
+ * Provides: push, put.
  *
  * This class is convenient for settings constants such as enums, string and such.
  */
@@ -2172,9 +2765,26 @@ public:
 	 * \param map the values
 	 * \note You need an object at the top of the stack before calling this function
 	 */
-	static void push(ContextPtr ctx, const std::unordered_map<std::string, T> &map)
+	static void push(Context *ctx, const std::unordered_map<std::string, T> &map)
 	{
-		StackAssert sa(ctx, 0);
+		StackAssert sa(ctx, 1);
+
+		duk_push_object(ctx);
+		put(ctx, map);
+	}
+
+	/**
+	 * Apply the map to the object at the top of the stack.
+	 *
+	 * \pre top value must be an object
+	 * \param ctx the context
+	 * \param map the map
+	 */
+	static void put(Context *ctx, const std::unordered_map<std::string, T> &map)
+	{
+		assert(type(ctx, -1) == DUK_TYPE_OBJECT);
+
+		StackAssert sa(ctx);
 
 		for (const auto &pair : map) {
 			TypeTraits<T>::push(ctx, pair.second);
@@ -2186,7 +2796,7 @@ public:
 /**
  * \brief Push or get vectors as JavaScript arrays.
  *
- * Provides: get, push.
+ * Provides: get, push, put.
  */
 template <typename T>
 class TypeTraits<std::vector<T>> {
@@ -2198,7 +2808,7 @@ public:
 	 * \param index the array index
 	 * \return the array or empty array if the value is not an array
 	 */
-	static std::vector<T> get(ContextPtr ctx, int index)
+	static std::vector<T> get(Context *ctx, int index)
 	{
 		StackAssert sa(ctx, 0);
 
@@ -2207,10 +2817,10 @@ public:
 		if (!duk_is_array(ctx, -1))
 			return result;
 
-		int total = duk_get_length(ctx, index);
+		size_t total = duk_get_length(ctx, index);
 
-		for (int i = 0; i < total; ++i)
-			result.push_back(getProperty<T>(ctx, index, i));
+		for (size_t i = 0; i < total; ++i)
+			result.push_back(getProperty<T>(ctx, index, static_cast<int>(i)));
 
 		return result;
 	}
@@ -2221,178 +2831,32 @@ public:
 	 * \param ctx the context
 	 * \param array the values
 	 */
-	static void push(ContextPtr ctx, const std::vector<T> &array)
+	static void push(Context *ctx, const std::vector<T> &array)
 	{
 		StackAssert sa(ctx, 1);
 
 		duk_push_array(ctx);
+		put(ctx, array);
+	}
+
+	/**
+	 * Apply the array to the object at the top of the stack.
+	 *
+	 * \pre top value must be an object
+	 * \param ctx the context
+	 * \param array the array
+	 */
+	static void put(Context *ctx, const std::vector<T> &array)
+	{
+		assert(type(ctx, -1) == DUK_TYPE_OBJECT);
+
+		StackAssert sa(ctx);
 
 		unsigned i = 0;
 		for (const auto &v : array) {
 			TypeTraits<T>::push(ctx, v);
 			duk_put_prop_index(ctx, -2, i++);
 		}
-	}
-};
-
-/**
- * \brief Implementation of managed shared_ptr
- * \see Shared
- */
-template <typename T>
-class TypeTraits<Shared<T>> {
-private:
-	static void apply(ContextPtr ctx, std::shared_ptr<T> value)
-	{
-		StackAssert sa(ctx, 0);
-
-		sign<T>(ctx, -1);
-
-		duk_push_pointer(ctx, new std::shared_ptr<T>(std::move(value)));
-		duk_put_prop_string(ctx, -2, "\xff""\xff""js-shared-ptr");
-		duk_push_c_function(ctx, [] (duk_context *ctx) -> Ret {
-			duk_get_prop_string(ctx, 0, "\xff""\xff""js-shared-ptr");
-			delete static_cast<std::shared_ptr<T> *>(duk_to_pointer(ctx, -1));
-			duk_pop(ctx);
-			duk_push_null(ctx);
-			duk_put_prop_string(ctx, 0, "\xff""\xff""js-ptr");
-
-			return 0;
-		}, 1);
-		duk_set_finalizer(ctx, -2);
-	}
-
-public:
-	/**
-	 * Construct the shared_ptr as this.
-	 *
-	 * \param ctx the context
-	 * \param value the value
-	 */
-	static void construct(ContextPtr ctx, Shared<T> value)
-	{
-		StackAssert sa(ctx, 0);
-
-		duk_push_this(ctx);
-		apply(ctx, std::move(value.object));
-		duk_pop(ctx);
-	}
-
-	/**
-	 * Push a managed shared_ptr as object.
-	 *
-	 * \param ctx the context
-	 * \param value the value
-	 */
-	static void push(ContextPtr ctx, Shared<T> value)
-	{
-		StackAssert sa(ctx, 1);
-
-		duk_push_object(ctx);
-		apply(ctx, value.object);
-		TypeTraits<T>::prototype(ctx);
-		duk_set_prototype(ctx, -2);
-	}
-
-	/**
-	 * Get a managed shared_ptr from the stack.
-	 *
-	 * \param ctx the context
-	 * \param index the object index
-	 * \return the shared_ptr
-	 */
-	static std::shared_ptr<T> get(ContextPtr ctx, int index)
-	{
-		StackAssert sa(ctx, 0);
-
-		checkSignature<T>(ctx, index);
-
-		duk_get_prop_string(ctx, index, "\xff""\xff""js-shared-ptr");
-		std::shared_ptr<T> value = *static_cast<std::shared_ptr<T> *>(duk_to_pointer(ctx, -1));
-		duk_pop(ctx);
-
-		return value;
-	}
-};
-
-/**
- * \brief Implementation of managed pointers
- * \see Pointer
- */
-template <typename T>
-class TypeTraits<Pointer<T>> {
-private:
-	static void apply(ContextPtr ctx, T *value)
-	{
-		StackAssert sa(ctx, 0);
-
-		sign<T>(ctx, -1);
-
-		duk_push_pointer(ctx, value);
-		duk_put_prop_string(ctx, -2, "\xff""\xff""js-ptr");
-		duk_push_c_function(ctx, [] (duk_context *ctx) -> Ret {
-			duk_get_prop_string(ctx, 0, "\xff""\xff""js-ptr");
-			delete static_cast<T *>(duk_to_pointer(ctx, -1));
-			duk_pop(ctx);
-			duk_push_null(ctx);
-			duk_put_prop_string(ctx, 0, "\xff""\xff""js-ptr");
-
-			return 0;
-		}, 1);
-		duk_set_finalizer(ctx, -2);
-	}
-
-public:
-	/**
-	 * Construct the pointer as this.
-	 *
-	 * \param ctx the context
-	 * \param value the value
-	 */
-	static void construct(ContextPtr ctx, Pointer<T> value)
-	{
-		StackAssert sa(ctx, 0);
-
-		duk_push_this(ctx);
-		apply(ctx, value.object);
-		duk_pop(ctx);
-	}
-
-	/**
-	 * Push a managed pointer as object.
-	 *
-	 * \param ctx the context
-	 * \param value the value
-	 */
-	static void push(ContextPtr ctx, Pointer<T> value)
-	{
-		StackAssert sa(ctx, 1);
-
-		duk_push_object(ctx);
-		apply(ctx, value.object);
-		TypeTraits<T>::prototype(ctx);
-		duk_set_prototype(ctx, -2);
-	}
-
-	/**
-	 * Get a managed pointer from the stack.
-	 *
-	 * \param ctx the context
-	 * \param index the object index
-	 * \return the pointer
-	 * \warning Do not store the pointer into the C++ side, the object can be deleted at any time
-	 */
-	static T *get(ContextPtr ctx, int index)
-	{
-		StackAssert sa(ctx, 0);
-
-		checkSignature<T>(ctx, index);
-
-		duk_get_prop_string(ctx, index, "\xff""\xff""js-ptr");
-		T *value = static_cast<T *>(duk_to_pointer(ctx, -1));
-		duk_pop(ctx);
-
-		return value;
 	}
 };
 

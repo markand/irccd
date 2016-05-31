@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <iterator>
 #include <vector>
 
@@ -35,6 +36,13 @@
 
 namespace irccd {
 
+namespace {
+
+const std::string Signature("\xff""\xff""irccd-file-ptr");
+const std::string Prototype("\xff""\xff""irccd-file-prototype");
+
+} // !namespace
+
 #if defined(HAVE_STAT)
 
 /*
@@ -47,7 +55,7 @@ namespace duk {
 template <>
 class TypeTraits<struct stat> {
 public:
-	static void push(ContextPtr ctx, const struct stat &st)
+	static void push(Context *ctx, const struct stat &st)
 	{
 		duk::push(ctx, Object{});
 
@@ -104,7 +112,7 @@ namespace {
  * ------------------------------------------------------------------
  */
 
-/* Remove trailing \r for CRLF line style */
+// Remove trailing \r for CRLF line style.
 inline std::string clearCr(std::string input)
 {
 	if (input.length() > 0 && input.back() == '\r')
@@ -127,9 +135,9 @@ inline std::string clearCr(std::string input)
  * Returns:
  *   The base name.
  */
-duk::Ret methodBasename(duk::ContextPtr ctx)
+duk::Ret methodBasename(duk::Context *ctx)
 {
-	duk::push(ctx, fs::baseName(duk::self<duk::Pointer<File>>(ctx)->path()));
+	duk::push(ctx, fs::baseName(duk::self<File *>(ctx)->path()));
 
 	return 1;
 }
@@ -140,9 +148,9 @@ duk::Ret methodBasename(duk::ContextPtr ctx)
  *
  * Force close of the file, automatically called when object is collected.
  */
-duk::Ret methodClose(duk::ContextPtr ctx)
+duk::Ret methodClose(duk::Context *ctx)
 {
-	duk::self<duk::Pointer<File>>(ctx)->close();
+	duk::self<File *>(ctx)->close();
 
 	return 0;
 }
@@ -156,9 +164,9 @@ duk::Ret methodClose(duk::ContextPtr ctx)
  * Returns:
  *   The directory name.
  */
-duk::Ret methodDirname(duk::ContextPtr ctx)
+duk::Ret methodDirname(duk::Context *ctx)
 {
-	duk::push(ctx, fs::dirName(duk::self<duk::Pointer<File>>(ctx)->path()));
+	duk::push(ctx, fs::dirName(duk::self<File *>(ctx)->path()));
 
 	return 1;
 }
@@ -174,11 +182,11 @@ duk::Ret methodDirname(duk::ContextPtr ctx)
  * Throws
  *   - Any exception on error.
  */
-duk::Ret methodLines(duk::ContextPtr ctx)
+duk::Ret methodLines(duk::Context *ctx)
 {
 	duk::push(ctx, duk::Array{});
 
-	std::FILE *fp = duk::self<duk::Pointer<File>>(ctx)->handle();
+	std::FILE *fp = duk::self<File *>(ctx)->handle();
 	std::string buffer;
 	std::array<char, 128> data;
 	std::int32_t i = 0;
@@ -218,10 +226,10 @@ duk::Ret methodLines(duk::ContextPtr ctx)
  * Throws:
  *   - Any exception on error.
  */
-duk::Ret methodRead(duk::ContextPtr ctx)
+duk::Ret methodRead(duk::Context *ctx)
 {
 	auto amount = duk::optional<int>(ctx, 0, -1);
-	auto file = duk::self<duk::Pointer<File>>(ctx);
+	auto file = duk::self<File *>(ctx);
 
 	if (amount == 0 || file->handle() == nullptr)
 		return 0;
@@ -272,9 +280,9 @@ duk::Ret methodRead(duk::ContextPtr ctx)
  * Throws:
  *   - Any exception on error.
  */
-duk::Ret methodReadline(duk::ContextPtr ctx)
+duk::Ret methodReadline(duk::Context *ctx)
 {
-	std::FILE *fp = duk::self<duk::Pointer<File>>(ctx)->handle();
+	std::FILE *fp = duk::self<File *>(ctx)->handle();
 	std::string result;
 
 	if (fp == nullptr || std::feof(fp))
@@ -298,9 +306,9 @@ duk::Ret methodReadline(duk::ContextPtr ctx)
  * Throws:
  *   - Any exception on error.
  */
-duk::Ret methodRemove(duk::ContextPtr ctx)
+duk::Ret methodRemove(duk::Context *ctx)
 {
-	if (::remove(duk::self<duk::Pointer<File>>(ctx)->path().c_str()) < 0)
+	if (::remove(duk::self<File *>(ctx)->path().c_str()) < 0)
 		duk::raise(ctx, SystemError());
 
 	return 0;
@@ -318,11 +326,11 @@ duk::Ret methodRemove(duk::ContextPtr ctx)
  * Throws:
  *   - Any exception on error.
  */
-duk::Ret methodSeek(duk::ContextPtr ctx)
+duk::Ret methodSeek(duk::Context *ctx)
 {
 	auto type = duk::require<int>(ctx, 0);
 	auto amount = duk::require<int>(ctx, 1);
-	auto fp = duk::self<duk::Pointer<File>>(ctx)->handle();
+	auto fp = duk::self<File *>(ctx)->handle();
 
 	if (fp != nullptr && std::fseek(fp, amount, type) != 0)
 		duk::raise(ctx, SystemError());
@@ -343,10 +351,10 @@ duk::Ret methodSeek(duk::ContextPtr ctx)
  * Throws:
  *   - Any exception on error.
  */
-duk::Ret methodStat(duk::ContextPtr ctx)
+duk::Ret methodStat(duk::Context *ctx)
 {
 	struct stat st;
-	auto file = duk::self<duk::Pointer<File>>(ctx);
+	auto file = duk::self<File *>(ctx);
 
 	if (file->handle() == nullptr && ::stat(file->path().c_str(), &st) < 0)
 		duk::raise(ctx, SystemError());
@@ -369,9 +377,9 @@ duk::Ret methodStat(duk::ContextPtr ctx)
  * Throws:
  *   - Any exception on error.
  */
-duk::Ret methodTell(duk::ContextPtr ctx)
+duk::Ret methodTell(duk::Context *ctx)
 {
-	auto fp = duk::self<duk::Pointer<File>>(ctx)->handle();
+	auto fp = duk::self<File *>(ctx)->handle();
 	long pos;
 
 	if (fp == nullptr)
@@ -398,9 +406,9 @@ duk::Ret methodTell(duk::ContextPtr ctx)
  * Throws:
  *   - Any exception on error.
  */
-duk::Ret methodWrite(duk::ContextPtr ctx)
+duk::Ret methodWrite(duk::Context *ctx)
 {
-	std::FILE *fp = duk::self<duk::Pointer<File>>(ctx)->handle();
+	std::FILE *fp = duk::self<File *>(ctx)->handle();
 	std::string data = duk::require<std::string>(ctx, 0);
 
 	if (fp == nullptr)
@@ -449,19 +457,31 @@ const duk::FunctionMap methods{
  * Throws:
  *   - Any exception on error.
  */
-duk::Ret constructor(duk::ContextPtr ctx)
+duk::Ret constructor(duk::Context *ctx)
 {
-	if (!duk_is_constructor_call(ctx))
+	if (!duk::isConstructorCall(ctx))
 		return 0;
 
-	std::string path = duk::require<std::string>(ctx, 0);
-	std::string mode = duk::require<std::string>(ctx, 1);
-
 	try {
-		duk::construct(ctx, duk::Pointer<File>{new File(path, mode)});
+		duk::construct(ctx, new File(duk::require<std::string>(ctx, 0), duk::require<std::string>(ctx, 1)));
 	} catch (const std::exception &) {
 		duk::raise(ctx, SystemError());
 	}
+
+	return 0;
+}
+
+/*
+ * Function: Irccd.File() [destructor]
+ * ------------------------------------------------------------------
+ *
+ * Delete the property.
+ */
+duk::Ret destructor(duk::Context *ctx)
+{
+	delete static_cast<File *>(duk::getProperty<void *>(ctx, 0, Signature));
+
+	duk::deleteProperty(ctx, 0, Signature);
 
 	return 0;
 }
@@ -477,7 +497,7 @@ duk::Ret constructor(duk::ContextPtr ctx)
  * Returns:
  *   The base name.
  */
-duk::Ret functionBasename(duk::ContextPtr ctx)
+duk::Ret functionBasename(duk::Context *ctx)
 {
 	duk::push(ctx, fs::baseName(duk::require<std::string>(ctx, 0)));
 
@@ -495,7 +515,7 @@ duk::Ret functionBasename(duk::ContextPtr ctx)
  * Returns:
  *   The directory name.
  */
-duk::Ret functionDirname(duk::ContextPtr ctx)
+duk::Ret functionDirname(duk::Context *ctx)
 {
 	duk::push(ctx, fs::dirName( duk::require<std::string>(ctx, 0)));
 
@@ -515,7 +535,7 @@ duk::Ret functionDirname(duk::ContextPtr ctx)
  * Throws:
  *   - Any exception if we don't have access.
  */
-duk::Ret functionExists(duk::ContextPtr ctx)
+duk::Ret functionExists(duk::Context *ctx)
 {
 	duk::push(ctx, fs::exists(duk::require<std::string>(ctx, 0)));
 
@@ -533,7 +553,7 @@ duk::Ret functionExists(duk::ContextPtr ctx)
  * Throws:
  *   - Any exception on error.
  */
-duk::Ret functionRemove(duk::ContextPtr ctx)
+duk::Ret functionRemove(duk::Context *ctx)
 {
 	if (::remove(duk::require<std::string>(ctx, 0).c_str()) < 0)
 		duk::raise(ctx, SystemError());
@@ -556,7 +576,7 @@ duk::Ret functionRemove(duk::ContextPtr ctx)
  * Throws:
  *   - Any exception on error.
  */
-duk::Ret functionStat(duk::ContextPtr ctx)
+duk::Ret functionStat(duk::Context *ctx)
 {
 	struct stat st;
 
@@ -588,6 +608,41 @@ const duk::Map<int> constants{
 
 } // !namespace
 
+namespace duk {
+
+void TypeTraits<File *>::construct(duk::Context *ctx, File *fp)
+{
+	assert(fp);
+
+	duk::StackAssert sa(ctx);
+
+	duk::push(ctx, duk::This());
+	duk::putProperty<void *>(ctx, -1, Signature, fp);
+	duk::pop(ctx);
+}
+
+void TypeTraits<File *>::push(duk::Context *ctx, File *fp)
+{
+	duk::StackAssert sa(ctx, 1);
+
+	duk::push(ctx, duk::Object());
+	duk::putProperty<void *>(ctx, -1, Signature, fp);
+	duk::getGlobal<void>(ctx, Prototype);
+	duk::setPrototype(ctx, -2);
+}
+
+File *TypeTraits<File *>::require(duk::Context *ctx, Index index)
+{
+	auto ptr = static_cast<File *>(duk::getProperty<void *>(ctx, index, Signature));
+
+	if (!ptr)
+		duk::raise(ctx, DUK_ERR_TYPE_ERROR, "not a File object");
+
+	return ptr;
+}
+
+} // !duk
+
 FileModule::FileModule() noexcept
 	: Module("Irccd.File")
 {
@@ -598,11 +653,15 @@ void FileModule::load(Irccd &, JsPlugin &plugin)
 	duk::StackAssert sa(plugin.context());
 
 	duk::getGlobal<void>(plugin.context(), "Irccd");
-	duk::push(plugin.context(), duk::Function{constructor, 2});
-	duk::push(plugin.context(), constants);
-	duk::push(plugin.context(), functions);
+	duk::push(plugin.context(), duk::Function(constructor, 2));
+	duk::put(plugin.context(), constants);
+	duk::put(plugin.context(), functions);
 	duk::push(plugin.context(), duk::Object{});
-	duk::push(plugin.context(), methods);
+	duk::put(plugin.context(), methods);
+	duk::push(plugin.context(), duk::Function(destructor, 1));
+	duk::setFinalizer(plugin.context(), -2);
+	duk::dup(plugin.context(), -1);
+	duk::putGlobal(plugin.context(), Prototype);
 	duk::putProperty(plugin.context(), -2, "prototype");
 	duk::putProperty(plugin.context(), -2, "File");
 	duk::pop(plugin.context());

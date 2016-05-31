@@ -24,7 +24,7 @@ namespace irccd {
 
 namespace {
 
-duk::Ret print(duk::ContextPtr ctx, std::ostream &out)
+duk::Ret print(duk::Context *ctx, std::ostream &out)
 {
 	/*
 	 * Get the message before we start printing stuff to avoid
@@ -45,7 +45,7 @@ duk::Ret print(duk::ContextPtr ctx, std::ostream &out)
  * Arguments:
  *   - message, the message.
  */
-duk::Ret info(duk::ContextPtr ctx)
+duk::Ret info(duk::Context *ctx)
 {
 	return print(ctx, log::info());
 }
@@ -59,7 +59,7 @@ duk::Ret info(duk::ContextPtr ctx)
  * Arguments:
  *   - message, the warning.
  */
-duk::Ret warning(duk::ContextPtr ctx)
+duk::Ret warning(duk::Context *ctx)
 {
 	return print(ctx, log::warning());
 }
@@ -73,7 +73,7 @@ duk::Ret warning(duk::ContextPtr ctx)
  * Arguments:
  *   - message, the message.
  */
-duk::Ret debug(duk::ContextPtr ctx)
+duk::Ret debug(duk::Context *ctx)
 {
 	return print(ctx, log::debug());
 }
@@ -97,7 +97,7 @@ void LoggerModule::load(Irccd &, JsPlugin &plugin)
 
 	duk::getGlobal<void>(plugin.context(), "Irccd");
 	duk::push(plugin.context(), duk::Object{});
-	duk::push(plugin.context(), functions);
+	duk::put(plugin.context(), functions);
 	duk::putProperty(plugin.context(), -2, "Logger");
 	duk::pop(plugin.context());
 }

@@ -34,7 +34,7 @@ namespace {
  * Returns:
  *   True if the code is in the digit category.
  */
-duk::Ret isDigit(duk::ContextPtr ctx)
+duk::Ret isDigit(duk::Context *ctx)
 {
 	duk::push(ctx, unicode::isdigit(duk::get<int>(ctx, 0)));
 
@@ -50,7 +50,7 @@ duk::Ret isDigit(duk::ContextPtr ctx)
  * Returns:
  *   True if the code is in the letter category.
  */
-duk::Ret isLetter(duk::ContextPtr ctx)
+duk::Ret isLetter(duk::Context *ctx)
 {
 	duk::push(ctx, unicode::isalpha(duk::get<int>(ctx, 0)));
 
@@ -66,7 +66,7 @@ duk::Ret isLetter(duk::ContextPtr ctx)
  * Returns:
  *   True if the code is lower case.
  */
-duk::Ret isLower(duk::ContextPtr ctx)
+duk::Ret isLower(duk::Context *ctx)
 {
 	duk::push(ctx, unicode::islower(duk::get<int>(ctx, 0)));
 
@@ -82,7 +82,7 @@ duk::Ret isLower(duk::ContextPtr ctx)
  * Returns:
  *   True if the code is in the space category.
  */
-duk::Ret isSpace(duk::ContextPtr ctx)
+duk::Ret isSpace(duk::Context *ctx)
 {
 	duk::push(ctx, unicode::isspace(duk::get<int>(ctx, 0)));
 
@@ -98,7 +98,7 @@ duk::Ret isSpace(duk::ContextPtr ctx)
  * Returns:
  *   True if the code is title case.
  */
-duk::Ret isTitle(duk::ContextPtr ctx)
+duk::Ret isTitle(duk::Context *ctx)
 {
 	duk::push(ctx, unicode::istitle(duk::get<int>(ctx, 0)));
 
@@ -114,7 +114,7 @@ duk::Ret isTitle(duk::ContextPtr ctx)
  * Returns:
  *   True if the code is upper case.
  */
-duk::Ret isUpper(duk::ContextPtr ctx)
+duk::Ret isUpper(duk::Context *ctx)
 {
 	duk::push(ctx, unicode::isupper(duk::get<int>(ctx, 0)));
 
@@ -143,7 +143,7 @@ void UnicodeModule::load(Irccd &, JsPlugin &plugin)
 
 	duk::getGlobal<void>(plugin.context(), "Irccd");
 	duk::push(plugin.context(), duk::Object{});
-	duk::push(plugin.context(), functions);
+	duk::put(plugin.context(), functions);
 	duk::putProperty(plugin.context(), -2, "Unicode");
 	duk::pop(plugin.context());
 }

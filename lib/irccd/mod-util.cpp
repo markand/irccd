@@ -40,20 +40,18 @@ namespace duk {
 template <>
 class TypeTraits<util::Substitution> {
 public:
-	static util::Substitution get(ContextPtr ctx, int index)
+	static util::Substitution get(duk::Context *ctx, int index)
 	{
 		util::Substitution params;
 
-		if (!duk::is<Object>(ctx, index)) {
+		if (!duk::is<Object>(ctx, index))
 			return params;
-		}
 
-		duk::enumerate(ctx, index, 0, true, [&] (ContextPtr) {
-			if (duk::get<std::string>(ctx, -2) == "date") {
+		duk::enumerate(ctx, index, 0, true, [&] (duk::Context *) {
+			if (duk::get<std::string>(ctx, -2) == "date")
 				params.time = static_cast<time_t>(duk::get<double>(ctx, -1) / 1000);
-			} else {
+			else
 				params.keywords.insert({duk::get<std::string>(ctx, -2), duk::get<std::string>(ctx, -1)});
-			}
 		});
 
 		return params;
@@ -76,7 +74,7 @@ namespace {
  * Returns:
  *   The converted text.
  */
-duk::Ret format(duk::ContextPtr ctx)
+duk::Ret format(duk::Context *ctx)
 {
 	try {
 		duk::push(ctx, util::format(duk::get<std::string>(ctx, 0), duk::get<util::Substitution>(ctx, 1)));
@@ -98,7 +96,7 @@ duk::Ret format(duk::ContextPtr ctx)
  * Returns:
  *   The nickname.
  */
-duk::Ret splituser(duk::ContextPtr ctx)
+duk::Ret splituser(duk::Context *ctx)
 {
 	const char *target = duk::require<const char *>(ctx, 0);
 	char nick[32] = {0};
@@ -120,7 +118,7 @@ duk::Ret splituser(duk::ContextPtr ctx)
  * Returns:
  *   The hostname.
  */
-duk::Ret splithost(duk::ContextPtr ctx)
+duk::Ret splithost(duk::Context *ctx)
 {
 	const char *target = duk::require<const char *>(ctx, 0);
 	char host[32] = {0};
@@ -150,7 +148,7 @@ void UtilModule::load(Irccd &, JsPlugin &plugin)
 
 	duk::getGlobal<void>(plugin.context(), "Irccd");
 	duk::push(plugin.context(), duk::Object{});
-	duk::push(plugin.context(), functions);
+	duk::put(plugin.context(), functions);
 	duk::putProperty(plugin.context(), -2, "Util");
 	duk::pop(plugin.context());
 }

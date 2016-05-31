@@ -45,14 +45,10 @@ void JsPlugin::call(const std::string &name, unsigned nargs)
 		// Call the function and discard the result.
 		duk::insert(m_context, -nargs - 1);
 
-		if (duk::pcall(m_context, nargs) != 0) {
-			auto error = duk::error(m_context, -1);
+		if (duk::pcall(m_context, nargs) != 0)
+			throw duk::exception(m_context, -1, true);
 
-			duk::pop(m_context);
-
-			throw error;
-		} else
-			duk::pop(m_context);
+		duk::pop(m_context);
 	}
 }
 
@@ -66,7 +62,7 @@ void JsPlugin::putVars()
 {
 	duk::StackAssert sa(m_context);
 
-	duk::putGlobal(m_context, "\xff""\xff""plugin", duk::RawPointer<JsPlugin>{this});
+	duk::putGlobal<void *>(m_context, "\xff""\xff""plugin", this);
 	duk::putGlobal(m_context, "\xff""\xff""name", name());
 	duk::putGlobal(m_context, "\xff""\xff""path", path());
 }
@@ -145,7 +141,7 @@ void JsPlugin::onChannelMode(Irccd &,
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	duk::push(m_context, origin);
 	duk::push(m_context, channel);
 	duk::push(m_context, mode);
@@ -161,7 +157,7 @@ void JsPlugin::onChannelNotice(Irccd &,
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	duk::push(m_context, origin);
 	duk::push(m_context, channel);
 	duk::push(m_context, notice);
@@ -176,7 +172,7 @@ void JsPlugin::onCommand(Irccd &,
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	duk::push(m_context, origin);
 	duk::push(m_context, channel);
 	duk::push(m_context, message);
@@ -187,7 +183,7 @@ void JsPlugin::onConnect(Irccd &, const std::shared_ptr<Server> &server)
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	call("onConnect", 1);
 }
 
@@ -195,7 +191,7 @@ void JsPlugin::onInvite(Irccd &, const std::shared_ptr<Server> &server, const st
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	duk::push(m_context, origin);
 	duk::push(m_context, channel);
 	call("onInvite", 3);
@@ -205,7 +201,7 @@ void JsPlugin::onJoin(Irccd &, const std::shared_ptr<Server> &server, const std:
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	duk::push(m_context, origin);
 	duk::push(m_context, channel);
 	call("onJoin", 3);
@@ -220,7 +216,7 @@ void JsPlugin::onKick(Irccd &,
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	duk::push(m_context, origin);
 	duk::push(m_context, channel);
 	duk::push(m_context, target);
@@ -256,7 +252,7 @@ void JsPlugin::onLoad(Irccd &irccd)
 
 	// Try to load the file (does not call onLoad yet).
 	if (duk::pevalFile(m_context, path()) != 0)
-		throw duk::error(m_context, -1);
+		throw duk::exception(m_context, -1, true);
 
 	duk::pop(m_context);
 
@@ -286,7 +282,7 @@ void JsPlugin::onMessage(Irccd &,
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	duk::push(m_context, origin);
 	duk::push(m_context, channel);
 	duk::push(m_context, message);
@@ -301,7 +297,7 @@ void JsPlugin::onMe(Irccd &,
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	duk::push(m_context, origin);
 	duk::push(m_context, channel);
 	duk::push(m_context, message);
@@ -312,7 +308,7 @@ void JsPlugin::onMode(Irccd &, const std::shared_ptr<Server> &server, const std:
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	duk::push(m_context, origin);
 	duk::push(m_context, mode);
 	call("onMode", 3);
@@ -322,7 +318,7 @@ void JsPlugin::onNames(Irccd &, const std::shared_ptr<Server> &server, const std
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	duk::push(m_context, channel);
 	duk::push(m_context, names);
 	call("onNames", 3);
@@ -332,7 +328,7 @@ void JsPlugin::onNick(Irccd &, const std::shared_ptr<Server> &server, const std:
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	duk::push(m_context, oldnick);
 	duk::push(m_context, newnick);
 	call("onNick", 3);
@@ -342,7 +338,7 @@ void JsPlugin::onNotice(Irccd &, const std::shared_ptr<Server> &server, const st
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	duk::push(m_context, origin);
 	duk::push(m_context, notice);
 	call("onNotice", 3);
@@ -356,7 +352,7 @@ void JsPlugin::onPart(Irccd &,
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	duk::push(m_context, origin);
 	duk::push(m_context, channel);
 	duk::push(m_context, reason);
@@ -370,7 +366,7 @@ void JsPlugin::onQuery(Irccd &,
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	duk::push(m_context, origin);
 	duk::push(m_context, message);
 	call("onQuery", 3);
@@ -383,7 +379,7 @@ void JsPlugin::onQueryCommand(Irccd &,
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	duk::push(m_context, origin);
 	duk::push(m_context, message);
 	call("onQueryCommand", 3);
@@ -404,7 +400,7 @@ void JsPlugin::onTopic(Irccd &,
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	duk::push(m_context, origin);
 	duk::push(m_context, channel);
 	duk::push(m_context, topic);
@@ -425,7 +421,7 @@ void JsPlugin::onWhois(Irccd &, const std::shared_ptr<Server> &server, const Ser
 {
 	duk::StackAssert sa(m_context);
 
-	duk::push(m_context, duk::Shared<Server>{server});
+	duk::push(m_context, server);
 	duk::push(m_context, duk::Object{});
 	duk::putProperty(m_context, -1, "nickname", whois.nick);
 	duk::putProperty(m_context, -1, "username", whois.user);

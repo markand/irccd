@@ -39,7 +39,7 @@ class Module;
 class JsPlugin : public Plugin {
 private:
 	// JavaScript context
-	duk::Context m_context;
+	duk::UniqueContext m_context;
 
 	// Store loaded modules.
 	std::vector<std::shared_ptr<Module>> m_modules;
@@ -67,7 +67,7 @@ public:
 	 *
 	 * \return the context
 	 */
-	inline duk::Context &context() noexcept
+	inline duk::UniqueContext &context() noexcept
 	{
 		return m_context;
 	}

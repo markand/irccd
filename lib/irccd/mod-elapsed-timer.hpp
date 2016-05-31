@@ -41,7 +41,7 @@ public:
 	/**
 	 * \copydoc Module::load
 	 */
-	IRCCD_EXPORT virtual void load(Irccd &irccd, JsPlugin &plugin);
+	IRCCD_EXPORT void load(Irccd &irccd, JsPlugin &plugin) override;
 };
 
 } // !irccd

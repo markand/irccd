@@ -36,41 +36,34 @@ namespace duk {
  * \brief JavaScript binding for Server.
  */
 template <>
-class TypeTraits<irccd::Server> {
+class TypeTraits<std::shared_ptr<Server>> {
 public:
 	/**
-	 * Push the Server prototype.
+	 * Construct a server.
+	 *
+	 * \pre server != nullptr
+	 * \param ctx the context
+	 * \param server the server
+	 */
+	IRCCD_EXPORT static void construct(Context *ctx, std::shared_ptr<Server> server);
+
+	/**
+	 * Push a server.
+	 *
+	 * \pre server != nullptr
+	 * \param ctx the context
+	 * \param server the server
+	 */
+	IRCCD_EXPORT static void push(Context *ctx, std::shared_ptr<Server>);
+
+	/**
+	 * Require a server. Raise a JavaScript error if not a Server.
 	 *
 	 * \param ctx the context
+	 * \param index the index
+	 * \return the server
 	 */
-	static inline void prototype(ContextPtr ctx)
-	{
-		getGlobal<void>(ctx, "Irccd");
-		getProperty<void>(ctx, -1, "Server");
-		getProperty<void>(ctx, -1, "prototype");
-		remove(ctx, -2);
-		remove(ctx, -2);
-	}
-
-	/**
-	 * Get the Server signature.
-	 *
-	 * \return Server
-	 */
-	static inline std::string name()
-	{
-		return "\xff""\xff""Server";
-	}
-
-	/**
-	 * Get the inheritance list.
-	 *
-	 * \return empty
-	 */
-	static inline std::vector<std::string> inherits()
-	{
-		return {};
-	}
+	IRCCD_EXPORT static std::shared_ptr<Server> require(Context *ctx, Index index);
 };
 
 } // !duk

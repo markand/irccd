@@ -62,7 +62,7 @@ public:
 	 *
 	 * \param ctx the context
 	 */
-	IRCCD_EXPORT void raise(duk::ContextPtr ctx) const;
+	IRCCD_EXPORT void raise(duk::Context *ctx) const;
 };
 
 /**

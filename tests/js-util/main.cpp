@@ -48,7 +48,7 @@ TEST_F(TestJsUtil, formatSimple)
 		);
 
 		if (ret != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -58,7 +58,7 @@ TEST_F(TestJsUtil, splituser)
 {
 	try {
 		if (duk::pevalString(m_plugin->context(), "result = Irccd.Util.splituser(\"user!~user@hyper/super/host\");") != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		ASSERT_EQ("user", duk::getGlobal<std::string>(m_plugin->context(), "result"));
 	} catch (const std::exception &ex) {
@@ -70,7 +70,7 @@ TEST_F(TestJsUtil, splithost)
 {
 	try {
 		if (duk::pevalString(m_plugin->context(), "result = Irccd.Util.splithost(\"user!~user@hyper/super/host\");") != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		ASSERT_EQ("!~user@hyper/super/host", duk::getGlobal<std::string>(m_plugin->context(), "result"));
 	} catch (const std::exception &ex) {

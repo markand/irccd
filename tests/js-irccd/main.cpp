@@ -48,7 +48,7 @@ TEST_F(TestJsIrccd, version)
 		);
 
 		if (ret != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		ASSERT_EQ(IRCCD_VERSION_MAJOR, duk::getGlobal<int>(m_plugin->context(), "major"));
 		ASSERT_EQ(IRCCD_VERSION_MINOR, duk::getGlobal<int>(m_plugin->context(), "minor"));
@@ -74,7 +74,7 @@ TEST_F(TestJsIrccd, fromJavascript)
 		);
 
 		if (ret != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		ASSERT_EQ(1, duk::getGlobal<int>(m_plugin->context(), "errno"));
 		ASSERT_EQ("SystemError", duk::getGlobal<std::string>(m_plugin->context(), "name"));
@@ -89,7 +89,7 @@ TEST_F(TestJsIrccd, fromJavascript)
 TEST_F(TestJsIrccd, fromNative)
 {
 	try {
-		duk::push(m_plugin->context(), duk::Function{[] (duk::ContextPtr ctx) -> duk::Ret {
+		duk::push(m_plugin->context(), duk::Function{[] (duk::Context *ctx) -> duk::Ret {
 			duk::raise(ctx, SystemError{EINVAL, "hey"});
 
 			return 0;
@@ -110,7 +110,7 @@ TEST_F(TestJsIrccd, fromNative)
 		);
 
 		if (ret != 0)
-			throw duk::error(m_plugin->context(), -1);
+			throw duk::exception(m_plugin->context(), -1);
 
 		ASSERT_EQ(EINVAL, duk::getGlobal<int>(m_plugin->context(), "errno"));
 		ASSERT_EQ("SystemError", duk::getGlobal<std::string>(m_plugin->context(), "name"));

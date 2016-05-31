@@ -23,6 +23,7 @@
 #include <irccd/mod-system.hpp>
 #include <irccd/plugin-js.hpp>
 #include <irccd/service-module.hpp>
+#include <irccd/sysconfig.hpp>
 #include <irccd/system.hpp>
 
 using namespace irccd;
@@ -36,6 +37,7 @@ protected:
 		: m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
 	{
 		m_irccd.moduleService().get("Irccd")->load(m_irccd, *m_plugin);
+		m_irccd.moduleService().get("Irccd.File")->load(m_irccd, *m_plugin);
 		m_irccd.moduleService().get("Irccd.System")->load(m_irccd, *m_plugin);
 	}
 };
@@ -50,6 +52,27 @@ TEST_F(TestJsSystem, home)
 		FAIL() << ex.what();
 	}
 }
+
+#if defined(HAVE_POPEN)
+
+TEST_F(TestJsSystem, popen)
+{
+	try {
+		auto ret = duk::pevalString(m_plugin->context(),
+			"f = Irccd.System.popen(\"" IRCCD_EXECUTABLE " --version\", \"r\");"
+			"r = f.readline();"
+		);
+
+		if (ret != 0)
+			throw duk::exception(m_plugin->context(), -1);
+
+		ASSERT_EQ(IRCCD_VERSION, duk::getGlobal<std::string>(m_plugin->context(), "r"));
+	} catch (const std::exception &ex) {
+		FAIL() << ex.what();
+	}
+}
+
+#endif
 
 int main(int argc, char **argv)
 {

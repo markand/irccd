@@ -142,41 +142,33 @@ namespace duk {
  * \brief JavaScript binding for File.
  */
 template <>
-class TypeTraits<File> {
+class TypeTraits<File *> {
 public:
 	/**
-	 * Push the File prototype.
+	 * Construct the file.
+	 *
+	 * \pre fp != nullptr
+	 * \param ctx the the context
+	 * \param fp the file
+	 */
+	IRCCD_EXPORT static void construct(duk::Context *ctx, File *fp);
+
+	/**
+	 * Push a file.
+	 *
+	 * \pre fp != nullptr
+	 * \param ctx the the context
+	 * \param fp the file
+	 */
+	IRCCD_EXPORT static void push(duk::Context *ctx, File *fp);
+
+	/**
+	 * Require a file. Raises a JavaScript error if not a File.
 	 *
 	 * \param ctx the context
+	 * \param index the index
 	 */
-	static inline void prototype(ContextPtr ctx)
-	{
-		getGlobal<void>(ctx, "Irccd");
-		getGlobal<void>(ctx, "File");
-		getProperty<void>(ctx, -1, "prototype");
-		remove(ctx, -2);
-		remove(ctx, -2);
-	}
-
-	/**
-	 * Get the File signature.
-	 *
-	 * \return File
-	 */
-	static inline std::string name()
-	{
-		return "\xff""\xff""File";
-	}
-
-	/**
-	 * Get the inheritance list.
-	 *
-	 * \return empty
-	 */
-	static inline std::vector<std::string> inherits()
-	{
-		return {};
-	}
+	IRCCD_EXPORT static File *require(duk::Context *ctx, Index index);
 };
 
 } // !duk

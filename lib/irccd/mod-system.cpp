@@ -47,7 +47,7 @@ namespace {
  * Returns:
  *   The value.
  */
-int env(duk::ContextPtr ctx)
+int env(duk::Context *ctx)
 {
 	duk::push(ctx, sys::env(duk::get<std::string>(ctx, 0)));
 
@@ -63,7 +63,7 @@ int env(duk::ContextPtr ctx)
  * Arguments:
  *   - cmd, the command to execute.
  */
-int exec(duk::ContextPtr ctx)
+int exec(duk::Context *ctx)
 {
 	std::system(duk::get<const char *>(ctx, 0));
 
@@ -79,7 +79,7 @@ int exec(duk::ContextPtr ctx)
  * Returns:
  *   The user home directory.
  */
-int home(duk::ContextPtr ctx)
+int home(duk::Context *ctx)
 {
 	duk::push(ctx, sys::home());
 
@@ -95,7 +95,7 @@ int home(duk::ContextPtr ctx)
  * Returns:
  *   The system name.
  */
-int name(duk::ContextPtr ctx)
+int name(duk::Context *ctx)
 {
 	duk::push(ctx, sys::name());
 
@@ -118,14 +118,14 @@ int name(duk::ContextPtr ctx)
  * Throws
  *   - Irccd.SystemError on failures.
  */
-int popen(duk::ContextPtr ctx)
+int popen(duk::Context *ctx)
 {
 	auto fp = ::popen(duk::require<const char *>(ctx, 0), duk::require<const char *>(ctx, 1));
 
 	if (fp == nullptr)
 		duk::raise(ctx, SystemError{});
 
-	duk::push(ctx, duk::Pointer<File>{new File(fp, [] (std::FILE *fp) { ::pclose(fp); })});
+	duk::push(ctx, new File(fp, [] (std::FILE *fp) { ::pclose(fp); }));
 
 	return 1;
 }
@@ -138,7 +138,7 @@ int popen(duk::ContextPtr ctx)
  *
  * Sleep the main loop for the specific delay in seconds.
  */
-int sleep(duk::ContextPtr ctx)
+int sleep(duk::Context *ctx)
 {
 	std::this_thread::sleep_for(std::chrono::seconds(duk::get<int>(ctx, 0)));
 
@@ -154,7 +154,7 @@ int sleep(duk::ContextPtr ctx)
  * Returns:
  *   The number of milliseconds.
  */
-int ticks(duk::ContextPtr ctx)
+int ticks(duk::Context *ctx)
 {
 	duk::push(ctx, static_cast<int>(sys::ticks()));
 
@@ -167,7 +167,7 @@ int ticks(duk::ContextPtr ctx)
  *
  * Sleep the main loop for the specific delay in microseconds.
  */
-int usleep(duk::ContextPtr ctx)
+int usleep(duk::Context *ctx)
 {
 	std::this_thread::sleep_for(std::chrono::microseconds(duk::get<int>(ctx, 0)));
 
@@ -183,7 +183,7 @@ int usleep(duk::ContextPtr ctx)
  * Returns:
  *   The system uptime.
  */
-int uptime(duk::ContextPtr ctx)
+int uptime(duk::Context *ctx)
 {
 	duk::push<int>(ctx, sys::uptime());
 
@@ -199,7 +199,7 @@ int uptime(duk::ContextPtr ctx)
  * Returns:
  *   The system version.
  */
-int version(duk::ContextPtr ctx)
+int version(duk::Context *ctx)
 {
 	duk::push(ctx, sys::version());
 
@@ -234,7 +234,7 @@ void SystemModule::load(Irccd &, JsPlugin &plugin)
 
 	duk::getGlobal<void>(plugin.context(), "Irccd");
 	duk::push(plugin.context(), duk::Object{});
-	duk::push(plugin.context(), functions);
+	duk::put(plugin.context(), functions);
 	duk::putProperty(plugin.context(), -2, "System");
 	duk::pop(plugin.context());
 }

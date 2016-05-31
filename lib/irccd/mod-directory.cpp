@@ -36,7 +36,7 @@ namespace irccd {
 
 namespace {
 
-std::string path(duk::ContextPtr ctx)
+std::string path(duk::Context *ctx)
 {
 	duk::push(ctx, duk::This{});
 	duk::getProperty<void>(ctx, -1, "path");
@@ -125,7 +125,7 @@ std::string findRegex(const std::string &base, std::string pattern, bool recursi
  *
  * The patternIndex is the argument where to test if the argument is a regex or a string.
  */
-duk::Ret find(duk::ContextPtr ctx, std::string base, bool recursive, int patternIndex)
+duk::Ret find(duk::Context *ctx, std::string base, bool recursive, int patternIndex)
 {
 	base = path::clean(base);
 
@@ -165,7 +165,7 @@ duk::Ret find(duk::ContextPtr ctx, std::string base, bool recursive, int pattern
  * - Directory.remove
  * - Directory.prototype.remove
  */
-duk::Ret remove(duk::ContextPtr ctx, const std::string &path, bool recursive)
+duk::Ret remove(duk::Context *ctx, const std::string &path, bool recursive)
 {
 	if (!fs::isDirectory(path))
 		duk::raise(ctx, SystemError(EINVAL, "not a directory"));
@@ -197,7 +197,7 @@ duk::Ret remove(duk::ContextPtr ctx, const std::string &path, bool recursive)
  * Throws:
  *   - Any exception on error.
  */
-duk::Ret methodFind(duk::ContextPtr ctx)
+duk::Ret methodFind(duk::Context *ctx)
 {
 	return find(ctx, path(ctx), duk::optional<bool>(ctx, 1, false), 0);
 }
@@ -214,7 +214,7 @@ duk::Ret methodFind(duk::ContextPtr ctx)
  * Throws:
  *   - Any exception on error.
  */
-duk::Ret methodRemove(duk::ContextPtr ctx)
+duk::Ret methodRemove(duk::Context *ctx)
 {
 	return remove(ctx, path(ctx), duk::optional<bool>(ctx, 0, false));
 }
@@ -240,7 +240,7 @@ const duk::FunctionMap methods{
  * Throws:
  *   - Any exception on error
  */
-duk::Ret constructor(duk::ContextPtr ctx)
+duk::Ret constructor(duk::Context *ctx)
 {
 	if (!duk_is_constructor_call(ctx))
 		return 0;
@@ -292,7 +292,7 @@ duk::Ret constructor(duk::ContextPtr ctx)
  * Returns:
  *   The path to the file or undefined on errors or not found.
  */
-duk::Ret funcFind(duk::ContextPtr ctx)
+duk::Ret funcFind(duk::Context *ctx)
 {
 	return find(ctx, duk::require<std::string>(ctx, 0), duk::optional<bool>(ctx, 2, false), 1);
 }
@@ -309,7 +309,7 @@ duk::Ret funcFind(duk::ContextPtr ctx)
  * Throws:
  *   - Any exception on error.
  */
-duk::Ret funcRemove(duk::ContextPtr ctx)
+duk::Ret funcRemove(duk::Context *ctx)
 {
 	return remove(ctx, duk::require<std::string>(ctx, 0), duk::optional<bool>(ctx, 1, false));
 }
@@ -327,7 +327,7 @@ duk::Ret funcRemove(duk::ContextPtr ctx)
  * Throws:
  *   - Any exception on error.
  */
-duk::Ret funcMkdir(duk::ContextPtr ctx)
+duk::Ret funcMkdir(duk::Context *ctx)
 {
 	try {
 		fs::mkdir(duk::require<std::string>(ctx, 0), duk::optional<int>(ctx, 1, 0700));
@@ -366,11 +366,11 @@ void DirectoryModule::load(Irccd &, JsPlugin &plugin)
 
 	duk::getGlobal<void>(plugin.context(), "Irccd");
 	duk::push(plugin.context(), duk::Function{constructor, 2});
-	duk::push(plugin.context(), constants);
-	duk::push(plugin.context(), functions);
+	duk::put(plugin.context(), constants);
+	duk::put(plugin.context(), functions);
 	duk::putProperty(plugin.context(), -1, "separator", std::string{fs::separator()});
 	duk::push(plugin.context(), duk::Object{});
-	duk::push(plugin.context(), methods);
+	duk::put(plugin.context(), methods);
 	duk::putProperty(plugin.context(), -2, "prototype");
 	duk::putProperty(plugin.context(), -2, "Directory");
 	duk::pop(plugin.context());
