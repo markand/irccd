@@ -22,13 +22,6 @@ project(doc)
 add_custom_target(
 	all-docs ALL
 	COMMENT "Building irccd documentation"
-	SOURCES
-		${doc_SOURCE_DIR}/procs/README.md
-		${doc_SOURCE_DIR}/procs/00.tests.md
-		${doc_SOURCE_DIR}/procs/00.new-release.md
-		${doc_SOURCE_DIR}/procs/20.options.md
-		${doc_SOURCE_DIR}/procs/30.options.md
-		${doc_SOURCE_DIR}/procs/60.new-command.md
 )
 
 set_target_properties(
