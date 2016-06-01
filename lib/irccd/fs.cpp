@@ -349,7 +349,6 @@ void rmdir(const std::string &base) noexcept
 				(void)::remove(path.c_str());
 		}
 	} catch (...) {
-		/* Silently discard to remove as much as possible */
 	}
 
 #if defined(_WIN32)

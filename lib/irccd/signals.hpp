@@ -35,9 +35,8 @@ namespace irccd {
  * \class SignalConnection
  * \brief Stores the reference to the callable
  *
- * This class can be stored to remove a registered function from a Signal, be
- * careful to not mix connections between different signals as they are just
- * referenced by ids.
+ * This class can be stored to remove a registered function from a Signal, be careful to not mix connections between different signals as
+ * they are just referenced by ids.
  */
 class SignalConnection {
 private:
@@ -148,8 +147,7 @@ public:
 	void operator()(Args... args) const
 	{
 		/*
-		 * Make a copy of the ids before iterating because the callbacks may eventually remove or modify
-		 * the list.
+		 * Make a copy of the ids before iterating because the callbacks may eventually remove or modify the list.
 		 */
 		std::vector<unsigned> ids;
 
@@ -157,8 +155,8 @@ public:
 			ids.push_back(pair.first);
 
 		/*
-		 * Now iterate while checking if the next id is still available, however if any new signals were
-		 * added while iterating, they will not be called immediately.
+		 * Now iterate while checking if the next id is still available, however if any new signals were added while iterating, they
+		 * will not be called immediately.
 		 */
 		for (unsigned i : ids) {
 			auto it = m_functions.find(i);

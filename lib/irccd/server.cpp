@@ -57,13 +57,12 @@ inline std::string strify(const char *s)
  */
 std::string cleanPrefix(const ServerInfo &info, std::string nickname)
 {
-	if (nickname.length() > 0) {
-		for (const auto &pair : info.modes) {
-			if (nickname[0] == pair.second) {
-				nickname.erase(0, 1);
-			}
-		}
-	}
+	if (nickname.length() == 0)
+		return nickname;
+
+	for (const auto &pair : info.modes)
+		if (nickname[0] == pair.second)
+			nickname.erase(0, 1);
 
 	return nickname;
 }
@@ -80,30 +79,27 @@ std::map<ServerChanMode, char> extractPrefixes(const std::string &line)
 	std::string buf = line.substr(7);
 	std::map<ServerChanMode, char> modes;
 
-	for (int i = 0; i < 16; ++i) {
+	for (int i = 0; i < 16; ++i)
 		table[i] = std::make_pair(-1, -1);
-	}
 
 	int j = 0;
 	bool readModes = true;
 	for (size_t i = 0; i < buf.size(); ++i) {
-		if (buf[i] == '(') {
+		if (buf[i] == '(')
 			continue;
-		}
 		if (buf[i] == ')') {
 			j = 0;
 			readModes = false;
 			continue;
 		}
 
-		if (readModes) {
+		if (readModes)
 			table[j++].first = buf[i];
-		} else {
+		else
 			table[j++].second = buf[i];
-		}
 	}
 
-	/* Put these as a map of mode to prefix */
+	// Put these as a map of mode to prefix.
 	for (int i = 0; i < 16; ++i) {
 		auto key = static_cast<ServerChanMode>(table[i].first);
 		auto value = table[i].second;
@@ -118,17 +114,17 @@ std::map<ServerChanMode, char> extractPrefixes(const std::string &line)
 
 void Server::handleConnect(const char *, const char **) noexcept
 {
-	/* Reset the number of tried reconnection. */
+	// Reset the number of tried reconnection.
 	m_cache.reconnectCurrent = 0;
 
-	/* Reset the timer. */
+	// Reset the timer.
 	m_cache.pingTimer.reset();
 
-	/* Don't forget to change state and notify. */
+	// Don't forget to change state and notify.
 	next(std::make_unique<state::Connected>());
 	onConnect();
 
-	/* Auto join listed channels. */
+	// Auto join listed channels.
 	for (const ServerChannel &channel : m_settings.channels) {
 		log::info() << "server " << m_name << ": auto joining " << channel.name << std::endl;
 		join(channel.name, channel.password);
@@ -157,10 +153,9 @@ void Server::handleCtcpAction(const char *orig, const char **params) noexcept
 
 void Server::handleInvite(const char *orig, const char **params) noexcept
 {
-	/* If joininvite is set, join the channel */
-	if ((m_settings.flags & ServerSettings::JoinInvite) && isSelf(strify(params[0]))) {
+	// If joininvite is set, join the channel.
+	if ((m_settings.flags & ServerSettings::JoinInvite) && isSelf(strify(params[0])))
 		join(strify(params[1]));
-	}
 
 	/*
 	 * The libircclient says that invite contains the target nickname, it's quite
@@ -177,10 +172,9 @@ void Server::handleJoin(const char *orig, const char **params) noexcept
 
 void Server::handleKick(const char *orig, const char **params) noexcept
 {
-	/* Rejoin the channel if the option has been set and I was kicked. */
-	if ((m_settings.flags & ServerSettings::AutoRejoin) && isSelf(strify(params[1]))) {
+	// Rejoin the channel if the option has been set and I was kicked.
+	if ((m_settings.flags & ServerSettings::AutoRejoin) && isSelf(strify(params[1])))
 		join(strify(params[0]));
-	}
 
 	onKick(strify(orig), strify(params[0]), strify(params[1]), strify(params[2]));
 }
@@ -192,19 +186,16 @@ void Server::handleMode(const char *orig, const char **params) noexcept
 
 void Server::handleNick(const char *orig, const char **params) noexcept
 {
-	/* Update our nickname. */
-	if (isSelf(strify(orig))) {
+	// Update our nickname.
+	if (isSelf(strify(orig)))
 		m_identity.nickname = strify(params[0]);
-	}
 
 	onNick(strify(orig), strify(params[0]));
 }
 
 void Server::handleNotice(const char *orig, const char **params) noexcept
 {
-	/*
-	 * As for handleInvite, the notice provides the target nickname, we discard it.
-	 */
+	// Like handleInvite, the notice provides the target nickname, we discard it.
 	onNotice(strify(orig), strify(params[1]));
 }
 
@@ -221,16 +212,14 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 		 *
 		 * IDEA for the future: maybe give the appropriate mode as a second parameter in onNames.
 		 */
-		if (c < 4 || params[2] == nullptr || params[3] == nullptr) {
+		if (c < 4 || params[2] == nullptr || params[3] == nullptr)
 			return;
-		}
 
 		std::vector<std::string> users = util::split(params[3], " \t");
 
-		/* The listing may add some prefixes, remove them if needed */
-		for (std::string u : users) {
+		// The listing may add some prefixes, remove them if needed.
+		for (std::string u : users)
 			m_cache.namesMap[params[2]].insert(cleanPrefix(m_info, u));
-		}
 	} else if (event == LIBIRC_RFC_RPL_ENDOFNAMES) {
 		/*
 		 * Called when end of name listing has finished on a channel.
@@ -239,16 +228,14 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 		 * params[1] == channel
 		 * params[2] == End of NAMES list
 		 */
-
-		if (c < 3 || params[1] == nullptr) {
+		if (c < 3 || params[1] == nullptr)
 			return;
-		}
 
 		auto it = m_cache.namesMap.find(params[1]);
 		if (it != m_cache.namesMap.end()) {
 			onNames(params[1], it->second);
 
-			/* Don't forget to remove the list */
+			// Don't forget to remove the list.
 			m_cache.namesMap.erase(it);
 		}
 	} else if (event == LIBIRC_RFC_RPL_WHOISUSER) {
@@ -262,9 +249,8 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 		 * params[4] == * (no idea what is that)
 		 * params[5] == realname
 		 */
-		if (c < 6 || !params[1] || !params[2] || !params[3] || !params[5]) {
+		if (c < 6 || !params[1] || !params[2] || !params[3] || !params[5])
 			return;
-		}
 
 		ServerWhois info;
 
@@ -282,20 +268,17 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 		 * params[1] == nickname
 		 * params[2] == list of channels with their prefixes
 		 */
-		if (c < 3 || !params[1] || !params[2]) {
+		if (c < 3 || !params[1] || !params[2])
 			return;
-		}
 
 		auto it = m_cache.whoisMap.find(params[1]);
 		if (it != m_cache.whoisMap.end()) {
 			std::vector<std::string> channels = util::split(params[2], " \t");
 
-			/* Clean their prefixes */
-			for (auto &s : channels) {
+			// Clean their prefixes.
+			for (auto &s : channels)
 				s = cleanPrefix(m_info, s);
-			}
 
-			/* Insert */
 			it->second.channels = std::move(channels);
 		}
 	} else if (event == LIBIRC_RFC_RPL_ENDOFWHOIS) {
@@ -306,12 +289,11 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 		 * params[1] == nickname
 		 * params[2] == End of WHOIS list
 		 */
-
 		auto it = m_cache.whoisMap.find(params[1]);
 		if (it != m_cache.whoisMap.end()) {
 			onWhois(it->second);
 
-			/* Don't forget to remove */
+			// Don't forget to remove.
 			m_cache.whoisMap.erase(it);
 		}
 	} else if (event == /* RPL_BOUNCE */ 5) {
@@ -334,10 +316,10 @@ void Server::handlePart(const char *orig, const char **params) noexcept
 
 void Server::handlePing(const char *, const char **params) noexcept
 {
-	/* Reset the timer to detect disconnection. */
+	// Reset the timer to detect disconnection.
 	m_cache.pingTimer.reset();
 
-	/* Don't forget to respond */
+	// Don't forget to respond.
 	send("PONG {}"_format(params[0]));
 }
 
@@ -355,9 +337,8 @@ ServerChannel Server::splitChannel(const std::string &value)
 {
 	auto pos = value.find(':');
 
-	if (pos != std::string::npos) {
+	if (pos != std::string::npos)
 		return ServerChannel{value.substr(0, pos), value.substr(pos + 1)};
-	}
 
 	return ServerChannel{value, ""};
 }
@@ -435,7 +416,7 @@ Server::Server(std::string name, ServerInfo info, ServerIdentity identity, Serve
 
 	m_session->handle() = Session::Handle{irc_create_session(&callbacks), irc_destroy_session};
 
-	/* Save this to the session */
+	// Save this to the session.
 	irc_set_ctx(*m_session, this);
 	irc_set_ctcp_version(*m_session, m_identity.ctcpversion.c_str());
 }
@@ -480,14 +461,13 @@ void Server::sync(fd_set &setinput, fd_set &setoutput)
 	bool done = false;
 
 	while (!m_queue.empty() && !done) {
-		if (m_queue.front()()) {
+		if (m_queue.front()())
 			m_queue.pop();
-		} else {
+		else
 			done = true;
-		}
 	}
 
-	/* 2. Read data */
+	// 2. Read data.
 	irc_process_select_descriptors(*m_session, &setinput, &setoutput);
 }
 
@@ -582,9 +562,8 @@ void Server::notice(std::string target, std::string message)
 void Server::part(std::string channel, std::string reason)
 {
 	m_queue.push([=] () -> bool {
-		if (reason.empty()) {
+		if (reason.empty())
 			return irc_cmd_part(*m_session, channel.c_str()) == 0;
-		}
 
 		return irc_send_raw(*m_session, "PART %s :%s", channel.c_str(), reason.c_str());
 	});

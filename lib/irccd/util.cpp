@@ -310,7 +310,7 @@ std::string strip(std::string str)
 std::vector<std::string> split(const std::string &list, const std::string &delimiters, int max)
 {
 	std::vector<std::string> result;
-	size_t next = -1, current;
+	std::size_t next = -1, current;
 	int count = 1;
 	bool finished = false;
 
@@ -383,11 +383,11 @@ bool isInt(const std::string &str, int base) noexcept
 {
 	if (str.empty())
 		return false;
-	
+
 	char *ptr;
-	
+
 	std::strtol(str.c_str(), &ptr, base);
-	
+
 	return *ptr == 0;
 }
 
@@ -395,11 +395,11 @@ bool isReal(const std::string &str) noexcept
 {
 	if (str.empty())
 		return false;
-	
+
 	char *ptr;
-	
+
 	std::strtod(str.c_str(), &ptr);
-	
+
 	return *ptr == 0;
 }
 

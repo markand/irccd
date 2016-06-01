@@ -68,7 +68,7 @@ private:
 
 	void debug(std::string line)
 	{
-	/* Print only in debug mode, the buffer is flushed anyway */
+		// Print only in debug mode, the buffer is flushed anyway.
 #if !defined(NDEBUG)
 		iface->debug(filter->preDebug(std::move(line)));
 #else
@@ -78,10 +78,9 @@ private:
 
 	void info(std::string line)
 	{
-		/* Print only if verbose, the buffer will be flushed anyway. */
-		if (verbose) {
+		// Print only if verbose, the buffer will be flushed anyway.
+		if (verbose)
 			iface->info(filter->preInfo(std::move(line)));
-		}
 	}
 
 	void warning(std::string line)
@@ -104,7 +103,7 @@ public:
 		while ((pos = buffer.find("\n")) != std::string::npos) {
 			std::string line = buffer.substr(0, pos);
 
-			/* Remove this line */
+			// Remove this line.
 			buffer.erase(buffer.begin(), buffer.begin() + pos + 1);
 
 			switch (m_level) {
@@ -133,16 +132,12 @@ public:
  * ------------------------------------------------------------------
  */
 
-/* Information buffer */
+// Buffers.
 Buffer bufferInfo{Buffer::Info};
-
-/* Warning buffer */
 Buffer bufferWarning{Buffer::Warning};
-
-/* Debug buffer */
 Buffer bufferDebug{Buffer::Debug};
 
-/* Stream outputs. */
+// Stream outputs.
 std::ostream streamInfo(&bufferInfo);
 std::ostream streamWarning(&bufferWarning);
 std::ostream streamDebug(&bufferDebug);
@@ -267,27 +262,24 @@ void setFilter(std::unique_ptr<Filter> newfilter) noexcept
 
 std::ostream &info(const std::string &message)
 {
-	if (!message.empty()) {
+	if (!message.empty())
 		streamInfo << message << std::endl;
-	}
 
 	return streamInfo;
 }
 
 std::ostream &warning(const std::string &message)
 {
-	if (!message.empty()) {
+	if (!message.empty())
 		streamWarning << message << std::endl;
-	}
 
 	return streamWarning;
 }
 
 std::ostream &debug(const std::string &message)
 {
-	if (!message.empty()) {
+	if (!message.empty())
 		streamDebug << message << std::endl;
-	}
 
 	return streamDebug;
 }

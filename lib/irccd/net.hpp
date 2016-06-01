@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef NET_HPP
-#define NET_HPP
+#ifndef IRCCD_NET_HPP
+#define IRCCD_NET_HPP
 
 /**
  * \file net.hpp
@@ -4959,4 +4959,4 @@ address::GenericAddress resolveOne(const Socket<Address, Protocol> &sc, const st
 
 } // !net
 
-#endif // !NET_HPP
+#endif // !IRCCD_NET_HPP

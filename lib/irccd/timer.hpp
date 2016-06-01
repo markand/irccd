@@ -85,7 +85,7 @@ private:
 	TimerType m_type;
 	unsigned m_delay;
 
-	/* Thread management */
+	// Thread management.
 	std::atomic<int> m_state{Paused};
 	std::mutex m_mutex;
 	std::condition_variable m_condition;

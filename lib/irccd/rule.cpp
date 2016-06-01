@@ -63,11 +63,9 @@ Rule::Rule(RuleSet servers, RuleSet channels, RuleSet origins, RuleSet plugins, 
 	, m_events(std::move(events))
 	, m_action(action)
 {
-	for (const std::string &n : m_events) {
-		if (validEvents.count(n) == 0) {
+	for (const std::string &n : m_events)
+		if (validEvents.count(n) == 0)
 			throw std::invalid_argument(n + " is not a valid event name");
-		}
-	}
 }
 
 bool Rule::match(const std::string &server,

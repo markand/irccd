@@ -57,7 +57,7 @@ void parseLongOption(Result &result, Args &args, Iterator &it, Iterator &end, co
 	if (opt == definition.end())
 		throw InvalidOption(arg);
 
-	/* Need argument? */
+	// Need argument?
 	if (opt->second) {
 		if (it == end || isOption(*it))
 			throw MissingValue(arg);
@@ -121,7 +121,7 @@ void parseShortOption(Result &result, Args &args, Iterator &it, Iterator &end, c
 
 			if (opt->second) {
 				if (i == (len - 1)) {
-					/* End of string, get the next argument (see 2.) */
+					// End of string, get the next argument (see 2.).
 					if (++it == end || isOption(*it))
 						throw MissingValue(arg);
 
@@ -131,9 +131,8 @@ void parseShortOption(Result &result, Args &args, Iterator &it, Iterator &end, c
 					result.insert(std::make_pair(arg, value.substr(i + 1)));
 					i = len;
 				}
-			} else {
+			} else
 				result.insert(std::make_pair(arg, ""));
-			}
 		}
 
 		it = args.erase(args.begin(), args.begin() + toremove);

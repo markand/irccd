@@ -73,10 +73,9 @@ std::string findPath(const std::string &base, bool recursive, Pred pred)
 	 */
 	auto entries = fs::readdir(base);
 
-	for (const auto &entry : entries) {
+	for (const auto &entry : entries)
 		if (entry.type != fs::Entry::Dir && pred(entry.name))
 			return base + entry.name;
-	}
 
 	if (!recursive)
 		return "";

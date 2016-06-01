@@ -89,11 +89,11 @@ namespace {
  *
  * Finally, when the id is resolved, the setter function (setuid, setgid) will be called.
  *
- * @param typeName the type of id (uid or gid)
- * @param value the value (numeric or name)
- * @param lookup the lookup function to resolve the name (getpwnam or getgrnam)
- * @param setter the function to apply the id (setuid or setgid)
- * @param getter the function to get the id from the informal structure
+ *   - typeName the type of id (uid or gid)
+ *   - value the value (numeric or name)
+ *   - lookup the lookup function to resolve the name (getpwnam or getgrnam)
+ *   - setter the function to apply the id (setuid or setgid)
+ *   - getter the function to get the id from the informal structure
  */
 template <typename IntType, typename LookupFunc, typename SetterFunc, typename FieldGetter>
 void setHelper(const std::string &typeName, const std::string &value, LookupFunc lookup, SetterFunc setter, FieldGetter getter)
@@ -203,7 +203,6 @@ uint64_t uptime()
 
 	return difftime(csec, bsec);
 #else
-	// BSD.
 	struct timespec ts;
 
 	if (clock_gettime(CLOCK_UPTIME, &ts) < 0)

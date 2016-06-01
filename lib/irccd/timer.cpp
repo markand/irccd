@@ -28,27 +28,25 @@ void Timer::run()
 	while (m_state != Stopped) {
 		std::unique_lock<std::mutex> lock(m_mutex);
 
-		/* Wait in case the timer is paused */
+		// Wait in case the timer is paused.
 		m_condition.wait(lock, [&] () {
 			return m_state != Paused;
 		});
 
-		if (m_state != Running) {
+		if (m_state != Running)
 			continue;
-		}
 
-		/* Wait the timer delay or the interrupt */
+		// Wait the timer delay or the interrupt.
 		m_condition.wait_for(lock, std::chrono::milliseconds(m_delay), [&] () {
 			return m_state != Running;
 		});
 
 		if (m_state == Running) {
-			/* Signal process */
+			// Signal process.
 			onSignal();
 
-			if (m_type == TimerType::Single) {
+			if (m_type == TimerType::Single)
 				m_state = Stopped;
-			}
 		}
 	}
 
@@ -58,7 +56,7 @@ void Timer::run()
 Timer::Timer(TimerType type, unsigned delay) noexcept
 	: m_type(type)
 	, m_delay(delay)
-	, m_thread([this] () { run(); })
+	, m_thread(std::bind(&Timer::run, this))
 {
 }
 

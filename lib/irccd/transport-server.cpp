@@ -37,7 +37,7 @@ namespace irccd {
 TransportServerIp::TransportServerIp(int domain, const std::string &address, int port, bool ipv6only)
 	: m_socket(domain, SOCK_STREAM, 0)
 {
-	m_socket.set(net::option::SockReuseAddress{true});
+	m_socket.set(net::option::SockReuseAddress(true));
 
 	// Disable or enable IPv4 when using IPv6.
 	if (domain == AF_INET6)

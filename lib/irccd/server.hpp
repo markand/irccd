@@ -148,13 +148,13 @@ public:
 /**
  * \brief The class that connect to a IRC server
  *
- * The server is a class that stores callbacks which will be called on IRC events. It is the lowest part of the
- * connection to a server, it can be used directly by the user to connect to a server.
+ * The server is a class that stores callbacks which will be called on IRC events. It is the lowest part of the connection to a server, it
+ * can be used directly by the user to connect to a server.
  *
  * The server has several signals that will be emitted when data has arrived.
  *
- * When adding a server to the irccd instance using Irccd::addServer, these signals are connected to generate
- * events that will be dispatched to the plugins and to the transports.
+ * When adding a server to the ServerService in irccd, these signals are connected to generate events that will be dispatched to the plugins
+ * and to the transports.
  *
  * Note: the server is set in non blocking mode, commands are placed in a queue and sent when only when they are ready.
  */

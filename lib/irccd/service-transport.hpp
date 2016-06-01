@@ -82,7 +82,6 @@ public:
 	 * \param data the data
 	 */
 	IRCCD_EXPORT void broadcast(std::string data);
-
 };
 
 } // !irccd

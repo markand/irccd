@@ -84,15 +84,14 @@ std::string executablePath()
 {
 	std::string result;
 	std::size_t size = MAX_PATH;
-	
+
 	result.resize(size);
-	
-	if (!(size = GetModuleFileNameA(nullptr, &result[0], size))) {
+
+	if (!(size = GetModuleFileNameA(nullptr, &result[0], size)))
 		throw std::runtime_error("GetModuleFileName error");
-	}
-	
+
 	result.resize(size);
-	
+
 	return result;
 }
 
@@ -101,17 +100,16 @@ std::string executablePath()
 std::string executablePath()
 {
 	std::string result;
-	
+
 	result.resize(2048);
-	
+
 	auto size = readlink("/proc/self/exe", &result[0], 2048);
-	
-	if (size < 0) {
+
+	if (size < 0)
 		throw std::invalid_argument(std::strerror(errno));
-	}
-	
+
 	result.resize(size);
-	
+
 	return result;
 }
 
@@ -122,15 +120,14 @@ std::string executablePath()
 	std::array<int, 4> mib{ { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 } };
 	std::string result;
 	std::size_t size = PATH_MAX + 1;
-	
+
 	result.resize(size);
-	
-	if (sysctl(mib.data(), 4, &result[0], &size, nullptr, 0) < 0) {
+
+	if (sysctl(mib.data(), 4, &result[0], &size, nullptr, 0) < 0)
 		throw std::runtime_error(std::strerror(errno));
-	}
-	
+
 	result.resize(size);
-	
+
 	return result;
 }
 
@@ -140,15 +137,14 @@ std::string executablePath()
 {
 	std::string result;
 	std::size_t size = PROC_PIDPATHINFO_MAXSIZE;
-	
+
 	result.resize(size);
-	
-	if ((size = proc_pidpath(getpid(), &result[0], size)) == 0) {
+
+	if ((size = proc_pidpath(getpid(), &result[0], size)) == 0)
 		throw std::runtime_error(std::strerror(errno));
-	}
-	
+
 	result.resize(size);
-	
+
 	return result;
 }
 
@@ -234,9 +230,9 @@ std::string userConfig()
 #if defined(IRCCD_SYSTEM_WINDOWS)
 	char path[MAX_PATH];
 
-	if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, path) != S_OK) {
+	if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, path) != S_OK)
 		oss << "";
-	} else {
+	else {
 		oss << path;
 		oss << "\\irccd\\config\\";
 	}
@@ -249,9 +245,8 @@ std::string userConfig()
 	} catch (const std::exception &) {
 		const char *home = getenv("HOME");
 
-		if (home != nullptr) {
+		if (home != nullptr)
 			oss << home;
-		}
 
 		oss << "/.config/irccd/";
 	}
@@ -282,9 +277,9 @@ std::string userData()
 #if defined(IRCCD_SYSTEM_WINDOWS)
 	char path[MAX_PATH];
 
-	if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, path) != S_OK) {
+	if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, path) != S_OK)
 		oss << "";
-	} else {
+	else {
 		oss << path;
 		oss << "\\irccd\\share";
 	}
@@ -297,9 +292,8 @@ std::string userData()
 	} catch (const std::exception &) {
 		const char *home = getenv("HOME");
 
-		if (home != nullptr) {
+		if (home != nullptr)
 			oss << home;
-		}
 
 		oss << "/.local/share/irccd/";
 	}
@@ -342,9 +336,8 @@ std::string userCache()
 	} catch (const std::exception &) {
 		const char *home = getenv("HOME");
 
-		if (home != nullptr) {
+		if (home != nullptr)
 			oss << home;
-		}
 
 		oss << "/.cache/irccd/";
 	}
@@ -394,9 +387,9 @@ void setApplicationPath(const std::string &argv0)
 	 * In the worst case use current working directory.
 	 */
 	if (base.empty()) {
-		if (fs::isAbsolute(argv0)) {
+		if (fs::isAbsolute(argv0))
 			base = argv0;
-		} else {
+		else {
 			std::string name = fs::baseName(argv0);
 
 			for (const auto &dir : util::split(sys::env("PATH"), std::string(1, Separator))) {
@@ -408,21 +401,19 @@ void setApplicationPath(const std::string &argv0)
 				}
 			}
 
-			/* Not found in PATH? add dummy value */
-			if (base.empty()) {
+			// Not found in PATH? add dummy value.
+			if (base.empty())
 				base = std::string(".") + fs::separator() + WITH_BINDIR + fs::separator() + "dummy";
-			}
 		}
 	}
 
-	/* Find bin/<progname> */
+	// Find bin/<progname>.
 	auto pos = base.rfind(std::string(WITH_BINDIR) + fs::separator() + fs::baseName(base));
 
-	if (pos != std::string::npos) {
+	if (pos != std::string::npos)
 		base.erase(pos);
-	}
 
-	/* Add trailing / or \\ for convenience */
+	// Add trailing / or \\ for convenience.
 	base = clean(base);
 
 	assert(!base.empty());
@@ -430,22 +421,20 @@ void setApplicationPath(const std::string &argv0)
 
 std::string clean(std::string input)
 {
-	if (input.empty()) {
+	if (input.empty())
 		return input;
-	}
 
-	/* First, remove any duplicates */
+	// First, remove any duplicates.
 	input.erase(std::unique(input.begin(), input.end(), [&] (char c1, char c2) {
 		return c1 == c2 && (c1 == '/' || c1 == '\\');
 	}), input.end());
 
-	/* Add a trailing / or \\ */
+	// Add a trailing / or \\.
 	char c = input[input.length() - 1];
-	if (c != '/' && c != '\\') {
+	if (c != '/' && c != '\\')
 		input += fs::separator();
-	}
 
-	/* Now converts all / to \\ for Windows and the opposite for Unix */
+	// Now converts all / to \\ for Windows and the opposite for Unix.
 #if defined(IRCCD_SYSTEM_WINDOWS)
 	std::replace(input.begin(), input.end(), '/', '\\');
 #else

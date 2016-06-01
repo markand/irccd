@@ -427,7 +427,6 @@ duk::Ret destructor(duk::Context *ctx)
 	return 0;
 }
 
-
 /*
  * Function: Irccd.Server.add(s)
  * ------------------------------------------------------------------

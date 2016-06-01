@@ -54,7 +54,7 @@ public:
 	 *
 	 * \return the number of rules
 	 */
-	inline unsigned length() const noexcept
+	inline std::size_t length() const noexcept
 	{
 		return m_rules.size();
 	}

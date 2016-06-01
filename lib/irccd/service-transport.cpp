@@ -41,7 +41,7 @@ void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const j
 		// 1. Check if the Json object is valid.
 		auto name = object.find("command");
 		if (name == object.end() || name->typeOf() != json::Type::String) {
-			// TODO: send error
+			// TODO: send error.
 			log::warning("invalid command object");
 			return;
 		}
@@ -50,7 +50,7 @@ void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const j
 		auto cmd = m_irccd.commandService().find(name->toString());
 
 		if (!cmd) {
-			// TODO: send error again
+			// TODO: send error again.
 			log::warning("command does not exists");
 			return;
 		}
@@ -157,9 +157,8 @@ void TransportService::sync(fd_set &in, fd_set &out)
 	}
 
 	// Transport clients.
-	for (const auto &client : m_clients) {
+	for (const auto &client : m_clients)
 		client->sync(in, out);
-	}
 }
 
 void TransportService::add(std::shared_ptr<TransportServer> ts)

@@ -40,11 +40,9 @@ namespace irccd {
  *
  * This class can be used to prepare a set of sockets that will be selected by Irccd class.
  *
- * First, the function prepare is called, the user is responsible to fill the input and output set and adjust max
- * accordingly.
+ * First, the function prepare is called, the user is responsible to fill the input and output set and adjust max accordingly.
  *
- * Second, after select has been called, sync is called. The user is responsible of checking which sockets are ready
- * for input or output.
+ * Second, after select has been called, sync is called. The user is responsible of checking which sockets are ready for input or output.
  */
 class Service {
 public:
