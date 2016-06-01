@@ -617,7 +617,7 @@ void TypeTraits<File *>::construct(duk::Context *ctx, File *fp)
 	duk::StackAssert sa(ctx);
 
 	duk::push(ctx, duk::This());
-	duk::putProperty<void *>(ctx, -1, Signature, fp);
+	duk::putProperty(ctx, -1, Signature, static_cast<void *>(fp));
 	duk::pop(ctx);
 }
 
@@ -626,7 +626,7 @@ void TypeTraits<File *>::push(duk::Context *ctx, File *fp)
 	duk::StackAssert sa(ctx, 1);
 
 	duk::push(ctx, duk::Object());
-	duk::putProperty<void *>(ctx, -1, Signature, fp);
+	duk::putProperty(ctx, -1, Signature, static_cast<void *>(fp));
 	duk::getGlobal<void>(ctx, Prototype);
 	duk::setPrototype(ctx, -2);
 }

@@ -104,7 +104,7 @@ function write(fmt, args)
 	Logger.debug("opening: " + path);
 
 	var str = Util.format(Plugin.format[fmt], args);
-	var file = new File(path, "wa");
+	var file = new File(path, "a");
 
 	file.write(str + "\n");
 }

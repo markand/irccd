@@ -19,6 +19,7 @@
 project(gtest)
 
 irccd_define_library(
+	LOCAL
 	TARGET extern-gtest
 	SOURCES src/gtest-all.cc
 	PUBLIC_INCLUDES ${gtest_SOURCE_DIR}/include

@@ -38,7 +38,7 @@ public:
 		duk::StackAssert sa(ctx);
 
 		duk::push(ctx, duk::This());
-		duk::putProperty<void *>(ctx, -1, Signature, timer);
+		duk::putProperty(ctx, -1, Signature, static_cast<void *>(timer));
 		duk::pop(ctx);
 	}
 
