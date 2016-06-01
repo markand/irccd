@@ -166,7 +166,7 @@ std::string substituteAttributes(const std::string &content)
 std::string substituteShell(const std::string &command)
 {
 #if defined(HAVE_POPEN)
-	std::unique_ptr<std::FILE, std::function<void (std::FILE *)>> fp(popen(command.c_str(), "r"), pclose);
+	std::unique_ptr<FILE, std::function<int (FILE *)>> fp(popen(command.c_str(), "r"), pclose);
 
 	if (fp == nullptr)
 		throw std::runtime_error(std::strerror(errno));
