@@ -17,6 +17,7 @@
  */
 
 #include "mod-logger.hpp"
+#include "mod-plugin.hpp"
 #include "logger.hpp"
 #include "plugin-js.hpp"
 
@@ -24,14 +25,9 @@ namespace irccd {
 
 namespace {
 
-duk::Ret print(duk::Context *ctx, std::ostream &out)
+duk_ret_t print(duk_context *ctx, std::ostream &out)
 {
-	/*
-	 * Get the message before we start printing stuff to avoid
-	 * empty lines.
-	 */
-	out << "plugin " << duk::getGlobal<std::string>(ctx, "\xff""\xff""name");
-	out << ": " << duk::require<std::string>(ctx, 0) << std::endl;
+	out << "plugin " << duk_get_plugin(ctx)->name() << ": " << duk_require_string(ctx, 0) << std::endl;
 
 	return 0;
 }
@@ -45,7 +41,7 @@ duk::Ret print(duk::Context *ctx, std::ostream &out)
  * Arguments:
  *   - message, the message.
  */
-duk::Ret info(duk::Context *ctx)
+duk_ret_t info(duk_context *ctx)
 {
 	return print(ctx, log::info());
 }
@@ -59,7 +55,7 @@ duk::Ret info(duk::Context *ctx)
  * Arguments:
  *   - message, the warning.
  */
-duk::Ret warning(duk::Context *ctx)
+duk_ret_t warning(duk_context *ctx)
 {
 	return print(ctx, log::warning());
 }
@@ -73,15 +69,16 @@ duk::Ret warning(duk::Context *ctx)
  * Arguments:
  *   - message, the message.
  */
-duk::Ret debug(duk::Context *ctx)
+duk_ret_t debug(duk_context *ctx)
 {
 	return print(ctx, log::debug());
 }
 
-const duk::FunctionMap functions{
-	{ "info",	{ info,		1 } },
-	{ "warning",	{ warning,	1 } },
-	{ "debug",	{ debug,	1 } }
+const duk_function_list_entry functions[] = {
+	{ "info",	info,		1 },
+	{ "warning",	warning,	1 },
+	{ "debug",	debug,		1 },
+	{ nullptr,	nullptr,	0 }
 };
 
 } // !namespace
@@ -93,13 +90,13 @@ LoggerModule::LoggerModule() noexcept
 
 void LoggerModule::load(Irccd &, JsPlugin &plugin)
 {
-	duk::StackAssert sa(plugin.context());
+	StackAssert sa(plugin.context());
 
-	duk::getGlobal<void>(plugin.context(), "Irccd");
-	duk::push(plugin.context(), duk::Object{});
-	duk::put(plugin.context(), functions);
-	duk::putProperty(plugin.context(), -2, "Logger");
-	duk::pop(plugin.context());
+	duk_get_global_string(plugin.context(), "Irccd");
+	duk_push_object(plugin.context());
+	duk_put_function_list(plugin.context(), -1, functions);
+	duk_put_prop_string(plugin.context(), -2, "Logger");
+	duk_pop(plugin.context());
 }
 
 } // !irccd

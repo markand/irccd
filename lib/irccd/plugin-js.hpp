@@ -24,7 +24,7 @@
  * \brief JavaScript plugins for irccd.
  */
 
-#include "js.hpp"
+#include "duktape.hpp"
 #include "path.hpp"
 #include "plugin.hpp"
 #include "signals.hpp"
@@ -40,7 +40,7 @@ class Module;
 class JsPlugin : public Plugin {
 private:
 	// JavaScript context
-	duk::UniqueContext m_context;
+	UniqueContext m_context;
 
 	// Store loaded modules.
 	std::vector<std::shared_ptr<Module>> m_modules;
@@ -68,7 +68,7 @@ public:
 	 *
 	 * \return the context
 	 */
-	inline duk::UniqueContext &context() noexcept
+	inline UniqueContext &context() noexcept
 	{
 		return m_context;
 	}

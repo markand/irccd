@@ -54,7 +54,7 @@ void ServerEvent::operator()(Irccd &irccd) const
 		// TODO: get generic error.
 		try {
 			m_exec(*plugin);
-		} catch (const duk::Exception &info) {
+		} catch (const Exception &info) {
 			log::warning() << "plugin " << plugin->name() << ": error: " << info.what() << std::endl;
 
 			if (!info.fileName.empty())

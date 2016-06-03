@@ -24,30 +24,10 @@
  * \brief Irccd.Plugin JavaScript API.
  */
 
-#include "js.hpp"
+#include "duktape.hpp"
 #include "module.hpp"
 
 namespace irccd {
-
-namespace duk {
-
-/**
- * \brief Custom specialization for JsPlugin.
- * \note Use the dedicated get function to get the underlying JsPlugin.
- */
-template <>
-class TypeTraits<std::shared_ptr<JsPlugin>> {
-public:
-	/**
-	 * Get the plugin.
-	 *
-	 * \param ctx the context
-	 * \return the plugin
-	 */
-	IRCCD_EXPORT static std::shared_ptr<JsPlugin> get(duk::Context *ctx);
-};
-
-} // !duk
 
 /**
  * \brief Irccd.Plugin JavaScript API.
@@ -65,6 +45,14 @@ public:
 	 */
 	IRCCD_EXPORT void load(Irccd &irccd, JsPlugin &plugin) override;
 };
+
+/**
+ * Access the plugin stored in this context.
+ *
+ * \param ctx the context
+ * \return the plugin
+ */
+std::shared_ptr<JsPlugin> duk_get_plugin(duk_context *ctx);
 
 } // !irccd
 

@@ -24,49 +24,11 @@
  * \brief Irccd.Server JavaScript API.
  */
 
-#include "js.hpp"
+#include "duktape.hpp"
 #include "module.hpp"
 #include "server.hpp"
 
 namespace irccd {
-
-namespace duk {
-
-/**
- * \brief JavaScript binding for Server.
- */
-template <>
-class TypeTraits<std::shared_ptr<Server>> {
-public:
-	/**
-	 * Construct a server.
-	 *
-	 * \pre server != nullptr
-	 * \param ctx the context
-	 * \param server the server
-	 */
-	IRCCD_EXPORT static void construct(Context *ctx, std::shared_ptr<Server> server);
-
-	/**
-	 * Push a server.
-	 *
-	 * \pre server != nullptr
-	 * \param ctx the context
-	 * \param server the server
-	 */
-	IRCCD_EXPORT static void push(Context *ctx, std::shared_ptr<Server> server);
-
-	/**
-	 * Require a server. Raise a JavaScript error if not a Server.
-	 *
-	 * \param ctx the context
-	 * \param index the index
-	 * \return the server
-	 */
-	IRCCD_EXPORT static std::shared_ptr<Server> require(Context *ctx, Index index);
-};
-
-} // !duk
 
 /**
  * \brief Irccd.Server JavaScript API.
@@ -84,6 +46,24 @@ public:
 	 */
 	IRCCD_EXPORT void load(Irccd &irccd, JsPlugin &plugin) override;
 };
+
+/**
+ * Push a server.
+ *
+ * \pre server != nullptr
+ * \param ctx the context
+ * \param server the server
+ */
+IRCCD_EXPORT void duk_push_server(duk_context *ctx, std::shared_ptr<Server> server);
+
+/**
+ * Require a server. Raise a JavaScript error if not a Server.
+ *
+ * \param ctx the context
+ * \param index the index
+ * \return the server
+ */
+IRCCD_EXPORT std::shared_ptr<Server> duk_require_server(duk_context *ctx, duk_idx_t index);
 
 } // !irccd
 

@@ -2802,7 +2802,7 @@ public:
 		: m_length(length)
 	{
 		assert(address);
-		assert(length <= sizeof (sockaddr_storage));
+		assert(static_cast<unsigned>(length) <= sizeof (sockaddr_storage));
 
 		std::memset(&m_address, 0, sizeof (sockaddr_storage));
 		std::memcpy(&m_address, address, length);

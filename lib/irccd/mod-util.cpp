@@ -24,7 +24,7 @@
 
 namespace irccd {
 
-namespace duk {
+namespace {
 
 /**
  * Read parameters for Irccd.Util.format function, the object is defined as follow:
@@ -37,30 +37,22 @@ namespace duk {
  *   fieldn: ...
  * }
  */
-template <>
-class TypeTraits<util::Substitution> {
-public:
-	static util::Substitution get(duk::Context *ctx, int index)
-	{
-		util::Substitution params;
+util::Substitution getSubstitution(duk_context *ctx, int index)
+{
+	util::Substitution params;
 
-		if (!duk::is<Object>(ctx, index))
-			return params;
-
-		duk::enumerate(ctx, index, 0, true, [&] (duk::Context *) {
-			if (duk::get<std::string>(ctx, -2) == "date")
-				params.time = static_cast<time_t>(duk::get<double>(ctx, -1) / 1000);
-			else
-				params.keywords.insert({duk::get<std::string>(ctx, -2), duk::get<std::string>(ctx, -1)});
-		});
-
+	if (!duk_is_object(ctx, index))
 		return params;
-	}
-};
 
-} // !duk
+	duk_enumerate(ctx, index, 0, true, [&] (duk_context *) {
+		if (duk_get_stdstring(ctx, -2) == "date")
+			params.time = static_cast<time_t>(duk_get_number(ctx, -1) / 1000);
+		else
+			params.keywords.insert({duk_get_string(ctx, -2), duk_get_string(ctx, -1)});
+	});
 
-namespace {
+	return params;
+}
 
 /*
  * Function: Irccd.Util.format(text, parameters)
@@ -74,12 +66,12 @@ namespace {
  * Returns:
  *   The converted text.
  */
-duk::Ret format(duk::Context *ctx)
+duk_ret_t format(duk_context *ctx)
 {
 	try {
-		duk::push(ctx, util::format(duk::get<std::string>(ctx, 0), duk::get<util::Substitution>(ctx, 1)));
+		duk_push_stdstring(ctx, util::format(duk_get_stdstring(ctx, 0), getSubstitution(ctx, 1)));
 	} catch (const std::exception &ex) {
-		duk::raise(ctx, duk::SyntaxError(ex.what()));
+		duk_throw(ctx, SyntaxError(ex.what()));
 	}
 
 	return 1;
@@ -96,13 +88,13 @@ duk::Ret format(duk::Context *ctx)
  * Returns:
  *   The nickname.
  */
-duk::Ret splituser(duk::Context *ctx)
+duk_ret_t splituser(duk_context *ctx)
 {
-	const char *target = duk::require<const char *>(ctx, 0);
+	auto target = duk_require_string(ctx, 0);
 	char nick[32] = {0};
 
 	irc_target_get_nick(target, nick, sizeof (nick) -1);
-	duk::push(ctx, std::string(nick));
+	duk_push_string(ctx, nick);
 
 	return 1;
 }
@@ -118,21 +110,22 @@ duk::Ret splituser(duk::Context *ctx)
  * Returns:
  *   The hostname.
  */
-duk::Ret splithost(duk::Context *ctx)
+duk_ret_t splithost(duk_context *ctx)
 {
-	const char *target = duk::require<const char *>(ctx, 0);
+	auto target = duk_require_string(ctx, 0);
 	char host[32] = {0};
 
 	irc_target_get_host(target, host, sizeof (host) -1);
-	duk::push(ctx, std::string(host));
+	duk_push_string(ctx, host);
 
 	return 1;
 }
 
-const duk::FunctionMap functions{
-	{ "format",		{ format,	DUK_VARARGS	} },
-	{ "splituser",		{ splituser,	1		} },
-	{ "splithost",		{ splithost,	1		} }
+const duk_function_list_entry functions[] = {
+	{ "format",	format,		DUK_VARARGS	},
+	{ "splituser",	splituser,	1		},
+	{ "splithost",	splithost,	1		},
+	{ nullptr,	nullptr,	0		}
 };
 
 } // !namespace
@@ -144,13 +137,13 @@ UtilModule::UtilModule() noexcept
 
 void UtilModule::load(Irccd &, JsPlugin &plugin)
 {
-	duk::StackAssert sa(plugin.context());
+	StackAssert sa(plugin.context());
 
-	duk::getGlobal<void>(plugin.context(), "Irccd");
-	duk::push(plugin.context(), duk::Object{});
-	duk::put(plugin.context(), functions);
-	duk::putProperty(plugin.context(), -2, "Util");
-	duk::pop(plugin.context());
+	duk_get_global_string(plugin.context(), "Irccd");
+	duk_push_object(plugin.context());
+	duk_put_function_list(plugin.context(), -1, functions);
+	duk_put_prop_string(plugin.context(), -2, "Util");
+	duk_pop(plugin.context());
 }
 
 } // !irccd

@@ -104,7 +104,7 @@
 #  if defined(IRCCD_BUILDING_DLL)
 #    define IRCCD_EXPORT __declspec(dllexport)
 #  else
-#    define IRCCD_EXPORT __declspec(dllimport)
+#    define IRCCD_EXPORT
 #  endif
 #else
 #  define IRCCD_EXPORT

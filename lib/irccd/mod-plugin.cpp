@@ -19,13 +19,14 @@
 #include "irccd.hpp"
 #include "plugin-js.hpp"
 #include "service-plugin.hpp"
+#include "mod-irccd.hpp"
 #include "mod-plugin.hpp"
 
 namespace irccd {
 
 namespace {
 
-const std::string PluginGlobal{"\xff""\xff""irccd-plugin-ptr"};
+const char *PluginGlobal("\xff""\xff""irccd-plugin-ptr");
 
 /*
  * Wrap function for these functions because they all takes the same arguments.
@@ -35,16 +36,16 @@ const std::string PluginGlobal{"\xff""\xff""irccd-plugin-ptr"};
  * - unload.
  */
 template <typename Func>
-duk::Ret wrap(duk::Context *ctx, int nret, Func &&func)
+duk_idx_t wrap(duk_context *ctx, int nret, Func &&func)
 {
-	std::string name = duk::require<std::string>(ctx, 0);
+	std::string name = duk_require_string(ctx, 0);
 
 	try {
-		func(*duk::getGlobal<Irccd *>(ctx, "\xff""\xff""irccd"), name);
+		func(duk_get_irccd(ctx), name);
 	} catch (const std::out_of_range &ex) {
-		duk::raise(ctx, duk::ReferenceError(ex.what()));
+		duk_throw(ctx, ReferenceError(ex.what()));
 	} catch (const std::exception &ex) {
-		duk::raise(ctx, duk::Error(ex.what()));
+		duk_throw(ctx, Error(ex.what()));
 	}
 
 	return nret;
@@ -66,27 +67,32 @@ duk::Ret wrap(duk::Context *ctx, int nret, Func &&func)
  *
  * Arguments:
  *   - name, the plugin identifier, if not specified the current plugin is selected.
- * Returns:
+ * duk_idx_turns:
  *   The plugin information or undefined if the plugin was not found.
  */
-duk::Ret info(duk::Context *ctx)
+duk_idx_t info(duk_context *ctx)
 {
-	Plugin *plugin = nullptr;
+	std::shared_ptr<Plugin> plugin;
 
-	if (duk::top(ctx) >= 1)
-		plugin = duk::getGlobal<Irccd *>(ctx, "\xff""\xff""irccd")->pluginService().get(duk::require<std::string>(ctx, 0)).get();
+	if (duk_get_top(ctx) >= 1)
+		plugin = duk_get_irccd(ctx).pluginService().get(duk_require_string(ctx, 0));
 	else
-		plugin = duk::getGlobal<Plugin *>(ctx, "\xff""\xff""plugin");
+		plugin = duk_get_plugin(ctx);
 
 	if (!plugin)
 		return 0;
 
-	duk::push(ctx, duk::Object{});
-	duk::putProperty(ctx, -1, "name", plugin->name());
-	duk::putProperty(ctx, -1, "author", plugin->author());
-	duk::putProperty(ctx, -1, "license", plugin->license());
-	duk::putProperty(ctx, -1, "summary", plugin->summary());
-	duk::putProperty(ctx, -1, "version", plugin->version());
+	duk_push_object(ctx);
+	duk_push_stdstring(ctx, plugin->name());
+	duk_put_prop_string(ctx, -2, "name");
+	duk_push_stdstring(ctx, plugin->author());
+	duk_put_prop_string(ctx, -2, "author");
+	duk_push_stdstring(ctx, plugin->license());
+	duk_put_prop_string(ctx, -2, "license");
+	duk_push_stdstring(ctx, plugin->summary());
+	duk_put_prop_string(ctx, -2, "summary");
+	duk_push_stdstring(ctx, plugin->version());
+	duk_put_prop_string(ctx, -2, "version");
 
 	return 1;
 }
@@ -97,16 +103,18 @@ duk::Ret info(duk::Context *ctx)
  *
  * Get the list of plugins, the array returned contains all plugin names.
  *
- * Returns:
+ * duk_idx_turns:
  *   The list of all plugin names.
  */
-duk::Ret list(duk::Context *ctx)
+duk_idx_t list(duk_context *ctx)
 {
-	duk::push(ctx, duk::Array{});
+	duk_push_array(ctx);
 
 	int i = 0;
-	for (const auto &plugin : duk::getGlobal<Irccd *>(ctx, "\xff""\xff""irccd")->pluginService().plugins())
-		duk::putProperty(ctx, -1, i++, plugin->name());
+	for (const auto &plugin : duk_get_irccd(ctx).pluginService().plugins()) {
+		duk_push_stdstring(ctx, plugin->name());
+		duk_put_prop_index(ctx, -1, i++);
+	}
 
 	return 1;
 }
@@ -123,7 +131,7 @@ duk::Ret list(duk::Context *ctx)
  *   - Error on errors,
  *   - ReferenceError if the plugin was not found.
  */
-duk::Ret load(duk::Context *ctx)
+duk_idx_t load(duk_context *ctx)
 {
 	return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
 		irccd.pluginService().load(name);
@@ -142,7 +150,7 @@ duk::Ret load(duk::Context *ctx)
  *   - Error on errors,
  *   - ReferenceError if the plugin was not found.
  */
-duk::Ret reload(duk::Context *ctx)
+duk_idx_t reload(duk_context *ctx)
 {
 	return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
 		irccd.pluginService().reload(name);
@@ -161,31 +169,23 @@ duk::Ret reload(duk::Context *ctx)
  *   - Error on errors,
  *   - ReferenceError if the plugin was not found.
  */
-duk::Ret unload(duk::Context *ctx)
+duk_idx_t unload(duk_context *ctx)
 {
 	return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
 		irccd.pluginService().unload(name);
 	});
 }
 
-const duk::FunctionMap functions{
-	{ "info",	{ info,		DUK_VARARGS	} },
-	{ "list",	{ list,		0		} },
-	{ "load",	{ load,		1		} },
-	{ "reload",	{ reload,	1		} },
-	{ "unload",	{ unload,	1		} }
+const duk_function_list_entry functions[] = {
+	{ "info",	info,		DUK_VARARGS	},
+	{ "list",	list,		0		},
+	{ "load",	load,		1		},
+	{ "reload",	reload,		1		},
+	{ "unload",	unload,		1		},
+	{ nullptr,	nullptr,	0		}
 };
 
 } // !namespace
-
-namespace duk {
-
-std::shared_ptr<JsPlugin> TypeTraits<std::shared_ptr<JsPlugin>>::get(duk::Context *ctx)
-{
-	return std::static_pointer_cast<JsPlugin>(static_cast<Plugin *>(duk::getGlobal<void *>(ctx, PluginGlobal))->shared_from_this());
-}
-
-} // !duk
 
 PluginModule::PluginModule() noexcept
 	: Module("Irccd.Plugin")
@@ -194,18 +194,30 @@ PluginModule::PluginModule() noexcept
 
 void PluginModule::load(Irccd &, JsPlugin &plugin)
 {
-	duk::StackAssert sa(plugin.context());
+	StackAssert sa(plugin.context());
 
-	duk::putGlobal<void *>(plugin.context(), PluginGlobal, &plugin);
-	duk::getGlobal<void>(plugin.context(), "Irccd");
-	duk::push(plugin.context(), duk::Object{});
-	duk::put(plugin.context(), functions);
-	duk::push(plugin.context(), duk::Object{});
-	duk::putProperty(plugin.context(), -2, "config");
-	duk::push(plugin.context(), duk::Object{});
-	duk::putProperty(plugin.context(), -2, "format");
-	duk::putProperty(plugin.context(), -2, "Plugin");
-	duk::pop(plugin.context());
+	duk_push_pointer(plugin.context(), &plugin);
+	duk_put_global_string(plugin.context(), PluginGlobal);
+	duk_get_global_string(plugin.context(), "Irccd");
+	duk_push_object(plugin.context());
+	duk_put_function_list(plugin.context(), -1, functions);
+	duk_push_object(plugin.context());
+	duk_put_prop_string(plugin.context(), -2, "config");
+	duk_push_object(plugin.context());
+	duk_put_prop_string(plugin.context(), -2, "format");
+	duk_put_prop_string(plugin.context(), -2, "Plugin");
+	duk_pop(plugin.context());
+}
+
+std::shared_ptr<JsPlugin> duk_get_plugin(duk_context *ctx)
+{
+	StackAssert sa(ctx);
+
+	duk_get_global_string(ctx, PluginGlobal);
+	auto plugin = std::static_pointer_cast<JsPlugin>(static_cast<JsPlugin *>(duk_to_pointer(ctx, -1))->shared_from_this());
+	duk_pop(ctx);
+
+	return plugin;
 }
 
 } // !irccd

@@ -24,38 +24,22 @@ namespace irccd {
 
 namespace {
 
-const std::string Signature{"\xff""\xff""irccd-elapsed-timer-ptr"};
+const char *Signature("\xff""\xff""irccd-elapsed-timer-ptr");
 
-} // !namespace
+ElapsedTimer *self(duk_context *ctx)
+{
+	StackAssert sa(ctx);
 
-namespace duk {
+	duk_push_this(ctx);
+	duk_get_prop_string(ctx, -1, Signature);
+	auto ptr = static_cast<ElapsedTimer *>(duk_to_pointer(ctx, -1));
+	duk_pop_2(ctx);
 
-template <>
-class TypeTraits<ElapsedTimer *> {
-public:
-	static inline void construct(duk::Context *ctx, ElapsedTimer *timer)
-	{
-		duk::StackAssert sa(ctx);
+	if (!ptr)
+		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not an ElapsedTimer object");
 
-		duk::push(ctx, duk::This());
-		duk::putProperty(ctx, -1, Signature, static_cast<void *>(timer));
-		duk::pop(ctx);
-	}
-
-	static inline ElapsedTimer *require(duk::Context *ctx, Index index)
-	{
-		auto ptr = static_cast<ElapsedTimer *>(duk::getProperty<void *>(ctx, index, Signature));
-
-		if (!ptr)
-			duk::raise(ctx, DUK_ERR_TYPE_ERROR, "not an ElapsedTimer object");
-
-		return ptr;
-	}
-};
-
-} // !duk
-
-namespace {
+	return ptr;
+}
 
 /*
  * Method: ElapsedTimer.pause
@@ -63,9 +47,9 @@ namespace {
  *
  * Pause the timer, without resetting the current elapsed time stored.
  */
-duk::Ret pause(duk::Context *ctx)
+duk_ret_t pause(duk_context *ctx)
 {
-	duk::self<ElapsedTimer *>(ctx)->pause();
+	self(ctx)->pause();
 
 	return 0;
 }
@@ -76,9 +60,9 @@ duk::Ret pause(duk::Context *ctx)
  *
  * Reset the elapsed time to 0, the status is not modified.
  */
-duk::Ret reset(duk::Context *ctx)
+duk_ret_t reset(duk_context *ctx)
 {
-	duk::self<ElapsedTimer *>(ctx)->reset();
+	self(ctx)->reset();
 
 	return 0;
 }
@@ -89,9 +73,9 @@ duk::Ret reset(duk::Context *ctx)
  *
  * Restart the timer without resetting the current elapsed time.
  */
-duk::Ret restart(duk::Context *ctx)
+duk_ret_t restart(duk_context *ctx)
 {
-	duk::self<ElapsedTimer *>(ctx)->restart();
+	self(ctx)->restart();
 
 	return 0;
 }
@@ -105,9 +89,9 @@ duk::Ret restart(duk::Context *ctx)
  * Returns:
  *   The time elapsed.
  */
-duk::Ret elapsed(duk::Context *ctx)
+duk_ret_t elapsed(duk_context *ctx)
 {
-	duk::push(ctx, static_cast<int>(duk::self<ElapsedTimer *>(ctx)->elapsed()));
+	duk_push_uint(ctx, self(ctx)->elapsed());
 
 	return 1;
 }
@@ -118,9 +102,12 @@ duk::Ret elapsed(duk::Context *ctx)
  *
  * Construct a new ElapsedTimer object.
  */
-duk::Ret constructor(duk::Context *ctx)
+duk_ret_t constructor(duk_context *ctx)
 {
-	duk::construct(ctx, new ElapsedTimer);
+	duk_push_this(ctx);
+	duk_push_pointer(ctx, new ElapsedTimer);
+	duk_put_prop_string(ctx, -2, Signature);
+	duk_pop_2(ctx);
 
 	return 0;
 }
@@ -131,20 +118,22 @@ duk::Ret constructor(duk::Context *ctx)
  *
  * Delete the property.
  */
-duk::Ret destructor(duk::Context *ctx)
+duk_ret_t destructor(duk_context *ctx)
 {
-	delete static_cast<ElapsedTimer *>(duk::getProperty<void *>(ctx, 0, Signature));
-
-	duk::deleteProperty(ctx, 0, Signature);
+	duk_get_prop_string(ctx, 0, Signature);
+	delete static_cast<ElapsedTimer *>(duk_to_pointer(ctx, -1));
+	duk_pop(ctx);
+	duk_del_prop_string(ctx, 0, Signature);
 
 	return 0;
 }
 
-const duk::FunctionMap methods{
-	{ "elapsed",	{ elapsed,	0 } },
-	{ "pause",	{ pause,	0 } },
-	{ "reset",	{ reset,	0 } },
-	{ "restart",	{ restart,	0 } }
+const duk_function_list_entry methods[] = {
+	{ "elapsed",	elapsed,	0 },
+	{ "pause",	pause,		0 },
+	{ "reset",	reset,		0 },
+	{ "restart",	restart,	0 },
+	{ nullptr,	nullptr,	0 }
 };
 
 } // !namespace
@@ -156,17 +145,17 @@ ElapsedTimerModule::ElapsedTimerModule() noexcept
 
 void ElapsedTimerModule::load(Irccd &, JsPlugin &plugin)
 {
-	duk::StackAssert sa(plugin.context());
+	StackAssert sa(plugin.context());
 
-	duk::getGlobal<void>(plugin.context(), "Irccd");
-	duk::push(plugin.context(), duk::Function{constructor, 0});
-	duk::push(plugin.context(), duk::Object{});
-	duk::put(plugin.context(), methods);
-	duk::push(plugin.context(), duk::Function(destructor, 1));
-	duk::setFinalizer(plugin.context(), -2);
-	duk::putProperty(plugin.context(), -2, "prototype");
-	duk::putProperty(plugin.context(), -2, "ElapsedTimer");
-	duk::pop(plugin.context());
+	duk_get_global_string(plugin.context(), "Irccd");
+	duk_push_c_function(plugin.context(), constructor, 0);
+	duk_push_object(plugin.context());
+	duk_put_function_list(plugin.context(), -1, methods);
+	duk_push_c_function(plugin.context(), destructor, 1);
+	duk_set_finalizer(plugin.context(), -2);
+	duk_put_prop_string(plugin.context(), -2, "prototype");
+	duk_put_prop_string(plugin.context(), -2, "ElapsedTimer");
+	duk_pop(plugin.context());
 }
 
 } // !irccd

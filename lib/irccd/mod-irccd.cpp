@@ -22,6 +22,24 @@
 
 namespace irccd {
 
+namespace {
+
+duk_ret_t constructor(duk_context *ctx)
+{
+	duk_push_this(ctx);
+	duk_push_int(ctx, duk_require_int(ctx, 0));
+	duk_put_prop_string(ctx, -2, "errno");
+	duk_push_string(ctx, duk_require_string(ctx, 1));
+	duk_put_prop_string(ctx, -2, "message");
+	duk_push_string(ctx, "SystemError");
+	duk_put_prop_string(ctx, -2, "name");
+	duk_pop(ctx);
+
+	return 0;
+}
+
+} // !namespace
+
 SystemError::SystemError()
 	: m_errno(errno)
 	, m_message(std::strerror(m_errno))
@@ -34,28 +52,17 @@ SystemError::SystemError(int e, std::string message)
 {
 }
 
-void SystemError::raise(duk::Context *ctx) const
+void SystemError::raise(duk_context *ctx) const
 {
-	duk::StackAssert sa(ctx, 0);
+	StackAssert sa(ctx, 0);
 
-	duk::getGlobal<void>(ctx, "Irccd");
-	duk::getProperty<void>(ctx, -1, "SystemError");
-	duk::remove(ctx, -2);
-	duk::push(ctx, m_errno);
-	duk::push(ctx, m_message);
-	duk::create(ctx, 2);
-	duk::raise(ctx);
-}
-
-duk::Ret constructor(duk::Context *ctx)
-{
-	duk::push(ctx, duk::This{});
-	duk::putProperty(ctx, -1, "errno", duk::require<int>(ctx, 0));
-	duk::putProperty(ctx, -1, "message", duk::require<std::string>(ctx, 1));
-	duk::putProperty(ctx, -1, "name", "SystemError");
-	duk::pop(ctx);
-
-	return 0;
+	duk_get_global_string(ctx, "Irccd");
+	duk_get_prop_string(ctx, -1, "SystemError");
+	duk_remove(ctx, -2);
+	duk_push_int(ctx, m_errno);
+	duk_push_stdstring(ctx, m_message);
+	duk_new(ctx, 2);
+	duk_throw(ctx);
 }
 
 IrccdModule::IrccdModule() noexcept
@@ -65,33 +72,48 @@ IrccdModule::IrccdModule() noexcept
 
 void IrccdModule::load(Irccd &irccd, JsPlugin &plugin)
 {
-	duk::StackAssert sa(plugin.context());
+	StackAssert sa(plugin.context());
 
 	// Irccd.
-	duk::push(plugin.context(), duk::Object{});
+	duk_push_object(plugin.context());
 
 	// Version.
-	duk::push(plugin.context(), duk::Object{});
-	duk::putProperty(plugin.context(), -1, "major", IRCCD_VERSION_MAJOR);
-	duk::putProperty(plugin.context(), -1, "minor", IRCCD_VERSION_MINOR);
-	duk::putProperty(plugin.context(), -1, "patch", IRCCD_VERSION_PATCH);
-	duk::putProperty(plugin.context(), -2, "version");
+	duk_push_object(plugin.context());
+	duk_push_int(plugin.context(), IRCCD_VERSION_MAJOR);
+	duk_put_prop_string(plugin.context(), -2, "major");
+	duk_push_int(plugin.context(), IRCCD_VERSION_MINOR);
+	duk_put_prop_string(plugin.context(), -2, "minor");
+	duk_push_int(plugin.context(), IRCCD_VERSION_PATCH);
+	duk_put_prop_string(plugin.context(), -2, "patch");
+	duk_put_prop_string(plugin.context(), -2, "version");
 
 	// Create the SystemError that inherits from Error.
-	duk::push(plugin.context(), duk::Function{constructor, 2});
-	duk::push(plugin.context(), duk::Object{});
-	duk::getGlobal<void>(plugin.context(), "Error");
-	duk::getProperty<void>(plugin.context(), -1, "prototype");
-	duk::remove(plugin.context(), -2);
-	duk::setPrototype(plugin.context(), -2);
-	duk::putProperty(plugin.context(), -2, "prototype");
-	duk::putProperty(plugin.context(), -2, "SystemError");
+	duk_push_c_function(plugin.context(), constructor, 2);
+	duk_push_object(plugin.context());
+	duk_get_global_string(plugin.context(), "Error");
+	duk_put_prop_string(plugin.context(), -1, "prototype");
+	duk_remove(plugin.context(), -2);
+	duk_set_prototype(plugin.context(), -2);
+	duk_put_prop_string(plugin.context(), -2, "prototype");
+	duk_put_prop_string(plugin.context(), -2, "SystemError");
 
 	// Set Irccd as global.
-	duk::putGlobal(plugin.context(), "Irccd");
+	duk_put_global_string(plugin.context(), "Irccd");
 
 	// Store global instance.
-	duk::putGlobal(plugin.context(), "\xff""\xff""irccd",&irccd);
+	duk_push_pointer(plugin.context(), &irccd);
+	duk_put_global_string(plugin.context(), "\xff""\xff""irccd-ref");
+}
+
+Irccd &duk_get_irccd(duk_context *ctx)
+{
+	StackAssert sa(ctx);
+
+	duk_get_global_string(ctx, "\xff""\xff""irccd-ref");
+	Irccd *irccd = static_cast<Irccd *>(duk_to_pointer(ctx, -1));
+	duk_pop(ctx);
+
+	return *irccd;
 }
 
 } // !irccd

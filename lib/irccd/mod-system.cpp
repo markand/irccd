@@ -47,9 +47,9 @@ namespace {
  * Returns:
  *   The value.
  */
-int env(duk::Context *ctx)
+duk_ret_t env(duk_context *ctx)
 {
-	duk::push(ctx, sys::env(duk::get<std::string>(ctx, 0)));
+	duk_push_stdstring(ctx, sys::env(duk_get_string(ctx, 0)));
 
 	return 1;
 }
@@ -63,9 +63,9 @@ int env(duk::Context *ctx)
  * Arguments:
  *   - cmd, the command to execute.
  */
-int exec(duk::Context *ctx)
+duk_ret_t exec(duk_context *ctx)
 {
-	std::system(duk::get<const char *>(ctx, 0));
+	std::system(duk_get_string(ctx, 0));
 
 	return 0;
 }
@@ -79,9 +79,9 @@ int exec(duk::Context *ctx)
  * Returns:
  *   The user home directory.
  */
-int home(duk::Context *ctx)
+duk_ret_t home(duk_context *ctx)
 {
-	duk::push(ctx, sys::home());
+	duk_push_stdstring(ctx, sys::home());
 
 	return 1;
 }
@@ -95,9 +95,9 @@ int home(duk::Context *ctx)
  * Returns:
  *   The system name.
  */
-int name(duk::Context *ctx)
+duk_ret_t name(duk_context *ctx)
 {
-	duk::push(ctx, sys::name());
+	duk_push_stdstring(ctx, sys::name());
 
 	return 1;
 }
@@ -118,14 +118,14 @@ int name(duk::Context *ctx)
  * Throws
  *   - Irccd.SystemError on failures.
  */
-int popen(duk::Context *ctx)
+duk_ret_t popen(duk_context *ctx)
 {
-	auto fp = ::popen(duk::require<const char *>(ctx, 0), duk::require<const char *>(ctx, 1));
+	auto fp = ::popen(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
 
 	if (fp == nullptr)
-		duk::raise(ctx, SystemError{});
+		duk_throw(ctx, SystemError());
 
-	duk::push(ctx, new File(fp, [] (std::FILE *fp) { ::pclose(fp); }));
+	duk_push_file(ctx, new File(fp, [] (std::FILE *fp) { ::pclose(fp); }));
 
 	return 1;
 }
@@ -138,9 +138,9 @@ int popen(duk::Context *ctx)
  *
  * Sleep the main loop for the specific delay in seconds.
  */
-int sleep(duk::Context *ctx)
+duk_ret_t sleep(duk_context *ctx)
 {
-	std::this_thread::sleep_for(std::chrono::seconds(duk::get<int>(ctx, 0)));
+	std::this_thread::sleep_for(std::chrono::seconds(duk_get_int(ctx, 0)));
 
 	return 0;
 }
@@ -154,9 +154,9 @@ int sleep(duk::Context *ctx)
  * Returns:
  *   The number of milliseconds.
  */
-int ticks(duk::Context *ctx)
+duk_ret_t ticks(duk_context *ctx)
 {
-	duk::push(ctx, static_cast<int>(sys::ticks()));
+	duk_push_int(ctx, sys::ticks());
 
 	return 1;
 }
@@ -167,9 +167,9 @@ int ticks(duk::Context *ctx)
  *
  * Sleep the main loop for the specific delay in microseconds.
  */
-int usleep(duk::Context *ctx)
+duk_ret_t usleep(duk_context *ctx)
 {
-	std::this_thread::sleep_for(std::chrono::microseconds(duk::get<int>(ctx, 0)));
+	std::this_thread::sleep_for(std::chrono::microseconds(duk_get_int(ctx, 0)));
 
 	return 0;
 }
@@ -183,9 +183,9 @@ int usleep(duk::Context *ctx)
  * Returns:
  *   The system uptime.
  */
-int uptime(duk::Context *ctx)
+duk_ret_t uptime(duk_context *ctx)
 {
-	duk::push<int>(ctx, sys::uptime());
+	duk_push_int(ctx, sys::uptime());
 
 	return 0;
 }
@@ -199,26 +199,26 @@ int uptime(duk::Context *ctx)
  * Returns:
  *   The system version.
  */
-int version(duk::Context *ctx)
+duk_ret_t version(duk_context *ctx)
 {
-	duk::push(ctx, sys::version());
+	duk_push_stdstring(ctx, sys::version());
 
 	return 1;
 }
 
-const duk::FunctionMap functions{
-	{ "env",	{ env,		1	} },
-	{ "exec",	{ exec,		1	} },
-	{ "home",	{ home,		0	} },
-	{ "name",	{ name,		0	} },
+const duk_function_list_entry functions[] = {
+	{ "env",	env,		1	},
+	{ "exec",	exec,		1	},
+	{ "home",	home,		0	},
+	{ "name",	name,		0	},
 #if defined(HAVE_POPEN)
-	{ "popen",	{ popen,	2	} }, 
+	{ "popen",	popen,		2	}, 
 #endif
-	{ "sleep",	{ sleep,	1	} },
-	{ "ticks",	{ ticks,	0	} },
-	{ "uptime",	{ uptime,	0	} },
-	{ "usleep",	{ usleep,	1	} },
-	{ "version",	{ version,	0	} }
+	{ "sleep",	sleep,		1	},
+	{ "ticks",	ticks,		0	},
+	{ "uptime",	uptime,		0	},
+	{ "usleep",	usleep,		1	},
+	{ "version",	version,	0	}
 };
 
 } // !namespace
@@ -230,13 +230,13 @@ SystemModule::SystemModule() noexcept
 
 void SystemModule::load(Irccd &, JsPlugin &plugin)
 {
-	duk::StackAssert sa(plugin.context());
+	StackAssert sa(plugin.context());
 
-	duk::getGlobal<void>(plugin.context(), "Irccd");
-	duk::push(plugin.context(), duk::Object{});
-	duk::put(plugin.context(), functions);
-	duk::putProperty(plugin.context(), -2, "System");
-	duk::pop(plugin.context());
+	duk_get_global_string(plugin.context(), "Irccd");
+	duk_push_object(plugin.context());
+	duk_put_function_list(plugin.context(), -1, functions);
+	duk_put_prop_string(plugin.context(), -2, "System");
+	duk_pop(plugin.context());
 }
 
 } // !irccd

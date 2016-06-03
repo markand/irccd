@@ -32,7 +32,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "js.hpp"
+#include "duktape.hpp"
 #include "module.hpp"
 
 namespace irccd {
@@ -136,43 +136,6 @@ public:
 	}
 };
 
-namespace duk {
-
-/**
- * \brief JavaScript binding for File.
- */
-template <>
-class TypeTraits<File *> {
-public:
-	/**
-	 * Construct the file.
-	 *
-	 * \pre fp != nullptr
-	 * \param ctx the the context
-	 * \param fp the file
-	 */
-	IRCCD_EXPORT static void construct(duk::Context *ctx, File *fp);
-
-	/**
-	 * Push a file.
-	 *
-	 * \pre fp != nullptr
-	 * \param ctx the the context
-	 * \param fp the file
-	 */
-	IRCCD_EXPORT static void push(duk::Context *ctx, File *fp);
-
-	/**
-	 * Require a file. Raises a JavaScript error if not a File.
-	 *
-	 * \param ctx the context
-	 * \param index the index
-	 */
-	IRCCD_EXPORT static File *require(duk::Context *ctx, Index index);
-};
-
-} // !duk
-
 /**
  * \brief Irccd.File JavaScript API.
  * \ingroup modules
@@ -189,6 +152,34 @@ public:
 	 */
 	IRCCD_EXPORT void load(Irccd &irccd, JsPlugin &plugin) override;
 };
+
+/**
+ * Construct the file as this.
+ *
+ * The object prototype takes ownership of fp and will be deleted once collected.
+ *
+ * \pre fp != nullptr
+ * \param ctx the the context
+ * \param fp the file
+ */
+IRCCD_EXPORT void duk_new_file(duk_context *ctx, File *fp);
+
+/**
+ * Push a file.
+ *
+ * \pre fp != nullptr
+ * \param ctx the the context
+ * \param fp the file
+ */
+IRCCD_EXPORT void duk_push_file(duk_context *ctx, File *fp);
+
+/**
+ * Require a file. Raises a JavaScript error if not a File.
+ *
+ * \param ctx the context
+ * \param index the index
+ */
+IRCCD_EXPORT File *duk_require_file(duk_context *ctx, duk_idx_t index);
 
 } // !irccd
 

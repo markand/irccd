@@ -36,19 +36,19 @@ namespace irccd {
 
 void JsPlugin::call(const std::string &name, unsigned nargs)
 {
-	duk::getGlobal<void>(m_context, name);
+	duk_get_global_string(m_context, name.c_str());
 
-	if (duk::type(m_context, -1) == DUK_TYPE_UNDEFINED)
+	if (duk_get_type(m_context, -1) == DUK_TYPE_UNDEFINED)
 		// Function not defined, remove the undefined value and all arguments.
-		duk::pop(m_context, nargs + 1);
+		duk_pop_n(m_context, nargs + 1);
 	else {
 		// Call the function and discard the result.
-		duk::insert(m_context, -nargs - 1);
+		duk_insert(m_context, -nargs - 1);
 
-		if (duk::pcall(m_context, nargs) != 0)
-			throw duk::exception(m_context, -1, true);
+		if (duk_pcall(m_context, nargs) != 0)
+			throw duk_exception(m_context, -1, true);
 
-		duk::pop(m_context);
+		duk_pop(m_context);
 	}
 }
 
@@ -60,16 +60,19 @@ void JsPlugin::putModules(Irccd &irccd)
 
 void JsPlugin::putVars()
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::putGlobal<void *>(m_context, "\xff""\xff""plugin", this);
-	duk::putGlobal(m_context, "\xff""\xff""name", name());
-	duk::putGlobal(m_context, "\xff""\xff""path", path());
+	duk_push_pointer(m_context, this);
+	duk_get_global_string(m_context, "\xff""\xff""plugin");
+	duk_push_stdstring(m_context, name());
+	duk_put_global_string(m_context, "\xff""\xff""name");
+	duk_push_stdstring(m_context, path());
+	duk_put_global_string(m_context, "\xff""\xff""path");
 }
 
 void JsPlugin::putPath(const std::string &varname, const std::string &append, path::Path type)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
 	bool found = true;
 	std::string foundpath;
@@ -88,43 +91,48 @@ void JsPlugin::putPath(const std::string &varname, const std::string &append, pa
 	if (!found)
 		foundpath = path::clean(path::get(type, path::OwnerSystem) + append);
 
-	duk::getGlobal<void>(m_context, "Irccd");
-	duk::getProperty<void>(m_context, -1, "Plugin");
-	duk::putProperty(m_context, -1, varname, foundpath);
-	duk::pop(m_context, 2);
+	duk_get_global_string(m_context, "Irccd");
+	duk_get_prop_string(m_context, -2, "Plugin");
+	duk_push_stdstring(m_context, foundpath);
+	duk_put_prop_string(m_context, -2, varname.c_str());
+	duk_pop_n(m_context, 2);
 }
 
 void JsPlugin::putConfig(const PluginConfig &config)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
 	// TODO: override dataPath, configPath, cachePath.
 	// TODO: verify more that these values still exist.
 
 	// Store plugin configuration into Irccd.Plugin.config.
-	duk::getGlobal<void>(m_context, "Irccd");
-	duk::getProperty<void>(m_context, -1, "Plugin");
-	duk::getProperty<void>(m_context, -1, "config");
+	duk_get_global_string(m_context, "Irccd");
+	duk_get_prop_string(m_context, -1, "Plugin");
+	duk_get_prop_string(m_context, -1, "config");
 
-	for (const auto &pair : config)
-		duk::putProperty(m_context, -1, pair.first, pair.second);
+	for (const auto &pair : config) {
+		duk_push_stdstring(m_context, pair.second);
+		duk_put_prop_string(m_context, -2, pair.first.c_str());
+	}
 
-	duk::putProperty(m_context, -2, "config");
-	duk::pop(m_context, 2);
+	duk_put_prop_string(m_context, -2, "config");
+	duk_pop_n(m_context, 2);
 }
 
 void JsPlugin::putFormats()
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::getGlobal<void>(m_context, "Irccd");
-	duk::getProperty<void>(m_context, -1, "Plugin");
-	duk::getProperty<void>(m_context, -1, "format");
+	duk_get_global_string(m_context, "Irccd");
+	duk_get_prop_string(m_context, -1, "Plugin");
+	duk_get_prop_string(m_context, -1, "format");
 
-	for (const auto &pair : formats())
-		duk::putProperty(m_context, -1, pair.first, pair.second);
+	for (const auto &pair : formats()) {
+		duk_push_stdstring(m_context, pair.second);
+		duk_put_prop_string(m_context, -1, pair.first.c_str());
+	}
 
-	duk::pop(m_context, 3);
+	duk_pop_n(m_context, 3);
 }
 
 JsPlugin::JsPlugin(std::string name, std::string path, const PluginConfig &config)
@@ -139,13 +147,13 @@ void JsPlugin::onChannelMode(Irccd &,
 			     const std::string &mode,
 			     const std::string &arg)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
-	duk::push(m_context, origin);
-	duk::push(m_context, channel);
-	duk::push(m_context, mode);
-	duk::push(m_context, arg);
+	duk_push_server(m_context, server);
+	duk_push_stdstring(m_context, origin);
+	duk_push_stdstring(m_context, channel);
+	duk_push_stdstring(m_context, mode);
+	duk_push_stdstring(m_context, arg);
 	call("onChannelMode", 5);
 }
 
@@ -155,12 +163,12 @@ void JsPlugin::onChannelNotice(Irccd &,
 			       const std::string &channel,
 			       const std::string &notice)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
-	duk::push(m_context, origin);
-	duk::push(m_context, channel);
-	duk::push(m_context, notice);
+	duk_push_server(m_context, server);
+	duk_push_stdstring(m_context, origin);
+	duk_push_stdstring(m_context, channel);
+	duk_push_stdstring(m_context, notice);
 	call("onChannelNotice", 4);
 }
 
@@ -170,40 +178,40 @@ void JsPlugin::onCommand(Irccd &,
 			 const std::string &channel,
 			 const std::string &message)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
-	duk::push(m_context, origin);
-	duk::push(m_context, channel);
-	duk::push(m_context, message);
+	duk_push_server(m_context, server);
+	duk_push_stdstring(m_context, origin);
+	duk_push_stdstring(m_context, channel);
+	duk_push_stdstring(m_context, message);
 	call("onCommand", 4);
 }
 
 void JsPlugin::onConnect(Irccd &, const std::shared_ptr<Server> &server)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
+	duk_push_server(m_context, server);
 	call("onConnect", 1);
 }
 
 void JsPlugin::onInvite(Irccd &, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
-	duk::push(m_context, origin);
-	duk::push(m_context, channel);
+	duk_push_server(m_context, server);
+	duk_push_stdstring(m_context, origin);
+	duk_push_stdstring(m_context, channel);
 	call("onInvite", 3);
 }
 
 void JsPlugin::onJoin(Irccd &, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
-	duk::push(m_context, origin);
-	duk::push(m_context, channel);
+	duk_push_server(m_context, server);
+	duk_push_stdstring(m_context, origin);
+	duk_push_stdstring(m_context, channel);
 	call("onJoin", 3);
 }
 
@@ -214,19 +222,19 @@ void JsPlugin::onKick(Irccd &,
 		      const std::string &target,
 		      const std::string &reason)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
-	duk::push(m_context, origin);
-	duk::push(m_context, channel);
-	duk::push(m_context, target);
-	duk::push(m_context, reason);
+	duk_push_server(m_context, server);
+	duk_push_stdstring(m_context, origin);
+	duk_push_stdstring(m_context, channel);
+	duk_push_stdstring(m_context, target);
+	duk_push_stdstring(m_context, reason);
 	call("onKick", 5);
 }
 
 void JsPlugin::onLoad(Irccd &irccd)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
 	/*
 	 * Duktape currently emit useless warnings when a file do
@@ -235,9 +243,8 @@ void JsPlugin::onLoad(Irccd &irccd)
 #if defined(HAVE_STAT)
 	struct stat st;
 
-	if (::stat(path().c_str(), &st) < 0) {
+	if (::stat(path().c_str(), &st) < 0)
 		throw std::runtime_error(std::strerror(errno));
-	}
 #endif
 
 	/*
@@ -251,26 +258,28 @@ void JsPlugin::onLoad(Irccd &irccd)
 	putPath("cachePath", "plugin/" + name(), path::PathCache);
 
 	// Try to load the file (does not call onLoad yet).
-	if (duk::pevalFile(m_context, path()) != 0)
-		throw duk::exception(m_context, -1, true);
+	if (duk_peval_file(m_context, path().c_str()) != 0)
+		throw duk_exception(m_context, -1, true);
 
-	duk::pop(m_context);
+	duk_pop(m_context);
 
 	putConfig(config());
 	putFormats();
 
 	// Read metadata .
-	duk::getGlobal<void>(m_context, "info");
+	duk_get_global_string(m_context, "info");
 
-	if (duk::type(m_context, -1) == DUK_TYPE_OBJECT) {
-		setAuthor(duk::optionalProperty<std::string>(m_context, -1, "author", author()));
-		setLicense(duk::optionalProperty<std::string>(m_context, -1, "license", license()));
-		setSummary(duk::optionalProperty<std::string>(m_context, -1, "summary", summary()));
-		setVersion(duk::optionalProperty<std::string>(m_context, -1, "version", version()));
+	if (duk_get_type(m_context, -1) == DUK_TYPE_OBJECT) {
+		// TODO: bring back
+#if 0
+		setAuthor(optionalProperty<std::string>(m_context, -1, "author", author()));
+		setLicense(optionalProperty<std::string>(m_context, -1, "license", license()));
+		setSummary(optionalProperty<std::string>(m_context, -1, "summary", summary()));
+		setVersion(optionalProperty<std::string>(m_context, -1, "version", version()));
+#endif
 	}
 
-	duk::pop(m_context);
-
+	duk_pop(m_context);
 	call("onLoad", 0);
 }
 
@@ -280,12 +289,12 @@ void JsPlugin::onMessage(Irccd &,
 			 const std::string &channel,
 			 const std::string &message)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
-	duk::push(m_context, origin);
-	duk::push(m_context, channel);
-	duk::push(m_context, message);
+	duk_push_server(m_context, server);
+	duk_push_stdstring(m_context, origin);
+	duk_push_stdstring(m_context, channel);
+	duk_push_stdstring(m_context, message);
 	call("onMessage", 4);
 }
 
@@ -295,52 +304,53 @@ void JsPlugin::onMe(Irccd &,
 		    const std::string &channel,
 		    const std::string &message)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
-	duk::push(m_context, origin);
-	duk::push(m_context, channel);
-	duk::push(m_context, message);
+	duk_push_server(m_context, server);
+	duk_push_stdstring(m_context, origin);
+	duk_push_stdstring(m_context, channel);
+	duk_push_stdstring(m_context, message);
 	call("onMe", 4);
 }
 
 void JsPlugin::onMode(Irccd &, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &mode)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
-	duk::push(m_context, origin);
-	duk::push(m_context, mode);
+	duk_push_server(m_context, server);
+	duk_push_stdstring(m_context, origin);
+	duk_push_stdstring(m_context, mode);
 	call("onMode", 3);
 }
 
 void JsPlugin::onNames(Irccd &, const std::shared_ptr<Server> &server, const std::string &channel, const std::vector<std::string> &names)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
-	duk::push(m_context, channel);
-	duk::push(m_context, names);
+	duk_push_server(m_context, server);
+	duk_push_stdstring(m_context, channel);
+	// TODO
+	// duk_push_stdstring(m_context, names);
 	call("onNames", 3);
 }
 
 void JsPlugin::onNick(Irccd &, const std::shared_ptr<Server> &server, const std::string &oldnick, const std::string &newnick)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
-	duk::push(m_context, oldnick);
-	duk::push(m_context, newnick);
+	duk_push_server(m_context, server);
+	duk_push_stdstring(m_context, oldnick);
+	duk_push_stdstring(m_context, newnick);
 	call("onNick", 3);
 }
 
 void JsPlugin::onNotice(Irccd &, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &notice)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
-	duk::push(m_context, origin);
-	duk::push(m_context, notice);
+	duk_push_server(m_context, server);
+	duk_push_stdstring(m_context, origin);
+	duk_push_stdstring(m_context, notice);
 	call("onNotice", 3);
 }
 
@@ -350,12 +360,12 @@ void JsPlugin::onPart(Irccd &,
 		      const std::string &channel,
 		      const std::string &reason)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
-	duk::push(m_context, origin);
-	duk::push(m_context, channel);
-	duk::push(m_context, reason);
+	duk_push_server(m_context, server);
+	duk_push_stdstring(m_context, origin);
+	duk_push_stdstring(m_context, channel);
+	duk_push_stdstring(m_context, reason);
 	call("onPart", 4);
 }
 
@@ -364,11 +374,11 @@ void JsPlugin::onQuery(Irccd &,
 		       const std::string &origin,
 		       const std::string &message)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
-	duk::push(m_context, origin);
-	duk::push(m_context, message);
+	duk_push_server(m_context, server);
+	duk_push_stdstring(m_context, origin);
+	duk_push_stdstring(m_context, message);
 	call("onQuery", 3);
 }
 
@@ -377,17 +387,17 @@ void JsPlugin::onQueryCommand(Irccd &,
 			      const std::string &origin,
 			      const std::string &message)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
-	duk::push(m_context, origin);
-	duk::push(m_context, message);
+	duk_push_server(m_context, server);
+	duk_push_stdstring(m_context, origin);
+	duk_push_stdstring(m_context, message);
 	call("onQueryCommand", 3);
 }
 
 void JsPlugin::onReload(Irccd &)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
 	call("onReload");
 }
@@ -398,18 +408,18 @@ void JsPlugin::onTopic(Irccd &,
 		       const std::string &channel,
 		       const std::string &topic)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
-	duk::push(m_context, origin);
-	duk::push(m_context, channel);
-	duk::push(m_context, topic);
+	duk_push_server(m_context, server);
+	duk_push_stdstring(m_context, origin);
+	duk_push_stdstring(m_context, channel);
+	duk_push_stdstring(m_context, topic);
 	call("onTopic", 4);
 }
 
 void JsPlugin::onUnload(Irccd &irccd)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
 	call("onUnload");
 
@@ -419,15 +429,20 @@ void JsPlugin::onUnload(Irccd &irccd)
 
 void JsPlugin::onWhois(Irccd &, const std::shared_ptr<Server> &server, const ServerWhois &whois)
 {
-	duk::StackAssert sa(m_context);
+	StackAssert sa(m_context);
 
-	duk::push(m_context, server);
-	duk::push(m_context, duk::Object{});
-	duk::putProperty(m_context, -1, "nickname", whois.nick);
-	duk::putProperty(m_context, -1, "username", whois.user);
-	duk::putProperty(m_context, -1, "realname", whois.realname);
-	duk::putProperty(m_context, -1, "host", whois.host);
-	duk::putProperty(m_context, 1, "channels", whois.channels);
+	duk_push_server(m_context, server);
+	duk_push_object(m_context);
+	duk_push_stdstring(m_context, whois.nick);
+	duk_put_prop_string(m_context, -2, "nickname");
+	duk_push_stdstring(m_context, whois.user);
+	duk_put_prop_string(m_context, -2, "username");
+	duk_push_stdstring(m_context, whois.realname);
+	duk_put_prop_string(m_context, -2, "realname");
+	duk_push_stdstring(m_context, whois.host);
+	duk_put_prop_string(m_context, -2, "host");
+	// TODO
+	// duk_put_prop_string(m_context, -2, "channels", whois.channels);
 	call("onWhois", 2);
 }
 

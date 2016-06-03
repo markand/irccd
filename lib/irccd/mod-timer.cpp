@@ -20,6 +20,7 @@
 
 #include "irccd.hpp"
 #include "logger.hpp"
+#include "mod-irccd.hpp"
 #include "mod-timer.hpp"
 #include "mod-plugin.hpp"
 #include "plugin-js.hpp"
@@ -31,39 +32,8 @@ namespace irccd {
 
 namespace {
 
-const std::string Signature{"\xff""\xff""irccd-timer-ptr"};
-const std::string CallbackTable{"\xff""\xff""irccd-timer-callbacks"};
-
-} // !namespace
-
-namespace duk {
-
-template <>
-class TypeTraits<std::shared_ptr<Timer>> {
-public:
-	static inline void construct(duk::Context *ctx, std::shared_ptr<Timer> timer)
-	{
-		duk::StackAssert sa(ctx);
-
-		duk::push(ctx, duk::This());
-		duk::putProperty<void *>(ctx, -1, Signature, new std::shared_ptr<Timer>(std::move(timer)));
-		duk::pop(ctx);
-	}
-
-	static inline std::shared_ptr<Timer> require(duk::Context *ctx, duk::Index index)
-	{
-		auto ptr = static_cast<std::shared_ptr<Timer> *>(duk::getProperty<void *>(ctx, index, Signature));
-
-		if (!ptr)
-			duk::raise(ctx, DUK_ERR_TYPE_ERROR, "not a Timer object");
-
-		return *ptr;
-	}
-};
-
-} // !duk
-
-namespace {
+const char *Signature("\xff""\xff""irccd-timer-ptr");
+const char *CallbackTable("\xff""\xff""irccd-timer-callbacks");
 
 void handleSignal(std::weak_ptr<JsPlugin> ptr, std::string key)
 {
@@ -72,23 +42,28 @@ void handleSignal(std::weak_ptr<JsPlugin> ptr, std::string key)
 	if (!plugin)
 		return;
 
-	auto irccd = duk::getGlobal<Irccd *>(plugin->context(), "\xff""\xff""irccd");
+	auto &irccd = duk_get_irccd(plugin->context());
 
-	irccd->post([plugin, key] (Irccd &) {
-		duk::StackAssert sa(plugin->context());
+	irccd.post([plugin, key] (Irccd &) {
+		StackAssert sa(plugin->context());
 
-		duk::getGlobal<void>(plugin->context(), CallbackTable);
-		duk::getProperty<void>(plugin->context(), -1, key);
-		duk::remove(plugin->context(), -2);
+		duk_get_global_string(plugin->context(), CallbackTable);
+		duk_get_prop_string(plugin->context(), -1, key.c_str());
+		duk_remove(plugin->context(), -2);
 
-		if (duk::is<duk::Function>(plugin->context(), -1)) {
-			if (duk::pcall(plugin->context()) != 0)
-				log::warning("plugin {}: {}"_format(plugin->name(), duk::exception(plugin->context(), -1).stack));
+		if (duk_is_callable(plugin->context(), -1)) {
+			if (duk_pcall(plugin->context(), 0) != 0)
+				log::warning("plugin {}: {}"_format(plugin->name(), duk_exception(plugin->context(), -1).stack));
 			else
-				duk::pop(plugin->context());
+				duk_pop(plugin->context());
 		} else
-			duk::pop(plugin->context());
+			duk_pop(plugin->context());
 	});
+}
+
+std::shared_ptr<Timer> self(duk_context *ctx)
+{
+	return nullptr;
 }
 
 /*
@@ -97,9 +72,9 @@ void handleSignal(std::weak_ptr<JsPlugin> ptr, std::string key)
  *
  * Start the timer. If the timer is already started the method is a no-op.
  */
-duk::Ret start(duk::Context *ctx)
+duk_ret_t start(duk_context *ctx)
 {
-	auto timer = duk::self<std::shared_ptr<Timer>>(ctx);
+	auto timer = self(ctx);
 
 	if (!timer->isRunning())
 		timer->start();
@@ -113,9 +88,9 @@ duk::Ret start(duk::Context *ctx)
  *
  * Stop the timer.
  */
-duk::Ret stop(duk::Context *ctx)
+duk_ret_t stop(duk_context *ctx)
 {
-	auto timer = duk::self<std::shared_ptr<Timer>>(ctx);
+	auto timer = self(ctx);
 
 	if (timer->isRunning())
 		timer->stop();
@@ -123,9 +98,10 @@ duk::Ret stop(duk::Context *ctx)
 	return 0;
 }
 
-const duk::FunctionMap methods{
-	{ "start",	{ start,	0 } },
-	{ "stop",	{ stop,		0 } }
+const duk_function_list_entry methods[] = {
+	{ "start",	start,		0 },
+	{ "stop",	stop,		0 },
+	{ nullptr,	nullptr,	0 }
 };
 
 /*
@@ -139,56 +115,60 @@ const duk::FunctionMap methods{
  *   - delay, the interval in milliseconds,
  *   - callback, the function to call.
  */
-duk::Ret constructor(duk::Context *ctx)
+duk_ret_t constructor(duk_context *ctx)
 {
 	// Check parameters.
-	auto type = duk::require<int>(ctx, 0);
-	auto delay = duk::require<int>(ctx, 1);
+	auto type = duk_require_int(ctx, 0);
+	auto delay = duk_require_int(ctx, 1);
 
 	if (type < static_cast<int>(TimerType::Single) || type > static_cast<int>(TimerType::Repeat))
-		duk::raise(ctx, DUK_ERR_TYPE_ERROR, "invalid timer type");
+		duk_error(ctx, DUK_ERR_TYPE_ERROR, "invalid timer type");
 	if (delay < 0)
-		duk::raise(ctx, DUK_ERR_TYPE_ERROR, "negative delay given");
-	if (!duk::is<duk::Function>(ctx, 2))
-		duk::raise(ctx, DUK_ERR_TYPE_ERROR, "missing callback function");
+		duk_error(ctx, DUK_ERR_TYPE_ERROR, "negative delay given");
+	if (!duk_is_callable(ctx, 2))
+		duk_error(ctx, DUK_ERR_TYPE_ERROR, "missing callback function");
 
 	// Construct the timer in 'this'.
 	auto timer = std::make_shared<Timer>(static_cast<TimerType>(type), delay);
-	auto plugin = duk::TypeTraits<std::shared_ptr<JsPlugin>>::get(ctx);
 	auto hash = std::to_string(reinterpret_cast<std::uintptr_t>(timer.get()));
 
-	timer->onSignal.connect(std::bind(handleSignal, std::weak_ptr<JsPlugin>(plugin), hash));
+	timer->onSignal.connect(std::bind(handleSignal, std::weak_ptr<JsPlugin>(duk_get_plugin(ctx)), hash));
 
-	// Set a finalizer that closes the timer.
-	duk::construct(ctx, std::shared_ptr<Timer>(std::move(timer)));
-	duk::push(ctx, duk::This());
-	duk::putProperty(ctx, -1, "\xff""\xff""timer-key", hash);
-	duk::push(ctx, duk::Function{[] (duk::Context *ctx) -> duk::Ret {
-		duk::StackAssert sa(ctx);
+	duk_push_this(ctx);
+	duk_push_pointer(ctx, new std::shared_ptr<Timer>(std::move(timer)));
+	duk_put_prop_string(ctx, -2, Signature);
+	duk_push_string(ctx, hash.c_str());
+	duk_put_prop_string(ctx, -2, "\xff""\xff""timer-key");
 
-		duk::require<std::shared_ptr<Timer>>(ctx, 0)->stop();
-		delete static_cast<std::shared_ptr<Timer> *>(duk::getProperty<void *>(ctx, 0, Signature));
-		duk::getGlobal<void>(ctx, CallbackTable);
-		duk::deleteProperty(ctx, -1, duk::getProperty<std::string>(ctx, 0, "\xff""\xff""timer-key"));
-		duk::pop(ctx);
+#if 0
+	push(ctx, Function{[] (duk_context *ctx) -> duk_ret_t {
+		StackAssert sa(ctx);
+
+		require<std::shared_ptr<Timer>>(ctx, 0)->stop();
+		delete static_cast<std::shared_ptr<Timer> *>(getProperty<void *>(ctx, 0, Signature));
+		getGlobal<void>(ctx, CallbackTable);
+		deleteProperty(ctx, -1, getProperty<std::string>(ctx, 0, "\xff""\xff""timer-key"));
+		pop(ctx);
 		log::debug("plugin: timer destroyed");
 
 		return 0;
 	}, 1});
-	duk::setFinalizer(ctx, -2);
+	setFinalizer(ctx, -2);
+#endif
 
 	// Save a callback function into the callback table.
-	duk::getGlobal<void>(ctx, CallbackTable);
-	duk::dup(ctx, 2);
-	duk::putProperty(ctx, -2, hash);
-	duk::pop(ctx);
+	duk_get_global_string(ctx, CallbackTable);
+	duk_dup(ctx, 2);
+	duk_put_prop_string(ctx, -2, hash.c_str());
+	duk_pop(ctx);
 
 	return 0;
 }
 
-const duk::Map<int> constants{
-	{ "Single",	static_cast<int>(TimerType::Single) },
-	{ "Repeat",	static_cast<int>(TimerType::Repeat) },
+const duk_number_list_entry constants[] = {
+	{ "Single",	static_cast<int>(TimerType::Single)	},
+	{ "Repeat",	static_cast<int>(TimerType::Repeat)	},
+	{ nullptr,	0					} 
 };
 
 } // !namespace
@@ -200,17 +180,18 @@ TimerModule::TimerModule() noexcept
 
 void TimerModule::load(Irccd &, JsPlugin &plugin)
 {
-	duk::StackAssert sa(plugin.context());
+	StackAssert sa(plugin.context());
 
-	duk::getGlobal<void>(plugin.context(), "Irccd");
-	duk::push(plugin.context(), duk::Function{constructor, 3});
-	duk::put(plugin.context(), constants);
-	duk::push(plugin.context(), duk::Object{});
-	duk::put(plugin.context(), methods);
-	duk::putProperty(plugin.context(), -2, "prototype");
-	duk::putProperty(plugin.context(), -2, "Timer");
-	duk::pop(plugin.context());
-	duk::putGlobal(plugin.context(), CallbackTable, duk::Object{});
+	duk_get_global_string(plugin.context(), "Irccd");
+	duk_push_c_function(plugin.context(), constructor, 3);
+	duk_put_number_list(plugin.context(), -1, constants);
+	duk_push_object(plugin.context());
+	duk_put_function_list(plugin.context(), -1, methods);
+	duk_put_prop_string(plugin.context(), -2, "prototype");
+	duk_put_prop_string(plugin.context(), -2, "Timer");
+	duk_pop(plugin.context());
+	duk_push_object(plugin.context());
+	duk_put_global_string(plugin.context(), CallbackTable);
 }
 
 } // !irccd

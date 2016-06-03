@@ -28,7 +28,7 @@
 #include <cstring>
 #include <string>
 
-#include "js.hpp"
+#include "duktape.hpp"
 #include "module.hpp"
 
 namespace irccd {
@@ -62,7 +62,7 @@ public:
 	 *
 	 * \param ctx the context
 	 */
-	IRCCD_EXPORT void raise(duk::Context *ctx) const;
+	IRCCD_EXPORT void raise(duk_context *ctx) const;
 };
 
 /**
@@ -81,6 +81,14 @@ public:
 	 */
 	IRCCD_EXPORT void load(Irccd &irccd, JsPlugin &plugin) override;
 };
+
+/**
+ * Get irccd instance stored in this context.
+ *
+ * \param ctx the context
+ * \return the irccd reference
+ */
+Irccd &duk_get_irccd(duk_context *ctx);
 
 } // !irccd
 
