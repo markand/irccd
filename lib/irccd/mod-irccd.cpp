@@ -60,7 +60,7 @@ void SystemError::raise(duk_context *ctx) const
 	duk_get_prop_string(ctx, -1, "SystemError");
 	duk_remove(ctx, -2);
 	duk_push_int(ctx, m_errno);
-	duk_push_stdstring(ctx, m_message);
+	dukx_push_std_string(ctx, m_message);
 	duk_new(ctx, 2);
 	duk_throw(ctx);
 }
@@ -91,7 +91,7 @@ void IrccdModule::load(Irccd &irccd, JsPlugin &plugin)
 	duk_push_c_function(plugin.context(), constructor, 2);
 	duk_push_object(plugin.context());
 	duk_get_global_string(plugin.context(), "Error");
-	duk_put_prop_string(plugin.context(), -1, "prototype");
+	duk_get_prop_string(plugin.context(), -1, "prototype");
 	duk_remove(plugin.context(), -2);
 	duk_set_prototype(plugin.context(), -2);
 	duk_put_prop_string(plugin.context(), -2, "prototype");

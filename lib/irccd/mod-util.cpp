@@ -44,8 +44,8 @@ util::Substitution getSubstitution(duk_context *ctx, int index)
 	if (!duk_is_object(ctx, index))
 		return params;
 
-	duk_enumerate(ctx, index, 0, true, [&] (duk_context *) {
-		if (duk_get_stdstring(ctx, -2) == "date")
+	dukx_enumerate(ctx, index, 0, true, [&] (duk_context *) {
+		if (dukx_get_std_string(ctx, -2) == "date")
 			params.time = static_cast<time_t>(duk_get_number(ctx, -1) / 1000);
 		else
 			params.keywords.insert({duk_get_string(ctx, -2), duk_get_string(ctx, -1)});
@@ -69,9 +69,9 @@ util::Substitution getSubstitution(duk_context *ctx, int index)
 duk_ret_t format(duk_context *ctx)
 {
 	try {
-		duk_push_stdstring(ctx, util::format(duk_get_stdstring(ctx, 0), getSubstitution(ctx, 1)));
+		dukx_push_std_string(ctx, util::format(dukx_get_std_string(ctx, 0), getSubstitution(ctx, 1)));
 	} catch (const std::exception &ex) {
-		duk_throw(ctx, SyntaxError(ex.what()));
+		dukx_throw(ctx, SyntaxError(ex.what()));
 	}
 
 	return 1;

@@ -42,7 +42,8 @@ TEST(Basic, single)
 		irccd.dispatch();
 	}
 
-	ASSERT_EQ(1, duk::getGlobal<int>(plugin->context(), "count"));
+	ASSERT_TRUE(duk_get_global_string(plugin->context(), "count"));
+	ASSERT_EQ(1, duk_get_int(plugin->context(), -1));
 }
 
 TEST(Basic, repeat)
@@ -60,7 +61,8 @@ TEST(Basic, repeat)
 		irccd.dispatch();
 	}
 
-	ASSERT_GE(duk::getGlobal<int>(plugin->context(), "count"), 5);
+	ASSERT_TRUE(duk_get_global_string(plugin->context(), "count"));
+	ASSERT_GE(duk_get_int(plugin->context(), -1), 5);
 }
 
 #if 0

@@ -49,7 +49,7 @@ namespace {
  */
 duk_ret_t env(duk_context *ctx)
 {
-	duk_push_stdstring(ctx, sys::env(duk_get_string(ctx, 0)));
+	dukx_push_std_string(ctx, sys::env(duk_get_string(ctx, 0)));
 
 	return 1;
 }
@@ -81,7 +81,7 @@ duk_ret_t exec(duk_context *ctx)
  */
 duk_ret_t home(duk_context *ctx)
 {
-	duk_push_stdstring(ctx, sys::home());
+	dukx_push_std_string(ctx, sys::home());
 
 	return 1;
 }
@@ -97,7 +97,7 @@ duk_ret_t home(duk_context *ctx)
  */
 duk_ret_t name(duk_context *ctx)
 {
-	duk_push_stdstring(ctx, sys::name());
+	dukx_push_std_string(ctx, sys::name());
 
 	return 1;
 }
@@ -123,9 +123,9 @@ duk_ret_t popen(duk_context *ctx)
 	auto fp = ::popen(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
 
 	if (fp == nullptr)
-		duk_throw(ctx, SystemError());
+		dukx_throw(ctx, SystemError());
 
-	duk_push_file(ctx, new File(fp, [] (std::FILE *fp) { ::pclose(fp); }));
+	dukx_push_file(ctx, new File(fp, [] (std::FILE *fp) { ::pclose(fp); }));
 
 	return 1;
 }
@@ -201,7 +201,7 @@ duk_ret_t uptime(duk_context *ctx)
  */
 duk_ret_t version(duk_context *ctx)
 {
-	duk_push_stdstring(ctx, sys::version());
+	dukx_push_std_string(ctx, sys::version());
 
 	return 1;
 }

@@ -31,6 +31,7 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 #include <duktape.h>
 
@@ -336,7 +337,7 @@ public:
  * \param pop if true, also remove the exception from the stack
  * \return the information
  */
-inline Exception duk_exception(duk_context *ctx, int index, bool pop = true)
+inline Exception dukx_exception(duk_context *ctx, int index, bool pop = true)
 {
 	Exception ex;
 
@@ -370,7 +371,7 @@ inline Exception duk_exception(duk_context *ctx, int index, bool pop = true)
  * \param func the function to call for each properties
  */
 template <typename Func>
-void duk_enumerate(duk_context *ctx, int index, duk_uint_t flags, duk_bool_t getvalue, Func &&func)
+void dukx_enumerate(duk_context *ctx, int index, duk_uint_t flags, duk_bool_t getvalue, Func &&func)
 {
 	duk_enum(ctx, index, flags);
 
@@ -389,7 +390,7 @@ void duk_enumerate(duk_context *ctx, int index, duk_uint_t flags, duk_bool_t get
  * \param ex the exception
  */
 template <typename Exception>
-void duk_throw(duk_context *ctx, const Exception &ex)
+void dukx_throw(duk_context *ctx, const Exception &ex)
 {
 	ex.raise(ctx);
 }
@@ -401,7 +402,7 @@ void duk_throw(duk_context *ctx, const Exception &ex)
  * \param index the index
  * \return the string
  */
-inline std::string duk_get_stdstring(duk_context *ctx, int index)
+inline std::string dukx_get_std_string(duk_context *ctx, int index)
 {
 	duk_size_t size;
 	const char *text = duk_get_lstring(ctx, index, &size);
@@ -416,7 +417,7 @@ inline std::string duk_get_stdstring(duk_context *ctx, int index)
  * \param index the index
  * \return the string
  */
-inline std::string duk_require_stdstring(duk_context *ctx, int index)
+inline std::string dukx_require_std_string(duk_context *ctx, int index)
 {
 	duk_size_t size;
 	const char *text = duk_require_lstring(ctx, index, &size);
@@ -430,9 +431,52 @@ inline std::string duk_require_stdstring(duk_context *ctx, int index)
  * \param ctx the context
  * \param str the string
  */
-inline void duk_push_stdstring(duk_context *ctx, const std::string &str)
+inline void dukx_push_std_string(duk_context *ctx, const std::string &str)
 {
 	duk_push_lstring(ctx, str.data(), str.length());
+}
+
+/**
+ * Get an array.
+ *
+ * \param ctx the context
+ * \param index the array index
+ * \param getter the conversion function (e.g. duk_get_int)
+ */
+template <typename Getter>
+auto dukx_get_array(duk_context *ctx, duk_idx_t index, Getter &&get)
+{
+	using T = decltype(get(ctx, 0));
+
+	std::vector<T> result;
+	std::size_t length = duk_get_length(ctx, index);
+
+	for (std::size_t i = 0; i < length; ++i) {
+		duk_get_prop_index(ctx, -1, i);
+		result.push_back(get(ctx, -1));
+		duk_pop(ctx);
+	}
+
+	return result;
+}
+
+/**
+ * Push an array.
+ *
+ * \param ctx the context
+ * \param values the values
+ * \param push the function to push values
+ */
+template <typename T, typename Pusher>
+void dukx_push_array(duk_context *ctx, const std::vector<T> &values, Pusher &&push)
+{
+	duk_push_array(ctx);
+
+	int i = 0;
+	for (auto x : values) {
+		push(ctx, x);
+		duk_put_prop_index(ctx, -2, i++);
+	}
 }
 
 } // !irccd

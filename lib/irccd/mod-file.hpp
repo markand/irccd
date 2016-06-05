@@ -162,7 +162,7 @@ public:
  * \param ctx the the context
  * \param fp the file
  */
-IRCCD_EXPORT void duk_new_file(duk_context *ctx, File *fp);
+IRCCD_EXPORT void dukx_new_file(duk_context *ctx, File *fp);
 
 /**
  * Push a file.
@@ -171,7 +171,7 @@ IRCCD_EXPORT void duk_new_file(duk_context *ctx, File *fp);
  * \param ctx the the context
  * \param fp the file
  */
-IRCCD_EXPORT void duk_push_file(duk_context *ctx, File *fp);
+IRCCD_EXPORT void dukx_push_file(duk_context *ctx, File *fp);
 
 /**
  * Require a file. Raises a JavaScript error if not a File.
@@ -179,7 +179,7 @@ IRCCD_EXPORT void duk_push_file(duk_context *ctx, File *fp);
  * \param ctx the context
  * \param index the index
  */
-IRCCD_EXPORT File *duk_require_file(duk_context *ctx, duk_idx_t index);
+IRCCD_EXPORT File *dukx_require_file(duk_context *ctx, duk_idx_t index);
 
 } // !irccd
 

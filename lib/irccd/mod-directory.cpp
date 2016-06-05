@@ -44,7 +44,7 @@ std::string path(duk_context *ctx)
 	if (duk_get_type(ctx, -1) != DUK_TYPE_STRING)
 		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Directory object");
 
-	auto ret = duk_get_stdstring(ctx, -1);
+	auto ret = dukx_get_std_string(ctx, -1);
 
 	if (ret.empty())
 		duk_error(ctx, DUK_ERR_TYPE_ERROR, "directory object has empty path");
@@ -151,7 +151,7 @@ duk_ret_t find(duk_context *ctx, std::string base, bool recursive, int patternIn
 		if (path.empty())
 			return 0;
 
-		duk_push_stdstring(ctx, path);
+		dukx_push_std_string(ctx, path);
 	} catch (const std::exception &ex) {
 		duk_error(ctx, DUK_ERR_ERROR, "%s", ex.what());
 	}
@@ -168,7 +168,7 @@ duk_ret_t find(duk_context *ctx, std::string base, bool recursive, int patternIn
 duk_ret_t remove(duk_context *ctx, const std::string &path, bool recursive)
 {
 	if (!fs::isDirectory(path))
-		duk_throw(ctx, SystemError(EINVAL, "not a directory"));
+		dukx_throw(ctx, SystemError(EINVAL, "not a directory"));
 
 	if (!recursive) {
 #if defined(_WIN32)
@@ -252,7 +252,7 @@ duk_ret_t constructor(duk_context *ctx)
 		std::int8_t flags = duk_get_uint(ctx, 1);
 
 		if (!fs::isDirectory(path))
-			duk_throw(ctx, SystemError(EINVAL, "not a directory"));
+			dukx_throw(ctx, SystemError(EINVAL, "not a directory"));
 
 		std::vector<fs::Entry> list = fs::readdir(path, flags);
 
@@ -261,14 +261,14 @@ duk_ret_t constructor(duk_context *ctx)
 		duk_push_int(ctx, list.size());
 		duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
 		duk_push_string(ctx, "path");
-		duk_push_stdstring(ctx, path);
+		dukx_push_std_string(ctx, path);
 		duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
 		duk_push_string(ctx, "entries");
 		duk_push_array(ctx);
 
 		for (unsigned i = 0; i < list.size(); ++i) {
 			duk_push_object(ctx);
-			duk_push_stdstring(ctx, list[i].name);
+			dukx_push_std_string(ctx, list[i].name);
 			duk_put_prop_string(ctx, -2, "name");
 			duk_push_int(ctx, list[i].type);
 			duk_put_prop_string(ctx, -2, "type");
@@ -277,7 +277,7 @@ duk_ret_t constructor(duk_context *ctx)
 
 		duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
 	} catch (const std::exception &ex) {
-		duk_throw(ctx, SystemError(errno, ex.what()));
+		dukx_throw(ctx, SystemError(errno, ex.what()));
 	}
 
 	return 0;
@@ -339,27 +339,27 @@ duk_ret_t funcMkdir(duk_context *ctx)
 			duk_is_number(ctx, 1) ? duk_get_int(ctx, 1) : 0700
 		);
 	} catch (const std::exception &ex) {
-		duk_throw(ctx, SystemError(errno, ex.what()));
+		dukx_throw(ctx, SystemError(errno, ex.what()));
 	}
 
 	return 0;
 }
 
 const duk_function_list_entry functions[] = {
-	{ "find",		funcFind,	DUK_VARARGS	},
-	{ "mkdir",		funcMkdir,	DUK_VARARGS	},
-	{ "remove",		funcRemove,	DUK_VARARGS	},
-	{ nullptr,		nullptr,	0		} 
+	{ "find", funcFind, DUK_VARARGS },
+	{ "mkdir", funcMkdir, DUK_VARARGS },
+	{ "remove", funcRemove, DUK_VARARGS },
+	{ nullptr, nullptr, 0 }
 };
 
 const duk_number_list_entry constants[] = {
-	{ "Dot",		static_cast<int>(fs::Dot)			},
-	{ "DotDot",		static_cast<int>(fs::DotDot)			},
-	{ "TypeUnknown",	static_cast<int>(fs::Entry::Unknown)		},
-	{ "TypeDir",		static_cast<int>(fs::Entry::Dir)		},
-	{ "TypeFile",		static_cast<int>(fs::Entry::File)		},
-	{ "TypeLink",		static_cast<int>(fs::Entry::Link)		},
-	{ nullptr,		0						} 
+	{ "Dot", static_cast<int>(fs::Dot) },
+	{ "DotDot", static_cast<int>(fs::DotDot) },
+	{ "TypeUnknown", static_cast<int>(fs::Entry::Unknown) },
+	{ "TypeDir", static_cast<int>(fs::Entry::Dir) },
+	{ "TypeFile", static_cast<int>(fs::Entry::File) },
+	{ "TypeLink", static_cast<int>(fs::Entry::Link) },
+	{ nullptr, 0 }
 };
 
 } // !namespace
@@ -377,7 +377,7 @@ void DirectoryModule::load(Irccd &, JsPlugin &plugin)
 	duk_push_c_function(plugin.context(), constructor, 2);
 	duk_put_number_list(plugin.context(), -1, constants);
 	duk_put_function_list(plugin.context(), -1, functions);
-	duk_push_stdstring(plugin.context(), std::string{fs::separator()});
+	dukx_push_std_string(plugin.context(), std::string{fs::separator()});
 	duk_put_prop_string(plugin.context(), -2, "separator");
 	duk_push_object(plugin.context());
 	duk_put_function_list(plugin.context(), -1, methods);

@@ -45,9 +45,10 @@ protected:
 TEST_F(TestJsSystem, home)
 {
 	try {
-		duk::pevalString(m_plugin->context(), "result = Irccd.System.home();");
+		duk_peval_string_noresult(m_plugin->context(), "result = Irccd.System.home();");
 
-		ASSERT_EQ(sys::home(), duk::getGlobal<std::string>(m_plugin->context(), "result"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_EQ(sys::home(), duk_get_string(m_plugin->context(), -1));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -58,15 +59,16 @@ TEST_F(TestJsSystem, home)
 TEST_F(TestJsSystem, popen)
 {
 	try {
-		auto ret = duk::pevalString(m_plugin->context(),
+		auto ret = duk_peval_string(m_plugin->context(),
 			"f = Irccd.System.popen(\"" IRCCD_EXECUTABLE " --version\", \"r\");"
 			"r = f.readline();"
 		);
 
 		if (ret != 0)
-			throw duk::exception(m_plugin->context(), -1);
+			throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_EQ(IRCCD_VERSION, duk::getGlobal<std::string>(m_plugin->context(), "r"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "r"));
+		ASSERT_STREQ(IRCCD_VERSION, duk_get_string(m_plugin->context(), -1));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}

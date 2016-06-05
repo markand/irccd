@@ -107,7 +107,7 @@ duk_ret_t constructor(duk_context *ctx)
 	duk_push_this(ctx);
 	duk_push_pointer(ctx, new ElapsedTimer);
 	duk_put_prop_string(ctx, -2, Signature);
-	duk_pop_2(ctx);
+	duk_pop(ctx);
 
 	return 0;
 }
@@ -129,11 +129,11 @@ duk_ret_t destructor(duk_context *ctx)
 }
 
 const duk_function_list_entry methods[] = {
-	{ "elapsed",	elapsed,	0 },
-	{ "pause",	pause,		0 },
-	{ "reset",	reset,		0 },
-	{ "restart",	restart,	0 },
-	{ nullptr,	nullptr,	0 }
+	{ "elapsed", elapsed, 0 },
+	{ "pause", pause, 0 },
+	{ "reset", reset, 0 },
+	{ "restart", restart, 0 },
+	{ nullptr, nullptr, 0 }
 };
 
 } // !namespace

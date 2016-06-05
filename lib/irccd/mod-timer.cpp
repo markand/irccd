@@ -53,7 +53,7 @@ void handleSignal(std::weak_ptr<JsPlugin> ptr, std::string key)
 
 		if (duk_is_callable(plugin->context(), -1)) {
 			if (duk_pcall(plugin->context(), 0) != 0)
-				log::warning("plugin {}: {}"_format(plugin->name(), duk_exception(plugin->context(), -1).stack));
+				log::warning("plugin {}: {}"_format(plugin->name(), dukx_exception(plugin->context(), -1).stack));
 			else
 				duk_pop(plugin->context());
 		} else
@@ -63,7 +63,17 @@ void handleSignal(std::weak_ptr<JsPlugin> ptr, std::string key)
 
 std::shared_ptr<Timer> self(duk_context *ctx)
 {
-	return nullptr;
+	StackAssert sa(ctx);
+
+	duk_push_this(ctx);
+	duk_get_prop_string(ctx, -1, Signature);
+	auto ptr = duk_to_pointer(ctx, -1);
+	duk_pop_2(ctx);
+
+	if (!ptr)
+		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Timer object");
+
+	return *static_cast<std::shared_ptr<Timer> *>(ptr);
 }
 
 /*
@@ -139,22 +149,24 @@ duk_ret_t constructor(duk_context *ctx)
 	duk_put_prop_string(ctx, -2, Signature);
 	duk_push_string(ctx, hash.c_str());
 	duk_put_prop_string(ctx, -2, "\xff""\xff""timer-key");
-
-#if 0
-	push(ctx, Function{[] (duk_context *ctx) -> duk_ret_t {
+	duk_push_c_function(ctx, [] (duk_context *ctx) -> duk_ret_t {
 		StackAssert sa(ctx);
 
-		require<std::shared_ptr<Timer>>(ctx, 0)->stop();
-		delete static_cast<std::shared_ptr<Timer> *>(getProperty<void *>(ctx, 0, Signature));
-		getGlobal<void>(ctx, CallbackTable);
-		deleteProperty(ctx, -1, getProperty<std::string>(ctx, 0, "\xff""\xff""timer-key"));
-		pop(ctx);
+		duk_get_prop_string(ctx, 0, "\xff""\xff""timer-key");
+		auto hash = duk_get_string(ctx, -1);
+		duk_pop(ctx);
+		duk_get_prop_string(ctx, 0, Signature);
+		static_cast<std::shared_ptr<Timer> *>(duk_to_pointer(ctx, -1))->get()->stop();
+		delete static_cast<std::shared_ptr<Timer> *>(duk_to_pointer(ctx, -1));
+		duk_pop(ctx);
+		duk_get_global_string(ctx, CallbackTable);
+		duk_del_prop_string(ctx, -1, hash);
+		duk_pop(ctx);
 		log::debug("plugin: timer destroyed");
 
 		return 0;
-	}, 1});
-	setFinalizer(ctx, -2);
-#endif
+	}, 1);
+	duk_set_finalizer(ctx, -2);
 
 	// Save a callback function into the callback table.
 	duk_get_global_string(ctx, CallbackTable);

@@ -119,16 +119,19 @@ inline std::string clearCr(std::string input)
 	return input;
 }
 
-inline File *self(duk_context *ctx)
+File *self(duk_context *ctx)
 {
 	StackAssert sa(ctx);
 
 	duk_push_this(ctx);
 	duk_get_prop_string(ctx, -1, Signature);
-	File *file = static_cast<File *>(duk_to_pointer(ctx, -1));
+	auto ptr = static_cast<File *>(duk_to_pointer(ctx, -1));
 	duk_pop_2(ctx);
 
-	return file;
+	if (!ptr)
+		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a File object");
+
+	return ptr;
 }
 
 /*
@@ -147,7 +150,7 @@ inline File *self(duk_context *ctx)
  */
 duk_ret_t methodBasename(duk_context *ctx)
 {
-	duk_push_stdstring(ctx, fs::baseName(self(ctx)->path()));
+	dukx_push_std_string(ctx, fs::baseName(self(ctx)->path()));
 
 	return 1;
 }
@@ -176,7 +179,7 @@ duk_ret_t methodClose(duk_context *ctx)
  */
 duk_ret_t methodDirname(duk_context *ctx)
 {
-	duk_push_stdstring(ctx, fs::dirName(self(ctx)->path()));
+	dukx_push_std_string(ctx, fs::dirName(self(ctx)->path()));
 
 	return 1;
 }
@@ -207,7 +210,7 @@ duk_ret_t methodLines(duk_context *ctx)
 		auto pos = buffer.find('\n');
 
 		if (pos != std::string::npos) {
-			duk_push_stdstring(ctx, clearCr(buffer.substr(0, pos)));
+			dukx_push_std_string(ctx, clearCr(buffer.substr(0, pos)));
 			duk_put_prop_index(ctx, -2, i++);
 
 			buffer.erase(0, pos + 1);
@@ -216,11 +219,11 @@ duk_ret_t methodLines(duk_context *ctx)
 
 	// Maybe an error in the stream.
 	if (std::ferror(fp))
-		duk_throw(ctx, SystemError());
+		dukx_throw(ctx, SystemError());
 
 	// Missing '\n' in end of file.
 	if (!buffer.empty()) {
-		duk_push_stdstring(ctx, clearCr(buffer));
+		dukx_push_std_string(ctx, clearCr(buffer));
 		duk_put_prop_index(ctx, -2, i++);
 	}
 
@@ -260,7 +263,7 @@ duk_ret_t methodRead(duk_context *ctx)
 				nread = std::fread(&buffer[0], sizeof (buffer[0]), buffer.size(), file->handle());
 
 				if (std::ferror(file->handle()))
-					duk_throw(ctx, SystemError());
+					dukx_throw(ctx, SystemError());
 
 				std::copy(buffer.begin(), buffer.begin() + nread, std::back_inserter(data));
 				total += nread;
@@ -270,14 +273,14 @@ duk_ret_t methodRead(duk_context *ctx)
 			total = std::fread(&data[0], sizeof (data[0]), (std::size_t)amount, file->handle());
 
 			if (std::ferror(file->handle()))
-				duk_throw(ctx, SystemError());
+				dukx_throw(ctx, SystemError());
 
 			data.resize(total);
 		}
 
-		duk_push_stdstring(ctx, data);
+		dukx_push_std_string(ctx, data);
 	} catch (const std::exception &) {
-		duk_throw(ctx, SystemError());
+		dukx_throw(ctx, SystemError());
 	}
 
 	return 1;
@@ -304,9 +307,9 @@ duk_ret_t methodReadline(duk_context *ctx)
 	for (int ch; (ch = std::fgetc(fp)) != EOF && ch != '\n'; )
 		result += (char)ch;
 	if (std::ferror(fp))
-		duk_throw(ctx, SystemError());
+		dukx_throw(ctx, SystemError());
 
-	duk_push_stdstring(ctx, clearCr(result));
+	dukx_push_std_string(ctx, clearCr(result));
 
 	return 1;
 }
@@ -323,7 +326,7 @@ duk_ret_t methodReadline(duk_context *ctx)
 duk_ret_t methodRemove(duk_context *ctx)
 {
 	if (::remove(self(ctx)->path().c_str()) < 0)
-		duk_throw(ctx, SystemError());
+		dukx_throw(ctx, SystemError());
 
 	return 0;
 }
@@ -347,7 +350,7 @@ duk_ret_t methodSeek(duk_context *ctx)
 	auto amount = duk_require_int(ctx, 1);
 
 	if (fp != nullptr && std::fseek(fp, amount, type) != 0)
-		duk_throw(ctx, SystemError());
+		dukx_throw(ctx, SystemError());
 
 	return 0;
 }
@@ -371,7 +374,7 @@ duk_ret_t methodStat(duk_context *ctx)
 	struct stat st;
 
 	if (file->handle() == nullptr && ::stat(file->path().c_str(), &st) < 0)
-		duk_throw(ctx, SystemError());
+		dukx_throw(ctx, SystemError());
 	else
 		pushStat(ctx, st);
 
@@ -400,7 +403,7 @@ duk_ret_t methodTell(duk_context *ctx)
 		return 0;
 
 	if ((pos = std::ftell(fp)) == -1L)
-		duk_throw(ctx, SystemError());
+		dukx_throw(ctx, SystemError());
 	else
 		duk_push_int(ctx, pos);
 
@@ -431,7 +434,7 @@ duk_ret_t methodWrite(duk_context *ctx)
 	std::size_t nwritten = std::fwrite(data.c_str(), 1, data.length(), fp);
 
 	if (std::ferror(fp))
-		duk_throw(ctx, SystemError());
+		dukx_throw(ctx, SystemError());
 
 	duk_push_uint(ctx, nwritten);
 
@@ -439,20 +442,20 @@ duk_ret_t methodWrite(duk_context *ctx)
 }
 
 const duk_function_list_entry methods[] = {
-	{ "basename",	methodBasename,		0	},
-	{ "close",	methodClose,		0	},
-	{ "dirname",	methodDirname,		0	},
-	{ "lines",	methodLines,		0	},
-	{ "read",	methodRead,		1	},
-	{ "readline",	methodReadline,		0	},
-	{ "remove",	methodRemove,		0	},
-	{ "seek",	methodSeek,		2	},
+	{ "basename", methodBasename, 0 },
+	{ "close", methodClose, 0 },
+	{ "dirname", methodDirname, 0 },
+	{ "lines", methodLines, 0 },
+	{ "read", methodRead, 1 },
+	{ "readline", methodReadline, 0 },
+	{ "remove", methodRemove, 0 },
+	{ "seek", methodSeek, 2 },
 #if defined(HAVE_STAT)
-	{ "stat",	methodStat,		0	},
+	{ "stat", methodStat, 0 },
 #endif
-	{ "tell",	methodTell,		0	},
-	{ "write",	methodWrite,		1	},
-	{ nullptr,	nullptr,		0	}
+	{ "tell", methodTell, 0 },
+	{ "write", methodWrite, 1 },
+	{ nullptr, nullptr, 0 }
 };
 
 /*
@@ -478,9 +481,9 @@ duk_ret_t constructor(duk_context *ctx)
 		return 0;
 
 	try {
-		duk_new_file(ctx, new File(duk_require_string(ctx, 0), duk_require_string(ctx, 1)));
+		dukx_new_file(ctx, new File(duk_require_string(ctx, 0), duk_require_string(ctx, 1)));
 	} catch (const std::exception &) {
-		duk_throw(ctx, SystemError());
+		dukx_throw(ctx, SystemError());
 	}
 
 	return 0;
@@ -515,7 +518,7 @@ duk_ret_t destructor(duk_context *ctx)
  */
 duk_ret_t functionBasename(duk_context *ctx)
 {
-	duk_push_stdstring(ctx, fs::baseName(duk_require_string(ctx, 0)));
+	dukx_push_std_string(ctx, fs::baseName(duk_require_string(ctx, 0)));
 
 	return 1;
 }
@@ -533,7 +536,7 @@ duk_ret_t functionBasename(duk_context *ctx)
  */
 duk_ret_t functionDirname(duk_context *ctx)
 {
-	duk_push_stdstring(ctx, fs::dirName(duk_require_string(ctx, 0)));
+	dukx_push_std_string(ctx, fs::dirName(duk_require_string(ctx, 0)));
 
 	return 1;
 }
@@ -572,7 +575,7 @@ duk_ret_t functionExists(duk_context *ctx)
 duk_ret_t functionRemove(duk_context *ctx)
 {
 	if (::remove(duk_require_string(ctx, 0)) < 0)
-		duk_throw(ctx, SystemError());
+		dukx_throw(ctx, SystemError());
 
 	return 0;
 }
@@ -597,7 +600,7 @@ duk_ret_t functionStat(duk_context *ctx)
 	struct stat st;
 
 	if (::stat(duk_require_string(ctx, 0), &st) < 0)
-		duk_throw(ctx, SystemError());
+		dukx_throw(ctx, SystemError());
 
 	pushStat(ctx, st);
 
@@ -607,20 +610,20 @@ duk_ret_t functionStat(duk_context *ctx)
 #endif // !HAVE_STAT
 
 const duk_function_list_entry functions[] = {
-	{ "basename",	functionBasename,	1 },
-	{ "dirname",	functionDirname,	1 },
-	{ "exists",	functionExists,		1 },
-	{ "remove",	functionRemove,		1 },
+	{ "basename", functionBasename, 1 },
+	{ "dirname", functionDirname, 1 },
+	{ "exists", functionExists, 1 },
+	{ "remove", functionRemove, 1 },
 #if defined(HAVE_STAT)
-	{ "stat",	functionStat,		1 },
+	{ "stat", functionStat, 1 },
 #endif
-	{ nullptr,	nullptr,		0 } 
+	{ nullptr, nullptr, 0 }
 };
 
 const duk_number_list_entry constants[] = {
-	{ "SeekCur",	SEEK_CUR },
-	{ "SeekEnd",	SEEK_END },
-	{ "SeekSet",	SEEK_SET },
+	{ "SeekCur", SEEK_CUR },
+	{ "SeekEnd", SEEK_END },
+	{ "SeekSet", SEEK_SET },
 };
 
 } // !namespace
@@ -643,13 +646,13 @@ void FileModule::load(Irccd &, JsPlugin &plugin)
 	duk_push_c_function(plugin.context(), destructor, 1);
 	duk_set_finalizer(plugin.context(), -2);
 	duk_dup(plugin.context(), -1);
-	duk_get_global_string(plugin.context(), Prototype);
+	duk_put_global_string(plugin.context(), Prototype);
 	duk_put_prop_string(plugin.context(), -2, "prototype");
 	duk_put_prop_string(plugin.context(), -2, "File");
 	duk_pop(plugin.context());
 }
 
-void duk_new_file(duk_context *ctx, File *fp)
+void dukx_new_file(duk_context *ctx, File *fp)
 {
 	assert(ctx);
 	assert(fp);
@@ -662,7 +665,7 @@ void duk_new_file(duk_context *ctx, File *fp)
 	duk_pop(ctx);
 }
 
-void duk_push_file(duk_context *ctx, File *fp)
+void dukx_push_file(duk_context *ctx, File *fp)
 {
 	assert(ctx);
 	assert(fp);
@@ -676,7 +679,7 @@ void duk_push_file(duk_context *ctx, File *fp)
 	duk_set_prototype(ctx, -2);
 }
 
-File *duk_require_file(duk_context *ctx, duk_idx_t index)
+File *dukx_require_file(duk_context *ctx, duk_idx_t index)
 {
 	if (!duk_is_object(ctx, index) || !duk_has_prop_string(ctx, index, Signature))
 		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a File object");

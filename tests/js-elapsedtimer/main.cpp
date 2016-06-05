@@ -45,16 +45,17 @@ protected:
 TEST_F(TestElapsedTimer, standard)
 {
 	try {
-		if (duk::pevalString(m_plugin->context(), "timer = new Irccd.ElapsedTimer();") != 0)
-			throw duk::exception(m_plugin->context(), -1);
+		if (duk_peval_string(m_plugin->context(), "timer = new Irccd.ElapsedTimer();") != 0)
+			throw dukx_exception(m_plugin->context(), -1);
 
 		std::this_thread::sleep_for(300ms);
 
-		if (duk::pevalString(m_plugin->context(), "result = timer.elapsed();") != 0)
-			throw duk::exception(m_plugin->context(), -1);
+		if (duk_peval_string(m_plugin->context(), "result = timer.elapsed();") != 0)
+			throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_GE(duk::getGlobal<int>(m_plugin->context(), "result"), 250);
-		ASSERT_LE(duk::getGlobal<int>(m_plugin->context(), "result"), 350);
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_GE(duk_get_int(m_plugin->context(), -1), 250);
+		ASSERT_LE(duk_get_int(m_plugin->context(), -1), 350);
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -63,15 +64,16 @@ TEST_F(TestElapsedTimer, standard)
 TEST_F(TestElapsedTimer, reset)
 {
 	try {
-		if (duk::pevalString(m_plugin->context(), "timer = new Irccd.ElapsedTimer();") != 0)
-			throw duk::exception(m_plugin->context(), -1);
+		if (duk_peval_string(m_plugin->context(), "timer = new Irccd.ElapsedTimer();") != 0)
+			throw dukx_exception(m_plugin->context(), -1);
 
 		std::this_thread::sleep_for(300ms);
 
-		if (duk::pevalString(m_plugin->context(), "timer.reset(); result = timer.elapsed();") != 0)
-			throw duk::exception(m_plugin->context(), -1);
+		if (duk_peval_string(m_plugin->context(), "timer.reset(); result = timer.elapsed();") != 0)
+			throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_LE(duk::getGlobal<int>(m_plugin->context(), "result"), 100);
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_LE(duk_get_int(m_plugin->context(), -1), 100);
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}

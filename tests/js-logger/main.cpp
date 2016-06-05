@@ -60,9 +60,10 @@ protected:
 	std::shared_ptr<JsPlugin> m_plugin;
 
 	TestJsLogger()
-		: m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
+		: m_plugin(std::make_shared<JsPlugin>("test", SOURCEDIR "/empty.js"))
 	{
 		m_irccd.moduleService().get("Irccd")->load(m_irccd, *m_plugin);
+		m_irccd.moduleService().get("Irccd.Plugin")->load(m_irccd, *m_plugin);
 		m_irccd.moduleService().get("Irccd.Logger")->load(m_irccd, *m_plugin);
 	}
 };
@@ -70,10 +71,8 @@ protected:
 TEST_F(TestJsLogger, info)
 {
 	try {
-		duk::putGlobal(m_plugin->context(), "\xff""\xff""name", "test");
-
-		if (duk::pevalString(m_plugin->context(), "Irccd.Logger.info(\"hello!\");") != 0)
-			throw duk::exception(m_plugin->context(), -1);
+		if (duk_peval_string(m_plugin->context(), "Irccd.Logger.info(\"hello!\");") != 0)
+			throw dukx_exception(m_plugin->context(), -1);
 
 		ASSERT_EQ("plugin test: hello!", lineInfo);
 	} catch (const std::exception &ex) {
@@ -84,10 +83,8 @@ TEST_F(TestJsLogger, info)
 TEST_F(TestJsLogger, warning)
 {
 	try {
-		duk::putGlobal(m_plugin->context(), "\xff""\xff""name", "test");
-
-		if (duk::pevalString(m_plugin->context(), "Irccd.Logger.warning(\"FAIL!\");") != 0)
-			throw duk::exception(m_plugin->context(), -1);
+		if (duk_peval_string(m_plugin->context(), "Irccd.Logger.warning(\"FAIL!\");") != 0)
+			throw dukx_exception(m_plugin->context(), -1);
 
 		ASSERT_EQ("plugin test: FAIL!", lineWarning);
 	} catch (const std::exception &ex) {
@@ -100,10 +97,8 @@ TEST_F(TestJsLogger, warning)
 TEST_F(TestJsLogger, debug)
 {
 	try {
-		duk::putGlobal(m_plugin->context(), "\xff""\xff""name", "test");
-
-		if (duk::pevalString(m_plugin->context(), "Irccd.Logger.debug(\"starting\");") != 0)
-			throw duk::exception(m_plugin->context(), -1);
+		if (duk_peval_string(m_plugin->context(), "Irccd.Logger.debug(\"starting\");") != 0)
+			throw dukx_exception(m_plugin->context(), -1);
 
 		ASSERT_EQ("plugin test: starting", lineDebug);
 	} catch (const std::exception &ex) {

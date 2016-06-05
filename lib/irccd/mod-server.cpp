@@ -49,6 +49,109 @@ std::shared_ptr<Server> self(duk_context *ctx)
 	return *static_cast<std::shared_ptr<Server> *>(ptr);
 }
 
+std::string readName(duk_context *ctx)
+{
+	duk_get_prop_string(ctx, 0, "name");
+	auto name = dukx_get_std_string(ctx, -1);
+	duk_pop(ctx);
+
+	if (!util::isIdentifierValid(name))
+		duk_error(ctx, DUK_ERR_ERROR, "invalid 'name' property");
+
+	return name;
+}
+
+ServerInfo readInfo(duk_context *ctx)
+{
+	ServerInfo info;
+
+	// 'host' property.
+	duk_get_prop_string(ctx, 0, "host");
+	info.host = duk_is_string(ctx, -1) ? dukx_get_std_string(ctx, -1) : info.host;
+	duk_pop(ctx);
+
+	// 'port' property.
+	duk_get_prop_string(ctx, 0, "port");
+	info.port = duk_is_number(ctx, -1) ? duk_get_int(ctx, -1) : info.port;
+	duk_pop(ctx);
+
+	// 'password' property.
+	duk_get_prop_string(ctx, 0, "password");
+	info.password = duk_is_string(ctx, -1) ? dukx_get_std_string(ctx, -1) : info.password;
+	duk_pop(ctx);
+
+	// 'ipv6' property.
+	duk_get_prop_string(ctx, 0, "ipv6");
+	if (duk_get_boolean(ctx, -1))
+		info.flags |= ServerInfo::Ipv6;
+	duk_pop(ctx);
+
+	return info;
+}
+
+ServerIdentity readIdentity(duk_context *ctx)
+{
+	ServerIdentity identity;
+
+	// 'nickname' property.
+	duk_get_prop_string(ctx, 0, "nickname");
+	identity.nickname = duk_is_string(ctx, -1) ? dukx_get_std_string(ctx, -1) : identity.nickname;
+	duk_pop(ctx);
+
+	// 'username' property.
+	duk_get_prop_string(ctx, 0, "username");
+	identity.username = duk_is_string(ctx, -1) ? dukx_get_std_string(ctx, -1) : identity.username;
+	duk_pop(ctx);
+
+	// 'realname' property.
+	duk_get_prop_string(ctx, 0, "realname");
+	identity.realname = duk_is_string(ctx, -1) ? dukx_get_std_string(ctx, -1) : identity.realname;
+	duk_pop(ctx);
+
+	// 'ctcpversion' property.
+	duk_get_prop_string(ctx, 0, "version");
+	identity.ctcpversion = duk_is_string(ctx, -1) ? dukx_get_std_string(ctx, -1) : identity.ctcpversion;
+	duk_pop(ctx);
+
+	return identity;
+}
+
+ServerSettings readSettings(duk_context *ctx)
+{
+	ServerSettings settings;
+
+	// 'channels' property.
+	duk_get_prop_string(ctx, 0, "channels");
+	settings.channels = dukx_get_array(ctx, -1, [] (auto ctx, auto) {
+		return Server::splitChannel(dukx_get_std_string(ctx, -1));
+	});
+	duk_pop(ctx);
+
+	// 'recoTries' property.
+	duk_get_prop_string(ctx, 0, "recoTries");
+	settings.reconnectTries = duk_is_number(ctx, -1) ? duk_get_int(ctx, -1) : settings.reconnectTries;
+	duk_pop(ctx);
+
+	// 'recoTimeout' property.
+	duk_get_prop_string(ctx, 0, "recoTimeout");
+	settings.reconnectDelay = duk_is_number(ctx, -1) ? duk_get_int(ctx, -1) : settings.reconnectDelay;
+	duk_pop(ctx);
+
+	// 'joinInvite' property.
+	duk_get_prop_string(ctx, 0, "joinInvite");
+	if (duk_get_boolean(ctx, -1))
+		settings.flags |= ServerSettings::JoinInvite;
+	duk_pop(ctx);
+
+	// 'autoRejoin' property.
+	duk_get_prop_string(ctx, 0, "autoRejoin");
+	if (duk_get_boolean(ctx, -1))
+		settings.flags |= ServerSettings::AutoRejoin;
+	duk_pop(ctx);
+
+	return settings;
+}
+
 /*
  * Method: Server.cmode(channel, mode)
  * ------------------------------------------------------------------
@@ -101,9 +204,9 @@ duk_ret_t info(duk_context *ctx)
 	auto server = self(ctx);
 
 	duk_push_object(ctx);
-	duk_push_stdstring(ctx, server->name());
+	dukx_push_std_string(ctx, server->name());
 	duk_put_prop_string(ctx, -2, "name");
-	duk_push_stdstring(ctx, server->info().host);
+	dukx_push_std_string(ctx, server->info().host);
 	duk_put_prop_string(ctx, -2, "host");
 	duk_push_int(ctx, server->info().port);
 	duk_put_prop_string(ctx, -2, "port");
@@ -111,13 +214,13 @@ duk_ret_t info(duk_context *ctx)
 	duk_put_prop_string(ctx, -2, "ssl");
 	duk_push_boolean(ctx, server->info().flags & ServerInfo::SslVerify);
 	duk_put_prop_string(ctx, -2, "sslVerify");
-	duk_push_stdstring(ctx, server->settings().command);
+	dukx_push_std_string(ctx, server->settings().command);
 	duk_put_prop_string(ctx, -2, "commandChar");
-	duk_push_stdstring(ctx, server->identity().realname);
+	dukx_push_std_string(ctx, server->identity().realname);
 	duk_put_prop_string(ctx, -2, "realname");
-	duk_push_stdstring(ctx, server->identity().nickname);
+	dukx_push_std_string(ctx, server->identity().nickname);
 	duk_put_prop_string(ctx, -2, "nickname");
-	duk_push_stdstring(ctx, server->identity().username);
+	dukx_push_std_string(ctx, server->identity().username);
 	duk_put_prop_string(ctx, -2, "username");
 
 	// Channels.
@@ -125,8 +228,8 @@ duk_ret_t info(duk_context *ctx)
 
 	int i = 0;
 	for (const auto &channel : server->settings().channels) {
-		duk_push_stdstring(ctx, channel.name);
-		duk_put_prop_index(ctx, -1, i++);
+		dukx_push_std_string(ctx, channel.name);
+		duk_put_prop_index(ctx, -2, i++);
 	}
 
 	duk_put_prop_string(ctx, -2, "channels");
@@ -363,7 +466,7 @@ duk_ret_t whois(duk_context *ctx)
  */
 duk_ret_t toString(duk_context *ctx)
 {
-	duk_push_stdstring(ctx, self(ctx)->name());
+	dukx_push_std_string(ctx, self(ctx)->name());
 
 	return 1;
 }
@@ -391,51 +494,19 @@ duk_ret_t toString(duk_context *ctx)
  */
 duk_ret_t constructor(duk_context *ctx)
 {
-#if 0
-	if (!isConstructorCall(ctx))
+	if (!duk_is_constructor_call(ctx))
 		return 0;
 
-	std::string name;
-	ServerInfo info;
-	ServerIdentity identity;
-	ServerSettings settings;
-
-	// Information part.
-	name = getProperty<std::string>(ctx, 0, "name");
-	info.host = getProperty<std::string>(ctx, 0, "host");
-	info.port = optionalProperty<int>(ctx, 0, "port", static_cast<int>(info.port));
-	info.password = optionalProperty<std::string>(ctx, 0, "password", "");
-
-	if (optionalProperty<bool>(ctx, 0, "ipv6", false))
-		info.flags |= ServerInfo::Ipv6;
-
-	// Identity part.
-	identity.nickname = optionalProperty<std::string>(ctx, 0, "nickname", identity.nickname);
-	identity.username = optionalProperty<std::string>(ctx, 0, "username", identity.username);
-	identity.realname = optionalProperty<std::string>(ctx, 0, "realname", identity.realname);
-	identity.ctcpversion = optionalProperty<std::string>(ctx, 0, "version", identity.ctcpversion);
-
-	// Settings part.
-	for (const auto &chan: getProperty<std::vector<std::string>>(ctx, 0, "channels"))
-		settings.channels.push_back(Server::splitChannel(chan));
-
-	settings.reconnectTries = optionalProperty<int>(ctx, 0, "recoTries", (int)settings.reconnectTries);
-	settings.reconnectDelay = optionalProperty<int>(ctx, 0, "recoTimeout", (int)settings.reconnectDelay);
-
-	if (optionalProperty<bool>(ctx, 0, "joinInvite", false))
-		settings.flags |= ServerSettings::JoinInvite;
-	if (optionalProperty<bool>(ctx, 0, "autoRejoin", false))
-		settings.flags |= ServerSettings::AutoRejoin;
-
 	try {
-		push(ctx, This());
-		pushPointer(ctx, new std::shared_ptr<Server>(std::move(name), std::move(info), std::move(identity), std::move(settings)));
-		putProperty(ctx, -2, Signature);
-		pop(ctx);
+		auto s = std::make_shared<Server>(readName(ctx), readInfo(ctx), readIdentity(ctx), readSettings(ctx));
+
+		duk_push_this(ctx);
+		duk_push_pointer(ctx, new std::shared_ptr<Server>(std::move(s)));
+		duk_put_prop_string(ctx, -2, Signature);
+		duk_pop(ctx);
 	} catch (const std::exception &ex) {
-		raise(ctx, Error(ex.what()));
+		duk_error(ctx, DUK_ERR_ERROR, "%s", ex.what());
 	}
-#endif
 
 	return 0;
 }
@@ -533,32 +604,32 @@ duk_ret_t remove(duk_context *ctx)
 }
 
 const duk_function_list_entry methods[] = {
-	{ "cmode",	cmode,		2		},
-	{ "cnotice",	cnotice,	2		},
-	{ "info",	info,		0		},
-	{ "invite",	invite,		2		},
-	{ "join",	join,		DUK_VARARGS	},
-	{ "kick",	kick,		DUK_VARARGS	},
-	{ "me",		me,		2		},
-	{ "message",	message,	2		},
-	{ "mode",	mode,		1		},
-	{ "names",	names,		1		},
-	{ "nick",	nick,		1		},
-	{ "notice",	notice,		2		},
-	{ "part",	part,		DUK_VARARGS	},
-	{ "send",	send,		1		},
-	{ "topic",	topic,		2		},
-	{ "whois",	whois,		1		},
-	{ "toString",	toString,	0		},
-	{ nullptr,	nullptr,	0		}
+	{ "cmode", cmode, 2 },
+	{ "cnotice", cnotice, 2 },
+	{ "info", info, 0 },
+	{ "invite", invite, 2 },
+	{ "join", join, DUK_VARARGS },
+	{ "kick", kick, DUK_VARARGS },
+	{ "me", me, 2 },
+	{ "message", message, 2 },
+	{ "mode", mode, 1 },
+	{ "names", names, 1 },
+	{ "nick", nick, 1 },
+	{ "notice", notice, 2 },
+	{ "part", part, DUK_VARARGS },
+	{ "send", send, 1 },
+	{ "topic", topic, 2 },
+	{ "whois", whois, 1 },
+	{ "toString", toString, 0 },
+	{ nullptr, nullptr, 0 }
 };
 
 const duk_function_list_entry functions[] = {
-	{ "add",	add,		1		},
-	{ "find",	find,		1		},
-	{ "list",	list,		0		},
-	{ "remove",	remove,		1		},
-	{ nullptr,	nullptr,	0		}
+	{ "add", add, 1 },
+	{ "find", find, 1 },
+	{ "list", list, 0 },
+	{ "remove", remove, 1 },
+	{ nullptr, nullptr, 0 }
 };
 
 } // !namespace
@@ -580,7 +651,7 @@ void ServerModule::load(Irccd &, JsPlugin &plugin)
 	duk_push_c_function(plugin.context(), destructor, 1);
 	duk_set_finalizer(plugin.context(), -2);
 	duk_dup_top(plugin.context());
-	duk_get_global_string(plugin.context(), Prototype);
+	duk_put_global_string(plugin.context(), Prototype);
 	duk_put_prop_string(plugin.context(), -2, "prototype");
 	duk_put_prop_string(plugin.context(), -2, "Server");
 	duk_pop(plugin.context());
@@ -600,7 +671,7 @@ void duk_push_server(duk_context *ctx, std::shared_ptr<Server> server)
 	duk_set_finalizer(ctx, -2);
 }
 
-std::shared_ptr<Server> require(duk_context *ctx, duk_idx_t index)
+std::shared_ptr<Server> duk_require_server(duk_context *ctx, duk_idx_t index)
 {
 	if (!duk_is_object(ctx, index) || !duk_has_prop_string(ctx, index, Signature))
 		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Server object");

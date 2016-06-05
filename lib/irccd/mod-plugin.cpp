@@ -43,9 +43,9 @@ duk_idx_t wrap(duk_context *ctx, int nret, Func &&func)
 	try {
 		func(duk_get_irccd(ctx), name);
 	} catch (const std::out_of_range &ex) {
-		duk_throw(ctx, ReferenceError(ex.what()));
+		dukx_throw(ctx, ReferenceError(ex.what()));
 	} catch (const std::exception &ex) {
-		duk_throw(ctx, Error(ex.what()));
+		dukx_throw(ctx, Error(ex.what()));
 	}
 
 	return nret;
@@ -83,15 +83,15 @@ duk_idx_t info(duk_context *ctx)
 		return 0;
 
 	duk_push_object(ctx);
-	duk_push_stdstring(ctx, plugin->name());
+	dukx_push_std_string(ctx, plugin->name());
 	duk_put_prop_string(ctx, -2, "name");
-	duk_push_stdstring(ctx, plugin->author());
+	dukx_push_std_string(ctx, plugin->author());
 	duk_put_prop_string(ctx, -2, "author");
-	duk_push_stdstring(ctx, plugin->license());
+	dukx_push_std_string(ctx, plugin->license());
 	duk_put_prop_string(ctx, -2, "license");
-	duk_push_stdstring(ctx, plugin->summary());
+	dukx_push_std_string(ctx, plugin->summary());
 	duk_put_prop_string(ctx, -2, "summary");
-	duk_push_stdstring(ctx, plugin->version());
+	dukx_push_std_string(ctx, plugin->version());
 	duk_put_prop_string(ctx, -2, "version");
 
 	return 1;
@@ -108,13 +108,9 @@ duk_idx_t info(duk_context *ctx)
  */
 duk_idx_t list(duk_context *ctx)
 {
-	duk_push_array(ctx);
-
-	int i = 0;
-	for (const auto &plugin : duk_get_irccd(ctx).pluginService().plugins()) {
-		duk_push_stdstring(ctx, plugin->name());
-		duk_put_prop_index(ctx, -1, i++);
-	}
+	dukx_push_array(ctx, duk_get_irccd(ctx).pluginService().plugins(), [] (auto ctx, auto plugin) {
+		dukx_push_std_string(ctx, plugin->name());
+	});
 
 	return 1;
 }
@@ -177,12 +173,12 @@ duk_idx_t unload(duk_context *ctx)
 }
 
 const duk_function_list_entry functions[] = {
-	{ "info",	info,		DUK_VARARGS	},
-	{ "list",	list,		0		},
-	{ "load",	load,		1		},
-	{ "reload",	reload,		1		},
-	{ "unload",	unload,		1		},
-	{ nullptr,	nullptr,	0		}
+	{ "info", info, DUK_VARARGS },
+	{ "list", list, 0 },
+	{ "load", load, 1 },
+	{ "reload", reload, 1 },
+	{ "unload", unload, 1 },
+	{ nullptr, nullptr, 0 }
 };
 
 } // !namespace

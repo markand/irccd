@@ -44,10 +44,11 @@ protected:
 TEST_F(TestJsFile, functionBasename)
 {
 	try {
-		if (duk::pevalString(m_plugin->context(), "result = Irccd.File.basename('/usr/local/etc/irccd.conf');") != 0)
-			throw duk::exception(m_plugin->context(), -1);
+		if (duk_peval_string(m_plugin->context(), "result = Irccd.File.basename('/usr/local/etc/irccd.conf');") != 0)
+			throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_EQ("irccd.conf", duk::getGlobal<std::string>(m_plugin->context(), "result"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_STREQ("irccd.conf", duk_get_string(m_plugin->context(), -1));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -56,9 +57,10 @@ TEST_F(TestJsFile, functionBasename)
 TEST_F(TestJsFile, functionDirname)
 {
 	try {
-		duk::pevalString(m_plugin->context(), "result = Irccd.File.dirname('/usr/local/etc/irccd.conf');");
+		duk_peval_string(m_plugin->context(), "result = Irccd.File.dirname('/usr/local/etc/irccd.conf');");
 
-		ASSERT_EQ("/usr/local/etc", duk::getGlobal<std::string>(m_plugin->context(),"result"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_STREQ("/usr/local/etc", duk_get_string(m_plugin->context(), -1));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -67,10 +69,12 @@ TEST_F(TestJsFile, functionDirname)
 TEST_F(TestJsFile, functionExists)
 {
 	try {
-		duk::putGlobal(m_plugin->context(), "directory", IRCCD_TESTS_DIRECTORY);
-		duk::pevalString(m_plugin->context(), "result = Irccd.File.exists(directory + '/file.txt')");
+		duk_push_string(m_plugin->context(), IRCCD_TESTS_DIRECTORY);
+		duk_put_global_string(m_plugin->context(), "directory");
+		duk_peval_string(m_plugin->context(), "result = Irccd.File.exists(directory + '/file.txt')");
 
-		ASSERT_TRUE(duk::getGlobal<bool>(m_plugin->context(),"result"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_TRUE(duk_get_boolean(m_plugin->context(), -1));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -79,9 +83,10 @@ TEST_F(TestJsFile, functionExists)
 TEST_F(TestJsFile, functionExists2)
 {
 	try {
-		duk::pevalString(m_plugin->context(), "result = Irccd.File.exists('file_which_does_not_exist.txt')");
+		duk_peval_string(m_plugin->context(), "result = Irccd.File.exists('file_which_does_not_exist.txt')");
 
-		ASSERT_FALSE(duk::getGlobal<bool>(m_plugin->context(),"result"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_FALSE(duk_get_boolean(m_plugin->context(), -1));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -93,8 +98,8 @@ TEST_F(TestJsFile, functionRemove)
 	std::ofstream("test-js-fs.remove");
 
 	try {
-		if (duk::pevalString(m_plugin->context(), "Irccd.File.remove('test-js-fs.remove');") != 0)
-			throw duk::exception(m_plugin->context(), -1);
+		if (duk_peval_string(m_plugin->context(), "Irccd.File.remove('test-js-fs.remove');") != 0)
+			throw dukx_exception(m_plugin->context(), -1);
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -107,17 +112,19 @@ TEST_F(TestJsFile, functionRemove)
 TEST_F(TestJsFile, methodBasename)
 {
 	try {
-		duk::putGlobal(m_plugin->context(),"directory", IRCCD_TESTS_DIRECTORY);
+		duk_push_string(m_plugin->context(), IRCCD_TESTS_DIRECTORY);
+		duk_put_global_string(m_plugin->context(), "directory");
 
-		auto ret = duk::pevalString(m_plugin->context(),
+		auto ret = duk_peval_string(m_plugin->context(),
 			"f = new Irccd.File(directory + '/level-1/file-1.txt', 'r');"
 			"result = f.basename();"
 		);
 
 		if (ret != 0)
-			throw duk::exception(m_plugin->context(), -1);
+			throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_EQ("file-1.txt", duk::getGlobal<std::string>(m_plugin->context(),"result"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_STREQ("file-1.txt", duk_get_string(m_plugin->context(), -1));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -126,18 +133,20 @@ TEST_F(TestJsFile, methodBasename)
 TEST_F(TestJsFile, methodBasenameClosed)
 {
 	try {
-		duk::putGlobal(m_plugin->context(),"directory", IRCCD_TESTS_DIRECTORY);
+		duk_push_string(m_plugin->context(), IRCCD_TESTS_DIRECTORY);
+		duk_put_global_string(m_plugin->context(), "directory");
 
-		auto ret = duk::pevalString(m_plugin->context(),
+		auto ret = duk_peval_string(m_plugin->context(),
 			"f = new Irccd.File(directory + '/level-1/file-1.txt', 'r');"
 			"f.close();"
 			"result = f.basename();"
 		);
 
 		if (ret != 0)
-			throw duk::exception(m_plugin->context(), -1);
+			throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_EQ("file-1.txt", duk::getGlobal<std::string>(m_plugin->context(),"result"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_STREQ("file-1.txt", duk_get_string(m_plugin->context(), -1));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -146,17 +155,19 @@ TEST_F(TestJsFile, methodBasenameClosed)
 TEST_F(TestJsFile, methodDirname)
 {
 	try {
-		duk::putGlobal(m_plugin->context(),"directory", IRCCD_TESTS_DIRECTORY);
+		duk_push_string(m_plugin->context(), IRCCD_TESTS_DIRECTORY);
+		duk_put_global_string(m_plugin->context(), "directory");
 
-		auto ret = duk::pevalString(m_plugin->context(),
+		auto ret = duk_peval_string(m_plugin->context(),
 			"f = new Irccd.File(directory + '/level-1/file-1.txt', 'r');"
 			"result = f.dirname();"
 		);
 
 		if (ret != 0)
-			throw duk::exception(m_plugin->context(), -1);
+			throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_EQ(std::string{IRCCD_TESTS_DIRECTORY "/level-1"}, duk::getGlobal<std::string>(m_plugin->context(), "result"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_STREQ(IRCCD_TESTS_DIRECTORY "/level-1", duk_get_string(m_plugin->context(), -1));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -165,18 +176,20 @@ TEST_F(TestJsFile, methodDirname)
 TEST_F(TestJsFile, methodDirnameClosed)
 {
 	try {
-		duk::putGlobal(m_plugin->context(), "directory", IRCCD_TESTS_DIRECTORY);
+		duk_push_string(m_plugin->context(), IRCCD_TESTS_DIRECTORY);
+		duk_put_global_string(m_plugin->context(), "directory");
 
-		auto ret = duk::pevalString(m_plugin->context(),
+		auto ret = duk_peval_string(m_plugin->context(),
 			"f = new Irccd.File(directory + '/level-1/file-1.txt', 'r');"
 			"f.close();"
 			"result = f.dirname();"
 		);
 
 		if (ret != 0)
-			throw duk::exception(m_plugin->context(), -1);
+			throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_EQ(std::string{IRCCD_TESTS_DIRECTORY "/level-1"}, duk::getGlobal<std::string>(m_plugin->context(), "result"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_STREQ(IRCCD_TESTS_DIRECTORY "/level-1", duk_get_string(m_plugin->context(), -1));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -185,18 +198,20 @@ TEST_F(TestJsFile, methodDirnameClosed)
 TEST_F(TestJsFile, methodLines)
 {
 	try {
-		duk::putGlobal(m_plugin->context(), "directory", IRCCD_TESTS_DIRECTORY);
+		duk_push_string(m_plugin->context(), IRCCD_TESTS_DIRECTORY);
+		duk_put_global_string(m_plugin->context(), "directory");
 
-		auto ret = duk::pevalString(m_plugin->context(),
-			"lines = new Irccd.File(directory + '/lines.txt', 'r').lines();"
+		auto ret = duk_peval_string(m_plugin->context(),
+			"result = new Irccd.File(directory + '/lines.txt', 'r').lines();"
 		);
 
 		if (ret != 0)
-			throw duk::exception(m_plugin->context(), -1);
+			throw dukx_exception(m_plugin->context(), -1);
 
 		std::vector<std::string> expected{"a", "b", "c"};
 
-		ASSERT_EQ(expected, duk::getGlobal<std::vector<std::string>>(m_plugin->context(), "lines"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_EQ(expected, dukx_get_array(m_plugin->context(), -1, dukx_get_std_string));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -205,18 +220,20 @@ TEST_F(TestJsFile, methodLines)
 TEST_F(TestJsFile, methodSeek1)
 {
 	try {
-		duk::putGlobal(m_plugin->context(), "directory", IRCCD_TESTS_DIRECTORY);
+		duk_push_string(m_plugin->context(), IRCCD_TESTS_DIRECTORY);
+		duk_put_global_string(m_plugin->context(), "directory");
 
-		auto ret = duk::pevalString(m_plugin->context(),
+		auto ret = duk_peval_string(m_plugin->context(),
 			"f = new Irccd.File(directory + '/file.txt', 'r');"
 			"f.seek(Irccd.File.SeekSet, 4);"
 			"result = f.read(1);"
 		);
 
 		if (ret != 0)
-			throw duk::exception(m_plugin->context(), -1);
+			throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_EQ(".", duk::getGlobal<std::string>(m_plugin->context(), "result"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_EQ(".", dukx_get_std_string(m_plugin->context(), -1));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -225,9 +242,10 @@ TEST_F(TestJsFile, methodSeek1)
 TEST_F(TestJsFile, methodSeek1Closed)
 {
 	try {
-		duk::putGlobal(m_plugin->context(), "directory", IRCCD_TESTS_DIRECTORY);
+		duk_push_string(m_plugin->context(), IRCCD_TESTS_DIRECTORY);
+		duk_put_global_string(m_plugin->context(), "directory");
 
-		auto ret = duk::pevalString(m_plugin->context(),
+		auto ret = duk_peval_string(m_plugin->context(),
 			"f = new Irccd.File(directory + '/file.txt', 'r');"
 			"f.close();"
 			"f.seek(Irccd.File.SeekSet, 4);"
@@ -236,9 +254,10 @@ TEST_F(TestJsFile, methodSeek1Closed)
 		);
 
 		if (ret != 0)
-			throw duk::exception(m_plugin->context(), -1);
+			throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_TRUE(duk::getGlobal<bool>(m_plugin->context(), "result"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_TRUE(duk_get_boolean(m_plugin->context(), -1));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -247,9 +266,10 @@ TEST_F(TestJsFile, methodSeek1Closed)
 TEST_F(TestJsFile, methodSeek2)
 {
 	try {
-		duk::putGlobal(m_plugin->context(), "directory", IRCCD_TESTS_DIRECTORY);
+		duk_push_string(m_plugin->context(), IRCCD_TESTS_DIRECTORY);
+		duk_put_global_string(m_plugin->context(), "directory");
 
-		auto ret = duk::pevalString(m_plugin->context(),
+		auto ret = duk_peval_string(m_plugin->context(),
 			"f = new Irccd.File(directory + '/file.txt', 'r');"
 			"f.seek(Irccd.File.SeekSet, 2);"
 			"f.seek(Irccd.File.SeekCur, 2);"
@@ -257,9 +277,10 @@ TEST_F(TestJsFile, methodSeek2)
 		);
 
 		if (ret != 0)
-			throw duk::exception(m_plugin->context(), -1);
+			throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_EQ(".", duk::getGlobal<std::string>(m_plugin->context(), "result"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_EQ(".", dukx_get_std_string(m_plugin->context(), -1));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -268,9 +289,10 @@ TEST_F(TestJsFile, methodSeek2)
 TEST_F(TestJsFile, methodSeek2Closed)
 {
 	try {
-		duk::putGlobal(m_plugin->context(), "directory", IRCCD_TESTS_DIRECTORY);
+		duk_push_string(m_plugin->context(), IRCCD_TESTS_DIRECTORY);
+		duk_put_global_string(m_plugin->context(), "directory");
 
-		auto ret = duk::pevalString(m_plugin->context(),
+		auto ret = duk_peval_string(m_plugin->context(),
 			"f = new Irccd.File(directory + '/file.txt', 'r');"
 			"f.close();"
 			"f.seek(Irccd.File.SeekSet, 2);"
@@ -280,9 +302,10 @@ TEST_F(TestJsFile, methodSeek2Closed)
 		);
 
 		if (ret != 0)
-			throw duk::exception(m_plugin->context(), -1);
+			throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_TRUE(duk::getGlobal<bool>(m_plugin->context(), "result"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_TRUE(duk_get_boolean(m_plugin->context(), -1));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -291,18 +314,20 @@ TEST_F(TestJsFile, methodSeek2Closed)
 TEST_F(TestJsFile, methodSeek3)
 {
 	try {
-		duk::putGlobal(m_plugin->context(), "directory", IRCCD_TESTS_DIRECTORY);
+		duk_push_string(m_plugin->context(), IRCCD_TESTS_DIRECTORY);
+		duk_put_global_string(m_plugin->context(), "directory");
 
-		auto ret = duk::pevalString(m_plugin->context(),
+		auto ret = duk_peval_string(m_plugin->context(),
 			"f = new Irccd.File(directory + '/file.txt', 'r');"
 			"f.seek(Irccd.File.SeekEnd, -2);"
 			"result = f.read(1);"
 		);
 
 		if (ret != 0)
-			throw duk::exception(m_plugin->context(), -1);
+			throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_EQ("x", duk::getGlobal<std::string>(m_plugin->context(), "result"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_STREQ("x", duk_get_string(m_plugin->context(), -1));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -311,9 +336,10 @@ TEST_F(TestJsFile, methodSeek3)
 TEST_F(TestJsFile, methodSeek3Closed)
 {
 	try {
-		duk::putGlobal(m_plugin->context(), "directory", IRCCD_TESTS_DIRECTORY);
+		duk_push_string(m_plugin->context(), IRCCD_TESTS_DIRECTORY);
+		duk_put_global_string(m_plugin->context(), "directory");
 
-		auto ret = duk::pevalString(m_plugin->context(),
+		auto ret = duk_peval_string(m_plugin->context(),
 			"f = new Irccd.File(directory + '/file.txt', 'r');"
 			"f.close();"
 			"f.seek(Irccd.File.SeekEnd, -2);"
@@ -322,9 +348,10 @@ TEST_F(TestJsFile, methodSeek3Closed)
 		);
 
 		if (ret != 0)
-			throw duk::exception(m_plugin->context(), -1);
+			throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_TRUE(duk::getGlobal<bool>(m_plugin->context(), "result"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_TRUE(duk_get_boolean(m_plugin->context(), -1));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -333,22 +360,24 @@ TEST_F(TestJsFile, methodSeek3Closed)
 TEST_F(TestJsFile, methodReadline)
 {
 	try {
-		duk::putGlobal(m_plugin->context(), "directory", IRCCD_TESTS_DIRECTORY);
+		duk_push_string(m_plugin->context(), IRCCD_TESTS_DIRECTORY);
+		duk_put_global_string(m_plugin->context(), "directory");
 
-		auto ret = duk::pevalString(m_plugin->context(),
-			"lines = [];"
+		auto ret = duk_peval_string(m_plugin->context(),
+			"result = [];"
 			"f = new Irccd.File(directory + '/lines.txt', 'r');"
 			"for (var s; s = f.readline(); ) {"
-			"  lines.push(s);"
+			"  result.push(s);"
 			"}"
 		);
 
 		if (ret != 0)
-			throw duk::exception(m_plugin->context(), -1);
+			throw dukx_exception(m_plugin->context(), -1);
 
 		std::vector<std::string> expected{"a", "b", "c"};
 
-		ASSERT_EQ(expected, duk::getGlobal<std::vector<std::string>>(m_plugin->context(), "lines"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_EQ(expected, dukx_get_array(m_plugin->context(), -1, dukx_get_std_string));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}
@@ -357,23 +386,25 @@ TEST_F(TestJsFile, methodReadline)
 TEST_F(TestJsFile, methodReadlineClosed)
 {
 	try {
-		duk::putGlobal(m_plugin->context(), "directory", IRCCD_TESTS_DIRECTORY);
+		duk_push_string(m_plugin->context(), IRCCD_TESTS_DIRECTORY);
+		duk_put_global_string(m_plugin->context(), "directory");
 
-		auto ret = duk::pevalString(m_plugin->context(),
-			"lines = [];"
+		auto ret = duk_peval_string(m_plugin->context(),
+			"result = [];"
 			"f = new Irccd.File(directory + '/lines.txt', 'r');"
 			"f.close();"
 			"for (var s; s = f.readline(); ) {"
-			"  lines.push(s);"
+			"  result.push(s);"
 			"}"
 		);
 
 		if (ret != 0)
-			throw duk::exception(m_plugin->context(), -1);
+			throw dukx_exception(m_plugin->context(), -1);
 
 		std::vector<std::string> expected;
 
-		ASSERT_EQ(expected, duk::getGlobal<std::vector<std::string>>(m_plugin->context(), "lines"));
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_EQ(expected, dukx_get_array(m_plugin->context(), -1, dukx_get_std_string));
 	} catch (const std::exception &ex) {
 		FAIL() << ex.what();
 	}

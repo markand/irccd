@@ -33,7 +33,6 @@ set(
 	${CMAKE_CURRENT_LIST_DIR}/ini.hpp
 	${CMAKE_CURRENT_LIST_DIR}/irccd.hpp
 	${CMAKE_CURRENT_LIST_DIR}/irccdctl.hpp
-	${CMAKE_CURRENT_LIST_DIR}/js.hpp
 	${CMAKE_CURRENT_LIST_DIR}/json.hpp
 	${CMAKE_CURRENT_LIST_DIR}/mod-directory.hpp
 	${CMAKE_CURRENT_LIST_DIR}/mod-elapsed-timer.hpp
