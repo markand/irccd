@@ -668,7 +668,7 @@ void duk_push_server(duk_context *ctx, std::shared_ptr<Server> server)
 	duk_push_pointer(ctx, new std::shared_ptr<Server>(std::move(server)));
 	duk_put_prop_string(ctx, -2, Signature);
 	duk_get_global_string(ctx, Prototype);
-	duk_set_finalizer(ctx, -2);
+	duk_set_prototype(ctx, -2);
 }
 
 std::shared_ptr<Server> duk_require_server(duk_context *ctx, duk_idx_t index)
