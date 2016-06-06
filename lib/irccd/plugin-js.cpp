@@ -270,13 +270,25 @@ void JsPlugin::onLoad(Irccd &irccd)
 	duk_get_global_string(m_context, "info");
 
 	if (duk_get_type(m_context, -1) == DUK_TYPE_OBJECT) {
-		// TODO: bring back
-#if 0
-		setAuthor(optionalProperty<std::string>(m_context, -1, "author", author()));
-		setLicense(optionalProperty<std::string>(m_context, -1, "license", license()));
-		setSummary(optionalProperty<std::string>(m_context, -1, "summary", summary()));
-		setVersion(optionalProperty<std::string>(m_context, -1, "version", version()));
-#endif
+		// 'author'
+		duk_get_prop_string(m_context, -1, "author");
+		setAuthor(duk_is_string(m_context, -1) ? duk_get_string(m_context, -1) : author());
+		duk_pop(m_context);
+
+		// 'license'
+		duk_get_prop_string(m_context, -1, "license");
+		setLicense(duk_is_string(m_context, -1) ? duk_get_string(m_context, -1) : license());
+		duk_pop(m_context);
+
+		// 'summary'
+		duk_get_prop_string(m_context, -1, "summary");
+		setSummary(duk_is_string(m_context, -1) ? duk_get_string(m_context, -1) : summary());
+		duk_pop(m_context);
+
+		// 'version'
+		duk_get_prop_string(m_context, -1, "version");
+		setVersion(duk_is_string(m_context, -1) ? duk_get_string(m_context, -1) : version());
+		duk_pop(m_context);
 	}
 
 	duk_pop(m_context);
@@ -440,8 +452,8 @@ void JsPlugin::onWhois(Irccd &, const std::shared_ptr<Server> &server, const Ser
 	duk_put_prop_string(m_context, -2, "realname");
 	dukx_push_std_string(m_context, whois.host);
 	duk_put_prop_string(m_context, -2, "host");
-	// TODO
-	// duk_put_prop_string(m_context, -2, "channels", whois.channels);
+	dukx_push_array(m_context, whois.channels, dukx_push_std_string);
+	duk_put_prop_string(m_context, -2, "channels");
 	call("onWhois", 2);
 }
 
