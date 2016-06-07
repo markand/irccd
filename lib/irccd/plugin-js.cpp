@@ -129,7 +129,7 @@ void JsPlugin::putFormats()
 
 	for (const auto &pair : formats()) {
 		dukx_push_std_string(m_context, pair.second);
-		duk_put_prop_string(m_context, -1, pair.first.c_str());
+		duk_put_prop_string(m_context, -2, pair.first.c_str());
 	}
 
 	duk_pop_n(m_context, 3);

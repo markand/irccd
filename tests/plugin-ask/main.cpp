@@ -58,7 +58,7 @@ public:
 		: m_ps(m_irccd.pluginService())
 		, m_server(std::make_shared<ServerTest>())
 	{
-		m_ps.configure("ask", {{"file", SOURCEDIR "/answers.conf"}});
+		m_ps.setConfig("ask", {{"file", SOURCEDIR "/answers.conf"}});
 		m_ps.load("ask", PLUGINDIR "/ask.js");
 		m_plugin = m_ps.require("ask");
 	}

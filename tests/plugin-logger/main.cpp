@@ -78,7 +78,7 @@ public:
 		if (config.count("path") == 0)
 			config.emplace("path", BINARYDIR "/log.txt");
 
-		m_ps.configure("logger", config);
+		m_ps.setConfig("logger", config);
 		m_ps.load("logger", PLUGINDIR "/logger.js");
 		m_plugin = m_ps.require("logger");
 	}

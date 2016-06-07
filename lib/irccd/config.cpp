@@ -582,7 +582,7 @@ void Config::loadPlugins(Irccd &irccd) const
 			if (!util::isIdentifierValid(option.key()))
 				continue;
 
-			irccd.pluginService().configure(option.key(), findPluginConfig(option.key()));
+			irccd.pluginService().setConfig(option.key(), findPluginConfig(option.key()));
 			irccd.pluginService().setFormats(option.key(), findPluginFormats(option.key()));
 			irccd.pluginService().load(option.key(), option.value());
 		}

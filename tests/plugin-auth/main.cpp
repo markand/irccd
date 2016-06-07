@@ -62,7 +62,7 @@ public:
 		, m_nickserv2(std::make_shared<ServerTest>("nickserv2"))
 		, m_quakenet(std::make_shared<ServerTest>("quakenet"))
 	{
-		m_ps.configure("auth", {
+		m_ps.setConfig("auth", {
 			{ "nickserv1.type", "nickserv" },
 			{ "nickserv1.password", "plopation" },
 			{ "nickserv2.type", "nickserv" },

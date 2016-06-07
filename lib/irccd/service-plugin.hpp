@@ -110,7 +110,7 @@ public:
 	 * \param name the plugin name
 	 * \param config the new configuration
 	 */
-	IRCCD_EXPORT void configure(const std::string &name, PluginConfig config);
+	IRCCD_EXPORT void setConfig(const std::string &name, PluginConfig config);
 
 	/**
 	 * Get a configuration for a plugin.

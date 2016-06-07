@@ -74,7 +74,7 @@ public:
 		if (config.count("file") == 0)
 			config.emplace("file", SOURCEDIR "/words.conf");
 
-		m_ps.configure("history", config);
+		m_ps.setConfig("history", config);
 		m_ps.load("history", PLUGINDIR "/history.js");
 		m_plugin = m_ps.require("history");
 	}

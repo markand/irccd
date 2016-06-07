@@ -115,7 +115,7 @@ void PluginService::add(std::shared_ptr<Plugin> plugin)
 	m_plugins.push_back(std::move(plugin));
 }
 
-void PluginService::configure(const std::string &name, PluginConfig config)
+void PluginService::setConfig(const std::string &name, PluginConfig config)
 {
 	m_config.emplace(name, std::move(config));
 }
