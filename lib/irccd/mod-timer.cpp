@@ -190,20 +190,20 @@ TimerModule::TimerModule() noexcept
 {
 }
 
-void TimerModule::load(Irccd &, JsPlugin &plugin)
+void TimerModule::load(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
 {
-	StackAssert sa(plugin.context());
+	StackAssert sa(plugin->context());
 
-	duk_get_global_string(plugin.context(), "Irccd");
-	duk_push_c_function(plugin.context(), constructor, 3);
-	duk_put_number_list(plugin.context(), -1, constants);
-	duk_push_object(plugin.context());
-	duk_put_function_list(plugin.context(), -1, methods);
-	duk_put_prop_string(plugin.context(), -2, "prototype");
-	duk_put_prop_string(plugin.context(), -2, "Timer");
-	duk_pop(plugin.context());
-	duk_push_object(plugin.context());
-	duk_put_global_string(plugin.context(), CallbackTable);
+	duk_get_global_string(plugin->context(), "Irccd");
+	duk_push_c_function(plugin->context(), constructor, 3);
+	duk_put_number_list(plugin->context(), -1, constants);
+	duk_push_object(plugin->context());
+	duk_put_function_list(plugin->context(), -1, methods);
+	duk_put_prop_string(plugin->context(), -2, "prototype");
+	duk_put_prop_string(plugin->context(), -2, "Timer");
+	duk_pop(plugin->context());
+	duk_push_object(plugin->context());
+	duk_put_global_string(plugin->context(), CallbackTable);
 }
 
 } // !irccd

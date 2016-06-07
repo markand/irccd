@@ -188,21 +188,33 @@ PluginModule::PluginModule() noexcept
 {
 }
 
-void PluginModule::load(Irccd &, JsPlugin &plugin)
+void PluginModule::load(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
 {
-	StackAssert sa(plugin.context());
+	StackAssert sa(plugin->context());
 
-	duk_push_pointer(plugin.context(), &plugin);
-	duk_put_global_string(plugin.context(), PluginGlobal);
-	duk_get_global_string(plugin.context(), "Irccd");
-	duk_push_object(plugin.context());
-	duk_put_function_list(plugin.context(), -1, functions);
-	duk_push_object(plugin.context());
-	duk_put_prop_string(plugin.context(), -2, "config");
-	duk_push_object(plugin.context());
-	duk_put_prop_string(plugin.context(), -2, "format");
-	duk_put_prop_string(plugin.context(), -2, "Plugin");
-	duk_pop(plugin.context());
+	duk_push_pointer(plugin->context(), new std::shared_ptr<JsPlugin>(plugin));
+	duk_put_global_string(plugin->context(), PluginGlobal);
+	duk_get_global_string(plugin->context(), "Irccd");
+	duk_push_object(plugin->context());
+	duk_put_function_list(plugin->context(), -1, functions);
+	duk_push_object(plugin->context());
+	duk_put_prop_string(plugin->context(), -2, "config");
+	duk_push_object(plugin->context());
+	duk_put_prop_string(plugin->context(), -2, "format");
+	duk_put_prop_string(plugin->context(), -2, "Plugin");
+	duk_pop(plugin->context());
+}
+
+void PluginModule::unload(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
+{
+	StackAssert sa(plugin->context());
+
+	duk_push_global_object(plugin->context());
+	duk_get_prop_string(plugin->context(), -1, PluginGlobal);
+	delete static_cast<std::shared_ptr<JsPlugin> *>(duk_to_pointer(plugin->context(), -1));
+	duk_pop(plugin->context());
+	duk_del_prop_string(plugin->context(), -1, PluginGlobal);
+	duk_pop(plugin->context());
 }
 
 std::shared_ptr<JsPlugin> duk_get_plugin(duk_context *ctx)
@@ -210,10 +222,10 @@ std::shared_ptr<JsPlugin> duk_get_plugin(duk_context *ctx)
 	StackAssert sa(ctx);
 
 	duk_get_global_string(ctx, PluginGlobal);
-	auto plugin = std::static_pointer_cast<JsPlugin>(static_cast<JsPlugin *>(duk_to_pointer(ctx, -1))->shared_from_this());
+	auto plugin = static_cast<std::shared_ptr<JsPlugin> *>(duk_to_pointer(ctx, -1));
 	duk_pop(ctx);
 
-	return plugin;
+	return *plugin;
 }
 
 } // !irccd

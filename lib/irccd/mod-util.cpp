@@ -48,7 +48,7 @@ util::Substitution getSubstitution(duk_context *ctx, int index)
 		if (dukx_get_std_string(ctx, -2) == "date")
 			params.time = static_cast<time_t>(duk_get_number(ctx, -1) / 1000);
 		else
-			params.keywords.insert({duk_get_string(ctx, -2), duk_get_string(ctx, -1)});
+			params.keywords.insert({dukx_get_std_string(ctx, -2), dukx_get_std_string(ctx, -1)});
 	});
 
 	return params;
@@ -135,15 +135,15 @@ UtilModule::UtilModule() noexcept
 {
 }
 
-void UtilModule::load(Irccd &, JsPlugin &plugin)
+void UtilModule::load(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
 {
-	StackAssert sa(plugin.context());
+	StackAssert sa(plugin->context());
 
-	duk_get_global_string(plugin.context(), "Irccd");
-	duk_push_object(plugin.context());
-	duk_put_function_list(plugin.context(), -1, functions);
-	duk_put_prop_string(plugin.context(), -2, "Util");
-	duk_pop(plugin.context());
+	duk_get_global_string(plugin->context(), "Irccd");
+	duk_push_object(plugin->context());
+	duk_put_function_list(plugin->context(), -1, functions);
+	duk_put_prop_string(plugin->context(), -2, "Util");
+	duk_pop(plugin->context());
 }
 
 } // !irccd

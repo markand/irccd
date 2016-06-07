@@ -266,7 +266,7 @@ duk_ret_t invite(duk_context *ctx)
  */
 duk_ret_t join(duk_context *ctx)
 {
-	self(ctx)->join(duk_require_string(ctx, 0), duk_get_string(ctx, 1));
+	self(ctx)->join(duk_require_string(ctx, 0), dukx_get_std_string(ctx, 1));
 
 	return 0;
 }
@@ -284,7 +284,7 @@ duk_ret_t join(duk_context *ctx)
  */
 duk_ret_t kick(duk_context *ctx)
 {
-	self(ctx)->kick(duk_require_string(ctx, 0), duk_require_string(ctx, 1), duk_get_string(ctx, 2));
+	self(ctx)->kick(duk_require_string(ctx, 0), duk_require_string(ctx, 1), dukx_get_std_string(ctx, 2));
 
 	return 0;
 }
@@ -400,7 +400,7 @@ duk_ret_t notice(duk_context *ctx)
  */
 duk_ret_t part(duk_context *ctx)
 {
-	self(ctx)->part(duk_require_string(ctx, 0), duk_get_string(ctx, 1));
+	self(ctx)->part(duk_require_string(ctx, 0), dukx_get_std_string(ctx, 1));
 
 	return 0;
 }
@@ -639,22 +639,22 @@ ServerModule::ServerModule() noexcept
 {
 }
 
-void ServerModule::load(Irccd &, JsPlugin &plugin)
+void ServerModule::load(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
 {
-	StackAssert sa(plugin.context());
+	StackAssert sa(plugin->context());
 
-	duk_get_global_string(plugin.context(), "Irccd");
-	duk_push_c_function(plugin.context(), constructor, 1);
-	duk_put_function_list(plugin.context(), -1, functions);
-	duk_push_object(plugin.context());
-	duk_put_function_list(plugin.context(), -1, methods);
-	duk_push_c_function(plugin.context(), destructor, 1);
-	duk_set_finalizer(plugin.context(), -2);
-	duk_dup_top(plugin.context());
-	duk_put_global_string(plugin.context(), Prototype);
-	duk_put_prop_string(plugin.context(), -2, "prototype");
-	duk_put_prop_string(plugin.context(), -2, "Server");
-	duk_pop(plugin.context());
+	duk_get_global_string(plugin->context(), "Irccd");
+	duk_push_c_function(plugin->context(), constructor, 1);
+	duk_put_function_list(plugin->context(), -1, functions);
+	duk_push_object(plugin->context());
+	duk_put_function_list(plugin->context(), -1, methods);
+	duk_push_c_function(plugin->context(), destructor, 1);
+	duk_set_finalizer(plugin->context(), -2);
+	duk_dup_top(plugin->context());
+	duk_put_global_string(plugin->context(), Prototype);
+	duk_put_prop_string(plugin->context(), -2, "prototype");
+	duk_put_prop_string(plugin->context(), -2, "Server");
+	duk_pop(plugin->context());
 }
 
 void duk_push_server(duk_context *ctx, std::shared_ptr<Server> server)

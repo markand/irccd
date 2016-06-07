@@ -30,6 +30,7 @@
  */
 
 #include <cassert>
+#include <memory>
 
 #include "sysconfig.hpp"
 #include "util.hpp"
@@ -79,7 +80,7 @@ public:
 	 * \param irccd the irccd instance
 	 * \param plugin the plugin
 	 */
-	virtual void load(Irccd &irccd, JsPlugin &plugin)
+	virtual void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin)
 	{
 		util::unused(irccd, plugin);
 	}
@@ -90,7 +91,7 @@ public:
 	 * \param irccd the irccd instance
 	 * \param plugin the plugin
 	 */
-	virtual void unload(Irccd &irccd, JsPlugin &plugin)
+	virtual void unload(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin)
 	{
 		util::unused(irccd, plugin);
 	}

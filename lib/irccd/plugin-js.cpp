@@ -54,8 +54,10 @@ void JsPlugin::call(const std::string &name, unsigned nargs)
 
 void JsPlugin::putModules(Irccd &irccd)
 {
+	m_modules = irccd.moduleService().modules();
+
 	for (const auto &module : irccd.moduleService().modules())
-		module->load(irccd, *this);
+		module->load(irccd, std::static_pointer_cast<JsPlugin>(shared_from_this()));
 }
 
 void JsPlugin::putVars()
@@ -434,8 +436,8 @@ void JsPlugin::onUnload(Irccd &irccd)
 
 	call("onUnload");
 
-	for (const auto &module : irccd.moduleService().modules())
-		module->unload(irccd, *this);
+	for (const auto &module : m_modules)
+		module->unload(irccd, std::static_pointer_cast<JsPlugin>(shared_from_this()));
 }
 
 void JsPlugin::onWhois(Irccd &, const std::shared_ptr<Server> &server, const ServerWhois &whois)

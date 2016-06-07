@@ -88,15 +88,15 @@ LoggerModule::LoggerModule() noexcept
 {
 }
 
-void LoggerModule::load(Irccd &, JsPlugin &plugin)
+void LoggerModule::load(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
 {
-	StackAssert sa(plugin.context());
+	StackAssert sa(plugin->context());
 
-	duk_get_global_string(plugin.context(), "Irccd");
-	duk_push_object(plugin.context());
-	duk_put_function_list(plugin.context(), -1, functions);
-	duk_put_prop_string(plugin.context(), -2, "Logger");
-	duk_pop(plugin.context());
+	duk_get_global_string(plugin->context(), "Irccd");
+	duk_push_object(plugin->context());
+	duk_put_function_list(plugin->context(), -1, functions);
+	duk_put_prop_string(plugin->context(), -2, "Logger");
+	duk_pop(plugin->context());
 }
 
 } // !irccd

@@ -369,21 +369,21 @@ DirectoryModule::DirectoryModule() noexcept
 {
 }
 
-void DirectoryModule::load(Irccd &, JsPlugin &plugin)
+void DirectoryModule::load(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
 {
-	StackAssert sa(plugin.context());
+	StackAssert sa(plugin->context());
 
-	duk_get_global_string(plugin.context(), "Irccd");
-	duk_push_c_function(plugin.context(), constructor, 2);
-	duk_put_number_list(plugin.context(), -1, constants);
-	duk_put_function_list(plugin.context(), -1, functions);
-	dukx_push_std_string(plugin.context(), std::string{fs::separator()});
-	duk_put_prop_string(plugin.context(), -2, "separator");
-	duk_push_object(plugin.context());
-	duk_put_function_list(plugin.context(), -1, methods);
-	duk_put_prop_string(plugin.context(), -2, "prototype");
-	duk_put_prop_string(plugin.context(), -2, "Directory");
-	duk_pop(plugin.context());
+	duk_get_global_string(plugin->context(), "Irccd");
+	duk_push_c_function(plugin->context(), constructor, 2);
+	duk_put_number_list(plugin->context(), -1, constants);
+	duk_put_function_list(plugin->context(), -1, functions);
+	dukx_push_std_string(plugin->context(), std::string{fs::separator()});
+	duk_put_prop_string(plugin->context(), -2, "separator");
+	duk_push_object(plugin->context());
+	duk_put_function_list(plugin->context(), -1, methods);
+	duk_put_prop_string(plugin->context(), -2, "prototype");
+	duk_put_prop_string(plugin->context(), -2, "Directory");
+	duk_pop(plugin->context());
 }
 
 } // !irccd
