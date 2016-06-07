@@ -624,6 +624,7 @@ const duk_number_list_entry constants[] = {
 	{ "SeekCur", SEEK_CUR },
 	{ "SeekEnd", SEEK_END },
 	{ "SeekSet", SEEK_SET },
+	{ nullptr, 0 } 
 };
 
 } // !namespace
