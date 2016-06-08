@@ -259,9 +259,7 @@ duk_ret_t methodRead(duk_context *ctx)
 			std::array<char, 128> buffer;
 			std::size_t nread;
 
-			while (!std::feof(file->handle())) {
-				nread = std::fread(&buffer[0], sizeof (buffer[0]), buffer.size(), file->handle());
-
+			while ((nread = std::fread(&buffer[0], sizeof (buffer[0]), buffer.size(), file->handle())) > 0) {
 				if (std::ferror(file->handle()))
 					dukx_throw(ctx, SystemError());
 
