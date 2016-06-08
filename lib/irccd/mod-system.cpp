@@ -207,19 +207,19 @@ duk_ret_t version(duk_context *ctx)
 }
 
 const duk_function_list_entry functions[] = {
-	{ "env", env, 1 },
-	{ "exec", exec, 1 },
-	{ "home", home, 0 },
-	{ "name", name, 0 },
+	{ "env",	env,		1 },
+	{ "exec",	exec,		1 },
+	{ "home",	home,		0 },
+	{ "name",	name,		0 },
 #if defined(HAVE_POPEN)
-	{ "popen", popen, 2 },
+	{ "popen",	popen,		2 },
 #endif
-	{ "sleep", sleep, 1 },
-	{ "ticks", ticks, 0 },
-	{ "uptime", uptime, 0 },
-	{ "usleep", usleep, 1 },
-	{ "version", version, 0 },
-	{ nullptr, nullptr, 0 }
+	{ "sleep",	sleep,		1 },
+	{ "ticks",	ticks,		0 },
+	{ "uptime",	uptime,		0 },
+	{ "usleep",	usleep,		1 },
+	{ "version",	version,	0 },
+	{ nullptr,	nullptr,	0 }
 };
 
 } // !namespace

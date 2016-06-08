@@ -122,13 +122,13 @@ duk_ret_t isUpper(duk_context *ctx)
 }
 
 const duk_function_list_entry functions[] = {
-	{ "isDigit",		isDigit,	1	},
-	{ "isLetter",		isLetter,	1	},
-	{ "isLower",		isLower,	1	},
-	{ "isSpace",		isSpace,	1	},
-	{ "isTitle",		isTitle,	1	},
-	{ "isUpper",		isUpper,	1	},
-	{ nullptr,		nullptr,	0	} 
+	{ "isDigit",		isDigit,	1 },
+	{ "isLetter",		isLetter,	1 },
+	{ "isLower",		isLower,	1 },
+	{ "isSpace",		isSpace,	1 },
+	{ "isTitle",		isTitle,	1 },
+	{ "isUpper",		isUpper,	1 },
+	{ nullptr,		nullptr,	0 } 
 };
 
 } // !namespace

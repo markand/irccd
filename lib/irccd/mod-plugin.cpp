@@ -173,12 +173,12 @@ duk_idx_t unload(duk_context *ctx)
 }
 
 const duk_function_list_entry functions[] = {
-	{ "info", info, DUK_VARARGS },
-	{ "list", list, 0 },
-	{ "load", load, 1 },
-	{ "reload", reload, 1 },
-	{ "unload", unload, 1 },
-	{ nullptr, nullptr, 0 }
+	{ "info",	info,		DUK_VARARGS	},
+	{ "list",	list,		0		},
+	{ "load",	load,		1		},
+	{ "reload",	reload,		1		},
+	{ "unload",	unload,		1		},
+	{ nullptr,	nullptr,	0		}
 };
 
 } // !namespace

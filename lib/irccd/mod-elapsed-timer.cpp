@@ -129,11 +129,11 @@ duk_ret_t destructor(duk_context *ctx)
 }
 
 const duk_function_list_entry methods[] = {
-	{ "elapsed", elapsed, 0 },
-	{ "pause", pause, 0 },
-	{ "reset", reset, 0 },
-	{ "restart", restart, 0 },
-	{ nullptr, nullptr, 0 }
+	{ "elapsed",	elapsed,	0 },
+	{ "pause",	pause,		0 },
+	{ "reset",	reset,		0 },
+	{ "restart",	restart,	0 },
+	{ nullptr,	nullptr,	0 }
 };
 
 } // !namespace

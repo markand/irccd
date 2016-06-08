@@ -442,20 +442,20 @@ duk_ret_t methodWrite(duk_context *ctx)
 }
 
 const duk_function_list_entry methods[] = {
-	{ "basename", methodBasename, 0 },
-	{ "close", methodClose, 0 },
-	{ "dirname", methodDirname, 0 },
-	{ "lines", methodLines, 0 },
-	{ "read", methodRead, 1 },
-	{ "readline", methodReadline, 0 },
-	{ "remove", methodRemove, 0 },
-	{ "seek", methodSeek, 2 },
+	{ "basename",	methodBasename,	0 },
+	{ "close",	methodClose,	0 },
+	{ "dirname",	methodDirname,	0 },
+	{ "lines",	methodLines,	0 },
+	{ "read",	methodRead,	1 },
+	{ "readline",	methodReadline,	0 },
+	{ "remove",	methodRemove,	0 },
+	{ "seek",	methodSeek,	2 },
 #if defined(HAVE_STAT)
-	{ "stat", methodStat, 0 },
+	{ "stat",	methodStat,	0 },
 #endif
-	{ "tell", methodTell, 0 },
-	{ "write", methodWrite, 1 },
-	{ nullptr, nullptr, 0 }
+	{ "tell",	methodTell,	0 },
+	{ "write",	methodWrite,	1 },
+	{ nullptr,	nullptr,	0 }
 };
 
 /*
@@ -610,21 +610,21 @@ duk_ret_t functionStat(duk_context *ctx)
 #endif // !HAVE_STAT
 
 const duk_function_list_entry functions[] = {
-	{ "basename", functionBasename, 1 },
-	{ "dirname", functionDirname, 1 },
-	{ "exists", functionExists, 1 },
-	{ "remove", functionRemove, 1 },
+	{ "basename",	functionBasename,	1 },
+	{ "dirname",	functionDirname,	1 },
+	{ "exists",	functionExists,		1 },
+	{ "remove",	functionRemove,		1 },
 #if defined(HAVE_STAT)
-	{ "stat", functionStat, 1 },
+	{ "stat",	functionStat,		1 },
 #endif
-	{ nullptr, nullptr, 0 }
+	{ nullptr,	nullptr,		0 }
 };
 
 const duk_number_list_entry constants[] = {
-	{ "SeekCur", SEEK_CUR },
-	{ "SeekEnd", SEEK_END },
-	{ "SeekSet", SEEK_SET },
-	{ nullptr, 0 } 
+	{ "SeekCur",	SEEK_CUR		},
+	{ "SeekEnd",	SEEK_END		},
+	{ "SeekSet",	SEEK_SET		},
+	{ nullptr, 	0			} 
 };
 
 } // !namespace

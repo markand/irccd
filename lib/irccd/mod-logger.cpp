@@ -75,10 +75,10 @@ duk_ret_t debug(duk_context *ctx)
 }
 
 const duk_function_list_entry functions[] = {
-	{ "info", info, 1 },
-	{ "warning", warning, 1 },
-	{ "debug", debug, 1 },
-	{ nullptr, nullptr, 0 }
+	{ "info",	info,		1 },
+	{ "warning",	warning,	1 },
+	{ "debug",	debug,		1 },
+	{ nullptr,	nullptr,	0 }
 };
 
 } // !namespace

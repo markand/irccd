@@ -222,16 +222,9 @@ duk_ret_t info(duk_context *ctx)
 	duk_put_prop_string(ctx, -2, "nickname");
 	dukx_push_std_string(ctx, server->identity().username);
 	duk_put_prop_string(ctx, -2, "username");
-
-	// Channels.
-	duk_push_array(ctx);
-
-	int i = 0;
-	for (const auto &channel : server->settings().channels) {
+	dukx_push_array(ctx, server->settings().channels, [] (auto ctx, auto channel) {
 		dukx_push_std_string(ctx, channel.name);
-		duk_put_prop_index(ctx, -2, i++);
-	}
-
+	});
 	duk_put_prop_string(ctx, -2, "channels");
 
 	return 1;
@@ -604,32 +597,32 @@ duk_ret_t remove(duk_context *ctx)
 }
 
 const duk_function_list_entry methods[] = {
-	{ "cmode", cmode, 2 },
-	{ "cnotice", cnotice, 2 },
-	{ "info", info, 0 },
-	{ "invite", invite, 2 },
-	{ "join", join, DUK_VARARGS },
-	{ "kick", kick, DUK_VARARGS },
-	{ "me", me, 2 },
-	{ "message", message, 2 },
-	{ "mode", mode, 1 },
-	{ "names", names, 1 },
-	{ "nick", nick, 1 },
-	{ "notice", notice, 2 },
-	{ "part", part, DUK_VARARGS },
-	{ "send", send, 1 },
-	{ "topic", topic, 2 },
-	{ "whois", whois, 1 },
-	{ "toString", toString, 0 },
-	{ nullptr, nullptr, 0 }
+	{ "cmode",	cmode,		2		},
+	{ "cnotice",	cnotice,	2		},
+	{ "info",	info,		0		},
+	{ "invite",	invite,		2		},
+	{ "join",	join,		DUK_VARARGS	},
+	{ "kick",	kick,		DUK_VARARGS	},
+	{ "me",		me,		2		},
+	{ "message",	message,	2		},
+	{ "mode",	mode,		1		},
+	{ "names",	names,		1		},
+	{ "nick",	nick,		1		},
+	{ "notice",	notice,		2		},
+	{ "part",	part,		DUK_VARARGS	},
+	{ "send",	send,		1		},
+	{ "topic",	topic,		2		},
+	{ "whois",	whois,		1		},
+	{ "toString",	toString,	0		},
+	{ nullptr,	nullptr,	0		}
 };
 
 const duk_function_list_entry functions[] = {
-	{ "add", add, 1 },
-	{ "find", find, 1 },
-	{ "list", list, 0 },
-	{ "remove", remove, 1 },
-	{ nullptr, nullptr, 0 }
+	{ "add",	add,		1		},
+	{ "find",	find,		1		},
+	{ "list",	list,		0		},
+	{ "remove",	remove,		1		},
+	{ nullptr,	nullptr,	0		}
 };
 
 } // !namespace

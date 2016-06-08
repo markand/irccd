@@ -220,9 +220,9 @@ duk_ret_t methodRemove(duk_context *ctx)
 }
 
 const duk_function_list_entry methods[] = {
-	{ "find",		methodFind,		DUK_VARARGS	},
-	{ "remove",		methodRemove,		1		},
-	{ nullptr,		nullptr,		0		} 
+	{ "find",	methodFind,	DUK_VARARGS	},
+	{ "remove",	methodRemove,	1		},
+	{ nullptr,	nullptr,	0		} 
 };
 
 /*
@@ -346,20 +346,20 @@ duk_ret_t funcMkdir(duk_context *ctx)
 }
 
 const duk_function_list_entry functions[] = {
-	{ "find", funcFind, DUK_VARARGS },
-	{ "mkdir", funcMkdir, DUK_VARARGS },
-	{ "remove", funcRemove, DUK_VARARGS },
-	{ nullptr, nullptr, 0 }
+	{ "find",		funcFind,		DUK_VARARGS	},
+	{ "mkdir",		funcMkdir,		DUK_VARARGS	},
+	{ "remove",		funcRemove,		DUK_VARARGS	},
+	{ nullptr,		nullptr,		0		}
 };
 
 const duk_number_list_entry constants[] = {
-	{ "Dot", static_cast<int>(fs::Dot) },
-	{ "DotDot", static_cast<int>(fs::DotDot) },
-	{ "TypeUnknown", static_cast<int>(fs::Entry::Unknown) },
-	{ "TypeDir", static_cast<int>(fs::Entry::Dir) },
-	{ "TypeFile", static_cast<int>(fs::Entry::File) },
-	{ "TypeLink", static_cast<int>(fs::Entry::Link) },
-	{ nullptr, 0 }
+	{ "Dot",		static_cast<int>(fs::Dot)		},
+	{ "DotDot",		static_cast<int>(fs::DotDot)		},
+	{ "TypeUnknown",	static_cast<int>(fs::Entry::Unknown)	},
+	{ "TypeDir",		static_cast<int>(fs::Entry::Dir)	},
+	{ "TypeFile",		static_cast<int>(fs::Entry::File)	},
+	{ "TypeLink",		static_cast<int>(fs::Entry::Link)	},
+	{ nullptr,		0					}
 };
 
 } // !namespace
