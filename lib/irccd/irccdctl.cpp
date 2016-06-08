@@ -94,6 +94,7 @@ void Irccdctl::usage() const
 	log::warning() << "\thelp\t\t\tShow an help topic\n";
 	log::warning() << "\twatch\t\t\tStart listening to irccd\n\n";
 	log::warning() << "Plugin management:\n";
+	log::warning() << "\tplugin-config\t\tGet or set a plugin configuration option\n";
 	log::warning() << "\tplugin-info\t\tGet plugin information\n";
 	log::warning() << "\tplugin-list\t\tList all loaded plugins\n";
 	log::warning() << "\tplugin-load\t\tLoad a plugin\n";

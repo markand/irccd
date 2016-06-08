@@ -19,6 +19,7 @@
 #include <algorithm>
 
 #include "cmd-help.hpp"
+#include "cmd-plugin-config.hpp"
 #include "cmd-plugin-info.hpp"
 #include "cmd-plugin-list.hpp"
 #include "cmd-plugin-load.hpp"
@@ -49,6 +50,7 @@ namespace irccd {
 CommandService::CommandService()
 	: m_commands{
 		std::make_shared<command::Help>(),
+		std::make_shared<command::PluginConfig>(),
 		std::make_shared<command::PluginInfo>(),
 		std::make_shared<command::PluginList>(),
 		std::make_shared<command::PluginLoad>(),
