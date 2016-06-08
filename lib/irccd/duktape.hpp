@@ -441,7 +441,7 @@ inline void dukx_push_std_string(duk_context *ctx, const std::string &str)
  *
  * \param ctx the context
  * \param index the array index
- * \param getter the conversion function (e.g. duk_get_int)
+ * \param get the conversion function (e.g. duk_get_int)
  */
 template <typename Getter>
 auto dukx_get_array(duk_context *ctx, duk_idx_t index, Getter &&get)

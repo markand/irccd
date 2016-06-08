@@ -246,7 +246,7 @@ duk_ret_t methodLines(duk_context *ctx)
 duk_ret_t methodRead(duk_context *ctx)
 {
 	auto file = self(ctx);
-	auto amount = duk_is_number(ctx, 0) ? duk_get_int(ctx, 0) : 0;
+	auto amount = duk_is_number(ctx, 0) ? duk_get_int(ctx, 0) : -1;
 
 	if (amount == 0 || file->handle() == nullptr)
 		return 0;

@@ -357,6 +357,27 @@ TEST_F(TestJsFile, methodSeek3Closed)
 	}
 }
 
+TEST_F(TestJsFile, methodRead1)
+{
+	try {
+		duk_push_string(m_plugin->context(), IRCCD_TESTS_DIRECTORY);
+		duk_put_global_string(m_plugin->context(), "directory");
+
+		auto ret = duk_peval_string(m_plugin->context(),
+			"f = new Irccd.File(directory + '/file.txt', 'r');"
+			"result = f.read();"
+		);
+
+		if (ret != 0)
+			throw dukx_exception(m_plugin->context(), -1);
+
+		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+		ASSERT_STREQ("file.txt", duk_get_string(m_plugin->context(), -1));
+	} catch (const std::exception &ex) {
+		FAIL() << ex.what();
+	}
+}
+
 TEST_F(TestJsFile, methodReadline)
 {
 	try {
