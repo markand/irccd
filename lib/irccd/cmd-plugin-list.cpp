@@ -22,7 +22,6 @@
 #include "irccd.hpp"
 #include "plugin.hpp"
 #include "service-plugin.hpp"
-#include "sysconfig.hpp"
 #include "util.hpp"
 
 namespace irccd {
@@ -41,7 +40,6 @@ std::string PluginList::help() const
 
 json::Value PluginList::exec(Irccd &irccd, const json::Value &request) const
 {
-#if defined(WITH_JS)
 	json::Value response = RemoteCommand::exec(irccd, request);
 	json::Value list = json::array({});
 
@@ -51,11 +49,6 @@ json::Value PluginList::exec(Irccd &irccd, const json::Value &request) const
 	response.insert("list", std::move(list));
 
 	return response;
-#else
-	util::unused(irccd, tc);
-
-	throw std::runtime_error("JavaScript disabled");
-#endif
 }
 
 void PluginList::result(Irccdctl &irccdctl, const json::Value &object) const

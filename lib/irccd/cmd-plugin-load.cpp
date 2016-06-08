@@ -19,7 +19,6 @@
 #include "cmd-plugin-load.hpp"
 #include "irccd.hpp"
 #include "service-plugin.hpp"
-#include "sysconfig.hpp"
 #include "util.hpp"
 
 namespace irccd {
@@ -43,17 +42,11 @@ std::vector<RemoteCommand::Arg> PluginLoad::args() const
 
 json::Value PluginLoad::exec(Irccd &irccd, const json::Value &request) const
 {
-#if defined(WITH_JS)
 	auto name = request.at("plugin").toString();
 
 	irccd.pluginService().load(name);
 
 	return RemoteCommand::exec(irccd, request);
-#else
-	util::unused(irccd, request);
-
-	throw std::runtime_error("JavaScript disabled");
-#endif
 }
 
 } // !command

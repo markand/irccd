@@ -28,7 +28,6 @@
 #include "server-event.hpp"
 #include "service-server.hpp"
 #include "service-transport.hpp"
-#include "sysconfig.hpp"
 #include "util.hpp"
 
 using namespace fmt::literals;
@@ -57,7 +56,6 @@ void ServerService::handleChannelMode(std::weak_ptr<Server> ptr, std::string ori
 		{ "argument",	arg			}
 	}).toJson(0));
 
-#if defined(WITH_JS)
 	m_irccd.post(ServerEvent(server->name(), origin, channel,
 		[=] (Plugin &) -> std::string {
 			return "onChannelMode";
@@ -67,7 +65,6 @@ void ServerService::handleChannelMode(std::weak_ptr<Server> ptr, std::string ori
 					     std::move(arg));
 		}
 	));
-#endif
 }
 
 void ServerService::handleChannelNotice(std::weak_ptr<Server> ptr, std::string origin, std::string channel, std::string message)
@@ -90,7 +87,6 @@ void ServerService::handleChannelNotice(std::weak_ptr<Server> ptr, std::string o
 		{ "message",	message			}
 	}).toJson(0));
 
-#if defined(WITH_JS)
 	m_irccd.post(ServerEvent(server->name(), origin, channel,
 		[=] (Plugin &) -> std::string {
 			return "onChannelNotice";
@@ -99,7 +95,6 @@ void ServerService::handleChannelNotice(std::weak_ptr<Server> ptr, std::string o
 			plugin.onChannelNotice(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(message));
 		}
 	));
-#endif
 }
 
 void ServerService::handleConnect(std::weak_ptr<Server> ptr)
@@ -116,7 +111,6 @@ void ServerService::handleConnect(std::weak_ptr<Server> ptr)
 		{ "server",	server->name()		}
 	}).toJson(0));
 
-#if defined(WITH_JS)
 	m_irccd.post(ServerEvent(server->name(), /* origin */ "", /* channel */ "",
 		[=] (Plugin &) -> std::string {
 			return "onConnect";
@@ -125,7 +119,6 @@ void ServerService::handleConnect(std::weak_ptr<Server> ptr)
 			plugin.onConnect(m_irccd, std::move(server));
 		}
 	));
-#endif
 }
 
 void ServerService::handleInvite(std::weak_ptr<Server> ptr, std::string origin, std::string channel, std::string target)
@@ -147,7 +140,6 @@ void ServerService::handleInvite(std::weak_ptr<Server> ptr, std::string origin, 
 		{ "channel",	channel			}
 	}).toJson(0));
 
-#if defined(WITH_JS)
 	m_irccd.post(ServerEvent(server->name(), origin, channel,
 		[=] (Plugin &) -> std::string {
 			return "onInvite";
@@ -156,7 +148,6 @@ void ServerService::handleInvite(std::weak_ptr<Server> ptr, std::string origin, 
 			plugin.onInvite(m_irccd, std::move(server), std::move(origin), std::move(channel));
 		}
 	));
-#endif
 }
 
 void ServerService::handleJoin(std::weak_ptr<Server> ptr, std::string origin, std::string channel)
@@ -177,7 +168,6 @@ void ServerService::handleJoin(std::weak_ptr<Server> ptr, std::string origin, st
 		{ "channel",	channel			}
 	}).toJson(0));
 
-#if defined(WITH_JS)
 	m_irccd.post(ServerEvent(server->name(), origin, channel,
 		[=] (Plugin &) -> std::string {
 			return "onJoin";
@@ -186,7 +176,6 @@ void ServerService::handleJoin(std::weak_ptr<Server> ptr, std::string origin, st
 			plugin.onJoin(m_irccd, std::move(server), std::move(origin), std::move(channel));
 		}
 	));
-#endif
 }
 
 void ServerService::handleKick(std::weak_ptr<Server> ptr, std::string origin, std::string channel, std::string target, std::string reason)
@@ -211,7 +200,6 @@ void ServerService::handleKick(std::weak_ptr<Server> ptr, std::string origin, st
 		{ "reason",	reason			}
 	}).toJson(0));
 
-#if defined(WITH_JS)
 	m_irccd.post(ServerEvent(server->name(), origin, channel,
 		[=] (Plugin &) -> std::string {
 			return "onKick";
@@ -220,7 +208,6 @@ void ServerService::handleKick(std::weak_ptr<Server> ptr, std::string origin, st
 			plugin.onKick(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(target), std::move(reason));
 		}
 	));
-#endif
 }
 
 void ServerService::handleMessage(std::weak_ptr<Server> ptr, std::string origin, std::string channel, std::string message)
@@ -243,7 +230,6 @@ void ServerService::handleMessage(std::weak_ptr<Server> ptr, std::string origin,
 		{ "message",	message			}
 	}).toJson(0));
 
-#if defined(WITH_JS)
 	m_irccd.post(ServerEvent(server->name(), origin, channel,
 		[=] (Plugin &plugin) -> std::string {
 			return util::parseMessage(message, server->settings().command, plugin.name()).second == util::MessageType::Command ? "onCommand" : "onMessage";
@@ -257,7 +243,6 @@ void ServerService::handleMessage(std::weak_ptr<Server> ptr, std::string origin,
 				plugin.onMessage(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(pack.first));
 		}
 	));
-#endif
 }
 
 void ServerService::handleMe(std::weak_ptr<Server> ptr, std::string origin, std::string target, std::string message)
@@ -280,7 +265,6 @@ void ServerService::handleMe(std::weak_ptr<Server> ptr, std::string origin, std:
 		{ "message",	message			}
 	}).toJson(0));
 
-#if defined(WITH_JS)
 	m_irccd.post(ServerEvent(server->name(), origin, target,
 		[=] (Plugin &) -> std::string {
 			return "onMe";
@@ -289,7 +273,6 @@ void ServerService::handleMe(std::weak_ptr<Server> ptr, std::string origin, std:
 			plugin.onMe(m_irccd, std::move(server), std::move(origin), std::move(target), std::move(message));
 		}
 	));
-#endif
 }
 
 void ServerService::handleMode(std::weak_ptr<Server> ptr, std::string origin, std::string mode)
@@ -310,7 +293,6 @@ void ServerService::handleMode(std::weak_ptr<Server> ptr, std::string origin, st
 		{ "mode",	mode			}
 	}).toJson(0));
 
-#if defined(WITH_JS)
 	m_irccd.post(ServerEvent(server->name(), origin, /* channel */ "",
 		[=] (Plugin &) -> std::string {
 			return "onMode";
@@ -319,7 +301,6 @@ void ServerService::handleMode(std::weak_ptr<Server> ptr, std::string origin, st
 			plugin.onMode(m_irccd, std::move(server), std::move(origin), std::move(mode));
 		}
 	));
-#endif
 }
 
 void ServerService::handleNames(std::weak_ptr<Server> ptr, std::string channel, std::set<std::string> nicknames)
@@ -342,7 +323,6 @@ void ServerService::handleNames(std::weak_ptr<Server> ptr, std::string channel, 
 		{ "names",	std::move(names)	}
 	}).toJson(0));
 
-#if defined(WITH_JS)
 	m_irccd.post(ServerEvent(server->name(), /* origin */ "", channel,
 		[=] (Plugin &) -> std::string {
 			return "onNames";
@@ -351,7 +331,6 @@ void ServerService::handleNames(std::weak_ptr<Server> ptr, std::string channel, 
 			plugin.onNames(m_irccd, std::move(server), std::move(channel), std::vector<std::string>(nicknames.begin(), nicknames.end()));
 		}
 	));
-#endif
 }
 
 void ServerService::handleNick(std::weak_ptr<Server> ptr, std::string origin, std::string nickname)
@@ -372,7 +351,6 @@ void ServerService::handleNick(std::weak_ptr<Server> ptr, std::string origin, st
 		{ "nickname",	nickname		}
 	}).toJson(0));
 
-#if defined(WITH_JS)
 	m_irccd.post(ServerEvent(server->name(), origin, /* channel */ "",
 		[=] (Plugin &) -> std::string {
 			return "onNick";
@@ -381,7 +359,6 @@ void ServerService::handleNick(std::weak_ptr<Server> ptr, std::string origin, st
 			plugin.onNick(m_irccd, std::move(server), std::move(origin), std::move(nickname));
 		}
 	));
-#endif
 }
 
 void ServerService::handleNotice(std::weak_ptr<Server> ptr, std::string origin, std::string message)
@@ -402,7 +379,6 @@ void ServerService::handleNotice(std::weak_ptr<Server> ptr, std::string origin, 
 		{ "message",	message			}
 	}).toJson(0));
 
-#if defined(WITH_JS)
 	m_irccd.post(ServerEvent(server->name(), origin, /* channel */ "",
 		[=] (Plugin &) -> std::string {
 			return "onNotice";
@@ -411,7 +387,6 @@ void ServerService::handleNotice(std::weak_ptr<Server> ptr, std::string origin, 
 			plugin.onNotice(m_irccd, std::move(server), std::move(origin), std::move(message));
 		}
 	));
-#endif
 }
 
 void ServerService::handlePart(std::weak_ptr<Server> ptr, std::string origin, std::string channel, std::string reason)
@@ -434,7 +409,6 @@ void ServerService::handlePart(std::weak_ptr<Server> ptr, std::string origin, st
 		{ "reason",	reason			}
 	}).toJson(0));
 
-#if defined(WITH_JS)
 	m_irccd.post(ServerEvent(server->name(), origin, channel,
 		[=] (Plugin &) -> std::string {
 			return "onPart";
@@ -443,7 +417,6 @@ void ServerService::handlePart(std::weak_ptr<Server> ptr, std::string origin, st
 			plugin.onPart(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(reason));
 		}
 	));
-#endif
 }
 
 void ServerService::handleQuery(std::weak_ptr<Server> ptr, std::string origin, std::string message)
@@ -464,7 +437,6 @@ void ServerService::handleQuery(std::weak_ptr<Server> ptr, std::string origin, s
 		{ "message",	message			}
 	}).toJson(0));
 
-#if defined(WITH_JS)
 	m_irccd.post(ServerEvent(server->name(), origin, /* channel */ "",
 		[=] (Plugin &plugin) -> std::string {
 			return util::parseMessage(message, server->settings().command, plugin.name()).second == util::MessageType::Command ? "onQueryCommand" : "onQuery";
@@ -478,7 +450,6 @@ void ServerService::handleQuery(std::weak_ptr<Server> ptr, std::string origin, s
 				plugin.onQuery(m_irccd, std::move(server), std::move(origin), std::move(pack.first));
 		}
 	));
-#endif
 }
 
 void ServerService::handleTopic(std::weak_ptr<Server> ptr, std::string origin, std::string channel, std::string topic)
@@ -501,7 +472,6 @@ void ServerService::handleTopic(std::weak_ptr<Server> ptr, std::string origin, s
 		{ "topic",	topic			}
 	}).toJson(0));
 
-#if defined(WITH_JS)
 	m_irccd.post(ServerEvent(server->name(), origin, channel,
 		[=] (Plugin &) -> std::string {
 			return "onTopic";
@@ -510,7 +480,6 @@ void ServerService::handleTopic(std::weak_ptr<Server> ptr, std::string origin, s
 			plugin.onTopic(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(topic));
 		}
 	));
-#endif
 }
 
 void ServerService::handleWhois(std::weak_ptr<Server> ptr, ServerWhois whois)
@@ -535,7 +504,6 @@ void ServerService::handleWhois(std::weak_ptr<Server> ptr, ServerWhois whois)
 		{ "realname",	whois.realname		}
 	}).toJson(0));
 
-#if defined(WITH_JS)
 	m_irccd.post(ServerEvent(server->name(), /* origin */ "", /* channel */ "",
 		[=] (Plugin &) -> std::string {
 			return "onWhois";
@@ -544,7 +512,6 @@ void ServerService::handleWhois(std::weak_ptr<Server> ptr, ServerWhois whois)
 			plugin.onWhois(m_irccd, std::move(server), std::move(whois));
 		}
 	));
-#endif
 }
 
 ServerService::ServerService(Irccd &irccd)
