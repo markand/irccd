@@ -60,7 +60,7 @@ json::Value execGet(Irccd &irccd, const json::Value &request)
 } // !namespace
 
 PluginConfig::PluginConfig()
-	: RemoteCommand("plugin-config", "Plugins")
+	: Command("plugin-config", "Plugins")
 {
 }
 
@@ -69,7 +69,7 @@ std::string PluginConfig::help() const
 	return "Get or set a plugin configuration option.";
 }
 
-std::vector<RemoteCommand::Arg> PluginConfig::args() const
+std::vector<Command::Arg> PluginConfig::args() const
 {
 	return {
 		{ "plugin",	true	},
@@ -78,7 +78,7 @@ std::vector<RemoteCommand::Arg> PluginConfig::args() const
 	};
 }
 
-json::Value PluginConfig::request(Irccdctl &, const RemoteCommandRequest &args) const
+json::Value PluginConfig::request(Irccdctl &, const CommandRequest &args) const
 {
 	auto object = json::object({
 		{ "plugin", args.arg(0) }
@@ -101,7 +101,7 @@ json::Value PluginConfig::exec(Irccd &irccd, const json::Value &request) const
 
 void PluginConfig::result(Irccdctl &irccdctl, const json::Value &response) const
 {
-	RemoteCommand::result(irccdctl, response);
+	Command::result(irccdctl, response);
 
 	auto it = response.find("vars");
 

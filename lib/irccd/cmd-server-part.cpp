@@ -26,7 +26,7 @@ namespace irccd {
 namespace command {
 
 ServerPart::ServerPart()
-	: RemoteCommand("server-part", "Server")
+	: Command("server-part", "Server")
 {
 }
 
@@ -35,7 +35,7 @@ std::string ServerPart::help() const
 	return "";
 }
 
-std::vector<RemoteCommand::Arg> ServerPart::args() const
+std::vector<Command::Arg> ServerPart::args() const
 {
 	return {
 		{ "server",	true	},
@@ -44,7 +44,7 @@ std::vector<RemoteCommand::Arg> ServerPart::args() const
 	};
 }
 
-json::Value ServerPart::request(Irccdctl &, const RemoteCommandRequest &args) const
+json::Value ServerPart::request(Irccdctl &, const CommandRequest &args) const
 {
 	auto req = json::object({
 		{ "server",	args.arg(0) },

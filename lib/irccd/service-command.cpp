@@ -83,7 +83,7 @@ bool CommandService::contains(const std::string &name) const noexcept
 	return find(name) != nullptr;
 }
 
-std::shared_ptr<RemoteCommand> CommandService::find(const std::string &name) const noexcept
+std::shared_ptr<Command> CommandService::find(const std::string &name) const noexcept
 {
 	auto it = std::find_if(m_commands.begin(), m_commands.end(), [&] (const auto &cmd) {
 		return cmd->name() == name;

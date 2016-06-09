@@ -28,7 +28,7 @@ namespace irccd {
 namespace command {
 
 ServerInfo::ServerInfo()
-	: RemoteCommand("server-info", "Server")
+	: Command("server-info", "Server")
 {
 }
 
@@ -37,12 +37,12 @@ std::string ServerInfo::help() const
 	return "";
 }
 
-std::vector<RemoteCommand::Arg> ServerInfo::args() const
+std::vector<Command::Arg> ServerInfo::args() const
 {
 	return {{ "server", true }};
 }
 
-json::Value ServerInfo::request(Irccdctl &, const RemoteCommandRequest &args) const
+json::Value ServerInfo::request(Irccdctl &, const CommandRequest &args) const
 {
 	return json::object({
 		{ "server",	args.args()[0] },
@@ -54,7 +54,7 @@ json::Value ServerInfo::request(Irccdctl &, const RemoteCommandRequest &args) co
 json::Value ServerInfo::exec(Irccd &irccd, const json::Value &request) const
 {
 	auto server = irccd.serverService().require(request.at("server").toString());
-	auto response = RemoteCommand::exec(irccd, request);
+	auto response = Command::exec(irccd, request);
 
 	/* General stuff */
 	response.insert("name", server->name());
@@ -85,7 +85,7 @@ json::Value ServerInfo::exec(Irccd &irccd, const json::Value &request) const
 
 void ServerInfo::result(Irccdctl &irccdctl, const json::Value &response) const
 {
-	RemoteCommand::result(irccdctl, response);
+	Command::result(irccdctl, response);
 
 	// Server information.
 	std::cout << std::boolalpha;

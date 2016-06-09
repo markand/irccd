@@ -26,7 +26,7 @@ namespace irccd {
 namespace command {
 
 ServerInvite::ServerInvite()
-	: RemoteCommand("server-invite", "Server")
+	: Command("server-invite", "Server")
 {
 }
 
@@ -35,7 +35,7 @@ std::string ServerInvite::help() const
 	return "";
 }
 
-std::vector<RemoteCommand::Arg> ServerInvite::args() const
+std::vector<Command::Arg> ServerInvite::args() const
 {
 	return {
 		{ "server",	true },
@@ -44,7 +44,7 @@ std::vector<RemoteCommand::Arg> ServerInvite::args() const
 	};
 }
 
-json::Value ServerInvite::request(Irccdctl &, const RemoteCommandRequest &args) const
+json::Value ServerInvite::request(Irccdctl &, const CommandRequest &args) const
 {
 	return json::object({
 		{ "server",	args.args()[0] },
@@ -61,7 +61,7 @@ json::Value ServerInvite::exec(Irccd &irccd, const json::Value &request) const
 		request.at("channel").toString()
 	);
 
-	return RemoteCommand::exec(irccd, request);
+	return Command::exec(irccd, request);
 }
 
 } // !command

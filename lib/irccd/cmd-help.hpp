@@ -34,7 +34,7 @@ namespace command {
  * \class Help
  * \brief Implementation of irccdctl help.
  */
-class Help : public RemoteCommand {
+class Help : public Command {
 public:
 	/**
 	 * Constructor.
@@ -42,19 +42,19 @@ public:
 	IRCCD_EXPORT Help();
 
 	/**
-	 * \copydoc RemoteCommand::args
+	 * \copydoc Command::args
 	 */
 	IRCCD_EXPORT std::vector<Arg> args() const override;
 
 	/**
-	 * \copydoc RemoteCommand::help
+	 * \copydoc Command::help
 	 */
 	IRCCD_EXPORT std::string help() const override;
 
 	/**
-	 * \copydoc RemoteCommand::request
+	 * \copydoc Command::request
 	 */
-	IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const override;
+	IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const CommandRequest &args) const override;
 };
 
 } // !command

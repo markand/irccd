@@ -26,7 +26,7 @@ namespace irccd {
 namespace command {
 
 ServerMe::ServerMe()
-	: RemoteCommand("server-me", "Server")
+	: Command("server-me", "Server")
 {
 }
 
@@ -35,7 +35,7 @@ std::string ServerMe::help() const
 	return "";
 }
 
-std::vector<RemoteCommand::Arg> ServerMe::args() const
+std::vector<Command::Arg> ServerMe::args() const
 {
 	return {
 		{ "server",	true },
@@ -44,7 +44,7 @@ std::vector<RemoteCommand::Arg> ServerMe::args() const
 	};
 }
 
-json::Value ServerMe::request(Irccdctl &, const RemoteCommandRequest &args) const
+json::Value ServerMe::request(Irccdctl &, const CommandRequest &args) const
 {
 	return json::object({
 		{ "server",	args.arg(0) },

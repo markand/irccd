@@ -34,7 +34,7 @@ namespace command {
  * \class ServerConnect
  * \brief Implementation of server-connect transport command.
  */
-class ServerConnect : public RemoteCommand {
+class ServerConnect : public Command {
 public:
 	/**
 	 * Constructor.
@@ -42,22 +42,22 @@ public:
 	IRCCD_EXPORT ServerConnect();
 
 	/**
-	 * \copydoc RemoteCommand::help
+	 * \copydoc Command::help
 	 */
 	IRCCD_EXPORT std::string help() const override;
 
 	/**
-	 * \copydoc RemoteCommand::options
+	 * \copydoc Command::options
 	 */
 	IRCCD_EXPORT std::vector<Option> options() const override;
 
 	/**
-	 * \copydoc RemoteCommand::args
+	 * \copydoc Command::args
 	 */
 	IRCCD_EXPORT std::vector<Arg> args() const override;
 
 	/**
-	 * \copydoc RemoteCommand::exec
+	 * \copydoc Command::exec
 	 */
 	IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };

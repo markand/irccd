@@ -28,7 +28,7 @@ using namespace std::string_literals;
 
 namespace irccd {
 
-std::string RemoteCommand::usage() const
+std::string Command::usage() const
 {
 	std::ostringstream oss;
 
@@ -71,7 +71,7 @@ std::string RemoteCommand::usage() const
 	return oss.str();
 }
 
-unsigned RemoteCommand::min() const noexcept
+unsigned Command::min() const noexcept
 {
 	auto list = args();
 
@@ -80,22 +80,22 @@ unsigned RemoteCommand::min() const noexcept
 	});
 }
 
-unsigned RemoteCommand::max() const noexcept
+unsigned Command::max() const noexcept
 {
 	return (unsigned)args().size();
 }
 
-json::Value RemoteCommand::request(Irccdctl &, const RemoteCommandRequest &) const
+json::Value Command::request(Irccdctl &, const CommandRequest &) const
 {
 	return json::object({});
 }
 
-json::Value RemoteCommand::exec(Irccd &, const json::Value &) const
+json::Value Command::exec(Irccd &, const json::Value &) const
 {
 	return json::object({});
 }
 
-void RemoteCommand::result(Irccdctl &, const json::Value &response) const
+void Command::result(Irccdctl &, const json::Value &response) const
 {
 	auto it = response.find("error");
 

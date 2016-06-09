@@ -116,7 +116,7 @@ ServerSettings readSettings(const json::Value &object)
 } // !namespace
 
 ServerConnect::ServerConnect()
-	: RemoteCommand("server-connect", "Server")
+	: Command("server-connect", "Server")
 {
 }
 
@@ -125,7 +125,7 @@ std::string ServerConnect::help() const
 	return "Connect to a server.";
 }
 
-std::vector<RemoteCommand::Option> ServerConnect::options() const
+std::vector<Command::Option> ServerConnect::options() const
 {
 	return {
 		{ "command",	"c", "command",		"char",		"command character to use"	},
@@ -137,7 +137,7 @@ std::vector<RemoteCommand::Option> ServerConnect::options() const
 	};
 }
 
-std::vector<RemoteCommand::Arg> ServerConnect::args() const
+std::vector<Command::Arg> ServerConnect::args() const
 {
 	return {
 		{ "id",		true	},
@@ -155,7 +155,7 @@ json::Value ServerConnect::exec(Irccd &irccd, const json::Value &request) const
 
 	irccd.serverService().add(std::move(server));
 
-	return RemoteCommand::exec(irccd, request);
+	return Command::exec(irccd, request);
 }
 
 } // !command

@@ -26,7 +26,7 @@ namespace irccd {
 namespace command {
 
 ServerJoin::ServerJoin()
-	: RemoteCommand("server-join", "Server")
+	: Command("server-join", "Server")
 {
 }
 
@@ -35,7 +35,7 @@ std::string ServerJoin::help() const
 	return "";
 }
 
-std::vector<RemoteCommand::Arg> ServerJoin::args() const
+std::vector<Command::Arg> ServerJoin::args() const
 {
 	return {
 		{ "server",	true	},
@@ -44,7 +44,7 @@ std::vector<RemoteCommand::Arg> ServerJoin::args() const
 	};
 }
 
-json::Value ServerJoin::request(Irccdctl &, const RemoteCommandRequest &args) const
+json::Value ServerJoin::request(Irccdctl &, const CommandRequest &args) const
 {
 	auto req = json::object({
 		{ "server",	args.args()[0] },
@@ -65,7 +65,7 @@ json::Value ServerJoin::exec(Irccd &irccd, const json::Value &request) const
 		request.valueOr("password", json::Type::String, "").toString()
 	);
 
-	return RemoteCommand::exec(irccd, request);
+	return Command::exec(irccd, request);
 }
 
 } // !command

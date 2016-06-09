@@ -34,7 +34,7 @@ namespace command {
  * \class ServerJoin
  * \brief Implementation of server-join transport command.
  */
-class ServerJoin : public RemoteCommand {
+class ServerJoin : public Command {
 public:
 	/**
 	 * Constructor.
@@ -42,22 +42,22 @@ public:
 	IRCCD_EXPORT ServerJoin();
 
 	/**
-	 * \copydoc RemoteCommand::help
+	 * \copydoc Command::help
 	 */
 	IRCCD_EXPORT std::string help() const override;
 
 	/**
-	 * \copydoc RemoteCommand::args
+	 * \copydoc Command::args
 	 */
 	IRCCD_EXPORT std::vector<Arg> args() const override;
 
 	/**
-	 * \copydoc RemoteCommand::request
+	 * \copydoc Command::request
 	 */
-	IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const override;
+	IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const CommandRequest &args) const override;
 
 	/**
-	 * \copydoc RemoteCommand::exec
+	 * \copydoc Command::exec
 	 */
 	IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };

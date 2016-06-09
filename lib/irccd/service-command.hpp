@@ -31,7 +31,7 @@
 
 namespace irccd {
 
-class RemoteCommand;
+class Command;
 
 /**
  * \brief Store remote commands.
@@ -39,7 +39,7 @@ class RemoteCommand;
  */
 class CommandService {
 private:
-	std::vector<std::shared_ptr<RemoteCommand>> m_commands;
+	std::vector<std::shared_ptr<Command>> m_commands;
 
 public:
 	/**
@@ -63,7 +63,7 @@ public:
 	 * \param name the command name
 	 * \return the command or empty one if not found
 	 */
-	IRCCD_EXPORT std::shared_ptr<RemoteCommand> find(const std::string &name) const noexcept;
+	IRCCD_EXPORT std::shared_ptr<Command> find(const std::string &name) const noexcept;
 };
 
 } // !irccd

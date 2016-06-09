@@ -29,7 +29,7 @@ namespace irccd {
 namespace command {
 
 PluginList::PluginList()
-	: RemoteCommand("plugin-list", "Plugins")
+	: Command("plugin-list", "Plugins")
 {
 }
 
@@ -40,7 +40,7 @@ std::string PluginList::help() const
 
 json::Value PluginList::exec(Irccd &irccd, const json::Value &request) const
 {
-	json::Value response = RemoteCommand::exec(irccd, request);
+	json::Value response = Command::exec(irccd, request);
 	json::Value list = json::array({});
 
 	for (const auto &plugin : irccd.pluginService().plugins())
@@ -53,7 +53,7 @@ json::Value PluginList::exec(Irccd &irccd, const json::Value &request) const
 
 void PluginList::result(Irccdctl &irccdctl, const json::Value &object) const
 {
-	RemoteCommand::result(irccdctl, object);
+	Command::result(irccdctl, object);
 
 	for (const auto &n : object.valueOr("list", json::Type::Array, json::array({})))
 		std::cout << n.toString() << std::endl;

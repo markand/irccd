@@ -25,11 +25,11 @@ namespace irccd {
 namespace command {
 
 Help::Help()
-	: RemoteCommand("help", "General")
+	: Command("help", "General")
 {
 }
 
-std::vector<RemoteCommand::Arg> Help::args() const
+std::vector<Command::Arg> Help::args() const
 {
 	return {{ "command", true }};
 }
@@ -39,7 +39,7 @@ std::string Help::help() const
 	return "Get help about a command.";
 }
 
-json::Value Help::request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const
+json::Value Help::request(Irccdctl &irccdctl, const CommandRequest &args) const
 {
 	auto it = irccdctl.commandService().find(args.arg(0U));
 

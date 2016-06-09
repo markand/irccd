@@ -26,7 +26,7 @@ namespace irccd {
 namespace command {
 
 ServerDisconnect::ServerDisconnect()
-	: RemoteCommand("server-disconnect", "Server")
+	: Command("server-disconnect", "Server")
 {
 }
 
@@ -35,7 +35,7 @@ std::string ServerDisconnect::help() const
 	return "";
 }
 
-std::vector<RemoteCommand::Arg> ServerDisconnect::args() const
+std::vector<Command::Arg> ServerDisconnect::args() const
 {
 	return {{ "server", false }};
 }
@@ -49,7 +49,7 @@ json::Value ServerDisconnect::exec(Irccd &irccd, const json::Value &request) con
 	else
 		irccd.serverService().remove(it->toString());
 
-	return RemoteCommand::exec(irccd, request);
+	return Command::exec(irccd, request);
 }
 
 } // !command

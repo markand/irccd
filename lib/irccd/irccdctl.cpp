@@ -359,7 +359,7 @@ parser::Result Irccdctl::parse(int &argc, char **&argv) const
 	return result;
 }
 
-void Irccdctl::exec(const RemoteCommand &cmd, std::vector<std::string> args)
+void Irccdctl::exec(const Command &cmd, std::vector<std::string> args)
 {
 	// 1. Build options from command line arguments.
 	parser::Options def;
@@ -373,7 +373,7 @@ void Irccdctl::exec(const RemoteCommand &cmd, std::vector<std::string> args)
 	}
 
 	// 2. Parse them, remove them from args (in parser::read) and build the map with id.
-	RemoteCommandRequest::Options requestOptions;
+	CommandRequest::Options requestOptions;
 
 	for (const auto &pair : parser::read(args, def)) {
 		auto options = cmd.options();
@@ -391,7 +391,7 @@ void Irccdctl::exec(const RemoteCommand &cmd, std::vector<std::string> args)
 		throw std::runtime_error("too many arguments");
 
 	// 4. Construct the request, if the returned value is not an object, do not send anything (e.g. help).
-	json::Value request = cmd.request(*this, RemoteCommandRequest(std::move(requestOptions), std::move(args)));
+	json::Value request = cmd.request(*this, CommandRequest(std::move(requestOptions), std::move(args)));
 
 	if (!request.isObject())
 		return;

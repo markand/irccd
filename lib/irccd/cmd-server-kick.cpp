@@ -26,7 +26,7 @@ namespace irccd {
 namespace command {
 
 ServerKick::ServerKick()
-	: RemoteCommand("server-kick", "Server")
+	: Command("server-kick", "Server")
 {
 }
 
@@ -35,7 +35,7 @@ std::string ServerKick::help() const
 	return "";
 }
 
-std::vector<RemoteCommand::Arg> ServerKick::args() const
+std::vector<Command::Arg> ServerKick::args() const
 {
 	return {
 		{ "server",	true	},
@@ -45,7 +45,7 @@ std::vector<RemoteCommand::Arg> ServerKick::args() const
 	};
 }
 
-json::Value ServerKick::request(Irccdctl &, const RemoteCommandRequest &args) const
+json::Value ServerKick::request(Irccdctl &, const CommandRequest &args) const
 {
 	auto req = json::object({
 		{ "server",	args.arg(0) },
@@ -67,7 +67,7 @@ json::Value ServerKick::exec(Irccd &irccd, const json::Value &request) const
 		request.valueOr("reason", json::Type::String, "").toString()
 	);
 
-	return RemoteCommand::exec(irccd, request);
+	return Command::exec(irccd, request);
 }
 
 } // !command

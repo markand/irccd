@@ -188,11 +188,11 @@ const std::unordered_map<std::string, std::function<void (const json::Value &)>>
 } // !namespace
 
 Watch::Watch()
-	: RemoteCommand("watch", "General")
+	: Command("watch", "General")
 {
 }
 
-std::vector<RemoteCommand::Option> Watch::options() const
+std::vector<Command::Option> Watch::options() const
 {
 	return {{ "format", "f", "format", "format", "output format" }};
 }
@@ -208,7 +208,7 @@ std::string Watch::help() const
 	return oss.str();
 }
 
-json::Value Watch::request(Irccdctl &ctl, const RemoteCommandRequest &request) const
+json::Value Watch::request(Irccdctl &ctl, const CommandRequest &request) const
 {
 	std::string format = request.optionOr("format", "native");
 

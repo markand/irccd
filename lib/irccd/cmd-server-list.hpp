@@ -34,7 +34,7 @@ namespace command {
  * \class ServerList
  * \brief Implementation of server-list transport command.
  */
-class ServerList : public RemoteCommand {
+class ServerList : public Command {
 public:
 	/**
 	 * Constructor.
@@ -42,17 +42,17 @@ public:
 	IRCCD_EXPORT ServerList();
 
 	/**
-	 * \copydoc RemoteCommand::help
+	 * \copydoc Command::help
 	 */
 	IRCCD_EXPORT std::string help() const override;
 
 	/**
-	 * \copydoc RemoteCommand::exec
+	 * \copydoc Command::exec
 	 */
 	IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
 
 	/**
-	 * \copydoc RemoteCommand::result
+	 * \copydoc Command::result
 	 */
 	IRCCD_EXPORT void result(Irccdctl &irccdctl, const json::Value &response) const override;
 };

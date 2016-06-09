@@ -47,7 +47,7 @@ namespace command {
  *
  * This class contains the resolved arguments from command line that can apply to the command.
  */
-class RemoteCommandRequest {
+class CommandRequest {
 public:
 	/**
 	 * The options given by command line.
@@ -70,7 +70,7 @@ public:
 	 * \param options the options
 	 * \param args the arguments
 	 */
-	inline RemoteCommandRequest(Options options, Args args) noexcept
+	inline CommandRequest(Options options, Args args) noexcept
 		: m_options(std::move(options))
 		, m_args(std::move(args))
 	{
@@ -196,7 +196,7 @@ public:
  * 3. Finally, the command receives the result in result() function and user can manipulate it. For convenience, the
  *    default implementation shows the error if any.
  */
-class RemoteCommand {
+class Command {
 public:
 	/**
 	 * \brief Defines available options for this command.
@@ -223,7 +223,7 @@ public:
 	 * \param category the category (e.g. Server)
 	 * \param visible true if the command should be visible without verbosity
 	 */
-	inline RemoteCommand(std::string name, std::string category, bool visible = true) noexcept
+	inline Command(std::string name, std::string category, bool visible = true) noexcept
 		: m_name(std::move(name))
 		, m_category(std::move(category))
 		, m_visible(visible)
@@ -235,7 +235,7 @@ public:
 	/**
 	 * Default destructor virtual.
 	 */
-	virtual ~RemoteCommand() = default;
+	virtual ~Command() = default;
 
 	/**
 	 * Return the command name, must not have spaces.
@@ -329,7 +329,7 @@ public:
 	 * \return the JSON object to send to the daemon
 	 * \post the returned JSON value must be an object
 	 */
-	IRCCD_EXPORT virtual json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const;
+	IRCCD_EXPORT virtual json::Value request(Irccdctl &irccdctl, const CommandRequest &args) const;
 
 	/**
 	 * Execute the command in the daemon.
@@ -361,7 +361,7 @@ public:
 /**
  * \brief Option description for a command.
  */
-class RemoteCommand::Option {
+class Command::Option {
 private:
 	std::string m_id;
 	std::string m_simple;
@@ -456,7 +456,7 @@ public:
 /**
  * \brief Argument description for command.
  */
-class RemoteCommand::Arg {
+class Command::Arg {
 private:
 	std::string m_name;
 	bool m_required;

@@ -29,7 +29,7 @@ namespace irccd {
 namespace command {
 
 PluginInfo::PluginInfo()
-	: RemoteCommand("plugin-info", "Plugins")
+	: Command("plugin-info", "Plugins")
 {
 }
 
@@ -38,12 +38,12 @@ std::string PluginInfo::help() const
 	return "Get plugin information.";
 }
 
-std::vector<RemoteCommand::Arg> PluginInfo::args() const
+std::vector<Command::Arg> PluginInfo::args() const
 {
 	return {{ "plugin", true }};
 }
 
-json::Value PluginInfo::request(Irccdctl &, const RemoteCommandRequest &args) const
+json::Value PluginInfo::request(Irccdctl &, const CommandRequest &args) const
 {
 	return json::object({{ "plugin", args.arg(0) }});
 }
@@ -62,7 +62,7 @@ json::Value PluginInfo::exec(Irccd &irccd, const json::Value &request) const
 
 void PluginInfo::result(Irccdctl &irccdctl, const json::Value &result) const
 {
-	RemoteCommand::result(irccdctl, result);
+	Command::result(irccdctl, result);
 
 	// Plugin information.
 	if (result.valueOr("status", false).toBool()) {

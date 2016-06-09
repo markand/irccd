@@ -26,7 +26,7 @@ namespace irccd {
 namespace command {
 
 ServerReconnect::ServerReconnect()
-	: RemoteCommand("server-reconnect", "Server")
+	: Command("server-reconnect", "Server")
 {
 }
 
@@ -35,12 +35,12 @@ std::string ServerReconnect::help() const
 	return "";
 }
 
-std::vector<RemoteCommand::Arg> ServerReconnect::args() const
+std::vector<Command::Arg> ServerReconnect::args() const
 {
 	return {{ "server", false }};
 }
 
-json::Value ServerReconnect::request(Irccdctl &, const RemoteCommandRequest &args) const
+json::Value ServerReconnect::request(Irccdctl &, const CommandRequest &args) const
 {
 	return args.length() == 0 ? nullptr : json::object({ { "server", args.arg(0) } });
 }

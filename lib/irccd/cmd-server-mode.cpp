@@ -26,7 +26,7 @@ namespace irccd {
 namespace command {
 
 ServerMode::ServerMode()
-	: RemoteCommand("server-mode", "Server")
+	: Command("server-mode", "Server")
 {
 }
 
@@ -35,7 +35,7 @@ std::string ServerMode::help() const
 	return "";
 }
 
-std::vector<RemoteCommand::Arg> ServerMode::args() const
+std::vector<Command::Arg> ServerMode::args() const
 {
 	return {
 		{ "server",	true },
@@ -43,7 +43,7 @@ std::vector<RemoteCommand::Arg> ServerMode::args() const
 	};
 }
 
-json::Value ServerMode::request(Irccdctl &, const RemoteCommandRequest &args) const
+json::Value ServerMode::request(Irccdctl &, const CommandRequest &args) const
 {
 	return json::object({
 		{ "server",	args.arg(0) },

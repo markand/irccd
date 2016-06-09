@@ -43,7 +43,7 @@ namespace command {
  *   "message": "the message"
  * }
  */
-class ServerChannelNotice : public RemoteCommand {
+class ServerChannelNotice : public Command {
 public:
 	/**
 	 * Constructor.
@@ -51,17 +51,17 @@ public:
 	IRCCD_EXPORT ServerChannelNotice();
 
 	/**
-	 * \copydoc RemoteCommand::help
+	 * \copydoc Command::help
 	 */
 	IRCCD_EXPORT std::string help() const override;
 
 	/**
-	 * \copydoc RemoteCommand::args
+	 * \copydoc Command::args
 	 */
 	IRCCD_EXPORT std::vector<Arg> args() const override;
 
 	/**
-	 * \copydoc RemoteCommand::exec
+	 * \copydoc Command::exec
 	 */
 	IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };

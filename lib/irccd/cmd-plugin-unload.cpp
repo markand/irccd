@@ -26,7 +26,7 @@ namespace irccd {
 namespace command {
 
 PluginUnload::PluginUnload()
-	: RemoteCommand("plugin-unload", "Plugins")
+	: Command("plugin-unload", "Plugins")
 {
 }
 
@@ -35,7 +35,7 @@ std::string PluginUnload::help() const
 	return "Unload a plugin.";
 }
 
-std::vector<RemoteCommand::Arg> PluginUnload::args() const
+std::vector<Command::Arg> PluginUnload::args() const
 {
 	return {{ "plugin", true }};
 }
@@ -44,7 +44,7 @@ json::Value PluginUnload::exec(Irccd &irccd, const json::Value &request) const
 {
 	irccd.pluginService().unload(request.at("plugin").toString());
 
-	return RemoteCommand::exec(irccd, request);
+	return Command::exec(irccd, request);
 }
 
 } // !command

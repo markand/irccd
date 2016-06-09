@@ -34,7 +34,7 @@ namespace command {
  * \class Watch
  * \brief Implementation of irccdctl watch.
  */
-class Watch : public RemoteCommand {
+class Watch : public Command {
 public:
 	/**
 	 * Constructor.
@@ -42,19 +42,19 @@ public:
 	IRCCD_EXPORT Watch();
 
 	/**
-	 * \copydoc RemoteCommand::options
+	 * \copydoc Command::options
 	 */
 	IRCCD_EXPORT std::vector<Option> options() const override;
 
 	/**
-	 * \copydoc RemoteCommand::help
+	 * \copydoc Command::help
 	 */
 	IRCCD_EXPORT std::string help() const override;
 
 	/**
-	 * \copydoc RemoteCommand::request
+	 * \copydoc Command::request
 	 */
-	IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const RemoteCommandRequest &args) const override;
+	IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const CommandRequest &args) const override;
 };
 
 } // !command

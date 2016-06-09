@@ -97,7 +97,7 @@ public:
 	 * \param cmd the command
 	 * \param args the arguments
 	 */
-	IRCCD_EXPORT void exec(const RemoteCommand &cmd, std::vector<std::string> args);
+	IRCCD_EXPORT void exec(const Command &cmd, std::vector<std::string> args);
 
 	/**
 	 * Execute the given alias.

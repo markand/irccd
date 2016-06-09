@@ -28,7 +28,7 @@ namespace irccd {
 namespace command {
 
 ServerList::ServerList()
-	: RemoteCommand("server-list", "Server")
+	: Command("server-list", "Server")
 {
 }
 

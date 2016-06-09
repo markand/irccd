@@ -34,7 +34,7 @@ namespace command {
  * \class PluginUnload
  * \brief Implementation of plugin-unload transport command.
  */
-class PluginUnload : public RemoteCommand {
+class PluginUnload : public Command {
 public:
 	/**
 	 * Constructor.
@@ -42,17 +42,17 @@ public:
 	IRCCD_EXPORT PluginUnload();
 
 	/**
-	 * \copydoc RemoteCommand::help
+	 * \copydoc Command::help
 	 */
 	IRCCD_EXPORT std::string help() const override;
 
 	/**
-	 * \copydoc RemoteCommand::args
+	 * \copydoc Command::args
 	 */
 	IRCCD_EXPORT std::vector<Arg> args() const override;
 
 	/**
-	 * \copydoc RemoteCommand::exec
+	 * \copydoc Command::exec
 	 */
 	IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };
