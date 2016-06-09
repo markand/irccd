@@ -38,19 +38,19 @@ std::string ServerKick::help() const
 std::vector<RemoteCommand::Arg> ServerKick::args() const
 {
 	return {
-		{ "server", true },
-		{ "target", true },
-		{ "channel", true },
-		{ "reason", false }
+		{ "server",	true	},
+		{ "target",	true	},
+		{ "channel",	true	},
+		{ "reason",	false	}
 	};
 }
 
 json::Value ServerKick::request(Irccdctl &, const RemoteCommandRequest &args) const
 {
 	auto req = json::object({
-		{ "server", args.arg(0) },
-		{ "target", args.arg(1) },
-		{ "channel", args.arg(2) }
+		{ "server",	args.arg(0) },
+		{ "target",	args.arg(1) },
+		{ "channel",	args.arg(2) }
 	});
 
 	if (args.length() == 4)

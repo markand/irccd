@@ -38,18 +38,18 @@ std::string ServerInvite::help() const
 std::vector<RemoteCommand::Arg> ServerInvite::args() const
 {
 	return {
-		{ "server", true },
-		{ "nickname", true },
-		{ "channel", true }
+		{ "server",	true },
+		{ "nickname",	true },
+		{ "channel",	true }
 	};
 }
 
 json::Value ServerInvite::request(Irccdctl &, const RemoteCommandRequest &args) const
 {
 	return json::object({
-		{ "server",	args.args()[0]		},
-		{ "target",	args.args()[1]		},
-		{ "channel",	args.args()[2]		}
+		{ "server",	args.args()[0] },
+		{ "target",	args.args()[1] },
+		{ "channel",	args.args()[2] }
 	});
 }
 

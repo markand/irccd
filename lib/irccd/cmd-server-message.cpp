@@ -38,18 +38,18 @@ std::string ServerMessage::help() const
 std::vector<RemoteCommand::Arg> ServerMessage::args() const
 {
 	return {
-		{ "server", true },
-		{ "target", true },
-		{ "message", true }
+		{ "server",	true },
+		{ "target",	true },
+		{ "message",	true }
 	};
 }
 
 json::Value ServerMessage::request(Irccdctl &, const RemoteCommandRequest &args) const
 {
 	return json::object({
-		{ "server", args.arg(0) },
-		{ "target", args.arg(1) },
-		{ "message", args.arg(2) }
+		{ "server",	args.arg(0) },
+		{ "target",	args.arg(1) },
+		{ "message",	args.arg(2) }
 	});
 }
 

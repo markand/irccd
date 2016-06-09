@@ -38,17 +38,17 @@ std::string ServerPart::help() const
 std::vector<RemoteCommand::Arg> ServerPart::args() const
 {
 	return {
-		{ "server", true },
-		{ "channel", true },
-		{ "reason", false }
+		{ "server",	true	},
+		{ "channel",	true	},
+		{ "reason",	false	}
 	};
 }
 
 json::Value ServerPart::request(Irccdctl &, const RemoteCommandRequest &args) const
 {
 	auto req = json::object({
-		{ "server", args.arg(0) },
-		{ "channel", args.arg(1) }
+		{ "server",	args.arg(0) },
+		{ "channel",	args.arg(1) }
 	});
 
 	if (args.length() == 3)

@@ -72,9 +72,9 @@ std::string PluginConfig::help() const
 std::vector<RemoteCommand::Arg> PluginConfig::args() const
 {
 	return {
-		{ "plugin", true },
-		{ "variable", false },
-		{ "value", false }
+		{ "plugin",	true	},
+		{ "variable",	false	},
+		{ "value",	false	}
 	};
 }
 

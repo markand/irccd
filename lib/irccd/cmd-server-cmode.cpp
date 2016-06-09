@@ -38,9 +38,9 @@ std::string ServerChannelMode::help() const
 std::vector<RemoteCommand::Arg> ServerChannelMode::args() const
 {
 	return {
-		{ "server", true },
-		{ "channel", true },
-		{ "mode", true }
+		{ "server",	true },
+		{ "channel",	true },
+		{ "mode",	true }
 	};
 }
 

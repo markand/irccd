@@ -45,9 +45,9 @@ std::vector<RemoteCommand::Arg> ServerInfo::args() const
 json::Value ServerInfo::request(Irccdctl &, const RemoteCommandRequest &args) const
 {
 	return json::object({
-		{ "server",	args.args()[0]		},
-		{ "target",	args.args()[1]		},
-		{ "channel",	args.args()[2]		}
+		{ "server",	args.args()[0] },
+		{ "target",	args.args()[1] },
+		{ "channel",	args.args()[2] }
 	});
 }
 
@@ -72,7 +72,7 @@ json::Value ServerInfo::exec(Irccd &irccd, const json::Value &request) const
 	if (server->info().flags & irccd::ServerInfo::SslVerify)
 		response.insert("sslVerify", true);
 
-	/* Channel list */
+	// Channel list.
 	auto channels = json::array({});
 
 	for (const auto &c : server->settings().channels)

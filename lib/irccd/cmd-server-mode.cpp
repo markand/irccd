@@ -38,16 +38,16 @@ std::string ServerMode::help() const
 std::vector<RemoteCommand::Arg> ServerMode::args() const
 {
 	return {
-		{ "server", true },
-		{ "mode", true }
+		{ "server",	true },
+		{ "mode",	true }
 	};
 }
 
 json::Value ServerMode::request(Irccdctl &, const RemoteCommandRequest &args) const
 {
 	return json::object({
-		{ "server", args.arg(0) },
-		{ "mode", args.arg(1) }
+		{ "server",	args.arg(0) },
+		{ "mode",	args.arg(1) }
 	});
 }
 

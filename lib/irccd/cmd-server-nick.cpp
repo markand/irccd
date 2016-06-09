@@ -38,16 +38,16 @@ std::string ServerNick::help() const
 std::vector<RemoteCommand::Arg> ServerNick::args() const
 {
 	return {
-		{ "server", true },
-		{ "nickname", true }
+		{ "server",	true },
+		{ "nickname",	true }
 	};
 }
 
 json::Value ServerNick::request(Irccdctl &, const RemoteCommandRequest &args) const
 {
 	return json::object({
-		{ "server", args.arg(0) },
-		{ "nickname", args.arg(1) }
+		{ "server",	args.arg(0) },
+		{ "nickname",	args.arg(1) }
 	});
 }
 

@@ -38,17 +38,17 @@ std::string ServerJoin::help() const
 std::vector<RemoteCommand::Arg> ServerJoin::args() const
 {
 	return {
-		{ "server", true },
-		{ "channel", true },
-		{ "password", false }
+		{ "server",	true	},
+		{ "channel",	true	},
+		{ "password",	false	}
 	};
 }
 
 json::Value ServerJoin::request(Irccdctl &, const RemoteCommandRequest &args) const
 {
 	auto req = json::object({
-		{ "server", args.args()[0] },
-		{ "channel", args.args()[1] }
+		{ "server",	args.args()[0] },
+		{ "channel",	args.args()[1] }
 	});
 
 	if (args.length() == 3)
