@@ -40,13 +40,18 @@ std::vector<Command::Arg> PluginLoad::args() const
 	return {{ "plugin", true }};
 }
 
+std::vector<Command::Property> PluginLoad::properties() const
+{
+	return {{ "plugin", { json::Type::String }}};
+}
+
 json::Value PluginLoad::exec(Irccd &irccd, const json::Value &request) const
 {
-	auto name = request.at("plugin").toString();
+	Command::exec(irccd, request);
 
-	irccd.pluginService().load(name);
+	irccd.pluginService().load(request.at("plugin").toString());
 
-	return Command::exec(irccd, request);
+	return json::object();
 }
 
 } // !command

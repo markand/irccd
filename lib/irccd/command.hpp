@@ -208,6 +208,11 @@ public:
 	 */
 	class Arg;
 
+	/**
+	 * \brief Defines properties that must be available in the JSON request.
+	 */
+	class Property;
+
 private:
 	std::string m_name;
 	std::string m_category;
@@ -299,6 +304,19 @@ public:
 	 * \return the arguments
 	 */
 	virtual std::vector<Arg> args() const
+	{
+		return {};
+	}
+
+	/**
+	 * Get the properties required in the JSON request.
+	 *
+	 * Default implementation returns empty list.
+	 *
+	 * \return the required properties
+	 * \note Put only **required** properties
+	 */
+	virtual std::vector<Property> properties() const
 	{
 		return {};
 	}
@@ -492,6 +510,52 @@ public:
 	inline bool required() const noexcept
 	{
 		return m_required;
+	}
+};
+
+/**
+ * \brief Property description for JSON request.
+ */
+class Command::Property {
+private:
+	std::string m_name;
+	std::vector<json::Type> m_types;
+
+public:
+	/**
+	 * Construct the property description.
+	 *
+	 * \pre !name.empty()
+	 * \pre types.size() >= 1
+	 * \param name the name
+	 * \param types the json types allowed
+	 */
+	inline Property(std::string name, std::vector<json::Type> types = { json::Type::String }) noexcept
+		: m_name(std::move(name))
+		, m_types(std::move(types))
+	{
+		assert(!m_name.empty());
+		assert(m_types.size() >= 1);
+	}
+
+	/**
+	 * Get the property name.
+	 *
+	 * \return the name
+	 */
+	inline const std::string &name() const noexcept
+	{
+		return m_name;
+	}
+
+	/**
+	 * Get the property types.
+	 *
+	 * \return the types
+	 */
+	inline const std::vector<json::Type> &types() const noexcept
+	{
+		return m_types;
 	}
 };
 

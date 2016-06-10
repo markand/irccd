@@ -41,11 +41,18 @@ std::vector<Command::Arg> PluginReload::args() const
 	return {{ "plugin", true }};
 }
 
+std::vector<Command::Property> PluginReload::properties() const
+{
+	return {{ "plugin", { json::Type::String }}};
+}
+
 json::Value PluginReload::exec(Irccd &irccd, const json::Value &request) const
 {
+	Command::exec(irccd, request);
+
 	irccd.pluginService().require(request.at("plugin").toString())->onReload(irccd);
 
-	return Command::exec(irccd, request);
+	return json::object();
 }
 
 } // !command

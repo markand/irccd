@@ -78,6 +78,11 @@ std::vector<Command::Arg> PluginConfig::args() const
 	};
 }
 
+std::vector<Command::Property> PluginConfig::properties() const
+{
+	return {{ "plugin", { json::Type::String }}};
+}
+
 json::Value PluginConfig::request(Irccdctl &, const CommandRequest &args) const
 {
 	auto object = json::object({
@@ -96,6 +101,8 @@ json::Value PluginConfig::request(Irccdctl &, const CommandRequest &args) const
 
 json::Value PluginConfig::exec(Irccd &irccd, const json::Value &request) const
 {
+	Command::exec(irccd, request);
+
 	return request.contains("value") ? execSet(irccd, request) : execGet(irccd, request);
 }
 

@@ -20,13 +20,64 @@
 #include <numeric>
 #include <sstream>
 
+#include <format.h>
+
 #include "command.hpp"
 #include "logger.hpp"
 #include "system.hpp"
 
 using namespace std::string_literals;
 
+using namespace fmt::literals;
+
 namespace irccd {
+
+namespace {
+
+/*
+ * typeName
+ * ------------------------------------------------------------------
+ *
+ * Convert a JSON value type to string for convenience.
+ */
+std::string typeName(json::Type type)
+{
+	static const std::vector<std::string> typenames{
+		"array", "boolean", "int", "null", "object", "real", "string"
+	};
+
+	assert(type >= json::Type::Array && type <= json::Type::String);
+
+	return typenames[static_cast<int>(type)];
+}
+
+/*
+ * typeNameList
+ * ------------------------------------------------------------------
+ *
+ * Construct a list of names to send a convenient error message if properties are invalid, example: string, int or bool expected.
+ */
+
+std::string typeNameList(const std::vector<json::Type> &types)
+{
+	std::ostringstream oss;
+
+	if (types.size() == 1)
+		return typeName(types[0]);
+
+	for (std::size_t i = 0; i < types.size(); ++i) {
+		oss << typeName(types[i]);
+
+		if (i == types.size() - 2)
+			oss << " or ";
+		else if (i < types.size() - 1)
+			oss << ", ";
+	}
+
+	return oss.str();
+}
+
+} // !namespace
 
 std::string Command::usage() const
 {
@@ -90,8 +141,23 @@ json::Value Command::request(Irccdctl &, const CommandRequest &) const
 	return json::object({});
 }
 
-json::Value Command::exec(Irccd &, const json::Value &) const
+json::Value Command::exec(Irccd &, const json::Value &request) const
 {
+	// Verify that requested properties are present in the request.
+	for (const auto &prop : properties()) {
+		auto it = request.find(prop.name());
+
+		if (it == request.end())
+			throw std::invalid_argument("missing '{}' property"_format(prop.name()));
+
+		if (std::find(prop.types().begin(), prop.types().end(), it->typeOf()) == prop.types().end()) {
+			auto expected = typeNameList(prop.types());
+			auto got = typeName(it->typeOf());
+
+			throw std::invalid_argument("invalid '{}' property ({} expected, got {})"_format(prop.name(), expected, got));
+		}
+	}
+
 	return json::object({});
 }
 

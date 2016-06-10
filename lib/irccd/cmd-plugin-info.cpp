@@ -43,6 +43,11 @@ std::vector<Command::Arg> PluginInfo::args() const
 	return {{ "plugin", true }};
 }
 
+std::vector<Command::Property> PluginInfo::properties() const
+{
+	return {{ "plugin", { json::Type::String }}};
+}
+
 json::Value PluginInfo::request(Irccdctl &, const CommandRequest &args) const
 {
 	return json::object({{ "plugin", args.arg(0) }});
@@ -50,6 +55,8 @@ json::Value PluginInfo::request(Irccdctl &, const CommandRequest &args) const
 
 json::Value PluginInfo::exec(Irccd &irccd, const json::Value &request) const
 {
+	Command::exec(irccd, request);
+
 	auto plugin = irccd.pluginService().require(request.at("plugin").toString());
 	
 	return json::object({
