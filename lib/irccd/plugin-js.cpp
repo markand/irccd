@@ -30,9 +30,45 @@
 #include "mod-server.hpp"
 #include "plugin-js.hpp"
 #include "service-module.hpp"
+#include "service-plugin.hpp"
 #include "timer.hpp"
 
 namespace irccd {
+
+namespace {
+
+const char *ConfigGlobal("\xff""\xff""irccd-plugin-config");
+const char *FormatGlobal("\xff""\xff""irccd-plugin-format");
+
+} // !namespace
+
+std::unordered_map<std::string, std::string> JsPlugin::getTable(const char *name) const
+{
+	StackAssert sa(m_context);
+	std::unordered_map<std::string, std::string> result;
+
+	duk_get_global_string(m_context, name);
+	dukx_enumerate(m_context, -1, 0, true, [&] (auto ctx) {
+		result.emplace(duk_to_string(ctx, -2), duk_to_string(ctx, -1));
+	});
+	duk_pop(m_context);
+
+	return result;
+}
+
+void JsPlugin::putTable(const char *name, const std::unordered_map<std::string, std::string> &vars)
+{
+	StackAssert sa(m_context);
+
+	duk_get_global_string(m_context, name);
+
+	for (const auto &pair : vars) {
+		dukx_push_std_string(m_context, pair.second);
+		duk_put_prop_string(m_context, -2, pair.first.c_str());
+	}
+
+	duk_pop(m_context);
+}
 
 void JsPlugin::call(const std::string &name, unsigned nargs)
 {
@@ -100,46 +136,42 @@ void JsPlugin::putPath(const std::string &varname, const std::string &append, pa
 	duk_pop_2(m_context);
 }
 
-void JsPlugin::putConfig(const PluginConfig &config)
+JsPlugin::JsPlugin(std::string name, std::string path)
+	: Plugin(name, path)
 {
-	StackAssert sa(m_context);
-
-	// TODO: override dataPath, configPath, cachePath.
-	// TODO: verify more that these values still exist.
-
-	// Store plugin configuration into Irccd.Plugin.config.
-	duk_get_global_string(m_context, "Irccd");
-	duk_get_prop_string(m_context, -1, "Plugin");
-	duk_get_prop_string(m_context, -1, "config");
-
-	for (const auto &pair : config) {
-		dukx_push_std_string(m_context, pair.second);
-		duk_put_prop_string(m_context, -2, pair.first.c_str());
-	}
-
-	duk_put_prop_string(m_context, -2, "config");
-	duk_pop_n(m_context, 2);
+	/*
+	 * Create two special tables for configuration and formats, they are referenced later as
+	 *
+	 *   - Irccd.Plugin.config
+	 *   - Irccd.Plugin.format
+	 *
+	 * In mod-plugin.cpp.
+	 */
+	duk_push_object(m_context);
+	duk_put_global_string(m_context, ConfigGlobal);
+	duk_push_object(m_context);
+	duk_put_global_string(m_context, FormatGlobal);
 }
 
-void JsPlugin::putFormats()
+PluginConfig JsPlugin::config()
 {
-	StackAssert sa(m_context);
-
-	duk_get_global_string(m_context, "Irccd");
-	duk_get_prop_string(m_context, -1, "Plugin");
-	duk_get_prop_string(m_context, -1, "format");
-
-	for (const auto &pair : formats()) {
-		dukx_push_std_string(m_context, pair.second);
-		duk_put_prop_string(m_context, -2, pair.first.c_str());
-	}
-
-	duk_pop_n(m_context, 3);
+	return getTable(ConfigGlobal);
 }
 
-JsPlugin::JsPlugin(std::string name, std::string path, const PluginConfig &config)
-	: Plugin(name, path, config)
+void JsPlugin::setConfig(PluginConfig config)
 {
+	printf("%s\n", config["collaborative"].c_str());
+	putTable(ConfigGlobal, config);
+}
+
+PluginFormats JsPlugin::formats()
+{
+	return getTable(FormatGlobal);
+}
+
+void JsPlugin::setFormats(PluginFormats formats)
+{
+	putTable(FormatGlobal, formats);
 }
 
 void JsPlugin::onChannelMode(Irccd &,
@@ -265,8 +297,12 @@ void JsPlugin::onLoad(Irccd &irccd)
 
 	duk_pop(m_context);
 
-	putConfig(config());
-	putFormats();
+	/*
+	 * We put configuration and formats after loading the file and before calling onLoad to allow the plugin adding configuration
+	 * to Irccd.Plugin.(config|format) before the user.
+	 */
+	setConfig(irccd.pluginService().config(name()));
+	setFormats(irccd.pluginService().formats(name()));
 
 	// Read metadata .
 	duk_get_global_string(m_context, "info");

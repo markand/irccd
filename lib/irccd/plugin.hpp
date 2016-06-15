@@ -71,23 +71,17 @@ private:
 	std::string m_summary{"unknown"};
 	std::string m_version{"unknown"};
 
-	// Configuration and formats.
-	PluginConfig m_config;
-	PluginFormats m_formats;
-
 public:
 	/**
 	 * Constructor.
 	 *
 	 * \param name the plugin id
 	 * \param path the fully resolved path to the plugin
-	 * \param config the plugin configuration
 	 * \throws std::runtime_error on errors
 	 */
-	inline Plugin(std::string name, std::string path, PluginConfig config = PluginConfig()) noexcept
+	inline Plugin(std::string name, std::string path) noexcept
 		: m_name(std::move(name))
 		, m_path(std::move(path))
-		, m_config(std::move(config))
 	{
 	}
 
@@ -202,19 +196,9 @@ public:
 	 *
 	 * \return the config
 	 */
-	inline const PluginConfig &config() const noexcept
+	virtual PluginConfig config()
 	{
-		return m_config;
-	}
-
-	/**
-	 * Overloaded function.
-	 *
-	 * \return the config
-	 */
-	inline PluginConfig &config() noexcept
-	{
-		return m_config;
+		return {};
 	}
 
 	/**
@@ -222,9 +206,9 @@ public:
 	 *
 	 * \param config the configuration
 	 */
-	inline void setConfig(PluginConfig config) noexcept
+	virtual void setConfig(PluginConfig config)
 	{
-		m_config = std::move(config);
+		(void)config;
 	}
 
 	/**
@@ -232,19 +216,9 @@ public:
 	 *
 	 * \return the format
 	 */
-	inline const PluginFormats &formats() const noexcept
+	virtual PluginFormats formats()
 	{
-		return m_formats;
-	}
-
-	/**
-	 * Overloaded function.
-	 *
-	 * \return the formats
-	 */
-	inline PluginFormats &formats() noexcept
-	{
-		return m_formats;
+		return {};
 	}
 
 	/**
@@ -252,9 +226,9 @@ public:
 	 *
 	 * \param formats the formats
 	 */
-	inline void setFormats(PluginFormats formats) noexcept
+	virtual void setFormats(PluginFormats formats)
 	{
-		m_formats = std::move(formats);
+		(void)formats;
 	}
 
 	/**

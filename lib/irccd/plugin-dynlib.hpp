@@ -80,16 +80,19 @@ private:
 	OnUnload m_onUnload;
 	OnWhois m_onWhois;
 
+	// Configuration and formats.
+	PluginConfig m_config;
+	PluginFormats m_formats;
+
 public:
 	/**
 	 * Construct the plugin.
 	 *
 	 * \param name the name
 	 * \param path the fully resolved path (must be absolute)
-	 * \param config the optional configuration
 	 * \throw std::exception on failures
 	 */
-	DynlibPlugin(std::string name, std::string path, PluginConfig config = PluginConfig());
+	DynlibPlugin(std::string name, std::string path);
 
 	/**
 	 * \copydoc Plugin::onCommand

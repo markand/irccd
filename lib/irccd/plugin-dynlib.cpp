@@ -41,8 +41,8 @@ inline void call(Sym sym, Args&&... args)
 
 } // !namespace
 
-DynlibPlugin::DynlibPlugin(std::string name, std::string path, PluginConfig config)
-	: Plugin(name, path, std::move(config))
+DynlibPlugin::DynlibPlugin(std::string name, std::string path)
+	: Plugin(name, path)
 	, m_dso(std::move(path))
 	, m_onCommand(sym<OnCommand>(m_dso, "irccd_onCommand"))
 	, m_onConnect(sym<OnConnect>(m_dso, "irccd_onConnect"))

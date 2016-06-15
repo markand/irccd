@@ -45,13 +45,13 @@ private:
 	// Store loaded modules.
 	std::vector<std::shared_ptr<Module>> m_modules;
 
-	// Private helpers
+	// Private helpers.
+	std::unordered_map<std::string, std::string> getTable(const char *name) const;
+	void putTable(const char *name, const std::unordered_map<std::string, std::string> &vars);
 	void call(const std::string &name, unsigned nargs = 0);
 	void putModules(Irccd &irccd);
 	void putVars();
 	void putPath(const std::string &varname, const std::string &append, path::Path type);
-	void putConfig(const PluginConfig &config);
-	void putFormats();
 
 public:
 	/**
@@ -59,9 +59,8 @@ public:
 	 *
 	 * \param name the plugin name
 	 * \param path the path to the plugin
-	 * \param config the configuration
 	 */
-	IRCCD_EXPORT JsPlugin(std::string name, std::string path, const PluginConfig &config = PluginConfig());
+	IRCCD_EXPORT JsPlugin(std::string name, std::string path);
 
 	/**
 	 * Access the Duktape context.
@@ -72,6 +71,14 @@ public:
 	{
 		return m_context;
 	}
+
+	IRCCD_EXPORT PluginConfig config() override;
+
+	IRCCD_EXPORT void setConfig(PluginConfig) override;
+
+	IRCCD_EXPORT PluginFormats formats() override;
+
+	IRCCD_EXPORT void setFormats(PluginFormats formats) override;
 
 	/**
 	 * \copydoc Plugin::onCommand

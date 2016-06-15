@@ -197,9 +197,9 @@ void PluginModule::load(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
 	duk_get_global_string(plugin->context(), "Irccd");
 	duk_push_object(plugin->context());
 	duk_put_function_list(plugin->context(), -1, functions);
-	duk_push_object(plugin->context());
+	duk_get_global_string(plugin->context(), "\xff""\xff""irccd-plugin-config");
 	duk_put_prop_string(plugin->context(), -2, "config");
-	duk_push_object(plugin->context());
+	duk_get_global_string(plugin->context(), "\xff""\xff""irccd-plugin-format");
 	duk_put_prop_string(plugin->context(), -2, "format");
 	duk_put_prop_string(plugin->context(), -2, "Plugin");
 	duk_pop(plugin->context());
