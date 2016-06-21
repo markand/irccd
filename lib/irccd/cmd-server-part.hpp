@@ -52,6 +52,11 @@ public:
 	IRCCD_EXPORT std::vector<Arg> args() const override;
 
 	/**
+	 * \copydoc Command::properties
+	 */
+	IRCCD_EXPORT std::vector<Property> properties() const override;
+
+	/**
 	 * \copydoc Command::request
 	 */
 	IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const CommandRequest &args) const override;

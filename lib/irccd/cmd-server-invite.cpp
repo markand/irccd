@@ -44,6 +44,15 @@ std::vector<Command::Arg> ServerInvite::args() const
 	};
 }
 
+std::vector<Command::Property> ServerInvite::properties() const
+{
+	return {
+		{ "server",	{ json::Type::String }},
+		{ "target",	{ json::Type::String }},
+		{ "channel",	{ json::Type::String }}
+	};
+}
+
 json::Value ServerInvite::request(Irccdctl &, const CommandRequest &args) const
 {
 	return json::object({
@@ -55,13 +64,15 @@ json::Value ServerInvite::request(Irccdctl &, const CommandRequest &args) const
 
 json::Value ServerInvite::exec(Irccd &irccd, const json::Value &request) const
 {
+	Command::exec(irccd, request);
+
 	irccd.serverService().require(
 		request.at("server").toString())->invite(
 		request.at("target").toString(),
 		request.at("channel").toString()
 	);
 
-	return Command::exec(irccd, request);
+	return json::object();
 }
 
 } // !command

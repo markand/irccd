@@ -44,6 +44,15 @@ std::vector<Command::Arg> ServerJoin::args() const
 	};
 }
 
+std::vector<Command::Property> ServerJoin::properties() const
+{
+	return {
+		{ "server",	{ json::Type::String }},
+		{ "channel",	{ json::Type::String }},
+		{ "password",	{ json::Type::String }}
+	};
+}
+
 json::Value ServerJoin::request(Irccdctl &, const CommandRequest &args) const
 {
 	auto req = json::object({
@@ -59,13 +68,15 @@ json::Value ServerJoin::request(Irccdctl &, const CommandRequest &args) const
 
 json::Value ServerJoin::exec(Irccd &irccd, const json::Value &request) const
 {
+	Command::exec(irccd, request);
+
 	irccd.serverService().require(
 		request.at("server").toString())->join(
 		request.at("channel").toString(),
 		request.valueOr("password", json::Type::String, "").toString()
 	);
 
-	return Command::exec(irccd, request);
+	return json::object();
 }
 
 } // !command

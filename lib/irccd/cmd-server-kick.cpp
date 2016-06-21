@@ -45,6 +45,15 @@ std::vector<Command::Arg> ServerKick::args() const
 	};
 }
 
+std::vector<Command::Property> ServerKick::properties() const
+{
+	return {
+		{ "server",	{ json::Type::String }},
+		{ "target",	{ json::Type::String }},
+		{ "channel",	{ json::Type::String }}
+	};
+}
+
 json::Value ServerKick::request(Irccdctl &, const CommandRequest &args) const
 {
 	auto req = json::object({
@@ -61,13 +70,15 @@ json::Value ServerKick::request(Irccdctl &, const CommandRequest &args) const
 
 json::Value ServerKick::exec(Irccd &irccd, const json::Value &request) const
 {
+	Command::exec(irccd, request);
+
 	irccd.serverService().require(request.at("server").toString())->kick(
 		request.at("target").toString(),
 		request.at("channel").toString(),
 		request.valueOr("reason", json::Type::String, "").toString()
 	);
 
-	return Command::exec(irccd, request);
+	return json::object();
 }
 
 } // !command

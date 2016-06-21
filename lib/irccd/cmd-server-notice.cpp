@@ -44,6 +44,15 @@ std::vector<Command::Arg> ServerNotice::args() const
 	};
 }
 
+std::vector<Command::Property> ServerNotice::properties() const
+{
+	return {
+		{ "server",	{ json::Type::String }},
+		{ "target",	{ json::Type::String }},
+		{ "message",	{ json::Type::String }}
+	};
+}
+
 json::Value ServerNotice::request(Irccdctl &, const CommandRequest &args) const
 {
 	return json::object({
@@ -55,12 +64,14 @@ json::Value ServerNotice::request(Irccdctl &, const CommandRequest &args) const
 
 json::Value ServerNotice::exec(Irccd &irccd, const json::Value &request) const
 {
+	Command::exec(irccd, request);
+
 	irccd.serverService().require(request.at("server").toString())->notice(
 		request.at("target").toString(),
 		request.at("message").toString()
 	);
 
-	return nullptr;
+	return json::object();
 }
 
 } // !command

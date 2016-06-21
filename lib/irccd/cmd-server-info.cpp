@@ -42,6 +42,11 @@ std::vector<Command::Arg> ServerInfo::args() const
 	return {{ "server", true }};
 }
 
+std::vector<Command::Property> ServerInfo::properties() const
+{
+	return {{ "server", { json::Type::String }}};
+}
+
 json::Value ServerInfo::request(Irccdctl &, const CommandRequest &args) const
 {
 	return json::object({
@@ -53,10 +58,10 @@ json::Value ServerInfo::request(Irccdctl &, const CommandRequest &args) const
 
 json::Value ServerInfo::exec(Irccd &irccd, const json::Value &request) const
 {
-	auto server = irccd.serverService().require(request.at("server").toString());
 	auto response = Command::exec(irccd, request);
+	auto server = irccd.serverService().require(request.at("server").toString());
 
-	/* General stuff */
+	// General stuff.
 	response.insert("name", server->name());
 	response.insert("host", server->info().host);
 	response.insert("port", server->info().port);

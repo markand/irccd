@@ -44,14 +44,25 @@ std::vector<Command::Arg> ServerChannelNotice::args() const
 	};
 }
 
+std::vector<Command::Property> ServerChannelNotice::properties() const
+{
+	return {
+		{ "server",	{ json::Type::String }},
+		{ "channel",	{ json::Type::String }},
+		{ "message",	{ json::Type::String }}
+	};
+}
+
 json::Value ServerChannelNotice::exec(Irccd &irccd, const json::Value &request) const
 {
+	Command::exec(irccd, request);
+
 	irccd.serverService().require(request.at("server").toString())->cnotice(
 		request.at("channel").toString(),
 		request.at("message").toString()
 	);
 
-	return Command::exec(irccd, request);
+	return json::object();
 }
 
 } // !command

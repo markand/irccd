@@ -44,6 +44,15 @@ std::vector<Command::Arg> ServerTopic::args() const
 	};
 }
 
+std::vector<Command::Property> ServerTopic::properties() const
+{
+	return {
+		{ "server",	{ json::Type::String }},
+		{ "channel",	{ json::Type::String }},
+		{ "topic",	{ json::Type::String }}
+	};
+}
+
 json::Value ServerTopic::request(Irccdctl &, const CommandRequest &args) const
 {
 	return json::object({
@@ -55,12 +64,14 @@ json::Value ServerTopic::request(Irccdctl &, const CommandRequest &args) const
 
 json::Value ServerTopic::exec(Irccd &irccd, const json::Value &request) const
 {
+	Command::exec(irccd, request);
+
 	irccd.serverService().require(request.at("server").toString())->topic(
 		request.at("channel").toString(),
 		request.at("topic").toString()
 	);
 
-	return nullptr;
+	return json::object();
 }
 
 } // !command

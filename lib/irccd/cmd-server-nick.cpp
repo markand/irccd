@@ -43,6 +43,14 @@ std::vector<Command::Arg> ServerNick::args() const
 	};
 }
 
+std::vector<Command::Property> ServerNick::properties() const
+{
+	return {
+		{ "server",	{ json::Type::String }},
+		{ "nickname",	{ json::Type::String }}
+	};
+}
+
 json::Value ServerNick::request(Irccdctl &, const CommandRequest &args) const
 {
 	return json::object({
@@ -53,9 +61,11 @@ json::Value ServerNick::request(Irccdctl &, const CommandRequest &args) const
 
 json::Value ServerNick::exec(Irccd &irccd, const json::Value &object) const
 {
+	Command::exec(irccd, object);
+
 	irccd.serverService().require(object.at("server").toString())->nick(object.at("nickname").toString());
 
-	return nullptr;
+	return json::object();
 }
 
 } // !command

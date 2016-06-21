@@ -44,6 +44,14 @@ std::vector<Command::Arg> ServerPart::args() const
 	};
 }
 
+std::vector<Command::Property> ServerPart::properties() const
+{
+	return {
+		{ "server",	{ json::Type::String }},
+		{ "channel",	{ json::Type::String }}
+	};
+}
+
 json::Value ServerPart::request(Irccdctl &, const CommandRequest &args) const
 {
 	auto req = json::object({
@@ -59,12 +67,14 @@ json::Value ServerPart::request(Irccdctl &, const CommandRequest &args) const
 
 json::Value ServerPart::exec(Irccd &irccd, const json::Value &request) const
 {
+	Command::exec(irccd, request);
+
 	irccd.serverService().require(request.at("server").toString())->part(
 		request.at("channel").toString(),
 		request.valueOr("reason", "").toString()
 	);
 
-	return nullptr;
+	return json::object();
 }
 
 } // !command

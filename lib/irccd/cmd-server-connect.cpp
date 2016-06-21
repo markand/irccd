@@ -146,6 +146,12 @@ std::vector<Command::Arg> ServerConnect::args() const
 	};
 }
 
+std::vector<Command::Property> ServerConnect::properties() const
+{
+	// TODO
+	return {};
+}
+
 json::Value ServerConnect::exec(Irccd &irccd, const json::Value &request) const
 {
 	auto server = std::make_shared<Server>(readInfoName(request), readInfo(request), readIdentity(request), readSettings(request));

@@ -43,6 +43,14 @@ std::vector<Command::Arg> ServerMode::args() const
 	};
 }
 
+std::vector<Command::Property> ServerMode::properties() const
+{
+	return {
+		{ "server",	{ json::Type::String }},
+		{ "mode",	{ json::Type::String }}
+	};
+}
+
 json::Value ServerMode::request(Irccdctl &, const CommandRequest &args) const
 {
 	return json::object({
@@ -53,9 +61,11 @@ json::Value ServerMode::request(Irccdctl &, const CommandRequest &args) const
 
 json::Value ServerMode::exec(Irccd &irccd, const json::Value &request) const
 {
+	Command::exec(irccd, request);
+
 	irccd.serverService().require(request.at("server").toString())->mode(request.at("mode").toString());
 
-	return nullptr;
+	return json::object();
 }
 
 } // !command

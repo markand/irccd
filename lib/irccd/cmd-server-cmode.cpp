@@ -44,14 +44,25 @@ std::vector<Command::Arg> ServerChannelMode::args() const
 	};
 }
 
+std::vector<Command::Property> ServerChannelMode::properties() const
+{
+	return {
+		{ "server",	{ json::Type::String }},
+		{ "channel",	{ json::Type::String }},
+		{ "mode",	{ json::Type::String }}
+	};
+}
+
 json::Value ServerChannelMode::exec(Irccd &irccd, const json::Value &request) const
 {
+	Command::exec(irccd, request);
+
 	irccd.serverService().require(request.at("server").toString())->cmode(
 		request.at("channel").toString(),
 		request.at("mode").toString()
 	);
 
-	return Command::exec(irccd, request);
+	return json::object();
 }
 
 } // !command
