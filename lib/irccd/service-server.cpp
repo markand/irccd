@@ -25,7 +25,8 @@
 #include "logger.hpp"
 #include "plugin.hpp"
 #include "server.hpp"
-#include "server-event.hpp"
+#include "service-plugin.hpp"
+#include "service-rule.hpp"
 #include "service-server.hpp"
 #include "service-transport.hpp"
 #include "util.hpp"
@@ -33,6 +34,44 @@
 using namespace fmt::literals;
 
 namespace irccd {
+
+class EventHandler {
+public:
+    std::string server;
+    std::string origin;
+    std::string target;
+    std::function<std::string (Plugin &)> functionName;
+    std::function<void (Plugin &)> functionExec;
+
+    void operator()(Irccd &irccd) const
+    {
+        for (auto &plugin : irccd.pluginService().plugins()) {
+            auto eventname = functionName(*plugin);
+            auto allowed = irccd.ruleService().solve(server, target, origin, plugin->name(), eventname);
+
+            if (!allowed) {
+                log::debug() << "rule: event skipped on match" << std::endl;
+                continue;
+            } else
+                log::debug() << "rule: event allowed" << std::endl;
+
+            // TODO: server-event must not know which type of plugin.
+            // TODO: get generic error.
+            try {
+                functionExec(*plugin);
+            } catch (const Exception &info) {
+                log::warning() << "plugin " << plugin->name() << ": error: " << info.what() << std::endl;
+
+                if (!info.fileName.empty())
+                    log::warning() << "    " << info.fileName << ":" << info.lineNumber << std::endl;
+                if (!info.stack.empty())
+                    log::warning() << "    " << info.stack << std::endl;
+            } catch (const std::exception &ex) {
+                log::warning() << "plugin " << plugin->name() << ": error: " << ex.what() << std::endl;
+            }
+        }
+    }
+};
 
 void ServerService::handleChannelMode(std::weak_ptr<Server> ptr, std::string origin, std::string channel, std::string mode, std::string arg)
 {
@@ -48,23 +87,22 @@ void ServerService::handleChannelMode(std::weak_ptr<Server> ptr, std::string ori
     log::debug() << "  argument: " << arg << std::endl;
 
     m_irccd.transportService().broadcast(json::object({
-        { "event",    "onChannelMode"        },
-        { "server",    server->name()        },
-        { "origin",    origin            },
-        { "channel",    channel            },
-        { "mode",    mode            },
-        { "argument",    arg            }
+        { "event",      "onChannelMode"     },
+        { "server",     server->name()      },
+        { "origin",     origin              },
+        { "channel",    channel             },
+        { "mode",       mode                },
+        { "argument",   arg                 }
     }).toJson(0));
 
-    m_irccd.post(ServerEvent(server->name(), origin, channel,
+    m_irccd.post(EventHandler{server->name(), origin, channel,
         [=] (Plugin &) -> std::string {
             return "onChannelMode";
         },
         [=] (Plugin &plugin) {
-            plugin.onChannelMode(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(mode),
-                         std::move(arg));
+            plugin.onChannelMode(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(mode), std::move(arg));
         }
-    ));
+    });
 }
 
 void ServerService::handleChannelNotice(std::weak_ptr<Server> ptr, std::string origin, std::string channel, std::string message)
@@ -80,21 +118,21 @@ void ServerService::handleChannelNotice(std::weak_ptr<Server> ptr, std::string o
     log::debug() << "  message: " << message << std::endl;
 
     m_irccd.transportService().broadcast(json::object({
-        { "event",    "onChannelNotice"    },
-        { "server",    server->name()        },
-        { "origin",    origin            },
-        { "channel",    channel            },
-        { "message",    message            }
+        { "event",      "onChannelNotice"   },
+        { "server",     server->name()      },
+        { "origin",     origin              },
+        { "channel",    channel             },
+        { "message",    message             }
     }).toJson(0));
 
-    m_irccd.post(ServerEvent(server->name(), origin, channel,
+    m_irccd.post(EventHandler{server->name(), origin, channel,
         [=] (Plugin &) -> std::string {
             return "onChannelNotice";
         },
         [=] (Plugin &plugin) {
             plugin.onChannelNotice(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(message));
         }
-    ));
+    });
 }
 
 void ServerService::handleConnect(std::weak_ptr<Server> ptr)
@@ -107,18 +145,18 @@ void ServerService::handleConnect(std::weak_ptr<Server> ptr)
     log::debug() << "server " << server->name() << ": event onConnect" << std::endl;
 
     m_irccd.transportService().broadcast(json::object({
-        { "event",    "onConnect"        },
-        { "server",    server->name()        }
+        { "event",      "onConnect"         },
+        { "server",     server->name()      }
     }).toJson(0));
 
-    m_irccd.post(ServerEvent(server->name(), /* origin */ "", /* channel */ "",
+    m_irccd.post(EventHandler{server->name(), /* origin */ "", /* channel */ "",
         [=] (Plugin &) -> std::string {
             return "onConnect";
         },
         [=] (Plugin &plugin) {
             plugin.onConnect(m_irccd, std::move(server));
         }
-    ));
+    });
 }
 
 void ServerService::handleInvite(std::weak_ptr<Server> ptr, std::string origin, std::string channel, std::string target)
@@ -134,20 +172,20 @@ void ServerService::handleInvite(std::weak_ptr<Server> ptr, std::string origin, 
     log::debug() << "  target: " << target << std::endl;
 
     m_irccd.transportService().broadcast(json::object({
-        { "event",    "onInvite"        },
-        { "server",    server->name()        },
-        { "origin",    origin            },
-        { "channel",    channel            }
+        { "event",      "onInvite"          },
+        { "server",     server->name()      },
+        { "origin",     origin              },
+        { "channel",    channel             }
     }).toJson(0));
 
-    m_irccd.post(ServerEvent(server->name(), origin, channel,
+    m_irccd.post(EventHandler{server->name(), origin, channel,
         [=] (Plugin &) -> std::string {
             return "onInvite";
         },
         [=] (Plugin &plugin) {
             plugin.onInvite(m_irccd, std::move(server), std::move(origin), std::move(channel));
         }
-    ));
+    });
 }
 
 void ServerService::handleJoin(std::weak_ptr<Server> ptr, std::string origin, std::string channel)
@@ -162,20 +200,20 @@ void ServerService::handleJoin(std::weak_ptr<Server> ptr, std::string origin, st
     log::debug() << "  channel: " << channel << std::endl;
 
     m_irccd.transportService().broadcast(json::object({
-        { "event",    "onJoin"        },
-        { "server",    server->name()        },
-        { "origin",    origin            },
-        { "channel",    channel            }
+        { "event",      "onJoin"            },
+        { "server",     server->name()      },
+        { "origin",     origin              },
+        { "channel",    channel             }
     }).toJson(0));
 
-    m_irccd.post(ServerEvent(server->name(), origin, channel,
+    m_irccd.post(EventHandler{server->name(), origin, channel,
         [=] (Plugin &) -> std::string {
             return "onJoin";
         },
         [=] (Plugin &plugin) {
             plugin.onJoin(m_irccd, std::move(server), std::move(origin), std::move(channel));
         }
-    ));
+    });
 }
 
 void ServerService::handleKick(std::weak_ptr<Server> ptr, std::string origin, std::string channel, std::string target, std::string reason)
@@ -192,22 +230,22 @@ void ServerService::handleKick(std::weak_ptr<Server> ptr, std::string origin, st
     log::debug() << "  reason: " << reason << std::endl;
 
     m_irccd.transportService().broadcast(json::object({
-        { "event",    "onKick"        },
-        { "server",    server->name()        },
-        { "origin",    origin            },
-        { "channel",    channel            },
-        { "target",    target            },
-        { "reason",    reason            }
+        { "event",      "onKick"            },
+        { "server",     server->name()      },
+        { "origin",     origin              },
+        { "channel",    channel             },
+        { "target",     target              },
+        { "reason",     reason              }
     }).toJson(0));
 
-    m_irccd.post(ServerEvent(server->name(), origin, channel,
+    m_irccd.post(EventHandler{server->name(), origin, channel,
         [=] (Plugin &) -> std::string {
             return "onKick";
         },
         [=] (Plugin &plugin) {
             plugin.onKick(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(target), std::move(reason));
         }
-    ));
+    });
 }
 
 void ServerService::handleMessage(std::weak_ptr<Server> ptr, std::string origin, std::string channel, std::string message)
@@ -223,14 +261,14 @@ void ServerService::handleMessage(std::weak_ptr<Server> ptr, std::string origin,
     log::debug() << "  message: " << message << std::endl;
 
     m_irccd.transportService().broadcast(json::object({
-        { "event",    "onMessage"        },
-        { "server",    server->name()        },
-        { "origin",    origin            },
-        { "channel",    channel            },
-        { "message",    message            }
+        { "event",      "onMessage"         },
+        { "server",     server->name()      },
+        { "origin",     origin              },
+        { "channel",    channel             },
+        { "message",    message             }
     }).toJson(0));
 
-    m_irccd.post(ServerEvent(server->name(), origin, channel,
+    m_irccd.post(EventHandler{server->name(), origin, channel,
         [=] (Plugin &plugin) -> std::string {
             return util::parseMessage(message, server->settings().command, plugin.name()).second == util::MessageType::Command ? "onCommand" : "onMessage";
         },
@@ -242,7 +280,7 @@ void ServerService::handleMessage(std::weak_ptr<Server> ptr, std::string origin,
             else
                 plugin.onMessage(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(pack.first));
         }
-    ));
+    });
 }
 
 void ServerService::handleMe(std::weak_ptr<Server> ptr, std::string origin, std::string target, std::string message)
@@ -258,21 +296,21 @@ void ServerService::handleMe(std::weak_ptr<Server> ptr, std::string origin, std:
     log::debug() << "  message: " << message << std::endl;
 
     m_irccd.transportService().broadcast(json::object({
-        { "event",    "onMe"            },
-        { "server",    server->name()        },
-        { "origin",    origin            },
-        { "target",    target            },
-        { "message",    message            }
+        { "event",      "onMe"              },
+        { "server",     server->name()      },
+        { "origin",     origin              },
+        { "target",     target              },
+        { "message",    message             }
     }).toJson(0));
 
-    m_irccd.post(ServerEvent(server->name(), origin, target,
+    m_irccd.post(EventHandler{server->name(), origin, target,
         [=] (Plugin &) -> std::string {
             return "onMe";
         },
         [=] (Plugin &plugin) {
             plugin.onMe(m_irccd, std::move(server), std::move(origin), std::move(target), std::move(message));
         }
-    ));
+    });
 }
 
 void ServerService::handleMode(std::weak_ptr<Server> ptr, std::string origin, std::string mode)
@@ -287,20 +325,20 @@ void ServerService::handleMode(std::weak_ptr<Server> ptr, std::string origin, st
     log::debug() << "  mode: " << mode << std::endl;
 
     m_irccd.transportService().broadcast(json::object({
-        { "event",    "onMode"        },
-        { "server",    server->name()        },
-        { "origin",    origin            },
-        { "mode",    mode            }
+        { "event",      "onMode"            },
+        { "server",     server->name()      },
+        { "origin",     origin              },
+        { "mode",       mode                }
     }).toJson(0));
 
-    m_irccd.post(ServerEvent(server->name(), origin, /* channel */ "",
+    m_irccd.post(EventHandler{server->name(), origin, /* channel */ "",
         [=] (Plugin &) -> std::string {
             return "onMode";
         },
         [=] (Plugin &plugin) {
             plugin.onMode(m_irccd, std::move(server), std::move(origin), std::move(mode));
         }
-    ));
+    });
 }
 
 void ServerService::handleNames(std::weak_ptr<Server> ptr, std::string channel, std::set<std::string> nicknames)
@@ -317,20 +355,20 @@ void ServerService::handleNames(std::weak_ptr<Server> ptr, std::string channel, 
     json::Value names(std::vector<json::Value>(nicknames.begin(), nicknames.end()));
 
     m_irccd.transportService().broadcast(json::object({
-        { "event",    "onNames"        },
-        { "server",    server->name()        },
-        { "channel",    channel            },
-        { "names",    std::move(names)    }
+        { "event",      "onNames"           },
+        { "server",     server->name()      },
+        { "channel",    channel             },
+        { "names",      std::move(names)    }
     }).toJson(0));
 
-    m_irccd.post(ServerEvent(server->name(), /* origin */ "", channel,
+    m_irccd.post(EventHandler{server->name(), /* origin */ "", channel,
         [=] (Plugin &) -> std::string {
             return "onNames";
         },
         [=] (Plugin &plugin) {
             plugin.onNames(m_irccd, std::move(server), std::move(channel), std::vector<std::string>(nicknames.begin(), nicknames.end()));
         }
-    ));
+    });
 }
 
 void ServerService::handleNick(std::weak_ptr<Server> ptr, std::string origin, std::string nickname)
@@ -345,20 +383,20 @@ void ServerService::handleNick(std::weak_ptr<Server> ptr, std::string origin, st
     log::debug() << "  nickname: " << nickname << std::endl;
 
     m_irccd.transportService().broadcast(json::object({
-        { "event",    "onNick"        },
-        { "server",    server->name()        },
-        { "origin",    origin            },
-        { "nickname",    nickname        }
+        { "event",      "onNick"            },
+        { "server",     server->name()      },
+        { "origin",     origin              },
+        { "nickname",   nickname            }
     }).toJson(0));
 
-    m_irccd.post(ServerEvent(server->name(), origin, /* channel */ "",
+    m_irccd.post(EventHandler{server->name(), origin, /* channel */ "",
         [=] (Plugin &) -> std::string {
             return "onNick";
         },
         [=] (Plugin &plugin) {
             plugin.onNick(m_irccd, std::move(server), std::move(origin), std::move(nickname));
         }
-    ));
+    });
 }
 
 void ServerService::handleNotice(std::weak_ptr<Server> ptr, std::string origin, std::string message)
@@ -373,20 +411,20 @@ void ServerService::handleNotice(std::weak_ptr<Server> ptr, std::string origin, 
     log::debug() << "  message: " << message << std::endl;
 
     m_irccd.transportService().broadcast(json::object({
-        { "event",    "onNotice"        },
-        { "server",    server->name()        },
-        { "origin",    origin            },
-        { "message",    message            }
+        { "event",      "onNotice"          },
+        { "server",     server->name()      },
+        { "origin",     origin              },
+        { "message",    message             }
     }).toJson(0));
 
-    m_irccd.post(ServerEvent(server->name(), origin, /* channel */ "",
+    m_irccd.post(EventHandler{server->name(), origin, /* channel */ "",
         [=] (Plugin &) -> std::string {
             return "onNotice";
         },
         [=] (Plugin &plugin) {
             plugin.onNotice(m_irccd, std::move(server), std::move(origin), std::move(message));
         }
-    ));
+    });
 }
 
 void ServerService::handlePart(std::weak_ptr<Server> ptr, std::string origin, std::string channel, std::string reason)
@@ -402,21 +440,21 @@ void ServerService::handlePart(std::weak_ptr<Server> ptr, std::string origin, st
     log::debug() << "  reason: " << reason << std::endl;
 
     m_irccd.transportService().broadcast(json::object({
-        { "event",    "onPart"        },
-        { "server",    server->name()        },
-        { "origin",    origin            },
-        { "channel",    channel            },
-        { "reason",    reason            }
+        { "event",      "onPart"            },
+        { "server",     server->name()      },
+        { "origin",     origin              },
+        { "channel",    channel             },
+        { "reason",     reason              }
     }).toJson(0));
 
-    m_irccd.post(ServerEvent(server->name(), origin, channel,
+    m_irccd.post(EventHandler{server->name(), origin, channel,
         [=] (Plugin &) -> std::string {
             return "onPart";
         },
         [=] (Plugin &plugin) {
             plugin.onPart(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(reason));
         }
-    ));
+    });
 }
 
 void ServerService::handleQuery(std::weak_ptr<Server> ptr, std::string origin, std::string message)
@@ -431,13 +469,13 @@ void ServerService::handleQuery(std::weak_ptr<Server> ptr, std::string origin, s
     log::debug() << "  message: " << message << std::endl;
 
     m_irccd.transportService().broadcast(json::object({
-        { "event",    "onQuery"        },
-        { "server",    server->name()        },
-        { "origin",    origin            },
-        { "message",    message            }
+        { "event",      "onQuery"           },
+        { "server",     server->name()      },
+        { "origin",     origin              },
+        { "message",    message             }
     }).toJson(0));
 
-    m_irccd.post(ServerEvent(server->name(), origin, /* channel */ "",
+    m_irccd.post(EventHandler{server->name(), origin, /* channel */ "",
         [=] (Plugin &plugin) -> std::string {
             return util::parseMessage(message, server->settings().command, plugin.name()).second == util::MessageType::Command ? "onQueryCommand" : "onQuery";
         },
@@ -449,7 +487,7 @@ void ServerService::handleQuery(std::weak_ptr<Server> ptr, std::string origin, s
             else
                 plugin.onQuery(m_irccd, std::move(server), std::move(origin), std::move(pack.first));
         }
-    ));
+    });
 }
 
 void ServerService::handleTopic(std::weak_ptr<Server> ptr, std::string origin, std::string channel, std::string topic)
@@ -465,21 +503,21 @@ void ServerService::handleTopic(std::weak_ptr<Server> ptr, std::string origin, s
     log::debug() << "  topic: " << topic << std::endl;
 
     m_irccd.transportService().broadcast(json::object({
-        { "event",    "onTopic"        },
-        { "server",    server->name()        },
-        { "origin",    origin            },
-        { "channel",    channel            },
-        { "topic",    topic            }
+        { "event",      "onTopic"           },
+        { "server",     server->name()      },
+        { "origin",     origin              },
+        { "channel",    channel             },
+        { "topic",      topic               }
     }).toJson(0));
 
-    m_irccd.post(ServerEvent(server->name(), origin, channel,
+    m_irccd.post(EventHandler{server->name(), origin, channel,
         [=] (Plugin &) -> std::string {
             return "onTopic";
         },
         [=] (Plugin &plugin) {
             plugin.onTopic(m_irccd, std::move(server), std::move(origin), std::move(channel), std::move(topic));
         }
-    ));
+    });
 }
 
 void ServerService::handleWhois(std::weak_ptr<Server> ptr, ServerWhois whois)
@@ -497,21 +535,21 @@ void ServerService::handleWhois(std::weak_ptr<Server> ptr, ServerWhois whois)
     log::debug() << "  channels: " << util::join(whois.channels.begin(), whois.channels.end()) << std::endl;
 
     m_irccd.transportService().broadcast(json::object({
-        { "server",    server->name()        },
-        { "nickname",    whois.nick        },
-        { "username",    whois.user        },
-        { "host",    whois.host        },
-        { "realname",    whois.realname        }
+        { "server",     server->name()      },
+        { "nickname",   whois.nick          },
+        { "username",   whois.user          },
+        { "host",       whois.host          },
+        { "realname",   whois.realname      }
     }).toJson(0));
 
-    m_irccd.post(ServerEvent(server->name(), /* origin */ "", /* channel */ "",
+    m_irccd.post(EventHandler{server->name(), /* origin */ "", /* channel */ "",
         [=] (Plugin &) -> std::string {
             return "onWhois";
         },
         [=] (Plugin &plugin) {
             plugin.onWhois(m_irccd, std::move(server), std::move(whois));
         }
-    ));
+    });
 }
 
 ServerService::ServerService(Irccd &irccd)
