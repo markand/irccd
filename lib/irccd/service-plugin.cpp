@@ -38,157 +38,157 @@ namespace {
 
 std::shared_ptr<Plugin> find(std::string name)
 {
-	for (const auto &path : path::list(path::PathPlugins)) {
-		std::string jspath = path + name + ".js";
-		std::string dynlibpath = path + name + DYNLIB_SUFFIX;
+    for (const auto &path : path::list(path::PathPlugins)) {
+        std::string jspath = path + name + ".js";
+        std::string dynlibpath = path + name + DYNLIB_SUFFIX;
 
-		if (fs::isReadable(jspath))
-			return std::make_shared<JsPlugin>(std::move(name), std::move(jspath));
-		if (fs::isReadable(dynlibpath))
-			return std::make_shared<DynlibPlugin>(std::move(name), std::move(dynlibpath));
-	}
+        if (fs::isReadable(jspath))
+            return std::make_shared<JsPlugin>(std::move(name), std::move(jspath));
+        if (fs::isReadable(dynlibpath))
+            return std::make_shared<DynlibPlugin>(std::move(name), std::move(dynlibpath));
+    }
 
-	throw std::runtime_error("no suitable plugin found");
+    throw std::runtime_error("no suitable plugin found");
 }
 
 std::shared_ptr<Plugin> open(std::string name, std::string path)
 {
-	std::regex regex(".*(\\..*)$");
-	std::smatch match;
-	std::shared_ptr<Plugin> plugin;
+    std::regex regex(".*(\\..*)$");
+    std::smatch match;
+    std::shared_ptr<Plugin> plugin;
 
-	if (std::regex_match(path, match, regex)) {
-		if (match[1] == DYNLIB_SUFFIX)
-			plugin = std::make_shared<DynlibPlugin>(name, path);
-		else
-			plugin = std::make_shared<JsPlugin>(name, path);
-	} else
-		throw std::runtime_error("could not deduce plugin type from {}"_format(path));
+    if (std::regex_match(path, match, regex)) {
+        if (match[1] == DYNLIB_SUFFIX)
+            plugin = std::make_shared<DynlibPlugin>(name, path);
+        else
+            plugin = std::make_shared<JsPlugin>(name, path);
+    } else
+        throw std::runtime_error("could not deduce plugin type from {}"_format(path));
 
-	return plugin;
+    return plugin;
 }
 
 } // !namespace
 
 PluginService::PluginService(Irccd &irccd) noexcept
-	: m_irccd(irccd)
+    : m_irccd(irccd)
 {
 }
 
 PluginService::~PluginService()
 {
-	for (const auto &plugin : m_plugins)
-		plugin->onUnload(m_irccd);
+    for (const auto &plugin : m_plugins)
+        plugin->onUnload(m_irccd);
 }
 
 bool PluginService::has(const std::string &name) const noexcept
 {
-	return std::count_if(m_plugins.cbegin(), m_plugins.cend(), [&] (const auto &plugin) {
-		return plugin->name() == name;
-	}) > 0;
+    return std::count_if(m_plugins.cbegin(), m_plugins.cend(), [&] (const auto &plugin) {
+        return plugin->name() == name;
+    }) > 0;
 }
 
 std::shared_ptr<Plugin> PluginService::get(const std::string &name) const noexcept
 {
-	auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (const auto &plugin) {
-		return plugin->name() == name;
-	});
+    auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (const auto &plugin) {
+        return plugin->name() == name;
+    });
 
-	if (it == m_plugins.end())
-		return nullptr;
+    if (it == m_plugins.end())
+        return nullptr;
 
-	return *it;
+    return *it;
 }
 
 std::shared_ptr<Plugin> PluginService::require(const std::string &name) const
 {
-	auto plugin = get(name);
+    auto plugin = get(name);
 
-	if (!plugin)
-		throw std::invalid_argument("plugin {} not found"_format(name));
+    if (!plugin)
+        throw std::invalid_argument("plugin {} not found"_format(name));
 
-	return plugin;
+    return plugin;
 }
 
 void PluginService::add(std::shared_ptr<Plugin> plugin)
 {
-	m_plugins.push_back(std::move(plugin));
+    m_plugins.push_back(std::move(plugin));
 }
 
 void PluginService::setConfig(const std::string &name, PluginConfig config)
 {
-	m_config.emplace(name, std::move(config));
+    m_config.emplace(name, std::move(config));
 }
 
 PluginConfig PluginService::config(const std::string &name) const
 {
-	auto it = m_config.find(name);
+    auto it = m_config.find(name);
 
-	if (it != m_config.end())
-		return it->second;
+    if (it != m_config.end())
+        return it->second;
 
-	return PluginConfig();
+    return PluginConfig();
 }
 
 void PluginService::setFormats(const std::string &name, PluginFormats formats)
 {
-	m_formats.emplace(name, std::move(formats));
+    m_formats.emplace(name, std::move(formats));
 }
 
 PluginFormats PluginService::formats(const std::string &name) const
 {
-	auto it = m_formats.find(name);
+    auto it = m_formats.find(name);
 
-	if (it != m_formats.end())
-		return it->second;
+    if (it != m_formats.end())
+        return it->second;
 
-	return PluginFormats();
+    return PluginFormats();
 }
 
 void PluginService::load(std::string name, std::string path)
 {
-	auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (const auto &plugin) {
-		return plugin->name() == name;
-	});
+    auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (const auto &plugin) {
+        return plugin->name() == name;
+    });
 
-	if (it != m_plugins.end())
-		return;
+    if (it != m_plugins.end())
+        return;
 
-	try {
-		std::shared_ptr<Plugin> plugin;
+    try {
+        std::shared_ptr<Plugin> plugin;
 
-		if (path.empty())
-			plugin = find(name);
-		else
-			plugin = open(name, std::move(path));
+        if (path.empty())
+            plugin = find(name);
+        else
+            plugin = open(name, std::move(path));
 
-		plugin->setConfig(m_config[name]);
-		plugin->setFormats(m_formats[name]);
-		plugin->onLoad(m_irccd);
-		add(std::move(plugin));
-	} catch (const std::exception &ex) {
-		log::warning("plugin {}: {}"_format(name, ex.what()));
-	}
+        plugin->setConfig(m_config[name]);
+        plugin->setFormats(m_formats[name]);
+        plugin->onLoad(m_irccd);
+        add(std::move(plugin));
+    } catch (const std::exception &ex) {
+        log::warning("plugin {}: {}"_format(name, ex.what()));
+    }
 }
 
 void PluginService::reload(const std::string &name)
 {
-	auto plugin = get(name);
+    auto plugin = get(name);
 
-	if (plugin)
-		plugin->onReload(m_irccd);
+    if (plugin)
+        plugin->onReload(m_irccd);
 }
 
 void PluginService::unload(const std::string &name)
 {
-	auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (const auto &plugin) {
-		return plugin->name() == name;
-	});
+    auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (const auto &plugin) {
+        return plugin->name() == name;
+    });
 
-	if (it != m_plugins.end()) {
-		(*it)->onUnload(m_irccd);
-		m_plugins.erase(it);
-	}
+    if (it != m_plugins.end()) {
+        (*it)->onUnload(m_irccd);
+        m_plugins.erase(it);
+    }
 }
 
 } // !irccd

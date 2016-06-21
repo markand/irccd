@@ -27,9 +27,9 @@ set(IRCCD_VERSION "${IRCCD_VERSION_MAJOR}.${IRCCD_VERSION_MINOR}.${IRCCD_VERSION
 # Irccd release date.
 # -------------------------------------------------------------------
 #
-# IRCCD_RELEASE_DATE_YEAR	4 digits
-# IRCCD_RELEASE_DATE_MONTH	2 digits (01 = January)
-# IRCCD_RELEASE_DATE_DAY	2 digits (01 = first day of month)
+# IRCCD_RELEASE_DATE_YEAR       4 digits
+# IRCCD_RELEASE_DATE_MONTH      2 digits (01 = January)
+# IRCCD_RELEASE_DATE_DAY        2 digits (01 = first day of month)
 #
 set(IRCCD_RELEASE_DATE_YEAR 2016)
 set(IRCCD_RELEASE_DATE_MONTH 04)
@@ -38,13 +38,13 @@ set(IRCCD_RELEASE_DATE "${IRCCD_RELEASE_DATE_YEAR}-${IRCCD_RELEASE_DATE_MONTH}-$
 
 # All plugins.
 set(
-	IRCCD_PLUGINS
-	ask
-	auth
-	hangman
-	history
-	logger
-	plugin
-	roulette
-	CACHE INTERNAL ""
+    IRCCD_PLUGINS
+    ask
+    auth
+    hangman
+    history
+    logger
+    plugin
+    roulette
+    CACHE INTERNAL ""
 )

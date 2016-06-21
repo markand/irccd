@@ -36,15 +36,15 @@ namespace irccd {
  */
 class ServerModule : public Module {
 public:
-	/**
-	 * Irccd.Server.
-	 */
-	IRCCD_EXPORT ServerModule() noexcept;
+    /**
+     * Irccd.Server.
+     */
+    IRCCD_EXPORT ServerModule() noexcept;
 
-	/**
-	 * \copydoc Module::load
-	 */
-	IRCCD_EXPORT void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
+    /**
+     * \copydoc Module::load
+     */
+    IRCCD_EXPORT void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
 };
 
 /**

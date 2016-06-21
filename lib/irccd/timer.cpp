@@ -25,65 +25,65 @@ namespace irccd {
 
 void Timer::run()
 {
-	while (m_state != Stopped) {
-		std::unique_lock<std::mutex> lock(m_mutex);
+    while (m_state != Stopped) {
+        std::unique_lock<std::mutex> lock(m_mutex);
 
-		// Wait in case the timer is paused.
-		m_condition.wait(lock, [&] () {
-			return m_state != Paused;
-		});
+        // Wait in case the timer is paused.
+        m_condition.wait(lock, [&] () {
+            return m_state != Paused;
+        });
 
-		if (m_state != Running)
-			continue;
+        if (m_state != Running)
+            continue;
 
-		// Wait the timer delay or the interrupt.
-		m_condition.wait_for(lock, std::chrono::milliseconds(m_delay), [&] () {
-			return m_state != Running;
-		});
+        // Wait the timer delay or the interrupt.
+        m_condition.wait_for(lock, std::chrono::milliseconds(m_delay), [&] () {
+            return m_state != Running;
+        });
 
-		if (m_state == Running) {
-			// Signal process.
-			onSignal();
+        if (m_state == Running) {
+            // Signal process.
+            onSignal();
 
-			if (m_type == TimerType::Single)
-				m_state = Stopped;
-		}
-	}
+            if (m_type == TimerType::Single)
+                m_state = Stopped;
+        }
+    }
 
-	onEnd();
+    onEnd();
 }
 
 Timer::Timer(TimerType type, unsigned delay) noexcept
-	: m_type(type)
-	, m_delay(delay)
-	, m_thread(std::bind(&Timer::run, this))
+    : m_type(type)
+    , m_delay(delay)
+    , m_thread(std::bind(&Timer::run, this))
 {
 }
 
 Timer::~Timer()
 {
-	assert(m_state != Running);
+    assert(m_state != Running);
 
-	try {
-		m_state = Stopped;
-		m_condition.notify_one();
-		m_thread.join();
-	} catch (...) {
-	}
+    try {
+        m_state = Stopped;
+        m_condition.notify_one();
+        m_thread.join();
+    } catch (...) {
+    }
 }
 
 void Timer::start()
 {
-	assert(m_state != Running);
+    assert(m_state != Running);
 
-	m_state = Running;
-	m_condition.notify_one();
+    m_state = Running;
+    m_condition.notify_one();
 }
 
 void Timer::stop()
 {
-	m_state = Paused;
-	m_condition.notify_one();
+    m_state = Paused;
+    m_condition.notify_one();
 }
 
 } // !irccd

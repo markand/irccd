@@ -313,6 +313,6 @@ identity = myIdentity
 
 # Load some plugins.
 [plugins]
-ask = ""				# This search for plugin ask
-myplugin = /path/to/myplugin.js		# This use absolute path
+ask = ""                # This search for plugin ask
+myplugin = /path/to/myplugin.js        # This use absolute path
 ````

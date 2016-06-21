@@ -17,9 +17,9 @@
 #
 
 set(
-	LOGGER_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/index.md
-	${CMAKE_CURRENT_LIST_DIR}/function/debug.md
-	${CMAKE_CURRENT_LIST_DIR}/function/info.md
-	${CMAKE_CURRENT_LIST_DIR}/function/warning.md
+    LOGGER_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/index.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/debug.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/info.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/warning.md
 )

@@ -26,39 +26,39 @@ namespace irccd {
 
 ElapsedTimer::ElapsedTimer() noexcept
 {
-	m_last = high_resolution_clock::now();
+    m_last = high_resolution_clock::now();
 }
 
 void ElapsedTimer::pause() noexcept
 {
-	/*
-	 * When we put the timer on pause, do not forget to set the already
-	 * elapsed time.
-	 */
-	(void)elapsed();
-	m_paused = true;
+    /*
+     * When we put the timer on pause, do not forget to set the already
+     * elapsed time.
+     */
+    (void)elapsed();
+    m_paused = true;
 }
 
 void ElapsedTimer::restart() noexcept
 {
-	m_paused = false;
-	m_last = high_resolution_clock::now();
+    m_paused = false;
+    m_last = high_resolution_clock::now();
 }
 
 void ElapsedTimer::reset() noexcept
 {
-	m_elapsed = 0;
-	m_last = high_resolution_clock::now();
+    m_elapsed = 0;
+    m_last = high_resolution_clock::now();
 }
 
 unsigned ElapsedTimer::elapsed() noexcept
 {
-	if (!m_paused) {
-		m_elapsed += duration_cast<milliseconds>(high_resolution_clock::now() - m_last).count();
-		m_last = high_resolution_clock::now();
-	}
+    if (!m_paused) {
+        m_elapsed += duration_cast<milliseconds>(high_resolution_clock::now() - m_last).count();
+        m_last = high_resolution_clock::now();
+    }
 
-	return m_elapsed;
+    return m_elapsed;
 }
 
 } // !irccd

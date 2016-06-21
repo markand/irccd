@@ -26,46 +26,46 @@ namespace irccd {
 namespace command {
 
 ServerNick::ServerNick()
-	: Command("server-nick", "Server")
+    : Command("server-nick", "Server")
 {
 }
 
 std::string ServerNick::help() const
 {
-	return "";
+    return "";
 }
 
 std::vector<Command::Arg> ServerNick::args() const
 {
-	return {
-		{ "server",	true },
-		{ "nickname",	true }
-	};
+    return {
+        { "server",     true },
+        { "nickname",   true }
+    };
 }
 
 std::vector<Command::Property> ServerNick::properties() const
 {
-	return {
-		{ "server",	{ json::Type::String }},
-		{ "nickname",	{ json::Type::String }}
-	};
+    return {
+        { "server",     { json::Type::String }},
+        { "nickname",   { json::Type::String }}
+    };
 }
 
 json::Value ServerNick::request(Irccdctl &, const CommandRequest &args) const
 {
-	return json::object({
-		{ "server",	args.arg(0) },
-		{ "nickname",	args.arg(1) }
-	});
+    return json::object({
+        { "server",     args.arg(0) },
+        { "nickname",   args.arg(1) }
+    });
 }
 
 json::Value ServerNick::exec(Irccd &irccd, const json::Value &object) const
 {
-	Command::exec(irccd, object);
+    Command::exec(irccd, object);
 
-	irccd.serverService().require(object.at("server").toString())->nick(object.at("nickname").toString());
+    irccd.serverService().require(object.at("server").toString())->nick(object.at("nickname").toString());
 
-	return json::object();
+    return json::object();
 }
 
 } // !command

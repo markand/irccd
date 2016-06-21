@@ -17,11 +17,11 @@
 #
 
 irccd_define_test(
-	NAME js-timer
-	SOURCES main.cpp
-	RESOURCES
-		${CMAKE_CURRENT_SOURCE_DIR}/timer-single.js
-		${CMAKE_CURRENT_SOURCE_DIR}/timer-repeat.js
-		${CMAKE_CURRENT_SOURCE_DIR}/timer-pending.js
-	LIBRARIES libirccd
+    NAME js-timer
+    SOURCES main.cpp
+    RESOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/timer-single.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/timer-repeat.js
+        ${CMAKE_CURRENT_SOURCE_DIR}/timer-pending.js
+    LIBRARIES libirccd
 )

@@ -36,25 +36,25 @@ namespace command {
  */
 class Watch : public Command {
 public:
-	/**
-	 * Constructor.
-	 */
-	IRCCD_EXPORT Watch();
+    /**
+     * Constructor.
+     */
+    IRCCD_EXPORT Watch();
 
-	/**
-	 * \copydoc Command::options
-	 */
-	IRCCD_EXPORT std::vector<Option> options() const override;
+    /**
+     * \copydoc Command::options
+     */
+    IRCCD_EXPORT std::vector<Option> options() const override;
 
-	/**
-	 * \copydoc Command::help
-	 */
-	IRCCD_EXPORT std::string help() const override;
+    /**
+     * \copydoc Command::help
+     */
+    IRCCD_EXPORT std::string help() const override;
 
-	/**
-	 * \copydoc Command::request
-	 */
-	IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const CommandRequest &args) const override;
+    /**
+     * \copydoc Command::request
+     */
+    IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const CommandRequest &args) const override;
 };
 
 } // !command

@@ -18,10 +18,10 @@
 
 // Plugin information.
 info = {
-	author: "David Demelier <markand@malikania.fr>",
-	license: "ISC",
-	summary: "A hangman game for IRC",
-	version: "@IRCCD_VERSION@"
+    author: "David Demelier <markand@malikania.fr>",
+    license: "ISC",
+    summary: "A hangman game for IRC",
+    version: "@IRCCD_VERSION@"
 };
 
 // Modules.
@@ -37,23 +37,23 @@ Plugin.config["collaborative"] = "true";
 
 // Formats.
 Plugin.format = {
-	"asked":	"#{nickname}, '#{letter}' was already asked.",
-	"dead":		"#{nickname}, fail the word was: #{word}.",
-	"found":	"#{nickname}, nice! the word is now #{word}",
-	"running":	"#{nickname}, the game is already running.",
-	"start":	"#{nickname}, the game is started, the word to find is: #{word}",
-	"win":		"#{nickname}, congratulations, the word is #{word}.",
-	"wrong-word":	"#{nickname}, this is not the word.",
-	"wrong-player":	"#{nickname}, please wait until someone else proposes.",
-	"wrong-letter":	"#{nickname}, there is no '#{letter}'."
+    "asked":        "#{nickname}, '#{letter}' was already asked.",
+    "dead":         "#{nickname}, fail the word was: #{word}.",
+    "found":        "#{nickname}, nice! the word is now #{word}",
+    "running":      "#{nickname}, the game is already running.",
+    "start":        "#{nickname}, the game is started, the word to find is: #{word}",
+    "win":          "#{nickname}, congratulations, the word is #{word}.",
+    "wrong-word":   "#{nickname}, this is not the word.",
+    "wrong-player": "#{nickname}, please wait until someone else proposes.",
+    "wrong-letter": "#{nickname}, there is no '#{letter}'."
 };
 
 function Hangman(server, channel)
 {
-	this.server = server;
-	this.channel = channel;
-	this.tries = 10;
-	this.select();
+    this.server = server;
+    this.channel = channel;
+    this.tries = 10;
+    this.select();
 }
 
 /**
@@ -75,7 +75,7 @@ Hangman.words = [];
  */
 Hangman.find = function (server, channel)
 {
-	return Hangman.map[server.toString() + '@' + channel];
+    return Hangman.map[server.toString() + '@' + channel];
 }
 
 /**
@@ -87,7 +87,7 @@ Hangman.find = function (server, channel)
  */
 Hangman.create = function (server, channel)
 {
-	return Hangman.map[server.toString() + "@" + channel] = new Hangman(server, channel);
+    return Hangman.map[server.toString() + "@" + channel] = new Hangman(server, channel);
 }
 
 /**
@@ -97,7 +97,7 @@ Hangman.create = function (server, channel)
  */
 Hangman.remove = function (game)
 {
-	delete Hangman.map[game.server + "@" + game.channel];
+    delete Hangman.map[game.server + "@" + game.channel];
 }
 
 /**
@@ -108,14 +108,14 @@ Hangman.remove = function (game)
  */
 Hangman.isWord = function (word)
 {
-	if (word.length === 0)
-		return false;
+    if (word.length === 0)
+        return false;
 
-	for (var i = 0; i < word.length; ++i)
-		if (!Unicode.isLetter(word.charCodeAt(i)))
-			return false;
+    for (var i = 0; i < word.length; ++i)
+        if (!Unicode.isLetter(word.charCodeAt(i)))
+            return false;
 
-	return true;
+    return true;
 }
 
 /**
@@ -123,31 +123,31 @@ Hangman.isWord = function (word)
  */
 Hangman.loadWords = function ()
 {
-	var path;
+    var path;
 
-	// User specified file?
-	if (Plugin.config["file"])
-		path = Plugin.config["file"];
-	else
-		path = Plugin.configPath + "words.conf";
+    // User specified file?
+    if (Plugin.config["file"])
+        path = Plugin.config["file"];
+    else
+        path = Plugin.configPath + "words.conf";
 
-	try {
-		Logger.info("loading words...");
+    try {
+        Logger.info("loading words...");
 
-		var file = new File(path, "r");
-		var line;
+        var file = new File(path, "r");
+        var line;
 
-		while ((line = file.readline()) !== undefined)
-			if (Hangman.isWord(line))
-				Hangman.words.push(line);
-	} catch (e) {
-		throw new Error("could not open '" + path + "'");
-	}
+        while ((line = file.readline()) !== undefined)
+            if (Hangman.isWord(line))
+                Hangman.words.push(line);
+    } catch (e) {
+        throw new Error("could not open '" + path + "'");
+    }
 
-	if (Hangman.words.length === 0)
-		throw new Error("empty word database");
+    if (Hangman.words.length === 0)
+        throw new Error("empty word database");
 
-	Logger.info("number of words in database: " + Hangman.words.length);
+    Logger.info("number of words in database: " + Hangman.words.length);
 }
 
 /**
@@ -155,26 +155,26 @@ Hangman.loadWords = function ()
  */
 Hangman.loadFormats = function ()
 {
-	// --- DEPRECATED -------------------------------------------
-	//
-	// This code will be removed.
-	//
-	// Since:	2.1.0
-	// Until:	3.0.0
-	// Reason:	new [format] section replaces it.
-	//
-	// ----------------------------------------------------------
-	for (var key in Plugin.format) {
-		var optname = "format-" + key;
+    // --- DEPRECATED -------------------------------------------
+    //
+    // This code will be removed.
+    //
+    // Since:    2.1.0
+    // Until:    3.0.0
+    // Reason:    new [format] section replaces it.
+    //
+    // ----------------------------------------------------------
+    for (var key in Plugin.format) {
+        var optname = "format-" + key;
 
-		if (typeof (Plugin.config[optname]) !== "string")
-			continue;
+        if (typeof (Plugin.config[optname]) !== "string")
+            continue;
 
-		if (Plugin.config[optname].length === 0)
-			Logger.warning("skipping empty '" + optname + "' format");
-		else
-			Plugin.format[key] = Plugin.config[optname];
-	}
+        if (Plugin.config[optname].length === 0)
+            Logger.warning("skipping empty '" + optname + "' format");
+        else
+            Plugin.format[key] = Plugin.config[optname];
+    }
 }
 
 /**
@@ -182,20 +182,20 @@ Hangman.loadFormats = function ()
  */
 Hangman.prototype.select = function ()
 {
-	// Reload the words if empty.
-	if (!this.words || this.words.length === 0)
-		this.words = Hangman.words.slice(0);
+    // Reload the words if empty.
+    if (!this.words || this.words.length === 0)
+        this.words = Hangman.words.slice(0);
 
-	var i = Math.floor(Math.random() * this.words.length);
+    var i = Math.floor(Math.random() * this.words.length);
 
-	this.word = this.words[i];
-	this.words.splice(i, 1);
+    this.word = this.words[i];
+    this.words.splice(i, 1);
 
-	// Fill table.
-	this.table = {};
+    // Fill table.
+    this.table = {};
 
-	for (var j = 0; j < this.word.length; ++j)
-		this.table[this.word.charCodeAt(j)] = false;
+    for (var j = 0; j < this.word.length; ++j)
+        this.table[this.word.charCodeAt(j)] = false;
 }
 
 /**
@@ -205,21 +205,21 @@ Hangman.prototype.select = function ()
  */
 Hangman.prototype.formatWord = function ()
 {
-	var str = "";
+    var str = "";
 
-	for (var i = 0; i < this.word.length; ++i) {
-		var ch = this.word.charCodeAt(i);
+    for (var i = 0; i < this.word.length; ++i) {
+        var ch = this.word.charCodeAt(i);
 
-		if (!this.table[ch])
-			str += "_";
-		else
-			str += String.fromCharCode(ch);
+        if (!this.table[ch])
+            str += "_";
+        else
+            str += String.fromCharCode(ch);
 
-		if (i + 1 < this.word.length)
-			str += " ";
-	}
+        if (i + 1 < this.word.length)
+            str += " ";
+    }
 
-	return str;
+    return str;
 }
 
 /**
@@ -231,139 +231,139 @@ Hangman.prototype.formatWord = function ()
  */
 Hangman.prototype.propose = function (ch, nickname)
 {
-	var status = "found";
+    var status = "found";
 
-	// Check for collaborative mode.
-	if (Plugin.config["collaborative"] === "true") {
-		if (this.last !== undefined && this.last === nickname)
-			return "wrong-player";
+    // Check for collaborative mode.
+    if (Plugin.config["collaborative"] === "true") {
+        if (this.last !== undefined && this.last === nickname)
+            return "wrong-player";
 
-		this.last = nickname;
-	}
+        this.last = nickname;
+    }
 
-	if (typeof(ch) == "number") {
-		if (this.table[ch] === undefined) {
-			this.tries -= 1;
-			status = "wrong-letter";
-		} else {
-			if (this.table[ch]) {
-				this.tries -= 1;
-				status = "asked";
-			} else
-				this.table[ch] = true;
-		}
-	} else {
-		if (this.word != ch) {
-			this.tries -= 1;
-			status = "wrong-word";
-		} else
-			status = "win";
-	}
+    if (typeof(ch) == "number") {
+        if (this.table[ch] === undefined) {
+            this.tries -= 1;
+            status = "wrong-letter";
+        } else {
+            if (this.table[ch]) {
+                this.tries -= 1;
+                status = "asked";
+            } else
+                this.table[ch] = true;
+        }
+    } else {
+        if (this.word != ch) {
+            this.tries -= 1;
+            status = "wrong-word";
+        } else
+            status = "win";
+    }
 
-	// Check if dead.
-	if (this.tries <= 0)
-		status = "dead";
+    // Check if dead.
+    if (this.tries <= 0)
+        status = "dead";
 
-	// Check if win.
-	var win = true;
+    // Check if win.
+    var win = true;
 
-	for (var i = 0; i < this.word.length; ++i) {
-		if (!this.table[this.word.charCodeAt(i)]) {
-			win = false;
-			break;
-		}
-	}
+    for (var i = 0; i < this.word.length; ++i) {
+        if (!this.table[this.word.charCodeAt(i)]) {
+            win = false;
+            break;
+        }
+    }
 
-	if (win)
-		status = "win";
+    if (win)
+        status = "win";
 
-	return status;
+    return status;
 }
 
 function onLoad()
 {
-	Hangman.loadFormats();
-	Hangman.loadWords();
+    Hangman.loadFormats();
+    Hangman.loadWords();
 }
 
 onReload = onLoad;
 
 function propose(server, channel, origin, game, proposition)
 {
-	var kw = {
-		channel: channel,
-		command: server.info().commandChar + Plugin.info().name,
-		nickname: Util.splituser(origin),
-		origin: origin,
-		plugin: Plugin.info().name,
-		server: server.toString()
-	};
+    var kw = {
+        channel: channel,
+        command: server.info().commandChar + Plugin.info().name,
+        nickname: Util.splituser(origin),
+        origin: origin,
+        plugin: Plugin.info().name,
+        server: server.toString()
+    };
 
-	var st = game.propose(proposition, kw.nickname);
+    var st = game.propose(proposition, kw.nickname);
 
-	switch (st) {
-	case "found":
-		kw.word = game.formatWord();
-		server.message(channel, Util.format(Plugin.format["found"], kw));
-		break;
-	case "wrong-letter":
-	case "wrong-player":
-	case "wrong-word":
-		kw.word = proposition;
-	case "asked":
-		kw.letter = String.fromCharCode(proposition);
-		server.message(channel, Util.format(Plugin.format[st], kw));
-		break;
-	case "dead":
-	case "win":
-		kw.word = game.word;
-		server.message(channel, Util.format(Plugin.format[st], kw));
+    switch (st) {
+    case "found":
+        kw.word = game.formatWord();
+        server.message(channel, Util.format(Plugin.format["found"], kw));
+        break;
+    case "wrong-letter":
+    case "wrong-player":
+    case "wrong-word":
+        kw.word = proposition;
+    case "asked":
+        kw.letter = String.fromCharCode(proposition);
+        server.message(channel, Util.format(Plugin.format[st], kw));
+        break;
+    case "dead":
+    case "win":
+        kw.word = game.word;
+        server.message(channel, Util.format(Plugin.format[st], kw));
 
-		// Remove the game.
-		Hangman.remove(game);
-		break;
-	default:
-		break;
-	}
+        // Remove the game.
+        Hangman.remove(game);
+        break;
+    default:
+        break;
+    }
 }
 
 function onCommand(server, origin, channel, message)
 {
-	var game = Hangman.find(server, channel);
-	var kw = {
-		channel: channel,
-		command: server.info().commandChar + Plugin.info().name,
-		nickname: Util.splituser(origin),
-		origin: origin,
-		plugin: Plugin.info().name,
-		server: server.toString()
-	};
+    var game = Hangman.find(server, channel);
+    var kw = {
+        channel: channel,
+        command: server.info().commandChar + Plugin.info().name,
+        nickname: Util.splituser(origin),
+        origin: origin,
+        plugin: Plugin.info().name,
+        server: server.toString()
+    };
 
-	if (game) {
-		var list = message.split(" \t");
+    if (game) {
+        var list = message.split(" \t");
 
-		if (list.length === 0 || String(list[0]).length === 0)
-			server.message(channel, Util.format(Plugin.format["running"], kw));
-		else {
-			var word = String(list[0]);
+        if (list.length === 0 || String(list[0]).length === 0)
+            server.message(channel, Util.format(Plugin.format["running"], kw));
+        else {
+            var word = String(list[0]);
 
-			if (Hangman.isWord(word))
-				propose(server, channel, origin, game, word);
-		}
-	} else {
-		game = Hangman.create(server, channel);
-		kw.word = game.formatWord();
-		server.message(channel, Util.format(Plugin.format["start"], kw));
-	}
+            if (Hangman.isWord(word))
+                propose(server, channel, origin, game, word);
+        }
+    } else {
+        game = Hangman.create(server, channel);
+        kw.word = game.formatWord();
+        server.message(channel, Util.format(Plugin.format["start"], kw));
+    }
 }
 
 function onMessage(server, origin, channel, message)
 {
-	var game = Hangman.find(server, channel);
+    var game = Hangman.find(server, channel);
 
-	if (!game)
-		return;
+    if (!game)
+        return;
 
-	if (message.length === 1 && Unicode.isLetter(message.charCodeAt(0)))
-		propose(server, channel, origin, game, message.charCodeAt(0));
+    if (message.length === 1 && Unicode.isLetter(message.charCodeAt(0)))
+        propose(server, channel, origin, game, message.charCodeAt(0));
 }

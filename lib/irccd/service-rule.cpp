@@ -30,49 +30,49 @@ namespace irccd {
 
 void RuleService::add(Rule rule)
 {
-	m_rules.push_back(std::move(rule));
+    m_rules.push_back(std::move(rule));
 }
 
 void RuleService::insert(Rule rule, unsigned position)
 {
-	assert(position <= m_rules.size());
+    assert(position <= m_rules.size());
 
-	m_rules.insert(m_rules.begin() + position, std::move(rule));
+    m_rules.insert(m_rules.begin() + position, std::move(rule));
 }
 
 void RuleService::remove(unsigned position)
 {
-	assert(position < m_rules.size());
+    assert(position < m_rules.size());
 
-	m_rules.erase(m_rules.begin() + position);
+    m_rules.erase(m_rules.begin() + position);
 }
 
 bool RuleService::solve(const std::string &server,
-			const std::string &channel,
-			const std::string &origin,
-			const std::string &plugin,
-			const std::string &event) noexcept
+                        const std::string &channel,
+                        const std::string &origin,
+                        const std::string &plugin,
+                        const std::string &event) noexcept
 {
-	bool result = true;
+    bool result = true;
 
-	log::debug("rule: solving for server={}, channel={}, origin={}, plugin={}, event={}"_format(server, channel,
-		   origin, plugin, event));
+    log::debug("rule: solving for server={}, channel={}, origin={}, plugin={}, event={}"_format(server, channel,
+           origin, plugin, event));
 
-	int i = 0;
-	for (const Rule &rule : m_rules) {
-		log::debug() << "  candidate " << i++ << ":\n"
-			     << "    servers: " << util::join(rule.servers().begin(), rule.servers().end()) << "\n"
-			     << "    channels: " << util::join(rule.channels().begin(), rule.channels().end()) << "\n"
-			     << "    origins: " << util::join(rule.origins().begin(), rule.origins().end()) << "\n"
-			     << "    plugins: " << util::join(rule.plugins().begin(), rule.plugins().end()) << "\n"
-			     << "    events: " << util::join(rule.events().begin(), rule.events().end()) << "\n"
-			     << "    action: " << ((rule.action() == RuleAction::Accept) ? "accept" : "drop") << std::endl;
+    int i = 0;
+    for (const Rule &rule : m_rules) {
+        log::debug() << "  candidate " << i++ << ":\n"
+                 << "    servers: " << util::join(rule.servers().begin(), rule.servers().end()) << "\n"
+                 << "    channels: " << util::join(rule.channels().begin(), rule.channels().end()) << "\n"
+                 << "    origins: " << util::join(rule.origins().begin(), rule.origins().end()) << "\n"
+                 << "    plugins: " << util::join(rule.plugins().begin(), rule.plugins().end()) << "\n"
+                 << "    events: " << util::join(rule.events().begin(), rule.events().end()) << "\n"
+                 << "    action: " << ((rule.action() == RuleAction::Accept) ? "accept" : "drop") << std::endl;
 
-		if (rule.match(server, channel, origin, plugin, event))
-			result = rule.action() == RuleAction::Accept;
-	}
+        if (rule.match(server, channel, origin, plugin, event))
+            result = rule.action() == RuleAction::Accept;
+    }
 
-	return result;
+    return result;
 }
 
 } // !irccd

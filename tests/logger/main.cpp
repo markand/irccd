@@ -34,72 +34,72 @@ std::string lineWarning;
 
 class MyInterface : public log::Interface {
 public:
-	void debug(const std::string &line) override
-	{
-		lineDebug = line;
-	}
+    void debug(const std::string &line) override
+    {
+        lineDebug = line;
+    }
 
-	void info(const std::string &line) override
-	{
-		lineInfo = line;
-	}
+    void info(const std::string &line) override
+    {
+        lineInfo = line;
+    }
 
-	void warning(const std::string &line) override
-	{
-		lineWarning = line;
-	}
+    void warning(const std::string &line) override
+    {
+        lineWarning = line;
+    }
 };
 
 class MyFilter : public log::Filter {
 public:
-	std::string preDebug(std::string input) const override
-	{
-		return std::reverse(input.begin(), input.end()), input;
-	}
+    std::string preDebug(std::string input) const override
+    {
+        return std::reverse(input.begin(), input.end()), input;
+    }
 
-	std::string preInfo(std::string input) const override
-	{
-		return std::reverse(input.begin(), input.end()), input;
-	}
+    std::string preInfo(std::string input) const override
+    {
+        return std::reverse(input.begin(), input.end()), input;
+    }
 
-	std::string preWarning(std::string input) const override
-	{
-		return std::reverse(input.begin(), input.end()), input;
-	}
+    std::string preWarning(std::string input) const override
+    {
+        return std::reverse(input.begin(), input.end()), input;
+    }
 };
 
 #if !defined(NDEBUG)
 
 TEST(Logger, debug)
 {
-	log::debug("debug");
+    log::debug("debug");
 
-	ASSERT_EQ("gubed", lineDebug);
+    ASSERT_EQ("gubed", lineDebug);
 }
 
 #endif
 
 TEST(Logger, info)
 {
-	log::info("info");
+    log::info("info");
 
-	ASSERT_EQ("ofni", lineInfo);
+    ASSERT_EQ("ofni", lineInfo);
 }
 
 TEST(Logger, warning)
 {
-	log::warning("warning");
+    log::warning("warning");
 
-	ASSERT_EQ("gninraw", lineWarning);
+    ASSERT_EQ("gninraw", lineWarning);
 }
 
 int main(int argc, char **argv)
 {
-	log::setVerbose(true);
-	log::setInterface(std::make_unique<MyInterface>());
-	log::setFilter(std::make_unique<MyFilter>());
+    log::setVerbose(true);
+    log::setInterface(std::make_unique<MyInterface>());
+    log::setFilter(std::make_unique<MyFilter>());
 
-	testing::InitGoogleTest(&argc, argv);
+    testing::InitGoogleTest(&argc, argv);
 
-	return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }

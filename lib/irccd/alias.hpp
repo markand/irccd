@@ -43,51 +43,51 @@ namespace irccd {
  */
 class AliasArg {
 private:
-	std::string m_value;
-	bool m_isPlaceholder;
+    std::string m_value;
+    bool m_isPlaceholder;
 
 public:
-	/**
-	 * Construct an argument.
-	 *
-	 * \pre value must not be empty
-	 * \param value the value
-	 */
-	IRCCD_EXPORT AliasArg(std::string value);
+    /**
+     * Construct an argument.
+     *
+     * \pre value must not be empty
+     * \param value the value
+     */
+    IRCCD_EXPORT AliasArg(std::string value);
 
-	/**
-	 * Check if the argument is a placeholder.
-	 *
-	 * \return true if the argument is a placeholder
-	 */
-	inline bool isPlaceholder() const noexcept
-	{
-		return m_isPlaceholder;
-	}
+    /**
+     * Check if the argument is a placeholder.
+     *
+     * \return true if the argument is a placeholder
+     */
+    inline bool isPlaceholder() const noexcept
+    {
+        return m_isPlaceholder;
+    }
 
-	/**
-	 * Get the placeholder index (e.g %0 returns 0)
-	 *
-	 * \pre isPlaceholder() must return true
-	 * \return the position
-	 */
-	IRCCD_EXPORT unsigned index() const noexcept;
+    /**
+     * Get the placeholder index (e.g %0 returns 0)
+     *
+     * \pre isPlaceholder() must return true
+     * \return the position
+     */
+    IRCCD_EXPORT unsigned index() const noexcept;
 
-	/**
-	 * Get the real value.
-	 *
-	 * \pre isPlaceholder() must return false
-	 * \return the value
-	 */
-	IRCCD_EXPORT const std::string &value() const noexcept;
+    /**
+     * Get the real value.
+     *
+     * \pre isPlaceholder() must return false
+     * \return the value
+     */
+    IRCCD_EXPORT const std::string &value() const noexcept;
 
-	/**
-	 * Output the alias to the stream.
-	 *
-	 * \param out the output stream
-	 * \return out
-	 */
-	IRCCD_EXPORT friend std::ostream &operator<<(std::ostream &out, const AliasArg &);
+    /**
+     * Output the alias to the stream.
+     *
+     * \param out the output stream
+     * \return out
+     */
+    IRCCD_EXPORT friend std::ostream &operator<<(std::ostream &out, const AliasArg &);
 };
 
 /**
@@ -98,41 +98,41 @@ public:
  */
 class AliasCommand {
 private:
-	std::string m_command;
-	std::vector<AliasArg> m_args;
+    std::string m_command;
+    std::vector<AliasArg> m_args;
 
 public:
-	/**
-	 * Create an alias command.
-	 *
-	 * \param command the command
-	 * \param args the arguments
-	 */
-	inline AliasCommand(std::string command, std::vector<AliasArg> args = {}) noexcept
-		: m_command(std::move(command))
-		, m_args(std::move(args))
-	{
-	}
+    /**
+     * Create an alias command.
+     *
+     * \param command the command
+     * \param args the arguments
+     */
+    inline AliasCommand(std::string command, std::vector<AliasArg> args = {}) noexcept
+        : m_command(std::move(command))
+        , m_args(std::move(args))
+    {
+    }
 
-	/**
-	 * Get the command to execute.
-	 *
-	 * \return the command name
-	 */
-	inline const std::string &command() const noexcept
-	{
-		return m_command;
-	}
+    /**
+     * Get the command to execute.
+     *
+     * \return the command name
+     */
+    inline const std::string &command() const noexcept
+    {
+        return m_command;
+    }
 
-	/**
-	 * Get the arguments.
-	 *
-	 * \return the arguments
-	 */
-	inline const std::vector<AliasArg> &args() const noexcept
-	{
-		return m_args;
-	}
+    /**
+     * Get the arguments.
+     *
+     * \return the arguments
+     */
+    inline const std::vector<AliasArg> &args() const noexcept
+    {
+        return m_args;
+    }
 };
 
 /**
@@ -144,28 +144,28 @@ public:
  */
 class Alias : public std::vector<AliasCommand> {
 private:
-	std::string m_name;
+    std::string m_name;
 
 public:
-	/**
-	 * Create an alias.
-	 *
-	 * \param name the alias name
-	 */
-	inline Alias(std::string name) noexcept
-		: m_name(std::move(name))
-	{
-	}
+    /**
+     * Create an alias.
+     *
+     * \param name the alias name
+     */
+    inline Alias(std::string name) noexcept
+        : m_name(std::move(name))
+    {
+    }
 
-	/**
-	 * Get the alias name.
-	 *
-	 * \return the name
-	 */
-	inline const std::string &name() const noexcept
-	{
-		return m_name;
-	}
+    /**
+     * Get the alias name.
+     *
+     * \return the name
+     */
+    inline const std::string &name() const noexcept
+    {
+        return m_name;
+    }
 };
 
 } // !irccd

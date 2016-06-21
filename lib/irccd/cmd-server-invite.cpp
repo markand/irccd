@@ -26,53 +26,53 @@ namespace irccd {
 namespace command {
 
 ServerInvite::ServerInvite()
-	: Command("server-invite", "Server")
+    : Command("server-invite", "Server")
 {
 }
 
 std::string ServerInvite::help() const
 {
-	return "";
+    return "";
 }
 
 std::vector<Command::Arg> ServerInvite::args() const
 {
-	return {
-		{ "server",	true },
-		{ "nickname",	true },
-		{ "channel",	true }
-	};
+    return {
+        { "server",     true },
+        { "nickname",   true },
+        { "channel",    true }
+    };
 }
 
 std::vector<Command::Property> ServerInvite::properties() const
 {
-	return {
-		{ "server",	{ json::Type::String }},
-		{ "target",	{ json::Type::String }},
-		{ "channel",	{ json::Type::String }}
-	};
+    return {
+        { "server",     { json::Type::String }},
+        { "target",     { json::Type::String }},
+        { "channel",    { json::Type::String }}
+    };
 }
 
 json::Value ServerInvite::request(Irccdctl &, const CommandRequest &args) const
 {
-	return json::object({
-		{ "server",	args.args()[0] },
-		{ "target",	args.args()[1] },
-		{ "channel",	args.args()[2] }
-	});
+    return json::object({
+        { "server",     args.args()[0] },
+        { "target",     args.args()[1] },
+        { "channel",    args.args()[2] }
+    });
 }
 
 json::Value ServerInvite::exec(Irccd &irccd, const json::Value &request) const
 {
-	Command::exec(irccd, request);
+    Command::exec(irccd, request);
 
-	irccd.serverService().require(
-		request.at("server").toString())->invite(
-		request.at("target").toString(),
-		request.at("channel").toString()
-	);
+    irccd.serverService().require(
+        request.at("server").toString())->invite(
+        request.at("target").toString(),
+        request.at("channel").toString()
+    );
 
-	return json::object();
+    return json::object();
 }
 
 } // !command

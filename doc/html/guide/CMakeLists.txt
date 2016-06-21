@@ -27,26 +27,26 @@ include(06-plugin/Files.cmake)
 include(07-socket/Files.cmake)
 
 set(
-	SOURCES
-	${INTRO_SOURCES}
-	${INSTALL_SOURCES}
-	${CONFIG_FORMAT_SOURCES}
-	${IRCCD_SOURCES}
-	${IRCCDCTL_SOURCES}
-	${PLUGIN_SOURCES}
-	${SOCKET_SOURCES}
+    SOURCES
+    ${INTRO_SOURCES}
+    ${INSTALL_SOURCES}
+    ${CONFIG_FORMAT_SOURCES}
+    ${IRCCD_SOURCES}
+    ${IRCCDCTL_SOURCES}
+    ${PLUGIN_SOURCES}
+    ${SOCKET_SOURCES}
 )
 
 irccd_define_html(
-	OUTPUT guide.html
-	TARGET docs-guide
-	SOURCES ${SOURCES}
-	ARGS --toc --toc-depth=2 -Vguide
+    OUTPUT guide.html
+    TARGET docs-guide
+    SOURCES ${SOURCES}
+    ARGS --toc --toc-depth=2 -Vguide
 )
 
 set_target_properties(
-	docs-guide
-	PROPERTIES
-		PROJECT_LABEL guide
-		FOLDER docs
+    docs-guide
+    PROPERTIES
+        PROJECT_LABEL guide
+        FOLDER docs
 )

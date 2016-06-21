@@ -26,43 +26,43 @@ namespace irccd {
 namespace command {
 
 ServerChannelMode::ServerChannelMode()
-	: Command("server-cmode", "Server")
+    : Command("server-cmode", "Server")
 {
 }
 
 std::string ServerChannelMode::help() const
 {
-	return "";
+    return "";
 }
 
 std::vector<Command::Arg> ServerChannelMode::args() const
 {
-	return {
-		{ "server",	true },
-		{ "channel",	true },
-		{ "mode",	true }
-	};
+    return {
+        { "server",     true },
+        { "channel",    true },
+        { "mode",       true }
+    };
 }
 
 std::vector<Command::Property> ServerChannelMode::properties() const
 {
-	return {
-		{ "server",	{ json::Type::String }},
-		{ "channel",	{ json::Type::String }},
-		{ "mode",	{ json::Type::String }}
-	};
+    return {
+        { "server",     { json::Type::String }},
+        { "channel",    { json::Type::String }},
+        { "mode",       { json::Type::String }}
+    };
 }
 
 json::Value ServerChannelMode::exec(Irccd &irccd, const json::Value &request) const
 {
-	Command::exec(irccd, request);
+    Command::exec(irccd, request);
 
-	irccd.serverService().require(request.at("server").toString())->cmode(
-		request.at("channel").toString(),
-		request.at("mode").toString()
-	);
+    irccd.serverService().require(request.at("server").toString())->cmode(
+        request.at("channel").toString(),
+        request.at("mode").toString()
+    );
 
-	return json::object();
+    return json::object();
 }
 
 } // !command

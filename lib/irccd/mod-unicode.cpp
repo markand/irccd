@@ -36,9 +36,9 @@ namespace {
  */
 duk_ret_t isDigit(duk_context *ctx)
 {
-	duk_push_boolean(ctx, unicode::isdigit(duk_get_int(ctx, 0)));
+    duk_push_boolean(ctx, unicode::isdigit(duk_get_int(ctx, 0)));
 
-	return 1;
+    return 1;
 }
 
 /*
@@ -52,9 +52,9 @@ duk_ret_t isDigit(duk_context *ctx)
  */
 duk_ret_t isLetter(duk_context *ctx)
 {
-	duk_push_boolean(ctx, unicode::isalpha(duk_get_int(ctx, 0)));
+    duk_push_boolean(ctx, unicode::isalpha(duk_get_int(ctx, 0)));
 
-	return 1;
+    return 1;
 }
 
 /*
@@ -68,9 +68,9 @@ duk_ret_t isLetter(duk_context *ctx)
  */
 duk_ret_t isLower(duk_context *ctx)
 {
-	duk_push_boolean(ctx, unicode::islower(duk_get_int(ctx, 0)));
+    duk_push_boolean(ctx, unicode::islower(duk_get_int(ctx, 0)));
 
-	return 1;
+    return 1;
 }
 
 /*
@@ -84,9 +84,9 @@ duk_ret_t isLower(duk_context *ctx)
  */
 duk_ret_t isSpace(duk_context *ctx)
 {
-	duk_push_boolean(ctx, unicode::isspace(duk_get_int(ctx, 0)));
+    duk_push_boolean(ctx, unicode::isspace(duk_get_int(ctx, 0)));
 
-	return 1;
+    return 1;
 }
 
 /*
@@ -100,9 +100,9 @@ duk_ret_t isSpace(duk_context *ctx)
  */
 duk_ret_t isTitle(duk_context *ctx)
 {
-	duk_push_boolean(ctx, unicode::istitle(duk_get_int(ctx, 0)));
+    duk_push_boolean(ctx, unicode::istitle(duk_get_int(ctx, 0)));
 
-	return 1;
+    return 1;
 }
 
 /*
@@ -116,37 +116,37 @@ duk_ret_t isTitle(duk_context *ctx)
  */
 duk_ret_t isUpper(duk_context *ctx)
 {
-	duk_push_boolean(ctx, unicode::isupper(duk_get_int(ctx, 0)));
+    duk_push_boolean(ctx, unicode::isupper(duk_get_int(ctx, 0)));
 
-	return 1;
+    return 1;
 }
 
 const duk_function_list_entry functions[] = {
-	{ "isDigit",		isDigit,	1 },
-	{ "isLetter",		isLetter,	1 },
-	{ "isLower",		isLower,	1 },
-	{ "isSpace",		isSpace,	1 },
-	{ "isTitle",		isTitle,	1 },
-	{ "isUpper",		isUpper,	1 },
-	{ nullptr,		nullptr,	0 } 
+    { "isDigit",        isDigit,    1 },
+    { "isLetter",       isLetter,   1 },
+    { "isLower",        isLower,    1 },
+    { "isSpace",        isSpace,    1 },
+    { "isTitle",        isTitle,    1 },
+    { "isUpper",        isUpper,    1 },
+    { nullptr,          nullptr,    0 }
 };
 
 } // !namespace
 
 UnicodeModule::UnicodeModule() noexcept
-	: Module("Irccd.Unicode")
+    : Module("Irccd.Unicode")
 {
 }
 
 void UnicodeModule::load(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
 {
-	StackAssert sa(plugin->context());
+    StackAssert sa(plugin->context());
 
-	duk_get_global_string(plugin->context(), "Irccd");
-	duk_push_object(plugin->context());
-	duk_put_function_list(plugin->context(), -1, functions);
-	duk_put_prop_string(plugin->context(), -2, "Unicode");
-	duk_pop(plugin->context());
+    duk_get_global_string(plugin->context(), "Irccd");
+    duk_push_object(plugin->context());
+    duk_put_function_list(plugin->context(), -1, functions);
+    duk_put_prop_string(plugin->context(), -2, "Unicode");
+    duk_pop(plugin->context());
 }
 
 } // !irccd

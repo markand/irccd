@@ -20,17 +20,17 @@
 # -------------------------------------------------------------------
 #
 # Parameters:
-#	file		- The file name to build
-#	man		- The man section
+#    file       The file name to build
+#    man        The man section
 #
 # This function configure the manual and install it if WITH_MAN is set.
 #
 
 function(irccd_define_man file man)
-	if (WITH_MAN)
-		set(input ${doc_SOURCE_DIR}/man/${file}.in)
-		set(output ${IRCCD_FAKEROOTDIR}/${WITH_MANDIR}/${man}/${file})
-		configure_file(${input} ${output} @ONLY)
-		install(FILES ${output} DESTINATION ${WITH_MANDIR}/${man})
-	endif ()
+    if (WITH_MAN)
+        set(input ${doc_SOURCE_DIR}/man/${file}.in)
+        set(output ${IRCCD_FAKEROOTDIR}/${WITH_MANDIR}/${man}/${file})
+        configure_file(${input} ${output} @ONLY)
+        install(FILES ${output} DESTINATION ${WITH_MANDIR}/${man})
+    endif ()
 endfunction()

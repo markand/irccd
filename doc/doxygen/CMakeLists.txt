@@ -20,27 +20,27 @@ set(DOXYGEN_INPUT ${CMAKE_SOURCE_DIR}/lib)
 set(DOXYGEN_OUTPUT ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/doxygen)
 
 if (NOT DOXYGEN_DOT_FOUND)
-	set(DOXYGEN_HAVE_DOT "NO")
-	set(DOXYGEN_DOT_PATH "")
+    set(DOXYGEN_HAVE_DOT "NO")
+    set(DOXYGEN_DOT_PATH "")
 else ()
-	set(DOXYGEN_HAVE_DOT "YES")
-	set(DOXYGEN_DOT_PATH "\"${DOXYGEN_DOT_EXECUTABLE}\"")
+    set(DOXYGEN_HAVE_DOT "YES")
+    set(DOXYGEN_DOT_PATH "\"${DOXYGEN_DOT_EXECUTABLE}\"")
 endif ()
 
 configure_file(
-	${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-	${CMAKE_BINARY_DIR}/Doxyfile
+    ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
+    ${CMAKE_BINARY_DIR}/Doxyfile
 )
 
 add_custom_target(
-	docs-doxygen
-	COMMENT "Generating doxygen documentation"
-	COMMAND
-		${CMAKE_COMMAND} -E make_directory ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/doxygen
-	COMMAND
-		${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
-	WORKING_DIRECTORY
-		${CMAKE_SOURCE_DIR}
+    docs-doxygen
+    COMMENT "Generating doxygen documentation"
+    COMMAND
+        ${CMAKE_COMMAND} -E make_directory ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/doxygen
+    COMMAND
+        ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
+    WORKING_DIRECTORY
+        ${CMAKE_SOURCE_DIR}
 )
 
 add_dependencies(all-docs docs-doxygen)

@@ -17,7 +17,7 @@
 #
 
 irccd_define_test(
-	NAME js-unicode
-	SOURCES main.cpp
-	LIBRARIES libirccd
+    NAME js-unicode
+    SOURCES main.cpp
+    LIBRARIES libirccd
 )

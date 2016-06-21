@@ -45,56 +45,56 @@ class JsPlugin;
  */
 class Module {
 private:
-	std::string m_name;
+    std::string m_name;
 
 public:
-	/**
-	 * Default constructor.
-	 *
-	 * \pre !name.empty()
-	 */
-	inline Module(std::string name) noexcept
-		: m_name(std::move(name))
-	{
-		assert(!m_name.empty());
-	}
+    /**
+     * Default constructor.
+     *
+     * \pre !name.empty()
+     */
+    inline Module(std::string name) noexcept
+        : m_name(std::move(name))
+    {
+        assert(!m_name.empty());
+    }
 
-	/**
-	 * Virtual destructor defaulted.
-	 */
-	virtual ~Module() = default;
+    /**
+     * Virtual destructor defaulted.
+     */
+    virtual ~Module() = default;
 
-	/**
-	 * Get the module name.
-	 *
-	 * \return the name
-	 */
-	inline const std::string &name() const noexcept
-	{
-		return m_name;
-	}
+    /**
+     * Get the module name.
+     *
+     * \return the name
+     */
+    inline const std::string &name() const noexcept
+    {
+        return m_name;
+    }
 
-	/**
-	 * Load the module into the JavaScript plugin.
-	 *
-	 * \param irccd the irccd instance
-	 * \param plugin the plugin
-	 */
-	virtual void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin)
-	{
-		util::unused(irccd, plugin);
-	}
+    /**
+     * Load the module into the JavaScript plugin.
+     *
+     * \param irccd the irccd instance
+     * \param plugin the plugin
+     */
+    virtual void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin)
+    {
+        util::unused(irccd, plugin);
+    }
 
-	/**
-	 * Unload the module from the JavaScript plugin.
-	 *
-	 * \param irccd the irccd instance
-	 * \param plugin the plugin
-	 */
-	virtual void unload(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin)
-	{
-		util::unused(irccd, plugin);
-	}
+    /**
+     * Unload the module from the JavaScript plugin.
+     *
+     * \param irccd the irccd instance
+     * \param plugin the plugin
+     */
+    virtual void unload(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin)
+    {
+        util::unused(irccd, plugin);
+    }
 };
 
 } // !irccd

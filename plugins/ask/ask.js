@@ -18,10 +18,10 @@
 
 // Plugin information.
 info = {
-	author: "David Demelier <markand@malikania.fr>",
-	license: "ISC",
-	summary: "Crazy module for asking a medium",
-	version: "@IRCCD_VERSION@"
+    author: "David Demelier <markand@malikania.fr>",
+    license: "ISC",
+    summary: "Crazy module for asking a medium",
+    version: "@IRCCD_VERSION@"
 };
 
 // Modules.
@@ -32,41 +32,41 @@ var Util = Irccd.Util;
 
 /* List of answers */
 var answers = [
-	"Yes",
-	"No"
+    "Yes",
+    "No"
 ];
 
 function onLoad()
 {
-	try {
-		// User specified file?
-		if (Plugin.config["file"])
-			path = Plugin.config["file"];
-		else
-			path = Plugin.configPath + "answers.conf";
+    try {
+        // User specified file?
+        if (Plugin.config["file"])
+            path = Plugin.config["file"];
+        else
+            path = Plugin.configPath + "answers.conf";
 
-		var file = new File(path, "r");
-		var line;
+        var file = new File(path, "r");
+        var line;
 
-		// Reset.
-		answers = [];
+        // Reset.
+        answers = [];
 
-		while ((line = file.readline()))
-			// Skip empty lines.
-			if (line.length > 0)
-				answers.push(line);
-	} catch (e) {
-		Logger.warning(path + ": " + e.message);
-		Logger.warning("using default answers");
-	}
+        while ((line = file.readline()))
+            // Skip empty lines.
+            if (line.length > 0)
+                answers.push(line);
+    } catch (e) {
+        Logger.warning(path + ": " + e.message);
+        Logger.warning("using default answers");
+    }
 }
 
 function onCommand(server, origin, channel)
 {
-	var target = Util.splituser(origin);
-	var response = answers[Math.floor(Math.random() * answers.length)];
+    var target = Util.splituser(origin);
+    var response = answers[Math.floor(Math.random() * answers.length)];
 
-	server.message(channel, target + ", " + response);
+    server.message(channel, target + ", " + response);
 }
 
 onReload = onLoad;

@@ -17,9 +17,9 @@
 #
 
 set(
-	TIMER_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/index.md
-	${CMAKE_CURRENT_LIST_DIR}/method/constructor.md
-	${CMAKE_CURRENT_LIST_DIR}/method/start.md
-	${CMAKE_CURRENT_LIST_DIR}/method/stop.md
+    TIMER_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/index.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/constructor.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/start.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/stop.md
 )

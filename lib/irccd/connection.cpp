@@ -23,25 +23,25 @@ namespace irccd {
 
 json::Value Connection::next(const std::string &name, int timeout)
 {
-	m_timer.reset();
+    m_timer.reset();
 
-	for (;;) {
-		json::Value object = next(clamp(timeout));
+    for (;;) {
+        json::Value object = next(clamp(timeout));
 
-		if (object.isObject() && object["response"].toString() == name)
-			return object;
-	}
+        if (object.isObject() && object["response"].toString() == name)
+            return object;
+    }
 
-	throw std::runtime_error("connection lost");
+    throw std::runtime_error("connection lost");
 }
 
 void Connection::verify(const std::string &name, int timeout)
 {
-	auto object = next(name, timeout);
-	auto value = object.at("status").toString();
+    auto object = next(name, timeout);
+    auto value = object.at("status").toString();
 
-	if (!value.empty() && value != "ok")
-		throw std::runtime_error(object.at("error").toString());
+    if (!value.empty() && value != "ok")
+        throw std::runtime_error(object.at("error").toString());
 }
 
 } // !irccd

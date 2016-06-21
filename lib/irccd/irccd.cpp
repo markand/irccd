@@ -34,98 +34,98 @@ using namespace std::string_literals;
 namespace irccd {
 
 Irccd::Irccd()
-	: m_commandService(std::make_shared<CommandService>())
-	, m_interruptService(std::make_shared<InterruptService>())
-	, m_serverService(std::make_shared<ServerService>(*this))
-	, m_transportService(std::make_shared<TransportService>(*this))
-	, m_ruleService(std::make_shared<RuleService>())
-	, m_moduleService(std::make_shared<ModuleService>())
-	, m_pluginService(std::make_shared<PluginService>(*this))
+    : m_commandService(std::make_shared<CommandService>())
+    , m_interruptService(std::make_shared<InterruptService>())
+    , m_serverService(std::make_shared<ServerService>(*this))
+    , m_transportService(std::make_shared<TransportService>(*this))
+    , m_ruleService(std::make_shared<RuleService>())
+    , m_moduleService(std::make_shared<ModuleService>())
+    , m_pluginService(std::make_shared<PluginService>(*this))
 {
-	m_services.push_back(m_interruptService);
-	m_services.push_back(m_serverService);
-	m_services.push_back(m_transportService);
+    m_services.push_back(m_interruptService);
+    m_services.push_back(m_serverService);
+    m_services.push_back(m_transportService);
 }
 
 void Irccd::post(std::function<void (Irccd &)> ev) noexcept
 {
-	std::lock_guard<mutex> lock(m_mutex);
+    std::lock_guard<mutex> lock(m_mutex);
 
-	m_events.push_back(move(ev));
-	m_interruptService->interrupt();
+    m_events.push_back(move(ev));
+    m_interruptService->interrupt();
 }
 
 void Irccd::run()
 {
-	while (m_running) {
-		poll();
-		dispatch();
-	}
+    while (m_running) {
+        poll();
+        dispatch();
+    }
 }
 
 void Irccd::poll()
 {
-	fd_set setinput;
-	fd_set setoutput;
-	net::Handle max = 0;
+    fd_set setinput;
+    fd_set setoutput;
+    net::Handle max = 0;
 
-	FD_ZERO(&setinput);
-	FD_ZERO(&setoutput);
+    FD_ZERO(&setinput);
+    FD_ZERO(&setoutput);
 
-	for (const auto &service : m_services)
-		service->prepare(setinput, setoutput, max);
+    for (const auto &service : m_services)
+        service->prepare(setinput, setoutput, max);
 
-	// Do the selection.
-	struct timeval tv;
+    // Do the selection.
+    struct timeval tv;
 
-	tv.tv_sec = 5;
-	tv.tv_usec = 250000;
+    tv.tv_sec = 5;
+    tv.tv_usec = 250000;
 
-	int error = select(max + 1, &setinput, &setoutput, nullptr, &tv);
+    int error = select(max + 1, &setinput, &setoutput, nullptr, &tv);
 
-	// Skip anyway if requested to stop
-	if (!m_running)
-		return;
+    // Skip anyway if requested to stop
+    if (!m_running)
+        return;
 
-	// Skip on error.
-	if (error < 0 && errno != EINTR) {
-		log::warning() << "irccd: " << net::error(error) << endl;
-		return;
-	}
+    // Skip on error.
+    if (error < 0 && errno != EINTR) {
+        log::warning() << "irccd: " << net::error(error) << endl;
+        return;
+    }
 
-	// Process after selection.
-	for (const auto &service : m_services)
-		service->sync(setinput, setoutput);
+    // Process after selection.
+    for (const auto &service : m_services)
+        service->sync(setinput, setoutput);
 }
 
 void Irccd::dispatch()
 {
-	/*
-	 * Make a copy because the events can add other events while we are iterating it. Also lock because the timers
-	 * may alter these events too.
-	 */
-	std::vector<std::function<void (Irccd &)>> copy;
+    /*
+     * Make a copy because the events can add other events while we are iterating it. Also lock because the timers
+     * may alter these events too.
+     */
+    std::vector<std::function<void (Irccd &)>> copy;
 
-	{
-		std::lock_guard<mutex> lock(m_mutex);
+    {
+        std::lock_guard<mutex> lock(m_mutex);
 
-		copy = move(m_events);
-		m_events.clear();
-	}
+        copy = move(m_events);
+        m_events.clear();
+    }
 
-	if (copy.size() > 0)
-		log::debug() << "irccd: dispatching " << copy.size() << " event" << (copy.size() > 1 ? "s" : "") << endl;
+    if (copy.size() > 0)
+        log::debug() << "irccd: dispatching " << copy.size() << " event" << (copy.size() > 1 ? "s" : "") << endl;
 
-	for (auto &ev : copy)
-		ev(*this);
+    for (auto &ev : copy)
+        ev(*this);
 }
 
 void Irccd::stop()
 {
-	log::debug() << "irccd: requesting to stop now" << endl;
+    log::debug() << "irccd: requesting to stop now" << endl;
 
-	m_running = false;
-	m_interruptService->interrupt();
+    m_running = false;
+    m_interruptService->interrupt();
 }
 
 } // !irccd

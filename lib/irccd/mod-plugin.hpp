@@ -35,20 +35,20 @@ namespace irccd {
  */
 class PluginModule : public Module {
 public:
-	/**
-	 * Irccd.Plugin.
-	 */
-	IRCCD_EXPORT PluginModule() noexcept;
+    /**
+     * Irccd.Plugin.
+     */
+    IRCCD_EXPORT PluginModule() noexcept;
 
-	/**
-	 * \copydoc Module::load
-	 */
-	IRCCD_EXPORT void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
+    /**
+     * \copydoc Module::load
+     */
+    IRCCD_EXPORT void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
 
-	/**
-	 * \copydoc Module::unload
-	 */
-	IRCCD_EXPORT void unload(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
+    /**
+     * \copydoc Module::unload
+     */
+    IRCCD_EXPORT void unload(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
 };
 
 /**

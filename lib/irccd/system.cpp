@@ -98,26 +98,26 @@ namespace {
 template <typename IntType, typename LookupFunc, typename SetterFunc, typename FieldGetter>
 void setHelper(const std::string &typeName, const std::string &value, LookupFunc lookup, SetterFunc setter, FieldGetter getter)
 {
-	IntType id;
+    IntType id;
 
-	if (util::isNumber(value))
-		id = std::stoi(value);
-	else {
-		auto info = lookup(value.c_str());
+    if (util::isNumber(value))
+        id = std::stoi(value);
+    else {
+        auto info = lookup(value.c_str());
 
-		if (info == nullptr) {
-			log::warning() << "irccd: invalid " << typeName << ": " << std::strerror(errno) << std::endl;
-			return;
-		} else {
-			id = getter(info);
-			log::debug() << "irccd: " << typeName << " " << value << " resolved to: " << id << std::endl;
-		}
-	}
+        if (info == nullptr) {
+            log::warning() << "irccd: invalid " << typeName << ": " << std::strerror(errno) << std::endl;
+            return;
+        } else {
+            id = getter(info);
+            log::debug() << "irccd: " << typeName << " " << value << " resolved to: " << id << std::endl;
+        }
+    }
 
-	if (setter(id) < 0)
-		log::warning() << "irccd: could not set " << typeName << ": " << std::strerror(errno) << std::endl;
-	else
-		log::info() << "irccd: setting " << typeName << " to " << value << std::endl;
+    if (setter(id) < 0)
+        log::warning() << "irccd: could not set " << typeName << ": " << std::strerror(errno) << std::endl;
+    else
+        log::info() << "irccd: setting " << typeName << " to " << value << std::endl;
 }
 
 /*
@@ -131,135 +131,135 @@ std::string programNameCopy;
 
 void setProgramName(std::string name) noexcept
 {
-	programNameCopy = std::move(name);
+    programNameCopy = std::move(name);
 
 #if defined(HAVE_SETPROGNAME)
-	setprogname(programNameCopy.c_str());
+    setprogname(programNameCopy.c_str());
 #endif
 }
 
 const std::string &programName() noexcept
 {
-	return programNameCopy;
+    return programNameCopy;
 }
 
 std::string name()
 {
 #if defined(IRCCD_SYSTEM_LINUX)
-	return "Linux";
+    return "Linux";
 #elif defined(IRCCD_SYSTEM_WINDOWS)
-	return "Windows";
+    return "Windows";
 #elif defined(IRCCD_SYSTEM_FREEBSD)
-	return "FreeBSD";
+    return "FreeBSD";
 #elif defined(IRCCD_SYSTEM_OPENBSD)
-	return "OpenBSD";
+    return "OpenBSD";
 #elif defined(IRCCD_SYSTEM_NETBSD)
-	return "NetBSD";
+    return "NetBSD";
 #elif defined(IRCCD_SYSTEM_MAC)
-	return "Mac";
+    return "Mac";
 #else
-	return "Unknown";
+    return "Unknown";
 #endif
 }
 
 std::string version()
 {
 #if defined(IRCCD_SYSTEM_WINDOWS)
-	auto version = GetVersion();
-	auto major = (DWORD)(LOBYTE(LOWORD(version)));
-	auto minor = (DWORD)(HIBYTE(LOWORD(version)));
+    auto version = GetVersion();
+    auto major = (DWORD)(LOBYTE(LOWORD(version)));
+    auto minor = (DWORD)(HIBYTE(LOWORD(version)));
 
-	return std::to_string(major) + "." + std::to_string(minor);
+    return std::to_string(major) + "." + std::to_string(minor);
 #else
-	struct utsname uts;
+    struct utsname uts;
 
-	if (uname(&uts) < 0)
-		throw std::runtime_error(std::strerror(errno));
+    if (uname(&uts) < 0)
+        throw std::runtime_error(std::strerror(errno));
 
-	return std::string(uts.release);
+    return std::string(uts.release);
 #endif
 }
 
 uint64_t uptime()
 {
 #if defined(IRCCD_SYSTEM_WINDOWS)
-	return ::GetTickCount64() / 1000;
+    return ::GetTickCount64() / 1000;
 #elif defined(IRCCD_SYSTEM_LINUX)
-	struct sysinfo info;
+    struct sysinfo info;
 
-	if (sysinfo(&info) < 0)
-		throw std::runtime_error(std::strerror(errno));
+    if (sysinfo(&info) < 0)
+        throw std::runtime_error(std::strerror(errno));
 
-	return info.uptime;
+    return info.uptime;
 #elif defined(IRCCD_SYSTEM_MAC)
-	struct timeval boottime;
-	size_t length = sizeof (boottime);
-	int mib[2] = { CTL_KERN, KERN_BOOTTIME };
+    struct timeval boottime;
+    size_t length = sizeof (boottime);
+    int mib[2] = { CTL_KERN, KERN_BOOTTIME };
 
-	if (sysctl(mib, 2, &boottime, &length, nullptr, 0) < 0)
-		throw std::runtime_error(std::strerror(errno));
+    if (sysctl(mib, 2, &boottime, &length, nullptr, 0) < 0)
+        throw std::runtime_error(std::strerror(errno));
 
-	time_t bsec = boottime.tv_sec, csec = time(nullptr);
+    time_t bsec = boottime.tv_sec, csec = time(nullptr);
 
-	return difftime(csec, bsec);
+    return difftime(csec, bsec);
 #else
-	struct timespec ts;
+    struct timespec ts;
 
-	if (clock_gettime(CLOCK_UPTIME, &ts) < 0)
-		throw std::runtime_error(std::strerror(errno));
+    if (clock_gettime(CLOCK_UPTIME, &ts) < 0)
+        throw std::runtime_error(std::strerror(errno));
 
-	return ts.tv_sec;
+    return ts.tv_sec;
 #endif
 }
 
 uint64_t ticks()
 {
 #if defined(IRCCD_SYSTEM_WINDOWS)
-	_timeb tp;
+    _timeb tp;
 
-	_ftime(&tp);
+    _ftime(&tp);
 
-	return tp.time * 1000LL + tp.millitm;
+    return tp.time * 1000LL + tp.millitm;
 #else
-	struct timeval tp;
+    struct timeval tp;
 
-	gettimeofday(&tp, NULL);
+    gettimeofday(&tp, NULL);
 
-	return tp.tv_sec * 1000LL + tp.tv_usec / 1000;
+    return tp.tv_sec * 1000LL + tp.tv_usec / 1000;
 #endif
 }
 
 std::string home()
 {
 #if defined(IRCCD_SYSTEM_WINDOWS)
-	char path[MAX_PATH];
+    char path[MAX_PATH];
 
-	if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, path) != S_OK)
-		return "";
+    if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, path) != S_OK)
+        return "";
 
-	return std::string(path);
+    return std::string(path);
 #else
-	return env("HOME");
+    return env("HOME");
 #endif
 }
 
 std::string env(const std::string &var)
 {
-	auto value = std::getenv(var.c_str());
+    auto value = std::getenv(var.c_str());
 
-	if (value == nullptr)
-		return "";
+    if (value == nullptr)
+        return "";
 
-	return value;
+    return value;
 }
 
 #if defined(HAVE_SETUID)
 
 void setUid(const std::string &value)
 {
-	setHelper<uid_t>("uid", value, &getpwnam, &setuid, [] (const struct passwd *pw) {
-		return pw->pw_uid;
-	});
+    setHelper<uid_t>("uid", value, &getpwnam, &setuid, [] (const struct passwd *pw) {
+        return pw->pw_uid;
+    });
 }
 
 #endif
@@ -268,9 +268,9 @@ void setUid(const std::string &value)
 
 void setGid(const std::string &value)
 {
-	setHelper<gid_t>("gid", value, &getgrnam, &setgid, [] (const struct group *gr) {
-		return gr->gr_gid;
-	});
+    setHelper<gid_t>("gid", value, &getgrnam, &setgid, [] (const struct group *gr) {
+        return gr->gr_gid;
+    });
 }
 
 #endif

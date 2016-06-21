@@ -26,30 +26,30 @@ namespace irccd {
 namespace command {
 
 ServerDisconnect::ServerDisconnect()
-	: Command("server-disconnect", "Server")
+    : Command("server-disconnect", "Server")
 {
 }
 
 std::string ServerDisconnect::help() const
 {
-	return "";
+    return "";
 }
 
 std::vector<Command::Arg> ServerDisconnect::args() const
 {
-	return {{ "server", false }};
+    return {{ "server", false }};
 }
 
 json::Value ServerDisconnect::exec(Irccd &irccd, const json::Value &request) const
 {
-	auto it = request.find("server");
+    auto it = request.find("server");
 
-	if (it == request.end())
-		irccd.serverService().clear();
-	else
-		irccd.serverService().remove(it->toString());
+    if (it == request.end())
+        irccd.serverService().clear();
+    else
+        irccd.serverService().remove(it->toString());
 
-	return Command::exec(irccd, request);
+    return Command::exec(irccd, request);
 }
 
 } // !command

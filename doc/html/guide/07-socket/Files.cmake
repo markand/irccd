@@ -17,8 +17,8 @@
 #
 
 set(
-	SOCKET_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/01-syntax.md
-	${CMAKE_CURRENT_LIST_DIR}/02-commands.md
-	${CMAKE_CURRENT_LIST_DIR}/03-messages.md
+    SOCKET_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/01-syntax.md
+    ${CMAKE_CURRENT_LIST_DIR}/02-commands.md
+    ${CMAKE_CURRENT_LIST_DIR}/03-messages.md
 )

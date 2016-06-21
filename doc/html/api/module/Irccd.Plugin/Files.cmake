@@ -17,11 +17,11 @@
 #
 
 set(
-	PLUGIN_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/index.md
-	${CMAKE_CURRENT_LIST_DIR}/function/info.md
-	${CMAKE_CURRENT_LIST_DIR}/function/list.md
-	${CMAKE_CURRENT_LIST_DIR}/function/load.md
-	${CMAKE_CURRENT_LIST_DIR}/function/reload.md
-	${CMAKE_CURRENT_LIST_DIR}/function/unload.md
+    PLUGIN_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/index.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/info.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/list.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/load.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/reload.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/unload.md
 )

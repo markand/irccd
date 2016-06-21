@@ -17,27 +17,27 @@
 #
 
 set(
-	SERVER_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/index.md
-	${CMAKE_CURRENT_LIST_DIR}/function/add.md
-	${CMAKE_CURRENT_LIST_DIR}/function/find.md
-	${CMAKE_CURRENT_LIST_DIR}/function/list.md
-	${CMAKE_CURRENT_LIST_DIR}/function/remove.md
-	${CMAKE_CURRENT_LIST_DIR}/method/cmode.md
-	${CMAKE_CURRENT_LIST_DIR}/method/constructor.md
-	${CMAKE_CURRENT_LIST_DIR}/method/cnotice.md
-	${CMAKE_CURRENT_LIST_DIR}/method/info.md
-	${CMAKE_CURRENT_LIST_DIR}/method/invite.md
-	${CMAKE_CURRENT_LIST_DIR}/method/join.md
-	${CMAKE_CURRENT_LIST_DIR}/method/kick.md
-	${CMAKE_CURRENT_LIST_DIR}/method/me.md
-	${CMAKE_CURRENT_LIST_DIR}/method/message.md
-	${CMAKE_CURRENT_LIST_DIR}/method/mode.md
-	${CMAKE_CURRENT_LIST_DIR}/method/names.md
-	${CMAKE_CURRENT_LIST_DIR}/method/nick.md
-	${CMAKE_CURRENT_LIST_DIR}/method/notice.md
-	${CMAKE_CURRENT_LIST_DIR}/method/part.md
-	${CMAKE_CURRENT_LIST_DIR}/method/topic.md
-	${CMAKE_CURRENT_LIST_DIR}/method/whois.md
-	${CMAKE_CURRENT_LIST_DIR}/method/toString.md
+    SERVER_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/index.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/add.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/find.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/list.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/remove.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/cmode.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/constructor.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/cnotice.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/info.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/invite.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/join.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/kick.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/me.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/message.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/mode.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/names.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/nick.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/notice.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/part.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/topic.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/whois.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/toString.md
 )

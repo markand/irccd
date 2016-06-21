@@ -12,9 +12,9 @@ Example:
 ````javascript
 /* Plugin information */
 info = {
-	author: "David Demelier <markand@malikania.fr>",
-	license: "ISC",
-	summary: "A FPS game for IRC",
-	version: "0.0.0.0.0.0.1"
+    author: "David Demelier <markand@malikania.fr>",
+    license: "ISC",
+    summary: "A FPS game for IRC",
+    version: "0.0.0.0.0.0.1"
 };
 ````

@@ -18,10 +18,10 @@
 
 // Plugin information.
 info = {
-	author: "David Demelier <markand@malikania.fr>",
-	license: "ISC",
-	summary: "Generic plugin to authenticate to services",
-	version: "@IRCCD_VERSION@"
+    author: "David Demelier <markand@malikania.fr>",
+    license: "ISC",
+    summary: "Generic plugin to authenticate to services",
+    version: "@IRCCD_VERSION@"
 };
 
 // Modules.
@@ -32,53 +32,53 @@ var Util = Irccd.Util;
 
 function authenticateNickserv(server, password)
 {
-	Logger.info("authenticating to NickServ on " + server.toString());
+    Logger.info("authenticating to NickServ on " + server.toString());
 
-	var username = Plugin.config[server.toString() + ".username"];
-	var str = Util.format("identify #{username}#{password}", {
-		"username": username ? (username + " ") : "",
-		"password": password
-	});
+    var username = Plugin.config[server.toString() + ".username"];
+    var str = Util.format("identify #{username}#{password}", {
+        "username": username ? (username + " ") : "",
+        "password": password
+    });
 
-	server.message("NickServ", str);
+    server.message("NickServ", str);
 }
 
 function authenticateQuakenet(server, password)
 {
-	var username = Plugin.config[server.toString() + ".username"];
+    var username = Plugin.config[server.toString() + ".username"];
 
-	if (!username)
-		Logger.warning("missing username for quakenet backend on " + server.toString());
-	else {
-		Logger.info("authenticating to Q on " + server.toString());
-		server.message("Q@CServe.quakenet.org", Util.format("AUTH #{username} #{password}", {
-			"username": username,
-			"password": password
-		}));
-	}
+    if (!username)
+        Logger.warning("missing username for quakenet backend on " + server.toString());
+    else {
+        Logger.info("authenticating to Q on " + server.toString());
+        server.message("Q@CServe.quakenet.org", Util.format("AUTH #{username} #{password}", {
+            "username": username,
+            "password": password
+        }));
+    }
 }
 
 function onConnect(server)
 {
-	var type = Plugin.config[server.toString() + ".type"];
+    var type = Plugin.config[server.toString() + ".type"];
 
-	if (type) {
-		// Password is mandatory.
-		var password = Plugin.config[server.toString() + ".password"];
+    if (type) {
+        // Password is mandatory.
+        var password = Plugin.config[server.toString() + ".password"];
 
-		if (!password)
-			Logger.warning("missing password for " + server.toString());
+        if (!password)
+            Logger.warning("missing password for " + server.toString());
 
-		switch (type) {
-		case "nickserv":
-			authenticateNickserv(server, password);
-			break;
-		case "quakenet":
-			authenticateQuakenet(server, password);
-			break;
-		default:
-			Logger.warning("unknown '" + type + "' backend");
-			break;
-		}
-	}
+        switch (type) {
+        case "nickserv":
+            authenticateNickserv(server, password);
+            break;
+        case "quakenet":
+            authenticateQuakenet(server, password);
+            break;
+        default:
+            Logger.warning("unknown '" + type + "' backend");
+            break;
+        }
+    }
 }

@@ -27,29 +27,29 @@ using namespace std::chrono_literals;
 
 TEST(TestElapsedTimer, standard)
 {
-	ElapsedTimer timer;
+    ElapsedTimer timer;
 
-	std::this_thread::sleep_for(300ms);
+    std::this_thread::sleep_for(300ms);
 
-	ASSERT_GE(timer.elapsed(), 250U);
-	ASSERT_LE(timer.elapsed(), 350U);
+    ASSERT_GE(timer.elapsed(), 250U);
+    ASSERT_LE(timer.elapsed(), 350U);
 }
 
 TEST(TestElapsedTimer, reset)
 {
-	ElapsedTimer timer;
+    ElapsedTimer timer;
 
-	std::this_thread::sleep_for(300ms);
+    std::this_thread::sleep_for(300ms);
 
-	timer.reset();
+    timer.reset();
 
-	ASSERT_LE(timer.elapsed(), 100U);
+    ASSERT_LE(timer.elapsed(), 100U);
 }
 
 int main(int argc, char **argv)
 {
-	testing::InitGoogleTest(&argc, argv);
+    testing::InitGoogleTest(&argc, argv);
 
-	return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }
 

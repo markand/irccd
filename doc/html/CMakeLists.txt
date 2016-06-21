@@ -23,7 +23,7 @@ add_subdirectory(resources)
 
 # JavaScript API and user guide
 if (WITH_JS)
-	add_subdirectory(api)
+    add_subdirectory(api)
 endif ()
 
 add_subdirectory(guide)

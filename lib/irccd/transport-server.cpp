@@ -35,28 +35,28 @@ namespace irccd {
  */
 
 TransportServerIp::TransportServerIp(int domain, const std::string &address, int port, bool ipv6only)
-	: m_socket(domain, SOCK_STREAM, 0)
+    : m_socket(domain, SOCK_STREAM, 0)
 {
-	m_socket.set(net::option::SockReuseAddress(true));
+    m_socket.set(net::option::SockReuseAddress(true));
 
-	// Disable or enable IPv4 when using IPv6.
-	if (domain == AF_INET6)
-		m_socket.set(net::option::Ipv6Only(ipv6only));
+    // Disable or enable IPv4 when using IPv6.
+    if (domain == AF_INET6)
+        m_socket.set(net::option::Ipv6Only(ipv6only));
 
-	m_socket.bind(net::address::Ip(address, port, domain));
-	m_socket.listen();
+    m_socket.bind(net::address::Ip(address, port, domain));
+    m_socket.listen();
 
-	log::info() << "transport: listening on " << address << ", port " << port << std::endl;
+    log::info() << "transport: listening on " << address << ", port " << port << std::endl;
 }
 
 net::Handle TransportServerIp::handle() noexcept
 {
-	return m_socket.handle();
+    return m_socket.handle();
 }
 
 std::shared_ptr<TransportClient> TransportServerIp::accept()
 {
-	return std::make_shared<TransportClientBase<net::address::Ip>>(m_socket.accept());
+    return std::make_shared<TransportClientBase<net::address::Ip>>(m_socket.accept());
 }
 
 /*
@@ -67,27 +67,27 @@ std::shared_ptr<TransportClient> TransportServerIp::accept()
 #if !defined(IRCCD_SYSTEM_WINDOWS)
 
 TransportServerUnix::TransportServerUnix(std::string path)
-	: m_path(std::move(path))
+    : m_path(std::move(path))
 {
-	m_socket.bind(net::address::Local{m_path, true});
-	m_socket.listen();
+    m_socket.bind(net::address::Local{m_path, true});
+    m_socket.listen();
 
-	log::info() << "transport: listening on " << m_path << std::endl;
+    log::info() << "transport: listening on " << m_path << std::endl;
 }
 
 TransportServerUnix::~TransportServerUnix()
 {
-	::remove(m_path.c_str());
+    ::remove(m_path.c_str());
 }
 
 net::Handle TransportServerUnix::handle() noexcept
 {
-	return m_socket.handle();
+    return m_socket.handle();
 }
 
 std::shared_ptr<TransportClient> TransportServerUnix::accept()
 {
-	return std::make_shared<TransportClientBase<net::address::Local>>(m_socket.accept());
+    return std::make_shared<TransportClientBase<net::address::Local>>(m_socket.accept());
 }
 
 #endif

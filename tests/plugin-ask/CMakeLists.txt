@@ -17,8 +17,8 @@
 #
 
 irccd_define_test(
-	NAME plugin-ask
-	SOURCES main.cpp answers.conf
-	LIBRARIES libirccd
-	FLAGS PLUGINDIR=\"${IRCCD_FAKEROOTDIR}/${WITH_PLUGINDIR}\"
+    NAME plugin-ask
+    SOURCES main.cpp answers.conf
+    LIBRARIES libirccd
+    FLAGS PLUGINDIR=\"${IRCCD_FAKEROOTDIR}/${WITH_PLUGINDIR}\"
 )

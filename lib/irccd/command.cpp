@@ -42,13 +42,13 @@ namespace {
  */
 std::string typeName(json::Type type)
 {
-	static const std::vector<std::string> typenames{
-		"array", "boolean", "int", "null", "object", "real", "string"
-	};
+    static const std::vector<std::string> typenames{
+        "array", "boolean", "int", "null", "object", "real", "string"
+    };
 
-	assert(type >= json::Type::Array && type <= json::Type::String);
+    assert(type >= json::Type::Array && type <= json::Type::String);
 
-	return typenames[static_cast<int>(type)];
+    return typenames[static_cast<int>(type)];
 }
 
 /*
@@ -60,113 +60,113 @@ std::string typeName(json::Type type)
 
 std::string typeNameList(const std::vector<json::Type> &types)
 {
-	std::ostringstream oss;
+    std::ostringstream oss;
 
-	if (types.size() == 1)
-		return typeName(types[0]);
+    if (types.size() == 1)
+        return typeName(types[0]);
 
-	for (std::size_t i = 0; i < types.size(); ++i) {
-		oss << typeName(types[i]);
+    for (std::size_t i = 0; i < types.size(); ++i) {
+        oss << typeName(types[i]);
 
-		if (i == types.size() - 2)
-			oss << " or ";
-		else if (i < types.size() - 1)
-			oss << ", ";
-	}
+        if (i == types.size() - 2)
+            oss << " or ";
+        else if (i < types.size() - 1)
+            oss << ", ";
+    }
 
-	return oss.str();
+    return oss.str();
 }
 
 } // !namespace
 
 std::string Command::usage() const
 {
-	std::ostringstream oss;
+    std::ostringstream oss;
 
-	oss << "usage: " << sys::programName() << " " << m_name;
+    oss << "usage: " << sys::programName() << " " << m_name;
 
-	// Options summary.
-	if (options().size() > 0)
-		oss << " [options...]";
+    // Options summary.
+    if (options().size() > 0)
+        oss << " [options...]";
 
-	// Arguments summary.
-	if (args().size() > 0) {
-		oss << " ";
+    // Arguments summary.
+    if (args().size() > 0) {
+        oss << " ";
 
-		for (const auto &arg : args())
-			oss << (arg.required() ? "" : "[") << arg.name() << (arg.required() ? "" : "]") << " ";
-	}
+        for (const auto &arg : args())
+            oss << (arg.required() ? "" : "[") << arg.name() << (arg.required() ? "" : "]") << " ";
+    }
 
-	// Description.
-	oss << "\n\n" << help() << "\n\n";
+    // Description.
+    oss << "\n\n" << help() << "\n\n";
 
-	// Options.
-	if (options().size() > 0) {
-		oss << "Options:\n";
+    // Options.
+    if (options().size() > 0) {
+        oss << "Options:\n";
 
-		for (const auto &opt : options()) {
-			std::ostringstream optoss;
+        for (const auto &opt : options()) {
+            std::ostringstream optoss;
 
-			// Construct the line for the option in a single string to pad it correctly.
-			optoss << "  ";
-			optoss << (!opt.simpleKey().empty() ? ("-"s + opt.simpleKey() + " ") : "   ");
-			optoss << (!opt.longKey().empty() ? ("--"s + opt.longKey() + " "s) : "");
-			optoss << opt.arg();
+            // Construct the line for the option in a single string to pad it correctly.
+            optoss << "  ";
+            optoss << (!opt.simpleKey().empty() ? ("-"s + opt.simpleKey() + " ") : "   ");
+            optoss << (!opt.longKey().empty() ? ("--"s + opt.longKey() + " "s) : "");
+            optoss << opt.arg();
 
-			// Add it padded with spaces.
-			oss << std::left << std::setw(28) << optoss.str();
-			oss << opt.description() << "\n";
-		}
-	}
+            // Add it padded with spaces.
+            oss << std::left << std::setw(28) << optoss.str();
+            oss << opt.description() << "\n";
+        }
+    }
 
-	return oss.str();
+    return oss.str();
 }
 
 unsigned Command::min() const noexcept
 {
-	auto list = args();
+    auto list = args();
 
-	return std::accumulate(list.begin(), list.end(), 0U, [] (unsigned i, const auto &arg) noexcept -> unsigned {
-		return i + (arg.required() ? 1 : 0);
-	});
+    return std::accumulate(list.begin(), list.end(), 0U, [] (unsigned i, const auto &arg) noexcept -> unsigned {
+        return i + (arg.required() ? 1 : 0);
+    });
 }
 
 unsigned Command::max() const noexcept
 {
-	return (unsigned)args().size();
+    return (unsigned)args().size();
 }
 
 json::Value Command::request(Irccdctl &, const CommandRequest &) const
 {
-	return json::object({});
+    return json::object({});
 }
 
 json::Value Command::exec(Irccd &, const json::Value &request) const
 {
-	// Verify that requested properties are present in the request.
-	for (const auto &prop : properties()) {
-		auto it = request.find(prop.name());
+    // Verify that requested properties are present in the request.
+    for (const auto &prop : properties()) {
+        auto it = request.find(prop.name());
 
-		if (it == request.end())
-			throw std::invalid_argument("missing '{}' property"_format(prop.name()));
+        if (it == request.end())
+            throw std::invalid_argument("missing '{}' property"_format(prop.name()));
 
-		if (std::find(prop.types().begin(), prop.types().end(), it->typeOf()) == prop.types().end()) {
-			auto expected = typeNameList(prop.types());
-			auto got = typeName(it->typeOf());
+        if (std::find(prop.types().begin(), prop.types().end(), it->typeOf()) == prop.types().end()) {
+            auto expected = typeNameList(prop.types());
+            auto got = typeName(it->typeOf());
 
-			throw std::invalid_argument("invalid '{}' property ({} expected, got {})"_format(prop.name(), expected, got));
-		}
-	}
+            throw std::invalid_argument("invalid '{}' property ({} expected, got {})"_format(prop.name(), expected, got));
+        }
+    }
 
-	return json::object({});
+    return json::object({});
 }
 
 void Command::result(Irccdctl &, const json::Value &response) const
 {
-	auto it = response.find("error");
+    auto it = response.find("error");
 
-	if (it != response.end() && it->isString())
-		log::warning() << "irccdctl: " << it->toString() << std::endl;
+    if (it != response.end() && it->isString())
+        log::warning() << "irccdctl: " << it->toString() << std::endl;
 }
 
 } // !irccd

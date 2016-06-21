@@ -36,15 +36,15 @@ namespace state {
  */
 class Connected : public ServerState {
 public:
-	/**
-	 * \copydoc ServerState::prepare
-	 */
-	IRCCD_EXPORT void prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) override;
+    /**
+     * \copydoc ServerState::prepare
+     */
+    IRCCD_EXPORT void prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) override;
 
-	/**
-	 * \copydoc ServerState::ident
-	 */
-	IRCCD_EXPORT std::string ident() const override;
+    /**
+     * \copydoc ServerState::ident
+     */
+    IRCCD_EXPORT std::string ident() const override;
 };
 
 } // !state

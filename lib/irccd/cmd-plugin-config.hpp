@@ -35,40 +35,40 @@ namespace command {
  */
 class PluginConfig : public Command {
 public:
-	/**
-	 * Constructor.
-	 */
-	IRCCD_EXPORT PluginConfig();
+    /**
+     * Constructor.
+     */
+    IRCCD_EXPORT PluginConfig();
 
-	/**
-	 * \copydoc Command::help
-	 */
-	IRCCD_EXPORT std::string help() const override;
+    /**
+     * \copydoc Command::help
+     */
+    IRCCD_EXPORT std::string help() const override;
 
-	/**
-	 * \copydoc Command::args
-	 */
-	IRCCD_EXPORT std::vector<Arg> args() const override;
+    /**
+     * \copydoc Command::args
+     */
+    IRCCD_EXPORT std::vector<Arg> args() const override;
 
-	/**
-	 * \copydoc Command::properties
-	 */
-	IRCCD_EXPORT std::vector<Property> properties() const override;
+    /**
+     * \copydoc Command::properties
+     */
+    IRCCD_EXPORT std::vector<Property> properties() const override;
 
-	/**
-	 * \copydoc Command::request
-	 */
-	IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const CommandRequest &args) const override;
+    /**
+     * \copydoc Command::request
+     */
+    IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const CommandRequest &args) const override;
 
-	/**
-	 * \copydoc Command::exec
-	 */
-	IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
+    /**
+     * \copydoc Command::exec
+     */
+    IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
 
-	/**
-	 * \copydoc Command::result
-	 */
-	IRCCD_EXPORT void result(Irccdctl &irccdctl, const json::Value &response) const override;
+    /**
+     * \copydoc Command::result
+     */
+    IRCCD_EXPORT void result(Irccdctl &irccdctl, const json::Value &response) const override;
 };
 
 } // !command

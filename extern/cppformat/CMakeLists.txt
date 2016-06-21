@@ -21,8 +21,8 @@ project(cppformat)
 add_library(extern-cppformat STATIC format.cc format.h)
 target_include_directories(extern-cppformat PUBLIC ${cppformat_SOURCE_DIR})
 set_target_properties(
-	extern-cppformat
-	PROPERTIES
-		PROJECT_LABEL cppformat
-		FOLDER extern
+    extern-cppformat
+    PROPERTIES
+        PROJECT_LABEL cppformat
+        FOLDER extern
 )

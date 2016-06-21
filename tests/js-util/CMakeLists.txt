@@ -17,7 +17,7 @@
 #
 
 irccd_define_test(
-	NAME js-util
-	SOURCES main.cpp
-	LIBRARIES libirccd
+    NAME js-util
+    SOURCES main.cpp
+    LIBRARIES libirccd
 )

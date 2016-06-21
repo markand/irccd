@@ -22,27 +22,27 @@
 #
 # If you plan to modify the build system there are several places to look to do what you want.
 #
-# cmake/IrccdOptions.cmake	- User definable options.
-# cmake/IrccdPackage.cmake	- Package creation.
-# cmake/IrccdSystem.cmake	- Contains some platforms checks and compile flags.
-# cmake/IrccdVersion.cmake	- Defines the Irccd version and its plugins.
-# cmake/check			- Platform checks in separate files.
-# cmake/function		- Custom functions.
-# cmake/installer		- Some files for the QtIFW installer.
-# cmake/internal		- Some internal files (e.g. the sysconfig.h)
-# cmake/packages		- Additional find_package modules.
+# cmake/IrccdOptions.cmake    - User definable options.
+# cmake/IrccdPackage.cmake    - Package creation.
+# cmake/IrccdSystem.cmake    - Contains some platforms checks and compile flags.
+# cmake/IrccdVersion.cmake    - Defines the Irccd version and its plugins.
+# cmake/check            - Platform checks in separate files.
+# cmake/function        - Custom functions.
+# cmake/installer        - Some files for the QtIFW installer.
+# cmake/internal        - Some internal files (e.g. the sysconfig.h)
+# cmake/packages        - Additional find_package modules.
 #
 # Build system is then processed in different directories:
 #
-# contrib			- User contributions not maintained by irccd authors.
-# doc				- The documentation process.
-# extern			- External libraries.
-# lib				- The irccd library
-# irccd				- The irccd executable.
-# irccdctl			- The irccdctl utility.
-# plugins			- Official irccd plugins.
-# tests				- The unit tests.
-# win32				- Additional files for Windows platform.
+# contrib            - User contributions not maintained by irccd authors.
+# doc                - The documentation process.
+# extern            - External libraries.
+# lib                - The irccd library
+# irccd                - The irccd executable.
+# irccdctl            - The irccdctl utility.
+# plugins            - Official irccd plugins.
+# tests                - The unit tests.
+# win32                - Additional files for Windows platform.
 #
 
 cmake_minimum_required(VERSION 3.3)
@@ -78,12 +78,12 @@ add_subdirectory(irccdctl)
 add_subdirectory(contrib)
 
 if (WITH_JS)
-	add_subdirectory(plugins)
+    add_subdirectory(plugins)
 endif ()
 
 # Platform specific.
 if (WIN32)
-	add_subdirectory(win32)
+    add_subdirectory(win32)
 endif ()
 
 # Tests.
@@ -107,20 +107,20 @@ message("")
 
 message("Installing plugins:")
 foreach (plugin ${IRCCD_PLUGINS})
-	string(TOUPPER ${plugin} name)
-	string(LENGTH ${plugin} length)
-	set(str "    ${plugin}:")
+    string(TOUPPER ${plugin} name)
+    string(LENGTH ${plugin} length)
+    set(str "    ${plugin}:")
 
-	#
-	# Build a string to indent the output correctly because tabs do not work well in all windows
-	# (e.g. CMake's GUI, QtCreator...)
-	#
-	while (${length} LESS 17)
-		math(EXPR length "${length} + 1")
-		set(str "${str} ")
-	endwhile ()
+    #
+    # Build a string to indent the output correctly because tabs do not work well in all windows
+    # (e.g. CMake's GUI, QtCreator...)
+    #
+    while (${length} LESS 17)
+        math(EXPR length "${length} + 1")
+        set(str "${str} ")
+    endwhile ()
 
-	message("${str}${WITH_PLUGIN_${name}_MSG}")
+    message("${str}${WITH_PLUGIN_${name}_MSG}")
 endforeach ()
 
 message("")
@@ -131,12 +131,12 @@ message("")
 
 # Meta release target.
 #if (IRCCD_PACKAGE)
-#	add_custom_target(
-#		release
-#		COMMENT "Releasing irccd ${IRCCD_VERSION}"
-#		COMMAND
-#			${CMAKE_MAKE_PROGRAM} package_source
-#	)
+#    add_custom_target(
+#        release
+#        COMMENT "Releasing irccd ${IRCCD_VERSION}"
+#        COMMAND
+#            ${CMAKE_MAKE_PROGRAM} package_source
+#    )
 #
-#	add_dependencies(release package_ifw)
+#    add_dependencies(release package_ifw)
 #endif ()

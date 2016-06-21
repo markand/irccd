@@ -17,22 +17,22 @@
 #
 
 irccd_define_test(
-	NAME js-file
-	SOURCES main.cpp
-	LIBRARIES libirccd
+    NAME js-file
+    SOURCES main.cpp
+    LIBRARIES libirccd
 )
 
 #
 # Create following tree:
 #
 # CMAKE_BINARY_DIR
-#	| tests
-#	|	|-- file.txt
-#	|	|-- lines.txt
-#	|	|-- level-1
-#	|	|	| -- file-1.txt
-#	|	|	| -- level-2
-#	|	|	|	| -- file-2.txt
+#    | tests
+#    |    |-- file.txt
+#    |    |-- lines.txt
+#    |    |-- level-1
+#    |    |    | -- file-1.txt
+#    |    |    | -- level-2
+#    |    |    |    | -- file-2.txt
 #
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/tests/level-1/level-2)
 file(WRITE ${CMAKE_BINARY_DIR}/tests/file.txt "file.txt")

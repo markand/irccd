@@ -34,15 +34,15 @@ namespace irccd {
  */
 class UnicodeModule : public Module {
 public:
-	/**
-	 * Irccd.Unicode.
-	 */
-	IRCCD_EXPORT UnicodeModule() noexcept;
+    /**
+     * Irccd.Unicode.
+     */
+    IRCCD_EXPORT UnicodeModule() noexcept;
 
-	/**
-	 * \copydoc Module::load
-	 */
-	IRCCD_EXPORT void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
+    /**
+     * \copydoc Module::load
+     */
+    IRCCD_EXPORT void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
 };
 
 } // !irccd

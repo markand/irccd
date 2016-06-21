@@ -24,30 +24,30 @@ namespace irccd {
 
 void TransportClient::parse(const std::string &message)
 {
-	json::Value document = json::fromString(message);
+    json::Value document = json::fromString(message);
 
-	if (!document.isObject())
-		throw std::invalid_argument("the message is not a valid JSON object");
+    if (!document.isObject())
+        throw std::invalid_argument("the message is not a valid JSON object");
 
-	onCommand(document);
+    onCommand(document);
 }
 
 void TransportClient::sync(fd_set &setinput, fd_set &setoutput)
 {
-	if (FD_ISSET(handle(), &setinput)) {
-		log::debug() << "transport: receiving to input buffer" << std::endl;
-		receive();
-	}
-	if (FD_ISSET(handle(), &setoutput)) {
-		log::debug() << "transport: sending outgoing buffer" << std::endl;
-		send();
-	}
+    if (FD_ISSET(handle(), &setinput)) {
+        log::debug() << "transport: receiving to input buffer" << std::endl;
+        receive();
+    }
+    if (FD_ISSET(handle(), &setoutput)) {
+        log::debug() << "transport: sending outgoing buffer" << std::endl;
+        send();
+    }
 }
 
 void TransportClient::send(std::string message)
 {
-	m_output += message;
-	m_output += "\r\n\r\n";
+    m_output += message;
+    m_output += "\r\n\r\n";
 }
 
 } // !irccd

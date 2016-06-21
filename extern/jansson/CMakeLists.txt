@@ -23,17 +23,17 @@ include(CheckIncludeFiles)
 include(CheckTypeSize)
 
 if (MSVC)
-	# Turn off Microsofts "security" warnings.
-	add_definitions( "/W3 /D_CRT_SECURE_NO_WARNINGS /wd4005 /wd4996 /nologo" )
-	
-	if (STATIC_CRT)
-		set(CMAKE_C_FLAGS_RELEASE "/MT")
-		set(CMAKE_C_FLAGS_DEBUG "/MTd")
-	endif()
+    # Turn off Microsofts "security" warnings.
+    add_definitions( "/W3 /D_CRT_SECURE_NO_WARNINGS /wd4005 /wd4996 /nologo" )
+    
+    if (STATIC_CRT)
+        set(CMAKE_C_FLAGS_RELEASE "/MT")
+        set(CMAKE_C_FLAGS_DEBUG "/MTd")
+    endif()
 endif()
 
 if (NOT WIN32 AND (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX))
-	add_definitions("-fPIC")
+    add_definitions("-fPIC")
 endif()
 
 check_include_files(endian.h HAVE_ENDIAN_H)
@@ -67,15 +67,15 @@ check_type_size("long" LONG_INT)
 check_type_size("int" INT)
 
 if (HAVE_INT32_T)
-	set(JSON_INT32 int32_t)
+    set(JSON_INT32 int32_t)
 elseif (HAVE___INT32)
-	set(JSON_INT32 __int32)
+    set(JSON_INT32 __int32)
 elseif (HAVE_LONG_INT AND (${LONG_INT} EQUAL 4))
-	set(JSON_INT32 long)
+    set(JSON_INT32 long)
 elseif (HAVE_INT AND (${INT} EQUAL 4))
-	set(JSON_INT32 int)
+    set(JSON_INT32 int)
 else ()
-	message (FATAL_ERROR "Could not detect a valid 32-bit integer type")
+    message (FATAL_ERROR "Could not detect a valid 32-bit integer type")
 endif ()
 
 check_type_size("unsigned long" UNSIGNED_LONG_INT)
@@ -85,41 +85,41 @@ check_type_size(uint32_t UINT32_T)
 check_type_size(__uint32 __UINT32)
 
 if (HAVE_UINT32_T)
-	set(JSON_UINT32 uint32_t)
+    set(JSON_UINT32 uint32_t)
 elseif (HAVE___UINT32)
-	set(JSON_UINT32 __uint32)
+    set(JSON_UINT32 __uint32)
 elseif (HAVE_UNSIGNED_LONG_INT AND (${UNSIGNED_LONG_INT} EQUAL 4))
-	set(JSON_UINT32 "unsigned long")
+    set(JSON_UINT32 "unsigned long")
 elseif (HAVE_UNSIGNED_INT AND (${UNSIGNED_INT} EQUAL 4))
-	set(JSON_UINT32 "unsigned int")
+    set(JSON_UINT32 "unsigned int")
 else ()
-	message(FATAL_ERROR "Could not detect a valid unsigned 32-bit integer type")
+    message(FATAL_ERROR "Could not detect a valid unsigned 32-bit integer type")
 endif ()
 
 check_type_size(uint16_t UINT16_T)
 check_type_size(__uint16 __UINT16)
 
 if (HAVE_UINT16_T)
-	set(JSON_UINT16 uint16_t)
+    set(JSON_UINT16 uint16_t)
 elseif (HAVE___UINT16)
-	set(JSON_UINT16 __uint16)
+    set(JSON_UINT16 __uint16)
 elseif (HAVE_UNSIGNED_INT AND (${UNSIGNED_INT} EQUAL 2))
-	set(JSON_UINT16 "unsigned int")
+    set(JSON_UINT16 "unsigned int")
 elseif (HAVE_UNSIGNED_SHORT AND (${UNSIGNED_SHORT} EQUAL 2))
-	set(JSON_UINT16 "unsigned short")
+    set(JSON_UINT16 "unsigned short")
 else ()
-	message(FATAL_ERROR "Could not detect a valid unsigned 16-bit integer type")
+    message(FATAL_ERROR "Could not detect a valid unsigned 16-bit integer type")
 endif ()
 
 check_type_size(uint8_t UINT8_T)
 check_type_size(__uint8 __UINT8)
 
 if (HAVE_UINT8_T)
-	set(JSON_UINT8 uint8_t)
+    set(JSON_UINT8 uint8_t)
 elseif (HAVE___UINT8)
-	set(JSON_UINT8 __uint8)
+    set(JSON_UINT8 __uint8)
 else ()
-	set(JSON_UINT8 "unsigned char")
+    set(JSON_UINT8 "unsigned char")
 endif ()
 
 # Check for ssize_t and SSIZE_T existance.
@@ -127,11 +127,11 @@ check_type_size(ssize_t SSIZE_T)
 check_type_size(SSIZE_T UPPERCASE_SSIZE_T)
 
 if(NOT HAVE_SSIZE_T)
-	if(HAVE_UPPERCASE_SSIZE_T)
-		set(JSON_SSIZE SSIZE_T)
-	else()
-		set(JSON_SSIZE int)
-	endif()
+    if(HAVE_UPPERCASE_SSIZE_T)
+        set(JSON_SSIZE SSIZE_T)
+    else()
+        set(JSON_SSIZE int)
+    endif()
 endif()
 
 set(CMAKE_EXTRA_INCLUDE_FILES "")
@@ -143,43 +143,43 @@ check_function_exists(_strtoi64 HAVE__STRTOI64)
 
 # Figure out what variant we should use
 if (HAVE_STRTOLL)
-	set(JSON_STRTOINT strtoll)
+    set(JSON_STRTOINT strtoll)
 elseif (HAVE_STRTOQ)
-	set(JSON_STRTOINT strtoq)
+    set(JSON_STRTOINT strtoq)
 elseif (HAVE__STRTOI64)
-	set(JSON_STRTOINT _strtoi64)
+    set(JSON_STRTOINT _strtoi64)
 else ()
-	# fallback to strtol (32 bit)
-	# this will set all the required variables
-	set (JSON_STRTOINT strtol)
-	set (JSON_INT_T long)
-	set (JSON_INTEGER_FORMAT "\"ld\"")
+    # fallback to strtol (32 bit)
+    # this will set all the required variables
+    set (JSON_STRTOINT strtol)
+    set (JSON_INT_T long)
+    set (JSON_INTEGER_FORMAT "\"ld\"")
 endif ()
 
 # if we haven't defined JSON_INT_T, then we have a 64 bit conversion function.
 # detect what to use for the 64 bit type.
 # Note: I will prefer long long if I can get it, as that is what the automake system aimed for.
 if (NOT DEFINED JSON_INT_T)
-	if (HAVE_LONG_LONG_INT AND (${LONG_LONG_INT} EQUAL 8))
-		set(JSON_INT_T "long long")
-	elseif (HAVE_INT64_T)
-		set(JSON_INT_T int64_t)
-	elseif (HAVE___INT64)
-		set(JSON_INT_T __int64)
-	else ()
-		message(FATAL_ERROR "Could not detect 64 bit type, although I detected the strtoll equivalent")
-	endif ()
+    if (HAVE_LONG_LONG_INT AND (${LONG_LONG_INT} EQUAL 8))
+        set(JSON_INT_T "long long")
+    elseif (HAVE_INT64_T)
+        set(JSON_INT_T int64_t)
+    elseif (HAVE___INT64)
+        set(JSON_INT_T __int64)
+    else ()
+        message(FATAL_ERROR "Could not detect 64 bit type, although I detected the strtoll equivalent")
+    endif ()
 
-	# Apparently, Borland BCC and MSVC wants I64d,
-	# Borland BCC could also accept LD
-	# and gcc wants ldd,
-	# I am not sure what cygwin will want, so I will assume I64d
+    # Apparently, Borland BCC and MSVC wants I64d,
+    # Borland BCC could also accept LD
+    # and gcc wants ldd,
+    # I am not sure what cygwin will want, so I will assume I64d
 
-	if (WIN32) # matches both msvc and cygwin
-		set(JSON_INTEGER_FORMAT "\"I64d\"")
-	else ()
-		set(JSON_INTEGER_FORMAT "\"lld\"")
-	endif ()
+    if (WIN32) # matches both msvc and cygwin
+        set(JSON_INTEGER_FORMAT "\"I64d\"")
+    else ()
+        set(JSON_INTEGER_FORMAT "\"lld\"")
+    endif ()
 endif ()
 
 
@@ -188,9 +188,9 @@ check_include_files (locale.h HAVE_LOCALE_H)
 check_function_exists (localeconv HAVE_LOCALECONV)
 
 if (HAVE_LOCALECONV AND HAVE_LOCALE_H)
-	set(JSON_HAVE_LOCALECONV 1)
+    set(JSON_HAVE_LOCALECONV 1)
 else ()
-	set(JSON_HAVE_LOCALECONV 0)
+    set(JSON_HAVE_LOCALECONV 0)
 endif()
 
 # check if we have setlocale
@@ -203,14 +203,14 @@ check_function_keywords("__inline")
 check_function_keywords("__inline__")
 
 if (HAVE_INLINE)
-	set(JSON_INLINE inline)
+    set(JSON_INLINE inline)
 elseif (HAVE___INLINE)
-	set(JSON_INLINE __inline)
+    set(JSON_INLINE __inline)
 elseif (HAVE___INLINE__)
-	set(JSON_INLINE __inline__)
+    set(JSON_INLINE __inline__)
 else()
-	# no inline on this platform
-	set (JSON_INLINE)
+    # no inline on this platform
+    set (JSON_INLINE)
 endif()
 
 # Find our snprintf
@@ -218,9 +218,9 @@ check_function_exists (snprintf HAVE_SNPRINTF)
 check_function_exists (_snprintf HAVE__SNPRINTF)
 
 if (HAVE_SNPRINTF)
-	set(JSON_SNPRINTF snprintf)
+    set(JSON_SNPRINTF snprintf)
 elseif (HAVE__SNPRINTF)
-	set(JSON_SNPRINTF _snprintf)
+    set(JSON_SNPRINTF _snprintf)
 endif () 
 
 check_c_source_compiles ("int main() { unsigned long val; __sync_bool_compare_and_swap(&val, 0, 1); return 0; } " HAVE_SYNC_BUILTINS)
@@ -250,35 +250,35 @@ include_directories(${CMAKE_CURRENT_BINARY_DIR}/private_include)
 file(GLOB JANSSON_SRC src/*.c)
 
 set(
-	JANSSON_HDR_PRIVATE
-	${CMAKE_CURRENT_SOURCE_DIR}/src/hashtable.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/jansson_private.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/strbuffer.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/utf.h
-	${CMAKE_CURRENT_BINARY_DIR}/private_include/jansson_private_config.h
+    JANSSON_HDR_PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/hashtable.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/jansson_private.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/strbuffer.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/utf.h
+    ${CMAKE_CURRENT_BINARY_DIR}/private_include/jansson_private_config.h
 )
 
 set(
-	JANSSON_HDR_PUBLIC 
-	${CMAKE_CURRENT_BINARY_DIR}/include/jansson_config.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/jansson.h
+    JANSSON_HDR_PUBLIC 
+    ${CMAKE_CURRENT_BINARY_DIR}/include/jansson_config.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/jansson.h
 )
 
 irccd_define_library(
-	LOCAL
-	TARGET extern-jansson
-	SOURCES
-		${JANSSON_SRC}
-		${JANSSON_HDR_PRIVATE} 
-		${JANSSON_HDR_PUBLIC}
-	PUBLIC_INCLUDES
-		"${jansson_SOURCE_DIR}/include"
-		"${jansson_BINARY_DIR}/include"
+    LOCAL
+    TARGET extern-jansson
+    SOURCES
+        ${JANSSON_SRC}
+        ${JANSSON_HDR_PRIVATE} 
+        ${JANSSON_HDR_PUBLIC}
+    PUBLIC_INCLUDES
+        "${jansson_SOURCE_DIR}/include"
+        "${jansson_BINARY_DIR}/include"
 )
 
 set_target_properties(
-	extern-jansson
-	PROPERTIES
-		PROJECT_LABEL jansson
-		FOLDER extern
+    extern-jansson
+    PROPERTIES
+        PROJECT_LABEL jansson
+        FOLDER extern
 )

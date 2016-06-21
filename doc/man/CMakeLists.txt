@@ -21,19 +21,19 @@
 # -------------------------------------------------------------------
 
 set(
-	MONTHS
-	January
-	February
-	March
-	April
-	May
-	June
-	July
-	August
-	September
-	October
-	November
-	December
+    MONTHS
+    January
+    February
+    March
+    April
+    May
+    June
+    July
+    August
+    September
+    October
+    November
+    December
 )
 
 # Get month as name.

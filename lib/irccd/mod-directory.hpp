@@ -36,15 +36,15 @@ class Irccd;
  */
 class DirectoryModule : public Module {
 public:
-	/**
-	 * Irccd.Directory.
-	 */
-	IRCCD_EXPORT DirectoryModule() noexcept;
+    /**
+     * Irccd.Directory.
+     */
+    IRCCD_EXPORT DirectoryModule() noexcept;
 
-	/**
-	 * \copydoc Module::load
-	 */
-	IRCCD_EXPORT void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
+    /**
+     * \copydoc Module::load
+     */
+    IRCCD_EXPORT void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
 };
 
 } // !irccd

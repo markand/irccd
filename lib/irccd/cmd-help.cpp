@@ -25,30 +25,30 @@ namespace irccd {
 namespace command {
 
 Help::Help()
-	: Command("help", "General")
+    : Command("help", "General")
 {
 }
 
 std::vector<Command::Arg> Help::args() const
 {
-	return {{ "command", true }};
+    return {{ "command", true }};
 }
 
 std::string Help::help() const
 {
-	return "Get help about a command.";
+    return "Get help about a command.";
 }
 
 json::Value Help::request(Irccdctl &irccdctl, const CommandRequest &args) const
 {
-	auto it = irccdctl.commandService().find(args.arg(0U));
+    auto it = irccdctl.commandService().find(args.arg(0U));
 
-	if (!it)
-		log::warning() << "there is no command named: " << args.arg(0U) << std::endl;
-	else
-		log::warning() << it->usage() << std::flush;
+    if (!it)
+        log::warning() << "there is no command named: " << args.arg(0U) << std::endl;
+    else
+        log::warning() << it->usage() << std::flush;
 
-	return nullptr;
+    return nullptr;
 }
 
 } // !command

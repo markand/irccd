@@ -23,15 +23,15 @@
 # Define a JavaScript plugin, the file will be configured using configure_file and then installed.
 #
 # Parameters:
-#	file		- The plugin full file path
+#    file        The plugin full file path
 #
 macro(irccd_define_plugin file)
-	get_filename_component(name ${file} NAME)
-	set(base ${IRCCD_FAKEROOTDIR}/${WITH_PLUGINDIR})
+    get_filename_component(name ${file} NAME)
+    set(base ${IRCCD_FAKEROOTDIR}/${WITH_PLUGINDIR})
 
-	# Substitude variables in the JavaScript file.
-	configure_file(${file} ${base}/${name})
+    # Substitude variables in the JavaScript file.
+    configure_file(${file} ${base}/${name})
 
-	# Install the plugin file.
-	install(FILES ${base}/${name} DESTINATION ${WITH_PLUGINDIR})
+    # Install the plugin file.
+    install(FILES ${base}/${name} DESTINATION ${WITH_PLUGINDIR})
 endmacro()

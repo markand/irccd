@@ -36,35 +36,35 @@ namespace command {
  */
 class ServerNotice : public Command {
 public:
-	/**
-	 * Constructor.
-	 */
-	IRCCD_EXPORT ServerNotice();
+    /**
+     * Constructor.
+     */
+    IRCCD_EXPORT ServerNotice();
 
-	/**
-	 * \copydoc Command::help
-	 */
-	IRCCD_EXPORT std::string help() const override;
+    /**
+     * \copydoc Command::help
+     */
+    IRCCD_EXPORT std::string help() const override;
 
-	/**
-	 * \copydoc Command::args
-	 */
-	IRCCD_EXPORT std::vector<Arg> args() const override;
+    /**
+     * \copydoc Command::args
+     */
+    IRCCD_EXPORT std::vector<Arg> args() const override;
 
-	/**
-	 * \copydoc Command::properties
-	 */
-	IRCCD_EXPORT std::vector<Property> properties() const override;
+    /**
+     * \copydoc Command::properties
+     */
+    IRCCD_EXPORT std::vector<Property> properties() const override;
 
-	/**
-	 * \copydoc Command::request
-	 */
-	IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const CommandRequest &args) const override;
+    /**
+     * \copydoc Command::request
+     */
+    IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const CommandRequest &args) const override;
 
-	/**
-	 * \copydoc Command::exec
-	 */
-	IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
+    /**
+     * \copydoc Command::exec
+     */
+    IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };
 
 } // !command

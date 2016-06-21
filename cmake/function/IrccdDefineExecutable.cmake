@@ -21,53 +21,53 @@
 # -------------------------------------------------------------------
 #
 # irccd_define_executable(
-#	TARGET target name
-#	SOURCES src1, src2, srcn
-#	FLAGS (Optional) C/C++ flags (without -D)
-#	LIBRARIES (Optional) libraries to link
-#	INCLUDES (Optional) includes for the target
-#	INSTALL (Optional) if set, install the executable (default: false)
-#	PRIVATE (Optional) if set, do not build it into the fake root (default: false)
+#    TARGET target name
+#    SOURCES src1, src2, srcn
+#    FLAGS (Optional) C/C++ flags (without -D)
+#    LIBRARIES (Optional) libraries to link
+#    INCLUDES (Optional) includes for the target
+#    INSTALL (Optional) if set, install the executable (default: false)
+#    PRIVATE (Optional) if set, do not build it into the fake root (default: false)
 # )
 #
 # Create an executable that can be installed or not.
 #
 
 function(irccd_define_executable)
-	set(options INSTALL PRIVATE)
-	set(oneValueArgs TARGET)
-	set(multiValueArgs SOURCES FLAGS LIBRARIES INCLUDES)
+    set(options INSTALL PRIVATE)
+    set(oneValueArgs TARGET)
+    set(multiValueArgs SOURCES FLAGS LIBRARIES INCLUDES)
 
-	cmake_parse_arguments(EXE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    cmake_parse_arguments(EXE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-	if (NOT EXE_TARGET)
-		message(FATAL_ERROR "Please set TARGET")
-	endif ()
-	if (NOT EXE_SOURCES)
-		message(FATAL_ERROR "Please set SOURCES")
-	endif ()
+    if (NOT EXE_TARGET)
+        message(FATAL_ERROR "Please set TARGET")
+    endif ()
+    if (NOT EXE_SOURCES)
+        message(FATAL_ERROR "Please set SOURCES")
+    endif ()
 
-	if (EXE_INSTALL AND EXE_PRIVATE)
-		message(FATAL_ERROR "INSTALL and PRIVATE are mutually exclusive")
-	endif ()
+    if (EXE_INSTALL AND EXE_PRIVATE)
+        message(FATAL_ERROR "INSTALL and PRIVATE are mutually exclusive")
+    endif ()
 
-	add_executable(${EXE_TARGET} ${EXE_SOURCES})
-	target_include_directories(${EXE_TARGET} PRIVATE ${EXE_INCLUDES})
-	target_compile_definitions(${EXE_TARGET} PRIVATE ${EXE_FLAGS})
-	target_link_libraries(${EXE_TARGET} ${EXE_LIBRARIES})
+    add_executable(${EXE_TARGET} ${EXE_SOURCES})
+    target_include_directories(${EXE_TARGET} PRIVATE ${EXE_INCLUDES})
+    target_compile_definitions(${EXE_TARGET} PRIVATE ${EXE_FLAGS})
+    target_link_libraries(${EXE_TARGET} ${EXE_LIBRARIES})
 
-	# use fakeroot for public executables.
-	if (NOT EXE_PRIVATE)
-		set_target_properties(
-			${EXE_TARGET}
-			PROPERTIES
-			RUNTIME_OUTPUT_DIRECTORY ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-			RUNTIME_OUTPUT_DIRECTORY_DEBUG ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-			RUNTIME_OUTPUT_DIRECTORY_RELEASE ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-			RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-			RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-		)
+    # use fakeroot for public executables.
+    if (NOT EXE_PRIVATE)
+        set_target_properties(
+            ${EXE_TARGET}
+            PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+            RUNTIME_OUTPUT_DIRECTORY_DEBUG ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+            RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+            RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+        )
 
-		install(TARGETS ${EXE_TARGET} RUNTIME DESTINATION ${WITH_BINDIR})
-	endif ()
+        install(TARGETS ${EXE_TARGET} RUNTIME DESTINATION ${WITH_BINDIR})
+    endif ()
 endfunction()

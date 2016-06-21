@@ -26,59 +26,59 @@ namespace irccd {
 namespace command {
 
 ServerKick::ServerKick()
-	: Command("server-kick", "Server")
+    : Command("server-kick", "Server")
 {
 }
 
 std::string ServerKick::help() const
 {
-	return "";
+    return "";
 }
 
 std::vector<Command::Arg> ServerKick::args() const
 {
-	return {
-		{ "server",	true	},
-		{ "target",	true	},
-		{ "channel",	true	},
-		{ "reason",	false	}
-	};
+    return {
+        { "server",     true    },
+        { "target",     true    },
+        { "channel",    true    },
+        { "reason",     false   }
+    };
 }
 
 std::vector<Command::Property> ServerKick::properties() const
 {
-	return {
-		{ "server",	{ json::Type::String }},
-		{ "target",	{ json::Type::String }},
-		{ "channel",	{ json::Type::String }}
-	};
+    return {
+        { "server",     { json::Type::String }},
+        { "target",     { json::Type::String }},
+        { "channel",    { json::Type::String }}
+    };
 }
 
 json::Value ServerKick::request(Irccdctl &, const CommandRequest &args) const
 {
-	auto req = json::object({
-		{ "server",	args.arg(0) },
-		{ "target",	args.arg(1) },
-		{ "channel",	args.arg(2) }
-	});
+    auto req = json::object({
+        { "server",     args.arg(0) },
+        { "target",     args.arg(1) },
+        { "channel",    args.arg(2) }
+    });
 
-	if (args.length() == 4)
-		req.insert("reason", args.arg(3));
+    if (args.length() == 4)
+        req.insert("reason", args.arg(3));
 
-	return req;
+    return req;
 }
 
 json::Value ServerKick::exec(Irccd &irccd, const json::Value &request) const
 {
-	Command::exec(irccd, request);
+    Command::exec(irccd, request);
 
-	irccd.serverService().require(request.at("server").toString())->kick(
-		request.at("target").toString(),
-		request.at("channel").toString(),
-		request.valueOr("reason", json::Type::String, "").toString()
-	);
+    irccd.serverService().require(request.at("server").toString())->kick(
+        request.at("target").toString(),
+        request.at("channel").toString(),
+        request.valueOr("reason", json::Type::String, "").toString()
+    );
 
-	return json::object();
+    return json::object();
 }
 
 } // !command

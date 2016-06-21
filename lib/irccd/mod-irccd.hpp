@@ -40,29 +40,29 @@ class Irccd;
  */
 class SystemError {
 private:
-	int m_errno;
-	std::string m_message;
+    int m_errno;
+    std::string m_message;
 
 public:
-	/**
-	 * Create a system error from the current errno value.
-	 */
-	IRCCD_EXPORT SystemError();
+    /**
+     * Create a system error from the current errno value.
+     */
+    IRCCD_EXPORT SystemError();
 
-	/**
-	 * Create a system error with the given errno and message.
-	 *
-	 * \param e the errno number
-	 * \param message the message
-	 */
-	IRCCD_EXPORT SystemError(int e, std::string message);
+    /**
+     * Create a system error with the given errno and message.
+     *
+     * \param e the errno number
+     * \param message the message
+     */
+    IRCCD_EXPORT SystemError(int e, std::string message);
 
-	/**
-	 * Raise the SystemError.
-	 *
-	 * \param ctx the context
-	 */
-	IRCCD_EXPORT void raise(duk_context *ctx) const;
+    /**
+     * Raise the SystemError.
+     *
+     * \param ctx the context
+     */
+    IRCCD_EXPORT void raise(duk_context *ctx) const;
 };
 
 /**
@@ -71,15 +71,15 @@ public:
  */
 class IrccdModule : public Module {
 public:
-	/**
-	 * Irccd.
-	 */
-	IRCCD_EXPORT IrccdModule() noexcept;
+    /**
+     * Irccd.
+     */
+    IRCCD_EXPORT IrccdModule() noexcept;
 
-	/**
-	 * \copydoc Module::load
-	 */
-	IRCCD_EXPORT void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
+    /**
+     * \copydoc Module::load
+     */
+    IRCCD_EXPORT void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
 };
 
 /**

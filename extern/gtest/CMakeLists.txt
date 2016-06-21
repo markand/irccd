@@ -19,20 +19,20 @@
 project(gtest)
 
 irccd_define_library(
-	LOCAL
-	TARGET extern-gtest
-	SOURCES src/gtest-all.cc
-	PUBLIC_INCLUDES ${gtest_SOURCE_DIR}/include
-	LOCAL_INCLUDES ${gtest_SOURCE_DIR}
+    LOCAL
+    TARGET extern-gtest
+    SOURCES src/gtest-all.cc
+    PUBLIC_INCLUDES ${gtest_SOURCE_DIR}/include
+    LOCAL_INCLUDES ${gtest_SOURCE_DIR}
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-	target_compile_options(extern-gtest PRIVATE -Wno-missing-field-initializers)
+    target_compile_options(extern-gtest PRIVATE -Wno-missing-field-initializers)
 endif ()
 
 set_target_properties(
-	extern-gtest
-	PROPERTIES
-		PROJECT_LABEL gtest
-		FOLDER extern
+    extern-gtest
+    PROPERTIES
+        PROJECT_LABEL gtest
+        FOLDER extern
 )

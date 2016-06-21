@@ -54,8 +54,8 @@ namespace util {
  * Example: `!reminder help' may invoke the command event if a plugin reminder exists.
  */
 enum class MessageType {
-	Command,		//!< special command
-	Message			//!< standard message
+    Command,                        //!< special command
+    Message                         //!< standard message
 };
 
 /**
@@ -69,31 +69,31 @@ using MessagePair = std::pair<std::string, MessageType>;
  */
 class Substitution {
 public:
-	/**
-	 * \brief Disable or enable some features.
-	 */
-	enum Flags {
-		Date		= (1 << 0),	//!< date templates
-		Keywords	= (1 << 1),	//!< keywords
-		Env		= (1 << 2),	//!< environment variables
-		Shell		= (1 << 3),	//!< command line command
-		IrcAttrs	= (1 << 4)	//!< IRC escape codes
-	};
+    /**
+     * \brief Disable or enable some features.
+     */
+    enum Flags {
+        Date        = (1 << 0),     //!< date templates
+        Keywords    = (1 << 1),     //!< keywords
+        Env         = (1 << 2),     //!< environment variables
+        Shell       = (1 << 3),     //!< command line command
+        IrcAttrs    = (1 << 4)      //!< IRC escape codes
+    };
 
-	/**
-	 * Flags for selecting templates.
-	 */
-	std::uint8_t flags{Date | Keywords | Env | IrcAttrs};
+    /**
+     * Flags for selecting templates.
+     */
+    std::uint8_t flags{Date | Keywords | Env | IrcAttrs};
 
-	/**
-	 * Fill that field if you want a date.
-	 */
-	std::time_t time{std::time(nullptr)};
+    /**
+     * Fill that field if you want a date.
+     */
+    std::time_t time{std::time(nullptr)};
 
-	/**
-	 * Fill that map if you want to replace keywords.
-	 */
-	std::unordered_map<std::string, std::string> keywords;
+    /**
+     * Fill that map if you want to replace keywords.
+     */
+    std::unordered_map<std::string, std::string> keywords;
 };
 
 /**
@@ -171,16 +171,16 @@ IRCCD_EXPORT std::vector<std::string> split(const std::string &list, const std::
 template <typename InputIt, typename DelimType = char>
 std::string join(InputIt first, InputIt last, DelimType delim = ':')
 {
-	std::ostringstream oss;
+    std::ostringstream oss;
 
-	if (first != last) {
-		oss << *first;
+    if (first != last) {
+        oss << *first;
 
-		while (++first != last)
-			oss << delim << *first;
-	}
+        while (++first != last)
+            oss << delim << *first;
+    }
 
-	return oss.str();
+    return oss.str();
 }
 
 /**
@@ -193,7 +193,7 @@ std::string join(InputIt first, InputIt last, DelimType delim = ':')
 template <typename T, typename DelimType = char>
 inline std::string join(std::initializer_list<T> list, DelimType delim = ':')
 {
-	return join(list.begin(), list.end(), delim);
+    return join(list.begin(), list.end(), delim);
 }
 
 /**
@@ -215,7 +215,7 @@ IRCCD_EXPORT MessagePair parseMessage(std::string message, const std::string &co
  */
 inline bool isIdentifierValid(const std::string &name)
 {
-	return std::regex_match(name, std::regex("[A-Za-z0-9-_]+"));
+    return std::regex_match(name, std::regex("[A-Za-z0-9-_]+"));
 }
 
 /**
@@ -252,7 +252,7 @@ IRCCD_EXPORT bool isReal(const std::string &value) noexcept;
  */
 inline bool isNumber(const std::string &value) noexcept
 {
-	return isInt(value) || isReal(value);
+    return isInt(value) || isReal(value);
 }
 
 /**
@@ -275,19 +275,19 @@ inline bool isNumber(const std::string &value) noexcept
 template <typename T>
 inline T toNumber(const std::string &number, T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max())
 {
-	static_assert(std::is_integral<T>::value, "T must be integer type");
+    static_assert(std::is_integral<T>::value, "T must be integer type");
 
-	std::conditional_t<std::is_unsigned<T>::value, unsigned long long, long long> value;
+    std::conditional_t<std::is_unsigned<T>::value, unsigned long long, long long> value;
 
-	if (std::is_unsigned<T>::value)
-		value = std::stoull(number);
-	else
-		value = std::stoll(number);
+    if (std::is_unsigned<T>::value)
+        value = std::stoull(number);
+    else
+        value = std::stoll(number);
 
-	if (value < min || value > max)
-		throw std::out_of_range("out of range");
+    if (value < min || value > max)
+        throw std::out_of_range("out of range");
 
-	return static_cast<T>(value);
+    return static_cast<T>(value);
 }
 
 /**

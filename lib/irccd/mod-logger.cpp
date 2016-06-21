@@ -27,9 +27,9 @@ namespace {
 
 duk_ret_t print(duk_context *ctx, std::ostream &out)
 {
-	out << "plugin " << duk_get_plugin(ctx)->name() << ": " << duk_require_string(ctx, 0) << std::endl;
+    out << "plugin " << duk_get_plugin(ctx)->name() << ": " << duk_require_string(ctx, 0) << std::endl;
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -43,7 +43,7 @@ duk_ret_t print(duk_context *ctx, std::ostream &out)
  */
 duk_ret_t info(duk_context *ctx)
 {
-	return print(ctx, log::info());
+    return print(ctx, log::info());
 }
 
 /*
@@ -57,7 +57,7 @@ duk_ret_t info(duk_context *ctx)
  */
 duk_ret_t warning(duk_context *ctx)
 {
-	return print(ctx, log::warning());
+    return print(ctx, log::warning());
 }
 
 /*
@@ -71,32 +71,32 @@ duk_ret_t warning(duk_context *ctx)
  */
 duk_ret_t debug(duk_context *ctx)
 {
-	return print(ctx, log::debug());
+    return print(ctx, log::debug());
 }
 
 const duk_function_list_entry functions[] = {
-	{ "info",	info,		1 },
-	{ "warning",	warning,	1 },
-	{ "debug",	debug,		1 },
-	{ nullptr,	nullptr,	0 }
+    { "info",       info,       1 },
+    { "warning",    warning,    1 },
+    { "debug",      debug,      1 },
+    { nullptr,      nullptr,    0 }
 };
 
 } // !namespace
 
 LoggerModule::LoggerModule() noexcept
-	: Module("Irccd.Logger")
+    : Module("Irccd.Logger")
 {
 }
 
 void LoggerModule::load(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
 {
-	StackAssert sa(plugin->context());
+    StackAssert sa(plugin->context());
 
-	duk_get_global_string(plugin->context(), "Irccd");
-	duk_push_object(plugin->context());
-	duk_put_function_list(plugin->context(), -1, functions);
-	duk_put_prop_string(plugin->context(), -2, "Logger");
-	duk_pop(plugin->context());
+    duk_get_global_string(plugin->context(), "Irccd");
+    duk_push_object(plugin->context());
+    duk_put_function_list(plugin->context(), -1, functions);
+    duk_put_prop_string(plugin->context(), -2, "Logger");
+    duk_pop(plugin->context());
 }
 
 } // !irccd

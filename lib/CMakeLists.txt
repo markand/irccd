@@ -23,109 +23,109 @@ include(irccd/CMakeSources.cmake)
 add_library(libirccd ${HEADERS} ${SOURCES})
 
 target_include_directories(
-	libirccd
-	PUBLIC
-		$<BUILD_INTERFACE:${duktape_SOURCE_DIR}>
-		$<BUILD_INTERFACE:${extern-libircclient_SOURCE_DIR}/include>
-		$<BUILD_INTERFACE:${IRCCD_FAKEROOTDIR}/include/irccd>
-		$<BUILD_INTERFACE:${IRCCD_FAKEROOTDIR}/include>
-		$<BUILD_INTERFACE:${lib_SOURCE_DIR}>
-		$<INSTALL_INTERFACE:include>
-		${OPENSSL_INCLUDE_DIR}
+    libirccd
+    PUBLIC
+        $<BUILD_INTERFACE:${duktape_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${extern-libircclient_SOURCE_DIR}/include>
+        $<BUILD_INTERFACE:${IRCCD_FAKEROOTDIR}/include/irccd>
+        $<BUILD_INTERFACE:${IRCCD_FAKEROOTDIR}/include>
+        $<BUILD_INTERFACE:${lib_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:include>
+        ${OPENSSL_INCLUDE_DIR}
 )
 
 source_group(irccd FILES ${HEADERS} ${SOURCES})
 
 if (IRCCD_SYSTEM_WINDOWS)
-	list(APPEND LIBRARIES ws2_32 shlwapi)
+    list(APPEND LIBRARIES ws2_32 shlwapi)
 
-	if (BUILD_SHARED_LIBS)
-		list(APPEND FLAGS IRCCD_BUILDING_DLL)
-	endif ()
+    if (BUILD_SHARED_LIBS)
+        list(APPEND FLAGS IRCCD_BUILDING_DLL)
+    endif ()
 elseif (IRCCD_SYSTEM_MAC)
-	list(APPEND LIBRARIES resolv)
+    list(APPEND LIBRARIES resolv)
 elseif (IRCCD_SYSTEM_LINUX)
-	list(APPEND LIBRARIES dl)
+    list(APPEND LIBRARIES dl)
 endif ()
 
 target_link_libraries(libirccd extern-duktape extern-ircclient extern-jansson extern-cppformat ${LIBRARIES})
 target_compile_definitions(libirccd PRIVATE ${FLAGS})
 
 set_target_properties(
-	libirccd
-	PROPERTIES
-		PREFIX ""
-		OUTPUT_NAME_DEBUG libirccd2d
-		RUNTIME_OUTPUT_DIRECTORY ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-		RUNTIME_OUTPUT_DIRECTORY_DEBUG ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-		RUNTIME_OUTPUT_DIRECTORY_RELEASE ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-		RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-		RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-		VERSION ${IRCCD_VERSION}
-		SOVERSION ${IRCCD_VERSION_SHLIB}
+    libirccd
+    PROPERTIES
+        PREFIX ""
+        OUTPUT_NAME_DEBUG libirccd2d
+        RUNTIME_OUTPUT_DIRECTORY ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+        RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+        VERSION ${IRCCD_VERSION}
+        SOVERSION ${IRCCD_VERSION_SHLIB}
 )
 
 install(
-	TARGETS libirccd
-#	EXPORT Irccd2Targets
-	RUNTIME DESTINATION bin
-	LIBRARY DESTINATION lib
-	ARCHIVE DESTINATION lib
+    TARGETS libirccd
+#    EXPORT Irccd2Targets
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
 )
 
 # # CMake target exports.
 # export(
-# 	EXPORT Irccd2Targets
-# 	FILE "${CMAKE_BINARY_DIR}/Irccd2Targets.cmake"
-# 	NAMESPACE Irccd2::
+#     EXPORT Irccd2Targets
+#     FILE "${CMAKE_BINARY_DIR}/Irccd2Targets.cmake"
+#     NAMESPACE Irccd2::
 # )
 
 # CMake version file.
 # include(CMakePackageConfigHelpers)
 
 # write_basic_package_version_file(
-# 	"${CMAKE_CURRENT_BINARY_DIR}/Irccd2ConfigVersion.cmake"
-# 	VERSION ${IRCCD_VERSION}
-# 	COMPATIBILITY AnyNewerVersion
+#     "${CMAKE_CURRENT_BINARY_DIR}/Irccd2ConfigVersion.cmake"
+#     VERSION ${IRCCD_VERSION}
+#     COMPATIBILITY AnyNewerVersion
 # )
 
 # Irccd main module file.
 # configure_file(
-# 	"${CMAKE_SOURCE_DIR}/cmake/internal/Irccd2Config.cmake.in"
-# 	"${CMAKE_BINARY_DIR}/Irccd2Config.cmake"
-# 	COPYONLY
+#     "${CMAKE_SOURCE_DIR}/cmake/internal/Irccd2Config.cmake.in"
+#     "${CMAKE_BINARY_DIR}/Irccd2Config.cmake"
+#     COPYONLY
 # )
 
 # Install all CMake stuff.
 # install(
-# 	EXPORT Irccd2Targets
-# 	FILE Irccd2Targets.cmake
-# 	NAMESPACE Irccd2::
-# 	DESTINATION ${WITH_CMAKEDIR}/Irccd2
+#     EXPORT Irccd2Targets
+#     FILE Irccd2Targets.cmake
+#     NAMESPACE Irccd2::
+#     DESTINATION ${WITH_CMAKEDIR}/Irccd2
 # )
 # 
 # install(
-# 	FILES
-# 		"${CMAKE_BINARY_DIR}/Irccd2Config.cmake"
-# 		"${CMAKE_BINARY_DIR}/Irccd2ConfigVersion.cmake"
-# 	DESTINATION ${WITH_CMAKEDIR}/Irccd2
+#     FILES
+#         "${CMAKE_BINARY_DIR}/Irccd2Config.cmake"
+#         "${CMAKE_BINARY_DIR}/Irccd2ConfigVersion.cmake"
+#     DESTINATION ${WITH_CMAKEDIR}/Irccd2
 # )
 
 # pkg-config
 if (WITH_PKGCONFIG)
-	# Configure the pkg-config file.
-	configure_file(
-		${CMAKE_SOURCE_DIR}/cmake/internal/irccd2.pc.in
-		${CMAKE_BINARY_DIR}/irccd2.pc
-		@ONLY
-	)
+    # Configure the pkg-config file.
+    configure_file(
+        ${CMAKE_SOURCE_DIR}/cmake/internal/irccd2.pc.in
+        ${CMAKE_BINARY_DIR}/irccd2.pc
+        @ONLY
+    )
 
-	# Adjust the library output name if debug.
-	file(
-		GENERATE
-		OUTPUT ${CMAKE_BINARY_DIR}/irccd2.pc
-		INPUT ${CMAKE_BINARY_DIR}/irccd2.pc
-	)
+    # Adjust the library output name if debug.
+    file(
+        GENERATE
+        OUTPUT ${CMAKE_BINARY_DIR}/irccd2.pc
+        INPUT ${CMAKE_BINARY_DIR}/irccd2.pc
+    )
 
-	install(FILES ${CMAKE_BINARY_DIR}/irccd2.pc DESTINATION ${WITH_PKGCONFIGDIR})
+    install(FILES ${CMAKE_BINARY_DIR}/irccd2.pc DESTINATION ${WITH_PKGCONFIGDIR})
 endif ()

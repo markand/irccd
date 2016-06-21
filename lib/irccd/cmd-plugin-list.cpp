@@ -29,34 +29,34 @@ namespace irccd {
 namespace command {
 
 PluginList::PluginList()
-	: Command("plugin-list", "Plugins")
+    : Command("plugin-list", "Plugins")
 {
 }
 
 std::string PluginList::help() const
 {
-	return "Get the list of loaded plugins.";
+    return "Get the list of loaded plugins.";
 }
 
 json::Value PluginList::exec(Irccd &irccd, const json::Value &request) const
 {
-	json::Value response = Command::exec(irccd, request);
-	json::Value list = json::array({});
+    json::Value response = Command::exec(irccd, request);
+    json::Value list = json::array({});
 
-	for (const auto &plugin : irccd.pluginService().plugins())
-		list.append(plugin->name());
+    for (const auto &plugin : irccd.pluginService().plugins())
+        list.append(plugin->name());
 
-	response.insert("list", std::move(list));
+    response.insert("list", std::move(list));
 
-	return response;
+    return response;
 }
 
 void PluginList::result(Irccdctl &irccdctl, const json::Value &object) const
 {
-	Command::result(irccdctl, object);
+    Command::result(irccdctl, object);
 
-	for (const auto &n : object.valueOr("list", json::Type::Array, json::array({})))
-		std::cout << n.toString() << std::endl;
+    for (const auto &n : object.valueOr("list", json::Type::Array, json::array({})))
+        std::cout << n.toString() << std::endl;
 }
 
 } // !command

@@ -34,15 +34,15 @@ namespace irccd {
  */
 class TimerModule : public Module {
 public:
-	/**
-	 * Irccd.Timer.
-	 */
-	IRCCD_EXPORT TimerModule() noexcept;
+    /**
+     * Irccd.Timer.
+     */
+    IRCCD_EXPORT TimerModule() noexcept;
 
-	/**
-	 * \copydoc Module::load
-	 */
-	IRCCD_EXPORT void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
+    /**
+     * \copydoc Module::load
+     */
+    IRCCD_EXPORT void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
 };
 
 } // !irccd

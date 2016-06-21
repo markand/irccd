@@ -25,10 +25,10 @@ The params argument may have the following properties:
 
 ````javascript
 var s = new Irccd.Server({
-	name: "localhost",
-	host: "localhost",
-	nickname: "kevin",
-	ssl: true,
-	sslVerify: false
+    name: "localhost",
+    host: "localhost",
+    nickname: "kevin",
+    ssl: true,
+    sslVerify: false
 });
 ````

@@ -19,12 +19,12 @@
 project(contrib)
 
 if (WITH_SYSTEMD)
-	set(PATH "${CMAKE_INSTALL_PREFIX}/${WITH_BINDIR}/irccd")
+    set(PATH "${CMAKE_INSTALL_PREFIX}/${WITH_BINDIR}/irccd")
 
-	configure_file(
-		${CMAKE_CURRENT_SOURCE_DIR}/irccd.service
-		${CMAKE_CURRENT_BINARY_DIR}/irccd.service
-	)
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/irccd.service
+        ${CMAKE_CURRENT_BINARY_DIR}/irccd.service
+    )
 
-	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/irccd.service DESTINATION ${WITH_SYSTEMDDIR})
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/irccd.service DESTINATION ${WITH_SYSTEMDDIR})
 endif()

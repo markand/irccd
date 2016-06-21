@@ -17,7 +17,7 @@
 #
 
 irccd_define_test(
-	NAME elapsedtimer
-	SOURCES main.cpp
-	LIBRARIES libirccd
+    NAME elapsedtimer
+    SOURCES main.cpp
+    LIBRARIES libirccd
 )

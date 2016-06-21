@@ -40,28 +40,28 @@ namespace irccd {
  */
 class SignalConnection {
 private:
-	unsigned m_id;
+    unsigned m_id;
 
 public:
-	/**
-	 * Create a signal connection.
-	 *
-	 * \param id the id
-	 */
-	inline SignalConnection(unsigned id) noexcept
-		: m_id(id)
-	{
-	}
+    /**
+     * Create a signal connection.
+     *
+     * \param id the id
+     */
+    inline SignalConnection(unsigned id) noexcept
+        : m_id(id)
+    {
+    }
 
-	/**
-	 * Get the reference object.
-	 *
-	 * \return the id
-	 */
-	inline unsigned id() const noexcept
-	{
-		return m_id;
-	}
+    /**
+     * Get the reference object.
+     *
+     * \return the id
+     */
+    inline unsigned id() const noexcept
+    {
+        return m_id;
+    }
 };
 
 /**
@@ -81,90 +81,90 @@ public:
 template <typename... Args>
 class Signal {
 private:
-	using Function = std::function<void (Args...)>;
-	using FunctionMap = std::unordered_map<unsigned, Function>;
-	using Stack = std::stack<unsigned>;
+    using Function = std::function<void (Args...)>;
+    using FunctionMap = std::unordered_map<unsigned, Function>;
+    using Stack = std::stack<unsigned>;
 
-	FunctionMap m_functions;
-	Stack m_stack;
-	unsigned m_max{0};
+    FunctionMap m_functions;
+    Stack m_stack;
+    unsigned m_max{0};
 
 public:
-	/**
-	 * Register a new function to the signal.
-	 *
-	 * \param function the function
-	 * \return the connection in case you want to remove it
-	 */
-	inline SignalConnection connect(Function function) noexcept
-	{
-		unsigned id;
+    /**
+     * Register a new function to the signal.
+     *
+     * \param function the function
+     * \return the connection in case you want to remove it
+     */
+    inline SignalConnection connect(Function function) noexcept
+    {
+        unsigned id;
 
-		if (!m_stack.empty()) {
-			id = m_stack.top();
-			m_stack.pop();
-		} else
-			id = m_max ++;
+        if (!m_stack.empty()) {
+            id = m_stack.top();
+            m_stack.pop();
+        } else
+            id = m_max ++;
 
-		m_functions.emplace(id, std::move(function));
+        m_functions.emplace(id, std::move(function));
 
-		return SignalConnection{id};
-	}
+        return SignalConnection{id};
+    }
 
-	/**
-	 * Disconnect a connection.
-	 *
-	 * \param connection the connection
-	 * \warning Be sure that the connection belongs to that signal
-	 */
-	inline void disconnect(const SignalConnection &connection) noexcept
-	{
-		auto value = m_functions.find(connection.id());
+    /**
+     * Disconnect a connection.
+     *
+     * \param connection the connection
+     * \warning Be sure that the connection belongs to that signal
+     */
+    inline void disconnect(const SignalConnection &connection) noexcept
+    {
+        auto value = m_functions.find(connection.id());
 
-		if (value != m_functions.end()) {
-			m_functions.erase(connection.id());
-			m_stack.push(connection.id());
-		}
-	}
+        if (value != m_functions.end()) {
+            m_functions.erase(connection.id());
+            m_stack.push(connection.id());
+        }
+    }
 
-	/**
-	 * Remove all registered functions.
-	 */
-	inline void clear()
-	{
-		m_functions.clear();
-		m_max = 0;
+    /**
+     * Remove all registered functions.
+     */
+    inline void clear()
+    {
+        m_functions.clear();
+        m_max = 0;
 
-		while (!m_stack.empty())
-			m_stack.pop();
-	}
+        while (!m_stack.empty())
+            m_stack.pop();
+    }
 
-	/**
-	 * Call every functions.
-	 *
-	 * \param args the arguments to pass to the signal
-	 */
-	void operator()(Args... args) const
-	{
-		/*
-		 * Make a copy of the ids before iterating because the callbacks may eventually remove or modify the list.
-		 */
-		std::vector<unsigned> ids;
+    /**
+     * Call every functions.
+     *
+     * \param args the arguments to pass to the signal
+     */
+    void operator()(Args... args) const
+    {
+        /*
+         * Make a copy of the ids before iterating because the callbacks may eventually remove or modify the list.
+         */
+        std::vector<unsigned> ids;
 
-		for (auto &pair : m_functions)
-			ids.push_back(pair.first);
+        for (auto &pair : m_functions)
+            ids.push_back(pair.first);
 
-		/*
-		 * Now iterate while checking if the next id is still available, however if any new signals were added while iterating, they
-		 * will not be called immediately.
-		 */
-		for (unsigned i : ids) {
-			auto it = m_functions.find(i);
+        /*
+         * Now iterate while checking if the next id is still available, however if any new signals were added while iterating, they
+         * will not be called immediately.
+         */
+        for (unsigned i : ids) {
+            auto it = m_functions.find(i);
 
-			if (it != m_functions.end())
-				it->second(args...);
-		}
-	}
+            if (it != m_functions.end())
+                it->second(args...);
+        }
+    }
 };
 
 } // !irccd

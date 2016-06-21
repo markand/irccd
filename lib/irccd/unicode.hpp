@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_UNICODE_HPP
-#define IRCCD_UNICODE_HPP
+#ifndef UNICODE_HPP
+#define UNICODE_HPP
 
 /**
  * \file unicode.hpp
@@ -85,7 +85,7 @@ unsigned length(const std::string &str);
  * Iterate over all real characters in the UTF-8 string.
  *
  * The function must have the following signature:
- *	void f(char ch)
+ *  void f(char ch)
  *
  * \param str the UTF-8 string
  * \param function the function callback
@@ -94,18 +94,18 @@ unsigned length(const std::string &str);
 template <typename Func>
 void forEach(const std::string &str, Func function)
 {
-	for (size_t i = 0; i < str.size(); ) {
-		char32_t point = 0;
-		int size = nbytesUtf8(str[i]);
+    for (size_t i = 0; i < str.size(); ) {
+        char32_t point = 0;
+        int size = nbytesUtf8(str[i]);
 
-		if (size < 0)
-			throw std::invalid_argument("invalid sequence");
+        if (size < 0)
+            throw std::invalid_argument("invalid sequence");
 
-		decode(point, str.data() + i);
-		function(point);
+        decode(point, str.data() + i);
+        function(point);
 
-		i += size;
-	}
+        i += size;
+    }
 }
 
 /**
@@ -206,10 +206,10 @@ char32_t totitle(char32_t c) noexcept;
  */
 inline std::u32string toupper(std::u32string str)
 {
-	for (size_t i = 0; i < str.size(); ++i)
-		str[i] = toupper(str[i]);
+    for (size_t i = 0; i < str.size(); ++i)
+        str[i] = toupper(str[i]);
 
-	return str;
+    return str;
 }
 
 /**
@@ -221,15 +221,15 @@ inline std::u32string toupper(std::u32string str)
  */
 inline std::string toupper(const std::string &str)
 {
-	std::string result;
-	char buffer[5];
+    std::string result;
+    char buffer[5];
 
-	forEach(str, [&] (char32_t code) {
-		encode(toupper(code), buffer);
-		result += buffer;
-	});
+    forEach(str, [&] (char32_t code) {
+        encode(toupper(code), buffer);
+        result += buffer;
+    });
 
-	return result;
+    return result;
 }
 
 /**
@@ -240,10 +240,10 @@ inline std::string toupper(const std::string &str)
  */
 inline std::u32string tolower(std::u32string str)
 {
-	for (size_t i = 0; i < str.size(); ++i)
-		str[i] = tolower(str[i]);
+    for (size_t i = 0; i < str.size(); ++i)
+        str[i] = tolower(str[i]);
 
-	return str;
+    return str;
 }
 
 /**
@@ -255,19 +255,19 @@ inline std::u32string tolower(std::u32string str)
  */
 inline std::string tolower(const std::string &str)
 {
-	std::string result;
-	char buffer[5];
+    std::string result;
+    char buffer[5];
 
-	forEach(str, [&] (char32_t code) {
-		encode(tolower(code), buffer);
-		result += buffer;
-	});
+    forEach(str, [&] (char32_t code) {
+        encode(tolower(code), buffer);
+        result += buffer;
+    });
 
-	return result;
+    return result;
 }
 
 } // !unicode
 
 } // !irccd
 
-#endif // !IRCCD_UNICODE_HPP
+#endif // !UNICODE_HPP

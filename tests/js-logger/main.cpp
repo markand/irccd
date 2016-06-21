@@ -38,82 +38,82 @@ std::string lineDebug;
 
 class LoggerIfaceTest : public log::Interface {
 public:
-	void info(const std::string &line) override
-	{
-		lineInfo = line;
-	}
+    void info(const std::string &line) override
+    {
+        lineInfo = line;
+    }
 
-	void warning(const std::string &line) override
-	{
-		lineWarning = line;
-	}
+    void warning(const std::string &line) override
+    {
+        lineWarning = line;
+    }
 
-	void debug(const std::string &line) override
-	{
-		lineDebug = line;
-	}
+    void debug(const std::string &line) override
+    {
+        lineDebug = line;
+    }
 };
 
 class TestJsLogger : public testing::Test {
 protected:
-	Irccd m_irccd;
-	std::shared_ptr<JsPlugin> m_plugin;
+    Irccd m_irccd;
+    std::shared_ptr<JsPlugin> m_plugin;
 
-	TestJsLogger()
-		: m_plugin(std::make_shared<JsPlugin>("test", SOURCEDIR "/empty.js"))
-	{
-		m_irccd.moduleService().get("Irccd")->load(m_irccd, m_plugin);
-		m_irccd.moduleService().get("Irccd.Plugin")->load(m_irccd, m_plugin);
-		m_irccd.moduleService().get("Irccd.Logger")->load(m_irccd, m_plugin);
-	}
+    TestJsLogger()
+        : m_plugin(std::make_shared<JsPlugin>("test", SOURCEDIR "/empty.js"))
+    {
+        m_irccd.moduleService().get("Irccd")->load(m_irccd, m_plugin);
+        m_irccd.moduleService().get("Irccd.Plugin")->load(m_irccd, m_plugin);
+        m_irccd.moduleService().get("Irccd.Logger")->load(m_irccd, m_plugin);
+    }
 };
 
 TEST_F(TestJsLogger, info)
 {
-	try {
-		if (duk_peval_string(m_plugin->context(), "Irccd.Logger.info(\"hello!\");") != 0)
-			throw dukx_exception(m_plugin->context(), -1);
+    try {
+        if (duk_peval_string(m_plugin->context(), "Irccd.Logger.info(\"hello!\");") != 0)
+            throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_EQ("plugin test: hello!", lineInfo);
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        ASSERT_EQ("plugin test: hello!", lineInfo);
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
 
 TEST_F(TestJsLogger, warning)
 {
-	try {
-		if (duk_peval_string(m_plugin->context(), "Irccd.Logger.warning(\"FAIL!\");") != 0)
-			throw dukx_exception(m_plugin->context(), -1);
+    try {
+        if (duk_peval_string(m_plugin->context(), "Irccd.Logger.warning(\"FAIL!\");") != 0)
+            throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_EQ("plugin test: FAIL!", lineWarning);
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        ASSERT_EQ("plugin test: FAIL!", lineWarning);
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
 
 #if !defined(NDEBUG)
 
 TEST_F(TestJsLogger, debug)
 {
-	try {
-		if (duk_peval_string(m_plugin->context(), "Irccd.Logger.debug(\"starting\");") != 0)
-			throw dukx_exception(m_plugin->context(), -1);
+    try {
+        if (duk_peval_string(m_plugin->context(), "Irccd.Logger.debug(\"starting\");") != 0)
+            throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_EQ("plugin test: starting", lineDebug);
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        ASSERT_EQ("plugin test: starting", lineDebug);
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
 
 #endif
 
 int main(int argc, char **argv)
 {
-	testing::InitGoogleTest(&argc, argv);
+    testing::InitGoogleTest(&argc, argv);
 
-	log::setVerbose(true);
-	log::setInterface(std::make_unique<LoggerIfaceTest>());
+    log::setVerbose(true);
+    log::setInterface(std::make_unique<LoggerIfaceTest>());
 
-	return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }

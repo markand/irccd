@@ -29,63 +29,63 @@ using namespace irccd;
 
 class TestJsUtil : public testing::Test {
 protected:
-	Irccd m_irccd;
-	std::shared_ptr<JsPlugin> m_plugin;
+    Irccd m_irccd;
+    std::shared_ptr<JsPlugin> m_plugin;
 
-	TestJsUtil()
-		: m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
-	{
-		m_irccd.moduleService().get("Irccd")->load(m_irccd, m_plugin);
-		m_irccd.moduleService().get("Irccd.Util")->load(m_irccd, m_plugin);
-	}
+    TestJsUtil()
+        : m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
+    {
+        m_irccd.moduleService().get("Irccd")->load(m_irccd, m_plugin);
+        m_irccd.moduleService().get("Irccd.Util")->load(m_irccd, m_plugin);
+    }
 };
 
 TEST_F(TestJsUtil, formatSimple)
 {
-	try {
-		auto ret = duk_peval_string(m_plugin->context(),
-			"result = Irccd.Util.format(\"#{target}\", { target: \"markand\" })"
-		);
+    try {
+        auto ret = duk_peval_string(m_plugin->context(),
+            "result = Irccd.Util.format(\"#{target}\", { target: \"markand\" })"
+        );
 
-		if (ret != 0)
-			throw dukx_exception(m_plugin->context(), -1);
+        if (ret != 0)
+            throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
-		ASSERT_STREQ("markand", duk_get_string(m_plugin->context(), -1));
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+        ASSERT_STREQ("markand", duk_get_string(m_plugin->context(), -1));
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
 
 TEST_F(TestJsUtil, splituser)
 {
-	try {
-		if (duk_peval_string(m_plugin->context(), "result = Irccd.Util.splituser(\"user!~user@hyper/super/host\");") != 0)
-			throw dukx_exception(m_plugin->context(), -1);
+    try {
+        if (duk_peval_string(m_plugin->context(), "result = Irccd.Util.splituser(\"user!~user@hyper/super/host\");") != 0)
+            throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
-		ASSERT_STREQ("user", duk_get_string(m_plugin->context(), -1));
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+        ASSERT_STREQ("user", duk_get_string(m_plugin->context(), -1));
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
 
 TEST_F(TestJsUtil, splithost)
 {
-	try {
-		if (duk_peval_string(m_plugin->context(), "result = Irccd.Util.splithost(\"user!~user@hyper/super/host\");") != 0)
-			throw dukx_exception(m_plugin->context(), -1);
+    try {
+        if (duk_peval_string(m_plugin->context(), "result = Irccd.Util.splithost(\"user!~user@hyper/super/host\");") != 0)
+            throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
-		ASSERT_STREQ("!~user@hyper/super/host", duk_get_string(m_plugin->context(), -1));
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+        ASSERT_STREQ("!~user@hyper/super/host", duk_get_string(m_plugin->context(), -1));
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
 
 int main(int argc, char **argv)
 {
-	testing::InitGoogleTest(&argc, argv);
+    testing::InitGoogleTest(&argc, argv);
 
-	return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }

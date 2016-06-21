@@ -31,57 +31,57 @@ using namespace std::chrono_literals;
 
 class TestElapsedTimer : public testing::Test {
 protected:
-	Irccd m_irccd;
-	std::shared_ptr<JsPlugin> m_plugin;
+    Irccd m_irccd;
+    std::shared_ptr<JsPlugin> m_plugin;
 
-	TestElapsedTimer()
-		: m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
-	{
-		m_irccd.moduleService().get("Irccd")->load(m_irccd, m_plugin);
-		m_irccd.moduleService().get("Irccd.ElapsedTimer")->load(m_irccd, m_plugin);
-	}
+    TestElapsedTimer()
+        : m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
+    {
+        m_irccd.moduleService().get("Irccd")->load(m_irccd, m_plugin);
+        m_irccd.moduleService().get("Irccd.ElapsedTimer")->load(m_irccd, m_plugin);
+    }
 };
 
 TEST_F(TestElapsedTimer, standard)
 {
-	try {
-		if (duk_peval_string(m_plugin->context(), "timer = new Irccd.ElapsedTimer();") != 0)
-			throw dukx_exception(m_plugin->context(), -1);
+    try {
+        if (duk_peval_string(m_plugin->context(), "timer = new Irccd.ElapsedTimer();") != 0)
+            throw dukx_exception(m_plugin->context(), -1);
 
-		std::this_thread::sleep_for(300ms);
+        std::this_thread::sleep_for(300ms);
 
-		if (duk_peval_string(m_plugin->context(), "result = timer.elapsed();") != 0)
-			throw dukx_exception(m_plugin->context(), -1);
+        if (duk_peval_string(m_plugin->context(), "result = timer.elapsed();") != 0)
+            throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
-		ASSERT_GE(duk_get_int(m_plugin->context(), -1), 250);
-		ASSERT_LE(duk_get_int(m_plugin->context(), -1), 350);
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+        ASSERT_GE(duk_get_int(m_plugin->context(), -1), 250);
+        ASSERT_LE(duk_get_int(m_plugin->context(), -1), 350);
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
 
 TEST_F(TestElapsedTimer, reset)
 {
-	try {
-		if (duk_peval_string(m_plugin->context(), "timer = new Irccd.ElapsedTimer();") != 0)
-			throw dukx_exception(m_plugin->context(), -1);
+    try {
+        if (duk_peval_string(m_plugin->context(), "timer = new Irccd.ElapsedTimer();") != 0)
+            throw dukx_exception(m_plugin->context(), -1);
 
-		std::this_thread::sleep_for(300ms);
+        std::this_thread::sleep_for(300ms);
 
-		if (duk_peval_string(m_plugin->context(), "timer.reset(); result = timer.elapsed();") != 0)
-			throw dukx_exception(m_plugin->context(), -1);
+        if (duk_peval_string(m_plugin->context(), "timer.reset(); result = timer.elapsed();") != 0)
+            throw dukx_exception(m_plugin->context(), -1);
 
-		ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
-		ASSERT_LE(duk_get_int(m_plugin->context(), -1), 100);
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+        ASSERT_LE(duk_get_int(m_plugin->context(), -1), 100);
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
 
 int main(int argc, char **argv)
 {
-	testing::InitGoogleTest(&argc, argv);
+    testing::InitGoogleTest(&argc, argv);
 
-	return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }

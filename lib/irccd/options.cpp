@@ -20,9 +20,7 @@
 
 #include "options.hpp"
 
-namespace irccd {
-
-namespace parser {
+namespace option {
 
 namespace {
 
@@ -31,153 +29,151 @@ using Args = std::vector<std::string>;
 
 inline bool isOption(const std::string &arg) noexcept
 {
-	return arg.size() >= 2 && arg[0] == '-';
+    return arg.size() >= 2 && arg[0] == '-';
 }
 
 inline bool isLongOption(const std::string &arg) noexcept
 {
-	assert(isOption(arg));
+    assert(isOption(arg));
 
-	return arg.size() >= 3 && arg[1] == '-';
+    return arg.size() >= 3 && arg[1] == '-';
 }
 
 inline bool isShortSimple(const std::string &arg) noexcept
 {
-	assert(isOption(arg));
-	assert(!isLongOption(arg));
+    assert(isOption(arg));
+    assert(!isLongOption(arg));
 
-	return arg.size() == 2;
+    return arg.size() == 2;
 }
 
 void parseLongOption(Result &result, Args &args, Iterator &it, Iterator &end, const Options &definition)
 {
-	auto arg = *it++;
-	auto opt = definition.find(arg);
+    auto arg = *it++;
+    auto opt = definition.find(arg);
 
-	if (opt == definition.end())
-		throw InvalidOption(arg);
+    if (opt == definition.end())
+        throw InvalidOption{arg};
 
-	// Need argument?
-	if (opt->second) {
-		if (it == end || isOption(*it))
-			throw MissingValue(arg);
+    // Need argument?
+    if (opt->second) {
+        if (it == end || isOption(*it))
+            throw MissingValue{arg};
 
-		result.insert(std::make_pair(arg, *it++));
-		it = args.erase(args.begin(), it);
-		end = args.end();
-	} else {
-		result.insert(std::make_pair(arg, ""));
-		it = args.erase(args.begin());
-		end = args.end();
-	}
+        result.insert(std::make_pair(arg, *it++));
+        it = args.erase(args.begin(), it);
+        end = args.end();
+    } else {
+        result.insert(std::make_pair(arg, ""));
+        it = args.erase(args.begin());
+        end = args.end();
+    }
 }
 
 void parseShortOption(Result &result, Args &args, Iterator &it, Iterator &end, const Options &definition)
 {
-	if (isShortSimple(*it)) {
-		/*
-		 * Here two cases:
-		 *
-		 * -v (no option)
-		 * -c value
-		 */
-		auto arg = *it++;
-		auto opt = definition.find(arg);
+    if (isShortSimple(*it)) {
+        /*
+         * Here two cases:
+         *
+         * -v (no option)
+         * -c value
+         */
+        auto arg = *it++;
+        auto opt = definition.find(arg);
 
-		if (opt == definition.end())
-			throw InvalidOption(arg);
+        if (opt == definition.end())
+            throw InvalidOption{arg};
 
-		/* Need argument? */
-		if (opt->second) {
-			if (it == end || isOption(*it))
-				throw MissingValue(arg);
+        // Need argument?
+        if (opt->second) {
+            if (it == end || isOption(*it))
+                throw MissingValue{arg};
 
-			result.insert(std::make_pair(arg, *it++));
-			it = args.erase(args.begin(), it);
-			end = args.end();
-		} else {
-			result.insert(std::make_pair(arg, ""));
-			it = args.erase(args.begin());
-			end = args.end();
-		}
-	} else {
-		/*
-		 * Here multiple scenarios:
-		 *
-		 * 1. -abc (-a -b -c if all are simple boolean arguments)
-		 * 2. -vc foo.conf (-v -c foo.conf if -c is argument dependant)
-		 * 3. -vcfoo.conf (-v -c foo.conf also)
-		 */
-		auto value = it->substr(1);
-		auto len = value.length();
-		int toremove = 1;
+            result.insert(std::make_pair(arg, *it++));
+            it = args.erase(args.begin(), it);
+            end = args.end();
+        } else {
+            result.insert(std::make_pair(arg, ""));
+            it = args.erase(args.begin());
+            end = args.end();
+        }
+    } else {
+        /*
+         * Here multiple scenarios:
+         *
+         * 1. -abc (-a -b -c if all are simple boolean arguments)
+         * 2. -vc foo.conf (-v -c foo.conf if -c is argument dependant)
+         * 3. -vcfoo.conf (-v -c foo.conf also)
+         */
+        auto value = it->substr(1);
+        auto len = value.length();
+        int toremove = 1;
 
-		for (decltype(len) i = 0; i < len; ++i) {
-			auto arg = std::string{'-'} + value[i];
-			auto opt = definition.find(arg);
+        for (decltype(len) i = 0; i < len; ++i) {
+            auto arg = std::string{'-'} + value[i];
+            auto opt = definition.find(arg);
 
-			if (opt == definition.end())
-				throw InvalidOption(arg);
+            if (opt == definition.end())
+                throw InvalidOption{arg};
 
-			if (opt->second) {
-				if (i == (len - 1)) {
-					// End of string, get the next argument (see 2.).
-					if (++it == end || isOption(*it))
-						throw MissingValue(arg);
+            if (opt->second) {
+                if (i == (len - 1)) {
+                    // End of string, get the next argument (see 2.).
+                    if (++it == end || isOption(*it))
+                        throw MissingValue{arg};
 
-					result.insert(std::make_pair(arg, *it));
-					toremove += 1;
-				} else {
-					result.insert(std::make_pair(arg, value.substr(i + 1)));
-					i = len;
-				}
-			} else
-				result.insert(std::make_pair(arg, ""));
-		}
+                    result.insert(std::make_pair(arg, *it));
+                    toremove += 1;
+                } else {
+                    result.insert(std::make_pair(arg, value.substr(i + 1)));
+                    i = len;
+                }
+            } else
+                result.insert(std::make_pair(arg, ""));
+        }
 
-		it = args.erase(args.begin(), args.begin() + toremove);
-		end = args.end();
-	}
+        it = args.erase(args.begin(), args.begin() + toremove);
+        end = args.end();
+    }
 }
 
 } // !namespace
 
 Result read(std::vector<std::string> &args, const Options &definition)
 {
-	Result result;
+    Result result;
 
-	auto it = args.begin();
-	auto end = args.end();
+    auto it = args.begin();
+    auto end = args.end();
 
-	while (it != end) {
-		if (!isOption(*it))
-			break;
+    while (it != end) {
+        if (!isOption(*it))
+            break;
 
-		if (isLongOption(*it))
-			parseLongOption(result, args, it, end, definition);
-		else
-			parseShortOption(result, args, it, end, definition);
-	}
+        if (isLongOption(*it))
+            parseLongOption(result, args, it, end, definition);
+        else
+            parseShortOption(result, args, it, end, definition);
+    }
 
-	return result;
+    return result;
 }
 
 Result read(int &argc, char **&argv, const Options &definition)
 {
-	std::vector<std::string> args;
+    std::vector<std::string> args;
 
-	for (int i = 0; i < argc; ++i)
-		args.push_back(argv[i]);
+    for (int i = 0; i < argc; ++i)
+        args.push_back(argv[i]);
 
-	auto before = args.size();
-	auto result = read(args, definition);
+    auto before = args.size();
+    auto result = read(args, definition);
 
-	argc -= before - args.size();
-	argv += before - args.size();
+    argc -= before - args.size();
+    argv += before - args.size();
 
-	return result;
+    return result;
 }
 
-} // !parser
-
-} // !irccd
+} // !option

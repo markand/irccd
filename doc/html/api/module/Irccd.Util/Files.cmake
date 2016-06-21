@@ -17,9 +17,9 @@
 #
 
 set(
-	UTIL_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/index.md
-	${CMAKE_CURRENT_LIST_DIR}/function/format.md
-	${CMAKE_CURRENT_LIST_DIR}/function/splithost.md
-	${CMAKE_CURRENT_LIST_DIR}/function/splituser.md
+    UTIL_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/index.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/format.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/splithost.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/splituser.md
 )

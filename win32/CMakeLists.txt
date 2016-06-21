@@ -21,24 +21,24 @@
 # they are also installed.
 #
 if (IRCCD_64BITS)
-	set(ARCH "amd64")
-	set(LIBGCC libgcc_s_seh-1.dll)
+    set(ARCH "amd64")
+    set(LIBGCC libgcc_s_seh-1.dll)
 else ()
-	set(ARCH "x86")
-	set(LIBGCC libgcc_s_dw2-1.dll)
+    set(ARCH "x86")
+    set(LIBGCC libgcc_s_dw2-1.dll)
 endif ()
 
 set(
-	FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/${ARCH}/libeay32.dll
-	${CMAKE_CURRENT_SOURCE_DIR}/${ARCH}/libstdc++-6.dll
-	${CMAKE_CURRENT_SOURCE_DIR}/${ARCH}/libwinpthread-1.dll
-	${CMAKE_CURRENT_SOURCE_DIR}/${ARCH}/ssleay32.dll
-	${CMAKE_CURRENT_SOURCE_DIR}/${ARCH}/${LIBGCC}
+    FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/${ARCH}/libeay32.dll
+    ${CMAKE_CURRENT_SOURCE_DIR}/${ARCH}/libstdc++-6.dll
+    ${CMAKE_CURRENT_SOURCE_DIR}/${ARCH}/libwinpthread-1.dll
+    ${CMAKE_CURRENT_SOURCE_DIR}/${ARCH}/ssleay32.dll
+    ${CMAKE_CURRENT_SOURCE_DIR}/${ARCH}/${LIBGCC}
 )
 
 install(FILES ${FILES} DESTINATION ${WITH_BINDIR})
 
 if (IRCCD_PACKAGE)
-	file(COPY ${FILES} DESTINATION ${CMAKE_BINARY_DIR}/installer/packages/base/data/${WITH_BINDIR})
+    file(COPY ${FILES} DESTINATION ${CMAKE_BINARY_DIR}/installer/packages/base/data/${WITH_BINDIR})
 endif ()

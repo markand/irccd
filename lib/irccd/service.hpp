@@ -46,38 +46,38 @@ namespace irccd {
  */
 class Service {
 public:
-	/**
-	 * Default constructor.
-	 */
-	Service() noexcept = default;
+    /**
+     * Default constructor.
+     */
+    Service() noexcept = default;
 
-	/**
-	 * Virtual destructor defaulted.
-	 */
-	virtual ~Service() noexcept = default;
+    /**
+     * Virtual destructor defaulted.
+     */
+    virtual ~Service() noexcept = default;
 
-	/**
-	 * Prepare the input and output set.
-	 *
-	 * \param in the input set
-	 * \param out the output set
-	 * \param max the handle to update
-	 */
-	virtual void prepare(fd_set &in, fd_set &out, net::Handle &max)
-	{
-		util::unused(in, out, max);
-	}
+    /**
+     * Prepare the input and output set.
+     *
+     * \param in the input set
+     * \param out the output set
+     * \param max the handle to update
+     */
+    virtual void prepare(fd_set &in, fd_set &out, net::Handle &max)
+    {
+        util::unused(in, out, max);
+    }
 
-	/**
-	 * Synchronize with result sets.
-	 *
-	 * \param in the input set
-	 * \param out the output set
-	 */
-	virtual void sync(fd_set &in, fd_set &out)
-	{
-		util::unused(in, out);
-	}
+    /**
+     * Synchronize with result sets.
+     *
+     * \param in the input set
+     * \param out the output set
+     */
+    virtual void sync(fd_set &in, fd_set &out)
+    {
+        util::unused(in, out);
+    }
 };
 
 } // !irccd

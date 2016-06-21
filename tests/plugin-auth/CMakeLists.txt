@@ -17,8 +17,8 @@
 #
 
 irccd_define_test(
-	NAME plugin-auth
-	SOURCES main.cpp
-	LIBRARIES libirccd
-	FLAGS PLUGINDIR=\"${IRCCD_FAKEROOTDIR}/${WITH_PLUGINDIR}\"
+    NAME plugin-auth
+    SOURCES main.cpp
+    LIBRARIES libirccd
+    FLAGS PLUGINDIR=\"${IRCCD_FAKEROOTDIR}/${WITH_PLUGINDIR}\"
 )

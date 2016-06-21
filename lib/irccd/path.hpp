@@ -46,10 +46,10 @@ extern const char Separator;
  * \brief Which special path to get
  */
 enum Path {
-	PathConfig,			//!< Configuration files
-	PathData,			//!< Data directory
-	PathCache,			//!< Cache files
-	PathPlugins			//!< Path to the plugins
+    PathConfig,         //!< Configuration files
+    PathData,           //!< Data directory
+    PathCache,          //!< Cache files
+    PathPlugins         //!< Path to the plugins
 };
 
 /**
@@ -57,8 +57,8 @@ enum Path {
  * \brief For paths, get the installation path or the user ones
  */
 enum Owner {
-	OwnerSystem,			//!< System wide
-	OwnerUser			//!< User
+    OwnerSystem,        //!< System wide
+    OwnerUser           //!< User
 };
 
 /**

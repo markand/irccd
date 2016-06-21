@@ -57,74 +57,74 @@ std::unique_ptr<Filter> filter{new Filter};
 
 class Buffer : public std::stringbuf {
 public:
-	enum Level {
-		Debug,
-		Info,
-		Warning
-	};
+    enum Level {
+        Debug,
+        Info,
+        Warning
+    };
 
 private:
-	Level m_level;
+    Level m_level;
 
-	void debug(std::string line)
-	{
-		// Print only in debug mode, the buffer is flushed anyway.
+    void debug(std::string line)
+    {
+        // Print only in debug mode, the buffer is flushed anyway.
 #if !defined(NDEBUG)
-		iface->debug(filter->preDebug(std::move(line)));
+        iface->debug(filter->preDebug(std::move(line)));
 #else
-		(void)line;
+        (void)line;
 #endif
-	}
+    }
 
-	void info(std::string line)
-	{
-		// Print only if verbose, the buffer will be flushed anyway.
-		if (verbose)
-			iface->info(filter->preInfo(std::move(line)));
-	}
+    void info(std::string line)
+    {
+        // Print only if verbose, the buffer will be flushed anyway.
+        if (verbose)
+            iface->info(filter->preInfo(std::move(line)));
+    }
 
-	void warning(std::string line)
-	{
-		iface->warning(filter->preWarning(std::move(line)));
-	}
+    void warning(std::string line)
+    {
+        iface->warning(filter->preWarning(std::move(line)));
+    }
 
 public:
-	inline Buffer(Level level) noexcept
-		: m_level(level)
-	{
-		assert(level >= Debug && level <= Warning);
-	}
+    inline Buffer(Level level) noexcept
+        : m_level(level)
+    {
+        assert(level >= Debug && level <= Warning);
+    }
 
-	virtual int sync() override
-	{
-		std::string buffer = str();
-		std::string::size_type pos;
+    virtual int sync() override
+    {
+        std::string buffer = str();
+        std::string::size_type pos;
 
-		while ((pos = buffer.find("\n")) != std::string::npos) {
-			std::string line = buffer.substr(0, pos);
+        while ((pos = buffer.find("\n")) != std::string::npos) {
+            std::string line = buffer.substr(0, pos);
 
-			// Remove this line.
-			buffer.erase(buffer.begin(), buffer.begin() + pos + 1);
+            // Remove this line.
+            buffer.erase(buffer.begin(), buffer.begin() + pos + 1);
 
-			switch (m_level) {
-			case Level::Debug:
-				debug(std::move(line));
-				break;
-			case Level::Info:
-				info(std::move(line));
-				break;
-			case Level::Warning:
-				warning(std::move(line));
-				break;
-			default:
-				break;
-			}
-		}
+            switch (m_level) {
+            case Level::Debug:
+                debug(std::move(line));
+                break;
+            case Level::Info:
+                info(std::move(line));
+                break;
+            case Level::Warning:
+                warning(std::move(line));
+                break;
+            default:
+                break;
+            }
+        }
 
-		str(buffer);
+        str(buffer);
 
-		return 0;
-	}
+        return 0;
+    }
 };
 
 /*
@@ -151,17 +151,17 @@ std::ostream streamDebug(&bufferDebug);
 
 void Console::info(const std::string &line)
 {
-	std::cout << line << std::endl;
+    std::cout << line << std::endl;
 }
 
 void Console::warning(const std::string &line)
 {
-	std::cerr << line << std::endl;
+    std::cerr << line << std::endl;
 }
 
 void Console::debug(const std::string &line)
 {
-	std::cout << line << std::endl;
+    std::cout << line << std::endl;
 }
 
 /*
@@ -170,24 +170,24 @@ void Console::debug(const std::string &line)
  */
 
 File::File(std::string normal, std::string errors)
-	: m_outputNormal(std::move(normal))
-	, m_outputError(std::move(errors))
+    : m_outputNormal(std::move(normal))
+    , m_outputError(std::move(errors))
 {
 }
 
 void File::info(const std::string &line)
 {
-	std::ofstream(m_outputNormal, std::ofstream::out | std::ofstream::app) << line << std::endl;
+    std::ofstream(m_outputNormal, std::ofstream::out | std::ofstream::app) << line << std::endl;
 }
 
 void File::warning(const std::string &line)
 {
-	std::ofstream(m_outputError, std::ofstream::out | std::ofstream::app) << line << std::endl;
+    std::ofstream(m_outputError, std::ofstream::out | std::ofstream::app) << line << std::endl;
 }
 
 void File::debug(const std::string &line)
 {
-	std::ofstream(m_outputNormal, std::ofstream::out | std::ofstream::app) << line << std::endl;
+    std::ofstream(m_outputNormal, std::ofstream::out | std::ofstream::app) << line << std::endl;
 }
 
 /*
@@ -216,27 +216,27 @@ void Silent::debug(const std::string &)
 
 Syslog::Syslog()
 {
-	openlog(sys::programName().c_str(), LOG_PID, LOG_DAEMON);
+    openlog(sys::programName().c_str(), LOG_PID, LOG_DAEMON);
 }
 
 Syslog::~Syslog()
 {
-	closelog();
+    closelog();
 }
 
 void Syslog::info(const std::string &line)
 {
-	syslog(LOG_INFO | LOG_USER, "%s", line.c_str());
+    syslog(LOG_INFO | LOG_USER, "%s", line.c_str());
 }
 
 void Syslog::warning(const std::string &line)
 {
-	syslog(LOG_WARNING | LOG_USER, "%s", line.c_str());
+    syslog(LOG_WARNING | LOG_USER, "%s", line.c_str());
 }
 
 void Syslog::debug(const std::string &line)
 {
-	syslog(LOG_DEBUG | LOG_USER, "%s", line.c_str());
+    syslog(LOG_DEBUG | LOG_USER, "%s", line.c_str());
 }
 
 #endif // !HAVE_SYSLOG
@@ -248,50 +248,50 @@ void Syslog::debug(const std::string &line)
 
 void setInterface(std::unique_ptr<Interface> newiface) noexcept
 {
-	assert(newiface);
+    assert(newiface);
 
-	iface = std::move(newiface);
+    iface = std::move(newiface);
 }
 
 void setFilter(std::unique_ptr<Filter> newfilter) noexcept
 {
-	assert(filter);
+    assert(filter);
 
-	filter = std::move(newfilter);
+    filter = std::move(newfilter);
 }
 
 std::ostream &info(const std::string &message)
 {
-	if (!message.empty())
-		streamInfo << message << std::endl;
+    if (!message.empty())
+        streamInfo << message << std::endl;
 
-	return streamInfo;
+    return streamInfo;
 }
 
 std::ostream &warning(const std::string &message)
 {
-	if (!message.empty())
-		streamWarning << message << std::endl;
+    if (!message.empty())
+        streamWarning << message << std::endl;
 
-	return streamWarning;
+    return streamWarning;
 }
 
 std::ostream &debug(const std::string &message)
 {
-	if (!message.empty())
-		streamDebug << message << std::endl;
+    if (!message.empty())
+        streamDebug << message << std::endl;
 
-	return streamDebug;
+    return streamDebug;
 }
 
 bool isVerbose() noexcept
 {
-	return verbose;
+    return verbose;
 }
 
 void setVerbose(bool mode) noexcept
 {
-	verbose = mode;
+    verbose = mode;
 }
 
 } // !log

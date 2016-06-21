@@ -18,34 +18,34 @@
 
 // Plugin information.
 info = {
-	author: "David Demelier <markand@malikania.fr>",
-	license: "ISC",
-	summary: "A plugin to log everything",
-	version: "@IRCCD_VERSION@"
+    author: "David Demelier <markand@malikania.fr>",
+    license: "ISC",
+    summary: "A plugin to log everything",
+    version: "@IRCCD_VERSION@"
 };
 
 // Modules.
-var Directory	= Irccd.Directory;
-var File	= Irccd.File;
-var Logger	= Irccd.Logger;
-var Plugin	= Irccd.Plugin;
-var Util	= Irccd.Util;
+var Directory   = Irccd.Directory;
+var File        = Irccd.File;
+var Logger      = Irccd.Logger;
+var Plugin      = Irccd.Plugin;
+var Util        = Irccd.Util;
 
 /**
  * All available formats.
  */
 Plugin.format = {
-	"cmode":	"%H:%M:%S :: #{nickname} changed the mode to: #{mode} #{arg}",
-	"cnotice":	"%H:%M:%S :: [notice] (#{channel}) #{nickname}: #{message}",
-	"join":		"%H:%M:%S >> #{nickname} joined #{channel}",
-	"kick":		"%H:%M:%S :: #{target} has been kicked by #{nickname} [reason: #{reason}]",
-	"me":		"%H:%M:%S * #{nickname} #{message}",
-	"message":	"%H:%M:%S #{nickname}: #{message}",
-	"mode":		"%H:%M:%S :: #{nickname} set mode #{mode} to #{arg}",
-	"notice":	"%H:%M:%S [notice] (#{nickname}) #{message}",
-	"part":		"%H:%M:%S << #{nickname} left #{channel} [#{reason}]",
-	"query":	"%H:%M:%S #{nickname}: #{message}",
-	"topic":	"%H:%M:%S :: #{nickname} changed the topic of #{channel} to: #{topic}"
+    "cmode":    "%H:%M:%S :: #{nickname} changed the mode to: #{mode} #{arg}",
+    "cnotice":  "%H:%M:%S :: [notice] (#{channel}) #{nickname}: #{message}",
+    "join":     "%H:%M:%S >> #{nickname} joined #{channel}",
+    "kick":     "%H:%M:%S :: #{target} has been kicked by #{nickname} [reason: #{reason}]",
+    "me":       "%H:%M:%S * #{nickname} #{message}",
+    "message":  "%H:%M:%S #{nickname}: #{message}",
+    "mode":     "%H:%M:%S :: #{nickname} set mode #{mode} to #{arg}",
+    "notice":   "%H:%M:%S [notice] (#{nickname}) #{message}",
+    "part":     "%H:%M:%S << #{nickname} left #{channel} [#{reason}]",
+    "query":    "%H:%M:%S #{nickname}: #{message}",
+    "topic":    "%H:%M:%S :: #{nickname} changed the topic of #{channel} to: #{topic}"
 };
 
 /**
@@ -53,172 +53,172 @@ Plugin.format = {
  */
 function loadFormats()
 {
-	// --- DEPRECATED -------------------------------------------
-	//
-	// This code will be removed.
-	//
-	// Since:	2.1.0
-	// Until:	3.0.0
-	// Reason:	new [format] section replaces it.
-	//
-	// ----------------------------------------------------------
-	for (var key in Plugin.format) {
-		var optname = "format-" + key;
+    // --- DEPRECATED -------------------------------------------
+    //
+    // This code will be removed.
+    //
+    // Since:    2.1.0
+    // Until:    3.0.0
+    // Reason:    new [format] section replaces it.
+    //
+    // ----------------------------------------------------------
+    for (var key in Plugin.format) {
+        var optname = "format-" + key;
 
-		if (typeof (Plugin.config[optname]) !== "string")
-			continue;
+        if (typeof (Plugin.config[optname]) !== "string")
+            continue;
 
-		if (Plugin.config[optname].length === 0)
-			Logger.warning("skipping empty '" + optname + "' format");
-		else
-			Plugin.format[key] = Plugin.config[optname];
-	}
+        if (Plugin.config[optname].length === 0)
+            Logger.warning("skipping empty '" + optname + "' format");
+        else
+            Plugin.format[key] = Plugin.config[optname];
+    }
 }
 
 function keywords(server, channel, origin, extra)
 {
-	var kw = {
-		"server": server.toString(),
-		"channel": channel,
-		"origin": origin,
-		"nickname": Util.splituser(origin)
-	};
+    var kw = {
+        "server": server.toString(),
+        "channel": channel,
+        "origin": origin,
+        "nickname": Util.splituser(origin)
+    };
 
-	for (var key in extra)
-		kw[key] = extra[key];
+    for (var key in extra)
+        kw[key] = extra[key];
 
-	return kw;
+    return kw;
 }
 
 function write(fmt, args)
 {
-	var path = Util.format(Plugin.config["path"], args);
-	var directory = File.dirname(path);
+    var path = Util.format(Plugin.config["path"], args);
+    var directory = File.dirname(path);
 
-	// Try to create the directory.
-	if (!File.exists(directory)) {
-		Logger.debug("creating directory: " + directory);
-		Directory.mkdir(directory);
-	}
+    // Try to create the directory.
+    if (!File.exists(directory)) {
+        Logger.debug("creating directory: " + directory);
+        Directory.mkdir(directory);
+    }
 
-	Logger.debug("opening: " + path);
+    Logger.debug("opening: " + path);
 
-	var str = Util.format(Plugin.format[fmt], args);
-	var file = new File(path, "a");
+    var str = Util.format(Plugin.format[fmt], args);
+    var file = new File(path, "a");
 
-	file.write(str + "\n");
+    file.write(str + "\n");
 }
 
 function onLoad()
 {
-	if (Plugin.config["path"] === undefined)
-		throw new Error("Missing 'path' option");
+    if (Plugin.config["path"] === undefined)
+        throw new Error("Missing 'path' option");
 
-	loadFormats();
+    loadFormats();
 }
 
 function onReload()
 {
-	loadFormats();
+    loadFormats();
 }
 
 function onChannelMode(server, origin, channel, mode, arg)
 {
-	write("cmode", keywords(server, channel, origin, {
-		"arg":		arg,
-		"mode":		mode,
-		"source":	channel
-	}));
+    write("cmode", keywords(server, channel, origin, {
+        "arg":        arg,
+        "mode":        mode,
+        "source":    channel
+    }));
 }
 
 function onChannelNotice(server, origin, channel, notice)
 {
-	write("cnotice", keywords(server, channel, origin, {
-		"message":	notice,
-		"source":	channel
-	}));
+    write("cnotice", keywords(server, channel, origin, {
+        "message":    notice,
+        "source":    channel
+    }));
 }
 
 function onInvite(server, origin, channel)
 {
-	write("invite", keywords(server, channel, origin, {
-		"source":	channel
-	}));
+    write("invite", keywords(server, channel, origin, {
+        "source":    channel
+    }));
 }
 
 function onJoin(server, origin, channel)
 {
-	write("join", keywords(server, channel, origin, {
-		"source":	channel
-	}));
+    write("join", keywords(server, channel, origin, {
+        "source":    channel
+    }));
 }
 
 function onKick(server, origin, channel, target, reason)
 {
-	write("kick", keywords(server, channel, origin, {
-		"target":	target,
-		"source":	channel,
-		"reason":	reason
-	}));
+    write("kick", keywords(server, channel, origin, {
+        "target":    target,
+        "source":    channel,
+        "reason":    reason
+    }));
 }
 
 function onMe(server, origin, channel, message)
 {
-	write("me", keywords(server, channel, origin, {
-		"message":	message,
-		"source":	channel
-	}));
+    write("me", keywords(server, channel, origin, {
+        "message":    message,
+        "source":    channel
+    }));
 }
 
 function onMessage(server, origin, channel, message)
 {
-	write("message", keywords(server, channel, origin, {
-		"message":	message,
-		"source":	channel
-	}));
+    write("message", keywords(server, channel, origin, {
+        "message":    message,
+        "source":    channel
+    }));
 }
 
 function onMode(server, origin, mode)
 {
-	write("mode", keywords(server, undefined, origin, {
-		"mode":		mode,
-		"source":	Util.splituser(origin)
-	}));
+    write("mode", keywords(server, undefined, origin, {
+        "mode":        mode,
+        "source":    Util.splituser(origin)
+    }));
 }
 
 function onNick(server, origin, nickname)
 {
-	// TODO: write for all servers/channels a log entry
+    // TODO: write for all servers/channels a log entry
 }
 
 function onNotice(server, origin, notice)
 {
-	write("notice", keywords(server, undefined, origin, {
-		"message":	notice,
-		"source":	Util.splituser(origin)
-	}));
+    write("notice", keywords(server, undefined, origin, {
+        "message":    notice,
+        "source":    Util.splituser(origin)
+    }));
 }
 
 function onPart(server, origin, channel, reason)
 {
-	write("part", keywords(server, channel, origin, {
-		"reason":	reason,
-		"source":	channel
-	}));
+    write("part", keywords(server, channel, origin, {
+        "reason":    reason,
+        "source":    channel
+    }));
 }
 
 function onQuery(server, origin, message)
 {
-	write("query", keywords(server, undefined, origin, {
-		"source":	Util.splituser(origin),
-		"message":	message
-	}));
+    write("query", keywords(server, undefined, origin, {
+        "source":    Util.splituser(origin),
+        "message":    message
+    }));
 }
 
 function onTopic(server, origin, channel, topic)
 {
-	write("topic", keywords(server, channel, origin, {
-		"source":	channel,
-		"topic":	topic
-	}));
+    write("topic", keywords(server, channel, origin, {
+        "source":    channel,
+        "topic":    topic
+    }));
 }

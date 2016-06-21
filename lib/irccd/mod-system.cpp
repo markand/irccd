@@ -49,9 +49,9 @@ namespace {
  */
 duk_ret_t env(duk_context *ctx)
 {
-	dukx_push_std_string(ctx, sys::env(dukx_get_std_string(ctx, 0)));
+    dukx_push_std_string(ctx, sys::env(dukx_get_std_string(ctx, 0)));
 
-	return 1;
+    return 1;
 }
 
 /*
@@ -65,9 +65,9 @@ duk_ret_t env(duk_context *ctx)
  */
 duk_ret_t exec(duk_context *ctx)
 {
-	std::system(duk_get_string(ctx, 0));
+    std::system(duk_get_string(ctx, 0));
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -81,9 +81,9 @@ duk_ret_t exec(duk_context *ctx)
  */
 duk_ret_t home(duk_context *ctx)
 {
-	dukx_push_std_string(ctx, sys::home());
+    dukx_push_std_string(ctx, sys::home());
 
-	return 1;
+    return 1;
 }
 
 /*
@@ -97,9 +97,9 @@ duk_ret_t home(duk_context *ctx)
  */
 duk_ret_t name(duk_context *ctx)
 {
-	dukx_push_std_string(ctx, sys::name());
+    dukx_push_std_string(ctx, sys::name());
 
-	return 1;
+    return 1;
 }
 
 #if defined(HAVE_POPEN)
@@ -120,14 +120,14 @@ duk_ret_t name(duk_context *ctx)
  */
 duk_ret_t popen(duk_context *ctx)
 {
-	auto fp = ::popen(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
+    auto fp = ::popen(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
 
-	if (fp == nullptr)
-		dukx_throw(ctx, SystemError());
+    if (fp == nullptr)
+        dukx_throw(ctx, SystemError());
 
-	dukx_push_file(ctx, new File(fp, [] (std::FILE *fp) { ::pclose(fp); }));
+    dukx_push_file(ctx, new File(fp, [] (std::FILE *fp) { ::pclose(fp); }));
 
-	return 1;
+    return 1;
 }
 
 #endif // !HAVE_POPEN
@@ -140,9 +140,9 @@ duk_ret_t popen(duk_context *ctx)
  */
 duk_ret_t sleep(duk_context *ctx)
 {
-	std::this_thread::sleep_for(std::chrono::seconds(duk_get_int(ctx, 0)));
+    std::this_thread::sleep_for(std::chrono::seconds(duk_get_int(ctx, 0)));
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -156,9 +156,9 @@ duk_ret_t sleep(duk_context *ctx)
  */
 duk_ret_t ticks(duk_context *ctx)
 {
-	duk_push_int(ctx, sys::ticks());
+    duk_push_int(ctx, sys::ticks());
 
-	return 1;
+    return 1;
 }
 
 /*
@@ -169,9 +169,9 @@ duk_ret_t ticks(duk_context *ctx)
  */
 duk_ret_t usleep(duk_context *ctx)
 {
-	std::this_thread::sleep_for(std::chrono::microseconds(duk_get_int(ctx, 0)));
+    std::this_thread::sleep_for(std::chrono::microseconds(duk_get_int(ctx, 0)));
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -185,9 +185,9 @@ duk_ret_t usleep(duk_context *ctx)
  */
 duk_ret_t uptime(duk_context *ctx)
 {
-	duk_push_int(ctx, sys::uptime());
+    duk_push_int(ctx, sys::uptime());
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -201,43 +201,43 @@ duk_ret_t uptime(duk_context *ctx)
  */
 duk_ret_t version(duk_context *ctx)
 {
-	dukx_push_std_string(ctx, sys::version());
+    dukx_push_std_string(ctx, sys::version());
 
-	return 1;
+    return 1;
 }
 
 const duk_function_list_entry functions[] = {
-	{ "env",	env,		1 },
-	{ "exec",	exec,		1 },
-	{ "home",	home,		0 },
-	{ "name",	name,		0 },
+    { "env",        env,        1 },
+    { "exec",       exec,       1 },
+    { "home",       home,       0 },
+    { "name",       name,       0 },
 #if defined(HAVE_POPEN)
-	{ "popen",	popen,		2 },
+    { "popen",      popen,      2 },
 #endif
-	{ "sleep",	sleep,		1 },
-	{ "ticks",	ticks,		0 },
-	{ "uptime",	uptime,		0 },
-	{ "usleep",	usleep,		1 },
-	{ "version",	version,	0 },
-	{ nullptr,	nullptr,	0 }
+    { "sleep",      sleep,      1 },
+    { "ticks",      ticks,      0 },
+    { "uptime",     uptime,     0 },
+    { "usleep",     usleep,     1 },
+    { "version",    version,    0 },
+    { nullptr,      nullptr,    0 }
 };
 
 } // !namespace
 
 SystemModule::SystemModule() noexcept
-	: Module("Irccd.System")
+    : Module("Irccd.System")
 {
 }
 
 void SystemModule::load(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
 {
-	StackAssert sa(plugin->context());
+    StackAssert sa(plugin->context());
 
-	duk_get_global_string(plugin->context(), "Irccd");
-	duk_push_object(plugin->context());
-	duk_put_function_list(plugin->context(), -1, functions);
-	duk_put_prop_string(plugin->context(), -2, "System");
-	duk_pop(plugin->context());
+    duk_get_global_string(plugin->context(), "Irccd");
+    duk_push_object(plugin->context());
+    duk_put_function_list(plugin->context(), -1, functions);
+    duk_put_prop_string(plugin->context(), -2, "System");
+    duk_pop(plugin->context());
 }
 
 } // !irccd

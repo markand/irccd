@@ -19,19 +19,19 @@
 project(duktape)
 
 irccd_define_library(
-	LOCAL
-	TARGET extern-duktape
-	FLAGS DUK_OPT_CPP_EXCEPTIONS
-	SOURCES
-		duk_config.h
-		duktape.cpp
-		duktape.h
-	PUBLIC_INCLUDES ${duktape_SOURCE_DIR}
+    LOCAL
+    TARGET extern-duktape
+    FLAGS DUK_OPT_CPP_EXCEPTIONS
+    SOURCES
+        duk_config.h
+        duktape.cpp
+        duktape.h
+    PUBLIC_INCLUDES ${duktape_SOURCE_DIR}
 )
 
 set_target_properties(
-	extern-duktape
-	PROPERTIES
-		PROJECT_LABEL duktape
-		FOLDER extern
+    extern-duktape
+    PROPERTIES
+        PROJECT_LABEL duktape
+        FOLDER extern
 )

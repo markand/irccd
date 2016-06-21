@@ -17,8 +17,8 @@
 #
 
 irccd_define_test(
-	NAME js-elapsedtimer
-	SOURCES main.cpp
-	LIBRARIES libirccd
+    NAME js-elapsedtimer
+    SOURCES main.cpp
+    LIBRARIES libirccd
 )
 

@@ -40,126 +40,126 @@ class Irccd;
  */
 class PluginService {
 private:
-	Irccd &m_irccd;
-	std::vector<std::shared_ptr<Plugin>> m_plugins;
-	std::unordered_map<std::string, PluginConfig> m_config;
-	std::unordered_map<std::string, PluginFormats> m_formats;
+    Irccd &m_irccd;
+    std::vector<std::shared_ptr<Plugin>> m_plugins;
+    std::unordered_map<std::string, PluginConfig> m_config;
+    std::unordered_map<std::string, PluginFormats> m_formats;
 
 public:
-	/**
-	 * Create the plugin service.
-	 *
-	 * \param irccd the irccd instance
-	 */
-	IRCCD_EXPORT PluginService(Irccd &irccd) noexcept;
+    /**
+     * Create the plugin service.
+     *
+     * \param irccd the irccd instance
+     */
+    IRCCD_EXPORT PluginService(Irccd &irccd) noexcept;
 
-	/**
-	 * Destroy plugins.
-	 */
-	IRCCD_EXPORT ~PluginService();
+    /**
+     * Destroy plugins.
+     */
+    IRCCD_EXPORT ~PluginService();
 
-	/**
-	 * Get the list of plugins.
-	 *
-	 * \return the list of plugins
-	 */
-	inline const std::vector<std::shared_ptr<Plugin>> &plugins() const noexcept
-	{
-		return m_plugins;
-	}
+    /**
+     * Get the list of plugins.
+     *
+     * \return the list of plugins
+     */
+    inline const std::vector<std::shared_ptr<Plugin>> &plugins() const noexcept
+    {
+        return m_plugins;
+    }
 
-	/**
-	 * Check if a plugin is loaded.
-	 *
-	 * \param name the plugin id
-	 * \return true if has plugin
-	 */
-	IRCCD_EXPORT bool has(const std::string &name) const noexcept;
+    /**
+     * Check if a plugin is loaded.
+     *
+     * \param name the plugin id
+     * \return true if has plugin
+     */
+    IRCCD_EXPORT bool has(const std::string &name) const noexcept;
 
-	/**
-	 * Get a loaded plugin or null if not found.
-	 *
-	 * \param name the plugin id
-	 * \return the plugin or empty one if not found
-	 */
-	IRCCD_EXPORT std::shared_ptr<Plugin> get(const std::string &name) const noexcept;
+    /**
+     * Get a loaded plugin or null if not found.
+     *
+     * \param name the plugin id
+     * \return the plugin or empty one if not found
+     */
+    IRCCD_EXPORT std::shared_ptr<Plugin> get(const std::string &name) const noexcept;
 
-	/**
-	 * Find a loaded plugin.
-	 *
-	 * \param name the plugin id
-	 * \return the plugin
-	 * \throws std::out_of_range if not found
-	 */
-	IRCCD_EXPORT std::shared_ptr<Plugin> require(const std::string &name) const;
+    /**
+     * Find a loaded plugin.
+     *
+     * \param name the plugin id
+     * \return the plugin
+     * \throws std::out_of_range if not found
+     */
+    IRCCD_EXPORT std::shared_ptr<Plugin> require(const std::string &name) const;
 
-	/**
-	 * Add the specified plugin to the registry.
-	 *
-	 * \pre plugin != nullptr
-	 * \param plugin the plugin
-	 * \note the plugin is only added to the list, no action is performed on it
-	 */
-	IRCCD_EXPORT void add(std::shared_ptr<Plugin> plugin);
+    /**
+     * Add the specified plugin to the registry.
+     *
+     * \pre plugin != nullptr
+     * \param plugin the plugin
+     * \note the plugin is only added to the list, no action is performed on it
+     */
+    IRCCD_EXPORT void add(std::shared_ptr<Plugin> plugin);
 
-	/**
-	 * Configure a plugin.
-	 *
-	 * If the plugin is already loaded, its configuration is updated.
-	 *
-	 * \param name the plugin name
-	 * \param config the new configuration
-	 */
-	IRCCD_EXPORT void setConfig(const std::string &name, PluginConfig config);
+    /**
+     * Configure a plugin.
+     *
+     * If the plugin is already loaded, its configuration is updated.
+     *
+     * \param name the plugin name
+     * \param config the new configuration
+     */
+    IRCCD_EXPORT void setConfig(const std::string &name, PluginConfig config);
 
-	/**
-	 * Get a configuration for a plugin.
-	 *
-	 * \param name the plugin name
-	 * \return the configuration or default one if not found
-	 */
-	IRCCD_EXPORT PluginConfig config(const std::string &name) const;
+    /**
+     * Get a configuration for a plugin.
+     *
+     * \param name the plugin name
+     * \return the configuration or default one if not found
+     */
+    IRCCD_EXPORT PluginConfig config(const std::string &name) const;
 
-	/**
-	 * Add formatting for a plugin.
-	 *
-	 * \param name the plugin name
-	 * \param formats the formats
-	 */
-	IRCCD_EXPORT void setFormats(const std::string &name, PluginFormats formats);
+    /**
+     * Add formatting for a plugin.
+     *
+     * \param name the plugin name
+     * \param formats the formats
+     */
+    IRCCD_EXPORT void setFormats(const std::string &name, PluginFormats formats);
 
-	/**
-	 * Get formats for a plugin.
-	 *
-	 * \param name the plugin name
-	 * \return the formats
-	 */
-	IRCCD_EXPORT PluginFormats formats(const std::string &name) const;
+    /**
+     * Get formats for a plugin.
+     *
+     * \param name the plugin name
+     * \return the formats
+     */
+    IRCCD_EXPORT PluginFormats formats(const std::string &name) const;
 
-	/**
-	 * Convenient wrapper that loads a plugin, call onLoad and add it to the registry.
-	 *
-	 * Any errors are printed using logger.
-	 *
-	 * \param name the name
-	 * \param path the optional path (searched if empty)
-	 */
-	IRCCD_EXPORT void load(std::string name, std::string path = "");
+    /**
+     * Convenient wrapper that loads a plugin, call onLoad and add it to the registry.
+     *
+     * Any errors are printed using logger.
+     *
+     * \param name the name
+     * \param path the optional path (searched if empty)
+     */
+    IRCCD_EXPORT void load(std::string name, std::string path = "");
 
-	/**
-	 * Unload a plugin and remove it.
-	 *
-	 * \param name the plugin id
-	 */
-	IRCCD_EXPORT void unload(const std::string &name);
+    /**
+     * Unload a plugin and remove it.
+     *
+     * \param name the plugin id
+     */
+    IRCCD_EXPORT void unload(const std::string &name);
 
-	/**
-	 * Reload a plugin by calling onReload.
-	 *
-	 * \param name the plugin name
-	 * \throw std::exception on failures
-	 */
-	IRCCD_EXPORT void reload(const std::string &name);
+    /**
+     * Reload a plugin by calling onReload.
+     *
+     * \param name the plugin name
+     * \throw std::exception on failures
+     */
+    IRCCD_EXPORT void reload(const std::string &name);
 };
 
 } // !irccd

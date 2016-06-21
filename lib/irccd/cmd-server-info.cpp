@@ -28,91 +28,91 @@ namespace irccd {
 namespace command {
 
 ServerInfo::ServerInfo()
-	: Command("server-info", "Server")
+    : Command("server-info", "Server")
 {
 }
 
 std::string ServerInfo::help() const
 {
-	return "";
+    return "";
 }
 
 std::vector<Command::Arg> ServerInfo::args() const
 {
-	return {{ "server", true }};
+    return {{ "server", true }};
 }
 
 std::vector<Command::Property> ServerInfo::properties() const
 {
-	return {{ "server", { json::Type::String }}};
+    return {{ "server", { json::Type::String }}};
 }
 
 json::Value ServerInfo::request(Irccdctl &, const CommandRequest &args) const
 {
-	return json::object({
-		{ "server",	args.args()[0] },
-		{ "target",	args.args()[1] },
-		{ "channel",	args.args()[2] }
-	});
+    return json::object({
+        { "server",     args.args()[0] },
+        { "target",     args.args()[1] },
+        { "channel",    args.args()[2] }
+    });
 }
 
 json::Value ServerInfo::exec(Irccd &irccd, const json::Value &request) const
 {
-	auto response = Command::exec(irccd, request);
-	auto server = irccd.serverService().require(request.at("server").toString());
+    auto response = Command::exec(irccd, request);
+    auto server = irccd.serverService().require(request.at("server").toString());
 
-	// General stuff.
-	response.insert("name", server->name());
-	response.insert("host", server->info().host);
-	response.insert("port", server->info().port);
-	response.insert("nickname", server->identity().nickname);
-	response.insert("username", server->identity().username);
-	response.insert("realname", server->identity().realname);
+    // General stuff.
+    response.insert("name", server->name());
+    response.insert("host", server->info().host);
+    response.insert("port", server->info().port);
+    response.insert("nickname", server->identity().nickname);
+    response.insert("username", server->identity().username);
+    response.insert("realname", server->identity().realname);
 
-	// Optional stuff.
-	if (server->info().flags & irccd::ServerInfo::Ipv6)
-		response.insert("ipv6", true);
-	if (server->info().flags & irccd::ServerInfo::Ssl)
-		response.insert("ssl", true);
-	if (server->info().flags & irccd::ServerInfo::SslVerify)
-		response.insert("sslVerify", true);
+    // Optional stuff.
+    if (server->info().flags & irccd::ServerInfo::Ipv6)
+        response.insert("ipv6", true);
+    if (server->info().flags & irccd::ServerInfo::Ssl)
+        response.insert("ssl", true);
+    if (server->info().flags & irccd::ServerInfo::SslVerify)
+        response.insert("sslVerify", true);
 
-	// Channel list.
-	auto channels = json::array({});
+    // Channel list.
+    auto channels = json::array({});
 
-	for (const auto &c : server->settings().channels)
-		channels.append(c.name);
+    for (const auto &c : server->settings().channels)
+        channels.append(c.name);
 
-	response.insert("channels", std::move(channels));
+    response.insert("channels", std::move(channels));
 
-	return response;
+    return response;
 }
 
 void ServerInfo::result(Irccdctl &irccdctl, const json::Value &response) const
 {
-	Command::result(irccdctl, response);
+    Command::result(irccdctl, response);
 
-	// Server information.
-	std::cout << std::boolalpha;
-	std::cout << "Name           : " << response.valueOr("name", "").toString(true) << std::endl;
-	std::cout << "Host           : " << response.valueOr("host", "").toString(true) << std::endl;
-	std::cout << "Port           : " << response.valueOr("port", "").toString(true) << std::endl;
-	std::cout << "Ipv6           : " << response.valueOr("ipv6", "").toString(true) << std::endl;
-	std::cout << "SSL            : " << response.valueOr("ssl", "").toString(true) << std::endl;
-	std::cout << "SSL verified   : " << response.valueOr("sslVerify", "").toString(true) << std::endl;
+    // Server information.
+    std::cout << std::boolalpha;
+    std::cout << "Name           : " << response.valueOr("name", "").toString(true) << std::endl;
+    std::cout << "Host           : " << response.valueOr("host", "").toString(true) << std::endl;
+    std::cout << "Port           : " << response.valueOr("port", "").toString(true) << std::endl;
+    std::cout << "Ipv6           : " << response.valueOr("ipv6", "").toString(true) << std::endl;
+    std::cout << "SSL            : " << response.valueOr("ssl", "").toString(true) << std::endl;
+    std::cout << "SSL verified   : " << response.valueOr("sslVerify", "").toString(true) << std::endl;
 
-	// Channels.
-	std::cout << "Channels       : ";
+    // Channels.
+    std::cout << "Channels       : ";
 
-	for (const json::Value &v : response.valueOr("channels", json::Type::Array, json::array({})))
-		std::cout << v.toString() << " ";
+    for (const json::Value &v : response.valueOr("channels", json::Type::Array, json::array({})))
+        std::cout << v.toString() << " ";
 
-	std::cout << std::endl;
+    std::cout << std::endl;
 
-	// Identity.
-	std::cout << "Nickname       : " << response.valueOr("nickname", "").toString(true) << std::endl;
-	std::cout << "User name      : " << response.valueOr("username", "").toString(true) << std::endl;
-	std::cout << "Real name      : " << response.valueOr("realname", "").toString(true) << std::endl;
+    // Identity.
+    std::cout << "Nickname       : " << response.valueOr("nickname", "").toString(true) << std::endl;
+    std::cout << "User name      : " << response.valueOr("username", "").toString(true) << std::endl;
+    std::cout << "Real name      : " << response.valueOr("realname", "").toString(true) << std::endl;
 }
 
 } // !command

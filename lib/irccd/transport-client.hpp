@@ -50,84 +50,84 @@ class Value;
  */
 class TransportClient {
 public:
-	/**
-	 * Signal: onCommand
-	 * ----------------------------------------------------------
-	 *
-	 * Arguments:
-	 *   - the command
-	 */
-	Signal<const json::Value &> onCommand;
+    /**
+     * Signal: onCommand
+     * ----------------------------------------------------------
+     *
+     * Arguments:
+     *   - the command
+     */
+    Signal<const json::Value &> onCommand;
 
-	/**
-	 * Signal: onDie
-	 * ----------------------------------------------------------
-	 *
-	 * The client has disconnected.
-	 */
-	Signal<> onDie;
+    /**
+     * Signal: onDie
+     * ----------------------------------------------------------
+     *
+     * The client has disconnected.
+     */
+    Signal<> onDie;
 
 protected:
-	std::string m_input;	//!< input buffer
-	std::string m_output;	//!< output buffer
+    std::string m_input;    //!< input buffer
+    std::string m_output;    //!< output buffer
 
-	/**
-	 * Parse input buffer.
-	 *
-	 * \param buffer the buffer.
-	 */
-	void parse(const std::string &buffer);
+    /**
+     * Parse input buffer.
+     *
+     * \param buffer the buffer.
+     */
+    void parse(const std::string &buffer);
 
-	/**
-	 * Start receiving data.
-	 */
-	virtual void receive() = 0;
+    /**
+     * Start receiving data.
+     */
+    virtual void receive() = 0;
 
-	/**
-	 * Start sending data.
-	 */
-	virtual void send() = 0;
+    /**
+     * Start sending data.
+     */
+    virtual void send() = 0;
 
 public:
-	/**
-	 * Virtual destructor defaulted.
-	 */
-	virtual ~TransportClient() = default;
+    /**
+     * Virtual destructor defaulted.
+     */
+    virtual ~TransportClient() = default;
 
-	/**
-	 * Send or receive data, called after a select.
-	 *
-	 * \param setinput the input fd_set
-	 * \param setoutput the output fd_set
-	 */
-	IRCCD_EXPORT void sync(fd_set &setinput, fd_set &setoutput);
+    /**
+     * Send or receive data, called after a select.
+     *
+     * \param setinput the input fd_set
+     * \param setoutput the output fd_set
+     */
+    IRCCD_EXPORT void sync(fd_set &setinput, fd_set &setoutput);
 
-	/**
-	 * Send some data, it will be pushed to the outgoing buffer.
-	 *
-	 * This function appends "\r\n\r\n" after the message so you don't have
-	 * to do it manually.
-	 *
-	 * \param message the message
-	 */
-	IRCCD_EXPORT void send(std::string message);
+    /**
+     * Send some data, it will be pushed to the outgoing buffer.
+     *
+     * This function appends "\r\n\r\n" after the message so you don't have
+     * to do it manually.
+     *
+     * \param message the message
+     */
+    IRCCD_EXPORT void send(std::string message);
 
-	/**
-	 * Tell if the client has data pending for output.
-	 *
-	 * \return true if has pending data to write
-	 */
-	inline bool hasOutput() const noexcept
-	{
-		return !m_output.empty();
-	}
+    /**
+     * Tell if the client has data pending for output.
+     *
+     * \return true if has pending data to write
+     */
+    inline bool hasOutput() const noexcept
+    {
+        return !m_output.empty();
+    }
 
-	/**
-	 * Get the underlying socket handle.
-	 *
-	 * \return the socket
-	 */
-	virtual net::Handle handle() noexcept = 0;
+    /**
+     * Get the underlying socket handle.
+     *
+     * \return the socket
+     */
+    virtual net::Handle handle() noexcept = 0;
 };
 
 /**
@@ -136,64 +136,64 @@ public:
 template <typename Address>
 class TransportClientBase : public TransportClient {
 private:
-	net::SocketTcp<Address> m_socket;
+    net::SocketTcp<Address> m_socket;
 
 protected:
-	void send() override;
-	void receive() override;
+    void send() override;
+    void receive() override;
 
 public:
-	/**
-	 * Create a client.
-	 *
-	 * \param socket the socket
-	 */
-	inline TransportClientBase(net::SocketTcp<Address> socket)
-		: m_socket(std::move(socket))
-	{
-	}
+    /**
+     * Create a client.
+     *
+     * \param socket the socket
+     */
+    inline TransportClientBase(net::SocketTcp<Address> socket)
+        : m_socket(std::move(socket))
+    {
+    }
 
-	/**
-	 * \copydoc TransportClient::handle
-	 */
-	net::Handle handle() noexcept override
-	{
-		return m_socket.handle();
-	}
+    /**
+     * \copydoc TransportClient::handle
+     */
+    net::Handle handle() noexcept override
+    {
+        return m_socket.handle();
+    }
 };
 
 template <typename Address>
 void TransportClientBase<Address>::receive()
 {
-	try {
-		auto message = m_socket.recv(512);
+    try {
+        auto message = m_socket.recv(512);
 
-		if (message.empty())
-			onDie();
+        if (message.empty())
+            onDie();
 
-		m_input += message;
-	} catch (const std::exception &) {
-		onDie();
-	}
+        m_input += message;
+    } catch (const std::exception &) {
+        onDie();
+    }
 
-	std::string::size_type pos;
-	while ((pos = m_input.find("\r\n\r\n")) != std::string::npos) {
-		/*
-		 * Make a copy and erase it in case that onComplete function
-		 * throws.
-		 */
-		auto message = m_input.substr(0, pos);
+    std::string::size_type pos;
+    while ((pos = m_input.find("\r\n\r\n")) != std::string::npos) {
+        /*
+         * Make a copy and erase it in case that onComplete function
+         * throws.
+         */
+        auto message = m_input.substr(0, pos);
 
-		m_input.erase(m_input.begin(), m_input.begin() + pos + 4);
+        m_input.erase(m_input.begin(), m_input.begin() + pos + 4);
 
-		parse(message);
-	}
+        parse(message);
+    }
 }
 
 template <typename Address>
 void TransportClientBase<Address>::send()
 {
-	m_output.erase(0, m_socket.send(m_output));
+    m_output.erase(0, m_socket.send(m_output));
 }
 
 } // !irccd

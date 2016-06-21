@@ -42,44 +42,44 @@ namespace irccd {
  */
 class ElapsedTimer {
 private:
-	using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
+    using TimePoint = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
-	TimePoint m_last;
-	bool m_paused{false};
-	unsigned m_elapsed{0};
+    TimePoint m_last;
+    bool m_paused{false};
+    unsigned m_elapsed{0};
 
 public:
-	/**
-	 * Construct the elapsed timer, start counting.
-	 */
-	IRCCD_EXPORT ElapsedTimer() noexcept;
+    /**
+     * Construct the elapsed timer, start counting.
+     */
+    IRCCD_EXPORT ElapsedTimer() noexcept;
 
-	/**
-	 * Virtual destructor defaulted.
-	 */
-	virtual ~ElapsedTimer() = default;
+    /**
+     * Virtual destructor defaulted.
+     */
+    virtual ~ElapsedTimer() = default;
 
-	/**
-	 * Put the timer on pause, the already elapsed time is stored.
-	 */
-	IRCCD_EXPORT void pause() noexcept;
+    /**
+     * Put the timer on pause, the already elapsed time is stored.
+     */
+    IRCCD_EXPORT void pause() noexcept;
 
-	/**
-	 * Restart the timer, does not reset it.
-	 */
-	IRCCD_EXPORT void restart() noexcept;
+    /**
+     * Restart the timer, does not reset it.
+     */
+    IRCCD_EXPORT void restart() noexcept;
 
-	/**
-	 * Reset the timer to 0.
-	 */
-	IRCCD_EXPORT void reset() noexcept;
+    /**
+     * Reset the timer to 0.
+     */
+    IRCCD_EXPORT void reset() noexcept;
 
-	/**
-	 * Get the number of elapsed milliseconds.
-	 *
-	 * \return the milliseconds
-	 */
-	IRCCD_EXPORT unsigned elapsed() noexcept;
+    /**
+     * Get the number of elapsed milliseconds.
+     *
+     * \return the milliseconds
+     */
+    IRCCD_EXPORT unsigned elapsed() noexcept;
 };
 
 } // !irccd

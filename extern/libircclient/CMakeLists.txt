@@ -28,41 +28,41 @@ check_function_exists(gethostbyname_r HAVE_GETHOSTBYNAME_R)
 check_function_exists(localtime_r HAVE_LOCALTIME_R)
 
 if (HAVE_GETHOSTBYNAME_R)
-	list(APPEND FLAGS "HAVE_GETHOSTBYNAME_R")
+    list(APPEND FLAGS "HAVE_GETHOSTBYNAME_R")
 endif ()
 if (HAVE_LOCALTIME_R)
-	list(APPEND FLAGS "HAVE_LOCALTIME_R")
+    list(APPEND FLAGS "HAVE_LOCALTIME_R")
 endif ()
 
 # SSL is optional
 if (WITH_SSL)
-	list(APPEND INCLUDES ${OPENSSL_INCLUDE_DIR})
-	list(APPEND LIBRARIES ${OPENSSL_LIBRARIES})
-	list(APPEND FLAGS "ENABLE_SSL")
+    list(APPEND INCLUDES ${OPENSSL_INCLUDE_DIR})
+    list(APPEND LIBRARIES ${OPENSSL_LIBRARIES})
+    list(APPEND FLAGS "ENABLE_SSL")
 endif ()
 
 # Enable or disable IPv6
 if (WITH_IPV6)
-	list(APPEND FLAGS "ENABLE_IPV6")
+    list(APPEND FLAGS "ENABLE_IPV6")
 endif ()
 
 if (WIN32)
-	list(APPEND LIBRARIES ws2_32)
+    list(APPEND LIBRARIES ws2_32)
 endif ()
 
 irccd_define_library(
-	LOCAL
-	TARGET extern-ircclient
-	SOURCES src/libircclient.c
-	FLAGS ${FLAGS}
-	LIBRARIES ${LIBRARIES}
-	PUBLIC_INCLUDES "${extern-libircclient_SOURCE_DIR}/include"
-	LOCAL_INCLUDES ${INCLUDES}
+    LOCAL
+    TARGET extern-ircclient
+    SOURCES src/libircclient.c
+    FLAGS ${FLAGS}
+    LIBRARIES ${LIBRARIES}
+    PUBLIC_INCLUDES "${extern-libircclient_SOURCE_DIR}/include"
+    LOCAL_INCLUDES ${INCLUDES}
 )
 
 set_target_properties(
-	extern-ircclient
-	PROPERTIES
-		PROJECT_LABEL libircclient
-		FOLDER extern
+    extern-ircclient
+    PROPERTIES
+        PROJECT_LABEL libircclient
+        FOLDER extern
 )

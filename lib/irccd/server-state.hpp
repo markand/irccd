@@ -49,32 +49,32 @@ namespace state {
  */
 class ServerState {
 public:
-	/**
-	 * Default constructor.
-	 */
-	ServerState() = default;
+    /**
+     * Default constructor.
+     */
+    ServerState() = default;
 
-	/**
-	 * Virtual default destructor.
-	 */
-	virtual ~ServerState() = default;
+    /**
+     * Virtual default destructor.
+     */
+    virtual ~ServerState() = default;
 
-	/**
-	 * Prepare the state.
-	 *
-	 * \param server the server
-	 * \param setinput the read set
-	 * \param setoutput the write set
-	 * \param maxfd the maximum fd
-	 */
-	virtual void prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) = 0;
+    /**
+     * Prepare the state.
+     *
+     * \param server the server
+     * \param setinput the read set
+     * \param setoutput the write set
+     * \param maxfd the maximum fd
+     */
+    virtual void prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) = 0;
 
-	/**
-	 * Return the state identifier, only for information purposes.
-	 *
-	 * \return the identifier
-	 */
-	virtual std::string ident() const = 0;
+    /**
+     * Return the state identifier, only for information purposes.
+     *
+     * \return the identifier
+     */
+    virtual std::string ident() const = 0;
 };
 
 } // !irccd

@@ -29,56 +29,55 @@ namespace irccd {
 namespace command {
 
 PluginInfo::PluginInfo()
-	: Command("plugin-info", "Plugins")
+    : Command("plugin-info", "Plugins")
 {
 }
 
 std::string PluginInfo::help() const
 {
-	return "Get plugin information.";
+    return "Get plugin information.";
 }
 
 std::vector<Command::Arg> PluginInfo::args() const
 {
-	return {{ "plugin", true }};
+    return {{ "plugin", true }};
 }
 
 std::vector<Command::Property> PluginInfo::properties() const
 {
-	return {{ "plugin", { json::Type::String }}};
+    return {{ "plugin", { json::Type::String }}};
 }
 
 json::Value PluginInfo::request(Irccdctl &, const CommandRequest &args) const
 {
-	return json::object({{ "plugin", args.arg(0) }});
+    return json::object({{ "plugin", args.arg(0) }});
 }
 
 json::Value PluginInfo::exec(Irccd &irccd, const json::Value &request) const
 {
-	Command::exec(irccd, request);
+    Command::exec(irccd, request);
 
-	auto plugin = irccd.pluginService().require(request.at("plugin").toString());
-	
-	return json::object({
-		{ "author",	plugin->author()	},
-		{ "license",	plugin->license()	},
-		{ "summary",	plugin->summary()	},
-		{ "version",	plugin->version()	}
-	});
+    auto plugin = irccd.pluginService().require(request.at("plugin").toString());
+
+    return json::object({
+        { "author",     plugin->author()    },
+        { "license",    plugin->license()   },
+        { "summary",    plugin->summary()   },
+        { "version",    plugin->version()   }
+    });
 }
 
 void PluginInfo::result(Irccdctl &irccdctl, const json::Value &result) const
 {
-	Command::result(irccdctl, result);
+    Command::result(irccdctl, result);
 
-	// Plugin information.
-	if (result.valueOr("status", false).toBool()) {
-		std::cout << std::boolalpha;
-		std::cout << "Author         : " << result.valueOr("author", "").toString(true) << std::endl;
-		std::cout << "License        : " << result.valueOr("license", "").toString(true) << std::endl;
-		std::cout << "Summary        : " << result.valueOr("summary", "").toString(true) << std::endl;
-		std::cout << "Version        : " << result.valueOr("version", "").toString(true) << std::endl;
-	}
+    if (result.valueOr("status", false).toBool()) {
+        std::cout << std::boolalpha;
+        std::cout << "Author         : " << result.valueOr("author", "").toString(true) << std::endl;
+        std::cout << "License        : " << result.valueOr("license", "").toString(true) << std::endl;
+        std::cout << "Summary        : " << result.valueOr("summary", "").toString(true) << std::endl;
+        std::cout << "Version        : " << result.valueOr("version", "").toString(true) << std::endl;
+    }
 }
 
 } // !command

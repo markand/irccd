@@ -39,19 +39,19 @@ namespace {
  */
 util::Substitution getSubstitution(duk_context *ctx, int index)
 {
-	util::Substitution params;
+    util::Substitution params;
 
-	if (!duk_is_object(ctx, index))
-		return params;
+    if (!duk_is_object(ctx, index))
+        return params;
 
-	dukx_enumerate(ctx, index, 0, true, [&] (duk_context *) {
-		if (dukx_get_std_string(ctx, -2) == "date")
-			params.time = static_cast<time_t>(duk_get_number(ctx, -1) / 1000);
-		else
-			params.keywords.insert({dukx_get_std_string(ctx, -2), dukx_get_std_string(ctx, -1)});
-	});
+    dukx_enumerate(ctx, index, 0, true, [&] (duk_context *) {
+        if (dukx_get_std_string(ctx, -2) == "date")
+            params.time = static_cast<time_t>(duk_get_number(ctx, -1) / 1000);
+        else
+            params.keywords.insert({dukx_get_std_string(ctx, -2), dukx_get_std_string(ctx, -1)});
+    });
 
-	return params;
+    return params;
 }
 
 /*
@@ -68,13 +68,13 @@ util::Substitution getSubstitution(duk_context *ctx, int index)
  */
 duk_ret_t format(duk_context *ctx)
 {
-	try {
-		dukx_push_std_string(ctx, util::format(dukx_get_std_string(ctx, 0), getSubstitution(ctx, 1)));
-	} catch (const std::exception &ex) {
-		dukx_throw(ctx, SyntaxError(ex.what()));
-	}
+    try {
+        dukx_push_std_string(ctx, util::format(dukx_get_std_string(ctx, 0), getSubstitution(ctx, 1)));
+    } catch (const std::exception &ex) {
+        dukx_throw(ctx, SyntaxError(ex.what()));
+    }
 
-	return 1;
+    return 1;
 }
 
 /*
@@ -90,13 +90,13 @@ duk_ret_t format(duk_context *ctx)
  */
 duk_ret_t splituser(duk_context *ctx)
 {
-	auto target = duk_require_string(ctx, 0);
-	char nick[32] = {0};
+    auto target = duk_require_string(ctx, 0);
+    char nick[32] = {0};
 
-	irc_target_get_nick(target, nick, sizeof (nick) -1);
-	duk_push_string(ctx, nick);
+    irc_target_get_nick(target, nick, sizeof (nick) -1);
+    duk_push_string(ctx, nick);
 
-	return 1;
+    return 1;
 }
 
 /*
@@ -112,38 +112,38 @@ duk_ret_t splituser(duk_context *ctx)
  */
 duk_ret_t splithost(duk_context *ctx)
 {
-	auto target = duk_require_string(ctx, 0);
-	char host[32] = {0};
+    auto target = duk_require_string(ctx, 0);
+    char host[32] = {0};
 
-	irc_target_get_host(target, host, sizeof (host) -1);
-	duk_push_string(ctx, host);
+    irc_target_get_host(target, host, sizeof (host) -1);
+    duk_push_string(ctx, host);
 
-	return 1;
+    return 1;
 }
 
 const duk_function_list_entry functions[] = {
-	{ "format",	format,		DUK_VARARGS	},
-	{ "splituser",	splituser,	1		},
-	{ "splithost",	splithost,	1		},
-	{ nullptr,	nullptr,	0		}
+    { "format",     format,     DUK_VARARGS },
+    { "splituser",  splituser,  1           },
+    { "splithost",  splithost,  1           },
+    { nullptr,      nullptr,    0           }
 };
 
 } // !namespace
 
 UtilModule::UtilModule() noexcept
-	: Module("Irccd.Util")
+    : Module("Irccd.Util")
 {
 }
 
 void UtilModule::load(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
 {
-	StackAssert sa(plugin->context());
+    StackAssert sa(plugin->context());
 
-	duk_get_global_string(plugin->context(), "Irccd");
-	duk_push_object(plugin->context());
-	duk_put_function_list(plugin->context(), -1, functions);
-	duk_put_prop_string(plugin->context(), -2, "Util");
-	duk_pop(plugin->context());
+    duk_get_global_string(plugin->context(), "Irccd");
+    duk_push_object(plugin->context());
+    duk_put_function_list(plugin->context(), -1, functions);
+    duk_put_prop_string(plugin->context(), -2, "Util");
+    duk_pop(plugin->context());
 }
 
 } // !irccd

@@ -115,16 +115,16 @@
  *
  * int main()
  * {
- *	try {
- *		Dynlib dso("./plugin" DYNLIB_SUFFIX);
+ *    try {
+ *        Dynlib dso("./plugin" DYNLIB_SUFFIX);
  *
- *		dso.sym<PluginLoad>("plugin_load")();
- *		dso.sym<PluginUnload>("plugin_unload")();
- *	} catch (const std::exception &ex) {
- *		std::cerr << ex.what() << std::endl;
- *	}
+ *        dso.sym<PluginLoad>("plugin_load")();
+ *        dso.sym<PluginUnload>("plugin_unload")();
+ *    } catch (const std::exception &ex) {
+ *        std::cerr << ex.what() << std::endl;
+ *    }
  *
- *	return 0;
+ *    return 0;
  * }
  * ````
  *
@@ -156,7 +156,7 @@
  * \endcode
  */
 #if defined(_WIN32)
-#  define DYNLIB_EXPORT	__declspec(dllexport)
+#  define DYNLIB_EXPORT    __declspec(dllexport)
 #else
 #  define DYNLIB_EXPORT
 #endif
@@ -191,80 +191,80 @@ namespace irccd {
 class Dynlib {
 private:
 #if defined(_WIN32)
-	using Handle	= HMODULE;
-	using Sym	= FARPROC;
+    using Handle    = HMODULE;
+    using Sym    = FARPROC;
 #else
-	using Handle	= void *;
-	using Sym	= void *;
+    using Handle    = void *;
+    using Sym    = void *;
 #endif
 
 public:
-	/**
-	 * \brief Policy for symbol resolution.
-	 */
-	enum Policy {
-		Immediately,		//!< load symbols immediately
-		Lazy			//!< load symbols when needed
-	};
+    /**
+     * \brief Policy for symbol resolution.
+     */
+    enum Policy {
+        Immediately,        //!< load symbols immediately
+        Lazy            //!< load symbols when needed
+    };
 
 private:
-	Handle	m_handle;
+    Handle    m_handle;
 
-	Dynlib(const Dynlib &) = delete;
-	Dynlib &operator=(const Dynlib &) = delete;
+    Dynlib(const Dynlib &) = delete;
+    Dynlib &operator=(const Dynlib &) = delete;
 
-	Dynlib(Dynlib &&) = delete;
-	Dynlib &operator=(Dynlib &&) = delete;
+    Dynlib(Dynlib &&) = delete;
+    Dynlib &operator=(Dynlib &&) = delete;
 
 #if defined(_WIN32)
-	std::string error()
-	{
-		LPSTR error = nullptr;
-		std::string errmsg;
+    std::string error()
+    {
+        LPSTR error = nullptr;
+        std::string errmsg;
 
-		FormatMessageA(
-			FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-			NULL,
-			GetLastError(),
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			(LPSTR)&error, 0, NULL);
+        FormatMessageA(
+            FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+            NULL,
+            GetLastError(),
+            MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+            (LPSTR)&error, 0, NULL);
 
-		if (error) {
-			errmsg = std::string(error);
-			LocalFree(error);
-		}
+        if (error) {
+            errmsg = std::string(error);
+            LocalFree(error);
+        }
 
-		return errmsg;
-	}
+        return errmsg;
+    }
 #endif
 
 public:
-	/**
-	 * Constructor to load a shared module.
-	 *
-	 * \param path the absolute path
-	 * \param policy the policy to load
-	 * \throw std::runtime_error on error
-	 */
-	inline Dynlib(const std::string &path, Policy policy = Immediately);
+    /**
+     * Constructor to load a shared module.
+     *
+     * \param path the absolute path
+     * \param policy the policy to load
+     * \throw std::runtime_error on error
+     */
+    inline Dynlib(const std::string &path, Policy policy = Immediately);
 
-	/**
-	 * Close the library automatically.
-	 */
-	inline ~Dynlib();
+    /**
+     * Close the library automatically.
+     */
+    inline ~Dynlib();
 
-	/**
-	 * Get a symbol from the library.
-	 *
-	 * On some platforms the symbol must be manually exported.
-	 *
-	 * \param name the symbol
-	 * \return the symbol
-	 * \throw std::runtime_error on error
-	 * \see DYNLIB_EXPORT
-	 */
-	template <typename T>
-	inline T sym(const std::string &name);
+    /**
+     * Get a symbol from the library.
+     *
+     * On some platforms the symbol must be manually exported.
+     *
+     * \param name the symbol
+     * \return the symbol
+     * \throw std::runtime_error on error
+     * \see DYNLIB_EXPORT
+     */
+    template <typename T>
+    inline T sym(const std::string &name);
 };
 
 #if defined(_WIN32)
@@ -276,27 +276,27 @@ public:
 
 Dynlib::Dynlib(const std::string &path, Policy)
 {
-	m_handle = LoadLibraryA(path.c_str());
+    m_handle = LoadLibraryA(path.c_str());
 
-	if (m_handle == nullptr)
-		throw std::runtime_error(error());
+    if (m_handle == nullptr)
+        throw std::runtime_error(error());
 }
 
 Dynlib::~Dynlib()
 {
-	FreeLibrary(m_handle);
-	m_handle = nullptr;
+    FreeLibrary(m_handle);
+    m_handle = nullptr;
 }
 
 template <typename T>
 T Dynlib::sym(const std::string &name)
 {
-	Sym sym = GetProcAddress(m_handle, name.c_str());
+    Sym sym = GetProcAddress(m_handle, name.c_str());
 
-	if (sym == nullptr)
-		throw std::runtime_error(error());
+    if (sym == nullptr)
+        throw std::runtime_error(error());
 
-	return reinterpret_cast<T>(sym);
+    return reinterpret_cast<T>(sym);
 }
 
 #else
@@ -308,27 +308,27 @@ T Dynlib::sym(const std::string &name)
 
 Dynlib::Dynlib(const std::string &path, Policy policy)
 {
-	m_handle = dlopen(path.c_str(), policy == Immediately ? RTLD_NOW : RTLD_LAZY);
+    m_handle = dlopen(path.c_str(), policy == Immediately ? RTLD_NOW : RTLD_LAZY);
 
-	if (m_handle == nullptr)
-		throw std::runtime_error(dlerror());
+    if (m_handle == nullptr)
+        throw std::runtime_error(dlerror());
 }
 
 Dynlib::~Dynlib()
 {
-	dlclose(m_handle);
-	m_handle = nullptr;
+    dlclose(m_handle);
+    m_handle = nullptr;
 }
 
 template <typename T>
 T Dynlib::sym(const std::string &name)
 {
-	Sym sym = dlsym(m_handle, name.c_str());
+    Sym sym = dlsym(m_handle, name.c_str());
 
-	if (sym == nullptr)
-		throw std::runtime_error(dlerror());
+    if (sym == nullptr)
+        throw std::runtime_error(dlerror());
 
-	return reinterpret_cast<T>(sym);
+    return reinterpret_cast<T>(sym);
 }
 
 #endif

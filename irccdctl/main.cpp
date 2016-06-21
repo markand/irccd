@@ -24,21 +24,21 @@ using namespace irccd;
 
 int main(int argc, char **argv)
 {
-	// TODO: move to Application
-	sys::setProgramName("irccdctl");
-	path::setApplicationPath(argv[0]);
-	log::setInterface(std::make_unique<log::Console>());
-	log::setVerbose(false);
-	net::init();
+    // TODO: move to Application
+    sys::setProgramName("irccdctl");
+    path::setApplicationPath(argv[0]);
+    log::setInterface(std::make_unique<log::Console>());
+    log::setVerbose(false);
+    net::init();
 
-	try {
-		Irccdctl ctl;
+    try {
+        Irccdctl ctl;
 
-		ctl.run(--argc, ++argv);
-	} catch (const std::exception &ex) {
-		log::warning() << sys::programName() << ": " << ex.what() << std::endl;
-		std::exit(1);
-	}
+        ctl.run(--argc, ++argv);
+    } catch (const std::exception &ex) {
+        log::warning() << sys::programName() << ": " << ex.what() << std::endl;
+        std::exit(1);
+    }
 
-	return 0;
+    return 0;
 }

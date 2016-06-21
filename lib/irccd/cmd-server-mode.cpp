@@ -26,46 +26,46 @@ namespace irccd {
 namespace command {
 
 ServerMode::ServerMode()
-	: Command("server-mode", "Server")
+    : Command("server-mode", "Server")
 {
 }
 
 std::string ServerMode::help() const
 {
-	return "";
+    return "";
 }
 
 std::vector<Command::Arg> ServerMode::args() const
 {
-	return {
-		{ "server",	true },
-		{ "mode",	true }
-	};
+    return {
+        { "server",     true },
+        { "mode",       true }
+    };
 }
 
 std::vector<Command::Property> ServerMode::properties() const
 {
-	return {
-		{ "server",	{ json::Type::String }},
-		{ "mode",	{ json::Type::String }}
-	};
+    return {
+        { "server",     { json::Type::String }},
+        { "mode",       { json::Type::String }}
+    };
 }
 
 json::Value ServerMode::request(Irccdctl &, const CommandRequest &args) const
 {
-	return json::object({
-		{ "server",	args.arg(0) },
-		{ "mode",	args.arg(1) }
-	});
+    return json::object({
+        { "server",     args.arg(0) },
+        { "mode",       args.arg(1) }
+    });
 }
 
 json::Value ServerMode::exec(Irccd &irccd, const json::Value &request) const
 {
-	Command::exec(irccd, request);
+    Command::exec(irccd, request);
 
-	irccd.serverService().require(request.at("server").toString())->mode(request.at("mode").toString());
+    irccd.serverService().require(request.at("server").toString())->mode(request.at("mode").toString());
 
-	return json::object();
+    return json::object();
 }
 
 } // !command

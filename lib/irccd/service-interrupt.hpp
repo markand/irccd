@@ -34,31 +34,31 @@ namespace irccd {
  */
 class InterruptService : public Service {
 private:
-	net::SocketTcpIpv4 m_in;
-	net::SocketTcpIpv4 m_out;
+    net::SocketTcpIpv4 m_in;
+    net::SocketTcpIpv4 m_out;
 
 public:
-	/**
-	 * Prepare the socket pair.
-	 *
-	 * \throw std::runtime_error on errors
-	 */
-	IRCCD_EXPORT InterruptService();
+    /**
+     * Prepare the socket pair.
+     *
+     * \throw std::runtime_error on errors
+     */
+    IRCCD_EXPORT InterruptService();
 
-	/**
-	 * \copydoc Service::prepare
-	 */
-	IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
+    /**
+     * \copydoc Service::prepare
+     */
+    IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
 
-	/**
-	 * \copydoc Service::sync
-	 */
-	IRCCD_EXPORT void sync(fd_set &in, fd_set &out) override;
+    /**
+     * \copydoc Service::sync
+     */
+    IRCCD_EXPORT void sync(fd_set &in, fd_set &out) override;
 
-	/**
-	 * Request interruption.
-	 */
-	IRCCD_EXPORT void interrupt() noexcept;
+    /**
+     * Request interruption.
+     */
+    IRCCD_EXPORT void interrupt() noexcept;
 };
 
 } // !irccd

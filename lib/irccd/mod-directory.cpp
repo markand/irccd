@@ -38,20 +38,20 @@ namespace {
 
 std::string path(duk_context *ctx)
 {
-	duk_push_this(ctx);
-	duk_get_prop_string(ctx, -1, "path");
+    duk_push_this(ctx);
+    duk_get_prop_string(ctx, -1, "path");
 
-	if (duk_get_type(ctx, -1) != DUK_TYPE_STRING)
-		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Directory object");
+    if (duk_get_type(ctx, -1) != DUK_TYPE_STRING)
+        duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Directory object");
 
-	auto ret = dukx_get_std_string(ctx, -1);
+    auto ret = dukx_get_std_string(ctx, -1);
 
-	if (ret.empty())
-		duk_error(ctx, DUK_ERR_TYPE_ERROR, "directory object has empty path");
+    if (ret.empty())
+        duk_error(ctx, DUK_ERR_TYPE_ERROR, "directory object has empty path");
 
-	duk_pop_n(ctx, 2);
+    duk_pop_n(ctx, 2);
 
-	return ret;
+    return ret;
 }
 
 /*
@@ -65,31 +65,31 @@ std::string path(duk_context *ctx)
 template <typename Pred>
 std::string findPath(const std::string &base, bool recursive, Pred pred)
 {
-	/*
-	 * For performance reason, we first iterate over all entries that are
-	 * not directories to avoid going deeper recursively if the requested
-	 * file is in the current directory.
-	 */
-	auto entries = fs::readdir(base);
+    /*
+     * For performance reason, we first iterate over all entries that are
+     * not directories to avoid going deeper recursively if the requested
+     * file is in the current directory.
+     */
+    auto entries = fs::readdir(base);
 
-	for (const auto &entry : entries)
-		if (entry.type != fs::Entry::Dir && pred(entry.name))
-			return base + entry.name;
+    for (const auto &entry : entries)
+        if (entry.type != fs::Entry::Dir && pred(entry.name))
+            return base + entry.name;
 
-	if (!recursive)
-		return "";
+    if (!recursive)
+        return "";
 
-	for (const auto &entry : entries) {
-		if (entry.type == fs::Entry::Dir) {
-			std::string next = base + entry.name + fs::separator();
-			std::string path = findPath(next, true, pred);
+    for (const auto &entry : entries) {
+        if (entry.type == fs::Entry::Dir) {
+            std::string next = base + entry.name + fs::separator();
+            std::string path = findPath(next, true, pred);
 
-			if (!path.empty())
-				return path;
-		}
-	}
+            if (!path.empty())
+                return path;
+        }
+    }
 
-	return "";
+    return "";
 }
 
 /*
@@ -97,9 +97,9 @@ std::string findPath(const std::string &base, bool recursive, Pred pred)
  */
 std::string findName(std::string base, const std::string &pattern, bool recursive)
 {
-	return findPath(base, recursive, [&] (const std::string &entryname) -> bool {
-		return pattern == entryname;
-	});
+    return findPath(base, recursive, [&] (const std::string &entryname) -> bool {
+        return pattern == entryname;
+    });
 }
 
 /*
@@ -107,12 +107,12 @@ std::string findName(std::string base, const std::string &pattern, bool recursiv
  */
 std::string findRegex(const std::string &base, std::string pattern, bool recursive)
 {
-	std::regex regexp(pattern, std::regex::ECMAScript);
-	std::smatch smatch;
+    std::regex regexp(pattern, std::regex::ECMAScript);
+    std::smatch smatch;
 
-	return findPath(base, recursive, [&] (const std::string &entryname) -> bool {
-		return std::regex_match(entryname, smatch, regexp);
-	});
+    return findPath(base, recursive, [&] (const std::string &entryname) -> bool {
+        return std::regex_match(entryname, smatch, regexp);
+    });
 }
 
 /*
@@ -125,38 +125,38 @@ std::string findRegex(const std::string &base, std::string pattern, bool recursi
  */
 duk_ret_t find(duk_context *ctx, std::string base, bool recursive, int patternIndex)
 {
-	base = path::clean(base);
+    base = path::clean(base);
 
-	try {
-		std::string path;
+    try {
+        std::string path;
 
-		if (duk_is_string(ctx, patternIndex))
-			path = findName(base, duk_get_string(ctx, patternIndex), recursive);
-		else {
-			// Check if it's a valid RegExp object.
-			duk_get_global_string(ctx, "RegExp");
-			auto isRegex = duk_instanceof(ctx, patternIndex, -1);
-			duk_pop(ctx);
+        if (duk_is_string(ctx, patternIndex))
+            path = findName(base, duk_get_string(ctx, patternIndex), recursive);
+        else {
+            // Check if it's a valid RegExp object.
+            duk_get_global_string(ctx, "RegExp");
+            auto isRegex = duk_instanceof(ctx, patternIndex, -1);
+            duk_pop(ctx);
 
-			if (isRegex) {
-				duk_get_prop_string(ctx, patternIndex, "source");
-				auto pattern = duk_to_string(ctx, -1);
-				duk_pop(ctx);
+            if (isRegex) {
+                duk_get_prop_string(ctx, patternIndex, "source");
+                auto pattern = duk_to_string(ctx, -1);
+                duk_pop(ctx);
 
-				path = findRegex(base, pattern, recursive);
-			} else
-				duk_error(ctx, DUK_ERR_TYPE_ERROR, "pattern must be a string or a regex expression");
-		}
+                path = findRegex(base, pattern, recursive);
+            } else
+                duk_error(ctx, DUK_ERR_TYPE_ERROR, "pattern must be a string or a regex expression");
+        }
 
-		if (path.empty())
-			return 0;
+        if (path.empty())
+            return 0;
 
-		dukx_push_std_string(ctx, path);
-	} catch (const std::exception &ex) {
-		duk_error(ctx, DUK_ERR_ERROR, "%s", ex.what());
-	}
+        dukx_push_std_string(ctx, path);
+    } catch (const std::exception &ex) {
+        duk_error(ctx, DUK_ERR_ERROR, "%s", ex.what());
+    }
 
-	return 1;
+    return 1;
 }
 
 /*
@@ -167,19 +167,19 @@ duk_ret_t find(duk_context *ctx, std::string base, bool recursive, int patternIn
  */
 duk_ret_t remove(duk_context *ctx, const std::string &path, bool recursive)
 {
-	if (!fs::isDirectory(path))
-		dukx_throw(ctx, SystemError(EINVAL, "not a directory"));
+    if (!fs::isDirectory(path))
+        dukx_throw(ctx, SystemError(EINVAL, "not a directory"));
 
-	if (!recursive) {
+    if (!recursive) {
 #if defined(_WIN32)
-		::RemoveDirectory(path.c_str());
+        ::RemoveDirectory(path.c_str());
 #else
-		::remove(path.c_str());
+        ::remove(path.c_str());
 #endif
-	} else
-		fs::rmdir(path.c_str());
+    } else
+        fs::rmdir(path.c_str());
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -199,7 +199,7 @@ duk_ret_t remove(duk_context *ctx, const std::string &path, bool recursive)
  */
 duk_ret_t methodFind(duk_context *ctx)
 {
-	return find(ctx, path(ctx), duk_get_boolean(ctx, 1), 0);
+    return find(ctx, path(ctx), duk_get_boolean(ctx, 1), 0);
 }
 
 /*
@@ -216,13 +216,13 @@ duk_ret_t methodFind(duk_context *ctx)
  */
 duk_ret_t methodRemove(duk_context *ctx)
 {
-	return remove(ctx, path(ctx), duk_get_boolean(ctx, 0));
+    return remove(ctx, path(ctx), duk_get_boolean(ctx, 0));
 }
 
 const duk_function_list_entry methods[] = {
-	{ "find",	methodFind,	DUK_VARARGS	},
-	{ "remove",	methodRemove,	1		},
-	{ nullptr,	nullptr,	0		} 
+    { "find",       methodFind,     DUK_VARARGS },
+    { "remove",     methodRemove,   1           },
+    { nullptr,      nullptr,        0           }
 };
 
 /*
@@ -244,43 +244,43 @@ const duk_function_list_entry methods[] = {
  */
 duk_ret_t constructor(duk_context *ctx)
 {
-	if (!duk_is_constructor_call(ctx))
-		return 0;
+    if (!duk_is_constructor_call(ctx))
+        return 0;
 
-	try {
-		std::string path = duk_require_string(ctx, 0);
-		std::int8_t flags = duk_get_uint(ctx, 1);
+    try {
+        std::string path = duk_require_string(ctx, 0);
+        std::int8_t flags = duk_get_uint(ctx, 1);
 
-		if (!fs::isDirectory(path))
-			dukx_throw(ctx, SystemError(EINVAL, "not a directory"));
+        if (!fs::isDirectory(path))
+            dukx_throw(ctx, SystemError(EINVAL, "not a directory"));
 
-		std::vector<fs::Entry> list = fs::readdir(path, flags);
+        std::vector<fs::Entry> list = fs::readdir(path, flags);
 
-		duk_push_this(ctx);
-		duk_push_string(ctx, "count");
-		duk_push_int(ctx, list.size());
-		duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
-		duk_push_string(ctx, "path");
-		dukx_push_std_string(ctx, path);
-		duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
-		duk_push_string(ctx, "entries");
-		duk_push_array(ctx);
+        duk_push_this(ctx);
+        duk_push_string(ctx, "count");
+        duk_push_int(ctx, list.size());
+        duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
+        duk_push_string(ctx, "path");
+        dukx_push_std_string(ctx, path);
+        duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
+        duk_push_string(ctx, "entries");
+        duk_push_array(ctx);
 
-		for (unsigned i = 0; i < list.size(); ++i) {
-			duk_push_object(ctx);
-			dukx_push_std_string(ctx, list[i].name);
-			duk_put_prop_string(ctx, -2, "name");
-			duk_push_int(ctx, list[i].type);
-			duk_put_prop_string(ctx, -2, "type");
-			duk_put_prop_index(ctx, -2, i);
-		}
+        for (unsigned i = 0; i < list.size(); ++i) {
+            duk_push_object(ctx);
+            dukx_push_std_string(ctx, list[i].name);
+            duk_put_prop_string(ctx, -2, "name");
+            duk_push_int(ctx, list[i].type);
+            duk_put_prop_string(ctx, -2, "type");
+            duk_put_prop_index(ctx, -2, i);
+        }
 
-		duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
-	} catch (const std::exception &ex) {
-		dukx_throw(ctx, SystemError(errno, ex.what()));
-	}
+        duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
+    } catch (const std::exception &ex) {
+        dukx_throw(ctx, SystemError(errno, ex.what()));
+    }
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -298,7 +298,7 @@ duk_ret_t constructor(duk_context *ctx)
  */
 duk_ret_t funcFind(duk_context *ctx)
 {
-	return find(ctx, duk_require_string(ctx, 0), duk_get_boolean(ctx, 2), 1);
+    return find(ctx, duk_require_string(ctx, 0), duk_get_boolean(ctx, 2), 1);
 }
 
 /*
@@ -315,7 +315,7 @@ duk_ret_t funcFind(duk_context *ctx)
  */
 duk_ret_t funcRemove(duk_context *ctx)
 {
-	return remove(ctx, duk_require_string(ctx, 0), duk_get_boolean(ctx, 1));
+    return remove(ctx, duk_require_string(ctx, 0), duk_get_boolean(ctx, 1));
 }
 
 /*
@@ -333,57 +333,57 @@ duk_ret_t funcRemove(duk_context *ctx)
  */
 duk_ret_t funcMkdir(duk_context *ctx)
 {
-	try {
-		fs::mkdir(
-			duk_require_string(ctx, 0),
-			duk_is_number(ctx, 1) ? duk_get_int(ctx, 1) : 0700
-		);
-	} catch (const std::exception &ex) {
-		dukx_throw(ctx, SystemError(errno, ex.what()));
-	}
+    try {
+        fs::mkdir(
+            duk_require_string(ctx, 0),
+            duk_is_number(ctx, 1) ? duk_get_int(ctx, 1) : 0700
+        );
+    } catch (const std::exception &ex) {
+        dukx_throw(ctx, SystemError(errno, ex.what()));
+    }
 
-	return 0;
+    return 0;
 }
 
 const duk_function_list_entry functions[] = {
-	{ "find",		funcFind,		DUK_VARARGS	},
-	{ "mkdir",		funcMkdir,		DUK_VARARGS	},
-	{ "remove",		funcRemove,		DUK_VARARGS	},
-	{ nullptr,		nullptr,		0		}
+    { "find",           funcFind,   DUK_VARARGS },
+    { "mkdir",          funcMkdir,  DUK_VARARGS },
+    { "remove",         funcRemove, DUK_VARARGS },
+    { nullptr,          nullptr,    0           }
 };
 
 const duk_number_list_entry constants[] = {
-	{ "Dot",		static_cast<int>(fs::Dot)		},
-	{ "DotDot",		static_cast<int>(fs::DotDot)		},
-	{ "TypeUnknown",	static_cast<int>(fs::Entry::Unknown)	},
-	{ "TypeDir",		static_cast<int>(fs::Entry::Dir)	},
-	{ "TypeFile",		static_cast<int>(fs::Entry::File)	},
-	{ "TypeLink",		static_cast<int>(fs::Entry::Link)	},
-	{ nullptr,		0					}
+    { "Dot",            static_cast<int>(fs::Dot)               },
+    { "DotDot",         static_cast<int>(fs::DotDot)            },
+    { "TypeUnknown",    static_cast<int>(fs::Entry::Unknown)    },
+    { "TypeDir",        static_cast<int>(fs::Entry::Dir)        },
+    { "TypeFile",       static_cast<int>(fs::Entry::File)       },
+    { "TypeLink",       static_cast<int>(fs::Entry::Link)       },
+    { nullptr,          0                                       }
 };
 
 } // !namespace
 
 DirectoryModule::DirectoryModule() noexcept
-	: Module("Irccd.Directory")
+    : Module("Irccd.Directory")
 {
 }
 
 void DirectoryModule::load(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
 {
-	StackAssert sa(plugin->context());
+    StackAssert sa(plugin->context());
 
-	duk_get_global_string(plugin->context(), "Irccd");
-	duk_push_c_function(plugin->context(), constructor, 2);
-	duk_put_number_list(plugin->context(), -1, constants);
-	duk_put_function_list(plugin->context(), -1, functions);
-	dukx_push_std_string(plugin->context(), std::string{fs::separator()});
-	duk_put_prop_string(plugin->context(), -2, "separator");
-	duk_push_object(plugin->context());
-	duk_put_function_list(plugin->context(), -1, methods);
-	duk_put_prop_string(plugin->context(), -2, "prototype");
-	duk_put_prop_string(plugin->context(), -2, "Directory");
-	duk_pop(plugin->context());
+    duk_get_global_string(plugin->context(), "Irccd");
+    duk_push_c_function(plugin->context(), constructor, 2);
+    duk_put_number_list(plugin->context(), -1, constants);
+    duk_put_function_list(plugin->context(), -1, functions);
+    dukx_push_std_string(plugin->context(), std::string{fs::separator()});
+    duk_put_prop_string(plugin->context(), -2, "separator");
+    duk_push_object(plugin->context());
+    duk_put_function_list(plugin->context(), -1, methods);
+    duk_put_prop_string(plugin->context(), -2, "prototype");
+    duk_put_prop_string(plugin->context(), -2, "Directory");
+    duk_pop(plugin->context());
 }
 
 } // !irccd

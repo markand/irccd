@@ -36,67 +36,67 @@ namespace irccd {
  */
 class RuleService {
 private:
-	std::vector<Rule> m_rules;
+    std::vector<Rule> m_rules;
 
 public:
-	/**
-	 * Get the list of rules.
-	 *
-	 * \return the list of rules
-	 */
-	inline const std::vector<Rule> &rules() const noexcept
-	{
-		return m_rules;
-	}
+    /**
+     * Get the list of rules.
+     *
+     * \return the list of rules
+     */
+    inline const std::vector<Rule> &rules() const noexcept
+    {
+        return m_rules;
+    }
 
-	/**
-	 * Get the number of rules.
-	 *
-	 * \return the number of rules
-	 */
-	inline std::size_t length() const noexcept
-	{
-		return m_rules.size();
-	}
+    /**
+     * Get the number of rules.
+     *
+     * \return the number of rules
+     */
+    inline std::size_t length() const noexcept
+    {
+        return m_rules.size();
+    }
 
-	/**
-	 * Append a rule.
-	 *
-	 * \param rule the rule to append
-	 */
-	IRCCD_EXPORT void add(Rule rule);
+    /**
+     * Append a rule.
+     *
+     * \param rule the rule to append
+     */
+    IRCCD_EXPORT void add(Rule rule);
 
-	/**
-	 * Insert a new rule at the specified position.
-	 *
-	 * \param rule the rule
-	 * \param position the position
-	 */
-	IRCCD_EXPORT void insert(Rule rule, unsigned position);
+    /**
+     * Insert a new rule at the specified position.
+     *
+     * \param rule the rule
+     * \param position the position
+     */
+    IRCCD_EXPORT void insert(Rule rule, unsigned position);
 
-	/**
-	 * Remove a new rule from the specified position.
-	 *
-	 * \pre position must be valid
-	 * \param position the position
-	 */
-	IRCCD_EXPORT void remove(unsigned position);
+    /**
+     * Remove a new rule from the specified position.
+     *
+     * \pre position must be valid
+     * \param position the position
+     */
+    IRCCD_EXPORT void remove(unsigned position);
 
-	/**
-	 * Resolve the action to execute with the specified list of rules.
-	 *
-	 * \param server the server name
-	 * \param channel the channel name
-	 * \param origin the origin
-	 * \param plugin the plugin name
-	 * \param event the event name (e.g onKick)
-	 * \return true if the plugin must be called
-	 */
-	IRCCD_EXPORT bool solve(const std::string &server,
-				const std::string &channel,
-				const std::string &origin,
-				const std::string &plugin,
-				const std::string &event) noexcept;
+    /**
+     * Resolve the action to execute with the specified list of rules.
+     *
+     * \param server the server name
+     * \param channel the channel name
+     * \param origin the origin
+     * \param plugin the plugin name
+     * \param event the event name (e.g onKick)
+     * \return true if the plugin must be called
+     */
+    IRCCD_EXPORT bool solve(const std::string &server,
+                            const std::string &channel,
+                            const std::string &origin,
+                            const std::string &plugin,
+                            const std::string &event) noexcept;
 };
 
 } // !irccd

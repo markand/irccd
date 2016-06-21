@@ -17,11 +17,11 @@
 #
 
 set(
-	ELAPSED_TIMER_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/index.md
-	${CMAKE_CURRENT_LIST_DIR}/method/constructor.md
-	${CMAKE_CURRENT_LIST_DIR}/method/elapsed.md
-	${CMAKE_CURRENT_LIST_DIR}/method/pause.md
-	${CMAKE_CURRENT_LIST_DIR}/method/reset.md
-	${CMAKE_CURRENT_LIST_DIR}/method/restart.md
+    ELAPSED_TIMER_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/index.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/constructor.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/elapsed.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/pause.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/reset.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/restart.md
 )

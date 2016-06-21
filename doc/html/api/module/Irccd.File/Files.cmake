@@ -17,23 +17,23 @@
 #
 
 set(
-	FILE_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/index.md
-	${CMAKE_CURRENT_LIST_DIR}/function/basename.md
-	${CMAKE_CURRENT_LIST_DIR}/function/dirname.md
-	${CMAKE_CURRENT_LIST_DIR}/function/exists.md
-	${CMAKE_CURRENT_LIST_DIR}/function/remove.md
-	${CMAKE_CURRENT_LIST_DIR}/function/stat.md
-	${CMAKE_CURRENT_LIST_DIR}/method/basename.md
-	${CMAKE_CURRENT_LIST_DIR}/method/close.md
-	${CMAKE_CURRENT_LIST_DIR}/method/constructor.md
-	${CMAKE_CURRENT_LIST_DIR}/method/dirname.md
-	${CMAKE_CURRENT_LIST_DIR}/method/lines.md
-	${CMAKE_CURRENT_LIST_DIR}/method/read.md
-	${CMAKE_CURRENT_LIST_DIR}/method/readline.md
-	${CMAKE_CURRENT_LIST_DIR}/method/remove.md
-	${CMAKE_CURRENT_LIST_DIR}/method/seek.md
-	${CMAKE_CURRENT_LIST_DIR}/method/stat.md
-	${CMAKE_CURRENT_LIST_DIR}/method/tell.md
-	${CMAKE_CURRENT_LIST_DIR}/method/write.md
+    FILE_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/index.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/basename.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/dirname.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/exists.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/remove.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/stat.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/basename.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/close.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/constructor.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/dirname.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/lines.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/read.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/readline.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/remove.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/seek.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/stat.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/tell.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/write.md
 )

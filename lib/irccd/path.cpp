@@ -82,70 +82,70 @@ std::string base;
 
 std::string executablePath()
 {
-	std::string result;
-	std::size_t size = MAX_PATH;
+    std::string result;
+    std::size_t size = MAX_PATH;
 
-	result.resize(size);
+    result.resize(size);
 
-	if (!(size = GetModuleFileNameA(nullptr, &result[0], size)))
-		throw std::runtime_error("GetModuleFileName error");
+    if (!(size = GetModuleFileNameA(nullptr, &result[0], size)))
+        throw std::runtime_error("GetModuleFileName error");
 
-	result.resize(size);
+    result.resize(size);
 
-	return result;
+    return result;
 }
 
 #elif defined(IRCCD_SYSTEM_LINUX)
 
 std::string executablePath()
 {
-	std::string result;
+    std::string result;
 
-	result.resize(2048);
+    result.resize(2048);
 
-	auto size = readlink("/proc/self/exe", &result[0], 2048);
+    auto size = readlink("/proc/self/exe", &result[0], 2048);
 
-	if (size < 0)
-		throw std::invalid_argument(std::strerror(errno));
+    if (size < 0)
+        throw std::invalid_argument(std::strerror(errno));
 
-	result.resize(size);
+    result.resize(size);
 
-	return result;
+    return result;
 }
 
 #elif defined(IRCCD_SYSTEM_FREEBSD)
 
 std::string executablePath()
 {
-	std::array<int, 4> mib{ { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 } };
-	std::string result;
-	std::size_t size = PATH_MAX + 1;
+    std::array<int, 4> mib{ { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 } };
+    std::string result;
+    std::size_t size = PATH_MAX + 1;
 
-	result.resize(size);
+    result.resize(size);
 
-	if (sysctl(mib.data(), 4, &result[0], &size, nullptr, 0) < 0)
-		throw std::runtime_error(std::strerror(errno));
+    if (sysctl(mib.data(), 4, &result[0], &size, nullptr, 0) < 0)
+        throw std::runtime_error(std::strerror(errno));
 
-	result.resize(size);
+    result.resize(size);
 
-	return result;
+    return result;
 }
 
 #elif defined(IRCCD_SYSTEM_MAC)
 
 std::string executablePath()
 {
-	std::string result;
-	std::size_t size = PROC_PIDPATHINFO_MAXSIZE;
+    std::string result;
+    std::size_t size = PROC_PIDPATHINFO_MAXSIZE;
 
-	result.resize(size);
+    result.resize(size);
 
-	if ((size = proc_pidpath(getpid(), &result[0], size)) == 0)
-		throw std::runtime_error(std::strerror(errno));
+    if ((size = proc_pidpath(getpid(), &result[0], size)) == 0)
+        throw std::runtime_error(std::strerror(errno));
 
-	result.resize(size);
+    result.resize(size);
 
-	return result;
+    return result;
 }
 
 #else
@@ -159,7 +159,7 @@ std::string executablePath()
 
 std::string executablePath()
 {
-	return "";
+    return "";
 }
 
 #endif
@@ -175,30 +175,30 @@ std::string executablePath()
 
 std::string systemConfig()
 {
-	assert(!base.empty());
+    assert(!base.empty());
 
-	return base + WITH_CONFDIR;
+    return base + WITH_CONFDIR;
 }
 
 std::string systemData()
 {
-	assert(!base.empty());
+    assert(!base.empty());
 
-	return base + WITH_DATADIR;
+    return base + WITH_DATADIR;
 }
 
 std::string systemCache()
 {
-	assert(!base.empty());
+    assert(!base.empty());
 
-	return base + WITH_CACHEDIR;
+    return base + WITH_CACHEDIR;
 }
 
 std::string systemPlugins()
 {
-	assert(!base.empty());
+    assert(!base.empty());
 
-	return base + WITH_PLUGINDIR;
+    return base + WITH_PLUGINDIR;
 }
 
 /*
@@ -225,34 +225,34 @@ std::string systemPlugins()
  */
 std::string userConfig()
 {
-	std::ostringstream oss;
+    std::ostringstream oss;
 
 #if defined(IRCCD_SYSTEM_WINDOWS)
-	char path[MAX_PATH];
+    char path[MAX_PATH];
 
-	if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, path) != S_OK)
-		oss << "";
-	else {
-		oss << path;
-		oss << "\\irccd\\config\\";
-	}
+    if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, path) != S_OK)
+        oss << "";
+    else {
+        oss << path;
+        oss << "\\irccd\\config\\";
+    }
 #else
-	try {
-		Xdg xdg;
+    try {
+        Xdg xdg;
 
-		oss << xdg.configHome();
-		oss << "/irccd/";
-	} catch (const std::exception &) {
-		const char *home = getenv("HOME");
+        oss << xdg.configHome();
+        oss << "/irccd/";
+    } catch (const std::exception &) {
+        const char *home = getenv("HOME");
 
-		if (home != nullptr)
-			oss << home;
+        if (home != nullptr)
+            oss << home;
 
-		oss << "/.config/irccd/";
-	}
+        oss << "/.config/irccd/";
+    }
 #endif
 
-	return oss.str();
+    return oss.str();
 }
 
 /*
@@ -272,34 +272,34 @@ std::string userConfig()
  */
 std::string userData()
 {
-	std::ostringstream oss;
+    std::ostringstream oss;
 
 #if defined(IRCCD_SYSTEM_WINDOWS)
-	char path[MAX_PATH];
+    char path[MAX_PATH];
 
-	if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, path) != S_OK)
-		oss << "";
-	else {
-		oss << path;
-		oss << "\\irccd\\share";
-	}
+    if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, path) != S_OK)
+        oss << "";
+    else {
+        oss << path;
+        oss << "\\irccd\\share";
+    }
 #else
-	try {
-		Xdg xdg;
+    try {
+        Xdg xdg;
 
-		oss << xdg.dataHome();
-		oss << "/irccd/";
-	} catch (const std::exception &) {
-		const char *home = getenv("HOME");
+        oss << xdg.dataHome();
+        oss << "/irccd/";
+    } catch (const std::exception &) {
+        const char *home = getenv("HOME");
 
-		if (home != nullptr)
-			oss << home;
+        if (home != nullptr)
+            oss << home;
 
-		oss << "/.local/share/irccd/";
-	}
+        oss << "/.local/share/irccd/";
+    }
 #endif
 
-	return oss.str();
+    return oss.str();
 }
 
 /*
@@ -319,31 +319,31 @@ std::string userData()
  */
 std::string userCache()
 {
-	std::ostringstream oss;
+    std::ostringstream oss;
 
 #if defined(IRCCD_SYSTEM_WINDOWS)
-	char path[MAX_PATH + 1];
+    char path[MAX_PATH + 1];
 
-	GetTempPathA(sizeof (path), path);
+    GetTempPathA(sizeof (path), path);
 
-	oss << path << "\\irccd\\";
+    oss << path << "\\irccd\\";
 #else
-	try {
-		Xdg xdg;
+    try {
+        Xdg xdg;
 
-		oss << xdg.cacheHome();
-		oss << "/irccd/";
-	} catch (const std::exception &) {
-		const char *home = getenv("HOME");
+        oss << xdg.cacheHome();
+        oss << "/irccd/";
+    } catch (const std::exception &) {
+        const char *home = getenv("HOME");
 
-		if (home != nullptr)
-			oss << home;
+        if (home != nullptr)
+            oss << home;
 
-		oss << "/.cache/irccd/";
-	}
+        oss << "/.cache/irccd/";
+    }
 #endif
 
-	return oss.str();
+    return oss.str();
 }
 
 /*
@@ -354,7 +354,7 @@ std::string userCache()
  */
 std::string userPlugins()
 {
-	return userData() + "/plugins/";
+    return userData() + "/plugins/";
 }
 
 } // !namespace
@@ -367,161 +367,161 @@ const char Separator(':');
 
 void setApplicationPath(const std::string &argv0)
 {
-	try {
-		base = executablePath();
-	} catch (const std::exception &) {
-		/*
-		 * If an exception is thrown, that means the operatin system supports a function to get the executable
-		 * path but it failed.
-		 *
-		 * TODO: show a waning
-		 */
-	}
+    try {
+        base = executablePath();
+    } catch (const std::exception &) {
+        /*
+         * If an exception is thrown, that means the operatin system supports a function to get the executable
+         * path but it failed.
+         *
+         * TODO: show a waning
+         */
+    }
 
-	/*
-	 * If we could not get the application path from the native function, check if argv[0] is an absolute path
-	 * and use that from there.
-	 *
-	 * Otherwise, search from the PATH.
-	 *
-	 * In the worst case use current working directory.
-	 */
-	if (base.empty()) {
-		if (fs::isAbsolute(argv0))
-			base = argv0;
-		else {
-			std::string name = fs::baseName(argv0);
+    /*
+     * If we could not get the application path from the native function, check if argv[0] is an absolute path
+     * and use that from there.
+     *
+     * Otherwise, search from the PATH.
+     *
+     * In the worst case use current working directory.
+     */
+    if (base.empty()) {
+        if (fs::isAbsolute(argv0))
+            base = argv0;
+        else {
+            std::string name = fs::baseName(argv0);
 
-			for (const auto &dir : util::split(sys::env("PATH"), std::string(1, Separator))) {
-				std::string path = dir + fs::separator() + name;
+            for (const auto &dir : util::split(sys::env("PATH"), std::string(1, Separator))) {
+                std::string path = dir + fs::separator() + name;
 
-				if (fs::exists(path)) {
-					base = path;
-					break;
-				}
-			}
+                if (fs::exists(path)) {
+                    base = path;
+                    break;
+                }
+            }
 
-			// Not found in PATH? add dummy value.
-			if (base.empty())
-				base = std::string(".") + fs::separator() + WITH_BINDIR + fs::separator() + "dummy";
-		}
-	}
+            // Not found in PATH? add dummy value.
+            if (base.empty())
+                base = std::string(".") + fs::separator() + WITH_BINDIR + fs::separator() + "dummy";
+        }
+    }
 
-	// Find bin/<progname>.
-	auto pos = base.rfind(std::string(WITH_BINDIR) + fs::separator() + fs::baseName(base));
+    // Find bin/<progname>.
+    auto pos = base.rfind(std::string(WITH_BINDIR) + fs::separator() + fs::baseName(base));
 
-	if (pos != std::string::npos)
-		base.erase(pos);
+    if (pos != std::string::npos)
+        base.erase(pos);
 
-	// Add trailing / or \\ for convenience.
-	base = clean(base);
+    // Add trailing / or \\ for convenience.
+    base = clean(base);
 
-	assert(!base.empty());
+    assert(!base.empty());
 }
 
 std::string clean(std::string input)
 {
-	if (input.empty())
-		return input;
+    if (input.empty())
+        return input;
 
-	// First, remove any duplicates.
-	input.erase(std::unique(input.begin(), input.end(), [&] (char c1, char c2) {
-		return c1 == c2 && (c1 == '/' || c1 == '\\');
-	}), input.end());
+    // First, remove any duplicates.
+    input.erase(std::unique(input.begin(), input.end(), [&] (char c1, char c2) {
+        return c1 == c2 && (c1 == '/' || c1 == '\\');
+    }), input.end());
 
-	// Add a trailing / or \\.
-	char c = input[input.length() - 1];
-	if (c != '/' && c != '\\')
-		input += fs::separator();
+    // Add a trailing / or \\.
+    char c = input[input.length() - 1];
+    if (c != '/' && c != '\\')
+        input += fs::separator();
 
-	// Now converts all / to \\ for Windows and the opposite for Unix.
+    // Now converts all / to \\ for Windows and the opposite for Unix.
 #if defined(IRCCD_SYSTEM_WINDOWS)
-	std::replace(input.begin(), input.end(), '/', '\\');
+    std::replace(input.begin(), input.end(), '/', '\\');
 #else
-	std::replace(input.begin(), input.end(), '\\', '/');
+    std::replace(input.begin(), input.end(), '\\', '/');
 #endif
 
-	return input;
+    return input;
 }
 
 std::string get(Path path, Owner owner)
 {
-	assert(path >= PathConfig && path <= PathPlugins);
-	assert(owner >= OwnerSystem && owner <= OwnerUser);
+    assert(path >= PathConfig && path <= PathPlugins);
+    assert(owner >= OwnerSystem && owner <= OwnerUser);
 
-	std::string result;
+    std::string result;
 
-	switch (owner) {
-	case OwnerSystem:
-		switch (path) {
-		case PathCache:
-			result = clean(systemCache());
-			break;
-		case PathConfig:
-			result = clean(systemConfig());
-			break;
-		case PathData:
-			result = clean(systemData());
-			break;
-		case PathPlugins:
-			result = clean(systemPlugins());
-			break;
-		default:
-			break;
-		}
-	case OwnerUser:
-		switch (path) {
-		case PathCache:
-			result = clean(userCache());
-			break;
-		case PathConfig:
-			result = clean(userConfig());
-			break;
-		case PathData:
-			result = clean(userData());
-			break;
-		case PathPlugins:
-			result = clean(userPlugins());
-			break;
-		default:
-			break;
-		}
-	default:
-		break;
-	}
+    switch (owner) {
+    case OwnerSystem:
+        switch (path) {
+        case PathCache:
+            result = clean(systemCache());
+            break;
+        case PathConfig:
+            result = clean(systemConfig());
+            break;
+        case PathData:
+            result = clean(systemData());
+            break;
+        case PathPlugins:
+            result = clean(systemPlugins());
+            break;
+        default:
+            break;
+        }
+    case OwnerUser:
+        switch (path) {
+        case PathCache:
+            result = clean(userCache());
+            break;
+        case PathConfig:
+            result = clean(userConfig());
+            break;
+        case PathData:
+            result = clean(userData());
+            break;
+        case PathPlugins:
+            result = clean(userPlugins());
+            break;
+        default:
+            break;
+        }
+    default:
+        break;
+    }
 
-	return result;
+    return result;
 }
 
 std::vector<std::string> list(Path path)
 {
-	assert(path >= PathConfig && path <= PathPlugins);
+    assert(path >= PathConfig && path <= PathPlugins);
 
-	std::vector<std::string> list;
+    std::vector<std::string> list;
 
-	switch (path) {
-	case PathCache:
-		list.push_back(clean(userCache()));
-		list.push_back(clean(systemCache()));
-		break;
-	case PathConfig:
-		list.push_back(clean(userConfig()));
-		list.push_back(clean(systemConfig()));
-		break;
-	case PathData:
-		list.push_back(clean(userData()));
-		list.push_back(clean(systemData()));
-		break;
-	case PathPlugins:
-		list.push_back(clean(fs::cwd()));
-		list.push_back(clean(userPlugins()));
-		list.push_back(clean(systemPlugins()));
-		break;
-	default:
-		break;
-	}
+    switch (path) {
+    case PathCache:
+        list.push_back(clean(userCache()));
+        list.push_back(clean(systemCache()));
+        break;
+    case PathConfig:
+        list.push_back(clean(userConfig()));
+        list.push_back(clean(systemConfig()));
+        break;
+    case PathData:
+        list.push_back(clean(userData()));
+        list.push_back(clean(systemData()));
+        break;
+    case PathPlugins:
+        list.push_back(clean(fs::cwd()));
+        list.push_back(clean(userPlugins()));
+        list.push_back(clean(systemPlugins()));
+        break;
+    default:
+        break;
+    }
 
-	return list;
+    return list;
 }
 
 } // !path

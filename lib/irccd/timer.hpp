@@ -40,8 +40,8 @@ namespace irccd {
  * \brief Type of timer
  */
 enum class TimerType {
-	Single,			//!< The timer ends after execution
-	Repeat			//!< The timer loops
+    Single,             //!< The timer ends after execution
+    Repeat              //!< The timer loops
 };
 
 /**
@@ -59,96 +59,96 @@ enum class TimerType {
  */
 class Timer {
 public:
-	/**
-	 * Signal: onSignal
-	 * ----------------------------------------------------------
-	 *
-	 * Called when the timeout expires.
-	 */
-	Signal<> onSignal;
+    /**
+     * Signal: onSignal
+     * ----------------------------------------------------------
+     *
+     * Called when the timeout expires.
+     */
+    Signal<> onSignal;
 
-	/**
-	 * Signal: onEnd
-	 * ----------------------------------------------------------
-	 *
-	 * Called when the timeout ends.
-	 */
-	Signal<> onEnd;
+    /**
+     * Signal: onEnd
+     * ----------------------------------------------------------
+     *
+     * Called when the timeout ends.
+     */
+    Signal<> onEnd;
 
 private:
-	enum {
-		Paused,
-		Running,
-		Stopped
-	};
+    enum {
+        Paused,
+        Running,
+        Stopped
+    };
 
-	TimerType m_type;
-	unsigned m_delay;
+    TimerType m_type;
+    unsigned m_delay;
 
-	// Thread management.
-	std::atomic<int> m_state{Paused};
-	std::mutex m_mutex;
-	std::condition_variable m_condition;
-	std::thread m_thread;
+    // Thread management.
+    std::atomic<int> m_state{Paused};
+    std::mutex m_mutex;
+    std::condition_variable m_condition;
+    std::thread m_thread;
 
-	void run();
+    void run();
 
 public:
-	/**
-	 * Timer constructor.
-	 *
-	 * The timer is not started, use start().
-	 *
-	 * \param type the timer type
-	 * \param delay the delay in milliseconds
-	 * \post isRunning() returns false
-	 */
-	IRCCD_EXPORT Timer(TimerType type, unsigned delay) noexcept;
+    /**
+     * Timer constructor.
+     *
+     * The timer is not started, use start().
+     *
+     * \param type the timer type
+     * \param delay the delay in milliseconds
+     * \post isRunning() returns false
+     */
+    IRCCD_EXPORT Timer(TimerType type, unsigned delay) noexcept;
 
-	/**
-	 * Destructor, closes the thread.
-	 *
-	 * \pre stop() must have been called.
-	 */
-	IRCCD_EXPORT virtual ~Timer();
+    /**
+     * Destructor, closes the thread.
+     *
+     * \pre stop() must have been called.
+     */
+    IRCCD_EXPORT virtual ~Timer();
 
-	/**
-	 * Start the thread.
-	 *
-	 * \pre isRunning() must return false
-	 * \pre onSignal() must have been called
-	 * \pre onEnd() must have been called
-	 * \note Thread-safe
-	 */
-	IRCCD_EXPORT void start();
+    /**
+     * Start the thread.
+     *
+     * \pre isRunning() must return false
+     * \pre onSignal() must have been called
+     * \pre onEnd() must have been called
+     * \note Thread-safe
+     */
+    IRCCD_EXPORT void start();
 
-	/**
-	 * Stop the timer, may be used by the user to stop it.
-	 *
-	 * \note Thread-safe
-	 */
-	IRCCD_EXPORT void stop();
+    /**
+     * Stop the timer, may be used by the user to stop it.
+     *
+     * \note Thread-safe
+     */
+    IRCCD_EXPORT void stop();
 
-	/**
-	 * Get the type of timer.
-	 *
-	 * \return the type.
-	 */
-	inline TimerType type() const noexcept
-	{
-		return m_type;
-	}
+    /**
+     * Get the type of timer.
+     *
+     * \return the type.
+     */
+    inline TimerType type() const noexcept
+    {
+        return m_type;
+    }
 
-	/**
-	 * Tells if the timer has still a running thread.
-	 *
-	 * \return true if still alive
-	 * \note Thread-safe
-	 */
-	inline bool isRunning() const noexcept
-	{
-		return m_state == Running;
-	}
+    /**
+     * Tells if the timer has still a running thread.
+     *
+     * \return true if still alive
+     * \note Thread-safe
+     */
+    inline bool isRunning() const noexcept
+    {
+        return m_state == Running;
+    }
 };
 
 } // !irccd

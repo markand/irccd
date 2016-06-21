@@ -38,17 +38,17 @@ const char *PluginGlobal("\xff""\xff""irccd-plugin-ptr");
 template <typename Func>
 duk_idx_t wrap(duk_context *ctx, int nret, Func &&func)
 {
-	std::string name = duk_require_string(ctx, 0);
+    std::string name = duk_require_string(ctx, 0);
 
-	try {
-		func(duk_get_irccd(ctx), name);
-	} catch (const std::out_of_range &ex) {
-		dukx_throw(ctx, ReferenceError(ex.what()));
-	} catch (const std::exception &ex) {
-		dukx_throw(ctx, Error(ex.what()));
-	}
+    try {
+        func(duk_get_irccd(ctx), name);
+    } catch (const std::out_of_range &ex) {
+        dukx_throw(ctx, ReferenceError(ex.what()));
+    } catch (const std::exception &ex) {
+        dukx_throw(ctx, Error(ex.what()));
+    }
 
-	return nret;
+    return nret;
 }
 
 /*
@@ -72,29 +72,29 @@ duk_idx_t wrap(duk_context *ctx, int nret, Func &&func)
  */
 duk_idx_t info(duk_context *ctx)
 {
-	std::shared_ptr<Plugin> plugin;
+    std::shared_ptr<Plugin> plugin;
 
-	if (duk_get_top(ctx) >= 1)
-		plugin = duk_get_irccd(ctx).pluginService().get(duk_require_string(ctx, 0));
-	else
-		plugin = duk_get_plugin(ctx);
+    if (duk_get_top(ctx) >= 1)
+        plugin = duk_get_irccd(ctx).pluginService().get(duk_require_string(ctx, 0));
+    else
+        plugin = duk_get_plugin(ctx);
 
-	if (!plugin)
-		return 0;
+    if (!plugin)
+        return 0;
 
-	duk_push_object(ctx);
-	dukx_push_std_string(ctx, plugin->name());
-	duk_put_prop_string(ctx, -2, "name");
-	dukx_push_std_string(ctx, plugin->author());
-	duk_put_prop_string(ctx, -2, "author");
-	dukx_push_std_string(ctx, plugin->license());
-	duk_put_prop_string(ctx, -2, "license");
-	dukx_push_std_string(ctx, plugin->summary());
-	duk_put_prop_string(ctx, -2, "summary");
-	dukx_push_std_string(ctx, plugin->version());
-	duk_put_prop_string(ctx, -2, "version");
+    duk_push_object(ctx);
+    dukx_push_std_string(ctx, plugin->name());
+    duk_put_prop_string(ctx, -2, "name");
+    dukx_push_std_string(ctx, plugin->author());
+    duk_put_prop_string(ctx, -2, "author");
+    dukx_push_std_string(ctx, plugin->license());
+    duk_put_prop_string(ctx, -2, "license");
+    dukx_push_std_string(ctx, plugin->summary());
+    duk_put_prop_string(ctx, -2, "summary");
+    dukx_push_std_string(ctx, plugin->version());
+    duk_put_prop_string(ctx, -2, "version");
 
-	return 1;
+    return 1;
 }
 
 /*
@@ -108,11 +108,11 @@ duk_idx_t info(duk_context *ctx)
  */
 duk_idx_t list(duk_context *ctx)
 {
-	dukx_push_array(ctx, duk_get_irccd(ctx).pluginService().plugins(), [] (auto ctx, auto plugin) {
-		dukx_push_std_string(ctx, plugin->name());
-	});
+    dukx_push_array(ctx, duk_get_irccd(ctx).pluginService().plugins(), [] (auto ctx, auto plugin) {
+        dukx_push_std_string(ctx, plugin->name());
+    });
 
-	return 1;
+    return 1;
 }
 
 /*
@@ -129,9 +129,9 @@ duk_idx_t list(duk_context *ctx)
  */
 duk_idx_t load(duk_context *ctx)
 {
-	return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
-		irccd.pluginService().load(name);
-	});
+    return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
+        irccd.pluginService().load(name);
+    });
 }
 
 /*
@@ -148,9 +148,9 @@ duk_idx_t load(duk_context *ctx)
  */
 duk_idx_t reload(duk_context *ctx)
 {
-	return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
-		irccd.pluginService().reload(name);
-	});
+    return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
+        irccd.pluginService().reload(name);
+    });
 }
 
 /*
@@ -167,65 +167,65 @@ duk_idx_t reload(duk_context *ctx)
  */
 duk_idx_t unload(duk_context *ctx)
 {
-	return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
-		irccd.pluginService().unload(name);
-	});
+    return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
+        irccd.pluginService().unload(name);
+    });
 }
 
 const duk_function_list_entry functions[] = {
-	{ "info",	info,		DUK_VARARGS	},
-	{ "list",	list,		0		},
-	{ "load",	load,		1		},
-	{ "reload",	reload,		1		},
-	{ "unload",	unload,		1		},
-	{ nullptr,	nullptr,	0		}
+    { "info",   info,       DUK_VARARGS     },
+    { "list",   list,       0               },
+    { "load",   load,       1               },
+    { "reload", reload,     1               },
+    { "unload", unload,     1               },
+    { nullptr,  nullptr,    0               }
 };
 
 } // !namespace
 
 PluginModule::PluginModule() noexcept
-	: Module("Irccd.Plugin")
+    : Module("Irccd.Plugin")
 {
 }
 
 void PluginModule::load(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
 {
-	StackAssert sa(plugin->context());
+    StackAssert sa(plugin->context());
 
-	duk_push_pointer(plugin->context(), new std::shared_ptr<JsPlugin>(plugin));
-	duk_put_global_string(plugin->context(), PluginGlobal);
-	duk_get_global_string(plugin->context(), "Irccd");
-	duk_push_object(plugin->context());
-	duk_put_function_list(plugin->context(), -1, functions);
-	duk_get_global_string(plugin->context(), "\xff""\xff""irccd-plugin-config");
-	duk_put_prop_string(plugin->context(), -2, "config");
-	duk_get_global_string(plugin->context(), "\xff""\xff""irccd-plugin-format");
-	duk_put_prop_string(plugin->context(), -2, "format");
-	duk_put_prop_string(plugin->context(), -2, "Plugin");
-	duk_pop(plugin->context());
+    duk_push_pointer(plugin->context(), new std::shared_ptr<JsPlugin>(plugin));
+    duk_put_global_string(plugin->context(), PluginGlobal);
+    duk_get_global_string(plugin->context(), "Irccd");
+    duk_push_object(plugin->context());
+    duk_put_function_list(plugin->context(), -1, functions);
+    duk_get_global_string(plugin->context(), "\xff""\xff""irccd-plugin-config");
+    duk_put_prop_string(plugin->context(), -2, "config");
+    duk_get_global_string(plugin->context(), "\xff""\xff""irccd-plugin-format");
+    duk_put_prop_string(plugin->context(), -2, "format");
+    duk_put_prop_string(plugin->context(), -2, "Plugin");
+    duk_pop(plugin->context());
 }
 
 void PluginModule::unload(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
 {
-	StackAssert sa(plugin->context());
+    StackAssert sa(plugin->context());
 
-	duk_push_global_object(plugin->context());
-	duk_get_prop_string(plugin->context(), -1, PluginGlobal);
-	delete static_cast<std::shared_ptr<JsPlugin> *>(duk_to_pointer(plugin->context(), -1));
-	duk_pop(plugin->context());
-	duk_del_prop_string(plugin->context(), -1, PluginGlobal);
-	duk_pop(plugin->context());
+    duk_push_global_object(plugin->context());
+    duk_get_prop_string(plugin->context(), -1, PluginGlobal);
+    delete static_cast<std::shared_ptr<JsPlugin> *>(duk_to_pointer(plugin->context(), -1));
+    duk_pop(plugin->context());
+    duk_del_prop_string(plugin->context(), -1, PluginGlobal);
+    duk_pop(plugin->context());
 }
 
 std::shared_ptr<JsPlugin> duk_get_plugin(duk_context *ctx)
 {
-	StackAssert sa(ctx);
+    StackAssert sa(ctx);
 
-	duk_get_global_string(ctx, PluginGlobal);
-	auto plugin = static_cast<std::shared_ptr<JsPlugin> *>(duk_to_pointer(ctx, -1));
-	duk_pop(ctx);
+    duk_get_global_string(ctx, PluginGlobal);
+    auto plugin = static_cast<std::shared_ptr<JsPlugin> *>(duk_to_pointer(ctx, -1));
+    duk_pop(ctx);
 
-	return *plugin;
+    return *plugin;
 }
 
 } // !irccd

@@ -28,17 +28,17 @@ const char *Signature("\xff""\xff""irccd-elapsed-timer-ptr");
 
 ElapsedTimer *self(duk_context *ctx)
 {
-	StackAssert sa(ctx);
+    StackAssert sa(ctx);
 
-	duk_push_this(ctx);
-	duk_get_prop_string(ctx, -1, Signature);
-	auto ptr = static_cast<ElapsedTimer *>(duk_to_pointer(ctx, -1));
-	duk_pop_2(ctx);
+    duk_push_this(ctx);
+    duk_get_prop_string(ctx, -1, Signature);
+    auto ptr = static_cast<ElapsedTimer *>(duk_to_pointer(ctx, -1));
+    duk_pop_2(ctx);
 
-	if (!ptr)
-		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not an ElapsedTimer object");
+    if (!ptr)
+        duk_error(ctx, DUK_ERR_TYPE_ERROR, "not an ElapsedTimer object");
 
-	return ptr;
+    return ptr;
 }
 
 /*
@@ -49,9 +49,9 @@ ElapsedTimer *self(duk_context *ctx)
  */
 duk_ret_t pause(duk_context *ctx)
 {
-	self(ctx)->pause();
+    self(ctx)->pause();
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -62,9 +62,9 @@ duk_ret_t pause(duk_context *ctx)
  */
 duk_ret_t reset(duk_context *ctx)
 {
-	self(ctx)->reset();
+    self(ctx)->reset();
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -75,9 +75,9 @@ duk_ret_t reset(duk_context *ctx)
  */
 duk_ret_t restart(duk_context *ctx)
 {
-	self(ctx)->restart();
+    self(ctx)->restart();
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -91,9 +91,9 @@ duk_ret_t restart(duk_context *ctx)
  */
 duk_ret_t elapsed(duk_context *ctx)
 {
-	duk_push_uint(ctx, self(ctx)->elapsed());
+    duk_push_uint(ctx, self(ctx)->elapsed());
 
-	return 1;
+    return 1;
 }
 
 /*
@@ -104,12 +104,12 @@ duk_ret_t elapsed(duk_context *ctx)
  */
 duk_ret_t constructor(duk_context *ctx)
 {
-	duk_push_this(ctx);
-	duk_push_pointer(ctx, new ElapsedTimer);
-	duk_put_prop_string(ctx, -2, Signature);
-	duk_pop(ctx);
+    duk_push_this(ctx);
+    duk_push_pointer(ctx, new ElapsedTimer);
+    duk_put_prop_string(ctx, -2, Signature);
+    duk_pop(ctx);
 
-	return 0;
+    return 0;
 }
 
 /*
@@ -120,42 +120,42 @@ duk_ret_t constructor(duk_context *ctx)
  */
 duk_ret_t destructor(duk_context *ctx)
 {
-	duk_get_prop_string(ctx, 0, Signature);
-	delete static_cast<ElapsedTimer *>(duk_to_pointer(ctx, -1));
-	duk_pop(ctx);
-	duk_del_prop_string(ctx, 0, Signature);
+    duk_get_prop_string(ctx, 0, Signature);
+    delete static_cast<ElapsedTimer *>(duk_to_pointer(ctx, -1));
+    duk_pop(ctx);
+    duk_del_prop_string(ctx, 0, Signature);
 
-	return 0;
+    return 0;
 }
 
 const duk_function_list_entry methods[] = {
-	{ "elapsed",	elapsed,	0 },
-	{ "pause",	pause,		0 },
-	{ "reset",	reset,		0 },
-	{ "restart",	restart,	0 },
-	{ nullptr,	nullptr,	0 }
+    { "elapsed",    elapsed,    0 },
+    { "pause",      pause,      0 },
+    { "reset",      reset,      0 },
+    { "restart",    restart,    0 },
+    { nullptr,      nullptr,    0 }
 };
 
 } // !namespace
 
 ElapsedTimerModule::ElapsedTimerModule() noexcept
-	: Module("Irccd.ElapsedTimer")
+    : Module("Irccd.ElapsedTimer")
 {
 }
 
 void ElapsedTimerModule::load(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
 {
-	StackAssert sa(plugin->context());
+    StackAssert sa(plugin->context());
 
-	duk_get_global_string(plugin->context(), "Irccd");
-	duk_push_c_function(plugin->context(), constructor, 0);
-	duk_push_object(plugin->context());
-	duk_put_function_list(plugin->context(), -1, methods);
-	duk_push_c_function(plugin->context(), destructor, 1);
-	duk_set_finalizer(plugin->context(), -2);
-	duk_put_prop_string(plugin->context(), -2, "prototype");
-	duk_put_prop_string(plugin->context(), -2, "ElapsedTimer");
-	duk_pop(plugin->context());
+    duk_get_global_string(plugin->context(), "Irccd");
+    duk_push_c_function(plugin->context(), constructor, 0);
+    duk_push_object(plugin->context());
+    duk_put_function_list(plugin->context(), -1, methods);
+    duk_push_c_function(plugin->context(), destructor, 1);
+    duk_set_finalizer(plugin->context(), -2);
+    duk_put_prop_string(plugin->context(), -2, "prototype");
+    duk_put_prop_string(plugin->context(), -2, "ElapsedTimer");
+    duk_pop(plugin->context());
 }
 
 } // !irccd

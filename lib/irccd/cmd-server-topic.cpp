@@ -26,52 +26,52 @@ namespace irccd {
 namespace command {
 
 ServerTopic::ServerTopic()
-	: Command("server-topic", "Server")
+    : Command("server-topic", "Server")
 {
 }
 
 std::string ServerTopic::help() const
 {
-	return "";
+    return "";
 }
 
 std::vector<Command::Arg> ServerTopic::args() const
 {
-	return {
-		{ "server",	true },
-		{ "channel",	true },
-		{ "topic",	true }
-	};
+    return {
+        { "server",     true },
+        { "channel",    true },
+        { "topic",      true }
+    };
 }
 
 std::vector<Command::Property> ServerTopic::properties() const
 {
-	return {
-		{ "server",	{ json::Type::String }},
-		{ "channel",	{ json::Type::String }},
-		{ "topic",	{ json::Type::String }}
-	};
+    return {
+        { "server",     { json::Type::String }},
+        { "channel",    { json::Type::String }},
+        { "topic",      { json::Type::String }}
+    };
 }
 
 json::Value ServerTopic::request(Irccdctl &, const CommandRequest &args) const
 {
-	return json::object({
-		{ "server",	args.arg(0) },
-		{ "channel",	args.arg(1) },
-		{ "topic",	args.arg(2) }
-	});
+    return json::object({
+        { "server",     args.arg(0) },
+        { "channel",    args.arg(1) },
+        { "topic",      args.arg(2) }
+    });
 }
 
 json::Value ServerTopic::exec(Irccd &irccd, const json::Value &request) const
 {
-	Command::exec(irccd, request);
+    Command::exec(irccd, request);
 
-	irccd.serverService().require(request.at("server").toString())->topic(
-		request.at("channel").toString(),
-		request.at("topic").toString()
-	);
+    irccd.serverService().require(request.at("server").toString())->topic(
+        request.at("channel").toString(),
+        request.at("topic").toString()
+    );
 
-	return json::object();
+    return json::object();
 }
 
 } // !command

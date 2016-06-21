@@ -26,32 +26,32 @@ namespace irccd {
 namespace command {
 
 PluginUnload::PluginUnload()
-	: Command("plugin-unload", "Plugins")
+    : Command("plugin-unload", "Plugins")
 {
 }
 
 std::string PluginUnload::help() const
 {
-	return "Unload a plugin.";
+    return "Unload a plugin.";
 }
 
 std::vector<Command::Arg> PluginUnload::args() const
 {
-	return {{ "plugin", true }};
+    return {{ "plugin", true }};
 }
 
 std::vector<Command::Property> PluginUnload::properties() const
 {
-	return {{ "plugin", { json::Type::String }}};
+    return {{ "plugin", { json::Type::String }}};
 }
 
 json::Value PluginUnload::exec(Irccd &irccd, const json::Value &request) const
 {
-	Command::exec(irccd, request);
+    Command::exec(irccd, request);
 
-	irccd.pluginService().unload(request.at("plugin").toString());
+    irccd.pluginService().unload(request.at("plugin").toString());
 
-	return json::object();
+    return json::object();
 }
 
 } // !command

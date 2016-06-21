@@ -28,107 +28,107 @@ using namespace irccd;
 
 class ServerTest : public Server {
 private:
-	std::string m_last;
+    std::string m_last;
 
 public:
-	inline ServerTest()
-		: Server("test", ServerInfo())
-	{
-	}
+    inline ServerTest()
+        : Server("test", ServerInfo())
+    {
+    }
 
-	inline const std::string &last() const noexcept
-	{
-		return m_last;
-	}
+    inline const std::string &last() const noexcept
+    {
+        return m_last;
+    }
 
-	void message(std::string target, std::string message) override
-	{
-		m_last = util::join({target, message});
-	}
+    void message(std::string target, std::string message) override
+    {
+        m_last = util::join({target, message});
+    }
 };
 
 class HistoryTest : public testing::Test {
 protected:
-	Irccd m_irccd;
-	PluginService &m_ps;
+    Irccd m_irccd;
+    PluginService &m_ps;
 
-	std::shared_ptr<ServerTest> m_server;
-	std::shared_ptr<Plugin> m_plugin;
+    std::shared_ptr<ServerTest> m_server;
+    std::shared_ptr<Plugin> m_plugin;
 
 public:
-	HistoryTest()
-		: m_ps(m_irccd.pluginService())
-		, m_server(std::make_shared<ServerTest>())
-	{
-		m_ps.setFormats("history", {
-			{ "error", "error=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}" },
-			{ "seen", "seen=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}:%H:%M" },
-			{ "said", "said=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}:#{message}:%H:%M" },
-			{ "unknown", "unknown=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}" },
-		});
-	}
+    HistoryTest()
+        : m_ps(m_irccd.pluginService())
+        , m_server(std::make_shared<ServerTest>())
+    {
+        m_ps.setFormats("history", {
+            { "error", "error=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}" },
+            { "seen", "seen=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}:%H:%M" },
+            { "said", "said=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}:#{message}:%H:%M" },
+            { "unknown", "unknown=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}" },
+        });
+    }
 
-	void load(PluginConfig config = PluginConfig())
-	{
-		// Add file if not there.
-		if (config.count("file") == 0)
-			config.emplace("file", SOURCEDIR "/words.conf");
+    void load(PluginConfig config = PluginConfig())
+    {
+        // Add file if not there.
+        if (config.count("file") == 0)
+            config.emplace("file", SOURCEDIR "/words.conf");
 
-		m_ps.setConfig("history", config);
-		m_ps.load("history", PLUGINDIR "/history.js");
-		m_plugin = m_ps.require("history");
-	}
+        m_ps.setConfig("history", config);
+        m_ps.load("history", PLUGINDIR "/history.js");
+        m_plugin = m_ps.require("history");
+    }
 };
 
 TEST_F(HistoryTest, formatError)
 {
-	load({{ "file", SOURCEDIR "/broken-conf.json" }});
+    load({{ "file", SOURCEDIR "/broken-conf.json" }});
 
-	m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#history", "seen francis");
-	ASSERT_EQ("#history:error=history:!history:test:#history:jean!jean@localhost:jean", m_server->last());
+    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#history", "seen francis");
+    ASSERT_EQ("#history:error=history:!history:test:#history:jean!jean@localhost:jean", m_server->last());
 }
 
 TEST_F(HistoryTest, formatSeen)
 {
-	std::regex rule("#history:seen=history:!history:test:#history:destructor!dst@localhost:destructor:jean:\\d{2}:\\d{2}");
+    std::regex rule("#history:seen=history:!history:test:#history:destructor!dst@localhost:destructor:jean:\\d{2}:\\d{2}");
 
-	remove(BINARYDIR "/seen.json");
-	load({{ "file", BINARYDIR "/seen.json" }});
+    remove(BINARYDIR "/seen.json");
+    load({{ "file", BINARYDIR "/seen.json" }});
 
-	m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#history", "hello");
-	m_plugin->onCommand(m_irccd, m_server, "destructor!dst@localhost", "#history", "seen jean");
+    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#history", "hello");
+    m_plugin->onCommand(m_irccd, m_server, "destructor!dst@localhost", "#history", "seen jean");
 
-	ASSERT_TRUE(std::regex_match(m_server->last(), rule));
+    ASSERT_TRUE(std::regex_match(m_server->last(), rule));
 }
 
 TEST_F(HistoryTest, formatSaid)
 {
-	std::regex rule("#history:said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:\\d{2}:\\d{2}");
+    std::regex rule("#history:said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:\\d{2}:\\d{2}");
 
-	remove(BINARYDIR "/said.json");
-	load({{ "file", BINARYDIR "/said.json" }});
+    remove(BINARYDIR "/said.json");
+    load({{ "file", BINARYDIR "/said.json" }});
 
-	m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#history", "hello");
-	m_plugin->onCommand(m_irccd, m_server, "destructor!dst@localhost", "#history", "said jean");
+    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#history", "hello");
+    m_plugin->onCommand(m_irccd, m_server, "destructor!dst@localhost", "#history", "said jean");
 
-	ASSERT_TRUE(std::regex_match(m_server->last(), rule));
+    ASSERT_TRUE(std::regex_match(m_server->last(), rule));
 }
 
 TEST_F(HistoryTest, formatUnknown)
 {
-	remove(BINARYDIR "/unknown.json");
-	load({{ "file", BINARYDIR "/unknown.json" }});
+    remove(BINARYDIR "/unknown.json");
+    load({{ "file", BINARYDIR "/unknown.json" }});
 
-	m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#history", "hello");
-	m_plugin->onCommand(m_irccd, m_server, "destructor!dst@localhost", "#history", "seen nobody");
+    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#history", "hello");
+    m_plugin->onCommand(m_irccd, m_server, "destructor!dst@localhost", "#history", "seen nobody");
 
-	ASSERT_EQ("#history:unknown=history:!history:test:#history:destructor!dst@localhost:destructor:nobody", m_server->last());
+    ASSERT_EQ("#history:unknown=history:!history:test:#history:destructor!dst@localhost:destructor:nobody", m_server->last());
 }
 
 int main(int argc, char **argv)
 {
-	path::setApplicationPath(argv[0]);
-	testing::InitGoogleTest(&argc, argv);
+    path::setApplicationPath(argv[0]);
+    testing::InitGoogleTest(&argc, argv);
 
-	return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }

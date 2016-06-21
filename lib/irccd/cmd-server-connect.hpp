@@ -36,35 +36,35 @@ namespace command {
  */
 class ServerConnect : public Command {
 public:
-	/**
-	 * Constructor.
-	 */
-	IRCCD_EXPORT ServerConnect();
+    /**
+     * Constructor.
+     */
+    IRCCD_EXPORT ServerConnect();
 
-	/**
-	 * \copydoc Command::help
-	 */
-	IRCCD_EXPORT std::string help() const override;
+    /**
+     * \copydoc Command::help
+     */
+    IRCCD_EXPORT std::string help() const override;
 
-	/**
-	 * \copydoc Command::options
-	 */
-	IRCCD_EXPORT std::vector<Option> options() const override;
+    /**
+     * \copydoc Command::options
+     */
+    IRCCD_EXPORT std::vector<Option> options() const override;
 
-	/**
-	 * \copydoc Command::args
-	 */
-	IRCCD_EXPORT std::vector<Arg> args() const override;
+    /**
+     * \copydoc Command::args
+     */
+    IRCCD_EXPORT std::vector<Arg> args() const override;
 
-	/**
-	 * \copydoc Command::properties
-	 */
-	IRCCD_EXPORT std::vector<Property> properties() const override;
+    /**
+     * \copydoc Command::properties
+     */
+    IRCCD_EXPORT std::vector<Property> properties() const override;
 
-	/**
-	 * \copydoc Command::exec
-	 */
-	IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
+    /**
+     * \copydoc Command::exec
+     */
+    IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };
 
 } // !command

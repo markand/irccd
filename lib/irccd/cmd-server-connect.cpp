@@ -36,132 +36,132 @@ namespace {
 
 std::string readInfoName(const json::Value &object)
 {
-	auto it = object.find("name");
+    auto it = object.find("name");
 
-	if (it == object.end())
-		throw std::invalid_argument("missing 'name' property");
-	if (!it->isString() || !util::isIdentifierValid(it->toString()))
-		throw std::invalid_argument("invalid server name");
+    if (it == object.end())
+        throw std::invalid_argument("missing 'name' property");
+    if (!it->isString() || !util::isIdentifierValid(it->toString()))
+        throw std::invalid_argument("invalid server name");
 
-	return it->toString();
+    return it->toString();
 }
 
 std::string readInfoHost(const json::Value &object)
 {
-	auto it = object.find("host");
+    auto it = object.find("host");
 
-	if (it == object.end())
-		throw std::invalid_argument("missing 'host' property");
-	if (!it->isString())
-		throw std::invalid_argument("invalid host");
+    if (it == object.end())
+        throw std::invalid_argument("missing 'host' property");
+    if (!it->isString())
+        throw std::invalid_argument("invalid host");
 
-	return it->toString();
+    return it->toString();
 }
 
 std::uint16_t readInfoPort(const json::Value &object)
 {
-	auto it = object.find("port");
-	uint16_t port = 6667;
+    auto it = object.find("port");
+    uint16_t port = 6667;
 
-	if (it != object.end())
-		if (it->isInt() && it->toInt() >= 0 && it->toInt() <= std::numeric_limits<std::uint16_t>::max())
-			port = static_cast<std::uint16_t>(it->toInt());
+    if (it != object.end())
+        if (it->isInt() && it->toInt() >= 0 && it->toInt() <= std::numeric_limits<std::uint16_t>::max())
+            port = static_cast<std::uint16_t>(it->toInt());
 
-	return port;
+    return port;
 }
 
 ServerInfo readInfo(const json::Value &object)
 {
-	ServerInfo info;
+    ServerInfo info;
 
-	info.host = readInfoHost(object);
-	info.port = readInfoPort(object);
+    info.host = readInfoHost(object);
+    info.port = readInfoPort(object);
 
-	if (object.valueOr("ssl", json::Type::Boolean, false).toBool())
+    if (object.valueOr("ssl", json::Type::Boolean, false).toBool())
 #if defined(WITH_SSL)
-		info.flags |= ServerInfo::Ssl;
+        info.flags |= ServerInfo::Ssl;
 #else
-		throw std::invalid_argument("ssl is disabled");
+        throw std::invalid_argument("ssl is disabled");
 #endif
 
-	if (object.valueOr("sslVerify", json::Type::Boolean, false).toBool())
-		info.flags |= ServerInfo::SslVerify;
+    if (object.valueOr("sslVerify", json::Type::Boolean, false).toBool())
+        info.flags |= ServerInfo::SslVerify;
 
-	return info;
+    return info;
 }
 
 ServerIdentity readIdentity(const json::Value &object)
 {
-	ServerIdentity identity;
+    ServerIdentity identity;
 
-	identity.nickname = object.valueOr("nickname", json::Type::String, identity.nickname).toString();
-	identity.realname = object.valueOr("realname", json::Type::String, identity.realname).toString();
-	identity.username = object.valueOr("username", json::Type::String, identity.username).toString();
-	identity.ctcpversion = object.valueOr("ctcpVersion", json::Type::String, identity.ctcpversion).toString();
+    identity.nickname = object.valueOr("nickname", json::Type::String, identity.nickname).toString();
+    identity.realname = object.valueOr("realname", json::Type::String, identity.realname).toString();
+    identity.username = object.valueOr("username", json::Type::String, identity.username).toString();
+    identity.ctcpversion = object.valueOr("ctcpVersion", json::Type::String, identity.ctcpversion).toString();
 
-	return identity;
+    return identity;
 }
 
 ServerSettings readSettings(const json::Value &object)
 {
-	ServerSettings settings;
+    ServerSettings settings;
 
-	settings.command = object.valueOr("commandChar", json::Type::String, settings.command).toString();
-	settings.reconnectTries = object.valueOr("reconnectTries", json::Type::Int, settings.reconnectTries).toInt();
-	settings.reconnectDelay = object.valueOr("reconnectTimeout", json::Type::Int, settings.reconnectDelay).toInt();
+    settings.command = object.valueOr("commandChar", json::Type::String, settings.command).toString();
+    settings.reconnectTries = object.valueOr("reconnectTries", json::Type::Int, settings.reconnectTries).toInt();
+    settings.reconnectDelay = object.valueOr("reconnectTimeout", json::Type::Int, settings.reconnectDelay).toInt();
 
-	return settings;
+    return settings;
 }
 
 } // !namespace
 
 ServerConnect::ServerConnect()
-	: Command("server-connect", "Server")
+    : Command("server-connect", "Server")
 {
 }
 
 std::string ServerConnect::help() const
 {
-	return "Connect to a server.";
+    return "Connect to a server.";
 }
 
 std::vector<Command::Option> ServerConnect::options() const
 {
-	return {
-		{ "command",	"c", "command",		"char",		"command character to use"	},
-		{ "nickname",	"n", "nickname",	"nickname",	"nickname to use"		},
-		{ "realname",	"r", "realname",	"realname",	"realname to use"		},
-		{ "sslverify",	"S", "ssl-verify",	"",		"verify SSL"			},
-		{ "ssl",	"s", "ssl",		"",		"connect with SSL"		},
-		{ "username",	"u", "username",	"",		"username to use"		}
-	};
+    return {
+        { "command",    "c", "command",     "char",     "command character to use"  },
+        { "nickname",   "n", "nickname",    "nickname", "nickname to use"           },
+        { "realname",   "r", "realname",    "realname", "realname to use"           },
+        { "sslverify",  "S", "ssl-verify",  "",         "verify SSL"                },
+        { "ssl",        "s", "ssl",         "",         "connect with SSL"          },
+        { "username",   "u", "username",    "",         "username to use"           }
+    };
 }
 
 std::vector<Command::Arg> ServerConnect::args() const
 {
-	return {
-		{ "id",		true	},
-		{ "host",	true	},
-		{ "port",	false	}
-	};
+    return {
+        { "id",     true    },
+        { "host",   true    },
+        { "port",   false   }
+    };
 }
 
 std::vector<Command::Property> ServerConnect::properties() const
 {
-	// TODO
-	return {};
+    // TODO
+    return {};
 }
 
 json::Value ServerConnect::exec(Irccd &irccd, const json::Value &request) const
 {
-	auto server = std::make_shared<Server>(readInfoName(request), readInfo(request), readIdentity(request), readSettings(request));
+    auto server = std::make_shared<Server>(readInfoName(request), readInfo(request), readIdentity(request), readSettings(request));
 
-	if (irccd.serverService().has(server->name()))
-		throw std::invalid_argument("server '{}' already exists"_format(server->name()));
+    if (irccd.serverService().has(server->name()))
+        throw std::invalid_argument("server '{}' already exists"_format(server->name()));
 
-	irccd.serverService().add(std::move(server));
+    irccd.serverService().add(std::move(server));
 
-	return Command::exec(irccd, request);
+    return Command::exec(irccd, request);
 }
 
 } // !command

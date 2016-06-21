@@ -26,52 +26,52 @@ namespace irccd {
 namespace command {
 
 ServerNotice::ServerNotice()
-	: Command("server-notice", "Server")
+    : Command("server-notice", "Server")
 {
 }
 
 std::string ServerNotice::help() const
 {
-	return "";
+    return "";
 }
 
 std::vector<Command::Arg> ServerNotice::args() const
 {
-	return {
-		{ "server",	true },
-		{ "target",	true },
-		{ "message",	true }
-	};
+    return {
+        { "server",     true },
+        { "target",     true },
+        { "message",    true }
+    };
 }
 
 std::vector<Command::Property> ServerNotice::properties() const
 {
-	return {
-		{ "server",	{ json::Type::String }},
-		{ "target",	{ json::Type::String }},
-		{ "message",	{ json::Type::String }}
-	};
+    return {
+        { "server",     { json::Type::String }},
+        { "target",     { json::Type::String }},
+        { "message",    { json::Type::String }}
+    };
 }
 
 json::Value ServerNotice::request(Irccdctl &, const CommandRequest &args) const
 {
-	return json::object({
-		{ "server",	args.arg(0) },
-		{ "target",	args.arg(1) },
-		{ "message",	args.arg(2) }
-	});
+    return json::object({
+        { "server",     args.arg(0) },
+        { "target",     args.arg(1) },
+        { "message",    args.arg(2) }
+    });
 }
 
 json::Value ServerNotice::exec(Irccd &irccd, const json::Value &request) const
 {
-	Command::exec(irccd, request);
+    Command::exec(irccd, request);
 
-	irccd.serverService().require(request.at("server").toString())->notice(
-		request.at("target").toString(),
-		request.at("message").toString()
-	);
+    irccd.serverService().require(request.at("server").toString())->notice(
+        request.at("target").toString(),
+        request.at("message").toString()
+    );
 
-	return json::object();
+    return json::object();
 }
 
 } // !command

@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_FS_HPP
-#define IRCCD_FS_HPP
+#ifndef FS_HPP
+#define FS_HPP
 
 /**
  * \file fs.hpp
@@ -25,28 +25,27 @@
  */
 
 /**
- * \page filesystem Filesystem
- * \brief Filesystem support
- *
- * The following options can be set by the user:
- *
- *   - **FS_HAVE_STAT**: (bool) Set to true if sys/stat.h and stat function are available, automatically detected.
+ * \cond FS_HIDDEN_SYMBOLS
  */
 
 #if !defined(FS_HAVE_STAT)
-#  if defined(_WIN32)
-#    define FS_HAVE_STAT
-#  elif defined(__linux__)
-#    define FS_HAVE_STAT
-#  elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
-#    define FS_HAVE_STAT
-#  elif defined(__APPLE__)
-#    define FS_HAVE_STAT
-#  endif
+#   if defined(_WIN32)
+#       define FS_HAVE_STAT
+#   elif defined(__linux__)
+#       define FS_HAVE_STAT
+#   elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
+#       define FS_HAVE_STAT
+#   elif defined(__APPLE__)
+#       define FS_HAVE_STAT
+#   endif
 #endif
 
+/**
+ * \endcond
+ */
+
 #if defined(FS_HAVE_STAT)
-#  include <sys/stat.h>
+#   include <sys/stat.h>
 #endif
 
 #include <regex>
@@ -67,8 +66,8 @@ namespace fs {
  * \brief Flags for readdir.
  */
 enum Flags {
-	Dot	= (1 << 0),	//!< if set, also lists "."
-	DotDot	= (1 << 1)	//!< if set, also lists ".."
+    Dot     = (1 << 0),         //!< if set, also lists "."
+    DotDot  = (1 << 1)          //!< if set, also lists ".."
 };
 
 /**
@@ -77,18 +76,18 @@ enum Flags {
  */
 class Entry {
 public:
-	/**
-	 * \brief Describe the type of an entry
-	 */
-	enum Type : char {
-		Unknown,	//!< File type is unknown,
-		File,		//!< File is regular type,
-		Dir,		//!< File is directory,
-		Link		//!< File is link
-	};
+    /**
+     * \brief Describe the type of an entry
+     */
+    enum Type : char {
+        Unknown,                //!< File type is unknown,
+        File,                   //!< File is regular type,
+        Dir,                    //!< File is directory,
+        Link                    //!< File is link
+    };
 
-	std::string name;	//!< name of entry (base name)
-	Type type{Unknown};	//!< type of file
+    std::string name;           //!< name of entry (base name)
+    Type type{Unknown};         //!< type of file
 };
 
 /**
@@ -100,7 +99,7 @@ public:
  */
 inline bool operator==(const Entry &e1, const Entry &e2) noexcept
 {
-	return e1.name == e2.name && e1.type == e2.type;
+    return e1.name == e2.name && e1.type == e2.type;
 }
 
 /**
@@ -112,7 +111,7 @@ inline bool operator==(const Entry &e1, const Entry &e2) noexcept
  */
 inline bool operator!=(const Entry &e1, const Entry &e2) noexcept
 {
-	return !(e1 == e2);
+    return !(e1 == e2);
 }
 
 /**
@@ -123,9 +122,9 @@ inline bool operator!=(const Entry &e1, const Entry &e2) noexcept
 inline char separator() noexcept
 {
 #if defined(_WIN32)
-	return '\\';
+    return '\\';
 #else
-	return '/';
+    return '/';
 #endif
 }
 
@@ -272,7 +271,7 @@ IRCCD_EXPORT void rmdir(const std::string &path) noexcept;
  * Search an item recursively.
  *
  * The predicate must have the following signature:
- *	void f(const std::string &base, const Entry &entry)
+ *  void f(const std::string &base, const Entry &entry)
  *
  * Where:
  *   - base is the current parent directory in the tree
@@ -286,34 +285,34 @@ IRCCD_EXPORT void rmdir(const std::string &path) noexcept;
 template <typename Predicate>
 std::string findIf(const std::string &base, Predicate &&predicate)
 {
-	/*
-	 * Do not go deeply to the tree before testing all files in the current directory for performances reasons, we iterate
-	 * this directory to search for the entry name and iterate again over all sub directories if not found.
-	 */
-	std::string path;
-	std::vector<Entry> entries = readdir(base);
+    /*
+     * Do not go deeply to the tree before testing all files in the current directory for performances reasons, we iterate
+     * this directory to search for the entry name and iterate again over all sub directories if not found.
+     */
+    std::string path;
+    std::vector<Entry> entries = readdir(base);
 
-	for (const auto &entry : entries) {
-		if (predicate(base, entry)) {
-			path = base + separator() + entry.name;
-			break;
-		}
-	}
+    for (const auto &entry : entries) {
+        if (predicate(base, entry)) {
+            path = base + separator() + entry.name;
+            break;
+        }
+    }
 
-	if (!path.empty())
-		return path;
+    if (!path.empty())
+        return path;
 
-	for (const auto &entry : entries) {
-		if (entry.type != Entry::Dir)
-			continue;
+    for (const auto &entry : entries) {
+        if (entry.type != Entry::Dir)
+            continue;
 
-		path = findIf(base + separator() + entry.name, std::forward<Predicate>(predicate));
+        path = findIf(base + separator() + entry.name, std::forward<Predicate>(predicate));
 
-		if (!path.empty())
-			break;
-	}
+        if (!path.empty())
+            break;
+    }
 
-	return path;
+    return path;
 }
 
 /**
@@ -326,7 +325,7 @@ std::string findIf(const std::string &base, Predicate &&predicate)
  */
 inline std::string find(const std::string &base, const std::string &name)
 {
-	return findIf(base, [&] (const auto &, const auto &entry) { return entry.name == name; });
+    return findIf(base, [&] (const auto &, const auto &entry) { return entry.name == name; });
 }
 
 /**
@@ -339,7 +338,7 @@ inline std::string find(const std::string &base, const std::string &name)
  */
 inline std::string find(const std::string &base, const std::regex &regex)
 {
-	return findIf(base, [&] (const auto &, const auto &entry) { return std::regex_match(entry.name, regex); });
+    return findIf(base, [&] (const auto &, const auto &entry) { return std::regex_match(entry.name, regex); });
 }
 
 /**
@@ -354,4 +353,4 @@ IRCCD_EXPORT std::string cwd();
 
 } // !irccd
 
-#endif // !IRCCD_FS_HPP
+#endif // !FS_HPP

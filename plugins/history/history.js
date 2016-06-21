@@ -18,207 +18,207 @@
 
 // Plugin information.
 info = {
-	author: "David Demelier <markand@malikania.fr>",
-	license: "ISC",
-	summary: "track nickname's history",
-	version: "@IRCCD_VERSION@"
+    author: "David Demelier <markand@malikania.fr>",
+    license: "ISC",
+    summary: "track nickname's history",
+    version: "@IRCCD_VERSION@"
 };
 
 // Modules.
-var Directory	= Irccd.Directory;
-var File	= Irccd.File;
-var Logger	= Irccd.Logger;
-var Plugin	= Irccd.Plugin;
-var Server	= Irccd.Server;
-var Util	= Irccd.Util;
+var Directory   = Irccd.Directory;
+var File        = Irccd.File;
+var Logger      = Irccd.Logger;
+var Plugin      = Irccd.Plugin;
+var Server      = Irccd.Server;
+var Util        = Irccd.Util;
 
 Plugin.format = {
-	"error":	"#{nickname}, I'm sorry, something went wrong.",
-	"seen":		"#{nickname}, I've seen #{target} for the last time the %d-%m-%Y %H:%M",
-	"said":		"#{nickname}, #{target} said on %d-%m-%Y %H:%M: #{message}",
-	"unknown":	"#{nickname}, I've never seen #{target}.",
-	"usage":	"#{nickname}, usage: #{plugin} seen | said <target>."
+    "error":    "#{nickname}, I'm sorry, something went wrong.",
+    "seen":     "#{nickname}, I've seen #{target} for the last time the %d-%m-%Y %H:%M",
+    "said":     "#{nickname}, #{target} said on %d-%m-%Y %H:%M: #{message}",
+    "unknown":  "#{nickname}, I've never seen #{target}.",
+    "usage":    "#{nickname}, usage: #{plugin} seen | said <target>."
 };
 
 function isSelf(server, origin)
 {
-	return server.info().nickname === Util.splituser(origin);
+    return server.info().nickname === Util.splituser(origin);
 }
 
 function command(server)
 {
-	return server.info().commandChar + "history";
+    return server.info().commandChar + "history";
 }
 
 function path(server, channel)
 {
-	var p;
+    var p;
 
-	if (Plugin.config["file"] !== undefined) {
-		p = Util.format(Plugin.config["file"], {
-			"server":	server.toString(),
-			"channel":	channel
-		});
-	} else
-		p = Plugin.cachePath + "db.json";
+    if (Plugin.config["file"] !== undefined) {
+        p = Util.format(Plugin.config["file"], {
+            "server":    server.toString(),
+            "channel":    channel
+        });
+    } else
+        p = Plugin.cachePath + "db.json";
 
-	return p;
+    return p;
 }
 
 function read(server, channel, nickname)
 {
-	var p = path(server, channel);
-	var db = {};
+    var p = path(server, channel);
+    var db = {};
 
-	if (File.exists(p)) {
-		var file = new File(path(server, channel), "r");
-		var str = file.read();
+    if (File.exists(p)) {
+        var file = new File(path(server, channel), "r");
+        var str = file.read();
 
-		db = JSON.parse(str);
-	}
+        db = JSON.parse(str);
+    }
 
-	// Complete if needed.
-	if (!db[server])
-		db[server] = {};
-	if (!db[server][channel])
-		db[server][channel] = {};
-	if (!db[server][channel][nickname])
-		db[server][channel][nickname] = {};
+    // Complete if needed.
+    if (!db[server])
+        db[server] = {};
+    if (!db[server][channel])
+        db[server][channel] = {};
+    if (!db[server][channel][nickname])
+        db[server][channel][nickname] = {};
 
-	return db;
+    return db;
 }
 
 function write(server, channel, nickname, message)
 {
-	var db = read(server, channel, nickname);
-	var entry = db[server][channel][nickname];
-	var p = path(server, channel);
+    var db = read(server, channel, nickname);
+    var entry = db[server][channel][nickname];
+    var p = path(server, channel);
 
-	if (!File.exists(File.dirname(p))) {
-		Logger.debug("creating directory " + File.dirname(p));
-		Directory.mkdir(File.dirname(p));
-	}
+    if (!File.exists(File.dirname(p))) {
+        Logger.debug("creating directory " + File.dirname(p));
+        Directory.mkdir(File.dirname(p));
+    }
 
-	var file = new File(path(server, channel), "wt");
+    var file = new File(path(server, channel), "wt");
 
-	entry.timestamp = Date.now();
-	entry.message = (message) ? message : entry.message;
+    entry.timestamp = Date.now();
+    entry.message = (message) ? message : entry.message;
 
-	file.write(JSON.stringify(db));
+    file.write(JSON.stringify(db));
 }
 
 function find(server, channel, target)
 {
-	var db = read(server, channel, target);
-	var it = db[server][channel][target];
+    var db = read(server, channel, target);
+    var it = db[server][channel][target];
 
-	if (it.timestamp)
-		return it;
+    if (it.timestamp)
+        return it;
 }
 
 function loadFormats()
 {
-	// --- DEPRECATED -------------------------------------------
-	//
-	// This code will be removed.
-	//
-	// Since:	2.1.0
-	// Until:	3.0.0
-	// Reason:	new [format] section replaces it.
-	//
-	// ----------------------------------------------------------
-	for (var key in Plugin.format) {
-		var optname = "format-" + key;
+    // --- DEPRECATED -------------------------------------------
+    //
+    // This code will be removed.
+    //
+    // Since:    2.1.0
+    // Until:    3.0.0
+    // Reason:    new [format] section replaces it.
+    //
+    // ----------------------------------------------------------
+    for (var key in Plugin.format) {
+        var optname = "format-" + key;
 
-		if (typeof (Plugin.config[optname]) !== "string")
-			continue;
+        if (typeof (Plugin.config[optname]) !== "string")
+            continue;
 
-		if (Plugin.config[optname].length === 0)
-			Logger.warning("skipping empty '" + optname + "' format");
-		else
-			Plugin.format[key] = Plugin.config[optname];
-	}
+        if (Plugin.config[optname].length === 0)
+            Logger.warning("skipping empty '" + optname + "' format");
+        else
+            Plugin.format[key] = Plugin.config[optname];
+    }
 }
 
 function onCommand(server, origin, channel, message)
 {
-	var args = message.trim().split(" ");
-	var kw = {
-		channel: channel,
-		command: command(server),
-		nickname: Util.splituser(origin),
-		origin: origin,
-		plugin: Plugin.info().name,
-		server: server.toString()
-	};
+    var args = message.trim().split(" ");
+    var kw = {
+        channel: channel,
+        command: command(server),
+        nickname: Util.splituser(origin),
+        origin: origin,
+        plugin: Plugin.info().name,
+        server: server.toString()
+    };
 
-	if (args.length !== 2 || args[0].length === 0 || args[1].length === 0) {
-		server.message(channel, Util.format(Plugin.format.usage, kw));
-		return;
-	}
+    if (args.length !== 2 || args[0].length === 0 || args[1].length === 0) {
+        server.message(channel, Util.format(Plugin.format.usage, kw));
+        return;
+    }
 
-	if (args[0] !== "seen" && args[0] !== "said") {
-		server.message(channel, Util.format(Plugin.format.usage, kw));
-		return;
-	}
+    if (args[0] !== "seen" && args[0] !== "said") {
+        server.message(channel, Util.format(Plugin.format.usage, kw));
+        return;
+    }
 
-	if (isSelf(server, args[1]))
-		return;
+    if (isSelf(server, args[1]))
+        return;
 
-	try {
-		var info = find(server, channel, args[1]);
+    try {
+        var info = find(server, channel, args[1]);
 
-		kw.target = args[1];
+        kw.target = args[1];
 
-		if (!info) {
-			server.message(channel, Util.format(Plugin.format.unknown, kw));
-			return;
-		}
+        if (!info) {
+            server.message(channel, Util.format(Plugin.format.unknown, kw));
+            return;
+        }
 
-		kw.date = info.timestamp;
-		kw.message = info.message ? info.message : "";
+        kw.date = info.timestamp;
+        kw.message = info.message ? info.message : "";
 
-		server.message(channel, Util.format(Plugin.format[args[0] == "seen" ? "seen" : "said"], kw));
-	} catch (e) {
-		server.message(channel, Util.format(Plugin.format["error"], kw));
-	}
+        server.message(channel, Util.format(Plugin.format[args[0] == "seen" ? "seen" : "said"], kw));
+    } catch (e) {
+        server.message(channel, Util.format(Plugin.format["error"], kw));
+    }
 }
 
 function onJoin(server, origin, channel)
 {
-	write(server, channel, Util.splituser(origin));
+    write(server, channel, Util.splituser(origin));
 }
 
 function onMessage(server, origin, channel, message)
 {
-	write(server, channel, Util.splituser(origin), message);
+    write(server, channel, Util.splituser(origin), message);
 }
 
 onMe = onMessage;
 
 function onTopic(server, origin, channel)
 {
-	write(server, channel, Util.splituser(origin));
+    write(server, channel, Util.splituser(origin));
 }
 
 function onLoad()
 {
-	var table = Server.list();
+    var table = Server.list();
 
-	for (var k in table)
-		for (var c in table[k].info().channels)
-			table[k].names(c);
+    for (var k in table)
+        for (var c in table[k].info().channels)
+            table[k].names(c);
 
-	loadFormats();
+    loadFormats();
 }
 
 function onReload()
 {
-	loadFormats();
+    loadFormats();
 }
 
 function onNames(server, channel, list)
 {
-	for (var i = 0; i < list.length; ++i)
-		write(server, channel, list[i]);
+    for (var i = 0; i < list.length; ++i)
+        write(server, channel, list[i]);
 }

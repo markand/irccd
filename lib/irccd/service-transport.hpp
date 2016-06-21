@@ -43,45 +43,45 @@ class Value;
  */
 class TransportService : public Service {
 private:
-	Irccd &m_irccd;
+    Irccd &m_irccd;
 
-	std::vector<std::shared_ptr<TransportServer>> m_servers;
-	std::vector<std::shared_ptr<TransportClient>> m_clients;
+    std::vector<std::shared_ptr<TransportServer>> m_servers;
+    std::vector<std::shared_ptr<TransportClient>> m_clients;
 
-	void handleCommand(std::weak_ptr<TransportClient>, const json::Value &);
-	void handleDie(std::weak_ptr<TransportClient>);
+    void handleCommand(std::weak_ptr<TransportClient>, const json::Value &);
+    void handleDie(std::weak_ptr<TransportClient>);
 
 public:
-	/**
-	 * Create the transport service.
-	 *
-	 * \param irccd the irccd instance
-	 */
-	IRCCD_EXPORT TransportService(Irccd &irccd) noexcept;
+    /**
+     * Create the transport service.
+     *
+     * \param irccd the irccd instance
+     */
+    IRCCD_EXPORT TransportService(Irccd &irccd) noexcept;
 
-	/**
-	 * \copydoc Service::prepare
-	 */
-	IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
+    /**
+     * \copydoc Service::prepare
+     */
+    IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
 
-	/**
-	 * \copydoc Service::sync
-	 */
-	IRCCD_EXPORT void sync(fd_set &in, fd_set &out) override;
+    /**
+     * \copydoc Service::sync
+     */
+    IRCCD_EXPORT void sync(fd_set &in, fd_set &out) override;
 
-	/**
-	 * Add a transport server.
-	 *
-	 * \param ts the transport server
-	 */
-	IRCCD_EXPORT void add(std::shared_ptr<TransportServer> ts);
+    /**
+     * Add a transport server.
+     *
+     * \param ts the transport server
+     */
+    IRCCD_EXPORT void add(std::shared_ptr<TransportServer> ts);
 
-	/**
-	 * Send data to all clients.
-	 *
-	 * \param data the data
-	 */
-	IRCCD_EXPORT void broadcast(std::string data);
+    /**
+     * Send data to all clients.
+     *
+     * \param data the data
+     */
+    IRCCD_EXPORT void broadcast(std::string data);
 };
 
 } // !irccd

@@ -17,7 +17,7 @@
 #
 
 irccd_define_test(
-	NAME path
-	SOURCES main.cpp
-	LIBRARIES libirccd
+    NAME path
+    SOURCES main.cpp
+    LIBRARIES libirccd
 )

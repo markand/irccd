@@ -32,12 +32,12 @@
  * ------------------------------------------------------------------
  */
 
-#define PREFIX			"@CMAKE_INSTALL_PREFIX@"
+#define PREFIX                  "@CMAKE_INSTALL_PREFIX@"
 
-#define IRCCD_VERSION_MAJOR	@IRCCD_VERSION_MAJOR@
-#define IRCCD_VERSION_MINOR	@IRCCD_VERSION_MINOR@
-#define IRCCD_VERSION_PATCH	@IRCCD_VERSION_PATCH@
-#define IRCCD_VERSION		"@IRCCD_VERSION@"
+#define IRCCD_VERSION_MAJOR     @IRCCD_VERSION_MAJOR@
+#define IRCCD_VERSION_MINOR     @IRCCD_VERSION_MINOR@
+#define IRCCD_VERSION_PATCH     @IRCCD_VERSION_PATCH@
+#define IRCCD_VERSION           "@IRCCD_VERSION@"
 
 /*
  * System identification.
@@ -57,11 +57,11 @@
  * ------------------------------------------------------------------
  */
 
-#define WITH_BINDIR		"@WITH_BINDIR@"
-#define WITH_DATADIR		"@WITH_DATADIR@"
-#define WITH_CONFDIR		"@WITH_CONFDIR@"
-#define WITH_PLUGINDIR		"@WITH_PLUGINDIR@"
-#define WITH_CACHEDIR		"@WITH_CACHEDIR@"
+#define WITH_BINDIR             "@WITH_BINDIR@"
+#define WITH_DATADIR            "@WITH_DATADIR@"
+#define WITH_CONFDIR            "@WITH_CONFDIR@"
+#define WITH_PLUGINDIR          "@WITH_PLUGINDIR@"
+#define WITH_CACHEDIR           "@WITH_CACHEDIR@"
 
 #cmakedefine WITH_JS
 #cmakedefine WITH_SSL

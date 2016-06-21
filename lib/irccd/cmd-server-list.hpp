@@ -36,25 +36,25 @@ namespace command {
  */
 class ServerList : public Command {
 public:
-	/**
-	 * Constructor.
-	 */
-	IRCCD_EXPORT ServerList();
+    /**
+     * Constructor.
+     */
+    IRCCD_EXPORT ServerList();
 
-	/**
-	 * \copydoc Command::help
-	 */
-	IRCCD_EXPORT std::string help() const override;
+    /**
+     * \copydoc Command::help
+     */
+    IRCCD_EXPORT std::string help() const override;
 
-	/**
-	 * \copydoc Command::exec
-	 */
-	IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
+    /**
+     * \copydoc Command::exec
+     */
+    IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
 
-	/**
-	 * \copydoc Command::result
-	 */
-	IRCCD_EXPORT void result(Irccdctl &irccdctl, const json::Value &response) const override;
+    /**
+     * \copydoc Command::result
+     */
+    IRCCD_EXPORT void result(Irccdctl &irccdctl, const json::Value &response) const override;
 };
 
 } // !command

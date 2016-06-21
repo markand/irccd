@@ -44,8 +44,8 @@ using RuleSet = std::unordered_set<std::string>;
  * \brief Rule action
  */
 enum class RuleAction {
-	Accept,			//!< The event is accepted (default)
-	Drop			//!< The event is dropped
+    Accept,         //!< The event is accepted (default)
+    Drop            //!< The event is dropped
 };
 
 /**
@@ -54,95 +54,95 @@ enum class RuleAction {
  */
 class Rule {
 private:
-	RuleSet m_servers;
-	RuleSet m_channels;
-	RuleSet m_origins;
-	RuleSet m_plugins;
-	RuleSet m_events;
-	RuleAction m_action{RuleAction::Accept};
+    RuleSet m_servers;
+    RuleSet m_channels;
+    RuleSet m_origins;
+    RuleSet m_plugins;
+    RuleSet m_events;
+    RuleAction m_action{RuleAction::Accept};
 
-	/*
-	 * Check if a map contains the value and return true if it is
-	 * or return true if value is empty (which means applicable).
-	 */
-	bool matchMap(const RuleSet &map, const std::string &value) const noexcept;
+    /*
+     * Check if a map contains the value and return true if it is
+     * or return true if value is empty (which means applicable).
+     */
+    bool matchMap(const RuleSet &map, const std::string &value) const noexcept;
 
 public:
-	/**
-	 * Rule constructor.
-	 *
-	 * \param servers the server list
-	 * \param channels the channels
-	 * \param nicknames the nicknames
-	 * \param plugins the plugins
-	 * \param events the events
-	 * \param action the rule action
-	 * \throw std::invalid_argument if events are invalid
-	 */
-	IRCCD_EXPORT Rule(RuleSet servers = RuleSet{},
-			  RuleSet channels = RuleSet{},
-			  RuleSet nicknames = RuleSet{},
-			  RuleSet plugins = RuleSet{},
-			  RuleSet events = RuleSet{},
-			  RuleAction action = RuleAction::Accept);
+    /**
+     * Rule constructor.
+     *
+     * \param servers the server list
+     * \param channels the channels
+     * \param nicknames the nicknames
+     * \param plugins the plugins
+     * \param events the events
+     * \param action the rule action
+     * \throw std::invalid_argument if events are invalid
+     */
+    IRCCD_EXPORT Rule(RuleSet servers = RuleSet{},
+                      RuleSet channels = RuleSet{},
+                      RuleSet nicknames = RuleSet{},
+                      RuleSet plugins = RuleSet{},
+                      RuleSet events = RuleSet{},
+                      RuleAction action = RuleAction::Accept);
 
-	/**
-	 * Check if that rule apply for the given criterias.
-	 *
-	 * \param server the server
-	 * \param channel the channel
-	 * \param nick the origin
-	 * \param plugin the plugin
-	 * \param event the event
-	 * \return true if match
-	 */
-	IRCCD_EXPORT bool match(const std::string &server,
-				const std::string &channel,
-				const std::string &nick,
-				const std::string &plugin,
-				const std::string &event) const noexcept;
+    /**
+     * Check if that rule apply for the given criterias.
+     *
+     * \param server the server
+     * \param channel the channel
+     * \param nick the origin
+     * \param plugin the plugin
+     * \param event the event
+     * \return true if match
+     */
+    IRCCD_EXPORT bool match(const std::string &server,
+                            const std::string &channel,
+                            const std::string &nick,
+                            const std::string &plugin,
+                            const std::string &event) const noexcept;
 
-	/**
-	 * Get the action.
-	 *
-	 * \return the action
-	 */
-	IRCCD_EXPORT RuleAction action() const noexcept;
+    /**
+     * Get the action.
+     *
+     * \return the action
+     */
+    IRCCD_EXPORT RuleAction action() const noexcept;
 
-	/**
-	 * Get the servers.
-	 *
-	 * \return the servers
-	 */
-	IRCCD_EXPORT const RuleSet &servers() const noexcept;
+    /**
+     * Get the servers.
+     *
+     * \return the servers
+     */
+    IRCCD_EXPORT const RuleSet &servers() const noexcept;
 
-	/**
-	 * Get the channels.
-	 *
-	 * \return the channels
-	 */
-	IRCCD_EXPORT const RuleSet &channels() const noexcept;
+    /**
+     * Get the channels.
+     *
+     * \return the channels
+     */
+    IRCCD_EXPORT const RuleSet &channels() const noexcept;
 
-	/**
-	 * Get the origins.
-	 *
-	 * \return the origins
-	 */
-	IRCCD_EXPORT const RuleSet &origins() const noexcept;
+    /**
+     * Get the origins.
+     *
+     * \return the origins
+     */
+    IRCCD_EXPORT const RuleSet &origins() const noexcept;
 
-	/**
-	 * Get the plugins.
-	 *
-	 * \return the plugins
-	 */
-	IRCCD_EXPORT const RuleSet &plugins() const noexcept;
+    /**
+     * Get the plugins.
+     *
+     * \return the plugins
+     */
+    IRCCD_EXPORT const RuleSet &plugins() const noexcept;
 
-	/**
-	 * Get the events.
-	 *
-	 * \return the events
-	 */
-	IRCCD_EXPORT const RuleSet &events() const noexcept;
+    /**
+     * Get the events.
+     *
+     * \return the events
+     */
+    IRCCD_EXPORT const RuleSet &events() const noexcept;
 };
 
 } // !irccd

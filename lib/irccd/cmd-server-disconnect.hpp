@@ -36,27 +36,27 @@ namespace command {
  */
 class ServerDisconnect : public Command {
 public:
-	/**
-	 * Constructor.
-	 */
-	IRCCD_EXPORT ServerDisconnect();
+    /**
+     * Constructor.
+     */
+    IRCCD_EXPORT ServerDisconnect();
 
-	/**
-	 * \copydoc Command::help
-	 */
-	IRCCD_EXPORT std::string help() const override;
+    /**
+     * \copydoc Command::help
+     */
+    IRCCD_EXPORT std::string help() const override;
 
-	/**
-	 * Get list of arguments required.
-	 *
-	 * \return the arguments required
-	 */
-	IRCCD_EXPORT std::vector<Arg> args() const override;
+    /**
+     * Get list of arguments required.
+     *
+     * \return the arguments required
+     */
+    IRCCD_EXPORT std::vector<Arg> args() const override;
 
-	/**
-	 * \copydoc Command::exec
-	 */
-	IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
+    /**
+     * \copydoc Command::exec
+     */
+    IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
 };
 
 } // !command

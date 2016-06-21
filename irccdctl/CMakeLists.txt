@@ -19,12 +19,12 @@
 project(irccdctl)
 
 irccd_define_executable(
-	TARGET irccdctl
-	INSTALL
-	SOURCES CMakeLists.txt main.cpp
-	LIBRARIES libirccd
+    TARGET irccdctl
+    INSTALL
+    SOURCES CMakeLists.txt main.cpp
+    LIBRARIES libirccd
 )
 
 if (UNIX)
-	set_target_properties(irccdctl PROPERTIES LINK_FLAGS -pthread)
+    set_target_properties(irccdctl PROPERTIES LINK_FLAGS -pthread)
 endif ()

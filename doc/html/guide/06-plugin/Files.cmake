@@ -17,11 +17,11 @@
 #
 
 set(
-	PLUGIN_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/01-intro.md
-	${CMAKE_CURRENT_LIST_DIR}/02-paths.md
-	${CMAKE_CURRENT_LIST_DIR}/03-patterns.md
-	${CMAKE_CURRENT_LIST_DIR}/04-metadata.md
-	${CMAKE_CURRENT_LIST_DIR}/05-sample-plugin.md
-	${CMAKE_CURRENT_LIST_DIR}/06-do-and-avoid.md
+    PLUGIN_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/01-intro.md
+    ${CMAKE_CURRENT_LIST_DIR}/02-paths.md
+    ${CMAKE_CURRENT_LIST_DIR}/03-patterns.md
+    ${CMAKE_CURRENT_LIST_DIR}/04-metadata.md
+    ${CMAKE_CURRENT_LIST_DIR}/05-sample-plugin.md
+    ${CMAKE_CURRENT_LIST_DIR}/06-do-and-avoid.md
 )

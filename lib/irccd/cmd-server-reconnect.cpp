@@ -26,36 +26,36 @@ namespace irccd {
 namespace command {
 
 ServerReconnect::ServerReconnect()
-	: Command("server-reconnect", "Server")
+    : Command("server-reconnect", "Server")
 {
 }
 
 std::string ServerReconnect::help() const
 {
-	return "";
+    return "";
 }
 
 std::vector<Command::Arg> ServerReconnect::args() const
 {
-	return {{ "server", false }};
+    return {{ "server", false }};
 }
 
 json::Value ServerReconnect::request(Irccdctl &, const CommandRequest &args) const
 {
-	return args.length() == 0 ? nullptr : json::object({ { "server", args.arg(0) } });
+    return args.length() == 0 ? nullptr : json::object({ { "server", args.arg(0) } });
 }
 
 json::Value ServerReconnect::exec(Irccd &irccd, const json::Value &request) const
 {
-	auto server = request.find("server");
+    auto server = request.find("server");
 
-	if (server != request.end() && server->isString())
-		irccd.serverService().require(server->toString())->reconnect();
-	else
-		for (auto &server : irccd.serverService().servers())
-			server->reconnect();
+    if (server != request.end() && server->isString())
+        irccd.serverService().require(server->toString())->reconnect();
+    else
+        for (auto &server : irccd.serverService().servers())
+            server->reconnect();
 
-	return nullptr;
+    return nullptr;
 }
 
 } // !command

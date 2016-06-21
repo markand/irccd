@@ -17,12 +17,12 @@
 #
 
 set(
-	UNICODE_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/index.md
-	${CMAKE_CURRENT_LIST_DIR}/function/isDigit.md
-	${CMAKE_CURRENT_LIST_DIR}/function/isLetter.md
-	${CMAKE_CURRENT_LIST_DIR}/function/isLower.md
-	${CMAKE_CURRENT_LIST_DIR}/function/isSpace.md
-	${CMAKE_CURRENT_LIST_DIR}/function/isTitle.md
-	${CMAKE_CURRENT_LIST_DIR}/function/isUpper.md
+    UNICODE_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/index.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/isDigit.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/isLetter.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/isLower.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/isSpace.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/isTitle.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/isUpper.md
 )

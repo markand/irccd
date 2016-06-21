@@ -22,6 +22,6 @@ Any plugin can log messages, the message will be prepended by the plugin name to
 ````javascript
 function onLoad()
 {
-	Irccd.Logger.info("This is an example");
+    Irccd.Logger.info("This is an example");
 }
 ````

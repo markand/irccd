@@ -17,9 +17,9 @@
 #
 
 irccd_define_test(
-	NAME js-system
-	SOURCES main.cpp
-	LIBRARIES libirccd
-	FLAGS IRCCD_EXECUTABLE=\"$<TARGET_FILE:irccd>\"
+    NAME js-system
+    SOURCES main.cpp
+    LIBRARIES libirccd
+    FLAGS IRCCD_EXECUTABLE=\"$<TARGET_FILE:irccd>\"
 )
 

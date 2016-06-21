@@ -37,51 +37,51 @@ namespace {
 
 auto find(const std::vector<std::shared_ptr<Module>> &modules, const std::string &name) noexcept
 {
-	return std::find_if(modules.begin(), modules.end(), [&] (const auto &module) {
-		return module->name() == name;
-	});
+    return std::find_if(modules.begin(), modules.end(), [&] (const auto &module) {
+        return module->name() == name;
+    });
 }
 
 } // !namespace
 
 ModuleService::ModuleService()
 {
-	// Load Irccd global first.
-	m_modules.push_back(std::make_shared<IrccdModule>());
+    // Load Irccd global first.
+    m_modules.push_back(std::make_shared<IrccdModule>());
 
-	// Additional modules.
-	m_modules.push_back(std::make_shared<ElapsedTimerModule>());
-	m_modules.push_back(std::make_shared<DirectoryModule>());
-	m_modules.push_back(std::make_shared<FileModule>());
-	m_modules.push_back(std::make_shared<LoggerModule>());
-	m_modules.push_back(std::make_shared<PluginModule>());
-	m_modules.push_back(std::make_shared<ServerModule>());
-	m_modules.push_back(std::make_shared<SystemModule>());
-	m_modules.push_back(std::make_shared<TimerModule>());
-	m_modules.push_back(std::make_shared<UnicodeModule>());
-	m_modules.push_back(std::make_shared<UtilModule>());
+    // Additional modules.
+    m_modules.push_back(std::make_shared<ElapsedTimerModule>());
+    m_modules.push_back(std::make_shared<DirectoryModule>());
+    m_modules.push_back(std::make_shared<FileModule>());
+    m_modules.push_back(std::make_shared<LoggerModule>());
+    m_modules.push_back(std::make_shared<PluginModule>());
+    m_modules.push_back(std::make_shared<ServerModule>());
+    m_modules.push_back(std::make_shared<SystemModule>());
+    m_modules.push_back(std::make_shared<TimerModule>());
+    m_modules.push_back(std::make_shared<UnicodeModule>());
+    m_modules.push_back(std::make_shared<UtilModule>());
 }
 
 std::shared_ptr<Module> ModuleService::get(const std::string &name) const noexcept
 {
-	auto it = find(m_modules, name);
+    auto it = find(m_modules, name);
 
-	if (it == m_modules.end())
-		return nullptr;
+    if (it == m_modules.end())
+        return nullptr;
 
-	return *it;
+    return *it;
 }
 
 bool ModuleService::contains(const std::string &name) const
 {
-	return find(m_modules, name) != m_modules.end();
+    return find(m_modules, name) != m_modules.end();
 }
 
 void ModuleService::add(std::shared_ptr<Module> module)
 {
-	assert(!contains(module->name()));
+    assert(!contains(module->name()));
 
-	m_modules.push_back(std::move(module));
+    m_modules.push_back(std::move(module));
 }
 
 } // !irccd

@@ -48,48 +48,48 @@
 namespace irccd {
 
 CommandService::CommandService()
-	: m_commands{
-		std::make_shared<command::Help>(),
-		std::make_shared<command::PluginConfig>(),
-		std::make_shared<command::PluginInfo>(),
-		std::make_shared<command::PluginList>(),
-		std::make_shared<command::PluginLoad>(),
-		std::make_shared<command::PluginReload>(),
-		std::make_shared<command::PluginUnload>(),
-		std::make_shared<command::ServerChannelMode>(),
-		std::make_shared<command::ServerChannelNotice>(),
-		std::make_shared<command::ServerConnect>(),
-		std::make_shared<command::ServerDisconnect>(),
-		std::make_shared<command::ServerInfo>(),
-		std::make_shared<command::ServerInvite>(),
-		std::make_shared<command::ServerJoin>(),
-		std::make_shared<command::ServerKick>(),
-		std::make_shared<command::ServerList>(),
-		std::make_shared<command::ServerMe>(),
-		std::make_shared<command::ServerMessage>(),
-		std::make_shared<command::ServerMode>(),
-		std::make_shared<command::ServerNick>(),
-		std::make_shared<command::ServerNotice>(),
-		std::make_shared<command::ServerPart>(),
-		std::make_shared<command::ServerReconnect>(),
-		std::make_shared<command::ServerTopic>(),
-		std::make_shared<command::Watch>(),
-	}
+    : m_commands{
+        std::make_shared<command::Help>(),
+        std::make_shared<command::PluginConfig>(),
+        std::make_shared<command::PluginInfo>(),
+        std::make_shared<command::PluginList>(),
+        std::make_shared<command::PluginLoad>(),
+        std::make_shared<command::PluginReload>(),
+        std::make_shared<command::PluginUnload>(),
+        std::make_shared<command::ServerChannelMode>(),
+        std::make_shared<command::ServerChannelNotice>(),
+        std::make_shared<command::ServerConnect>(),
+        std::make_shared<command::ServerDisconnect>(),
+        std::make_shared<command::ServerInfo>(),
+        std::make_shared<command::ServerInvite>(),
+        std::make_shared<command::ServerJoin>(),
+        std::make_shared<command::ServerKick>(),
+        std::make_shared<command::ServerList>(),
+        std::make_shared<command::ServerMe>(),
+        std::make_shared<command::ServerMessage>(),
+        std::make_shared<command::ServerMode>(),
+        std::make_shared<command::ServerNick>(),
+        std::make_shared<command::ServerNotice>(),
+        std::make_shared<command::ServerPart>(),
+        std::make_shared<command::ServerReconnect>(),
+        std::make_shared<command::ServerTopic>(),
+        std::make_shared<command::Watch>(),
+    }
 {
 }
 
 bool CommandService::contains(const std::string &name) const noexcept
 {
-	return find(name) != nullptr;
+    return find(name) != nullptr;
 }
 
 std::shared_ptr<Command> CommandService::find(const std::string &name) const noexcept
 {
-	auto it = std::find_if(m_commands.begin(), m_commands.end(), [&] (const auto &cmd) {
-		return cmd->name() == name;
-	});
+    auto it = std::find_if(m_commands.begin(), m_commands.end(), [&] (const auto &cmd) {
+        return cmd->name() == name;
+    });
 
-	return it == m_commands.end() ? nullptr : *it;
+    return it == m_commands.end() ? nullptr : *it;
 }
 
 } // !irccd

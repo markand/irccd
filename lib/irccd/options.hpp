@@ -1,5 +1,5 @@
 /*
- * options.hpp -- parse Unix command line options
+ * options.h -- parse Unix command line options
  *
  * Copyright (c) 2015 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_OPTION_PARSER_HPP
-#define IRCCD_OPTION_PARSER_HPP
+#ifndef OPTIONS_HPP
+#define OPTIONS_HPP
 
 /**
- * \file options.hpp
- * \brief Basic options parsing.
+ * \file options.h
+ * \brief Basic Unix options parser.
  */
 
 #include <exception>
@@ -30,85 +30,87 @@
 #include <utility>
 #include <vector>
 
-#include "sysconfig.hpp"
-
 namespace irccd {
 
 /**
  * Namespace for options parsing.
  */
-namespace parser {
+namespace option {
 
 /**
- * \class InvalidOption
  * \brief This exception is thrown when an invalid option has been found.
  */
 class InvalidOption : public std::exception {
 private:
-	std::string message;
+    std::string message;
 
 public:
-	/**
-	 * The invalid option given.
-	 */
-	std::string argument;
+    /**
+     * The invalid option given.
+     */
+    std::string argument;
 
-	/**
-	 * Construct the exception.
-	 *
-	 * \param arg the argument missing
-	 */
-	inline InvalidOption(std::string arg)
-		: argument(std::move(arg))
-	{
-		message = std::string("invalid option: ") + argument;
-	}
+    /**
+     * Construct the exception.
+     *
+     * \param arg the argument missing
+     */
+    inline InvalidOption(std::string arg)
+        : argument(std::move(arg))
+    {
+        message = std::string("invalid option: ") + argument;
+    }
 
-	/**
-	 * Get the error message.
-	 *
-	 * \return the error message
-	 */
-	const char *what() const noexcept override
-	{
-		return message.c_str();
-	}
+    /**
+     * Get the error message.
+     *
+     * \return the error message
+     */
+    const char *what() const noexcept override
+    {
+        return message.c_str();
+    }
 };
 
 /**
- * \class MissingValue
- * \brief This exception is thrown when an option requires a value and no value has been given
+ * \brief This exception is thrown when an option requires a value and no value has been given.
  */
 class MissingValue : public std::exception {
 private:
-	std::string message;
+    std::string m_message;
+    std::string m_option;
 
 public:
-	/**
-	 * The argument that requires a value.
-	 */
-	std::string argument;
+    /**
+     * Construct the exception.
+     *
+     * \param option the option that requires a value
+     */
+    inline MissingValue(std::string option)
+        : m_option(std::move(option))
+    {
+        m_message = std::string("missing argument for: ") + m_option;
+    }
 
-	/**
-	 * Construct the exception.
-	 *
-	 * \param arg the argument that requires a value
-	 */
-	inline MissingValue(std::string arg)
-		: argument(std::move(arg))
-	{
-		message = std::string("missing argument for: ") + argument;
-	}
+    /**
+     * Get the options that requires a value.
+     *
+     * \return the option name
+     */
+    inline const std::string &option() const noexcept
+    {
+        return m_option;
+    }
 
-	/**
-	 * Get the error message.
-	 *
-	 * \return the error message
-	 */
-	const char *what() const noexcept override
-	{
-		return message.c_str();
-	}
+    /**
+     * Get the error message.
+     *
+     * \return the error message
+     */
+    const char *what() const noexcept override
+    {
+        return m_message.c_str();
+    }
 };
 
 /**
@@ -130,7 +132,7 @@ using Options = std::map<std::string, bool>;
  * \throw MissingValue
  * \throw InvalidOption
  */
-IRCCD_EXPORT Result read(std::vector<std::string> &args, const Options &definition);
+Result read(std::vector<std::string> &args, const Options &definition);
 
 /**
  * Overloaded function for usage with main() arguments.
@@ -143,10 +145,10 @@ IRCCD_EXPORT Result read(std::vector<std::string> &args, const Options &definiti
  * \throw MissingValue
  * \throw InvalidOption
  */
-IRCCD_EXPORT Result read(int &argc, char **&argv, const Options &definition);
+Result read(int &argc, char **&argv, const Options &definition);
 
-} // !parser
+} // !option
 
 } // !irccd
 
-#endif // !IRCCD_OPTION_PARSER_HPP
+#endif // !OPTIONS_HPP

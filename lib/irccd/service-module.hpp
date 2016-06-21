@@ -39,47 +39,47 @@ class Module;
  */
 class ModuleService {
 private:
-	std::vector<std::shared_ptr<Module>> m_modules;
+    std::vector<std::shared_ptr<Module>> m_modules;
 
 public:
-	/**
-	 * Construct the service and predefined irccd API.
-	 */
-	IRCCD_EXPORT ModuleService();
+    /**
+     * Construct the service and predefined irccd API.
+     */
+    IRCCD_EXPORT ModuleService();
 
-	/**
-	 * Get all modules.
-	 *
-	 * \return the modules
-	 */
-	inline const std::vector<std::shared_ptr<Module>> &modules() const noexcept
-	{
-		return m_modules;
-	}
+    /**
+     * Get all modules.
+     *
+     * \return the modules
+     */
+    inline const std::vector<std::shared_ptr<Module>> &modules() const noexcept
+    {
+        return m_modules;
+    }
 
-	/**
-	 * Get a module.
-	 *
-	 * \param name the module name
-	 * \return the module or empty if not found
-	 */
-	IRCCD_EXPORT std::shared_ptr<Module> get(const std::string &name) const noexcept;
+    /**
+     * Get a module.
+     *
+     * \param name the module name
+     * \return the module or empty if not found
+     */
+    IRCCD_EXPORT std::shared_ptr<Module> get(const std::string &name) const noexcept;
 
-	/**
-	 * Tells if a module exist.
-	 *
-	 * \param name the name
-	 */
-	IRCCD_EXPORT bool contains(const std::string &name) const;
+    /**
+     * Tells if a module exist.
+     *
+     * \param name the name
+     */
+    IRCCD_EXPORT bool contains(const std::string &name) const;
 
-	/**
-	 * Add a JavaScript API module.
-	 *
-	 * \pre module != nullptr
-	 * \pre !contains(module)
-	 * \param module the module
-	 */
-	IRCCD_EXPORT void add(std::shared_ptr<Module> module);
+    /**
+     * Add a JavaScript API module.
+     *
+     * \pre module != nullptr
+     * \pre !contains(module)
+     * \param module the module
+     */
+    IRCCD_EXPORT void add(std::shared_ptr<Module> module);
 };
 
 } // !irccd

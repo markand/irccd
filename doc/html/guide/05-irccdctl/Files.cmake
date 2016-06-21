@@ -17,8 +17,8 @@
 #
 
 set(
-	IRCCDCTL_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/01-config.md
-	${CMAKE_CURRENT_LIST_DIR}/02-usage.md
-	${CMAKE_CURRENT_LIST_DIR}/03-commands.md
+    IRCCDCTL_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/01-config.md
+    ${CMAKE_CURRENT_LIST_DIR}/02-usage.md
+    ${CMAKE_CURRENT_LIST_DIR}/03-commands.md
 )

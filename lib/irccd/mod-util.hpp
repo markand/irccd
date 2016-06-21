@@ -34,15 +34,15 @@ namespace irccd {
  */
 class UtilModule : public Module {
 public:
-	/**
-	 * Irccd.Util.
-	 */
-	IRCCD_EXPORT UtilModule() noexcept;
+    /**
+     * Irccd.Util.
+     */
+    IRCCD_EXPORT UtilModule() noexcept;
 
-	/**
-	 * \copydoc Module::load
-	 */
-	IRCCD_EXPORT void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
+    /**
+     * \copydoc Module::load
+     */
+    IRCCD_EXPORT void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
 };
 
 } // !irccd

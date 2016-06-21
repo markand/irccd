@@ -51,45 +51,45 @@ namespace log {
  */
 class Interface {
 public:
-	/**
-	 * Default constructor.
-	 */
-	Interface() = default;
+    /**
+     * Default constructor.
+     */
+    Interface() = default;
 
-	/**
-	 * Virtual destructor defaulted.
-	 */
-	virtual ~Interface() = default;
+    /**
+     * Virtual destructor defaulted.
+     */
+    virtual ~Interface() = default;
 
-	/**
-	 * Write a debug message.
-	 *
-	 * This function is called only if NDEBUG is not defined.
-	 *
-	 * \param line the data
-	 * \see log::debug
-	 */
-	virtual void debug(const std::string &line) = 0;
+    /**
+     * Write a debug message.
+     *
+     * This function is called only if NDEBUG is not defined.
+     *
+     * \param line the data
+     * \see log::debug
+     */
+    virtual void debug(const std::string &line) = 0;
 
-	/**
-	 * Write a information message.
-	 *
-	 * The function is called only if verbose is true.
-	 *
-	 * \param line the data
-	 * \see log::info
-	 */
-	virtual void info(const std::string &line) = 0;
+    /**
+     * Write a information message.
+     *
+     * The function is called only if verbose is true.
+     *
+     * \param line the data
+     * \see log::info
+     */
+    virtual void info(const std::string &line) = 0;
 
-	/**
-	 * Write an error message.
-	 *
-	 * This function is always called.
-	 *
-	 * \param line the data
-	 * \see log::warning
-	 */
-	virtual void warning(const std::string &line) = 0;
+    /**
+     * Write an error message.
+     *
+     * This function is always called.
+     *
+     * \param line the data
+     * \see log::warning
+     */
+    virtual void warning(const std::string &line) = 0;
 };
 
 /*
@@ -104,48 +104,48 @@ public:
  */
 class Filter {
 public:
-	/**
-	 * Default constructor.
-	 */
-	Filter() = default;
+    /**
+     * Default constructor.
+     */
+    Filter() = default;
 
-	/**
-	 * Virtual destructor defaulted.
-	 */
-	virtual ~Filter() = default;
+    /**
+     * Virtual destructor defaulted.
+     */
+    virtual ~Filter() = default;
 
-	/**
-	 * Update the debug message.
-	 *
-	 * \param input the message
-	 * \return the updated message
-	 */
-	virtual std::string preDebug(std::string input) const
-	{
-		return input;
-	}
+    /**
+     * Update the debug message.
+     *
+     * \param input the message
+     * \return the updated message
+     */
+    virtual std::string preDebug(std::string input) const
+    {
+        return input;
+    }
 
-	/**
-	 * Update the information message.
-	 *
-	 * \param input the message
-	 * \return the updated message
-	 */
-	virtual std::string preInfo(std::string input) const
-	{
-		return input;
-	}
+    /**
+     * Update the information message.
+     *
+     * \param input the message
+     * \return the updated message
+     */
+    virtual std::string preInfo(std::string input) const
+    {
+        return input;
+    }
 
-	/**
-	 * Update the warning message.
-	 *
-	 * \param input the message
-	 * \return the updated message
-	 */
-	virtual std::string preWarning(std::string input) const
-	{
-		return input;
-	}
+    /**
+     * Update the warning message.
+     *
+     * \param input the message
+     * \return the updated message
+     */
+    virtual std::string preWarning(std::string input) const
+    {
+        return input;
+    }
 };
 
 /*
@@ -158,20 +158,20 @@ public:
  */
 class Console : public Interface {
 public:
-	/**
-	 * \copydoc Interface::debug
-	 */
-	IRCCD_EXPORT void debug(const std::string &line) override;
+    /**
+     * \copydoc Interface::debug
+     */
+    IRCCD_EXPORT void debug(const std::string &line) override;
 
-	/**
-	 * \copydoc Interface::info
-	 */
-	IRCCD_EXPORT void info(const std::string &line) override;
+    /**
+     * \copydoc Interface::info
+     */
+    IRCCD_EXPORT void info(const std::string &line) override;
 
-	/**
-	 * \copydoc Interface::warning
-	 */
-	IRCCD_EXPORT void warning(const std::string &line) override;
+    /**
+     * \copydoc Interface::warning
+     */
+    IRCCD_EXPORT void warning(const std::string &line) override;
 };
 
 /*
@@ -184,32 +184,32 @@ public:
  */
 class File : public Interface {
 private:
-	std::string m_outputNormal;
-	std::string m_outputError;
+    std::string m_outputNormal;
+    std::string m_outputError;
 
 public:
-	/**
-	 * Outputs to files.
-	 *
-	 * \param normal the path to the normal logs
-	 * \param errors the path to the errors logs
-	 */
-	IRCCD_EXPORT File(std::string normal, std::string errors);
+    /**
+     * Outputs to files.
+     *
+     * \param normal the path to the normal logs
+     * \param errors the path to the errors logs
+     */
+    IRCCD_EXPORT File(std::string normal, std::string errors);
 
-	/**
-	 * \copydoc Interface::debug
-	 */
-	IRCCD_EXPORT void debug(const std::string &line) override;
+    /**
+     * \copydoc Interface::debug
+     */
+    IRCCD_EXPORT void debug(const std::string &line) override;
 
-	/**
-	 * \copydoc Interface::info
-	 */
-	IRCCD_EXPORT void info(const std::string &line) override;
+    /**
+     * \copydoc Interface::info
+     */
+    IRCCD_EXPORT void info(const std::string &line) override;
 
-	/**
-	 * \copydoc Interface::warning
-	 */
-	IRCCD_EXPORT void warning(const std::string &line) override;
+    /**
+     * \copydoc Interface::warning
+     */
+    IRCCD_EXPORT void warning(const std::string &line) override;
 };
 
 /*
@@ -224,20 +224,20 @@ public:
  */
 class Silent : public Interface {
 public:
-	/**
-	 * \copydoc Interface::debug
-	 */
-	IRCCD_EXPORT void debug(const std::string &line) override;
+    /**
+     * \copydoc Interface::debug
+     */
+    IRCCD_EXPORT void debug(const std::string &line) override;
 
-	/**
-	 * \copydoc Interface::info
-	 */
-	IRCCD_EXPORT void info(const std::string &line) override;
+    /**
+     * \copydoc Interface::info
+     */
+    IRCCD_EXPORT void info(const std::string &line) override;
 
-	/**
-	 * \copydoc Interface::warning
-	 */
-	IRCCD_EXPORT void warning(const std::string &line) override;
+    /**
+     * \copydoc Interface::warning
+     */
+    IRCCD_EXPORT void warning(const std::string &line) override;
 };
 
 /*
@@ -252,30 +252,30 @@ public:
  */
 class Syslog : public Interface {
 public:
-	/**
-	 * Open the syslog.
-	 */
-	IRCCD_EXPORT Syslog();
+    /**
+     * Open the syslog.
+     */
+    IRCCD_EXPORT Syslog();
 
-	/**
-	 * Close the syslog.
-	 */
-	IRCCD_EXPORT ~Syslog();
+    /**
+     * Close the syslog.
+     */
+    IRCCD_EXPORT ~Syslog();
 
-	/**
-	 * \copydoc Interface::debug
-	 */
-	IRCCD_EXPORT void debug(const std::string &line) override;
+    /**
+     * \copydoc Interface::debug
+     */
+    IRCCD_EXPORT void debug(const std::string &line) override;
 
-	/**
-	 * \copydoc Interface::info
-	 */
-	IRCCD_EXPORT void info(const std::string &line) override;
+    /**
+     * \copydoc Interface::info
+     */
+    IRCCD_EXPORT void info(const std::string &line) override;
 
-	/**
-	 * \copydoc Interface::warning
-	 */
-	IRCCD_EXPORT void warning(const std::string &line) override;
+    /**
+     * \copydoc Interface::warning
+     */
+    IRCCD_EXPORT void warning(const std::string &line) override;
 };
 
 #endif // !HAVE_SYSLOG

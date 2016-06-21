@@ -56,216 +56,216 @@ std::unique_ptr<Irccd> instance;
 
 void usage()
 {
-	log::warning() << "usage: " << sys::programName() << " [options...]\n\n";
-	log::warning() << "Available options:\n";
-	log::warning() << "  -c, --config file       specify the configuration file\n";
-	log::warning() << "  -f, --foreground        do not run as a daemon\n";
-	log::warning() << "      --help              show this help\n";
-	log::warning() << "  -p, --plugin name       load a specific plugin\n";
-	log::warning() << "  -v, --verbose           be verbose\n";
-	log::warning() << "      --version           show the version\n";
-	std::exit(1);
+    log::warning() << "usage: " << sys::programName() << " [options...]\n\n";
+    log::warning() << "Available options:\n";
+    log::warning() << "  -c, --config file       specify the configuration file\n";
+    log::warning() << "  -f, --foreground        do not run as a daemon\n";
+    log::warning() << "      --help              show this help\n";
+    log::warning() << "  -p, --plugin name       load a specific plugin\n";
+    log::warning() << "  -v, --verbose           be verbose\n";
+    log::warning() << "      --version           show the version\n";
+    std::exit(1);
 }
 
 void stop(int)
 {
-	instance->stop();
+    instance->stop();
 }
 
 void init(int &argc, char **&argv)
 {
-	// Needed for some components.
-	sys::setProgramName("irccd");
-	path::setApplicationPath(argv[0]);
+    // Needed for some components.
+    sys::setProgramName("irccd");
+    path::setApplicationPath(argv[0]);
 
-	// Default logging to console.
-	log::setVerbose(false);
-	log::setInterface(std::make_unique<log::Console>());
+    // Default logging to console.
+    log::setVerbose(false);
+    log::setInterface(std::make_unique<log::Console>());
 
-	// Register some signals.
-	signal(SIGINT, stop);
-	signal(SIGTERM, stop);
+    // Register some signals.
+    signal(SIGINT, stop);
+    signal(SIGTERM, stop);
 
-	-- argc;
-	++ argv;
+    -- argc;
+    ++ argv;
 }
 
 parser::Result parse(int &argc, char **&argv)
 {
-	// Parse command line options.
-	parser::Result result;
+    // Parse command line options.
+    parser::Result result;
 
-	try {
-		parser::Options options{
-			{ "-c",			true	},
-			{ "--config",		true	},
-			{ "-f",			false	},
-			{ "--foreground",	false	},
-			{ "--help",		false	},
-			{ "-p",			true	},
-			{ "--plugin",		true	},
-			{ "-v",			false	},
-			{ "--verbose",		false	},
-			{ "--version",		false	}
-		};
+    try {
+        parser::Options options{
+            { "-c",             true    },
+            { "--config",       true    },
+            { "-f",             false   },
+            { "--foreground",   false   },
+            { "--help",         false   },
+            { "-p",             true    },
+            { "--plugin",       true    },
+            { "-v",             false   },
+            { "--verbose",      false   },
+            { "--version",      false   }
+        };
 
-		result = parser::read(argc, argv, options);
+        result = parser::read(argc, argv, options);
 
-		for (const auto &pair : result) {
-			if (pair.first == "--help")
-				usage();
-				// NOTREACHED
-			if (pair.first == "--version") {
-				std::cout << IRCCD_VERSION << std::endl;
-				std::exit(1);
-			}
-			if (pair.first == "-v" || pair.first == "--verbose")
-				log::setVerbose(true);
-		}
-	} catch (const std::exception &ex) {
-		log::warning() << sys::programName() << ": " << ex.what() << std::endl;
-		usage();
-	}
+        for (const auto &pair : result) {
+            if (pair.first == "--help")
+                usage();
+                // NOTREACHED
+            if (pair.first == "--version") {
+                std::cout << IRCCD_VERSION << std::endl;
+                std::exit(1);
+            }
+            if (pair.first == "-v" || pair.first == "--verbose")
+                log::setVerbose(true);
+        }
+    } catch (const std::exception &ex) {
+        log::warning() << sys::programName() << ": " << ex.what() << std::endl;
+        usage();
+    }
 
-	return result;
+    return result;
 }
 
 Config open(const parser::Result &result)
 {
-	auto it = result.find("-c");
+    auto it = result.find("-c");
 
-	if (it != result.end() || (it = result.find("--config")) != result.end()) {
-		try {
-			return Config(it->second);
-		} catch (const std::exception &ex) {
-			throw std::runtime_error("{}: {}"_format(it->second, ex.what()));
-		}
-	}
+    if (it != result.end() || (it = result.find("--config")) != result.end()) {
+        try {
+            return Config(it->second);
+        } catch (const std::exception &ex) {
+            throw std::runtime_error("{}: {}"_format(it->second, ex.what()));
+        }
+    }
 
-	return Config::find();
+    return Config::find();
 }
 
 void loadPid(const std::string &path)
 {
-	if (path.empty())
-		return;
+    if (path.empty())
+        return;
 
-	try {
+    try {
 #if defined(HAVE_GETPID)
-		std::ofstream out(path, std::ofstream::trunc);
+        std::ofstream out(path, std::ofstream::trunc);
 
-		if (!out)
-			throw std::runtime_error("could not open pidfile {}: {}"_format(path, std::strerror(errno)));
+        if (!out)
+            throw std::runtime_error("could not open pidfile {}: {}"_format(path, std::strerror(errno)));
 
-		log::debug() << "irccd: pid written in " << path << std::endl;
-		out << getpid() << std::endl;
+        log::debug() << "irccd: pid written in " << path << std::endl;
+        out << getpid() << std::endl;
 #else
-		throw std::runtime_error("pidfile option not supported on this platform");
+        throw std::runtime_error("pidfile option not supported on this platform");
 #endif
-	} catch (const std::exception &ex) {
-		log::warning() << "irccd: " << ex.what() << std::endl;
-	}
+    } catch (const std::exception &ex) {
+        log::warning() << "irccd: " << ex.what() << std::endl;
+    }
 }
 
 void loadGid(const std::string gid)
 {
-	try {
-		if (!gid.empty())
+    try {
+        if (!gid.empty())
 #if defined(HAVE_SETGID)
-			sys::setGid(gid);
+            sys::setGid(gid);
 #else
-			throw std::runtime_error(" gid option not supported on this platform");
+            throw std::runtime_error(" gid option not supported on this platform");
 #endif
-	} catch (const std::exception &ex) {
-		log::warning() << "irccd: " << ex.what() << std::endl;
-	}
+    } catch (const std::exception &ex) {
+        log::warning() << "irccd: " << ex.what() << std::endl;
+    }
 }
 
 void loadUid(const std::string &uid)
 {
-	try {
-		if (!uid.empty())
+    try {
+        if (!uid.empty())
 #if defined(HAVE_SETUID)
-			sys::setUid(uid);
+            sys::setUid(uid);
 #else
-			throw std::runtime_error("uid option not supported on this platform");
+            throw std::runtime_error("uid option not supported on this platform");
 #endif
-	} catch (const std::exception &ex) {
-		log::warning() << "irccd: " << ex.what() << std::endl;
-	}
+    } catch (const std::exception &ex) {
+        log::warning() << "irccd: " << ex.what() << std::endl;
+    }
 }
 
 void loadForeground(bool foreground, const parser::Result &options)
 {
-	try {
+    try {
 #if defined(HAVE_DAEMON)
-		if (options.count("-f") == 0 && options.count("--foreground") == 0 && !foreground)
-			daemon(1, 0);
+        if (options.count("-f") == 0 && options.count("--foreground") == 0 && !foreground)
+            daemon(1, 0);
 #else
-		if (options.count("-f") > 0 || options.count("--foreground") > 0 || foreground)
-			throw std::runtime_error("foreground option not supported on this platform");
+        if (options.count("-f") > 0 || options.count("--foreground") > 0 || foreground)
+            throw std::runtime_error("foreground option not supported on this platform");
 #endif
-	} catch (const std::exception &ex) {
-		log::warning() << "irccd: " << ex.what() << std::endl;
-	}
+    } catch (const std::exception &ex) {
+        log::warning() << "irccd: " << ex.what() << std::endl;
+    }
 }
 
 void load(const Config &config, const parser::Result &options)
 {
-	/*
-	 * Order matters, please be careful when changing this.
-	 *
-	 * 1. Open logs as early as possible to use the defined outputs on any loading errors.
-	 */
+    /*
+     * Order matters, please be careful when changing this.
+     *
+     * 1. Open logs as early as possible to use the defined outputs on any loading errors.
+     */
 
-	// [logs] and [format] sections.
-	config.loadLogs();
-	config.loadFormats();
+    // [logs] and [format] sections.
+    config.loadLogs();
+    config.loadFormats();
 
-	// Show message here to use the formats.
-	log::info() << "irccd: using " << config.path() << std::endl;
+    // Show message here to use the formats.
+    log::info() << "irccd: using " << config.path() << std::endl;
 
-	// [general] section.
-	loadPid(config.pidfile());
-	loadGid(config.gid());
-	loadUid(config.uid());
-	loadForeground(config.isForeground(), options);
+    // [general] section.
+    loadPid(config.pidfile());
+    loadGid(config.gid());
+    loadUid(config.uid());
+    loadForeground(config.isForeground(), options);
 
-	// [transport]
-	for (const auto &transport : config.loadTransports())
-		instance->transportService().add(transport);
+    // [transport]
+    for (const auto &transport : config.loadTransports())
+        instance->transportService().add(transport);
 
-	// [server] section.
-	for (const auto &server : config.loadServers())
-		instance->serverService().add(server);
+    // [server] section.
+    for (const auto &server : config.loadServers())
+        instance->serverService().add(server);
 
-	// [rule] section.
-	for (const auto &rule : config.loadRules())
-		instance->ruleService().add(rule);
+    // [rule] section.
+    for (const auto &rule : config.loadRules())
+        instance->ruleService().add(rule);
 
-	// [plugin] section.
-	config.loadPlugins(*instance);
+    // [plugin] section.
+    config.loadPlugins(*instance);
 }
 
 } // !namespace
 
 int main(int argc, char **argv)
 {
-	init(argc, argv);
+    init(argc, argv);
 
-	parser::Result options = parse(argc, argv);
+    parser::Result options = parse(argc, argv);
 
-	// Find configuration file.
-	instance = std::make_unique<Irccd>();
+    // Find configuration file.
+    instance = std::make_unique<Irccd>();
 
-	try {
-		load(open(options), options);
-	} catch (const std::exception &ex) {
-		log::warning() << "irccd: " << ex.what() << std::endl;
-		return 1;
-	}
+    try {
+        load(open(options), options);
+    } catch (const std::exception &ex) {
+        log::warning() << "irccd: " << ex.what() << std::endl;
+        return 1;
+    }
 
-	instance->run();
+    instance->run();
 
-	return 0;
+    return 0;
 }

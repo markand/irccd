@@ -29,148 +29,148 @@ namespace irccd {
 
 void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const json::Value &object)
 {
-	assert(object.isObject());
+    assert(object.isObject());
 
-	m_irccd.post([=] (Irccd &) {
-		// 0. Be sure the object still exists.
-		auto tc = ptr.lock();
+    m_irccd.post([=] (Irccd &) {
+        // 0. Be sure the object still exists.
+        auto tc = ptr.lock();
 
-		if (!tc)
-			return;
+        if (!tc)
+            return;
 
-		// 1. Check if the Json object is valid.
-		auto name = object.find("command");
-		if (name == object.end() || name->typeOf() != json::Type::String) {
-			// TODO: send error.
-			log::warning("invalid command object");
-			return;
-		}
+        // 1. Check if the Json object is valid.
+        auto name = object.find("command");
+        if (name == object.end() || name->typeOf() != json::Type::String) {
+            // TODO: send error.
+            log::warning("invalid command object");
+            return;
+        }
 
-		// 2. Search for a command
-		auto cmd = m_irccd.commandService().find(name->toString());
+        // 2. Search for a command
+        auto cmd = m_irccd.commandService().find(name->toString());
 
-		if (!cmd) {
-			// TODO: send error again.
-			log::warning("command does not exists");
-			return;
-		}
+        if (!cmd) {
+            // TODO: send error again.
+            log::warning("command does not exists");
+            return;
+        }
 
-		// 3. Try to execute it.
-		json::Value response = json::object({});
+        // 3. Try to execute it.
+        json::Value response = json::object({});
 
-		try {
-			response = cmd->exec(m_irccd, object);
+        try {
+            response = cmd->exec(m_irccd, object);
 
-			// Adjust if command has returned something else.
-			if (!response.isObject())
-				response = json::object({});
+            // Adjust if command has returned something else.
+            if (!response.isObject())
+                response = json::object({});
 
-			response.insert("status", true);
-		} catch (const std::exception &ex) {
-			response.insert("status", false);
-			response.insert("error", ex.what());
-		}
+            response.insert("status", true);
+        } catch (const std::exception &ex) {
+            response.insert("status", false);
+            response.insert("error", ex.what());
+        }
 
-		// 4. Store the command name result.
-		response.insert("response", name->toString());
+        // 4. Store the command name result.
+        response.insert("response", name->toString());
 
-		// 5. Send the result.
-		tc->send(response.toJson(0));
-	});
+        // 5. Send the result.
+        tc->send(response.toJson(0));
+    });
 }
 
 void TransportService::handleDie(std::weak_ptr<TransportClient> ptr)
 {
-	m_irccd.post([=] (Irccd &) {
-		log::info("transport: client disconnected");
+    m_irccd.post([=] (Irccd &) {
+        log::info("transport: client disconnected");
 
-		auto tc = ptr.lock();
+        auto tc = ptr.lock();
 
-		if (tc)
-			m_clients.erase(std::find(m_clients.begin(), m_clients.end(), tc));
-	});
+        if (tc)
+            m_clients.erase(std::find(m_clients.begin(), m_clients.end(), tc));
+    });
 }
 
 TransportService::TransportService(Irccd &irccd) noexcept
-	: m_irccd(irccd)
+    : m_irccd(irccd)
 {
 }
 
 void TransportService::prepare(fd_set &in, fd_set &out, net::Handle &max)
 {
-	// Add transport servers.
-	for (const auto &transport : m_servers) {
-		FD_SET(transport->handle(), &in);
+    // Add transport servers.
+    for (const auto &transport : m_servers) {
+        FD_SET(transport->handle(), &in);
 
-		if (transport->handle() > max)
-			max = transport->handle();
-	}
+        if (transport->handle() > max)
+            max = transport->handle();
+    }
 
-	// Transport clients.
-	for (const auto &client : m_clients) {
-		FD_SET(client->handle(), &in);
+    // Transport clients.
+    for (const auto &client : m_clients) {
+        FD_SET(client->handle(), &in);
 
-		if (client->hasOutput())
-			FD_SET(client->handle(), &out);
-		if (client->handle() > max)
-			max = client->handle();
-	}
+        if (client->hasOutput())
+            FD_SET(client->handle(), &out);
+        if (client->handle() > max)
+            max = client->handle();
+    }
 }
 
 void TransportService::sync(fd_set &in, fd_set &out)
 {
-	using namespace std::placeholders;
+    using namespace std::placeholders;
 
-	// Transport servers.
-	for (const auto &transport : m_servers) {
-		if (!FD_ISSET(transport->handle(), &in))
-			continue;
+    // Transport servers.
+    for (const auto &transport : m_servers) {
+        if (!FD_ISSET(transport->handle(), &in))
+            continue;
 
-		log::debug("transport: new client connected");
+        log::debug("transport: new client connected");
 
-		std::shared_ptr<TransportClient> client = transport->accept();
-		std::weak_ptr<TransportClient> ptr(client);
+        std::shared_ptr<TransportClient> client = transport->accept();
+        std::weak_ptr<TransportClient> ptr(client);
 
-		// Send some information.
-		json::Value object = json::object({
-			{ "program",	"irccd"			},
-			{ "major",	IRCCD_VERSION_MAJOR	},
-			{ "minor",	IRCCD_VERSION_MINOR	},
-			{ "patch",	IRCCD_VERSION_PATCH	}
-		});
+        // Send some information.
+        json::Value object = json::object({
+            { "program",    "irccd"                 },
+            { "major",      IRCCD_VERSION_MAJOR     },
+            { "minor",      IRCCD_VERSION_MINOR     },
+            { "patch",      IRCCD_VERSION_PATCH     }
+        });
 
 #if defined(WITH_JS)
-		object.insert("javascript", true);
+        object.insert("javascript", true);
 #endif
 #if defined(WITH_SSL)
-		object.insert("ssl", true);
+        object.insert("ssl", true);
 #endif
 
-		client->send(object.toJson(0));
+        client->send(object.toJson(0));
 
-		// Connect signals.
-		client->onCommand.connect(std::bind(&TransportService::handleCommand, this, ptr, _1));
-		client->onDie.connect(std::bind(&TransportService::handleDie, this, ptr));
+        // Connect signals.
+        client->onCommand.connect(std::bind(&TransportService::handleCommand, this, ptr, _1));
+        client->onDie.connect(std::bind(&TransportService::handleDie, this, ptr));
 
-		// Register it.
-		m_clients.push_back(std::move(client));
-	}
+        // Register it.
+        m_clients.push_back(std::move(client));
+    }
 
-	// Transport clients.
-	for (const auto &client : m_clients)
-		client->sync(in, out);
+    // Transport clients.
+    for (const auto &client : m_clients)
+        client->sync(in, out);
 }
 
 void TransportService::add(std::shared_ptr<TransportServer> ts)
 {
-	m_servers.push_back(std::move(ts));
+    m_servers.push_back(std::move(ts));
 }
 
 void TransportService::broadcast(std::string data)
 {
-	// Asynchronous send.
-	for (const auto &client : m_clients)
-		client->send(data);
+    // Asynchronous send.
+    for (const auto &client : m_clients)
+        client->send(data);
 }
 
 } // !irccd

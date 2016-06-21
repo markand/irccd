@@ -26,57 +26,57 @@ namespace irccd {
 namespace command {
 
 ServerJoin::ServerJoin()
-	: Command("server-join", "Server")
+    : Command("server-join", "Server")
 {
 }
 
 std::string ServerJoin::help() const
 {
-	return "";
+    return "";
 }
 
 std::vector<Command::Arg> ServerJoin::args() const
 {
-	return {
-		{ "server",	true	},
-		{ "channel",	true	},
-		{ "password",	false	}
-	};
+    return {
+        { "server",     true    },
+        { "channel",    true    },
+        { "password",   false   }
+    };
 }
 
 std::vector<Command::Property> ServerJoin::properties() const
 {
-	return {
-		{ "server",	{ json::Type::String }},
-		{ "channel",	{ json::Type::String }},
-		{ "password",	{ json::Type::String }}
-	};
+    return {
+        { "server",     { json::Type::String }},
+        { "channel",    { json::Type::String }},
+        { "password",   { json::Type::String }}
+    };
 }
 
 json::Value ServerJoin::request(Irccdctl &, const CommandRequest &args) const
 {
-	auto req = json::object({
-		{ "server",	args.args()[0] },
-		{ "channel",	args.args()[1] }
-	});
+    auto req = json::object({
+        { "server",     args.args()[0] },
+        { "channel",    args.args()[1] }
+    });
 
-	if (args.length() == 3)
-		req.insert("password", args.args()[2]);
+    if (args.length() == 3)
+        req.insert("password", args.args()[2]);
 
-	return req;
+    return req;
 }
 
 json::Value ServerJoin::exec(Irccd &irccd, const json::Value &request) const
 {
-	Command::exec(irccd, request);
+    Command::exec(irccd, request);
 
-	irccd.serverService().require(
-		request.at("server").toString())->join(
-		request.at("channel").toString(),
-		request.valueOr("password", json::Type::String, "").toString()
-	);
+    irccd.serverService().require(
+        request.at("server").toString())->join(
+        request.at("channel").toString(),
+        request.valueOr("password", json::Type::String, "").toString()
+    );
 
-	return json::object();
+    return json::object();
 }
 
 } // !command

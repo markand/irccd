@@ -26,43 +26,43 @@ namespace irccd {
 namespace command {
 
 ServerChannelNotice::ServerChannelNotice()
-	: Command("server-cnotice", "Server")
+    : Command("server-cnotice", "Server")
 {
 }
 
 std::string ServerChannelNotice::help() const
 {
-	return "";
+    return "";
 }
 
 std::vector<Command::Arg> ServerChannelNotice::args() const
 {
-	return {
-		{ "server",	true },
-		{ "channel",	true },
-		{ "message",	true }
-	};
+    return {
+        { "server",     true },
+        { "channel",    true },
+        { "message",    true }
+    };
 }
 
 std::vector<Command::Property> ServerChannelNotice::properties() const
 {
-	return {
-		{ "server",	{ json::Type::String }},
-		{ "channel",	{ json::Type::String }},
-		{ "message",	{ json::Type::String }}
-	};
+    return {
+        { "server",     { json::Type::String }},
+        { "channel",    { json::Type::String }},
+        { "message",    { json::Type::String }}
+    };
 }
 
 json::Value ServerChannelNotice::exec(Irccd &irccd, const json::Value &request) const
 {
-	Command::exec(irccd, request);
+    Command::exec(irccd, request);
 
-	irccd.serverService().require(request.at("server").toString())->cnotice(
-		request.at("channel").toString(),
-		request.at("message").toString()
-	);
+    irccd.serverService().require(request.at("server").toString())->cnotice(
+        request.at("channel").toString(),
+        request.at("message").toString()
+    );
 
-	return json::object();
+    return json::object();
 }
 
 } // !command

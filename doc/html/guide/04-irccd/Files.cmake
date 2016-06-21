@@ -17,6 +17,6 @@
 #
 
 set(
-	IRCCD_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/01-config.md
+    IRCCD_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/01-config.md
 )

@@ -27,32 +27,32 @@ namespace irccd {
 namespace command {
 
 PluginReload::PluginReload()
-	: Command("plugin-reload", "Plugins")
+    : Command("plugin-reload", "Plugins")
 {
 }
 
 std::string PluginReload::help() const
 {
-	return "Reload a plugin.";
+    return "Reload a plugin.";
 }
 
 std::vector<Command::Arg> PluginReload::args() const
 {
-	return {{ "plugin", true }};
+    return {{ "plugin", true }};
 }
 
 std::vector<Command::Property> PluginReload::properties() const
 {
-	return {{ "plugin", { json::Type::String }}};
+    return {{ "plugin", { json::Type::String }}};
 }
 
 json::Value PluginReload::exec(Irccd &irccd, const json::Value &request) const
 {
-	Command::exec(irccd, request);
+    Command::exec(irccd, request);
 
-	irccd.pluginService().require(request.at("plugin").toString())->onReload(irccd);
+    irccd.pluginService().require(request.at("plugin").toString())->onReload(irccd);
 
-	return json::object();
+    return json::object();
 }
 
 } // !command

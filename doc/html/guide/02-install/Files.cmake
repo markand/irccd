@@ -17,7 +17,7 @@
 #
 
 set(
-	INSTALL_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/01-building-from-sources.md
-	${CMAKE_CURRENT_LIST_DIR}/02-customize.md
+    INSTALL_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/01-building-from-sources.md
+    ${CMAKE_CURRENT_LIST_DIR}/02-customize.md
 )

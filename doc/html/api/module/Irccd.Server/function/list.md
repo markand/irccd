@@ -11,8 +11,8 @@ returns: "the table of all servers."
 var table = Irccd.Server.list();
 
 for (var name in table) {
-	var server = table[name];
+    var server = table[name];
 
-	/* Use server */
+    /* Use server */
 }
 ````

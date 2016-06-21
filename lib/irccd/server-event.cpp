@@ -26,43 +26,43 @@
 namespace irccd {
 
 ServerEvent::ServerEvent(std::string server,
-			 std::string origin,
-			 std::string target,
-			 std::function<std::string (Plugin &)> functionName,
-			 std::function<void (Plugin &)> exec)
-	: m_server(std::move(server))
-	, m_origin(std::move(origin))
-	, m_target(std::move(target))
-	, m_functionName(std::move(functionName))
-	, m_exec(std::move(exec))
+                         std::string origin,
+                         std::string target,
+                         std::function<std::string (Plugin &)> functionName,
+                         std::function<void (Plugin &)> exec)
+    : m_server(std::move(server))
+    , m_origin(std::move(origin))
+    , m_target(std::move(target))
+    , m_functionName(std::move(functionName))
+    , m_exec(std::move(exec))
 {
 }
 
 void ServerEvent::operator()(Irccd &irccd) const
 {
-	for (auto &plugin : irccd.pluginService().plugins()) {
-		auto eventname = m_functionName(*plugin);
-		auto allowed = irccd.ruleService().solve(m_server, m_target, m_origin, plugin->name(), eventname);
+    for (auto &plugin : irccd.pluginService().plugins()) {
+        auto eventname = m_functionName(*plugin);
+        auto allowed = irccd.ruleService().solve(m_server, m_target, m_origin, plugin->name(), eventname);
 
-		if (!allowed) {
-			log::debug() << "rule: event skipped on match" << std::endl;
-			continue;
-		} else
-			log::debug() << "rule: event allowed" << std::endl;
+        if (!allowed) {
+            log::debug() << "rule: event skipped on match" << std::endl;
+            continue;
+        } else
+            log::debug() << "rule: event allowed" << std::endl;
 
-		// TODO: server-event must not know which type of plugin.
-		// TODO: get generic error.
-		try {
-			m_exec(*plugin);
-		} catch (const Exception &info) {
-			log::warning() << "plugin " << plugin->name() << ": error: " << info.what() << std::endl;
+        // TODO: server-event must not know which type of plugin.
+        // TODO: get generic error.
+        try {
+            m_exec(*plugin);
+        } catch (const Exception &info) {
+            log::warning() << "plugin " << plugin->name() << ": error: " << info.what() << std::endl;
 
-			if (!info.fileName.empty())
-				log::warning() << "    " << info.fileName << ":" << info.lineNumber << std::endl;
-			if (!info.stack.empty())
-				log::warning() << "    " << info.stack << std::endl;
-		}
-	}
+            if (!info.fileName.empty())
+                log::warning() << "    " << info.fileName << ":" << info.lineNumber << std::endl;
+            if (!info.stack.empty())
+                log::warning() << "    " << info.stack << std::endl;
+        }
+    }
 }
 
 } // !irccd

@@ -39,31 +39,31 @@ class Command;
  */
 class CommandService {
 private:
-	std::vector<std::shared_ptr<Command>> m_commands;
+    std::vector<std::shared_ptr<Command>> m_commands;
 
 public:
-	/**
-	 * Default constructor.
-	 *
-	 * Populate the commands with predefined ones.
-	 */
-	IRCCD_EXPORT CommandService();
+    /**
+     * Default constructor.
+     *
+     * Populate the commands with predefined ones.
+     */
+    IRCCD_EXPORT CommandService();
 
-	/**
-	 * Tells if a command exists.
-	 *
-	 * \param name the command name
-	 * \return true if the command exists
-	 */
-	IRCCD_EXPORT bool contains(const std::string &name) const noexcept;
+    /**
+     * Tells if a command exists.
+     *
+     * \param name the command name
+     * \return true if the command exists
+     */
+    IRCCD_EXPORT bool contains(const std::string &name) const noexcept;
 
-	/**
-	 * Find a command by name.
-	 *
-	 * \param name the command name
-	 * \return the command or empty one if not found
-	 */
-	IRCCD_EXPORT std::shared_ptr<Command> find(const std::string &name) const noexcept;
+    /**
+     * Find a command by name.
+     *
+     * \param name the command name
+     * \return the command or empty one if not found
+     */
+    IRCCD_EXPORT std::shared_ptr<Command> find(const std::string &name) const noexcept;
 };
 
 } // !irccd

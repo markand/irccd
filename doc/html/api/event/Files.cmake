@@ -17,26 +17,26 @@
 #
 
 set(
-	EVENT_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/onCommand.md
-	${CMAKE_CURRENT_LIST_DIR}/onConnect.md
-	${CMAKE_CURRENT_LIST_DIR}/onChannelMode.md
-	${CMAKE_CURRENT_LIST_DIR}/onChannelNotice.md
-	${CMAKE_CURRENT_LIST_DIR}/onInvite.md
-	${CMAKE_CURRENT_LIST_DIR}/onJoin.md
-	${CMAKE_CURRENT_LIST_DIR}/onKick.md
-	${CMAKE_CURRENT_LIST_DIR}/onLoad.md
-	${CMAKE_CURRENT_LIST_DIR}/onMessage.md
-	${CMAKE_CURRENT_LIST_DIR}/onMe.md
-	${CMAKE_CURRENT_LIST_DIR}/onMode.md
-	${CMAKE_CURRENT_LIST_DIR}/onNames.md
-	${CMAKE_CURRENT_LIST_DIR}/onNick.md
-	${CMAKE_CURRENT_LIST_DIR}/onNotice.md
-	${CMAKE_CURRENT_LIST_DIR}/onPart.md
-	${CMAKE_CURRENT_LIST_DIR}/onQuery.md
-	${CMAKE_CURRENT_LIST_DIR}/onQueryCommand.md
-	${CMAKE_CURRENT_LIST_DIR}/onReload.md
-	${CMAKE_CURRENT_LIST_DIR}/onTopic.md
-	${CMAKE_CURRENT_LIST_DIR}/onUnload.md
-	${CMAKE_CURRENT_LIST_DIR}/onWhois.md
+    EVENT_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/onCommand.md
+    ${CMAKE_CURRENT_LIST_DIR}/onConnect.md
+    ${CMAKE_CURRENT_LIST_DIR}/onChannelMode.md
+    ${CMAKE_CURRENT_LIST_DIR}/onChannelNotice.md
+    ${CMAKE_CURRENT_LIST_DIR}/onInvite.md
+    ${CMAKE_CURRENT_LIST_DIR}/onJoin.md
+    ${CMAKE_CURRENT_LIST_DIR}/onKick.md
+    ${CMAKE_CURRENT_LIST_DIR}/onLoad.md
+    ${CMAKE_CURRENT_LIST_DIR}/onMessage.md
+    ${CMAKE_CURRENT_LIST_DIR}/onMe.md
+    ${CMAKE_CURRENT_LIST_DIR}/onMode.md
+    ${CMAKE_CURRENT_LIST_DIR}/onNames.md
+    ${CMAKE_CURRENT_LIST_DIR}/onNick.md
+    ${CMAKE_CURRENT_LIST_DIR}/onNotice.md
+    ${CMAKE_CURRENT_LIST_DIR}/onPart.md
+    ${CMAKE_CURRENT_LIST_DIR}/onQuery.md
+    ${CMAKE_CURRENT_LIST_DIR}/onQueryCommand.md
+    ${CMAKE_CURRENT_LIST_DIR}/onReload.md
+    ${CMAKE_CURRENT_LIST_DIR}/onTopic.md
+    ${CMAKE_CURRENT_LIST_DIR}/onUnload.md
+    ${CMAKE_CURRENT_LIST_DIR}/onWhois.md
 )

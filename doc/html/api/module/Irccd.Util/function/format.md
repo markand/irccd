@@ -34,7 +34,7 @@ is terribly dangerous:
 ````javascript
 function onMessage(server, channel, origin, message)
 {
-	server.message(channel, Irccd.Util.format("@{red}" + message + "@{}");
+    server.message(channel, Irccd.Util.format("@{red}" + message + "@{}");
 }
 ````
 
@@ -51,7 +51,7 @@ if you have environment variables with passwords.
 ````javascript
 function onMessage(server, channel, origin, message)
 {
-	server.message(channel, Irccd.Util.format("@{red}#{message}@{}", { message: message });
+    server.message(channel, Irccd.Util.format("@{red}#{message}@{}", { message: message });
 }
 ````
  </div>

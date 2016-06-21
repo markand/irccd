@@ -17,7 +17,7 @@
 #
 
 set(
-	INTRO_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/01-what-is-irc.md
-	${CMAKE_CURRENT_LIST_DIR}/02-what-is-irccd.md
+    INTRO_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/01-what-is-irc.md
+    ${CMAKE_CURRENT_LIST_DIR}/02-what-is-irccd.md
 )

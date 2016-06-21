@@ -17,16 +17,16 @@
 #
 
 set(
-	SYSTEM_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/index.md
-	${CMAKE_CURRENT_LIST_DIR}/function/env.md
-	${CMAKE_CURRENT_LIST_DIR}/function/exec.md
-	${CMAKE_CURRENT_LIST_DIR}/function/home.md
-	${CMAKE_CURRENT_LIST_DIR}/function/name.md
-	${CMAKE_CURRENT_LIST_DIR}/function/popen.md
-	${CMAKE_CURRENT_LIST_DIR}/function/sleep.md
-	${CMAKE_CURRENT_LIST_DIR}/function/ticks.md
-	${CMAKE_CURRENT_LIST_DIR}/function/uptime.md
-	${CMAKE_CURRENT_LIST_DIR}/function/usleep.md
-	${CMAKE_CURRENT_LIST_DIR}/function/version.md
+    SYSTEM_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/index.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/env.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/exec.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/home.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/name.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/popen.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/sleep.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/ticks.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/uptime.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/usleep.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/version.md
 )

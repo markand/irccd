@@ -17,12 +17,12 @@
 #
 
 set(
-	DIRECTORY_SOURCES
-	${CMAKE_CURRENT_LIST_DIR}/index.md
-	${CMAKE_CURRENT_LIST_DIR}/function/find.md
-	${CMAKE_CURRENT_LIST_DIR}/function/mkdir.md
-	${CMAKE_CURRENT_LIST_DIR}/function/remove.md
-	${CMAKE_CURRENT_LIST_DIR}/method/constructor.md
-	${CMAKE_CURRENT_LIST_DIR}/method/find.md
-	${CMAKE_CURRENT_LIST_DIR}/method/remove.md
+    DIRECTORY_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/index.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/find.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/mkdir.md
+    ${CMAKE_CURRENT_LIST_DIR}/function/remove.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/constructor.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/find.md
+    ${CMAKE_CURRENT_LIST_DIR}/method/remove.md
 )

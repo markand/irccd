@@ -19,17 +19,17 @@
 project(irccd)
 
 irccd_define_executable(
-	TARGET irccd
-	INSTALL
-	SOURCES CMakeLists.txt main.cpp
-	INCLUDES ${irccd_SOURCE_DIR}
-	LIBRARIES libirccd
+    TARGET irccd
+    INSTALL
+    SOURCES CMakeLists.txt main.cpp
+    INCLUDES ${irccd_SOURCE_DIR}
+    LIBRARIES libirccd
 )
 
 if (IRCCD_SYSTEM_MAC)
-	target_compile_options(irccd PRIVATE -Wno-deprecated-declarations)
+    target_compile_options(irccd PRIVATE -Wno-deprecated-declarations)
 endif ()
 
 if (UNIX)
-	set_target_properties(irccd PROPERTIES LINK_FLAGS -pthread)
+    set_target_properties(irccd PROPERTIES LINK_FLAGS -pthread)
 endif ()

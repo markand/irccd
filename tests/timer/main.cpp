@@ -30,68 +30,68 @@ using namespace std::chrono_literals;
 
 TEST(Basic, single)
 {
-	Timer timer(TimerType::Single, 1000);
-	ElapsedTimer elapsed;
-	int count = 0;
+    Timer timer(TimerType::Single, 1000);
+    ElapsedTimer elapsed;
+    int count = 0;
 
-	timer.onSignal.connect([&] () {
-		count = elapsed.elapsed();
-	});
+    timer.onSignal.connect([&] () {
+        count = elapsed.elapsed();
+    });
 
-	elapsed.reset();
-	timer.start();
+    elapsed.reset();
+    timer.start();
 
-	std::this_thread::sleep_for(3s);
+    std::this_thread::sleep_for(3s);
 
-	ASSERT_GE(count, 900);
-	ASSERT_LE(count, 1100);
+    ASSERT_GE(count, 900);
+    ASSERT_LE(count, 1100);
 
 }
 
 TEST(Basic, repeat)
 {
-	Timer timer(TimerType::Repeat, 500);
-	int max = 0;
+    Timer timer(TimerType::Repeat, 500);
+    int max = 0;
 
-	timer.onSignal.connect([&] () {
-		max ++;
-	});
+    timer.onSignal.connect([&] () {
+        max ++;
+    });
 
-	timer.start();
+    timer.start();
 
-	// Should be at least 5
-	std::this_thread::sleep_for(3s);
+    // Should be at least 5
+    std::this_thread::sleep_for(3s);
 
-	ASSERT_GE(max, 5);
+    ASSERT_GE(max, 5);
 
-	timer.stop();
+    timer.stop();
 }
 
 TEST(Basic, restart)
 {
-	Timer timer(TimerType::Repeat, 500);
-	int max = 0;
+    Timer timer(TimerType::Repeat, 500);
+    int max = 0;
 
-	timer.onSignal.connect([&] () {
-		max ++;
-	});
+    timer.onSignal.connect([&] () {
+        max ++;
+    });
 
-	timer.start();
-	std::this_thread::sleep_for(3s);
-	timer.stop();
-	std::this_thread::sleep_for(3s);
-	timer.start();
-	std::this_thread::sleep_for(3s);
+    timer.start();
+    std::this_thread::sleep_for(3s);
+    timer.stop();
+    std::this_thread::sleep_for(3s);
+    timer.start();
+    std::this_thread::sleep_for(3s);
 
-	ASSERT_GE(max, 10);
-	ASSERT_LT(max, 15);
+    ASSERT_GE(max, 10);
+    ASSERT_LT(max, 15);
 
-	timer.stop();
+    timer.stop();
 }
 
 int main(int argc, char **argv)
 {
-	testing::InitGoogleTest(&argc, argv);
+    testing::InitGoogleTest(&argc, argv);
 
-	return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }

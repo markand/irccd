@@ -29,40 +29,40 @@ using namespace irccd;
 
 TEST(Basic, single)
 {
-	Irccd irccd;
-	ElapsedTimer timer;
+    Irccd irccd;
+    ElapsedTimer timer;
 
-	auto plugin = std::make_shared<JsPlugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-single.js");
+    auto plugin = std::make_shared<JsPlugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-single.js");
 
-	plugin->onLoad(irccd);
-	irccd.pluginService().add(plugin);
+    plugin->onLoad(irccd);
+    irccd.pluginService().add(plugin);
 
-	while (timer.elapsed() < 3000) {
-		irccd.poll();
-		irccd.dispatch();
-	}
+    while (timer.elapsed() < 3000) {
+        irccd.poll();
+        irccd.dispatch();
+    }
 
-	ASSERT_TRUE(duk_get_global_string(plugin->context(), "count"));
-	ASSERT_EQ(1, duk_get_int(plugin->context(), -1));
+    ASSERT_TRUE(duk_get_global_string(plugin->context(), "count"));
+    ASSERT_EQ(1, duk_get_int(plugin->context(), -1));
 }
 
 TEST(Basic, repeat)
 {
-	Irccd irccd;
-	ElapsedTimer timer;
+    Irccd irccd;
+    ElapsedTimer timer;
 
-	auto plugin = std::make_shared<JsPlugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-repeat.js");
+    auto plugin = std::make_shared<JsPlugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-repeat.js");
 
-	plugin->onLoad(irccd);
-	irccd.pluginService().add(plugin);
+    plugin->onLoad(irccd);
+    irccd.pluginService().add(plugin);
 
-	while (timer.elapsed() < 3000) {
-		irccd.poll();
-		irccd.dispatch();
-	}
+    while (timer.elapsed() < 3000) {
+        irccd.poll();
+        irccd.dispatch();
+    }
 
-	ASSERT_TRUE(duk_get_global_string(plugin->context(), "count"));
-	ASSERT_GE(duk_get_int(plugin->context(), -1), 5);
+    ASSERT_TRUE(duk_get_global_string(plugin->context(), "count"));
+    ASSERT_GE(duk_get_int(plugin->context(), -1), 5);
 }
 
 #if 0
@@ -73,31 +73,31 @@ TEST(Basic, repeat)
 
 TEST(Basic, pending)
 {
-	/*
-	 * This test ensure that if pending actions on a stopped timer are never executed.
-	 */
-	Irccd irccd;
-	ElapsedTimer timer;
+    /*
+     * This test ensure that if pending actions on a stopped timer are never executed.
+     */
+    Irccd irccd;
+    ElapsedTimer timer;
 
-	auto plugin = std::make_shared<Plugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-pending.js");
+    auto plugin = std::make_shared<Plugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-pending.js");
 
-	irccd.addPlugin(plugin);
-	irccd.poll();
-	irccd.dispatch();
+    irccd.addPlugin(plugin);
+    irccd.poll();
+    irccd.dispatch();
 
-	ASSERT_EQ(0, plugin->context().getGlobal<int>("count"));
+    ASSERT_EQ(0, plugin->context().getGlobal<int>("count"));
 }
 
 #endif
 
 int main(int argc, char **argv)
 {
-	// Needed for some components.
-	sys::setProgramName("irccd");
-	path::setApplicationPath(argv[0]);
-	log::setInterface(std::make_unique<log::Silent>());
-	log::setVerbose(true);
-	testing::InitGoogleTest(&argc, argv);
+    // Needed for some components.
+    sys::setProgramName("irccd");
+    path::setApplicationPath(argv[0]);
+    log::setInterface(std::make_unique<log::Silent>());
+    log::setVerbose(true);
+    testing::InitGoogleTest(&argc, argv);
 
-	return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }

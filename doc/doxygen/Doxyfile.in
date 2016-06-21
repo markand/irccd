@@ -5,11 +5,11 @@
 #
 # The following variables are set by CMake:
 #
-# VERSION		- The project version
-# DOXYGEN_INPUT		- The source directory
-# DOXYGEN_OUTPUT	- The output directory
-# DOXYGEN_HAVE_DOT	- True if have dot
-# DOXYGEN_DOT_PATH	- The path to dot
+# VERSION               The project version
+# DOXYGEN_INPUT         The source directory
+# DOXYGEN_OUTPUT        The output directory
+# DOXYGEN_HAVE_DOT      True if have dot
+# DOXYGEN_DOT_PATH      The path to dot
 #
 
 #---------------------------------------------------------------------------
