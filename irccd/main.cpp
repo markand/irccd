@@ -90,13 +90,13 @@ void init(int &argc, char **&argv)
     ++ argv;
 }
 
-parser::Result parse(int &argc, char **&argv)
+option::Result parse(int &argc, char **&argv)
 {
     // Parse command line options.
-    parser::Result result;
+    option::Result result;
 
     try {
-        parser::Options options{
+        option::Options options{
             { "-c",             true    },
             { "--config",       true    },
             { "-f",             false   },
@@ -109,7 +109,7 @@ parser::Result parse(int &argc, char **&argv)
             { "--version",      false   }
         };
 
-        result = parser::read(argc, argv, options);
+        result = option::read(argc, argv, options);
 
         for (const auto &pair : result) {
             if (pair.first == "--help")
@@ -130,7 +130,7 @@ parser::Result parse(int &argc, char **&argv)
     return result;
 }
 
-Config open(const parser::Result &result)
+Config open(const option::Result &result)
 {
     auto it = result.find("-c");
 
@@ -195,7 +195,7 @@ void loadUid(const std::string &uid)
     }
 }
 
-void loadForeground(bool foreground, const parser::Result &options)
+void loadForeground(bool foreground, const option::Result &options)
 {
     try {
 #if defined(HAVE_DAEMON)
@@ -210,7 +210,7 @@ void loadForeground(bool foreground, const parser::Result &options)
     }
 }
 
-void load(const Config &config, const parser::Result &options)
+void load(const Config &config, const option::Result &options)
 {
     /*
      * Order matters, please be careful when changing this.
@@ -253,7 +253,7 @@ int main(int argc, char **argv)
 {
     init(argc, argv);
 
-    parser::Result options = parse(argc, argv);
+    option::Result options = parse(argc, argv);
 
     // Find configuration file.
     instance = std::make_unique<Irccd>();

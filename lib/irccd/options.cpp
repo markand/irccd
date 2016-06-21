@@ -20,6 +20,8 @@
 
 #include "options.hpp"
 
+namespace irccd {
+
 namespace option {
 
 namespace {
@@ -177,3 +179,5 @@ Result read(int &argc, char **&argv, const Options &definition)
 }
 
 } // !option
+
+} // !irccd

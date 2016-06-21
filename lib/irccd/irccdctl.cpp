@@ -43,11 +43,6 @@ namespace irccd {
 
 using namespace fmt::literals;
 
-using namespace net;
-using namespace net::address;
-using namespace net::option;
-using namespace net::protocol;
-
 using namespace std::placeholders;
 using namespace std::chrono_literals;
 using namespace std::string_literals;
@@ -158,7 +153,7 @@ void Irccdctl::readConnectIp(const ini::Section &sc)
             throw std::invalid_argument("invalid domain: " + it->value());
     }
 
-    m_connection =  std::make_unique<ConnectionBase<Ip>>(Ip::resolve(host, std::to_string(port), domain));
+    m_connection =  std::make_unique<ConnectionBase<net::address::Ip>>(net::address::Ip::resolve(host, std::to_string(port), domain));
 }
 
 void Irccdctl::readConnectUnix(const ini::Section &sc)
@@ -169,7 +164,7 @@ void Irccdctl::readConnectUnix(const ini::Section &sc)
     if (it == sc.end())
         throw std::invalid_argument("missing path parameter");
 
-    m_connection = std::make_unique<ConnectionBase<Local>>(Local{it->value(), false});
+    m_connection = std::make_unique<ConnectionBase<net::address::Local>>(net::address::Local(it->value(), false));
 #else
     (void)sc;
 
@@ -239,7 +234,7 @@ void Irccdctl::readAliases(const ini::Section &sc)
     }
 }
 
-void Irccdctl::read(const std::string &path, const parser::Result &options)
+void Irccdctl::read(const std::string &path, const option::Result &options)
 {
     ini::Document doc = ini::readFile(path);
     ini::Document::const_iterator it = doc.find("connect");
@@ -258,9 +253,9 @@ void Irccdctl::read(const std::string &path, const parser::Result &options)
  * ------------------------------------------------------------------
  */
 
-void Irccdctl::parseConnectIp(const parser::Result &options, bool ipv6)
+void Irccdctl::parseConnectIp(const option::Result &options, bool ipv6)
 {
-    parser::Result::const_iterator it;
+    option::Result::const_iterator it;
 
     // Host (-h or --host).
     std::string host;
@@ -285,18 +280,18 @@ void Irccdctl::parseConnectIp(const parser::Result &options, bool ipv6)
     // Domain
     int domain = (ipv6) ? AF_INET6 : AF_INET;
 
-    m_connection =  std::make_unique<ConnectionBase<Ip>>(Ip::resolve(host, std::to_string(port), domain, SOCK_STREAM));
+    m_connection =  std::make_unique<ConnectionBase<net::address::Ip>>(net::address::Ip::resolve(host, std::to_string(port), domain, SOCK_STREAM));
 }
 
-void Irccdctl::parseConnectUnix(const parser::Result &options)
+void Irccdctl::parseConnectUnix(const option::Result &options)
 {
 #if !defined(IRCCD_SYSTEM_WINDOWS)
-    parser::Result::const_iterator it;
+    option::Result::const_iterator it;
 
     if ((it = options.find("-P")) == options.end() && (it = options.find("--path")) == options.end())
         throw std::invalid_argument("missing path parameter (-P or --path)");
 
-    m_connection = std::make_unique<ConnectionBase<Local>>(Local{it->second, false});
+    m_connection = std::make_unique<ConnectionBase<net::address::Local>>(net::address::Local(it->second, false));
 #else
     (void)options;
 
@@ -304,7 +299,7 @@ void Irccdctl::parseConnectUnix(const parser::Result &options)
 #endif
 }
 
-void Irccdctl::parseConnect(const parser::Result &options)
+void Irccdctl::parseConnect(const option::Result &options)
 {
     assert(options.count("-t") > 0 || options.count("--type") > 0);
 
@@ -320,10 +315,10 @@ void Irccdctl::parseConnect(const parser::Result &options)
     throw std::invalid_argument("invalid type given: " + it->second);
 }
 
-parser::Result Irccdctl::parse(int &argc, char **&argv) const
+option::Result Irccdctl::parse(int &argc, char **&argv) const
 {
     // 1. Parse command line options.
-    parser::Options def{
+    option::Options def{
         { "-c",         true    },
         { "--config",   true    },
         { "-h",         true    },
@@ -339,10 +334,10 @@ parser::Result Irccdctl::parse(int &argc, char **&argv) const
         { "--verbose",  false   }
     };
 
-    parser::Result result;
+    option::Result result;
 
     try {
-        result = parser::read(argc, argv, def);
+        result = option::read(argc, argv, def);
 
         if (result.count("--help") != 0) {
             usage();
@@ -362,7 +357,7 @@ parser::Result Irccdctl::parse(int &argc, char **&argv) const
 void Irccdctl::exec(const Command &cmd, std::vector<std::string> args)
 {
     // 1. Build options from command line arguments.
-    parser::Options def;
+    option::Options def;
 
     for (const auto &opt : cmd.options()) {
         // parser::read needs '-' and '--' so add them.
@@ -375,7 +370,7 @@ void Irccdctl::exec(const Command &cmd, std::vector<std::string> args)
     // 2. Parse them, remove them from args (in parser::read) and build the map with id.
     CommandRequest::Options requestOptions;
 
-    for (const auto &pair : parser::read(args, def)) {
+    for (const auto &pair : option::read(args, def)) {
         auto options = cmd.options();
         auto it = std::find_if(options.begin(), options.end(), [&] (const auto &opt) {
             return ("-"s + opt.simpleKey()) == pair.first || ("--"s + opt.longKey()) == pair.first;
@@ -491,7 +486,7 @@ void Irccdctl::connect()
 void Irccdctl::run(int argc, char **argv)
 {
     // 1. Read command line arguments.
-    parser::Result result = parse(argc, argv);
+    option::Result result = parse(argc, argv);
 
     /*
      * 2. Open optional config by command line or by searching it

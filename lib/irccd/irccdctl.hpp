@@ -71,12 +71,12 @@ private:
     void readConnect(const ini::Section &sc);
     void readGeneral(const ini::Section &sc);
     void readAliases(const ini::Section &sc);
-    void read(const std::string &path, const parser::Result &options);
+    void read(const std::string &path, const option::Result &options);
 
-    void parseConnectIp(const parser::Result &options, bool ipv6);
-    void parseConnectUnix(const parser::Result &options);
-    void parseConnect(const parser::Result &options);
-    parser::Result parse(int &argc, char **&argv) const;
+    void parseConnectIp(const option::Result &options, bool ipv6);
+    void parseConnectUnix(const option::Result &options);
+    void parseConnect(const option::Result &options);
+    option::Result parse(int &argc, char **&argv) const;
 
     void connect();
 
