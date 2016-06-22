@@ -20,7 +20,7 @@
 #define OPTIONS_HPP
 
 /**
- * \file options.h
+ * \file options.hpp
  * \brief Basic Unix options parser.
  */
 
