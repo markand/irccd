@@ -84,7 +84,7 @@ TEST_F(HistoryTest, formatError)
 {
     load({{ "file", SOURCEDIR "/broken-conf.json" }});
 
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#history", "seen francis");
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#history", "seen francis"});
     ASSERT_EQ("#history:error=history:!history:test:#history:jean!jean@localhost:jean", m_server->last());
 }
 
@@ -95,8 +95,8 @@ TEST_F(HistoryTest, formatSeen)
     remove(BINARYDIR "/seen.json");
     load({{ "file", BINARYDIR "/seen.json" }});
 
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#history", "hello");
-    m_plugin->onCommand(m_irccd, m_server, "destructor!dst@localhost", "#history", "seen jean");
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#history", "hello"});
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "destructor!dst@localhost", "#history", "seen jean"});
 
     ASSERT_TRUE(std::regex_match(m_server->last(), rule));
 }
@@ -108,8 +108,8 @@ TEST_F(HistoryTest, formatSaid)
     remove(BINARYDIR "/said.json");
     load({{ "file", BINARYDIR "/said.json" }});
 
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#history", "hello");
-    m_plugin->onCommand(m_irccd, m_server, "destructor!dst@localhost", "#history", "said jean");
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#history", "hello"});
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "destructor!dst@localhost", "#history", "said jean"});
 
     ASSERT_TRUE(std::regex_match(m_server->last(), rule));
 }
@@ -119,8 +119,8 @@ TEST_F(HistoryTest, formatUnknown)
     remove(BINARYDIR "/unknown.json");
     load({{ "file", BINARYDIR "/unknown.json" }});
 
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#history", "hello");
-    m_plugin->onCommand(m_irccd, m_server, "destructor!dst@localhost", "#history", "seen nobody");
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#history", "hello"});
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "destructor!dst@localhost", "#history", "seen nobody"});
 
     ASSERT_EQ("#history:unknown=history:!history:test:#history:destructor!dst@localhost:destructor:nobody", m_server->last());
 }

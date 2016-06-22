@@ -35,27 +35,27 @@ namespace irccd {
  */
 class DynlibPlugin : public Plugin {
 private:
-    using OnCommand = void (*)(Irccd &, const std::shared_ptr<Server> &, const std::string &, const std::string &, const std::string &);
-    using OnConnect = void (*)(Irccd &, const std::shared_ptr<Server> &);
-    using OnChannelMode = void (*)(Irccd &, const std::shared_ptr<Server> &, const std::string &, const std::string &, const std::string &, const std::string &);
-    using OnChannelNotice = void (*)(Irccd &, const std::shared_ptr<Server> &, const std::string &, const std::string &, const std::string &);
-    using OnInvite = void (*)(Irccd &, const std::shared_ptr<Server> &, const std::string &, const std::string &);
-    using OnJoin = void (*)(Irccd &, const std::shared_ptr<Server> &, const std::string &, const std::string &);
-    using OnKick = void (*)(Irccd &, const std::shared_ptr<Server> &, const std::string &, const std::string &, const std::string &, const std::string &);
+    using OnCommand = void (*)(Irccd &, const MessageEvent &);
+    using OnConnect = void (*)(Irccd &, const ConnectEvent &);
+    using OnChannelMode = void (*)(Irccd &, const ChannelModeEvent &);
+    using OnChannelNotice = void (*)(Irccd &, const ChannelNoticeEvent &);
+    using OnInvite = void (*)(Irccd &, const InviteEvent &);
+    using OnJoin = void (*)(Irccd &, const JoinEvent &);
+    using OnKick = void (*)(Irccd &, const KickEvent &);
     using OnLoad = void (*)(Irccd &, DynlibPlugin &);
-    using OnMessage = void (*)(Irccd &, const std::shared_ptr<Server> &, const std::string &, const std::string &, const std::string &);
-    using OnMe = void (*)(Irccd &, const std::shared_ptr<Server> &, const std::string &, const std::string &, const std::string &);
-    using OnMode = void (*)(Irccd &, const std::shared_ptr<Server> &, const std::string &, const std::string &);
-    using OnNames = void (*)(Irccd &, const std::shared_ptr<Server> &, const std::string &, const std::vector<std::string> &);
-    using OnNick = void (*)(Irccd &, const std::shared_ptr<Server> &, const std::string &, const std::string &);
-    using OnNotice = void (*)(Irccd &, const std::shared_ptr<Server> &, const std::string &, const std::string &);
-    using OnPart = void (*)(Irccd &, const std::shared_ptr<Server> &, const std::string &, const std::string &, const std::string &);
-    using OnQuery = void (*)(Irccd &, const std::shared_ptr<Server> &, const std::string &, const std::string &);
-    using OnQueryCommand = void (*)(Irccd &, const std::shared_ptr<Server> &, const std::string &, const std::string &);
+    using OnMessage = void (*)(Irccd &, const MessageEvent &);
+    using OnMe = void (*)(Irccd &, const MeEvent &);
+    using OnMode = void (*)(Irccd &, const ModeEvent &);
+    using OnNames = void (*)(Irccd &, const NamesEvent &);
+    using OnNick = void (*)(Irccd &, const NickEvent &);
+    using OnNotice = void (*)(Irccd &, const NoticeEvent &);
+    using OnPart = void (*)(Irccd &, const PartEvent &);
+    using OnQuery = void (*)(Irccd &, const QueryEvent &);
+    using OnQueryCommand = void (*)(Irccd &, const QueryEvent &);
     using OnReload = void (*)(Irccd &, DynlibPlugin &);
-    using OnTopic = void (*)(Irccd &, const std::shared_ptr<Server> &, const std::string &, const std::string &, const std::string &);
+    using OnTopic = void (*)(Irccd &, const TopicEvent &);
     using OnUnload = void (*)(Irccd &, DynlibPlugin &);
-    using OnWhois = void (*)(Irccd &, const std::shared_ptr<Server> &, const ServerWhois &);
+    using OnWhois = void (*)(Irccd &, const WhoisEvent &);
 
     Dynlib m_dso;
     OnCommand m_onCommand;
@@ -97,55 +97,37 @@ public:
     /**
      * \copydoc Plugin::onCommand
      */
-    IRCCD_EXPORT void onCommand(Irccd &irccd,
-                                const std::shared_ptr<Server> &server,
-                                const std::string &origin,
-                                const std::string &channel,
-                                const std::string &message) override;
+    IRCCD_EXPORT void onCommand(Irccd &irccd, const MessageEvent &event) override;
 
     /**
      * \copydoc Plugin::onConnect
      */
-    IRCCD_EXPORT void onConnect(Irccd &irccd, const std::shared_ptr<Server> &server) override;
+    IRCCD_EXPORT void onConnect(Irccd &irccd, const ConnectEvent &event) override;
 
     /**
      * \copydoc Plugin::onChannelMode
      */
-    IRCCD_EXPORT void onChannelMode(Irccd &irccd,
-                                    const std::shared_ptr<Server> &server,
-                                    const std::string &origin,
-                                    const std::string &channel,
-                                    const std::string &mode,
-                                    const std::string &arg) override;
+    IRCCD_EXPORT void onChannelMode(Irccd &irccd, const ChannelModeEvent &event) override;
 
     /**
      * \copydoc Plugin::onChannelNotice
      */
-    IRCCD_EXPORT void onChannelNotice(Irccd &irccd,
-                                      const std::shared_ptr<Server> &server,
-                                      const std::string &origin,
-                                      const std::string &channel,
-                                      const std::string &notice) override;
+    IRCCD_EXPORT void onChannelNotice(Irccd &irccd, const ChannelNoticeEvent &event) override;
 
     /**
      * \copydoc Plugin::onInvite
      */
-    IRCCD_EXPORT void onInvite(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel) override;
+    IRCCD_EXPORT void onInvite(Irccd &irccd, const InviteEvent &event) override;
 
     /**
      * \copydoc Plugin::onJoin
      */
-    IRCCD_EXPORT void onJoin(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel) override;
+    IRCCD_EXPORT void onJoin(Irccd &irccd, const JoinEvent &event) override;
 
     /**
      * \copydoc Plugin::onKick
      */
-    IRCCD_EXPORT void onKick(Irccd &irccd,
-                             const std::shared_ptr<Server> &server,
-                             const std::string &origin,
-                             const std::string &channel,
-                             const std::string &target,
-                             const std::string &reason) override;
+    IRCCD_EXPORT void onKick(Irccd &irccd, const KickEvent &event) override;
 
     /**
      * \copydoc Plugin::onLoad
@@ -155,65 +137,47 @@ public:
     /**
      * \copydoc Plugin::onMessage
      */
-    IRCCD_EXPORT void onMessage(Irccd &irccd,
-                                const std::shared_ptr<Server> &server,
-                                const std::string &origin,
-                                const std::string &channel,
-                                const std::string &message) override;
+    IRCCD_EXPORT void onMessage(Irccd &irccd, const MessageEvent &event) override;
 
     /**
      * \copydoc Plugin::onMe
      */
-    IRCCD_EXPORT void onMe(Irccd &irccd,
-                           const std::shared_ptr<Server> &server,
-                           const std::string &origin,
-                           const std::string &channel,
-                           const std::string &message) override;
+    IRCCD_EXPORT void onMe(Irccd &irccd, const MeEvent &event) override;
 
     /**
      * \copydoc Plugin::onMode
      */
-    IRCCD_EXPORT void onMode(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &mode) override;
+    IRCCD_EXPORT void onMode(Irccd &irccd, const ModeEvent &event) override;
 
     /**
      * \copydoc Plugin::onNames
      */
-    IRCCD_EXPORT void onNames(Irccd &irccd,
-                              const std::shared_ptr<Server> &server,
-                              const std::string &channel,
-                              const std::vector<std::string> &list) override;
+    IRCCD_EXPORT void onNames(Irccd &irccd, const NamesEvent &event) override;
 
     /**
      * \copydoc Plugin::onNick
      */
-    IRCCD_EXPORT void onNick(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &nick) override;
+    IRCCD_EXPORT void onNick(Irccd &irccd, const NickEvent &event) override;
 
     /**
      * \copydoc Plugin::onNotice
      */
-    IRCCD_EXPORT void onNotice(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &notice) override;
+    IRCCD_EXPORT void onNotice(Irccd &irccd, const NoticeEvent &event) override;
 
     /**
      * \copydoc Plugin::onPart
      */
-    IRCCD_EXPORT void onPart(Irccd &irccd,
-                             const std::shared_ptr<Server> &server,
-                             const std::string &origin,
-                             const std::string &channel,
-                             const std::string &reason) override;
+    IRCCD_EXPORT void onPart(Irccd &irccd, const PartEvent &event) override;
 
     /**
      * \copydoc Plugin::onQuery
      */
-    IRCCD_EXPORT void onQuery(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &message) override;
+    IRCCD_EXPORT void onQuery(Irccd &irccd, const QueryEvent &event) override;
 
     /**
      * \copydoc Plugin::onQueryCommand
      */
-    IRCCD_EXPORT void onQueryCommand(Irccd &irccd,
-                                     const std::shared_ptr<Server> &server,
-                                     const std::string &origin,
-                                     const std::string &message) override;
+    IRCCD_EXPORT void onQueryCommand(Irccd &irccd, const QueryEvent &event) override;
 
     /**
      * \copydoc Plugin::onReload
@@ -223,11 +187,7 @@ public:
     /**
      * \copydoc Plugin::onTopic
      */
-    IRCCD_EXPORT void onTopic(Irccd &irccd,
-                              const std::shared_ptr<Server> &server,
-                              const std::string &origin,
-                              const std::string &channel,
-                              const std::string &topic) override;
+    IRCCD_EXPORT void onTopic(Irccd &irccd, const TopicEvent &event) override;
 
     /**
      * \copydoc Plugin::onUnload
@@ -237,7 +197,7 @@ public:
     /**
      * \copydoc Plugin::onWhois
      */
-    IRCCD_EXPORT void onWhois(Irccd &irccd, const std::shared_ptr<Server> &server, const ServerWhois &info) override;
+    IRCCD_EXPORT void onWhois(Irccd &irccd, const WhoisEvent &event) override;
 };
 
 } // !irccd

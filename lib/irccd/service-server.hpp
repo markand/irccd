@@ -28,13 +28,12 @@
 #include <set>
 #include <string>
 
+#include "server.hpp"
 #include "service.hpp"
 
 namespace irccd {
 
 class Irccd;
-class Server;
-class ServerWhois;
 
 /**
  * \brief Manage IRC servers.
@@ -45,22 +44,22 @@ private:
     Irccd &m_irccd;
     std::vector<std::shared_ptr<Server>> m_servers;
 
-    void handleChannelMode(std::weak_ptr<Server>, std::string, std::string, std::string, std::string);
-    void handleChannelNotice(std::weak_ptr<Server>, std::string, std::string, std::string);
-    void handleConnect(std::weak_ptr<Server>);
-    void handleInvite(std::weak_ptr<Server>, std::string, std::string, std::string);
-    void handleJoin(std::weak_ptr<Server>, std::string, std::string);
-    void handleKick(std::weak_ptr<Server>, std::string, std::string, std::string, std::string);
-    void handleMessage(std::weak_ptr<Server>, std::string, std::string, std::string);
-    void handleMe(std::weak_ptr<Server>, std::string, std::string, std::string);
-    void handleMode(std::weak_ptr<Server>, std::string, std::string);
-    void handleNames(std::weak_ptr<Server>, std::string, std::set<std::string>);
-    void handleNick(std::weak_ptr<Server>, std::string, std::string);
-    void handleNotice(std::weak_ptr<Server>, std::string, std::string);
-    void handlePart(std::weak_ptr<Server>, std::string, std::string, std::string);
-    void handleQuery(std::weak_ptr<Server>, std::string, std::string);
-    void handleTopic(std::weak_ptr<Server>, std::string, std::string, std::string);
-    void handleWhois(std::weak_ptr<Server>, ServerWhois);
+    void handleChannelMode(const ChannelModeEvent &);
+    void handleChannelNotice(const ChannelNoticeEvent &);
+    void handleConnect(const ConnectEvent &);
+    void handleInvite(const InviteEvent &);
+    void handleJoin(const JoinEvent &);
+    void handleKick(const KickEvent &);
+    void handleMessage(const MessageEvent &);
+    void handleMe(const MeEvent &);
+    void handleMode(const ModeEvent &);
+    void handleNames(const NamesEvent &);
+    void handleNick(const NickEvent &);
+    void handleNotice(const NoticeEvent &);
+    void handlePart(const PartEvent &);
+    void handleQuery(const QueryEvent &);
+    void handleTopic(const TopicEvent &);
+    void handleWhois(const WhoisEvent &);
 
 public:
     /**

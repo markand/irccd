@@ -34,14 +34,13 @@
 #include <unordered_map>
 #include <vector>
 
+#include "server.hpp"
 #include "sysconfig.hpp"
 #include "util.hpp"
 
 namespace irccd {
 
 class Irccd;
-class Server;
-class ServerWhois;
 
 /**
  * \brief Configuration map extract from config file.
@@ -208,7 +207,7 @@ public:
      */
     virtual void setConfig(PluginConfig config)
     {
-        (void)config;
+        util::unused(config);
     }
 
     /**
@@ -228,7 +227,7 @@ public:
      */
     virtual void setFormats(PluginFormats formats)
     {
-        (void)formats;
+        util::unused(formats);
     }
 
     /**
@@ -237,113 +236,77 @@ public:
      * plus the plugin name.
      *
      * \param irccd the irccd instance
-     * \param server the server
-     * \param origin the user who sent the message
-     * \param channel the channel
-     * \param message the message or command
+     * \param event the event
      */
-    virtual void onCommand(Irccd &irccd,
-                           const std::shared_ptr<Server> &server,
-                           const std::string &origin,
-                           const std::string &channel,
-                           const std::string &message)
+    virtual void onCommand(Irccd &irccd, const MessageEvent &event)
     {
-        util::unused(irccd, server, origin, channel, message);
+        util::unused(irccd, event);
     }
 
     /**
      * On successful connection.
      *
      * \param irccd the irccd instance
-     * \param server the server
+     * \param event the event
      */
-    virtual void onConnect(Irccd &irccd, const std::shared_ptr<Server> &server)
+    virtual void onConnect(Irccd &irccd, const ConnectEvent &event)
     {
-        util::unused(irccd, server);
+        util::unused(irccd, event);
     }
 
     /**
      * On channel mode.
      *
      * \param irccd the irccd instance
-     * \param server the server
-     * \param origin the ouser who has changed the mode
-     * \param channel the channel
-     * \param mode the mode
-     * \param arg the optional mode argument
+     * \param event the event
      */
-    virtual void onChannelMode(Irccd &irccd,
-                               const std::shared_ptr<Server> &server,
-                               const std::string &origin,
-                               const std::string &channel,
-                               const std::string &mode,
-                               const std::string &arg)
+    virtual void onChannelMode(Irccd &irccd, const ChannelModeEvent &event)
     {
-        util::unused(irccd, server, origin, channel, mode, arg);
+        util::unused(irccd, event);
     }
 
     /**
      * On a channel notice.
      *
      * \param irccd the irccd instance
-     * \param server the server
-     * \param origin the user who sent the notice
-     * \param channel on which channel
-     * \param notice the message
+     * \param event the event
      */
-    virtual void onChannelNotice(Irccd &irccd,
-                                 const std::shared_ptr<Server> &server,
-                                 const std::string &origin,
-                                 const std::string &channel,
-                                 const std::string &notice)
+    virtual void onChannelNotice(Irccd &irccd, const ChannelNoticeEvent &event)
     {
-        util::unused(irccd, server, origin, channel, notice);
+        util::unused(irccd, event);
     }
 
     /**
      * On invitation.
      *
      * \param irccd the irccd instance
-     * \param server the server
-     * \param origin the user who invited you
-     * \param channel the channel
+     * \param event the event
      */
-    virtual void onInvite(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel)
+    virtual void onInvite(Irccd &irccd, const InviteEvent &event)
     {
-        util::unused(irccd, server, origin, channel);
+        util::unused(irccd, event);
     }
 
     /**
      * On join.
      *
      * \param irccd the irccd instance
-     * \param server the server
-     * \param origin the user who joined
-     * \param channel the channel
+     * \param event the event
      */
-    virtual void onJoin(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel)
+    virtual void onJoin(Irccd &irccd, const JoinEvent &event)
     {
-        util::unused(irccd, server, origin, channel);
+        util::unused(irccd, event);
     }
 
     /**
      * On kick.
      *
      * \param irccd the irccd instance
-     * \param server the server
-     * \param origin the user who kicked the target
-     * \param channel the channel
-     * \param target the kicked target
-     * \param reason the optional reason
+     * \param event the event
      */
-    virtual void onKick(Irccd &irccd, 
-                        const std::shared_ptr<Server> &server,
-                        const std::string &origin,
-                        const std::string &channel,
-                        const std::string &target,
-                        const std::string &reason)
+    virtual void onKick(Irccd &irccd, const KickEvent &event)
     {
-        util::unused(irccd, server, origin, channel, target, reason);
+        util::unused(irccd, event);
     }
 
     /**
@@ -360,138 +323,99 @@ public:
      * On channel message.
      *
      * \param irccd the irccd instance
-     * \param server the server
-     * \param origin the user who sent the message
-     * \param channel the channel
-     * \param message the message or command
+     * \param event the event
      */
-    virtual void onMessage(Irccd &irccd, 
-                           const std::shared_ptr<Server> &server,
-                           const std::string &origin,
-                           const std::string &channel,
-                           const std::string &message)
+    virtual void onMessage(Irccd &irccd, const MessageEvent &event)
     {
-        util::unused(irccd, server, origin, channel, message);
+        util::unused(irccd, event);
     }
 
     /**
      * On CTCP Action.
      *
      * \param irccd the irccd instance
-     * \param server the server
-     * \param origin the user who sent the message
-     * \param channel the channel (may also be your nickname)
-     * \param message the message
+     * \param event the event
      */
-    virtual void onMe(Irccd &irccd, 
-                      const std::shared_ptr<Server> &server,
-                      const std::string &origin,
-                      const std::string &channel,
-                      const std::string &message)
+    virtual void onMe(Irccd &irccd, const MeEvent &event)
     {
-        util::unused(irccd, server, origin, channel, message);
+        util::unused(irccd, event);
     }
 
     /**
      * On user mode change.
      *
      * \param irccd the irccd instance
-     * \param server the server
-     * \param origin the person who changed the mode
-     * \param mode the new mode
+     * \param event the event
      */
-    virtual void onMode(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &mode)
+    virtual void onMode(Irccd &irccd, const ModeEvent &event)
     {
-        util::unused(irccd, server, origin, mode);
+        util::unused(irccd, event);
     }
 
     /**
      * On names listing.
      *
      * \param irccd the irccd instance
-     * \param server the server
-     * \param channel the channel
-     * \param list the list of nicknames
+     * \param event the event
      */
-    virtual void onNames(Irccd &irccd,
-                         const std::shared_ptr<Server> &server,
-                         const std::string &channel,
-                         const std::vector<std::string> &list)
+    virtual void onNames(Irccd &irccd, const NamesEvent &event)
     {
-        util::unused(irccd, server, channel, list);
+        util::unused(irccd, event);
     }
 
     /**
      * On nick change.
      *
      * \param irccd the irccd instance
-     * \param server the server
-     * \param origin the user that changed its nickname
-     * \param nick the new nickname
+     * \param event the event
      */
-    virtual void onNick(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &nick)
+    virtual void onNick(Irccd &irccd, const NickEvent &event)
     {
-        util::unused(irccd, server, origin, nick);
+        util::unused(irccd, event);
     }
 
     /**
      * On user notice.
      *
      * \param irccd the irccd instance
-     * \param server the server
-     * \param origin the user who sent the notice
-     * \param notice the notice
+     * \param event the event
      */
-    virtual void onNotice(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &notice)
+    virtual void onNotice(Irccd &irccd, const NoticeEvent &event)
     {
-        util::unused(irccd, server, origin, notice);
+        util::unused(irccd, event);
     }
 
     /**
      * On part.
      *
      * \param irccd the irccd instance
-     * \param server the server
-     * \param origin the user who left
-     * \param channel the channel
-     * \param reason the optional reason
+     * \param event the event
      */
-    virtual void onPart(Irccd &irccd, 
-                        const std::shared_ptr<Server> &server,
-                        const std::string &origin,
-                        const std::string &channel,
-                        const std::string &reason)
+    virtual void onPart(Irccd &irccd, const PartEvent &event)
     {
-        util::unused(irccd, server, origin, channel, reason);
+        util::unused(irccd, event);
     }
 
     /**
      * On user query.
      *
      * \param irccd the irccd instance
-     * \param server the server
-     * \param origin the user who sent the query
-     * \param message the message
+     * \param event the event
      */
-    virtual void onQuery(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &message)
+    virtual void onQuery(Irccd &irccd, const QueryEvent &event)
     {
-        util::unused(irccd, server, origin, message);
+        util::unused(irccd, event);
     }
 
     /**
      * On user query command.
      *
      * \param irccd the irccd instance
-     * \param server the server
-     * \param origin the user who sent the query
-     * \param message the message
+     * \param event the event
      */
-    virtual void onQueryCommand(Irccd &irccd,
-                                const std::shared_ptr<Server> &server,
-                                const std::string &origin,
-                                const std::string &message)
+    virtual void onQueryCommand(Irccd &irccd, const QueryEvent &event)
     {
-        util::unused(irccd, server, origin, message);
+        util::unused(irccd, event);
     }
 
     /**
@@ -508,18 +432,11 @@ public:
      * On topic change.
      *
      * \param irccd the irccd instance
-     * \param server the server
-     * \param origin the user who sent the topic
-     * \param channel the channel
-     * \param topic the new topic
+     * \param event the event
      */
-    virtual void onTopic(Irccd &irccd, 
-                         const std::shared_ptr<Server> &server,
-                         const std::string &origin,
-                         const std::string &channel,
-                         const std::string &topic)
+    virtual void onTopic(Irccd &irccd, const TopicEvent &event)
     {
-        util::unused(irccd, server, origin, channel, topic);
+        util::unused(irccd, event);
     }
 
     /**
@@ -536,12 +453,11 @@ public:
      * On whois information.
      *
      * \param irccd the irccd instance
-     * \param server the server
-     * \param info the info
+     * \param event the event
      */
-    virtual void onWhois(Irccd &irccd, const std::shared_ptr<Server> &server, const ServerWhois &info)
+    virtual void onWhois(Irccd &irccd, const WhoisEvent &event)
     {
-        util::unused(irccd, server, info);
+        util::unused(irccd, event);
     }
 };
 

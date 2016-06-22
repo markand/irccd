@@ -71,7 +71,7 @@ TEST_F(AskTest, basic)
 
     // Invoke the plugin 1000 times, it will be very unlucky to not have both answers in that amount of tries.
     for (int i = 0; i < 1000; ++i) {
-        m_plugin->onCommand(m_irccd, m_server, "tester", "#dummy", "");
+        m_plugin->onCommand(m_irccd, MessageEvent{m_server, "tester", "#dummy", ""});
 
         if (m_server->last() == "#dummy:tester, YES")
             yes = true;

@@ -89,26 +89,26 @@ public:
 
 TEST_F(PluginTest, formatUsage)
 {
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#staff", "");
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#staff", ""});
     ASSERT_EQ("#staff:usage=plugin:!plugin:test:#staff:jean!jean@localhost:jean", m_server->last());
 
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#staff", "fail");
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#staff", "fail"});
     ASSERT_EQ("#staff:usage=plugin:!plugin:test:#staff:jean!jean@localhost:jean", m_server->last());
 
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#staff", "info");
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#staff", "info"});
     ASSERT_EQ("#staff:usage=plugin:!plugin:test:#staff:jean!jean@localhost:jean", m_server->last());
 }
 
 TEST_F(PluginTest, formatInfo)
 {
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#staff", "info fake");
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#staff", "info fake"});
 
     ASSERT_EQ("#staff:info=plugin:!plugin:test:#staff:jean!jean@localhost:jean:jean:BEER:fake:Fake White Beer 2000:0.0.0.0.0.1", m_server->last());
 }
 
 TEST_F(PluginTest, formatNotFound)
 {
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#staff", "info doesnotexistsihope");
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#staff", "info doesnotexistsihope"});
 
     ASSERT_EQ("#staff:not-found=plugin:!plugin:test:#staff:jean!jean@localhost:jean:doesnotexistsihope", m_server->last());
 }
@@ -118,7 +118,7 @@ TEST_F(PluginTest, formatTooLong)
     for (int i = 0; i < 100; ++i)
         m_ps.add(std::make_shared<Plugin>("plugin-n-{}"_format(i), ""));
 
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#staff", "list");
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#staff", "list"});
 
     ASSERT_EQ("#staff:too-long=plugin:!plugin:test:#staff:jean!jean@localhost:jean", m_server->last());
 }

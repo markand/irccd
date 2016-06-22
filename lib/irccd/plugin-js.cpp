@@ -174,95 +174,77 @@ void JsPlugin::setFormats(PluginFormats formats)
     putTable(FormatGlobal, formats);
 }
 
-void JsPlugin::onChannelMode(Irccd &,
-                             const std::shared_ptr<Server> &server,
-                             const std::string &origin,
-                             const std::string &channel,
-                             const std::string &mode,
-                             const std::string &arg)
+void JsPlugin::onChannelMode(Irccd &, const ChannelModeEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
-    dukx_push_std_string(m_context, origin);
-    dukx_push_std_string(m_context, channel);
-    dukx_push_std_string(m_context, mode);
-    dukx_push_std_string(m_context, arg);
+    duk_push_server(m_context, std::move(event.server));
+    dukx_push_std_string(m_context, event.origin);
+    dukx_push_std_string(m_context, event.channel);
+    dukx_push_std_string(m_context, event.mode);
+    dukx_push_std_string(m_context, event.argument);
     call("onChannelMode", 5);
 }
 
-void JsPlugin::onChannelNotice(Irccd &,
-                               const std::shared_ptr<Server> &server,
-                               const std::string &origin,
-                               const std::string &channel,
-                               const std::string &notice)
+void JsPlugin::onChannelNotice(Irccd &, const ChannelNoticeEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
-    dukx_push_std_string(m_context, origin);
-    dukx_push_std_string(m_context, channel);
-    dukx_push_std_string(m_context, notice);
+    duk_push_server(m_context, std::move(event.server));
+    dukx_push_std_string(m_context, event.origin);
+    dukx_push_std_string(m_context, event.channel);
+    dukx_push_std_string(m_context, event.message);
     call("onChannelNotice", 4);
 }
 
-void JsPlugin::onCommand(Irccd &,
-                         const std::shared_ptr<Server> &server,
-                         const std::string &origin,
-                         const std::string &channel,
-                         const std::string &message)
+void JsPlugin::onCommand(Irccd &, const MessageEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
-    dukx_push_std_string(m_context, origin);
-    dukx_push_std_string(m_context, channel);
-    dukx_push_std_string(m_context, message);
+    duk_push_server(m_context, std::move(event.server));
+    dukx_push_std_string(m_context, event.origin);
+    dukx_push_std_string(m_context, event.channel);
+    dukx_push_std_string(m_context, event.message);
     call("onCommand", 4);
 }
 
-void JsPlugin::onConnect(Irccd &, const std::shared_ptr<Server> &server)
+void JsPlugin::onConnect(Irccd &, const ConnectEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
+    duk_push_server(m_context, std::move(event.server));
     call("onConnect", 1);
 }
 
-void JsPlugin::onInvite(Irccd &, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel)
+void JsPlugin::onInvite(Irccd &, const InviteEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
-    dukx_push_std_string(m_context, origin);
-    dukx_push_std_string(m_context, channel);
+    duk_push_server(m_context, std::move(event.server));
+    dukx_push_std_string(m_context, event.origin);
+    dukx_push_std_string(m_context, event.channel);
     call("onInvite", 3);
 }
 
-void JsPlugin::onJoin(Irccd &, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel)
+void JsPlugin::onJoin(Irccd &, const JoinEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
-    dukx_push_std_string(m_context, origin);
-    dukx_push_std_string(m_context, channel);
+    duk_push_server(m_context, std::move(event.server));
+    dukx_push_std_string(m_context, event.origin);
+    dukx_push_std_string(m_context, event.channel);
     call("onJoin", 3);
 }
 
-void JsPlugin::onKick(Irccd &,
-                      const std::shared_ptr<Server> &server,
-                      const std::string &origin,
-                      const std::string &channel,
-                      const std::string &target,
-                      const std::string &reason)
+void JsPlugin::onKick(Irccd &, const KickEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
-    dukx_push_std_string(m_context, origin);
-    dukx_push_std_string(m_context, channel);
-    dukx_push_std_string(m_context, target);
-    dukx_push_std_string(m_context, reason);
+    duk_push_server(m_context, std::move(event.server));
+    dukx_push_std_string(m_context, event.origin);
+    dukx_push_std_string(m_context, event.channel);
+    dukx_push_std_string(m_context, event.target);
+    dukx_push_std_string(m_context, event.reason);
     call("onKick", 5);
 }
 
@@ -333,114 +315,96 @@ void JsPlugin::onLoad(Irccd &irccd)
     call("onLoad", 0);
 }
 
-void JsPlugin::onMessage(Irccd &,
-                         const std::shared_ptr<Server> &server,
-                         const std::string &origin,
-                         const std::string &channel,
-                         const std::string &message)
+void JsPlugin::onMessage(Irccd &, const MessageEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
-    dukx_push_std_string(m_context, origin);
-    dukx_push_std_string(m_context, channel);
-    dukx_push_std_string(m_context, message);
+    duk_push_server(m_context, std::move(event.server));
+    dukx_push_std_string(m_context, event.origin);
+    dukx_push_std_string(m_context, event.channel);
+    dukx_push_std_string(m_context, event.message);
     call("onMessage", 4);
 }
 
-void JsPlugin::onMe(Irccd &,
-                    const std::shared_ptr<Server> &server,
-                    const std::string &origin,
-                    const std::string &channel,
-                    const std::string &message)
+void JsPlugin::onMe(Irccd &, const MeEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
-    dukx_push_std_string(m_context, origin);
-    dukx_push_std_string(m_context, channel);
-    dukx_push_std_string(m_context, message);
+    duk_push_server(m_context, std::move(event.server));
+    dukx_push_std_string(m_context, event.origin);
+    dukx_push_std_string(m_context, event.channel);
+    dukx_push_std_string(m_context, event.message);
     call("onMe", 4);
 }
 
-void JsPlugin::onMode(Irccd &, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &mode)
+void JsPlugin::onMode(Irccd &, const ModeEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
-    dukx_push_std_string(m_context, origin);
-    dukx_push_std_string(m_context, mode);
+    duk_push_server(m_context, std::move(event.server));
+    dukx_push_std_string(m_context, event.origin);
+    dukx_push_std_string(m_context, event.mode);
     call("onMode", 3);
 }
 
-void JsPlugin::onNames(Irccd &, const std::shared_ptr<Server> &server, const std::string &channel, const std::vector<std::string> &names)
+void JsPlugin::onNames(Irccd &, const NamesEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
-    dukx_push_std_string(m_context, channel);
-    dukx_push_array(m_context, names, dukx_push_std_string);
+    duk_push_server(m_context, std::move(event.server));
+    dukx_push_std_string(m_context, event.channel);
+    dukx_push_array(m_context, event.names, dukx_push_std_string);
     call("onNames", 3);
 }
 
-void JsPlugin::onNick(Irccd &, const std::shared_ptr<Server> &server, const std::string &oldnick, const std::string &newnick)
+void JsPlugin::onNick(Irccd &, const NickEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
-    dukx_push_std_string(m_context, oldnick);
-    dukx_push_std_string(m_context, newnick);
+    duk_push_server(m_context, std::move(event.server));
+    dukx_push_std_string(m_context, event.origin);
+    dukx_push_std_string(m_context, event.nickname);
     call("onNick", 3);
 }
 
-void JsPlugin::onNotice(Irccd &, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &notice)
+void JsPlugin::onNotice(Irccd &, const NoticeEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
-    dukx_push_std_string(m_context, origin);
-    dukx_push_std_string(m_context, notice);
+    duk_push_server(m_context, std::move(event.server));
+    dukx_push_std_string(m_context, event.origin);
+    dukx_push_std_string(m_context, event.message);
     call("onNotice", 3);
 }
 
-void JsPlugin::onPart(Irccd &,
-                      const std::shared_ptr<Server> &server,
-                      const std::string &origin,
-                      const std::string &channel,
-                      const std::string &reason)
+void JsPlugin::onPart(Irccd &, const PartEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
-    dukx_push_std_string(m_context, origin);
-    dukx_push_std_string(m_context, channel);
-    dukx_push_std_string(m_context, reason);
+    duk_push_server(m_context, std::move(event.server));
+    dukx_push_std_string(m_context, event.origin);
+    dukx_push_std_string(m_context, event.channel);
+    dukx_push_std_string(m_context, event.reason);
     call("onPart", 4);
 }
 
-void JsPlugin::onQuery(Irccd &,
-                       const std::shared_ptr<Server> &server,
-                       const std::string &origin,
-                       const std::string &message)
+void JsPlugin::onQuery(Irccd &, const QueryEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
-    dukx_push_std_string(m_context, origin);
-    dukx_push_std_string(m_context, message);
+    duk_push_server(m_context, std::move(event.server));
+    dukx_push_std_string(m_context, event.origin);
+    dukx_push_std_string(m_context, event.message);
     call("onQuery", 3);
 }
 
-void JsPlugin::onQueryCommand(Irccd &,
-                              const std::shared_ptr<Server> &server,
-                              const std::string &origin,
-                              const std::string &message)
+void JsPlugin::onQueryCommand(Irccd &, const QueryEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
-    dukx_push_std_string(m_context, origin);
-    dukx_push_std_string(m_context, message);
+    duk_push_server(m_context, std::move(event.server));
+    dukx_push_std_string(m_context, event.origin);
+    dukx_push_std_string(m_context, event.message);
     call("onQueryCommand", 3);
 }
 
@@ -451,18 +415,14 @@ void JsPlugin::onReload(Irccd &)
     call("onReload");
 }
 
-void JsPlugin::onTopic(Irccd &,
-                       const std::shared_ptr<Server> &server,
-                       const std::string &origin,
-                       const std::string &channel,
-                       const std::string &topic)
+void JsPlugin::onTopic(Irccd &, const TopicEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
-    dukx_push_std_string(m_context, origin);
-    dukx_push_std_string(m_context, channel);
-    dukx_push_std_string(m_context, topic);
+    duk_push_server(m_context, std::move(event.server));
+    dukx_push_std_string(m_context, event.origin);
+    dukx_push_std_string(m_context, event.channel);
+    dukx_push_std_string(m_context, event.topic);
     call("onTopic", 4);
 }
 
@@ -476,21 +436,21 @@ void JsPlugin::onUnload(Irccd &irccd)
         module->unload(irccd, std::static_pointer_cast<JsPlugin>(shared_from_this()));
 }
 
-void JsPlugin::onWhois(Irccd &, const std::shared_ptr<Server> &server, const ServerWhois &whois)
+void JsPlugin::onWhois(Irccd &, const WhoisEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, server);
+    duk_push_server(m_context, std::move(event.server));
     duk_push_object(m_context);
-    dukx_push_std_string(m_context, whois.nick);
+    dukx_push_std_string(m_context, event.whois.nick);
     duk_put_prop_string(m_context, -2, "nickname");
-    dukx_push_std_string(m_context, whois.user);
+    dukx_push_std_string(m_context, event.whois.user);
     duk_put_prop_string(m_context, -2, "username");
-    dukx_push_std_string(m_context, whois.realname);
+    dukx_push_std_string(m_context, event.whois.realname);
     duk_put_prop_string(m_context, -2, "realname");
-    dukx_push_std_string(m_context, whois.host);
+    dukx_push_std_string(m_context, event.whois.host);
     duk_put_prop_string(m_context, -2, "host");
-    dukx_push_array(m_context, whois.channels, dukx_push_std_string);
+    dukx_push_array(m_context, event.whois.channels, dukx_push_std_string);
     duk_put_prop_string(m_context, -2, "channels");
     call("onWhois", 2);
 }

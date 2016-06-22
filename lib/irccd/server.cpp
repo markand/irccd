@@ -122,7 +122,7 @@ void Server::handleConnect(const char *, const char **) noexcept
 
     // Don't forget to change state and notify.
     next(std::make_unique<state::Connected>());
-    onConnect();
+    onConnect(ConnectEvent{shared_from_this()});
 
     // Auto join listed channels.
     for (const ServerChannel &channel : m_settings.channels) {
@@ -133,22 +133,22 @@ void Server::handleConnect(const char *, const char **) noexcept
 
 void Server::handleChannel(const char *orig, const char **params) noexcept
 {
-    onMessage(strify(orig), strify(params[0]), strify(params[1]));
+    onMessage(MessageEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
 }
 
 void Server::handleChannelMode(const char *orig, const char **params) noexcept
 {
-    onChannelMode(strify(orig), strify(params[0]), strify(params[1]), strify(params[2]));
+    onChannelMode(ChannelModeEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1]), strify(params[2])});
 }
 
 void Server::handleChannelNotice(const char *orig, const char **params) noexcept
 {
-    onChannelNotice(strify(orig), strify(params[0]), strify(params[1]));
+    onChannelNotice(ChannelNoticeEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
 }
 
 void Server::handleCtcpAction(const char *orig, const char **params) noexcept
 {
-    onMe(strify(orig), strify(params[0]), strify(params[1]));
+    onMe(MeEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
 }
 
 void Server::handleInvite(const char *orig, const char **params) noexcept
@@ -162,12 +162,12 @@ void Server::handleInvite(const char *orig, const char **params) noexcept
      * uncommon to need it so it is passed as the last argument to be
      * optional in the plugin.
      */
-    onInvite(strify(orig), strify(params[1]), strify(params[0]));
+    onInvite(InviteEvent{shared_from_this(), strify(orig), strify(params[1]), strify(params[0])});
 }
 
 void Server::handleJoin(const char *orig, const char **params) noexcept
 {
-    onJoin(strify(orig), strify(params[0]));
+    onJoin(JoinEvent{shared_from_this(), strify(orig), strify(params[0])});
 }
 
 void Server::handleKick(const char *orig, const char **params) noexcept
@@ -176,12 +176,12 @@ void Server::handleKick(const char *orig, const char **params) noexcept
     if ((m_settings.flags & ServerSettings::AutoRejoin) && isSelf(strify(params[1])))
         join(strify(params[0]));
 
-    onKick(strify(orig), strify(params[0]), strify(params[1]), strify(params[2]));
+    onKick(KickEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1]), strify(params[2])});
 }
 
 void Server::handleMode(const char *orig, const char **params) noexcept
 {
-    onMode(strify(orig), strify(params[1]));
+    onMode(ModeEvent{shared_from_this(), strify(orig), strify(params[1])});
 }
 
 void Server::handleNick(const char *orig, const char **params) noexcept
@@ -190,13 +190,13 @@ void Server::handleNick(const char *orig, const char **params) noexcept
     if (isSelf(strify(orig)))
         m_identity.nickname = strify(params[0]);
 
-    onNick(strify(orig), strify(params[0]));
+    onNick(NickEvent{shared_from_this(), strify(orig), strify(params[0])});
 }
 
 void Server::handleNotice(const char *orig, const char **params) noexcept
 {
     // Like handleInvite, the notice provides the target nickname, we discard it.
-    onNotice(strify(orig), strify(params[1]));
+    onNotice(NoticeEvent{shared_from_this(), strify(orig), strify(params[1])});
 }
 
 void Server::handleNumeric(unsigned int event, const char **params, unsigned int c) noexcept
@@ -233,7 +233,7 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 
         auto it = m_cache.namesMap.find(params[1]);
         if (it != m_cache.namesMap.end()) {
-            onNames(params[1], it->second);
+            onNames(NamesEvent{shared_from_this(), params[1], std::vector<std::string>(it->second.begin(), it->second.end())});
 
             // Don't forget to remove the list.
             m_cache.namesMap.erase(it);
@@ -291,7 +291,7 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
          */
         auto it = m_cache.whoisMap.find(params[1]);
         if (it != m_cache.whoisMap.end()) {
-            onWhois(it->second);
+            onWhois(WhoisEvent{shared_from_this(), it->second});
 
             // Don't forget to remove.
             m_cache.whoisMap.erase(it);
@@ -311,7 +311,7 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 
 void Server::handlePart(const char *orig, const char **params) noexcept
 {
-    onPart(strify(orig), strify(params[0]), strify(params[1]));
+    onPart(PartEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
 }
 
 void Server::handlePing(const char *, const char **params) noexcept
@@ -325,12 +325,12 @@ void Server::handlePing(const char *, const char **params) noexcept
 
 void Server::handleQuery(const char *orig, const char **params) noexcept
 {
-    onQuery(strify(orig), strify(params[1]));
+    onQuery(QueryEvent{shared_from_this(), strify(orig), strify(params[1])});
 }
 
 void Server::handleTopic(const char *orig, const char **params) noexcept
 {
-    onTopic(strify(orig), strify(params[0]), strify(params[1]));
+    onTopic(TopicEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
 }
 
 ServerChannel Server::splitChannel(const std::string &value)

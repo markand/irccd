@@ -79,21 +79,21 @@ public:
 
 TEST_F(AuthTest, nickserv1)
 {
-    m_plugin->onConnect(m_irccd, m_nickserv1);
+    m_plugin->onConnect(m_irccd, ConnectEvent{m_nickserv1});
 
     ASSERT_EQ("NickServ:identify plopation", m_nickserv1->last());
 }
 
 TEST_F(AuthTest, nickserv2)
 {
-    m_plugin->onConnect(m_irccd, m_nickserv2);
+    m_plugin->onConnect(m_irccd, ConnectEvent{m_nickserv2});
 
     ASSERT_EQ("NickServ:identify jean something", m_nickserv2->last());
 }
 
 TEST_F(AuthTest, quakenet)
 {
-    m_plugin->onConnect(m_irccd, m_quakenet);
+    m_plugin->onConnect(m_irccd, ConnectEvent{m_quakenet});
 
     ASSERT_EQ("Q@CServe.quakenet.org:AUTH mario hello", m_quakenet->last());
 }

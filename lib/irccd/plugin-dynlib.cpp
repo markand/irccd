@@ -68,57 +68,39 @@ DynlibPlugin::DynlibPlugin(std::string name, std::string path)
 {
 }
 
-void DynlibPlugin::onCommand(Irccd &irccd,
-                             const std::shared_ptr<Server> &server,
-                             const std::string &origin,
-                             const std::string &channel,
-                             const std::string &message)
+void DynlibPlugin::onCommand(Irccd &irccd, const MessageEvent &ev)
 {
-    call(m_onCommand, irccd, server, origin, channel, message);
+    call(m_onCommand, irccd, ev);
 }
 
-void DynlibPlugin::onConnect(Irccd &irccd, const std::shared_ptr<Server> &server)
+void DynlibPlugin::onConnect(Irccd &irccd, const ConnectEvent &ev)
 {
-    call(m_onConnect, irccd, server);
+    call(m_onConnect, irccd, ev);
 }
 
-void DynlibPlugin::onChannelMode(Irccd &irccd,
-                                 const std::shared_ptr<Server> &server,
-                                 const std::string &origin,
-                                 const std::string &channel,
-                                 const std::string &mode,
-                                 const std::string &arg)
+void DynlibPlugin::onChannelMode(Irccd &irccd, const ChannelModeEvent &ev)
 {
-    call(m_onChannelMode, irccd, server, origin, channel, mode, arg);
+    call(m_onChannelMode, irccd, ev);
 }
 
-void DynlibPlugin::onChannelNotice(Irccd &irccd,
-                                   const std::shared_ptr<Server> &server,
-                                   const std::string &origin,
-                                   const std::string &channel,
-                                   const std::string &notice)
+void DynlibPlugin::onChannelNotice(Irccd &irccd, const ChannelNoticeEvent &ev)
 {
-    call(m_onChannelNotice, irccd, server, origin, channel, notice);
+    call(m_onChannelNotice, irccd, ev);
 }
 
-void DynlibPlugin::onInvite(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel)
+void DynlibPlugin::onInvite(Irccd &irccd, const InviteEvent &ev)
 {
-    call(m_onInvite, irccd, server, origin, channel);
+    call(m_onInvite, irccd, ev);
 }
 
-void DynlibPlugin::onJoin(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &channel)
+void DynlibPlugin::onJoin(Irccd &irccd, const JoinEvent &ev)
 {
-    call(m_onJoin, irccd, server, origin, channel);
+    call(m_onJoin, irccd, ev);
 }
 
-void DynlibPlugin::onKick(Irccd &irccd,
-                          const std::shared_ptr<Server> &server,
-                          const std::string &origin,
-                          const std::string &channel,
-                          const std::string &target,
-                          const std::string &reason)
+void DynlibPlugin::onKick(Irccd &irccd, const KickEvent &ev)
 {
-    call(m_onKick, irccd, server, origin, channel, target, reason);
+    call(m_onKick, irccd, ev);
 }
 
 void DynlibPlugin::onLoad(Irccd &irccd)
@@ -126,67 +108,49 @@ void DynlibPlugin::onLoad(Irccd &irccd)
     call(m_onLoad, irccd, *this);
 }
 
-void DynlibPlugin::onMessage(Irccd &irccd,
-                             const std::shared_ptr<Server> &server,
-                             const std::string &origin,
-                             const std::string &channel,
-                             const std::string &message)
+void DynlibPlugin::onMessage(Irccd &irccd, const MessageEvent &ev)
 {
-    call(m_onMessage, irccd, server, origin, channel, message);
+    call(m_onMessage, irccd, ev);
 }
 
-void DynlibPlugin::onMe(Irccd &irccd,
-                        const std::shared_ptr<Server> &server,
-                        const std::string &origin,
-                        const std::string &channel,
-                        const std::string &message)
+void DynlibPlugin::onMe(Irccd &irccd, const MeEvent &ev)
 {
-    call(m_onMe, irccd, server, origin, channel, message);
+    call(m_onMe, irccd, ev);
 }
 
-void DynlibPlugin::onMode(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &mode)
+void DynlibPlugin::onMode(Irccd &irccd, const ModeEvent &ev)
 {
-    call(m_onMode, irccd, server, origin, mode);
+    call(m_onMode, irccd, ev);
 }
 
-void DynlibPlugin::onNames(Irccd &irccd,
-                           const std::shared_ptr<Server> &server,
-                           const std::string &channel,
-                           const std::vector<std::string> &list)
+void DynlibPlugin::onNames(Irccd &irccd, const NamesEvent &ev)
 {
-    call(m_onNames, irccd, server, channel, list);
+    call(m_onNames, irccd, ev);
 }
 
-void DynlibPlugin::onNick(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &nick)
+void DynlibPlugin::onNick(Irccd &irccd, const NickEvent &ev)
 {
-    call(m_onNick, irccd, server, origin, nick);
+    call(m_onNick, irccd, ev);
 }
 
-void DynlibPlugin::onNotice(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &notice)
+void DynlibPlugin::onNotice(Irccd &irccd, const NoticeEvent &ev)
 {
-    call(m_onNotice, irccd, server, origin, notice);
+    call(m_onNotice, irccd, ev);
 }
 
-void DynlibPlugin::onPart(Irccd &irccd,
-                          const std::shared_ptr<Server> &server,
-                          const std::string &origin,
-                          const std::string &channel,
-                          const std::string &reason)
+void DynlibPlugin::onPart(Irccd &irccd, const PartEvent &ev)
 {
-    call(m_onPart, irccd, server, origin, channel, reason);
+    call(m_onPart, irccd, ev);
 }
 
-void DynlibPlugin::onQuery(Irccd &irccd, const std::shared_ptr<Server> &server, const std::string &origin, const std::string &message)
+void DynlibPlugin::onQuery(Irccd &irccd, const QueryEvent &ev)
 {
-    call(m_onQuery, irccd, server, origin, message);
+    call(m_onQuery, irccd, ev);
 }
 
-void DynlibPlugin::onQueryCommand(Irccd &irccd,
-                                  const std::shared_ptr<Server> &server,
-                                  const std::string &origin,
-                                  const std::string &message)
+void DynlibPlugin::onQueryCommand(Irccd &irccd, const QueryEvent &ev)
 {
-    call(m_onQueryCommand, irccd, server, origin, message);
+    call(m_onQueryCommand, irccd, ev);
 }
 
 void DynlibPlugin::onReload(Irccd &irccd)
@@ -194,13 +158,9 @@ void DynlibPlugin::onReload(Irccd &irccd)
     call(m_onReload, irccd, *this);
 }
 
-void DynlibPlugin::onTopic(Irccd &irccd,
-                           const std::shared_ptr<Server> &server,
-                           const std::string &origin,
-                           const std::string &channel,
-                           const std::string &topic)
+void DynlibPlugin::onTopic(Irccd &irccd, const TopicEvent &ev)
 {
-    call(m_onTopic, irccd, server, origin, channel, topic);
+    call(m_onTopic, irccd, ev);
 }
 
 void DynlibPlugin::onUnload(Irccd &irccd)
@@ -208,9 +168,9 @@ void DynlibPlugin::onUnload(Irccd &irccd)
     call(m_onUnload, irccd, *this);
 }
 
-void DynlibPlugin::onWhois(Irccd &irccd, const std::shared_ptr<Server> &server, const ServerWhois &info)
+void DynlibPlugin::onWhois(Irccd &irccd, const WhoisEvent &ev)
 {
-    call(m_onWhois, irccd, server, info);
+    call(m_onWhois, irccd, ev);
 }
 
 } // !irccd

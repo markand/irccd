@@ -146,6 +146,173 @@ public:
 };
 
 /**
+ * \brief Channel event.
+ */
+class ChannelModeEvent {
+public:
+    std::shared_ptr<Server> server;         //!< The server.
+    std::string origin;                     //!< The originator.
+    std::string channel;                    //!< The channel.
+    std::string mode;                       //!< The mode.
+    std::string argument;                   //!< The mode argument (Optional).
+};
+
+/**
+ * \brief Channel notice event.
+ */
+class ChannelNoticeEvent {
+public:
+    std::shared_ptr<Server> server;         //!< The server.
+    std::string origin;                     //!< The originator.
+    std::string channel;                    //!< The channel.
+    std::string message;                    //!< The notice message.
+};
+
+/**
+ * \brief Connection success event.
+ */
+class ConnectEvent {
+public:
+    std::shared_ptr<Server> server;         //!< The server.
+};
+
+/**
+ * \brief Invite event.
+ */
+class InviteEvent {
+public:
+    std::shared_ptr<Server> server;         //!< The server.
+    std::string origin;                     //!< The originator.
+    std::string channel;                    //!< The channel.
+    std::string nickname;                   //!< The nickname (you).
+};
+
+/**
+ * \brief Join event.
+ */
+class JoinEvent {
+public:
+    std::shared_ptr<Server> server;         //!< The server.
+    std::string origin;                     //!< The originator.
+    std::string channel;                    //!< The channel.
+};
+
+/**
+ * \brief Kick event.
+ */
+class KickEvent {
+public:
+    std::shared_ptr<Server> server;         //!< The server.
+    std::string origin;                     //!< The originator.
+    std::string channel;                    //!< The channel.
+    std::string target;                     //!< The target.
+    std::string reason;                     //!< The reason (Optional).
+};
+
+/**
+ * \brief Message event.
+ */
+class MessageEvent {
+public:
+    std::shared_ptr<Server> server;         //!< The server.
+    std::string origin;                     //!< The originator.
+    std::string channel;                    //!< The channel.
+    std::string message;                    //!< The message.
+};
+
+/**
+ * \brief CTCP action event.
+ */
+class MeEvent {
+public:
+    std::shared_ptr<Server> server;         //!< The server.
+    std::string origin;                     //!< The originator.
+    std::string channel;                    //!< The channel.
+    std::string message;                    //!< The message.
+};
+
+/**
+ * \brief Mode event.
+ */
+class ModeEvent {
+public:
+    std::shared_ptr<Server> server;         //!< The server.
+    std::string origin;                     //!< The originator.
+    std::string mode;                       //!< The mode.
+};
+
+/**
+ * \brief Names listing event.
+ */
+class NamesEvent {
+public:
+    std::shared_ptr<Server> server;         //!< The server.
+    std::string channel;                    //!< The channel.
+    std::vector<std::string> names;         //!< The names.
+};
+
+/**
+ * \brief Nick change event.
+ */
+class NickEvent {
+public:
+    std::shared_ptr<Server> server;         //!< The server.
+    std::string origin;                     //!< The originator.
+    std::string nickname;                   //!< The new nickname.
+};
+
+/**
+ * \brief Notice event.
+ */
+class NoticeEvent {
+public:
+    std::shared_ptr<Server> server;         //!< The server.
+    std::string origin;                     //!< The originator.
+    std::string message;                    //!< The message.
+};
+
+/**
+ * \brief Part event.
+ */
+class PartEvent {
+public:
+    std::shared_ptr<Server> server;         //!< The server.
+    std::string origin;                     //!< The originator.
+    std::string channel;                    //!< The channel.
+    std::string reason;                     //!< The reason.
+};
+
+/**
+ * \brief Query event.
+ */
+class QueryEvent {
+public:
+    std::shared_ptr<Server> server;         //!< The server.
+    std::string origin;                     //!< The originator.
+    std::string message;                    //!< The message.
+};
+
+/**
+ * \brief Topic event.
+ */
+class TopicEvent {
+public:
+    std::shared_ptr<Server> server;         //!< The server.
+    std::string origin;                     //!< The originator.
+    std::string channel;                    //!< The channel.
+    std::string topic;                      //!< The topic message.
+};
+
+/**
+ * \brief Whois event.
+ */
+class WhoisEvent {
+public:
+    std::shared_ptr<Server> server;         //!< The server.
+    ServerWhois whois;                      //!< The whois information.
+};
+
+/**
  * \brief The class that connect to a IRC server
  *
  * The server is a class that stores callbacks which will be called on IRC events. It is the lowest part of the connection to a server, it
@@ -158,7 +325,7 @@ public:
  *
  * Note: the server is set in non blocking mode, commands are placed in a queue and sent when only when they are ready.
  */
-class Server {
+class Server : public std::enable_shared_from_this<Server> {
 public:
     /**
      * Bridge for libircclient.
@@ -170,27 +337,16 @@ public:
      * ----------------------------------------------------------
      *
      * Triggered when someone changed the channel mode.
-     *
-     * Arguments:
-     * - the origin,
-     * - the channel,
-     * - the mode,
-     * - the optional mode argument.
      */
-    Signal<std::string, std::string, std::string, std::string> onChannelMode;
+    Signal<ChannelModeEvent> onChannelMode;
 
     /**
      * Signal: onChannelNotice
      * ----------------------------------------------------------
      *
      * Triggered when a notice has been sent on a channel.
-     *
-     * Arguments:
-     *   - the origin (the nickname who has sent the notice),
-     *   - the channel name,
-     *   - the notice message.
      */
-    Signal<std::string, std::string, std::string> onChannelNotice;
+    Signal<ChannelNoticeEvent> onChannelNotice;
 
     /**
      * Signal: onConnect
@@ -198,7 +354,7 @@ public:
      *
      * Triggered when the server is successfully connected.
      */
-    Signal<> onConnect;
+    Signal<ConnectEvent> onConnect;
 
     /**
      * Signal: onDie
@@ -213,52 +369,32 @@ public:
      * ----------------------------------------------------------
      *
      * Triggered when an invite has been sent to you (the bot).
-     *
-     * Arguments:
-     *   - the origin,
-     *   - the channel,
-     *   - your nickname.
      */
-    Signal<std::string, std::string, std::string> onInvite;
+    Signal<InviteEvent> onInvite;
 
     /**
      * Signal: onJoin
      * ----------------------------------------------------------
      *
      * Triggered when a user has joined the channel, it also includes you.
-     *
-     * Arguments:
-     *   - the origin (may be you),
-     *   - the channel.
      */
-    Signal<std::string, std::string> onJoin;
+    Signal<JoinEvent> onJoin;
 
     /**
      * Signal: onKick
      * ----------------------------------------------------------
      *
      * Triggered when someone has been kicked from a channel.
-     *
-     * Arguments:
-     *   - the origin,
-     *   - the channel,
-     *   - the target who has been kicked,
-     *   - the optional reason.
      */
-    Signal<std::string, std::string, std::string, std::string> onKick;
+    Signal<KickEvent> onKick;
 
     /**
      * ServerEvent: onMessage
      * ----------------------------------------------------------
      *
      * Triggered when a message on a channel has been sent.
-     *
-     * Arguments:
-     *   - the origin,
-     *   - the channel,
-     *   - the message.
      */
-    Signal<std::string, std::string, std::string> onMessage;
+    Signal<MessageEvent> onMessage;
 
     /**
      * Signal: onMe
@@ -267,110 +403,72 @@ public:
      * Triggered on a CTCP Action.
      *
      * This is both used in a channel and in a private message so the target may be a channel or your nickname.
-     *
-     * Arguments:
-     *   - the origin,
-     *   - the target,
-     *   - the message.
      */
-    Signal<std::string, std::string, std::string> onMe;
+    Signal<MeEvent> onMe;
 
     /**
      * Signal: onMode
      * ----------------------------------------------------------
      *
      * Triggered when the server changed your user mode.
-     *
-     * Arguments:
-     *   - the origin,
-     *   - the mode (e.g +i).
      */
-    Signal<std::string, std::string> onMode;
+    Signal<ModeEvent> onMode;
 
     /**
      * Signal: onNames
      * ----------------------------------------------------------
      *
      * Triggered when names listing has finished on a channel.
-     *
-     * Arguments:
-     *   - the channel,
-     *   - the ordered list of names.
      */
-    Signal<std::string, std::set<std::string>> onNames;
+    Signal<NamesEvent> onNames;
 
     /**
      * Signal: onNick
      * ----------------------------------------------------------
      *
      * Triggered when someone changed its nickname, it also includes you.
-     *
-     * Arguments:
-     *   - the old nickname (may be you),
-     *   - the new nickname.
      */
-    Signal<std::string, std::string> onNick;
+    Signal<NickEvent> onNick;
 
     /**
      * Signal: onNotice
      * ----------------------------------------------------------
      *
      * Triggered when someone has sent a notice to you.
-     *
-     * Arguments:
-     *   - the origin,
-     *   - the notice message.
      */
-    Signal<std::string, std::string> onNotice;
+    Signal<NoticeEvent> onNotice;
 
     /**
      * Signal: onPart
      * ----------------------------------------------------------
      *
      * Triggered when someone has left the channel.
-     *
-     * Arguments:
-     *   - the origin,
-     *   - the channel that the nickname has left,
-     *   - the optional reason.
      */
-    Signal<std::string, std::string, std::string> onPart;
+    Signal<PartEvent> onPart;
 
     /**
      * Signal: onQuery
      * ----------------------------------------------------------
      *
      * Triggered when someone has sent you a private message.
-     *
-     * Arguments:
-     *   - the origin,
-     *   - the message.
      */
-    Signal<std::string, std::string> onQuery;
+    Signal<QueryEvent> onQuery;
 
     /**
      * Signal: onTopic
      * ----------------------------------------------------------
      *
      * Triggered when someone changed the channel topic.
-     *
-     * Arguments:
-     *   - the origin,
-     *   - the channel,
-     *   - the new topic.
      */
-    Signal<std::string, std::string, std::string> onTopic;
+    Signal<TopicEvent> onTopic;
 
     /**
      * Signal: onWhois
      * ----------------------------------------------------------
      *
      * Triggered when whois information has been received.
-     *
-     * Arguments:
-     *   - the whois object.
      */
-    Signal<ServerWhois> onWhois;
+    Signal<WhoisEvent> onWhois;
 
 private:
     // Identifier.

@@ -86,9 +86,9 @@ TEST_F(HangmanTest, asked)
 {
     load({{ "collaborative", "false" }});
 
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#hangman", "");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "s");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "s");
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", ""});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "s"});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "s"});
 
     ASSERT_EQ("#hangman:asked=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s", m_server->last());
 }
@@ -97,17 +97,17 @@ TEST_F(HangmanTest, dead)
 {
     load({{ "collaborative", "false" }});
 
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#hangman", "");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "a");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "b");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "c");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "d");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "e");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "f");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "g");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "h");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "i");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "j");
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", ""});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "a"});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "b"});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "c"});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "d"});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "e"});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "f"});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "g"});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "h"});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "i"});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "j"});
 
     ASSERT_EQ("#hangman:dead=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:sky", m_server->last());
 }
@@ -116,8 +116,8 @@ TEST_F(HangmanTest, found)
 {
     load({{ "collaborative", "false" }});
 
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#hangman", "");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "s");
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", ""});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "s"});
 
     ASSERT_EQ("#hangman:found=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s _ _", m_server->last());
 }
@@ -126,7 +126,7 @@ TEST_F(HangmanTest, start)
 {
     load();
 
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#hangman", "");
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", ""});
 
     ASSERT_EQ("#hangman:start=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:_ _ _", m_server->last());
 }
@@ -135,10 +135,10 @@ TEST_F(HangmanTest, win1)
 {
     load({{ "collaborative", "false" }});
 
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#hangman", "");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "s");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "k");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "y");
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", ""});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "s"});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "k"});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "y"});
 
     ASSERT_EQ("#hangman:win=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:sky", m_server->last());
 }
@@ -147,8 +147,8 @@ TEST_F(HangmanTest, win2)
 {
     load({{ "collaborative", "false" }});
 
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#hangman", "");
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#hangman", "sky");
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", ""});
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "sky"});
 
     ASSERT_EQ("#hangman:win=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:sky", m_server->last());
 }
@@ -157,8 +157,8 @@ TEST_F(HangmanTest, wrongLetter)
 {
     load();
 
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#hangman", "");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "x");
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", ""});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "x"});
 
     ASSERT_EQ("#hangman:wrong-letter=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:x", m_server->last());
 }
@@ -167,8 +167,8 @@ TEST_F(HangmanTest, wrongWord)
 {
     load();
 
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#hangman", "");
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#hangman", "cheese");
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", ""});
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "cheese"});
 
     ASSERT_EQ("#hangman:wrong-word=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:cheese", m_server->last());
 }
@@ -178,10 +178,10 @@ TEST_F(HangmanTest, collaborativeDisabled)
     // Disable collaborative mode.
     load({{ "collaborative", "false" }});
 
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#hangman", "");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "s");
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", ""});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "s"});
     ASSERT_EQ("#hangman:found=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s _ _", m_server->last());
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "k");
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "k"});
     ASSERT_EQ("#hangman:found=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s k _", m_server->last());
 }
 
@@ -190,12 +190,12 @@ TEST_F(HangmanTest, collaborativeEnabled)
     // Enable collaborative mode.
     load({{ "collaborative", "true" }});
 
-    m_plugin->onCommand(m_irccd, m_server, "jean!jean@localhost", "#hangman", "");
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "s");
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", ""});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "s"});
     ASSERT_EQ("#hangman:found=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s _ _", m_server->last());
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#hangman", "k");
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "k"});
     ASSERT_EQ("#hangman:wrong-player=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:k", m_server->last());
-    m_plugin->onMessage(m_irccd, m_server, "francis!francis@localhost", "#hangman", "k");
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "francis!francis@localhost", "#hangman", "k"});
     ASSERT_EQ("#hangman:found=hangman:!hangman:test:#hangman:francis!francis@localhost:francis:s k _", m_server->last());
 }
 

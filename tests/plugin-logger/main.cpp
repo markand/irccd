@@ -88,7 +88,7 @@ TEST_F(LoggerTest, formatChannelMode)
 {
     load();
 
-    m_plugin->onChannelMode(m_irccd, m_server, "jean!jean@localhost", "#staff", "+o", "jean");
+    m_plugin->onChannelMode(m_irccd, ChannelModeEvent{m_server, "jean!jean@localhost", "#staff", "+o", "jean"});
 
     ASSERT_EQ("cmode=test:#staff:jean!jean@localhost:jean:+o:jean\n", last());
 }
@@ -97,7 +97,7 @@ TEST_F(LoggerTest, formatChannelNotice)
 {
     load();
 
-    m_plugin->onChannelNotice(m_irccd, m_server, "jean!jean@localhost", "#staff", "bonjour!");
+    m_plugin->onChannelNotice(m_irccd, ChannelNoticeEvent{m_server, "jean!jean@localhost", "#staff", "bonjour!"});
 
     ASSERT_EQ("cnotice=test:#staff:jean!jean@localhost:jean:bonjour!\n", last());
 }
@@ -106,7 +106,7 @@ TEST_F(LoggerTest, formatJoin)
 {
     load();
 
-    m_plugin->onJoin(m_irccd, m_server, "jean!jean@localhost", "#staff");
+    m_plugin->onJoin(m_irccd, JoinEvent{m_server, "jean!jean@localhost", "#staff"});
 
     ASSERT_EQ("join=test:#staff:jean!jean@localhost:jean\n", last());
 }
@@ -115,7 +115,7 @@ TEST_F(LoggerTest, formatKick)
 {
     load();
 
-    m_plugin->onKick(m_irccd, m_server, "jean!jean@localhost", "#staff", "badboy", "please do not flood");
+    m_plugin->onKick(m_irccd, KickEvent{m_server, "jean!jean@localhost", "#staff", "badboy", "please do not flood"});
 
     ASSERT_EQ("kick=test:#staff:jean!jean@localhost:jean:badboy:please do not flood\n", last());
 }
@@ -124,7 +124,7 @@ TEST_F(LoggerTest, formatMe)
 {
     load();
 
-    m_plugin->onMe(m_irccd, m_server, "jean!jean@localhost", "#staff", "is drinking water");
+    m_plugin->onMe(m_irccd, MeEvent{m_server, "jean!jean@localhost", "#staff", "is drinking water"});
 
     ASSERT_EQ("me=test:#staff:jean!jean@localhost:jean:is drinking water\n", last());
 }
@@ -133,7 +133,7 @@ TEST_F(LoggerTest, formatMessage)
 {
     load();
 
-    m_plugin->onMessage(m_irccd, m_server, "jean!jean@localhost", "#staff", "hello guys");
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#staff", "hello guys"});
 
     ASSERT_EQ("message=test:#staff:jean!jean@localhost:jean:hello guys\n", last());
 }
@@ -142,7 +142,7 @@ TEST_F(LoggerTest, formatMode)
 {
     load();
 
-    m_plugin->onMode(m_irccd, m_server, "jean!jean@localhost", "+i");
+    m_plugin->onMode(m_irccd, ModeEvent{m_server, "jean!jean@localhost", "+i"});
 
     ASSERT_EQ("mode=test:jean!jean@localhost:jean:+i:\n", last());
 }
@@ -151,7 +151,7 @@ TEST_F(LoggerTest, formatNotice)
 {
     load();
 
-    m_plugin->onNotice(m_irccd, m_server, "jean!jean@localhost", "tu veux voir mon chat ?");
+    m_plugin->onNotice(m_irccd, NoticeEvent{m_server, "jean!jean@localhost", "tu veux voir mon chat ?"});
 
     ASSERT_EQ("notice=test:jean!jean@localhost:jean:tu veux voir mon chat ?\n", last());
 }
@@ -160,7 +160,7 @@ TEST_F(LoggerTest, formatPart)
 {
     load();
 
-    m_plugin->onPart(m_irccd, m_server, "jean!jean@localhost", "#staff", "too noisy here");
+    m_plugin->onPart(m_irccd, PartEvent{m_server, "jean!jean@localhost", "#staff", "too noisy here"});
 
     ASSERT_EQ("part=test:#staff:jean!jean@localhost:jean:too noisy here\n", last());
 }
@@ -169,7 +169,7 @@ TEST_F(LoggerTest, formatQuery)
 {
     load();
 
-    m_plugin->onQuery(m_irccd, m_server, "jean!jean@localhost", "much irccd, wow");
+    m_plugin->onQuery(m_irccd, QueryEvent{m_server, "jean!jean@localhost", "much irccd, wow"});
 
     ASSERT_EQ("query=test:jean!jean@localhost:jean:much irccd, wow\n", last());
 }
@@ -178,7 +178,7 @@ TEST_F(LoggerTest, formatTopic)
 {
     load();
 
-    m_plugin->onTopic(m_irccd, m_server, "jean!jean@localhost", "#staff", "oh yeah yeaaaaaaaah");
+    m_plugin->onTopic(m_irccd, TopicEvent{m_server, "jean!jean@localhost", "#staff", "oh yeah yeaaaaaaaah"});
 
     ASSERT_EQ("topic=test:#staff:jean!jean@localhost:jean:oh yeah yeaaaaaaaah\n", last());
 }
