@@ -474,16 +474,16 @@ duk_ret_t toString(duk_context *ctx)
  *
  * name: the name,
  * host: the host,
- * ipv6: true to use ipv6,    (Optional: default false)
- * port: the port number,    (Optional: default 6667)
- * password: the password,    (Optional: default none)
- * channels: array of channels    (Optiona: default empty)
- * ssl: true to use ssl,    (Optional: default false)
+ * ipv6: true to use ipv6,      (Optional: default false)
+ * port: the port number,       (Optional: default 6667)
+ * password: the password,      (Optional: default none)
+ * channels: array of channels  (Optiona: default empty)
+ * ssl: true to use ssl,        (Optional: default false)
  * sslVerify: true to verify    (Optional: default true)
- * nickname: "nickname",    (Optional, default: irccd)
- * username: "user name",    (Optional, default: irccd)
- * realname: "real name",    (Optional, default: IRC Client Daemon)
- * commandChar: "!",        (Optional, the command char, default: "!")
+ * nickname: "nickname",        (Optional, default: irccd)
+ * username: "user name",       (Optional, default: irccd)
+ * realname: "real name",       (Optional, default: IRC Client Daemon)
+ * commandChar: "!",            (Optional, the command char, default: "!")
  */
 duk_ret_t constructor(duk_context *ctx)
 {
