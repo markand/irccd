@@ -44,7 +44,7 @@ duk_idx_t wrap(duk_context *ctx, int nret, Func &&func)
     std::string name = duk_require_string(ctx, 0);
 
     try {
-        func(duk_get_irccd(ctx), name);
+        func(dukx_get_irccd(ctx), name);
     } catch (const std::out_of_range &ex) {
         dukx_throw(ctx, ReferenceError(ex.what()));
     } catch (const std::exception &ex) {
@@ -187,7 +187,7 @@ duk_idx_t info(duk_context *ctx)
     std::shared_ptr<Plugin> plugin;
 
     if (duk_get_top(ctx) >= 1)
-        plugin = duk_get_irccd(ctx).pluginService().get(duk_require_string(ctx, 0));
+        plugin = dukx_get_irccd(ctx).pluginService().get(duk_require_string(ctx, 0));
     else
         plugin = dukx_get_plugin(ctx);
 
@@ -220,7 +220,7 @@ duk_idx_t info(duk_context *ctx)
  */
 duk_idx_t list(duk_context *ctx)
 {
-    dukx_push_array(ctx, duk_get_irccd(ctx).pluginService().plugins(), [] (auto ctx, auto plugin) {
+    dukx_push_array(ctx, dukx_get_irccd(ctx).pluginService().plugins(), [] (auto ctx, auto plugin) {
         dukx_push_std_string(ctx, plugin->name());
     });
 

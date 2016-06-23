@@ -42,7 +42,7 @@ void handleSignal(std::weak_ptr<JsPlugin> ptr, std::string key)
     if (!plugin)
         return;
 
-    auto &irccd = duk_get_irccd(plugin->context());
+    auto &irccd = dukx_get_irccd(plugin->context());
 
     irccd.post([plugin, key] (Irccd &) {
         StackAssert sa(plugin->context());

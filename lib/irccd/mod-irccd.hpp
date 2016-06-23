@@ -88,7 +88,7 @@ public:
  * \param ctx the context
  * \return the irccd reference
  */
-Irccd &duk_get_irccd(duk_context *ctx);
+Irccd &dukx_get_irccd(duk_context *ctx);
 
 } // !irccd
 

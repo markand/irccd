@@ -105,7 +105,7 @@ void IrccdModule::load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin)
     duk_put_global_string(plugin->context(), "\xff""\xff""irccd-ref");
 }
 
-Irccd &duk_get_irccd(duk_context *ctx)
+Irccd &dukx_get_irccd(duk_context *ctx)
 {
     StackAssert sa(ctx);
 
