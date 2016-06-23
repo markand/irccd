@@ -57,7 +57,7 @@ public:
  * \param ctx the context
  * \return the plugin
  */
-std::shared_ptr<JsPlugin> duk_get_plugin(duk_context *ctx);
+std::shared_ptr<JsPlugin> dukx_get_plugin(duk_context *ctx);
 
 } // !irccd
 

@@ -189,7 +189,7 @@ duk_idx_t info(duk_context *ctx)
     if (duk_get_top(ctx) >= 1)
         plugin = duk_get_irccd(ctx).pluginService().get(duk_require_string(ctx, 0));
     else
-        plugin = duk_get_plugin(ctx);
+        plugin = dukx_get_plugin(ctx);
 
     if (!plugin)
         return 0;
@@ -338,7 +338,7 @@ void PluginModule::unload(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
     duk_pop(plugin->context());
 }
 
-std::shared_ptr<JsPlugin> duk_get_plugin(duk_context *ctx)
+std::shared_ptr<JsPlugin> dukx_get_plugin(duk_context *ctx)
 {
     StackAssert sa(ctx);
 

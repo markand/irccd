@@ -142,7 +142,7 @@ duk_ret_t constructor(duk_context *ctx)
     auto timer = std::make_shared<Timer>(static_cast<TimerType>(type), delay);
     auto hash = std::to_string(reinterpret_cast<std::uintptr_t>(timer.get()));
 
-    timer->onSignal.connect(std::bind(handleSignal, std::weak_ptr<JsPlugin>(duk_get_plugin(ctx)), hash));
+    timer->onSignal.connect(std::bind(handleSignal, std::weak_ptr<JsPlugin>(dukx_get_plugin(ctx)), hash));
 
     duk_push_this(ctx);
     duk_push_pointer(ctx, new std::shared_ptr<Timer>(std::move(timer)));
