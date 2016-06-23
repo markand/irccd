@@ -127,7 +127,7 @@ duk_ret_t get(duk_context *ctx, const char *name)
  */
 duk_ret_t setConfig(duk_context *ctx)
 {
-    return set(ctx, PluginConfigProperty);
+    return set(ctx, JsPlugin::ConfigProperty);
 }
 
 /*
@@ -138,7 +138,7 @@ duk_ret_t setConfig(duk_context *ctx)
  */
 duk_ret_t getConfig(duk_context *ctx)
 {
-    return get(ctx, PluginConfigProperty);
+    return get(ctx, JsPlugin::ConfigProperty);
 }
 
 /*
@@ -149,7 +149,7 @@ duk_ret_t getConfig(duk_context *ctx)
  */
 duk_ret_t setFormat(duk_context *ctx)
 {
-    return set(ctx, PluginFormatProperty);
+    return set(ctx, JsPlugin::FormatProperty);
 }
 
 /*
@@ -160,7 +160,7 @@ duk_ret_t setFormat(duk_context *ctx)
  */
 duk_ret_t getFormat(duk_context *ctx)
 {
-    return get(ctx, PluginFormatProperty);
+    return get(ctx, JsPlugin::FormatProperty);
 }
 
 /*

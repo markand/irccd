@@ -38,6 +38,17 @@ class Module;
  * \ingroup plugins
  */
 class JsPlugin : public Plugin {
+public:
+    /**
+     * Global property where to read/write plugin configuration (object).
+     */
+    static const char ConfigProperty[];
+
+    /**
+     * Global property where to read/write plugin formats (object).
+     */
+    static const char FormatProperty[];
+
 private:
     // JavaScript context
     UniqueContext m_context;
@@ -72,13 +83,37 @@ public:
         return m_context;
     }
 
-    IRCCD_EXPORT PluginConfig config() override;
+    /**
+     * \copydoc Plugin::config
+     */
+    PluginConfig config() override
+    {
+        return getTable(ConfigProperty);
+    }
 
-    IRCCD_EXPORT void setConfig(PluginConfig) override;
+    /**
+     * \copydoc Plugin::setConfig
+     */
+    void setConfig(PluginConfig config) override
+    {
+        putTable(ConfigProperty, config);
+    }
 
-    IRCCD_EXPORT PluginFormats formats() override;
+    /**
+     * \copydoc Plugin::formats
+     */
+    PluginFormats formats() override
+    {
+        return getTable(FormatProperty);
+    }
 
-    IRCCD_EXPORT void setFormats(PluginFormats formats) override;
+    /**
+     * \copydoc Plugin::setConfig
+     */
+    void setFormats(PluginFormats formats) override
+    {
+        putTable(FormatProperty, formats);
+    }
 
     /**
      * \copydoc Plugin::onCommand
