@@ -154,7 +154,7 @@ void JsPlugin::onChannelMode(Irccd &, const ChannelModeEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     dukx_push_std_string(m_context, event.origin);
     dukx_push_std_string(m_context, event.channel);
     dukx_push_std_string(m_context, event.mode);
@@ -166,7 +166,7 @@ void JsPlugin::onChannelNotice(Irccd &, const ChannelNoticeEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     dukx_push_std_string(m_context, event.origin);
     dukx_push_std_string(m_context, event.channel);
     dukx_push_std_string(m_context, event.message);
@@ -177,7 +177,7 @@ void JsPlugin::onCommand(Irccd &, const MessageEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     dukx_push_std_string(m_context, event.origin);
     dukx_push_std_string(m_context, event.channel);
     dukx_push_std_string(m_context, event.message);
@@ -188,7 +188,7 @@ void JsPlugin::onConnect(Irccd &, const ConnectEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     call("onConnect", 1);
 }
 
@@ -196,7 +196,7 @@ void JsPlugin::onInvite(Irccd &, const InviteEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     dukx_push_std_string(m_context, event.origin);
     dukx_push_std_string(m_context, event.channel);
     call("onInvite", 3);
@@ -206,7 +206,7 @@ void JsPlugin::onJoin(Irccd &, const JoinEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     dukx_push_std_string(m_context, event.origin);
     dukx_push_std_string(m_context, event.channel);
     call("onJoin", 3);
@@ -216,7 +216,7 @@ void JsPlugin::onKick(Irccd &, const KickEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     dukx_push_std_string(m_context, event.origin);
     dukx_push_std_string(m_context, event.channel);
     dukx_push_std_string(m_context, event.target);
@@ -295,7 +295,7 @@ void JsPlugin::onMessage(Irccd &, const MessageEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     dukx_push_std_string(m_context, event.origin);
     dukx_push_std_string(m_context, event.channel);
     dukx_push_std_string(m_context, event.message);
@@ -306,7 +306,7 @@ void JsPlugin::onMe(Irccd &, const MeEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     dukx_push_std_string(m_context, event.origin);
     dukx_push_std_string(m_context, event.channel);
     dukx_push_std_string(m_context, event.message);
@@ -317,7 +317,7 @@ void JsPlugin::onMode(Irccd &, const ModeEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     dukx_push_std_string(m_context, event.origin);
     dukx_push_std_string(m_context, event.mode);
     call("onMode", 3);
@@ -327,7 +327,7 @@ void JsPlugin::onNames(Irccd &, const NamesEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     dukx_push_std_string(m_context, event.channel);
     dukx_push_array(m_context, event.names, dukx_push_std_string);
     call("onNames", 3);
@@ -337,7 +337,7 @@ void JsPlugin::onNick(Irccd &, const NickEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     dukx_push_std_string(m_context, event.origin);
     dukx_push_std_string(m_context, event.nickname);
     call("onNick", 3);
@@ -347,7 +347,7 @@ void JsPlugin::onNotice(Irccd &, const NoticeEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     dukx_push_std_string(m_context, event.origin);
     dukx_push_std_string(m_context, event.message);
     call("onNotice", 3);
@@ -357,7 +357,7 @@ void JsPlugin::onPart(Irccd &, const PartEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     dukx_push_std_string(m_context, event.origin);
     dukx_push_std_string(m_context, event.channel);
     dukx_push_std_string(m_context, event.reason);
@@ -368,7 +368,7 @@ void JsPlugin::onQuery(Irccd &, const QueryEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     dukx_push_std_string(m_context, event.origin);
     dukx_push_std_string(m_context, event.message);
     call("onQuery", 3);
@@ -378,7 +378,7 @@ void JsPlugin::onQueryCommand(Irccd &, const QueryEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     dukx_push_std_string(m_context, event.origin);
     dukx_push_std_string(m_context, event.message);
     call("onQueryCommand", 3);
@@ -395,7 +395,7 @@ void JsPlugin::onTopic(Irccd &, const TopicEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     dukx_push_std_string(m_context, event.origin);
     dukx_push_std_string(m_context, event.channel);
     dukx_push_std_string(m_context, event.topic);
@@ -416,7 +416,7 @@ void JsPlugin::onWhois(Irccd &, const WhoisEvent &event)
 {
     StackAssert sa(m_context);
 
-    duk_push_server(m_context, std::move(event.server));
+    dukx_push_server(m_context, std::move(event.server));
     duk_push_object(m_context);
     dukx_push_std_string(m_context, event.whois.nick);
     duk_put_prop_string(m_context, -2, "nickname");

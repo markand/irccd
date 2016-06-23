@@ -54,7 +54,7 @@ public:
  * \param ctx the context
  * \param server the server
  */
-IRCCD_EXPORT void duk_push_server(duk_context *ctx, std::shared_ptr<Server> server);
+IRCCD_EXPORT void dukx_push_server(duk_context *ctx, std::shared_ptr<Server> server);
 
 /**
  * Require a server. Raise a JavaScript error if not a Server.
@@ -63,7 +63,7 @@ IRCCD_EXPORT void duk_push_server(duk_context *ctx, std::shared_ptr<Server> serv
  * \param index the index
  * \return the server
  */
-IRCCD_EXPORT std::shared_ptr<Server> duk_require_server(duk_context *ctx, duk_idx_t index);
+IRCCD_EXPORT std::shared_ptr<Server> dukx_require_server(duk_context *ctx, duk_idx_t index);
 
 } // !irccd
 
