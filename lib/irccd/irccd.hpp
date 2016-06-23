@@ -24,7 +24,6 @@
  * \brief Base class for irccd front end.
  */
 
-#include <algorithm>
 #include <atomic>
 #include <functional>
 #include <memory>
