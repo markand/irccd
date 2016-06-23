@@ -27,6 +27,7 @@
 #include "fs.hpp"
 #include "irccd.hpp"
 #include "logger.hpp"
+#include "mod-plugin.hpp"
 #include "mod-server.hpp"
 #include "plugin-js.hpp"
 #include "service-module.hpp"
@@ -34,13 +35,6 @@
 #include "timer.hpp"
 
 namespace irccd {
-
-namespace {
-
-const char *ConfigGlobal("\xff""\xff""irccd-plugin-config");
-const char *FormatGlobal("\xff""\xff""irccd-plugin-format");
-
-} // !namespace
 
 std::unordered_map<std::string, std::string> JsPlugin::getTable(const char *name) const
 {
@@ -148,30 +142,29 @@ JsPlugin::JsPlugin(std::string name, std::string path)
      * In mod-plugin.cpp.
      */
     duk_push_object(m_context);
-    duk_put_global_string(m_context, ConfigGlobal);
+    duk_put_global_string(m_context, PluginConfigProperty);
     duk_push_object(m_context);
-    duk_put_global_string(m_context, FormatGlobal);
+    duk_put_global_string(m_context, PluginFormatProperty);
 }
 
 PluginConfig JsPlugin::config()
 {
-    return getTable(ConfigGlobal);
+    return getTable(PluginConfigProperty);
 }
 
 void JsPlugin::setConfig(PluginConfig config)
 {
-    printf("%s\n", config["collaborative"].c_str());
-    putTable(ConfigGlobal, config);
+    putTable(PluginConfigProperty, config);
 }
 
 PluginFormats JsPlugin::formats()
 {
-    return getTable(FormatGlobal);
+    return getTable(PluginFormatProperty);
 }
 
 void JsPlugin::setFormats(PluginFormats formats)
 {
-    putTable(FormatGlobal, formats);
+    putTable(PluginFormatProperty, formats);
 }
 
 void JsPlugin::onChannelMode(Irccd &, const ChannelModeEvent &event)

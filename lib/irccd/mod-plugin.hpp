@@ -30,6 +30,16 @@
 namespace irccd {
 
 /**
+ * Global property where to read/write plugin configuration.
+ */
+const char PluginConfigProperty[] = "\xff""\xff""irccd-plugin-config";
+
+/**
+ * Global property where to read/write plugin formats.
+ */
+const char PluginFormatProperty[] = "\xff""\xff""irccd-plugin-format";
+
+/**
  * \brief Irccd.Plugin JavaScript API.
  * \ingroup modules
  */

@@ -26,9 +26,12 @@ namespace irccd {
 
 namespace {
 
-const char *PluginGlobal("\xff""\xff""irccd-plugin-ptr");
+const char PluginGlobal[] = "\xff""\xff""irccd-plugin-ptr";
 
 /*
+ * wrap
+ * ------------------------------------------------------------------
+ *
  * Wrap function for these functions because they all takes the same arguments.
  *
  * - load,
@@ -49,6 +52,115 @@ duk_idx_t wrap(duk_context *ctx, int nret, Func &&func)
     }
 
     return nret;
+}
+
+/*
+ * set
+ * ------------------------------------------------------------------
+ *
+ * This setter is used to replace the Irccd.Plugin.(config|format) property when the plugin assign a new one.
+ *
+ * Because the plugin configuration always has higher priority, when a new object is assigned to 'config' or to the 'format' property,
+ * the plugin configuration is merged to the assigned one, adding or replacing any values.
+ *
+ * Example:
+ *
+ * Plugin 'xyz' does:
+ *
+ * Irccd.Plugin.config = {
+ *      mode: "simple",
+ *      level: "123"
+ * };
+ *
+ * The user configuration is:
+ *
+ * [plugin.xyz]
+ * mode = "hard"
+ * path = "/var"
+ *
+ * The final user table looks like this:
+ *
+ * Irccd.Plugin.config = {
+ *      mode: "hard",
+ *      level: "123",
+ *      path: "/var"
+ */
+duk_ret_t set(duk_context *ctx, const char *name)
+{
+    if (!duk_is_object(ctx, 0))
+        duk_error(ctx, DUK_ERR_TYPE_ERROR, "'%s' property must be object", name);
+
+    // Merge old table with new one.
+    duk_get_global_string(ctx, name);
+    duk_enum(ctx, -1, 0);
+
+    while (duk_next(ctx, -1, true))
+        duk_put_prop(ctx, 0);
+
+    // Pop enum and old table.
+    duk_pop_2(ctx);
+
+    // Replace the old table with the new assigned one.
+    duk_put_global_string(ctx, name);
+
+    return 0;
+}
+
+/*
+ * get
+ * ------------------------------------------------------------------
+ *
+ * Get the Irccd.Plugin.(config|format) property.
+ */
+duk_ret_t get(duk_context *ctx, const char *name)
+{
+    duk_get_global_string(ctx, name);
+
+    return 1;
+}
+
+/*
+ * setConfig
+ * ------------------------------------------------------------------
+ *
+ * Wrap setter for Irccd.Plugin.config property.
+ */
+duk_ret_t setConfig(duk_context *ctx)
+{
+    return set(ctx, PluginConfigProperty);
+}
+
+/*
+ * getConfig
+ * ------------------------------------------------------------------
+ *
+ * Wrap getter for Irccd.Plugin.config property.
+ */
+duk_ret_t getConfig(duk_context *ctx)
+{
+    return get(ctx, PluginConfigProperty);
+}
+
+/*
+ * setFormat
+ * ------------------------------------------------------------------
+ *
+ * Wrap setter for Irccd.Plugin.format property.
+ */
+duk_ret_t setFormat(duk_context *ctx)
+{
+    return set(ctx, PluginFormatProperty);
+}
+
+/*
+ * getFormat
+ * ------------------------------------------------------------------
+ *
+ * Wrap getter for Irccd.Plugin.format property.
+ */
+duk_ret_t getFormat(duk_context *ctx)
+{
+    return get(ctx, PluginFormatProperty);
 }
 
 /*
@@ -197,10 +309,19 @@ void PluginModule::load(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
     duk_get_global_string(plugin->context(), "Irccd");
     duk_push_object(plugin->context());
     duk_put_function_list(plugin->context(), -1, functions);
-    duk_get_global_string(plugin->context(), "\xff""\xff""irccd-plugin-config");
-    duk_put_prop_string(plugin->context(), -2, "config");
-    duk_get_global_string(plugin->context(), "\xff""\xff""irccd-plugin-format");
-    duk_put_prop_string(plugin->context(), -2, "format");
+
+    // 'config' property.
+    duk_push_string(plugin->context(), "config");
+    duk_push_c_function(plugin->context(), getConfig, 0);
+    duk_push_c_function(plugin->context(), setConfig, 1);
+    duk_def_prop(plugin->context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
+
+    // 'format' property.
+    duk_push_string(plugin->context(), "format");
+    duk_push_c_function(plugin->context(), getFormat, 0);
+    duk_push_c_function(plugin->context(), setFormat, 1);
+    duk_def_prop(plugin->context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
+
     duk_put_prop_string(plugin->context(), -2, "Plugin");
     duk_pop(plugin->context());
 }
