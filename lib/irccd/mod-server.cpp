@@ -672,7 +672,7 @@ std::shared_ptr<Server> dukx_require_server(duk_context *ctx, duk_idx_t index)
     duk_get_prop_string(ctx, index, Signature);
     auto file = *static_cast<std::shared_ptr<Server> *>(duk_to_pointer(ctx, -1));
     duk_pop(ctx);
-    
+
     return file;
 }
 
