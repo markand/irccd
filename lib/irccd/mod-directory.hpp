@@ -28,8 +28,6 @@
 
 namespace irccd {
 
-class Irccd;
-
 /**
  * \brief Irccd.Directory JavaScript API.
  * \ingroup modules

@@ -33,8 +33,6 @@
 
 namespace irccd {
 
-class Irccd;
-
 /**
  * \brief Custom JavaScript exception for system error.
  */
