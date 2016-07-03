@@ -48,37 +48,37 @@ std::vector<Command::Arg> ServerKick::args() const
 std::vector<Command::Property> ServerKick::properties() const
 {
     return {
-        { "server",     { json::Type::String }},
-        { "target",     { json::Type::String }},
-        { "channel",    { json::Type::String }}
+        { "server",     { nlohmann::json::value_t::string }},
+        { "target",     { nlohmann::json::value_t::string }},
+        { "channel",    { nlohmann::json::value_t::string }}
     };
 }
 
-json::Value ServerKick::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerKick::request(Irccdctl &, const CommandRequest &args) const
 {
-    auto req = json::object({
+    auto req = nlohmann::json::object({
         { "server",     args.arg(0) },
         { "target",     args.arg(1) },
         { "channel",    args.arg(2) }
     });
 
     if (args.length() == 4)
-        req.insert("reason", args.arg(3));
+        req.push_back({"reason", args.arg(3)});
 
     return req;
 }
 
-json::Value ServerKick::exec(Irccd &irccd, const json::Value &request) const
+nlohmann::json ServerKick::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 
-    irccd.serverService().require(request.at("server").toString())->kick(
-        request.at("target").toString(),
-        request.at("channel").toString(),
-        request.valueOr("reason", json::Type::String, "").toString()
+    irccd.serverService().require(request["server"])->kick(
+        request["target"],
+        request["channel"],
+        request.count("reason") > 0 ? request["reason"] : ""
     );
 
-    return json::object();
+    return nlohmann::json::object();
 }
 
 } // !command

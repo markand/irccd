@@ -45,21 +45,21 @@ std::vector<Command::Arg> PluginInfo::args() const
 
 std::vector<Command::Property> PluginInfo::properties() const
 {
-    return {{ "plugin", { json::Type::String }}};
+    return {{ "plugin", { nlohmann::json::value_t::string }}};
 }
 
-json::Value PluginInfo::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json PluginInfo::request(Irccdctl &, const CommandRequest &args) const
 {
-    return json::object({{ "plugin", args.arg(0) }});
+    return nlohmann::json::object({{ "plugin", args.arg(0) }});
 }
 
-json::Value PluginInfo::exec(Irccd &irccd, const json::Value &request) const
+nlohmann::json PluginInfo::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 
-    auto plugin = irccd.pluginService().require(request.at("plugin").toString());
+    auto plugin = irccd.pluginService().require(request.at("plugin").get<std::string>());
 
-    return json::object({
+    return nlohmann::json::object({
         { "author",     plugin->author()    },
         { "license",    plugin->license()   },
         { "summary",    plugin->summary()   },
@@ -67,17 +67,29 @@ json::Value PluginInfo::exec(Irccd &irccd, const json::Value &request) const
     });
 }
 
-void PluginInfo::result(Irccdctl &irccdctl, const json::Value &result) const
+void PluginInfo::result(Irccdctl &irccdctl, const nlohmann::json &result) const
 {
     Command::result(irccdctl, result);
 
-    if (result.valueOr("status", false).toBool()) {
-        std::cout << std::boolalpha;
-        std::cout << "Author         : " << result.valueOr("author", "").toString(true) << std::endl;
-        std::cout << "License        : " << result.valueOr("license", "").toString(true) << std::endl;
-        std::cout << "Summary        : " << result.valueOr("summary", "").toString(true) << std::endl;
-        std::cout << "Version        : " << result.valueOr("version", "").toString(true) << std::endl;
-    }
+    auto it = result.find("status");
+
+    if (!it->is_boolean() || !*it)
+        return;
+
+    auto get = [&] (auto key) -> std::string {
+        auto v = result.find(key);
+
+        if (v == result.end() || !v->is_primitive())
+            return "";
+
+        return v->dump();
+    };
+
+    std::cout << std::boolalpha;
+    std::cout << "Author         : " << get("author") << std::endl;
+    std::cout << "License        : " << get("license") << std::endl;
+    std::cout << "Summary        : " << get("summary") << std::endl;
+    std::cout << "Version        : " << get("version") << std::endl;
 }
 
 } // !command

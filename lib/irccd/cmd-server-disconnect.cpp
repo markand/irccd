@@ -40,14 +40,14 @@ std::vector<Command::Arg> ServerDisconnect::args() const
     return {{ "server", false }};
 }
 
-json::Value ServerDisconnect::exec(Irccd &irccd, const json::Value &request) const
+nlohmann::json ServerDisconnect::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     auto it = request.find("server");
 
     if (it == request.end())
         irccd.serverService().clear();
     else
-        irccd.serverService().remove(it->toString());
+        irccd.serverService().remove(*it);
 
     return Command::exec(irccd, request);
 }

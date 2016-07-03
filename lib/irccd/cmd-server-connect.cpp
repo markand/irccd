@@ -28,87 +28,94 @@
 
 using namespace fmt::literals;
 
+using json = nlohmann::json;
+
 namespace irccd {
 
 namespace command {
 
 namespace {
 
-std::string readInfoName(const json::Value &object)
+std::string readInfoName(const json &object)
 {
-    auto it = object.find("name");
+    std::string name = object["name"];
+
+    if (!util::isIdentifierValid(name))
+        throw PropertyError("name", "invalid identifier");
+
+    return name;
+}
+
+std::string readInfoHost(const json &object)
+{
+    std::string host = object["host"];
+
+    if (host.empty())
+        throw PropertyError("host", "empty hostname");
+
+    return host;
+}
+
+std::uint16_t readInfoPort(const json &object)
+{
+    json::const_iterator it = object.find("port");
 
     if (it == object.end())
-        throw std::invalid_argument("missing 'name' property");
-    if (!it->isString() || !util::isIdentifierValid(it->toString()))
-        throw std::invalid_argument("invalid server name");
+        return 6667;
 
-    return it->toString();
+    if (!it->is_number())
+        throw InvalidPropertyError("port", json::value_t::number_unsigned, it->type());
+    if (!util::isBound(it->get<int>(), 0, UINT16_MAX))
+        throw PropertyRangeError("port", 0, UINT16_MAX, it->get<int>());
+
+    return static_cast<std::uint16_t>(it->get<int>());
 }
 
-std::string readInfoHost(const json::Value &object)
-{
-    auto it = object.find("host");
-
-    if (it == object.end())
-        throw std::invalid_argument("missing 'host' property");
-    if (!it->isString())
-        throw std::invalid_argument("invalid host");
-
-    return it->toString();
-}
-
-std::uint16_t readInfoPort(const json::Value &object)
-{
-    auto it = object.find("port");
-    uint16_t port = 6667;
-
-    if (it != object.end())
-        if (it->isInt() && it->toInt() >= 0 && it->toInt() <= std::numeric_limits<std::uint16_t>::max())
-            port = static_cast<std::uint16_t>(it->toInt());
-
-    return port;
-}
-
-ServerInfo readInfo(const json::Value &object)
+ServerInfo readInfo(const json &object)
 {
     ServerInfo info;
 
     info.host = readInfoHost(object);
     info.port = readInfoPort(object);
 
-    if (object.valueOr("ssl", json::Type::Boolean, false).toBool())
-#if defined(WITH_SSL)
-        info.flags |= ServerInfo::Ssl;
-#else
-        throw std::invalid_argument("ssl is disabled");
-#endif
+    json::const_iterator it;
 
-    if (object.valueOr("sslVerify", json::Type::Boolean, false).toBool())
+    if ((it = object.find("ssl")) != object.end() && it->is_boolean() && *it)
+        info.flags |= ServerInfo::Ssl;
+    if ((it = object.find("sslVerify")) != object.end() && it->is_boolean() && *it)
         info.flags |= ServerInfo::SslVerify;
 
     return info;
 }
 
-ServerIdentity readIdentity(const json::Value &object)
+ServerIdentity readIdentity(const json &object)
 {
     ServerIdentity identity;
+    json::const_iterator it;
 
-    identity.nickname = object.valueOr("nickname", json::Type::String, identity.nickname).toString();
-    identity.realname = object.valueOr("realname", json::Type::String, identity.realname).toString();
-    identity.username = object.valueOr("username", json::Type::String, identity.username).toString();
-    identity.ctcpversion = object.valueOr("ctcpVersion", json::Type::String, identity.ctcpversion).toString();
+    if ((it = object.find("nickname")) != object.end() && it->is_string())
+        identity.nickname = *it;
+    if ((it = object.find("realname")) != object.end() && it->is_string())
+        identity.realname = *it;
+    if ((it = object.find("username")) != object.end() && it->is_string())
+        identity.username = *it;
+    if ((it = object.find("ctcpVersion")) != object.end() && it->is_string())
+        identity.ctcpversion = *it;
 
     return identity;
 }
 
-ServerSettings readSettings(const json::Value &object)
+ServerSettings readSettings(const json &object)
 {
     ServerSettings settings;
+    json::const_iterator it;
 
-    settings.command = object.valueOr("commandChar", json::Type::String, settings.command).toString();
-    settings.reconnectTries = object.valueOr("reconnectTries", json::Type::Int, settings.reconnectTries).toInt();
-    settings.reconnectDelay = object.valueOr("reconnectTimeout", json::Type::Int, settings.reconnectDelay).toInt();
+    if ((it = object.find("commandChar")) != object.end() && it->is_string())
+        settings.command = *it;
+    if ((it = object.find("reconnectTries")) != object.end() && it->is_number_integer())
+        settings.reconnectTries = *it;
+    if ((it = object.find("reconnectTimeout")) != object.end() && it->is_number_integer())
+        settings.reconnectDelay = *it;
 
     return settings;
 }
@@ -148,11 +155,13 @@ std::vector<Command::Arg> ServerConnect::args() const
 
 std::vector<Command::Property> ServerConnect::properties() const
 {
-    // TODO
-    return {};
+    return {
+        { "name",   { json::value_t::string }},
+        { "host",   { json::value_t::string }}
+    };
 }
 
-json::Value ServerConnect::exec(Irccd &irccd, const json::Value &request) const
+json ServerConnect::exec(Irccd &irccd, const json &request) const
 {
     auto server = std::make_shared<Server>(readInfoName(request), readInfo(request), readIdentity(request), readSettings(request));
 

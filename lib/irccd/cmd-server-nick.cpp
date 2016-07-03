@@ -46,26 +46,26 @@ std::vector<Command::Arg> ServerNick::args() const
 std::vector<Command::Property> ServerNick::properties() const
 {
     return {
-        { "server",     { json::Type::String }},
-        { "nickname",   { json::Type::String }}
+        { "server",     { nlohmann::json::value_t::string }},
+        { "nickname",   { nlohmann::json::value_t::string }}
     };
 }
 
-json::Value ServerNick::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerNick::request(Irccdctl &, const CommandRequest &args) const
 {
-    return json::object({
+    return nlohmann::json::object({
         { "server",     args.arg(0) },
         { "nickname",   args.arg(1) }
     });
 }
 
-json::Value ServerNick::exec(Irccd &irccd, const json::Value &object) const
+nlohmann::json ServerNick::exec(Irccd &irccd, const nlohmann::json &object) const
 {
     Command::exec(irccd, object);
 
-    irccd.serverService().require(object.at("server").toString())->nick(object.at("nickname").toString());
+    irccd.serverService().require(object["server"])->nick(object["nickname"]);
 
-    return json::object();
+    return nlohmann::json::object();
 }
 
 } // !command

@@ -70,7 +70,7 @@ include(cmake/IrccdSystem.cmake)
 
 add_subdirectory(extern/cppformat)
 add_subdirectory(extern/libircclient)
-add_subdirectory(extern/jansson)
+add_subdirectory(extern/json)
 add_subdirectory(doc)
 add_subdirectory(lib)
 add_subdirectory(irccd)

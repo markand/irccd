@@ -47,34 +47,34 @@ std::vector<Command::Arg> ServerPart::args() const
 std::vector<Command::Property> ServerPart::properties() const
 {
     return {
-        { "server",     { json::Type::String }},
-        { "channel",    { json::Type::String }}
+        { "server",     { nlohmann::json::value_t::string }},
+        { "channel",    { nlohmann::json::value_t::string }}
     };
 }
 
-json::Value ServerPart::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerPart::request(Irccdctl &, const CommandRequest &args) const
 {
-    auto req = json::object({
+    auto req = nlohmann::json::object({
         { "server",     args.arg(0) },
         { "channel",    args.arg(1) }
     });
 
     if (args.length() == 3)
-        req.insert("reason", args.arg(2));
+        req.push_back({"reason", args.arg(2)});
 
     return req;
 }
 
-json::Value ServerPart::exec(Irccd &irccd, const json::Value &request) const
+nlohmann::json ServerPart::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 
-    irccd.serverService().require(request.at("server").toString())->part(
-        request.at("channel").toString(),
-        request.valueOr("reason", "").toString()
+    irccd.serverService().require(request["server"])->part(
+        request["channel"],
+        request.count("reason") > 0 ? request["reason"] : ""
     );
 
-    return json::object();
+    return nlohmann::json::object();
 }
 
 } // !command

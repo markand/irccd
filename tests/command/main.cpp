@@ -39,7 +39,7 @@ public:
         return {
             { "b", { json::Type::Boolean }},
             { "i", { json::Type::Int }},
-            { "m", { json::Type::Boolean, json::Type::Int, json::Type::String }}
+            { "m", { json::Type::Boolean, json::Type::Int, nlohmann::json::value_t::string }}
         };
     }
 };
@@ -49,19 +49,19 @@ TEST(Properties, valid)
     Irccd *irccd = nullptr;
     MyCommand cmd;
 
-    ASSERT_NO_THROW(cmd.exec(*irccd, json::object({
+    ASSERT_NO_THROW(cmd.exec(*irccd, nlohmann::json::object({
         { "b", true     },
         { "i", 123      },
         { "m", "abc"    }
     })));
 
-    ASSERT_NO_THROW(cmd.exec(*irccd, json::object({
+    ASSERT_NO_THROW(cmd.exec(*irccd, nlohmann::json::object({
         { "b", true     },
         { "i", 123      },
         { "m", 456      }
     })));
 
-    ASSERT_NO_THROW(cmd.exec(*irccd, json::object({
+    ASSERT_NO_THROW(cmd.exec(*irccd, nlohmann::json::object({
         { "b", true     },
         { "i", 123      },
         { "m", "456"    }
@@ -73,7 +73,7 @@ TEST(Properties, missingB)
     Irccd *irccd = nullptr;
     MyCommand cmd;
 
-    ASSERT_THROW(cmd.exec(*irccd, json::object({
+    ASSERT_THROW(cmd.exec(*irccd, nlohmann::json::object({
         { "i", 123      },
         { "m", "abc"    }
     })), std::invalid_argument);
@@ -84,7 +84,7 @@ TEST(Properties, missingI)
     Irccd *irccd = nullptr;
     MyCommand cmd;
 
-    ASSERT_THROW(cmd.exec(*irccd, json::object({
+    ASSERT_THROW(cmd.exec(*irccd, nlohmann::json::object({
         { "b", true     },
         { "m", "abc"    }
     })), std::invalid_argument);
@@ -95,7 +95,7 @@ TEST(Properties, missingM)
     Irccd *irccd = nullptr;
     MyCommand cmd;
 
-    ASSERT_THROW(cmd.exec(*irccd, json::object({
+    ASSERT_THROW(cmd.exec(*irccd, nlohmann::json::object({
         { "b", true     },
         { "i", 123      },
     })), std::invalid_argument);
@@ -106,7 +106,7 @@ TEST(Properties, invalidB)
     Irccd *irccd = nullptr;
     MyCommand cmd;
 
-    ASSERT_THROW(cmd.exec(*irccd, json::object({
+    ASSERT_THROW(cmd.exec(*irccd, nlohmann::json::object({
         { "b", "fail"   },
         { "i", 123      },
         { "m", "abc"    }
@@ -118,7 +118,7 @@ TEST(Properties, invalidM)
     Irccd *irccd = nullptr;
     MyCommand cmd;
 
-    ASSERT_THROW(cmd.exec(*irccd, json::object({
+    ASSERT_THROW(cmd.exec(*irccd, nlohmann::json::object({
         { "b", "fail"   },
         { "i", 123      },
         { "m", nullptr  }

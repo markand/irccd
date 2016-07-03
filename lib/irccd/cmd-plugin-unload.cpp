@@ -42,16 +42,16 @@ std::vector<Command::Arg> PluginUnload::args() const
 
 std::vector<Command::Property> PluginUnload::properties() const
 {
-    return {{ "plugin", { json::Type::String }}};
+    return {{ "plugin", { nlohmann::json::value_t::string }}};
 }
 
-json::Value PluginUnload::exec(Irccd &irccd, const json::Value &request) const
+nlohmann::json PluginUnload::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 
-    irccd.pluginService().unload(request.at("plugin").toString());
+    irccd.pluginService().unload(request["plugin"].get<std::string>());
 
-    return json::object();
+    return nlohmann::json::object();
 }
 
 } // !command

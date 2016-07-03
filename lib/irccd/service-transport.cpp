@@ -27,9 +27,9 @@
 
 namespace irccd {
 
-void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const json::Value &object)
+void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const nlohmann::json &object)
 {
-    assert(object.isObject());
+    assert(object.is_object());
 
     m_irccd.post([=] (Irccd &) {
         // 0. Be sure the object still exists.
@@ -40,14 +40,14 @@ void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const j
 
         // 1. Check if the Json object is valid.
         auto name = object.find("command");
-        if (name == object.end() || name->typeOf() != json::Type::String) {
+        if (name == object.end() || !name->is_string()) {
             // TODO: send error.
             log::warning("invalid command object");
             return;
         }
 
         // 2. Search for a command
-        auto cmd = m_irccd.commandService().find(name->toString());
+        auto cmd = m_irccd.commandService().find(*name);
 
         if (!cmd) {
             // TODO: send error again.
@@ -56,26 +56,26 @@ void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const j
         }
 
         // 3. Try to execute it.
-        json::Value response = json::object({});
+        auto response = nlohmann::json::object({});
 
         try {
             response = cmd->exec(m_irccd, object);
 
             // Adjust if command has returned something else.
-            if (!response.isObject())
-                response = json::object({});
+            if (!response.is_object())
+                response = nlohmann::json::object({});
 
-            response.insert("status", true);
+            response.push_back({"status", true});
         } catch (const std::exception &ex) {
-            response.insert("status", false);
-            response.insert("error", ex.what());
+            response.push_back({"status", false});
+            response.push_back({"error", ex.what()});
         }
 
         // 4. Store the command name result.
-        response.insert("response", name->toString());
+        response.push_back({"response", *name});
 
         // 5. Send the result.
-        tc->send(response.toJson(0));
+        tc->send(response.dump());
     });
 }
 
@@ -132,7 +132,7 @@ void TransportService::sync(fd_set &in, fd_set &out)
         std::weak_ptr<TransportClient> ptr(client);
 
         // Send some information.
-        json::Value object = json::object({
+        nlohmann::json object = nlohmann::json::object({
             { "program",    "irccd"                 },
             { "major",      IRCCD_VERSION_MAJOR     },
             { "minor",      IRCCD_VERSION_MINOR     },
@@ -140,13 +140,13 @@ void TransportService::sync(fd_set &in, fd_set &out)
         });
 
 #if defined(WITH_JS)
-        object.insert("javascript", true);
+        object.push_back({"javascript", true});
 #endif
 #if defined(WITH_SSL)
-        object.insert("ssl", true);
+        object.push_back({"ssl", true});
 #endif
 
-        client->send(object.toJson(0));
+        client->send(object.dump());
 
         // Connect signals.
         client->onCommand.connect(std::bind(&TransportService::handleCommand, this, ptr, _1));

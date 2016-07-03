@@ -30,143 +30,153 @@ namespace command {
 
 namespace {
 
-void onChannelMode(const json::Value &v)
+std::string dump(const nlohmann::json &object, const std::string &property)
+{
+    auto it = object.find(property);
+
+    if (it == object.end())
+        return "";
+
+    return it->dump();
+}
+
+void onChannelMode(const nlohmann::json &v)
 {
     std::cout << "event:       onChannelMode\n";
-    std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
-    std::cout << "origin:      " << v.valueOr("origin", "").toString() << "\n";
-    std::cout << "mode:        " << v.valueOr("mode", "").toString() << "\n";
-    std::cout << "argument:    " << v.valueOr("argument", "").toString() << "\n";
+    std::cout << "server:      " << dump(v, "server") << "\n";
+    std::cout << "origin:      " << dump(v, "origin") << "\n";
+    std::cout << "mode:        " << dump(v, "mode") << "\n";
+    std::cout << "argument:    " << dump(v, "argument") << "\n";
 }
 
-void onChannelNotice(const json::Value &v)
+void onChannelNotice(const nlohmann::json &v)
 {
     std::cout << "event:       onChannelNotice\n";
-    std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
-    std::cout << "origin:      " << v.valueOr("origin", "").toString() << "\n";
-    std::cout << "channel:     " << v.valueOr("channel", "").toString() << "\n";
-    std::cout << "message:     " << v.valueOr("message", "").toString() << "\n";
+    std::cout << "server:      " << dump(v, "server") << "\n";
+    std::cout << "origin:      " << dump(v, "origin") << "\n";
+    std::cout << "channel:     " << dump(v, "channel") << "\n";
+    std::cout << "message:     " << dump(v, "message") << "\n";
 }
 
-void onConnect(const json::Value &v)
+void onConnect(const nlohmann::json &v)
 {
     std::cout << "event:       onConnect\n";
-    std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
+    std::cout << "server:      " << dump(v, "server") << "\n";
 }
 
-void onInvite(const json::Value &v)
+void onInvite(const nlohmann::json &v)
 {
     std::cout << "event:       onInvite\n";
-    std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
-    std::cout << "origin:      " << v.valueOr("origin", "").toString() << "\n";
-    std::cout << "channel:     " << v.valueOr("channel", "").toString() << "\n";
+    std::cout << "server:      " << dump(v, "server") << "\n";
+    std::cout << "origin:      " << dump(v, "origin") << "\n";
+    std::cout << "channel:     " << dump(v, "channel") << "\n";
 }
 
-void onJoin(const json::Value &v)
+void onJoin(const nlohmann::json &v)
 {
     std::cout << "event:       onJoin\n";
-    std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
-    std::cout << "origin:      " << v.valueOr("origin", "").toString() << "\n";
-    std::cout << "channel:     " << v.valueOr("channel", "").toString() << "\n";
+    std::cout << "server:      " << dump(v, "server") << "\n";
+    std::cout << "origin:      " << dump(v, "origin") << "\n";
+    std::cout << "channel:     " << dump(v, "channel") << "\n";
 }
 
-void onKick(const json::Value &v)
+void onKick(const nlohmann::json &v)
 {
     std::cout << "event:       onKick\n";
-    std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
-    std::cout << "origin:      " << v.valueOr("origin", "").toString() << "\n";
-    std::cout << "channel:     " << v.valueOr("channel", "").toString() << "\n";
-    std::cout << "target:      " << v.valueOr("target", "").toString() << "\n";
-    std::cout << "reason:      " << v.valueOr("reason", "").toString() << "\n";
+    std::cout << "server:      " << dump(v, "server") << "\n";
+    std::cout << "origin:      " << dump(v, "origin") << "\n";
+    std::cout << "channel:     " << dump(v, "channel") << "\n";
+    std::cout << "target:      " << dump(v, "target") << "\n";
+    std::cout << "reason:      " << dump(v, "reason") << "\n";
 }
 
-void onMessage(const json::Value &v)
+void onMessage(const nlohmann::json &v)
 {
     std::cout << "event:       onMessage\n";
-    std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
-    std::cout << "origin:      " << v.valueOr("origin", "").toString() << "\n";
-    std::cout << "channel:     " << v.valueOr("channel", "").toString() << "\n";
-    std::cout << "message:     " << v.valueOr("message", "").toString() << "\n";
+    std::cout << "server:      " << dump(v, "server") << "\n";
+    std::cout << "origin:      " << dump(v, "origin") << "\n";
+    std::cout << "channel:     " << dump(v, "channel") << "\n";
+    std::cout << "message:     " << dump(v, "message") << "\n";
 }
 
-void onMe(const json::Value &v)
+void onMe(const nlohmann::json &v)
 {
     std::cout << "event:       onMe\n";
-    std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
-    std::cout << "origin:      " << v.valueOr("origin", "").toString() << "\n";
-    std::cout << "target:      " << v.valueOr("target", "").toString() << "\n";
-    std::cout << "message:     " << v.valueOr("message", "").toString() << "\n";
+    std::cout << "server:      " << dump(v, "server") << "\n";
+    std::cout << "origin:      " << dump(v, "origin") << "\n";
+    std::cout << "target:      " << dump(v, "target") << "\n";
+    std::cout << "message:     " << dump(v, "message") << "\n";
 }
 
-void onMode(const json::Value &v)
+void onMode(const nlohmann::json &v)
 {
     std::cout << "event:       onMode\n";
-    std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
-    std::cout << "origin:      " << v.valueOr("origin", "").toString() << "\n";
-    std::cout << "mode:        " << v.valueOr("mode", "").toString() << "\n";
+    std::cout << "server:      " << dump(v, "server") << "\n";
+    std::cout << "origin:      " << dump(v, "origin") << "\n";
+    std::cout << "mode:        " << dump(v, "mode") << "\n";
 }
 
-void onNames(const json::Value &v)
+void onNames(const nlohmann::json &v)
 {
     std::cout << "event:       onNames\n";
-    std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
-    std::cout << "channel:     " << v.valueOr("channel", "").toString() << "\n";
-    std::cout << "names:       " << v.valueOr("names", "").toJson(0) << "\n";
+    std::cout << "server:      " << dump(v, "server") << "\n";
+    std::cout << "channel:     " << dump(v, "channel") << "\n";
+    std::cout << "names:       " << dump(v, "names") << "\n";
 }
 
-void onNick(const json::Value &v)
+void onNick(const nlohmann::json &v)
 {
     std::cout << "event:       onNick\n";
-    std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
-    std::cout << "origin:      " << v.valueOr("origin", "").toString() << "\n";
-    std::cout << "nickname:    " << v.valueOr("nickname", "").toString() << "\n";
+    std::cout << "server:      " << dump(v, "server") << "\n";
+    std::cout << "origin:      " << dump(v, "origin") << "\n";
+    std::cout << "nickname:    " << dump(v, "nickname") << "\n";
 }
 
-void onNotice(const json::Value &v)
+void onNotice(const nlohmann::json &v)
 {
     std::cout << "event:       onNotice\n";
-    std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
-    std::cout << "origin:      " << v.valueOr("origin", "").toString() << "\n";
-    std::cout << "message:      " << v.valueOr("message", "").toString() << "\n";
+    std::cout << "server:      " << dump(v, "server") << "\n";
+    std::cout << "origin:      " << dump(v, "origin") << "\n";
+    std::cout << "message:     " << dump(v, "message") << "\n";
 }
 
-void onPart(const json::Value &v)
+void onPart(const nlohmann::json &v)
 {
     std::cout << "event:       onPart\n";
-    std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
-    std::cout << "origin:      " << v.valueOr("origin", "").toString() << "\n";
-    std::cout << "channel:     " << v.valueOr("channel", "").toString() << "\n";
-    std::cout << "reason:      " << v.valueOr("reason", "").toString() << "\n";
+    std::cout << "server:      " << dump(v, "server") << "\n";
+    std::cout << "origin:      " << dump(v, "origin") << "\n";
+    std::cout << "channel:     " << dump(v, "channel") << "\n";
+    std::cout << "reason:      " << dump(v, "reason") << "\n";
 }
 
-void onQuery(const json::Value &v)
+void onQuery(const nlohmann::json &v)
 {
     std::cout << "event:       onQuery\n";
-    std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
-    std::cout << "origin:      " << v.valueOr("origin", "").toString() << "\n";
-    std::cout << "message:     " << v.valueOr("message", "").toString() << "\n";
+    std::cout << "server:      " << dump(v, "server") << "\n";
+    std::cout << "origin:      " << dump(v, "origin") << "\n";
+    std::cout << "message:     " << dump(v, "message") << "\n";
 }
 
-void onTopic(const json::Value &v)
+void onTopic(const nlohmann::json &v)
 {
     std::cout << "event:       onTopic\n";
-    std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
-    std::cout << "origin:      " << v.valueOr("origin", "").toString() << "\n";
-    std::cout << "channel:     " << v.valueOr("channel", "").toString() << "\n";
-    std::cout << "topic:       " << v.valueOr("topic", "").toString() << "\n";
+    std::cout << "server:      " << dump(v, "server") << "\n";
+    std::cout << "origin:      " << dump(v, "origin") << "\n";
+    std::cout << "channel:     " << dump(v, "channel") << "\n";
+    std::cout << "topic:       " << dump(v, "topic") << "\n";
 }
 
-void onWhois(const json::Value &v)
+void onWhois(const nlohmann::json &v)
 {
     std::cout << "event:       onWhois\n";
-    std::cout << "server:      " << v.valueOr("server", "").toString() << "\n";
-    std::cout << "nickname:    " << v.valueOr("nickname", "").toString() << "\n";
-    std::cout << "username:    " << v.valueOr("username", "").toString() << "\n";
-    std::cout << "host:        " << v.valueOr("host", "").toString() << "\n";
-    std::cout << "realname:    " << v.valueOr("realname", "").toString() << "\n";
+    std::cout << "server:      " << dump(v, "server") << "\n";
+    std::cout << "nickname:    " << dump(v, "nickname") << "\n";
+    std::cout << "username:    " << dump(v, "username") << "\n";
+    std::cout << "host:        " << dump(v, "host") << "\n";
+    std::cout << "realname:    " << dump(v, "realname") << "\n";
 }
 
-const std::unordered_map<std::string, std::function<void (const json::Value &)>> events{
+const std::unordered_map<std::string, std::function<void (const nlohmann::json &)>> events{
     { "onChannelMode",      onChannelMode   },
     { "onChannelNotice",    onChannelNotice },
     { "onConnect",          onConnect       },
@@ -208,7 +218,7 @@ std::string Watch::help() const
     return oss.str();
 }
 
-json::Value Watch::request(Irccdctl &ctl, const CommandRequest &request) const
+nlohmann::json Watch::request(Irccdctl &ctl, const CommandRequest &request) const
 {
     std::string format = request.optionOr("format", "native");
 
@@ -218,14 +228,19 @@ json::Value Watch::request(Irccdctl &ctl, const CommandRequest &request) const
     for (;;) {
         try {
             auto object = ctl.connection().next(-1);
-            auto it = events.find(object.valueOr("event", "").toString());
+            auto event = object.find("event");
+
+            if (event == object.end() || !event->is_string())
+                continue;
+
+            auto it = events.find(*event);
 
             // Silently ignore to avoid breaking user output.
             if (it == events.end())
                 continue;
 
             if (format == "json")
-                std::cout << object.toJson() << std::endl;
+                std::cout << object.dump() << std::endl;
             else {
                 it->second(object);
                 std::cout << std::endl;

@@ -54,7 +54,7 @@ public:
     /**
      * \copydoc Command::request
      */
-    IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const CommandRequest &args) const override;
+    IRCCD_EXPORT nlohmann::json request(Irccdctl &irccdctl, const CommandRequest &args) const override;
 };
 
 } // !command

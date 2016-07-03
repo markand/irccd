@@ -20,13 +20,15 @@
 #include "logger.hpp"
 #include "transport-client.hpp"
 
+using json = nlohmann::json;
+
 namespace irccd {
 
 void TransportClient::parse(const std::string &message)
 {
-    json::Value document = json::fromString(message);
+    auto document = json::parse(message);
 
-    if (!document.isObject())
+    if (!document.is_object())
         throw std::invalid_argument("the message is not a valid JSON object");
 
     onCommand(document);

@@ -30,6 +30,8 @@ using namespace std::string_literals;
 
 using namespace fmt::literals;
 
+using json = nlohmann::json;
+
 namespace irccd {
 
 namespace {
@@ -40,15 +42,28 @@ namespace {
  *
  * Convert a JSON value type to string for convenience.
  */
-std::string typeName(json::Type type)
+std::string typeName(nlohmann::json::value_t type) noexcept
 {
-    static const std::vector<std::string> typenames{
-        "array", "boolean", "int", "null", "object", "real", "string"
-    };
-
-    assert(type >= json::Type::Array && type <= json::Type::String);
-
-    return typenames[static_cast<int>(type)];
+    switch (type) {
+    case nlohmann::json::value_t::array:
+        return "array";
+    case nlohmann::json::value_t::boolean:
+        return "bool";
+    case nlohmann::json::value_t::number_float:
+        return "float";
+    case nlohmann::json::value_t::number_integer:
+        return "integer";
+    case nlohmann::json::value_t::number_unsigned:
+        return "unsigned";
+    case nlohmann::json::value_t::null:
+        return "null";
+    case nlohmann::json::value_t::object:
+        return "object";
+    case nlohmann::json::value_t::string:
+        return "string";
+    default:
+        return "";
+    }
 }
 
 /*
@@ -58,7 +73,7 @@ std::string typeName(json::Type type)
  * Construct a list of names to send a convenient error message if properties are invalid, example: string, int or bool expected.
  */
 
-std::string typeNameList(const std::vector<json::Type> &types)
+std::string typeNameList(const std::vector<json::value_t> &types)
 {
     std::ostringstream oss;
 
@@ -78,6 +93,51 @@ std::string typeNameList(const std::vector<json::Type> &types)
 }
 
 } // !namespace
+
+/*
+ * JSON errors
+ * ------------------------------------------------------------------
+ */
+
+MissingPropertyError::MissingPropertyError(std::string name, std::vector<nlohmann::json::value_t> types)
+    : m_name(std::move(name))
+    , m_types(std::move(types))
+{
+    m_message = "missing '" + m_name + "' property (" + typeNameList(m_types) + " expected)";
+}
+
+InvalidPropertyError::InvalidPropertyError(std::string name, nlohmann::json::value_t expected, nlohmann::json::value_t result)
+    : m_name(std::move(name))
+    , m_expected(expected)
+    , m_result(result)
+{
+    m_message += "invalid '" + m_name + "' property ";
+    m_message += "(" + typeName(expected) + " expected, ";
+    m_message += "got " + typeName(result) + ")";
+}
+
+PropertyRangeError::PropertyRangeError(std::string name, std::uint64_t min, std::uint64_t max, std::uint64_t value)
+    : m_name(std::move(name))
+    , m_min(min)
+    , m_max(max)
+    , m_value(value)
+{
+    assert(value < min || value > max);
+
+    m_message += "property '" + m_name + "' is out of range ";
+    m_message += std::to_string(min) + ".." + std::to_string(max) + ", got " + std::to_string(value);
+}
+
+PropertyError::PropertyError(std::string name, std::string message)
+    : m_name(std::move(name))
+{
+    m_message += "property '" + m_name + "': " + message;
+}
+
+/*
+ * Command implementation
+ * ------------------------------------------------------------------
+ */
 
 std::string Command::usage() const
 {
@@ -136,12 +196,12 @@ unsigned Command::max() const noexcept
     return (unsigned)args().size();
 }
 
-json::Value Command::request(Irccdctl &, const CommandRequest &) const
+nlohmann::json Command::request(Irccdctl &, const CommandRequest &) const
 {
-    return json::object({});
+    return nlohmann::json::object({});
 }
 
-json::Value Command::exec(Irccd &, const json::Value &request) const
+nlohmann::json Command::exec(Irccd &, const nlohmann::json &request) const
 {
     // Verify that requested properties are present in the request.
     for (const auto &prop : properties()) {
@@ -150,23 +210,23 @@ json::Value Command::exec(Irccd &, const json::Value &request) const
         if (it == request.end())
             throw std::invalid_argument("missing '{}' property"_format(prop.name()));
 
-        if (std::find(prop.types().begin(), prop.types().end(), it->typeOf()) == prop.types().end()) {
+        if (std::find(prop.types().begin(), prop.types().end(), it->type()) == prop.types().end()) {
             auto expected = typeNameList(prop.types());
-            auto got = typeName(it->typeOf());
+            auto got = typeName(it->type());
 
             throw std::invalid_argument("invalid '{}' property ({} expected, got {})"_format(prop.name(), expected, got));
         }
     }
 
-    return json::object({});
+    return nlohmann::json::object({});
 }
 
-void Command::result(Irccdctl &, const json::Value &response) const
+void Command::result(Irccdctl &, const nlohmann::json &response) const
 {
     auto it = response.find("error");
 
-    if (it != response.end() && it->isString())
-        log::warning() << "irccdctl: " << it->toString() << std::endl;
+    if (it != response.end() && it->is_string())
+        log::warning() << "irccdctl: " << it->dump() << std::endl;
 }
 
 } // !irccd

@@ -46,26 +46,26 @@ std::vector<Command::Arg> ServerMode::args() const
 std::vector<Command::Property> ServerMode::properties() const
 {
     return {
-        { "server",     { json::Type::String }},
-        { "mode",       { json::Type::String }}
+        { "server",     { nlohmann::json::value_t::string }},
+        { "mode",       { nlohmann::json::value_t::string }}
     };
 }
 
-json::Value ServerMode::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerMode::request(Irccdctl &, const CommandRequest &args) const
 {
-    return json::object({
+    return nlohmann::json::object({
         { "server",     args.arg(0) },
         { "mode",       args.arg(1) }
     });
 }
 
-json::Value ServerMode::exec(Irccd &irccd, const json::Value &request) const
+nlohmann::json ServerMode::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 
-    irccd.serverService().require(request.at("server").toString())->mode(request.at("mode").toString());
+    irccd.serverService().require(request["server"])->mode(request["mode"]);
 
-    return json::object();
+    return nlohmann::json::object();
 }
 
 } // !command

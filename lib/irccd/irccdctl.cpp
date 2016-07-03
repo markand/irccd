@@ -386,15 +386,15 @@ void Irccdctl::exec(const Command &cmd, std::vector<std::string> args)
         throw std::runtime_error("too many arguments");
 
     // 4. Construct the request, if the returned value is not an object, do not send anything (e.g. help).
-    json::Value request = cmd.request(*this, CommandRequest(std::move(requestOptions), std::move(args)));
+    nlohmann::json request = cmd.request(*this, CommandRequest(std::move(requestOptions), std::move(args)));
 
-    if (!request.isObject())
+    if (!request.is_object())
         return;
 
-    request.insert("command", cmd.name());
+    request.push_back({"command", cmd.name()});
 
     // 5. Send the command.
-    m_connection->send(request.toJson(0), 30000);
+    m_connection->send(request.dump(), 30000);
 
     // 6. Parse the result.
     cmd.result(*this, m_connection->next(cmd.name(), 30000));
@@ -466,17 +466,18 @@ void Irccdctl::connect()
     m_connection->connect(30000);
 
     // Get irccd information.
-    json::Value object = m_connection->next(30000);
+    auto object = m_connection->next(30000);
+    auto program = object.find("program");
 
-    if (!object.contains("program") || object.at("program").toString() != "irccd")
+    if (program == object.end() || !program->is_string() || program->get<std::string>() != "irccd")
         throw std::runtime_error("not an irccd server");
 
     // Get values.
-    m_major = object.at("major").toInt();
-    m_minor = object.at("minor").toInt();
-    m_patch = object.at("patch").toInt();
-    m_javascript = object.valueOr("javascript", json::Type::Boolean, false).toBool();
-    m_ssl = object.valueOr("ssl", json::Type::Boolean, false).toBool();
+    m_major = util::json::toInt(object["major"]);
+    m_minor = util::json::toInt(object["minor"]);
+    m_patch = util::json::toInt(object["patch"]);
+    m_javascript = util::json::toBool(object["javascript"]);
+    m_ssl = util::json::toBool(object["ssl"]);
 
     log::info() << std::boolalpha;
     log::info("{}: connected to irccd {}.{}.{}"_format(sys::programName(), m_major, m_minor, m_patch));

@@ -35,6 +35,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <json.hpp>
+
 #include "sysconfig.hpp"
 
 namespace irccd {
@@ -256,6 +258,20 @@ inline bool isNumber(const std::string &value) noexcept
 }
 
 /**
+ * Tells if a number is bound between the limits.
+ *
+ * \param value the value to check
+ * \param min the minimum
+ * \param max the maximum
+ * \return true if value is beyond the limits
+ */
+template <typename T>
+constexpr bool isBound(T value, T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max()) noexcept
+{
+    return value >= min && value <= max;
+}
+
+/**
  * Try to convert the string into number.
  *
  * This function will try to convert the string to number in the limits of T.
@@ -305,6 +321,69 @@ template <typename... Args>
 inline void unused(Args&&...) noexcept
 {
 }
+
+/**
+ * Utilities for nlohmann json.
+ */
+namespace json {
+
+/**
+ * Get a property or return null one if not found or if json is not an object.
+ *
+ * \param json the json value
+ * \param property the property key
+ * \return the value or null one if not found
+ */
+inline nlohmann::json get(const nlohmann::json &json, const std::string &property) noexcept
+{
+    if (!json.is_object())
+        return nlohmann::json();
+
+    auto it = json.find(property);
+
+    if (it == json.end())
+        return nlohmann::json();
+
+    return *it;
+}
+
+/**
+ * Convert the json value to boolean.
+ *
+ * \param json the json value
+ * \param def the default value if not boolean
+ * \return a boolean
+ */
+inline bool toBool(const nlohmann::json &json, bool def = false) noexcept
+{
+    return json.is_boolean() ? json.get<bool>() : def;
+}
+
+/**
+ * Convert the json value to int.
+ *
+ * \param json the json value
+ * \param def the default value if not an int
+ * \return an int
+ */
+inline int toInt(const nlohmann::json &json, int def = 0) noexcept
+{
+    return json.is_number() ? json.get<int>() : def;
+}
+
+/**
+ * Convert the json value to string.
+ *
+ * \param json the json value
+ * \param def the default value if not a string
+ * \return a string
+ */
+inline std::string toString(const nlohmann::json &json, std::string def = "") noexcept
+{
+    return json.is_string() ? json.get<std::string>() : def;
+}
+
+} // !json
 
 } // !util
 

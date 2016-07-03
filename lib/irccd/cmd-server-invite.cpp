@@ -47,32 +47,28 @@ std::vector<Command::Arg> ServerInvite::args() const
 std::vector<Command::Property> ServerInvite::properties() const
 {
     return {
-        { "server",     { json::Type::String }},
-        { "target",     { json::Type::String }},
-        { "channel",    { json::Type::String }}
+        { "server",     { nlohmann::json::value_t::string }},
+        { "target",     { nlohmann::json::value_t::string }},
+        { "channel",    { nlohmann::json::value_t::string }}
     };
 }
 
-json::Value ServerInvite::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerInvite::request(Irccdctl &, const CommandRequest &args) const
 {
-    return json::object({
+    return nlohmann::json::object({
         { "server",     args.args()[0] },
         { "target",     args.args()[1] },
         { "channel",    args.args()[2] }
     });
 }
 
-json::Value ServerInvite::exec(Irccd &irccd, const json::Value &request) const
+nlohmann::json ServerInvite::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 
-    irccd.serverService().require(
-        request.at("server").toString())->invite(
-        request.at("target").toString(),
-        request.at("channel").toString()
-    );
+    irccd.serverService().require(request["server"])->invite(request["target"], request["channel"]);
 
-    return json::object();
+    return nlohmann::json::object();
 }
 
 } // !command

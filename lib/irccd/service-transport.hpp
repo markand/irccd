@@ -24,18 +24,14 @@
  * \brief manage transport servers and clients.
  */
 
+#include <json.hpp>
+
 #include "service.hpp"
 
 namespace irccd {
 
 class TransportServer;
 class TransportClient;
-
-namespace json {
-
-class Value;
-
-} // !json
 
 /**
  * \brief manage transport servers and clients.
@@ -48,7 +44,7 @@ private:
     std::vector<std::shared_ptr<TransportServer>> m_servers;
     std::vector<std::shared_ptr<TransportClient>> m_clients;
 
-    void handleCommand(std::weak_ptr<TransportClient>, const json::Value &);
+    void handleCommand(std::weak_ptr<TransportClient>, const nlohmann::json &);
     void handleDie(std::weak_ptr<TransportClient>);
 
 public:

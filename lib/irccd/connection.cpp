@@ -21,14 +21,14 @@
 
 namespace irccd {
 
-json::Value Connection::next(const std::string &name, int timeout)
+nlohmann::json Connection::next(const std::string &name, int timeout)
 {
     m_timer.reset();
 
     for (;;) {
-        json::Value object = next(clamp(timeout));
+        nlohmann::json object = next(clamp(timeout));
 
-        if (object.isObject() && object["response"].toString() == name)
+        if (object.is_object() && object["response"].dump() == name)
             return object;
     }
 
@@ -38,10 +38,10 @@ json::Value Connection::next(const std::string &name, int timeout)
 void Connection::verify(const std::string &name, int timeout)
 {
     auto object = next(name, timeout);
-    auto value = object.at("status").toString();
+    auto value = object.at("status").dump();
 
     if (!value.empty() && value != "ok")
-        throw std::runtime_error(object.at("error").toString());
+        throw std::runtime_error(object.at("error").dump());
 }
 
 } // !irccd

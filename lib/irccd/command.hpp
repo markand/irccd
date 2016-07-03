@@ -37,10 +37,130 @@ class Irccd;
 class Irccdctl;
 
 /**
+ * \brief A JSON property is missing.
+ */
+class MissingPropertyError : public std::exception {
+private:
+    std::string m_message;
+    std::string m_name;
+    std::vector<nlohmann::json::value_t> m_types;
+
+public:
+    /**
+     * Constructor.
+     */
+    MissingPropertyError(std::string name, std::vector<nlohmann::json::value_t> types);
+
+    /**
+     * Get human error message.
+     *
+     * \return a message
+     */
+    const char *what() const noexcept override
+    {
+        return m_message.c_str();
+    }
+};
+
+/**
+ * \brief A JSON property is invalid
+ */
+class InvalidPropertyError : public std::exception {
+private:
+    std::string m_message;
+    std::string m_name;
+
+    nlohmann::json::value_t m_expected;
+    nlohmann::json::value_t m_result;
+
+public:
+    /**
+     * Constructor.
+     *
+     * \param name the property name
+     * \param expected the expected type
+     * \param result the type received
+     */
+    InvalidPropertyError(std::string name, nlohmann::json::value_t expected, nlohmann::json::value_t result);
+
+    /**
+     * Get human error message.
+     *
+     * \return a message
+     */
+    const char *what() const noexcept override
+    {
+        return m_message.c_str();
+    }
+};
+
+/**
+ * \brief Property range error.
+ */
+class PropertyRangeError : public std::exception {
+private:
+    std::string m_message;
+    std::string m_name;
+    std::uint64_t m_min;
+    std::uint64_t m_max;
+    std::uint64_t m_value;
+
+public:
+    /**
+     * Constructor.
+     *
+     * \pre value < min || value > max
+     * \param name the property name
+     * \param min the minimum value
+     * \param max the maximum value
+     * \param value the actual value
+     */
+    PropertyRangeError(std::string name, std::uint64_t min, std::uint64_t max, std::uint64_t value);
+
+    /**
+     * Get human error message.
+     *
+     * \return a message
+     */
+    const char *what() const noexcept override
+    {
+        return m_message.c_str();
+    }
+};
+
+/**
+ * \brief Generic error for JSON properties.
+ */
+class PropertyError : public std::exception {
+private:
+    std::string m_message;
+    std::string m_name;
+
+public:
+    /**
+     * Constructor.
+     *
+     * \param name the property name
+     * \param message the error message
+     */
+    PropertyError(std::string name, std::string message);
+
+    /**
+     * Get human error message.
+     *
+     * \return a message
+     */
+    const char *what() const noexcept override
+    {
+        return m_message.c_str();
+    }
+};
+
+
+/**
  * \brief Namespace for remote commands.
  */
-namespace command {
-}
+//namespace command {
 
 /**
  * \brief Command line arguments to irccdctl.
@@ -347,7 +467,7 @@ public:
      * \return the JSON object to send to the daemon
      * \post the returned JSON value must be an object
      */
-    IRCCD_EXPORT virtual json::Value request(Irccdctl &irccdctl, const CommandRequest &args) const;
+    IRCCD_EXPORT virtual nlohmann::json request(Irccdctl &irccdctl, const CommandRequest &args) const;
 
     /**
      * Execute the command in the daemon.
@@ -363,7 +483,7 @@ public:
      * \param request the JSON request
      * \return the response
      */
-    IRCCD_EXPORT virtual json::Value exec(Irccd &irccd, const json::Value &request) const;
+    IRCCD_EXPORT virtual nlohmann::json exec(Irccd &irccd, const nlohmann::json &request) const;
 
     /**
      * What to do when receiving the response from irccd.
@@ -373,7 +493,7 @@ public:
      * \param irccdctl the irccdctl instance
      * \param response the JSON response
      */
-    IRCCD_EXPORT virtual void result(Irccdctl &irccdctl, const json::Value &response) const;
+    IRCCD_EXPORT virtual void result(Irccdctl &irccdctl, const nlohmann::json &response) const;
 };
 
 /**
@@ -519,7 +639,7 @@ public:
 class Command::Property {
 private:
     std::string m_name;
-    std::vector<json::Type> m_types;
+    std::vector<nlohmann::json::value_t> m_types;
 
 public:
     /**
@@ -530,7 +650,7 @@ public:
      * \param name the name
      * \param types the json types allowed
      */
-    inline Property(std::string name, std::vector<json::Type> types = { json::Type::String }) noexcept
+    inline Property(std::string name, std::vector<nlohmann::json::value_t> types = { nlohmann::json::value_t::string }) noexcept
         : m_name(std::move(name))
         , m_types(std::move(types))
     {
@@ -553,7 +673,7 @@ public:
      *
      * \return the types
      */
-    inline const std::vector<json::Type> &types() const noexcept
+    inline const std::vector<nlohmann::json::value_t> &types() const noexcept
     {
         return m_types;
     }

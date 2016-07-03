@@ -34,7 +34,6 @@ set(
     ${CMAKE_CURRENT_LIST_DIR}/ini.hpp
     ${CMAKE_CURRENT_LIST_DIR}/irccd.hpp
     ${CMAKE_CURRENT_LIST_DIR}/irccdctl.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/json.hpp
     ${CMAKE_CURRENT_LIST_DIR}/mod-directory.hpp
     ${CMAKE_CURRENT_LIST_DIR}/mod-elapsed-timer.hpp
     ${CMAKE_CURRENT_LIST_DIR}/mod-file.hpp
@@ -113,7 +112,6 @@ set(
     ${CMAKE_CURRENT_LIST_DIR}/ini.cpp
     ${CMAKE_CURRENT_LIST_DIR}/irccd.cpp
     ${CMAKE_CURRENT_LIST_DIR}/irccdctl.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/json.cpp
     ${CMAKE_CURRENT_LIST_DIR}/mod-directory.cpp
     ${CMAKE_CURRENT_LIST_DIR}/mod-elapsed-timer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/mod-file.cpp

@@ -59,17 +59,17 @@ public:
     /**
      * \copydoc Command::request
      */
-    IRCCD_EXPORT json::Value request(Irccdctl &irccdctl, const CommandRequest &args) const override;
+    IRCCD_EXPORT nlohmann::json request(Irccdctl &irccdctl, const CommandRequest &args) const override;
 
     /**
      * \copydoc Command::exec
      */
-    IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
+    IRCCD_EXPORT nlohmann::json exec(Irccd &irccd, const nlohmann::json &request) const override;
 
     /**
      * \copydoc Command::result
      */
-    IRCCD_EXPORT void result(Irccdctl &irccdctl, const json::Value &response) const override;
+    IRCCD_EXPORT void result(Irccdctl &irccdctl, const nlohmann::json &response) const override;
 };
 
 } // !command

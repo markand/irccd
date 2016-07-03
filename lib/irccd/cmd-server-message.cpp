@@ -47,31 +47,28 @@ std::vector<Command::Arg> ServerMessage::args() const
 std::vector<Command::Property> ServerMessage::properties() const
 {
     return {
-        { "server",     { json::Type::String }},
-        { "target",     { json::Type::String }},
-        { "message",    { json::Type::String }}
+        { "server",     { nlohmann::json::value_t::string }},
+        { "target",     { nlohmann::json::value_t::string }},
+        { "message",    { nlohmann::json::value_t::string }}
     };
 }
 
-json::Value ServerMessage::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerMessage::request(Irccdctl &, const CommandRequest &args) const
 {
-    return json::object({
+    return nlohmann::json::object({
         { "server",     args.arg(0) },
         { "target",     args.arg(1) },
         { "message",    args.arg(2) }
     });
 }
 
-json::Value ServerMessage::exec(Irccd &irccd, const json::Value &request) const
+nlohmann::json ServerMessage::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 
-    irccd.serverService().require(request.at("server").toString())->me(
-        request.at("target").toString(),
-        request.at("message").toString()
-    );
+    irccd.serverService().require(request["server"])->me(request["target"], request["message"]);
 
-    return json::object();
+    return nlohmann::json::object();
 }
 
 } // !command

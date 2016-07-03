@@ -74,7 +74,7 @@ public:
      * \return the object
      * \throw net::Error on errors or on timeout
      */
-    IRCCD_EXPORT json::Value next(const std::string &name, int timeout = 30000);
+    IRCCD_EXPORT nlohmann::json next(const std::string &name, int timeout = 30000);
 
     /**
      * Just wait if the operation succeeded.
@@ -111,7 +111,7 @@ public:
      * \return the next event
      * \throw net::Error on errors or disconnection
      */
-    virtual json::Value next(int timeout = 30000) = 0;
+    virtual nlohmann::json next(int timeout = 30000) = 0;
 };
 
 /**
@@ -154,7 +154,7 @@ public:
     /**
      * \copydoc Connection::next(int)
      */
-    json::Value next(int timeout) override;
+    nlohmann::json next(int timeout) override;
 };
 
 template <typename Address>
@@ -204,7 +204,7 @@ void ConnectionBase<Address>::send(std::string msg, int timeout)
 }
 
 template <typename Address>
-json::Value ConnectionBase<Address>::next(int timeout)
+nlohmann::json ConnectionBase<Address>::next(int timeout)
 {
     // Maybe there is already something.
     std::string buffer = util::nextNetwork(m_input);
@@ -223,9 +223,9 @@ json::Value ConnectionBase<Address>::next(int timeout)
         buffer = util::nextNetwork(m_input);
     }
 
-    json::Value value = json::fromString(buffer);
+    auto value = nlohmann::json::parse(buffer);
 
-    if (!value.isObject())
+    if (!value.is_object())
         throw std::invalid_argument("invalid message received");
 
     return value;

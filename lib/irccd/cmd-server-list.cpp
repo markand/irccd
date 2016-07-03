@@ -37,23 +37,24 @@ std::string ServerList::help() const
     return "";
 }
 
-json::Value ServerList::exec(Irccd &irccd, const json::Value &) const
+nlohmann::json ServerList::exec(Irccd &irccd, const nlohmann::json &) const
 {
-    auto json = json::object({});
-    auto list = json::array({});
+    auto json = nlohmann::json::object();
+    auto list = nlohmann::json::array();
 
     for (const auto &server : irccd.serverService().servers())
-        list.append(server->name());
+        list.push_back(server->name());
 
-    json.insert("list", std::move(list));
+    json.push_back({"list", std::move(list)});
 
     return json;
 }
 
-void ServerList::result(Irccdctl &, const json::Value &response) const
+void ServerList::result(Irccdctl &, const nlohmann::json &response) const
 {
-    for (const auto &n : response.valueOr("list", json::Type::Array, json::array({})))
-        std::cout << n.toString() << std::endl;
+    if (response.count("list") != 0)
+        for (const auto &n : response["list"])
+            std::cout << n.dump() << std::endl;
 }
 
 } // !command

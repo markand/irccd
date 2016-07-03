@@ -40,17 +40,17 @@ std::vector<Command::Arg> ServerReconnect::args() const
     return {{ "server", false }};
 }
 
-json::Value ServerReconnect::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerReconnect::request(Irccdctl &, const CommandRequest &args) const
 {
-    return args.length() == 0 ? nullptr : json::object({ { "server", args.arg(0) } });
+    return args.length() == 0 ? nlohmann::json::object() : nlohmann::json::object({ { "server", args.arg(0) } });
 }
 
-json::Value ServerReconnect::exec(Irccd &irccd, const json::Value &request) const
+nlohmann::json ServerReconnect::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     auto server = request.find("server");
 
-    if (server != request.end() && server->isString())
-        irccd.serverService().require(server->toString())->reconnect();
+    if (server != request.end() && server->is_string())
+        irccd.serverService().require(*server)->reconnect();
     else
         for (auto &server : irccd.serverService().servers())
             server->reconnect();

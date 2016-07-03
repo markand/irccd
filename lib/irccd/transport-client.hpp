@@ -29,18 +29,14 @@
 #include <stdexcept>
 #include <string>
 
+#include <json.hpp>
+
 #include "net.hpp"
 #include "server.hpp"
 #include "signals.hpp"
 #include "sysconfig.hpp"
 
 namespace irccd {
-
-namespace json {
-
-class Value;
-
-} // !json
 
 /**
  * \class TransportClient
@@ -57,7 +53,7 @@ public:
      * Arguments:
      *   - the command
      */
-    Signal<const json::Value &> onCommand;
+    Signal<const nlohmann::json &> onCommand;
 
     /**
      * Signal: onDie

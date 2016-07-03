@@ -38,25 +38,28 @@ std::string PluginList::help() const
     return "Get the list of loaded plugins.";
 }
 
-json::Value PluginList::exec(Irccd &irccd, const json::Value &request) const
+nlohmann::json PluginList::exec(Irccd &irccd, const nlohmann::json &request) const
 {
-    json::Value response = Command::exec(irccd, request);
-    json::Value list = json::array({});
+    auto response = Command::exec(irccd, request);
+    auto list = nlohmann::json::array();
 
     for (const auto &plugin : irccd.pluginService().plugins())
-        list.append(plugin->name());
+        list += plugin->name();
 
-    response.insert("list", std::move(list));
+    response.push_back({"list", std::move(list)});
 
     return response;
 }
 
-void PluginList::result(Irccdctl &irccdctl, const json::Value &object) const
+void PluginList::result(Irccdctl &irccdctl, const nlohmann::json &object) const
 {
     Command::result(irccdctl, object);
 
-    for (const auto &n : object.valueOr("list", json::Type::Array, json::array({})))
-        std::cout << n.toString() << std::endl;
+    auto it = object.find("list");
+
+    if (it != object.end() && it->is_array())
+        for (const auto &n : *it)
+            std::cout << n.dump() << std::endl;
 }
 
 } // !command

@@ -39,7 +39,7 @@ std::string Help::help() const
     return "Get help about a command.";
 }
 
-json::Value Help::request(Irccdctl &irccdctl, const CommandRequest &args) const
+nlohmann::json Help::request(Irccdctl &irccdctl, const CommandRequest &args) const
 {
     auto it = irccdctl.commandService().find(args.arg(0U));
 

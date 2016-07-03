@@ -29,32 +29,31 @@ namespace command {
 
 namespace {
 
-json::Value execSet(Irccd &irccd, const json::Value &request)
+nlohmann::json execSet(Irccd &irccd, const nlohmann::json &request, const std::string &var, const std::string &value)
 {
-    auto plugin = irccd.pluginService().require(request.at("plugin").toString());
+    auto plugin = irccd.pluginService().require(request["plugin"].get<std::string>());
     auto config = plugin->config();
 
-    config[request.at("variable").toString()] = request.at("value").toString(true);
+    config[var] = value;
     plugin->setConfig(config);
 
     return nullptr;
 }
 
-json::Value execGet(Irccd &irccd, const json::Value &request)
+nlohmann::json execGet(Irccd &irccd, const nlohmann::json &request, const nlohmann::json::const_iterator &var)
 {
-    auto config = irccd.pluginService().require(request.at("plugin").toString())->config();
-    auto var = request.find("variable");
+    auto config = irccd.pluginService().require(request["plugin"].get<std::string>())->config();
 
     // 'vars' property.
-    std::map<std::string, json::Value> vars;
+    std::map<std::string, nlohmann::json> vars;
 
     if (var != request.end())
-        vars.emplace(var->toString(), config[var->toString()]);
+        vars.emplace(var->get<std::string>(), config[var->get<std::string>()]);
     else
         for (const auto &pair : config)
             vars.emplace(pair.first, pair.second);
 
-    return json::object({{ "vars", json::Value(vars) }});
+    return nlohmann::json::object({{ "variables", nlohmann::json(vars) }});
 }
 
 } // !namespace
@@ -80,46 +79,56 @@ std::vector<Command::Arg> PluginConfig::args() const
 
 std::vector<Command::Property> PluginConfig::properties() const
 {
-    return {{ "plugin", { json::Type::String }}};
+    return {{ "plugin", { nlohmann::json::value_t::string }}};
 }
 
-json::Value PluginConfig::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json PluginConfig::request(Irccdctl &, const CommandRequest &args) const
 {
-    auto object = json::object({
+    auto object = nlohmann::json::object({
         { "plugin", args.arg(0) }
     });
 
     if (args.length() >= 2U) {
-        object.insert("variable", args.arg(1));
+        object.push_back({"variable", args.arg(1)});
 
         if (args.length() == 3U)
-            object.insert("value", args.arg(2));
+            object.push_back({"value", args.arg(2)});
     }
 
     return object;
 }
 
-json::Value PluginConfig::exec(Irccd &irccd, const json::Value &request) const
+nlohmann::json PluginConfig::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 
-    return request.contains("value") ? execSet(irccd, request) : execGet(irccd, request);
+    auto var = request.find("variable");
+
+    if (var != request.end() && var->is_string())
+        throw InvalidPropertyError("variable", nlohmann::json::value_t::string, var->type());
+
+    auto value = request.find("value");
+
+    if (value != request.end())
+        return execSet(irccd, request, var->dump(), value->dump());
+
+    return execGet(irccd, request, var);
 }
 
-void PluginConfig::result(Irccdctl &irccdctl, const json::Value &response) const
+void PluginConfig::result(Irccdctl &irccdctl, const nlohmann::json &response) const
 {
     Command::result(irccdctl, response);
 
-    auto it = response.find("vars");
+    auto it = response.find("variables");
 
-    if (it == response.end() || !it->isObject())
+    if (it == response.end() || !it->is_object())
         return;
 
     if (it->size() > 1U)
         for (auto v = it->begin(); v != it->end(); ++v)
-            std::cout << std::setw(16) << std::left << v.key() << " : " << v->toString(true) << std::endl;
+            std::cout << std::setw(16) << std::left << v.key() << " : " << v->dump() << std::endl;
     else
-        std::cout << it->begin()->toString(true) << std::endl;
+        std::cout << it->begin()->dump() << std::endl;
 }
 
 } // !command

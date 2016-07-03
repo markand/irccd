@@ -68,7 +68,7 @@ public:
     /**
      * \copydoc Command::exec
      */
-    IRCCD_EXPORT json::Value exec(Irccd &irccd, const json::Value &request) const override;
+    IRCCD_EXPORT nlohmann::json exec(Irccd &irccd, const nlohmann::json &request) const override;
 };
 
 } // !command
