@@ -43,18 +43,6 @@
 namespace irccd {
 
 /**
- * \brief Identity to use when connecting.
- */
-class ServerIdentity {
-public:
-    std::string name{"irccd"};                      //!< identity name
-    std::string nickname{"irccd"};                  //!< nickname to show
-    std::string username{"irccd"};                  //!< username to use for connection
-    std::string realname{"IRC Client Daemon"};      //!< the full real name
-    std::string ctcpversion{"IRC Client Daemon"};   //!< the CTCP version to define
-};
-
-/**
  * \brief A channel to join with an optional password.
  */
 class ServerChannel {
@@ -474,10 +462,15 @@ private:
     // Identifier.
     std::string m_name;
 
+    // Identity.
+    std::string m_nickname{"irccd"};
+    std::string m_username{"irccd"};
+    std::string m_realname{"IRC Client Daemon"};
+    std::string m_ctcpversion{"IRC Client Daemon"};
+
     // Various settings.
     ServerInfo m_info;
     ServerSettings m_settings;
-    ServerIdentity m_identity;
     ServerCache m_cache;
 
     // Queue of requests to send.
@@ -522,10 +515,9 @@ public:
      *
      * \param name the identifier
      * \param info the information
-     * \param identity the identity
      * \param settings the settings
      */
-    IRCCD_EXPORT Server(std::string name, ServerInfo info, ServerIdentity identity = {}, ServerSettings settings = {});
+    IRCCD_EXPORT Server(std::string name, ServerInfo info, ServerSettings settings = {});
 
     /**
      * Destructor. Close the connection if needed.
@@ -540,6 +532,84 @@ public:
     inline const std::string &name() const noexcept
     {
         return m_name;
+    }
+
+    /**
+     * Get the nickname.
+     *
+     * \return the nickname
+     */
+    inline const std::string &nickname() const noexcept
+    {
+        return m_nickname;
+    }
+
+    /**
+     * Set the nickname.
+     *
+     * If the server is connected, send a nickname command to the IRC server, otherwise change it locally.
+     *
+     * \param nickname the nickname
+     */
+    IRCCD_EXPORT void setNickname(std::string nickname);
+
+    /**
+     * Get the CTCP version.
+     *
+     * \return the CTCP version
+     */
+    inline const std::string &ctcpVersion() const noexcept
+    {
+        return m_ctcpversion;
+    }
+
+    /**
+     * Set the CTCP version.
+     *
+     * \param ctcpversion the version
+     */
+    IRCCD_EXPORT void setCtcpVersion(std::string ctcpversion);
+
+    /**
+     * Get the username.
+     *
+     * \return the username
+     */
+    inline const std::string &username() const noexcept
+    {
+        return m_username;
+    }
+
+    /**
+     * Set the username.
+     *
+     * \param name the username
+     * \note the username will be changed on the next connection
+     */
+    inline void setUsername(std::string name) noexcept
+    {
+        m_username = std::move(name);
+    }
+
+    /**
+     * Get the realname.
+     *
+     * \return the realname
+     */
+    inline const std::string &realname() const noexcept
+    {
+        return m_realname;
+    }
+
+    /**
+     * Set the realname.
+     *
+     * \param name the username
+     * \note the username will be changed on the next connection
+     */
+    inline void setRealname(std::string realname) noexcept
+    {
+        m_realname = std::move(realname);
     }
 
     /**
@@ -571,16 +641,6 @@ public:
     inline const ServerSettings &settings() const noexcept
     {
         return m_settings;
-    }
-
-    /**
-     * Access the identity.
-     *
-     * \return the identity
-     */
-    inline const ServerIdentity &identity() const noexcept
-    {
-        return m_identity;
     }
 
     /**
@@ -728,13 +788,6 @@ public:
      * \param channel the channel
      */
     IRCCD_EXPORT virtual void names(std::string channel);
-
-    /**
-     * Change your nickname.
-     *
-     * \param newnick the new nickname to use
-     */
-    IRCCD_EXPORT virtual void nick(std::string newnick);
 
     /**
      * Send a private notice.

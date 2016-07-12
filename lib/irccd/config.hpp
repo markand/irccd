@@ -37,7 +37,6 @@ namespace irccd {
 class Irccd;
 class Rule;
 class Server;
-class ServerIdentity;
 class TransportServer;
 
 /**
@@ -79,15 +78,17 @@ public:
         return m_path;
     }
 
-    /**
+   /**
      * Find an entity if defined in the configuration file.
      *
      * \pre util::isValidIdentifier(name)
+     * \param server the server to update
+     * \param name the identity name
      * \return default identity if cannot be found
      */
-    IRCCD_EXPORT ServerIdentity findIdentity(const std::string &name) const;
+    IRCCD_EXPORT void loadServerIdentity(Server &server, const std::string &name) const;
 
-    /**
+     /**
      * Find a plugin configuration if defined in the configuration file.
      *
      * \pre util::isValidIdentifier(name)

@@ -90,31 +90,6 @@ std::string get(const ini::Document &doc, const std::string &section, const std:
     return ito->value();
 }
 
-ServerIdentity loadIdentity(const ini::Section &sc)
-{
-    assert(sc.key() == "identity");
-    assert(sc.contains("name") && util::isIdentifierValid(sc["name"].value()));
-
-    ServerIdentity identity;
-
-    // Mandatory stuff.
-    identity.name = sc["name"].value();
-
-    // Optional stuff.
-    ini::Section::const_iterator it;
-
-    if ((it = sc.find("username")) != sc.end())
-        identity.username = it->value();
-    if ((it = sc.find("realname")) != sc.end())
-        identity.realname = it->value();
-    if ((it = sc.find("nickname")) != sc.end())
-        identity.nickname = it->value();
-    if ((it = sc.find("ctcp-version")) != sc.end())
-        identity.ctcpversion = it->value();
-
-    return identity;
-}
-
 PluginConfig loadPluginConfig(const ini::Section &sc)
 {
     PluginConfig config;
@@ -297,7 +272,6 @@ std::shared_ptr<Server> loadServer(const ini::Section &sc, const Config &config)
 
     std::string name;
     ServerInfo info;
-    ServerIdentity identity;
     ServerSettings settings;
 
     // Name.
@@ -315,10 +289,6 @@ std::shared_ptr<Server> loadServer(const ini::Section &sc, const Config &config)
         throw std::invalid_argument("server {}: missing host"_format(name));
 
     info.host = it->value();
-
-    // Optional identity
-    if ((it = sc.find("identity")) != sc.end())
-        identity = config.findIdentity(it->value());
 
     // Optional port
     if ((it = sc.find("port")) != sc.end()) {
@@ -380,7 +350,13 @@ std::shared_ptr<Server> loadServer(const ini::Section &sc, const Config &config)
         log::warning("server {}: invalid number for {}: {}"_format(name, it->key(), it->value()));
     }
 
-    return std::make_shared<Server>(std::move(name), std::move(info), std::move(identity), std::move(settings));
+    auto server = std::make_shared<Server>(std::move(name), std::move(info), std::move(settings));
+
+    // Optional identity
+    if ((it = sc.find("identity")) != sc.end())
+        config.loadServerIdentity(*server, it->value());
+
+    return server;
 }
 
 } // !namespace
@@ -403,31 +379,30 @@ Config Config::find()
     throw std::runtime_error("no configuration file found");
 }
 
-ServerIdentity Config::findIdentity(const std::string &name) const
+void Config::loadServerIdentity(Server &server, const std::string &identity) const
 {
-    assert(util::isIdentifierValid(name));
+    ini::Document::const_iterator sc = std::find_if(m_document.begin(), m_document.end(), [&] (const auto &sc) {
+        if (sc.key() != "identity")
+            return false;
 
-    for (const auto &section : m_document) {
-        if (section.key() != "identity")
-            continue;
+        auto name = sc.find("name");
 
-        auto it = section.find("name");
+        return name != sc.end() && name->value() == identity;
+    });
 
-        if (it == section.end()) {
-            log::warning("identity: missing 'name' property");
-            continue;
-        }
-        if (!util::isIdentifierValid(it->value())) {
-            log::warning("identity: invalid identifier: {}"_format(it->value()));
-            continue;
-        }
-        if (it->value() != name)
-            continue;
+    if (sc == m_document.end())
+        return;
 
-        return loadIdentity(section);
-    }
+    ini::Section::const_iterator it;
 
-    return ServerIdentity();
+    if ((it = sc->find("username")) != sc->end())
+        server.setUsername(it->value());
+    if ((it = sc->find("realname")) != sc->end())
+        server.setRealname(it->value());
+    if ((it = sc->find("nickname")) != sc->end())
+        server.setNickname(it->value());
+    if ((it = sc->find("ctcp-version")) != sc->end())
+        server.setCtcpVersion(it->value());
 }
 
 PluginConfig Config::findPluginConfig(const std::string &name) const

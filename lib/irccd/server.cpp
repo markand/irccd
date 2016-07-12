@@ -188,7 +188,7 @@ void Server::handleNick(const char *orig, const char **params) noexcept
 {
     // Update our nickname.
     if (isSelf(strify(orig)))
-        m_identity.nickname = strify(params[0]);
+        m_nickname = strify(params[0]);
 
     onNick(NickEvent{shared_from_this(), strify(orig), strify(params[0])});
 }
@@ -343,11 +343,10 @@ ServerChannel Server::splitChannel(const std::string &value)
     return ServerChannel{value, ""};
 }
 
-Server::Server(std::string name, ServerInfo info, ServerIdentity identity, ServerSettings settings)
+Server::Server(std::string name, ServerInfo info, ServerSettings settings)
     : m_name(std::move(name))
     , m_info(std::move(info))
     , m_settings(std::move(settings))
-    , m_identity(std::move(identity))
     , m_session(std::make_unique<Session>())
     , m_state(std::make_unique<state::Connecting>())
 {
@@ -418,12 +417,28 @@ Server::Server(std::string name, ServerInfo info, ServerIdentity identity, Serve
 
     // Save this to the session.
     irc_set_ctx(*m_session, this);
-    irc_set_ctcp_version(*m_session, m_identity.ctcpversion.c_str());
+    irc_set_ctcp_version(*m_session, m_ctcpversion.c_str());
 }
 
 Server::~Server()
 {
     irc_disconnect(*m_session);
+}
+
+void Server::setNickname(std::string nickname)
+{
+    if (m_session->isConnected())
+        m_queue.push([=] () {
+            return irc_cmd_nick(*m_session, nickname.c_str()) == 0;
+        });
+    else
+        m_nickname = std::move(nickname);
+}
+
+void Server::setCtcpVersion(std::string ctcpversion)
+{
+    m_ctcpversion = std::move(ctcpversion);
+    irc_set_ctcp_version(*m_session, ctcpversion.c_str());
 }
 
 void Server::update() noexcept
@@ -477,7 +492,7 @@ bool Server::isSelf(const std::string &nick) const noexcept
 
     irc_target_get_nick(nick.c_str(), target, sizeof (target));
 
-    return m_identity.nickname == target;
+    return m_nickname == target;
 }
 
 void Server::cmode(std::string channel, std::string mode)
@@ -542,13 +557,6 @@ void Server::names(std::string channel)
 {
     m_queue.push([=] () {
         return irc_cmd_names(*m_session, channel.c_str()) == 0;
-    });
-}
-
-void Server::nick(std::string newnick)
-{
-    m_queue.push([=] () {
-        return irc_cmd_nick(*m_session, newnick.c_str()) == 0;
     });
 }
 

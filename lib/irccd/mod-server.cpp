@@ -89,31 +89,31 @@ ServerInfo readInfo(duk_context *ctx)
     return info;
 }
 
-ServerIdentity readIdentity(duk_context *ctx)
+void readIdentity(Server &server, duk_context *ctx)
 {
-    ServerIdentity identity;
-
     // 'nickname' property.
     duk_get_prop_string(ctx, 0, "nickname");
-    identity.nickname = duk_is_string(ctx, -1) ? dukx_get_std_string(ctx, -1) : identity.nickname;
+    if (duk_is_string(ctx, -1))
+        server.setNickname(dukx_get_std_string(ctx, -1));
     duk_pop(ctx);
 
     // 'username' property.
     duk_get_prop_string(ctx, 0, "username");
-    identity.username = duk_is_string(ctx, -1) ? dukx_get_std_string(ctx, -1) : identity.username;
+    if (duk_is_string(ctx, -1))
+        server.setUsername(dukx_get_std_string(ctx, -1));
     duk_pop(ctx);
 
     // 'realname' property.
     duk_get_prop_string(ctx, 0, "realname");
-    identity.realname = duk_is_string(ctx, -1) ? dukx_get_std_string(ctx, -1) : identity.realname;
+    if (duk_is_string(ctx, -1))
+        server.setRealname(dukx_get_std_string(ctx, -1));
     duk_pop(ctx);
 
     // 'ctcpversion' property.
     duk_get_prop_string(ctx, 0, "version");
-    identity.ctcpversion = duk_is_string(ctx, -1) ? dukx_get_std_string(ctx, -1) : identity.ctcpversion;
+    if (duk_is_string(ctx, -1))
+        server.setCtcpVersion(dukx_get_std_string(ctx, -1));
     duk_pop(ctx);
-
-    return identity;
 }
 
 ServerSettings readSettings(duk_context *ctx)
@@ -216,11 +216,11 @@ duk_ret_t info(duk_context *ctx)
     duk_put_prop_string(ctx, -2, "sslVerify");
     dukx_push_std_string(ctx, server->settings().command);
     duk_put_prop_string(ctx, -2, "commandChar");
-    dukx_push_std_string(ctx, server->identity().realname);
+    dukx_push_std_string(ctx, server->realname());
     duk_put_prop_string(ctx, -2, "realname");
-    dukx_push_std_string(ctx, server->identity().nickname);
+    dukx_push_std_string(ctx, server->nickname());
     duk_put_prop_string(ctx, -2, "nickname");
-    dukx_push_std_string(ctx, server->identity().username);
+    dukx_push_std_string(ctx, server->username());
     duk_put_prop_string(ctx, -2, "username");
     dukx_push_array(ctx, server->settings().channels, [] (auto ctx, auto channel) {
         dukx_push_std_string(ctx, channel.name);
@@ -359,7 +359,7 @@ duk_ret_t names(duk_context *ctx)
  */
 duk_ret_t nick(duk_context *ctx)
 {
-    self(ctx)->nick(duk_require_string(ctx, 0));
+    self(ctx)->setNickname(duk_require_string(ctx, 0));
 
     return 0;
 }
@@ -491,7 +491,9 @@ duk_ret_t constructor(duk_context *ctx)
         return 0;
 
     try {
-        auto s = std::make_shared<Server>(readName(ctx), readInfo(ctx), readIdentity(ctx), readSettings(ctx));
+        auto s = std::make_shared<Server>(readName(ctx), readInfo(ctx), readSettings(ctx));
+
+        readIdentity(*s, ctx);
 
         duk_push_this(ctx);
         duk_push_pointer(ctx, new std::shared_ptr<Server>(std::move(s)));

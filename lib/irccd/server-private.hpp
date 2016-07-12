@@ -74,6 +74,16 @@ public:
     {
         return m_handle;
     }
+
+    /**
+     * Tells if the connection is made.
+     *
+     * \return true if connected
+     */
+    inline bool isConnected() const noexcept
+    {
+        return irc_is_connected(m_handle.get());
+    }
 };
 
 } // !irccd

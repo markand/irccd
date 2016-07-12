@@ -88,21 +88,18 @@ ServerInfo readInfo(const json &object)
     return info;
 }
 
-ServerIdentity readIdentity(const json &object)
+void readIdentity(Server &server, const json &object)
 {
-    ServerIdentity identity;
     json::const_iterator it;
 
     if ((it = object.find("nickname")) != object.end() && it->is_string())
-        identity.nickname = *it;
+        server.setNickname(*it);
     if ((it = object.find("realname")) != object.end() && it->is_string())
-        identity.realname = *it;
+        server.setRealname(*it);
     if ((it = object.find("username")) != object.end() && it->is_string())
-        identity.username = *it;
+        server.setUsername(*it);
     if ((it = object.find("ctcpVersion")) != object.end() && it->is_string())
-        identity.ctcpversion = *it;
-
-    return identity;
+        server.setCtcpVersion(*it);
 }
 
 ServerSettings readSettings(const json &object)
@@ -163,7 +160,9 @@ std::vector<Command::Property> ServerConnect::properties() const
 
 json ServerConnect::exec(Irccd &irccd, const json &request) const
 {
-    auto server = std::make_shared<Server>(readInfoName(request), readInfo(request), readIdentity(request), readSettings(request));
+    auto server = std::make_shared<Server>(readInfoName(request), readInfo(request), readSettings(request));
+
+    readIdentity(*server, request);
 
     if (irccd.serverService().has(server->name()))
         throw std::invalid_argument("server '{}' already exists"_format(server->name()));

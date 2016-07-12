@@ -63,7 +63,7 @@ nlohmann::json ServerNick::exec(Irccd &irccd, const nlohmann::json &object) cons
 {
     Command::exec(irccd, object);
 
-    irccd.serverService().require(object["server"])->nick(object["nickname"]);
+    irccd.serverService().require(object["server"])->setNickname(object["nickname"]);
 
     return nlohmann::json::object();
 }

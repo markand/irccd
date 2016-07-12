@@ -43,7 +43,6 @@ namespace {
 bool connect(Server &server)
 {
     const ServerInfo &info = server.info();
-    const ServerIdentity &identity = server.identity();
     const char *password = info.password.empty() ? nullptr : info.password.c_str();
     std::string host = info.host;
     int code;
@@ -58,14 +57,14 @@ bool connect(Server &server)
 
     if (info.flags & ServerInfo::Ipv6) {
         code = irc_connect6(server.session(), host.c_str(), info.port, password,
-                    identity.nickname.c_str(),
-                    identity.username.c_str(),
-                    identity.realname.c_str());
+                            server.nickname().c_str(),
+                            server.username().c_str(),
+                            server.realname().c_str());
     } else {
         code = irc_connect(server.session(), host.c_str(), info.port, password,
-                   identity.nickname.c_str(),
-                   identity.username.c_str(),
-                   identity.realname.c_str());
+                           server.nickname().c_str(),
+                           server.username().c_str(),
+                           server.realname().c_str());
     }
 
     return code == 0;
