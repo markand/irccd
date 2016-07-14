@@ -5788,7 +5788,6 @@ class basic_json
     /// @}
 
 
-  private:
     ///////////////////////////
     // convenience functions //
     ///////////////////////////
@@ -5815,6 +5814,7 @@ class basic_json
         }
     }
 
+private:
     /*!
     @brief calculates the extra space to escape a JSON string
 

@@ -29,13 +29,11 @@
 
 namespace irccd {
 
-namespace state {
-
 /**
  * \brief Disconnected state.
  * \ingroup states
  */
-class Disconnected : public ServerState {
+class DisconnectedState : public State {
 private:
     ElapsedTimer m_timer;
 
@@ -50,8 +48,6 @@ public:
      */
     IRCCD_EXPORT std::string ident() const override;
 };
-
-} // !state
 
 } // !irccd
 

@@ -28,13 +28,11 @@
 
 namespace irccd {
 
-namespace state {
-
 /**
  * \brief Connected state.
  * \ingroup states
  */
-class Connected : public ServerState {
+class ConnectedState : public State {
 public:
     /**
      * \copydoc ServerState::prepare
@@ -46,8 +44,6 @@ public:
      */
     IRCCD_EXPORT std::string ident() const override;
 };
-
-} // !state
 
 } // !irccd
 

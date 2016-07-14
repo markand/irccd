@@ -35,6 +35,8 @@
 #include <utility>
 #include <vector>
 
+#include <json.hpp>
+
 #include "elapsed-timer.hpp"
 #include "server-state.hpp"
 #include "signals.hpp"
@@ -42,19 +44,12 @@
 
 namespace irccd {
 
-/**
- * \brief A channel to join with an optional password.
- */
-class ServerChannel {
-public:
-    std::string name;                               //!< the channel to join
-    std::string password;                           //!< the optional password
-};
+class Server;
 
 /**
  * \brief Prefixes for nicknames.
  */
-enum class ServerChanMode {
+enum class ChannelMode {
     Creator         = 'O',                          //!< Channel creator
     HalfOperator    = 'h',                          //!< Half operator
     Operator        = 'o',                          //!< Channel operator
@@ -63,9 +58,18 @@ enum class ServerChanMode {
 };
 
 /**
+ * \brief A channel to join with an optional password.
+ */
+class Channel {
+public:
+    std::string name;                               //!< the channel to join
+    std::string password;                           //!< the optional password
+};
+
+/**
  * \brief Describe a whois information.
  */
-class ServerWhois {
+class Whois {
 public:
     std::string nick;                               //!< user's nickname
     std::string user;                               //!< user's user
@@ -75,49 +79,9 @@ public:
 };
 
 /**
- * \brief Server information
- *
- * This class contains everything needed to connect to a server.
- */
-class ServerInfo {
-public:
-    enum {
-        Ipv6        = (1 << 0),                     //!< Connect using IPv6
-        Ssl         = (1 << 1),                     //!< Use SSL
-        SslVerify   = (1 << 2)                      //!< Verify SSL
-    };
-
-    std::string host;                               //!< Hostname
-    std::string password;                           //!< Optional server password
-    std::uint16_t port{6667};                       //!< Server's port
-    std::uint8_t flags{0};                          //!< Optional flags
-    std::map<ServerChanMode, char> modes;           //!< IRC modes (e.g. @~)
-};
-
-/**
- * \brief Contains settings to tweak the server
- *
- * This class contains additional settings that tweaks the server operations.
- */
-class ServerSettings {
-public:
-    enum {
-        AutoRejoin  = (1 << 0),                     //!< Auto rejoin a channel after being kicked
-        JoinInvite  = (1 << 1)                      //!< Join a channel on invitation
-    };
-
-    std::vector<ServerChannel> channels;            //!< List of channel to join
-    std::string command{"!"};                       //!< The command character to trigger plugin command
-    std::int8_t reconnectTries{-1};                 //!< Number of tries to reconnect before giving up
-    std::uint16_t reconnectDelay{30};               //!< Number of seconds to wait before trying to connect
-    std::uint8_t flags{0};                          //!< Optional flags
-    std::uint16_t pingTimeout{300};                 //!< Time in seconds before ping timeout is announced
-};
-
-/**
  * \brief Some variables that are needed in many places internally.
  */
-class ServerCache {
+class Cache {
 public:
     ElapsedTimer pingTimer;                         //!< Track elapsed time for ping timeout.
     std::int8_t reconnectCurrent{1};                //!< Number of reconnection already tested.
@@ -130,7 +94,7 @@ public:
     /**
      * Map of whois being build by nicknames.
      */
-    std::map<std::string, ServerWhois> whoisMap;
+    std::map<std::string, Whois> whoisMap;
 };
 
 /**
@@ -297,7 +261,7 @@ public:
 class WhoisEvent {
 public:
     std::shared_ptr<Server> server;         //!< The server.
-    ServerWhois whois;                      //!< The whois information.
+    Whois whois;                            //!< The whois information.
 };
 
 /**
@@ -319,6 +283,17 @@ public:
      * Bridge for libircclient.
      */
     class Session;
+
+    /**
+     * \brief Various options for server.
+     */
+    enum {
+        Ipv6        = (1 << 0),                     //!< Connect using IPv6
+        Ssl         = (1 << 1),                     //!< Use SSL
+        SslVerify   = (1 << 2),                     //!< Verify SSL
+        AutoRejoin  = (1 << 3),                     //!< Auto rejoin a channel after being kicked
+        JoinInvite  = (1 << 4)                      //!< Join a channel on invitation
+    };
 
     /**
      * Signal: onChannelMode
@@ -459,8 +434,17 @@ public:
     Signal<WhoisEvent> onWhois;
 
 private:
+    // Misc
+    std::map<ChannelMode, char> m_modes;
+
     // Identifier.
     std::string m_name;
+
+    // Connection information
+    std::string m_host;
+    std::string m_password;
+    std::uint16_t m_port{6667};
+    std::uint8_t m_flags{0};
 
     // Identity.
     std::string m_nickname{"irccd"};
@@ -468,10 +452,17 @@ private:
     std::string m_realname{"IRC Client Daemon"};
     std::string m_ctcpversion{"IRC Client Daemon"};
 
+    // Settings.
+    std::string m_commandCharacter{"!"};
+    std::int8_t m_reconnectTries{-1};
+    std::uint16_t m_reconnectDelay{30};
+    std::uint16_t m_pingTimeout{300};
+
     // Various settings.
-    ServerInfo m_info;
-    ServerSettings m_settings;
-    ServerCache m_cache;
+    std::vector<Channel> m_channels;
+
+    // TODO: find another way.
+    Cache m_cache;
 
     // Queue of requests to send.
     std::queue<std::function<bool ()>> m_queue;
@@ -480,8 +471,8 @@ private:
     std::unique_ptr<Session> m_session;
 
     // States.
-    std::unique_ptr<ServerState> m_state;
-    std::unique_ptr<ServerState> m_stateNext;
+    std::unique_ptr<State> m_state;
+    std::unique_ptr<State> m_stateNext;
 
     // Handle libircclient callbacks.
     void handleChannel(const char *, const char **) noexcept;
@@ -503,21 +494,30 @@ private:
 
 public:
     /**
+     * Convert a JSON object as a server.
+     *
+     * Used in JavaScript API and transport commands.
+     *
+     * \param object the object
+     * \return the server
+     * \throw std::exception on failures
+     */
+    IRCCD_EXPORT static std::shared_ptr<Server> fromJson(const nlohmann::json &object);
+
+    /**
      * Split a channel from the form channel:password into a ServerChannel object.
      *
      * \param value the value
      * \return a channel
      */
-    IRCCD_EXPORT static ServerChannel splitChannel(const std::string &value);
+    IRCCD_EXPORT static Channel splitChannel(const std::string &value);
 
     /**
      * Construct a server.
      *
      * \param name the identifier
-     * \param info the information
-     * \param settings the settings
      */
-    IRCCD_EXPORT Server(std::string name, ServerInfo info, ServerSettings settings = {});
+    IRCCD_EXPORT Server(std::string name);
 
     /**
      * Destructor. Close the connection if needed.
@@ -532,6 +532,91 @@ public:
     inline const std::string &name() const noexcept
     {
         return m_name;
+    }
+
+    /**
+     * Get the hostname.
+     *
+     * \return the hostname
+     */
+    inline const std::string &host() const noexcept
+    {
+        return m_host;
+    }
+
+    /**
+     * Set the hostname.
+     *
+     * \param host the hostname
+     */
+    inline void setHost(std::string host) noexcept
+    {
+        m_host = std::move(host);
+    }
+
+    /**
+     * Get the password.
+     *
+     * \return the password
+     */
+    inline const std::string &password() const noexcept
+    {
+        return m_password;
+    }
+
+    /**
+     * Set the password.
+     *
+     * An empty password means no password.
+     *
+     * \param password the password
+     */
+    inline void setPassword(std::string password) noexcept
+    {
+        m_password = std::move(password);
+    }
+
+    /**
+     * Get the port.
+     *
+     * \return the port
+     */
+    inline std::uint16_t port() const noexcept
+    {
+        return m_port;
+    }
+
+    /**
+     * Set the port.
+     *
+     * \param port the port
+     */
+    inline void setPort(std::uint16_t port) noexcept
+    {
+        m_port = port;
+    }
+
+    /**
+     * Get the flags.
+     *
+     * \return the flags
+     */
+    inline std::uint8_t flags() const noexcept
+    {
+        return m_flags;
+    }
+
+    /**
+     * Set the flags.
+     *
+     * \pre flags must be valid
+     * \param flags the flags
+     */
+    inline void setFlags(std::uint8_t flags) noexcept
+    {
+        assert(flags <= 0x1f);
+
+        m_flags = flags;
     }
 
     /**
@@ -552,23 +637,6 @@ public:
      * \param nickname the nickname
      */
     IRCCD_EXPORT void setNickname(std::string nickname);
-
-    /**
-     * Get the CTCP version.
-     *
-     * \return the CTCP version
-     */
-    inline const std::string &ctcpVersion() const noexcept
-    {
-        return m_ctcpversion;
-    }
-
-    /**
-     * Set the CTCP version.
-     *
-     * \param ctcpversion the version
-     */
-    IRCCD_EXPORT void setCtcpVersion(std::string ctcpversion);
 
     /**
      * Get the username.
@@ -613,34 +681,115 @@ public:
     }
 
     /**
-     * Get the server information.
+     * Get the CTCP version.
      *
-     * \return the server information
+     * \return the CTCP version
      */
-    inline const ServerInfo &info() const noexcept
+    inline const std::string &ctcpVersion() const noexcept
     {
-        return m_info;
+        return m_ctcpversion;
     }
 
     /**
-     * Get the server settings.
+     * Set the CTCP version.
      *
-     * \note some settings will be used only after the next reconnection
-     * \return the settings
+     * \param ctcpversion the version
      */
-    inline ServerSettings &settings() noexcept
+    IRCCD_EXPORT void setCtcpVersion(std::string ctcpversion);
+
+    /**
+     * Get the command character.
+     *
+     * \return the character
+     */
+    inline const std::string &commandCharacter() const noexcept
     {
-        return m_settings;
+        return m_commandCharacter;
     }
 
     /**
-     * Get the server settings.
+     * Set the command character.
      *
-     * \return the settings
+     * \pre !commandCharacter.empty()
+     * \param commandCharacter the command character
      */
-    inline const ServerSettings &settings() const noexcept
+    inline void setCommandCharacter(std::string commandCharacter) noexcept
     {
-        return m_settings;
+        assert(!commandCharacter.empty());
+
+        m_commandCharacter = std::move(commandCharacter);
+    }
+
+    /**
+     * Get the number of reconnections before giving up.
+     *
+     * \return the number of reconnections
+     */
+    inline std::int8_t reconnectTries() const noexcept
+    {
+        return m_reconnectTries;
+    }
+
+    /**
+     * Set the number of reconnections to test before giving up.
+     *
+     * A value less than 0 means infinite.
+     *
+     * \param reconnectTries the number of reconnections
+     */
+    inline void setReconnectTries(std::int8_t reconnectTries) noexcept
+    {
+        m_reconnectTries = reconnectTries;
+    }
+
+    /**
+     * Get the reconnection delay before retrying.
+     *
+     * \return the number of seconds
+     */
+    inline std::uint16_t reconnectDelay() const noexcept
+    {
+        return m_reconnectDelay;
+    }
+
+    /**
+     * Set the number of seconds before retrying.
+     *
+     * \param reconnectDelay the number of seconds
+     */
+    inline void setReconnectDelay(std::uint16_t reconnectDelay) noexcept
+    {
+        m_reconnectDelay = reconnectDelay;
+    }
+
+    /**
+     * Get the ping timeout.
+     *
+     * \return the ping timeout
+     */
+    inline std::uint16_t pingTimeout() const noexcept
+    {
+        return m_pingTimeout;
+    }
+
+    /**
+     * Set the ping timeout before considering a server as dead.
+     *
+     * \param pingTimeout the delay in seconds
+     */
+    inline void setPingTimeout(std::uint16_t pingTimeout) noexcept
+    {
+        m_pingTimeout = pingTimeout;
+    }
+
+    /**
+     * Get the list of channels joined.
+     *
+     * \return the channels
+     */
+    inline const std::vector<Channel> &channels() const noexcept
+    {
+        return m_channels;
     }
 
     /**
@@ -649,7 +798,7 @@ public:
      * \return the cache
      * \warning use with care
      */
-    inline ServerCache &cache() noexcept
+    inline Cache &cache() noexcept
     {
         return m_cache;
     }
@@ -669,7 +818,7 @@ public:
      *
      * \param state the new state
      */
-    inline void next(std::unique_ptr<ServerState> state) noexcept
+    inline void next(std::unique_ptr<State> state) noexcept
     {
         m_stateNext = std::move(state);
     }

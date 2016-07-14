@@ -35,6 +35,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <format.h>
 #include <json.hpp>
 
 #include "sysconfig.hpp"
@@ -199,6 +200,20 @@ inline std::string join(std::initializer_list<T> list, DelimType delim = ':')
 }
 
 /**
+ * Clamp the value between low and high.
+ *
+ * \param value the value
+ * \param low the minimum value
+ * \param high the maximum value
+ * \return the value between minimum and maximum
+ */
+template <typename T>
+constexpr T clamp(T value, T low, T high) noexcept
+{
+    return (value < high) ? std::max(value, low) : std::min(value, high);
+}
+
+/**
  * Parse IRC message and determine if it's a command or a simple message.
  *
  * \param message the message line
@@ -328,23 +343,95 @@ inline void unused(Args&&...) noexcept
 namespace json {
 
 /**
- * Get a property or return null one if not found or if json is not an object.
+ * Require a property.
  *
  * \param json the json value
- * \param property the property key
- * \return the value or null one if not found
+ * \param key the property name
+ * \param type the requested property type
+ * \return the value
+ * \throw std::runtime_error if the property is missing
  */
-inline nlohmann::json get(const nlohmann::json &json, const std::string &property) noexcept
+inline nlohmann::json require(const nlohmann::json &json, const std::string &key, nlohmann::json::value_t type)
 {
-    if (!json.is_object())
-        return nlohmann::json();
-
-    auto it = json.find(property);
+    auto it = json.find(key);
+    auto dummy = nlohmann::json(type);
 
     if (it == json.end())
-        return nlohmann::json();
+        throw std::runtime_error(fmt::format("missing '{}' property", key));
+    if (it->type() != type)
+        throw std::runtime_error(fmt::format("invalid '{}' property ({} expected, got {})", key, it->type_name(), dummy.type_name()));
 
     return *it;
+}
+
+/**
+ * Convenient access for booleans.
+ *
+ * \param json the json object
+ * \param key the property key
+ * \return the boolean
+ * \throw std::runtime_error if the property is missing or not a boolean
+ */
+inline bool requireBool(const nlohmann::json &json, const std::string &key)
+{
+    return require(json, key, nlohmann::json::value_t::boolean);
+}
+
+/**
+ * Convenient access for ints.
+ *
+ * \param json the json object
+ * \param key the property key
+ * \return the int
+ * \throw std::runtime_error if the property is missing or not ant int
+ */
+inline std::int64_t requireInt(const nlohmann::json &json, const std::string &key)
+{
+    return require(json, key, nlohmann::json::value_t::number_integer);
+}
+
+/**
+ * Convenient access for unsigned ints.
+ *
+ * \param json the json object
+ * \param key the property key
+ * \return the unsigned int
+ * \throw std::runtime_error if the property is missing or not ant int
+ */
+inline std::uint64_t requireUint(const nlohmann::json &json, const std::string &key)
+{
+    return require(json, key, nlohmann::json::value_t::number_unsigned);
+}
+
+/**
+ * Convenient access for strings.
+ *
+ * \param json the json object
+ * \param key the property key
+ * \return the string
+ * \throw std::runtime_error if the property is missing or not a string
+ */
+inline std::string requireString(const nlohmann::json &json, const std::string &key)
+{
+    return require(json, key, nlohmann::json::value_t::string);
+}
+
+/**
+ * Convenient access for unique identifiers.
+ *
+ * \param json the json object
+ * \param key the property key
+ * \return the identifier
+ * \throw std::runtime_error if the property is invalid
+ */
+inline std::string requireIdentifier(const nlohmann::json &json, const std::string &key)
+{
+    auto id = requireString(json, key);
+
+    if (!isIdentifierValid(id))
+        throw std::runtime_error("invalid '{}' identifier property");
+
+    return id;
 }
 
 /**
@@ -366,9 +453,21 @@ inline bool toBool(const nlohmann::json &json, bool def = false) noexcept
  * \param def the default value if not an int
  * \return an int
  */
-inline int toInt(const nlohmann::json &json, int def = 0) noexcept
+inline std::int64_t toInt(const nlohmann::json &json, std::int64_t def = 0) noexcept
 {
-    return json.is_number() ? json.get<int>() : def;
+    return json.is_number_integer() ? json.get<std::int64_t>() : def;
+}
+
+/**
+ * Convert the json value to unsigned.
+ *
+ * \param json the json value
+ * \param def the default value if not a unsigned int
+ * \return an unsigned int
+ */
+inline std::uint64_t toUint(const nlohmann::json &json, std::uint64_t def = 0) noexcept
+{
+    return json.is_number_unsigned() ? json.get<std::uint64_t>() : def;
 }
 
 /**
@@ -381,6 +480,109 @@ inline int toInt(const nlohmann::json &json, int def = 0) noexcept
 inline std::string toString(const nlohmann::json &json, std::string def = "") noexcept
 {
     return json.is_string() ? json.get<std::string>() : def;
+}
+
+/**
+ * Get a property or return null one if not found or if json is not an object.
+ *
+ * \param json the json value
+ * \param property the property key
+ * \return the value or null one if not found
+ */
+inline nlohmann::json get(const nlohmann::json &json, const std::string &property) noexcept
+{
+    auto it = json.find(property);
+
+    if (it == json.end())
+        return nlohmann::json();
+
+    return *it;
+}
+
+/**
+ * Convenient access for boolean with default value.
+ *
+ * \param json the json value
+ * \param key the property key
+ * \param def the default value
+ * \return the boolean
+ */
+inline bool getBool(const nlohmann::json &json, const std::string &key, bool def = false) noexcept
+{
+    return toBool(get(json, key), def);
+}
+
+/**
+ * Convenient access for ints with default value.
+ *
+ * \param json the json value
+ * \param key the property key
+ * \param def the default value
+ * \return the int
+ */
+inline std::int64_t getInt(const nlohmann::json &json, const std::string &key, std::int64_t def = 0) noexcept
+{
+    return toInt(get(json, key), def);
+}
+
+/**
+ * Convenient access for unsigned ints with default value.
+ *
+ * \param json the json value
+ * \param key the property key
+ * \param def the default value
+ * \return the unsigned int
+ */
+inline std::uint64_t getUint(const nlohmann::json &json, const std::string &key, std::uint64_t def = 0) noexcept
+{
+    return toUint(get(json, key), def);
+}
+
+/**
+ * Get an integer in the given range.
+ *
+ * \param json the json value
+ * \param key the property key
+ * \param def the default value
+ * \return the boolean
+ */
+template <typename T>
+inline T getIntRange(const nlohmann::json &json,
+                     const std::string &key,
+                     std::int64_t min = std::numeric_limits<T>::min(),
+                     std::int64_t max = std::numeric_limits<T>::max()) noexcept
+{
+    return clamp(getInt(json, key), min, max);
+}
+
+/**
+ * Get an unsigned integer in the given range.
+ *
+ * \param json the json value
+ * \param key the property key
+ * \param def the default value
+ * \return the boolean
+ */
+template <typename T>
+inline T getUintRange(const nlohmann::json &json,
+                    const std::string &key,
+                    std::uint64_t min = std::numeric_limits<T>::min(),
+                    std::uint64_t max = std::numeric_limits<T>::max()) noexcept
+{
+    return clamp(getUint(json, key), min, max);
+}
+
+/**
+ * Convenient access for strings with default value.
+ *
+ * \param json the json value
+ * \param key the property key
+ * \param def the default value
+ * \return the string
+ */
+inline std::string getString(const nlohmann::json &json, const std::string &key, std::string def = "") noexcept
+{
+    return toString(get(json, key), def);
 }
 
 } // !json

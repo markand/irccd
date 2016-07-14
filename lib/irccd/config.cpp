@@ -270,10 +270,6 @@ std::shared_ptr<Server> loadServer(const ini::Section &sc, const Config &config)
 {
     assert(sc.key() == "server");
 
-    std::string name;
-    ServerInfo info;
-    ServerSettings settings;
-
     // Name.
     ini::Section::const_iterator it;
 
@@ -282,49 +278,40 @@ std::shared_ptr<Server> loadServer(const ini::Section &sc, const Config &config)
     else if (!util::isIdentifierValid(it->value()))
         throw std::invalid_argument("server: invalid identifier: {}"_format(it->value()));
 
-    name = it->value();
+    auto server = std::make_shared<Server>(it->value());
 
     // Host
     if ((it = sc.find("host")) == sc.end())
-        throw std::invalid_argument("server {}: missing host"_format(name));
+        throw std::invalid_argument("server {}: missing host"_format(server->name()));
 
-    info.host = it->value();
-
-    // Optional port
-    if ((it = sc.find("port")) != sc.end()) {
-        try {
-            info.port = util::toNumber<std::uint16_t>(it->value());
-        } catch (const std::exception &) {
-            throw std::invalid_argument("server {}: invalid number for {}: {}"_format(name, it->key(), it->value()));
-        }
-    }
+    server->setHost(it->value());
 
     // Optional password
     if ((it = sc.find("password")) != sc.end())
-        info.password = it->value();
+        server->setPassword(it->value());
 
     // Optional flags
     if ((it = sc.find("ipv6")) != sc.end() && util::isBoolean(it->value()))
-        info.flags |= ServerInfo::Ipv6;
-    if ((it = sc.find("ssl")) != sc.end()) {
-        if (util::isBoolean(it->value()))
-            info.flags |= ServerInfo::Ssl;
-    }
-    if ((it = sc.find("ssl-verify")) != sc.end()) {
-        if (util::isBoolean(it->value()))
-            info.flags |= ServerInfo::SslVerify;
-    }
+        server->setFlags(server->flags() | Server::Ipv6);
+    if ((it = sc.find("ssl")) != sc.end() && util::isBoolean(it->value()))
+        server->setFlags(server->flags() | Server::Ssl);
+    if ((it = sc.find("ssl-verify")) != sc.end() && util::isBoolean(it->value()))
+        server->setFlags(server->flags() | Server::SslVerify);
+
+    // Optional identity
+    if ((it = sc.find("identity")) != sc.end())
+        config.loadServerIdentity(*server, it->value());
 
     // Options
     if ((it = sc.find("auto-rejoin")) != sc.end() && util::isBoolean(it->value()))
-        settings.flags |= ServerSettings::AutoRejoin;
+        server->setFlags(server->flags() | Server::AutoRejoin);
     if ((it = sc.find("join-invite")) != sc.end() && util::isBoolean(it->value()))
-        settings.flags |= ServerSettings::JoinInvite;
+        server->setFlags(server->flags() | Server::JoinInvite);
 
     // Channels
     if ((it = sc.find("channels")) != sc.end()) {
         for (const std::string &s : *it) {
-            ServerChannel channel;
+            Channel channel;
 
             if (auto pos = s.find(":") != std::string::npos) {
                 channel.name = s.substr(0, pos);
@@ -332,29 +319,27 @@ std::shared_ptr<Server> loadServer(const ini::Section &sc, const Config &config)
             } else
                 channel.name = s;
 
-            settings.channels.push_back(std::move(channel));
+            //server.channels.push_back(std::move(channel));
+            //server->join()
+            server->join(channel.name, channel.password);
         }
     }
     if ((it = sc.find("command-char")) != sc.end())
-        settings.command = it->value();
+        server->setCommandCharacter(it->value());
 
     // Reconnect and ping timeout
     try {
+        if ((it = sc.find("port")) != sc.end())
+            server->setPort(util::toNumber<std::uint16_t>(it->value()));
         if ((it = sc.find("reconnect-tries")) != sc.end())
-            settings.reconnectTries = util::toNumber<std::int8_t>(it->value());
+            server->setReconnectTries(util::toNumber<std::int8_t>(it->value()));
         if ((it = sc.find("reconnect-timeout")) != sc.end())
-            settings.reconnectDelay = util::toNumber<std::uint16_t>(it->value());
+            server->setReconnectDelay(util::toNumber<std::uint16_t>(it->value()));
         if ((it = sc.find("ping-timeout")) != sc.end())
-            settings.pingTimeout = util::toNumber<std::uint16_t>(it->value());
+            server->setPingTimeout(util::toNumber<std::uint16_t>(it->value()));
     } catch (const std::exception &) {
-        log::warning("server {}: invalid number for {}: {}"_format(name, it->key(), it->value()));
+        log::warning("server {}: invalid number for {}: {}"_format(server->name(), it->key(), it->value()));
     }
-
-    auto server = std::make_shared<Server>(std::move(name), std::move(info), std::move(settings));
-
-    // Optional identity
-    if ((it = sc.find("identity")) != sc.end())
-        config.loadServerIdentity(*server, it->value());
 
     return server;
 }

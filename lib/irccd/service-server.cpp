@@ -236,11 +236,11 @@ void ServerService::handleMessage(const MessageEvent &ev)
 
     m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
         [=] (Plugin &plugin) -> std::string {
-            return util::parseMessage(ev.message, ev.server->settings().command, plugin.name()).second == util::MessageType::Command ? "onCommand" : "onMessage";
+            return util::parseMessage(ev.message, ev.server->commandCharacter(), plugin.name()).second == util::MessageType::Command ? "onCommand" : "onMessage";
         },
         [=] (Plugin &plugin) mutable {
             auto copy = ev;
-            auto pack = util::parseMessage(copy.message, copy.server->settings().command, plugin.name());
+            auto pack = util::parseMessage(copy.message, copy.server->commandCharacter(), plugin.name());
 
             copy.message = pack.first;
 
@@ -414,11 +414,11 @@ void ServerService::handleQuery(const QueryEvent &ev)
 
     m_irccd.post(EventHandler{ev.server->name(), ev.origin, /* channel */ "",
         [=] (Plugin &plugin) -> std::string {
-            return util::parseMessage(ev.message, ev.server->settings().command, plugin.name()).second == util::MessageType::Command ? "onQueryCommand" : "onQuery";
+            return util::parseMessage(ev.message, ev.server->commandCharacter(), plugin.name()).second == util::MessageType::Command ? "onQueryCommand" : "onQuery";
         },
         [=] (Plugin &plugin) mutable {
             auto copy = ev;
-            auto pack = util::parseMessage(copy.message, copy.server->settings().command, plugin.name());
+            auto pack = util::parseMessage(copy.message, copy.server->commandCharacter(), plugin.name());
 
             copy.message = pack.first;
 

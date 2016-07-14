@@ -34,91 +34,6 @@ namespace irccd {
 
 namespace command {
 
-namespace {
-
-std::string readInfoName(const json &object)
-{
-    std::string name = object["name"];
-
-    if (!util::isIdentifierValid(name))
-        throw PropertyError("name", "invalid identifier");
-
-    return name;
-}
-
-std::string readInfoHost(const json &object)
-{
-    std::string host = object["host"];
-
-    if (host.empty())
-        throw PropertyError("host", "empty hostname");
-
-    return host;
-}
-
-std::uint16_t readInfoPort(const json &object)
-{
-    json::const_iterator it = object.find("port");
-
-    if (it == object.end())
-        return 6667;
-
-    if (!it->is_number())
-        throw InvalidPropertyError("port", json::value_t::number_unsigned, it->type());
-    if (!util::isBound(it->get<int>(), 0, UINT16_MAX))
-        throw PropertyRangeError("port", 0, UINT16_MAX, it->get<int>());
-
-    return static_cast<std::uint16_t>(it->get<int>());
-}
-
-ServerInfo readInfo(const json &object)
-{
-    ServerInfo info;
-
-    info.host = readInfoHost(object);
-    info.port = readInfoPort(object);
-
-    json::const_iterator it;
-
-    if ((it = object.find("ssl")) != object.end() && it->is_boolean() && *it)
-        info.flags |= ServerInfo::Ssl;
-    if ((it = object.find("sslVerify")) != object.end() && it->is_boolean() && *it)
-        info.flags |= ServerInfo::SslVerify;
-
-    return info;
-}
-
-void readIdentity(Server &server, const json &object)
-{
-    json::const_iterator it;
-
-    if ((it = object.find("nickname")) != object.end() && it->is_string())
-        server.setNickname(*it);
-    if ((it = object.find("realname")) != object.end() && it->is_string())
-        server.setRealname(*it);
-    if ((it = object.find("username")) != object.end() && it->is_string())
-        server.setUsername(*it);
-    if ((it = object.find("ctcpVersion")) != object.end() && it->is_string())
-        server.setCtcpVersion(*it);
-}
-
-ServerSettings readSettings(const json &object)
-{
-    ServerSettings settings;
-    json::const_iterator it;
-
-    if ((it = object.find("commandChar")) != object.end() && it->is_string())
-        settings.command = *it;
-    if ((it = object.find("reconnectTries")) != object.end() && it->is_number_integer())
-        settings.reconnectTries = *it;
-    if ((it = object.find("reconnectTimeout")) != object.end() && it->is_number_integer())
-        settings.reconnectDelay = *it;
-
-    return settings;
-}
-
-} // !namespace
-
 ServerConnect::ServerConnect()
     : Command("server-connect", "Server")
 {
@@ -160,9 +75,7 @@ std::vector<Command::Property> ServerConnect::properties() const
 
 json ServerConnect::exec(Irccd &irccd, const json &request) const
 {
-    auto server = std::make_shared<Server>(readInfoName(request), readInfo(request), readSettings(request));
-
-    readIdentity(*server, request);
+    auto server = Server::fromJson(request);
 
     if (irccd.serverService().has(server->name()))
         throw std::invalid_argument("server '{}' already exists"_format(server->name()));

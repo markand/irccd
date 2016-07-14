@@ -63,24 +63,24 @@ nlohmann::json ServerInfo::exec(Irccd &irccd, const nlohmann::json &request) con
 
     // General stuff.
     response.push_back({"name", server->name()});
-    response.push_back({"host", server->info().host});
-    response.push_back({"port", server->info().port});
+    response.push_back({"host", server->host()});
+    response.push_back({"port", server->port()});
     response.push_back({"nickname", server->nickname()});
     response.push_back({"username", server->username()});
     response.push_back({"realname", server->realname()});
 
     // Optional stuff.
-    if (server->info().flags & irccd::ServerInfo::Ipv6)
+    if (server->flags() & Server::Ipv6)
         response.push_back({"ipv6", true});
-    if (server->info().flags & irccd::ServerInfo::Ssl)
+    if (server->flags() & Server::Ssl)
         response.push_back({"ssl", true});
-    if (server->info().flags & irccd::ServerInfo::SslVerify)
+    if (server->flags() & Server::SslVerify)
         response.push_back({"sslVerify", true});
 
     // Channel list.
     auto channels = nlohmann::json::array();
 
-    for (const auto &c : server->settings().channels)
+    for (const auto &c : server->channels())
         channels.push_back(c.name);
 
     response.push_back({"channels", std::move(channels)});

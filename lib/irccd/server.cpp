@@ -55,12 +55,12 @@ inline std::string strify(const char *s)
  * Remove the user prefix only if it is present in the mode table, for example removes @ from @irccd if and only if
  * @ is a character mode (e.g. operator).
  */
-std::string cleanPrefix(const ServerInfo &info, std::string nickname)
+std::string cleanPrefix(const std::map<ChannelMode, char> &modes, std::string nickname)
 {
     if (nickname.length() == 0)
         return nickname;
 
-    for (const auto &pair : info.modes)
+    for (const auto &pair : modes)
         if (nickname[0] == pair.second)
             nickname.erase(0, 1);
 
@@ -73,11 +73,11 @@ std::string cleanPrefix(const ServerInfo &info, std::string nickname)
  *
  * Read modes from the IRC event numeric.
  */
-std::map<ServerChanMode, char> extractPrefixes(const std::string &line)
+std::map<ChannelMode, char> extractPrefixes(const std::string &line)
 {
     std::pair<char, char> table[16];
     std::string buf = line.substr(7);
-    std::map<ServerChanMode, char> modes;
+    std::map<ChannelMode, char> modes;
 
     for (int i = 0; i < 16; ++i)
         table[i] = std::make_pair(-1, -1);
@@ -101,7 +101,7 @@ std::map<ServerChanMode, char> extractPrefixes(const std::string &line)
 
     // Put these as a map of mode to prefix.
     for (int i = 0; i < 16; ++i) {
-        auto key = static_cast<ServerChanMode>(table[i].first);
+        auto key = static_cast<ChannelMode>(table[i].first);
         auto value = table[i].second;
 
         modes.emplace(key, value);
@@ -121,11 +121,11 @@ void Server::handleConnect(const char *, const char **) noexcept
     m_cache.pingTimer.reset();
 
     // Don't forget to change state and notify.
-    next(std::make_unique<state::Connected>());
+    next(std::make_unique<ConnectedState>());
     onConnect(ConnectEvent{shared_from_this()});
 
     // Auto join listed channels.
-    for (const ServerChannel &channel : m_settings.channels) {
+    for (const Channel &channel : m_channels) {
         log::info() << "server " << m_name << ": auto joining " << channel.name << std::endl;
         join(channel.name, channel.password);
     }
@@ -154,7 +154,7 @@ void Server::handleCtcpAction(const char *orig, const char **params) noexcept
 void Server::handleInvite(const char *orig, const char **params) noexcept
 {
     // If joininvite is set, join the channel.
-    if ((m_settings.flags & ServerSettings::JoinInvite) && isSelf(strify(params[0])))
+    if ((m_flags & JoinInvite) && isSelf(strify(params[0])))
         join(strify(params[1]));
 
     /*
@@ -173,7 +173,7 @@ void Server::handleJoin(const char *orig, const char **params) noexcept
 void Server::handleKick(const char *orig, const char **params) noexcept
 {
     // Rejoin the channel if the option has been set and I was kicked.
-    if ((m_settings.flags & ServerSettings::AutoRejoin) && isSelf(strify(params[1])))
+    if ((m_flags & AutoRejoin) && isSelf(strify(params[1])))
         join(strify(params[0]));
 
     onKick(KickEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1]), strify(params[2])});
@@ -219,7 +219,7 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 
         // The listing may add some prefixes, remove them if needed.
         for (std::string u : users)
-            m_cache.namesMap[params[2]].insert(cleanPrefix(m_info, u));
+            m_cache.namesMap[params[2]].insert(cleanPrefix(m_modes, u));
     } else if (event == LIBIRC_RFC_RPL_ENDOFNAMES) {
         /*
          * Called when end of name listing has finished on a channel.
@@ -252,7 +252,7 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
         if (c < 6 || !params[1] || !params[2] || !params[3] || !params[5])
             return;
 
-        ServerWhois info;
+        Whois info;
 
         info.nick = strify(params[1]);
         info.user = strify(params[2]);
@@ -277,7 +277,7 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 
             // Clean their prefixes.
             for (auto &s : channels)
-                s = cleanPrefix(m_info, s);
+                s = cleanPrefix(m_modes, s);
 
             it->second.channels = std::move(channels);
         }
@@ -302,7 +302,7 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
          */
         for (unsigned int i = 0; i < c; ++i) {
             if (strncmp(params[i], "PREFIX", 6) == 0) {
-                m_info.modes = extractPrefixes(params[i]);
+                m_modes = extractPrefixes(params[i]);
                 break;
             }
         }
@@ -333,22 +333,48 @@ void Server::handleTopic(const char *orig, const char **params) noexcept
     onTopic(TopicEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
 }
 
-ServerChannel Server::splitChannel(const std::string &value)
+std::shared_ptr<Server> Server::fromJson(const nlohmann::json &object)
+{
+    auto server = std::make_shared<Server>(util::json::requireIdentifier(object, "name"));
+
+    server->setHost(util::json::requireString(object, "host"));
+    server->setPassword(util::json::getString(object, "password"));
+    server->setNickname(util::json::getString(object, "nickname", server->nickname()));
+    server->setRealname(util::json::getString(object, "realname", server->realname()));
+    server->setUsername(util::json::getString(object, "username", server->username()));
+    server->setCtcpVersion(util::json::getString(object, "ctcpVersion", server->ctcpVersion()));
+    server->setCommandCharacter(util::json::getString(object, "commandChar", server->commandCharacter()));
+
+    if (object.find("port") != object.end())
+        server->setPort(util::json::getUintRange<std::uint16_t>(object, "port"));
+    if (util::json::getBool(object, "ipv6"))
+        server->setFlags(server->flags() | Server::Ipv6);
+    if (util::json::getBool(object, "ssl"))
+        server->setFlags(server->flags() | Server::Ssl);
+    if (util::json::getBool(object, "sslVerify"))
+        server->setFlags(server->flags() | Server::SslVerify);
+    if (util::json::getBool(object, "autoRejoin"))
+        server->setFlags(server->flags() | Server::AutoRejoin);
+    if (util::json::getBool(object, "joinInvite"))
+        server->setFlags(server->flags() | Server::JoinInvite);
+
+    return server;
+}
+
+Channel Server::splitChannel(const std::string &value)
 {
     auto pos = value.find(':');
 
     if (pos != std::string::npos)
-        return ServerChannel{value.substr(0, pos), value.substr(pos + 1)};
+        return { value.substr(0, pos), value.substr(pos + 1) };
 
-    return ServerChannel{value, ""};
+    return { value, "" };
 }
 
-Server::Server(std::string name, ServerInfo info, ServerSettings settings)
+Server::Server(std::string name)
     : m_name(std::move(name))
-    , m_info(std::move(info))
-    , m_settings(std::move(settings))
     , m_session(std::make_unique<Session>())
-    , m_state(std::make_unique<state::Connecting>())
+    , m_state(std::make_unique<ConnectingState>())
 {
     irc_callbacks_t callbacks;
 
@@ -462,7 +488,7 @@ void Server::disconnect() noexcept
 void Server::reconnect() noexcept
 {
     irc_disconnect(*m_session);
-    next(std::make_unique<state::Connecting>());
+    next(std::make_unique<ConnectingState>());
 }
 
 void Server::sync(fd_set &setinput, fd_set &setoutput)
@@ -518,11 +544,14 @@ void Server::invite(std::string target, std::string channel)
 
 void Server::join(std::string channel, std::string password)
 {
-    m_queue.push([=] () {
-        const char *ptr = password.empty() ? nullptr : password.c_str();
+    if (m_session->isConnected())
+        m_queue.push([=] () {
+            const char *ptr = password.empty() ? nullptr : password.c_str();
 
-        return irc_cmd_join(*m_session, channel.c_str(), ptr) == 0;
-    });
+            return irc_cmd_join(*m_session, channel.c_str(), ptr) == 0;
+        });
+    else
+        m_channels.push_back({ std::move(channel), std::move(password) });
 }
 
 void Server::kick(std::string target, std::string channel, std::string reason)

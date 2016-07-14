@@ -38,26 +38,20 @@ namespace irccd {
 class Server;
 
 /**
- * \brief Namespace for server states.
- */
-namespace state {
-}
-
-/**
  * \class ServerState
  * \brief Server current state.
  */
-class ServerState {
+class State {
 public:
     /**
      * Default constructor.
      */
-    ServerState() = default;
+    State() = default;
 
     /**
      * Virtual default destructor.
      */
-    virtual ~ServerState() = default;
+    virtual ~State() = default;
 
     /**
      * Prepare the state.

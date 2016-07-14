@@ -27,33 +27,26 @@ using namespace fmt::literals;
 
 namespace irccd {
 
-namespace state {
-
-void Connected::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
+void ConnectedState::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
 {
-    const ServerSettings &settings = server.settings();
-
     if (!irc_is_connected(server.session())) {
         log::warning() << "server " << server.name() << ": disconnected" << std::endl;
 
-        if (settings.reconnectDelay > 0)
-            log::warning("server {}: retrying in {} seconds"_format(server.name(), settings.reconnectDelay));
+        if (server.reconnectDelay() > 0)
+            log::warning("server {}: retrying in {} seconds"_format(server.name(), server.reconnectDelay()));
 
-        server.next(std::make_unique<state::Disconnected>());
-    } else if (server.cache().pingTimer.elapsed() >= settings.pingTimeout * 1000) {
+        server.next(std::make_unique<DisconnectedState>());
+    } else if (server.cache().pingTimer.elapsed() >= server.pingTimeout() * 1000) {
         log::warning() << "server " << server.name() << ": ping timeout after "
                    << (server.cache().pingTimer.elapsed() / 1000) << " seconds" << std::endl;
-        server.next(std::make_unique<state::Disconnected>());
-    } else {
+        server.next(std::make_unique<DisconnectedState>());
+    } else
         irc_add_select_descriptors(server.session(), &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
-    }
 }
 
-std::string Connected::ident() const
+std::string ConnectedState::ident() const
 {
     return "Connected";
 }
-
-} // !state
 
 } // !irccd
