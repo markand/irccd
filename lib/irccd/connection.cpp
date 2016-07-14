@@ -18,6 +18,7 @@
 
 #include "connection.hpp"
 #include "logger.hpp"
+#include "util.hpp"
 
 namespace irccd {
 
@@ -26,9 +27,10 @@ nlohmann::json Connection::next(const std::string &name, int timeout)
     m_timer.reset();
 
     for (;;) {
-        nlohmann::json object = next(clamp(timeout));
+        auto object = next(clamp(timeout));
+        auto response = object.find("response");
 
-        if (object.is_object() && object["response"].dump() == name)
+        if (response != object.end() && util::json::toString(*response) == name)
             return object;
     }
 
