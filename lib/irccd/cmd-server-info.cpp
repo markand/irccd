@@ -49,11 +49,7 @@ std::vector<Command::Property> ServerInfo::properties() const
 
 nlohmann::json ServerInfo::request(Irccdctl &, const CommandRequest &args) const
 {
-    return nlohmann::json::object({
-        { "server",     args.args()[0] },
-        { "target",     args.args()[1] },
-        { "channel",    args.args()[2] }
-    });
+    return {{ "server", args.args()[0] }};
 }
 
 nlohmann::json ServerInfo::exec(Irccd &irccd, const nlohmann::json &request) const
@@ -68,6 +64,7 @@ nlohmann::json ServerInfo::exec(Irccd &irccd, const nlohmann::json &request) con
     response.push_back({"nickname", server->nickname()});
     response.push_back({"username", server->username()});
     response.push_back({"realname", server->realname()});
+    response.push_back({"channels", server->channels() });
 
     // Optional stuff.
     if (server->flags() & Server::Ipv6)
@@ -76,14 +73,6 @@ nlohmann::json ServerInfo::exec(Irccd &irccd, const nlohmann::json &request) con
         response.push_back({"ssl", true});
     if (server->flags() & Server::SslVerify)
         response.push_back({"sslVerify", true});
-
-    // Channel list.
-    auto channels = nlohmann::json::array();
-
-    for (const auto &c : server->channels())
-        channels.push_back(c.name);
-
-    response.push_back({"channels", std::move(channels)});
 
     return response;
 }
