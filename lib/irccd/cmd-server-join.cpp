@@ -48,8 +48,7 @@ std::vector<Command::Property> ServerJoin::properties() const
 {
     return {
         { "server",     { nlohmann::json::value_t::string }},
-        { "channel",    { nlohmann::json::value_t::string }},
-        { "password",   { nlohmann::json::value_t::string }}
+        { "channel",    { nlohmann::json::value_t::string }}
     };
 }
 
@@ -61,7 +60,7 @@ nlohmann::json ServerJoin::request(Irccdctl &, const CommandRequest &args) const
     });
 
     if (args.length() == 3)
-        req.push_back(nlohmann::json::object({"password", args.args()[2]}));
+        req.push_back({"password", args.args()[2]});
 
     return req;
 }
@@ -70,12 +69,15 @@ nlohmann::json ServerJoin::exec(Irccd &irccd, const nlohmann::json &request) con
 {
     Command::exec(irccd, request);
 
-    auto password = request["password"];
+    std::string password;
+
+    if (request.find("password") != request.end())
+        password = request["password"];
 
     irccd.serverService().require(
         request.at("server").get<std::string>())->join(
         request.at("channel").get<std::string>(),
-        password.is_string() ? password.get<std::string>() : ""
+        password
     );
 
     return nlohmann::json::object();
