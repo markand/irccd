@@ -64,7 +64,7 @@ nlohmann::json ServerInfo::exec(Irccd &irccd, const nlohmann::json &request) con
     response.push_back({"nickname", server->nickname()});
     response.push_back({"username", server->username()});
     response.push_back({"realname", server->realname()});
-    response.push_back({"channels", server->channels() });
+    response.push_back({"channels", server->channels()});
 
     // Optional stuff.
     if (server->flags() & Server::Ipv6)
