@@ -112,6 +112,11 @@ std::map<ChannelMode, char> extractPrefixes(const std::string &line)
 
 } // !namespace
 
+void Server::removeJoinedChannel(const std::string &channel)
+{
+    m_jchannels.erase(std::remove(m_jchannels.begin(), m_jchannels.end(), channel), m_jchannels.end());
+}
+
 void Server::handleConnect(const char *, const char **) noexcept
 {
     // Reset the number of tried reconnection.
@@ -120,12 +125,15 @@ void Server::handleConnect(const char *, const char **) noexcept
     // Reset the timer.
     m_cache.pingTimer.reset();
 
+    // Reset joined channels.
+    m_jchannels.clear();
+
     // Don't forget to change state and notify.
     next(std::make_unique<ConnectedState>());
     onConnect(ConnectEvent{shared_from_this()});
 
     // Auto join listed channels.
-    for (const Channel &channel : m_channels) {
+    for (const auto &channel : m_rchannels) {
         log::info() << "server " << m_name << ": auto joining " << channel.name << std::endl;
         join(channel.name, channel.password);
     }
@@ -167,14 +175,22 @@ void Server::handleInvite(const char *orig, const char **params) noexcept
 
 void Server::handleJoin(const char *orig, const char **params) noexcept
 {
+    if (isSelf(strify(orig)))
+        m_jchannels.push_back(strify(params[0]));
+
     onJoin(JoinEvent{shared_from_this(), strify(orig), strify(params[0])});
 }
 
 void Server::handleKick(const char *orig, const char **params) noexcept
 {
-    // Rejoin the channel if the option has been set and I was kicked.
-    if ((m_flags & AutoRejoin) && isSelf(strify(params[1])))
-        join(strify(params[0]));
+    if (isSelf(strify(params[1]))) {
+        // Remove the channel from the joined list.
+        removeJoinedChannel(strify(params[0]));
+
+        // Rejoin the channel if the option has been set and I was kicked.
+        if (m_flags & AutoRejoin)
+            join(strify(params[0]));
+    }
 
     onKick(KickEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1]), strify(params[2])});
 }
@@ -311,6 +327,10 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 
 void Server::handlePart(const char *orig, const char **params) noexcept
 {
+    // Remove the channel from the joined list if I left a channel.
+    if (isSelf(strify(orig)))
+        removeJoinedChannel(strify(params[0]));
+
     onPart(PartEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
 }
 
@@ -474,6 +494,9 @@ void Server::update() noexcept
 
         m_state = std::move(m_stateNext);
         m_stateNext = nullptr;
+
+        // Reset channels.
+        m_jchannels.clear();
     }
 }
 
@@ -544,14 +567,19 @@ void Server::invite(std::string target, std::string channel)
 
 void Server::join(std::string channel, std::string password)
 {
-    if (m_session->isConnected())
-        m_queue.push([=] () {
-            const char *ptr = password.empty() ? nullptr : password.c_str();
+    // 1. Add the channel or update it to the requested channels.
+    auto it = std::find_if(m_rchannels.begin(), m_rchannels.end(), [&] (const auto &c) {
+        return c.name == channel;
+    });
 
-            return irc_cmd_join(*m_session, channel.c_str(), ptr) == 0;
-        });
+    if (it == m_rchannels.end())
+        m_rchannels.push_back({ channel, password });
     else
-        m_channels.push_back({ std::move(channel), std::move(password) });
+        *it = { channel, password };
+
+    // 2. Join if not found and connected.
+    if (m_session->isConnected())
+        irc_cmd_join(*m_session, channel.c_str(), password.empty() ? nullptr : password.c_str());
 }
 
 void Server::kick(std::string target, std::string channel, std::string reason)

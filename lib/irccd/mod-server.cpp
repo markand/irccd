@@ -119,8 +119,8 @@ duk_ret_t info(duk_context *ctx)
     duk_put_prop_string(ctx, -2, "nickname");
     dukx_push_std_string(ctx, server->username());
     duk_put_prop_string(ctx, -2, "username");
-    dukx_push_array(ctx, server->channels(), [] (auto ctx, auto channel) {
-        dukx_push_std_string(ctx, channel.name);
+    dukx_push_array(ctx, server->channels(), [&] (auto ctx, auto channel) {
+        dukx_push_std_string(ctx, channel);
     });
     duk_put_prop_string(ctx, -2, "channels");
 

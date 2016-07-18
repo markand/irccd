@@ -434,8 +434,12 @@ public:
     Signal<WhoisEvent> onWhois;
 
 private:
-    // Misc
+    // Misc.
     std::map<ChannelMode, char> m_modes;
+
+    // Requested and joined channels.
+    std::vector<Channel> m_rchannels;
+    std::vector<std::string> m_jchannels;
 
     // Identifier.
     std::string m_name;
@@ -458,9 +462,6 @@ private:
     std::uint16_t m_reconnectDelay{30};
     std::uint16_t m_pingTimeout{300};
 
-    // Various settings.
-    std::vector<Channel> m_channels;
-
     // TODO: find another way.
     Cache m_cache;
 
@@ -473,6 +474,9 @@ private:
     // States.
     std::unique_ptr<State> m_state;
     std::unique_ptr<State> m_stateNext;
+
+    // Private helpers.
+    void removeJoinedChannel(const std::string &channel);
 
     // Handle libircclient callbacks.
     void handleChannel(const char *, const char **) noexcept;
@@ -787,9 +791,9 @@ public:
      *
      * \return the channels
      */
-    inline const std::vector<Channel> &channels() const noexcept
+    inline const std::vector<std::string> &channels() const noexcept
     {
-        return m_channels;
+        return m_jchannels;
     }
 
     /**
