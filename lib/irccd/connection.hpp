@@ -119,15 +119,9 @@ private:
     std::string m_output;
 
 public:
-    /**
-     * \brief TEST
-     */
     class State;
     class DisconnectedState;
     class ConnectingState;
-    /**
-     * \brief TEST
-     */
     class CheckingState;
     class ReadyState;
 
