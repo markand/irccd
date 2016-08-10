@@ -55,18 +55,17 @@ void Connection::ReadyState::sync(Connection &cnx, fd_set &in, fd_set &out)
     if (FD_ISSET(cnx.m_socket.handle(), &out))
         cnx.syncOutput();
 
-    if (FD_ISSET(cnx.m_socket.handle(), &in)) {
+    if (FD_ISSET(cnx.m_socket.handle(), &in))
         cnx.syncInput();
 
-        std::string msg;
+    std::string msg;
 
-        do {
-            msg = util::nextNetwork(cnx.m_input);
+    do {
+        msg = util::nextNetwork(cnx.m_input);
 
-            if (!msg.empty())
-                parse(cnx, msg);
-        } while (!msg.empty());
-    }
+        if (!msg.empty())
+            parse(cnx, msg);
+    } while (!msg.empty());
 }
 
 } // !irccd
