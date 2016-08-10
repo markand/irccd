@@ -26,13 +26,8 @@ namespace irccd {
 namespace command {
 
 ServerReconnect::ServerReconnect()
-    : Command("server-reconnect", "Server")
+    : Command("server-reconnect", "Server", "Force reconnection of one or more servers")
 {
-}
-
-std::string ServerReconnect::help() const
-{
-    return "";
 }
 
 std::vector<Command::Arg> ServerReconnect::args() const

@@ -59,13 +59,8 @@ nlohmann::json execGet(Irccd &irccd, const nlohmann::json &request, const nlohma
 } // !namespace
 
 PluginConfig::PluginConfig()
-    : Command("plugin-config", "Plugins")
+    : Command("plugin-config", "Plugins", "Get or set a plugin config variable")
 {
-}
-
-std::string PluginConfig::help() const
-{
-    return "Get or set a plugin configuration option.";
 }
 
 std::vector<Command::Arg> PluginConfig::args() const

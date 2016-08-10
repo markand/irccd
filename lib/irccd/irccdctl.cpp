@@ -16,67 +16,44 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <algorithm>
-#include <cassert>
-#include <iterator>
-#include <memory>
-#include <string>
-#include <unordered_map>
-
 #include <format.h>
 
 #include "command.hpp"
+#include "connection.hpp"
 #include "elapsed-timer.hpp"
 #include "fs.hpp"
 #include "ini.hpp"
 #include "irccdctl.hpp"
-#include "json.hpp"
-#include "net.hpp"
 #include "logger.hpp"
 #include "options.hpp"
 #include "path.hpp"
-#include "sysconfig.hpp"
 #include "system.hpp"
 #include "util.hpp"
 
-namespace irccd {
+using namespace std::string_literals;
 
 using namespace fmt::literals;
 
-using namespace std::placeholders;
-using namespace std::chrono_literals;
-using namespace std::string_literals;
-
-/*
- * Config file format
- * ------------------------------------------------------------------
- *
- * [connect]
- * type = "ip | unix"
- *
- * # if ip
- * host = ""
- * port = number
- * domain = "ipv4 | ipv6", default: ipv4
- *
- * # if unix
- * path = ""
- *
- * [alias]
- * name = replacement
- */
-
-/*
- * Initialize a connection from the configuration file
- * ------------------------------------------------------------------
- */
+namespace irccd {
 
 void Irccdctl::usage() const
 {
-    // TODO: CHANGE
+    bool first = true;
+
+    for (const auto &cmd : m_commandService.commands()) {
+        log::warning() << (first ? "usage: " : "       ") << sys::programName() << " "
+                       << cmd->usage() << std::endl;
+        first = false;
+    }
+
+    std::exit(1);
+}
+
+void Irccdctl::help() const
+{
     log::warning() << "usage: " << sys::programName() << " [options...] <command> [command-options...] [command-args...]\n\n";
     log::warning() << "General options:\n";
-    log::warning() << "\tc, --config file\tspecify the configuration file\n";
+    log::warning() << "\t-c, --config file\tspecify the configuration file\n";
     log::warning() << "\t--help\t\t\tshow this help\n";
     log::warning() << "\t-t, --type type\t\tspecify connection type\n";
     log::warning() << "\t-v, --verbose\t\tbe verbose\n\n";
@@ -85,63 +62,50 @@ void Irccdctl::usage() const
     log::warning() << "\t-p, --port port\t\tuse the specified port number\n\n";
     log::warning() << "Available options for type unix (-t, --type):\n";
     log::warning() << "\t-P, --path file\t\tconnect to the specified socket file\n\n";
-    log::warning() << "General commands:\n";
-    log::warning() << "\thelp\t\t\tShow an help topic\n";
-    log::warning() << "\twatch\t\t\tStart listening to irccd\n\n";
-    log::warning() << "Plugin management:\n";
-    log::warning() << "\tplugin-config\t\tGet or set a plugin configuration option\n";
-    log::warning() << "\tplugin-info\t\tGet plugin information\n";
-    log::warning() << "\tplugin-list\t\tList all loaded plugins\n";
-    log::warning() << "\tplugin-load\t\tLoad a plugin\n";
-    log::warning() << "\tplugin-reload\t\tReload a plugin\n";
-    log::warning() << "\tplugin-unload\t\tUnload a plugin\n\n";
-    log::warning() << "Server management:\n";
-    log::warning() << "\tserver-cmode\t\tChange a channel mode\n";
-    log::warning() << "\tserver-cnotice\t\tSend a channel notice\n";
-    log::warning() << "\tserver-connect\t\tConnect to a server\n";
-    log::warning() << "\tserver-disconnect\tDisconnect from a server\n";
-    log::warning() << "\tserver-info\t\tGet server information\n";
-    log::warning() << "\tserver-invite\t\tInvite someone to a channel\n";
-    log::warning() << "\tserver-join\t\tJoin a channel\n";
-    log::warning() << "\tserver-kick\t\tKick someone from a channel\n";
-    log::warning() << "\tserver-list\t\tList all servers\n";
-    log::warning() << "\tserver-me\t\tSend a CTCP Action (same as /me)\n";
-    log::warning() << "\tserver-message\t\tSend a message to someone or a channel\n";
-    log::warning() << "\tserver-mode\t\tChange a user mode\n";
-    log::warning() << "\tserver-notice\t\tSend a private notice\n";
-    log::warning() << "\tserver-nick\t\tChange your nickname\n";
-    log::warning() << "\tserver-part\t\tLeave a channel\n";
-    log::warning() << "\tserver-reconnect\tReconnect one or all servers\n";
-    log::warning() << "\tserver-topic\t\tChange a channel topic\n";
+    log::warning() << "Available commands:\n";
+
+    for (const auto &cmd : m_commandService.commands())
+        log::warning() << "\t" << std::left << std::setw(32)
+                       << cmd->name() << cmd->description() << std::endl;
+
     log::warning() << "\nFor more information on a command, type " << sys::programName() << " help <command>" << std::endl;
+
     std::exit(1);
 }
 
+/*
+ * Configuration file parsing.
+ * -------------------------------------------------------------------
+ */
+
+/*
+ * readConnectIp
+ * -------------------------------------------------------------------
+ *
+ * Extract IP connection information from the config file.
+ *
+ * [connect]
+ * type = "ip"
+ * host = "ip or hostname"
+ * port = "port number or service"
+ * domain = "ipv4 or ipv6" (Optional, default: ipv4)
+ */
 void Irccdctl::readConnectIp(const ini::Section &sc)
 {
     ini::Section::const_iterator it;
 
-    // Host.
-    std::string host;
+    std::string host, port;
 
     if ((it = sc.find("host")) == sc.end())
         throw std::invalid_argument("missing host parameter");
 
     host = it->value();
 
-    // Port.
-    std::uint16_t port;
-
     if ((it = sc.find("port")) == sc.end())
         throw std::invalid_argument("missing port parameter");
 
-    try {
-        port = util::toNumber<std::uint16_t>(it->value());
-    } catch (...) {
-        throw std::invalid_argument("invalid port number: " + it->value());
-    }
+    port = it->value();
 
-    // Domain.
     int domain = AF_INET;
 
     if ((it = sc.find("domain")) != sc.end()) {
@@ -153,10 +117,21 @@ void Irccdctl::readConnectIp(const ini::Section &sc)
             throw std::invalid_argument("invalid domain: " + it->value());
     }
 
-    m_connection =  std::make_unique<ConnectionBase<net::address::Ip>>(net::address::Ip::resolve(host, std::to_string(port), domain));
+    m_address = net::resolveOne(host, port, domain, SOCK_STREAM);
+    m_connection = std::make_unique<Connection>();
 }
 
-void Irccdctl::readConnectUnix(const ini::Section &sc)
+/*
+ * readConnectLocal
+ * -------------------------------------------------------------------
+ *
+ * Extract local connection for Unix.
+ *
+ * [connect]
+ * type = "unix"
+ * path = "path to socket file"
+ */
+void Irccdctl::readConnectLocal(const ini::Section &sc)
 {
 #if !defined(IRCCD_SYSTEM_WINDOWS)
     auto it = sc.find("path");
@@ -164,7 +139,8 @@ void Irccdctl::readConnectUnix(const ini::Section &sc)
     if (it == sc.end())
         throw std::invalid_argument("missing path parameter");
 
-    m_connection = std::make_unique<ConnectionBase<net::address::Local>>(net::address::Local(it->value(), false));
+    m_address = net::local::create(it->value());
+    m_connection = std::make_unique<Connection>();
 #else
     (void)sc;
 
@@ -172,6 +148,12 @@ void Irccdctl::readConnectUnix(const ini::Section &sc)
 #endif
 }
 
+/*
+ * readConnect
+ * -------------------------------------------------------------------
+ *
+ * Generic function for reading the [connect] section.
+ */
 void Irccdctl::readConnect(const ini::Section &sc)
 {
     auto it = sc.find("type");
@@ -182,11 +164,20 @@ void Irccdctl::readConnect(const ini::Section &sc)
     if (it->value() == "ip")
         readConnectIp(sc);
     else if (it->value() == "unix")
-        readConnectUnix(sc);
+        readConnectLocal(sc);
     else
         throw std::invalid_argument("invalid type given: " + it->value());
 }
 
+/*
+ * readGeneral
+ * -------------------------------------------------------------------
+ *
+ * Read the general section.
+ *
+ * [general]
+ * verbose = true
+ */
 void Irccdctl::readGeneral(const ini::Section &sc)
 {
     auto verbose = sc.find("verbose");
@@ -195,65 +186,73 @@ void Irccdctl::readGeneral(const ini::Section &sc)
         log::setVerbose(util::isBoolean(verbose->value()));
 }
 
+/*
+ * readAliases
+ * -------------------------------------------------------------------
+ *
+ * Read aliases for irccdctl.
+ *
+ * [alias]
+ * name = ( "command", "arg1, "...", "argn" )
+ */
 void Irccdctl::readAliases(const ini::Section &sc)
 {
-    for (const ini::Option &option : sc) {
+    for (const auto &option : sc) {
         // This is the alias name.
         Alias alias(option.key());
 
-        if (m_commandService.contains(option.key()))
-            throw std::invalid_argument("there is already a command named " + option.key());
-
         // Iterate over the list of commands to execute for this alias.
-        for (const std::string &repl : option) {
+        for (const auto &repl : option) {
             // This is the alias split string.
-            std::vector<std::string> list = util::split(repl, " \t");
+            auto list = util::split(repl, " \t");
 
             if (list.size() < 1)
                 throw std::invalid_argument("alias require at least one argument");
 
             // First argument is the command/alias to execute.
-            std::string command = list[0];
+            auto command = list[0];
 
-            // This is the alias arguments.
-            std::vector<AliasArg> args;
-
-            for (auto it = list.begin() + 1; it != list.end(); ++it)
-                args.push_back(std::move(*it));
-
-            alias.push_back({std::move(command), std::move(args)});
+            // Remove command name and puts arguments.
+            alias.push_back({std::move(command), std::vector<AliasArg>(list.begin() + 1, list.end())});
         }
-
-        // Show for debugging purpose.
-        log::debug("alias {}:"_format(option.key()));
-
-        for (const auto &cmd : alias)
-            log::debug("  {} {}"_format(cmd.command(), util::join(cmd.args().begin(), cmd.args().end(), ' ')));
 
         m_aliases.emplace(option.key(), std::move(alias));
     }
 }
 
-void Irccdctl::read(const std::string &path, const option::Result &options)
+void Irccdctl::read(const std::string &path)
 {
-    ini::Document doc = ini::readFile(path);
-    ini::Document::const_iterator it = doc.find("connect");
+    try {
+        ini::Document doc = ini::readFile(path);
+        ini::Document::const_iterator it;
 
-    // Do not try to read [connect] if specified at command line.
-    if (it != doc.end() && options.count("-t") == 0 && options.count("--type") == 0)
-        readConnect(*it);
-    if ((it = doc.find("general")) != doc.end())
-        readGeneral(*it);
-    if ((it = doc.find("alias")) != doc.end())
-        readAliases(*it);
+        if (!m_connection && (it = doc.find("connect")) != doc.end())
+            readConnect(*it);
+        if ((it = doc.find("general")) != doc.end())
+            readGeneral(*it);
+        if ((it = doc.find("alias")) != doc.end())
+            readAliases(*it);
+    } catch (const std::exception &ex) {
+        log::warning() << path << ": " << ex.what() << std::endl;
+    }
 }
 
 /*
- * Initialize a connection from the command line.
- * ------------------------------------------------------------------
+ * Command line parsing.
+ * -------------------------------------------------------------------
  */
 
-void Irccdctl::parseConnectIp(const option::Result &options, bool ipv6)
+/*
+ * parseConnectIp
+ * ------------------------------------------------------------------
+ *
+ * Parse internet connection from command line.
+ *
+ * -t ip | ipv6
+ * -h host or ip
+ * -p port
+ */
+void Irccdctl::parseConnectIp(const option::Result &options)
 {
     option::Result::const_iterator it;
 
@@ -266,24 +265,34 @@ void Irccdctl::parseConnectIp(const option::Result &options, bool ipv6)
     host = it->second;
 
     // Port (-p or --port).
-    std::uint16_t port;
+    std::string port;
 
     if ((it = options.find("-p")) == options.end() && (it = options.find("--port")) == options.end())
         throw std::invalid_argument("missing port argument (-p or --port)");
 
-    try {
-        port = util::toNumber<std::uint16_t>(it->second);
-    } catch (...) {
-        throw std::invalid_argument("invalid port number: " + it->second);
-    }
+    port = it->second;
 
     // Domain
-    int domain = (ipv6) ? AF_INET6 : AF_INET;
+    int domain = AF_INET;
 
-    m_connection =  std::make_unique<ConnectionBase<net::address::Ip>>(net::address::Ip::resolve(host, std::to_string(port), domain, SOCK_STREAM));
+    if ((it = options.find("-t")) != options.end())
+        domain = it->second == "ipv6" ? AF_INET6 : AF_INET;
+    else if ((it = options.find("--type")) != options.end())
+        domain = it->second == "ipv6" ? AF_INET6: AF_INET;
+
+    m_address = net::resolveOne(host, port, domain, SOCK_STREAM);
+    m_connection = std::make_unique<Connection>();
 }
 
-void Irccdctl::parseConnectUnix(const option::Result &options)
+/*
+ * parseConnectLocal
+ * ------------------------------------------------------------------
+ *
+ * Parse local connection.
+ *
+ * -P file
+ */
+void Irccdctl::parseConnectLocal(const option::Result &options)
 {
 #if !defined(IRCCD_SYSTEM_WINDOWS)
     option::Result::const_iterator it;
@@ -291,7 +300,8 @@ void Irccdctl::parseConnectUnix(const option::Result &options)
     if ((it = options.find("-P")) == options.end() && (it = options.find("--path")) == options.end())
         throw std::invalid_argument("missing path parameter (-P or --path)");
 
-    m_connection = std::make_unique<ConnectionBase<net::address::Local>>(net::address::Local(it->second, false));
+    m_address = net::local::create(it->second, false);
+    m_connection = std::make_unique<Connection>();
 #else
     (void)options;
 
@@ -299,6 +309,12 @@ void Irccdctl::parseConnectUnix(const option::Result &options)
 #endif
 }
 
+/*
+ * parseConnect
+ * ------------------------------------------------------------------
+ *
+ * Generic parsing of command line option for connection.
+ */
 void Irccdctl::parseConnect(const option::Result &options)
 {
     assert(options.count("-t") > 0 || options.count("--type") > 0);
@@ -308,14 +324,14 @@ void Irccdctl::parseConnect(const option::Result &options)
     if (it == options.end())
         it = options.find("--type");
     if (it->second == "ip" || it->second == "ipv6")
-        return parseConnectIp(options, it->second == "ipv6");
+        return parseConnectIp(options);
     if (it->second == "unix")
-        return parseConnectUnix(options);
+        return parseConnectLocal(options);
 
     throw std::invalid_argument("invalid type given: " + it->second);
 }
 
-option::Result Irccdctl::parse(int &argc, char **&argv) const
+option::Result Irccdctl::parse(int &argc, char **&argv)
 {
     // 1. Parse command line options.
     option::Options def{
@@ -352,6 +368,41 @@ option::Result Irccdctl::parse(int &argc, char **&argv) const
     }
 
     return result;
+}
+
+nlohmann::json Irccdctl::next(const std::string id)
+{
+    ElapsedTimer timer;
+
+    while (m_input.empty() && m_connection->isConnected() && timer.elapsed() < m_timeout)
+        m_connection->poll();
+
+    if (m_input.empty())
+        return nlohmann::json();
+
+    nlohmann::json value;
+
+    if (id == "") {
+        value = m_input[0];
+        m_input.erase(m_input.begin());
+    } else {
+        auto it = std::find_if(m_input.begin(), m_input.end(), [&] (const auto &v) {
+            auto rt = v.find("response");
+
+            if (rt != v.end() && rt->is_string() && *rt == id)
+                return true;
+
+            return false;
+        });
+
+        // Remove the previous messages.
+        if (it != m_input.end()) {
+            value = *it;
+            m_input.erase(m_input.begin(), it);
+        }
+    }
+
+    return value;
 }
 
 void Irccdctl::exec(const Command &cmd, std::vector<std::string> args)
@@ -394,10 +445,10 @@ void Irccdctl::exec(const Command &cmd, std::vector<std::string> args)
     request.push_back({"command", cmd.name()});
 
     // 5. Send the command.
-    m_connection->send(request.dump(), 30000);
+    m_connection->request(request);
 
     // 6. Parse the result.
-    cmd.result(*this, m_connection->next(cmd.name(), 30000));
+    cmd.result(*this, next(cmd.name()));
 }
 
 void Irccdctl::exec(const Alias &alias, std::vector<std::string> argsCopy)
@@ -458,36 +509,10 @@ void Irccdctl::exec(std::vector<std::string> args)
     }
 }
 
-void Irccdctl::connect()
-{
-    log::info("{}: connecting to irccd..."_format(sys::programName()));
-
-    // Try to connect.
-    m_connection->connect(30000);
-
-    // Get irccd information.
-    auto object = m_connection->next(30000);
-    auto program = object.find("program");
-
-    if (program == object.end() || !program->is_string() || program->get<std::string>() != "irccd")
-        throw std::runtime_error("not an irccd server");
-
-    // Get values.
-    m_major = util::json::toInt(object["major"]);
-    m_minor = util::json::toInt(object["minor"]);
-    m_patch = util::json::toInt(object["patch"]);
-    m_javascript = util::json::toBool(object["javascript"]);
-    m_ssl = util::json::toBool(object["ssl"]);
-
-    log::info() << std::boolalpha;
-    log::info("{}: connected to irccd {}.{}.{}"_format(sys::programName(), m_major, m_minor, m_patch));
-    log::info("{}: javascript: {}, ssl support: {}"_format(sys::programName(), m_javascript, m_ssl));
-}
-
 void Irccdctl::run(int argc, char **argv)
 {
     // 1. Read command line arguments.
-    option::Result result = parse(argc, argv);
+    auto result = parse(argc, argv);
 
     /*
      * 2. Open optional config by command line or by searching it
@@ -505,17 +530,19 @@ void Irccdctl::run(int argc, char **argv)
         auto it = result.find("-c");
 
         if (it != result.end() || (it = result.find("--config")) != result.end())
-            read(it->second, result);
+            read(it->second);
         else {
             for (const std::string &dir : path::list(path::PathConfig)) {
                 std::string path = dir + "irccdctl.conf";
 
-                if (fs::exists(path))
-                    read(path, result);
+                if (fs::exists(path)) {
+                    read(path);
+                    break;
+                }
             }
         }
     } catch (const std::exception &ex) {
-        log::warning("{}: {}"_format(sys::programName(), ex.what()));
+        log::warning() << sys::programName() << ": " << ex.what() << std::endl;
         std::exit(1);
     }
 
@@ -531,8 +558,23 @@ void Irccdctl::run(int argc, char **argv)
             std::exit(1);
         }
 
-        connect();
-    }
+        m_connection->onDisconnect.connect([this] (auto reason) {
+            log::warning() << "connection lost to irccd: " << reason << std::endl;
+        });
+        m_connection->onConnect.connect([this] (auto info) {
+            log::info() << "connected to irccd "
+                        << info.major << "."
+                        << info.minor << "."
+                        << info.patch << std::endl;
+        });
+        m_connection->onMessage.connect([this] (auto msg) {
+            m_input.push_back(std::move(msg));
+        });
+
+        m_connection->connect(m_address);
+    } else if (argc == 1)
+        help();
+        // NOTREACHED
 
     // Build a vector of arguments.
     std::vector<std::string> args;

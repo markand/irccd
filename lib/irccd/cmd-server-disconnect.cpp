@@ -26,13 +26,8 @@ namespace irccd {
 namespace command {
 
 ServerDisconnect::ServerDisconnect()
-    : Command("server-disconnect", "Server")
+    : Command("server-disconnect", "Server", "Disconnect one or more servers")
 {
-}
-
-std::string ServerDisconnect::help() const
-{
-    return "";
 }
 
 std::vector<Command::Arg> ServerDisconnect::args() const

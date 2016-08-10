@@ -40,12 +40,12 @@ private:
 
 public:
     /**
-     * \copydoc ServerState::prepare
+     * \copydoc State::prepare
      */
     IRCCD_EXPORT void prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) override;
 
     /**
-     * \copydoc ServerState::ident
+     * \copydoc State::ident
      */
     IRCCD_EXPORT std::string ident() const override;
 };

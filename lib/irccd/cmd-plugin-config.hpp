@@ -41,11 +41,6 @@ public:
     IRCCD_EXPORT PluginConfig();
 
     /**
-     * \copydoc Command::help
-     */
-    IRCCD_EXPORT std::string help() const override;
-
-    /**
      * \copydoc Command::args
      */
     IRCCD_EXPORT std::vector<Arg> args() const override;

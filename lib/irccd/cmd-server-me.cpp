@@ -26,13 +26,8 @@ namespace irccd {
 namespace command {
 
 ServerMe::ServerMe()
-    : Command("server-me", "Server")
+    : Command("server-me", "Server", "Send an action emote")
 {
-}
-
-std::string ServerMe::help() const
-{
-    return "";
 }
 
 std::vector<Command::Arg> ServerMe::args() const

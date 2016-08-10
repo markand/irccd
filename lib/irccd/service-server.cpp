@@ -89,7 +89,7 @@ void ServerService::handleChannelMode(const ChannelModeEvent &ev)
         { "channel",    ev.channel          },
         { "mode",       ev.mode             },
         { "argument",   ev.argument         }
-    }).dump());
+    }));
 
     m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
         [=] (Plugin &) -> std::string {
@@ -114,7 +114,7 @@ void ServerService::handleChannelNotice(const ChannelNoticeEvent &ev)
         { "origin",     ev.origin           },
         { "channel",    ev.channel          },
         { "message",    ev.message          }
-    }).dump(0));
+    }));
 
     m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
         [=] (Plugin &) -> std::string {
@@ -133,7 +133,7 @@ void ServerService::handleConnect(const ConnectEvent &ev)
     m_irccd.transportService().broadcast(nlohmann::json::object({
         { "event",      "onConnect"         },
         { "server",     ev.server->name()   }
-    }).dump(0));
+    }));
 
     m_irccd.post(EventHandler{ev.server->name(), /* origin */ "", /* channel */ "",
         [=] (Plugin &) -> std::string {
@@ -157,7 +157,7 @@ void ServerService::handleInvite(const InviteEvent &ev)
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
         { "channel",    ev.channel          }
-    }).dump(0));
+    }));
 
     m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
         [=] (Plugin &) -> std::string {
@@ -180,7 +180,7 @@ void ServerService::handleJoin(const JoinEvent &ev)
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
         { "channel",    ev.channel          }
-    }).dump(0));
+    }));
 
     m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
         [=] (Plugin &) -> std::string {
@@ -207,7 +207,7 @@ void ServerService::handleKick(const KickEvent &ev)
         { "channel",    ev.channel          },
         { "target",     ev.target           },
         { "reason",     ev.reason           }
-    }).dump(0));
+    }));
 
     m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
         [=] (Plugin &) -> std::string {
@@ -232,7 +232,7 @@ void ServerService::handleMessage(const MessageEvent &ev)
         { "origin",     ev.origin           },
         { "channel",    ev.channel          },
         { "message",    ev.message          }
-    }).dump(0));
+    }));
 
     m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
         [=] (Plugin &plugin) -> std::string {
@@ -265,7 +265,7 @@ void ServerService::handleMe(const MeEvent &ev)
         { "origin",     ev.origin           },
         { "target",     ev.channel          },
         { "message",    ev.message          }
-    }).dump(0));
+    }));
 
     m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
         [=] (Plugin &) -> std::string {
@@ -288,7 +288,7 @@ void ServerService::handleMode(const ModeEvent &ev)
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
         { "mode",       ev.mode             }
-    }).dump());
+    }));
 
     m_irccd.post(EventHandler{ev.server->name(), ev.origin, /* channel */ "",
         [=] (Plugin &) -> std::string {
@@ -316,7 +316,7 @@ void ServerService::handleNames(const NamesEvent &ev)
         { "server",     ev.server->name()   },
         { "channel",    ev.channel          },
         { "names",      std::move(names)    }
-    }).dump());
+    }));
 
     m_irccd.post(EventHandler{ev.server->name(), /* origin */ "", ev.channel,
         [=] (Plugin &) -> std::string {
@@ -339,7 +339,7 @@ void ServerService::handleNick(const NickEvent &ev)
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
         { "nickname",   ev.nickname         }
-    }).dump());
+    }));
 
     m_irccd.post(EventHandler{ev.server->name(), ev.origin, /* channel */ "",
         [=] (Plugin &) -> std::string {
@@ -362,7 +362,7 @@ void ServerService::handleNotice(const NoticeEvent &ev)
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
         { "message",    ev.message          }
-    }).dump());
+    }));
 
     m_irccd.post(EventHandler{ev.server->name(), ev.origin, /* channel */ "",
         [=] (Plugin &) -> std::string {
@@ -387,7 +387,7 @@ void ServerService::handlePart(const PartEvent &ev)
         { "origin",     ev.origin           },
         { "channel",    ev.channel          },
         { "reason",     ev.reason           }
-    }).dump());
+    }));
 
     m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
         [=] (Plugin &) -> std::string {
@@ -410,7 +410,7 @@ void ServerService::handleQuery(const QueryEvent &ev)
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
         { "message",    ev.message          }
-    }).dump());
+    }));
 
     m_irccd.post(EventHandler{ev.server->name(), ev.origin, /* channel */ "",
         [=] (Plugin &plugin) -> std::string {
@@ -443,7 +443,7 @@ void ServerService::handleTopic(const TopicEvent &ev)
         { "origin",     ev.origin           },
         { "channel",    ev.channel          },
         { "topic",      ev.topic            }
-    }).dump());
+    }));
 
     m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
         [=] (Plugin &) -> std::string {
@@ -471,7 +471,7 @@ void ServerService::handleWhois(const WhoisEvent &ev)
         { "username",   ev.whois.user       },
         { "host",       ev.whois.host       },
         { "realname",   ev.whois.realname   }
-    }).dump());
+    }));
 
     m_irccd.post(EventHandler{ev.server->name(), /* origin */ "", /* channel */ "",
         [=] (Plugin &) -> std::string {

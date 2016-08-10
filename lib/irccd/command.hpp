@@ -336,6 +336,7 @@ public:
 private:
     std::string m_name;
     std::string m_category;
+    std::string m_description;
     bool m_visible;
 
 public:
@@ -346,11 +347,16 @@ public:
      * \pre category must not be empty
      * \param name the command name (e.g. server-list)
      * \param category the category (e.g. Server)
+     * \param description a one line description with no dots, no new line
      * \param visible true if the command should be visible without verbosity
      */
-    inline Command(std::string name, std::string category, bool visible = true) noexcept
+    inline Command(std::string name,
+                   std::string category,
+                   std::string description,
+                   bool visible = true) noexcept
         : m_name(std::move(name))
         , m_category(std::move(category))
+        , m_description(std::move(description))
         , m_visible(visible)
     {
         assert(!m_name.empty());
@@ -385,6 +391,16 @@ public:
     }
 
     /**
+     * Get the command description.
+     *
+     * \return the description
+     */
+    inline const std::string &description() const noexcept
+    {
+        return m_description;
+    }
+
+    /**
      * Hide the command in non-verbose mode.
      *
      * \return true if the command should be visible in non-verbose mode
@@ -406,7 +422,7 @@ public:
      *
      * \return the help message
      */
-    virtual std::string help() const = 0;
+    IRCCD_EXPORT std::string help() const;
 
     /**
      * Get the supported irccdctl options.
@@ -489,7 +505,7 @@ public:
      * What to do when receiving the response from irccd.
      *
      * This default implementation just check for an error string and shows it if any.
-     * 
+     *
      * \param irccdctl the irccdctl instance
      * \param response the JSON response
      */

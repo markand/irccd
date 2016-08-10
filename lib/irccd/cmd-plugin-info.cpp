@@ -29,13 +29,8 @@ namespace irccd {
 namespace command {
 
 PluginInfo::PluginInfo()
-    : Command("plugin-info", "Plugins")
+    : Command("plugin-info", "Plugins", "Get plugin information")
 {
-}
-
-std::string PluginInfo::help() const
-{
-    return "Get plugin information.";
 }
 
 std::vector<Command::Arg> PluginInfo::args() const

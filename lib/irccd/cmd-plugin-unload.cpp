@@ -26,13 +26,8 @@ namespace irccd {
 namespace command {
 
 PluginUnload::PluginUnload()
-    : Command("plugin-unload", "Plugins")
+    : Command("plugin-unload", "Plugins", "Unload a plugin")
 {
-}
-
-std::string PluginUnload::help() const
-{
-    return "Unload a plugin.";
 }
 
 std::vector<Command::Arg> PluginUnload::args() const

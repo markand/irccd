@@ -26,13 +26,8 @@ namespace irccd {
 namespace command {
 
 ServerMessage::ServerMessage()
-    : Command("server-message", "Server")
+    : Command("server-message", "Server", "Send a message")
 {
-}
-
-std::string ServerMessage::help() const
-{
-    return "";
 }
 
 std::vector<Command::Arg> ServerMessage::args() const

@@ -1,5 +1,5 @@
 /*
- * server-state-disconnected.hpp -- disconnected state
+ * conn-state-ready.hpp -- connection is ready for I/O
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,39 +16,45 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_SERVER_STATE_DISCONNECTED_HPP
-#define IRCCD_SERVER_STATE_DISCONNECTED_HPP
+#ifndef IRCCD_CONN_STATE_READY_HPP
+#define IRCCD_CONN_STATE_READY_HPP
 
 /**
- * \file server-state-disconnected.hpp
- * \brief Connecting state.
+ * \file conn-state-ready.hpp
+ * \brief Connection is ready.
  */
 
-#include "elapsed-timer.hpp"
-#include "server-state.hpp"
+#include "conn-state.hpp"
 
 namespace irccd {
 
 /**
- * \brief Disconnected state.
- * \ingroup states
+ * \brief Ready state.
+ *
+ * This state is used when the connection to irccd is complete, including
+ * irccd daemon verification and optional handshaking.
+ *
+ * It's the only state that may trigger onEvent and onResponse signals
+ * from the Connection.
  */
-class DisconnectedState : public State {
-private:
-    ElapsedTimer m_timer;
-
+class Connection::ReadyState : public Connection::State {
 public:
+    /**
+     * \copydoc State::status
+     */
+    Status status() const noexcept override;
+
     /**
      * \copydoc State::prepare
      */
-    IRCCD_EXPORT void prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) override;
+    void prepare(Connection &cnt, fd_set &in, fd_set &out) override;
 
     /**
-     * \copydoc State::ident
+     * \copydoc State::sync
      */
-    IRCCD_EXPORT std::string ident() const override;
+    void sync(Connection &cnt, fd_set &in, fd_set &out) override;
 };
 
 } // !irccd
 
-#endif // !IRCCD_SERVER_STATE_DISCONNECTED_HPP
+#endif // !IRCCD_CONN_STATE_READY_HPP

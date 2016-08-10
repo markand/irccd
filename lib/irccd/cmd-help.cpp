@@ -25,18 +25,13 @@ namespace irccd {
 namespace command {
 
 Help::Help()
-    : Command("help", "General")
+    : Command("help", "General", "Get help about a command")
 {
 }
 
 std::vector<Command::Arg> Help::args() const
 {
     return {{ "command", true }};
-}
-
-std::string Help::help() const
-{
-    return "Get help about a command.";
 }
 
 nlohmann::json Help::request(Irccdctl &irccdctl, const CommandRequest &args) const
@@ -46,7 +41,7 @@ nlohmann::json Help::request(Irccdctl &irccdctl, const CommandRequest &args) con
     if (!it)
         log::warning() << "there is no command named: " << args.arg(0U) << std::endl;
     else
-        log::warning() << it->usage() << std::flush;
+        log::warning() << it->help() << std::flush;
 
     return nullptr;
 }

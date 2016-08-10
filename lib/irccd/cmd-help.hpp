@@ -47,11 +47,6 @@ public:
     IRCCD_EXPORT std::vector<Arg> args() const override;
 
     /**
-     * \copydoc Command::help
-     */
-    IRCCD_EXPORT std::string help() const override;
-
-    /**
      * \copydoc Command::request
      */
     IRCCD_EXPORT nlohmann::json request(Irccdctl &irccdctl, const CommandRequest &args) const override;

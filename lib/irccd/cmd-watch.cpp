@@ -198,24 +198,14 @@ const std::unordered_map<std::string, std::function<void (const nlohmann::json &
 } // !namespace
 
 Watch::Watch()
-    : Command("watch", "General")
+    : Command(
+        "watch", "General", "Start watching irccd events")
 {
 }
 
 std::vector<Command::Option> Watch::options() const
 {
     return {{ "format", "f", "format", "format", "output format" }};
-}
-
-std::string Watch::help() const
-{
-    std::ostringstream oss;
-
-    oss << "Start watching irccd events.\n\n";
-    oss << "You can use different output formats, native which is a human readable\n";
-    oss << "format or json, pretty formatted json.";
-
-    return oss.str();
 }
 
 nlohmann::json Watch::request(Irccdctl &ctl, const CommandRequest &request) const
@@ -225,9 +215,9 @@ nlohmann::json Watch::request(Irccdctl &ctl, const CommandRequest &request) cons
     if (format != "native" && format != "json")
         throw std::invalid_argument("invalid format given: " + format);
 
-    for (;;) {
+    while (ctl.connection().isConnected()) {
         try {
-            auto object = ctl.connection().next(-1);
+            auto object = ctl.next();
             auto event = object.find("event");
 
             if (event == object.end() || !event->is_string())
@@ -248,8 +238,6 @@ nlohmann::json Watch::request(Irccdctl &ctl, const CommandRequest &request) cons
         } catch (...) {
         }
     }
-
-    throw std::runtime_error("connection lost");
 
     return nullptr;
 }

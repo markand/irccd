@@ -19,6 +19,7 @@
 #include <irccd/irccdctl.hpp>
 #include <irccd/logger.hpp>
 #include <irccd/path.hpp>
+#include <irccd/system.hpp>
 
 using namespace irccd;
 
@@ -29,14 +30,13 @@ int main(int argc, char **argv)
     path::setApplicationPath(argv[0]);
     log::setInterface(std::make_unique<log::Console>());
     log::setVerbose(false);
-    net::init();
 
     try {
         Irccdctl ctl;
 
         ctl.run(--argc, ++argv);
     } catch (const std::exception &ex) {
-        log::warning() << sys::programName() << ": " << ex.what() << std::endl;
+        log::warning() << "error: " << ex.what() << std::endl;
         std::exit(1);
     }
 

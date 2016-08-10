@@ -38,7 +38,6 @@ namespace irccd {
 class Server;
 
 /**
- * \class ServerState
  * \brief Server current state.
  */
 class State {

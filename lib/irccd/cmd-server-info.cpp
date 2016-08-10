@@ -28,13 +28,8 @@ namespace irccd {
 namespace command {
 
 ServerInfo::ServerInfo()
-    : Command("server-info", "Server")
+    : Command("server-info", "Server", "Get server information")
 {
-}
-
-std::string ServerInfo::help() const
-{
-    return "";
 }
 
 std::vector<Command::Arg> ServerInfo::args() const

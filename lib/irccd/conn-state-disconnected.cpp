@@ -1,5 +1,5 @@
 /*
- * server-state-disconnected.hpp -- disconnected state
+ * conn-state-disconnected.cpp -- disconnected state
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,39 +16,21 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_SERVER_STATE_DISCONNECTED_HPP
-#define IRCCD_SERVER_STATE_DISCONNECTED_HPP
-
-/**
- * \file server-state-disconnected.hpp
- * \brief Connecting state.
- */
-
-#include "elapsed-timer.hpp"
-#include "server-state.hpp"
+#include "conn-state-disconnected.hpp"
 
 namespace irccd {
 
-/**
- * \brief Disconnected state.
- * \ingroup states
- */
-class DisconnectedState : public State {
-private:
-    ElapsedTimer m_timer;
+Connection::Status Connection::DisconnectedState::status() const noexcept
+{
+    return Disconnected;
+}
 
-public:
-    /**
-     * \copydoc State::prepare
-     */
-    IRCCD_EXPORT void prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) override;
+void Connection::DisconnectedState::prepare(Connection &, fd_set &, fd_set &)
+{
+}
 
-    /**
-     * \copydoc State::ident
-     */
-    IRCCD_EXPORT std::string ident() const override;
-};
+void Connection::DisconnectedState::sync(Connection &, fd_set &, fd_set &)
+{
+}
 
 } // !irccd
-
-#endif // !IRCCD_SERVER_STATE_DISCONNECTED_HPP

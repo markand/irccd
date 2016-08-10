@@ -16,20 +16,24 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <array>
+
 #include "logger.hpp"
 #include "service-interrupt.hpp"
 
 namespace irccd {
 
 InterruptService::InterruptService()
+    : m_in(AF_INET, 0)
+    , m_out(AF_INET, 0)
 {
     // Bind a socket to any port.
     m_in.set(net::option::SockReuseAddress(true));
-    m_in.bind(net::address::Ipv4("*", 0));
+    m_in.bind(net::ipv4::any(0));
     m_in.listen(1);
 
     // Do the socket pair.
-    m_out.connect(net::address::Ipv4("127.0.0.1", m_in.getsockname().port()));
+    m_out.connect(net::ipv4::pton("127.0.0.1", net::ipv4::port(m_in.getsockname())));
     m_in = m_in.accept();
     m_out.set(net::option::SockBlockMode(false));
 }
@@ -45,9 +49,11 @@ void InterruptService::prepare(fd_set &in, fd_set &, net::Handle &max)
 void InterruptService::sync(fd_set &in, fd_set &)
 {
     if (FD_ISSET(m_in.handle(), &in)) {
+        static std::array<char, 32> tmp;
+
         try {
             log::debug("irccd: interrupt service recv");
-            m_in.recv(32);
+            m_in.recv(tmp.data(), 32);
         } catch (const std::exception &ex) {
             log::warning() << "irccd: interrupt service error: " << ex.what() << std::endl;
         }
@@ -57,8 +63,10 @@ void InterruptService::sync(fd_set &in, fd_set &)
 void InterruptService::interrupt() noexcept
 {
     try {
+        static char byte;
+
         log::debug("irccd: interrupt service send");
-        m_out.send(" ");
+        m_out.send(&byte, 1);
     } catch (const std::exception &ex) {
         log::warning() << "irccd: interrupt service error: " << ex.what() << std::endl;
     }

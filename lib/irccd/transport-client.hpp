@@ -64,8 +64,9 @@ public:
     Signal<> onDie;
 
 protected:
-    std::string m_input;    //!< input buffer
-    std::string m_output;    //!< output buffer
+    net::TcpSocket m_socket;    //!< socket
+    std::string m_input;        //!< input buffer
+    std::string m_output;       //!< output buffer
 
     /**
      * Parse input buffer.
@@ -74,123 +75,27 @@ protected:
      */
     void parse(const std::string &buffer);
 
-    /**
-     * Start receiving data.
-     */
-    virtual void receive() = 0;
-
-    /**
-     * Start sending data.
-     */
-    virtual void send() = 0;
-
-public:
-    /**
-     * Virtual destructor defaulted.
-     */
-    virtual ~TransportClient() = default;
-
-    /**
-     * Send or receive data, called after a select.
-     *
-     * \param setinput the input fd_set
-     * \param setoutput the output fd_set
-     */
-    IRCCD_EXPORT void sync(fd_set &setinput, fd_set &setoutput);
-
-    /**
-     * Send some data, it will be pushed to the outgoing buffer.
-     *
-     * This function appends "\r\n\r\n" after the message so you don't have
-     * to do it manually.
-     *
-     * \param message the message
-     */
-    IRCCD_EXPORT void send(std::string message);
-
-    /**
-     * Tell if the client has data pending for output.
-     *
-     * \return true if has pending data to write
-     */
-    inline bool hasOutput() const noexcept
-    {
-        return !m_output.empty();
-    }
-
-    /**
-     * Get the underlying socket handle.
-     *
-     * \return the socket
-     */
-    virtual net::Handle handle() noexcept = 0;
-};
-
-/**
- * \brief Template class for Tcp and Ssl sockets
- */
-template <typename Address>
-class TransportClientBase : public TransportClient {
 private:
-    net::SocketTcp<Address> m_socket;
-
-protected:
-    void send() override;
-    void receive() override;
+    void receive();
+    void send();
 
 public:
-    /**
-     * Create a client.
-     *
-     * \param socket the socket
-     */
-    inline TransportClientBase(net::SocketTcp<Address> socket)
+    inline TransportClient(net::TcpSocket socket)
         : m_socket(std::move(socket))
     {
     }
 
     /**
-     * \copydoc TransportClient::handle
+     * Virtual destructor defaulted.
      */
-    net::Handle handle() noexcept override
-    {
-        return m_socket.handle();
-    }
+    virtual ~TransportClient() = default;
+
+    IRCCD_EXPORT void send(const nlohmann::json &json);
+
+    IRCCD_EXPORT virtual void prepare(fd_set &in, fd_set &out, net::Handle &max);
+
+    IRCCD_EXPORT virtual void sync(fd_set &in, fd_set &out);
 };
-
-template <typename Address>
-void TransportClientBase<Address>::receive()
-{
-    try {
-        auto message = m_socket.recv(512);
-
-        if (message.empty())
-            onDie();
-
-        m_input += message;
-    } catch (const std::exception &) {
-        onDie();
-    }
-
-    std::string::size_type pos;
-    while ((pos = m_input.find("\r\n\r\n")) != std::string::npos) {
-        /*
-         * Make a copy and erase it in case that onComplete function
-         * throws.
-         */
-        auto message = m_input.substr(0, pos);
-
-        m_input.erase(m_input.begin(), m_input.begin() + pos + 4);
-
-        parse(message);
-    }
-}
-
-template <typename Address>
-void TransportClientBase<Address>::send()
-{
-    m_output.erase(0, m_socket.send(m_output));
-}
 
 } // !irccd
 

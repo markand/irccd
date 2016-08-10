@@ -75,7 +75,7 @@ void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const n
         response.push_back({"response", *name});
 
         // 5. Send the result.
-        tc->send(response.dump());
+        tc->send(response);
     });
 }
 
@@ -107,14 +107,8 @@ void TransportService::prepare(fd_set &in, fd_set &out, net::Handle &max)
     }
 
     // Transport clients.
-    for (const auto &client : m_clients) {
-        FD_SET(client->handle(), &in);
-
-        if (client->hasOutput())
-            FD_SET(client->handle(), &out);
-        if (client->handle() > max)
-            max = client->handle();
-    }
+    for (const auto &client : m_clients)
+        client->prepare(in, out, max);
 }
 
 void TransportService::sync(fd_set &in, fd_set &out)
@@ -132,7 +126,7 @@ void TransportService::sync(fd_set &in, fd_set &out)
         std::weak_ptr<TransportClient> ptr(client);
 
         // Send some information.
-        nlohmann::json object = nlohmann::json::object({
+        auto object = nlohmann::json::object({
             { "program",    "irccd"                 },
             { "major",      IRCCD_VERSION_MAJOR     },
             { "minor",      IRCCD_VERSION_MINOR     },
@@ -146,19 +140,29 @@ void TransportService::sync(fd_set &in, fd_set &out)
         object.push_back({"ssl", true});
 #endif
 
-        client->send(object.dump());
+        try {
+            client->send(object);
 
-        // Connect signals.
-        client->onCommand.connect(std::bind(&TransportService::handleCommand, this, ptr, _1));
-        client->onDie.connect(std::bind(&TransportService::handleDie, this, ptr));
+            // Connect signals.
+            client->onCommand.connect(std::bind(&TransportService::handleCommand, this, ptr, _1));
+            client->onDie.connect(std::bind(&TransportService::handleDie, this, ptr));
 
-        // Register it.
-        m_clients.push_back(std::move(client));
+            // Register it.
+            m_clients.push_back(std::move(client));
+        } catch (const std::exception &ex) {
+            log::info() << "transport: client disconnected: " << ex.what() << std::endl;
+        }
     }
 
     // Transport clients.
-    for (const auto &client : m_clients)
-        client->sync(in, out);
+    for (const auto &client : m_clients) {
+        try {
+            client->sync(in, out);
+        } catch (const std::exception &ex) {
+            log::info() << "transport: client disconnected: " << ex.what() << std::endl;
+            handleDie(client);
+        }
+    }
 }
 
 void TransportService::add(std::shared_ptr<TransportServer> ts)
@@ -166,11 +170,13 @@ void TransportService::add(std::shared_ptr<TransportServer> ts)
     m_servers.push_back(std::move(ts));
 }
 
-void TransportService::broadcast(std::string data)
+void TransportService::broadcast(const nlohmann::json &json)
 {
+    assert(json.is_object());
+
     // Asynchronous send.
     for (const auto &client : m_clients)
-        client->send(data);
+        client->send(json);
 }
 
 } // !irccd

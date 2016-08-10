@@ -543,8 +543,9 @@ inline std::uint64_t getUint(const nlohmann::json &json, const std::string &key,
  *
  * \param json the json value
  * \param key the property key
- * \param def the default value
- * \return the boolean
+ * \param min the minimum value
+ * \param max the maximum value
+ * \return the value
  */
 template <typename T>
 inline T getIntRange(const nlohmann::json &json,
@@ -560,8 +561,9 @@ inline T getIntRange(const nlohmann::json &json,
  *
  * \param json the json value
  * \param key the property key
- * \param def the default value
- * \return the boolean
+ * \param min the minimum value
+ * \param max the maximum value
+ * \return value
  */
 template <typename T>
 inline T getUintRange(const nlohmann::json &json,

@@ -16,34 +16,102 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <stdexcept>
+
 #include "connection.hpp"
-#include "logger.hpp"
+#include "conn-state-connecting.hpp"
+#include "conn-state-checking.hpp"
+#include "conn-state-disconnected.hpp"
 #include "util.hpp"
 
 namespace irccd {
 
-nlohmann::json Connection::next(const std::string &name, int timeout)
+void Connection::syncInput()
 {
-    m_timer.reset();
+    try {
+        std::string buffer;
 
-    for (;;) {
-        auto object = next(clamp(timeout));
-        auto response = object.find("response");
+        buffer.resize(512);
+        buffer.resize(m_socket.recv(&buffer[0], buffer.size()));
 
-        if (response != object.end() && util::json::toString(*response) == name)
-            return object;
+        if (buffer.empty())
+            throw std::runtime_error("connection lost");
+
+        m_input += std::move(buffer);
+    } catch (const std::exception &ex) {
+        m_stateNext = std::make_unique<DisconnectedState>();
+        onDisconnect(ex.what());
     }
-
-    throw std::runtime_error("connection lost");
 }
 
-void Connection::verify(const std::string &name, int timeout)
+void Connection::syncOutput()
 {
-    auto object = next(name, timeout);
-    auto value = object.at("status").dump();
+    try {
+        auto ns = m_socket.send(m_output.data(), m_output.length());
 
-    if (!value.empty() && value != "ok")
-        throw std::runtime_error(object.at("error").dump());
+        if (ns > 0)
+            m_output.erase(0, ns);
+    } catch (const std::exception &ex) {
+        m_stateNext = std::make_unique<DisconnectedState>();
+        onDisconnect(ex.what());
+    }
+}
+
+Connection::Connection()
+    : m_state(std::make_unique<DisconnectedState>())
+{
+}
+
+Connection::~Connection() = default;
+
+Connection::Status Connection::status() const noexcept
+{
+    return m_state->status();
+}
+
+void Connection::connect(const net::Address &address)
+{
+    assert(status() == Disconnected);
+
+    try {
+        m_socket = net::TcpSocket(address.domain(), 0);
+        m_socket.set(net::option::SockBlockMode(false));
+        m_socket.connect(address);
+        m_state = std::make_unique<CheckingState>();
+    } catch (const net::WouldBlockError &) {
+        m_state = std::make_unique<ConnectingState>();
+    } catch (const std::exception &ex) {
+        m_state = std::make_unique<DisconnectedState>();
+        onDisconnect(ex.what());
+    }
+}
+
+void Connection::prepare(fd_set &in, fd_set &out, net::Handle &max)
+{
+    try {
+        m_state->prepare(*this, in, out);
+
+        if (m_socket.handle() > max)
+            max = m_socket.handle();
+    } catch (const std::exception &ex) {
+        m_state = std::make_unique<DisconnectedState>();
+        onDisconnect(ex.what());
+    }
+}
+
+void Connection::sync(fd_set &in, fd_set &out)
+{
+    try {
+        m_state->sync(*this, in, out);
+
+        if (m_stateNext) {
+            m_state = std::move(m_stateNext);
+            m_stateNext = nullptr;
+        }
+    } catch (const std::exception &ex) {
+        m_state = std::make_unique<DisconnectedState>();
+        onDisconnect(ex.what());
+    }
 }
 
 } // !irccd

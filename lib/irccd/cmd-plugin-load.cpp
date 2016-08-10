@@ -26,13 +26,8 @@ namespace irccd {
 namespace command {
 
 PluginLoad::PluginLoad()
-    : Command("plugin-load", "Plugins")
+    : Command("plugin-load", "Plugins", "Load a plugin")
 {
-}
-
-std::string PluginLoad::help() const
-{
-    return "Load a plugin.";
 }
 
 std::vector<Command::Arg> PluginLoad::args() const

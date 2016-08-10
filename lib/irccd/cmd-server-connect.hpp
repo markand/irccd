@@ -42,11 +42,6 @@ public:
     IRCCD_EXPORT ServerConnect();
 
     /**
-     * \copydoc Command::help
-     */
-    IRCCD_EXPORT std::string help() const override;
-
-    /**
      * \copydoc Command::options
      */
     IRCCD_EXPORT std::vector<Option> options() const override;

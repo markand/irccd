@@ -75,9 +75,10 @@ public:
     /**
      * Send data to all clients.
      *
-     * \param data the data
+     * \pre object.is_object()
+     * \param object the json object
      */
-    IRCCD_EXPORT void broadcast(std::string data);
+    IRCCD_EXPORT void broadcast(const nlohmann::json &object);
 };
 
 } // !irccd

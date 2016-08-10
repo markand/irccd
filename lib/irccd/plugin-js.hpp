@@ -108,7 +108,7 @@ public:
     }
 
     /**
-     * \copydoc Plugin::setConfig
+     * \copydoc Plugin::setFormats
      */
     void setFormats(PluginFormats formats) override
     {

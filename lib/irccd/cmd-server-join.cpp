@@ -26,13 +26,8 @@ namespace irccd {
 namespace command {
 
 ServerJoin::ServerJoin()
-    : Command("server-join", "Server")
+    : Command("server-join", "Server", "Join a channel")
 {
-}
-
-std::string ServerJoin::help() const
-{
-    return "";
 }
 
 std::vector<Command::Arg> ServerJoin::args() const

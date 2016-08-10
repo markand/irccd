@@ -25,211 +25,192 @@
  */
 
 #include <cassert>
-#include <stdexcept>
+#include <memory>
+#include <string>
 
-#include "elapsed-timer.hpp"
-#include "json.hpp"
 #include "net.hpp"
-#include "sysconfig.hpp"
-#include "system.hpp"
-#include "util.hpp"
+#include "signals.hpp"
+#include "service.hpp"
 
 namespace irccd {
 
 /**
- * \class Connection
- * \brief Abstract class for connecting to irccd from Ip or Local addresses.
+ * \brief Low level connection to irccd instance.
+ *
+ * This class is an event-based connection to an irccd instance. You can use
+ * it directly if you want to issue commands to irccd in an asynchronous way.
+ *
+ * Being asynchronous makes mixing the event loop with this connection easier.
+ *
+ * It is implemented as a finite state machine as it may requires several
+ * roundtrips between the controller and irccd.
+ *
+ * Be aware that there are no namespaces for commands, if you plan to use
+ * Irccdctl class and you also connect the onMessage signal, irccdctl will also
+ * use it. Do not use irccdctl directly if this is a concern.
+ *
+ * The state may change as following.
+ *
+ *   [o]
+ *    |       +----------------------------+
+ *    v       v                            |
+ * +--------------+   +----------+     +----------------+
+ * | Disconnected |-->| Checking |---->| Authenticating |
+ * +--------------+   +----------+     +----------------+
+ *     ^       |            ^              |
+ *     |       |            |              v
+ *     |       |      +------------+   +-------+
+ *     |       +----->| Connecting |<--| Ready |
+ *     |              +------------+   +-------+
+ *     |                                   |
+ *     ------------------------------------+
+ *
+ * Note: authenticating state is not implemented yet.
  */
-class Connection {
-protected:
+class Connection : public Service {
+public:
     /**
-     * Timer to track elapsed time.
+     * \brief The current connection state.
      */
-    ElapsedTimer m_timer;
+    enum Status {
+        Disconnected,       //!< Socket is closed
+        Connecting,         //!< Connection is in progress
+        Checking,           //!< Connection is checking irccd daemon
+        Authenticating,     //!< Connection is authenticating
+        Ready               //!< Socket is ready for I/O
+    };
 
     /**
-     * Clamp the time to wait to be sure that it will be never less than 0.
+     * \brief Irccd information.
      */
-    inline int clamp(int timeout) noexcept
-    {
-        return timeout < 0 ? -1 : (timeout - (int)m_timer.elapsed() < 0) ? 0 : (timeout - m_timer.elapsed());
-    }
+    class Info {
+    public:
+        unsigned short major;
+        unsigned short minor;
+        unsigned short patch;
+    };
+
+    /**
+     * onConnect
+     * --------------------------------------------------------------
+     *
+     * Connection was successfull.
+     */
+    Signal<const Info &> onConnect;
+
+    /**
+     * onMessage
+     * ---------------------------------------------------------------
+     *
+     * Upon message.
+     */
+    Signal<const nlohmann::json &> onMessage;
+
+    /**
+     * onDisconnect
+     * --------------------------------------------------------------
+     *
+     * A fatal error occured resulting in disconnection.
+     */
+    Signal<const std::string &> onDisconnect;
+
+private:
+    std::string m_input;
+    std::string m_output;
+
+public:
+    /**
+     * \brief TEST
+     */
+    class State;
+    class DisconnectedState;
+    class ConnectingState;
+    /**
+     * \brief TEST
+     */
+    class CheckingState;
+    class ReadyState;
+
+private:
+    std::unique_ptr<State> m_state;
+    std::unique_ptr<State> m_stateNext;
+
+protected:
+    net::TcpSocket m_socket{net::Invalid};
+
+    void syncInput();
+    void syncOutput();
 
 public:
     /**
      * Default constructor.
      */
-    Connection() = default;
+    Connection();
 
     /**
      * Default destructor.
      */
-    virtual ~Connection() = default;
+    virtual ~Connection();
 
     /**
-     * Wait for the next requested response.
+     * Send an asynchronous request to irccd.
      *
-     * \param name the response name
-     * \param timeout the optional timeout
-     * \return the object
-     * \throw net::Error on errors or on timeout
+     * \pre json.is_object
+     * \param json the JSON object
      */
-    IRCCD_EXPORT nlohmann::json next(const std::string &name, int timeout = 30000);
+    inline void request(const nlohmann::json &json)
+    {
+        assert(json.is_object());
+
+        m_output += json.dump();
+        m_output += "\r\n\r\n";
+    }
 
     /**
-     * Just wait if the operation succeeded.
+     * Get the underlying socket handle.
      *
-     * \param name the response name
-     * \param timeout the timeout
+     * \return the handle
      */
-    IRCCD_EXPORT void verify(const std::string &name, int timeout = 30000);
+    inline net::Handle handle() const noexcept
+    {
+        return m_socket.handle();
+    }
 
     /**
-     * Try to connect to the host.
+     * Shorthand for state() != Disconnected.
      *
-     * \param timeout the maximum time in milliseconds
-     * \throw net::Error on errors or timeout
+     * \return true if state() != Disconnected
      */
-    virtual void connect(int timeout = 30000) = 0;
+    inline bool isConnected() const noexcept
+    {
+        return status() != Disconnected;
+    }
 
     /**
-     * Try to send the message in 30 seconds. The message must not end with \\r\\n\\r\\n, it is added automatically.
+     * Get the current state.
      *
-     * \pre msg must not be empty
-     * \param msg the message to send
-     * \param timeout the maximum time in milliseconds
-     * \throw net::Error on errors
+     * \return the state
      */
-    virtual void send(std::string msg, int timeout = 30000) = 0;
+    Status status() const noexcept;
 
     /**
-     * Get the next event from irccd.
+     * Initiate connection to irccd.
      *
-     * This functions throws if the connection is lost.
-     *
-     * \param timeout the maximum time in milliseconds
-     * \return the next event
-     * \throw net::Error on errors or disconnection
-     */
-    virtual nlohmann::json next(int timeout = 30000) = 0;
-};
-
-/**
- * \class ConnectionBase
- * \brief Implementation for Ip or Local.
- */
-template <typename Address>
-class ConnectionBase : public Connection {
-private:
-    net::SocketTcp<Address> m_socket;
-    net::Listener<> m_listener;
-    Address m_address;
-
-    // Input buffer.
-    std::string m_input;
-
-public:
-    /**
-     * Construct the socket but do not connect immediately.
-     *
+     * \pre state() == Disconnected
      * \param address the address
      */
-    inline ConnectionBase(Address address)
-        : m_address(std::move(address))
-    {
-        m_socket.set(net::option::SockBlockMode{false});
-        m_listener.set(m_socket.handle(), net::Condition::Readable);
-    }
+    virtual void connect(const net::Address &address);
 
     /**
-     * \copydoc Connection::connect
+     * \copydoc Service::prepare
      */
-    void connect(int timeout) override;
+    void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
 
     /**
-     * \copydoc Connection::send
+     * \copydoc Service::sync
      */
-    void send(std::string msg, int timeout) override;
-
-    /**
-     * \copydoc Connection::next(int)
-     */
-    nlohmann::json next(int timeout) override;
+    void sync(fd_set &in, fd_set &out) override;
 };
-
-template <typename Address>
-void ConnectionBase<Address>::connect(int timeout)
-{
-    net::Condition cond;
-
-    m_socket.connect(m_address, cond);
-    m_timer.reset();
-
-    while (cond != net::Condition::None) {
-        if (timeout >= 0 && m_timer.elapsed() >= static_cast<unsigned>(timeout))
-            throw std::runtime_error("timeout while connecting");
-
-        m_listener.remove(m_socket.handle());
-        m_listener.set(m_socket.handle(), cond);
-        m_listener.wait(timeout - m_timer.elapsed());
-        m_socket.resumeConnect(cond);
-    }
-
-    m_listener.set(m_socket.handle(), net::Condition::Readable);
-}
-
-template <typename Address>
-void ConnectionBase<Address>::send(std::string msg, int timeout)
-{
-    assert(!msg.empty());
-
-    // Add termination.
-    msg += "\r\n\r\n";
-
-    m_listener.remove(m_socket.handle());
-    m_listener.set(m_socket.handle(), net::Condition::Writable);
-    m_timer.reset();
-
-    while (!msg.empty()) {
-        // Do not wait the time that is already passed.
-        m_listener.wait(clamp(timeout));
-
-        // Try to send at most as possible.
-        msg.erase(0, m_socket.send(msg));
-    }
-
-    // Timeout?
-    if (!msg.empty())
-        throw std::runtime_error("operation timed out while sending to irccd");
-}
-
-template <typename Address>
-nlohmann::json ConnectionBase<Address>::next(int timeout)
-{
-    // Maybe there is already something.
-    std::string buffer = util::nextNetwork(m_input);
-
-    m_listener.remove(m_socket.handle());
-    m_listener.set(m_socket.handle(), net::Condition::Readable);
-    m_timer.reset();
-
-    // Read if there is nothing.
-    while (buffer.empty()) {
-        // Wait and read.
-        m_listener.wait(clamp(timeout));
-        m_input += m_socket.recv(512);
-
-        // Finally try.
-        buffer = util::nextNetwork(m_input);
-    }
-
-    auto value = nlohmann::json::parse(buffer);
-
-    if (!value.is_object())
-        throw std::invalid_argument("invalid message received");
-
-    return value;
-}
 
 } // !irccd
 

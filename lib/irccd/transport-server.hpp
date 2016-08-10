@@ -34,8 +34,7 @@
 namespace irccd {
 
 /**
- * \class TransportServer
- * \brief Bring networking between irccd and irccdctl
+ * \brief Bring networking between irccd and irccdctl.
  *
  * This class contains a master sockets for listening to TCP connections, it is then processed by irccd.
  *
@@ -56,11 +55,30 @@ private:
     TransportServer &operator=(const TransportServer &) = delete;
     TransportServer &operator=(TransportServer &&) = delete;
 
+protected:
+    /**
+     * The socket handle.
+     */
+    net::TcpSocket m_socket;
+
 public:
     /**
      * Default constructor.
      */
-    TransportServer() = default;
+    inline TransportServer(net::TcpSocket socket)
+        : m_socket(std::move(socket))
+    {
+    }
+
+    /**
+     * Get the socket handle for this transport.
+     *
+     * \return the handle
+     */
+    inline net::Handle handle() const noexcept
+    {
+        return m_socket.handle();
+    }
 
     /**
      * Destructor defaulted.
@@ -68,63 +86,52 @@ public:
     virtual ~TransportServer() = default;
 
     /**
-     * Retrieve the underlying socket handle.
-     *
-     * \return the socket
-     */
-    virtual net::Handle handle() noexcept = 0;
-
-    /**
      * Accept a new client depending on the domain.
      *
      * \return the new client
      */
-    virtual std::shared_ptr<TransportClient> accept() = 0;
+    virtual std::unique_ptr<TransportClient> accept()
+    {
+        return std::make_unique<TransportClient>(m_socket.accept());
+    }
 };
 
 /**
- * \class TransportServerIp
- * \brief Base class for both IPv4 and IPv6 servers.
+ * \brief Create IP transport.
  */
 class TransportServerIp : public TransportServer {
-protected:
-    /**
-     * The TCP/IP socket.
-     */
-    net::SocketTcp<net::address::Ip> m_socket;
-
 public:
     /**
-     * Create a IP transport, use IPv6 or IPv4 address.
+     * Constructor.
      *
-     * \param domain AF_INET or AF_INET6
-     * \param address the address or "*" for any
+     * \param address the address (* for any)
      * \param port the port number
-     * \param ipv6only set to true to disable IPv4
-     * \throw net::Error on failures
      */
-    IRCCD_EXPORT TransportServerIp(int domain, const std::string &address, int port, bool ipv6only = true);
+    IRCCD_EXPORT TransportServerIp(const std::string &address, std::uint16_t port);
+};
 
+/**
+ * \brief Create IPv6 transport.
+ */
+class TransportServerIpv6 : public TransportServer {
+public:
     /**
-     * \copydoc TransportServer::handle
+     * Constructor.
+     *
+     * \param address the address (* for any)
+     * \param port the port number
+     * \param ipv6only set to true to disable ipv4 completely
      */
-    IRCCD_EXPORT net::Handle handle() noexcept override;
-
-    /**
-     * \copydoc TransportServer::accept
-     */
-    IRCCD_EXPORT std::shared_ptr<TransportClient> accept() override;
+    IRCCD_EXPORT TransportServerIpv6(const std::string &address, std::uint16_t port, bool ipv6only = true);
 };
 
 #if !defined(IRCCD_SYSTEM_WINDOWS)
 
 /**
- * \class TransportServerUnix
  * \brief Implementation of transports for Unix sockets.
  */
-class TransportServerUnix : public TransportServer {
+class TransportServerLocal : public TransportServer {
 private:
-    net::SocketTcp<net::address::Local> m_socket;
     std::string m_path;
 
 public:
@@ -133,22 +140,12 @@ public:
      *
      * \param path the path
      */
-    IRCCD_EXPORT TransportServerUnix(std::string path);
+    IRCCD_EXPORT TransportServerLocal(std::string path);
 
     /**
      * Destroy the transport and remove the file.
      */
-    IRCCD_EXPORT ~TransportServerUnix();
-
-    /**
-     * \copydoc TransportServer::handle
-     */
-    IRCCD_EXPORT net::Handle handle() noexcept override;
-
-    /**
-     * \copydoc TransportServer::accept
-     */
-    IRCCD_EXPORT std::shared_ptr<TransportClient> accept() override;
+    IRCCD_EXPORT ~TransportServerLocal();
 };
 
 #endif // !_WIN32

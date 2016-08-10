@@ -26,13 +26,8 @@ namespace irccd {
 namespace command {
 
 ServerNick::ServerNick()
-    : Command("server-nick", "Server")
+    : Command("server-nick", "Server", "Change your nickname")
 {
-}
-
-std::string ServerNick::help() const
-{
-    return "";
 }
 
 std::vector<Command::Arg> ServerNick::args() const

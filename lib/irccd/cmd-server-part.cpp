@@ -26,13 +26,8 @@ namespace irccd {
 namespace command {
 
 ServerPart::ServerPart()
-    : Command("server-part", "Server")
+    : Command("server-part", "Server", "Leave a channel")
 {
-}
-
-std::string ServerPart::help() const
-{
-    return "";
 }
 
 std::vector<Command::Arg> ServerPart::args() const

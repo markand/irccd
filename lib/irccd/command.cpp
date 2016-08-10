@@ -143,6 +143,45 @@ std::string Command::usage() const
 {
     std::ostringstream oss;
 
+    oss << m_name << " ";
+
+    // Options.
+    auto optlist = options();
+
+    if (optlist.size() > 0) {
+        for (const auto &opt : optlist) {
+            oss << "[";
+
+            /*
+             * Long options are too big so only show them in the help
+             * command usage or only if no short option is available.
+             */
+            if (opt.simpleKey().size() > 0)
+                oss << "-" << opt.simpleKey();
+            else if (opt.longKey().size() > 0)
+                oss << " --" << opt.longKey();
+
+            oss << (opt.arg().empty() ? "" : " ") << opt.arg() << "] ";
+        }
+    }
+
+    // Arguments.
+    auto argslist = args();
+
+    if (argslist.size() > 0) {
+        for (const auto &arg : argslist)
+            oss << (arg.required() ? "" : "[")
+                << arg.name()
+                << (arg.required() ? "" : "]") << " ";
+    }
+
+    return oss.str();
+}
+
+std::string Command::help() const
+{
+    std::ostringstream oss;
+
     oss << "usage: " << sys::programName() << " " << m_name;
 
     // Options summary.
@@ -158,7 +197,7 @@ std::string Command::usage() const
     }
 
     // Description.
-    oss << "\n\n" << help() << "\n\n";
+    oss << "\n\n" << m_description << "\n\n";
 
     // Options.
     if (options().size() > 0) {

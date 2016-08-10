@@ -20,35 +20,85 @@
 #include "logger.hpp"
 #include "transport-client.hpp"
 
-using json = nlohmann::json;
-
 namespace irccd {
 
 void TransportClient::parse(const std::string &message)
 {
-    auto document = json::parse(message);
+    auto document = nlohmann::json::parse(message);
 
-    if (!document.is_object())
-        throw std::invalid_argument("the message is not a valid JSON object");
-
-    onCommand(document);
+    if (document.is_object())
+        onCommand(document);
 }
 
-void TransportClient::sync(fd_set &setinput, fd_set &setoutput)
+void TransportClient::receive()
 {
-    if (FD_ISSET(handle(), &setinput)) {
+    try {
+        std::string buffer;
+
+        buffer.resize(512);
+        buffer.resize(m_socket.recv(&buffer[0], buffer.size()));
+
+        if (buffer.empty())
+            onDie();
+
+        m_input += std::move(buffer);
+    } catch (const std::exception &) {
+        onDie();
+    }
+}
+
+void TransportClient::send()
+{
+    try {
+        auto ns = m_socket.send(&m_output[0], m_output.size());
+
+        if (ns == 0)
+            onDie();
+
+        m_output.erase(0, ns);
+    } catch (const std::exception &ex) {
+        onDie();
+    }
+}
+
+void TransportClient::prepare(fd_set &in, fd_set &out, net::Handle &max)
+{
+    if (m_socket.handle() > max)
+        max = m_socket.handle();
+
+    FD_SET(m_socket.handle(), &in);
+
+    if (!m_output.empty())
+        FD_SET(m_socket.handle(), &out);
+}
+
+void TransportClient::sync(fd_set &in, fd_set &out)
+{
+    // Do some I/O.
+    if (FD_ISSET(m_socket.handle(), &in)) {
         log::debug() << "transport: receiving to input buffer" << std::endl;
         receive();
     }
-    if (FD_ISSET(handle(), &setoutput)) {
+    if (FD_ISSET(m_socket.handle(), &out)) {
         log::debug() << "transport: sending outgoing buffer" << std::endl;
         send();
     }
+
+    // Flush the queue.
+    for (std::size_t pos; (pos = m_input.find("\r\n\r\n")) != std::string::npos; ) {
+        auto message = m_input.substr(0, pos);
+
+        m_input.erase(m_input.begin(), m_input.begin() + pos + 4);
+
+        parse(message);
+    }
 }
 
-void TransportClient::send(std::string message)
+void TransportClient::send(const nlohmann::json &json)
 {
-    m_output += message;
+    assert(json.is_object());
+
+    m_output += json.dump();
     m_output += "\r\n\r\n";
 }
 

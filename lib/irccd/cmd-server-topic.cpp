@@ -26,13 +26,8 @@ namespace irccd {
 namespace command {
 
 ServerTopic::ServerTopic()
-    : Command("server-topic", "Server")
+    : Command("server-topic", "Server", "Change a channel topic")
 {
-}
-
-std::string ServerTopic::help() const
-{
-    return "";
 }
 
 std::vector<Command::Arg> ServerTopic::args() const

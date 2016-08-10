@@ -261,7 +261,7 @@ int main(int argc, char **argv)
     try {
         load(open(options), options);
     } catch (const std::exception &ex) {
-        log::warning() << "irccd: " << ex.what() << std::endl;
+        log::warning() << "error: " << ex.what() << std::endl;
         return 1;
     }
 

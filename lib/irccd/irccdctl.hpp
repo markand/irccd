@@ -24,22 +24,24 @@
  * \brief Base class for irccdctl front end.
  */
 
-#include <cassert>
 #include <map>
 #include <memory>
 #include <string>
 
-#include "alias.hpp"
 #include "connection.hpp"
+#include "alias.hpp"
 #include "options.hpp"
 #include "service-command.hpp"
 
+#include <json.hpp>
+
 namespace irccd {
 
-class Command;
+class Connection;
 
 namespace ini {
 
+class Document;
 class Section;
 
 } // !ini
@@ -49,36 +51,36 @@ class Section;
  */
 class Irccdctl {
 private:
-    // Irccd's information.
-    unsigned short m_major{0};
-    unsigned short m_minor{0};
-    unsigned short m_patch{0};
-
-    // Irccd's compilation option.
-    bool m_javascript{true};
-    bool m_ssl{true};
-
     // Commands.
     CommandService m_commandService;
 
+    // Connection handler.
     std::unique_ptr<Connection> m_connection;
-    std::unordered_map<std::string, Alias> m_aliases;
+    std::uint32_t m_timeout{30000};
+    net::Address m_address;
+
+    // Aliases.
+    std::map<std::string, Alias> m_aliases;
+
+    // Incoming data.
+    std::vector<nlohmann::json> m_input;
 
     void usage() const;
+    void help() const;
 
+    // Parse configuration file.
     void readConnectIp(const ini::Section &sc);
-    void readConnectUnix(const ini::Section &sc);
+    void readConnectLocal(const ini::Section &sc);
     void readConnect(const ini::Section &sc);
     void readGeneral(const ini::Section &sc);
     void readAliases(const ini::Section &sc);
-    void read(const std::string &path, const option::Result &options);
+    void read(const std::string &path);
 
-    void parseConnectIp(const option::Result &options, bool ipv6);
-    void parseConnectUnix(const option::Result &options);
+    // Parse command line options.
+    void parseConnectIp(const option::Result &options);
+    void parseConnectLocal(const option::Result &options);
     void parseConnect(const option::Result &options);
-    option::Result parse(int &argc, char **&argv) const;
-
-    void connect();
+    option::Result parse(int &argc, char **&argv);
 
 public:
     /**
@@ -90,6 +92,30 @@ public:
     {
         return m_commandService;
     }
+
+    inline const Connection &connection() const noexcept
+    {
+        return *m_connection;
+    }
+
+    inline Connection &connection() noexcept
+    {
+        return *m_connection;
+    }
+
+    /**
+     * Get the next response with the given id.
+     *
+     * If the response id is not provided, get the next incoming message.
+     *
+     * Otherwise, if the id is provided, all other previous messages will be
+     * discarded.
+     *
+     * \param id the response id (e.g. server-message)
+     * \return the next message
+     * \warning this may skip previous events
+     */
+    IRCCD_EXPORT nlohmann::json next(const std::string id = "");
 
     /**
      * Execute the given command and wait for its result.
@@ -113,16 +139,6 @@ public:
      * \param args the main arguments
      */
     IRCCD_EXPORT void exec(std::vector<std::string> args);
-
-    /**
-     * Get the connection.
-     *
-     * \return the connection
-     */
-    inline Connection &connection() noexcept
-    {
-        return *m_connection;
-    }
 
     /**
      * Run the irccdctl front end.

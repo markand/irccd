@@ -174,9 +174,9 @@ std::shared_ptr<TransportServer> loadTransportIp(const ini::Section &sc)
     }
 
     if (ipv6)
-        transport = std::make_shared<TransportServerIp>(AF_INET6, move(address), port, !ipv4);
+        transport = std::make_shared<TransportServerIpv6>(move(address), port, !ipv4);
     else if (ipv4)
-        transport = std::make_shared<TransportServerIp>(AF_INET, move(address), port);
+        transport = std::make_shared<TransportServerIp>(move(address), port);
     else
         throw std::invalid_argument("transport: domain must at least have ipv4 or ipv6");
 
@@ -193,7 +193,7 @@ std::shared_ptr<TransportServer> loadTransportUnix(const ini::Section &sc)
     if (it == sc.end())
         throw std::invalid_argument("transport: missing 'path' parameter");
 
-    return std::make_shared<TransportServerUnix>(it->value());
+    return std::make_shared<TransportServerLocal>(it->value());
 #else
     (void)sc;
 

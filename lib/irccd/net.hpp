@@ -1,5 +1,5 @@
 /*
- * net.hpp -- portable C++ socket wrappers
+ * net.hpp -- portable C++ socket wrapper
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -63,36 +63,53 @@
 /**
  * \page Networking Networking
  *
- *   - \subpage net-configuration
  *   - \subpage net-options
  *   - \subpage net-concepts
  */
 
 /**
- * \page net-configuration Configuration
+ * \page net-options User options
+ *
+ * The user may set the following variables before compiling these files:
+ *
+ * # General options
+ *
+ * - **NET_NO_AUTO_INIT**: (bool) Set to 0 if you don't want Socket class to
+ *   automatically calls init function and finish functions.
+ *
+ * - **NET_NO_SSL**: (bool) Set to 0 if you don't have access to OpenSSL
+ *   library.
+ *
+ * - **NET_NO_AUTO_SSL_INIT**: (bool) Set to 0 if you don't want Socket class
+ *   with Tls to automatically init the OpenSSL library. You will need to call
+ *   ssl::init and ssl::finish.
  *
  * # General compatibility options.
  *
- * The following options are auto detected but you can override them if you want.
+ * The following options are auto detected but you can override them if you
+ * want.
  *
- * - **NET_HAVE_INET_PTON**: (bool) Set to 1 if you have inet_pton function. True for all platforms and Windows
+ * - **NET_HAVE_INET_PTON**: (bool) Set to 1 if you have inet_pton function.
+ *   True for all platforms and Windows
  *   if _WIN32_WINNT is greater or equal to 0x0600.
  *
  * - **NET_HAVE_INET_NTOP**: (bool) Same as above.
  *
- * **Note:** On Windows, it is highly encouraged to set _WIN32_WINNT to at least 0x0600 on MinGW.
+ * **Note:** On Windows, it is highly encouraged to set _WIN32_WINNT to at least
+ * 0x0600 on MinGW.
  *
  * # Options for Listener class
  *
- * Feature detection, multiple implementations may be avaible, for example, Linux has poll, select and epoll.
+ * Feature detection, multiple implementations may be avaible, for example,
+ * Linux has poll, select and epoll.
  *
  * We assume that `select(2)` is always available.
  *
- * Of course, you can set the variables yourself if you test it with your build system.
+ * Of course, you can set the variables yourself if you test it with your build
+ * system.
  *
  * - **NET_HAVE_POLL**: Defined on all BSD, Linux. Also defined on Windows
  *   if _WIN32_WINNT is set to 0x0600 or greater.
- *
  * - **NET_HAVE_KQUEUE**: Defined on all BSD and Apple.
  * - **NET_HAVE_EPOLL**: Defined on Linux only.
  * - **NET_DEFAULT_BACKEND**: Which backend to use (e.g. `Select`).
@@ -108,25 +125,8 @@
  */
 
 /**
- * \page net-options User options
- *
- * The user may set the following variables before compiling these files:
- *
- * # General options
- *
- * - **NET_NO_AUTO_INIT**: (bool) Set to 0 if you don't want Socket class to
- * automatically calls net::init function and net::finish functions.
- *
- * - **NET_NO_SSL**: (bool) Set to 0 if you don't have access to OpenSSL library.
- *
- * - **NET_NO_AUTO_SSL_INIT**: (bool) Set to 0 if you don't want Socket class with Tls to automatically init
- *   the OpenSSL library. You will need to call net::ssl::init and net::ssl::finish.
- */
-
-/**
  * \page net-concepts Concepts
  *
- *   - \subpage net-concept-address
  *   - \subpage net-concept-backend
  *   - \subpage net-concept-option
  *   - \subpage net-concept-stream
@@ -134,81 +134,13 @@
  */
 
 /**
- * \page net-concept-address Address (Concept)
- *
- * An address is used in many place for creating, binding, connecting, receiving and sending. They are implemented as
- * templates to allow any type of address and to make sure the same address is used for a given socket.
- *
- * This concepts requires the following functions:
- *
- * # Address (constructor)
- *
- * The address must have the following constructor overloads.
- *
- * **Note**: the user can add custom constructors.
- *
- * ## Synopsis
- *
- * ````
- * Address(); // (0);
- * Address(const sockaddr *sa, socklen_t length); // (1)
- * ````
- *
- * ## Arguments
- *
- *   - **ss**: the storage to construct from,
- *   - **length**: the storage length.
- *
- * # domain
- *
- * Get the domain (e.g. AF_INET).
- *
- * ## Synopsis
- *
- * ````
- * int domain() const noexcept;
- * ````
- *
- * ## Returns
- *
- * The domain.
- *
- * # address
- *
- * Get the underlying address.
- *
- * ## Synopsis
- *
- * ````
- * const sockaddr *address() const noexcept;
- * ````
- *
- * ## Returns
- *
- * The address.
- *
- * # length
- *
- * Get the underlying length.
- *
- * ## Synopsis
- *
- * ````
- * socklen_t length() const noexcept;
- * ````
- *
- * ## Returns
- *
- * The length.
- */
-
-/**
  * \page net-concept-backend Backend (Concept)
  *
- * A backend is an interface for the Listener class. It is primarily designed to be the most suitable for the host
- * environment.
+ * A backend is an interface for the Listener class. It is primarily designed to
+ * be the most suitable for the host environment.
  *
- * The backend must be default constructible, it is highly encouraged to be move constructible.
+ * The backend must be default constructible, it is highly encouraged to be move
+ * constructible.
  *
  * This concepts requires the following functions:
  *
@@ -233,7 +165,8 @@
  * ## Synopsis
  *
  * ````
- * void set(const ListenerTable &table, Handle handle, Condition condition, bool add);
+ * void set(const ListenerTable &table, Handle handle, Condition condition,
+ * bool add);
  * ````
  *
  * ## Arguments
@@ -241,7 +174,7 @@
  *   - **table**: the current table of sockets,
  *   - **handle**: the handle to set,
  *   - **condition**: the condition to add (may be OR'ed),
- *   - **add**: hint set to true if the handle is not currently registered at all.
+ *   - **add**: hint set to true if the handle is not currently registered.
  *
  * # unset
  *
@@ -250,7 +183,8 @@
  * ## Synopsis
  *
  * ````
- * void unset(const ListenerTable &table, Handle handle, Condition condition, bool remove);
+ * void unset(const ListenerTable &table, Handle handle, Condition condition,
+ * bool remove);
  * ````
  *
  * ## Arguments
@@ -285,7 +219,8 @@
  *
  * An option can be set or get from a socket.
  *
- * If an operation is not available, provides the function but throws an exception with ENOSYS errno code.
+ * If an operation is not available, provides the function but throws an
+ * exception with ENOSYS message.
  *
  * This concepts requires the following functions:
  *
@@ -306,8 +241,8 @@
  * ## Synopsis
  *
  * ````
- * template <typename Address, typename Protocol>
- * inline void set(Socket<Address, Protocol> &sc) const;
+ * template <typename Address>
+ * void set(Socket &sc) const;
  * ````
  *
  * ## Arguments
@@ -321,8 +256,8 @@
  * ## Synopsis
  *
  * ````
- * template <typename Address, typename Protocol>
- * inline bool get(Socket<Address, Protocol> &sc) const;
+ * template <typename Address>
+ * T get(Socket &sc) const;
  * ````
  *
  * ## Arguments
@@ -353,95 +288,49 @@
  *
  * The type of socket.
  *
- * # create
- *
- * Function called immediately after creation of socket. Interface must provides this function even if the
- * interface does not require anything.
- *
- * ## Synopsis
- *
- * ````
- * template <typename Address>
- * void create(Socket<Address, Tcp> &) const noexcept;
- * ````
- *
  * # connect
  *
- * Initial connect function.
- *
- * In this function, the interface receive the socket, address and a condition (initially set to None). If the
- * underlying socket is marked non-blocking and the operation would block, the interface must set the condition
- * to the required one.
+ * Connect to the given address.
  *
  * ## Synopsis
  *
  * ````
- * template <typename Address, typename Protocol>
- * void connect(Socket<Address, Protocol> &sc, const sockaddr *address, socklen_t length, Condition &cond);
+ * void connect(const sockaddr *address, socklen_t length); // (0)
+ * void connect(const Address &address); // 1 (Optional)
  * ````
  *
  * ## Arguments
  *
- *   - **sc**: the socket,
  *   - **address**: the address,
- *   - **length**: the address length,
- *   - **cond**: the condition to update.
+ *   - **length**: the address length.
  *
- * # resumeConnect
+ * ## Throws
  *
- * Continue the connection.
- *
- * ## Synopsis
- *
- * ````
- * template <typename Address, typename Protocol>
- * void resumeConnect(Socket<Address, Protocol> &sc, Condition &cond)
- * ````
- *
- * ## Arguments
- *
- *   - **sc**: the socket,
- *   - **cond**: the condition to update.
+ *   - net::WouldBlockError: if the operation would block,
+ *   - net::Error: on other error.
  *
  * # accept
  *
  * Accept a new client.
  *
- * If the interface has no pending connection, an invalid socket SHOULD be returned, otherwise return the client and
- * set the condition if the accept process is not complete yet.
- *
- * The interface MUST stores the client information into address and length parameters, they are guaranted to never be
- * null.
+ * If no pending connection is available and operation would block, the
+ * implementation must throw WouldBlockError. Any other error can be thrown
+ * otherwise a valid socket must be returned.
  *
  * ## Synopsis
  *
  * ````
- * template <typename Address, typename Protocol>
- * Socket<Address, Protocol> accept(Socket<Address, Protocol> &sc, sockaddr *address, socklen_t *length, Condition &cond);
+ * Socket accept();
  * ````
  *
- * ## Arguments
+ * ## Returns
  *
- *   - **sc**: the socket,
- *   - **address**: the information address,
- *   - **length**: the address initial length (sockaddr_storage),
- *   - **cond**: the condition to update.
+ * The new socket.
  *
- * # resumeAccept
+ * ## Throws
  *
- * Continue the accept process on the returned client.
- *
- * ## Synopsis
- *
- * ````
- * template <typename Address, typename Protocol>
- * void accept(Socket<Address, Protocol> &sc, Condition &cond) const noexcept;
- * ````
- *
- * ## Arguments
- *
- *   - **sc**: the socket,
- *   - **cond**: the condition to update.
+ *   - net::WouldBlockError: if the operation would block,
+ *   - net::Error: on other error.
  *
  * # recv
  *
@@ -450,20 +339,22 @@
  * ## Synopsis
  *
  * ````
- * template <typename Address>
- * std::size_t recv(Socket<Address, Tcp> &sc, void *data, std::size_t length, Condition &cond);
+ * unsigned recv(void *data, unsigned length);
  * ````
  *
  * ## Arguments
  *
- *   - **sc**: the socket,
  *   - **data**: the destination buffer,
- *   - **length**: the destination buffer length,
- *   - **cond**: the condition to update.
+ *   - **length**: the destination buffer length.
  *
  * ## Returns
  *
  * The number of bytes sent.
+ *
+ * ## Throws
+ *
+ *   - net::WouldBlockError: if the operation would block,
+ *   - net::Error: on other error.
  *
  * # send
  *
@@ -472,20 +363,22 @@
  * ## Synopsis
  *
  * ````
- * template <typename Address>
- * std::size_t send(Socket<Address, Tcp> &sc, const void *data, std::size_t length, Condition &cond);
+ * unsigned send(const void *data, unsigned length);
  * ````
  *
  * ## Arguments
  *
- *   - **sc**: the socket,
  *   - **data**: the data to send,
- *   - **length**: the data length,
- *   - **cond**: the condition to update.
+ *   - **length**: the data length.
  *
  * ## Returns
  *
  * The number of bytes sent.
+ *
+ * ## Throws
+ *
+ *   - net::WouldBlockError: if the operation would block,
+ *   - net::Error: on other error.
  */
 
 /**
@@ -514,42 +407,50 @@
  * ## Synopsis
  *
  * ````
- * template <typename Address, typename Protocol>
- * std::size_t recvfrom(Socket<Address, Protocol> &sc, void *data, std::size_t length, sockaddr *address, socklen_t *addrlen, Condition &cond);
+ * unsigned recvfrom(void *data, unsigned length, sockaddr *address,
+ *     socklen_t *addrlen);
+ * unsigned recvfrom(void *data, unsigned length, Address *source)
  * ````
  *
  * ## Arguments
  *
- *   - **sc**: the socket,
  *   - **data**: the data,
  *   - **length**: the length,
  *   - **address**: the source address,
- *   - **addrlen**: the source address in/out length,
- *   - **cond**: the condition.
+ *   - **addrlen**: the source address in/out length.
  *
  * ## Returns
  *
  * The number of bytes received.
  *
+ * ## Throws
+ *
+ *   - net::WouldBlockError: if the operation would block,
+ *   - net::Error: on other error.
+ *
  * # sendto
  *
  * ````
- * template <typename Address, typename Protocol>
- * std::size_t sendto(Socket<Address, Protocol> &sc, const void *data, std::size_t length, const sockaddr *address, socklen_t addrlen, Condition &cond);
+ * unsigned sendto(const void *data, unsigned length, const sockaddr *address,
+ *     socklen_t addrlen);
+ * unsigned sendto(const void *data, unsigned length, const Address &address);
  * ````
  *
  * ## Arguments
  *
- *   - **sc**: the socket,
  *   - **data**: the data to send,
  *   - **length**: the data length,
  *   - **address**: the destination address,
- *   - **addrlen**: the destination address length,
- *   - **cond**: the condition.
+ *   - **addrlen**: the destination address length.
  *
  * ## Returns
  *
  * The number of bytes sent.
+ *
+ * ## Throws
+ *
+ *   - net::WouldBlockError: if the operation would block,
+ *   - net::Error: on other error.
  */
 
 /*
@@ -557,24 +458,27 @@
  * ------------------------------------------------------------------
  */
 
-// Include Windows headers before because it brings _WIN32_WINNT if not specified by the user.
+/*
+ * Include Windows headers before because it brings _WIN32_WINNT if not
+ * specified by the user.
+ */
 #if defined(_WIN32)
-#  include <WinSock2.h>
-#  include <WS2tcpip.h>
+#   include <WinSock2.h>
+#   include <WS2tcpip.h>
 #else
-#  include <sys/ioctl.h>
-#  include <sys/types.h>
-#  include <sys/socket.h>
-#  include <sys/un.h>
+#   include <sys/ioctl.h>
+#   include <sys/types.h>
+#   include <sys/socket.h>
+#   include <sys/un.h>
 
-#  include <arpa/inet.h>
+#   include <arpa/inet.h>
 
-#  include <netinet/in.h>
-#  include <netinet/tcp.h>
+#   include <netinet/in.h>
+#   include <netinet/tcp.h>
 
-#  include <fcntl.h>
-#  include <netdb.h>
-#  include <unistd.h>
+#   include <fcntl.h>
+#   include <netdb.h>
+#   include <unistd.h>
 #endif
 
 #include <algorithm>
@@ -613,23 +517,23 @@
  */
 
 #if defined(_WIN32)
-#  if _WIN32_WINNT >= 0x0600 && !defined(NET_HAVE_POLL)
-#    define NET_HAVE_POLL
-#  endif
+#   if _WIN32_WINNT >= 0x0600 && !defined(NET_HAVE_POLL)
+#       define NET_HAVE_POLL
+#   endif
 #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE__)
-#  if !defined(NET_HAVE_KQUEUE)
-#    define NET_HAVE_KQUEUE
-#  endif
-#  if !defined(NET_HAVE_POLL)
-#    define NET_HAVE_POLL
-#  endif
+#   if !defined(NET_HAVE_KQUEUE)
+#       define NET_HAVE_KQUEUE
+#   endif
+#   if !defined(NET_HAVE_POLL)
+#       define NET_HAVE_POLL
+#   endif
 #elif defined(__linux__)
-#  if !defined(NET_HAVE_EPOLL)
-#    define NET_HAVE_EPOLL
-#  endif
-#  if !defined(NET_HAVE_POLL)
-#    define NET_HAVE_POLL
-#  endif
+#   if !defined(NET_HAVE_EPOLL)
+#       define NET_HAVE_EPOLL
+#   endif
+#   if !defined(NET_HAVE_POLL)
+#       define NET_HAVE_POLL
+#   endif
 #endif
 
 /*
@@ -641,26 +545,26 @@
  * \brief Tells if inet_pton is available
  */
 #if !defined(NET_HAVE_INET_PTON)
-#  if defined(_WIN32)
-#    if _WIN32_WINNT >= 0x0600
-#      define NET_HAVE_INET_PTON
-#    endif
-#  else
-#    define NET_HAVE_INET_PTON
-#  endif
+#   if defined(_WIN32)
+#       if _WIN32_WINNT >= 0x0600
+#           define NET_HAVE_INET_PTON
+#       endif
+#   else
+#       define NET_HAVE_INET_PTON
+#   endif
 #endif
 
 /**
  * \brief Tells if inet_ntop is available
  */
 #if !defined(NET_HAVE_INET_NTOP)
-#  if defined(_WIN32)
-#    if _WIN32_WINNT >= 0x0600
-#      define NET_HAVE_INET_NTOP
-#    endif
-#  else
-#    define NET_HAVE_INET_NTOP
-#  endif
+#   if defined(_WIN32)
+#       if _WIN32_WINNT >= 0x0600
+#           define NET_HAVE_INET_NTOP
+#       endif
+#   else
+#       define NET_HAVE_INET_NTOP
+#   endif
 #endif
 
 /*
@@ -674,35 +578,35 @@
  * \brief Defines the default backend
  */
 #if defined(_WIN32)
-#  if !defined(NET_DEFAULT_BACKEND)
-#    if defined(NET_HAVE_POLL)
-#      define NET_DEFAULT_BACKEND Poll
-#    else
-#      define NET_DEFAULT_BACKEND Select
-#    endif
-#  endif
+#   if !defined(NET_DEFAULT_BACKEND)
+#       if defined(NET_HAVE_POLL)
+#           define NET_DEFAULT_BACKEND Poll
+#       else
+#           define NET_DEFAULT_BACKEND Select
+#       endif
+#   endif
 #elif defined(__linux__)
-#  include <sys/epoll.h>
+#   include <sys/epoll.h>
 
-#  if !defined(NET_DEFAULT_BACKEND)
-#    define NET_DEFAULT_BACKEND Epoll
-#  endif
+#   if !defined(NET_DEFAULT_BACKEND)
+#       define NET_DEFAULT_BACKEND Epoll
+#   endif
 #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__DragonFly__) || defined(__APPLE__)
-#  include <sys/types.h>
-#  include <sys/event.h>
-#  include <sys/time.h>
+#   include <sys/types.h>
+#   include <sys/event.h>
+#   include <sys/time.h>
 
-#  if !defined(NET_DEFAULT_BACKEND)
-#    define NET_DEFAULT_BACKEND Kqueue
-#  endif
+#   if !defined(NET_DEFAULT_BACKEND)
+#       define NET_DEFAULT_BACKEND Kqueue
+#   endif
 #else
-#  if !defined(NET_DEFAULT_BACKEND)
-#    define NET_DEFAULT_BACKEND Select
-#  endif
+#   if !defined(NET_DEFAULT_BACKEND)
+#       define NET_DEFAULT_BACKEND Select
+#   endif
 #endif
 
 #if defined(NET_HAVE_POLL) && !defined(_WIN32)
-#  include <poll.h>
+#    include <poll.h>
 #endif
 
 namespace irccd {
@@ -759,7 +663,8 @@ using Arg = void *;
  * Portable constants.
  * ------------------------------------------------------------------
  *
- * These constants are needed to check functions return codes, they are rarely needed in end user code.
+ * These constants are needed to check functions return codes, they are rarely
+ * needed in end user code.
  */
 
 #if defined(_WIN32)
@@ -799,7 +704,8 @@ inline void finish() noexcept
 }
 
 /**
- * Initialize the socket library. Except if you defined NET_NO_AUTO_INIT, you don't need to call this
+ * Initialize the socket library. Except if you defined NET_NO_AUTO_INIT, you
+ * don't need to call this
  * function manually.
  */
 inline void init() noexcept
@@ -816,7 +722,10 @@ inline void init() noexcept
         WSADATA wsa;
         WSAStartup(MAKEWORD(2, 2), &wsa);
 
-        // If NET_NO_AUTO_INIT is not set then the user must also call finish himself.
+        /*
+         * If NET_NO_AUTO_INIT is not set then the user must also call finish
+         * himself.
+         */
 #if !defined(NET_NO_AUTO_INIT)
         atexit(finish);
 #endif
@@ -856,7 +765,8 @@ inline std::string error(int errn)
 }
 
 /**
- * Get the last socket system error. The error is set from errno or from WSAGetLastError on Windows.
+ * Get the last socket system error. The error is set from errno or from
+ * WSAGetLastError on Windows.
  *
  * \return a string message
  */
@@ -871,6 +781,9 @@ inline std::string error()
 
 #if !defined(NET_NO_SSL)
 
+/**
+ * \brief SSL namespace
+ */
 namespace ssl {
 
 /**
@@ -878,13 +791,13 @@ namespace ssl {
  * \brief Which OpenSSL method to use.
  */
 enum Method {
-    Tlsv1,        //!< TLS v1.2 (recommended)
-    Sslv3        //!< SSLv3
+    Tlsv1,      //!< TLS v1.2 (recommended)
+    Sslv3       //!< SSLv3
 };
 
 /**
- * Initialize the OpenSSL library. Except if you defined NET_NO_AUTO_SSL_INIT, you don't need to call this function
- * manually.
+ * Initialize the OpenSSL library. Except if you defined NET_NO_AUTO_SSL_INIT,
+ * you don't need to call this function manually.
  */
 inline void init() noexcept
 {
@@ -926,85 +839,44 @@ inline void finish() noexcept
  */
 
 /**
- * \brief Base class for sockets error
+ * \brief Base class for sockets error.
  */
 class Error : public std::exception {
-public:
-    /**
-     * \enum Code
-     * \brief Which kind of error
-     */
-    enum Code {
-        Timeout,        ///!< The action did timeout
-        System,            ///!< There is a system error
-        Other            ///!< Other custom error
-    };
-
 private:
-    Code m_code;
-    std::string m_function;
-    std::string m_error;
+    std::string m_message;
 
 public:
     /**
-     * Constructor that use the last system error.
+     * Construct the error using the specified error from the system.
      *
-     * \param code which kind of error
-     * \param function the function name
+     * \param code the error code
+     * \warning the code must be a Winsock error or errno on Unix
      */
-    inline Error(Code code, std::string function)
-        : m_code(code)
-        , m_function(std::move(function))
-        , m_error(error())
+    inline Error(int code) noexcept
+        : m_message(error(code))
     {
     }
 
     /**
-     * Constructor that use the system error set by the user.
+     * Construct the error using the custom message.
      *
-     * \param code which kind of error
-     * \param function the function name
-     * \param n the error
+     * \param message the message
      */
-    inline Error(Code code, std::string function, int n)
-        : m_code(code)
-        , m_function(std::move(function))
-        , m_error(error(n))
+    inline Error(std::string message) noexcept
+        : m_message(std::move(message))
     {
     }
 
     /**
-     * Constructor that set the error specified by the user.
-     *
-     * \param code which kind of error
-     * \param function the function name
-     * \param error the error
+     * Construct the error using the last message from the system.
      */
-    inline Error(Code code, std::string function, std::string error)
-        : m_code(code)
-        , m_function(std::move(function))
-        , m_error(std::move(error))
+    inline Error() noexcept
+#if defined(_WIN32)
+        : Error(WSAGetLastError())
+#else
+        : Error(errno)
+#endif
     {
-    }
-
-    /**
-     * Get which function has triggered the error.
-     *
-     * \return the function name (e.g connect)
-     */
-    inline const std::string &function() const noexcept
-    {
-        return m_function;
-    }
-
-    /**
-     * The error code.
-     *
-     * \return the code
-     */
-    inline Code code() const noexcept
-    {
-        return m_code;
     }
 
     /**
@@ -1014,7 +886,71 @@ public:
      */
     const char *what() const noexcept override
     {
-        return m_error.c_str();
+        return m_message.c_str();
+    }
+};
+
+/**
+ * \brief Timeout occured.
+ */
+class TimeoutError : public std::exception {
+public:
+    /**
+     * Get the error message.
+     *
+     * \return the message
+     */
+    const char *what() const noexcept override
+    {
+        return std::strerror(ETIMEDOUT);
+    }
+};
+
+/**
+ * \brief Operation would block.
+ */
+class WouldBlockError : public std::exception {
+public:
+    /**
+     * Get the error message.
+     *
+     * \return the message
+     */
+    const char *what() const noexcept override
+    {
+        return std::strerror(EWOULDBLOCK);
+    }
+};
+
+/**
+ * \brief Operation requires sending data to complete.
+ */
+class WantWriteError : public std::exception {
+public:
+    /**
+     * Get the error message.
+     *
+     * \return the message
+     */
+    const char *what() const noexcept override
+    {
+        return "operation requires writing to complete";
+    }
+};
+
+/**
+ * \brief Operation requires reading data to complete.
+ */
+class WantReadError : public std::exception {
+public:
+    /**
+     * Get the error message.
+     *
+     * \return the message
+     */
+    const char *what() const noexcept override
+    {
+        return "operation requires read to complete";
     }
 };
 
@@ -1028,14 +964,11 @@ public:
 /**
  * \enum Condition
  * \brief Define the required condition for the socket.
- *
- * As explained in Action enumeration, some operations required to be called several times, before calling these
- * operations, the user must wait the socket to be readable or writable. This can be checked with Socket::condition.
  */
 enum class Condition {
-    None,            //!< No condition is required
-    Readable = (1 << 0),    //!< The socket must be readable
-    Writable = (1 << 1)    //!< The socket must be writable
+    None,                       //!< No condition is required
+    Readable = (1 << 0),        //!< The socket must be readable
+    Writable = (1 << 1)         //!< The socket must be writable
 };
 
 /**
@@ -1127,1695 +1060,38 @@ inline Condition &operator^=(Condition &v1, Condition v2) noexcept
     return v1;
 }
 
-/*
- * Base Socket class
- * ------------------------------------------------------------------
- *
- * This base class has operations that are common to all types of sockets but you usually instanciate
- * a SocketTcp or SocketUdp
- */
-
 /**
- * \brief Base socket class for socket operations.
- *
- * **Important:** When using non-blocking sockets, some considerations must be taken. See the implementation of the
- * underlying protocol for more details.
- *
- * When using non-blocking sockets, it is important to pass the condition to functions which may block, they indicate
- * the condition to wait to perform or continue the operation if they would block.
- *
- * For example, when trying to connect with non-blocking, user should do the following:
- *
- * 1. Call Socket::connect() with the condition,
- * 2. Loop until condition is not set to Condition::None (or an exception is thrown),
- * 3. Wait with a listener for the condition to be ready (see Listener::poll),
- * 4. Call Socket::resumeConnect() with the condition again.
- *
- * \see protocol::Tls
- * \see protocol::Tcp
- * \see protocol::Udp
- */
-template <typename Address, typename Protocol>
-class Socket {
-private:
-    Protocol m_proto;
-
-protected:
-    /**
-     * The native handle.
-     */
-    Handle m_handle{Invalid};
-
-public:
-    /**
-     * Create a socket handle.
-     *
-     * This is the primary function and the only one that creates the socket handle, all other constructors
-     * are just overloaded functions.
-     *
-     * \param domain the domain AF_*
-     * \param type the type SOCK_*
-     * \param protocol the protocol
-     * \param iface the implementation
-     * \throw net::Error on errors
-     */
-    Socket(int domain, int type, int protocol, Protocol iface = {})
-        : m_proto(std::move(iface))
-    {
-#if !defined(NET_NO_AUTO_INIT)
-        init();
-#endif
-        m_handle = ::socket(domain, type, protocol);
-
-        if (m_handle == Invalid)
-            throw Error(Error::System, "socket");
-
-        m_proto.create(*this);
-    }
-
-    /**
-     * This tries to create a socket.
-     *
-     * Domain and type are determined by the Address and Protocol object.
-     *
-     * \param address which type of address
-     * \param protocol the protocol
-     * \throw net::Error on errors
-     */
-    explicit inline Socket(const Address &address = {}, Protocol protocol = {})
-        : Socket(address.domain(), protocol.type(), 0, std::move(protocol))
-    {
-    }
-
-    /**
-     * Create the socket with an already defined handle and its protocol.
-     *
-     * \param handle the handle
-     * \param protocol the protocol
-     */
-    explicit inline Socket(Handle handle, Protocol protocol = {}) noexcept
-        : m_proto(std::move(protocol))
-        , m_handle(handle)
-    {
-    }
-
-    /**
-     * Create an invalid socket. Can be used when you cannot instanciate the socket immediately.
-     */
-    explicit inline Socket(std::nullptr_t) noexcept
-        : m_handle(Invalid)
-    {
-    }
-
-    /**
-     * Copy constructor deleted.
-     */
-    Socket(const Socket &) = delete;
-
-    /**
-     * Transfer ownership from other to this.
-     *
-     * \param other the other socket
-     */
-    inline Socket(Socket &&other) noexcept
-        : m_proto(std::move(other.m_proto))
-        , m_handle(other.m_handle)
-    {
-        other.m_handle = Invalid;
-    }
-
-    /**
-     * Default destructor.
-     */
-    virtual ~Socket()
-    {
-        close();
-    }
-
-    /**
-     * Access the implementation.
-     *
-     * \return the implementation
-     * \warning use this function with care
-     */
-    inline const Protocol &protocol() const noexcept
-    {
-        return m_proto;
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \return the implementation
-     */
-    inline Protocol &protocol() noexcept
-    {
-        return m_proto;
-    }
-
-    /**
-     * Tells if the socket is not invalid.
-     *
-     * \return true if not invalid
-     */
-    inline bool isOpen() const noexcept
-    {
-        return m_handle != Invalid;
-    }
-
-    /**
-     * Set an option for the socket. Wrapper of setsockopt(2).
-     *
-     * \pre isOpen()
-     * \param level the setting level
-     * \param name the name
-     * \param arg the value
-     * \throw net::Error on errors
-     */
-    template <typename Argument>
-    inline void set(int level, int name, const Argument &arg)
-    {
-        assert(m_handle != Invalid);
-
-        if (setsockopt(m_handle, level, name, (ConstArg)&arg, sizeof (arg)) == Failure)
-            throw Error(Error::System, "set");
-    }
-
-    /**
-     * Object-oriented option setter.
-     *
-     * The object must have `set(Socket<Address, Protocol> &) const`.
-     *
-     * \pre isOpen()
-     * \param option the option
-     * \throw net::Error on errors
-     */
-    template <typename Option>
-    inline void set(const Option &option)
-    {
-        assert(m_handle != Invalid);
-
-        option.set(*this);
-    }
-
-    /**
-     * Get an option for the socket. Wrapper of getsockopt(2).
-     *
-     * \pre isOpen()
-     * \param level the setting level
-     * \param name the name
-     * \return the value
-     * \throw net::Error on errors
-     */
-    template <typename Argument>
-    Argument get(int level, int name)
-    {
-        assert(m_handle != Invalid);
-
-        Argument desired, result{};
-        socklen_t size = sizeof (result);
-
-        if (getsockopt(m_handle, level, name, (Arg)&desired, &size) == Failure)
-            throw Error(Error::System, "get");
-
-        std::memcpy(&result, &desired, size);
-
-        return result;
-    }
-
-    /**
-     * Object-oriented option getter.
-     *
-     * The object must have `T get(Socket<Address, Protocol> &) const`, T can be any type and it is the value
-     * returned from this function.
-     *
-     * \pre isOpen()
-     * \return the same value as get() in the option
-     * \throw net::Error on errors
-     */
-    template <typename Option>
-    inline auto get() -> decltype(std::declval<Option>().get(*this))
-    {
-        assert(m_handle != Invalid);
-
-        return Option().get(*this);
-    }
-
-    /**
-     * Get the native handle.
-     *
-     * \return the handle
-     * \warning Not portable
-     */
-    inline Handle handle() const noexcept
-    {
-        return m_handle;
-    }
-
-    /**
-     * Bind using a native address.
-     *
-     * \pre isOpen()
-     * \param address the address
-     * \param length the size
-     * \throw net::Error on errors
-     */
-    inline void bind(const sockaddr *address, socklen_t length)
-    {
-        assert(m_handle != Invalid);
-
-        if (::bind(m_handle, address, length) == Failure)
-            throw Error(Error::System, "bind");
-    }
-
-    /**
-     * Overload that takes an address.
-     *
-     * \pre isOpen()
-     * \param address the address
-     * \throw net::Error on errors
-     */
-    inline void bind(const Address &address)
-    {
-        assert(m_handle != Invalid);
-
-        if (::bind(m_handle, address.address(), address.length()) == Failure)
-            throw Error(Error::System, "bind");
-    }
-
-    /**
-     * Listen for pending connection.
-     *
-     * \pre isOpen()
-     * \param max the maximum number
-     * \throw net::Error on errors
-     */
-    inline void listen(int max = 128)
-    {
-        assert(m_handle != Invalid);
-
-        if (::listen(this->m_handle, max) == Failure)
-            throw Error(Error::System, "listen");
-    }
-
-    /**
-     * Get the local name. This is a wrapper of getsockname().
-     *
-     * \pre isOpen()
-     * \return the address
-     * \throw Error on failures
-     */
-    Address getsockname() const
-    {
-        assert(m_handle != Invalid);
-
-        sockaddr_storage ss;
-        socklen_t length = sizeof (sockaddr_storage);
-
-        if (::getsockname(m_handle, reinterpret_cast<sockaddr *>(&ss), &length) == Failure)
-            throw Error(Error::System, "getsockname");
-
-        return Address(reinterpret_cast<sockaddr *>(&ss), length);
-    }
-
-    /**
-     * Get connected address. This is a wrapper for getpeername().
-     *
-     * \pre isOpen()
-     * \return the address
-     * \throw Error on failures
-     */
-    Address getpeername() const
-    {
-        assert(m_handle != Invalid);
-
-        sockaddr_storage ss;
-        socklen_t length = sizeof (sockaddr_storage);
-
-        if (::getpeername(m_handle, reinterpret_cast<sockaddr *>(&ss), &length) == Failure)
-            throw Error(Error::System, "getpeername");
-
-        return Address(reinterpret_cast<sockaddr *>(&ss), length);
-    }
-
-    /**
-     * Initialize connection to the given address.
-     *
-     * \pre isOpen()
-     * \param address the address
-     * \param length the address length
-     * \param cond the condition
-     * \throw net::Error on failures
-     */
-    inline void connect(const sockaddr *address, socklen_t length, Condition &cond)
-    {
-        assert(m_handle != Invalid);
-
-        cond = Condition::None;
-
-        m_proto.connect(*this, address, length, cond);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param address the address
-     * \param length the address length
-     * \throw net::Error on failures
-     */
-    inline void connect(const sockaddr *address, socklen_t length)
-    {
-        Condition dummy;
-
-        connect(address, length, dummy);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param address the address
-     * \param cond the condition
-     * \throw net::Error on failures
-     */
-    inline void connect(const Address &address, Condition &cond)
-    {
-        connect(address.address(), address.length(), cond);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param address the address
-     * \throw net::Error on failures
-     */
-    inline void connect(const Address &address)
-    {
-        Condition dummy;
-
-        connect(address.address(), address.length(), dummy);
-    }
-
-    /**
-     * Continue connect process.
-     *
-     * \pre isOpen()
-     * \param cond the condition require for next selection
-     * \throw net::Error on failures
-     */
-    inline void resumeConnect(Condition &cond)
-    {
-        assert(m_handle != Invalid);
-
-        cond = Condition::None;
-
-        m_proto.resumeConnect(*this, cond);
-    }
-
-    /**
-     * Continue connect process.
-     *
-     * \pre isOpen()
-     * \throw net::Error on failures
-     */
-    inline void resumeConnect()
-    {
-        Condition dummy;
-
-        resumeConnect(dummy);
-    }
-
-    /**
-     * Accept a new client.
-     *
-     * If no connection is available immediately, returns an invalid socket.
-     *
-     * \pre isOpen()
-     * \param address the client information
-     * \param cond the condition to wait to complete accept on the **client**
-     * \return the new client or an invalid if no client is immediately available
-     * \throw net::Error on failures
-     */
-    Socket<Address, Protocol> accept(Address &address, Condition &cond)
-    {
-        assert(m_handle != Invalid);
-
-        sockaddr_storage storage;
-        socklen_t length = sizeof (storage);
-
-        cond = Condition::None;
-
-        Socket<Address, Protocol> client = m_proto.accept(*this, reinterpret_cast<sockaddr *>(&storage), &length, cond);
-
-        address = Address(reinterpret_cast<sockaddr *>(&storage), length);
-
-        return client;
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param address the client information
-     * \return the new client or an invalid if no client is immediately available
-     * \throw net::Error on failures
-     */
-    inline Socket<Address, Protocol> accept(Address &address)
-    {
-        Condition dummy;
-
-        return accept(address, dummy);
-    }
-
-    /**
-     * Overlaoded function.
-     *
-     * \pre isOpen()
-     * \return the new client or an invalid if no client is immediately available
-     * \throw net::Error on failures
-     */
-    inline Socket<Address, Protocol> accept()
-    {
-        Address da;
-        Condition dc;
-
-        return accept(da, dc);
-    }
-
-    /**
-     * Continue accept process.
-     *
-     * \pre isOpen()
-     * \param cond the condition
-     * \throw net::Error on failures
-     * \note This should be called on the returned client from accept
-     */
-    inline void resumeAccept(Condition &cond)
-    {
-        assert(m_handle != Invalid);
-
-        cond = Condition::None;
-
-        m_proto.resumeAccept(*this, cond);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \throw net::Error on failures
-     */
-    inline void resumeAccept()
-    {
-        Condition dummy;
-
-        resumeAccept(dummy);
-    }
-
-    /**
-     * Receive some data.
-     *
-     * \pre isOpen()
-     * \param data the destination buffer
-     * \param length the data length
-     * \param cond the condition
-     * \return the number of bytes received
-     * \throw net::Error on failures
-     */
-    inline std::size_t recv(void *data, std::size_t length, Condition &cond)
-    {
-        assert(m_handle != Invalid);
-
-        cond = Condition::None;
-
-        return m_proto.recv(*this, data, length, cond);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param data the destination buffer
-     * \param length the data length
-     * \return the number of bytes received
-     * \throw net::Error on failures
-     */
-    inline std::size_t recv(void *data, std::size_t length)
-    {
-        Condition dummy;
-
-        return recv(data, length, dummy);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param count number of bytes desired
-     * \param cond the condition
-     * \return the result string
-     * \throw net::Error on failures
-     */
-    std::string recv(std::size_t count, Condition &cond)
-    {
-        assert(m_handle != Invalid);
-
-        std::string result;
-
-        result.resize(count);
-        auto n = recv(const_cast<char *>(result.data()), count, cond);
-        result.resize(n);
-
-        return result;
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param count number of bytes desired
-     * \return the result string
-     * \throw net::Error on failures
-     */
-    inline std::string recv(std::size_t count)
-    {
-        Condition dummy;
-
-        return recv(count, dummy);
-    }
-
-    /**
-     * Send some data.
-     *
-     * \pre isOpen()
-     * \param data the data to send
-     * \param length the length
-     * \param cond the condition
-     * \return the number of bytes sent
-     * \throw net::Error on failures
-     */
-    inline std::size_t send(const void *data, std::size_t length, Condition &cond)
-    {
-        assert(m_handle != Invalid);
-
-        cond = Condition::None;
-
-        return m_proto.send(*this, data, length, cond);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param data the data to send
-     * \param length the length
-     * \return the number of bytes sent
-     * \throw net::Error on failures
-     */
-    inline std::size_t send(const void *data, std::size_t length)
-    {
-        Condition dummy;
-
-        return send(data, length, dummy);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param data the data to send
-     * \param cond the condition
-     * \return the number of bytes sent
-     * \throw net::Error on failures
-     */
-    inline std::size_t send(const std::string &data, Condition &cond)
-    {
-        return send(data.c_str(), data.length(), cond);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param data the data to send
-     * \return the number of bytes sent
-     * \throw net::Error on failures
-     */
-    inline std::size_t send(const std::string &data)
-    {
-        Condition dummy;
-
-        return send(data.c_str(), data.length(), dummy);
-    }
-
-    /**
-     * Send some data to the given client.
-     *
-     * \pre isOpen()
-     * \param data the data
-     * \param length the length
-     * \param address the client address
-     * \param addrlen the client address length
-     * \param cond the condition
-     * \return the number of bytes sent
-     * \throw net::Error on failures
-     */
-    inline std::size_t sendto(const void *data, std::size_t length, const sockaddr *address, socklen_t addrlen, Condition &cond)
-    {
-        assert(m_handle != Invalid);
-
-        cond = Condition::None;
-
-        return m_proto.sendto(*this, data, length, address, addrlen, cond);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param data the data
-     * \param length the length
-     * \param address the client address
-     * \param addrlen the client address length
-     * \return the number of bytes sent
-     * \throw net::Error on failures
-     */
-    inline std::size_t sendto(const void *data, std::size_t length, const sockaddr *address, socklen_t addrlen)
-    {
-        Condition dummy;
-
-        return send(data, length, address, addrlen, dummy);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param data the data
-     * \param length the length
-     * \param address the client address
-     * \param cond the condition
-     * \return the number of bytes sent
-     * \throw net::Error on failures
-     */
-    inline std::size_t sendto(const void *data, std::size_t length, const Address &address, Condition &cond)
-    {
-        return sendto(data, length, address.address(), address.length(), cond);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param data the data
-     * \param length the length
-     * \param address the client address
-     * \return the number of bytes sent
-     * \throw net::Error on failures
-     */
-    inline std::size_t sendto(const void *data, std::size_t length, const Address &address)
-    {
-        Condition dummy;
-
-        return sendto(data, length, address.address(), address.length(), dummy);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param data the data
-     * \param cond the condition
-     * \param address the client address
-     * \return the number of bytes sent
-     * \throw net::Error on failures
-     */
-    inline std::size_t sendto(const std::string &data, const Address &address, Condition &cond)
-    {
-        return sendto(data.c_str(), data.length(), address.address(), address.length(), cond);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param data the data
-     * \param address the client address
-     * \return the number of bytes sent
-     * \throw net::Error on failures
-     */
-    inline std::size_t sendto(const std::string &data, const Address &address)
-    {
-        Condition dummy;
-
-        return sendto(data.c_str(), data.length(), address.address(), address.length(), dummy);
-    }
-
-    /**
-     * Receive some data from a client.
-     *
-     * \pre isOpen()
-     * \param data the destination buffer
-     * \param length the buffer length
-     * \param address the client information
-     * \param addrlen the client address initial length
-     * \param cond the condition
-     * \return the number of bytes received
-     * \throw net::Error on failures
-     */
-    inline std::size_t recvfrom(void *data, std::size_t length, sockaddr *address, socklen_t *addrlen, Condition &cond)
-    {
-        assert(m_handle != Invalid);
-
-        cond = Condition::None;
-
-        return m_proto.recvfrom(*this, data, length, address, addrlen, cond);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param data the destination buffer
-     * \param length the buffer length
-     * \param address the client information
-     * \param addrlen the client address initial length
-     * \return the number of bytes received
-     * \throw net::Error on failures
-     */
-    inline std::size_t recvfrom(void *data, std::size_t length, sockaddr *address, socklen_t *addrlen)
-    {
-        Condition dummy;
-
-        return recvfrom(data, length, address, addrlen, dummy);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param data the destination buffer
-     * \param length the buffer length
-     * \param address the client information
-     * \param cond the condition
-     * \return the number of bytes received
-     * \throw net::Error on failures
-     */
-    std::size_t recvfrom(void *data, std::size_t length, Address &address, Condition &cond)
-    {
-        sockaddr_storage storage;
-        socklen_t addrlen = sizeof (sockaddr_storage);
-
-        auto n = recvfrom(data, length, reinterpret_cast<sockaddr *>(&storage), &addrlen, cond);
-
-        if (n != 0 && cond == Condition::None)
-            address = Address(reinterpret_cast<sockaddr *>(&storage), addrlen);
-
-        return n;
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param data the destination buffer
-     * \param length the buffer length
-     * \param address the client information
-     * \return the number of bytes received
-     * \throw net::Error on failures
-     */
-    inline std::size_t recvfrom(void *data, std::size_t length, Address &address)
-    {
-        Condition dummy;
-
-        return recvfrom(data, length, address, dummy);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param data the destination buffer
-     * \param length the buffer length
-     * \return the number of bytes received
-     * \throw net::Error on failures
-     */
-    inline std::size_t recvfrom(void *data, std::size_t length)
-    {
-        Address da;
-        Condition dc;
-
-        return recvfrom(data, length, da, dc);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param count the number of bytes desired
-     * \param address the client information
-     * \param cond the condition
-     * \return the result string
-     * \throw net::Error on failures
-     */
-    std::string recvfrom(std::size_t count, Address &address, Condition &cond)
-    {
-        std::string result;
-
-        result.resize(count);
-        auto n = recvfrom(const_cast<char *>(result.data()), count, address, cond);
-        result.resize(n);
-
-        return result;
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param count the number of bytes desired
-     * \param address the client information
-     * \return the result string
-     * \throw net::Error on failures
-     */
-    inline std::string recvfrom(std::size_t count, Address &address)
-    {
-        Condition dummy;
-
-        return recvfrom(count, address, dummy);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \pre isOpen()
-     * \param count the number of bytes desired
-     * \return the result string
-     * \throw net::Error on failures
-     */
-    inline std::string recvfrom(std::size_t count)
-    {
-        Address da;
-        Condition dc;
-
-        return recvfrom(count, da, dc);
-    }
-
-    /**
-     * Close the socket.
-     *
-     * Automatically called from the destructor.
-     */
-    void close()
-    {
-        if (m_handle != Invalid) {
-#if defined(_WIN32)
-            ::closesocket(m_handle);
-#else
-            ::close(m_handle);
-#endif
-            m_handle = Invalid;
-        }
-    }
-
-    /**
-     * Assignment operator forbidden.
-     *
-     * \return *this
-     */
-    Socket &operator=(const Socket &) = delete;
-
-    /**
-     * Transfer ownership from other to this. The other socket is left
-     * invalid and will not be closed.
-     *
-     * \param other the other socket
-     * \return this
-     */
-    Socket &operator=(Socket &&other) noexcept
-    {
-        m_handle = other.m_handle;
-        m_proto = std::move(other.m_proto);
-
-        other.m_handle = Invalid;
-
-        return *this;
-    }
-};
-
-/**
- * Compare two sockets.
- *
- * \param s1 the first socket
- * \param s2 the second socket
- * \return true if they equals
- */
-template <typename Address, typename Protocol>
-inline bool operator==(const Socket<Address, Protocol> &s1, const Socket<Address, Protocol> &s2)
-{
-    return s1.handle() == s2.handle();
-}
-
-/**
- * Compare two sockets.
- *
- * \param s1 the first socket
- * \param s2 the second socket
- * \return true if they are different
- */
-template <typename Address, typename Protocol>
-inline bool operator!=(const Socket<Address, Protocol> &s1, const Socket<Address, Protocol> &s2)
-{
-    return s1.handle() != s2.handle();
-}
-
-/**
- * Compare two sockets.
- *
- * \param s1 the first socket
- * \param s2 the second socket
- * \return true if s1 < s2
- */
-template <typename Address, typename Protocol>
-inline bool operator<(const Socket<Address, Protocol> &s1, const Socket<Address, Protocol> &s2)
-{
-    return s1.handle() < s2.handle();
-}
-
-/**
- * Compare two sockets.
- *
- * \param s1 the first socket
- * \param s2 the second socket
- * \return true if s1 > s2
- */
-template <typename Address, typename Protocol>
-inline bool operator>(const Socket<Address, Protocol> &s1, const Socket<Address, Protocol> &s2)
-{
-    return s1.handle() > s2.handle();
-}
-
-/**
- * Compare two sockets.
- *
- * \param s1 the first socket
- * \param s2 the second socket
- * \return true if s1 <= s2
- */
-template <typename Address, typename Protocol>
-inline bool operator<=(const Socket<Address, Protocol> &s1, const Socket<Address, Protocol> &s2)
-{
-    return s1.handle() <= s2.handle();
-}
-
-/**
- * Compare two sockets.
- *
- * \param s1 the first socket
- * \param s2 the second socket
- * \return true if s1 >= s2
- */
-template <typename Address, typename Protocol>
-inline bool operator>=(const Socket<Address, Protocol> &s1, const Socket<Address, Protocol> &s2)
-{
-    return s1.handle() >= s2.handle();
-}
-
-/**
- * \brief Predefined protocols.
- */
-namespace protocol {
-
-/**
- * \brief Clear TCP implementation.
- * \ingroup net-module-tcp
- *
- * This is the basic TCP protocol that implements recv, send, connect and accept as wrappers of the usual
- * C functions.
- */
-class Tcp {
-public:
-    /**
-     * Socket type.
-     *
-     * \return SOCK_STREAM
-     */
-    inline int type() const noexcept
-    {
-        return SOCK_STREAM;
-    }
-
-    /**
-     * Do nothing.
-     *
-     * This function is just present for compatibility, it should never be called.
-     */
-    template <typename Address>
-    inline void create(Socket<Address, Tcp> &) const noexcept
-    {
-    }
-
-    /**
-     * Initiate connection.
-     *
-     * \param sc the socket
-     * \param address the address
-     * \param length the address length
-     * \param cond the condition
-     */
-    template <typename Address, typename Protocol>
-    void connect(Socket<Address, Protocol> &sc, const sockaddr *address, socklen_t length, Condition &cond)
-    {
-        if (::connect(sc.handle(), address, length) == Failure) {
-            /*
-             * Determine if the error comes from a non-blocking connect that cannot be
-             * accomplished yet.
-             */
-#if defined(_WIN32)
-            int error = WSAGetLastError();
-
-            if (error == WSAEWOULDBLOCK)
-                cond = Condition::Writable;
-            else
-                throw Error(Error::System, "connect", error);
-#else
-            if (errno == EINPROGRESS)
-                cond = Condition::Writable;
-            else
-                throw Error(Error::System, "connect");
-#endif
-        }
-    }
-
-    /**
-     * Resume the connection.
-     *
-     * Just check for SOL_SOCKET/SO_ERROR.
-     *
-     * User is responsible to wait before the socket is writable, otherwise behavior is undefined.
-     *
-     * \param sc the socket
-     * \param cond the condition
-     */
-    template <typename Address, typename Protocol>
-    void resumeConnect(Socket<Address, Protocol> &sc, Condition &cond)
-    {
-        int error = sc.template get<int>(SOL_SOCKET, SO_ERROR);
-
-#if defined(_WIN32)
-        if (error == WSAEWOULDBLOCK)
-            cond = Condition::Writable;
-        else if (error != 0)
-            throw Error(Error::System, "connect", error);
-#else
-        if (error == EINPROGRESS)
-            cond = Condition::Writable;
-        else if (error != 0)
-            throw Error(Error::System, "connect", error);
-#endif
-    }
-
-    /**
-     * Accept a new client.
-     *
-     * If there are no pending connection, an invalid socket is returned, condition is left to Condition::None.
-     *
-     * \param sc the socket
-     * \param address the address
-     * \param length the length
-     * \return the new socket
-     */
-    template <typename Address, typename Protocol>
-    Socket<Address, Protocol> accept(Socket<Address, Protocol> &sc, sockaddr *address, socklen_t *length, Condition &)
-    {
-        Handle handle = ::accept(sc.handle(), address, length);
-
-        if (handle == Invalid)
-            return Socket<Address, Protocol>();
-
-        return Socket<Address, Protocol>(handle);
-    }
-
-    /**
-     * Resume accept process.
-     *
-     * No-op for TCP.
-     */
-    template <typename Address, typename Protocol>
-    inline void resumeAcept(Socket<Address, Protocol> &, Condition &) const noexcept
-    {
-    }
-
-    /**
-     * Receive some data.
-     *
-     * \param sc the socket
-     * \param data the destination buffer
-     * \param length the buffer length
-     * \param cond the condition
-     * \return the number of byte received
-     */
-    template <typename Address>
-    std::size_t recv(Socket<Address, Tcp> &sc, void *data, std::size_t length, Condition &cond)
-    {
-        int max = length > INT_MAX ? INT_MAX : static_cast<int>(length);
-        int nbread = ::recv(sc.handle(), (Arg)data, max, 0);
-
-        if (nbread == Failure) {
-#if defined(_WIN32)
-            int error = WSAGetLastError();
-
-            if (error == WSAEWOULDBLOCK) {
-                nbread = 0;
-                cond = Condition::Readable;
-            } else
-                throw Error(Error::System, "recv", error);
-#else
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                nbread = 0;
-                cond = Condition::Readable;
-            } else
-                throw Error(Error::System, "recv");
-#endif
-        }
-
-        return static_cast<std::size_t>(nbread);
-    }
-
-    /**
-     * Send some data.
-     *
-     * \param sc the socket
-     * \param data the data to send
-     * \param length the length
-     * \param cond the condition
-     * \return the number of bytes sent
-     */
-    template <typename Address>
-    std::size_t send(Socket<Address, Tcp> &sc, const void *data, std::size_t length, Condition &cond)
-    {
-        int max = length > INT_MAX ? INT_MAX : static_cast<int>(length);
-        int nbsent = ::send(sc.handle(), (ConstArg)data, max, 0);
-
-        if (nbsent == Failure) {
-#if defined(_WIN32)
-            int error = WSAGetLastError();
-
-            if (error == WSAEWOULDBLOCK) {
-                nbsent = 0;
-                cond = Condition::Writable;
-            } else
-                throw Error(Error::System, "send", error);
-#else
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                nbsent = 0;
-                cond = Condition::Writable;
-            } else
-                throw Error(Error::System, "send");
-#endif
-        }
-
-        return static_cast<unsigned>(nbsent);
-    }
-};
-
-/**
- * \brief Clear UDP type.
- *
- * This class is the basic implementation of UDP sockets.
- */
-class Udp {
-public:
-    /**
-     * Socket type.
-     *
-     * \return SOCK_DGRAM
-     */
-    inline int type() const noexcept
-    {
-        return SOCK_DGRAM;
-    }
-
-    /**
-     * Do nothing.
-     */
-    template <typename Address, typename Protocol>
-    inline void create(Socket<Address, Protocol> &) noexcept
-    {
-    }
-
-    /**
-     * Receive some data.
-     *
-     * \param sc the socket
-     * \param data the data
-     * \param length the length
-     * \param address the source address
-     * \param addrlen the source address in/out length
-     * \param cond the condition
-     * \return the number of bytes received
-     */
-    template <typename Address, typename Protocol>
-    std::size_t recvfrom(Socket<Address, Protocol> &sc, void *data, std::size_t length, sockaddr *address, socklen_t *addrlen, Condition &cond)
-    {
-        int max = length > INT_MAX ? INT_MAX : static_cast<int>(length);
-        int nbread;
-
-        nbread = ::recvfrom(sc.handle(), (Arg)data, max, 0, address, addrlen);
-
-        if (nbread == Failure) {
-#if defined(_WIN32)
-            int error = WSAGetLastError();
-
-            if (error == WSAEWOULDBLOCK) {
-                nbread = 0;
-                cond = Condition::Writable;
-            } else
-                throw Error(Error::System, "recvfrom");
-#else
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                nbread = 0;
-                cond = Condition::Writable;
-            } else
-                throw Error(Error::System, "recvfrom");
-#endif
-        }
-
-        return static_cast<unsigned>(nbread);
-    }
-
-    /**
-     * Send some data.
-     *
-     * \param sc the socket
-     * \param data the data to send
-     * \param length the data length
-     * \param address the destination address
-     * \param addrlen the destination address length
-     * \param cond the condition
-     * \return the number of bytes sent
-     */
-    template <typename Address, typename Protocol>
-    std::size_t sendto(Socket<Address, Protocol> &sc, const void *data, std::size_t length, const sockaddr *address, socklen_t addrlen, Condition &cond)
-    {
-        int max = length > INT_MAX ? INT_MAX : static_cast<int>(length);
-        int nbsent;
-
-        nbsent = ::sendto(sc.handle(), (ConstArg)data, max, 0, address, addrlen);
-        if (nbsent == Failure) {
-#if defined(_WIN32)
-            int error = WSAGetLastError();
-
-            if (error == WSAEWOULDBLOCK) {
-                nbsent = 0;
-                cond = Condition::Writable;
-            } else
-                throw Error(Error::System, "sendto", error);
-#else
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                nbsent = 0;
-                cond = Condition::Writable;
-            } else
-                throw Error(Error::System, "sendto");
-#endif
-        }
-
-        return static_cast<unsigned>(nbsent);
-    }
-};
-
-#if !defined(NET_NO_SSL)
-
-/**
- * \brief Experimental TLS support.
- * \ingroup net-module-tls
- * \warning This class is highly experimental.
- */
-class Tls : private Tcp {
-private:
-    using Context = std::shared_ptr<SSL_CTX>;
-    using Ssl = std::unique_ptr<SSL, void (*)(SSL *)>;
-
-    // OpenSSL objects.
-    Context m_context;
-    Ssl m_ssl{nullptr, nullptr};
-
-    // Status.
-    bool m_tcpconnected{false};
-
-    /*
-     * User definable parameters.
-     */
-    ssl::Method m_method{ssl::Tlsv1};
-    std::string m_key;
-    std::string m_certificate;
-    bool m_verify{false};
-
-    // Construct with a context and ssl, for Tls::accept.
-    Tls(Context context, Ssl ssl)
-        : m_context(std::move(context))
-        , m_ssl(std::move(ssl))
-    {
-    }
-
-    inline std::string error()
-    {
-        BIO *bio = BIO_new(BIO_s_mem());
-        char *buf = nullptr;
-
-        ERR_print_errors(bio);
-
-        std::size_t length = BIO_get_mem_data (bio, &buf);
-        std::string result(buf, length);
-
-        BIO_free(bio);
-
-        return result;
-    }
-
-    template <typename Function>
-    void wrap(const std::string &func, Condition &cond, Function &&function)
-    {
-        auto ret = function();
-
-        if (ret <= 0) {
-            int no = SSL_get_error(m_ssl.get(), ret);
-
-            switch (no) {
-            case SSL_ERROR_WANT_READ:
-                cond = Condition::Readable;
-                break;
-            case SSL_ERROR_WANT_WRITE:
-                cond = Condition::Writable;
-                break;
-            default:
-                throw Error(Error::System, func, error());
-            }
-        }
-    }
-
-    template <typename Address, typename Protocol>
-    void doConnect(Socket<Address, Protocol> &, Condition &cond)
-    {
-        wrap("connect", cond, [&] () -> int {
-            return SSL_connect(m_ssl.get());
-        });
-    }
-
-    template <typename Address, typename Protocol>
-    void doAccept(Socket<Address, Protocol> &, Condition &cond)
-    {
-        wrap("accept", cond, [&] () -> int {
-            return SSL_accept(m_ssl.get());
-        });
-    }
-
-public:
-    /**
-     * \copydoc Tcp::type
-     */
-    inline int type() const noexcept
-    {
-        return SOCK_STREAM;
-    }
-
-    /**
-     * Empty TLS constructor.
-     */
-    inline Tls()
-    {
-#if !defined(NET_NO_SSL_AUTO_INIT)
-        ssl::init();
-#endif
-    }
-
-    /**
-     * Set the method.
-     *
-     * \param method the method
-     * \pre the socket must not be already created
-     */
-    inline void setMethod(ssl::Method method) noexcept
-    {
-        assert(!m_context);
-        assert(!m_ssl);
-
-        m_method = method;
-    }
-
-    /**
-     * Use the specified private key file.
-     *
-     * \param file the path to the private key
-     */
-    inline void setPrivateKey(std::string file) noexcept
-    {
-        m_key = std::move(file);
-    }
-
-    /**
-     * Use the specified certificate file.
-     *
-     * \param file the path to the file
-     */
-    inline void setCertificate(std::string file) noexcept
-    {
-        m_certificate = std::move(file);
-    }
-
-    /**
-     * Set to true if we must verify the certificate and private key.
-     *
-     * \param verify the mode
-     */
-    inline void setVerify(bool verify = true) noexcept
-    {
-        m_verify = verify;
-    }
-
-    /**
-     * Initialize the SSL objects after have created.
-     *
-     * \param sc the socket
-     * \throw net::Error on errors
-     */
-    template <typename Address>
-    void create(Socket<Address, Tls> &sc)
-    {
-        auto method = (m_method == ssl::Tlsv1) ? TLSv1_method() : SSLv23_method();
-
-        m_context = Context(SSL_CTX_new(method), SSL_CTX_free);
-        m_ssl = Ssl(SSL_new(m_context.get()), SSL_free);
-
-        SSL_set_fd(m_ssl.get(), static_cast<int>(sc.handle()));
-
-        /*
-         * Load certificates, the wrap function requires a condition so just add a dummy value.
-         */
-        Condition dummy;
-
-        if (m_certificate.size() > 0)
-            wrap("SSL_CTX_use_certificate_file", dummy, [&] () -> int {
-                return SSL_CTX_use_certificate_file(m_context.get(), m_certificate.c_str(), SSL_FILETYPE_PEM);
-            });
-        if (m_key.size() > 0)
-            wrap("SSL_CTX_use_PrivateKey_file", dummy, [&] () -> int {
-                return SSL_CTX_use_PrivateKey_file(m_context.get(), m_key.c_str(), SSL_FILETYPE_PEM);
-            });
-        if (m_verify && !SSL_CTX_check_private_key(m_context.get()))
-            throw Error(Error::System, "(openssl)", "unable to verify key");
-    }
-
-    /**
-     * Initiate connection.
-     *
-     * \param sc the socket
-     * \param address the address
-     * \param length the address length
-     * \param cond the condition
-     */
-    template <typename Address, typename Protocol>
-    void connect(Socket<Address, Protocol> &sc, const sockaddr *address, socklen_t length, Condition &cond)
-    {
-        // 1. Connect using raw TCP.
-        Tcp::connect(sc, address, length, cond);
-
-        // 2. If the connection is complete (e.g. non-blocking), try handshake.
-        if (cond == Condition::None) {
-            m_tcpconnected = true;
-            doConnect(sc, cond);
-        }
-    }
-
-    /**
-     * Resume the connection.
-     *
-     * \param sc the socket
-     * \param cond the condition to wait
-     */
-    template <typename Address, typename Protocol>
-    void connect(Socket<Address, Protocol> &sc, Condition &cond)
-    {
-        // 1. Be sure to complete standard connect before.
-        if (!m_tcpconnected) {
-            Tcp::connect(sc, cond);
-            m_tcpconnected = (cond == Condition::None);
-        }
-
-        // 2. Do SSL connect.
-        if (m_tcpconnected)
-            doConnect(sc, cond);
-    }
-
-    /**
-     * Accept a new client.
-     *
-     * If there are no pending connection, an invalid socket is returned, condition is left to Condition::None.
-     *
-     * \param sc the socket
-     * \param address the address
-     * \param length the length
-     * \param cond the condition to wait
-     * \return the new socket
-     */
-    template <typename Address>
-    Socket<Address, Tls> accept(Socket<Address, Tls> &sc, sockaddr *address, socklen_t *length, Condition &cond)
-    {
-        // 1. TCP returns empty client if no pending connection is available.
-        auto client = Tcp::accept(sc, address, length, cond);
-
-        // 2. If a client is available, try initial accept.
-        if (client.isOpen()) {
-            Tls &proto = client.protocol();
-
-            // 2.1. Share the context.
-            proto.m_context = m_context;
-
-            // 2.2. Create new SSL instance.
-            proto.m_ssl = Ssl(SSL_new(m_context.get()), SSL_free);
-
-            SSL_set_fd(proto.m_ssl.get(), static_cast<int>(client.handle()));
-
-            // 2.3. Try accept process on the **new** client.
-            proto.doAccept(client, cond);
-        }
-
-        return client;
-    }
-
-    /**
-     * Resume accept process.
-     *
-     * \param sc the socket
-     * \param cond the condition to wait
-     * \throw net::Error on failures
-     */
-    template <typename Address, typename Protocol>
-    inline void accept(Socket<Address, Protocol> &sc, Condition &cond)
-    {
-        doAccept(sc, cond);
-    }
-
-    /**
-     * Receive some data.
-     *
-     * \param data the destination buffer
-     * \param length the buffer length
-     * \param cond the condition
-     * \return the number of bytes received
-     */
-    template <typename Address>
-    std::size_t recv(Socket<Address, Tls> &, void *data, std::size_t length, Condition &cond)
-    {
-        int max = length > INT_MAX ? INT_MAX : static_cast<int>(length);
-        int nbread = 0;
-
-        wrap("recv", cond, [&] () -> int {
-            return (nbread = SSL_read(m_ssl.get(), data, max));
-        });
-
-        return static_cast<std::size_t>(nbread < 0 ? 0 : nbread);
-    }
-
-    /**
-     * Send some data.
-     *
-     * \param data the data to send
-     * \param length the length
-     * \param cond the condition
-     * \return the number of bytes sent
-     */
-    template <typename Address>
-    std::size_t send(Socket<Address, Tls> &, const void *data, std::size_t length, Condition &cond)
-    {
-        int max = length > INT_MAX ? INT_MAX : static_cast<int>(length);
-        int nbsent = 0;
-
-        wrap("send", cond, [&] () -> int {
-            return (nbsent = SSL_write(m_ssl.get(), data, max));
-        });
-
-        return static_cast<std::size_t>(nbsent < 0 ? 0 : nbsent);
-    }
-};
-
-#endif // !NET_NO_SSL
-
-} // !protocol
-
-/**
- * \brief Predefined addresses.
- */
-namespace address {
-
-/**
- * \brief Generic address.
+ * \brief Generic socket address storage.
  * \ingroup net-module-addresses
- *
- * This address can store anything that fits into a sockaddr_storage.
  */
-class GenericAddress {
+class Address {
 private:
-    sockaddr_storage m_address;
-    socklen_t m_length{0};
+    sockaddr_storage m_storage;
+    socklen_t m_length;
 
 public:
     /**
-     * Construct a null address.
+     * Construct empty address.
      */
-    inline GenericAddress() noexcept
+    inline Address() noexcept
+        : m_storage{}
+        , m_length(0)
     {
-        std::memset(&m_address, 0, sizeof (sockaddr_storage));
     }
 
     /**
-     * Construct an address.
+     * Construct address from existing one.
      *
-     * \pre address is not null
-     * \pre length <= sizeof (sockaddr_storage)
-     * \param address the address to copy
+     * \pre address != nullptr
+     * \param address the address
      * \param length the address length
      */
-    inline GenericAddress(const sockaddr *address, socklen_t length) noexcept
+    inline Address(const sockaddr *address, socklen_t length) noexcept
         : m_length(length)
     {
         assert(address);
-        assert(static_cast<unsigned>(length) <= sizeof (sockaddr_storage));
 
-        std::memset(&m_address, 0, sizeof (sockaddr_storage));
-        std::memcpy(&m_address, address, length);
-    }
-
-    /**
-     * Get the address family.
-     *
-     * \return the address family
-     */
-    inline int domain() const noexcept
-    {
-        return m_address.ss_family;
+        std::memcpy(&m_storage, address, length);
     }
 
     /**
@@ -2823,19 +1099,41 @@ public:
      *
      * \return the address
      */
-    inline sockaddr *address() noexcept
+    inline const sockaddr *get() const noexcept
     {
-        return reinterpret_cast<sockaddr *>(&m_address);
+        return reinterpret_cast<const sockaddr *>(&m_storage);
     }
 
     /**
-     * Overloaded function.
+     * Overloaded function
      *
      * \return the address
      */
-    inline const sockaddr *address() const noexcept
+    inline sockaddr *get() noexcept
     {
-        return reinterpret_cast<const sockaddr *>(&m_address);
+        return reinterpret_cast<sockaddr *>(&m_storage);
+    }
+
+    /**
+     * Get the underlying address as the given type (e.g sockaddr_in).
+     *
+     * \return the address reference
+     */
+    template <typename T>
+    inline const T &as() const noexcept
+    {
+        return reinterpret_cast<const T &>(m_storage);
+    }
+
+    /**
+     * Overloaded function
+     *
+     * \return the address reference
+     */
+    template <typename T>
+    inline T &as() noexcept
+    {
+        return reinterpret_cast<T &>(m_storage);
     }
 
     /**
@@ -2847,623 +1145,17 @@ public:
     {
         return m_length;
     }
-};
-
-/**
- * Compare two generic addresses.
- *
- * \param a1 the first address
- * \param a2 the second address
- * \return true if they equal
- */
-inline bool operator==(const GenericAddress &a1, const GenericAddress &a2) noexcept
-{
-    return a1.length() == a2.length() && std::memcmp(a1.address(), a2.address(), a1.length()) == 0;
-}
-
-/**
- * Compare two generic addresses.
- *
- * \param a1 the first address
- * \param a2 the second address
- * \return false if they equal
- */
-inline bool operator!=(const GenericAddress &a1, const GenericAddress &a2) noexcept
-{
-    return !(a1 == a2);
-}
-
-/**
- * \brief Generic IP address.
- * \ingroup net-module-addresses
- *
- * You can use this address instead of Ipv4 or Ipv6 if you don't know which address to use at runtime. However,
- * when creating your socket, you will need to define the correct domain.
- */
-class Ip {
-private:
-    union {
-        sockaddr_in6 m_sin6;
-        sockaddr_in m_sin;
-    };
-
-    int m_domain;
-
-public:
-    /**
-     * Create IP address, defaults to IPv4.
-     *
-     * \pre domain must be AF_INET or AF_INET6
-     * \param domain the domain
-     */
-    inline Ip(int domain = AF_INET) noexcept
-        : m_domain(domain)
-    {
-        assert(domain == AF_INET || domain == AF_INET6);
-
-        std::memset(&m_sin, 0, sizeof (sockaddr_in));
-    }
 
     /**
-     * Create an IP address on the specific ip address.
+     * Get the address domain.
      *
-     * \pre domain must be AF_INET or AF_INET6
-     * \param ip the address or "*" for any
-     * \param port the port
-     * \param domain the domain
-     * \warning If NET_HAVE_INET_PTON is undefined, host can not be other than "*"
-     * \throw net::Error on failures or if inet_pton is unavailable
-     */
-    inline Ip(const std::string &ip, std::uint16_t port, int domain)
-        : Ip(domain)
-    {
-        if (m_domain == AF_INET)
-            make(ip, port, m_sin);
-        else
-            make(ip, port, m_sin6);
-    }
-
-    /**
-     * Create the IP address from the storage.
-     *
-     * \pre the storage domain must be AF_INET or AF_INET6
-     * \param ss the the storage
-     * \param length the storage length
-     */
-    inline Ip(const sockaddr *ss, socklen_t length) noexcept
-        : Ip(ss->sa_family)
-    {
-        assert(ss->sa_family == AF_INET || ss->sa_family == AF_INET6);
-
-        if (ss->sa_family == AF_INET)
-            std::memcpy(&m_sin, ss, length);
-        else
-            std::memcpy(&m_sin6, ss, length);
-    }
-
-    /**
-     * Get the domain.
-     *
-     * \return AF_INET or AF_INET6
+     * \return the domain
      */
     inline int domain() const noexcept
     {
-        return m_domain;
-    }
-
-    /**
-     * Get the underlying address, may be a sockaddr_in or sockaddr_in6.
-     *
-     * \return the address
-     */
-    inline const sockaddr *address() const noexcept
-    {
-        return m_domain == AF_INET ? reinterpret_cast<const sockaddr *>(&m_sin) : reinterpret_cast<const sockaddr *>(&m_sin6);
-    }
-
-    /**
-     * Get the address length.
-     *
-     * \return the address length
-     */
-    inline socklen_t length() const noexcept
-    {
-        return m_domain == AF_INET ? sizeof (sockaddr_in) : sizeof (sockaddr_in6);
-    }
-
-    /**
-     * Retrieve the port.
-     *
-     * \return the port
-     */
-    inline std::uint16_t port() const noexcept
-    {
-        return m_domain == AF_INET ? ntohs(m_sin.sin_port) : ntohs(m_sin6.sin6_port);
-    }
-
-    /**
-     * Get the ip address.
-     *
-     * \return the ip address
-     * \throw net::Error on errors or if inet_ntop is unavailable
-     */
-    inline std::string ip() const
-    {
-        return m_domain == AF_INET ? ip(m_sin) : ip(m_sin6);
-    }
-
-    /**
-     * Prepare the sockaddr_in structure with the given ip.
-     *
-     * \param ip the ip address
-     * \param port the port
-     * \param sin the Ipv4 address
-     * \throw net::Error if inet_pton is unavailable
-     */
-    static void make(const std::string &ip, std::uint16_t port, sockaddr_in &sin)
-    {
-#if !defined(NET_NO_AUTO_INIT)
-        net::init();
-#endif
-
-        sin.sin_family = AF_INET;
-        sin.sin_port = htons(port);
-
-        if (ip == "*")
-            sin.sin_addr.s_addr = INADDR_ANY;
-#if defined(NET_HAVE_INET_PTON)
-        else if (inet_pton(AF_INET, ip.c_str(), &sin.sin_addr) <= 0)
-            throw Error(Error::System, "inet_pton");
-#else
-        else
-            throw Error(Error::System, "inet_pton", std::strerror(ENOSYS));
-#endif
-    }
-
-    /**
-     * Prepare the sockaddr_in structure with the given ip.
-     *
-     * \param ip the ip address
-     * \param port the port
-     * \param sin6 the Ipv6 address
-     * \throw net::Error if inet_pton is unavailable
-     */
-    static void make(const std::string &ip, std::uint16_t port, sockaddr_in6 &sin6)
-    {
-#if !defined(NET_NO_AUTO_INIT)
-        net::init();
-#endif
-
-        sin6.sin6_family = AF_INET6;
-        sin6.sin6_port = htons(port);
-
-        if (ip == "*")
-            sin6.sin6_addr = in6addr_any;
-#if defined(NET_HAVE_INET_PTON)
-        else if (inet_pton(AF_INET6, ip.c_str(), &sin6.sin6_addr) <= 0)
-            throw Error(Error::System, "inet_pton");
-#else
-        else
-            throw Error(Error::System, "inet_pton", std::strerror(ENOSYS));
-#endif
-    }
-
-    /**
-     * Get the underlying ip from the given address.
-     *
-     * \param sin the Ipv4 address
-     * \return the ip address
-     * \throw net::Error if inet_ntop is unavailable
-     */
-    static std::string ip(const sockaddr_in &sin)
-    {
-#if !defined(NET_NO_AUTO_INIT)
-        net::init();
-#endif
-
-#if !defined(NET_HAVE_INET_NTOP)
-        (void)sin;
-
-        throw Error(Error::System, "inet_ntop", std::strerror(ENOSYS));
-#else
-        char result[INET_ADDRSTRLEN + 1];
-
-        std::memset(result, 0, sizeof (result));
-
-        if (!inet_ntop(AF_INET, const_cast<in_addr *>(&sin.sin_addr), result, sizeof (result)))
-            throw Error(Error::System, "inet_ntop");
-
-        return result;
-#endif
-    }
-
-    /**
-     * Get the underlying ip from the given address.
-     *
-     * \param sin6 the Ipv6 address
-     * \return the ip address
-     * \throw net::Error if inet_ntop is unavailable
-     */
-    static std::string ip(const sockaddr_in6 &sin6)
-    {
-#if !defined(NET_NO_AUTO_INIT)
-        net::init();
-#endif
-
-#if !defined(NET_HAVE_INET_NTOP)
-        (void)sin6;
-
-        throw Error(Error::System, "inet_ntop", std::strerror(ENOSYS));
-#else
-        char result[INET6_ADDRSTRLEN];
-
-        std::memset(result, 0, sizeof (result));
-
-        if (!inet_ntop(AF_INET6, const_cast<in6_addr *>(&sin6.sin6_addr), result, sizeof (result)))
-            throw Error(Error::System, "inet_ntop");
-
-        return result;
-#endif
-    }
-
-    /**
-     * Resolve an hostname.
-     *
-     * This function wraps getaddrinfo and returns the first result.
-     *
-     * \param host the hostname
-     * \param service the service name (port or name)
-     * \param domain the domain (e.g. AF_INET)
-     * \param type the socket type (e.g. SOCK_STREAM)
-     * \return the resolved address
-     * \throw net::Error on failures
-     */
-    static Ip resolve(const std::string &host, const std::string &service, int domain = AF_INET, int type = SOCK_STREAM)
-    {
-        assert(domain == AF_INET || domain == AF_INET6);
-#if !defined(NET_NO_AUTO_INIT)
-        net::init();
-#endif
-
-        struct addrinfo hints, *res;
-
-        std::memset(&hints, 0, sizeof (struct addrinfo));
-        hints.ai_family = domain;
-        hints.ai_socktype = type;
-
-        int e = getaddrinfo(host.c_str(), service.c_str(), &hints, &res);
-
-        if (e != 0)
-            throw Error(Error::System, "getaddrinfo", gai_strerror(e));
-
-        Ip ip(res->ai_addr, res->ai_addrlen);
-
-        freeaddrinfo(res);
-
-        return ip;
+        return m_storage.ss_family;
     }
 };
-
-/**
- * \brief Ipv4 only address.
- * \ingroup net-module-addresses
- */
-class Ipv4 {
-private:
-    sockaddr_in m_sin;
-
-public:
-    /**
-     * Create an Ipv4 address.
-     */
-    inline Ipv4() noexcept
-    {
-        std::memset(&m_sin, 0, sizeof (sockaddr_in));
-    }
-
-    /**
-     * Create an Ipv4 address on the specific ip address.
-     *
-     * \param ip the address or "*" for any
-     * \param port the port
-     * \warning If NET_HAVE_INET_PTON is undefined, host can not be other than "*"
-     * \throw net::Error on failures or if inet_pton is unavailable
-     */
-    inline Ipv4(const std::string &ip, std::uint16_t port)
-        : Ipv4()
-    {
-        Ip::make(ip, port, m_sin);
-    }
-
-    /**
-     * Create the IP address from the storage.
-     *
-     * \pre the storage domain must be AF_INET
-     * \param ss the the storage
-     * \param length the storage length
-     */
-    inline Ipv4(const sockaddr *ss, socklen_t length) noexcept
-    {
-        assert(ss->sa_family == AF_INET);
-
-        std::memcpy(&m_sin, ss, length);
-    }
-
-    /**
-     * Get the domain.
-     *
-     * \return AF_INET
-     */
-    inline int domain() const noexcept
-    {
-        return AF_INET;
-    }
-
-    /**
-     * Get the underlying address.
-     *
-     * \return the address
-     */
-    inline const sockaddr *address() const noexcept
-    {
-        return reinterpret_cast<const sockaddr *>(&m_sin);
-    }
-
-    /**
-     * Get the address length.
-     *
-     * \return the size of sockaddr_in
-     */
-    inline socklen_t length() const noexcept
-    {
-        return sizeof (sockaddr_in);
-    }
-
-    /**
-     * Get the port.
-     *
-     * \return the port
-     */
-    inline std::uint16_t port() const noexcept
-    {
-        return ntohs(m_sin.sin_port);
-    }
-
-    /**
-     * Get the ip address.
-     *
-     * \return the ip address
-     * \throw net::Error on errors or if inet_ntop is unavailable
-     */
-    inline std::string ip() const
-    {
-        return Ip::ip(m_sin);
-    }
-
-    /**
-     * Same as Ip::resolve with AF_INET as domain.
-     *
-     * \param host the hostname
-     * \param service the service name (port or name)
-     * \param type the socket type (e.g. SOCK_STREAM)
-     * \return the resolved address
-     * \throw net::Error on failures
-     */
-    static Ipv4 resolve(const std::string &host, const std::string &service, int type = SOCK_STREAM)
-    {
-        Ip result = Ip::resolve(host, service, AF_INET, type);
-
-        return Ipv4(result.address(), result.length());
-    }
-};
-
-/**
- * \brief Ipv4 only address.
- * \ingroup net-module-addresses
- */
-class Ipv6 {
-private:
-    sockaddr_in6 m_sin6;
-
-public:
-    /**
-     * Create an Ipv6 address.
-     */
-    inline Ipv6() noexcept
-    {
-        std::memset(&m_sin6, 0, sizeof (sockaddr_in6));
-    }
-
-    /**
-     * Create an Ipv6 address on the specific ip address.
-     *
-     * \param ip the address or "*" for any
-     * \param port the port
-     * \warning If NET_HAVE_INET_PTON is undefined, host can not be other than "*"
-     * \throw net::Error on failures or if inet_pton is unavailable
-     */
-    inline Ipv6(const std::string &ip, std::uint16_t port)
-        : Ipv6()
-    {
-        Ip::make(ip, port, m_sin6);
-    }
-
-    /**
-     * Create the IP address from the storage.
-     *
-     * \pre the storage domain must be AF_INET6
-     * \param ss the the storage
-     * \param length the storage length
-     */
-    inline Ipv6(const sockaddr *ss, socklen_t length) noexcept
-    {
-        assert(ss->sa_family == AF_INET6);
-
-        std::memcpy(&m_sin6, ss, length);
-    }
-
-    /**
-     * Get the domain.
-     *
-     * \return AF_INET6
-     */
-    inline int domain() const noexcept
-    {
-        return AF_INET6;
-    }
-
-    /**
-     * Get the underlying address.
-     *
-     * \return the address
-     */
-    inline const sockaddr *address() const noexcept
-    {
-        return reinterpret_cast<const sockaddr *>(&m_sin6);
-    }
-
-    /**
-     * Get the address length.
-     *
-     * \return the size of sockaddr_in
-     */
-    inline socklen_t length() const noexcept
-    {
-        return sizeof (sockaddr_in6);
-    }
-
-    /**
-     * Get the port.
-     *
-     * \return the port
-     */
-    inline std::uint16_t port() const noexcept
-    {
-        return ntohs(m_sin6.sin6_port);
-    }
-
-    /**
-     * Get the ip address.
-     *
-     * \return the ip address
-     * \throw net::Error on errors or if inet_ntop is unavailable
-     */
-    inline std::string ip() const
-    {
-        return Ip::ip(m_sin6);
-    }
-
-    /**
-     * Same as Ip::resolve with AF_INET6 as domain.
-     *
-     * \param host the hostname
-     * \param service the service name (port or name)
-     * \param type the socket type (e.g. SOCK_STREAM)
-     * \return the resolved address
-     * \throw net::Error on failures
-     */
-    static Ipv6 resolve(const std::string &host, const std::string &service, int type = SOCK_STREAM)
-    {
-        Ip result = Ip::resolve(host, service, AF_INET6, type);
-
-        return Ipv6(result.address(), result.length());
-    }
-};
-
-#if !defined(_WIN32)
-
-/**
- * \brief unix family sockets
- * \ingroup net-module-addresses
- *
- * Create an address to a specific path. Only available on Unix.
- */
-class Local {
-private:
-    sockaddr_un m_sun;
-    std::string m_path;
-
-public:
-    /**
-     * Get the domain AF_LOCAL.
-     *
-     * \return AF_LOCAL
-     */
-    inline int domain() const noexcept
-    {
-        return AF_LOCAL;
-    }
-
-    /**
-     * Default constructor.
-     */
-    inline Local() noexcept
-    {
-        std::memset(&m_sun, 0, sizeof (sockaddr_un));
-    }
-
-    /**
-     * Construct an address to a path.
-     *
-     * \param path the path
-     * \param rm remove the file before (default: false)
-     */
-    Local(std::string path, bool rm = false) noexcept
-        : m_path(std::move(path))
-    {
-        // Silently remove the file even if it fails.
-        if (rm)
-            ::remove(m_path.c_str());
-
-        // Copy the path.
-        std::memset(m_sun.sun_path, 0, sizeof (m_sun.sun_path));
-        std::strncpy(m_sun.sun_path, m_path.c_str(), sizeof (m_sun.sun_path) - 1);
-
-        // Set the parameters.
-        m_sun.sun_family = AF_LOCAL;
-    }
-
-    /**
-     * Construct an unix address from a storage address.
-     *
-     * \pre storage's domain must be AF_LOCAL
-     * \param ss the storage
-     * \param length the length
-     */
-    Local(const sockaddr *ss, socklen_t length) noexcept
-    {
-        assert(ss->sa_family == AF_LOCAL);
-
-        std::memcpy(&m_sun, ss, length);
-        m_path = reinterpret_cast<const sockaddr_un &>(m_sun).sun_path;
-    }
-
-    /**
-     * Get the sockaddr_un.
-     *
-     * \return the address
-     */
-    inline const sockaddr *address() const noexcept
-    {
-        return reinterpret_cast<const sockaddr *>(&m_sun);
-    }
-
-    /**
-     * Get the address length.
-     *
-     * \return the length
-     */
-    inline socklen_t length() const noexcept
-    {
-#if defined(NET_HAVE_SUN_LEN)
-        return SUN_LEN(&m_sun);
-#else
-        return sizeof (m_sun);
-#endif
-    }
-};
-
-#endif // !_WIN32
 
 /**
  * \brief Address iterator.
@@ -3472,24 +1164,26 @@ public:
  *
  * This iterator can be used to try to connect to an host.
  *
- * When you use net::resolve with unspecified domain or socket type, the function may retrieve several different addresses that you can
- * iterate over to try to connect to.
+ * When you use resolve with unspecified domain or socket type, the function may
+ * retrieve several different addresses that you can iterate over to try to
+ * connect to.
  *
  * Example:
  *
  * ````cpp
- * net::SocketTcpIp sc;
- * net::AddressIterator end, it = net::resolve("hostname.test", "80");
+ * SocketTcp sc;
+ * AddressIterator end, it = resolve("hostname.test", "80");
  *
  * while (!connected_condition && it != end)
  *   sc.connect(it->address(), it->length());
  * ````
  *
- * When an iterator equals to a default constructed iterator, it is considered not dereferenceable.
+ * When an iterator equals to a default constructed iterator, it is considered
+ * not dereferenceable.
  */
-class AddressIterator : public std::iterator<std::forward_iterator_tag, GenericAddress> {
+class AddressIterator : public std::iterator<std::forward_iterator_tag, Address> {
 private:
-    std::vector<GenericAddress> m_addresses;
+    std::vector<Address> m_addresses;
     std::size_t m_index{0};
 
 public:
@@ -3507,7 +1201,7 @@ public:
      * \param addresses the addresses
      * \param index the first index
      */
-    inline AddressIterator(std::vector<GenericAddress> addresses, std::size_t index = 0) noexcept
+    inline AddressIterator(std::vector<Address> addresses, std::size_t index = 0) noexcept
         : m_addresses(std::move(addresses))
         , m_index(index)
     {
@@ -3520,7 +1214,7 @@ public:
      * \pre this is dereferenceable
      * \return the generic address
      */
-    inline const GenericAddress &operator*() const noexcept
+    inline const Address &operator*() const noexcept
     {
         assert(m_index <= m_addresses.size());
 
@@ -3533,7 +1227,7 @@ public:
      * \pre this is dereferenceable
      * \return the generic address
      */
-    inline GenericAddress &operator*() noexcept
+    inline Address &operator*() noexcept
     {
         assert(m_index <= m_addresses.size());
 
@@ -3546,7 +1240,7 @@ public:
      * \pre this is dereferenceable
      * \return the generic address
      */
-    inline const GenericAddress *operator->() const noexcept
+    inline const Address *operator->() const noexcept
     {
         assert(m_index <= m_addresses.size());
 
@@ -3559,7 +1253,7 @@ public:
      * \pre this is dereferenceable
      * \return the generic address
      */
-    inline GenericAddress *operator->() noexcept
+    inline Address *operator->() noexcept
     {
         assert(m_index <= m_addresses.size());
 
@@ -3628,7 +1322,1201 @@ inline bool operator!=(const AddressIterator &i1, const AddressIterator &i2) noe
     return !(i1 == i2);
 }
 
-} // !address
+/**
+ * Compare two generic addresses.
+ *
+ * \param a1 the first address
+ * \param a2 the second address
+ * \return true if they equal
+ */
+inline bool operator==(const Address &a1, const Address &a2) noexcept
+{
+    return a1.length() == a2.length() && std::memcmp(a1.get(), a2.get(), a1.length()) == 0;
+}
+
+/**
+ * Compare two generic addresses.
+ *
+ * \param a1 the first address
+ * \param a2 the second address
+ * \return false if they equal
+ */
+inline bool operator!=(const Address &a1, const Address &a2) noexcept
+{
+    return !(a1 == a2);
+}
+
+/**
+ * \brief Base socket class.
+ */
+class Socket {
+protected:
+    /**
+     * The native handle.
+     */
+    Handle m_handle{Invalid};
+
+public:
+    /**
+     * Create a socket handle.
+     *
+     * This is the primary function and the only one that creates the socket
+     * handle, all other constructors are just overloaded functions.
+     *
+     * \param domain the domain AF_*
+     * \param type the type SOCK_*
+     * \param protocol the protocol
+     * \throw Error on errors
+     */
+    Socket(int domain, int type, int protocol)
+    {
+#if !defined(NET_NO_AUTO_INIT)
+        init();
+#endif
+        m_handle = ::socket(domain, type, protocol);
+
+        if (m_handle == Invalid)
+            throw Error();
+    }
+
+    /**
+     * Create the socket with an already defined handle and its protocol.
+     *
+     * \param handle the handle
+     */
+    explicit inline Socket(Handle handle) noexcept
+        : m_handle(handle)
+    {
+    }
+
+    /**
+     * Create an invalid socket. Can be used when you cannot instanciate the
+     * socket immediately.
+     */
+    explicit inline Socket(std::nullptr_t) noexcept
+        : m_handle(Invalid)
+    {
+    }
+
+    /**
+     * Copy constructor deleted.
+     */
+    Socket(const Socket &) = delete;
+
+    /**
+     * Transfer ownership from other to this.
+     *
+     * \param other the other socket
+     */
+    inline Socket(Socket &&other) noexcept
+        : m_handle(other.m_handle)
+    {
+        other.m_handle = Invalid;
+    }
+
+    /**
+     * Default destructor.
+     */
+    virtual ~Socket()
+    {
+        close();
+    }
+
+    /**
+     * Tells if the socket is not invalid.
+     *
+     * \return true if not invalid
+     */
+    inline bool isOpen() const noexcept
+    {
+        return m_handle != Invalid;
+    }
+
+    /**
+     * Set an option for the socket. Wrapper of setsockopt(2).
+     *
+     * \pre isOpen()
+     * \param level the setting level
+     * \param name the name
+     * \param arg the value
+     * \throw Error on errors
+     */
+    template <typename Argument>
+    inline void set(int level, int name, const Argument &arg)
+    {
+        assert(m_handle != Invalid);
+
+        if (::setsockopt(m_handle, level, name, (ConstArg)&arg, sizeof (arg)) == Failure)
+            throw Error();
+    }
+
+    /**
+     * Object-oriented option setter.
+     *
+     * The object must have `set(Socket &) const`.
+     *
+     * \pre isOpen()
+     * \param option the option
+     * \throw Error on errors
+     */
+    template <typename Option>
+    inline void set(const Option &option)
+    {
+        assert(m_handle != Invalid);
+
+        option.set(*this);
+    }
+
+    /**
+     * Get an option for the socket. Wrapper of getsockopt(2).
+     *
+     * \pre isOpen()
+     * \param level the setting level
+     * \param name the name
+     * \return the value
+     * \throw Error on errors
+     */
+    template <typename Argument>
+    Argument get(int level, int name)
+    {
+        assert(m_handle != Invalid);
+
+        Argument desired, result{};
+        socklen_t size = sizeof (result);
+
+        if (::getsockopt(m_handle, level, name, (Arg)&desired, &size) == Failure)
+            throw Error();
+
+        std::memcpy(&result, &desired, size);
+
+        return result;
+    }
+
+    /**
+     * Object-oriented option getter.
+     *
+     * The object must have `T get(Socket &) const`, T can be any type and it is
+     * the value returned from this function.
+     *
+     * \pre isOpen()
+     * \return the same value as get() in the option
+     * \throw Error on errors
+     */
+    template <typename Option>
+    inline auto get() -> decltype(std::declval<Option>().get(*this))
+    {
+        assert(m_handle != Invalid);
+
+        return Option().get(*this);
+    }
+
+    /**
+     * Get the native handle.
+     *
+     * \return the handle
+     * \warning Not portable
+     */
+    inline Handle handle() const noexcept
+    {
+        return m_handle;
+    }
+
+    /**
+     * Bind using a native address.
+     *
+     * \pre isOpen()
+     * \param address the address
+     * \param length the size
+     * \throw Error on errors
+     */
+    inline void bind(const sockaddr *address, socklen_t length)
+    {
+        assert(m_handle != Invalid);
+
+        if (::bind(m_handle, address, length) == Failure)
+            throw Error();
+    }
+
+    /**
+     * Overload that takes an address.
+     *
+     * \pre isOpen()
+     * \param address the address
+     * \throw Error on errors
+     */
+    inline void bind(const Address &address)
+    {
+        assert(m_handle != Invalid);
+
+        bind(address.get(), address.length());
+    }
+
+    /**
+     * Listen for pending connection.
+     *
+     * \pre isOpen()
+     * \param max the maximum number
+     * \throw Error on errors
+     */
+    inline void listen(int max = 128)
+    {
+        assert(m_handle != Invalid);
+
+        if (::listen(m_handle, max) == Failure)
+            throw Error();
+    }
+
+    /**
+     * Get the local name. This is a wrapper of getsockname().
+     *
+     * \pre isOpen()
+     * \return the address
+     * \throw Error on failures
+     */
+    Address getsockname() const
+    {
+        assert(m_handle != Invalid);
+
+        sockaddr_storage ss;
+        socklen_t length = sizeof (sockaddr_storage);
+
+        if (::getsockname(m_handle, reinterpret_cast<sockaddr *>(&ss), &length) == Failure)
+            throw Error();
+
+        return Address(reinterpret_cast<sockaddr *>(&ss), length);
+    }
+
+    /**
+     * Get connected address. This is a wrapper for getpeername().
+     *
+     * \pre isOpen()
+     * \return the address
+     * \throw Error on failures
+     */
+    Address getpeername() const
+    {
+        assert(m_handle != Invalid);
+
+        sockaddr_storage ss;
+        socklen_t length = sizeof (sockaddr_storage);
+
+        if (::getpeername(m_handle, reinterpret_cast<sockaddr *>(&ss), &length) == Failure)
+            throw Error();
+
+        return Address(reinterpret_cast<sockaddr *>(&ss), length);
+    }
+
+    /**
+     * Close the socket.
+     *
+     * Automatically called from the destructor.
+     */
+    void close()
+    {
+        if (m_handle != Invalid) {
+#if defined(_WIN32)
+            ::closesocket(m_handle);
+#else
+            ::close(m_handle);
+#endif
+            m_handle = Invalid;
+        }
+    }
+
+    /**
+     * Assignment operator forbidden.
+     *
+     * \return *this
+     */
+    Socket &operator=(const Socket &) = delete;
+
+    /**
+     * Transfer ownership from other to this. The other socket is left
+     * invalid and will not be closed.
+     *
+     * \param other the other socket
+     * \return this
+     */
+    Socket &operator=(Socket &&other) noexcept
+    {
+        m_handle = other.m_handle;
+        other.m_handle = Invalid;
+
+        return *this;
+    }
+};
+
+/**
+ * Compare two sockets.
+ *
+ * \param s1 the first socket
+ * \param s2 the second socket
+ * \return true if they equals
+ */
+inline bool operator==(const Socket &s1, const Socket &s2)
+{
+    return s1.handle() == s2.handle();
+}
+
+/**
+ * Compare two sockets.
+ *
+ * \param s1 the first socket
+ * \param s2 the second socket
+ * \return true if they are different
+ */
+inline bool operator!=(const Socket &s1, const Socket &s2)
+{
+    return s1.handle() != s2.handle();
+}
+
+/**
+ * Compare two sockets.
+ *
+ * \param s1 the first socket
+ * \param s2 the second socket
+ * \return true if s1 < s2
+ */
+inline bool operator<(const Socket &s1, const Socket &s2)
+{
+    return s1.handle() < s2.handle();
+}
+
+/**
+ * Compare two sockets.
+ *
+ * \param s1 the first socket
+ * \param s2 the second socket
+ * \return true if s1 > s2
+ */
+inline bool operator>(const Socket &s1, const Socket &s2)
+{
+    return s1.handle() > s2.handle();
+}
+
+/**
+ * Compare two sockets.
+ *
+ * \param s1 the first socket
+ * \param s2 the second socket
+ * \return true if s1 <= s2
+ */
+inline bool operator<=(const Socket &s1, const Socket &s2)
+{
+    return s1.handle() <= s2.handle();
+}
+
+/**
+ * Compare two sockets.
+ *
+ * \param s1 the first socket
+ * \param s2 the second socket
+ * \return true if s1 >= s2
+ */
+inline bool operator>=(const Socket &s1, const Socket &s2)
+{
+    return s1.handle() >= s2.handle();
+}
+
+/**
+ * \brief Clear TCP implementation.
+ * \ingroup net-module-tcp
+ *
+ * This is the basic TCP protocol that implements recv, send, connect and accept
+ * as wrappers of the usual C functions.
+ */
+class TcpSocket : public Socket {
+public:
+    /**
+     * Inherited constructors.
+     */
+    using Socket::Socket;
+
+    /**
+     * Construct a TCP socket.
+     *
+     * \param domain the domain
+     * \param protocol the protocol
+     * \throw Error on errors
+     */
+    inline TcpSocket(int domain, int protocol)
+        : Socket(domain, SOCK_STREAM, protocol)
+    {
+    }
+
+    /**
+     * Get the type of the socket.
+     *
+     * \return the type
+     */
+    inline int type() const noexcept
+    {
+        return SOCK_STREAM;
+    }
+
+    /**
+     * Initiate connection.
+     *
+     * \param address the address
+     * \param length the address length
+     * \throw WouldBlockError if the socket is marked non-blocking and
+     * connection cannot be established immediately
+     * \throw Error on other errors
+     */
+    void connect(const sockaddr *address, socklen_t length)
+    {
+        if (::connect(this->m_handle, address, length) == Failure) {
+#if defined(_WIN32)
+            int error = WSAGetLastError();
+
+            if (error == WSAEWOULDBLOCK)
+                throw WouldBlockError();
+            else
+                throw Error(error);
+#else
+            if (errno == EINPROGRESS)
+                throw WouldBlockError();
+            else
+                throw Error();
+#endif
+        }
+    }
+
+    /**
+     * Overloaded function.
+     *
+     * \param address the address
+     * \throw WouldBlockError if the socket is marked non-blocking and
+     * connection cannot be established immediately
+     * \throw Error on other errors
+     */
+    void connect(const Address &address)
+    {
+        connect(address.get(), address.length());
+    }
+
+    /**
+     * Accept a new client.
+     *
+     * If there are no pending connection, an invalid socket is returned.
+     *
+     * \return the new socket
+     * \throw WouldBlockError if the socket is marked non-blocking and no
+     * connection are available
+     * \throw Error on other errors
+     */
+    TcpSocket accept()
+    {
+        Handle handle = ::accept(this->m_handle, nullptr, 0);
+
+        if (handle == Invalid) {
+#if defined(_WIN32)
+            int error = WSAGetLastError();
+
+            if (error == WSAEWOULDBLOCK)
+                throw WouldBlockError();
+            else
+                throw Error(error);
+#else
+            if (errno == EWOULDBLOCK || errno == EAGAIN)
+                throw WouldBlockError();
+            else
+                throw Error();
+#endif
+        }
+
+        return TcpSocket(handle);
+    }
+
+    /**
+     * Receive some data.
+     *
+     * \param data the destination buffer
+     * \param length the buffer length
+     * \return the number of bytes received
+     */
+    unsigned recv(void *data, unsigned length)
+    {
+        int max = length > INT_MAX ? INT_MAX : static_cast<int>(length);
+        int nbread = ::recv(this->m_handle, (Arg)data, max, 0);
+
+        if (nbread == Failure) {
+#if defined(_WIN32)
+            int error = WSAGetLastError();
+
+            if (error == WSAEWOULDBLOCK)
+                throw WouldBlockError();
+            else
+                throw Error(error);
+#else
+            if (errno == EAGAIN || errno == EWOULDBLOCK)
+                throw WouldBlockError();
+            else
+                throw Error();
+#endif
+        }
+
+        return static_cast<unsigned>(nbread);
+    }
+
+    /**
+     * Send some data.
+     *
+     * \param data the data to send
+     * \param length the length
+     * \return the number of bytes sent
+     */
+    unsigned send(const void *data, unsigned length)
+    {
+        int max = length > INT_MAX ? INT_MAX : static_cast<int>(length);
+        int nbsent = ::send(this->m_handle, (ConstArg)data, max, 0);
+
+        if (nbsent == Failure) {
+#if defined(_WIN32)
+            int error = WSAGetLastError();
+
+            if (error == WSAEWOULDBLOCK)
+                throw WouldBlockError();
+            else
+                throw Error();
+#else
+            if (errno == EAGAIN || errno == EWOULDBLOCK)
+                throw WouldBlockError();
+            else
+                throw Error();
+#endif
+        }
+
+        return static_cast<unsigned>(nbsent);
+    }
+};
+
+/**
+ * \brief Clear UDP type.
+ *
+ * This class is the basic implementation of UDP sockets.
+ */
+class UdpSocket : public Socket {
+public:
+    /**
+     * Inherited constructors.
+     */
+    using Socket::Socket;
+
+    /**
+     * Construct a TCP socket.
+     *
+     * \param domain the domain
+     * \param protocol the protocol
+     * \throw Error on errors
+     */
+    inline UdpSocket(int domain, int protocol)
+        : Socket(domain, SOCK_DGRAM, protocol)
+    {
+    }
+
+    /**
+     * Get the type of the socket.
+     *
+     * \return the type
+     */
+    inline int type() const noexcept
+    {
+        return SOCK_DGRAM;
+    }
+
+    /**
+     * Receive some data.
+     *
+     * \param data the data
+     * \param length the length
+     * \param address the source address
+     * \param addrlen the source address in/out length
+     * \return the number of bytes received
+     * \throw WouldBlockError if the socket is marked non-blocking and the
+     * operation would block
+     * \throw Error on other errors
+     */
+    unsigned recvfrom(void *data, unsigned length, sockaddr *address, socklen_t *addrlen)
+    {
+        int max = length > INT_MAX ? INT_MAX : static_cast<int>(length);
+        int nbread = ::recvfrom(this->m_handle, (Arg)data, max, 0, address, addrlen);
+
+        if (nbread == Failure) {
+#if defined(_WIN32)
+            int error = WSAGetLastError();
+
+            if (error == EWOULDBLOCK)
+                throw WouldBlockError();
+            else
+                throw Error(error);
+#else
+            if (errno == EAGAIN || errno == EWOULDBLOCK)
+                throw WouldBlockError();
+            else
+                throw Error();
+#endif
+        }
+
+        return static_cast<unsigned>(nbread);
+    }
+
+    /**
+     * Overloaded function.
+     *
+     * \param data the data
+     * \param length the length
+     * \param source the source information (optional)
+     * \throw WouldBlockError if the socket is marked non-blocking and the
+     * operation would block
+     * \throw Error on other errors
+     */
+    inline unsigned recvfrom(void *data, unsigned length, Address *source = nullptr)
+    {
+        sockaddr_storage st;
+        socklen_t socklen = sizeof (sockaddr_storage);
+
+        auto nr = recvfrom(data, length, reinterpret_cast<sockaddr *>(&st), &socklen);
+
+        if (source)
+            *source = Address(reinterpret_cast<const sockaddr *>(&st), socklen);
+
+        return nr;
+    }
+
+    /**
+     * Send some data.
+     *
+     * \param data the data to send
+     * \param length the data length
+     * \param address the destination address
+     * \param addrlen the destination address length
+     * \return the number of bytes sent
+     * \throw WouldBlockError if the socket is marked non-blocking and the
+     * operation would block
+     * \throw Error on other errors
+     */
+    unsigned sendto(const void *data, unsigned length, const sockaddr *address, socklen_t addrlen)
+    {
+        int max = length > INT_MAX ? INT_MAX : static_cast<int>(length);
+        int nbsent = ::sendto(this->m_handle, (ConstArg)data, max, 0, address, addrlen);
+
+        if (nbsent == Failure) {
+#if defined(_WIN32)
+            int error = WSAGetLastError();
+
+            if (error == EWOULDBLOCK)
+                throw WouldBlockError();
+            else
+                throw Error(error);
+#else
+            if (errno == EAGAIN || errno == EWOULDBLOCK)
+                throw WouldBlockError();
+            else
+                throw Error();
+#endif
+        }
+
+        return static_cast<unsigned>(nbsent);
+    }
+
+    /**
+     * Overloaded function
+     *
+     * \param data the data to send
+     * \param length the data length
+     * \param address the destination address
+     * \return the number of bytes sent
+     * \throw WouldBlockError if the socket is marked non-blocking and the
+     * operation would block
+     * \throw Error on other errors
+     */
+    inline unsigned sendto(const void *data, unsigned length, const Address &address)
+    {
+        return sendto(data, length, address.get(), address.length());
+    }
+};
+
+#if !defined(NET_NO_SSL)
+
+/**
+ * \brief Experimental TLS support.
+ * \ingroup net-module-tls
+ * \warning This class is highly experimental.
+ */
+class TlsSocket : public Socket {
+public:
+    /**
+     * \brief SSL connection mode.
+     */
+    enum Mode {
+        Server,         //!< Use Server when you accept a socket server side,
+        Client          //!< Use Client when you connect to a server.
+    };
+
+private:
+    using Context = std::shared_ptr<SSL_CTX>;
+    using Ssl = std::unique_ptr<SSL, void (*)(SSL *)>;
+
+    // Determine if we created a TlsSocket from a temporary or a lvalue.
+    bool m_mustclose{false};
+
+    Context m_context;
+    Ssl m_ssl{nullptr, nullptr};
+
+    inline std::string error()
+    {
+        BIO *bio = BIO_new(BIO_s_mem());
+        char *buf = nullptr;
+
+        ERR_print_errors(bio);
+
+        std::size_t length = BIO_get_mem_data (bio, &buf);
+        std::string result(buf, length);
+
+        BIO_free(bio);
+
+        return result;
+    }
+
+    template <typename Function>
+    void wrap(Function &&function)
+    {
+        auto ret = function();
+
+        if (ret <= 0) {
+            int no = SSL_get_error(m_ssl.get(), ret);
+
+            switch (no) {
+            case SSL_ERROR_WANT_READ:
+                throw WantReadError();
+            case SSL_ERROR_WANT_WRITE:
+                throw WantWriteError();
+            default:
+                throw Error(error());
+            }
+        }
+    }
+
+    void create(Mode mode, const SSL_METHOD *method)
+    {
+#if !defined(NET_NO_SSL_AUTO_INIT)
+        ssl::init();
+#endif
+        m_context = Context(SSL_CTX_new(method), SSL_CTX_free);
+        m_ssl = Ssl(SSL_new(m_context.get()), SSL_free);
+
+        SSL_set_fd(m_ssl.get(), this->m_handle);
+
+        if (mode == Server)
+            SSL_set_accept_state(m_ssl.get());
+        else
+            SSL_set_connect_state(m_ssl.get());
+    }
+
+public:
+    /**
+     * Create a socket around an existing one.
+     *
+     * The original socket is moved to this instance and must not be used
+     * anymore.
+     *
+     * \param sock the TCP socket
+     * \param mode the mode
+     * \param method the method
+     */
+    TlsSocket(TcpSocket &&sock, Mode mode = Server, const SSL_METHOD *method = TLSv1_method())
+        : Socket(std::move(sock))
+        , m_mustclose(true)
+    {
+        create(mode, method);
+    }
+
+    /**
+     * Wrap a socket around an existing one without taking ownership.
+     *
+     * The original socket must still exist until this TlsSocket is closed.
+     *
+     * \param sock the TCP socket
+     * \param mode the mode
+     * \param method the method
+     */
+    TlsSocket(TcpSocket &sock, Mode mode = Server, const SSL_METHOD *method = TLSv1_method())
+        : Socket(sock.handle())
+    {
+        create(mode, method);
+    }
+
+    /**
+     * Destroy the socket if owned.
+     */
+    ~TlsSocket()
+    {
+        /**
+         * If the socket has been created from a rvalue this class owns the
+         * socket and will close it in the parent destructor.
+         *
+         * Otherwise, when created from a lvalue, mark this socket as invalid
+         * to avoid double close'ing it as two sockets points to the same
+         * descriptor.
+         */
+        if (!m_mustclose)
+            m_handle = Invalid;
+    }
+
+    /**
+     * Get the type of socket.
+     *
+     * \return the type
+     */
+    inline int type() const noexcept
+    {
+        return SOCK_STREAM;
+    }
+
+    /**
+     * Use the specified private key file.
+     *
+     * \param file the path to the private key
+     * \param type the type of file
+     */
+    inline void setPrivateKey(std::string file, int type = SSL_FILETYPE_PEM)
+    {
+        if (SSL_use_PrivateKey_file(m_ssl.get(), file.c_str(), type) != 1)
+            throw Error(error());
+    }
+
+    /**
+     * Use the specified certificate file.
+     *
+     * \param file the path to the file
+     * \param type the type of file
+     */
+    inline void setCertificate(std::string file, int type = SSL_FILETYPE_PEM)
+    {
+        if (SSL_use_certificate_file(m_ssl.get(), file.c_str(), type) != 1)
+            throw Error(error());
+    }
+
+    /**
+     * Do handshake, needed in some case when you have non blocking sockets.
+     */
+    void handshake()
+    {
+        wrap([&] () -> int {
+            return SSL_do_handshake(m_ssl.get());
+        });
+    }
+
+    /**
+     * Receive some data.
+     *
+     * \param data the destination buffer
+     * \param length the buffer length
+     * \return the number of bytes received
+     */
+    unsigned recv(void *data, unsigned length)
+    {
+        int max = length > INT_MAX ? INT_MAX : static_cast<int>(length);
+        int nbread = 0;
+
+        wrap([&] () -> int {
+            return (nbread = SSL_read(m_ssl.get(), data, max));
+        });
+
+        return static_cast<unsigned>(nbread < 0 ? 0 : nbread);
+    }
+
+    /**
+     * Send some data.
+     *
+     * \param data the data to send
+     * \param length the length
+     * \return the number of bytes sent
+     */
+    unsigned send(const void *data, unsigned length)
+    {
+        int max = length > INT_MAX ? INT_MAX : static_cast<int>(length);
+        int nbsent = 0;
+
+        wrap([&] () -> int {
+            return (nbsent = SSL_write(m_ssl.get(), data, max));
+        });
+
+        return static_cast<unsigned>(nbsent < 0 ? 0 : nbsent);
+    }
+};
+
+#endif // !NET_NO_SSL
+
+/**
+ * \brief IPv4 functions.
+ */
+namespace ipv4 {
+
+/**
+ * Create an address to bind on any.
+ *
+ * \param port the port
+ * \return the address
+ */
+inline Address any(std::uint16_t port)
+{
+    sockaddr_in sin;
+    socklen_t length = sizeof (sockaddr_in);
+
+    std::memset(&sin, 0, sizeof (sockaddr_in));
+    sin.sin_family = AF_INET;
+    sin.sin_addr.s_addr = INADDR_ANY;
+    sin.sin_port = htons(port);
+
+    return Address(reinterpret_cast<const sockaddr *>(&sin), length);
+}
+
+/**
+ * Create an address from a IPv4 string.
+ *
+ * \param ip the ip address
+ * \param port the port
+ * \return the address
+ * \throw Error if inet_pton is unavailable
+ */
+inline Address pton(const std::string &ip, std::uint16_t port)
+{
+#if defined(NET_HAVE_INET_PTON)
+#if !defined(NET_NO_AUTO_INIT)
+    init();
+#endif
+
+    sockaddr_in sin;
+    socklen_t length = sizeof (sockaddr_in);
+
+    std::memset(&sin, 0, sizeof (sockaddr_in));
+    sin.sin_family = AF_INET;
+    sin.sin_port = htons(port);
+
+    if (inet_pton(AF_INET, ip.c_str(), &sin.sin_addr) <= 0)
+        throw Error();
+
+    return Address(reinterpret_cast<const sockaddr *>(&sin), length);
+#else
+    (void)ip;
+    (void)port;
+
+    throw Error(std::strerror(ENOSYS));
+#endif
+}
+
+/**
+ * Get the underlying ip from the given address.
+ *
+ * \pre address.domain() == AF_INET
+ * \param address the IPv6 address
+ * \return the ip address
+ * \throw Error if inet_ntop is unavailable
+ */
+inline std::string ntop(const Address &address)
+{
+    assert(address.domain() == AF_INET);
+
+#if !defined(NET_NO_AUTO_INIT)
+    init();
+#endif
+
+#if defined(NET_HAVE_INET_NTOP)
+    char result[INET_ADDRSTRLEN + 1];
+
+    std::memset(result, 0, sizeof (result));
+
+    if (!inet_ntop(AF_INET, const_cast<in_addr *>(&address.as<sockaddr_in>().sin_addr), result, sizeof (result)))
+        throw Error();
+
+    return result;
+#else
+    (void)address;
+
+    throw Error(std::strerror(ENOSYS));
+#endif
+}
+
+/**
+ * Get the port from the IPv4 address.
+ *
+ * \pre address.domain() == AF_INET4
+ * \param address the address
+ * \return the port
+ */
+inline std::uint16_t port(const Address &address) noexcept
+{
+    assert(address.domain() == AF_INET);
+
+    return ntohs(address.as<sockaddr_in>().sin_port);
+}
+
+} // !ipv4
+
+/**
+ * \brief IPv6 functions.
+ */
+namespace ipv6 {
+
+/**
+ * Create an address to bind on any.
+ *
+ * \param port the port
+ * \return the address
+ */
+inline Address any(std::uint16_t port)
+{
+    sockaddr_in6 sin6;
+    socklen_t length = sizeof (sockaddr_in6);
+
+    std::memset(&sin6, 0, sizeof (sockaddr_in6));
+    sin6.sin6_family = AF_INET6;
+    sin6.sin6_addr = in6addr_any;
+    sin6.sin6_port = htons(port);
+
+    return Address(reinterpret_cast<const sockaddr *>(&sin6), length);
+}
+
+/**
+ * Create an address from a IPv4 string.
+ *
+ * \param ip the ip address
+ * \param port the port
+ * \return the address
+ * \throw Error if inet_pton is unavailable
+ */
+inline Address pton(const std::string &ip, std::uint16_t port)
+{
+#if defined(NET_HAVE_INET_PTON)
+#if !defined(NET_NO_AUTO_INIT)
+    init();
+#endif
+
+    sockaddr_in6 sin6;
+    socklen_t length = sizeof (sockaddr_in6);
+
+    std::memset(&sin6, 0, sizeof (sockaddr_in6));
+    sin6.sin6_family = AF_INET6;
+    sin6.sin6_port = htons(port);
+
+    if (inet_pton(AF_INET6, ip.c_str(), &sin6.sin6_addr) <= 0)
+        throw Error();
+
+    return Address(reinterpret_cast<const sockaddr *>(&sin6), length);
+#else
+    (void)ip;
+    (void)port;
+
+    throw Error(std::strerror(ENOSYS));
+#endif
+}
+
+/**
+ * Get the underlying ip from the given address.
+ *
+ * \pre address.domain() == AF_INET6
+ * \param address the IPv6 address
+ * \return the ip address
+ * \throw Error if inet_ntop is unavailable
+ */
+inline std::string ntop(const Address &address)
+{
+    assert(address.domain() == AF_INET6);
+
+#if defined(NET_HAVE_INET_NTOP)
+#if !defined(NET_NO_AUTO_INIT)
+    init();
+#endif
+
+    char ret[INET6_ADDRSTRLEN];
+
+    std::memset(ret, 0, sizeof (ret));
+
+    if (!inet_ntop(AF_INET6, const_cast<in6_addr *>(&address.as<sockaddr_in6>().sin6_addr), ret, sizeof (ret)))
+        throw Error();
+
+    return ret;
+#else
+    (void)address;
+
+    throw Error(std::strerror(ENOSYS));
+#endif
+}
+
+/**
+ * Get the port from the IPv6 address.
+ *
+ * \pre address.domain() == AF_INET6
+ * \param address the address
+ * \return the port
+ */
+inline std::uint16_t port(const Address &address) noexcept
+{
+    assert(address.domain() == AF_INET6);
+
+    return ntohs(address.as<sockaddr_in6>().sin6_port);
+}
+
+} // !ipv6
+
+#if !defined(_WIN32)
+
+/**
+ * \brief Unix domain functions.
+ */
+namespace local {
+
+/**
+ * Construct an address to a path.
+ *
+ * \pre !path.empty()
+ * \param path the path
+ * \param rm remove the file before (default: false)
+ */
+inline Address create(const std::string &path, bool rm = false) noexcept
+{
+    assert(!path.empty());
+
+    // Silently remove the file even if it fails.
+    if (rm)
+        remove(path.c_str());
+
+    sockaddr_un sun;
+    socklen_t length;
+
+    std::memset(sun.sun_path, 0, sizeof (sun.sun_path));
+    std::strncpy(sun.sun_path, path.c_str(), sizeof (sun.sun_path) - 1);
+
+    sun.sun_family = AF_LOCAL;
+
+#if defined(NET_HAVE_SUN_LEN)
+    length = SUN_LEN(&sun);
+#else
+    length = sizeof (sun);
+#endif
+
+    return Address(reinterpret_cast<const sockaddr *>(&sun), length); 
+}
+
+/**
+ * Get the path from the address.
+ *
+ * \pre address.domain() == AF_LOCAL
+ * \param address the local address
+ * \return the path to the socket file
+ */
+inline std::string path(const Address &address)
+{
+    assert(address.domain() == AF_LOCAL);
+
+    return reinterpret_cast<const sockaddr_un *>(address.get())->sun_path;
+}
+
+} // !local
+
+#endif // !_WIN32
 
 /**
  * \brief Predefined options.
@@ -3638,7 +2526,8 @@ namespace option {
 /**
  * \ingroup net-module-options
  * \brief Set or get the blocking-mode for a socket.
- * \warning On Windows, it's not possible to check if the socket is blocking or not.
+ * \warning On Windows, it's not possible to check if the socket is blocking or
+ * not.
  */
 class SockBlockMode {
 private:
@@ -3663,8 +2552,7 @@ public:
      * \param sc the socket
      * \throw Error on errors
      */
-    template <typename Address, typename Protocol>
-    void set(Socket<Address, Protocol> &sc) const
+    void set(Socket &sc) const
     {
 #if defined(O_NONBLOCK) && !defined(_WIN32)
         int flags;
@@ -3678,12 +2566,12 @@ public:
             flags |= O_NONBLOCK;
 
         if (fcntl(sc.handle(), F_SETFL, flags) < 0)
-            throw Error(Error::System, "fcntl");
+            throw Error();
 #else
         unsigned long flags = (m_value) ? 0 : 1;
 
         if (ioctlsocket(sc.handle(), FIONBIO, &flags) == Failure)
-            throw Error(Error::System, "fcntl");
+            throw Error();
 #endif
     }
 
@@ -3694,20 +2582,19 @@ public:
      * \return the value
      * \throw Error on errors
      */
-    template <typename Address, typename Protocol>
-    bool get(Socket<Address, Protocol> &sc) const
+    bool get(Socket &sc) const
     {
 #if defined(O_NONBLOCK) && !defined(_WIN32)
         int flags = fcntl(sc.handle(), F_GETFL, 0);
 
         if (flags < 0)
-            throw Error(Error::System, "fcntl");
+            throw Error();
 
         return !(flags & O_NONBLOCK);
 #else
         (void)sc;
 
-        throw Error(Error::Other, "get", std::strerror(ENOSYS));
+        throw Error(std::strerror(ENOSYS));
 #endif
     }
 };
@@ -3737,8 +2624,7 @@ public:
      * \param sc the socket
      * \throw Error on errors
      */
-    template <typename Address, typename Protocol>
-    inline void set(Socket<Address, Protocol> &sc) const
+    inline void set(Socket &sc) const
     {
         sc.set(SOL_SOCKET, SO_RCVBUF, m_value);
     }
@@ -3750,10 +2636,9 @@ public:
      * \return the value
      * \throw Error on errors
      */
-    template <typename Address, typename Protocol>
-    inline int get(Socket<Address, Protocol> &sc) const
+    inline int get(Socket &sc) const
     {
-        return sc.template get<int>(SOL_SOCKET, SO_RCVBUF);
+        return sc.get<int>(SOL_SOCKET, SO_RCVBUF);
     }
 };
 
@@ -3784,8 +2669,7 @@ public:
      * \param sc the socket
      * \throw Error on errors
      */
-    template <typename Address, typename Protocol>
-    inline void set(Socket<Address, Protocol> &sc) const
+    inline void set(Socket &sc) const
     {
         sc.set(SOL_SOCKET, SO_REUSEADDR, m_value ? 1 : 0);
     }
@@ -3797,10 +2681,9 @@ public:
      * \return the value
      * \throw Error on errors
      */
-    template <typename Address, typename Protocol>
-    inline bool get(Socket<Address, Protocol> &sc) const
+    inline bool get(Socket &sc) const
     {
-        return sc.template get<int>(SOL_SOCKET, SO_REUSEADDR) != 0;
+        return sc.get<int>(SOL_SOCKET, SO_REUSEADDR) != 0;
     }
 };
 
@@ -3829,8 +2712,7 @@ public:
      * \param sc the socket
      * \throw Error on errors
      */
-    template <typename Address, typename Protocol>
-    inline void set(Socket<Address, Protocol> &sc) const
+    inline void set(Socket &sc) const
     {
         sc.set(SOL_SOCKET, SO_SNDBUF, m_value);
     }
@@ -3842,10 +2724,9 @@ public:
      * \return the value
      * \throw Error on errors
      */
-    template <typename Address, typename Protocol>
-    inline int get(Socket<Address, Protocol> &sc) const
+    inline int get(Socket &sc) const
     {
-        return sc.template get<int>(SOL_SOCKET, SO_SNDBUF);
+        return sc.get<int>(SOL_SOCKET, SO_SNDBUF);
     }
 };
 
@@ -3876,8 +2757,7 @@ public:
      * \param sc the socket
      * \throw Error on errors
      */
-    template <typename Address, typename Protocol>
-    inline void set(Socket<Address, Protocol> &sc) const
+    inline void set(Socket &sc) const
     {
         sc.set(IPPROTO_TCP, TCP_NODELAY, m_value ? 1 : 0);
     }
@@ -3889,10 +2769,9 @@ public:
      * \return the value
      * \throw Error on errors
      */
-    template <typename Address, typename Protocol>
-    inline bool get(Socket<Address, Protocol> &sc) const
+    inline bool get(Socket &sc) const
     {
-        return sc.template get<int>(IPPROTO_TCP, TCP_NODELAY) != 0;
+        return sc.get<int>(IPPROTO_TCP, TCP_NODELAY) != 0;
     }
 };
 
@@ -3900,7 +2779,8 @@ public:
  * \ingroup net-module-options
  * \brief Control IPPROTO_IPV6/IPV6_V6ONLY
  *
- * Note: some systems may or not set this option by default so it's a good idea to set it in any case to either
+ * Note: some systems may or not set this option by default so it's a good idea
+ * to set it in any case to either
  * false or true if portability is a concern.
  */
 class Ipv6Only {
@@ -3926,8 +2806,7 @@ public:
      * \param sc the socket
      * \throw Error on errors
      */
-    template <typename Address, typename Protocol>
-    inline void set(Socket<Address, Protocol> &sc) const
+    inline void set(Socket &sc) const
     {
         sc.set(IPPROTO_IPV6, IPV6_V6ONLY, m_value ? 1 : 0);
     }
@@ -3939,10 +2818,9 @@ public:
      * \return the value
      * \throw Error on errors
      */
-    template <typename Address, typename Protocol>
-    inline bool get(Socket<Address, Protocol> &sc) const
+    inline bool get(Socket &sc) const
     {
-        return sc.template get<int>(IPPROTO_IPV6, IPV6_V6ONLY) != 0;
+        return sc.get<int>(IPPROTO_IPV6, IPV6_V6ONLY) != 0;
     }
 };
 
@@ -3956,8 +2834,8 @@ public:
  */
 class ListenerStatus {
 public:
-    Handle socket;        //!< which socket is ready
-    Condition flags;    //!< the flags
+    Handle socket;              //!< which socket is ready
+    Condition flags;            //!< the flags
 };
 
 /**
@@ -4019,20 +2897,20 @@ private:
         ev.data.fd = h;
 
         if (epoll_ctl(m_handle, op, h, &ev) < 0)
-            throw Error(Error::System, "epoll_ctl");
+            throw Error();
     }
 
 public:
     /**
      * Create epoll.
      *
-     * \throw net::Error on failures
+     * \throw Error on failures
      */
     inline Epoll()
         : m_handle(epoll_create1(0))
     {
         if (m_handle < 0)
-            throw Error(Error::System, "epoll_create");
+            throw Error();
     }
 
     /**
@@ -4066,15 +2944,15 @@ public:
     }
 
     /**
-     * For set and unset, we need to apply the whole flags required, so if the socket
-     * was set to Connection::Readable and user *8adds** Connection::Writable, we must
-     * place both.
+     * For set and unset, we need to apply the whole flags required, so if the
+     * socket was set to Connection::Readable and user **adds**
+     * Connection::Writable, we must set both.
      *
      * \param table the listener table
      * \param h the handle
      * \param condition the condition
      * \param add set to true if the socket is new to the backend
-     * \throw net::Error on failures
+     * \throw Error on failures
      */
     void set(const ListenerTable &table, Handle h, Condition condition, bool add)
     {
@@ -4097,7 +2975,7 @@ public:
      * \param h the handle
      * \param condition the condition
      * \param add set to true if the socket is new to the backend
-     * \throw net::Error on failures
+     * \throw Error on failures
      */
     void unset(const ListenerTable &table, Handle h, Condition condition, bool remove)
     {
@@ -4113,7 +2991,7 @@ public:
      *
      * \param ms the milliseconds timeout
      * \return the sockets ready
-     * \throw net::Error on failures
+     * \throw Error on failures
      */
     std::vector<ListenerStatus> wait(const ListenerTable &, int ms)
     {
@@ -4121,9 +2999,9 @@ public:
         std::vector<ListenerStatus> result;
 
         if (ret == 0)
-            throw Error(Error::Timeout, "epoll_wait", std::strerror(ETIMEDOUT));
+            throw TimeoutError();
         if (ret < 0)
-            throw Error(Error::System, "epoll_wait");
+            throw Error();
 
         for (int i = 0; i < ret; ++i)
             result.push_back(ListenerStatus{m_events[i].data.fd, toCondition(m_events[i].events)});
@@ -4172,20 +3050,20 @@ private:
         EV_SET(&ev, h, filter, kflags, 0, 0, nullptr);
 
         if (kevent(m_handle, &ev, 1, nullptr, 0, nullptr) < 0)
-            throw Error(Error::System, "kevent");
+            throw Error();
     }
 
 public:
     /**
      * Create kqueue.
      *
-     * \throw net::Error on failures
+     * \throw Error on failures
      */
     inline Kqueue()
         : m_handle(kqueue())
     {
         if (m_handle < 0)
-            throw Error(Error::System, "kqueue");
+            throw Error();
     }
 
     /**
@@ -4224,7 +3102,7 @@ public:
      * \param h the handle
      * \param condition the condition
      * \param add set to true if the socket is new to the backend
-     * \throw net::Error on failures
+     * \throw Error on failures
      */
     void set(const ListenerTable &, Handle h, Condition condition, bool add)
     {
@@ -4242,7 +3120,7 @@ public:
      * \param h the handle
      * \param condition the condition
      * \param remove set to true if the socket is completely removed
-     * \throw net::Error on failures
+     * \throw Error on failures
      */
     void unset(const ListenerTable &, Handle h, Condition condition, bool remove)
     {
@@ -4259,7 +3137,7 @@ public:
      *
      * \param ms the milliseconds timeout
      * \return the sockets ready
-     * \throw net::Error on failures
+     * \throw Error on failures
      */
     std::vector<ListenerStatus> wait(const ListenerTable &, int ms)
     {
@@ -4273,9 +3151,9 @@ public:
         int nevents = kevent(m_handle, nullptr, 0, &m_result[0], m_result.capacity(), pts);
 
         if (nevents == 0)
-            throw Error(Error::Timeout, "kevent", std::strerror(ETIMEDOUT));
+            throw TimeoutError();
         if (nevents < 0)
-            throw Error(Error::System, "kevent");
+            throw Error();
 
         for (int i = 0; i < nevents; ++i) {
             sockets.push_back(ListenerStatus{
@@ -4334,9 +3212,11 @@ private:
         Condition condition = Condition::None;
 
         /*
-         * Poll implementations mark the socket differently regarding the disconnection of a socket.
+         * Poll implementations mark the socket differently regarding the
+         * disconnection of a socket.
          *
-         * At least, even if POLLHUP or POLLIN is set, recv() always return 0 so we mark the socket as readable.
+         * At least, even if POLLHUP or POLLIN is set, recv() always return 0 so
+         * we mark the socket as readable.
          */
         if ((event & POLLIN) || (event & POLLHUP))
             condition |= Condition::Readable;
@@ -4366,7 +3246,7 @@ public:
      * \param h the handle
      * \param condition the condition
      * \param add set to true if the socket is new to the backend
-     * \throw net::Error on failures
+     * \throw Error on failures
      */
     void set(const ListenerTable &, Handle h, Condition condition, bool add)
     {
@@ -4387,7 +3267,7 @@ public:
      * \param h the handle
      * \param condition the condition
      * \param remove set to true if the socket is completely removed
-     * \throw net::Error on failures
+     * \throw Error on failures
      */
     void unset(const ListenerTable &, Handle h, Condition condition, bool remove)
     {
@@ -4406,7 +3286,7 @@ public:
      *
      * \param ms the milliseconds timeout
      * \return the sockets ready
-     * \throw net::Error on failures
+     * \throw Error on failures
      */
     std::vector<ListenerStatus> wait(const ListenerTable &, int ms)
     {
@@ -4417,9 +3297,9 @@ public:
 #endif
 
         if (result == 0)
-            throw Error(Error::Timeout, "select", std::strerror(ETIMEDOUT));
+            throw TimeoutError();
         if (result < 0)
-            throw Error(Error::System, "poll");
+            throw Error();
 
         std::vector<ListenerStatus> sockets;
 
@@ -4437,7 +3317,8 @@ public:
  * \ingroup net-module-backends
  * \brief Implements select(2)
  *
- * This class is the fallback of any other method, it is not preferred at all for many reasons.
+ * This class is the fallback of any other method, it is not preferred at all
+ * for many reasons.
  */
 class Select {
 public:
@@ -4471,7 +3352,7 @@ public:
      * \param table the listener table
      * \param ms the milliseconds timeout
      * \return the sockets ready
-     * \throw net::Error on failures
+     * \throw Error on failures
      */
     std::vector<ListenerStatus> wait(const ListenerTable &table, int ms)
     {
@@ -4502,9 +3383,9 @@ public:
         auto error = ::select(static_cast<int>(max + 1), &readset, &writeset, nullptr, towait);
 
         if (error == Failure)
-            throw Error(Error::System, "select");
+            throw Error();
         if (error == 0)
-            throw Error(Error::Timeout, "select", std::strerror(ETIMEDOUT));
+            throw TimeoutError();
 
         std::vector<ListenerStatus> sockets;
 
@@ -4691,7 +3572,8 @@ public:
     /**
      * Remove completely the socket from the listener.
      *
-     * It is a shorthand for unset(sc, Condition::Readable | Condition::Writable);
+     * It is a shorthand for unset(sc, Condition::Readable |
+     * Condition::Writable);
      *
      * \param sc the socket
      */
@@ -4720,7 +3602,8 @@ public:
     }
 
     /**
-     * Select a socket. Waits for a specific amount of time specified as the duration.
+     * Select a socket. Waits for a specific amount of time specified as the
+     * duration.
      *
      * \param duration the duration
      * \return the socket ready
@@ -4772,101 +3655,6 @@ public:
 };
 
 /**
- * \ingroup net-module-tcp
- * \brief Helper to create TCP sockets.
- */
-template <typename Address>
-using SocketTcp = Socket<Address, protocol::Tcp>;
-
-/**
- * \ingroup net-module-tcp
- * \brief Helper to create TCP/Ipv4 or TCP/Ipv6 sockets.
- */
-using SocketTcpIp = Socket<address::Ip, protocol::Tcp>;
-
-/**
- * \ingroup net-module-tcp
- * \brief Helper to create TCP/Ipv4 sockets.
- */
-using SocketTcpIpv4 = Socket<address::Ipv4, protocol::Tcp>;
-
-/**
- * \ingroup net-module-tcp
- * \brief Helper to create TCP/Ipv6 sockets.
- */
-using SocketTcpIpv6 = Socket<address::Ipv6, protocol::Tcp>;
-
-/**
- * \ingroup net-module-udp
- * \brief Helper to create UDP sockets.
- */
-template <typename Address>
-using SocketUdp = Socket<Address, protocol::Udp>;
-
-/**
- * \ingroup net-module-udp
- * \brief Helper to create UDP/Ipv4 or UDP/Ipv6 sockets.
- */
-using SocketUdpIp = Socket<address::Ip, protocol::Udp>;
-
-/**
- * \ingroup net-module-udp
- * \brief Helper to create UDP/Ipv4 sockets.
- */
-using SocketUdpIpv4 = Socket<address::Ipv4, protocol::Udp>;
-
-/**
- * \ingroup net-module-udp
- * \brief Helper to create UDP/Ipv6 sockets.
- */
-using SocketUdpIpv6 = Socket<address::Ipv6, protocol::Udp>;
-
-#if !defined(_WIN32)
-
-/**
- * \ingroup net-module-tcp
- * \brief Helper to create TCP/Local sockets.
- */
-using SocketTcpLocal = Socket<address::Local, protocol::Tcp>;
-
-/**
- * \ingroup net-module-udp
- * \brief Helper to create UDP/Local sockets.
- */
-using SocketUdpLocal = Socket<address::Local, protocol::Udp>;
-
-#endif
-
-#if !defined(NET_NO_SSL)
-
-/**
- * \ingroup net-module-tls
- * \brief Helper to create TLS sockets.
- */
-template <typename Address>
-using SocketTls = Socket<Address, protocol::Tls>;
-
-/**
- * \ingroup net-module-tls
- * \brief Helper to create TLS/Ipv4 or TLS/Ipv6 sockets.
- */
-using SocketTlsIp = Socket<address::Ip, protocol::Tls>;
-
-/**
- * \ingroup net-module-tls
- * \brief Helper to create TLS/Ipv4 sockets.
- */
-using SocketTlsIpv4 = Socket<address::Ip, protocol::Tls>;
-
-/**
- * \ingroup net-module-tls
- * \brief Helper to create TLS/Ipv6 sockets.
- */
-using SocketTlsIpv6 = Socket<address::Ip, protocol::Tls>;
-
-#endif
-
-/**
  * \ingroup net-module-resolv
  *
  * Resolve an hostname immediately.
@@ -4876,12 +3664,15 @@ using SocketTlsIpv6 = Socket<address::Ip, protocol::Tls>;
  * \param domain the domain (e.g. AF_INET)
  * \param type the type (e.g. SOCK_STREAM)
  * \return the address iterator
- * \throw net::Error on failures
+ * \throw Error on failures
  */
-inline address::AddressIterator resolve(const std::string &host, const std::string &service, int domain = AF_UNSPEC, int type = 0)
+inline AddressIterator resolve(const std::string &host,
+                               const std::string &service,
+                               int domain = AF_UNSPEC,
+                               int type = 0)
 {
 #if !defined(NET_NO_AUTO_INIT)
-        net::init();
+        init();
 #endif
 
     struct addrinfo hints, *res, *p;
@@ -4893,32 +3684,19 @@ inline address::AddressIterator resolve(const std::string &host, const std::stri
     int e = getaddrinfo(host.c_str(), service.c_str(), &hints, &res);
 
     if (e != 0)
-        throw Error(Error::System, "getaddrinfo", gai_strerror(e));
+        throw Error(gai_strerror(e));
 
-    std::vector<address::GenericAddress> addresses;
+    std::vector<Address> addresses;
 
     for (p = res; p != nullptr; p = p->ai_next)
-        addresses.push_back(address::GenericAddress(p->ai_addr, p->ai_addrlen));
+        addresses.push_back(Address(p->ai_addr, p->ai_addrlen));
 
-    return address::AddressIterator(addresses, 0);
+    return AddressIterator(addresses, 0);
 }
 
 /**
- * Overloaded function.
+ * \ingroup net-module-resolv
  *
- * \param sc the parent socket
- * \param host the hostname
- * \param service the service name
- * \return the address iterator
- * \throw net::Error on failures
- */
-template <typename Address, typename Protocol>
-address::AddressIterator resolve(const Socket<Address, Protocol> &sc, const std::string &host, const std::string &service)
-{
-    return resolve(host, service, Address().domain(), sc.protocol().type());
-}
-
-/**
  * Resolve the first address.
  *
  * \param host the hostname
@@ -4926,37 +3704,22 @@ address::AddressIterator resolve(const Socket<Address, Protocol> &sc, const std:
  * \param domain the domain (e.g. AF_INET)
  * \param type the type (e.g. SOCK_STREAM)
  * \return the first generic address available
- * \throw net::Error on failures
+ * \throw Error on failures
  * \note do not use AF_UNSPEC and 0 as type for this function
  */
-inline address::GenericAddress resolveOne(const std::string &host, const std::string &service, int domain, int type)
+inline Address resolveOne(const std::string &host, const std::string &service, int domain, int type)
 {
-    address::AddressIterator end;
-    address::AddressIterator it = resolve(host, service, domain, type);
+    AddressIterator it = resolve(host, service, domain, type);
+    AddressIterator end;
 
     if (it == end)
-        throw Error(Error::Other, "resolveOne", "no address available");
+        throw Error("no address available");
 
     return *it;
 }
 
-/**
- * Overloaded function
- *
- * \param sc the parent socket
- * \param host the hostname
- * \param service the service name
- * \return the first generic address available
- * \throw net::Error on failures
- */
-template <typename Address, typename Protocol>
-address::GenericAddress resolveOne(const Socket<Address, Protocol> &sc, const std::string &host, const std::string &service)
-{
-    return resolveOne(host, service, Address().domain(), sc.protocol().type());
-}
+} // !net
 
 } // !irccd
-
-} // !net
 
 #endif // !IRCCD_NET_HPP

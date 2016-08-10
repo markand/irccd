@@ -49,6 +49,11 @@ public:
      */
     IRCCD_EXPORT CommandService();
 
+    inline const std::vector<std::shared_ptr<Command>> &commands() const noexcept
+    {
+        return m_commands;
+    }
+
     /**
      * Tells if a command exists.
      *

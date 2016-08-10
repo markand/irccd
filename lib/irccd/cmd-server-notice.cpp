@@ -26,13 +26,8 @@ namespace irccd {
 namespace command {
 
 ServerNotice::ServerNotice()
-    : Command("server-notice", "Server")
+    : Command("server-notice", "Server", "Send a private notice")
 {
-}
-
-std::string ServerNotice::help() const
-{
-    return "";
 }
 
 std::vector<Command::Arg> ServerNotice::args() const

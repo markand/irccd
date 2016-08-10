@@ -26,13 +26,8 @@ namespace irccd {
 namespace command {
 
 ServerInvite::ServerInvite()
-    : Command("server-invite", "Server")
+    : Command("server-invite", "Server", "Invite someone into a channel")
 {
-}
-
-std::string ServerInvite::help() const
-{
-    return "";
 }
 
 std::vector<Command::Arg> ServerInvite::args() const

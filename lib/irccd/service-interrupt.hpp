@@ -34,8 +34,8 @@ namespace irccd {
  */
 class InterruptService : public Service {
 private:
-    net::SocketTcpIpv4 m_in;
-    net::SocketTcpIpv4 m_out;
+    net::TcpSocket m_in;
+    net::TcpSocket m_out;
 
 public:
     /**

@@ -78,6 +78,26 @@ public:
     {
         util::unused(in, out);
     }
+
+    /**
+     * Convenient function for polling events with a timeout.
+     *
+     * \param timeout the timeout in milliseconds
+     */
+    virtual void poll(int timeout = -1)
+    {
+        fd_set in, out;
+        timeval tv = {0, timeout * 1000};
+
+        FD_ZERO(&in);
+        FD_ZERO(&out);
+
+        net::Handle max = 0;
+
+        prepare(in, out, max);
+        select(max + 1, &in, &out, nullptr, timeout < 0 ? nullptr : &tv);
+        sync(in, out);
+    }
 };
 
 } // !irccd

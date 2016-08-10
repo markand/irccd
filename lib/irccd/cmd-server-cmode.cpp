@@ -26,13 +26,8 @@ namespace irccd {
 namespace command {
 
 ServerChannelMode::ServerChannelMode()
-    : Command("server-cmode", "Server")
+    : Command("server-cmode", "Server", "Change a channel mode")
 {
-}
-
-std::string ServerChannelMode::help() const
-{
-    return "";
 }
 
 std::vector<Command::Arg> ServerChannelMode::args() const

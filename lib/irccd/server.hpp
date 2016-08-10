@@ -676,7 +676,7 @@ public:
     /**
      * Set the realname.
      *
-     * \param name the username
+     * \param realname the username
      * \note the username will be changed on the next connection
      */
     inline void setRealname(std::string realname) noexcept

@@ -42,11 +42,6 @@ public:
     IRCCD_EXPORT PluginList();
 
     /**
-     * \copydoc Command::help
-     */
-    IRCCD_EXPORT std::string help() const override;
-
-    /**
      * \copydoc Command::exec
      */
     IRCCD_EXPORT nlohmann::json exec(Irccd &irccd, const nlohmann::json &request) const override;

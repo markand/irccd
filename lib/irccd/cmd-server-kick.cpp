@@ -26,13 +26,8 @@ namespace irccd {
 namespace command {
 
 ServerKick::ServerKick()
-    : Command("server-kick", "Server")
+    : Command("server-kick", "Server", "Kick someone from a channel")
 {
-}
-
-std::string ServerKick::help() const
-{
-    return "";
 }
 
 std::vector<Command::Arg> ServerKick::args() const

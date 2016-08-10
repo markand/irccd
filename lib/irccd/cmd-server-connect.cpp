@@ -35,13 +35,8 @@ namespace irccd {
 namespace command {
 
 ServerConnect::ServerConnect()
-    : Command("server-connect", "Server")
+    : Command("server-connect", "Server", "Connect to a server")
 {
-}
-
-std::string ServerConnect::help() const
-{
-    return "Connect to a server.";
 }
 
 std::vector<Command::Option> ServerConnect::options() const

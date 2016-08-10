@@ -1,0 +1,72 @@
+/*
+ * conn-state-ready.cpp -- connection is ready for I/O
+ *
+ * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+#include "conn-state-ready.hpp"
+
+namespace irccd {
+
+namespace {
+
+void parse(Connection &cnx, const std::string &message)
+{
+    try {
+        auto json = nlohmann::json::parse(message);
+
+        if (!json.is_object())
+            return;
+
+        cnx.onMessage(json);
+    } catch (const std::exception &) {
+    }
+}
+
+} // !namespace
+
+Connection::Status Connection::ReadyState::status() const noexcept
+{
+    return Ready;
+}
+
+void Connection::ReadyState::prepare(Connection &cnx, fd_set &in, fd_set &out)
+{
+    FD_SET(cnx.m_socket.handle(), &in);
+
+    if (!cnx.m_output.empty())
+        FD_SET(cnx.m_socket.handle(), &out);
+}
+
+void Connection::ReadyState::sync(Connection &cnx, fd_set &in, fd_set &out)
+{
+    if (FD_ISSET(cnx.m_socket.handle(), &out))
+        cnx.syncOutput();
+
+    if (FD_ISSET(cnx.m_socket.handle(), &in)) {
+        cnx.syncInput();
+
+        std::string msg;
+
+        do {
+            msg = util::nextNetwork(cnx.m_input);
+
+            if (!msg.empty())
+                parse(cnx, msg);
+        } while (!msg.empty());
+    }
+}
+
+} // !irccd

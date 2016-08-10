@@ -27,13 +27,8 @@ namespace irccd {
 namespace command {
 
 PluginReload::PluginReload()
-    : Command("plugin-reload", "Plugins")
+    : Command("plugin-reload", "Plugins", "Reload a plugin")
 {
-}
-
-std::string PluginReload::help() const
-{
-    return "Reload a plugin.";
 }
 
 std::vector<Command::Arg> PluginReload::args() const

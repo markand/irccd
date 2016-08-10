@@ -42,11 +42,6 @@ public:
     IRCCD_EXPORT ServerDisconnect();
 
     /**
-     * \copydoc Command::help
-     */
-    IRCCD_EXPORT std::string help() const override;
-
-    /**
      * Get list of arguments required.
      *
      * \return the arguments required
