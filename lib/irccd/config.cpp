@@ -158,29 +158,23 @@ std::shared_ptr<TransportServer> loadTransportIp(const ini::Section &sc)
         address = it->value();
 
     // Domain
-    bool ipv6 = true;
-    bool ipv4 = true;
+    std::uint8_t mode = TransportServerIp::v4;
 
     if ((it = sc.find("domain")) != sc.end()) {
-        ipv6 = false;
-        ipv4 = false;
+        mode = 0;
 
         for (const auto &v : *it) {
             if (v == "ipv4")
-                ipv4 = true;
+                mode |= TransportServerIp::v4;
             if (v == "ipv6")
-                ipv6 = true;
+                mode |= TransportServerIp::v6;
         }
     }
 
-    if (ipv6)
-        transport = std::make_shared<TransportServerIpv6>(move(address), port, !ipv4);
-    else if (ipv4)
-        transport = std::make_shared<TransportServerIp>(move(address), port);
-    else
+    if (mode == 0)
         throw std::invalid_argument("transport: domain must at least have ipv4 or ipv6");
 
-    return transport;
+    return std::make_shared<TransportServerIp>(address, port, mode);
 }
 
 std::shared_ptr<TransportServer> loadTransportUnix(const ini::Section &sc)

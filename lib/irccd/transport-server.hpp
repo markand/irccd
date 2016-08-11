@@ -102,27 +102,23 @@ public:
 class TransportServerIp : public TransportServer {
 public:
     /**
-     * Constructor.
-     *
-     * \param address the address (* for any)
-     * \param port the port number
+     * \brief Domain to use.
      */
-    IRCCD_EXPORT TransportServerIp(const std::string &address, std::uint16_t port);
-};
+    enum Mode {
+        v4 = (1 << 0),      //!< IPv6
+        v6 = (1 << 1)       //!< IPv4
+    };
 
-/**
- * \brief Create IPv6 transport.
- */
-class TransportServerIpv6 : public TransportServer {
-public:
     /**
      * Constructor.
-     *
+     * \pre mode > 0
      * \param address the address (* for any)
      * \param port the port number
-     * \param ipv6only set to true to disable ipv4 completely
+     * \param mode the domains to use (can be OR'ed)
      */
-    IRCCD_EXPORT TransportServerIpv6(const std::string &address, std::uint16_t port, bool ipv6only = true);
+    IRCCD_EXPORT TransportServerIp(const std::string &address,
+                                   std::uint16_t port,
+                                   std::uint8_t mode = v4);
 };
 
 #if !defined(IRCCD_SYSTEM_WINDOWS)

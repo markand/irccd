@@ -34,39 +34,30 @@ namespace irccd {
  * ------------------------------------------------------------------
  */
 
-TransportServerIpv6::TransportServerIpv6(const std::string &address, std::uint16_t port, bool ipv6only)
-    : TransportServer(net::TcpSocket(AF_INET6, 0))
+TransportServerIp::TransportServerIp(const std::string &address,
+                                     std::uint16_t port,
+                                     std::uint8_t mode)
+    : TransportServer(net::TcpSocket((mode & v6) ? AF_INET6 : AF_INET, 0))
 {
+    assert((mode & v6) || (mode & v4));
+
     m_socket.set(net::option::SockReuseAddress(true));
 
-    // Disable or enable IPv4 when using IPv6.
-    if (ipv6only)
-        m_socket.set(net::option::Ipv6Only(true));
+    if (mode & v6) {
+        if (address == "*")
+            m_socket.bind(net::ipv6::any(port));
+        else
+            m_socket.bind(net::ipv6::pton(address, port));
 
-    if (address == "*")
-        m_socket.bind(net::ipv6::any(port));
-    else
-        m_socket.bind(net::ipv6::pton(address, port));
-
-    m_socket.listen();
-
-    log::info() << "transport: listening on " << address << ", port " << port << std::endl;
-}
-
-/*
- * TransportServerIp
- * ------------------------------------------------------------------
- */
-
-TransportServerIp::TransportServerIp(const std::string &address, std::uint16_t port)
-    : TransportServer(net::TcpSocket(AF_INET, 0))
-{
-    m_socket.set(net::option::SockReuseAddress(true));
-
-    if (address == "*")
-        m_socket.bind(net::ipv4::any(port));
-    else
-        m_socket.bind(net::ipv4::pton(address, port));
+        // Disable or enable IPv4 when using IPv6.
+        if (!(mode & v4))
+            m_socket.set(net::option::Ipv6Only(true));
+    } else {
+        if (address == "*")
+            m_socket.bind(net::ipv4::any(port));
+        else
+            m_socket.bind(net::ipv4::pton(address, port));
+    }
 
     m_socket.listen();
 
