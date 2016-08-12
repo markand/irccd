@@ -125,15 +125,28 @@ public:
     class CheckingState;
     class ReadyState;
 
-private:
+protected:
     std::unique_ptr<State> m_state;
     std::unique_ptr<State> m_stateNext;
-
-protected:
     net::TcpSocket m_socket{net::Invalid};
 
-    void syncInput();
-    void syncOutput();
+    /**
+     * Try to receive some data into the given buffer.
+     *
+     * \param buffer the destination buffer
+     * \param length the buffer length
+     * \return the number of bytes received
+     */
+    virtual unsigned recv(char *buffer, unsigned length);
+
+    /**
+     * Try to send some data into the given buffer.
+     *
+     * \param buffer the source buffer
+     * \param length the buffer length
+     * \return the number of bytes sent
+     */
+    virtual unsigned send(const char *buffer, unsigned length);
 
 public:
     /**
@@ -145,6 +158,20 @@ public:
      * Default destructor.
      */
     virtual ~Connection();
+
+    /**
+     * Convenient wrapper around recv().
+     *
+     * Must be used in sync() function.
+     */
+    void syncInput();
+
+    /**
+     * Convenient wrapper around send().
+     *
+     * Must be used in sync() function.
+     */
+    void syncOutput();
 
     /**
      * Send an asynchronous request to irccd.
@@ -194,6 +221,51 @@ public:
      * \param address the address
      */
     virtual void connect(const net::Address &address);
+
+    /**
+     * \copydoc Service::prepare
+     */
+    void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
+
+    /**
+     * \copydoc Service::sync
+     */
+    void sync(fd_set &in, fd_set &out) override;
+};
+
+/**
+ * \brief TLS over IP connection.
+ */
+class TlsConnection : public Connection {
+private:
+    enum {
+        HandshakeUndone,
+        HandshakeRead,
+        HandshakeWrite,
+        HandshakeReady
+    } m_handshake{HandshakeUndone};
+
+private:
+    std::unique_ptr<net::TlsSocket> m_ssl;
+
+    void handshake();
+
+protected:
+    /**
+     * \copydoc Connection::recv
+     */
+    virtual unsigned recv(char *buffer, unsigned length);
+
+    /**
+     * \copydoc Connection::send
+     */
+    virtual unsigned send(const char *buffer, unsigned length);
+
+public:
+    /**
+     * \copydoc Connection::connect
+     */
+    void connect(const net::Address &address) override;
 
     /**
      * \copydoc Service::prepare

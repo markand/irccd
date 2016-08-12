@@ -89,6 +89,7 @@ void Irccdctl::help() const
  * host = "ip or hostname"
  * port = "port number or service"
  * domain = "ipv4 or ipv6" (Optional, default: ipv4)
+ * ssl = true | false
  */
 void Irccdctl::readConnectIp(const ini::Section &sc)
 {
@@ -118,7 +119,11 @@ void Irccdctl::readConnectIp(const ini::Section &sc)
     }
 
     m_address = net::resolveOne(host, port, domain, SOCK_STREAM);
-    m_connection = std::make_unique<Connection>();
+
+    if ((it = sc.find("ssl")) != sc.end() && util::isBoolean(it->value()))
+        m_connection = std::make_unique<TlsConnection>();
+    else
+        m_connection = std::make_unique<Connection>();
 }
 
 /*

@@ -26,13 +26,18 @@
 
 namespace irccd {
 
+/*
+ * Connection.
+ * ------------------------------------------------------------------
+ */
+
 void Connection::syncInput()
 {
     try {
         std::string buffer;
 
         buffer.resize(512);
-        buffer.resize(m_socket.recv(&buffer[0], buffer.size()));
+        buffer.resize(recv(&buffer[0], buffer.size()));
 
         if (buffer.empty())
             throw std::runtime_error("connection lost");
@@ -47,7 +52,7 @@ void Connection::syncInput()
 void Connection::syncOutput()
 {
     try {
-        auto ns = m_socket.send(m_output.data(), m_output.length());
+        auto ns = send(m_output.data(), m_output.length());
 
         if (ns > 0)
             m_output.erase(0, ns);
@@ -55,6 +60,16 @@ void Connection::syncOutput()
         m_stateNext = std::make_unique<DisconnectedState>();
         onDisconnect(ex.what());
     }
+}
+
+unsigned Connection::recv(char *buffer, unsigned length)
+{
+    return m_socket.recv(buffer, length);
+}
+
+unsigned Connection::send(const char *buffer, unsigned length)
+{
+    return m_socket.send(buffer, length);
 }
 
 Connection::Connection()
@@ -112,6 +127,101 @@ void Connection::sync(fd_set &in, fd_set &out)
         m_state = std::make_unique<DisconnectedState>();
         onDisconnect(ex.what());
     }
+}
+
+/*
+ * TlsConnection.
+ * ------------------------------------------------------------------
+ */
+
+void TlsConnection::handshake()
+{
+    try {
+        m_ssl->handshake();
+        m_handshake = HandshakeReady;
+    } catch (const net::WantReadError &) {
+        m_handshake = HandshakeRead;
+    } catch (const net::WantWriteError &) {
+        m_handshake = HandshakeWrite;
+    } catch (const std::exception &ex) {
+        m_state = std::make_unique<DisconnectedState>();
+        onDisconnect(ex.what());
+    }
+}
+
+unsigned TlsConnection::recv(char *buffer, unsigned length)
+{
+    unsigned nread = 0;
+
+    try {
+        nread = m_ssl->recv(buffer, length);
+    } catch (const net::WantReadError &) {
+        m_handshake = HandshakeRead;
+    } catch (const net::WantWriteError &) {
+        m_handshake = HandshakeWrite;
+    }
+
+    return nread;
+}
+
+unsigned TlsConnection::send(const char *buffer, unsigned length)
+{
+    unsigned nsent = 0;
+
+    try {
+        nsent = m_ssl->send(buffer, length);
+    } catch (const net::WantReadError &) {
+        m_handshake = HandshakeRead;
+    } catch (const net::WantWriteError &) {
+        m_handshake = HandshakeWrite;
+    }
+
+    return nsent;
+}
+
+void TlsConnection::connect(const net::Address &address)
+{
+    Connection::connect(address);
+
+    m_ssl = std::make_unique<net::TlsSocket>(m_socket, net::TlsSocket::Client);
+}
+
+void TlsConnection::prepare(fd_set &in, fd_set &out, net::Handle &max)
+{
+    if (m_state->status() == Connecting)
+        Connection::prepare(in, out, max);
+    else {
+        if (m_socket.handle() > max)
+            max = m_socket.handle();
+
+        /*
+         * Attempt an immediate handshake immediately if connection succeeded
+         * in last iteration.
+         */
+        if (m_handshake == HandshakeUndone)
+            handshake();
+
+        switch (m_handshake) {
+        case HandshakeRead:
+            FD_SET(m_socket.handle(), &in);
+            break;
+        case HandshakeWrite:
+            FD_SET(m_socket.handle(), &out);
+            break;
+        default:
+            Connection::prepare(in, out, max);
+        }
+    }
+}
+
+void TlsConnection::sync(fd_set &in, fd_set &out)
+{
+    if (m_state->status() == Connecting)
+        Connection::sync(in, out);
+    else if (m_handshake != HandshakeReady)
+        handshake();
+    else
+        Connection::sync(in, out);
 }
 
 } // !irccd
