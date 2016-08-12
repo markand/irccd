@@ -1,5 +1,5 @@
 /*
- * transport-server.hpp -- I/O for irccd clients (acceptors)
+ * transport.hpp -- irccd transports
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,22 +16,193 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_TRANSPORT_SERVER_HPP
-#define IRCCD_TRANSPORT_SERVER_HPP
+#ifndef IRCCD_TRANSPORT_HPP
+#define IRCCD_TRANSPORT_HPP
 
 /**
- * \file transport-server.hpp
- * \brief Transports for irccd
+ * \file transport.hpp
+ * \brief Irccd transports.
  */
 
+#include <cstdint>
 #include <memory>
 #include <string>
 
+#include <json.hpp>
+
 #include "net.hpp"
+#include "signals.hpp"
 #include "sysconfig.hpp"
-#include "transport-client.hpp"
 
 namespace irccd {
+
+/**
+ * \class TransportClient
+ * \brief Client connected to irccd.
+ *
+ * This class emits a warning upon clients request through onCommand signal.
+ */
+class TransportClient {
+public:
+    /**
+     * Signal: onCommand
+     * ----------------------------------------------------------
+     *
+     * Arguments:
+     *   - the command
+     */
+    Signal<const nlohmann::json &> onCommand;
+
+    /**
+     * Signal: onDie
+     * ----------------------------------------------------------
+     *
+     * The client has disconnected.
+     */
+    Signal<> onDie;
+
+protected:
+    net::TcpSocket m_socket;    //!< socket
+    std::string m_input;        //!< input buffer
+    std::string m_output;       //!< output buffer
+
+    /**
+     * Parse input buffer.
+     *
+     * \param buffer the buffer.
+     */
+    void parse(const std::string &buffer);
+
+protected:
+    /**
+     * Try to receive some data into the given buffer.
+     *
+     * \param buffer the destination buffer
+     * \param length the buffer length
+     * \return the number of bytes received
+     */
+    IRCCD_EXPORT virtual unsigned recv(char *buffer, unsigned length);
+
+    /**
+     * Try to send some data into the given buffer.
+     *
+     * \param buffer the source buffer
+     * \param length the buffer length
+     * \return the number of bytes sent
+     */
+    IRCCD_EXPORT virtual unsigned send(const char *buffer, unsigned length);
+
+public:
+    /**
+     * Create a transport client from the socket.
+     *
+     * \pre socket must be valid
+     */
+    inline TransportClient(net::TcpSocket socket)
+        : m_socket(std::move(socket))
+    {
+        assert(m_socket.isOpen());
+
+        m_socket.set(net::option::SockBlockMode(false));
+    }
+
+    /**
+     * Virtual destructor defaulted.
+     */
+    virtual ~TransportClient() = default;
+
+    /**
+     * Convenient wrapper around recv().
+     *
+     * Must be used in sync() function.
+     */
+    IRCCD_EXPORT void syncInput();
+
+    /**
+     * Convenient wrapper around send().
+     *
+     * Must be used in sync() function.
+     */
+    IRCCD_EXPORT void syncOutput();
+
+    /**
+     * Append some data to the output queue.
+     *
+     * \pre json.is_object()
+     * \param json the json object
+     */
+    IRCCD_EXPORT void send(const nlohmann::json &json);
+
+    /**
+     * \copydoc Service::prepare
+     */
+    IRCCD_EXPORT virtual void prepare(fd_set &in, fd_set &out, net::Handle &max);
+
+    /**
+     * \copydoc Service::sync
+     */
+    IRCCD_EXPORT virtual void sync(fd_set &in, fd_set &out);
+};
+
+/*
+ * TransportClientTls
+ * ------------------------------------------------------------------
+ */
+
+/**
+ * \brief TLS version of transport client.
+ */
+class TransportClientTls : public TransportClient {
+private:
+    enum {
+        HandshakeWrite,
+        HandshakeRead,
+        HandshakeReady
+    } m_handshake{HandshakeReady};
+
+    net::TlsSocket m_ssl;
+
+    void handshake();
+
+protected:
+    /**
+     * \copydoc TransportClient::recv
+     */
+    unsigned recv(char *buffer, unsigned length) override;
+
+    /**
+     * \copydoc TransportClient::send
+     */
+    unsigned send(const char *buffer, unsigned length) override;
+
+public:
+    /**
+     * Create the transport client.
+     *
+     * \pre socket.isOpen()
+     * \param pkey the private key
+     * \param cert the certificate file
+     * \param socket the accepted socket
+     */
+    IRCCD_EXPORT TransportClientTls(const std::string &pkey,
+                                    const std::string &cert,
+                                    net::TcpSocket socket);
+
+    /**
+     * \copydoc TransportClient::prepare
+     */
+    IRCCD_EXPORT virtual void prepare(fd_set &in, fd_set &out, net::Handle &max);
+
+    /**
+     * \copydoc TransportClient::sync
+     */
+    IRCCD_EXPORT virtual void sync(fd_set &in, fd_set &out);
+};
+
+/*
+ * TransportServer
+ * ------------------------------------------------------------------
+ */
 
 /**
  * \brief Bring networking between irccd and irccdctl.
@@ -174,8 +345,8 @@ public:
     IRCCD_EXPORT ~TransportServerLocal();
 };
 
-#endif // !_WIN32
+#endif // !IRCCD_SYSTEM_WINDOWS
 
 } // !irccd
 
-#endif // !IRCCD_TRANSPORT_SERVER_HPP
+#endif // !IRCCD_TRANSPORT_HPP

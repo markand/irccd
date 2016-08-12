@@ -22,8 +22,7 @@
 #include "logger.hpp"
 #include "service-command.hpp"
 #include "service-transport.hpp"
-#include "transport-client.hpp"
-#include "transport-server.hpp"
+#include "transport.hpp"
 
 namespace irccd {
 

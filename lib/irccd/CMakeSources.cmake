@@ -74,8 +74,7 @@ set(
     ${CMAKE_CURRENT_LIST_DIR}/service-transport.hpp
     ${CMAKE_CURRENT_LIST_DIR}/system.hpp
     ${CMAKE_CURRENT_LIST_DIR}/timer.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/transport-client.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/transport-server.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/transport.hpp
     ${CMAKE_CURRENT_LIST_DIR}/unicode.hpp
     ${CMAKE_CURRENT_LIST_DIR}/util.hpp
 )
@@ -150,8 +149,7 @@ set(
     ${CMAKE_CURRENT_LIST_DIR}/service-transport.cpp
     ${CMAKE_CURRENT_LIST_DIR}/system.cpp
     ${CMAKE_CURRENT_LIST_DIR}/timer.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/transport-client.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/transport-server.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/transport.cpp
     ${CMAKE_CURRENT_LIST_DIR}/unicode.cpp
     ${CMAKE_CURRENT_LIST_DIR}/util.cpp
 )
