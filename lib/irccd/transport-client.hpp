@@ -76,8 +76,23 @@ protected:
     void parse(const std::string &buffer);
 
 protected:
-    virtual void syncInput();
-    virtual void syncOutput();
+    /**
+     * Try to receive some data into the given buffer.
+     *
+     * \param buffer the destination buffer
+     * \param length the buffer length
+     * \return the number of bytes received
+     */
+    virtual unsigned recv(char *buffer, unsigned length);
+
+    /**
+     * Try to send some data into the given buffer.
+     *
+     * \param buffer the source buffer
+     * \param length the buffer length
+     * \return the number of bytes sent
+     */
+    virtual unsigned send(const char *buffer, unsigned length);
 
 public:
     inline TransportClient(net::TcpSocket socket)
@@ -85,6 +100,20 @@ public:
     {
         m_socket.set(net::option::SockBlockMode(false));
     }
+
+    /**
+     * Convenient wrapper around recv().
+     *
+     * Must be used in sync() function.
+     */
+    void syncInput();
+
+    /**
+     * Convenient wrapper around send().
+     *
+     * Must be used in sync() function.
+     */
+    void syncOutput();
 
     /**
      * Virtual destructor defaulted.
@@ -111,8 +140,15 @@ private:
     void handshake();
 
 protected:
-    void syncInput() override;
-    void syncOutput() override;
+    /**
+     * \copydoc TransportClient::recv
+     */
+    unsigned recv(char *buffer, unsigned length) override;
+
+    /**
+     * \copydoc TransportClient::send
+     */
+    unsigned send(const char *buffer, unsigned length) override;
 
 public:
     IRCCD_EXPORT TransportClientTls(const std::string &pkey,

@@ -30,13 +30,23 @@ void TransportClient::parse(const std::string &message)
         onCommand(document);
 }
 
+unsigned TransportClient::recv(char *buffer, unsigned length)
+{
+    return m_socket.recv(buffer, length);
+}
+
+unsigned TransportClient::send(const char *buffer, unsigned length)
+{
+    return m_socket.send(buffer, length);
+}
+
 void TransportClient::syncInput()
 {
     try {
         std::string buffer;
 
         buffer.resize(512);
-        buffer.resize(m_socket.recv(&buffer[0], buffer.size()));
+        buffer.resize(recv(&buffer[0], buffer.size()));
 
         if (buffer.empty())
             onDie();
@@ -50,7 +60,7 @@ void TransportClient::syncInput()
 void TransportClient::syncOutput()
 {
     try {
-        auto ns = m_socket.send(&m_output[0], m_output.size());
+        auto ns = send(&m_output[0], m_output.size());
 
         if (ns == 0)
             onDie();
@@ -133,35 +143,34 @@ TransportClientTls::TransportClientTls(const std::string &pkey,
     handshake();
 }
 
-void TransportClientTls::syncInput()
+unsigned TransportClientTls::recv(char *buffer, unsigned length)
 {
+    unsigned nread = 0;
+
     try {
-        std::string buffer;
-
-        buffer.resize(512);
-        buffer.resize(m_ssl.recv(&buffer[0], buffer.size()));
-
-        if (buffer.empty())
-            onDie();
-
-        m_input += std::move(buffer);
-    } catch (const std::exception &) {
-        onDie();
+        nread = m_ssl.recv(buffer, length);
+    } catch (const net::WantReadError &) {
+        m_handshake = HandshakeRead;
+    } catch (const net::WantWriteError &) {
+        m_handshake = HandshakeWrite;
     }
+
+    return nread;
 }
 
-void TransportClientTls::syncOutput()
+unsigned TransportClientTls::send(const char *buffer, unsigned length)
 {
+    unsigned nsent = 0;
+
     try {
-        auto ns = m_ssl.send(&m_output[0], m_output.size());
-
-        if (ns == 0)
-            onDie();
-
-        m_output.erase(0, ns);
-    } catch (const std::exception &ex) {
-        onDie();
+        nsent = m_ssl.send(buffer, length);
+    } catch (const net::WantReadError &) {
+        m_handshake = HandshakeRead;
+    } catch (const net::WantWriteError &) {
+        m_handshake = HandshakeWrite;
     }
+
+    return nsent;
 }
 
 void TransportClientTls::prepare(fd_set &in, fd_set &out, net::Handle &max)

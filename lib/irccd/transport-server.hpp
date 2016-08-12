@@ -133,6 +133,8 @@ public:
     /**
      * Constructor.
      * \pre mode > 0
+     * \param pkey the private key file
+     * \param cert the certificate file
      * \param address the address (* for any)
      * \param port the port number
      * \param mode the domains to use (can be OR'ed)
