@@ -30,7 +30,7 @@
 namespace irccd {
 
 /*
- * TransportServerIpv6
+ * TransportServerIp
  * ------------------------------------------------------------------
  */
 
@@ -62,6 +62,29 @@ TransportServerIp::TransportServerIp(const std::string &address,
     m_socket.listen();
 
     log::info() << "transport: listening on " << address << ", port " << port << std::endl;
+}
+
+/*
+ * TransportServerTls
+ * ------------------------------------------------------------------
+ */
+
+TransportServerTls::TransportServerTls(const std::string &pkey,
+                                       const std::string &cert,
+                                       const std::string &address,
+                                       std::uint16_t port,
+                                       std::uint8_t mode)
+    : TransportServerIp(address, port, mode)
+    , m_privatekey(pkey)
+    , m_cert(cert)
+{
+    log::info() << "transport: listening on " << address << ", port " << port
+                << " (using SSL)" << std::endl;
+}
+
+std::unique_ptr<TransportClient> TransportServerTls::accept()
+{
+    return std::make_unique<TransportClientTls>(m_privatekey, m_cert, m_socket.accept());
 }
 
 /*

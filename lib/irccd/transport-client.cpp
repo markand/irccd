@@ -30,7 +30,7 @@ void TransportClient::parse(const std::string &message)
         onCommand(document);
 }
 
-void TransportClient::receive()
+void TransportClient::syncInput()
 {
     try {
         std::string buffer;
@@ -47,7 +47,7 @@ void TransportClient::receive()
     }
 }
 
-void TransportClient::send()
+void TransportClient::syncOutput()
 {
     try {
         auto ns = m_socket.send(&m_output[0], m_output.size());
@@ -77,11 +77,11 @@ void TransportClient::sync(fd_set &in, fd_set &out)
     // Do some I/O.
     if (FD_ISSET(m_socket.handle(), &in)) {
         log::debug() << "transport: receiving to input buffer" << std::endl;
-        receive();
+        syncInput();
     }
     if (FD_ISSET(m_socket.handle(), &out)) {
         log::debug() << "transport: sending outgoing buffer" << std::endl;
-        send();
+        syncOutput();
     }
 
     // Flush the queue.
@@ -100,6 +100,98 @@ void TransportClient::send(const nlohmann::json &json)
 
     m_output += json.dump();
     m_output += "\r\n\r\n";
+}
+
+/*
+ * TransportClientTls
+ * ------------------------------------------------------------------
+ */
+
+void TransportClientTls::handshake()
+{
+    try {
+        m_ssl.handshake();
+        m_handshake = HandshakeReady;
+    } catch (const net::WantReadError &) {
+        m_handshake = HandshakeRead;
+    } catch (const net::WantWriteError &) {
+        m_handshake = HandshakeWrite;
+    } catch (const std::exception &) {
+        onDie();
+    }
+}
+
+TransportClientTls::TransportClientTls(const std::string &pkey,
+                                       const std::string &cert,
+                                       net::TcpSocket socket)
+    : TransportClient(std::move(socket))
+    , m_ssl(m_socket)
+{
+    m_ssl.setPrivateKey(pkey);
+    m_ssl.setCertificate(cert);
+
+    handshake();
+}
+
+void TransportClientTls::syncInput()
+{
+    try {
+        std::string buffer;
+
+        buffer.resize(512);
+        buffer.resize(m_ssl.recv(&buffer[0], buffer.size()));
+
+        if (buffer.empty())
+            onDie();
+
+        m_input += std::move(buffer);
+    } catch (const std::exception &) {
+        onDie();
+    }
+}
+
+void TransportClientTls::syncOutput()
+{
+    try {
+        auto ns = m_ssl.send(&m_output[0], m_output.size());
+
+        if (ns == 0)
+            onDie();
+
+        m_output.erase(0, ns);
+    } catch (const std::exception &ex) {
+        onDie();
+    }
+}
+
+void TransportClientTls::prepare(fd_set &in, fd_set &out, net::Handle &max)
+{
+    if (m_socket.handle() > max)
+        max = m_socket.handle();
+
+    switch (m_handshake) {
+    case HandshakeRead:
+        FD_SET(m_socket.handle(), &in);
+        break;
+    case HandshakeWrite:
+        FD_SET(m_socket.handle(), &out);
+        break;
+    default:
+        TransportClient::prepare(in, out, max);
+        break;
+    }
+}
+
+void TransportClientTls::sync(fd_set &in, fd_set &out)
+{
+    switch (m_handshake) {
+    case HandshakeRead:
+    case HandshakeWrite:
+        handshake();
+        break;
+    default:
+        TransportClient::sync(in, out);
+    }
 }
 
 } // !irccd

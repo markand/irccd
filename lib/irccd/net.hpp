@@ -2203,7 +2203,7 @@ public:
      */
     void handshake()
     {
-        wrap([&] () -> int {
+        wrap([this] () -> int {
             return SSL_do_handshake(m_ssl.get());
         });
     }
@@ -2221,7 +2221,7 @@ public:
         int nbread = 0;
 
         wrap([&] () -> int {
-            return (nbread = SSL_read(m_ssl.get(), data, max));
+            return nbread = SSL_read(m_ssl.get(), data, max);
         });
 
         return static_cast<unsigned>(nbread < 0 ? 0 : nbread);
@@ -2240,7 +2240,7 @@ public:
         int nbsent = 0;
 
         wrap([&] () -> int {
-            return (nbsent = SSL_write(m_ssl.get(), data, max));
+            return nbsent = SSL_write(m_ssl.get(), data, max);
         });
 
         return static_cast<unsigned>(nbsent < 0 ? 0 : nbsent);
@@ -2497,7 +2497,7 @@ inline Address create(const std::string &path, bool rm = false) noexcept
     length = sizeof (sun);
 #endif
 
-    return Address(reinterpret_cast<const sockaddr *>(&sun), length); 
+    return Address(reinterpret_cast<const sockaddr *>(&sun), length);
 }
 
 /**

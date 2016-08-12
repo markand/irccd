@@ -75,14 +75,15 @@ protected:
      */
     void parse(const std::string &buffer);
 
-private:
-    void receive();
-    void send();
+protected:
+    virtual void syncInput();
+    virtual void syncOutput();
 
 public:
     inline TransportClient(net::TcpSocket socket)
         : m_socket(std::move(socket))
     {
+        m_socket.set(net::option::SockBlockMode(false));
     }
 
     /**
@@ -91,6 +92,32 @@ public:
     virtual ~TransportClient() = default;
 
     IRCCD_EXPORT void send(const nlohmann::json &json);
+
+    IRCCD_EXPORT virtual void prepare(fd_set &in, fd_set &out, net::Handle &max);
+
+    IRCCD_EXPORT virtual void sync(fd_set &in, fd_set &out);
+};
+
+class TransportClientTls : public TransportClient {
+private:
+    enum {
+        HandshakeWrite,
+        HandshakeRead,
+        HandshakeReady
+    } m_handshake{HandshakeReady};
+
+    net::TlsSocket m_ssl;
+
+    void handshake();
+
+protected:
+    void syncInput() override;
+    void syncOutput() override;
+
+public:
+    IRCCD_EXPORT TransportClientTls(const std::string &pkey,
+                                    const std::string &cert,
+                                    net::TcpSocket socket);
 
     IRCCD_EXPORT virtual void prepare(fd_set &in, fd_set &out, net::Handle &max);
 

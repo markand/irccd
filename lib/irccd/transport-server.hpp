@@ -121,6 +121,34 @@ public:
                                    std::uint8_t mode = v4);
 };
 
+/**
+ * \brief TLS over IP transport.
+ */
+class TransportServerTls : public TransportServerIp {
+private:
+    std::string m_privatekey;
+    std::string m_cert;
+
+public:
+    /**
+     * Constructor.
+     * \pre mode > 0
+     * \param address the address (* for any)
+     * \param port the port number
+     * \param mode the domains to use (can be OR'ed)
+     */
+    IRCCD_EXPORT TransportServerTls(const std::string &pkey,
+                                    const std::string &cert,
+                                    const std::string &address,
+                                    std::uint16_t port,
+                                    std::uint8_t mode = v4);
+
+    /**
+     * \copydoc TransportServer::accept
+     */
+    IRCCD_EXPORT std::unique_ptr<TransportClient> accept() override;
+};
+
 #if !defined(IRCCD_SYSTEM_WINDOWS)
 
 /**

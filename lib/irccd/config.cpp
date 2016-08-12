@@ -171,10 +171,29 @@ std::shared_ptr<TransportServer> loadTransportIp(const ini::Section &sc)
         }
     }
 
+    // Optional SSL.
+    std::string pkey;
+    std::string cert;
+
+    if ((it = sc.find("ssl")) != sc.end() && util::isBoolean(it->value())) {
+        if ((it = sc.find("certificate")) == sc.end())
+            throw std::invalid_argument("transport: missing 'certificate' parameter");
+
+        cert = it->value();
+
+        if ((it = sc.find("key")) == sc.end())
+            throw std::invalid_argument("transport: missing 'key' parameter");
+
+        pkey = it->value();
+    }
+
     if (mode == 0)
         throw std::invalid_argument("transport: domain must at least have ipv4 or ipv6");
 
-    return std::make_shared<TransportServerIp>(address, port, mode);
+    if (pkey.empty())
+        return std::make_shared<TransportServerIp>(address, port, mode);
+
+    return std::make_shared<TransportServerTls>(pkey, cert, address, port, mode);
 }
 
 std::shared_ptr<TransportServer> loadTransportUnix(const ini::Section &sc)
