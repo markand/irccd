@@ -205,33 +205,6 @@ void TransportClientTls::sync(fd_set &in, fd_set &out)
     }
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /*
  * TransportServerIp
  * ------------------------------------------------------------------
