@@ -37,7 +37,7 @@ nlohmann::json ServerList::exec(Irccd &irccd, const nlohmann::json &) const
     auto json = nlohmann::json::object();
     auto list = nlohmann::json::array();
 
-    for (const auto &server : irccd.serverService().servers())
+    for (const auto &server : irccd.servers().servers())
         list.push_back(server->name());
 
     json.push_back({"list", std::move(list)});

@@ -45,9 +45,9 @@ nlohmann::json ServerReconnect::exec(Irccd &irccd, const nlohmann::json &request
     auto server = request.find("server");
 
     if (server != request.end() && server->is_string())
-        irccd.serverService().require(*server)->reconnect();
+        irccd.servers().require(*server)->reconnect();
     else
-        for (auto &server : irccd.serverService().servers())
+        for (auto &server : irccd.servers().servers())
             server->reconnect();
 
     return nullptr;

@@ -45,7 +45,7 @@ nlohmann::json PluginReload::exec(Irccd &irccd, const nlohmann::json &request) c
 {
     Command::exec(irccd, request);
 
-    irccd.pluginService().require(request["plugin"])->onReload(irccd);
+    irccd.plugins().require(request["plugin"])->onReload(irccd);
 
     return nlohmann::json::object();
 }

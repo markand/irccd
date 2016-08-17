@@ -63,7 +63,7 @@ public:
      *
      * \return the list of plugins
      */
-    inline const std::vector<std::shared_ptr<Plugin>> &plugins() const noexcept
+    inline const std::vector<std::shared_ptr<Plugin>> &list() const noexcept
     {
         return m_plugins;
     }

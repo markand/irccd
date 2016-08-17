@@ -61,7 +61,7 @@ nlohmann::json ServerTopic::exec(Irccd &irccd, const nlohmann::json &request) co
 {
     Command::exec(irccd, request);
 
-    irccd.serverService().require(request["server"])->topic(request["channel"], request["topic"]);
+    irccd.servers().require(request["server"])->topic(request["channel"], request["topic"]);
 
     return nlohmann::json::object();
 }

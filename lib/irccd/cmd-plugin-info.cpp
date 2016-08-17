@@ -52,7 +52,7 @@ nlohmann::json PluginInfo::exec(Irccd &irccd, const nlohmann::json &request) con
 {
     Command::exec(irccd, request);
 
-    auto plugin = irccd.pluginService().require(request.at("plugin").get<std::string>());
+    auto plugin = irccd.plugins().require(request.at("plugin").get<std::string>());
 
     return nlohmann::json::object({
         { "author",     plugin->author()    },

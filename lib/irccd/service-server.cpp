@@ -46,9 +46,9 @@ public:
 
     void operator()(Irccd &irccd) const
     {
-        for (auto &plugin : irccd.pluginService().plugins()) {
+        for (auto &plugin : irccd.plugins().list()) {
             auto eventname = functionName(*plugin);
-            auto allowed = irccd.ruleService().solve(server, target, origin, plugin->name(), eventname);
+            auto allowed = irccd.rules().solve(server, target, origin, plugin->name(), eventname);
 
             if (!allowed) {
                 log::debug() << "rule: event skipped on match" << std::endl;
@@ -82,7 +82,7 @@ void ServerService::handleChannelMode(const ChannelModeEvent &ev)
     log::debug() << "  mode: " << ev.mode << "\n";
     log::debug() << "  argument: " << ev.argument << std::endl;
 
-    m_irccd.transportService().broadcast(nlohmann::json::object({
+    m_irccd.transports().broadcast(nlohmann::json::object({
         { "event",      "onChannelMode"     },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -108,7 +108,7 @@ void ServerService::handleChannelNotice(const ChannelNoticeEvent &ev)
     log::debug() << "  channel: " << ev.channel << "\n";
     log::debug() << "  message: " << ev.message << std::endl;
 
-    m_irccd.transportService().broadcast(nlohmann::json::object({
+    m_irccd.transports().broadcast(nlohmann::json::object({
         { "event",      "onChannelNotice"   },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -130,7 +130,7 @@ void ServerService::handleConnect(const ConnectEvent &ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onConnect" << std::endl;
 
-    m_irccd.transportService().broadcast(nlohmann::json::object({
+    m_irccd.transports().broadcast(nlohmann::json::object({
         { "event",      "onConnect"         },
         { "server",     ev.server->name()   }
     }));
@@ -152,7 +152,7 @@ void ServerService::handleInvite(const InviteEvent &ev)
     log::debug() << "  channel: " << ev.channel << "\n";
     log::debug() << "  target: " << ev.nickname << std::endl;
 
-    m_irccd.transportService().broadcast(nlohmann::json::object({
+    m_irccd.transports().broadcast(nlohmann::json::object({
         { "event",      "onInvite"          },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -175,7 +175,7 @@ void ServerService::handleJoin(const JoinEvent &ev)
     log::debug() << "  origin: " << ev.origin << "\n";
     log::debug() << "  channel: " << ev.channel << std::endl;
 
-    m_irccd.transportService().broadcast(nlohmann::json::object({
+    m_irccd.transports().broadcast(nlohmann::json::object({
         { "event",      "onJoin"            },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -200,7 +200,7 @@ void ServerService::handleKick(const KickEvent &ev)
     log::debug() << "  target: " << ev.target << "\n";
     log::debug() << "  reason: " << ev.reason << std::endl;
 
-    m_irccd.transportService().broadcast(nlohmann::json::object({
+    m_irccd.transports().broadcast(nlohmann::json::object({
         { "event",      "onKick"            },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -226,7 +226,7 @@ void ServerService::handleMessage(const MessageEvent &ev)
     log::debug() << "  channel: " << ev.channel << "\n";
     log::debug() << "  message: " << ev.message << std::endl;
 
-    m_irccd.transportService().broadcast(nlohmann::json::object({
+    m_irccd.transports().broadcast(nlohmann::json::object({
         { "event",      "onMessage"         },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -259,7 +259,7 @@ void ServerService::handleMe(const MeEvent &ev)
     log::debug() << "  target: " << ev.channel << "\n";
     log::debug() << "  message: " << ev.message << std::endl;
 
-    m_irccd.transportService().broadcast(nlohmann::json::object({
+    m_irccd.transports().broadcast(nlohmann::json::object({
         { "event",      "onMe"              },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -283,7 +283,7 @@ void ServerService::handleMode(const ModeEvent &ev)
     log::debug() << "  origin: " << ev.origin << "\n";
     log::debug() << "  mode: " << ev.mode << std::endl;
 
-    m_irccd.transportService().broadcast(nlohmann::json::object({
+    m_irccd.transports().broadcast(nlohmann::json::object({
         { "event",      "onMode"            },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -311,7 +311,7 @@ void ServerService::handleNames(const NamesEvent &ev)
     for (const auto &v : ev.names)
         names.push_back(v);
 
-    m_irccd.transportService().broadcast(nlohmann::json::object({
+    m_irccd.transports().broadcast(nlohmann::json::object({
         { "event",      "onNames"           },
         { "server",     ev.server->name()   },
         { "channel",    ev.channel          },
@@ -334,7 +334,7 @@ void ServerService::handleNick(const NickEvent &ev)
     log::debug() << "  origin: " << ev.origin << "\n";
     log::debug() << "  nickname: " << ev.nickname << std::endl;
 
-    m_irccd.transportService().broadcast(nlohmann::json::object({
+    m_irccd.transports().broadcast(nlohmann::json::object({
         { "event",      "onNick"            },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -357,7 +357,7 @@ void ServerService::handleNotice(const NoticeEvent &ev)
     log::debug() << "  origin: " << ev.origin << "\n";
     log::debug() << "  message: " << ev.message << std::endl;
 
-    m_irccd.transportService().broadcast(nlohmann::json::object({
+    m_irccd.transports().broadcast(nlohmann::json::object({
         { "event",      "onNotice"          },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -381,7 +381,7 @@ void ServerService::handlePart(const PartEvent &ev)
     log::debug() << "  channel: " << ev.channel << "\n";
     log::debug() << "  reason: " << ev.reason << std::endl;
 
-    m_irccd.transportService().broadcast(nlohmann::json::object({
+    m_irccd.transports().broadcast(nlohmann::json::object({
         { "event",      "onPart"            },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -405,7 +405,7 @@ void ServerService::handleQuery(const QueryEvent &ev)
     log::debug() << "  origin: " << ev.origin << "\n";
     log::debug() << "  message: " << ev.message << std::endl;
 
-    m_irccd.transportService().broadcast(nlohmann::json::object({
+    m_irccd.transports().broadcast(nlohmann::json::object({
         { "event",      "onQuery"           },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -437,7 +437,7 @@ void ServerService::handleTopic(const TopicEvent &ev)
     log::debug() << "  channel: " << ev.channel << "\n";
     log::debug() << "  topic: " << ev.topic << std::endl;
 
-    m_irccd.transportService().broadcast(nlohmann::json::object({
+    m_irccd.transports().broadcast(nlohmann::json::object({
         { "event",      "onTopic"           },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -464,7 +464,7 @@ void ServerService::handleWhois(const WhoisEvent &ev)
     log::debug() << "  realname: " << ev.whois.realname << "\n";
     log::debug() << "  channels: " << util::join(ev.whois.channels.begin(), ev.whois.channels.end()) << std::endl;
 
-    m_irccd.transportService().broadcast(nlohmann::json::object({
+    m_irccd.transports().broadcast(nlohmann::json::object({
         { "event",      "onWhois"           },
         { "server",     ev.server->name()   },
         { "nickname",   ev.whois.nick       },

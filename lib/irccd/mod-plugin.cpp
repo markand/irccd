@@ -190,7 +190,7 @@ duk_idx_t info(duk_context *ctx)
     std::shared_ptr<Plugin> plugin;
 
     if (duk_get_top(ctx) >= 1)
-        plugin = dukx_get_irccd(ctx).pluginService().get(duk_require_string(ctx, 0));
+        plugin = dukx_get_irccd(ctx).plugins().get(duk_require_string(ctx, 0));
     else
         plugin = dukx_get_plugin(ctx);
 
@@ -223,7 +223,7 @@ duk_idx_t info(duk_context *ctx)
  */
 duk_idx_t list(duk_context *ctx)
 {
-    dukx_push_array(ctx, dukx_get_irccd(ctx).pluginService().plugins(), [] (auto ctx, auto plugin) {
+    dukx_push_array(ctx, dukx_get_irccd(ctx).plugins().list(), [] (auto ctx, auto plugin) {
         dukx_push_std_string(ctx, plugin->name());
     });
 
@@ -246,7 +246,7 @@ duk_idx_t list(duk_context *ctx)
 duk_idx_t load(duk_context *ctx)
 {
     return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
-        irccd.pluginService().load(name);
+        irccd.plugins().load(name);
     });
 }
 
@@ -265,7 +265,7 @@ duk_idx_t load(duk_context *ctx)
 duk_idx_t reload(duk_context *ctx)
 {
     return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
-        irccd.pluginService().reload(name);
+        irccd.plugins().reload(name);
     });
 }
 
@@ -284,7 +284,7 @@ duk_idx_t reload(duk_context *ctx)
 duk_idx_t unload(duk_context *ctx)
 {
     return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
-        irccd.pluginService().unload(name);
+        irccd.plugins().unload(name);
     });
 }
 

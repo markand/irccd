@@ -52,7 +52,7 @@ nlohmann::json ServerChannelMode::exec(Irccd &irccd, const nlohmann::json &reque
 {
     Command::exec(irccd, request);
 
-    irccd.serverService().require(request["server"].get<std::string>())->cmode(
+    irccd.servers().require(request["server"].get<std::string>())->cmode(
         request["channel"].get<std::string>(),
         request["mode"].get<std::string>()
     );

@@ -61,7 +61,7 @@ nlohmann::json ServerInvite::exec(Irccd &irccd, const nlohmann::json &request) c
 {
     Command::exec(irccd, request);
 
-    irccd.serverService().require(request["server"])->invite(request["target"], request["channel"]);
+    irccd.servers().require(request["server"])->invite(request["target"], request["channel"]);
 
     return nlohmann::json::object();
 }

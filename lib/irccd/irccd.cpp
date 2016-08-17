@@ -36,15 +36,15 @@ namespace irccd {
 Irccd::Irccd()
     : m_commandService(std::make_shared<CommandService>())
     , m_interruptService(std::make_shared<InterruptService>())
-    , m_serverService(std::make_shared<ServerService>(*this))
-    , m_transportService(std::make_shared<TransportService>(*this))
+    , m_servers(std::make_shared<ServerService>(*this))
+    , m_transports(std::make_shared<TransportService>(*this))
     , m_ruleService(std::make_shared<RuleService>())
     , m_moduleService(std::make_shared<ModuleService>())
-    , m_pluginService(std::make_shared<PluginService>(*this))
+    , m_plugins(std::make_shared<PluginService>(*this))
 {
     m_services.push_back(m_interruptService);
-    m_services.push_back(m_serverService);
-    m_services.push_back(m_transportService);
+    m_services.push_back(m_servers);
+    m_services.push_back(m_transports);
 }
 
 void Irccd::post(std::function<void (Irccd &)> ev) noexcept

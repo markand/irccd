@@ -58,7 +58,7 @@ nlohmann::json ServerMode::exec(Irccd &irccd, const nlohmann::json &request) con
 {
     Command::exec(irccd, request);
 
-    irccd.serverService().require(request["server"])->mode(request["mode"]);
+    irccd.servers().require(request["server"])->mode(request["mode"]);
 
     return nlohmann::json::object();
 }

@@ -40,9 +40,9 @@ nlohmann::json ServerDisconnect::exec(Irccd &irccd, const nlohmann::json &reques
     auto it = request.find("server");
 
     if (it == request.end())
-        irccd.serverService().clear();
+        irccd.servers().clear();
     else
-        irccd.serverService().remove(*it);
+        irccd.servers().remove(*it);
 
     return Command::exec(irccd, request);
 }

@@ -38,7 +38,7 @@ nlohmann::json PluginList::exec(Irccd &irccd, const nlohmann::json &request) con
     auto response = Command::exec(irccd, request);
     auto list = nlohmann::json::array();
 
-    for (const auto &plugin : irccd.pluginService().plugins())
+    for (const auto &plugin : irccd.plugins().list())
         list += plugin->name();
 
     response.push_back({"list", std::move(list)});

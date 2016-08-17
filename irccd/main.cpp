@@ -234,15 +234,15 @@ void load(const Config &config, const option::Result &options)
 
     // [transport]
     for (const auto &transport : config.loadTransports())
-        instance->transportService().add(transport);
+        instance->transports().add(transport);
 
     // [server] section.
     for (const auto &server : config.loadServers())
-        instance->serverService().add(server);
+        instance->servers().add(server);
 
     // [rule] section.
     for (const auto &rule : config.loadRules())
-        instance->ruleService().add(rule);
+        instance->rules().add(rule);
 
     // [plugin] section.
     config.loadPlugins(*instance);

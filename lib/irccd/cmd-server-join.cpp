@@ -69,7 +69,7 @@ nlohmann::json ServerJoin::exec(Irccd &irccd, const nlohmann::json &request) con
     if (request.find("password") != request.end())
         password = request["password"];
 
-    irccd.serverService().require(
+    irccd.servers().require(
         request.at("server").get<std::string>())->join(
         request.at("channel").get<std::string>(),
         password

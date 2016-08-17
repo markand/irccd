@@ -44,7 +44,7 @@ public:
      *
      * \return the list of rules
      */
-    inline const std::vector<Rule> &rules() const noexcept
+    inline const std::vector<Rule> &list() const noexcept
     {
         return m_rules;
     }

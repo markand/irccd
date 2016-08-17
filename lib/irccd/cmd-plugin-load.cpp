@@ -44,7 +44,7 @@ nlohmann::json PluginLoad::exec(Irccd &irccd, const nlohmann::json &request) con
 {
     Command::exec(irccd, request);
 
-    irccd.pluginService().load(request["plugin"]);
+    irccd.plugins().load(request["plugin"]);
 
     return nlohmann::json::object();
 }

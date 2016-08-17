@@ -50,7 +50,7 @@ nlohmann::json ServerInfo::request(Irccdctl &, const CommandRequest &args) const
 nlohmann::json ServerInfo::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     auto response = Command::exec(irccd, request);
-    auto server = irccd.serverService().require(request["server"]);
+    auto server = irccd.servers().require(request["server"]);
 
     // General stuff.
     response.push_back({"name", server->name()});

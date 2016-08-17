@@ -52,7 +52,7 @@ public:
      *
      * \return the modules
      */
-    inline const std::vector<std::shared_ptr<Module>> &modules() const noexcept
+    inline const std::vector<std::shared_ptr<Module>> &list() const noexcept
     {
         return m_modules;
     }

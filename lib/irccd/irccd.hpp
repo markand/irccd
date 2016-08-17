@@ -60,11 +60,11 @@ private:
     // Services.
     std::shared_ptr<CommandService> m_commandService;
     std::shared_ptr<InterruptService> m_interruptService;
-    std::shared_ptr<ServerService> m_serverService;
-    std::shared_ptr<TransportService> m_transportService;
+    std::shared_ptr<ServerService> m_servers;
+    std::shared_ptr<TransportService> m_transports;
     std::shared_ptr<RuleService> m_ruleService;
     std::shared_ptr<ModuleService> m_moduleService;
-    std::shared_ptr<PluginService> m_pluginService;
+    std::shared_ptr<PluginService> m_plugins;
     std::vector<std::shared_ptr<Pollable>> m_services;
 
     // Not copyable and not movable because services has references to irccd.
@@ -95,7 +95,7 @@ public:
      *
      * \return the service
      */
-    inline CommandService &commandService() noexcept
+    inline CommandService &commands() noexcept
     {
         return *m_commandService;
     }
@@ -105,9 +105,9 @@ public:
      *
      * \return the service
      */
-    inline ServerService &serverService() noexcept
+    inline ServerService &servers() noexcept
     {
-        return *m_serverService;
+        return *m_servers;
     }
 
     /**
@@ -115,9 +115,9 @@ public:
      *
      * \return the service
      */
-    inline TransportService &transportService() noexcept
+    inline TransportService &transports() noexcept
     {
-        return *m_transportService;
+        return *m_transports;
     }
 
     /**
@@ -125,7 +125,7 @@ public:
      *
      * \return the service
      */
-    inline RuleService &ruleService() noexcept
+    inline RuleService &rules() noexcept
     {
         return *m_ruleService;
     }
@@ -135,7 +135,7 @@ public:
      *
      * \return the service
      */
-    inline ModuleService &moduleService() noexcept
+    inline ModuleService &modules() noexcept
     {
         return *m_moduleService;
     }
@@ -145,9 +145,9 @@ public:
      *
      * \return the service
      */
-    inline PluginService &pluginService() noexcept
+    inline PluginService &plugins() noexcept
     {
-        return *m_pluginService;
+        return *m_plugins;
     }
 
     /**

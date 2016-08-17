@@ -31,7 +31,7 @@ namespace {
 
 nlohmann::json execSet(Irccd &irccd, const nlohmann::json &request, const std::string &var, const std::string &value)
 {
-    auto plugin = irccd.pluginService().require(request["plugin"].get<std::string>());
+    auto plugin = irccd.plugins().require(request["plugin"].get<std::string>());
     auto config = plugin->config();
 
     config[var] = value;
@@ -42,7 +42,7 @@ nlohmann::json execSet(Irccd &irccd, const nlohmann::json &request, const std::s
 
 nlohmann::json execGet(Irccd &irccd, const nlohmann::json &request, const nlohmann::json::const_iterator &var)
 {
-    auto config = irccd.pluginService().require(request["plugin"].get<std::string>())->config();
+    auto config = irccd.plugins().require(request["plugin"].get<std::string>())->config();
 
     // 'vars' property.
     std::map<std::string, nlohmann::json> vars;

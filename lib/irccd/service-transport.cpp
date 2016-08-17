@@ -46,7 +46,7 @@ void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const n
         }
 
         // 2. Search for a command
-        auto cmd = m_irccd.commandService().find(*name);
+        auto cmd = m_irccd.commands().find(*name);
 
         if (!cmd) {
             // TODO: send error again.

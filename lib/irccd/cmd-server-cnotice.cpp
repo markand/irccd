@@ -52,7 +52,7 @@ nlohmann::json ServerChannelNotice::exec(Irccd &irccd, const nlohmann::json &req
 {
     Command::exec(irccd, request);
 
-    irccd.serverService().require(request["server"].get<std::string>())->cnotice(
+    irccd.servers().require(request["server"].get<std::string>())->cnotice(
         request["channel"].get<std::string>(),
         request["message"].get<std::string>()
     );

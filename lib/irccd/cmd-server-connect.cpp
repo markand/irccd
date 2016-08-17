@@ -72,10 +72,10 @@ json ServerConnect::exec(Irccd &irccd, const json &request) const
 {
     auto server = Server::fromJson(request);
 
-    if (irccd.serverService().has(server->name()))
+    if (irccd.servers().has(server->name()))
         throw std::invalid_argument("server '{}' already exists"_format(server->name()));
 
-    irccd.serverService().add(std::move(server));
+    irccd.servers().add(std::move(server));
 
     return Command::exec(irccd, request);
 }

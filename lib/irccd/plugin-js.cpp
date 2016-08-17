@@ -87,9 +87,9 @@ void JsPlugin::call(const std::string &name, unsigned nargs)
 
 void JsPlugin::putModules(Irccd &irccd)
 {
-    m_modules = irccd.moduleService().modules();
+    m_modules = irccd.modules().list();
 
-    for (const auto &module : irccd.moduleService().modules())
+    for (const auto &module : irccd.modules().list())
         module->load(irccd, std::static_pointer_cast<JsPlugin>(shared_from_this()));
 }
 
@@ -261,8 +261,8 @@ void JsPlugin::onLoad(Irccd &irccd)
      * calling onLoad to allow the plugin adding configuration to
      * Irccd.Plugin.(config|format) before the user.
      */
-    setConfig(irccd.pluginService().config(name()));
-    setFormats(irccd.pluginService().formats(name()));
+    setConfig(irccd.plugins().config(name()));
+    setFormats(irccd.plugins().formats(name()));
 
     // Read metadata .
     duk_get_global_string(m_context, "info");

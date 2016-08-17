@@ -61,7 +61,7 @@ nlohmann::json ServerMe::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 
-    irccd.serverService().require(request["server"])->me(request["target"], request["message"]);
+    irccd.servers().require(request["server"])->me(request["target"], request["message"]);
 
     return nlohmann::json::object();
 }

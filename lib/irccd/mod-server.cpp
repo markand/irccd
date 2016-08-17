@@ -431,7 +431,7 @@ duk_ret_t destructor(duk_context *ctx)
  */
 duk_ret_t add(duk_context *ctx)
 {
-    dukx_get_irccd(ctx).serverService().add(dukx_require_server(ctx, 0));
+    dukx_get_irccd(ctx).servers().add(dukx_require_server(ctx, 0));
 
     return 0;
 }
@@ -449,7 +449,7 @@ duk_ret_t add(duk_context *ctx)
  */
 duk_ret_t find(duk_context *ctx)
 {
-    auto server = dukx_get_irccd(ctx).serverService().get(duk_require_string(ctx, 0));
+    auto server = dukx_get_irccd(ctx).servers().get(duk_require_string(ctx, 0));
 
     if (!server)
         return 0;
@@ -472,7 +472,7 @@ duk_ret_t list(duk_context *ctx)
 {
     duk_push_object(ctx);
 
-    for (const auto &server : dukx_get_irccd(ctx).serverService().servers()) {
+    for (const auto &server : dukx_get_irccd(ctx).servers().servers()) {
         dukx_push_server(ctx, server);
         duk_put_prop_string(ctx, -2, server->name().c_str());
     }
@@ -492,7 +492,7 @@ duk_ret_t list(duk_context *ctx)
  */
 duk_ret_t remove(duk_context *ctx)
 {
-    dukx_get_irccd(ctx).serverService().remove(duk_require_string(ctx, 0));
+    dukx_get_irccd(ctx).servers().remove(duk_require_string(ctx, 0));
 
     return 0;
 }

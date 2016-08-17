@@ -67,7 +67,7 @@ nlohmann::json ServerKick::exec(Irccd &irccd, const nlohmann::json &request) con
 {
     Command::exec(irccd, request);
 
-    irccd.serverService().require(request["server"])->kick(
+    irccd.servers().require(request["server"])->kick(
         request["target"],
         request["channel"],
         request.count("reason") > 0 ? request["reason"] : ""
