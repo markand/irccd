@@ -34,6 +34,8 @@ namespace irccd {
 
 class Connection::State {
 public:
+    State() = default;
+    virtual ~State() = default;
     virtual Status status() const noexcept = 0;
     virtual void prepare(Connection &cnt, fd_set &in, fd_set &out) = 0;
     virtual void sync(Connection &cnt, fd_set &in, fd_set &out) = 0;
@@ -46,13 +48,13 @@ public:
 
 class Connection::DisconnectedState : public Connection::State {
 public:
-    Connection::Status status() const noexcept
+    Connection::Status status() const noexcept override
     {
         return Disconnected;
     }
 
-    void prepare(Connection &, fd_set &, fd_set &) {}
-    void sync(Connection &, fd_set &, fd_set &){}
+    void prepare(Connection &, fd_set &, fd_set &) override {}
+    void sync(Connection &, fd_set &, fd_set &) override {}
 };
 
 /*
@@ -75,12 +77,12 @@ private:
         }
     }
 public:
-    Connection::Status status() const noexcept
+    Connection::Status status() const noexcept override
     {
         return Ready;
     }
 
-    void prepare(Connection &cnx, fd_set &in, fd_set &out)
+    void prepare(Connection &cnx, fd_set &in, fd_set &out) override
     {
         FD_SET(cnx.m_socket.handle(), &in);
 
@@ -88,13 +90,13 @@ public:
             FD_SET(cnx.m_socket.handle(), &out);
     }
 
-    void sync(Connection &cnx, fd_set &in, fd_set &out)
+    void sync(Connection &cnx, fd_set &in, fd_set &out) override
     {
         if (FD_ISSET(cnx.m_socket.handle(), &out))
-            cnx.syncOutput();
+            cnx.send();
 
         if (FD_ISSET(cnx.m_socket.handle(), &in))
-            cnx.syncInput();
+            cnx.recv();
 
         std::string msg;
 
@@ -144,7 +146,7 @@ private:
 
     void check(Connection &cnt) noexcept
     {
-        cnt.syncInput();
+        cnt.recv();
 
         auto msg = util::nextNetwork(cnt.m_input);
 
@@ -178,12 +180,12 @@ private:
     }
 
 public:
-    Connection::Status status() const noexcept
+    Connection::Status status() const noexcept override
     {
         return Authenticating;
     }
 
-    void prepare(Connection &cnt, fd_set &in, fd_set &out)
+    void prepare(Connection &cnt, fd_set &in, fd_set &out) override
     {
         switch (m_auth) {
         case Created:
@@ -206,7 +208,7 @@ public:
         }
     }
 
-    void sync(Connection &cnt, fd_set &in, fd_set &out)
+    void sync(Connection &cnt, fd_set &in, fd_set &out) override
     {
         switch (m_auth) {
         case Sending:
@@ -289,19 +291,19 @@ private:
     }
 
 public:
-    Connection::Status status() const noexcept
+    Connection::Status status() const noexcept override
     {
         return Checking;
     }
 
-    void prepare(Connection &cnx, fd_set &in, fd_set &)
+    void prepare(Connection &cnx, fd_set &in, fd_set &) override
     {
         FD_SET(cnx.m_socket.handle(), &in);
     }
 
-    void sync(Connection &cnx, fd_set &, fd_set &)
+    void sync(Connection &cnx, fd_set &, fd_set &) override
     {
-        cnx.syncInput();
+        cnx.recv();
 
         verify(cnx);
     }
@@ -314,17 +316,17 @@ public:
 
 class Connection::ConnectingState : public Connection::State {
 public:
-    Connection::Status status() const noexcept
+    Connection::Status status() const noexcept override
     {
         return Connecting;
     }
 
-    void prepare(Connection &cnx, fd_set &, fd_set &out)
+    void prepare(Connection &cnx, fd_set &, fd_set &out) override
     {
         FD_SET(cnx.m_socket.handle(), &out);
     }
 
-    void sync(Connection &cnx, fd_set &, fd_set &out)
+    void sync(Connection &cnx, fd_set &, fd_set &out) override
     {
         if (!FD_ISSET(cnx.m_socket.handle(), &out))
             return;
@@ -349,7 +351,17 @@ public:
  * ------------------------------------------------------------------
  */
 
-void Connection::syncInput()
+unsigned Connection::recv(char *buffer, unsigned length)
+{
+    return m_socket.recv(buffer, length);
+}
+
+unsigned Connection::send(const char *buffer, unsigned length)
+{
+    return m_socket.send(buffer, length);
+}
+
+void Connection::recv()
 {
     try {
         std::string buffer;
@@ -367,7 +379,7 @@ void Connection::syncInput()
     }
 }
 
-void Connection::syncOutput()
+void Connection::send()
 {
     try {
         auto ns = send(m_output.data(), m_output.length());
@@ -378,16 +390,6 @@ void Connection::syncOutput()
         m_stateNext = std::make_unique<DisconnectedState>();
         onDisconnect(ex.what());
     }
-}
-
-unsigned Connection::recv(char *buffer, unsigned length)
-{
-    return m_socket.recv(buffer, length);
-}
-
-unsigned Connection::send(const char *buffer, unsigned length)
-{
-    return m_socket.send(buffer, length);
 }
 
 Connection::Connection()

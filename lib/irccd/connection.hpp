@@ -47,9 +47,9 @@ namespace irccd {
  *
  * Be aware that there are no namespaces for commands, if you plan to use
  * Irccdctl class and you also connect the onMessage signal, irccdctl will also
- * use it. Do not use irccdctl directly if this is a concern.
+ * use it. Do not use Irccdctl directly if this is a concern.
  *
- * The state may change as following.
+ * The state may change and is currently implementing as following:
  *
  *   [o]
  *    |       +----------------------------+
@@ -64,8 +64,6 @@ namespace irccd {
  *     |              +------------+   +-------+
  *     |                                   |
  *     ------------------------------------+
- *
- * Note: authenticating state is not implemented yet.
  */
 class Connection : public Service {
 public:
@@ -73,11 +71,11 @@ public:
      * \brief The current connection state.
      */
     enum Status {
-        Disconnected,       //!< Socket is closed
-        Connecting,         //!< Connection is in progress
-        Checking,           //!< Connection is checking irccd daemon
-        Authenticating,     //!< Connection is authenticating
-        Ready               //!< Socket is ready for I/O
+        Disconnected,           //!< Socket is closed
+        Connecting,             //!< Connection is in progress
+        Checking,               //!< Connection is checking irccd daemon
+        Authenticating,         //!< Connection is authenticating
+        Ready                   //!< Socket is ready for I/O
     };
 
     /**
@@ -85,16 +83,16 @@ public:
      */
     class Info {
     public:
-        unsigned short major;
-        unsigned short minor;
-        unsigned short patch;
+        unsigned short major;   //!< Major version number
+        unsigned short minor;   //!< Minor version number
+        unsigned short patch;   //!< Patch version
     };
 
     /**
      * onConnect
      * --------------------------------------------------------------
      *
-     * Connection was successfull.
+     * Connection was successful.
      */
     Signal<const Info &> onConnect;
 
@@ -102,7 +100,7 @@ public:
      * onMessage
      * ---------------------------------------------------------------
      *
-     * Upon message.
+     * A message from irccd was received.
      */
     Signal<const nlohmann::json &> onMessage;
 
@@ -150,6 +148,20 @@ protected:
      */
     virtual unsigned send(const char *buffer, unsigned length);
 
+    /**
+     * Convenient wrapper around recv().
+     *
+     * Must be used in sync() function.
+     */
+    void recv();
+
+    /**
+     * Convenient wrapper around send().
+     *
+     * Must be used in sync() function.
+     */
+    void send();
+
 public:
     /**
      * Default constructor.
@@ -180,20 +192,6 @@ public:
     {
         m_password = std::move(password);
     }
-
-    /**
-     * Convenient wrapper around recv().
-     *
-     * Must be used in sync() function.
-     */
-    void syncInput();
-
-    /**
-     * Convenient wrapper around send().
-     *
-     * Must be used in sync() function.
-     */
-    void syncOutput();
 
     /**
      * Send an asynchronous request to irccd.
@@ -245,12 +243,20 @@ public:
     virtual void connect(const net::Address &address);
 
     /**
-     * \copydoc Service::prepare
+     * Prepare the input and output set according to the current connection
+     * state.
+     *
+     * \param in the input set
+     * \param out the output set
+     * \param max the maximum file descriptor
      */
     void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
 
     /**
-     * \copydoc Service::sync
+     * Do some I/O using the protected recv and send functions.
+     *
+     * \param in the input set
+     * \param out the output set
      */
     void sync(fd_set &in, fd_set &out) override;
 };
