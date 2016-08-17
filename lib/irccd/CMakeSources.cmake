@@ -55,11 +55,6 @@ set(
     ${CMAKE_CURRENT_LIST_DIR}/plugin-js.hpp
     ${CMAKE_CURRENT_LIST_DIR}/rule.hpp
     ${CMAKE_CURRENT_LIST_DIR}/server.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/server-private.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/server-state.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/server-state-connected.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/server-state-connecting.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/server-state-disconnected.hpp
     ${CMAKE_CURRENT_LIST_DIR}/service.hpp
     ${CMAKE_CURRENT_LIST_DIR}/service-command.hpp
     ${CMAKE_CURRENT_LIST_DIR}/service-interrupt.hpp
@@ -129,9 +124,6 @@ set(
     ${CMAKE_CURRENT_LIST_DIR}/plugin-js.cpp
     ${CMAKE_CURRENT_LIST_DIR}/rule.cpp
     ${CMAKE_CURRENT_LIST_DIR}/server.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/server-state-connected.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/server-state-connecting.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/server-state-disconnected.cpp
     ${CMAKE_CURRENT_LIST_DIR}/service-command.cpp
     ${CMAKE_CURRENT_LIST_DIR}/service-interrupt.cpp
     ${CMAKE_CURRENT_LIST_DIR}/service-module.cpp

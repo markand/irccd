@@ -23,17 +23,109 @@
 
 #include <format.h>
 
+#include <libircclient.h>
 #include <libirc_rfcnumeric.h>
 
+#include "sysconfig.hpp"
+
+#if !defined(IRCCD_SYSTEM_WINDOWS)
+#  include <sys/types.h>
+#  include <netinet/in.h>
+#  include <arpa/nameser.h>
+#  include <resolv.h>
+#endif
+
 #include "logger.hpp"
-#include "server-private.hpp"
-#include "server-state-connected.hpp"
-#include "server-state-connecting.hpp"
 #include "util.hpp"
+#include "server.hpp"
 
 using namespace fmt::literals;
 
 namespace irccd {
+
+/*
+ * Server::Session declaration.
+ * ------------------------------------------------------------------
+ */
+
+class Server::Session {
+public:
+    std::unique_ptr<irc_session_t, void (*)(irc_session_t *)> m_handle{nullptr, nullptr};
+
+    inline operator const irc_session_t *() const noexcept
+    {
+        return m_handle.get();
+    }
+
+    inline operator irc_session_t *() noexcept
+    {
+        return m_handle.get();
+    }
+
+    inline bool isConnected() const noexcept
+    {
+        return irc_is_connected(m_handle.get());
+    }
+};
+
+/*
+ * Server::State declaration.
+ * ------------------------------------------------------------------
+ */
+
+class Server::State {
+public:
+    State() = default;
+    virtual ~State() = default;
+    virtual void prepare(Server &, fd_set &, fd_set &, net::Handle &) = 0;
+    virtual std::string ident() const = 0;
+};
+
+/*
+ * Server::DisconnectedState declaration.
+ * ------------------------------------------------------------------
+ */
+
+class Server::DisconnectedState : public Server::State {
+private:
+    ElapsedTimer m_timer;
+
+public:
+    void prepare(Server &, fd_set &, fd_set &, net::Handle &) override;
+    std::string ident() const override;
+};
+
+/*
+ * Server::ConnectingState declaration.
+ * ------------------------------------------------------------------
+ */
+
+class Server::ConnectingState : public State {
+private:
+    enum {
+        Disconnected,
+        Connecting
+    } m_state{Disconnected};
+
+    ElapsedTimer m_timer;
+
+    bool connect(Server &server);
+
+public:
+    void prepare(Server &, fd_set &, fd_set &, net::Handle &) override;
+    std::string ident() const override;
+};
+
+/*
+ * Server::ConnectedState declaration.
+ * ------------------------------------------------------------------
+ */
+
+class Server::ConnectedState : public State {
+public:
+    void prepare(Server &, fd_set &, fd_set &, net::Handle &) override;
+    std::string ident() const override;
+};
 
 namespace {
 
@@ -459,7 +551,7 @@ Server::Server(std::string name)
         static_cast<Server *>(irc_get_ctx(session))->handleMode(orig, params);
     };
 
-    m_session->handle() = Session::Handle{irc_create_session(&callbacks), irc_destroy_session};
+    m_session->m_handle = {irc_create_session(&callbacks), irc_destroy_session};
 
     // Save this to the session.
     irc_set_ctx(*m_session, this);
@@ -663,6 +755,151 @@ void Server::whois(std::string target)
     m_queue.push([=] () {
         return irc_cmd_whois(*m_session, target.c_str()) == 0;
     });
+}
+
+/*
+ * Server::DisconnectedState implementation
+ * ------------------------------------------------------------------
+ */
+
+void Server::DisconnectedState::prepare(Server &server, fd_set &, fd_set &, net::Handle &)
+{
+    if (server.m_recotries == 0) {
+        log::warning() << "server " << server.m_name << ": reconnection disabled, skipping" << std::endl;
+        server.onDie();
+    } else if (server.m_recotries > 0 && server.m_recocur > server.m_recotries) {
+        log::warning() << "server " << server.m_name << ": giving up" << std::endl;
+        server.onDie();
+    } else {
+        if (m_timer.elapsed() > static_cast<unsigned>(server.m_recodelay * 1000)) {
+            irc_disconnect(*server.m_session);
+
+            server.m_recocur ++;
+            server.next(std::make_unique<ConnectingState>());
+        }
+    }
+}
+
+std::string Server::DisconnectedState::ident() const
+{
+    return "Disconnected";
+}
+
+/*
+ * Server::ConnectingState implementation
+ * ------------------------------------------------------------------
+ */
+
+bool Server::ConnectingState::connect(Server &server)
+{
+    const char *password = server.m_password.empty() ? nullptr : server.m_password.c_str();
+    std::string host = server.m_host;
+    int code;
+
+    // libircclient requires # for SSL connection.
+#if defined(WITH_SSL)
+    if (server.m_flags & Server::Ssl)
+        host.insert(0, 1, '#');
+    if (!(server.m_flags & Server::SslVerify))
+        irc_option_set(*server.m_session, LIBIRC_OPTION_SSL_NO_VERIFY);
+#endif
+
+    if (server.flags() & Server::Ipv6) {
+        code = irc_connect6(*server.m_session, host.c_str(), server.m_port, password,
+                            server.m_nickname.c_str(),
+                            server.m_username.c_str(),
+                            server.m_realname.c_str());
+    } else {
+        code = irc_connect(*server.m_session, host.c_str(), server.m_port, password,
+                           server.m_nickname.c_str(),
+                           server.m_username.c_str(),
+                           server.m_realname.c_str());
+    }
+
+    return code == 0;
+}
+
+void Server::ConnectingState::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
+{
+    /*
+     * The connect function will either fail if the hostname wasn't resolved or if any of the internal functions
+     * fail.
+     *
+     * It returns success if the connection was successful but it does not mean that connection is established.
+     *
+     * Because this function will be called repeatidly, the connection was started and we're still not
+     * connected in the specified timeout time, we mark the server as disconnected.
+     *
+     * Otherwise, the libircclient event_connect will change the state.
+     */
+    if (m_state == Disconnected) {
+        if (m_timer.elapsed() > static_cast<unsigned>(server.m_recodelay * 1000)) {
+            log::warning() << "server " << server.name() << ": timeout while connecting" << std::endl;
+            server.next(std::make_unique<DisconnectedState>());
+        } else if (!irc_is_connected(*server.m_session)) {
+            log::warning() << "server " << server.m_name << ": error while connecting: ";
+            log::warning() << irc_strerror(irc_errno(*server.m_session)) << std::endl;
+
+            if (server.m_recotries != 0)
+                log::warning("server {}: retrying in {} seconds"_format(server.m_name, server.m_recodelay));
+
+            server.next(std::make_unique<DisconnectedState>());
+        } else
+            irc_add_select_descriptors(*server.m_session, &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
+    } else {
+        /*
+         * This is needed if irccd is started before DHCP or if DNS cache is outdated.
+         *
+         * For more information see bug #190.
+         */
+#if !defined(IRCCD_SYSTEM_WINDOWS)
+        (void)res_init();
+#endif
+        log::info("server {}: trying to connect to {}, port {}"_format(server.m_name, server.m_host, server.m_port));
+
+        if (!connect(server)) {
+            log::warning() << "server " << server.m_name << ": disconnected while connecting: ";
+            log::warning() << irc_strerror(irc_errno(*server.m_session)) << std::endl;
+            server.next(std::make_unique<DisconnectedState>());
+        } else {
+            m_state = Connecting;
+
+            if (irc_is_connected(*server.m_session))
+                irc_add_select_descriptors(*server.m_session, &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
+        }
+    }
+}
+
+std::string Server::ConnectingState::ident() const
+{
+    return "Connecting";
+}
+
+/*
+ * Server::ConnectedState implementation
+ * ------------------------------------------------------------------
+ */
+
+void Server::ConnectedState::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
+{
+    if (!irc_is_connected(*server.m_session)) {
+        log::warning() << "server " << server.m_name << ": disconnected" << std::endl;
+
+        if (server.m_recodelay > 0)
+            log::warning("server {}: retrying in {} seconds"_format(server.m_name, server.m_recodelay));
+
+        server.next(std::make_unique<DisconnectedState>());
+    } else if (server.m_timer.elapsed() >= server.m_timeout * 1000) {
+        log::warning() << "server " << server.m_name << ": ping timeout after "
+                   << (server.m_timer.elapsed() / 1000) << " seconds" << std::endl;
+        server.next(std::make_unique<DisconnectedState>());
+    } else
+        irc_add_select_descriptors(*server.m_session, &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
+}
+
+std::string Server::ConnectedState::ident() const
+{
+    return "Connected";
 }
 
 } // !irccd
