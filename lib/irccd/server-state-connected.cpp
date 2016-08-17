@@ -36,9 +36,9 @@ void Server::ConnectedState::prepare(Server &server, fd_set &setinput, fd_set &s
             log::warning("server {}: retrying in {} seconds"_format(server.name(), server.reconnectDelay()));
 
         server.next(std::make_unique<DisconnectedState>());
-    } else if (server.cache().pingTimer.elapsed() >= server.pingTimeout() * 1000) {
+    } else if (server.m_timer.elapsed() >= server.m_pingTimeout * 1000) {
         log::warning() << "server " << server.name() << ": ping timeout after "
-                   << (server.cache().pingTimer.elapsed() / 1000) << " seconds" << std::endl;
+                   << (server.m_timer.elapsed() / 1000) << " seconds" << std::endl;
         server.next(std::make_unique<DisconnectedState>());
     } else
         irc_add_select_descriptors(server.session(), &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));

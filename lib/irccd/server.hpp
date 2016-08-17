@@ -83,18 +83,7 @@ public:
  */
 class Cache {
 public:
-    ElapsedTimer pingTimer;                         //!< Track elapsed time for ping timeout.
-    std::int8_t reconnectCurrent{1};                //!< Number of reconnection already tested.
 
-    /**
-     * Map of names being build by channels.
-     */
-    std::map<std::string, std::set<std::string>> namesMap;
-
-    /**
-     * Map of whois being build by nicknames.
-     */
-    std::map<std::string, Whois> whoisMap;
 };
 
 /**
@@ -439,9 +428,6 @@ private:
     class ConnectingState;
     class DisconnectedState;
 
-    // Misc.
-    std::map<ChannelMode, char> m_modes;
-
     // Requested and joined channels.
     std::vector<Channel> m_rchannels;
     std::vector<std::string> m_jchannels;
@@ -467,9 +453,6 @@ private:
     std::uint16_t m_reconnectDelay{30};
     std::uint16_t m_pingTimeout{300};
 
-    // TODO: find another way.
-    Cache m_cache;
-
     // Queue of requests to send.
     std::queue<std::function<bool ()>> m_queue;
 
@@ -479,6 +462,13 @@ private:
     // States.
     std::unique_ptr<State> m_state;
     std::unique_ptr<State> m_stateNext;
+
+    // Misc.
+    ElapsedTimer m_timer;
+    std::map<ChannelMode, char> m_modes;
+    std::int8_t m_recocur{0};
+    std::map<std::string, std::set<std::string>> m_namesMap;
+    std::map<std::string, Whois> m_whoisMap;
 
     // Private helpers.
     void removeJoinedChannel(const std::string &channel);
@@ -799,17 +789,6 @@ public:
     inline const std::vector<std::string> &channels() const noexcept
     {
         return m_jchannels;
-    }
-
-    /**
-     * Access the cache.
-     *
-     * \return the cache
-     * \warning use with care
-     */
-    inline Cache &cache() noexcept
-    {
-        return m_cache;
     }
 
     /**

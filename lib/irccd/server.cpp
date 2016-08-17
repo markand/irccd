@@ -120,10 +120,10 @@ void Server::removeJoinedChannel(const std::string &channel)
 void Server::handleConnect(const char *, const char **) noexcept
 {
     // Reset the number of tried reconnection.
-    m_cache.reconnectCurrent = 0;
+    m_recocur = 1;
 
     // Reset the timer.
-    m_cache.pingTimer.reset();
+    m_timer.reset();
 
     // Reset joined channels.
     m_jchannels.clear();
@@ -235,7 +235,7 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
 
         // The listing may add some prefixes, remove them if needed.
         for (std::string u : users)
-            m_cache.namesMap[params[2]].insert(cleanPrefix(m_modes, u));
+            m_namesMap[params[2]].insert(cleanPrefix(m_modes, u));
     } else if (event == LIBIRC_RFC_RPL_ENDOFNAMES) {
         /*
          * Called when end of name listing has finished on a channel.
@@ -247,12 +247,12 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
         if (c < 3 || params[1] == nullptr)
             return;
 
-        auto it = m_cache.namesMap.find(params[1]);
-        if (it != m_cache.namesMap.end()) {
+        auto it = m_namesMap.find(params[1]);
+        if (it != m_namesMap.end()) {
             onNames(NamesEvent{shared_from_this(), params[1], std::vector<std::string>(it->second.begin(), it->second.end())});
 
             // Don't forget to remove the list.
-            m_cache.namesMap.erase(it);
+            m_namesMap.erase(it);
         }
     } else if (event == LIBIRC_RFC_RPL_WHOISUSER) {
         /*
@@ -275,7 +275,7 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
         info.host = strify(params[3]);
         info.realname = strify(params[5]);
 
-        m_cache.whoisMap.emplace(info.nick, info);
+        m_whoisMap.emplace(info.nick, info);
     } else if (event == LIBIRC_RFC_RPL_WHOISCHANNELS) {
         /*
          * Called when we have received channels for one user.
@@ -287,8 +287,8 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
         if (c < 3 || !params[1] || !params[2])
             return;
 
-        auto it = m_cache.whoisMap.find(params[1]);
-        if (it != m_cache.whoisMap.end()) {
+        auto it = m_whoisMap.find(params[1]);
+        if (it != m_whoisMap.end()) {
             std::vector<std::string> channels = util::split(params[2], " \t");
 
             // Clean their prefixes.
@@ -305,12 +305,12 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
          * params[1] == nickname
          * params[2] == End of WHOIS list
          */
-        auto it = m_cache.whoisMap.find(params[1]);
-        if (it != m_cache.whoisMap.end()) {
+        auto it = m_whoisMap.find(params[1]);
+        if (it != m_whoisMap.end()) {
             onWhois(WhoisEvent{shared_from_this(), it->second});
 
             // Don't forget to remove.
-            m_cache.whoisMap.erase(it);
+            m_whoisMap.erase(it);
         }
     } else if (event == /* RPL_BOUNCE */ 5) {
         /*
@@ -337,7 +337,7 @@ void Server::handlePart(const char *orig, const char **params) noexcept
 void Server::handlePing(const char *, const char **params) noexcept
 {
     // Reset the timer to detect disconnection.
-    m_cache.pingTimer.reset();
+    m_timer.reset();
 
     // Don't forget to respond.
     send("PONG {}"_format(params[0]));
