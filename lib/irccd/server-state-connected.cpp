@@ -32,11 +32,11 @@ void Server::ConnectedState::prepare(Server &server, fd_set &setinput, fd_set &s
     if (!irc_is_connected(*server.m_session)) {
         log::warning() << "server " << server.m_name << ": disconnected" << std::endl;
 
-        if (server.m_reconnectDelay > 0)
-            log::warning("server {}: retrying in {} seconds"_format(server.m_name, server.m_reconnectDelay));
+        if (server.m_recodelay > 0)
+            log::warning("server {}: retrying in {} seconds"_format(server.m_name, server.m_recodelay));
 
         server.next(std::make_unique<DisconnectedState>());
-    } else if (server.m_timer.elapsed() >= server.m_pingTimeout * 1000) {
+    } else if (server.m_timer.elapsed() >= server.m_timeout * 1000) {
         log::warning() << "server " << server.m_name << ": ping timeout after "
                    << (server.m_timer.elapsed() / 1000) << " seconds" << std::endl;
         server.next(std::make_unique<DisconnectedState>());

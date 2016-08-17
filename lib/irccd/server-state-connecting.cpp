@@ -79,15 +79,15 @@ void Server::ConnectingState::prepare(Server &server, fd_set &setinput, fd_set &
      * Otherwise, the libircclient event_connect will change the state.
      */
     if (m_started) {
-        if (m_timer.elapsed() > static_cast<unsigned>(server.m_reconnectDelay * 1000)) {
+        if (m_timer.elapsed() > static_cast<unsigned>(server.m_recodelay * 1000)) {
             log::warning() << "server " << server.name() << ": timeout while connecting" << std::endl;
             server.next(std::make_unique<DisconnectedState>());
         } else if (!irc_is_connected(*server.m_session)) {
             log::warning() << "server " << server.m_name << ": error while connecting: ";
             log::warning() << irc_strerror(irc_errno(*server.m_session)) << std::endl;
 
-            if (server.m_reconnectTries != 0)
-                log::warning("server {}: retrying in {} seconds"_format(server.m_name, server.m_reconnectDelay));
+            if (server.m_recotries != 0)
+                log::warning("server {}: retrying in {} seconds"_format(server.m_name, server.m_recodelay));
 
             server.next(std::make_unique<DisconnectedState>());
         } else

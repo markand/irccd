@@ -25,14 +25,14 @@ namespace irccd {
 
 void Server::DisconnectedState::prepare(Server &server, fd_set &, fd_set &, net::Handle &)
 {
-    if (server.m_reconnectTries == 0) {
+    if (server.m_recotries == 0) {
         log::warning() << "server " << server.m_name << ": reconnection disabled, skipping" << std::endl;
         server.onDie();
-    } else if (server.m_reconnectTries > 0 && server.m_recocur > server.m_reconnectTries) {
+    } else if (server.m_recotries > 0 && server.m_recocur > server.m_recotries) {
         log::warning() << "server " << server.m_name << ": giving up" << std::endl;
         server.onDie();
     } else {
-        if (m_timer.elapsed() > static_cast<unsigned>(server.m_reconnectDelay * 1000)) {
+        if (m_timer.elapsed() > static_cast<unsigned>(server.m_recodelay * 1000)) {
             irc_disconnect(*server.m_session);
 
             server.m_recocur ++;

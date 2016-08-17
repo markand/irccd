@@ -449,9 +449,9 @@ private:
 
     // Settings.
     std::string m_commandCharacter{"!"};
-    std::int8_t m_reconnectTries{-1};
-    std::uint16_t m_reconnectDelay{30};
-    std::uint16_t m_pingTimeout{300};
+    std::int8_t m_recotries{-1};
+    std::uint16_t m_recodelay{30};
+    std::uint16_t m_timeout{300};
 
     // Queue of requests to send.
     std::queue<std::function<bool ()>> m_queue;
@@ -726,7 +726,7 @@ public:
      */
     inline std::int8_t reconnectTries() const noexcept
     {
-        return m_reconnectTries;
+        return m_recotries;
     }
 
     /**
@@ -738,7 +738,7 @@ public:
      */
     inline void setReconnectTries(std::int8_t reconnectTries) noexcept
     {
-        m_reconnectTries = reconnectTries;
+        m_recotries = reconnectTries;
     }
 
     /**
@@ -748,7 +748,7 @@ public:
      */
     inline std::uint16_t reconnectDelay() const noexcept
     {
-        return m_reconnectDelay;
+        return m_recodelay;
     }
 
     /**
@@ -758,7 +758,7 @@ public:
      */
     inline void setReconnectDelay(std::uint16_t reconnectDelay) noexcept
     {
-        m_reconnectDelay = reconnectDelay;
+        m_recodelay = reconnectDelay;
     }
 
     /**
@@ -768,7 +768,7 @@ public:
      */
     inline std::uint16_t pingTimeout() const noexcept
     {
-        return m_pingTimeout;
+        return m_timeout;
     }
 
     /**
@@ -778,7 +778,7 @@ public:
      */
     inline void setPingTimeout(std::uint16_t pingTimeout) noexcept
     {
-        m_pingTimeout = pingTimeout;
+        m_timeout = pingTimeout;
     }
 
     /**
