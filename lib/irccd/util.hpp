@@ -51,10 +51,11 @@ namespace util {
  * \enum MessageType
  * \brief Describe which type of message has been received
  *
- * On channels and queries, you may have a special command or a standard message depending on the
- * beginning of the message.
+ * On channels and queries, you may have a special command or a standard message
+ * depending on the beginning of the message.
  *
- * Example: `!reminder help' may invoke the command event if a plugin reminder exists.
+ * Example: `!reminder help' may invoke the command event if a plugin reminder
+ * exists.
  */
 enum class MessageType {
     Command,                        //!< special command
@@ -104,8 +105,8 @@ public:
  *
  * ## Syntax
  *
- * The syntax is <strong>?{}</strong> where <strong>?</strong> is replaced by one of the token defined below. Braces
- * are mandatory and cannot be ommited.
+ * The syntax is <strong>?{}</strong> where <strong>?</strong> is replaced by
+ * one of the token defined below. Braces are mandatory and cannot be ommited.
  *
  * To write a literal template construct, prepend the token twice.
  *
@@ -113,23 +114,30 @@ public:
  *
  * The following templates are available:
  *
- * - <strong>\#{name}</strong>: name will be substituted from the keywords in params,
- * - <strong>\${name}</strong>: name will be substituted from the environment variable,
- * - <strong>\@{attributes}</strong>: the attributes will be substituted to IRC colors (see below),
+ * - <strong>\#{name}</strong>: name will be substituted from the keywords in
+ *   params,
+ * - <strong>\${name}</strong>: name will be substituted from the environment
+ *   variable,
+ * - <strong>\@{attributes}</strong>: the attributes will be substituted to IRC
+ *   colors (see below),
  * - <strong>%</strong>, any format accepted by strftime(3).
  *
  * ## Attributes
  *
- * The attribute format is composed of three parts, foreground, background and modifiers, each separated by a comma.
+ * The attribute format is composed of three parts, foreground, background and
+ * modifiers, each separated by a comma.
  *
- * **Note:** you cannot omit parameters, to specify the background, you must specify the foreground.
+ * **Note:** you cannot omit parameters, to specify the background, you must
+ * specify the foreground.
  *
  * ## Examples
  *
  * ### Valid constructs
  *
- *   - <strong>\#{target}, welcome</strong>: if target is set to "irccd", becomes "irccd, welcome",
- *   - <strong>\@{red}\#{target}</strong>: if target is specified, it is written in red,
+ *   - <strong>\#{target}, welcome</strong>: if target is set to "irccd",
+ *     becomes "irccd, welcome",
+ *   - <strong>\@{red}\#{target}</strong>: if target is specified, it is written
+ *     in red,
  *
  * ### Invalid or literals constructs
  *
@@ -141,8 +149,10 @@ public:
  * ### Colors & attributes
  *
  *   - <strong>\@{red,blue}</strong>: will write text red on blue background,
- *   - <strong>\@{default,yellow}</strong>: will write default color text on yellow background,
- *   - <strong>\@{white,black,bold,underline}</strong>: will write white text on black in both bold and underline.
+ *   - <strong>\@{default,yellow}</strong>: will write default color text on
+ *     yellow background,
+ *   - <strong>\@{white,black,bold,underline}</strong>: will write white text on
+ *     black in both bold and underline.
  */
 IRCCD_EXPORT std::string format(std::string text, const Substitution &params = {});
 
@@ -291,8 +301,8 @@ constexpr bool isBound(T value, T min = std::numeric_limits<T>::min(), T max = s
  *
  * This function will try to convert the string to number in the limits of T.
  *
- * If the string is not a number or if the converted value is out of range than specified boundaries, an exception is
- * thrown.
+ * If the string is not a number or if the converted value is out of range than
+ * specified boundaries, an exception is thrown.
  *
  * By default, the function will use numeric limits from T.
  *

@@ -64,8 +64,8 @@ enum Owner {
 /**
  * This function must be called before at the beginning of the main.
  *
- * It use system dependant program path lookup if available and fallbacks to the path given as argument if any failure
- * was encoutered.
+ * It use system dependant program path lookup if available and fallbacks to the
+ * path given as argument if any failure was encoutered.
  *
  * \param argv0 the path to the executable (argv[0])
  */
@@ -94,7 +94,8 @@ IRCCD_EXPORT std::string get(Path path, Owner owner);
 /**
  * Generic function for multiple paths.
  *
- * This function will add more directories than pathSystem*() and pathUser*() functions.
+ * This function will add more directories than pathSystem*() and pathUser*()
+ * functions.
  *
  * \pre setApplicationPath must have been called
  * \param path the type of path

@@ -101,8 +101,8 @@ void Irccd::poll()
 void Irccd::dispatch()
 {
     /*
-     * Make a copy because the events can add other events while we are iterating it. Also lock because the timers
-     * may alter these events too.
+     * Make a copy because the events can add other events while we are
+     * iterating it. Also lock because the timers may alter these events too.
      */
     std::vector<std::function<void (Irccd &)>> copy;
 

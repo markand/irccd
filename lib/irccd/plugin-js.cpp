@@ -137,7 +137,8 @@ JsPlugin::JsPlugin(std::string name, std::string path)
     : Plugin(name, path)
 {
     /*
-     * Create two special tables for configuration and formats, they are referenced later as
+     * Create two special tables for configuration and formats, they are
+     * referenced later as
      *
      *   - Irccd.Plugin.config
      *   - Irccd.Plugin.format
@@ -256,8 +257,9 @@ void JsPlugin::onLoad(Irccd &irccd)
     duk_pop(m_context);
 
     /*
-     * We put configuration and formats after loading the file and before calling onLoad to allow the plugin adding configuration
-     * to Irccd.Plugin.(config|format) before the user.
+     * We put configuration and formats after loading the file and before
+     * calling onLoad to allow the plugin adding configuration to
+     * Irccd.Plugin.(config|format) before the user.
      */
     setConfig(irccd.pluginService().config(name()));
     setFormats(irccd.pluginService().formats(name()));

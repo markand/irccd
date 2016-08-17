@@ -154,7 +154,8 @@ public:
  */
 
 /**
- * \brief Logger implementation for console output using std::cout and std::cerr.
+ * \brief Logger implementation for console output using std::cout and
+ *        std::cerr.
  */
 class Console : public Interface {
 public:

@@ -73,7 +73,8 @@ namespace {
  *
  * This variable stores the program base directory.
  *
- * If it is empty, the program was not able to detect it (e.g. error, not supported).
+ * If it is empty, the program was not able to detect it (e.g. error, not
+ * supported).
  */
 
 std::string base;
@@ -371,16 +372,16 @@ void setApplicationPath(const std::string &argv0)
         base = executablePath();
     } catch (const std::exception &) {
         /*
-         * If an exception is thrown, that means the operatin system supports a function to get the executable
-         * path but it failed.
+         * If an exception is thrown, that means the operatin system supports a
+         * function to get the executable path but it failed.
          *
          * TODO: show a waning
          */
     }
 
     /*
-     * If we could not get the application path from the native function, check if argv[0] is an absolute path
-     * and use that from there.
+     * If we could not get the application path from the native function, check
+     * if argv[0] is an absolute path and use that from there.
      *
      * Otherwise, search from the PATH.
      *

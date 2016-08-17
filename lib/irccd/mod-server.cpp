@@ -484,7 +484,8 @@ duk_ret_t list(duk_context *ctx)
  * Function: Irccd.Server.remove(name)
  * ------------------------------------------------------------------
  *
- * Remove a server from the irccd instance. You can pass the server object since it's coercible to a string.
+ * Remove a server from the irccd instance. You can pass the server object since
+ * it's coercible to a string.
  *
  * Arguments:
  *   - name the server name.

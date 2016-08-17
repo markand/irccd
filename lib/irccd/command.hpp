@@ -165,7 +165,8 @@ public:
 /**
  * \brief Command line arguments to irccdctl.
  *
- * This class contains the resolved arguments from command line that can apply to the command.
+ * This class contains the resolved arguments from command line that can apply
+ * to the command.
  */
 class CommandRequest {
 public:
@@ -298,23 +299,26 @@ public:
 /**
  * \brief Invokable command.
  *
- * A remote command is a invokable command in the irccd daemon. You can register dynamically any remote command you
- * like using Application::addCommand.
+ * A remote command is a invokable command in the irccd daemon. You can register
+ * dynamically any remote command you like using Application::addCommand.
  *
- * The remote command will be usable directly from irccdctl without any other code.
+ * The remote command will be usable directly from irccdctl without any other
+ * code.
  *
- * A remote command can have options and arguments. Options always come first, before arguments.
+ * A remote command can have options and arguments. Options always come first,
+ * before arguments.
  *
  * The command workflow is defined as follow:
  *
- * 1. User wants to invoke a command, request() is called and return a JSON object containaing the request, it it send
- *    to the daemon.
+ * 1. User wants to invoke a command, request() is called and return a JSON
+ *    object containaing the request, it it send to the daemon.
  *
- * 2. The daemon receive the request and execute it using exec(). It returns a JSON object containint the request result
- *    or error if any.
+ * 2. The daemon receive the request and execute it using exec(). It returns a
+ *    JSON object containint the request result or error if any.
  *
- * 3. Finally, the command receives the result in result() function and user can manipulate it. For convenience, the
- *    default implementation shows the error if any.
+ * 3. Finally, the command receives the result in result() function and user can
+ *    manipulate it. For convenience, the default implementation shows the error
+ *    if any.
  */
 class Command {
 public:
@@ -474,7 +478,8 @@ public:
     /**
      * Prepare a JSON request to the daemon.
      *
-     * If the command is local and does not need to send anything to irccd's instance, return a null JSON value.
+     * If the command is local and does not need to send anything to irccd's
+     * instance, return a null JSON value.
      *
      * The default implementation just send the command name with no arguments.
      *
@@ -488,12 +493,14 @@ public:
     /**
      * Execute the command in the daemon.
      *
-     * The user can return an object with any properties to forward to the client. Irccd will automatically
-     * add the command name and the appropriate status code.
+     * The user can return an object with any properties to forward to the
+     * client. Irccd will automatically add the command name and the appropriate
+     * status code.
      *
      * The default return an empty object which indicates success.
      *
-     * If any exception is thrown from this function, it is forwarded to the client as error status.
+     * If any exception is thrown from this function, it is forwarded to the
+     * client as error status.
      *
      * \param irccd the instance
      * \param request the JSON request
@@ -504,7 +511,8 @@ public:
     /**
      * What to do when receiving the response from irccd.
      *
-     * This default implementation just check for an error string and shows it if any.
+     * This default implementation just check for an error string and shows it
+     * if any.
      *
      * \param irccdctl the irccdctl instance
      * \param response the JSON response
@@ -527,7 +535,8 @@ public:
     /**
      * Constructor an option description.
      *
-     * Simple and long keys must not start with '-' or '--', they will be added automatically.
+     * Simple and long keys must not start with '-' or '--', they will be added
+     * automatically.
      *
      * If arg is not empty, the option takes an argument.
      *

@@ -137,7 +137,8 @@ public:
     IRCCD_EXPORT PluginFormats formats(const std::string &name) const;
 
     /**
-     * Convenient wrapper that loads a plugin, call onLoad and add it to the registry.
+     * Convenient wrapper that loads a plugin, call onLoad and add it to the
+     * registry.
      *
      * Any errors are printed using logger.
      *

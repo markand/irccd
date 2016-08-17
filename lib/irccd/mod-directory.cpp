@@ -55,7 +55,8 @@ std::string path(duk_context *ctx)
 }
 
 /*
- * Find an entry recursively (or not) in a directory using a predicate which can be used to test for regular expression, equality.
+ * Find an entry recursively (or not) in a directory using a predicate which can
+ * be used to test for regular expression, equality.
  *
  * Do not use this function directly, use:
  *
@@ -121,7 +122,8 @@ std::string findRegex(const std::string &base, std::string pattern, bool recursi
  * - Directory.find
  * - Directory.prototype.find
  *
- * The patternIndex is the argument where to test if the argument is a regex or a string.
+ * The patternIndex is the argument where to test if the argument is a regex or
+ * a string.
  */
 duk_ret_t find(duk_context *ctx, std::string base, bool recursive, int patternIndex)
 {

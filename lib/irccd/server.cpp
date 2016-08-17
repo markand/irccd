@@ -144,8 +144,8 @@ inline std::string strify(const char *s)
  * cleanPrefix
  * ------------------------------------------------------------------
  *
- * Remove the user prefix only if it is present in the mode table, for example removes @ from @irccd if and only if
- * @ is a character mode (e.g. operator).
+ * Remove the user prefix only if it is present in the mode table, for example
+ * removes @ from @irccd if and only if @ is a character mode (e.g. operator).
  */
 std::string cleanPrefix(const std::map<ChannelMode, char> &modes, std::string nickname)
 {
@@ -258,8 +258,8 @@ void Server::handleInvite(const char *orig, const char **params) noexcept
         join(strify(params[1]));
 
     /*
-     * The libircclient says that invite contains the target nickname, it's quite
-     * uncommon to need it so it is passed as the last argument to be
+     * The libircclient says that invite contains the target nickname, it's
+     * quit uncommon to need it so it is passed as the last argument to be
      * optional in the plugin.
      */
     onInvite(InviteEvent{shared_from_this(), strify(orig), strify(params[1]), strify(params[0])});
@@ -303,7 +303,10 @@ void Server::handleNick(const char *orig, const char **params) noexcept
 
 void Server::handleNotice(const char *orig, const char **params) noexcept
 {
-    // Like handleInvite, the notice provides the target nickname, we discard it.
+    /*
+     * Like handleInvite, the notice provides the target nickname, we discard
+     * it.
+     */
     onNotice(NoticeEvent{shared_from_this(), strify(orig), strify(params[1])});
 }
 
@@ -318,7 +321,8 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
          * params[2] == channel
          * params[3] == list of users with their prefixes
          *
-         * IDEA for the future: maybe give the appropriate mode as a second parameter in onNames.
+         * IDEA for the future: maybe give the appropriate mode as a second
+         * parameter in onNames.
          */
         if (c < 4 || params[2] == nullptr || params[3] == nullptr)
             return;
@@ -822,13 +826,15 @@ bool Server::ConnectingState::connect(Server &server)
 void Server::ConnectingState::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
 {
     /*
-     * The connect function will either fail if the hostname wasn't resolved or if any of the internal functions
-     * fail.
+     * The connect function will either fail if the hostname wasn't resolved or
+     * if any of the internal functions fail.
      *
-     * It returns success if the connection was successful but it does not mean that connection is established.
+     * It returns success if the connection was successful but it does not mean
+     * that connection is established.
      *
-     * Because this function will be called repeatidly, the connection was started and we're still not
-     * connected in the specified timeout time, we mark the server as disconnected.
+     * Because this function will be called repeatidly, the connection was
+     * started and we're still not connected in the specified timeout time, we
+     * mark the server as disconnected.
      *
      * Otherwise, the libircclient event_connect will change the state.
      */
@@ -848,9 +854,8 @@ void Server::ConnectingState::prepare(Server &server, fd_set &setinput, fd_set &
             irc_add_select_descriptors(*server.m_session, &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
     } else {
         /*
-         * This is needed if irccd is started before DHCP or if DNS cache is outdated.
-         *
-         * For more information see bug #190.
+         * This is needed if irccd is started before DHCP or if DNS cache is
+         * outdated.
          */
 #if !defined(IRCCD_SYSTEM_WINDOWS)
         (void)res_init();

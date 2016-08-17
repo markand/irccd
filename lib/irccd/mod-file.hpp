@@ -154,7 +154,8 @@ public:
 /**
  * Construct the file as this.
  *
- * The object prototype takes ownership of fp and will be deleted once collected.
+ * The object prototype takes ownership of fp and will be deleted once
+ * collected.
  *
  * \pre fp != nullptr
  * \param ctx the the context

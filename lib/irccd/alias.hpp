@@ -36,8 +36,8 @@ namespace irccd {
  * \class AliasArg
  * \brief Describe an alias argument.
  *
- * When the user specify arguments, it can precise an applied argument or a placeholder that will be substituted
- * during command line invocation.
+ * When the user specify arguments, it can precise an applied argument or a
+ * placeholder that will be substituted during command line invocation.
  *
  * Placeholders are placed using %n where n is an integer starting from 0.
  */
@@ -94,7 +94,8 @@ public:
  * \class AliasCommand
  * \brief Describe a user-provided alias command.
  *
- * An alias command is just a command with a set of applied or placeholders arguments.
+ * An alias command is just a command with a set of applied or placeholders
+ * arguments.
  */
 class AliasCommand {
 private:
@@ -139,8 +140,8 @@ public:
  * \class Alias
  * \brief A set of commands to execute with their arguments.
  *
- * An alias is a composition of AliasCommand, typically, the user is able to set an alias that execute a list of
- * specified commands in order they are defined.
+ * An alias is a composition of AliasCommand, typically, the user is able to set
+ * an alias that execute a list of specified commands in order they are defined.
  */
 class Alias : public std::vector<AliasCommand> {
 private:

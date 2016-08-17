@@ -215,7 +215,8 @@ void load(const Config &config, const option::Result &options)
     /*
      * Order matters, please be careful when changing this.
      *
-     * 1. Open logs as early as possible to use the defined outputs on any loading errors.
+     * 1. Open logs as early as possible to use the defined outputs on any
+     *    loading errors.
      */
 
     // [logs] and [format] sections.

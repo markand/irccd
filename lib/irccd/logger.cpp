@@ -51,8 +51,8 @@ std::unique_ptr<Filter> filter{new Filter};
  * Buffer -- output buffer.
  * ------------------------------------------------------------------
  *
- * This class inherits from std::stringbuf and writes the messages to the specified interface function which is one of
- * info, warning and debug.
+ * This class inherits from std::stringbuf and writes the messages to the
+ * specified interface function which is one of info, warning and debug.
  */
 
 class Buffer : public std::stringbuf {

@@ -451,7 +451,10 @@ void Irccdctl::exec(const Command &cmd, std::vector<std::string> args)
     if (args.size() > cmd.max())
         throw std::runtime_error("too many arguments");
 
-    // 4. Construct the request, if the returned value is not an object, do not send anything (e.g. help).
+    /*
+     * 4. Construct the request, if the returned value is not an object, do not
+     * send anything (e.g. help).
+     */
     nlohmann::json request = cmd.request(*this, CommandRequest(std::move(requestOptions), std::move(args)));
 
     if (!request.is_object())

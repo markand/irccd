@@ -27,7 +27,8 @@ namespace irccd {
 namespace {
 
 /**
- * Read parameters for Irccd.Util.format function, the object is defined as follow:
+ * Read parameters for Irccd.Util.format function, the object is defined as
+ * following:
  *
  * {
  *   date: the date object

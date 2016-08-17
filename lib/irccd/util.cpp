@@ -240,8 +240,8 @@ std::string substitute(std::string::const_iterator &it, std::string::const_itera
 std::string format(std::string text, const Substitution &params)
 {
     /*
-     * Change the date format before anything else to avoid interpolation with keywords and
-     * user input.
+     * Change the date format before anything else to avoid interpolation with
+     * keywords and user input.
      */
     if (params.flags & Substitution::Date)
         text = substituteDate(text, params);
@@ -270,8 +270,9 @@ std::string format(std::string text, const Substitution &params)
         }
 
         /*
-         * If the next token is different from the previous one, just let the next iteration parse the string because
-         * we can have the following constructs.
+         * If the next token is different from the previous one, just let the
+         * next iteration parse the string because we can have the following
+         * constructs.
          *
          * "@#{var}" -> "@value"
          */
@@ -281,8 +282,8 @@ std::string format(std::string text, const Substitution &params)
         }
 
         /*
-         * Write the token only if it's not a variable because at this step we may have the following
-         * constructs.
+         * Write the token only if it's not a variable because at this step we
+         * may have the following constructs.
          *
          * "##" -> "##"
          * "##hello" -> "##hello"

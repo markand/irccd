@@ -81,13 +81,16 @@ namespace {
  * setHelper
  * ------------------------------------------------------------------
  *
- * This is an helper for setting the uid or gid. It accepts both numeric and string uid and gid.
+ * This is an helper for setting the uid or gid. It accepts both numeric and
+ * string uid and gid.
  *
- * If a name is specified as uid/group, the lookup function will be called and must be getpwname or
- * getgrname. Then, to get the id from the returned structure (struct passwd, struct group), the getter
- * function will return either pw_uid or gr_gid.
+ * If a name is specified as uid/group, the lookup function will be called and
+ * must be getpwname or getgrname. Then, to get the id from the returned
+ * structure (struct passwd, struct group), the getter function will return
+ * either pw_uid or gr_gid.
  *
- * Finally, when the id is resolved, the setter function (setuid, setgid) will be called.
+ * Finally, when the id is resolved, the setter function (setuid, setgid) will
+ * be called.
  *
  *   - typeName the type of id (uid or gid)
  *   - value the value (numeric or name)
@@ -121,8 +124,9 @@ void setHelper(const std::string &typeName, const std::string &value, LookupFunc
 }
 
 /*
- * XXX: the setprogname() function keeps a pointer without copying it so when main's argv is modified, we're not using
- * the same name so create our own copy.
+ * XXX: the setprogname() function keeps a pointer without copying it so when
+ * main's argv is modified, we're not using the same name so create our own
+ * copy.
  */
 
 std::string programNameCopy;

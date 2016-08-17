@@ -80,7 +80,8 @@ std::string error()
  * hasAccess.
  * ------------------------------------------------------------------
  *
- * Check if we have access to the file specified, mode is the same used as std::fopen.
+ * Check if we have access to the file specified, mode is the same used as
+ * std::fopen.
  */
 bool hasAccess(const std::string &path, const std::string &mode)
 {

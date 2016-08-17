@@ -172,7 +172,8 @@ IRCCD_EXPORT struct stat stat(const std::string &path);
 /**
  * Check if a file exists.
  *
- * If HAVE_ACCESS is defined, the function access is used, otherwise stat is used.
+ * If HAVE_ACCESS is defined, the function access is used, otherwise stat is
+ * used.
  *
  * \param path the path to check
  * \return true if the path exists
@@ -286,8 +287,10 @@ template <typename Predicate>
 std::string findIf(const std::string &base, Predicate &&predicate)
 {
     /*
-     * Do not go deeply to the tree before testing all files in the current directory for performances reasons, we iterate
-     * this directory to search for the entry name and iterate again over all sub directories if not found.
+     * Do not go deeply to the tree before testing all files in the current
+     * directory for performances reasons, we iterate this directory to search
+     * for the entry name and iterate again over all sub directories if not
+     * found.
      */
     std::string path;
     std::vector<Entry> entries = readdir(base);

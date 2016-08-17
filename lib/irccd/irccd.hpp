@@ -151,8 +151,8 @@ public:
     }
 
     /**
-     * Add an event to the queue. This will immediately signals the event loop to interrupt itself to dispatch
-     * the pending events.
+     * Add an event to the queue. This will immediately signals the event loop
+     * to interrupt itself to dispatch the pending events.
      *
      * \param ev the event
      * \note Thread-safe

@@ -50,11 +50,11 @@ class Server;
  * \brief Prefixes for nicknames.
  */
 enum class ChannelMode {
-    Creator         = 'O',                          //!< Channel creator
-    HalfOperator    = 'h',                          //!< Half operator
-    Operator        = 'o',                          //!< Channel operator
-    Protection      = 'a',                          //!< Unkillable
-    Voiced          = 'v'                           //!< Voice power
+    Creator         = 'O',                  //!< Channel creator
+    HalfOperator    = 'h',                  //!< Half operator
+    Operator        = 'o',                  //!< Channel operator
+    Protection      = 'a',                  //!< Unkillable
+    Voiced          = 'v'                   //!< Voice power
 };
 
 /**
@@ -62,8 +62,8 @@ enum class ChannelMode {
  */
 class Channel {
 public:
-    std::string name;                               //!< the channel to join
-    std::string password;                           //!< the optional password
+    std::string name;                       //!< the channel to join
+    std::string password;                   //!< the optional password
 };
 
 /**
@@ -71,11 +71,11 @@ public:
  */
 class Whois {
 public:
-    std::string nick;                               //!< user's nickname
-    std::string user;                               //!< user's user
-    std::string host;                               //!< hostname
-    std::string realname;                           //!< realname
-    std::vector<std::string> channels;              //!< the channels where the user is
+    std::string nick;                       //!< user's nickname
+    std::string user;                       //!< user's user
+    std::string host;                       //!< hostname
+    std::string realname;                   //!< realname
+    std::vector<std::string> channels;      //!< the channels where the user is
 };
 
 /**
@@ -256,15 +256,18 @@ public:
 /**
  * \brief The class that connect to a IRC server
  *
- * The server is a class that stores callbacks which will be called on IRC events. It is the lowest part of the connection to a server, it
- * can be used directly by the user to connect to a server.
+ * The server is a class that stores callbacks which will be called on IRC
+ * events. It is the lowest part of the connection to a server, it can be used
+ * directly by the user to connect to a server.
  *
  * The server has several signals that will be emitted when data has arrived.
  *
- * When adding a server to the ServerService in irccd, these signals are connected to generate events that will be dispatched to the plugins
- * and to the transports.
+ * When adding a server to the ServerService in irccd, these signals are
+ * connected to generate events that will be dispatched to the plugins and to
+ * the transports.
  *
- * Note: the server is set in non blocking mode, commands are placed in a queue and sent when only when they are ready.
+ * Note: the server is set in non blocking mode, commands are placed in a queue
+ * and sent when only when they are ready.
  */
 class Server : public std::enable_shared_from_this<Server> {
 public:
@@ -277,11 +280,11 @@ public:
      * \brief Various options for server.
      */
     enum {
-        Ipv6        = (1 << 0),                     //!< Connect using IPv6
-        Ssl         = (1 << 1),                     //!< Use SSL
-        SslVerify   = (1 << 2),                     //!< Verify SSL
-        AutoRejoin  = (1 << 3),                     //!< Auto rejoin a channel after being kicked
-        JoinInvite  = (1 << 4)                      //!< Join a channel on invitation
+        Ipv6        = (1 << 0),             //!< Connect using IPv6
+        Ssl         = (1 << 1),             //!< Use SSL
+        SslVerify   = (1 << 2),             //!< Verify SSL
+        AutoRejoin  = (1 << 3),             //!< Auto rejoin a kick
+        JoinInvite  = (1 << 4)              //!< Join a channel on invitation
     };
 
     /**
@@ -354,7 +357,8 @@ public:
      *
      * Triggered on a CTCP Action.
      *
-     * This is both used in a channel and in a private message so the target may be a channel or your nickname.
+     * This is both used in a channel and in a private message so the target may
+     * be a channel or your nickname.
      */
     Signal<MeEvent> onMe;
 
@@ -504,7 +508,8 @@ public:
     IRCCD_EXPORT static std::shared_ptr<Server> fromJson(const nlohmann::json &object);
 
     /**
-     * Split a channel from the form channel:password into a ServerChannel object.
+     * Split a channel from the form channel:password into a ServerChannel
+     * object.
      *
      * \param value the value
      * \return a channel
@@ -631,7 +636,8 @@ public:
     /**
      * Set the nickname.
      *
-     * If the server is connected, send a nickname command to the IRC server, otherwise change it locally.
+     * If the server is connected, send a nickname command to the IRC server,
+     * otherwise change it locally.
      *
      * \param nickname the nickname
      */
@@ -921,7 +927,8 @@ public:
     /**
      * Part from a channel.
      *
-     * Please note that the reason is not supported on all servers so if you want portability, don't provide it.
+     * Please note that the reason is not supported on all servers so if you
+     * want portability, don't provide it.
      *
      * \param channel the channel to leave
      * \param reason the optional reason

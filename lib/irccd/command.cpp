@@ -70,7 +70,8 @@ std::string typeName(nlohmann::json::value_t type) noexcept
  * typeNameList
  * ------------------------------------------------------------------
  *
- * Construct a list of names to send a convenient error message if properties are invalid, example: string, int or bool expected.
+ * Construct a list of names to send a convenient error message if properties
+ * are invalid, example: string, int or bool expected.
  */
 
 std::string typeNameList(const std::vector<json::value_t> &types)

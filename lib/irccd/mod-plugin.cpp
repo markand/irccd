@@ -58,10 +58,12 @@ duk_idx_t wrap(duk_context *ctx, int nret, Func &&func)
  * set
  * ------------------------------------------------------------------
  *
- * This setter is used to replace the Irccd.Plugin.(config|format) property when the plugin assign a new one.
+ * This setter is used to replace the Irccd.Plugin.(config|format) property when
+ * the plugin assign a new one.
  *
- * Because the plugin configuration always has higher priority, when a new object is assigned to 'config' or to the 'format' property,
- * the plugin configuration is merged to the assigned one, adding or replacing any values.
+ * Because the plugin configuration always has higher priority, when a new
+ * object is assigned to 'config' or to the 'format' property, the plugin
+ * configuration is merged to the assigned one, adding or replacing any values.
  *
  * Example:
  *
@@ -178,8 +180,9 @@ duk_ret_t getFormat(duk_context *ctx)
  * - version: (string) the version
  *
  * Arguments:
- *   - name, the plugin identifier, if not specified the current plugin is selected.
- * duk_idx_turns:
+ *   - name, the plugin identifier, if not specified the current plugin is
+ *     selected.
+ * Returns:
  *   The plugin information or undefined if the plugin was not found.
  */
 duk_idx_t info(duk_context *ctx)
@@ -215,7 +218,7 @@ duk_idx_t info(duk_context *ctx)
  *
  * Get the list of plugins, the array returned contains all plugin names.
  *
- * duk_idx_turns:
+ * Returns:
  *   The list of all plugin names.
  */
 duk_idx_t list(duk_context *ctx)
@@ -231,7 +234,8 @@ duk_idx_t list(duk_context *ctx)
  * Function: Irccd.Plugin.load(name)
  * ------------------------------------------------------------------
  *
- * Load a plugin by name. This function will search through the standard directories.
+ * Load a plugin by name. This function will search through the standard
+ * directories.
  *
  * Arguments:
  *   - name, the plugin identifier.

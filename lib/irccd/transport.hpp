@@ -223,7 +223,8 @@ public:
 /**
  * \brief Bring networking between irccd and irccdctl.
  *
- * This class contains a master sockets for listening to TCP connections, it is then processed by irccd.
+ * This class contains a master sockets for listening to TCP connections, it is
+ * then processed by irccd.
  *
  * The transport class supports the following domains:
  *
@@ -232,7 +233,8 @@ public:
  * | IPv4, IPv6            | TransportServerIp     |
  * | Unix (not on Windows) | TransportServerUnix   |
  *
- * Note: IPv4 and IPv6 can be combined, using TransportServer::IPv6 and its option.
+ * Note: IPv4 and IPv6 can be combined, using TransportServer::IPv6 and its
+ * option.
  */
 class TransportServer {
 private:
