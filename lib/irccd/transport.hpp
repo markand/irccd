@@ -36,6 +36,8 @@
 
 namespace irccd {
 
+class TransportServer;
+
 /**
  * \class TransportClient
  * \brief Client connected to irccd.
@@ -44,6 +46,16 @@ namespace irccd {
  */
 class TransportClient {
 public:
+    /**
+     * \brief Client state
+     */
+    enum State {
+        Greeting,               //!< client is getting irccd info
+        Authenticating,         //!< client requires authentication
+        Ready,                  //!< client is ready to use
+        Closing                 //!< client must disconnect
+    };
+
     /**
      * Signal: onCommand
      * ----------------------------------------------------------
@@ -61,19 +73,28 @@ public:
      */
     Signal<> onDie;
 
+private:
+    void error(const std::string &msg);
+    void flush() noexcept;
+    void authenticate() noexcept;
+
 protected:
+    State m_state{Greeting};    //!< current client state
+    TransportServer &m_parent;  //!< parent transport server
     net::TcpSocket m_socket;    //!< socket
     std::string m_input;        //!< input buffer
     std::string m_output;       //!< output buffer
 
     /**
-     * Parse input buffer.
-     *
-     * \param buffer the buffer.
+     * Fill the input buffer with available data.
      */
-    void parse(const std::string &buffer);
+    void recv() noexcept;
 
-protected:
+    /**
+     * Flush the output buffer from available pending data.
+     */
+    void send() noexcept;
+
     /**
      * Try to receive some data into the given buffer.
      *
@@ -81,7 +102,7 @@ protected:
      * \param length the buffer length
      * \return the number of bytes received
      */
-    IRCCD_EXPORT virtual unsigned recv(char *buffer, unsigned length);
+    IRCCD_EXPORT virtual unsigned recv(void *buffer, unsigned length);
 
     /**
      * Try to send some data into the given buffer.
@@ -90,21 +111,17 @@ protected:
      * \param length the buffer length
      * \return the number of bytes sent
      */
-    IRCCD_EXPORT virtual unsigned send(const char *buffer, unsigned length);
+    IRCCD_EXPORT virtual unsigned send(const void *buffer, unsigned length);
 
 public:
     /**
      * Create a transport client from the socket.
      *
      * \pre socket must be valid
+     * \param parent the parent server
+     * \param socket the new socket
      */
-    inline TransportClient(net::TcpSocket socket)
-        : m_socket(std::move(socket))
-    {
-        assert(m_socket.isOpen());
-
-        m_socket.set(net::option::SockBlockMode(false));
-    }
+    IRCCD_EXPORT TransportClient(TransportServer &parent, net::TcpSocket socket);
 
     /**
      * Virtual destructor defaulted.
@@ -112,18 +129,14 @@ public:
     virtual ~TransportClient() = default;
 
     /**
-     * Convenient wrapper around recv().
+     * Get the client state.
      *
-     * Must be used in sync() function.
+     * \return the client state
      */
-    IRCCD_EXPORT void syncInput();
-
-    /**
-     * Convenient wrapper around send().
-     *
-     * Must be used in sync() function.
-     */
-    IRCCD_EXPORT void syncOutput();
+    inline State state() const noexcept
+    {
+        return m_state;
+    }
 
     /**
      * Append some data to the output queue.
@@ -168,12 +181,12 @@ protected:
     /**
      * \copydoc TransportClient::recv
      */
-    unsigned recv(char *buffer, unsigned length) override;
+    unsigned recv(void *buffer, unsigned length) override;
 
     /**
      * \copydoc TransportClient::send
      */
-    unsigned send(const char *buffer, unsigned length) override;
+    unsigned send(const void *buffer, unsigned length) override;
 
 public:
     /**
@@ -183,9 +196,12 @@ public:
      * \param pkey the private key
      * \param cert the certificate file
      * \param socket the accepted socket
+     * \param parent the parent server
+     * \param socket the new socket
      */
     IRCCD_EXPORT TransportClientTls(const std::string &pkey,
                                     const std::string &cert,
+                                    TransportServer &server,
                                     net::TcpSocket socket);
 
     /**
@@ -227,10 +243,8 @@ private:
     TransportServer &operator=(TransportServer &&) = delete;
 
 protected:
-    /**
-     * The socket handle.
-     */
     net::TcpSocket m_socket;
+    std::string m_password;
 
 public:
     /**
@@ -252,6 +266,26 @@ public:
     }
 
     /**
+     * Get the password.
+     *
+     * \return the password
+     */
+    inline const std::string &password() const noexcept
+    {
+        return m_password;
+    }
+
+    /**
+     * Set an optional password.
+     *
+     * \return the password
+     */
+    inline void setPassword(std::string password) noexcept
+    {
+        m_password = std::move(password);
+    }
+
+    /**
      * Destructor defaulted.
      */
     virtual ~TransportServer() = default;
@@ -263,7 +297,7 @@ public:
      */
     virtual std::unique_ptr<TransportClient> accept()
     {
-        return std::make_unique<TransportClient>(m_socket.accept());
+        return std::make_unique<TransportClient>(*this, m_socket.accept());
     }
 };
 

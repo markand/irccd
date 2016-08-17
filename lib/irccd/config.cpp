@@ -231,6 +231,9 @@ std::shared_ptr<TransportServer> loadTransport(const ini::Section &sc)
     else
         throw std::invalid_argument("transport: invalid type given: {}"_format(it->value()));
 
+    if ((it = sc.find("password")) != sc.end())
+        transport->setPassword(it->value());
+
     return transport;
 }
 

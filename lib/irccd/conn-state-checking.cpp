@@ -18,6 +18,7 @@
 
 #include <format.h>
 
+#include "conn-state-auth.hpp"
 #include "conn-state-checking.hpp"
 #include "conn-state-disconnected.hpp"
 #include "conn-state-ready.hpp"
@@ -59,7 +60,11 @@ void Connection::CheckingState::verifyVersion(Connection &cnx, const nlohmann::j
             IRCCD_VERSION_MAJOR, IRCCD_VERSION_MINOR, IRCCD_VERSION_PATCH));
 
     // Successfully connected.
-    cnx.m_stateNext = std::make_unique<ReadyState>();
+    if (cnx.m_password.empty())
+        cnx.m_stateNext = std::make_unique<ReadyState>();
+    else
+        cnx.m_stateNext = std::make_unique<AuthState>();
+
     cnx.onConnect(info);
 }
 

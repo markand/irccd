@@ -172,6 +172,11 @@ void Irccdctl::readConnect(const ini::Section &sc)
         readConnectLocal(sc);
     else
         throw std::invalid_argument("invalid type given: " + it->value());
+
+    auto password = sc.find("password");
+
+    if (password != sc.end())
+        m_connection->setPassword(password->value());
 }
 
 /*
@@ -394,7 +399,7 @@ nlohmann::json Irccdctl::next(const std::string id)
         auto it = std::find_if(m_input.begin(), m_input.end(), [&] (const auto &v) {
             auto rt = v.find("response");
 
-            if (rt != v.end() && rt->is_string() && *rt == id)
+            if (v.count("error") > 0 || (rt != v.end() && rt->is_string() && *rt == id))
                 return true;
 
             return false;
@@ -406,6 +411,11 @@ nlohmann::json Irccdctl::next(const std::string id)
             m_input.erase(m_input.begin(), it);
         }
     }
+
+    auto error = value.find("error");
+
+    if (error != value.end() && error->is_string())
+        throw std::runtime_error(error->template get<std::string>());
 
     return value;
 }

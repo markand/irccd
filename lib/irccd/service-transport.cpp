@@ -114,6 +114,16 @@ void TransportService::sync(fd_set &in, fd_set &out)
 {
     using namespace std::placeholders;
 
+    // Transport clients.
+    for (const auto &client : m_clients) {
+        try {
+            client->sync(in, out);
+        } catch (const std::exception &ex) {
+            log::info() << "transport: client disconnected: " << ex.what() << std::endl;
+            handleDie(client);
+        }
+    }
+
     // Transport servers.
     for (const auto &transport : m_servers) {
         if (!FD_ISSET(transport->handle(), &in))
@@ -124,24 +134,7 @@ void TransportService::sync(fd_set &in, fd_set &out)
         std::shared_ptr<TransportClient> client = transport->accept();
         std::weak_ptr<TransportClient> ptr(client);
 
-        // Send some information.
-        auto object = nlohmann::json::object({
-            { "program",    "irccd"                 },
-            { "major",      IRCCD_VERSION_MAJOR     },
-            { "minor",      IRCCD_VERSION_MINOR     },
-            { "patch",      IRCCD_VERSION_PATCH     }
-        });
-
-#if defined(WITH_JS)
-        object.push_back({"javascript", true});
-#endif
-#if defined(WITH_SSL)
-        object.push_back({"ssl", true});
-#endif
-
         try {
-            client->send(object);
-
             // Connect signals.
             client->onCommand.connect(std::bind(&TransportService::handleCommand, this, ptr, _1));
             client->onDie.connect(std::bind(&TransportService::handleDie, this, ptr));
@@ -150,16 +143,6 @@ void TransportService::sync(fd_set &in, fd_set &out)
             m_clients.push_back(std::move(client));
         } catch (const std::exception &ex) {
             log::info() << "transport: client disconnected: " << ex.what() << std::endl;
-        }
-    }
-
-    // Transport clients.
-    for (const auto &client : m_clients) {
-        try {
-            client->sync(in, out);
-        } catch (const std::exception &ex) {
-            log::info() << "transport: client disconnected: " << ex.what() << std::endl;
-            handleDie(client);
         }
     }
 }
@@ -173,9 +156,9 @@ void TransportService::broadcast(const nlohmann::json &json)
 {
     assert(json.is_object());
 
-    // Asynchronous send.
     for (const auto &client : m_clients)
-        client->send(json);
+        if (client->state() == TransportClient::Ready)
+            client->send(json);
 }
 
 } // !irccd

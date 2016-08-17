@@ -2,6 +2,7 @@ set(
     HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/alias.hpp
     ${CMAKE_CURRENT_LIST_DIR}/connection.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/conn-state-auth.hpp
     ${CMAKE_CURRENT_LIST_DIR}/conn-state-checking.hpp
     ${CMAKE_CURRENT_LIST_DIR}/conn-state-connecting.hpp
     ${CMAKE_CURRENT_LIST_DIR}/conn-state-disconnected.hpp
@@ -83,6 +84,7 @@ set(
     SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/alias.cpp
     ${CMAKE_CURRENT_LIST_DIR}/connection.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/conn-state-auth.cpp
     ${CMAKE_CURRENT_LIST_DIR}/conn-state-checking.cpp
     ${CMAKE_CURRENT_LIST_DIR}/conn-state-connecting.cpp
     ${CMAKE_CURRENT_LIST_DIR}/conn-state-disconnected.cpp

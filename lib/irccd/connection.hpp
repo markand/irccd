@@ -117,9 +117,11 @@ public:
 private:
     std::string m_input;
     std::string m_output;
+    std::string m_password;
 
 public:
     class State;
+    class AuthState;
     class DisconnectedState;
     class ConnectingState;
     class CheckingState;
@@ -158,6 +160,26 @@ public:
      * Default destructor.
      */
     virtual ~Connection();
+
+    /**
+     * Get the optional password.
+     *
+     * \return the password
+     */
+    inline const std::string &password() const noexcept
+    {
+        return m_password;
+    }
+
+    /**
+     * Set the optional password
+     *
+     * \param password the password
+     */
+    inline void setPassword(std::string password) noexcept
+    {
+        m_password = std::move(password);
+    }
 
     /**
      * Convenient wrapper around recv().
