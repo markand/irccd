@@ -27,7 +27,7 @@ using namespace fmt::literals;
 
 namespace irccd {
 
-void ConnectedState::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
+void Server::ConnectedState::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
 {
     if (!irc_is_connected(server.session())) {
         log::warning() << "server " << server.name() << ": disconnected" << std::endl;
@@ -44,7 +44,7 @@ void ConnectedState::prepare(Server &server, fd_set &setinput, fd_set &setoutput
         irc_add_select_descriptors(server.session(), &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
 }
 
-std::string ConnectedState::ident() const
+std::string Server::ConnectedState::ident() const
 {
     return "Connected";
 }

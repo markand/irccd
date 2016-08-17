@@ -33,7 +33,7 @@ namespace irccd {
  * \brief Connecting state.
  * \ingroup states
  */
-class ConnectingState : public State {
+class Server::ConnectingState : public State {
 private:
     bool m_started{false};
     ElapsedTimer m_timer;

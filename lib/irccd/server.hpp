@@ -38,7 +38,7 @@
 #include <json.hpp>
 
 #include "elapsed-timer.hpp"
-#include "server-state.hpp"
+#include "net.hpp"
 #include "signals.hpp"
 #include "sysconfig.hpp"
 
@@ -434,6 +434,11 @@ public:
     Signal<WhoisEvent> onWhois;
 
 private:
+    class State;
+    class ConnectedState;
+    class ConnectingState;
+    class DisconnectedState;
+
     // Misc.
     std::map<ChannelMode, char> m_modes;
 
@@ -822,10 +827,7 @@ public:
      *
      * \param state the new state
      */
-    inline void next(std::unique_ptr<State> state) noexcept
-    {
-        m_stateNext = std::move(state);
-    }
+    IRCCD_EXPORT void next(std::unique_ptr<State> state) noexcept;
 
     /**
      * Switch to next state if it has.
@@ -847,10 +849,7 @@ public:
      *
      * \warning Not thread-safe
      */
-    inline void prepare(fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) noexcept
-    {
-        m_state->prepare(*this, setinput, setoutput, maxfd);
-    }
+    IRCCD_EXPORT void prepare(fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) noexcept;
 
     /**
      * Process incoming/outgoing data after selection.

@@ -32,15 +32,14 @@
 #include "elapsed-timer.hpp"
 #include "net.hpp"
 #include "sysconfig.hpp"
+#include "server.hpp"
 
 namespace irccd {
-
-class Server;
 
 /**
  * \brief Server current state.
  */
-class State {
+class Server::State {
 public:
     /**
      * Default constructor.

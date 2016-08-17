@@ -33,7 +33,7 @@ namespace irccd {
  * \brief Disconnected state.
  * \ingroup states
  */
-class DisconnectedState : public State {
+class Server::DisconnectedState : public Server::State {
 private:
     ElapsedTimer m_timer;
 

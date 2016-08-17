@@ -69,7 +69,7 @@ bool connect(Server &server)
 
 } // !namespace
 
-void ConnectingState::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
+void Server::ConnectingState::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
 {
     /*
      * The connect function will either fail if the hostname wasn't resolved or if any of the internal functions
@@ -120,7 +120,7 @@ void ConnectingState::prepare(Server &server, fd_set &setinput, fd_set &setoutpu
     }
 }
 
-std::string ConnectingState::ident() const
+std::string Server::ConnectingState::ident() const
 {
     return "Connecting";
 }

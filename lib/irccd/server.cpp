@@ -487,6 +487,11 @@ void Server::setCtcpVersion(std::string ctcpversion)
     irc_set_ctcp_version(*m_session, ctcpversion.c_str());
 }
 
+void Server::next(std::unique_ptr<State> state) noexcept
+{
+    m_stateNext = std::move(state);
+}
+
 void Server::update() noexcept
 {
     if (m_stateNext) {
@@ -512,6 +517,11 @@ void Server::reconnect() noexcept
 {
     irc_disconnect(*m_session);
     next(std::make_unique<ConnectingState>());
+}
+
+void Server::prepare(fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) noexcept
+{
+    m_state->prepare(*this, setinput, setoutput, maxfd);
 }
 
 void Server::sync(fd_set &setinput, fd_set &setoutput)

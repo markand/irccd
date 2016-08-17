@@ -32,7 +32,7 @@ namespace irccd {
  * \brief Connected state.
  * \ingroup states
  */
-class ConnectedState : public State {
+class Server::ConnectedState : public State {
 public:
     /**
      * \copydoc State::prepare

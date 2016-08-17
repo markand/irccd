@@ -23,7 +23,7 @@
 
 namespace irccd {
 
-void DisconnectedState::prepare(Server &server, fd_set &, fd_set &, net::Handle &)
+void Server::DisconnectedState::prepare(Server &server, fd_set &, fd_set &, net::Handle &)
 {
     auto &cache = server.cache();
 
@@ -43,7 +43,7 @@ void DisconnectedState::prepare(Server &server, fd_set &, fd_set &, net::Handle 
     }
 }
 
-std::string DisconnectedState::ident() const
+std::string Server::DisconnectedState::ident() const
 {
     return "Disconnected";
 }
