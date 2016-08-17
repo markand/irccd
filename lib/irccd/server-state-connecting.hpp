@@ -38,6 +38,8 @@ private:
     bool m_started{false};
     ElapsedTimer m_timer;
 
+    bool connect(Server &server);
+
 public:
     /**
      * \copydoc State::prepare

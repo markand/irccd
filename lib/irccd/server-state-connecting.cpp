@@ -36,38 +36,34 @@ using namespace fmt::literals;
 
 namespace irccd {
 
-namespace {
-
-bool connect(Server &server)
+bool Server::ConnectingState::connect(Server &server)
 {
-    const char *password = server.password().empty() ? nullptr : server.password().c_str();
-    std::string host = server.host();
+    const char *password = server.m_password.empty() ? nullptr : server.m_password.c_str();
+    std::string host = server.m_host;
     int code;
 
     // libircclient requires # for SSL connection.
 #if defined(WITH_SSL)
-    if (server.flags() & Server::Ssl)
+    if (server.m_flags & Server::Ssl)
         host.insert(0, 1, '#');
-    if (!(server.flags() & Server::SslVerify))
-        irc_option_set(server.session(), LIBIRC_OPTION_SSL_NO_VERIFY);
+    if (!(server.m_flags & Server::SslVerify))
+        irc_option_set(*server.m_session, LIBIRC_OPTION_SSL_NO_VERIFY);
 #endif
 
     if (server.flags() & Server::Ipv6) {
-        code = irc_connect6(server.session(), host.c_str(), server.port(), password,
-                            server.nickname().c_str(),
-                            server.username().c_str(),
-                            server.realname().c_str());
+        code = irc_connect6(*server.m_session, host.c_str(), server.m_port, password,
+                            server.m_nickname.c_str(),
+                            server.m_username.c_str(),
+                            server.m_realname.c_str());
     } else {
-        code = irc_connect(server.session(), host.c_str(), server.port(), password,
-                           server.nickname().c_str(),
-                           server.username().c_str(),
-                           server.realname().c_str());
+        code = irc_connect(*server.m_session, host.c_str(), server.m_port, password,
+                           server.m_nickname.c_str(),
+                           server.m_username.c_str(),
+                           server.m_realname.c_str());
     }
 
     return code == 0;
 }
-
-} // !namespace
 
 void Server::ConnectingState::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
 {
@@ -83,19 +79,19 @@ void Server::ConnectingState::prepare(Server &server, fd_set &setinput, fd_set &
      * Otherwise, the libircclient event_connect will change the state.
      */
     if (m_started) {
-        if (m_timer.elapsed() > static_cast<unsigned>(server.reconnectDelay() * 1000)) {
+        if (m_timer.elapsed() > static_cast<unsigned>(server.m_reconnectDelay * 1000)) {
             log::warning() << "server " << server.name() << ": timeout while connecting" << std::endl;
             server.next(std::make_unique<DisconnectedState>());
-        } else if (!irc_is_connected(server.session())) {
-            log::warning() << "server " << server.name() << ": error while connecting: ";
-            log::warning() << irc_strerror(irc_errno(server.session())) << std::endl;
+        } else if (!irc_is_connected(*server.m_session)) {
+            log::warning() << "server " << server.m_name << ": error while connecting: ";
+            log::warning() << irc_strerror(irc_errno(*server.m_session)) << std::endl;
 
-            if (server.reconnectTries() != 0)
-                log::warning("server {}: retrying in {} seconds"_format(server.name(), server.reconnectDelay()));
+            if (server.m_reconnectTries != 0)
+                log::warning("server {}: retrying in {} seconds"_format(server.m_name, server.m_reconnectDelay));
 
             server.next(std::make_unique<DisconnectedState>());
         } else
-            irc_add_select_descriptors(server.session(), &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
+            irc_add_select_descriptors(*server.m_session, &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
     } else {
         /*
          * This is needed if irccd is started before DHCP or if DNS cache is outdated.
@@ -105,17 +101,17 @@ void Server::ConnectingState::prepare(Server &server, fd_set &setinput, fd_set &
 #if !defined(IRCCD_SYSTEM_WINDOWS)
         (void)res_init();
 #endif
-        log::info("server {}: trying to connect to {}, port {}"_format(server.name(), server.host(), server.port()));
+        log::info("server {}: trying to connect to {}, port {}"_format(server.m_name, server.m_host, server.m_port));
 
         if (!connect(server)) {
-            log::warning() << "server " << server.name() << ": disconnected while connecting: ";
-            log::warning() << irc_strerror(irc_errno(server.session())) << std::endl;
+            log::warning() << "server " << server.m_name << ": disconnected while connecting: ";
+            log::warning() << irc_strerror(irc_errno(*server.m_session)) << std::endl;
             server.next(std::make_unique<DisconnectedState>());
         } else {
             m_started = true;
 
-            if (irc_is_connected(server.session()))
-                irc_add_select_descriptors(server.session(), &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
+            if (irc_is_connected(*server.m_session))
+                irc_add_select_descriptors(*server.m_session, &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
         }
     }
 }

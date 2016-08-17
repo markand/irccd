@@ -792,16 +792,6 @@ public:
     }
 
     /**
-     * Get the private session.
-     *
-     * \return the session
-     */
-    inline Session &session() noexcept
-    {
-        return *m_session;
-    }
-
-    /**
      * Set the next state, it is not changed immediately but on next iteration.
      *
      * \param state the new state

@@ -29,19 +29,19 @@ namespace irccd {
 
 void Server::ConnectedState::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
 {
-    if (!irc_is_connected(server.session())) {
-        log::warning() << "server " << server.name() << ": disconnected" << std::endl;
+    if (!irc_is_connected(*server.m_session)) {
+        log::warning() << "server " << server.m_name << ": disconnected" << std::endl;
 
-        if (server.reconnectDelay() > 0)
-            log::warning("server {}: retrying in {} seconds"_format(server.name(), server.reconnectDelay()));
+        if (server.m_reconnectDelay > 0)
+            log::warning("server {}: retrying in {} seconds"_format(server.m_name, server.m_reconnectDelay));
 
         server.next(std::make_unique<DisconnectedState>());
     } else if (server.m_timer.elapsed() >= server.m_pingTimeout * 1000) {
-        log::warning() << "server " << server.name() << ": ping timeout after "
+        log::warning() << "server " << server.m_name << ": ping timeout after "
                    << (server.m_timer.elapsed() / 1000) << " seconds" << std::endl;
         server.next(std::make_unique<DisconnectedState>());
     } else
-        irc_add_select_descriptors(server.session(), &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
+        irc_add_select_descriptors(*server.m_session, &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
 }
 
 std::string Server::ConnectedState::ident() const
