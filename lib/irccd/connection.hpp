@@ -30,7 +30,7 @@
 
 #include "net.hpp"
 #include "signals.hpp"
-#include "service.hpp"
+#include "pollable.hpp"
 
 namespace irccd {
 
@@ -65,7 +65,7 @@ namespace irccd {
  *     |                                   |
  *     ------------------------------------+
  */
-class Connection : public Service {
+class Connection : public Pollable {
 public:
     /**
      * \brief The current connection state.

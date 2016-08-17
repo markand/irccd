@@ -24,7 +24,7 @@
  * \brief Interrupt irccd event loop.
  */
 
-#include "service.hpp"
+#include "pollable.hpp"
 
 namespace irccd {
 
@@ -32,7 +32,7 @@ namespace irccd {
  * \brief Interrupt irccd event loop.
  * \ingroup services
  */
-class InterruptService : public Service {
+class InterruptService : public Pollable {
 private:
     net::TcpSocket m_in;
     net::TcpSocket m_out;

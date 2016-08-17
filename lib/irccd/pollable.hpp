@@ -1,5 +1,5 @@
 /*
- * service.hpp -- selectable service
+ * pollable.hpp -- pollable object
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,45 +16,55 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_SERVICE_HPP
-#define IRCCD_SERVICE_HPP
+#ifndef IRCCD_POLLABLE_HPP
+#define IRCCD_POLLABLE_HPP
 
 /**
  * \file service.hpp
- * \brief Selectable service.
- */
-
-/**
- * \defgroup services Irccd services
- * \brief Irccd services.
+ * \brief Pollable object.
  */
 
 #include "net.hpp"
-#include "sysconfig.hpp"
 #include "util.hpp"
 
 namespace irccd {
 
 /**
- * \brief Selectable service.
+ * \brief Pollable object.
  *
- * This class can be used to prepare a set of sockets that will be selected by Irccd class.
+ * This class can be used to prepare an object into a select(2) system call.
  *
- * First, the function prepare is called, the user is responsible to fill the input and output set and adjust max accordingly.
+ * The primary use case of these objects is to be polled in the main loop while
+ * being generic.
  *
- * Second, after select has been called, sync is called. The user is responsible of checking which sockets are ready for input or output.
+ * To use the pollable objects:
+ *
+ * 1. Create two fd_set, one for input and one for output. Don't forget to
+ *    initialize them using FD_ZERO.
+ *
+ * 2. For all of your pollable objects, call the prepare function and pass the
+ *    input and output sets. The max handle is usually the pollable socket.
+ *
+ * 3. Do your select(2) call using the input, output and socket handle and your
+ *    desired timeout.
+ *
+ * 4. For all of your pollable objects, call the sync function and pass the
+ *    input and output sets.
+ *
+ * Pollable objects are usually implemented using asynchronous signals defined
+ * in signals.hpp file.
  */
-class Service {
+class Pollable {
 public:
     /**
      * Default constructor.
      */
-    Service() noexcept = default;
+    Pollable() noexcept = default;
 
     /**
      * Virtual destructor defaulted.
      */
-    virtual ~Service() noexcept = default;
+    virtual ~Pollable() noexcept = default;
 
     /**
      * Prepare the input and output set.
@@ -102,4 +112,4 @@ public:
 
 } // !irccd
 
-#endif // !IRCCD_SERVICE_HPP
+#endif // !IRCCD_POLLABLE_HPP

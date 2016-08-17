@@ -29,7 +29,7 @@
 #include <string>
 
 #include "server.hpp"
-#include "service.hpp"
+#include "pollable.hpp"
 
 namespace irccd {
 
@@ -39,7 +39,7 @@ class Irccd;
  * \brief Manage IRC servers.
  * \ingroup services
  */
-class ServerService : public Service {
+class ServerService : public Pollable {
 private:
     Irccd &m_irccd;
     std::vector<std::shared_ptr<Server>> m_servers;

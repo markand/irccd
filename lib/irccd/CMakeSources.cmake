@@ -53,9 +53,9 @@ set(
     ${CMAKE_CURRENT_LIST_DIR}/plugin.hpp
     ${CMAKE_CURRENT_LIST_DIR}/plugin-dynlib.hpp
     ${CMAKE_CURRENT_LIST_DIR}/plugin-js.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/pollable.hpp
     ${CMAKE_CURRENT_LIST_DIR}/rule.hpp
     ${CMAKE_CURRENT_LIST_DIR}/server.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/service.hpp
     ${CMAKE_CURRENT_LIST_DIR}/service-command.hpp
     ${CMAKE_CURRENT_LIST_DIR}/service-interrupt.hpp
     ${CMAKE_CURRENT_LIST_DIR}/service-module.hpp

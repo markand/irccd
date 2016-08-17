@@ -41,9 +41,9 @@ class CommandService;
 class InterruptService;
 class ModuleService;
 class PluginService;
+class Pollable;
 class RuleService;
 class ServerService;
-class Service;
 class TransportService;
 
 /**
@@ -65,7 +65,7 @@ private:
     std::shared_ptr<RuleService> m_ruleService;
     std::shared_ptr<ModuleService> m_moduleService;
     std::shared_ptr<PluginService> m_pluginService;
-    std::vector<std::shared_ptr<Service>> m_services;
+    std::vector<std::shared_ptr<Pollable>> m_services;
 
     // Not copyable and not movable because services has references to irccd.
     Irccd(const Irccd &) = delete;
@@ -85,7 +85,7 @@ public:
      *
      * \param service the service
      */
-    inline void addService(std::shared_ptr<Service> service)
+    inline void addService(std::shared_ptr<Pollable> service)
     {
         m_services.push_back(std::move(service));
     }

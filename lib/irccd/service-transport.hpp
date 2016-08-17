@@ -26,7 +26,7 @@
 
 #include <json.hpp>
 
-#include "service.hpp"
+#include "pollable.hpp"
 
 namespace irccd {
 
@@ -37,7 +37,7 @@ class TransportClient;
  * \brief manage transport servers and clients.
  * \ingroup services
  */
-class TransportService : public Service {
+class TransportService : public Pollable {
 private:
     Irccd &m_irccd;
 
