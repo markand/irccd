@@ -35,7 +35,7 @@ private:
 
 public:
     inline ServerTest()
-        : Server("test", ServerInfo())
+        : Server("test")
     {
     }
 
@@ -72,7 +72,7 @@ protected:
 
 public:
     PluginTest()
-        : m_ps(m_irccd.pluginService())
+        : m_ps(m_irccd.plugins())
         , m_server(std::make_shared<ServerTest>())
     {
         m_ps.add(std::make_shared<FakePlugin>());

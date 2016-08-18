@@ -39,8 +39,8 @@ protected:
     TestJsUnicode()
         : m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
     {
-        m_irccd.moduleService().get("Irccd")->load(m_irccd, m_plugin);
-        m_irccd.moduleService().get("Irccd.Unicode")->load(m_irccd, m_plugin);
+        m_irccd.modules().get("Irccd")->load(m_irccd, m_plugin);
+        m_irccd.modules().get("Irccd.Unicode")->load(m_irccd, m_plugin);
     }
 };
 

@@ -25,21 +25,21 @@ using namespace irccd;
 class MyCommand : public Command {
 public:
     MyCommand()
-        : Command("test", "Test")
+        : Command("test", "Test", "This is a super command")
     {
-    }
-
-    std::string help() const override
-    {
-        return "This is a super command";
     }
 
     std::vector<Property> properties() const
     {
         return {
-            { "b", { json::Type::Boolean }},
-            { "i", { json::Type::Int }},
-            { "m", { json::Type::Boolean, json::Type::Int, nlohmann::json::value_t::string }}
+            { "b", { nlohmann::json::value_t::boolean }},
+            { "i", { nlohmann::json::value_t::number_integer }},
+            { "m", {
+                nlohmann::json::value_t::boolean,
+                nlohmann::json::value_t::number_integer,
+                nlohmann::json::value_t::string
+                   }
+            }
         };
     }
 };

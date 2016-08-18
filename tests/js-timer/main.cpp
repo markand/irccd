@@ -35,7 +35,7 @@ TEST(Basic, single)
     auto plugin = std::make_shared<JsPlugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-single.js");
 
     plugin->onLoad(irccd);
-    irccd.pluginService().add(plugin);
+    irccd.plugins().add(plugin);
 
     while (timer.elapsed() < 3000) {
         irccd.poll();
@@ -54,7 +54,7 @@ TEST(Basic, repeat)
     auto plugin = std::make_shared<JsPlugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-repeat.js");
 
     plugin->onLoad(irccd);
-    irccd.pluginService().add(plugin);
+    irccd.plugins().add(plugin);
 
     while (timer.elapsed() < 3000) {
         irccd.poll();

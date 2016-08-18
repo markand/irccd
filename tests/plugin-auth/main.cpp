@@ -30,7 +30,7 @@ private:
 
 public:
     inline ServerTest(std::string name)
-        : Server(std::move(name), ServerInfo())
+        : Server(std::move(name))
     {
     }
 
@@ -57,7 +57,7 @@ protected:
 
 public:
     AuthTest()
-        : m_ps(m_irccd.pluginService())
+        : m_ps(m_irccd.plugins())
         , m_nickserv1(std::make_shared<ServerTest>("nickserv1"))
         , m_nickserv2(std::make_shared<ServerTest>("nickserv2"))
         , m_quakenet(std::make_shared<ServerTest>("quakenet"))

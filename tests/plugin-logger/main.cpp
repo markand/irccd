@@ -31,7 +31,7 @@ using namespace irccd;
 class ServerTest : public Server {
 public:
     inline ServerTest()
-        : Server("test", ServerInfo())
+        : Server("test")
     {
     }
 };
@@ -53,7 +53,7 @@ protected:
 
 public:
     LoggerTest()
-        : m_ps(m_irccd.pluginService())
+        : m_ps(m_irccd.plugins())
         , m_server(std::make_shared<ServerTest>())
     {
         remove(BINARYDIR "/log.txt");

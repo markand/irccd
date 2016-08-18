@@ -30,7 +30,7 @@ private:
 
 public:
     inline ServerTest()
-        : Server("test", ServerInfo())
+        : Server("test")
     {
     }
 
@@ -55,7 +55,7 @@ protected:
 
 public:
     AskTest()
-        : m_ps(m_irccd.pluginService())
+        : m_ps(m_irccd.plugins())
         , m_server(std::make_shared<ServerTest>())
     {
         m_ps.setConfig("ask", {{"file", SOURCEDIR "/answers.conf"}});
@@ -69,7 +69,10 @@ TEST_F(AskTest, basic)
     bool no = false;
     bool yes = false;
 
-    // Invoke the plugin 1000 times, it will be very unlucky to not have both answers in that amount of tries.
+    /*
+     * Invoke the plugin 1000 times, it will be very unlucky to not have both
+     * answers in that amount of tries.
+     */
     for (int i = 0; i < 1000; ++i) {
         m_plugin->onCommand(m_irccd, MessageEvent{m_server, "tester", "#dummy", ""});
 
