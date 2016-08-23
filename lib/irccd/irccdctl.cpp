@@ -19,7 +19,7 @@
 #include <format.h>
 
 #include "command.hpp"
-#include "connection.hpp"
+#include "client.hpp"
 #include "elapsed-timer.hpp"
 #include "fs.hpp"
 #include "ini.hpp"
@@ -121,9 +121,9 @@ void Irccdctl::readConnectIp(const ini::Section &sc)
     m_address = net::resolveOne(host, port, domain, SOCK_STREAM);
 
     if ((it = sc.find("ssl")) != sc.end() && util::isBoolean(it->value()))
-        m_connection = std::make_unique<TlsConnection>();
+        m_connection = std::make_unique<TlsClient>();
     else
-        m_connection = std::make_unique<Connection>();
+        m_connection = std::make_unique<Client>();
 }
 
 /*
@@ -145,7 +145,7 @@ void Irccdctl::readConnectLocal(const ini::Section &sc)
         throw std::invalid_argument("missing path parameter");
 
     m_address = net::local::create(it->value());
-    m_connection = std::make_unique<Connection>();
+    m_connection = std::make_unique<Client>();
 #else
     (void)sc;
 
@@ -291,7 +291,7 @@ void Irccdctl::parseConnectIp(const option::Result &options)
         domain = it->second == "ipv6" ? AF_INET6: AF_INET;
 
     m_address = net::resolveOne(host, port, domain, SOCK_STREAM);
-    m_connection = std::make_unique<Connection>();
+    m_connection = std::make_unique<Client>();
 }
 
 /*
@@ -311,7 +311,7 @@ void Irccdctl::parseConnectLocal(const option::Result &options)
         throw std::invalid_argument("missing path parameter (-P or --path)");
 
     m_address = net::local::create(it->second, false);
-    m_connection = std::make_unique<Connection>();
+    m_connection = std::make_unique<Client>();
 #else
     (void)options;
 

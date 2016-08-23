@@ -28,7 +28,7 @@
 #include <memory>
 #include <string>
 
-#include "connection.hpp"
+#include "client.hpp"
 #include "alias.hpp"
 #include "options.hpp"
 #include "service-command.hpp"
@@ -37,7 +37,7 @@
 
 namespace irccd {
 
-class Connection;
+class Client;
 
 namespace ini {
 
@@ -55,7 +55,7 @@ private:
     CommandService m_commandService;
 
     // Connection handler.
-    std::unique_ptr<Connection> m_connection;
+    std::unique_ptr<Client> m_connection;
     std::uint32_t m_timeout{30000};
     net::Address m_address;
 
@@ -93,12 +93,22 @@ public:
         return m_commandService;
     }
 
-    inline const Connection &connection() const noexcept
+    /**
+     * Get the client connection to irccd.
+     *
+     * \return the connection
+     */
+    inline const Client &client() const noexcept
     {
         return *m_connection;
     }
 
-    inline Connection &connection() noexcept
+    /**
+     * Get the client connection to irccd.
+     *
+     * \return the connection
+     */
+    inline Client &client() noexcept
     {
         return *m_connection;
     }

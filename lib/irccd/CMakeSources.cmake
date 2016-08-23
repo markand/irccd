@@ -1,7 +1,7 @@
 set(
     HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/alias.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/connection.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/client.hpp
     ${CMAKE_CURRENT_LIST_DIR}/cmd-help.hpp
     ${CMAKE_CURRENT_LIST_DIR}/cmd-plugin-config.hpp
     ${CMAKE_CURRENT_LIST_DIR}/cmd-plugin-info.hpp
@@ -73,7 +73,7 @@ set(
 set(
     SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/alias.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/connection.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/client.cpp
     ${CMAKE_CURRENT_LIST_DIR}/config.cpp
     ${CMAKE_CURRENT_LIST_DIR}/cmd-help.cpp
     ${CMAKE_CURRENT_LIST_DIR}/cmd-plugin-config.cpp

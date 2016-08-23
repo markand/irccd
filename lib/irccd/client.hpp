@@ -1,5 +1,5 @@
 /*
- * connection.hpp -- value wrapper for connecting to irccd
+ * client.hpp -- value wrapper for connecting to irccd
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_CONNECTION_HPP
-#define IRCCD_CONNECTION_HPP
+#ifndef IRCCD_CLIENT_HPP
+#define IRCCD_CLIENT_HPP
 
 /**
- * \file connection.hpp
+ * \file client.hpp
  * \brief Connection to irccd instance.
  */
 
@@ -65,7 +65,7 @@ namespace irccd {
  *     |                                   |
  *     ------------------------------------+
  */
-class Connection : public Pollable {
+class Client : public Pollable {
 public:
     /**
      * \brief The current connection state.
@@ -166,12 +166,12 @@ public:
     /**
      * Default constructor.
      */
-    Connection();
+    Client();
 
     /**
      * Default destructor.
      */
-    virtual ~Connection();
+    virtual ~Client();
 
     /**
      * Get the optional password.
@@ -264,7 +264,7 @@ public:
 /**
  * \brief TLS over IP connection.
  */
-class TlsConnection : public Connection {
+class TlsClient : public Client {
 private:
     enum {
         HandshakeUndone,
@@ -280,18 +280,18 @@ private:
 
 protected:
     /**
-     * \copydoc Connection::recv
+     * \copydoc Client::recv
      */
     virtual unsigned recv(char *buffer, unsigned length);
 
     /**
-     * \copydoc Connection::send
+     * \copydoc Client::send
      */
     virtual unsigned send(const char *buffer, unsigned length);
 
 public:
     /**
-     * \copydoc Connection::connect
+     * \copydoc Client::connect
      */
     void connect(const net::Address &address) override;
 
@@ -308,4 +308,4 @@ public:
 
 } // !irccd
 
-#endif // !IRCCD_CONNECTION_HPP
+#endif // !IRCCD_CLIENT_HPP

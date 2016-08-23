@@ -215,7 +215,7 @@ nlohmann::json Watch::request(Irccdctl &ctl, const CommandRequest &request) cons
     if (format != "native" && format != "json")
         throw std::invalid_argument("invalid format given: " + format);
 
-    while (ctl.connection().isConnected()) {
+    while (ctl.client().isConnected()) {
         try {
             auto object = ctl.next();
             auto event = object.find("event");

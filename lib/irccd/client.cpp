@@ -1,5 +1,5 @@
 /*
- * connection.cpp -- value wrapper for connecting to irccd
+ * client.cpp -- value wrapper for connecting to irccd
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -13,14 +13,14 @@
  * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ * OR IN Client WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
 #include <stdexcept>
 
 #include <format.h>
 
-#include "connection.hpp"
+#include "client.hpp"
 #include "util.hpp"
 
 using namespace fmt::literals;
@@ -28,43 +28,43 @@ using namespace fmt::literals;
 namespace irccd {
 
 /*
- * Connection::State.
+ * Client::State.
  * ------------------------------------------------------------------
  */
 
-class Connection::State {
+class Client::State {
 public:
     State() = default;
     virtual ~State() = default;
     virtual Status status() const noexcept = 0;
-    virtual void prepare(Connection &cnt, fd_set &in, fd_set &out) = 0;
-    virtual void sync(Connection &cnt, fd_set &in, fd_set &out) = 0;
+    virtual void prepare(Client &cnt, fd_set &in, fd_set &out) = 0;
+    virtual void sync(Client &cnt, fd_set &in, fd_set &out) = 0;
 };
 
 /*
- * Connection::DisconnectedState.
+ * Client::DisconnectedState.
  * ------------------------------------------------------------------
  */
 
-class Connection::DisconnectedState : public Connection::State {
+class Client::DisconnectedState : public Client::State {
 public:
-    Connection::Status status() const noexcept override
+    Client::Status status() const noexcept override
     {
         return Disconnected;
     }
 
-    void prepare(Connection &, fd_set &, fd_set &) override {}
-    void sync(Connection &, fd_set &, fd_set &) override {}
+    void prepare(Client &, fd_set &, fd_set &) override {}
+    void sync(Client &, fd_set &, fd_set &) override {}
 };
 
 /*
- * Connection::DisconnectedState.
+ * Client::DisconnectedState.
  * ------------------------------------------------------------------
  */
 
-class Connection::ReadyState : public Connection::State {
+class Client::ReadyState : public Client::State {
 private:
-    void parse(Connection &cnx, const std::string &message)
+    void parse(Client &cnx, const std::string &message)
     {
         try {
             auto json = nlohmann::json::parse(message);
@@ -77,12 +77,12 @@ private:
         }
     }
 public:
-    Connection::Status status() const noexcept override
+    Client::Status status() const noexcept override
     {
         return Ready;
     }
 
-    void prepare(Connection &cnx, fd_set &in, fd_set &out) override
+    void prepare(Client &cnx, fd_set &in, fd_set &out) override
     {
         FD_SET(cnx.m_socket.handle(), &in);
 
@@ -90,7 +90,7 @@ public:
             FD_SET(cnx.m_socket.handle(), &out);
     }
 
-    void sync(Connection &cnx, fd_set &in, fd_set &out) override
+    void sync(Client &cnx, fd_set &in, fd_set &out) override
     {
         if (FD_ISSET(cnx.m_socket.handle(), &out))
             cnx.send();
@@ -110,11 +110,11 @@ public:
 };
 
 /*
- * Connection::AuthState.
+ * Client::AuthState.
  * ------------------------------------------------------------------
  */
 
-class Connection::AuthState : public Connection::State {
+class Client::AuthState : public Client::State {
 private:
     enum {
         Created,
@@ -124,14 +124,14 @@ private:
 
     std::string m_output;
 
-    void send(Connection &cnt) noexcept
+    void send(Client &cnt) noexcept
     {
         try {
             auto n = cnt.send(m_output.data(), m_output.size());
 
             if (n == 0) {
                 m_output.clear();
-                throw std::runtime_error("connection lost");
+                throw std::runtime_error("Client lost");
             }
 
             m_output.erase(0, n);
@@ -144,7 +144,7 @@ private:
         }
     }
 
-    void check(Connection &cnt) noexcept
+    void check(Client &cnt) noexcept
     {
         cnt.recv();
 
@@ -180,12 +180,12 @@ private:
     }
 
 public:
-    Connection::Status status() const noexcept override
+    Client::Status status() const noexcept override
     {
         return Authenticating;
     }
 
-    void prepare(Connection &cnt, fd_set &in, fd_set &out) override
+    void prepare(Client &cnt, fd_set &in, fd_set &out) override
     {
         switch (m_auth) {
         case Created:
@@ -208,7 +208,7 @@ public:
         }
     }
 
-    void sync(Connection &cnt, fd_set &in, fd_set &out) override
+    void sync(Client &cnt, fd_set &in, fd_set &out) override
     {
         switch (m_auth) {
         case Sending:
@@ -226,11 +226,11 @@ public:
 };
 
 /*
- * Connection::CheckingState.
+ * Client::CheckingState.
  * ------------------------------------------------------------------
  */
 
-class Connection::CheckingState : public Connection::State {
+class Client::CheckingState : public Client::State {
 private:
     void verifyProgram(const nlohmann::json &json) const
     {
@@ -240,7 +240,7 @@ private:
             throw std::runtime_error("not an irccd instance");
     }
 
-    void verifyVersion(Connection &cnx, const nlohmann::json &json) const
+    void verifyVersion(Client &cnx, const nlohmann::json &json) const
     {
         auto getVersionVar = [&] (auto key) {
             auto it = json.find(key);
@@ -272,7 +272,7 @@ private:
         cnx.onConnect(info);
     }
 
-    void verify(Connection &cnx) const
+    void verify(Client &cnx) const
     {
         auto msg = util::nextNetwork(cnx.m_input);
 
@@ -291,17 +291,17 @@ private:
     }
 
 public:
-    Connection::Status status() const noexcept override
+    Client::Status status() const noexcept override
     {
         return Checking;
     }
 
-    void prepare(Connection &cnx, fd_set &in, fd_set &) override
+    void prepare(Client &cnx, fd_set &in, fd_set &) override
     {
         FD_SET(cnx.m_socket.handle(), &in);
     }
 
-    void sync(Connection &cnx, fd_set &, fd_set &) override
+    void sync(Client &cnx, fd_set &, fd_set &) override
     {
         cnx.recv();
 
@@ -310,23 +310,23 @@ public:
 };
 
 /*
- * Connection::ConnectingState.
+ * Client::ConnectingState.
  * ------------------------------------------------------------------
  */
 
-class Connection::ConnectingState : public Connection::State {
+class Client::ConnectingState : public Client::State {
 public:
-    Connection::Status status() const noexcept override
+    Client::Status status() const noexcept override
     {
         return Connecting;
     }
 
-    void prepare(Connection &cnx, fd_set &, fd_set &out) override
+    void prepare(Client &cnx, fd_set &, fd_set &out) override
     {
         FD_SET(cnx.m_socket.handle(), &out);
     }
 
-    void sync(Connection &cnx, fd_set &, fd_set &out) override
+    void sync(Client &cnx, fd_set &, fd_set &out) override
     {
         if (!FD_ISSET(cnx.m_socket.handle(), &out))
             return;
@@ -347,21 +347,21 @@ public:
 };
 
 /*
- * Connection.
+ * Client.
  * ------------------------------------------------------------------
  */
 
-unsigned Connection::recv(char *buffer, unsigned length)
+unsigned Client::recv(char *buffer, unsigned length)
 {
     return m_socket.recv(buffer, length);
 }
 
-unsigned Connection::send(const char *buffer, unsigned length)
+unsigned Client::send(const char *buffer, unsigned length)
 {
     return m_socket.send(buffer, length);
 }
 
-void Connection::recv()
+void Client::recv()
 {
     try {
         std::string buffer;
@@ -370,7 +370,7 @@ void Connection::recv()
         buffer.resize(recv(&buffer[0], buffer.size()));
 
         if (buffer.empty())
-            throw std::runtime_error("connection lost");
+            throw std::runtime_error("Client lost");
 
         m_input += std::move(buffer);
     } catch (const std::exception &ex) {
@@ -379,7 +379,7 @@ void Connection::recv()
     }
 }
 
-void Connection::send()
+void Client::send()
 {
     try {
         auto ns = send(m_output.data(), m_output.length());
@@ -392,19 +392,19 @@ void Connection::send()
     }
 }
 
-Connection::Connection()
+Client::Client()
     : m_state(std::make_unique<DisconnectedState>())
 {
 }
 
-Connection::~Connection() = default;
+Client::~Client() = default;
 
-Connection::Status Connection::status() const noexcept
+Client::Status Client::status() const noexcept
 {
     return m_state->status();
 }
 
-void Connection::connect(const net::Address &address)
+void Client::connect(const net::Address &address)
 {
     assert(status() == Disconnected);
 
@@ -421,7 +421,7 @@ void Connection::connect(const net::Address &address)
     }
 }
 
-void Connection::prepare(fd_set &in, fd_set &out, net::Handle &max)
+void Client::prepare(fd_set &in, fd_set &out, net::Handle &max)
 {
     try {
         m_state->prepare(*this, in, out);
@@ -434,7 +434,7 @@ void Connection::prepare(fd_set &in, fd_set &out, net::Handle &max)
     }
 }
 
-void Connection::sync(fd_set &in, fd_set &out)
+void Client::sync(fd_set &in, fd_set &out)
 {
     try {
         m_state->sync(*this, in, out);
@@ -450,11 +450,11 @@ void Connection::sync(fd_set &in, fd_set &out)
 }
 
 /*
- * TlsConnection.
+ * TlsClient.
  * ------------------------------------------------------------------
  */
 
-void TlsConnection::handshake()
+void TlsClient::handshake()
 {
     try {
         m_ssl->handshake();
@@ -469,7 +469,7 @@ void TlsConnection::handshake()
     }
 }
 
-unsigned TlsConnection::recv(char *buffer, unsigned length)
+unsigned TlsClient::recv(char *buffer, unsigned length)
 {
     unsigned nread = 0;
 
@@ -484,7 +484,7 @@ unsigned TlsConnection::recv(char *buffer, unsigned length)
     return nread;
 }
 
-unsigned TlsConnection::send(const char *buffer, unsigned length)
+unsigned TlsClient::send(const char *buffer, unsigned length)
 {
     unsigned nsent = 0;
 
@@ -499,23 +499,23 @@ unsigned TlsConnection::send(const char *buffer, unsigned length)
     return nsent;
 }
 
-void TlsConnection::connect(const net::Address &address)
+void TlsClient::connect(const net::Address &address)
 {
-    Connection::connect(address);
+    Client::connect(address);
 
     m_ssl = std::make_unique<net::TlsSocket>(m_socket, net::TlsSocket::Client);
 }
 
-void TlsConnection::prepare(fd_set &in, fd_set &out, net::Handle &max)
+void TlsClient::prepare(fd_set &in, fd_set &out, net::Handle &max)
 {
     if (m_state->status() == Connecting)
-        Connection::prepare(in, out, max);
+        Client::prepare(in, out, max);
     else {
         if (m_socket.handle() > max)
             max = m_socket.handle();
 
         /*
-         * Attempt an immediate handshake immediately if connection succeeded
+         * Attempt an immediate handshake immediately if Client succeeded
          * in last iteration.
          */
         if (m_handshake == HandshakeUndone)
@@ -529,19 +529,19 @@ void TlsConnection::prepare(fd_set &in, fd_set &out, net::Handle &max)
             FD_SET(m_socket.handle(), &out);
             break;
         default:
-            Connection::prepare(in, out, max);
+            Client::prepare(in, out, max);
         }
     }
 }
 
-void TlsConnection::sync(fd_set &in, fd_set &out)
+void TlsClient::sync(fd_set &in, fd_set &out)
 {
     if (m_state->status() == Connecting)
-        Connection::sync(in, out);
+        Client::sync(in, out);
     else if (m_handshake != HandshakeReady)
         handshake();
     else
-        Connection::sync(in, out);
+        Client::sync(in, out);
 }
 
 } // !irccd
