@@ -64,7 +64,7 @@ public:
 
 class Client::ReadyState : public Client::State {
 private:
-    void parse(Client &cnx, const std::string &message)
+    void parse(Client &client, const std::string &message)
     {
         try {
             auto json = nlohmann::json::parse(message);
@@ -72,7 +72,10 @@ private:
             if (!json.is_object())
                 return;
 
-            cnx.onMessage(json);
+            if (json.count("event") > 0)
+                client.onEvent(json);
+            else
+                client.onMessage(json);
         } catch (const std::exception &) {
         }
     }

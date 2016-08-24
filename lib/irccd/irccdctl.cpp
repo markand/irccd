@@ -380,23 +380,23 @@ option::Result Irccdctl::parse(int &argc, char **&argv)
     return result;
 }
 
-nlohmann::json Irccdctl::next(const std::string id)
+nlohmann::json Irccdctl::waitMessage(const std::string id)
 {
     ElapsedTimer timer;
 
-    while (m_input.empty() && m_connection->isConnected() && timer.elapsed() < m_timeout)
+    while (m_messages.empty() && m_connection->isConnected() && timer.elapsed() < m_timeout)
         m_connection->poll();
 
-    if (m_input.empty())
+    if (m_messages.empty())
         return nlohmann::json();
 
     nlohmann::json value;
 
     if (id == "") {
-        value = m_input[0];
-        m_input.erase(m_input.begin());
+        value = m_messages[0];
+        m_messages.erase(m_messages.begin());
     } else {
-        auto it = std::find_if(m_input.begin(), m_input.end(), [&] (const auto &v) {
+        auto it = std::find_if(m_messages.begin(), m_messages.end(), [&] (const auto &v) {
             auto rt = v.find("response");
 
             if (v.count("error") > 0 || (rt != v.end() && rt->is_string() && *rt == id))
@@ -406,9 +406,9 @@ nlohmann::json Irccdctl::next(const std::string id)
         });
 
         // Remove the previous messages.
-        if (it != m_input.end()) {
+        if (it != m_messages.end()) {
             value = *it;
-            m_input.erase(m_input.begin(), it);
+            m_messages.erase(m_messages.begin(), it);
         }
     }
 
@@ -418,6 +418,22 @@ nlohmann::json Irccdctl::next(const std::string id)
         throw std::runtime_error(error->template get<std::string>());
 
     return value;
+}
+
+nlohmann::json Irccdctl::waitEvent()
+{
+    ElapsedTimer timer;
+
+    while (m_events.empty() && m_connection->isConnected() && timer.elapsed() < m_timeout)
+        m_connection->poll();
+
+    if (m_events.empty())
+        return nullptr;
+
+    auto first = m_events.front();
+    m_events.erase(m_events.begin());
+
+    return first;
 }
 
 void Irccdctl::exec(const Command &cmd, std::vector<std::string> args)
@@ -466,7 +482,7 @@ void Irccdctl::exec(const Command &cmd, std::vector<std::string> args)
     m_connection->request(request);
 
     // 6. Parse the result.
-    cmd.result(*this, next(cmd.name()));
+    cmd.result(*this, waitMessage(cmd.name()));
 }
 
 void Irccdctl::exec(const Alias &alias, std::vector<std::string> argsCopy)
@@ -585,8 +601,11 @@ void Irccdctl::run(int argc, char **argv)
                         << info.minor << "."
                         << info.patch << std::endl;
         });
+        m_connection->onEvent.connect([this] (auto msg) {
+            m_events.push_back(std::move(msg));
+        });
         m_connection->onMessage.connect([this] (auto msg) {
-            m_input.push_back(std::move(msg));
+            m_messages.push_back(std::move(msg));
         });
 
         m_connection->connect(m_address);

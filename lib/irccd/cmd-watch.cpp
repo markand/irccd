@@ -217,7 +217,7 @@ nlohmann::json Watch::request(Irccdctl &ctl, const CommandRequest &request) cons
 
     while (ctl.client().isConnected()) {
         try {
-            auto object = ctl.next();
+            auto object = ctl.waitEvent();
             auto event = object.find("event");
 
             if (event == object.end() || !event->is_string())

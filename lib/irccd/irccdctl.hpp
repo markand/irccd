@@ -63,7 +63,8 @@ private:
     std::map<std::string, Alias> m_aliases;
 
     // Incoming data.
-    std::vector<nlohmann::json> m_input;
+    std::vector<nlohmann::json> m_events;
+    std::vector<nlohmann::json> m_messages;
 
     void usage() const;
     void help() const;
@@ -114,7 +115,7 @@ public:
     }
 
     /**
-     * Get the next response with the given id.
+     * Get the next message response with the given id.
      *
      * If the response id is not provided, get the next incoming message.
      *
@@ -125,7 +126,14 @@ public:
      * \return the next message
      * \warning this may skip previous events
      */
-    IRCCD_EXPORT nlohmann::json next(const std::string id = "");
+    IRCCD_EXPORT nlohmann::json waitMessage(const std::string id = "");
+
+    /**
+     * Get the next pending even within the internal timeout.
+     *
+     * \return the next event or empty if not available
+     */
+    IRCCD_EXPORT nlohmann::json waitEvent();
 
     /**
      * Execute the given command and wait for its result.

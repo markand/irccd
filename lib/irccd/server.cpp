@@ -838,7 +838,7 @@ void Server::ConnectingState::prepare(Server &server, fd_set &setinput, fd_set &
      *
      * Otherwise, the libircclient event_connect will change the state.
      */
-    if (m_state == Disconnected) {
+    if (m_state == Connecting) {
         if (m_timer.elapsed() > static_cast<unsigned>(server.m_recodelay * 1000)) {
             log::warning() << "server " << server.name() << ": timeout while connecting" << std::endl;
             server.next(std::make_unique<DisconnectedState>());

@@ -97,6 +97,14 @@ public:
     Signal<const Info &> onConnect;
 
     /**
+     * onEvent
+     * --------------------------------------------------------------
+     *
+     * An event has been received.
+     */
+    Signal<const nlohmann::json &> onEvent;
+
+    /**
      * onMessage
      * ---------------------------------------------------------------
      *
