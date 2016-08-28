@@ -16,6 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "fs.hpp"
+#include "logger.hpp"
+#include "path.hpp"
 #include "plugin-dynlib.hpp"
 
 namespace irccd {
@@ -171,6 +174,37 @@ void DynlibPlugin::onUnload(Irccd &irccd)
 void DynlibPlugin::onWhois(Irccd &irccd, const WhoisEvent &ev)
 {
     call(m_onWhois, irccd, ev);
+}
+
+std::shared_ptr<Plugin> DynlibPluginLoader::open(const std::string &id,
+                                                 const std::string &path) noexcept
+{
+    if (path.rfind(DYNLIB_SUFFIX) == std::string::npos)
+        return nullptr;
+
+    try {
+        return std::make_shared<DynlibPlugin>(id, path);
+    } catch (const std::exception &ex) {
+        log::warning() << "plugin " << id << ": " << ex.what() << std::endl;
+    }
+
+    return nullptr;
+}
+
+std::shared_ptr<Plugin> DynlibPluginLoader::find(const std::string &id) noexcept
+{
+    for (const auto &dir : path::list(path::PathNativePlugins)) {
+        auto path = dir + id + DYNLIB_SUFFIX;
+
+        if (!fs::isReadable(path))
+            continue;
+
+        log::info() << "plugin " << id << ": trying " << path << std::endl;
+
+        return open(id, path);
+    }
+
+    return nullptr;
 }
 
 } // !irccd

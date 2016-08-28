@@ -34,45 +34,11 @@ using namespace fmt::literals;
 
 namespace irccd {
 
-namespace {
-
-std::shared_ptr<Plugin> find(std::string name)
-{
-    for (const auto &path : path::list(path::PathPlugins)) {
-        std::string jspath = path + name + ".js";
-        std::string dynlibpath = path + name + DYNLIB_SUFFIX;
-
-        if (fs::isReadable(jspath))
-            return std::make_shared<JsPlugin>(std::move(name), std::move(jspath));
-        if (fs::isReadable(dynlibpath))
-            return std::make_shared<DynlibPlugin>(std::move(name), std::move(dynlibpath));
-    }
-
-    throw std::runtime_error("no suitable plugin found");
-}
-
-std::shared_ptr<Plugin> open(std::string name, std::string path)
-{
-    std::regex regex(".*(\\..*)$");
-    std::smatch match;
-    std::shared_ptr<Plugin> plugin;
-
-    if (std::regex_match(path, match, regex)) {
-        if (match[1] == DYNLIB_SUFFIX)
-            plugin = std::make_shared<DynlibPlugin>(name, path);
-        else
-            plugin = std::make_shared<JsPlugin>(name, path);
-    } else
-        throw std::runtime_error("could not deduce plugin type from {}"_format(path));
-
-    return plugin;
-}
-
-} // !namespace
-
 PluginService::PluginService(Irccd &irccd) noexcept
     : m_irccd(irccd)
 {
+    m_loaders.push_back(std::make_unique<DynlibPluginLoader>());
+    m_loaders.push_back(std::make_unique<JsPluginLoader>());
 }
 
 PluginService::~PluginService()
@@ -145,13 +111,34 @@ PluginFormats PluginService::formats(const std::string &name) const
     return PluginFormats();
 }
 
+std::shared_ptr<Plugin> PluginService::open(const std::string &id,
+                                            const std::string &path)
+{
+    for (const auto &loader : m_loaders) {
+        auto plugin = loader->open(id, path);
+
+        if (plugin)
+            return plugin;
+    }
+
+    return nullptr;
+}
+
+std::shared_ptr<Plugin> PluginService::find(const std::string &id)
+{
+    for (const auto &loader : m_loaders) {
+        auto plugin = loader->find(id);
+
+        if (plugin)
+            return plugin;
+    }
+
+    return nullptr;
+}
+
 void PluginService::load(std::string name, std::string path)
 {
-    auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (const auto &plugin) {
-        return plugin->name() == name;
-    });
-
-    if (it != m_plugins.end())
+    if (has(name))
         return;
 
     try {
@@ -162,10 +149,13 @@ void PluginService::load(std::string name, std::string path)
         else
             plugin = open(name, std::move(path));
 
-        plugin->setConfig(m_config[name]);
-        plugin->setFormats(m_formats[name]);
-        plugin->onLoad(m_irccd);
-        add(std::move(plugin));
+        if (plugin) {
+            plugin->setConfig(m_config[name]);
+            plugin->setFormats(m_formats[name]);
+            plugin->onLoad(m_irccd);
+
+            add(std::move(plugin));
+        }
     } catch (const std::exception &ex) {
         log::warning("plugin {}: {}"_format(name, ex.what()));
     }

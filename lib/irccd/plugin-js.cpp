@@ -433,4 +433,35 @@ void JsPlugin::onWhois(Irccd &, const WhoisEvent &event)
     call("onWhois", 2);
 }
 
+std::shared_ptr<Plugin> JsPluginLoader::open(const std::string &id,
+                                             const std::string &path) noexcept
+{
+    if (path.rfind(".js") == std::string::npos)
+        return nullptr;
+
+    try {
+        return std::make_shared<JsPlugin>(id, path);
+    } catch (const std::exception &ex) {
+        log::warning() << "plugin " << id << ": " << ex.what() << std::endl;
+    }
+
+    return nullptr;
+}
+
+std::shared_ptr<Plugin> JsPluginLoader::find(const std::string &id) noexcept
+{
+    for (const auto &dir : path::list(path::PathPlugins)) {
+        auto path = dir + id + ".js";
+
+        if (!fs::isReadable(path))
+            continue;
+
+        log::info() << "plugin " << id << ": trying " << path << std::endl;
+
+        return open(id, path);
+    }
+
+    return nullptr;
+}
+
 } // !irccd

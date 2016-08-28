@@ -461,6 +461,40 @@ public:
     }
 };
 
+/**
+ * \brief Abstract interface for searching plugins.
+ *
+ * This class is used to make loading of plugins extensible, the PluginService
+ * knows some predefined plugins loaders and use them to search for available
+ * plugins.
+ *
+ * This makes easier to implement new plugins or new ways of loading them.
+ *
+ * \see DynlibPluginLoader
+ * \see JsPluginLoader
+ */
+class PluginLoader {
+public:
+    /**
+     * Try to open the plugin specified by path.
+     *
+     * The implementation must test if the plugin is suitable for opening, by
+     * testing extension for example.
+     *
+     * \param file the file
+     */
+    virtual std::shared_ptr<Plugin> open(const std::string &id,
+                                         const std::string &file) noexcept = 0;
+
+    /**
+     * Search for a plugin named by this id.
+     *
+     * \param id the plugin id
+     * \return the plugin
+     */
+    virtual std::shared_ptr<Plugin> find(const std::string &id) noexcept = 0;
+};
+
 } // !irccd
 
 #endif // !IRCCD_PLUGIN_HPP

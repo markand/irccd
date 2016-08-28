@@ -27,7 +27,6 @@
 #include "duktape.hpp"
 #include "path.hpp"
 #include "plugin.hpp"
-#include "signals.hpp"
 
 namespace irccd {
 
@@ -219,6 +218,23 @@ public:
      * \copydoc Plugin::onWhois
      */
     IRCCD_EXPORT void onWhois(Irccd &irccd, const WhoisEvent &event) override;
+};
+
+/**
+ * \brief Implementation for searching Javascript plugins.
+ */
+class JsPluginLoader : public PluginLoader {
+public:
+    /**
+     * \copydoc PluginLoader::find
+     */
+    std::shared_ptr<Plugin> open(const std::string &id,
+                                 const std::string &path) noexcept override;
+
+    /**
+     * \copydoc PluginLoader::find
+     */
+    std::shared_ptr<Plugin> find(const std::string &id) noexcept override;
 };
 
 } // !irccd

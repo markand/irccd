@@ -77,7 +77,7 @@ namespace {
  * supported).
  */
 
-std::string base;
+std::string base{"."};
 
 #if defined(IRCCD_SYSTEM_WINDOWS)
 
@@ -176,30 +176,27 @@ std::string executablePath()
 
 std::string systemConfig()
 {
-    assert(!base.empty());
-
     return base + WITH_CONFDIR;
 }
 
 std::string systemData()
 {
-    assert(!base.empty());
-
     return base + WITH_DATADIR;
 }
 
 std::string systemCache()
 {
-    assert(!base.empty());
-
     return base + WITH_CACHEDIR;
 }
 
 std::string systemPlugins()
 {
-    assert(!base.empty());
-
     return base + WITH_PLUGINDIR;
+}
+
+std::string systemNativePlugins()
+{
+    return base + WITH_NPLUGINDIR;
 }
 
 /*
@@ -372,7 +369,7 @@ void setApplicationPath(const std::string &argv0)
         base = executablePath();
     } catch (const std::exception &) {
         /*
-         * If an exception is thrown, that means the operatin system supports a
+         * If an exception is thrown, that means the operating system supports a
          * function to get the executable path but it failed.
          *
          * TODO: show a waning
@@ -447,7 +444,7 @@ std::string clean(std::string input)
 
 std::string get(Path path, Owner owner)
 {
-    assert(path >= PathConfig && path <= PathPlugins);
+    assert(path >= PathConfig && path <= PathNativePlugins);
     assert(owner >= OwnerSystem && owner <= OwnerUser);
 
     std::string result;
@@ -467,6 +464,9 @@ std::string get(Path path, Owner owner)
         case PathPlugins:
             result = clean(systemPlugins());
             break;
+        case PathNativePlugins:
+            result = clean(systemNativePlugins());
+            break;
         default:
             break;
         }
@@ -481,6 +481,7 @@ std::string get(Path path, Owner owner)
         case PathData:
             result = clean(userData());
             break;
+        case PathNativePlugins:
         case PathPlugins:
             result = clean(userPlugins());
             break;
@@ -496,7 +497,7 @@ std::string get(Path path, Owner owner)
 
 std::vector<std::string> list(Path path)
 {
-    assert(path >= PathConfig && path <= PathPlugins);
+    assert(path >= PathConfig && path <= PathNativePlugins);
 
     std::vector<std::string> list;
 
@@ -516,6 +517,9 @@ std::vector<std::string> list(Path path)
     case PathPlugins:
         list.push_back(clean(fs::cwd()));
         list.push_back(clean(userPlugins()));
+        list.push_back(clean(systemPlugins()));
+        break;
+    case PathNativePlugins:
         list.push_back(clean(systemPlugins()));
         break;
     default:

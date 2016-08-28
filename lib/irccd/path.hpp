@@ -49,7 +49,8 @@ enum Path {
     PathConfig,         //!< Configuration files
     PathData,           //!< Data directory
     PathCache,          //!< Cache files
-    PathPlugins         //!< Path to the plugins
+    PathPlugins,        //!< Path to the plugins
+    PathNativePlugins   //!< Path to native plugins
 };
 
 /**

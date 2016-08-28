@@ -200,6 +200,23 @@ public:
     IRCCD_EXPORT void onWhois(Irccd &irccd, const WhoisEvent &event) override;
 };
 
+/**
+ * \brief Implementation for searching native plugins.
+ */
+class DynlibPluginLoader : public PluginLoader {
+public:
+    /**
+     * \copydoc PluginLoader::find
+     */
+    std::shared_ptr<Plugin> open(const std::string &id,
+                                 const std::string &path) noexcept override;
+
+    /**
+     * \copydoc PluginLoader::find
+     */
+    std::shared_ptr<Plugin> find(const std::string &id) noexcept override;
+};
+
 } // !irccd
 
 #endif // !IRCCD_PLUGIN_DYNLIB_HPP

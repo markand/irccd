@@ -39,6 +39,7 @@
 #
 # WITH_BINDIR           Binary directory for irccd, irccdctl
 # WITH_PLUGINDIR        Path where plugins must be installed
+# WITH_NPLUGINDIR       Path where native plugins must be installed
 # WITH_DOCDIR           Path where to install documentation
 # WITH_MANDIR           Path where to install manuals
 # WITH_CONFDIR          Path where to search configuration files
@@ -119,11 +120,13 @@ if (WIN32)
     set(WITH_DATADIR "share" CACHE STRING "Data directory")
     set(WITH_CACHEDIR "var" CACHE STRING "Temporary files directory")
     set(WITH_PLUGINDIR "share/plugins" CACHE STRING "Module prefix where to install")
+    set(WITH_NPLUGINDIR "lib/irccd/plugins" CACHE STRING "Directory for native plugins")
     set(WITH_DOCDIR "share/doc" CACHE STRING "Documentation directory")
 else ()
     set(WITH_DATADIR "share/irccd" CACHE STRING "Data directory")
     set(WITH_CACHEDIR "var/irccd" CACHE STRING "Temporary files directory")
     set(WITH_PLUGINDIR "share/irccd/plugins" CACHE STRING "Module prefix where to install")
+    set(WITH_NPLUGINDIR "lib/irccd/plugins" CACHE STRING "Directory for native plugins")
     set(WITH_DOCDIR "share/doc/irccd" CACHE STRING "Documentation directory")
 endif ()
 

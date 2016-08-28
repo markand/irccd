@@ -42,6 +42,7 @@ class PluginService {
 private:
     Irccd &m_irccd;
     std::vector<std::shared_ptr<Plugin>> m_plugins;
+    std::vector<std::unique_ptr<PluginLoader>> m_loaders;
     std::unordered_map<std::string, PluginConfig> m_config;
     std::unordered_map<std::string, PluginFormats> m_formats;
 
@@ -135,6 +136,27 @@ public:
      * \return the formats
      */
     IRCCD_EXPORT PluginFormats formats(const std::string &name) const;
+
+    /**
+     * Generic function for opening the plugin at the given path.
+     *
+     * This function will search for every PluginLoader and call open() on it,
+     * the first one that success will be returned.
+     *
+     * \param id the plugin id
+     * \param path the path to the file
+     * \return the plugin or nullptr on failures
+     */
+    IRCCD_EXPORT std::shared_ptr<Plugin> open(const std::string &id,
+                                              const std::string &path);
+
+    /**
+     * Generic function for finding a plugin.
+     *
+     * \param id the plugin id
+     * \return the plugin or nullptr on failures
+     */
+    IRCCD_EXPORT std::shared_ptr<Plugin> find(const std::string &id);
 
     /**
      * Convenient wrapper that loads a plugin, call onLoad and add it to the
