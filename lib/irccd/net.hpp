@@ -463,8 +463,8 @@
  * specified by the user.
  */
 #if defined(_WIN32)
-#   include <WinSock2.h>
-#   include <WS2tcpip.h>
+#   include <winsock2.h>
+#   include <ws2tcpip.h>
 #else
 #   include <sys/ioctl.h>
 #   include <sys/types.h>

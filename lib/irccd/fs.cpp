@@ -16,8 +16,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#if defined(_WIN32) && !defined(_CRT_SECURE_NO_WARNINGS)
-#   define _CRT_SECURE_NO_WARNINGS
+#if defined(_WIN32)
+#   if !defined(_CRT_SECURE_NO_WARNINGS)
+#       define _CRT_SECURE_NO_WARNINGS
+#   endif
+#   if !defined(WIN32_LEAN_AND_MEAN)
+#       define WIN32_LEAN_AND_MEAN
+#   endif
 #endif
 
 #include <algorithm>
@@ -30,8 +35,8 @@
 
 #if defined(_WIN32)
 #   include <direct.h>
-#   include <Windows.h>
-#   include <Shlwapi.h>
+#   include <windows.h>
+#   include <shlwapi.h>
 #else
 #   include <sys/types.h>
 #   include <dirent.h>

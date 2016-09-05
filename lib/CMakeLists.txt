@@ -31,7 +31,6 @@ target_include_directories(
         $<BUILD_INTERFACE:${IRCCD_FAKEROOTDIR}/include>
         $<BUILD_INTERFACE:${lib_SOURCE_DIR}>
         $<INSTALL_INTERFACE:include>
-        ${OPENSSL_INCLUDE_DIR}
 )
 
 source_group(irccd FILES ${HEADERS} ${SOURCES})
@@ -46,6 +45,12 @@ elseif (IRCCD_SYSTEM_MAC)
     list(APPEND LIBRARIES resolv)
 elseif (IRCCD_SYSTEM_LINUX)
     list(APPEND LIBRARIES dl)
+endif ()
+
+if (OPENSSL_FOUND)
+    list(APPEND LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
+else ()
+    list(APPEND FLAGS NET_NO_SSL)
 endif ()
 
 target_link_libraries(libirccd extern-duktape extern-ircclient extern-json extern-cppformat ${LIBRARIES})
@@ -103,7 +108,7 @@ install(
 #     NAMESPACE Irccd2::
 #     DESTINATION ${WITH_CMAKEDIR}/Irccd2
 # )
-# 
+#
 # install(
 #     FILES
 #         "${CMAKE_BINARY_DIR}/Irccd2Config.cmake"
