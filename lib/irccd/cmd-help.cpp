@@ -24,17 +24,17 @@ namespace irccd {
 
 namespace command {
 
-Help::Help()
+HelpCommand::HelpCommand()
     : Command("help", "General", "Get help about a command")
 {
 }
 
-std::vector<Command::Arg> Help::args() const
+std::vector<Command::Arg> HelpCommand::args() const
 {
     return {{ "command", true }};
 }
 
-nlohmann::json Help::request(Irccdctl &irccdctl, const CommandRequest &args) const
+nlohmann::json HelpCommand::request(Irccdctl &irccdctl, const CommandRequest &args) const
 {
     auto it = irccdctl.commandService().find(args.arg(0U));
 

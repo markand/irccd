@@ -31,15 +31,14 @@ namespace irccd {
 namespace command {
 
 /**
- * \class ServerKick
  * \brief Implementation of server-kick transport command.
  */
-class ServerKick : public Command {
+class ServerKickCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerKick();
+    IRCCD_EXPORT ServerKickCommand();
 
     /**
      * \copydoc Command::args

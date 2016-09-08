@@ -25,12 +25,12 @@ namespace irccd {
 
 namespace command {
 
-ServerInvite::ServerInvite()
+ServerInviteCommand::ServerInviteCommand()
     : Command("server-invite", "Server", "Invite someone into a channel")
 {
 }
 
-std::vector<Command::Arg> ServerInvite::args() const
+std::vector<Command::Arg> ServerInviteCommand::args() const
 {
     return {
         { "server",     true },
@@ -39,7 +39,7 @@ std::vector<Command::Arg> ServerInvite::args() const
     };
 }
 
-std::vector<Command::Property> ServerInvite::properties() const
+std::vector<Command::Property> ServerInviteCommand::properties() const
 {
     return {
         { "server",     { nlohmann::json::value_t::string }},
@@ -48,7 +48,7 @@ std::vector<Command::Property> ServerInvite::properties() const
     };
 }
 
-nlohmann::json ServerInvite::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerInviteCommand::request(Irccdctl &, const CommandRequest &args) const
 {
     return nlohmann::json::object({
         { "server",     args.args()[0] },
@@ -57,7 +57,7 @@ nlohmann::json ServerInvite::request(Irccdctl &, const CommandRequest &args) con
     });
 }
 
-nlohmann::json ServerInvite::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json ServerInviteCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 

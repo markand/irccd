@@ -197,18 +197,17 @@ const std::unordered_map<std::string, std::function<void (const nlohmann::json &
 
 } // !namespace
 
-Watch::Watch()
-    : Command(
-        "watch", "General", "Start watching irccd events")
+WatchCommand::WatchCommand()
+    : Command("watch", "General", "Start watching irccd events")
 {
 }
 
-std::vector<Command::Option> Watch::options() const
+std::vector<Command::Option> WatchCommand::options() const
 {
     return {{ "format", "f", "format", "format", "output format" }};
 }
 
-nlohmann::json Watch::request(Irccdctl &ctl, const CommandRequest &request) const
+nlohmann::json WatchCommand::request(Irccdctl &ctl, const CommandRequest &request) const
 {
     std::string format = request.optionOr("format", "native");
 

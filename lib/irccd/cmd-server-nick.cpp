@@ -25,12 +25,12 @@ namespace irccd {
 
 namespace command {
 
-ServerNick::ServerNick()
+ServerNickCommand::ServerNickCommand()
     : Command("server-nick", "Server", "Change your nickname")
 {
 }
 
-std::vector<Command::Arg> ServerNick::args() const
+std::vector<Command::Arg> ServerNickCommand::args() const
 {
     return {
         { "server",     true },
@@ -38,7 +38,7 @@ std::vector<Command::Arg> ServerNick::args() const
     };
 }
 
-std::vector<Command::Property> ServerNick::properties() const
+std::vector<Command::Property> ServerNickCommand::properties() const
 {
     return {
         { "server",     { nlohmann::json::value_t::string }},
@@ -46,7 +46,7 @@ std::vector<Command::Property> ServerNick::properties() const
     };
 }
 
-nlohmann::json ServerNick::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerNickCommand::request(Irccdctl &, const CommandRequest &args) const
 {
     return nlohmann::json::object({
         { "server",     args.arg(0) },
@@ -54,7 +54,7 @@ nlohmann::json ServerNick::request(Irccdctl &, const CommandRequest &args) const
     });
 }
 
-nlohmann::json ServerNick::exec(Irccd &irccd, const nlohmann::json &object) const
+nlohmann::json ServerNickCommand::exec(Irccd &irccd, const nlohmann::json &object) const
 {
     Command::exec(irccd, object);
 

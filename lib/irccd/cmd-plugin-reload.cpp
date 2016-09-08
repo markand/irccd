@@ -26,22 +26,22 @@ namespace irccd {
 
 namespace command {
 
-PluginReload::PluginReload()
+PluginReloadCommand::PluginReloadCommand()
     : Command("plugin-reload", "Plugins", "Reload a plugin")
 {
 }
 
-std::vector<Command::Arg> PluginReload::args() const
+std::vector<Command::Arg> PluginReloadCommand::args() const
 {
     return {{ "plugin", true }};
 }
 
-std::vector<Command::Property> PluginReload::properties() const
+std::vector<Command::Property> PluginReloadCommand::properties() const
 {
     return {{ "plugin", { nlohmann::json::value_t::string }}};
 }
 
-nlohmann::json PluginReload::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json PluginReloadCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 

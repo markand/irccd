@@ -25,12 +25,12 @@ namespace irccd {
 
 namespace command {
 
-ServerKick::ServerKick()
+ServerKickCommand::ServerKickCommand()
     : Command("server-kick", "Server", "Kick someone from a channel")
 {
 }
 
-std::vector<Command::Arg> ServerKick::args() const
+std::vector<Command::Arg> ServerKickCommand::args() const
 {
     return {
         { "server",     true    },
@@ -40,7 +40,7 @@ std::vector<Command::Arg> ServerKick::args() const
     };
 }
 
-std::vector<Command::Property> ServerKick::properties() const
+std::vector<Command::Property> ServerKickCommand::properties() const
 {
     return {
         { "server",     { nlohmann::json::value_t::string }},
@@ -49,7 +49,7 @@ std::vector<Command::Property> ServerKick::properties() const
     };
 }
 
-nlohmann::json ServerKick::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerKickCommand::request(Irccdctl &, const CommandRequest &args) const
 {
     auto req = nlohmann::json::object({
         { "server",     args.arg(0) },
@@ -63,7 +63,7 @@ nlohmann::json ServerKick::request(Irccdctl &, const CommandRequest &args) const
     return req;
 }
 
-nlohmann::json ServerKick::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json ServerKickCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 

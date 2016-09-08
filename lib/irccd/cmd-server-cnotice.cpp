@@ -25,12 +25,12 @@ namespace irccd {
 
 namespace command {
 
-ServerChannelNotice::ServerChannelNotice()
+ServerChannelNoticeCommand::ServerChannelNoticeCommand()
     : Command("server-cnotice", "Server", "Send a channel notice")
 {
 }
 
-std::vector<Command::Arg> ServerChannelNotice::args() const
+std::vector<Command::Arg> ServerChannelNoticeCommand::args() const
 {
     return {
         { "server",     true },
@@ -39,7 +39,7 @@ std::vector<Command::Arg> ServerChannelNotice::args() const
     };
 }
 
-std::vector<Command::Property> ServerChannelNotice::properties() const
+std::vector<Command::Property> ServerChannelNoticeCommand::properties() const
 {
     return {
         { "server",     { nlohmann::json::value_t::string }},
@@ -48,7 +48,7 @@ std::vector<Command::Property> ServerChannelNotice::properties() const
     };
 }
 
-nlohmann::json ServerChannelNotice::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json ServerChannelNoticeCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 

@@ -34,12 +34,12 @@ namespace command {
  * \class ServerPart
  * \brief Implementation of server-part transport command.
  */
-class ServerPart : public Command {
+class ServerPartCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerPart();
+    IRCCD_EXPORT ServerPartCommand();
 
     /**
      * \copydoc Command::args

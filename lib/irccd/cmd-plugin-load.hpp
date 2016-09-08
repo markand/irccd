@@ -31,15 +31,14 @@ namespace irccd {
 namespace command {
 
 /**
- * \class PluginLoad
  * \brief Implementation of plugin-load transport command.
  */
-class PluginLoad : public Command {
+class PluginLoadCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT PluginLoad();
+    IRCCD_EXPORT PluginLoadCommand();
 
     /**
      * \copydoc Command::args

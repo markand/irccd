@@ -58,12 +58,12 @@ nlohmann::json execGet(Irccd &irccd, const nlohmann::json &request, const nlohma
 
 } // !namespace
 
-PluginConfig::PluginConfig()
+PluginConfigCommand::PluginConfigCommand()
     : Command("plugin-config", "Plugins", "Get or set a plugin config variable")
 {
 }
 
-std::vector<Command::Arg> PluginConfig::args() const
+std::vector<Command::Arg> PluginConfigCommand::args() const
 {
     return {
         { "plugin",     true    },
@@ -72,12 +72,12 @@ std::vector<Command::Arg> PluginConfig::args() const
     };
 }
 
-std::vector<Command::Property> PluginConfig::properties() const
+std::vector<Command::Property> PluginConfigCommand::properties() const
 {
     return {{ "plugin", { nlohmann::json::value_t::string }}};
 }
 
-nlohmann::json PluginConfig::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json PluginConfigCommand::request(Irccdctl &, const CommandRequest &args) const
 {
     auto object = nlohmann::json::object({
         { "plugin", args.arg(0) }
@@ -93,7 +93,7 @@ nlohmann::json PluginConfig::request(Irccdctl &, const CommandRequest &args) con
     return object;
 }
 
-nlohmann::json PluginConfig::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json PluginConfigCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 
@@ -110,7 +110,7 @@ nlohmann::json PluginConfig::exec(Irccd &irccd, const nlohmann::json &request) c
     return execGet(irccd, request, var);
 }
 
-void PluginConfig::result(Irccdctl &irccdctl, const nlohmann::json &response) const
+void PluginConfigCommand::result(Irccdctl &irccdctl, const nlohmann::json &response) const
 {
     Command::result(irccdctl, response);
 

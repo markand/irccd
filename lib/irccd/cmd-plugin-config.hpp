@@ -33,12 +33,12 @@ namespace command {
 /**
  * \brief Implementation of plugin-config transport command.
  */
-class PluginConfig : public Command {
+class PluginConfigCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT PluginConfig();
+    IRCCD_EXPORT PluginConfigCommand();
 
     /**
      * \copydoc Command::args

@@ -27,12 +27,12 @@ namespace irccd {
 
 namespace command {
 
-ServerList::ServerList()
+ServerListCommand::ServerListCommand()
     : Command("server-list", "Server", "Get the list of servers")
 {
 }
 
-nlohmann::json ServerList::exec(Irccd &irccd, const nlohmann::json &) const
+nlohmann::json ServerListCommand::exec(Irccd &irccd, const nlohmann::json &) const
 {
     auto json = nlohmann::json::object();
     auto list = nlohmann::json::array();
@@ -45,7 +45,7 @@ nlohmann::json ServerList::exec(Irccd &irccd, const nlohmann::json &) const
     return json;
 }
 
-void ServerList::result(Irccdctl &, const nlohmann::json &response) const
+void ServerListCommand::result(Irccdctl &, const nlohmann::json &response) const
 {
     auto list = response.find("list");
 

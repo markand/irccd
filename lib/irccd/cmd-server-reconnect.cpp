@@ -25,22 +25,22 @@ namespace irccd {
 
 namespace command {
 
-ServerReconnect::ServerReconnect()
+ServerReconnectCommand::ServerReconnectCommand()
     : Command("server-reconnect", "Server", "Force reconnection of one or more servers")
 {
 }
 
-std::vector<Command::Arg> ServerReconnect::args() const
+std::vector<Command::Arg> ServerReconnectCommand::args() const
 {
     return {{ "server", false }};
 }
 
-nlohmann::json ServerReconnect::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerReconnectCommand::request(Irccdctl &, const CommandRequest &args) const
 {
     return args.length() == 0 ? nlohmann::json::object() : nlohmann::json::object({ { "server", args.arg(0) } });
 }
 
-nlohmann::json ServerReconnect::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json ServerReconnectCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     auto server = request.find("server");
 

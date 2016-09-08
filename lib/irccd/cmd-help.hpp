@@ -34,12 +34,12 @@ namespace command {
  * \class Help
  * \brief Implementation of irccdctl help.
  */
-class Help : public Command {
+class HelpCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT Help();
+    IRCCD_EXPORT HelpCommand();
 
     /**
      * \copydoc Command::args

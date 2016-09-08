@@ -25,12 +25,12 @@ namespace irccd {
 
 namespace command {
 
-ServerMode::ServerMode()
+ServerModeCommand::ServerModeCommand()
     : Command("server-mode", "Server", "Change your mode")
 {
 }
 
-std::vector<Command::Arg> ServerMode::args() const
+std::vector<Command::Arg> ServerModeCommand::args() const
 {
     return {
         { "server",     true },
@@ -38,7 +38,7 @@ std::vector<Command::Arg> ServerMode::args() const
     };
 }
 
-std::vector<Command::Property> ServerMode::properties() const
+std::vector<Command::Property> ServerModeCommand::properties() const
 {
     return {
         { "server",     { nlohmann::json::value_t::string }},
@@ -46,7 +46,7 @@ std::vector<Command::Property> ServerMode::properties() const
     };
 }
 
-nlohmann::json ServerMode::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerModeCommand::request(Irccdctl &, const CommandRequest &args) const
 {
     return nlohmann::json::object({
         { "server",     args.arg(0) },
@@ -54,7 +54,7 @@ nlohmann::json ServerMode::request(Irccdctl &, const CommandRequest &args) const
     });
 }
 
-nlohmann::json ServerMode::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json ServerModeCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 

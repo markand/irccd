@@ -31,15 +31,14 @@ namespace irccd {
 namespace command {
 
 /**
- * \class ServerChannelMode
  * \brief Implementation of server-cmode transport command.
  */
-class ServerChannelMode : public Command {
+class ServerChannelModeCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerChannelMode();
+    IRCCD_EXPORT ServerChannelModeCommand();
 
     /**
      * \copydoc Command::args

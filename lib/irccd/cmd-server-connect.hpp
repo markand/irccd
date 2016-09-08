@@ -31,15 +31,14 @@ namespace irccd {
 namespace command {
 
 /**
- * \class ServerConnect
  * \brief Implementation of server-connect transport command.
  */
-class ServerConnect : public Command {
+class ServerConnectCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerConnect();
+    IRCCD_EXPORT ServerConnectCommand();
 
     /**
      * \copydoc Command::options

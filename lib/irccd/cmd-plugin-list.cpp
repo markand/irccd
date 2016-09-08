@@ -28,12 +28,12 @@ namespace irccd {
 
 namespace command {
 
-PluginList::PluginList()
+PluginListCommand::PluginListCommand()
     : Command("plugin-list", "Plugins", "Get the list of loaded plugins")
 {
 }
 
-nlohmann::json PluginList::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json PluginListCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     auto response = Command::exec(irccd, request);
     auto list = nlohmann::json::array();
@@ -46,7 +46,7 @@ nlohmann::json PluginList::exec(Irccd &irccd, const nlohmann::json &request) con
     return response;
 }
 
-void PluginList::result(Irccdctl &irccdctl, const nlohmann::json &object) const
+void PluginListCommand::result(Irccdctl &irccdctl, const nlohmann::json &object) const
 {
     Command::result(irccdctl, object);
 

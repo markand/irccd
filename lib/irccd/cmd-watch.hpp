@@ -31,15 +31,14 @@ namespace irccd {
 namespace command {
 
 /**
- * \class Watch
  * \brief Implementation of irccdctl watch.
  */
-class Watch : public Command {
+class WatchCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT Watch();
+    IRCCD_EXPORT WatchCommand();
 
     /**
      * \copydoc Command::options

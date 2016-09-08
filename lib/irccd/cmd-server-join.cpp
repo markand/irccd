@@ -25,12 +25,12 @@ namespace irccd {
 
 namespace command {
 
-ServerJoin::ServerJoin()
+ServerJoinCommand::ServerJoinCommand()
     : Command("server-join", "Server", "Join a channel")
 {
 }
 
-std::vector<Command::Arg> ServerJoin::args() const
+std::vector<Command::Arg> ServerJoinCommand::args() const
 {
     return {
         { "server",     true    },
@@ -39,7 +39,7 @@ std::vector<Command::Arg> ServerJoin::args() const
     };
 }
 
-std::vector<Command::Property> ServerJoin::properties() const
+std::vector<Command::Property> ServerJoinCommand::properties() const
 {
     return {
         { "server",     { nlohmann::json::value_t::string }},
@@ -47,7 +47,7 @@ std::vector<Command::Property> ServerJoin::properties() const
     };
 }
 
-nlohmann::json ServerJoin::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerJoinCommand::request(Irccdctl &, const CommandRequest &args) const
 {
     auto req = nlohmann::json::object({
         { "server",     args.args()[0] },
@@ -60,7 +60,7 @@ nlohmann::json ServerJoin::request(Irccdctl &, const CommandRequest &args) const
     return req;
 }
 
-nlohmann::json ServerJoin::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json ServerJoinCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 

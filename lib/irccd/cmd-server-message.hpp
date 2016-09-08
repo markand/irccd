@@ -31,15 +31,14 @@ namespace irccd {
 namespace command {
 
 /**
- * \class ServerMessage
  * \brief Implementation of server-message transport command.
  */
-class ServerMessage : public Command {
+class ServerMessageCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerMessage();
+    IRCCD_EXPORT ServerMessageCommand();
 
     /**
      * \copydoc Command::args

@@ -31,15 +31,14 @@ namespace irccd {
 namespace command {
 
 /**
- * \class ServerMe
  * \brief Implementation of server-me transport command.
  */
-class ServerMe : public Command {
+class ServerMeCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerMe();
+    IRCCD_EXPORT ServerMeCommand();
 
     /**
      * \copydoc Command::args

@@ -25,12 +25,12 @@ namespace irccd {
 
 namespace command {
 
-ServerMessage::ServerMessage()
+ServerMessageCommand::ServerMessageCommand()
     : Command("server-message", "Server", "Send a message")
 {
 }
 
-std::vector<Command::Arg> ServerMessage::args() const
+std::vector<Command::Arg> ServerMessageCommand::args() const
 {
     return {
         { "server",     true },
@@ -39,7 +39,7 @@ std::vector<Command::Arg> ServerMessage::args() const
     };
 }
 
-std::vector<Command::Property> ServerMessage::properties() const
+std::vector<Command::Property> ServerMessageCommand::properties() const
 {
     return {
         { "server",     { nlohmann::json::value_t::string }},
@@ -48,7 +48,7 @@ std::vector<Command::Property> ServerMessage::properties() const
     };
 }
 
-nlohmann::json ServerMessage::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerMessageCommand::request(Irccdctl &, const CommandRequest &args) const
 {
     return nlohmann::json::object({
         { "server",     args.arg(0) },
@@ -57,7 +57,7 @@ nlohmann::json ServerMessage::request(Irccdctl &, const CommandRequest &args) co
     });
 }
 
-nlohmann::json ServerMessage::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json ServerMessageCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 

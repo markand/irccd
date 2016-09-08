@@ -31,15 +31,14 @@ namespace irccd {
 namespace command {
 
 /**
- * \class ServerNotice
  * \brief Implementation of server-notice transport command.
  */
-class ServerNotice : public Command {
+class ServerNoticeCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerNotice();
+    IRCCD_EXPORT ServerNoticeCommand();
 
     /**
      * \copydoc Command::args

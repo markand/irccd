@@ -31,15 +31,14 @@ namespace irccd {
 namespace command {
 
 /**
- * \class ServerInvite
  * \brief Implementation of server-invite transport command.
  */
-class ServerInvite : public Command {
+class ServerInviteCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerInvite();
+    IRCCD_EXPORT ServerInviteCommand();
 
     /**
      * \copydoc Command::args

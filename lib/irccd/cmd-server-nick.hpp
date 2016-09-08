@@ -31,15 +31,14 @@ namespace irccd {
 namespace command {
 
 /**
- * \class ServerNick
  * \brief Implementation of server-nick transport command.
  */
-class ServerNick : public Command {
+class ServerNickCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerNick();
+    IRCCD_EXPORT ServerNickCommand();
 
     /**
      * \copydoc Command::args

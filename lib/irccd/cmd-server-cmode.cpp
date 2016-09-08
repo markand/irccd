@@ -25,12 +25,12 @@ namespace irccd {
 
 namespace command {
 
-ServerChannelMode::ServerChannelMode()
+ServerChannelModeCommand::ServerChannelModeCommand()
     : Command("server-cmode", "Server", "Change a channel mode")
 {
 }
 
-std::vector<Command::Arg> ServerChannelMode::args() const
+std::vector<Command::Arg> ServerChannelModeCommand::args() const
 {
     return {
         { "server",     true },
@@ -39,7 +39,7 @@ std::vector<Command::Arg> ServerChannelMode::args() const
     };
 }
 
-std::vector<Command::Property> ServerChannelMode::properties() const
+std::vector<Command::Property> ServerChannelModeCommand::properties() const
 {
     return {
         { "server",     { nlohmann::json::value_t::string }},
@@ -48,7 +48,7 @@ std::vector<Command::Property> ServerChannelMode::properties() const
     };
 }
 
-nlohmann::json ServerChannelMode::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json ServerChannelModeCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 

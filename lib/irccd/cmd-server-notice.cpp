@@ -25,12 +25,12 @@ namespace irccd {
 
 namespace command {
 
-ServerNotice::ServerNotice()
+ServerNoticeCommand::ServerNoticeCommand()
     : Command("server-notice", "Server", "Send a private notice")
 {
 }
 
-std::vector<Command::Arg> ServerNotice::args() const
+std::vector<Command::Arg> ServerNoticeCommand::args() const
 {
     return {
         { "server",     true },
@@ -39,7 +39,7 @@ std::vector<Command::Arg> ServerNotice::args() const
     };
 }
 
-std::vector<Command::Property> ServerNotice::properties() const
+std::vector<Command::Property> ServerNoticeCommand::properties() const
 {
     return {
         { "server",     { nlohmann::json::value_t::string }},
@@ -48,7 +48,7 @@ std::vector<Command::Property> ServerNotice::properties() const
     };
 }
 
-nlohmann::json ServerNotice::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerNoticeCommand::request(Irccdctl &, const CommandRequest &args) const
 {
     return nlohmann::json::object({
         { "server",     args.arg(0) },
@@ -57,7 +57,7 @@ nlohmann::json ServerNotice::request(Irccdctl &, const CommandRequest &args) con
     });
 }
 
-nlohmann::json ServerNotice::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json ServerNoticeCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 

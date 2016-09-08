@@ -31,7 +31,6 @@ namespace irccd {
 namespace command {
 
 /**
- * \class ServerChannelNotice
  * \brief Implementation of server-cnotice transport command.
  *
  * Send a channel notice to the specified channel.
@@ -43,12 +42,12 @@ namespace command {
  *   "message": "the message"
  * }
  */
-class ServerChannelNotice : public Command {
+class ServerChannelNoticeCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerChannelNotice();
+    IRCCD_EXPORT ServerChannelNoticeCommand();
 
     /**
      * \copydoc Command::args

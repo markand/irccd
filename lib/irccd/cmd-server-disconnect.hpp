@@ -31,15 +31,14 @@ namespace irccd {
 namespace command {
 
 /**
- * \class ServerDisconnect
  * \brief Implementation of server-disconnect transport command.
  */
-class ServerDisconnect : public Command {
+class ServerDisconnectCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerDisconnect();
+    IRCCD_EXPORT ServerDisconnectCommand();
 
     /**
      * Get list of arguments required.

@@ -31,15 +31,14 @@ namespace irccd {
 namespace command {
 
 /**
- * \class ServerJoin
  * \brief Implementation of server-join transport command.
  */
-class ServerJoin : public Command {
+class ServerJoinCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerJoin();
+    IRCCD_EXPORT ServerJoinCommand();
 
     /**
      * \copydoc Command::args

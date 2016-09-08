@@ -27,27 +27,27 @@ namespace irccd {
 
 namespace command {
 
-ServerInfo::ServerInfo()
+ServerInfoCommand::ServerInfoCommand()
     : Command("server-info", "Server", "Get server information")
 {
 }
 
-std::vector<Command::Arg> ServerInfo::args() const
+std::vector<Command::Arg> ServerInfoCommand::args() const
 {
     return {{ "server", true }};
 }
 
-std::vector<Command::Property> ServerInfo::properties() const
+std::vector<Command::Property> ServerInfoCommand::properties() const
 {
     return {{ "server", { nlohmann::json::value_t::string }}};
 }
 
-nlohmann::json ServerInfo::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerInfoCommand::request(Irccdctl &, const CommandRequest &args) const
 {
     return {{ "server", args.args()[0] }};
 }
 
-nlohmann::json ServerInfo::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json ServerInfoCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     auto response = Command::exec(irccd, request);
     auto server = irccd.servers().require(request["server"]);
@@ -72,7 +72,7 @@ nlohmann::json ServerInfo::exec(Irccd &irccd, const nlohmann::json &request) con
     return response;
 }
 
-void ServerInfo::result(Irccdctl &irccdctl, const nlohmann::json &response) const
+void ServerInfoCommand::result(Irccdctl &irccdctl, const nlohmann::json &response) const
 {
     Command::result(irccdctl, response);
 

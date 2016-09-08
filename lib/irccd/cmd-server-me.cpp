@@ -25,12 +25,12 @@ namespace irccd {
 
 namespace command {
 
-ServerMe::ServerMe()
+ServerMeCommand::ServerMeCommand()
     : Command("server-me", "Server", "Send an action emote")
 {
 }
 
-std::vector<Command::Arg> ServerMe::args() const
+std::vector<Command::Arg> ServerMeCommand::args() const
 {
     return {
         { "server",     true },
@@ -39,7 +39,7 @@ std::vector<Command::Arg> ServerMe::args() const
     };
 }
 
-std::vector<Command::Property> ServerMe::properties() const
+std::vector<Command::Property> ServerMeCommand::properties() const
 {
     return {
         { "server",     { nlohmann::json::value_t::string }},
@@ -48,7 +48,7 @@ std::vector<Command::Property> ServerMe::properties() const
     };
 }
 
-nlohmann::json ServerMe::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerMeCommand::request(Irccdctl &, const CommandRequest &args) const
 {
     return nlohmann::json::object({
         { "server",     args.arg(0) },
@@ -57,7 +57,7 @@ nlohmann::json ServerMe::request(Irccdctl &, const CommandRequest &args) const
     });
 }
 
-nlohmann::json ServerMe::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json ServerMeCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 

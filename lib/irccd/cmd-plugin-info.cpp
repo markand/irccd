@@ -28,27 +28,27 @@ namespace irccd {
 
 namespace command {
 
-PluginInfo::PluginInfo()
+PluginInfoCommand::PluginInfoCommand()
     : Command("plugin-info", "Plugins", "Get plugin information")
 {
 }
 
-std::vector<Command::Arg> PluginInfo::args() const
+std::vector<Command::Arg> PluginInfoCommand::args() const
 {
     return {{ "plugin", true }};
 }
 
-std::vector<Command::Property> PluginInfo::properties() const
+std::vector<Command::Property> PluginInfoCommand::properties() const
 {
     return {{ "plugin", { nlohmann::json::value_t::string }}};
 }
 
-nlohmann::json PluginInfo::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json PluginInfoCommand::request(Irccdctl &, const CommandRequest &args) const
 {
     return nlohmann::json::object({{ "plugin", args.arg(0) }});
 }
 
-nlohmann::json PluginInfo::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json PluginInfoCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 
@@ -62,7 +62,7 @@ nlohmann::json PluginInfo::exec(Irccd &irccd, const nlohmann::json &request) con
     });
 }
 
-void PluginInfo::result(Irccdctl &irccdctl, const nlohmann::json &result) const
+void PluginInfoCommand::result(Irccdctl &irccdctl, const nlohmann::json &result) const
 {
     Command::result(irccdctl, result);
 

@@ -25,12 +25,12 @@ namespace irccd {
 
 namespace command {
 
-ServerTopic::ServerTopic()
+ServerTopicCommand::ServerTopicCommand()
     : Command("server-topic", "Server", "Change a channel topic")
 {
 }
 
-std::vector<Command::Arg> ServerTopic::args() const
+std::vector<Command::Arg> ServerTopicCommand::args() const
 {
     return {
         { "server",     true },
@@ -39,7 +39,7 @@ std::vector<Command::Arg> ServerTopic::args() const
     };
 }
 
-std::vector<Command::Property> ServerTopic::properties() const
+std::vector<Command::Property> ServerTopicCommand::properties() const
 {
     return {
         { "server",     { nlohmann::json::value_t::string }},
@@ -48,7 +48,7 @@ std::vector<Command::Property> ServerTopic::properties() const
     };
 }
 
-nlohmann::json ServerTopic::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerTopicCommand::request(Irccdctl &, const CommandRequest &args) const
 {
     return nlohmann::json::object({
         { "server",     args.arg(0) },
@@ -57,7 +57,7 @@ nlohmann::json ServerTopic::request(Irccdctl &, const CommandRequest &args) cons
     });
 }
 
-nlohmann::json ServerTopic::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json ServerTopicCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 

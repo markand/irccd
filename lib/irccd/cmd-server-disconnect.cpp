@@ -25,17 +25,17 @@ namespace irccd {
 
 namespace command {
 
-ServerDisconnect::ServerDisconnect()
+ServerDisconnectCommand::ServerDisconnectCommand()
     : Command("server-disconnect", "Server", "Disconnect one or more servers")
 {
 }
 
-std::vector<Command::Arg> ServerDisconnect::args() const
+std::vector<Command::Arg> ServerDisconnectCommand::args() const
 {
     return {{ "server", false }};
 }
 
-nlohmann::json ServerDisconnect::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json ServerDisconnectCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     auto it = request.find("server");
 

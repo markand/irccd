@@ -25,12 +25,12 @@ namespace irccd {
 
 namespace command {
 
-ServerPart::ServerPart()
+ServerPartCommand::ServerPartCommand()
     : Command("server-part", "Server", "Leave a channel")
 {
 }
 
-std::vector<Command::Arg> ServerPart::args() const
+std::vector<Command::Arg> ServerPartCommand::args() const
 {
     return {
         { "server",     true    },
@@ -39,7 +39,7 @@ std::vector<Command::Arg> ServerPart::args() const
     };
 }
 
-std::vector<Command::Property> ServerPart::properties() const
+std::vector<Command::Property> ServerPartCommand::properties() const
 {
     return {
         { "server",     { nlohmann::json::value_t::string }},
@@ -47,7 +47,7 @@ std::vector<Command::Property> ServerPart::properties() const
     };
 }
 
-nlohmann::json ServerPart::request(Irccdctl &, const CommandRequest &args) const
+nlohmann::json ServerPartCommand::request(Irccdctl &, const CommandRequest &args) const
 {
     auto req = nlohmann::json::object({
         { "server",     args.arg(0) },
@@ -60,7 +60,7 @@ nlohmann::json ServerPart::request(Irccdctl &, const CommandRequest &args) const
     return req;
 }
 
-nlohmann::json ServerPart::exec(Irccd &irccd, const nlohmann::json &request) const
+nlohmann::json ServerPartCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
 

@@ -34,12 +34,12 @@ namespace irccd {
 
 namespace command {
 
-ServerConnect::ServerConnect()
+ServerConnectCommand::ServerConnectCommand()
     : Command("server-connect", "Server", "Connect to a server")
 {
 }
 
-std::vector<Command::Option> ServerConnect::options() const
+std::vector<Command::Option> ServerConnectCommand::options() const
 {
     return {
         { "command",    "c", "command",     "char",     "command character to use"  },
@@ -51,7 +51,7 @@ std::vector<Command::Option> ServerConnect::options() const
     };
 }
 
-std::vector<Command::Arg> ServerConnect::args() const
+std::vector<Command::Arg> ServerConnectCommand::args() const
 {
     return {
         { "id",     true    },
@@ -60,7 +60,7 @@ std::vector<Command::Arg> ServerConnect::args() const
     };
 }
 
-std::vector<Command::Property> ServerConnect::properties() const
+std::vector<Command::Property> ServerConnectCommand::properties() const
 {
     return {
         { "name",   { json::value_t::string }},
@@ -68,7 +68,7 @@ std::vector<Command::Property> ServerConnect::properties() const
     };
 }
 
-json ServerConnect::exec(Irccd &irccd, const json &request) const
+json ServerConnectCommand::exec(Irccd &irccd, const json &request) const
 {
     auto server = Server::fromJson(request);
 
