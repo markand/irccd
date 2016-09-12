@@ -80,7 +80,6 @@ void init(int &argc, char **&argv)
 
     // Default logging to console.
     log::setVerbose(false);
-    log::setInterface(std::make_unique<log::Console>());
 
     // Register some signals.
     signal(SIGINT, stop);

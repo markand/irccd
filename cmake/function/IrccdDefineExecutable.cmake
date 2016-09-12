@@ -22,20 +22,19 @@
 #
 # irccd_define_executable(
 #    TARGET target name
+#    DESCRIPTION short description (Required if installed)
 #    SOURCES src1, src2, srcn
 #    FLAGS (Optional) C/C++ flags (without -D)
 #    LIBRARIES (Optional) libraries to link
 #    INCLUDES (Optional) includes for the target
-#    INSTALL (Optional) if set, install the executable (default: false)
-#    PRIVATE (Optional) if set, do not build it into the fake root (default: false)
 # )
 #
 # Create an executable that can be installed or not.
 #
 
 function(irccd_define_executable)
-    set(options INSTALL PRIVATE)
-    set(oneValueArgs TARGET)
+    set(options "")
+    set(oneValueArgs DESCRIPTION TARGET)
     set(multiValueArgs SOURCES FLAGS LIBRARIES INCLUDES)
 
     cmake_parse_arguments(EXE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -46,9 +45,8 @@ function(irccd_define_executable)
     if (NOT EXE_SOURCES)
         message(FATAL_ERROR "Please set SOURCES")
     endif ()
-
-    if (EXE_INSTALL AND EXE_PRIVATE)
-        message(FATAL_ERROR "INSTALL and PRIVATE are mutually exclusive")
+    if (NOT EXE_DESCRIPTION)
+        message(FATAL_ERROR "DESCRIPTION required")
     endif ()
 
     add_executable(${EXE_TARGET} ${EXE_SOURCES})
@@ -57,17 +55,25 @@ function(irccd_define_executable)
     target_link_libraries(${EXE_TARGET} ${EXE_LIBRARIES})
 
     # use fakeroot for public executables.
-    if (NOT EXE_PRIVATE)
-        set_target_properties(
-            ${EXE_TARGET}
-            PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-            RUNTIME_OUTPUT_DIRECTORY_DEBUG ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-            RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-            RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-        )
+    set_target_properties(
+        ${EXE_TARGET}
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+        RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+    )
 
-        install(TARGETS ${EXE_TARGET} RUNTIME DESTINATION ${WITH_BINDIR})
-    endif ()
+    install(
+        TARGETS ${EXE_TARGET}
+        COMPONENT ${EXE_TARGET}
+        RUNTIME DESTINATION ${WITH_BINDIR}
+    )
+
+    # Put the application into a cpack group.
+    string(TOUPPER ${EXE_TARGET} CMP)
+    setg(CPACK_COMPONENT_${CMP}_DISPLAY_NAME "${EXE_TARGET} executable")
+    setg(CPACK_COMPONENT_${CMP}_DESCRIPTION ${EXE_DESCRIPTION})
+    setg(CPACK_COMPONENT_${CMP}_GROUP "Applications")
 endfunction()

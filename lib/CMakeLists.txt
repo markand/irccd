@@ -72,11 +72,25 @@ set_target_properties(
 
 install(
     TARGETS libirccd
-#    EXPORT Irccd2Targets
-    RUNTIME DESTINATION bin
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
 )
+
+#
+# Headers.
+# -------------------------------------------------------------------
+#
+
+install(
+    FILES ${HEADERS}
+    COMPONENT headers
+    DESTINATION include/irccd
+)
+
+setg(CPACK_COMPONENT_HEADERS_GROUP "Development")
+setg(CPACK_COMPONENT_HEADERS_DISPLAY_NAME "C++ headers")
+setg(CPACK_COMPONENT_HEADERS_DESCRIPTION
+    "Install the C++ headers if you want to build irccd native plugins.")
 
 # # CMake target exports.
 # export(

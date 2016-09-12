@@ -212,16 +212,10 @@ endif ()
 # Do not move this section because irccd's CMake functions requires the IRCCD_PACKAGE value.
 #
 
-find_package(QtIFW)
-
 set(IRCCD_PACKAGE FALSE)
 
 if (NOT WITH_HTML)
     set(IRCCD_PACKAGE_MSG "No (HTML documentation disabled)")
-elseif (NOT WIN32)
-    set(IRCCD_PACKAGE_MSG "No (only for Windows)")
-elseif (NOT QtIFW_FOUND)
-    set(IRCCD_PACKAGE_MSG "No (QtIFW not found)")
 else ()
     # Now check that a plugin has not been disabled.
     set(IRCCD_PACKAGE TRUE)

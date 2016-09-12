@@ -29,8 +29,8 @@
 #if defined(IRCCD_SYSTEM_WINDOWS)
 #  include <sys/types.h>
 #  include <sys/timeb.h>
-#  include <Windows.h>
-#  include <Shlobj.h>
+#  include <windows.h>
+#  include <shlobj.h>
 #else // All non Windows
 #if defined(IRCCD_SYSTEM_MAC)
 #  include <sys/sysctl.h>

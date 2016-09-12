@@ -100,7 +100,7 @@ PluginConfig loadPluginConfig(const ini::Section &sc)
     return config;
 }
 
-std::unique_ptr<log::Interface> loadLogFile(const ini::Section &sc)
+std::unique_ptr<log::Logger> loadLogFile(const ini::Section &sc)
 {
     /*
      * TODO: improve that with CMake options.
@@ -120,13 +120,13 @@ std::unique_ptr<log::Interface> loadLogFile(const ini::Section &sc)
     if ((it = sc.find("path-errors")) != sc.end())
         errors = it->value();
 
-    return std::make_unique<log::File>(std::move(normal), std::move(errors));
+    return std::make_unique<log::FileLogger>(std::move(normal), std::move(errors));
 }
 
-std::unique_ptr<log::Interface> loadLogSyslog()
+std::unique_ptr<log::Logger> loadLogSyslog()
 {
 #if defined(HAVE_SYSLOG)
-    return std::make_unique<log::Syslog>();
+    return std::make_unique<log::SyslogLogger>();
 #else
     throw std::runtime_error("logs: syslog is not available on this platform");
 #endif // !HAVE_SYSLOG
@@ -474,7 +474,7 @@ void Config::loadLogs() const
     ini::Section::const_iterator it;
 
     if ((it = sc->find("type")) != sc->end()) {
-        std::unique_ptr<log::Interface> iface;
+        std::unique_ptr<log::Logger> iface;
 
         // Console is the default, no test case.
         if (it->value() == "file")
@@ -485,7 +485,7 @@ void Config::loadLogs() const
             throw std::runtime_error("logs: unknown log type: {}"_format(it->value()));
 
         if (iface)
-            log::setInterface(std::move(iface));
+            log::setLogger(std::move(iface));
     }
 }
 

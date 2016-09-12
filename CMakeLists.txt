@@ -48,6 +48,11 @@
 cmake_minimum_required(VERSION 3.3)
 project(irccd)
 
+# Helper to set global internal variables.
+function(setg var value)
+    set("${var}" "${value}" CACHE INTERNAL "")
+endfunction ()
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${irccd_SOURCE_DIR}/cmake/packages)
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
@@ -125,18 +130,5 @@ endforeach ()
 
 message("")
 
-# CPack (only for package_source, package_ifw is home made).
-#include(cmake/IrccdPackage.cmake)
-#include(CPack)
-
-# Meta release target.
-#if (IRCCD_PACKAGE)
-#    add_custom_target(
-#        release
-#        COMMENT "Releasing irccd ${IRCCD_VERSION}"
-#        COMMAND
-#            ${CMAKE_MAKE_PROGRAM} package_source
-#    )
-#
-#    add_dependencies(release package_ifw)
-#endif ()
+include(cmake/IrccdPackage.cmake)
+include(CPack)

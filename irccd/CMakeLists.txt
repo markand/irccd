@@ -20,7 +20,7 @@ project(irccd)
 
 irccd_define_executable(
     TARGET irccd
-    INSTALL
+    DESCRIPTION "The main irccd daemon."
     SOURCES CMakeLists.txt main.cpp
     INCLUDES ${irccd_SOURCE_DIR}
     LIBRARIES libirccd

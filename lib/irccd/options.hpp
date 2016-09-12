@@ -30,6 +30,8 @@
 #include <utility>
 #include <vector>
 
+#include "sysconfig.hpp"
+
 namespace irccd {
 
 /**
@@ -132,7 +134,7 @@ using Options = std::map<std::string, bool>;
  * \throw MissingValue
  * \throw InvalidOption
  */
-Result read(std::vector<std::string> &args, const Options &definition);
+IRCCD_EXPORT Result read(std::vector<std::string> &args, const Options &definition);
 
 /**
  * Overloaded function for usage with main() arguments.
@@ -145,7 +147,7 @@ Result read(std::vector<std::string> &args, const Options &definition);
  * \throw MissingValue
  * \throw InvalidOption
  */
-Result read(int &argc, char **&argv, const Options &definition);
+IRCCD_EXPORT Result read(int &argc, char **&argv, const Options &definition);
 
 } // !option
 

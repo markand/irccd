@@ -35,31 +35,31 @@ namespace irccd {
 namespace log {
 
 /*
- * Interface -- abstract logging interface
+ * Logger -- abstract logging interface
  * ------------------------------------------------------------------
  */
 
 /**
  * \brief Interface to implement new logger mechanisms.
  *
- * Derive from this class and use log::setInterface() to change logging system.
+ * Derive from this class and use log::setLogger() to change logging system.
  *
  * \see File
  * \see Console
  * \see Syslog
  * \see Silent
  */
-class Interface {
+class Logger {
 public:
     /**
      * Default constructor.
      */
-    Interface() = default;
+    Logger() = default;
 
     /**
      * Virtual destructor defaulted.
      */
-    virtual ~Interface() = default;
+    virtual ~Logger() = default;
 
     /**
      * Write a debug message.
@@ -157,20 +157,22 @@ public:
  * \brief Logger implementation for console output using std::cout and
  *        std::cerr.
  */
-class Console : public Interface {
+class ConsoleLogger : public Logger {
 public:
+    IRCCD_EXPORT ConsoleLogger() = default;
+
     /**
-     * \copydoc Interface::debug
+     * \copydoc Logger::debug
      */
     IRCCD_EXPORT void debug(const std::string &line) override;
 
     /**
-     * \copydoc Interface::info
+     * \copydoc Logger::info
      */
     IRCCD_EXPORT void info(const std::string &line) override;
 
     /**
-     * \copydoc Interface::warning
+     * \copydoc Logger::warning
      */
     IRCCD_EXPORT void warning(const std::string &line) override;
 };
@@ -183,7 +185,7 @@ public:
 /**
  * \brief Output to a files.
  */
-class File : public Interface {
+class FileLogger : public Logger {
 private:
     std::string m_outputNormal;
     std::string m_outputError;
@@ -195,20 +197,20 @@ public:
      * \param normal the path to the normal logs
      * \param errors the path to the errors logs
      */
-    IRCCD_EXPORT File(std::string normal, std::string errors);
+    IRCCD_EXPORT FileLogger(std::string normal, std::string errors);
 
     /**
-     * \copydoc Interface::debug
+     * \copydoc Logger::debug
      */
     IRCCD_EXPORT void debug(const std::string &line) override;
 
     /**
-     * \copydoc Interface::info
+     * \copydoc Logger::info
      */
     IRCCD_EXPORT void info(const std::string &line) override;
 
     /**
-     * \copydoc Interface::warning
+     * \copydoc Logger::warning
      */
     IRCCD_EXPORT void warning(const std::string &line) override;
 };
@@ -223,20 +225,22 @@ public:
  *
  * Useful for unit tests when some classes may emits log.
  */
-class Silent : public Interface {
+class SilentLogger : public Logger {
 public:
+    IRCCD_EXPORT SilentLogger() = default;
+
     /**
-     * \copydoc Interface::debug
+     * \copydoc Logger::debug
      */
     IRCCD_EXPORT void debug(const std::string &line) override;
 
     /**
-     * \copydoc Interface::info
+     * \copydoc Logger::info
      */
     IRCCD_EXPORT void info(const std::string &line) override;
 
     /**
-     * \copydoc Interface::warning
+     * \copydoc Logger::warning
      */
     IRCCD_EXPORT void warning(const std::string &line) override;
 };
@@ -251,30 +255,30 @@ public:
 /**
  * \brief Implements logger into syslog.
  */
-class Syslog : public Interface {
+class SyslogLogger : public Logger {
 public:
     /**
      * Open the syslog.
      */
-    IRCCD_EXPORT Syslog();
+    IRCCD_EXPORT SyslogLogger();
 
     /**
      * Close the syslog.
      */
-    IRCCD_EXPORT ~Syslog();
+    IRCCD_EXPORT ~SyslogLogger();
 
     /**
-     * \copydoc Interface::debug
+     * \copydoc Logger::debug
      */
     IRCCD_EXPORT void debug(const std::string &line) override;
 
     /**
-     * \copydoc Interface::info
+     * \copydoc Logger::info
      */
     IRCCD_EXPORT void info(const std::string &line) override;
 
     /**
-     * \copydoc Interface::warning
+     * \copydoc Logger::warning
      */
     IRCCD_EXPORT void warning(const std::string &line) override;
 };
@@ -292,7 +296,7 @@ public:
  * \pre iface must not be null
  * \param iface the new interface
  */
-IRCCD_EXPORT void setInterface(std::unique_ptr<Interface> iface) noexcept;
+IRCCD_EXPORT void setLogger(std::unique_ptr<Logger> iface) noexcept;
 
 /**
  * Set an optional filter.

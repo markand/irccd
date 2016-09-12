@@ -135,7 +135,7 @@
 #include <string>
 
 #if defined(_WIN32)
-#  include <Windows.h>
+#  include <windows.h>
 #else
 #  include <dlfcn.h>
 #endif

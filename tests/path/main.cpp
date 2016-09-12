@@ -129,7 +129,6 @@ int main(int argc, char **argv)
      * Just show everything for test purpose.
      */
     path::setApplicationPath(argv[0]);
-    log::setInterface(std::make_unique<log::Console>());
     log::debug() << "System paths:" << std::endl;
     log::debug() << "  config(system):  " << path::get(path::PathConfig, path::OwnerSystem) << std::endl;
     log::debug() << "  data(system):    " << path::get(path::PathData, path::OwnerSystem) << std::endl;

@@ -187,7 +187,7 @@ int main(int argc, char **argv)
 {
     path::setApplicationPath(argv[0]);
     testing::InitGoogleTest(&argc, argv);
-    log::setInterface(std::make_unique<log::Silent>());
+    log::setLogger(std::make_unique<log::SilentLogger>());
 
     return RUN_ALL_TESTS();
 }

@@ -95,7 +95,7 @@ int main(int argc, char **argv)
     // Needed for some components.
     sys::setProgramName("irccd");
     path::setApplicationPath(argv[0]);
-    log::setInterface(std::make_unique<log::Silent>());
+    log::setLogger(std::make_unique<log::SilentLogger>());
     log::setVerbose(true);
     testing::InitGoogleTest(&argc, argv);
 

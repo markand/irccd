@@ -24,8 +24,8 @@
 #include "sysconfig.hpp"
 
 #if defined(IRCCD_SYSTEM_WINDOWS)
-#  include <Windows.h>
-#  include <Shlobj.h>
+#  include <windows.h>
+#  include <shlobj.h>
 #else
 #  if defined(IRCCD_SYSTEM_LINUX)
 #    include <limits.h>

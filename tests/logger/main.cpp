@@ -32,7 +32,7 @@ std::string lineWarning;
 
 } // !namespace
 
-class MyInterface : public log::Interface {
+class MyInterface : public log::Logger {
 public:
     void debug(const std::string &line) override
     {
@@ -96,7 +96,7 @@ TEST(Logger, warning)
 int main(int argc, char **argv)
 {
     log::setVerbose(true);
-    log::setInterface(std::make_unique<MyInterface>());
+    log::setLogger(std::make_unique<MyInterface>());
     log::setFilter(std::make_unique<MyFilter>());
 
     testing::InitGoogleTest(&argc, argv);

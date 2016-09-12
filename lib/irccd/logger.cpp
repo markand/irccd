@@ -44,7 +44,7 @@ namespace {
  */
 
 std::atomic<bool> verbose{false};
-std::unique_ptr<Interface> iface{new Console};
+std::unique_ptr<Logger> iface{new ConsoleLogger};
 std::unique_ptr<Filter> filter{new Filter};
 
 /*
@@ -145,96 +145,96 @@ std::ostream streamDebug(&bufferDebug);
 } // !namespace
 
 /*
- * Console
+ * ConsoleLogger
  * ------------------------------------------------------------------
  */
 
-void Console::info(const std::string &line)
+void ConsoleLogger::info(const std::string &line)
 {
     std::cout << line << std::endl;
 }
 
-void Console::warning(const std::string &line)
+void ConsoleLogger::warning(const std::string &line)
 {
     std::cerr << line << std::endl;
 }
 
-void Console::debug(const std::string &line)
+void ConsoleLogger::debug(const std::string &line)
 {
     std::cout << line << std::endl;
 }
 
 /*
- * File
+ * FileLogger
  * ------------------------------------------------------------------
  */
 
-File::File(std::string normal, std::string errors)
+FileLogger::FileLogger(std::string normal, std::string errors)
     : m_outputNormal(std::move(normal))
     , m_outputError(std::move(errors))
 {
 }
 
-void File::info(const std::string &line)
+void FileLogger::info(const std::string &line)
 {
     std::ofstream(m_outputNormal, std::ofstream::out | std::ofstream::app) << line << std::endl;
 }
 
-void File::warning(const std::string &line)
+void FileLogger::warning(const std::string &line)
 {
     std::ofstream(m_outputError, std::ofstream::out | std::ofstream::app) << line << std::endl;
 }
 
-void File::debug(const std::string &line)
+void FileLogger::debug(const std::string &line)
 {
     std::ofstream(m_outputNormal, std::ofstream::out | std::ofstream::app) << line << std::endl;
 }
 
 /*
- * Silent
+ * SilentLogger
  * ------------------------------------------------------------------
  */
 
-void Silent::info(const std::string &)
+void SilentLogger::info(const std::string &)
 {
 }
 
-void Silent::warning(const std::string &)
+void SilentLogger::warning(const std::string &)
 {
 }
 
-void Silent::debug(const std::string &)
+void SilentLogger::debug(const std::string &)
 {
 }
 
 /*
- * Syslog
+ * SyslogLogger
  * ------------------------------------------------------------------
  */
 
 #if defined(HAVE_SYSLOG)
 
-Syslog::Syslog()
+SyslogLogger::SyslogLogger()
 {
     openlog(sys::programName().c_str(), LOG_PID, LOG_DAEMON);
 }
 
-Syslog::~Syslog()
+SyslogLogger::~SyslogLogger()
 {
     closelog();
 }
 
-void Syslog::info(const std::string &line)
+void SyslogLogger::info(const std::string &line)
 {
     syslog(LOG_INFO | LOG_USER, "%s", line.c_str());
 }
 
-void Syslog::warning(const std::string &line)
+void SyslogLogger::warning(const std::string &line)
 {
     syslog(LOG_WARNING | LOG_USER, "%s", line.c_str());
 }
 
-void Syslog::debug(const std::string &line)
+void SyslogLogger::debug(const std::string &line)
 {
     syslog(LOG_DEBUG | LOG_USER, "%s", line.c_str());
 }
@@ -246,7 +246,7 @@ void Syslog::debug(const std::string &line)
  * ------------------------------------------------------------------
  */
 
-void setInterface(std::unique_ptr<Interface> newiface) noexcept
+void setLogger(std::unique_ptr<Logger> newiface) noexcept
 {
     assert(newiface);
 

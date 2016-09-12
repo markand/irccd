@@ -28,7 +28,6 @@ int main(int argc, char **argv)
     // TODO: move to Application
     sys::setProgramName("irccdctl");
     path::setApplicationPath(argv[0]);
-    log::setInterface(std::make_unique<log::Console>());
     log::setVerbose(false);
 
     try {

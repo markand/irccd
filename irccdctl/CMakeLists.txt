@@ -20,7 +20,7 @@ project(irccdctl)
 
 irccd_define_executable(
     TARGET irccdctl
-    INSTALL
+    DESCRIPTION "Irccd controller."
     SOURCES CMakeLists.txt main.cpp
     LIBRARIES libirccd
 )

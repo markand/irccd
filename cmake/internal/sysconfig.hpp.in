@@ -19,12 +19,21 @@
 #ifndef IRCCD_SYSCONFIG_H
 #define IRCCD_SYSCONFIG_H
 
+
+
 /*
  * Fix annoying "Please include winsock2.h before windows.h"
  */
 #if defined(_WIN32)
-#  include <winsock2.h>
-#  include <windows.h>
+#   if !defined(WIN32_MEAN_AND_LEAN)
+#       define WIN32_MEAN_AND_LEAN
+#   endif
+#   if !defined(NOMINMAX)
+#       define NOMINMAX
+#   endif
+
+#   include <winsock2.h>
+#   include <windows.h>
 #endif
 
 /*
@@ -100,13 +109,18 @@
  * Export stuff.
  * ------------------------------------------------------------------
  */
+#cmakedefine BUILD_SHARED_LIBS
 
 #if defined(_WIN32)
-#  if defined(IRCCD_BUILDING_DLL)
-#    define IRCCD_EXPORT __declspec(dllexport)
-#  else
-#    define IRCCD_EXPORT
-#  endif
+#   if defined(BUILD_SHARED_LIBS)
+#       if defined(IRCCD_BUILDING_DLL)
+#           define IRCCD_EXPORT __declspec(dllexport)
+#       else
+#           define IRCCD_EXPORT __declspec(dllimport)
+#       endif
+#   else
+#       define IRCCD_EXPORT
+#   endif
 #else
 #  define IRCCD_EXPORT
 #endif

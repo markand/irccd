@@ -39,9 +39,8 @@ foreach (plugin ${IRCCD_PLUGINS})
         # 2. Build documentation.
         if (WITH_HTML)
             set(basedocdir ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR})
-
             file(RELATIVE_PATH baseurl ${basedocdir}/plugin ${basedocdir})
-    
+
             pandoc(
                 OUTPUT ${basedocdir}/plugin/${plugin}.html
                 SOURCES ${plugin}/${plugin}.md
@@ -54,9 +53,16 @@ foreach (plugin ${IRCCD_PLUGINS})
                 FROM markdown TO html5
                 STANTALONE MAKE_DIRECTORY TOC
             )
-    
+
             list(APPEND outputs ${basedocdir}/plugin/${plugin}.html)
-            install(FILES ${basedocdir}/plugin/${plugin}.html DESTINATION ${WITH_DOCDIR}/plugin)
+            install(
+                FILES ${basedocdir}/plugin/${plugin}.html
+                COMPONENT ${plugin}
+                DESTINATION ${WITH_DOCDIR}/plugin
+            )
+            string(TOUPPER ${plugin} CMP)
+            setg(CPACK_COMPONENT_${CMP}_DESCRIPTION "Install ${plugin}.")
+            setg(CPACK_COMPONENT_${CMP}_GROUP "Plugins")
         endif ()
 
         add_custom_target(

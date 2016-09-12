@@ -36,7 +36,7 @@ std::string lineDebug;
 
 } // !namespace
 
-class LoggerIfaceTest : public log::Interface {
+class LoggerIfaceTest : public log::Logger {
 public:
     void info(const std::string &line) override
     {
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
     testing::InitGoogleTest(&argc, argv);
 
     log::setVerbose(true);
-    log::setInterface(std::make_unique<LoggerIfaceTest>());
+    log::setLogger(std::make_unique<LoggerIfaceTest>());
 
     return RUN_ALL_TESTS();
 }
