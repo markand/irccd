@@ -70,6 +70,7 @@ function(_irccd_define_javascript_plugin)
 
     add_custom_target(
         plugin-${PLG_NAME}
+        ALL
         DEPENDS ${PLG_OUTPUT_DOC}
     )
 endfunction()
