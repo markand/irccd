@@ -265,7 +265,13 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    /*
+     * Assign instance to nullptr to force deletion of irccd and all its
+     * associated objects before any other static global values such as
+     * loggers.
+     */
     instance->run();
+    instance = nullptr;
 
     return 0;
 }

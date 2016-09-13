@@ -35,16 +35,3 @@ set(IRCCD_RELEASE_DATE_YEAR 2016)
 set(IRCCD_RELEASE_DATE_MONTH 04)
 set(IRCCD_RELEASE_DATE_DAY 19)
 set(IRCCD_RELEASE_DATE "${IRCCD_RELEASE_DATE_YEAR}-${IRCCD_RELEASE_DATE_MONTH}-${IRCCD_RELEASE_DATE_DAY}")
-
-# All plugins.
-set(
-    IRCCD_PLUGINS
-    ask
-    auth
-    hangman
-    history
-    logger
-    plugin
-    roulette
-    CACHE INTERNAL ""
-)

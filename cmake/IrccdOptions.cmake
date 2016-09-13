@@ -86,18 +86,6 @@ option(WITH_DOXYGEN "Enable doxygen" Off)
 option(WITH_MAN "Install man pages" ${DEFAULT_MAN})
 option(WITH_PKGCONFIG "Enable pkg-config file" ${DEFAULT_PKGCONFIG})
 
-# Build options for all plugins.
-foreach (plugin ${IRCCD_PLUGINS})
-    string(TOUPPER ${plugin} optname)
-    option(WITH_PLUGIN_${optname} "Enable ${plugin} plugin" On)
-
-    if (NOT WITH_PLUGIN_${optname})
-        set(WITH_PLUGIN_${optname}_MSG "No (disabled by user)")
-    else ()
-        set(WITH_PLUGIN_${optname}_MSG "Yes")
-    endif ()
-endforeach ()
-
 set(WITH_TEST_IRCHOST "127.0.0.1" CACHE STRING "IRC host for tests")
 set(WITH_TEST_IRCPORT 6667 CACHE STRING "IRC port for test")
 

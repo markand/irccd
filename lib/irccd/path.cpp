@@ -520,7 +520,8 @@ std::vector<std::string> list(Path path)
         list.push_back(clean(systemPlugins()));
         break;
     case PathNativePlugins:
-        list.push_back(clean(systemPlugins()));
+        list.push_back(clean(fs::cwd()));
+        list.push_back(clean(systemNativePlugins()));
         break;
     default:
         break;

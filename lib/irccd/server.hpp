@@ -79,14 +79,6 @@ public:
 };
 
 /**
- * \brief Some variables that are needed in many places internally.
- */
-class Cache {
-public:
-
-};
-
-/**
  * \brief Channel event.
  */
 class ChannelModeEvent {
