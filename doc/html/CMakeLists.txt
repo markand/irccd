@@ -173,10 +173,12 @@ set(
 if (WITH_HTML)
     foreach (file ${HTML_SOURCES})
         # 'baseurl': compute the tree from the file to this directory.
+        # 'inputbase': the canonical file name.
         get_filename_component(fulldirectory ${file} DIRECTORY)
+        get_filename_component(inputname ${file} NAME_WE)
         file(RELATIVE_PATH baseurl ${fulldirectory} ${html_SOURCE_DIR})
 
-        # 'inputname': relative to this source directory.
+        # 'inputbase': relative to this source directory.
         file(RELATIVE_PATH inputbase ${html_SOURCE_DIR} ${file})
 
         # 'outputbase': replace .md to .html as file extension.
@@ -193,10 +195,32 @@ if (WITH_HTML)
             ${html_BINARY_DIR}/${inputbase}
         )
 
+        # Create a list of parents for the breadcrumb widget.
+        get_filename_component(parentlist ${inputbase} DIRECTORY)
+        string(REPLACE "/" ";" parentlist "${parentlist}")
+        set(parents "  -\n")
+        set(parents "${parents}    name: \"index\"\n")
+        set(parents "${parents}    path: \"${baseurl}index.html\"\n")
+
+        set(path "${baseurl}")
+        foreach (p ${parentlist})
+            set(path "${path}${p}/")
+            set(parents "${parents}  -\n")
+            set(parents "${parents}    name: \"${p}\"\n")
+            set(parents "${parents}    path: \"${path}index.html\"\n")
+        endforeach ()
+
+        configure_file(
+            ${html_SOURCE_DIR}/resources/metadata.yml
+            ${html_BINARY_DIR}/${inputbase}.yml
+        )
+
         # Create an output target to that file.
         pandoc(
             OUTPUT ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/${outputbase}
-            SOURCES ${html_BINARY_DIR}/${inputbase}
+            SOURCES
+				${html_BINARY_DIR}/${inputbase}.yml
+				${html_BINARY_DIR}/${inputbase}
             DEPENDS ${file}
             TEMPLATE ${html_SOURCE_DIR}/resources/template.html
             VARIABLE baseurl:${baseurl}

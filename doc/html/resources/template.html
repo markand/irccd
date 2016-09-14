@@ -85,6 +85,13 @@ $endif$ <!-- endif guide -->
     </div><!-- Side bar -->
 
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+      <ol class="breadcrumb">
+$for(parents)$
+        <li><a href="$parents.path$">$parents.name$</a></li>
+$endfor$
+        <li class="active">$filename$</li>
+      </ol><!-- !breadcrumb -->
+
     <!-- Page body for JavaScript -->
 $if(js)$
     <!-- Page header, may be: event | module | function | method -->
