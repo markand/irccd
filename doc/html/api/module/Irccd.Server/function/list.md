@@ -1,5 +1,6 @@
 ---
 function: list
+js: true
 summary: "List all servers in a map."
 synopsis: "table = Irccd.Server.list()"
 returns: "the table of all servers."

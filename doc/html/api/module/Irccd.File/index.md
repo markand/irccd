@@ -1,5 +1,6 @@
 ---
 module: Irccd.File
+js: true
 summary: "File opening and writing."
 ---
 

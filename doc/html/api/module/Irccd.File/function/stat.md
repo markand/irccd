@@ -1,5 +1,6 @@
 ---
 function: stat
+js: true
 summary: >
   Get file information at the specified path.
 

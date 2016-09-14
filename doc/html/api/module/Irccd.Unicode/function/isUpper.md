@@ -1,5 +1,6 @@
 ---
 function: isUpper
+js: true
 summary: "Check if the unicode character is upper case."
 synopsis: "ret = Irccd.Unicode.isUpper(code)"
 arguments:

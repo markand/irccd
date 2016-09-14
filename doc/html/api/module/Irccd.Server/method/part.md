@@ -1,5 +1,6 @@
 ---
 method: part
+js: true
 summary: "Leave the specified channel, the reason is optional."
 synopsis: "Server.prototype.part(channel, reason)"
 arguments:

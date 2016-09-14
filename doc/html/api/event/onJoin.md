@@ -1,5 +1,6 @@
 ---
 event: onJoin
+js: true
 summary: "User join events, this function is called when someone joins a channel."
 synopsis: "function onJoin(server, origin, channel)"
 arguments:

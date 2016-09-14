@@ -1,5 +1,6 @@
 ---
 module: Irccd.Logger
+js: true
 summary: "Logging functions."
 ---
 

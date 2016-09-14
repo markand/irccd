@@ -1,5 +1,6 @@
 ---
 event: onChannelNotice
+js: true
 summary: "This callback is called when someone sent a notice on a channel."
 synopsis: "function onChannelNotice(server, origin, channel, notice)"
 arguments:

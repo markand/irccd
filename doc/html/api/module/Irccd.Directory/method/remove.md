@@ -1,5 +1,6 @@
 ---
 method: remove
+js: true
 summary: "Synonym of [Irccd.Directory.remove](@baseurl@/api/module/Irccd.Directory/function/remove.html) but the path is taken from the directory object."
 synopsis: "Directory.prototype.remove(recursive)"
 arguments:

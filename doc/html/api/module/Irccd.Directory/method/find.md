@@ -1,5 +1,6 @@
 ---
 method: find
+js: true
 summary: "Synonym of [Irccd.Directory.find](@baseurl@/api/module/Irccd.Directory/function/find.html) but the path is taken from the directory object."
 synopsis: "Directory.prototype.find(pattern, recursive)"
 arguments:

@@ -1,4 +1,7 @@
-# Irccdctl
+---
+title: Configuring irccdctl
+guide: yes
+---
 
 The `irccdctl` utility let you controlling a running `irccd` instance. It uses sockets to perform any operation.
 

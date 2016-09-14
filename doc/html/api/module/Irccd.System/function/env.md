@@ -1,5 +1,6 @@
 ---
 function: env
+js: true
 summary: "Get a environment variable."
 synopsis: "home = Irccd.System.env(name)"
 arguments:

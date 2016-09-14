@@ -1,5 +1,6 @@
 ---
 function: reload
+js: true
 summary: "Reload a plugin by name."
 synopsis: "Irccd.Plugin.reload(name)"
 arguments:

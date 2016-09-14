@@ -1,13 +1,11 @@
-# Irccd
-
-Now that you've successfully installed irccd, let's add a configuration file
-so we can run it.
-
-## Configure irccd
+---
+title: Configuring irccd
+guide: yes
+---
 
 Options that have a default value are optional and can be omitted.
 
-## Identifiers
+# Identifiers
 
 Some sections require an identifier (specified as id) as parameter. They must be unique, not empty and can only
 contain characters, numbers, '-' and '_'.
@@ -21,7 +19,7 @@ Example:
 **Note**: the regular expression is defined as `[A-Za-z0-9-_]+`.
 </div>
 
-### The general section
+# The general section
 
 This section contains global options that are used in the whole irccd application.
 
@@ -45,7 +43,7 @@ uid = "nobody"
 gid = 1002
 ````
 
-### The logs section
+# The logs section
 
 This section can let you configure how irccd should log the messages.
 
@@ -73,7 +71,7 @@ path-logs = "/var/log/irccd/log.txt"
 path-errors = "/var/log/irccd/errors.txt"
 ````
 
-### The format section
+# The format section
 
 The format section let you change the irccd's output. It uses the [common patterns](#common-patterns-and-formatting).
 
@@ -98,7 +96,7 @@ info = "%H:%M info: #{message}"
 warning = "%H:%M warning: #{message}"
 ````
 
-### The identity section
+# The identity section
 
 This section is completely optional, if you don't provide one, irccd will use a default identity with **irccd** as
 nickname and username. This section is redefinable, you can create one or more.
@@ -129,7 +127,7 @@ nickname = "unstable"
 username = "un"
 ````
 
-### The server section
+# The server section
 
 This section is used to connect to one or more server. Thus, this section is also redefinable.
 
@@ -164,7 +162,7 @@ port = 6667
 channels = ( "#staff", "#club:secret" )
 ````
 
-### The plugins section
+# The plugins section
 
 This section is used to load plugins.
 
@@ -185,7 +183,7 @@ myplugin = /tmp/myplugin.js
 
 The `history` plugin will be searched while `myplugin` will be load from **/tmp/myplugin.js**.
 
-### The transport section
+# The transport section
 
 This section defines transports, you may use sockets to do a basic IPC system within irccd.
 
@@ -241,7 +239,7 @@ path = "/tmp/irccd.sock"
 This will let you controlling irccd on path **/tmp/irccd.sock**, the file is automatically deleted when irccd starts,
 but not when it stops.
 
-### The rule section
+# The rule section
 
 The rule section is one of the most powerful within irccd configuration. It let you enable or disable plugins and IRC
 events for specific criterias. For instance, you may want to disable a plugin only for a specific channel on a specific
@@ -255,7 +253,7 @@ The available options:
   - **events**, (list) which events (e.g onCommand, onMessage, ...) (Optional, default: empty),
   - **action**, (string) set to **accept** or **drop**.
 
-#### Basic rules example
+## Basic rules example
 
 This first rule disable the plugin reboot on **all** servers and channels.
 
@@ -275,7 +273,7 @@ plugins = "reboot"
 action = accept
 ````
 
-### Full example of configuration file
+# Full example of configuration file
 
 ````ini
 # Add a transport that bind only to IPv6.

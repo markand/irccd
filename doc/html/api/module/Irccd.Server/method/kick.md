@@ -1,5 +1,6 @@
 ---
 method: kick
+js: true
 summary: "Kick the specified target from the channel, the reason is optional."
 synopsis: "Server.prototype.kick(nickname, channel, reason)"
 arguments:

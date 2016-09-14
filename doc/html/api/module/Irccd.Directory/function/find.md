@@ -1,5 +1,6 @@
 ---
 function: find
+js: true
 summary: "Find an entry by a pattern or a regular expression."
 synopsis: "Irccd.Directory.find(path, pattern, recursive)"
 arguments:

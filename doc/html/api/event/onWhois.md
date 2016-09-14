@@ -1,5 +1,6 @@
 ---
 event: onWhois
+js: true
 summary: "This event is triggered when irccd gets information about a user."
 synopsis: "function onWhois(server, info)"
 arguments:

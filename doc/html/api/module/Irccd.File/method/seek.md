@@ -1,5 +1,6 @@
 ---
 method: seek
+js: true
 summary: "Sets the position in the file."
 synopsis: "File.prototype.seek(type, amount)"
 arguments:

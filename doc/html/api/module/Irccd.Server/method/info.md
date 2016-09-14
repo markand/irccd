@@ -1,5 +1,6 @@
 ---
 method: info
+js: true
 summary: "Get server information."
 synopsis: "info = Server.prototype.info()"
 returns: "The server information."

@@ -1,5 +1,6 @@
 ---
 event: onInvite
+js: true
 summary: "This event is called when someone is inviting you to a channel."
 synopsis: "function onInvite(server, origin, channel)"
 arguments:

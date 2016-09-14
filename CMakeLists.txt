@@ -61,7 +61,6 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 include(CMakeParseArguments)
 
 include(cmake/function/IrccdDefineExecutable.cmake)
-include(cmake/function/IrccdDefineHtml.cmake)
 include(cmake/function/IrccdDefineLibrary.cmake)
 include(cmake/function/IrccdDefineMan.cmake)
 include(cmake/function/IrccdDefinePlugin.cmake)

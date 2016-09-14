@@ -1,5 +1,6 @@
 ---
 event: onMe
+js: true
 summary: "Action emote."
 synopsis: "function onMe(server, origin, channel, message)"
 arguments:

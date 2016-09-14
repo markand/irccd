@@ -1,5 +1,6 @@
 ---
 method: stat
+js: true
 summary: "Synonym of [Irccd.File.stat](@baseurl@/api/module/Irccd.File/function/stat.html) but with the path from the file."
 synopsis: "File.prototype.stat()"
 returns: "The stat information."

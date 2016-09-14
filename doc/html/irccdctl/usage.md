@@ -1,3 +1,8 @@
+---
+title: Irccdctl usage and options
+guide: yes
+---
+
 ## Usage
 
 Usage of irccdctl.

@@ -1,5 +1,6 @@
 ---
 module: Irccd.Timer
+js: true
 ---
 
 ## Usage

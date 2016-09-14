@@ -1,5 +1,6 @@
 ---
 module: Irccd.Server
+js: true
 summary: "Server management."
 ---
 

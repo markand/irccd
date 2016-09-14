@@ -1,5 +1,6 @@
 ---
 function: popen
+js: true
 summary: "Wrapper for `popen(3)` if the function is available."
 synopsis: "Irccd.System.popen(cmd, mode) /* optional */"
 arguments:

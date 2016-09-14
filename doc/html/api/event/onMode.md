@@ -1,5 +1,6 @@
 ---
 event: onMode
+js: true
 summary: "This event is triggered when the server changed your mode."
 synopsis: "function onMode(server, origin, mode)"
 arguments:

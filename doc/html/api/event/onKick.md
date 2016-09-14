@@ -1,5 +1,6 @@
 ---
 event: onKick
+js: true
 summary: "This event is triggered when someone has been kicked from a channel."
 synopsis: "function onKick(server, origin, channel, target, reason)"
 arguments:

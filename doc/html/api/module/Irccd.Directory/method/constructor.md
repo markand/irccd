@@ -1,5 +1,6 @@
 ---
 method: constructor
+js: true
 summary: "Open a directory."
 synopsis: "Irccd.Directory(path, flags) /* constructor */"
 arguments:

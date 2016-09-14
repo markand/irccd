@@ -1,5 +1,6 @@
 ---
 function: mkdir
+js: true
 summary: "Create a directory specified by path. It will create needed subdirectories just like you have invoked `mkdir -p`."
 synopsis: "Irccd.Directory.mkdir(path, mode = 0700)"
 arguments:

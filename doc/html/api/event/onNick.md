@@ -1,5 +1,6 @@
 ---
 event: onNick
+js: true
 summary: "This event is triggered when someone changed its nickname."
 synopsis: "function onNick(server, origin, nickname)"
 arguments:

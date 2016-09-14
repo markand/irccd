@@ -1,13 +1,18 @@
-# Irccd socket API
+---
+title: Irccd socket API
+guide: true
+---
 
 This guide will help you controlling irccd via sockets.
 
-Currently, irccd supports internet and unix sockets, you need at least one listener defined in your **irccd.conf**.
+Currently, irccd supports internet and unix sockets, you need at least one
+transport defined in your **irccd.conf**.
 
-## Syntax
+# Syntax
 
-Irccd use JSON as protocol for sending and receiving data. A message must ends with `\r\n\r\n` to be complete, thus
-it's possible to write JSON messages in multiple lines.
+Irccd use JSON as protocol for sending and receiving data. A message must ends
+with `\r\n\r\n` to be complete, thus it's possible to write JSON messages in
+multiple lines.
 
 For example, this buffer will be parsed as two different messages.
 

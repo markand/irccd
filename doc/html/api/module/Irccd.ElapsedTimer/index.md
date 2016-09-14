@@ -1,5 +1,6 @@
 ---
 module: Irccd.ElapsedTimer
+js: true
 ---
 
 ## Usage

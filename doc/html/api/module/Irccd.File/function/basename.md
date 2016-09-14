@@ -1,5 +1,6 @@
 ---
 function: basename
+js: true
 summary: "Return the file basename as specified in `basename(3)` C function."
 synopsis: "base = Irccd.File.basename(path)"
 arguments:

@@ -1,5 +1,6 @@
 ---
 function: info
+js: true
 summary: "Get information about a plugin."
 synopsis: "Irccd.Plugin.info(name)"
 arguments:

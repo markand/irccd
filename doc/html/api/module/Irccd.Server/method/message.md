@@ -1,5 +1,6 @@
 ---
 method: message
+js: true
 summary: "Send a message to the specified target or channel."
 synopsis: "Server.prototype.message(target, message)"
 arguments:

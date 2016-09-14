@@ -1,5 +1,6 @@
 ---
 method: constructor
+js: true
 summary: "Create a new timer object."
 synopsis: "Irccd.Timer(type, delay, callback) /* constructor */"
 arguments:

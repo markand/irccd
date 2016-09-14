@@ -1,8 +1,9 @@
-## Irccdctl commands
+---
+title: Irccdctl commands
+guide: yes
+---
 
-The following commands are available.
-
-### help
+# help
 
 Get the help.
 
@@ -18,7 +19,7 @@ $ irccdctl help subject
 $ irccdctl help server-message
 ````
 
-### plugin-info
+# plugin-info
 
 Get plugin information.
 
@@ -34,7 +35,7 @@ $ irccdctl plugin-info name
 $ irccdctl plugin-info ask
 ````
 
-### plugin-list
+# plugin-list
 
 Get the list of all loaded plugins.
 
@@ -44,7 +45,7 @@ Get the list of all loaded plugins.
 $ irccdctl plugin-list
 ````
 
-### plugin-load
+# plugin-load
 
 Load a plugin into the irccd instance.
 
@@ -60,7 +61,7 @@ $ irccdctl plugin-load plugin
 $ irccdctl load ask
 ````
 
-### plugin-reload
+# plugin-reload
 
 Reload a plugin by calling the appropriate onReload event, the plugin is not unloaded and must be already loaded.
 
@@ -76,7 +77,7 @@ $ irccdctl plugin-reload name
 $ irccdctl plugin-reload logger
 ````
 
-### plugin-unload
+# plugin-unload
 
 Unload a loaded plugin from the irccd instance.
 
@@ -92,7 +93,7 @@ $ irccdctl plugin-unload name
 $ irccdctl plugin-unload logger
 ````
 
-### server-cmode
+# server-cmode
 
 Change the mode of the specified channel.
 
@@ -108,7 +109,7 @@ $ irccdctl server-cmode server channel mode
 $ irccdctl server-cmode freenode #staff +t
 ````
 
-### server-cnotice
+# server-cnotice
 
 Send a notice to a public channel. This is a notice that everyone will be notified by.
 
@@ -124,7 +125,7 @@ $ irccdctl server-cnotice server channel message
 $ irccdctl server-cnotice freenode #staff "Don't flood"
 ````
 
-### server-connect
+# server-connect
 
 Connect to a new IRC server.
 
@@ -150,7 +151,7 @@ $ irccdctl server-connect wanadoo chat.wanadoo.fr 6667
 $ irccdctl server-connect -s -S -n "undead" wanadoo chat.wanadoo.fr 6697
 ````
 
-### server-disconnect
+# server-disconnect
 
 Disconnect from a connected server.
 
@@ -166,7 +167,7 @@ $ irccdctl server-disconnect name
 $ irccdctl server-disconnect wanadoo
 ````
 
-### server-invite
+# server-invite
 
 Invite someone to a channel, needed for channel with mode +i
 
@@ -182,7 +183,7 @@ $ irccdctl server-invite server nickname channel
 $ irccdctl server-invite freenode xorg62 #staff
 ````
 
-### server-join
+# server-join
 
 Join the specified channel, the password is optional.
 
@@ -198,7 +199,7 @@ $ irccdctl server-join server channel [password]
 $ irccdctl server-join freenode #staff
 ````
 
-### server-kick
+# server-kick
 
 Kick the specified target from the channel, the reason is optional.
 
@@ -214,7 +215,7 @@ $ irccdctl server-kick server target channel [reason]
 $ irccdctl kick freenode jean #staff "Stop flooding"
 ````
 
-### server-list
+# server-list
 
 Get the list of all connected servers.
 
@@ -224,7 +225,7 @@ Get the list of all connected servers.
 $ irccdctl server-list
 ````
 
-### server-me
+# server-me
 
 Send an action emote.
 
@@ -240,7 +241,7 @@ $ irccdctl server-me server target message
 $ irccdctl server-me freenode #staff "going back soon"
 ````
 
-### server-message
+# server-message
 
 Send a message to the specified target or channel.
 
@@ -256,7 +257,7 @@ $ irccdctl server-message server target message
 $ irccdctl server-message freenode #staff "Hello from irccd"
 ````
 
-### server-mode
+# server-mode
 
 Set the irccd's user mode.
 
@@ -272,7 +273,7 @@ $ server-mode server mode
 $ irccdctl server-mode +i
 ````
 
-### server-nick
+# server-nick
 
 Change irccd's nickname.
 
@@ -288,7 +289,7 @@ $ irccdctl server-nick server nickname
 $ irccdctl server-nick freenode david
 ````
 
-### server-notice
+# server-notice
 
 Send a private notice to the specified target.
 
@@ -304,7 +305,7 @@ $ irccdctl server-notice server target message
 $ irccdctl server-notice freenode jean "I know you are here."
 ````
 
-### server-part
+# server-part
 
 Leave the specified channel, the reason is optional.
 
@@ -325,7 +326,7 @@ $ irccdctl server-part freenode #staff
 $ irccdctl server-part freenode #botwar "too noisy"
 ````
 
-### server-reconnect
+# server-reconnect
 
 Force reconnection of one or all servers.
 
@@ -344,7 +345,7 @@ $ irccdctl server-reconnect
 $ irccdctl server-reconnect wanadoo
 ````
 
-### server-topic
+# server-topic
 
 Change the topic of the specified channel.
 
@@ -360,7 +361,7 @@ $ irccdctl server-topic server channel topic
 $ irccdctl server-topic freenode #wmfs "This is the best channel"
 ````
 
-### watch
+# watch
 
 Start watching irccd events. You can use different output formats, native is human readable format, json is pretty
 formatted json.

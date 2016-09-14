@@ -1,5 +1,6 @@
 ---
 method: read
+js: true
 summary: "Read the specified amount of characters or the whole file."
 synopsis: "File.prototype.read(amount)"
 arguments:

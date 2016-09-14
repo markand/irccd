@@ -1,5 +1,6 @@
 ---
 module: Irccd.System
+js: true
 summary: "System inspection."
 ---
 

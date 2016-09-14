@@ -1,5 +1,6 @@
 ---
 module: Irccd.Unicode
+js: true
 ---
 
 ## Usage

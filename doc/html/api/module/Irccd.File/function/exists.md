@@ -1,5 +1,6 @@
 ---
 function: exists
+js: true
 summary: "Check if the file exists."
 synopsis: "ret = Irccd.File.exists(path)"
 arguments:

@@ -1,5 +1,6 @@
 ---
 method: write
+js: true
 summary: "Write some characters to the file."
 synopsis: "File.prototype.write(data)"
 arguments:

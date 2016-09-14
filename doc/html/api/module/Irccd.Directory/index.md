@@ -1,5 +1,6 @@
 ---
 module: Irccd.Directory
+js: true
 summary: Open an read directories.
 ---
 

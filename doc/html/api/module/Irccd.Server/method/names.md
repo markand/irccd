@@ -1,5 +1,6 @@
 ---
 method: names
+js: true
 summary: "Get the list of names. This function will generate the onNames event."
 synopsis: "Server.prototype.names(channel)"
 arguments:

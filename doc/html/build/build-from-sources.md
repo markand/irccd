@@ -1,11 +1,12 @@
-# Installation
+---
+title: Building from sources
+guide: yes
+---
 
-You should use the irccd version provided by your package manger if possible. If irccd is not available, you can build
-it from sources.
+You should use the irccd version provided by your package manger if possible. If
+irccd is not available, you can build it from sources.
 
-## Building from sources
-
-### Requirements
+# Requirements
 
 To build from sources, you need the following installed on your system:
 
@@ -18,7 +19,7 @@ To build from sources, you need the following installed on your system:
 **Warning**: don't even try to compile with GCC 4.x, it will not work due to missing C++14 features.
 </div>
 
-### Running the build
+# Running the build
 
 When you're ready, extract the **irccd-x.y.z.tar.gz** where **x.y.z** is the current version. Go to that directory,
 then type the following commands:

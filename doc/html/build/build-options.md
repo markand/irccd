@@ -1,8 +1,13 @@
-## Customizing the build
+---
+title: Build options
+guide: yes
+---
+
+# Customizing the build
 
 You can configure some features when compiling irccd.
 
-### Disabling JavaScript
+## Disabling JavaScript
 
 You can disable JavaScript support.
 
@@ -10,7 +15,7 @@ You can disable JavaScript support.
 $ cmake .. -DWITH_JS=Off
 ````
 
-### Disabling SSL
+## Disabling SSL
 
 You can disable OpenSSL support, it is automatically unset if OpenSSL is not found.
 
@@ -22,7 +27,7 @@ You can disable OpenSSL support, it is automatically unset if OpenSSL is not fou
 $ cmake .. -DWITH_SSL=Off
 ````
 
-### Disabling all documentation
+## Disabling all documentation
 
 You can disable all the documentation.
 
@@ -32,7 +37,7 @@ $ cmake .. -DWITH_DOCS=Off
 
 See below to disable only specific parts of the documentation.
 
-### Disabling HTML documentation
+## Disabling HTML documentation
 
 By default if Pandoc is available, the HTML documentation is built, you can disable it.
 
@@ -40,7 +45,7 @@ By default if Pandoc is available, the HTML documentation is built, you can disa
 $ cmake .. -DWITH_HTML=Off
 ````
 
-### Disabling man pages
+## Disabling man pages
 
 You can disable installation of manuals.
 
@@ -48,7 +53,7 @@ You can disable installation of manuals.
 $ cmake .. -DWITH_MAN=Off
 ````
 
-### Installation path
+## Installation path
 
 Sometimes, you may need to install irccd over other place, for that, you can
 specify the prefix where to install files.
@@ -61,7 +66,7 @@ To change this, use the following:
 $ cmake .. -DCMAKE_INSTALL_PREFIX=/opt/some/directory
 ````
 
-### Manual pages path
+## Manual pages path
 
 By default, irccd use **${CMAKE_INSTALL_PREFIX}/share/man** for manual pages. Some systems use different one.
 

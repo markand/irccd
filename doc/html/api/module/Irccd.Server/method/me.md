@@ -1,5 +1,6 @@
 ---
 method: me
+js: true
 summary: "Send an action emote."
 synopsis: "Server.prototype.me(target, message)"
 arguments:

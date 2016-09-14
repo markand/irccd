@@ -1,5 +1,6 @@
 ---
 function: remove
+js: true
 summary: "Remove the file at the specified path."
 synopsis: "Irccd.File.remove(path)"
 arguments:

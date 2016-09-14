@@ -1,5 +1,6 @@
 ---
 method: toString
+js: true
 synopsis: "Server.prototype.toString()"
 returns: "The server identifier"
 ---

@@ -1,5 +1,6 @@
 ---
 module: Irccd.Util
+js: true
 ---
 
 ## Usage

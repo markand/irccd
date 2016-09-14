@@ -1,5 +1,6 @@
 ---
 function: isSpace
+js: true
 summary: "Check if the unicode character is a space."
 synopsis: "ret = Irccd.Unicode.isSpace(code)"
 arguments:

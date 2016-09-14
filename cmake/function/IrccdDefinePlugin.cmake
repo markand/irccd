@@ -136,9 +136,7 @@ function(irccd_define_plugin)
                 OUTPUT ${basedocdir}/plugin/${PLG_NAME}.html
                 SOURCES ${PLG_DOCS}
                 TEMPLATE ${resources_SOURCE_DIR}/template.html
-                DEPENDS
-                    ${resources_SOURCE_DIR}/template.html
-                    docs-resources
+                DEPENDS ${html_SOURCE_DIR}/resources/template.html
                 ARGS -Vguide
                 VARIABLE baseurl:${baseurl}
                 FROM markdown TO html5

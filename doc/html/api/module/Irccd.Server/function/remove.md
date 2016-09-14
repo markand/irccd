@@ -1,5 +1,6 @@
 ---
 function: remove
+js: true
 summary: "Remove a server from the irccd instance and disconnect it."
 synopsis: "Irccd.Server.remove(name)"
 arguments:

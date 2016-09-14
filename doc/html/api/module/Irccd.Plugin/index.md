@@ -1,5 +1,6 @@
 ---
 module: Irccd.Plugin
+js: true
 summary: Plugin management and inspection.
 ---
 

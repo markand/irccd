@@ -1,5 +1,6 @@
 ---
 method: constructor
+js: true
 summary: "Open a file specified by path with the specified mode."
 synopsis: "Irccd.File(path, mode) /* constructor */"
 arguments:

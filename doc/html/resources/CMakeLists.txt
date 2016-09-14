@@ -58,7 +58,9 @@ add_custom_command(
 
 add_custom_target(
     docs-resources
-    SOURCES ${SOURCES}
+    SOURCES
+        ${SOURCES}
+        ${resources_SOURCE_DIR}/template.html
     DEPENDS ${OUTPUTS}
 )
 

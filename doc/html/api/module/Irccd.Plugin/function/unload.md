@@ -1,5 +1,6 @@
 ---
 function: unload
+js: true
 summary: "Unload a plugin by name."
 synopsis: "Irccd.Plugin.unload(name)"
 arguments:

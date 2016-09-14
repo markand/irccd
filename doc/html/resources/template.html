@@ -77,7 +77,9 @@ $endif$ <!-- endif js -->
 
     <!-- Side bar for guide -->
 $if(guide)$
+<nav id="toc">
 $toc$
+</nav>
 $endif$ <!-- endif guide -->
 
     </div><!-- Side bar -->
@@ -176,5 +178,8 @@ $endif$ <!-- endif guide -->
     <script src="$baseurl$/js/highlight.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
     <script>jQuery("table").addClass("table");</script>
+    <script>jQuery("#toc").addClass("nav");</script>
+    <script>jQuery("#toc").addClass("nav-sidebar");</script>
+    <script>jQuery("nav ul").addClass("nav");</script>
   </body>
 </html>

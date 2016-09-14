@@ -1,5 +1,6 @@
 ---
 method: constructor
+js: true
 summary: "Construct a new server"
 synopsis: "Irccd.Server(params) /* constructor */"
 arguments:

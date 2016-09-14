@@ -1,13 +1,16 @@
-## Common patterns and formatting
+---
+title: Common patterns and formatting
+guide: yes
+---
 
 Some plugins can be configured, and some of them can use patterns to substitute variables.
 
-### Syntax
+# Syntax
 
 The syntax is `?{}` where `?` is replaced by one of the token defined below. Braces are mandatory and cannot be ommited.
 To write a literal template construct, prepend the token twice.
 
-### Availables templates
+# Availables templates
 
 The following templates are available:
 
@@ -16,16 +19,16 @@ The following templates are available:
   - `${name}`, name will be substituted from the environment variable (see [Environment variables](#environment-variables)),
   - `@{attributes}`, the attributes will be substituted to IRC colors (see [Attributes](#attributes)),
 
-### Time
+# Time
 
 When you can use patterns, the date and time may be used just like `strftime(3)` so for the hours and minutes,
 you can use **%H:%M**.
 
-### Environment variables
+# Environment variables
 
 If supported, you can use environment variables like **${HOME}**. Please note that braces are mandatory.
 
-### Attributes
+# Attributes
 
 The attribute format is composed of three parts, foreground, background and modifiers, each separated by a comma.
 
@@ -38,7 +41,7 @@ The attribute format is composed of three parts, foreground, background and modi
 only valid in IRC context.
 </div>
 
-#### Available colors
+## Available colors
 
   - white,
   - black,
@@ -57,7 +60,7 @@ only valid in IRC context.
   - grey,
   - lightgrey.
 
-#### Available attributes
+## Available attributes
 
   - bold,
   - italic,
@@ -67,12 +70,12 @@ only valid in IRC context.
   - underline2,
   - reverse.
 
-### Keywords
+# Keywords
 
 Keywords are arbitrary names that are replaced depending on the context. They are usually available to configure
 plugins.
 
-#### Predefined keywords
+## Predefined keywords
 
 Here's the list of keywords that a lot of plugins uses:
 
@@ -90,27 +93,27 @@ Here's the list of keywords that a lot of plugins uses:
 **Warning**: these keywords can be overriden by plugins.
 </div>
 
-### Examples
+# Examples
 
-#### Valid constructs
+## Valid constructs
 
   - `#{target}, welcome`: if target is set to "irccd", becomes "irccd, welcome",
   - `@{red}#{target}`: if target is specified, it is written in red.
 
-#### Invalid or literals constructs
+## Invalid or literals constructs
 
   - `##{target}`: will output "#{target}",
   - `##`: will output "##",
   - `#target`: will output "#target",
   - `#{target`: will throw an error.
 
-#### Colors & attributes
+## Colors & attributes
 
   - `@{red,blue}`: will write text red on blue background,
   - `@{default,yellow}`: will write default color text on yellow background,
   - `@{white,black,bold,underline}`: will write white text on black in both bold and underline.
 
-#### In the logger plugin
+## In the logger plugin
 
 For instance, using the **logger** plugin, it's possible to customize the pattern to use when someone joins a channel
 like that:
@@ -120,3 +123,4 @@ like that:
 ````
 
 The keyword **#{origin}** will be substituted to the nickname and **#{channel}** to the channel name.
+

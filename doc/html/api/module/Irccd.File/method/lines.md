@@ -1,5 +1,6 @@
 ---
 method: lines
+js: true
 summary: "Read all lines and return an array."
 synopsis: "File.prototype.lines()"
 returns: "An array with all lines."

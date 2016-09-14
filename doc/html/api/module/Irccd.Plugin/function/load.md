@@ -1,5 +1,6 @@
 ---
 function: load
+js: true
 summary: "Load a plugin by name. This function will search through the standard directories."
 synopsis: "Irccd.Plugin.load(name)"
 arguments:

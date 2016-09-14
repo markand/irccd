@@ -1,5 +1,6 @@
 ---
 function: remove
+js: true
 summary: "Remove the directory optionally recursively."
 synopsis: "Irccd.Directory.remove(path, recursive)"
 arguments:

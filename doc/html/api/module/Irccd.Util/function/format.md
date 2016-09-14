@@ -1,5 +1,6 @@
 ---
 function: format
+js: true
 summary: >
   Format a string according to the [Common patterns and formatting](../../../../guide.html#common-patterns-and-formatting)
   specification.
