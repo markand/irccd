@@ -21,6 +21,7 @@ project(html)
 set(
     HTML_SOURCES
     ${html_SOURCE_DIR}/index.md
+    ${html_SOURCE_DIR}/api/module/index.md
     ${html_SOURCE_DIR}/api/module/Irccd.File/index.md
     ${html_SOURCE_DIR}/api/module/Irccd.File/function/stat.md
     ${html_SOURCE_DIR}/api/module/Irccd.File/function/dirname.md
@@ -112,6 +113,7 @@ set(
     ${html_SOURCE_DIR}/api/module/Irccd.ElapsedTimer/method/restart.md
     ${html_SOURCE_DIR}/api/module/Irccd.ElapsedTimer/method/reset.md
     ${html_SOURCE_DIR}/api/index.md
+    ${html_SOURCE_DIR}/api/event/index.md
     ${html_SOURCE_DIR}/api/event/onWhois.md
     ${html_SOURCE_DIR}/api/event/onMessage.md
     ${html_SOURCE_DIR}/api/event/onPart.md
@@ -219,8 +221,8 @@ if (WITH_HTML)
         pandoc(
             OUTPUT ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/${outputbase}
             SOURCES
-				${html_BINARY_DIR}/${inputbase}.yml
-				${html_BINARY_DIR}/${inputbase}
+                ${html_BINARY_DIR}/${inputbase}.yml
+                ${html_BINARY_DIR}/${inputbase}
             DEPENDS ${file}
             TEMPLATE ${html_SOURCE_DIR}/resources/template.html
             VARIABLE baseurl:${baseurl}
