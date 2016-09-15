@@ -9,9 +9,9 @@ Check for character categories.
 
 ## Functions
 
-  - [isDigit](function/isDigit.html)
-  - [isLetter](function/isLetter.html)
-  - [isLower](function/isLower.html)
-  - [isSpace](function/isSpace.html)
-  - [isTitle](function/isTitle.html)
-  - [isUpper](function/isUpper.html)
+  - [isDigit](Irccd.Unicode.isDigit.html)
+  - [isLetter](Irccd.Unicode.isLetter.html)
+  - [isLower](Irccd.Unicode.isLower.html)
+  - [isSpace](Irccd.Unicode.isSpace.html)
+  - [isTitle](Irccd.Unicode.isTitle.html)
+  - [isUpper](Irccd.Unicode.isUpper.html)

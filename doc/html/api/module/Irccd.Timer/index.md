@@ -16,6 +16,6 @@ The following properties are defined:
 
 ## Methods
 
-  - [(constructor)](method/constructor.html)
-  - [start](method/start.html)
-  - [stop](method/stop.html)
+  - [(constructor)](Irccd.Timer.prototype.constructor.html)
+  - [start](Irccd.Timer.prototype.start.html)
+  - [stop](Irccd.Timer.prototype.stop.html)

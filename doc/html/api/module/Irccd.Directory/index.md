@@ -23,12 +23,12 @@ The following properties are defined:
 
 ## Functions
 
-  - [find](function/find.html)
-  - [mkdir](function/mkdir.html)
-  - [remove](function/remove.html)
+  - [find](Irccd.Directory.find.html)
+  - [mkdir](Irccd.Directory.mkdir.html)
+  - [remove](Irccd.Directory.remove.html)
 
 ## Methods
 
-  - [(constructor)](method/constructor.html)
-  - [find](method/find.html)
-  - [remove](method/remove.html)
+  - [(constructor)](Irccd.Directory.prototype.constructor.html)
+  - [find](Irccd.Directory.prototype.find.html)
+  - [remove](Irccd.Directory.prototype.remove.html)

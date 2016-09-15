@@ -135,7 +135,7 @@ function(irccd_define_plugin)
             pandoc(
                 OUTPUT ${basedocdir}/plugin/${PLG_NAME}.html
                 SOURCES ${PLG_DOCS}
-                TEMPLATE ${resources_SOURCE_DIR}/template.html
+                TEMPLATE ${html_SOURCE_DIR}/resources/template.html
                 DEPENDS ${html_SOURCE_DIR}/resources/template.html
                 ARGS -Vguide
                 VARIABLE baseurl:${baseurl}
