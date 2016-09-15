@@ -408,7 +408,7 @@ nlohmann::json Irccdctl::waitMessage(const std::string id)
         // Remove the previous messages.
         if (it != m_messages.end()) {
             value = *it;
-            m_messages.erase(m_messages.begin(), it);
+            m_messages.erase(m_messages.begin(), it + 1);
         }
     }
 
@@ -436,7 +436,7 @@ nlohmann::json Irccdctl::waitEvent()
     return first;
 }
 
-void Irccdctl::exec(const Command &cmd, std::vector<std::string> args)
+nlohmann::json Irccdctl::exec(const Command &cmd, std::vector<std::string> args)
 {
     // 1. Build options from command line arguments.
     option::Options def;
@@ -464,29 +464,29 @@ void Irccdctl::exec(const Command &cmd, std::vector<std::string> args)
     // 3. Check number of arguments.
     if (args.size() < cmd.min())
         throw std::runtime_error("too few arguments");
-    if (args.size() > cmd.max())
-        throw std::runtime_error("too many arguments");
 
     /*
      * 4. Construct the request, if the returned value is not an object, do not
      * send anything (e.g. help).
      */
-    nlohmann::json request = cmd.request(*this, CommandRequest(std::move(requestOptions), std::move(args)));
+    auto request = cmd.request(*this, CommandRequest(std::move(requestOptions), std::move(args)));
 
     if (!request.is_object())
-        return;
+        throw std::invalid_argument("command has returned invalid request");
 
     request.push_back({"command", cmd.name()});
 
     // 5. Send the command.
     m_connection->request(request);
 
-    // 6. Parse the result.
-    cmd.result(*this, waitMessage(cmd.name()));
+    // 6. Returns the response.
+    return waitMessage(cmd.name());
 }
 
-void Irccdctl::exec(const Alias &alias, std::vector<std::string> argsCopy)
+std::vector<nlohmann::json> Irccdctl::exec(const Alias &alias, std::vector<std::string> argsCopy)
 {
+    std::vector<nlohmann::json> values;
+
     for (const AliasCommand &cmd : alias) {
         std::vector<std::string> args(argsCopy);
         std::vector<std::string> cmdArgs;
@@ -495,7 +495,7 @@ void Irccdctl::exec(const Alias &alias, std::vector<std::string> argsCopy)
         // 1. Append command name before.
         cmdArgs.push_back(cmd.command());
 
-        for (const AliasArg &arg : cmd.args()) {
+        for (const auto &arg : cmd.args()) {
             if (arg.isPlaceholder()) {
                 if (args.size() < arg.index() + 1)
                     throw std::invalid_argument("missing argument for placeholder %" + std::to_string(arg.index()));
@@ -517,11 +517,15 @@ void Irccdctl::exec(const Alias &alias, std::vector<std::string> argsCopy)
         std::copy(args.begin(), args.end(), std::back_inserter(cmdArgs));
 
         // 4. Finally try to execute.
-        exec(cmdArgs);
+        auto response = exec(cmdArgs);
+
+        values.insert(values.end(), response.begin(), response.end());
     }
+
+    return values;
 }
 
-void Irccdctl::exec(std::vector<std::string> args)
+std::vector<nlohmann::json> Irccdctl::exec(std::vector<std::string> args)
 {
     assert(args.size() > 0);
 
@@ -531,16 +535,22 @@ void Irccdctl::exec(std::vector<std::string> args)
     // Remove name.
     args.erase(args.begin());
 
-    if (alias != m_aliases.end())
-        exec(alias->second, args);
-    else {
+    std::vector<nlohmann::json> values;
+
+    if (alias != m_aliases.end()) {
+        auto response = exec(alias->second, args);
+
+        values.insert(values.end(), response.begin(), response.end());
+    } else {
         auto cmd = m_commandService.find(name);
 
         if (cmd)
-            exec(*cmd, args);
+            values.push_back(exec(*cmd, args));
         else
             throw std::invalid_argument("no alias or command named " + name);
     }
+
+    return values;
 }
 
 void Irccdctl::run(int argc, char **argv)
@@ -619,7 +629,18 @@ void Irccdctl::run(int argc, char **argv)
     for (int i = 0; i < argc; ++i)
         args.push_back(argv[i]);
 
-    exec(args);
+    auto commands = exec(args);
+
+    for (const auto &r : commands) {
+        auto name = r.find("response");
+
+        if (name == r.end() || !name->is_string())
+            log::warning() << "unknown irccd response with no response" << std::endl;
+
+        auto it = m_commandService.find(*name);
+
+        it->result(*this, r);
+    }
 }
 
 } // !irccd

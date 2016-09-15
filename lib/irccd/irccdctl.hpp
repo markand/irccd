@@ -27,6 +27,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "client.hpp"
 #include "alias.hpp"
@@ -141,7 +142,7 @@ public:
      * \param cmd the command
      * \param args the arguments
      */
-    IRCCD_EXPORT void exec(const Command &cmd, std::vector<std::string> args);
+    IRCCD_EXPORT nlohmann::json exec(const Command &cmd, std::vector<std::string> args);
 
     /**
      * Execute the given alias.
@@ -149,14 +150,14 @@ public:
      * \param alias the alias
      * \param args the arguments
      */
-    IRCCD_EXPORT void exec(const Alias &alias, std::vector<std::string> args);
+    IRCCD_EXPORT std::vector<nlohmann::json> exec(const Alias &alias, std::vector<std::string> args);
 
     /**
      * Resolve the command line arguments.
      *
      * \param args the main arguments
      */
-    IRCCD_EXPORT void exec(std::vector<std::string> args);
+    IRCCD_EXPORT std::vector<nlohmann::json> exec(std::vector<std::string> args);
 
     /**
      * Run the irccdctl front end.

@@ -51,6 +51,11 @@ public:
     IRCCD_EXPORT std::vector<Property> properties() const override;
 
     /**
+     * \copydoc Command::request
+     */
+    IRCCD_EXPORT nlohmann::json request(Irccdctl &irccdctl, const CommandRequest &args) const override;
+
+    /**
      * \copydoc Command::exec
      */
     IRCCD_EXPORT nlohmann::json exec(Irccd &irccd, const nlohmann::json &request) const override;

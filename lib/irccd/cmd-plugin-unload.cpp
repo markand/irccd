@@ -40,6 +40,11 @@ std::vector<Command::Property> PluginUnloadCommand::properties() const
     return {{ "plugin", { nlohmann::json::value_t::string }}};
 }
 
+nlohmann::json PluginUnloadCommand::request(Irccdctl &, const CommandRequest &args) const
+{
+    return nlohmann::json::object({{ "plugin", args.arg(0) }});
+}
+
 nlohmann::json PluginUnloadCommand::exec(Irccd &irccd, const nlohmann::json &request) const
 {
     Command::exec(irccd, request);
