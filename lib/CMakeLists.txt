@@ -72,9 +72,14 @@ set_target_properties(
 
 install(
     TARGETS libirccd
+    COMPONENT libirccd
     LIBRARY DESTINATION lib
     ARCHIVE DESTINATION lib
 )
+
+set(CPACK_COMPONENT_LIBIRCCD_GROUP "Applications")
+set(CPACK_COMPONENT_LIBIRCCD_DISPLAY_NAME "Irccd library")
+set(CPACK_COMPONENT_LIBIRCCD_DESCRIPTION "Irccd runtime library")
 
 #
 # Headers.
@@ -146,5 +151,9 @@ if (WITH_PKGCONFIG)
         INPUT ${CMAKE_BINARY_DIR}/irccd2.pc
     )
 
-    install(FILES ${CMAKE_BINARY_DIR}/irccd2.pc DESTINATION ${WITH_PKGCONFIGDIR})
+    install(
+        FILES ${CMAKE_BINARY_DIR}/irccd2.pc
+        COMPONENT pkgconfig
+        DESTINATION ${WITH_PKGCONFIGDIR}
+    )
 endif ()
