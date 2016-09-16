@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013-2015 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -17,28 +17,70 @@
 #
 
 #
-# Copy MinGW runtimes into the WITH_BINDIR directory and then put them in the Qt IFW installer hierarchy so that
-# they are also installed.
+# This file consists of installing required .dll files for Windows.
 #
-if (IRCCD_64BITS)
-    set(ARCH "amd64")
-    set(LIBGCC libgcc_s_seh-1.dll)
-else ()
-    set(ARCH "x86")
-    set(LIBGCC libgcc_s_dw2-1.dll)
+# It currently only supports MinGW.
+#
+
+project(win32)
+
+#
+# MinGW libraries.
+# -------------------------------------------------------------------
+#
+
+if (MINGW)
+    if (IRCCD_64BITS)
+        find_program(LIBGCC_DLL libgcc_s_seh-1.dll)
+    else ()
+        find_program(LIBGCC_DLL libgcc_s_sjlj-1.dll)
+    endif ()
+
+    find_program(LIBWINPTHREAD_DLL libwinpthread-1.dll)
+    find_program(LIBSTDCPP_DLL libstdc++-6.dll)
+
+    set(WITH_LIBGCC_DLL "${LIBGCC_DLL}" CACHE STRING
+        "Path to libgcc dll")
+    set(WITH_LIBWINPTHREAD_DLL "${LIBWINPTHREAD_DLL}" CACHE STRING
+        "Path to libwinpthread dll")
+    set(WITH_LIBSTDCPP_DLL "${LIBSTDCPP_DLL}" CACHE STRING
+        "Path to libstdc++ dll")
+
+    if (EXISTS ${WITH_LIBGCC_DLL} AND
+        EXISTS ${WITH_LIBWINPTHREAD_DLL} AND
+        EXISTS ${WITH_LIBSTDCPP_DLL})
+        install(
+            PROGRAMS
+                ${WITH_LIBGCC_DLL}
+                ${WITH_LIBWINPTHREAD_DLL}
+                ${WITH_LIBSTDCPP_DLL}
+            COMPONENT libirccd
+            DESTINATION bin
+        )
+    endif ()
 endif ()
 
-set(
-    FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/${ARCH}/libeay32.dll
-    ${CMAKE_CURRENT_SOURCE_DIR}/${ARCH}/libstdc++-6.dll
-    ${CMAKE_CURRENT_SOURCE_DIR}/${ARCH}/libwinpthread-1.dll
-    ${CMAKE_CURRENT_SOURCE_DIR}/${ARCH}/ssleay32.dll
-    ${CMAKE_CURRENT_SOURCE_DIR}/${ARCH}/${LIBGCC}
-)
+#
+# SSL libraries.
+# -------------------------------------------------------------------
+#
 
-install(FILES ${FILES} DESTINATION ${WITH_BINDIR})
+if (WITH_SSL)
+    find_program(SSL_EAY_DLL libeay32.dll)
+    find_program(SSL_LIB_DLL ssleay32.dll)
 
-if (IRCCD_PACKAGE)
-    file(COPY ${FILES} DESTINATION ${CMAKE_BINARY_DIR}/installer/packages/base/data/${WITH_BINDIR})
+    set(WITH_SSL_EAY_DLL "${SSL_EAY_DLL}" CACHE STRING
+        "Path to ssleay32.dll")
+    set(WITH_SSL_LIB_DLL "${SSL_LIB_DLL}" CACHE STRING
+        "Path to libeay32.dll")
+
+    if (EXISTS ${WITH_SSL_EAY_DLL} AND EXISTS ${WITH_SSL_LIB_DLL})
+        install(
+            PROGRAMS
+                ${WITH_SSL_EAY_DLL}
+                ${WITH_SSL_LIB_DLL}
+            COMPONENT libirccd
+            DESTINATION bin
+        )
+    endif ()
 endif ()
