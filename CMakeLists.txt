@@ -22,27 +22,27 @@
 #
 # If you plan to modify the build system there are several places to look to do what you want.
 #
-# cmake/IrccdOptions.cmake    - User definable options.
-# cmake/IrccdPackage.cmake    - Package creation.
-# cmake/IrccdSystem.cmake    - Contains some platforms checks and compile flags.
-# cmake/IrccdVersion.cmake    - Defines the Irccd version and its plugins.
-# cmake/check            - Platform checks in separate files.
-# cmake/function        - Custom functions.
-# cmake/installer        - Some files for the QtIFW installer.
-# cmake/internal        - Some internal files (e.g. the sysconfig.h)
-# cmake/packages        - Additional find_package modules.
+# cmake/IrccdOptions.cmake  - User definable options.
+# cmake/IrccdPackage.cmake  - Package creation.
+# cmake/IrccdSystem.cmake   - Contains some platforms checks and compile flags.
+# cmake/IrccdVersion.cmake  - Defines the Irccd version and its plugins.
+# cmake/check               - Platform checks in separate files.
+# cmake/function            - Custom functions.
+# cmake/installer           - Some files for the QtIFW installer.
+# cmake/internal            - Some internal files (e.g. the sysconfig.h)
+# cmake/packages            - Additional find_package modules.
 #
 # Build system is then processed in different directories:
 #
-# contrib            - User contributions not maintained by irccd authors.
-# doc                - The documentation process.
-# extern            - External libraries.
-# lib                - The irccd library
-# irccd                - The irccd executable.
-# irccdctl            - The irccdctl utility.
-# plugins            - Official irccd plugins.
-# tests                - The unit tests.
-# win32                - Additional files for Windows platform.
+# contrib                   - User contributions not maintained by irccd authors.
+# doc                       - The documentation process.
+# extern                    - External libraries.
+# lib                       - The irccd library
+# irccd                     - The irccd executable.
+# irccdctl                  - The irccdctl utility.
+# plugins                   - Official irccd plugins.
+# tests                     - The unit tests.
+# win32                     - Additional files for Windows platform.
 #
 
 cmake_minimum_required(VERSION 3.3)
