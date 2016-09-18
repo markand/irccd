@@ -159,7 +159,7 @@ set(
 set(
     JS
     ${html_SOURCE_DIR}/resources/js/bootstrap.min.js
-    ${html_SOURCE_DIR}/resources/js/highlight.js
+    ${html_SOURCE_DIR}/resources/js/highlight.min.js
     ${html_SOURCE_DIR}/resources/js/jquery.min.js
 )
 
