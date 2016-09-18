@@ -267,3 +267,7 @@ if (WITH_HTML)
         DESTINATION ${WITH_DOCDIR}/js
     )
 endif ()
+
+setg(CPACK_COMPONENT_DOCS_DISPLAY_NAME "Documentation")
+setg(CPACK_COMPONENT_DOCS_DESCRIPTION "User guide and JavaScript API.")
+setg(CPACK_COMPONENT_DOCS_GROUP "Documentation")
