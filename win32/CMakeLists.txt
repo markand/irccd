@@ -31,33 +31,14 @@ project(win32)
 
 if (MINGW)
     if (IRCCD_64BITS)
-        find_program(LIBGCC_DLL libgcc_s_seh-1.dll)
+        set(LIBGCC_DLL libgcc_s_seh-1.dll)
     else ()
-        find_program(LIBGCC_DLL libgcc_s_sjlj-1.dll)
+        set(LIBGCC_DLL libgcc_s_sjlj-1.dll)
     endif ()
 
-    find_program(LIBWINPTHREAD_DLL libwinpthread-1.dll)
-    find_program(LIBSTDCPP_DLL libstdc++-6.dll)
-
-    set(WITH_LIBGCC_DLL "${LIBGCC_DLL}" CACHE STRING
-        "Path to libgcc dll")
-    set(WITH_LIBWINPTHREAD_DLL "${LIBWINPTHREAD_DLL}" CACHE STRING
-        "Path to libwinpthread dll")
-    set(WITH_LIBSTDCPP_DLL "${LIBSTDCPP_DLL}" CACHE STRING
-        "Path to libstdc++ dll")
-
-    if (EXISTS ${WITH_LIBGCC_DLL} AND
-        EXISTS ${WITH_LIBWINPTHREAD_DLL} AND
-        EXISTS ${WITH_LIBSTDCPP_DLL})
-        install(
-            PROGRAMS
-                ${WITH_LIBGCC_DLL}
-                ${WITH_LIBWINPTHREAD_DLL}
-                ${WITH_LIBSTDCPP_DLL}
-            COMPONENT libirccd
-            DESTINATION bin
-        )
-    endif ()
+    set(LIBWINPTHREAD_DLL libwinpthread-1.dll)
+    set(LIBSTDCPP_DLL libstdc++-6.dll)
+    list(APPEND DLLS LIBGCC_DLL LIBWINPTHREAD_DLL LIBSTDCPP_DLL)
 endif ()
 
 #
@@ -66,21 +47,47 @@ endif ()
 #
 
 if (WITH_SSL)
-    find_program(SSL_EAY_DLL libeay32.dll)
-    find_program(SSL_LIB_DLL ssleay32.dll)
+    set(SSL_EAY_DLL libeay32.dll)
+    set(SSL_LIB_DLL ssleay32.dll)
+    list(APPEND DLLS SSL_EAY_DLL SSL_LIB_DLL)
+endif ()
 
-    set(WITH_SSL_EAY_DLL "${SSL_EAY_DLL}" CACHE STRING
-        "Path to ssleay32.dll")
-    set(WITH_SSL_LIB_DLL "${SSL_LIB_DLL}" CACHE STRING
-        "Path to libeay32.dll")
+#
+# Find DLL to copy/install by iterating DLLS value.
+#
+# Creates a cache WITH_<NAME> variable with the path to the DLL if found,
+# otherwise, set to not found.
+#
+# If found, WITH_<NAME> is appended to IRCCD_DLLS global variable and set as
+# parent scope.
+#
+# If not found, WITH_<NAME> is appended to IRCCD_DLLS_NOT_FOUND variable.
+#
 
-    if (EXISTS ${WITH_SSL_EAY_DLL} AND EXISTS ${WITH_SSL_LIB_DLL})
+foreach (name ${DLLS})
+    find_program(
+        WITH_${name}
+        NAMES ${${name}}
+        DOC "Path to DLL"
+    )
+
+    if (EXISTS ${WITH_${name}})
+        file(
+            COPY ${WITH_${name}}
+            DESTINATION ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+        )
         install(
-            PROGRAMS
-                ${WITH_SSL_EAY_DLL}
-                ${WITH_SSL_LIB_DLL}
+            PROGRAMS ${WITH_${name}}
             COMPONENT libirccd
             DESTINATION bin
         )
+        list(APPEND IRCCD_DLLS WITH_${name})
+    else ()
+        set(IRCCD_PACKAGE Off PARENT_SCOPE)
+        set(IRCCD_PACKAGE_MSG "No (some .dll were not found)" PARENT_SCOPE)
+        list(APPEND IRCCD_DLLS_NOT_FOUND WITH_${name})
     endif ()
-endif ()
+endforeach ()
+
+set(IRCCD_DLLS ${IRCCD_DLLS} PARENT_SCOPE)
+set(IRCCD_DLLS_NOT_FOUND ${IRCCD_DLLS_NOT_FOUND} PARENT_SCOPE)

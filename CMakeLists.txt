@@ -65,6 +65,7 @@ include(cmake/function/IrccdDefineLibrary.cmake)
 include(cmake/function/IrccdDefineMan.cmake)
 include(cmake/function/IrccdDefinePlugin.cmake)
 include(cmake/function/IrccdDefineTest.cmake)
+include(cmake/function/IrccdIndentMessage.cmake)
 
 include(cmake/check/PutTime.cmake)
 
@@ -112,22 +113,25 @@ message("")
 message("Installing plugins:")
 foreach (plugin ${IRCCD_PLUGINS})
     string(TOUPPER ${plugin} name)
-    string(LENGTH ${plugin} length)
-    set(str "    ${plugin}:")
-
-    #
-    # Build a string to indent the output correctly because tabs do not work well in all windows
-    # (e.g. CMake's GUI, QtCreator...)
-    #
-    while (${length} LESS 17)
-        math(EXPR length "${length} + 1")
-        set(str "${str} ")
-    endwhile ()
-
-    message("${str}${WITH_PLUGIN_${name}_MSG}")
+    irccd_indent_message("    ${plugin}: " "${WITH_PLUGIN_${name}_MSG}" 22)
 endforeach ()
-
 message("")
+
+if (WIN32)
+    message("Installing these DLLs:")
+    foreach (name ${IRCCD_DLLS})
+        irccd_indent_message("    ${name}: " "${${name}}" 30)
+    endforeach ()
+    message("")
+
+    if (IRCCD_DLLS_NOT_FOUND)
+        message("The following DLLs were not found:")
+        foreach (name ${IRCCD_DLLS_NOT_FOUND})
+            message("    ${name}")
+        endforeach ()
+        message("")
+    endif ()
+endif ()
 
 include(cmake/IrccdPackage.cmake)
 include(CPack)
