@@ -30,6 +30,7 @@
 #include <mutex>
 #include <vector>
 
+#include "pollable.hpp"
 #include "sysconfig.hpp"
 
 /**
@@ -50,7 +51,7 @@ class TransportService;
  * \class Irccd
  * \brief Irccd main instance.
  */
-class Irccd {
+class Irccd : public Pollable {
 private:
     // Main loop stuff.
     std::atomic<bool> m_running{true};
@@ -151,6 +152,23 @@ public:
     }
 
     /**
+     * Prepare the services for selection.
+     *
+     * \param in the input set
+     * \param out the output set
+     * \param max the maximum handle
+     */
+    IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
+
+    /**
+     * Synchronize the services.
+     *
+     * \param in the input set
+     * \param out the output set
+     */
+    IRCCD_EXPORT void sync(fd_set &in, fd_set &out) override;
+
+    /**
      * Add an event to the queue. This will immediately signals the event loop
      * to interrupt itself to dispatch the pending events.
      *
@@ -163,11 +181,6 @@ public:
      * Loop forever by calling poll() and dispatch() indefinitely.
      */
     IRCCD_EXPORT void run();
-
-    /**
-     * Poll the next events without blocking (250 ms max).
-     */
-    IRCCD_EXPORT void poll();
 
     /**
      * Dispatch the pending events, usually after calling poll().

@@ -58,44 +58,21 @@ void Irccd::post(std::function<void (Irccd &)> ev) noexcept
 void Irccd::run()
 {
     while (m_running) {
-        poll();
+        poll(250);
         dispatch();
     }
 }
 
-void Irccd::poll()
+void Irccd::prepare(fd_set &in, fd_set &out, net::Handle &max)
 {
-    fd_set setinput;
-    fd_set setoutput;
-    net::Handle max = 0;
-
-    FD_ZERO(&setinput);
-    FD_ZERO(&setoutput);
-
     for (const auto &service : m_services)
-        service->prepare(setinput, setoutput, max);
+        service->prepare(in, out, max);
+}
 
-    // Do the selection.
-    struct timeval tv;
-
-    tv.tv_sec = 5;
-    tv.tv_usec = 250000;
-
-    int error = select(max + 1, &setinput, &setoutput, nullptr, &tv);
-
-    // Skip anyway if requested to stop
-    if (!m_running)
-        return;
-
-    // Skip on error.
-    if (error < 0 && errno != EINTR) {
-        log::warning() << "irccd: " << net::error(error) << endl;
-        return;
-    }
-
-    // Process after selection.
+void Irccd::sync(fd_set &in, fd_set &out)
+{
     for (const auto &service : m_services)
-        service->sync(setinput, setoutput);
+        service->sync(in, out);
 }
 
 void Irccd::dispatch()
