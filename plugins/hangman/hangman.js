@@ -234,7 +234,7 @@ Hangman.prototype.propose = function (ch, nickname)
     var status = "found";
 
     // Check for collaborative mode.
-    if (Plugin.config["collaborative"] === "true") {
+    if (Plugin.config["collaborative"] === "true" && !this.query) {
         if (this.last !== undefined && this.last === nickname)
             return "wrong-player";
 
@@ -355,6 +355,8 @@ function onCommand(server, origin, channel, message)
         kw.word = game.formatWord();
         server.message(channel, Util.format(Plugin.format["start"], kw));
     }
+
+    return game;
 }
 
 function onMessage(server, origin, channel, message)
@@ -366,4 +368,14 @@ function onMessage(server, origin, channel, message)
 
     if (message.length === 1 && Unicode.isLetter(message.charCodeAt(0)))
         propose(server, channel, origin, game, message.charCodeAt(0));
+}
+
+function onQueryCommand(server, origin, message)
+{
+    onCommand(server, origin, Util.splituser(origin), message).query = true;
+}
+
+function onQuery(server, origin, message)
+{
+    onMessage(server, origin, Util.splituser(origin), message);
 }

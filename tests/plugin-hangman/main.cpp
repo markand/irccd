@@ -199,6 +199,21 @@ TEST_F(HangmanTest, collaborativeEnabled)
     ASSERT_EQ("#hangman:found=hangman:!hangman:test:#hangman:francis!francis@localhost:francis:s k _", m_server->last());
 }
 
+TEST_F(HangmanTest, query)
+{
+    load();
+
+    // Query mode is never collaborative.
+    m_plugin->onQueryCommand(m_irccd, QueryEvent{m_server, "jean!jean@localhost", ""});
+    ASSERT_EQ("jean:start=hangman:!hangman:test:jean:jean!jean@localhost:jean:_ _ _", m_server->last());
+    m_plugin->onQuery(m_irccd, QueryEvent{m_server, "jean!jean@localhost", "s"});
+    ASSERT_EQ("jean:found=hangman:!hangman:test:jean:jean!jean@localhost:jean:s _ _", m_server->last());
+    m_plugin->onQuery(m_irccd, QueryEvent{m_server, "jean!jean@localhost", "k"});
+    ASSERT_EQ("jean:found=hangman:!hangman:test:jean:jean!jean@localhost:jean:s k _", m_server->last());
+    m_plugin->onQueryCommand(m_irccd, QueryEvent{m_server, "jean!jean@localhost", "sky"});
+    ASSERT_EQ("jean:win=hangman:!hangman:test:jean:jean!jean@localhost:jean:sky", m_server->last());
+}
+
 int main(int argc, char **argv)
 {
     path::setApplicationPath(argv[0]);
