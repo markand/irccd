@@ -72,6 +72,7 @@ function(_irccd_define_javascript_plugin)
         plugin-${PLG_NAME}
         ALL
         DEPENDS ${PLG_OUTPUT_DOC}
+        SOURCES ${PLG_SCRIPT} ${PLG_DOCS}
     )
 endfunction()
 
@@ -80,7 +81,7 @@ function(_irccd_define_native_plugin)
         message(FATAL_ERROR "Missing SOURCES parameter")
     endif ()
 
-    add_library(plugin-${PLG_NAME} MODULE ${PLG_SOURCES} ${PLG_OUTPUT_DOC})
+    add_library(plugin-${PLG_NAME} MODULE ${PLG_SOURCES} ${PLG_OUTPUT_DOC} ${PLG_DOCS})
 
     # Move the target into the native plugin directory and rename it.
     set_target_properties(
