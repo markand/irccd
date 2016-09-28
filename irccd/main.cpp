@@ -85,6 +85,10 @@ void init(int &argc, char **&argv)
     signal(SIGINT, stop);
     signal(SIGTERM, stop);
 
+#if defined(SIGQUIT)
+    signal(SIGQUIT, stop);
+#endif
+
     -- argc;
     ++ argv;
 }

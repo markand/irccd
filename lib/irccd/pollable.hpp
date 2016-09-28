@@ -105,8 +105,10 @@ public:
         net::Handle max = 0;
 
         prepare(in, out, max);
-        select(max + 1, &in, &out, nullptr, timeout < 0 ? nullptr : &tv);
-        sync(in, out);
+
+        // Timeout or error are discarded.
+        if (::select(max + 1, &in, &out, nullptr, timeout < 0 ? nullptr : &tv) > 0)
+            sync(in, out);
     }
 };
 
