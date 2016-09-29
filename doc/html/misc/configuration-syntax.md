@@ -1,7 +1,6 @@
 ---
 title: Configuration file format
 guide: yes
-toc: yes
 ---
 
 Both `irccd` and `irccdctl` use configuration file in a extended [INI][ini] format.
