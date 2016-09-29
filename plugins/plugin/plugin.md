@@ -1,6 +1,7 @@
 ---
 title: "Plugin plugin"
 header: "Plugin plugin"
+guide: yes
 ---
 
 The plugin **plugin** let you inspect loaded plugins.

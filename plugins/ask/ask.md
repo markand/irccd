@@ -1,6 +1,7 @@
 ---
 title: "Ask plugin"
 header: "Ask plugin"
+guide: yes
 ---
 
 The plugin **ask** is funny script that helps you in your life. It will tells you if you will be rich, famous and so on.

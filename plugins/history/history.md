@@ -1,6 +1,7 @@
 ---
 title: "History plugin"
 header: "History plugin"
+guide: yes
 ---
 
 The plugin **history** is used to check when someone has been seen for the last time on a channel. For that purpose,

@@ -1,6 +1,7 @@
 ---
 title: "Logger plugin"
 header: "Logger plugin"
+guide: yes
 ---
 
 The plugin **logger** may be used to log everything you want. It supports the following events:

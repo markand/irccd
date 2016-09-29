@@ -1,6 +1,7 @@
 ---
 title: "Hangman plugin"
 header: "Hangman plugin"
+guide: yes
 ---
 
 Hangman is a plugin to play the hangman game.

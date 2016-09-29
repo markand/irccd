@@ -1,5 +1,6 @@
 ---
+baseurl: "@baseurl@"
 parents:
 @parents@
-filename: "@inputname@"
+basename: "@basename@"
 ---

@@ -1,3 +1,8 @@
+---
+title: Irccd socket API
+guide: true
+---
+
 ## Commands
 
 The following commands are available. Please note that a lot of commands require a server as the first argument, it’s

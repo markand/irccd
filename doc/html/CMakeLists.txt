@@ -163,81 +163,14 @@ set(
     ${html_SOURCE_DIR}/resources/js/jquery.min.js
 )
 
-#
-# For each files, define the following variables:
-#
-# - baseurl: relative path to get climb to the root documentation (e.g. ../../)
-# - inputbase: file name with it's base directory (e.g. api/event/onMessage.md)
-# - inputname: file name without it's directory (e.g. onMessage.md)
-# - outputbase: file name, directory and html extension
-#   (e.g api/event/onMessage.html)
-#
 if (WITH_HTML)
     foreach (file ${HTML_SOURCES})
-        # 'baseurl': compute the tree from the file to this directory.
-        # 'inputbase': the canonical file name.
-        get_filename_component(fulldirectory ${file} DIRECTORY)
-        get_filename_component(inputname ${file} NAME_WE)
-        file(RELATIVE_PATH baseurl ${fulldirectory} ${html_SOURCE_DIR})
-
-        # 'inputbase': relative to this source directory.
-        file(RELATIVE_PATH inputbase ${html_SOURCE_DIR} ${file})
-
-        # 'outputbase': replace .md to .html as file extension.
-        string(REGEX REPLACE "^(.*)\\.md$" "\\1.html" outputbase ${inputbase})
-
-        # If file is located at root, replace empty baseurl with "./".
-        if (baseurl STREQUAL "")
-            set(baseurl "./")
-        endif ()
-
-        # Configure the file so it can resolve CMake variables.
-        configure_file(
-            ${file}
-            ${html_BINARY_DIR}/${inputbase}
+        irccd_build_html(
+            SOURCE ${file}
+            OUTPUT_VAR output
         )
+        list(APPEND OUTPUTS ${output})
 
-        # Create a list of parents for the breadcrumb widget.
-        get_filename_component(parentlist ${inputbase} DIRECTORY)
-        string(REPLACE "/" ";" parentlist "${parentlist}")
-        set(parents "  -\n")
-        set(parents "${parents}    name: \"index\"\n")
-        set(parents "${parents}    path: \"${baseurl}index.html\"\n")
-
-        set(path "${baseurl}")
-        foreach (p ${parentlist})
-            set(path "${path}${p}/")
-            set(parents "${parents}  -\n")
-            set(parents "${parents}    name: \"${p}\"\n")
-            set(parents "${parents}    path: \"${path}index.html\"\n")
-        endforeach ()
-
-        configure_file(
-            ${html_SOURCE_DIR}/resources/metadata.yml
-            ${html_BINARY_DIR}/${inputbase}.yml
-        )
-
-        # Create an output target to that file.
-        pandoc(
-            OUTPUT ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/${outputbase}
-            SOURCES
-                ${html_BINARY_DIR}/${inputbase}.yml
-                ${html_BINARY_DIR}/${inputbase}
-            DEPENDS ${file}
-            TEMPLATE ${html_SOURCE_DIR}/resources/template.html
-            VARIABLE baseurl:${baseurl}
-            FROM markdown
-            TO html5
-            STANDALONE TOC MAKE_DIRECTORY
-        )
-
-        list(APPEND OUTPUTS ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/${outputbase})
-        install(
-            FILES ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/${outputbase}
-            COMPONENT docs
-            DESTINATION ${WITH_DOCDIR}
-            RENAME ${outputbase}
-        )
     endforeach ()
 
     add_custom_target(

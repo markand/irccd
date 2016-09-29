@@ -1,6 +1,7 @@
 ---
 title: "Auth plugin"
 header: "Auth plugin"
+guide: yes
 ---
 
 The plugin **auth** provides generic authentication to the most popular services.

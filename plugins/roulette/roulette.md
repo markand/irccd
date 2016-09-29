@@ -1,6 +1,7 @@
 ---
 title: "Roulette plugin"
 header: "Roulette plugin"
+guide: yes
 ---
 
 The plugin **roulette** is a funny script that let you do a russian roulette game but without any injuries.

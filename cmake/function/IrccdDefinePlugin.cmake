@@ -110,8 +110,8 @@ endfunction()
 
 function(irccd_define_plugin)
     set(options "")
-    set(oneValueArgs NAME TYPE SCRIPT)
-    set(multiValueArgs DOCS SOURCES)
+    set(oneValueArgs NAME DOCS TYPE SCRIPT)
+    set(multiValueArgs SOURCES)
 
     cmake_parse_arguments(PLG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -129,24 +129,11 @@ function(irccd_define_plugin)
 
         # Optional documentation.
         if (PLG_DOCS AND WITH_HTML)
-            set(basedocdir ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR})
-            set(PLG_OUTPUT_DOC ${basedocdir}/plugin/${PLG_NAME}.html)
-            file(RELATIVE_PATH baseurl ${basedocdir}/plugin ${basedocdir})
-
-            pandoc(
-                OUTPUT ${basedocdir}/plugin/${PLG_NAME}.html
-                SOURCES ${PLG_DOCS}
-                TEMPLATE ${html_SOURCE_DIR}/resources/template.html
-                DEPENDS ${html_SOURCE_DIR}/resources/template.html
-                ARGS -Vguide
-                VARIABLE baseurl:${baseurl}
-                FROM markdown TO html5
-                STANTALONE MAKE_DIRECTORY TOC
-            )
-            install(
-                FILES ${basedocdir}/plugin/${PLG_NAME}.html
+            irccd_build_html(
+                SOURCE ${PLG_DOCS}
+                OUTPUT plugin/${PLG_NAME}
                 COMPONENT ${PLG_NAME}
-                DESTINATION ${WITH_DOCDIR}/plugin
+                OUTPUT_VAR PLG_OUTPUT_DOC
             )
         endif ()
 
