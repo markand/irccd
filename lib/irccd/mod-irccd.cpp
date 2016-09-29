@@ -16,6 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cerrno>
+#include <string>
+#include <unordered_map>
+
 #include "mod-irccd.hpp"
 #include "plugin-js.hpp"
 #include "sysconfig.hpp"
@@ -23,6 +27,87 @@
 namespace irccd {
 
 namespace {
+
+const std::unordered_map<std::string, int> errors{
+    { "E2BIG",              E2BIG           },
+    { "EACCES",             EACCES          },
+    { "EADDRINUSE",         EADDRINUSE      },
+    { "EADDRNOTAVAIL",      EADDRNOTAVAIL   },
+    { "EAFNOSUPPORT",       EAFNOSUPPORT    },
+    { "EAGAIN",             EAGAIN          },
+    { "EALREADY",           EALREADY        },
+    { "EBADF",              EBADF           },
+    { "EBADMSG",            EBADMSG         },
+    { "EBUSY",              EBUSY           },
+    { "ECANCELED",          ECANCELED       },
+    { "ECHILD",             ECHILD          },
+    { "ECONNABORTED",       ECONNABORTED    },
+    { "ECONNREFUSED",       ECONNREFUSED    },
+    { "ECONNRESET",         ECONNRESET      },
+    { "EDEADLK",            EDEADLK         },
+    { "EDESTADDRREQ",       EDESTADDRREQ    },
+    { "EDOM",               EDOM            },
+    { "EEXIST",             EEXIST          },
+    { "EFAULT",             EFAULT          },
+    { "EFBIG",              EFBIG           },
+    { "EHOSTUNREACH",       EHOSTUNREACH    },
+    { "EIDRM",              EIDRM           },
+    { "EILSEQ",             EILSEQ          },
+    { "EINPROGRESS",        EINPROGRESS     },
+    { "EINTR",              EINTR           },
+    { "EINVAL",             EINVAL          },
+    { "EIO",                EIO             },
+    { "EISCONN",            EISCONN         },
+    { "EISDIR",             EISDIR          },
+    { "ELOOP",              ELOOP           },
+    { "EMFILE",             EMFILE          },
+    { "EMLINK",             EMLINK          },
+    { "EMSGSIZE",           EMSGSIZE        },
+    { "ENAMETOOLONG",       ENAMETOOLONG    },
+    { "ENETDOWN",           ENETDOWN        },
+    { "ENETRESET",          ENETRESET       },
+    { "ENETUNREACH",        ENETUNREACH     },
+    { "ENFILE",             ENFILE          },
+    { "ENOBUFS",            ENOBUFS         },
+    { "ENODATA",            ENODATA         },
+    { "ENODEV",             ENODEV          },
+    { "ENOENT",             ENOENT          },
+    { "ENOEXEC",            ENOEXEC         },
+    { "ENOLCK",             ENOLCK          },
+    { "ENOLINK",            ENOLINK         },
+    { "ENOMEM",             ENOMEM          },
+    { "ENOMSG",             ENOMSG          },
+    { "ENOPROTOOPT",        ENOPROTOOPT     },
+    { "ENOSPC",             ENOSPC          },
+    { "ENOSR",              ENOSR           },
+    { "ENOSTR",             ENOSTR          },
+    { "ENOSYS",             ENOSYS          },
+    { "ENOTCONN",           ENOTCONN        },
+    { "ENOTDIR",            ENOTDIR         },
+    { "ENOTEMPTY",          ENOTEMPTY       },
+    { "ENOTRECOVERABLE",    ENOTRECOVERABLE },
+    { "ENOTSOCK",           ENOTSOCK        },
+    { "ENOTSUP",            ENOTSUP         },
+    { "ENOTTY",             ENOTTY          },
+    { "ENXIO",              ENXIO           },
+    { "EOPNOTSUPP",         EOPNOTSUPP      },
+    { "EOVERFLOW",          EOVERFLOW       },
+    { "EOWNERDEAD",         EOWNERDEAD      },
+    { "EPERM",              EPERM           },
+    { "EPIPE",              EPIPE           },
+    { "EPROTO",             EPROTO          },
+    { "EPROTONOSUPPORT",    EPROTONOSUPPORT },
+    { "EPROTOTYPE",         EPROTOTYPE      },
+    { "ERANGE",             ERANGE          },
+    { "EROFS",              EROFS           },
+    { "ESPIPE",             ESPIPE          },
+    { "ESRCH",              ESRCH           },
+    { "ETIME",              ETIME           },
+    { "ETIMEDOUT",          ETIMEDOUT       },
+    { "ETXTBSY",            ETXTBSY         },
+    { "EWOULDBLOCK",        EWOULDBLOCK     },
+    { "EXDEV",              EXDEV           }
+};
 
 duk_ret_t constructor(duk_context *ctx)
 {
@@ -89,6 +174,13 @@ void IrccdModule::load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin)
 
     // Create the SystemError that inherits from Error.
     duk_push_c_function(plugin->context(), constructor, 2);
+
+    // Put errno codes into the Irccd.SystemError object.
+    for (const auto &pair : errors) {
+        duk_push_int(plugin->context(), pair.second);
+        duk_put_prop_string(plugin->context(), -2, pair.first.c_str());
+    }
+
     duk_push_object(plugin->context());
     duk_get_global_string(plugin->context(), "Error");
     duk_get_prop_string(plugin->context(), -1, "prototype");
