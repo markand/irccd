@@ -26,8 +26,6 @@
 
 #include <json.hpp>
 
-#include "pollable.hpp"
-
 namespace irccd {
 
 class TransportServer;
@@ -37,7 +35,7 @@ class TransportClient;
  * \brief manage transport servers and clients.
  * \ingroup services
  */
-class TransportService : public Pollable {
+class TransportService {
 private:
     Irccd &m_irccd;
 
@@ -58,12 +56,12 @@ public:
     /**
      * \copydoc Service::prepare
      */
-    IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
+    IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max);
 
     /**
      * \copydoc Service::sync
      */
-    IRCCD_EXPORT void sync(fd_set &in, fd_set &out) override;
+    IRCCD_EXPORT void sync(fd_set &in, fd_set &out);
 
     /**
      * Add a transport server.

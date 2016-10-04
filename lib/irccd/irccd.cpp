@@ -26,6 +26,7 @@
 #include "service-rule.hpp"
 #include "service-server.hpp"
 #include "service-transport.hpp"
+#include "util.hpp"
 
 using namespace std;
 using namespace std::placeholders;
@@ -42,9 +43,6 @@ Irccd::Irccd()
     , m_moduleService(std::make_shared<ModuleService>())
     , m_plugins(std::make_shared<PluginService>(*this))
 {
-    m_services.push_back(m_interruptService);
-    m_services.push_back(m_servers);
-    m_services.push_back(m_transports);
 }
 
 void Irccd::post(std::function<void (Irccd &)> ev) noexcept
@@ -58,21 +56,19 @@ void Irccd::post(std::function<void (Irccd &)> ev) noexcept
 void Irccd::run()
 {
     while (m_running) {
-        poll(250);
+        util::poller::poll(250, *m_interruptService, *m_servers, *m_transports);
         dispatch();
     }
 }
 
 void Irccd::prepare(fd_set &in, fd_set &out, net::Handle &max)
 {
-    for (const auto &service : m_services)
-        service->prepare(in, out, max);
+    util::poller::prepare(in, out, max, *m_interruptService, *m_servers, *m_transports);
 }
 
 void Irccd::sync(fd_set &in, fd_set &out)
 {
-    for (const auto &service : m_services)
-        service->sync(in, out);
+    util::poller::sync(in, out, *m_interruptService, *m_servers, *m_transports);
 }
 
 void Irccd::dispatch()

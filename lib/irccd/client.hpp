@@ -28,9 +28,10 @@
 #include <memory>
 #include <string>
 
+#include <json.hpp>
+
 #include "net.hpp"
 #include "signals.hpp"
-#include "pollable.hpp"
 
 namespace irccd {
 
@@ -65,7 +66,7 @@ namespace irccd {
  *     |                                   |
  *     ------------------------------------+
  */
-class Client : public Pollable {
+class Client {
 public:
     /**
      * \brief The current connection state.
@@ -258,7 +259,7 @@ public:
      * \param out the output set
      * \param max the maximum file descriptor
      */
-    void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
+    virtual void prepare(fd_set &in, fd_set &out, net::Handle &max);
 
     /**
      * Do some I/O using the protected recv and send functions.
@@ -266,7 +267,7 @@ public:
      * \param in the input set
      * \param out the output set
      */
-    void sync(fd_set &in, fd_set &out) override;
+    virtual void sync(fd_set &in, fd_set &out);
 };
 
 /**

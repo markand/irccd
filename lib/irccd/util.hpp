@@ -38,6 +38,7 @@
 #include <format.h>
 #include <json.hpp>
 
+#include "net.hpp"
 #include "sysconfig.hpp"
 
 namespace irccd {
@@ -598,6 +599,93 @@ inline std::string getString(const nlohmann::json &json, const std::string &key,
 }
 
 } // !json
+
+/**
+ * \brief Miscellaneous utilities for Pollable objects
+ */
+namespace poller {
+
+/**
+ * \cond HIDDEN_SYMBOLS
+ */
+
+inline void prepare(fd_set &, fd_set &, net::Handle &) noexcept
+{
+}
+
+/**
+ * \endcond
+ */
+
+/**
+ * Call prepare function for every Pollable objects.
+ *
+ * \param in the input set
+ * \param out the output set
+ * \param max the maximum handle
+ * \param first the first Pollable object
+ * \param rest the additional Pollable objects
+ */
+template <typename Pollable, typename... Rest>
+inline void prepare(fd_set &in, fd_set &out, net::Handle &max, Pollable &first, Rest&... rest)
+{
+    first.prepare(in, out, max);
+    prepare(in, out, max, rest...);
+}
+
+/**
+ * \cond HIDDEN_SYMBOLS
+ */
+
+inline void sync(fd_set &, fd_set &) noexcept
+{
+}
+
+/**
+ * \endcond
+ */
+
+/**
+ * Call sync function for every Pollable objects.
+ *
+ * \param in the input set
+ * \param out the output set
+ * \param first the first Pollable object
+ * \param rest the additional Pollable objects
+ */
+template <typename Pollable, typename... Rest>
+inline void sync(fd_set &in, fd_set &out, Pollable &first, Rest&... rest)
+{
+    first.sync(in, out);
+    sync(in, out, rest...);
+}
+
+/**
+ * Prepare and sync Pollable objects.
+ *
+ * \param timeout the timeout in milliseconds (< 0 means forever)
+ * \param first the the first Pollable object
+ * \param rest the additional Pollable objects
+ */
+template <typename Pollable, typename... Rest>
+void poll(int timeout, Pollable &first, Rest&... rest)
+{
+    fd_set in, out;
+    timeval tv = {0, timeout * 1000};
+
+    FD_ZERO(&in);
+    FD_ZERO(&out);
+
+    net::Handle max = 0;
+
+    prepare(in, out, max, first, rest...);
+
+    // Timeout or error are discarded.
+    if (::select(max + 1, &in, &out, nullptr, timeout < 0 ? nullptr : &tv) > 0)
+        sync(in, out, first, rest...);
+}
+
+} // !poller
 
 } // !util
 

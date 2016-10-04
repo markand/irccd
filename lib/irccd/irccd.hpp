@@ -30,7 +30,7 @@
 #include <mutex>
 #include <vector>
 
-#include "pollable.hpp"
+#include "net.hpp"
 #include "sysconfig.hpp"
 
 /**
@@ -42,7 +42,6 @@ class CommandService;
 class InterruptService;
 class ModuleService;
 class PluginService;
-class Pollable;
 class RuleService;
 class ServerService;
 class TransportService;
@@ -51,7 +50,7 @@ class TransportService;
  * \class Irccd
  * \brief Irccd main instance.
  */
-class Irccd : public Pollable {
+class Irccd {
 private:
     // Main loop stuff.
     std::atomic<bool> m_running{true};
@@ -66,7 +65,6 @@ private:
     std::shared_ptr<RuleService> m_ruleService;
     std::shared_ptr<ModuleService> m_moduleService;
     std::shared_ptr<PluginService> m_plugins;
-    std::vector<std::shared_ptr<Pollable>> m_services;
 
     // Not copyable and not movable because services has references to irccd.
     Irccd(const Irccd &) = delete;
@@ -80,16 +78,6 @@ public:
      * Prepare standard services.
      */
     IRCCD_EXPORT Irccd();
-
-    /**
-     * Add a generic service.
-     *
-     * \param service the service
-     */
-    inline void addService(std::shared_ptr<Pollable> service)
-    {
-        m_services.push_back(std::move(service));
-    }
 
     /**
      * Access the command service.
@@ -158,7 +146,7 @@ public:
      * \param out the output set
      * \param max the maximum handle
      */
-    IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
+    IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max);
 
     /**
      * Synchronize the services.
@@ -166,7 +154,7 @@ public:
      * \param in the input set
      * \param out the output set
      */
-    IRCCD_EXPORT void sync(fd_set &in, fd_set &out) override;
+    IRCCD_EXPORT void sync(fd_set &in, fd_set &out);
 
     /**
      * Add an event to the queue. This will immediately signals the event loop

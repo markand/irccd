@@ -24,7 +24,7 @@
  * \brief Interrupt irccd event loop.
  */
 
-#include "pollable.hpp"
+#include "net.hpp"
 
 namespace irccd {
 
@@ -32,7 +32,7 @@ namespace irccd {
  * \brief Interrupt irccd event loop.
  * \ingroup services
  */
-class InterruptService : public Pollable {
+class InterruptService {
 private:
     net::TcpSocket m_in;
     net::TcpSocket m_out;
@@ -48,12 +48,12 @@ public:
     /**
      * \copydoc Service::prepare
      */
-    IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
+    IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max);
 
     /**
      * \copydoc Service::sync
      */
-    IRCCD_EXPORT void sync(fd_set &in, fd_set &out) override;
+    IRCCD_EXPORT void sync(fd_set &in, fd_set &out);
 
     /**
      * Request interruption.

@@ -385,7 +385,7 @@ nlohmann::json Irccdctl::waitMessage(const std::string id)
     ElapsedTimer timer;
 
     while (m_messages.empty() && m_connection->isConnected() && timer.elapsed() < m_timeout)
-        m_connection->poll();
+        util::poller::poll(250, *m_connection);
 
     if (m_messages.empty())
         return nlohmann::json();
@@ -425,7 +425,7 @@ nlohmann::json Irccdctl::waitEvent()
     ElapsedTimer timer;
 
     while (m_events.empty() && m_connection->isConnected() && timer.elapsed() < m_timeout)
-        m_connection->poll();
+        util::poller::poll(250, *m_connection);
 
     if (m_events.empty())
         return nullptr;

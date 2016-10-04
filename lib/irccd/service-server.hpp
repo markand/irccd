@@ -29,7 +29,6 @@
 #include <string>
 
 #include "server.hpp"
-#include "pollable.hpp"
 
 namespace irccd {
 
@@ -39,7 +38,7 @@ class Irccd;
  * \brief Manage IRC servers.
  * \ingroup services
  */
-class ServerService : public Pollable {
+class ServerService {
 private:
     Irccd &m_irccd;
     std::vector<std::shared_ptr<Server>> m_servers;
@@ -70,12 +69,12 @@ public:
     /**
      * \copydoc Service::prepare
      */
-    IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
+    IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max);
 
     /**
      * \copydoc Service::sync
      */
-    IRCCD_EXPORT void sync(fd_set &in, fd_set &out) override;
+    IRCCD_EXPORT void sync(fd_set &in, fd_set &out);
 
     /**
      * Get the list of servers
