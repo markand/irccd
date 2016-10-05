@@ -80,7 +80,11 @@ add_subdirectory(extern/json)
 add_subdirectory(doc)
 add_subdirectory(libcommon)
 add_subdirectory(libirccd)
-#add_subdirectory(lib)
+
+if (WITH_JS)
+    add_subdirectory(libirccd-js)
+endif ()
+
 #add_subdirectory(irccd)
 #add_subdirectory(irccdctl)
 #add_subdirectory(contrib)
