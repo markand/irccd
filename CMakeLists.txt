@@ -78,23 +78,24 @@ add_subdirectory(extern/cppformat)
 add_subdirectory(extern/libircclient)
 add_subdirectory(extern/json)
 add_subdirectory(doc)
-add_subdirectory(lib)
-add_subdirectory(irccd)
-add_subdirectory(irccdctl)
-add_subdirectory(contrib)
+add_subdirectory(libcommon)
+#add_subdirectory(lib)
+#add_subdirectory(irccd)
+#add_subdirectory(irccdctl)
+#add_subdirectory(contrib)
 
 if (WITH_JS)
-    add_subdirectory(plugins)
+#add_subdirectory(plugins)
 endif ()
 
 # Platform specific.
 if (WIN32)
-    add_subdirectory(win32)
+    # add_subdirectory(win32)
 endif ()
 
 # Tests.
 include(CTest)
-add_subdirectory(tests)
+# add_subdirectory(tests)
 
 message("Compiling with the following flags:")
 message("    General flags:    ${CMAKE_CXX_FLAGS}")
