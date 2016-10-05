@@ -1,0 +1,92 @@
+project(libirccd)
+
+set(
+    HEADERS
+    ${libirccd_SOURCE_DIR}/irccd/cmd-plugin-config.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-plugin-info.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-plugin-list.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-plugin-load.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-plugin-reload.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-plugin-unload.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-cmode.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-cnotice.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-connect.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-disconnect.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-info.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-invite.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-join.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-kick.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-list.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-me.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-message.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-mode.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-nick.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-notice.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-part.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-reconnect.hpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-topic.hpp
+    ${libirccd_SOURCE_DIR}/irccd/command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/config.hpp
+    ${libirccd_SOURCE_DIR}/irccd/dynlib.hpp
+    ${libirccd_SOURCE_DIR}/irccd/irccd.hpp
+    ${libirccd_SOURCE_DIR}/irccd/plugin-dynlib.hpp
+    ${libirccd_SOURCE_DIR}/irccd/plugin.hpp
+    ${libirccd_SOURCE_DIR}/irccd/rule.hpp
+    ${libirccd_SOURCE_DIR}/irccd/server.hpp
+    ${libirccd_SOURCE_DIR}/irccd/service-command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/service-interrupt.hpp
+    ${libirccd_SOURCE_DIR}/irccd/service-plugin.hpp
+    ${libirccd_SOURCE_DIR}/irccd/service-rule.hpp
+    ${libirccd_SOURCE_DIR}/irccd/service-server.hpp
+    ${libirccd_SOURCE_DIR}/irccd/service-transport.hpp
+    ${libirccd_SOURCE_DIR}/irccd/transport.hpp
+)
+
+set(
+    SOURCES
+    ${libirccd_SOURCE_DIR}/irccd/cmd-plugin-config.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-plugin-info.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-plugin-list.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-plugin-load.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-plugin-reload.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-plugin-unload.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-cmode.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-cnotice.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-connect.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-disconnect.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-info.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-invite.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-join.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-kick.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-list.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-me.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-message.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-mode.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-nick.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-notice.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-part.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-reconnect.cpp
+    ${libirccd_SOURCE_DIR}/irccd/cmd-server-topic.cpp
+    ${libirccd_SOURCE_DIR}/irccd/command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/config.cpp
+    ${libirccd_SOURCE_DIR}/irccd/irccd.cpp
+    ${libirccd_SOURCE_DIR}/irccd/plugin-dynlib.cpp
+    ${libirccd_SOURCE_DIR}/irccd/rule.cpp
+    ${libirccd_SOURCE_DIR}/irccd/server.cpp
+    ${libirccd_SOURCE_DIR}/irccd/service-command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/service-interrupt.cpp
+    ${libirccd_SOURCE_DIR}/irccd/service-plugin.cpp
+    ${libirccd_SOURCE_DIR}/irccd/service-rule.cpp
+    ${libirccd_SOURCE_DIR}/irccd/service-server.cpp
+    ${libirccd_SOURCE_DIR}/irccd/service-transport.cpp
+    ${libirccd_SOURCE_DIR}/irccd/transport.cpp
+)
+
+irccd_define_library(
+    TARGET libirccd
+    SOURCES
+        ${libirccd_SOURCE_DIR}/CMakeLists.txt
+        ${HEADERS}
+        ${SOURCES}
+    LIBRARIES extern-ircclient libcommon
+)
