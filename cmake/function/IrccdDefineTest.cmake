@@ -48,7 +48,7 @@ function(irccd_define_test)
 
     foreach (r ${TEST_RESOURCES})
         file(RELATIVE_PATH output ${CMAKE_CURRENT_SOURCE_DIR} ${r})
-    
+
         add_custom_command(
             OUTPUT ${CMAKE_BINARY_DIR}/tests/${output}
             COMMAND ${CMAKE_COMMAND} -E copy ${r} ${CMAKE_BINARY_DIR}/tests/${output}
@@ -59,7 +59,7 @@ function(irccd_define_test)
     endforeach ()
 
     # Always link to googletest
-    list(APPEND TEST_LIBRARIES extern-gtest)
+    list(APPEND TEST_LIBRARIES libirccd-test)
 
     # Executable
     add_executable(test-${TEST_NAME} ${TEST_SOURCES} ${TEST_RESOURCES} ${RESOURCES})

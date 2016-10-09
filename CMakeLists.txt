@@ -100,8 +100,11 @@ if (WIN32)
 endif ()
 
 # Tests.
-include(CTest)
-# add_subdirectory(tests)
+if (WITH_TESTS)
+    include(CTest)
+    add_subdirectory(libirccd-test)
+    add_subdirectory(tests)
+endif ()
 
 message("Compiling with the following flags:")
 message("    General flags:    ${CMAKE_CXX_FLAGS}")
