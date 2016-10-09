@@ -18,52 +18,27 @@
 
 #include "cmd-server-message.hpp"
 #include "irccd.hpp"
+#include "transport.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
+#include "util.hpp"
 
 namespace irccd {
 
 namespace command {
 
 ServerMessageCommand::ServerMessageCommand()
-    : Command("server-message", "Server", "Send a message")
+    : Command("server-message")
 {
 }
 
-std::vector<Command::Arg> ServerMessageCommand::args() const
+void ServerMessageCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {
-        { "server",     true },
-        { "target",     true },
-        { "message",    true }
-    };
-}
-
-std::vector<Command::Property> ServerMessageCommand::properties() const
-{
-    return {
-        { "server",     { nlohmann::json::value_t::string }},
-        { "target",     { nlohmann::json::value_t::string }},
-        { "message",    { nlohmann::json::value_t::string }}
-    };
-}
-
-nlohmann::json ServerMessageCommand::request(Irccdctl &, const CommandRequest &args) const
-{
-    return nlohmann::json::object({
-        { "server",     args.arg(0) },
-        { "target",     args.arg(1) },
-        { "message",    args.arg(2) }
-    });
-}
-
-nlohmann::json ServerMessageCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    Command::exec(irccd, request);
-
-    irccd.servers().require(request["server"])->me(request["target"], request["message"]);
-
-    return nlohmann::json::object();
+    irccd.servers().require(util::json::requireIdentifier(args, "server"))->message(
+        util::json::requireString(args, "target"),
+        util::json::requireString(args, "message")
+    );
+    client.success("server-message");
 }
 
 } // !command
