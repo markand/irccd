@@ -18,49 +18,26 @@
 
 #include "cmd-server-mode.hpp"
 #include "irccd.hpp"
+#include "transport.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
+#include "util.hpp"
 
 namespace irccd {
 
 namespace command {
 
 ServerModeCommand::ServerModeCommand()
-    : Command("server-mode", "Server", "Change your mode")
+    : Command("server-mode")
 {
 }
 
-std::vector<Command::Arg> ServerModeCommand::args() const
+void ServerModeCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {
-        { "server",     true },
-        { "mode",       true }
-    };
-}
-
-std::vector<Command::Property> ServerModeCommand::properties() const
-{
-    return {
-        { "server",     { nlohmann::json::value_t::string }},
-        { "mode",       { nlohmann::json::value_t::string }}
-    };
-}
-
-nlohmann::json ServerModeCommand::request(Irccdctl &, const CommandRequest &args) const
-{
-    return nlohmann::json::object({
-        { "server",     args.arg(0) },
-        { "mode",       args.arg(1) }
-    });
-}
-
-nlohmann::json ServerModeCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    Command::exec(irccd, request);
-
-    irccd.servers().require(request["server"])->mode(request["mode"]);
-
-    return nlohmann::json::object();
+    irccd.servers().require(util::json::requireIdentifier(args, "server"))->mode(
+        util::json::requireString(args, "mode")
+    );
+    client.success("server-mode");
 }
 
 } // !command

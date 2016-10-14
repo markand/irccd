@@ -25,6 +25,7 @@ if (WITH_TESTS)
     add_subdirectory(cmd-server-disconnect)
     add_subdirectory(cmd-server-me)
     add_subdirectory(cmd-server-message)
+    add_subdirectory(cmd-server-mode)
 
 #    # Misc
 #    add_subdirectory(command)
