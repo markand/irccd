@@ -23,6 +23,7 @@ if (WITH_TESTS)
     add_subdirectory(cmd-server-cmode)
     add_subdirectory(cmd-server-cnotice)
     add_subdirectory(cmd-server-disconnect)
+    add_subdirectory(cmd-server-me)
     add_subdirectory(cmd-server-message)
 
 #    # Misc
