@@ -26,6 +26,7 @@ if (WITH_TESTS)
     add_subdirectory(cmd-server-me)
     add_subdirectory(cmd-server-message)
     add_subdirectory(cmd-server-mode)
+    add_subdirectory(cmd-server-nick)
 
 #    # Misc
 #    add_subdirectory(command)

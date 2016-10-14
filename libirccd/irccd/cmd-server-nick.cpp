@@ -18,49 +18,26 @@
 
 #include "cmd-server-nick.hpp"
 #include "irccd.hpp"
+#include "transport.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
+#include "util.hpp"
 
 namespace irccd {
 
 namespace command {
 
 ServerNickCommand::ServerNickCommand()
-    : Command("server-nick", "Server", "Change your nickname")
+    : Command("server-nick")
 {
 }
 
-std::vector<Command::Arg> ServerNickCommand::args() const
+void ServerNickCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {
-        { "server",     true },
-        { "nickname",   true }
-    };
-}
-
-std::vector<Command::Property> ServerNickCommand::properties() const
-{
-    return {
-        { "server",     { nlohmann::json::value_t::string }},
-        { "nickname",   { nlohmann::json::value_t::string }}
-    };
-}
-
-nlohmann::json ServerNickCommand::request(Irccdctl &, const CommandRequest &args) const
-{
-    return nlohmann::json::object({
-        { "server",     args.arg(0) },
-        { "nickname",   args.arg(1) }
-    });
-}
-
-nlohmann::json ServerNickCommand::exec(Irccd &irccd, const nlohmann::json &object) const
-{
-    Command::exec(irccd, object);
-
-    irccd.servers().require(object["server"])->setNickname(object["nickname"]);
-
-    return nlohmann::json::object();
+    irccd.servers().require(util::json::requireIdentifier(args, "server"))->setNickname(
+        util::json::requireString(args, "nickname")
+    );
+    client.success("server-nick");
 }
 
 } // !command
