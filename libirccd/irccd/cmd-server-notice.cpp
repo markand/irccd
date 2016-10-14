@@ -18,52 +18,27 @@
 
 #include "cmd-server-notice.hpp"
 #include "irccd.hpp"
+#include "transport.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
+#include "util.hpp"
 
 namespace irccd {
 
 namespace command {
 
 ServerNoticeCommand::ServerNoticeCommand()
-    : Command("server-notice", "Server", "Send a private notice")
+    : Command("server-notice")
 {
 }
 
-std::vector<Command::Arg> ServerNoticeCommand::args() const
+void ServerNoticeCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {
-        { "server",     true },
-        { "target",     true },
-        { "message",    true }
-    };
-}
-
-std::vector<Command::Property> ServerNoticeCommand::properties() const
-{
-    return {
-        { "server",     { nlohmann::json::value_t::string }},
-        { "target",     { nlohmann::json::value_t::string }},
-        { "message",    { nlohmann::json::value_t::string }}
-    };
-}
-
-nlohmann::json ServerNoticeCommand::request(Irccdctl &, const CommandRequest &args) const
-{
-    return nlohmann::json::object({
-        { "server",     args.arg(0) },
-        { "target",     args.arg(1) },
-        { "message",    args.arg(2) }
-    });
-}
-
-nlohmann::json ServerNoticeCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    Command::exec(irccd, request);
-
-    irccd.servers().require(request["server"])->notice(request["target"], request["message"]);
-
-    return nlohmann::json::object();
+    irccd.servers().require(util::json::requireIdentifier(args, "server"))->notice(
+        util::json::requireString(args, "target"),
+        util::json::requireString(args, "message")
+    );
+    client.success("server-notice");
 }
 
 } // !command
