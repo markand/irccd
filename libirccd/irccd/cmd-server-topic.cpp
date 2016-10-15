@@ -20,50 +20,25 @@
 #include "irccd.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
+#include "transport.hpp"
+#include "util.hpp"
 
 namespace irccd {
 
 namespace command {
 
 ServerTopicCommand::ServerTopicCommand()
-    : Command("server-topic", "Server", "Change a channel topic")
+    : Command("server-topic")
 {
 }
 
-std::vector<Command::Arg> ServerTopicCommand::args() const
+void ServerTopicCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {
-        { "server",     true },
-        { "channel",    true },
-        { "topic",      true }
-    };
-}
-
-std::vector<Command::Property> ServerTopicCommand::properties() const
-{
-    return {
-        { "server",     { nlohmann::json::value_t::string }},
-        { "channel",    { nlohmann::json::value_t::string }},
-        { "topic",      { nlohmann::json::value_t::string }}
-    };
-}
-
-nlohmann::json ServerTopicCommand::request(Irccdctl &, const CommandRequest &args) const
-{
-    return nlohmann::json::object({
-        { "server",     args.arg(0) },
-        { "channel",    args.arg(1) },
-        { "topic",      args.arg(2) }
-    });
-}
-
-nlohmann::json ServerTopicCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    Command::exec(irccd, request);
-
-    irccd.servers().require(request["server"])->topic(request["channel"], request["topic"]);
-
-    return nlohmann::json::object();
+    irccd.servers().require(util::json::requireIdentifier(args, "server"))->topic(
+        util::json::requireString(args, "channel"),
+        util::json::requireString(args, "topic")
+    );
+    client.success("server-topic");
 }
 
 } // !command

@@ -29,6 +29,7 @@ if (WITH_TESTS)
     add_subdirectory(cmd-server-nick)
     add_subdirectory(cmd-server-notice)
     add_subdirectory(cmd-server-part)
+    add_subdirectory(cmd-server-topic)
 
 #    # Misc
 #    add_subdirectory(command)
