@@ -20,56 +20,25 @@
 #include "irccd.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
+#include "transport.hpp"
+#include "util.hpp"
 
 namespace irccd {
 
 namespace command {
 
 ServerPartCommand::ServerPartCommand()
-    : Command("server-part", "Server", "Leave a channel")
+    : Command("server-part")
 {
 }
 
-std::vector<Command::Arg> ServerPartCommand::args() const
+void ServerPartCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {
-        { "server",     true    },
-        { "channel",    true    },
-        { "reason",     false    }
-    };
-}
-
-std::vector<Command::Property> ServerPartCommand::properties() const
-{
-    return {
-        { "server",     { nlohmann::json::value_t::string }},
-        { "channel",    { nlohmann::json::value_t::string }}
-    };
-}
-
-nlohmann::json ServerPartCommand::request(Irccdctl &, const CommandRequest &args) const
-{
-    auto req = nlohmann::json::object({
-        { "server",     args.arg(0) },
-        { "channel",    args.arg(1) }
-    });
-
-    if (args.length() == 3)
-        req.push_back({"reason", args.arg(2)});
-
-    return req;
-}
-
-nlohmann::json ServerPartCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    Command::exec(irccd, request);
-
-    irccd.servers().require(request["server"])->part(
-        request["channel"],
-        request.count("reason") > 0 ? request["reason"] : ""
+    irccd.servers().require(util::json::requireIdentifier(args, "server"))->part(
+        util::json::requireString(args, "channel"),
+        util::json::getString(args, "reason")
     );
-
-    return nlohmann::json::object();
+    client.success("server-part");
 }
 
 } // !command

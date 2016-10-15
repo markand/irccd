@@ -25,6 +25,7 @@
  */
 
 #include "command.hpp"
+#include "sysconfig.hpp"
 
 namespace irccd {
 
@@ -34,32 +35,17 @@ namespace command {
  * \class ServerPart
  * \brief Implementation of server-part transport command.
  */
-class ServerPartCommand : public Command {
+class IRCCD_EXPORT ServerPartCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerPartCommand();
-
-    /**
-     * \copydoc Command::args
-     */
-    IRCCD_EXPORT std::vector<Arg> args() const override;
-
-    /**
-     * \copydoc Command::properties
-     */
-    IRCCD_EXPORT std::vector<Property> properties() const override;
-
-    /**
-     * \copydoc Command::request
-     */
-    IRCCD_EXPORT nlohmann::json request(Irccdctl &irccdctl, const CommandRequest &args) const override;
+    ServerPartCommand();
 
     /**
      * \copydoc Command::exec
      */
-    IRCCD_EXPORT nlohmann::json exec(Irccd &irccd, const nlohmann::json &request) const override;
+    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
 };
 
 } // !command
