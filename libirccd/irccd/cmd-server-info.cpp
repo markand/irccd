@@ -22,35 +22,22 @@
 #include "irccd.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
+#include "transport.hpp"
+#include "util.hpp"
 
 namespace irccd {
 
 namespace command {
 
 ServerInfoCommand::ServerInfoCommand()
-    : Command("server-info", "Server", "Get server information")
+    : Command("server-info")
 {
 }
 
-std::vector<Command::Arg> ServerInfoCommand::args() const
+void ServerInfoCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {{ "server", true }};
-}
-
-std::vector<Command::Property> ServerInfoCommand::properties() const
-{
-    return {{ "server", { nlohmann::json::value_t::string }}};
-}
-
-nlohmann::json ServerInfoCommand::request(Irccdctl &, const CommandRequest &args) const
-{
-    return {{ "server", args.args()[0] }};
-}
-
-nlohmann::json ServerInfoCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    auto response = Command::exec(irccd, request);
-    auto server = irccd.servers().require(request["server"]);
+    auto response = nlohmann::json::object();
+    auto server = irccd.servers().require(util::json::requireIdentifier(args, "server"));
 
     // General stuff.
     response.push_back({"name", server->name()});
@@ -69,44 +56,7 @@ nlohmann::json ServerInfoCommand::exec(Irccd &irccd, const nlohmann::json &reque
     if (server->flags() & Server::SslVerify)
         response.push_back({"sslVerify", true});
 
-    return response;
-}
-
-void ServerInfoCommand::result(Irccdctl &irccdctl, const nlohmann::json &response) const
-{
-    Command::result(irccdctl, response);
-
-    auto get = [&] (auto key) -> std::string {
-        auto v = response.find(key);
-
-        if (v == response.end() || !v->is_primitive())
-            return "";
-
-        return v->dump();
-    };
-
-    // Server information.
-    std::cout << std::boolalpha;
-    std::cout << "Name           : " << get("name") << std::endl;
-    std::cout << "Host           : " << get("host") << std::endl;
-    std::cout << "Port           : " << get("port") << std::endl;
-    std::cout << "Ipv6           : " << get("ipv6") << std::endl;
-    std::cout << "SSL            : " << get("ssl") << std::endl;
-    std::cout << "SSL verified   : " << get("sslVerify") << std::endl;
-
-    // Channels.
-    std::cout << "Channels       : ";
-
-    if (response.count("channels") != 0)
-        for (const auto &v : response["channels"])
-            std::cout << v.dump() << " ";
-
-    std::cout << std::endl;
-
-    // Identity.
-    std::cout << "Nickname       : " << get("nickname") << std::endl;
-    std::cout << "User name      : " << get("username") << std::endl;
-    std::cout << "Real name      : " << get("realname") << std::endl;
+    client.success("server-info", response);
 }
 
 } // !command
