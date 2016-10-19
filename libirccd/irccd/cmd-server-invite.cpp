@@ -20,50 +20,25 @@
 #include "irccd.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
+#include "transport.hpp"
+#include "util.hpp"
 
 namespace irccd {
 
 namespace command {
 
 ServerInviteCommand::ServerInviteCommand()
-    : Command("server-invite", "Server", "Invite someone into a channel")
+    : Command("server-invite")
 {
 }
 
-std::vector<Command::Arg> ServerInviteCommand::args() const
+void ServerInviteCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {
-        { "server",     true },
-        { "nickname",   true },
-        { "channel",    true }
-    };
-}
-
-std::vector<Command::Property> ServerInviteCommand::properties() const
-{
-    return {
-        { "server",     { nlohmann::json::value_t::string }},
-        { "target",     { nlohmann::json::value_t::string }},
-        { "channel",    { nlohmann::json::value_t::string }}
-    };
-}
-
-nlohmann::json ServerInviteCommand::request(Irccdctl &, const CommandRequest &args) const
-{
-    return nlohmann::json::object({
-        { "server",     args.args()[0] },
-        { "target",     args.args()[1] },
-        { "channel",    args.args()[2] }
-    });
-}
-
-nlohmann::json ServerInviteCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    Command::exec(irccd, request);
-
-    irccd.servers().require(request["server"])->invite(request["target"], request["channel"]);
-
-    return nlohmann::json::object();
+    irccd.servers().require(util::json::requireIdentifier(args, "server"))->invite(
+        util::json::requireString(args, "target"),
+        util::json::requireString(args, "channel")
+    );
+    client.success("server-invite");
 }
 
 } // !command
