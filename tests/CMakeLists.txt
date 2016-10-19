@@ -20,6 +20,7 @@
 project(tests)
 
 if (WITH_TESTS)
+    add_subdirectory(cmd-server-cmode)
     add_subdirectory(cmd-server-message)
 
 #    # Misc

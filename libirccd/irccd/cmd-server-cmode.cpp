@@ -20,44 +20,25 @@
 #include "irccd.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
+#include "transport.hpp"
+#include "util.hpp"
 
 namespace irccd {
 
 namespace command {
 
 ServerChannelModeCommand::ServerChannelModeCommand()
-    : Command("server-cmode", "Server", "Change a channel mode")
+    : Command("server-cmode")
 {
 }
 
-std::vector<Command::Arg> ServerChannelModeCommand::args() const
+void ServerChannelModeCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {
-        { "server",     true },
-        { "channel",    true },
-        { "mode",       true }
-    };
-}
-
-std::vector<Command::Property> ServerChannelModeCommand::properties() const
-{
-    return {
-        { "server",     { nlohmann::json::value_t::string }},
-        { "channel",    { nlohmann::json::value_t::string }},
-        { "mode",       { nlohmann::json::value_t::string }}
-    };
-}
-
-nlohmann::json ServerChannelModeCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    Command::exec(irccd, request);
-
-    irccd.servers().require(request["server"].get<std::string>())->cmode(
-        request["channel"].get<std::string>(),
-        request["mode"].get<std::string>()
+    irccd.servers().require(util::json::requireIdentifier(args, "server"))->cmode(
+        util::json::requireString(args, "channel"),
+        util::json::requireString(args, "mode")
     );
-
-    return nlohmann::json::object();
+    client.success("server-cmode");
 }
 
 } // !command
