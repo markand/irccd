@@ -43,12 +43,7 @@ public:
     /**
      * \copydoc Command::exec
      */
-    IRCCD_EXPORT nlohmann::json exec(Irccd &irccd, const nlohmann::json &request) const override;
-
-    /**
-     * \copydoc Command::result
-     */
-    IRCCD_EXPORT void result(Irccdctl &irccdctl, const nlohmann::json &response) const override;
+    IRCCD_EXPORT void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &request) override;
 };
 
 } // !command

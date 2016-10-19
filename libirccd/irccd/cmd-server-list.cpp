@@ -22,17 +22,18 @@
 #include "irccd.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
+#include "transport.hpp"
 
 namespace irccd {
 
 namespace command {
 
 ServerListCommand::ServerListCommand()
-    : Command("server-list", "Server", "Get the list of servers")
+    : Command("server-list")
 {
 }
 
-nlohmann::json ServerListCommand::exec(Irccd &irccd, const nlohmann::json &) const
+void ServerListCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &)
 {
     auto json = nlohmann::json::object();
     auto list = nlohmann::json::array();
@@ -41,20 +42,7 @@ nlohmann::json ServerListCommand::exec(Irccd &irccd, const nlohmann::json &) con
         list.push_back(server->name());
 
     json.push_back({"list", std::move(list)});
-
-    return json;
-}
-
-void ServerListCommand::result(Irccdctl &, const nlohmann::json &response) const
-{
-    auto list = response.find("list");
-
-    if (list == response.end())
-        return;
-
-    for (auto v : *list)
-        if (v.is_string())
-            std::cout << v.get<std::string>() << std::endl;
+    client.success("server-list", json);
 }
 
 } // !command
