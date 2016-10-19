@@ -20,60 +20,26 @@
 #include "irccd.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
+#include "transport.hpp"
+#include "util.hpp"
 
 namespace irccd {
 
 namespace command {
 
 ServerKickCommand::ServerKickCommand()
-    : Command("server-kick", "Server", "Kick someone from a channel")
+    : Command("server-kick")
 {
 }
 
-std::vector<Command::Arg> ServerKickCommand::args() const
+void ServerKickCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {
-        { "server",     true    },
-        { "target",     true    },
-        { "channel",    true    },
-        { "reason",     false   }
-    };
-}
-
-std::vector<Command::Property> ServerKickCommand::properties() const
-{
-    return {
-        { "server",     { nlohmann::json::value_t::string }},
-        { "target",     { nlohmann::json::value_t::string }},
-        { "channel",    { nlohmann::json::value_t::string }}
-    };
-}
-
-nlohmann::json ServerKickCommand::request(Irccdctl &, const CommandRequest &args) const
-{
-    auto req = nlohmann::json::object({
-        { "server",     args.arg(0) },
-        { "target",     args.arg(1) },
-        { "channel",    args.arg(2) }
-    });
-
-    if (args.length() == 4)
-        req.push_back({"reason", args.arg(3)});
-
-    return req;
-}
-
-nlohmann::json ServerKickCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    Command::exec(irccd, request);
-
-    irccd.servers().require(request["server"])->kick(
-        request["target"],
-        request["channel"],
-        request.count("reason") > 0 ? request["reason"] : ""
+    irccd.servers().require(util::json::requireIdentifier(args, "server"))->kick(
+        util::json::requireString(args, "target"),
+        util::json::requireString(args, "channel"),
+        util::json::getString(args, "reason")
     );
-
-    return nlohmann::json::object();
+    client.success("server-kick");
 }
 
 } // !command
