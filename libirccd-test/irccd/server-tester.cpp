@@ -20,8 +20,8 @@
 
 namespace irccd {
 
-ServerTester::ServerTester()
-    : Server("test")
+ServerTester::ServerTester(std::string name)
+    : Server(std::move(name))
 {
 }
 

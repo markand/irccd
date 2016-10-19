@@ -797,6 +797,13 @@ public:
     IRCCD_EXPORT void next(std::unique_ptr<State> state) noexcept;
 
     /**
+     * Get the state current id.
+     *
+     * \return the state id
+     */
+    IRCCD_EXPORT std::string status() const noexcept;
+
+    /**
      * Switch to next state if it has.
      */
     IRCCD_EXPORT void update() noexcept;
@@ -816,7 +823,7 @@ public:
      *
      * \warning Not thread-safe
      */
-    IRCCD_EXPORT void prepare(fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) noexcept;
+    IRCCD_EXPORT virtual void prepare(fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) noexcept;
 
     /**
      * Process incoming/outgoing data after selection.
@@ -825,7 +832,7 @@ public:
      * \param setoutput
      * \throw any exception that have been throw from user functions
      */
-    IRCCD_EXPORT void sync(fd_set &setinput, fd_set &setoutput);
+    IRCCD_EXPORT virtual void sync(fd_set &setinput, fd_set &setoutput);
 
     /**
      * Determine if the nickname is the bot itself.

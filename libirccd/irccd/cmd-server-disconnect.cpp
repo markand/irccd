@@ -20,31 +20,27 @@
 #include "irccd.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
+#include "transport.hpp"
 
 namespace irccd {
 
 namespace command {
 
 ServerDisconnectCommand::ServerDisconnectCommand()
-    : Command("server-disconnect", "Server", "Disconnect one or more servers")
+    : Command("server-disconnect")
 {
 }
 
-std::vector<Command::Arg> ServerDisconnectCommand::args() const
+void ServerDisconnectCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {{ "server", false }};
-}
+    auto it = args.find("server");
 
-nlohmann::json ServerDisconnectCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    auto it = request.find("server");
-
-    if (it == request.end())
+    if (it == args.end())
         irccd.servers().clear();
     else
         irccd.servers().remove(*it);
 
-    return Command::exec(irccd, request);
+    client.success("server-disconnect");
 }
 
 } // !command

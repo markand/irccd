@@ -20,44 +20,25 @@
 #include "irccd.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
+#include "transport.hpp"
+#include "util.hpp"
 
 namespace irccd {
 
 namespace command {
 
 ServerChannelNoticeCommand::ServerChannelNoticeCommand()
-    : Command("server-cnotice", "Server", "Send a channel notice")
+    : Command("server-cnotice")
 {
 }
 
-std::vector<Command::Arg> ServerChannelNoticeCommand::args() const
+void ServerChannelNoticeCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {
-        { "server",     true },
-        { "channel",    true },
-        { "message",    true }
-    };
-}
-
-std::vector<Command::Property> ServerChannelNoticeCommand::properties() const
-{
-    return {
-        { "server",     { nlohmann::json::value_t::string }},
-        { "channel",    { nlohmann::json::value_t::string }},
-        { "message",    { nlohmann::json::value_t::string }}
-    };
-}
-
-nlohmann::json ServerChannelNoticeCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    Command::exec(irccd, request);
-
-    irccd.servers().require(request["server"].get<std::string>())->cnotice(
-        request["channel"].get<std::string>(),
-        request["message"].get<std::string>()
+    irccd.servers().require(util::json::requireString(args, "server"))->cnotice(
+        util::json::requireString(args, "channel"),
+        util::json::requireString(args, "message")
     );
-
-    return nlohmann::json::object();
+    client.success("server-cnotice");
 }
 
 } // !command

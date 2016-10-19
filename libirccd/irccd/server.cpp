@@ -588,6 +588,11 @@ void Server::next(std::unique_ptr<State> state) noexcept
     m_stateNext = std::move(state);
 }
 
+std::string Server::status() const noexcept
+{
+    return !m_state ? "null" : m_state->ident();
+}
+
 void Server::update() noexcept
 {
     if (m_stateNext) {

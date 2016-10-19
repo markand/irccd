@@ -25,6 +25,7 @@
  */
 
 #include "command.hpp"
+#include "sysconfig.hpp"
 
 namespace irccd {
 
@@ -33,24 +34,17 @@ namespace command {
 /**
  * \brief Implementation of server-disconnect transport command.
  */
-class ServerDisconnectCommand : public Command {
+class IRCCD_EXPORT ServerDisconnectCommand : public Command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerDisconnectCommand();
-
-    /**
-     * Get list of arguments required.
-     *
-     * \return the arguments required
-     */
-    IRCCD_EXPORT std::vector<Arg> args() const override;
+    ServerDisconnectCommand();
 
     /**
      * \copydoc Command::exec
      */
-    IRCCD_EXPORT nlohmann::json exec(Irccd &irccd, const nlohmann::json &request) const override;
+    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
 };
 
 } // !command

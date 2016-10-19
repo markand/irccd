@@ -35,9 +35,9 @@ namespace irccd {
 class IRCCD_EXPORT ServerTester : public Server {
 public:
     /**
-     * Create a server with named 'test'
+     * Create a server with named 'test' by default.
      */
-    ServerTester();
+    ServerTester(std::string name = "test");
 
     /**
      * Overload that is a no-op.

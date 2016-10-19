@@ -36,7 +36,6 @@ protected:
     Irccd m_irccd;
     Irccdctl m_irccdctl;
 
-
 public:
     CommandTester(std::unique_ptr<Command> cmd = nullptr,
                   std::unique_ptr<Server> server = nullptr);
