@@ -20,62 +20,25 @@
 #include "irccd.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
+#include "transport.hpp"
+#include "util.hpp"
 
 namespace irccd {
 
 namespace command {
 
 ServerJoinCommand::ServerJoinCommand()
-    : Command("server-join", "Server", "Join a channel")
+    : Command("server-join")
 {
 }
 
-std::vector<Command::Arg> ServerJoinCommand::args() const
+void ServerJoinCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {
-        { "server",     true    },
-        { "channel",    true    },
-        { "password",   false   }
-    };
-}
-
-std::vector<Command::Property> ServerJoinCommand::properties() const
-{
-    return {
-        { "server",     { nlohmann::json::value_t::string }},
-        { "channel",    { nlohmann::json::value_t::string }}
-    };
-}
-
-nlohmann::json ServerJoinCommand::request(Irccdctl &, const CommandRequest &args) const
-{
-    auto req = nlohmann::json::object({
-        { "server",     args.args()[0] },
-        { "channel",    args.args()[1] }
-    });
-
-    if (args.length() == 3)
-        req.push_back({"password", args.args()[2]});
-
-    return req;
-}
-
-nlohmann::json ServerJoinCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    Command::exec(irccd, request);
-
-    std::string password;
-
-    if (request.find("password") != request.end())
-        password = request["password"];
-
-    irccd.servers().require(
-        request.at("server").get<std::string>())->join(
-        request.at("channel").get<std::string>(),
-        password
+    irccd.servers().require(util::json::requireIdentifier(args, "server"))->join(
+        util::json::requireString(args, "channel"),
+        util::json::getString(args, "password")
     );
-
-    return nlohmann::json::object();
+    client.success("server-join");
 }
 
 } // !command
