@@ -41,19 +41,9 @@ public:
     IRCCD_EXPORT ServerReconnectCommand();
 
     /**
-     * \copydoc Command::args
-     */
-    IRCCD_EXPORT std::vector<Arg> args() const override;
-
-    /**
-     * \copydoc Command::request
-     */
-    IRCCD_EXPORT nlohmann::json request(Irccdctl &irccdctl, const CommandRequest &args) const override;
-
-    /**
      * \copydoc Command::exec
      */
-    IRCCD_EXPORT nlohmann::json exec(Irccd &irccd, const nlohmann::json &request) const override;
+    IRCCD_EXPORT void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
 };
 
 } // !command

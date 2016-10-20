@@ -20,37 +20,28 @@
 #include "irccd.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
+#include "transport.hpp"
 
 namespace irccd {
 
 namespace command {
 
 ServerReconnectCommand::ServerReconnectCommand()
-    : Command("server-reconnect", "Server", "Force reconnection of one or more servers")
+    : Command("server-reconnect")
 {
 }
 
-std::vector<Command::Arg> ServerReconnectCommand::args() const
+void ServerReconnectCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {{ "server", false }};
-}
+    auto server = args.find("server");
 
-nlohmann::json ServerReconnectCommand::request(Irccdctl &, const CommandRequest &args) const
-{
-    return args.length() == 0 ? nlohmann::json::object() : nlohmann::json::object({ { "server", args.arg(0) } });
-}
-
-nlohmann::json ServerReconnectCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    auto server = request.find("server");
-
-    if (server != request.end() && server->is_string())
+    if (server != args.end() && server->is_string())
         irccd.servers().require(*server)->reconnect();
     else
         for (auto &server : irccd.servers().servers())
             server->reconnect();
 
-    return nullptr;
+    client.success("server-reconnect");
 }
 
 } // !command
