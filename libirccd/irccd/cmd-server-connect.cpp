@@ -18,66 +18,32 @@
 
 #include <limits>
 
-#include <format.h>
-
 #include "cmd-server-connect.hpp"
 #include "irccd.hpp"
 #include "server.hpp"
 #include "service-server.hpp"
+#include "transport.hpp"
 #include "util.hpp"
-
-using namespace fmt::literals;
-
-using json = nlohmann::json;
 
 namespace irccd {
 
 namespace command {
 
 ServerConnectCommand::ServerConnectCommand()
-    : Command("server-connect", "Server", "Connect to a server")
+    : Command("server-connect")
 {
 }
 
-std::vector<Command::Option> ServerConnectCommand::options() const
+void ServerConnectCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {
-        { "command",    "c", "command",     "char",     "command character to use"  },
-        { "nickname",   "n", "nickname",    "nickname", "nickname to use"           },
-        { "realname",   "r", "realname",    "realname", "realname to use"           },
-        { "sslverify",  "S", "ssl-verify",  "",         "verify SSL"                },
-        { "ssl",        "s", "ssl",         "",         "connect with SSL"          },
-        { "username",   "u", "username",    "",         "username to use"           }
-    };
-}
-
-std::vector<Command::Arg> ServerConnectCommand::args() const
-{
-    return {
-        { "id",     true    },
-        { "host",   true    },
-        { "port",   false   }
-    };
-}
-
-std::vector<Command::Property> ServerConnectCommand::properties() const
-{
-    return {
-        { "name",   { json::value_t::string }},
-        { "host",   { json::value_t::string }}
-    };
-}
-
-json ServerConnectCommand::exec(Irccd &irccd, const json &request) const
-{
-    auto server = Server::fromJson(request);
+    auto server = Server::fromJson(args);
 
     if (irccd.servers().has(server->name()))
-        throw std::invalid_argument("server '{}' already exists"_format(server->name()));
-
-    irccd.servers().add(std::move(server));
-
-    return Command::exec(irccd, request);
+        client.error("server-connect", "server already exists");
+    else {
+        irccd.servers().add(std::move(server));
+        client.success("server-connect");
+    }
 }
 
 } // !command
