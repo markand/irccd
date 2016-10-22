@@ -38,7 +38,7 @@ TEST(Basic, single)
     irccd.plugins().add(plugin);
 
     while (timer.elapsed() < 3000) {
-        irccd.poll();
+        util::poller::poll(512, irccd);
         irccd.dispatch();
     }
 
@@ -57,7 +57,7 @@ TEST(Basic, repeat)
     irccd.plugins().add(plugin);
 
     while (timer.elapsed() < 3000) {
-        irccd.poll();
+        util::poller::poll(512, irccd);
         irccd.dispatch();
     }
 
