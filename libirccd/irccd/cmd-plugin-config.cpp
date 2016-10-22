@@ -16,12 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <iomanip>
-#include <iostream>
-
 #include "irccd.hpp"
 #include "cmd-plugin-config.hpp"
 #include "service-plugin.hpp"
+#include "transport.hpp"
+#include "util.hpp"
 
 namespace irccd {
 
@@ -29,101 +28,63 @@ namespace command {
 
 namespace {
 
-nlohmann::json execSet(Irccd &irccd, const nlohmann::json &request, const std::string &var, const std::string &value)
+void execSet(Irccd &, TransportClient &client, Plugin &plugin, const nlohmann::json &args)
 {
-    auto plugin = irccd.plugins().require(request["plugin"].get<std::string>());
-    auto config = plugin->config();
+    assert(args.count("value") > 0);
 
-    config[var] = value;
-    plugin->setConfig(config);
+    auto var = args.find("variable");
+    auto value = args.find("value");
 
-    return nullptr;
+    if (var == args.end() || !var->is_string())
+        client.error("plugin-config", "missing 'variable' property (string expected)");
+    else if (!value->is_string())
+        client.error("plugin-config", "invalid 'value' property (string expected)");
+    else {
+        auto config = plugin.config();
+
+        config[*var] = *value;
+        plugin.setConfig(config);
+        client.success("plugin-config");
+    }
 }
 
-nlohmann::json execGet(Irccd &irccd, const nlohmann::json &request, const nlohmann::json::const_iterator &var)
+void execGet(Irccd &, TransportClient &client, Plugin &plugin, const nlohmann::json &args)
 {
-    auto config = irccd.plugins().require(request["plugin"].get<std::string>())->config();
+    auto variables = nlohmann::json::object();
+    auto var = args.find("variable");
 
-    // 'vars' property.
-    std::map<std::string, nlohmann::json> vars;
-
-    if (var != request.end())
-        vars.emplace(var->get<std::string>(), config[var->get<std::string>()]);
+    if (var != args.end() && var->is_string())
+        variables[var->get<std::string>()] = plugin.config()[*var];
     else
-        for (const auto &pair : config)
-            vars.emplace(pair.first, pair.second);
+        for (const auto &pair : plugin.config())
+            variables[pair.first] = pair.second;
 
-    return nlohmann::json::object({{ "variables", nlohmann::json(vars) }});
+    /*
+     * Don't put all variables into the response, put them into a sub property
+     * 'variables' instead.
+     *
+     * It's easier for the client to iterate over all.
+     */
+    client.success("plugin-config", {
+        { "variables", variables }
+    });
 }
 
 } // !namespace
 
 PluginConfigCommand::PluginConfigCommand()
-    : Command("plugin-config", "Plugins", "Get or set a plugin config variable")
+    : Command("plugin-config")
 {
 }
 
-std::vector<Command::Arg> PluginConfigCommand::args() const
+void PluginConfigCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {
-        { "plugin",     true    },
-        { "variable",   false   },
-        { "value",      false   }
-    };
-}
+    auto plugin = irccd.plugins().require(util::json::requireIdentifier(args, "plugin"));
 
-std::vector<Command::Property> PluginConfigCommand::properties() const
-{
-    return {{ "plugin", { nlohmann::json::value_t::string }}};
-}
-
-nlohmann::json PluginConfigCommand::request(Irccdctl &, const CommandRequest &args) const
-{
-    auto object = nlohmann::json::object({
-        { "plugin", args.arg(0) }
-    });
-
-    if (args.length() >= 2U) {
-        object.push_back({"variable", args.arg(1)});
-
-        if (args.length() == 3U)
-            object.push_back({"value", args.arg(2)});
-    }
-
-    return object;
-}
-
-nlohmann::json PluginConfigCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    Command::exec(irccd, request);
-
-    auto var = request.find("variable");
-
-    if (var != request.end() && var->is_string())
-        throw InvalidPropertyError("variable", nlohmann::json::value_t::string, var->type());
-
-    auto value = request.find("value");
-
-    if (value != request.end())
-        return execSet(irccd, request, var->dump(), value->dump());
-
-    return execGet(irccd, request, var);
-}
-
-void PluginConfigCommand::result(Irccdctl &irccdctl, const nlohmann::json &response) const
-{
-    Command::result(irccdctl, response);
-
-    auto it = response.find("variables");
-
-    if (it == response.end() || !it->is_object())
-        return;
-
-    if (it->size() > 1U)
-        for (auto v = it->begin(); v != it->end(); ++v)
-            std::cout << std::setw(16) << std::left << v.key() << " : " << v->dump() << std::endl;
+    if (args.count("value") > 0)
+        execSet(irccd, client, *plugin, args);
     else
-        std::cout << it->begin()->dump() << std::endl;
+        execGet(irccd, client, *plugin, args);
 }
 
 } // !command
