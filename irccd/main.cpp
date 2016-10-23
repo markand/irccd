@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/sysconfig.hpp>
+#include "sysconfig.hpp"
 
 #if defined(HAVE_GETPID)
 #  include <sys/types.h>
@@ -35,16 +35,16 @@
 
 #include <format.h>
 
-#include <irccd/logger.hpp>
-#include <irccd/options.hpp>
-#include <irccd/path.hpp>
-#include <irccd/service-plugin.hpp>
-#include <irccd/service-rule.hpp>
-#include <irccd/service-server.hpp>
-#include <irccd/service-transport.hpp>
-#include <irccd/system.hpp>
-#include <irccd/config.hpp>
-#include <irccd/irccd.hpp>
+#include "logger.hpp"
+#include "options.hpp"
+#include "path.hpp"
+#include "service-plugin.hpp"
+#include "service-rule.hpp"
+#include "service-server.hpp"
+#include "service-transport.hpp"
+#include "system.hpp"
+#include "config.hpp"
+#include "irccd.hpp"
 
 using namespace fmt::literals;
 

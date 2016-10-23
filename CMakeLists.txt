@@ -86,9 +86,9 @@ if (WITH_JS)
     add_subdirectory(libirccd-js)
 endif ()
 
-#add_subdirectory(irccd)
+add_subdirectory(irccd)
 #add_subdirectory(irccdctl)
-#add_subdirectory(contrib)
+add_subdirectory(contrib)
 
 if (WITH_JS)
 #add_subdirectory(plugins)
