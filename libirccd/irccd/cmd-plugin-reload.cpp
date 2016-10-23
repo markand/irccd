@@ -20,6 +20,7 @@
 #include "irccd.hpp"
 #include "plugin.hpp"
 #include "service-plugin.hpp"
+#include "transport.hpp"
 #include "util.hpp"
 
 namespace irccd {
@@ -27,32 +28,14 @@ namespace irccd {
 namespace command {
 
 PluginReloadCommand::PluginReloadCommand()
-    : Command("plugin-reload", "Plugins", "Reload a plugin")
+    : Command("plugin-reload")
 {
 }
 
-std::vector<Command::Arg> PluginReloadCommand::args() const
+void PluginReloadCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {{ "plugin", true }};
-}
-
-std::vector<Command::Property> PluginReloadCommand::properties() const
-{
-    return {{ "plugin", { nlohmann::json::value_t::string }}};
-}
-
-nlohmann::json PluginReloadCommand::request(Irccdctl &, const CommandRequest &args) const
-{
-    return nlohmann::json::object({{ "plugin", args.arg(0) }});
-}
-
-nlohmann::json PluginReloadCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    Command::exec(irccd, request);
-
-    irccd.plugins().require(request["plugin"])->onReload(irccd);
-
-    return nlohmann::json::object();
+    irccd.plugins().require(util::json::requireIdentifier(args, "plugin"))->onReload(irccd);
+    client.success("plugin-reload");
 }
 
 } // !command
