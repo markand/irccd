@@ -67,7 +67,6 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/cmd-server-part.cpp
     ${libirccd_SOURCE_DIR}/irccd/cmd-server-reconnect.cpp
     ${libirccd_SOURCE_DIR}/irccd/cmd-server-topic.cpp
-    ${libirccd_SOURCE_DIR}/irccd/command.cpp
     ${libirccd_SOURCE_DIR}/irccd/config.cpp
     ${libirccd_SOURCE_DIR}/irccd/irccd.cpp
     ${libirccd_SOURCE_DIR}/irccd/plugin-dynlib.cpp

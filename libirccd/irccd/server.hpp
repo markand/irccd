@@ -633,7 +633,7 @@ public:
      *
      * \param nickname the nickname
      */
-    IRCCD_EXPORT void setNickname(std::string nickname);
+    IRCCD_EXPORT virtual void setNickname(std::string nickname);
 
     /**
      * Get the username.
@@ -816,7 +816,7 @@ public:
     /**
      * Asks for a reconnection.
      */
-    IRCCD_EXPORT void reconnect() noexcept;
+    IRCCD_EXPORT virtual void reconnect() noexcept;
 
     /**
      * Prepare the IRC session.

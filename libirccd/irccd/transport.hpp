@@ -155,6 +155,27 @@ public:
      * \copydoc Service::sync
      */
     IRCCD_EXPORT virtual void sync(fd_set &in, fd_set &out);
+
+    /**
+     * Send a successful command to the client with optional extra data
+     *
+     * \pre extra must be null or object
+     * \param cmd the command name
+     * \param extra the optional extra data
+     */
+    IRCCD_EXPORT void success(const std::string &cmd, nlohmann::json extra = nullptr);
+
+    /**
+     * Send an error status to the client.
+     *
+     * \pre extra must be null or object
+     * \param cmd the command name
+     * \param error the error string
+     * \param extra the optional extra data
+     */
+    IRCCD_EXPORT void error(const std::string &cmd,
+                            const std::string &error,
+                            nlohmann::json extra = nullptr);
 };
 
 /*

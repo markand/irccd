@@ -232,6 +232,35 @@ void TransportClient::send(const nlohmann::json &json)
     m_output += "\r\n\r\n";
 }
 
+void TransportClient::success(const std::string &cmd, nlohmann::json extra)
+{
+    assert(extra.is_object() || extra.is_null());
+
+    if (!extra.is_object())
+        extra = nlohmann::json::object();
+
+    extra["command"] = cmd;
+    extra["status"] = true;
+
+    m_output += extra.dump();
+    m_output += "\r\n\r\n";
+}
+
+void TransportClient::error(const std::string &cmd, const std::string &error, nlohmann::json extra)
+{
+    assert(extra.is_object() || extra.is_null());
+
+    if (!extra.is_object())
+        extra = nlohmann::json::object();
+
+    extra["command"] = cmd;
+    extra["status"] = false;
+    extra["error"] = error;
+
+    m_output += extra.dump();
+    m_output += "\r\n\r\n";
+}
+
 /*
  * TransportClientTls
  * ------------------------------------------------------------------

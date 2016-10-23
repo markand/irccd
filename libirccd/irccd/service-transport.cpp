@@ -37,7 +37,6 @@ void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const n
         if (!tc)
             return;
 
-        // 1. Check if the Json object is valid.
         auto name = object.find("command");
         if (name == object.end() || !name->is_string()) {
             // TODO: send error.
@@ -45,36 +44,17 @@ void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const n
             return;
         }
 
-        // 2. Search for a command
         auto cmd = m_irccd.commands().find(*name);
 
-        if (!cmd) {
-            // TODO: send error again.
-            log::warning("command does not exists");
-            return;
+        if (!cmd)
+            tc->error(*name, "command does not exist");
+        else {
+            try {
+                cmd->exec(m_irccd, *tc, object);
+            } catch (const std::exception &ex) {
+                tc->error(cmd->name(), ex.what());
+            }
         }
-
-        // 3. Try to execute it.
-        auto response = nlohmann::json::object({});
-
-        try {
-            response = cmd->exec(m_irccd, object);
-
-            // Adjust if command has returned something else.
-            if (!response.is_object())
-                response = nlohmann::json::object({});
-
-            response.push_back({"status", true});
-        } catch (const std::exception &ex) {
-            response.push_back({"status", false});
-            response.push_back({"error", ex.what()});
-        }
-
-        // 4. Store the command name result.
-        response.push_back({"response", *name});
-
-        // 5. Send the result.
-        tc->send(response);
     });
 }
 

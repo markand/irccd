@@ -19,153 +19,44 @@
 #ifndef IRCCD_IRCCDCTL_HPP
 #define IRCCD_IRCCDCTL_HPP
 
-/**
- * \file irccdctl.hpp
- * \brief Base class for irccdctl front end.
- */
-
-#include <map>
 #include <memory>
-#include <string>
-#include <vector>
 
 #include "client.hpp"
-#include "alias.hpp"
-#include "options.hpp"
-#include "service-command.hpp"
-
-#include <json.hpp>
 
 namespace irccd {
 
-class Client;
-
-namespace ini {
-
-class Document;
-class Section;
-
-} // !ini
-
 /**
- * \brief Main irccdctl class.
+ * \brief Transient class for connecting to irccd
  */
 class Irccdctl {
 private:
-    // Commands.
-    CommandService m_commandService;
-
-    // Connection handler.
-    std::unique_ptr<Client> m_connection;
-    std::uint32_t m_timeout{30000};
-    net::Address m_address;
-
-    // Aliases.
-    std::map<std::string, Alias> m_aliases;
-
-    // Incoming data.
-    std::vector<nlohmann::json> m_events;
-    std::vector<nlohmann::json> m_messages;
-
-    void usage() const;
-    void help() const;
-
-    // Parse configuration file.
-    void readConnectIp(const ini::Section &sc);
-    void readConnectLocal(const ini::Section &sc);
-    void readConnect(const ini::Section &sc);
-    void readGeneral(const ini::Section &sc);
-    void readAliases(const ini::Section &sc);
-    void read(const std::string &path);
-
-    // Parse command line options.
-    void parseConnectIp(const option::Result &options);
-    void parseConnectLocal(const option::Result &options);
-    void parseConnect(const option::Result &options);
-    option::Result parse(int &argc, char **&argv);
+    std::unique_ptr<Client> m_client;
 
 public:
-    /**
-     * Get the command service.
-     *
-     * \return the command service
-     */
-    inline CommandService &commandService() noexcept
+    inline Irccdctl(std::unique_ptr<Client> client) noexcept
+        : m_client(std::move(client))
     {
-        return m_commandService;
     }
 
-    /**
-     * Get the client connection to irccd.
-     *
-     * \return the connection
-     */
-    inline const Client &client() const noexcept
-    {
-        return *m_connection;
-    }
-
-    /**
-     * Get the client connection to irccd.
-     *
-     * \return the connection
-     */
     inline Client &client() noexcept
     {
-        return *m_connection;
+        return *m_client;
     }
 
-    /**
-     * Get the next message response with the given id.
-     *
-     * If the response id is not provided, get the next incoming message.
-     *
-     * Otherwise, if the id is provided, all other previous messages will be
-     * discarded.
-     *
-     * \param id the response id (e.g. server-message)
-     * \return the next message
-     * \warning this may skip previous events
-     */
-    IRCCD_EXPORT nlohmann::json waitMessage(const std::string id = "");
+    inline const Client &client() const noexcept
+    {
+        return *m_client;
+    }
 
-    /**
-     * Get the next pending even within the internal timeout.
-     *
-     * \return the next event or empty if not available
-     */
-    IRCCD_EXPORT nlohmann::json waitEvent();
+    inline void prepare(fd_set &in, fd_set &out, net::Handle &max)
+    {
+        m_client->prepare(in, out, max);
+    }
 
-    /**
-     * Execute the given command and wait for its result.
-     *
-     * \param cmd the command
-     * \param args the arguments
-     */
-    IRCCD_EXPORT nlohmann::json exec(const Command &cmd, std::vector<std::string> args);
-
-    /**
-     * Execute the given alias.
-     *
-     * \param alias the alias
-     * \param args the arguments
-     */
-    IRCCD_EXPORT std::vector<nlohmann::json> exec(const Alias &alias, std::vector<std::string> args);
-
-    /**
-     * Resolve the command line arguments.
-     *
-     * \param args the main arguments
-     */
-    IRCCD_EXPORT std::vector<nlohmann::json> exec(std::vector<std::string> args);
-
-    /**
-     * Run the irccdctl front end.
-     *
-     * \param argc the number of arguments
-     * \param argv the arguments
-     */
-    IRCCD_EXPORT void run(int argc, char **argv);
+    inline void sync(fd_set &in, fd_set &out)
+    {
+        m_client->sync(in, out);
+    }
 };
 
 } // !irccd

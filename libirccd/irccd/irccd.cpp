@@ -53,10 +53,8 @@ void Irccd::post(std::function<void (Irccd &)> ev) noexcept
 
 void Irccd::run()
 {
-    while (m_running) {
+    while (m_running)
         util::poller::poll(250, *m_interruptService, *m_servers, *m_transports);
-        dispatch();
-    }
 }
 
 void Irccd::prepare(fd_set &in, fd_set &out, net::Handle &max)
@@ -67,10 +65,7 @@ void Irccd::prepare(fd_set &in, fd_set &out, net::Handle &max)
 void Irccd::sync(fd_set &in, fd_set &out)
 {
     util::poller::sync(in, out, *m_interruptService, *m_servers, *m_transports);
-}
 
-void Irccd::dispatch()
-{
     /*
      * Make a copy because the events can add other events while we are
      * iterating it. Also lock because the timers may alter these events too.

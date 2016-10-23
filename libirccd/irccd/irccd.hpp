@@ -154,14 +154,9 @@ public:
     IRCCD_EXPORT void post(std::function<void (Irccd &)> ev) noexcept;
 
     /**
-     * Loop forever by calling poll() and dispatch() indefinitely.
+     * Loop forever by calling prepare and sync indefinitely.
      */
     IRCCD_EXPORT void run();
-
-    /**
-     * Dispatch the pending events, usually after calling poll().
-     */
-    IRCCD_EXPORT void dispatch();
 
     /**
      * Request to stop, usually from a signal.

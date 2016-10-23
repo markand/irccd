@@ -19,4 +19,5 @@ irccd_define_library(
         ${HEADERS}
         ${SOURCES}
     LIBRARIES libcommon
+    PUBLIC_INCLUDES ${libirccdctl_SOURCE_DIR}/irccd
 )

@@ -66,6 +66,14 @@ public:
      * \return the command or empty one if not found
      */
     IRCCD_EXPORT std::shared_ptr<Command> find(const std::string &name) const noexcept;
+
+    /**
+     * Add a command or replace existing one.
+     *
+     * \pre command != nullptr
+     * \param command the command name
+     */
+    IRCCD_EXPORT void add(std::shared_ptr<Command> command);
 };
 
 } // !irccd

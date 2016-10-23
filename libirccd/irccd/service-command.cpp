@@ -36,4 +36,16 @@ std::shared_ptr<Command> CommandService::find(const std::string &name) const noe
     return it == m_commands.end() ? nullptr : *it;
 }
 
+void CommandService::add(std::shared_ptr<Command> command)
+{
+    auto it = std::find_if(m_commands.begin(), m_commands.end(), [&] (const auto &cmd) {
+        return cmd->name() == command->name();
+    });
+
+    if (it != m_commands.end())
+        *it = std::move(command);
+    else
+        m_commands.push_back(std::move(command));
+}
+
 } // !irccd
