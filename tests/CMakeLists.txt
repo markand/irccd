@@ -21,6 +21,7 @@ project(tests)
 
 if (WITH_TESTS)
     add_subdirectory(cmd-plugin-config)
+    add_subdirectory(cmd-plugin-info)
     add_subdirectory(cmd-server-cmode)
     add_subdirectory(cmd-server-cnotice)
     add_subdirectory(cmd-server-connect)

@@ -22,6 +22,7 @@
 #include "irccd.hpp"
 #include "plugin.hpp"
 #include "service-plugin.hpp"
+#include "transport.hpp"
 #include "util.hpp"
 
 namespace irccd {
@@ -29,62 +30,20 @@ namespace irccd {
 namespace command {
 
 PluginInfoCommand::PluginInfoCommand()
-    : Command("plugin-info", "Plugins", "Get plugin information")
+    : Command("plugin-info")
 {
 }
 
-std::vector<Command::Arg> PluginInfoCommand::args() const
+void PluginInfoCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {{ "plugin", true }};
-}
+    auto plugin = irccd.plugins().require(util::json::requireIdentifier(args, "plugin"));
 
-std::vector<Command::Property> PluginInfoCommand::properties() const
-{
-    return {{ "plugin", { nlohmann::json::value_t::string }}};
-}
-
-nlohmann::json PluginInfoCommand::request(Irccdctl &, const CommandRequest &args) const
-{
-    return nlohmann::json::object({{ "plugin", args.arg(0) }});
-}
-
-nlohmann::json PluginInfoCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    Command::exec(irccd, request);
-
-    auto plugin = irccd.plugins().require(request.at("plugin").get<std::string>());
-
-    return nlohmann::json::object({
+    client.success("plugin-info", {
         { "author",     plugin->author()    },
         { "license",    plugin->license()   },
         { "summary",    plugin->summary()   },
         { "version",    plugin->version()   }
     });
-}
-
-void PluginInfoCommand::result(Irccdctl &irccdctl, const nlohmann::json &result) const
-{
-    Command::result(irccdctl, result);
-
-    auto it = result.find("status");
-
-    if (!it->is_boolean() || !*it)
-        return;
-
-    auto get = [&] (auto key) -> std::string {
-        auto v = result.find(key);
-
-        if (v == result.end() || !v->is_primitive())
-            return "";
-
-        return v->dump();
-    };
-
-    std::cout << std::boolalpha;
-    std::cout << "Author         : " << get("author") << std::endl;
-    std::cout << "License        : " << get("license") << std::endl;
-    std::cout << "Summary        : " << get("summary") << std::endl;
-    std::cout << "Version        : " << get("version") << std::endl;
 }
 
 } // !command
