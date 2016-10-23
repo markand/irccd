@@ -104,6 +104,13 @@ public:
     IRCCD_EXPORT void add(std::shared_ptr<Plugin> plugin);
 
     /**
+     * Add a loader.
+     *
+     * \param loader the loader
+     */
+    IRCCD_EXPORT void addLoader(std::unique_ptr<PluginLoader> loader);
+
+    /**
      * Configure a plugin.
      *
      * If the plugin is already loaded, its configuration is updated.

@@ -75,6 +75,11 @@ void PluginService::add(std::shared_ptr<Plugin> plugin)
     m_plugins.push_back(std::move(plugin));
 }
 
+void PluginService::addLoader(std::unique_ptr<PluginLoader> loader)
+{
+    m_loaders.push_back(std::move(loader));
+}
+
 void PluginService::setConfig(const std::string &name, PluginConfig config)
 {
     m_config.emplace(name, std::move(config));

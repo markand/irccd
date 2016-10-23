@@ -19,6 +19,7 @@
 #include "cmd-plugin-load.hpp"
 #include "irccd.hpp"
 #include "service-plugin.hpp"
+#include "transport.hpp"
 #include "util.hpp"
 
 namespace irccd {
@@ -26,32 +27,14 @@ namespace irccd {
 namespace command {
 
 PluginLoadCommand::PluginLoadCommand()
-    : Command("plugin-load", "Plugins", "Load a plugin")
+    : Command("plugin-load")
 {
 }
 
-std::vector<Command::Arg> PluginLoadCommand::args() const
+void PluginLoadCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {{ "plugin", true }};
-}
-
-std::vector<Command::Property> PluginLoadCommand::properties() const
-{
-    return {{ "plugin", { nlohmann::json::value_t::string }}};
-}
-
-nlohmann::json PluginLoadCommand::request(Irccdctl &, const CommandRequest &args) const
-{
-    return nlohmann::json::object({{ "plugin", args.arg(0) }});
-}
-
-nlohmann::json PluginLoadCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    Command::exec(irccd, request);
-
-    irccd.plugins().load(request["plugin"]);
-
-    return nlohmann::json::object();
+    irccd.plugins().load(util::json::requireIdentifier(args, "plugin"));
+    client.success("plugin-load");
 }
 
 } // !command
