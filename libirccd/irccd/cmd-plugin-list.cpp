@@ -22,6 +22,7 @@
 #include "irccd.hpp"
 #include "plugin.hpp"
 #include "service-plugin.hpp"
+#include "transport.hpp"
 #include "util.hpp"
 
 namespace irccd {
@@ -33,19 +34,16 @@ PluginListCommand::PluginListCommand()
 {
 }
 
-void PluginListCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void PluginListCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &)
 {
-#if 0
-    auto response = Command::exec(irccd, request);
     auto list = nlohmann::json::array();
 
     for (const auto &plugin : irccd.plugins().list())
         list += plugin->name();
 
-    response.push_back({"list", std::move(list)});
-
-    return response;
-#endif
+    client.success("plugin-list", {
+        { "list", list }
+    });
 }
 
 } // !command
