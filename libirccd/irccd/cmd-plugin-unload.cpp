@@ -19,6 +19,7 @@
 #include "cmd-plugin-unload.hpp"
 #include "irccd.hpp"
 #include "service-plugin.hpp"
+#include "transport.hpp"
 #include "util.hpp"
 
 namespace irccd {
@@ -26,32 +27,14 @@ namespace irccd {
 namespace command {
 
 PluginUnloadCommand::PluginUnloadCommand()
-    : Command("plugin-unload", "Plugins", "Unload a plugin")
+    : Command("plugin-unload")
 {
 }
 
-std::vector<Command::Arg> PluginUnloadCommand::args() const
+void PluginUnloadCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
 {
-    return {{ "plugin", true }};
-}
-
-std::vector<Command::Property> PluginUnloadCommand::properties() const
-{
-    return {{ "plugin", { nlohmann::json::value_t::string }}};
-}
-
-nlohmann::json PluginUnloadCommand::request(Irccdctl &, const CommandRequest &args) const
-{
-    return nlohmann::json::object({{ "plugin", args.arg(0) }});
-}
-
-nlohmann::json PluginUnloadCommand::exec(Irccd &irccd, const nlohmann::json &request) const
-{
-    Command::exec(irccd, request);
-
-    irccd.plugins().unload(request["plugin"].get<std::string>());
-
-    return nlohmann::json::object();
+    irccd.plugins().unload(util::json::requireIdentifier(args, "plugin"));
+    client.success("plugin-unload");
 }
 
 } // !command
