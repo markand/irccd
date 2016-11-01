@@ -37,17 +37,17 @@ The plugin **logger** can be configured to format logs and to use different log 
 The following options are available under the `[plugin.logger]` section:
 
   - **file**: (string) the path to the file where to store logs,
-  - **cmode**: (string) format for channel mode change,
-  - **cnotice**: (string) format for channel notices,
-  - **join**: (string) format when someone joins a channel,
-  - **kick**: (string) format when someone has been kicked,
-  - **me**: (string) format for emote actions,
-  - **message**: (string) format for channel messages,
-  - **mode**: (string) format for user mode change,
-  - **notice**: (string) format on private notices,
-  - **part**: (string) format when someone leaves a channel,
-  - **query**: (string) format on private messages,
-  - **topic**: (string) format when a topic is changed.
+  - **format-cmode**: (string) format for channel mode change,
+  - **format-cnotice**: (string) format for channel notices,
+  - **format-join**: (string) format when someone joins a channel,
+  - **format-kick**: (string) format when someone has been kicked,
+  - **format-me**: (string) format for emote actions,
+  - **format-message**: (string) format for channel messages,
+  - **format-mode**: (string) format for user mode change,
+  - **format-notice**: (string) format on private notices,
+  - **format-part**: (string) format when someone leaves a channel,
+  - **format-query**: (string) format on private messages,
+  - **format-topic**: (string) format when a topic is changed.
 
 ### Keywords supported
 
