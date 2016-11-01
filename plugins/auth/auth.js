@@ -50,7 +50,7 @@ function authenticateQuakenet(server, password)
 	if (!username) {
 		Logger.warning("missing username for quakenet backend on " + server.toString());
 	} else {
-		Logger.log("authenticating to Q on " + server.toString());
+		Logger.info("authenticating to Q on " + server.toString());
 		server.message("Q@CServe.quakenet.org", Util.format("AUTH #{username} #{password}", {
 			"username": username,
 			"password": password
