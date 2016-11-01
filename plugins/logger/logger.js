@@ -83,7 +83,7 @@ function keywords(server, channel, origin, extra)
 
 function write(fmt, args)
 {
-	var path = Util.format(Plugin.config["path"], args);
+	var path = Util.format(Plugin.config["file"], args);
 	var directory = File.dirname(path);
 
 	/* Try to create the directory */
@@ -95,15 +95,22 @@ function write(fmt, args)
 	Logger.debug("opening: " + path);
 
 	var str = Util.format(formats[fmt], args);
-	var file = new File(path, "wa");
+	var file = new File(path, "a");
 
 	file.write(str + "\n");
 }
 
 function onLoad()
 {
-	if (Plugin.config["path"] === undefined)
-		throw new Error("Missing 'path' option");
+	if (Plugin.config["file"] === undefined)
+		throw new Error("Missing 'file' option");
+
+    loadFormats();
+}
+
+function onReload()
+{
+    loadFormats();
 }
 
 function onChannelMode(server, origin, channel, mode, arg)
