@@ -430,13 +430,10 @@ void Server::handlePart(const char *orig, const char **params) noexcept
     onPart(PartEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
 }
 
-void Server::handlePing(const char *, const char **params) noexcept
+void Server::handlePing(const char *, const char **) noexcept
 {
     // Reset the timer to detect disconnection.
     m_timer.reset();
-
-    // Don't forget to respond.
-    send("PONG {}"_format(params[0]));
 }
 
 void Server::handleQuery(const char *orig, const char **params) noexcept
