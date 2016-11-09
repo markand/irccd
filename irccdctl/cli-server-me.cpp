@@ -1,5 +1,5 @@
 /*
- * cmd-server-me.cpp -- implementation of server-me transport command
+ * cli-server-me.cpp -- implementation of irccdctl server-me
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,31 +16,34 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "cmd-server-me.hpp"
-#include "irccd.hpp"
-#include "transport.hpp"
-#include "server.hpp"
-#include "service-server.hpp"
-#include "util.hpp"
+#include "cli-server-me.hpp"
 
 namespace irccd {
 
-namespace command {
+namespace cli {
 
-ServerMeCommand::ServerMeCommand()
-    : Command("server-me")
+ServerMeCli::ServerMeCli()
+    : Cli("server-me",
+          "send an action emote",
+          "server-me server target message",
+          "Send an action emote.\n\n"
+          "Example:\n"
+          "\tirccdctl server-me freenode #staff \"going back soon\"")
 {
 }
 
-void ServerMeCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void ServerMeCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
 {
-    irccd.servers().require(util::json::requireIdentifier(args, "server"))->me(
-        util::json::requireString(args, "target"),
-        util::json::requireString(args, "message")
-    );
-    client.success("server-me");
+    if (args.size() < 3)
+        throw std::runtime_error("server-me requires 3 arguments");
+
+    check(request(irccdctl, {
+        { "server",     args[0]     },
+        { "target",     args[1]     },
+        { "message",    args[2]     }
+    }));
 }
 
-} // !command
+} // !cli
 
 } // !irccd

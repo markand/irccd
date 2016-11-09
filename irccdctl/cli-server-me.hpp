@@ -1,5 +1,5 @@
 /*
- * cmd-server-me.cpp -- implementation of server-me transport command
+ * cli-server-me.hpp -- implementation of irccdctl server-me
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -16,31 +16,38 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "cmd-server-me.hpp"
-#include "irccd.hpp"
-#include "transport.hpp"
-#include "server.hpp"
-#include "service-server.hpp"
-#include "util.hpp"
+#ifndef IRCCDCTL_CLI_SERVER_ME_HPP
+#define IRCCDCTL_CLI_SERVER_ME_HPP
+
+/**
+ * \file cli-server-me.hpp
+ * \brief Implementation of irccdctl server-me.
+ */
+
+#include "cli.hpp"
 
 namespace irccd {
 
-namespace command {
+namespace cli {
 
-ServerMeCommand::ServerMeCommand()
-    : Command("server-me")
-{
-}
+/**
+ * \brief Implementation of irccdctl server-me.
+ */
+class ServerMeCli : public Cli {
+public:
+    /**
+     * Default constructor.
+     */
+    ServerMeCli();
 
-void ServerMeCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
-{
-    irccd.servers().require(util::json::requireIdentifier(args, "server"))->me(
-        util::json::requireString(args, "target"),
-        util::json::requireString(args, "message")
-    );
-    client.success("server-me");
-}
+    /**
+     * \copydoc Command::exec
+     */
+    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+};
 
-} // !command
+} // !cli
 
 } // !irccd
+
+#endif // !_IRCCDCTL_COMMAND_SERVER_ME_H_
