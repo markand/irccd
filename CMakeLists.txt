@@ -91,7 +91,7 @@ add_subdirectory(irccdctl)
 add_subdirectory(contrib)
 
 if (WITH_JS)
-#add_subdirectory(plugins)
+    add_subdirectory(plugins)
 endif ()
 
 # Platform specific.

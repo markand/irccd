@@ -35,6 +35,7 @@
 
 #include <format.h>
 
+#include "cmd-plugin-config.hpp"
 #include "cmd-plugin-reload.hpp"
 #include "cmd-plugin-unload.hpp"
 #include "cmd-server-cmode.hpp"
@@ -297,6 +298,7 @@ int main(int argc, char **argv)
     option::Result options = parse(argc, argv);
 
     instance = std::make_unique<Irccd>();
+    instance->commands().add(std::make_unique<command::PluginConfigCommand>());
     instance->commands().add(std::make_unique<command::PluginReloadCommand>());
     instance->commands().add(std::make_unique<command::PluginUnloadCommand>());
     instance->commands().add(std::make_unique<command::ServerChannelModeCommand>());

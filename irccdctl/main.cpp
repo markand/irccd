@@ -19,6 +19,7 @@
 #include "client.hpp"
 #include "irccdctl.hpp"
 
+#include "cli-plugin-config.hpp"
 #include "cli-plugin-reload.hpp"
 #include "cli-plugin-unload.hpp"
 #include "cli-server-cmode.hpp"
@@ -46,8 +47,8 @@ int main(int, char **)
         Irccdctl ctl(std::make_unique<Client>());
         ctl.client().connect(net::local::create("/tmp/irccd.sock"));
 
-        cli::ServerReconnectCli command;
-        command.exec(ctl, {"local"});
+        cli::PluginConfigCli command;
+        command.exec(ctl, {"ask", "disable_if", "ok"});
     } catch (const std::exception &ex) {
         std::cerr << ex.what() << std::endl;
     }

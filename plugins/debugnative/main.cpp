@@ -18,11 +18,11 @@
 
 #include <iostream>
 
-#include <irccd/irccd.hpp>
-#include <irccd/logger.hpp>
-#include <irccd/plugin-dynlib.hpp>
-#include <irccd/server.hpp>
-#include <irccd/util.hpp>
+#include <irccd.hpp>
+#include <logger.hpp>
+#include <plugin-dynlib.hpp>
+#include <server.hpp>
+#include <util.hpp>
 
 using namespace irccd;
 
