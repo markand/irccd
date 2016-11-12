@@ -43,12 +43,7 @@ public:
     /**
      * \copydoc Module::load
      */
-    IRCCD_EXPORT void load(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
-
-    /**
-     * \copydoc Module::unload
-     */
-    IRCCD_EXPORT void unload(Irccd &irccd, const std::shared_ptr<JsPlugin> &plugin) override;
+    IRCCD_EXPORT void load(Irccd &irccd, irccd::JsPlugin &plugin) override;
 };
 
 /**
@@ -57,7 +52,7 @@ public:
  * \param ctx the context
  * \return the plugin
  */
-std::shared_ptr<JsPlugin> dukx_get_plugin(duk_context *ctx);
+JsPlugin &dukx_get_plugin(duk_context *ctx);
 
 } // !irccd
 

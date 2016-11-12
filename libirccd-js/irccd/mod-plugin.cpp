@@ -187,6 +187,7 @@ duk_ret_t getFormat(duk_context *ctx)
  */
 duk_idx_t info(duk_context *ctx)
 {
+#if 0
     std::shared_ptr<Plugin> plugin;
 
     if (duk_get_top(ctx) >= 1)
@@ -198,17 +199,18 @@ duk_idx_t info(duk_context *ctx)
         return 0;
 
     duk_push_object(ctx);
-    dukx_push_std_string(ctx, plugin->name());
+    dukx_push_std_string(ctx, plugin.name());
     duk_put_prop_string(ctx, -2, "name");
-    dukx_push_std_string(ctx, plugin->author());
+    dukx_push_std_string(ctx, plugin.author());
     duk_put_prop_string(ctx, -2, "author");
-    dukx_push_std_string(ctx, plugin->license());
+    dukx_push_std_string(ctx, plugin.license());
     duk_put_prop_string(ctx, -2, "license");
-    dukx_push_std_string(ctx, plugin->summary());
+    dukx_push_std_string(ctx, plugin.summary());
     duk_put_prop_string(ctx, -2, "summary");
-    dukx_push_std_string(ctx, plugin->version());
+    dukx_push_std_string(ctx, plugin.version());
     duk_put_prop_string(ctx, -2, "version");
 
+#endif
     return 1;
 }
 
@@ -223,9 +225,11 @@ duk_idx_t info(duk_context *ctx)
  */
 duk_idx_t list(duk_context *ctx)
 {
+#if 0
     dukx_push_array(ctx, dukx_get_irccd(ctx).plugins().list(), [] (auto ctx, auto plugin) {
-        dukx_push_std_string(ctx, plugin->name());
+        dukx_push_std_string(ctx, plugin.name());
     });
+#endif
 
     return 1;
 }
@@ -304,50 +308,38 @@ PluginModule::PluginModule() noexcept
 {
 }
 
-void PluginModule::load(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
+void PluginModule::load(Irccd &, JsPlugin &plugin)
 {
-    StackAssert sa(plugin->context());
+    StackAssert sa(plugin.context());
 
-    duk_push_pointer(plugin->context(), new std::shared_ptr<JsPlugin>(plugin));
-    duk_put_global_string(plugin->context(), PluginGlobal);
-    duk_get_global_string(plugin->context(), "Irccd");
-    duk_push_object(plugin->context());
-    duk_put_function_list(plugin->context(), -1, functions);
+    duk_push_pointer(plugin.context(), &plugin);
+    duk_put_global_string(plugin.context(), PluginGlobal);
+    duk_get_global_string(plugin.context(), "Irccd");
+    duk_push_object(plugin.context());
+    duk_put_function_list(plugin.context(), -1, functions);
 
     // 'config' property.
-    duk_push_string(plugin->context(), "config");
-    duk_push_c_function(plugin->context(), getConfig, 0);
-    duk_push_c_function(plugin->context(), setConfig, 1);
-    duk_def_prop(plugin->context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
+    duk_push_string(plugin.context(), "config");
+    duk_push_c_function(plugin.context(), getConfig, 0);
+    duk_push_c_function(plugin.context(), setConfig, 1);
+    duk_def_prop(plugin.context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
 
     // 'format' property.
-    duk_push_string(plugin->context(), "format");
-    duk_push_c_function(plugin->context(), getFormat, 0);
-    duk_push_c_function(plugin->context(), setFormat, 1);
-    duk_def_prop(plugin->context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
+    duk_push_string(plugin.context(), "format");
+    duk_push_c_function(plugin.context(), getFormat, 0);
+    duk_push_c_function(plugin.context(), setFormat, 1);
+    duk_def_prop(plugin.context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
 
-    duk_put_prop_string(plugin->context(), -2, "Plugin");
-    duk_pop(plugin->context());
+    duk_put_prop_string(plugin.context(), -2, "Plugin");
+    duk_pop(plugin.context());
 }
 
-void PluginModule::unload(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
-{
-    StackAssert sa(plugin->context());
-
-    duk_push_global_object(plugin->context());
-    duk_get_prop_string(plugin->context(), -1, PluginGlobal);
-    delete static_cast<std::shared_ptr<JsPlugin> *>(duk_to_pointer(plugin->context(), -1));
-    duk_pop(plugin->context());
-    duk_del_prop_string(plugin->context(), -1, PluginGlobal);
-    duk_pop(plugin->context());
-}
-
-std::shared_ptr<JsPlugin> dukx_get_plugin(duk_context *ctx)
+JsPlugin &dukx_get_plugin(duk_context *ctx)
 {
     StackAssert sa(ctx);
 
     duk_get_global_string(ctx, PluginGlobal);
-    auto plugin = static_cast<std::shared_ptr<JsPlugin> *>(duk_to_pointer(ctx, -1));
+    auto plugin = static_cast<JsPlugin *>(duk_to_pointer(ctx, -1));
     duk_pop(ctx);
 
     return *plugin;

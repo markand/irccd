@@ -24,11 +24,15 @@
  * \brief JavaScript plugins for irccd.
  */
 
+#include <vector>
+
 #include "duktape.hpp"
 #include "path.hpp"
 #include "plugin.hpp"
 
 namespace irccd {
+
+class Module;
 
 /**
  * \brief JavaScript plugins for irccd.
@@ -218,7 +222,17 @@ public:
  * \brief Implementation for searching Javascript plugins.
  */
 class JsPluginLoader : public PluginLoader {
+private:
+    Irccd &m_irccd;
+    std::vector<std::unique_ptr<Module>> m_modules;
+
 public:
+    JsPluginLoader(Irccd &irccd) noexcept;
+
+    ~JsPluginLoader() noexcept;
+
+    void addModule(std::unique_ptr<Module> module);
+
     /**
      * \copydoc PluginLoader::find
      */

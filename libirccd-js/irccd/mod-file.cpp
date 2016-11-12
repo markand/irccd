@@ -632,23 +632,23 @@ FileModule::FileModule() noexcept
 {
 }
 
-void FileModule::load(Irccd &, const std::shared_ptr<JsPlugin> &plugin)
+void FileModule::load(Irccd &, JsPlugin &plugin)
 {
-    StackAssert sa(plugin->context());
+    StackAssert sa(plugin.context());
 
-    duk_get_global_string(plugin->context(), "Irccd");
-    duk_push_c_function(plugin->context(), constructor, 2);
-    duk_put_number_list(plugin->context(), -1, constants);
-    duk_put_function_list(plugin->context(), -1, functions);
-    duk_push_object(plugin->context());
-    duk_put_function_list(plugin->context(), -1, methods);
-    duk_push_c_function(plugin->context(), destructor, 1);
-    duk_set_finalizer(plugin->context(), -2);
-    duk_dup(plugin->context(), -1);
-    duk_put_global_string(plugin->context(), Prototype);
-    duk_put_prop_string(plugin->context(), -2, "prototype");
-    duk_put_prop_string(plugin->context(), -2, "File");
-    duk_pop(plugin->context());
+    duk_get_global_string(plugin.context(), "Irccd");
+    duk_push_c_function(plugin.context(), constructor, 2);
+    duk_put_number_list(plugin.context(), -1, constants);
+    duk_put_function_list(plugin.context(), -1, functions);
+    duk_push_object(plugin.context());
+    duk_put_function_list(plugin.context(), -1, methods);
+    duk_push_c_function(plugin.context(), destructor, 1);
+    duk_set_finalizer(plugin.context(), -2);
+    duk_dup(plugin.context(), -1);
+    duk_put_global_string(plugin.context(), Prototype);
+    duk_put_prop_string(plugin.context(), -2, "prototype");
+    duk_put_prop_string(plugin.context(), -2, "File");
+    duk_pop(plugin.context());
 }
 
 void dukx_new_file(duk_context *ctx, File *fp)

@@ -140,6 +140,10 @@ JsPlugin::JsPlugin(std::string name, std::string path)
     duk_put_global_string(m_context, ConfigProperty);
     duk_push_object(m_context);
     duk_put_global_string(m_context, FormatProperty);
+
+    // Used by many Javascript APIs.
+    duk_push_object(m_context);
+    duk_put_global_string(m_context, "Irccd");
 }
 
 void JsPlugin::onChannelMode(Irccd &, const ChannelModeEvent &event)
@@ -420,6 +424,20 @@ void JsPlugin::onWhois(Irccd &, const WhoisEvent &event)
     call("onWhois", 2);
 }
 
+JsPluginLoader::JsPluginLoader(Irccd &irccd) noexcept
+    : m_irccd(irccd)
+{
+}
+
+JsPluginLoader::~JsPluginLoader() noexcept = default;
+
+void JsPluginLoader::addModule(std::unique_ptr<Module> module)
+{
+    assert(module);
+
+    m_modules.push_back(std::move(module));
+}
+
 std::shared_ptr<Plugin> JsPluginLoader::open(const std::string &id,
                                              const std::string &path) noexcept
 {
@@ -427,7 +445,15 @@ std::shared_ptr<Plugin> JsPluginLoader::open(const std::string &id,
         return nullptr;
 
     try {
-        return std::make_shared<JsPlugin>(id, path);
+        auto plugin = std::make_shared<JsPlugin>(id, path);
+
+        for (const auto &mod : m_modules) {
+            log::debug() << "plugin " << plugin->name() << ": ";
+            log::debug() << "loading " << mod->name() << " Javascript API" << std::endl;
+            mod->load(m_irccd, *plugin);
+        }
+
+        return plugin;
     } catch (const std::exception &ex) {
         log::warning() << "plugin " << id << ": " << ex.what() << std::endl;
     }

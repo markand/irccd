@@ -23,7 +23,9 @@ irccd_define_executable(
     DESCRIPTION "The main irccd daemon."
     SOURCES CMakeLists.txt main.cpp
     INCLUDES ${irccd_SOURCE_DIR}
-    LIBRARIES libirccd
+    LIBRARIES
+        libirccd
+        $<$<BOOL:${WITH_JS}>:libirccd-js>
 )
 
 if (IRCCD_SYSTEM_MAC)

@@ -169,6 +169,7 @@ void TransportClient::prepare(fd_set &in, fd_set &out, net::Handle &max)
 
     switch (m_state) {
     case Greeting:
+        FD_SET(m_socket.handle(), &in);
         FD_SET(m_socket.handle(), &out);
         break;
     case Authenticating:
@@ -195,7 +196,10 @@ void TransportClient::sync(fd_set &in, fd_set &out)
 {
     switch (m_state) {
     case Greeting:
-        send();
+        if (FD_ISSET(m_socket.handle(), &in))
+            recv();
+        else if (FD_ISSET(m_socket.handle(), &out))
+            send();
 
         if (m_output.empty())
             m_state = m_parent.password().empty() ? Ready : Authenticating;

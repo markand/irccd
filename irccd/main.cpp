@@ -35,16 +35,52 @@
 
 #include <format.h>
 
+#include "cmd-plugin-reload.hpp"
+#include "cmd-plugin-unload.hpp"
+#include "cmd-server-cmode.hpp"
+#include "cmd-server-cnotice.hpp"
+#include "cmd-server-connect.hpp"
+#include "cmd-server-disconnect.hpp"
+#include "cmd-server-info.hpp"
+#include "cmd-server-invite.hpp"
+#include "cmd-server-join.hpp"
+#include "cmd-server-kick.hpp"
+#include "cmd-server-list.hpp"
+#include "cmd-server-me.hpp"
+#include "cmd-server-message.hpp"
+#include "cmd-server-mode.hpp"
+#include "cmd-server-nick.hpp"
+#include "cmd-server-notice.hpp"
+#include "cmd-server-part.hpp"
+#include "cmd-server-reconnect.hpp"
+
 #include "logger.hpp"
 #include "options.hpp"
 #include "path.hpp"
+#include "system.hpp"
+#include "config.hpp"
+#include "irccd.hpp"
+
+#include "service-command.hpp"
 #include "service-plugin.hpp"
 #include "service-rule.hpp"
 #include "service-server.hpp"
 #include "service-transport.hpp"
-#include "system.hpp"
-#include "config.hpp"
-#include "irccd.hpp"
+
+#if defined(WITH_JS)
+#   include "mod-directory.hpp"
+#   include "mod-elapsed-timer.hpp"
+#   include "mod-file.hpp"
+#   include "mod-irccd.hpp"
+#   include "mod-logger.hpp"
+#   include "mod-plugin.hpp"
+#   include "mod-server.hpp"
+#   include "mod-system.hpp"
+#   include "mod-timer.hpp"
+#   include "mod-unicode.hpp"
+#   include "mod-util.hpp"
+#   include "plugin-js.hpp"
+#endif
 
 using namespace fmt::literals;
 
@@ -84,6 +120,7 @@ void init(int &argc, char **&argv)
     // Register some signals.
     signal(SIGINT, stop);
     signal(SIGTERM, stop);
+    signal(SIGPIPE, SIG_IGN);
 
 #if defined(SIGQUIT)
     signal(SIGQUIT, stop);
@@ -259,8 +296,44 @@ int main(int argc, char **argv)
 
     option::Result options = parse(argc, argv);
 
-    // Find configuration file.
     instance = std::make_unique<Irccd>();
+    instance->commands().add(std::make_unique<command::PluginReloadCommand>());
+    instance->commands().add(std::make_unique<command::PluginUnloadCommand>());
+    instance->commands().add(std::make_unique<command::ServerChannelModeCommand>());
+    instance->commands().add(std::make_unique<command::ServerChannelNoticeCommand>());
+    instance->commands().add(std::make_unique<command::ServerConnectCommand>());
+    instance->commands().add(std::make_unique<command::ServerDisconnectCommand>());
+    instance->commands().add(std::make_unique<command::ServerInfoCommand>());
+    instance->commands().add(std::make_unique<command::ServerInviteCommand>());
+    instance->commands().add(std::make_unique<command::ServerJoinCommand>());
+    instance->commands().add(std::make_unique<command::ServerKickCommand>());
+    instance->commands().add(std::make_unique<command::ServerListCommand>());
+    instance->commands().add(std::make_unique<command::ServerMeCommand>());
+    instance->commands().add(std::make_unique<command::ServerMessageCommand>());
+    instance->commands().add(std::make_unique<command::ServerModeCommand>());
+    instance->commands().add(std::make_unique<command::ServerNickCommand>());
+    instance->commands().add(std::make_unique<command::ServerNoticeCommand>());
+    instance->commands().add(std::make_unique<command::ServerPartCommand>());
+    instance->commands().add(std::make_unique<command::ServerReconnectCommand>());
+
+    // Load Javascript API and plugin loader.
+#if defined(WITH_JS)
+    auto loader = std::make_unique<JsPluginLoader>(*instance);
+
+    loader->addModule(std::make_unique<DirectoryModule>());
+    loader->addModule(std::make_unique<ElapsedTimerModule>());
+    loader->addModule(std::make_unique<FileModule>());
+    loader->addModule(std::make_unique<IrccdModule>());
+    loader->addModule(std::make_unique<LoggerModule>());
+    loader->addModule(std::make_unique<PluginModule>());
+    loader->addModule(std::make_unique<ServerModule>());
+    loader->addModule(std::make_unique<SystemModule>());
+    loader->addModule(std::make_unique<TimerModule>());
+    loader->addModule(std::make_unique<UnicodeModule>());
+    loader->addModule(std::make_unique<UtilModule>());
+
+    instance->plugins().addLoader(std::move(loader));
+#endif
 
     try {
         load(open(options), options);
@@ -276,6 +349,4 @@ int main(int argc, char **argv)
      */
     instance->run();
     instance = nullptr;
-
-    return 0;
 }

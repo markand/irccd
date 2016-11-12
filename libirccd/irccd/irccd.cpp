@@ -54,7 +54,7 @@ void Irccd::post(std::function<void (Irccd &)> ev) noexcept
 void Irccd::run()
 {
     while (m_running)
-        util::poller::poll(250, *m_interruptService, *m_servers, *m_transports);
+        util::poller::poll(250, *this);
 }
 
 void Irccd::prepare(fd_set &in, fd_set &out, net::Handle &max)
