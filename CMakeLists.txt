@@ -87,7 +87,7 @@ if (WITH_JS)
 endif ()
 
 add_subdirectory(irccd)
-#add_subdirectory(irccdctl)
+add_subdirectory(irccdctl)
 add_subdirectory(contrib)
 
 if (WITH_JS)

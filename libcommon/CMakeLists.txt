@@ -33,7 +33,11 @@ irccd_define_library(
         ${libcommon_SOURCE_DIR}/CMakeLists.txt
         ${HEADERS}
         ${SOURCES}
-    LIBRARIES extern-cppformat extern-json
+    LIBRARIES
+        extern-cppformat
+        extern-json
+        $<$<BOOL:${WITH_SSL}>:OpenSSL::SSL>
+        $<$<BOOL:${WITH_SSL}>:OpenSSL::Crypto>
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${IRCCD_FAKEROOTDIR}/include/irccd>
         $<BUILD_INTERFACE:${libcommon_SOURCE_DIR}/irccd>

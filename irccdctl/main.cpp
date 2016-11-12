@@ -16,28 +16,39 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/irccdctl.hpp>
-#include <irccd/logger.hpp>
-#include <irccd/path.hpp>
-#include <irccd/system.hpp>
+#include "client.hpp"
+#include "irccdctl.hpp"
+
+#include "cli-plugin-reload.hpp"
+#include "cli-plugin-unload.hpp"
+#include "cli-server-cmode.hpp"
+#include "cli-server-cnotice.hpp"
+#include "cli-server-connect.hpp"
+#include "cli-server-disconnect.hpp"
+#include "cli-server-info.hpp"
+#include "cli-server-invite.hpp"
+#include "cli-server-join.hpp"
+#include "cli-server-kick.hpp"
+#include "cli-server-list.hpp"
+#include "cli-server-me.hpp"
+#include "cli-server-message.hpp"
+#include "cli-server-mode.hpp"
+#include "cli-server-nick.hpp"
+#include "cli-server-notice.hpp"
+#include "cli-server-part.hpp"
+#include "cli-server-reconnect.hpp"
 
 using namespace irccd;
 
-int main(int argc, char **argv)
+int main(int, char **)
 {
-    // TODO: move to Application
-    sys::setProgramName("irccdctl");
-    path::setApplicationPath(argv[0]);
-    log::setVerbose(false);
-
     try {
-        Irccdctl ctl;
+        Irccdctl ctl(std::make_unique<Client>());
+        ctl.client().connect(net::local::create("/tmp/irccd.sock"));
 
-        ctl.run(--argc, ++argv);
+        cli::ServerReconnectCli command;
+        command.exec(ctl, {"local"});
     } catch (const std::exception &ex) {
-        log::warning() << "error: " << ex.what() << std::endl;
-        std::exit(1);
+        std::cerr << ex.what() << std::endl;
     }
-
-    return 0;
 }

@@ -598,6 +598,24 @@ inline std::string getString(const nlohmann::json &json, const std::string &key,
     return toString(get(json, key), def);
 }
 
+/**
+ * Print the value as human readable.
+ *
+ * \param value the value
+ * \return the string
+ */
+inline std::string pretty(const nlohmann::json &value)
+{
+    switch (value.type()) {
+    case nlohmann::json::value_t::boolean:
+        return value.get<bool>() ? "true" : "false";
+    case nlohmann::json::value_t::string:
+        return value.get<std::string>();
+    default:
+        return value.dump();
+    }
+}
+
 } // !json
 
 /**
