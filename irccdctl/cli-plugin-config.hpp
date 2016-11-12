@@ -31,6 +31,11 @@ namespace irccd {
 namespace cli {
 
 class PluginConfigCli : public Cli {
+private:
+    void set(Irccdctl &, const std::vector<std::string> &);
+    void get(Irccdctl &, const std::vector<std::string> &);
+    void getall(Irccdctl &, const std::vector<std::string> &);
+
 public:
     /**
      * Default constructor.
