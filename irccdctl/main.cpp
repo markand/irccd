@@ -18,7 +18,8 @@
 
 #include "client.hpp"
 #include "irccdctl.hpp"
-
+#include "cli.hpp"
+#if 0
 #include "cli-plugin-config.hpp"
 #include "cli-plugin-reload.hpp"
 #include "cli-plugin-unload.hpp"
@@ -38,6 +39,7 @@
 #include "cli-server-notice.hpp"
 #include "cli-server-part.hpp"
 #include "cli-server-reconnect.hpp"
+#endif
 
 using namespace irccd;
 
