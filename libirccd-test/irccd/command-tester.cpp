@@ -19,9 +19,7 @@
 #include "command-tester.hpp"
 #include "client.hpp"
 #include "logger.hpp"
-#include "service-command.hpp"
-#include "service-server.hpp"
-#include "service-transport.hpp"
+#include "service.hpp"
 #include "transport.hpp"
 
 namespace irccd {

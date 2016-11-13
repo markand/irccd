@@ -18,7 +18,7 @@
 
 #include "irccd.hpp"
 #include "plugin-js.hpp"
-#include "service-plugin.hpp"
+#include "service.hpp"
 #include "mod-irccd.hpp"
 #include "mod-plugin.hpp"
 

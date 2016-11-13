@@ -28,7 +28,7 @@
 #include "plugin.hpp"
 #include "rule.hpp"
 #include "server.hpp"
-#include "service-plugin.hpp"
+#include "service.hpp"
 #include "sysconfig.hpp"
 #include "transport.hpp"
 #include "util.hpp"

@@ -25,7 +25,7 @@
 #include "mod-server.hpp"
 #include "plugin-js.hpp"
 #include "server.hpp"
-#include "service-server.hpp"
+#include "service.hpp"
 
 namespace irccd {
 

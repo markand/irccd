@@ -39,15 +39,10 @@
 #include "logger.hpp"
 #include "options.hpp"
 #include "path.hpp"
+#include "service.hpp"
 #include "system.hpp"
 #include "config.hpp"
 #include "irccd.hpp"
-
-#include "service-command.hpp"
-#include "service-plugin.hpp"
-#include "service-rule.hpp"
-#include "service-server.hpp"
-#include "service-transport.hpp"
 
 #if defined(WITH_JS)
 #   include "mod-directory.hpp"

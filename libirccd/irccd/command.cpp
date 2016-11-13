@@ -18,8 +18,7 @@
 
 #include "command.hpp"
 #include "irccd.hpp"
-#include "service-plugin.hpp"
-#include "service-server.hpp"
+#include "service.hpp"
 #include "transport.hpp"
 #include "util.hpp"
 

@@ -19,7 +19,7 @@
 #include <command.hpp>
 #include <command-tester.hpp>
 #include <server-tester.hpp>
-#include <service-plugin.hpp>
+#include <service.hpp>
 
 using namespace irccd;
 using namespace irccd::command;

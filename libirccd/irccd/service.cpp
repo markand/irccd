@@ -1,5 +1,5 @@
 /*
- * service-server.cpp -- manage IRC servers
+ * service.cpp -- irccd services
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *
@@ -17,24 +17,317 @@
  */
 
 #include <algorithm>
+#include <array>
+#include <functional>
+#include <stdexcept>
 
-#include <json.hpp>
 #include <format.h>
 
 #include "irccd.hpp"
 #include "logger.hpp"
-#include "plugin.hpp"
-#include "server.hpp"
-#include "service-plugin.hpp"
-#include "service-rule.hpp"
-#include "service-server.hpp"
-#include "service-transport.hpp"
-#include "util.hpp"
+#include "service.hpp"
+#include "transport.hpp"
 
 using namespace fmt::literals;
-using namespace nlohmann;
 
 namespace irccd {
+
+/*
+ * CommandService.
+ * ------------------------------------------------------------------
+ */
+
+bool CommandService::contains(const std::string &name) const noexcept
+{
+    return find(name) != nullptr;
+}
+
+std::shared_ptr<Command> CommandService::find(const std::string &name) const noexcept
+{
+    auto it = std::find_if(m_commands.begin(), m_commands.end(), [&] (const auto &cmd) {
+        return cmd->name() == name;
+    });
+
+    return it == m_commands.end() ? nullptr : *it;
+}
+
+void CommandService::add(std::shared_ptr<Command> command)
+{
+    auto it = std::find_if(m_commands.begin(), m_commands.end(), [&] (const auto &cmd) {
+        return cmd->name() == command->name();
+    });
+
+    if (it != m_commands.end())
+        *it = std::move(command);
+    else
+        m_commands.push_back(std::move(command));
+}
+
+/*
+ * InterruptService.
+ * ------------------------------------------------------------------
+ */
+
+InterruptService::InterruptService()
+    : m_in(AF_INET, 0)
+    , m_out(AF_INET, 0)
+{
+    // Bind a socket to any port.
+    m_in.set(net::option::SockReuseAddress(true));
+    m_in.bind(net::ipv4::any(0));
+    m_in.listen(1);
+
+    // Do the socket pair.
+    m_out.connect(net::ipv4::pton("127.0.0.1", net::ipv4::port(m_in.getsockname())));
+    m_in = m_in.accept();
+    m_out.set(net::option::SockBlockMode(false));
+}
+
+void InterruptService::prepare(fd_set &in, fd_set &, net::Handle &max)
+{
+    FD_SET(m_in.handle(), &in);
+
+    if (m_in.handle() > max)
+        max = m_in.handle();
+}
+
+void InterruptService::sync(fd_set &in, fd_set &)
+{
+    if (FD_ISSET(m_in.handle(), &in)) {
+        static std::array<char, 32> tmp;
+
+        try {
+            log::debug("irccd: interrupt service recv");
+            m_in.recv(tmp.data(), 32);
+        } catch (const std::exception &ex) {
+            log::warning() << "irccd: interrupt service error: " << ex.what() << std::endl;
+        }
+    }
+}
+
+void InterruptService::interrupt() noexcept
+{
+    try {
+        static char byte;
+
+        log::debug("irccd: interrupt service send");
+        m_out.send(&byte, 1);
+    } catch (const std::exception &ex) {
+        log::warning() << "irccd: interrupt service error: " << ex.what() << std::endl;
+    }
+}
+
+/*
+ * PluginService.
+ * ------------------------------------------------------------------
+ */
+
+PluginService::PluginService(Irccd &irccd) noexcept
+    : m_irccd(irccd)
+{
+}
+
+PluginService::~PluginService()
+{
+    for (const auto &plugin : m_plugins)
+        plugin->onUnload(m_irccd);
+}
+
+bool PluginService::has(const std::string &name) const noexcept
+{
+    return std::count_if(m_plugins.cbegin(), m_plugins.cend(), [&] (const auto &plugin) {
+        return plugin->name() == name;
+    }) > 0;
+}
+
+std::shared_ptr<Plugin> PluginService::get(const std::string &name) const noexcept
+{
+    auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (const auto &plugin) {
+        return plugin->name() == name;
+    });
+
+    if (it == m_plugins.end())
+        return nullptr;
+
+    return *it;
+}
+
+std::shared_ptr<Plugin> PluginService::require(const std::string &name) const
+{
+    auto plugin = get(name);
+
+    if (!plugin)
+        throw std::invalid_argument("plugin {} not found"_format(name));
+
+    return plugin;
+}
+
+void PluginService::add(std::shared_ptr<Plugin> plugin)
+{
+    m_plugins.push_back(std::move(plugin));
+}
+
+void PluginService::addLoader(std::unique_ptr<PluginLoader> loader)
+{
+    m_loaders.push_back(std::move(loader));
+}
+
+void PluginService::setConfig(const std::string &name, PluginConfig config)
+{
+    m_config.emplace(name, std::move(config));
+}
+
+PluginConfig PluginService::config(const std::string &name) const
+{
+    auto it = m_config.find(name);
+
+    if (it != m_config.end())
+        return it->second;
+
+    return PluginConfig();
+}
+
+void PluginService::setFormats(const std::string &name, PluginFormats formats)
+{
+    m_formats.emplace(name, std::move(formats));
+}
+
+PluginFormats PluginService::formats(const std::string &name) const
+{
+    auto it = m_formats.find(name);
+
+    if (it != m_formats.end())
+        return it->second;
+
+    return PluginFormats();
+}
+
+std::shared_ptr<Plugin> PluginService::open(const std::string &id,
+                                            const std::string &path)
+{
+    for (const auto &loader : m_loaders) {
+        auto plugin = loader->open(id, path);
+
+        if (plugin)
+            return plugin;
+    }
+
+    return nullptr;
+}
+
+std::shared_ptr<Plugin> PluginService::find(const std::string &id)
+{
+    for (const auto &loader : m_loaders) {
+        auto plugin = loader->find(id);
+
+        if (plugin)
+            return plugin;
+    }
+
+    return nullptr;
+}
+
+void PluginService::load(std::string name, std::string path)
+{
+    if (has(name))
+        return;
+
+    try {
+        std::shared_ptr<Plugin> plugin;
+
+        if (path.empty())
+            plugin = find(name);
+        else
+            plugin = open(name, std::move(path));
+
+        if (plugin) {
+            plugin->setConfig(m_config[name]);
+            plugin->setFormats(m_formats[name]);
+            plugin->onLoad(m_irccd);
+
+            add(std::move(plugin));
+        }
+    } catch (const std::exception &ex) {
+        log::warning("plugin {}: {}"_format(name, ex.what()));
+    }
+}
+
+void PluginService::reload(const std::string &name)
+{
+    auto plugin = get(name);
+
+    if (plugin)
+        plugin->onReload(m_irccd);
+}
+
+void PluginService::unload(const std::string &name)
+{
+    auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (const auto &plugin) {
+        return plugin->name() == name;
+    });
+
+    if (it != m_plugins.end()) {
+        (*it)->onUnload(m_irccd);
+        m_plugins.erase(it);
+    }
+}
+
+/*
+ * RuleService.
+ * ------------------------------------------------------------------
+ */
+
+void RuleService::add(Rule rule)
+{
+    m_rules.push_back(std::move(rule));
+}
+
+void RuleService::insert(Rule rule, unsigned position)
+{
+    assert(position <= m_rules.size());
+
+    m_rules.insert(m_rules.begin() + position, std::move(rule));
+}
+
+void RuleService::remove(unsigned position)
+{
+    assert(position < m_rules.size());
+
+    m_rules.erase(m_rules.begin() + position);
+}
+
+bool RuleService::solve(const std::string &server,
+                        const std::string &channel,
+                        const std::string &origin,
+                        const std::string &plugin,
+                        const std::string &event) noexcept
+{
+    bool result = true;
+
+    log::debug("rule: solving for server={}, channel={}, origin={}, plugin={}, event={}"_format(server, channel,
+           origin, plugin, event));
+
+    int i = 0;
+    for (const Rule &rule : m_rules) {
+        log::debug() << "  candidate " << i++ << ":\n"
+                 << "    servers: " << util::join(rule.servers().begin(), rule.servers().end()) << "\n"
+                 << "    channels: " << util::join(rule.channels().begin(), rule.channels().end()) << "\n"
+                 << "    origins: " << util::join(rule.origins().begin(), rule.origins().end()) << "\n"
+                 << "    plugins: " << util::join(rule.plugins().begin(), rule.plugins().end()) << "\n"
+                 << "    events: " << util::join(rule.events().begin(), rule.events().end()) << "\n"
+                 << "    action: " << ((rule.action() == RuleAction::Accept) ? "accept" : "drop") << std::endl;
+
+        if (rule.match(server, channel, origin, plugin, event))
+            result = rule.action() == RuleAction::Accept;
+    }
+
+    return result;
+}
+
+/*
+ * ServerService.
+ * ------------------------------------------------------------------
+ */
 
 class EventHandler {
 public:
@@ -300,7 +593,7 @@ void ServerService::handleNames(const NamesEvent &ev)
     log::debug() << "  channel: " << ev.channel << "\n";
     log::debug() << "  names: " << util::join(ev.names.begin(), ev.names.end(), ", ") << std::endl;
 
-    auto names = json::array();
+    auto names = nlohmann::json::array();
 
     for (const auto &v : ev.names)
         names.push_back(v);
@@ -581,6 +874,126 @@ void ServerService::clear() noexcept
         server->disconnect();
 
     m_servers.clear();
+}
+
+/*
+ * TransportService.
+ * ------------------------------------------------------------------
+ */
+
+void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const nlohmann::json &object)
+{
+    assert(object.is_object());
+
+    m_irccd.post([=] (Irccd &) {
+        // 0. Be sure the object still exists.
+        auto tc = ptr.lock();
+
+        if (!tc)
+            return;
+
+        auto name = object.find("command");
+        if (name == object.end() || !name->is_string()) {
+            // TODO: send error.
+            log::warning("invalid command object");
+            return;
+        }
+
+        auto cmd = m_irccd.commands().find(*name);
+
+        if (!cmd)
+            tc->error(*name, "command does not exist");
+        else {
+            try {
+                cmd->exec(m_irccd, *tc, object);
+            } catch (const std::exception &ex) {
+                tc->error(cmd->name(), ex.what());
+            }
+        }
+    });
+}
+
+void TransportService::handleDie(std::weak_ptr<TransportClient> ptr)
+{
+    m_irccd.post([=] (Irccd &) {
+        log::info("transport: client disconnected");
+
+        auto tc = ptr.lock();
+
+        if (tc)
+            m_clients.erase(std::find(m_clients.begin(), m_clients.end(), tc));
+    });
+}
+
+TransportService::TransportService(Irccd &irccd) noexcept
+    : m_irccd(irccd)
+{
+}
+
+void TransportService::prepare(fd_set &in, fd_set &out, net::Handle &max)
+{
+    // Add transport servers.
+    for (const auto &transport : m_servers) {
+        FD_SET(transport->handle(), &in);
+
+        if (transport->handle() > max)
+            max = transport->handle();
+    }
+
+    // Transport clients.
+    for (const auto &client : m_clients)
+        client->prepare(in, out, max);
+}
+
+void TransportService::sync(fd_set &in, fd_set &out)
+{
+    using namespace std::placeholders;
+
+    // Transport clients.
+    for (const auto &client : m_clients) {
+        try {
+            client->sync(in, out);
+        } catch (const std::exception &ex) {
+            log::info() << "transport: client disconnected: " << ex.what() << std::endl;
+            handleDie(client);
+        }
+    }
+
+    // Transport servers.
+    for (const auto &transport : m_servers) {
+        if (!FD_ISSET(transport->handle(), &in))
+            continue;
+
+        log::debug("transport: new client connected");
+
+        std::shared_ptr<TransportClient> client = transport->accept();
+        std::weak_ptr<TransportClient> ptr(client);
+
+        try {
+            // Connect signals.
+            client->onCommand.connect(std::bind(&TransportService::handleCommand, this, ptr, _1));
+            client->onDie.connect(std::bind(&TransportService::handleDie, this, ptr));
+
+            // Register it.
+            m_clients.push_back(std::move(client));
+        } catch (const std::exception &ex) {
+            log::info() << "transport: client disconnected: " << ex.what() << std::endl;
+        }
+    }
+}
+
+void TransportService::add(std::shared_ptr<TransportServer> ts)
+{
+    m_servers.push_back(std::move(ts));
+}
+
+void TransportService::broadcast(const nlohmann::json &json)
+{
+    assert(json.is_object());
+
+    for (const auto &client : m_clients)
+        if (client->state() == TransportClient::Ready)
+            client->send(json);
 }
 
 } // !irccd

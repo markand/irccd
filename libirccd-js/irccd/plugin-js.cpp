@@ -30,7 +30,7 @@
 #include "mod-plugin.hpp"
 #include "mod-server.hpp"
 #include "plugin-js.hpp"
-#include "service-plugin.hpp"
+#include "service.hpp"
 #include "timer.hpp"
 
 namespace irccd {

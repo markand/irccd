@@ -19,12 +19,7 @@
 #include "irccd.hpp"
 #include "logger.hpp"
 #include "net.hpp"
-#include "service-command.hpp"
-#include "service-interrupt.hpp"
-#include "service-plugin.hpp"
-#include "service-rule.hpp"
-#include "service-server.hpp"
-#include "service-transport.hpp"
+#include "service.hpp"
 #include "util.hpp"
 
 using namespace std;

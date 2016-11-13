@@ -10,12 +10,7 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/plugin.hpp
     ${libirccd_SOURCE_DIR}/irccd/rule.hpp
     ${libirccd_SOURCE_DIR}/irccd/server.hpp
-    ${libirccd_SOURCE_DIR}/irccd/service-command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/service-interrupt.hpp
-    ${libirccd_SOURCE_DIR}/irccd/service-plugin.hpp
-    ${libirccd_SOURCE_DIR}/irccd/service-rule.hpp
-    ${libirccd_SOURCE_DIR}/irccd/service-server.hpp
-    ${libirccd_SOURCE_DIR}/irccd/service-transport.hpp
+    ${libirccd_SOURCE_DIR}/irccd/service.hpp
     ${libirccd_SOURCE_DIR}/irccd/transport.hpp
 )
 
@@ -27,12 +22,7 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/plugin-dynlib.cpp
     ${libirccd_SOURCE_DIR}/irccd/rule.cpp
     ${libirccd_SOURCE_DIR}/irccd/server.cpp
-    ${libirccd_SOURCE_DIR}/irccd/service-command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/service-interrupt.cpp
-    ${libirccd_SOURCE_DIR}/irccd/service-plugin.cpp
-    ${libirccd_SOURCE_DIR}/irccd/service-rule.cpp
-    ${libirccd_SOURCE_DIR}/irccd/service-server.cpp
-    ${libirccd_SOURCE_DIR}/irccd/service-transport.cpp
+    ${libirccd_SOURCE_DIR}/irccd/service.cpp
     ${libirccd_SOURCE_DIR}/irccd/transport.cpp
 )
 
