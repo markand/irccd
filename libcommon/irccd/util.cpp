@@ -374,8 +374,12 @@ MessagePair parseMessage(std::string message, const std::string &cc, const std::
     return MessagePair(result, ((iscommand) ? MessageType::Command : MessageType::Message));
 }
 
-bool isBoolean(const std::string &value) noexcept
+bool isBoolean(std::string value) noexcept
 {
+    std::transform(value.begin(), value.end(), value.begin(), [] (auto c) {
+        return toupper(c);
+    });
+
     return value == "1" || value == "YES" || value == "TRUE" || value == "ON";
 }
 

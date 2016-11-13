@@ -253,7 +253,7 @@ inline bool isIdentifierValid(const std::string &name)
  * \return true if is boolean
  * \note this function is case-insensitive
  */
-IRCCD_EXPORT bool isBoolean(const std::string &value) noexcept;
+IRCCD_EXPORT bool isBoolean(std::string value) noexcept;
 
 /**
  * Check if the string is an integer.
