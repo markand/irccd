@@ -35,26 +35,7 @@
 
 #include <format.h>
 
-#include "cmd-plugin-config.hpp"
-#include "cmd-plugin-reload.hpp"
-#include "cmd-plugin-unload.hpp"
-#include "cmd-server-cmode.hpp"
-#include "cmd-server-cnotice.hpp"
-#include "cmd-server-connect.hpp"
-#include "cmd-server-disconnect.hpp"
-#include "cmd-server-info.hpp"
-#include "cmd-server-invite.hpp"
-#include "cmd-server-join.hpp"
-#include "cmd-server-kick.hpp"
-#include "cmd-server-list.hpp"
-#include "cmd-server-me.hpp"
-#include "cmd-server-message.hpp"
-#include "cmd-server-mode.hpp"
-#include "cmd-server-nick.hpp"
-#include "cmd-server-notice.hpp"
-#include "cmd-server-part.hpp"
-#include "cmd-server-reconnect.hpp"
-
+#include "command.hpp"
 #include "logger.hpp"
 #include "options.hpp"
 #include "path.hpp"

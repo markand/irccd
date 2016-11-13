@@ -19,27 +19,6 @@
 #include "client.hpp"
 #include "irccdctl.hpp"
 #include "cli.hpp"
-#if 0
-#include "cli-plugin-config.hpp"
-#include "cli-plugin-reload.hpp"
-#include "cli-plugin-unload.hpp"
-#include "cli-server-cmode.hpp"
-#include "cli-server-cnotice.hpp"
-#include "cli-server-connect.hpp"
-#include "cli-server-disconnect.hpp"
-#include "cli-server-info.hpp"
-#include "cli-server-invite.hpp"
-#include "cli-server-join.hpp"
-#include "cli-server-kick.hpp"
-#include "cli-server-list.hpp"
-#include "cli-server-me.hpp"
-#include "cli-server-message.hpp"
-#include "cli-server-mode.hpp"
-#include "cli-server-nick.hpp"
-#include "cli-server-notice.hpp"
-#include "cli-server-part.hpp"
-#include "cli-server-reconnect.hpp"
-#endif
 
 using namespace irccd;
 

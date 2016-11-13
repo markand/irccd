@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cmd-plugin-info.hpp>
+#include <command.hpp>
 #include <command-tester.hpp>
 #include <server-tester.hpp>
 #include <service-plugin.hpp>

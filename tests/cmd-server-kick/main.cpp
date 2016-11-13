@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cmd-server-kick.hpp>
+#include <command.hpp>
 #include <command-tester.hpp>
 #include <server-tester.hpp>
 
