@@ -71,8 +71,6 @@ nlohmann::json Cli::request(Irccdctl &irccdctl, nlohmann::json args)
 
     irccdctl.client().onMessage.disconnect(id);
 
-    std::cout << msg << std::endl;
-
     if (!msg.is_object())
         throw std::runtime_error("no response received");
     if (util::json::getString(msg, "command") != m_name)

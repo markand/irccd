@@ -275,6 +275,8 @@ int main(int argc, char **argv)
 
     instance = std::make_unique<Irccd>();
     instance->commands().add(std::make_unique<command::PluginConfigCommand>());
+    instance->commands().add(std::make_unique<command::PluginInfoCommand>());
+    instance->commands().add(std::make_unique<command::PluginListCommand>());
     instance->commands().add(std::make_unique<command::PluginReloadCommand>());
     instance->commands().add(std::make_unique<command::PluginUnloadCommand>());
     instance->commands().add(std::make_unique<command::ServerChannelModeCommand>());
