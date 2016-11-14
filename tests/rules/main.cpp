@@ -19,7 +19,7 @@
 #include <gtest/gtest.h>
 
 #include <irccd/rule.hpp>
-#include <irccd/service-rule.hpp>
+#include <irccd/service.hpp>
 
 namespace irccd {
 

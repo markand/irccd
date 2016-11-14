@@ -300,10 +300,10 @@ int main(int argc, char **argv)
 #if defined(WITH_JS)
     auto loader = std::make_unique<JsPluginLoader>(*instance);
 
+    loader->addModule(std::make_unique<IrccdModule>());
     loader->addModule(std::make_unique<DirectoryModule>());
     loader->addModule(std::make_unique<ElapsedTimerModule>());
     loader->addModule(std::make_unique<FileModule>());
-    loader->addModule(std::make_unique<IrccdModule>());
     loader->addModule(std::make_unique<LoggerModule>());
     loader->addModule(std::make_unique<PluginModule>());
     loader->addModule(std::make_unique<ServerModule>());

@@ -19,5 +19,5 @@
 irccd_define_test(
     NAME js-logger
     SOURCES main.cpp
-    LIBRARIES libirccd
+    LIBRARIES libirccd-js
 )

@@ -26,7 +26,7 @@
 #include <irccd/mod-irccd.hpp>
 #include <irccd/mod-unicode.hpp>
 #include <irccd/plugin-js.hpp>
-#include <irccd/service-module.hpp>
+#include <irccd/service.hpp>
 #include <irccd/system.hpp>
 
 using namespace irccd;
@@ -39,8 +39,8 @@ protected:
     TestJsUnicode()
         : m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
     {
-        m_irccd.modules().get("Irccd")->load(m_irccd, m_plugin);
-        m_irccd.modules().get("Irccd.Unicode")->load(m_irccd, m_plugin);
+        IrccdModule().load(m_irccd, *m_plugin);
+        UnicodeModule().load(m_irccd, *m_plugin);
     }
 };
 

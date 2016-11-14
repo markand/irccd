@@ -21,7 +21,7 @@
 #include <irccd/irccd.hpp>
 #include <irccd/mod-irccd.hpp>
 #include <irccd/plugin-js.hpp>
-#include <irccd/service-module.hpp>
+#include <irccd/service.hpp>
 #include <irccd/sysconfig.hpp>
 
 using namespace irccd;
@@ -34,7 +34,7 @@ protected:
     TestJsIrccd()
         : m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
     {
-        m_irccd.modules().get("Irccd")->load(m_irccd, m_plugin);
+        IrccdModule().load(m_irccd, *m_plugin);
     }
 };
 

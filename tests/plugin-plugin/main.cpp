@@ -23,7 +23,10 @@
 #include <irccd/irccd.hpp>
 #include <irccd/logger.hpp>
 #include <irccd/server.hpp>
-#include <irccd/service-plugin.hpp>
+#include <irccd/service.hpp>
+#include <irccd/path.hpp>
+
+#include "plugin-tester.hpp"
 
 using namespace fmt::literals;
 
@@ -62,28 +65,24 @@ public:
     }
 };
 
-class PluginTest : public testing::Test {
+class PluginTest : public PluginTester {
 protected:
-    Irccd m_irccd;
-    PluginService &m_ps;
-
     std::shared_ptr<ServerTest> m_server;
     std::shared_ptr<Plugin> m_plugin;
 
 public:
     PluginTest()
-        : m_ps(m_irccd.plugins())
-        , m_server(std::make_shared<ServerTest>())
+        : m_server(std::make_shared<ServerTest>())
     {
-        m_ps.add(std::make_shared<FakePlugin>());
-        m_ps.setFormats("plugin", {
+        m_irccd.plugins().add(std::make_shared<FakePlugin>());
+        m_irccd.plugins().setFormats("plugin", {
             { "usage", "usage=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}" },
             { "info", "info=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{author}:#{license}:#{name}:#{summary}:#{version}" },
             { "not-found", "not-found=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{name}" },
             { "too-long", "too-long=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}" }
         });
-        m_ps.load("plugin", PLUGINDIR "/plugin.js");
-        m_plugin = m_ps.require("plugin");
+        m_irccd.plugins().load("plugin", PLUGINDIR "/plugin.js");
+        m_plugin = m_irccd.plugins().require("plugin");
     }
 };
 
@@ -116,7 +115,7 @@ TEST_F(PluginTest, formatNotFound)
 TEST_F(PluginTest, formatTooLong)
 {
     for (int i = 0; i < 100; ++i)
-        m_ps.add(std::make_shared<Plugin>("plugin-n-{}"_format(i), ""));
+        m_irccd.plugins().add(std::make_shared<Plugin>("plugin-n-{}"_format(i), ""));
 
     m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#staff", "list"});
 

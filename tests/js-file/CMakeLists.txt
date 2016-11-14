@@ -19,7 +19,7 @@
 irccd_define_test(
     NAME js-file
     SOURCES main.cpp
-    LIBRARIES libirccd
+    LIBRARIES libirccd-js
 )
 
 #

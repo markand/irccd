@@ -19,7 +19,6 @@
 #include <gtest/gtest.h>
 
 #include <irccd/sysconfig.hpp>
-
 #include <irccd/logger.hpp>
 #include <irccd/path.hpp>
 

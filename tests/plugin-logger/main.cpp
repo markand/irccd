@@ -24,7 +24,10 @@
 #include <irccd/irccd.hpp>
 #include <irccd/logger.hpp>
 #include <irccd/server.hpp>
-#include <irccd/service-plugin.hpp>
+#include <irccd/service.hpp>
+#include <irccd/path.hpp>
+
+#include "plugin-tester.hpp"
 
 using namespace irccd;
 
@@ -36,11 +39,8 @@ public:
     }
 };
 
-class LoggerTest : public testing::Test {
+class LoggerTest : public PluginTester {
 protected:
-    Irccd m_irccd;
-    PluginService &m_ps;
-
     std::shared_ptr<ServerTest> m_server;
     std::shared_ptr<Plugin> m_plugin;
 
@@ -53,12 +53,11 @@ protected:
 
 public:
     LoggerTest()
-        : m_ps(m_irccd.plugins())
-        , m_server(std::make_shared<ServerTest>())
+        : m_server(std::make_shared<ServerTest>())
     {
         remove(BINARYDIR "/log.txt");
 
-        m_ps.setFormats("logger", {
+        m_irccd.plugins().setFormats("logger", {
             { "cmode", "cmode=#{server}:#{channel}:#{origin}:#{nickname}:#{mode}:#{arg}" },
             { "cnotice", "cnotice=#{server}:#{channel}:#{origin}:#{nickname}:#{message}" },
             { "join", "join=#{server}:#{channel}:#{origin}:#{nickname}" },
@@ -78,9 +77,9 @@ public:
         if (config.count("path") == 0)
             config.emplace("path", BINARYDIR "/log.txt");
 
-        m_ps.setConfig("logger", config);
-        m_ps.load("logger", PLUGINDIR "/logger.js");
-        m_plugin = m_ps.require("logger");
+        m_irccd.plugins().setConfig("logger", config);
+        m_irccd.plugins().load("logger", PLUGINDIR "/logger.js");
+        m_plugin = m_irccd.plugins().require("logger");
     }
 };
 

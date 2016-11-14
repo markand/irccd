@@ -20,7 +20,10 @@
 
 #include <irccd/irccd.hpp>
 #include <irccd/server.hpp>
-#include <irccd/service-plugin.hpp>
+#include <irccd/service.hpp>
+#include <irccd/path.hpp>
+
+#include "plugin-tester.hpp"
 
 using namespace irccd;
 
@@ -45,20 +48,16 @@ public:
     }
 };
 
-class HangmanTest : public testing::Test {
+class HangmanTest : public PluginTester {
 protected:
-    Irccd m_irccd;
-    PluginService &m_ps;
-
     std::shared_ptr<ServerTest> m_server;
     std::shared_ptr<Plugin> m_plugin;
 
 public:
     HangmanTest()
-        : m_ps(m_irccd.plugins())
-        , m_server(std::make_shared<ServerTest>())
+        : m_server(std::make_shared<ServerTest>())
     {
-        m_ps.setFormats("hangman", {
+        m_irccd.plugins().setFormats("hangman", {
             { "asked", "asked=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{letter}" },
             { "dead", "dead=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{word}" },
             { "found", "found=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{word}" },
@@ -76,9 +75,9 @@ public:
         if (config.count("file") == 0)
             config.emplace("file", SOURCEDIR "/words.conf");
 
-        m_ps.setConfig("hangman", config);
-        m_ps.load("hangman", PLUGINDIR "/hangman.js");
-        m_plugin = m_ps.require("hangman");
+        m_irccd.plugins().setConfig("hangman", config);
+        m_irccd.plugins().load("hangman", PLUGINDIR "/hangman.js");
+        m_plugin = m_irccd.plugins().require("hangman");
     }
 };
 

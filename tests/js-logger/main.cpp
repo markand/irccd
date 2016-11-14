@@ -22,8 +22,9 @@
 #include <irccd/logger.hpp>
 #include <irccd/mod-irccd.hpp>
 #include <irccd/mod-logger.hpp>
+#include <irccd/mod-plugin.hpp>
 #include <irccd/plugin-js.hpp>
-#include <irccd/service-module.hpp>
+#include <irccd/service.hpp>
 #include <irccd/sysconfig.hpp>
 
 using namespace irccd;
@@ -62,9 +63,9 @@ protected:
     TestJsLogger()
         : m_plugin(std::make_shared<JsPlugin>("test", SOURCEDIR "/empty.js"))
     {
-        m_irccd.modules().get("Irccd")->load(m_irccd, m_plugin);
-        m_irccd.modules().get("Irccd.Plugin")->load(m_irccd, m_plugin);
-        m_irccd.modules().get("Irccd.Logger")->load(m_irccd, m_plugin);
+        IrccdModule().load(m_irccd, *m_plugin);
+        PluginModule().load(m_irccd, *m_plugin);
+        LoggerModule().load(m_irccd, *m_plugin);
     }
 };
 

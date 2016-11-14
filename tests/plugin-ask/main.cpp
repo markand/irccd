@@ -20,7 +20,10 @@
 
 #include <irccd/irccd.hpp>
 #include <irccd/server.hpp>
-#include <irccd/service-plugin.hpp>
+#include <irccd/service.hpp>
+#include <irccd/path.hpp>
+
+#include "plugin-tester.hpp"
 
 using namespace irccd;
 
@@ -45,22 +48,18 @@ public:
     }
 };
 
-class AskTest : public testing::Test {
+class AskTest : public PluginTester {
 protected:
-    Irccd m_irccd;
-    PluginService &m_ps;
-
     std::shared_ptr<ServerTest> m_server;
     std::shared_ptr<Plugin> m_plugin;
 
 public:
     AskTest()
-        : m_ps(m_irccd.plugins())
-        , m_server(std::make_shared<ServerTest>())
+        : m_server(std::make_shared<ServerTest>())
     {
-        m_ps.setConfig("ask", {{"file", SOURCEDIR "/answers.conf"}});
-        m_ps.load("ask", PLUGINDIR "/ask.js");
-        m_plugin = m_ps.require("ask");
+        m_irccd.plugins().setConfig("ask", {{"file", SOURCEDIR "/answers.conf"}});
+        m_irccd.plugins().load("ask", PLUGINDIR "/ask.js");
+        m_plugin = m_irccd.plugins().require("ask");
     }
 };
 

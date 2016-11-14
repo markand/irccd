@@ -35,4 +35,6 @@ irccd_define_library(
     LIBRARIES extern-ircclient libcommon
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${libirccd_SOURCE_DIR}/irccd>
+        $<BUILD_INTERFACE:${libirccd_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:${WITH_INCLUDEDIR}>
 )

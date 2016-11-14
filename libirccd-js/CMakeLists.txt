@@ -45,5 +45,7 @@ irccd_define_library(
         ${HEADERS}
         ${SOURCES}
     LIBRARIES extern-duktape libirccd
-    PUBLIC_INCLUDES ${libirccd-js_SOURCE_DIR}/irccd
+    PUBLIC_INCLUDES
+        $<BUILD_INTERFACE:${libirccd-js_SOURCE_DIR}/irccd>
+        $<BUILD_INTERFACE:${libirccd-js_SOURCE_DIR}>
 )

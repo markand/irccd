@@ -20,7 +20,10 @@
 
 #include <irccd/irccd.hpp>
 #include <irccd/server.hpp>
-#include <irccd/service-plugin.hpp>
+#include <irccd/service.hpp>
+#include <irccd/path.hpp>
+
+#include "plugin-tester.hpp"
 
 using namespace irccd;
 
@@ -45,11 +48,8 @@ public:
     }
 };
 
-class AuthTest : public testing::Test {
+class AuthTest : public PluginTester {
 protected:
-    Irccd m_irccd;
-    PluginService &m_ps;
-
     std::shared_ptr<ServerTest> m_nickserv1;
     std::shared_ptr<ServerTest> m_nickserv2;
     std::shared_ptr<ServerTest> m_quakenet;
@@ -57,12 +57,11 @@ protected:
 
 public:
     AuthTest()
-        : m_ps(m_irccd.plugins())
-        , m_nickserv1(std::make_shared<ServerTest>("nickserv1"))
+        : m_nickserv1(std::make_shared<ServerTest>("nickserv1"))
         , m_nickserv2(std::make_shared<ServerTest>("nickserv2"))
         , m_quakenet(std::make_shared<ServerTest>("quakenet"))
     {
-        m_ps.setConfig("auth", {
+        m_irccd.plugins().setConfig("auth", {
             { "nickserv1.type", "nickserv" },
             { "nickserv1.password", "plopation" },
             { "nickserv2.type", "nickserv" },
@@ -72,8 +71,8 @@ public:
             { "quakenet.password", "hello" },
             { "quakenet.username", "mario" }
         });
-        m_ps.load("auth", PLUGINDIR "/auth.js");
-        m_plugin = m_ps.require("auth");
+        m_irccd.plugins().load("auth", PLUGINDIR "/auth.js");
+        m_plugin = m_irccd.plugins().require("auth");
     }
 };
 

@@ -23,5 +23,5 @@ irccd_define_test(
         ${CMAKE_CURRENT_SOURCE_DIR}/timer-single.js
         ${CMAKE_CURRENT_SOURCE_DIR}/timer-repeat.js
         ${CMAKE_CURRENT_SOURCE_DIR}/timer-pending.js
-    LIBRARIES libirccd
+    LIBRARIES libirccd-js
 )

@@ -40,5 +40,7 @@ irccd_define_library(
         $<$<BOOL:${WITH_SSL}>:OpenSSL::Crypto>
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${IRCCD_FAKEROOTDIR}/include/irccd>
+        $<BUILD_INTERFACE:${IRCCD_FAKEROOTDIR}/include>
         $<BUILD_INTERFACE:${libcommon_SOURCE_DIR}/irccd>
+        $<BUILD_INTERFACE:${libcommon_SOURCE_DIR}>
 )

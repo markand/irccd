@@ -24,7 +24,7 @@
 #include <irccd/mod-irccd.hpp>
 #include <irccd/mod-elapsed-timer.hpp>
 #include <irccd/plugin-js.hpp>
-#include <irccd/service-module.hpp>
+#include <irccd/service.hpp>
 
 using namespace irccd;
 using namespace std::chrono_literals;
@@ -37,8 +37,8 @@ protected:
     TestElapsedTimer()
         : m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
     {
-        m_irccd.modules().get("Irccd")->load(m_irccd, m_plugin);
-        m_irccd.modules().get("Irccd.ElapsedTimer")->load(m_irccd, m_plugin);
+        IrccdModule().load(m_irccd, *m_plugin);
+        ElapsedTimerModule().load(m_irccd, *m_plugin);
     }
 };
 

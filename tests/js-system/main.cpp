@@ -19,10 +19,11 @@
 #include <gtest/gtest.h>
 
 #include <irccd/irccd.hpp>
+#include <irccd/mod-file.hpp>
 #include <irccd/mod-irccd.hpp>
 #include <irccd/mod-system.hpp>
 #include <irccd/plugin-js.hpp>
-#include <irccd/service-module.hpp>
+#include <irccd/service.hpp>
 #include <irccd/sysconfig.hpp>
 #include <irccd/system.hpp>
 
@@ -36,9 +37,9 @@ protected:
     TestJsSystem()
         : m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
     {
-        m_irccd.modules().get("Irccd")->load(m_irccd, m_plugin);
-        m_irccd.modules().get("Irccd.File")->load(m_irccd, m_plugin);
-        m_irccd.modules().get("Irccd.System")->load(m_irccd, m_plugin);
+        IrccdModule().load(m_irccd, *m_plugin);
+        FileModule().load(m_irccd, *m_plugin);
+        SystemModule().load(m_irccd, *m_plugin);
     }
 };
 
