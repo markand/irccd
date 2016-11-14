@@ -450,7 +450,7 @@ std::shared_ptr<Plugin> JsPluginLoader::open(const std::string &id,
         for (const auto &mod : m_modules) {
             log::debug() << "plugin " << plugin->name() << ": ";
             log::debug() << "loading " << mod->name() << " Javascript API" << std::endl;
-            mod->load(m_irccd, *plugin);
+            mod->load(m_irccd, plugin);
         }
 
         return plugin;

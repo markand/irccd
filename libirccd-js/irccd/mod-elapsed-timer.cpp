@@ -143,19 +143,19 @@ ElapsedTimerModule::ElapsedTimerModule() noexcept
 {
 }
 
-void ElapsedTimerModule::load(Irccd &, JsPlugin &plugin)
+void ElapsedTimerModule::load(Irccd &, std::shared_ptr<JsPlugin> plugin)
 {
-    StackAssert sa(plugin.context());
+    StackAssert sa(plugin->context());
 
-    duk_get_global_string(plugin.context(), "Irccd");
-    duk_push_c_function(plugin.context(), constructor, 0);
-    duk_push_object(plugin.context());
-    duk_put_function_list(plugin.context(), -1, methods);
-    duk_push_c_function(plugin.context(), destructor, 1);
-    duk_set_finalizer(plugin.context(), -2);
-    duk_put_prop_string(plugin.context(), -2, "prototype");
-    duk_put_prop_string(plugin.context(), -2, "ElapsedTimer");
-    duk_pop(plugin.context());
+    duk_get_global_string(plugin->context(), "Irccd");
+    duk_push_c_function(plugin->context(), constructor, 0);
+    duk_push_object(plugin->context());
+    duk_put_function_list(plugin->context(), -1, methods);
+    duk_push_c_function(plugin->context(), destructor, 1);
+    duk_set_finalizer(plugin->context(), -2);
+    duk_put_prop_string(plugin->context(), -2, "prototype");
+    duk_put_prop_string(plugin->context(), -2, "ElapsedTimer");
+    duk_pop(plugin->context());
 }
 
 } // !irccd

@@ -37,8 +37,8 @@ protected:
     TestElapsedTimer()
         : m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
     {
-        IrccdModule().load(m_irccd, *m_plugin);
-        ElapsedTimerModule().load(m_irccd, *m_plugin);
+        IrccdModule().load(m_irccd, m_plugin);
+        ElapsedTimerModule().load(m_irccd, m_plugin);
     }
 };
 

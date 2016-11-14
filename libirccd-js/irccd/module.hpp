@@ -80,7 +80,7 @@ public:
      * \param irccd the irccd instance
      * \param plugin the plugin
      */
-    virtual void load(Irccd &irccd, JsPlugin &plugin)
+    virtual void load(Irccd &irccd, std::shared_ptr<JsPlugin> plugin)
     {
         util::unused(irccd, plugin);
     }

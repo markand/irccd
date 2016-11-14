@@ -36,8 +36,8 @@ protected:
     TestJsFile()
         : m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
     {
-        IrccdModule().load(m_irccd, *m_plugin);
-        FileModule().load(m_irccd, *m_plugin);
+        IrccdModule().load(m_irccd, m_plugin);
+        FileModule().load(m_irccd, m_plugin);
     }
 };
 

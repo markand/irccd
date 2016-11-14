@@ -42,7 +42,7 @@ public:
     /**
      * \copydoc Module::load
      */
-    IRCCD_EXPORT void load(Irccd &irccd, JsPlugin &plugin) override;
+    IRCCD_EXPORT void load(Irccd &irccd, std::shared_ptr<JsPlugin> plugin) override;
 };
 
 } // !irccd

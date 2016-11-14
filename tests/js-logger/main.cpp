@@ -63,9 +63,9 @@ protected:
     TestJsLogger()
         : m_plugin(std::make_shared<JsPlugin>("test", SOURCEDIR "/empty.js"))
     {
-        IrccdModule().load(m_irccd, *m_plugin);
-        PluginModule().load(m_irccd, *m_plugin);
-        LoggerModule().load(m_irccd, *m_plugin);
+        IrccdModule().load(m_irccd, m_plugin);
+        PluginModule().load(m_irccd, m_plugin);
+        LoggerModule().load(m_irccd, m_plugin);
     }
 };
 

@@ -16,57 +16,62 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-int main() { }
-
-#if 0
-
 #include <gtest/gtest.h>
 
 #include <irccd/elapsed-timer.hpp>
 #include <irccd/irccd.hpp>
 #include <irccd/logger.hpp>
+#include <irccd/mod-irccd.hpp>
+#include <irccd/mod-plugin.hpp>
+#include <irccd/mod-timer.hpp>
 #include <irccd/plugin-js.hpp>
 #include <irccd/service.hpp>
 #include <irccd/system.hpp>
 
 using namespace irccd;
 
-TEST(Basic, single)
+class TestJsTimer : public testing::Test {
+protected:
+    Irccd m_irccd;
+    std::shared_ptr<JsPlugin> m_plugin;
+
+    void open(const std::string &file)
+    {
+        m_plugin = std::make_shared<JsPlugin>("timer", file);
+
+        IrccdModule().load(m_irccd, m_plugin);
+        PluginModule().load(m_irccd, m_plugin);
+        TimerModule().load(m_irccd, m_plugin);
+
+        m_plugin->onLoad(m_irccd);
+        m_irccd.plugins().add(m_plugin);
+    }
+};
+
+TEST_F(TestJsTimer, single)
 {
-    Irccd irccd;
+    open(IRCCD_TESTS_DIRECTORY "/timer-single.js");
+
     ElapsedTimer timer;
 
-    auto plugin = std::make_shared<JsPlugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-single.js");
+    while (timer.elapsed() < 3000)
+        util::poller::poll(512, m_irccd);
 
-    plugin->onLoad(irccd);
-    irccd.plugins().add(plugin);
-
-    while (timer.elapsed() < 3000) {
-        util::poller::poll(512, irccd);
-        irccd.dispatch();
-    }
-
-    ASSERT_TRUE(duk_get_global_string(plugin->context(), "count"));
-    ASSERT_EQ(1, duk_get_int(plugin->context(), -1));
+    ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "count"));
+    ASSERT_EQ(1, duk_get_int(m_plugin->context(), -1));
 }
 
-TEST(Basic, repeat)
+TEST_F(TestJsTimer, repeat)
 {
-    Irccd irccd;
+    open(IRCCD_TESTS_DIRECTORY "/timer-repeat.js");
+
     ElapsedTimer timer;
 
-    auto plugin = std::make_shared<JsPlugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-repeat.js");
+    while (timer.elapsed() < 3000)
+        util::poller::poll(512, m_irccd);
 
-    plugin->onLoad(irccd);
-    irccd.plugins().add(plugin);
-
-    while (timer.elapsed() < 3000) {
-        util::poller::poll(512, irccd);
-        irccd.dispatch();
-    }
-
-    ASSERT_TRUE(duk_get_global_string(plugin->context(), "count"));
-    ASSERT_GE(duk_get_int(plugin->context(), -1), 5);
+    ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "count"));
+    ASSERT_GE(duk_get_int(m_plugin->context(), -1), 5);
 }
 
 #if 0
@@ -105,5 +110,3 @@ int main(int argc, char **argv)
 
     return RUN_ALL_TESTS();
 }
-
-#endif

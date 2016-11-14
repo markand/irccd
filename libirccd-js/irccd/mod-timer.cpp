@@ -37,30 +37,28 @@ const char *CallbackTable("\xff""\xff""irccd-timer-callbacks");
 
 void handleSignal(std::weak_ptr<JsPlugin> ptr, std::string key)
 {
-#if 0
     auto plugin = ptr.lock();
 
     if (!plugin)
         return;
 
-    auto &irccd = dukx_get_irccd(plugin.context());
+    auto &irccd = dukx_get_irccd(plugin->context());
 
     irccd.post([plugin, key] (Irccd &) {
-        StackAssert sa(plugin.context());
+        StackAssert sa(plugin->context());
 
-        duk_get_global_string(plugin.context(), CallbackTable);
-        duk_get_prop_string(plugin.context(), -1, key.c_str());
-        duk_remove(plugin.context(), -2);
+        duk_get_global_string(plugin->context(), CallbackTable);
+        duk_get_prop_string(plugin->context(), -1, key.c_str());
+        duk_remove(plugin->context(), -2);
 
-        if (duk_is_callable(plugin.context(), -1)) {
-            if (duk_pcall(plugin.context(), 0) != 0)
-                log::warning("plugin {}: {}"_format(plugin.name(), dukx_exception(plugin.context(), -1).stack));
+        if (duk_is_callable(plugin->context(), -1)) {
+            if (duk_pcall(plugin->context(), 0) != 0)
+                log::warning("plugin {}: {}"_format(plugin->name(), dukx_exception(plugin->context(), -1).stack));
             else
-                duk_pop(plugin.context());
+                duk_pop(plugin->context());
         } else
-            duk_pop(plugin.context());
+            duk_pop(plugin->context());
     });
-#endif
 }
 
 std::shared_ptr<Timer> self(duk_context *ctx)
@@ -129,7 +127,6 @@ const duk_function_list_entry methods[] = {
  */
 duk_ret_t constructor(duk_context *ctx)
 {
-#if 0
     // Check parameters.
     auto type = duk_require_int(ctx, 0);
     auto delay = duk_require_int(ctx, 1);
@@ -176,7 +173,7 @@ duk_ret_t constructor(duk_context *ctx)
     duk_dup(ctx, 2);
     duk_put_prop_string(ctx, -2, hash.c_str());
     duk_pop(ctx);
-#endif
+
     return 0;
 }
 
@@ -193,20 +190,20 @@ TimerModule::TimerModule() noexcept
 {
 }
 
-void TimerModule::load(Irccd &, JsPlugin &plugin)
+void TimerModule::load(Irccd &, std::shared_ptr<JsPlugin> plugin)
 {
-    StackAssert sa(plugin.context());
+    StackAssert sa(plugin->context());
 
-    duk_get_global_string(plugin.context(), "Irccd");
-    duk_push_c_function(plugin.context(), constructor, 3);
-    duk_put_number_list(plugin.context(), -1, constants);
-    duk_push_object(plugin.context());
-    duk_put_function_list(plugin.context(), -1, methods);
-    duk_put_prop_string(plugin.context(), -2, "prototype");
-    duk_put_prop_string(plugin.context(), -2, "Timer");
-    duk_pop(plugin.context());
-    duk_push_object(plugin.context());
-    duk_put_global_string(plugin.context(), CallbackTable);
+    duk_get_global_string(plugin->context(), "Irccd");
+    duk_push_c_function(plugin->context(), constructor, 3);
+    duk_put_number_list(plugin->context(), -1, constants);
+    duk_push_object(plugin->context());
+    duk_put_function_list(plugin->context(), -1, methods);
+    duk_put_prop_string(plugin->context(), -2, "prototype");
+    duk_put_prop_string(plugin->context(), -2, "Timer");
+    duk_pop(plugin->context());
+    duk_push_object(plugin->context());
+    duk_put_global_string(plugin->context(), CallbackTable);
 }
 
 } // !irccd
