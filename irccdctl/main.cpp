@@ -90,6 +90,7 @@ void help(const std::string &command)
     if (it == commands.end()) {
         log::warning() << "no command named " << command << std::endl;
     } else {
+        log::warning() << "usage: " << sys::programName() << " " << (*it)->usage() << "\n" << std::endl;
         log::warning() << (*it)->help() << std::endl;
     }
 
