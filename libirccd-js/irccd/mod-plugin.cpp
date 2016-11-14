@@ -308,7 +308,18 @@ void PluginModule::load(Irccd &, std::shared_ptr<JsPlugin> plugin)
 {
     StackAssert sa(plugin->context());
 
-    duk_push_pointer(plugin->context(), &plugin);
+    duk_push_pointer(plugin->context(), new std::weak_ptr<JsPlugin>(plugin));
+    duk_push_object(plugin->context());
+    duk_push_c_function(plugin->context(), [] (auto *ctx) -> duk_ret_t {
+        duk_get_global_string(ctx, PluginGlobal);
+        delete static_cast<std::shared_ptr<JsPlugin> *>(duk_to_pointer(ctx, -1));
+        duk_pop(ctx);
+        duk_push_null(ctx);
+        duk_put_global_string(ctx, PluginGlobal);
+        return 0;
+    }, 1);
+    duk_set_finalizer(plugin->context(), -2);
+    duk_put_global_string(plugin->context(), "\xff""\xff""dummy-shared-ptr");
     duk_put_global_string(plugin->context(), PluginGlobal);
     duk_get_global_string(plugin->context(), "Irccd");
     duk_push_object(plugin->context());
@@ -335,10 +346,10 @@ std::shared_ptr<JsPlugin> dukx_get_plugin(duk_context *ctx)
     StackAssert sa(ctx);
 
     duk_get_global_string(ctx, PluginGlobal);
-    auto plugin = static_cast<std::shared_ptr<JsPlugin> *>(duk_to_pointer(ctx, -1));
+    auto plugin = static_cast<std::weak_ptr<JsPlugin> *>(duk_to_pointer(ctx, -1));
     duk_pop(ctx);
 
-    return *plugin;
+    return plugin->lock();
 }
 
 } // !irccd
