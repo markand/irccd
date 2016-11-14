@@ -564,6 +564,27 @@ public:
     void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
 };
 
+/*
+ * ServerTopicCli.
+ * ------------------------------------------------------------------
+ */
+
+/**
+ * \brief Implementation of irccdctl server-topic.
+ */
+class ServerTopicCli : public Cli {
+public:
+    /**
+     * Default constructor.
+     */
+    ServerTopicCli();
+
+    /**
+     * \copydoc Cli::exec
+     */
+    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+};
+
 } // !cli
 
 } // !irccd

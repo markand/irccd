@@ -803,6 +803,33 @@ void ServerReconnectCli::exec(Irccdctl &irccdctl, const std::vector<std::string>
     check(request(irccdctl, object));
 }
 
+/*
+ * ServerTopicCli.
+ * ------------------------------------------------------------------
+ */
+
+ServerTopicCli::ServerTopicCli()
+    : Cli("server-topic",
+          "change channel topic",
+          "server-topic server channel topic",
+          "Change the topic of the specified channel.\n\n"
+          "Example:\n"
+          "\tirccdctl server-topic freenode #wmfs \"This is the best channel\"")
+{
+}
+
+void ServerTopicCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+{
+    if (args.size() < 3)
+        throw std::invalid_argument("server-topic requires 3 arguments");
+
+    check(request(irccdctl, {
+        { "server",     args[0] },
+        { "channel",    args[1] },
+        { "topic",      args[2] }
+    }));
+}
+
 } // !cli
 
 } // !irccd

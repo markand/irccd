@@ -507,6 +507,7 @@ void init(int &argc, char **&argv)
     commands.push_back(std::make_unique<cli::ServerNoticeCli>());
     commands.push_back(std::make_unique<cli::ServerPartCli>());
     commands.push_back(std::make_unique<cli::ServerReconnectCli>());
+    commands.push_back(std::make_unique<cli::ServerTopicCli>());
 }
 
 } // !namespace
