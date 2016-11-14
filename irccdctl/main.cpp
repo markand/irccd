@@ -81,6 +81,21 @@ void help()
     std::exit(1);
 }
 
+void help(const std::string &command)
+{
+    auto it = std::find_if(commands.begin(), commands.end(), [&] (const auto &c) {
+        return c->name() == command;
+    });
+
+    if (it == commands.end()) {
+        log::warning() << "no command named " << command << std::endl;
+    } else {
+        log::warning() << (*it)->help() << std::endl;
+    }
+
+    std::exit(1);
+}
+
 /*
  * Configuration file parsing.
  * -------------------------------------------------------------------
@@ -539,7 +554,10 @@ int main(int argc, char **argv)
         // NOTREACHED
     }
     if (std::strcmp(argv[0], "help") == 0) {
-        help();
+        if (argc >= 2)
+            help(argv[1]);
+        else
+            help();
         // NOTREACHED
     }
 
