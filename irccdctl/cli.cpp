@@ -589,7 +589,7 @@ void ServerKickCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &arg
 ServerListCli::ServerListCli()
     : Cli("server-list",
           "get list of servers",
-          "server-list\n\n",
+          "server-list",
           "Get the list of all connected servers.\n\n"
           "Example:\n"
           "\tirccdctl server-list")
