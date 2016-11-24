@@ -63,7 +63,7 @@ void help()
     log::warning() << "usage: " << sys::programName() << " [options...] <command> [command-options...] [command-args...]\n\n";
     log::warning() << "General options:\n";
     log::warning() << "\t-c, --config file\tspecify the configuration file\n";
-    log::warning() << "\t--help\t\t\tshow this help\n";
+    log::warning() << "\t    --help\t\tshow this help\n";
     log::warning() << "\t-t, --type type\t\tspecify connection type\n";
     log::warning() << "\t-v, --verbose\t\tbe verbose\n\n";
     log::warning() << "Available options for type ip and ipv6 (-t, --type):\n";
