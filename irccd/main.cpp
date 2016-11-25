@@ -277,6 +277,7 @@ int main(int argc, char **argv)
     instance->commands().add(std::make_unique<command::PluginConfigCommand>());
     instance->commands().add(std::make_unique<command::PluginInfoCommand>());
     instance->commands().add(std::make_unique<command::PluginListCommand>());
+    instance->commands().add(std::make_unique<command::PluginLoadCommand>());
     instance->commands().add(std::make_unique<command::PluginReloadCommand>());
     instance->commands().add(std::make_unique<command::PluginUnloadCommand>());
     instance->commands().add(std::make_unique<command::ServerChannelModeCommand>());
