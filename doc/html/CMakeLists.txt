@@ -144,10 +144,33 @@ set(
     ${html_SOURCE_DIR}/dev/socket-protocol.md
     ${html_SOURCE_DIR}/irccd/configuring.md
     ${html_SOURCE_DIR}/irccd/index.md
-    ${html_SOURCE_DIR}/irccdctl/commands.md
     ${html_SOURCE_DIR}/irccdctl/configuring.md
     ${html_SOURCE_DIR}/irccdctl/index.md
     ${html_SOURCE_DIR}/irccdctl/usage.md
+    ${html_SOURCE_DIR}/irccdctl/command/index.md
+    ${html_SOURCE_DIR}/irccdctl/command/help.md
+    ${html_SOURCE_DIR}/irccdctl/command/plugin-info.md
+    ${html_SOURCE_DIR}/irccdctl/command/plugin-list.md
+    ${html_SOURCE_DIR}/irccdctl/command/plugin-load.md
+    ${html_SOURCE_DIR}/irccdctl/command/plugin-reload.md
+    ${html_SOURCE_DIR}/irccdctl/command/plugin-unload.md
+    ${html_SOURCE_DIR}/irccdctl/command/server-cmode.md
+    ${html_SOURCE_DIR}/irccdctl/command/server-cnotice.md
+    ${html_SOURCE_DIR}/irccdctl/command/server-connect.md
+    ${html_SOURCE_DIR}/irccdctl/command/server-disconnect.md
+    ${html_SOURCE_DIR}/irccdctl/command/server-invite.md
+    ${html_SOURCE_DIR}/irccdctl/command/server-join.md
+    ${html_SOURCE_DIR}/irccdctl/command/server-kick.md
+    ${html_SOURCE_DIR}/irccdctl/command/server-list.md
+    ${html_SOURCE_DIR}/irccdctl/command/server-me.md
+    ${html_SOURCE_DIR}/irccdctl/command/server-message.md
+    ${html_SOURCE_DIR}/irccdctl/command/server-mode.md
+    ${html_SOURCE_DIR}/irccdctl/command/server-nick.md
+    ${html_SOURCE_DIR}/irccdctl/command/server-notice.md
+    ${html_SOURCE_DIR}/irccdctl/command/server-part.md
+    ${html_SOURCE_DIR}/irccdctl/command/server-reconnect.md
+    ${html_SOURCE_DIR}/irccdctl/command/server-topic.md
+    ${html_SOURCE_DIR}/irccdctl/command/watch.md
     ${html_SOURCE_DIR}/misc/common-patterns-and-formatting.md
     ${html_SOURCE_DIR}/misc/configuration-syntax.md
     ${html_SOURCE_DIR}/misc/index.md
