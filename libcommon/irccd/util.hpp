@@ -616,6 +616,23 @@ inline std::string pretty(const nlohmann::json &value)
     }
 }
 
+/**
+ * Pretty print a json value in the given object.
+ *
+ * \param object the object
+ * \param prop the property
+ * \return the pretty value or empty if key does not exist
+ */
+inline std::string pretty(const nlohmann::json &object, const std::string &prop)
+{
+    auto it = object.find(prop);
+
+    if (it == object.end())
+        return "";
+
+    return pretty(*it);
+}
+
 } // !json
 
 /**

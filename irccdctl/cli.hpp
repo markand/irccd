@@ -585,6 +585,27 @@ public:
     void exec(Irccdctl &client, const std::vector<std::string> &args) override;
 };
 
+/*
+ * WatchCli.
+ * ------------------------------------------------------------------
+ */
+
+/**
+ * \brief Implementation of irccdctl watch.
+ */
+class WatchCli : public Cli {
+public:
+    /**
+     * Default constructor.
+     */
+    WatchCli();
+
+    /**
+     * \copydoc Cli::exec
+     */
+    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+};
+
 } // !cli
 
 } // !irccd
