@@ -12,6 +12,7 @@ guide: yes
 # List of support commands
 
   - [help](command/help.html)
+  - [plugin-config](command/plugin-config.html)
   - [plugin-info](command/plugin-info.html)
   - [plugin-list](command/plugin-list.html)
   - [plugin-load](command/plugin-load.html)

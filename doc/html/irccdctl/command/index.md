@@ -4,6 +4,7 @@ guide: yes
 ---
 
   - [help](help.html)
+  - [plugin-config](plugin-config.html)
   - [plugin-info](plugin-info.html)
   - [plugin-list](plugin-list.html)
   - [plugin-load](plugin-load.html)

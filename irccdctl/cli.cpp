@@ -132,7 +132,11 @@ PluginConfigCli::PluginConfigCli()
     : Cli("plugin-config",
           "configure a plugin",
           "plugin-config plugin [variable] [value]",
-          "Get or set plugin configuration.\n\n"
+          "Get or set a plugin configuration variable.\n\n"
+          "If both variable and value are provided, sets the plugin configuration "
+          "to the\nrespective variable name and value.\n\n"
+          "If only variable is specified, shows its current value. Otherwise, list "
+          "all\nvariables and their values.\n\n"
           "Examples:\n"
           "\tirccdctl plugin-config ask")
 {

@@ -149,6 +149,7 @@ set(
     ${html_SOURCE_DIR}/irccdctl/usage.md
     ${html_SOURCE_DIR}/irccdctl/command/index.md
     ${html_SOURCE_DIR}/irccdctl/command/help.md
+    ${html_SOURCE_DIR}/irccdctl/command/plugin-config.md
     ${html_SOURCE_DIR}/irccdctl/command/plugin-info.md
     ${html_SOURCE_DIR}/irccdctl/command/plugin-list.md
     ${html_SOURCE_DIR}/irccdctl/command/plugin-load.md
