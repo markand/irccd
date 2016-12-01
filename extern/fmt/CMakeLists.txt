@@ -17,12 +17,6 @@
 #
 
 cmake_minimum_required(VERSION 3.0)
-project(cppformat)
-add_library(extern-cppformat STATIC format.cc format.h)
-target_include_directories(extern-cppformat PUBLIC ${cppformat_SOURCE_DIR})
-set_target_properties(
-    extern-cppformat
-    PROPERTIES
-        PROJECT_LABEL cppformat
-        FOLDER extern
-)
+project(fmt)
+add_library(extern-fmt STATIC format.cc format.h)
+target_include_directories(extern-fmt PUBLIC ${fmt_SOURCE_DIR})

@@ -34,7 +34,7 @@ irccd_define_library(
         ${HEADERS}
         ${SOURCES}
     LIBRARIES
-        extern-cppformat
+        extern-fmt
         extern-json
         $<$<BOOL:${WITH_SSL}>:OpenSSL::SSL>
         $<$<BOOL:${WITH_SSL}>:OpenSSL::Crypto>

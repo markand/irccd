@@ -53,7 +53,7 @@ else ()
     list(APPEND FLAGS NET_NO_SSL)
 endif ()
 
-target_link_libraries(libirccd extern-duktape extern-ircclient extern-json extern-cppformat ${LIBRARIES})
+target_link_libraries(libirccd extern-duktape extern-ircclient extern-json extern-fmt ${LIBRARIES})
 target_compile_definitions(libirccd PRIVATE ${FLAGS})
 
 set_target_properties(
