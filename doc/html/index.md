@@ -16,6 +16,7 @@ Everything you need to build irccd.
 
 Running irccd, configuration and command line options.
 
+  - [Paths](irccd/paths.html)
   - [Configure irccd](irccd/configuring.html)
 
 And about irccdctl.

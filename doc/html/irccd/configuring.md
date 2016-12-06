@@ -3,6 +3,11 @@ title: Configuring irccd
 guide: yes
 ---
 
+# Configuring irccd
+
+To configure irccd, create a `irccd.conf` file in one of the
+[configuration directories][cfgdir].
+
 Options that have a default value are optional and can be omitted.
 
 # Identifiers
@@ -314,3 +319,5 @@ identity = myIdentity
 ask = ""                # This search for plugin ask
 myplugin = /path/to/myplugin.js        # This use absolute path
 ````
+
+[cfgdir]: @baseurl@/irccd/paths.html
