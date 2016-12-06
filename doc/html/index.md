@@ -25,6 +25,18 @@ And about irccdctl.
   - [List of irccdctl commands](irccdctl/commands.html)
   - [Irccdctl command line usage](irccdctl/usage.html)
 
+# Plugins
+
+Documentation about official irccd plugins.
+
+  - [ask](plugin/ask.html)
+  - [auth](plugin/auth.html)
+  - [hangman](plugin/hangman.html)
+  - [history](plugin/history.html)
+  - [logger](plugin/logger.html)
+  - [plugin](plugin/plugin.html)
+  - [roulette](plugin/roulette.html)
+
 # Development
 
 Development of plugins and other development documentation.
