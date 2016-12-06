@@ -1,9 +1,7 @@
 ---
-title: Configuring irccd
+header: Configuring irccd
 guide: yes
 ---
-
-# Configuring irccd
 
 To configure irccd, create a `irccd.conf` file in one of the
 [configuration directories][cfgdir].

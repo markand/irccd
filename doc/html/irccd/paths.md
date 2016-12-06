@@ -1,9 +1,7 @@
 ---
-title: Paths
+header: Paths
 guide: yes
 ---
-
-# Paths
 
 Irccd uses different types of paths depending on the context.
 
@@ -14,7 +12,7 @@ Irccd uses different types of paths depending on the context.
 Paths prefixed by (W) means they are only used on Windows, others prefixed by
 (U) means they are used on Unix.
 
-## Configuration
+# Configuration
 
 The following directories are searched in the specified order for configuration
 files. For example, the files `irccd.conf` and `irccdctl.conf` will be searched
@@ -32,7 +30,7 @@ Examples:
   - `C:/Program Files/irccd/etc/irccd.conf`
   - `C:/Users/john/AppData/irccd/config`
 
-## Data
+# Data
 
 The data directory is only used by plugins, it is dedicated to store important
 files such as plugin assets, logs or anything that is meaningful for the user
@@ -64,7 +62,7 @@ Examples:
   - `C:/Users/john/AppData/irccd/share/plugin/ask`
   - `C:/Program Files/irccd/share/plugin/ask`
 
-## Plugins
+# Plugins
 
 These directories are searched in the following order to load plugins when they
 are not specified by full paths.

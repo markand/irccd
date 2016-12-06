@@ -1,25 +1,25 @@
 ---
-title: Irccd socket API
+header: Irccd socket API
 guide: true
 ---
 
-## Commands
+# Commands
 
 The following commands are available. Please note that a lot of commands require a server as the first argument, it’s
 one of defined in the **irccd.conf** file in the server section.
 
-### server-cnotice
+## server-cnotice
 
 Send a message notice on a channel.
 
-#### Properties
+## Properties
 
   - **command**: (string) "server-cnotice",
   - **server**: (string) the server unique id,
   - **channel**: (string) the channel name,
   - **message**: (string) the notice message.
 
-#### Example
+## Example
 
 ````json
 {
@@ -30,11 +30,11 @@ Send a message notice on a channel.
 }
 ````
 
-### server-connect
+## server-connect
 
 Connect to a server.
 
-#### Properties
+## Properties
 
   - **command**: (string) "server-connect",
   - **name**: (string) the server unique id,
@@ -50,7 +50,7 @@ Connect to a server.
   - **reconnectTries**: (int) the number of reconnection to try (Optional, default: -1),
   - **reconnectTimeout**: (int) the number of seconds to wait before retrying to connect (Optional, default: 30).
 
-#### Example
+## Example
 
 ````json
 {
@@ -61,18 +61,18 @@ Connect to a server.
 }
 ````
 
-### server-disconnect
+## server-disconnect
 
 Disconnect from a server.
 
 If server is not specified, irccd disconnects all servers.
 
-#### Properties
+## Properties
 
   - **command**: (string) "server-disconnect",
   - **server**: (string) the server unique id (Optional, default: none).
 
-#### Example
+## Example
 
 ````json
 {
@@ -81,16 +81,16 @@ If server is not specified, irccd disconnects all servers.
 }
 ````
 
-### server-info
+## server-info
 
 Get server information.
 
-#### Properties
+## Properties
 
   - **command**: (string) "server-info",
   - **server**: (string) the server unique id.
 
-#### Example
+## Example
 
 ````json
 {
@@ -99,7 +99,7 @@ Get server information.
 }
 ````
 
-#### Responses
+## Responses
 
   - **name**: (string) the server unique id,
   - **host**: (string) the server hostname,
@@ -112,18 +112,18 @@ Get server information.
   - **username**: (string) the username in use,
   - **realname**: (string) the realname in use.
 
-### server-invite
+## server-invite
 
 Invite the specified target on the channel.
 
-#### Properties
+## Properties
 
   - **command**: (string) "server-invite",
   - **server**: (string) the server unique id,
   - **target**: (string) the nickname to invite,
   - **channel**: (string) the channel.
 
-#### Example
+## Example
 
 ````json
 {
@@ -134,18 +134,18 @@ Invite the specified target on the channel.
 }
 ````
 
-### server-join
+## server-join
 
 Join the specified channel, the password is optional.
 
-#### Properties
+## Properties
 
   - **command**: (string) "server-join",
   - **server**: (string) the server unique id,
   - **channel**: (string) the channel to join,
   - **password**: (string) the password (Optional, default: none).
 
-#### Example
+## Example
 
 ````json
 {
@@ -155,11 +155,11 @@ Join the specified channel, the password is optional.
 }
 ````
 
-### server-kick
+## server-kick
 
 Kick the specified target from the channel, the reason is optional.
 
-#### Properties
+## Properties
 
   - **command**: (string) "server-kick",
   - **server**: (string) the server unique id,
@@ -167,7 +167,7 @@ Kick the specified target from the channel, the reason is optional.
   - **channel**: (string) the channel,
   - **reason**: (string) the reason (Optional, default: none).
 
-#### Example
+## Example
 
 ````json
 {
@@ -179,15 +179,15 @@ Kick the specified target from the channel, the reason is optional.
 }
 ````
 
-### server-list
+## server-list
 
 Get the list of all connected servers.
 
-#### Properties
+## Properties
 
 - **command**: (string) "server-list".
 
-#### Example
+## Example
 
 ````json
 {
@@ -195,23 +195,23 @@ Get the list of all connected servers.
 }
 ````
 
-#### Responses
+## Responses
 
   - The following properties:
     - **list**: (string list) the list of all server unique ids.
 
-### server-me
+## server-me
 
 Send an action emote.
 
-#### Properties
+## Properties
 
   - **command**: (string) "server-me",
   - **server**: (string) the server unique id,
   - **target**: (string) the target or channel,
   - **message**: (string) the message.
 
-#### Example
+## Example
 
 ````json
 {
@@ -222,18 +222,18 @@ Send an action emote.
 }
 ````
 
-### server-message
+## server-message
 
 Send a message to the specified target or channel.
 
-#### Properties
+## Properties
 
   - **command**: (string) "server-message",
   - **server**: (string) the server unique id,
   - **target**: (string) the target or channel,
   - **message**: (string) the message.
 
-#### Example
+## Example
 
 ````json
 {
@@ -244,17 +244,17 @@ Send a message to the specified target or channel.
 }
 ````
 
-### server-mode
+## server-mode
 
 Set the irccd's user mode.
 
-#### Properties
+## Properties
 
   - **command**: (string) "server-mode",
   - **server**: (string) the server unique id,
   - **mode**: (string) the mode.
 
-#### Example
+## Example
 
 ````json
 {
@@ -264,17 +264,17 @@ Set the irccd's user mode.
 }
 ````
 
-### server-nick
+## server-nick
 
 Change irccd's nickname.
 
-#### Properties
+## Properties
 
   - **command**: (string) "server-nick",
   - **server**: (string) the server unique id,
   - **nickname**: (string) the new nickname.
 
-#### Example
+## Example
 
 ````json
 {
@@ -284,18 +284,18 @@ Change irccd's nickname.
 }
 ````
 
-### server-notice
+## server-notice
 
 Send a private notice to the specified target.
 
-#### Properties
+## Properties
 
   - **command**: (string) "server-notice",
   - **server**: (string) the server unique id,
   - **target**: (string) the target,
   - **message**: (string) the notice message.
 
-#### Example
+## Example
 
 ````json
 {
@@ -306,20 +306,20 @@ Send a private notice to the specified target.
 }
 ````
 
-### server-part
+## server-part
 
 Leave the specified channel, the reason is optional.
 
 Not all IRC servers support giving a reason to leave a channel, do not specify it if this is a concern.
 
-#### Properties
+## Properties
 
   - **command**: (string) "server-part",
   - **server**: (string) the unique server id,
   - **channel**: (string) the channel to leave,
   - **reason**: (string) the reason (Optional, default: none).
 
-#### Example
+## Example
 
 ````json
 {
@@ -330,18 +330,18 @@ Not all IRC servers support giving a reason to leave a channel, do not specify i
 }
 ````
 
-### server-reconnect
+## server-reconnect
 
 Force reconnection of one or all servers.
 
 If server is not specified, all servers will try to reconnect.
 
-#### Properties
+## Properties
 
   - **command**: (string) "server-reconnect",
   - **server**: (string) the server unique id (Optional, default: none).
 
-#### Example
+## Example
 
 ````json
 {
@@ -350,18 +350,18 @@ If server is not specified, all servers will try to reconnect.
 }
 ````
 
-### server-topic
+## server-topic
 
 Change the topic of the specified channel.
 
-#### Properties
+## Properties
 
   - **command**: (string) "server-topic",
   - **server**: (string) the unique server id,
   - **channel**: (string) the channel,
   - **topic**: (string) the new topic.
 
-#### Example
+## Example
 
 ````json
 {
@@ -372,7 +372,7 @@ Change the topic of the specified channel.
 }
 ````
 
-### server-umode
+## server-umode
 
 Change your irccd user mode for the specified server.
 

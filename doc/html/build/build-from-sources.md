@@ -1,5 +1,5 @@
 ---
-title: Building from sources
+header: Building from sources
 guide: yes
 ---
 

@@ -1,5 +1,5 @@
 ---
-title: Common patterns and formatting
+header: Common patterns and formatting
 guide: yes
 ---
 

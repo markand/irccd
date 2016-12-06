@@ -1,5 +1,5 @@
 ---
-title: Configuration file format
+header: Configuration file format
 guide: yes
 ---
 

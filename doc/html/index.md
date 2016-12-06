@@ -22,8 +22,8 @@ Running irccd, configuration and command line options.
 And about irccdctl.
 
   - [Configure irccdctl](irccdctl/configuring.html)
-  - [List of irccdctl commands](irccdctl/commands.html)
   - [Irccdctl command line usage](irccdctl/usage.html)
+  - [List of irccdctl commands](irccdctl/commands.html)
 
 # Plugins
 

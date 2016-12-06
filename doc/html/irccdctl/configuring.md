@@ -1,5 +1,5 @@
 ---
-title: Configuring irccdctl
+header: Configuring irccdctl
 guide: yes
 ---
 
@@ -7,11 +7,7 @@ The `irccdctl` utility let you controlling a running `irccd` instance. It uses s
 
 You need to define at least one transport before using `irccdctl`.
 
-## Configuration
-
-Configuration of irccdctl is done in the same rules than `irccd`.
-
-### The general section
+# The general section
 
 This section defines the global irccdctl parameters.
 
@@ -26,7 +22,7 @@ The available options:
 verbose = true
 ````
 
-## The connect section
+# The connect section
 
 The section socket permit irccdctl to connect to a specific irccd listener, only one may be defined. Just like
 transports you can connect to Unix or internet sockets.

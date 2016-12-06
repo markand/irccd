@@ -1,5 +1,5 @@
 ---
-title: JavaScript plugin introduction
+header: JavaScript plugin introduction
 guide: yes
 ---
 

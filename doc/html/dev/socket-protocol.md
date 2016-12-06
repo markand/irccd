@@ -1,5 +1,5 @@
 ---
-title: Irccd socket API
+header: Irccd socket API
 guide: true
 ---
 
