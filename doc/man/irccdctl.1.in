@@ -34,11 +34,17 @@ utility:
 .Cm watch
 .Op Ar options
 .Pp
+.\" PLUGIN-CONFIG
+.Nm
+.Cm plugin-config
+.Ar name
+.Op Ar variable
+.Op Ar value
 .\" PLUGIN-INFO
 .Nm
 .Cm plugin-info
 .Ar name
-.\" PLUGIN-list
+.\" PLUGIN-LIST
 .Nm
 .Cm plugin-list
 .\" PLUGIN-LOAD
