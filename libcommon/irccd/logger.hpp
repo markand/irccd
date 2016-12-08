@@ -52,11 +52,6 @@ namespace log {
 class Logger {
 public:
     /**
-     * Default constructor.
-     */
-    Logger() = default;
-
-    /**
      * Virtual destructor defaulted.
      */
     virtual ~Logger() = default;
@@ -104,11 +99,6 @@ public:
  */
 class Filter {
 public:
-    /**
-     * Default constructor.
-     */
-    Filter() = default;
-
     /**
      * Virtual destructor defaulted.
      */
@@ -159,8 +149,6 @@ public:
  */
 class ConsoleLogger : public Logger {
 public:
-    IRCCD_EXPORT ConsoleLogger() = default;
-
     /**
      * \copydoc Logger::debug
      */
@@ -227,8 +215,6 @@ public:
  */
 class SilentLogger : public Logger {
 public:
-    IRCCD_EXPORT SilentLogger() = default;
-
     /**
      * \copydoc Logger::debug
      */

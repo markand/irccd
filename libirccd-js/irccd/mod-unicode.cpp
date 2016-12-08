@@ -1,5 +1,5 @@
 /*
- * js-unicode.cpp -- Irccd.Unicode API
+ * mod-unicode.cpp -- Irccd.Unicode API
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

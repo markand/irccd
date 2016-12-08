@@ -32,7 +32,6 @@
 namespace irccd {
 
 /**
- * \class SignalConnection
  * \brief Stores the reference to the callable
  *
  * This class can be stored to remove a registered function from a Signal, be careful to not mix connections between different signals as
@@ -65,7 +64,6 @@ public:
 };
 
 /**
- * \class Signal
  * \brief Stores and call registered functions
  *
  * This class is intended to be use as a public field in the desired object.

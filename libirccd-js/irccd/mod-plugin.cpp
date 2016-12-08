@@ -1,5 +1,5 @@
 /*
- * js-plugin->cpp -- Irccd.Plugin API
+ * mod-plugin.cpp -- Irccd.Plugin API
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

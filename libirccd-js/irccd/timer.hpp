@@ -45,7 +45,6 @@ enum class TimerType {
 };
 
 /**
- * \class Timer
  * \brief Timer class
  *
  * A timer is a thread object that emits a signal periodically or just one time. It is perfectly pausable and resumable

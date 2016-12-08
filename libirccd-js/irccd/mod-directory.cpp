@@ -1,5 +1,5 @@
 /*
- * js-directory.cpp -- Irccd.Directory API
+ * mod-directory.cpp -- Irccd.Directory API
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

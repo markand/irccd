@@ -22,9 +22,10 @@ include(CheckStructHasMember)
 include(CheckSymbolExists)
 include(CheckTypeSize)
 
-# ---------------------------------------------------------
-# Global compile flags
-# ---------------------------------------------------------
+#
+# Global compile flags.
+# -------------------------------------------------------------------
+#
 
 #
 # Recent versions of CMake has nice C++ feature detection for modern
@@ -77,9 +78,10 @@ if (NOT EXISTS ${IRCCD_FAKEROOTDIR})
     file(MAKE_DIRECTORY ${IRCCD_FAKEROOTDIR})
 endif ()
 
-# ---------------------------------------------------------
-# System identification
-# ---------------------------------------------------------
+#
+# System identification.
+# -------------------------------------------------------------------
+#
 
 if (WIN32)
     set(IRCCD_SYSTEM_WINDOWS TRUE)
@@ -95,9 +97,10 @@ elseif (CMAKE_SYSTEM_NAME MATCHES "Linux")
     set(IRCCD_SYSTEM_LINUX TRUE)
 endif ()
 
-# ---------------------------------------------------------
-# Portability requirements
-# ---------------------------------------------------------
+#
+# Portability requirements.
+# -------------------------------------------------------------------
+#
 
 check_type_size(int8_t HAVE_INT8)
 check_type_size(uint8_t HAVE_UINT8)

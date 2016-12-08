@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef XDG_HPP
-#define XDG_HPP
+#ifndef IRCCD_XDG_HPP
+#define IRCCD_XDG_HPP
 
 /**
  * \file xdg.hpp
@@ -34,7 +34,6 @@
 namespace irccd {
 
 /**
- * \class Xdg
  * \brief XDG directory specifications.
  *
  * Read and get XDG directories.
@@ -187,4 +186,4 @@ public:
 
 } // !irccd
 
-#endif // !XDG_HPP
+#endif // !IRCCD_XDG_HPP

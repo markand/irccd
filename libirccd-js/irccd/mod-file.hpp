@@ -38,7 +38,6 @@
 namespace irccd {
 
 /**
- * \class File
  * \brief Object for Javascript to perform I/O.
  *
  * This class can be constructed to Javascript.

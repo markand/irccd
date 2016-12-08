@@ -19,6 +19,11 @@
 #ifndef IRCCD_IRCCDCTL_HPP
 #define IRCCD_IRCCDCTL_HPP
 
+/**
+ * \file irccdctl.hpp
+ * \brief Main irccdctl class
+ */
+
 #include <memory>
 
 #include "client.hpp"
@@ -33,26 +38,54 @@ private:
     std::unique_ptr<Client> m_client;
 
 public:
+    /**
+     * Create the irccdctl instance with the specified client.
+     *
+     * \param client the client
+     */
     inline Irccdctl(std::unique_ptr<Client> client) noexcept
         : m_client(std::move(client))
     {
     }
 
+    /**
+     * Get the client.
+     *
+     * \return the client reference
+     */
     inline Client &client() noexcept
     {
         return *m_client;
     }
 
+    /**
+     * Overloaded function.
+     *
+     * \return the client
+     */
     inline const Client &client() const noexcept
     {
         return *m_client;
     }
 
+    /**
+     * Pollable prepare function.
+     *
+     * \param in the input set
+     * \param out the output set
+     * \param max the maximum handle
+     */
     inline void prepare(fd_set &in, fd_set &out, net::Handle &max)
     {
         m_client->prepare(in, out, max);
     }
 
+    /**
+     * Pollable sync function.
+     *
+     * \param in the input set
+     * \param out the output set
+     */
     inline void sync(fd_set &in, fd_set &out)
     {
         m_client->sync(in, out);

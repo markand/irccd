@@ -89,9 +89,10 @@ option(WITH_PKGCONFIG "Enable pkg-config file" ${DEFAULT_PKGCONFIG})
 set(WITH_TEST_IRCHOST "127.0.0.1" CACHE STRING "IRC host for tests")
 set(WITH_TEST_IRCPORT 6667 CACHE STRING "IRC port for test")
 
-# ---------------------------------------------------------
-# Installation paths
-# ---------------------------------------------------------
+#
+# Installation paths.
+# -------------------------------------------------------------------
+#
 
 set(WITH_BINDIR "bin" CACHE STRING "Binary directory")
 set(WITH_MANDIR "share/man" CACHE STRING "Man directory")
@@ -127,9 +128,10 @@ foreach (d WITH_BINDIR WITH_CACHEDIR WITH_DATADIR WITH_CONFDIR WITH_PLUGINDIR)
     endif ()
 endforeach ()
 
-# ---------------------------------------------------------
-# Internal dependencies
-# ---------------------------------------------------------
+#
+# Internal dependencies.
+# -------------------------------------------------------------------
+#
 
 if (WITH_JS)
     add_subdirectory(extern/duktape)
@@ -145,9 +147,10 @@ else ()
     set(WITH_TESTS_MSG "No")
 endif ()
 
-# ---------------------------------------------------------
-# External dependencies
-# ---------------------------------------------------------
+#
+# External dependencies.
+# -------------------------------------------------------------------
+#
 
 find_package(Doxygen)
 find_package(Pandoc)

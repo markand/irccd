@@ -33,7 +33,6 @@
 namespace irccd {
 
 /**
- * \class AliasArg
  * \brief Describe an alias argument.
  *
  * When the user specify arguments, it can precise an applied argument or a
@@ -91,7 +90,6 @@ public:
 };
 
 /**
- * \class AliasCommand
  * \brief Describe a user-provided alias command.
  *
  * An alias command is just a command with a set of applied or placeholders
@@ -137,7 +135,6 @@ public:
 };
 
 /**
- * \class Alias
  * \brief A set of commands to execute with their arguments.
  *
  * An alias is a composition of AliasCommand, typically, the user is able to set

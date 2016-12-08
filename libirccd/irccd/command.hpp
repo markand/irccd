@@ -204,15 +204,6 @@ public:
 
 /**
  * \brief Implementation of server-cnotice transport command.
- *
- * Send a channel notice to the specified channel.
- *
- * {
- *   "command": "server-cnotice",
- *   "server": "the server name",
- *   "channel": "name",
- *   "message": "the message"
- * }
  */
 class ServerChannelNoticeCommand : public Command {
 public:
@@ -420,7 +411,6 @@ public:
 };
 
 /**
- * \class ServerPart
  * \brief Implementation of server-part transport command.
  */
 class IRCCD_EXPORT ServerPartCommand : public Command {
@@ -472,4 +462,4 @@ public:
 
 } // !irccd
 
-#endif // !IRCCD_CMD_SERVER_TOPIC_HPP
+#endif // !IRCCD_COMMAND_HPP

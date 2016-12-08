@@ -79,6 +79,13 @@ namespace {
 
 std::string base{"."};
 
+/*
+ * executablePath.
+ * ------------------------------------------------------------------
+ *
+ * Get the executable directory.
+ */
+
 #if defined(IRCCD_SYSTEM_WINDOWS)
 
 std::string executablePath()
@@ -166,7 +173,7 @@ std::string executablePath()
 #endif
 
 /*
- * System paths
+ * System paths.
  * ------------------------------------------------------------------
  *
  * Compute system paths.
@@ -200,14 +207,14 @@ std::string systemNativePlugins()
 }
 
 /*
- * User paths
+ * User paths.
  * ------------------------------------------------------------------
  *
  * Compute user paths.
  */
 
 /*
- * userConfig
+ * userConfig.
  * ---------------------------------------------------------
  *
  * Get the path directory to the user configuration. Example:
@@ -254,7 +261,7 @@ std::string userConfig()
 }
 
 /*
- * userData
+ * userData.
  * --------------------------------------------------------
  *
  * Get the path to the data application.
@@ -301,7 +308,7 @@ std::string userData()
 }
 
 /*
- * userCache
+ * userCache.
  * --------------------------------------------------------
  *
  * Directory for cache files.
@@ -345,7 +352,7 @@ std::string userCache()
 }
 
 /*
- * userPlugins
+ * userPlugins.
  * --------------------------------------------------------
  *
  * Path to the data + plugins.

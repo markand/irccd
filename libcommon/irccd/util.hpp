@@ -69,7 +69,6 @@ enum class MessageType {
 using MessagePair = std::pair<std::string, MessageType>;
 
 /**
- * \class Substitution
  * \brief Used for format() function.
  */
 class Substitution {

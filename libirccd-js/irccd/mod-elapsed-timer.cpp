@@ -1,5 +1,5 @@
 /*
- * js-elapsed-timer.cpp -- Irccd.ElapsedTimer API
+ * mod-elapsed-timer.cpp -- Irccd.ElapsedTimer API
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

@@ -40,7 +40,6 @@ class Server;
 class TransportServer;
 
 /**
- * \class Config
  * \brief Read .ini configuration file for irccd
  */
 class Config {

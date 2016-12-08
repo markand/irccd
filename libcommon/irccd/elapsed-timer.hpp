@@ -31,7 +31,6 @@
 namespace irccd {
 
 /**
- * \class ElapsedTimer
  * \brief Measure elapsed time
  *
  * This class provides an abstraction to measure elapsed time since the

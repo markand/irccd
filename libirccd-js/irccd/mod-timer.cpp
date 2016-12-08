@@ -1,5 +1,5 @@
 /*
- * js-timer.cpp -- Irccd.Timer API
+ * mod-timer.cpp -- Irccd.Timer API
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

@@ -38,7 +38,6 @@
 namespace irccd {
 
 /**
- * \class StackAssert
  * \brief Stack sanity checker.
  *
  * Instanciate this class where you need to manipulate the Duktape stack outside a Duktape/C function, its destructor
@@ -100,7 +99,6 @@ public:
 };
 
 /**
- * \class Exception
  * \brief Error description.
  *
  * This class fills the fields got in an Error object.
@@ -182,7 +180,6 @@ public:
 };
 
 /**
- * \class Error
  * \brief Base ECMAScript error class.
  * \warning Override the function create for your own exceptions
  */
@@ -228,7 +225,6 @@ public:
 };
 
 /**
- * \class EvalError
  * \brief Error in eval() function.
  */
 class EvalError : public Error {
@@ -245,7 +241,6 @@ public:
 };
 
 /**
- * \class RangeError
  * \brief Value is out of range.
  */
 class RangeError : public Error {
@@ -262,7 +257,6 @@ public:
 };
 
 /**
- * \class ReferenceError
  * \brief Trying to use a variable that does not exist.
  */
 class ReferenceError : public Error {
@@ -279,7 +273,6 @@ public:
 };
 
 /**
- * \class SyntaxError
  * \brief Syntax error in the script.
  */
 class SyntaxError : public Error {
@@ -296,7 +289,6 @@ public:
 };
 
 /**
- * \class TypeError
  * \brief Invalid type given.
  */
 class TypeError : public Error {
@@ -313,7 +305,6 @@ public:
 };
 
 /**
- * \class URIError
  * \brief URI manipulation failure.
  */
 class URIError : public Error {

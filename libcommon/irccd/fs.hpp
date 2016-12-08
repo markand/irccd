@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef FS_HPP
-#define FS_HPP
+#ifndef IRCCD_FS_HPP
+#define IRCCD_FS_HPP
 
 /**
  * \file fs.hpp
@@ -71,7 +71,6 @@ enum Flags {
 };
 
 /**
- * \class Entry
  * \brief Entry in the directory list.
  */
 class Entry {
@@ -356,4 +355,4 @@ IRCCD_EXPORT std::string cwd();
 
 } // !irccd
 
-#endif // !FS_HPP
+#endif // !IRCCD_FS_HPP

@@ -1,5 +1,5 @@
 /*
- * cmd-plugin-config.cpp -- implementation of plugin-config command
+ * command.cpp -- implementation of plugin-config command
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

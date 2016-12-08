@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef INI_HPP
-#define INI_HPP
+#ifndef IRCCD_INI_HPP
+#define IRCCD_INI_HPP
 
 /**
  * \file ini.hpp
@@ -62,7 +62,7 @@
  * ````ini
  * [section]
  * value = "1"
- * 
+ *
  * [section]
  * value = "2"
  * ````
@@ -122,7 +122,6 @@ namespace ini {
 class Document;
 
 /**
- * \class Error
  * \brief Error in a file.
  */
 class Error : public std::exception {
@@ -178,7 +177,6 @@ public:
 };
 
 /**
- * \class Token
  * \brief Describe a token read in the .ini source.
  *
  * This class can be used when you want to parse a .ini file yourself.
@@ -295,7 +293,6 @@ public:
 using Tokens = std::vector<Token>;
 
 /**
- * \class Option
  * \brief Option definition.
  */
 class Option : public std::vector<std::string> {
@@ -369,7 +366,6 @@ public:
 };
 
 /**
- * \class Section
  * \brief Section that contains one or more options.
  */
 class Section : public std::vector<Option> {
@@ -471,7 +467,6 @@ public:
 };
 
 /**
- * \class Document
  * \brief Ini document description.
  * \see readFile
  * \see readString
@@ -613,4 +608,4 @@ IRCCD_EXPORT void dump(const Tokens &tokens);
 
 } // !irccd
 
-#endif // !INI_HPP
+#endif // !IRCCD_INI_HPP

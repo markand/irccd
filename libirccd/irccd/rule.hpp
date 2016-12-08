@@ -49,7 +49,6 @@ enum class RuleAction {
 };
 
 /**
- * \class Rule
  * \brief Manage rule to activate or deactive events.
  */
 class Rule {

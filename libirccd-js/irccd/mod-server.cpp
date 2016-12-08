@@ -1,5 +1,5 @@
 /*
- * js-server.cpp -- Irccd.Server API
+ * mod-server.cpp -- Irccd.Server API
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

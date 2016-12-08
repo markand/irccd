@@ -39,7 +39,6 @@ namespace irccd {
 class TransportServer;
 
 /**
- * \class TransportClient
  * \brief Client connected to irccd.
  *
  * This class emits a warning upon clients request through onCommand signal.

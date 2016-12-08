@@ -78,7 +78,7 @@ namespace sys {
 namespace {
 
 /*
- * setHelper
+ * setHelper.
  * ------------------------------------------------------------------
  *
  * This is an helper for setting the uid or gid. It accepts both numeric and

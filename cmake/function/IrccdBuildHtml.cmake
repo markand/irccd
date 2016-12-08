@@ -100,11 +100,6 @@ macro(irccd_build_html)
         set(baseurl "./")
     endif ()
 
-#    message("==> dumping ${HTML_SOURCE} <==")
-#    message("  -> basename: ${basename}")
-#    message("  -> dirname: ${dirname}")
-#    message("  -> baseurl: ${baseurl}")
-
     # Replace CMake variables.
     configure_file(
         ${HTML_SOURCE}

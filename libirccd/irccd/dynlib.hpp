@@ -183,7 +183,6 @@
 namespace irccd {
 
 /**
- * \class Dynlib
  * \brief Load a dynamic module.
  *
  * This class is a portable wrapper to load shared libraries on supported systems.

@@ -1,5 +1,5 @@
 /*
- * js-file.cpp -- Irccd.File API
+ * mod-file.cpp -- Irccd.File API
  *
  * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
  *

@@ -9,7 +9,6 @@ set(
 set(
     SOURCES
     ${libirccdctl_SOURCE_DIR}/irccd/client.cpp
-    ${libirccdctl_SOURCE_DIR}/irccd/irccdctl.cpp
 )
 
 irccd_define_library(

@@ -46,7 +46,6 @@ class ServerService;
 class TransportService;
 
 /**
- * \class Irccd
  * \brief Irccd main instance.
  */
 class Irccd {
