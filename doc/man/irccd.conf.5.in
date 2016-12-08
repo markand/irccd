@@ -180,7 +180,7 @@ Unix sockets, based on files (not available on Windows)
 .El
 .Pp
 .Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
-.It
+.It type
 (string) type of listener "ip" or "unix"
 .El
 .Pp
@@ -221,6 +221,7 @@ you can override rules.
 (list) which events (e.g onCommand, onMessage, ...) (Optional, default: empty),
 .It action
 (string) set to **accept** or **drop**.
+.El
 .\" FILES
 .Sh FILES
 The default config file is located at
