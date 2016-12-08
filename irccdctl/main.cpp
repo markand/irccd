@@ -222,37 +222,39 @@ void readGeneral(const ini::Section &sc)
 }
 
 /*
- * readAliases
+ * readAlias
  * -------------------------------------------------------------------
  *
  * Read aliases for irccdctl.
  *
- * [alias]
- * name = ( "command", "arg1, "...", "argn" )
+ * [alias.<name>]
+ * cmd1 = ( "command", "arg1, "...", "argn" )
+ * cmd2 = ( "command", "arg1, "...", "argn" )
  */
-void readAliases(const ini::Section &sc)
+Alias readAlias(const ini::Section &sc, const std::string &name)
 {
+    Alias alias(name);
+
+    /*
+     * Each defined option is a command that the user can call. The name is
+     * unused and serves as documentation purpose.
+     */
     for (const auto &option : sc) {
-        // This is the alias name.
-        Alias alias(option.key());
-
-        // Iterate over the list of commands to execute for this alias.
-        for (const auto &repl : option) {
-            // This is the alias split string.
-            auto list = util::split(repl, " \t");
-
-            if (list.size() < 1)
-                throw std::invalid_argument("alias require at least one argument");
-
-            // First argument is the command/alias to execute.
-            auto command = list[0];
-
-            // Remove command name and puts arguments.
-            alias.push_back({std::move(command), std::vector<AliasArg>(list.begin() + 1, list.end())});
+        /*
+         * Iterate over the arguments which are usually a list and the first
+         * argument is a command name.
+         */
+        if (option.size() == 1 && option[0].empty()) {
+            throw std::runtime_error("alias {}: missing command name in '{}'"_format(name, option.key()));
         }
 
-        aliases.emplace(option.key(), std::move(alias));
+        std::string command = option[0];
+        std::vector<AliasArg> args(option.begin() + 1, option.end());
+
+        alias.emplace_back(std::move(command), std::move(args));
     }
+
+    return alias;
 }
 
 void read(const std::string &path)
@@ -265,8 +267,16 @@ void read(const std::string &path)
             readConnect(*it);
         if ((it = doc.find("general")) != doc.end())
             readGeneral(*it);
-        if ((it = doc.find("alias")) != doc.end())
-            readAliases(*it);
+
+        // [alias.*] sections.
+        for (const auto& sc : doc) {
+            if (sc.key().compare(0, 6, "alias.") == 0) {
+                auto name = sc.key().substr(6);
+                auto alias = readAlias(sc, name);
+
+                aliases.emplace(std::move(name), std::move(alias));
+            }
+        }
     } catch (const std::exception &ex) {
         log::warning() << path << ": " << ex.what() << std::endl;
     }
