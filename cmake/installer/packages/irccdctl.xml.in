@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<Package>
-    <DisplayName>Irccdctl executable</DisplayName>
-    <Description>Install irccd controller</Description>
-    <Version>@IRCCD_VERSION@</Version>
-    <ReleaseDate>@IRCCD_RELEASE_DATE@</ReleaseDate>
-    <Default>true</Default>
-    <SortingPriority>50</SortingPriority>
-</Package>
