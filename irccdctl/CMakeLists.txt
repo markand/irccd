@@ -1,4 +1,5 @@
-# # CMakeLists.txt -- CMake build system for irccd
+#
+# CMakeLists.txt -- CMake build system for irccd
 #
 # Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
 #
@@ -32,10 +33,4 @@ irccd_define_executable(
     DESCRIPTION "Irccd controller."
     SOURCES ${SOURCES}
     LIBRARIES libirccdctl
-    INCLUDES ${irccdctl_SOURCE_DIR}
 )
-
-if (UNIX)
-    set_target_properties(irccdctl PROPERTIES LINK_FLAGS -pthread)
-endif ()
-

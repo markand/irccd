@@ -26,12 +26,9 @@ irccd_define_executable(
     LIBRARIES
         libirccd
         $<$<BOOL:${WITH_JS}>:libirccd-js>
+        $<$<BOOL:${UNIX}>:-pthread>
 )
 
 if (IRCCD_SYSTEM_MAC)
     target_compile_options(irccd PRIVATE -Wno-deprecated-declarations)
-endif ()
-
-if (UNIX)
-    set_target_properties(irccd PROPERTIES LINK_FLAGS -pthread)
 endif ()
