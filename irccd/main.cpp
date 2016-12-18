@@ -69,15 +69,36 @@ std::unique_ptr<Irccd> instance;
 
 void usage()
 {
-    log::warning() << "usage: " << sys::programName() << " [options...]\n\n";
-    log::warning() << "Available options:\n";
-    log::warning() << "  -c, --config file       specify the configuration file\n";
-    log::warning() << "  -f, --foreground        do not run as a daemon\n";
-    log::warning() << "      --help              show this help\n";
-    log::warning() << "  -p, --plugin name       load a specific plugin\n";
-    log::warning() << "  -v, --verbose           be verbose\n";
-    log::warning() << "      --version           show the version\n";
+    std::cerr << "usage: " << sys::programName() << " [options...]\n\n";
+    std::cerr << "Available options:\n";
+    std::cerr << "  -c, --config file       specify the configuration file\n";
+    std::cerr << "  -f, --foreground        do not run as a daemon\n";
+    std::cerr << "  -h, --help              show this help\n";
+    std::cerr << "  -v, --verbose           be verbose\n";
+    std::cerr << "      --version           show the version\n";
     std::exit(1);
+}
+
+void version(const option::Result &options)
+{
+    std::cout << IRCCD_VERSION << std::endl;
+
+    if (options.count("-v") > 0 || options.count("--verbose") > 0) {
+        bool ssl = false;
+        bool js = false;
+
+#if defined(WITH_SSL)
+        ssl = true;
+#endif
+#if defined(WITH_JS)
+        js = true;
+#endif
+
+        std::cout << std::boolalpha << std::endl;
+        std::cout << "ssl:          " << ssl << std::endl;
+        std::cout << "javascript:   " << js << std::endl;
+        std::exit(0);
+    }
 }
 
 void stop(int)
@@ -118,9 +139,8 @@ option::Result parse(int &argc, char **&argv)
             { "--config",       true    },
             { "-f",             false   },
             { "--foreground",   false   },
+            { "-h",             false   },
             { "--help",         false   },
-            { "-p",             true    },
-            { "--plugin",       true    },
             { "-v",             false   },
             { "--verbose",      false   },
             { "--version",      false   }
@@ -129,13 +149,12 @@ option::Result parse(int &argc, char **&argv)
         result = option::read(argc, argv, options);
 
         for (const auto &pair : result) {
-            if (pair.first == "--help")
+            if (pair.first == "-h" || pair.first == "--help")
                 usage();
                 // NOTREACHED
-            if (pair.first == "--version") {
-                std::cout << IRCCD_VERSION << std::endl;
-                std::exit(1);
-            }
+            if (pair.first == "--version")
+                version(result);
+                // NOTREACHED
             if (pair.first == "-v" || pair.first == "--verbose")
                 log::setVerbose(true);
         }
