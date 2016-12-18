@@ -145,6 +145,7 @@ set(
     ${html_SOURCE_DIR}/irccd/configuring.md
     ${html_SOURCE_DIR}/irccd/index.md
     ${html_SOURCE_DIR}/irccd/paths.md
+    ${html_SOURCE_DIR}/irccd/usage.md
     ${html_SOURCE_DIR}/irccdctl/configuring.md
     ${html_SOURCE_DIR}/irccdctl/index.md
     ${html_SOURCE_DIR}/irccdctl/usage.md

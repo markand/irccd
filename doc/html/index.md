@@ -27,6 +27,7 @@ which directories they are located.
 Configure and run `irccd` daemon.
 
   - [Configure irccd](irccd/configuring.html)
+  - [Irccd command line usage](irccd/usage.html)
 
 ## Irccdctl
 
