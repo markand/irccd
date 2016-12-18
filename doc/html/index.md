@@ -12,14 +12,25 @@ Everything you need to build irccd.
   - [Build from sources](build/build-from-sources.html)
   - [Build options](build/build-options.html)
 
-# Running
+# Configuring & running
 
-Running irccd, configuration and command line options.
+## General topics
+
+Read the following sections to understand the configuration file format and in
+which directories they are located.
 
   - [Paths](irccd/paths.html)
+  - [Configuration file syntax](misc/configuration-syntax.html)
+
+## Irccd
+
+Configure and run `irccd` daemon.
+
   - [Configure irccd](irccd/configuring.html)
 
-And about irccdctl.
+## Irccdctl
+
+Everything about the `irccdctl` utility.
 
   - [Configure irccdctl](irccdctl/configuring.html)
   - [Irccdctl command line usage](irccdctl/usage.html)
@@ -56,4 +67,3 @@ The official Javascript API.
 Miscellaneous documentation.
 
   - [Common patterns and formatting](misc/common-patterns-and-formatting.html)
-  - [Configuration file syntax](misc/configuration-syntax.html)
