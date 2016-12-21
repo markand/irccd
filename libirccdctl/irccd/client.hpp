@@ -291,12 +291,12 @@ protected:
     /**
      * \copydoc Client::recv
      */
-    virtual unsigned recv(char *buffer, unsigned length);
+    unsigned recv(char *buffer, unsigned length) override;
 
     /**
      * \copydoc Client::send
      */
-    virtual unsigned send(const char *buffer, unsigned length);
+    unsigned send(const char *buffer, unsigned length) override;
 
 public:
     /**

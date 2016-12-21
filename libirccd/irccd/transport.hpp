@@ -227,12 +227,12 @@ public:
     /**
      * \copydoc TransportClient::prepare
      */
-    IRCCD_EXPORT virtual void prepare(fd_set &in, fd_set &out, net::Handle &max);
+    IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
 
     /**
      * \copydoc TransportClient::sync
      */
-    IRCCD_EXPORT virtual void sync(fd_set &in, fd_set &out);
+    IRCCD_EXPORT void sync(fd_set &in, fd_set &out) override;
 };
 
 /*
