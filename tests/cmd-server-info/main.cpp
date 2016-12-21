@@ -70,12 +70,12 @@ TEST_F(ServerInfoCommandTest, basic)
         });
 
         ASSERT_TRUE(message.is_object());
-        ASSERT_EQ("example.org", message["host"]);
-        ASSERT_EQ("test", message["name"]);
-        ASSERT_EQ("pascal", message["nickname"]);
-        ASSERT_EQ(8765, message["port"]);
-        ASSERT_EQ("Pascal le grand frere", message["realname"]);
-        ASSERT_EQ("psc", message["username"]);
+        ASSERT_EQ("example.org", message["host"].get<std::string>());
+        ASSERT_EQ("test", message["name"].get<std::string>());
+        ASSERT_EQ("pascal", message["nickname"].get<std::string>());
+        ASSERT_EQ(8765, message["port"].get<int>());
+        ASSERT_EQ("Pascal le grand frere", message["realname"].get<std::string>());
+        ASSERT_EQ("psc", message["username"].get<std::string>());
     } catch (const std::exception &ex) {
         FAIL() << ex.what();
     }
@@ -95,7 +95,7 @@ TEST_F(ServerInfoCommandTest, notfound)
 
         ASSERT_TRUE(message.is_object());
         ASSERT_FALSE(message["status"]);
-        ASSERT_EQ("server test not found", message["error"]);
+        ASSERT_EQ("server test not found", message["error"].get<std::string>());
     } catch (const std::exception &ex) {
         FAIL() << ex.what();
     }
