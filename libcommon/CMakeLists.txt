@@ -54,6 +54,8 @@ irccd_define_library(
     LIBRARIES
         extern-fmt
         extern-json
+        $<$<BOOL:${WIN32}>:shlwapi>
+        $<$<BOOL:${WIN32}>:ws2_32>
         $<$<BOOL:${WITH_SSL}>:OpenSSL::SSL>
         $<$<BOOL:${WITH_SSL}>:OpenSSL::Crypto>
     PUBLIC_INCLUDES

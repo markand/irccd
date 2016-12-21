@@ -118,7 +118,10 @@ void init(int &argc, char **&argv)
     // Register some signals.
     signal(SIGINT, stop);
     signal(SIGTERM, stop);
+
+#if defined(SIGPIPE)
     signal(SIGPIPE, SIG_IGN);
+#endif
 
 #if defined(SIGQUIT)
     signal(SIGQUIT, stop);

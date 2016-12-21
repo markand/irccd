@@ -37,7 +37,9 @@ const std::unordered_map<std::string, int> errors{
     { "EAGAIN",             EAGAIN          },
     { "EALREADY",           EALREADY        },
     { "EBADF",              EBADF           },
+#if defined(EBADMSG)
     { "EBADMSG",            EBADMSG         },
+#endif
     { "EBUSY",              EBUSY           },
     { "ECANCELED",          ECANCELED       },
     { "ECHILD",             ECHILD          },
@@ -51,7 +53,9 @@ const std::unordered_map<std::string, int> errors{
     { "EFAULT",             EFAULT          },
     { "EFBIG",              EFBIG           },
     { "EHOSTUNREACH",       EHOSTUNREACH    },
+#if defined(EIDRM)
     { "EIDRM",              EIDRM           },
+#endif
     { "EILSEQ",             EILSEQ          },
     { "EINPROGRESS",        EINPROGRESS     },
     { "EINTR",              EINTR           },
@@ -69,23 +73,35 @@ const std::unordered_map<std::string, int> errors{
     { "ENETUNREACH",        ENETUNREACH     },
     { "ENFILE",             ENFILE          },
     { "ENOBUFS",            ENOBUFS         },
+#if defined(ENODATA)
     { "ENODATA",            ENODATA         },
+#endif
     { "ENODEV",             ENODEV          },
     { "ENOENT",             ENOENT          },
     { "ENOEXEC",            ENOEXEC         },
     { "ENOLCK",             ENOLCK          },
+#if defined(ENOLINK)
     { "ENOLINK",            ENOLINK         },
+#endif
     { "ENOMEM",             ENOMEM          },
+#if defined(ENOMSG)
     { "ENOMSG",             ENOMSG          },
+#endif
     { "ENOPROTOOPT",        ENOPROTOOPT     },
     { "ENOSPC",             ENOSPC          },
+#if defined(ENOSR)
     { "ENOSR",              ENOSR           },
+#endif
+#if defined(ENOSTR)
     { "ENOSTR",             ENOSTR          },
+#endif
     { "ENOSYS",             ENOSYS          },
     { "ENOTCONN",           ENOTCONN        },
     { "ENOTDIR",            ENOTDIR         },
     { "ENOTEMPTY",          ENOTEMPTY       },
+#if defined(ENOTRECOVERABLE)
     { "ENOTRECOVERABLE",    ENOTRECOVERABLE },
+#endif
     { "ENOTSOCK",           ENOTSOCK        },
     { "ENOTSUP",            ENOTSUP         },
     { "ENOTTY",             ENOTTY          },
@@ -102,9 +118,13 @@ const std::unordered_map<std::string, int> errors{
     { "EROFS",              EROFS           },
     { "ESPIPE",             ESPIPE          },
     { "ESRCH",              ESRCH           },
+#if defined(ETIME)
     { "ETIME",              ETIME           },
+#endif
     { "ETIMEDOUT",          ETIMEDOUT       },
+#if defined(ETXTBSY)
     { "ETXTBSY",            ETXTBSY         },
+#endif
     { "EWOULDBLOCK",        EWOULDBLOCK     },
     { "EXDEV",              EXDEV           }
 };
