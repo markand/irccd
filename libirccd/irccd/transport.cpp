@@ -270,6 +270,8 @@ void TransportClient::error(const std::string &cmd, const std::string &error, nl
  * ------------------------------------------------------------------
  */
 
+#if defined(WITH_SSL)
+
 void TransportClientTls::handshake()
 {
     try {
@@ -357,6 +359,8 @@ void TransportClientTls::sync(fd_set &in, fd_set &out)
     }
 }
 
+#endif  // !WITH_SSL
+
 /*
  * TransportServerIp
  * ------------------------------------------------------------------
@@ -395,6 +399,8 @@ TransportServerIp::TransportServerIp(const std::string &address,
  * ------------------------------------------------------------------
  */
 
+#if defined(WITH_SSL)
+
 TransportServerTls::TransportServerTls(const std::string &pkey,
                                        const std::string &cert,
                                        const std::string &address,
@@ -410,6 +416,8 @@ std::unique_ptr<TransportClient> TransportServerTls::accept()
 {
     return std::make_unique<TransportClientTls>(m_privatekey, m_cert, *this, m_socket.accept());
 }
+
+#endif  // !WITH_SSL
 
 /*
  * TransportServerLocal

@@ -458,6 +458,8 @@ void Client::sync(fd_set &in, fd_set &out)
  * ------------------------------------------------------------------
  */
 
+#if defined(WITH_SSL)
+
 void TlsClient::handshake()
 {
     try {
@@ -547,5 +549,7 @@ void TlsClient::sync(fd_set &in, fd_set &out)
     else
         Client::sync(in, out);
 }
+
+#endif // !WITH_SSL
 
 } // !irccd

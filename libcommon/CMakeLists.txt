@@ -51,6 +51,8 @@ irccd_define_library(
         ${libcommon_SOURCE_DIR}/CMakeLists.txt
         ${HEADERS}
         ${SOURCES}
+    FLAGS
+        $<$<BOOL:NOT ${WITH_SSL}>:NET_NO_SSL>
     LIBRARIES
         extern-fmt
         extern-json

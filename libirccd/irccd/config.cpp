@@ -193,7 +193,11 @@ std::shared_ptr<TransportServer> loadTransportIp(const ini::Section &sc)
     if (pkey.empty())
         return std::make_shared<TransportServerIp>(address, port, mode);
 
+#if defined(WITH_SSL)
     return std::make_shared<TransportServerTls>(pkey, cert, address, port, mode);
+#else
+    throw std::invalid_argument("transport: SSL disabled");
+#endif
 }
 
 std::shared_ptr<TransportServer> loadTransportUnix(const ini::Section &sc)

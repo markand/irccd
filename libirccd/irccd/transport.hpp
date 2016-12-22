@@ -182,6 +182,8 @@ public:
  * ------------------------------------------------------------------
  */
 
+#if defined(WITH_SSL)
+
 /**
  * \brief TLS version of transport client.
  */
@@ -234,6 +236,8 @@ public:
      */
     IRCCD_EXPORT void sync(fd_set &in, fd_set &out) override;
 };
+
+#endif  // !WITH_SSL
 
 /*
  * TransportServer
@@ -348,6 +352,8 @@ public:
                                    std::uint8_t mode = v4);
 };
 
+#if defined(WITH_SSL)
+
 /**
  * \brief TLS over IP transport.
  */
@@ -377,6 +383,8 @@ public:
      */
     IRCCD_EXPORT std::unique_ptr<TransportClient> accept() override;
 };
+
+#endif // !WITH_SSL
 
 #if !defined(IRCCD_SYSTEM_WINDOWS)
 

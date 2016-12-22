@@ -145,7 +145,11 @@ void readConnectIp(const ini::Section &sc)
     address = net::resolveOne(host, port, domain, SOCK_STREAM);
 
     if ((it = sc.find("ssl")) != sc.end() && util::isBoolean(it->value()))
+#if defined(WITH_SSL)
         client = std::make_unique<TlsClient>();
+#else
+        throw std::runtime_error("SSL disabled");
+#endif
     else
         client = std::make_unique<Client>();
 }

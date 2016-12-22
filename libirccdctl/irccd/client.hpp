@@ -270,6 +270,8 @@ public:
     virtual void sync(fd_set &in, fd_set &out);
 };
 
+#if defined(WITH_SSL)
+
 /**
  * \brief TLS over IP connection.
  */
@@ -314,6 +316,8 @@ public:
      */
     void sync(fd_set &in, fd_set &out) override;
 };
+
+#endif // !WITH_SSL
 
 } // !irccd
 
