@@ -97,8 +97,9 @@ void version(const option::Result &options)
         std::cout << std::boolalpha << std::endl;
         std::cout << "ssl:          " << ssl << std::endl;
         std::cout << "javascript:   " << js << std::endl;
-        std::exit(0);
     }
+
+    std::exit(0);
 }
 
 void stop(int)
