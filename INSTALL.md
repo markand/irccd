@@ -14,9 +14,11 @@ Requirements
 
 Optional:
 
-  - [OpenSSL](http://openssl.org), Used for SSL connections to IRC servers, recommended,
+  - [OpenSSL](http://openssl.org), Used for SSL connections to IRC servers,
+    recommended,
   - [Pandoc](http://pandoc.org), Used for documentation process,
-  - [Doxygen](http://www.stack.nl/~dimitri/doxygen), For the documentation about irccd internals.
+  - [Doxygen](http://www.stack.nl/~dimitri/doxygen), For the documentation about
+    irccd internals.
 
 Basic installation
 ------------------
