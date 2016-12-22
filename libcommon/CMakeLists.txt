@@ -45,14 +45,17 @@ set(
     ${libcommon_SOURCE_DIR}/irccd/util.cpp
 )
 
+if (NOT WITH_SSL)
+    list(APPEND FLAGS NET_NO_SSL)
+endif ()
+
 irccd_define_library(
     TARGET libcommon
     SOURCES
         ${libcommon_SOURCE_DIR}/CMakeLists.txt
         ${HEADERS}
         ${SOURCES}
-    FLAGS
-        $<$<BOOL:NOT ${WITH_SSL}>:NET_NO_SSL>
+    FLAGS ${FLAGS}
     LIBRARIES
         extern-fmt
         extern-json

@@ -32,6 +32,7 @@
 
 #include "net.hpp"
 #include "signals.hpp"
+#include "sysconfig.hpp"
 
 namespace irccd {
 
