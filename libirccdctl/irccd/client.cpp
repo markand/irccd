@@ -304,11 +304,12 @@ public:
         FD_SET(cnx.m_socket.handle(), &in);
     }
 
-    void sync(Client &cnx, fd_set &, fd_set &) override
+    void sync(Client &cnx, fd_set &in, fd_set &) override
     {
-        cnx.recv();
-
-        verify(cnx);
+        if (FD_ISSET(cnx.m_socket.handle(), &in)) {
+            cnx.recv();
+            verify(cnx);
+        }
     }
 };
 
