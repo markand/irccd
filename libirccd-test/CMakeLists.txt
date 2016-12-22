@@ -23,12 +23,13 @@ irccd_define_library(
     SOURCES
         ${libirccd-test_SOURCE_DIR}/irccd/command-tester.cpp
         ${libirccd-test_SOURCE_DIR}/irccd/command-tester.hpp
-        ${libirccd-test_SOURCE_DIR}/irccd/plugin-tester.cpp
-        ${libirccd-test_SOURCE_DIR}/irccd/plugin-tester.hpp
+        $<$<BOOL:${WITH_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin-tester.cpp>
+        $<$<BOOL:${WITH_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin-tester.hpp>
         ${libirccd-test_SOURCE_DIR}/irccd/server-tester.cpp
         ${libirccd-test_SOURCE_DIR}/irccd/server-tester.hpp
     LIBRARIES
-        libirccd-js
+        $<$<BOOL:${WITH_JS}>:libirccd-js>
+        libirccd
         libirccdctl
         extern-gtest
     PUBLIC_INCLUDES
