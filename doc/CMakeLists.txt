@@ -18,18 +18,6 @@
 
 project(doc)
 
-# Meta targets `docs`
-add_custom_target(
-    all-docs ALL
-    COMMENT "Building irccd documentation"
-)
-
-set_target_properties(
-    all-docs
-    PROPERTIES
-        FOLDER meta
-)
-
 if (WITH_DOXYGEN)
     add_subdirectory(doxygen)
 endif ()
