@@ -3,6 +3,8 @@ title: Irccdctl commands
 guide: yes
 ---
 
+# Irccdctl commands
+
   - [help](help.html)
   - [plugin-config](plugin-config.html)
   - [plugin-info](plugin-info.html)

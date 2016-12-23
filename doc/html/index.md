@@ -35,7 +35,7 @@ Everything about the `irccdctl` utility.
 
   - [Configure irccdctl](irccdctl/configuring.html)
   - [Irccdctl command line usage](irccdctl/usage.html)
-  - [List of irccdctl commands](irccdctl/commands.html)
+  - [List of irccdctl commands](irccdctl/command/index.html)
 
 # Plugins
 
