@@ -5,7 +5,7 @@ guide: yes
 
 # server-invite
 
-Invite someone to a channel, needed for channel with mode +i
+Invite the specified target on the channel.
 
 ## Usage
 

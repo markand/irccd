@@ -5,7 +5,8 @@ guide: yes
 
 # plugin-reload
 
-Reload a plugin by calling the appropriate onReload event, the plugin is not unloaded and must be already loaded.
+Reload a plugin by calling the appropriate onReload event, the plugin is not
+unloaded and must be already loaded.
 
 ## Usage
 

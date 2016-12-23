@@ -25,6 +25,6 @@ Available options:
 ## Example
 
 ````nohighlight
-$ irccdctl server-connect wanadoo chat.wanadoo.fr 6667
-$ irccdctl server-connect -s -S -n "undead" wanadoo chat.wanadoo.fr 6697
+$ irccdctl server-connect -n jean example irc.example.org
+$ irccdctl server-connect --ssl example irc.example.org 6697
 ````

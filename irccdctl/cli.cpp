@@ -168,7 +168,7 @@ PluginInfoCli::PluginInfoCli()
     : Cli("plugin-info",
           "get plugin information",
           "plugin-info plugin",
-          "Get plugin information\n\n"
+          "Get plugin information.\n\n"
           "Example:\n"
           "\tirccdctl plugin-info ask"
     )
@@ -245,7 +245,10 @@ PluginReloadCli::PluginReloadCli()
     : Cli("plugin-reload",
           "reload a plugin",
           "plugin-reload plugin",
-          "Call the onReload event on the specified plugin.")
+          "Reload a plugin by calling the appropriate onReload event, the plugin is not\n"
+          "unloaded and must be already loaded.\n\n"
+          "Example:\n"
+          "\tirccdctl plugin-reload logger")
 {
 }
 
@@ -268,7 +271,7 @@ PluginUnloadCli::PluginUnloadCli()
           "plugin-unload plugin",
           "Unload a loaded plugin from the irccd instance.\n\n"
           "Example:\n"
-          "tirccdctl plugin-unload logger")
+          "\tirccdctl plugin-unload logger")
 {
 }
 
@@ -317,7 +320,8 @@ ServerChannelNoticeCli::ServerChannelNoticeCli()
     : Cli("server-cnotice",
           "send a channel notice",
           "server-cnotice server channel message",
-          "Send a message notice on a channel.\n\n"
+          "Send a notice to a public channel. This is a notice that everyone on the channel\n"
+          "will receive.\n\n"
           "Example:\n"
           "\tirccdctl server-cnotice freenode #staff \"Don't flood!\"")
 {
@@ -369,7 +373,7 @@ ServerConnectCli::ServerConnectCli()
     : Cli("server-connect",
           "add a server",
           "server-connect [options] id host [port]",
-          "Connect to a server.\n\n"
+          "Connect to a new IRC server.\n\n"
           "Available options:\n"
           "  -c, --command\t\tspecify the command char\n"
           "  -n, --nickname\tspecify a nickname\n"
@@ -755,10 +759,10 @@ ServerPartCli::ServerPartCli()
           "leave a channel",
           "server-part server channel [reason]",
           "Leave the specified channel, the reason is optional.\n\n"
-          "Not all IRC servers support giving a reason to leave a channel, do not "
-          "specify it if this is a concern.\n\n"
+          "Not all IRC servers support giving a reason to leave a channel, do not specify\n"
+          "it if this is a concern.\n\n"
           "Example:\n"
-          "\tirccdctl server-part freenode #staff"
+          "\tirccdctl server-part freenode #staff\n"
           "\tirccdctl server-part freenode #botwar \"too noisy\"")
 {
 }
@@ -1019,11 +1023,11 @@ WatchCli::WatchCli()
           "watch irccd events",
           "watch [-f|--format json|native]",
           "Start watching irccd events.\n\n"
-          "You can use different output formats, native is human readable format, json is pretty"
-          "formatted json.\n\n"
+          "You can use different output formats, native is human readable format, json is\n"
+          "pretty formatted json.\n\n"
           "Example:\n"
           "\tirccdctl watch\n"
-          "\tirccdctl watch -f json\n")
+          "\tirccdctl watch -f json")
 {
 }
 

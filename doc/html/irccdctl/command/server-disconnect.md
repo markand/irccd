@@ -5,16 +5,18 @@ guide: yes
 
 # server-disconnect
 
-Disconnect from a connected server.
+Disconnect from a server.
+
+If server is not specified, irccd disconnects all servers.
 
 ## Usage
 
 ````nohighlight
-$ irccdctl server-disconnect name
+$ irccdctl server-disconnect [server]
 ````
 
 ## Example
 
 ````nohighlight
-$ irccdctl server-disconnect wanadoo
+$ irccdctl server-disconnect localhost
 ````

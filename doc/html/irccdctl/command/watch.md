@@ -5,8 +5,10 @@ guide: yes
 
 # watch
 
-Start watching irccd events. You can use different output formats, native is human readable format, json is pretty
-formatted json.
+Start watching irccd events.
+
+You can use different output formats, native is human readable format, json is
+pretty formatted json.
 
 ## Usage
 

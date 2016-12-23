@@ -16,5 +16,6 @@ $ irccdctl server-join server channel [password]
 ## Example
 
 ````nohighlight
-$ irccdctl server-join freenode #staff
+$ irccdctl server-join freenode #test
+$ irccdctl server-join freenode #private-club secret
 ````

@@ -5,7 +5,8 @@ guide: yes
 
 # server-cnotice
 
-Send a notice to a public channel. This is a notice that everyone will be notified by.
+Send a notice to a public channel. This is a notice that everyone on the channel
+will receive.
 
 ## Usage
 
