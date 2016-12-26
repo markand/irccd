@@ -19,6 +19,8 @@
 #include <cassert>
 #include <chrono>
 
+#include <iostream>
+
 #include "timer.hpp"
 
 namespace irccd {
@@ -65,8 +67,13 @@ Timer::~Timer()
     assert(m_state != Running);
 
     try {
-        m_state = Stopped;
-        m_condition.notify_one();
+        {
+            std::lock_guard<std::mutex> lk(m_mutex);
+
+            m_state = Stopped;
+            m_condition.notify_one();
+        }
+
         m_thread.join();
     } catch (...) {
     }
