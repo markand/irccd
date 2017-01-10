@@ -713,10 +713,8 @@ void poll(int timeout, Pollable &first, Rest&... rest)
     net::Handle max = 0;
 
     prepare(in, out, max, first, rest...);
-
-    // Timeout or error are discarded.
-    if (::select(max + 1, &in, &out, nullptr, timeout < 0 ? nullptr : &tv) > 0)
-        sync(in, out, first, rest...);
+    select(max + 1, &in, &out, nullptr, timeout < 0 ? nullptr : &tv);
+    sync(in, out, first, rest...);
 }
 
 } // !poller
