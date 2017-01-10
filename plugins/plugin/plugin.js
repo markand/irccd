@@ -49,17 +49,17 @@ var commands = {
         // --------------------------------------------------
         for (var key in Plugin.format) {
             var optname = "format-" + key;
-    
+
             if (typeof (Plugin.config[optname]) !== "string")
                 continue;
-    
+
             if (Plugin.config[optname].length === 0)
                 Logger.warning("skipping empty '" + optname + "' format");
             else
                 Plugin.format[key] = Plugin.config[optname];
         }
     },
-    
+
     keywords: function (server, channel, origin)
     {
         return {
@@ -99,11 +99,11 @@ var commands = {
             kw.license = info.license;
             kw.summary = info.summary;
             kw.version = info.version;
-    
+
             str = Util.format(Plugin.format["info"], kw);
         } else
             str = Util.format(Plugin.format["not-found"], kw);
-    
+
         server.message(target, str);
     },
 
