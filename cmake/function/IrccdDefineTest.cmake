@@ -24,7 +24,6 @@
 #    NAME the test name
 #    SOURCES the sources files
 #    LIBRARIES (Optional) libraries to link
-#    RESOURCES (Optional) some resources file to copy
 #    FLAGS (Optional) compilation flags
 # )
 #
@@ -35,7 +34,7 @@
 
 function(irccd_define_test)
     set(oneValueArgs NAME)
-    set(multiValueArgs SOURCES LIBRARIES RESOURCES FLAGS)
+    set(multiValueArgs SOURCES LIBRARIES FLAGS)
 
     cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -46,25 +45,12 @@ function(irccd_define_test)
         message(FATAL_ERROR "Please set SOURCES")
     endif ()
 
-    foreach (r ${TEST_RESOURCES})
-        file(RELATIVE_PATH output ${CMAKE_CURRENT_SOURCE_DIR} ${r})
-
-        add_custom_command(
-            OUTPUT ${CMAKE_BINARY_DIR}/tests/${output}
-            COMMAND ${CMAKE_COMMAND} -E copy ${r} ${CMAKE_BINARY_DIR}/tests/${output}
-            DEPENDS ${r}
-        )
-
-        list(APPEND RESOURCES ${CMAKE_BINARY_DIR}/tests/${output})
-    endforeach ()
-
     # Always link to googletest
     list(APPEND TEST_LIBRARIES libirccd-test)
 
     # Executable
-    add_executable(test-${TEST_NAME} ${TEST_SOURCES} ${TEST_RESOURCES} ${RESOURCES})
+    add_executable(test-${TEST_NAME} ${TEST_SOURCES})
     target_link_libraries(test-${TEST_NAME} ${TEST_LIBRARIES})
-    source_group(Auto-generated FILES ${RESOURCES})
 
     target_include_directories(
         test-${TEST_NAME}

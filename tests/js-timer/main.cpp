@@ -50,7 +50,7 @@ protected:
 
 TEST_F(TestJsTimer, single)
 {
-    open(IRCCD_TESTS_DIRECTORY "/timer-single.js");
+    open(DIRECTORY "/timer-single.js");
 
     ElapsedTimer timer;
 
@@ -63,7 +63,7 @@ TEST_F(TestJsTimer, single)
 
 TEST_F(TestJsTimer, repeat)
 {
-    open(IRCCD_TESTS_DIRECTORY "/timer-repeat.js");
+    open(DIRECTORY "/timer-repeat.js");
 
     ElapsedTimer timer;
 
@@ -88,7 +88,7 @@ TEST(Basic, pending)
     Irccd irccd;
     ElapsedTimer timer;
 
-    auto plugin = std::make_shared<Plugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-pending.js");
+    auto plugin = std::make_shared<Plugin>("timer", DIRECTORY "/timer-pending.js");
 
     irccd.addPlugin(plugin);
     irccd.poll();
