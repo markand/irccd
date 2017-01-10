@@ -59,6 +59,10 @@ void Irccd::prepare(fd_set &in, fd_set &out, net::Handle &max)
 
 void Irccd::sync(fd_set &in, fd_set &out)
 {
+    if (!m_running) {
+        return;
+    }
+
     util::poller::sync(in, out, *m_interruptService, *m_servers, *m_transports);
 
     if (!m_running) {
