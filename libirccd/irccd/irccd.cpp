@@ -61,6 +61,10 @@ void Irccd::sync(fd_set &in, fd_set &out)
 {
     util::poller::sync(in, out, *m_interruptService, *m_servers, *m_transports);
 
+    if (!m_running) {
+        return;
+    }
+
     /*
      * Make a copy because the events can add other events while we are
      * iterating it. Also lock because the timers may alter these events too.
