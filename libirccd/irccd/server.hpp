@@ -447,7 +447,7 @@ private:
     std::string m_commandCharacter{"!"};
     std::int8_t m_recotries{-1};
     std::uint16_t m_recodelay{30};
-    std::uint16_t m_timeout{300};
+    std::uint16_t m_timeout{1000};
 
     // Queue of requests to send.
     std::queue<std::function<bool ()>> m_queue;

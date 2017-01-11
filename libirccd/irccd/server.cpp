@@ -434,9 +434,6 @@ void Server::handlePing(const char *, const char **) noexcept
 {
     // Reset the timer to detect disconnection.
     m_timer.reset();
-
-//    // Don't forget to respond.
-//    send("PONG {}"_format(params[0]));
 }
 
 void Server::handleQuery(const char *orig, const char **params) noexcept
