@@ -32,7 +32,7 @@ void Timer::run()
 
         // Wait in case the timer is paused.
         m_condition.wait(lock, [&] () {
-            return m_state != Paused;
+            return m_state == Running;
         });
 
         if (m_state != Running)
@@ -83,13 +83,21 @@ void Timer::start()
 {
     assert(m_state != Running);
 
-    m_state = Running;
+    {
+        std::lock_guard<std::mutex> lk(m_mutex);
+        m_state = Running;
+    }
+
     m_condition.notify_one();
 }
 
 void Timer::stop()
 {
-    m_state = Paused;
+    {
+        std::lock_guard<std::mutex> lk(m_mutex);
+        m_state = Paused;
+    }
+
     m_condition.notify_one();
 }
 
