@@ -394,6 +394,15 @@ TransportServerIp::TransportServerIp(const std::string &address,
     m_socket.listen();
 }
 
+std::uint16_t TransportServerIp::port() const
+{
+    auto addr = m_socket.getsockname();
+
+    return addr.domain() == AF_INET
+        ? ntohs(addr.as<sockaddr_in>().sin_port)
+        : ntohs(addr.as<sockaddr_in6>().sin6_port);
+}
+
 /*
  * TransportServerTls
  * ------------------------------------------------------------------

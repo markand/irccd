@@ -32,8 +32,11 @@ CommandTester::CommandTester(std::unique_ptr<Command> cmd,
     log::setLogger(std::make_unique<log::SilentLogger>());
     log::setVerbose(false);
 
-    m_irccd.transports().add(std::make_unique<TransportServerIp>("*", 5000));
-    m_irccdctl.client().connect(net::ipv4::pton("127.0.0.1", 5000));
+    auto tpt = std::make_unique<TransportServerIp>("*", 0);
+    auto port = tpt->port();
+
+    m_irccd.transports().add(std::move(tpt));
+    m_irccdctl.client().connect(net::ipv4::pton("127.0.0.1", port));
 
     if (cmd)
         m_irccd.commands().add(std::move(cmd));

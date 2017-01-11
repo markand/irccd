@@ -350,6 +350,13 @@ public:
     IRCCD_EXPORT TransportServerIp(const std::string &address,
                                    std::uint16_t port,
                                    std::uint8_t mode = v4);
+
+    /**
+     * Get the associated port.
+     *
+     * \return the port
+     */
+    std::uint16_t port() const;
 };
 
 #if defined(WITH_SSL)
