@@ -35,14 +35,12 @@ namespace {
 const char *Signature("\xff""\xff""irccd-timer-ptr");
 const char *CallbackTable("\xff""\xff""irccd-timer-callbacks");
 
-void handleSignal(std::weak_ptr<JsPlugin> ptr, std::string key)
+void handleSignal(Irccd& irccd, std::weak_ptr<JsPlugin> ptr, std::string key)
 {
     auto plugin = ptr.lock();
 
     if (!plugin)
         return;
-
-    auto &irccd = dukx_get_irccd(plugin->context());
 
     irccd.post([plugin, key] (Irccd &) {
         StackAssert sa(plugin->context());
@@ -139,10 +137,12 @@ duk_ret_t constructor(duk_context *ctx)
         duk_error(ctx, DUK_ERR_TYPE_ERROR, "missing callback function");
 
     // Construct the timer in 'this'.
+    auto &irccd = dukx_get_irccd(ctx);
     auto timer = std::make_shared<Timer>(static_cast<TimerType>(type), delay);
     auto hash = std::to_string(reinterpret_cast<std::uintptr_t>(timer.get()));
 
-    timer->onSignal.connect(std::bind(handleSignal, std::weak_ptr<JsPlugin>(dukx_get_plugin(ctx)), hash));
+    timer->onSignal.connect(std::bind(handleSignal, std::ref(irccd),
+        std::weak_ptr<JsPlugin>(dukx_get_plugin(ctx)), hash));
 
     duk_push_this(ctx);
     duk_push_pointer(ctx, new std::shared_ptr<Timer>(std::move(timer)));
