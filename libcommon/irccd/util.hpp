@@ -24,6 +24,8 @@
  * \brief Utilities.
  */
 
+#include <cerrno>
+#include <cstring>
 #include <ctime>
 #include <initializer_list>
 #include <limits>
@@ -705,7 +707,7 @@ template <typename Pollable, typename... Rest>
 void poll(int timeout, Pollable &first, Rest&... rest)
 {
     fd_set in, out;
-    timeval tv = {0, timeout * 1000};
+    timeval tv = { timeout / 1000, (timeout % 1000) * 1000 };
 
     FD_ZERO(&in);
     FD_ZERO(&out);
@@ -713,8 +715,12 @@ void poll(int timeout, Pollable &first, Rest&... rest)
     net::Handle max = 0;
 
     prepare(in, out, max, first, rest...);
-    select(max + 1, &in, &out, nullptr, timeout < 0 ? nullptr : &tv);
-    sync(in, out, first, rest...);
+
+    if (select(max + 1, &in, &out, nullptr, timeout < 0 ? nullptr : &tv) < 0 && errno != EINTR) {
+        throw std::runtime_error(std::strerror(errno));
+    } else {
+        sync(in, out, first, rest...);
+    }
 }
 
 } // !poller
