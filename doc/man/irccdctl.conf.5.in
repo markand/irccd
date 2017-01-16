@@ -65,7 +65,7 @@ set this only once.
 .Pp
 .Bl -tag -width PARAMETERXXX -compact
 .It type
-(string) type of listener "ip" or "unix".
+(string) connection type: "ip" or "unix".
 .It password
 (string) an authentication password (Optional, default: none).
 .El
