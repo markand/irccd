@@ -29,7 +29,8 @@ transports you can connect to Unix or internet sockets.
 
 The available options:
 
-  - **type**: (string) type of listener "ip" or "unix"
+  - **type**: (string) type of listener "ip" or "unix".
+  - **password**: (string) an authentication password (Optional, default: none).
 
 The options for **internet** type:
 

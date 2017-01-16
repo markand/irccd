@@ -181,7 +181,9 @@ Unix sockets, based on files (not available on Windows)
 .Pp
 .Bl -tag -width XXXXXXXXXXXXXXXXXXX -compact
 .It type
-(string) type of listener "ip" or "unix"
+(string) type of listener "ip" or "unix".
+.It password
+(string) an authentication password (Optional, default: none).
 .El
 .Pp
 The following parameters are available for type "ip":
@@ -191,7 +193,7 @@ The following parameters are available for type "ip":
 (int) port number.
 .It address
 (string) address to bind or "*" for any (Optional, default: *).
-.It familty
+.It family
 (list) ipv6, ipv4. Both are accepted (Optional, default: ipv4)
 .El
 .Pp
