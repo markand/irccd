@@ -195,6 +195,12 @@ The following parameters are available for type "ip":
 (string) address to bind or "*" for any (Optional, default: *).
 .It family
 (list) ipv6, ipv4. Both are accepted (Optional, default: ipv4)
+.It ssl
+(bool) enable SSL (Optional, default: false).
+.It key
+(string) path to private key file (Optional, default: none).
+.It certificate
+(string) path to certificate (Optional, default: none).
 .El
 .Pp
 The following parameters are available for type "unix":

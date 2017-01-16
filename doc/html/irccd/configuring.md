@@ -208,8 +208,11 @@ The available options:
 The options for **ip** type:
 
   - **port**: (int) port number.
-  - **address**: (string) address to bind or "*" for any (Optional, default: *).
-  - **family**: (list) ipv6, ipv4. Both are accepted (Optional, default: ipv4)
+  - **address**: (string) address to bind or "\*" for any (Optional, default: \*).
+  - **family**: (list) ipv6, ipv4. Both are accepted (Optional, default: ipv4).
+  - **ssl**: (bool) enable SSL (Optional, default: false).
+  - **key**: (string) path to private key file (Optional, default: none).
+  - **certificate**: (string) path to certificate (Optional, default: none).
 
 The options for **unix** type:
 
