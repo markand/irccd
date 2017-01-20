@@ -63,7 +63,7 @@ nlohmann::json Cli::request(Irccdctl &irccdctl, nlohmann::json args)
     try {
         ElapsedTimer timer;
 
-        while (!msg.is_object() && timer.elapsed() < 3000)
+        while (irccdctl.client().isConnected() && !msg.is_object() && timer.elapsed() < 3000)
             util::poller::poll(3000 - timer.elapsed(), irccdctl);
     } catch (const std::exception &) {
         irccdctl.client().onMessage.disconnect(id);
