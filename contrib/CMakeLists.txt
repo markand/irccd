@@ -26,5 +26,8 @@ if (WITH_SYSTEMD)
         ${CMAKE_CURRENT_BINARY_DIR}/irccd.service
     )
 
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/irccd.service DESTINATION ${WITH_SYSTEMDDIR})
+    install(
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/irccd.service
+        DESTINATION ${WITH_SYSTEMDDIR}
+    )
 endif()
