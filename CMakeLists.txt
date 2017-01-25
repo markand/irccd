@@ -147,3 +147,15 @@ endif ()
 
 include(cmake/IrccdPackage.cmake)
 include(CPack)
+
+# Metadata files
+add_custom_target(
+    metadata
+    SOURCES
+        ${CMAKE_SOURCE_DIR}/CHANGES.md
+        ${CMAKE_SOURCE_DIR}/CONTRIBUTE.md
+        ${CMAKE_SOURCE_DIR}/CREDITS.md
+        ${CMAKE_SOURCE_DIR}/INSTALL.md
+        ${CMAKE_SOURCE_DIR}/README.md
+        ${CMAKE_SOURCE_DIR}/STYLE.md
+)
