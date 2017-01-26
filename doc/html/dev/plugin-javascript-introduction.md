@@ -79,7 +79,7 @@ will live as **/home/markand/.local/share/irccd/plugins/repeater.js**.
 
 Remember, plugins are made through the event driven mechanism, so we must define
 a function that will be called when a user said something on the channel. The
-function defined on channel message is called `onMessage`.
+function defined on channel message is called [onMessage][].
 
 It has the following signature:
 
@@ -122,9 +122,6 @@ You've just made a brand new plugin, of course it's not a very powerful one but
 at least you understood the way it works. With the powerful API provided you
 will be able to create a bunch of plugins that can fits your needs, such as
 a content provider, a moderator, a calculator and so on.
-
-[server-api]: @baseurl@/api/module/Irccd.Server/index.html
-[server-message]: @baseurl@/api/module/Irccd.Server/method/message.html
 
 # Do and do not
 
@@ -172,3 +169,6 @@ This will output to the irccd log something like:
 plugin foo: error condition
 ````
 
+[onMessage]: @baseurl@/api/event/onMessage.html
+[server-api]: @baseurl@/api/module/Irccd.Server/index.html
+[server-message]: @baseurl@/api/module/Irccd.Server/Irccd.Server.prototype.message.html

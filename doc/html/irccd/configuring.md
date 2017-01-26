@@ -76,7 +76,7 @@ path-errors = "/var/log/irccd/errors.txt"
 
 # The format section
 
-The format section let you change the irccd's output. It uses the [common patterns](#common-patterns-and-formatting).
+The format section let you change the irccd's output. It uses the [common patterns][cp].
 
 Only one keyword is defined, `message` which contains the message that irccd wants to output.
 
@@ -112,7 +112,7 @@ The available options:
 
   - **name**: (id) the identity unique id,
   - **nickname**: (string) the nickname (Optional, default: irccd),
-  - **realname**: (string) the realname (Optional, default: IRC Client daemon),
+  - **realname**: (string) the realname (Optional, default: IRC Client Daemon),
   - **username**: (string) the username name (Optional, default: irccd),
   - **ctcp-version**: (string) what version to respond to CTCP VERSION (Optional, default: IRC Client Daemon),
   - **ctcp-autoreply**: (bool) enable auto CTCP VERSION reply, (Optional, default: true).
@@ -193,7 +193,7 @@ This section defines transports, you may use sockets to do a basic IPC system wi
 With transports, you can may ask `irccd` to send a message, a notice or even kicking someone from a channel. Irccd
 will also notify all clients connected to this transport on IRC events.
 
-See [irccdctl chapter](#irccdctl) and the [socket chapter](#irccd-socket-api) for more information.
+See [irccdctl chapter][irccdctl] and the [socket chapter][sockets] for more information.
 
 There are two type of listeners availables:
 
@@ -207,11 +207,11 @@ The available options:
 
 The options for **ip** type:
 
-  - **port**: (int) port number.
-  - **address**: (string) address to bind or "\*" for any (Optional, default: \*).
-  - **family**: (list) ipv6, ipv4. Both are accepted (Optional, default: ipv4).
-  - **ssl**: (bool) enable SSL (Optional, default: false).
-  - **key**: (string) path to private key file (Optional, default: none).
+  - **port**: (int) port number,
+  - **address**: (string) address to bind or "\*" for any (Optional, default: \*),
+  - **family**: (list) ipv6, ipv4. Both are accepted (Optional, default: ipv4),
+  - **ssl**: (bool) enable SSL (Optional, default: false),
+  - **key**: (string) path to private key file (Optional, default: none),
   - **certificate**: (string) path to certificate (Optional, default: none).
 
 The options for **unix** type:
@@ -318,8 +318,11 @@ identity = myIdentity
 
 # Load some plugins.
 [plugins]
-ask = ""                # This search for plugin ask
-myplugin = /path/to/myplugin.js        # This use absolute path
+ask = ""                               # Search ask
+myplugin = /path/to/myplugin.js        # Use absolute path
 ````
 
 [cfgdir]: @baseurl@/irccd/paths.html
+[cp]: @baseurl@/misc/common-patterns-and-formatting.html
+[irccdctl]: @baseurl@/irccdctl/index.html
+[sockets]: @baseurl@/dev/socket-commands.html

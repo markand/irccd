@@ -40,7 +40,7 @@ The options for **ip** type:
 
 The options for **unix** type:
 
-  - **path**: (string) Required. The file path to the socket.
+  - **path**: (string) The file path to the socket.
 
 **Example for internet transports**
 

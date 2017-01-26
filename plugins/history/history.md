@@ -54,16 +54,6 @@ The following keywords are supported:
 |-----------|-----------------|
 | **file**  | channel, server |
 
-## Formats
-
-The **history** plugin supports the following formats in `[format.history]` section:
-
-  - **error**: (string) format when an internal error occured,
-  - **seen**: (string) format for showing last seen,
-  - **said**: (string) format for showing the last message,
-  - **unknown**: (string) format when the user has never been seen,
-  - **usage**: (string) format to show the plugin usage.
-
 <div class="panel panel-warning">
  <div class="panel-heading">If you don't want to specify the **file** parameter, irccd will try to use the plugin cache
  path, you must create it.</div>
@@ -73,6 +63,16 @@ $ mkdir -p ~/.cache/irccd/plugin/history
 ````
  </div>
 </div>
+
+## Formats
+
+The **history** plugin supports the following formats in `[format.history]` section:
+
+  - **error**: (string) format when an internal error occured,
+  - **seen**: (string) format for showing last seen,
+  - **said**: (string) format for showing the last message,
+  - **unknown**: (string) format when the user has never been seen,
+  - **usage**: (string) format to show the plugin usage.
 
 ### Keywords supported
 
