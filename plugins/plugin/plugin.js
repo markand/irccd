@@ -35,6 +35,11 @@ Plugin.format = {
     "too-long":     "#{nickname}, plugin list too long, ask in query for more details."
 }
 
+Plugin.config = {
+    "max-list-lines":   3,
+    "max-list-columns": 80
+}
+
 var commands = {
     loadFormats: function ()
     {
@@ -75,15 +80,36 @@ var commands = {
     list: function (server, origin, target, query)
     {
         var kw = commands.keywords(server, target, origin);
-        var list = Plugin.list();
-        var str;
+        var plugins = Plugin.list();
+        var lines = [ "" ];
+        var maxl = parseInt(Plugin.config["max-list-lines"]);
+        var maxc = parseInt(Plugin.config["max-list-columns"]);
 
-        if (!query && list.length >= 16)
-            str = Util.format(Plugin.format["too-long"], kw);
-        else
-            str = list.join(" ");
+        if (isNaN(maxc)) {
+            maxc = 80;
+        }
+        if (isNaN(maxl)) {
+            maxl = 3;
+        }
 
-        server.message(target, str);
+        for (var p = 0; p < plugins.length; ++p) {
+            var l = lines.length - 1;
+
+            if (plugins[p].length + 1 + lines[l].length > maxc) {
+                lines.push("");
+                l++;
+            }
+
+            lines[l] += plugins[p] + " ";
+        }
+
+        if (!query && maxl > 0 && lines.length > maxl) {
+            server.message(target, Util.format(Plugin.format["too-long"], kw));
+        } else {
+            for (var i = 0; i < lines.length; ++i) {
+                server.message(target, lines[i]);
+            }
+        }
     },
 
     info: function (server, origin, target, name)

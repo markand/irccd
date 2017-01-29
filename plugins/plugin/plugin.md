@@ -20,13 +20,18 @@ plugin = ""
 The plugin **plugin** only reacts to the special command. It understands `info` and `list` sub commands.
 
   - The sub command `info` shows information about a plugin,
-  - The sub command `list` shows loaded plugins.
+  - The sub command `list` shows loaded plugins (see configuration for limits).
 
 Both commands work in a channel or as private message with irccd.
 
 ## Configuration
 
 The following options are available under the `[plugin.plugin]` section:
+
+  - **max-list-lines**: (int) max number of lines allowed for the `list` sub
+    command (Optional, default: 3),
+  - **max-list-columns**: (int) max number of columns allowed per lines
+    (Optional, default: 80).
 
 **Deprecated in irccd 2.1.0:**
 
