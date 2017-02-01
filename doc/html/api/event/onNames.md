@@ -1,5 +1,6 @@
 ---
 event: onNames
+js: true
 summary: "This event is triggered when a list of names has come."
 synopsis: "function onNames(server, channel, list)"
 arguments:

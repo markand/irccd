@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -18,41 +18,24 @@
 
 project(examples)
 
-if (IRCCD_RELOCATABLE)
-	add_custom_command(
-		OUTPUT
-			${CMAKE_BINARY_DIR}/fakeroot/${WITH_CONFDIR}/irccd.conf.sample
-			${CMAKE_BINARY_DIR}/fakeroot/${WITH_CONFDIR}/irccdctl.conf.sample
-		COMMAND
-			${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/irccd.conf ${CMAKE_BINARY_DIR}/fakeroot/${WITH_CONFDIR}/irccd.conf.sample
-		COMMAND
-			${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/irccdctl.conf ${CMAKE_BINARY_DIR}/fakeroot/${WITH_CONFDIR}/irccdctl.conf.sample
-		DEPENDS
-			${CMAKE_CURRENT_SOURCE_DIR}/irccd.conf
-			${CMAKE_CURRENT_SOURCE_DIR}/irccdctl.conf
-	)
+configure_file(
+    ${examples_SOURCE_DIR}/irccd.conf.sample
+    ${IRCCD_FAKEROOTDIR}/${WITH_CONFDIR}/irccd.conf
+)
 
-	add_custom_target(
-		docs-examples
-		DEPENDS
-			${CMAKE_BINARY_DIR}/fakeroot/${WITH_CONFDIR}/irccd.conf.sample
-			${CMAKE_BINARY_DIR}/fakeroot/${WITH_CONFDIR}/irccdctl.conf.sample
-		SOURCES
-			${CMAKE_CURRENT_SOURCE_DIR}/irccd.conf
-			${CMAKE_CURRENT_SOURCE_DIR}/irccdctl.conf
-	)
-
-	add_dependencies(docs docs-examples)
-endif ()
-
-install(
-	FILES irccdctl.conf
-	DESTINATION "${WITH_CONFDIR}"
-	RENAME "irccdctl.conf.sample"
+configure_file(
+    ${examples_SOURCE_DIR}/irccdctl.conf.sample
+    ${IRCCD_FAKEROOTDIR}/${WITH_CONFDIR}/irccdctl.conf
 )
 
 install(
-	FILES irccd.conf
-	DESTINATION "${WITH_CONFDIR}"
-	RENAME "irccd.conf.sample"
+    FILES
+        ${examples_SOURCE_DIR}/irccd.conf.sample
+        ${examples_SOURCE_DIR}/irccdctl.conf.sample
+    COMPONENT examples
+    DESTINATION ${WITH_CONFDIR}
 )
+
+setg(CPACK_COMPONENT_EXAMPLES_HIDDEN On)
+setg(CPACK_COMPONENT_EXAMPLES_DESCRIPTION "Install examples of configuration files")
+setg(CPACK_COMPONENT_EXAMPLES_GROUP "Documentation")

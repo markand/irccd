@@ -1,0 +1,120 @@
+#
+# irccd.conf -- config file for irccd
+#
+
+# Section general:
+#    This section describe global options used by irccd.
+#
+# [general]
+# uid = "nobody"                # (string or number) the user id to use (Optional, default: none),
+# gid = "nobody"                # (string or number) the group id to use (Optional, default: none),
+# foreground = false            # (bool) set to true to not daemonize (Optional, default: false),
+# pidfile = "/tmp/irccd.pid"    # (string) path to a file where to store the irccd pid (Optional, default: none).
+
+[general]
+foreground = true
+
+# Section plugins:
+#    Load plugins by name or by paths.
+#
+# [plugins]
+# abc =                         # This will search for abc
+# ask = /tmp/ask.js             # This use /tmp/ask.js to load the plugin
+
+[plugins]
+history = ""
+ask = ""
+
+# Section identities:
+#    This describe identities, you can add any number you want they are used with servers so you can reuse an
+#    identity for one or more servers if you want.
+#
+# [identity]
+# name = "id"                   # (id) the identity unique id,
+# nickname = "foo"              # (string) the nickname (Optional, default: irccd),
+# username = "bar"              # (string) the realname (Optional, default: IRC Client daemon),
+# realname = "Jean"             # (string) the username name (Optional, default: irccd),
+# ctcp-version = "irccd"        # (string) what version to respond to CTCP VERSION (Optional, default: IRC Client Daemon),
+# ctcp-autoreply = true         # (bool) enable auto CTCP VERSION reply, (Optional, default: true).
+
+[identity]
+name = "default"
+nickname = "superbot"
+username = "superbot"
+realname = "Superbot Killer"
+
+# Section transport:
+#    You can use transport to wait for any input you want. Unix and internet sockets are supported. Unix are used
+#    for file based socket while internet bind to standard address plus a specific port.
+#
+# For internet sockets:
+#
+# [transport]
+# type = "ip"
+# port = "1234"                 # (int) port number,
+# address = "*"                 # (string) address to bind or "*" for any (Optional, default: *),
+# family = ( "ipv4", "ipv6" )   # (list) ipv6, ipv4. Both are accepted (Optional, default: ipv4).
+#
+# For unix sockets:
+#
+# [transport]
+# type = "unix"
+# path = "/tmp/irccd.sock"      # (string) the file path to the socket.
+
+[transport]
+type = "ip"
+address = "*"
+port = "5980"
+family = "ipv4 ipv6"
+
+# Section server:
+#    List of server you want to connect to. A server may use an identity to
+#    set the username, nickname and so on. A server is registered with a
+#    unique id that is needed for irccdctl(1).
+#
+# [server]
+# name = "id"                   # (id) the unique id,
+# host = "chat.foo.com"         # (string) the server address,
+# port = "4321"                 # (int) the server port (Optional, default: 6667),
+# identity = "default"          # (string) an identity to use (Optional, default: irccd's default),
+# password = "secret"           # (string) an optional password (Optional, default: none),
+# auto-rejoin = false           # (bool) auto rejoin a channel after being kicked (Optional, default: false),
+# join-invite = false           # (bool) join channels upon invitation (Optional, default: false),
+# channels = ""                 # (list) list of channels to auto join, (Optional, default: empty),
+# command-char = "!"            # (string) the prefix for invoking special commands (Optional, default: !),
+# ssl = false                   # (bool) enable or disable SSL (Optional, default: false),
+# ssl-verify = false            # (bool) verify the SSL certificates (Optional, default: true),
+# reconnect = true              # (bool) enable reconnection after failure (Optional, default: true),
+# reconnect-tries = 0           # (int) number of tries before giving up. A value of 0 means indefinitely (Optional, default: 0),
+# reconnect-timeout = 5         # (int) number of seconds to wait before retrying (Optional, default: 30).
+
+[server]
+identity = "default"
+name = "localhost"
+host = "localhost"
+port = 6667
+reconnect-timeout = 60
+reconnect-tries = 20
+
+# Section rule:
+#    Add one or more rules to filter IRC events.
+#
+# servers = ""                  # (list) a list of servers that will match the rule (Optional, default: empty),
+# channels = ""                 # (list) a list of channel (Optional, default: empty),
+# plugins = ""                  # (list) which plugins (Optional, default: empty),
+# events = ""                   # (list) which events (e.g onCommand, onMessage, ...) (Optional, default: empty),
+# action = ""                   # (string) set to **accept** or **drop**.
+#
+# Block plugin hangman everywhere.
+#
+# [rule]
+# plugins = "hangman"
+# action = drop
+#
+# Allow it again on #games@localhost
+#
+# [rule]
+# servers = "localhost"
+# channels = "#games"
+# plugins = "hangman"
+# action = accept

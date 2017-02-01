@@ -1,7 +1,7 @@
 /*
  * main.cpp -- test Irccd.Logger API
  *
- * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,12 +18,14 @@
 
 #include <gtest/gtest.h>
 
-#include <irccd-config.h>
-
-#include <logger.h>
-
-#include <js-irccd.h>
-#include <js-logger.h>
+#include <irccd/irccd.hpp>
+#include <irccd/logger.hpp>
+#include <irccd/mod-irccd.hpp>
+#include <irccd/mod-logger.hpp>
+#include <irccd/mod-plugin.hpp>
+#include <irccd/plugin-js.hpp>
+#include <irccd/service.hpp>
+#include <irccd/sysconfig.hpp>
 
 using namespace irccd;
 
@@ -35,87 +37,84 @@ std::string lineDebug;
 
 } // !namespace
 
-class TestLogger : public log::Interface {
+class LoggerIfaceTest : public log::Logger {
 public:
-	void write(log::Level level, const std::string &line) noexcept override
-	{
-		switch (level) {
-		case log::Level::Info:
-			lineInfo = line;
-			break;
-		case log::Level::Warning:
-			lineWarning = line;
-			break;
-		case log::Level::Debug:
-			lineDebug = line;
-			break;
-		default:
-			break;
-		}
-	}
+    void info(const std::string &line) override
+    {
+        lineInfo = line;
+    }
+
+    void warning(const std::string &line) override
+    {
+        lineWarning = line;
+    }
+
+    void debug(const std::string &line) override
+    {
+        lineDebug = line;
+    }
 };
 
-TEST(TestJsLogger, info)
+class TestJsLogger : public testing::Test {
+protected:
+    Irccd m_irccd;
+    std::shared_ptr<JsPlugin> m_plugin;
+
+    TestJsLogger()
+        : m_plugin(std::make_shared<JsPlugin>("test", SOURCEDIR "/empty.js"))
+    {
+        IrccdModule().load(m_irccd, m_plugin);
+        PluginModule().load(m_irccd, m_plugin);
+        LoggerModule().load(m_irccd, m_plugin);
+    }
+};
+
+TEST_F(TestJsLogger, info)
 {
-	js::Context ctx;
+    try {
+        if (duk_peval_string(m_plugin->context(), "Irccd.Logger.info(\"hello!\");") != 0)
+            throw dukx_exception(m_plugin->context(), -1);
 
-	loadJsIrccd(ctx);
-	loadJsLogger(ctx);
-
-	try {
-		ctx.putGlobal("\xff""\xff""name", "test");
-		ctx.peval(js::Script{"Irccd.Logger.info(\"hello!\");"});
-
-		ASSERT_EQ("plugin test: hello!", lineInfo);
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        ASSERT_EQ("plugin test: hello!", lineInfo);
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
 
-TEST(TestJsLogger, warning)
+TEST_F(TestJsLogger, warning)
 {
-	js::Context ctx;
+    try {
+        if (duk_peval_string(m_plugin->context(), "Irccd.Logger.warning(\"FAIL!\");") != 0)
+            throw dukx_exception(m_plugin->context(), -1);
 
-	loadJsIrccd(ctx);
-	loadJsLogger(ctx);
-
-	try {
-		ctx.putGlobal("\xff""\xff""name", "test");
-		ctx.peval(js::Script{"Irccd.Logger.warning(\"FAIL!\");"});
-
-		ASSERT_EQ("plugin test: FAIL!", lineWarning);
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        ASSERT_EQ("plugin test: FAIL!", lineWarning);
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
 
 #if !defined(NDEBUG)
 
-TEST(TestJsLogger, debug)
+TEST_F(TestJsLogger, debug)
 {
-	js::Context ctx;
+    try {
+        if (duk_peval_string(m_plugin->context(), "Irccd.Logger.debug(\"starting\");") != 0)
+            throw dukx_exception(m_plugin->context(), -1);
 
-	loadJsIrccd(ctx);
-	loadJsLogger(ctx);
-
-	try {
-		ctx.putGlobal("\xff""\xff""name", "test");
-		ctx.peval(js::Script{"Irccd.Logger.debug(\"starting\");"});
-
-		ASSERT_EQ("plugin test: starting", lineDebug);
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        ASSERT_EQ("plugin test: starting", lineDebug);
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
 
 #endif
 
 int main(int argc, char **argv)
 {
-	testing::InitGoogleTest(&argc, argv);
+    testing::InitGoogleTest(&argc, argv);
 
-	log::setVerbose(true);
-	log::setInterface(std::make_unique<TestLogger>());
+    log::setVerbose(true);
+    log::setLogger(std::make_unique<LoggerIfaceTest>());
 
-	return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }

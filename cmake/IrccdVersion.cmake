@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -18,32 +18,20 @@
 
 # Irccd version.
 set(IRCCD_VERSION_MAJOR "2")
-set(IRCCD_VERSION_MINOR "0")
-set(IRCCD_VERSION_PATCH "3")
-set(IRCCD_VERSION "${IRCCD_VERSION_MAJOR}.${IRCCD_VERSION_MINOR}.${IRCCD_VERSION_PATCH}")
+set(IRCCD_VERSION_MINOR "1")
+set(IRCCD_VERSION_PATCH "0")
+set(IRCCD_VERSION "${IRCCD_VERSION_MAJOR}.${IRCCD_VERSION_MINOR}.${IRCCD_VERSION_PATCH}-dev")
+set(IRCCD_VERSION_SHLIB "2")
 
 #
 # Irccd release date.
 # -------------------------------------------------------------------
 #
-# IRCCD_RELEASE_DATE_YEAR	4 digits
-# IRCCD_RELEASE_DATE_MONTH	2 digits (01 = January)
-# IRCCD_RELEASE_DATE_DAY	2 digits (01 = first day of month)
+# IRCCD_RELEASE_DATE_YEAR       4 digits
+# IRCCD_RELEASE_DATE_MONTH      2 digits (01 = January)
+# IRCCD_RELEASE_DATE_DAY        2 digits (01 = first day of month)
 #
 set(IRCCD_RELEASE_DATE_YEAR 2016)
 set(IRCCD_RELEASE_DATE_MONTH 11)
 set(IRCCD_RELEASE_DATE_DAY 01)
 set(IRCCD_RELEASE_DATE "${IRCCD_RELEASE_DATE_YEAR}-${IRCCD_RELEASE_DATE_MONTH}-${IRCCD_RELEASE_DATE_DAY}")
-
-# All plugins.
-set(
-	IRCCD_PLUGINS
-	ask
-	auth
-	hangman
-	history
-	logger
-	plugin
-	roulette
-	CACHE INTERNAL ""
-)

@@ -1,7 +1,7 @@
 #
 # IrccdDefineTest.cmake -- CMake build system for irccd
 #
-# Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -21,10 +21,10 @@
 # -------------------------------------------------------------------
 #
 # irccd_define_test(
-#	NAME the test name
-#	SOURCES the sources files
-#	LIBRARIES (Optional) libraries to link
-#	RESOURCES (Optional) some resources file to copy
+#    NAME the test name
+#    SOURCES the sources files
+#    LIBRARIES (Optional) libraries to link
+#    FLAGS (Optional) compilation flags
 # )
 #
 # Create a unit test named test-${NAME}
@@ -33,69 +33,61 @@
 #
 
 function(irccd_define_test)
-	set(oneValueArgs NAME)
-	set(multiValueArgs SOURCES LIBRARIES RESOURCES)
+    set(oneValueArgs NAME)
+    set(multiValueArgs SOURCES LIBRARIES FLAGS)
 
-	cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-	if (NOT TEST_NAME)
-		message(FATAL_ERROR "Please set NAME")
-	endif ()
-	if (NOT TEST_SOURCES)
-		message(FATAL_ERROR "Please set SOURCES")
-	endif ()
+    if (NOT TEST_NAME)
+        message(FATAL_ERROR "Please set NAME")
+    endif ()
+    if (NOT TEST_SOURCES)
+        message(FATAL_ERROR "Please set SOURCES")
+    endif ()
 
-	foreach (r ${TEST_RESOURCES})
-		file(RELATIVE_PATH output ${CMAKE_CURRENT_SOURCE_DIR} ${r})
-	
-		add_custom_command(
-			OUTPUT ${CMAKE_BINARY_DIR}/tests/${output}
-			COMMAND ${CMAKE_COMMAND} -E copy ${r} ${CMAKE_BINARY_DIR}/tests/${output}
-			DEPENDS ${r}
-		)
+    # Always link to googletest
+    list(APPEND TEST_LIBRARIES libirccd-test)
 
-		list(APPEND RESOURCES ${CMAKE_BINARY_DIR}/tests/${output})
-	endforeach ()
+    # Executable
+    add_executable(test-${TEST_NAME} ${TEST_SOURCES})
+    target_link_libraries(test-${TEST_NAME} ${TEST_LIBRARIES})
 
-	# Always link to googletest
-	list(APPEND TEST_LIBRARIES extern-gtest)
+    target_include_directories(
+        test-${TEST_NAME}
+        PRIVATE
+            ${irccd_SOURCE_DIR}
+    )
 
-	# Executable
-	add_executable(test-${TEST_NAME} ${TEST_SOURCES} ${TEST_RESOURCES} ${RESOURCES})
-	target_link_libraries(test-${TEST_NAME} ${TEST_LIBRARIES})
-	source_group(Auto-generated FILES ${RESOURCES})
+    target_compile_definitions(
+        test-${TEST_NAME}
+        PRIVATE
+            ${TEST_FLAGS}
+            SOURCEDIR="${CMAKE_CURRENT_SOURCE_DIR}"
+            BINARYDIR="${CMAKE_CURRENT_BINARY_DIR}"
+            IRCCD_TESTS_DIRECTORY="${CMAKE_BINARY_DIR}/tests"
+    )
 
-	target_include_directories(
-		test-${TEST_NAME}
-		PRIVATE
-			${irccd_SOURCE_DIR}
-	)
+    # Tests are all in the same directory
+    set_target_properties(
+        test-${TEST_NAME}
+        PROPERTIES
+            PROJECT_LABEL ${TEST_NAME}
+            FOLDER test
+            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tests
+            RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/tests
+            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/tests
+            RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/tests
+            RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/tests
+    )
 
-	target_compile_definitions(
-		test-${TEST_NAME}
-		PRIVATE
-			IRCCD_TESTS_DIRECTORY="${CMAKE_BINARY_DIR}/tests"
-	)
+    if (UNIX)
+        set_target_properties(test-${TEST_NAME} PROPERTIES LINK_FLAGS -pthread)
+    endif ()
 
-	# Tests are all in the same directory
-	set_target_properties(
-		test-${TEST_NAME}
-		PROPERTIES
-			RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tests
-			RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/tests
-			RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/tests
-			RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/tests
-			RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/tests
-	)
-
-	if (UNIX)
-		set_target_properties(test-${TEST_NAME} PROPERTIES LINK_FLAGS -pthread)
-	endif ()
-
-	# And test
-	add_test(
-		NAME test-${TEST_NAME}
-		COMMAND test-${TEST_NAME}
-		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests
-	)
+    # And test
+    add_test(
+        NAME test-${TEST_NAME}
+        COMMAND test-${TEST_NAME}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests
+    )
 endfunction()

@@ -1,6 +1,7 @@
 ---
 title: "Hangman plugin"
 header: "Hangman plugin"
+guide: yes
 ---
 
 Hangman is a plugin to play the hangman game.
@@ -51,20 +52,34 @@ irccd: jean, congratulations, the word is candy.
 
 ## Configuration
 
-The **hangman** plugin can be configured to show different messages.
-
 The following options are available under the `[plugin.hangman]` section:
 
   - **file**: (string) the path to the database file (Optional, default: configuration directory),
   - **collaborative**: (bool) set to true to enable collaborative mode, a player can't propose two consecutives proposals (Optional, default: true),
-  - **format-asked**: (string) when a letter has been already asked but present in the word (Optional),
-  - **format-dead**: (string) when the man was hung (Optional),
-  - **format-found**: (string) when a correct letter has been placed (Optional),
-  - **format-running**: (string) when a game is requested but it's already running (Optional),
-  - **format-start**: (string) when the game starts (Optional),
-  - **format-win**: (string) when the game succeeded (Optional),
-  - **format-wrong-word**: (string) when a word proposal is wrong (Optional),
-  - **format-wrong-letter**: (string) when a letter proposal is wrong (Optional).
+
+**Deprecated in irccd 2.1.0:**
+
+  - **format-asked**: Use `[format.hangman] asked` instead,
+  - **format-dead**: Use `[format.hangman] dead` instead,
+  - **format-found**: Use `[format.hangman] found` instead,
+  - **format-running**: Use `[format.hangman] running` instead,
+  - **format-start**: Use `[format.hangman] start` instead,
+  - **format-win**: Use `[format.hangman] win` instead,
+  - **format-wrong-word**: Use `[format.hangman] wrong-word` instead,
+  - **format-wrong-letter**: Use `[format.hangman] wrong-letter` instead.
+
+## Formats
+
+The **hangman** plugin supports the following formats in `[format.hangman]` section:
+
+  - **asked**: (string) when a letter has been already asked but present in the word (Optional),
+  - **dead**: (string) when the man was hung (Optional),
+  - **found**: (string) when a correct letter has been placed (Optional),
+  - **running**: (string) when a game is requested but it's already running (Optional),
+  - **start**: (string) when the game starts (Optional),
+  - **win**: (string) when the game succeeded (Optional),
+  - **wrong-word**: (string) when a word proposal is wrong (Optional),
+  - **wrong-letter**: (string) when a letter proposal is wrong (Optional).
 
 ### Keywords supported
 
@@ -73,13 +88,13 @@ The following keywords are supported:
 | Format                  | Keywords                                           | Notes                           |
 |-------------------------|----------------------------------------------------|---------------------------------|
 | (any)                   | channel, command, nickname, origin, plugin, server | all formats                     |
-| **format-asked**        | letter                                             | the letter proposal             |
-| **format-dead**         | word                                               | the word to find                |
-| **format-found**        | word                                               | the hidden word                 |
-| **format-start**        | word                                               | the hidden word                 |
-| **format-win**          | word                                               | the word to find                |
-| **format-wrong-word**   | word                                               | the invalid word proposal       |
-| **format-wrong-letter** | letter                                             | the letter proposal             |
+| **asked**               | letter                                             | the letter proposal             |
+| **dead**                | word                                               | the word to find                |
+| **found**               | word                                               | the hidden word                 |
+| **start**               | word                                               | the hidden word                 |
+| **win**                 | word                                               | the word to find                |
+| **wrong-word**          | word                                               | the invalid word proposal       |
+| **wrong-letter**        | letter                                             | the letter proposal             |
 
 Example:
 
@@ -87,9 +102,9 @@ Example:
  <div class="panel-heading">~/.config/irccd/irccd.conf</div>
  <div class="panel-body">
 ````ini
-[plugin.hangman]
-format-win = "nice job, the word was #{word}!"
-format-wrong-letter = "please try again, there is no #{letter}"
+[format.hangman]
+win = "nice job, the word was #{word}!"
+wrong-letter = "please try again, there is no #{letter}"
 ````
  </div>
 </div>

@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -18,53 +18,30 @@
 
 project(plugins)
 
-add_custom_target(
-	plugins ALL
-	COMMENT "Irccd plugins"
+set(
+    IRCCD_PLUGINS
+    ask
+    auth
+    hangman
+    history
+    logger
+    plugin
+    roulette
+    CACHE INTERNAL ""
 )
 
 foreach (plugin ${IRCCD_PLUGINS})
-	string(TOUPPER ${plugin} optname)
-
-	if (WITH_PLUGIN_${optname})
-		# 1. Configure the plugin and install it.
-		irccd_define_plugin(${plugin}/${plugin}.js)
-
-		# 2. Build documentation.
-		if (WITH_HTML)
-			if (IRCCD_RELOCATABLE)
-				set(basedocdir ${CMAKE_BINARY_DIR}/fakeroot/${WITH_DOCDIR})
-			else ()
-				set(basedocdir ${CMAKE_BINARY_DIR}/docs)
-			endif ()
-
-			file(RELATIVE_PATH baseurl ${basedocdir}/plugin ${basedocdir})
-	
-			pandoc(
-				OUTPUT ${basedocdir}/plugin/${plugin}.html
-				SOURCES ${plugin}/${plugin}.md
-				TEMPLATE ${resources_SOURCE_DIR}/template.html
-				DEPENDS
-					${resources_SOURCE_DIR}/template.html
-					docs-resources
-				ARGS -Vguide
-				VARIABLE baseurl:${baseurl}
-				FROM markdown TO html5
-				STANTALONE MAKE_DIRECTORY TOC
-			)
-	
-			list(APPEND outputs ${basedocdir}/plugin/${plugin}.html)
-			install(FILES ${basedocdir}/plugin/${plugin}.html DESTINATION ${WITH_DOCDIR}/plugin)
-		endif ()
-
-		add_custom_target(
-			plugin-${plugin}
-			SOURCES
-				${outputs}
-				${plugin}/${plugin}.js
-				${plugin}/${plugin}.md
-		)
-
-		add_dependencies(plugins plugin-${plugin})
-	endif ()
+    irccd_define_plugin(
+        NAME ${plugin}
+        TYPE JS
+        SCRIPT ${plugins_SOURCE_DIR}/${plugin}/${plugin}.js
+        DOCS ${plugins_SOURCE_DIR}/${plugin}/${plugin}.md
+    )
 endforeach ()
+
+# Debug plugins.
+irccd_define_plugin(
+    NAME debugnative
+    TYPE NATIVE
+    SOURCES ${plugins_SOURCE_DIR}/debugnative/main.cpp
+)

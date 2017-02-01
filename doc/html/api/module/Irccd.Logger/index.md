@@ -1,5 +1,6 @@
 ---
 module: Irccd.Logger
+js: true
 summary: "Logging functions."
 ---
 
@@ -13,15 +14,15 @@ Any plugin can log messages, the message will be prepended by the plugin name to
 
 ## Functions
 
-  - [debug](function/debug.html)
-  - [info](function/info.html)
-  - [warning](function/warning.html)
+  - [debug](Irccd.Logger.debug.html)
+  - [info](Irccd.Logger.info.html)
+  - [warning](Irccd.Logger.warning.html)
 
 ## Example
 
 ````javascript
 function onLoad()
 {
-	Irccd.Logger.info("This is an example");
+    Irccd.Logger.info("This is an example");
 }
 ````

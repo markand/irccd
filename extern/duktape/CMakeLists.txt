@@ -1,7 +1,7 @@
 #
-# CMakeLists.txt -- CMake build system for irccd
+# CMakeLists.txt -- CMake build system for duktape
 #
-# Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+# Copyright (c) 2016-2017 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -16,13 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+cmake_minimum_required(VERSION 3.0)
 project(duktape)
-
-irccd_define_library(
-	TARGET extern-duktape
-	SOURCES
-		duk_config.h
-		duktape.c
-		duktape.h
-	PUBLIC_INCLUDES ${duktape_SOURCE_DIR}
-)
+add_library(extern-duktape STATIC duk_config.h duktape.cpp duktape.h)
+target_include_directories(extern-duktape PUBLIC ${duktape_SOURCE_DIR})
+target_compile_definitions(extern-duktape PUBLIC DUK_OPT_CPP_EXCEPTIONS)

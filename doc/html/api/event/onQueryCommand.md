@@ -1,5 +1,6 @@
 ---
 event: onQueryCommand
+js: true
 summary: "Execute special command in query."
 synopsis: "function onQueryCommand(server, origin, message)"
 arguments:

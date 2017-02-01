@@ -1,5 +1,6 @@
 ---
 event: onQuery
+js: true
 summary: "This event is triggered when someone sent a private message to you."
 synopsis: "function onQuery(server, origin, message)"
 arguments:

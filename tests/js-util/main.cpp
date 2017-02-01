@@ -1,7 +1,7 @@
 /*
  * main.cpp -- test Irccd.Util API
  *
- * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,63 +18,74 @@
 
 #include <gtest/gtest.h>
 
-#include <js-irccd.h>
-#include <js-util.h>
+#include <irccd/irccd.hpp>
+#include <irccd/mod-irccd.hpp>
+#include <irccd/mod-util.hpp>
+#include <irccd/plugin-js.hpp>
+#include <irccd/service.hpp>
+#include <irccd/system.hpp>
 
 using namespace irccd;
 
-TEST(TestJsUtil, formatSimple)
+class TestJsUtil : public testing::Test {
+protected:
+    Irccd m_irccd;
+    std::shared_ptr<JsPlugin> m_plugin;
+
+    TestJsUtil()
+        : m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
+    {
+        IrccdModule().load(m_irccd, m_plugin);
+        UtilModule().load(m_irccd, m_plugin);
+    }
+};
+
+TEST_F(TestJsUtil, formatSimple)
 {
-	js::Context ctx;
+    try {
+        auto ret = duk_peval_string(m_plugin->context(),
+            "result = Irccd.Util.format(\"#{target}\", { target: \"markand\" })"
+        );
 
-	loadJsIrccd(ctx);
-	loadJsUtil(ctx);
+        if (ret != 0)
+            throw dukx_exception(m_plugin->context(), -1);
 
-	try {
-		ctx.peval(js::Script{
-			"result = Irccd.Util.format(\"#{target}\", { target: \"markand\" })"
-		});
-
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+        ASSERT_STREQ("markand", duk_get_string(m_plugin->context(), -1));
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
 
-TEST(TestJsUtil, splituser)
+TEST_F(TestJsUtil, splituser)
 {
-	js::Context ctx;
+    try {
+        if (duk_peval_string(m_plugin->context(), "result = Irccd.Util.splituser(\"user!~user@hyper/super/host\");") != 0)
+            throw dukx_exception(m_plugin->context(), -1);
 
-	loadJsIrccd(ctx);
-	loadJsUtil(ctx);
-
-	try {
-		ctx.peval(js::Script{"result = Irccd.Util.splituser(\"user!~user@hyper/super/host\");"});
-
-		ASSERT_EQ("user", ctx.getGlobal<std::string>("result"));
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+        ASSERT_STREQ("user", duk_get_string(m_plugin->context(), -1));
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
 
-TEST(TestJsUtil, splithost)
+TEST_F(TestJsUtil, splithost)
 {
-	js::Context ctx;
+    try {
+        if (duk_peval_string(m_plugin->context(), "result = Irccd.Util.splithost(\"user!~user@hyper/super/host\");") != 0)
+            throw dukx_exception(m_plugin->context(), -1);
 
-	loadJsIrccd(ctx);
-	loadJsUtil(ctx);
-
-	try {
-		ctx.peval(js::Script{"result = Irccd.Util.splithost(\"user!~user@hyper/super/host\");"});
-
-		ASSERT_EQ("!~user@hyper/super/host", ctx.getGlobal<std::string>("result"));
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+        ASSERT_STREQ("!~user@hyper/super/host", duk_get_string(m_plugin->context(), -1));
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
 
 int main(int argc, char **argv)
 {
-	testing::InitGoogleTest(&argc, argv);
+    testing::InitGoogleTest(&argc, argv);
 
-	return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }

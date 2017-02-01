@@ -1,7 +1,7 @@
 /*
  * alias.cpp -- create irccdctl aliases
  *
- * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,42 +19,42 @@
 #include <cassert>
 #include <regex>
 
-#include "alias.h"
+#include "alias.hpp"
 
 namespace irccd {
 
 AliasArg::AliasArg(std::string value)
 {
-	assert(!value.empty());
+    assert(!value.empty());
 
-	if ((m_isPlaceholder = std::regex_match(value, std::regex("^%\\d+$"))))
-		m_value = value.substr(1);
-	else
-		m_value = std::move(value);
+    if ((m_isPlaceholder = std::regex_match(value, std::regex("^%\\d+$")))) 
+        m_value = value.substr(1);
+    else
+        m_value = std::move(value);
 }
 
 unsigned AliasArg::index() const noexcept
 {
-	assert(isPlaceholder());
+    assert(isPlaceholder());
 
-	return std::stoi(m_value);
+    return std::stoi(m_value);
 }
 
 const std::string &AliasArg::value() const noexcept
 {
-	assert(!isPlaceholder());
+    assert(!isPlaceholder());
 
-	return m_value;
+    return m_value;
 }
 
 std::ostream &operator<<(std::ostream &out, const AliasArg &arg)
 {
-	if (arg.m_isPlaceholder)
-		out << "%" << arg.m_value;
-	else
-		out << arg.m_value;
+    if (arg.m_isPlaceholder)
+        out << "%" << arg.m_value;
+    else
+        out << arg.m_value;
 
-	return out;
+    return out;
 }
 
 } // !irccd

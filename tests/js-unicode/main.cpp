@@ -1,7 +1,7 @@
 /*
  * main.cpp -- test Irccd.Unicode API
  *
- * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -22,68 +22,76 @@
 
 #include <gtest/gtest.h>
 
-#include <js-irccd.h>
-#include <js-unicode.h>
+#include <irccd/irccd.hpp>
+#include <irccd/mod-irccd.hpp>
+#include <irccd/mod-unicode.hpp>
+#include <irccd/plugin-js.hpp>
+#include <irccd/service.hpp>
+#include <irccd/system.hpp>
 
 using namespace irccd;
 
-TEST(TestJsUnicode, isLetter)
+class TestJsUnicode : public testing::Test {
+protected:
+    Irccd m_irccd;
+    std::shared_ptr<JsPlugin> m_plugin;
+
+    TestJsUnicode()
+        : m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
+    {
+        IrccdModule().load(m_irccd, m_plugin);
+        UnicodeModule().load(m_irccd, m_plugin);
+    }
+};
+
+TEST_F(TestJsUnicode, isLetter)
 {
-	js::Context ctx;
+    try {
+        duk_peval_string_noresult(m_plugin->context(), "result = Irccd.Unicode.isLetter(String('é').charCodeAt(0));");
+        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+        ASSERT_TRUE(duk_get_boolean(m_plugin->context(), -1));
 
-	loadJsIrccd(ctx);
-	loadJsUnicode(ctx);
-
-	try {
-		ctx.peval(js::Script{"result = Irccd.Unicode.isLetter(String('é').charCodeAt(0));"});
-		ASSERT_TRUE(ctx.getGlobal<bool>("result"));
-
-		ctx.peval(js::Script{"result = Irccd.Unicode.isLetter(String('€').charCodeAt(0));"});
-		ASSERT_FALSE(ctx.getGlobal<bool>("result"));
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        duk_peval_string_noresult(m_plugin->context(), "result = Irccd.Unicode.isLetter(String('€').charCodeAt(0));");
+        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+        ASSERT_FALSE(duk_get_boolean(m_plugin->context(), -1));
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
 
-TEST(TestJsUnicode, isLower)
+TEST_F(TestJsUnicode, isLower)
 {
-	js::Context ctx;
+    try {
+        duk_peval_string_noresult(m_plugin->context(), "result = Irccd.Unicode.isLower(String('é').charCodeAt(0));");
+        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+        ASSERT_TRUE(duk_get_boolean(m_plugin->context(), -1));
 
-	loadJsIrccd(ctx);
-	loadJsUnicode(ctx);
-
-	try {
-		ctx.peval(js::Script{"result = Irccd.Unicode.isLower(String('é').charCodeAt(0));"});
-		ASSERT_TRUE(ctx.getGlobal<bool>("result"));
-
-		ctx.peval(js::Script{"result = Irccd.Unicode.isLower(String('É').charCodeAt(0));"});
-		ASSERT_FALSE(ctx.getGlobal<bool>("result"));
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        duk_peval_string_noresult(m_plugin->context(), "result = Irccd.Unicode.isLower(String('É').charCodeAt(0));");
+        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+        ASSERT_FALSE(duk_get_boolean(m_plugin->context(), -1));
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
 
-TEST(TestJsUnicode, isUpper)
+TEST_F(TestJsUnicode, isUpper)
 {
-	js::Context ctx;
+    try {
+        duk_peval_string_noresult(m_plugin->context(), "result = Irccd.Unicode.isUpper(String('É').charCodeAt(0));");
+        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+        ASSERT_TRUE(duk_get_boolean(m_plugin->context(), -1));
 
-	loadJsIrccd(ctx);
-	loadJsUnicode(ctx);
-
-	try {
-		ctx.peval(js::Script{"result = Irccd.Unicode.isUpper(String('É').charCodeAt(0));"});
-		ASSERT_TRUE(ctx.getGlobal<bool>("result"));
-
-		ctx.peval(js::Script{"result = Irccd.Unicode.isUpper(String('é').charCodeAt(0));"});
-		ASSERT_FALSE(ctx.getGlobal<bool>("result"));
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        duk_peval_string_noresult(m_plugin->context(), "result = Irccd.Unicode.isUpper(String('é').charCodeAt(0));");
+        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+        ASSERT_FALSE(duk_get_boolean(m_plugin->context(), -1));
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
 
 int main(int argc, char **argv)
 {
-	testing::InitGoogleTest(&argc, argv);
+    testing::InitGoogleTest(&argc, argv);
 
-	return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }

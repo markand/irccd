@@ -158,6 +158,11 @@ typedef struct
 	irc_event_callback_t	event_connect;
 
 	/*!
+	 * The "ping" event is triggered when the client receives PING requests.
+	 */
+	irc_event_callback_t	event_ping;
+
+	/*!
 	 * The "nick" event is triggered when the client receives a NICK message,
 	 * meaning that someone (including you) on a channel with the client has 
 	 * changed their nickname. 

@@ -1,5 +1,6 @@
 ---
 module: Irccd.Plugin
+js: true
 summary: Plugin management and inspection.
 ---
 
@@ -42,8 +43,8 @@ Then `Irccd.Plugin.config` will have the following properties:
 
 ## Functions
 
-  - [info](function/info.html)
-  - [list](function/list.html)
-  - [load](function/load.html)
-  - [reload](function/reload.html)
-  - [unload](function/unload.html)
+  - [info](Irccd.Plugin.info.html)
+  - [list](Irccd.Plugin.list.html)
+  - [load](Irccd.Plugin.load.html)
+  - [reload](Irccd.Plugin.reload.html)
+  - [unload](Irccd.Plugin.unload.html)

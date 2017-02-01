@@ -1,5 +1,5 @@
-IRC Client Daemon LICENSE
-=========================
+IRC Client Daemon ISC LICENSE
+=============================
 
 Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
 

@@ -1,5 +1,6 @@
 ---
 event: onReload
+js: true
 summary: "Request to reload the plugin."
 synopsis: "function onReload()"
 ---

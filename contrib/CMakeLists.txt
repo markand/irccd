@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -19,19 +19,15 @@
 project(contrib)
 
 if (WITH_SYSTEMD)
-	# Directory for systemd
-	set(WITH_SYSTEMDDIR "/usr/lib/systemd/system" CACHE STRING "Absolute path where to install systemd files")
+    set(PATH "${CMAKE_INSTALL_PREFIX}/${WITH_BINDIR}/irccd")
 
-	if (IRCCD_RELOCATABLE)
-		set(PATH "${CMAKE_INSTALL_PREFIX}/${WITH_BINDIR}/irccd")
-	else ()
-		set(PATH "${WITH_BINDIR}/irccd")
-	endif ()
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/irccd.service
+        ${CMAKE_CURRENT_BINARY_DIR}/irccd.service
+    )
 
-	configure_file(
-		${CMAKE_CURRENT_SOURCE_DIR}/irccd.service
-		${CMAKE_CURRENT_BINARY_DIR}/irccd.service
-	)
-
-	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/irccd.service DESTINATION ${WITH_SYSTEMDDIR})
+    install(
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/irccd.service
+        DESTINATION ${WITH_SYSTEMDDIR}
+    )
 endif()

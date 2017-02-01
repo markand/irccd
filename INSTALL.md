@@ -14,21 +14,21 @@ Requirements
 
 Optional:
 
-  - [OpenSSL](http://openssl.org), Used for SSL connections to IRC servers, recommended,
-  - [Pandoc](http://pandoc.org). Used for documentation process,
-  - [Doxygen](http://www.stack.nl/~dimitri/doxygen). For the documentation about irccd internals.
+  - [OpenSSL](http://openssl.org), Used for SSL connections to IRC servers,
+    recommended,
+  - [Pandoc](http://pandoc.org), Used for documentation process,
+  - [Doxygen](http://www.stack.nl/~dimitri/doxygen), For the documentation about
+    irccd internals.
 
 Basic installation
 ------------------
 
 This is the quick way to install irccd.
 
-````
-tar xvzf irccd-x.y.z-tar.xz
-cd irccd-x.y.z
-mkdir _build_
-cd _build_
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make
-sudo make install
-````
+    tar xvzf irccd-x.y.z-tar.xz
+    cd irccd-x.y.z
+    mkdir _build_
+    cd _build_
+    cmake .. -DCMAKE_BUILD_TYPE=Release
+    make
+    sudo make install

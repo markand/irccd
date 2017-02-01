@@ -1,6 +1,7 @@
 ---
 title: "Roulette plugin"
 header: "Roulette plugin"
+guide: yes
 ---
 
 The plugin **roulette** is a funny script that let you do a russian roulette game but without any injuries.
@@ -31,21 +32,28 @@ markand was kicked by irccd [markand, HEADSHOT]
 
 ## Configuration
 
-The **roulette** plugin can be configured to use different formats.
-
 The following options are available under the `[plugin.roulette]` section:
 
-  - **format-lucky**: (string) the text to show on luck,
-  - **format-shot**: (string) the text to show on shot.
+**Deprecated in irccd 2.1.0:**
+
+  - **format-lucky**: Use `[format.roulette] lucky` instead,
+  - **format-shot**: Use `[format.roulette] shot` instead,
+
+## Formats
+
+The **roulette** plugin supports the following formats in `[format.roulette]` section:
+
+  - **lucky**: (string) the text to show on luck,
+  - **shot**: (string) the text to show on shot.
 
 ### Keywords supported
 
 The following keywords are supported:
 
-| Format           | Keywords                                           | Notes                             |
-|------------------|----------------------------------------------------|-----------------------------------|
-| (any)            | channel, command, nickname, origin, plugin, server | all formats                       |
-| **format-lucky** | count                                              | the number of cylinder count left |
+| Format    | Keywords                                           | Notes                             |
+|-----------|----------------------------------------------------|-----------------------------------|
+| (any)     | channel, command, nickname, origin, plugin, server | all formats                       |
+| **lucky** | count                                              | the number of cylinder count left |
 
 Example:
 
@@ -53,9 +61,9 @@ Example:
  <div class="panel-heading">~/.config/irccd/irccd.conf</div>
  <div class="panel-body">
 ````ini
-[plugin.roulette]
-format-lucky = "#{nickname} you're gonna get shot"
-format-shot = "BIM"
+[format.roulette]
+lucky = "#{nickname} you're gonna get shot"
+shot = "BIM"
 ````
  </div>
 </div>

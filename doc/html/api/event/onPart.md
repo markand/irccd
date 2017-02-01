@@ -1,5 +1,6 @@
 ---
 event: onPart
+js: true
 summary: "This event is triggered when someone has left a specific channel."
 synopsis: "function onPart(server, origin, channel, reason)"
 arguments:

@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -19,12 +19,20 @@
 project(gtest)
 
 irccd_define_library(
-	TARGET extern-gtest
-	SOURCES src/gtest-all.cc
-	PUBLIC_INCLUDES ${gtest_SOURCE_DIR}/include
-	LOCAL_INCLUDES ${gtest_SOURCE_DIR}
+    LOCAL
+    TARGET extern-gtest
+    SOURCES src/gtest-all.cc
+    PUBLIC_INCLUDES ${gtest_SOURCE_DIR}/include
+    LOCAL_INCLUDES ${gtest_SOURCE_DIR}
 )
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-	target_compile_options(extern-gtest PRIVATE -Wno-missing-field-initializers)
+    target_compile_options(extern-gtest PRIVATE -Wno-missing-field-initializers)
 endif ()
+
+set_target_properties(
+    extern-gtest
+    PROPERTIES
+        PROJECT_LABEL gtest
+        FOLDER extern
+)

@@ -1,15 +1,16 @@
 ---
 module: Irccd.ElapsedTimer
+js: true
 ---
 
 ## Usage
 
-This class let you measure the elpased time.
+This class let you measure the elapsed time.
 
 ## Methods
 
-  - [(constructor)](method/constructor.html)
-  - [elapsed](method/elapsed.html)
-  - [pause](method/pause.html)
-  - [reset](method/reset.html)
-  - [restart](method/restart.html)
+  - [(constructor)](Irccd.ElapsedTimer.prototype.constructor.html)
+  - [elapsed](Irccd.ElapsedTimer.prototype.elapsed.html)
+  - [pause](Irccd.ElapsedTimer.prototype.pause.html)
+  - [reset](Irccd.ElapsedTimer.prototype.reset.html)
+  - [restart](Irccd.ElapsedTimer.prototype.restart.html)

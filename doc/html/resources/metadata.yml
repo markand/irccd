@@ -1,0 +1,6 @@
+---
+baseurl: "@baseurl@"
+parents:
+@parents@
+basename: "@basename@"
+---

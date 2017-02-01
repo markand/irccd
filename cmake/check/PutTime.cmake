@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -22,15 +22,15 @@ include(CheckCXXSourceCompiles)
 # std::put_time does not exists on Debian 8, probably too old libstdc++.
 #
 check_cxx_source_compiles(
-	"#include <iomanip>
-	 #include <iostream>
+    "#include <iomanip>
+     #include <iostream>
 
-	 int main()
-	 {
-		std::cout << std::put_time(nullptr, \"\");
+     int main()
+     {
+        std::cout << std::put_time(nullptr, \"\");
 
-		return 0;
-	 }
-	"
-	HAVE_STD_PUT_TIME
+        return 0;
+     }
+    "
+    HAVE_STD_PUT_TIME
 )

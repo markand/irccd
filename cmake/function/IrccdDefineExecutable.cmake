@@ -1,7 +1,7 @@
 #
 # IrccdDefineExecutable.cmake -- CMake build system for irccd
 #
-# Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -21,59 +21,59 @@
 # -------------------------------------------------------------------
 #
 # irccd_define_executable(
-#	TARGET target name
-#	SOURCES src1, src2, srcn
-#	FLAGS (Optional) C/C++ flags (without -D)
-#	LIBRARIES (Optional) libraries to link
-#	INCLUDES (Optional) includes for the target
-#	INSTALL (Optional) if set, install the executable (default: false)
-#	PRIVATE (Optional) if set, do not build it into the fake root (default: false)
+#    TARGET target name
+#    DESCRIPTION short description (Required if installed)
+#    SOURCES src1, src2, srcn
+#    FLAGS (Optional) C/C++ flags (without -D)
+#    LIBRARIES (Optional) libraries to link
+#    INCLUDES (Optional) includes for the target
 # )
 #
 # Create an executable that can be installed or not.
 #
 
 function(irccd_define_executable)
-	set(options INSTALL PRIVATE)
-	set(oneValueArgs TARGET)
-	set(multiValueArgs SOURCES FLAGS LIBRARIES INCLUDES)
+    set(options "")
+    set(oneValueArgs DESCRIPTION TARGET)
+    set(multiValueArgs SOURCES FLAGS LIBRARIES INCLUDES)
 
-	cmake_parse_arguments(EXE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    cmake_parse_arguments(EXE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-	if (NOT EXE_TARGET)
-		message(FATAL_ERROR "Please set TARGET")
-	endif ()
-	if (NOT EXE_SOURCES)
-		message(FATAL_ERROR "Please set SOURCES")
-	endif ()
+    if (NOT EXE_TARGET)
+        message(FATAL_ERROR "Please set TARGET")
+    endif ()
+    if (NOT EXE_SOURCES)
+        message(FATAL_ERROR "Please set SOURCES")
+    endif ()
+    if (NOT EXE_DESCRIPTION)
+        message(FATAL_ERROR "DESCRIPTION required")
+    endif ()
 
-	if (EXE_INSTALL AND EXE_PRIVATE)
-		message(FATAL_ERROR "INSTALL and PRIVATE are mutually exclusive")
-	endif ()
+    add_executable(${EXE_TARGET} ${EXE_SOURCES})
+    target_include_directories(${EXE_TARGET} PRIVATE ${EXE_INCLUDES})
+    target_compile_definitions(${EXE_TARGET} PRIVATE ${EXE_FLAGS})
+    target_link_libraries(${EXE_TARGET} ${EXE_LIBRARIES})
 
-	add_executable(${EXE_TARGET} ${EXE_SOURCES})
-	target_include_directories(${EXE_TARGET} PRIVATE ${EXE_INCLUDES})
-	target_compile_definitions(${EXE_TARGET} PRIVATE ${EXE_FLAGS})
-	target_link_libraries(${EXE_TARGET} ${EXE_LIBRARIES})
+    # use fakeroot for public executables.
+    set_target_properties(
+        ${EXE_TARGET}
+        PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+        RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+    )
 
-	# use fakeroot if relocatable for public executables.
-	if (IRCCD_RELOCATABLE AND NOT EXE_PRIVATE)
-		file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/fakeroot/${WITH_BINDIR})
+    install(
+        TARGETS ${EXE_TARGET}
+        COMPONENT ${EXE_TARGET}
+        RUNTIME DESTINATION ${WITH_BINDIR}
+    )
 
-		set_target_properties(
-			${EXE_TARGET}
-			PROPERTIES
-				RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/fakeroot/${WITH_BINDIR}
-				RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/fakeroot/${WITH_BINDIR}
-				RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/fakeroot/${WITH_BINDIR}
-		)
-	endif ()
-
-	# Install the target.
-	if (EXE_INSTALL)
-		install(
-			TARGETS ${EXE_TARGET}
-			RUNTIME DESTINATION ${WITH_BINDIR}
-		)
-	endif ()
+    # Put the application into a cpack group.
+    string(TOUPPER ${EXE_TARGET} CMP)
+    setg(CPACK_COMPONENT_${CMP}_DISPLAY_NAME "${EXE_TARGET} executable")
+    setg(CPACK_COMPONENT_${CMP}_DESCRIPTION ${EXE_DESCRIPTION})
+    setg(CPACK_COMPONENT_${CMP}_GROUP "Applications")
 endfunction()

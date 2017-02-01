@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+.\" Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
 .\"
 .\" Permission to use, copy, modify, and/or distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -65,7 +65,9 @@ set this only once.
 .Pp
 .Bl -tag -width PARAMETERXXX -compact
 .It type
-(string) type of listener "ip" or "unix"
+(string) connection type: "ip" or "unix".
+.It password
+(string) an authentication password (Optional, default: none).
 .El
 .Pp
 The following parameters are available for type "ip":
@@ -85,6 +87,38 @@ The following parameters are available for type "unix":
 .It path
 (string) the file path to the socket.
 .El
+.\" ALIAS
+.Ss alias
+The alias section can be used to define custom user commands.
+.Pp
+To define an alias, just add a new section named
+.Nm alias.name
+where name is your desired alias name.
+.Pp
+Then, add any option you like to execute commands you want. The option name is
+ignored and serves as auto-documentation only.
+.Pp
+Example:
+.Bd -literal
+[alias.present]
+say-hello = ( "server-message", "localhost", "#staff", "hello world!" )
+warning = ( "server-me", "localhost", "#staff", "is a bot")
+.Ed
+.Pp
+.Nm Placeholders
+.Pp
+Sometimes, you want to pass parameters to your alias. The placeholder syntax
+allows you to define where your command line arguments will be replaced before
+being sent to irccd.
+.Pp
+The syntax uses `%n` where **n** is an integer starting from 0.
+.Pp
+Example:
+.Bd -literal
+[alias.present]
+say-hello = ( "server-message", "%0", "%1", "hello world!" )
+warning = ( "server-me", "%0", "%1", "is a bot")
+.Ed
 .\" FILES
 .Sh FILES
 The default config file is located at

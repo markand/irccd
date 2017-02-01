@@ -1,5 +1,6 @@
 ---
 event: onNotice
+js: true
 summary: "This event is triggered when someone sent a notice to you."
 synopsis: "function onNotice(server, origin, notice)"
 arguments:

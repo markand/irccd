@@ -77,12 +77,21 @@ $endif$ <!-- endif js -->
 
     <!-- Side bar for guide -->
 $if(guide)$
+<nav id="toc">
 $toc$
+</nav>
 $endif$ <!-- endif guide -->
 
     </div><!-- Side bar -->
 
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+      <ol class="breadcrumb">
+$for(parents)$
+        <li><a href="$parents.path$">$parents.name$</a></li>
+$endfor$
+        <li class="active">$basename$</li>
+      </ol><!-- !breadcrumb -->
+
     <!-- Page body for JavaScript -->
 $if(js)$
     <!-- Page header, may be: event | module | function | method -->
@@ -163,7 +172,7 @@ $endif$ <!-- endif guide -->
 
   <hr>
   <footer>
-    <p>&copy; 2013-2016 David Demelier.</p>
+    <p>&copy; 2013-2017 David Demelier.</p>
   </footer>
 </div> <!-- !container -->
 
@@ -173,8 +182,11 @@ $endif$ <!-- endif guide -->
     <script src="$baseurl$/js/jquery.min.js"></script>
     <script src="$baseurl$/js/bootstrap.min.js"></script>
 
-    <script src="$baseurl$/js/highlight.js"></script>
+    <script src="$baseurl$/js/highlight.min.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
     <script>jQuery("table").addClass("table");</script>
+    <script>jQuery("#toc").addClass("nav");</script>
+    <script>jQuery("#toc").addClass("nav-sidebar");</script>
+    <script>jQuery("nav ul").addClass("nav");</script>
   </body>
 </html>

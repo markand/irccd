@@ -1,7 +1,7 @@
 #
 # IrccdDefineLibrary.cmake -- CMake build system for irccd
 #
-# Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -21,33 +21,39 @@
 # -------------------------------------------------------------------
 #
 # irccd_define_library(
-#	TARGET target name
-#	SOURCES src1, src2, srcn
-#	FLAGS (Optional) C/C++ flags (without -D)
-#	LIBRARIES (Optional) libraries to link
-#	LOCAL_INCLUDES (Optional) local includes for the target only
-#	PUBLIC_INCLUDES (Optional) includes to share with target dependencies
+#    TARGET target name
+#    SOURCES src1, src2, srcn
+#    LOCAL (Optional) set to true to build a static library
+#    FLAGS (Optional) C/C++ flags (without -D)
+#    LIBRARIES (Optional) libraries to link
+#    LOCAL_INCLUDES (Optional) local includes for the target only
+#    PUBLIC_INCLUDES (Optional) includes to share with target dependencies
 # )
 #
 # Create a static library for internal use.
 #
 
 function(irccd_define_library)
-	set(oneValueArgs TARGET)
-	set(multiValueArgs SOURCES FLAGS LIBRARIES LOCAL_INCLUDES PUBLIC_INCLUDES)
-	set(mandatory TARGET SOURCES)
+    set(options LOCAL)
+    set(oneValueArgs TARGET)
+    set(multiValueArgs SOURCES FLAGS LIBRARIES LOCAL_INCLUDES PUBLIC_INCLUDES)
+    set(mandatory TARGET SOURCES)
 
-	cmake_parse_arguments(LIB "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    cmake_parse_arguments(LIB "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-	if (NOT LIB_TARGET)
-		message(FATAL_ERROR "Please set TARGET")
-	endif ()
-	if (NOT LIB_SOURCES)
-		message(FATAL_ERROR "Please set SOURCES")
-	endif ()
+    if (NOT LIB_TARGET)
+        message(FATAL_ERROR "Please set TARGET")
+    endif ()
+    if (NOT LIB_SOURCES)
+        message(FATAL_ERROR "Please set SOURCES")
+    endif ()
+    if (LIB_LOCAL)
+        set(type STATIC)
+    endif ()
 
-	add_library(${LIB_TARGET} STATIC ${LIB_SOURCES})
-	target_include_directories(${LIB_TARGET} PRIVATE ${LIB_LOCAL_INCLUDES} PUBLIC ${LIB_PUBLIC_INCLUDES})
-	target_compile_definitions(${LIB_TARGET} PUBLIC ${LIB_FLAGS})
-	target_link_libraries(${LIB_TARGET} ${LIB_LIBRARIES})
+    add_library(${LIB_TARGET} ${type} ${LIB_SOURCES})
+    target_include_directories(${LIB_TARGET} PRIVATE ${LIB_LOCAL_INCLUDES} PUBLIC ${LIB_PUBLIC_INCLUDES})
+    target_compile_definitions(${LIB_TARGET} PUBLIC ${LIB_FLAGS})
+    target_link_libraries(${LIB_TARGET} ${LIB_LIBRARIES})
+    set_target_properties(${LIB_TARGET} PROPERTIES PREFIX "")
 endfunction()

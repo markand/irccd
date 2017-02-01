@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -28,29 +28,41 @@ check_function_exists(gethostbyname_r HAVE_GETHOSTBYNAME_R)
 check_function_exists(localtime_r HAVE_LOCALTIME_R)
 
 if (HAVE_GETHOSTBYNAME_R)
-	list(APPEND FLAGS "HAVE_GETHOSTBYNAME_R")
+    list(APPEND FLAGS "HAVE_GETHOSTBYNAME_R")
 endif ()
 if (HAVE_LOCALTIME_R)
-	list(APPEND FLAGS "HAVE_LOCALTIME_R")
+    list(APPEND FLAGS "HAVE_LOCALTIME_R")
 endif ()
 
 # SSL is optional
 if (WITH_SSL)
-	list(APPEND INCLUDES ${OPENSSL_INCLUDE_DIR})
-	list(APPEND LIBRARIES ${OPENSSL_LIBRARIES})
-	list(APPEND FLAGS "ENABLE_SSL")
+    list(APPEND INCLUDES ${OPENSSL_INCLUDE_DIR})
+    list(APPEND LIBRARIES ${OPENSSL_LIBRARIES})
+    list(APPEND FLAGS "ENABLE_SSL")
 endif ()
 
 # Enable or disable IPv6
 if (WITH_IPV6)
-	list(APPEND FLAGS "ENABLE_IPV6")
+    list(APPEND FLAGS "ENABLE_IPV6")
+endif ()
+
+if (WIN32)
+    list(APPEND LIBRARIES ws2_32)
 endif ()
 
 irccd_define_library(
-	TARGET extern-ircclient
-	SOURCES src/libircclient.c
-	FLAGS ${FLAGS}
-	LIBRARIES ${LIBRARIES}
-	PUBLIC_INCLUDES "${extern-libircclient_SOURCE_DIR}/include"
-	LOCAL_INCLUDES ${INCLUDES}
+    LOCAL
+    TARGET extern-ircclient
+    SOURCES src/libircclient.c
+    FLAGS ${FLAGS}
+    LIBRARIES ${LIBRARIES}
+    PUBLIC_INCLUDES "${extern-libircclient_SOURCE_DIR}/include"
+    LOCAL_INCLUDES ${INCLUDES}
+)
+
+set_target_properties(
+    extern-ircclient
+    PROPERTIES
+        PROJECT_LABEL libircclient
+        FOLDER extern
 )

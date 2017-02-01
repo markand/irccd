@@ -1,5 +1,6 @@
 ---
 event: onCommand
+js: true
 summary: "Execute special command."
 synopsis: "function onCommand(server, origin, channel, message)"
 arguments:

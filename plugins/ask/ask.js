@@ -1,7 +1,7 @@
 /*
  * ask.js -- crazy module for asking a medium
  *
- * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,52 +16,57 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* Modules */
-var File	= Irccd.File;
-var Logger	= Irccd.Logger;
-var Plugin	= Irccd.Plugin;
-var Util	= Irccd.Util;
-
-/* Plugin information */
+// Plugin information.
 info = {
-	author: "David Demelier <markand@malikania.fr>",
-	license: "ISC",
-	summary: "Crazy module for asking a medium",
-	version: "@IRCCD_VERSION@"
+    author: "David Demelier <markand@malikania.fr>",
+    license: "ISC",
+    summary: "Crazy module for asking a medium",
+    version: "@IRCCD_VERSION@"
 };
+
+// Modules.
+var File = Irccd.File;
+var Logger = Irccd.Logger;
+var Plugin = Irccd.Plugin;
+var Util = Irccd.Util;
 
 /* List of answers */
 var answers = [
-	"Yes",
-	"No"
+    "Yes",
+    "No"
 ];
 
 function onLoad()
 {
-	try {
-		var path = Plugin.configPath + "answers.conf";
-		var file = new File(path, "r");
-		var line;
+    try {
+        // User specified file?
+        if (Plugin.config["file"])
+            path = Plugin.config["file"];
+        else
+            path = Plugin.configPath + "answers.conf";
 
-		/* Reset */
-		answers = [];
+        var file = new File(path, "r");
+        var line;
 
-		while ((line = file.readline()))
-			/* Skip empty lines */
-			if (line.length > 0)
-				answers.push(line);
-	} catch (e) {
-		Logger.warning(path + ": " + e.message);
-		Logger.warning("using default answers");
-	}
+        // Reset.
+        answers = [];
+
+        while ((line = file.readline()))
+            // Skip empty lines.
+            if (line.length > 0)
+                answers.push(line);
+    } catch (e) {
+        Logger.warning(path + ": " + e.message);
+        Logger.warning("using default answers");
+    }
 }
 
 function onCommand(server, origin, channel)
 {
-	var target = Util.splituser(origin);
-	var response = answers[Math.floor(Math.random() * answers.length)];
+    var target = Util.splituser(origin);
+    var response = answers[Math.floor(Math.random() * answers.length)];
 
-	server.message(channel, target + ", " + response);
+    server.message(channel, target + ", " + response);
 }
 
 onReload = onLoad;

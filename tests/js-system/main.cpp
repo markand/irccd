@@ -1,7 +1,7 @@
 /*
  * main.cpp -- test Irccd.System API
  *
- * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,32 +18,68 @@
 
 #include <gtest/gtest.h>
 
-#include <system.h>
-
-#include <js-irccd.h>
-#include <js-system.h>
+#include <irccd/irccd.hpp>
+#include <irccd/mod-file.hpp>
+#include <irccd/mod-irccd.hpp>
+#include <irccd/mod-system.hpp>
+#include <irccd/plugin-js.hpp>
+#include <irccd/service.hpp>
+#include <irccd/sysconfig.hpp>
+#include <irccd/system.hpp>
 
 using namespace irccd;
 
-TEST(TestJsSystem, home)
+class TestJsSystem : public testing::Test {
+protected:
+    Irccd m_irccd;
+    std::shared_ptr<JsPlugin> m_plugin;
+
+    TestJsSystem()
+        : m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
+    {
+        IrccdModule().load(m_irccd, m_plugin);
+        FileModule().load(m_irccd, m_plugin);
+        SystemModule().load(m_irccd, m_plugin);
+    }
+};
+
+TEST_F(TestJsSystem, home)
 {
-	js::Context ctx;
+    try {
+        duk_peval_string_noresult(m_plugin->context(), "result = Irccd.System.home();");
 
-	loadJsIrccd(ctx);
-	loadJsSystem(ctx);
-
-	try {
-		ctx.peval(js::Script{"result = Irccd.System.home();"});
-
-		ASSERT_EQ(sys::home(), ctx.getGlobal<std::string>("result"));
-	} catch (const std::exception &ex) {
-		FAIL() << ex.what();
-	}
+        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
+        ASSERT_EQ(sys::home(), duk_get_string(m_plugin->context(), -1));
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
 }
+
+#if defined(HAVE_POPEN)
+
+TEST_F(TestJsSystem, popen)
+{
+    try {
+        auto ret = duk_peval_string(m_plugin->context(),
+            "f = Irccd.System.popen(\"" IRCCD_EXECUTABLE " --version\", \"r\");"
+            "r = f.readline();"
+        );
+
+        if (ret != 0)
+            throw dukx_exception(m_plugin->context(), -1);
+
+        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "r"));
+        ASSERT_STREQ(IRCCD_VERSION, duk_get_string(m_plugin->context(), -1));
+    } catch (const std::exception &ex) {
+        FAIL() << ex.what();
+    }
+}
+
+#endif
 
 int main(int argc, char **argv)
 {
-	testing::InitGoogleTest(&argc, argv);
+    testing::InitGoogleTest(&argc, argv);
 
-	return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }

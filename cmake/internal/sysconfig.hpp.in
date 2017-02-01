@@ -1,0 +1,126 @@
+/*
+ * sysconfig.h -- configuration for irccd
+ *
+ * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+#ifndef IRCCD_SYSCONFIG_H
+#define IRCCD_SYSCONFIG_H
+
+/*
+ * Fix annoying "Please include winsock2.h before windows.h"
+ */
+#if defined(_WIN32)
+#   if !defined(WIN32_MEAN_AND_LEAN)
+#       define WIN32_MEAN_AND_LEAN
+#   endif
+#   if !defined(NOMINMAX)
+#       define NOMINMAX
+#   endif
+
+#   include <winsock2.h>
+#   include <windows.h>
+#endif
+
+/*
+ * Auto generated from CMake.
+ * ------------------------------------------------------------------
+ */
+
+#define PREFIX                  "@CMAKE_INSTALL_PREFIX@"
+
+#define IRCCD_VERSION_MAJOR     @IRCCD_VERSION_MAJOR@
+#define IRCCD_VERSION_MINOR     @IRCCD_VERSION_MINOR@
+#define IRCCD_VERSION_PATCH     @IRCCD_VERSION_PATCH@
+#define IRCCD_VERSION           "@IRCCD_VERSION@"
+
+/*
+ * System identification.
+ * ------------------------------------------------------------------
+ */
+
+#cmakedefine IRCCD_SYSTEM_WINDOWS
+#cmakedefine IRCCD_SYSTEM_MAC
+#cmakedefine IRCCD_SYSTEM_FREEBSD
+#cmakedefine IRCCD_SYSTEM_NETBSD
+#cmakedefine IRCCD_SYSTEM_OPENBSD
+#cmakedefine IRCCD_SYSTEM_LINUX
+#cmakedefine IRCCD_SYSTEM_UNKNOWN
+
+/*
+ * User definable options.
+ * ------------------------------------------------------------------
+ */
+
+#define WITH_BINDIR             "@WITH_BINDIR@"
+#define WITH_DATADIR            "@WITH_DATADIR@"
+#define WITH_CONFDIR            "@WITH_CONFDIR@"
+#define WITH_PLUGINDIR          "@WITH_PLUGINDIR@"
+#define WITH_NPLUGINDIR         "@WITH_NPLUGINDIR@"
+#define WITH_CACHEDIR           "@WITH_CACHEDIR@"
+
+#cmakedefine WITH_JS
+#cmakedefine WITH_SSL
+
+/*
+ * Platform checks.
+ * ------------------------------------------------------------------
+ */
+
+#cmakedefine HAVE_ACCESS
+#cmakedefine HAVE_DAEMON
+#cmakedefine HAVE_GETPID
+#cmakedefine HAVE_POPEN
+#cmakedefine HAVE_SETGID
+#cmakedefine HAVE_SETPROGNAME
+#cmakedefine HAVE_SETUID
+#cmakedefine HAVE_STD_PUT_TIME
+#cmakedefine HAVE_STAT
+#cmakedefine HAVE_STAT_ST_ATIME
+#cmakedefine HAVE_STAT_ST_BLKSIZE
+#cmakedefine HAVE_STAT_ST_BLOCKS
+#cmakedefine HAVE_STAT_ST_CTIME
+#cmakedefine HAVE_STAT_ST_DEV
+#cmakedefine HAVE_STAT_ST_GID
+#cmakedefine HAVE_STAT_ST_INO
+#cmakedefine HAVE_STAT_ST_MODE
+#cmakedefine HAVE_STAT_ST_MTIME
+#cmakedefine HAVE_STAT_ST_NLINK
+#cmakedefine HAVE_STAT_ST_RDEV
+#cmakedefine HAVE_STAT_ST_SIZE
+#cmakedefine HAVE_STAT_ST_UID
+#cmakedefine HAVE_SYSLOG
+
+/*
+ * Export stuff.
+ * ------------------------------------------------------------------
+ */
+#cmakedefine BUILD_SHARED_LIBS
+
+#if defined(_WIN32)
+#   if defined(BUILD_SHARED_LIBS)
+#       if defined(IRCCD_BUILDING_DLL)
+#           define IRCCD_EXPORT __declspec(dllexport)
+#       else
+#           define IRCCD_EXPORT __declspec(dllimport)
+#       endif
+#   else
+#       define IRCCD_EXPORT
+#   endif
+#else
+#  define IRCCD_EXPORT
+#endif
+
+#endif // !IRCCD_SYSCONFIG_H

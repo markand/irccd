@@ -1,5 +1,6 @@
 ---
 event: onMessage
+js: true
 summary: "This event is triggered when someone said something on a specific channel."
 synopsis: "function onMessage(server, origin, channel, message)"
 arguments:

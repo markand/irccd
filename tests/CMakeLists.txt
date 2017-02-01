@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -20,22 +20,53 @@
 project(tests)
 
 if (WITH_TESTS)
-	# Misc
-	add_subdirectory(elapsedtimer)
-	add_subdirectory(path)
-	add_subdirectory(rules)
-	add_subdirectory(timer)
-	add_subdirectory(util)
+    add_subdirectory(cmd-plugin-config)
+    add_subdirectory(cmd-plugin-info)
+    add_subdirectory(cmd-plugin-list)
+    add_subdirectory(cmd-plugin-load)
+    add_subdirectory(cmd-plugin-reload)
+    add_subdirectory(cmd-plugin-unload)
+    add_subdirectory(cmd-server-cmode)
+    add_subdirectory(cmd-server-cnotice)
+    add_subdirectory(cmd-server-connect)
+    add_subdirectory(cmd-server-disconnect)
+    add_subdirectory(cmd-server-info)
+    add_subdirectory(cmd-server-invite)
+    add_subdirectory(cmd-server-join)
+    add_subdirectory(cmd-server-kick)
+    add_subdirectory(cmd-server-list)
+    add_subdirectory(cmd-server-me)
+    add_subdirectory(cmd-server-message)
+    add_subdirectory(cmd-server-mode)
+    add_subdirectory(cmd-server-nick)
+    add_subdirectory(cmd-server-notice)
+    add_subdirectory(cmd-server-part)
+    add_subdirectory(cmd-server-reconnect)
+    add_subdirectory(cmd-server-topic)
 
-	# JS API
-	if (WITH_JS)
-		add_subdirectory(js-elapsedtimer)
-		add_subdirectory(js-file)
-		add_subdirectory(js-irccd)
-		add_subdirectory(js-logger)
-		add_subdirectory(js-system)
-		add_subdirectory(js-timer)
-		add_subdirectory(js-unicode)
-		add_subdirectory(js-util)
-	endif ()
+    # Misc
+    add_subdirectory(elapsedtimer)
+    add_subdirectory(logger)
+    add_subdirectory(path)
+    add_subdirectory(rules)
+    add_subdirectory(util)
+
+    # JS API
+    if (WITH_JS)
+        add_subdirectory(js-elapsedtimer)
+        add_subdirectory(js-file)
+        add_subdirectory(js-irccd)
+        add_subdirectory(js-logger)
+        add_subdirectory(js-system)
+        add_subdirectory(js-timer)
+        add_subdirectory(js-unicode)
+        add_subdirectory(js-util)
+        add_subdirectory(plugin-ask)
+        add_subdirectory(plugin-auth)
+        add_subdirectory(plugin-hangman)
+        add_subdirectory(plugin-history)
+        add_subdirectory(plugin-logger)
+        add_subdirectory(plugin-plugin)
+        add_subdirectory(timer)
+    endif ()
 endif ()

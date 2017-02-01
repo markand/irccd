@@ -1,7 +1,7 @@
 /*
  * main.cpp -- test path functions
  *
- * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,10 +18,9 @@
 
 #include <gtest/gtest.h>
 
-#include <irccd-config.h>
-
-#include <logger.h>
-#include <path.h>
+#include <irccd/sysconfig.hpp>
+#include <irccd/logger.hpp>
+#include <irccd/path.hpp>
 
 namespace irccd {
 
@@ -33,42 +32,42 @@ namespace irccd {
 
 TEST(Back, nochange)
 {
-	std::string path = "\\usr\\local\\etc\\";
-	std::string result = path::clean(path);
+    std::string path = "\\usr\\local\\etc\\";
+    std::string result = path::clean(path);
 
-	ASSERT_EQ(path, result);
+    ASSERT_EQ(path, result);
 }
 
 TEST(Back, duplicateBegin)
 {
-	std::string path = "\\\\usr\\local\\etc\\";
-	std::string result = path::clean(path);
+    std::string path = "\\\\usr\\local\\etc\\";
+    std::string result = path::clean(path);
 
-	ASSERT_EQ("\\usr\\local\\etc\\", result);
+    ASSERT_EQ("\\usr\\local\\etc\\", result);
 }
 
 TEST(Back, duplicateEnd)
 {
-	std::string path = "\\usr\\local\\etc\\\\";
-	std::string result = path::clean(path);
+    std::string path = "\\usr\\local\\etc\\\\";
+    std::string result = path::clean(path);
 
-	ASSERT_EQ("\\usr\\local\\etc\\", result);
+    ASSERT_EQ("\\usr\\local\\etc\\", result);
 }
 
 TEST(Back, duplicateEverywhere)
 {
-	std::string path = "\\\\usr\\\\local\\\\etc\\\\";
-	std::string result = path::clean(path);
+    std::string path = "\\\\usr\\\\local\\\\etc\\\\";
+    std::string result = path::clean(path);
 
-	ASSERT_EQ("\\usr\\local\\etc\\", result);
+    ASSERT_EQ("\\usr\\local\\etc\\", result);
 }
 
 TEST(Back, missingTrailing)
 {
-	std::string path = "\\usr\\local\\etc";
-	std::string result = path::clean(path);
+    std::string path = "\\usr\\local\\etc";
+    std::string result = path::clean(path);
 
-	ASSERT_EQ("\\usr\\local\\etc\\", result);
+    ASSERT_EQ("\\usr\\local\\etc\\", result);
 }
 
 #else
@@ -79,42 +78,42 @@ TEST(Back, missingTrailing)
 
 TEST(Forward, nochange)
 {
-	std::string path = "/usr/local/etc/";
-	std::string result = path::clean(path);
+    std::string path = "/usr/local/etc/";
+    std::string result = path::clean(path);
 
-	ASSERT_EQ(path, result);
+    ASSERT_EQ(path, result);
 }
 
 TEST(Forward, duplicateBegin)
 {
-	std::string path = "//usr/local/etc/";
-	std::string result = path::clean(path);
+    std::string path = "//usr/local/etc/";
+    std::string result = path::clean(path);
 
-	ASSERT_EQ("/usr/local/etc/", result);
+    ASSERT_EQ("/usr/local/etc/", result);
 }
 
 TEST(Forward, duplicateEnd)
 {
-	std::string path = "/usr/local/etc//";
-	std::string result = path::clean(path);
+    std::string path = "/usr/local/etc//";
+    std::string result = path::clean(path);
 
-	ASSERT_EQ("/usr/local/etc/", result);
+    ASSERT_EQ("/usr/local/etc/", result);
 }
 
 TEST(Forward, duplicateEverywhere)
 {
-	std::string path = "//usr//local//etc//";
-	std::string result = path::clean(path);
+    std::string path = "//usr//local//etc//";
+    std::string result = path::clean(path);
 
-	ASSERT_EQ("/usr/local/etc/", result);
+    ASSERT_EQ("/usr/local/etc/", result);
 }
 
 TEST(Forward, missingTrailing)
 {
-	std::string path = "/usr/local/etc";
-	std::string result = path::clean(path);
+    std::string path = "/usr/local/etc";
+    std::string result = path::clean(path);
 
-	ASSERT_EQ("/usr/local/etc/", result);
+    ASSERT_EQ("/usr/local/etc/", result);
 }
 
 #endif
@@ -125,23 +124,22 @@ using namespace irccd;
 
 int main(int argc, char **argv)
 {
-	/*
-	 * Just show everything for test purpose.
-	 */
-	path::setApplicationPath(argv[0]);
-	log::setInterface(std::make_unique<log::Console>());
-	log::debug() << "System paths:" << std::endl;
-	log::debug() << "  config(system):  " << path::get(path::PathConfig, path::OwnerSystem) << std::endl;
-	log::debug() << "  data(system):    " << path::get(path::PathData, path::OwnerSystem) << std::endl;
-	log::debug() << "  plugins(system): " << path::get(path::PathPlugins, path::OwnerSystem) << std::endl;
-	log::debug() << "  cache(system):   " << path::get(path::PathCache, path::OwnerSystem) << std::endl;
-	log::debug() << "User paths:" << std::endl;
-	log::debug() << "  config(user):    " << path::get(path::PathConfig, path::OwnerUser) << std::endl;
-	log::debug() << "  data(user):      " << path::get(path::PathData, path::OwnerUser) << std::endl;
-	log::debug() << "  plugins(user):   " << path::get(path::PathPlugins, path::OwnerUser) << std::endl;
-	log::debug() << "  cache(user):     " << path::get(path::PathCache, path::OwnerUser) << std::endl;
+    /*
+     * Just show everything for test purpose.
+     */
+    path::setApplicationPath(argv[0]);
+    log::debug() << "System paths:" << std::endl;
+    log::debug() << "  config(system):  " << path::get(path::PathConfig, path::OwnerSystem) << std::endl;
+    log::debug() << "  data(system):    " << path::get(path::PathData, path::OwnerSystem) << std::endl;
+    log::debug() << "  plugins(system): " << path::get(path::PathPlugins, path::OwnerSystem) << std::endl;
+    log::debug() << "  cache(system):   " << path::get(path::PathCache, path::OwnerSystem) << std::endl;
+    log::debug() << "User paths:" << std::endl;
+    log::debug() << "  config(user):    " << path::get(path::PathConfig, path::OwnerUser) << std::endl;
+    log::debug() << "  data(user):      " << path::get(path::PathData, path::OwnerUser) << std::endl;
+    log::debug() << "  plugins(user):   " << path::get(path::PathPlugins, path::OwnerUser) << std::endl;
+    log::debug() << "  cache(user):     " << path::get(path::PathCache, path::OwnerUser) << std::endl;
 
-	testing::InitGoogleTest(&argc, argv);
+    testing::InitGoogleTest(&argc, argv);
 
-	return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }

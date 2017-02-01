@@ -1,5 +1,6 @@
 ---
 module: Irccd
+js: true
 ---
 
 ## Usage
@@ -26,8 +27,8 @@ var Logger = Irccd.Logger;
 
 function onLoad()
 {
-	Logger.info("Major: " + Irccd.version.major);
-	Logger.info("Minor: " + Irccd.version.minor);
-	Logger.info("Patch: " + Irccd.version.patch);
+    Logger.info("Major: " + Irccd.version.major);
+    Logger.info("Minor: " + Irccd.version.minor);
+    Logger.info("Patch: " + Irccd.version.patch);
 }
 ````

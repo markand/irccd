@@ -1,5 +1,6 @@
 ---
 event: onChannelMode
+js: true
 summary: "This event is triggered when someone changed the channel's mode."
 synopsis: "function onChannelMode(server, origin, channel, mode, arg)"
 arguments:

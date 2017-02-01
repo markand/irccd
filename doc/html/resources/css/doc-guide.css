@@ -1,17 +1,13 @@
-h1, h2, h3 {
-	margin-top: 40px;
-}
-
 #introduction {
-	margin-top: 0px;
+    margin-top: 0px;
 }
 
 pre {
-	margin-top: 20px;
-	margin-bottom: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
 .alert {
-	margin-top: 20px;
-	margin-bottom: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }

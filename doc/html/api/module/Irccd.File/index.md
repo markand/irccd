@@ -1,5 +1,6 @@
 ---
 module: Irccd.File
+js: true
 summary: "File opening and writing."
 ---
 
@@ -25,22 +26,23 @@ The following properties are defined:
 
 ## Functions
 
-  - [basename](function/basename.html)
-  - [dirname](function/dirname.html)
-  - [exists](function/exists.html)
-  - [remove](function/remove.html)
-  - [stat](function/stat.html) (Optional)
+  - [basename](Irccd.File.basename.html)
+  - [dirname](Irccd.File.dirname.html)
+  - [exists](Irccd.File.exists.html)
+  - [remove](Irccd.File.remove.html)
+  - [stat](Irccd.File.stat.html) (Optional)
 
 ## Methods
 
-  - [(constructor)](method/constructor.html)
-  - [basename](method/basename.html)
-  - [close](method/close.html)
-  - [dirname](method/dirname.html)
-  - [read](method/read.html)
-  - [readline](method/readline.html)
-  - [remove](method/remove.html)
-  - [seek](method/seek.html)
-  - [stat](method/stat.html) (Optional)
-  - [tell](method/tell.html)
-  - [write](method/write.html)
+  - [(constructor)](Irccd.File.prototype.constructor.html)
+  - [basename](Irccd.File.prototype.basename.html)
+  - [close](Irccd.File.prototype.close.html)
+  - [dirname](Irccd.File.prototype.dirname.html)
+  - [lines](Irccd.File.prototype.lines.html)
+  - [read](Irccd.File.prototype.read.html)
+  - [readline](Irccd.File.prototype.readline.html)
+  - [remove](Irccd.File.prototype.remove.html)
+  - [seek](Irccd.File.prototype.seek.html)
+  - [stat](Irccd.File.prototype.stat.html) (Optional)
+  - [tell](Irccd.File.prototype.tell.html)
+  - [write](Irccd.File.prototype.write.html)

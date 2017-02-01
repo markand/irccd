@@ -1,7 +1,7 @@
 /*
  * main.cpp -- test Irccd.Timer API
  *
- * Copyright (c) 2013-2016 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -18,44 +18,60 @@
 
 #include <gtest/gtest.h>
 
-#include <irccd.h>
-#include <elapsed-timer.h>
-#include <system.h>
+#include <irccd/elapsed-timer.hpp>
+#include <irccd/irccd.hpp>
+#include <irccd/logger.hpp>
+#include <irccd/mod-irccd.hpp>
+#include <irccd/mod-plugin.hpp>
+#include <irccd/mod-timer.hpp>
+#include <irccd/plugin-js.hpp>
+#include <irccd/service.hpp>
+#include <irccd/system.hpp>
 
 using namespace irccd;
 
-TEST(Basic, single)
+class TestJsTimer : public testing::Test {
+protected:
+    Irccd m_irccd;
+    std::shared_ptr<JsPlugin> m_plugin;
+
+    void open(const std::string &file)
+    {
+        m_plugin = std::make_shared<JsPlugin>("timer", file);
+
+        IrccdModule().load(m_irccd, m_plugin);
+        PluginModule().load(m_irccd, m_plugin);
+        TimerModule().load(m_irccd, m_plugin);
+
+        m_plugin->onLoad(m_irccd);
+        m_irccd.plugins().add(m_plugin);
+    }
+};
+
+TEST_F(TestJsTimer, single)
 {
-	Irccd irccd;
-	ElapsedTimer timer;
+    open(DIRECTORY "/timer-single.js");
 
-	auto plugin = std::make_shared<Plugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-single.js");
+    ElapsedTimer timer;
 
-	irccd.addPlugin(plugin);
+    while (timer.elapsed() < 3000)
+        util::poller::poll(512, m_irccd);
 
-	while (timer.elapsed() < 3000) {
-		irccd.poll();
-		irccd.dispatch();
-	}
-
-	ASSERT_EQ(1, plugin->context().getGlobal<int>("count"));
+    ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "count"));
+    ASSERT_EQ(1, duk_get_int(m_plugin->context(), -1));
 }
 
-TEST(Basic, repeat)
+TEST_F(TestJsTimer, repeat)
 {
-	Irccd irccd;
-	ElapsedTimer timer;
+    open(DIRECTORY "/timer-repeat.js");
 
-	auto plugin = std::make_shared<Plugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-repeat.js");
+    ElapsedTimer timer;
 
-	irccd.addPlugin(plugin);
+    while (timer.elapsed() < 3000)
+        util::poller::poll(512, m_irccd);
 
-	while (timer.elapsed() < 3000) {
-		irccd.poll();
-		irccd.dispatch();
-	}
-
-	ASSERT_GE(plugin->context().getGlobal<int>("count"), 5);
+    ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "count"));
+    ASSERT_GE(duk_get_int(m_plugin->context(), -1), 5);
 }
 
 #if 0
@@ -66,31 +82,31 @@ TEST(Basic, repeat)
 
 TEST(Basic, pending)
 {
-	/*
-	 * This test ensure that if pending actions on a stopped timer are never executed.
-	 */
-	Irccd irccd;
-	ElapsedTimer timer;
+    /*
+     * This test ensure that if pending actions on a stopped timer are never executed.
+     */
+    Irccd irccd;
+    ElapsedTimer timer;
 
-	auto plugin = std::make_shared<Plugin>("timer", IRCCD_TESTS_DIRECTORY "/timer-pending.js");
+    auto plugin = std::make_shared<Plugin>("timer", DIRECTORY "/timer-pending.js");
 
-	irccd.addPlugin(plugin);
-	irccd.poll();
-	irccd.dispatch();
+    irccd.addPlugin(plugin);
+    irccd.poll();
+    irccd.dispatch();
 
-	ASSERT_EQ(0, plugin->context().getGlobal<int>("count"));
+    ASSERT_EQ(0, plugin->context().getGlobal<int>("count"));
 }
 
 #endif
 
 int main(int argc, char **argv)
 {
-	/* Needed for some components */
-	sys::setProgramName("irccd");
-	path::setApplicationPath(argv[0]);
-	log::setInterface(std::make_unique<log::Console>());
-	log::setVerbose(true);
-	testing::InitGoogleTest(&argc, argv);
+    // Needed for some components.
+    sys::setProgramName("irccd");
+    path::setApplicationPath(argv[0]);
+    log::setLogger(std::make_unique<log::SilentLogger>());
+    log::setVerbose(true);
+    testing::InitGoogleTest(&argc, argv);
 
-	return RUN_ALL_TESTS();
+    return RUN_ALL_TESTS();
 }
