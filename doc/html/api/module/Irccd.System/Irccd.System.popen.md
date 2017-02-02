@@ -6,8 +6,8 @@ synopsis: "Irccd.System.popen(cmd, mode) /* optional */"
 arguments:
   - "**cmd**: the command to execute,"
   - "**mode**: the mode (e.g. `r`)."
-returns: "An [Irccd.File](@baseurl@/api/module/Irccd.File/index.html) object."
-throws: "An [Irccd.SystemError](@baseurl@/api/module/Irccd/index.html#types) on failures."
+returns: "An [Irccd.File](@baseurl@api/module/Irccd.File/index.html) object."
+throws: "An [Irccd.SystemError](@baseurl@api/module/Irccd/index.html#types) on failures."
 ---
 
 ## Remarks

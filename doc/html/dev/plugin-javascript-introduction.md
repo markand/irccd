@@ -169,6 +169,6 @@ This will output to the irccd log something like:
 plugin foo: error condition
 ````
 
-[onMessage]: @baseurl@/api/event/onMessage.html
-[server-api]: @baseurl@/api/module/Irccd.Server/index.html
-[server-message]: @baseurl@/api/module/Irccd.Server/Irccd.Server.prototype.message.html
+[onMessage]: @baseurl@api/event/onMessage.html
+[server-api]: @baseurl@api/module/Irccd.Server/index.html
+[server-message]: @baseurl@api/module/Irccd.Server/Irccd.Server.prototype.message.html

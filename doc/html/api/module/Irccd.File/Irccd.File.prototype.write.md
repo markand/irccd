@@ -6,5 +6,5 @@ synopsis: "File.prototype.write(data)"
 arguments:
   - "**data**: the character to write."
 returns: "The number of bytes written."
-throws: "An [Irccd.SystemError](@baseurl@/api/module/Irccd/index.html#types) on failures."
+throws: "An [Irccd.SystemError](@baseurl@api/module/Irccd/index.html#types) on failures."
 ---
