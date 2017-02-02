@@ -110,13 +110,19 @@ macro(irccd_build_html)
     # Create a list of parents for the breadcrumb widget.
     string(REPLACE "/" ";" parentlist "${dirname}")
     set(parents "  -\n")
-    set(parents "${parents}    name: \"index\"\n")
+    set(parents "${parents}    active: true\n")
+    set(parents "${parents}    name: \"Home\"\n")
     set(parents "${parents}    path: \"${baseurl}index.html\"\n")
 
     set(path "${baseurl}")
     foreach (p ${parentlist})
         set(path "${path}${p}/")
         set(parents "${parents}  -\n")
+
+        if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${dirname}/${path}index.md)
+            set(parents "${parents}    active: true\n")
+        endif ()
+
         set(parents "${parents}    name: \"${p}\"\n")
         set(parents "${parents}    path: \"${path}index.html\"\n")
     endforeach ()
