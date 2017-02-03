@@ -21,7 +21,6 @@ project(html)
 set(
     HTML_SOURCES
     ${html_SOURCE_DIR}/index.md
-    ${html_SOURCE_DIR}/api/module/index.md
     ${html_SOURCE_DIR}/api/module/Irccd.Directory/index.md
     ${html_SOURCE_DIR}/api/module/Irccd.Directory/Irccd.Directory.remove.md
     ${html_SOURCE_DIR}/api/module/Irccd.Directory/Irccd.Directory.mkdir.md
@@ -113,7 +112,6 @@ set(
     ${html_SOURCE_DIR}/api/module/Irccd.Util/Irccd.Util.format.md
     ${html_SOURCE_DIR}/api/module/Irccd.Util/Irccd.Util.splituser.md
     ${html_SOURCE_DIR}/api/index.md
-    ${html_SOURCE_DIR}/api/event/index.md
     ${html_SOURCE_DIR}/api/event/onWhois.md
     ${html_SOURCE_DIR}/api/event/onMessage.md
     ${html_SOURCE_DIR}/api/event/onPart.md
@@ -137,17 +135,13 @@ set(
     ${html_SOURCE_DIR}/api/event/onQuery.md
     ${html_SOURCE_DIR}/build/build-from-sources.md
     ${html_SOURCE_DIR}/build/build-options.md
-    ${html_SOURCE_DIR}/build/index.md
-    ${html_SOURCE_DIR}/dev/index.md
     ${html_SOURCE_DIR}/dev/plugin-javascript-introduction.md
     ${html_SOURCE_DIR}/dev/socket-commands.md
     ${html_SOURCE_DIR}/dev/socket-protocol.md
     ${html_SOURCE_DIR}/irccd/configuring.md
-    ${html_SOURCE_DIR}/irccd/index.md
     ${html_SOURCE_DIR}/irccd/paths.md
     ${html_SOURCE_DIR}/irccd/usage.md
     ${html_SOURCE_DIR}/irccdctl/configuring.md
-    ${html_SOURCE_DIR}/irccdctl/index.md
     ${html_SOURCE_DIR}/irccdctl/usage.md
     ${html_SOURCE_DIR}/irccdctl/command/index.md
     ${html_SOURCE_DIR}/irccdctl/command/help.md
@@ -176,7 +170,6 @@ set(
     ${html_SOURCE_DIR}/irccdctl/command/watch.md
     ${html_SOURCE_DIR}/misc/common-patterns-and-formatting.md
     ${html_SOURCE_DIR}/misc/configuration-syntax.md
-    ${html_SOURCE_DIR}/misc/index.md
 )
 
 set(

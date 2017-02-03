@@ -322,7 +322,7 @@ ask = ""                               # Search ask
 myplugin = /path/to/myplugin.js        # Use absolute path
 ````
 
-[cfgdir]: @baseurl@/irccd/paths.html
-[cp]: @baseurl@/misc/common-patterns-and-formatting.html
-[irccdctl]: @baseurl@/irccdctl/index.html
-[sockets]: @baseurl@/dev/socket-commands.html
+[cfgdir]: @baseurl@irccd/paths.html
+[cp]: @baseurl@misc/common-patterns-and-formatting.html
+[irccdctl]: @baseurl@irccdctl/index.html
+[sockets]: @baseurl@dev/socket-commands.html

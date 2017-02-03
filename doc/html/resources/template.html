@@ -11,12 +11,12 @@
     <title>$title$</title>
 
     <!-- CSS -->
-    <link href="$baseurl$/css/bootstrap.min.css" rel="stylesheet">
-    <link href="$baseurl$/css/tomorrow.css" rel="stylesheet">
-    <link href="$baseurl$/css/doc.css" rel="stylesheet">
+    <link href="$baseurl$css/bootstrap.min.css" rel="stylesheet">
+    <link href="$baseurl$css/tomorrow.css" rel="stylesheet">
+    <link href="$baseurl$css/doc.css" rel="stylesheet">
 
 $if(guide)$
-    <link href="$baseurl$/css/doc-guide.css" rel="stylesheet">
+    <link href="$baseurl$css/doc-guide.css" rel="stylesheet">
 $endif$
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -34,7 +34,6 @@ $endif$
     <div class="col-sm-1 col-md-2 sidebar">
     <!-- Side bar for JavaScript -->
 $if(js)$
-      <a href="$baseurl$api/index.html"><h3>Home</h3></a>
       <h3>Events</h3>
       <ul class="nav nav-sidebar sidebar-list">
         <li><a href="$baseurl$api/event/onChannelMode.html">onChannelMode</a></li>
@@ -87,7 +86,11 @@ $endif$ <!-- endif guide -->
     <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
       <ol class="breadcrumb">
 $for(parents)$
+        $if(parents.active)$
         <li><a href="$parents.path$">$parents.name$</a></li>
+        $else$
+        <li>$parents.name$</li>
+        $endif$
 $endfor$
         <li class="active">$basename$</li>
       </ol><!-- !breadcrumb -->
@@ -179,10 +182,10 @@ $endif$ <!-- endif guide -->
     <!-- Bootstrap core JavaScript
     ================================================== -->
     <!-- Placed at the end of the document so the pages load faster -->
-    <script src="$baseurl$/js/jquery.min.js"></script>
-    <script src="$baseurl$/js/bootstrap.min.js"></script>
+    <script src="$baseurl$js/jquery.min.js"></script>
+    <script src="$baseurl$js/bootstrap.min.js"></script>
 
-    <script src="$baseurl$/js/highlight.min.js"></script>
+    <script src="$baseurl$js/highlight.min.js"></script>
     <script>hljs.initHighlightingOnLoad();</script>
     <script>jQuery("table").addClass("table");</script>
     <script>jQuery("#toc").addClass("nav");</script>

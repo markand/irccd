@@ -9,4 +9,4 @@ arguments:
   - "**message**: the real message, without the ! part."
 ---
 
-Synonym of [onCommand](@baseurl@/api/event/onCommand.html) but for queries.
+Synonym of [onCommand](@baseurl@api/event/onCommand.html) but for queries.
