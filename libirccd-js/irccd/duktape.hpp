@@ -25,8 +25,13 @@
  * \author David Demelier <markand@malikania.fr>
  */
 
+#include <cerrno>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
+#include <exception>
+#include <fstream>
+#include <iterator>
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -105,11 +110,11 @@ public:
  */
 class Exception : public std::exception {
 public:
-    std::string name;        //!< name of error
-    std::string message;        //!< error message
-    std::string stack;        //!< stack if available
-    std::string fileName;        //!< filename if applicable
-    int lineNumber{0};        //!< line number if applicable
+    std::string name;       //!< name of error
+    std::string message;    //!< error message
+    std::string stack;      //!< stack if available
+    std::string fileName;   //!< filename if applicable
+    int lineNumber{0};      //!< line number if applicable
 
     /**
      * Get the error message. This effectively returns message field.
@@ -467,6 +472,38 @@ void dukx_push_array(duk_context *ctx, const std::vector<T> &values, Pusher &&pu
     for (auto x : values) {
         push(ctx, x);
         duk_put_prop_index(ctx, -2, i++);
+    }
+}
+
+/**
+ * Replace the removed duk_peval_string with one throwing exception.
+ *
+ * \param ctx the context
+ * \param path the path to the file
+ * \throw Exception on errors
+ */
+inline void dukx_peval_file(duk_context* ctx, const std::string& path)
+{
+    std::ifstream input(path);
+
+    if (!input) {
+        Exception ex;
+
+        ex.name = "Error";
+        ex.message = std::strerror(errno);
+        ex.fileName = path;
+
+        throw ex;
+    }
+
+    std::string data(std::istreambuf_iterator<char>(input), {});
+
+    if (duk_peval_lstring(ctx, data.c_str(), data.length()) != 0) {
+        auto ex = dukx_exception(ctx, -1);
+
+        ex.fileName = path;
+
+        throw ex;
     }
 }
 

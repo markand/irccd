@@ -313,9 +313,7 @@ TEST_F(TestJsUtil, cut_invalid_data)
         auto ret = duk_peval_string(m_plugin->context(),
             "try {\n"
             "  lines = Irccd.Util.cut(123);\n"
-            "print(':(');"
             "} catch (e) {\n"
-            "print(':)');"
             "  name = e.name;\n"
             "  message = e.message;\n"
             "}\n"
