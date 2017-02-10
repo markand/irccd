@@ -149,14 +149,6 @@
 #define DUK_API_PUBLIC_H_INCLUDED
 
 /*
- *  Avoid C++ name mangling
- */
-
-#if defined(__cplusplus)
-extern "C" {
-#endif
-
-/*
  *  Some defines forwarded from feature detection
  */
 
@@ -1217,15 +1209,6 @@ DUK_EXTERNAL_DECL duk_double_t duk_components_to_time(duk_context *ctx, duk_time
  */
 #if defined(DUK_USE_ROM_OBJECTS) && defined(DUK_USE_HEAPPTR16)
 DUK_EXTERNAL_DECL const void * const duk_rom_compressed_pointers[];
-#endif
-
-/*
- *  C++ name mangling
- */
-
-#if defined(__cplusplus)
-/* end 'extern "C"' wrapper */
-}
 #endif
 
 #endif  /* DUK_API_PUBLIC_H_INCLUDED */
