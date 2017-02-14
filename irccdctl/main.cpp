@@ -18,6 +18,8 @@
 
 #include <unordered_map>
 
+#include <boost/filesystem.hpp>
+
 #include <format.h>
 
 #include "alias.hpp"
@@ -559,9 +561,10 @@ int main(int argc, char **argv)
             read(it->second);
         else {
             for (const std::string &dir : path::list(path::PathConfig)) {
+                boost::system::error_code ec;
                 std::string path = dir + "irccdctl.conf";
 
-                if (fs::exists(path)) {
+                if (boost::filesystem::exists(path, ec) && !ec) {
                     read(path);
                     break;
                 }

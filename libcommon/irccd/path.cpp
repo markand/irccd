@@ -21,6 +21,8 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <boost/filesystem.hpp>
+
 #include "sysconfig.hpp"
 
 #if defined(IRCCD_SYSTEM_WINDOWS)
@@ -398,9 +400,10 @@ void setApplicationPath(const std::string &argv0)
             std::string name = fs::baseName(argv0);
 
             for (const auto &dir : util::split(sys::env("PATH"), std::string(1, Separator))) {
+                boost::system::error_code ec;
                 std::string path = dir + fs::separator() + name;
 
-                if (fs::exists(path)) {
+                if (boost::filesystem::exists(path, ec) && !ec) {
                     base = path;
                     break;
                 }

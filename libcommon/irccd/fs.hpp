@@ -169,17 +169,6 @@ IRCCD_EXPORT struct stat stat(const std::string &path);
 #endif // !HAVE_STAT
 
 /**
- * Check if a file exists.
- *
- * If HAVE_ACCESS is defined, the function access is used, otherwise stat is
- * used.
- *
- * \param path the path to check
- * \return true if the path exists
- */
-IRCCD_EXPORT bool exists(const std::string &path) noexcept;
-
-/**
  * Check if the path is absolute.
  *
  * \param path the path

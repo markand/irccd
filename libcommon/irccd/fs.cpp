@@ -320,21 +320,6 @@ struct stat stat(const std::string &path)
 #endif
 
 /*
- * exists.
- * ------------------------------------------------------------------
- */
-bool exists(const std::string &path) noexcept
-{
-#if defined(FS_HAVE_STAT)
-    struct stat st;
-
-    return ::stat(path.c_str(), &st) == 0;
-#else
-    return  hasAccess(path, "r");
-#endif
-}
-
-/*
  * readdir.
  * ------------------------------------------------------------------
  */

@@ -22,6 +22,8 @@
 #include <iterator>
 #include <vector>
 
+#include <boost/filesystem.hpp>
+
 #include "sysconfig.hpp"
 
 #if defined(HAVE_STAT)
@@ -554,7 +556,11 @@ duk_ret_t functionDirname(duk_context *ctx)
  */
 duk_ret_t functionExists(duk_context *ctx)
 {
-    duk_push_boolean(ctx, fs::exists(duk_require_string(ctx, 0)));
+    try {
+        duk_push_boolean(ctx, boost::filesystem::exists(duk_require_string(ctx, 0)));
+    } catch (...) {
+        duk_push_boolean(ctx, false);
+    }
 
     return 1;
 }

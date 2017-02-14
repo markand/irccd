@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <boost/filesystem.hpp>
+
 #include "sysconfig.hpp"
 
 #if defined(HAVE_STAT)
@@ -105,9 +107,10 @@ void JsPlugin::putPath(const std::string &varname, const std::string &append, pa
 
     // Use the first existing directory available.
     for (const auto &p : path::list(type)) {
+        boost::system::error_code ec;
         foundpath = path::clean(p + append);
 
-        if (fs::exists(foundpath)) {
+        if (boost::filesystem::exists(foundpath, ec) && !ec) {
             found = true;
             break;
         }

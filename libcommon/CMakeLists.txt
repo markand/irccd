@@ -18,6 +18,8 @@
 
 project(libcommon)
 
+find_package(Boost 1.60 REQUIRED COMPONENTS filesystem system)
+
 set(
     HEADERS
     ${libcommon_SOURCE_DIR}/irccd/elapsed-timer.hpp
@@ -59,11 +61,13 @@ irccd_define_library(
     LIBRARIES
         extern-fmt
         extern-json
+        ${Boost_LIBRARIES}
         $<$<BOOL:${WIN32}>:shlwapi>
         $<$<BOOL:${WIN32}>:ws2_32>
         $<$<BOOL:${WITH_SSL}>:OpenSSL::SSL>
         $<$<BOOL:${WITH_SSL}>:OpenSSL::Crypto>
     PUBLIC_INCLUDES
+        ${Boost_INCLUDE_DIRS}
         $<BUILD_INTERFACE:${IRCCD_FAKEROOTDIR}/include/irccd>
         $<BUILD_INTERFACE:${IRCCD_FAKEROOTDIR}/include>
         $<BUILD_INTERFACE:${libcommon_SOURCE_DIR}/irccd>
