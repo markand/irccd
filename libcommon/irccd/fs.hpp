@@ -169,22 +169,6 @@ IRCCD_EXPORT struct stat stat(const std::string &path);
 #endif // !HAVE_STAT
 
 /**
- * Check if the path is absolute.
- *
- * \param path the path
- * \return true if the path is absolute
- */
-IRCCD_EXPORT bool isAbsolute(const std::string &path) noexcept;
-
-/**
- * Check if the path is relative.
- *
- * \param path the path
- * \return true if the path is absolute
- */
-IRCCD_EXPORT bool isRelative(const std::string &path) noexcept;
-
-/**
  * Check if the file is readable.
  *
  * \param path the path

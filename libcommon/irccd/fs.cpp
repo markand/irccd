@@ -213,32 +213,6 @@ std::string dirName(std::string path)
 }
 
 /*
- * isAbsolute.
- * ------------------------------------------------------------------
- */
-bool isAbsolute(const std::string &path) noexcept
-{
-#if defined(_WIN32)
-    return !isRelative(path);
-#else
-    return path.size() > 0 && path[0] == '/';
-#endif
-}
-
-/*
- * isRelative.
- * ------------------------------------------------------------------
- */
-bool isRelative(const std::string &path) noexcept
-{
-#if defined(_WIN32)
-    return PathIsRelativeA(path.c_str()) == 1;
-#else
-    return !isAbsolute(path);
-#endif
-}
-
-/*
  * isReadable.
  * ------------------------------------------------------------------
  */

@@ -394,9 +394,9 @@ void setApplicationPath(const std::string &argv0)
      * In the worst case use current working directory.
      */
     if (base.empty()) {
-        if (fs::isAbsolute(argv0))
+        if (boost::filesystem::path(argv0).is_absolute()) {
             base = argv0;
-        else {
+        } else {
             std::string name = fs::baseName(argv0);
 
             for (const auto &dir : util::split(sys::env("PATH"), std::string(1, Separator))) {
