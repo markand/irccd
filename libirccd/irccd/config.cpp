@@ -485,7 +485,7 @@ void Config::loadLogs() const
             iface = loadLogFile(*sc);
         else if (it->value() == "syslog")
             iface = loadLogSyslog();
-        else
+        else if (it->value() != "console")
             throw std::runtime_error("logs: unknown log type: {}"_format(it->value()));
 
         if (iface)
