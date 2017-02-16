@@ -222,15 +222,6 @@ IRCCD_EXPORT bool isSymlink(const std::string &path);
 IRCCD_EXPORT std::vector<Entry> readdir(const std::string &path, int flags = 0);
 
 /**
- * Remove a directory recursively.
- *
- * If errors happens, they are silently discarded to remove as much as possible.
- *
- * \param path the path
- */
-IRCCD_EXPORT void rmdir(const std::string &path) noexcept;
-
-/**
  * Search an item recursively.
  *
  * The predicate must have the following signature:

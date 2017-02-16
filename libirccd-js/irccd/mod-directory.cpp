@@ -174,14 +174,13 @@ duk_ret_t remove(duk_context *ctx, const std::string &path, bool recursive)
     if (!fs::isDirectory(path))
         dukx_throw(ctx, SystemError(EINVAL, "not a directory"));
 
+    boost::system::error_code ec;
+
     if (!recursive) {
-#if defined(_WIN32)
-        ::RemoveDirectory(path.c_str());
-#else
-        ::remove(path.c_str());
-#endif
-    } else
-        fs::rmdir(path.c_str());
+        boost::filesystem::remove(path, ec);
+    } else {
+        boost::filesystem::remove_all(path, ec);
+    }
 
     return 0;
 }
