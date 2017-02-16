@@ -24,6 +24,8 @@
 #include <stdexcept>
 #include <string>
 
+#include <boost/filesystem.hpp>
+
 #include "duktape.hpp"
 #include "fs.hpp"
 #include "mod-directory.hpp"
@@ -329,17 +331,13 @@ duk_ret_t funcRemove(duk_context *ctx)
  *
  * Arguments:
  *   - path, the path to the directory,
- *   - mode, the mode, not available on all platforms.
  * Throws:
  *   - Any exception on error.
  */
 duk_ret_t funcMkdir(duk_context *ctx)
 {
     try {
-        fs::mkdir(
-            duk_require_string(ctx, 0),
-            duk_is_number(ctx, 1) ? duk_get_int(ctx, 1) : 0700
-        );
+        boost::filesystem::create_directories(duk_require_string(ctx, 0));
     } catch (const std::exception &ex) {
         dukx_throw(ctx, SystemError(errno, ex.what()));
     }

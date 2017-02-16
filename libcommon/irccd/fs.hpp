@@ -222,16 +222,6 @@ IRCCD_EXPORT bool isSymlink(const std::string &path);
 IRCCD_EXPORT std::vector<Entry> readdir(const std::string &path, int flags = 0);
 
 /**
- * Create a directory recursively.
- *
- * \param path the path
- * \param mode the optional mode (not always supported)
- * \throw std::runtime_error on failure
- * \post all intermediate directories are created
- */
-IRCCD_EXPORT void mkdir(const std::string &path, int mode = 0700);
-
-/**
  * Remove a directory recursively.
  *
  * If errors happens, they are silently discarded to remove as much as possible.
