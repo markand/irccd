@@ -510,6 +510,7 @@ std::vector<std::string> list(Path path)
     assert(path >= PathConfig && path <= PathNativePlugins);
 
     std::vector<std::string> list;
+    boost::system::error_code ec;
 
     switch (path) {
     case PathCache:
@@ -525,12 +526,12 @@ std::vector<std::string> list(Path path)
         list.push_back(clean(systemData()));
         break;
     case PathPlugins:
-        list.push_back(clean(fs::cwd()));
+        list.push_back(clean(boost::filesystem::current_path(ec).string()));
         list.push_back(clean(userPlugins()));
         list.push_back(clean(systemPlugins()));
         break;
     case PathNativePlugins:
-        list.push_back(clean(fs::cwd()));
+        list.push_back(clean(boost::filesystem::current_path(ec).string()));
         list.push_back(clean(systemNativePlugins()));
         break;
     default:

@@ -270,14 +270,6 @@ inline std::string find(const std::string &base, const std::regex &regex)
     return findIf(base, [&] (const auto &, const auto &entry) { return std::regex_match(entry.name, regex); });
 }
 
-/**
- * Get the current working directory.
- *
- * \return the current working directory
- * \throw std::runtime_error on failure
- */
-IRCCD_EXPORT std::string cwd();
-
 } // !fs
 
 } // !irccd
