@@ -261,21 +261,6 @@ bool isDirectory(const std::string &path)
 }
 
 /*
- * isSymlink.
- * ------------------------------------------------------------------
- */
-bool isSymlink(const std::string &path)
-{
-    return typeOf(path, [] (const auto &object) {
-#if defined(_WIN32)
-        return (object & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT;
-#elif defined(FS_HAVE_STAT)
-        return S_ISLNK(object.st_mode);
-#endif
-    });
-}
-
-/*
  * stat.
  * ------------------------------------------------------------------
  */
