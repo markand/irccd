@@ -194,15 +194,6 @@ IRCCD_EXPORT bool isWritable(const std::string &path) noexcept;
 IRCCD_EXPORT bool isFile(const std::string &path);
 
 /**
- * Check if the file is a directory.
- *
- * \param path the path
- * \return true if it is a directory and false if not or not readable
- * \throw std::runtime_error if the operation is not supported
- */
-IRCCD_EXPORT bool isDirectory(const std::string &path);
-
-/**
  * Read a directory and return a list of entries (not recursive).
  *
  * \param path the directory path

@@ -171,10 +171,11 @@ duk_ret_t find(duk_context *ctx, std::string base, bool recursive, int patternIn
  */
 duk_ret_t remove(duk_context *ctx, const std::string &path, bool recursive)
 {
-    if (!fs::isDirectory(path))
-        dukx_throw(ctx, SystemError(EINVAL, "not a directory"));
-
     boost::system::error_code ec;
+
+    if (!boost::filesystem::is_directory(path, ec) || ec) {
+        dukx_throw(ctx, SystemError(EINVAL, "not a directory"));
+    }
 
     if (!recursive) {
         boost::filesystem::remove(path, ec);
@@ -254,7 +255,7 @@ duk_ret_t constructor(duk_context *ctx)
         std::string path = duk_require_string(ctx, 0);
         std::int8_t flags = duk_get_uint(ctx, 1);
 
-        if (!fs::isDirectory(path))
+        if (!boost::filesystem::is_directory(path))
             dukx_throw(ctx, SystemError(EINVAL, "not a directory"));
 
         std::vector<fs::Entry> list = fs::readdir(path, flags);
