@@ -376,14 +376,14 @@ TransportServerIp::TransportServerIp(const std::string &address,
     m_socket.set(net::option::SockReuseAddress(true));
 
     if (mode & v6) {
+        // Disable or enable IPv4 when using IPv6.
+        if (!(mode & v4))
+            m_socket.set(net::option::Ipv6Only(true));
+
         if (address == "*")
             m_socket.bind(net::ipv6::any(port));
         else
             m_socket.bind(net::ipv6::pton(address, port));
-
-        // Disable or enable IPv4 when using IPv6.
-        if (!(mode & v4))
-            m_socket.set(net::option::Ipv6Only(true));
     } else {
         if (address == "*")
             m_socket.bind(net::ipv4::any(port));

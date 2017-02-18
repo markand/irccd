@@ -157,10 +157,16 @@ std::shared_ptr<TransportServer> loadTransportIp(const ini::Section &sc)
     if ((it = sc.find("address")) != sc.end())
         address = it->value();
 
-    // Domain
     std::uint8_t mode = TransportServerIp::v4;
 
-    if ((it = sc.find("domain")) != sc.end()) {
+    /*
+     * Documentation stated family but code checked for 'domain' option.
+     *
+     * As irccdctl uses domain, accept both and unify the option name to 'family'.
+     *
+     * See #637
+     */
+    if ((it = sc.find("domain")) != sc.end() || (it = sc.find("family")) != sc.end()) {
         mode = 0;
 
         for (const auto &v : *it) {
@@ -188,7 +194,7 @@ std::shared_ptr<TransportServer> loadTransportIp(const ini::Section &sc)
     }
 
     if (mode == 0)
-        throw std::invalid_argument("transport: domain must at least have ipv4 or ipv6");
+        throw std::invalid_argument("transport: family must at least have ipv4 or ipv6");
 
     if (pkey.empty())
         return std::make_shared<TransportServerIp>(address, port, mode);
