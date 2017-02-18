@@ -53,6 +53,7 @@ if (WITH_TESTS)
 
     # JS API
     if (WITH_JS)
+        add_subdirectory(js)
         add_subdirectory(js-elapsedtimer)
         add_subdirectory(js-file)
         add_subdirectory(js-irccd)

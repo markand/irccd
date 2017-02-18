@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <climits>
+
 #include <libircclient.h>
 
 #include "mod-util.hpp"
@@ -53,6 +55,156 @@ util::Substitution getSubstitution(duk_context *ctx, int index)
     });
 
     return params;
+}
+
+/*
+ * split (for Irccd.Util.cut as cut)
+ * ------------------------------------------------------------------
+ *
+ * Extract individual tokens in array or a whole string as a std:::vector.
+ */
+std::vector<std::string> split(duk_context *ctx)
+{
+    duk_require_type_mask(ctx, 0, DUK_TYPE_MASK_OBJECT | DUK_TYPE_MASK_STRING);
+
+    std::vector<std::string> result;
+    std::string pattern = " \t\n";
+
+    if (duk_is_string(ctx, 0)) {
+        result = util::split(dukx_get_std_string(ctx, 0), pattern);
+    } else if (duk_is_array(ctx, 0)) {
+        duk_enum(ctx, 0, DUK_ENUM_ARRAY_INDICES_ONLY);
+
+        while (duk_next(ctx, -1, 1)) {
+            // Split individual tokens as array if spaces are found.
+            auto tmp = util::split(duk_to_string(ctx, -1), pattern);
+
+            result.insert(result.end(), tmp.begin(), tmp.end());
+            duk_pop_2(ctx);
+        }
+    }
+
+    return result;
+}
+
+/*
+ * limit (for Irccd.Util.cut as cut)
+ * ------------------------------------------------------------------
+ *
+ * Get the maxl/maxc argument.
+ *
+ * The argument value is the default and also used as the result returned.
+ */
+int limit(duk_context *ctx, int index, const char *name, int value)
+{
+    if (duk_get_top(ctx) < index || !duk_is_number(ctx, index)) {
+        return value;
+    }
+
+    value = duk_to_int(ctx, index);
+    
+    if (value <= 0) {
+        duk_error(ctx, DUK_ERR_RANGE_ERROR, "argument %d (%s) must be positive", index, name);
+    }
+
+    return value;
+}
+
+/*
+ * lines (for Irccd.Util.cut as cut)
+ * ------------------------------------------------------------------
+ *
+ * Build a list of lines.
+ *
+ * Several cases possible:
+ *
+ *   - s is the current line
+ *   - abc is the token to add
+ *
+ * s   = ""                 (new line)
+ * s  -> "abc"
+ *
+ * s   = "hello world"      (enough room)
+ * s  -> "hello world abc"
+ *
+ * s   = "hello world"      (not enough room: maxc is smaller)
+ * s+1 = "abc"
+ */
+std::vector<std::string> lines(duk_context *ctx, const std::vector<std::string>& tokens, int maxc)
+{
+    std::vector<std::string> result{""};
+
+    for (const auto &s : tokens) {
+        if (s.length() > static_cast<std::size_t>(maxc)) {
+            duk_error(ctx, DUK_ERR_RANGE_ERROR, "word '%s' could not fit in maxc limit (%d)", s.c_str(), maxc);
+        }
+
+        // Compute the length required (prepend a space if needed)
+        auto required = s.length() + (result.back().empty() ? 0 : 1);
+
+        if (result.back().length() + required > static_cast<std::size_t>(maxc)) {
+            result.push_back(s);
+        } else {
+            if (!result.back().empty()) {
+                result.back() += ' ';
+            }
+            result.back() += s;
+        }
+    }
+
+    return result;
+}
+
+/*
+ * Function: Irccd.Util.cut(data, maxc, maxl)
+ * --------------------------------------------------------
+ *
+ * Cut a piece of data into several lines.
+ *
+ * The argument data is a string or a list of strings. In any case, all strings
+ * are first splitted by spaces and trimmed. This ensure that useless
+ * whitespaces are discarded.
+ *
+ * The argument maxc controls the maximum of characters allowed per line, it can
+ * be a positive integer. If undefined is given, a default of 72 is used.
+ *
+ * The argument maxl controls the maximum of lines allowed. It can be a positive
+ * integer or undefined for an infinite list.
+ *
+ * If maxl is used as a limit and the data can not fit within the bounds,
+ * undefined is returned.
+ *
+ * An empty list may be returned if empty strings were found.
+ *
+ * Arguments:
+ *   - data, a string or an array of strings,
+ *   - maxc, max number of colums (Optional, default: 72),
+ *   - maxl, max number of lines (Optional, default: undefined).
+ * Returns:
+ *   A list of strings ready to be sent or undefined if the data is too big.
+ * Throws:
+ *   - RangeError if maxl or maxc are negative numbers,
+ *   - RangeError if one word length was bigger than maxc,
+ *   - TypeError if data is not a string or a list of strings.
+ */
+duk_ret_t cut(duk_context *ctx)
+{
+    auto list = lines(ctx, split(ctx), limit(ctx, 1, "maxc", 72));
+    auto maxl = limit(ctx, 2, "maxl", INT_MAX);
+
+    if (list.size() > static_cast<std::size_t>(maxl)) {
+        return 0;
+    }
+
+    // Empty list but lines() returns at least one.
+    if (list.size() == 1 && list[0].empty()) {
+        duk_push_array(ctx);
+        return 1;
+    }
+
+    dukx_push_array(ctx, list, dukx_push_std_string);
+
+    return 1;
 }
 
 /*
@@ -123,6 +275,7 @@ duk_ret_t splithost(duk_context *ctx)
 }
 
 const duk_function_list_entry functions[] = {
+    { "cut",        cut,        DUK_VARARGS },
     { "format",     format,     DUK_VARARGS },
     { "splituser",  splituser,  1           },
     { "splithost",  splithost,  1           },

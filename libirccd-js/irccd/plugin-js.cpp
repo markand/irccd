@@ -245,9 +245,7 @@ void JsPlugin::onLoad(Irccd &irccd)
     putPath("cachePath", "plugin/" + name(), path::PathCache);
 
     // Try to load the file (does not call onLoad yet).
-    if (duk_peval_file(m_context, path().c_str()) != 0)
-        throw dukx_exception(m_context, -1, true);
-
+    dukx_peval_file(m_context, path());
     duk_pop(m_context);
 
     /*

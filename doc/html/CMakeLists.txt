@@ -108,8 +108,9 @@ set(
     ${html_SOURCE_DIR}/api/module/Irccd.Unicode/Irccd.Unicode.isDigit.md
     ${html_SOURCE_DIR}/api/module/Irccd.Unicode/Irccd.Unicode.isLower.md
     ${html_SOURCE_DIR}/api/module/Irccd.Util/index.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Util/Irccd.Util.splithost.md
+    ${html_SOURCE_DIR}/api/module/Irccd.Util/Irccd.Util.cut.md
     ${html_SOURCE_DIR}/api/module/Irccd.Util/Irccd.Util.format.md
+    ${html_SOURCE_DIR}/api/module/Irccd.Util/Irccd.Util.splithost.md
     ${html_SOURCE_DIR}/api/module/Irccd.Util/Irccd.Util.splituser.md
     ${html_SOURCE_DIR}/api/index.md
     ${html_SOURCE_DIR}/api/event/onWhois.md
