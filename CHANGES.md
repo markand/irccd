@@ -1,6 +1,13 @@
 IRC Client Daemon CHANGES
 =========================
 
+irccd 2.1.1 2017-03-07
+----------------------
+
+  - Fix invalid documented option transport.family,
+  - Fix error when logs.type is set to console,
+  - Fix invalid IPV6_V6ONLY option in transports.
+
 irccd 2.1.0 2017-02-01
 ----------------------
 
