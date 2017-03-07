@@ -377,8 +377,7 @@ TransportServerIp::TransportServerIp(const std::string &address,
 
     if (mode & v6) {
         // Disable or enable IPv4 when using IPv6.
-        if (!(mode & v4))
-            m_socket.set(net::option::Ipv6Only(true));
+        m_socket.set(net::option::Ipv6Only(!(mode & v4)));
 
         if (address == "*")
             m_socket.bind(net::ipv6::any(port));
