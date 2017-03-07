@@ -132,13 +132,13 @@ void readConnectIp(const ini::Section &sc)
 
     int domain = AF_INET;
 
-    if ((it = sc.find("domain")) != sc.end()) {
+    if ((it = sc.find("domain")) != sc.end() || (it = sc.find("family")) != sc.end()) {
         if (it->value() == "ipv6") {
             domain = AF_INET6;
         } else if (it->value() == "ipv4") {
             domain = AF_INET;
         } else {
-            throw std::invalid_argument("invalid domain: " + it->value());
+            throw std::invalid_argument("invalid family: " + it->value());
         }
     }
 
