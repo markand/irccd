@@ -126,6 +126,8 @@ onReload = onLoad;
 
 function onCommand(server, origin, channel)
 {
+    channel = channel.toLowerCase();
+
     var kw = {
         channel: channel,
         command: server.info().commandChar + Plugin.info().name,

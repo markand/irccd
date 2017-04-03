@@ -329,6 +329,8 @@ function propose(server, channel, origin, game, proposition)
 
 function onCommand(server, origin, channel, message)
 {
+    channel = channel.toLowerCase();
+
     var game = Hangman.find(server, channel);
     var kw = {
         channel: channel,
@@ -361,6 +363,8 @@ function onCommand(server, origin, channel, message)
 
 function onMessage(server, origin, channel, message)
 {
+    channel = channel.toLowerCase();
+
     var game = Hangman.find(server, channel);
 
     if (!game)
