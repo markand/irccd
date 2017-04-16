@@ -17,11 +17,19 @@ hangman = ""
 
 ## Usage
 
-The **hangman** plugin starts when a user execute its special command with no arguments.
+The **hangman** plugin starts when a user execute its special command with no
+arguments.
 
 ````nohighlight
 markand: !hangman
 irccd: markand, the game is started, the word to find is: _ _ _ _ _ _ _ _ _ _ _
+````
+
+If a game is already running, the same command shows the current word.
+
+````nohighlight
+markand: !hangman
+irccd: markand, the game is already running and the word is: s _ _,
 ````
 
 ### Proposal
@@ -92,6 +100,7 @@ The following keywords are supported:
 | **dead**                | word                                               | the word to find                |
 | **found**               | word                                               | the hidden word                 |
 | **start**               | word                                               | the hidden word                 |
+| **running**             | word                                               | the hidden word                 |
 | **win**                 | word                                               | the word to find                |
 | **wrong-word**          | word                                               | the invalid word proposal       |
 | **wrong-letter**        | letter                                             | the letter proposal             |
