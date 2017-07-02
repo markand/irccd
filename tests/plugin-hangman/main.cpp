@@ -198,6 +198,19 @@ TEST_F(HangmanTest, collaborativeEnabled)
     ASSERT_EQ("#hangman:found=hangman:!hangman:test:#hangman:francis!francis@localhost:francis:s k _", m_server->last());
 }
 
+TEST_F(HangmanTest, caseInsensitive)
+{
+    load();
+
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", ""});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#HANGMAN", "s"});
+    ASSERT_EQ("#hangman:found=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s _ _", m_server->last());
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#HaNGMaN", "k"});
+    ASSERT_EQ("#hangman:wrong-player=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:k", m_server->last());
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "francis!francis@localhost", "#hAngmAn", "k"});
+    ASSERT_EQ("#hangman:found=hangman:!hangman:test:#hangman:francis!francis@localhost:francis:s k _", m_server->last());
+}
+
 TEST_F(HangmanTest, query)
 {
     load();
