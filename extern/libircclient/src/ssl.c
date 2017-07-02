@@ -122,9 +122,11 @@ static int ssl_init_context( irc_session_t * session )
 	if ( !ssl_context )
 		return LIBIRC_ERR_SSL_INIT_FAILED;
 
+#if 0
 	// Disable SSLv2 as it is unsecure
 	if ( (SSL_CTX_set_options( ssl_context, SSL_OP_NO_SSLv2) & SSL_OP_NO_SSLv2) == 0 )
 		return LIBIRC_ERR_SSL_INIT_FAILED;
+#endif
 
 	// Enable only strong ciphers
 	if ( SSL_CTX_set_cipher_list( ssl_context, "ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH" ) != 1 )

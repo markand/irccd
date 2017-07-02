@@ -502,6 +502,7 @@
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/ssl.h>
+#include <openssl/opensslv.h>
 
 #endif // !NET_NO_SSL
 
@@ -607,6 +608,14 @@
 
 #if defined(NET_HAVE_POLL) && !defined(_WIN32)
 #    include <poll.h>
+#endif
+
+#if !defined(NET_NO_SSL)
+#   if OPENSSL_VERSION_NUMBER >= 0x10100000L
+#       define NET_SSL_DEFAULT_METHOD TLS_method
+#   else
+#       define NET_SSL_DEFAULT_METHOD TLSv1_method
+#   endif
 #endif
 
 namespace irccd {
@@ -2125,7 +2134,7 @@ public:
      * \param mode the mode
      * \param method the method
      */
-    TlsSocket(TcpSocket &&sock, Mode mode = Server, const SSL_METHOD *method = TLSv1_method())
+    TlsSocket(TcpSocket &&sock, Mode mode = Server, const SSL_METHOD *method = NET_SSL_DEFAULT_METHOD())
         : Socket(std::move(sock))
         , m_mustclose(true)
     {
@@ -2141,7 +2150,7 @@ public:
      * \param mode the mode
      * \param method the method
      */
-    TlsSocket(TcpSocket &sock, Mode mode = Server, const SSL_METHOD *method = TLSv1_method())
+    TlsSocket(TcpSocket &sock, Mode mode = Server, const SSL_METHOD *method = NET_SSL_DEFAULT_METHOD())
         : Socket(sock.handle())
     {
         create(mode, method);

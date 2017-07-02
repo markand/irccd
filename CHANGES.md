@@ -1,6 +1,14 @@
 IRC Client Daemon CHANGES
 =========================
 
+irccd 2.1.2 2017-06-02
+----------------------
+
+  - Fix SSL initialization error in libircclient (#653),
+  - Fix various SSL warnings (#652),
+  - Fix build on Linux with musl (#649),
+  - Fix case sensitivity in hangman and roulette (#642).
+
 irccd 2.1.1 2017-03-07
 ----------------------
 

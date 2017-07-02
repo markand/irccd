@@ -41,6 +41,7 @@
 #   include <sys/types.h>
 #   include <dirent.h>
 #   include <unistd.h>
+#   include <climits>
 #endif
 
 #include "fs.hpp"
