@@ -12,6 +12,7 @@ guide: yes
   - [plugin-load](plugin-load.html)
   - [plugin-reload](plugin-reload.html)
   - [plugin-unload](plugin-unload.html)
+  - [rule-list](rule-list.html)
   - [server-cmode](server-cmode.html)
   - [server-cnotice](server-cnotice.html)
   - [server-connect](server-connect.html)

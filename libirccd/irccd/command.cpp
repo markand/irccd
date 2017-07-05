@@ -70,6 +70,34 @@ void execGet(Irccd &, TransportClient &client, Plugin &plugin, const nlohmann::j
     });
 }
 
+nlohmann::json toJson(const Rule &rule)
+{
+    auto join = [] (const auto &set) {
+        auto array = nlohmann::json::array();
+
+        for (const auto &entry : set)
+            array.push_back(entry);
+
+        return array;
+    };
+    auto str = [] (auto action) {
+        switch (action) {
+        case RuleAction::Accept:
+            return "accept";
+        default:
+            return "drop";
+        }
+    };
+
+    return {
+        { "servers",    join(rule.servers())    },
+        { "channels",   join(rule.channels())   },
+        { "plugins",    join(rule.plugins())    },
+        { "events",     join(rule.events())     },
+        { "action",     str(rule.action())      }
+    };
+}
+
 } // !namespace
 
 PluginConfigCommand::PluginConfigCommand()
@@ -419,6 +447,21 @@ void ServerTopicCommand::exec(Irccd &irccd, TransportClient &client, const nlohm
         util::json::requireString(args, "topic")
     );
     client.success("server-topic");
+}
+
+RuleListCommand::RuleListCommand()
+    : Command("rule-list")
+{
+}
+
+void RuleListCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &)
+{
+    auto array = nlohmann::json::array();
+
+    for (const auto& rule : irccd.rules().list())
+        array.push_back(toJson(rule));
+
+    client.success("rule-list", {{ "list", std::move(array) }});
 }
 
 } // !command

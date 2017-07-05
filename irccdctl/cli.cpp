@@ -16,7 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cassert>
 #include <iostream>
+#include <sstream>
 
 #include <json.hpp>
 
@@ -837,6 +839,72 @@ void ServerTopicCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &ar
         { "channel",    args[1] },
         { "topic",      args[2] }
     }));
+}
+
+/*
+ * RuleListCli.
+ * ------------------------------------------------------------------
+ */
+
+namespace {
+
+void showRule(const nlohmann::json& json, int index)
+{
+    assert(json.is_object());
+
+    auto unjoin = [] (auto array) {
+        std::ostringstream oss;
+
+        for (auto it = array.begin(); it != array.end(); ++it) {
+            if (!it->is_string())
+                continue;
+
+            oss << it->template get<std::string>() << " ";
+        }
+
+        return oss.str();
+    };
+    auto unstr = [] (auto action) {
+        if (action.is_string() && action == "accept")
+            return "accept";
+        else
+            return "drop";
+    };
+
+    std::cout << "rule:        " << index << std::endl;
+    std::cout << "servers:     " << unjoin(json["servers"]) << std::endl;
+    std::cout << "channels:    " << unjoin(json["channels"]) << std::endl;
+    std::cout << "plugins:     " << unjoin(json["plugins"]) << std::endl;
+    std::cout << "events:      " << unjoin(json["events"]) << std::endl;
+    std::cout << "action:      " << unstr(json["action"]) << std::endl;
+    std::cout << std::endl;
+}
+
+} // !namespace
+
+RuleListCli::RuleListCli()
+    : Cli("rule-list",
+          "list all rules",
+          "rule-list",
+          "List all rules.\n\n"
+          "Example:\n"
+          "\tirccdctl rule-list")
+{
+}
+
+void RuleListCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &)
+{
+    auto response = request(irccdctl);
+    auto pos = 0;
+
+    check(response);
+
+    for (const auto &obj : response["list"]) {
+        if (!obj.is_object())
+            continue;
+
+        showRule(obj, pos++);
+    }
 }
 
 /*

@@ -458,6 +458,22 @@ public:
     void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
 };
 
+/**
+ * \brief Implementation of rule-list transport command.
+ */
+class IRCCD_EXPORT RuleListCommand : public Command {
+public:
+    /**
+     * Constructor.
+     */
+    RuleListCommand();
+
+    /**
+     * \copydoc Command::exec
+     */
+    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+};
+
 } // !command
 
 } // !irccd

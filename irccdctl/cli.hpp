@@ -586,6 +586,27 @@ public:
 };
 
 /*
+ * RuleListCli.
+ * ------------------------------------------------------------------
+ */
+
+/**
+ * \brief Implementation of irccdctl rule-list.
+ */
+class RuleListCli : public Cli {
+public:
+    /**
+     * Default constructor.
+     */
+    RuleListCli();
+
+    /**
+     * \copydoc Cli::exec
+     */
+    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+};
+
+/*
  * WatchCli.
  * ------------------------------------------------------------------
  */
