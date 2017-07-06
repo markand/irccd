@@ -523,6 +523,7 @@ void init(int &argc, char **&argv)
     commands.push_back(std::make_unique<cli::ServerReconnectCli>());
     commands.push_back(std::make_unique<cli::ServerTopicCli>());
     commands.push_back(std::make_unique<cli::RuleListCli>());
+    commands.push_back(std::make_unique<cli::RuleInfoCli>());
     commands.push_back(std::make_unique<cli::WatchCli>());
 }
 

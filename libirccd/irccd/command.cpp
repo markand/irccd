@@ -464,6 +464,16 @@ void RuleListCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann
     client.success("rule-list", {{ "list", std::move(array) }});
 }
 
+RuleInfoCommand::RuleInfoCommand()
+    : Command("rule-info")
+{
+}
+
+void RuleInfoCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+{
+    client.success("rule-info", toJson(irccd.rules().require(util::json::requireUint(args, "index"))));
+}
+
 } // !command
 
 } // !irccd

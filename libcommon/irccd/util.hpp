@@ -399,7 +399,17 @@ inline bool requireBool(const nlohmann::json &json, const std::string &key)
  */
 inline std::int64_t requireInt(const nlohmann::json &json, const std::string &key)
 {
-    return require(json, key, nlohmann::json::value_t::number_integer);
+    auto it = json.find(key);
+
+    if (it == json.end())
+        throw std::runtime_error(fmt::format("missing '{}' property", key));
+    if (it->is_number_integer())
+        return it->get<int>();
+    if (it->is_number_unsigned() && it->get<unsigned>() <= INT_MAX)
+        return static_cast<int>(it->get<unsigned>());
+
+    throw std::runtime_error(fmt::format("invalid '{}' property ({} expected, got {})",
+        key, it->type_name(), nlohmann::json(0).type_name()));
 }
 
 /**
@@ -412,7 +422,17 @@ inline std::int64_t requireInt(const nlohmann::json &json, const std::string &ke
  */
 inline std::uint64_t requireUint(const nlohmann::json &json, const std::string &key)
 {
-    return require(json, key, nlohmann::json::value_t::number_unsigned);
+    auto it = json.find(key);
+
+    if (it == json.end())
+        throw std::runtime_error(fmt::format("missing '{}' property", key));
+    if (it->is_number_unsigned())
+        return it->get<unsigned>();
+    if (it->is_number_integer() && it->get<int>() >= 0)
+        return static_cast<unsigned>(it->get<int>());
+
+    throw std::runtime_error(fmt::format("invalid '{}' property ({} expected, got {})",
+        key, it->type_name(), nlohmann::json(0U).type_name()));
 }
 
 /**

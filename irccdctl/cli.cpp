@@ -908,6 +908,44 @@ void RuleListCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &)
 }
 
 /*
+ * RuleInfoCli.
+ * ------------------------------------------------------------------
+ */
+
+RuleInfoCli::RuleInfoCli()
+    : Cli("rule-info",
+          "show a rule",
+          "rule-info index",
+          "Show a rule.\n\n"
+          "Example:\n"
+          "\tirccdctl rule-info 0\n"
+          "\tirccdctl rule-info 1")
+{
+}
+
+void RuleInfoCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+{
+    if (args.size() < 1)
+        throw std::invalid_argument("rule-info requires 1 argument");
+
+    int index = 0;
+
+    try {
+        index = std::stoi(args[0]);
+    } catch (...) {
+        throw std::invalid_argument("invalid number '" + args[0] + "'");
+    }
+
+    auto result = request(irccdctl, {
+        { "command",    "rule-info" },
+        { "index",      index       }
+    });
+
+    check(result);
+    showRule(result, 0);
+}
+
+/*
  * WatchCli.
  * ------------------------------------------------------------------
  */
