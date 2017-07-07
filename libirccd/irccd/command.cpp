@@ -493,6 +493,60 @@ void RuleRemoveCommand::exec(Irccd &irccd, TransportClient &client, const nlohma
     }
 }
 
+RuleMoveCommand::RuleMoveCommand()
+    : Command("rule-move")
+{
+}
+
+void RuleMoveCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+{
+    auto from = util::json::requireUint(args, "from");
+    auto to = util::json::requireUint(args, "to");
+
+    /*
+     * Examples of moves
+     * --------------------------------------------------------------
+     *
+     * Before: [0] [1] [2]
+     *
+     * from = 0
+     * to   = 2
+     *
+     * After:  [1] [2] [0]
+     *
+     * --------------------------------------------------------------
+     *
+     * Before: [0] [1] [2]
+     *
+     * from = 2
+     * to   = 0
+     *
+     * After:  [2] [0] [1]
+     *
+     * --------------------------------------------------------------
+     *
+     * Before: [0] [1] [2]
+     *
+     * from = 0
+     * to   = 123
+     *
+     * After:  [1] [2] [0]
+     */
+
+    // Ignore dump input.
+    if (from == to)
+        client.success("rule-move");
+    else if (from >= irccd.rules().length())
+        client.error("rule-move", "rule source index is out of range");
+    else {
+        auto save = irccd.rules().list()[from];
+
+        irccd.rules().remove(from);
+        irccd.rules().insert(save, to > irccd.rules().length() ? irccd.rules().length() : to);
+        client.success("rule-move");
+    }
+}
+
 } // !command
 
 } // !irccd

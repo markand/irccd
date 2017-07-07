@@ -983,6 +983,47 @@ void RuleRemoveCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &arg
 }
 
 /*
+ * RuleMoveCli.
+ * ------------------------------------------------------------------
+ */
+
+RuleMoveCli::RuleMoveCli()
+    : Cli("rule-move",
+          "move a rule to a new position",
+          "rule-move source destination",
+          "Move a rule from the given source at the specified destination index.\n\n"
+          "The rule will replace the existing one at the given destination moving\ndown every "
+          "other rules. If destination is greater or equal the number of rules,\nthe rule "
+          "is moved to the end.\n\n"
+          "Example:\n"
+          "\tirccdctl rule-move 0 5\n"
+          "\tirccdctl rule-move 4 3")
+{
+}
+
+void RuleMoveCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+{
+    if (args.size() < 2)
+        throw std::invalid_argument("rule-move requires 2 arguments");
+
+    int from = 0;
+    int to = 0;
+
+    try {
+        from = std::stoi(args[0]);
+        to = std::stoi(args[1]);
+    } catch (...) {
+        throw std::invalid_argument("invalid number");
+    }
+
+    check(request(irccdctl, {
+        { "command",    "rule-move" },
+        { "from",       from        },
+        { "to",         to          }
+    }));
+}
+
+/*
  * WatchCli.
  * ------------------------------------------------------------------
  */

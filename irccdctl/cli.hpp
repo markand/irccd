@@ -648,6 +648,26 @@ public:
     void exec(Irccdctl &client, const std::vector<std::string> &args) override;
 };
 
+/*
+ * RuleMoveCli
+ * ------------------------------------------------------------------
+ */
+
+/**
+ * \brief Implementation of irccdctl rule-move.
+ */
+class RuleMoveCli : public Cli {
+public:
+    /**
+     * Default constructor.
+     */
+    RuleMoveCli();
+
+    /**
+     * \copydoc Cli::exec
+     */
+    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+};
 
 /*
  * WatchCli.

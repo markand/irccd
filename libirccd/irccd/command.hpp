@@ -506,6 +506,22 @@ public:
     void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
 };
 
+/**
+ * \brief Implementation of rule-move transport command.
+ */
+class IRCCD_EXPORT RuleMoveCommand : public Command {
+public:
+    /**
+     * Constructor.
+     */
+    RuleMoveCommand();
+
+    /**
+     * \copydoc Command::exec
+     */
+    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+};
+
 } // !command
 
 } // !irccd
