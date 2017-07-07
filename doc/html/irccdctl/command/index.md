@@ -14,6 +14,7 @@ guide: yes
   - [plugin-unload](plugin-unload.html)
   - [rule-list](rule-list.html)
   - [rule-info](rule-info.html)
+  - [rule-remove](rule-remove.html)
   - [server-cmode](server-cmode.html)
   - [server-cnotice](server-cnotice.html)
   - [server-connect](server-connect.html)

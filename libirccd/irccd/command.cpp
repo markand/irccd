@@ -474,6 +474,25 @@ void RuleInfoCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann
     client.success("rule-info", toJson(irccd.rules().require(util::json::requireUint(args, "index"))));
 }
 
+RuleRemoveCommand::RuleRemoveCommand()
+    : Command("rule-remove")
+{
+}
+
+void RuleRemoveCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+{
+    unsigned position = util::json::requireUint(args, "index");
+
+    if (irccd.rules().length() == 0)
+        client.error("rule-remove", "rule list is empty");
+    if (position >= irccd.rules().length())
+        client.error("rule-remove", "index is out of range");
+    else {
+        irccd.rules().remove(position);
+        client.success("rule-remove");
+    }
+}
+
 } // !command
 
 } // !irccd

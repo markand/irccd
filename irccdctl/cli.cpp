@@ -946,6 +946,43 @@ void RuleInfoCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
 }
 
 /*
+ * RuleRemoveCli.
+ * ------------------------------------------------------------------
+ */
+
+RuleRemoveCli::RuleRemoveCli()
+    : Cli("rule-remove",
+          "remove a rule",
+          "rule-remove index",
+          "Remove an existing rule.\n\n"
+          "Example:\n"
+          "\tirccdctl rule-remove 0\n"
+          "\tirccdctl rule-remove 1")
+{
+}
+
+void RuleRemoveCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+{
+    if (args.size() < 1)
+        throw std::invalid_argument("rule-remove requires 1 argument");
+
+    int index = 0;
+
+    try {
+        index = std::stoi(args[0]);
+    } catch (...) {
+        throw std::invalid_argument("invalid number '" + args[0] + "'");
+    }
+
+    auto result = request(irccdctl, {
+        { "command",    "rule-remove"   },
+        { "index",      index           }
+    });
+
+    check(result);
+}
+
+/*
  * WatchCli.
  * ------------------------------------------------------------------
  */

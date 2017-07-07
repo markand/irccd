@@ -628,6 +628,28 @@ public:
 };
 
 /*
+ * RuleRemoveCli
+ * ------------------------------------------------------------------
+ */
+
+/**
+ * \brief Implementation of irccdctl rule-remove.
+ */
+class RuleRemoveCli : public Cli {
+public:
+    /**
+     * Default constructor.
+     */
+    RuleRemoveCli();
+
+    /**
+     * \copydoc Cli::exec
+     */
+    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+};
+
+
+/*
  * WatchCli.
  * ------------------------------------------------------------------
  */

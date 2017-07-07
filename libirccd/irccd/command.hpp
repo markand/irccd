@@ -490,6 +490,22 @@ public:
     void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
 };
 
+/**
+ * \brief Implementation of rule-remove transport command.
+ */
+class IRCCD_EXPORT RuleRemoveCommand : public Command {
+public:
+    /**
+     * Constructor.
+     */
+    RuleRemoveCommand();
+
+    /**
+     * \copydoc Command::exec
+     */
+    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+};
+
 } // !command
 
 } // !irccd
