@@ -38,12 +38,14 @@
 # Options that controls both installations and the irccd runtime:
 #
 # WITH_BINDIR           Binary directory for irccd, irccdctl
-# WITH_PLUGINDIR        Path where plugins must be installed
+# WITH_CACHEDIR         Path where to store temporary files
+# WITH_CMAKEDIR         Path where to install CMake configuration files
+# WITH_DATADIR          Path for data files
 # WITH_DOCDIR           Path where to install documentation
 # WITH_MANDIR           Path where to install manuals
-# WITH_CONFDIR          Path where to search configuration files
-# WITH_CACHEDIR         Path where to store temporary files
 # WITH_PKGCONFIGDIR     Path where to install pkg-config files
+# WITH_PLUGINDIR        Path where plugins must be installed
+# WITH_SYSCONFDIR       Path where to install configuration files
 # WITH_SYSTEMDDIR       Path where to install systemd unit file
 #
 
@@ -84,36 +86,15 @@ option(WITH_PKGCONFIG "Enable pkg-config file" ${DEFAULT_PKGCONFIG})
 #
 
 set(WITH_BINDIR "bin" CACHE STRING "Binary directory")
-set(WITH_MANDIR "share/man" CACHE STRING "Man directory")
-set(WITH_CONFDIR "etc" CACHE STRING "Configuration directory")
+set(WITH_CACHEDIR "var/cache/irccd" CACHE STRING "Cache directory")
 set(WITH_CMAKEDIR "lib/cmake" CACHE STRING "Directory for CMake modules")
+set(WITH_DATADIR "share/irccd" CACHE STRING "Directory for additional data")
+set(WITH_DOCDIR "share/doc/irccd" CACHE STRING "Documentation directory")
+set(WITH_MANDIR "share/man" CACHE STRING "Man directory")
 set(WITH_PKGCONFIGDIR "lib/pkgconfig" CACHE STRING "Directory for pkg-config file")
+set(WITH_PLUGINDIR "libexec/irccd/plugins" CACHE STRING "Module prefix where to install")
+set(WITH_SYSCONFDIR "etc" CACHE STRING "Configuration directory")
 set(WITH_SYSTEMDDIR "/usr/lib/systemd/system" CACHE STRING "Absolute path where to install systemd files")
-
-#
-# On Windows, we install the applcation like C:/Program Files/irccd so do not append irccd to the
-# directories again.
-#
-if (WIN32)
-    set(WITH_DATADIR "share" CACHE STRING "Data directory")
-    set(WITH_CACHEDIR "var" CACHE STRING "Temporary files directory")
-    set(WITH_PLUGINDIR "share/plugins" CACHE STRING "Module prefix where to install")
-    set(WITH_DOCDIR "share/doc" CACHE STRING "Documentation directory")
-else ()
-    set(WITH_DATADIR "share/irccd" CACHE STRING "Data directory")
-    set(WITH_CACHEDIR "var/irccd" CACHE STRING "Temporary files directory")
-    set(WITH_PLUGINDIR "share/irccd/plugins" CACHE STRING "Module prefix where to install")
-    set(WITH_DOCDIR "share/doc/irccd" CACHE STRING "Documentation directory")
-endif ()
-
-#
-# Check if any of these path is absolute and raise an error if true.
-#
-foreach (d WITH_BINDIR WITH_CACHEDIR WITH_DATADIR WITH_CONFDIR WITH_PLUGINDIR)
-    if (IS_ABSOLUTE ${${d}})
-        message(FATAL_ERROR "${d} can not be absolute (${${d}} given)")
-    endif ()
-endforeach ()
 
 #
 # Internal dependencies.

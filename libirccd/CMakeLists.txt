@@ -37,6 +37,7 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/command.cpp
     ${libirccd_SOURCE_DIR}/irccd/config.cpp
     ${libirccd_SOURCE_DIR}/irccd/irccd.cpp
+    ${libirccd_SOURCE_DIR}/irccd/plugin.cpp
     ${libirccd_SOURCE_DIR}/irccd/plugin-dynlib.cpp
     ${libirccd_SOURCE_DIR}/irccd/rule.cpp
     ${libirccd_SOURCE_DIR}/irccd/server.cpp

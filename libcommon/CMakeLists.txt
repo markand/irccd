@@ -28,7 +28,6 @@ set(
     ${libcommon_SOURCE_DIR}/irccd/logger.hpp
     ${libcommon_SOURCE_DIR}/irccd/net.hpp
     ${libcommon_SOURCE_DIR}/irccd/options.hpp
-    ${libcommon_SOURCE_DIR}/irccd/path.hpp
     ${libcommon_SOURCE_DIR}/irccd/signals.hpp
     ${libcommon_SOURCE_DIR}/irccd/system.hpp
     ${libcommon_SOURCE_DIR}/irccd/util.hpp
@@ -42,7 +41,6 @@ set(
     ${libcommon_SOURCE_DIR}/irccd/ini.cpp
     ${libcommon_SOURCE_DIR}/irccd/logger.cpp
     ${libcommon_SOURCE_DIR}/irccd/options.cpp
-    ${libcommon_SOURCE_DIR}/irccd/path.cpp
     ${libcommon_SOURCE_DIR}/irccd/system.cpp
     ${libcommon_SOURCE_DIR}/irccd/util.cpp
 )

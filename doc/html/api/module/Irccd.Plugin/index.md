@@ -8,22 +8,17 @@ summary: Plugin management and inspection.
 
 This module let you manage plugins.
 
-## Constants
+## Objects
 
-The following properties are defined:
+The following properties are defined as read in the configuration file:
 
-  - **cachePath**: (string) the path to the cache directory,
-  - **configPath**: (string) the path to the configuration directory,
-  - **dataPath**: (string) the path to the data directory.
-
-## Configuration
-
-An additional property `config` is defined with all options set in the appropriate `[plugin.<name>]` from the user
-configuration file.
+  - **config**: the `[plugin.<name>]` section,
+  - **paths**: the `[paths.<name>]` section,
+  - **format**: the `[format.<name>]` section.
 
 ### Example
 
-If the configuration file configures the plugin **xyz**:
+Assuming the configuration file is defined as following:
 
 <div class="panel panel-info">
  <div class="panel-heading">~/.config/irccd/irccd.conf</div>
@@ -32,14 +27,23 @@ If the configuration file configures the plugin **xyz**:
 [plugin.xyz]
 foo = true
 baz = "hello"
+
+[paths.xyz]
+config = "/etc/xyz"
 ````
  </div>
 </div>
 
-Then `Irccd.Plugin.config` will have the following properties:
+The `Irccd.Plugin.config` will have the following properties:
 
   - **foo**: (string) set to "true",
   - **baz**: (string) set to "hello".
+
+The `Irccd.Plugin.paths` will have the following properties:
+
+  - **cache**: (string) set to the default cache directory,
+  - **config**: (string) set to "/etc/xyz",
+  - **data**: (string) set to the default data directory.
 
 ## Functions
 

@@ -24,7 +24,6 @@
 #include <irccd/logger.hpp>
 #include <irccd/server.hpp>
 #include <irccd/service.hpp>
-#include <irccd/path.hpp>
 
 #include "plugin-tester.hpp"
 
@@ -124,7 +123,6 @@ TEST_F(PluginTest, formatTooLong)
 
 int main(int argc, char **argv)
 {
-    path::setApplicationPath(argv[0]);
     testing::InitGoogleTest(&argc, argv);
     log::setLogger(std::make_unique<log::SilentLogger>());
 

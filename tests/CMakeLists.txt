@@ -53,9 +53,11 @@ if (WITH_TESTS)
     # Misc
     add_subdirectory(elapsedtimer)
     add_subdirectory(logger)
-    add_subdirectory(path)
     add_subdirectory(rules)
     add_subdirectory(util)
+
+    # Services
+    add_subdirectory(service-plugin)
 
     # JS API
     if (WITH_JS)

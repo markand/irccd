@@ -60,7 +60,7 @@ function path(server, channel)
             "channel":    channel
         });
     } else
-        p = Plugin.cachePath + "db.json";
+        p = Plugin.paths.cache + "/db.json";
 
     return p;
 }

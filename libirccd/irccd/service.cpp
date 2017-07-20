@@ -26,9 +26,11 @@
 #include "irccd.hpp"
 #include "logger.hpp"
 #include "service.hpp"
+#include "system.hpp"
 #include "transport.hpp"
 
 using namespace fmt::literals;
+using namespace std::string_literals;
 
 namespace irccd {
 
@@ -125,6 +127,9 @@ void InterruptService::interrupt() noexcept
 PluginService::PluginService(Irccd &irccd) noexcept
     : m_irccd(irccd)
 {
+    m_default_paths.emplace("cache", sys::cachedir());
+    m_default_paths.emplace("data", sys::datadir());
+    m_default_paths.emplace("config", sys::sysconfigdir());
 }
 
 PluginService::~PluginService()
@@ -202,6 +207,40 @@ PluginFormats PluginService::formats(const std::string &name) const
     return PluginFormats();
 }
 
+const PluginPaths& PluginService::paths() const noexcept
+{
+    return m_default_paths;
+}
+
+PluginPaths PluginService::paths(const std::string& name) const
+{
+    auto result = m_default_paths;
+    auto overriden = m_paths.find(name);
+
+    // For all default paths, append the plugin name.
+    for (auto& pair : result)
+        pair.second += "/plugin/"s + name;
+
+    // Now, mere overriden paths.
+    if (overriden != m_paths.end())
+        for (const auto& pair : overriden->second)
+            result[pair.first] = pair.second;
+
+    return result;
+}
+
+void PluginService::setPaths(PluginPaths paths)
+{
+    // If the paths is empty or not complete, do not erase default items.
+    for (const auto& pair : paths)
+        m_default_paths[pair.first] = pair.second;
+}
+
+void PluginService::setPaths(const std::string& name, PluginPaths paths)
+{
+    m_paths.emplace(name, std::move(paths));
+}
+
 std::shared_ptr<Plugin> PluginService::open(const std::string &id,
                                             const std::string &path)
 {
@@ -243,6 +282,7 @@ void PluginService::load(std::string name, std::string path)
         if (plugin) {
             plugin->setConfig(m_config[name]);
             plugin->setFormats(m_formats[name]);
+            plugin->setPaths(paths(name));
             plugin->onLoad(m_irccd);
 
             add(std::move(plugin));

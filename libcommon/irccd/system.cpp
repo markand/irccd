@@ -16,66 +16,107 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <algorithm>
+#include <cassert>
 #include <cstdlib>
 #include <ctime>
 #include <stdexcept>
+#include <string>
+
+#include <boost/filesystem.hpp>
 
 #include "sysconfig.hpp"
 
 #if defined(HAVE_SETPROGNAME)
-#  include <cstdlib>
-#endif
-
-#if defined(IRCCD_SYSTEM_WINDOWS)
-#  include <sys/types.h>
-#  include <sys/timeb.h>
-#  include <windows.h>
-#  include <shlobj.h>
-#else // All non Windows
-#if defined(IRCCD_SYSTEM_MAC)
-#  include <sys/sysctl.h>
+#   include <cstdlib>
 #endif
 
 #if defined(IRCCD_SYSTEM_LINUX)
-#  include <sys/sysinfo.h>
+#   include <sys/sysinfo.h>
+
+#   include <unistd.h>
+
+#   include <cerrno>
+#   include <climits>
+#   include <cstring>
+#elif defined(IRCCD_SYSTEM_FREEBSD) ||
+      defined(IRCCD_SYSTEM_DRAGONFLYBSD) ||
+      defined(IRCCD_SYSTEM_NETBSD) ||
+      defined(IRCCD_SYSTEM_OPENBSD)
+#   if defined(IRCCD_SYSTEM_NETBSD)
+#       include <sys/param.h>
+#   else
+#       include <sys/types.h>
+#   endif
+
+#   if defined(IRCCD_SYSTEM_OPENBSD)
+#       include <unistd.h>
+#   endif
+
+#   include <sys/sysctl.h>
+
+#   include <cerrno>
+#   include <climits>
+#   include <cstddef>
+#   include <cstdlib>
+#   include <cstring>
+#elif defined(IRCCD_SYSTEM_MAC)
+#   include <sys/sysctl.h>
+#   include <cerrno>
+#   include <cstring>
+#   include <libproc.h>
+#   include <unistd.h>
+#elif defined(IRCCD_SYSTEM_WINDOWS)
+#   include <sys/types.h>
+#   include <sys/timeb.h>
+#   include <windows.h>
+#   include <shlobj.h>
 #endif
 
-#  include <sys/utsname.h>
-#  include <sys/time.h>
-#  include <sys/types.h>
-#  include <unistd.h>
+#if !defined(IRCCD_SYSTEM_WINDOWS)
+#   include <sys/utsname.h>
+#   include <sys/time.h>
+#   include <sys/types.h>
+#   include <unistd.h>
 
-#  include <cerrno>
-#  include <cstring>
-#  include <stdexcept>
-#  include <ctime>
-
+#   include <cerrno>
+#   include <cstring>
+#   include <ctime>
 #endif
 
 // For sys::setGid.
 #if defined(HAVE_SETGID)
-#  include <sys/types.h>
-#  include <unistd.h>
-#  include <grp.h>
+#   include <sys/types.h>
+#   include <unistd.h>
+#   include <grp.h>
 #endif
 
 // For sys::setUid.
 #if defined(HAVE_SETGID)
-#  include <sys/types.h>
-#  include <unistd.h>
-#  include <pwd.h>
+#   include <sys/types.h>
+#   include <unistd.h>
+#   include <pwd.h>
 #endif
 
 #include "fs.hpp"
 #include "logger.hpp"
 #include "system.hpp"
 #include "util.hpp"
+#include "xdg.hpp"
 
 namespace irccd {
 
 namespace sys {
 
 namespace {
+
+/*
+ * XXX: the setprogname() function keeps a pointer without copying it so when
+ * main's argv is modified, we're not using the same name so create our own
+ * copy.
+ */
+
+std::string programNameCopy;
 
 /*
  * setHelper.
@@ -124,12 +165,235 @@ void setHelper(const std::string &typeName, const std::string &value, LookupFunc
 }
 
 /*
- * XXX: the setprogname() function keeps a pointer without copying it so when
- * main's argv is modified, we're not using the same name so create our own
- * copy.
+ * executable_path
+ * ------------------------------------------------------------------
+ *
+ * Get the executable path.
+ *
+ * Example:
+ *
+ * /usr/local/bin/irccd -> /usr/local/bin
  */
+std::string executable_path()
+{
+    std::string result;
 
-std::string programNameCopy;
+#if defined(__linux__)
+    char path[PATH_MAX + 1] = {0};
+
+    if (readlink("/proc/self/exe", path, sizeof (path) - 1) < 0)
+        throw std::runtime_error(std::strerror(errno));
+
+    result = path;
+#elif defined(__FreeBSD__) || defined(__DragonFly__)
+    int size = PATH_MAX, mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
+    char path[PATH_MAX + 1] = {0};
+
+    if (sysctl(mib, 4, path, &size, nullptr, 0) < 0)
+        throw std::runtime_error(std::strerror(errno));
+
+    result = path;
+#elif defined(__APPLE__)
+    char path[PROC_PIDPATHINFO_MAXSIZE + 1] = {0};
+
+    if ((proc_pidpath(getpid(), path, sizeof (path) - 1) == 0)
+        throw std::runtime_error(std::strerror(errno));
+
+    result = path;
+#elif defined(_WIN32)
+    char path[PATH_MAX + 1] = {0};
+
+    if (GetModuleFileNameA(nullptr, path, sizeof (path) - 1) == 0)
+        throw std::runtime_error("GetModuleFileName error");
+
+    result = path;
+#elif defined(__NetBSD__)
+    char path[4096 + 1] = {0};
+
+#   if defined(KERN_PROC_PATHNAME)
+    int mib[] = { CTL_KERN, KERN_PROC_ARGS, -1, KERN_PROC_PATHNAME };
+    int size = sizeof (path) - 1;
+
+    if (sysctl(mib, 4, path, &size, nullptr, 0) < 0)
+        throw std::runtime_error(std::strerror(errno));
+#   else
+    if (readlink("/proc/curproc/exe", path, sizeof (path) - 1) < 0)
+        throw std::runtime_error(std::strerror(errno));
+#   endif
+
+    result = path;
+#elif defined(__OpenBSD__)
+    char **paths, path[PATH_MAX + 1] = {0};
+    int length, mib[] = { CTL_KERN, KERN_PROC_ARGS, getpid(), KERN_PROC_ARGV };
+
+    if (sysctl(mib, 4, nullptr, &length, nullptr, 0) < 0)
+        throw std::runtime_error(std::strerror(errno));
+    if ((paths = static_cast<char**>(std::malloc(length))) == nullptr)
+        throw std::runtime_error(std::strerror(errno));
+    if (sysctl(mib, 4, paths, &length, nullptr, 0) < 0) {
+        std::free(paths);
+        throw std::runtime_error(std::strerror(errno));
+    }
+
+    realpath(paths[0], path);
+    result = path;
+
+    std::free(paths);
+    std::free(path);
+#endif
+    return result;
+}
+
+/*
+ * add_config_user_path
+ * ------------------------------------------------------------------
+ *
+ * Referenced by: config_filenames.
+ *
+ * Add user config path.
+ */
+void add_config_user_path(std::vector<std::string>& result, const std::string& file)
+{
+    boost::filesystem::path path;
+
+#if defined(IRCCD_SYSTEM_WINDOWS)
+    char folder[MAX_PATH] = {0};
+
+    if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, folder) == S_OK)
+        path = folder + "\\irccd\\config";
+    else
+        path = ".";
+#else
+    try {
+        path = Xdg().configHome();
+    } catch (...) {
+        path = sys::env("HOME");
+        path /= ".config";
+    }
+
+    path /= "irccd";
+#endif
+
+    path /= file;
+    result.push_back(path.string());
+}
+
+/*
+ * add_plugin_user_path
+ * ------------------------------------------------------------------
+ *
+ * Referenced by: plugin_filenames.
+ *
+ * Like add add_config_user_path but for plugins.
+ */
+void add_plugin_user_path(std::vector<std::string>& result, const std::string& file)
+{
+    boost::filesystem::path path;
+
+#if defined(IRCCD_SYSTEM_WINDOWS)
+    char folder[MAX_PATH] = {0};
+
+    if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, folder) == S_OK)
+        path = folder + "\\irccd\\share";
+#else
+    try {
+        path = Xdg().dataHome();
+    } catch (...) {
+        path = sys::env("HOME");
+        path /= ".local/share";
+    }
+
+    path /= "irccd";
+#endif
+
+    path /= file;
+    result.push_back(path.string());
+}
+
+/*
+ * base_directory
+ * ------------------------------------------------------------------
+ *
+ * Get the base program directory.
+ *
+ * If irccd has been compiled with relative paths, the base directory is
+ * evaluated by climbing the `bindir' directory from the executable path.
+ *
+ * Otherwise, use the installation prefix.
+ */
+boost::filesystem::path base_directory()
+{
+    static const boost::filesystem::path bindir(WITH_BINDIR);
+    static const boost::filesystem::path prefix(PREFIX);
+
+    boost::filesystem::path path(".");
+
+    if (bindir.is_relative()) {
+        try {
+            path = executable_path();
+            path = path.parent_path();
+        } catch (...) {
+            path = "./";
+        }
+
+        // Compute relative base directory.
+        for (auto len = std::distance(bindir.begin(), bindir.end()); len > 0; len--)
+            path = path.parent_path();
+        if (path.empty())
+            path = ".";
+    } else
+        path = prefix;
+
+    return path;
+}
+
+/*
+ * add_system_path
+ * ------------------------------------------------------------------
+ *
+ * Referenced by: config_filenames,
+ *                plugin_filenames
+ *
+ * Add system path into the result list.
+ */
+void add_system_path(std::vector<std::string>& result,
+                     const std::string& file,
+                     const boost::filesystem::path& component)
+{
+    boost::filesystem::path path;
+
+    if (component.is_absolute())
+        path = component;
+    else {
+        path = base_directory();
+        path /= component;
+    }
+
+    path /= file;
+    result.push_back(path.string());
+}
+
+/*
+ * system_directory
+ * ------------------------------------------------------------------
+ *
+ * Compute the system wise directory path for the given component.
+ *
+ * Referenced by: cachedir,
+ *                datadir,
+ *                sysconfigdir
+ */
+std::string system_directory(const std::string& component)
+{
+    boost::filesystem::path path(component);
+
+    if (path.is_relative()) {
+        path = base_directory();
+        path /= component;
+    }
+
+    return path.string();
+}
 
 } // !namespace
 
@@ -155,6 +419,8 @@ std::string name()
     return "Windows";
 #elif defined(IRCCD_SYSTEM_FREEBSD)
     return "FreeBSD";
+#elif defined(IRCCD_SYSTEM_DRAGONFLYBSD)
+    return "DragonFlyBSD";
 #elif defined(IRCCD_SYSTEM_OPENBSD)
     return "OpenBSD";
 #elif defined(IRCCD_SYSTEM_NETBSD)
@@ -278,6 +544,46 @@ void setGid(const std::string &value)
 }
 
 #endif
+
+std::string cachedir()
+{
+    return system_directory(WITH_CACHEDIR);
+}
+
+std::string datadir()
+{
+    return system_directory(WITH_DATADIR);
+}
+
+std::string sysconfigdir()
+{
+    return system_directory(WITH_SYSCONFDIR);
+}
+
+std::vector<std::string> config_filenames(std::string file)
+{
+    std::vector<std::string> result;
+
+    add_config_user_path(result, file);
+    add_system_path(result, file, WITH_SYSCONFDIR);
+
+    return result;
+}
+
+std::vector<std::string> plugin_filenames(const std::string& name,
+                                          const std::vector<std::string>& extensions)
+{
+    assert(!extensions.empty());
+
+    std::vector<std::string> result;
+
+    for (const auto& ext : extensions)
+        add_plugin_user_path(result, name + ext);
+    for (const auto& ext : extensions)
+        add_system_path(result, name + ext, WITH_PLUGINDIR);
+
+    return result;
+}
 
 } // !sys
 

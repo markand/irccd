@@ -17,7 +17,8 @@
 #
 
 irccd_define_test(
-    NAME path
+    NAME service-plugin
     SOURCES main.cpp
     LIBRARIES libirccd
 )
+

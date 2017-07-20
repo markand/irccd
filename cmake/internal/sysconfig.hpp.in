@@ -54,6 +54,7 @@
 #cmakedefine IRCCD_SYSTEM_WINDOWS
 #cmakedefine IRCCD_SYSTEM_MAC
 #cmakedefine IRCCD_SYSTEM_FREEBSD
+#cmakedefine IRCCD_SYSTEM_DRAGONFLYBSD
 #cmakedefine IRCCD_SYSTEM_NETBSD
 #cmakedefine IRCCD_SYSTEM_OPENBSD
 #cmakedefine IRCCD_SYSTEM_LINUX
@@ -64,12 +65,11 @@
  * ------------------------------------------------------------------
  */
 
-#define WITH_BINDIR             "@WITH_BINDIR@"
-#define WITH_DATADIR            "@WITH_DATADIR@"
-#define WITH_CONFDIR            "@WITH_CONFDIR@"
-#define WITH_PLUGINDIR          "@WITH_PLUGINDIR@"
-#define WITH_NPLUGINDIR         "@WITH_NPLUGINDIR@"
-#define WITH_CACHEDIR           "@WITH_CACHEDIR@"
+#define WITH_CACHEDIR       "@WITH_CACHEDIR@"
+#define WITH_DATADIR        "@WITH_DATADIR@"
+#define WITH_BINDIR         "@WITH_BINDIR@"
+#define WITH_SYSCONFDIR     "@WITH_SYSCONFDIR@"
+#define WITH_PLUGINDIR      "@WITH_PLUGINDIR@"
 
 #cmakedefine WITH_JS
 #cmakedefine WITH_SSL
@@ -120,7 +120,7 @@
 #       define IRCCD_EXPORT
 #   endif
 #else
-#  define IRCCD_EXPORT
+#   define IRCCD_EXPORT
 #endif
 
 #endif // !IRCCD_SYSCONFIG_H

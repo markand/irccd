@@ -104,6 +104,14 @@ public:
     IRCCD_EXPORT PluginFormats findPluginFormats(const std::string &name) const;
 
     /**
+     * Find plugin paths if defined.
+     *
+     * \pre util::isValidIdentifier(name)
+     * \param name the plugin name
+     */
+    IRCCD_EXPORT PluginPaths findPluginPaths(const std::string& name) const;
+
+    /**
      * Get the path to the pidfile.
      *
      * \return the path or empty if not defined
@@ -168,6 +176,13 @@ public:
      * \return the list of servers
      */
     IRCCD_EXPORT std::vector<std::shared_ptr<Server>> loadServers() const;
+
+    /**
+     * Load default paths for plugins.
+     *
+     * \return the map of paths
+     */
+    IRCCD_EXPORT PluginPaths loadPaths() const;
 
     /**
      * Get the list of defined plugins.

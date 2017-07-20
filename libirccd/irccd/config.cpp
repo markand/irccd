@@ -18,18 +18,20 @@
 
 #include <cassert>
 
+#include <boost/filesystem.hpp>
+
 #include <format.h>
 
 #include "config.hpp"
 #include "fs.hpp"
 #include "irccd.hpp"
 #include "logger.hpp"
-#include "path.hpp"
 #include "plugin.hpp"
 #include "rule.hpp"
 #include "server.hpp"
 #include "service.hpp"
 #include "sysconfig.hpp"
+#include "system.hpp"
 #include "transport.hpp"
 #include "util.hpp"
 
@@ -98,6 +100,16 @@ PluginConfig loadPluginConfig(const ini::Section &sc)
         config.emplace(option.key(), option.value());
 
     return config;
+}
+
+PluginPaths readPaths(const ini::Section& sc)
+{
+    PluginPaths paths;
+
+    for (const auto& opt : sc)
+        paths.emplace(opt.key(), opt.value());
+
+    return paths;
 }
 
 std::unique_ptr<log::Logger> loadLogFile(const ini::Section &sc)
@@ -374,16 +386,14 @@ std::shared_ptr<Server> loadServer(const ini::Section &sc, const Config &config)
 
 Config Config::find()
 {
-    for (const auto &path : path::list(path::PathConfig)) {
-        std::string fullpath = path + "irccd.conf";
-
-        if (!fs::isReadable(fullpath))
-            continue;
-
+    for (const auto& path : sys::config_filenames("irccd.conf")) {
         try {
-            return Config(fullpath);
+            boost::system::error_code ec;
+
+            if (boost::filesystem::exists(path, ec) && !ec)
+                return Config(path);
         } catch (const std::exception &ex) {
-            throw std::runtime_error("{}: {}"_format(fullpath, ex.what()));
+            log::warning() << path << ": " << ex.what() << std::endl;
         }
     }
 
@@ -447,6 +457,18 @@ PluginFormats Config::findPluginFormats(const std::string &name) const
         formats.emplace(opt.key(), opt.value());
 
     return formats;
+}
+
+PluginPaths Config::findPluginPaths(const std::string& name) const
+{
+    assert(util::isIdentifierValid(name));
+
+    auto section = m_document.find(std::string("paths.") + name);
+
+    if (section == m_document.end())
+        return PluginPaths();
+
+    return readPaths(*section);
 }
 
 bool Config::isVerbose() const noexcept
@@ -559,14 +581,31 @@ std::vector<std::shared_ptr<Server>> Config::loadServers() const
     return servers;
 }
 
+PluginPaths Config::loadPaths() const
+{
+    auto section = m_document.find("paths");
+
+    if (section == m_document.end())
+        return {};
+
+    return readPaths(*section);
+}
+
 void Config::loadPlugins(Irccd &irccd) const
 {
     auto it = m_document.find("plugins");
+
+    irccd.plugins().setPaths(loadPaths());
 
     if (it != m_document.end()) {
         for (const auto &option : *it) {
             if (!util::isIdentifierValid(option.key()))
                 continue;
+
+            auto paths = findPluginPaths(option.key());
+
+            if (!paths.empty())
+                irccd.plugins().setPaths(std::move(paths));
 
             irccd.plugins().setConfig(option.key(), findPluginConfig(option.key()));
             irccd.plugins().setFormats(option.key(), findPluginFormats(option.key()));

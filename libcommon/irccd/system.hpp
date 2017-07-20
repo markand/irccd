@@ -26,6 +26,9 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
+
+#include <boost/filesystem.hpp>
 
 #include "sysconfig.hpp"
 
@@ -114,6 +117,61 @@ IRCCD_EXPORT void setUid(const std::string &value);
 IRCCD_EXPORT void setGid(const std::string &value);
 
 #endif
+
+/**
+ * Get the cache directory as specified as compile time option WITH_CACHEDIR, if
+ * the value is absolute, it is returned as-is.
+ *
+ * If the component is relative, it is evaluated using the binary executable
+ * path.
+ *
+ * \return the evaluated cache directory.
+ * \see datadir
+ * \see configdir
+ */
+std::string cachedir();
+
+/**
+ * Like cachedir but for WITH_DATADIR.
+ *
+ * \return the evaluated data directory.
+ * \see cachedir
+ * \see datadir
+ */
+std::string datadir();
+
+/**
+ * Like cachedir but for WITH_SYSCONFIGDIR.
+ *
+ * \return the evaluated config directory.
+ * \see cachedir
+ * \see datadir
+ * \note use config_filenames for irccd.conf, irccdctl.conf files
+ */
+std::string sysconfigdir();
+
+
+/**
+ * Construct a list of paths to read configuration files from.
+ *
+ * This function does not test the presence of the files as a condition race
+ * may occur.
+ *
+ * The caller is responsible of opening files for each path.
+ *
+ * \param file the filename to append for convenience
+ * \return the list of paths to check in order
+ */
+std::vector<std::string> config_filenames(std::string file);
+
+/**
+ * Construct a list of paths for reading plugins.
+ *
+ * \param name the plugin id (without extension)
+ * \param extensions the list of extensions supported
+ */
+std::vector<std::string> plugin_filenames(const std::string& name,
+                                          const std::vector<std::string>& extensions);
 
 } // !sys
 

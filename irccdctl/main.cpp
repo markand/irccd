@@ -31,7 +31,6 @@
 #include "irccdctl.hpp"
 #include "logger.hpp"
 #include "options.hpp"
-#include "path.hpp"
 #include "system.hpp"
 #include "util.hpp"
 
@@ -560,9 +559,8 @@ int main(int argc, char **argv)
         if (it != result.end() || (it = result.find("--config")) != result.end())
             read(it->second);
         else {
-            for (const std::string &dir : path::list(path::PathConfig)) {
+            for (const auto& path : sys::config_filenames("irccdctl.conf")) {
                 boost::system::error_code ec;
-                std::string path = dir + "irccdctl.conf";
 
                 if (boost::filesystem::exists(path, ec) && !ec) {
                     read(path);

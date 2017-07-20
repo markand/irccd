@@ -164,6 +164,46 @@ port = 6667
 channels = ( "#staff", "#club:secret" )
 ````
 
+# The paths section
+
+The paths section defines common paths used as defaults for all plugins.
+
+Any option in this section can be defined altough the following are used as
+common convention used in all plugins:
+
+  - **cache**: (string) path for data files written by the plugin,
+  - **data**: (string) path for data files provided by the user,
+  - **config**: (string) path for additional configuration from the user.
+
+For each of these paths, **plugin/name** is appended with the appropriate
+plugin name when loaded.
+
+The section is redefinable per plugin basis using the `[paths.<plugin>]` syntax.
+
+**Example**
+
+````ini
+#
+# Common for all plugins.
+#
+# Example with ask plugin:
+#
+#   cache  -> /var/cache/irccd/plugin/ask
+#   config -> /usr/local/etc/irccd/plugin/ask
+#   data   -> /var/data/irccd/plugin/ask
+#
+[paths]
+cache = "/var/cache/irccd"
+config = "/usr/local/etc/irccd"
+data = "/var/data/irccd"
+
+#
+# Explicit override for plugin hangman.
+#
+[paths.hangman]
+config = "/etc/hangman"
+````
+
 # The plugins section
 
 This section is used to load plugins.

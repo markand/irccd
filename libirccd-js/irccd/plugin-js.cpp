@@ -39,6 +39,7 @@ namespace irccd {
 
 const char JsPlugin::ConfigProperty[] = "\xff""\xff""irccd-plugin-config";
 const char JsPlugin::FormatProperty[] = "\xff""\xff""irccd-plugin-format";
+const char JsPlugin::PathsProperty[] = "\xff""\xff""irccd-plugin-paths";
 
 std::unordered_map<std::string, std::string> JsPlugin::getTable(const char *name) const
 {
@@ -98,35 +99,6 @@ void JsPlugin::putVars()
     duk_put_global_string(m_context, "\xff""\xff""path");
 }
 
-void JsPlugin::putPath(const std::string &varname, const std::string &append, path::Path type)
-{
-    StackAssert sa(m_context);
-
-    bool found = true;
-    std::string foundpath;
-
-    // Use the first existing directory available.
-    for (const auto &p : path::list(type)) {
-        boost::system::error_code ec;
-        foundpath = path::clean(p + append);
-
-        if (boost::filesystem::exists(foundpath, ec) && !ec) {
-            found = true;
-            break;
-        }
-    }
-
-    // Use the system as default.
-    if (!found)
-        foundpath = path::clean(path::get(type, path::OwnerSystem) + append);
-
-    duk_get_global_string(m_context, "Irccd");
-    duk_get_prop_string(m_context, -1, "Plugin");
-    dukx_push_std_string(m_context, foundpath);
-    duk_put_prop_string(m_context, -2, varname.c_str());
-    duk_pop_2(m_context);
-}
-
 JsPlugin::JsPlugin(std::string name, std::string path)
     : Plugin(name, path)
 {
@@ -136,6 +108,7 @@ JsPlugin::JsPlugin(std::string name, std::string path)
      *
      *   - Irccd.Plugin.config
      *   - Irccd.Plugin.format
+     *   - Irccd.Plugin.paths
      *
      * In mod-plugin.cpp.
      */
@@ -143,6 +116,8 @@ JsPlugin::JsPlugin(std::string name, std::string path)
     duk_put_global_string(m_context, ConfigProperty);
     duk_push_object(m_context);
     duk_put_global_string(m_context, FormatProperty);
+    duk_push_object(m_context);
+    duk_put_global_string(m_context, PathsProperty);
 
     // Used by many Javascript APIs.
     duk_push_object(m_context);
@@ -238,15 +213,6 @@ void JsPlugin::onLoad(Irccd &irccd)
         throw std::runtime_error(std::strerror(errno));
 #endif
 
-    /*
-     * dataPath: DATA + plugin/name (e.g ~/.local/share/irccd/plugins/<name>/)
-     * configPath: CONFIG + plugin/name (e.g ~/.config/irccd/plugin/<name>/)
-     */
-    putVars();
-    putPath("dataPath", "plugin/" + name(), path::PathData);
-    putPath("configPath", "plugin/" + name(), path::PathConfig);
-    putPath("cachePath", "plugin/" + name(), path::PathCache);
-
     // Try to load the file (does not call onLoad yet).
     dukx_peval_file(m_context, path());
     duk_pop(m_context);
@@ -256,8 +222,10 @@ void JsPlugin::onLoad(Irccd &irccd)
      * calling onLoad to allow the plugin adding configuration to
      * Irccd.Plugin.(config|format) before the user.
      */
+    putVars();
     setConfig(irccd.plugins().config(name()));
     setFormats(irccd.plugins().formats(name()));
+    setPaths(irccd.plugins().paths(name()));
 
     // Read metadata .
     duk_get_global_string(m_context, "info");
@@ -426,7 +394,8 @@ void JsPlugin::onWhois(Irccd &, const WhoisEvent &event)
 }
 
 JsPluginLoader::JsPluginLoader(Irccd &irccd) noexcept
-    : m_irccd(irccd)
+    : PluginLoader({}, { ".js" })
+    , m_irccd(irccd)
 {
 }
 
@@ -457,22 +426,6 @@ std::shared_ptr<Plugin> JsPluginLoader::open(const std::string &id,
         return plugin;
     } catch (const std::exception &ex) {
         log::warning() << "plugin " << id << ": " << ex.what() << std::endl;
-    }
-
-    return nullptr;
-}
-
-std::shared_ptr<Plugin> JsPluginLoader::find(const std::string &id) noexcept
-{
-    for (const auto &dir : path::list(path::PathPlugins)) {
-        auto path = dir + id + ".js";
-
-        if (!fs::isReadable(path))
-            continue;
-
-        log::info() << "plugin " << id << ": trying " << path << std::endl;
-
-        return open(id, path);
     }
 
     return nullptr;

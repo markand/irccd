@@ -138,10 +138,12 @@ public:
 class PluginService {
 private:
     Irccd &m_irccd;
+    PluginPaths m_default_paths;
     std::vector<std::shared_ptr<Plugin>> m_plugins;
     std::vector<std::unique_ptr<PluginLoader>> m_loaders;
     std::unordered_map<std::string, PluginConfig> m_config;
     std::unordered_map<std::string, PluginFormats> m_formats;
+    std::unordered_map<std::string, PluginPaths> m_paths;
 
 public:
     /**
@@ -240,6 +242,36 @@ public:
      * \return the formats
      */
     IRCCD_EXPORT PluginFormats formats(const std::string &name) const;
+
+    /**
+     * Get the default paths for plugins.
+     *
+     * \return the paths
+     */
+    IRCCD_EXPORT const PluginPaths& paths() const noexcept;
+
+    /**
+     * Get the paths for the specified plugin.
+     *
+     * \param name the plugin
+     * \return the paths
+     */
+    IRCCD_EXPORT PluginPaths paths(const std::string& name) const;
+
+    /**
+     * Set default paths.
+     *
+     * \param paths the default paths (for all plugins)
+     */
+    IRCCD_EXPORT void setPaths(PluginPaths paths);
+
+    /**
+     * Override paths for the specified plugin.
+     *
+     * \param name the plugin name
+     * \param paths the paths
+     */
+    void setPaths(const std::string& name, PluginPaths paths);
 
     /**
      * Generic function for opening the plugin at the given path.

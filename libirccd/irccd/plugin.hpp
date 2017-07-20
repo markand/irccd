@@ -53,6 +53,11 @@ using PluginConfig = std::unordered_map<std::string, std::string>;
 using PluginFormats = std::unordered_map<std::string, std::string>;
 
 /**
+ * \brief Paths for plugins.
+ */
+using PluginPaths = std::unordered_map<std::string, std::string>;
+
+/**
  * \ingroup plugins
  * \brief Abstract plugin.
  *
@@ -228,6 +233,26 @@ public:
     virtual void setFormats(PluginFormats formats)
     {
         util::unused(formats);
+    }
+
+    /**
+     * Access the plugin paths.
+     *
+     * \return the paths
+     */
+    virtual PluginPaths paths()
+    {
+        return {};
+    }
+
+    /**
+     * Set the paths.
+     *
+     * \param paths the paths
+     */
+    virtual void setPaths(PluginPaths paths)
+    {
+        util::unused(paths);
     }
 
     /**
@@ -474,7 +499,46 @@ public:
  * \see JsPluginLoader
  */
 class PluginLoader {
+private:
+    std::vector<std::string> directories_;
+    std::vector<std::string> extensions_;
+
 public:
+    /**
+     * Construct the loader with a predefined set of directories and extensions.
+     *
+     * If directories is not specified, a sensible default list of system and
+     * user paths are searched.
+     *
+     * If extensions is empty, default find function implementation does
+     * nothing.
+     *
+     * \param directories directories to search
+     * \param extensions the list of extensions supported
+     */
+    PluginLoader(std::vector<std::string> directories = {},
+                 std::vector<std::string> extensions = {});
+
+    /**
+     * Set directories where to search plugins.
+     *
+     * \param dirs the directories
+     */
+    inline void set_directories(std::vector<std::string> dirs)
+    {
+        directories_ = std::move(dirs);
+    }
+
+    /**
+     * Set supported extensions for this loader.
+     *
+     * \param extensions the extensions (with the dot)
+     */
+    inline void set_extensions(std::vector<std::string> extensions)
+    {
+        extensions_ = std::move(extensions);
+    }
+
     /**
      * Try to open the plugin specified by path.
      *
@@ -492,7 +556,7 @@ public:
      * \param id the plugin id
      * \return the plugin
      */
-    virtual std::shared_ptr<Plugin> find(const std::string &id) noexcept = 0;
+    virtual std::shared_ptr<Plugin> find(const std::string &id) noexcept;
 };
 
 } // !irccd

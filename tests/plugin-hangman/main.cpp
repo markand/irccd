@@ -24,7 +24,6 @@
 #include <irccd/irccd.hpp>
 #include <irccd/server.hpp>
 #include <irccd/service.hpp>
-#include <irccd/path.hpp>
 
 #include "plugin-tester.hpp"
 
@@ -293,7 +292,6 @@ TEST_F(HangmanTest, wordlist_fix_644)
 
 int main(int argc, char **argv)
 {
-    path::setApplicationPath(argv[0]);
     testing::InitGoogleTest(&argc, argv);
 
     return RUN_ALL_TESTS();

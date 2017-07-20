@@ -30,7 +30,6 @@
 #include "fs.hpp"
 #include "mod-directory.hpp"
 #include "mod-irccd.hpp"
-#include "path.hpp"
 #include "plugin-js.hpp"
 #include "sysconfig.hpp"
 
@@ -129,8 +128,6 @@ std::string findRegex(const std::string &base, std::string pattern, bool recursi
  */
 duk_ret_t find(duk_context *ctx, std::string base, bool recursive, int patternIndex)
 {
-    base = path::clean(base);
-
     try {
         std::string path;
 

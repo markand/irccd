@@ -83,6 +83,8 @@ elseif (APPLE)
     set(IRCCD_SYSTEM_MAC TRUE)
 elseif (CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
     set(IRCCD_SYSTEM_FREEBSD TRUE)
+elseif (CMAKE_SYSTEM_NAME MATCHES "DragonFly")
+    set(IRCCD_SYSTEM_DRAGONFLYBSD TRUE)
 elseif (CMAKE_SYSTEM_NAME MATCHES "NetBSD")
     set(IRCCD_SYSTEM_NETBSD TRUE)
 elseif (CMAKE_SYSTEM_NAME MATCHES "OpenBSD")
@@ -263,4 +265,7 @@ configure_file(
     ${CMAKE_BINARY_DIR}/irccd/sysconfig.hpp
 )
 
-include_directories(${CMAKE_BINARY_DIR})
+include_directories(
+    ${CMAKE_BINARY_DIR}
+    ${CMAKE_BINARY_DIR}/irccd
+)

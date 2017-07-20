@@ -43,7 +43,7 @@ function onLoad()
         if (Plugin.config["file"])
             path = Plugin.config["file"];
         else
-            path = Plugin.configPath + "answers.conf";
+            path = Plugin.paths.config + "/answers.conf";
 
         var file = new File(path, "r");
         var line;

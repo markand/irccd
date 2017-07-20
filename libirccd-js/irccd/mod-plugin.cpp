@@ -112,7 +112,7 @@ duk_ret_t set(duk_context *ctx, const char *name)
  * get
  * ------------------------------------------------------------------
  *
- * Get the Irccd.plugin->(config|format) property.
+ * Get the Irccd.plugin->(config|format|paths) property.
  */
 duk_ret_t get(duk_context *ctx, const char *name)
 {
@@ -166,7 +166,29 @@ duk_ret_t getFormat(duk_context *ctx)
 }
 
 /*
- * Function: Irccd.plugin->info([name])
+ * setPaths
+ * ------------------------------------------------------------------
+ *
+ * Wrap setter for Irccd.plugin->format property.
+ */
+duk_ret_t setPaths(duk_context *ctx)
+{
+    return set(ctx, JsPlugin::PathsProperty);
+}
+
+/*
+ * getPaths
+ * ------------------------------------------------------------------
+ *
+ * Wrap getter for Irccd.plugin->format property.
+ */
+duk_ret_t getPaths(duk_context *ctx)
+{
+    return get(ctx, JsPlugin::PathsProperty);
+}
+
+/*
+ * Function: Irccd.plugin.info([name])
  * ------------------------------------------------------------------
  *
  * Get information about a plugin->
@@ -335,6 +357,12 @@ void PluginModule::load(Irccd &, std::shared_ptr<JsPlugin> plugin)
     duk_push_string(plugin->context(), "format");
     duk_push_c_function(plugin->context(), getFormat, 0);
     duk_push_c_function(plugin->context(), setFormat, 1);
+    duk_def_prop(plugin->context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
+
+    // 'format' property.
+    duk_push_string(plugin->context(), "paths");
+    duk_push_c_function(plugin->context(), getPaths, 0);
+    duk_push_c_function(plugin->context(), setPaths, 1);
     duk_def_prop(plugin->context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
 
     duk_put_prop_string(plugin->context(), -2, "Plugin");

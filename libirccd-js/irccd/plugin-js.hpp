@@ -27,7 +27,6 @@
 #include <vector>
 
 #include "duktape.hpp"
-#include "path.hpp"
 #include "plugin.hpp"
 
 namespace irccd {
@@ -50,6 +49,11 @@ public:
      */
     static const char FormatProperty[];
 
+    /**
+     * Global property where paths are defined (object).
+     */
+    static const char PathsProperty[];
+
 private:
     // JavaScript context
     UniqueContext m_context;
@@ -59,7 +63,6 @@ private:
     void putTable(const char *name, const std::unordered_map<std::string, std::string> &vars);
     void call(const std::string &name, unsigned nargs = 0);
     void putVars();
-    void putPath(const std::string &varname, const std::string &append, path::Path type);
 
 public:
     /**
@@ -110,6 +113,22 @@ public:
     void setFormats(PluginFormats formats) override
     {
         putTable(FormatProperty, formats);
+    }
+
+    /**
+     * \copydoc Plugin::paths
+     */
+    PluginPaths paths() override
+    {
+        return getTable(PathsProperty);
+    }
+
+    /**
+     * \copydoc Plugin::set_paths
+     */
+    void setPaths(PluginPaths paths) override
+    {
+        putTable(PathsProperty, std::move(paths));
     }
 
     /**
@@ -238,11 +257,6 @@ public:
      */
     std::shared_ptr<Plugin> open(const std::string &id,
                                  const std::string &path) noexcept override;
-
-    /**
-     * \copydoc PluginLoader::find
-     */
-    std::shared_ptr<Plugin> find(const std::string &id) noexcept override;
 };
 
 } // !irccd

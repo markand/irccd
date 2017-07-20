@@ -156,6 +156,7 @@ add_custom_target(
         ${CMAKE_SOURCE_DIR}/CONTRIBUTE.md
         ${CMAKE_SOURCE_DIR}/CREDITS.md
         ${CMAKE_SOURCE_DIR}/INSTALL.md
+        ${CMAKE_SOURCE_DIR}/MIGRATING.md
         ${CMAKE_SOURCE_DIR}/README.md
         ${CMAKE_SOURCE_DIR}/STYLE.md
 )

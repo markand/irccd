@@ -38,7 +38,6 @@
 #include "command.hpp"
 #include "logger.hpp"
 #include "options.hpp"
-#include "path.hpp"
 #include "service.hpp"
 #include "system.hpp"
 #include "config.hpp"
@@ -111,7 +110,6 @@ void init(int &argc, char **&argv)
 {
     // Needed for some components.
     sys::setProgramName("irccd");
-    path::setApplicationPath(argv[0]);
 
     // Default logging to console.
     log::setVerbose(false);

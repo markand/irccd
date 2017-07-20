@@ -86,7 +86,7 @@ function(_irccd_define_native_plugin)
     install(
         TARGETS plugin-${PLG_NAME}
         COMPONENT ${PLG_NAME}
-        LIBRARY DESTINATION ${WITH_NPLUGINDIR}
+        LIBRARY DESTINATION ${WITH_PLUGINDIR}
     )
 endfunction()
 

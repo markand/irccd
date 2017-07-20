@@ -132,7 +132,7 @@ Hangman.loadWords = function ()
     if (Plugin.config["file"])
         path = Plugin.config["file"];
     else
-        path = Plugin.configPath + "words.conf";
+        path = Plugin.paths.config + "/words.conf";
 
     try {
         Logger.info("loading words...");
@@ -289,6 +289,7 @@ Hangman.prototype.propose = function (ch, nickname)
 
 function onLoad()
 {
+    Logger.warning("TAMERE");
     Hangman.loadFormats();
     Hangman.loadWords();
 }
