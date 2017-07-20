@@ -12,6 +12,7 @@ guide: yes
   - [plugin-load](plugin-load.html)
   - [plugin-reload](plugin-reload.html)
   - [plugin-unload](plugin-unload.html)
+  - [rule-add](rule-add.html)
   - [rule-info](rule-info.html)
   - [rule-list](rule-list.html)
   - [rule-move](rule-move.html)

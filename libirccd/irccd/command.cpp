@@ -22,6 +22,8 @@
 #include "transport.hpp"
 #include "util.hpp"
 
+using namespace std::string_literals;
+
 namespace irccd {
 
 namespace command {
@@ -95,6 +97,42 @@ nlohmann::json toJson(const Rule &rule)
         { "plugins",    join(rule.plugins())    },
         { "events",     join(rule.events())     },
         { "action",     str(rule.action())      }
+    };
+}
+
+Rule fromJson(const nlohmann::json &json)
+{
+    auto toset = [] (auto object, auto name) -> RuleSet {
+        RuleSet result;
+
+        for (const auto &s : object[name])
+            if (s.is_string())
+                result.insert(s.template get<std::string>());
+
+        return result;
+    };
+    auto toaction = [] (auto object, auto name) -> RuleAction {
+        auto v = object[name];
+
+        if (!v.is_string())
+            throw std::runtime_error("no action given");
+
+        auto s = v.template get<std::string>();
+        if (s == "accept")
+            return RuleAction::Accept;
+        if (s == "drop")
+            return RuleAction::Drop;
+
+        throw std::runtime_error("unknown action '"s + s + "' given");
+    };
+
+    return {
+        toset(json, "servers"),
+        toset(json, "channels"),
+        toset(json, "origins"),
+        toset(json, "plugins"),
+        toset(json, "events"),
+        toaction(json, "action")
     };
 }
 
@@ -544,6 +582,24 @@ void RuleMoveCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann
         irccd.rules().remove(from);
         irccd.rules().insert(save, to > irccd.rules().length() ? irccd.rules().length() : to);
         client.success("rule-move");
+    }
+}
+
+RuleAddCommand::RuleAddCommand()
+    : Command("rule-add")
+{
+}
+
+void RuleAddCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+{
+    auto index = util::json::getUint(args, "index", irccd.rules().length());
+    auto rule = fromJson(args);
+
+    if (index > irccd.rules().length())
+        client.error("rule-add", "index is out of range");
+    else {
+        irccd.rules().insert(rule, index);
+        client.success("rule-add");
     }
 }
 

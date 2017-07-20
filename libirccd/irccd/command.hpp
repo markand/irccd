@@ -522,6 +522,22 @@ public:
     void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
 };
 
+/**
+ * \brief Implementation of rule-add transport command.
+ */
+class IRCCD_EXPORT RuleAddCommand : public Command {
+public:
+    /**
+     * Constructor.
+     */
+    RuleAddCommand();
+
+    /**
+     * \copydoc Command::exec
+     */
+    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+};
+
 } // !command
 
 } // !irccd

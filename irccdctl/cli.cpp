@@ -29,6 +29,8 @@
 #include "options.hpp"
 #include "util.hpp"
 
+using namespace std::string_literals;
+
 namespace irccd {
 
 /*
@@ -839,6 +841,85 @@ void ServerTopicCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &ar
         { "channel",    args[1] },
         { "topic",      args[2] }
     }));
+}
+
+/*
+ * RuleAddCli.
+ * ------------------------------------------------------------------
+ */
+
+RuleAddCli::RuleAddCli()
+    : Cli("rule-add",
+          "add a new rule",
+          "rule-add [options] accept|drop",
+          "Add a new rule to irccd.\n\n"
+          "If no index is specified, the rule is added to the end.\n\n"
+          "Available options:\n"
+          "  -c, --add-channel\t\tmatch a channel\n"
+          "  -e, --add-event\t\tmatch an event\n"
+          "  -i, --index\t\t\trule position\n"
+          "  -p, --add-plugin\t\tmatch a plugin\n"
+          "  -s, --add-server\t\tmatch a server\n\n"
+          "Example:\n"
+          "\tirccdctl rule-add -p hangman drop\n"
+          "\tirccdctl rule-add -s localhost -c #games -p hangman accept")
+{
+}
+
+void RuleAddCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+{
+    static const option::Options options{
+        { "-c",             true },
+        { "--add-channel",  true },
+        { "-e",             true },
+        { "--add-event",    true },
+        { "-i",             true },
+        { "--index",        true },
+        { "-p",             true },
+        { "--add-plugin",   true },
+        { "-s",             true },
+        { "--add-server",   true }
+    };
+
+    auto copy = args;
+    auto result = option::read(copy, options);
+
+    if (copy.size() < 1)
+        throw std::invalid_argument("rule-add requires at least 1 argument");
+
+    auto json = nlohmann::json::object({
+        { "command",    "rule-add"              },
+        { "channels",   nlohmann::json::array() },
+        { "events",     nlohmann::json::array() },
+        { "plugins",    nlohmann::json::array() },
+        { "servers",    nlohmann::json::array() }
+    });
+
+    // All sets.
+    for (const auto& pair : result) {
+        if (pair.first == "-c" || pair.first == "--add-channel")
+            json["channels"].push_back(pair.second);
+        if (pair.first == "-e" || pair.first == "--add-event")
+            json["events"].push_back(pair.second);
+        if (pair.first == "-p" || pair.first == "--add-plugin")
+            json["plugins"].push_back(pair.second);
+        if (pair.first == "-s" || pair.first == "--add-server")
+            json["servers"].push_back(pair.second);
+    }
+
+    // Index.
+    if (result.count("-i") > 0)
+        json["index"] = util::toNumber<unsigned>(result.find("-i")->second);
+    if (result.count("--index") > 0)
+        json["index"] = util::toNumber<unsigned>(result.find("--index")->second);
+
+    // And action.
+    if (copy[0] != "accept" && copy[0] != "drop")
+        throw std::runtime_error("invalid action '"s + copy[0] + "'");
+
+    json["action"] = copy[0];
+
+    check(request(irccdctl, json));
 }
 
 /*

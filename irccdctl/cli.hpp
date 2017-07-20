@@ -586,6 +586,27 @@ public:
 };
 
 /*
+ * RuleAddCli.
+ * ------------------------------------------------------------------
+ */
+
+/**
+ * \brief Implementation of irccdctl rule-add.
+ */
+class RuleAddCli : public Cli {
+public:
+    /**
+     * Default constructor.
+     */
+    RuleAddCli();
+
+    /**
+     * \copydoc Cli::exec
+     */
+    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+};
+
+/*
  * RuleListCli.
  * ------------------------------------------------------------------
  */
