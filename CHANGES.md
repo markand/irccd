@@ -1,6 +1,12 @@
 IRC Client Daemon CHANGES
 =========================
 
+irccd 2.1.3
+----------------------
+
+  - Rules are now case insensitive (#645).
+
+
 irccd 2.1.2 2017-06-02
 ----------------------
 
