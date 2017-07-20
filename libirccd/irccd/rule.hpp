@@ -109,6 +109,13 @@ public:
     IRCCD_EXPORT RuleAction action() const noexcept;
 
     /**
+     * Set the action.
+     *
+     * \pre action must be valid
+     */
+    IRCCD_EXPORT void setAction(RuleAction action) noexcept;
+
+    /**
      * Get the servers.
      *
      * \return the servers
@@ -116,11 +123,32 @@ public:
     IRCCD_EXPORT const RuleSet &servers() const noexcept;
 
     /**
+     * Overloaded function.
+     *
+     * \return the servers
+     */
+    inline RuleSet &servers() noexcept
+    {
+        return m_servers;
+    }
+
+    /**
      * Get the channels.
      *
      * \return the channels
      */
     IRCCD_EXPORT const RuleSet &channels() const noexcept;
+
+
+    /**
+     * Overloaded function.
+     *
+     * \return the channels
+     */
+    inline RuleSet &channels() noexcept
+    {
+        return m_channels;
+    }
 
     /**
      * Get the origins.
@@ -136,12 +164,34 @@ public:
      */
     IRCCD_EXPORT const RuleSet &plugins() const noexcept;
 
+
+    /**
+     * Overloaded function.
+     *
+     * \return the plugins
+     */
+    inline RuleSet &plugins() noexcept
+    {
+        return m_plugins;
+    }
+
     /**
      * Get the events.
      *
      * \return the events
      */
     IRCCD_EXPORT const RuleSet &events() const noexcept;
+
+
+    /**
+     * Overloaded function.
+     *
+     * \return the events
+     */
+    inline RuleSet& events() noexcept
+    {
+        return m_events;
+    }
 };
 
 } // !irccd

@@ -923,6 +923,102 @@ void RuleAddCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
 }
 
 /*
+ * RuleEditCli.
+ * ------------------------------------------------------------------
+ */
+
+RuleEditCli::RuleEditCli()
+    : Cli("rule-edit",
+          "edit an existing rule",
+          "rule-edit [options] index",
+          "Edit an existing rule in irccd.\n\n"
+          "All options can be specified multiple times.\n\n"
+          "Available options:\n"
+          "  -a, --action\t\t\tset action\n"
+          "  -c, --add-channel\t\tmatch a channel\n"
+          "  -C, --remove-channel\t\tremove a channel\n"
+          "  -e, --add-event\t\tmatch an event\n"
+          "  -E, --remove-event\t\tremove an event\n"
+          "  -p, --add-plugin\t\tmatch a plugin\n"
+          "  -P, --add-plugin\t\tremove a plugin\n"
+          "  -s, --add-server\t\tmatch a server\n"
+          "  -S, --remove-server\t\tremove a server\n\n"
+          "Example:\n"
+          "\tirccdctl rule-edit -p hangman 0\n"
+          "\tirccdctl rule-edit -S localhost -c #games -p hangman 1")
+{
+}
+
+void RuleEditCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+{
+    static const option::Options options{
+        { "-a",                 true },
+        { "--action",           true },
+        { "-c",                 true },
+        { "--add-channel",      true },
+        { "-C",                 true },
+        { "--remove-channel",   true },
+        { "-e",                 true },
+        { "--add-event",        true },
+        { "-E",                 true },
+        { "--remove-event",     true },
+        { "-p",                 true },
+        { "--add-plugin",       true },
+        { "-P",                 true },
+        { "--remove-plugin",    true },
+        { "-s",                 true },
+        { "--add-server",       true },
+        { "-S",                 true },
+        { "--remove-server",    true },
+    };
+
+    auto copy = args;
+    auto result = option::read(copy, options);
+
+    if (copy.size() < 1)
+        throw std::invalid_argument("rule-edit requires at least 1 argument");
+
+    auto json = nlohmann::json::object({
+        { "command",    "rule-edit"             },
+        { "channels",   nlohmann::json::array() },
+        { "events",     nlohmann::json::array() },
+        { "plugins",    nlohmann::json::array() },
+        { "servers",    nlohmann::json::array() }
+    });
+
+    for (const auto& pair : result) {
+        // Action.
+        if (pair.first == "-a" || pair.first == "--action")
+            json["action"] = pair.second;
+
+        // Additions.
+        if (pair.first == "-c" || pair.first == "--add-channel")
+            json["add-channels"].push_back(pair.second);
+        if (pair.first == "-e" || pair.first == "--add-event")
+            json["add-events"].push_back(pair.second);
+        if (pair.first == "-p" || pair.first == "--add-plugin")
+            json["add-plugins"].push_back(pair.second);
+        if (pair.first == "-s" || pair.first == "--add-server")
+            json["add-servers"].push_back(pair.second);
+
+        // Removals.
+        if (pair.first == "-C" || pair.first == "--remove-channel")
+            json["remove-channels"].push_back(pair.second);
+        if (pair.first == "-E" || pair.first == "--remove-event")
+            json["remove-events"].push_back(pair.second);
+        if (pair.first == "-P" || pair.first == "--remove-plugin")
+            json["remove-plugins"].push_back(pair.second);
+        if (pair.first == "-S" || pair.first == "--remove-server")
+            json["remove-servers"].push_back(pair.second);
+    }
+
+    // Index.
+    json["index"] = util::toNumber<unsigned>(copy[0]);
+
+    check(request(irccdctl, json));
+}
+
+/*
  * RuleListCli.
  * ------------------------------------------------------------------
  */

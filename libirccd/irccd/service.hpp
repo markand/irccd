@@ -356,6 +356,13 @@ public:
     IRCCD_EXPORT const Rule &require(unsigned position) const;
 
     /**
+     * Overloaded function.
+     *
+     * \copydoc require
+     */
+    IRCCD_EXPORT Rule& require(unsigned position);
+
+    /**
      * Resolve the action to execute with the specified list of rules.
      *
      * \param server the server name

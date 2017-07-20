@@ -487,6 +487,56 @@ void ServerTopicCommand::exec(Irccd &irccd, TransportClient &client, const nlohm
     client.success("server-topic");
 }
 
+RuleEditCommand::RuleEditCommand()
+    : Command("rule-edit")
+{
+}
+
+void RuleEditCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+{
+    static const auto updateset = [] (auto &set, auto args, const auto &key) {
+        for (const auto &v : args["remove-"s + key]) {
+            if (v.is_string())
+                set.erase(v.template get<std::string>());
+        }
+        for (const auto &v : args["add-"s + key]) {
+            if (v.is_string())
+                set.insert(v.template get<std::string>());
+        }
+    };
+
+    // Create a copy to avoid incomplete edition in case of errors.
+    auto index = util::json::requireUint(args, "index");
+    auto rule = irccd.rules().require(index);
+
+    updateset(rule.channels(), args, "channels");
+    updateset(rule.events(), args, "events");
+    updateset(rule.plugins(), args, "plugins");
+    updateset(rule.servers(), args, "servers");
+
+    auto action = args.find("action");
+
+    if (action != args.end()) {
+        if (!action->is_string()) {
+            client.error("rule-edit", "action must be \"accept\" or \"drop\"");
+            return;
+        }
+
+        if (action->get<std::string>() == "accept")
+            rule.setAction(RuleAction::Accept);
+        else if (action->get<std::string>() == "drop")
+            rule.setAction(RuleAction::Drop);
+        else {
+            client.error("rule-edit", "invalid action '"s + action->get<std::string>() + "'");
+            return;
+        }
+    }
+
+    // All done, sync the rule.
+    irccd.rules().require(index) = rule;
+    client.success("rule-edit");
+}
+
 RuleListCommand::RuleListCommand()
     : Command("rule-list")
 {

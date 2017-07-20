@@ -153,6 +153,7 @@ set(
     ${html_SOURCE_DIR}/irccdctl/command/plugin-reload.md
     ${html_SOURCE_DIR}/irccdctl/command/plugin-unload.md
     ${html_SOURCE_DIR}/irccdctl/command/rule-add.md
+    ${html_SOURCE_DIR}/irccdctl/command/rule-edit.md
     ${html_SOURCE_DIR}/irccdctl/command/rule-info.md
     ${html_SOURCE_DIR}/irccdctl/command/rule-list.md
     ${html_SOURCE_DIR}/irccdctl/command/rule-move.md
