@@ -124,65 +124,88 @@ function onReload()
 
 function onChannelMode(server, origin, channel, mode, arg)
 {
+    origin = origin.toLowerCase();
+    channel = channel.toLowerCase();
+
     write("cmode", keywords(server, channel, origin, {
-        "arg":        arg,
-        "mode":        mode,
-        "source":    channel
+        "arg":      arg,
+        "mode":     mode,
+        "source":   channel
     }));
 }
 
 function onChannelNotice(server, origin, channel, notice)
 {
+    origin = origin.toLowerCase();
+    channel = channel.toLowerCase();
+
     write("cnotice", keywords(server, channel, origin, {
-        "message":    notice,
-        "source":    channel
+        "message":  notice,
+        "source":   channel
     }));
 }
 
 function onInvite(server, origin, channel)
 {
+    origin = origin.toLowerCase();
+    channel = channel.toLowerCase();
+
     write("invite", keywords(server, channel, origin, {
-        "source":    channel
+        "source":   channel
     }));
 }
 
 function onJoin(server, origin, channel)
 {
+    origin = origin.toLowerCase();
+    channel = channel.toLowerCase();
+
     write("join", keywords(server, channel, origin, {
-        "source":    channel
+        "source":   channel
     }));
 }
 
 function onKick(server, origin, channel, target, reason)
 {
+    origin = origin.toLowerCase();
+    channel = channel.toLowerCase();
+
     write("kick", keywords(server, channel, origin, {
-        "target":    target,
-        "source":    channel,
-        "reason":    reason
+        "target":   target,
+        "source":   channel,
+        "reason":   reason
     }));
 }
 
 function onMe(server, origin, channel, message)
 {
+    origin = origin.toLowerCase();
+    channel = channel.toLowerCase();
+
     write("me", keywords(server, channel, origin, {
-        "message":    message,
-        "source":    channel
+        "message":  message,
+        "source":   channel
     }));
 }
 
 function onMessage(server, origin, channel, message)
 {
+    origin = origin.toLowerCase();
+    channel = channel.toLowerCase();
+
     write("message", keywords(server, channel, origin, {
-        "message":    message,
-        "source":    channel
+        "message":  message,
+        "source":   channel
     }));
 }
 
 function onMode(server, origin, mode)
 {
+    origin = origin.toLowerCase();
+
     write("mode", keywords(server, undefined, origin, {
-        "mode":        mode,
-        "source":    Util.splituser(origin)
+        "mode":     mode,
+        "source":   Util.splituser(origin)
     }));
 }
 
@@ -193,32 +216,42 @@ function onNick(server, origin, nickname)
 
 function onNotice(server, origin, notice)
 {
+    origin = origin.toLowerCase();
+
     write("notice", keywords(server, undefined, origin, {
-        "message":    notice,
-        "source":    Util.splituser(origin)
+        "message":  notice,
+        "source":   Util.splituser(origin)
     }));
 }
 
 function onPart(server, origin, channel, reason)
 {
+    origin = origin.toLowerCase();
+    channel = channel.toLowerCase();
+
     write("part", keywords(server, channel, origin, {
-        "reason":    reason,
-        "source":    channel
+        "reason":   reason,
+        "source":   channel
     }));
 }
 
 function onQuery(server, origin, message)
 {
+    origin = origin.toLowerCase();
+
     write("query", keywords(server, undefined, origin, {
-        "source":    Util.splituser(origin),
-        "message":    message
+        "source":   Util.splituser(origin),
+        "message":  message
     }));
 }
 
 function onTopic(server, origin, channel, topic)
 {
+    origin = origin.toLowerCase();
+    channel = channel.toLowerCase();
+
     write("topic", keywords(server, channel, origin, {
-        "source":    channel,
+        "source":   channel,
         "topic":    topic
     }));
 }

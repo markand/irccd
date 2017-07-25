@@ -198,7 +198,7 @@ TEST_F(HangmanTest, collaborativeEnabled)
     ASSERT_EQ("#hangman:found=hangman:!hangman:test:#hangman:francis!francis@localhost:francis:s k _", m_server->last());
 }
 
-TEST_F(HangmanTest, caseInsensitive)
+TEST_F(HangmanTest, case_fix_642)
 {
     load();
 
