@@ -48,13 +48,6 @@
 # WITH_SYSTEMDDIR       Path where to install systemd unit file
 #
 
-#
-# Options for unit tests only:
-#
-# WITH_TEST_IRCHOST     Which IRC server to use for tests (default: 127.0.0.1)
-# WITH_TEST_IRCPORT     Which IRC server port to use for tests (default: 6667)
-#
-
 # Manual pages on Windows are pretty useless.
 if (WIN32)
     set(DEFAULT_MAN "No")
@@ -85,9 +78,6 @@ option(WITH_HTML "Enable building of HTML documentation" On)
 option(WITH_DOXYGEN "Enable doxygen" Off)
 option(WITH_MAN "Install man pages" ${DEFAULT_MAN})
 option(WITH_PKGCONFIG "Enable pkg-config file" ${DEFAULT_PKGCONFIG})
-
-set(WITH_TEST_IRCHOST "127.0.0.1" CACHE STRING "IRC host for tests")
-set(WITH_TEST_IRCPORT 6667 CACHE STRING "IRC port for test")
 
 #
 # Installation paths.
