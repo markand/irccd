@@ -59,11 +59,11 @@ function(_irccd_define_javascript_plugin)
 
     configure_file(
         ${PLG_SCRIPT}
-        ${IRCCD_FAKEROOTDIR}/${WITH_PLUGINDIR}/${name}
+        ${CMAKE_CURRENT_BINARY_DIR}/${name}
     )
 
     install(
-        FILES ${IRCCD_FAKEROOTDIR}/${WITH_PLUGINDIR}/${name}
+        FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}
         COMPONENT ${PLG_NAME}
         DESTINATION ${WITH_PLUGINDIR}
     )
@@ -82,24 +82,6 @@ function(_irccd_define_native_plugin)
     endif ()
 
     add_library(plugin-${PLG_NAME} MODULE ${PLG_SOURCES} ${PLG_OUTPUT_DOC} ${PLG_DOCS})
-
-    # Move the target into the native plugin directory and rename it.
-    set_target_properties(
-        plugin-${PLG_NAME}
-        PROPERTIES
-            PREFIX ""
-            OUTPUT_NAME ${PLG_NAME}
-            LIBRARY_OUTPUT_DIRECTORY ${IRCCD_FAKEROOTDIR}/${WITH_NPLUGINDIR}
-    )
-    foreach (c ${CMAKE_CONFIGURATION_TYPES})
-        string(TOUPPER CONFIG ${c})
-        set_target_properties(
-            plugin-${PLG_NAME}
-            PROPERTIES
-                OUTPUT_NAME_${CONFIG} ${PLG_NAME}
-                LIBRARY_OUTPUT_DIRECTORY_${CONFIG} ${IRCCD_FAKEROOTDIR}/${WITH_NPLUGINDIR}
-        )
-    endforeach()
     target_link_libraries(plugin-${PLG_NAME} libirccd)
     install(
         TARGETS plugin-${PLG_NAME}

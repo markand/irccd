@@ -72,12 +72,6 @@ else ()
     set(IRCCD_64BITS FALSE)
 endif ()
 
-set(IRCCD_FAKEROOTDIR ${CMAKE_BINARY_DIR}/fakeroot)
-
-if (NOT EXISTS ${IRCCD_FAKEROOTDIR})
-    file(MAKE_DIRECTORY ${IRCCD_FAKEROOTDIR})
-endif ()
-
 #
 # System identification.
 # -------------------------------------------------------------------
@@ -262,7 +256,11 @@ check_struct_has_member("struct stat" st_size sys/stat.h HAVE_STAT_ST_SIZE)
 check_struct_has_member("struct stat" st_uid sys/stat.h HAVE_STAT_ST_UID)
 
 # Configuration file.
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/irccd)
+
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/internal/sysconfig.hpp.in
-    ${IRCCD_FAKEROOTDIR}/include/irccd/sysconfig.hpp
+    ${CMAKE_BINARY_DIR}/irccd/sysconfig.hpp
 )
+
+include_directories(${CMAKE_BINARY_DIR})

@@ -202,6 +202,14 @@ if (WITH_HTML)
         )
         list(APPEND OUTPUTS ${output})
 
+        # Install this file.
+        file(RELATIVE_PATH basename ${html_SOURCE_DIR} ${file})
+        get_filename_component(dirname ${basename} DIRECTORY)
+        install(
+            FILES ${output}
+            COMPONENT docs
+            DESTINATION ${WITH_DOCDIR}/${dirname}
+        )
     endforeach ()
 
     add_custom_target(
@@ -210,13 +218,13 @@ if (WITH_HTML)
             ${HTML_SOURCES} ${CSS} ${JS} ${OUTPUTS}
             ${html_SOURCE_DIR}/resources/template.html
         COMMAND
-            ${CMAKE_COMMAND} -E make_directory ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/css
+            ${CMAKE_COMMAND} -E make_directory ${html_BINARY_DIR}/css
         COMMAND
-            ${CMAKE_COMMAND} -E make_directory ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/js
+            ${CMAKE_COMMAND} -E make_directory ${html_BINARY_DIR}/js
         COMMAND
-            ${CMAKE_COMMAND} -E copy ${CSS} ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/css
+            ${CMAKE_COMMAND} -E copy ${CSS} ${html_BINARY_DIR}/css
         COMMAND
-            ${CMAKE_COMMAND} -E copy ${JS} ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/js
+            ${CMAKE_COMMAND} -E copy ${JS} ${html_BINARY_DIR}/js
     )
 
     # Install resources files.

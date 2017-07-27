@@ -90,10 +90,10 @@ macro(irccd_build_html)
     string(REGEX REPLACE "^(.*)\\.md$" "\\1" basename ${basename})
 
     file(
-            RELATIVE_PATH
-            baseurl
-            ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/${dirname}
-            ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}
+        RELATIVE_PATH
+        baseurl
+        ${CMAKE_CURRENT_BINARY_DIR}/${dirname}
+        ${CMAKE_CURRENT_BINARY_DIR}/
     )
 
     if (baseurl STREQUAL "")
@@ -134,7 +134,7 @@ macro(irccd_build_html)
 
     # Pandoc the file.
     pandoc(
-        OUTPUT ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/${dirname}/${basename}.html
+        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${dirname}/${basename}.html
         SOURCES
             ${CMAKE_CURRENT_BINARY_DIR}/${dirname}/${basename}.yml
             ${CMAKE_CURRENT_BINARY_DIR}/${dirname}/${basename}.md
@@ -148,13 +148,13 @@ macro(irccd_build_html)
     # Install the documentation file as component if provided.
     if (HTML_COMPONENT)
         install(
-            FILES ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/${dirname}/${basename}.html
+            FILES ${CMAKE_CURRENT_BINARY_DIR}/${dirname}/${basename}.html
             COMPONENT ${HTML_COMPONENT}
             DESTINATION ${WITH_DOCDIR}/${dirname}
         )
     endif ()
 
     if (HTML_OUTPUT_VAR)
-        set(${HTML_OUTPUT_VAR} ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/${dirname}/${basename}.html)
+        set(${HTML_OUTPUT_VAR} ${CMAKE_CURRENT_BINARY_DIR}/${dirname}/${basename}.html)
     endif ()
 endmacro ()

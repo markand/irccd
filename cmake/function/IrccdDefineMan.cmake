@@ -29,7 +29,7 @@
 function(irccd_define_man file man)
     if (WITH_MAN)
         set(input ${doc_SOURCE_DIR}/man/${file}.in)
-        set(output ${IRCCD_FAKEROOTDIR}/${WITH_MANDIR}/${man}/${file})
+        set(output ${CMAKE_CURRENT_BINARY_DIR}/${file})
         configure_file(${input} ${output} @ONLY)
         install(FILES ${output} DESTINATION ${WITH_MANDIR}/${man})
     endif ()

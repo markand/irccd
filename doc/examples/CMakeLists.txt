@@ -20,12 +20,12 @@ project(examples)
 
 configure_file(
     ${examples_SOURCE_DIR}/irccd.conf.sample
-    ${IRCCD_FAKEROOTDIR}/${WITH_CONFDIR}/irccd.conf
+    ${examples_BINARY_DIR}/irccd.conf
 )
 
 configure_file(
     ${examples_SOURCE_DIR}/irccdctl.conf.sample
-    ${IRCCD_FAKEROOTDIR}/${WITH_CONFDIR}/irccdctl.conf
+    ${examples_BINARY_DIR}/irccdctl.conf
 )
 
 install(

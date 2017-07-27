@@ -54,17 +54,6 @@ function(irccd_define_executable)
     target_compile_definitions(${EXE_TARGET} PRIVATE ${EXE_FLAGS})
     target_link_libraries(${EXE_TARGET} ${EXE_LIBRARIES})
 
-    # use fakeroot for public executables.
-    set_target_properties(
-        ${EXE_TARGET}
-        PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-        RUNTIME_OUTPUT_DIRECTORY_DEBUG ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-        RUNTIME_OUTPUT_DIRECTORY_RELEASE ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-        RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
-    )
-
     install(
         TARGETS ${EXE_TARGET}
         COMPONENT ${EXE_TARGET}
