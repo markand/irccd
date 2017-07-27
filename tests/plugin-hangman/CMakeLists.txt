@@ -18,7 +18,7 @@
 
 irccd_define_test(
     NAME plugin-hangman
-    SOURCES main.cpp
+    SOURCES main.cpp words.conf wordlist_fix_644.conf
     LIBRARIES libirccd
     FLAGS PLUGINDIR=\"${IRCCD_FAKEROOTDIR}/${WITH_PLUGINDIR}\"
 )
