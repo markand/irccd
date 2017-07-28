@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 
+#include <irccd/logger.hpp>
 #include <irccd/rule.hpp>
 #include <irccd/service.hpp>
 
@@ -228,10 +229,16 @@ TEST_F(RulesTest, gamesSolve)
     ASSERT_FALSE(m_rules.solve("malikania", "#test", "", "game", "onMessage"));
 }
 
+TEST_F(RulesTest, case_fix_645)
+{
+    ASSERT_FALSE(m_rules.solve("MALIKANIA", "#STAFF", "", "SYSTEM", "onCommand"));
+}
+
 } // !irccd
 
 int main(int argc, char **argv)
 {
+    irccd::log::setLogger(std::make_unique<irccd::log::SilentLogger>());
     testing::InitGoogleTest(&argc, argv);
 
     return RUN_ALL_TESTS();

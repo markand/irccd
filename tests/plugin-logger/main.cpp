@@ -182,6 +182,15 @@ TEST_F(LoggerTest, formatTopic)
     ASSERT_EQ("topic=test:#staff:jean!jean@localhost:jean:oh yeah yeaaaaaaaah\n", last());
 }
 
+TEST_F(LoggerTest, case_fix_642)
+{
+    load();
+
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#STAFF", "hello guys"});
+
+    ASSERT_EQ("message=test:#staff:jean!jean@localhost:jean:hello guys\n", last());
+}
+
 int main(int argc, char **argv)
 {
     path::setApplicationPath(argv[0]);

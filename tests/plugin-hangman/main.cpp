@@ -16,6 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <unordered_map>
+#include <unordered_set>
+
 #include <gtest/gtest.h>
 
 #include <irccd/irccd.hpp>
@@ -198,7 +201,7 @@ TEST_F(HangmanTest, collaborativeEnabled)
     ASSERT_EQ("#hangman:found=hangman:!hangman:test:#hangman:francis!francis@localhost:francis:s k _", m_server->last());
 }
 
-TEST_F(HangmanTest, caseInsensitive)
+TEST_F(HangmanTest, case_fix_642)
 {
     load();
 
@@ -224,6 +227,57 @@ TEST_F(HangmanTest, query)
     ASSERT_EQ("jean:found=hangman:!hangman:test:jean:jean!jean@localhost:jean:s k _", m_server->last());
     m_plugin->onQueryCommand(m_irccd, QueryEvent{m_server, "jean!jean@localhost", "sky"});
     ASSERT_EQ("jean:win=hangman:!hangman:test:jean:jean!jean@localhost:jean:sky", m_server->last());
+}
+
+TEST_F(HangmanTest, wordlist_fix_644)
+{
+    /*
+     * To be sure that the selection use the same list, we create a list of
+     * three words that has different size to determine which one was selected.
+     *
+     * Then we run 3 games and verify that the old selection is not the same
+     * as the current.
+     *
+     * This is not very accurate but it's better than nothing.
+     */
+    load({{ "file", SOURCEDIR "/wordlist_fix_644.conf" }});
+
+    std::unordered_map<unsigned, std::string> words{
+        { 14, "abc"     },
+        { 16, "abcd"    },
+        { 18, "abcde"   }
+    };
+    std::unordered_set<unsigned> found;
+
+    m_plugin->setFormats({
+        { "start", "#{word}" }
+    });
+
+    unsigned last, current;
+
+    // 1. Initial game + finish.
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", ""});
+    last = m_server->last().length();
+    found.insert(last);
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", words[last]});
+
+    // 2. Current must not be the last one.
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", ""});
+    current = m_server->last().length();
+
+    ASSERT_NE(last, current);
+    ASSERT_EQ(0U, found.count(current));
+
+    found.insert(current);
+    last = current;
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", words[current]});
+
+    // 3. Last word must be the one that is kept into the map.
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", ""});
+    current = m_server->last().length();
+
+    ASSERT_NE(last, current);
+    ASSERT_EQ(0U, found.count(current));
 }
 
 int main(int argc, char **argv)

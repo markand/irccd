@@ -1,6 +1,13 @@
 IRC Client Daemon CHANGES
 =========================
 
+irccd 2.1.3 2017-07-28
+----------------------
+
+  - Rules are now case insensitive (#645),
+  - Plugin hangman, history and logger are now case insensitive (#642),
+  - Plugin hangman: fix successive word selection (#644).
+
 irccd 2.1.2 2017-06-02
 ----------------------
 
