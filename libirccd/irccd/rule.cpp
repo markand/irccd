@@ -16,7 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cassert>
+#include <algorithm>
+#include <cctype>
 #include <stdexcept>
 
 #include "logger.hpp"
@@ -75,10 +76,15 @@ bool Rule::match(const std::string &server,
                  const std::string &plugin,
                  const std::string &event) const noexcept
 {
-    return matchMap(m_servers, server) &&
-           matchMap(m_channels, channel) &&
-           matchMap(m_origins, nick) &&
-           matchMap(m_plugins, plugin) &&
+    auto tolower = [] (auto str) {
+        std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+        return str;
+    };
+
+    return matchMap(m_servers, tolower(server)) &&
+           matchMap(m_channels, tolower(channel)) &&
+           matchMap(m_origins, tolower(nick)) &&
+           matchMap(m_plugins, tolower(plugin)) &&
            matchMap(m_events, event);
 }
 

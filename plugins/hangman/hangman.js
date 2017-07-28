@@ -62,9 +62,12 @@ function Hangman(server, channel)
 Hangman.map = {};
 
 /**
- * List of words
+ * List of words.
  */
-Hangman.words = [];
+Hangman.words = {
+    all: [],        //!< All words,
+    registry: {}    //!< Words list per server/channel.
+};
 
 /**
  * Search for an existing game.
@@ -139,15 +142,15 @@ Hangman.loadWords = function ()
 
         while ((line = file.readline()) !== undefined)
             if (Hangman.isWord(line))
-                Hangman.words.push(line);
+                Hangman.words.all.push(line);
     } catch (e) {
         throw new Error("could not open '" + path + "'");
     }
 
-    if (Hangman.words.length === 0)
+    if (Hangman.words.all.length === 0)
         throw new Error("empty word database");
 
-    Logger.info("number of words in database: " + Hangman.words.length);
+    Logger.info("number of words in database: " + Hangman.words.all.length);
 }
 
 /**
@@ -182,14 +185,18 @@ Hangman.loadFormats = function ()
  */
 Hangman.prototype.select = function ()
 {
+    var id = this.server.toString() + "@" + this.channel;
+
     // Reload the words if empty.
-    if (!this.words || this.words.length === 0)
-        this.words = Hangman.words.slice(0);
+    if (!Hangman.words.registry[id] || Hangman.words.registry[id].length === 0)
+        Hangman.words.registry[id] = Hangman.words.all.slice(0);
 
-    var i = Math.floor(Math.random() * this.words.length);
+    var i = Math.floor(Math.random() * Hangman.words.registry[id].length);
 
-    this.word = this.words[i];
-    this.words.splice(i, 1);
+    this.word = Hangman.words.registry[id][i];
+
+    // Erase words from the registry.
+    Hangman.words.registry[id].splice(i, 1);
 
     // Fill table.
     this.table = {};

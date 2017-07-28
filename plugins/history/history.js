@@ -142,6 +142,8 @@ function loadFormats()
 
 function onCommand(server, origin, channel, message)
 {
+    channel = channel.toLowerCase();
+
     var args = message.trim().split(" ");
     var kw = {
         channel: channel,
@@ -161,6 +163,8 @@ function onCommand(server, origin, channel, message)
         server.message(channel, Util.format(Plugin.format.usage, kw));
         return;
     }
+
+    args[1] = args[1].toLowerCase();
 
     if (isSelf(server, args[1]))
         return;
@@ -186,19 +190,28 @@ function onCommand(server, origin, channel, message)
 
 function onJoin(server, origin, channel)
 {
-    write(server, channel, Util.splituser(origin));
+    origin = Util.splituser(origin).toLowerCase();
+    channel = channel.toLowerCase();
+
+    write(server, channel, origin);
 }
 
 function onMessage(server, origin, channel, message)
 {
-    write(server, channel, Util.splituser(origin), message);
+    origin = Util.splituser(origin).toLowerCase();
+    channel = channel.toLowerCase();
+
+    write(server, channel, origin, message);
 }
 
 onMe = onMessage;
 
 function onTopic(server, origin, channel)
 {
-    write(server, channel, Util.splituser(origin));
+    origin = Util.splituser(origin).toLowerCase();
+    channel = channel.toLowerCase();
+
+    write(server, origin, channel)
 }
 
 function onLoad()
@@ -220,5 +233,5 @@ function onReload()
 function onNames(server, channel, list)
 {
     for (var i = 0; i < list.length; ++i)
-        write(server, channel, list[i]);
+        write(server, channel.toLowerCase(), list[i]);
 }

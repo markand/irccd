@@ -124,6 +124,21 @@ TEST_F(HistoryTest, formatUnknown)
     ASSERT_EQ("#history:unknown=history:!history:test:#history:destructor!dst@localhost:destructor:nobody", m_server->last());
 }
 
+TEST_F(HistoryTest, case_fix_642)
+{
+    std::regex rule("#history:said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:\\d{2}:\\d{2}");
+
+    remove(BINARYDIR "/case.json");
+    load({{"file", BINARYDIR "/case.json"}});
+
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "JeaN!JeaN@localhost", "#history", "hello"});
+
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "destructor!dst@localhost", "#HISTORY", "said JEAN"});
+    ASSERT_TRUE(std::regex_match(m_server->last(), rule));
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "destructor!dst@localhost", "#HiSToRy", "said JeaN"});
+    ASSERT_TRUE(std::regex_match(m_server->last(), rule));
+}
+
 int main(int argc, char **argv)
 {
     path::setApplicationPath(argv[0]);
