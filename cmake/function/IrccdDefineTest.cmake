@@ -62,6 +62,8 @@ function(irccd_define_test)
         test-${TEST_NAME}
         PRIVATE
             ${TEST_FLAGS}
+            CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+            CMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
             SOURCEDIR="${CMAKE_CURRENT_SOURCE_DIR}"
             BINARYDIR="${CMAKE_CURRENT_BINARY_DIR}"
             IRCCD_TESTS_DIRECTORY="${CMAKE_BINARY_DIR}/tests"

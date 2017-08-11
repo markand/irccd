@@ -25,100 +25,100 @@
 #include <irccd/server.hpp>
 #include <irccd/service.hpp>
 
-#include "plugin-tester.hpp"
+#include "plugin_test.hpp"
 
 using namespace fmt::literals;
 
 using namespace irccd;
 
-class ServerTest : public Server {
+class server_test : public Server {
 private:
-    std::string m_last;
+    std::string last_;
 
 public:
-    inline ServerTest()
+    inline server_test()
         : Server("test")
     {
     }
 
-    inline const std::string &last() const noexcept
+    inline const std::string& last() const noexcept
     {
-        return m_last;
+        return last_;
     }
 
     void message(std::string target, std::string message) override
     {
-        m_last = util::join({target, message});
+        last_ = util::join({target, message});
     }
 };
 
-class FakePlugin : public Plugin {
+class fake_plugin : public plugin {
 public:
-    FakePlugin()
-        : Plugin("fake", "")
+    fake_plugin()
+        : plugin("fake", "")
     {
-        setAuthor("jean");
-        setVersion("0.0.0.0.0.1");
-        setLicense("BEER");
-        setSummary("Fake White Beer 2000");
+        set_author("jean");
+        set_version("0.0.0.0.0.1");
+        set_license("BEER");
+        set_summary("Fake White Beer 2000");
     }
 };
 
-class PluginTest : public PluginTester {
+class plugin_test_suite : public plugin_test {
 protected:
-    std::shared_ptr<ServerTest> m_server;
-    std::shared_ptr<Plugin> m_plugin;
+    std::shared_ptr<server_test> server_;
 
 public:
-    PluginTest()
-        : m_server(std::make_shared<ServerTest>())
+    plugin_test_suite()
+        : plugin_test(PLUGIN_NAME, PLUGIN_PATH)
+        , server_(std::make_shared<server_test>())
     {
-        m_irccd.plugins().add(std::make_shared<FakePlugin>());
-        m_irccd.plugins().setFormats("plugin", {
+        irccd_.plugins().add(std::make_shared<fake_plugin>());
+
+        plugin_->set_formats({
             { "usage", "usage=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}" },
             { "info", "info=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{author}:#{license}:#{name}:#{summary}:#{version}" },
             { "not-found", "not-found=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{name}" },
             { "too-long", "too-long=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}" }
         });
-        m_irccd.plugins().load("plugin", PLUGINDIR "/plugin.js");
-        m_plugin = m_irccd.plugins().require("plugin");
+        plugin_->on_load(irccd_);
     }
 };
 
-TEST_F(PluginTest, formatUsage)
+TEST_F(plugin_test_suite, formatUsage)
 {
-    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#staff", ""});
-    ASSERT_EQ("#staff:usage=plugin:!plugin:test:#staff:jean!jean@localhost:jean", m_server->last());
+    plugin_->on_command(irccd_, MessageEvent{server_, "jean!jean@localhost", "#staff", ""});
+    ASSERT_EQ("#staff:usage=plugin:!plugin:test:#staff:jean!jean@localhost:jean", server_->last());
 
-    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#staff", "fail"});
-    ASSERT_EQ("#staff:usage=plugin:!plugin:test:#staff:jean!jean@localhost:jean", m_server->last());
+    plugin_->on_command(irccd_, MessageEvent{server_, "jean!jean@localhost", "#staff", "fail"});
+    ASSERT_EQ("#staff:usage=plugin:!plugin:test:#staff:jean!jean@localhost:jean", server_->last());
 
-    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#staff", "info"});
-    ASSERT_EQ("#staff:usage=plugin:!plugin:test:#staff:jean!jean@localhost:jean", m_server->last());
+    plugin_->on_command(irccd_, MessageEvent{server_, "jean!jean@localhost", "#staff", "info"});
+    ASSERT_EQ("#staff:usage=plugin:!plugin:test:#staff:jean!jean@localhost:jean", server_->last());
 }
 
-TEST_F(PluginTest, formatInfo)
+TEST_F(plugin_test_suite, formatInfo)
 {
-    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#staff", "info fake"});
+    plugin_->on_command(irccd_, MessageEvent{server_, "jean!jean@localhost", "#staff", "info fake"});
 
-    ASSERT_EQ("#staff:info=plugin:!plugin:test:#staff:jean!jean@localhost:jean:jean:BEER:fake:Fake White Beer 2000:0.0.0.0.0.1", m_server->last());
+    ASSERT_EQ("#staff:info=plugin:!plugin:test:#staff:jean!jean@localhost:jean:jean:BEER:fake:Fake White Beer 2000:0.0.0.0.0.1", server_->last());
 }
 
-TEST_F(PluginTest, formatNotFound)
+TEST_F(plugin_test_suite, formatNotFound)
 {
-    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#staff", "info doesnotexistsihope"});
+    plugin_->on_command(irccd_, MessageEvent{server_, "jean!jean@localhost", "#staff", "info doesnotexistsihope"});
 
-    ASSERT_EQ("#staff:not-found=plugin:!plugin:test:#staff:jean!jean@localhost:jean:doesnotexistsihope", m_server->last());
+    ASSERT_EQ("#staff:not-found=plugin:!plugin:test:#staff:jean!jean@localhost:jean:doesnotexistsihope", server_->last());
 }
 
-TEST_F(PluginTest, formatTooLong)
+TEST_F(plugin_test_suite, formatTooLong)
 {
     for (int i = 0; i < 100; ++i)
-        m_irccd.plugins().add(std::make_shared<Plugin>("plugin-n-{}"_format(i), ""));
+        irccd_.plugins().add(std::make_shared<plugin>("plugin-n-{}"_format(i), ""));
 
-    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#staff", "list"});
+    plugin_->on_command(irccd_, MessageEvent{server_, "jean!jean@localhost", "#staff", "list"});
 
-    ASSERT_EQ("#staff:too-long=plugin:!plugin:test:#staff:jean!jean@localhost:jean", m_server->last());
+    ASSERT_EQ("#staff:too-long=plugin:!plugin:test:#staff:jean!jean@localhost:jean", server_->last());
 }
 
 int main(int argc, char **argv)

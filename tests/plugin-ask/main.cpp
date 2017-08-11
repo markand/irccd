@@ -22,47 +22,47 @@
 #include <irccd/server.hpp>
 #include <irccd/service.hpp>
 
-#include "plugin-tester.hpp"
+#include "plugin_test.hpp"
 
 using namespace irccd;
 
-class ServerTest : public Server {
+class server_test : public Server {
 private:
-    std::string m_last;
+    std::string last_;
 
 public:
-    inline ServerTest()
+    inline server_test()
         : Server("test")
     {
     }
 
-    inline const std::string &last() const noexcept
+    inline const std::string& last() const noexcept
     {
-        return m_last;
+        return last_;
     }
 
     void message(std::string target, std::string message) override
     {
-        m_last = util::join({target, message});
+        last_ = util::join({target, message});
     }
 };
 
-class AskTest : public PluginTester {
+class ask_test : public plugin_test {
 protected:
-    std::shared_ptr<ServerTest> m_server;
-    std::shared_ptr<Plugin> m_plugin;
+    std::shared_ptr<server_test> server_{new server_test};
 
 public:
-    AskTest()
-        : m_server(std::make_shared<ServerTest>())
+    inline ask_test()
+        : plugin_test(PLUGIN_NAME, PLUGIN_PATH)
     {
-        m_irccd.plugins().setConfig("ask", {{"file", SOURCEDIR "/answers.conf"}});
-        m_irccd.plugins().load("ask", PLUGINDIR "/ask.js");
-        m_plugin = m_irccd.plugins().require("ask");
+        plugin_->set_config({
+            { "file", CMAKE_CURRENT_SOURCE_DIR "/answers.conf" }
+        });
+        plugin_->on_load(irccd_);
     }
 };
 
-TEST_F(AskTest, basic)
+TEST_F(ask_test, basic)
 {
     bool no = false;
     bool yes = false;
@@ -72,11 +72,11 @@ TEST_F(AskTest, basic)
      * answers in that amount of tries.
      */
     for (int i = 0; i < 1000; ++i) {
-        m_plugin->onCommand(m_irccd, MessageEvent{m_server, "tester", "#dummy", ""});
+        plugin_->on_command(irccd_, MessageEvent{server_, "tester", "#dummy", ""});
 
-        if (m_server->last() == "#dummy:tester, YES")
+        if (server_->last() == "#dummy:tester, YES")
             yes = true;
-        if (m_server->last() == "#dummy:tester, NO")
+        if (server_->last() == "#dummy:tester, NO")
             no = true;
     }
 
@@ -84,7 +84,7 @@ TEST_F(AskTest, basic)
     ASSERT_TRUE(yes);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     testing::InitGoogleTest(&argc, argv);
 

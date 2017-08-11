@@ -26,22 +26,13 @@
 #include <irccd/server.hpp>
 #include <irccd/service.hpp>
 
-#include "plugin-tester.hpp"
+#include "plugin_test.hpp"
 
 using namespace irccd;
 
-class ServerTest : public Server {
-public:
-    inline ServerTest()
-        : Server("test")
-    {
-    }
-};
-
-class LoggerTest : public PluginTester {
+class logger_test : public plugin_test {
 protected:
-    std::shared_ptr<ServerTest> m_server;
-    std::shared_ptr<Plugin> m_plugin;
+    std::shared_ptr<Server> server_;
 
     std::string last() const
     {
@@ -51,12 +42,13 @@ protected:
     }
 
 public:
-    LoggerTest()
-        : m_server(std::make_shared<ServerTest>())
+    logger_test()
+        : plugin_test(PLUGIN_NAME, PLUGIN_PATH)
+        , server_(std::make_shared<Server>("test"))
     {
         remove(BINARYDIR "/log.txt");
 
-        m_irccd.plugins().setFormats("logger", {
+        plugin_->set_formats({
             { "cmode", "cmode=#{server}:#{channel}:#{origin}:#{nickname}:#{mode}:#{arg}" },
             { "cnotice", "cnotice=#{server}:#{channel}:#{origin}:#{nickname}:#{message}" },
             { "join", "join=#{server}:#{channel}:#{origin}:#{nickname}" },
@@ -71,126 +63,125 @@ public:
         });
     }
 
-    void load(PluginConfig config = PluginConfig())
+    void load(plugin_config config = plugin_config())
     {
         if (config.count("path") == 0)
             config.emplace("path", BINARYDIR "/log.txt");
 
-        m_irccd.plugins().setConfig("logger", config);
-        m_irccd.plugins().load("logger", PLUGINDIR "/logger.js");
-        m_plugin = m_irccd.plugins().require("logger");
+        plugin_->set_config(config);
+        plugin_->on_load(irccd_);
     }
 };
 
-TEST_F(LoggerTest, formatChannelMode)
+TEST_F(logger_test, formatChannelMode)
 {
     load();
 
-    m_plugin->onChannelMode(m_irccd, ChannelModeEvent{m_server, "jean!jean@localhost", "#staff", "+o", "jean"});
+    plugin_->on_channel_mode(irccd_, ChannelModeEvent{server_, "jean!jean@localhost", "#staff", "+o", "jean"});
 
     ASSERT_EQ("cmode=test:#staff:jean!jean@localhost:jean:+o:jean\n", last());
 }
 
-TEST_F(LoggerTest, formatChannelNotice)
+TEST_F(logger_test, formatChannelNotice)
 {
     load();
 
-    m_plugin->onChannelNotice(m_irccd, ChannelNoticeEvent{m_server, "jean!jean@localhost", "#staff", "bonjour!"});
+    plugin_->on_channel_notice(irccd_, ChannelNoticeEvent{server_, "jean!jean@localhost", "#staff", "bonjour!"});
 
     ASSERT_EQ("cnotice=test:#staff:jean!jean@localhost:jean:bonjour!\n", last());
 }
 
-TEST_F(LoggerTest, formatJoin)
+TEST_F(logger_test, formatJoin)
 {
     load();
 
-    m_plugin->onJoin(m_irccd, JoinEvent{m_server, "jean!jean@localhost", "#staff"});
+    plugin_->on_join(irccd_, JoinEvent{server_, "jean!jean@localhost", "#staff"});
 
     ASSERT_EQ("join=test:#staff:jean!jean@localhost:jean\n", last());
 }
 
-TEST_F(LoggerTest, formatKick)
+TEST_F(logger_test, formatKick)
 {
     load();
 
-    m_plugin->onKick(m_irccd, KickEvent{m_server, "jean!jean@localhost", "#staff", "badboy", "please do not flood"});
+    plugin_->on_kick(irccd_, KickEvent{server_, "jean!jean@localhost", "#staff", "badboy", "please do not flood"});
 
     ASSERT_EQ("kick=test:#staff:jean!jean@localhost:jean:badboy:please do not flood\n", last());
 }
 
-TEST_F(LoggerTest, formatMe)
+TEST_F(logger_test, formatMe)
 {
     load();
 
-    m_plugin->onMe(m_irccd, MeEvent{m_server, "jean!jean@localhost", "#staff", "is drinking water"});
+    plugin_->on_me(irccd_, MeEvent{server_, "jean!jean@localhost", "#staff", "is drinking water"});
 
     ASSERT_EQ("me=test:#staff:jean!jean@localhost:jean:is drinking water\n", last());
 }
 
-TEST_F(LoggerTest, formatMessage)
+TEST_F(logger_test, formatMessage)
 {
     load();
 
-    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#staff", "hello guys"});
+    plugin_->on_message(irccd_, MessageEvent{server_, "jean!jean@localhost", "#staff", "hello guys"});
 
     ASSERT_EQ("message=test:#staff:jean!jean@localhost:jean:hello guys\n", last());
 }
 
-TEST_F(LoggerTest, formatMode)
+TEST_F(logger_test, formatMode)
 {
     load();
 
-    m_plugin->onMode(m_irccd, ModeEvent{m_server, "jean!jean@localhost", "+i"});
+    plugin_->on_mode(irccd_, ModeEvent{server_, "jean!jean@localhost", "+i"});
 
     ASSERT_EQ("mode=test:jean!jean@localhost:jean:+i:\n", last());
 }
 
-TEST_F(LoggerTest, formatNotice)
+TEST_F(logger_test, formatNotice)
 {
     load();
 
-    m_plugin->onNotice(m_irccd, NoticeEvent{m_server, "jean!jean@localhost", "tu veux voir mon chat ?"});
+    plugin_->on_notice(irccd_, NoticeEvent{server_, "jean!jean@localhost", "tu veux voir mon chat ?"});
 
     ASSERT_EQ("notice=test:jean!jean@localhost:jean:tu veux voir mon chat ?\n", last());
 }
 
-TEST_F(LoggerTest, formatPart)
+TEST_F(logger_test, formatPart)
 {
     load();
 
-    m_plugin->onPart(m_irccd, PartEvent{m_server, "jean!jean@localhost", "#staff", "too noisy here"});
+    plugin_->on_part(irccd_, PartEvent{server_, "jean!jean@localhost", "#staff", "too noisy here"});
 
     ASSERT_EQ("part=test:#staff:jean!jean@localhost:jean:too noisy here\n", last());
 }
 
-TEST_F(LoggerTest, formatQuery)
+TEST_F(logger_test, formatQuery)
 {
     load();
 
-    m_plugin->onQuery(m_irccd, QueryEvent{m_server, "jean!jean@localhost", "much irccd, wow"});
+    plugin_->on_query(irccd_, QueryEvent{server_, "jean!jean@localhost", "much irccd, wow"});
 
     ASSERT_EQ("query=test:jean!jean@localhost:jean:much irccd, wow\n", last());
 }
 
-TEST_F(LoggerTest, formatTopic)
+TEST_F(logger_test, formatTopic)
 {
     load();
 
-    m_plugin->onTopic(m_irccd, TopicEvent{m_server, "jean!jean@localhost", "#staff", "oh yeah yeaaaaaaaah"});
+    plugin_->on_topic(irccd_, TopicEvent{server_, "jean!jean@localhost", "#staff", "oh yeah yeaaaaaaaah"});
 
     ASSERT_EQ("topic=test:#staff:jean!jean@localhost:jean:oh yeah yeaaaaaaaah\n", last());
 }
 
-TEST_F(LoggerTest, case_fix_642)
+TEST_F(logger_test, case_fix_642)
 {
     load();
 
-    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#STAFF", "hello guys"});
+    plugin_->on_message(irccd_, MessageEvent{server_, "jean!jean@localhost", "#STAFF", "hello guys"});
 
     ASSERT_EQ("message=test:#staff:jean!jean@localhost:jean:hello guys\n", last());
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     testing::InitGoogleTest(&argc, argv);
     log::setLogger(std::make_unique<log::SilentLogger>());

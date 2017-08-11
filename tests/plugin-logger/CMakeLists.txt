@@ -20,5 +20,7 @@ irccd_define_test(
     NAME plugin-logger
     SOURCES main.cpp
     LIBRARIES libirccd
-    FLAGS PLUGINDIR=\"${IRCCD_FAKEROOTDIR}/${WITH_PLUGINDIR}\"
+    FLAGS
+        PLUGIN_NAME="logger"
+        PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/logger/logger.js"
 )

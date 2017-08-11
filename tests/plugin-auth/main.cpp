@@ -22,45 +22,45 @@
 #include <irccd/server.hpp>
 #include <irccd/service.hpp>
 
-#include "plugin-tester.hpp"
+#include "plugin_test.hpp"
 
 using namespace irccd;
 
-class ServerTest : public Server {
+class server_test : public Server {
 private:
-    std::string m_last;
+    std::string last_;
 
 public:
-    inline ServerTest(std::string name)
+    inline server_test(std::string name)
         : Server(std::move(name))
     {
     }
 
-    inline const std::string &last() const noexcept
+    inline const std::string& last() const noexcept
     {
-        return m_last;
+        return last_;
     }
 
     void message(std::string target, std::string message) override
     {
-        m_last = util::join({target, message});
+        last_ = util::join({target, message});
     }
 };
 
-class AuthTest : public PluginTester {
+class auth_test : public plugin_test {
 protected:
-    std::shared_ptr<ServerTest> m_nickserv1;
-    std::shared_ptr<ServerTest> m_nickserv2;
-    std::shared_ptr<ServerTest> m_quakenet;
-    std::shared_ptr<Plugin> m_plugin;
+    std::shared_ptr<server_test> nickserv1_;
+    std::shared_ptr<server_test> nickserv2_;
+    std::shared_ptr<server_test> quakenet_;
 
 public:
-    AuthTest()
-        : m_nickserv1(std::make_shared<ServerTest>("nickserv1"))
-        , m_nickserv2(std::make_shared<ServerTest>("nickserv2"))
-        , m_quakenet(std::make_shared<ServerTest>("quakenet"))
+    auth_test()
+        : plugin_test(PLUGIN_NAME, PLUGIN_PATH)
+        , nickserv1_(std::make_shared<server_test>("nickserv1"))
+        , nickserv2_(std::make_shared<server_test>("nickserv2"))
+        , quakenet_(std::make_shared<server_test>("quakenet"))
     {
-        m_irccd.plugins().setConfig("auth", {
+        plugin_->set_config({
             { "nickserv1.type", "nickserv" },
             { "nickserv1.password", "plopation" },
             { "nickserv2.type", "nickserv" },
@@ -70,33 +70,32 @@ public:
             { "quakenet.password", "hello" },
             { "quakenet.username", "mario" }
         });
-        m_irccd.plugins().load("auth", PLUGINDIR "/auth.js");
-        m_plugin = m_irccd.plugins().require("auth");
+        plugin_->on_load(irccd_);
     }
 };
 
-TEST_F(AuthTest, nickserv1)
+TEST_F(auth_test, nickserv1)
 {
-    m_plugin->onConnect(m_irccd, ConnectEvent{m_nickserv1});
+    plugin_->on_connect(irccd_, ConnectEvent{nickserv1_});
 
-    ASSERT_EQ("NickServ:identify plopation", m_nickserv1->last());
+    ASSERT_EQ("NickServ:identify plopation", nickserv1_->last());
 }
 
-TEST_F(AuthTest, nickserv2)
+TEST_F(auth_test, nickserv2)
 {
-    m_plugin->onConnect(m_irccd, ConnectEvent{m_nickserv2});
+    plugin_->on_connect(irccd_, ConnectEvent{nickserv2_});
 
-    ASSERT_EQ("NickServ:identify jean something", m_nickserv2->last());
+    ASSERT_EQ("NickServ:identify jean something", nickserv2_->last());
 }
 
-TEST_F(AuthTest, quakenet)
+TEST_F(auth_test, quakenet)
 {
-    m_plugin->onConnect(m_irccd, ConnectEvent{m_quakenet});
+    plugin_->on_connect(irccd_, ConnectEvent{quakenet_});
 
-    ASSERT_EQ("Q@CServe.quakenet.org:AUTH mario hello", m_quakenet->last());
+    ASSERT_EQ("Q@CServe.quakenet.org:AUTH mario hello", quakenet_->last());
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     testing::InitGoogleTest(&argc, argv);
 

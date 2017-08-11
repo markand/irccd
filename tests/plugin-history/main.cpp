@@ -24,41 +24,41 @@
 #include <irccd/server.hpp>
 #include <irccd/service.hpp>
 
-#include "plugin-tester.hpp"
+#include "plugin_test.hpp"
 
 using namespace irccd;
 
-class ServerTest : public Server {
+class server_test : public Server {
 private:
-    std::string m_last;
+    std::string last_;
 
 public:
-    inline ServerTest()
+    inline server_test()
         : Server("test")
     {
     }
 
-    inline const std::string &last() const noexcept
+    inline const std::string& last() const noexcept
     {
-        return m_last;
+        return last_;
     }
 
     void message(std::string target, std::string message) override
     {
-        m_last = util::join({target, message});
+        last_ = util::join({target, message});
     }
 };
 
-class HistoryTest : public PluginTester {
+class history_test : public plugin_test {
 protected:
-    std::shared_ptr<ServerTest> m_server;
-    std::shared_ptr<Plugin> m_plugin;
+    std::shared_ptr<server_test> server_;
 
 public:
-    HistoryTest()
-        : m_server(std::make_shared<ServerTest>())
+    history_test()
+        : plugin_test(PLUGIN_NAME, PLUGIN_PATH)
+        , server_(std::make_shared<server_test>())
     {
-        m_irccd.plugins().setFormats("history", {
+        plugin_->set_formats({
             { "error", "error=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}" },
             { "seen", "seen=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}:%H:%M" },
             { "said", "said=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}:#{message}:%H:%M" },
@@ -66,79 +66,78 @@ public:
         });
     }
 
-    void load(PluginConfig config = PluginConfig())
+    void load(plugin_config config = {})
     {
         // Add file if not there.
         if (config.count("file") == 0)
             config.emplace("file", SOURCEDIR "/words.conf");
 
-        m_irccd.plugins().setConfig("history", config);
-        m_irccd.plugins().load("history", PLUGINDIR "/history.js");
-        m_plugin = m_irccd.plugins().require("history");
+        plugin_->set_config(config);
+        plugin_->on_load(irccd_);
     }
 };
 
-TEST_F(HistoryTest, formatError)
+TEST_F(history_test, formatError)
 {
     load({{ "file", SOURCEDIR "/broken-conf.json" }});
 
-    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#history", "seen francis"});
-    ASSERT_EQ("#history:error=history:!history:test:#history:jean!jean@localhost:jean", m_server->last());
+    plugin_->on_command(irccd_, MessageEvent{server_, "jean!jean@localhost", "#history", "seen francis"});
+    ASSERT_EQ("#history:error=history:!history:test:#history:jean!jean@localhost:jean", server_->last());
 }
 
-TEST_F(HistoryTest, formatSeen)
+TEST_F(history_test, formatSeen)
 {
     std::regex rule("#history:seen=history:!history:test:#history:destructor!dst@localhost:destructor:jean:\\d{2}:\\d{2}");
 
     remove(BINARYDIR "/seen.json");
     load({{ "file", BINARYDIR "/seen.json" }});
 
-    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#history", "hello"});
-    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "destructor!dst@localhost", "#history", "seen jean"});
+    plugin_->on_message(irccd_, MessageEvent{server_, "jean!jean@localhost", "#history", "hello"});
+    plugin_->on_command(irccd_, MessageEvent{server_, "destructor!dst@localhost", "#history", "seen jean"});
 
-    ASSERT_TRUE(std::regex_match(m_server->last(), rule));
+    ASSERT_TRUE(std::regex_match(server_->last(), rule));
 }
 
-TEST_F(HistoryTest, formatSaid)
+TEST_F(history_test, formatSaid)
 {
     std::regex rule("#history:said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:\\d{2}:\\d{2}");
 
     remove(BINARYDIR "/said.json");
     load({{ "file", BINARYDIR "/said.json" }});
 
-    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#history", "hello"});
-    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "destructor!dst@localhost", "#history", "said jean"});
+    plugin_->on_message(irccd_, MessageEvent{server_, "jean!jean@localhost", "#history", "hello"});
+    plugin_->on_command(irccd_, MessageEvent{server_, "destructor!dst@localhost", "#history", "said jean"});
 
-    ASSERT_TRUE(std::regex_match(m_server->last(), rule));
+    ASSERT_TRUE(std::regex_match(server_->last(), rule));
 }
 
-TEST_F(HistoryTest, formatUnknown)
+TEST_F(history_test, formatUnknown)
 {
     remove(BINARYDIR "/unknown.json");
     load({{ "file", BINARYDIR "/unknown.json" }});
 
-    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#history", "hello"});
-    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "destructor!dst@localhost", "#history", "seen nobody"});
+    plugin_->on_message(irccd_, MessageEvent{server_, "jean!jean@localhost", "#history", "hello"});
+    plugin_->on_command(irccd_, MessageEvent{server_, "destructor!dst@localhost", "#history", "seen nobody"});
 
-    ASSERT_EQ("#history:unknown=history:!history:test:#history:destructor!dst@localhost:destructor:nobody", m_server->last());
+    ASSERT_EQ("#history:unknown=history:!history:test:#history:destructor!dst@localhost:destructor:nobody", server_->last());
 }
 
-TEST_F(HistoryTest, case_fix_642)
+TEST_F(history_test, case_fix_642)
 {
     std::regex rule("#history:said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:\\d{2}:\\d{2}");
 
     remove(BINARYDIR "/case.json");
     load({{"file", BINARYDIR "/case.json"}});
 
-    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "JeaN!JeaN@localhost", "#history", "hello"});
+    plugin_->on_message(irccd_, MessageEvent{server_, "JeaN!JeaN@localhost", "#history", "hello"});
 
-    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "destructor!dst@localhost", "#HISTORY", "said JEAN"});
-    ASSERT_TRUE(std::regex_match(m_server->last(), rule));
-    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "destructor!dst@localhost", "#HiSToRy", "said JeaN"});
-    ASSERT_TRUE(std::regex_match(m_server->last(), rule));
+    plugin_->on_command(irccd_, MessageEvent{server_, "destructor!dst@localhost", "#HISTORY", "said JEAN"});
+    ASSERT_TRUE(std::regex_match(server_->last(), rule));
+    plugin_->on_command(irccd_, MessageEvent{server_, "destructor!dst@localhost", "#HiSToRy", "said JeaN"});
+    ASSERT_TRUE(std::regex_match(server_->last(), rule));
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     testing::InitGoogleTest(&argc, argv);
 

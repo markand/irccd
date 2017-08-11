@@ -20,5 +20,7 @@ irccd_define_test(
     NAME plugin-history
     SOURCES main.cpp
     LIBRARIES libirccd
-    FLAGS PLUGINDIR=\"${IRCCD_FAKEROOTDIR}/${WITH_PLUGINDIR}\"
+    FLAGS
+        PLUGIN_NAME="history"
+        PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/history/history.js"
 )

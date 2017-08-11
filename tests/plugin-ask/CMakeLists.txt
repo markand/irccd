@@ -18,7 +18,11 @@
 
 irccd_define_test(
     NAME plugin-ask
-    SOURCES main.cpp answers.conf
+    SOURCES
+        ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/answers.conf
     LIBRARIES libirccd
-    FLAGS PLUGINDIR=\"${IRCCD_FAKEROOTDIR}/${WITH_PLUGINDIR}\"
+    FLAGS
+        PLUGIN_NAME="ask"
+        PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/ask/ask.js"
 )
