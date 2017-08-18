@@ -28,6 +28,7 @@
 #include <irccd/js_unicode_module.hpp>
 #include <irccd/js_util_module.hpp>
 #include <irccd/js_plugin.hpp>
+#include <irccd/logger.hpp>
 #include <irccd/service.hpp>
 
 #include "plugin_test.hpp"
@@ -35,7 +36,11 @@
 namespace irccd {
 
 plugin_test::plugin_test(std::string name, std::string path)
+    : server_(std::make_shared<journal_server>("test"))
 {
+    log::set_verbose(false);
+    log::set_logger(std::make_unique<log::silent_logger>());
+
     js_plugin_loader loader(irccd_);
 
     loader.add_module(std::make_unique<js_irccd_module>());
@@ -52,6 +57,7 @@ plugin_test::plugin_test(std::string name, std::string path)
 
     plugin_ = loader.open(name, path);
     irccd_.plugins().add(plugin_);
+    irccd_.servers().add(server_);
 }
 
 } // !irccd

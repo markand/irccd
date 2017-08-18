@@ -24,10 +24,9 @@
  * \brief test fixture helper for Javascript plugins.
  */
 
-#include <gtest/gtest.h>
-
 #include "irccd.hpp"
 #include "plugin.hpp"
+#include "journal_server.hpp"
 
 namespace irccd {
 
@@ -36,10 +35,11 @@ namespace irccd {
  *
  * Holds a plugin that is opened (but not loaded).
  */
-class plugin_test : public testing::Test {
+class plugin_test {
 protected:
     irccd irccd_;
     std::shared_ptr<plugin> plugin_;
+    std::shared_ptr<journal_server> server_;
 
 public:
     /**
