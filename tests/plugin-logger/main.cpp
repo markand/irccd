@@ -19,7 +19,8 @@
 #include <fstream>
 #include <iterator>
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "Logger plugin"
+#include <boost/test/unit_test.hpp>
 
 #include <irccd/irccd.hpp>
 #include <irccd/logger.hpp>
@@ -28,12 +29,10 @@
 
 #include "plugin_test.hpp"
 
-using namespace irccd;
+namespace irccd {
 
 class logger_test : public plugin_test {
 protected:
-    std::shared_ptr<server> server_;
-
     std::string last() const
     {
         std::ifstream file(BINARYDIR "/log.txt");
@@ -44,7 +43,6 @@ protected:
 public:
     logger_test()
         : plugin_test(PLUGIN_NAME, PLUGIN_PATH)
-        , server_(std::make_shared<server>("test"))
     {
         remove(BINARYDIR "/log.txt");
 
@@ -73,118 +71,116 @@ public:
     }
 };
 
-TEST_F(logger_test, formatChannelMode)
+BOOST_FIXTURE_TEST_SUITE(logger_test_suite, logger_test)
+
+BOOST_AUTO_TEST_CASE(format_channel_mode)
 {
     load();
 
     plugin_->on_channel_mode(irccd_, {server_, "jean!jean@localhost", "#staff", "+o", "jean"});
 
-    ASSERT_EQ("cmode=test:#staff:jean!jean@localhost:jean:+o:jean\n", last());
+    BOOST_REQUIRE_EQUAL("cmode=test:#staff:jean!jean@localhost:jean:+o:jean\n", last());
 }
 
-TEST_F(logger_test, formatChannelNotice)
+BOOST_AUTO_TEST_CASE(format_channel_notice)
 {
     load();
 
     plugin_->on_channel_notice(irccd_, {server_, "jean!jean@localhost", "#staff", "bonjour!"});
 
-    ASSERT_EQ("cnotice=test:#staff:jean!jean@localhost:jean:bonjour!\n", last());
+    BOOST_REQUIRE_EQUAL("cnotice=test:#staff:jean!jean@localhost:jean:bonjour!\n", last());
 }
 
-TEST_F(logger_test, formatJoin)
+BOOST_AUTO_TEST_CASE(format_join)
 {
     load();
 
     plugin_->on_join(irccd_, {server_, "jean!jean@localhost", "#staff"});
 
-    ASSERT_EQ("join=test:#staff:jean!jean@localhost:jean\n", last());
+    BOOST_REQUIRE_EQUAL("join=test:#staff:jean!jean@localhost:jean\n", last());
 }
 
-TEST_F(logger_test, formatKick)
+BOOST_AUTO_TEST_CASE(format_kick)
 {
     load();
 
     plugin_->on_kick(irccd_, {server_, "jean!jean@localhost", "#staff", "badboy", "please do not flood"});
 
-    ASSERT_EQ("kick=test:#staff:jean!jean@localhost:jean:badboy:please do not flood\n", last());
+    BOOST_REQUIRE_EQUAL("kick=test:#staff:jean!jean@localhost:jean:badboy:please do not flood\n", last());
 }
 
-TEST_F(logger_test, formatMe)
+BOOST_AUTO_TEST_CASE(format_me)
 {
     load();
 
     plugin_->on_me(irccd_, {server_, "jean!jean@localhost", "#staff", "is drinking water"});
 
-    ASSERT_EQ("me=test:#staff:jean!jean@localhost:jean:is drinking water\n", last());
+    BOOST_REQUIRE_EQUAL("me=test:#staff:jean!jean@localhost:jean:is drinking water\n", last());
 }
 
-TEST_F(logger_test, formatMessage)
+BOOST_AUTO_TEST_CASE(format_message)
 {
     load();
 
     plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#staff", "hello guys"});
 
-    ASSERT_EQ("message=test:#staff:jean!jean@localhost:jean:hello guys\n", last());
+    BOOST_REQUIRE_EQUAL("message=test:#staff:jean!jean@localhost:jean:hello guys\n", last());
 }
 
-TEST_F(logger_test, formatMode)
+BOOST_AUTO_TEST_CASE(format_mode)
 {
     load();
 
     plugin_->on_mode(irccd_, {server_, "jean!jean@localhost", "+i"});
 
-    ASSERT_EQ("mode=test:jean!jean@localhost:jean:+i:\n", last());
+    BOOST_REQUIRE_EQUAL("mode=test:jean!jean@localhost:jean:+i:\n", last());
 }
 
-TEST_F(logger_test, formatNotice)
+BOOST_AUTO_TEST_CASE(format_notice)
 {
     load();
 
     plugin_->on_notice(irccd_, {server_, "jean!jean@localhost", "tu veux voir mon chat ?"});
 
-    ASSERT_EQ("notice=test:jean!jean@localhost:jean:tu veux voir mon chat ?\n", last());
+    BOOST_REQUIRE_EQUAL("notice=test:jean!jean@localhost:jean:tu veux voir mon chat ?\n", last());
 }
 
-TEST_F(logger_test, formatPart)
+BOOST_AUTO_TEST_CASE(format_part)
 {
     load();
 
     plugin_->on_part(irccd_, {server_, "jean!jean@localhost", "#staff", "too noisy here"});
 
-    ASSERT_EQ("part=test:#staff:jean!jean@localhost:jean:too noisy here\n", last());
+    BOOST_REQUIRE_EQUAL("part=test:#staff:jean!jean@localhost:jean:too noisy here\n", last());
 }
 
-TEST_F(logger_test, formatQuery)
+BOOST_AUTO_TEST_CASE(format_query)
 {
     load();
 
     plugin_->on_query(irccd_, {server_, "jean!jean@localhost", "much irccd, wow"});
 
-    ASSERT_EQ("query=test:jean!jean@localhost:jean:much irccd, wow\n", last());
+    BOOST_REQUIRE_EQUAL("query=test:jean!jean@localhost:jean:much irccd, wow\n", last());
 }
 
-TEST_F(logger_test, formatTopic)
+BOOST_AUTO_TEST_CASE(format_topic)
 {
     load();
 
     plugin_->on_topic(irccd_, {server_, "jean!jean@localhost", "#staff", "oh yeah yeaaaaaaaah"});
 
-    ASSERT_EQ("topic=test:#staff:jean!jean@localhost:jean:oh yeah yeaaaaaaaah\n", last());
+    BOOST_REQUIRE_EQUAL("topic=test:#staff:jean!jean@localhost:jean:oh yeah yeaaaaaaaah\n", last());
 }
 
-TEST_F(logger_test, case_fix_642)
+BOOST_AUTO_TEST_CASE(fix_642)
 {
     load();
 
     plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#STAFF", "hello guys"});
 
-    ASSERT_EQ("message=test:#staff:jean!jean@localhost:jean:hello guys\n", last());
+    BOOST_REQUIRE_EQUAL("message=test:#staff:jean!jean@localhost:jean:hello guys\n", last());
 }
 
-int main(int argc, char** argv)
-{
-    testing::InitGoogleTest(&argc, argv);
-    log::set_logger(std::make_unique<log::silent_logger>());
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

@@ -32,6 +32,8 @@
 # Resources files are copied VERBATIM into the same directory.
 #
 
+find_package(Boost REQUIRED COMPONENTS unit_test_framework)
+
 function(irccd_define_test)
     set(oneValueArgs NAME)
     set(multiValueArgs SOURCES LIBRARIES FLAGS)
@@ -45,8 +47,12 @@ function(irccd_define_test)
         message(FATAL_ERROR "Please set SOURCES")
     endif ()
 
-    # Always link to googletest
-    list(APPEND TEST_LIBRARIES libirccd-test)
+    list(
+        APPEND
+        TEST_LIBRARIES
+            libirccd-test
+            Boost::unit_test_framework
+    )
 
     # Executable
     add_executable(test-${TEST_NAME} ${TEST_SOURCES})
@@ -62,6 +68,7 @@ function(irccd_define_test)
         test-${TEST_NAME}
         PRIVATE
             ${TEST_FLAGS}
+            BOOST_TEST_DYN_LINK
             CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
             CMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
             SOURCEDIR="${CMAKE_CURRENT_SOURCE_DIR}"

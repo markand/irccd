@@ -25,3 +25,10 @@ The following properties in `Irccd.Plugin` has been renamed:
 
 Note: these paths are no more automatically detected and set with the new
       `[paths]` and `[paths.<name>]` sections.
+
+### Javascript API
+
+#### Module ElapsedTimer
+
+  - The method ElapsedTimer.reset has been removed, just use `start` instead
+    when you want to accumulate time.

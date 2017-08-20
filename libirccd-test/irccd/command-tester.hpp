@@ -19,9 +19,10 @@
 #ifndef IRCCD_COMMAND_TESTER_HPP
 #define IRCCD_COMMAND_TESTER_HPP
 
+#include <boost/timer/timer.hpp>
+
 #include <gtest/gtest.h>
 
-#include "elapsed-timer.hpp"
 #include "irccd.hpp"
 #include "irccdctl.hpp"
 #include "util.hpp"
@@ -43,9 +44,9 @@ public:
     template <typename Predicate>
     void poll(Predicate &&predicate)
     {
-        ElapsedTimer timer;
+        boost::timer::cpu_timer timer;
 
-        while (!predicate() && timer.elapsed() < 30000)
+        while (!predicate() && timer.elapsed().wall / 1000000LL < 30000)
             util::poller::poll(250, m_irccd, m_irccdctl);
     }
 };

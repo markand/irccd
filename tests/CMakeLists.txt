@@ -51,7 +51,6 @@ if (WITH_TESTS)
     add_subdirectory(cmd-server-topic)
 
     # Misc
-    add_subdirectory(elapsedtimer)
     add_subdirectory(logger)
     add_subdirectory(rules)
     add_subdirectory(util)

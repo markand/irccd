@@ -19,13 +19,13 @@
 #include <unordered_map>
 
 #include <boost/filesystem.hpp>
+#include <boost/timer/timer.hpp>
 
 #include <format.h>
 
 #include "alias.hpp"
 #include "cli.hpp"
 #include "client.hpp"
-#include "elapsed-timer.hpp"
 #include "fs.hpp"
 #include "ini.hpp"
 #include "irccdctl.hpp"

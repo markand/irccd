@@ -16,7 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "Auth plugin"
+#include <boost/test/unit_test.hpp>
 
 #include <irccd/irccd.hpp>
 #include <irccd/server.hpp>
@@ -24,41 +25,20 @@
 
 #include "plugin_test.hpp"
 
-using namespace irccd;
-
-class server_test : public server {
-private:
-    std::string last_;
-
-public:
-    inline server_test(std::string name)
-        : server(std::move(name))
-    {
-    }
-
-    inline const std::string& last() const noexcept
-    {
-        return last_;
-    }
-
-    void message(std::string target, std::string message) override
-    {
-        last_ = util::join({target, message});
-    }
-};
+namespace irccd {
 
 class auth_test : public plugin_test {
 protected:
-    std::shared_ptr<server_test> nickserv1_;
-    std::shared_ptr<server_test> nickserv2_;
-    std::shared_ptr<server_test> quakenet_;
+    std::shared_ptr<journal_server> nickserv1_;
+    std::shared_ptr<journal_server> nickserv2_;
+    std::shared_ptr<journal_server> quakenet_;
 
 public:
     auth_test()
         : plugin_test(PLUGIN_NAME, PLUGIN_PATH)
-        , nickserv1_(std::make_shared<server_test>("nickserv1"))
-        , nickserv2_(std::make_shared<server_test>("nickserv2"))
-        , quakenet_(std::make_shared<server_test>("quakenet"))
+        , nickserv1_(std::make_shared<journal_server>("nickserv1"))
+        , nickserv2_(std::make_shared<journal_server>("nickserv2"))
+        , quakenet_(std::make_shared<journal_server>("quakenet"))
     {
         plugin_->set_config({
             { "nickserv1.type", "nickserv" },
@@ -74,30 +54,41 @@ public:
     }
 };
 
-TEST_F(auth_test, nickserv1)
+BOOST_FIXTURE_TEST_SUITE(auth_test_suite, auth_test)
+
+BOOST_AUTO_TEST_CASE(nickserv1)
 {
     plugin_->on_connect(irccd_, {nickserv1_});
 
-    ASSERT_EQ("NickServ:identify plopation", nickserv1_->last());
+    auto cmd = nickserv1_->cqueue().front();
+
+    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
+    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "NickServ");
+    BOOST_REQUIRE_EQUAL(cmd["message"].get<std::string>(), "identify plopation");
 }
 
-TEST_F(auth_test, nickserv2)
+BOOST_AUTO_TEST_CASE(nickserv2)
 {
     plugin_->on_connect(irccd_, {nickserv2_});
 
-    ASSERT_EQ("NickServ:identify jean something", nickserv2_->last());
+    auto cmd = nickserv2_->cqueue().front();
+
+    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
+    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "NickServ");
+    BOOST_REQUIRE_EQUAL(cmd["message"].get<std::string>(), "identify jean something");
 }
 
-TEST_F(auth_test, quakenet)
+BOOST_AUTO_TEST_CASE(quakenet)
 {
     plugin_->on_connect(irccd_, {quakenet_});
 
-    ASSERT_EQ("Q@CServe.quakenet.org:AUTH mario hello", quakenet_->last());
+    auto cmd = quakenet_->cqueue().front();
+
+    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
+    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "Q@CServe.quakenet.org");
+    BOOST_REQUIRE_EQUAL(cmd["message"].get<std::string>(), "AUTH mario hello");
 }
 
-int main(int argc, char** argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

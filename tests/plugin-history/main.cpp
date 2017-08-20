@@ -18,7 +18,8 @@
 
 #include <regex>
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "History plugin"
+#include <boost/test/unit_test.hpp>
 
 #include <irccd/irccd.hpp>
 #include <irccd/server.hpp>
@@ -26,37 +27,12 @@
 
 #include "plugin_test.hpp"
 
-using namespace irccd;
-
-class server_test : public server {
-private:
-    std::string last_;
-
-public:
-    inline server_test()
-        : server("test")
-    {
-    }
-
-    inline const std::string& last() const noexcept
-    {
-        return last_;
-    }
-
-    void message(std::string target, std::string message) override
-    {
-        last_ = util::join({target, message});
-    }
-};
+namespace irccd {
 
 class history_test : public plugin_test {
-protected:
-    std::shared_ptr<server_test> server_;
-
 public:
     history_test()
         : plugin_test(PLUGIN_NAME, PLUGIN_PATH)
-        , server_(std::make_shared<server_test>())
     {
         plugin_->set_formats({
             { "error", "error=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}" },
@@ -77,17 +53,24 @@ public:
     }
 };
 
-TEST_F(history_test, formatError)
+BOOST_FIXTURE_TEST_SUITE(history_test_suite, history_test)
+
+BOOST_AUTO_TEST_CASE(format_error)
 {
-    load({{ "file", SOURCEDIR "/broken-conf.json" }});
+    load({{"file", SOURCEDIR "/broken-conf.json"}});
 
     plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#history", "seen francis"});
-    ASSERT_EQ("#history:error=history:!history:test:#history:jean!jean@localhost:jean", server_->last());
+
+    auto cmd = server_->cqueue().front();
+
+    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
+    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "#history");
+    BOOST_REQUIRE_EQUAL(cmd["message"].get<std::string>(), "error=history:!history:test:#history:jean!jean@localhost:jean");
 }
 
-TEST_F(history_test, formatSeen)
+BOOST_AUTO_TEST_CASE(format_seen)
 {
-    std::regex rule("#history:seen=history:!history:test:#history:destructor!dst@localhost:destructor:jean:\\d{2}:\\d{2}");
+    const std::regex rule("seen=history:!history:test:#history:destructor!dst@localhost:destructor:jean:\\d{2}:\\d{2}");
 
     remove(BINARYDIR "/seen.json");
     load({{ "file", BINARYDIR "/seen.json" }});
@@ -95,12 +78,16 @@ TEST_F(history_test, formatSeen)
     plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#history", "hello"});
     plugin_->on_command(irccd_, {server_, "destructor!dst@localhost", "#history", "seen jean"});
 
-    ASSERT_TRUE(std::regex_match(server_->last(), rule));
+    auto cmd = server_->cqueue().front();
+
+    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
+    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "#history");
+    BOOST_REQUIRE(std::regex_match(cmd["message"].get<std::string>(), rule));
 }
 
-TEST_F(history_test, formatSaid)
+BOOST_AUTO_TEST_CASE(format_said)
 {
-    std::regex rule("#history:said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:\\d{2}:\\d{2}");
+    std::regex rule("said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:\\d{2}:\\d{2}");
 
     remove(BINARYDIR "/said.json");
     load({{ "file", BINARYDIR "/said.json" }});
@@ -108,10 +95,14 @@ TEST_F(history_test, formatSaid)
     plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#history", "hello"});
     plugin_->on_command(irccd_, {server_, "destructor!dst@localhost", "#history", "said jean"});
 
-    ASSERT_TRUE(std::regex_match(server_->last(), rule));
+    auto cmd = server_->cqueue().front();
+
+    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
+    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "#history");
+    BOOST_REQUIRE(std::regex_match(cmd["message"].get<std::string>(), rule));
 }
 
-TEST_F(history_test, formatUnknown)
+BOOST_AUTO_TEST_CASE(format_unknown)
 {
     remove(BINARYDIR "/unknown.json");
     load({{ "file", BINARYDIR "/unknown.json" }});
@@ -119,27 +110,41 @@ TEST_F(history_test, formatUnknown)
     plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#history", "hello"});
     plugin_->on_command(irccd_, {server_, "destructor!dst@localhost", "#history", "seen nobody"});
 
-    ASSERT_EQ("#history:unknown=history:!history:test:#history:destructor!dst@localhost:destructor:nobody", server_->last());
+    auto cmd = server_->cqueue().front();
+
+    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
+    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "#history");
+    BOOST_REQUIRE_EQUAL(cmd["message"].get<std::string>(), "unknown=history:!history:test:#history:destructor!dst@localhost:destructor:nobody");
 }
 
-TEST_F(history_test, case_fix_642)
+BOOST_AUTO_TEST_CASE(fix_642)
 {
-    std::regex rule("#history:said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:\\d{2}:\\d{2}");
+    const std::regex rule("said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:\\d{2}:\\d{2}");
 
     remove(BINARYDIR "/case.json");
     load({{"file", BINARYDIR "/case.json"}});
 
     plugin_->on_message(irccd_, {server_, "JeaN!JeaN@localhost", "#history", "hello"});
 
+    // Full caps.
     plugin_->on_command(irccd_, {server_, "destructor!dst@localhost", "#HISTORY", "said JEAN"});
-    ASSERT_TRUE(std::regex_match(server_->last(), rule));
+
+    auto cmd = server_->cqueue().front();
+
+    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
+    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "#history");
+    BOOST_REQUIRE(std::regex_match(cmd["message"].get<std::string>(), rule));
+
+    // Random caps.
     plugin_->on_command(irccd_, {server_, "destructor!dst@localhost", "#HiSToRy", "said JeaN"});
-    ASSERT_TRUE(std::regex_match(server_->last(), rule));
+
+    cmd = server_->cqueue().front();
+
+    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
+    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "#history");
+    BOOST_REQUIRE(std::regex_match(cmd["message"].get<std::string>(), rule));
 }
 
-int main(int argc, char** argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

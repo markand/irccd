@@ -18,6 +18,8 @@
 
 project(libirccd-js)
 
+find_package(Boost REQUIRED COMPONENTS timer)
+
 set(
     HEADERS
     ${libirccd-js_SOURCE_DIR}/irccd/duktape.hpp
@@ -63,6 +65,7 @@ irccd_define_library(
         ${HEADERS}
         ${SOURCES}
     LIBRARIES
+        Boost::timer
         extern-duktape
         libirccd
     PUBLIC_INCLUDES

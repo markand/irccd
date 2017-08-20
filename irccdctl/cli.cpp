@@ -20,10 +20,11 @@
 #include <iostream>
 #include <sstream>
 
+#include <boost/timer/timer.hpp>
+
 #include <json.hpp>
 
 #include "cli.hpp"
-#include "elapsed-timer.hpp"
 #include "irccdctl.hpp"
 #include "logger.hpp"
 #include "options.hpp"
@@ -65,10 +66,10 @@ nlohmann::json Cli::request(Irccdctl &irccdctl, nlohmann::json args)
     });
 
     try {
-        ElapsedTimer timer;
+        boost::timer::cpu_timer timer;
 
-        while (irccdctl.client().isConnected() && !msg.is_object() && timer.elapsed() < 3000)
-            util::poller::poll(3000 - timer.elapsed(), irccdctl);
+        while (irccdctl.client().isConnected() && !msg.is_object() && timer.elapsed().wall / 1000000LL < 3000)
+            util::poller::poll(3000 - timer.elapsed().wall / 1000000LL, irccdctl);
     } catch (const std::exception &) {
         irccdctl.client().onMessage.disconnect(id);
         throw;

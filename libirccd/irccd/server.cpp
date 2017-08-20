@@ -88,7 +88,7 @@ public:
 
 class server::disconnected_state : public server::state {
 private:
-    ElapsedTimer timer_;
+    boost::timer::cpu_timer timer_;
 
 public:
     void prepare(server&, fd_set&, fd_set&, net::Handle&) override;
@@ -107,7 +107,7 @@ private:
         connecting
     } state_{disconnected};
 
-    ElapsedTimer timer_;
+    boost::timer::cpu_timer timer_;
 
     bool connect(server& server);
 
@@ -216,7 +216,7 @@ void server::handle_connect(const char*, const char**) noexcept
     recocur_ = 1;
 
     // Reset the timer.
-    timer_.reset();
+    timer_.start();
 
     // Reset joined channels.
     jchannels_.clear();
@@ -455,7 +455,7 @@ void server::handle_part(const char* orig, const char** params) noexcept
 void server::handle_ping(const char*, const char**) noexcept
 {
     // Reset the timer to detect disconnection.
-    timer_.reset();
+    timer_.start();
 }
 
 void server::handle_query(const char* orig, const char** params) noexcept
@@ -799,7 +799,7 @@ void server::disconnected_state::prepare(server& server, fd_set&, fd_set&, net::
         log::warning() << "server " << server.name_ << ": giving up" << std::endl;
         server.on_die();
     } else {
-        if (timer_.elapsed() > static_cast<unsigned>(server.recodelay_ * 1000)) {
+        if (timer_.elapsed().wall / 1000000LL > static_cast<unsigned>(server.recodelay_ * 1000)) {
             irc_disconnect(*server.session_);
 
             server.recocur_ ++;
@@ -863,7 +863,7 @@ void server::connecting_state::prepare(server& server, fd_set& setinput, fd_set&
      * Otherwise, the libircclient event_connect will change the state.
      */
     if (state_ == connecting) {
-        if (timer_.elapsed() > static_cast<unsigned>(server.recodelay_ * 1000)) {
+        if (timer_.elapsed().wall / 1000000LL > static_cast<unsigned>(server.recodelay_ * 1000)) {
             log::warning() << "server " << server.name() << ": timeout while connecting" << std::endl;
             server.next(std::make_unique<disconnected_state>());
         } else if (!irc_is_connected(*server.session_)) {
@@ -918,9 +918,9 @@ void server::connected_state::prepare(server& server, fd_set& setinput, fd_set& 
             log::warning("server {}: retrying in {} seconds"_format(server.name_, server.recodelay_));
 
         server.next(std::make_unique<disconnected_state>());
-    } else if (server.timer_.elapsed() >= server.timeout_ * 1000) {
+    } else if (server.timer_.elapsed().wall / 1000000LL >= server.timeout_ * 1000) {
         log::warning() << "server " << server.name_ << ": ping timeout after "
-                       << (server.timer_.elapsed() / 1000) << " seconds" << std::endl;
+                       << (server.timer_.elapsed().wall / 1000000000LL) << " seconds" << std::endl;
         server.next(std::make_unique<disconnected_state>());
     } else
         irc_add_select_descriptors(*server.session_, &setinput, &setoutput, reinterpret_cast<int*>(&maxfd));

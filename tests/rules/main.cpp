@@ -16,7 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "Rules"
+#include <boost/test/unit_test.hpp>
 
 #include <irccd/logger.hpp>
 #include <irccd/rule.hpp>
@@ -64,15 +65,17 @@ namespace irccd {
  * events       = "onMessage onCommand"
  * action       = accept
  */
-class RulesTest : public testing::Test {
+class rules_test {
 protected:
-    rule_service m_rules;
+    rule_service rules_;
 
-    RulesTest()
+    rules_test()
     {
+        log::set_logger(std::make_unique<log::silent_logger>());
+
         // #1
         {
-            m_rules.add({
+            rules_.add({
                 rule::set{                }, // Servers
                 rule::set{ "#staff"       }, // Channels
                 rule::set{                }, // Origins
@@ -84,7 +87,7 @@ protected:
 
         // #2
         {
-            m_rules.add({
+            rules_.add({
                 rule::set{ "unsafe"       },
                 rule::set{ "#staff"       },
                 rule::set{                },
@@ -96,7 +99,7 @@ protected:
 
         // #3-1
         {
-            m_rules.add({
+            rules_.add({
                 rule::set{},
                 rule::set{},
                 rule::set{},
@@ -108,7 +111,7 @@ protected:
 
         // #3-2
         {
-            m_rules.add({
+            rules_.add({
                 rule::set{ "malikania", "localhost"   },
                 rule::set{ "#games"                   },
                 rule::set{                            },
@@ -120,18 +123,20 @@ protected:
     }
 };
 
-TEST_F(RulesTest, basicMatch1)
+BOOST_FIXTURE_TEST_SUITE(rules_test_suite, rules_test)
+
+BOOST_AUTO_TEST_CASE(basic_match1)
 {
     rule m;
 
     /*
      * [rule]
      */
-    ASSERT_TRUE(m.match("freenode", "#test", "a", "", ""));
-    ASSERT_TRUE(m.match("", "", "", "", ""));
+    BOOST_REQUIRE(m.match("freenode", "#test", "a", "", ""));
+    BOOST_REQUIRE(m.match("", "", "", "", ""));
 }
 
-TEST_F(RulesTest, basicMatch2)
+BOOST_AUTO_TEST_CASE(basic_match2)
 {
     rule m(rule::set{"freenode"});
 
@@ -140,12 +145,12 @@ TEST_F(RulesTest, basicMatch2)
      * servers    = "freenode"
      */
 
-    ASSERT_TRUE(m.match("freenode", "#test", "a", "", ""));
-    ASSERT_FALSE(m.match("malikania", "#test", "a", "", ""));
-    ASSERT_TRUE(m.match("freenode", "", "jean", "", "onMessage"));
+    BOOST_REQUIRE(m.match("freenode", "#test", "a", "", ""));
+    BOOST_REQUIRE(!m.match("malikania", "#test", "a", "", ""));
+    BOOST_REQUIRE(m.match("freenode", "", "jean", "", "onMessage"));
 }
 
-TEST_F(RulesTest, basicMatch3)
+BOOST_AUTO_TEST_CASE(basic_match3)
 {
     rule m(rule::set{"freenode"}, rule::set{"#staff"});
 
@@ -155,12 +160,12 @@ TEST_F(RulesTest, basicMatch3)
      * channels    = "#staff"
      */
 
-    ASSERT_TRUE(m.match("freenode", "#staff", "a", "", ""));
-    ASSERT_FALSE(m.match("freenode", "#test", "a", "", ""));
-    ASSERT_FALSE(m.match("malikania", "#staff", "a", "", ""));
+    BOOST_REQUIRE(m.match("freenode", "#staff", "a", "", ""));
+    BOOST_REQUIRE(!m.match("freenode", "#test", "a", "", ""));
+    BOOST_REQUIRE(!m.match("malikania", "#staff", "a", "", ""));
 }
 
-TEST_F(RulesTest, basicMatch4)
+BOOST_AUTO_TEST_CASE(basic_match4)
 {
     rule m(rule::set{"malikania"}, rule::set{"#staff"}, rule::set{"a"});
 
@@ -171,12 +176,12 @@ TEST_F(RulesTest, basicMatch4)
      * plugins    = "a"
      */
 
-    ASSERT_TRUE(m.match("malikania", "#staff", "a", "",""));
-    ASSERT_FALSE(m.match("malikania", "#staff", "b", "", ""));
-    ASSERT_FALSE(m.match("freenode", "#staff", "a", "", ""));
+    BOOST_REQUIRE(m.match("malikania", "#staff", "a", "",""));
+    BOOST_REQUIRE(!m.match("malikania", "#staff", "b", "", ""));
+    BOOST_REQUIRE(!m.match("freenode", "#staff", "a", "", ""));
 }
 
-TEST_F(RulesTest, complexMatch1)
+BOOST_AUTO_TEST_CASE(complex_match1)
 {
     rule m(rule::set{"malikania", "freenode"});
 
@@ -185,61 +190,55 @@ TEST_F(RulesTest, complexMatch1)
      * servers    = "malikania freenode"
      */
 
-    ASSERT_TRUE(m.match("malikania", "", "", "", ""));
-    ASSERT_TRUE(m.match("freenode", "", "", "", ""));
-    ASSERT_FALSE(m.match("no", "", "", "", ""));
+    BOOST_REQUIRE(m.match("malikania", "", "", "", ""));
+    BOOST_REQUIRE(m.match("freenode", "", "", "", ""));
+    BOOST_REQUIRE(!m.match("no", "", "", "", ""));
 }
 
-TEST_F(RulesTest, basicSolve)
+BOOST_AUTO_TEST_CASE(basic_solve)
 {
     /* Allowed */
-    ASSERT_TRUE(m_rules.solve("malikania", "#staff", "", "a", "onMessage"));
+    BOOST_REQUIRE(rules_.solve("malikania", "#staff", "", "a", "onMessage"));
 
     /* Allowed */
-    ASSERT_TRUE(m_rules.solve("freenode", "#staff", "", "b", "onTopic"));
+    BOOST_REQUIRE(rules_.solve("freenode", "#staff", "", "b", "onTopic"));
 
     /* Not allowed */
-    ASSERT_FALSE(m_rules.solve("malikania", "#staff", "", "", "onCommand"));
+    BOOST_REQUIRE(!rules_.solve("malikania", "#staff", "", "", "onCommand"));
 
     /* Not allowed */
-    ASSERT_FALSE(m_rules.solve("freenode", "#staff", "", "c", "onCommand"));
+    BOOST_REQUIRE(!rules_.solve("freenode", "#staff", "", "c", "onCommand"));
 
     /* Allowed */
-    ASSERT_TRUE(m_rules.solve("unsafe", "#staff", "", "c", "onCommand"));
+    BOOST_REQUIRE(rules_.solve("unsafe", "#staff", "", "c", "onCommand"));
 }
 
-TEST_F(RulesTest, gamesSolve)
+BOOST_AUTO_TEST_CASE(games_solve)
 {
     /* Allowed */
-    ASSERT_TRUE(m_rules.solve("malikania", "#games", "", "game", "onMessage"));
+    BOOST_REQUIRE(rules_.solve("malikania", "#games", "", "game", "onMessage"));
 
     /* Allowed */
-    ASSERT_TRUE(m_rules.solve("localhost", "#games", "", "game", "onMessage"));
+    BOOST_REQUIRE(rules_.solve("localhost", "#games", "", "game", "onMessage"));
 
     /* Allowed */
-    ASSERT_TRUE(m_rules.solve("malikania", "#games", "", "game", "onCommand"));
+    BOOST_REQUIRE(rules_.solve("malikania", "#games", "", "game", "onCommand"));
 
     /* Not allowed */
-    ASSERT_FALSE(m_rules.solve("malikania", "#games", "", "game", "onQuery"));
+    BOOST_REQUIRE(!rules_.solve("malikania", "#games", "", "game", "onQuery"));
 
     /* Not allowed */
-    ASSERT_FALSE(m_rules.solve("freenode", "#no", "", "game", "onMessage"));
+    BOOST_REQUIRE(!rules_.solve("freenode", "#no", "", "game", "onMessage"));
 
     /* Not allowed */
-    ASSERT_FALSE(m_rules.solve("malikania", "#test", "", "game", "onMessage"));
+    BOOST_REQUIRE(!rules_.solve("malikania", "#test", "", "game", "onMessage"));
 }
 
-TEST_F(RulesTest, case_fix_645)
+BOOST_AUTO_TEST_CASE(fix_645)
 {
-    ASSERT_FALSE(m_rules.solve("MALIKANIA", "#STAFF", "", "SYSTEM", "onCommand"));
+    BOOST_REQUIRE(!rules_.solve("MALIKANIA", "#STAFF", "", "SYSTEM", "onCommand"));
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 } // !irccd
-
-int main(int argc, char **argv)
-{
-    irccd::log::set_logger(std::make_unique<irccd::log::silent_logger>());
-    testing::InitGoogleTest(&argc, argv);
-
-    return RUN_ALL_TESTS();
-}

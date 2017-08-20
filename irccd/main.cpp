@@ -210,7 +210,7 @@ void load_gid(const std::string& gid)
     try {
         if (!gid.empty())
 #if defined(HAVE_SETGID)
-            sys::setGid(gid);
+            sys::set_gid(gid);
 #else
             throw std::runtime_error(" gid option not supported on this platform");
 #endif
@@ -224,7 +224,7 @@ void load_uid(const std::string& uid)
     try {
         if (!uid.empty())
 #if defined(HAVE_SETUID)
-            sys::setUid(uid);
+            sys::set_uid(uid);
 #else
             throw std::runtime_error("uid option not supported on this platform");
 #endif

@@ -16,7 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "Ask plugin"
+#include <boost/test/unit_test.hpp>
 
 #include <irccd/irccd.hpp>
 #include <irccd/server.hpp>
@@ -24,33 +25,9 @@
 
 #include "plugin_test.hpp"
 
-using namespace irccd;
-
-class server_test : public server {
-private:
-    std::string last_;
-
-public:
-    inline server_test()
-        : server("test")
-    {
-    }
-
-    inline const std::string& last() const noexcept
-    {
-        return last_;
-    }
-
-    void message(std::string target, std::string message) override
-    {
-        last_ = util::join({target, message});
-    }
-};
+namespace irccd {
 
 class ask_test : public plugin_test {
-protected:
-    std::shared_ptr<server_test> server_{new server_test};
-
 public:
     inline ask_test()
         : plugin_test(PLUGIN_NAME, PLUGIN_PATH)
@@ -62,7 +39,9 @@ public:
     }
 };
 
-TEST_F(ask_test, basic)
+BOOST_FIXTURE_TEST_SUITE(ask_test_suite, ask_test)
+
+BOOST_AUTO_TEST_CASE(basic)
 {
     bool no = false;
     bool yes = false;
@@ -74,19 +53,25 @@ TEST_F(ask_test, basic)
     for (int i = 0; i < 1000; ++i) {
         plugin_->on_command(irccd_, {server_, "tester", "#dummy", ""});
 
-        if (server_->last() == "#dummy:tester, YES")
+        auto cmd = server_->cqueue().front();
+
+        BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
+        BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "#dummy");
+
+        auto msg = cmd["message"].get<std::string>();
+
+        if (msg == "tester, YES")
             yes = true;
-        if (server_->last() == "#dummy:tester, NO")
+        if (msg == "tester, NO")
             no = true;
+
+        server_->cqueue().clear();
     }
 
-    ASSERT_TRUE(no);
-    ASSERT_TRUE(yes);
+    BOOST_REQUIRE(no);
+    BOOST_REQUIRE(yes);
 }
 
-int main(int argc, char** argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

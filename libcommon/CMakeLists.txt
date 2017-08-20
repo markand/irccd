@@ -22,7 +22,6 @@ find_package(Boost 1.60 REQUIRED COMPONENTS filesystem system)
 
 set(
     HEADERS
-    ${libcommon_SOURCE_DIR}/irccd/elapsed-timer.hpp
     ${libcommon_SOURCE_DIR}/irccd/fs.hpp
     ${libcommon_SOURCE_DIR}/irccd/ini.hpp
     ${libcommon_SOURCE_DIR}/irccd/logger.hpp
@@ -36,7 +35,6 @@ set(
 
 set(
     SOURCES
-    ${libcommon_SOURCE_DIR}/irccd/elapsed-timer.cpp
     ${libcommon_SOURCE_DIR}/irccd/fs.cpp
     ${libcommon_SOURCE_DIR}/irccd/ini.cpp
     ${libcommon_SOURCE_DIR}/irccd/logger.cpp

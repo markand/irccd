@@ -35,9 +35,10 @@
 #include <utility>
 #include <vector>
 
+#include <boost/timer/timer.hpp>
+
 #include <json.hpp>
 
-#include "elapsed-timer.hpp"
 #include "net.hpp"
 #include "signals.hpp"
 #include "sysconfig.hpp"
@@ -460,7 +461,7 @@ private:
     std::unique_ptr<state> state_next_;
 
     // Misc.
-    ElapsedTimer timer_;
+    boost::timer::cpu_timer timer_;
     std::map<channel_mode, char> modes_;
     std::int8_t recocur_{0};
     std::map<std::string, std::set<std::string>> names_map_;

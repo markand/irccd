@@ -16,38 +16,43 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "Timer"
+#include <boost/test/unit_test.hpp>
+#include <boost/timer/timer.hpp>
 
-#include <irccd/elapsed-timer.hpp>
 #include <irccd/timer.hpp>
 
-using namespace irccd;
 using namespace std::chrono_literals;
 
-/* --------------------------------------------------------
- * timer object itself
- * -------------------------------------------------------- */
+namespace irccd {
 
-TEST(Basic, single)
+/*
+ * timer object itself
+ * --------------------------------------------------------
+ */
+
+BOOST_AUTO_TEST_SUITE(timer_suite)
+
+BOOST_AUTO_TEST_CASE(single)
 {
     timer timer(timer::type::single, 1000);
-    ElapsedTimer elapsed;
+    boost::timer::cpu_timer elapsed;
     int count = 0;
 
     timer.on_signal.connect([&] () {
-        count = elapsed.elapsed();
+        count = elapsed.elapsed().wall / 1000000LL;
     });
 
-    elapsed.reset();
+    elapsed.start();
     timer.start();
 
     std::this_thread::sleep_for(3s);
 
-    ASSERT_GE(count, 900);
-    ASSERT_LE(count, 1100);
+    BOOST_REQUIRE_GE(count, 900);
+    BOOST_REQUIRE_LE(count, 1100);
 }
 
-TEST(Basic, repeat)
+BOOST_AUTO_TEST_CASE(repeat)
 {
     timer timer(timer::type::repeat, 500);
     int max = 0;
@@ -61,12 +66,12 @@ TEST(Basic, repeat)
     // Should be at least 5
     std::this_thread::sleep_for(3s);
 
-    ASSERT_GE(max, 5);
+    BOOST_REQUIRE_GE(max, 5);
 
     timer.stop();
 }
 
-TEST(Basic, restart)
+BOOST_AUTO_TEST_CASE(restart)
 {
     timer timer(timer::type::repeat, 500);
     int max = 0;
@@ -82,15 +87,12 @@ TEST(Basic, restart)
     timer.start();
     std::this_thread::sleep_for(3s);
 
-    ASSERT_GE(max, 10);
-    ASSERT_LT(max, 15);
+    BOOST_REQUIRE_GE(max, 10);
+    BOOST_REQUIRE_LT(max, 15);
 
     timer.stop();
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

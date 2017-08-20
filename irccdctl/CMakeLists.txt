@@ -18,6 +18,8 @@
 
 project(irccdctl)
 
+find_package(Boost REQUIRED COMPONENTS timer)
+
 set(
     SOURCES
     ${irccdctl_SOURCE_DIR}/CMakeLists.txt
@@ -32,5 +34,5 @@ irccd_define_executable(
     TARGET irccdctl
     DESCRIPTION "Irccd controller."
     SOURCES ${SOURCES}
-    LIBRARIES libirccdctl
+    LIBRARIES Boost::timer libirccdctl
 )
