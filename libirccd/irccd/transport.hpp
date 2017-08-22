@@ -28,10 +28,11 @@
 #include <memory>
 #include <string>
 
+#include <boost/signals2/signal.hpp>
+
 #include <json.hpp>
 
 #include "net.hpp"
-#include "signals.hpp"
 #include "sysconfig.hpp"
 
 namespace irccd {
@@ -62,7 +63,7 @@ public:
      * Arguments:
      *   - the command
      */
-    Signal<const nlohmann::json&> on_command;
+    boost::signals2::signal<void (const nlohmann::json&)> on_command;
 
     /**
      * Signal: on_die
@@ -70,7 +71,7 @@ public:
      *
      * The client has disconnected.
      */
-    Signal<> on_die;
+    boost::signals2::signal<void ()> on_die;
 
 private:
     void error(const std::string& msg);

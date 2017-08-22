@@ -863,26 +863,24 @@ void server_service::add(std::shared_ptr<server> server)
 {
     assert(!has(server->name()));
 
-    using namespace std::placeholders;
-
     std::weak_ptr<class server> ptr(server);
 
-    server->on_channel_mode.connect(std::bind(&server_service::handle_channel_mode, this, _1));
-    server->on_channel_notice.connect(std::bind(&server_service::handle_channel_notice, this, _1));
-    server->on_connect.connect(std::bind(&server_service::handle_connect, this, _1));
-    server->on_invite.connect(std::bind(&server_service::handle_invite, this, _1));
-    server->on_join.connect(std::bind(&server_service::handle_join, this, _1));
-    server->on_kick.connect(std::bind(&server_service::handle_kick, this, _1));
-    server->on_message.connect(std::bind(&server_service::handle_message, this, _1));
-    server->on_me.connect(std::bind(&server_service::handle_me, this, _1));
-    server->on_mode.connect(std::bind(&server_service::handle_mode, this, _1));
-    server->on_names.connect(std::bind(&server_service::handle_names, this, _1));
-    server->on_nick.connect(std::bind(&server_service::handle_nick, this, _1));
-    server->on_notice.connect(std::bind(&server_service::handle_notice, this, _1));
-    server->on_part.connect(std::bind(&server_service::handle_part, this, _1));
-    server->on_query.connect(std::bind(&server_service::handle_query, this, _1));
-    server->on_topic.connect(std::bind(&server_service::handle_topic, this, _1));
-    server->on_whois.connect(std::bind(&server_service::handle_whois, this, _1));
+    server->on_channel_mode.connect(boost::bind(&server_service::handle_channel_mode, this, _1));
+    server->on_channel_notice.connect(boost::bind(&server_service::handle_channel_notice, this, _1));
+    server->on_connect.connect(boost::bind(&server_service::handle_connect, this, _1));
+    server->on_invite.connect(boost::bind(&server_service::handle_invite, this, _1));
+    server->on_join.connect(boost::bind(&server_service::handle_join, this, _1));
+    server->on_kick.connect(boost::bind(&server_service::handle_kick, this, _1));
+    server->on_message.connect(boost::bind(&server_service::handle_message, this, _1));
+    server->on_me.connect(boost::bind(&server_service::handle_me, this, _1));
+    server->on_mode.connect(boost::bind(&server_service::handle_mode, this, _1));
+    server->on_names.connect(boost::bind(&server_service::handle_names, this, _1));
+    server->on_nick.connect(boost::bind(&server_service::handle_nick, this, _1));
+    server->on_notice.connect(boost::bind(&server_service::handle_notice, this, _1));
+    server->on_part.connect(boost::bind(&server_service::handle_part, this, _1));
+    server->on_query.connect(boost::bind(&server_service::handle_query, this, _1));
+    server->on_topic.connect(boost::bind(&server_service::handle_topic, this, _1));
+    server->on_whois.connect(boost::bind(&server_service::handle_whois, this, _1));
     server->on_die.connect([this, ptr] () {
         irccd_.post([=] (irccd&) {
             auto server = ptr.lock();
@@ -1010,8 +1008,6 @@ void transport_service::prepare(fd_set& in, fd_set& out, net::Handle& max)
 
 void transport_service::sync(fd_set& in, fd_set& out)
 {
-    using namespace std::placeholders;
-
     // Transport clients.
     for (const auto& client : clients_) {
         try {
@@ -1034,8 +1030,8 @@ void transport_service::sync(fd_set& in, fd_set& out)
 
         try {
             // Connect signals.
-            client->on_command.connect(std::bind(&transport_service::handle_command, this, ptr, _1));
-            client->on_die.connect(std::bind(&transport_service::handle_die, this, ptr));
+            client->on_command.connect(boost::bind(&transport_service::handle_command, this, ptr, _1));
+            client->on_die.connect(boost::bind(&transport_service::handle_die, this, ptr));
 
             // Register it.
             clients_.push_back(std::move(client));

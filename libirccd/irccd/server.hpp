@@ -35,12 +35,12 @@
 #include <utility>
 #include <vector>
 
+#include <boost/signals2/signal.hpp>
 #include <boost/timer/timer.hpp>
 
 #include <json.hpp>
 
 #include "net.hpp"
-#include "signals.hpp"
 #include "sysconfig.hpp"
 
 namespace irccd {
@@ -286,7 +286,7 @@ public:
      *
      * Triggered when someone changed the channel mode.
      */
-    Signal<channel_mode_event> on_channel_mode;
+    boost::signals2::signal<void (channel_mode_event)> on_channel_mode;
 
     /**
      * Signal: on_channel_notice
@@ -294,7 +294,7 @@ public:
      *
      * Triggered when a notice has been sent on a channel.
      */
-    Signal<channel_notice_event> on_channel_notice;
+    boost::signals2::signal<void (channel_notice_event)> on_channel_notice;
 
     /**
      * Signal: on_connect
@@ -302,7 +302,7 @@ public:
      *
      * Triggered when the server is successfully connected.
      */
-    Signal<connect_event> on_connect;
+    boost::signals2::signal<void (connect_event)> on_connect;
 
     /**
      * Signal: on_die
@@ -310,7 +310,7 @@ public:
      *
      * The server is dead.
      */
-    Signal<> on_die;
+    boost::signals2::signal<void ()> on_die;
 
     /**
      * Signal: on_invite
@@ -318,7 +318,7 @@ public:
      *
      * Triggered when an invite has been sent to you (the bot).
      */
-    Signal<invite_event> on_invite;
+    boost::signals2::signal<void (invite_event)> on_invite;
 
     /**
      * Signal: on_join
@@ -326,7 +326,7 @@ public:
      *
      * Triggered when a user has joined the channel, it also includes you.
      */
-    Signal<join_event> on_join;
+    boost::signals2::signal<void (join_event)> on_join;
 
     /**
      * Signal: on_kick
@@ -334,7 +334,7 @@ public:
      *
      * Triggered when someone has been kicked from a channel.
      */
-    Signal<kick_event> on_kick;
+    boost::signals2::signal<void (kick_event)> on_kick;
 
     /**
      * Signal: on_message
@@ -342,7 +342,7 @@ public:
      *
      * Triggered when a message on a channel has been sent.
      */
-    Signal<message_event> on_message;
+    boost::signals2::signal<void (message_event)> on_message;
 
     /**
      * Signal: on_me
@@ -353,7 +353,7 @@ public:
      * This is both used in a channel and in a private message so the target may
      * be a channel or your nickname.
      */
-    Signal<me_event> on_me;
+    boost::signals2::signal<void (me_event)> on_me;
 
     /**
      * Signal: on_mode
@@ -361,7 +361,7 @@ public:
      *
      * Triggered when the server changed your user mode.
      */
-    Signal<mode_event> on_mode;
+    boost::signals2::signal<void (mode_event)> on_mode;
 
     /**
      * Signal: on_names
@@ -369,7 +369,7 @@ public:
      *
      * Triggered when names listing has finished on a channel.
      */
-    Signal<names_event> on_names;
+    boost::signals2::signal<void (names_event)> on_names;
 
     /**
      * Signal: on_nick
@@ -377,7 +377,7 @@ public:
      *
      * Triggered when someone changed its nickname, it also includes you.
      */
-    Signal<nick_event> on_nick;
+    boost::signals2::signal<void (nick_event)> on_nick;
 
     /**
      * Signal: on_notice
@@ -385,7 +385,7 @@ public:
      *
      * Triggered when someone has sent a notice to you.
      */
-    Signal<notice_event> on_notice;
+    boost::signals2::signal<void (notice_event)> on_notice;
 
     /**
      * Signal: on_part
@@ -393,7 +393,7 @@ public:
      *
      * Triggered when someone has left the channel.
      */
-    Signal<part_event> on_part;
+    boost::signals2::signal<void (part_event)> on_part;
 
     /**
      * Signal: on_query
@@ -401,7 +401,7 @@ public:
      *
      * Triggered when someone has sent you a private message.
      */
-    Signal<query_event> on_query;
+    boost::signals2::signal<void (query_event)> on_query;
 
     /**
      * Signal: on_topic
@@ -409,7 +409,7 @@ public:
      *
      * Triggered when someone changed the channel topic.
      */
-    Signal<topic_event> on_topic;
+    boost::signals2::signal<void (topic_event)> on_topic;
 
     /**
      * Signal: on_whois
@@ -417,7 +417,7 @@ public:
      *
      * Triggered when whois information has been received.
      */
-    Signal<whois_event> on_whois;
+    boost::signals2::signal<void (whois_event)> on_whois;
 
 private:
     class state;
