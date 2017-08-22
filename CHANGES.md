@@ -7,7 +7,8 @@ irccd current
   - Add new Irccd.Util.cut function (#635),
   - Add new irccdctl commands to edit rules (#641),
   - Plugin plugin: add options max-list-lines, max-list-columns (#618),
-  - Import Duktape 2.1.0 (#648).
+  - Import Duktape 2.1.0 (#648),
+  - Fix identity.ctcp-version option (#690).
 
 irccd 2.1.3 2017-07-28
 ----------------------
