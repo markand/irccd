@@ -60,7 +60,7 @@ realname = "Superbot Killer"
 type = "ip"
 address = "*"
 port = "5980"
-family = "ipv4 ipv6"
+family = ( "ipv4","ipv6" )
 
 # Section server:
 #    List of server you want to connect to. A server may use an identity to
