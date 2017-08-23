@@ -20,7 +20,7 @@
 # type = "ip"
 # host = "localhost"            # (string) host to connect,
 # port = "1234"                 # (int) port number,
-# family = "ipv4 ipv6"          # (string) internet family: ipv6 or ipv4 (Optional, default: ipv4).
+# family = "ipv4" or "ipv6"     # (string) internet family: ipv6 or ipv4 (Optional, default: ipv4).
 #
 # For unix sockets:
 #
