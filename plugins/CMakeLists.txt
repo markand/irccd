@@ -38,10 +38,3 @@ foreach (plugin ${IRCCD_PLUGINS})
         DOCS ${plugins_SOURCE_DIR}/${plugin}/${plugin}.md
     )
 endforeach ()
-
-# Debug plugins.
-irccd_define_plugin(
-    NAME debugnative
-    TYPE NATIVE
-    SOURCES ${plugins_SOURCE_DIR}/debugnative/main.cpp
-)
