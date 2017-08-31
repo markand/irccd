@@ -20,8 +20,6 @@
 
 #include <boost/filesystem.hpp>
 
-#include <format.h>
-
 #include "config.hpp"
 #include "fs.hpp"
 #include "irccd.hpp"
@@ -34,8 +32,6 @@
 #include "system.hpp"
 #include "transport.hpp"
 #include "util.hpp"
-
-using namespace fmt::literals;
 
 namespace irccd {
 
@@ -160,7 +156,7 @@ std::shared_ptr<transport_server> load_transport_ip(const ini::section& sc)
     try {
         port = util::to_number<std::uint16_t>(it->value());
     } catch (const std::exception&) {
-        throw std::invalid_argument("transport: invalid port number: {}"_format(it->value()));
+        throw std::invalid_argument(util::sprintf("transport: invalid port number: %s", it->value()));
     }
 
     // Address.
@@ -251,7 +247,7 @@ std::shared_ptr<transport_server> load_transport(const ini::section& sc)
     else if (it->value() == "unix")
         transport = load_transport_unix(sc);
     else
-        throw std::invalid_argument("transport: invalid type given: {}"_format(it->value()));
+        throw std::invalid_argument(util::sprintf("transport: invalid type given: %s", it->value()));
 
     if ((it = sc.find("password")) != sc.end())
         transport->set_password(it->value());
@@ -294,7 +290,7 @@ rule load_rule(const ini::section& sc)
     else if (it->value() == "accept")
         action = rule::action_type::accept;
     else
-        throw std::invalid_argument("rule: invalid action given: {}"_format(it->value()));
+        throw std::invalid_argument(util::sprintf("rule: invalid action given: %s", it->value()));
 
     return {
         std::move(servers),
@@ -316,13 +312,13 @@ std::shared_ptr<server> load_server(const ini::section& sc, const config& config
     if ((it = sc.find("name")) == sc.end())
         throw std::invalid_argument("server: missing 'name' parameter");
     else if (!util::is_identifier(it->value()))
-        throw std::invalid_argument("server: invalid identifier: {}"_format(it->value()));
+        throw std::invalid_argument(util::sprintf("server: invalid identifier: %s", it->value()));
 
     auto sv = std::make_shared<server>(it->value());
 
     // Host
     if ((it = sc.find("host")) == sc.end())
-        throw std::invalid_argument("server {}: missing host"_format(sv->name()));
+        throw std::invalid_argument(util::sprintf("server %s: missing host", sv->name()));
 
     sv->set_host(it->value());
 
@@ -376,7 +372,8 @@ std::shared_ptr<server> load_server(const ini::section& sc, const config& config
         if ((it = sc.find("ping-timeout")) != sc.end())
             sv->set_ping_timeout(util::to_number<std::uint16_t>(it->value()));
     } catch (const std::exception&) {
-        log::warning("server {}: invalid number for {}: {}"_format(sv->name(), it->key(), it->value()));
+        log::warning(util::sprintf("server %s: invalid number for %s: %s",
+            sv->name(), it->key(), it->value()));
     }
 
     return sv;
@@ -514,7 +511,7 @@ void config::load_logs() const
         else if (it->value() == "syslog")
             iface = load_log_syslog();
         else if (it->value() != "console")
-            throw std::runtime_error("logs: unknown log type: {}"_format(it->value()));
+            throw std::runtime_error(util::sprintf("logs: unknown log type: %s", it->value()));
 
         if (iface)
             log::set_logger(std::move(iface));

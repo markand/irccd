@@ -75,7 +75,6 @@ include(cmake/IrccdVersion.cmake)
 include(cmake/IrccdOptions.cmake)
 include(cmake/IrccdSystem.cmake)
 
-add_subdirectory(extern/fmt)
 add_subdirectory(extern/libircclient)
 add_subdirectory(extern/json)
 add_subdirectory(doc)

@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <format.h>
-
 #include <irccd/irccd.hpp>
 #include <irccd/logger.hpp>
 #include <irccd/js_plugin.hpp>
@@ -26,8 +24,6 @@
 #include "js_irccd_module.hpp"
 #include "js_plugin_module.hpp"
 #include "js_timer_module.hpp"
-
-using namespace fmt::literals;
 
 namespace irccd {
 
@@ -52,7 +48,8 @@ void handle_signal(irccd& instance, std::weak_ptr<js_plugin> ptr, std::string ke
 
         if (duk_is_callable(plugin->context(), -1)) {
             if (duk_pcall(plugin->context(), 0) != 0)
-                log::warning("plugin {}: {}"_format(plugin->name(), dukx_exception(plugin->context(), -1).stack));
+                log::warning(util::sprintf("plugin %s: %s", plugin->name(),
+                    dukx_exception(plugin->context(), -1).stack));
             else
                 duk_pop(plugin->context());
         } else

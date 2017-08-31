@@ -18,12 +18,8 @@
 
 #include <stdexcept>
 
-#include <format.h>
-
 #include "client.hpp"
 #include "util.hpp"
-
-using namespace fmt::literals;
 
 namespace irccd {
 
@@ -262,9 +258,10 @@ private:
 
         // Ensure compatibility.
         if (info.major != IRCCD_VERSION_MAJOR || info.minor > IRCCD_VERSION_MINOR)
-            throw std::runtime_error("server version too recent {}.{}.{} vs {}.{}.{}"_format(
+            throw std::runtime_error(util::sprintf("server version too recent %d.%d.%d vs %d.%d.%d",
                 info.major, info.minor, info.patch,
-                IRCCD_VERSION_MAJOR, IRCCD_VERSION_MINOR, IRCCD_VERSION_PATCH));
+                IRCCD_VERSION_MAJOR, IRCCD_VERSION_MINOR, IRCCD_VERSION_PATCH
+            ));
 
         // Successfully connected.
         if (cnx.m_password.empty())

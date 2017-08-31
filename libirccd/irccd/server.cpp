@@ -21,8 +21,6 @@
 #include <cstring>
 #include <stdexcept>
 
-#include <format.h>
-
 #include <libircclient.h>
 #include <libirc_rfcnumeric.h>
 
@@ -38,8 +36,6 @@
 #include "logger.hpp"
 #include "util.hpp"
 #include "server.hpp"
-
-using namespace fmt::literals;
 
 namespace irccd {
 
@@ -615,7 +611,8 @@ std::string server::status() const noexcept
 void server::update() noexcept
 {
     if (state_next_) {
-        log::debug("server {}: switch state {} -> {}"_format(name_, state_->ident(), state_next_->ident()));
+        log::debug(util::sprintf("server %s: switch state %s -> %s",
+            name_, state_->ident(), state_next_->ident()));
 
         state_ = std::move(state_next_);
         state_next_ = nullptr;
@@ -871,7 +868,7 @@ void server::connecting_state::prepare(server& server, fd_set& setinput, fd_set&
             log::warning() << irc_strerror(irc_errno(*server.session_)) << std::endl;
 
             if (server.recotries_ != 0)
-                log::warning("server {}: retrying in {} seconds"_format(server.name_, server.recodelay_));
+                log::warning(util::sprintf("server %s: retrying in %hu seconds", server.name_, server.recodelay_));
 
             server.next(std::make_unique<disconnected_state>());
         } else
@@ -884,7 +881,7 @@ void server::connecting_state::prepare(server& server, fd_set& setinput, fd_set&
 #if !defined(IRCCD_SYSTEM_WINDOWS)
         (void)res_init();
 #endif
-        log::info("server {}: trying to connect to {}, port {}"_format(server.name_, server.host_, server.port_));
+        log::info(util::sprintf("server %s: trying to connect to %s, port %hu", server.name_, server.host_, server.port_));
 
         if (!connect(server)) {
             log::warning() << "server " << server.name_ << ": disconnected while connecting: ";
@@ -915,7 +912,7 @@ void server::connected_state::prepare(server& server, fd_set& setinput, fd_set& 
         log::warning() << "server " << server.name_ << ": disconnected" << std::endl;
 
         if (server.recodelay_ > 0)
-            log::warning("server {}: retrying in {} seconds"_format(server.name_, server.recodelay_));
+            log::warning(util::sprintf("server %s: retrying in %hu seconds", server.name_, server.recodelay_));
 
         server.next(std::make_unique<disconnected_state>());
     } else if (server.timer_.elapsed().wall / 1000000LL >= server.timeout_ * 1000) {

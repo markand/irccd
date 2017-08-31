@@ -19,16 +19,12 @@
 #define BOOST_TEST_MODULE "Plugin plugin"
 #include <boost/test/unit_test.hpp>
 
-#include <format.h>
-
 #include <irccd/irccd.hpp>
 #include <irccd/logger.hpp>
 #include <irccd/server.hpp>
 #include <irccd/service.hpp>
 
 #include "plugin_test.hpp"
-
-using namespace fmt::literals;
 
 namespace irccd {
 
@@ -114,7 +110,7 @@ BOOST_AUTO_TEST_CASE(format_not_found)
 BOOST_AUTO_TEST_CASE(format_too_long)
 {
     for (int i = 0; i < 100; ++i)
-        irccd_.plugins().add(std::make_shared<plugin>("plugin-n-{}"_format(i), ""));
+        irccd_.plugins().add(std::make_shared<plugin>(util::sprintf("plugin-n-%d", i), ""));
 
     plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#staff", "list"});
 

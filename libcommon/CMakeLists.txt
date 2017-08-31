@@ -55,7 +55,6 @@ irccd_define_library(
         ${SOURCES}
     FLAGS ${FLAGS}
     LIBRARIES
-        extern-fmt
         extern-json
         ${Boost_LIBRARIES}
         $<$<BOOL:${WIN32}>:shlwapi>

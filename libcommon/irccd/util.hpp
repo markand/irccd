@@ -37,7 +37,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include <format.h>
+#include <boost/format.hpp>
+
 #include <json.hpp>
 
 #include "net.hpp"
@@ -348,6 +349,48 @@ inline bool is_number(const std::string& value) noexcept
 }
 
 /**
+ * \cond HIDDEN_SYMBOLS
+ */
+
+namespace detail {
+
+inline void sprintf(boost::format&)
+{
+}
+
+template <typename Arg, typename... Args>
+void sprintf(boost::format& fmter, const Arg& arg, const Args&... args)
+{
+    fmter % arg;
+    sprintf(fmter, args...);
+}
+
+} // !detail
+
+/**
+ * \endcond
+ */
+
+/**
+ * Convenient wrapper arount boost::format in sprintf style.
+ *
+ * This is identical as calling boost::format(format) % arg1 % arg2 % argN.
+ *
+ * \param format the format string
+ * \param args the arguments
+ * \return the string
+ */
+template <typename Format, typename... Args>
+std::string sprintf(const Format& format, const Args&... args)
+{
+    boost::format fmter(format);
+
+    detail::sprintf(fmter, args...);
+
+    return fmter.str();
+}
+
+/**
  * Try to convert the string into number.
  *
  * This function will try to convert the string to number in the limits of T.
@@ -420,9 +463,10 @@ inline nlohmann::json require(const nlohmann::json& json, const std::string& key
     auto dummy = nlohmann::json(type);
 
     if (it == json.end())
-        throw std::runtime_error(fmt::format("missing '{}' property", key));
+        throw std::runtime_error(sprintf("missing '%s' property", key));
     if (it->type() != type)
-        throw std::runtime_error(fmt::format("invalid '{}' property ({} expected, got {})", key, it->type_name(), dummy.type_name()));
+        throw std::runtime_error(sprintf("invalid '%s' property (%s expected, got %s)",
+            key, it->type_name(), dummy.type_name()));
 
     return *it;
 }
@@ -453,13 +497,13 @@ inline std::int64_t require_int(const nlohmann::json& json, const std::string& k
     auto it = json.find(key);
 
     if (it == json.end())
-        throw std::runtime_error(fmt::format("missing '{}' property", key));
+        throw std::runtime_error(sprintf("missing '%s' property", key));
     if (it->is_number_integer())
         return it->get<int>();
     if (it->is_number_unsigned() && it->get<unsigned>() <= INT_MAX)
         return static_cast<int>(it->get<unsigned>());
 
-    throw std::runtime_error(fmt::format("invalid '{}' property ({} expected, got {})",
+    throw std::runtime_error(sprintf("invalid '%s' property (%s expected, got %s)",
         key, it->type_name(), nlohmann::json(0).type_name()));
 }
 
@@ -476,13 +520,13 @@ inline std::uint64_t require_uint(const nlohmann::json& json, const std::string&
     auto it = json.find(key);
 
     if (it == json.end())
-        throw std::runtime_error(fmt::format("missing '{}' property", key));
+        throw std::runtime_error(sprintf("missing '%s' property", key));
     if (it->is_number_unsigned())
         return it->get<unsigned>();
     if (it->is_number_integer() && it->get<int>() >= 0)
         return static_cast<unsigned>(it->get<int>());
 
-    throw std::runtime_error(fmt::format("invalid '{}' property ({} expected, got {})",
+    throw std::runtime_error(sprintf("invalid '%s' property (%s expected, got %s)",
         key, it->type_name(), nlohmann::json(0U).type_name()));
 }
 
@@ -512,7 +556,7 @@ inline std::string require_identifier(const nlohmann::json& json, const std::str
     auto id = require_string(json, key);
 
     if (!is_identifier(id))
-        throw std::runtime_error("invalid '{}' identifier property");
+        throw std::runtime_error(sprintf("invalid '%s' identifier property", id));
 
     return id;
 }

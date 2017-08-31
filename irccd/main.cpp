@@ -33,8 +33,6 @@
 #include <csignal>
 #include <iostream>
 
-#include <format.h>
-
 #include "command.hpp"
 #include "logger.hpp"
 #include "options.hpp"
@@ -57,8 +55,6 @@
 #   include <js_util_module.hpp>
 #   include "js_plugin.hpp"
 #endif
-
-using namespace fmt::literals;
 
 using namespace irccd;
 
@@ -176,7 +172,7 @@ config open(const option::Result& result)
         try {
             return config(it->second);
         } catch (const std::exception &ex) {
-            throw std::runtime_error("{}: {}"_format(it->second, ex.what()));
+            throw std::runtime_error(util::sprintf("%s: %s", it->second, ex.what()));
         }
     }
 
@@ -193,7 +189,8 @@ void load_pid(const std::string& path)
         std::ofstream out(path, std::ofstream::trunc);
 
         if (!out)
-            throw std::runtime_error("could not open pidfile {}: {}"_format(path, std::strerror(errno)));
+            throw std::runtime_error(util::sprintf("could not open pidfile %s: %s",
+                path, std::strerror(errno)));
 
         log::debug() << "irccd: pid written in " << path << std::endl;
         out << getpid() << std::endl;
@@ -341,7 +338,7 @@ int main(int argc, char** argv)
     loader->add_module(std::make_unique<js_unicode_module>());
     loader->add_module(std::make_unique<js_util_module>());
 
-    instance->plugins().addLoader(std::move(loader));
+    instance->plugins().add_loader(std::move(loader));
 #endif
 
     try {

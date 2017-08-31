@@ -21,8 +21,6 @@
 #include <boost/filesystem.hpp>
 #include <boost/timer/timer.hpp>
 
-#include <format.h>
-
 #include "alias.hpp"
 #include "cli.hpp"
 #include "client.hpp"
@@ -35,7 +33,6 @@
 #include "util.hpp"
 
 using namespace std::string_literals;
-using namespace fmt::literals;
 using namespace irccd;
 
 namespace {
@@ -249,9 +246,8 @@ Alias readAlias(const ini::section &sc, const std::string &name)
          * Iterate over the arguments which are usually a list and the first
          * argument is a command name.
          */
-        if (option.size() == 1 && option[0].empty()) {
-            throw std::runtime_error("alias {}: missing command name in '{}'"_format(name, option.key()));
-        }
+        if (option.size() == 1 && option[0].empty())
+            throw std::runtime_error(util::sprintf("alias %s: missing command name in '%s'", name, option.key()));
 
         std::string command = option[0];
         std::vector<AliasArg> args(option.begin() + 1, option.end());
@@ -417,7 +413,7 @@ option::Result parse(int &argc, char **&argv)
             log::set_verbose(true);
         }
     } catch (const std::exception &ex) {
-        log::warning("{}: {}"_format(sys::program_name(), ex.what()));
+        log::warning() << "irccdctl: " << ex.what() << std::endl;
         usage();
     }
 
@@ -440,9 +436,8 @@ void exec(const Alias &alias, std::vector<std::string> argsCopy)
 
         for (const auto &arg : cmd.args()) {
             if (arg.isPlaceholder()) {
-                if (args.size() < arg.index() + 1) {
-                    throw std::invalid_argument("missing argument for placeholder %" + std::to_string(arg.index()));
-                }
+                if (args.size() < arg.index() + 1)
+                    throw std::invalid_argument(util::sprintf("missing argument for placeholder %d", arg.index()));
 
                 cmdArgs.push_back(args[arg.index()]);
 
@@ -586,7 +581,7 @@ int main(int argc, char **argv)
     }
 
     if (!client) {
-        log::warning("{}: no connection specified"_format(sys::program_name()));
+        log::warning("irccdctl: no connection specified");
         std::exit(1);
     }
 

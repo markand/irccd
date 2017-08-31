@@ -21,15 +21,12 @@
 #include <functional>
 #include <stdexcept>
 
-#include <format.h>
-
 #include "irccd.hpp"
 #include "logger.hpp"
 #include "service.hpp"
 #include "system.hpp"
 #include "transport.hpp"
 
-using namespace fmt::literals;
 using namespace std::string_literals;
 
 namespace irccd {
@@ -162,7 +159,7 @@ std::shared_ptr<plugin> plugin_service::require(const std::string& name) const
     auto plugin = get(name);
 
     if (!plugin)
-        throw std::invalid_argument("plugin {} not found"_format(name));
+        throw std::invalid_argument(util::sprintf("plugin %s not found", name));
 
     return plugin;
 }
@@ -288,7 +285,7 @@ void plugin_service::load(std::string name, std::string path)
             add(std::move(plugin));
         }
     } catch (const std::exception& ex) {
-        log::warning("plugin {}: {}"_format(name, ex.what()));
+        log::warning(util::sprintf("plugin %s: %s", name, ex.what()));
     }
 }
 
@@ -360,18 +357,18 @@ bool rule_service::solve(const std::string& server,
 {
     bool result = true;
 
-    log::debug("rule: solving for server={}, channel={}, origin={}, plugin={}, event={}"_format(server, channel,
-           origin, plugin, event));
+    log::debug(util::sprintf("rule: solving for server=%s, channel=%s, origin=%s, plugin=%s, event=%s",
+        server, channel, origin, plugin, event));
 
     int i = 0;
     for (const auto& rule : rules_) {
-        log::debug() << "  candidate " << i++ << ":\n"
-                     << "    servers: " << util::join(rule.servers().begin(), rule.servers().end()) << "\n"
+        log::debug() << "  candidate "   << i++ << ":\n"
+                     << "    servers: "  << util::join(rule.servers().begin(), rule.servers().end()) << "\n"
                      << "    channels: " << util::join(rule.channels().begin(), rule.channels().end()) << "\n"
-                     << "    origins: " << util::join(rule.origins().begin(), rule.origins().end()) << "\n"
-                     << "    plugins: " << util::join(rule.plugins().begin(), rule.plugins().end()) << "\n"
-                     << "    events: " << util::join(rule.events().begin(), rule.events().end()) << "\n"
-                     << "    action: " << ((rule.action() == rule::action_type::accept) ? "accept" : "drop") << std::endl;
+                     << "    origins: "  << util::join(rule.origins().begin(), rule.origins().end()) << "\n"
+                     << "    plugins: "  << util::join(rule.plugins().begin(), rule.plugins().end()) << "\n"
+                     << "    events: "   << util::join(rule.events().begin(), rule.events().end()) << "\n"
+                     << "    action: "   << ((rule.action() == rule::action_type::accept) ? "accept" : "drop") << std::endl;
 
         if (rule.match(server, channel, origin, plugin, event))
             result = rule.action() == rule::action_type::accept;
@@ -886,7 +883,7 @@ void server_service::add(std::shared_ptr<server> server)
             auto server = ptr.lock();
 
             if (server) {
-                log::info("server {}: removed"_format(server->name()));
+                log::info(util::sprintf("server %s: removed", server->name()));
                 servers_.erase(std::find(servers_.begin(), servers_.end(), server));
             }
         });
@@ -912,7 +909,7 @@ std::shared_ptr<server> server_service::require(const std::string& name) const
     auto server = get(name);
 
     if (!server)
-        throw std::invalid_argument("server {} not found"_format(name));
+        throw std::invalid_argument(util::sprintf("server %s not found", name));
 
     return server;
 }
