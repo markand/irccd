@@ -16,105 +16,86 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "Logger Javascript API"
+#include <boost/test/unit_test.hpp>
 
-#include <irccd/irccd.hpp>
 #include <irccd/logger.hpp>
-#include <irccd/mod-irccd.hpp>
-#include <irccd/mod-logger.hpp>
-#include <irccd/mod-plugin.hpp>
-#include <irccd/plugin-js.hpp>
-#include <irccd/service.hpp>
-#include <irccd/sysconfig.hpp>
+#include <irccd/js_logger_module.hpp>
+#include <irccd/js_plugin_module.hpp>
 
-using namespace irccd;
+#include <js_test.hpp>
 
-namespace {
+namespace irccd {
 
-std::string lineInfo;
-std::string lineWarning;
-std::string lineDebug;
-
-} // !namespace
-
-class LoggerIfaceTest : public log::Logger {
-public:
-    void info(const std::string &line) override
-    {
-        lineInfo = line;
-    }
-
-    void warning(const std::string &line) override
-    {
-        lineWarning = line;
-    }
-
-    void debug(const std::string &line) override
-    {
-        lineDebug = line;
-    }
-};
-
-class TestJsLogger : public testing::Test {
+class logger_test : public js_test<js_logger_module, js_plugin_module> {
 protected:
-    Irccd m_irccd;
-    std::shared_ptr<JsPlugin> m_plugin;
+    std::string line_info;
+    std::string line_warning;
+    std::string line_debug;
 
-    TestJsLogger()
-        : m_plugin(std::make_shared<JsPlugin>("test", SOURCEDIR "/empty.js"))
+    class my_logger : public log::logger {
+    private:
+        logger_test& test_;
+
+    public:
+        inline my_logger(logger_test& test) noexcept
+            : test_(test)
+        {
+        }
+
+        void info(const std::string& line) override
+        {
+            test_.line_info = line;
+        }
+
+        void warning(const std::string& line) override
+        {
+            test_.line_warning = line;
+        }
+
+        void debug(const std::string& line) override
+        {
+            test_.line_debug = line;
+        }
+    };
+
+    logger_test()
     {
-        IrccdModule().load(m_irccd, m_plugin);
-        PluginModule().load(m_irccd, m_plugin);
-        LoggerModule().load(m_irccd, m_plugin);
+        log::set_verbose(true);
+        log::set_logger(std::make_unique<my_logger>(*this));
     }
 };
 
-TEST_F(TestJsLogger, info)
-{
-    try {
-        if (duk_peval_string(m_plugin->context(), "Irccd.Logger.info(\"hello!\");") != 0)
-            throw dukx_exception(m_plugin->context(), -1);
+BOOST_FIXTURE_TEST_SUITE(js_logger_suite, logger_test)
 
-        ASSERT_EQ("plugin test: hello!", lineInfo);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+BOOST_AUTO_TEST_CASE(info)
+{
+    if (duk_peval_string(plugin_->context(), "Irccd.Logger.info(\"hello!\");") != 0)
+        throw dukx_exception(plugin_->context(), -1);
+
+    BOOST_TEST("plugin test: hello!" == line_info);
 }
 
-TEST_F(TestJsLogger, warning)
+BOOST_AUTO_TEST_CASE(warning)
 {
-    try {
-        if (duk_peval_string(m_plugin->context(), "Irccd.Logger.warning(\"FAIL!\");") != 0)
-            throw dukx_exception(m_plugin->context(), -1);
+    if (duk_peval_string(plugin_->context(), "Irccd.Logger.warning(\"FAIL!\");") != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        ASSERT_EQ("plugin test: FAIL!", lineWarning);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST("plugin test: FAIL!" == line_warning);
 }
 
 #if !defined(NDEBUG)
 
-TEST_F(TestJsLogger, debug)
+BOOST_AUTO_TEST_CASE(debug)
 {
-    try {
-        if (duk_peval_string(m_plugin->context(), "Irccd.Logger.debug(\"starting\");") != 0)
-            throw dukx_exception(m_plugin->context(), -1);
+    if (duk_peval_string(plugin_->context(), "Irccd.Logger.debug(\"starting\");") != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        ASSERT_EQ("plugin test: starting", lineDebug);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST("plugin test: starting" == line_debug);
 }
 
 #endif
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    log::setVerbose(true);
-    log::setLogger(std::make_unique<LoggerIfaceTest>());
-
-    return RUN_ALL_TESTS();
-}
+} // !irccd

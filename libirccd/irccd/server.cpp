@@ -44,86 +44,86 @@ using namespace fmt::literals;
 namespace irccd {
 
 /*
- * Server::Session declaration.
+ * server::session declaration.
  * ------------------------------------------------------------------
  */
 
-class Server::Session {
+class server::session {
 public:
-    std::unique_ptr<irc_session_t, void (*)(irc_session_t *)> m_handle{nullptr, nullptr};
+    std::unique_ptr<irc_session_t, void (*)(irc_session_t *)> handle_{nullptr, nullptr};
 
-    inline operator const irc_session_t *() const noexcept
+    inline operator const irc_session_t*() const noexcept
     {
-        return m_handle.get();
+        return handle_.get();
     }
 
-    inline operator irc_session_t *() noexcept
+    inline operator irc_session_t*() noexcept
     {
-        return m_handle.get();
+        return handle_.get();
     }
 
-    inline bool isConnected() const noexcept
+    inline bool is_connected() const noexcept
     {
-        return irc_is_connected(m_handle.get());
+        return irc_is_connected(handle_.get());
     }
 };
 
 /*
- * Server::State declaration.
+ * server::state declaration.
  * ------------------------------------------------------------------
  */
 
-class Server::State {
+class server::state {
 public:
-    State() = default;
-    virtual ~State() = default;
-    virtual void prepare(Server &, fd_set &, fd_set &, net::Handle &) = 0;
+    state() = default;
+    virtual ~state() = default;
+    virtual void prepare(server&, fd_set&, fd_set&, net::Handle&) = 0;
     virtual std::string ident() const = 0;
 };
 
 /*
- * Server::DisconnectedState declaration.
+ * server::disconnected_state declaration.
  * ------------------------------------------------------------------
  */
 
-class Server::DisconnectedState : public Server::State {
+class server::disconnected_state : public server::state {
 private:
-    ElapsedTimer m_timer;
+    ElapsedTimer timer_;
 
 public:
-    void prepare(Server &, fd_set &, fd_set &, net::Handle &) override;
+    void prepare(server&, fd_set&, fd_set&, net::Handle&) override;
     std::string ident() const override;
 };
 
 /*
- * Server::ConnectingState declaration.
+ * server::connecting_state declaration.
  * ------------------------------------------------------------------
  */
 
-class Server::ConnectingState : public State {
+class server::connecting_state : public state {
 private:
     enum {
-        Disconnected,
-        Connecting
-    } m_state{Disconnected};
+        disconnected,
+        connecting
+    } state_{disconnected};
 
-    ElapsedTimer m_timer;
+    ElapsedTimer timer_;
 
-    bool connect(Server &server);
+    bool connect(server& server);
 
 public:
-    void prepare(Server &, fd_set &, fd_set &, net::Handle &) override;
+    void prepare(server&, fd_set&, fd_set&, net::Handle&) override;
     std::string ident() const override;
 };
 
 /*
- * Server::ConnectedState declaration.
+ * server::connected_state declaration.
  * ------------------------------------------------------------------
  */
 
-class Server::ConnectedState : public State {
+class server::connected_state : public state {
 public:
-    void prepare(Server &, fd_set &, fd_set &, net::Handle &) override;
+    void prepare(server&, fd_set&, fd_set&, net::Handle&) override;
     std::string ident() const override;
 };
 
@@ -135,24 +135,24 @@ namespace {
  *
  * Make sure to build a C++ string with a not-null C string.
  */
-inline std::string strify(const char *s)
+inline std::string strify(const char* s)
 {
     return (s == nullptr) ? "" : std::string(s);
 }
 
 /*
- * cleanPrefix
+ * clean_prefix
  * ------------------------------------------------------------------
  *
  * Remove the user prefix only if it is present in the mode table, for example
  * removes @ from @irccd if and only if @ is a character mode (e.g. operator).
  */
-std::string cleanPrefix(const std::map<ChannelMode, char> &modes, std::string nickname)
+std::string clean_prefix(const std::map<channel_mode, char>& modes, std::string nickname)
 {
     if (nickname.length() == 0)
         return nickname;
 
-    for (const auto &pair : modes)
+    for (const auto& pair : modes)
         if (nickname[0] == pair.second)
             nickname.erase(0, 1);
 
@@ -160,32 +160,33 @@ std::string cleanPrefix(const std::map<ChannelMode, char> &modes, std::string ni
 }
 
 /*
- * extractPrefixes
+ * extract_prefixes
  * ------------------------------------------------------------------
  *
  * Read modes from the IRC event numeric.
  */
-std::map<ChannelMode, char> extractPrefixes(const std::string &line)
+std::map<channel_mode, char> extract_prefixes(const std::string& line)
 {
+    // FIXME: what if line has different size?
     std::pair<char, char> table[16];
     std::string buf = line.substr(7);
-    std::map<ChannelMode, char> modes;
+    std::map<channel_mode, char> modes;
 
     for (int i = 0; i < 16; ++i)
         table[i] = std::make_pair(-1, -1);
 
     int j = 0;
-    bool readModes = true;
+    bool read_modes = true;
     for (size_t i = 0; i < buf.size(); ++i) {
         if (buf[i] == '(')
             continue;
         if (buf[i] == ')') {
             j = 0;
-            readModes = false;
+            read_modes = false;
             continue;
         }
 
-        if (readModes)
+        if (read_modes)
             table[j++].first = buf[i];
         else
             table[j++].second = buf[i];
@@ -193,7 +194,7 @@ std::map<ChannelMode, char> extractPrefixes(const std::string &line)
 
     // Put these as a map of mode to prefix.
     for (int i = 0; i < 16; ++i) {
-        auto key = static_cast<ChannelMode>(table[i].first);
+        auto key = static_cast<channel_mode>(table[i].first);
         auto value = table[i].second;
 
         modes.emplace(key, value);
@@ -204,57 +205,68 @@ std::map<ChannelMode, char> extractPrefixes(const std::string &line)
 
 } // !namespace
 
-void Server::removeJoinedChannel(const std::string &channel)
+void server::remove_joined_channel(const std::string& channel)
 {
-    m_jchannels.erase(std::remove(m_jchannels.begin(), m_jchannels.end(), channel), m_jchannels.end());
+    jchannels_.erase(std::remove(jchannels_.begin(), jchannels_.end(), channel), jchannels_.end());
 }
 
-void Server::handleConnect(const char *, const char **) noexcept
+void server::handle_connect(const char*, const char**) noexcept
 {
     // Reset the number of tried reconnection.
-    m_recocur = 1;
+    recocur_ = 1;
 
     // Reset the timer.
-    m_timer.reset();
+    timer_.reset();
 
     // Reset joined channels.
-    m_jchannels.clear();
+    jchannels_.clear();
 
     // Don't forget to change state and notify.
-    next(std::make_unique<ConnectedState>());
-    onConnect(ConnectEvent{shared_from_this()});
+    next(std::make_unique<connected_state>());
+    on_connect(connect_event{shared_from_this()});
 
     // Auto join listed channels.
-    for (const auto &channel : m_rchannels) {
-        log::info() << "server " << m_name << ": auto joining " << channel.name << std::endl;
+    for (const auto& channel : rchannels_) {
+        log::info() << "server " << name_ << ": auto joining " << channel.name << std::endl;
         join(channel.name, channel.password);
     }
 }
 
-void Server::handleChannel(const char *orig, const char **params) noexcept
+void server::handle_channel(const char* orig, const char** params) noexcept
 {
-    onMessage(MessageEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
+    on_message({shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
 }
 
-void Server::handleChannelMode(const char *orig, const char **params) noexcept
+void server::handle_channel_mode(const char* orig, const char** params) noexcept
 {
-    onChannelMode(ChannelModeEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1]), strify(params[2])});
+    on_channel_mode({
+        shared_from_this(),
+        strify(orig),
+        strify(params[0]),
+        strify(params[1]),
+        strify(params[2])
+    });
 }
 
-void Server::handleChannelNotice(const char *orig, const char **params) noexcept
+void server::handle_channel_notice(const char* orig, const char** params) noexcept
 {
-    onChannelNotice(ChannelNoticeEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
+    on_channel_notice({
+        shared_from_this(),
+        strify(orig),
+        strify(params[0]),
+        strify(params[1])
+    });
 }
 
-void Server::handleCtcpAction(const char *orig, const char **params) noexcept
+void server::handle_ctcp_action(const char* orig, const char** params) noexcept
 {
-    onMe(MeEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
+    on_me({shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
 }
 
-void Server::handleInvite(const char *orig, const char **params) noexcept
+void server::handle_invite(const char* orig, const char** params) noexcept
 {
     // If joininvite is set, join the channel.
-    if ((m_flags & JoinInvite) && isSelf(strify(params[0])))
+    if ((flags_ & join_invite) && is_self(strify(params[0])))
         join(strify(params[1]));
 
     /*
@@ -262,55 +274,61 @@ void Server::handleInvite(const char *orig, const char **params) noexcept
      * quit uncommon to need it so it is passed as the last argument to be
      * optional in the plugin.
      */
-    onInvite(InviteEvent{shared_from_this(), strify(orig), strify(params[1]), strify(params[0])});
+    on_invite({shared_from_this(), strify(orig), strify(params[1]), strify(params[0])});
 }
 
-void Server::handleJoin(const char *orig, const char **params) noexcept
+void server::handle_join(const char* orig, const char** params) noexcept
 {
-    if (isSelf(strify(orig)))
-        m_jchannels.push_back(strify(params[0]));
+    if (is_self(strify(orig)))
+        jchannels_.push_back(strify(params[0]));
 
-    onJoin(JoinEvent{shared_from_this(), strify(orig), strify(params[0])});
+    on_join({shared_from_this(), strify(orig), strify(params[0])});
 }
 
-void Server::handleKick(const char *orig, const char **params) noexcept
+void server::handle_kick(const char* orig, const char** params) noexcept
 {
-    if (isSelf(strify(params[1]))) {
+    if (is_self(strify(params[1]))) {
         // Remove the channel from the joined list.
-        removeJoinedChannel(strify(params[0]));
+        remove_joined_channel(strify(params[0]));
 
         // Rejoin the channel if the option has been set and I was kicked.
-        if (m_flags & AutoRejoin)
+        if (flags_ & auto_rejoin)
             join(strify(params[0]));
     }
 
-    onKick(KickEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1]), strify(params[2])});
+    on_kick({
+        shared_from_this(),
+        strify(orig),
+        strify(params[0]),
+        strify(params[1]),
+        strify(params[2])
+    });
 }
 
-void Server::handleMode(const char *orig, const char **params) noexcept
+void server::handle_mode(const char* orig, const char** params) noexcept
 {
-    onMode(ModeEvent{shared_from_this(), strify(orig), strify(params[1])});
+    on_mode({shared_from_this(), strify(orig), strify(params[1])});
 }
 
-void Server::handleNick(const char *orig, const char **params) noexcept
+void server::handle_nick(const char* orig, const char** params) noexcept
 {
     // Update our nickname.
-    if (isSelf(strify(orig)))
-        m_nickname = strify(params[0]);
+    if (is_self(strify(orig)))
+        nickname_ = strify(params[0]);
 
-    onNick(NickEvent{shared_from_this(), strify(orig), strify(params[0])});
+    on_nick({shared_from_this(), strify(orig), strify(params[0])});
 }
 
-void Server::handleNotice(const char *orig, const char **params) noexcept
+void server::handle_notice(const char* orig, const char** params) noexcept
 {
     /*
      * Like handleInvite, the notice provides the target nickname, we discard
      * it.
      */
-    onNotice(NoticeEvent{shared_from_this(), strify(orig), strify(params[1])});
+    on_notice({shared_from_this(), strify(orig), strify(params[1])});
 }
 
-void Server::handleNumeric(unsigned int event, const char **params, unsigned int c) noexcept
+void server::handle_numeric(unsigned int event, const char** params, unsigned int c) noexcept
 {
     if (event == LIBIRC_RFC_RPL_NAMREPLY) {
         /*
@@ -327,11 +345,11 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
         if (c < 4 || params[2] == nullptr || params[3] == nullptr)
             return;
 
-        std::vector<std::string> users = util::split(params[3], " \t");
+        auto users = util::split(params[3], " \t");
 
         // The listing may add some prefixes, remove them if needed.
-        for (std::string u : users)
-            m_namesMap[params[2]].insert(cleanPrefix(m_modes, u));
+        for (auto u : users)
+            names_map_[params[2]].insert(clean_prefix(modes_, u));
     } else if (event == LIBIRC_RFC_RPL_ENDOFNAMES) {
         /*
          * Called when end of name listing has finished on a channel.
@@ -343,12 +361,16 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
         if (c < 3 || params[1] == nullptr)
             return;
 
-        auto it = m_namesMap.find(params[1]);
-        if (it != m_namesMap.end()) {
-            onNames(NamesEvent{shared_from_this(), params[1], std::vector<std::string>(it->second.begin(), it->second.end())});
+        auto it = names_map_.find(params[1]);
+        if (it != names_map_.end()) {
+            on_names({
+                shared_from_this(),
+                params[1],
+                std::vector<std::string>(it->second.begin(), it->second.end())
+            });
 
             // Don't forget to remove the list.
-            m_namesMap.erase(it);
+            names_map_.erase(it);
         }
     } else if (event == LIBIRC_RFC_RPL_WHOISUSER) {
         /*
@@ -364,14 +386,14 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
         if (c < 6 || !params[1] || !params[2] || !params[3] || !params[5])
             return;
 
-        Whois info;
+        class whois info;
 
         info.nick = strify(params[1]);
         info.user = strify(params[2]);
         info.host = strify(params[3]);
         info.realname = strify(params[5]);
 
-        m_whoisMap.emplace(info.nick, info);
+        whois_map_.emplace(info.nick, info);
     } else if (event == LIBIRC_RFC_RPL_WHOISCHANNELS) {
         /*
          * Called when we have received channels for one user.
@@ -383,13 +405,13 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
         if (c < 3 || !params[1] || !params[2])
             return;
 
-        auto it = m_whoisMap.find(params[1]);
-        if (it != m_whoisMap.end()) {
-            std::vector<std::string> channels = util::split(params[2], " \t");
+        auto it = whois_map_.find(params[1]);
+        if (it != whois_map_.end()) {
+            auto channels = util::split(params[2], " \t");
 
             // Clean their prefixes.
             for (auto &s : channels)
-                s = cleanPrefix(m_modes, s);
+                s = clean_prefix(modes_, s);
 
             it->second.channels = std::move(channels);
         }
@@ -401,12 +423,12 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
          * params[1] == nickname
          * params[2] == End of WHOIS list
          */
-        auto it = m_whoisMap.find(params[1]);
-        if (it != m_whoisMap.end()) {
-            onWhois(WhoisEvent{shared_from_this(), it->second});
+        auto it = whois_map_.find(params[1]);
+        if (it != whois_map_.end()) {
+            on_whois({shared_from_this(), it->second});
 
             // Don't forget to remove.
-            m_whoisMap.erase(it);
+            whois_map_.erase(it);
         }
     } else if (event == /* RPL_BOUNCE */ 5) {
         /*
@@ -414,80 +436,80 @@ void Server::handleNumeric(unsigned int event, const char **params, unsigned int
          */
         for (unsigned int i = 0; i < c; ++i) {
             if (strncmp(params[i], "PREFIX", 6) == 0) {
-                m_modes = extractPrefixes(params[i]);
+                modes_ = extract_prefixes(params[i]);
                 break;
             }
         }
     }
 }
 
-void Server::handlePart(const char *orig, const char **params) noexcept
+void server::handle_part(const char* orig, const char** params) noexcept
 {
     // Remove the channel from the joined list if I left a channel.
-    if (isSelf(strify(orig)))
-        removeJoinedChannel(strify(params[0]));
+    if (is_self(strify(orig)))
+        remove_joined_channel(strify(params[0]));
 
-    onPart(PartEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
+    on_part({shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
 }
 
-void Server::handlePing(const char *, const char **) noexcept
+void server::handle_ping(const char*, const char**) noexcept
 {
     // Reset the timer to detect disconnection.
-    m_timer.reset();
+    timer_.reset();
 }
 
-void Server::handleQuery(const char *orig, const char **params) noexcept
+void server::handle_query(const char* orig, const char** params) noexcept
 {
-    onQuery(QueryEvent{shared_from_this(), strify(orig), strify(params[1])});
+    on_query({shared_from_this(), strify(orig), strify(params[1])});
 }
 
-void Server::handleTopic(const char *orig, const char **params) noexcept
+void server::handle_topic(const char* orig, const char** params) noexcept
 {
-    onTopic(TopicEvent{shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
+    on_topic({shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
 }
 
-std::shared_ptr<Server> Server::fromJson(const nlohmann::json &object)
+std::shared_ptr<server> server::from_json(const nlohmann::json& object)
 {
-    auto server = std::make_shared<Server>(util::json::requireIdentifier(object, "name"));
+    auto sv = std::make_shared<server>(util::json::require_identifier(object, "name"));
 
-    server->setHost(util::json::requireString(object, "host"));
-    server->setPassword(util::json::getString(object, "password"));
-    server->setNickname(util::json::getString(object, "nickname", server->nickname()));
-    server->setRealname(util::json::getString(object, "realname", server->realname()));
-    server->setUsername(util::json::getString(object, "username", server->username()));
-    server->setCtcpVersion(util::json::getString(object, "ctcpVersion", server->ctcpVersion()));
-    server->setCommandCharacter(util::json::getString(object, "commandChar", server->commandCharacter()));
+    sv->set_host(util::json::require_string(object, "host"));
+    sv->set_password(util::json::get_string(object, "password"));
+    sv->set_nickname(util::json::get_string(object, "nickname", sv->nickname()));
+    sv->set_realname(util::json::get_string(object, "realname", sv->realname()));
+    sv->set_username(util::json::get_string(object, "username", sv->username()));
+    sv->set_ctcp_version(util::json::get_string(object, "ctcpVersion", sv->ctcp_version()));
+    sv->set_command_char(util::json::get_string(object, "commandChar", sv->command_char()));
 
     if (object.find("port") != object.end())
-        server->setPort(util::json::getUintRange<std::uint16_t>(object, "port"));
-    if (util::json::getBool(object, "ipv6"))
-        server->setFlags(server->flags() | Server::Ipv6);
-    if (util::json::getBool(object, "ssl"))
-        server->setFlags(server->flags() | Server::Ssl);
-    if (util::json::getBool(object, "sslVerify"))
-        server->setFlags(server->flags() | Server::SslVerify);
-    if (util::json::getBool(object, "autoRejoin"))
-        server->setFlags(server->flags() | Server::AutoRejoin);
-    if (util::json::getBool(object, "joinInvite"))
-        server->setFlags(server->flags() | Server::JoinInvite);
+        sv->set_port(util::json::get_uint_range<std::uint16_t>(object, "port"));
+    if (util::json::get_bool(object, "ipv6"))
+        sv->set_flags(sv->flags() | server::ipv6);
+    if (util::json::get_bool(object, "ssl"))
+        sv->set_flags(sv->flags() | server::ssl);
+    if (util::json::get_bool(object, "sslVerify"))
+        sv->set_flags(sv->flags() | server::ssl_verify);
+    if (util::json::get_bool(object, "autoRejoin"))
+        sv->set_flags(sv->flags() | server::auto_rejoin);
+    if (util::json::get_bool(object, "joinInvite"))
+        sv->set_flags(sv->flags() | server::join_invite);
 
-    return server;
+    return sv;
 }
 
-Channel Server::splitChannel(const std::string &value)
+channel server::split_channel(const std::string& value)
 {
     auto pos = value.find(':');
 
     if (pos != std::string::npos)
-        return { value.substr(0, pos), value.substr(pos + 1) };
+        return {value.substr(0, pos), value.substr(pos + 1)};
 
-    return { value, "" };
+    return {value, ""};
 }
 
-Server::Server(std::string name)
-    : m_name(std::move(name))
-    , m_session(std::make_unique<Session>())
-    , m_state(std::make_unique<ConnectingState>())
+server::server(std::string name)
+    : name_(std::move(name))
+    , session_(std::make_unique<session>())
+    , state_(std::make_unique<connecting_state>())
 {
     irc_callbacks_t callbacks;
 
@@ -503,126 +525,126 @@ Server::Server(std::string name)
      *
      * While doing this, discard useless arguments.
      */
-    callbacks.event_channel = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
-        static_cast<Server *>(irc_get_ctx(session))->handleChannel(orig, params);
+    callbacks.event_channel = [] (auto session, auto, auto orig, auto params, auto) {
+        static_cast<server*>(irc_get_ctx(session))->handle_channel(orig, params);
     };
-    callbacks.event_channel_notice = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
-        static_cast<Server *>(irc_get_ctx(session))->handleChannelNotice(orig, params);
+    callbacks.event_channel_notice = [] (auto session, auto, auto orig, auto params, auto) {
+        static_cast<server*>(irc_get_ctx(session))->handle_channel_notice(orig, params);
     };
-    callbacks.event_connect = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
-        static_cast<Server *>(irc_get_ctx(session))->handleConnect(orig, params);
+    callbacks.event_connect = [] (auto session, auto, auto orig, auto params, auto) {
+        static_cast<server*>(irc_get_ctx(session))->handle_connect(orig, params);
     };
-    callbacks.event_ctcp_action = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
-        static_cast<Server *>(irc_get_ctx(session))->handleCtcpAction(orig, params);
+    callbacks.event_ctcp_action = [] (auto session, auto, auto orig, auto params, auto) {
+        static_cast<server*>(irc_get_ctx(session))->handle_ctcp_action(orig, params);
     };
-    callbacks.event_invite = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
-        static_cast<Server *>(irc_get_ctx(session))->handleInvite(orig, params);
+    callbacks.event_invite = [] (auto session, auto, auto orig, auto params, auto) {
+        static_cast<server*>(irc_get_ctx(session))->handle_invite(orig, params);
     };
-    callbacks.event_join = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
-        static_cast<Server *>(irc_get_ctx(session))->handleJoin(orig, params);
+    callbacks.event_join = [] (auto session, auto, auto orig, auto params, auto) {
+        static_cast<server*>(irc_get_ctx(session))->handle_join(orig, params);
     };
-    callbacks.event_kick = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
-        static_cast<Server *>(irc_get_ctx(session))->handleKick(orig, params);
+    callbacks.event_kick = [] (auto session, auto, auto orig, auto params, auto) {
+        static_cast<server*>(irc_get_ctx(session))->handle_kick(orig, params);
     };
-    callbacks.event_mode = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
-        static_cast<Server *>(irc_get_ctx(session))->handleChannelMode(orig, params);
+    callbacks.event_mode = [] (auto session, auto, auto orig, auto params, auto) {
+        static_cast<server*>(irc_get_ctx(session))->handle_channel_mode(orig, params);
     };
-    callbacks.event_nick = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
-        static_cast<Server *>(irc_get_ctx(session))->handleNick(orig, params);
+    callbacks.event_nick = [] (auto session, auto, auto orig, auto params, auto) {
+        static_cast<server*>(irc_get_ctx(session))->handle_nick(orig, params);
     };
-    callbacks.event_notice = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
-        static_cast<Server *>(irc_get_ctx(session))->handleNotice(orig, params);
+    callbacks.event_notice = [] (auto session, auto, auto orig, auto params, auto) {
+        static_cast<server*>(irc_get_ctx(session))->handle_notice(orig, params);
     };
-    callbacks.event_numeric = [] (irc_session_t *session, unsigned int event, const char *, const char **params, unsigned int count) {
-        static_cast<Server *>(irc_get_ctx(session))->handleNumeric(event, params, count);
+    callbacks.event_numeric = [] (auto session, auto event, auto, auto params, auto count) {
+        static_cast<server*>(irc_get_ctx(session))->handle_numeric(event, params, count);
     };
-    callbacks.event_part = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
-        static_cast<Server *>(irc_get_ctx(session))->handlePart(orig, params);
+    callbacks.event_part = [] (auto session, auto, auto orig, auto params, auto) {
+        static_cast<server*>(irc_get_ctx(session))->handle_part(orig, params);
     };
-    callbacks.event_ping = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
-        static_cast<Server *>(irc_get_ctx(session))->handlePing(orig, params);
+    callbacks.event_ping = [] (auto session, auto, auto orig, auto params, auto) {
+        static_cast<server*>(irc_get_ctx(session))->handle_ping(orig, params);
     };
-    callbacks.event_privmsg = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
-        static_cast<Server *>(irc_get_ctx(session))->handleQuery(orig, params);
+    callbacks.event_privmsg = [] (auto session, auto, auto orig, auto params, auto) {
+        static_cast<server*>(irc_get_ctx(session))->handle_query(orig, params);
     };
-    callbacks.event_topic = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
-        static_cast<Server *>(irc_get_ctx(session))->handleTopic(orig, params);
+    callbacks.event_topic = [] (auto session, auto, auto orig, auto params, auto) {
+        static_cast<server*>(irc_get_ctx(session))->handle_topic(orig, params);
     };
-    callbacks.event_umode = [] (irc_session_t *session, const char *, const char *orig, const char **params, unsigned) {
-        static_cast<Server *>(irc_get_ctx(session))->handleMode(orig, params);
+    callbacks.event_umode = [] (auto session, auto, auto orig, auto params, auto) {
+        static_cast<server*>(irc_get_ctx(session))->handle_mode(orig, params);
     };
 
-    m_session->m_handle = {irc_create_session(&callbacks), irc_destroy_session};
+    session_->handle_ = {irc_create_session(&callbacks), irc_destroy_session};
 
     // Save this to the session.
-    irc_set_ctx(*m_session, this);
-    irc_set_ctcp_version(*m_session, m_ctcpversion.c_str());
+    irc_set_ctx(*session_, this);
+    irc_set_ctcp_version(*session_, ctcpversion_.c_str());
 }
 
-Server::~Server()
+server::~server()
 {
-    irc_disconnect(*m_session);
+    irc_disconnect(*session_);
 }
 
-void Server::setNickname(std::string nickname)
+void server::set_nickname(std::string nickname)
 {
-    if (m_session->isConnected())
-        m_queue.push([=] () {
-            return irc_cmd_nick(*m_session, nickname.c_str()) == 0;
+    if (session_->is_connected())
+        queue_.push([=] () {
+            return irc_cmd_nick(*session_, nickname.c_str()) == 0;
         });
     else
-        m_nickname = std::move(nickname);
+        nickname_ = std::move(nickname);
 }
 
-void Server::setCtcpVersion(std::string ctcpversion)
+void server::set_ctcp_version(std::string ctcpversion)
 {
-    m_ctcpversion = std::move(ctcpversion);
-    irc_set_ctcp_version(*m_session, m_ctcpversion.c_str());
+    ctcpversion_ = std::move(ctcpversion);
+    irc_set_ctcp_version(*session_, ctcpversion_.c_str());
 }
 
-void Server::next(std::unique_ptr<State> state) noexcept
+void server::next(std::unique_ptr<state> state) noexcept
 {
-    m_stateNext = std::move(state);
+    state_next_ = std::move(state);
 }
 
-std::string Server::status() const noexcept
+std::string server::status() const noexcept
 {
-    return !m_state ? "null" : m_state->ident();
+    return state_ ? state_->ident() : "null";
 }
 
-void Server::update() noexcept
+void server::update() noexcept
 {
-    if (m_stateNext) {
-        log::debug("server {}: switch state {} -> {}"_format(m_name, m_state->ident(), m_stateNext->ident()));
+    if (state_next_) {
+        log::debug("server {}: switch state {} -> {}"_format(name_, state_->ident(), state_next_->ident()));
 
-        m_state = std::move(m_stateNext);
-        m_stateNext = nullptr;
+        state_ = std::move(state_next_);
+        state_next_ = nullptr;
 
         // Reset channels.
-        m_jchannels.clear();
+        jchannels_.clear();
     }
 }
 
-void Server::disconnect() noexcept
+void server::disconnect() noexcept
 {
     using namespace std::placeholders;
 
-    irc_disconnect(*m_session);
-    onDie();
+    irc_disconnect(*session_);
+    on_die();
 }
 
-void Server::reconnect() noexcept
+void server::reconnect() noexcept
 {
-    irc_disconnect(*m_session);
-    next(std::make_unique<ConnectingState>());
+    irc_disconnect(*session_);
+    next(std::make_unique<connecting_state>());
 }
 
-void Server::prepare(fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) noexcept
+void server::prepare(fd_set& setinput, fd_set& setoutput, net::Handle& maxfd) noexcept
 {
-    m_state->prepare(*this, setinput, setoutput, maxfd);
+    state_->prepare(*this, setinput, setoutput, maxfd);
 }
 
-void Server::sync(fd_set &setinput, fd_set &setoutput)
+void server::sync(fd_set &setinput, fd_set &setoutput)
 {
     /*
      * 1. Send maximum of command possible if available for write
@@ -632,200 +654,200 @@ void Server::sync(fd_set &setinput, fd_set &setoutput)
      */
     bool done = false;
 
-    while (!m_queue.empty() && !done) {
-        if (m_queue.front()())
-            m_queue.pop();
+    while (!queue_.empty() && !done) {
+        if (queue_.front()())
+            queue_.pop();
         else
             done = true;
     }
 
     // 2. Read data.
-    irc_process_select_descriptors(*m_session, &setinput, &setoutput);
+    irc_process_select_descriptors(*session_, &setinput, &setoutput);
 }
 
-bool Server::isSelf(const std::string &nick) const noexcept
+bool server::is_self(const std::string& nick) const noexcept
 {
     char target[32]{0};
 
     irc_target_get_nick(nick.c_str(), target, sizeof (target));
 
-    return m_nickname == target;
+    return nickname_ == target;
 }
 
-void Server::cmode(std::string channel, std::string mode)
+void server::cmode(std::string channel, std::string mode)
 {
-    m_queue.push([=] () {
-        return irc_cmd_channel_mode(*m_session, channel.c_str(), mode.c_str()) == 0;
+    queue_.push([=] () {
+        return irc_cmd_channel_mode(*session_, channel.c_str(), mode.c_str()) == 0;
     });
 }
 
-void Server::cnotice(std::string channel, std::string message)
+void server::cnotice(std::string channel, std::string message)
 {
-    m_queue.push([=] () {
-        return irc_cmd_notice(*m_session, channel.c_str(), message.c_str()) == 0;
+    queue_.push([=] () {
+        return irc_cmd_notice(*session_, channel.c_str(), message.c_str()) == 0;
     });
 }
 
-void Server::invite(std::string target, std::string channel)
+void server::invite(std::string target, std::string channel)
 {
-    m_queue.push([=] () {
-        return irc_cmd_invite(*m_session, target.c_str(), channel.c_str()) == 0;
+    queue_.push([=] () {
+        return irc_cmd_invite(*session_, target.c_str(), channel.c_str()) == 0;
     });
 }
 
-void Server::join(std::string channel, std::string password)
+void server::join(std::string channel, std::string password)
 {
     // 1. Add the channel or update it to the requested channels.
-    auto it = std::find_if(m_rchannels.begin(), m_rchannels.end(), [&] (const auto &c) {
+    auto it = std::find_if(rchannels_.begin(), rchannels_.end(), [&] (const auto& c) {
         return c.name == channel;
     });
 
-    if (it == m_rchannels.end())
-        m_rchannels.push_back({ channel, password });
+    if (it == rchannels_.end())
+        rchannels_.push_back({ channel, password });
     else
         *it = { channel, password };
 
     // 2. Join if not found and connected.
-    if (m_session->isConnected())
-        irc_cmd_join(*m_session, channel.c_str(), password.empty() ? nullptr : password.c_str());
+    if (session_->is_connected())
+        irc_cmd_join(*session_, channel.c_str(), password.empty() ? nullptr : password.c_str());
 }
 
-void Server::kick(std::string target, std::string channel, std::string reason)
+void server::kick(std::string target, std::string channel, std::string reason)
 {
-    m_queue.push([=] () {
-        return irc_cmd_kick(*m_session, target.c_str(), channel.c_str(), reason.c_str()) == 0;
+    queue_.push([=] () {
+        return irc_cmd_kick(*session_, target.c_str(), channel.c_str(), reason.c_str()) == 0;
     });
 }
 
-void Server::me(std::string target, std::string message)
+void server::me(std::string target, std::string message)
 {
-    m_queue.push([=] () {
-        return irc_cmd_me(*m_session, target.c_str(), message.c_str()) == 0;
+    queue_.push([=] () {
+        return irc_cmd_me(*session_, target.c_str(), message.c_str()) == 0;
     });
 }
 
-void Server::message(std::string target, std::string message)
+void server::message(std::string target, std::string message)
 {
-    m_queue.push([=] () {
-        return irc_cmd_msg(*m_session, target.c_str(), message.c_str()) == 0;
+    queue_.push([=] () {
+        return irc_cmd_msg(*session_, target.c_str(), message.c_str()) == 0;
     });
 }
 
-void Server::mode(std::string mode)
+void server::mode(std::string mode)
 {
-    m_queue.push([=] () {
-        return irc_cmd_user_mode(*m_session, mode.c_str()) == 0;
+    queue_.push([=] () {
+        return irc_cmd_user_mode(*session_, mode.c_str()) == 0;
     });
 }
 
-void Server::names(std::string channel)
+void server::names(std::string channel)
 {
-    m_queue.push([=] () {
-        return irc_cmd_names(*m_session, channel.c_str()) == 0;
+    queue_.push([=] () {
+        return irc_cmd_names(*session_, channel.c_str()) == 0;
     });
 }
 
-void Server::notice(std::string target, std::string message)
+void server::notice(std::string target, std::string message)
 {
-    m_queue.push([=] () {
-        return irc_cmd_notice(*m_session, target.c_str(), message.c_str()) == 0;
+    queue_.push([=] () {
+        return irc_cmd_notice(*session_, target.c_str(), message.c_str()) == 0;
     });
 }
 
-void Server::part(std::string channel, std::string reason)
+void server::part(std::string channel, std::string reason)
 {
-    m_queue.push([=] () -> bool {
+    queue_.push([=] () -> bool {
         if (reason.empty())
-            return irc_cmd_part(*m_session, channel.c_str()) == 0;
+            return irc_cmd_part(*session_, channel.c_str()) == 0;
 
-        return irc_send_raw(*m_session, "PART %s :%s", channel.c_str(), reason.c_str());
+        return irc_send_raw(*session_, "PART %s :%s", channel.c_str(), reason.c_str());
     });
 }
 
-void Server::send(std::string raw)
+void server::send(std::string raw)
 {
-    m_queue.push([=] () {
-        return irc_send_raw(*m_session, raw.c_str()) == 0;
+    queue_.push([=] () {
+        return irc_send_raw(*session_, raw.c_str()) == 0;
     });
 }
 
-void Server::topic(std::string channel, std::string topic)
+void server::topic(std::string channel, std::string topic)
 {
-    m_queue.push([=] () {
-        return irc_cmd_topic(*m_session, channel.c_str(), topic.c_str()) == 0;
+    queue_.push([=] () {
+        return irc_cmd_topic(*session_, channel.c_str(), topic.c_str()) == 0;
     });
 }
 
-void Server::whois(std::string target)
+void server::whois(std::string target)
 {
-    m_queue.push([=] () {
-        return irc_cmd_whois(*m_session, target.c_str()) == 0;
+    queue_.push([=] () {
+        return irc_cmd_whois(*session_, target.c_str()) == 0;
     });
 }
 
 /*
- * Server::DisconnectedState implementation
+ * server::disconnected_state implementation
  * ------------------------------------------------------------------
  */
 
-void Server::DisconnectedState::prepare(Server &server, fd_set &, fd_set &, net::Handle &)
+void server::disconnected_state::prepare(server& server, fd_set&, fd_set&, net::Handle&)
 {
-    if (server.m_recotries == 0) {
-        log::warning() << "server " << server.m_name << ": reconnection disabled, skipping" << std::endl;
-        server.onDie();
-    } else if (server.m_recotries > 0 && server.m_recocur > server.m_recotries) {
-        log::warning() << "server " << server.m_name << ": giving up" << std::endl;
-        server.onDie();
+    if (server.recotries_ == 0) {
+        log::warning() << "server " << server.name_ << ": reconnection disabled, skipping" << std::endl;
+        server.on_die();
+    } else if (server.recotries_ > 0 && server.recocur_ > server.recotries_) {
+        log::warning() << "server " << server.name_ << ": giving up" << std::endl;
+        server.on_die();
     } else {
-        if (m_timer.elapsed() > static_cast<unsigned>(server.m_recodelay * 1000)) {
-            irc_disconnect(*server.m_session);
+        if (timer_.elapsed() > static_cast<unsigned>(server.recodelay_ * 1000)) {
+            irc_disconnect(*server.session_);
 
-            server.m_recocur ++;
-            server.next(std::make_unique<ConnectingState>());
+            server.recocur_ ++;
+            server.next(std::make_unique<connecting_state>());
         }
     }
 }
 
-std::string Server::DisconnectedState::ident() const
+std::string server::disconnected_state::ident() const
 {
     return "Disconnected";
 }
 
 /*
- * Server::ConnectingState implementation
+ * server::connecting_state implementation
  * ------------------------------------------------------------------
  */
 
-bool Server::ConnectingState::connect(Server &server)
+bool server::connecting_state::connect(server& server)
 {
-    const char *password = server.m_password.empty() ? nullptr : server.m_password.c_str();
-    std::string host = server.m_host;
-    int code;
+    auto password = server.password_.empty() ? nullptr : server.password_.c_str();
+    auto host = server.host_;
 
     // libircclient requires # for SSL connection.
 #if defined(WITH_SSL)
-    if (server.m_flags & Server::Ssl)
+    if (server.flags_ & server::ssl)
         host.insert(0, 1, '#');
-    if (!(server.m_flags & Server::SslVerify))
-        irc_option_set(*server.m_session, LIBIRC_OPTION_SSL_NO_VERIFY);
+    if (!(server.flags_ & server::ssl_verify))
+        irc_option_set(*server.session_, LIBIRC_OPTION_SSL_NO_VERIFY);
 #endif
 
-    if (server.flags() & Server::Ipv6) {
-        code = irc_connect6(*server.m_session, host.c_str(), server.m_port, password,
-                            server.m_nickname.c_str(),
-                            server.m_username.c_str(),
-                            server.m_realname.c_str());
+    int code;
+    if (server.flags() & server::ipv6) {
+        code = irc_connect6(*server.session_, host.c_str(), server.port_, password,
+                            server.nickname_.c_str(),
+                            server.username_.c_str(),
+                            server.realname_.c_str());
     } else {
-        code = irc_connect(*server.m_session, host.c_str(), server.m_port, password,
-                           server.m_nickname.c_str(),
-                           server.m_username.c_str(),
-                           server.m_realname.c_str());
+        code = irc_connect(*server.session_, host.c_str(), server.port_, password,
+                           server.nickname_.c_str(),
+                           server.username_.c_str(),
+                           server.realname_.c_str());
     }
 
     return code == 0;
 }
 
-void Server::ConnectingState::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
+void server::connecting_state::prepare(server& server, fd_set& setinput, fd_set& setoutput, net::Handle& maxfd)
 {
     /*
      * The connect function will either fail if the hostname wasn't resolved or
@@ -840,20 +862,20 @@ void Server::ConnectingState::prepare(Server &server, fd_set &setinput, fd_set &
      *
      * Otherwise, the libircclient event_connect will change the state.
      */
-    if (m_state == Connecting) {
-        if (m_timer.elapsed() > static_cast<unsigned>(server.m_recodelay * 1000)) {
+    if (state_ == connecting) {
+        if (timer_.elapsed() > static_cast<unsigned>(server.recodelay_ * 1000)) {
             log::warning() << "server " << server.name() << ": timeout while connecting" << std::endl;
-            server.next(std::make_unique<DisconnectedState>());
-        } else if (!irc_is_connected(*server.m_session)) {
-            log::warning() << "server " << server.m_name << ": error while connecting: ";
-            log::warning() << irc_strerror(irc_errno(*server.m_session)) << std::endl;
+            server.next(std::make_unique<disconnected_state>());
+        } else if (!irc_is_connected(*server.session_)) {
+            log::warning() << "server " << server.name_ << ": error while connecting: ";
+            log::warning() << irc_strerror(irc_errno(*server.session_)) << std::endl;
 
-            if (server.m_recotries != 0)
-                log::warning("server {}: retrying in {} seconds"_format(server.m_name, server.m_recodelay));
+            if (server.recotries_ != 0)
+                log::warning("server {}: retrying in {} seconds"_format(server.name_, server.recodelay_));
 
-            server.next(std::make_unique<DisconnectedState>());
+            server.next(std::make_unique<disconnected_state>());
         } else
-            irc_add_select_descriptors(*server.m_session, &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
+            irc_add_select_descriptors(*server.session_, &setinput, &setoutput, reinterpret_cast<int*>(&maxfd));
     } else {
         /*
          * This is needed if irccd is started before DHCP or if DNS cache is
@@ -862,49 +884,49 @@ void Server::ConnectingState::prepare(Server &server, fd_set &setinput, fd_set &
 #if !defined(IRCCD_SYSTEM_WINDOWS)
         (void)res_init();
 #endif
-        log::info("server {}: trying to connect to {}, port {}"_format(server.m_name, server.m_host, server.m_port));
+        log::info("server {}: trying to connect to {}, port {}"_format(server.name_, server.host_, server.port_));
 
         if (!connect(server)) {
-            log::warning() << "server " << server.m_name << ": disconnected while connecting: ";
-            log::warning() << irc_strerror(irc_errno(*server.m_session)) << std::endl;
-            server.next(std::make_unique<DisconnectedState>());
+            log::warning() << "server " << server.name_ << ": disconnected while connecting: ";
+            log::warning() << irc_strerror(irc_errno(*server.session_)) << std::endl;
+            server.next(std::make_unique<disconnected_state>());
         } else {
-            m_state = Connecting;
+            state_ = connecting;
 
-            if (irc_is_connected(*server.m_session))
-                irc_add_select_descriptors(*server.m_session, &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
+            if (irc_is_connected(*server.session_))
+                irc_add_select_descriptors(*server.session_, &setinput, &setoutput, reinterpret_cast<int*>(&maxfd));
         }
     }
 }
 
-std::string Server::ConnectingState::ident() const
+std::string server::connecting_state::ident() const
 {
     return "Connecting";
 }
 
 /*
- * Server::ConnectedState implementation
+ * server::connected_state implementation
  * ------------------------------------------------------------------
  */
 
-void Server::ConnectedState::prepare(Server &server, fd_set &setinput, fd_set &setoutput, net::Handle &maxfd)
+void server::connected_state::prepare(server& server, fd_set& setinput, fd_set& setoutput, net::Handle& maxfd)
 {
-    if (!irc_is_connected(*server.m_session)) {
-        log::warning() << "server " << server.m_name << ": disconnected" << std::endl;
+    if (!irc_is_connected(*server.session_)) {
+        log::warning() << "server " << server.name_ << ": disconnected" << std::endl;
 
-        if (server.m_recodelay > 0)
-            log::warning("server {}: retrying in {} seconds"_format(server.m_name, server.m_recodelay));
+        if (server.recodelay_ > 0)
+            log::warning("server {}: retrying in {} seconds"_format(server.name_, server.recodelay_));
 
-        server.next(std::make_unique<DisconnectedState>());
-    } else if (server.m_timer.elapsed() >= server.m_timeout * 1000) {
-        log::warning() << "server " << server.m_name << ": ping timeout after "
-                   << (server.m_timer.elapsed() / 1000) << " seconds" << std::endl;
-        server.next(std::make_unique<DisconnectedState>());
+        server.next(std::make_unique<disconnected_state>());
+    } else if (server.timer_.elapsed() >= server.timeout_ * 1000) {
+        log::warning() << "server " << server.name_ << ": ping timeout after "
+                       << (server.timer_.elapsed() / 1000) << " seconds" << std::endl;
+        server.next(std::make_unique<disconnected_state>());
     } else
-        irc_add_select_descriptors(*server.m_session, &setinput, &setoutput, reinterpret_cast<int *>(&maxfd));
+        irc_add_select_descriptors(*server.session_, &setinput, &setoutput, reinterpret_cast<int*>(&maxfd));
 }
 
-std::string Server::ConnectedState::ident() const
+std::string server::connected_state::ident() const
 {
     return "Connected";
 }

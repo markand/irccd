@@ -32,7 +32,7 @@ std::string lineWarning;
 
 } // !namespace
 
-class MyInterface : public log::Logger {
+class MyInterface : public log::logger {
 public:
     void debug(const std::string &line) override
     {
@@ -50,19 +50,19 @@ public:
     }
 };
 
-class MyFilter : public log::Filter {
+class MyFilter : public log::filter {
 public:
-    std::string preDebug(std::string input) const override
+    std::string pre_debug(std::string input) const override
     {
         return std::reverse(input.begin(), input.end()), input;
     }
 
-    std::string preInfo(std::string input) const override
+    std::string pre_info(std::string input) const override
     {
         return std::reverse(input.begin(), input.end()), input;
     }
 
-    std::string preWarning(std::string input) const override
+    std::string pre_warning(std::string input) const override
     {
         return std::reverse(input.begin(), input.end()), input;
     }
@@ -95,9 +95,9 @@ TEST(Logger, warning)
 
 int main(int argc, char **argv)
 {
-    log::setVerbose(true);
-    log::setLogger(std::make_unique<MyInterface>());
-    log::setFilter(std::make_unique<MyFilter>());
+    log::set_verbose(true);
+    log::set_logger(std::make_unique<MyInterface>());
+    log::set_filter(std::make_unique<MyFilter>());
 
     testing::InitGoogleTest(&argc, argv);
 

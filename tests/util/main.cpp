@@ -16,89 +16,105 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cstdint>
+#define BOOST_TEST_MODULE "util"
+#include <boost/test/unit_test.hpp>
 
-#include <gtest/gtest.h>
+#include <cstdint>
 
 #include <irccd/util.hpp>
 #include <irccd/system.hpp>
 
+namespace std {
+
+std::ostream& operator<<(std::ostream& out, const std::vector<std::string>& list)
+{
+    for (const auto& s : list)
+        out << s << " ";
+
+    return out;
+}
+
+} // !std
+
 namespace irccd {
 
-/* --------------------------------------------------------
- * util::format function
- * -------------------------------------------------------- */
+BOOST_AUTO_TEST_SUITE(format)
 
-TEST(Format, nothing)
+/*
+ * util::format function
+ * --------------------------------------------------------
+ */
+
+BOOST_AUTO_TEST_CASE(nothing)
 {
     std::string expected = "hello world!";
     std::string result = util::format("hello world!");
 
-    ASSERT_EQ(expected, result);
+    BOOST_REQUIRE_EQUAL(expected, result);
 }
 
-TEST(Format, escape)
+BOOST_AUTO_TEST_CASE(escape)
 {
-    util::Substitution params;
+    util::subst params;
 
     params.keywords.emplace("target", "hello");
 
-    ASSERT_EQ("$@#", util::format("$@#"));
-    ASSERT_EQ(" $ @ # ", util::format(" $ @ # "));
-    ASSERT_EQ("#", util::format("#"));
-    ASSERT_EQ(" # ", util::format(" # "));
-    ASSERT_EQ("#@", util::format("#@"));
-    ASSERT_EQ("##", util::format("##"));
-    ASSERT_EQ("#!", util::format("#!"));
-    ASSERT_EQ("#{target}", util::format("##{target}"));
-    ASSERT_EQ("@hello", util::format("@#{target}", params));
-    ASSERT_EQ("hello#", util::format("#{target}#", params));
-    ASSERT_ANY_THROW(util::format("#{failure"));
+    BOOST_REQUIRE_EQUAL("$@#", util::format("$@#"));
+    BOOST_REQUIRE_EQUAL(" $ @ # ", util::format(" $ @ # "));
+    BOOST_REQUIRE_EQUAL("#", util::format("#"));
+    BOOST_REQUIRE_EQUAL(" # ", util::format(" # "));
+    BOOST_REQUIRE_EQUAL("#@", util::format("#@"));
+    BOOST_REQUIRE_EQUAL("##", util::format("##"));
+    BOOST_REQUIRE_EQUAL("#!", util::format("#!"));
+    BOOST_REQUIRE_EQUAL("#{target}", util::format("##{target}"));
+    BOOST_REQUIRE_EQUAL("@hello", util::format("@#{target}", params));
+    BOOST_REQUIRE_EQUAL("hello#", util::format("#{target}#", params));
+    BOOST_REQUIRE_THROW(util::format("#{failure"), std::exception);
 }
 
-TEST(Format, disableDate)
+BOOST_AUTO_TEST_CASE(disable_date)
 {
-    util::Substitution params;
+    util::subst params;
 
-    params.flags &= ~(util::Substitution::Date);
+    params.flags &= ~(util::subst_flags::date);
 
-    ASSERT_EQ("%H:%M", util::format("%H:%M", params));
+    BOOST_REQUIRE_EQUAL("%H:%M", util::format("%H:%M", params));
 }
 
-TEST(Format, disableKeywords)
+BOOST_AUTO_TEST_CASE(disable_keywords)
 {
-    util::Substitution params;
+    util::subst params;
 
     params.keywords.emplace("target", "hello");
-    params.flags &= ~(util::Substitution::Keywords);
+    params.flags &= ~(util::subst_flags::keywords);
 
-    ASSERT_EQ("#{target}", util::format("#{target}", params));
+    BOOST_REQUIRE_EQUAL("#{target}", util::format("#{target}", params));
 }
 
-TEST(Format, disableEnv)
+BOOST_AUTO_TEST_CASE(disable_env)
 {
-    util::Substitution params;
+    util::subst params;
 
-    params.flags &= ~(util::Substitution::Env);
+    params.flags &= ~(util::subst_flags::env);
 
-    ASSERT_EQ("${HOME}", util::format("${HOME}", params));
+    BOOST_REQUIRE_EQUAL("${HOME}", util::format("${HOME}", params));
 }
 
-TEST(Format, keywordSimple)
+BOOST_AUTO_TEST_CASE(keyword_simple)
 {
-    util::Substitution params;
+    util::subst params;
 
     params.keywords.insert({"target", "irccd"});
 
     std::string expected = "hello irccd!";
     std::string result = util::format("hello #{target}!", params);
 
-    ASSERT_EQ(expected, result);
+    BOOST_REQUIRE_EQUAL(expected, result);
 }
 
-TEST(Format, keywordMultiple)
+BOOST_AUTO_TEST_CASE(keyword_multiple)
 {
-    util::Substitution params;
+    util::subst params;
 
     params.keywords.insert({"target", "irccd"});
     params.keywords.insert({"source", "nightmare"});
@@ -106,30 +122,30 @@ TEST(Format, keywordMultiple)
     std::string expected = "hello irccd from nightmare!";
     std::string result = util::format("hello #{target} from #{source}!", params);
 
-    ASSERT_EQ(expected, result);
+    BOOST_REQUIRE_EQUAL(expected, result);
 }
 
-TEST(Format, keywordAdjTwice)
+BOOST_AUTO_TEST_CASE(keyword_adj_twice)
 {
-    util::Substitution params;
+    util::subst params;
 
     params.keywords.insert({"target", "irccd"});
 
     std::string expected = "hello irccdirccd!";
     std::string result = util::format("hello #{target}#{target}!", params);
 
-    ASSERT_EQ(expected, result);
+    BOOST_REQUIRE_EQUAL(expected, result);
 }
 
-TEST(Format, keywordMissing)
+BOOST_AUTO_TEST_CASE(keyword_missing)
 {
     std::string expected = "hello !";
     std::string result = util::format("hello #{target}!");
 
-    ASSERT_EQ(expected, result);
+    BOOST_REQUIRE_EQUAL(expected, result);
 }
 
-TEST(Format, envSimple)
+BOOST_AUTO_TEST_CASE(env_simple)
 {
     std::string home = sys::env("HOME");
 
@@ -137,282 +153,311 @@ TEST(Format, envSimple)
         std::string expected = "my home is " + home;
         std::string result = util::format("my home is ${HOME}");
 
-        ASSERT_EQ(expected, result);
+        BOOST_REQUIRE_EQUAL(expected, result);
     }
 }
 
-TEST(Format, envMissing)
+BOOST_AUTO_TEST_CASE(env_missing)
 {
     std::string expected = "value is ";
     std::string result = util::format("value is ${HOPE_THIS_VAR_NOT_EXIST}");
 
-    ASSERT_EQ(expected, result);
+    BOOST_REQUIRE_EQUAL(expected, result);
 }
 
-/* --------------------------------------------------------
+BOOST_AUTO_TEST_SUITE_END()
+
+/*
  * util::split function
- * -------------------------------------------------------- */
+ * --------------------------------------------------------
+ */
 
-using List = std::vector<std::string>;
+BOOST_AUTO_TEST_SUITE(split)
 
-TEST(Split, simple)
+using list = std::vector<std::string>;
+
+BOOST_AUTO_TEST_CASE(simple)
 {
-    List expected { "a", "b" };
-    List result = util::split("a;b", ";");
+    list expected { "a", "b" };
+    list result = util::split("a;b", ";");
 
-    ASSERT_EQ(expected, result);
+    BOOST_REQUIRE_EQUAL(expected, result);
 }
 
-TEST(Split, cut)
+BOOST_AUTO_TEST_CASE(cut)
 {
-    List expected { "msg", "#staff", "foo bar baz" };
-    List result = util::split("msg;#staff;foo bar baz", ";", 3);
+    list expected { "msg", "#staff", "foo bar baz" };
+    list result = util::split("msg;#staff;foo bar baz", ";", 3);
 
-    ASSERT_EQ(expected, result);
+    BOOST_REQUIRE_EQUAL(expected, result);
 }
 
-/* --------------------------------------------------------
+BOOST_AUTO_TEST_SUITE_END()
+
+/*
  * util::strip function
- * -------------------------------------------------------- */
+ * --------------------------------------------------------
+ */
 
-TEST(Strip, left)
+BOOST_AUTO_TEST_SUITE(strip)
+
+BOOST_AUTO_TEST_CASE(left)
 {
     std::string value = "   123";
     std::string result = util::strip(value);
 
-    ASSERT_EQ("123", result);
+    BOOST_REQUIRE_EQUAL("123", result);
 }
 
-TEST(Strip, right)
+BOOST_AUTO_TEST_CASE(right)
 {
     std::string value = "123   ";
     std::string result = util::strip(value);
 
-    ASSERT_EQ("123", result);
+    BOOST_REQUIRE_EQUAL("123", result);
 }
 
-TEST(Strip, both)
+BOOST_AUTO_TEST_CASE(both)
 {
     std::string value = "   123   ";
     std::string result = util::strip(value);
 
-    ASSERT_EQ("123", result);
+    BOOST_REQUIRE_EQUAL("123", result);
 }
 
-TEST(Strip, none)
+BOOST_AUTO_TEST_CASE(none)
 {
     std::string value = "without";
     std::string result = util::strip(value);
 
-    ASSERT_EQ("without", result);
+    BOOST_REQUIRE_EQUAL("without", result);
 }
 
-TEST(Strip, betweenEmpty)
+BOOST_AUTO_TEST_CASE(betweenEmpty)
 {
     std::string value = "one list";
     std::string result = util::strip(value);
 
-    ASSERT_EQ("one list", result);
+    BOOST_REQUIRE_EQUAL("one list", result);
 }
 
-TEST(Strip, betweenLeft)
+BOOST_AUTO_TEST_CASE(betweenLeft)
 {
     std::string value = "  space at left";
     std::string result = util::strip(value);
 
-    ASSERT_EQ("space at left", result);
+    BOOST_REQUIRE_EQUAL("space at left", result);
 }
 
-TEST(Strip, betweenRight)
+BOOST_AUTO_TEST_CASE(betweenRight)
 {
     std::string value = "space at right  ";
     std::string result = util::strip(value);
 
-    ASSERT_EQ("space at right", result);
+    BOOST_REQUIRE_EQUAL("space at right", result);
 }
 
-TEST(Strip, betweenBoth)
+BOOST_AUTO_TEST_CASE(betweenBoth)
 {
     std::string value = "  space at both  ";
     std::string result = util::strip(value);
 
-    ASSERT_EQ("space at both", result);
+    BOOST_REQUIRE_EQUAL("space at both", result);
 }
 
-TEST(Strip, empty)
+BOOST_AUTO_TEST_CASE(empty)
 {
     std::string value = "    ";
     std::string result = util::strip(value);
 
-    ASSERT_EQ("", result);
-}
+    BOOST_REQUIRE_EQUAL("", result);
+} 
 
-/* --------------------------------------------------------
+BOOST_AUTO_TEST_SUITE_END()
+
+/*
  * util::join function
- * -------------------------------------------------------- */
+ * --------------------------------------------------------
+ */
 
-TEST(Join, empty)
+BOOST_AUTO_TEST_SUITE(join)
+
+BOOST_AUTO_TEST_CASE(empty)
 {
     std::string expected = "";
     std::string result = util::join<int>({});
 
-    ASSERT_EQ(expected, result);
+    BOOST_REQUIRE_EQUAL(expected, result);
 }
 
-TEST(Join, one)
+BOOST_AUTO_TEST_CASE(one)
 {
     std::string expected = "1";
     std::string result = util::join({1});
 
-    ASSERT_EQ(expected, result);
+    BOOST_REQUIRE_EQUAL(expected, result);
 }
 
-TEST(Join, two)
+BOOST_AUTO_TEST_CASE(two)
 {
     std::string expected = "1:2";
     std::string result = util::join({1, 2});
 
-    ASSERT_EQ(expected, result);
+    BOOST_REQUIRE_EQUAL(expected, result);
 }
 
-TEST(Join, delimiterString)
+BOOST_AUTO_TEST_CASE(delimiterString)
 {
     std::string expected = "1;;2;;3";
     std::string result = util::join({1, 2, 3}, ";;");
 
-    ASSERT_EQ(expected, result);
+    BOOST_REQUIRE_EQUAL(expected, result);
 }
 
-TEST(Join, delimiterChar)
+BOOST_AUTO_TEST_CASE(delimiterChar)
 {
     std::string expected = "1@2@3@4";
     std::string result = util::join({1, 2, 3, 4}, '@');
 
-    ASSERT_EQ(expected, result);
+    BOOST_REQUIRE_EQUAL(expected, result);
 }
 
-/* --------------------------------------------------------
- * util::isIdentifierValid function
- * -------------------------------------------------------- */
-
-TEST(IsIdentifierValid, correct)
-{
-    ASSERT_TRUE(util::isIdentifierValid("localhost"));
-    ASSERT_TRUE(util::isIdentifierValid("localhost2"));
-    ASSERT_TRUE(util::isIdentifierValid("localhost2-4_"));
-}
-
-TEST(IsIdentifierValid, incorrect)
-{
-    ASSERT_FALSE(util::isIdentifierValid(""));
-    ASSERT_FALSE(util::isIdentifierValid("localhost with spaces"));
-    ASSERT_FALSE(util::isIdentifierValid("localhost*"));
-    ASSERT_FALSE(util::isIdentifierValid("&&"));
-    ASSERT_FALSE(util::isIdentifierValid("@'"));
-    ASSERT_FALSE(util::isIdentifierValid("##"));
-    ASSERT_FALSE(util::isIdentifierValid("===++"));
-}
-
-/* --------------------------------------------------------
- * util::isBoolean function
- * -------------------------------------------------------- */
-
-TEST(IsBoolean, correct)
-{
-    // true
-    ASSERT_TRUE(util::isBoolean("true"));
-    ASSERT_TRUE(util::isBoolean("True"));
-    ASSERT_TRUE(util::isBoolean("TRUE"));
-    ASSERT_TRUE(util::isBoolean("TruE"));
-
-    // yes
-    ASSERT_TRUE(util::isBoolean("yes"));
-    ASSERT_TRUE(util::isBoolean("Yes"));
-    ASSERT_TRUE(util::isBoolean("YES"));
-    ASSERT_TRUE(util::isBoolean("YeS"));
-
-    // on
-    ASSERT_TRUE(util::isBoolean("on"));
-    ASSERT_TRUE(util::isBoolean("On"));
-    ASSERT_TRUE(util::isBoolean("oN"));
-    ASSERT_TRUE(util::isBoolean("ON"));
-
-    // 1
-    ASSERT_TRUE(util::isBoolean("1"));
-}
-
-TEST(IsBoolean, incorrect)
-{
-    ASSERT_FALSE(util::isBoolean("false"));
-    ASSERT_FALSE(util::isBoolean("lol"));
-    ASSERT_FALSE(util::isBoolean(""));
-    ASSERT_FALSE(util::isBoolean("0"));
-}
-
-/* --------------------------------------------------------
- * util::isNumber function
- * -------------------------------------------------------- */
-
-TEST(IsNumber, correct)
-{
-    ASSERT_TRUE(util::isNumber("123"));
-    ASSERT_TRUE(util::isNumber("-123"));
-    ASSERT_TRUE(util::isNumber("123.67"));
-}
-
-TEST(IsNumber, incorrect)
-{
-    ASSERT_FALSE(util::isNumber("lol"));
-    ASSERT_FALSE(util::isNumber("this is not a number"));
-}
+BOOST_AUTO_TEST_SUITE_END()
 
 /*
- * util::toNumber function
+ * util::is_identifier function
+ * --------------------------------------------------------
+ */
+
+BOOST_AUTO_TEST_SUITE(is_identifier_valid)
+
+BOOST_AUTO_TEST_CASE(correct)
+{
+    BOOST_REQUIRE(util::is_identifier("localhost"));
+    BOOST_REQUIRE(util::is_identifier("localhost2"));
+    BOOST_REQUIRE(util::is_identifier("localhost2-4_"));
+}
+
+BOOST_AUTO_TEST_CASE(incorrect)
+{
+    BOOST_REQUIRE(!util::is_identifier(""));
+    BOOST_REQUIRE(!util::is_identifier("localhost with spaces"));
+    BOOST_REQUIRE(!util::is_identifier("localhost*"));
+    BOOST_REQUIRE(!util::is_identifier("&&"));
+    BOOST_REQUIRE(!util::is_identifier("@'"));
+    BOOST_REQUIRE(!util::is_identifier("##"));
+    BOOST_REQUIRE(!util::is_identifier("===++"));
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+/*
+ * util::is_boolean function
+ * --------------------------------------------------------
+ */
+
+BOOST_AUTO_TEST_SUITE(is_boolean)
+
+BOOST_AUTO_TEST_CASE(correct)
+{
+    // true
+    BOOST_REQUIRE(util::is_boolean("true"));
+    BOOST_REQUIRE(util::is_boolean("True"));
+    BOOST_REQUIRE(util::is_boolean("TRUE"));
+    BOOST_REQUIRE(util::is_boolean("TruE"));
+
+    // yes
+    BOOST_REQUIRE(util::is_boolean("yes"));
+    BOOST_REQUIRE(util::is_boolean("Yes"));
+    BOOST_REQUIRE(util::is_boolean("YES"));
+    BOOST_REQUIRE(util::is_boolean("YeS"));
+
+    // on
+    BOOST_REQUIRE(util::is_boolean("on"));
+    BOOST_REQUIRE(util::is_boolean("On"));
+    BOOST_REQUIRE(util::is_boolean("oN"));
+    BOOST_REQUIRE(util::is_boolean("ON"));
+
+    // 1
+    BOOST_REQUIRE(util::is_boolean("1"));
+}
+
+BOOST_AUTO_TEST_CASE(incorrect)
+{
+    BOOST_REQUIRE(!util::is_boolean("false"));
+    BOOST_REQUIRE(!util::is_boolean("lol"));
+    BOOST_REQUIRE(!util::is_boolean(""));
+    BOOST_REQUIRE(!util::is_boolean("0"));
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+/*
+ * util::is_number function
+ * --------------------------------------------------------
+ */
+
+BOOST_AUTO_TEST_SUITE(is_number)
+
+BOOST_AUTO_TEST_CASE(correct)
+{
+    BOOST_REQUIRE(util::is_number("123"));
+    BOOST_REQUIRE(util::is_number("-123"));
+    BOOST_REQUIRE(util::is_number("123.67"));
+}
+
+BOOST_AUTO_TEST_CASE(incorrect)
+{
+    BOOST_REQUIRE(!util::is_number("lol"));
+    BOOST_REQUIRE(!util::is_number("this is not a number"));
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+/*
+ * util::to_number function
  * ------------------------------------------------------------------
  */
 
-TEST(ToNumber, correct)
+BOOST_AUTO_TEST_SUITE(to_number)
+
+BOOST_AUTO_TEST_CASE(correct)
 {
     /* unsigned */
-    ASSERT_EQ(50u, util::toNumber<std::uint8_t>("50"));
-    ASSERT_EQ(5000u, util::toNumber<std::uint16_t>("5000"));
-    ASSERT_EQ(50000u, util::toNumber<std::uint32_t>("50000"));
-    ASSERT_EQ(500000u, util::toNumber<std::uint64_t>("500000"));
+    BOOST_REQUIRE_EQUAL(50u, util::to_number<std::uint8_t>("50"));
+    BOOST_REQUIRE_EQUAL(5000u, util::to_number<std::uint16_t>("5000"));
+    BOOST_REQUIRE_EQUAL(50000u, util::to_number<std::uint32_t>("50000"));
+    BOOST_REQUIRE_EQUAL(500000u, util::to_number<std::uint64_t>("500000"));
 
     /* signed */
-    ASSERT_EQ(-50, util::toNumber<std::int8_t>("-50"));
-    ASSERT_EQ(-500, util::toNumber<std::int16_t>("-500"));
-    ASSERT_EQ(-5000, util::toNumber<std::int32_t>("-5000"));
-    ASSERT_EQ(-50000, util::toNumber<std::int64_t>("-50000"));
+    BOOST_REQUIRE_EQUAL(-50, util::to_number<std::int8_t>("-50"));
+    BOOST_REQUIRE_EQUAL(-500, util::to_number<std::int16_t>("-500"));
+    BOOST_REQUIRE_EQUAL(-5000, util::to_number<std::int32_t>("-5000"));
+    BOOST_REQUIRE_EQUAL(-50000, util::to_number<std::int64_t>("-50000"));
 }
 
-TEST(ToNumber, incorrect)
+BOOST_AUTO_TEST_CASE(incorrect)
 {
     /* unsigned */
-    ASSERT_THROW(util::toNumber<std::uint8_t>("300"), std::out_of_range);
-    ASSERT_THROW(util::toNumber<std::uint16_t>("80000"), std::out_of_range);
-    ASSERT_THROW(util::toNumber<std::uint8_t>("-125"), std::out_of_range);
-    ASSERT_THROW(util::toNumber<std::uint16_t>("-25000"), std::out_of_range);
+    BOOST_REQUIRE_THROW(util::to_number<std::uint8_t>("300"), std::out_of_range);
+    BOOST_REQUIRE_THROW(util::to_number<std::uint16_t>("80000"), std::out_of_range);
+    BOOST_REQUIRE_THROW(util::to_number<std::uint8_t>("-125"), std::out_of_range);
+    BOOST_REQUIRE_THROW(util::to_number<std::uint16_t>("-25000"), std::out_of_range);
 
     /* signed */
-    ASSERT_THROW(util::toNumber<std::int8_t>("300"), std::out_of_range);
-    ASSERT_THROW(util::toNumber<std::int16_t>("80000"), std::out_of_range);
-    ASSERT_THROW(util::toNumber<std::int8_t>("-300"), std::out_of_range);
-    ASSERT_THROW(util::toNumber<std::int16_t>("-80000"), std::out_of_range);
+    BOOST_REQUIRE_THROW(util::to_number<std::int8_t>("300"), std::out_of_range);
+    BOOST_REQUIRE_THROW(util::to_number<std::int16_t>("80000"), std::out_of_range);
+    BOOST_REQUIRE_THROW(util::to_number<std::int8_t>("-300"), std::out_of_range);
+    BOOST_REQUIRE_THROW(util::to_number<std::int16_t>("-80000"), std::out_of_range);
 
     /* not numbers */
-    ASSERT_THROW(util::toNumber<std::uint8_t>("nonono"), std::invalid_argument);
+    BOOST_REQUIRE_THROW(util::to_number<std::uint8_t>("nonono"), std::invalid_argument);
 
     /* custom ranges */
-    ASSERT_THROW(util::toNumber<std::uint8_t>("50", 0, 10), std::out_of_range);
-    ASSERT_THROW(util::toNumber<std::int8_t>("-50", -10, 10), std::out_of_range);
+    BOOST_REQUIRE_THROW(util::to_number<std::uint8_t>("50", 0, 10), std::out_of_range);
+    BOOST_REQUIRE_THROW(util::to_number<std::int8_t>("-50", -10, 10), std::out_of_range);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 } // !irccd
-
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
-
-    return RUN_ALL_TESTS();
-}

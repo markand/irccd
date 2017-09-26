@@ -21,13 +21,12 @@
 #include <server-tester.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
-std::string target;
-std::string channel;
-std::string reason;
+std::string cmd_target;
+std::string cmd_channel;
+std::string cmd_reason;
 
 } // !namespace
 
@@ -35,21 +34,21 @@ class ServerKickTest : public ServerTester {
 public:
     void kick(std::string target, std::string channel, std::string reason) override
     {
-        ::target = target;
-        ::channel = channel;
-        ::reason = reason;
+        ::cmd_target = target;
+        ::cmd_channel = channel;
+        ::cmd_reason = reason;
     }
 };
 
 class ServerKickCommandTest : public CommandTester {
 public:
     ServerKickCommandTest()
-        : CommandTester(std::make_unique<ServerKickCommand>(),
+        : CommandTester(std::make_unique<server_kick_command>(),
                         std::make_unique<ServerKickTest>())
     {
-        target.clear();
-        channel.clear();
-        reason.clear();
+        cmd_target.clear();
+        cmd_channel.clear();
+        cmd_reason.clear();
     }
 };
 
@@ -65,12 +64,12 @@ TEST_F(ServerKickCommandTest, basic)
         });
 
         poll([&] () {
-            return !target.empty() && !channel.empty();
+            return !cmd_target.empty() && !cmd_channel.empty();
         });
 
-        ASSERT_EQ("francis", target);
-        ASSERT_EQ("#staff", channel);
-        ASSERT_EQ("too noisy", reason);
+        ASSERT_EQ("francis", cmd_target);
+        ASSERT_EQ("#staff", cmd_channel);
+        ASSERT_EQ("too noisy", cmd_reason);
     } catch (const std::exception &ex) {
         FAIL() << ex.what();
     }
@@ -87,12 +86,12 @@ TEST_F(ServerKickCommandTest, noreason)
         });
 
         poll([&] () {
-            return !target.empty() && !channel.empty();
+            return !cmd_target.empty() && !cmd_channel.empty();
         });
 
-        ASSERT_EQ("francis", target);
-        ASSERT_EQ("#staff", channel);
-        ASSERT_EQ("", reason);
+        ASSERT_EQ("francis", cmd_target);
+        ASSERT_EQ("#staff", cmd_channel);
+        ASSERT_EQ("", cmd_reason);
     } catch (const std::exception &ex) {
         FAIL() << ex.what();
     }

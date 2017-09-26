@@ -51,7 +51,7 @@ void usage()
     bool first = true;
 
     for (const auto &cmd : commands) {
-        log::warning() << (first ? "usage: " : "       ") << sys::programName() << " "
+        log::warning() << (first ? "usage: " : "       ") << sys::program_name() << " "
                        << cmd->usage() << std::endl;
         first = false;
     }
@@ -61,7 +61,7 @@ void usage()
 
 void help()
 {
-    log::warning() << "usage: " << sys::programName() << " [options...] <command> [command-options...] [command-args...]\n\n";
+    log::warning() << "usage: " << sys::program_name() << " [options...] <command> [command-options...] [command-args...]\n\n";
     log::warning() << "General options:\n";
     log::warning() << "\t-c, --config file\tspecify the configuration file\n";
     log::warning() << "\t    --help\t\tshow this help\n";
@@ -78,7 +78,7 @@ void help()
         log::warning() << "\t" << std::left << std::setw(32)
                        << cmd->name() << cmd->summary() << std::endl;
 
-    log::warning() << "\nFor more information on a command, type " << sys::programName() << " help <command>" << std::endl;
+    log::warning() << "\nFor more information on a command, type " << sys::program_name() << " help <command>" << std::endl;
     std::exit(1);
 }
 
@@ -91,7 +91,7 @@ void help(const std::string &command)
     if (it == commands.end()) {
         log::warning() << "no command named " << command << std::endl;
     } else {
-        log::warning() << "usage: " << sys::programName() << " " << (*it)->usage() << "\n" << std::endl;
+        log::warning() << "usage: " << sys::program_name() << " " << (*it)->usage() << "\n" << std::endl;
         log::warning() << (*it)->help() << std::endl;
     }
 
@@ -116,9 +116,9 @@ void help(const std::string &command)
  * domain = "ipv4 or ipv6" (Optional, default: ipv4)
  * ssl = true | false
  */
-void readConnectIp(const ini::Section &sc)
+void readConnectIp(const ini::section &sc)
 {
-    ini::Section::const_iterator it;
+    ini::section::const_iterator it;
     std::string host, port;
 
     if ((it = sc.find("host")) == sc.end())
@@ -145,7 +145,7 @@ void readConnectIp(const ini::Section &sc)
 
     address = net::resolveOne(host, port, domain, SOCK_STREAM);
 
-    if ((it = sc.find("ssl")) != sc.end() && util::isBoolean(it->value()))
+    if ((it = sc.find("ssl")) != sc.end() && util::is_boolean(it->value()))
 #if defined(WITH_SSL)
         client = std::make_unique<TlsClient>();
 #else
@@ -165,7 +165,7 @@ void readConnectIp(const ini::Section &sc)
  * type = "unix"
  * path = "path to socket file"
  */
-void readConnectLocal(const ini::Section &sc)
+void readConnectLocal(const ini::section &sc)
 {
 #if !defined(IRCCD_SYSTEM_WINDOWS)
     auto it = sc.find("path");
@@ -188,7 +188,7 @@ void readConnectLocal(const ini::Section &sc)
  *
  * Generic function for reading the [connect] section.
  */
-void readConnect(const ini::Section &sc)
+void readConnect(const ini::section &sc)
 {
     auto it = sc.find("type");
 
@@ -218,12 +218,12 @@ void readConnect(const ini::Section &sc)
  * [general]
  * verbose = true
  */
-void readGeneral(const ini::Section &sc)
+void readGeneral(const ini::section &sc)
 {
     auto verbose = sc.find("verbose");
 
     if (verbose != sc.end())
-        log::setVerbose(util::isBoolean(verbose->value()));
+        log::set_verbose(util::is_boolean(verbose->value()));
 }
 
 /*
@@ -236,7 +236,7 @@ void readGeneral(const ini::Section &sc)
  * cmd1 = ( "command", "arg1, "...", "argn" )
  * cmd2 = ( "command", "arg1, "...", "argn" )
  */
-Alias readAlias(const ini::Section &sc, const std::string &name)
+Alias readAlias(const ini::section &sc, const std::string &name)
 {
     Alias alias(name);
 
@@ -265,8 +265,8 @@ Alias readAlias(const ini::Section &sc, const std::string &name)
 void read(const std::string &path)
 {
     try {
-        ini::Document doc = ini::readFile(path);
-        ini::Document::const_iterator it;
+        ini::document doc = ini::read_file(path);
+        ini::document::const_iterator it;
 
         if (!client && (it = doc.find("connect")) != doc.end())
             readConnect(*it);
@@ -414,10 +414,10 @@ option::Result parse(int &argc, char **&argv)
         }
 
         if (result.count("-v") != 0 || result.count("--verbose") != 0) {
-            log::setVerbose(true);
+            log::set_verbose(true);
         }
     } catch (const std::exception &ex) {
-        log::warning("{}: {}"_format(sys::programName(), ex.what()));
+        log::warning("{}: {}"_format(sys::program_name(), ex.what()));
         usage();
     }
 
@@ -494,7 +494,7 @@ void exec(std::vector<std::string> args)
 
 void init(int &argc, char **&argv)
 {
-    sys::setProgramName("irccdctl");
+    sys::set_program_name("irccdctl");
     net::init();
 
     --argc;
@@ -569,7 +569,7 @@ int main(int argc, char **argv)
             }
         }
     } catch (const std::exception &ex) {
-        log::warning() << sys::programName() << ": " << ex.what() << std::endl;
+        log::warning() << sys::program_name() << ": " << ex.what() << std::endl;
         std::exit(1);
     }
 
@@ -586,7 +586,7 @@ int main(int argc, char **argv)
     }
 
     if (!client) {
-        log::warning("{}: no connection specified"_format(sys::programName()));
+        log::warning("{}: no connection specified"_format(sys::program_name()));
         std::exit(1);
     }
 
@@ -611,6 +611,6 @@ int main(int argc, char **argv)
     try {
         exec(args);
     } catch (const std::exception &ex) {
-        std::cerr << sys::programName() << ": unrecoverable error: " << ex.what() << std::endl;
+        std::cerr << sys::program_name() << ": unrecoverable error: " << ex.what() << std::endl;
     }
 }

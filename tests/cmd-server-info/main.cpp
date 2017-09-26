@@ -22,7 +22,6 @@
 #include <service.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
@@ -33,7 +32,7 @@ nlohmann::json message;
 class ServerInfoCommandTest : public CommandTester {
 public:
     ServerInfoCommandTest()
-        : CommandTester(std::make_unique<ServerInfoCommand>())
+        : CommandTester(std::make_unique<server_info_command>())
     {
         message = nullptr;
 
@@ -48,16 +47,16 @@ TEST_F(ServerInfoCommandTest, basic)
     try {
         auto server = std::make_unique<ServerTester>();
 
-        server->setHost("example.org");
-        server->setPort(8765);
-        server->setPassword("none");
-        server->setNickname("pascal");
-        server->setUsername("psc");
-        server->setRealname("Pascal le grand frere");
-        server->setCtcpVersion("yeah");
-        server->setCommandCharacter("@");
-        server->setReconnectTries(80);
-        server->setPingTimeout(20000);
+        server->set_host("example.org");
+        server->set_port(8765);
+        server->set_password("none");
+        server->set_nickname("pascal");
+        server->set_username("psc");
+        server->set_realname("Pascal le grand frere");
+        server->set_ctcp_version("yeah");
+        server->set_command_char("@");
+        server->set_reconnect_tries(80);
+        server->set_ping_timeout(20000);
 
         m_irccd.servers().add(std::move(server));
         m_irccdctl.client().request({

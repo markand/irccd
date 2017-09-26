@@ -28,13 +28,13 @@
 
 using namespace irccd;
 
-class server_test : public Server {
+class server_test : public server {
 private:
     std::string last_;
 
 public:
     inline server_test()
-        : Server("test")
+        : server("test")
     {
     }
 
@@ -81,7 +81,7 @@ TEST_F(history_test, formatError)
 {
     load({{ "file", SOURCEDIR "/broken-conf.json" }});
 
-    plugin_->on_command(irccd_, MessageEvent{server_, "jean!jean@localhost", "#history", "seen francis"});
+    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#history", "seen francis"});
     ASSERT_EQ("#history:error=history:!history:test:#history:jean!jean@localhost:jean", server_->last());
 }
 
@@ -92,8 +92,8 @@ TEST_F(history_test, formatSeen)
     remove(BINARYDIR "/seen.json");
     load({{ "file", BINARYDIR "/seen.json" }});
 
-    plugin_->on_message(irccd_, MessageEvent{server_, "jean!jean@localhost", "#history", "hello"});
-    plugin_->on_command(irccd_, MessageEvent{server_, "destructor!dst@localhost", "#history", "seen jean"});
+    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#history", "hello"});
+    plugin_->on_command(irccd_, {server_, "destructor!dst@localhost", "#history", "seen jean"});
 
     ASSERT_TRUE(std::regex_match(server_->last(), rule));
 }
@@ -105,8 +105,8 @@ TEST_F(history_test, formatSaid)
     remove(BINARYDIR "/said.json");
     load({{ "file", BINARYDIR "/said.json" }});
 
-    plugin_->on_message(irccd_, MessageEvent{server_, "jean!jean@localhost", "#history", "hello"});
-    plugin_->on_command(irccd_, MessageEvent{server_, "destructor!dst@localhost", "#history", "said jean"});
+    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#history", "hello"});
+    plugin_->on_command(irccd_, {server_, "destructor!dst@localhost", "#history", "said jean"});
 
     ASSERT_TRUE(std::regex_match(server_->last(), rule));
 }
@@ -116,8 +116,8 @@ TEST_F(history_test, formatUnknown)
     remove(BINARYDIR "/unknown.json");
     load({{ "file", BINARYDIR "/unknown.json" }});
 
-    plugin_->on_message(irccd_, MessageEvent{server_, "jean!jean@localhost", "#history", "hello"});
-    plugin_->on_command(irccd_, MessageEvent{server_, "destructor!dst@localhost", "#history", "seen nobody"});
+    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#history", "hello"});
+    plugin_->on_command(irccd_, {server_, "destructor!dst@localhost", "#history", "seen nobody"});
 
     ASSERT_EQ("#history:unknown=history:!history:test:#history:destructor!dst@localhost:destructor:nobody", server_->last());
 }
@@ -129,11 +129,11 @@ TEST_F(history_test, case_fix_642)
     remove(BINARYDIR "/case.json");
     load({{"file", BINARYDIR "/case.json"}});
 
-    plugin_->on_message(irccd_, MessageEvent{server_, "JeaN!JeaN@localhost", "#history", "hello"});
+    plugin_->on_message(irccd_, {server_, "JeaN!JeaN@localhost", "#history", "hello"});
 
-    plugin_->on_command(irccd_, MessageEvent{server_, "destructor!dst@localhost", "#HISTORY", "said JEAN"});
+    plugin_->on_command(irccd_, {server_, "destructor!dst@localhost", "#HISTORY", "said JEAN"});
     ASSERT_TRUE(std::regex_match(server_->last(), rule));
-    plugin_->on_command(irccd_, MessageEvent{server_, "destructor!dst@localhost", "#HiSToRy", "said JeaN"});
+    plugin_->on_command(irccd_, {server_, "destructor!dst@localhost", "#HiSToRy", "said JeaN"});
     ASSERT_TRUE(std::regex_match(server_->last(), rule));
 }
 

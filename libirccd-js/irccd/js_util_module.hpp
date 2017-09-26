@@ -1,5 +1,5 @@
 /*
- * mod-elapsed-timer.hpp -- Irccd.ElapsedTimer API
+ * js_util_module.hpp -- Irccd.Util API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_MOD_ELAPSED_TIMER_HPP
-#define IRCCD_MOD_ELAPSED_TIMER_HPP
+#ifndef IRCCD_JS_UTIL_MODULE_HPP
+#define IRCCD_JS_UTIL_MODULE_HPP
 
 /**
- * \file mod-elapsed-timer.hpp
- * \brief Irccd.ElapsedTimer JavaScript API.
+ * \file js_util_module.hpp
+ * \brief irccd.Util JavaScript API.
  */
 
 #include "module.hpp"
@@ -29,22 +29,22 @@
 namespace irccd {
 
 /**
- * \brief Irccd.ElapsedTimer JavaScript API.
+ * \brief Irccd.Util JavaScript API.
  * \ingroup modules
  */
-class ElapsedTimerModule : public Module {
+class js_util_module : public module {
 public:
     /**
-     * Irccd.ElapsedTimer.
+     * Constructor.
      */
-    IRCCD_EXPORT ElapsedTimerModule() noexcept;
+    js_util_module() noexcept;
 
     /**
-     * \copydoc Module::load
+     * \copydoc module::load
      */
-    IRCCD_EXPORT void load(Irccd &irccd, std::shared_ptr<JsPlugin> plugin) override;
+    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
 } // !irccd
 
-#endif // !IRCCD_MOD_ELAPSED_TIMER_HPP
+#endif // !IRCCD_MOD_UTIL_HPP

@@ -33,16 +33,16 @@
 
 namespace irccd {
 
-class Irccd;
-class Irccdctl;
-class TransportClient;
+class irccd;
+class irccdctl;
+class transport_client;
 
 /**
  * \brief Server side remote command
  */
-class Command {
+class command {
 private:
-    std::string m_name;
+    std::string name_;
 
 public:
     /**
@@ -51,25 +51,25 @@ public:
      * \pre !name.empty()
      * \param name the command name
      */
-    inline Command(std::string name) noexcept
-        : m_name(std::move(name))
+    inline command(std::string name) noexcept
+        : name_(std::move(name))
     {
-        assert(!m_name.empty());
+        assert(!name_.empty());
     }
 
     /**
      * Default destructor virtual.
      */
-    virtual ~Command() = default;
+    virtual ~command() = default;
 
     /**
      * Return the command name, must not have spaces.
      *
      * \return the command name
      */
-    inline const std::string &name() const noexcept
+    inline const std::string& name() const noexcept
     {
-        return m_name;
+        return name_;
     }
 
     /**
@@ -85,473 +85,472 @@ public:
      * \param client the client
      * \param args the client arguments
      */
-    IRCCD_EXPORT virtual void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) = 0;
+    virtual void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) = 0;
 };
-
-namespace command {
 
 /**
  * \brief Implementation of plugin-config transport command.
  */
-class PluginConfigCommand : public Command {
+class plugin_config_command : public command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT PluginConfigCommand();
+    plugin_config_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    IRCCD_EXPORT void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of plugin-info transport command.
  */
-class PluginInfoCommand : public Command {
+class plugin_info_command : public command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT PluginInfoCommand();
+    plugin_info_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    IRCCD_EXPORT void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of plugin-list transport command.
  */
-class PluginListCommand : public Command {
+class plugin_list_command : public command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT PluginListCommand();
+    plugin_list_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    IRCCD_EXPORT void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &request) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& request) override;
 };
 
 /**
  * \brief Implementation of plugin-load transport command.
  */
-class PluginLoadCommand : public Command {
+class plugin_load_command : public command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT PluginLoadCommand();
+    plugin_load_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    IRCCD_EXPORT void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of plugin-reload transport command.
  */
-class PluginReloadCommand : public Command {
+class plugin_reload_command : public command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT PluginReloadCommand();
+    plugin_reload_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    IRCCD_EXPORT void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of plugin-unload transport command.
  */
-class PluginUnloadCommand : public Command {
+class plugin_unload_command : public command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT PluginUnloadCommand();
+    plugin_unload_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    IRCCD_EXPORT void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of server-cmode transport command.
  */
-class ServerChannelModeCommand : public Command {
+class server_channel_mode_command : public command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerChannelModeCommand();
+    server_channel_mode_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    IRCCD_EXPORT void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of server-cnotice transport command.
  */
-class ServerChannelNoticeCommand : public Command {
+class server_channel_notice_command : public command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerChannelNoticeCommand();
+    server_channel_notice_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    IRCCD_EXPORT void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of server-connect transport command.
  */
-class ServerConnectCommand : public Command {
+class server_connect_command : public command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerConnectCommand();
+    server_connect_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    IRCCD_EXPORT void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of server-disconnect transport command.
  */
-class IRCCD_EXPORT ServerDisconnectCommand : public Command {
+class server_disconnect_command : public command {
 public:
     /**
      * Constructor.
      */
-    ServerDisconnectCommand();
+    server_disconnect_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of server-info transport command.
  */
-class IRCCD_EXPORT ServerInfoCommand : public Command {
+class server_info_command : public command {
 public:
     /**
      * Constructor.
      */
-    ServerInfoCommand();
+    server_info_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of server-invite transport command.
  */
-class ServerInviteCommand : public Command {
+class server_invite_command : public command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerInviteCommand();
+    server_invite_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    IRCCD_EXPORT void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of server-join transport command.
  */
-class ServerJoinCommand : public Command {
+class server_join_command : public command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerJoinCommand();
+    server_join_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    IRCCD_EXPORT void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of server-kick transport command.
  */
-class ServerKickCommand : public Command {
+class server_kick_command : public command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerKickCommand();
+    server_kick_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    IRCCD_EXPORT void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of server-list transport command.
  */
-class ServerListCommand : public Command {
+class server_list_command : public command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerListCommand();
+    server_list_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    IRCCD_EXPORT void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of server-me transport command.
  */
-class IRCCD_EXPORT ServerMeCommand : public Command {
+class server_me_command : public command {
 public:
     /**
      * Constructor.
      */
-    ServerMeCommand();
+    server_me_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of server-message transport command.
  */
-class IRCCD_EXPORT ServerMessageCommand : public Command {
+class server_message_command : public command {
 public:
     /**
      * Constructor.
      */
-    ServerMessageCommand();
+    server_message_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of server-mode transport command.
  */
-class IRCCD_EXPORT ServerModeCommand : public Command {
+class server_mode_command : public command {
 public:
     /**
      * Constructor.
      */
-    ServerModeCommand();
+    server_mode_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of server-nick transport command.
  */
-class IRCCD_EXPORT ServerNickCommand : public Command {
+class server_nick_command : public command {
 public:
     /**
      * Constructor.
      */
-    ServerNickCommand();
+    server_nick_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of server-notice transport command.
  */
-class IRCCD_EXPORT ServerNoticeCommand : public Command {
+class server_notice_command : public command {
 public:
     /**
      * Constructor.
      */
-    ServerNoticeCommand();
+    server_notice_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of server-part transport command.
  */
-class IRCCD_EXPORT ServerPartCommand : public Command {
+class server_part_command : public command {
 public:
     /**
      * Constructor.
      */
-    ServerPartCommand();
+    server_part_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of server-reconnect transport command.
  */
-class ServerReconnectCommand : public Command {
+class server_reconnect_command : public command {
 public:
     /**
      * Constructor.
      */
-    IRCCD_EXPORT ServerReconnectCommand();
+    server_reconnect_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    IRCCD_EXPORT void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of server-topic transport command.
  */
-class IRCCD_EXPORT ServerTopicCommand : public Command {
+class server_topic_command : public command {
 public:
     /**
      * Constructor.
      */
-    ServerTopicCommand();
+    server_topic_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
-class IRCCD_EXPORT RuleEditCommand : public Command {
+/**
+ * \brief Implementation of rule-edit transport command.
+ */
+class rule_edit_command : public command {
 public:
     /**
      * Constructor.
      */
-    RuleEditCommand();
+    rule_edit_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of rule-list transport command.
  */
-class IRCCD_EXPORT RuleListCommand : public Command {
+class rule_list_command : public command {
 public:
     /**
      * Constructor.
      */
-    RuleListCommand();
+    rule_list_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of rule-info transport command.
  */
-class IRCCD_EXPORT RuleInfoCommand : public Command {
+class rule_info_command : public command {
 public:
     /**
      * Constructor.
      */
-    RuleInfoCommand();
+    rule_info_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of rule-remove transport command.
  */
-class IRCCD_EXPORT RuleRemoveCommand : public Command {
+class rule_remove_command : public command {
 public:
     /**
      * Constructor.
      */
-    RuleRemoveCommand();
+    rule_remove_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of rule-move transport command.
  */
-class IRCCD_EXPORT RuleMoveCommand : public Command {
+class rule_move_command : public command {
 public:
     /**
      * Constructor.
      */
-    RuleMoveCommand();
+    rule_move_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
 
 /**
  * \brief Implementation of rule-add transport command.
  */
-class IRCCD_EXPORT RuleAddCommand : public Command {
+class rule_add_command : public command {
 public:
     /**
      * Constructor.
      */
-    RuleAddCommand();
+    rule_add_command();
 
     /**
-     * \copydoc Command::exec
+     * \copydoc command::exec
      */
-    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
 };
-
-} // !command
 
 } // !irccd
 

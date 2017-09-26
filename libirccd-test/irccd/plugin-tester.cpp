@@ -16,18 +16,18 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "mod-directory.hpp"
-#include "mod-elapsed-timer.hpp"
-#include "mod-file.hpp"
-#include "mod-irccd.hpp"
-#include "mod-logger.hpp"
-#include "mod-plugin.hpp"
-#include "mod-server.hpp"
-#include "mod-system.hpp"
-#include "mod-timer.hpp"
-#include "mod-unicode.hpp"
-#include "mod-util.hpp"
-#include "plugin-js.hpp"
+#include "js_directory_module.hpp"
+#include "js_elapsed_timer_module.hpp"
+#include "js_file_module.hpp"
+#include "js_irccd_module.hpp"
+#include "js_logger_module.hpp"
+#include "js_plugin_module.hpp"
+#include "js_server_module.hpp"
+#include "js_system_module.hpp"
+#include "js_timer_module.hpp"
+#include "js_unicode_module.hpp"
+#include "js_util_module.hpp"
+#include "js_plugin.hpp"
 #include "plugin-tester.hpp"
 #include "service.hpp"
 
@@ -35,21 +35,21 @@ namespace irccd {
 
 PluginTester::PluginTester()
 {
-    auto loader = std::make_unique<JsPluginLoader>(m_irccd);
+    auto loader = std::make_unique<js_plugin_loader>(m_irccd);
 
-    loader->addModule(std::make_unique<IrccdModule>());
-    loader->addModule(std::make_unique<DirectoryModule>());
-    loader->addModule(std::make_unique<ElapsedTimerModule>());
-    loader->addModule(std::make_unique<FileModule>());
-    loader->addModule(std::make_unique<LoggerModule>());
-    loader->addModule(std::make_unique<PluginModule>());
-    loader->addModule(std::make_unique<ServerModule>());
-    loader->addModule(std::make_unique<SystemModule>());
-    loader->addModule(std::make_unique<TimerModule>());
-    loader->addModule(std::make_unique<UnicodeModule>());
-    loader->addModule(std::make_unique<UtilModule>());
+    loader->add_module(std::make_unique<js_irccd_module>());
+    loader->add_module(std::make_unique<js_directory_module>());
+    loader->add_module(std::make_unique<js_elapsed_timer_module>());
+    loader->add_module(std::make_unique<js_file_module>());
+    loader->add_module(std::make_unique<js_logger_module>());
+    loader->add_module(std::make_unique<js_plugin_module>());
+    loader->add_module(std::make_unique<js_server_module>());
+    loader->add_module(std::make_unique<js_system_module>());
+    loader->add_module(std::make_unique<js_timer_module>());
+    loader->add_module(std::make_unique<js_unicode_module>());
+    loader->add_module(std::make_unique<js_util_module>());
 
-    m_irccd.plugins().addLoader(std::move(loader));
+    m_irccd.plugins().add_loader(std::move(loader));
 }
 
 } // !irccd

@@ -44,23 +44,23 @@
 
 namespace irccd {
 
-class Server;
+class server;
 
 /**
  * \brief Prefixes for nicknames.
  */
-enum class ChannelMode {
-    Creator         = 'O',                  //!< Channel creator
-    HalfOperator    = 'h',                  //!< Half operator
-    Operator        = 'o',                  //!< Channel operator
-    Protection      = 'a',                  //!< Unkillable
-    Voiced          = 'v'                   //!< Voice power
+enum class channel_mode {
+    creator         = 'O',                  //!< Channel creator
+    half_op         = 'h',                  //!< Half operator
+    op              = 'o',                  //!< Channel operator
+    protection      = 'a',                  //!< Unkillable
+    voiced          = 'v'                   //!< Voice power
 };
 
 /**
  * \brief A channel to join with an optional password.
  */
-class Channel {
+class channel {
 public:
     std::string name;                       //!< the channel to join
     std::string password;                   //!< the optional password
@@ -69,7 +69,7 @@ public:
 /**
  * \brief Describe a whois information.
  */
-class Whois {
+class whois {
 public:
     std::string nick;                       //!< user's nickname
     std::string user;                       //!< user's user
@@ -81,9 +81,9 @@ public:
 /**
  * \brief Channel event.
  */
-class ChannelModeEvent {
+class channel_mode_event {
 public:
-    std::shared_ptr<Server> server;         //!< The server.
+    std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel.
     std::string mode;                       //!< The mode.
@@ -93,9 +93,9 @@ public:
 /**
  * \brief Channel notice event.
  */
-class ChannelNoticeEvent {
+class channel_notice_event {
 public:
-    std::shared_ptr<Server> server;         //!< The server.
+    std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel.
     std::string message;                    //!< The notice message.
@@ -104,17 +104,17 @@ public:
 /**
  * \brief Connection success event.
  */
-class ConnectEvent {
+class connect_event {
 public:
-    std::shared_ptr<Server> server;         //!< The server.
+    std::shared_ptr<class server> server;   //!< The server.
 };
 
 /**
  * \brief Invite event.
  */
-class InviteEvent {
+class invite_event {
 public:
-    std::shared_ptr<Server> server;         //!< The server.
+    std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel.
     std::string nickname;                   //!< The nickname (you).
@@ -123,9 +123,9 @@ public:
 /**
  * \brief Join event.
  */
-class JoinEvent {
+class join_event {
 public:
-    std::shared_ptr<Server> server;         //!< The server.
+    std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel.
 };
@@ -133,9 +133,9 @@ public:
 /**
  * \brief Kick event.
  */
-class KickEvent {
+class kick_event {
 public:
-    std::shared_ptr<Server> server;         //!< The server.
+    std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel.
     std::string target;                     //!< The target.
@@ -145,9 +145,9 @@ public:
 /**
  * \brief Message event.
  */
-class MessageEvent {
+class message_event {
 public:
-    std::shared_ptr<Server> server;         //!< The server.
+    std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel.
     std::string message;                    //!< The message.
@@ -156,9 +156,9 @@ public:
 /**
  * \brief CTCP action event.
  */
-class MeEvent {
+class me_event {
 public:
-    std::shared_ptr<Server> server;         //!< The server.
+    std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel.
     std::string message;                    //!< The message.
@@ -167,9 +167,9 @@ public:
 /**
  * \brief Mode event.
  */
-class ModeEvent {
+class mode_event {
 public:
-    std::shared_ptr<Server> server;         //!< The server.
+    std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string mode;                       //!< The mode.
 };
@@ -177,9 +177,9 @@ public:
 /**
  * \brief Names listing event.
  */
-class NamesEvent {
+class names_event {
 public:
-    std::shared_ptr<Server> server;         //!< The server.
+    std::shared_ptr<class server> server;   //!< The server.
     std::string channel;                    //!< The channel.
     std::vector<std::string> names;         //!< The names.
 };
@@ -187,9 +187,9 @@ public:
 /**
  * \brief Nick change event.
  */
-class NickEvent {
+class nick_event {
 public:
-    std::shared_ptr<Server> server;         //!< The server.
+    std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string nickname;                   //!< The new nickname.
 };
@@ -197,9 +197,9 @@ public:
 /**
  * \brief Notice event.
  */
-class NoticeEvent {
+class notice_event {
 public:
-    std::shared_ptr<Server> server;         //!< The server.
+    std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string message;                    //!< The message.
 };
@@ -207,9 +207,9 @@ public:
 /**
  * \brief Part event.
  */
-class PartEvent {
+class part_event {
 public:
-    std::shared_ptr<Server> server;         //!< The server.
+    std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel.
     std::string reason;                     //!< The reason.
@@ -218,9 +218,9 @@ public:
 /**
  * \brief Query event.
  */
-class QueryEvent {
+class query_event {
 public:
-    std::shared_ptr<Server> server;         //!< The server.
+    std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string message;                    //!< The message.
 };
@@ -228,9 +228,9 @@ public:
 /**
  * \brief Topic event.
  */
-class TopicEvent {
+class topic_event {
 public:
-    std::shared_ptr<Server> server;         //!< The server.
+    std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel.
     std::string topic;                      //!< The topic message.
@@ -239,10 +239,10 @@ public:
 /**
  * \brief Whois event.
  */
-class WhoisEvent {
+class whois_event {
 public:
-    std::shared_ptr<Server> server;         //!< The server.
-    Whois whois;                            //!< The whois information.
+    std::shared_ptr<class server> server;   //!< The server.
+    class whois whois;                            //!< The whois information.
 };
 
 /**
@@ -261,90 +261,90 @@ public:
  * Note: the server is set in non blocking mode, commands are placed in a queue
  * and sent when only when they are ready.
  */
-class Server : public std::enable_shared_from_this<Server> {
+class server : public std::enable_shared_from_this<server> {
 public:
     /**
      * Bridge for libircclient.
      */
-    class Session;
+    class session;
 
     /**
      * \brief Various options for server.
      */
     enum {
-        Ipv6        = (1 << 0),             //!< Connect using IPv6
-        Ssl         = (1 << 1),             //!< Use SSL
-        SslVerify   = (1 << 2),             //!< Verify SSL
-        AutoRejoin  = (1 << 3),             //!< Auto rejoin a kick
-        JoinInvite  = (1 << 4)              //!< Join a channel on invitation
+        ipv6        = (1 << 0),             //!< Connect using IPv6
+        ssl         = (1 << 1),             //!< Use SSL
+        ssl_verify  = (1 << 2),             //!< Verify SSL
+        auto_rejoin = (1 << 3),             //!< Auto rejoin a kick
+        join_invite = (1 << 4)              //!< Join a channel on invitation
     };
 
     /**
-     * Signal: onChannelMode
+     * Signal: on_channel_mode
      * ----------------------------------------------------------
      *
      * Triggered when someone changed the channel mode.
      */
-    Signal<ChannelModeEvent> onChannelMode;
+    Signal<channel_mode_event> on_channel_mode;
 
     /**
-     * Signal: onChannelNotice
+     * Signal: on_channel_notice
      * ----------------------------------------------------------
      *
      * Triggered when a notice has been sent on a channel.
      */
-    Signal<ChannelNoticeEvent> onChannelNotice;
+    Signal<channel_notice_event> on_channel_notice;
 
     /**
-     * Signal: onConnect
+     * Signal: on_connect
      * ----------------------------------------------------------
      *
      * Triggered when the server is successfully connected.
      */
-    Signal<ConnectEvent> onConnect;
+    Signal<connect_event> on_connect;
 
     /**
-     * Signal: onDie
+     * Signal: on_die
      * ----------------------------------------------------------
      *
      * The server is dead.
      */
-    Signal<> onDie;
+    Signal<> on_die;
 
     /**
-     * Signal: onInvite
+     * Signal: on_invite
      * ----------------------------------------------------------
      *
      * Triggered when an invite has been sent to you (the bot).
      */
-    Signal<InviteEvent> onInvite;
+    Signal<invite_event> on_invite;
 
     /**
-     * Signal: onJoin
+     * Signal: on_join
      * ----------------------------------------------------------
      *
      * Triggered when a user has joined the channel, it also includes you.
      */
-    Signal<JoinEvent> onJoin;
+    Signal<join_event> on_join;
 
     /**
-     * Signal: onKick
+     * Signal: on_kick
      * ----------------------------------------------------------
      *
      * Triggered when someone has been kicked from a channel.
      */
-    Signal<KickEvent> onKick;
+    Signal<kick_event> on_kick;
 
     /**
-     * ServerEvent: onMessage
+     * Signal: on_message
      * ----------------------------------------------------------
      *
      * Triggered when a message on a channel has been sent.
      */
-    Signal<MessageEvent> onMessage;
+    Signal<message_event> on_message;
 
     /**
-     * Signal: onMe
+     * Signal: on_me
      * ----------------------------------------------------------
      *
      * Triggered on a CTCP Action.
@@ -352,140 +352,140 @@ public:
      * This is both used in a channel and in a private message so the target may
      * be a channel or your nickname.
      */
-    Signal<MeEvent> onMe;
+    Signal<me_event> on_me;
 
     /**
-     * Signal: onMode
+     * Signal: on_mode
      * ----------------------------------------------------------
      *
      * Triggered when the server changed your user mode.
      */
-    Signal<ModeEvent> onMode;
+    Signal<mode_event> on_mode;
 
     /**
-     * Signal: onNames
+     * Signal: on_names
      * ----------------------------------------------------------
      *
      * Triggered when names listing has finished on a channel.
      */
-    Signal<NamesEvent> onNames;
+    Signal<names_event> on_names;
 
     /**
-     * Signal: onNick
+     * Signal: on_nick
      * ----------------------------------------------------------
      *
      * Triggered when someone changed its nickname, it also includes you.
      */
-    Signal<NickEvent> onNick;
+    Signal<nick_event> on_nick;
 
     /**
-     * Signal: onNotice
+     * Signal: on_notice
      * ----------------------------------------------------------
      *
      * Triggered when someone has sent a notice to you.
      */
-    Signal<NoticeEvent> onNotice;
+    Signal<notice_event> on_notice;
 
     /**
-     * Signal: onPart
+     * Signal: on_part
      * ----------------------------------------------------------
      *
      * Triggered when someone has left the channel.
      */
-    Signal<PartEvent> onPart;
+    Signal<part_event> on_part;
 
     /**
-     * Signal: onQuery
+     * Signal: on_query
      * ----------------------------------------------------------
      *
      * Triggered when someone has sent you a private message.
      */
-    Signal<QueryEvent> onQuery;
+    Signal<query_event> on_query;
 
     /**
-     * Signal: onTopic
+     * Signal: on_topic
      * ----------------------------------------------------------
      *
      * Triggered when someone changed the channel topic.
      */
-    Signal<TopicEvent> onTopic;
+    Signal<topic_event> on_topic;
 
     /**
-     * Signal: onWhois
+     * Signal: on_whois
      * ----------------------------------------------------------
      *
      * Triggered when whois information has been received.
      */
-    Signal<WhoisEvent> onWhois;
+    Signal<whois_event> on_whois;
 
 private:
-    class State;
-    class ConnectedState;
-    class ConnectingState;
-    class DisconnectedState;
+    class state;
+    class connected_state;
+    class connecting_state;
+    class disconnected_state;
 
     // Requested and joined channels.
-    std::vector<Channel> m_rchannels;
-    std::vector<std::string> m_jchannels;
+    std::vector<channel> rchannels_;
+    std::vector<std::string> jchannels_;
 
     // Identifier.
-    std::string m_name;
+    std::string name_;
 
     // Connection information
-    std::string m_host;
-    std::string m_password;
-    std::uint16_t m_port{6667};
-    std::uint8_t m_flags{0};
+    std::string host_;
+    std::string password_;
+    std::uint16_t port_{6667};
+    std::uint8_t flags_{0};
 
     // Identity.
-    std::string m_nickname{"irccd"};
-    std::string m_username{"irccd"};
-    std::string m_realname{"IRC Client Daemon"};
-    std::string m_ctcpversion{"IRC Client Daemon"};
+    std::string nickname_{"irccd"};
+    std::string username_{"irccd"};
+    std::string realname_{"IRC Client Daemon"};
+    std::string ctcpversion_{"IRC Client Daemon"};
 
     // Settings.
-    std::string m_commandCharacter{"!"};
-    std::int8_t m_recotries{-1};
-    std::uint16_t m_recodelay{30};
-    std::uint16_t m_timeout{1000};
+    std::string command_char_{"!"};
+    std::int8_t recotries_{-1};
+    std::uint16_t recodelay_{30};
+    std::uint16_t timeout_{1000};
 
     // Queue of requests to send.
-    std::queue<std::function<bool ()>> m_queue;
+    std::queue<std::function<bool ()>> queue_;
 
     // libircclient session (bridge).
-    std::unique_ptr<Session> m_session;
+    std::unique_ptr<session> session_;
 
     // States.
-    std::unique_ptr<State> m_state;
-    std::unique_ptr<State> m_stateNext;
+    std::unique_ptr<state> state_;
+    std::unique_ptr<state> state_next_;
 
     // Misc.
-    ElapsedTimer m_timer;
-    std::map<ChannelMode, char> m_modes;
-    std::int8_t m_recocur{0};
-    std::map<std::string, std::set<std::string>> m_namesMap;
-    std::map<std::string, Whois> m_whoisMap;
+    ElapsedTimer timer_;
+    std::map<channel_mode, char> modes_;
+    std::int8_t recocur_{0};
+    std::map<std::string, std::set<std::string>> names_map_;
+    std::map<std::string, class whois> whois_map_;
 
     // Private helpers.
-    void removeJoinedChannel(const std::string &channel);
+    void remove_joined_channel(const std::string& channel);
 
     // Handle libircclient callbacks.
-    void handleChannel(const char *, const char **) noexcept;
-    void handleChannelMode(const char *, const char **) noexcept;
-    void handleChannelNotice(const char *, const char **) noexcept;
-    void handleConnect(const char *, const char **) noexcept;
-    void handleCtcpAction(const char *, const char **) noexcept;
-    void handleInvite(const char *, const char **) noexcept;
-    void handleJoin(const char *, const char **) noexcept;
-    void handleKick(const char *, const char **) noexcept;
-    void handleMode(const char *, const char **) noexcept;
-    void handleNick(const char *, const char **) noexcept;
-    void handleNotice(const char *, const char **) noexcept;
-    void handleNumeric(unsigned int, const char **, unsigned int) noexcept;
-    void handlePart(const char *, const char **) noexcept;
-    void handlePing(const char *, const char **) noexcept;
-    void handleQuery(const char *, const char **) noexcept;
-    void handleTopic(const char *, const char **) noexcept;
+    void handle_channel(const char*, const char**) noexcept;
+    void handle_channel_mode(const char*, const char**) noexcept;
+    void handle_channel_notice(const char*, const char**) noexcept;
+    void handle_connect(const char*, const char**) noexcept;
+    void handle_ctcp_action(const char*, const char**) noexcept;
+    void handle_invite(const char*, const char**) noexcept;
+    void handle_join(const char*, const char**) noexcept;
+    void handle_kick(const char*, const char**) noexcept;
+    void handle_mode(const char*, const char**) noexcept;
+    void handle_nick(const char*, const char**) noexcept;
+    void handle_notice(const char*, const char**) noexcept;
+    void handle_numeric(unsigned int, const char**, unsigned int) noexcept;
+    void handle_part(const char*, const char**) noexcept;
+    void handle_ping(const char*, const char**) noexcept;
+    void handle_query(const char*, const char**) noexcept;
+    void handle_topic(const char*, const char**) noexcept;
 
 public:
     /**
@@ -497,37 +497,37 @@ public:
      * \return the server
      * \throw std::exception on failures
      */
-    IRCCD_EXPORT static std::shared_ptr<Server> fromJson(const nlohmann::json &object);
+    static std::shared_ptr<server> from_json(const nlohmann::json& object);
 
     /**
-     * Split a channel from the form channel:password into a ServerChannel
+     * Split a channel from the form channel:password into a server_channel
      * object.
      *
      * \param value the value
      * \return a channel
      */
-    IRCCD_EXPORT static Channel splitChannel(const std::string &value);
+    static channel split_channel(const std::string& value);
 
     /**
      * Construct a server.
      *
      * \param name the identifier
      */
-    IRCCD_EXPORT Server(std::string name);
+    server(std::string name);
 
     /**
      * Destructor. Close the connection if needed.
      */
-    IRCCD_EXPORT virtual ~Server();
+    virtual ~server();
 
     /**
      * Get the server identifier.
      *
      * \return the id
      */
-    inline const std::string &name() const noexcept
+    inline const std::string& name() const noexcept
     {
-        return m_name;
+        return name_;
     }
 
     /**
@@ -535,9 +535,9 @@ public:
      *
      * \return the hostname
      */
-    inline const std::string &host() const noexcept
+    inline const std::string& host() const noexcept
     {
-        return m_host;
+        return host_;
     }
 
     /**
@@ -545,9 +545,9 @@ public:
      *
      * \param host the hostname
      */
-    inline void setHost(std::string host) noexcept
+    inline void set_host(std::string host) noexcept
     {
-        m_host = std::move(host);
+        host_ = std::move(host);
     }
 
     /**
@@ -555,9 +555,9 @@ public:
      *
      * \return the password
      */
-    inline const std::string &password() const noexcept
+    inline const std::string& password() const noexcept
     {
-        return m_password;
+        return password_;
     }
 
     /**
@@ -567,9 +567,9 @@ public:
      *
      * \param password the password
      */
-    inline void setPassword(std::string password) noexcept
+    inline void set_password(std::string password) noexcept
     {
-        m_password = std::move(password);
+        password_ = std::move(password);
     }
 
     /**
@@ -579,7 +579,7 @@ public:
      */
     inline std::uint16_t port() const noexcept
     {
-        return m_port;
+        return port_;
     }
 
     /**
@@ -587,9 +587,9 @@ public:
      *
      * \param port the port
      */
-    inline void setPort(std::uint16_t port) noexcept
+    inline void set_port(std::uint16_t port) noexcept
     {
-        m_port = port;
+        port_ = port;
     }
 
     /**
@@ -599,20 +599,17 @@ public:
      */
     inline std::uint8_t flags() const noexcept
     {
-        return m_flags;
+        return flags_;
     }
 
     /**
      * Set the flags.
      *
-     * \pre flags must be valid
      * \param flags the flags
      */
-    inline void setFlags(std::uint8_t flags) noexcept
+    inline void set_flags(std::uint8_t flags) noexcept
     {
-        assert(flags <= 0x1f);
-
-        m_flags = flags;
+        flags_ = flags;
     }
 
     /**
@@ -620,9 +617,9 @@ public:
      *
      * \return the nickname
      */
-    inline const std::string &nickname() const noexcept
+    inline const std::string& nickname() const noexcept
     {
-        return m_nickname;
+        return nickname_;
     }
 
     /**
@@ -633,16 +630,16 @@ public:
      *
      * \param nickname the nickname
      */
-    IRCCD_EXPORT virtual void setNickname(std::string nickname);
+    virtual void set_nickname(std::string nickname);
 
     /**
      * Get the username.
      *
      * \return the username
      */
-    inline const std::string &username() const noexcept
+    inline const std::string& username() const noexcept
     {
-        return m_username;
+        return username_;
     }
 
     /**
@@ -651,9 +648,9 @@ public:
      * \param name the username
      * \note the username will be changed on the next connection
      */
-    inline void setUsername(std::string name) noexcept
+    inline void set_username(std::string name) noexcept
     {
-        m_username = std::move(name);
+        username_ = std::move(name);
     }
 
     /**
@@ -661,9 +658,9 @@ public:
      *
      * \return the realname
      */
-    inline const std::string &realname() const noexcept
+    inline const std::string& realname() const noexcept
     {
-        return m_realname;
+        return realname_;
     }
 
     /**
@@ -672,9 +669,9 @@ public:
      * \param realname the username
      * \note the username will be changed on the next connection
      */
-    inline void setRealname(std::string realname) noexcept
+    inline void set_realname(std::string realname) noexcept
     {
-        m_realname = std::move(realname);
+        realname_ = std::move(realname);
     }
 
     /**
@@ -682,9 +679,9 @@ public:
      *
      * \return the CTCP version
      */
-    inline const std::string &ctcpVersion() const noexcept
+    inline const std::string& ctcp_version() const noexcept
     {
-        return m_ctcpversion;
+        return ctcpversion_;
     }
 
     /**
@@ -692,29 +689,29 @@ public:
      *
      * \param ctcpversion the version
      */
-    IRCCD_EXPORT void setCtcpVersion(std::string ctcpversion);
+    void set_ctcp_version(std::string ctcpversion);
 
     /**
      * Get the command character.
      *
      * \return the character
      */
-    inline const std::string &commandCharacter() const noexcept
+    inline const std::string& command_char() const noexcept
     {
-        return m_commandCharacter;
+        return command_char_;
     }
 
     /**
      * Set the command character.
      *
-     * \pre !commandCharacter.empty()
-     * \param commandCharacter the command character
+     * \pre !command_char_.empty()
+     * \param command_char the command character
      */
-    inline void setCommandCharacter(std::string commandCharacter) noexcept
+    inline void set_command_char(std::string command_char) noexcept
     {
-        assert(!commandCharacter.empty());
+        assert(!command_char.empty());
 
-        m_commandCharacter = std::move(commandCharacter);
+        command_char_ = std::move(command_char);
     }
 
     /**
@@ -722,9 +719,9 @@ public:
      *
      * \return the number of reconnections
      */
-    inline std::int8_t reconnectTries() const noexcept
+    inline std::int8_t reconnect_tries() const noexcept
     {
-        return m_recotries;
+        return recotries_;
     }
 
     /**
@@ -732,11 +729,11 @@ public:
      *
      * A value less than 0 means infinite.
      *
-     * \param reconnectTries the number of reconnections
+     * \param reconnect_tries the number of reconnections
      */
-    inline void setReconnectTries(std::int8_t reconnectTries) noexcept
+    inline void set_reconnect_tries(std::int8_t reconnect_tries) noexcept
     {
-        m_recotries = reconnectTries;
+        recotries_ = reconnect_tries;
     }
 
     /**
@@ -744,19 +741,19 @@ public:
      *
      * \return the number of seconds
      */
-    inline std::uint16_t reconnectDelay() const noexcept
+    inline std::uint16_t reconnect_delay() const noexcept
     {
-        return m_recodelay;
+        return recodelay_;
     }
 
     /**
      * Set the number of seconds before retrying.
      *
-     * \param reconnectDelay the number of seconds
+     * \param reconnect_delay the number of seconds
      */
-    inline void setReconnectDelay(std::uint16_t reconnectDelay) noexcept
+    inline void set_reconnect_delay(std::uint16_t reconnect_delay) noexcept
     {
-        m_recodelay = reconnectDelay;
+        recodelay_ = reconnect_delay;
     }
 
     /**
@@ -764,19 +761,19 @@ public:
      *
      * \return the ping timeout
      */
-    inline std::uint16_t pingTimeout() const noexcept
+    inline std::uint16_t ping_timeout() const noexcept
     {
-        return m_timeout;
+        return timeout_;
     }
 
     /**
      * Set the ping timeout before considering a server as dead.
      *
-     * \param pingTimeout the delay in seconds
+     * \param ping_timeout the delay in seconds
      */
-    inline void setPingTimeout(std::uint16_t pingTimeout) noexcept
+    inline void set_ping_timeout(std::uint16_t ping_timeout) noexcept
     {
-        m_timeout = pingTimeout;
+        timeout_ = ping_timeout;
     }
 
     /**
@@ -784,9 +781,9 @@ public:
      *
      * \return the channels
      */
-    inline const std::vector<std::string> &channels() const noexcept
+    inline const std::vector<std::string>& channels() const noexcept
     {
-        return m_jchannels;
+        return jchannels_;
     }
 
     /**
@@ -794,36 +791,36 @@ public:
      *
      * \param state the new state
      */
-    IRCCD_EXPORT void next(std::unique_ptr<State> state) noexcept;
+    void next(std::unique_ptr<state> state) noexcept;
 
     /**
      * Get the state current id.
      *
      * \return the state id
      */
-    IRCCD_EXPORT std::string status() const noexcept;
+    std::string status() const noexcept;
 
     /**
      * Switch to next state if it has.
      */
-    IRCCD_EXPORT void update() noexcept;
+    void update() noexcept;
 
     /**
      * Force disconnection.
      */
-    IRCCD_EXPORT void disconnect() noexcept;
+    void disconnect() noexcept;
 
     /**
      * Asks for a reconnection.
      */
-    IRCCD_EXPORT virtual void reconnect() noexcept;
+    virtual void reconnect() noexcept;
 
     /**
      * Prepare the IRC session.
      *
      * \warning Not thread-safe
      */
-    IRCCD_EXPORT virtual void prepare(fd_set &setinput, fd_set &setoutput, net::Handle &maxfd) noexcept;
+    virtual void prepare(fd_set& setinput, fd_set& setoutput, net::Handle& maxfd) noexcept;
 
     /**
      * Process incoming/outgoing data after selection.
@@ -832,7 +829,7 @@ public:
      * \param setoutput
      * \throw any exception that have been throw from user functions
      */
-    IRCCD_EXPORT virtual void sync(fd_set &setinput, fd_set &setoutput);
+    virtual void sync(fd_set& setinput, fd_set& setoutput);
 
     /**
      * Determine if the nickname is the bot itself.
@@ -840,7 +837,7 @@ public:
      * \param nick the nickname to check
      * \return true if it is the bot
      */
-    IRCCD_EXPORT bool isSelf(const std::string &nick) const noexcept;
+    bool is_self(const std::string& nick) const noexcept;
 
     /**
      * Change the channel mode.
@@ -848,7 +845,7 @@ public:
      * \param channel the channel
      * \param mode the new mode
      */
-    IRCCD_EXPORT virtual void cmode(std::string channel, std::string mode);
+    virtual void cmode(std::string channel, std::string mode);
 
     /**
      * Send a channel notice.
@@ -856,7 +853,7 @@ public:
      * \param channel the channel
      * \param message message notice
      */
-    IRCCD_EXPORT virtual void cnotice(std::string channel, std::string message);
+    virtual void cnotice(std::string channel, std::string message);
 
     /**
      * Invite a user to a channel.
@@ -864,7 +861,7 @@ public:
      * \param target the target nickname
      * \param channel the channel
      */
-    IRCCD_EXPORT virtual void invite(std::string target, std::string channel);
+    virtual void invite(std::string target, std::string channel);
 
     /**
      * Join a channel, the password is optional and can be kept empty.
@@ -872,7 +869,7 @@ public:
      * \param channel the channel to join
      * \param password the optional password
      */
-    IRCCD_EXPORT virtual void join(std::string channel, std::string password = "");
+    virtual void join(std::string channel, std::string password = "");
 
     /**
      * Kick someone from the channel. Please be sure to have the rights
@@ -882,7 +879,7 @@ public:
      * \param channel from which channel
      * \param reason the optional reason
      */
-    IRCCD_EXPORT virtual void kick(std::string target, std::string channel, std::string reason = "");
+    virtual void kick(std::string target, std::string channel, std::string reason = "");
 
     /**
      * Send a CTCP Action as known as /me. The target may be either a
@@ -891,7 +888,7 @@ public:
      * \param target the nickname or the channel
      * \param message the message
      */
-    IRCCD_EXPORT virtual void me(std::string target, std::string message);
+    virtual void me(std::string target, std::string message);
 
     /**
      * Send a message to the specified target or channel.
@@ -899,21 +896,21 @@ public:
      * \param target the target
      * \param message the message
      */
-    IRCCD_EXPORT virtual void message(std::string target, std::string message);
+    virtual void message(std::string target, std::string message);
 
     /**
      * Change your user mode.
      *
      * \param mode the mode
      */
-    IRCCD_EXPORT virtual void mode(std::string mode);
+    virtual void mode(std::string mode);
 
     /**
      * Request the list of names.
      *
      * \param channel the channel
      */
-    IRCCD_EXPORT virtual void names(std::string channel);
+    virtual void names(std::string channel);
 
     /**
      * Send a private notice.
@@ -921,7 +918,7 @@ public:
      * \param target the target
      * \param message the notice message
      */
-    IRCCD_EXPORT virtual void notice(std::string target, std::string message);
+    virtual void notice(std::string target, std::string message);
 
     /**
      * Part from a channel.
@@ -932,7 +929,7 @@ public:
      * \param channel the channel to leave
      * \param reason the optional reason
      */
-    IRCCD_EXPORT virtual void part(std::string channel, std::string reason = "");
+    virtual void part(std::string channel, std::string reason = "");
 
     /**
      * Send a raw message to the IRC server. You don't need to add
@@ -941,7 +938,7 @@ public:
      * \warning Use this function with care
      * \param raw the raw message (without `\r\n\r\n`)
      */
-    IRCCD_EXPORT virtual void send(std::string raw);
+    virtual void send(std::string raw);
 
     /**
      * Change the channel topic.
@@ -949,14 +946,14 @@ public:
      * \param channel the channel
      * \param topic the desired topic
      */
-    IRCCD_EXPORT virtual void topic(std::string channel, std::string topic);
+    virtual void topic(std::string channel, std::string topic);
 
     /**
      * Request for whois information.
      *
      * \param target the target nickname
      */
-    IRCCD_EXPORT virtual void whois(std::string target);
+    virtual void whois(std::string target);
 };
 
 } // !irccd

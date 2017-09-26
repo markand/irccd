@@ -22,35 +22,32 @@
 #include <service.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
-struct CustomPlugin : public Plugin {
-    PluginConfig m_config;
+struct CustomPlugin : public plugin {
+    plugin_config m_config;
 
     CustomPlugin(std::string name = "test")
-        : Plugin(std::move(name), "")
+        : plugin(std::move(name), "")
     {
     }
 
-    PluginConfig config() override
+    plugin_config config() override
     {
         return m_config;
     }
 
-    void setConfig(PluginConfig config) override
+    void set_config(plugin_config config) override
     {
         m_config = std::move(config);
     }
 };
 
-
-
 class PluginConfigCommandTest : public CommandTester {
 public:
     PluginConfigCommandTest()
-        : CommandTester(std::make_unique<PluginConfigCommand>())
+        : CommandTester(std::make_unique<plugin_config_command>())
     {
     }
 };
@@ -85,7 +82,7 @@ TEST_F(PluginConfigCommandTest, get)
         auto plugin = std::make_unique<CustomPlugin>("test");
         auto json = nlohmann::json();
 
-        plugin->setConfig({
+        plugin->set_config({
             { "x1", "10" },
             { "x2", "20" }
         });
@@ -118,7 +115,7 @@ TEST_F(PluginConfigCommandTest, getAll)
         auto plugin = std::make_unique<CustomPlugin>("test");
         auto json = nlohmann::json();
 
-        plugin->setConfig({
+        plugin->set_config({
             { "x1", "10" },
             { "x2", "20" }
         });

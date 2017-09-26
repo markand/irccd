@@ -1,5 +1,5 @@
 /*
- * mod-directory.cpp -- Irccd.Directory API
+ * js_directory_module.cpp -- irccd.Directory API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -28,9 +28,9 @@
 
 #include "duktape.hpp"
 #include "fs.hpp"
-#include "mod-directory.hpp"
-#include "mod-irccd.hpp"
-#include "plugin-js.hpp"
+#include "js_directory_module.hpp"
+#include "js_irccd_module.hpp"
+#include "js_plugin.hpp"
 #include "sysconfig.hpp"
 
 namespace irccd {
@@ -61,11 +61,11 @@ std::string path(duk_context *ctx)
  *
  * Do not use this function directly, use:
  *
- * - findName
- * - findRegex
+ * - find_name
+ * - find_regex
  */
 template <typename Pred>
-std::string findPath(const std::string &base, bool recursive, Pred pred)
+std::string find_path(const std::string& base, bool recursive, Pred&& pred)
 {
     /*
      * For performance reason, we first iterate over all entries that are
@@ -74,17 +74,17 @@ std::string findPath(const std::string &base, bool recursive, Pred pred)
      */
     auto entries = fs::readdir(base);
 
-    for (const auto &entry : entries)
+    for (const auto& entry : entries)
         if (entry.type != fs::Entry::Dir && pred(entry.name))
             return base + entry.name;
 
     if (!recursive)
         return "";
 
-    for (const auto &entry : entries) {
+    for (const auto& entry : entries) {
         if (entry.type == fs::Entry::Dir) {
             std::string next = base + entry.name + fs::separator();
-            std::string path = findPath(next, true, pred);
+            std::string path = find_path(next, true, pred);
 
             if (!path.empty())
                 return path;
@@ -97,9 +97,9 @@ std::string findPath(const std::string &base, bool recursive, Pred pred)
 /*
  * Helper for finding by equality.
  */
-std::string findName(std::string base, const std::string &pattern, bool recursive)
+std::string find_name(std::string base, const std::string& pattern, bool recursive)
 {
-    return findPath(base, recursive, [&] (const std::string &entryname) -> bool {
+    return find_path(base, recursive, [&] (const auto& entryname) -> bool {
         return pattern == entryname;
     });
 }
@@ -107,12 +107,12 @@ std::string findName(std::string base, const std::string &pattern, bool recursiv
 /*
  * Helper for finding by regular expression
  */
-std::string findRegex(const std::string &base, std::string pattern, bool recursive)
+std::string find_regex(const std::string& base, std::string pattern, bool recursive)
 {
     std::regex regexp(pattern, std::regex::ECMAScript);
     std::smatch smatch;
 
-    return findPath(base, recursive, [&] (const std::string &entryname) -> bool {
+    return find_path(base, recursive, [&] (const auto& entryname) -> bool {
         return std::regex_match(entryname, smatch, regexp);
     });
 }
@@ -126,25 +126,25 @@ std::string findRegex(const std::string &base, std::string pattern, bool recursi
  * The patternIndex is the argument where to test if the argument is a regex or
  * a string.
  */
-duk_ret_t find(duk_context *ctx, std::string base, bool recursive, int patternIndex)
+duk_ret_t find(duk_context* ctx, std::string base, bool recursive, int pattern_index)
 {
     try {
         std::string path;
 
-        if (duk_is_string(ctx, patternIndex))
-            path = findName(base, duk_get_string(ctx, patternIndex), recursive);
+        if (duk_is_string(ctx, pattern_index))
+            path = find_name(base, duk_get_string(ctx, pattern_index), recursive);
         else {
             // Check if it's a valid RegExp object.
             duk_get_global_string(ctx, "RegExp");
-            auto isRegex = duk_instanceof(ctx, patternIndex, -1);
+            auto is_regex = duk_instanceof(ctx, pattern_index, -1);
             duk_pop(ctx);
 
-            if (isRegex) {
-                duk_get_prop_string(ctx, patternIndex, "source");
+            if (is_regex) {
+                duk_get_prop_string(ctx, pattern_index, "source");
                 auto pattern = duk_to_string(ctx, -1);
                 duk_pop(ctx);
 
-                path = findRegex(base, pattern, recursive);
+                path = find_regex(base, pattern, recursive);
             } else
                 duk_error(ctx, DUK_ERR_TYPE_ERROR, "pattern must be a string or a regex expression");
         }
@@ -153,7 +153,7 @@ duk_ret_t find(duk_context *ctx, std::string base, bool recursive, int patternIn
             return 0;
 
         dukx_push_std_string(ctx, path);
-    } catch (const std::exception &ex) {
+    } catch (const std::exception& ex) {
         duk_error(ctx, DUK_ERR_ERROR, "%s", ex.what());
     }
 
@@ -166,19 +166,17 @@ duk_ret_t find(duk_context *ctx, std::string base, bool recursive, int patternIn
  * - Directory.remove
  * - Directory.prototype.remove
  */
-duk_ret_t remove(duk_context *ctx, const std::string &path, bool recursive)
+duk_ret_t remove(duk_context* ctx, const std::string& path, bool recursive)
 {
     boost::system::error_code ec;
 
-    if (!boost::filesystem::is_directory(path, ec) || ec) {
-        dukx_throw(ctx, SystemError(EINVAL, "not a directory"));
-    }
+    if (!boost::filesystem::is_directory(path, ec) || ec)
+        dukx_throw(ctx, system_error(EINVAL, "not a directory"));
 
-    if (!recursive) {
+    if (!recursive)
         boost::filesystem::remove(path, ec);
-    } else {
+    else
         boost::filesystem::remove_all(path, ec);
-    }
 
     return 0;
 }
@@ -198,7 +196,7 @@ duk_ret_t remove(duk_context *ctx, const std::string &path, bool recursive)
  * Throws:
  *   - Any exception on error.
  */
-duk_ret_t methodFind(duk_context *ctx)
+duk_ret_t method_find(duk_context* ctx)
 {
     return find(ctx, path(ctx), duk_get_boolean(ctx, 1), 0);
 }
@@ -215,14 +213,14 @@ duk_ret_t methodFind(duk_context *ctx)
  * Throws:
  *   - Any exception on error.
  */
-duk_ret_t methodRemove(duk_context *ctx)
+duk_ret_t method_remove(duk_context* ctx)
 {
     return remove(ctx, path(ctx), duk_get_boolean(ctx, 0));
 }
 
 const duk_function_list_entry methods[] = {
-    { "find",       methodFind,     DUK_VARARGS },
-    { "remove",     methodRemove,   1           },
+    { "find",       method_find,    DUK_VARARGS },
+    { "remove",     method_remove,  1           },
     { nullptr,      nullptr,        0           }
 };
 
@@ -232,7 +230,7 @@ const duk_function_list_entry methods[] = {
  */
 
 /*
- * Function: Irccd.Directory(path, flags) [constructor]
+ * Function: irccd.Directory(path, flags) [constructor]
  * --------------------------------------------------------
  *
  * Opens and read the directory at the specified path.
@@ -243,19 +241,19 @@ const duk_function_list_entry methods[] = {
  * Throws:
  *   - Any exception on error
  */
-duk_ret_t constructor(duk_context *ctx)
+duk_ret_t constructor(duk_context* ctx)
 {
     if (!duk_is_constructor_call(ctx))
         return 0;
 
     try {
-        std::string path = duk_require_string(ctx, 0);
-        std::int8_t flags = duk_get_uint(ctx, 1);
+        auto path = duk_require_string(ctx, 0);
+        auto flags = duk_get_uint(ctx, 1);
 
         if (!boost::filesystem::is_directory(path))
-            dukx_throw(ctx, SystemError(EINVAL, "not a directory"));
+            dukx_throw(ctx, system_error(EINVAL, "not a directory"));
 
-        std::vector<fs::Entry> list = fs::readdir(path, flags);
+        auto list = fs::readdir(path, flags);
 
         duk_push_this(ctx);
         duk_push_string(ctx, "count");
@@ -277,15 +275,15 @@ duk_ret_t constructor(duk_context *ctx)
         }
 
         duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
-    } catch (const std::exception &ex) {
-        dukx_throw(ctx, SystemError(errno, ex.what()));
+    } catch (const std::exception& ex) {
+        dukx_throw(ctx, system_error(errno, ex.what()));
     }
 
     return 0;
 }
 
 /*
- * Function: Irccd.Directory.find(path, pattern, recursive)
+ * Function: irccd.Directory.find(path, pattern, recursive)
  * --------------------------------------------------------
  *
  * Find an entry by a pattern or a regular expression.
@@ -297,13 +295,13 @@ duk_ret_t constructor(duk_context *ctx)
  * Returns:
  *   The path to the file or undefined on errors or not found.
  */
-duk_ret_t funcFind(duk_context *ctx)
+duk_ret_t func_find(duk_context* ctx)
 {
     return find(ctx, duk_require_string(ctx, 0), duk_get_boolean(ctx, 2), 1);
 }
 
 /*
- * Function: Irccd.Directory.remove(path, recursive)
+ * Function: irccd.Directory.remove(path, recursive)
  * --------------------------------------------------------
  *
  * Remove the directory optionally recursively.
@@ -314,13 +312,13 @@ duk_ret_t funcFind(duk_context *ctx)
  * Throws:
  *   - Any exception on error.
  */
-duk_ret_t funcRemove(duk_context *ctx)
+duk_ret_t func_remove(duk_context *ctx)
 {
     return remove(ctx, duk_require_string(ctx, 0), duk_get_boolean(ctx, 1));
 }
 
 /*
- * Function: Irccd.Directory.mkdir(path, mode = 0700)
+ * Function: irccd.Directory.mkdir(path, mode = 0700)
  * --------------------------------------------------------
  *
  * Create a directory specified by path. It will create needed subdirectories
@@ -331,22 +329,22 @@ duk_ret_t funcRemove(duk_context *ctx)
  * Throws:
  *   - Any exception on error.
  */
-duk_ret_t funcMkdir(duk_context *ctx)
+duk_ret_t func_mkdir(duk_context *ctx)
 {
     try {
         boost::filesystem::create_directories(duk_require_string(ctx, 0));
     } catch (const std::exception &ex) {
-        dukx_throw(ctx, SystemError(errno, ex.what()));
+        dukx_throw(ctx, system_error(errno, ex.what()));
     }
 
     return 0;
 }
 
 const duk_function_list_entry functions[] = {
-    { "find",           funcFind,   DUK_VARARGS },
-    { "mkdir",          funcMkdir,  DUK_VARARGS },
-    { "remove",         funcRemove, DUK_VARARGS },
-    { nullptr,          nullptr,    0           }
+    { "find",           func_find,      DUK_VARARGS },
+    { "mkdir",          func_mkdir,     DUK_VARARGS },
+    { "remove",         func_remove,    DUK_VARARGS },
+    { nullptr,          nullptr,        0           }
 };
 
 const duk_number_list_entry constants[] = {
@@ -361,12 +359,12 @@ const duk_number_list_entry constants[] = {
 
 } // !namespace
 
-DirectoryModule::DirectoryModule() noexcept
-    : Module("Irccd.Directory")
+js_directory_module::js_directory_module() noexcept
+    : module("Irccd.Directory")
 {
 }
 
-void DirectoryModule::load(Irccd &, std::shared_ptr<JsPlugin> plugin)
+void js_directory_module::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
     StackAssert sa(plugin->context());
 

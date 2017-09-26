@@ -16,16 +16,17 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "Javascript"
+#include <boost/test/unit_test.hpp>
 
 #include <duktape.hpp>
 #include <fs.hpp>
 
 namespace irccd {
 
-class Test : public testing::Test {
+class test {
 protected:
-    UniqueContext m_ctx;
+    UniqueContext ctx_;
 };
 
 /*
@@ -33,37 +34,34 @@ protected:
  * ------------------------------------------------------------------
  */
 
-TEST_F(Test, no_file)
+BOOST_FIXTURE_TEST_SUITE(test_suite, test)
+
+BOOST_AUTO_TEST_CASE(no_file)
 {
-    ASSERT_THROW(dukx_peval_file(m_ctx, "nonexistent"), Exception);
+    BOOST_REQUIRE_THROW(dukx_peval_file(ctx_, "nonexistent"), Exception);
 
     try {
-        dukx_peval_file(m_ctx, "nonexistent");
+        dukx_peval_file(ctx_, "nonexistent");
     } catch (const Exception& ex) {
-        ASSERT_EQ("Error", ex.name);
-        ASSERT_EQ("nonexistent", ex.fileName);
+        BOOST_REQUIRE_EQUAL("Error", ex.name);
+        BOOST_REQUIRE_EQUAL("nonexistent", ex.fileName);
     }
 }
 
-TEST_F(Test, syntax_error)
+BOOST_AUTO_TEST_CASE(syntax_error)
 {
-    ASSERT_THROW(dukx_peval_file(m_ctx, SOURCEDIR "/syntax-error.js"), Exception);
+    BOOST_REQUIRE_THROW(dukx_peval_file(ctx_, SOURCEDIR "/syntax-error.js"), Exception);
 
     try {
-        dukx_peval_file(m_ctx, SOURCEDIR "/syntax-error.js");
+        dukx_peval_file(ctx_, SOURCEDIR "/syntax-error.js");
     } catch (const Exception& ex) {
-        ASSERT_EQ("SyntaxError", ex.name);
-        ASSERT_EQ("syntax-error.js", fs::baseName(ex.fileName));
-        ASSERT_EQ(6, ex.lineNumber);
-        ASSERT_EQ("empty expression not allowed (line 6)", ex.message);
+        BOOST_REQUIRE_EQUAL("SyntaxError", ex.name);
+        BOOST_REQUIRE_EQUAL("syntax-error.js", fs::baseName(ex.fileName));
+        BOOST_REQUIRE_EQUAL(6, ex.lineNumber);
+        BOOST_REQUIRE_EQUAL("empty expression not allowed (line 6)", ex.message);
     }
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 } // !irccd
-
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
-
-    return RUN_ALL_TESTS();
-}

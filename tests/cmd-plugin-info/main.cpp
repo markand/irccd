@@ -23,14 +23,13 @@
 #include <plugin.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
 class PluginInfoCommandTest : public CommandTester {
 public:
     PluginInfoCommandTest()
-        : CommandTester(std::make_unique<PluginInfoCommand>())
+        : CommandTester(std::make_unique<plugin_info_command>())
     {
     }
 };
@@ -38,15 +37,15 @@ public:
 TEST_F(PluginInfoCommandTest, basic)
 {
     try {
-        auto plugin = std::make_unique<Plugin>("test", "");
+        auto plg = std::make_unique<plugin>("test", "");
         auto response = nlohmann::json();
 
-        plugin->setAuthor("Francis Beaugrand");
-        plugin->setLicense("GPL");
-        plugin->setSummary("Completely useless plugin");
-        plugin->setVersion("0.0.0.0.0.0.0.0.1-beta5");
+        plg->set_author("Francis Beaugrand");
+        plg->set_license("GPL");
+        plg->set_summary("Completely useless plugin");
+        plg->set_version("0.0.0.0.0.0.0.0.1-beta5");
 
-        m_irccd.plugins().add(std::move(plugin));
+        m_irccd.plugins().add(std::move(plg));
         m_irccdctl.client().onMessage.connect([&] (auto msg) {
             response = std::move(msg);
         });

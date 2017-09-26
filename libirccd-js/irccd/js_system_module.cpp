@@ -1,5 +1,5 @@
 /*
- * mod-system.cpp -- Irccd.System API
+ * js_system_module.cpp -- Irccd.System API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -20,24 +20,25 @@
 #include <cstdlib>
 #include <thread>
 
-#include "sysconfig.hpp"
+#include <irccd/sysconfig.hpp>
 
 #if defined(HAVE_POPEN)
 #  include <cstdio>
 #endif
 
-#include "mod-file.hpp"
-#include "mod-irccd.hpp"
-#include "mod-system.hpp"
-#include "plugin-js.hpp"
-#include "system.hpp"
+#include <irccd/js_plugin.hpp>
+#include <irccd/system.hpp>
+
+#include "js_file_module.hpp"
+#include "js_irccd_module.hpp"
+#include "js_system_module.hpp"
 
 namespace irccd {
 
 namespace {
 
 /*
- * Function: Irccd.System.env(key)
+ * Function: irccd.System.env(key)
  * ------------------------------------------------------------------
  *
  * Get an environment system variable.
@@ -47,7 +48,7 @@ namespace {
  * Returns:
  *   The value.
  */
-duk_ret_t env(duk_context *ctx)
+duk_ret_t env(duk_context* ctx)
 {
     dukx_push_std_string(ctx, sys::env(dukx_get_std_string(ctx, 0)));
 
@@ -55,7 +56,7 @@ duk_ret_t env(duk_context *ctx)
 }
 
 /*
- * Function: Irccd.System.exec(cmd)
+ * Function: irccd.System.exec(cmd)
  * ------------------------------------------------------------------
  *
  * Execute a system command.
@@ -63,7 +64,7 @@ duk_ret_t env(duk_context *ctx)
  * Arguments:
  *   - cmd, the command to execute.
  */
-duk_ret_t exec(duk_context *ctx)
+duk_ret_t exec(duk_context* ctx)
 {
     std::system(duk_get_string(ctx, 0));
 
@@ -71,7 +72,7 @@ duk_ret_t exec(duk_context *ctx)
 }
 
 /*
- * Function: Irccd.System.home()
+ * Function: irccd.System.home()
  * ------------------------------------------------------------------
  *
  * Get the operating system user's home.
@@ -79,7 +80,7 @@ duk_ret_t exec(duk_context *ctx)
  * Returns:
  *   The user home directory.
  */
-duk_ret_t home(duk_context *ctx)
+duk_ret_t home(duk_context* ctx)
 {
     dukx_push_std_string(ctx, sys::home());
 
@@ -87,7 +88,7 @@ duk_ret_t home(duk_context *ctx)
 }
 
 /*
- * Function: Irccd.System.name()
+ * Function: irccd.System.name()
  * ------------------------------------------------------------------
  *
  * Get the operating system name.
@@ -95,7 +96,7 @@ duk_ret_t home(duk_context *ctx)
  * Returns:
  *   The system name.
  */
-duk_ret_t name(duk_context *ctx)
+duk_ret_t name(duk_context* ctx)
 {
     dukx_push_std_string(ctx, sys::name());
 
@@ -105,7 +106,7 @@ duk_ret_t name(duk_context *ctx)
 #if defined(HAVE_POPEN)
 
 /*
- * Function: Irccd.System.popen(cmd, mode) [optional]
+ * Function: irccd.System.popen(cmd, mode) [optional]
  * ------------------------------------------------------------------
  *
  * Wrapper for popen(3) if the function is available.
@@ -114,18 +115,18 @@ duk_ret_t name(duk_context *ctx)
  *   - cmd, the command to execute,
  *   - mode, the mode (e.g. "r").
  * Returns:
- *   A Irccd.File object.
+ *   A irccd.File object.
  * Throws
- *   - Irccd.SystemError on failures.
+ *   - irccd.system_error on failures.
  */
-duk_ret_t popen(duk_context *ctx)
+duk_ret_t popen(duk_context* ctx)
 {
     auto fp = ::popen(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
 
     if (fp == nullptr)
-        dukx_throw(ctx, SystemError());
+        dukx_throw(ctx, system_error());
 
-    dukx_push_file(ctx, new File(fp, [] (std::FILE *fp) { ::pclose(fp); }));
+    dukx_push_file(ctx, new file(fp, [] (auto fp) { ::pclose(fp); }));
 
     return 1;
 }
@@ -133,12 +134,12 @@ duk_ret_t popen(duk_context *ctx)
 #endif // !HAVE_POPEN
 
 /*
- * Function: Irccd.System.sleep(delay)
+ * Function: irccd.System.sleep(delay)
  * ------------------------------------------------------------------
  *
  * Sleep the main loop for the specific delay in seconds.
  */
-duk_ret_t sleep(duk_context *ctx)
+duk_ret_t sleep(duk_context* ctx)
 {
     std::this_thread::sleep_for(std::chrono::seconds(duk_get_int(ctx, 0)));
 
@@ -146,7 +147,7 @@ duk_ret_t sleep(duk_context *ctx)
 }
 
 /*
- * Function: Irccd.System.ticks()
+ * Function: irccd.System.ticks()
  * ------------------------------------------------------------------
  *
  * Get the number of milliseconds since irccd was started.
@@ -154,7 +155,7 @@ duk_ret_t sleep(duk_context *ctx)
  * Returns:
  *   The number of milliseconds.
  */
-duk_ret_t ticks(duk_context *ctx)
+duk_ret_t ticks(duk_context* ctx)
 {
     duk_push_int(ctx, sys::ticks());
 
@@ -162,12 +163,12 @@ duk_ret_t ticks(duk_context *ctx)
 }
 
 /*
- * Function: Irccd.System.usleep(delay)
+ * Function: irccd.System.usleep(delay)
  * ------------------------------------------------------------------
  *
  * Sleep the main loop for the specific delay in microseconds.
  */
-duk_ret_t usleep(duk_context *ctx)
+duk_ret_t usleep(duk_context* ctx)
 {
     std::this_thread::sleep_for(std::chrono::microseconds(duk_get_int(ctx, 0)));
 
@@ -175,7 +176,7 @@ duk_ret_t usleep(duk_context *ctx)
 }
 
 /*
- * Function: Irccd.System.uptime()
+ * Function: irccd.System.uptime()
  * ------------------------------------------------------------------
  *
  * Get the system uptime.
@@ -183,7 +184,7 @@ duk_ret_t usleep(duk_context *ctx)
  * Returns:
  *   The system uptime.
  */
-duk_ret_t uptime(duk_context *ctx)
+duk_ret_t uptime(duk_context* ctx)
 {
     duk_push_int(ctx, sys::uptime());
 
@@ -191,7 +192,7 @@ duk_ret_t uptime(duk_context *ctx)
 }
 
 /*
- * Function: Irccd.System.version()
+ * Function: irccd.System.version()
  * ------------------------------------------------------------------
  *
  * Get the operating system version.
@@ -199,7 +200,7 @@ duk_ret_t uptime(duk_context *ctx)
  * Returns:
  *   The system version.
  */
-duk_ret_t version(duk_context *ctx)
+duk_ret_t version(duk_context* ctx)
 {
     dukx_push_std_string(ctx, sys::version());
 
@@ -224,12 +225,12 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-SystemModule::SystemModule() noexcept
-    : Module("Irccd.System")
+js_system_module::js_system_module() noexcept
+    : module("Irccd.System")
 {
 }
 
-void SystemModule::load(Irccd &, std::shared_ptr<JsPlugin> plugin)
+void js_system_module::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
     StackAssert sa(plugin->context());
 

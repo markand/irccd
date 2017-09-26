@@ -29,14 +29,14 @@ namespace {
 
 } // !namespace
 
-PluginLoader::PluginLoader(std::vector<std::string> directories,
-                           std::vector<std::string> extensions)
+plugin_loader::plugin_loader(std::vector<std::string> directories,
+                             std::vector<std::string> extensions)
     : directories_(std::move(directories))
     , extensions_(std::move(extensions))
 {
 }
 
-std::shared_ptr<Plugin> PluginLoader::find(const std::string& name) noexcept
+std::shared_ptr<plugin> plugin_loader::find(const std::string& name) noexcept
 {
     if (extensions_.empty())
         return nullptr;
@@ -51,7 +51,7 @@ std::shared_ptr<Plugin> PluginLoader::find(const std::string& name) noexcept
                 filenames.push_back(dir + "/" + name + ext);
     }
 
-    std::shared_ptr<Plugin> plugin;
+    std::shared_ptr<plugin> plugin;
 
     for (const auto& candidate : filenames) {
         boost::system::error_code ec;

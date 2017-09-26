@@ -21,12 +21,11 @@
 #include <server-tester.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
-std::string channel;
-std::string message;
+std::string cmd_channel;
+std::string cmd_message;
 
 } // !namespace
 
@@ -34,15 +33,15 @@ class ServerNoticeTest : public ServerTester {
 public:
     void notice(std::string channel, std::string message) override
     {
-        ::channel = channel;
-        ::message = message;
+        ::cmd_channel = channel;
+        ::cmd_message = message;
     }
 };
 
 class ServerNoticeCommandTest : public CommandTester {
 public:
     ServerNoticeCommandTest()
-        : CommandTester(std::make_unique<ServerNoticeCommand>(),
+        : CommandTester(std::make_unique<server_notice_command>(),
                         std::make_unique<ServerNoticeTest>())
     {
         m_irccdctl.client().request({
@@ -58,11 +57,11 @@ TEST_F(ServerNoticeCommandTest, basic)
 {
     try {
         poll([&] () {
-            return !channel.empty() && !message.empty();
+            return !cmd_channel.empty() && !cmd_message.empty();
         });
 
-        ASSERT_EQ("#staff", channel);
-        ASSERT_EQ("quiet!", message);
+        ASSERT_EQ("#staff", cmd_channel);
+        ASSERT_EQ("quiet!", cmd_message);
     } catch (const std::exception &ex) {
         FAIL() << ex.what();
     }

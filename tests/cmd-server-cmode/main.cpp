@@ -21,12 +21,11 @@
 #include <server-tester.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
-std::string channel;
-std::string mode;
+std::string cmd_channel;
+std::string cmd_mode;
 
 } // !namespace
 
@@ -34,15 +33,15 @@ class ServerChannelModeTest : public ServerTester {
 public:
     void cmode(std::string channel, std::string mode)
     {
-        ::channel = channel;
-        ::mode = mode;
+        ::cmd_channel = channel;
+        ::cmd_mode = mode;
     }
 };
 
 class ServerChannelModeCommandTest : public CommandTester {
 public:
     ServerChannelModeCommandTest()
-        : CommandTester(std::make_unique<ServerChannelModeCommand>(),
+        : CommandTester(std::make_unique<server_channel_mode_command>(),
                         std::make_unique<ServerChannelModeTest>())
     {
         m_irccdctl.client().request({
@@ -58,11 +57,11 @@ TEST_F(ServerChannelModeCommandTest, basic)
 {
     try {
         poll([&] () {
-            return !channel.empty() && !mode.empty();
+            return !cmd_channel.empty() && !cmd_mode.empty();
         });
 
-        ASSERT_EQ("#staff", channel);
-        ASSERT_EQ("+c", mode);
+        ASSERT_EQ("#staff", cmd_channel);
+        ASSERT_EQ("+c", cmd_mode);
     } catch (const std::exception &ex) {
         FAIL() << ex.what();
     }

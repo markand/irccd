@@ -21,12 +21,11 @@
 #include <server-tester.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
-std::string channel;
-std::string topic;
+std::string cmd_channel;
+std::string cmd_topic;
 
 } // !namespace
 
@@ -34,15 +33,15 @@ class ServerTopicTest : public ServerTester {
 public:
     void topic(std::string channel, std::string topic) override
     {
-        ::channel = channel;
-        ::topic = topic;
+        ::cmd_channel = channel;
+        ::cmd_topic = topic;
     }
 };
 
 class ServerTopicCommandTest : public CommandTester {
 public:
     ServerTopicCommandTest()
-        : CommandTester(std::make_unique<ServerTopicCommand>(),
+        : CommandTester(std::make_unique<server_topic_command>(),
                         std::make_unique<ServerTopicTest>())
     {
         m_irccdctl.client().request({
@@ -58,11 +57,11 @@ TEST_F(ServerTopicCommandTest, basic)
 {
     try {
         poll([&] () {
-            return !channel.empty() && !topic.empty();
+            return !cmd_channel.empty() && !cmd_topic.empty();
         });
 
-        ASSERT_EQ("#staff", channel);
-        ASSERT_EQ("new version", topic);
+        ASSERT_EQ("#staff", cmd_channel);
+        ASSERT_EQ("new version", cmd_topic);
     } catch (const std::exception &ex) {
         FAIL() << ex.what();
     }

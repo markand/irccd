@@ -1,5 +1,5 @@
 /*
- * mod-server.hpp -- Irccd.Server API
+ * js_logger_module.hpp -- Irccd.Logger API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,55 +16,35 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_MOD_SERVER_HPP
-#define IRCCD_MOD_SERVER_HPP
+#ifndef IRCCD_JS_LOGGER_MODULE_HPP
+#define IRCCD_JS_LOGGER_MODULE_HPP
 
 /**
- * \file mod-server.hpp
- * \brief Irccd.Server JavaScript API.
+ * \file js_logger_module.hpp
+ * \brief Irccd.Logger JavaScript API.
  */
 
-#include "duktape.hpp"
 #include "module.hpp"
-#include "server.hpp"
 
 namespace irccd {
 
 /**
- * \brief Irccd.Server JavaScript API.
+ * \brief irccd.Logger JavaScript API.
  * \ingroup modules
  */
-class ServerModule : public Module {
+class js_logger_module : public module {
 public:
     /**
-     * Irccd.Server.
+     * Constructor.
      */
-    IRCCD_EXPORT ServerModule() noexcept;
+    js_logger_module() noexcept;
 
     /**
      * \copydoc Module::load
      */
-    IRCCD_EXPORT void load(Irccd &irccd, std::shared_ptr<JsPlugin> plugin) override;
+    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
-
-/**
- * Push a server.
- *
- * \pre server != nullptr
- * \param ctx the context
- * \param server the server
- */
-IRCCD_EXPORT void dukx_push_server(duk_context *ctx, std::shared_ptr<Server> server);
-
-/**
- * Require a server. Raise a JavaScript error if not a Server.
- *
- * \param ctx the context
- * \param index the index
- * \return the server
- */
-IRCCD_EXPORT std::shared_ptr<Server> dukx_require_server(duk_context *ctx, duk_idx_t index);
 
 } // !irccd
 
-#endif // !IRCCD_JS_SERVER_HPP
+#endif // !IRCCD_JS_LOGGER_MODULE_HPP

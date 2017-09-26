@@ -22,7 +22,6 @@
 #include <service.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
@@ -33,7 +32,7 @@ nlohmann::json message;
 class ServerConnectCommandTest : public CommandTester {
 public:
     ServerConnectCommandTest()
-        : CommandTester(std::make_unique<ServerConnectCommand>())
+        : CommandTester(std::make_unique<server_connect_command>())
     {
         message = nullptr;
 
@@ -101,12 +100,12 @@ TEST_F(ServerConnectCommandTest, full)
         ASSERT_EQ("francis", s->nickname());
         ASSERT_EQ("the_francis", s->realname());
         ASSERT_EQ("frc", s->username());
-        ASSERT_EQ("::", s->commandCharacter());
-        ASSERT_EQ("ultra bot", s->ctcpVersion());
-        ASSERT_TRUE(s->flags() & Server::Ssl);
-        ASSERT_TRUE(s->flags() & Server::SslVerify);
-        ASSERT_TRUE(s->flags() & Server::AutoRejoin);
-        ASSERT_TRUE(s->flags() & Server::JoinInvite);
+        ASSERT_EQ("::", s->command_char());
+        ASSERT_EQ("ultra bot", s->ctcp_version());
+        ASSERT_TRUE(s->flags() & server::ssl);
+        ASSERT_TRUE(s->flags() & server::ssl_verify);
+        ASSERT_TRUE(s->flags() & server::auto_rejoin);
+        ASSERT_TRUE(s->flags() & server::join_invite);
     } catch (const std::exception &ex) {
         FAIL() << ex.what();
     }

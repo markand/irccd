@@ -23,17 +23,16 @@
 #include <plugin.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
 class PluginListCommandTest : public CommandTester {
 public:
     PluginListCommandTest()
-        : CommandTester(std::make_unique<PluginListCommand>())
+        : CommandTester(std::make_unique<plugin_list_command>())
     {
-        m_irccd.plugins().add(std::make_unique<Plugin>("t1", ""));
-        m_irccd.plugins().add(std::make_unique<Plugin>("t2", ""));
+        m_irccd.plugins().add(std::make_unique<plugin>("t1", ""));
+        m_irccd.plugins().add(std::make_unique<plugin>("t2", ""));
     }
 };
 

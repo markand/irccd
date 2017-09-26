@@ -32,7 +32,7 @@ namespace irccd {
 /**
  * \brief Useless server for testing purpose.
  */
-class IRCCD_EXPORT ServerTester : public Server {
+class IRCCD_EXPORT ServerTester : public server {
 public:
     /**
      * Create a server with named 'test' by default.

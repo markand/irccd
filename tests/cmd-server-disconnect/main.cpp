@@ -23,12 +23,11 @@
 #include <server.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 class ServerDisconnectCommandTest : public CommandTester {
 public:
     ServerDisconnectCommandTest()
-        : CommandTester(std::make_unique<ServerDisconnectCommand>())
+        : CommandTester(std::make_unique<server_disconnect_command>())
     {
     }
 };

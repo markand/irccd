@@ -45,7 +45,7 @@ namespace util {
 
 namespace {
 
-const std::unordered_map<std::string, int> colorTable{
+const std::unordered_map<std::string, int> colors{
     { "white",      0   },
     { "black",      1   },
     { "blue",       2   },
@@ -64,7 +64,7 @@ const std::unordered_map<std::string, int> colorTable{
     { "lightgrey",  15  }
 };
 
-const std::unordered_map<std::string, char> attributesTable{
+const std::unordered_map<std::string, char> attributes{
     { "bold",       '\x02'  },
     { "italic",     '\x09'  },
     { "strike",     '\x13'  },
@@ -74,12 +74,12 @@ const std::unordered_map<std::string, char> attributesTable{
     { "reverse",    '\x16'  }
 };
 
-inline bool isReserved(char token) noexcept
+inline bool is_reserved(char token) noexcept
 {
     return token == '#' || token == '@' || token == '$' || token == '!';
 }
 
-std::string substituteDate(const std::string &text, const Substitution &params)
+std::string subst_date(const std::string& text, const subst& params)
 {
     std::ostringstream oss;
 
@@ -87,7 +87,8 @@ std::string substituteDate(const std::string &text, const Substitution &params)
     oss << std::put_time(std::localtime(&params.time), text.c_str());
 #else
     /*
-     * Quick and dirty hack because GCC does not have this function.
+     * Quick and dirty hack because old version of GCC does not have this
+     * function.
      */
     char buffer[4096];
 
@@ -99,7 +100,7 @@ std::string substituteDate(const std::string &text, const Substitution &params)
     return oss.str();
 }
 
-std::string substituteKeywords(const std::string &content, const Substitution &params)
+std::string subst_keywords(const std::string& content, const subst& params)
 {
     auto value = params.keywords.find(content);
 
@@ -109,7 +110,7 @@ std::string substituteKeywords(const std::string &content, const Substitution &p
     return "";
 }
 
-std::string substituteEnv(const std::string &content)
+std::string subst_env(const std::string& content)
 {
     auto value = std::getenv(content.c_str());
 
@@ -119,14 +120,14 @@ std::string substituteEnv(const std::string &content)
     return "";
 }
 
-std::string substituteAttributes(const std::string &content)
+std::string subst_attrs(const std::string& content)
 {
     std::stringstream oss;
     std::vector<std::string> list = split(content, ",");
 
     // @{} means reset.
     if (list.empty())
-        return std::string(1, attributesTable.at("reset"));
+        return std::string(1, attributes.at("reset"));
 
     // Remove useless spaces.
     std::transform(list.begin(), list.end(), list.begin(), strip);
@@ -142,19 +143,19 @@ std::string substituteAttributes(const std::string &content)
         oss << '\x03';
 
         // Foreground.
-        auto it = colorTable.find(foreground);
-        if (it != colorTable.end())
+        auto it = colors.find(foreground);
+        if (it != colors.end())
             oss << it->second;
 
         // Background.
-        if (list.size() >= 2 && (it = colorTable.find(list[1])) != colorTable.end())
+        if (list.size() >= 2 && (it = colors.find(list[1])) != colors.end())
             oss << "," << it->second;
 
         // Attributes.
         for (std::size_t i = 2; i < list.size(); ++i) {
-            auto attribute = attributesTable.find(list[i]);
+            auto attribute = attributes.find(list[i]);
 
-            if (attribute != attributesTable.end())
+            if (attribute != attributes.end())
                 oss << attribute->second;
         }
     }
@@ -162,10 +163,10 @@ std::string substituteAttributes(const std::string &content)
     return oss.str();
 }
 
-std::string substituteShell(const std::string &command)
+std::string subst_shell(const std::string& command)
 {
 #if defined(HAVE_POPEN)
-    std::unique_ptr<FILE, std::function<int (FILE *)>> fp(popen(command.c_str(), "r"), pclose);
+    std::unique_ptr<FILE, std::function<int (FILE*)>> fp(popen(command.c_str(), "r"), pclose);
 
     if (fp == nullptr)
         throw std::runtime_error(std::strerror(errno));
@@ -190,9 +191,9 @@ std::string substituteShell(const std::string &command)
 #endif
 }
 
-std::string substitute(std::string::const_iterator &it, std::string::const_iterator &end, char token, const Substitution &params)
+std::string substitute(std::string::const_iterator& it, std::string::const_iterator& end, char token, const subst& params)
 {
-    assert(isReserved(token));
+    assert(is_reserved(token));
 
     std::string content, value;
 
@@ -212,20 +213,20 @@ std::string substitute(std::string::const_iterator &it, std::string::const_itera
 
     switch (token) {
     case '#':
-        if (params.flags & Substitution::Keywords)
-            value = substituteKeywords(content, params);
+        if ((params.flags & subst_flags::keywords) == subst_flags::keywords)
+            value = subst_keywords(content, params);
         break;
     case '$':
-        if (params.flags & Substitution::Env)
-            value = substituteEnv(content);
+        if ((params.flags & subst_flags::env) == subst_flags::env)
+            value = subst_env(content);
         break;
     case '@':
-        if (params.flags & Substitution::IrcAttrs)
-            value = substituteAttributes(content);
+        if ((params.flags & subst_flags::irc_attrs) == subst_flags::irc_attrs)
+            value = subst_attrs(content);
         break;
     case '!':
-        if (params.flags & Substitution::Shell)
-            value = substituteShell(content);
+        if ((params.flags & subst_flags::shell) == subst_flags::shell)
+            value = subst_shell(content);
         break;
     default:
         break;
@@ -236,33 +237,33 @@ std::string substitute(std::string::const_iterator &it, std::string::const_itera
 
 } // !namespace
 
-std::string format(std::string text, const Substitution &params)
+std::string format(std::string text, const subst& params)
 {
     /*
      * Change the date format before anything else to avoid interpolation with
      * keywords and user input.
      */
-    if (params.flags & Substitution::Date)
-        text = substituteDate(text, params);
+    if ((params.flags & subst_flags::date) == subst_flags::date)
+        text = subst_date(text, params);
 
     std::ostringstream oss;
 
     for (auto it = text.cbegin(), end = text.cend(); it != end; ) {
         auto token = *it;
 
-        /* Is the current character a reserved token or not? */
-        if (!isReserved(token)) {
+        // Is the current character a reserved token or not?
+        if (!is_reserved(token)) {
             oss << *it++;
             continue;
         }
 
-        /* The token was at the end, just write it and return now. */
+        // The token was at the end, just write it and return now.
         if (++it == end) {
             oss << token;
             continue;
         }
 
-        /* The token is declaring a template variable, substitute it. */
+        // The token is declaring a template variable, substitute it.
         if (*it == '{') {
             oss << substitute(++it, end, token, params);
             continue;
@@ -307,7 +308,7 @@ std::string strip(std::string str)
     return str;
 }
 
-std::vector<std::string> split(const std::string &list, const std::string &delimiters, int max)
+std::vector<std::string> split(const std::string& list, const std::string& delimiters, int max)
 {
     std::vector<std::string> result;
     std::size_t next = -1, current;
@@ -338,10 +339,10 @@ std::vector<std::string> split(const std::string &list, const std::string &delim
     return result;
 }
 
-MessagePair parseMessage(std::string message, const std::string &cc, const std::string &name)
+message_pack parse_message(std::string message, const std::string& cc, const std::string& name)
 {
-    std::string result = message;
-    bool iscommand = false;
+    auto result = message;
+    auto iscommand = false;
 
     // handle special commands "!<plugin> command"
     if (cc.length() > 0) {
@@ -371,10 +372,13 @@ MessagePair parseMessage(std::string message, const std::string &cc, const std::
         }
     }
 
-    return MessagePair(result, ((iscommand) ? MessageType::Command : MessageType::Message));
+    return {
+        iscommand ? message_pack::type::command : message_pack::type::message,
+        result
+    };
 }
 
-bool isBoolean(std::string value) noexcept
+bool is_boolean(std::string value) noexcept
 {
     std::transform(value.begin(), value.end(), value.begin(), [] (auto c) {
         return toupper(c);
@@ -383,7 +387,7 @@ bool isBoolean(std::string value) noexcept
     return value == "1" || value == "YES" || value == "TRUE" || value == "ON";
 }
 
-bool isInt(const std::string &str, int base) noexcept
+bool is_int(const std::string &str, int base) noexcept
 {
     if (str.empty())
         return false;
@@ -395,7 +399,7 @@ bool isInt(const std::string &str, int base) noexcept
     return *ptr == 0;
 }
 
-bool isReal(const std::string &str) noexcept
+bool is_real(const std::string &str) noexcept
 {
     if (str.empty())
         return false;
@@ -407,7 +411,7 @@ bool isReal(const std::string &str) noexcept
     return *ptr == 0;
 }
 
-std::string nextNetwork(std::string &input)
+std::string next_network(std::string& input)
 {
     std::string result;
     std::string::size_type pos = input.find("\r\n\r\n");

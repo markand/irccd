@@ -34,18 +34,18 @@
 
 namespace irccd {
 
-class Irccd;
-class Rule;
-class Server;
-class TransportServer;
+class irccd;
+class rule;
+class server;
+class transport_server;
 
 /**
  * \brief Read .ini configuration file for irccd
  */
-class Config {
+class config {
 private:
-    std::string m_path;
-    ini::Document m_document;
+    std::string path_;
+    ini::document document_;
 
 public:
     /**
@@ -54,16 +54,16 @@ public:
      * \return the config
      * \throw std::exception on errors or if no config could be found
      */
-    IRCCD_EXPORT static Config find();
+    static config find();
 
     /**
      * Load the configuration from the specified path.
      *
      * \param path the path
      */
-    inline Config(std::string path)
-        : m_path(std::move(path))
-        , m_document(ini::readFile(m_path))
+    inline config(std::string path)
+        : path_(std::move(path))
+        , document_(ini::read_file(path_))
     {
     }
 
@@ -72,9 +72,9 @@ public:
      *
      * \return the path
      */
-    inline const std::string &path() const noexcept
+    inline const std::string& path() const noexcept
     {
-        return m_path;
+        return path_;
     }
 
    /**
@@ -85,7 +85,7 @@ public:
      * \param name the identity name
      * \return default identity if cannot be found
      */
-    IRCCD_EXPORT void loadServerIdentity(Server &server, const std::string &name) const;
+    void load_server_identity(server& server, const std::string& name) const;
 
      /**
      * Find a plugin configuration if defined in the configuration file.
@@ -93,7 +93,7 @@ public:
      * \pre util::isValidIdentifier(name)
      * \return the configuration or empty if not found
      */
-    IRCCD_EXPORT PluginConfig findPluginConfig(const std::string &name) const;
+    plugin_config find_plugin_config(const std::string& name) const;
 
     /**
      * Find plugin formats if defined.
@@ -101,7 +101,7 @@ public:
      * \pre util::isValidIdentifier(name)
      * \return the formats or empty one if not found
      */
-    IRCCD_EXPORT PluginFormats findPluginFormats(const std::string &name) const;
+    plugin_formats find_plugin_formats(const std::string& name) const;
 
     /**
      * Find plugin paths if defined.
@@ -109,80 +109,80 @@ public:
      * \pre util::isValidIdentifier(name)
      * \param name the plugin name
      */
-    IRCCD_EXPORT PluginPaths findPluginPaths(const std::string& name) const;
+    plugin_paths find_plugin_paths(const std::string& name) const;
 
     /**
      * Get the path to the pidfile.
      *
      * \return the path or empty if not defined
      */
-    IRCCD_EXPORT std::string pidfile() const;
+    std::string pidfile() const;
 
     /**
      * Get the uid.
      *
      * \return the uid or empty one if no one is set
      */
-    IRCCD_EXPORT std::string uid() const;
+    std::string uid() const;
 
     /**
      * Get the gid.
      *
      * \return the gid or empty one if no one is set
      */
-    IRCCD_EXPORT std::string gid() const;
+    std::string gid() const;
 
     /**
      * Check if verbosity is enabled.
      *
      * \return true if verbosity was requested
      */
-    IRCCD_EXPORT bool isVerbose() const noexcept;
+    bool is_verbose() const noexcept;
 
     /**
      * Check if foreground is specified (= no daemonize).
      *
      * \return true if foreground was requested
      */
-    IRCCD_EXPORT bool isForeground() const noexcept;
+    bool is_foreground() const noexcept;
 
     /**
      * Load logging interface.
      */
-    IRCCD_EXPORT void loadLogs() const;
+    void load_logs() const;
 
     /**
      * Load formats for logging.
      */
-    IRCCD_EXPORT void loadFormats() const;
+    void load_formats() const;
 
     /**
      * Load transports.
      *
      * \return the set of transports
      */
-    IRCCD_EXPORT std::vector<std::shared_ptr<TransportServer>> loadTransports() const;
+    std::vector<std::shared_ptr<transport_server>> load_transports() const;
 
     /**
      * Load rules.
      *
      * \return the rules
      */
-    IRCCD_EXPORT std::vector<Rule> loadRules() const;
+    std::vector<rule> load_rules() const;
 
     /**
      * Get the list of servers defined.
      *
      * \return the list of servers
      */
-    IRCCD_EXPORT std::vector<std::shared_ptr<Server>> loadServers() const;
+    std::vector<std::shared_ptr<server>> load_servers() const;
 
     /**
      * Load default paths for plugins.
      *
      * \return the map of paths
      */
-    IRCCD_EXPORT PluginPaths loadPaths() const;
+    plugin_paths load_paths() const;
 
     /**
      * Get the list of defined plugins.
@@ -190,7 +190,7 @@ public:
      * \param irccd the irccd instance
      * \return the list of plugins
      */
-    IRCCD_EXPORT void loadPlugins(Irccd &irccd) const;
+    void load_plugins(irccd& irccd) const;
 };
 
 } // !irccd

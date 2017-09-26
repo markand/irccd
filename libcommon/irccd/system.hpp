@@ -44,14 +44,14 @@ namespace sys {
  *
  * \param name the program name
  */
-IRCCD_EXPORT void setProgramName(std::string name) noexcept;
+IRCCD_EXPORT void set_program_name(std::string name) noexcept;
 
 /**
  * Get the program name.
  *
  * \return the program name
  */
-IRCCD_EXPORT const std::string &programName() noexcept;
+IRCCD_EXPORT const std::string& program_name() noexcept;
 
 /**
  * Get the system name.
@@ -72,7 +72,7 @@ IRCCD_EXPORT std::string version();
  *
  * \return the number of seconds
  */
-IRCCD_EXPORT uint64_t uptime();
+IRCCD_EXPORT std::uint64_t uptime();
 
 /**
  * Get the milliseconds elapsed since the application
@@ -80,14 +80,14 @@ IRCCD_EXPORT uint64_t uptime();
  *
  * \return the milliseconds
  */
-IRCCD_EXPORT uint64_t ticks();
+IRCCD_EXPORT std::uint64_t ticks();
 
 /**
  * Get an environment variable.
  *
  * \return the value or empty string
  */
-IRCCD_EXPORT std::string env(const std::string &var);
+IRCCD_EXPORT std::string env(const std::string& var);
 
 /**
  * Get home directory usually /home/foo
@@ -103,7 +103,7 @@ IRCCD_EXPORT std::string home();
  *
  * \param value the value
  */
-IRCCD_EXPORT void setUid(const std::string &value);
+IRCCD_EXPORT void set_uid(const std::string& value);
 
 #endif
 
@@ -114,7 +114,7 @@ IRCCD_EXPORT void setUid(const std::string &value);
  *
  * \param value the value
  */
-IRCCD_EXPORT void setGid(const std::string &value);
+IRCCD_EXPORT void set_gid(const std::string& value);
 
 #endif
 

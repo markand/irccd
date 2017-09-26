@@ -1,5 +1,5 @@
 /*
- * mod-timer.hpp -- Irccd.Timer API
+ * js_timer_module.hpp -- Irccd.Timer API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_MOD_TIMER_HPP
-#define IRCCD_MOD_TIMER_HPP
+#ifndef IRCCD_JS_TIMER_MODULE_HPP
+#define IRCCD_JS_TIMER_MODULE_HPP
 
 /**
- * \file mod-timer.hpp
- * \brief Irccd.Timer JavaScript API.
+ * \file js_timer_module
+ * \brief irccd.Timer JavaScript API.
  */
 
 #include "module.hpp"
@@ -32,17 +32,17 @@ namespace irccd {
  * \brief Irccd.Timer JavaScript API.
  * \ingroup modules
  */
-class TimerModule : public Module {
+class js_timer_module : public module {
 public:
     /**
-     * Irccd.Timer.
+     * Constructor.
      */
-    IRCCD_EXPORT TimerModule() noexcept;
+    js_timer_module() noexcept;
 
     /**
-     * \copydoc Module::load
+     * \copydoc module::load
      */
-    IRCCD_EXPORT void load(Irccd &irccd, std::shared_ptr<JsPlugin> plugin) override;
+    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
 } // !irccd

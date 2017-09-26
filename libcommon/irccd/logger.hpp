@@ -35,26 +35,26 @@ namespace irccd {
 namespace log {
 
 /*
- * Logger -- abstract logging interface
+ * logger -- abstract logging interface
  * ------------------------------------------------------------------
  */
 
 /**
  * \brief Interface to implement new logger mechanisms.
  *
- * Derive from this class and use log::setLogger() to change logging system.
+ * Derive from this class and use log::set_logger() to change logging system.
  *
- * \see File
- * \see Console
- * \see Syslog
- * \see Silent
+ * \see file_logger
+ * \see console_logger
+ * \see syslog_logger
+ * \see silent_logger
  */
-class Logger {
+class logger {
 public:
     /**
      * Virtual destructor defaulted.
      */
-    virtual ~Logger() = default;
+    virtual ~logger() = default;
 
     /**
      * Write a debug message.
@@ -64,7 +64,7 @@ public:
      * \param line the data
      * \see log::debug
      */
-    virtual void debug(const std::string &line) = 0;
+    virtual void debug(const std::string& line) = 0;
 
     /**
      * Write a information message.
@@ -74,7 +74,7 @@ public:
      * \param line the data
      * \see log::info
      */
-    virtual void info(const std::string &line) = 0;
+    virtual void info(const std::string& line) = 0;
 
     /**
      * Write an error message.
@@ -84,11 +84,11 @@ public:
      * \param line the data
      * \see log::warning
      */
-    virtual void warning(const std::string &line) = 0;
+    virtual void warning(const std::string& line) = 0;
 };
 
 /*
- * Filter -- modify messages before printing
+ * filter -- modify messages before printing
  * ------------------------------------------------------------------
  */
 
@@ -97,12 +97,12 @@ public:
  *
  * Derive from this class and use log::setFilter.
  */
-class Filter {
+class filter {
 public:
     /**
      * Virtual destructor defaulted.
      */
-    virtual ~Filter() = default;
+    virtual ~filter() = default;
 
     /**
      * Update the debug message.
@@ -110,7 +110,7 @@ public:
      * \param input the message
      * \return the updated message
      */
-    virtual std::string preDebug(std::string input) const
+    virtual std::string pre_debug(std::string input) const
     {
         return input;
     }
@@ -121,7 +121,7 @@ public:
      * \param input the message
      * \return the updated message
      */
-    virtual std::string preInfo(std::string input) const
+    virtual std::string pre_info(std::string input) const
     {
         return input;
     }
@@ -132,14 +132,14 @@ public:
      * \param input the message
      * \return the updated message
      */
-    virtual std::string preWarning(std::string input) const
+    virtual std::string pre_warning(std::string input) const
     {
         return input;
     }
 };
 
 /*
- * Console -- logs to console
+ * console_logger -- logs to console
  * ------------------------------------------------------------------
  */
 
@@ -147,36 +147,36 @@ public:
  * \brief Logger implementation for console output using std::cout and
  *        std::cerr.
  */
-class ConsoleLogger : public Logger {
+class console_logger : public logger {
 public:
     /**
-     * \copydoc Logger::debug
+     * \copydoc logger::debug
      */
-    IRCCD_EXPORT void debug(const std::string &line) override;
+    void debug(const std::string& line) override;
 
     /**
-     * \copydoc Logger::info
+     * \copydoc logger::info
      */
-    IRCCD_EXPORT void info(const std::string &line) override;
+    void info(const std::string& line) override;
 
     /**
-     * \copydoc Logger::warning
+     * \copydoc logger::warning
      */
-    IRCCD_EXPORT void warning(const std::string &line) override;
+    void warning(const std::string& line) override;
 };
 
 /*
- * File -- logs to a file
+ * file_logger -- logs to a file
  * ------------------------------------------------------------------
  */
 
 /**
  * \brief Output to a files.
  */
-class FileLogger : public Logger {
+class file_logger : public logger {
 private:
-    std::string m_outputNormal;
-    std::string m_outputError;
+    std::string output_normal_;
+    std::string output_error_;
 
 public:
     /**
@@ -185,26 +185,26 @@ public:
      * \param normal the path to the normal logs
      * \param errors the path to the errors logs
      */
-    IRCCD_EXPORT FileLogger(std::string normal, std::string errors);
+    file_logger(std::string normal, std::string errors);
 
     /**
-     * \copydoc Logger::debug
+     * \copydoc logger::debug
      */
-    IRCCD_EXPORT void debug(const std::string &line) override;
+    void debug(const std::string& line) override;
 
     /**
-     * \copydoc Logger::info
+     * \copydoc logger::info
      */
-    IRCCD_EXPORT void info(const std::string &line) override;
+    void info(const std::string& line) override;
 
     /**
-     * \copydoc Logger::warning
+     * \copydoc logger::warning
      */
-    IRCCD_EXPORT void warning(const std::string &line) override;
+    void warning(const std::string& line) override;
 };
 
 /*
- * Silent -- disable all logs
+ * silent_logger -- disable all logs
  * ------------------------------------------------------------------
  */
 
@@ -213,26 +213,26 @@ public:
  *
  * Useful for unit tests when some classes may emits log.
  */
-class SilentLogger : public Logger {
+class silent_logger : public logger {
 public:
     /**
-     * \copydoc Logger::debug
+     * \copydoc logger::debug
      */
-    IRCCD_EXPORT void debug(const std::string &line) override;
+    void debug(const std::string& line) override;
 
     /**
-     * \copydoc Logger::info
+     * \copydoc logger::info
      */
-    IRCCD_EXPORT void info(const std::string &line) override;
+    void info(const std::string& line) override;
 
     /**
-     * \copydoc Logger::warning
+     * \copydoc logger::warning
      */
-    IRCCD_EXPORT void warning(const std::string &line) override;
+    void warning(const std::string& line) override;
 };
 
 /*
- * Syslog -- system logger
+ * syslog_logger -- system logger
  * ------------------------------------------------------------------
  */
 
@@ -241,32 +241,32 @@ public:
 /**
  * \brief Implements logger into syslog.
  */
-class SyslogLogger : public Logger {
+class syslog_logger : public logger {
 public:
     /**
      * Open the syslog.
      */
-    IRCCD_EXPORT SyslogLogger();
+    syslog_logger();
 
     /**
      * Close the syslog.
      */
-    IRCCD_EXPORT ~SyslogLogger();
+    ~syslog_logger();
 
     /**
-     * \copydoc Logger::debug
+     * \copydoc logger::debug
      */
-    IRCCD_EXPORT void debug(const std::string &line) override;
+    void debug(const std::string& line) override;
 
     /**
-     * \copydoc Logger::info
+     * \copydoc logger::info
      */
-    IRCCD_EXPORT void info(const std::string &line) override;
+    void info(const std::string& line) override;
 
     /**
-     * \copydoc Logger::warning
+     * \copydoc logger::warning
      */
-    IRCCD_EXPORT void warning(const std::string &line) override;
+    void warning(const std::string& line) override;
 };
 
 #endif // !HAVE_SYSLOG
@@ -282,7 +282,7 @@ public:
  * \pre iface must not be null
  * \param iface the new interface
  */
-IRCCD_EXPORT void setLogger(std::unique_ptr<Logger> iface) noexcept;
+IRCCD_EXPORT void set_logger(std::unique_ptr<logger> iface) noexcept;
 
 /**
  * Set an optional filter.
@@ -290,7 +290,7 @@ IRCCD_EXPORT void setLogger(std::unique_ptr<Logger> iface) noexcept;
  * \pre filter must not be null
  * \param filter the filter
  */
-IRCCD_EXPORT void setFilter(std::unique_ptr<Filter> filter) noexcept;
+IRCCD_EXPORT void set_filter(std::unique_ptr<filter> filter) noexcept;
 
 /**
  * Get the stream for informational messages.
@@ -301,7 +301,7 @@ IRCCD_EXPORT void setFilter(std::unique_ptr<Filter> filter) noexcept;
  * \return the stream
  * \note Has no effect if verbose is set to false.
  */
-IRCCD_EXPORT std::ostream &info(const std::string &message = "");
+IRCCD_EXPORT std::ostream& info(const std::string& message = "");
 
 /**
  * Get the stream for warnings.
@@ -311,7 +311,7 @@ IRCCD_EXPORT std::ostream &info(const std::string &message = "");
  * \param message the optional message to write
  * \return the stream
  */
-IRCCD_EXPORT std::ostream &warning(const std::string &message = "");
+IRCCD_EXPORT std::ostream& warning(const std::string& message = "");
 
 /**
  * Get the stream for debug messages.
@@ -322,21 +322,21 @@ IRCCD_EXPORT std::ostream &warning(const std::string &message = "");
  * \return the stream
  * \note Has no effect if compiled in release mode.
  */
-IRCCD_EXPORT std::ostream &debug(const std::string &message = "");
+IRCCD_EXPORT std::ostream& debug(const std::string& message = "");
 
 /**
  * Tells if verbose is enabled.
  *
  * \return true if enabled
  */
-IRCCD_EXPORT bool isVerbose() noexcept;
+IRCCD_EXPORT bool is_verbose() noexcept;
 
 /**
  * Set the verbosity mode.
  *
  * \param mode the new mode
  */
-IRCCD_EXPORT void setVerbose(bool mode) noexcept;
+IRCCD_EXPORT void set_verbose(bool mode) noexcept;
 
 } // !log
 

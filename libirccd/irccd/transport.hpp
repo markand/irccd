@@ -36,53 +36,53 @@
 
 namespace irccd {
 
-class TransportServer;
+class transport_server;
 
 /**
  * \brief Client connected to irccd.
  *
  * This class emits a warning upon clients request through onCommand signal.
  */
-class TransportClient {
+class transport_client {
 public:
     /**
      * \brief Client state
      */
-    enum State {
-        Greeting,               //!< client is getting irccd info
-        Authenticating,         //!< client requires authentication
-        Ready,                  //!< client is ready to use
-        Closing                 //!< client must disconnect
+    enum class state {
+        greeting,               //!< client is getting irccd info
+        authenticating,         //!< client requires authentication
+        ready,                  //!< client is ready to use
+        closing                 //!< client must disconnect
     };
 
     /**
-     * Signal: onCommand
+     * Signal: on_command
      * ----------------------------------------------------------
      *
      * Arguments:
      *   - the command
      */
-    Signal<const nlohmann::json &> onCommand;
+    Signal<const nlohmann::json&> on_command;
 
     /**
-     * Signal: onDie
+     * Signal: on_die
      * ----------------------------------------------------------
      *
      * The client has disconnected.
      */
-    Signal<> onDie;
+    Signal<> on_die;
 
 private:
-    void error(const std::string &msg);
+    void error(const std::string& msg);
     void flush() noexcept;
     void authenticate() noexcept;
 
 protected:
-    State m_state{Greeting};    //!< current client state
-    TransportServer &m_parent;  //!< parent transport server
-    net::TcpSocket m_socket;    //!< socket
-    std::string m_input;        //!< input buffer
-    std::string m_output;       //!< output buffer
+    state state_{state::greeting};      //!< current client state
+    transport_server& parent_;          //!< parent transport server
+    net::TcpSocket socket_;             //!< socket
+    std::string input_;                 //!< input buffer
+    std::string output_;                //!< output buffer
 
     /**
      * Fill the input buffer with available data.
@@ -101,7 +101,7 @@ protected:
      * \param length the buffer length
      * \return the number of bytes received
      */
-    IRCCD_EXPORT virtual unsigned recv(void *buffer, unsigned length);
+    virtual unsigned recv(void* buffer, unsigned length);
 
     /**
      * Try to send some data into the given buffer.
@@ -110,7 +110,7 @@ protected:
      * \param length the buffer length
      * \return the number of bytes sent
      */
-    IRCCD_EXPORT virtual unsigned send(const void *buffer, unsigned length);
+    virtual unsigned send(const void* buffer, unsigned length);
 
 public:
     /**
@@ -120,21 +120,21 @@ public:
      * \param parent the parent server
      * \param socket the new socket
      */
-    IRCCD_EXPORT TransportClient(TransportServer &parent, net::TcpSocket socket);
+    transport_client(transport_server& parent, net::TcpSocket socket);
 
     /**
      * Virtual destructor defaulted.
      */
-    virtual ~TransportClient() = default;
+    virtual ~transport_client() = default;
 
     /**
      * Get the client state.
      *
      * \return the client state
      */
-    inline State state() const noexcept
+    inline enum state state() const noexcept
     {
-        return m_state;
+        return state_;
     }
 
     /**
@@ -143,17 +143,17 @@ public:
      * \pre json.is_object()
      * \param json the json object
      */
-    IRCCD_EXPORT void send(const nlohmann::json &json);
+    void send(const nlohmann::json& json);
 
     /**
      * \copydoc Service::prepare
      */
-    IRCCD_EXPORT virtual void prepare(fd_set &in, fd_set &out, net::Handle &max);
+    virtual void prepare(fd_set& in, fd_set& out, net::Handle& max);
 
     /**
      * \copydoc Service::sync
      */
-    IRCCD_EXPORT virtual void sync(fd_set &in, fd_set &out);
+    virtual void sync(fd_set& in, fd_set& out);
 
     /**
      * Send a successful command to the client with optional extra data
@@ -162,7 +162,7 @@ public:
      * \param cmd the command name
      * \param extra the optional extra data
      */
-    IRCCD_EXPORT void success(const std::string &cmd, nlohmann::json extra = nullptr);
+    void success(const std::string& cmd, nlohmann::json extra = nullptr);
 
     /**
      * Send an error status to the client.
@@ -172,9 +172,9 @@ public:
      * \param error the error string
      * \param extra the optional extra data
      */
-    IRCCD_EXPORT void error(const std::string &cmd,
-                            const std::string &error,
-                            nlohmann::json extra = nullptr);
+    void error(const std::string& cmd,
+               const std::string& error,
+               nlohmann::json extra = nullptr);
 };
 
 /*
@@ -187,15 +187,15 @@ public:
 /**
  * \brief TLS version of transport client.
  */
-class TransportClientTls : public TransportClient {
+class transport_client_tls : public transport_client {
 private:
-    enum {
-        HandshakeWrite,
-        HandshakeRead,
-        HandshakeReady
-    } m_handshake{HandshakeReady};
+    enum class handshake {
+        write,
+        read,
+        ready
+    } handshake_{handshake::ready};
 
-    net::TlsSocket m_ssl;
+    net::TlsSocket ssl_;
 
     void handshake();
 
@@ -203,12 +203,12 @@ protected:
     /**
      * \copydoc TransportClient::recv
      */
-    unsigned recv(void *buffer, unsigned length) override;
+    unsigned recv(void* buffer, unsigned length) override;
 
     /**
      * \copydoc TransportClient::send
      */
-    unsigned send(const void *buffer, unsigned length) override;
+    unsigned send(const void* buffer, unsigned length) override;
 
 public:
     /**
@@ -221,20 +221,20 @@ public:
      * \param parent the parent server
      * \param socket the new socket
      */
-    IRCCD_EXPORT TransportClientTls(const std::string &pkey,
-                                    const std::string &cert,
-                                    TransportServer &server,
-                                    net::TcpSocket socket);
+    transport_client_tls(const std::string& pkey,
+                         const std::string& cert,
+                         transport_server& server,
+                         net::TcpSocket socket);
 
     /**
      * \copydoc TransportClient::prepare
      */
-    IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max) override;
+    void prepare(fd_set& in, fd_set& out, net::Handle& max) override;
 
     /**
      * \copydoc TransportClient::sync
      */
-    IRCCD_EXPORT void sync(fd_set &in, fd_set &out) override;
+    void sync(fd_set& in, fd_set& out) override;
 };
 
 #endif  // !WITH_SSL
@@ -252,32 +252,32 @@ public:
  *
  * The transport class supports the following domains:
  *
- * | Domain                | Class                 |
- * |-----------------------|-----------------------|
- * | IPv4, IPv6            | TransportServerIp     |
- * | Unix (not on Windows) | TransportServerUnix   |
+ * | Domain                | Class                  |
+ * |-----------------------|------------------------|
+ * | IPv4, IPv6            | transport_server_ip    |
+ * | Unix (not on Windows) | transport_server_local |
  *
  * Note: IPv4 and IPv6 can be combined, using TransportServer::IPv6 and its
  * option.
  */
-class TransportServer {
+class transport_server {
 private:
-    TransportServer(const TransportServer &) = delete;
-    TransportServer(TransportServer &&) = delete;
+    transport_server(const transport_server&) = delete;
+    transport_server(transport_server&&) = delete;
 
-    TransportServer &operator=(const TransportServer &) = delete;
-    TransportServer &operator=(TransportServer &&) = delete;
+    transport_server& operator=(const transport_server&) = delete;
+    transport_server& operator=(transport_server&&) = delete;
 
 protected:
-    net::TcpSocket m_socket;
-    std::string m_password;
+    net::TcpSocket socket_;
+    std::string password_;
 
 public:
     /**
      * Default constructor.
      */
-    inline TransportServer(net::TcpSocket socket)
-        : m_socket(std::move(socket))
+    inline transport_server(net::TcpSocket socket)
+        : socket_(std::move(socket))
     {
     }
 
@@ -288,7 +288,7 @@ public:
      */
     inline net::Handle handle() const noexcept
     {
-        return m_socket.handle();
+        return socket_.handle();
     }
 
     /**
@@ -296,9 +296,9 @@ public:
      *
      * \return the password
      */
-    inline const std::string &password() const noexcept
+    inline const std::string& password() const noexcept
     {
-        return m_password;
+        return password_;
     }
 
     /**
@@ -306,36 +306,36 @@ public:
      *
      * \return the password
      */
-    inline void setPassword(std::string password) noexcept
+    inline void set_password(std::string password) noexcept
     {
-        m_password = std::move(password);
+        password_ = std::move(password);
     }
 
     /**
      * Destructor defaulted.
      */
-    virtual ~TransportServer() = default;
+    virtual ~transport_server() = default;
 
     /**
      * Accept a new client depending on the domain.
      *
      * \return the new client
      */
-    virtual std::unique_ptr<TransportClient> accept()
+    virtual std::unique_ptr<transport_client> accept()
     {
-        return std::make_unique<TransportClient>(*this, m_socket.accept());
+        return std::make_unique<transport_client>(*this, socket_.accept());
     }
 };
 
 /**
  * \brief Create IP transport.
  */
-class TransportServerIp : public TransportServer {
+class transport_server_ip : public transport_server {
 public:
     /**
      * \brief Domain to use.
      */
-    enum Mode {
+    enum mode {
         v4 = (1 << 0),      //!< IPv6
         v6 = (1 << 1)       //!< IPv4
     };
@@ -347,9 +347,9 @@ public:
      * \param port the port number
      * \param mode the domains to use (can be OR'ed)
      */
-    IRCCD_EXPORT TransportServerIp(const std::string &address,
-                                   std::uint16_t port,
-                                   std::uint8_t mode = v4);
+    transport_server_ip(const std::string& address,
+                        std::uint16_t port,
+                        std::uint8_t mode = v4);
 
     /**
      * Get the associated port.
@@ -364,10 +364,10 @@ public:
 /**
  * \brief TLS over IP transport.
  */
-class TransportServerTls : public TransportServerIp {
+class transport_server_tls : public transport_server_ip {
 private:
-    std::string m_privatekey;
-    std::string m_cert;
+    std::string privatekey_;
+    std::string cert_;
 
 public:
     /**
@@ -379,16 +379,16 @@ public:
      * \param port the port number
      * \param mode the domains to use (can be OR'ed)
      */
-    IRCCD_EXPORT TransportServerTls(const std::string &pkey,
-                                    const std::string &cert,
-                                    const std::string &address,
-                                    std::uint16_t port,
-                                    std::uint8_t mode = v4);
+    transport_server_tls(const std::string& pkey,
+                         const std::string& cert,
+                         const std::string& address,
+                         std::uint16_t port,
+                         std::uint8_t mode = mode::v4);
 
     /**
      * \copydoc TransportServer::accept
      */
-    IRCCD_EXPORT std::unique_ptr<TransportClient> accept() override;
+    std::unique_ptr<transport_client> accept() override;
 };
 
 #endif // !WITH_SSL
@@ -398,9 +398,9 @@ public:
 /**
  * \brief Implementation of transports for Unix sockets.
  */
-class TransportServerLocal : public TransportServer {
+class transport_server_local : public transport_server {
 private:
-    std::string m_path;
+    std::string path_;
 
 public:
     /**
@@ -408,12 +408,12 @@ public:
      *
      * \param path the path
      */
-    IRCCD_EXPORT TransportServerLocal(std::string path);
+    transport_server_local(std::string path);
 
     /**
      * Destroy the transport and remove the file.
      */
-    IRCCD_EXPORT ~TransportServerLocal();
+    ~transport_server_local();
 };
 
 #endif // !IRCCD_SYSTEM_WINDOWS

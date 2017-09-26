@@ -21,7 +21,6 @@
 #include <service.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 class RuleEditCommandTest : public CommandTester {
 protected:
@@ -42,16 +41,16 @@ protected:
 
 public:
     RuleEditCommandTest()
-        : CommandTester(std::make_unique<RuleEditCommand>())
+        : CommandTester(std::make_unique<rule_edit_command>())
     {
-        m_irccd.commands().add(std::make_unique<RuleInfoCommand>());
-        m_irccd.rules().add(Rule(
+        m_irccd.commands().add(std::make_unique<rule_info_command>());
+        m_irccd.rules().add(rule(
             { "s1", "s2" },
             { "c1", "c2" },
             { "o1", "o2" },
             { "p1", "p2" },
             { "onMessage", "onCommand" },
-            RuleAction::Drop
+            rule::action_type::drop
         ));
         m_irccdctl.client().onMessage.connect([&] (auto result) {
             m_result = result;

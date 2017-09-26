@@ -104,7 +104,7 @@ public:
         std::string msg;
 
         do {
-            msg = util::nextNetwork(cnx.m_input);
+            msg = util::next_network(cnx.m_input);
 
             if (!msg.empty())
                 parse(cnx, msg);
@@ -151,7 +151,7 @@ private:
     {
         cnt.recv();
 
-        auto msg = util::nextNetwork(cnt.m_input);
+        auto msg = util::next_network(cnt.m_input);
 
         if (msg.empty())
             return;
@@ -277,7 +277,7 @@ private:
 
     void verify(Client &cnx) const
     {
-        auto msg = util::nextNetwork(cnx.m_input);
+        auto msg = util::next_network(cnx.m_input);
 
         if (msg.empty())
             return;

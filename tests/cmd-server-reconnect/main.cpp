@@ -22,7 +22,6 @@
 #include <service.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
@@ -52,7 +51,7 @@ public:
 class ServerReconnectCommandTest : public CommandTester {
 public:
     ServerReconnectCommandTest()
-        : CommandTester(std::make_unique<ServerReconnectCommand>())
+        : CommandTester(std::make_unique<server_reconnect_command>())
     {
         m_irccd.servers().add(std::make_unique<ServerReconnectTest>("s1", s1));
         m_irccd.servers().add(std::make_unique<ServerReconnectTest>("s2", s2));

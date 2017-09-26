@@ -23,20 +23,19 @@
 #include <plugin.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
 bool called = false;
 
-class CustomPlugin : public Plugin {
+class CustomPlugin : public plugin {
 public:
     CustomPlugin()
-        : Plugin("test", "")
+        : plugin("test", "")
     {
     }
 
-    void onReload(Irccd &) override
+    void on_reload(irccd::irccd &) override
     {
         called = true;
     }
@@ -45,7 +44,7 @@ public:
 class PluginReloadCommandTest : public CommandTester {
 public:
     PluginReloadCommandTest()
-        : CommandTester(std::make_unique<PluginReloadCommand>())
+        : CommandTester(std::make_unique<plugin_reload_command>())
     {
         called = false;
     }

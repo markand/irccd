@@ -1,5 +1,5 @@
 /*
- * mod-directory.hpp -- Irccd.Directory API
+ * js_plugin_module.hpp -- Irccd.Plugin API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,35 +16,44 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_MOD_DIRECTORY_HPP
-#define IRCCD_MOD_DIRECTORY_HPP
+#ifndef IRCCD_JS_PLUGIN_MODULE_HPP
+#define IRCCD_JS_PLUGIN_MODULE_HPP
 
 /**
- * \file mod-directory.hpp
- * \brief Irccd.Directory JavaScript API.
+ * \file js_plugin_module.hpp
+ * \brief Irccd.Plugin JavaScript API.
  */
 
+#include "duktape.hpp"
 #include "module.hpp"
 
 namespace irccd {
 
 /**
- * \brief Irccd.Directory JavaScript API.
+ * \brief Irccd.Plugin JavaScript API.
  * \ingroup modules
  */
-class DirectoryModule : public Module {
+class js_plugin_module : public module {
 public:
     /**
-     * Irccd.Directory.
+     * Irccd.Plugin.
      */
-    IRCCD_EXPORT DirectoryModule() noexcept;
+    js_plugin_module() noexcept;
 
     /**
      * \copydoc Module::load
      */
-    IRCCD_EXPORT void load(Irccd &irccd, std::shared_ptr<JsPlugin> plugin) override;
+    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
+
+/**
+ * Access the plugin stored in this context.
+ *
+ * \param ctx the context
+ * \return the plugin
+ */
+std::shared_ptr<js_plugin> dukx_get_plugin(duk_context* ctx);
 
 } // !irccd
 
-#endif // !IRCCD_MOD_DIRECTORY_HPP
+#endif // !IRCCD_JS_PLUGIN_MODULE_HPP

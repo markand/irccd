@@ -19,8 +19,8 @@
 #include <gtest/gtest.h>
 
 #include <irccd/irccd.hpp>
-#include <irccd/mod-irccd.hpp>
-#include <irccd/plugin-js.hpp>
+#include <irccd/js_irccd_module.hpp>
+#include <irccd/js_plugin.hpp>
 #include <irccd/service.hpp>
 #include <irccd/sysconfig.hpp>
 
@@ -28,13 +28,13 @@ using namespace irccd;
 
 class TestJsIrccd : public testing::Test {
 protected:
-    Irccd m_irccd;
-    std::shared_ptr<JsPlugin> m_plugin;
+    irccd::irccd m_irccd;
+    std::shared_ptr<js_plugin> m_plugin;
 
     TestJsIrccd()
-        : m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
+        : m_plugin(std::make_shared<js_plugin>("empty", SOURCEDIR "/empty.js"))
     {
-        IrccdModule().load(m_irccd, m_plugin);
+        js_irccd_module().load(m_irccd, m_plugin);
     }
 };
 
@@ -98,7 +98,7 @@ TEST_F(TestJsIrccd, fromNative)
 {
     try {
         duk_push_c_function(m_plugin->context(), [] (duk_context *ctx) -> duk_ret_t {
-            dukx_throw(ctx, SystemError(EINVAL, "hey"));
+            dukx_throw(ctx, system_error(EINVAL, "hey"));
 
             return 0;
         }, 0);

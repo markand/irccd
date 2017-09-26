@@ -1,5 +1,5 @@
 /*
- * mod-plugin.cpp -- Irccd.Plugin API
+ * js_plugin_module.cpp -- Irccd.Plugin API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,17 +16,18 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "irccd.hpp"
-#include "plugin-js.hpp"
-#include "service.hpp"
-#include "mod-irccd.hpp"
-#include "mod-plugin.hpp"
+#include <irccd/irccd.hpp>
+#include <irccd/service.hpp>
+
+#include "js_irccd_module.hpp"
+#include "js_plugin.hpp"
+#include "js_plugin_module.hpp"
 
 namespace irccd {
 
 namespace {
 
-const char PluginGlobal[] = "\xff""\xff""irccd-plugin-ptr";
+const char plugin_ref[] = "\xff""\xff""irccd-plugin-ptr";
 
 /*
  * wrap
@@ -39,7 +40,7 @@ const char PluginGlobal[] = "\xff""\xff""irccd-plugin-ptr";
  * - unload.
  */
 template <typename Func>
-duk_idx_t wrap(duk_context *ctx, int nret, Func &&func)
+duk_idx_t wrap(duk_context* ctx, int nret, Func&& func)
 {
     std::string name = duk_require_string(ctx, 0);
 
@@ -58,8 +59,8 @@ duk_idx_t wrap(duk_context *ctx, int nret, Func &&func)
  * set
  * ------------------------------------------------------------------
  *
- * This setter is used to replace the Irccd.plugin->(config|format) property when
- * the plugin assign a new one.
+ * This setter is used to replace the Irccd.Plugin.(config|format|paths)
+ * property when the plugin assign a new one.
  *
  * Because the plugin configuration always has higher priority, when a new
  * object is assigned to 'config' or to the 'format' property, the plugin
@@ -69,31 +70,32 @@ duk_idx_t wrap(duk_context *ctx, int nret, Func &&func)
  *
  * Plugin 'xyz' does:
  *
- * Irccd.plugin->config = {
+ * Irccd.Plugin.config = {
  *      mode: "simple",
  *      level: "123"
  * };
  *
  * The user configuration is:
  *
- * [plugin->xyz]
+ * [plugin.xyz]
  * mode = "hard"
  * path = "/var"
  *
  * The final user table looks like this:
  *
- * Irccd.plugin->config = {
+ * Irccd.Plugin.Config = {
  *      mode: "hard",
  *      level: "123",
  *      path: "/var"
+ * };
  */
-duk_ret_t set(duk_context *ctx, const char *name)
+duk_ret_t set(duk_context* ctx, const std::string& name)
 {
     if (!duk_is_object(ctx, 0))
-        duk_error(ctx, DUK_ERR_TYPE_ERROR, "'%s' property must be object", name);
+        duk_error(ctx, DUK_ERR_TYPE_ERROR, "'%s' property must be object", name.c_str());
 
     // Merge old table with new one.
-    duk_get_global_string(ctx, name);
+    duk_get_global_string(ctx, name.c_str());
     duk_enum(ctx, -1, 0);
 
     while (duk_next(ctx, -1, true))
@@ -103,7 +105,7 @@ duk_ret_t set(duk_context *ctx, const char *name)
     duk_pop_2(ctx);
 
     // Replace the old table with the new assigned one.
-    duk_put_global_string(ctx, name);
+    duk_put_global_string(ctx, name.c_str());
 
     return 0;
 }
@@ -112,86 +114,86 @@ duk_ret_t set(duk_context *ctx, const char *name)
  * get
  * ------------------------------------------------------------------
  *
- * Get the Irccd.plugin->(config|format|paths) property.
+ * Get the Irccd.Plugin.(config|format|paths) property.
  */
-duk_ret_t get(duk_context *ctx, const char *name)
+duk_ret_t get(duk_context* ctx, const std::string& name)
 {
-    duk_get_global_string(ctx, name);
+    duk_get_global_string(ctx, name.c_str());
 
     return 1;
 }
 
 /*
- * setConfig
+ * set_config
  * ------------------------------------------------------------------
  *
- * Wrap setter for Irccd.plugin->config property.
+ * Wrap setter for Irccd.Plugin.config property.
  */
-duk_ret_t setConfig(duk_context *ctx)
+duk_ret_t set_config(duk_context* ctx)
 {
-    return set(ctx, JsPlugin::ConfigProperty);
+    return set(ctx, js_plugin::config_property);
 }
 
 /*
- * getConfig
+ * get_config
  * ------------------------------------------------------------------
  *
- * Wrap getter for Irccd.plugin->config property.
+ * Wrap getter for Irccd.Plugin.config property.
  */
-duk_ret_t getConfig(duk_context *ctx)
+duk_ret_t get_config(duk_context* ctx)
 {
-    return get(ctx, JsPlugin::ConfigProperty);
+    return get(ctx, js_plugin::config_property);
 }
 
 /*
- * setFormat
+ * set_format
  * ------------------------------------------------------------------
  *
- * Wrap setter for Irccd.plugin->format property.
+ * Wrap setter for Irccd.Plugin.format property.
  */
-duk_ret_t setFormat(duk_context *ctx)
+duk_ret_t set_format(duk_context* ctx)
 {
-    return set(ctx, JsPlugin::FormatProperty);
+    return set(ctx, js_plugin::format_property);
 }
 
 /*
- * getFormat
+ * get_format
  * ------------------------------------------------------------------
  *
- * Wrap getter for Irccd.plugin->format property.
+ * Wrap getter for Irccd.Plugin.format property.
  */
-duk_ret_t getFormat(duk_context *ctx)
+duk_ret_t get_format(duk_context* ctx)
 {
-    return get(ctx, JsPlugin::FormatProperty);
+    return get(ctx, js_plugin::format_property);
 }
 
 /*
- * setPaths
+ * set_paths
  * ------------------------------------------------------------------
  *
- * Wrap setter for Irccd.plugin->format property.
+ * Wrap setter for Irccd.Plugin.format property.
  */
-duk_ret_t setPaths(duk_context *ctx)
+duk_ret_t set_paths(duk_context* ctx)
 {
-    return set(ctx, JsPlugin::PathsProperty);
+    return set(ctx, js_plugin::paths_property);
 }
 
 /*
- * getPaths
+ * get_paths
  * ------------------------------------------------------------------
  *
- * Wrap getter for Irccd.plugin->format property.
+ * Wrap getter for Irccd.Plugin.format property.
  */
-duk_ret_t getPaths(duk_context *ctx)
+duk_ret_t get_paths(duk_context* ctx)
 {
-    return get(ctx, JsPlugin::PathsProperty);
+    return get(ctx, js_plugin::paths_property);
 }
 
 /*
- * Function: Irccd.plugin.info([name])
+ * Function: Irccd.Plugin.info([name])
  * ------------------------------------------------------------------
  *
- * Get information about a plugin->
+ * Get information about a plugin.
  *
  * The returned object as the following properties:
  *
@@ -207,9 +209,9 @@ duk_ret_t getPaths(duk_context *ctx)
  * Returns:
  *   The plugin information or undefined if the plugin was not found.
  */
-duk_idx_t info(duk_context *ctx)
+duk_idx_t info(duk_context* ctx)
 {
-    std::shared_ptr<Plugin> plugin;
+    std::shared_ptr<plugin> plugin;
 
     if (duk_get_top(ctx) >= 1)
         plugin = dukx_get_irccd(ctx).plugins().get(duk_require_string(ctx, 0));
@@ -235,7 +237,7 @@ duk_idx_t info(duk_context *ctx)
 }
 
 /*
- * Function: Irccd.plugin->list()
+ * Function: Irccd.Plugin.list()
  * ------------------------------------------------------------------
  *
  * Get the list of plugins, the array returned contains all plugin names.
@@ -243,7 +245,7 @@ duk_idx_t info(duk_context *ctx)
  * Returns:
  *   The list of all plugin names.
  */
-duk_idx_t list(duk_context *ctx)
+duk_idx_t list(duk_context* ctx)
 {
     dukx_push_array(ctx, dukx_get_irccd(ctx).plugins().list(), [] (auto ctx, auto plugin) {
         dukx_push_std_string(ctx, plugin->name());
@@ -253,7 +255,7 @@ duk_idx_t list(duk_context *ctx)
 }
 
 /*
- * Function: Irccd.plugin->load(name)
+ * Function: Irccd.Plugin.load(name)
  * ------------------------------------------------------------------
  *
  * Load a plugin by name. This function will search through the standard
@@ -265,15 +267,15 @@ duk_idx_t list(duk_context *ctx)
  *   - Error on errors,
  *   - ReferenceError if the plugin was not found.
  */
-duk_idx_t load(duk_context *ctx)
+duk_idx_t load(duk_context* ctx)
 {
-    return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
+    return wrap(ctx, 0, [&] (irccd &irccd, const std::string &name) {
         irccd.plugins().load(name);
     });
 }
 
 /*
- * Function: Irccd.plugin->reload(name)
+ * Function: Irccd.Plugin.reload(name)
  * ------------------------------------------------------------------
  *
  * Reload a plugin by name.
@@ -284,15 +286,15 @@ duk_idx_t load(duk_context *ctx)
  *   - Error on errors,
  *   - ReferenceError if the plugin was not found.
  */
-duk_idx_t reload(duk_context *ctx)
+duk_idx_t reload(duk_context* ctx)
 {
-    return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
+    return wrap(ctx, 0, [&] (irccd &irccd, const std::string &name) {
         irccd.plugins().reload(name);
     });
 }
 
 /*
- * Function: Irccd.plugin->unload(name)
+ * Function: Irccd.Plugin.unload(name)
  * ------------------------------------------------------------------
  *
  * Unload a plugin by name.
@@ -303,9 +305,9 @@ duk_idx_t reload(duk_context *ctx)
  *   - Error on errors,
  *   - ReferenceError if the plugin was not found.
  */
-duk_idx_t unload(duk_context *ctx)
+duk_idx_t unload(duk_context* ctx)
 {
-    return wrap(ctx, 0, [&] (Irccd &irccd, const std::string &name) {
+    return wrap(ctx, 0, [&] (irccd &irccd, const std::string &name) {
         irccd.plugins().unload(name);
     });
 }
@@ -321,60 +323,60 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-PluginModule::PluginModule() noexcept
-    : Module("Irccd.Plugin")
+js_plugin_module::js_plugin_module() noexcept
+    : module("Irccd.Plugin")
 {
 }
 
-void PluginModule::load(Irccd &, std::shared_ptr<JsPlugin> plugin)
+void js_plugin_module::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
     StackAssert sa(plugin->context());
 
-    duk_push_pointer(plugin->context(), new std::weak_ptr<JsPlugin>(plugin));
+    duk_push_pointer(plugin->context(), new std::weak_ptr<js_plugin>(plugin));
     duk_push_object(plugin->context());
-    duk_push_c_function(plugin->context(), [] (auto *ctx) -> duk_ret_t {
-        duk_get_global_string(ctx, PluginGlobal);
-        delete static_cast<std::shared_ptr<JsPlugin> *>(duk_to_pointer(ctx, -1));
+    duk_push_c_function(plugin->context(), [] (auto ctx) -> duk_ret_t {
+        duk_get_global_string(ctx, plugin_ref);
+        delete static_cast<std::shared_ptr<js_plugin>*>(duk_to_pointer(ctx, -1));
         duk_pop(ctx);
         duk_push_null(ctx);
-        duk_put_global_string(ctx, PluginGlobal);
+        duk_put_global_string(ctx, plugin_ref);
         return 0;
     }, 1);
     duk_set_finalizer(plugin->context(), -2);
     duk_put_global_string(plugin->context(), "\xff""\xff""dummy-shared-ptr");
-    duk_put_global_string(plugin->context(), PluginGlobal);
+    duk_put_global_string(plugin->context(), plugin_ref);
     duk_get_global_string(plugin->context(), "Irccd");
     duk_push_object(plugin->context());
     duk_put_function_list(plugin->context(), -1, functions);
 
     // 'config' property.
     duk_push_string(plugin->context(), "config");
-    duk_push_c_function(plugin->context(), getConfig, 0);
-    duk_push_c_function(plugin->context(), setConfig, 1);
+    duk_push_c_function(plugin->context(), get_config, 0);
+    duk_push_c_function(plugin->context(), set_config, 1);
     duk_def_prop(plugin->context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
 
     // 'format' property.
     duk_push_string(plugin->context(), "format");
-    duk_push_c_function(plugin->context(), getFormat, 0);
-    duk_push_c_function(plugin->context(), setFormat, 1);
+    duk_push_c_function(plugin->context(), get_format, 0);
+    duk_push_c_function(plugin->context(), set_format, 1);
     duk_def_prop(plugin->context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
 
     // 'format' property.
     duk_push_string(plugin->context(), "paths");
-    duk_push_c_function(plugin->context(), getPaths, 0);
-    duk_push_c_function(plugin->context(), setPaths, 1);
+    duk_push_c_function(plugin->context(), get_paths, 0);
+    duk_push_c_function(plugin->context(), set_paths, 1);
     duk_def_prop(plugin->context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
 
     duk_put_prop_string(plugin->context(), -2, "Plugin");
     duk_pop(plugin->context());
 }
 
-std::shared_ptr<JsPlugin> dukx_get_plugin(duk_context *ctx)
+std::shared_ptr<js_plugin> dukx_get_plugin(duk_context* ctx)
 {
     StackAssert sa(ctx);
 
-    duk_get_global_string(ctx, PluginGlobal);
-    auto plugin = static_cast<std::weak_ptr<JsPlugin> *>(duk_to_pointer(ctx, -1));
+    duk_get_global_string(ctx, plugin_ref);
+    auto plugin = static_cast<std::weak_ptr<js_plugin>*>(duk_to_pointer(ctx, -1));
     duk_pop(ctx);
 
     return plugin->lock();

@@ -1,5 +1,5 @@
 /*
- * mod-irccd.cpp -- Irccd API
+ * js_irccd_module.cpp -- Irccd API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -20,9 +20,10 @@
 #include <string>
 #include <unordered_map>
 
-#include "mod-irccd.hpp"
-#include "plugin-js.hpp"
-#include "sysconfig.hpp"
+#include <irccd/js_plugin.hpp>
+#include <irccd/sysconfig.hpp>
+
+#include "js_irccd_module.hpp"
 
 namespace irccd {
 
@@ -129,7 +130,7 @@ const std::unordered_map<std::string, int> errors{
     { "EXDEV",              EXDEV           }
 };
 
-duk_ret_t constructor(duk_context *ctx)
+duk_ret_t constructor(duk_context* ctx)
 {
     duk_push_this(ctx);
     duk_push_int(ctx, duk_require_int(ctx, 0));
@@ -145,41 +146,41 @@ duk_ret_t constructor(duk_context *ctx)
 
 } // !namespace
 
-SystemError::SystemError()
-    : m_errno(errno)
-    , m_message(std::strerror(m_errno))
+system_error::system_error()
+    : errno_(errno)
+    , message_(std::strerror(errno_))
 {
 }
 
-SystemError::SystemError(int e, std::string message)
-    : m_errno(e)
-    , m_message(std::move(message))
+system_error::system_error(int e, std::string message)
+    : errno_(e)
+    , message_(std::move(message))
 {
 }
 
-void SystemError::raise(duk_context *ctx) const
+void system_error::raise(duk_context *ctx) const
 {
     StackAssert sa(ctx, 0);
 
     duk_get_global_string(ctx, "Irccd");
     duk_get_prop_string(ctx, -1, "SystemError");
     duk_remove(ctx, -2);
-    duk_push_int(ctx, m_errno);
-    dukx_push_std_string(ctx, m_message);
+    duk_push_int(ctx, errno_);
+    dukx_push_std_string(ctx, message_);
     duk_new(ctx, 2);
     duk_throw(ctx);
 }
 
-IrccdModule::IrccdModule() noexcept
-    : Module("Irccd")
+js_irccd_module::js_irccd_module() noexcept
+    : module("Irccd")
 {
 }
 
-void IrccdModule::load(Irccd &irccd, std::shared_ptr<JsPlugin> plugin)
+void js_irccd_module::load(irccd& irccd, std::shared_ptr<js_plugin> plugin)
 {
     StackAssert sa(plugin->context());
 
-    // Irccd.
+    // irccd.
     duk_push_object(plugin->context());
 
     // Version.
@@ -192,11 +193,11 @@ void IrccdModule::load(Irccd &irccd, std::shared_ptr<JsPlugin> plugin)
     duk_put_prop_string(plugin->context(), -2, "patch");
     duk_put_prop_string(plugin->context(), -2, "version");
 
-    // Create the SystemError that inherits from Error.
+    // Create the system_error that inherits from Error.
     duk_push_c_function(plugin->context(), constructor, 2);
 
-    // Put errno codes into the Irccd.SystemError object.
-    for (const auto &pair : errors) {
+    // Put errno codes into the irccd.system_error object.
+    for (const auto& pair : errors) {
         duk_push_int(plugin->context(), pair.second);
         duk_put_prop_string(plugin->context(), -2, pair.first.c_str());
     }
@@ -209,7 +210,7 @@ void IrccdModule::load(Irccd &irccd, std::shared_ptr<JsPlugin> plugin)
     duk_put_prop_string(plugin->context(), -2, "prototype");
     duk_put_prop_string(plugin->context(), -2, "SystemError");
 
-    // Set Irccd as global.
+    // Set irccd as global.
     duk_put_global_string(plugin->context(), "Irccd");
 
     // Store global instance.
@@ -217,15 +218,15 @@ void IrccdModule::load(Irccd &irccd, std::shared_ptr<JsPlugin> plugin)
     duk_put_global_string(plugin->context(), "\xff""\xff""irccd-ref");
 }
 
-Irccd &dukx_get_irccd(duk_context *ctx)
+irccd& dukx_get_irccd(duk_context *ctx)
 {
     StackAssert sa(ctx);
 
     duk_get_global_string(ctx, "\xff""\xff""irccd-ref");
-    Irccd *irccd = static_cast<Irccd *>(duk_to_pointer(ctx, -1));
+    auto ptr = static_cast<irccd*>(duk_to_pointer(ctx, -1));
     duk_pop(ctx);
 
-    return *irccd;
+    return *ptr;
 }
 
 } // !irccd

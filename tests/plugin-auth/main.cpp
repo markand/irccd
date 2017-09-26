@@ -26,13 +26,13 @@
 
 using namespace irccd;
 
-class server_test : public Server {
+class server_test : public server {
 private:
     std::string last_;
 
 public:
     inline server_test(std::string name)
-        : Server(std::move(name))
+        : server(std::move(name))
     {
     }
 
@@ -76,21 +76,21 @@ public:
 
 TEST_F(auth_test, nickserv1)
 {
-    plugin_->on_connect(irccd_, ConnectEvent{nickserv1_});
+    plugin_->on_connect(irccd_, {nickserv1_});
 
     ASSERT_EQ("NickServ:identify plopation", nickserv1_->last());
 }
 
 TEST_F(auth_test, nickserv2)
 {
-    plugin_->on_connect(irccd_, ConnectEvent{nickserv2_});
+    plugin_->on_connect(irccd_, {nickserv2_});
 
     ASSERT_EQ("NickServ:identify jean something", nickserv2_->last());
 }
 
 TEST_F(auth_test, quakenet)
 {
-    plugin_->on_connect(irccd_, ConnectEvent{quakenet_});
+    plugin_->on_connect(irccd_, {quakenet_});
 
     ASSERT_EQ("Q@CServe.quakenet.org:AUTH mario hello", quakenet_->last());
 }

@@ -1,5 +1,5 @@
 /*
- * mod-server.cpp -- Irccd.Server API
+ * js_server_module.cpp -- Irccd.Server API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -20,33 +20,34 @@
 #include <sstream>
 #include <unordered_map>
 
-#include "irccd.hpp"
-#include "mod-irccd.hpp"
-#include "mod-server.hpp"
-#include "plugin-js.hpp"
-#include "server.hpp"
-#include "service.hpp"
+#include <irccd.hpp>
+#include <irccd/js_plugin.hpp>
+#include <irccd/server.hpp>
+#include <irccd/service.hpp>
+
+#include "js_irccd_module.hpp"
+#include "js_server_module.hpp"
 
 namespace irccd {
 
 namespace {
 
-const char *Signature("\xff""\xff""irccd-server-ptr");
-const char *Prototype("\xff""\xff""irccd-server-prototype");
+const char *signature("\xff""\xff""irccd-server-ptr");
+const char *prototype("\xff""\xff""irccd-server-prototype");
 
-std::shared_ptr<Server> self(duk_context *ctx)
+std::shared_ptr<server> self(duk_context* ctx)
 {
     StackAssert sa(ctx);
 
     duk_push_this(ctx);
-    duk_get_prop_string(ctx, -1, Signature);
+    duk_get_prop_string(ctx, -1, signature);
     auto ptr = duk_to_pointer(ctx, -1);
     duk_pop_2(ctx);
 
     if (!ptr)
         duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Server object");
 
-    return *static_cast<std::shared_ptr<Server> *>(ptr);
+    return *static_cast<std::shared_ptr<server>*>(ptr);
 }
 
 /*
@@ -59,7 +60,7 @@ std::shared_ptr<Server> self(duk_context *ctx)
  *   - channel, the channel,
  *   - mode, the mode.
  */
-duk_ret_t cmode(duk_context *ctx)
+duk_ret_t cmode(duk_context* ctx)
 {
     self(ctx)->cmode(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
 
@@ -76,7 +77,7 @@ duk_ret_t cmode(duk_context *ctx)
  *   - channel, the channel,
  *   - message, the message.
  */
-duk_ret_t cnotice(duk_context *ctx)
+duk_ret_t cnotice(duk_context* ctx)
 {
     self(ctx)->cnotice(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
 
@@ -96,7 +97,7 @@ duk_ret_t cnotice(duk_context *ctx)
  * sslVerify: true if ssl was verified
  * channels: an array of all channels
  */
-duk_ret_t info(duk_context *ctx)
+duk_ret_t info(duk_context* ctx)
 {
     auto server = self(ctx);
 
@@ -107,11 +108,11 @@ duk_ret_t info(duk_context *ctx)
     duk_put_prop_string(ctx, -2, "host");
     duk_push_int(ctx, server->port());
     duk_put_prop_string(ctx, -2, "port");
-    duk_push_boolean(ctx, server->flags() & Server::Ssl);
+    duk_push_boolean(ctx, server->flags() & server::ssl);
     duk_put_prop_string(ctx, -2, "ssl");
-    duk_push_boolean(ctx, server->flags() & Server::SslVerify);
+    duk_push_boolean(ctx, server->flags() & server::ssl_verify);
     duk_put_prop_string(ctx, -2, "sslVerify");
-    dukx_push_std_string(ctx, server->commandCharacter());
+    dukx_push_std_string(ctx, server->command_char());
     duk_put_prop_string(ctx, -2, "commandChar");
     dukx_push_std_string(ctx, server->realname());
     duk_put_prop_string(ctx, -2, "realname");
@@ -137,7 +138,7 @@ duk_ret_t info(duk_context *ctx)
  *   - target, the target to invite,
  *   - channel, the channel.
  */
-duk_ret_t invite(duk_context *ctx)
+duk_ret_t invite(duk_context* ctx)
 {
     self(ctx)->invite(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
 
@@ -154,7 +155,7 @@ duk_ret_t invite(duk_context *ctx)
  *   - channel, the channel to join,
  *   - password, the password or undefined to not use.
  */
-duk_ret_t join(duk_context *ctx)
+duk_ret_t join(duk_context* ctx)
 {
     self(ctx)->join(duk_require_string(ctx, 0), dukx_get_std_string(ctx, 1));
 
@@ -172,7 +173,7 @@ duk_ret_t join(duk_context *ctx)
  *   - channel, the channel,
  *   - reason, the optional reason or undefined to not set.
  */
-duk_ret_t kick(duk_context *ctx)
+duk_ret_t kick(duk_context* ctx)
 {
     self(ctx)->kick(duk_require_string(ctx, 0), duk_require_string(ctx, 1), dukx_get_std_string(ctx, 2));
 
@@ -189,7 +190,7 @@ duk_ret_t kick(duk_context *ctx)
  *   - target, the target or a channel,
  *   - message, the message.
  */
-duk_ret_t me(duk_context *ctx)
+duk_ret_t me(duk_context* ctx)
 {
     self(ctx)->me(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
 
@@ -206,7 +207,7 @@ duk_ret_t me(duk_context *ctx)
  *   - target, the target or a channel,
  *   - message, the message.
  */
-duk_ret_t message(duk_context *ctx)
+duk_ret_t message(duk_context* ctx)
 {
     self(ctx)->message(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
 
@@ -222,7 +223,7 @@ duk_ret_t message(duk_context *ctx)
  * Arguments:
  *   - mode, the new mode.
  */
-duk_ret_t mode(duk_context *ctx)
+duk_ret_t mode(duk_context* ctx)
 {
     self(ctx)->mode(duk_require_string(ctx, 0));
 
@@ -238,7 +239,7 @@ duk_ret_t mode(duk_context *ctx)
  * Arguments:
  *   - channel, the channel.
  */
-duk_ret_t names(duk_context *ctx)
+duk_ret_t names(duk_context* ctx)
 {
     self(ctx)->names(duk_require_string(ctx, 0));
 
@@ -254,9 +255,9 @@ duk_ret_t names(duk_context *ctx)
  * Arguments:
  *   - nickname, the nickname.
  */
-duk_ret_t nick(duk_context *ctx)
+duk_ret_t nick(duk_context* ctx)
 {
-    self(ctx)->setNickname(duk_require_string(ctx, 0));
+    self(ctx)->set_nickname(duk_require_string(ctx, 0));
 
     return 0;
 }
@@ -271,7 +272,7 @@ duk_ret_t nick(duk_context *ctx)
  *   - target, the target,
  *   - message, the notice message.
  */
-duk_ret_t notice(duk_context *ctx)
+duk_ret_t notice(duk_context* ctx)
 {
     self(ctx)->notice(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
 
@@ -288,7 +289,7 @@ duk_ret_t notice(duk_context *ctx)
  *   - channel, the channel to leave,
  *   - reason, the optional reason, keep undefined for portability.
  */
-duk_ret_t part(duk_context *ctx)
+duk_ret_t part(duk_context* ctx)
 {
     self(ctx)->part(duk_require_string(ctx, 0), dukx_get_std_string(ctx, 1));
 
@@ -304,7 +305,7 @@ duk_ret_t part(duk_context *ctx)
  * Arguments:
  *   - raw, the raw message (without terminators).
  */
-duk_ret_t send(duk_context *ctx)
+duk_ret_t send(duk_context* ctx)
 {
     self(ctx)->send(duk_require_string(ctx, 0));
 
@@ -321,7 +322,7 @@ duk_ret_t send(duk_context *ctx)
  *   - channel, the channel,
  *   - topic, the new topic.
  */
-duk_ret_t topic(duk_context *ctx)
+duk_ret_t topic(duk_context* ctx)
 {
     self(ctx)->topic(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
 
@@ -337,7 +338,7 @@ duk_ret_t topic(duk_context *ctx)
  * Arguments:
  *   - target, the target.
  */
-duk_ret_t whois(duk_context *ctx)
+duk_ret_t whois(duk_context* ctx)
 {
     self(ctx)->whois(duk_require_string(ctx, 0));
 
@@ -354,7 +355,7 @@ duk_ret_t whois(duk_context *ctx)
  * duk_ret_turns:
  *   The server name (unique).
  */
-duk_ret_t toString(duk_context *ctx)
+duk_ret_t toString(duk_context* ctx)
 {
     dukx_push_std_string(ctx, self(ctx)->name());
 
@@ -382,7 +383,7 @@ duk_ret_t toString(duk_context *ctx)
  * realname: "real name",       (Optional, default: IRC Client Daemon)
  * commandChar: "!",            (Optional, the command char, default: "!")
  */
-duk_ret_t constructor(duk_context *ctx)
+duk_ret_t constructor(duk_context* ctx)
 {
     if (!duk_is_constructor_call(ctx))
         return 0;
@@ -391,13 +392,13 @@ duk_ret_t constructor(duk_context *ctx)
 
     try {
         auto json = duk_json_encode(ctx, 0);
-        auto s = Server::fromJson(nlohmann::json::parse(json));
+        auto s = server::from_json(nlohmann::json::parse(json));
 
         duk_push_this(ctx);
-        duk_push_pointer(ctx, new std::shared_ptr<Server>(std::move(s)));
-        duk_put_prop_string(ctx, -2, Signature);
+        duk_push_pointer(ctx, new std::shared_ptr<server>(std::move(s)));
+        duk_put_prop_string(ctx, -2, signature);
         duk_pop(ctx);
-    } catch (const std::exception &ex) {
+    } catch (const std::exception& ex) {
         duk_error(ctx, DUK_ERR_ERROR, "%s", ex.what());
     }
 
@@ -410,12 +411,12 @@ duk_ret_t constructor(duk_context *ctx)
  *
  * Delete the property.
  */
-duk_ret_t destructor(duk_context *ctx)
+duk_ret_t destructor(duk_context* ctx)
 {
-    duk_get_prop_string(ctx, 0, Signature);
-    delete static_cast<std::shared_ptr<Server> *>(duk_to_pointer(ctx, -1));
+    duk_get_prop_string(ctx, 0, signature);
+    delete static_cast<std::shared_ptr<server>*>(duk_to_pointer(ctx, -1));
     duk_pop(ctx);
-    duk_del_prop_string(ctx, 0, Signature);
+    duk_del_prop_string(ctx, 0, signature);
 
     return 0;
 }
@@ -429,7 +430,7 @@ duk_ret_t destructor(duk_context *ctx)
  * Arguments:
  *   - s, the server to add.
  */
-duk_ret_t add(duk_context *ctx)
+duk_ret_t add(duk_context* ctx)
 {
     dukx_get_irccd(ctx).servers().add(dukx_require_server(ctx, 0));
 
@@ -447,7 +448,7 @@ duk_ret_t add(duk_context *ctx)
  * duk_ret_turns:
  *   The server object or undefined if not found.
  */
-duk_ret_t find(duk_context *ctx)
+duk_ret_t find(duk_context* ctx)
 {
     auto server = dukx_get_irccd(ctx).servers().get(duk_require_string(ctx, 0));
 
@@ -468,7 +469,7 @@ duk_ret_t find(duk_context *ctx)
  * duk_ret_turns:
  *   An object with string-to-servers pairs.
  */
-duk_ret_t list(duk_context *ctx)
+duk_ret_t list(duk_context* ctx)
 {
     duk_push_object(ctx);
 
@@ -481,7 +482,7 @@ duk_ret_t list(duk_context *ctx)
 }
 
 /*
- * Function: Irccd.Server.remove(name)
+ * Function: irccd.Server.remove(name)
  * ------------------------------------------------------------------
  *
  * Remove a server from the irccd instance. You can pass the server object since
@@ -490,7 +491,7 @@ duk_ret_t list(duk_context *ctx)
  * Arguments:
  *   - name the server name.
  */
-duk_ret_t remove(duk_context *ctx)
+duk_ret_t remove(duk_context* ctx)
 {
     dukx_get_irccd(ctx).servers().remove(duk_require_string(ctx, 0));
 
@@ -528,12 +529,12 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-ServerModule::ServerModule() noexcept
-    : Module("Irccd.Server")
+js_server_module::js_server_module() noexcept
+    : module("Irccd.Server")
 {
 }
 
-void ServerModule::load(Irccd &, std::shared_ptr<JsPlugin> plugin)
+void js_server_module::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
     StackAssert sa(plugin->context());
 
@@ -545,13 +546,13 @@ void ServerModule::load(Irccd &, std::shared_ptr<JsPlugin> plugin)
     duk_push_c_function(plugin->context(), destructor, 1);
     duk_set_finalizer(plugin->context(), -2);
     duk_dup_top(plugin->context());
-    duk_put_global_string(plugin->context(), Prototype);
+    duk_put_global_string(plugin->context(), prototype);
     duk_put_prop_string(plugin->context(), -2, "prototype");
     duk_put_prop_string(plugin->context(), -2, "Server");
     duk_pop(plugin->context());
 }
 
-void dukx_push_server(duk_context *ctx, std::shared_ptr<Server> server)
+void dukx_push_server(duk_context* ctx, std::shared_ptr<server> server)
 {
     assert(ctx);
     assert(server);
@@ -559,19 +560,19 @@ void dukx_push_server(duk_context *ctx, std::shared_ptr<Server> server)
     StackAssert sa(ctx, 1);
 
     duk_push_object(ctx);
-    duk_push_pointer(ctx, new std::shared_ptr<Server>(std::move(server)));
-    duk_put_prop_string(ctx, -2, Signature);
-    duk_get_global_string(ctx, Prototype);
+    duk_push_pointer(ctx, new std::shared_ptr<class server>(std::move(server)));
+    duk_put_prop_string(ctx, -2, signature);
+    duk_get_global_string(ctx, prototype);
     duk_set_prototype(ctx, -2);
 }
 
-std::shared_ptr<Server> dukx_require_server(duk_context *ctx, duk_idx_t index)
+std::shared_ptr<server> dukx_require_server(duk_context* ctx, duk_idx_t index)
 {
-    if (!duk_is_object(ctx, index) || !duk_has_prop_string(ctx, index, Signature))
+    if (!duk_is_object(ctx, index) || !duk_has_prop_string(ctx, index, signature))
         duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Server object");
 
-    duk_get_prop_string(ctx, index, Signature);
-    auto file = *static_cast<std::shared_ptr<Server> *>(duk_to_pointer(ctx, -1));
+    duk_get_prop_string(ctx, index, signature);
+    auto file = *static_cast<std::shared_ptr<server> *>(duk_to_pointer(ctx, -1));
     duk_pop(ctx);
 
     return file;

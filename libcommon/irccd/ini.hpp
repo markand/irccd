@@ -16,13 +16,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_INI_HPP
-#define IRCCD_INI_HPP
+#ifndef INI_HPP
+#define INI_HPP
 
 /**
  * \file ini.hpp
  * \brief Extended .ini file parser.
  * \author David Demelier <markand@malikania.fr>
+ * \version 1.0.0
  */
 
 /**
@@ -42,7 +43,8 @@
  *   - an option **must** always be defined in a section,
  *   - empty options must be surrounded by quotes,
  *   - lists can not includes trailing commas,
- *   - include statement must always be at the beginning of files (in no sections),
+ *   - include statement must always be at the beginning of files
+ *     (in no sections),
  *   - comments starts with # until the end of line,
  *   - options with spaces **must** use quotes.
  *
@@ -57,7 +59,8 @@
  *
  * # Redefinition
  *
- * Sections can be redefined multiple times and are kept the order they are seen.
+ * Sections can be redefined multiple times and are kept the order they are
+ * seen.
  *
  * ````ini
  * [section]
@@ -67,7 +70,7 @@
  * value = "2"
  * ````
  *
- * The ini::Document object will contains two ini::Section.
+ * The ini::document object will contains two ini::Section.
  *
  * # Lists
  *
@@ -86,8 +89,8 @@
  *
  * # Include statement
  *
- * You can split a file into several pieces, if the include statement contains a relative path, the path will be relative
- * to the current file being parsed.
+ * You can split a file into several pieces, if the include statement contains a
+ * relative path, the path will be relative to the current file being parsed.
  *
  * You **must** use the include statement before any section.
  *
@@ -103,14 +106,38 @@
  * ````
  */
 
+/**
+ * \cond INI_HIDDEN_SYMBOLS
+ */
+
+#if !defined(IRCCD_EXPORT)
+#   if defined(INI_DLL)
+#       if defined(_WIN32)
+#           if defined(INI_BUILDING_DLL)
+#               define IRCCD_EXPORT __declspec(dllexport)
+#           else
+#               define IRCCD_EXPORT __declspec(dllimport)
+#           endif
+#       else
+#           define IRCCD_EXPORT
+#       endif
+#   else
+#       define IRCCD_EXPORT
+#   endif
+#endif
+
+/**
+ * \endcond
+ */
+
+#include <sysconfig.hpp>
+
 #include <algorithm>
 #include <cassert>
 #include <exception>
 #include <stdexcept>
 #include <string>
 #include <vector>
-
-#include "sysconfig.hpp"
 
 namespace irccd {
 
@@ -119,16 +146,16 @@ namespace irccd {
  */
 namespace ini {
 
-class Document;
+class document;
 
 /**
- * \brief Error in a file.
+ * \brief exception in a file.
  */
-class Error : public std::exception {
+class exception : public std::exception {
 private:
     int m_line;                 //!< line number
     int m_column;               //!< line column
-    std::string m_message;      //!< error message
+    std::string m_message;      //!< exception message
 
 public:
     /**
@@ -138,7 +165,7 @@ public:
      * \param column the column
      * \param msg the message
      */
-    inline Error(int line, int column, std::string msg) noexcept
+    inline exception(int line, int column, std::string msg) noexcept
         : m_line(line)
         , m_column(column)
         , m_message(std::move(msg))
@@ -166,11 +193,11 @@ public:
     }
 
     /**
-     * Return the raw error message (no line and column shown).
+     * Return the raw exception message (no line and column shown).
      *
-     * \return the error message
+     * \return the exception message
      */
-    const char *what() const noexcept override
+    const char* what() const noexcept override
     {
         return m_message.c_str();
     }
@@ -183,24 +210,24 @@ public:
  *
  * \see analyze
  */
-class Token {
+class token {
 public:
     /**
-     * \brief Token type.
+     * \brief token type.
      */
-    enum Type {
-        Include,                //!< include statement
-        Section,                //!< [section]
-        Word,                   //!< word without quotes
-        QuotedWord,             //!< word with quotes
-        Assign,                 //!< = assignment
-        ListBegin,              //!< begin of list (
-        ListEnd,                //!< end of list )
-        Comma                   //!< list separation
+    enum type {
+        include,                //!< include statement
+        section,                //!< [section]
+        word,                   //!< word without quotes
+        quoted_word,            //!< word with quotes
+        assign,                 //!< = assignment
+        list_begin,             //!< begin of list (
+        list_end,               //!< end of list )
+        comma                   //!< list separation
     };
 
 private:
-    Type m_type;
+    type m_type;
     int m_line;
     int m_column;
     std::string m_value;
@@ -214,30 +241,30 @@ public:
      * \param column the column
      * \param value the value
      */
-    Token(Type type, int line, int column, std::string value = "") noexcept
+    token(type type, int line, int column, std::string value = "") noexcept
         : m_type(type)
         , m_line(line)
         , m_column(column)
     {
         switch (type) {
-        case Include:
+        case include:
             m_value = "@include";
             break;
-        case Section:
-        case Word:
-        case QuotedWord:
+        case section:
+        case word:
+        case quoted_word:
             m_value = value;
             break;
-        case Assign:
+        case assign:
             m_value = "=";
             break;
-        case ListBegin:
+        case list_begin:
             m_value = "(";
             break;
-        case ListEnd:
+        case list_end:
             m_value = ")";
             break;
-        case Comma:
+        case comma:
             m_value = ",";
             break;
         default:
@@ -250,7 +277,7 @@ public:
      *
      * \return the type
      */
-    inline Type type() const noexcept
+    inline type type() const noexcept
     {
         return m_type;
     }
@@ -276,12 +303,12 @@ public:
     }
 
     /**
-     * Get the value. For words, quoted words and section, the value is the content. Otherwise it's the
-     * characters parsed.
+     * Get the value. For words, quoted words and section, the value is the
+     * content. Otherwise it's the characters parsed.
      *
      * \return the value
      */
-    inline const std::string &value() const noexcept
+    inline const std::string& value() const noexcept
     {
         return m_value;
     }
@@ -290,12 +317,12 @@ public:
 /**
  * List of tokens in order they are analyzed.
  */
-using Tokens = std::vector<Token>;
+using tokens = std::vector<token>;
 
 /**
- * \brief Option definition.
+ * \brief option definition.
  */
-class Option : public std::vector<std::string> {
+class option : public std::vector<std::string> {
 private:
     std::string m_key;
 
@@ -306,7 +333,7 @@ public:
      * \pre key must not be empty
      * \param key the key
      */
-    inline Option(std::string key) noexcept
+    inline option(std::string key) noexcept
         : std::vector<std::string>()
         , m_key(std::move(key))
     {
@@ -320,7 +347,7 @@ public:
      * \param key the key
      * \param value the value
      */
-    inline Option(std::string key, std::string value) noexcept
+    inline option(std::string key, std::string value) noexcept
         : m_key(std::move(key))
     {
         assert(!m_key.empty());
@@ -335,7 +362,7 @@ public:
      * \param key the key
      * \param values the values
      */
-    inline Option(std::string key, std::vector<std::string> values) noexcept
+    inline option(std::string key, std::vector<std::string> values) noexcept
         : std::vector<std::string>(std::move(values))
         , m_key(std::move(key))
     {
@@ -347,7 +374,7 @@ public:
      *
      * \return the key
      */
-    inline const std::string &key() const noexcept
+    inline const std::string& key() const noexcept
     {
         return m_key;
     }
@@ -357,7 +384,7 @@ public:
      *
      * \return the value
      */
-    inline const std::string &value() const noexcept
+    inline const std::string& value() const noexcept
     {
         static std::string dummy;
 
@@ -368,7 +395,7 @@ public:
 /**
  * \brief Section that contains one or more options.
  */
-class Section : public std::vector<Option> {
+class section : public std::vector<option> {
 private:
     std::string m_key;
 
@@ -379,7 +406,7 @@ public:
      * \pre key must not be empty
      * \param key the key
      */
-    inline Section(std::string key) noexcept
+    inline section(std::string key) noexcept
         : m_key(std::move(key))
     {
         assert(!m_key.empty());
@@ -390,7 +417,7 @@ public:
      *
      * \return the key
      */
-    inline const std::string &key() const noexcept
+    inline const std::string& key() const noexcept
     {
         return m_key;
     }
@@ -401,7 +428,7 @@ public:
      * \param key the option key
      * \return true if the option exists
      */
-    inline bool contains(const std::string &key) const noexcept
+    inline bool contains(const std::string& key) const noexcept
     {
         return find(key) != end();
     }
@@ -412,9 +439,9 @@ public:
      * \param key the key
      * \return the iterator or end() if not found
      */
-    inline iterator find(const std::string &key) noexcept
+    inline iterator find(const std::string& key) noexcept
     {
-        return std::find_if(begin(), end(), [&] (const auto &o) {
+        return std::find_if(begin(), end(), [&] (const auto& o) {
             return o.key() == key;
         });
     }
@@ -425,9 +452,9 @@ public:
      * \param key the key
      * \return the iterator or end() if not found
      */
-    inline const_iterator find(const std::string &key) const noexcept
+    inline const_iterator find(const std::string& key) const noexcept
     {
-        return std::find_if(cbegin(), cend(), [&] (const auto &o) {
+        return std::find_if(cbegin(), cend(), [&] (const auto& o) {
             return o.key() == key;
         });
     }
@@ -439,7 +466,7 @@ public:
      * \return the option
      * \pre contains(key) must return true
      */
-    inline Option &operator[](const std::string &key)
+    inline option& operator[](const std::string& key)
     {
         assert(contains(key));
 
@@ -453,7 +480,7 @@ public:
      * \return the option
      * \pre contains(key) must return true
      */
-    inline const Option &operator[](const std::string &key) const
+    inline const option& operator[](const std::string& key) const
     {
         assert(contains(key));
 
@@ -463,7 +490,7 @@ public:
     /**
      * Inherited operators.
      */
-    using std::vector<Option>::operator[];
+    using std::vector<option>::operator[];
 };
 
 /**
@@ -471,7 +498,7 @@ public:
  * \see readFile
  * \see readString
  */
-class Document : public std::vector<Section> {
+class document : public std::vector<section> {
 public:
     /**
      * Check if a document has a specific section.
@@ -479,9 +506,9 @@ public:
      * \param key the key
      * \return true if the document contains the section
      */
-    inline bool contains(const std::string &key) const noexcept
+    inline bool contains(const std::string& key) const noexcept
     {
-        return std::find_if(begin(), end(), [&] (const auto &sc) { return sc.key() == key; }) != end();
+        return find(key) != end();
     }
 
     /**
@@ -490,9 +517,9 @@ public:
      * \param key the key
      * \return the iterator or end() if not found
      */
-    inline iterator find(const std::string &key) noexcept
+    inline iterator find(const std::string& key) noexcept
     {
-        return std::find_if(begin(), end(), [&] (const auto &o) {
+        return std::find_if(begin(), end(), [&] (const auto& o) {
             return o.key() == key;
         });
     }
@@ -503,9 +530,9 @@ public:
      * \param key the key
      * \return the iterator or end() if not found
      */
-    inline const_iterator find(const std::string &key) const noexcept
+    inline const_iterator find(const std::string& key) const noexcept
     {
-        return std::find_if(cbegin(), cend(), [&] (const auto &o) {
+        return std::find_if(cbegin(), cend(), [&] (const auto& o) {
             return o.key() == key;
         });
     }
@@ -517,7 +544,7 @@ public:
      * \return the section
      * \pre contains(key) must return true
      */
-    inline Section &operator[](const std::string &key)
+    inline section& operator[](const std::string& key)
     {
         assert(contains(key));
 
@@ -531,7 +558,7 @@ public:
      * \return the section
      * \pre contains(key) must return true
      */
-    inline const Section &operator[](const std::string &key) const
+    inline const section& operator[](const std::string& key) const
     {
         assert(contains(key));
 
@@ -541,31 +568,31 @@ public:
     /**
      * Inherited operators.
      */
-    using std::vector<Section>::operator[];
+    using std::vector<section>::operator[];
 };
 
 /**
- * Analyse a stream and detect potential syntax errors. This does not parse the file like including other
- * files in include statement.
+ * Analyse a stream and detect potential syntax errors. This does not parse the
+ * file like including other files in include statement.
  *
- * It does only analysis, for example if an option is defined under no section, this does not trigger an
- * error while it's invalid.
+ * It does only analysis, for example if an option is defined under no section,
+ * this does not trigger an exception while it's invalid.
  *
  * \param it the iterator
  * \param end where to stop
  * \return the list of tokens
- * \throws Error on errors
+ * \throws exception on errors
  */
-IRCCD_EXPORT Tokens analyse(std::istreambuf_iterator<char> it, std::istreambuf_iterator<char> end);
+IRCCD_EXPORT tokens analyse(std::istreambuf_iterator<char> it, std::istreambuf_iterator<char> end);
 
 /**
  * Overloaded function for stream.
  *
  * \param stream the stream
  * \return the list of tokens
- * \throws Error on errors
+ * \throws exception on errors
  */
-IRCCD_EXPORT Tokens analyse(std::istream &stream);
+IRCCD_EXPORT tokens analyse(std::istream& stream);
 
 /**
  * Parse the produced tokens.
@@ -573,39 +600,40 @@ IRCCD_EXPORT Tokens analyse(std::istream &stream);
  * \param tokens the tokens
  * \param path the parent path
  * \return the document
- * \throw Error on errors
+ * \throw exception on errors
  */
-IRCCD_EXPORT Document parse(const Tokens &tokens, const std::string &path = ".");
+IRCCD_EXPORT document parse(const tokens& tokens, const std::string& path = ".");
 
 /**
  * Parse a file.
  *
  * \param filename the file name
  * \return the document
- * \throw Error on errors
+ * \throw exception on errors
  */
-IRCCD_EXPORT Document readFile(const std::string &filename);
+IRCCD_EXPORT document read_file(const std::string& filename);
 
 /**
  * Parse a string.
  *
- * If the string contains include statements, they are relative to the current working directory.
+ * If the string contains include statements, they are relative to the current
+ * working directory.
  *
  * \param buffer the buffer
  * \return the document
- * \throw Error on errors
+ * \throw exception on exceptions
  */
-IRCCD_EXPORT Document readString(const std::string &buffer);
+IRCCD_EXPORT document read_string(const std::string& buffer);
 
 /**
  * Show all tokens and their description.
  *
  * \param tokens the tokens
  */
-IRCCD_EXPORT void dump(const Tokens &tokens);
+IRCCD_EXPORT void dump(const tokens& tokens);
 
 } // !ini
 
 } // !irccd
 
-#endif // !IRCCD_INI_HPP
+#endif // !INI_HPP

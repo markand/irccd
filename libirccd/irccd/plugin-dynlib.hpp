@@ -81,8 +81,8 @@ private:
     OnWhois m_onWhois;
 
     // Configuration and formats.
-    PluginConfig m_config;
-    PluginFormats m_formats;
+    plugin_config m_config;
+    plugin_formats m_formats;
 
 public:
     /**
@@ -97,107 +97,107 @@ public:
     /**
      * \copydoc Plugin::onCommand
      */
-    IRCCD_EXPORT void onCommand(Irccd &irccd, const MessageEvent &event) override;
+    IRCCD_EXPORT void onCommand(irccd &irccd, const MessageEvent &event) override;
 
     /**
      * \copydoc Plugin::onConnect
      */
-    IRCCD_EXPORT void onConnect(Irccd &irccd, const ConnectEvent &event) override;
+    IRCCD_EXPORT void onConnect(irccd &irccd, const ConnectEvent &event) override;
 
     /**
      * \copydoc Plugin::onChannelMode
      */
-    IRCCD_EXPORT void onChannelMode(Irccd &irccd, const ChannelModeEvent &event) override;
+    IRCCD_EXPORT void onChannelMode(irccd &irccd, const ChannelModeEvent &event) override;
 
     /**
      * \copydoc Plugin::onChannelNotice
      */
-    IRCCD_EXPORT void onChannelNotice(Irccd &irccd, const ChannelNoticeEvent &event) override;
+    IRCCD_EXPORT void onChannelNotice(irccd &irccd, const ChannelNoticeEvent &event) override;
 
     /**
      * \copydoc Plugin::onInvite
      */
-    IRCCD_EXPORT void onInvite(Irccd &irccd, const InviteEvent &event) override;
+    IRCCD_EXPORT void onInvite(irccd &irccd, const InviteEvent &event) override;
 
     /**
      * \copydoc Plugin::onJoin
      */
-    IRCCD_EXPORT void onJoin(Irccd &irccd, const JoinEvent &event) override;
+    IRCCD_EXPORT void onJoin(irccd &irccd, const JoinEvent &event) override;
 
     /**
      * \copydoc Plugin::onKick
      */
-    IRCCD_EXPORT void onKick(Irccd &irccd, const KickEvent &event) override;
+    IRCCD_EXPORT void onKick(irccd &irccd, const KickEvent &event) override;
 
     /**
      * \copydoc Plugin::onLoad
      */
-    IRCCD_EXPORT void onLoad(Irccd &irccd) override;
+    IRCCD_EXPORT void onLoad(irccd &irccd) override;
 
     /**
      * \copydoc Plugin::onMessage
      */
-    IRCCD_EXPORT void onMessage(Irccd &irccd, const MessageEvent &event) override;
+    IRCCD_EXPORT void onMessage(irccd &irccd, const MessageEvent &event) override;
 
     /**
      * \copydoc Plugin::onMe
      */
-    IRCCD_EXPORT void onMe(Irccd &irccd, const MeEvent &event) override;
+    IRCCD_EXPORT void onMe(irccd &irccd, const MeEvent &event) override;
 
     /**
      * \copydoc Plugin::onMode
      */
-    IRCCD_EXPORT void onMode(Irccd &irccd, const ModeEvent &event) override;
+    IRCCD_EXPORT void onMode(irccd &irccd, const ModeEvent &event) override;
 
     /**
      * \copydoc Plugin::onNames
      */
-    IRCCD_EXPORT void onNames(Irccd &irccd, const NamesEvent &event) override;
+    IRCCD_EXPORT void onNames(irccd &irccd, const NamesEvent &event) override;
 
     /**
      * \copydoc Plugin::onNick
      */
-    IRCCD_EXPORT void onNick(Irccd &irccd, const NickEvent &event) override;
+    IRCCD_EXPORT void onNick(irccd &irccd, const NickEvent &event) override;
 
     /**
      * \copydoc Plugin::onNotice
      */
-    IRCCD_EXPORT void onNotice(Irccd &irccd, const NoticeEvent &event) override;
+    IRCCD_EXPORT void onNotice(irccd &irccd, const NoticeEvent &event) override;
 
     /**
      * \copydoc Plugin::onPart
      */
-    IRCCD_EXPORT void onPart(Irccd &irccd, const PartEvent &event) override;
+    IRCCD_EXPORT void onPart(irccd &irccd, const PartEvent &event) override;
 
     /**
      * \copydoc Plugin::onQuery
      */
-    IRCCD_EXPORT void onQuery(Irccd &irccd, const QueryEvent &event) override;
+    IRCCD_EXPORT void onQuery(irccd &irccd, const QueryEvent &event) override;
 
     /**
      * \copydoc Plugin::onQueryCommand
      */
-    IRCCD_EXPORT void onQueryCommand(Irccd &irccd, const QueryEvent &event) override;
+    IRCCD_EXPORT void onQueryCommand(irccd &irccd, const QueryEvent &event) override;
 
     /**
      * \copydoc Plugin::onReload
      */
-    IRCCD_EXPORT void onReload(Irccd &irccd) override;
+    IRCCD_EXPORT void onReload(irccd &irccd) override;
 
     /**
      * \copydoc Plugin::onTopic
      */
-    IRCCD_EXPORT void onTopic(Irccd &irccd, const TopicEvent &event) override;
+    IRCCD_EXPORT void onTopic(irccd &irccd, const TopicEvent &event) override;
 
     /**
      * \copydoc Plugin::onUnload
      */
-    IRCCD_EXPORT void onUnload(Irccd &irccd) override;
+    IRCCD_EXPORT void onUnload(irccd &irccd) override;
 
     /**
      * \copydoc Plugin::onWhois
      */
-    IRCCD_EXPORT void onWhois(Irccd &irccd, const WhoisEvent &event) override;
+    IRCCD_EXPORT void onWhois(irccd &irccd, const WhoisEvent &event) override;
 };
 
 /**

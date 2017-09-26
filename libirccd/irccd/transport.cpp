@@ -24,23 +24,23 @@
 namespace irccd {
 
 /*
- * TransportClient
+ * transport_client
  * ------------------------------------------------------------------
  */
 
-void TransportClient::error(const std::string &msg)
+void transport_client::error(const std::string& msg)
 {
-    m_state = Closing;
+    state_ = state::closing;
 
     send({{ "error", msg }});
 }
 
-void TransportClient::flush() noexcept
+void transport_client::flush() noexcept
 {
-    for (std::size_t pos; (pos = m_input.find("\r\n\r\n")) != std::string::npos; ) {
-        auto message = m_input.substr(0, pos);
+    for (std::size_t pos; (pos = input_.find("\r\n\r\n")) != std::string::npos; ) {
+        auto message = input_.substr(0, pos);
 
-        m_input.erase(m_input.begin(), m_input.begin() + pos + 4);
+        input_.erase(input_.begin(), input_.begin() + pos + 4);
 
         try {
             auto document = nlohmann::json::parse(message);
@@ -48,23 +48,23 @@ void TransportClient::flush() noexcept
             if (!document.is_object())
                 error("invalid argument");
             else
-                onCommand(document);
-        } catch (const std::exception &ex) {
+                on_command(document);
+        } catch (const std::exception& ex) {
             error(ex.what());
         }
     }
 }
 
-void TransportClient::authenticate() noexcept
+void transport_client::authenticate() noexcept
 {
-    auto pos = m_input.find("\r\n\r\n");
+    auto pos = input_.find("\r\n\r\n");
 
     if (pos == std::string::npos)
         return;
 
-    auto msg = m_input.substr(0, pos);
+    auto msg = input_.substr(0, pos);
 
-    m_input.erase(m_input.begin(), m_input.begin() + pos + 4);
+    input_.erase(input_.begin(), input_.begin() + pos + 4);
 
     try {
         auto doc = nlohmann::json::parse(msg);
@@ -80,22 +80,22 @@ void TransportClient::authenticate() noexcept
         auto pw = doc.find("password");
         auto result = true;
 
-        if (pw == doc.end() || !pw->is_string() || *pw != m_parent.password()) {
-            m_state = Closing;
+        if (pw == doc.end() || !pw->is_string() || *pw != parent_.password()) {
+            state_ = state::closing;
             result = false;
         } else
-            m_state = Ready;
+            state_ = state::ready;
 
         send({
             { "response", "auth" },
             { "result", result }
         });
-    } catch (const std::exception &ex) {
+    } catch (const std::exception& ex) {
         error(ex.what());
     }
 }
 
-void TransportClient::recv() noexcept
+void transport_client::recv() noexcept
 {
     try {
         std::string buffer;
@@ -104,45 +104,45 @@ void TransportClient::recv() noexcept
         buffer.resize(recv(&buffer[0], buffer.size()));
 
         if (buffer.empty())
-            onDie();
+            on_die();
 
-        m_input += std::move(buffer);
+        input_ += std::move(buffer);
     } catch (const std::exception &) {
-        onDie();
+        on_die();
     }
 }
 
-void TransportClient::send() noexcept
+void transport_client::send() noexcept
 {
     try {
-        auto ns = send(&m_output[0], m_output.size());
+        auto ns = send(&output_[0], output_.size());
 
         if (ns == 0)
-            onDie();
+            on_die();
 
-        m_output.erase(0, ns);
-    } catch (const std::exception &ex) {
-        onDie();
+        output_.erase(0, ns);
+    } catch (const std::exception&) {
+        on_die();
     }
 }
 
-unsigned TransportClient::recv(void *buffer, unsigned length)
+unsigned transport_client::recv(void* buffer, unsigned length)
 {
-    return m_socket.recv(buffer, length);
+    return socket_.recv(buffer, length);
 }
 
-unsigned TransportClient::send(const void *buffer, unsigned length)
+unsigned transport_client::send(const void* buffer, unsigned length)
 {
-    return m_socket.send(buffer, length);
+    return socket_.send(buffer, length);
 }
 
-TransportClient::TransportClient(TransportServer &parent, net::TcpSocket socket)
-    : m_parent(parent)
-    , m_socket(std::move(socket))
+transport_client::transport_client(transport_server& parent, net::TcpSocket socket)
+    : parent_(parent)
+    , socket_(std::move(socket))
 {
-    assert(m_socket.isOpen());
+    assert(socket_.isOpen());
 
-    m_socket.set(net::option::SockBlockMode(false));
+    socket_.set(net::option::SockBlockMode(false));
 
     // Send some information.
     auto object = nlohmann::json::object({
@@ -162,65 +162,65 @@ TransportClient::TransportClient(TransportServer &parent, net::TcpSocket socket)
     send(object);
 }
 
-void TransportClient::prepare(fd_set &in, fd_set &out, net::Handle &max)
+void transport_client::prepare(fd_set& in, fd_set& out, net::Handle& max)
 {
-    if (m_socket.handle() > max)
-        max = m_socket.handle();
+    if (socket_.handle() > max)
+        max = socket_.handle();
 
-    switch (m_state) {
-    case Greeting:
-        FD_SET(m_socket.handle(), &in);
-        FD_SET(m_socket.handle(), &out);
+    switch (state_) {
+    case state::greeting:
+        FD_SET(socket_.handle(), &in);
+        FD_SET(socket_.handle(), &out);
         break;
-    case Authenticating:
-        FD_SET(m_socket.handle(), &in);
+    case state::authenticating:
+        FD_SET(socket_.handle(), &in);
         break;
-    case Ready:
-        FD_SET(m_socket.handle(), &in);
+    case state::ready:
+        FD_SET(socket_.handle(), &in);
 
-        if (!m_output.empty())
-            FD_SET(m_socket.handle(), &out);
+        if (!output_.empty())
+            FD_SET(socket_.handle(), &out);
         break;
-    case Closing:
-        if (!m_output.empty())
-            FD_SET(m_socket.handle(), &out);
+    case state::closing:
+        if (!output_.empty())
+            FD_SET(socket_.handle(), &out);
         else
-            onDie();
+            on_die();
         break;
     default:
         break;
     }
 }
 
-void TransportClient::sync(fd_set &in, fd_set &out)
+void transport_client::sync(fd_set& in, fd_set& out)
 {
-    switch (m_state) {
-    case Greeting:
-        if (FD_ISSET(m_socket.handle(), &in))
+    switch (state_) {
+    case state::greeting:
+        if (FD_ISSET(socket_.handle(), &in))
             recv();
-        else if (FD_ISSET(m_socket.handle(), &out))
+        else if (FD_ISSET(socket_.handle(), &out))
             send();
 
-        if (m_output.empty())
-            m_state = m_parent.password().empty() ? Ready : Authenticating;
+        if (output_.empty())
+            state_ = parent_.password().empty() ? state::ready : state::authenticating;
 
         break;
-    case Authenticating:
-        if (FD_ISSET(m_socket.handle(), &in))
+    case state::authenticating:
+        if (FD_ISSET(socket_.handle(), &in))
             recv();
 
         authenticate();
         break;
-    case Ready:
-        if (FD_ISSET(m_socket.handle(), &in))
+    case state::ready:
+        if (FD_ISSET(socket_.handle(), &in))
             recv();
-        if (FD_ISSET(m_socket.handle(), &out))
+        if (FD_ISSET(socket_.handle(), &out))
             send();
 
         flush();
         break;
-    case Closing:
-        if (FD_ISSET(m_socket.handle(), &out))
+    case state::closing:
+        if (FD_ISSET(socket_.handle(), &out))
             send();
         break;
     default:
@@ -228,15 +228,15 @@ void TransportClient::sync(fd_set &in, fd_set &out)
     }
 }
 
-void TransportClient::send(const nlohmann::json &json)
+void transport_client::send(const nlohmann::json& json)
 {
     assert(json.is_object());
 
-    m_output += json.dump();
-    m_output += "\r\n\r\n";
+    output_ += json.dump();
+    output_ += "\r\n\r\n";
 }
 
-void TransportClient::success(const std::string &cmd, nlohmann::json extra)
+void transport_client::success(const std::string& cmd, nlohmann::json extra)
 {
     assert(extra.is_object() || extra.is_null());
 
@@ -246,11 +246,11 @@ void TransportClient::success(const std::string &cmd, nlohmann::json extra)
     extra["command"] = cmd;
     extra["status"] = true;
 
-    m_output += extra.dump();
-    m_output += "\r\n\r\n";
+    output_ += extra.dump();
+    output_ += "\r\n\r\n";
 }
 
-void TransportClient::error(const std::string &cmd, const std::string &error, nlohmann::json extra)
+void transport_client::error(const std::string& cmd, const std::string& error, nlohmann::json extra)
 {
     assert(extra.is_object() || extra.is_null());
 
@@ -261,141 +261,145 @@ void TransportClient::error(const std::string &cmd, const std::string &error, nl
     extra["status"] = false;
     extra["error"] = error;
 
-    m_output += extra.dump();
-    m_output += "\r\n\r\n";
+    output_ += extra.dump();
+    output_ += "\r\n\r\n";
 }
 
 /*
- * TransportClientTls
+ * transport_client_tls
  * ------------------------------------------------------------------
  */
 
 #if defined(WITH_SSL)
 
-void TransportClientTls::handshake()
+void transport_client_tls::handshake()
 {
     try {
-        m_ssl.handshake();
-        m_handshake = HandshakeReady;
-    } catch (const net::WantReadError &) {
-        m_handshake = HandshakeRead;
-    } catch (const net::WantWriteError &) {
-        m_handshake = HandshakeWrite;
-    } catch (const std::exception &) {
-        onDie();
+        ssl_.handshake();
+        handshake_ = handshake::ready;
+    } catch (const net::WantReadError&) {
+        handshake_ = handshake::read;
+    } catch (const net::WantWriteError&) {
+        handshake_ = handshake::write;
+    } catch (const std::exception&) {
+        on_die();
     }
 }
 
-TransportClientTls::TransportClientTls(const std::string &pkey,
-                                       const std::string &cert,
-                                       TransportServer &server,
-                                       net::TcpSocket socket)
-    : TransportClient(server, std::move(socket))
-    , m_ssl(m_socket)
+transport_client_tls::transport_client_tls(const std::string& pkey,
+                                           const std::string& cert,
+                                           transport_server& parent,
+                                           net::TcpSocket socket)
+    : transport_client(parent, std::move(socket))
+    , ssl_(socket_)
 {
-    m_ssl.setPrivateKey(pkey);
-    m_ssl.setCertificate(cert);
+    ssl_.setPrivateKey(pkey);
+    ssl_.setCertificate(cert);
 
     handshake();
 }
 
-unsigned TransportClientTls::recv(void *buffer, unsigned length)
+unsigned transport_client_tls::recv(void* buffer, unsigned length)
 {
     unsigned nread = 0;
 
     try {
-        nread = m_ssl.recv(buffer, length);
-    } catch (const net::WantReadError &) {
-        m_handshake = HandshakeRead;
-    } catch (const net::WantWriteError &) {
-        m_handshake = HandshakeWrite;
+        nread = ssl_.recv(buffer, length);
+    } catch (const net::WantReadError&) {
+        handshake_ = handshake::read;
+    } catch (const net::WantWriteError&) {
+        handshake_ = handshake::write;
+    } catch (const std::exception&) {
+        on_die();
     }
 
     return nread;
 }
 
-unsigned TransportClientTls::send(const void *buffer, unsigned length)
+unsigned transport_client_tls::send(const void* buffer, unsigned length)
 {
     unsigned nsent = 0;
 
     try {
-        nsent = m_ssl.send(buffer, length);
-    } catch (const net::WantReadError &) {
-        m_handshake = HandshakeRead;
+        nsent = ssl_.send(buffer, length);
+    } catch (const net::WantReadError&) {
+        handshake_ = handshake::read;
     } catch (const net::WantWriteError &) {
-        m_handshake = HandshakeWrite;
+        handshake_ = handshake::write;
+    } catch (const std::exception&) {
+        on_die();
     }
 
     return nsent;
 }
 
-void TransportClientTls::prepare(fd_set &in, fd_set &out, net::Handle &max)
+void transport_client_tls::prepare(fd_set& in, fd_set& out, net::Handle& max)
 {
-    if (m_socket.handle() > max)
-        max = m_socket.handle();
+    if (socket_.handle() > max)
+        max = socket_.handle();
 
-    switch (m_handshake) {
-    case HandshakeRead:
-        FD_SET(m_socket.handle(), &in);
+    switch (handshake_) {
+    case handshake::read:
+        FD_SET(socket_.handle(), &in);
         break;
-    case HandshakeWrite:
-        FD_SET(m_socket.handle(), &out);
+    case handshake::write:
+        FD_SET(socket_.handle(), &out);
         break;
     default:
-        TransportClient::prepare(in, out, max);
+        transport_client::prepare(in, out, max);
         break;
     }
 }
 
-void TransportClientTls::sync(fd_set &in, fd_set &out)
+void transport_client_tls::sync(fd_set& in, fd_set& out)
 {
-    switch (m_handshake) {
-    case HandshakeRead:
-    case HandshakeWrite:
+    switch (handshake_) {
+    case handshake::read:
+    case handshake::write:
         handshake();
         break;
     default:
-        TransportClient::sync(in, out);
+        transport_client::sync(in, out);
     }
 }
 
 #endif  // !WITH_SSL
 
 /*
- * TransportServerIp
+ * transport_server_ip
  * ------------------------------------------------------------------
  */
 
-TransportServerIp::TransportServerIp(const std::string &address,
-                                     std::uint16_t port,
-                                     std::uint8_t mode)
-    : TransportServer(net::TcpSocket((mode & v6) ? AF_INET6 : AF_INET, 0))
+transport_server_ip::transport_server_ip(const std::string& address,
+                                         std::uint16_t port,
+                                         std::uint8_t mode)
+    : transport_server(net::TcpSocket((mode & v6) ? AF_INET6 : AF_INET, 0))
 {
     assert((mode & v6) || (mode & v4));
 
-    m_socket.set(net::option::SockReuseAddress(true));
+    socket_.set(net::option::SockReuseAddress(true));
 
     if (mode & v6) {
         // Disable or enable IPv4 when using IPv6.
-        m_socket.set(net::option::Ipv6Only(!(mode & v4)));
+        socket_.set(net::option::Ipv6Only(!(mode & v4)));
 
         if (address == "*")
-            m_socket.bind(net::ipv6::any(port));
+            socket_.bind(net::ipv6::any(port));
         else
-            m_socket.bind(net::ipv6::pton(address, port));
+            socket_.bind(net::ipv6::pton(address, port));
     } else {
         if (address == "*")
-            m_socket.bind(net::ipv4::any(port));
+            socket_.bind(net::ipv4::any(port));
         else
-            m_socket.bind(net::ipv4::pton(address, port));
+            socket_.bind(net::ipv4::pton(address, port));
     }
 
-    m_socket.listen();
+    socket_.listen();
 }
 
-std::uint16_t TransportServerIp::port() const
+std::uint16_t transport_server_ip::port() const
 {
-    auto addr = m_socket.getsockname();
+    auto addr = socket_.getsockname();
 
     return addr.domain() == AF_INET
         ? ntohs(addr.as<sockaddr_in>().sin_port)
@@ -403,48 +407,48 @@ std::uint16_t TransportServerIp::port() const
 }
 
 /*
- * TransportServerTls
+ * transport_server_tls
  * ------------------------------------------------------------------
  */
 
 #if defined(WITH_SSL)
 
-TransportServerTls::TransportServerTls(const std::string &pkey,
-                                       const std::string &cert,
-                                       const std::string &address,
-                                       std::uint16_t port,
-                                       std::uint8_t mode)
-    : TransportServerIp(address, port, mode)
-    , m_privatekey(pkey)
-    , m_cert(cert)
+transport_server_tls::transport_server_tls(const std::string& pkey,
+                                           const std::string& cert,
+                                           const std::string& address,
+                                           std::uint16_t port,
+                                           std::uint8_t mode)
+    : transport_server_ip(address, port, mode)
+    , privatekey_(pkey)
+    , cert_(cert)
 {
 }
 
-std::unique_ptr<TransportClient> TransportServerTls::accept()
+std::unique_ptr<transport_client> transport_server_tls::accept()
 {
-    return std::make_unique<TransportClientTls>(m_privatekey, m_cert, *this, m_socket.accept());
+    return std::make_unique<transport_client_tls>(privatekey_, cert_, *this, socket_.accept());
 }
 
 #endif  // !WITH_SSL
 
 /*
- * TransportServerLocal
+ * transport_server_local
  * ------------------------------------------------------------------
  */
 
 #if !defined(IRCCD_SYSTEM_WINDOWS)
 
-TransportServerLocal::TransportServerLocal(std::string path)
-    : TransportServer(net::TcpSocket(AF_LOCAL, 0))
-    , m_path(std::move(path))
+transport_server_local::transport_server_local(std::string path)
+    : transport_server(net::TcpSocket(AF_LOCAL, 0))
+    , path_(std::move(path))
 {
-    m_socket.bind(net::local::create(m_path, true));
-    m_socket.listen();
+    socket_.bind(net::local::create(path_, true));
+    socket_.listen();
 }
 
-TransportServerLocal::~TransportServerLocal()
+transport_server_local::~transport_server_local()
 {
-    ::remove(m_path.c_str());
+    ::remove(path_.c_str());
 }
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * mod-util.cpp -- Irccd.Util API
+ * js_util_module.cpp -- Irccd.Util API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -20,16 +20,17 @@
 
 #include <libircclient.h>
 
-#include "mod-util.hpp"
-#include "plugin-js.hpp"
-#include "util.hpp"
+#include <irccd/util.hpp>
+
+#include "js_util_module.hpp"
+#include "js_plugin.hpp"
 
 namespace irccd {
 
 namespace {
 
-/**
- * Read parameters for Irccd.Util.format function, the object is defined as
+/*
+ * Read parameters for irccd.Util.format function, the object is defined as
  * following:
  *
  * {
@@ -40,14 +41,14 @@ namespace {
  *   fieldn: ...
  * }
  */
-util::Substitution getSubstitution(duk_context *ctx, int index)
+util::subst get_subst(duk_context* ctx, int index)
 {
-    util::Substitution params;
+    util::subst params;
 
     if (!duk_is_object(ctx, index))
         return params;
 
-    dukx_enumerate(ctx, index, 0, true, [&] (duk_context *) {
+    dukx_enumerate(ctx, index, 0, true, [&] (auto) {
         if (dukx_get_std_string(ctx, -2) == "date")
             params.time = static_cast<time_t>(duk_get_number(ctx, -1) / 1000);
         else
@@ -58,21 +59,21 @@ util::Substitution getSubstitution(duk_context *ctx, int index)
 }
 
 /*
- * split (for Irccd.Util.cut as cut)
+ * split (for Irccd.Util.cut)
  * ------------------------------------------------------------------
  *
  * Extract individual tokens in array or a whole string as a std:::vector.
  */
-std::vector<std::string> split(duk_context *ctx)
+std::vector<std::string> split(duk_context* ctx)
 {
     duk_require_type_mask(ctx, 0, DUK_TYPE_MASK_OBJECT | DUK_TYPE_MASK_STRING);
 
     std::vector<std::string> result;
     std::string pattern = " \t\n";
 
-    if (duk_is_string(ctx, 0)) {
+    if (duk_is_string(ctx, 0))
         result = util::split(dukx_get_std_string(ctx, 0), pattern);
-    } else if (duk_is_array(ctx, 0)) {
+    else if (duk_is_array(ctx, 0)) {
         duk_enum(ctx, 0, DUK_ENUM_ARRAY_INDICES_ONLY);
 
         while (duk_next(ctx, -1, 1)) {
@@ -88,30 +89,28 @@ std::vector<std::string> split(duk_context *ctx)
 }
 
 /*
- * limit (for Irccd.Util.cut as cut)
+ * limit (for Irccd.Util.cut)
  * ------------------------------------------------------------------
  *
  * Get the maxl/maxc argument.
  *
  * The argument value is the default and also used as the result returned.
  */
-int limit(duk_context *ctx, int index, const char *name, int value)
+int limit(duk_context* ctx, int index, const char* name, int value)
 {
-    if (duk_get_top(ctx) < index || !duk_is_number(ctx, index)) {
+    if (duk_get_top(ctx) < index || !duk_is_number(ctx, index))
         return value;
-    }
 
     value = duk_to_int(ctx, index);
     
-    if (value <= 0) {
+    if (value <= 0)
         duk_error(ctx, DUK_ERR_RANGE_ERROR, "argument %d (%s) must be positive", index, name);
-    }
 
     return value;
 }
 
 /*
- * lines (for Irccd.Util.cut as cut)
+ * lines (for Irccd.Util.cut)
  * ------------------------------------------------------------------
  *
  * Build a list of lines.
@@ -130,24 +129,23 @@ int limit(duk_context *ctx, int index, const char *name, int value)
  * s   = "hello world"      (not enough room: maxc is smaller)
  * s+1 = "abc"
  */
-std::vector<std::string> lines(duk_context *ctx, const std::vector<std::string>& tokens, int maxc)
+std::vector<std::string> lines(duk_context* ctx, const std::vector<std::string>& tokens, int maxc)
 {
     std::vector<std::string> result{""};
 
-    for (const auto &s : tokens) {
-        if (s.length() > static_cast<std::size_t>(maxc)) {
+    for (const auto& s : tokens) {
+        if (s.length() > static_cast<std::size_t>(maxc))
             duk_error(ctx, DUK_ERR_RANGE_ERROR, "word '%s' could not fit in maxc limit (%d)", s.c_str(), maxc);
-        }
 
         // Compute the length required (prepend a space if needed)
         auto required = s.length() + (result.back().empty() ? 0 : 1);
 
-        if (result.back().length() + required > static_cast<std::size_t>(maxc)) {
+        if (result.back().length() + required > static_cast<std::size_t>(maxc))
             result.push_back(s);
-        } else {
-            if (!result.back().empty()) {
+        else {
+            if (!result.back().empty())
                 result.back() += ' ';
-            }
+
             result.back() += s;
         }
     }
@@ -187,14 +185,13 @@ std::vector<std::string> lines(duk_context *ctx, const std::vector<std::string>&
  *   - RangeError if one word length was bigger than maxc,
  *   - TypeError if data is not a string or a list of strings.
  */
-duk_ret_t cut(duk_context *ctx)
+duk_ret_t cut(duk_context* ctx)
 {
     auto list = lines(ctx, split(ctx), limit(ctx, 1, "maxc", 72));
     auto maxl = limit(ctx, 2, "maxl", INT_MAX);
 
-    if (list.size() > static_cast<std::size_t>(maxl)) {
+    if (list.size() > static_cast<std::size_t>(maxl))
         return 0;
-    }
 
     // Empty list but lines() returns at least one.
     if (list.size() == 1 && list[0].empty()) {
@@ -219,10 +216,10 @@ duk_ret_t cut(duk_context *ctx)
  * Returns:
  *   The converted text.
  */
-duk_ret_t format(duk_context *ctx)
+duk_ret_t format(duk_context* ctx)
 {
     try {
-        dukx_push_std_string(ctx, util::format(dukx_get_std_string(ctx, 0), getSubstitution(ctx, 1)));
+        dukx_push_std_string(ctx, util::format(dukx_get_std_string(ctx, 0), get_subst(ctx, 1)));
     } catch (const std::exception &ex) {
         dukx_throw(ctx, SyntaxError(ex.what()));
     }
@@ -241,7 +238,7 @@ duk_ret_t format(duk_context *ctx)
  * Returns:
  *   The nickname.
  */
-duk_ret_t splituser(duk_context *ctx)
+duk_ret_t splituser(duk_context* ctx)
 {
     auto target = duk_require_string(ctx, 0);
     char nick[32] = {0};
@@ -263,7 +260,7 @@ duk_ret_t splituser(duk_context *ctx)
  * Returns:
  *   The hostname.
  */
-duk_ret_t splithost(duk_context *ctx)
+duk_ret_t splithost(duk_context* ctx)
 {
     auto target = duk_require_string(ctx, 0);
     char host[32] = {0};
@@ -284,12 +281,12 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-UtilModule::UtilModule() noexcept
-    : Module("Irccd.Util")
+js_util_module::js_util_module() noexcept
+    : module("Irccd.Util")
 {
 }
 
-void UtilModule::load(Irccd &, std::shared_ptr<JsPlugin> plugin)
+void js_util_module::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
     StackAssert sa(plugin->context());
 

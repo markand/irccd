@@ -22,7 +22,6 @@
 #include <service.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
@@ -33,7 +32,7 @@ nlohmann::json result;
 class ServerListCommandTest : public CommandTester {
 public:
     ServerListCommandTest()
-        : CommandTester(std::make_unique<ServerListCommand>())
+        : CommandTester(std::make_unique<server_list_command>())
     {
         m_irccd.servers().add(std::make_unique<ServerTester>("s1"));
         m_irccd.servers().add(std::make_unique<ServerTester>("s2"));

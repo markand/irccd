@@ -38,52 +38,52 @@
  */
 namespace irccd {
 
-class CommandService;
-class InterruptService;
-class PluginService;
-class RuleService;
-class ServerService;
-class TransportService;
+class command_service;
+class interrupt_service;
+class plugin_service;
+class rule_service;
+class server_service;
+class transport_service;
 
 /**
  * \brief Irccd main instance.
  */
-class Irccd {
+class irccd {
 private:
     // Main loop stuff.
-    std::atomic<bool> m_running{true};
-    std::mutex m_mutex;
-    std::vector<std::function<void (Irccd &)>> m_events;
+    std::atomic<bool> running_{true};
+    std::mutex mutex_;
+    std::vector<std::function<void (irccd&)>> events_;
 
     // Services.
-    std::shared_ptr<CommandService> m_commandService;
-    std::shared_ptr<InterruptService> m_interruptService;
-    std::shared_ptr<ServerService> m_servers;
-    std::shared_ptr<TransportService> m_transports;
-    std::shared_ptr<RuleService> m_ruleService;
-    std::shared_ptr<PluginService> m_plugins;
+    std::shared_ptr<command_service> command_service_;
+    std::shared_ptr<interrupt_service> itr_service_;
+    std::shared_ptr<server_service> server_service_;
+    std::shared_ptr<transport_service> tpt_service_;
+    std::shared_ptr<rule_service> rule_service_;
+    std::shared_ptr<plugin_service> plugin_service_;
 
     // Not copyable and not movable because services has references to irccd.
-    Irccd(const Irccd &) = delete;
-    Irccd(Irccd &&) = delete;
+    irccd(const irccd&) = delete;
+    irccd(irccd&&) = delete;
 
-    Irccd &operator=(const Irccd &) = delete;
-    Irccd &operator=(Irccd &&) = delete;
+    irccd& operator=(const irccd&) = delete;
+    irccd& operator=(irccd&&) = delete;
 
 public:
     /**
      * Prepare standard services.
      */
-    IRCCD_EXPORT Irccd();
+    irccd();
 
     /**
      * Access the command service.
      *
      * \return the service
      */
-    inline CommandService &commands() noexcept
+    inline command_service& commands() noexcept
     {
-        return *m_commandService;
+        return *command_service_;
     }
 
     /**
@@ -91,9 +91,9 @@ public:
      *
      * \return the service
      */
-    inline ServerService &servers() noexcept
+    inline server_service& servers() noexcept
     {
-        return *m_servers;
+        return *server_service_;
     }
 
     /**
@@ -101,9 +101,9 @@ public:
      *
      * \return the service
      */
-    inline TransportService &transports() noexcept
+    inline transport_service& transports() noexcept
     {
-        return *m_transports;
+        return *tpt_service_;
     }
 
     /**
@@ -111,9 +111,9 @@ public:
      *
      * \return the service
      */
-    inline RuleService &rules() noexcept
+    inline rule_service& rules() noexcept
     {
-        return *m_ruleService;
+        return *rule_service_;
     }
 
     /**
@@ -121,9 +121,9 @@ public:
      *
      * \return the service
      */
-    inline PluginService &plugins() noexcept
+    inline plugin_service& plugins() noexcept
     {
-        return *m_plugins;
+        return *plugin_service_;
     }
 
     /**
@@ -133,7 +133,7 @@ public:
      * \param out the output set
      * \param max the maximum handle
      */
-    IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max);
+    void prepare(fd_set& in, fd_set& out, net::Handle& max);
 
     /**
      * Synchronize the services.
@@ -141,7 +141,7 @@ public:
      * \param in the input set
      * \param out the output set
      */
-    IRCCD_EXPORT void sync(fd_set &in, fd_set &out);
+    void sync(fd_set& in, fd_set& out);
 
     /**
      * Add an event to the queue. This will immediately signals the event loop
@@ -150,17 +150,17 @@ public:
      * \param ev the event
      * \note Thread-safe
      */
-    IRCCD_EXPORT void post(std::function<void (Irccd &)> ev) noexcept;
+    void post(std::function<void (irccd&)> ev) noexcept;
 
     /**
      * Loop forever by calling prepare and sync indefinitely.
      */
-    IRCCD_EXPORT void run();
+    void run();
 
     /**
      * Request to stop, usually from a signal.
      */
-    IRCCD_EXPORT void stop();
+    void stop();
 };
 
 } // !irccd

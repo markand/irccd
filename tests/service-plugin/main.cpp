@@ -25,9 +25,9 @@ namespace irccd {
 
 TEST(service_plugin, default_paths)
 {
-    Irccd irccd;
+    irccd irccd;
 
-    irccd.plugins().setPaths({
+    irccd.plugins().set_paths({
         { "cache",  "/var/cache/irccd"          },
         { "config", "/etc/irccd"                },
         { "data",   "/usr/local/share/irccd"    }
@@ -42,14 +42,14 @@ TEST(service_plugin, default_paths)
 
 TEST(service_plugin, override_cache)
 {
-    Irccd irccd;
+    irccd irccd;
 
-    irccd.plugins().setPaths({
+    irccd.plugins().set_paths({
         { "cache",  "/var/cache/irccd"          },
         { "config", "/etc/irccd"                },
         { "data",   "/usr/local/share/irccd"    }
     });
-    irccd.plugins().setPaths("ask", {
+    irccd.plugins().set_paths("ask", {
         { "cache",  "/opt/cache/ask"            }
     });
 
@@ -62,14 +62,14 @@ TEST(service_plugin, override_cache)
 
 TEST(service_plugin, override_config)
 {
-    Irccd irccd;
+    irccd irccd;
 
-    irccd.plugins().setPaths({
+    irccd.plugins().set_paths({
         { "cache",  "/var/cache/irccd"          },
         { "config", "/etc/irccd"                },
         { "data",   "/usr/local/share/irccd"    }
     });
-    irccd.plugins().setPaths("ask", {
+    irccd.plugins().set_paths("ask", {
         { "config", "/opt/config/ask"           }
     });
 
@@ -82,14 +82,14 @@ TEST(service_plugin, override_config)
 
 TEST(service_plugin, override_data)
 {
-    Irccd irccd;
+    irccd irccd;
 
-    irccd.plugins().setPaths({
+    irccd.plugins().set_paths({
         { "cache",  "/var/cache/irccd"          },
         { "config", "/etc/irccd"                },
         { "data",   "/usr/local/share/irccd"    }
     });
-    irccd.plugins().setPaths("ask", {
+    irccd.plugins().set_paths("ask", {
         { "data",   "/opt/data/ask"             }
     });
 
@@ -102,14 +102,14 @@ TEST(service_plugin, override_data)
 
 TEST(service_plugin, override_all)
 {
-    Irccd irccd;
+    irccd irccd;
 
-    irccd.plugins().setPaths({
+    irccd.plugins().set_paths({
         { "cache",  "/var/cache/irccd"          },
         { "config", "/etc/irccd"                },
         { "data",   "/usr/local/share/irccd"    }
     });
-    irccd.plugins().setPaths("ask", {
+    irccd.plugins().set_paths("ask", {
         { "cache",  "/opt/cache/ask"            },
         { "config", "/opt/config/ask"           },
         { "data",   "/opt/data/ask"             }
@@ -124,14 +124,14 @@ TEST(service_plugin, override_all)
 
 TEST(service_plugin, extra_paths)
 {
-    Irccd irccd;
+    irccd irccd;
 
-    irccd.plugins().setPaths({
+    irccd.plugins().set_paths({
         { "cache",  "/var/cache/irccd"          },
         { "config", "/etc/irccd"                },
         { "data",   "/usr/local/share/irccd"    }
     });
-    irccd.plugins().setPaths("ask", {
+    irccd.plugins().set_paths("ask", {
         { "extra",  "/opt/magic"                }
     });
 

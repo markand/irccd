@@ -51,8 +51,7 @@ namespace irccd {
 namespace util {
 
 /**
- * \enum MessageType
- * \brief Describe which type of message has been received
+ * \brief Pack a message and its type
  *
  * On channels and queries, you may have a special command or a standard message
  * depending on the beginning of the message.
@@ -60,36 +59,95 @@ namespace util {
  * Example: `!reminder help' may invoke the command event if a plugin reminder
  * exists.
  */
-enum class MessageType {
-    Command,                        //!< special command
-    Message                         //!< standard message
+struct message_pack {
+    /**
+     * \brief Describe which type of message has been received
+     */
+    enum class type {
+        command,                        //!< special command
+        message                         //!< standard message
+    } type;
+
+    /**
+     * Message content.
+     */
+    std::string message;
 };
 
 /**
- * \brief Combine the type of message and its content.
+ * \brief Disable or enable some features.
  */
-using MessagePair = std::pair<std::string, MessageType>;
+enum class subst_flags : std::uint8_t {
+    date        = (1 << 0),     //!< date templates
+    keywords    = (1 << 1),     //!< keywords
+    env         = (1 << 2),     //!< environment variables
+    shell       = (1 << 3),     //!< command line command
+    irc_attrs   = (1 << 4)      //!< IRC escape codes
+};
+
+/**
+ * \cond ENUM_HIDDEN_SYMBOLS
+ */
+
+inline subst_flags operator^(subst_flags v1, subst_flags v2) noexcept
+{
+    return static_cast<subst_flags>(static_cast<unsigned>(v1) ^ static_cast<unsigned>(v2));
+}
+
+inline subst_flags operator&(subst_flags v1, subst_flags v2) noexcept
+{
+    return static_cast<subst_flags>(static_cast<unsigned>(v1)&  static_cast<unsigned>(v2));
+}
+
+inline subst_flags operator|(subst_flags v1, subst_flags v2) noexcept
+{
+    return static_cast<subst_flags>(static_cast<unsigned>(v1) | static_cast<unsigned>(v2));
+}
+
+inline subst_flags operator~(subst_flags v) noexcept
+{
+    return static_cast<subst_flags>(~static_cast<unsigned>(v));
+}
+
+inline subst_flags& operator|=(subst_flags& v1, subst_flags v2) noexcept
+{
+    v1 = static_cast<subst_flags>(static_cast<unsigned>(v1) | static_cast<unsigned>(v2));
+
+    return v1;
+}
+
+inline subst_flags& operator&=(subst_flags& v1, subst_flags v2) noexcept
+{
+    v1 = static_cast<subst_flags>(static_cast<unsigned>(v1)&  static_cast<unsigned>(v2));
+
+    return v1;
+}
+
+inline subst_flags& operator^=(subst_flags& v1, subst_flags v2) noexcept
+{
+    v1 = static_cast<subst_flags>(static_cast<unsigned>(v1) ^ static_cast<unsigned>(v2));
+
+    return v1;
+}
+
+/**
+ * \endcond
+ */
 
 /**
  * \brief Used for format() function.
  */
-class Substitution {
+class subst {
 public:
-    /**
-     * \brief Disable or enable some features.
-     */
-    enum Flags {
-        Date        = (1 << 0),     //!< date templates
-        Keywords    = (1 << 1),     //!< keywords
-        Env         = (1 << 2),     //!< environment variables
-        Shell       = (1 << 3),     //!< command line command
-        IrcAttrs    = (1 << 4)      //!< IRC escape codes
-    };
-
     /**
      * Flags for selecting templates.
      */
-    std::uint8_t flags{Date | Keywords | Env | IrcAttrs};
+    subst_flags flags{
+        subst_flags::date |
+        subst_flags::keywords |
+        subst_flags::env |
+        subst_flags::irc_attrs
+    };
 
     /**
      * Fill that field if you want a date.
@@ -156,7 +214,7 @@ public:
  *   - <strong>\@{white,black,bold,underline}</strong>: will write white text on
  *     black in both bold and underline.
  */
-IRCCD_EXPORT std::string format(std::string text, const Substitution &params = {});
+IRCCD_EXPORT std::string format(std::string text, const subst& params = {});
 
 /**
  * Remove leading and trailing spaces.
@@ -174,7 +232,7 @@ IRCCD_EXPORT std::string strip(std::string str);
  * \param max max number of split
  * \return a list of string splitted
  */
-IRCCD_EXPORT std::vector<std::string> split(const std::string &list, const std::string &delimiters, int max = -1);
+IRCCD_EXPORT std::vector<std::string> split(const std::string& list, const std::string& delimiters, int max = -1);
 
 /**
  * Join values by a separator and return a string.
@@ -228,12 +286,17 @@ constexpr T clamp(T value, T low, T high) noexcept
 /**
  * Parse IRC message and determine if it's a command or a simple message.
  *
+ * If it's a command, the plugin invocation command is removed from the
+ * original message, otherwise it is copied verbatime.
+ *
  * \param message the message line
- * \param commandChar the command char (e.g '!')
+ * \param cchar the command char (e.g '!')
  * \param plugin the plugin name
  * \return the pair
  */
-IRCCD_EXPORT MessagePair parseMessage(std::string message, const std::string &commandChar, const std::string &plugin);
+IRCCD_EXPORT message_pack parse_message(std::string message,
+                                        const std::string& cchar,
+                                        const std::string& plugin);
 
 /**
  * Server and identities must have strict names. This function can
@@ -242,7 +305,7 @@ IRCCD_EXPORT MessagePair parseMessage(std::string message, const std::string &co
  * \param name the identifier name
  * \return true if is valid
  */
-inline bool isIdentifierValid(const std::string &name)
+inline bool is_identifier(const std::string& name)
 {
     return std::regex_match(name, std::regex("[A-Za-z0-9-_]+"));
 }
@@ -254,7 +317,7 @@ inline bool isIdentifierValid(const std::string &name)
  * \return true if is boolean
  * \note this function is case-insensitive
  */
-IRCCD_EXPORT bool isBoolean(std::string value) noexcept;
+IRCCD_EXPORT bool is_boolean(std::string value) noexcept;
 
 /**
  * Check if the string is an integer.
@@ -263,15 +326,15 @@ IRCCD_EXPORT bool isBoolean(std::string value) noexcept;
  * \param base the optional base
  * \return true if integer
  */
-IRCCD_EXPORT bool isInt(const std::string &value, int base = 10) noexcept;
-
+IRCCD_EXPORT bool is_int(const std::string& value, int base = 10) noexcept;
+ 
 /**
  * Check if the string is real.
  *
  * \param value the value
  * \return true if real
  */
-IRCCD_EXPORT bool isReal(const std::string &value) noexcept;
+IRCCD_EXPORT bool is_real(const std::string& value) noexcept;
 
 /**
  * Check if the string is a number.
@@ -279,23 +342,9 @@ IRCCD_EXPORT bool isReal(const std::string &value) noexcept;
  * \param value the value
  * \return true if it is a number
  */
-inline bool isNumber(const std::string &value) noexcept
+inline bool is_number(const std::string& value) noexcept
 {
-    return isInt(value) || isReal(value);
-}
-
-/**
- * Tells if a number is bound between the limits.
- *
- * \param value the value to check
- * \param min the minimum
- * \param max the maximum
- * \return true if value is beyond the limits
- */
-template <typename T>
-constexpr bool isBound(T value, T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max()) noexcept
-{
-    return value >= min && value <= max;
+    return is_int(value) || is_real(value);
 }
 
 /**
@@ -316,7 +365,9 @@ constexpr bool isBound(T value, T min = std::numeric_limits<T>::min(), T max = s
  * \throw std::out_of_range if the number is not between min and max
  */
 template <typename T>
-inline T toNumber(const std::string &number, T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max())
+inline T to_number(const std::string& number,
+                   T min = std::numeric_limits<T>::min(),
+                   T max = std::numeric_limits<T>::max())
 {
     static_assert(std::is_integral<T>::value, "T must be integer type");
 
@@ -334,20 +385,20 @@ inline T toNumber(const std::string &number, T min = std::numeric_limits<T>::min
 }
 
 /**
- * Parse a network message from an input buffer and remove it from it.
- *
- * \param input the buffer, will be updated
- * \return the message or empty string if there is nothing
- */
-IRCCD_EXPORT std::string nextNetwork(std::string &input);
-
-/**
  * Use arguments to avoid compiler warnings about unused parameters.
  */
 template <typename... Args>
 inline void unused(Args&&...) noexcept
 {
 }
+
+/**
+ * Parse a network message from an input buffer and remove it from it.
+ *
+ * \param input the buffer, will be updated
+ * \return the message or empty string if there is nothing
+ */
+IRCCD_EXPORT std::string next_network(std::string& input);
 
 /**
  * Utilities for nlohmann json.
@@ -363,7 +414,7 @@ namespace json {
  * \return the value
  * \throw std::runtime_error if the property is missing
  */
-inline nlohmann::json require(const nlohmann::json &json, const std::string &key, nlohmann::json::value_t type)
+inline nlohmann::json require(const nlohmann::json& json, const std::string& key, nlohmann::json::value_t type)
 {
     auto it = json.find(key);
     auto dummy = nlohmann::json(type);
@@ -384,7 +435,7 @@ inline nlohmann::json require(const nlohmann::json &json, const std::string &key
  * \return the boolean
  * \throw std::runtime_error if the property is missing or not a boolean
  */
-inline bool requireBool(const nlohmann::json &json, const std::string &key)
+inline bool require_bool(const nlohmann::json& json, const std::string& key)
 {
     return require(json, key, nlohmann::json::value_t::boolean);
 }
@@ -397,7 +448,7 @@ inline bool requireBool(const nlohmann::json &json, const std::string &key)
  * \return the int
  * \throw std::runtime_error if the property is missing or not ant int
  */
-inline std::int64_t requireInt(const nlohmann::json &json, const std::string &key)
+inline std::int64_t require_int(const nlohmann::json& json, const std::string& key)
 {
     auto it = json.find(key);
 
@@ -420,7 +471,7 @@ inline std::int64_t requireInt(const nlohmann::json &json, const std::string &ke
  * \return the unsigned int
  * \throw std::runtime_error if the property is missing or not ant int
  */
-inline std::uint64_t requireUint(const nlohmann::json &json, const std::string &key)
+inline std::uint64_t require_uint(const nlohmann::json& json, const std::string& key)
 {
     auto it = json.find(key);
 
@@ -443,7 +494,7 @@ inline std::uint64_t requireUint(const nlohmann::json &json, const std::string &
  * \return the string
  * \throw std::runtime_error if the property is missing or not a string
  */
-inline std::string requireString(const nlohmann::json &json, const std::string &key)
+inline std::string require_string(const nlohmann::json& json, const std::string& key)
 {
     return require(json, key, nlohmann::json::value_t::string);
 }
@@ -456,11 +507,11 @@ inline std::string requireString(const nlohmann::json &json, const std::string &
  * \return the identifier
  * \throw std::runtime_error if the property is invalid
  */
-inline std::string requireIdentifier(const nlohmann::json &json, const std::string &key)
+inline std::string require_identifier(const nlohmann::json& json, const std::string& key)
 {
-    auto id = requireString(json, key);
+    auto id = require_string(json, key);
 
-    if (!isIdentifierValid(id))
+    if (!is_identifier(id))
         throw std::runtime_error("invalid '{}' identifier property");
 
     return id;
@@ -473,7 +524,7 @@ inline std::string requireIdentifier(const nlohmann::json &json, const std::stri
  * \param def the default value if not boolean
  * \return a boolean
  */
-inline bool toBool(const nlohmann::json &json, bool def = false) noexcept
+inline bool to_bool(const nlohmann::json& json, bool def = false) noexcept
 {
     return json.is_boolean() ? json.get<bool>() : def;
 }
@@ -485,7 +536,7 @@ inline bool toBool(const nlohmann::json &json, bool def = false) noexcept
  * \param def the default value if not an int
  * \return an int
  */
-inline std::int64_t toInt(const nlohmann::json &json, std::int64_t def = 0) noexcept
+inline std::int64_t to_int(const nlohmann::json& json, std::int64_t def = 0) noexcept
 {
     return json.is_number_integer() ? json.get<std::int64_t>() : def;
 }
@@ -497,7 +548,7 @@ inline std::int64_t toInt(const nlohmann::json &json, std::int64_t def = 0) noex
  * \param def the default value if not a unsigned int
  * \return an unsigned int
  */
-inline std::uint64_t toUint(const nlohmann::json &json, std::uint64_t def = 0) noexcept
+inline std::uint64_t to_uint(const nlohmann::json& json, std::uint64_t def = 0) noexcept
 {
     return json.is_number_unsigned() ? json.get<std::uint64_t>() : def;
 }
@@ -509,7 +560,7 @@ inline std::uint64_t toUint(const nlohmann::json &json, std::uint64_t def = 0) n
  * \param def the default value if not a string
  * \return a string
  */
-inline std::string toString(const nlohmann::json &json, std::string def = "") noexcept
+inline std::string to_string(const nlohmann::json& json, std::string def = "") noexcept
 {
     return json.is_string() ? json.get<std::string>() : def;
 }
@@ -521,7 +572,7 @@ inline std::string toString(const nlohmann::json &json, std::string def = "") no
  * \param property the property key
  * \return the value or null one if not found
  */
-inline nlohmann::json get(const nlohmann::json &json, const std::string &property) noexcept
+inline nlohmann::json get(const nlohmann::json& json, const std::string& property) noexcept
 {
     auto it = json.find(property);
 
@@ -539,9 +590,11 @@ inline nlohmann::json get(const nlohmann::json &json, const std::string &propert
  * \param def the default value
  * \return the boolean
  */
-inline bool getBool(const nlohmann::json &json, const std::string &key, bool def = false) noexcept
+inline bool get_bool(const nlohmann::json& json,
+                     const std::string& key,
+                     bool def = false) noexcept
 {
-    return toBool(get(json, key), def);
+    return to_bool(get(json, key), def);
 }
 
 /**
@@ -552,9 +605,11 @@ inline bool getBool(const nlohmann::json &json, const std::string &key, bool def
  * \param def the default value
  * \return the int
  */
-inline std::int64_t getInt(const nlohmann::json &json, const std::string &key, std::int64_t def = 0) noexcept
+inline std::int64_t get_int(const nlohmann::json& json,
+                            const std::string& key,
+                            std::int64_t def = 0) noexcept
 {
-    return toInt(get(json, key), def);
+    return to_int(get(json, key), def);
 }
 
 /**
@@ -565,9 +620,11 @@ inline std::int64_t getInt(const nlohmann::json &json, const std::string &key, s
  * \param def the default value
  * \return the unsigned int
  */
-inline std::uint64_t getUint(const nlohmann::json &json, const std::string &key, std::uint64_t def = 0) noexcept
+inline std::uint64_t get_uint(const nlohmann::json& json,
+                              const std::string& key,
+                              std::uint64_t def = 0) noexcept
 {
-    return toUint(get(json, key), def);
+    return to_uint(get(json, key), def);
 }
 
 /**
@@ -580,12 +637,12 @@ inline std::uint64_t getUint(const nlohmann::json &json, const std::string &key,
  * \return the value
  */
 template <typename T>
-inline T getIntRange(const nlohmann::json &json,
-                     const std::string &key,
-                     std::int64_t min = std::numeric_limits<T>::min(),
-                     std::int64_t max = std::numeric_limits<T>::max()) noexcept
+inline T get_int_range(const nlohmann::json& json,
+                       const std::string& key,
+                       std::int64_t min = std::numeric_limits<T>::min(),
+                       std::int64_t max = std::numeric_limits<T>::max()) noexcept
 {
-    return clamp(getInt(json, key), min, max);
+    return clamp(get_int(json, key), min, max);
 }
 
 /**
@@ -598,12 +655,12 @@ inline T getIntRange(const nlohmann::json &json,
  * \return value
  */
 template <typename T>
-inline T getUintRange(const nlohmann::json &json,
-                    const std::string &key,
-                    std::uint64_t min = std::numeric_limits<T>::min(),
-                    std::uint64_t max = std::numeric_limits<T>::max()) noexcept
+inline T get_uint_range(const nlohmann::json& json,
+                        const std::string& key,
+                        std::uint64_t min = std::numeric_limits<T>::min(),
+                        std::uint64_t max = std::numeric_limits<T>::max()) noexcept
 {
-    return clamp(getUint(json, key), min, max);
+    return clamp(get_uint(json, key), min, max);
 }
 
 /**
@@ -614,9 +671,11 @@ inline T getUintRange(const nlohmann::json &json,
  * \param def the default value
  * \return the string
  */
-inline std::string getString(const nlohmann::json &json, const std::string &key, std::string def = "") noexcept
+inline std::string get_string(const nlohmann::json& json,
+                              const std::string& key,
+                              std::string def = "") noexcept
 {
-    return toString(get(json, key), def);
+    return to_string(get(json, key), def);
 }
 
 /**
@@ -625,7 +684,7 @@ inline std::string getString(const nlohmann::json &json, const std::string &key,
  * \param value the value
  * \return the string
  */
-inline std::string pretty(const nlohmann::json &value)
+inline std::string pretty(const nlohmann::json& value)
 {
     switch (value.type()) {
     case nlohmann::json::value_t::boolean:
@@ -644,7 +703,7 @@ inline std::string pretty(const nlohmann::json &value)
  * \param prop the property
  * \return the pretty value or empty if key does not exist
  */
-inline std::string pretty(const nlohmann::json &object, const std::string &prop)
+inline std::string pretty(const nlohmann::json& object, const std::string& prop)
 {
     auto it = object.find(prop);
 

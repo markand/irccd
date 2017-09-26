@@ -21,7 +21,6 @@
 #include <service.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 class RuleMoveCommandTest : public CommandTester {
 protected:
@@ -42,32 +41,32 @@ protected:
 
 public:
     RuleMoveCommandTest()
-        : CommandTester(std::make_unique<RuleMoveCommand>())
+        : CommandTester(std::make_unique<rule_move_command>())
     {
-        m_irccd.commands().add(std::make_unique<RuleListCommand>());
-        m_irccd.rules().add(Rule(
+        m_irccd.commands().add(std::make_unique<rule_list_command>());
+        m_irccd.rules().add(rule(
             { "s0" },
             { "c0" },
             { "o0" },
             { "p0" },
             { "onMessage" },
-            RuleAction::Drop
+            rule::action_type::drop
         ));
-        m_irccd.rules().add(Rule(
+        m_irccd.rules().add(rule(
             { "s1", },
             { "c1", },
             { "o1", },
             { "p1", },
             { "onMessage", },
-            RuleAction::Accept
+            rule::action_type::accept
         ));
-        m_irccd.rules().add(Rule(
+        m_irccd.rules().add(rule(
             { "s2", },
             { "c2", },
             { "o2", },
             { "p2", },
             { "onMessage", },
-            RuleAction::Accept
+            rule::action_type::accept
         ));
         m_irccdctl.client().onMessage.connect([&] (auto result) {
             m_result = result;

@@ -21,7 +21,7 @@
 
 /**
  * \file service.hpp
- * \brief Irccd services.
+ * \brief irccd services.
  */
 
 #include <memory>
@@ -40,7 +40,7 @@
 namespace irccd {
 
 /*
- * CommandService.
+ * command_service.
  * ------------------------------------------------------------------
  */
 
@@ -48,9 +48,9 @@ namespace irccd {
  * \brief Store remote commands.
  * \ingroup services
  */
-class CommandService {
+class command_service {
 private:
-    std::vector<std::shared_ptr<Command>> m_commands;
+    std::vector<std::shared_ptr<command>> commands_;
 
 public:
     /**
@@ -58,9 +58,9 @@ public:
      *
      * \return the list of commands.
      */
-    inline const std::vector<std::shared_ptr<Command>> &commands() const noexcept
+    inline const std::vector<std::shared_ptr<command>>& commands() const noexcept
     {
-        return m_commands;
+        return commands_;
     }
 
     /**
@@ -69,7 +69,7 @@ public:
      * \param name the command name
      * \return true if the command exists
      */
-    IRCCD_EXPORT bool contains(const std::string &name) const noexcept;
+    bool contains(const std::string& name) const noexcept;
 
     /**
      * Find a command by name.
@@ -77,7 +77,7 @@ public:
      * \param name the command name
      * \return the command or empty one if not found
      */
-    IRCCD_EXPORT std::shared_ptr<Command> find(const std::string &name) const noexcept;
+    std::shared_ptr<command> find(const std::string& name) const noexcept;
 
     /**
      * Add a command or replace existing one.
@@ -85,11 +85,11 @@ public:
      * \pre command != nullptr
      * \param command the command name
      */
-    IRCCD_EXPORT void add(std::shared_ptr<Command> command);
+    void add(std::shared_ptr<command> command);
 };
 
 /*
- * InterruptService.
+ * interrupt_service.
  * ------------------------------------------------------------------
  */
 
@@ -97,10 +97,10 @@ public:
  * \brief Interrupt irccd event loop.
  * \ingroup services
  */
-class InterruptService {
+class interrupt_service {
 private:
-    net::TcpSocket m_in;
-    net::TcpSocket m_out;
+    net::TcpSocket in_;
+    net::TcpSocket out_;
 
 public:
     /**
@@ -108,26 +108,26 @@ public:
      *
      * \throw std::runtime_error on errors
      */
-    IRCCD_EXPORT InterruptService();
+    interrupt_service();
 
     /**
      * \copydoc Service::prepare
      */
-    IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max);
+    void prepare(fd_set& in, fd_set& out, net::Handle& max);
 
     /**
      * \copydoc Service::sync
      */
-    IRCCD_EXPORT void sync(fd_set &in, fd_set &out);
+    void sync(fd_set& in, fd_set& out);
 
     /**
      * Request interruption.
      */
-    IRCCD_EXPORT void interrupt() noexcept;
+    void interrupt() noexcept;
 };
 
 /*
- * PluginService.
+ * plugin_service.
  * ------------------------------------------------------------------
  */
 
@@ -135,15 +135,15 @@ public:
  * \brief Manage plugins.
  * \ingroup services
  */
-class PluginService {
+class plugin_service {
 private:
-    Irccd &m_irccd;
-    PluginPaths m_default_paths;
-    std::vector<std::shared_ptr<Plugin>> m_plugins;
-    std::vector<std::unique_ptr<PluginLoader>> m_loaders;
-    std::unordered_map<std::string, PluginConfig> m_config;
-    std::unordered_map<std::string, PluginFormats> m_formats;
-    std::unordered_map<std::string, PluginPaths> m_paths;
+    irccd& irccd_;
+    plugin_paths default_paths_;
+    std::vector<std::shared_ptr<plugin>> plugins_;
+    std::vector<std::unique_ptr<plugin_loader>> loaders_;
+    std::unordered_map<std::string, plugin_config> config_;
+    std::unordered_map<std::string, plugin_formats> formats_;
+    std::unordered_map<std::string, plugin_paths> paths_;
 
 public:
     /**
@@ -151,21 +151,21 @@ public:
      *
      * \param irccd the irccd instance
      */
-    IRCCD_EXPORT PluginService(Irccd &irccd) noexcept;
+    plugin_service(irccd& irccd) noexcept;
 
     /**
      * Destroy plugins.
      */
-    IRCCD_EXPORT ~PluginService();
+    ~plugin_service();
 
     /**
      * Get the list of plugins.
      *
      * \return the list of plugins
      */
-    inline const std::vector<std::shared_ptr<Plugin>> &list() const noexcept
+    inline const std::vector<std::shared_ptr<plugin>>& list() const noexcept
     {
-        return m_plugins;
+        return plugins_;
     }
 
     /**
@@ -174,7 +174,7 @@ public:
      * \param name the plugin id
      * \return true if has plugin
      */
-    IRCCD_EXPORT bool has(const std::string &name) const noexcept;
+    bool has(const std::string& name) const noexcept;
 
     /**
      * Get a loaded plugin or null if not found.
@@ -182,7 +182,7 @@ public:
      * \param name the plugin id
      * \return the plugin or empty one if not found
      */
-    IRCCD_EXPORT std::shared_ptr<Plugin> get(const std::string &name) const noexcept;
+    std::shared_ptr<plugin> get(const std::string& name) const noexcept;
 
     /**
      * Find a loaded plugin.
@@ -191,7 +191,7 @@ public:
      * \return the plugin
      * \throws std::out_of_range if not found
      */
-    IRCCD_EXPORT std::shared_ptr<Plugin> require(const std::string &name) const;
+    std::shared_ptr<plugin> require(const std::string& name) const;
 
     /**
      * Add the specified plugin to the registry.
@@ -200,14 +200,14 @@ public:
      * \param plugin the plugin
      * \note the plugin is only added to the list, no action is performed on it
      */
-    IRCCD_EXPORT void add(std::shared_ptr<Plugin> plugin);
+    void add(std::shared_ptr<plugin> plugin);
 
     /**
      * Add a loader.
      *
      * \param loader the loader
      */
-    IRCCD_EXPORT void addLoader(std::unique_ptr<PluginLoader> loader);
+    void add_loader(std::unique_ptr<plugin_loader> loader);
 
     /**
      * Configure a plugin.
@@ -217,7 +217,7 @@ public:
      * \param name the plugin name
      * \param config the new configuration
      */
-    IRCCD_EXPORT void setConfig(const std::string &name, PluginConfig config);
+    void set_config(const std::string& name, plugin_config config);
 
     /**
      * Get a configuration for a plugin.
@@ -225,7 +225,7 @@ public:
      * \param name the plugin name
      * \return the configuration or default one if not found
      */
-    IRCCD_EXPORT PluginConfig config(const std::string &name) const;
+    plugin_config config(const std::string& name) const;
 
     /**
      * Add formatting for a plugin.
@@ -233,7 +233,7 @@ public:
      * \param name the plugin name
      * \param formats the formats
      */
-    IRCCD_EXPORT void setFormats(const std::string &name, PluginFormats formats);
+    void set_formats(const std::string& name, plugin_formats formats);
 
     /**
      * Get formats for a plugin.
@@ -241,14 +241,14 @@ public:
      * \param name the plugin name
      * \return the formats
      */
-    IRCCD_EXPORT PluginFormats formats(const std::string &name) const;
+    plugin_formats formats(const std::string& name) const;
 
     /**
      * Get the default paths for plugins.
      *
      * \return the paths
      */
-    IRCCD_EXPORT const PluginPaths& paths() const noexcept;
+    const plugin_paths& paths() const noexcept;
 
     /**
      * Get the paths for the specified plugin.
@@ -256,14 +256,14 @@ public:
      * \param name the plugin
      * \return the paths
      */
-    IRCCD_EXPORT PluginPaths paths(const std::string& name) const;
+    plugin_paths paths(const std::string& name) const;
 
     /**
      * Set default paths.
      *
      * \param paths the default paths (for all plugins)
      */
-    IRCCD_EXPORT void setPaths(PluginPaths paths);
+    void set_paths(plugin_paths paths);
 
     /**
      * Override paths for the specified plugin.
@@ -271,20 +271,20 @@ public:
      * \param name the plugin name
      * \param paths the paths
      */
-    void setPaths(const std::string& name, PluginPaths paths);
+    void set_paths(const std::string& name, plugin_paths paths);
 
     /**
      * Generic function for opening the plugin at the given path.
      *
-     * This function will search for every PluginLoader and call open() on it,
+     * This function will search for every pluginLoader and call open() on it,
      * the first one that success will be returned.
      *
      * \param id the plugin id
      * \param path the path to the file
      * \return the plugin or nullptr on failures
      */
-    IRCCD_EXPORT std::shared_ptr<Plugin> open(const std::string &id,
-                                              const std::string &path);
+    std::shared_ptr<plugin> open(const std::string& id,
+                                 const std::string& path);
 
     /**
      * Generic function for finding a plugin.
@@ -292,7 +292,7 @@ public:
      * \param id the plugin id
      * \return the plugin or nullptr on failures
      */
-    IRCCD_EXPORT std::shared_ptr<Plugin> find(const std::string &id);
+    std::shared_ptr<plugin> find(const std::string& id);
 
     /**
      * Convenient wrapper that loads a plugin, call onLoad and add it to the
@@ -303,14 +303,14 @@ public:
      * \param name the name
      * \param path the optional path (searched if empty)
      */
-    IRCCD_EXPORT void load(std::string name, std::string path = "");
+    void load(std::string name, std::string path = "");
 
     /**
      * Unload a plugin and remove it.
      *
      * \param name the plugin id
      */
-    IRCCD_EXPORT void unload(const std::string &name);
+    void unload(const std::string& name);
 
     /**
      * Reload a plugin by calling onReload.
@@ -318,11 +318,11 @@ public:
      * \param name the plugin name
      * \throw std::exception on failures
      */
-    IRCCD_EXPORT void reload(const std::string &name);
+    void reload(const std::string& name);
 };
 
 /*
- * RuleService.
+ * rule_service.
  * ------------------------------------------------------------------
  */
 
@@ -330,9 +330,9 @@ public:
  * \brief Store and solve rules.
  * \ingroup services
  */
-class RuleService {
+class rule_service {
 private:
-    std::vector<Rule> m_rules;
+    std::vector<rule> rules_;
 
 public:
     /**
@@ -340,9 +340,9 @@ public:
      *
      * \return the list of rules
      */
-    inline const std::vector<Rule> &list() const noexcept
+    inline const std::vector<rule>& list() const noexcept
     {
-        return m_rules;
+        return rules_;
     }
 
     /**
@@ -352,7 +352,7 @@ public:
      */
     inline std::size_t length() const noexcept
     {
-        return m_rules.size();
+        return rules_.size();
     }
 
     /**
@@ -360,7 +360,7 @@ public:
      *
      * \param rule the rule to append
      */
-    IRCCD_EXPORT void add(Rule rule);
+    void add(rule rule);
 
     /**
      * Insert a new rule at the specified position.
@@ -368,7 +368,7 @@ public:
      * \param rule the rule
      * \param position the position
      */
-    IRCCD_EXPORT void insert(Rule rule, unsigned position);
+    void insert(rule rule, unsigned position);
 
     /**
      * Remove a new rule from the specified position.
@@ -376,7 +376,7 @@ public:
      * \pre position must be valid
      * \param position the position
      */
-    IRCCD_EXPORT void remove(unsigned position);
+    void remove(unsigned position);
 
     /**
      * Get a rule at the specified index or throw an exception if not found.
@@ -385,14 +385,14 @@ public:
      * \return the rule
      * \throw std::out_of_range if position is invalid
      */
-    IRCCD_EXPORT const Rule &require(unsigned position) const;
+    const rule& require(unsigned position) const;
 
     /**
      * Overloaded function.
      *
      * \copydoc require
      */
-    IRCCD_EXPORT Rule& require(unsigned position);
+    rule& require(unsigned position);
 
     /**
      * Resolve the action to execute with the specified list of rules.
@@ -404,15 +404,15 @@ public:
      * \param event the event name (e.g onKick)
      * \return true if the plugin must be called
      */
-    IRCCD_EXPORT bool solve(const std::string &server,
-                            const std::string &channel,
-                            const std::string &origin,
-                            const std::string &plugin,
-                            const std::string &event) noexcept;
+    bool solve(const std::string& server,
+               const std::string& channel,
+               const std::string& origin,
+               const std::string& plugin,
+               const std::string& event) noexcept;
 };
 
 /*
- * ServerService.
+ * server_service.
  * ------------------------------------------------------------------
  */
 
@@ -420,52 +420,52 @@ public:
  * \brief Manage IRC servers.
  * \ingroup services
  */
-class ServerService {
+class server_service {
 private:
-    Irccd &m_irccd;
-    std::vector<std::shared_ptr<Server>> m_servers;
+    irccd& irccd_;
+    std::vector<std::shared_ptr<server>> servers_;
 
-    void handleChannelMode(const ChannelModeEvent &);
-    void handleChannelNotice(const ChannelNoticeEvent &);
-    void handleConnect(const ConnectEvent &);
-    void handleInvite(const InviteEvent &);
-    void handleJoin(const JoinEvent &);
-    void handleKick(const KickEvent &);
-    void handleMessage(const MessageEvent &);
-    void handleMe(const MeEvent &);
-    void handleMode(const ModeEvent &);
-    void handleNames(const NamesEvent &);
-    void handleNick(const NickEvent &);
-    void handleNotice(const NoticeEvent &);
-    void handlePart(const PartEvent &);
-    void handleQuery(const QueryEvent &);
-    void handleTopic(const TopicEvent &);
-    void handleWhois(const WhoisEvent &);
+    void handle_channel_mode(const channel_mode_event&);
+    void handle_channel_notice(const channel_notice_event&);
+    void handle_connect(const connect_event&);
+    void handle_invite(const invite_event&);
+    void handle_join(const join_event&);
+    void handle_kick(const kick_event&);
+    void handle_message(const message_event&);
+    void handle_me(const me_event&);
+    void handle_mode(const mode_event&);
+    void handle_names(const names_event&);
+    void handle_nick(const nick_event&);
+    void handle_notice(const notice_event&);
+    void handle_part(const part_event&);
+    void handle_query(const query_event&);
+    void handle_topic(const topic_event&);
+    void handle_whois(const whois_event&);
 
 public:
     /**
      * Create the server service.
      */
-    IRCCD_EXPORT ServerService(Irccd &instance);
+    server_service(irccd& instance);
 
     /**
      * \copydoc Service::prepare
      */
-    IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max);
+    void prepare(fd_set& in, fd_set& out, net::Handle& max);
 
     /**
      * \copydoc Service::sync
      */
-    IRCCD_EXPORT void sync(fd_set &in, fd_set &out);
+    void sync(fd_set& in, fd_set& out);
 
     /**
      * Get the list of servers
      *
      * \return the servers
      */
-    inline const std::vector<std::shared_ptr<Server>> &servers() const noexcept
+    inline const std::vector<std::shared_ptr<server>>& servers() const noexcept
     {
-        return m_servers;
+        return servers_;
     }
 
     /**
@@ -474,7 +474,7 @@ public:
      * \param name the name
      * \return true if exists
      */
-    IRCCD_EXPORT bool has(const std::string &name) const noexcept;
+    bool has(const std::string& name) const noexcept;
 
     /**
      * Add a new server to the application.
@@ -482,7 +482,7 @@ public:
      * \pre hasServer must return false
      * \param sv the server
      */
-    IRCCD_EXPORT void add(std::shared_ptr<Server> sv);
+    void add(std::shared_ptr<server> sv);
 
     /**
      * Get a server or empty one if not found
@@ -490,7 +490,7 @@ public:
      * \param name the server name
      * \return the server or empty one if not found
      */
-    IRCCD_EXPORT std::shared_ptr<Server> get(const std::string &name) const noexcept;
+    std::shared_ptr<server> get(const std::string& name) const noexcept;
 
     /**
      * Find a server by name.
@@ -499,7 +499,7 @@ public:
      * \return the server
      * \throw std::out_of_range if the server does not exist
      */
-    IRCCD_EXPORT std::shared_ptr<Server> require(const std::string &name) const;
+    std::shared_ptr<server> require(const std::string& name) const;
 
     /**
      * Remove a server from the irccd instance.
@@ -508,37 +508,37 @@ public:
      *
      * \param name the server name
      */
-    IRCCD_EXPORT void remove(const std::string &name);
+    void remove(const std::string& name);
 
     /**
      * Remove all servers.
      *
      * All servers will be disconnected.
      */
-    IRCCD_EXPORT void clear() noexcept;
+    void clear() noexcept;
 };
 
 /*
- * TransportService.
+ * transport_service.
  * ------------------------------------------------------------------
  */
 
-class TransportServer;
-class TransportClient;
+class transport_server;
+class transport_client;
 
 /**
  * \brief manage transport servers and clients.
  * \ingroup services
  */
-class TransportService {
+class transport_service {
 private:
-    Irccd &m_irccd;
+    irccd& irccd_;
 
-    std::vector<std::shared_ptr<TransportServer>> m_servers;
-    std::vector<std::shared_ptr<TransportClient>> m_clients;
+    std::vector<std::shared_ptr<transport_server>> servers_;
+    std::vector<std::shared_ptr<transport_client>> clients_;
 
-    void handleCommand(std::weak_ptr<TransportClient>, const nlohmann::json &);
-    void handleDie(std::weak_ptr<TransportClient>);
+    void handle_command(std::weak_ptr<transport_client>, const nlohmann::json&);
+    void handle_die(std::weak_ptr<transport_client>);
 
 public:
     /**
@@ -546,24 +546,24 @@ public:
      *
      * \param irccd the irccd instance
      */
-    IRCCD_EXPORT TransportService(Irccd &irccd) noexcept;
+    transport_service(irccd& irccd) noexcept;
 
     /**
      * \copydoc Service::prepare
      */
-    IRCCD_EXPORT void prepare(fd_set &in, fd_set &out, net::Handle &max);
+    void prepare(fd_set& in, fd_set& out, net::Handle& max);
 
     /**
      * \copydoc Service::sync
      */
-    IRCCD_EXPORT void sync(fd_set &in, fd_set &out);
+    void sync(fd_set& in, fd_set& out);
 
     /**
      * Add a transport server.
      *
      * \param ts the transport server
      */
-    IRCCD_EXPORT void add(std::shared_ptr<TransportServer> ts);
+    void add(std::shared_ptr<transport_server> ts);
 
     /**
      * Send data to all clients.
@@ -571,7 +571,7 @@ public:
      * \pre object.is_object()
      * \param object the json object
      */
-    IRCCD_EXPORT void broadcast(const nlohmann::json &object);
+    void broadcast(const nlohmann::json& object);
 };
 
 } // !irccd

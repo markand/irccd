@@ -1,5 +1,5 @@
 /*
- * mod-plugin.hpp -- Irccd.Plugin API
+ * js_unicode_module.hpp -- Irccd.Unicode API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,44 +16,35 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_MOD_PLUGIN_HPP
-#define IRCCD_MOD_PLUGIN_HPP
+#ifndef IRCCD_JS_UNICODE_MODULE_HPP
+#define IRCCD_JS_UNICODE_MODULE_HPP
 
 /**
- * \file mod-plugin.hpp
- * \brief Irccd.Plugin JavaScript API.
+ * \file js_unicode_module.hpp
+ * \brief irccd.Unicode JavaScript API.
  */
 
-#include "duktape.hpp"
 #include "module.hpp"
 
 namespace irccd {
 
 /**
- * \brief Irccd.Plugin JavaScript API.
+ * \brief Irccd.Unicode JavaScript API.
  * \ingroup modules
  */
-class PluginModule : public Module {
+class js_unicode_module : public module {
 public:
     /**
-     * Irccd.Plugin.
+     * Constructor.
      */
-    IRCCD_EXPORT PluginModule() noexcept;
+    js_unicode_module() noexcept;
 
     /**
      * \copydoc Module::load
      */
-    IRCCD_EXPORT void load(Irccd &irccd, std::shared_ptr<JsPlugin> plugin) override;
+    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
-
-/**
- * Access the plugin stored in this context.
- *
- * \param ctx the context
- * \return the plugin
- */
-std::shared_ptr<irccd::JsPlugin> dukx_get_plugin(duk_context *ctx);
 
 } // !irccd
 
-#endif // !IRCCD_MOD_PLUGIN_HPP
+#endif // !IRCCD_JS_UNICODE_MODULE_HPP

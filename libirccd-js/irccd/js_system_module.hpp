@@ -1,5 +1,5 @@
 /*
- * mod-util.hpp -- Irccd.Util API
+ * js_system_module.hpp -- Irccd.System API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_MOD_UTIL_HPP
-#define IRCCD_MOD_UTIL_HPP
+#ifndef IRCCD_JS_SYSTEM_MODULE_HPP
+#define IRCCD_JS_SYSTEM_MODULE_HPP
 
 /**
- * \file mod-util.hpp
- * \brief Irccd.Util JavaScript API.
+ * \file mod-system.hpp
+ * \brief irccd.System JavaScript API.
  */
 
 #include "module.hpp"
@@ -29,22 +29,22 @@
 namespace irccd {
 
 /**
- * \brief Irccd.Util JavaScript API.
+ * \brief irccd.System JavaScript API.
  * \ingroup modules
  */
-class UtilModule : public Module {
+class js_system_module : public module {
 public:
     /**
-     * Irccd.Util.
+     * irccd.System.
      */
-    IRCCD_EXPORT UtilModule() noexcept;
+    js_system_module() noexcept;
 
     /**
      * \copydoc Module::load
      */
-    IRCCD_EXPORT void load(Irccd &irccd, std::shared_ptr<JsPlugin> plugin) override;
+    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
 } // !irccd
 
-#endif // !IRCCD_MOD_UTIL_HPP
+#endif // !IRCCD_JS_SYSTEM_MODULE_HPP

@@ -25,80 +25,80 @@
 
 namespace irccd {
 
-void Timer::run()
+void timer::run()
 {
-    while (m_state != Stopped) {
-        std::unique_lock<std::mutex> lock(m_mutex);
+    while (state_ != state::stopped) {
+        std::unique_lock<std::mutex> lock(mutex_);
 
         // Wait in case the timer is paused.
-        m_condition.wait(lock, [&] () {
-            return m_state == Running;
+        condition_.wait(lock, [&] () {
+            return state_ == state::running;
         });
 
-        if (m_state != Running)
+        if (state_ != state::running)
             continue;
 
         // Wait the timer delay or the interrupt.
-        m_condition.wait_for(lock, std::chrono::milliseconds(m_delay), [&] () {
-            return m_state != Running;
+        condition_.wait_for(lock, std::chrono::milliseconds(delay_), [&] () {
+            return state_ != state::running;
         });
 
-        if (m_state == Running) {
+        if (state_ == state::running) {
             // Signal process.
-            onSignal();
+            on_signal();
 
-            if (m_type == TimerType::Single)
-                m_state = Stopped;
+            if (type_ == type::single)
+                state_ = state::stopped;
         }
     }
 
-    onEnd();
+    on_end();
 }
 
-Timer::Timer(TimerType type, unsigned delay) noexcept
-    : m_type(type)
-    , m_delay(delay)
-    , m_thread(std::bind(&Timer::run, this))
+timer::timer(type type, unsigned delay) noexcept
+    : type_(type)
+    , delay_(delay)
+    , thread_(std::bind(&timer::run, this))
 {
 }
 
-Timer::~Timer()
+timer::~timer()
 {
-    assert(m_state != Running);
+    assert(state_ != state::running);
 
     try {
         {
-            std::lock_guard<std::mutex> lk(m_mutex);
+            std::lock_guard<std::mutex> lk(mutex_);
 
-            m_state = Stopped;
-            m_condition.notify_one();
+            state_ = state::stopped;
+            condition_.notify_one();
         }
 
-        m_thread.join();
+        thread_.join();
     } catch (...) {
     }
 }
 
-void Timer::start()
+void timer::start()
 {
-    assert(m_state != Running);
+    assert(state_ != state::running);
 
     {
-        std::lock_guard<std::mutex> lk(m_mutex);
-        m_state = Running;
+        std::lock_guard<std::mutex> lk(mutex_);
+        state_ = state::running;
     }
 
-    m_condition.notify_one();
+    condition_.notify_one();
 }
 
-void Timer::stop()
+void timer::stop()
 {
     {
-        std::lock_guard<std::mutex> lk(m_mutex);
-        m_state = Paused;
+        std::lock_guard<std::mutex> lk(mutex_);
+        state_ = state::paused;
     }
 
-    m_condition.notify_one();
+    condition_.notify_one();
 }
 
 } // !irccd

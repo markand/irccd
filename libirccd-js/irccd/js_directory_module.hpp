@@ -1,5 +1,5 @@
 /*
- * mod-unicode.cpp -- Irccd.Unicode API
+ * js_directory_module.hpp -- irccd.Directory API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_MOD_UNICODE_HPP
-#define IRCCD_MOD_UNICODE_HPP
+#ifndef IRCCD_JS_DIRECTORY_MODULE_HPP
+#define IRCCD_JS_DIRECTORY_MODULE_HPP
 
 /**
- * \file mod-unicode.hpp
- * \brief Irccd.Unicode JavaScript API.
+ * \file mod-directory.hpp
+ * \brief irccd.Directory JavaScript API.
  */
 
 #include "module.hpp"
@@ -29,22 +29,22 @@
 namespace irccd {
 
 /**
- * \brief Irccd.Unicode JavaScript API.
+ * \brief irccd.Directory JavaScript API.
  * \ingroup modules
  */
-class UnicodeModule : public Module {
+class js_directory_module : public module {
 public:
     /**
-     * Irccd.Unicode.
+     * Constructor.
      */
-    IRCCD_EXPORT UnicodeModule() noexcept;
+    js_directory_module() noexcept;
 
     /**
      * \copydoc Module::load
      */
-    IRCCD_EXPORT void load(Irccd &irccd, std::shared_ptr<JsPlugin> plugin) override;
+    void load(irccd &irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
 } // !irccd
 
-#endif // !IRCCD_MOD_UNICODE_HPP
+#endif // !IRCCD_JS_DIRECTORY_MODULE_HPP

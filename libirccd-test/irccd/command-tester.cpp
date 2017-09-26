@@ -24,15 +24,15 @@
 
 namespace irccd {
 
-CommandTester::CommandTester(std::unique_ptr<Command> cmd,
-                             std::unique_ptr<Server> server)
+CommandTester::CommandTester(std::unique_ptr<command> cmd,
+                             std::unique_ptr<server> server)
     : m_irccdctl(std::make_unique<Client>())
 {
     // Be silent.
-    log::setLogger(std::make_unique<log::SilentLogger>());
-    log::setVerbose(false);
+    log::set_logger(std::make_unique<log::silent_logger>());
+    log::set_verbose(false);
 
-    auto tpt = std::make_unique<TransportServerIp>("*", 0);
+    auto tpt = std::make_unique<transport_server_ip>("*", 0);
     auto port = tpt->port();
 
     m_irccd.transports().add(std::move(tpt));

@@ -1,5 +1,5 @@
 /*
- * mod-file.hpp -- Irccd.File API
+ * js_file_module.hpp -- Irccd.File API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_MOD_FILE_HPP
-#define IRCCD_MOD_FILE_HPP
+#ifndef IRCCD_JS_FILE_MODULE_HPP
+#define IRCCD_JS_FILE_MODULE_HPP
 
 /**
- * \file mod-file.hpp
+ * \file js_file_module.hpp
  * \brief Irccd.File JavaScript API.
  */
 
@@ -47,18 +47,18 @@ namespace irccd {
  * - Irccd.File [constructor]
  * - Irccd.System.popen (optional)
  */
-class File {
+class file {
 private:
-    File(const File &) = delete;
-    File &operator=(const File &) = delete;
+    file(const file&) = delete;
+    file& operator=(const file&) = delete;
 
-    File(File &&) = delete;
-    File &operator=(File &&) = delete;
+    file(file&&) = delete;
+    file& operator=(file&&) = delete;
 
 private:
-    std::string m_path;
-    std::FILE *m_stream;
-    std::function<void (std::FILE *)> m_destructor;
+    std::string path_;
+    std::FILE *stream_;
+    std::function<void (std::FILE*)> destructor_;
 
 public:
     /**
@@ -68,11 +68,11 @@ public:
      * \param mode the mode string (for std::fopen)
      * \throw std::runtime_error on failures
      */
-    inline File(std::string path, const std::string &mode)
-        : m_path(std::move(path))
-        , m_destructor([] (std::FILE *fp) { std::fclose(fp); })
+    inline file(std::string path, const std::string& mode)
+        : path_(std::move(path))
+        , destructor_([] (std::FILE* fp) { std::fclose(fp); })
     {
-        if ((m_stream = std::fopen(m_path.c_str(), mode.c_str())) == nullptr)
+        if ((stream_ = std::fopen(path_.c_str(), mode.c_str())) == nullptr)
             throw std::runtime_error(std::strerror(errno));
     }
 
@@ -85,17 +85,17 @@ public:
      * \param fp the file pointer
      * \param destructor the function to close fp (e.g. std::fclose)
      */
-    inline File(std::FILE *fp, std::function<void (std::FILE *)> destructor) noexcept
-        : m_stream(fp)
-        , m_destructor(std::move(destructor))
+    inline file(std::FILE* fp, std::function<void (std::FILE*)> destructor) noexcept
+        : stream_(fp)
+        , destructor_(std::move(destructor))
     {
-        assert(m_destructor != nullptr);
+        assert(destructor_ != nullptr);
     }
 
     /**
      * Closes the file.
      */
-    virtual ~File() noexcept
+    virtual ~file() noexcept
     {
         close();
     }
@@ -106,9 +106,9 @@ public:
      * \return the path
      * \warning empty when constructed from the FILE constructor
      */
-    inline const std::string &path() const noexcept
+    inline const std::string& path() const noexcept
     {
-        return m_path;
+        return path_;
     }
 
     /**
@@ -116,9 +116,9 @@ public:
      *
      * \return the handle or nullptr if the stream was closed
      */
-    inline std::FILE *handle() noexcept
+    inline std::FILE* handle() noexcept
     {
-        return m_stream;
+        return stream_;
     }
 
     /**
@@ -126,9 +126,9 @@ public:
      */
     inline void close() noexcept
     {
-        if (m_stream) {
-            m_destructor(m_stream);
-            m_stream = nullptr;
+        if (stream_) {
+            destructor_(stream_);
+            stream_ = nullptr;
         }
     }
 };
@@ -137,17 +137,17 @@ public:
  * \brief Irccd.File JavaScript API.
  * \ingroup modules
  */
-class FileModule : public Module {
+class js_file_module : public module {
 public:
     /**
-     * Irccd.File.
+     * Constructor.
      */
-    IRCCD_EXPORT FileModule() noexcept;
+    js_file_module() noexcept;
 
     /**
      * \copydoc Module::load
      */
-    IRCCD_EXPORT void load(Irccd &irccd, std::shared_ptr<JsPlugin> plugin) override;
+    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
 /**
@@ -160,7 +160,7 @@ public:
  * \param ctx the the context
  * \param fp the file
  */
-IRCCD_EXPORT void dukx_new_file(duk_context *ctx, File *fp);
+IRCCD_EXPORT void dukx_new_file(duk_context* ctx, file* fp);
 
 /**
  * Push a file.
@@ -169,7 +169,7 @@ IRCCD_EXPORT void dukx_new_file(duk_context *ctx, File *fp);
  * \param ctx the the context
  * \param fp the file
  */
-IRCCD_EXPORT void dukx_push_file(duk_context *ctx, File *fp);
+IRCCD_EXPORT void dukx_push_file(duk_context* ctx, file* fp);
 
 /**
  * Require a file. Raises a JavaScript error if not a File.
@@ -177,8 +177,8 @@ IRCCD_EXPORT void dukx_push_file(duk_context *ctx, File *fp);
  * \param ctx the context
  * \param index the index
  */
-IRCCD_EXPORT File *dukx_require_file(duk_context *ctx, duk_idx_t index);
+IRCCD_EXPORT file* dukx_require_file(duk_context* ctx, duk_idx_t index);
 
 } // !irccd
 
-#endif // !IRCCD_MOD_FILE_HPP
+#endif // !IRCCD_JS_FILE_MODULE_HPP

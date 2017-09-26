@@ -18,111 +18,42 @@
 
 #include <algorithm>
 #include <cctype>
-#include <stdexcept>
 
-#include "logger.hpp"
 #include "rule.hpp"
-#include "util.hpp"
-
-using namespace std;
-
-namespace {
-
-const std::unordered_set<std::string> validEvents{
-    "onChannelMode"
-    "onChannelNotice",
-    "onCommand",
-    "onConnect",
-    "onInvite",
-    "onJoin",
-    "onKick",
-    "onMessage",
-    "onMode",
-    "onNames",
-    "onNick",
-    "onNotice",
-    "onPart",
-    "onQuery",
-    "onQueryCommand",
-    "onTopic",
-    "onWhois"
-};
-
-} // !namespace
 
 namespace irccd {
 
-bool Rule::matchMap(const RuleSet &map, const std::string &value) const noexcept
+bool rule::match_set(const set& set, const std::string& value) const noexcept
 {
-    return value.empty() || map.empty() || map.count(value) == 1;
+    return value.empty() || set.empty() || set.count(value) == 1;
 }
 
-Rule::Rule(RuleSet servers, RuleSet channels, RuleSet origins, RuleSet plugins, RuleSet events, RuleAction action)
-    : m_servers(std::move(servers))
-    , m_channels(std::move(channels))
-    , m_origins(std::move(origins))
-    , m_plugins(std::move(plugins))
-    , m_events(std::move(events))
-    , m_action(action)
+rule::rule(set servers, set channels, set origins, set plugins, set events, action_type action)
+    : servers_(std::move(servers))
+    , channels_(std::move(channels))
+    , origins_(std::move(origins))
+    , plugins_(std::move(plugins))
+    , events_(std::move(events))
+    , action_(action)
 {
-    for (const std::string &n : m_events)
-        if (validEvents.count(n) == 0)
-            throw std::invalid_argument(n + " is not a valid event name");
 }
 
-bool Rule::match(const std::string &server,
-                 const std::string &channel,
-                 const std::string &nick,
-                 const std::string &plugin,
-                 const std::string &event) const noexcept
+bool rule::match(const std::string& server,
+                 const std::string& channel,
+                 const std::string& nick,
+                 const std::string& plugin,
+                 const std::string& event) const noexcept
 {
     auto tolower = [] (auto str) {
         std::transform(str.begin(), str.end(), str.begin(), ::tolower);
         return str;
     };
 
-    return matchMap(m_servers, tolower(server)) &&
-           matchMap(m_channels, tolower(channel)) &&
-           matchMap(m_origins, tolower(nick)) &&
-           matchMap(m_plugins, tolower(plugin)) &&
-           matchMap(m_events, event);
-}
-
-RuleAction Rule::action() const noexcept
-{
-    return m_action;
-}
-
-void Rule::setAction(RuleAction action) noexcept
-{
-    assert(action == RuleAction::Accept || action == RuleAction::Drop);
-
-    m_action = action;
-}
-
-const RuleSet &Rule::servers() const noexcept
-{
-    return m_servers;
-}
-
-const RuleSet &Rule::channels() const noexcept
-{
-    return m_channels;
-}
-
-const RuleSet &Rule::origins() const noexcept
-{
-    return m_origins;
-}
-
-const RuleSet &Rule::plugins() const noexcept
-{
-    return m_plugins;
-}
-
-const RuleSet &Rule::events() const noexcept
-{
-    return m_events;
+    return match_set(servers_, tolower(server)) &&
+           match_set(channels_, tolower(channel)) &&
+           match_set(origins_, tolower(nick)) &&
+           match_set(plugins_, tolower(plugin)) &&
+           match_set(events_, event);
 }
 
 } // !irccd

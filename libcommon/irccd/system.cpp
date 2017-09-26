@@ -111,15 +111,15 @@ namespace sys {
 namespace {
 
 /*
- * XXX: the setprogname() function keeps a pointer without copying it so when
+ * The setprogname() function keeps a pointer without copying it so when
  * main's argv is modified, we're not using the same name so create our own
  * copy.
  */
 
-std::string programNameCopy;
+std::string program_name_value;
 
 /*
- * setHelper.
+ * set_privileges.
  * ------------------------------------------------------------------
  *
  * This is an helper for setting the uid or gid. It accepts both numeric and
@@ -140,28 +140,32 @@ std::string programNameCopy;
  *   - getter the function to get the id from the informal structure
  */
 template <typename IntType, typename LookupFunc, typename SetterFunc, typename FieldGetter>
-void setHelper(const std::string &typeName, const std::string &value, LookupFunc lookup, SetterFunc setter, FieldGetter getter)
+void set_privileges(const std::string& type_name,
+                    const std::string& value,
+                    LookupFunc lookup,
+                    SetterFunc setter,
+                    FieldGetter getter)
 {
-    IntType id;
+    IntType id = 0;
 
-    if (util::isNumber(value))
+    if (util::is_int(value))
         id = std::stoi(value);
     else {
         auto info = lookup(value.c_str());
 
         if (info == nullptr) {
-            log::warning() << "irccd: invalid " << typeName << ": " << std::strerror(errno) << std::endl;
+            log::warning() << "irccd: invalid " << type_name << ": " << std::strerror(errno) << std::endl;
             return;
         } else {
             id = getter(info);
-            log::debug() << "irccd: " << typeName << " " << value << " resolved to: " << id << std::endl;
+            log::debug() << "irccd: " << type_name << " " << value << " resolved to: " << id << std::endl;
         }
     }
 
     if (setter(id) < 0)
-        log::warning() << "irccd: could not set " << typeName << ": " << std::strerror(errno) << std::endl;
+        log::warning() << "irccd: could not set " << type_name << ": " << std::strerror(errno) << std::endl;
     else
-        log::info() << "irccd: setting " << typeName << " to " << value << std::endl;
+        log::info() << "irccd: setting " << type_name << " to " << value << std::endl;
 }
 
 /*
@@ -397,18 +401,18 @@ std::string system_directory(const std::string& component)
 
 } // !namespace
 
-void setProgramName(std::string name) noexcept
+void set_program_name(std::string name) noexcept
 {
-    programNameCopy = std::move(name);
+    program_name_value = std::move(name);
 
 #if defined(HAVE_SETPROGNAME)
-    setprogname(programNameCopy.c_str());
+    setprogname(program_name_value.c_str());
 #endif
 }
 
-const std::string &programName() noexcept
+const std::string& program_name() noexcept
 {
-    return programNameCopy;
+    return program_name_value;
 }
 
 std::string name()
@@ -513,7 +517,7 @@ std::string home()
 #endif
 }
 
-std::string env(const std::string &var)
+std::string env(const std::string& var)
 {
     auto value = std::getenv(var.c_str());
 
@@ -525,9 +529,9 @@ std::string env(const std::string &var)
 
 #if defined(HAVE_SETUID)
 
-void setUid(const std::string &value)
+void set_uid(const std::string& value)
 {
-    setHelper<uid_t>("uid", value, &getpwnam, &setuid, [] (const struct passwd *pw) {
+    set_privileges<uid_t>("uid", value, &getpwnam, &setuid, [] (auto pw) {
         return pw->pw_uid;
     });
 }
@@ -536,9 +540,9 @@ void setUid(const std::string &value)
 
 #if defined(HAVE_SETGID)
 
-void setGid(const std::string &value)
+void set_gid(const std::string& value)
 {
-    setHelper<gid_t>("gid", value, &getgrnam, &setgid, [] (const struct group *gr) {
+    set_privileges<gid_t>("gid", value, &getgrnam, &setgid, [] (auto gr) {
         return gr->gr_gid;
     });
 }

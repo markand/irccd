@@ -26,25 +26,21 @@
 
 // for PathIsRelative.
 #if defined(_WIN32)
-#   if !defined(WIN32_LEAN_AND_MEAN)
-#       define WIN32_LEAN_AND_MEAN
-#   endif
-
-#   include <shlwapi.h>
+#  include <Shlwapi.h>
 #endif
 
 #include "ini.hpp"
 
 namespace irccd {
 
+namespace ini {
+
 namespace {
 
-using namespace ini;
+using stream_iterator = std::istreambuf_iterator<char>;
+using token_iterator = std::vector<token>::const_iterator;
 
-using StreamIterator = std::istreambuf_iterator<char>;
-using TokenIterator = std::vector<Token>::const_iterator;
-
-inline bool isAbsolute(const std::string &path) noexcept
+inline bool is_absolute(const std::string& path) noexcept
 {
 #if defined(_WIN32)
     return !PathIsRelative(path.c_str());
@@ -53,28 +49,28 @@ inline bool isAbsolute(const std::string &path) noexcept
 #endif
 }
 
-inline bool isQuote(char c) noexcept
+inline bool is_quote(char c) noexcept
 {
     return c == '\'' || c == '"';
 }
 
-inline bool isSpace(char c) noexcept
+inline bool is_space(char c) noexcept
 {
     // Custom version because std::isspace includes \n as space.
     return c == ' ' || c == '\t';
 }
 
-inline bool isList(char c) noexcept
+inline bool is_list(char c) noexcept
 {
     return c == '(' || c == ')' || c == ',';
 }
 
-inline bool isReserved(char c) noexcept
+inline bool is_reserved(char c) noexcept
 {
-    return isList(c) || isQuote(c) || c == '[' || c == ']' || c == '@' || c == '#' || c == '=';
+    return is_list(c) || is_quote(c) || c == '[' || c == ']' || c == '@' || c == '#' || c == '=';
 }
 
-void analyseLine(int &line, int &column, StreamIterator &it) noexcept
+void analyse_line(int& line, int& column, stream_iterator& it) noexcept
 {
     assert(*it == '\n');
 
@@ -83,7 +79,7 @@ void analyseLine(int &line, int &column, StreamIterator &it) noexcept
     column = 0;
 }
 
-void analyseComment(int &column, StreamIterator &it, StreamIterator end) noexcept
+void analyse_comment(int& column, stream_iterator& it, stream_iterator end) noexcept
 {
     assert(*it == '#');
 
@@ -93,36 +89,36 @@ void analyseComment(int &column, StreamIterator &it, StreamIterator end) noexcep
     }
 }
 
-void analyseSpaces(int &column, StreamIterator &it, StreamIterator end) noexcept
+void analyse_spaces(int& column, stream_iterator& it, stream_iterator end) noexcept
 {
-    assert(isSpace(*it));
+    assert(is_space(*it));
 
-    while (it != end && isSpace(*it)) {
+    while (it != end && is_space(*it)) {
         ++ column;
         ++ it;
     }
 }
 
-void analyseList(Tokens &list, int line, int &column, StreamIterator &it) noexcept
+void analyse_list(tokens& list, int line, int& column, stream_iterator& it) noexcept
 {
-    assert(isList(*it));
+    assert(is_list(*it));
 
     switch (*it++) {
     case '(':
-        list.emplace_back(Token::ListBegin, line, column++);
+        list.emplace_back(token::list_begin, line, column++);
         break;
     case ')':
-        list.emplace_back(Token::ListEnd, line, column++);
+        list.emplace_back(token::list_end, line, column++);
         break;
     case ',':
-        list.emplace_back(Token::Comma, line, column++);
+        list.emplace_back(token::comma, line, column++);
         break;
     default:
         break;
     }
 }
 
-void analyseSection(Tokens &list, int &line, int &column, StreamIterator &it, StreamIterator end)
+void analyse_section(tokens& list, int& line, int& column, stream_iterator& it, stream_iterator end)
 {
     assert(*it == '[');
 
@@ -132,35 +128,39 @@ void analyseSection(Tokens &list, int &line, int &column, StreamIterator &it, St
     // Read section name.
     ++ it;
     while (it != end && *it != ']') {
-        if (*it == '\n')
-            throw Error(line, column, "section not terminated, missing ']'");
-        if (isReserved(*it))
-            throw Error(line, column, "section name expected after '[', got '" + std::string(1, *it) + "'");
+        if (*it == '\n') {
+            throw exception(line, column, "section not terminated, missing ']'");
+        }
+        if (is_reserved(*it)) {
+            throw exception(line, column, "section name expected after '[', got '" + std::string(1, *it) + "'");
+        }
 
         ++ column;
         value += *it++;
     }
 
-    if (it == end)
-        throw Error(line, column, "section name expected after '[', got <EOF>");
-    if (value.empty())
-        throw Error(line, column, "empty section name");
+    if (it == end) {
+        throw exception(line, column, "section name expected after '[', got <EOF>");
+    }
+    if (value.empty()) {
+        throw exception(line, column, "empty section name");
+    }
 
     // Remove ']'.
     ++ it;
 
-    list.emplace_back(Token::Section, line, save, std::move(value));
+    list.emplace_back(token::section, line, save, std::move(value));
 }
 
-void analyseAssign(Tokens &list, int &line, int &column, StreamIterator &it)
+void analyse_assign(tokens& list, int& line, int& column, stream_iterator& it)
 {
     assert(*it == '=');
 
-    list.push_back({ Token::Assign, line, column++ });
+    list.push_back({ token::assign, line, column++ });
     ++ it;
 }
 
-void analyseQuotedWord(Tokens &list, int &line, int &column, StreamIterator &it, StreamIterator end)
+void analyse_quoted_word(tokens& list, int& line, int& column, stream_iterator& it, stream_iterator end)
 {
     std::string value;
     int save = column;
@@ -172,31 +172,32 @@ void analyseQuotedWord(Tokens &list, int &line, int &column, StreamIterator &it,
         value += *it++;
     }
 
-    if (it == end)
-        throw Error(line, column, "undisclosed '" + std::string(1, quote) + "', got <EOF>");
+    if (it == end) {
+        throw exception(line, column, "undisclosed '" + std::string(1, quote) + "', got <EOF>");
+    }
 
     // Remove quote.
     ++ it;
 
-    list.push_back({ Token::QuotedWord, line, save, std::move(value) });
+    list.push_back({ token::quoted_word, line, save, std::move(value) });
 }
 
-void analyseWord(Tokens &list, int &line, int &column, StreamIterator &it, StreamIterator end)
+void analyse_word(tokens& list, int& line, int& column, stream_iterator& it, stream_iterator end)
 {
-    assert(!isReserved(*it));
+    assert(!is_reserved(*it));
 
     std::string value;
     int save = column;
 
-    while (it != end && !std::isspace(*it) && !isReserved(*it)) {
+    while (it != end && !std::isspace(*it) && !is_reserved(*it)) {
         ++ column;
         value += *it++;
     }
 
-    list.push_back({ Token::Word, line, save, std::move(value) });
+    list.push_back({ token::word, line, save, std::move(value) });
 }
 
-void analyseInclude(Tokens &list, int &line, int &column, StreamIterator &it, StreamIterator end)
+void analyse_include(tokens& list, int& line, int& column, stream_iterator& it, stream_iterator end)
 {
     assert(*it == '@');
 
@@ -205,117 +206,127 @@ void analyseInclude(Tokens &list, int &line, int &column, StreamIterator &it, St
 
     // Read include.
     ++ it;
-    while (it != end && !isSpace(*it)) {
+    while (it != end && !is_space(*it)) {
         ++ column;
         include += *it++;
     }
 
-    if (include != "include")
-        throw Error(line, column, "expected include after '@' token");
+    if (include != "include") {
+        throw exception(line, column, "expected include after '@' token");
+    }
 
-    list.push_back({ Token::Include, line, save });
+    list.push_back({ token::include, line, save });
 }
 
-void parseOptionValueSimple(Option &option, TokenIterator &it)
+void parse_option_value_simple(option& option, token_iterator& it)
 {
-    assert(it->type() == Token::Word || it->type() == Token::QuotedWord);
+    assert(it->type() == token::word || it->type() == token::quoted_word);
 
     option.push_back((it++)->value());
 }
 
-void parseOptionValueList(Option &option, TokenIterator &it, TokenIterator end)
+void parse_option_value_list(option& option, token_iterator& it, token_iterator end)
 {
-    assert(it->type() == Token::ListBegin);
+    assert(it->type() == token::list_begin);
 
-    TokenIterator save = it++;
+    token_iterator save = it++;
 
-    while (it != end && it->type() != Token::ListEnd) {
+    while (it != end && it->type() != token::list_end) {
         switch (it->type()) {
-        case Token::Comma:
+        case token::comma:
             // Previous must be a word.
-            if (it[-1].type() != Token::Word && it[-1].type() != Token::QuotedWord)
-                throw Error(it->line(), it->column(), "unexpected comma after '" + it[-1].value() + "'");
+            if (it[-1].type() != token::word && it[-1].type() != token::quoted_word) {
+                throw exception(it->line(), it->column(), "unexpected comma after '" + it[-1].value() + "'");
+            }
 
             ++ it;
             break;
-        case Token::Word:
-        case Token::QuotedWord:
+        case token::word:
+        case token::quoted_word:
             option.push_back((it++)->value());
             break;
         default:
-            throw Error(it->line(), it->column(), "unexpected '" + it[-1].value() + "' in list construct");
+            throw exception(it->line(), it->column(), "unexpected '" + it[-1].value() + "' in list construct");
             break;
         }
     }
 
-    if (it == end)
-        throw Error(save->line(), save->column(), "unterminated list construct");
+    if (it == end) {
+        throw exception(save->line(), save->column(), "unterminated list construct");
+    }
 
     // Remove ).
     ++ it;
 }
 
-void parseOption(Section &sc, TokenIterator &it, TokenIterator end)
+void parse_option(section& sc, token_iterator& it, token_iterator end)
 {
-    Option option(it->value());
-
-    TokenIterator save = it;
+    option option(it->value());
+    token_iterator save(it);
 
     // No '=' or something else?
-    if (++it == end)
-        throw Error(save->line(), save->column(), "expected '=' assignment, got <EOF>");
-    if (it->type() != Token::Assign)
-        throw Error(it->line(), it->column(), "expected '=' assignment, got " + it->value());
+    if (++it == end) {
+        throw exception(save->line(), save->column(), "expected '=' assignment, got <EOF>");
+    }
+    if (it->type() != token::assign) {
+        throw exception(it->line(), it->column(), "expected '=' assignment, got " + it->value());
+    }
 
     // Empty options are allowed so just test for words.
     if (++it != end) {
-        if (it->type() == Token::Word || it->type() == Token::QuotedWord)
-            parseOptionValueSimple(option, it);
-        else if (it->type() == Token::ListBegin)
-            parseOptionValueList(option, it, end);
+        if (it->type() == token::word || it->type() == token::quoted_word) {
+            parse_option_value_simple(option, it);
+        } else if (it->type() == token::list_begin) {
+            parse_option_value_list(option, it, end);
+        }
     }
 
     sc.push_back(std::move(option));
 }
 
-void parseInclude(Document &doc, const std::string &path, TokenIterator &it, TokenIterator end)
+void parse_include(document& doc, const std::string& path, token_iterator& it, token_iterator end)
 {
-    TokenIterator save = it;
+    token_iterator save(it);
 
-    if (++it == end)
-        throw Error(save->line(), save->column(), "expected file name after '@include' statement, got <EOF>");
-    if (it->type() != Token::Word && it->type() != Token::QuotedWord)
-        throw Error(it->line(), it->column(), "expected file name after '@include' statement, got " + it->value());
+    if (++it == end) {
+        throw exception(save->line(), save->column(), "expected file name after '@include' statement, got <EOF>");
+    }
+    if (it->type() != token::word && it->type() != token::quoted_word) {
+        throw exception(it->line(), it->column(), "expected file name after '@include' statement, got " + it->value());
+    }
 
     std::string value = (it++)->value();
     std::string file;
 
-    if (!isAbsolute(value))
+    if (!is_absolute(value)) {
 #if defined(_WIN32)
         file = path + "\\" + value;
 #else
         file = path + "/" + value;
 #endif
-    else
+    } else {
         file = value;
+    }
 
-    for (const auto &sc : readFile(file))
+    for (const auto& sc : read_file(file)) {
         doc.push_back(sc);
+    }
 }
 
-void parseSection(Document &doc, TokenIterator &it, TokenIterator end)
+void parse_section(document& doc, token_iterator& it, token_iterator end)
 {
-    Section sc(it->value());
+    section sc(it->value());
 
     // Skip [section].
     ++ it;
 
     // Read until next section.
-    while (it != end && it->type() != Token::Section) {
-        if (it->type() != Token::Word)
-            throw Error(it->line(), it->column(), "unexpected token '" + it->value() + "' in section definition");
+    while (it != end && it->type() != token::section) {
+        if (it->type() != token::word) {
+            throw exception(it->line(), it->column(), "unexpected token '" + it->value() + "' in section definition");
+        }
 
-        parseOption(sc, it, end);
+        parse_option(sc, it, end);
     }
 
     doc.push_back(std::move(sc));
@@ -323,96 +334,98 @@ void parseSection(Document &doc, TokenIterator &it, TokenIterator end)
 
 } // !namespace
 
-namespace ini {
-
-Tokens analyse(std::istreambuf_iterator<char> it, std::istreambuf_iterator<char> end)
+tokens analyse(std::istreambuf_iterator<char> it, std::istreambuf_iterator<char> end)
 {
-    Tokens list;
+    tokens list;
     int line = 1;
     int column = 0;
 
     while (it != end) {
-        if (*it == '\n')
-            analyseLine(line, column, it);
-        else if (*it == '#')
-            analyseComment(column, it, end);
-        else if (*it == '[')
-            analyseSection(list, line, column, it, end);
-        else if (*it == '=')
-            analyseAssign(list, line, column, it);
-        else if (isSpace(*it))
-            analyseSpaces(column, it, end);
-        else if (*it == '@')
-            analyseInclude(list, line, column, it, end);
-        else if (isQuote(*it))
-            analyseQuotedWord(list, line, column, it, end);
-        else if (isList(*it))
-            analyseList(list, line, column, it);
-        else
-            analyseWord(list, line, column, it, end);
+        if (*it == '\n') {
+            analyse_line(line, column, it);
+        } else if (*it == '#') {
+            analyse_comment(column, it, end);
+        } else if (*it == '[') {
+            analyse_section(list, line, column, it, end);
+        } else if (*it == '=') {
+            analyse_assign(list, line, column, it);
+        } else if (is_space(*it)) {
+            analyse_spaces(column, it, end);
+        } else if (*it == '@') {
+            analyse_include(list, line, column, it, end);
+        } else if (is_quote(*it)) {
+            analyse_quoted_word(list, line, column, it, end);
+        } else if (is_list(*it)) {
+            analyse_list(list, line, column, it);
+        } else {
+            analyse_word(list, line, column, it, end);
+        }
     }
 
     return list;
 }
 
-Tokens analyse(std::istream &stream)
+tokens analyse(std::istream& stream)
 {
     return analyse(std::istreambuf_iterator<char>(stream), {});
 }
 
-Document parse(const Tokens &tokens, const std::string &path)
+document parse(const tokens& tokens, const std::string& path)
 {
-    Document doc;
-    TokenIterator it = tokens.cbegin();
-    TokenIterator end = tokens.cend();
+    document doc;
+    token_iterator it = tokens.cbegin();
+    token_iterator end = tokens.cend();
 
     while (it != end) {
         switch (it->type()) {
-        case Token::Include:
-            parseInclude(doc, path, it, end);
+        case token::include:
+            parse_include(doc, path, it, end);
             break;
-        case Token::Section:
-            parseSection(doc, it, end);
+        case token::section:
+            parse_section(doc, it, end);
             break;
         default:
-            throw Error(it->line(), it->column(), "unexpected '" + it->value() + "' on root document");
+            throw exception(it->line(), it->column(), "unexpected '" + it->value() + "' on root document");
         }
     }
 
     return doc;
 }
 
-Document readFile(const std::string &filename)
+document read_file(const std::string& filename)
 {
     // Get parent path.
     auto parent = filename;
     auto pos = parent.find_last_of("/\\");
 
-    if (pos != std::string::npos)
+    if (pos != std::string::npos) {
         parent.erase(pos);
-    else
+    } else {
         parent = ".";
+    }
 
     std::ifstream input(filename);
 
-    if (!input)
-        throw Error(0, 0, std::strerror(errno));
+    if (!input) {
+        throw exception(0, 0, std::strerror(errno));
+    }
 
     return parse(analyse(input), parent);
 }
 
-Document readString(const std::string &buffer)
+document read_string(const std::string& buffer)
 {
     std::istringstream iss(buffer);
 
     return parse(analyse(iss));
 }
 
-void dump(const Tokens &tokens)
+void dump(const tokens& tokens)
 {
-    for (const Token &token: tokens)
+    for (const token& token: tokens) {
         // TODO: add better description
         std::cout << token.line() << ":" << token.column() << ": " << token.value() << std::endl;
+    }
 }
 
 } // !ini

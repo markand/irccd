@@ -21,7 +21,6 @@
 #include <service.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 class RuleAddCommandTest : public CommandTester {
 protected:
@@ -42,9 +41,9 @@ protected:
 
 public:
     RuleAddCommandTest()
-        : CommandTester(std::make_unique<RuleAddCommand>())
+        : CommandTester(std::make_unique<rule_add_command>())
     {
-        m_irccd.commands().add(std::make_unique<RuleListCommand>());
+        m_irccd.commands().add(std::make_unique<rule_list_command>());
         m_irccdctl.client().onMessage.connect([&] (auto result) {
             m_result = result;
         });

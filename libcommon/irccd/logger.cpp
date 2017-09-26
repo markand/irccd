@@ -44,33 +44,33 @@ namespace {
  */
 
 std::atomic<bool> verbose{false};
-std::unique_ptr<Logger> iface{new ConsoleLogger};
-std::unique_ptr<Filter> filter{new Filter};
+std::unique_ptr<logger> use_iface{new console_logger};
+std::unique_ptr<filter> use_filter{new filter};
 
 /*
- * Buffer -- output buffer.
+ * buffer -- output buffer.
  * ------------------------------------------------------------------
  *
  * This class inherits from std::stringbuf and writes the messages to the
  * specified interface function which is one of info, warning and debug.
  */
 
-class Buffer : public std::stringbuf {
+class buffer : public std::stringbuf {
 public:
-    enum Level {
-        Debug,
-        Info,
-        Warning
+    enum class level {
+        debug,
+        info,
+        warning
     };
 
 private:
-    Level m_level;
+    level level_;
 
     void debug(std::string line)
     {
         // Print only in debug mode, the buffer is flushed anyway.
 #if !defined(NDEBUG)
-        iface->debug(filter->preDebug(std::move(line)));
+        use_iface->debug(use_filter->pre_debug(std::move(line)));
 #else
         (void)line;
 #endif
@@ -80,19 +80,19 @@ private:
     {
         // Print only if verbose, the buffer will be flushed anyway.
         if (verbose)
-            iface->info(filter->preInfo(std::move(line)));
+            use_iface->info(use_filter->pre_info(std::move(line)));
     }
 
     void warning(std::string line)
     {
-        iface->warning(filter->preWarning(std::move(line)));
+        use_iface->warning(use_filter->pre_warning(std::move(line)));
     }
 
 public:
-    inline Buffer(Level level) noexcept
-        : m_level(level)
+    inline buffer(level level) noexcept
+        : level_(level)
     {
-        assert(level >= Debug && level <= Warning);
+        assert(level >= level::debug && level <= level::warning);
     }
 
     virtual int sync() override
@@ -101,19 +101,19 @@ public:
         std::string::size_type pos;
 
         while ((pos = buffer.find("\n")) != std::string::npos) {
-            std::string line = buffer.substr(0, pos);
+            auto line = buffer.substr(0, pos);
 
             // Remove this line.
             buffer.erase(buffer.begin(), buffer.begin() + pos + 1);
 
-            switch (m_level) {
-            case Level::Debug:
+            switch (level_) {
+            case level::debug:
                 debug(std::move(line));
                 break;
-            case Level::Info:
+            case level::info:
                 info(std::move(line));
                 break;
-            case Level::Warning:
+            case level::warning:
                 warning(std::move(line));
                 break;
             default:
@@ -133,108 +133,108 @@ public:
  */
 
 // Buffers.
-Buffer bufferInfo{Buffer::Info};
-Buffer bufferWarning{Buffer::Warning};
-Buffer bufferDebug{Buffer::Debug};
+buffer buffer_info{buffer::level::info};
+buffer buffer_warning{buffer::level::warning};
+buffer buffer_debug{buffer::level::debug};
 
 // Stream outputs.
-std::ostream streamInfo(&bufferInfo);
-std::ostream streamWarning(&bufferWarning);
-std::ostream streamDebug(&bufferDebug);
+std::ostream stream_info(&buffer_info);
+std::ostream stream_warning(&buffer_warning);
+std::ostream stream_debug(&buffer_debug);
 
 } // !namespace
 
 /*
- * ConsoleLogger
+ * console_logger
  * ------------------------------------------------------------------
  */
 
-void ConsoleLogger::info(const std::string &line)
+void console_logger::info(const std::string& line)
 {
     std::cout << line << std::endl;
 }
 
-void ConsoleLogger::warning(const std::string &line)
+void console_logger::warning(const std::string& line)
 {
     std::cerr << line << std::endl;
 }
 
-void ConsoleLogger::debug(const std::string &line)
+void console_logger::debug(const std::string& line)
 {
     std::cout << line << std::endl;
 }
 
 /*
- * FileLogger
+ * file_logger
  * ------------------------------------------------------------------
  */
 
-FileLogger::FileLogger(std::string normal, std::string errors)
-    : m_outputNormal(std::move(normal))
-    , m_outputError(std::move(errors))
+file_logger::file_logger(std::string normal, std::string errors)
+    : output_normal_(std::move(normal))
+    , output_error_(std::move(errors))
 {
 }
 
-void FileLogger::info(const std::string &line)
+void file_logger::info(const std::string& line)
 {
-    std::ofstream(m_outputNormal, std::ofstream::out | std::ofstream::app) << line << std::endl;
+    std::ofstream(output_normal_, std::ofstream::out | std::ofstream::app) << line << std::endl;
 }
 
-void FileLogger::warning(const std::string &line)
+void file_logger::warning(const std::string& line)
 {
-    std::ofstream(m_outputError, std::ofstream::out | std::ofstream::app) << line << std::endl;
+    std::ofstream(output_error_, std::ofstream::out | std::ofstream::app) << line << std::endl;
 }
 
-void FileLogger::debug(const std::string &line)
+void file_logger::debug(const std::string& line)
 {
-    std::ofstream(m_outputNormal, std::ofstream::out | std::ofstream::app) << line << std::endl;
+    std::ofstream(output_normal_, std::ofstream::out | std::ofstream::app) << line << std::endl;
 }
 
 /*
- * SilentLogger
+ * silent_logger
  * ------------------------------------------------------------------
  */
 
-void SilentLogger::info(const std::string &)
+void silent_logger::info(const std::string&)
 {
 }
 
-void SilentLogger::warning(const std::string &)
+void silent_logger::warning(const std::string&)
 {
 }
 
-void SilentLogger::debug(const std::string &)
+void silent_logger::debug(const std::string&)
 {
 }
 
 /*
- * SyslogLogger
+ * syslog_logger
  * ------------------------------------------------------------------
  */
 
 #if defined(HAVE_SYSLOG)
 
-SyslogLogger::SyslogLogger()
+syslog_logger::syslog_logger()
 {
-    openlog(sys::programName().c_str(), LOG_PID, LOG_DAEMON);
+    openlog(sys::program_name().c_str(), LOG_PID, LOG_DAEMON);
 }
 
-SyslogLogger::~SyslogLogger()
+syslog_logger::~syslog_logger()
 {
     closelog();
 }
 
-void SyslogLogger::info(const std::string &line)
+void syslog_logger::info(const std::string& line)
 {
     syslog(LOG_INFO | LOG_USER, "%s", line.c_str());
 }
 
-void SyslogLogger::warning(const std::string &line)
+void syslog_logger::warning(const std::string& line)
 {
     syslog(LOG_WARNING | LOG_USER, "%s", line.c_str());
 }
 
-void SyslogLogger::debug(const std::string &line)
+void syslog_logger::debug(const std::string& line)
 {
     syslog(LOG_DEBUG | LOG_USER, "%s", line.c_str());
 }
@@ -246,50 +246,50 @@ void SyslogLogger::debug(const std::string &line)
  * ------------------------------------------------------------------
  */
 
-void setLogger(std::unique_ptr<Logger> newiface) noexcept
+void set_logger(std::unique_ptr<logger> new_iface) noexcept
 {
-    assert(newiface);
+    assert(new_iface);
 
-    iface = std::move(newiface);
+    use_iface = std::move(new_iface);
 }
 
-void setFilter(std::unique_ptr<Filter> newfilter) noexcept
+void set_filter(std::unique_ptr<filter> newfilter) noexcept
 {
-    assert(filter);
+    assert(newfilter);
 
-    filter = std::move(newfilter);
+    use_filter = std::move(newfilter);
 }
 
-std::ostream &info(const std::string &message)
-{
-    if (!message.empty())
-        streamInfo << message << std::endl;
-
-    return streamInfo;
-}
-
-std::ostream &warning(const std::string &message)
+std::ostream& info(const std::string& message)
 {
     if (!message.empty())
-        streamWarning << message << std::endl;
+        stream_info << message << std::endl;
 
-    return streamWarning;
+    return stream_info;
 }
 
-std::ostream &debug(const std::string &message)
+std::ostream& warning(const std::string& message)
 {
     if (!message.empty())
-        streamDebug << message << std::endl;
+        stream_warning << message << std::endl;
 
-    return streamDebug;
+    return stream_warning;
 }
 
-bool isVerbose() noexcept
+std::ostream& debug(const std::string& message)
+{
+    if (!message.empty())
+        stream_debug << message << std::endl;
+
+    return stream_debug;
+}
+
+bool is_verbose() noexcept
 {
     return verbose;
 }
 
-void setVerbose(bool mode) noexcept
+void set_verbose(bool mode) noexcept
 {
     verbose = mode;
 }

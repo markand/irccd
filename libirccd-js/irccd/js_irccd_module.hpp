@@ -1,5 +1,5 @@
 /*
- * mod-irccd.hpp -- Irccd API
+ * js_irccd_module.hpp -- Irccd API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_MOD_IRCCD_HPP
-#define IRCCD_MOD_IRCCD_HPP
+#ifndef IRCCD_JS_IRCCD_MODULE_HPP
+#define IRCCD_JS_IRCCD_MODULE_HPP
 
 /**
- * \file mod-irccd.hpp
- * \brief Irccd JavaScript API.
+ * \file js_irccd_module.hpp
+ * \brief irccd JavaScript API.
  */
 
 #include <cerrno>
@@ -36,16 +36,16 @@ namespace irccd {
 /**
  * \brief Custom JavaScript exception for system error.
  */
-class SystemError {
+class system_error {
 private:
-    int m_errno;
-    std::string m_message;
+    int errno_;
+    std::string message_;
 
 public:
     /**
      * Create a system error from the current errno value.
      */
-    IRCCD_EXPORT SystemError();
+    system_error();
 
     /**
      * Create a system error with the given errno and message.
@@ -53,31 +53,31 @@ public:
      * \param e the errno number
      * \param message the message
      */
-    IRCCD_EXPORT SystemError(int e, std::string message);
+    system_error(int e, std::string message);
 
     /**
-     * Raise the SystemError.
+     * Raise the SystemError Javascript exception.
      *
      * \param ctx the context
      */
-    IRCCD_EXPORT void raise(duk_context *ctx) const;
+    void raise(duk_context* ctx) const;
 };
 
 /**
  * \brief Irccd JavaScript API.
  * \ingroup modules
  */
-class IrccdModule : public Module {
+class js_irccd_module : public module {
 public:
     /**
-     * Irccd.
+     * Constructor.
      */
-    IRCCD_EXPORT IrccdModule() noexcept;
+    js_irccd_module() noexcept;
 
     /**
-     * \copydoc Module::load
+     * \copydoc module::load
      */
-    IRCCD_EXPORT void load(Irccd &irccd, std::shared_ptr<JsPlugin> plugin) override;
+    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
 /**
@@ -86,8 +86,8 @@ public:
  * \param ctx the context
  * \return the irccd reference
  */
-Irccd &dukx_get_irccd(duk_context *ctx);
+irccd& dukx_get_irccd(duk_context* ctx);
 
 } // !irccd
 
-#endif // !IRCCD_MOD_IRCCD_HPP
+#endif // !IRCCD_JS_IRCCD_MODULE_HPP

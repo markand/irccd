@@ -21,12 +21,11 @@
 #include <server-tester.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
-std::string channel;
-std::string password;
+std::string cmd_channel;
+std::string cmd_password;
 
 } // !namespace
 
@@ -34,21 +33,19 @@ class ServerJoinTest : public ServerTester {
 public:
     void join(std::string channel, std::string password) override
     {
-        ::channel = channel;
-        ::password = password;
+        ::cmd_channel = channel;
+        ::cmd_password = password;
     }
 };
 
 class ServerJoinCommandTest : public CommandTester {
 public:
     ServerJoinCommandTest()
-        : CommandTester(std::make_unique<ServerJoinCommand>(),
+        : CommandTester(std::make_unique<server_join_command>(),
                         std::make_unique<ServerJoinTest>())
     {
-        channel.clear();
-        password.clear();
-
-
+        cmd_channel.clear();
+        cmd_password.clear();
     }
 };
 
@@ -63,11 +60,11 @@ TEST_F(ServerJoinCommandTest, basic)
         });
 
         poll([&] () {
-            return !channel.empty();
+            return !cmd_channel.empty();
         });
 
-        ASSERT_EQ("#music", channel);
-        ASSERT_EQ("plop", password);
+        ASSERT_EQ("#music", cmd_channel);
+        ASSERT_EQ("plop", cmd_password);
     } catch (const std::exception &ex) {
         FAIL() << ex.what();
     }
@@ -83,11 +80,11 @@ TEST_F(ServerJoinCommandTest, nopassword)
         });
 
         poll([&] () {
-            return !channel.empty();
+            return !cmd_channel.empty();
         });
 
-        ASSERT_EQ("#music", channel);
-        ASSERT_EQ("", password);
+        ASSERT_EQ("#music", cmd_channel);
+        ASSERT_EQ("", cmd_password);
     } catch (const std::exception &ex) {
         FAIL() << ex.what();
     }

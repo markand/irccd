@@ -23,30 +23,29 @@
 #include <plugin.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
-class CustomLoader : public PluginLoader {
+class CustomLoader : public plugin_loader {
 public:
-    std::shared_ptr<Plugin> open(const std::string &,
+    std::shared_ptr<plugin> open(const std::string &,
                                  const std::string &) noexcept override
     {
         return nullptr;
     }
 
-    std::shared_ptr<Plugin> find(const std::string &id) noexcept override
+    std::shared_ptr<plugin> find(const std::string &id) noexcept override
     {
-        return std::make_unique<Plugin>(id, "");
+        return std::make_unique<plugin>(id, "");
     }
 };
 
 class PluginLoadCommandTest : public CommandTester {
 public:
     PluginLoadCommandTest()
-        : CommandTester(std::make_unique<PluginLoadCommand>())
+        : CommandTester(std::make_unique<plugin_load_command>())
     {
-        m_irccd.plugins().addLoader(std::make_unique<CustomLoader>());
+        m_irccd.plugins().add_loader(std::make_unique<CustomLoader>());
     }
 };
 

@@ -21,7 +21,6 @@
 #include <server-tester.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
@@ -40,7 +39,7 @@ public:
 class ServerModeCommandTest : public CommandTester {
 public:
     ServerModeCommandTest()
-        : CommandTester(std::make_unique<ServerModeCommand>(),
+        : CommandTester(std::make_unique<server_mode_command>(),
                         std::make_unique<ServerModeTest>())
     {
         m_irccdctl.client().request({

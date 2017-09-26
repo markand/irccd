@@ -22,79 +22,74 @@
 #include "service.hpp"
 #include "util.hpp"
 
-using namespace std;
-using namespace std::placeholders;
-using namespace std::string_literals;
-
 namespace irccd {
 
-Irccd::Irccd()
-    : m_commandService(std::make_shared<CommandService>())
-    , m_interruptService(std::make_shared<InterruptService>())
-    , m_servers(std::make_shared<ServerService>(*this))
-    , m_transports(std::make_shared<TransportService>(*this))
-    , m_ruleService(std::make_shared<RuleService>())
-    , m_plugins(std::make_shared<PluginService>(*this))
+irccd::irccd()
+    : command_service_(std::make_shared<command_service>())
+    , itr_service_(std::make_shared<interrupt_service>())
+    , server_service_(std::make_shared<server_service>(*this))
+    , tpt_service_(std::make_shared<transport_service>(*this))
+    , rule_service_(std::make_shared<rule_service>())
+    , plugin_service_(std::make_shared<plugin_service>(*this))
 {
 }
 
-void Irccd::post(std::function<void (Irccd &)> ev) noexcept
+void irccd::post(std::function<void (irccd&)> ev) noexcept
 {
-    std::lock_guard<mutex> lock(m_mutex);
+    std::lock_guard<std::mutex> lock(mutex_);
 
-    m_events.push_back(move(ev));
-    m_interruptService->interrupt();
+    events_.push_back(std::move(ev));
+    itr_service_->interrupt();
 }
 
-void Irccd::run()
+void irccd::run()
 {
-    while (m_running)
+    while (running_)
         util::poller::poll(250, *this);
 }
 
-void Irccd::prepare(fd_set &in, fd_set &out, net::Handle &max)
+void irccd::prepare(fd_set& in, fd_set& out, net::Handle& max)
 {
-    util::poller::prepare(in, out, max, *m_interruptService, *m_servers, *m_transports);
+    util::poller::prepare(in, out, max, *itr_service_, *server_service_, *tpt_service_);
 }
 
-void Irccd::sync(fd_set &in, fd_set &out)
+void irccd::sync(fd_set& in, fd_set& out)
 {
-    if (!m_running) {
+    if (!running_)
         return;
-    }
 
-    util::poller::sync(in, out, *m_interruptService, *m_servers, *m_transports);
+    util::poller::sync(in, out, *itr_service_, *server_service_, *tpt_service_);
 
-    if (!m_running) {
+    if (!running_)
         return;
-    }
 
     /*
      * Make a copy because the events can add other events while we are
      * iterating it. Also lock because the timers may alter these events too.
      */
-    std::vector<std::function<void (Irccd &)>> copy;
+    std::vector<std::function<void (irccd&)>> copy;
 
     {
-        std::lock_guard<mutex> lock(m_mutex);
+        std::lock_guard<std::mutex> lock(mutex_);
 
-        copy = move(m_events);
-        m_events.clear();
+        copy = std::move(events_);
+        events_.clear();
     }
 
     if (copy.size() > 0)
-        log::debug() << "irccd: dispatching " << copy.size() << " event" << (copy.size() > 1 ? "s" : "") << endl;
+        log::debug() << "irccd: dispatching " << copy.size() << " event"
+                     << (copy.size() > 1 ? "s" : "") << std::endl;
 
-    for (auto &ev : copy)
+    for (auto& ev : copy)
         ev(*this);
 }
 
-void Irccd::stop()
+void irccd::stop()
 {
-    log::debug() << "irccd: requesting to stop now" << endl;
+    log::debug() << "irccd: requesting to stop now" << std::endl;
 
-    m_running = false;
-    m_interruptService->interrupt();
+    running_ = false;
+    itr_service_->interrupt();
 }
 
 } // !irccd

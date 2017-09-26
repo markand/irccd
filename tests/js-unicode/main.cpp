@@ -23,9 +23,9 @@
 #include <gtest/gtest.h>
 
 #include <irccd/irccd.hpp>
-#include <irccd/mod-irccd.hpp>
-#include <irccd/mod-unicode.hpp>
-#include <irccd/plugin-js.hpp>
+#include <irccd/js_irccd_module.hpp>
+#include <irccd/js_unicode_module.hpp>
+#include <irccd/js_plugin.hpp>
 #include <irccd/service.hpp>
 #include <irccd/system.hpp>
 
@@ -33,14 +33,14 @@ using namespace irccd;
 
 class TestJsUnicode : public testing::Test {
 protected:
-    Irccd m_irccd;
-    std::shared_ptr<JsPlugin> m_plugin;
+    irccd::irccd m_irccd;
+    std::shared_ptr<js_plugin> m_plugin;
 
     TestJsUnicode()
-        : m_plugin(std::make_shared<JsPlugin>("empty", SOURCEDIR "/empty.js"))
+        : m_plugin(std::make_shared<js_plugin>("empty", SOURCEDIR "/empty.js"))
     {
-        IrccdModule().load(m_irccd, m_plugin);
-        UnicodeModule().load(m_irccd, m_plugin);
+        js_irccd_module().load(m_irccd, m_plugin);
+        js_unicode_module().load(m_irccd, m_plugin);
     }
 };
 

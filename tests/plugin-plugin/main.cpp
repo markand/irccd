@@ -31,13 +31,13 @@ using namespace fmt::literals;
 
 using namespace irccd;
 
-class server_test : public Server {
+class server_test : public server {
 private:
     std::string last_;
 
 public:
     inline server_test()
-        : Server("test")
+        : server("test")
     {
     }
 
@@ -87,26 +87,26 @@ public:
 
 TEST_F(plugin_test_suite, formatUsage)
 {
-    plugin_->on_command(irccd_, MessageEvent{server_, "jean!jean@localhost", "#staff", ""});
+    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#staff", ""});
     ASSERT_EQ("#staff:usage=plugin:!plugin:test:#staff:jean!jean@localhost:jean", server_->last());
 
-    plugin_->on_command(irccd_, MessageEvent{server_, "jean!jean@localhost", "#staff", "fail"});
+    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#staff", "fail"});
     ASSERT_EQ("#staff:usage=plugin:!plugin:test:#staff:jean!jean@localhost:jean", server_->last());
 
-    plugin_->on_command(irccd_, MessageEvent{server_, "jean!jean@localhost", "#staff", "info"});
+    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#staff", "info"});
     ASSERT_EQ("#staff:usage=plugin:!plugin:test:#staff:jean!jean@localhost:jean", server_->last());
 }
 
 TEST_F(plugin_test_suite, formatInfo)
 {
-    plugin_->on_command(irccd_, MessageEvent{server_, "jean!jean@localhost", "#staff", "info fake"});
+    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#staff", "info fake"});
 
     ASSERT_EQ("#staff:info=plugin:!plugin:test:#staff:jean!jean@localhost:jean:jean:BEER:fake:Fake White Beer 2000:0.0.0.0.0.1", server_->last());
 }
 
 TEST_F(plugin_test_suite, formatNotFound)
 {
-    plugin_->on_command(irccd_, MessageEvent{server_, "jean!jean@localhost", "#staff", "info doesnotexistsihope"});
+    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#staff", "info doesnotexistsihope"});
 
     ASSERT_EQ("#staff:not-found=plugin:!plugin:test:#staff:jean!jean@localhost:jean:doesnotexistsihope", server_->last());
 }
@@ -116,7 +116,7 @@ TEST_F(plugin_test_suite, formatTooLong)
     for (int i = 0; i < 100; ++i)
         irccd_.plugins().add(std::make_shared<plugin>("plugin-n-{}"_format(i), ""));
 
-    plugin_->on_command(irccd_, MessageEvent{server_, "jean!jean@localhost", "#staff", "list"});
+    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#staff", "list"});
 
     ASSERT_EQ("#staff:too-long=plugin:!plugin:test:#staff:jean!jean@localhost:jean", server_->last());
 }
@@ -124,7 +124,7 @@ TEST_F(plugin_test_suite, formatTooLong)
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
-    log::setLogger(std::make_unique<log::SilentLogger>());
+    log::set_logger(std::make_unique<log::silent_logger>());
 
     return RUN_ALL_TESTS();
 }

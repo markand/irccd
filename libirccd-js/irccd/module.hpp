@@ -21,11 +21,11 @@
 
 /**
  * \file module.hpp
- * \brief JavaScript API module.
+ * \brief Javascript API module.
  */
 
 /**
- * \defgroup modules JavaScript modules
+ * \defgroup Javascript modules.
  * \brief Modules for the JavaScript API.
  */
 
@@ -37,15 +37,15 @@
 
 namespace irccd {
 
-class Irccd;
-class JsPlugin;
+class irccd;
+class js_plugin;
 
 /**
  * \brief JavaScript API module.
  */
-class Module {
+class module {
 private:
-    std::string m_name;
+    std::string name_;
 
 public:
     /**
@@ -53,25 +53,25 @@ public:
      *
      * \pre !name.empty()
      */
-    inline Module(std::string name) noexcept
-        : m_name(std::move(name))
+    inline module(std::string name) noexcept
+        : name_(std::move(name))
     {
-        assert(!m_name.empty());
+        assert(!name_.empty());
     }
 
     /**
      * Virtual destructor defaulted.
      */
-    virtual ~Module() = default;
+    virtual ~module() noexcept = default;
 
     /**
      * Get the module name.
      *
      * \return the name
      */
-    inline const std::string &name() const noexcept
+    inline const std::string& name() const noexcept
     {
-        return m_name;
+        return name_;
     }
 
     /**
@@ -80,7 +80,7 @@ public:
      * \param irccd the irccd instance
      * \param plugin the plugin
      */
-    virtual void load(Irccd &irccd, std::shared_ptr<JsPlugin> plugin)
+    virtual void load(irccd& irccd, std::shared_ptr<js_plugin> plugin)
     {
         util::unused(irccd, plugin);
     }

@@ -40,8 +40,8 @@ namespace irccd {
 
 void Cli::check(const nlohmann::json &response)
 {
-    if (!util::json::getBool(response, "status", false)) {
-        auto error = util::json::getString(response, "error");
+    if (!util::json::get_bool(response, "status", false)) {
+        auto error = util::json::get_string(response, "error");
 
         if (error.empty())
             throw std::runtime_error("command failed with an unknown error");
@@ -78,7 +78,7 @@ nlohmann::json Cli::request(Irccdctl &irccdctl, nlohmann::json args)
 
     if (!msg.is_object())
         throw std::runtime_error("no response received");
-    if (util::json::getString(msg, "command") != m_name)
+    if (util::json::get_string(msg, "command") != m_name)
         throw std::runtime_error("unexpected command result received");
 
     check(msg);
@@ -187,10 +187,10 @@ void PluginInfoCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &arg
     auto result = request(irccdctl, {{ "plugin", args[0] }});
 
     std::cout << std::boolalpha;
-    std::cout << "Author         : " << util::json::getString(result, "author") << std::endl;
-    std::cout << "License        : " << util::json::getString(result, "license") << std::endl;
-    std::cout << "Summary        : " << util::json::getString(result, "summary") << std::endl;
-    std::cout << "Version        : " << util::json::getString(result, "version") << std::endl;
+    std::cout << "Author         : " << util::json::get_string(result, "author") << std::endl;
+    std::cout << "License        : " << util::json::get_string(result, "license") << std::endl;
+    std::cout << "Summary        : " << util::json::get_string(result, "summary") << std::endl;
+    std::cout << "Version        : " << util::json::get_string(result, "version") << std::endl;
 }
 
 /*
@@ -407,7 +407,7 @@ void ServerConnectCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &
     });
 
     if (copy.size() == 3) {
-        if (!util::isNumber(copy[2]))
+        if (!util::is_int(copy[2]))
             throw std::invalid_argument("invalid port number");
 
         object["port"] = std::stoi(copy[2]);
@@ -909,9 +909,9 @@ void RuleAddCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
 
     // Index.
     if (result.count("-i") > 0)
-        json["index"] = util::toNumber<unsigned>(result.find("-i")->second);
+        json["index"] = util::to_number<unsigned>(result.find("-i")->second);
     if (result.count("--index") > 0)
-        json["index"] = util::toNumber<unsigned>(result.find("--index")->second);
+        json["index"] = util::to_number<unsigned>(result.find("--index")->second);
 
     // And action.
     if (copy[0] != "accept" && copy[0] != "drop")
@@ -1013,7 +1013,7 @@ void RuleEditCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
     }
 
     // Index.
-    json["index"] = util::toNumber<unsigned>(copy[0]);
+    json["index"] = util::to_number<unsigned>(copy[0]);
 
     check(request(irccdctl, json));
 }

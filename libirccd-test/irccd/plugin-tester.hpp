@@ -27,7 +27,7 @@ namespace irccd {
 
 class PluginTester : public testing::Test {
 protected:
-    Irccd m_irccd;
+    irccd m_irccd;
 
 public:
     PluginTester();

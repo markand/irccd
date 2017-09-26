@@ -24,47 +24,45 @@
  * \brief Rule description
  */
 
-#include <sstream>
+#include <cassert>
 #include <string>
 #include <unordered_set>
-#include <utility>
-#include <vector>
 
 #include "sysconfig.hpp"
 
 namespace irccd {
 
 /**
- * List of criterias.
- */
-using RuleSet = std::unordered_set<std::string>;
-
-/**
- * \enum RuleAction
- * \brief Rule action
- */
-enum class RuleAction {
-    Accept,         //!< The event is accepted (default)
-    Drop            //!< The event is dropped
-};
-
-/**
  * \brief Manage rule to activate or deactive events.
  */
-class Rule {
+class rule {
+public:
+    /**
+     * List of criterias.
+     */
+    using set = std::unordered_set<std::string>;
+
+    /**
+     * \brief Rule action type.
+     */
+    enum class action_type {
+        accept,         //!< The event is accepted (default)
+        drop            //!< The event is dropped
+    };
+
 private:
-    RuleSet m_servers;
-    RuleSet m_channels;
-    RuleSet m_origins;
-    RuleSet m_plugins;
-    RuleSet m_events;
-    RuleAction m_action{RuleAction::Accept};
+    set servers_;
+    set channels_;
+    set origins_;
+    set plugins_;
+    set events_;
+    action_type action_{action_type::accept};
 
     /*
-     * Check if a map contains the value and return true if it is
-     * or return true if value is empty (which means applicable).
+     * Check if a set contains the value and return true if it is or return
+     * true if value is empty (which means applicable).
      */
-    bool matchMap(const RuleSet &map, const std::string &value) const noexcept;
+    bool match_set(const set&, const std::string&) const noexcept;
 
 public:
     /**
@@ -78,12 +76,12 @@ public:
      * \param action the rule action
      * \throw std::invalid_argument if events are invalid
      */
-    IRCCD_EXPORT Rule(RuleSet servers = RuleSet{},
-                      RuleSet channels = RuleSet{},
-                      RuleSet nicknames = RuleSet{},
-                      RuleSet plugins = RuleSet{},
-                      RuleSet events = RuleSet{},
-                      RuleAction action = RuleAction::Accept);
+    rule(set servers = {},
+         set channels = {},
+         set nicknames = {},
+         set plugins = {},
+         set events = {},
+         action_type action = action_type::accept);
 
     /**
      * Check if that rule apply for the given criterias.
@@ -95,41 +93,52 @@ public:
      * \param event the event
      * \return true if match
      */
-    IRCCD_EXPORT bool match(const std::string &server,
-                            const std::string &channel,
-                            const std::string &nick,
-                            const std::string &plugin,
-                            const std::string &event) const noexcept;
+    bool match(const std::string& server,
+               const std::string& channel,
+               const std::string& nick,
+               const std::string& plugin,
+               const std::string& event) const noexcept;
 
     /**
      * Get the action.
      *
      * \return the action
      */
-    IRCCD_EXPORT RuleAction action() const noexcept;
+    inline action_type action() const noexcept
+    {
+        return action_;
+    }
 
     /**
      * Set the action.
      *
      * \pre action must be valid
      */
-    IRCCD_EXPORT void setAction(RuleAction action) noexcept;
+    inline void set_action(action_type action) noexcept
+    {
+        assert(action == action_type::accept || action == action_type::drop);
+
+        action_ = action;
+    }
 
     /**
      * Get the servers.
      *
      * \return the servers
      */
-    IRCCD_EXPORT const RuleSet &servers() const noexcept;
+    inline const set& servers() const noexcept
+    {
+        return servers_;
+    }
 
     /**
      * Overloaded function.
      *
      * \return the servers
      */
-    inline RuleSet &servers() noexcept
+    inline set& servers() noexcept
     {
-        return m_servers;
+        return servers_;
     }
 
     /**
@@ -137,17 +146,19 @@ public:
      *
      * \return the channels
      */
-    IRCCD_EXPORT const RuleSet &channels() const noexcept;
-
+    inline const set& channels() const noexcept
+    {
+        return channels_;
+    }
 
     /**
      * Overloaded function.
      *
      * \return the channels
      */
-    inline RuleSet &channels() noexcept
+    inline set& channels() noexcept
     {
-        return m_channels;
+        return channels_;
     }
 
     /**
@@ -155,24 +166,29 @@ public:
      *
      * \return the origins
      */
-    IRCCD_EXPORT const RuleSet &origins() const noexcept;
+    inline const set& origins() const noexcept
+    {
+        return origins_;
+    }
 
     /**
      * Get the plugins.
      *
      * \return the plugins
      */
-    IRCCD_EXPORT const RuleSet &plugins() const noexcept;
-
+    inline const set& plugins() const noexcept
+    {
+        return plugins_;
+    }
 
     /**
      * Overloaded function.
      *
      * \return the plugins
      */
-    inline RuleSet &plugins() noexcept
+    inline set& plugins() noexcept
     {
-        return m_plugins;
+        return plugins_;
     }
 
     /**
@@ -180,17 +196,19 @@ public:
      *
      * \return the events
      */
-    IRCCD_EXPORT const RuleSet &events() const noexcept;
-
+    inline const set& events() const noexcept
+    {
+        return events_;
+    }
 
     /**
      * Overloaded function.
      *
      * \return the events
      */
-    inline RuleSet& events() noexcept
+    inline set& events() noexcept
     {
-        return m_events;
+        return events_;
     }
 };
 

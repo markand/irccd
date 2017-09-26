@@ -25,16 +25,16 @@ using namespace irccd;
 using namespace std::chrono_literals;
 
 /* --------------------------------------------------------
- * Timer object itself
+ * timer object itself
  * -------------------------------------------------------- */
 
 TEST(Basic, single)
 {
-    Timer timer(TimerType::Single, 1000);
+    timer timer(timer::type::single, 1000);
     ElapsedTimer elapsed;
     int count = 0;
 
-    timer.onSignal.connect([&] () {
+    timer.on_signal.connect([&] () {
         count = elapsed.elapsed();
     });
 
@@ -45,15 +45,14 @@ TEST(Basic, single)
 
     ASSERT_GE(count, 900);
     ASSERT_LE(count, 1100);
-
 }
 
 TEST(Basic, repeat)
 {
-    Timer timer(TimerType::Repeat, 500);
+    timer timer(timer::type::repeat, 500);
     int max = 0;
 
-    timer.onSignal.connect([&] () {
+    timer.on_signal.connect([&] () {
         max ++;
     });
 
@@ -69,10 +68,10 @@ TEST(Basic, repeat)
 
 TEST(Basic, restart)
 {
-    Timer timer(TimerType::Repeat, 500);
+    timer timer(timer::type::repeat, 500);
     int max = 0;
 
-    timer.onSignal.connect([&] () {
+    timer.on_signal.connect([&] () {
         max ++;
     });
 

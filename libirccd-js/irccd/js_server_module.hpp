@@ -1,5 +1,5 @@
 /*
- * mod-system.hpp -- Irccd.System API
+ * js_server_module.hpp -- Irccd.Server API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,35 +16,55 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_MOD_SYSTEM_HPP
-#define IRCCD_MOD_SYSTEM_HPP
+#ifndef IRCCD_JS_SERVER_MODULE_HPP
+#define IRCCD_JS_SERVER_MODULE_HPP
 
 /**
- * \file mod-system.hpp
- * \brief Irccd.System JavaScript API.
+ * \file mod-server.hpp
+ * \brief irccd.Server JavaScript API.
  */
 
+#include "duktape.hpp"
 #include "module.hpp"
+#include "server.hpp"
 
 namespace irccd {
 
 /**
- * \brief Irccd.System JavaScript API.
+ * \brief irccd.Server JavaScript API.
  * \ingroup modules
  */
-class SystemModule : public Module {
+class js_server_module : public module {
 public:
     /**
-     * Irccd.System.
+     * irccd.Server.
      */
-    IRCCD_EXPORT SystemModule() noexcept;
+    js_server_module() noexcept;
 
     /**
      * \copydoc Module::load
      */
-    IRCCD_EXPORT void load(Irccd &irccd, std::shared_ptr<JsPlugin> plugin) override;
+    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
+
+/**
+ * Push a server.
+ *
+ * \pre server != nullptr
+ * \param ctx the context
+ * \param server the server
+ */
+void dukx_push_server(duk_context* ctx, std::shared_ptr<server> server);
+
+/**
+ * Require a server. Raise a JavaScript error if not a Server.
+ *
+ * \param ctx the context
+ * \param index the index
+ * \return the server
+ */
+std::shared_ptr<server> dukx_require_server(duk_context* ctx, duk_idx_t index);
 
 } // !irccd
 
-#endif // !IRCCD_MOD_SYSTEM_HPP
+#endif // !IRCCD_JS_SERVER_MODULE_HPP

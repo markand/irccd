@@ -21,12 +21,11 @@
 #include <server-tester.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
-std::string channel;
-std::string reason;
+std::string cmd_channel;
+std::string cmd_reason;
 
 } // !namespace
 
@@ -34,19 +33,19 @@ class ServerPartTest : public ServerTester {
 public:
     void part(std::string channel, std::string reason) override
     {
-        ::channel = channel;
-        ::reason = reason;
+        ::cmd_channel = channel;
+        ::cmd_reason = reason;
     }
 };
 
 class ServerPartCommandTest : public CommandTester {
 public:
     ServerPartCommandTest()
-        : CommandTester(std::make_unique<ServerPartCommand>(),
+        : CommandTester(std::make_unique<server_part_command>(),
                         std::make_unique<ServerPartTest>())
     {
-        channel.clear();
-        reason.clear();
+        cmd_channel.clear();
+        cmd_reason.clear();
     }
 };
 
@@ -61,11 +60,11 @@ TEST_F(ServerPartCommandTest, basic)
         });
 
         poll([&] () {
-            return !channel.empty();
+            return !cmd_channel.empty();
         });
 
-        ASSERT_EQ("#staff", channel);
-        ASSERT_EQ("too noisy", reason);
+        ASSERT_EQ("#staff", cmd_channel);
+        ASSERT_EQ("too noisy", cmd_reason);
     } catch (const std::exception &ex) {
         FAIL() << ex.what();
     }
@@ -81,11 +80,11 @@ TEST_F(ServerPartCommandTest, noreason)
         });
 
         poll([&] () {
-            return !channel.empty();
+            return !cmd_channel.empty();
         });
 
-        ASSERT_EQ("#staff", channel);
-        ASSERT_TRUE(reason.empty());
+        ASSERT_EQ("#staff", cmd_channel);
+        ASSERT_TRUE(cmd_reason.empty());
     } catch (const std::exception &ex) {
         FAIL() << ex.what();
     }

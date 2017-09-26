@@ -44,18 +44,18 @@
 #include "irccd.hpp"
 
 #if defined(WITH_JS)
-#   include "mod-directory.hpp"
-#   include "mod-elapsed-timer.hpp"
-#   include "mod-file.hpp"
-#   include "mod-irccd.hpp"
-#   include "mod-logger.hpp"
-#   include "mod-plugin.hpp"
-#   include "mod-server.hpp"
-#   include "mod-system.hpp"
-#   include "mod-timer.hpp"
-#   include "mod-unicode.hpp"
-#   include "mod-util.hpp"
-#   include "plugin-js.hpp"
+#   include <js_directory_module.hpp>
+#   include <js_elapsed_timer_module.hpp>
+#   include <js_file_module.hpp>
+#   include <js_irccd_module.hpp>
+#   include <js_logger_module.hpp>
+#   include <js_plugin_module.hpp>
+#   include <js_server_module.hpp>
+#   include <js_system_module.hpp>
+#   include <js_timer_module.hpp>
+#   include <js_unicode_module.hpp>
+#   include <js_util_module.hpp>
+#   include "js_plugin.hpp"
 #endif
 
 using namespace fmt::literals;
@@ -64,11 +64,11 @@ using namespace irccd;
 
 namespace {
 
-std::unique_ptr<Irccd> instance;
+std::unique_ptr<irccd::irccd> instance;
 
 void usage()
 {
-    std::cerr << "usage: " << sys::programName() << " [options...]\n\n";
+    std::cerr << "usage: " << sys::program_name() << " [options...]\n\n";
     std::cerr << "Available options:\n";
     std::cerr << "  -c, --config file       specify the configuration file\n";
     std::cerr << "  -f, --foreground        do not run as a daemon\n";
@@ -78,7 +78,7 @@ void usage()
     std::exit(1);
 }
 
-void version(const option::Result &options)
+void version(const option::Result& options)
 {
     std::cout << IRCCD_VERSION << std::endl;
 
@@ -106,13 +106,13 @@ void stop(int)
     instance->stop();
 }
 
-void init(int &argc, char **&argv)
+void init(int& argc, char**& argv)
 {
     // Needed for some components.
-    sys::setProgramName("irccd");
+    sys::set_program_name("irccd");
 
     // Default logging to console.
-    log::setVerbose(false);
+    log::set_verbose(false);
 
     // Register some signals.
     signal(SIGINT, stop);
@@ -130,7 +130,7 @@ void init(int &argc, char **&argv)
     ++ argv;
 }
 
-option::Result parse(int &argc, char **&argv)
+option::Result parse(int& argc, char**& argv)
 {
     // Parse command line options.
     option::Result result;
@@ -150,7 +150,7 @@ option::Result parse(int &argc, char **&argv)
 
         result = option::read(argc, argv, options);
 
-        for (const auto &pair : result) {
+        for (const auto& pair : result) {
             if (pair.first == "-h" || pair.first == "--help")
                 usage();
                 // NOTREACHED
@@ -158,32 +158,32 @@ option::Result parse(int &argc, char **&argv)
                 version(result);
                 // NOTREACHED
             if (pair.first == "-v" || pair.first == "--verbose")
-                log::setVerbose(true);
+                log::set_verbose(true);
         }
-    } catch (const std::exception &ex) {
-        log::warning() << sys::programName() << ": " << ex.what() << std::endl;
+    } catch (const std::exception& ex) {
+        log::warning() << sys::program_name() << ": " << ex.what() << std::endl;
         usage();
     }
 
     return result;
 }
 
-Config open(const option::Result &result)
+config open(const option::Result& result)
 {
     auto it = result.find("-c");
 
     if (it != result.end() || (it = result.find("--config")) != result.end()) {
         try {
-            return Config(it->second);
+            return config(it->second);
         } catch (const std::exception &ex) {
             throw std::runtime_error("{}: {}"_format(it->second, ex.what()));
         }
     }
 
-    return Config::find();
+    return config::find();
 }
 
-void loadPid(const std::string &path)
+void load_pid(const std::string& path)
 {
     if (path.empty())
         return;
@@ -200,12 +200,12 @@ void loadPid(const std::string &path)
 #else
         throw std::runtime_error("pidfile option not supported on this platform");
 #endif
-    } catch (const std::exception &ex) {
+    } catch (const std::exception& ex) {
         log::warning() << "irccd: " << ex.what() << std::endl;
     }
 }
 
-void loadGid(const std::string gid)
+void load_gid(const std::string& gid)
 {
     try {
         if (!gid.empty())
@@ -214,12 +214,12 @@ void loadGid(const std::string gid)
 #else
             throw std::runtime_error(" gid option not supported on this platform");
 #endif
-    } catch (const std::exception &ex) {
+    } catch (const std::exception& ex) {
         log::warning() << "irccd: " << ex.what() << std::endl;
     }
 }
 
-void loadUid(const std::string &uid)
+void load_uid(const std::string& uid)
 {
     try {
         if (!uid.empty())
@@ -228,12 +228,12 @@ void loadUid(const std::string &uid)
 #else
             throw std::runtime_error("uid option not supported on this platform");
 #endif
-    } catch (const std::exception &ex) {
+    } catch (const std::exception& ex) {
         log::warning() << "irccd: " << ex.what() << std::endl;
     }
 }
 
-void loadForeground(bool foreground, const option::Result &options)
+void load_foreground(bool foreground, const option::Result& options)
 {
     try {
 #if defined(HAVE_DAEMON)
@@ -243,12 +243,12 @@ void loadForeground(bool foreground, const option::Result &options)
         if (options.count("-f") > 0 || options.count("--foreground") > 0 || foreground)
             throw std::runtime_error("foreground option not supported on this platform");
 #endif
-    } catch (const std::exception &ex) {
+    } catch (const std::exception& ex) {
         log::warning() << "irccd: " << ex.what() << std::endl;
     }
 }
 
-void load(const Config &config, const option::Result &options)
+void load(const config& config, const option::Result& options)
 {
     /*
      * Order matters, please be careful when changing this.
@@ -258,95 +258,95 @@ void load(const Config &config, const option::Result &options)
      */
 
     // [logs] and [format] sections.
-    config.loadLogs();
-    config.loadFormats();
+    config.load_logs();
+    config.load_formats();
 
     // Show message here to use the formats.
     log::info() << "irccd: using " << config.path() << std::endl;
 
     // [general] section.
-    loadPid(config.pidfile());
-    loadGid(config.gid());
-    loadUid(config.uid());
-    loadForeground(config.isForeground(), options);
+    load_pid(config.pidfile());
+    load_gid(config.gid());
+    load_uid(config.uid());
+    load_foreground(config.is_foreground(), options);
 
     // [transport]
-    for (const auto &transport : config.loadTransports())
+    for (const auto& transport : config.load_transports())
         instance->transports().add(transport);
 
     // [server] section.
-    for (const auto &server : config.loadServers())
+    for (const auto& server : config.load_servers())
         instance->servers().add(server);
 
     // [rule] section.
-    for (const auto &rule : config.loadRules())
+    for (const auto& rule : config.load_rules())
         instance->rules().add(rule);
 
     // [plugin] section.
-    config.loadPlugins(*instance);
+    config.load_plugins(*instance);
 }
 
 } // !namespace
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
     init(argc, argv);
 
     option::Result options = parse(argc, argv);
 
-    instance = std::make_unique<Irccd>();
-    instance->commands().add(std::make_unique<command::PluginConfigCommand>());
-    instance->commands().add(std::make_unique<command::PluginInfoCommand>());
-    instance->commands().add(std::make_unique<command::PluginListCommand>());
-    instance->commands().add(std::make_unique<command::PluginLoadCommand>());
-    instance->commands().add(std::make_unique<command::PluginReloadCommand>());
-    instance->commands().add(std::make_unique<command::PluginUnloadCommand>());
-    instance->commands().add(std::make_unique<command::ServerChannelModeCommand>());
-    instance->commands().add(std::make_unique<command::ServerChannelNoticeCommand>());
-    instance->commands().add(std::make_unique<command::ServerConnectCommand>());
-    instance->commands().add(std::make_unique<command::ServerDisconnectCommand>());
-    instance->commands().add(std::make_unique<command::ServerInfoCommand>());
-    instance->commands().add(std::make_unique<command::ServerInviteCommand>());
-    instance->commands().add(std::make_unique<command::ServerJoinCommand>());
-    instance->commands().add(std::make_unique<command::ServerKickCommand>());
-    instance->commands().add(std::make_unique<command::ServerListCommand>());
-    instance->commands().add(std::make_unique<command::ServerMeCommand>());
-    instance->commands().add(std::make_unique<command::ServerMessageCommand>());
-    instance->commands().add(std::make_unique<command::ServerModeCommand>());
-    instance->commands().add(std::make_unique<command::ServerNickCommand>());
-    instance->commands().add(std::make_unique<command::ServerNoticeCommand>());
-    instance->commands().add(std::make_unique<command::ServerPartCommand>());
-    instance->commands().add(std::make_unique<command::ServerReconnectCommand>());
-    instance->commands().add(std::make_unique<command::ServerTopicCommand>());
-    instance->commands().add(std::make_unique<command::RuleAddCommand>());
-    instance->commands().add(std::make_unique<command::RuleEditCommand>());
-    instance->commands().add(std::make_unique<command::RuleInfoCommand>());
-    instance->commands().add(std::make_unique<command::RuleListCommand>());
-    instance->commands().add(std::make_unique<command::RuleMoveCommand>());
-    instance->commands().add(std::make_unique<command::RuleRemoveCommand>());
+    instance = std::make_unique<irccd::irccd>();
+    instance->commands().add(std::make_unique<plugin_config_command>());
+    instance->commands().add(std::make_unique<plugin_info_command>());
+    instance->commands().add(std::make_unique<plugin_list_command>());
+    instance->commands().add(std::make_unique<plugin_load_command>());
+    instance->commands().add(std::make_unique<plugin_reload_command>());
+    instance->commands().add(std::make_unique<plugin_unload_command>());
+    instance->commands().add(std::make_unique<server_channel_mode_command>());
+    instance->commands().add(std::make_unique<server_channel_notice_command>());
+    instance->commands().add(std::make_unique<server_connect_command>());
+    instance->commands().add(std::make_unique<server_disconnect_command>());
+    instance->commands().add(std::make_unique<server_info_command>());
+    instance->commands().add(std::make_unique<server_invite_command>());
+    instance->commands().add(std::make_unique<server_join_command>());
+    instance->commands().add(std::make_unique<server_kick_command>());
+    instance->commands().add(std::make_unique<server_list_command>());
+    instance->commands().add(std::make_unique<server_me_command>());
+    instance->commands().add(std::make_unique<server_message_command>());
+    instance->commands().add(std::make_unique<server_mode_command>());
+    instance->commands().add(std::make_unique<server_nick_command>());
+    instance->commands().add(std::make_unique<server_notice_command>());
+    instance->commands().add(std::make_unique<server_part_command>());
+    instance->commands().add(std::make_unique<server_reconnect_command>());
+    instance->commands().add(std::make_unique<server_topic_command>());
+    instance->commands().add(std::make_unique<rule_add_command>());
+    instance->commands().add(std::make_unique<rule_edit_command>());
+    instance->commands().add(std::make_unique<rule_info_command>());
+    instance->commands().add(std::make_unique<rule_list_command>());
+    instance->commands().add(std::make_unique<rule_move_command>());
+    instance->commands().add(std::make_unique<rule_remove_command>());
 
     // Load Javascript API and plugin loader.
 #if defined(WITH_JS)
-    auto loader = std::make_unique<JsPluginLoader>(*instance);
+    auto loader = std::make_unique<js_plugin_loader>(*instance);
 
-    loader->addModule(std::make_unique<IrccdModule>());
-    loader->addModule(std::make_unique<DirectoryModule>());
-    loader->addModule(std::make_unique<ElapsedTimerModule>());
-    loader->addModule(std::make_unique<FileModule>());
-    loader->addModule(std::make_unique<LoggerModule>());
-    loader->addModule(std::make_unique<PluginModule>());
-    loader->addModule(std::make_unique<ServerModule>());
-    loader->addModule(std::make_unique<SystemModule>());
-    loader->addModule(std::make_unique<TimerModule>());
-    loader->addModule(std::make_unique<UnicodeModule>());
-    loader->addModule(std::make_unique<UtilModule>());
+    loader->add_module(std::make_unique<js_irccd_module>());
+    loader->add_module(std::make_unique<js_directory_module>());
+    loader->add_module(std::make_unique<js_elapsed_timer_module>());
+    loader->add_module(std::make_unique<js_file_module>());
+    loader->add_module(std::make_unique<js_logger_module>());
+    loader->add_module(std::make_unique<js_plugin_module>());
+    loader->add_module(std::make_unique<js_server_module>());
+    loader->add_module(std::make_unique<js_system_module>());
+    loader->add_module(std::make_unique<js_timer_module>());
+    loader->add_module(std::make_unique<js_unicode_module>());
+    loader->add_module(std::make_unique<js_util_module>());
 
     instance->plugins().addLoader(std::move(loader));
 #endif
 
     try {
         load(open(options), options);
-    } catch (const std::exception &ex) {
+    } catch (const std::exception& ex) {
         log::warning() << "error: " << ex.what() << std::endl;
         return 1;
     }

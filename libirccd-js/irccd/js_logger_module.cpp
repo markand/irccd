@@ -1,5 +1,5 @@
 /*
- * mod-logger.cpp -- Irccd.Logger API
+ * js_logger_module.cpp -- Irccd.Logger API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,16 +16,17 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "mod-logger.hpp"
-#include "mod-plugin.hpp"
-#include "logger.hpp"
-#include "plugin-js.hpp"
+#include <irccd/logger.hpp>
+
+#include "js_plugin.hpp"
+#include "js_logger_module.hpp"
+#include "js_plugin_module.hpp"
 
 namespace irccd {
 
 namespace {
 
-duk_ret_t print(duk_context *ctx, std::ostream &out)
+duk_ret_t print(duk_context* ctx, std::ostream &out)
 {
     out << "plugin " << dukx_get_plugin(ctx)->name() << ": " << duk_require_string(ctx, 0) << std::endl;
 
@@ -41,13 +42,13 @@ duk_ret_t print(duk_context *ctx, std::ostream &out)
  * Arguments:
  *   - message, the message.
  */
-duk_ret_t info(duk_context *ctx)
+duk_ret_t info(duk_context* ctx)
 {
     return print(ctx, log::info());
 }
 
 /*
- * Function: Irccd.Logger.warning(message)
+ * Function: irccd.Logger.warning(message)
  * --------------------------------------------------------
  *
  * Write a warning message.
@@ -55,7 +56,7 @@ duk_ret_t info(duk_context *ctx)
  * Arguments:
  *   - message, the warning.
  */
-duk_ret_t warning(duk_context *ctx)
+duk_ret_t warning(duk_context* ctx)
 {
     return print(ctx, log::warning());
 }
@@ -69,7 +70,7 @@ duk_ret_t warning(duk_context *ctx)
  * Arguments:
  *   - message, the message.
  */
-duk_ret_t debug(duk_context *ctx)
+duk_ret_t debug(duk_context* ctx)
 {
     return print(ctx, log::debug());
 }
@@ -83,12 +84,12 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-LoggerModule::LoggerModule() noexcept
-    : Module("Irccd.Logger")
+js_logger_module::js_logger_module() noexcept
+    : module("Irccd.Logger")
 {
 }
 
-void LoggerModule::load(Irccd &, std::shared_ptr<JsPlugin> plugin)
+void js_logger_module::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
     StackAssert sa(plugin->context());
 

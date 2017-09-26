@@ -26,11 +26,9 @@ using namespace std::string_literals;
 
 namespace irccd {
 
-namespace command {
-
 namespace {
 
-void execSet(Irccd &, TransportClient &client, Plugin &plugin, const nlohmann::json &args)
+void exec_set(transport_client& client, plugin& plugin, const nlohmann::json& args)
 {
     assert(args.count("value") > 0);
 
@@ -45,12 +43,12 @@ void execSet(Irccd &, TransportClient &client, Plugin &plugin, const nlohmann::j
         auto config = plugin.config();
 
         config[*var] = *value;
-        plugin.setConfig(config);
+        plugin.set_config(config);
         client.success("plugin-config");
     }
 }
 
-void execGet(Irccd &, TransportClient &client, Plugin &plugin, const nlohmann::json &args)
+void exec_get(transport_client& client, plugin& plugin, const nlohmann::json& args)
 {
     auto variables = nlohmann::json::object();
     auto var = args.find("variable");
@@ -58,7 +56,7 @@ void execGet(Irccd &, TransportClient &client, Plugin &plugin, const nlohmann::j
     if (var != args.end() && var->is_string())
         variables[var->get<std::string>()] = plugin.config()[*var];
     else
-        for (const auto &pair : plugin.config())
+        for (const auto& pair : plugin.config())
             variables[pair.first] = pair.second;
 
     /*
@@ -72,19 +70,19 @@ void execGet(Irccd &, TransportClient &client, Plugin &plugin, const nlohmann::j
     });
 }
 
-nlohmann::json toJson(const Rule &rule)
+nlohmann::json to_json(const rule& rule)
 {
-    auto join = [] (const auto &set) {
+    auto join = [] (const auto& set) {
         auto array = nlohmann::json::array();
 
-        for (const auto &entry : set)
+        for (const auto& entry : set)
             array.push_back(entry);
 
         return array;
     };
     auto str = [] (auto action) {
         switch (action) {
-        case RuleAction::Accept:
+        case rule::action_type::accept:
             return "accept";
         default:
             return "drop";
@@ -100,18 +98,18 @@ nlohmann::json toJson(const Rule &rule)
     };
 }
 
-Rule fromJson(const nlohmann::json &json)
+rule from_json(const nlohmann::json& json)
 {
-    auto toset = [] (auto object, auto name) -> RuleSet {
-        RuleSet result;
+    auto toset = [] (auto object, auto name) {
+        rule::set result;
 
-        for (const auto &s : object[name])
+        for (const auto& s : object[name])
             if (s.is_string())
                 result.insert(s.template get<std::string>());
 
         return result;
     };
-    auto toaction = [] (auto object, auto name) -> RuleAction {
+    auto toaction = [] (auto object, auto name) {
         auto v = object[name];
 
         if (!v.is_string())
@@ -119,9 +117,9 @@ Rule fromJson(const nlohmann::json &json)
 
         auto s = v.template get<std::string>();
         if (s == "accept")
-            return RuleAction::Accept;
+            return rule::action_type::accept;
         if (s == "drop")
-            return RuleAction::Drop;
+            return rule::action_type::drop;
 
         throw std::runtime_error("unknown action '"s + s + "' given");
     };
@@ -138,30 +136,29 @@ Rule fromJson(const nlohmann::json &json)
 
 } // !namespace
 
-PluginConfigCommand::PluginConfigCommand()
-    : Command("plugin-config")
+plugin_config_command::plugin_config_command()
+    : command("plugin-config")
 {
 }
 
-void PluginConfigCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void plugin_config_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto plugin = irccd.plugins().require(util::json::requireIdentifier(args, "plugin"));
+    auto plugin = irccd.plugins().require(util::json::require_identifier(args, "plugin"));
 
     if (args.count("value") > 0)
-        execSet(irccd, client, *plugin, args);
+        exec_set(client, *plugin, args);
     else
-        execGet(irccd, client, *plugin, args);
+        exec_get(client, *plugin, args);
 }
 
-
-PluginInfoCommand::PluginInfoCommand()
-    : Command("plugin-info")
+plugin_info_command::plugin_info_command()
+    : command("plugin-info")
 {
 }
 
-void PluginInfoCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void plugin_info_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto plugin = irccd.plugins().require(util::json::requireIdentifier(args, "plugin"));
+    auto plugin = irccd.plugins().require(util::json::require_identifier(args, "plugin"));
 
     client.success("plugin-info", {
         { "author",     plugin->author()    },
@@ -171,16 +168,16 @@ void PluginInfoCommand::exec(Irccd &irccd, TransportClient &client, const nlohma
     });
 }
 
-PluginListCommand::PluginListCommand()
-    : Command("plugin-list")
+plugin_list_command::plugin_list_command()
+    : command("plugin-list")
 {
 }
 
-void PluginListCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &)
+void plugin_list_command::exec(irccd& irccd, transport_client& client, const nlohmann::json&)
 {
     auto list = nlohmann::json::array();
 
-    for (const auto &plugin : irccd.plugins().list())
+    for (const auto& plugin : irccd.plugins().list())
         list += plugin->name();
 
     client.success("plugin-list", {
@@ -188,75 +185,75 @@ void PluginListCommand::exec(Irccd &irccd, TransportClient &client, const nlohma
     });
 }
 
-PluginLoadCommand::PluginLoadCommand()
-    : Command("plugin-load")
+plugin_load_command::plugin_load_command()
+    : command("plugin-load")
 {
 }
 
-void PluginLoadCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void plugin_load_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.plugins().load(util::json::requireIdentifier(args, "plugin"));
+    irccd.plugins().load(util::json::require_identifier(args, "plugin"));
     client.success("plugin-load");
 }
 
-PluginReloadCommand::PluginReloadCommand()
-    : Command("plugin-reload")
+plugin_reload_command::plugin_reload_command()
+    : command("plugin-reload")
 {
 }
 
-void PluginReloadCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void plugin_reload_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.plugins().require(util::json::requireIdentifier(args, "plugin"))->onReload(irccd);
+    irccd.plugins().require(util::json::require_identifier(args, "plugin"))->on_reload(irccd);
     client.success("plugin-reload");
 }
 
-PluginUnloadCommand::PluginUnloadCommand()
-    : Command("plugin-unload")
+plugin_unload_command::plugin_unload_command()
+    : command("plugin-unload")
 {
 }
 
-void PluginUnloadCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void plugin_unload_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.plugins().unload(util::json::requireIdentifier(args, "plugin"));
+    irccd.plugins().unload(util::json::require_identifier(args, "plugin"));
     client.success("plugin-unload");
 }
 
-ServerChannelModeCommand::ServerChannelModeCommand()
-    : Command("server-cmode")
+server_channel_mode_command::server_channel_mode_command()
+    : command("server-cmode")
 {
 }
 
-void ServerChannelModeCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void server_channel_mode_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::requireIdentifier(args, "server"))->cmode(
-        util::json::requireString(args, "channel"),
-        util::json::requireString(args, "mode")
+    irccd.servers().require(util::json::require_identifier(args, "server"))->cmode(
+        util::json::require_string(args, "channel"),
+        util::json::require_string(args, "mode")
     );
     client.success("server-cmode");
 }
 
-ServerChannelNoticeCommand::ServerChannelNoticeCommand()
-    : Command("server-cnotice")
+server_channel_notice_command::server_channel_notice_command()
+    : command("server-cnotice")
 {
 }
 
-void ServerChannelNoticeCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void server_channel_notice_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::requireString(args, "server"))->cnotice(
-        util::json::requireString(args, "channel"),
-        util::json::requireString(args, "message")
+    irccd.servers().require(util::json::require_string(args, "server"))->cnotice(
+        util::json::require_string(args, "channel"),
+        util::json::require_string(args, "message")
     );
     client.success("server-cnotice");
 }
 
-ServerConnectCommand::ServerConnectCommand()
-    : Command("server-connect")
+server_connect_command::server_connect_command()
+    : command("server-connect")
 {
 }
 
-void ServerConnectCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void server_connect_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto server = Server::fromJson(args);
+    auto server = server::from_json(args);
 
     if (irccd.servers().has(server->name()))
         client.error("server-connect", "server already exists");
@@ -266,12 +263,12 @@ void ServerConnectCommand::exec(Irccd &irccd, TransportClient &client, const nlo
     }
 }
 
-ServerDisconnectCommand::ServerDisconnectCommand()
-    : Command("server-disconnect")
+server_disconnect_command::server_disconnect_command()
+    : command("server-disconnect")
 {
 }
 
-void ServerDisconnectCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void server_disconnect_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
     auto it = args.find("server");
 
@@ -283,15 +280,15 @@ void ServerDisconnectCommand::exec(Irccd &irccd, TransportClient &client, const 
     client.success("server-disconnect");
 }
 
-ServerInfoCommand::ServerInfoCommand()
-    : Command("server-info")
+server_info_command::server_info_command()
+    : command("server-info")
 {
 }
 
-void ServerInfoCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void server_info_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
     auto response = nlohmann::json::object();
-    auto server = irccd.servers().require(util::json::requireIdentifier(args, "server"));
+    auto server = irccd.servers().require(util::json::require_identifier(args, "server"));
 
     // General stuff.
     response.push_back({"name", server->name()});
@@ -303,210 +300,210 @@ void ServerInfoCommand::exec(Irccd &irccd, TransportClient &client, const nlohma
     response.push_back({"channels", server->channels()});
 
     // Optional stuff.
-    if (server->flags() & Server::Ipv6)
+    if (server->flags() & server::ipv6)
         response.push_back({"ipv6", true});
-    if (server->flags() & Server::Ssl)
+    if (server->flags() & server::ssl)
         response.push_back({"ssl", true});
-    if (server->flags() & Server::SslVerify)
+    if (server->flags() & server::ssl_verify)
         response.push_back({"sslVerify", true});
 
     client.success("server-info", response);
 }
 
-ServerInviteCommand::ServerInviteCommand()
-    : Command("server-invite")
+server_invite_command::server_invite_command()
+    : command("server-invite")
 {
 }
 
-void ServerInviteCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void server_invite_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::requireIdentifier(args, "server"))->invite(
-        util::json::requireString(args, "target"),
-        util::json::requireString(args, "channel")
+    irccd.servers().require(util::json::require_identifier(args, "server"))->invite(
+        util::json::require_string(args, "target"),
+        util::json::require_string(args, "channel")
     );
     client.success("server-invite");
 }
 
-ServerJoinCommand::ServerJoinCommand()
-    : Command("server-join")
+server_join_command::server_join_command()
+    : command("server-join")
 {
 }
 
-void ServerJoinCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void server_join_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::requireIdentifier(args, "server"))->join(
-        util::json::requireString(args, "channel"),
-        util::json::getString(args, "password")
+    irccd.servers().require(util::json::require_identifier(args, "server"))->join(
+        util::json::require_string(args, "channel"),
+        util::json::get_string(args, "password")
     );
     client.success("server-join");
 }
 
-ServerKickCommand::ServerKickCommand()
-    : Command("server-kick")
+server_kick_command::server_kick_command()
+    : command("server-kick")
 {
 }
 
-void ServerKickCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void server_kick_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::requireIdentifier(args, "server"))->kick(
-        util::json::requireString(args, "target"),
-        util::json::requireString(args, "channel"),
-        util::json::getString(args, "reason")
+    irccd.servers().require(util::json::require_identifier(args, "server"))->kick(
+        util::json::require_string(args, "target"),
+        util::json::require_string(args, "channel"),
+        util::json::get_string(args, "reason")
     );
     client.success("server-kick");
 }
 
-ServerListCommand::ServerListCommand()
-    : Command("server-list")
+server_list_command::server_list_command()
+    : command("server-list")
 {
 }
 
-void ServerListCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &)
+void server_list_command::exec(irccd& irccd, transport_client& client, const nlohmann::json&)
 {
     auto json = nlohmann::json::object();
     auto list = nlohmann::json::array();
 
-    for (const auto &server : irccd.servers().servers())
+    for (const auto& server : irccd.servers().servers())
         list.push_back(server->name());
 
     json.push_back({"list", std::move(list)});
     client.success("server-list", json);
 }
 
-ServerMeCommand::ServerMeCommand()
-    : Command("server-me")
+server_me_command::server_me_command()
+    : command("server-me")
 {
 }
 
-void ServerMeCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void server_me_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::requireIdentifier(args, "server"))->me(
-        util::json::requireString(args, "target"),
-        util::json::requireString(args, "message")
+    irccd.servers().require(util::json::require_identifier(args, "server"))->me(
+        util::json::require_string(args, "target"),
+        util::json::require_string(args, "message")
     );
     client.success("server-me");
 }
 
-ServerMessageCommand::ServerMessageCommand()
-    : Command("server-message")
+server_message_command::server_message_command()
+    : command("server-message")
 {
 }
 
-void ServerMessageCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void server_message_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::requireIdentifier(args, "server"))->message(
-        util::json::requireString(args, "target"),
-        util::json::requireString(args, "message")
+    irccd.servers().require(util::json::require_identifier(args, "server"))->message(
+        util::json::require_string(args, "target"),
+        util::json::require_string(args, "message")
     );
     client.success("server-message");
 }
 
-ServerModeCommand::ServerModeCommand()
-    : Command("server-mode")
+server_mode_command::server_mode_command()
+    : command("server-mode")
 {
 }
 
-void ServerModeCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void server_mode_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::requireIdentifier(args, "server"))->mode(
-        util::json::requireString(args, "mode")
+    irccd.servers().require(util::json::require_identifier(args, "server"))->mode(
+        util::json::require_string(args, "mode")
     );
     client.success("server-mode");
 }
 
-ServerNickCommand::ServerNickCommand()
-    : Command("server-nick")
+server_nick_command::server_nick_command()
+    : command("server-nick")
 {
 }
 
-void ServerNickCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void server_nick_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::requireIdentifier(args, "server"))->setNickname(
-        util::json::requireString(args, "nickname")
+    irccd.servers().require(util::json::require_identifier(args, "server"))->set_nickname(
+        util::json::require_string(args, "nickname")
     );
     client.success("server-nick");
 }
 
-ServerNoticeCommand::ServerNoticeCommand()
-    : Command("server-notice")
+server_notice_command::server_notice_command()
+    : command("server-notice")
 {
 }
 
-void ServerNoticeCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void server_notice_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::requireIdentifier(args, "server"))->notice(
-        util::json::requireString(args, "target"),
-        util::json::requireString(args, "message")
+    irccd.servers().require(util::json::require_identifier(args, "server"))->notice(
+        util::json::require_string(args, "target"),
+        util::json::require_string(args, "message")
     );
     client.success("server-notice");
 }
 
-ServerPartCommand::ServerPartCommand()
-    : Command("server-part")
+server_part_command::server_part_command()
+    : command("server-part")
 {
 }
 
-void ServerPartCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void server_part_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::requireIdentifier(args, "server"))->part(
-        util::json::requireString(args, "channel"),
-        util::json::getString(args, "reason")
+    irccd.servers().require(util::json::require_identifier(args, "server"))->part(
+        util::json::require_string(args, "channel"),
+        util::json::get_string(args, "reason")
     );
     client.success("server-part");
 }
 
-ServerReconnectCommand::ServerReconnectCommand()
-    : Command("server-reconnect")
+server_reconnect_command::server_reconnect_command()
+    : command("server-reconnect")
 {
 }
 
-void ServerReconnectCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void server_reconnect_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
     auto server = args.find("server");
 
     if (server != args.end() && server->is_string())
         irccd.servers().require(*server)->reconnect();
     else
-        for (auto &server : irccd.servers().servers())
+        for (auto& server : irccd.servers().servers())
             server->reconnect();
 
     client.success("server-reconnect");
 }
 
-ServerTopicCommand::ServerTopicCommand()
-    : Command("server-topic")
+server_topic_command::server_topic_command()
+    : command("server-topic")
 {
 }
 
-void ServerTopicCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void server_topic_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::requireIdentifier(args, "server"))->topic(
-        util::json::requireString(args, "channel"),
-        util::json::requireString(args, "topic")
+    irccd.servers().require(util::json::require_identifier(args, "server"))->topic(
+        util::json::require_string(args, "channel"),
+        util::json::require_string(args, "topic")
     );
     client.success("server-topic");
 }
 
-RuleEditCommand::RuleEditCommand()
-    : Command("rule-edit")
+rule_edit_command::rule_edit_command()
+    : command("rule-edit")
 {
 }
 
-void RuleEditCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void rule_edit_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    static const auto updateset = [] (auto &set, auto args, const auto &key) {
-        for (const auto &v : args["remove-"s + key]) {
+    static const auto updateset = [] (auto& set, auto args, const auto& key) {
+        for (const auto& v : args["remove-"s + key]) {
             if (v.is_string())
                 set.erase(v.template get<std::string>());
         }
-        for (const auto &v : args["add-"s + key]) {
+        for (const auto& v : args["add-"s + key]) {
             if (v.is_string())
                 set.insert(v.template get<std::string>());
         }
     };
 
     // Create a copy to avoid incomplete edition in case of errors.
-    auto index = util::json::requireUint(args, "index");
+    auto index = util::json::require_uint(args, "index");
     auto rule = irccd.rules().require(index);
 
     updateset(rule.channels(), args, "channels");
@@ -523,9 +520,9 @@ void RuleEditCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann
         }
 
         if (action->get<std::string>() == "accept")
-            rule.setAction(RuleAction::Accept);
+            rule.set_action(rule::action_type::accept);
         else if (action->get<std::string>() == "drop")
-            rule.setAction(RuleAction::Drop);
+            rule.set_action(rule::action_type::drop);
         else {
             client.error("rule-edit", "invalid action '"s + action->get<std::string>() + "'");
             return;
@@ -537,39 +534,39 @@ void RuleEditCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann
     client.success("rule-edit");
 }
 
-RuleListCommand::RuleListCommand()
-    : Command("rule-list")
+rule_list_command::rule_list_command()
+    : command("rule-list")
 {
 }
 
-void RuleListCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &)
+void rule_list_command::exec(irccd& irccd, transport_client& client, const nlohmann::json&)
 {
     auto array = nlohmann::json::array();
 
     for (const auto& rule : irccd.rules().list())
-        array.push_back(toJson(rule));
+        array.push_back(to_json(rule));
 
     client.success("rule-list", {{ "list", std::move(array) }});
 }
 
-RuleInfoCommand::RuleInfoCommand()
-    : Command("rule-info")
+rule_info_command::rule_info_command()
+    : command("rule-info")
 {
 }
 
-void RuleInfoCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void rule_info_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    client.success("rule-info", toJson(irccd.rules().require(util::json::requireUint(args, "index"))));
+    client.success("rule-info", to_json(irccd.rules().require(util::json::require_uint(args, "index"))));
 }
 
-RuleRemoveCommand::RuleRemoveCommand()
-    : Command("rule-remove")
+rule_remove_command::rule_remove_command()
+    : command("rule-remove")
 {
 }
 
-void RuleRemoveCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void rule_remove_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    unsigned position = util::json::requireUint(args, "index");
+    unsigned position = util::json::require_uint(args, "index");
 
     if (irccd.rules().length() == 0)
         client.error("rule-remove", "rule list is empty");
@@ -581,15 +578,15 @@ void RuleRemoveCommand::exec(Irccd &irccd, TransportClient &client, const nlohma
     }
 }
 
-RuleMoveCommand::RuleMoveCommand()
-    : Command("rule-move")
+rule_move_command::rule_move_command()
+    : command("rule-move")
 {
 }
 
-void RuleMoveCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void rule_move_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto from = util::json::requireUint(args, "from");
-    auto to = util::json::requireUint(args, "to");
+    auto from = util::json::require_uint(args, "from");
+    auto to = util::json::require_uint(args, "to");
 
     /*
      * Examples of moves
@@ -635,15 +632,15 @@ void RuleMoveCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann
     }
 }
 
-RuleAddCommand::RuleAddCommand()
-    : Command("rule-add")
+rule_add_command::rule_add_command()
+    : command("rule-add")
 {
 }
 
-void RuleAddCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+void rule_add_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto index = util::json::getUint(args, "index", irccd.rules().length());
-    auto rule = fromJson(args);
+    auto index = util::json::get_uint(args, "index", irccd.rules().length());
+    auto rule = from_json(args);
 
     if (index > irccd.rules().length())
         client.error("rule-add", "index is out of range");
@@ -652,7 +649,5 @@ void RuleAddCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann:
         client.success("rule-add");
     }
 }
-
-} // !command
 
 } // !irccd

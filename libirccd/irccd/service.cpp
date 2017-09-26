@@ -35,129 +35,129 @@ using namespace std::string_literals;
 namespace irccd {
 
 /*
- * CommandService.
+ * command_service.
  * ------------------------------------------------------------------
  */
 
-bool CommandService::contains(const std::string &name) const noexcept
+bool command_service::contains(const std::string& name) const noexcept
 {
     return find(name) != nullptr;
 }
 
-std::shared_ptr<Command> CommandService::find(const std::string &name) const noexcept
+std::shared_ptr<command> command_service::find(const std::string& name) const noexcept
 {
-    auto it = std::find_if(m_commands.begin(), m_commands.end(), [&] (const auto &cmd) {
+    auto it = std::find_if(commands_.begin(), commands_.end(), [&] (const auto& cmd) {
         return cmd->name() == name;
     });
 
-    return it == m_commands.end() ? nullptr : *it;
+    return it == commands_.end() ? nullptr : *it;
 }
 
-void CommandService::add(std::shared_ptr<Command> command)
+void command_service::add(std::shared_ptr<command> command)
 {
-    auto it = std::find_if(m_commands.begin(), m_commands.end(), [&] (const auto &cmd) {
+    auto it = std::find_if(commands_.begin(), commands_.end(), [&] (const auto& cmd) {
         return cmd->name() == command->name();
     });
 
-    if (it != m_commands.end())
+    if (it != commands_.end())
         *it = std::move(command);
     else
-        m_commands.push_back(std::move(command));
+        commands_.push_back(std::move(command));
 }
 
 /*
- * InterruptService.
+ * interrupt_service.
  * ------------------------------------------------------------------
  */
 
-InterruptService::InterruptService()
-    : m_in(AF_INET, 0)
-    , m_out(AF_INET, 0)
+interrupt_service::interrupt_service()
+    : in_(AF_INET, 0)
+    , out_(AF_INET, 0)
 {
     // Bind a socket to any port.
-    m_in.set(net::option::SockReuseAddress(true));
-    m_in.bind(net::ipv4::any(0));
-    m_in.listen(1);
+    in_.set(net::option::SockReuseAddress(true));
+    in_.bind(net::ipv4::any(0));
+    in_.listen(1);
 
     // Do the socket pair.
-    m_out.connect(net::ipv4::pton("127.0.0.1", net::ipv4::port(m_in.getsockname())));
-    m_in = m_in.accept();
-    m_out.set(net::option::SockBlockMode(false));
+    out_.connect(net::ipv4::pton("127.0.0.1", net::ipv4::port(in_.getsockname())));
+    in_ = in_.accept();
+    out_.set(net::option::SockBlockMode(false));
 }
 
-void InterruptService::prepare(fd_set &in, fd_set &, net::Handle &max)
+void interrupt_service::prepare(fd_set& in, fd_set&, net::Handle& max)
 {
-    FD_SET(m_in.handle(), &in);
+    FD_SET(in_.handle(), &in);
 
-    if (m_in.handle() > max)
-        max = m_in.handle();
+    if (in_.handle() > max)
+        max = in_.handle();
 }
 
-void InterruptService::sync(fd_set &in, fd_set &)
+void interrupt_service::sync(fd_set& in, fd_set&)
 {
-    if (FD_ISSET(m_in.handle(), &in)) {
+    if (FD_ISSET(in_.handle(), &in)) {
         static std::array<char, 32> tmp;
 
         try {
             log::debug("irccd: interrupt service recv");
-            m_in.recv(tmp.data(), 32);
-        } catch (const std::exception &ex) {
+            in_.recv(tmp.data(), 32);
+        } catch (const std::exception& ex) {
             log::warning() << "irccd: interrupt service error: " << ex.what() << std::endl;
         }
     }
 }
 
-void InterruptService::interrupt() noexcept
+void interrupt_service::interrupt() noexcept
 {
     try {
         static char byte;
 
         log::debug("irccd: interrupt service send");
-        m_out.send(&byte, 1);
-    } catch (const std::exception &ex) {
+        out_.send(&byte, 1);
+    } catch (const std::exception& ex) {
         log::warning() << "irccd: interrupt service error: " << ex.what() << std::endl;
     }
 }
 
 /*
- * PluginService.
+ * plugin_service.
  * ------------------------------------------------------------------
  */
 
-PluginService::PluginService(Irccd &irccd) noexcept
-    : m_irccd(irccd)
+plugin_service::plugin_service(irccd& irccd) noexcept
+    : irccd_(irccd)
 {
-    m_default_paths.emplace("cache", sys::cachedir());
-    m_default_paths.emplace("data", sys::datadir());
-    m_default_paths.emplace("config", sys::sysconfigdir());
+    default_paths_.emplace("cache", sys::cachedir());
+    default_paths_.emplace("data", sys::datadir());
+    default_paths_.emplace("config", sys::sysconfigdir());
 }
 
-PluginService::~PluginService()
+plugin_service::~plugin_service()
 {
-    for (const auto &plugin : m_plugins)
-        plugin->onUnload(m_irccd);
+    for (const auto& plugin : plugins_)
+        plugin->on_unload(irccd_);
 }
 
-bool PluginService::has(const std::string &name) const noexcept
+bool plugin_service::has(const std::string& name) const noexcept
 {
-    return std::count_if(m_plugins.cbegin(), m_plugins.cend(), [&] (const auto &plugin) {
+    return std::count_if(plugins_.cbegin(), plugins_.cend(), [&] (const auto& plugin) {
         return plugin->name() == name;
     }) > 0;
 }
 
-std::shared_ptr<Plugin> PluginService::get(const std::string &name) const noexcept
+std::shared_ptr<plugin> plugin_service::get(const std::string& name) const noexcept
 {
-    auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (const auto &plugin) {
+    auto it = std::find_if(plugins_.begin(), plugins_.end(), [&] (const auto& plugin) {
         return plugin->name() == name;
     });
 
-    if (it == m_plugins.end())
+    if (it == plugins_.end())
         return nullptr;
 
     return *it;
 }
 
-std::shared_ptr<Plugin> PluginService::require(const std::string &name) const
+std::shared_ptr<plugin> plugin_service::require(const std::string& name) const
 {
     auto plugin = get(name);
 
@@ -167,84 +167,84 @@ std::shared_ptr<Plugin> PluginService::require(const std::string &name) const
     return plugin;
 }
 
-void PluginService::add(std::shared_ptr<Plugin> plugin)
+void plugin_service::add(std::shared_ptr<plugin> plugin)
 {
-    m_plugins.push_back(std::move(plugin));
+    plugins_.push_back(std::move(plugin));
 }
 
-void PluginService::addLoader(std::unique_ptr<PluginLoader> loader)
+void plugin_service::add_loader(std::unique_ptr<plugin_loader> loader)
 {
-    m_loaders.push_back(std::move(loader));
+    loaders_.push_back(std::move(loader));
 }
 
-void PluginService::setConfig(const std::string &name, PluginConfig config)
+void plugin_service::set_config(const std::string& name, plugin_config config)
 {
-    m_config.emplace(name, std::move(config));
+    config_.emplace(name, std::move(config));
 }
 
-PluginConfig PluginService::config(const std::string &name) const
+plugin_config plugin_service::config(const std::string& name) const
 {
-    auto it = m_config.find(name);
+    auto it = config_.find(name);
 
-    if (it != m_config.end())
+    if (it != config_.end())
         return it->second;
 
-    return PluginConfig();
+    return plugin_config();
 }
 
-void PluginService::setFormats(const std::string &name, PluginFormats formats)
+void plugin_service::set_formats(const std::string& name, plugin_formats formats)
 {
-    m_formats.emplace(name, std::move(formats));
+    formats_.emplace(name, std::move(formats));
 }
 
-PluginFormats PluginService::formats(const std::string &name) const
+plugin_formats plugin_service::formats(const std::string& name) const
 {
-    auto it = m_formats.find(name);
+    auto it = formats_.find(name);
 
-    if (it != m_formats.end())
+    if (it != formats_.end())
         return it->second;
 
-    return PluginFormats();
+    return plugin_formats();
 }
 
-const PluginPaths& PluginService::paths() const noexcept
+const plugin_paths& plugin_service::paths() const noexcept
 {
-    return m_default_paths;
+    return default_paths_;
 }
 
-PluginPaths PluginService::paths(const std::string& name) const
+plugin_paths plugin_service::paths(const std::string& name) const
 {
-    auto result = m_default_paths;
-    auto overriden = m_paths.find(name);
+    auto result = default_paths_;
+    auto overriden = paths_.find(name);
 
     // For all default paths, append the plugin name.
     for (auto& pair : result)
         pair.second += "/plugin/"s + name;
 
     // Now, mere overriden paths.
-    if (overriden != m_paths.end())
+    if (overriden != paths_.end())
         for (const auto& pair : overriden->second)
             result[pair.first] = pair.second;
 
     return result;
 }
 
-void PluginService::setPaths(PluginPaths paths)
+void plugin_service::set_paths(plugin_paths paths)
 {
     // If the paths is empty or not complete, do not erase default items.
     for (const auto& pair : paths)
-        m_default_paths[pair.first] = pair.second;
+        default_paths_[pair.first] = pair.second;
 }
 
-void PluginService::setPaths(const std::string& name, PluginPaths paths)
+void plugin_service::set_paths(const std::string& name, plugin_paths paths)
 {
-    m_paths.emplace(name, std::move(paths));
+    paths_.emplace(name, std::move(paths));
 }
 
-std::shared_ptr<Plugin> PluginService::open(const std::string &id,
-                                            const std::string &path)
+std::shared_ptr<plugin> plugin_service::open(const std::string& id,
+                                             const std::string& path)
 {
-    for (const auto &loader : m_loaders) {
+    for (const auto& loader : loaders_) {
         auto plugin = loader->open(id, path);
 
         if (plugin)
@@ -254,9 +254,9 @@ std::shared_ptr<Plugin> PluginService::open(const std::string &id,
     return nullptr;
 }
 
-std::shared_ptr<Plugin> PluginService::find(const std::string &id)
+std::shared_ptr<plugin> plugin_service::find(const std::string& id)
 {
-    for (const auto &loader : m_loaders) {
+    for (const auto& loader : loaders_) {
         auto plugin = loader->find(id);
 
         if (plugin)
@@ -266,13 +266,13 @@ std::shared_ptr<Plugin> PluginService::find(const std::string &id)
     return nullptr;
 }
 
-void PluginService::load(std::string name, std::string path)
+void plugin_service::load(std::string name, std::string path)
 {
     if (has(name))
         return;
 
     try {
-        std::shared_ptr<Plugin> plugin;
+        std::shared_ptr<plugin> plugin;
 
         if (path.empty())
             plugin = find(name);
@@ -280,83 +280,83 @@ void PluginService::load(std::string name, std::string path)
             plugin = open(name, std::move(path));
 
         if (plugin) {
-            plugin->setConfig(m_config[name]);
-            plugin->setFormats(m_formats[name]);
-            plugin->setPaths(paths(name));
-            plugin->onLoad(m_irccd);
+            plugin->set_config(config_[name]);
+            plugin->set_formats(formats_[name]);
+            plugin->set_paths(paths(name));
+            plugin->on_load(irccd_);
 
             add(std::move(plugin));
         }
-    } catch (const std::exception &ex) {
+    } catch (const std::exception& ex) {
         log::warning("plugin {}: {}"_format(name, ex.what()));
     }
 }
 
-void PluginService::reload(const std::string &name)
+void plugin_service::reload(const std::string& name)
 {
     auto plugin = get(name);
 
     if (plugin)
-        plugin->onReload(m_irccd);
+        plugin->on_reload(irccd_);
 }
 
-void PluginService::unload(const std::string &name)
+void plugin_service::unload(const std::string& name)
 {
-    auto it = std::find_if(m_plugins.begin(), m_plugins.end(), [&] (const auto &plugin) {
+    auto it = std::find_if(plugins_.begin(), plugins_.end(), [&] (const auto& plugin) {
         return plugin->name() == name;
     });
 
-    if (it != m_plugins.end()) {
-        (*it)->onUnload(m_irccd);
-        m_plugins.erase(it);
+    if (it != plugins_.end()) {
+        (*it)->on_unload(irccd_);
+        plugins_.erase(it);
     }
 }
 
 /*
- * RuleService.
+ * rule_service.
  * ------------------------------------------------------------------
  */
 
-void RuleService::add(Rule rule)
+void rule_service::add(rule rule)
 {
-    m_rules.push_back(std::move(rule));
+    rules_.push_back(std::move(rule));
 }
 
-void RuleService::insert(Rule rule, unsigned position)
+void rule_service::insert(rule rule, unsigned position)
 {
-    assert(position <= m_rules.size());
+    assert(position <= rules_.size());
 
-    m_rules.insert(m_rules.begin() + position, std::move(rule));
+    rules_.insert(rules_.begin() + position, std::move(rule));
 }
 
-void RuleService::remove(unsigned position)
+void rule_service::remove(unsigned position)
 {
-    assert(position < m_rules.size());
+    assert(position < rules_.size());
 
-    m_rules.erase(m_rules.begin() + position);
+    rules_.erase(rules_.begin() + position);
 }
 
-const Rule &RuleService::require(unsigned position) const
+const rule &rule_service::require(unsigned position) const
 {
-    if (position >= m_rules.size())
+    if (position >= rules_.size())
         throw std::out_of_range("rule " + std::to_string(position) + " does not exist");
 
-    return m_rules[position];
+    return rules_[position];
 }
 
-Rule &RuleService::require(unsigned position)
+rule &rule_service::require(unsigned position)
 {
-    if (position >= m_rules.size())
+    if (position >= rules_.size())
         throw std::out_of_range("rule " + std::to_string(position) + " does not exist");
 
-    return m_rules[position];
+    return rules_[position];
 }
 
-bool RuleService::solve(const std::string &server,
-                        const std::string &channel,
-                        const std::string &origin,
-                        const std::string &plugin,
-                        const std::string &event) noexcept
+bool rule_service::solve(const std::string& server,
+                         const std::string& channel,
+                         const std::string& origin,
+                         const std::string& plugin,
+                         const std::string& event) noexcept
 {
     bool result = true;
 
@@ -364,60 +364,59 @@ bool RuleService::solve(const std::string &server,
            origin, plugin, event));
 
     int i = 0;
-    for (const Rule &rule : m_rules) {
+    for (const auto& rule : rules_) {
         log::debug() << "  candidate " << i++ << ":\n"
-                 << "    servers: " << util::join(rule.servers().begin(), rule.servers().end()) << "\n"
-                 << "    channels: " << util::join(rule.channels().begin(), rule.channels().end()) << "\n"
-                 << "    origins: " << util::join(rule.origins().begin(), rule.origins().end()) << "\n"
-                 << "    plugins: " << util::join(rule.plugins().begin(), rule.plugins().end()) << "\n"
-                 << "    events: " << util::join(rule.events().begin(), rule.events().end()) << "\n"
-                 << "    action: " << ((rule.action() == RuleAction::Accept) ? "accept" : "drop") << std::endl;
+                     << "    servers: " << util::join(rule.servers().begin(), rule.servers().end()) << "\n"
+                     << "    channels: " << util::join(rule.channels().begin(), rule.channels().end()) << "\n"
+                     << "    origins: " << util::join(rule.origins().begin(), rule.origins().end()) << "\n"
+                     << "    plugins: " << util::join(rule.plugins().begin(), rule.plugins().end()) << "\n"
+                     << "    events: " << util::join(rule.events().begin(), rule.events().end()) << "\n"
+                     << "    action: " << ((rule.action() == rule::action_type::accept) ? "accept" : "drop") << std::endl;
 
         if (rule.match(server, channel, origin, plugin, event))
-            result = rule.action() == RuleAction::Accept;
+            result = rule.action() == rule::action_type::accept;
     }
 
     return result;
 }
 
 /*
- * ServerService.
+ * server_service.
  * ------------------------------------------------------------------
  */
 
-class EventHandler {
+class event_handler {
 public:
     std::string server;
     std::string origin;
     std::string target;
-    std::function<std::string (Plugin &)> functionName;
-    std::function<void (Plugin &)> functionExec;
+    std::function<std::string (plugin &)> function_name;
+    std::function<void (plugin &)> function_exec;
 
-    void operator()(Irccd &irccd) const
+    void operator()(irccd& irccd) const
     {
-        for (auto &plugin : irccd.plugins().list()) {
-            auto eventname = functionName(*plugin);
+        for (auto& plugin : irccd.plugins().list()) {
+            auto eventname = function_name(*plugin);
             auto allowed = irccd.rules().solve(server, target, origin, plugin->name(), eventname);
 
             if (!allowed) {
                 log::debug() << "rule: event skipped on match" << std::endl;
                 continue;
-            } else
-                log::debug() << "rule: event allowed" << std::endl;
+            }
 
-            // TODO: server-event must not know which type of plugin.
-            // TODO: get generic error.
-            // TODO: this is the responsability of service-plugin.
+            log::debug() << "rule: event allowed" << std::endl;
+
+            // TODO: this is the responsability of plugin_service.
             try {
-                functionExec(*plugin);
-            } catch (const std::exception &ex) {
+                function_exec(*plugin);
+            } catch (const std::exception& ex) {
                 log::warning() << "plugin " << plugin->name() << ": error: " << ex.what() << std::endl;
             }
         }
     }
 };
 
-void ServerService::handleChannelMode(const ChannelModeEvent &ev)
+void server_service::handle_channel_mode(const channel_mode_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onChannelMode:\n";
     log::debug() << "  origin: " << ev.origin << "\n";
@@ -425,7 +424,7 @@ void ServerService::handleChannelMode(const ChannelModeEvent &ev)
     log::debug() << "  mode: " << ev.mode << "\n";
     log::debug() << "  argument: " << ev.argument << std::endl;
 
-    m_irccd.transports().broadcast(nlohmann::json::object({
+    irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onChannelMode"     },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -434,24 +433,24 @@ void ServerService::handleChannelMode(const ChannelModeEvent &ev)
         { "argument",   ev.argument         }
     }));
 
-    m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
-        [=] (Plugin &) -> std::string {
+    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+        [=] (plugin&) -> std::string {
             return "onChannelMode";
         },
-        [=] (Plugin &plugin) {
-            plugin.onChannelMode(m_irccd, ev);
+        [=] (plugin& plugin) {
+            plugin.on_channel_mode(irccd_, ev);
         }
     });
 }
 
-void ServerService::handleChannelNotice(const ChannelNoticeEvent &ev)
+void server_service::handle_channel_notice(const channel_notice_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onChannelNotice:\n";
     log::debug() << "  origin: " << ev.origin << "\n";
     log::debug() << "  channel: " << ev.channel << "\n";
     log::debug() << "  message: " << ev.message << std::endl;
 
-    m_irccd.transports().broadcast(nlohmann::json::object({
+    irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onChannelNotice"   },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -459,83 +458,83 @@ void ServerService::handleChannelNotice(const ChannelNoticeEvent &ev)
         { "message",    ev.message          }
     }));
 
-    m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
-        [=] (Plugin &) -> std::string {
+    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+        [=] (plugin&) -> std::string {
             return "onChannelNotice";
         },
-        [=] (Plugin &plugin) {
-            plugin.onChannelNotice(m_irccd, ev);
+        [=] (plugin& plugin) {
+            plugin.on_channel_notice(irccd_, ev);
         }
     });
 }
 
-void ServerService::handleConnect(const ConnectEvent &ev)
+void server_service::handle_connect(const connect_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onConnect" << std::endl;
 
-    m_irccd.transports().broadcast(nlohmann::json::object({
+    irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onConnect"         },
         { "server",     ev.server->name()   }
     }));
 
-    m_irccd.post(EventHandler{ev.server->name(), /* origin */ "", /* channel */ "",
-        [=] (Plugin &) -> std::string {
+    irccd_.post(event_handler{ev.server->name(), /* origin */ "", /* channel */ "",
+        [=] (plugin&) -> std::string {
             return "onConnect";
         },
-        [=] (Plugin &plugin) {
-            plugin.onConnect(m_irccd, ev);
+        [=] (plugin& plugin) {
+            plugin.on_connect(irccd_, ev);
         }
     });
 }
 
-void ServerService::handleInvite(const InviteEvent &ev)
+void server_service::handle_invite(const invite_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onInvite:\n";
     log::debug() << "  origin: " << ev.origin << "\n";
     log::debug() << "  channel: " << ev.channel << "\n";
     log::debug() << "  target: " << ev.nickname << std::endl;
 
-    m_irccd.transports().broadcast(nlohmann::json::object({
+    irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onInvite"          },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
         { "channel",    ev.channel          }
     }));
 
-    m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
-        [=] (Plugin &) -> std::string {
+    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+        [=] (plugin&) -> std::string {
             return "onInvite";
         },
-        [=] (Plugin &plugin) {
-            plugin.onInvite(m_irccd, ev);
+        [=] (plugin& plugin) {
+            plugin.on_invite(irccd_, ev);
         }
     });
 }
 
-void ServerService::handleJoin(const JoinEvent &ev)
+void server_service::handle_join(const join_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onJoin:\n";
     log::debug() << "  origin: " << ev.origin << "\n";
     log::debug() << "  channel: " << ev.channel << std::endl;
 
-    m_irccd.transports().broadcast(nlohmann::json::object({
+    irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onJoin"            },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
         { "channel",    ev.channel          }
     }));
 
-    m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
-        [=] (Plugin &) -> std::string {
+    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+        [=] (plugin&) -> std::string {
             return "onJoin";
         },
-        [=] (Plugin &plugin) {
-            plugin.onJoin(m_irccd, ev);
+        [=] (plugin& plugin) {
+            plugin.on_join(irccd_, ev);
         }
     });
 }
 
-void ServerService::handleKick(const KickEvent &ev)
+void server_service::handle_kick(const kick_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onKick:\n";
     log::debug() << "  origin: " << ev.origin << "\n";
@@ -543,7 +542,7 @@ void ServerService::handleKick(const KickEvent &ev)
     log::debug() << "  target: " << ev.target << "\n";
     log::debug() << "  reason: " << ev.reason << std::endl;
 
-    m_irccd.transports().broadcast(nlohmann::json::object({
+    irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onKick"            },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -552,24 +551,24 @@ void ServerService::handleKick(const KickEvent &ev)
         { "reason",     ev.reason           }
     }));
 
-    m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
-        [=] (Plugin &) -> std::string {
+    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+        [=] (plugin&) -> std::string {
             return "onKick";
         },
-        [=] (Plugin &plugin) {
-            plugin.onKick(m_irccd, ev);
+        [=] (plugin& plugin) {
+            plugin.on_kick(irccd_, ev);
         }
     });
 }
 
-void ServerService::handleMessage(const MessageEvent &ev)
+void server_service::handle_message(const message_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onMessage:\n";
     log::debug() << "  origin: " << ev.origin << "\n";
     log::debug() << "  channel: " << ev.channel << "\n";
     log::debug() << "  message: " << ev.message << std::endl;
 
-    m_irccd.transports().broadcast(nlohmann::json::object({
+    irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onMessage"         },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -577,32 +576,36 @@ void ServerService::handleMessage(const MessageEvent &ev)
         { "message",    ev.message          }
     }));
 
-    m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
-        [=] (Plugin &plugin) -> std::string {
-            return util::parseMessage(ev.message, ev.server->commandCharacter(), plugin.name()).second == util::MessageType::Command ? "onCommand" : "onMessage";
+    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+        [=] (plugin& plugin) -> std::string {
+            return util::parse_message(
+                ev.message,
+                ev.server->command_char(),
+                plugin.name()
+            ).type == util::message_pack::type::command ? "onCommand" : "onMessage";
         },
-        [=] (Plugin &plugin) mutable {
+        [=] (plugin& plugin) mutable {
             auto copy = ev;
-            auto pack = util::parseMessage(copy.message, copy.server->commandCharacter(), plugin.name());
+            auto pack = util::parse_message(copy.message, copy.server->command_char(), plugin.name());
 
-            copy.message = pack.first;
+            copy.message = pack.message;
 
-            if (pack.second == util::MessageType::Command)
-                plugin.onCommand(m_irccd, copy);
+            if (pack.type == util::message_pack::type::command)
+                plugin.on_command(irccd_, copy);
             else
-                plugin.onMessage(m_irccd, copy);
+                plugin.on_message(irccd_, copy);
         }
     });
 }
 
-void ServerService::handleMe(const MeEvent &ev)
+void server_service::handle_me(const me_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onMe:\n";
     log::debug() << "  origin: " << ev.origin << "\n";
     log::debug() << "  target: " << ev.channel << "\n";
     log::debug() << "  message: " << ev.message << std::endl;
 
-    m_irccd.transports().broadcast(nlohmann::json::object({
+    irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onMe"              },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -610,40 +613,40 @@ void ServerService::handleMe(const MeEvent &ev)
         { "message",    ev.message          }
     }));
 
-    m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
-        [=] (Plugin &) -> std::string {
+    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+        [=] (plugin&) -> std::string {
             return "onMe";
         },
-        [=] (Plugin &plugin) {
-            plugin.onMe(m_irccd, ev);
+        [=] (plugin& plugin) {
+            plugin.on_me(irccd_, ev);
         }
     });
 }
 
-void ServerService::handleMode(const ModeEvent &ev)
+void server_service::handle_mode(const mode_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onMode\n";
     log::debug() << "  origin: " << ev.origin << "\n";
     log::debug() << "  mode: " << ev.mode << std::endl;
 
-    m_irccd.transports().broadcast(nlohmann::json::object({
+    irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onMode"            },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
         { "mode",       ev.mode             }
     }));
 
-    m_irccd.post(EventHandler{ev.server->name(), ev.origin, /* channel */ "",
-        [=] (Plugin &) -> std::string {
+    irccd_.post(event_handler{ev.server->name(), ev.origin, /* channel */ "",
+        [=] (plugin &) -> std::string {
             return "onMode";
         },
-        [=] (Plugin &plugin) {
-            plugin.onMode(m_irccd, ev);
+        [=] (plugin &plugin) {
+            plugin.on_mode(irccd_, ev);
         }
     });
 }
 
-void ServerService::handleNames(const NamesEvent &ev)
+void server_service::handle_names(const names_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onNames:\n";
     log::debug() << "  channel: " << ev.channel << "\n";
@@ -651,80 +654,80 @@ void ServerService::handleNames(const NamesEvent &ev)
 
     auto names = nlohmann::json::array();
 
-    for (const auto &v : ev.names)
+    for (const auto& v : ev.names)
         names.push_back(v);
 
-    m_irccd.transports().broadcast(nlohmann::json::object({
+    irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onNames"           },
         { "server",     ev.server->name()   },
         { "channel",    ev.channel          },
         { "names",      std::move(names)    }
     }));
 
-    m_irccd.post(EventHandler{ev.server->name(), /* origin */ "", ev.channel,
-        [=] (Plugin &) -> std::string {
+    irccd_.post(event_handler{ev.server->name(), /* origin */ "", ev.channel,
+        [=] (plugin&) -> std::string {
             return "onNames";
         },
-        [=] (Plugin &plugin) {
-            plugin.onNames(m_irccd, ev);
+        [=] (plugin& plugin) {
+            plugin.on_names(irccd_, ev);
         }
     });
 }
 
-void ServerService::handleNick(const NickEvent &ev)
+void server_service::handle_nick(const nick_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onNick:\n";
     log::debug() << "  origin: " << ev.origin << "\n";
     log::debug() << "  nickname: " << ev.nickname << std::endl;
 
-    m_irccd.transports().broadcast(nlohmann::json::object({
+    irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onNick"            },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
         { "nickname",   ev.nickname         }
     }));
 
-    m_irccd.post(EventHandler{ev.server->name(), ev.origin, /* channel */ "",
-        [=] (Plugin &) -> std::string {
+    irccd_.post(event_handler{ev.server->name(), ev.origin, /* channel */ "",
+        [=] (plugin&) -> std::string {
             return "onNick";
         },
-        [=] (Plugin &plugin) {
-            plugin.onNick(m_irccd, ev);
+        [=] (plugin& plugin) {
+            plugin.on_nick(irccd_, ev);
         }
     });
 }
 
-void ServerService::handleNotice(const NoticeEvent &ev)
+void server_service::handle_notice(const notice_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onNotice:\n";
     log::debug() << "  origin: " << ev.origin << "\n";
     log::debug() << "  message: " << ev.message << std::endl;
 
-    m_irccd.transports().broadcast(nlohmann::json::object({
+    irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onNotice"          },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
         { "message",    ev.message          }
     }));
 
-    m_irccd.post(EventHandler{ev.server->name(), ev.origin, /* channel */ "",
-        [=] (Plugin &) -> std::string {
+    irccd_.post(event_handler{ev.server->name(), ev.origin, /* channel */ "",
+        [=] (plugin&) -> std::string {
             return "onNotice";
         },
-        [=] (Plugin &plugin) {
-            plugin.onNotice(m_irccd, ev);
+        [=] (plugin& plugin) {
+            plugin.on_notice(irccd_, ev);
         }
     });
 }
 
-void ServerService::handlePart(const PartEvent &ev)
+void server_service::handle_part(const part_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onPart:\n";
     log::debug() << "  origin: " << ev.origin << "\n";
     log::debug() << "  channel: " << ev.channel << "\n";
     log::debug() << "  reason: " << ev.reason << std::endl;
 
-    m_irccd.transports().broadcast(nlohmann::json::object({
+    irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onPart"            },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -732,55 +735,59 @@ void ServerService::handlePart(const PartEvent &ev)
         { "reason",     ev.reason           }
     }));
 
-    m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
-        [=] (Plugin &) -> std::string {
+    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+        [=] (plugin&) -> std::string {
             return "onPart";
         },
-        [=] (Plugin &plugin) {
-            plugin.onPart(m_irccd, ev);
+        [=] (plugin& plugin) {
+            plugin.on_part(irccd_, ev);
         }
     });
 }
 
-void ServerService::handleQuery(const QueryEvent &ev)
+void server_service::handle_query(const query_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onQuery:\n";
     log::debug() << "  origin: " << ev.origin << "\n";
     log::debug() << "  message: " << ev.message << std::endl;
 
-    m_irccd.transports().broadcast(nlohmann::json::object({
+    irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onQuery"           },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
         { "message",    ev.message          }
     }));
 
-    m_irccd.post(EventHandler{ev.server->name(), ev.origin, /* channel */ "",
-        [=] (Plugin &plugin) -> std::string {
-            return util::parseMessage(ev.message, ev.server->commandCharacter(), plugin.name()).second == util::MessageType::Command ? "onQueryCommand" : "onQuery";
+    irccd_.post(event_handler{ev.server->name(), ev.origin, /* channel */ "",
+        [=] (plugin& plugin) -> std::string {
+            return util::parse_message(
+                ev.message,
+                ev.server->command_char(),
+                plugin.name()
+            ).type == util::message_pack::type::command ? "onQueryCommand" : "onQuery";
         },
-        [=] (Plugin &plugin) mutable {
+        [=] (plugin& plugin) mutable {
             auto copy = ev;
-            auto pack = util::parseMessage(copy.message, copy.server->commandCharacter(), plugin.name());
+            auto pack = util::parse_message(copy.message, copy.server->command_char(), plugin.name());
 
-            copy.message = pack.first;
+            copy.message = pack.message;
 
-            if (pack.second == util::MessageType::Command)
-                plugin.onQueryCommand(m_irccd, copy);
+            if (pack.type == util::message_pack::type::command)
+                plugin.on_query_command(irccd_, copy);
             else
-                plugin.onQuery(m_irccd, copy);
+                plugin.on_query(irccd_, copy);
         }
     });
 }
 
-void ServerService::handleTopic(const TopicEvent &ev)
+void server_service::handle_topic(const topic_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onTopic:\n";
     log::debug() << "  origin: " << ev.origin << "\n";
     log::debug() << "  channel: " << ev.channel << "\n";
     log::debug() << "  topic: " << ev.topic << std::endl;
 
-    m_irccd.transports().broadcast(nlohmann::json::object({
+    irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onTopic"           },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
@@ -788,17 +795,17 @@ void ServerService::handleTopic(const TopicEvent &ev)
         { "topic",      ev.topic            }
     }));
 
-    m_irccd.post(EventHandler{ev.server->name(), ev.origin, ev.channel,
-        [=] (Plugin &) -> std::string {
+    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+        [=] (plugin&) -> std::string {
             return "onTopic";
         },
-        [=] (Plugin &plugin) {
-            plugin.onTopic(m_irccd, ev);
+        [=] (plugin& plugin) {
+            plugin.on_topic(irccd_, ev);
         }
     });
 }
 
-void ServerService::handleWhois(const WhoisEvent &ev)
+void server_service::handle_whois(const whois_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onWhois\n";
     log::debug() << "  nickname: " << ev.whois.nick << "\n";
@@ -807,7 +814,7 @@ void ServerService::handleWhois(const WhoisEvent &ev)
     log::debug() << "  realname: " << ev.whois.realname << "\n";
     log::debug() << "  channels: " << util::join(ev.whois.channels.begin(), ev.whois.channels.end()) << std::endl;
 
-    m_irccd.transports().broadcast(nlohmann::json::object({
+    irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onWhois"           },
         { "server",     ev.server->name()   },
         { "nickname",   ev.whois.nick       },
@@ -816,93 +823,93 @@ void ServerService::handleWhois(const WhoisEvent &ev)
         { "realname",   ev.whois.realname   }
     }));
 
-    m_irccd.post(EventHandler{ev.server->name(), /* origin */ "", /* channel */ "",
-        [=] (Plugin &) -> std::string {
+    irccd_.post(event_handler{ev.server->name(), /* origin */ "", /* channel */ "",
+        [=] (plugin&) -> std::string {
             return "onWhois";
         },
-        [=] (Plugin &plugin) {
-            plugin.onWhois(m_irccd, ev);
+        [=] (plugin& plugin) {
+            plugin.on_whois(irccd_, ev);
         }
     });
 }
 
-ServerService::ServerService(Irccd &irccd)
-    : m_irccd(irccd)
+server_service::server_service(irccd &irccd)
+    : irccd_(irccd)
 {
 }
 
-void ServerService::prepare(fd_set &in, fd_set &out, net::Handle &max)
+void server_service::prepare(fd_set& in, fd_set& out, net::Handle& max)
 {
-    for (auto &server : m_servers) {
+    for (auto& server : servers_) {
         server->update();
         server->prepare(in, out, max);
     }
 }
 
-void ServerService::sync(fd_set &in, fd_set &out)
+void server_service::sync(fd_set& in, fd_set& out)
 {
-    for (auto &server : m_servers)
+    for (auto& server : servers_)
         server->sync(in, out);
 }
 
-bool ServerService::has(const std::string &name) const noexcept
+bool server_service::has(const std::string& name) const noexcept
 {
-    return std::count_if(m_servers.cbegin(), m_servers.end(), [&] (const auto &server) {
+    return std::count_if(servers_.cbegin(), servers_.end(), [&] (const auto& server) {
         return server->name() == name;
     }) > 0;
 }
 
-void ServerService::add(std::shared_ptr<Server> server)
+void server_service::add(std::shared_ptr<server> server)
 {
     assert(!has(server->name()));
 
     using namespace std::placeholders;
 
-    std::weak_ptr<Server> ptr(server);
+    std::weak_ptr<class server> ptr(server);
 
-    server->onChannelMode.connect(std::bind(&ServerService::handleChannelMode, this, _1));
-    server->onChannelNotice.connect(std::bind(&ServerService::handleChannelNotice, this, _1));
-    server->onConnect.connect(std::bind(&ServerService::handleConnect, this, _1));
-    server->onInvite.connect(std::bind(&ServerService::handleInvite, this, _1));
-    server->onJoin.connect(std::bind(&ServerService::handleJoin, this, _1));
-    server->onKick.connect(std::bind(&ServerService::handleKick, this, _1));
-    server->onMessage.connect(std::bind(&ServerService::handleMessage, this, _1));
-    server->onMe.connect(std::bind(&ServerService::handleMe, this, _1));
-    server->onMode.connect(std::bind(&ServerService::handleMode, this, _1));
-    server->onNames.connect(std::bind(&ServerService::handleNames, this, _1));
-    server->onNick.connect(std::bind(&ServerService::handleNick, this, _1));
-    server->onNotice.connect(std::bind(&ServerService::handleNotice, this, _1));
-    server->onPart.connect(std::bind(&ServerService::handlePart, this, _1));
-    server->onQuery.connect(std::bind(&ServerService::handleQuery, this, _1));
-    server->onTopic.connect(std::bind(&ServerService::handleTopic, this, _1));
-    server->onWhois.connect(std::bind(&ServerService::handleWhois, this, _1));
-    server->onDie.connect([this, ptr] () {
-        m_irccd.post([=] (Irccd &) {
+    server->on_channel_mode.connect(std::bind(&server_service::handle_channel_mode, this, _1));
+    server->on_channel_notice.connect(std::bind(&server_service::handle_channel_notice, this, _1));
+    server->on_connect.connect(std::bind(&server_service::handle_connect, this, _1));
+    server->on_invite.connect(std::bind(&server_service::handle_invite, this, _1));
+    server->on_join.connect(std::bind(&server_service::handle_join, this, _1));
+    server->on_kick.connect(std::bind(&server_service::handle_kick, this, _1));
+    server->on_message.connect(std::bind(&server_service::handle_message, this, _1));
+    server->on_me.connect(std::bind(&server_service::handle_me, this, _1));
+    server->on_mode.connect(std::bind(&server_service::handle_mode, this, _1));
+    server->on_names.connect(std::bind(&server_service::handle_names, this, _1));
+    server->on_nick.connect(std::bind(&server_service::handle_nick, this, _1));
+    server->on_notice.connect(std::bind(&server_service::handle_notice, this, _1));
+    server->on_part.connect(std::bind(&server_service::handle_part, this, _1));
+    server->on_query.connect(std::bind(&server_service::handle_query, this, _1));
+    server->on_topic.connect(std::bind(&server_service::handle_topic, this, _1));
+    server->on_whois.connect(std::bind(&server_service::handle_whois, this, _1));
+    server->on_die.connect([this, ptr] () {
+        irccd_.post([=] (irccd&) {
             auto server = ptr.lock();
 
             if (server) {
                 log::info("server {}: removed"_format(server->name()));
-                m_servers.erase(std::find(m_servers.begin(), m_servers.end(), server));
+                servers_.erase(std::find(servers_.begin(), servers_.end(), server));
             }
         });
     });
 
-    m_servers.push_back(std::move(server));
+    servers_.push_back(std::move(server));
 }
 
-std::shared_ptr<Server> ServerService::get(const std::string &name) const noexcept
+std::shared_ptr<server> server_service::get(const std::string& name) const noexcept
 {
-    auto it = std::find_if(m_servers.begin(), m_servers.end(), [&] (const auto &server) {
+    auto it = std::find_if(servers_.begin(), servers_.end(), [&] (const auto& server) {
         return server->name() == name;
     });
 
-    if (it == m_servers.end())
+    if (it == servers_.end())
         return nullptr;
 
     return *it;
 }
 
-std::shared_ptr<Server> ServerService::require(const std::string &name) const
+std::shared_ptr<server> server_service::require(const std::string& name) const
 {
     auto server = get(name);
 
@@ -912,36 +919,36 @@ std::shared_ptr<Server> ServerService::require(const std::string &name) const
     return server;
 }
 
-void ServerService::remove(const std::string &name)
+void server_service::remove(const std::string& name)
 {
-    auto it = std::find_if(m_servers.begin(), m_servers.end(), [&] (const auto &server) {
+    auto it = std::find_if(servers_.begin(), servers_.end(), [&] (const auto& server) {
         return server->name() == name;
     });
 
-    if (it != m_servers.end()) {
+    if (it != servers_.end()) {
         (*it)->disconnect();
-        m_servers.erase(it);
+        servers_.erase(it);
     }
 }
 
-void ServerService::clear() noexcept
+void server_service::clear() noexcept
 {
-    for (auto &server : m_servers)
+    for (auto &server : servers_)
         server->disconnect();
 
-    m_servers.clear();
+    servers_.clear();
 }
 
 /*
- * TransportService.
+ * transport_service.
  * ------------------------------------------------------------------
  */
 
-void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const nlohmann::json &object)
+void transport_service::handle_command(std::weak_ptr<transport_client> ptr, const nlohmann::json& object)
 {
     assert(object.is_object());
 
-    m_irccd.post([=] (Irccd &) {
+    irccd_.post([=] (irccd&) {
         // 0. Be sure the object still exists.
         auto tc = ptr.lock();
 
@@ -955,41 +962,41 @@ void TransportService::handleCommand(std::weak_ptr<TransportClient> ptr, const n
             return;
         }
 
-        auto cmd = m_irccd.commands().find(*name);
+        auto cmd = irccd_.commands().find(*name);
 
         if (!cmd)
             tc->error(*name, "command does not exist");
         else {
             try {
-                cmd->exec(m_irccd, *tc, object);
-            } catch (const std::exception &ex) {
+                cmd->exec(irccd_, *tc, object);
+            } catch (const std::exception& ex) {
                 tc->error(cmd->name(), ex.what());
             }
         }
     });
 }
 
-void TransportService::handleDie(std::weak_ptr<TransportClient> ptr)
+void transport_service::handle_die(std::weak_ptr<transport_client> ptr)
 {
-    m_irccd.post([=] (Irccd &) {
+    irccd_.post([=] (irccd &) {
         log::info("transport: client disconnected");
 
         auto tc = ptr.lock();
 
         if (tc)
-            m_clients.erase(std::find(m_clients.begin(), m_clients.end(), tc));
+            clients_.erase(std::find(clients_.begin(), clients_.end(), tc));
     });
 }
 
-TransportService::TransportService(Irccd &irccd) noexcept
-    : m_irccd(irccd)
+transport_service::transport_service(irccd& irccd) noexcept
+    : irccd_(irccd)
 {
 }
 
-void TransportService::prepare(fd_set &in, fd_set &out, net::Handle &max)
+void transport_service::prepare(fd_set& in, fd_set& out, net::Handle& max)
 {
     // Add transport servers.
-    for (const auto &transport : m_servers) {
+    for (const auto& transport : servers_) {
         FD_SET(transport->handle(), &in);
 
         if (transport->handle() > max)
@@ -997,58 +1004,58 @@ void TransportService::prepare(fd_set &in, fd_set &out, net::Handle &max)
     }
 
     // Transport clients.
-    for (const auto &client : m_clients)
+    for (const auto& client : clients_)
         client->prepare(in, out, max);
 }
 
-void TransportService::sync(fd_set &in, fd_set &out)
+void transport_service::sync(fd_set& in, fd_set& out)
 {
     using namespace std::placeholders;
 
     // Transport clients.
-    for (const auto &client : m_clients) {
+    for (const auto& client : clients_) {
         try {
             client->sync(in, out);
-        } catch (const std::exception &ex) {
+        } catch (const std::exception& ex) {
             log::info() << "transport: client disconnected: " << ex.what() << std::endl;
-            handleDie(client);
+            handle_die(client);
         }
     }
 
     // Transport servers.
-    for (const auto &transport : m_servers) {
+    for (const auto& transport : servers_) {
         if (!FD_ISSET(transport->handle(), &in))
             continue;
 
         log::debug("transport: new client connected");
 
-        std::shared_ptr<TransportClient> client = transport->accept();
-        std::weak_ptr<TransportClient> ptr(client);
+        std::shared_ptr<transport_client> client = transport->accept();
+        std::weak_ptr<transport_client> ptr(client);
 
         try {
             // Connect signals.
-            client->onCommand.connect(std::bind(&TransportService::handleCommand, this, ptr, _1));
-            client->onDie.connect(std::bind(&TransportService::handleDie, this, ptr));
+            client->on_command.connect(std::bind(&transport_service::handle_command, this, ptr, _1));
+            client->on_die.connect(std::bind(&transport_service::handle_die, this, ptr));
 
             // Register it.
-            m_clients.push_back(std::move(client));
-        } catch (const std::exception &ex) {
+            clients_.push_back(std::move(client));
+        } catch (const std::exception& ex) {
             log::info() << "transport: client disconnected: " << ex.what() << std::endl;
         }
     }
 }
 
-void TransportService::add(std::shared_ptr<TransportServer> ts)
+void transport_service::add(std::shared_ptr<transport_server> ts)
 {
-    m_servers.push_back(std::move(ts));
+    servers_.push_back(std::move(ts));
 }
 
-void TransportService::broadcast(const nlohmann::json &json)
+void transport_service::broadcast(const nlohmann::json& json)
 {
     assert(json.is_object());
 
-    for (const auto &client : m_clients)
-        if (client->state() == TransportClient::Ready)
+    for (const auto& client : clients_)
+        if (client->state() == transport_client::state::ready)
             client->send(json);
 }
 

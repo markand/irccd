@@ -21,7 +21,7 @@
 
 /**
  * \file plugin.hpp
- * \brief Irccd plugins
+ * \brief irccd plugins
  */
 
 /**
@@ -40,22 +40,22 @@
 
 namespace irccd {
 
-class Irccd;
+class irccd;
 
 /**
  * \brief Configuration map extract from config file.
  */
-using PluginConfig = std::unordered_map<std::string, std::string>;
+using plugin_config = std::unordered_map<std::string, std::string>;
 
 /**
  * \brief Formats for plugins.
  */
-using PluginFormats = std::unordered_map<std::string, std::string>;
+using plugin_formats = std::unordered_map<std::string, std::string>;
 
 /**
  * \brief Paths for plugins.
  */
-using PluginPaths = std::unordered_map<std::string, std::string>;
+using plugin_paths = std::unordered_map<std::string, std::string>;
 
 /**
  * \ingroup plugins
@@ -63,17 +63,17 @@ using PluginPaths = std::unordered_map<std::string, std::string>;
  *
  * A plugin is identified by name and can be loaded and unloaded at runtime.
  */
-class Plugin : public std::enable_shared_from_this<Plugin> {
+class plugin : public std::enable_shared_from_this<plugin> {
 private:
     // Plugin information
-    std::string m_name;
-    std::string m_path;
+    std::string name_;
+    std::string path_;
 
     // Metadata
-    std::string m_author{"unknown"};
-    std::string m_license{"unknown"};
-    std::string m_summary{"unknown"};
-    std::string m_version{"unknown"};
+    std::string author_{"unknown"};
+    std::string license_{"unknown"};
+    std::string summary_{"unknown"};
+    std::string version_{"unknown"};
 
 public:
     /**
@@ -83,25 +83,25 @@ public:
      * \param path the fully resolved path to the plugin
      * \throws std::runtime_error on errors
      */
-    inline Plugin(std::string name, std::string path) noexcept
-        : m_name(std::move(name))
-        , m_path(std::move(path))
+    inline plugin(std::string name, std::string path) noexcept
+        : name_(std::move(name))
+        , path_(std::move(path))
     {
     }
 
     /**
      * Temporary, close all timers.
      */
-    virtual ~Plugin() = default;
+    virtual ~plugin() = default;
 
     /**
      * Get the plugin name.
      *
      * \return the plugin name
      */
-    inline const std::string &name() const noexcept
+    inline const std::string& name() const noexcept
     {
-        return m_name;
+        return name_;
     }
 
     /**
@@ -110,9 +110,9 @@ public:
      * \return the plugin path
      * \note some plugins may not exist on the disk
      */
-    inline const std::string &path() const noexcept
+    inline const std::string& path() const noexcept
     {
-        return m_path;
+        return path_;
     }
 
     /**
@@ -120,9 +120,9 @@ public:
      *
      * \return the author
      */
-    inline const std::string &author() const noexcept
+    inline const std::string& author() const noexcept
     {
-        return m_author;
+        return author_;
     }
 
     /**
@@ -130,9 +130,9 @@ public:
      *
      * \param author the author
      */
-    inline void setAuthor(std::string author) noexcept
+    inline void set_author(std::string author) noexcept
     {
-        m_author = std::move(author);
+        author_ = std::move(author);
     }
 
     /**
@@ -140,9 +140,9 @@ public:
      *
      * \return the license
      */
-    inline const std::string &license() const noexcept
+    inline const std::string& license() const noexcept
     {
-        return m_license;
+        return license_;
     }
 
     /**
@@ -150,9 +150,9 @@ public:
      *
      * \param license the license
      */
-    inline void setLicense(std::string license) noexcept
+    inline void set_license(std::string license) noexcept
     {
-        m_license = std::move(license);
+        license_ = std::move(license);
     }
 
     /**
@@ -160,9 +160,9 @@ public:
      *
      * \return the summary
      */
-    inline const std::string &summary() const noexcept
+    inline const std::string& summary() const noexcept
     {
-        return m_summary;
+        return summary_;
     }
 
     /**
@@ -170,9 +170,9 @@ public:
      *
      * \param summary the summary
      */
-    inline void setSummary(std::string summary) noexcept
+    inline void set_summary(std::string summary) noexcept
     {
-        m_summary = std::move(summary);
+        summary_ = std::move(summary);
     }
 
     /**
@@ -180,9 +180,9 @@ public:
      *
      * \return the version
      */
-    inline const std::string &version() const noexcept
+    inline const std::string& version() const noexcept
     {
-        return m_version;
+        return version_;
     }
 
     /**
@@ -190,9 +190,9 @@ public:
      *
      * \param version the version
      */
-    inline void setVersion(std::string version) noexcept
+    inline void set_version(std::string version) noexcept
     {
-        m_version = std::move(version);
+        version_ = std::move(version);
     }
 
     /**
@@ -200,7 +200,7 @@ public:
      *
      * \return the config
      */
-    virtual PluginConfig config()
+    virtual plugin_config config()
     {
         return {};
     }
@@ -210,7 +210,7 @@ public:
      *
      * \param config the configuration
      */
-    virtual void setConfig(PluginConfig config)
+    virtual void set_config(plugin_config config)
     {
         util::unused(config);
     }
@@ -220,7 +220,7 @@ public:
      *
      * \return the format
      */
-    virtual PluginFormats formats()
+    virtual plugin_formats formats()
     {
         return {};
     }
@@ -230,7 +230,7 @@ public:
      *
      * \param formats the formats
      */
-    virtual void setFormats(PluginFormats formats)
+    virtual void set_formats(plugin_formats formats)
     {
         util::unused(formats);
     }
@@ -240,7 +240,7 @@ public:
      *
      * \return the paths
      */
-    virtual PluginPaths paths()
+    virtual plugin_paths paths()
     {
         return {};
     }
@@ -250,7 +250,7 @@ public:
      *
      * \param paths the paths
      */
-    virtual void setPaths(PluginPaths paths)
+    virtual void set_paths(plugin_paths paths)
     {
         util::unused(paths);
     }
@@ -263,7 +263,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onCommand(Irccd &irccd, const MessageEvent &event)
+    virtual void on_command(irccd& irccd, const message_event& event)
     {
         util::unused(irccd, event);
     }
@@ -274,7 +274,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onConnect(Irccd &irccd, const ConnectEvent &event)
+    virtual void on_connect(irccd& irccd, const connect_event& event)
     {
         util::unused(irccd, event);
     }
@@ -285,7 +285,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onChannelMode(Irccd &irccd, const ChannelModeEvent &event)
+    virtual void on_channel_mode(irccd& irccd, const channel_mode_event& event)
     {
         util::unused(irccd, event);
     }
@@ -296,7 +296,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onChannelNotice(Irccd &irccd, const ChannelNoticeEvent &event)
+    virtual void on_channel_notice(irccd& irccd, const channel_notice_event& event)
     {
         util::unused(irccd, event);
     }
@@ -307,7 +307,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onInvite(Irccd &irccd, const InviteEvent &event)
+    virtual void on_invite(irccd& irccd, const invite_event& event)
     {
         util::unused(irccd, event);
     }
@@ -318,7 +318,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onJoin(Irccd &irccd, const JoinEvent &event)
+    virtual void on_join(irccd& irccd, const join_event& event)
     {
         util::unused(irccd, event);
     }
@@ -329,7 +329,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onKick(Irccd &irccd, const KickEvent &event)
+    virtual void on_kick(irccd& irccd, const kick_event& event)
     {
         util::unused(irccd, event);
     }
@@ -339,7 +339,7 @@ public:
      *
      * \param irccd the irccd instance
      */
-    virtual void onLoad(Irccd &irccd)
+    virtual void on_load(irccd& irccd)
     {
         util::unused(irccd);
     }
@@ -350,7 +350,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onMessage(Irccd &irccd, const MessageEvent &event)
+    virtual void on_message(irccd& irccd, const message_event& event)
     {
         util::unused(irccd, event);
     }
@@ -361,7 +361,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onMe(Irccd &irccd, const MeEvent &event)
+    virtual void on_me(irccd& irccd, const me_event& event)
     {
         util::unused(irccd, event);
     }
@@ -372,7 +372,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onMode(Irccd &irccd, const ModeEvent &event)
+    virtual void on_mode(irccd& irccd, const mode_event& event)
     {
         util::unused(irccd, event);
     }
@@ -383,7 +383,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onNames(Irccd &irccd, const NamesEvent &event)
+    virtual void on_names(irccd& irccd, const names_event& event)
     {
         util::unused(irccd, event);
     }
@@ -394,7 +394,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onNick(Irccd &irccd, const NickEvent &event)
+    virtual void on_nick(irccd& irccd, const nick_event& event)
     {
         util::unused(irccd, event);
     }
@@ -405,7 +405,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onNotice(Irccd &irccd, const NoticeEvent &event)
+    virtual void on_notice(irccd& irccd, const notice_event& event)
     {
         util::unused(irccd, event);
     }
@@ -416,7 +416,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onPart(Irccd &irccd, const PartEvent &event)
+    virtual void on_part(irccd& irccd, const part_event& event)
     {
         util::unused(irccd, event);
     }
@@ -427,7 +427,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onQuery(Irccd &irccd, const QueryEvent &event)
+    virtual void on_query(irccd& irccd, const query_event& event)
     {
         util::unused(irccd, event);
     }
@@ -438,7 +438,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onQueryCommand(Irccd &irccd, const QueryEvent &event)
+    virtual void on_query_command(irccd& irccd, const query_event& event)
     {
         util::unused(irccd, event);
     }
@@ -448,7 +448,7 @@ public:
      *
      * \param irccd the irccd instance
      */
-    virtual void onReload(Irccd &irccd)
+    virtual void on_reload(irccd& irccd)
     {
         util::unused(irccd);
     }
@@ -459,7 +459,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onTopic(Irccd &irccd, const TopicEvent &event)
+    virtual void on_topic(irccd& irccd, const topic_event& event)
     {
         util::unused(irccd, event);
     }
@@ -469,7 +469,7 @@ public:
      *
      * \param irccd the irccd instance
      */
-    virtual void onUnload(Irccd &irccd)
+    virtual void on_unload(irccd& irccd)
     {
         util::unused(irccd);
     }
@@ -480,7 +480,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void onWhois(Irccd &irccd, const WhoisEvent &event)
+    virtual void on_whois(irccd& irccd, const whois_event& event)
     {
         util::unused(irccd, event);
     }
@@ -489,16 +489,16 @@ public:
 /**
  * \brief Abstract interface for searching plugins.
  *
- * This class is used to make loading of plugins extensible, the PluginService
+ * This class is used to make loading of plugins extensible, the plugin_service
  * knows some predefined plugins loaders and use them to search for available
  * plugins.
  *
  * This makes easier to implement new plugins or new ways of loading them.
  *
- * \see DynlibPluginLoader
- * \see JsPluginLoader
+ * \see dynlib_plugin_loader
+ * \see js_plugin_loader
  */
-class PluginLoader {
+class plugin_loader {
 private:
     std::vector<std::string> directories_;
     std::vector<std::string> extensions_;
@@ -516,8 +516,8 @@ public:
      * \param directories directories to search
      * \param extensions the list of extensions supported
      */
-    PluginLoader(std::vector<std::string> directories = {},
-                 std::vector<std::string> extensions = {});
+    plugin_loader(std::vector<std::string> directories = {},
+                  std::vector<std::string> extensions = {});
 
     /**
      * Set directories where to search plugins.
@@ -547,8 +547,8 @@ public:
      *
      * \param file the file
      */
-    virtual std::shared_ptr<Plugin> open(const std::string &id,
-                                         const std::string &file) noexcept = 0;
+    virtual std::shared_ptr<plugin> open(const std::string& id,
+                                         const std::string& file) noexcept = 0;
 
     /**
      * Search for a plugin named by this id.
@@ -556,7 +556,7 @@ public:
      * \param id the plugin id
      * \return the plugin
      */
-    virtual std::shared_ptr<Plugin> find(const std::string &id) noexcept;
+    virtual std::shared_ptr<plugin> find(const std::string& id) noexcept;
 };
 
 } // !irccd

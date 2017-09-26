@@ -66,55 +66,55 @@ namespace irccd {
  */
 class RulesTest : public testing::Test {
 protected:
-    RuleService m_rules;
+    rule_service m_rules;
 
     RulesTest()
     {
         // #1
         {
             m_rules.add({
-                RuleSet{                }, // Servers
-                RuleSet{ "#staff"       }, // Channels
-                RuleSet{                }, // Origins
-                RuleSet{                }, // Plugins
-                RuleSet{ "onCommand"    }, // Events
-                RuleAction::Drop
+                rule::set{                }, // Servers
+                rule::set{ "#staff"       }, // Channels
+                rule::set{                }, // Origins
+                rule::set{                }, // Plugins
+                rule::set{ "onCommand"    }, // Events
+                rule::action_type::drop
             });
         }
 
         // #2
         {
             m_rules.add({
-                RuleSet{ "unsafe"       },
-                RuleSet{ "#staff"       },
-                RuleSet{                },
-                RuleSet{                },
-                RuleSet{ "onCommand"    },
-                RuleAction::Accept
+                rule::set{ "unsafe"       },
+                rule::set{ "#staff"       },
+                rule::set{                },
+                rule::set{                },
+                rule::set{ "onCommand"    },
+                rule::action_type::accept
             });
         }
 
         // #3-1
         {
             m_rules.add({
-                RuleSet{},
-                RuleSet{},
-                RuleSet{},
-                RuleSet{"game"},
-                RuleSet{},
-                RuleAction::Drop
+                rule::set{},
+                rule::set{},
+                rule::set{},
+                rule::set{"game"},
+                rule::set{},
+                rule::action_type::drop
             });
         }
 
         // #3-2
         {
             m_rules.add({
-                RuleSet{ "malikania", "localhost"   },
-                RuleSet{ "#games"                   },
-                RuleSet{                            },
-                RuleSet{ "game"                     },
-                RuleSet{ "onCommand", "onMessage"   },
-                RuleAction::Accept
+                rule::set{ "malikania", "localhost"   },
+                rule::set{ "#games"                   },
+                rule::set{                            },
+                rule::set{ "game"                     },
+                rule::set{ "onCommand", "onMessage"   },
+                rule::action_type::accept
             });
         }
     }
@@ -122,7 +122,7 @@ protected:
 
 TEST_F(RulesTest, basicMatch1)
 {
-    Rule m;
+    rule m;
 
     /*
      * [rule]
@@ -133,7 +133,7 @@ TEST_F(RulesTest, basicMatch1)
 
 TEST_F(RulesTest, basicMatch2)
 {
-    Rule m(RuleSet{"freenode"});
+    rule m(rule::set{"freenode"});
 
     /*
      * [rule]
@@ -147,7 +147,7 @@ TEST_F(RulesTest, basicMatch2)
 
 TEST_F(RulesTest, basicMatch3)
 {
-    Rule m(RuleSet{"freenode"}, RuleSet{"#staff"});
+    rule m(rule::set{"freenode"}, rule::set{"#staff"});
 
     /*
      * [rule]
@@ -162,7 +162,7 @@ TEST_F(RulesTest, basicMatch3)
 
 TEST_F(RulesTest, basicMatch4)
 {
-    Rule m(RuleSet{"malikania"}, RuleSet{"#staff"}, RuleSet{"a"});
+    rule m(rule::set{"malikania"}, rule::set{"#staff"}, rule::set{"a"});
 
     /*
      * [rule]
@@ -178,7 +178,7 @@ TEST_F(RulesTest, basicMatch4)
 
 TEST_F(RulesTest, complexMatch1)
 {
-    Rule m(RuleSet{"malikania", "freenode"});
+    rule m(rule::set{"malikania", "freenode"});
 
     /*
      * [rule]
@@ -238,7 +238,7 @@ TEST_F(RulesTest, case_fix_645)
 
 int main(int argc, char **argv)
 {
-    irccd::log::setLogger(std::make_unique<irccd::log::SilentLogger>());
+    irccd::log::set_logger(std::make_unique<irccd::log::silent_logger>());
     testing::InitGoogleTest(&argc, argv);
 
     return RUN_ALL_TESTS();

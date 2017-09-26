@@ -23,20 +23,19 @@
 #include <plugin.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
 bool called = false;
 
-class CustomPlugin : public Plugin {
+class CustomPlugin : public plugin {
 public:
     CustomPlugin()
-        : Plugin("test", "")
+        : plugin("test", "")
     {
     }
 
-    void onUnload(Irccd &) override
+    void on_unload(irccd::irccd &) override
     {
         called = true;
     }
@@ -45,7 +44,7 @@ public:
 class PluginUnloadCommandTest : public CommandTester {
 public:
     PluginUnloadCommandTest()
-        : CommandTester(std::make_unique<PluginUnloadCommand>())
+        : CommandTester(std::make_unique<plugin_unload_command>())
     {
         called = false;
     }

@@ -26,13 +26,13 @@
 
 using namespace irccd;
 
-class server_test : public Server {
+class server_test : public server {
 private:
     std::string last_;
 
 public:
     inline server_test()
-        : Server("test")
+        : server("test")
     {
     }
 
@@ -72,7 +72,7 @@ TEST_F(ask_test, basic)
      * answers in that amount of tries.
      */
     for (int i = 0; i < 1000; ++i) {
-        plugin_->on_command(irccd_, MessageEvent{server_, "tester", "#dummy", ""});
+        plugin_->on_command(irccd_, {server_, "tester", "#dummy", ""});
 
         if (server_->last() == "#dummy:tester, YES")
             yes = true;

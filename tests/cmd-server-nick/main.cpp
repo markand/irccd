@@ -21,7 +21,6 @@
 #include <server-tester.hpp>
 
 using namespace irccd;
-using namespace irccd::command;
 
 namespace {
 
@@ -31,7 +30,7 @@ std::string nick;
 
 class ServerNickTest : public ServerTester {
 public:
-    void setNickname(std::string nick) override
+    void set_nickname(std::string nick) override
     {
         ::nick = nick;
     }
@@ -40,7 +39,7 @@ public:
 class ServerNickCommandTest : public CommandTester {
 public:
     ServerNickCommandTest()
-        : CommandTester(std::make_unique<ServerNickCommand>(),
+        : CommandTester(std::make_unique<server_nick_command>(),
                         std::make_unique<ServerNickTest>())
     {
         m_irccdctl.client().request({

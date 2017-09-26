@@ -28,18 +28,17 @@
 
 namespace irccd {
 
-class Command;
-class Server;
+class command;
+class server;
 
 class CommandTester : public testing::Test {
 protected:
-    Irccd m_irccd;
+    irccd m_irccd;
     Irccdctl m_irccdctl;
 
 public:
-    CommandTester(std::unique_ptr<Command> cmd = nullptr,
-                  std::unique_ptr<Server> server = nullptr);
-
+    CommandTester(std::unique_ptr<command> cmd = nullptr,
+                  std::unique_ptr<server> server = nullptr);
 
     template <typename Predicate>
     void poll(Predicate &&predicate)
