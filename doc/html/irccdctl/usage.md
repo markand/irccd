@@ -16,6 +16,7 @@ usage: irccdctl plugin-config plugin [variable] [value]
        irccdctl plugin-load logger
        irccdctl plugin-reload plugin
        irccdctl plugin-unload plugin
+       irccdctl rule-list
        irccdctl server-cmode server channel mode
        irccdctl server-cnotice server channel message
        irccdctl server-connect [options] id host [port]

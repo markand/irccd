@@ -4,7 +4,7 @@ IRC Client Daemon INSTALL
 This guide will help you to install irccd on your computer. For a better guide
 with more details see:
 
-http://projects.malikania.fr/irccd/guide.html
+    http://projects.malikania.fr/irccd//build/build-from-sources.html
 
 Requirements
 ------------

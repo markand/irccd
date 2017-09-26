@@ -296,6 +296,22 @@ void RuleService::remove(unsigned position)
     m_rules.erase(m_rules.begin() + position);
 }
 
+const Rule &RuleService::require(unsigned position) const
+{
+    if (position >= m_rules.size())
+        throw std::out_of_range("rule " + std::to_string(position) + " does not exist");
+
+    return m_rules[position];
+}
+
+Rule &RuleService::require(unsigned position)
+{
+    if (position >= m_rules.size())
+        throw std::out_of_range("rule " + std::to_string(position) + " does not exist");
+
+    return m_rules[position];
+}
+
 bool RuleService::solve(const std::string &server,
                         const std::string &channel,
                         const std::string &origin,

@@ -40,7 +40,7 @@ Plugin.format = {
     "asked":        "#{nickname}, '#{letter}' was already asked.",
     "dead":         "#{nickname}, fail the word was: #{word}.",
     "found":        "#{nickname}, nice! the word is now #{word}",
-    "running":      "#{nickname}, the game is already running.",
+    "running":      "#{nickname}, the game is already running and the word is: #{word}",
     "start":        "#{nickname}, the game is started, the word to find is: #{word}",
     "win":          "#{nickname}, congratulations, the word is #{word}.",
     "wrong-word":   "#{nickname}, this is not the word.",
@@ -351,9 +351,10 @@ function onCommand(server, origin, channel, message)
     if (game) {
         var list = message.split(" \t");
 
-        if (list.length === 0 || String(list[0]).length === 0)
+        if (list.length === 0 || String(list[0]).length === 0) {
+            kw.word = game.formatWord();
             server.message(channel, Util.format(Plugin.format["running"], kw));
-        else {
+        } else {
             var word = String(list[0]);
 
             if (Hangman.isWord(word))

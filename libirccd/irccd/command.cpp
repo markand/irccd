@@ -22,6 +22,8 @@
 #include "transport.hpp"
 #include "util.hpp"
 
+using namespace std::string_literals;
+
 namespace irccd {
 
 namespace command {
@@ -68,6 +70,70 @@ void execGet(Irccd &, TransportClient &client, Plugin &plugin, const nlohmann::j
     client.success("plugin-config", {
         { "variables", variables }
     });
+}
+
+nlohmann::json toJson(const Rule &rule)
+{
+    auto join = [] (const auto &set) {
+        auto array = nlohmann::json::array();
+
+        for (const auto &entry : set)
+            array.push_back(entry);
+
+        return array;
+    };
+    auto str = [] (auto action) {
+        switch (action) {
+        case RuleAction::Accept:
+            return "accept";
+        default:
+            return "drop";
+        }
+    };
+
+    return {
+        { "servers",    join(rule.servers())    },
+        { "channels",   join(rule.channels())   },
+        { "plugins",    join(rule.plugins())    },
+        { "events",     join(rule.events())     },
+        { "action",     str(rule.action())      }
+    };
+}
+
+Rule fromJson(const nlohmann::json &json)
+{
+    auto toset = [] (auto object, auto name) -> RuleSet {
+        RuleSet result;
+
+        for (const auto &s : object[name])
+            if (s.is_string())
+                result.insert(s.template get<std::string>());
+
+        return result;
+    };
+    auto toaction = [] (auto object, auto name) -> RuleAction {
+        auto v = object[name];
+
+        if (!v.is_string())
+            throw std::runtime_error("no action given");
+
+        auto s = v.template get<std::string>();
+        if (s == "accept")
+            return RuleAction::Accept;
+        if (s == "drop")
+            return RuleAction::Drop;
+
+        throw std::runtime_error("unknown action '"s + s + "' given");
+    };
+
+    return {
+        toset(json, "servers"),
+        toset(json, "channels"),
+        toset(json, "origins"),
+        toset(json, "plugins"),
+        toset(json, "events"),
+        toaction(json, "action")
+    };
 }
 
 } // !namespace
@@ -419,6 +485,172 @@ void ServerTopicCommand::exec(Irccd &irccd, TransportClient &client, const nlohm
         util::json::requireString(args, "topic")
     );
     client.success("server-topic");
+}
+
+RuleEditCommand::RuleEditCommand()
+    : Command("rule-edit")
+{
+}
+
+void RuleEditCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+{
+    static const auto updateset = [] (auto &set, auto args, const auto &key) {
+        for (const auto &v : args["remove-"s + key]) {
+            if (v.is_string())
+                set.erase(v.template get<std::string>());
+        }
+        for (const auto &v : args["add-"s + key]) {
+            if (v.is_string())
+                set.insert(v.template get<std::string>());
+        }
+    };
+
+    // Create a copy to avoid incomplete edition in case of errors.
+    auto index = util::json::requireUint(args, "index");
+    auto rule = irccd.rules().require(index);
+
+    updateset(rule.channels(), args, "channels");
+    updateset(rule.events(), args, "events");
+    updateset(rule.plugins(), args, "plugins");
+    updateset(rule.servers(), args, "servers");
+
+    auto action = args.find("action");
+
+    if (action != args.end()) {
+        if (!action->is_string()) {
+            client.error("rule-edit", "action must be \"accept\" or \"drop\"");
+            return;
+        }
+
+        if (action->get<std::string>() == "accept")
+            rule.setAction(RuleAction::Accept);
+        else if (action->get<std::string>() == "drop")
+            rule.setAction(RuleAction::Drop);
+        else {
+            client.error("rule-edit", "invalid action '"s + action->get<std::string>() + "'");
+            return;
+        }
+    }
+
+    // All done, sync the rule.
+    irccd.rules().require(index) = rule;
+    client.success("rule-edit");
+}
+
+RuleListCommand::RuleListCommand()
+    : Command("rule-list")
+{
+}
+
+void RuleListCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &)
+{
+    auto array = nlohmann::json::array();
+
+    for (const auto& rule : irccd.rules().list())
+        array.push_back(toJson(rule));
+
+    client.success("rule-list", {{ "list", std::move(array) }});
+}
+
+RuleInfoCommand::RuleInfoCommand()
+    : Command("rule-info")
+{
+}
+
+void RuleInfoCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+{
+    client.success("rule-info", toJson(irccd.rules().require(util::json::requireUint(args, "index"))));
+}
+
+RuleRemoveCommand::RuleRemoveCommand()
+    : Command("rule-remove")
+{
+}
+
+void RuleRemoveCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+{
+    unsigned position = util::json::requireUint(args, "index");
+
+    if (irccd.rules().length() == 0)
+        client.error("rule-remove", "rule list is empty");
+    if (position >= irccd.rules().length())
+        client.error("rule-remove", "index is out of range");
+    else {
+        irccd.rules().remove(position);
+        client.success("rule-remove");
+    }
+}
+
+RuleMoveCommand::RuleMoveCommand()
+    : Command("rule-move")
+{
+}
+
+void RuleMoveCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+{
+    auto from = util::json::requireUint(args, "from");
+    auto to = util::json::requireUint(args, "to");
+
+    /*
+     * Examples of moves
+     * --------------------------------------------------------------
+     *
+     * Before: [0] [1] [2]
+     *
+     * from = 0
+     * to   = 2
+     *
+     * After:  [1] [2] [0]
+     *
+     * --------------------------------------------------------------
+     *
+     * Before: [0] [1] [2]
+     *
+     * from = 2
+     * to   = 0
+     *
+     * After:  [2] [0] [1]
+     *
+     * --------------------------------------------------------------
+     *
+     * Before: [0] [1] [2]
+     *
+     * from = 0
+     * to   = 123
+     *
+     * After:  [1] [2] [0]
+     */
+
+    // Ignore dump input.
+    if (from == to)
+        client.success("rule-move");
+    else if (from >= irccd.rules().length())
+        client.error("rule-move", "rule source index is out of range");
+    else {
+        auto save = irccd.rules().list()[from];
+
+        irccd.rules().remove(from);
+        irccd.rules().insert(save, to > irccd.rules().length() ? irccd.rules().length() : to);
+        client.success("rule-move");
+    }
+}
+
+RuleAddCommand::RuleAddCommand()
+    : Command("rule-add")
+{
+}
+
+void RuleAddCommand::exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args)
+{
+    auto index = util::json::getUint(args, "index", irccd.rules().length());
+    auto rule = fromJson(args);
+
+    if (index > irccd.rules().length())
+        client.error("rule-add", "index is out of range");
+    else {
+        irccd.rules().insert(rule, index);
+        client.success("rule-add");
+    }
 }
 
 } // !command
