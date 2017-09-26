@@ -36,7 +36,7 @@ foreground = true
 name = "default"
 nickname = "superbot"
 username = "superbot"
-realname = "Superbot Killer"
+realname = "Superbot"
 
 # Section transport:
 #    You can use transport to wait for any input you want. Unix and internet sockets are supported. Unix are used
@@ -60,7 +60,7 @@ realname = "Superbot Killer"
 type = "ip"
 address = "*"
 port = "5980"
-family = ( "ipv4","ipv6" )
+family = ( "ipv4", "ipv6" )
 
 # Section server:
 #    List of server you want to connect to. A server may use an identity to
