@@ -39,10 +39,7 @@
 #   include <cerrno>
 #   include <climits>
 #   include <cstring>
-#elif defined(IRCCD_SYSTEM_FREEBSD) ||
-      defined(IRCCD_SYSTEM_DRAGONFLYBSD) ||
-      defined(IRCCD_SYSTEM_NETBSD) ||
-      defined(IRCCD_SYSTEM_OPENBSD)
+#elif defined(IRCCD_SYSTEM_FREEBSD) || defined(IRCCD_SYSTEM_DRAGONFLYBSD) || defined(IRCCD_SYSTEM_NETBSD) || defined(IRCCD_SYSTEM_OPENBSD)
 #   if defined(IRCCD_SYSTEM_NETBSD)
 #       include <sys/param.h>
 #   else
@@ -182,36 +179,37 @@ std::string executable_path()
 {
     std::string result;
 
-#if defined(__linux__)
+#if defined(IRCCD_SYSTEM_LINUX)
     char path[PATH_MAX + 1] = {0};
 
     if (readlink("/proc/self/exe", path, sizeof (path) - 1) < 0)
         throw std::runtime_error(std::strerror(errno));
 
     result = path;
-#elif defined(__FreeBSD__) || defined(__DragonFly__)
-    int size = PATH_MAX, mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
+#elif defined(IRCCD_SYSTEM_FREEBSD) || defined(IRCCD_SYSTEM_DRAGONFLYBSD)
+    int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
     char path[PATH_MAX + 1] = {0};
+    size_t size = PATH_MAX;
 
     if (sysctl(mib, 4, path, &size, nullptr, 0) < 0)
         throw std::runtime_error(std::strerror(errno));
 
     result = path;
-#elif defined(__APPLE__)
+#elif defined(IRCCD_SYSTEM_MAC)
     char path[PROC_PIDPATHINFO_MAXSIZE + 1] = {0};
 
     if ((proc_pidpath(getpid(), path, sizeof (path) - 1) == 0)
         throw std::runtime_error(std::strerror(errno));
 
     result = path;
-#elif defined(_WIN32)
+#elif defined(IRCCD_SYSTEM_WINDOWS)
     char path[PATH_MAX + 1] = {0};
 
     if (GetModuleFileNameA(nullptr, path, sizeof (path) - 1) == 0)
         throw std::runtime_error("GetModuleFileName error");
 
     result = path;
-#elif defined(__NetBSD__)
+#elif defined(IRCCD_SYSTEM_NETBSD)
     char path[4096 + 1] = {0};
 
 #   if defined(KERN_PROC_PATHNAME)
@@ -226,15 +224,16 @@ std::string executable_path()
 #   endif
 
     result = path;
-#elif defined(__OpenBSD__)
+#elif defined(IRCCD_SYSTEM_OPENBSD)
     char **paths, path[PATH_MAX + 1] = {0};
-    int length, mib[] = { CTL_KERN, KERN_PROC_ARGS, getpid(), KERN_PROC_ARGV };
+    int mib[] = { CTL_KERN, KERN_PROC_ARGS, getpid(), KERN_PROC_ARGV };
+    size_t length = 0;
 
-    if (sysctl(mib, 4, nullptr, &length, nullptr, 0) < 0)
+    if (sysctl(mib, 4, 0, &length, 0, 0) < 0)
         throw std::runtime_error(std::strerror(errno));
-    if ((paths = static_cast<char**>(std::malloc(length))) == nullptr)
+    if (!(paths = static_cast<char**>(std::malloc(length))))
         throw std::runtime_error(std::strerror(errno));
-    if (sysctl(mib, 4, paths, &length, nullptr, 0) < 0) {
+    if (sysctl(mib, 4, paths, &length, 0, 0) < 0) {
         std::free(paths);
         throw std::runtime_error(std::strerror(errno));
     }
@@ -243,8 +242,8 @@ std::string executable_path()
     result = path;
 
     std::free(paths);
-    std::free(path);
 #endif
+
     return result;
 }
 
