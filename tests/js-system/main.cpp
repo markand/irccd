@@ -16,70 +16,48 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "System Javascript API"
+#include <boost/test/unit_test.hpp>
 
 #include <irccd/irccd.hpp>
 #include <irccd/js_file_module.hpp>
-#include <irccd/js_irccd_module.hpp>
 #include <irccd/js_system_module.hpp>
-#include <irccd/js_plugin.hpp>
-#include <irccd/service.hpp>
-#include <irccd/sysconfig.hpp>
 #include <irccd/system.hpp>
 
-using namespace irccd;
+#include <js_test.hpp>
 
-class TestJsSystem : public testing::Test {
-protected:
-    irccd::irccd m_irccd;
-    std::shared_ptr<js_plugin> m_plugin;
+namespace irccd {
 
-    TestJsSystem()
-        : m_plugin(std::make_shared<js_plugin>("empty", SOURCEDIR "/empty.js"))
-    {
-        js_irccd_module().load(m_irccd, m_plugin);
-        js_file_module().load(m_irccd, m_plugin);
-        js_system_module().load(m_irccd, m_plugin);
-    }
-};
+using fixture = js_test<js_file_module, js_system_module>;
 
-TEST_F(TestJsSystem, home)
+BOOST_FIXTURE_TEST_SUITE(js_system_suite, fixture)
+
+BOOST_AUTO_TEST_CASE(home)
 {
-    try {
-        duk_peval_string_noresult(m_plugin->context(), "result = Irccd.System.home();");
+    duk_peval_string_noresult(plugin_->context(), "result = Irccd.System.home();");
 
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
-        ASSERT_EQ(sys::home(), duk_get_string(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(duk_get_global_string(plugin_->context(),"result"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == sys::home());
 }
 
 #if defined(HAVE_POPEN)
 
-TEST_F(TestJsSystem, popen)
+BOOST_AUTO_TEST_CASE(popen)
 {
-    try {
-        auto ret = duk_peval_string(m_plugin->context(),
-            "f = Irccd.System.popen(\"" IRCCD_EXECUTABLE " --version\", \"r\");"
-            "r = f.readline();"
-        );
+    auto ret = duk_peval_string(plugin_->context(),
+        "f = Irccd.System.popen(\"" IRCCD_EXECUTABLE " --version\", \"r\");"
+        "r = f.readline();"
+    );
 
-        if (ret != 0)
-            throw dukx_exception(m_plugin->context(), -1);
+    if (ret != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "r"));
-        ASSERT_STREQ(IRCCD_VERSION, duk_get_string(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "r"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == IRCCD_VERSION);
 }
 
 #endif
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

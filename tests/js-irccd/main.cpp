@@ -16,128 +16,100 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "Irccd Javascript API"
+#include <boost/test/unit_test.hpp>
 
-#include <irccd/irccd.hpp>
-#include <irccd/js_irccd_module.hpp>
-#include <irccd/js_plugin.hpp>
-#include <irccd/service.hpp>
-#include <irccd/sysconfig.hpp>
+#include <js_test.hpp>
 
-using namespace irccd;
+namespace irccd {
 
-class TestJsIrccd : public testing::Test {
-protected:
-    irccd::irccd m_irccd;
-    std::shared_ptr<js_plugin> m_plugin;
+BOOST_FIXTURE_TEST_SUITE(js_irccd_suite, js_test<js_irccd_module>)
 
-    TestJsIrccd()
-        : m_plugin(std::make_shared<js_plugin>("empty", SOURCEDIR "/empty.js"))
-    {
-        js_irccd_module().load(m_irccd, m_plugin);
-    }
-};
-
-TEST_F(TestJsIrccd, version)
+BOOST_AUTO_TEST_CASE(version)
 {
-    try {
-        auto ret = duk_peval_string(m_plugin->context(),
-            "major = Irccd.version.major;"
-            "minor = Irccd.version.minor;"
-            "patch = Irccd.version.patch;"
-        );
+    auto ret = duk_peval_string(plugin_->context(),
+        "major = Irccd.version.major;"
+        "minor = Irccd.version.minor;"
+        "patch = Irccd.version.patch;"
+    );
 
-        if (ret != 0)
-            throw dukx_exception(m_plugin->context(), -1);
+    if (ret != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "major"));
-        ASSERT_EQ(IRCCD_VERSION_MAJOR, duk_get_int(m_plugin->context(), -1));
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "minor"));
-        ASSERT_EQ(IRCCD_VERSION_MINOR, duk_get_int(m_plugin->context(), -1));
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "patch"));
-        ASSERT_EQ(IRCCD_VERSION_PATCH, duk_get_int(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "major"));
+    BOOST_TEST(IRCCD_VERSION_MAJOR == duk_get_int(plugin_->context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "minor"));
+    BOOST_TEST(IRCCD_VERSION_MINOR == duk_get_int(plugin_->context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "patch"));
+    BOOST_TEST(IRCCD_VERSION_PATCH == duk_get_int(plugin_->context(), -1));
 }
 
-TEST_F(TestJsIrccd, fromJavascript)
+BOOST_AUTO_TEST_CASE(from_javascript)
 {
-    try {
-        auto ret = duk_peval_string(m_plugin->context(),
-            "try {"
-            "  throw new Irccd.SystemError(1, 'test');"
-            "} catch (e) {"
-            "  errno = e.errno;"
-            "  name = e.name;"
-            "  message = e.message;"
-            "  v1 = (e instanceof Error);"
-            "  v2 = (e instanceof Irccd.SystemError);"
-            "}"
-        );
+    auto ret = duk_peval_string(plugin_->context(),
+        "try {"
+        "  throw new Irccd.SystemError(1, 'test');"
+        "} catch (e) {"
+        "  errno = e.errno;"
+        "  name = e.name;"
+        "  message = e.message;"
+        "  v1 = (e instanceof Error);"
+        "  v2 = (e instanceof Irccd.SystemError);"
+        "}"
+    );
 
-        if (ret != 0)
-            throw dukx_exception(m_plugin->context(), -1);
+    if (ret != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "errno"));
-        ASSERT_EQ(1, duk_get_int(m_plugin->context(), -1));
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "name"));
-        ASSERT_STREQ("SystemError", duk_get_string(m_plugin->context(), -1));
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "message"));
-        ASSERT_STREQ("test", duk_get_string(m_plugin->context(), -1));
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "v1"));
-        ASSERT_TRUE(duk_get_boolean(m_plugin->context(), -1));
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "v2"));
-        ASSERT_TRUE(duk_get_boolean(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "errno"));
+    BOOST_TEST(1 == duk_get_int(plugin_->context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "name"));
+    BOOST_TEST("SystemError" == duk_get_string(plugin_->context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "message"));
+    BOOST_TEST("test" == duk_get_string(plugin_->context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "v1"));
+    BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "v2"));
+    BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
 }
 
-TEST_F(TestJsIrccd, fromNative)
+BOOST_AUTO_TEST_CASE(fromNative)
 {
-    try {
-        duk_push_c_function(m_plugin->context(), [] (duk_context *ctx) -> duk_ret_t {
-            dukx_throw(ctx, system_error(EINVAL, "hey"));
+    duk_push_c_function(plugin_->context(), [] (duk_context *ctx) -> duk_ret_t {
+        dukx_throw(ctx, system_error(EINVAL, "hey"));
 
-            return 0;
-        }, 0);
+        return 0;
+    }, 0);
 
-        duk_put_global_string(m_plugin->context(), "f");
+    duk_put_global_string(plugin_->context(), "f");
 
-        auto ret = duk_peval_string(m_plugin->context(),
-            "try {"
-            "  f();"
-            "} catch (e) {"
-            "  errno = e.errno;"
-            "  name = e.name;"
-            "  message = e.message;"
-            "  v1 = (e instanceof Error);"
-            "  v2 = (e instanceof Irccd.SystemError);"
-            "}"
-        );
+    auto ret = duk_peval_string(plugin_->context(),
+        "try {"
+        "  f();"
+        "} catch (e) {"
+        "  errno = e.errno;"
+        "  name = e.name;"
+        "  message = e.message;"
+        "  v1 = (e instanceof Error);"
+        "  v2 = (e instanceof Irccd.SystemError);"
+        "}"
+    );
 
-        if (ret != 0)
-            throw dukx_exception(m_plugin->context(), -1);
+    if (ret != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "errno"));
-        ASSERT_EQ(EINVAL, duk_get_int(m_plugin->context(), -1));
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "name"));
-        ASSERT_STREQ("SystemError", duk_get_string(m_plugin->context(), -1));
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "message"));
-        ASSERT_STREQ("hey", duk_get_string(m_plugin->context(), -1));
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "v1"));
-        ASSERT_TRUE(duk_get_boolean(m_plugin->context(), -1));
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "v2"));
-        ASSERT_TRUE(duk_get_boolean(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "errno"));
+    BOOST_TEST(EINVAL == duk_get_int(plugin_->context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "name"));
+    BOOST_TEST("SystemError" == duk_get_string(plugin_->context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "message"));
+    BOOST_TEST("hey" == duk_get_string(plugin_->context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "v1"));
+    BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "v2"));
+    BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

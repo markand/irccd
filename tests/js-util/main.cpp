@@ -16,323 +16,245 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "Unicode Javascript API"
+#include <boost/test/unit_test.hpp>
 
-#include <irccd/irccd.hpp>
-#include <irccd/js_irccd_module.hpp>
 #include <irccd/js_util_module.hpp>
-#include <irccd/js_plugin.hpp>
-#include <irccd/service.hpp>
-#include <irccd/system.hpp>
 
-using namespace irccd;
+#include <js_test.hpp>
 
-class TestJsUtil : public testing::Test {
-protected:
-    irccd::irccd m_irccd;
-    std::shared_ptr<js_plugin> m_plugin;
+namespace irccd {
 
-    TestJsUtil()
-        : m_plugin(std::make_shared<js_plugin>("empty", SOURCEDIR "/empty.js"))
-    {
-        js_irccd_module().load(m_irccd, m_plugin);
-        js_util_module().load(m_irccd, m_plugin);
-    }
-};
-
-TEST_F(TestJsUtil, formatSimple)
-{
-    try {
-        auto ret = duk_peval_string(m_plugin->context(),
-            "result = Irccd.Util.format(\"#{target}\", { target: \"markand\" })"
-        );
-
-        if (ret != 0)
-            throw dukx_exception(m_plugin->context(), -1);
-
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
-        ASSERT_STREQ("markand", duk_get_string(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
-}
-
-TEST_F(TestJsUtil, splituser)
-{
-    try {
-        if (duk_peval_string(m_plugin->context(), "result = Irccd.Util.splituser(\"user!~user@hyper/super/host\");") != 0)
-            throw dukx_exception(m_plugin->context(), -1);
-
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
-        ASSERT_STREQ("user", duk_get_string(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
-}
-
-TEST_F(TestJsUtil, splithost)
-{
-    try {
-        if (duk_peval_string(m_plugin->context(), "result = Irccd.Util.splithost(\"user!~user@hyper/super/host\");") != 0)
-            throw dukx_exception(m_plugin->context(), -1);
-
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
-        ASSERT_STREQ("!~user@hyper/super/host", duk_get_string(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
-}
+BOOST_FIXTURE_TEST_SUITE(js_util_suite, js_test<js_util_module>)
 
 /*
- * Irccd.Util.cut
+ * Irccd.Util misc.
  * ------------------------------------------------------------------
  */
 
-TEST_F(TestJsUtil, cut_string_simple)
+BOOST_AUTO_TEST_CASE(format_simple)
 {
-    try {
-        auto ret = duk_peval_string(m_plugin->context(),
-            "lines = Irccd.Util.cut('hello world');\n"
-            "line0 = lines[0];\n"
-        );
+    auto ret = duk_peval_string(plugin_->context(),
+        "result = Irccd.Util.format(\"#{target}\", { target: \"markand\" })"
+    );
 
-        if (ret != 0) {
-            throw dukx_exception(m_plugin->context(), -1);
-        }
+    if (ret != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "line0"));
-        ASSERT_STREQ("hello world", duk_get_string(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "markand");
 }
 
-TEST_F(TestJsUtil, cut_string_double)
+BOOST_AUTO_TEST_CASE(splituser)
 {
-    try {
-        auto ret = duk_peval_string(m_plugin->context(),
-            "lines = Irccd.Util.cut('hello world', 5);\n"
-            "line0 = lines[0];\n"
-            "line1 = lines[1];\n"
-        );
+    if (duk_peval_string(plugin_->context(), "result = Irccd.Util.splituser(\"user!~user@hyper/super/host\");") != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        if (ret != 0) {
-            throw dukx_exception(m_plugin->context(), -1);
-        }
-
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "line0"));
-        ASSERT_STREQ("hello", duk_get_string(m_plugin->context(), -1));
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "line1"));
-        ASSERT_STREQ("world", duk_get_string(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "user");
 }
 
-TEST_F(TestJsUtil, cut_string_dirty)
+BOOST_AUTO_TEST_CASE(splithost)
 {
-    try {
-        auto ret = duk_peval_string(m_plugin->context(),
-            "lines = Irccd.Util.cut('     hello    world     ', 5);\n"
-            "line0 = lines[0];\n"
-            "line1 = lines[1];\n"
-        );
+    if (duk_peval_string(plugin_->context(), "result = Irccd.Util.splithost(\"user!~user@hyper/super/host\");") != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        if (ret != 0) {
-            throw dukx_exception(m_plugin->context(), -1);
-        }
-
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "line0"));
-        ASSERT_STREQ("hello", duk_get_string(m_plugin->context(), -1));
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "line1"));
-        ASSERT_STREQ("world", duk_get_string(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "!~user@hyper/super/host");
 }
 
-TEST_F(TestJsUtil, cut_string_too_much_lines)
+/*
+ * Irccd.Util.cut.
+ * ------------------------------------------------------------------
+ */
+
+BOOST_AUTO_TEST_CASE(cut_string_simple)
 {
-    try {
-        auto ret = duk_peval_string(m_plugin->context(),
-            "lines = Irccd.Util.cut('abc def ghi jkl', 3, 3);\n"
-        );
+    auto ret = duk_peval_string(plugin_->context(),
+        "lines = Irccd.Util.cut('hello world');\n"
+        "line0 = lines[0];\n"
+    );
 
-        if (ret != 0) {
-            throw dukx_exception(m_plugin->context(), -1);
-        }
+    if (ret != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "lines"));
-        ASSERT_TRUE(duk_is_undefined(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "line0"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "hello world");
 }
 
-TEST_F(TestJsUtil, cut_string_token_too_big)
+BOOST_AUTO_TEST_CASE(cut_string_double)
 {
-    try {
-        auto ret = duk_peval_string(m_plugin->context(),
-            "try {\n"
-            "  lines = Irccd.Util.cut('hello world', 3);\n"
-            "} catch (e) {\n"
-            "  name = e.name;\n"
-            "  message = e.message;\n"
-            "}\n"
-        );
+    auto ret = duk_peval_string(plugin_->context(),
+        "lines = Irccd.Util.cut('hello world', 5);\n"
+        "line0 = lines[0];\n"
+        "line1 = lines[1];\n"
+    );
 
-        if (ret != 0) {
-            throw dukx_exception(m_plugin->context(), -1);
-        }
+    if (ret != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "name"));
-        ASSERT_STREQ("RangeError", duk_get_string(m_plugin->context(), -1));
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "message"));
-        ASSERT_STREQ("word 'hello' could not fit in maxc limit (3)", duk_get_string(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "line0"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "hello");
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "line1"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "world");
 }
 
-TEST_F(TestJsUtil, cut_string_negative_maxc)
+BOOST_AUTO_TEST_CASE(cut_string_dirty)
 {
-    try {
-        auto ret = duk_peval_string(m_plugin->context(),
-            "try {\n"
-            "  lines = Irccd.Util.cut('hello world', -3);\n"
-            "} catch (e) {\n"
-            "  name = e.name;\n"
-            "  message = e.message;\n"
-            "}\n"
-        );
+    auto ret = duk_peval_string(plugin_->context(),
+        "lines = Irccd.Util.cut('     hello    world     ', 5);\n"
+        "line0 = lines[0];\n"
+        "line1 = lines[1];\n"
+    );
 
-        if (ret != 0) {
-            throw dukx_exception(m_plugin->context(), -1);
-        }
+    if (ret != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "name"));
-        ASSERT_STREQ("RangeError", duk_get_string(m_plugin->context(), -1));
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "message"));
-        ASSERT_STREQ("argument 1 (maxc) must be positive", duk_get_string(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "line0"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "hello");
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "line1"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "world");
 }
 
-TEST_F(TestJsUtil, cut_string_negative_maxl)
+BOOST_AUTO_TEST_CASE(cut_string_too_much_lines)
 {
-    try {
-        auto ret = duk_peval_string(m_plugin->context(),
-            "try {\n"
-            "  lines = Irccd.Util.cut('hello world', undefined, -1);\n"
-            "} catch (e) {\n"
-            "  name = e.name;\n"
-            "  message = e.message;\n"
-            "}\n"
-        );
+    auto ret = duk_peval_string(plugin_->context(),
+        "lines = Irccd.Util.cut('abc def ghi jkl', 3, 3);\n"
+    );
 
-        if (ret != 0) {
-            throw dukx_exception(m_plugin->context(), -1);
-        }
+    if (ret != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "name"));
-        ASSERT_STREQ("RangeError", duk_get_string(m_plugin->context(), -1));
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "message"));
-        ASSERT_STREQ("argument 2 (maxl) must be positive", duk_get_string(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "lines"));
+    BOOST_TEST(duk_is_undefined(plugin_->context(), -1));
 }
 
-TEST_F(TestJsUtil, cut_array_simple)
+BOOST_AUTO_TEST_CASE(cut_string_token_too_big)
 {
-    try {
-        auto ret = duk_peval_string(m_plugin->context(),
-            "lines = Irccd.Util.cut([ 'hello', 'world' ]);\n"
-            "line0 = lines[0];\n"
-        );
+    auto ret = duk_peval_string(plugin_->context(),
+        "try {\n"
+        "  lines = Irccd.Util.cut('hello world', 3);\n"
+        "} catch (e) {\n"
+        "  name = e.name;\n"
+        "  message = e.message;\n"
+        "}\n"
+    );
 
-        if (ret != 0) {
-            throw dukx_exception(m_plugin->context(), -1);
-        }
+    if (ret != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "line0"));
-        ASSERT_STREQ("hello world", duk_get_string(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "name"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "RangeError");
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "message"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "word 'hello' could not fit in maxc limit (3)");
 }
 
-TEST_F(TestJsUtil, cut_array_double)
+BOOST_AUTO_TEST_CASE(cut_string_negative_maxc)
 {
-    try {
-        auto ret = duk_peval_string(m_plugin->context(),
-            "lines = Irccd.Util.cut([ 'hello', 'world' ], 5);\n"
-            "line0 = lines[0];\n"
-            "line1 = lines[1];\n"
-        );
+    auto ret = duk_peval_string(plugin_->context(),
+        "try {\n"
+        "  lines = Irccd.Util.cut('hello world', -3);\n"
+        "} catch (e) {\n"
+        "  name = e.name;\n"
+        "  message = e.message;\n"
+        "}\n"
+    );
 
-        if (ret != 0) {
-            throw dukx_exception(m_plugin->context(), -1);
-        }
+    if (ret != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "line0"));
-        ASSERT_STREQ("hello", duk_get_string(m_plugin->context(), -1));
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "line1"));
-        ASSERT_STREQ("world", duk_get_string(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "name"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "RangeError");
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "message"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "argument 1 (maxc) must be positive");
 }
 
-TEST_F(TestJsUtil, cut_array_dirty)
+BOOST_AUTO_TEST_CASE(cut_string_negative_maxl)
 {
-    try {
-        auto ret = duk_peval_string(m_plugin->context(),
-            "lines = Irccd.Util.cut([ '   ', ' hello  ', '  world ', '    '], 5);\n"
-            "line0 = lines[0];\n"
-            "line1 = lines[1];\n"
-        );
+    auto ret = duk_peval_string(plugin_->context(),
+        "try {\n"
+        "  lines = Irccd.Util.cut('hello world', undefined, -1);\n"
+        "} catch (e) {\n"
+        "  name = e.name;\n"
+        "  message = e.message;\n"
+        "}\n"
+    );
 
-        if (ret != 0) {
-            throw dukx_exception(m_plugin->context(), -1);
-        }
+    if (ret != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "line0"));
-        ASSERT_STREQ("hello", duk_get_string(m_plugin->context(), -1));
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "line1"));
-        ASSERT_STREQ("world", duk_get_string(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "name"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "RangeError");
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "message"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "argument 2 (maxl) must be positive");
 }
 
-TEST_F(TestJsUtil, cut_invalid_data)
+BOOST_AUTO_TEST_CASE(cut_array_simple)
 {
-    try {
-        auto ret = duk_peval_string(m_plugin->context(),
-            "try {\n"
-            "  lines = Irccd.Util.cut(123);\n"
-            "} catch (e) {\n"
-            "  name = e.name;\n"
-            "  message = e.message;\n"
-            "}\n"
-        );
+    auto ret = duk_peval_string(plugin_->context(),
+        "lines = Irccd.Util.cut([ 'hello', 'world' ]);\n"
+        "line0 = lines[0];\n"
+    );
 
-        if (ret != 0) {
-            throw dukx_exception(m_plugin->context(), -1);
-        }
+    if (ret != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "name"));
-        ASSERT_STREQ("TypeError", duk_get_string(m_plugin->context(), -1));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "line0"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "hello world");
 }
 
-int main(int argc, char **argv)
+BOOST_AUTO_TEST_CASE(cut_array_double)
 {
-    testing::InitGoogleTest(&argc, argv);
+    auto ret = duk_peval_string(plugin_->context(),
+        "lines = Irccd.Util.cut([ 'hello', 'world' ], 5);\n"
+        "line0 = lines[0];\n"
+        "line1 = lines[1];\n"
+    );
 
-    return RUN_ALL_TESTS();
+    if (ret != 0)
+        throw dukx_exception(plugin_->context(), -1);
+
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "line0"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "hello");
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "line1"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "world");
 }
+
+BOOST_AUTO_TEST_CASE(cut_array_dirty)
+{
+    auto ret = duk_peval_string(plugin_->context(),
+        "lines = Irccd.Util.cut([ '   ', ' hello  ', '  world ', '    '], 5);\n"
+        "line0 = lines[0];\n"
+        "line1 = lines[1];\n"
+    );
+
+    if (ret != 0)
+        throw dukx_exception(plugin_->context(), -1);
+
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "line0"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "hello");
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "line1"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "world");
+}
+
+BOOST_AUTO_TEST_CASE(cut_invalid_data)
+{
+    auto ret = duk_peval_string(plugin_->context(),
+        "try {\n"
+        "  lines = Irccd.Util.cut(123);\n"
+        "} catch (e) {\n"
+        "  name = e.name;\n"
+        "  message = e.message;\n"
+        "}\n"
+    );
+
+    if (ret != 0)
+        throw dukx_exception(plugin_->context(), -1);
+
+    BOOST_TEST(duk_get_global_string(plugin_->context(), "name"));
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "TypeError");
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+} // !irccd

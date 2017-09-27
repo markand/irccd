@@ -1,5 +1,5 @@
 /*
- * main.cpp -- test irccd.ElapsedTimer API
+ * main.cpp -- test Irccd.ElapsedTimer API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,54 +16,36 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <gtest/gtest.h>
+#define BOOST_TEST_MODULE "ElapsedTimer Javascript API"
+#include <boost/test/unit_test.hpp>
 
 #include <thread>
 
-#include <irccd/irccd.hpp>
-#include <irccd/js_irccd_module.hpp>
 #include <irccd/js_elapsed_timer_module.hpp>
-#include <irccd/js_plugin.hpp>
-#include <irccd/service.hpp>
 
-using namespace irccd;
+#include <js_test.hpp>
+
 using namespace std::chrono_literals;
 
-class TestElapsedTimer : public testing::Test {
-protected:
-    irccd::irccd m_irccd;
-    std::shared_ptr<js_plugin> m_plugin;
+namespace irccd {
 
-    TestElapsedTimer()
-        : m_plugin(std::make_shared<js_plugin>("empty", SOURCEDIR "/empty.js"))
-    {
-        js_irccd_module().load(m_irccd, m_plugin);
-        js_elapsed_timer_module().load(m_irccd, m_plugin);
-    }
-};
+BOOST_FIXTURE_TEST_SUITE(js_elapsed_timer_suite, js_test<js_elapsed_timer_module>)
 
-TEST_F(TestElapsedTimer, standard)
+BOOST_AUTO_TEST_CASE(standard)
 {
-    try {
-        if (duk_peval_string(m_plugin->context(), "timer = new Irccd.ElapsedTimer();") != 0)
-            throw dukx_exception(m_plugin->context(), -1);
+    if (duk_peval_string(plugin_->context(), "timer = new Irccd.ElapsedTimer();") != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        std::this_thread::sleep_for(300ms);
+    std::this_thread::sleep_for(300ms);
 
-        if (duk_peval_string(m_plugin->context(), "result = timer.elapsed();") != 0)
-            throw dukx_exception(m_plugin->context(), -1);
+    if (duk_peval_string(plugin_->context(), "result = timer.elapsed();") != 0)
+        throw dukx_exception(plugin_->context(), -1);
 
-        ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "result"));
-        ASSERT_GE(duk_get_int(m_plugin->context(), -1), 250);
-        ASSERT_LE(duk_get_int(m_plugin->context(), -1), 350);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_REQUIRE(duk_get_global_string(plugin_->context(), "result"));
+    BOOST_REQUIRE_GE(duk_get_int(plugin_->context(), -1), 250);
+    BOOST_REQUIRE_LE(duk_get_int(plugin_->context(), -1), 350);
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+} // !irccd
 
-    return RUN_ALL_TESTS();
-}
+BOOST_AUTO_TEST_SUITE_END()

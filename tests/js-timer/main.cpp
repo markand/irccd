@@ -16,97 +16,50 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#define BOOST_TEST_MODULE "Timer Javascript API"
+#include <boost/test/unit_test.hpp>
 #include <boost/timer/timer.hpp>
 
-#include <gtest/gtest.h>
-
-#include <irccd/irccd.hpp>
-#include <irccd/logger.hpp>
-#include <irccd/js_irccd_module.hpp>
 #include <irccd/js_plugin_module.hpp>
 #include <irccd/js_timer_module.hpp>
-#include <irccd/js_plugin.hpp>
-#include <irccd/service.hpp>
-#include <irccd/system.hpp>
 
-using namespace irccd;
+#include <js_test.hpp>
 
-class TestJsTimer : public testing::Test {
-protected:
-    irccd::irccd m_irccd;
-    std::shared_ptr<js_plugin> m_plugin;
+namespace irccd {
 
-    void open(const std::string &file)
-    {
-        m_plugin = std::make_shared<js_plugin>("timer", file);
-
-        js_irccd_module().load(m_irccd, m_plugin);
-        PluginModule().load(m_irccd, m_plugin);
-        js_timer_module().load(m_irccd, m_plugin);
-
-        m_plugin->on_load(m_irccd);
-        m_irccd.plugins().add(m_plugin);
-    }
+class fixture : public js_test<js_plugin_module, js_timer_module> {
+public:
+    using js_test::js_test;
 };
 
-TEST_F(TestJsTimer, single)
+BOOST_FIXTURE_TEST_SUITE(js_timer_suite, fixture)
+
+BOOST_AUTO_TEST_CASE(single)
 {
-    open(DIRECTORY "/timer-single.js");
+    fixture f(DIRECTORY "/timer-single.js");
 
     boost::timer::cpu_timer timer;
 
     while (timer.elapsed().wall / 1000000LL < 3000)
-        util::poller::poll(512, m_irccd);
+        util::poller::poll(512, f.irccd_);
 
-    ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "count"));
-    ASSERT_EQ(1, duk_get_int(m_plugin->context(), -1));
+    BOOST_TEST(duk_get_global_string(f.plugin_->context(), "count"));
+    BOOST_TEST(duk_get_int(f.plugin_->context(), -1) == 1);
 }
 
-TEST_F(TestJsTimer, repeat)
+BOOST_AUTO_TEST_CASE(repeat)
 {
-    open(DIRECTORY "/timer-repeat.js");
+    fixture f(DIRECTORY "/timer-repeat.js");
 
     boost::timer::cpu_timer timer;
 
     while (timer.elapsed().wall / 1000000LL < 3000)
-        util::poller::poll(512, m_irccd);
+        util::poller::poll(512, f.irccd_);
 
-    ASSERT_TRUE(duk_get_global_string(m_plugin->context(), "count"));
-    ASSERT_GE(duk_get_int(m_plugin->context(), -1), 5);
+    BOOST_TEST(duk_get_global_string(f.plugin_->context(), "count"));
+    BOOST_TEST(duk_get_int(f.plugin_->context(), -1) >= 5);
 }
 
-#if 0
+BOOST_AUTO_TEST_SUITE_END()
 
-/*
- * XXX: currently disabled because it will break single-shot timers.
- */
-
-TEST(Basic, pending)
-{
-    /*
-     * This test ensure that if pending actions on a stopped timer are never executed.
-     */
-    Irccd irccd;
-    boost::timer::cpu_timer timer;
-
-    auto plugin = std::make_shared<Plugin>("timer", DIRECTORY "/timer-pending.js");
-
-    irccd.addPlugin(plugin);
-    irccd.poll();
-    irccd.dispatch();
-
-    ASSERT_EQ(0, plugin->context().getGlobal<int>("count"));
-}
-
-#endif
-
-int main(int argc, char **argv)
-{
-    // Needed for some components.
-    sys::set_program_name("irccd");
-    log::set_logger(std::make_unique<log::silent_logger>());
-    log::set_verbose(true);
-    testing::InitGoogleTest(&argc, argv);
-
-    return RUN_ALL_TESTS();
-}
+} // !irccd
