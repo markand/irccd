@@ -521,52 +521,53 @@ server::server(std::string name)
      *
      * While doing this, discard useless arguments.
      */
-    callbacks.event_channel = [] (auto session, auto, auto orig, auto params, auto) {
+
+    callbacks.event_channel = [] (irc_session_t* session, const char*, const char* orig, const char** params, unsigned int) {
         static_cast<server*>(irc_get_ctx(session))->handle_channel(orig, params);
     };
-    callbacks.event_channel_notice = [] (auto session, auto, auto orig, auto params, auto) {
+    callbacks.event_channel_notice = [] (irc_session_t* session, const char*, const char* orig, const char** params, unsigned int) {
         static_cast<server*>(irc_get_ctx(session))->handle_channel_notice(orig, params);
     };
-    callbacks.event_connect = [] (auto session, auto, auto orig, auto params, auto) {
+    callbacks.event_connect = [] (irc_session_t* session, const char*, const char* orig, const char** params, unsigned int) {
         static_cast<server*>(irc_get_ctx(session))->handle_connect(orig, params);
     };
-    callbacks.event_ctcp_action = [] (auto session, auto, auto orig, auto params, auto) {
+    callbacks.event_ctcp_action = [] (irc_session_t* session, const char*, const char* orig, const char** params, unsigned int) {
         static_cast<server*>(irc_get_ctx(session))->handle_ctcp_action(orig, params);
     };
-    callbacks.event_invite = [] (auto session, auto, auto orig, auto params, auto) {
+    callbacks.event_invite = [] (irc_session_t* session, const char*, const char* orig, const char** params, unsigned int) {
         static_cast<server*>(irc_get_ctx(session))->handle_invite(orig, params);
     };
-    callbacks.event_join = [] (auto session, auto, auto orig, auto params, auto) {
+    callbacks.event_join = [] (irc_session_t* session, const char*, const char* orig, const char** params, unsigned int) {
         static_cast<server*>(irc_get_ctx(session))->handle_join(orig, params);
     };
-    callbacks.event_kick = [] (auto session, auto, auto orig, auto params, auto) {
+    callbacks.event_kick = [] (irc_session_t* session, const char*, const char* orig, const char** params, unsigned int) {
         static_cast<server*>(irc_get_ctx(session))->handle_kick(orig, params);
     };
-    callbacks.event_mode = [] (auto session, auto, auto orig, auto params, auto) {
+    callbacks.event_mode = [] (irc_session_t* session, const char*, const char* orig, const char** params, unsigned int) {
         static_cast<server*>(irc_get_ctx(session))->handle_channel_mode(orig, params);
     };
-    callbacks.event_nick = [] (auto session, auto, auto orig, auto params, auto) {
+    callbacks.event_nick = [] (irc_session_t* session, const char*, const char* orig, const char** params, unsigned int) {
         static_cast<server*>(irc_get_ctx(session))->handle_nick(orig, params);
     };
-    callbacks.event_notice = [] (auto session, auto, auto orig, auto params, auto) {
+    callbacks.event_notice = [] (irc_session_t* session, const char*, const char* orig, const char** params, unsigned int) {
         static_cast<server*>(irc_get_ctx(session))->handle_notice(orig, params);
     };
-    callbacks.event_numeric = [] (auto session, auto event, auto, auto params, auto count) {
+    callbacks.event_numeric = [] (irc_session_t* session, unsigned int event, const char*, const char** params, unsigned int count) {
         static_cast<server*>(irc_get_ctx(session))->handle_numeric(event, params, count);
     };
-    callbacks.event_part = [] (auto session, auto, auto orig, auto params, auto) {
+    callbacks.event_part = [] (irc_session_t* session, const char*, const char* orig, const char** params, unsigned int) {
         static_cast<server*>(irc_get_ctx(session))->handle_part(orig, params);
     };
-    callbacks.event_ping = [] (auto session, auto, auto orig, auto params, auto) {
+    callbacks.event_ping = [] (irc_session_t* session, const char*, const char* orig, const char** params, unsigned int) {
         static_cast<server*>(irc_get_ctx(session))->handle_ping(orig, params);
     };
-    callbacks.event_privmsg = [] (auto session, auto, auto orig, auto params, auto) {
+    callbacks.event_privmsg = [] (irc_session_t* session, const char*, const char* orig, const char** params, unsigned int) {
         static_cast<server*>(irc_get_ctx(session))->handle_query(orig, params);
     };
-    callbacks.event_topic = [] (auto session, auto, auto orig, auto params, auto) {
+    callbacks.event_topic = [] (irc_session_t* session, const char*, const char* orig, const char** params, unsigned int) {
         static_cast<server*>(irc_get_ctx(session))->handle_topic(orig, params);
     };
-    callbacks.event_umode = [] (auto session, auto, auto orig, auto params, auto) {
+    callbacks.event_umode = [] (irc_session_t* session, const char*, const char* orig, const char** params, unsigned int) {
         static_cast<server*>(irc_get_ctx(session))->handle_mode(orig, params);
     };
 
