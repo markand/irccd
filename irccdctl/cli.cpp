@@ -352,9 +352,9 @@ void ServerChannelNoticeCli::exec(Irccdctl &irccdctl, const std::vector<std::str
 
 namespace {
 
-option::Result parse(std::vector<std::string> &args)
+option::result parse(std::vector<std::string> &args)
 {
-    option::Options options{
+    option::options options{
         { "-c",             true    },
         { "--command",      true    },
         { "-n",             true    },
@@ -396,8 +396,8 @@ void ServerConnectCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &
 {
     std::vector<std::string> copy(args);
 
-    option::Result result = parse(copy);
-    option::Result::const_iterator it;
+    option::result result = parse(copy);
+    option::result::const_iterator it;
 
     if (copy.size() < 2)
         throw std::invalid_argument("server-connect requires at least 2 arguments");
@@ -869,7 +869,7 @@ RuleAddCli::RuleAddCli()
 
 void RuleAddCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
 {
-    static const option::Options options{
+    static const option::options options{
         { "-c",             true },
         { "--add-channel",  true },
         { "-e",             true },
@@ -952,7 +952,7 @@ RuleEditCli::RuleEditCli()
 
 void RuleEditCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
 {
-    static const option::Options options{
+    static const option::options options{
         { "-a",                 true },
         { "--action",           true },
         { "-c",                 true },

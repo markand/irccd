@@ -74,7 +74,7 @@ void usage()
     std::exit(1);
 }
 
-void version(const option::Result& options)
+void version(const option::result& options)
 {
     std::cout << IRCCD_VERSION << std::endl;
 
@@ -126,13 +126,13 @@ void init(int& argc, char**& argv)
     ++ argv;
 }
 
-option::Result parse(int& argc, char**& argv)
+option::result parse(int& argc, char**& argv)
 {
     // Parse command line options.
-    option::Result result;
+    option::result result;
 
     try {
-        option::Options options{
+        option::options options{
             { "-c",             true    },
             { "--config",       true    },
             { "-f",             false   },
@@ -164,7 +164,7 @@ option::Result parse(int& argc, char**& argv)
     return result;
 }
 
-config open(const option::Result& result)
+config open(const option::result& result)
 {
     auto it = result.find("-c");
 
@@ -230,7 +230,7 @@ void load_uid(const std::string& uid)
     }
 }
 
-void load_foreground(bool foreground, const option::Result& options)
+void load_foreground(bool foreground, const option::result& options)
 {
     try {
 #if defined(HAVE_DAEMON)
@@ -245,7 +245,7 @@ void load_foreground(bool foreground, const option::Result& options)
     }
 }
 
-void load(const config& config, const option::Result& options)
+void load(const config& config, const option::result& options)
 {
     /*
      * Order matters, please be careful when changing this.
@@ -289,7 +289,7 @@ int main(int argc, char** argv)
 {
     init(argc, argv);
 
-    option::Result options = parse(argc, argv);
+    option::result options = parse(argc, argv);
 
     instance = std::make_unique<irccd::irccd>();
     instance->commands().add(std::make_unique<plugin_config_command>());

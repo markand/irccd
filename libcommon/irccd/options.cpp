@@ -1,7 +1,7 @@
 /*
  * options.cpp -- parse Unix command line options
  *
- * Copyright (c) 2015 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2015-2017 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,41 +26,40 @@ namespace option {
 
 namespace {
 
-using Iterator = std::vector<std::string>::iterator;
-using Args = std::vector<std::string>;
+using iterator = std::vector<std::string>::iterator;
+using args = std::vector<std::string>;
 
-inline bool isOption(const std::string &arg) noexcept
+inline bool is_option(const std::string& arg) noexcept
 {
     return arg.size() >= 2 && arg[0] == '-';
 }
 
-inline bool isLongOption(const std::string &arg) noexcept
+inline bool is_long_option(const std::string& arg) noexcept
 {
-    assert(isOption(arg));
+    assert(is_option(arg));
 
     return arg.size() >= 3 && arg[1] == '-';
 }
 
-inline bool isShortSimple(const std::string &arg) noexcept
+inline bool is_short_simple(const std::string& arg) noexcept
 {
-    assert(isOption(arg));
-    assert(!isLongOption(arg));
+    assert(is_option(arg) && !is_long_option(arg));
 
     return arg.size() == 2;
 }
 
-void parseLongOption(Result &result, Args &args, Iterator &it, Iterator &end, const Options &definition)
+void parse_long_option(result& result, args& args, iterator& it, iterator& end, const options& definition)
 {
     auto arg = *it++;
     auto opt = definition.find(arg);
 
     if (opt == definition.end())
-        throw InvalidOption{arg};
+        throw invalid_option(arg);
 
     // Need argument?
     if (opt->second) {
-        if (it == end || isOption(*it))
-            throw MissingValue{arg};
+        if (it == end || is_option(*it))
+            throw missing_value(arg);
 
         result.insert(std::make_pair(arg, *it++));
         it = args.erase(args.begin(), it);
@@ -72,97 +71,106 @@ void parseLongOption(Result &result, Args &args, Iterator &it, Iterator &end, co
     }
 }
 
-void parseShortOption(Result &result, Args &args, Iterator &it, Iterator &end, const Options &definition)
+void parse_short_option_simple(result& result, args& args, iterator& it, iterator &end, const options& definition)
 {
-    if (isShortSimple(*it)) {
-        /*
-         * Here two cases:
-         *
-         * -v (no option)
-         * -c value
-         */
-        auto arg = *it++;
-        auto opt = definition.find(arg);
+    /*
+     * Here two cases:
+     *
+     * -v (no option)
+     * -c value
+     */
+    auto arg = *it++;
+    auto opt = definition.find(arg);
 
-        if (opt == definition.end())
-            throw InvalidOption{arg};
+    if (opt == definition.end())
+        throw invalid_option(arg);
 
-        // Need argument?
-        if (opt->second) {
-            if (it == end || isOption(*it))
-                throw MissingValue{arg};
+    // Need argument?
+    if (opt->second) {
+        if (it == end || is_option(*it))
+            throw missing_value(arg);
 
-            result.insert(std::make_pair(arg, *it++));
-            it = args.erase(args.begin(), it);
-            end = args.end();
-        } else {
-            result.insert(std::make_pair(arg, ""));
-            it = args.erase(args.begin());
-            end = args.end();
-        }
+        result.insert(std::make_pair(arg, *it++));
+        it = args.erase(args.begin(), it);
+        end = args.end();
     } else {
-        /*
-         * Here multiple scenarios:
-         *
-         * 1. -abc (-a -b -c if all are simple boolean arguments)
-         * 2. -vc foo.conf (-v -c foo.conf if -c is argument dependant)
-         * 3. -vcfoo.conf (-v -c foo.conf also)
-         */
-        auto value = it->substr(1);
-        auto len = value.length();
-        int toremove = 1;
-
-        for (decltype(len) i = 0; i < len; ++i) {
-            auto arg = std::string{'-'} + value[i];
-            auto opt = definition.find(arg);
-
-            if (opt == definition.end())
-                throw InvalidOption{arg};
-
-            if (opt->second) {
-                if (i == (len - 1)) {
-                    // End of string, get the next argument (see 2.).
-                    if (++it == end || isOption(*it))
-                        throw MissingValue{arg};
-
-                    result.insert(std::make_pair(arg, *it));
-                    toremove += 1;
-                } else {
-                    result.insert(std::make_pair(arg, value.substr(i + 1)));
-                    i = len;
-                }
-            } else
-                result.insert(std::make_pair(arg, ""));
-        }
-
-        it = args.erase(args.begin(), args.begin() + toremove);
+        result.insert(std::make_pair(arg, ""));
+        it = args.erase(args.begin());
         end = args.end();
     }
 }
 
+void parse_short_option_compressed(result& result, args& args, iterator& it, iterator &end, const options& definition)
+{
+    /*
+     * Here multiple scenarios:
+     *
+     * 1. -abc (-a -b -c if all are simple boolean arguments)
+     * 2. -vc foo.conf (-v -c foo.conf if -c is argument dependant)
+     * 3. -vcfoo.conf (-v -c foo.conf also)
+     */
+    auto value = it->substr(1);
+    auto len = value.length();
+    int toremove = 1;
+
+    for (std::size_t i = 0; i < len; ++i) {
+        auto arg = std::string{'-'} + value[i];
+        auto opt = definition.find(arg);
+
+        if (opt == definition.end())
+            throw invalid_option(arg);
+
+        if (opt->second) {
+            if (i == (len - 1)) {
+                // End of string, get the next argument (see 2.).
+                if (++it == end || is_option(*it))
+                    throw missing_value(arg);
+
+                result.insert(std::make_pair(arg, *it));
+                toremove += 1;
+            } else {
+                result.insert(std::make_pair(arg, value.substr(i + 1)));
+                i = len;
+            }
+        } else
+            result.insert(std::make_pair(arg, ""));
+    }
+
+    it = args.erase(args.begin(), args.begin() + toremove);
+    end = args.end();
+}
+
+void parse_short_option(result& result, args& args, iterator& it, iterator &end, const options& definition)
+{
+    if (is_short_simple(*it))
+        parse_short_option_simple(result, args, it, end, definition);
+    else
+        parse_short_option_compressed(result, args, it, end, definition);
+}
+
 } // !namespace
 
-Result read(std::vector<std::string> &args, const Options &definition)
+result read(std::vector<std::string>& args, const options& definition)
 {
-    Result result;
+    result result;
 
     auto it = args.begin();
     auto end = args.end();
 
     while (it != end) {
-        if (!isOption(*it))
+        if (!is_option(*it))
             break;
 
-        if (isLongOption(*it))
-            parseLongOption(result, args, it, end, definition);
+        if (is_long_option(*it))
+            parse_long_option(result, args, it, end, definition);
         else
-            parseShortOption(result, args, it, end, definition);
+            parse_short_option(result, args, it, end, definition);
     }
 
     return result;
 }
 
-Result read(int &argc, char **&argv, const Options &definition)
+result read(int& argc, char**& argv, const options& definition)
 {
     std::vector<std::string> args;
 

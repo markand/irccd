@@ -298,9 +298,9 @@ void read(const std::string &path)
  * -h host or ip
  * -p port
  */
-void parseConnectIp(const option::Result &options)
+void parseConnectIp(const option::result &options)
 {
-    option::Result::const_iterator it;
+    option::result::const_iterator it;
 
     // Host (-h or --host).
     std::string host;
@@ -341,10 +341,10 @@ void parseConnectIp(const option::Result &options)
  *
  * -P file
  */
-void parseConnectLocal(const option::Result &options)
+void parseConnectLocal(const option::result &options)
 {
 #if !defined(IRCCD_SYSTEM_WINDOWS)
-    option::Result::const_iterator it;
+    option::result::const_iterator it;
 
     if ((it = options.find("-P")) == options.end() && (it = options.find("--path")) == options.end())
         throw std::invalid_argument("missing path parameter (-P or --path)");
@@ -364,7 +364,7 @@ void parseConnectLocal(const option::Result &options)
  *
  * Generic parsing of command line option for connection.
  */
-void parseConnect(const option::Result &options)
+void parseConnect(const option::result &options)
 {
     assert(options.count("-t") > 0 || options.count("--type") > 0);
 
@@ -380,10 +380,10 @@ void parseConnect(const option::Result &options)
     throw std::invalid_argument("invalid type given: " + it->second);
 }
 
-option::Result parse(int &argc, char **&argv)
+option::result parse(int &argc, char **&argv)
 {
     // 1. Parse command line options.
-    option::Options def{
+    option::options def{
         { "-c",         true    },
         { "--config",   true    },
         { "-h",         true    },
@@ -399,7 +399,7 @@ option::Result parse(int &argc, char **&argv)
         { "--verbose",  false   }
     };
 
-    option::Result result;
+    option::result result;
 
     try {
         result = option::read(argc, argv, def);

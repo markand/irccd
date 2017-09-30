@@ -1,7 +1,7 @@
 /*
- * options.h -- parse Unix command line options
+ * options.hpp -- parse Unix command line options
  *
- * Copyright (c) 2015 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2015-2017 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,8 +30,6 @@
 #include <utility>
 #include <vector>
 
-#include "sysconfig.hpp"
-
 namespace irccd {
 
 /**
@@ -42,25 +40,31 @@ namespace option {
 /**
  * \brief This exception is thrown when an invalid option has been found.
  */
-class InvalidOption : public std::exception {
+class invalid_option : public std::exception {
 private:
-    std::string message;
+    std::string message_;
+    std::string name_;
 
 public:
-    /**
-     * The invalid option given.
-     */
-    std::string argument;
-
     /**
      * Construct the exception.
      *
      * \param arg the argument missing
      */
-    inline InvalidOption(std::string arg)
-        : argument(std::move(arg))
+    inline invalid_option(std::string name)
+        : name_(std::move(name))
     {
-        message = std::string("invalid option: ") + argument;
+        message_ = std::string("invalid option: ") + name_;
+    }
+
+    /**
+     * Get the option name.
+     *
+     * \return the name
+     */
+    inline const std::string& name() const noexcept
+    {
+        return name_;
     }
 
     /**
@@ -68,40 +72,41 @@ public:
      *
      * \return the error message
      */
-    const char *what() const noexcept override
+    const char* what() const noexcept override
     {
-        return message.c_str();
+        return message_.c_str();
     }
 };
 
 /**
- * \brief This exception is thrown when an option requires a value and no value has been given.
+ * \brief This exception is thrown when an option requires a value and no value
+ * has been given.
  */
-class MissingValue : public std::exception {
+class missing_value : public std::exception {
 private:
-    std::string m_message;
-    std::string m_option;
+    std::string message_;
+    std::string name_;
 
 public:
     /**
      * Construct the exception.
      *
-     * \param option the option that requires a value
+     * \param name the option that requires a value
      */
-    inline MissingValue(std::string option)
-        : m_option(std::move(option))
+    inline missing_value(std::string name)
+        : name_(std::move(name))
     {
-        m_message = std::string("missing argument for: ") + m_option;
+        message_ = std::string("missing argument for: ") + name_;
     }
 
     /**
-     * Get the options that requires a value.
+     * Get the option name.
      *
-     * \return the option name
+     * \return the name
      */
-    inline const std::string &option() const noexcept
+    inline const std::string& name() const noexcept
     {
-        return m_option;
+        return name_;
     }
 
     /**
@@ -109,21 +114,21 @@ public:
      *
      * \return the error message
      */
-    const char *what() const noexcept override
+    const char* what() const noexcept override
     {
-        return m_message.c_str();
+        return message_.c_str();
     }
 };
 
 /**
  * Packed multimap of options.
  */
-using Result = std::multimap<std::string, std::string>;
+using result = std::multimap<std::string, std::string>;
 
 /**
  * Define the allowed options.
  */
-using Options = std::map<std::string, bool>;
+using options = std::map<std::string, bool>;
 
 /**
  * Extract the command line options and return a result.
@@ -131,10 +136,10 @@ using Options = std::map<std::string, bool>;
  * \param args the arguments
  * \param definition
  * \warning the arguments vector is modified in place to remove parsed options
- * \throw MissingValue
- * \throw InvalidOption
+ * \throw missing_value
+ * \throw invalid_option
  */
-IRCCD_EXPORT Result read(std::vector<std::string> &args, const Options &definition);
+result read(std::vector<std::string>& args, const options& definition);
 
 /**
  * Overloaded function for usage with main() arguments.
@@ -144,13 +149,13 @@ IRCCD_EXPORT Result read(std::vector<std::string> &args, const Options &definiti
  * \param definition
  * \note don't forget to remove the first argv[0] argument
  * \warning the argc and argv are modified in place to remove parsed options
- * \throw MissingValue
- * \throw InvalidOption
+ * \throw missing_value
+ * \throw invalid_option
  */
-IRCCD_EXPORT Result read(int &argc, char **&argv, const Options &definition);
+result read(int& argc, char**& argv, const options& definition);
 
 } // !option
 
 } // !irccd
 
-#endif // !IRCCD_OPTIONS_HPP
+#endif // !OPTIONS_HPP
