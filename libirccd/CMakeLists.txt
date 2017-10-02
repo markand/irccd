@@ -22,6 +22,7 @@ set(
     HEADERS
     ${libirccd_SOURCE_DIR}/irccd/command.hpp
     ${libirccd_SOURCE_DIR}/irccd/config.hpp
+    ${libirccd_SOURCE_DIR}/irccd/dynlib_plugin.hpp
     ${libirccd_SOURCE_DIR}/irccd/irccd.hpp
     ${libirccd_SOURCE_DIR}/irccd/plugin.hpp
     ${libirccd_SOURCE_DIR}/irccd/rule.hpp
@@ -34,6 +35,7 @@ set(
     SOURCES
     ${libirccd_SOURCE_DIR}/irccd/command.cpp
     ${libirccd_SOURCE_DIR}/irccd/config.cpp
+    ${libirccd_SOURCE_DIR}/irccd/dynlib_plugin.cpp
     ${libirccd_SOURCE_DIR}/irccd/irccd.cpp
     ${libirccd_SOURCE_DIR}/irccd/plugin.cpp
     ${libirccd_SOURCE_DIR}/irccd/rule.cpp
@@ -48,7 +50,10 @@ irccd_define_library(
         ${libirccd_SOURCE_DIR}/CMakeLists.txt
         ${HEADERS}
         ${SOURCES}
-    LIBRARIES extern-ircclient libcommon
+    LIBRARIES
+        $<$<BOOL:${IRCCD_SYSTEM_LINUX}>:dl>
+        extern-ircclient
+        libcommon
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${libirccd_SOURCE_DIR}/irccd>
         $<BUILD_INTERFACE:${libirccd_SOURCE_DIR}>
