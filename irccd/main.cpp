@@ -56,11 +56,11 @@
 #   include "js_plugin.hpp"
 #endif
 
-using namespace irccd;
+namespace irccd {
 
 namespace {
 
-std::unique_ptr<irccd::irccd> instance;
+std::unique_ptr<irccd> instance;
 
 void usage()
 {
@@ -285,8 +285,12 @@ void load(const config& config, const option::result& options)
 
 } // !namespace
 
+} // !irccd
+
 int main(int argc, char** argv)
 {
+    using namespace irccd;
+
     init(argc, argv);
 
     option::result options = parse(argc, argv);
