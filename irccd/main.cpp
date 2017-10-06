@@ -295,7 +295,7 @@ int main(int argc, char** argv)
 
     option::result options = parse(argc, argv);
 
-    instance = std::make_unique<irccd::irccd>();
+    instance = std::make_unique<class irccd>();
     instance->commands().add(std::make_unique<plugin_config_command>());
     instance->commands().add(std::make_unique<plugin_info_command>());
     instance->commands().add(std::make_unique<plugin_list_command>());
