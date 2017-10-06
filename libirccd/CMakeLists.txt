@@ -18,6 +18,8 @@
 
 project(libirccd)
 
+find_package(Boost REQUIRED COMPONENTS timer)
+
 set(
     HEADERS
     ${libirccd_SOURCE_DIR}/irccd/command.hpp
@@ -51,6 +53,7 @@ irccd_define_library(
         ${HEADERS}
         ${SOURCES}
     LIBRARIES
+        Boost::timer
         $<$<BOOL:${IRCCD_SYSTEM_LINUX}>:dl>
         extern-ircclient
         libcommon
