@@ -55,6 +55,7 @@ irccd_define_library(
     LIBRARIES
         Boost::timer
         $<$<BOOL:${IRCCD_SYSTEM_LINUX}>:dl>
+        $<$<BOOL:${IRCCD_SYSTEM_MAC}>:resolv>
         extern-ircclient
         libcommon
     PUBLIC_INCLUDES

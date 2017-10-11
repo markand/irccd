@@ -198,7 +198,7 @@ std::string executable_path()
 #elif defined(IRCCD_SYSTEM_MAC)
     char path[PROC_PIDPATHINFO_MAXSIZE + 1] = {0};
 
-    if ((proc_pidpath(getpid(), path, sizeof (path) - 1) == 0)
+    if ((proc_pidpath(getpid(), path, sizeof (path) - 1)) == 0)
         throw std::runtime_error(std::strerror(errno));
 
     result = path;
