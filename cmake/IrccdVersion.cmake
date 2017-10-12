@@ -16,12 +16,23 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+# Find Mercurial to extract version.
+find_program(HG_EXECUTABLE hg)
+
+if (HG_EXECUTABLE)
+    execute_process(
+        COMMAND hg log -r . -T " ({rev}:{node|short})"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE HG_REV
+    )
+endif ()
+
 # Irccd version.
-set(IRCCD_VERSION_MAJOR "2")
-set(IRCCD_VERSION_MINOR "2")
-set(IRCCD_VERSION_PATCH "0")
-set(IRCCD_VERSION "${IRCCD_VERSION_MAJOR}.${IRCCD_VERSION_MINOR}.${IRCCD_VERSION_PATCH}")
-set(IRCCD_VERSION_SHLIB "2")
+set(IRCCD_VERSION_MAJOR "3")
+set(IRCCD_VERSION_MINOR "0")
+set(IRCCD_VERSION_PATCH "0-dev")
+set(IRCCD_VERSION "${IRCCD_VERSION_MAJOR}.${IRCCD_VERSION_MINOR}.${IRCCD_VERSION_PATCH}${HG_REV}")
+set(IRCCD_VERSION_SHLIB "3")
 
 #
 # Irccd release date.
