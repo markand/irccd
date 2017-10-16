@@ -83,12 +83,16 @@ function(irccd_define_test)
         PROPERTIES
             PROJECT_LABEL ${TEST_NAME}
             FOLDER test
-            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/tests
-            RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/tests
-            RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/tests
-            RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/tests
-            RUNTIME_OUTPUT_DIRECTORY_MINSIZEREL ${CMAKE_BINARY_DIR}/tests
+            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
     )
+    foreach (c ${CMAKE_CONFIGURATION_TYPES})
+        string(TOUPPER ${c} cu)
+        set_target_properties(
+            test-${TEST_NAME}
+            PROPERTIES
+                RUNTIME_OUTPUT_DIRECTORY_${cu} ${CMAKE_BINARY_DIR}/bin/${c}
+        )
+    endforeach()
 
     if (UNIX)
         set_target_properties(test-${TEST_NAME} PROPERTIES LINK_FLAGS -pthread)

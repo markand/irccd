@@ -54,6 +54,20 @@ function(irccd_define_executable)
     target_compile_definitions(${EXE_TARGET} PRIVATE ${EXE_FLAGS})
     target_link_libraries(${EXE_TARGET} ${EXE_LIBRARIES})
 
+    set_target_properties(
+        ${EXE_TARGET}
+        PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+    )
+    foreach (c ${CMAKE_CONFIGURATION_TYPES})
+        string(TOUPPER ${c} cu)
+        set_target_properties(
+            ${EXE_TARGET}
+            PROPERTIES
+                RUNTIME_OUTPUT_DIRECTORY_${cu} ${CMAKE_BINARY_DIR}/bin/${c}
+        )
+    endforeach()
+
     install(
         TARGETS ${EXE_TARGET}
         COMPONENT ${EXE_TARGET}
