@@ -439,8 +439,8 @@ private:
     std::uint8_t flags_{0};
 
     // Identity.
-    std::string nickname_{"irccd"};
-    std::string username_{"irccd"};
+    std::string nickname_;
+    std::string username_;
     std::string realname_{"IRC Client Daemon"};
     std::string ctcpversion_{"IRC Client Daemon"};
 

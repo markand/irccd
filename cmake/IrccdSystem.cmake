@@ -118,6 +118,7 @@ endif ()
 #
 # HAVE_ACCESS           True if has access(2) function (and sys/types.h and sys/stat.h),
 # HAVE_DAEMON           True if daemon(3),
+# HAVE_GETLOGIN         True if getlogin(3) function (and unistd.h)
 # HAVE_GETPID           True if has getpid(2) function (and sys/types.h and unistd.h and grp.h),
 # HAVE_POPEN            True if has popen(3) function (in stdio.h)
 # HAVE_SETGID           True if has setgid(2) function and getgrnam(3) (and sys/types.h and unistd.h and pwd.h),
@@ -163,6 +164,17 @@ check_function_exists(access HAVE_ACCESS)
 
 if (NOT HAVE_UNISTD_H)
     set(HAVE_ACCESS FALSE)
+endif ()
+
+# getlogin() function
+#
+# If HAVE_GETLOGIN is defined, include:
+#
+# #include <unistd.h>
+check_function_exists(getlogin HAVE_GETLOGIN)
+
+if (NOT HAVE_UNISTD_H)
+    set(HAVE_GETLOGIN FALSE)
 endif ()
 
 # getpid() function

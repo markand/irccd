@@ -106,11 +106,11 @@ redefinable, you can create one or more.
 .It name
 (id) the identity unique id.
 .It nickname
-(string) the nickname (Optional, default: irccd).
+(string) the nickname (Optional, default: system username if available or irccd).
 .It realname
 (string) the realname (Optional, default: IRC Client daemon).
 .It username
-(string) the username name (Optional, default: irccd).
+(string) the username name (Optional, default: system username if available or irccd).
 .It ctcp-version
 (string) what version to respond to CTCP VERSION (Optional, default: IRC Client Daemon).
 .El

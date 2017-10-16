@@ -36,6 +36,7 @@
 #include "logger.hpp"
 #include "util.hpp"
 #include "server.hpp"
+#include "system.hpp"
 
 namespace irccd {
 
@@ -507,6 +508,12 @@ server::server(std::string name)
     , session_(std::make_unique<session>())
     , state_(std::make_unique<connecting_state>())
 {
+    // Initialize nickname and username.
+    auto user = sys::username();
+
+    nickname_ = user.empty() ? "irccd" : user;
+    username_ = user.empty() ? "irccd" : user;
+
     irc_callbacks_t callbacks;
 
     /*

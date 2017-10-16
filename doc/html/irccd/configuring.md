@@ -111,9 +111,9 @@ nickname and username. This section is redefinable, you can create one or more.
 The available options:
 
   - **name**: (id) the identity unique id,
-  - **nickname**: (string) the nickname (Optional, default: irccd),
+  - **nickname**: (string) the nickname (Optional, default: system username if available or irccd),
   - **realname**: (string) the realname (Optional, default: IRC Client Daemon),
-  - **username**: (string) the username name (Optional, default: irccd),
+  - **username**: (string) the username name (Optional, default: system username if available or irccd),
   - **ctcp-version**: (string) what version to respond to CTCP VERSION (Optional, default: IRC Client Daemon).
 
 **Example**

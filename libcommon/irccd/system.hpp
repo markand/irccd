@@ -150,6 +150,12 @@ std::string datadir();
  */
 std::string sysconfigdir();
 
+/**
+ * Get user account login or empty if not available.
+ *
+ * \return the user account name
+ */
+std::string username();
 
 /**
  * Construct a list of paths to read configuration files from.

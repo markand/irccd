@@ -81,6 +81,7 @@
 
 #cmakedefine HAVE_ACCESS
 #cmakedefine HAVE_DAEMON
+#cmakedefine HAVE_GETLOGIN
 #cmakedefine HAVE_GETPID
 #cmakedefine HAVE_POPEN
 #cmakedefine HAVE_SETGID

@@ -95,6 +95,11 @@
 #   include <pwd.h>
 #endif
 
+// For sys::username
+#if defined(HAVE_GETLOGIN)
+#   include <unistd.h>
+#endif
+
 #include "fs.hpp"
 #include "logger.hpp"
 #include "system.hpp"
@@ -561,6 +566,18 @@ std::string datadir()
 std::string sysconfigdir()
 {
     return system_directory(WITH_SYSCONFDIR);
+}
+
+std::string username()
+{
+#if defined(HAVE_GETLOGIN)
+    auto v = getlogin();
+
+    if (v)
+        return v;
+#endif
+
+    return "";
 }
 
 std::vector<std::string> config_filenames(std::string file)
