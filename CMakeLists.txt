@@ -119,6 +119,7 @@ message("    Tests:            ${WITH_TESTS_MSG}")
 message("    User docs:        ${WITH_HTML_MSG}")
 message("    Doxygen:          ${WITH_DOXYGEN_MSG}")
 message("    Package:          ${IRCCD_PACKAGE_MSG}")
+message("    Vera:             ${WITH_VERA_MSG}")
 message("")
 
 message("Installing plugins:")

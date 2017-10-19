@@ -51,7 +51,7 @@ if (WIN32)
 endif ()
 
 irccd_define_library(
-    LOCAL
+    LOCAL EXTERNAL
     TARGET extern-ircclient
     SOURCES src/libircclient.c
     FLAGS ${FLAGS}

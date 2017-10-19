@@ -24,6 +24,7 @@
 #    TARGET target name
 #    SOURCES src1, src2, srcn
 #    LOCAL (Optional) set to true to build a static library
+#    EXTERNAL (Optional) set to true if library is third party
 #    FLAGS (Optional) C/C++ flags (without -D)
 #    LIBRARIES (Optional) libraries to link
 #    LOCAL_INCLUDES (Optional) local includes for the target only
@@ -33,8 +34,10 @@
 # Create a static library for internal use.
 #
 
+include(${CMAKE_CURRENT_LIST_DIR}/IrccdVeraCheck.cmake)
+
 function(irccd_define_library)
-    set(options LOCAL)
+    set(options EXTERNAL LOCAL)
     set(oneValueArgs TARGET)
     set(multiValueArgs SOURCES FLAGS LIBRARIES LOCAL_INCLUDES PUBLIC_INCLUDES)
     set(mandatory TARGET SOURCES)
@@ -69,4 +72,8 @@ function(irccd_define_library)
                 RUNTIME_OUTPUT_DIRECTORY_${cu} ${CMAKE_BINARY_DIR}/bin/${c}
         )
     endforeach()
+
+    if (NOT ${LIB_EXTERNAL})
+        irccd_vera_check(${LIB_TARGET} "${LIB_SOURCES}")
+    endif ()
 endfunction()

@@ -29,6 +29,7 @@
 # WITH_MAN              Install manpages (default: on, off for Windows)
 # WITH_PKGCONFIG        Install pkg-config files (default: on, off for Windows (except MinGW))
 # WITH_PLUGIN_<NAME>    Enable or disable the specified plugin (default: on)
+# WITH_VERA             Enable style checking using vera (default: on)
 #
 # Note: the option() commands for WITH_PLUGIN_<name> variables are defined automatically from the IRCCD_PLUGINS
 # list.
@@ -79,6 +80,7 @@ option(WITH_HTML "Enable building of HTML documentation" On)
 option(WITH_DOXYGEN "Enable doxygen" Off)
 option(WITH_MAN "Install man pages" ${DEFAULT_MAN})
 option(WITH_PKGCONFIG "Enable pkg-config file" ${DEFAULT_PKGCONFIG})
+option(WITH_VERA "Enable vera++" On)
 
 #
 # Installation paths.
@@ -162,6 +164,30 @@ if (WITH_HTML)
 else ()
     set(WITH_HTML_MSG "No (disabled by user)")
     set(WITH_HTML FALSE)
+endif ()
+
+find_program(VERA_EXECUTABLE vera++)
+
+if (VERA_EXECUTABLE)
+    if (WITH_VERA)
+        execute_process(
+            COMMAND ${VERA_EXECUTABLE} --version
+            OUTPUT_VARIABLE VERA_VERSION
+        )
+
+        if (${VERA_VERSION} VERSION_LESS "1.3.0")
+            set(WITH_VERA Off)
+            set(WITH_VERA_MSG "No (1.3.0 or greater required)")
+        else ()
+            set(WITH_VERA_MSG "Yes")
+        endif ()
+    else ()
+        set(WITH_VERA Off)
+        set(WITH_VERA_MSG "No (disabled by user)")
+    endif ()
+else ()
+    set(WITH_VERA Off)
+    set(WITH_VERA_MSG "No (vera++ not found)")
 endif ()
 
 #
