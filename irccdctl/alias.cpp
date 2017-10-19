@@ -27,7 +27,7 @@ AliasArg::AliasArg(std::string value)
 {
     assert(!value.empty());
 
-    if ((m_isPlaceholder = std::regex_match(value, std::regex("^%\\d+$")))) 
+    if ((m_isPlaceholder = std::regex_match(value, std::regex("^%\\d+$"))))
         m_value = value.substr(1);
     else
         m_value = std::move(value);
