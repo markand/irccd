@@ -9,12 +9,12 @@ Send a private notice to the specified target.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl server-notice server target message
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl server-notice freenode jean "I know you are here."
-````
+```

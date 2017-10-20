@@ -9,6 +9,6 @@ Get the list of all loaded plugins.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl plugin-list
-````
+```

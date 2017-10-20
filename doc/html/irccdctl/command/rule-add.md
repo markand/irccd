@@ -11,9 +11,9 @@ If no index is specified, the rule is added to the end.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl rule-add [options] accept|drop
-````
+```
 
 Available options:
 
@@ -25,7 +25,7 @@ Available options:
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl rule-add -p hangman drop
 $ irccdctl rule-add -s localhost -c #games -p hangman accept
-````
+```

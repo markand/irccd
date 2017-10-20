@@ -10,12 +10,12 @@ will receive.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl server-cnotice server channel message
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl server-cnotice freenode #staff "Don't flood"
-````
+```

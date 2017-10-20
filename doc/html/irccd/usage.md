@@ -9,9 +9,9 @@ Usage of irccd.
 
 ## Synopsis
 
-````nohighlight
+```nohighlight
 $ irccd [options...]
-````
+```
 
 ## Options
 

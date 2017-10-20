@@ -9,12 +9,12 @@ Set the irccd's user mode.
 
 **Usage**
 
-````nohighlight
+```nohighlight
 $ server-mode server mode
-````
+```
 
 **Example**
 
-````nohighlight
+```nohighlight
 $ irccdctl server-mode +i
-````
+```

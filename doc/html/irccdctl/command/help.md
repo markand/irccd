@@ -9,12 +9,12 @@ Get the help.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl help subject
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl help server-message
-````
+```

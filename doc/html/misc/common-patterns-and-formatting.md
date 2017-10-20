@@ -118,9 +118,9 @@ Here's the list of keywords that a lot of plugins uses:
 For instance, using the **logger** plugin, it's possible to customize the pattern to use when someone joins a channel
 like that:
 
-````nohighlight
+```nohighlight
 #{origin} joined #{channel}
-````
+```
 
 The keyword **#{origin}** will be substituted to the nickname and **#{channel}** to the channel name.
 

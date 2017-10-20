@@ -27,13 +27,13 @@ parsed.
 
 ## Example
 
-````ini
+```ini
 @include "rules.conf"
 @include "servers.conf"
 
 [mysection]
 myoption = "1"
-````
+```
 
 # The list construct
 
@@ -47,20 +47,20 @@ If the list have only one value, you can just use a simple string.
 <div class="panel panel-success">
  <div class="panel-heading">**Example:** two servers defined in a rule</div>
  <div class="panel-body">
-````ini
+```ini
 [rule]
 servers = ( "server1", "server2" )
-````
+```
  </div>
 </div>
 
 <div class="panel panel-success">
  <div class="panel-heading">**Example:** only one server</div>
  <div class="panel-body">
-````ini
+```ini
 [rule]
 servers = "only-one-server"
-````
+```
  </div>
 </div>
 

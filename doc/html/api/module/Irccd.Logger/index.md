@@ -20,9 +20,9 @@ Any plugin can log messages, the message will be prepended by the plugin name to
 
 ## Example
 
-````javascript
+```javascript
 function onLoad()
 {
     Irccd.Logger.info("This is an example");
 }
-````
+```

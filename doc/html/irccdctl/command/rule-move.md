@@ -13,13 +13,13 @@ the rule is moved to the end.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 irccdctl rule-move source destination
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 irccdctl rule-move 0 5
 irccdctl rule-move 4 3
-````
+```

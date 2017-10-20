@@ -15,12 +15,12 @@ variables and their values.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl plugin-config plugin [variable] [value]
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl plugin-config ask
-````
+```

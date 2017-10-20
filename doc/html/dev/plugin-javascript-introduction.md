@@ -52,14 +52,14 @@ object:
 
 Example:
 
-````javascript
+```javascript
 info = {
     author: "David Demelier <markand@malikania.fr>",
     license: "ISC",
     summary: "A FPS game for IRC",
     version: "0.0.0.0.0.0.1"
 };
-````
+```
 
 # Plugin creation
 
@@ -83,9 +83,9 @@ function defined on channel message is called [onMessage][].
 
 It has the following signature:
 
-````javascript
+```javascript
 function onMessage(server, origin, channel, message)
-````
+```
 
 The parameters are defined as following:
 
@@ -109,12 +109,12 @@ hannel and the message.
 
 So the only thing to do is the following:
 
-````javascript
+```javascript
 function onMessage(server, origin, channel, message)
 {
     server.message(channel, message)
 }
-````
+```
 
 That's it!
 
@@ -155,19 +155,19 @@ in the irccd output.
 
 **Example**
 
-````javascript
+```javascript
 function onCommand()
 {
     if (something_is_wrong)
         Irccd.Logger.warning("error condition")
 }
-````
+```
 
 This will output to the irccd log something like:
 
-````nohighlight
+```nohighlight
 plugin foo: error condition
-````
+```
 
 [onMessage]: @baseurl@api/event/onMessage.html
 [server-api]: @baseurl@api/module/Irccd.Server/index.html

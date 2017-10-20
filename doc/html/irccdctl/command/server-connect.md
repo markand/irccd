@@ -9,9 +9,9 @@ Connect to a new IRC server.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl server-connect [options] name host port
-````
+```
 
 Available options:
 
@@ -24,7 +24,7 @@ Available options:
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl server-connect -n jean example irc.example.org
 $ irccdctl server-connect --ssl example irc.example.org 6697
-````
+```

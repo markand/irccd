@@ -39,12 +39,12 @@ The available options:
 
 **Example**
 
-````ini
+```ini
 [general]
 pidfile = "/var/run/irccd/pid"
 uid = "nobody"
 gid = 1002
-````
+```
 
 # The logs section
 
@@ -66,13 +66,13 @@ The options for **file** type:
 
 **Example**
 
-````ini
+```ini
 [logs]
 type = file
 verbose = true
 path-logs = "/var/log/irccd/log.txt"
 path-errors = "/var/log/irccd/errors.txt"
-````
+```
 
 # The format section
 
@@ -92,12 +92,12 @@ The available options:
 
 **Example**
 
-````ini
+```ini
 [format]
 debug = "%H:%M debug: #{message}"
 info = "%H:%M info: #{message}"
 warning = "%H:%M warning: #{message}"
-````
+```
 
 # The identity section
 
@@ -118,7 +118,7 @@ The available options:
 
 **Example**
 
-````ini
+```ini
 [identity]
 name = "default"
 nickname = "jean"
@@ -127,7 +127,7 @@ nickname = "jean"
 name = "development"
 nickname = "unstable"
 username = "un"
-````
+```
 
 # The server section
 
@@ -156,13 +156,13 @@ The available options:
 
 **Example**
 
-````ini
+```ini
 [server]
 name = "local"
 host = "localhost"
 port = 6667
 channels = ( "#staff", "#club:secret" )
-````
+```
 
 # The paths section
 
@@ -182,7 +182,7 @@ The section is redefinable per plugin basis using the `[paths.<plugin>]` syntax.
 
 **Example**
 
-````ini
+```ini
 #
 # Common for all plugins.
 #
@@ -202,7 +202,7 @@ data = "/var/data/irccd"
 #
 [paths.hangman]
 config = "/etc/hangman"
-````
+```
 
 # The plugins section
 
@@ -217,11 +217,11 @@ directories, otherwise, provide the full path (including the .js extension).
 
 **Example**
 
-````ini
+```ini
 [plugins]
 history = ""
 myplugin = /tmp/myplugin.js
-````
+```
 
 The `history` plugin will be searched while `myplugin` will be load from **/tmp/myplugin.js**.
 
@@ -259,13 +259,13 @@ The options for **unix** type:
 
 **Example of internet transports**
 
-````ini
+```ini
 [transport]
 type = "ip"
 address = "*"
 family = ( "ipv4", "ipv6" )
 port = 9999
-````
+```
 
 This will let you controlling irccd on port 9999 with both IPv4 and IPv6 families.
 
@@ -276,11 +276,11 @@ multiple users. If your bot has operator rights and you bind on any address, alm
 
 **Example of unix transports**
 
-````ini
+```ini
 [transport]
 type = "unix"
 path = "/tmp/irccd.sock"
-````
+```
 
 This will let you controlling irccd on path **/tmp/irccd.sock**, the file is automatically deleted when irccd starts,
 but not when it stops.
@@ -303,25 +303,25 @@ The available options:
 
 This first rule disable the plugin reboot on **all** servers and channels.
 
-````ini
+```ini
 [rule]
 plugins = "reboot"
 action = drop
-````
+```
 
 This rule enable the reboot plugin again on the server **localhost**, channel **#staff**.
 
-````ini
+```ini
 [rule]
 servers = "localhost"
 channels = "#staff"
 plugins = "reboot"
 action = accept
-````
+```
 
 # Full example of configuration file
 
-````ini
+```ini
 # Add a transport that bind only to IPv6.
 [transport]
 type = ip
@@ -359,7 +359,7 @@ identity = myIdentity
 [plugins]
 ask = ""                               # Search ask
 myplugin = /path/to/myplugin.js        # Use absolute path
-````
+```
 
 [cfgdir]: @baseurl@irccd/paths.html
 [cp]: @baseurl@misc/common-patterns-and-formatting.html

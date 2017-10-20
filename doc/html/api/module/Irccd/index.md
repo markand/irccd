@@ -22,7 +22,7 @@ The following properties are defined:
 
 ## Example
 
-````javascript
+```javascript
 var Logger = Irccd.Logger;
 
 function onLoad()
@@ -31,4 +31,4 @@ function onLoad()
     Logger.info("Minor: " + Irccd.version.minor);
     Logger.info("Patch: " + Irccd.version.patch);
 }
-````
+```

@@ -9,12 +9,12 @@ Change the mode of the specified channel.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl server-cmode server channel mode
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl server-cmode freenode #staff +t
-````
+```

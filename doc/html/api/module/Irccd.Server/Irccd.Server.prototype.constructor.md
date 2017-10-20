@@ -24,7 +24,7 @@ The params argument may have the following properties:
 
 ## Example
 
-````javascript
+```javascript
 var s = new Irccd.Server({
     name: "localhost",
     host: "localhost",
@@ -32,4 +32,4 @@ var s = new Irccd.Server({
     ssl: true,
     sslVerify: false
 });
-````
+```

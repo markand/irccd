@@ -14,13 +14,13 @@ not specify it if this is a concern.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl server-part server channel [reason]
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl server-part freenode #staff
 $ irccdctl server-part freenode #botwar "too noisy"
-````
+```

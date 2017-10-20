@@ -9,12 +9,12 @@ Get plugin information.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl plugin-info name
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl plugin-info ask
-````
+```

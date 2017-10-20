@@ -9,6 +9,6 @@ List all rules.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl rule-list
-````
+```

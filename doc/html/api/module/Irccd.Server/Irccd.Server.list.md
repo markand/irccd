@@ -8,7 +8,7 @@ returns: "the table of all servers."
 
 ## Example
 
-````javascript
+```javascript
 var table = Irccd.Server.list();
 
 for (var name in table) {
@@ -16,4 +16,4 @@ for (var name in table) {
 
     /* Use server */
 }
-````
+```

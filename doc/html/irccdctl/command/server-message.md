@@ -9,12 +9,12 @@ Send a message to the specified target or channel.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl server-message server target message
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl server-message freenode #staff "Hello from irccd"
-````
+```

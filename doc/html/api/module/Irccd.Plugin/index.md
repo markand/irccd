@@ -23,14 +23,14 @@ Assuming the configuration file is defined as following:
 <div class="panel panel-info">
  <div class="panel-heading">~/.config/irccd/irccd.conf</div>
  <div class="panel-body">
-````ini
+```ini
 [plugin.xyz]
 foo = true
 baz = "hello"
 
 [paths.xyz]
 config = "/etc/xyz"
-````
+```
  </div>
 </div>
 

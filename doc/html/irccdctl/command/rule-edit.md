@@ -23,13 +23,13 @@ Available options:
 
 ## Usage
 
-````nohighlight
+```nohighlight
 usage: irccdctl rule-edit [options] index
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl rule-edit -p hangman 0
 $ irccdctl rule-edit -S localhost -c #games -p hangman 1
-````
+```

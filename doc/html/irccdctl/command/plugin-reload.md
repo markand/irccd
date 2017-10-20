@@ -10,12 +10,12 @@ unloaded and must be already loaded.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl plugin-reload name
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl plugin-reload logger
-````
+```

@@ -11,13 +11,13 @@ If server is not specified, all servers will try to reconnect.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl server-reconnect [server]
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl server-reconnect
 $ irccdctl server-reconnect wanadoo
-````
+```

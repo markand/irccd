@@ -9,12 +9,12 @@ Load a plugin into the irccd instance.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl plugin-load plugin
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl load ask
-````
+```

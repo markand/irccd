@@ -19,7 +19,7 @@ When constructed successfully, the object has the following properties:
 
 ## Example
 
-````javascript
+```javascript
 try {
   var d = new Irccd.Directory("/usr/share/games");
 
@@ -29,7 +29,7 @@ try {
 } catch (e) {
   // Use the error
 }
-````
+```
 
 
 

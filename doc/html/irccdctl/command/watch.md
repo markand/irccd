@@ -12,13 +12,13 @@ pretty formatted json.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl watch [-f|--format native|json]
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl watch
 $ irccdctl watch -f json
-````
+```

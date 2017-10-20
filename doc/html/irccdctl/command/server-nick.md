@@ -9,12 +9,12 @@ Change irccd's nickname.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl server-nick server nickname
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl server-nick freenode david
-````
+```

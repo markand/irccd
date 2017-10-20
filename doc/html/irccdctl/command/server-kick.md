@@ -9,12 +9,12 @@ Kick the specified target from the channel, the reason is optional.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl server-kick server target channel [reason]
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl kick freenode jean #staff "Stop flooding"
-````
+```

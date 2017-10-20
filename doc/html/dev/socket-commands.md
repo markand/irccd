@@ -21,14 +21,14 @@ Send a message notice on a channel.
 
 ## Example
 
-````json
+```json
 {
   "command": "server-cnotice",
   "server": "myserver",
   "channel": "#staff",
   "message": "please be quiet"
 }
-````
+```
 
 ## server-connect
 
@@ -52,14 +52,14 @@ Connect to a server.
 
 ## Example
 
-````json
+```json
 {
   "command": "server-connect",
   "name": "myserver",
   "host": "localhost",
   "nickname": "edouard"
 }
-````
+```
 
 ## server-disconnect
 
@@ -74,12 +74,12 @@ If server is not specified, irccd disconnects all servers.
 
 ## Example
 
-````json
+```json
 {
   "command": "server-disconnect",
   "server": "myserver"
 }
-````
+```
 
 ## server-info
 
@@ -92,12 +92,12 @@ Get server information.
 
 ## Example
 
-````json
+```json
 {
   "command": "server-info",
   "server": "myserver"
 }
-````
+```
 
 ## Responses
 
@@ -125,14 +125,14 @@ Invite the specified target on the channel.
 
 ## Example
 
-````json
+```json
 {
   "command": "server-invite",
   "server": "myserver",
   "target": "edouard",
   "channel": "#staff"
 }
-````
+```
 
 ## server-join
 
@@ -147,13 +147,13 @@ Join the specified channel, the password is optional.
 
 ## Example
 
-````json
+```json
 {
   "command": "server-join",
   "server": "myserver",
   "channel": "#games"
 }
-````
+```
 
 ## server-kick
 
@@ -169,7 +169,7 @@ Kick the specified target from the channel, the reason is optional.
 
 ## Example
 
-````json
+```json
 {
   "command": "server-kick",
   "server": "myserver",
@@ -177,7 +177,7 @@ Kick the specified target from the channel, the reason is optional.
   "channel": "#staff",
   "reason": "please be nice"
 }
-````
+```
 
 ## server-list
 
@@ -189,11 +189,11 @@ Get the list of all connected servers.
 
 ## Example
 
-````json
+```json
 {
   "command": "server-list"
 }
-````
+```
 
 ## Responses
 
@@ -213,14 +213,14 @@ Send an action emote.
 
 ## Example
 
-````json
+```json
 {
   "command": "server-me",
   "server": "myserver",
   "channel": "#staff",
   "message": "like that"
 }
-````
+```
 
 ## server-message
 
@@ -235,14 +235,14 @@ Send a message to the specified target or channel.
 
 ## Example
 
-````json
+```json
 {
   "command": "server-message",
   "server": "myserver",
   "target": "#staff",
   "message": "this channel is nice"
 }
-````
+```
 
 ## server-mode
 
@@ -256,13 +256,13 @@ Set the irccd's user mode.
 
 ## Example
 
-````json
+```json
 {
   "command": "server-mode",
   "server": "myserver",
   "mode": "mode"
 }
-````
+```
 
 ## server-nick
 
@@ -276,13 +276,13 @@ Change irccd's nickname.
 
 ## Example
 
-````json
+```json
 {
   "command": "server-nick",
   "server": "myserver",
   "nickname": "edouard"
 }
-````
+```
 
 ## server-notice
 
@@ -297,14 +297,14 @@ Send a private notice to the specified target.
 
 ## Example
 
-````json
+```json
 {
   "command": "server-notice",
   "server": "myserver",
   "target": "edouard",
   "message": "hello dude"
 }
-````
+```
 
 ## server-part
 
@@ -321,14 +321,14 @@ Not all IRC servers support giving a reason to leave a channel, do not specify i
 
 ## Example
 
-````json
+```json
 {
   "command": "server-part",
   "server": "myserver",
   "channel": "#staff",
   "reason": "the reason"
 }
-````
+```
 
 ## server-reconnect
 
@@ -343,12 +343,12 @@ If server is not specified, all servers will try to reconnect.
 
 ## Example
 
-````json
+```json
 {
   "command": "server-reconnect",
   "server": "myserver"
 }
-````
+```
 
 ## server-topic
 
@@ -363,23 +363,23 @@ Change the topic of the specified channel.
 
 ## Example
 
-````json
+```json
 {
   "command": "server-topic",
   "server": "myserver",
   "channel": "#staff",
   "topic": "the new topic"
 }
-````
+```
 
 ## server-umode
 
 Change your irccd user mode for the specified server.
 
-````json
+```json
 {
   "command": "umode",
   "server": "the server name",
   "mode": "the mode"
 }
-````
+```

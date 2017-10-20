@@ -19,7 +19,7 @@ For example, this buffer will be parsed as two different messages.
 <div class="alert alert-success" role="alert">
 **Example**: two commands issued
 
-````json
+```json
 {
   "param1": "value1"
 }
@@ -28,7 +28,7 @@ For example, this buffer will be parsed as two different messages.
   "param1": "value1"
 }
 
-````
+```
 </div>
 
 <div class="alert alert-warning" role="alert">
@@ -47,22 +47,22 @@ All commands emit a response with the following properties:
 <div class="alert alert-success" role="alert">
 **Example**: command issued with no errors
 
-````json
+```json
 {
   "command": "server-message",
   "status": "ok"
 }
-````
+```
 </div>
 
 <div class="alert alert-danger" role="alert">
 **Example**: command issued with errors
 
-````json
+```json
 {
   "command": "server-message",
   "status": "error",
   "error": "server xyz not found"
 }
-````
+```
 </div>

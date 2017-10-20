@@ -15,12 +15,12 @@ returns: "The converted text."
 
 Replaces the keyword `message` and formats it bold and red.
 
-````javascript
+```javascript
 function onMessage(server, channel, origin, message)
 {
     var s = Irccd.Util.format("@{red,default,bold}#{message}@{}", { message: message })
 }
-````
+```
 
 ## Security
 
@@ -32,12 +32,12 @@ Be very careful when you use this function with untrusted input.
 is terribly dangerous:
  </div>
  <div class="panel-body">
-````javascript
+```javascript
 function onMessage(server, channel, origin, message)
 {
     server.message(channel, Irccd.Util.format("@{red}" + message + "@{}");
 }
-````
+```
 
 If a user sends a message like `${HOME}`, it will prints the user home directory, which is a high security issue
 if you have environment variables with passwords.
@@ -49,11 +49,11 @@ if you have environment variables with passwords.
 **Correct code**: Instead, always use a literal string using a replacement with the user input:
  </div>
  <div class="panel-body">
-````javascript
+```javascript
 function onMessage(server, channel, origin, message)
 {
     server.message(channel, Irccd.Util.format("@{red}#{message}@{}", { message: message });
 }
-````
+```
  </div>
 </div>

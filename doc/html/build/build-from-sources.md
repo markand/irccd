@@ -24,12 +24,12 @@ To build from sources, you need the following installed on your system:
 When you're ready, extract the **irccd-x.y.z.tar.gz** where **x.y.z** is the current version. Go to that directory,
 then type the following commands:
 
-````nohighlight
+```nohighlight
 $ mkdir _build_
 $ cd _build_
 $ cmake ..
 $ make
 $ sudo make install
-````
+```
 
 This is the quick way of compiling and installing. It's also possible to set some options to customize the build.

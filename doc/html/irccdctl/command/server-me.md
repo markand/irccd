@@ -9,12 +9,12 @@ Send an action emote.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl server-me server target message
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl server-me freenode #staff "going back soon"
-````
+```

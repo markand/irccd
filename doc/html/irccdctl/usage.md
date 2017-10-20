@@ -9,7 +9,7 @@ Usage of irccdctl.
 
 ## Synopsis
 
-````nohighlight
+```nohighlight
 usage: irccdctl plugin-config plugin [variable] [value]
        irccdctl plugin-info plugin
        irccdctl plugin-list
@@ -36,15 +36,15 @@ usage: irccdctl plugin-config plugin [variable] [value]
        irccdctl server-topic server channel topic
        irccdctl watch [-f|--format json|native]
 
-````
+```
 
 ## Syntax
 
 The general syntax for running an irccdctl command is:
 
-````nohighlight
+```nohighlight
 irccdctl commandname arg1 arg2 arg3 ... argn
-````
+```
 
 You can have the online documentation by typing `irccdctl help commandname`.
 
@@ -53,12 +53,12 @@ You can have the online documentation by typing `irccdctl help commandname`.
 Some shells may discard arguments if they begins with a hash. For instance, `bash` will not understand the following
 command:
 
-````nohighlight
+```nohighlight
 $ irccdctl server-join localhost #staff
-````
+```
 
 Instead, enclose the arguments with quotes
 
-````nohighlight
+```nohighlight
 $ irccdctl server-join localhost "#staff"
-````
+```

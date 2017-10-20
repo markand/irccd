@@ -9,12 +9,12 @@ Invite the specified target on the channel.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl server-invite server nickname channel
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl server-invite freenode xorg62 #staff
-````
+```

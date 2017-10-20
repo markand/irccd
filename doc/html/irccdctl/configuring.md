@@ -17,10 +17,10 @@ The available options:
 
 **Example**
 
-````ini
+```ini
 [general]
 verbose = true
-````
+```
 
 # The connect section
 
@@ -44,21 +44,21 @@ The options for **unix** type:
 
 **Example for internet transports**
 
-````ini
+```ini
 [connect]
 type = "internet"
 host = "localhost"
 port = "9999"
 family = "ipv6"
-````
+```
 
 **Example for unix transports**
 
-````ini
+```ini
 [connect]
 type = "unix"
 path = "/tmp/irccd.sock"
-````
+```
 
 # The alias section
 
@@ -72,11 +72,11 @@ ignored and serves as auto-documentation only.
 
 Example:
 
-````ini
+```ini
 [alias.present]
 say-hello = ( "server-message", "localhost", "#staff", "hello world!" )
 warning = ( "server-me", "localhost", "#staff", "is a bot")
-````
+```
 
 This example defines an alias `present` that will:
 
@@ -99,11 +99,11 @@ Let's update this alias with placeholders to make it more generic.
 
 Example:
 
-````ini
+```ini
 [alias.present]
 say-hello = ( "server-message", "%0", "%1", "hello world!" )
 warning = ( "server-me", "%0", "%1", "is a bot")
-````
+```
 
 Now, the `present` alias will except two arguments from the command line when
 the user invokes `irccdctl present`. Thus if you want to use this alias on the

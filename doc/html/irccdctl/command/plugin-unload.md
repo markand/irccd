@@ -9,12 +9,12 @@ Unload a loaded plugin from the irccd instance.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl plugin-unload name
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl plugin-unload logger
-````
+```

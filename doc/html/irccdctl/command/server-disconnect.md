@@ -11,12 +11,12 @@ If server is not specified, irccd disconnects all servers.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl server-disconnect [server]
-````
+```
 
 ## Example
 
-````nohighlight
+```nohighlight
 $ irccdctl server-disconnect localhost
-````
+```

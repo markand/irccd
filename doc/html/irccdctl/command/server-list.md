@@ -9,6 +9,6 @@ Get the list of all connected servers.
 
 ## Usage
 
-````nohighlight
+```nohighlight
 $ irccdctl server-list
-````
+```
