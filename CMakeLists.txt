@@ -82,7 +82,7 @@ add_subdirectory(libcommon)
 add_subdirectory(libirccd)
 add_subdirectory(libirccdctl)
 
-if (WITH_JS)
+if (HAVE_JS)
     add_subdirectory(libirccd-js)
 endif ()
 
@@ -90,7 +90,7 @@ add_subdirectory(irccd)
 add_subdirectory(irccdctl)
 add_subdirectory(contrib)
 
-if (WITH_JS)
+if (HAVE_JS)
     add_subdirectory(plugins)
 endif ()
 

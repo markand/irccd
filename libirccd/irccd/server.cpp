@@ -829,7 +829,7 @@ bool server::connecting_state::connect(server& server)
     auto host = server.host_;
 
     // libircclient requires # for SSL connection.
-#if defined(WITH_SSL)
+#if defined(HAVE_SSL)
     if (server.flags_ & server::ssl)
         host.insert(0, 1, '#');
     if (!(server.flags_ & server::ssl_verify))

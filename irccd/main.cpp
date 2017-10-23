@@ -41,7 +41,7 @@
 #include "config.hpp"
 #include "irccd.hpp"
 
-#if defined(WITH_JS)
+#if defined(HAVE_JS)
 #   include <js_directory_module.hpp>
 #   include <js_elapsed_timer_module.hpp>
 #   include <js_file_module.hpp>
@@ -82,10 +82,10 @@ void version(const option::result& options)
         bool ssl = false;
         bool js = false;
 
-#if defined(WITH_SSL)
+#if defined(HAVE_SSL)
         ssl = true;
 #endif
-#if defined(WITH_JS)
+#if defined(HAVE_JS)
         js = true;
 #endif
 
@@ -327,7 +327,7 @@ int main(int argc, char** argv)
     instance->commands().add(std::make_unique<rule_remove_command>());
 
     // Load Javascript API and plugin loader.
-#if defined(WITH_JS)
+#if defined(HAVE_JS)
     auto loader = std::make_unique<js_plugin_loader>(*instance);
 
     loader->add_module(std::make_unique<js_irccd_module>());

@@ -43,7 +43,7 @@ set(
     ${libcommon_SOURCE_DIR}/irccd/util.cpp
 )
 
-if (NOT WITH_SSL)
+if (NOT HAVE_SSL)
     list(APPEND FLAGS NET_NO_SSL)
 endif ()
 
@@ -59,8 +59,8 @@ irccd_define_library(
         ${Boost_LIBRARIES}
         $<$<BOOL:${WIN32}>:shlwapi>
         $<$<BOOL:${WIN32}>:ws2_32>
-        $<$<BOOL:${WITH_SSL}>:OpenSSL::SSL>
-        $<$<BOOL:${WITH_SSL}>:OpenSSL::Crypto>
+        $<$<BOOL:${HAVE_SSL}>:OpenSSL::SSL>
+        $<$<BOOL:${HAVE_SSL}>:OpenSSL::Crypto>
     PUBLIC_INCLUDES
         ${Boost_INCLUDE_DIRS}
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>

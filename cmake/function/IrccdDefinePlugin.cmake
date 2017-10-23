@@ -110,7 +110,7 @@ function(irccd_define_plugin)
         setg(WITH_PLUGIN_${PLG_UPPER_NAME}_MSG "Yes")
 
         # Optional documentation.
-        if (PLG_DOCS AND WITH_HTML)
+        if (PLG_DOCS AND HAVE_HTML)
             irccd_build_html(
                 SOURCE ${PLG_DOCS}
                 OUTPUT plugin/${PLG_NAME}

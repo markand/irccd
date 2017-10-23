@@ -25,7 +25,7 @@ irccd_define_executable(
     INCLUDES ${irccd_SOURCE_DIR}
     LIBRARIES
         libirccd
-        $<$<BOOL:${WITH_JS}>:libirccd-js>
+        $<$<BOOL:${HAVE_JS}>:libirccd-js>
         $<$<BOOL:${UNIX}>:-pthread>
 )
 

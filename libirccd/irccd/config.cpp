@@ -207,7 +207,7 @@ std::shared_ptr<transport_server> load_transport_ip(const ini::section& sc)
     if (pkey.empty())
         return std::make_shared<transport_server_ip>(address, port, mode);
 
-#if defined(WITH_SSL)
+#if defined(HAVE_SSL)
     return std::make_shared<transport_server_tls>(pkey, cert, address, port, mode);
 #else
     throw std::invalid_argument("transport: SSL disabled");

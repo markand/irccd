@@ -183,7 +183,7 @@ public:
  * ------------------------------------------------------------------
  */
 
-#if defined(WITH_SSL)
+#if defined(HAVE_SSL)
 
 /**
  * \brief TLS version of transport client.
@@ -238,7 +238,7 @@ public:
     void sync(fd_set& in, fd_set& out) override;
 };
 
-#endif  // !WITH_SSL
+#endif  // !HAVE_SSL
 
 /*
  * TransportServer
@@ -360,7 +360,7 @@ public:
     std::uint16_t port() const;
 };
 
-#if defined(WITH_SSL)
+#if defined(HAVE_SSL)
 
 /**
  * \brief TLS over IP transport.
@@ -392,7 +392,7 @@ public:
     std::unique_ptr<transport_client> accept() override;
 };
 
-#endif // !WITH_SSL
+#endif // !HAVE_SSL
 
 #if !defined(IRCCD_SYSTEM_WINDOWS)
 

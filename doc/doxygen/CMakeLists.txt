@@ -16,9 +16,6 @@
 
 project(doxygen)
 
-set(DOXYGEN_INPUT ${CMAKE_SOURCE_DIR}/lib)
-set(DOXYGEN_OUTPUT ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/doxygen)
-
 if (NOT DOXYGEN_DOT_FOUND)
     set(DOXYGEN_HAVE_DOT "NO")
     set(DOXYGEN_DOT_PATH "")
@@ -29,18 +26,17 @@ endif ()
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-    ${CMAKE_BINARY_DIR}/Doxyfile
+    ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
 )
 
 add_custom_target(
-    docs-doxygen
+    doxygen
+    ALL
     COMMENT "Generating doxygen documentation"
     COMMAND
-        ${CMAKE_COMMAND} -E make_directory ${IRCCD_FAKEROOTDIR}/${WITH_DOCDIR}/doxygen
+        ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}
     COMMAND
-        ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
+        ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
     WORKING_DIRECTORY
         ${CMAKE_SOURCE_DIR}
 )
-
-add_dependencies(all-docs docs-doxygen)

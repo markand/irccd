@@ -60,7 +60,7 @@ if (WITH_TESTS)
     add_subdirectory(service-plugin)
 
     # JS API
-    if (WITH_JS)
+    if (HAVE_JS)
         add_subdirectory(js)
         add_subdirectory(js-elapsedtimer)
         add_subdirectory(js-file)

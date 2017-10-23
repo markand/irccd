@@ -152,10 +152,10 @@ transport_client::transport_client(transport_server& parent, net::TcpSocket sock
         { "patch",      IRCCD_VERSION_PATCH     }
     });
 
-#if defined(WITH_JS)
+#if defined(HAVE_JS)
     object.push_back({"javascript", true});
 #endif
-#if defined(WITH_SSL)
+#if defined(HAVE_SSL)
     object.push_back({"ssl", true});
 #endif
 
@@ -270,7 +270,7 @@ void transport_client::error(const std::string& cmd, const std::string& error, n
  * ------------------------------------------------------------------
  */
 
-#if defined(WITH_SSL)
+#if defined(HAVE_SSL)
 
 void transport_client_tls::handshake()
 {
@@ -363,7 +363,7 @@ void transport_client_tls::sync(fd_set& in, fd_set& out)
     }
 }
 
-#endif  // !WITH_SSL
+#endif  // !HAVE_SSL
 
 /*
  * transport_server_ip
@@ -411,7 +411,7 @@ std::uint16_t transport_server_ip::port() const
  * ------------------------------------------------------------------
  */
 
-#if defined(WITH_SSL)
+#if defined(HAVE_SSL)
 
 transport_server_tls::transport_server_tls(const std::string& pkey,
                                            const std::string& cert,
@@ -429,7 +429,7 @@ std::unique_ptr<transport_client> transport_server_tls::accept()
     return std::make_unique<transport_client_tls>(privatekey_, cert_, *this, socket_.accept());
 }
 
-#endif  // !WITH_SSL
+#endif  // !HAVE_SSL
 
 /*
  * transport_server_local

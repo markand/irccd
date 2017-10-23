@@ -25,16 +25,16 @@ irccd_define_library(
         ${libirccd-test_SOURCE_DIR}/irccd/command-tester.hpp
         ${libirccd-test_SOURCE_DIR}/irccd/journal_server.cpp
         ${libirccd-test_SOURCE_DIR}/irccd/journal_server.hpp
-        $<$<BOOL:${WITH_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin-tester.cpp>
-        $<$<BOOL:${WITH_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin-tester.hpp>
-        $<$<BOOL:${WITH_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin_test.cpp>
-        $<$<BOOL:${WITH_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin_test.hpp>
-        $<$<BOOL:${WITH_JS}>:${libirccd-test_SOURCE_DIR}/irccd/js_test.hpp>
-        $<$<BOOL:${WITH_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin_test.js>
+        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin-tester.cpp>
+        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin-tester.hpp>
+        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin_test.cpp>
+        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin_test.hpp>
+        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/js_test.hpp>
+        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin_test.js>
         ${libirccd-test_SOURCE_DIR}/irccd/server-tester.cpp
         ${libirccd-test_SOURCE_DIR}/irccd/server-tester.hpp
     LIBRARIES
-        $<$<BOOL:${WITH_JS}>:libirccd-js>
+        $<$<BOOL:${HAVE_JS}>:libirccd-js>
         libirccd
         libirccdctl
         extern-gtest

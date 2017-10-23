@@ -18,13 +18,13 @@
 
 project(doc)
 
-if (WITH_DOXYGEN)
+if (HAVE_DOXYGEN)
     add_subdirectory(doxygen)
 endif ()
 
 add_subdirectory(examples)
 add_subdirectory(man)
 
-if (WITH_HTML)
+if (HAVE_HTML)
     add_subdirectory(html)
 endif ()

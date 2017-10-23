@@ -46,7 +46,7 @@ endif ()
 # -------------------------------------------------------------------
 #
 
-if (WITH_SSL)
+if (HAVE_SSL)
     set(SSL_EAY_DLL libeay32.dll)
     set(SSL_LIB_DLL ssleay32.dll)
     list(APPEND DLLS SSL_EAY_DLL SSL_LIB_DLL)

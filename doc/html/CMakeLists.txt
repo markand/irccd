@@ -194,51 +194,49 @@ set(
     ${html_SOURCE_DIR}/resources/js/jquery.min.js
 )
 
-if (WITH_HTML)
-    foreach (file ${HTML_SOURCES})
-        irccd_build_html(
-            SOURCE ${file}
-            OUTPUT_VAR output
-        )
-        list(APPEND OUTPUTS ${output})
-
-        # Install this file.
-        file(RELATIVE_PATH basename ${html_SOURCE_DIR} ${file})
-        get_filename_component(dirname ${basename} DIRECTORY)
-        install(
-            FILES ${output}
-            COMPONENT docs
-            DESTINATION ${WITH_DOCDIR}/${dirname}
-        )
-    endforeach ()
-
-    add_custom_target(
-        html ALL
-        SOURCES
-            ${HTML_SOURCES} ${CSS} ${JS} ${OUTPUTS}
-            ${html_SOURCE_DIR}/resources/template.html
-        COMMAND
-            ${CMAKE_COMMAND} -E make_directory ${html_BINARY_DIR}/css
-        COMMAND
-            ${CMAKE_COMMAND} -E make_directory ${html_BINARY_DIR}/js
-        COMMAND
-            ${CMAKE_COMMAND} -E copy ${CSS} ${html_BINARY_DIR}/css
-        COMMAND
-            ${CMAKE_COMMAND} -E copy ${JS} ${html_BINARY_DIR}/js
+foreach (file ${HTML_SOURCES})
+    irccd_build_html(
+        SOURCE ${file}
+        OUTPUT_VAR output
     )
+    list(APPEND OUTPUTS ${output})
 
-    # Install resources files.
+    # Install this file.
+    file(RELATIVE_PATH basename ${html_SOURCE_DIR} ${file})
+    get_filename_component(dirname ${basename} DIRECTORY)
     install(
-        FILES ${CSS}
+        FILES ${output}
         COMPONENT docs
-        DESTINATION ${WITH_DOCDIR}/css
+        DESTINATION ${WITH_DOCDIR}/${dirname}
     )
-    install(
-        FILES ${JS}
-        COMPONENT docs
-        DESTINATION ${WITH_DOCDIR}/js
-    )
-endif ()
+endforeach ()
+
+add_custom_target(
+    html ALL
+    SOURCES
+        ${HTML_SOURCES} ${CSS} ${JS} ${OUTPUTS}
+        ${html_SOURCE_DIR}/resources/template.html
+    COMMAND
+        ${CMAKE_COMMAND} -E make_directory ${html_BINARY_DIR}/css
+    COMMAND
+        ${CMAKE_COMMAND} -E make_directory ${html_BINARY_DIR}/js
+    COMMAND
+        ${CMAKE_COMMAND} -E copy ${CSS} ${html_BINARY_DIR}/css
+    COMMAND
+        ${CMAKE_COMMAND} -E copy ${JS} ${html_BINARY_DIR}/js
+)
+
+# Install resources files.
+install(
+    FILES ${CSS}
+    COMPONENT docs
+    DESTINATION ${WITH_DOCDIR}/css
+)
+install(
+    FILES ${JS}
+    COMPONENT docs
+    DESTINATION ${WITH_DOCDIR}/js
+)
 
 setg(CPACK_COMPONENT_DOCS_DISPLAY_NAME "Documentation")
 setg(CPACK_COMPONENT_DOCS_DESCRIPTION "User guide and JavaScript API.")
