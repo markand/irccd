@@ -21,7 +21,6 @@
 #include <boost/filesystem.hpp>
 
 #include "config.hpp"
-#include "fs.hpp"
 #include "irccd.hpp"
 #include "logger.hpp"
 #include "plugin.hpp"

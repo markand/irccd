@@ -271,7 +271,7 @@ BOOST_AUTO_TEST_CASE(empty)
     std::string result = util::strip(value);
 
     BOOST_REQUIRE_EQUAL("", result);
-} 
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -456,6 +456,60 @@ BOOST_AUTO_TEST_CASE(incorrect)
     /* custom ranges */
     BOOST_REQUIRE_THROW(util::to_number<std::uint8_t>("50", 0, 10), std::out_of_range);
     BOOST_REQUIRE_THROW(util::to_number<std::int8_t>("-50", -10, 10), std::out_of_range);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+/*
+ * util::fs::find function (name)
+ * ------------------------------------------------------------------
+ */
+
+BOOST_AUTO_TEST_SUITE(fs_find_name)
+
+BOOST_AUTO_TEST_CASE(not_recursive)
+{
+    auto file1 = util::fs::find(CMAKE_CURRENT_BINARY_DIR "/root", "file-1.txt", false);
+    auto file2 = util::fs::find(CMAKE_CURRENT_BINARY_DIR "/root", "file-2.txt", false);
+
+    BOOST_TEST(file1.find("file-1.txt") != std::string::npos);
+    BOOST_TEST(file2.empty());
+}
+
+BOOST_AUTO_TEST_CASE(recursive)
+{
+    auto file1 = util::fs::find(CMAKE_CURRENT_BINARY_DIR "/root", "file-1.txt", true);
+    auto file2 = util::fs::find(CMAKE_CURRENT_BINARY_DIR "/root", "file-2.txt", true);
+
+    BOOST_TEST(file1.find("file-1.txt") != std::string::npos);
+    BOOST_TEST(file2.find("file-2.txt") != std::string::npos);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+/*
+ * util::fs::find function (regex)
+ * ------------------------------------------------------------------
+ */
+
+BOOST_AUTO_TEST_SUITE(fs_find_regex)
+
+BOOST_AUTO_TEST_CASE(not_recursive)
+{
+    const std::regex regex("file-[12]\\.txt");
+
+    auto file = util::fs::find(TESTS_BINARY_DIR "/root", regex, false);
+
+    BOOST_TEST(file.find("file-1.txt") != std::string::npos);
+}
+
+BOOST_AUTO_TEST_CASE(recursive)
+{
+    const std::regex regex("file-[12]\\.txt");
+
+    auto file = util::fs::find(TESTS_BINARY_DIR "/root/level-a", regex, true);
+
+    BOOST_TEST(file.find("file-2.txt") != std::string::npos);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

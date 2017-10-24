@@ -31,7 +31,6 @@
 #  include <sys/stat.h>
 #endif
 
-#include <irccd/fs.hpp>
 #include <irccd/js_plugin.hpp>
 
 #include "js_file_module.hpp"
@@ -153,7 +152,7 @@ file* self(duk_context* ctx)
  */
 duk_ret_t method_basename(duk_context* ctx)
 {
-    dukx_push_std_string(ctx, fs::baseName(self(ctx)->path()));
+    dukx_push_std_string(ctx, util::fs::base_name(self(ctx)->path()));
 
     return 1;
 }
@@ -182,7 +181,7 @@ duk_ret_t method_close(duk_context* ctx)
  */
 duk_ret_t method_dirname(duk_context* ctx)
 {
-    dukx_push_std_string(ctx, fs::dirName(self(ctx)->path()));
+    dukx_push_std_string(ctx, util::fs::dir_name(self(ctx)->path()));
 
     return 1;
 }
@@ -519,7 +518,7 @@ duk_ret_t destructor(duk_context* ctx)
  */
 duk_ret_t function_basename(duk_context* ctx)
 {
-    dukx_push_std_string(ctx, fs::baseName(duk_require_string(ctx, 0)));
+    dukx_push_std_string(ctx, util::fs::base_name(duk_require_string(ctx, 0)));
 
     return 1;
 }
@@ -537,7 +536,7 @@ duk_ret_t function_basename(duk_context* ctx)
  */
 duk_ret_t function_dirname(duk_context* ctx)
 {
-    dukx_push_std_string(ctx, fs::dirName(duk_require_string(ctx, 0)));
+    dukx_push_std_string(ctx, util::fs::dir_name(duk_require_string(ctx, 0)));
 
     return 1;
 }

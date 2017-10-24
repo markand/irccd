@@ -27,11 +27,12 @@
 #include <boost/filesystem.hpp>
 
 #include "duktape.hpp"
-#include "fs.hpp"
 #include "js_directory_module.hpp"
 #include "js_irccd_module.hpp"
 #include "js_plugin.hpp"
 #include "sysconfig.hpp"
+
+namespace fs = boost::filesystem;
 
 namespace irccd {
 
@@ -56,68 +57,6 @@ std::string path(duk_context *ctx)
 }
 
 /*
- * Find an entry recursively (or not) in a directory using a predicate which can
- * be used to test for regular expression, equality.
- *
- * Do not use this function directly, use:
- *
- * - find_name
- * - find_regex
- */
-template <typename Pred>
-std::string find_path(const std::string& base, bool recursive, Pred&& pred)
-{
-    /*
-     * For performance reason, we first iterate over all entries that are
-     * not directories to avoid going deeper recursively if the requested
-     * file is in the current directory.
-     */
-    auto entries = fs::readdir(base);
-
-    for (const auto& entry : entries)
-        if (entry.type != fs::Entry::Dir && pred(entry.name))
-            return base + entry.name;
-
-    if (!recursive)
-        return "";
-
-    for (const auto& entry : entries) {
-        if (entry.type == fs::Entry::Dir) {
-            std::string next = base + entry.name + fs::separator();
-            std::string path = find_path(next, true, pred);
-
-            if (!path.empty())
-                return path;
-        }
-    }
-
-    return "";
-}
-
-/*
- * Helper for finding by equality.
- */
-std::string find_name(std::string base, const std::string& pattern, bool recursive)
-{
-    return find_path(base, recursive, [&] (const auto& entryname) -> bool {
-        return pattern == entryname;
-    });
-}
-
-/*
- * Helper for finding by regular expression
- */
-std::string find_regex(const std::string& base, std::string pattern, bool recursive)
-{
-    std::regex regexp(pattern, std::regex::ECMAScript);
-    std::smatch smatch;
-
-    return find_path(base, recursive, [&] (const auto& entryname) -> bool {
-        return std::regex_match(entryname, smatch, regexp);
-    });
-}
-
-/*
  * Generic find function for:
  *
  * - Directory.find
@@ -132,7 +71,7 @@ duk_ret_t find(duk_context* ctx, std::string base, bool recursive, int pattern_i
         std::string path;
 
         if (duk_is_string(ctx, pattern_index))
-            path = find_name(base, duk_get_string(ctx, pattern_index), recursive);
+            path = util::fs::find(base, dukx_get_std_string(ctx, pattern_index), recursive);
         else {
             // Check if it's a valid RegExp object.
             duk_get_global_string(ctx, "RegExp");
@@ -144,7 +83,7 @@ duk_ret_t find(duk_context* ctx, std::string base, bool recursive, int pattern_i
                 auto pattern = duk_to_string(ctx, -1);
                 duk_pop(ctx);
 
-                path = find_regex(base, pattern, recursive);
+                path = util::fs::find(base, std::regex(pattern), recursive);
             } else
                 duk_error(ctx, DUK_ERR_TYPE_ERROR, "pattern must be a string or a regex expression");
         }
@@ -230,14 +169,13 @@ const duk_function_list_entry methods[] = {
  */
 
 /*
- * Function: irccd.Directory(path, flags) [constructor]
+ * Function: Irccd.Directory(path) [constructor]
  * --------------------------------------------------------
  *
  * Opens and read the directory at the specified path.
  *
  * Arguments:
  *   - path, the path to the directory,
- *   - flags, the optional flags (default: 0).
  * Throws:
  *   - Any exception on error
  */
@@ -248,32 +186,31 @@ duk_ret_t constructor(duk_context* ctx)
 
     try {
         auto path = duk_require_string(ctx, 0);
-        auto flags = duk_get_uint(ctx, 1);
 
         if (!boost::filesystem::is_directory(path))
             dukx_throw(ctx, system_error(EINVAL, "not a directory"));
 
-        auto list = fs::readdir(path, flags);
-
         duk_push_this(ctx);
-        duk_push_string(ctx, "count");
-        duk_push_int(ctx, list.size());
-        duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
-        duk_push_string(ctx, "path");
-        dukx_push_std_string(ctx, path);
-        duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
+
+        // 'entries' property.
         duk_push_string(ctx, "entries");
         duk_push_array(ctx);
 
-        for (unsigned i = 0; i < list.size(); ++i) {
+        unsigned i = 0;
+        for (const auto& entry : boost::filesystem::directory_iterator(path)) {
             duk_push_object(ctx);
-            dukx_push_std_string(ctx, list[i].name);
+            dukx_push_std_string(ctx, entry.path().filename().string());
             duk_put_prop_string(ctx, -2, "name");
-            duk_push_int(ctx, list[i].type);
+            duk_push_int(ctx, entry.status().type());
             duk_put_prop_string(ctx, -2, "type");
-            duk_put_prop_index(ctx, -2, i);
+            duk_put_prop_index(ctx, -2, i++);
         }
 
+        duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
+
+        // 'path' property.
+        duk_push_string(ctx, "path");
+        dukx_push_std_string(ctx, path);
         duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
     } catch (const std::exception& ex) {
         dukx_throw(ctx, system_error(errno, ex.what()));
@@ -348,13 +285,15 @@ const duk_function_list_entry functions[] = {
 };
 
 const duk_number_list_entry constants[] = {
-    { "Dot",            static_cast<int>(fs::Dot)               },
-    { "DotDot",         static_cast<int>(fs::DotDot)            },
-    { "TypeUnknown",    static_cast<int>(fs::Entry::Unknown)    },
-    { "TypeDir",        static_cast<int>(fs::Entry::Dir)        },
-    { "TypeFile",       static_cast<int>(fs::Entry::File)       },
-    { "TypeLink",       static_cast<int>(fs::Entry::Link)       },
-    { nullptr,          0                                       }
+    { "TypeFile",       static_cast<int>(fs::regular_file)    },
+    { "TypeDir",        static_cast<int>(fs::directory_file)  },
+    { "TypeLink",       static_cast<int>(fs::symlink_file)    },
+    { "TypeBlock",      static_cast<int>(fs::block_file)      },
+    { "TypeCharacter",  static_cast<int>(fs::character_file)  },
+    { "TypeFifo",       static_cast<int>(fs::fifo_file)       },
+    { "TypeSocket",     static_cast<int>(fs::socket_file)     },
+    { "TypeUnknown",    static_cast<int>(fs::type_unknown)    },
+    { nullptr,          0                                           }
 };
 
 } // !namespace
@@ -372,8 +311,15 @@ void js_directory_module::load(irccd&, std::shared_ptr<js_plugin> plugin)
     duk_push_c_function(plugin->context(), constructor, 2);
     duk_put_number_list(plugin->context(), -1, constants);
     duk_put_function_list(plugin->context(), -1, functions);
-    dukx_push_std_string(plugin->context(), std::string{fs::separator()});
+
+#if defined(IRCCD_SYSTEM_WINDOWS)
+    duk_push_string(plugin->context(), "\\");
+#else
+    duk_push_string(plugin->context(), "/");
+#endif
+
     duk_put_prop_string(plugin->context(), -2, "separator");
+
     duk_push_object(plugin->context());
     duk_put_function_list(plugin->context(), -1, methods);
     duk_put_prop_string(plugin->context(), -2, "prototype");

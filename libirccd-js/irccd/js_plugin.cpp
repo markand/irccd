@@ -26,7 +26,6 @@
 #  include <cstring>
 #endif
 
-#include "fs.hpp"
 #include "irccd.hpp"
 #include "logger.hpp"
 #include "js_plugin_module.hpp"

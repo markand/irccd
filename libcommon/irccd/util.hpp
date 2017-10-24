@@ -37,6 +37,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 
 #include <json.hpp>
@@ -328,7 +329,7 @@ IRCCD_EXPORT bool is_boolean(std::string value) noexcept;
  * \return true if integer
  */
 IRCCD_EXPORT bool is_int(const std::string& value, int base = 10) noexcept;
- 
+
 /**
  * Check if the string is real.
  *
@@ -847,6 +848,101 @@ void poll(int timeout, Pollable &first, Rest&... rest)
 }
 
 } // !poller
+
+namespace fs {
+
+/**
+ * Get the base name from a path.
+ *
+ * Example, baseName("/etc/foo.conf") // foo.conf
+ *
+ * \param path the path
+ * \return the base name
+ */
+inline std::string base_name(const std::string& path)
+{
+    return boost::filesystem::path(path).filename().string();
+}
+
+/**
+ * Get the parent directory from a path.
+ *
+ * Example, dirName("/etc/foo.conf") // /etc
+ *
+ * \param path the path
+ * \return the parent directory
+ */
+inline std::string dir_name(std::string path)
+{
+    return boost::filesystem::path(path).parent_path().string();
+}
+
+/**
+ * Search an item recursively.
+ *
+ * The predicate must have the following signature:
+ *  void f(const boost::filesystem::directory_entry& entry)
+ *
+ * Where:
+ *   - base is the current parent directory in the tree
+ *   - entry is the current entry
+ *
+ * \param base the base directory
+ * \param predicate the predicate
+ * \param recursive true to do recursive search
+ * \return the full path name to the file or empty string if never found
+ * \throw std::runtime_error on read errors
+ */
+template <typename Predicate>
+std::string find_if(const std::string& base, bool recursive, Predicate&& predicate)
+{
+    auto find = [&] (auto it) -> std::string {
+        for (const auto& entry : it)
+            if (predicate(entry))
+                return entry.path().string();
+
+        return "";
+    };
+
+    if (recursive)
+        return find(boost::filesystem::recursive_directory_iterator(base));
+
+    return find(boost::filesystem::directory_iterator(base));
+}
+
+/**
+ * Find a file by name recursively.
+ *
+ * \param base the base directory
+ * \param name the file name
+ * \param recursive true to do recursive search
+ * \return the full path name to the file or empty string if never found
+ * \throw std::runtime_error on read errors
+ */
+inline std::string find(const std::string& base, const std::string& name, bool recursive = false)
+{
+    return find_if(base, recursive, [&] (const auto& entry) {
+        return entry.path().filename().string() == name;
+    });
+}
+
+/**
+ * Overload by regular expression.
+ *
+ * \param base the base directory
+ * \param regex the regular expression
+ * \param recursive true to do recursive search
+ * \return the full path name to the file or empty string if never found
+ * \throw std::runtime_error on read errors
+ */
+inline std::string find(const std::string& base, const std::regex& regex, bool recursive = false)
+{
+    return find_if(base, recursive, [&] (const auto& entry) {
+        return std::regex_match(entry.path().filename().string(), regex);
+    });
+}
+
+} // !fs
 
 } // !util
 

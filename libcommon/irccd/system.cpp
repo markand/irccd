@@ -100,7 +100,6 @@
 #   include <unistd.h>
 #endif
 
-#include "fs.hpp"
 #include "logger.hpp"
 #include "system.hpp"
 #include "util.hpp"

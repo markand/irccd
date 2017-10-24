@@ -24,7 +24,6 @@
 #include "alias.hpp"
 #include "cli.hpp"
 #include "client.hpp"
-#include "fs.hpp"
 #include "ini.hpp"
 #include "irccdctl.hpp"
 #include "logger.hpp"

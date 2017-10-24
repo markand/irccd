@@ -20,6 +20,13 @@
 project(tests)
 
 if (WITH_TESTS)
+    # Create some hierarchy.
+    file(MAKE_DIRECTORY ${tests_BINARY_DIR}/root)
+    file(MAKE_DIRECTORY ${tests_BINARY_DIR}/root/level-a)
+    file(MAKE_DIRECTORY ${tests_BINARY_DIR}/root/level-a/level-1)
+    file(WRITE ${tests_BINARY_DIR}/root/file-1.txt "\n")
+    file(WRITE ${tests_BINARY_DIR}/root/level-a/level-1/file-2.txt)
+
     add_subdirectory(cmd-plugin-config)
 #    add_subdirectory(cmd-plugin-info)
 #    add_subdirectory(cmd-plugin-list)
@@ -63,6 +70,7 @@ if (WITH_TESTS)
     if (HAVE_JS)
         add_subdirectory(js)
         add_subdirectory(js-elapsedtimer)
+        add_subdirectory(js-directory)
         add_subdirectory(js-file)
         add_subdirectory(js-irccd)
         add_subdirectory(js-logger)

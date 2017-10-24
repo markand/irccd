@@ -32,3 +32,7 @@ Note: these paths are no more automatically detected and set with the new
 
   - The method ElapsedTimer.reset has been removed, just use `start` instead
     when you want to accumulate time.
+
+#### Module Directory
+
+  - The property `Directory.count` has been removed.

@@ -70,6 +70,10 @@ public:
         add<Modules...>();
 
         plugin_->on_load(irccd_);
+
+        // Add some CMake variables.
+        duk_push_string(plugin_->context(), TESTS_BINARY_DIR);
+        duk_put_global_string(plugin_->context(), "TESTS_BINARY_DIR");
     }
 };
 
