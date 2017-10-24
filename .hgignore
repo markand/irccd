@@ -1,4 +1,12 @@
-CMakeLists\.txt\.user
-tags
+# Build directory used in lots of documentation.
 build
+
+# Qt Creator creates CMakeLists.txt.user.
+CMakeLists\.txt\.user
+
+# vim/emacs specific.
+tags
 \.swp$
+
+# macOS specific.
+\.DS_Store
