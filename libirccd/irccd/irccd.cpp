@@ -24,8 +24,9 @@
 
 namespace irccd {
 
-irccd::irccd()
-    : command_service_(std::make_unique<command_service>())
+irccd::irccd(std::string config)
+    : config_(std::move(config))
+    , command_service_(std::make_unique<command_service>())
     , itr_service_(std::make_unique<interrupt_service>())
     , server_service_(std::make_unique<server_service>(*this))
     , tpt_service_(std::make_unique<transport_service>(*this))

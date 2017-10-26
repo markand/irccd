@@ -55,6 +55,9 @@ private:
     std::mutex mutex_;
     std::vector<std::function<void (irccd&)>> events_;
 
+    // Path to config.
+    std::string config_;
+
     // Services.
     std::shared_ptr<command_service> command_service_;
     std::shared_ptr<interrupt_service> itr_service_;
@@ -73,13 +76,35 @@ private:
 public:
     /**
      * Prepare standard services.
+     *
+     * \param config the optional path to the configuration.
      */
-    irccd();
+    irccd(std::string config = "");
 
     /**
      * Default destructor.
      */
     ~irccd();
+
+    /**
+     * Get the current configuration path.
+     *
+     * \return the path
+     */
+    inline const std::string& config() const noexcept
+    {
+        return config_;
+    }
+
+    /**
+     * Set the configuration path.
+     *
+     * \param path the new path
+     */
+    inline void set_config(std::string path) noexcept
+    {
+        config_ = std::move(path);
+    }
 
     /**
      * Access the command service.

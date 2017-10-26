@@ -247,6 +247,8 @@ void load_foreground(bool foreground, const option::result& options)
 
 void load(const config& config, const option::result& options)
 {
+    instance->set_config(config.path());
+
     /*
      * Order matters, please be careful when changing this.
      *
