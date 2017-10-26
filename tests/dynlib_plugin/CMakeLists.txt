@@ -16,7 +16,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-find_package(Boost REQUIRED)
+find_package(Boost REQUIRED QUIET)
 
 add_library(test-plugin MODULE test_plugin.cpp)
 target_link_libraries(test-plugin libirccd Boost::boost)

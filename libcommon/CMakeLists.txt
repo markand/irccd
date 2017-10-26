@@ -18,7 +18,7 @@
 
 project(libcommon)
 
-find_package(Boost 1.60 REQUIRED COMPONENTS filesystem system)
+find_package(Boost 1.60 REQUIRED QUIET COMPONENTS filesystem system)
 
 set(
     HEADERS

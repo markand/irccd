@@ -32,7 +32,7 @@
 # Resources files are copied VERBATIM into the same directory.
 #
 
-find_package(Boost REQUIRED COMPONENTS unit_test_framework)
+find_package(Boost REQUIRED QUIET COMPONENTS unit_test_framework)
 
 include(${CMAKE_CURRENT_LIST_DIR}/IrccdVeraCheck.cmake)
 

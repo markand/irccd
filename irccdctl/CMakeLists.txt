@@ -18,7 +18,7 @@
 
 project(irccdctl)
 
-find_package(Boost REQUIRED COMPONENTS timer)
+find_package(Boost REQUIRED QUIET COMPONENTS timer)
 
 set(
     SOURCES
