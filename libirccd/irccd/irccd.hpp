@@ -77,6 +77,11 @@ public:
     irccd();
 
     /**
+     * Default destructor.
+     */
+    ~irccd();
+
+    /**
      * Access the command service.
      *
      * \return the service

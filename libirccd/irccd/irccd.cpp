@@ -25,14 +25,16 @@
 namespace irccd {
 
 irccd::irccd()
-    : command_service_(std::make_shared<command_service>())
-    , itr_service_(std::make_shared<interrupt_service>())
-    , server_service_(std::make_shared<server_service>(*this))
-    , tpt_service_(std::make_shared<transport_service>(*this))
-    , rule_service_(std::make_shared<rule_service>())
-    , plugin_service_(std::make_shared<plugin_service>(*this))
+    : command_service_(std::make_unique<command_service>())
+    , itr_service_(std::make_unique<interrupt_service>())
+    , server_service_(std::make_unique<server_service>(*this))
+    , tpt_service_(std::make_unique<transport_service>(*this))
+    , rule_service_(std::make_unique<rule_service>())
+    , plugin_service_(std::make_unique<plugin_service>(*this))
 {
 }
+
+irccd::~irccd() = default;
 
 void irccd::post(std::function<void (irccd&)> ev) noexcept
 {
