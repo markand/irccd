@@ -469,8 +469,8 @@ BOOST_AUTO_TEST_SUITE(fs_find_name)
 
 BOOST_AUTO_TEST_CASE(not_recursive)
 {
-    auto file1 = util::fs::find(CMAKE_CURRENT_BINARY_DIR "/root", "file-1.txt", false);
-    auto file2 = util::fs::find(CMAKE_CURRENT_BINARY_DIR "/root", "file-2.txt", false);
+    auto file1 = util::fs::find(TESTS_BINARY_DIR "/root", "file-1.txt", false);
+    auto file2 = util::fs::find(TESTS_BINARY_DIR "/root", "file-2.txt", false);
 
     BOOST_TEST(file1.find("file-1.txt") != std::string::npos);
     BOOST_TEST(file2.empty());
@@ -478,8 +478,8 @@ BOOST_AUTO_TEST_CASE(not_recursive)
 
 BOOST_AUTO_TEST_CASE(recursive)
 {
-    auto file1 = util::fs::find(CMAKE_CURRENT_BINARY_DIR "/root", "file-1.txt", true);
-    auto file2 = util::fs::find(CMAKE_CURRENT_BINARY_DIR "/root", "file-2.txt", true);
+    auto file1 = util::fs::find(TESTS_BINARY_DIR "/root", "file-1.txt", true);
+    auto file2 = util::fs::find(TESTS_BINARY_DIR "/root", "file-2.txt", true);
 
     BOOST_TEST(file1.find("file-1.txt") != std::string::npos);
     BOOST_TEST(file2.find("file-2.txt") != std::string::npos);

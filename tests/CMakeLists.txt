@@ -56,7 +56,7 @@ if (WITH_TESTS)
     add_subdirectory(cmd-server-part)
     add_subdirectory(cmd-server-reconnect)
     add_subdirectory(cmd-server-topic)
-    add_subdirectory(dynlib_plugin)
+#    add_subdirectory(dynlib_plugin)
 
     # Misc
     add_subdirectory(logger)

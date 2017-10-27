@@ -34,9 +34,9 @@ BOOST_FIXTURE_TEST_SUITE(js_directory_suite, directory_test)
 BOOST_AUTO_TEST_CASE(constructor)
 {
     const std::string script(
-        "d = new Irccd.Directory(TESTS_BINARY_DIR + \"/level-1\");"
+        "d = new Irccd.Directory(TESTS_BINARY_DIR + \"/root\");"
         "p = d.path;"
-        "e = d.entries;"
+        "l = d.entries.length;"
     );
 
     if (duk_peval_string(plugin_->context(), script.c_str()) != 0)
