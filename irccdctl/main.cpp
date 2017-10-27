@@ -29,6 +29,7 @@
 #include "logger.hpp"
 #include "options.hpp"
 #include "system.hpp"
+#include "string_util.hpp"
 #include "util.hpp"
 
 using namespace std::string_literals;
@@ -141,7 +142,7 @@ void readConnectIp(const ini::section &sc)
 
     address = net::resolveOne(host, port, domain, SOCK_STREAM);
 
-    if ((it = sc.find("ssl")) != sc.end() && util::is_boolean(it->value()))
+    if ((it = sc.find("ssl")) != sc.end() && string_util::is_boolean(it->value()))
 #if defined(HAVE_SSL)
         client = std::make_unique<TlsClient>();
 #else
@@ -219,7 +220,7 @@ void readGeneral(const ini::section &sc)
     auto verbose = sc.find("verbose");
 
     if (verbose != sc.end())
-        log::set_verbose(util::is_boolean(verbose->value()));
+        log::set_verbose(string_util::is_boolean(verbose->value()));
 }
 
 /*
@@ -246,7 +247,7 @@ Alias readAlias(const ini::section &sc, const std::string &name)
          * argument is a command name.
          */
         if (option.size() == 1 && option[0].empty())
-            throw std::runtime_error(util::sprintf("alias %s: missing command name in '%s'", name, option.key()));
+            throw std::runtime_error(string_util::sprintf("alias %s: missing command name in '%s'", name, option.key()));
 
         std::string command = option[0];
         std::vector<AliasArg> args(option.begin() + 1, option.end());
@@ -436,7 +437,7 @@ void exec(const Alias &alias, std::vector<std::string> argsCopy)
         for (const auto &arg : cmd.args()) {
             if (arg.isPlaceholder()) {
                 if (args.size() < arg.index() + 1)
-                    throw std::invalid_argument(util::sprintf("missing argument for placeholder %d", arg.index()));
+                    throw std::invalid_argument(string_util::sprintf("missing argument for placeholder %d", arg.index()));
 
                 cmdArgs.push_back(args[arg.index()]);
 

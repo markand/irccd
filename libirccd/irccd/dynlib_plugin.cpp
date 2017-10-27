@@ -22,7 +22,7 @@
 #include <boost/filesystem.hpp>
 
 #include "dynlib_plugin.hpp"
-#include "util.hpp"
+#include "string_util.hpp"
 
 #if defined(IRCCD_SYSTEM_WINDOWS)
 #   define DYNLIB_EXTENSION ".dll"
@@ -53,11 +53,11 @@ dynlib_plugin::dynlib_plugin(std::string name, std::string path)
 
     base.erase(std::remove_if(base.begin(), base.end(), need_remove), base.end());
 
-    auto fname = util::sprintf("irccd_%s_load", base);
+    auto fname = string_util::sprintf("irccd_%s_load", base);
     auto load = dso_.get<load_t>(fname);
 
     if (!load)
-        throw std::runtime_error(util::sprintf("missing plugin entry function '%s'", fname));
+        throw std::runtime_error(string_util::sprintf("missing plugin entry function '%s'", fname));
 
     plugin_ = load(name, path);
 

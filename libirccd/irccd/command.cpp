@@ -18,6 +18,7 @@
 
 #include "command.hpp"
 #include "irccd.hpp"
+#include "json_util.hpp"
 #include "service.hpp"
 #include "transport.hpp"
 #include "util.hpp"
@@ -143,7 +144,7 @@ plugin_config_command::plugin_config_command()
 
 void plugin_config_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto plugin = irccd.plugins().require(util::json::require_identifier(args, "plugin"));
+    auto plugin = irccd.plugins().require(json_util::require_identifier(args, "plugin"));
 
     if (args.count("value") > 0)
         exec_set(client, *plugin, args);
@@ -158,7 +159,7 @@ plugin_info_command::plugin_info_command()
 
 void plugin_info_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto plugin = irccd.plugins().require(util::json::require_identifier(args, "plugin"));
+    auto plugin = irccd.plugins().require(json_util::require_identifier(args, "plugin"));
 
     client.success("plugin-info", {
         { "author",     plugin->author()    },
@@ -192,7 +193,7 @@ plugin_load_command::plugin_load_command()
 
 void plugin_load_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.plugins().load(util::json::require_identifier(args, "plugin"));
+    irccd.plugins().load(json_util::require_identifier(args, "plugin"));
     client.success("plugin-load");
 }
 
@@ -203,7 +204,7 @@ plugin_reload_command::plugin_reload_command()
 
 void plugin_reload_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.plugins().require(util::json::require_identifier(args, "plugin"))->on_reload(irccd);
+    irccd.plugins().require(json_util::require_identifier(args, "plugin"))->on_reload(irccd);
     client.success("plugin-reload");
 }
 
@@ -214,7 +215,7 @@ plugin_unload_command::plugin_unload_command()
 
 void plugin_unload_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.plugins().unload(util::json::require_identifier(args, "plugin"));
+    irccd.plugins().unload(json_util::require_identifier(args, "plugin"));
     client.success("plugin-unload");
 }
 
@@ -225,9 +226,9 @@ server_channel_mode_command::server_channel_mode_command()
 
 void server_channel_mode_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::require_identifier(args, "server"))->cmode(
-        util::json::require_string(args, "channel"),
-        util::json::require_string(args, "mode")
+    irccd.servers().require(json_util::require_identifier(args, "server"))->cmode(
+        json_util::require_string(args, "channel"),
+        json_util::require_string(args, "mode")
     );
     client.success("server-cmode");
 }
@@ -239,9 +240,9 @@ server_channel_notice_command::server_channel_notice_command()
 
 void server_channel_notice_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::require_string(args, "server"))->cnotice(
-        util::json::require_string(args, "channel"),
-        util::json::require_string(args, "message")
+    irccd.servers().require(json_util::require_string(args, "server"))->cnotice(
+        json_util::require_string(args, "channel"),
+        json_util::require_string(args, "message")
     );
     client.success("server-cnotice");
 }
@@ -288,7 +289,7 @@ server_info_command::server_info_command()
 void server_info_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
     auto response = nlohmann::json::object();
-    auto server = irccd.servers().require(util::json::require_identifier(args, "server"));
+    auto server = irccd.servers().require(json_util::require_identifier(args, "server"));
 
     // General stuff.
     response.push_back({"name", server->name()});
@@ -317,9 +318,9 @@ server_invite_command::server_invite_command()
 
 void server_invite_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::require_identifier(args, "server"))->invite(
-        util::json::require_string(args, "target"),
-        util::json::require_string(args, "channel")
+    irccd.servers().require(json_util::require_identifier(args, "server"))->invite(
+        json_util::require_string(args, "target"),
+        json_util::require_string(args, "channel")
     );
     client.success("server-invite");
 }
@@ -331,9 +332,9 @@ server_join_command::server_join_command()
 
 void server_join_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::require_identifier(args, "server"))->join(
-        util::json::require_string(args, "channel"),
-        util::json::get_string(args, "password")
+    irccd.servers().require(json_util::require_identifier(args, "server"))->join(
+        json_util::require_string(args, "channel"),
+        json_util::get_string(args, "password")
     );
     client.success("server-join");
 }
@@ -345,10 +346,10 @@ server_kick_command::server_kick_command()
 
 void server_kick_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::require_identifier(args, "server"))->kick(
-        util::json::require_string(args, "target"),
-        util::json::require_string(args, "channel"),
-        util::json::get_string(args, "reason")
+    irccd.servers().require(json_util::require_identifier(args, "server"))->kick(
+        json_util::require_string(args, "target"),
+        json_util::require_string(args, "channel"),
+        json_util::get_string(args, "reason")
     );
     client.success("server-kick");
 }
@@ -377,9 +378,9 @@ server_me_command::server_me_command()
 
 void server_me_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::require_identifier(args, "server"))->me(
-        util::json::require_string(args, "target"),
-        util::json::require_string(args, "message")
+    irccd.servers().require(json_util::require_identifier(args, "server"))->me(
+        json_util::require_string(args, "target"),
+        json_util::require_string(args, "message")
     );
     client.success("server-me");
 }
@@ -391,9 +392,9 @@ server_message_command::server_message_command()
 
 void server_message_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::require_identifier(args, "server"))->message(
-        util::json::require_string(args, "target"),
-        util::json::require_string(args, "message")
+    irccd.servers().require(json_util::require_identifier(args, "server"))->message(
+        json_util::require_string(args, "target"),
+        json_util::require_string(args, "message")
     );
     client.success("server-message");
 }
@@ -405,8 +406,8 @@ server_mode_command::server_mode_command()
 
 void server_mode_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::require_identifier(args, "server"))->mode(
-        util::json::require_string(args, "mode")
+    irccd.servers().require(json_util::require_identifier(args, "server"))->mode(
+        json_util::require_string(args, "mode")
     );
     client.success("server-mode");
 }
@@ -418,8 +419,8 @@ server_nick_command::server_nick_command()
 
 void server_nick_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::require_identifier(args, "server"))->set_nickname(
-        util::json::require_string(args, "nickname")
+    irccd.servers().require(json_util::require_identifier(args, "server"))->set_nickname(
+        json_util::require_string(args, "nickname")
     );
     client.success("server-nick");
 }
@@ -431,9 +432,9 @@ server_notice_command::server_notice_command()
 
 void server_notice_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::require_identifier(args, "server"))->notice(
-        util::json::require_string(args, "target"),
-        util::json::require_string(args, "message")
+    irccd.servers().require(json_util::require_identifier(args, "server"))->notice(
+        json_util::require_string(args, "target"),
+        json_util::require_string(args, "message")
     );
     client.success("server-notice");
 }
@@ -445,9 +446,9 @@ server_part_command::server_part_command()
 
 void server_part_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::require_identifier(args, "server"))->part(
-        util::json::require_string(args, "channel"),
-        util::json::get_string(args, "reason")
+    irccd.servers().require(json_util::require_identifier(args, "server"))->part(
+        json_util::require_string(args, "channel"),
+        json_util::get_string(args, "reason")
     );
     client.success("server-part");
 }
@@ -477,9 +478,9 @@ server_topic_command::server_topic_command()
 
 void server_topic_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(util::json::require_identifier(args, "server"))->topic(
-        util::json::require_string(args, "channel"),
-        util::json::require_string(args, "topic")
+    irccd.servers().require(json_util::require_identifier(args, "server"))->topic(
+        json_util::require_string(args, "channel"),
+        json_util::require_string(args, "topic")
     );
     client.success("server-topic");
 }
@@ -503,7 +504,7 @@ void rule_edit_command::exec(irccd& irccd, transport_client& client, const nlohm
     };
 
     // Create a copy to avoid incomplete edition in case of errors.
-    auto index = util::json::require_uint(args, "index");
+    auto index = json_util::require_uint(args, "index");
     auto rule = irccd.rules().require(index);
 
     updateset(rule.channels(), args, "channels");
@@ -556,7 +557,7 @@ rule_info_command::rule_info_command()
 
 void rule_info_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    client.success("rule-info", to_json(irccd.rules().require(util::json::require_uint(args, "index"))));
+    client.success("rule-info", to_json(irccd.rules().require(json_util::require_uint(args, "index"))));
 }
 
 rule_remove_command::rule_remove_command()
@@ -566,7 +567,7 @@ rule_remove_command::rule_remove_command()
 
 void rule_remove_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    unsigned position = util::json::require_uint(args, "index");
+    unsigned position = json_util::require_uint(args, "index");
 
     if (irccd.rules().length() == 0)
         client.error("rule-remove", "rule list is empty");
@@ -585,8 +586,8 @@ rule_move_command::rule_move_command()
 
 void rule_move_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto from = util::json::require_uint(args, "from");
-    auto to = util::json::require_uint(args, "to");
+    auto from = json_util::require_uint(args, "from");
+    auto to = json_util::require_uint(args, "to");
 
     /*
      * Examples of moves
@@ -639,7 +640,7 @@ rule_add_command::rule_add_command()
 
 void rule_add_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto index = util::json::get_uint(args, "index", irccd.rules().length());
+    auto index = json_util::get_uint(args, "index", irccd.rules().length());
     auto rule = from_json(args);
 
     if (index > irccd.rules().length())

@@ -20,7 +20,7 @@
 
 #include <libircclient.h>
 
-#include <irccd/util.hpp>
+#include <irccd/string_util.hpp>
 
 #include "js_util_module.hpp"
 #include "js_plugin.hpp"
@@ -41,9 +41,9 @@ namespace {
  *   fieldn: ...
  * }
  */
-util::subst get_subst(duk_context* ctx, int index)
+string_util::subst get_subst(duk_context* ctx, int index)
 {
-    util::subst params;
+    string_util::subst params;
 
     if (!duk_is_object(ctx, index))
         return params;
@@ -72,13 +72,13 @@ std::vector<std::string> split(duk_context* ctx)
     std::string pattern = " \t\n";
 
     if (duk_is_string(ctx, 0))
-        result = util::split(dukx_get_std_string(ctx, 0), pattern);
+        result = string_util::split(dukx_get_std_string(ctx, 0), pattern);
     else if (duk_is_array(ctx, 0)) {
         duk_enum(ctx, 0, DUK_ENUM_ARRAY_INDICES_ONLY);
 
         while (duk_next(ctx, -1, 1)) {
             // Split individual tokens as array if spaces are found.
-            auto tmp = util::split(duk_to_string(ctx, -1), pattern);
+            auto tmp = string_util::split(duk_to_string(ctx, -1), pattern);
 
             result.insert(result.end(), tmp.begin(), tmp.end());
             duk_pop_2(ctx);
@@ -102,7 +102,7 @@ int limit(duk_context* ctx, int index, const char* name, int value)
         return value;
 
     value = duk_to_int(ctx, index);
-    
+
     if (value <= 0)
         duk_error(ctx, DUK_ERR_RANGE_ERROR, "argument %d (%s) must be positive", index, name);
 
@@ -219,7 +219,7 @@ duk_ret_t cut(duk_context* ctx)
 duk_ret_t format(duk_context* ctx)
 {
     try {
-        dukx_push_std_string(ctx, util::format(dukx_get_std_string(ctx, 0), get_subst(ctx, 1)));
+        dukx_push_std_string(ctx, string_util::format(dukx_get_std_string(ctx, 0), get_subst(ctx, 1)));
     } catch (const std::exception &ex) {
         dukx_throw(ctx, SyntaxError(ex.what()));
     }

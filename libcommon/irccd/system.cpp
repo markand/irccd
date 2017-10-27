@@ -102,7 +102,7 @@
 
 #include "logger.hpp"
 #include "system.hpp"
-#include "util.hpp"
+#include "string_util.hpp"
 #include "xdg.hpp"
 
 namespace irccd {
@@ -149,7 +149,7 @@ void set_privileges(const std::string& type_name,
 {
     IntType id = 0;
 
-    if (util::is_int(value))
+    if (string_util::is_int(value))
         id = std::stoi(value);
     else {
         auto info = lookup(value.c_str());

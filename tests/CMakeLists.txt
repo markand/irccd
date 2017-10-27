@@ -64,7 +64,7 @@ if (WITH_TESTS)
     add_subdirectory(util)
 
     # Services
-    add_subdirectory(service-plugin)
+    #add_subdirectory(service-plugin)
 
     # JS API
     if (HAVE_JS)
@@ -80,7 +80,7 @@ if (WITH_TESTS)
         add_subdirectory(js-util)
         add_subdirectory(plugin-ask)
         add_subdirectory(plugin-auth)
-        add_subdirectory(plugin-hangman)
+        #add_subdirectory(plugin-hangman)
         add_subdirectory(plugin-history)
         add_subdirectory(plugin-logger)
         add_subdirectory(plugin-plugin)

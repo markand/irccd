@@ -21,6 +21,7 @@
 
 #include <duktape.hpp>
 
+#include <irccd/fs_util.hpp>
 #include <irccd/util.hpp>
 
 namespace irccd {
@@ -57,7 +58,7 @@ BOOST_AUTO_TEST_CASE(syntax_error)
         dukx_peval_file(ctx_, SOURCEDIR "/syntax-error.js");
     } catch (const Exception& ex) {
         BOOST_REQUIRE_EQUAL("SyntaxError", ex.name);
-        BOOST_REQUIRE_EQUAL("syntax-error.js", util::fs::base_name(ex.fileName));
+        BOOST_REQUIRE_EQUAL("syntax-error.js", fs_util::base_name(ex.fileName));
         BOOST_REQUIRE_EQUAL(6, ex.lineNumber);
         BOOST_REQUIRE_EQUAL("empty expression not allowed (line 6)", ex.message);
     }

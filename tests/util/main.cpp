@@ -22,6 +22,8 @@
 #include <cstdint>
 
 #include <irccd/util.hpp>
+#include <irccd/fs_util.hpp>
+#include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
 
 namespace std {
@@ -41,98 +43,98 @@ namespace irccd {
 BOOST_AUTO_TEST_SUITE(format)
 
 /*
- * util::format function
+ * string_util::format function
  * --------------------------------------------------------
  */
 
 BOOST_AUTO_TEST_CASE(nothing)
 {
     std::string expected = "hello world!";
-    std::string result = util::format("hello world!");
+    std::string result = string_util::format("hello world!");
 
     BOOST_REQUIRE_EQUAL(expected, result);
 }
 
 BOOST_AUTO_TEST_CASE(escape)
 {
-    util::subst params;
+    string_util::subst params;
 
     params.keywords.emplace("target", "hello");
 
-    BOOST_REQUIRE_EQUAL("$@#", util::format("$@#"));
-    BOOST_REQUIRE_EQUAL(" $ @ # ", util::format(" $ @ # "));
-    BOOST_REQUIRE_EQUAL("#", util::format("#"));
-    BOOST_REQUIRE_EQUAL(" # ", util::format(" # "));
-    BOOST_REQUIRE_EQUAL("#@", util::format("#@"));
-    BOOST_REQUIRE_EQUAL("##", util::format("##"));
-    BOOST_REQUIRE_EQUAL("#!", util::format("#!"));
-    BOOST_REQUIRE_EQUAL("#{target}", util::format("##{target}"));
-    BOOST_REQUIRE_EQUAL("@hello", util::format("@#{target}", params));
-    BOOST_REQUIRE_EQUAL("hello#", util::format("#{target}#", params));
-    BOOST_REQUIRE_THROW(util::format("#{failure"), std::exception);
+    BOOST_REQUIRE_EQUAL("$@#", string_util::format("$@#"));
+    BOOST_REQUIRE_EQUAL(" $ @ # ", string_util::format(" $ @ # "));
+    BOOST_REQUIRE_EQUAL("#", string_util::format("#"));
+    BOOST_REQUIRE_EQUAL(" # ", string_util::format(" # "));
+    BOOST_REQUIRE_EQUAL("#@", string_util::format("#@"));
+    BOOST_REQUIRE_EQUAL("##", string_util::format("##"));
+    BOOST_REQUIRE_EQUAL("#!", string_util::format("#!"));
+    BOOST_REQUIRE_EQUAL("#{target}", string_util::format("##{target}"));
+    BOOST_REQUIRE_EQUAL("@hello", string_util::format("@#{target}", params));
+    BOOST_REQUIRE_EQUAL("hello#", string_util::format("#{target}#", params));
+    BOOST_REQUIRE_THROW(string_util::format("#{failure"), std::exception);
 }
 
 BOOST_AUTO_TEST_CASE(disable_date)
 {
-    util::subst params;
+    string_util::subst params;
 
-    params.flags &= ~(util::subst_flags::date);
+    params.flags &= ~(string_util::subst_flags::date);
 
-    BOOST_REQUIRE_EQUAL("%H:%M", util::format("%H:%M", params));
+    BOOST_REQUIRE_EQUAL("%H:%M", string_util::format("%H:%M", params));
 }
 
 BOOST_AUTO_TEST_CASE(disable_keywords)
 {
-    util::subst params;
+    string_util::subst params;
 
     params.keywords.emplace("target", "hello");
-    params.flags &= ~(util::subst_flags::keywords);
+    params.flags &= ~(string_util::subst_flags::keywords);
 
-    BOOST_REQUIRE_EQUAL("#{target}", util::format("#{target}", params));
+    BOOST_REQUIRE_EQUAL("#{target}", string_util::format("#{target}", params));
 }
 
 BOOST_AUTO_TEST_CASE(disable_env)
 {
-    util::subst params;
+    string_util::subst params;
 
-    params.flags &= ~(util::subst_flags::env);
+    params.flags &= ~(string_util::subst_flags::env);
 
-    BOOST_REQUIRE_EQUAL("${HOME}", util::format("${HOME}", params));
+    BOOST_REQUIRE_EQUAL("${HOME}", string_util::format("${HOME}", params));
 }
 
 BOOST_AUTO_TEST_CASE(keyword_simple)
 {
-    util::subst params;
+    string_util::subst params;
 
     params.keywords.insert({"target", "irccd"});
 
     std::string expected = "hello irccd!";
-    std::string result = util::format("hello #{target}!", params);
+    std::string result = string_util::format("hello #{target}!", params);
 
     BOOST_REQUIRE_EQUAL(expected, result);
 }
 
 BOOST_AUTO_TEST_CASE(keyword_multiple)
 {
-    util::subst params;
+    string_util::subst params;
 
     params.keywords.insert({"target", "irccd"});
     params.keywords.insert({"source", "nightmare"});
 
     std::string expected = "hello irccd from nightmare!";
-    std::string result = util::format("hello #{target} from #{source}!", params);
+    std::string result = string_util::format("hello #{target} from #{source}!", params);
 
     BOOST_REQUIRE_EQUAL(expected, result);
 }
 
 BOOST_AUTO_TEST_CASE(keyword_adj_twice)
 {
-    util::subst params;
+    string_util::subst params;
 
     params.keywords.insert({"target", "irccd"});
 
     std::string expected = "hello irccdirccd!";
-    std::string result = util::format("hello #{target}#{target}!", params);
+    std::string result = string_util::format("hello #{target}#{target}!", params);
 
     BOOST_REQUIRE_EQUAL(expected, result);
 }
@@ -140,7 +142,7 @@ BOOST_AUTO_TEST_CASE(keyword_adj_twice)
 BOOST_AUTO_TEST_CASE(keyword_missing)
 {
     std::string expected = "hello !";
-    std::string result = util::format("hello #{target}!");
+    std::string result = string_util::format("hello #{target}!");
 
     BOOST_REQUIRE_EQUAL(expected, result);
 }
@@ -151,7 +153,7 @@ BOOST_AUTO_TEST_CASE(env_simple)
 
     if (!home.empty()) {
         std::string expected = "my home is " + home;
-        std::string result = util::format("my home is ${HOME}");
+        std::string result = string_util::format("my home is ${HOME}");
 
         BOOST_REQUIRE_EQUAL(expected, result);
     }
@@ -160,7 +162,7 @@ BOOST_AUTO_TEST_CASE(env_simple)
 BOOST_AUTO_TEST_CASE(env_missing)
 {
     std::string expected = "value is ";
-    std::string result = util::format("value is ${HOPE_THIS_VAR_NOT_EXIST}");
+    std::string result = string_util::format("value is ${HOPE_THIS_VAR_NOT_EXIST}");
 
     BOOST_REQUIRE_EQUAL(expected, result);
 }
@@ -168,7 +170,7 @@ BOOST_AUTO_TEST_CASE(env_missing)
 BOOST_AUTO_TEST_SUITE_END()
 
 /*
- * util::split function
+ * string_util::split function
  * --------------------------------------------------------
  */
 
@@ -179,7 +181,7 @@ using list = std::vector<std::string>;
 BOOST_AUTO_TEST_CASE(simple)
 {
     list expected { "a", "b" };
-    list result = util::split("a;b", ";");
+    list result = string_util::split("a;b", ";");
 
     BOOST_REQUIRE_EQUAL(expected, result);
 }
@@ -187,7 +189,7 @@ BOOST_AUTO_TEST_CASE(simple)
 BOOST_AUTO_TEST_CASE(cut)
 {
     list expected { "msg", "#staff", "foo bar baz" };
-    list result = util::split("msg;#staff;foo bar baz", ";", 3);
+    list result = string_util::split("msg;#staff;foo bar baz", ";", 3);
 
     BOOST_REQUIRE_EQUAL(expected, result);
 }
@@ -195,7 +197,7 @@ BOOST_AUTO_TEST_CASE(cut)
 BOOST_AUTO_TEST_SUITE_END()
 
 /*
- * util::strip function
+ * string_util::strip function
  * --------------------------------------------------------
  */
 
@@ -204,7 +206,7 @@ BOOST_AUTO_TEST_SUITE(strip)
 BOOST_AUTO_TEST_CASE(left)
 {
     std::string value = "   123";
-    std::string result = util::strip(value);
+    std::string result = string_util::strip(value);
 
     BOOST_REQUIRE_EQUAL("123", result);
 }
@@ -212,7 +214,7 @@ BOOST_AUTO_TEST_CASE(left)
 BOOST_AUTO_TEST_CASE(right)
 {
     std::string value = "123   ";
-    std::string result = util::strip(value);
+    std::string result = string_util::strip(value);
 
     BOOST_REQUIRE_EQUAL("123", result);
 }
@@ -220,7 +222,7 @@ BOOST_AUTO_TEST_CASE(right)
 BOOST_AUTO_TEST_CASE(both)
 {
     std::string value = "   123   ";
-    std::string result = util::strip(value);
+    std::string result = string_util::strip(value);
 
     BOOST_REQUIRE_EQUAL("123", result);
 }
@@ -228,7 +230,7 @@ BOOST_AUTO_TEST_CASE(both)
 BOOST_AUTO_TEST_CASE(none)
 {
     std::string value = "without";
-    std::string result = util::strip(value);
+    std::string result = string_util::strip(value);
 
     BOOST_REQUIRE_EQUAL("without", result);
 }
@@ -236,7 +238,7 @@ BOOST_AUTO_TEST_CASE(none)
 BOOST_AUTO_TEST_CASE(betweenEmpty)
 {
     std::string value = "one list";
-    std::string result = util::strip(value);
+    std::string result = string_util::strip(value);
 
     BOOST_REQUIRE_EQUAL("one list", result);
 }
@@ -244,7 +246,7 @@ BOOST_AUTO_TEST_CASE(betweenEmpty)
 BOOST_AUTO_TEST_CASE(betweenLeft)
 {
     std::string value = "  space at left";
-    std::string result = util::strip(value);
+    std::string result = string_util::strip(value);
 
     BOOST_REQUIRE_EQUAL("space at left", result);
 }
@@ -252,7 +254,7 @@ BOOST_AUTO_TEST_CASE(betweenLeft)
 BOOST_AUTO_TEST_CASE(betweenRight)
 {
     std::string value = "space at right  ";
-    std::string result = util::strip(value);
+    std::string result = string_util::strip(value);
 
     BOOST_REQUIRE_EQUAL("space at right", result);
 }
@@ -260,7 +262,7 @@ BOOST_AUTO_TEST_CASE(betweenRight)
 BOOST_AUTO_TEST_CASE(betweenBoth)
 {
     std::string value = "  space at both  ";
-    std::string result = util::strip(value);
+    std::string result = string_util::strip(value);
 
     BOOST_REQUIRE_EQUAL("space at both", result);
 }
@@ -268,7 +270,7 @@ BOOST_AUTO_TEST_CASE(betweenBoth)
 BOOST_AUTO_TEST_CASE(empty)
 {
     std::string value = "    ";
-    std::string result = util::strip(value);
+    std::string result = string_util::strip(value);
 
     BOOST_REQUIRE_EQUAL("", result);
 }
@@ -276,7 +278,7 @@ BOOST_AUTO_TEST_CASE(empty)
 BOOST_AUTO_TEST_SUITE_END()
 
 /*
- * util::join function
+ * string_util::join function
  * --------------------------------------------------------
  */
 
@@ -285,7 +287,7 @@ BOOST_AUTO_TEST_SUITE(join)
 BOOST_AUTO_TEST_CASE(empty)
 {
     std::string expected = "";
-    std::string result = util::join<int>({});
+    std::string result = string_util::join<int>({});
 
     BOOST_REQUIRE_EQUAL(expected, result);
 }
@@ -293,7 +295,7 @@ BOOST_AUTO_TEST_CASE(empty)
 BOOST_AUTO_TEST_CASE(one)
 {
     std::string expected = "1";
-    std::string result = util::join({1});
+    std::string result = string_util::join({1});
 
     BOOST_REQUIRE_EQUAL(expected, result);
 }
@@ -301,7 +303,7 @@ BOOST_AUTO_TEST_CASE(one)
 BOOST_AUTO_TEST_CASE(two)
 {
     std::string expected = "1:2";
-    std::string result = util::join({1, 2});
+    std::string result = string_util::join({1, 2});
 
     BOOST_REQUIRE_EQUAL(expected, result);
 }
@@ -309,7 +311,7 @@ BOOST_AUTO_TEST_CASE(two)
 BOOST_AUTO_TEST_CASE(delimiterString)
 {
     std::string expected = "1;;2;;3";
-    std::string result = util::join({1, 2, 3}, ";;");
+    std::string result = string_util::join({1, 2, 3}, ";;");
 
     BOOST_REQUIRE_EQUAL(expected, result);
 }
@@ -317,7 +319,7 @@ BOOST_AUTO_TEST_CASE(delimiterString)
 BOOST_AUTO_TEST_CASE(delimiterChar)
 {
     std::string expected = "1@2@3@4";
-    std::string result = util::join({1, 2, 3, 4}, '@');
+    std::string result = string_util::join({1, 2, 3, 4}, '@');
 
     BOOST_REQUIRE_EQUAL(expected, result);
 }
@@ -325,7 +327,7 @@ BOOST_AUTO_TEST_CASE(delimiterChar)
 BOOST_AUTO_TEST_SUITE_END()
 
 /*
- * util::is_identifier function
+ * string_util::is_identifier function
  * --------------------------------------------------------
  */
 
@@ -333,26 +335,26 @@ BOOST_AUTO_TEST_SUITE(is_identifier_valid)
 
 BOOST_AUTO_TEST_CASE(correct)
 {
-    BOOST_REQUIRE(util::is_identifier("localhost"));
-    BOOST_REQUIRE(util::is_identifier("localhost2"));
-    BOOST_REQUIRE(util::is_identifier("localhost2-4_"));
+    BOOST_REQUIRE(string_util::is_identifier("localhost"));
+    BOOST_REQUIRE(string_util::is_identifier("localhost2"));
+    BOOST_REQUIRE(string_util::is_identifier("localhost2-4_"));
 }
 
 BOOST_AUTO_TEST_CASE(incorrect)
 {
-    BOOST_REQUIRE(!util::is_identifier(""));
-    BOOST_REQUIRE(!util::is_identifier("localhost with spaces"));
-    BOOST_REQUIRE(!util::is_identifier("localhost*"));
-    BOOST_REQUIRE(!util::is_identifier("&&"));
-    BOOST_REQUIRE(!util::is_identifier("@'"));
-    BOOST_REQUIRE(!util::is_identifier("##"));
-    BOOST_REQUIRE(!util::is_identifier("===++"));
+    BOOST_REQUIRE(!string_util::is_identifier(""));
+    BOOST_REQUIRE(!string_util::is_identifier("localhost with spaces"));
+    BOOST_REQUIRE(!string_util::is_identifier("localhost*"));
+    BOOST_REQUIRE(!string_util::is_identifier("&&"));
+    BOOST_REQUIRE(!string_util::is_identifier("@'"));
+    BOOST_REQUIRE(!string_util::is_identifier("##"));
+    BOOST_REQUIRE(!string_util::is_identifier("===++"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
 /*
- * util::is_boolean function
+ * string_util::is_boolean function
  * --------------------------------------------------------
  */
 
@@ -361,39 +363,39 @@ BOOST_AUTO_TEST_SUITE(is_boolean)
 BOOST_AUTO_TEST_CASE(correct)
 {
     // true
-    BOOST_REQUIRE(util::is_boolean("true"));
-    BOOST_REQUIRE(util::is_boolean("True"));
-    BOOST_REQUIRE(util::is_boolean("TRUE"));
-    BOOST_REQUIRE(util::is_boolean("TruE"));
+    BOOST_REQUIRE(string_util::is_boolean("true"));
+    BOOST_REQUIRE(string_util::is_boolean("True"));
+    BOOST_REQUIRE(string_util::is_boolean("TRUE"));
+    BOOST_REQUIRE(string_util::is_boolean("TruE"));
 
     // yes
-    BOOST_REQUIRE(util::is_boolean("yes"));
-    BOOST_REQUIRE(util::is_boolean("Yes"));
-    BOOST_REQUIRE(util::is_boolean("YES"));
-    BOOST_REQUIRE(util::is_boolean("YeS"));
+    BOOST_REQUIRE(string_util::is_boolean("yes"));
+    BOOST_REQUIRE(string_util::is_boolean("Yes"));
+    BOOST_REQUIRE(string_util::is_boolean("YES"));
+    BOOST_REQUIRE(string_util::is_boolean("YeS"));
 
     // on
-    BOOST_REQUIRE(util::is_boolean("on"));
-    BOOST_REQUIRE(util::is_boolean("On"));
-    BOOST_REQUIRE(util::is_boolean("oN"));
-    BOOST_REQUIRE(util::is_boolean("ON"));
+    BOOST_REQUIRE(string_util::is_boolean("on"));
+    BOOST_REQUIRE(string_util::is_boolean("On"));
+    BOOST_REQUIRE(string_util::is_boolean("oN"));
+    BOOST_REQUIRE(string_util::is_boolean("ON"));
 
     // 1
-    BOOST_REQUIRE(util::is_boolean("1"));
+    BOOST_REQUIRE(string_util::is_boolean("1"));
 }
 
 BOOST_AUTO_TEST_CASE(incorrect)
 {
-    BOOST_REQUIRE(!util::is_boolean("false"));
-    BOOST_REQUIRE(!util::is_boolean("lol"));
-    BOOST_REQUIRE(!util::is_boolean(""));
-    BOOST_REQUIRE(!util::is_boolean("0"));
+    BOOST_REQUIRE(!string_util::is_boolean("false"));
+    BOOST_REQUIRE(!string_util::is_boolean("lol"));
+    BOOST_REQUIRE(!string_util::is_boolean(""));
+    BOOST_REQUIRE(!string_util::is_boolean("0"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
 /*
- * util::is_number function
+ * string_util::is_number function
  * --------------------------------------------------------
  */
 
@@ -401,21 +403,21 @@ BOOST_AUTO_TEST_SUITE(is_number)
 
 BOOST_AUTO_TEST_CASE(correct)
 {
-    BOOST_REQUIRE(util::is_number("123"));
-    BOOST_REQUIRE(util::is_number("-123"));
-    BOOST_REQUIRE(util::is_number("123.67"));
+    BOOST_REQUIRE(string_util::is_number("123"));
+    BOOST_REQUIRE(string_util::is_number("-123"));
+    BOOST_REQUIRE(string_util::is_number("123.67"));
 }
 
 BOOST_AUTO_TEST_CASE(incorrect)
 {
-    BOOST_REQUIRE(!util::is_number("lol"));
-    BOOST_REQUIRE(!util::is_number("this is not a number"));
+    BOOST_REQUIRE(!string_util::is_number("lol"));
+    BOOST_REQUIRE(!string_util::is_number("this is not a number"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
 /*
- * util::to_number function
+ * string_util::to_number function
  * ------------------------------------------------------------------
  */
 
@@ -424,44 +426,44 @@ BOOST_AUTO_TEST_SUITE(to_number)
 BOOST_AUTO_TEST_CASE(correct)
 {
     /* unsigned */
-    BOOST_REQUIRE_EQUAL(50u, util::to_number<std::uint8_t>("50"));
-    BOOST_REQUIRE_EQUAL(5000u, util::to_number<std::uint16_t>("5000"));
-    BOOST_REQUIRE_EQUAL(50000u, util::to_number<std::uint32_t>("50000"));
-    BOOST_REQUIRE_EQUAL(500000u, util::to_number<std::uint64_t>("500000"));
+    BOOST_REQUIRE_EQUAL(50u, string_util::to_number<std::uint8_t>("50"));
+    BOOST_REQUIRE_EQUAL(5000u, string_util::to_number<std::uint16_t>("5000"));
+    BOOST_REQUIRE_EQUAL(50000u, string_util::to_number<std::uint32_t>("50000"));
+    BOOST_REQUIRE_EQUAL(500000u, string_util::to_number<std::uint64_t>("500000"));
 
     /* signed */
-    BOOST_REQUIRE_EQUAL(-50, util::to_number<std::int8_t>("-50"));
-    BOOST_REQUIRE_EQUAL(-500, util::to_number<std::int16_t>("-500"));
-    BOOST_REQUIRE_EQUAL(-5000, util::to_number<std::int32_t>("-5000"));
-    BOOST_REQUIRE_EQUAL(-50000, util::to_number<std::int64_t>("-50000"));
+    BOOST_REQUIRE_EQUAL(-50, string_util::to_number<std::int8_t>("-50"));
+    BOOST_REQUIRE_EQUAL(-500, string_util::to_number<std::int16_t>("-500"));
+    BOOST_REQUIRE_EQUAL(-5000, string_util::to_number<std::int32_t>("-5000"));
+    BOOST_REQUIRE_EQUAL(-50000, string_util::to_number<std::int64_t>("-50000"));
 }
 
 BOOST_AUTO_TEST_CASE(incorrect)
 {
     /* unsigned */
-    BOOST_REQUIRE_THROW(util::to_number<std::uint8_t>("300"), std::out_of_range);
-    BOOST_REQUIRE_THROW(util::to_number<std::uint16_t>("80000"), std::out_of_range);
-    BOOST_REQUIRE_THROW(util::to_number<std::uint8_t>("-125"), std::out_of_range);
-    BOOST_REQUIRE_THROW(util::to_number<std::uint16_t>("-25000"), std::out_of_range);
+    BOOST_REQUIRE_THROW(string_util::to_number<std::uint8_t>("300"), std::out_of_range);
+    BOOST_REQUIRE_THROW(string_util::to_number<std::uint16_t>("80000"), std::out_of_range);
+    BOOST_REQUIRE_THROW(string_util::to_number<std::uint8_t>("-125"), std::out_of_range);
+    BOOST_REQUIRE_THROW(string_util::to_number<std::uint16_t>("-25000"), std::out_of_range);
 
     /* signed */
-    BOOST_REQUIRE_THROW(util::to_number<std::int8_t>("300"), std::out_of_range);
-    BOOST_REQUIRE_THROW(util::to_number<std::int16_t>("80000"), std::out_of_range);
-    BOOST_REQUIRE_THROW(util::to_number<std::int8_t>("-300"), std::out_of_range);
-    BOOST_REQUIRE_THROW(util::to_number<std::int16_t>("-80000"), std::out_of_range);
+    BOOST_REQUIRE_THROW(string_util::to_number<std::int8_t>("300"), std::out_of_range);
+    BOOST_REQUIRE_THROW(string_util::to_number<std::int16_t>("80000"), std::out_of_range);
+    BOOST_REQUIRE_THROW(string_util::to_number<std::int8_t>("-300"), std::out_of_range);
+    BOOST_REQUIRE_THROW(string_util::to_number<std::int16_t>("-80000"), std::out_of_range);
 
     /* not numbers */
-    BOOST_REQUIRE_THROW(util::to_number<std::uint8_t>("nonono"), std::invalid_argument);
+    BOOST_REQUIRE_THROW(string_util::to_number<std::uint8_t>("nonono"), std::invalid_argument);
 
     /* custom ranges */
-    BOOST_REQUIRE_THROW(util::to_number<std::uint8_t>("50", 0, 10), std::out_of_range);
-    BOOST_REQUIRE_THROW(util::to_number<std::int8_t>("-50", -10, 10), std::out_of_range);
+    BOOST_REQUIRE_THROW(string_util::to_number<std::uint8_t>("50", 0, 10), std::out_of_range);
+    BOOST_REQUIRE_THROW(string_util::to_number<std::int8_t>("-50", -10, 10), std::out_of_range);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
 /*
- * util::fs::find function (name)
+ * fs_util::find function (name)
  * ------------------------------------------------------------------
  */
 
@@ -469,8 +471,8 @@ BOOST_AUTO_TEST_SUITE(fs_find_name)
 
 BOOST_AUTO_TEST_CASE(not_recursive)
 {
-    auto file1 = util::fs::find(TESTS_BINARY_DIR "/root", "file-1.txt", false);
-    auto file2 = util::fs::find(TESTS_BINARY_DIR "/root", "file-2.txt", false);
+    auto file1 = fs_util::find(TESTS_BINARY_DIR "/root", "file-1.txt", false);
+    auto file2 = fs_util::find(TESTS_BINARY_DIR "/root", "file-2.txt", false);
 
     BOOST_TEST(file1.find("file-1.txt") != std::string::npos);
     BOOST_TEST(file2.empty());
@@ -478,8 +480,8 @@ BOOST_AUTO_TEST_CASE(not_recursive)
 
 BOOST_AUTO_TEST_CASE(recursive)
 {
-    auto file1 = util::fs::find(TESTS_BINARY_DIR "/root", "file-1.txt", true);
-    auto file2 = util::fs::find(TESTS_BINARY_DIR "/root", "file-2.txt", true);
+    auto file1 = fs_util::find(TESTS_BINARY_DIR "/root", "file-1.txt", true);
+    auto file2 = fs_util::find(TESTS_BINARY_DIR "/root", "file-2.txt", true);
 
     BOOST_TEST(file1.find("file-1.txt") != std::string::npos);
     BOOST_TEST(file2.find("file-2.txt") != std::string::npos);
@@ -488,7 +490,7 @@ BOOST_AUTO_TEST_CASE(recursive)
 BOOST_AUTO_TEST_SUITE_END()
 
 /*
- * util::fs::find function (regex)
+ * fs_util::find function (regex)
  * ------------------------------------------------------------------
  */
 
@@ -498,7 +500,7 @@ BOOST_AUTO_TEST_CASE(not_recursive)
 {
     const std::regex regex("file-[12]\\.txt");
 
-    auto file = util::fs::find(TESTS_BINARY_DIR "/root", regex, false);
+    auto file = fs_util::find(TESTS_BINARY_DIR "/root", regex, false);
 
     BOOST_TEST(file.find("file-1.txt") != std::string::npos);
 }
@@ -507,7 +509,7 @@ BOOST_AUTO_TEST_CASE(recursive)
 {
     const std::regex regex("file-[12]\\.txt");
 
-    auto file = util::fs::find(TESTS_BINARY_DIR "/root/level-a", regex, true);
+    auto file = fs_util::find(TESTS_BINARY_DIR "/root/level-a", regex, true);
 
     BOOST_TEST(file.find("file-2.txt") != std::string::npos);
 }

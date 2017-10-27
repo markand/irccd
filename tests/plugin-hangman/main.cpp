@@ -24,6 +24,7 @@
 #include <irccd/irccd.hpp>
 #include <irccd/server.hpp>
 #include <irccd/service.hpp>
+#include <irccd/string_util.hpp>
 
 #include "plugin-tester.hpp"
 
@@ -46,7 +47,7 @@ public:
 
     void message(std::string target, std::string message) override
     {
-        m_last = util::join({target, message});
+        m_last = string_util::join({target, message});
     }
 };
 

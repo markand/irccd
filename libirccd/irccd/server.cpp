@@ -33,9 +33,10 @@
 #  include <resolv.h>
 #endif
 
+#include "json_util.hpp"
 #include "logger.hpp"
-#include "util.hpp"
 #include "server.hpp"
+#include "string_util.hpp"
 #include "system.hpp"
 
 namespace irccd {
@@ -342,7 +343,7 @@ void server::handle_numeric(unsigned int event, const char** params, unsigned in
         if (c < 4 || params[2] == nullptr || params[3] == nullptr)
             return;
 
-        auto users = util::split(params[3], " \t");
+        auto users = string_util::split(params[3], " \t");
 
         // The listing may add some prefixes, remove them if needed.
         for (auto u : users)
@@ -404,7 +405,7 @@ void server::handle_numeric(unsigned int event, const char** params, unsigned in
 
         auto it = whois_map_.find(params[1]);
         if (it != whois_map_.end()) {
-            auto channels = util::split(params[2], " \t");
+            auto channels = string_util::split(params[2], " \t");
 
             // Clean their prefixes.
             for (auto &s : channels)
@@ -467,27 +468,27 @@ void server::handle_topic(const char* orig, const char** params) noexcept
 
 std::shared_ptr<server> server::from_json(const nlohmann::json& object)
 {
-    auto sv = std::make_shared<server>(util::json::require_identifier(object, "name"));
+    auto sv = std::make_shared<server>(json_util::require_identifier(object, "name"));
 
-    sv->set_host(util::json::require_string(object, "host"));
-    sv->set_password(util::json::get_string(object, "password"));
-    sv->set_nickname(util::json::get_string(object, "nickname", sv->nickname()));
-    sv->set_realname(util::json::get_string(object, "realname", sv->realname()));
-    sv->set_username(util::json::get_string(object, "username", sv->username()));
-    sv->set_ctcp_version(util::json::get_string(object, "ctcpVersion", sv->ctcp_version()));
-    sv->set_command_char(util::json::get_string(object, "commandChar", sv->command_char()));
+    sv->set_host(json_util::require_string(object, "host"));
+    sv->set_password(json_util::get_string(object, "password"));
+    sv->set_nickname(json_util::get_string(object, "nickname", sv->nickname()));
+    sv->set_realname(json_util::get_string(object, "realname", sv->realname()));
+    sv->set_username(json_util::get_string(object, "username", sv->username()));
+    sv->set_ctcp_version(json_util::get_string(object, "ctcpVersion", sv->ctcp_version()));
+    sv->set_command_char(json_util::get_string(object, "commandChar", sv->command_char()));
 
     if (object.find("port") != object.end())
-        sv->set_port(util::json::get_uint_range<std::uint16_t>(object, "port"));
-    if (util::json::get_bool(object, "ipv6"))
+        sv->set_port(json_util::get_uint(object, "port"));
+    if (json_util::get_bool(object, "ipv6"))
         sv->set_flags(sv->flags() | server::ipv6);
-    if (util::json::get_bool(object, "ssl"))
+    if (json_util::get_bool(object, "ssl"))
         sv->set_flags(sv->flags() | server::ssl);
-    if (util::json::get_bool(object, "sslVerify"))
+    if (json_util::get_bool(object, "sslVerify"))
         sv->set_flags(sv->flags() | server::ssl_verify);
-    if (util::json::get_bool(object, "autoRejoin"))
+    if (json_util::get_bool(object, "autoRejoin"))
         sv->set_flags(sv->flags() | server::auto_rejoin);
-    if (util::json::get_bool(object, "joinInvite"))
+    if (json_util::get_bool(object, "joinInvite"))
         sv->set_flags(sv->flags() | server::join_invite);
 
     return sv;
@@ -619,7 +620,7 @@ std::string server::status() const noexcept
 void server::update() noexcept
 {
     if (state_next_) {
-        log::debug(util::sprintf("server %s: switch state %s -> %s",
+        log::debug(string_util::sprintf("server %s: switch state %s -> %s",
             name_, state_->ident(), state_next_->ident()));
 
         state_ = std::move(state_next_);
@@ -876,7 +877,7 @@ void server::connecting_state::prepare(server& server, fd_set& setinput, fd_set&
             log::warning() << irc_strerror(irc_errno(*server.session_)) << std::endl;
 
             if (server.recotries_ != 0)
-                log::warning(util::sprintf("server %s: retrying in %hu seconds", server.name_, server.recodelay_));
+                log::warning(string_util::sprintf("server %s: retrying in %hu seconds", server.name_, server.recodelay_));
 
             server.next(std::make_unique<disconnected_state>());
         } else
@@ -889,7 +890,7 @@ void server::connecting_state::prepare(server& server, fd_set& setinput, fd_set&
 #if !defined(IRCCD_SYSTEM_WINDOWS)
         (void)res_init();
 #endif
-        log::info(util::sprintf("server %s: trying to connect to %s, port %hu", server.name_, server.host_, server.port_));
+        log::info(string_util::sprintf("server %s: trying to connect to %s, port %hu", server.name_, server.host_, server.port_));
 
         if (!connect(server)) {
             log::warning() << "server " << server.name_ << ": disconnected while connecting: ";
@@ -920,7 +921,7 @@ void server::connected_state::prepare(server& server, fd_set& setinput, fd_set& 
         log::warning() << "server " << server.name_ << ": disconnected" << std::endl;
 
         if (server.recodelay_ > 0)
-            log::warning(util::sprintf("server %s: retrying in %hu seconds", server.name_, server.recodelay_));
+            log::warning(string_util::sprintf("server %s: retrying in %hu seconds", server.name_, server.recodelay_));
 
         server.next(std::make_unique<disconnected_state>());
     } else if (server.timer_.elapsed().wall / 1000000LL >= server.timeout_ * 1000) {

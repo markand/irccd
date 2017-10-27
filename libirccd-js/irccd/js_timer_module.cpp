@@ -19,6 +19,7 @@
 #include <irccd/irccd.hpp>
 #include <irccd/logger.hpp>
 #include <irccd/js_plugin.hpp>
+#include <irccd/string_util.hpp>
 #include <irccd/timer.hpp>
 
 #include "js_irccd_module.hpp"
@@ -48,7 +49,7 @@ void handle_signal(irccd& instance, std::weak_ptr<js_plugin> ptr, std::string ke
 
         if (duk_is_callable(plugin->context(), -1)) {
             if (duk_pcall(plugin->context(), 0) != 0)
-                log::warning(util::sprintf("plugin %s: %s", plugin->name(),
+                log::warning(string_util::sprintf("plugin %s: %s", plugin->name(),
                     dukx_exception(plugin->context(), -1).stack));
             else
                 duk_pop(plugin->context());

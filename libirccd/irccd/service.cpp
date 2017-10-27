@@ -25,6 +25,7 @@
 #include "irccd.hpp"
 #include "logger.hpp"
 #include "service.hpp"
+#include "string_util.hpp"
 #include "system.hpp"
 #include "transport.hpp"
 
@@ -157,7 +158,7 @@ std::shared_ptr<plugin> plugin_service::require(const std::string& name) const
     auto plugin = get(name);
 
     if (!plugin)
-        throw std::invalid_argument(util::sprintf("plugin %s not found", name));
+        throw std::invalid_argument(string_util::sprintf("plugin %s not found", name));
 
     return plugin;
 }
@@ -189,12 +190,12 @@ Map to_map(const config& conf, const std::string& section)
 
 plugin_config plugin_service::config(const std::string& id)
 {
-    return to_map<plugin_config>(irccd_.config(), util::sprintf("plugin.%s", id));
+    return to_map<plugin_config>(irccd_.config(), string_util::sprintf("plugin.%s", id));
 }
 
 plugin_formats plugin_service::formats(const std::string& id)
 {
-    return to_map<plugin_formats>(irccd_.config(), util::sprintf("format.%s", id));
+    return to_map<plugin_formats>(irccd_.config(), string_util::sprintf("format.%s", id));
 }
 
 plugin_paths plugin_service::paths(const std::string& id)
@@ -202,7 +203,7 @@ plugin_paths plugin_service::paths(const std::string& id)
     class config cfg(irccd_.config());
 
     auto defaults = to_map<plugin_paths>(cfg, "paths");
-    auto paths = to_map<plugin_paths>(cfg, util::sprintf("paths.%s", id));
+    auto paths = to_map<plugin_paths>(cfg, string_util::sprintf("paths.%s", id));
 
     // Fill defaults paths.
     if (!defaults.count("cache"))
@@ -270,7 +271,7 @@ void plugin_service::load(std::string name, std::string path)
             add(std::move(plugin));
         }
     } catch (const std::exception& ex) {
-        log::warning(util::sprintf("plugin %s: %s", name, ex.what()));
+        log::warning(string_util::sprintf("plugin %s: %s", name, ex.what()));
     }
 }
 
@@ -342,17 +343,17 @@ bool rule_service::solve(const std::string& server,
 {
     bool result = true;
 
-    log::debug(util::sprintf("rule: solving for server=%s, channel=%s, origin=%s, plugin=%s, event=%s",
+    log::debug(string_util::sprintf("rule: solving for server=%s, channel=%s, origin=%s, plugin=%s, event=%s",
         server, channel, origin, plugin, event));
 
     int i = 0;
     for (const auto& rule : rules_) {
         log::debug() << "  candidate "   << i++ << ":\n"
-                     << "    servers: "  << util::join(rule.servers().begin(), rule.servers().end()) << "\n"
-                     << "    channels: " << util::join(rule.channels().begin(), rule.channels().end()) << "\n"
-                     << "    origins: "  << util::join(rule.origins().begin(), rule.origins().end()) << "\n"
-                     << "    plugins: "  << util::join(rule.plugins().begin(), rule.plugins().end()) << "\n"
-                     << "    events: "   << util::join(rule.events().begin(), rule.events().end()) << "\n"
+                     << "    servers: "  << string_util::join(rule.servers().begin(), rule.servers().end()) << "\n"
+                     << "    channels: " << string_util::join(rule.channels().begin(), rule.channels().end()) << "\n"
+                     << "    origins: "  << string_util::join(rule.origins().begin(), rule.origins().end()) << "\n"
+                     << "    plugins: "  << string_util::join(rule.plugins().begin(), rule.plugins().end()) << "\n"
+                     << "    events: "   << string_util::join(rule.events().begin(), rule.events().end()) << "\n"
                      << "    action: "   << ((rule.action() == rule::action_type::accept) ? "accept" : "drop") << std::endl;
 
         if (rule.match(server, channel, origin, plugin, event))
@@ -560,19 +561,19 @@ void server_service::handle_message(const message_event& ev)
 
     irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
         [=] (plugin& plugin) -> std::string {
-            return util::parse_message(
+            return string_util::parse_message(
                 ev.message,
                 ev.server->command_char(),
                 plugin.name()
-            ).type == util::message_pack::type::command ? "onCommand" : "onMessage";
+            ).type == string_util::message_pack::type::command ? "onCommand" : "onMessage";
         },
         [=] (plugin& plugin) mutable {
             auto copy = ev;
-            auto pack = util::parse_message(copy.message, copy.server->command_char(), plugin.name());
+            auto pack = string_util::parse_message(copy.message, copy.server->command_char(), plugin.name());
 
             copy.message = pack.message;
 
-            if (pack.type == util::message_pack::type::command)
+            if (pack.type == string_util::message_pack::type::command)
                 plugin.on_command(irccd_, copy);
             else
                 plugin.on_message(irccd_, copy);
@@ -632,7 +633,7 @@ void server_service::handle_names(const names_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onNames:\n";
     log::debug() << "  channel: " << ev.channel << "\n";
-    log::debug() << "  names: " << util::join(ev.names.begin(), ev.names.end(), ", ") << std::endl;
+    log::debug() << "  names: " << string_util::join(ev.names.begin(), ev.names.end(), ", ") << std::endl;
 
     auto names = nlohmann::json::array();
 
@@ -742,19 +743,19 @@ void server_service::handle_query(const query_event& ev)
 
     irccd_.post(event_handler{ev.server->name(), ev.origin, /* channel */ "",
         [=] (plugin& plugin) -> std::string {
-            return util::parse_message(
+            return string_util::parse_message(
                 ev.message,
                 ev.server->command_char(),
                 plugin.name()
-            ).type == util::message_pack::type::command ? "onQueryCommand" : "onQuery";
+            ).type == string_util::message_pack::type::command ? "onQueryCommand" : "onQuery";
         },
         [=] (plugin& plugin) mutable {
             auto copy = ev;
-            auto pack = util::parse_message(copy.message, copy.server->command_char(), plugin.name());
+            auto pack = string_util::parse_message(copy.message, copy.server->command_char(), plugin.name());
 
             copy.message = pack.message;
 
-            if (pack.type == util::message_pack::type::command)
+            if (pack.type == string_util::message_pack::type::command)
                 plugin.on_query_command(irccd_, copy);
             else
                 plugin.on_query(irccd_, copy);
@@ -794,7 +795,7 @@ void server_service::handle_whois(const whois_event& ev)
     log::debug() << "  username: " << ev.whois.user << "\n";
     log::debug() << "  host: " << ev.whois.host << "\n";
     log::debug() << "  realname: " << ev.whois.realname << "\n";
-    log::debug() << "  channels: " << util::join(ev.whois.channels.begin(), ev.whois.channels.end()) << std::endl;
+    log::debug() << "  channels: " << string_util::join(ev.whois.channels.begin(), ev.whois.channels.end()) << std::endl;
 
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onWhois"           },
@@ -868,7 +869,7 @@ void server_service::add(std::shared_ptr<server> server)
             auto server = ptr.lock();
 
             if (server) {
-                log::info(util::sprintf("server %s: removed", server->name()));
+                log::info(string_util::sprintf("server %s: removed", server->name()));
                 servers_.erase(std::find(servers_.begin(), servers_.end(), server));
             }
         });
@@ -894,7 +895,7 @@ std::shared_ptr<server> server_service::require(const std::string& name) const
     auto server = get(name);
 
     if (!server)
-        throw std::invalid_argument(util::sprintf("server %s not found", name));
+        throw std::invalid_argument(string_util::sprintf("server %s not found", name));
 
     return server;
 }

@@ -22,6 +22,7 @@
 
 #include <irccd/js_plugin_module.hpp>
 #include <irccd/js_timer_module.hpp>
+#include <irccd/net_util.hpp>
 
 #include <js_test.hpp>
 
@@ -41,7 +42,7 @@ BOOST_AUTO_TEST_CASE(single)
     boost::timer::cpu_timer timer;
 
     while (timer.elapsed().wall / 1000000LL < 3000)
-        util::poller::poll(512, f.irccd_);
+        net_util::poll(512, f.irccd_);
 
     BOOST_TEST(duk_get_global_string(f.plugin_->context(), "count"));
     BOOST_TEST(duk_get_int(f.plugin_->context(), -1) == 1);
@@ -54,7 +55,7 @@ BOOST_AUTO_TEST_CASE(repeat)
     boost::timer::cpu_timer timer;
 
     while (timer.elapsed().wall / 1000000LL < 3000)
-        util::poller::poll(512, f.irccd_);
+        net_util::poll(512, f.irccd_);
 
     BOOST_TEST(duk_get_global_string(f.plugin_->context(), "count"));
     BOOST_TEST(duk_get_int(f.plugin_->context(), -1) >= 5);

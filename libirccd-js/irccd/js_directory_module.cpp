@@ -24,8 +24,7 @@
 #include <stdexcept>
 #include <string>
 
-#include <boost/filesystem.hpp>
-
+#include "fs_util.hpp"
 #include "duktape.hpp"
 #include "js_directory_module.hpp"
 #include "js_irccd_module.hpp"
@@ -71,7 +70,7 @@ duk_ret_t find(duk_context* ctx, std::string base, bool recursive, int pattern_i
         std::string path;
 
         if (duk_is_string(ctx, pattern_index))
-            path = util::fs::find(base, dukx_get_std_string(ctx, pattern_index), recursive);
+            path = fs_util::find(base, dukx_get_std_string(ctx, pattern_index), recursive);
         else {
             // Check if it's a valid RegExp object.
             duk_get_global_string(ctx, "RegExp");
@@ -83,7 +82,7 @@ duk_ret_t find(duk_context* ctx, std::string base, bool recursive, int pattern_i
                 auto pattern = duk_to_string(ctx, -1);
                 duk_pop(ctx);
 
-                path = util::fs::find(base, std::regex(pattern), recursive);
+                path = fs_util::find(base, std::regex(pattern), recursive);
             } else
                 duk_error(ctx, DUK_ERR_TYPE_ERROR, "pattern must be a string or a regex expression");
         }

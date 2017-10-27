@@ -31,6 +31,7 @@
 
 #include <cassert>
 #include <memory>
+#include <string>
 
 #include "sysconfig.hpp"
 #include "util.hpp"

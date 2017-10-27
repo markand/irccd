@@ -18,7 +18,7 @@
 
 #include "irccd.hpp"
 #include "logger.hpp"
-#include "net.hpp"
+#include "net_util.hpp"
 #include "service.hpp"
 #include "util.hpp"
 
@@ -48,12 +48,12 @@ void irccd::post(std::function<void (irccd&)> ev) noexcept
 void irccd::run()
 {
     while (running_)
-        util::poller::poll(250, *this);
+        net_util::poll(250, *this);
 }
 
 void irccd::prepare(fd_set& in, fd_set& out, net::Handle& max)
 {
-    util::poller::prepare(in, out, max, *itr_service_, *server_service_, *tpt_service_);
+    net_util::prepare(in, out, max, *itr_service_, *server_service_, *tpt_service_);
 }
 
 void irccd::sync(fd_set& in, fd_set& out)
@@ -61,7 +61,7 @@ void irccd::sync(fd_set& in, fd_set& out)
     if (!running_)
         return;
 
-    util::poller::sync(in, out, *itr_service_, *server_service_, *tpt_service_);
+    net_util::sync(in, out, *itr_service_, *server_service_, *tpt_service_);
 
     if (!running_)
         return;

@@ -19,7 +19,8 @@
 #include <stdexcept>
 
 #include "client.hpp"
-#include "util.hpp"
+#include "net_util.hpp"
+#include "string_util.hpp"
 
 namespace irccd {
 
@@ -100,7 +101,7 @@ public:
         std::string msg;
 
         do {
-            msg = util::next_network(cnx.m_input);
+            msg = net_util::next_network(cnx.m_input);
 
             if (!msg.empty())
                 parse(cnx, msg);
@@ -147,7 +148,7 @@ private:
     {
         cnt.recv();
 
-        auto msg = util::next_network(cnt.m_input);
+        auto msg = net_util::next_network(cnt.m_input);
 
         if (msg.empty())
             return;
@@ -258,7 +259,7 @@ private:
 
         // Ensure compatibility.
         if (info.major != IRCCD_VERSION_MAJOR || info.minor > IRCCD_VERSION_MINOR)
-            throw std::runtime_error(util::sprintf("server version too recent %d.%d.%d vs %d.%d.%d",
+            throw std::runtime_error(string_util::sprintf("server version too recent %d.%d.%d vs %d.%d.%d",
                 info.major, info.minor, info.patch,
                 IRCCD_VERSION_MAJOR, IRCCD_VERSION_MINOR, IRCCD_VERSION_PATCH
             ));
@@ -274,7 +275,7 @@ private:
 
     void verify(Client &cnx) const
     {
-        auto msg = util::next_network(cnx.m_input);
+        auto msg = net_util::next_network(cnx.m_input);
 
         if (msg.empty())
             return;

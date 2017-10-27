@@ -25,7 +25,7 @@
 
 #include "irccd.hpp"
 #include "irccdctl.hpp"
-#include "util.hpp"
+#include "net_util.hpp"
 
 namespace irccd {
 
@@ -47,7 +47,7 @@ public:
         boost::timer::cpu_timer timer;
 
         while (!predicate() && timer.elapsed().wall / 1000000LL < 30000)
-            util::poller::poll(250, m_irccd, m_irccdctl);
+            net_util::poll(250, m_irccd, m_irccdctl);
     }
 };
 

@@ -27,10 +27,10 @@
 #include "rule.hpp"
 #include "server.hpp"
 #include "service.hpp"
+#include "string_util.hpp"
 #include "sysconfig.hpp"
 #include "system.hpp"
 #include "transport.hpp"
-#include "util.hpp"
 
 namespace irccd {
 
@@ -43,12 +43,12 @@ private:
         if (tmpl.empty())
             return input;
 
-        util::subst params;
+        string_util::subst params;
 
-        params.flags &= ~(util::subst_flags::irc_attrs);
+        params.flags &= ~(string_util::subst_flags::irc_attrs);
         params.keywords.emplace("message", std::move(input));
 
-        return util::format(tmpl, params);
+        return string_util::format(tmpl, params);
     }
 
 public:
@@ -133,9 +133,9 @@ std::shared_ptr<transport_server> load_transport_ip(const ini::section& sc)
         throw std::invalid_argument("transport: missing 'port' parameter");
 
     try {
-        port = util::to_number<std::uint16_t>(it->value());
+        port = string_util::to_number<std::uint16_t>(it->value());
     } catch (const std::exception&) {
-        throw std::invalid_argument(util::sprintf("transport: invalid port number: %s", it->value()));
+        throw std::invalid_argument(string_util::sprintf("transport: invalid port number: %s", it->value()));
     }
 
     // Address.
@@ -168,7 +168,7 @@ std::shared_ptr<transport_server> load_transport_ip(const ini::section& sc)
     std::string pkey;
     std::string cert;
 
-    if ((it = sc.find("ssl")) != sc.end() && util::is_boolean(it->value())) {
+    if ((it = sc.find("ssl")) != sc.end() && string_util::is_boolean(it->value())) {
         if ((it = sc.find("certificate")) == sc.end())
             throw std::invalid_argument("transport: missing 'certificate' parameter");
 
@@ -226,7 +226,7 @@ std::shared_ptr<transport_server> load_transport(const ini::section& sc)
     else if (it->value() == "unix")
         transport = load_transport_unix(sc);
     else
-        throw std::invalid_argument(util::sprintf("transport: invalid type given: %s", it->value()));
+        throw std::invalid_argument(string_util::sprintf("transport: invalid type given: %s", it->value()));
 
     if ((it = sc.find("password")) != sc.end())
         transport->set_password(it->value());
@@ -269,7 +269,7 @@ rule load_rule(const ini::section& sc)
     else if (it->value() == "accept")
         action = rule::action_type::accept;
     else
-        throw std::invalid_argument(util::sprintf("rule: invalid action given: %s", it->value()));
+        throw std::invalid_argument(string_util::sprintf("rule: invalid action given: %s", it->value()));
 
     return {
         std::move(servers),
@@ -290,14 +290,14 @@ std::shared_ptr<server> load_server(const ini::section& sc, const config& config
 
     if ((it = sc.find("name")) == sc.end())
         throw std::invalid_argument("server: missing 'name' parameter");
-    else if (!util::is_identifier(it->value()))
-        throw std::invalid_argument(util::sprintf("server: invalid identifier: %s", it->value()));
+    else if (!string_util::is_identifier(it->value()))
+        throw std::invalid_argument(string_util::sprintf("server: invalid identifier: %s", it->value()));
 
     auto sv = std::make_shared<server>(it->value());
 
     // Host
     if ((it = sc.find("host")) == sc.end())
-        throw std::invalid_argument(util::sprintf("server %s: missing host", sv->name()));
+        throw std::invalid_argument(string_util::sprintf("server %s: missing host", sv->name()));
 
     sv->set_host(it->value());
 
@@ -306,11 +306,11 @@ std::shared_ptr<server> load_server(const ini::section& sc, const config& config
         sv->set_password(it->value());
 
     // Optional flags
-    if ((it = sc.find("ipv6")) != sc.end() && util::is_boolean(it->value()))
+    if ((it = sc.find("ipv6")) != sc.end() && string_util::is_boolean(it->value()))
         sv->set_flags(sv->flags() | server::ipv6);
-    if ((it = sc.find("ssl")) != sc.end() && util::is_boolean(it->value()))
+    if ((it = sc.find("ssl")) != sc.end() && string_util::is_boolean(it->value()))
         sv->set_flags(sv->flags() | server::ssl);
-    if ((it = sc.find("ssl-verify")) != sc.end() && util::is_boolean(it->value()))
+    if ((it = sc.find("ssl-verify")) != sc.end() && string_util::is_boolean(it->value()))
         sv->set_flags(sv->flags() | server::ssl_verify);
 
     // Optional identity
@@ -318,9 +318,9 @@ std::shared_ptr<server> load_server(const ini::section& sc, const config& config
         config.load_server_identity(*sv, it->value());
 
     // Options
-    if ((it = sc.find("auto-rejoin")) != sc.end() && util::is_boolean(it->value()))
+    if ((it = sc.find("auto-rejoin")) != sc.end() && string_util::is_boolean(it->value()))
         sv->set_flags(sv->flags() | server::auto_rejoin);
-    if ((it = sc.find("join-invite")) != sc.end() && util::is_boolean(it->value()))
+    if ((it = sc.find("join-invite")) != sc.end() && string_util::is_boolean(it->value()))
         sv->set_flags(sv->flags() | server::join_invite);
 
     // Channels
@@ -343,15 +343,15 @@ std::shared_ptr<server> load_server(const ini::section& sc, const config& config
     // Reconnect and ping timeout
     try {
         if ((it = sc.find("port")) != sc.end())
-            sv->set_port(util::to_number<std::uint16_t>(it->value()));
+            sv->set_port(string_util::to_number<std::uint16_t>(it->value()));
         if ((it = sc.find("reconnect-tries")) != sc.end())
-            sv->set_reconnect_tries(util::to_number<std::int8_t>(it->value()));
+            sv->set_reconnect_tries(string_util::to_number<std::int8_t>(it->value()));
         if ((it = sc.find("reconnect-timeout")) != sc.end())
-            sv->set_reconnect_delay(util::to_number<std::uint16_t>(it->value()));
+            sv->set_reconnect_delay(string_util::to_number<std::uint16_t>(it->value()));
         if ((it = sc.find("ping-timeout")) != sc.end())
-            sv->set_ping_timeout(util::to_number<std::uint16_t>(it->value()));
+            sv->set_ping_timeout(string_util::to_number<std::uint16_t>(it->value()));
     } catch (const std::exception&) {
-        log::warning(util::sprintf("server %s: invalid number for %s: %s",
+        log::warning(string_util::sprintf("server %s: invalid number for %s: %s",
             sv->name(), it->key(), it->value()));
     }
 
@@ -404,12 +404,12 @@ void config::load_server_identity(server& server, const std::string& identity) c
 
 bool config::is_verbose() const noexcept
 {
-    return util::is_boolean(get(document_, "logs", "verbose"));
+    return string_util::is_boolean(get(document_, "logs", "verbose"));
 }
 
 bool config::is_foreground() const noexcept
 {
-    return util::is_boolean(get(document_, "general", "foreground"));
+    return string_util::is_boolean(get(document_, "general", "foreground"));
 }
 
 std::string config::pidfile() const
@@ -445,7 +445,7 @@ void config::load_logs() const
         else if (it->value() == "syslog")
             iface = load_log_syslog();
         else if (it->value() != "console")
-            throw std::runtime_error(util::sprintf("logs: unknown log type: %s", it->value()));
+            throw std::runtime_error(string_util::sprintf("logs: unknown log type: %s", it->value()));
 
         if (iface)
             log::set_logger(std::move(iface));
@@ -520,7 +520,7 @@ void config::load_plugins(irccd& irccd) const
         return;
 
     for (const auto& option : *it) {
-        if (!util::is_identifier(option.key()))
+        if (!string_util::is_identifier(option.key()))
             continue;
 
         irccd.plugins().load(option.key(), option.value());

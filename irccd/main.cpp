@@ -37,6 +37,7 @@
 #include "logger.hpp"
 #include "options.hpp"
 #include "service.hpp"
+#include "string_util.hpp"
 #include "system.hpp"
 #include "config.hpp"
 #include "irccd.hpp"
@@ -172,7 +173,7 @@ config open(const option::result& result)
         try {
             return config(it->second);
         } catch (const std::exception &ex) {
-            throw std::runtime_error(util::sprintf("%s: %s", it->second, ex.what()));
+            throw std::runtime_error(string_util::sprintf("%s: %s", it->second, ex.what()));
         }
     }
 
@@ -189,7 +190,7 @@ void load_pid(const std::string& path)
         std::ofstream out(path, std::ofstream::trunc);
 
         if (!out)
-            throw std::runtime_error(util::sprintf("could not open pidfile %s: %s",
+            throw std::runtime_error(string_util::sprintf("could not open pidfile %s: %s",
                 path, std::strerror(errno)));
 
         log::debug() << "irccd: pid written in " << path << std::endl;

@@ -1,5 +1,5 @@
 /*
- * util.cpp -- some utilities
+ * string_util.cpp -- string utilities
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -18,30 +18,23 @@
 
 #include "sysconfig.hpp"
 
-#include <algorithm>
-#include <cassert>
-#include <cctype>
-#include <cstdlib>
-#include <ctime>
-#include <iomanip>
-#include <sstream>
-#include <stdexcept>
-
 #if defined(HAVE_POPEN)
-#include <array>
-#include <cerrno>
-#include <cstring>
-#include <functional>
-#include <memory>
+#   include <array>
+#   include <cerrno>
+#   include <cstring>
+#   include <functional>
+#   include <memory>
 #endif
 
-#include "util.hpp"
+#include <iomanip>
+
+#include "string_util.hpp"
 
 using namespace std::string_literals;
 
 namespace irccd {
 
-namespace util {
+namespace string_util {
 
 namespace {
 
@@ -411,19 +404,6 @@ bool is_real(const std::string &str) noexcept
     return *ptr == 0;
 }
 
-std::string next_network(std::string& input)
-{
-    std::string result;
-    std::string::size_type pos = input.find("\r\n\r\n");
+} // !string_util
 
-    if ((pos = input.find("\r\n\r\n")) != std::string::npos) {
-        result = input.substr(0, pos);
-        input.erase(input.begin(), input.begin() + pos + 4);
-    }
-
-    return result;
-}
-
-} // util
-
-} // !irccd
+} // !util
