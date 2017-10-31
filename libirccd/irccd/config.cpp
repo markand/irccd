@@ -87,26 +87,6 @@ std::string get(const ini::document& doc, const std::string& section, const std:
     return ito->value();
 }
 
-plugin_config load_plugin_config(const ini::section& sc)
-{
-    plugin_config config;
-
-    for (const auto& option : sc)
-        config.emplace(option.key(), option.value());
-
-    return config;
-}
-
-plugin_paths read_paths(const ini::section& sc)
-{
-    plugin_paths paths;
-
-    for (const auto& opt : sc)
-        paths.emplace(opt.key(), opt.value());
-
-    return paths;
-}
-
 std::unique_ptr<log::logger> load_log_file(const ini::section& sc)
 {
     /*
@@ -422,51 +402,6 @@ void config::load_server_identity(server& server, const std::string& identity) c
         server.set_ctcp_version(it->value());
 }
 
-plugin_config config::find_plugin_config(const std::string& name) const
-{
-    assert(util::is_identifier(name));
-
-    std::string fullname = std::string("plugin.") + name;
-
-    for (const auto& section : document_) {
-        if (section.key() != fullname)
-            continue;
-
-        return load_plugin_config(section);
-    }
-
-    return plugin_config();
-}
-
-plugin_formats config::find_plugin_formats(const std::string& name) const
-{
-    assert(util::is_identifier(name));
-
-    auto section = document_.find(std::string("format.") + name);
-
-    if (section == document_.end())
-        return plugin_formats();
-
-    plugin_formats formats;
-
-    for (const auto& opt : *section)
-        formats.emplace(opt.key(), opt.value());
-
-    return formats;
-}
-
-plugin_paths config::find_plugin_paths(const std::string& name) const
-{
-    assert(util::is_identifier(name));
-
-    auto section = document_.find(std::string("paths.") + name);
-
-    if (section == document_.end())
-        return plugin_paths();
-
-    return read_paths(*section);
-}
-
 bool config::is_verbose() const noexcept
 {
     return util::is_boolean(get(document_, "logs", "verbose"));
@@ -577,36 +512,18 @@ std::vector<std::shared_ptr<server>> config::load_servers() const
     return servers;
 }
 
-plugin_paths config::load_paths() const
-{
-    auto section = document_.find("paths");
-
-    if (section == document_.end())
-        return {};
-
-    return read_paths(*section);
-}
-
 void config::load_plugins(irccd& irccd) const
 {
     auto it = document_.find("plugins");
 
-    irccd.plugins().set_paths(load_paths());
+    if (it == document_.end())
+        return;
 
-    if (it != document_.end()) {
-        for (const auto& option : *it) {
-            if (!util::is_identifier(option.key()))
-                continue;
+    for (const auto& option : *it) {
+        if (!util::is_identifier(option.key()))
+            continue;
 
-            auto paths = find_plugin_paths(option.key());
-
-            if (!paths.empty())
-                irccd.plugins().set_paths(std::move(paths));
-
-            irccd.plugins().set_config(option.key(), find_plugin_config(option.key()));
-            irccd.plugins().set_formats(option.key(), find_plugin_formats(option.key()));
-            irccd.plugins().load(option.key(), option.value());
-        }
+        irccd.plugins().load(option.key(), option.value());
     }
 }
 

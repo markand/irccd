@@ -21,6 +21,7 @@
 #include <functional>
 #include <stdexcept>
 
+#include "config.hpp"
 #include "irccd.hpp"
 #include "logger.hpp"
 #include "service.hpp"
@@ -124,9 +125,6 @@ void interrupt_service::interrupt() noexcept
 plugin_service::plugin_service(irccd& irccd) noexcept
     : irccd_(irccd)
 {
-    default_paths_.emplace("cache", sys::cachedir());
-    default_paths_.emplace("data", sys::datadir());
-    default_paths_.emplace("config", sys::sysconfigdir());
 }
 
 plugin_service::~plugin_service()
@@ -174,68 +172,55 @@ void plugin_service::add_loader(std::unique_ptr<plugin_loader> loader)
     loaders_.push_back(std::move(loader));
 }
 
-void plugin_service::set_config(const std::string& name, plugin_config config)
+namespace {
+
+template <typename Map>
+Map to_map(const config& conf, const std::string& section)
 {
-    config_.emplace(name, std::move(config));
+    Map ret;
+
+    for (const auto& opt : conf.doc().get(section))
+        ret.emplace(opt.key(), opt.value());
+
+    return ret;
 }
 
-plugin_config plugin_service::config(const std::string& name) const
+} // !namespace
+
+plugin_config plugin_service::config(const std::string& id)
 {
-    auto it = config_.find(name);
-
-    if (it != config_.end())
-        return it->second;
-
-    return plugin_config();
+    return to_map<plugin_config>(irccd_.config(), util::sprintf("plugin.%s", id));
 }
 
-void plugin_service::set_formats(const std::string& name, plugin_formats formats)
+plugin_formats plugin_service::formats(const std::string& id)
 {
-    formats_.emplace(name, std::move(formats));
+    return to_map<plugin_formats>(irccd_.config(), util::sprintf("format.%s", id));
 }
 
-plugin_formats plugin_service::formats(const std::string& name) const
+plugin_paths plugin_service::paths(const std::string& id)
 {
-    auto it = formats_.find(name);
+    class config cfg(irccd_.config());
 
-    if (it != formats_.end())
-        return it->second;
+    auto defaults = to_map<plugin_paths>(cfg, "paths");
+    auto paths = to_map<plugin_paths>(cfg, util::sprintf("paths.%s", id));
 
-    return plugin_formats();
-}
+    // Fill defaults paths.
+    if (!defaults.count("cache"))
+        defaults.emplace("cache", sys::cachedir() + "/plugin/" + id);
+    if (!defaults.count("data"))
+        paths.emplace("data", sys::datadir() + "/plugin/" + id);
+    if (!defaults.count("config"))
+        paths.emplace("config", sys::sysconfigdir() + "/plugin/" + id);
 
-const plugin_paths& plugin_service::paths() const noexcept
-{
-    return default_paths_;
-}
+    // Now fill missing fields.
+    if (!paths.count("cache"))
+        paths.emplace("cache", defaults["cache"]);
+    if (!paths.count("data"))
+        paths.emplace("data", defaults["data"]);
+    if (!paths.count("config"))
+        paths.emplace("config", defaults["config"]);
 
-plugin_paths plugin_service::paths(const std::string& name) const
-{
-    auto result = default_paths_;
-    auto overriden = paths_.find(name);
-
-    // For all default paths, append the plugin name.
-    for (auto& pair : result)
-        pair.second += "/plugin/"s + name;
-
-    // Now, mere overriden paths.
-    if (overriden != paths_.end())
-        for (const auto& pair : overriden->second)
-            result[pair.first] = pair.second;
-
-    return result;
-}
-
-void plugin_service::set_paths(plugin_paths paths)
-{
-    // If the paths is empty or not complete, do not erase default items.
-    for (const auto& pair : paths)
-        default_paths_[pair.first] = pair.second;
-}
-
-void plugin_service::set_paths(const std::string& name, plugin_paths paths)
-{
-    paths_.emplace(name, std::move(paths));
+    return paths;
 }
 
 std::shared_ptr<plugin> plugin_service::open(const std::string& id,
@@ -277,8 +262,8 @@ void plugin_service::load(std::string name, std::string path)
             plugin = open(name, std::move(path));
 
         if (plugin) {
-            plugin->set_config(config_[name]);
-            plugin->set_formats(formats_[name]);
+            plugin->set_config(config(name));
+            plugin->set_formats(formats(name));
             plugin->set_paths(paths(name));
             plugin->on_load(irccd_);
 

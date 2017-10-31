@@ -68,6 +68,16 @@ public:
     }
 
     /**
+     * Get the underlying document.
+     *
+     * \return the document
+     */
+    inline const ini::document& doc() const noexcept
+    {
+        return document_;
+    }
+
+    /**
      * Get the path to the configuration file.
      *
      * \return the path
@@ -86,30 +96,6 @@ public:
      * \return default identity if cannot be found
      */
     void load_server_identity(server& server, const std::string& name) const;
-
-     /**
-     * Find a plugin configuration if defined in the configuration file.
-     *
-     * \pre util::isValidIdentifier(name)
-     * \return the configuration or empty if not found
-     */
-    plugin_config find_plugin_config(const std::string& name) const;
-
-    /**
-     * Find plugin formats if defined.
-     *
-     * \pre util::isValidIdentifier(name)
-     * \return the formats or empty one if not found
-     */
-    plugin_formats find_plugin_formats(const std::string& name) const;
-
-    /**
-     * Find plugin paths if defined.
-     *
-     * \pre util::isValidIdentifier(name)
-     * \param name the plugin name
-     */
-    plugin_paths find_plugin_paths(const std::string& name) const;
 
     /**
      * Get the path to the pidfile.
@@ -176,13 +162,6 @@ public:
      * \return the list of servers
      */
     std::vector<std::shared_ptr<server>> load_servers() const;
-
-    /**
-     * Load default paths for plugins.
-     *
-     * \return the map of paths
-     */
-    plugin_paths load_paths() const;
 
     /**
      * Get the list of defined plugins.

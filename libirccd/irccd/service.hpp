@@ -138,12 +138,8 @@ public:
 class plugin_service {
 private:
     irccd& irccd_;
-    plugin_paths default_paths_;
     std::vector<std::shared_ptr<plugin>> plugins_;
     std::vector<std::unique_ptr<plugin_loader>> loaders_;
-    std::unordered_map<std::string, plugin_config> config_;
-    std::unordered_map<std::string, plugin_formats> formats_;
-    std::unordered_map<std::string, plugin_paths> paths_;
 
 public:
     /**
@@ -210,68 +206,27 @@ public:
     void add_loader(std::unique_ptr<plugin_loader> loader);
 
     /**
-     * Configure a plugin.
+     * Get the configuration for the specified plugin.
      *
-     * If the plugin is already loaded, its configuration is updated.
-     *
-     * \param name the plugin name
-     * \param config the new configuration
+     * \return the configuration
      */
-    void set_config(const std::string& name, plugin_config config);
+    plugin_config config(const std::string& id);
 
     /**
-     * Get a configuration for a plugin.
+     * Get the formats for the specified plugin.
      *
-     * \param name the plugin name
-     * \return the configuration or default one if not found
-     */
-    plugin_config config(const std::string& name) const;
-
-    /**
-     * Add formatting for a plugin.
-     *
-     * \param name the plugin name
-     * \param formats the formats
-     */
-    void set_formats(const std::string& name, plugin_formats formats);
-
-    /**
-     * Get formats for a plugin.
-     *
-     * \param name the plugin name
      * \return the formats
      */
-    plugin_formats formats(const std::string& name) const;
-
-    /**
-     * Get the default paths for plugins.
-     *
-     * \return the paths
-     */
-    const plugin_paths& paths() const noexcept;
+    plugin_formats formats(const std::string& id);
 
     /**
      * Get the paths for the specified plugin.
      *
-     * \param name the plugin
+     * If none is defined, return the default ones.
+     *
      * \return the paths
      */
-    plugin_paths paths(const std::string& name) const;
-
-    /**
-     * Set default paths.
-     *
-     * \param paths the default paths (for all plugins)
-     */
-    void set_paths(plugin_paths paths);
-
-    /**
-     * Override paths for the specified plugin.
-     *
-     * \param name the plugin name
-     * \param paths the paths
-     */
-    void set_paths(const std::string& name, plugin_paths paths);
+    plugin_paths paths(const std::string& id);
 
     /**
      * Generic function for opening the plugin at the given path.

@@ -128,23 +128,19 @@ void analyse_section(tokens& list, int& line, int& column, stream_iterator& it, 
     // Read section name.
     ++ it;
     while (it != end && *it != ']') {
-        if (*it == '\n') {
+        if (*it == '\n')
             throw exception(line, column, "section not terminated, missing ']'");
-        }
-        if (is_reserved(*it)) {
+        if (is_reserved(*it))
             throw exception(line, column, "section name expected after '[', got '" + std::string(1, *it) + "'");
-        }
 
         ++ column;
         value += *it++;
     }
 
-    if (it == end) {
+    if (it == end)
         throw exception(line, column, "section name expected after '[', got <EOF>");
-    }
-    if (value.empty()) {
+    if (value.empty())
         throw exception(line, column, "empty section name");
-    }
 
     // Remove ']'.
     ++ it;
@@ -172,9 +168,8 @@ void analyse_quoted_word(tokens& list, int& line, int& column, stream_iterator& 
         value += *it++;
     }
 
-    if (it == end) {
+    if (it == end)
         throw exception(line, column, "undisclosed '" + std::string(1, quote) + "', got <EOF>");
-    }
 
     // Remove quote.
     ++ it;
@@ -211,9 +206,8 @@ void analyse_include(tokens& list, int& line, int& column, stream_iterator& it, 
         include += *it++;
     }
 
-    if (include != "include") {
+    if (include != "include")
         throw exception(line, column, "expected include after '@' token");
-    }
 
     list.push_back({ token::include, line, save });
 }
@@ -235,9 +229,8 @@ void parse_option_value_list(option& option, token_iterator& it, token_iterator 
         switch (it->type()) {
         case token::comma:
             // Previous must be a word.
-            if (it[-1].type() != token::word && it[-1].type() != token::quoted_word) {
+            if (it[-1].type() != token::word && it[-1].type() != token::quoted_word)
                 throw exception(it->line(), it->column(), "unexpected comma after '" + it[-1].value() + "'");
-            }
 
             ++ it;
             break;
@@ -251,9 +244,8 @@ void parse_option_value_list(option& option, token_iterator& it, token_iterator 
         }
     }
 
-    if (it == end) {
+    if (it == end)
         throw exception(save->line(), save->column(), "unterminated list construct");
-    }
 
     // Remove ).
     ++ it;
@@ -265,20 +257,17 @@ void parse_option(section& sc, token_iterator& it, token_iterator end)
     token_iterator save(it);
 
     // No '=' or something else?
-    if (++it == end) {
+    if (++it == end)
         throw exception(save->line(), save->column(), "expected '=' assignment, got <EOF>");
-    }
-    if (it->type() != token::assign) {
+    if (it->type() != token::assign)
         throw exception(it->line(), it->column(), "expected '=' assignment, got " + it->value());
-    }
 
     // Empty options are allowed so just test for words.
     if (++it != end) {
-        if (it->type() == token::word || it->type() == token::quoted_word) {
+        if (it->type() == token::word || it->type() == token::quoted_word)
             parse_option_value_simple(option, it);
-        } else if (it->type() == token::list_begin) {
+        else if (it->type() == token::list_begin)
             parse_option_value_list(option, it, end);
-        }
     }
 
     sc.push_back(std::move(option));
@@ -288,12 +277,10 @@ void parse_include(document& doc, const std::string& path, token_iterator& it, t
 {
     token_iterator save(it);
 
-    if (++it == end) {
+    if (++it == end)
         throw exception(save->line(), save->column(), "expected file name after '@include' statement, got <EOF>");
-    }
-    if (it->type() != token::word && it->type() != token::quoted_word) {
+    if (it->type() != token::word && it->type() != token::quoted_word)
         throw exception(it->line(), it->column(), "expected file name after '@include' statement, got " + it->value());
-    }
 
     std::string value = (it++)->value();
     std::string file;
@@ -304,13 +291,11 @@ void parse_include(document& doc, const std::string& path, token_iterator& it, t
 #else
         file = path + "/" + value;
 #endif
-    } else {
+    } else
         file = value;
-    }
 
-    for (const auto& sc : read_file(file)) {
+    for (const auto& sc : read_file(file))
         doc.push_back(sc);
-    }
 }
 
 void parse_section(document& doc, token_iterator& it, token_iterator end)
@@ -322,9 +307,8 @@ void parse_section(document& doc, token_iterator& it, token_iterator end)
 
     // Read until next section.
     while (it != end && it->type() != token::section) {
-        if (it->type() != token::word) {
+        if (it->type() != token::word)
             throw exception(it->line(), it->column(), "unexpected token '" + it->value() + "' in section definition");
-        }
 
         parse_option(sc, it, end);
     }
@@ -341,25 +325,24 @@ tokens analyse(std::istreambuf_iterator<char> it, std::istreambuf_iterator<char>
     int column = 0;
 
     while (it != end) {
-        if (*it == '\n') {
+        if (*it == '\n')
             analyse_line(line, column, it);
-        } else if (*it == '#') {
+        else if (*it == '#')
             analyse_comment(column, it, end);
-        } else if (*it == '[') {
+        else if (*it == '[')
             analyse_section(list, line, column, it, end);
-        } else if (*it == '=') {
+        else if (*it == '=')
             analyse_assign(list, line, column, it);
-        } else if (is_space(*it)) {
+        else if (is_space(*it))
             analyse_spaces(column, it, end);
-        } else if (*it == '@') {
+        else if (*it == '@')
             analyse_include(list, line, column, it, end);
-        } else if (is_quote(*it)) {
+        else if (is_quote(*it))
             analyse_quoted_word(list, line, column, it, end);
-        } else if (is_list(*it)) {
+        else if (is_list(*it))
             analyse_list(list, line, column, it);
-        } else {
+        else
             analyse_word(list, line, column, it, end);
-        }
     }
 
     return list;
@@ -398,17 +381,15 @@ document read_file(const std::string& filename)
     auto parent = filename;
     auto pos = parent.find_last_of("/\\");
 
-    if (pos != std::string::npos) {
+    if (pos != std::string::npos)
         parent.erase(pos);
-    } else {
+    else
         parent = ".";
-    }
 
     std::ifstream input(filename);
 
-    if (!input) {
+    if (!input)
         throw exception(0, 0, std::strerror(errno));
-    }
 
     return parse(analyse(input), parent);
 }

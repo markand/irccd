@@ -16,19 +16,25 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef INI_HPP
-#define INI_HPP
+#ifndef IRCCD_INI_HPP
+#define IRCCD_INI_HPP
 
 /**
  * \file ini.hpp
  * \brief Extended .ini file parser.
  * \author David Demelier <markand@malikania.fr>
- * \version 1.0.0
+ * \version 2.0.0
  */
 
 /**
  * \page Ini Ini
  * \brief Extended .ini file parser.
+ *
+ * ## Export macros
+ *
+ * You must define `INI_DLL` globally and `INI_BUILDING_DLL` when compiling the
+ * library if you want a DLL, alternatively you can provide your own
+ * `` macro instead.
  *
  *   - \subpage ini-syntax
  */
@@ -42,10 +48,10 @@
  *   - a section is delimited by `[name]` can be redefined multiple times,
  *   - an option **must** always be defined in a section,
  *   - empty options must be surrounded by quotes,
- *   - lists can not includes trailing commas,
- *   - include statement must always be at the beginning of files
+ *   - lists can not include trailing commas,
+ *   - include statements must always live at the beginning of files
  *     (in no sections),
- *   - comments starts with # until the end of line,
+ *   - comments start with # until the end of line,
  *   - options with spaces **must** use quotes.
  *
  * # Basic file
@@ -70,7 +76,7 @@
  * value = "2"
  * ````
  *
- * The ini::document object will contains two ini::Section.
+ * The ini::document object will contains two ini::section.
  *
  * # Lists
  *
@@ -80,7 +86,7 @@
  * [section]
  * names = ( "x1", "x2" )
  *
- * # This is also allowed
+ * # This is also allowed.
  * biglist = (
  *   "abc",
  *   "def"
@@ -106,32 +112,6 @@
  * ````
  */
 
-/**
- * \cond INI_HIDDEN_SYMBOLS
- */
-
-#if !defined(IRCCD_EXPORT)
-#   if defined(INI_DLL)
-#       if defined(_WIN32)
-#           if defined(INI_BUILDING_DLL)
-#               define IRCCD_EXPORT __declspec(dllexport)
-#           else
-#               define IRCCD_EXPORT __declspec(dllimport)
-#           endif
-#       else
-#           define IRCCD_EXPORT
-#       endif
-#   else
-#       define IRCCD_EXPORT
-#   endif
-#endif
-
-/**
- * \endcond
- */
-
-#include <sysconfig.hpp>
-
 #include <algorithm>
 #include <cassert>
 #include <exception>
@@ -153,9 +133,9 @@ class document;
  */
 class exception : public std::exception {
 private:
-    int m_line;                 //!< line number
-    int m_column;               //!< line column
-    std::string m_message;      //!< exception message
+    int line_;
+    int column_;
+    std::string message_;
 
 public:
     /**
@@ -166,9 +146,9 @@ public:
      * \param msg the message
      */
     inline exception(int line, int column, std::string msg) noexcept
-        : m_line(line)
-        , m_column(column)
-        , m_message(std::move(msg))
+        : line_(line)
+        , column_(column)
+        , message_(std::move(msg))
     {
     }
 
@@ -179,7 +159,7 @@ public:
      */
     inline int line() const noexcept
     {
-        return m_line;
+        return line_;
     }
 
     /**
@@ -189,7 +169,7 @@ public:
      */
     inline int column() const noexcept
     {
-        return m_column;
+        return column_;
     }
 
     /**
@@ -199,7 +179,7 @@ public:
      */
     const char* what() const noexcept override
     {
-        return m_message.c_str();
+        return message_.c_str();
     }
 };
 
@@ -208,7 +188,7 @@ public:
  *
  * This class can be used when you want to parse a .ini file yourself.
  *
- * \see analyze
+ * \see analyse
  */
 class token {
 public:
@@ -227,10 +207,10 @@ public:
     };
 
 private:
-    type m_type;
-    int m_line;
-    int m_column;
-    std::string m_value;
+    type type_;
+    int line_;
+    int column_;
+    std::string value_;
 
 public:
     /**
@@ -242,30 +222,30 @@ public:
      * \param value the value
      */
     token(type type, int line, int column, std::string value = "") noexcept
-        : m_type(type)
-        , m_line(line)
-        , m_column(column)
+        : type_(type)
+        , line_(line)
+        , column_(column)
     {
         switch (type) {
         case include:
-            m_value = "@include";
+            value_ = "@include";
             break;
         case section:
         case word:
         case quoted_word:
-            m_value = value;
+            value_ = value;
             break;
         case assign:
-            m_value = "=";
+            value_ = "=";
             break;
         case list_begin:
-            m_value = "(";
+            value_ = "(";
             break;
         case list_end:
-            m_value = ")";
+            value_ = ")";
             break;
         case comma:
-            m_value = ",";
+            value_ = ",";
             break;
         default:
             break;
@@ -279,7 +259,7 @@ public:
      */
     inline type type() const noexcept
     {
-        return m_type;
+        return type_;
     }
 
     /**
@@ -289,7 +269,7 @@ public:
      */
     inline int line() const noexcept
     {
-        return m_line;
+        return line_;
     }
 
     /**
@@ -299,7 +279,7 @@ public:
      */
     inline int column() const noexcept
     {
-        return m_column;
+        return column_;
     }
 
     /**
@@ -310,7 +290,7 @@ public:
      */
     inline const std::string& value() const noexcept
     {
-        return m_value;
+        return value_;
     }
 };
 
@@ -324,7 +304,7 @@ using tokens = std::vector<token>;
  */
 class option : public std::vector<std::string> {
 private:
-    std::string m_key;
+    std::string key_;
 
 public:
     /**
@@ -335,9 +315,9 @@ public:
      */
     inline option(std::string key) noexcept
         : std::vector<std::string>()
-        , m_key(std::move(key))
+        , key_(std::move(key))
     {
-        assert(!m_key.empty());
+        assert(!key_.empty());
     }
 
     /**
@@ -348,9 +328,9 @@ public:
      * \param value the value
      */
     inline option(std::string key, std::string value) noexcept
-        : m_key(std::move(key))
+        : key_(std::move(key))
     {
-        assert(!m_key.empty());
+        assert(!key_.empty());
 
         push_back(std::move(value));
     }
@@ -364,9 +344,9 @@ public:
      */
     inline option(std::string key, std::vector<std::string> values) noexcept
         : std::vector<std::string>(std::move(values))
-        , m_key(std::move(key))
+        , key_(std::move(key))
     {
-        assert(!m_key.empty());
+        assert(!key_.empty());
     }
 
     /**
@@ -376,7 +356,7 @@ public:
      */
     inline const std::string& key() const noexcept
     {
-        return m_key;
+        return key_;
     }
 
     /**
@@ -397,7 +377,7 @@ public:
  */
 class section : public std::vector<option> {
 private:
-    std::string m_key;
+    std::string key_;
 
 public:
     /**
@@ -407,9 +387,9 @@ public:
      * \param key the key
      */
     inline section(std::string key) noexcept
-        : m_key(std::move(key))
+        : key_(std::move(key))
     {
-        assert(!m_key.empty());
+        assert(!key_.empty());
     }
 
     /**
@@ -419,7 +399,7 @@ public:
      */
     inline const std::string& key() const noexcept
     {
-        return m_key;
+        return key_;
     }
 
     /**
@@ -431,6 +411,22 @@ public:
     inline bool contains(const std::string& key) const noexcept
     {
         return find(key) != end();
+    }
+
+    /**
+     * Find an option or return an empty one if not found.
+     *
+     * \param key the key
+     * \return the option or empty one if not found
+     */
+    inline option get(const std::string& key) const noexcept
+    {
+        auto it = find(key);
+
+        if (it == end())
+            return option(key);
+
+        return *it;
     }
 
     /**
@@ -495,8 +491,8 @@ public:
 
 /**
  * \brief Ini document description.
- * \see readFile
- * \see readString
+ * \see read_file
+ * \see read_string
  */
 class document : public std::vector<section> {
 public:
@@ -509,6 +505,22 @@ public:
     inline bool contains(const std::string& key) const noexcept
     {
         return find(key) != end();
+    }
+
+    /**
+     * Find a section or return an empty one if not found.
+     *
+     * \param key the key
+     * \return the section or empty one if not found
+     */
+    inline section get(const std::string& key) const noexcept
+    {
+        auto it = find(key);
+
+        if (it == end())
+            return section(key);
+
+        return *it;
     }
 
     /**
@@ -583,7 +595,7 @@ public:
  * \return the list of tokens
  * \throws exception on errors
  */
-IRCCD_EXPORT tokens analyse(std::istreambuf_iterator<char> it, std::istreambuf_iterator<char> end);
+ tokens analyse(std::istreambuf_iterator<char> it, std::istreambuf_iterator<char> end);
 
 /**
  * Overloaded function for stream.
@@ -592,7 +604,7 @@ IRCCD_EXPORT tokens analyse(std::istreambuf_iterator<char> it, std::istreambuf_i
  * \return the list of tokens
  * \throws exception on errors
  */
-IRCCD_EXPORT tokens analyse(std::istream& stream);
+ tokens analyse(std::istream& stream);
 
 /**
  * Parse the produced tokens.
@@ -602,7 +614,7 @@ IRCCD_EXPORT tokens analyse(std::istream& stream);
  * \return the document
  * \throw exception on errors
  */
-IRCCD_EXPORT document parse(const tokens& tokens, const std::string& path = ".");
+ document parse(const tokens& tokens, const std::string& path = ".");
 
 /**
  * Parse a file.
@@ -611,7 +623,7 @@ IRCCD_EXPORT document parse(const tokens& tokens, const std::string& path = ".")
  * \return the document
  * \throw exception on errors
  */
-IRCCD_EXPORT document read_file(const std::string& filename);
+ document read_file(const std::string& filename);
 
 /**
  * Parse a string.
@@ -623,17 +635,17 @@ IRCCD_EXPORT document read_file(const std::string& filename);
  * \return the document
  * \throw exception on exceptions
  */
-IRCCD_EXPORT document read_string(const std::string& buffer);
+ document read_string(const std::string& buffer);
 
 /**
  * Show all tokens and their description.
  *
  * \param tokens the tokens
  */
-IRCCD_EXPORT void dump(const tokens& tokens);
+ void dump(const tokens& tokens);
 
 } // !ini
 
 } // !irccd
 
-#endif // !INI_HPP
+#endif // !IRCCD_INI_HPP
