@@ -19,6 +19,8 @@
 #ifndef IRCCD_COMMON_JSON_UTIL_HPP
 #define IRCCD_COMMON_JSON_UTIL_HPP
 
+#include <climits>
+
 #include <json.hpp>
 
 /**
