@@ -68,6 +68,9 @@ if (WITH_TESTS)
 
     # JS API
     if (HAVE_JS)
+        # Javascript plugin object.
+        add_subdirectory(js-plugin)
+
         add_subdirectory(js)
         add_subdirectory(js-elapsedtimer)
         add_subdirectory(js-directory)

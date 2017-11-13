@@ -105,9 +105,9 @@ js_plugin::js_plugin(std::string name, std::string path)
      * Create two special tables for configuration and formats, they are
      * referenced later as
      *
-     *   - irccd.Plugin.config
-     *   - irccd.Plugin.format
-     *   - irccd.Plugin.paths
+     *   - Irccd.Plugin.config
+     *   - Irccd.Plugin.format
+     *   - Irccd.Plugin.paths
      *
      * In js_plugin_module.cpp.
      */
@@ -117,13 +117,9 @@ js_plugin::js_plugin(std::string name, std::string path)
     duk_put_global_string(context_, format_property.c_str());
     duk_push_object(context_);
     duk_put_global_string(context_, paths_property.c_str());
-
-    // Used by many Javascript APIs.
-    duk_push_object(context_);
-    duk_put_global_string(context_, "irccd");
 }
 
-void js_plugin::on_channel_mode(irccd &, const channel_mode_event &event)
+void js_plugin::on_channel_mode(irccd& , const channel_mode_event &event)
 {
     StackAssert sa(context_);
 
@@ -135,7 +131,7 @@ void js_plugin::on_channel_mode(irccd &, const channel_mode_event &event)
     call("onChannelMode", 5);
 }
 
-void js_plugin::on_channel_notice(irccd &, const channel_notice_event &event)
+void js_plugin::on_channel_notice(irccd& , const channel_notice_event &event)
 {
     StackAssert sa(context_);
 
@@ -146,7 +142,7 @@ void js_plugin::on_channel_notice(irccd &, const channel_notice_event &event)
     call("onChannelNotice", 4);
 }
 
-void js_plugin::on_command(irccd &, const message_event &event)
+void js_plugin::on_command(irccd& , const message_event &event)
 {
     StackAssert sa(context_);
 
@@ -157,7 +153,7 @@ void js_plugin::on_command(irccd &, const message_event &event)
     call("onCommand", 4);
 }
 
-void js_plugin::on_connect(irccd &, const connect_event &event)
+void js_plugin::on_connect(irccd& , const connect_event &event)
 {
     StackAssert sa(context_);
 
@@ -165,7 +161,7 @@ void js_plugin::on_connect(irccd &, const connect_event &event)
     call("onConnect", 1);
 }
 
-void js_plugin::on_invite(irccd &, const invite_event &event)
+void js_plugin::on_invite(irccd& , const invite_event &event)
 {
     StackAssert sa(context_);
 
@@ -175,7 +171,7 @@ void js_plugin::on_invite(irccd &, const invite_event &event)
     call("onInvite", 3);
 }
 
-void js_plugin::on_join(irccd &, const join_event &event)
+void js_plugin::on_join(irccd& , const join_event &event)
 {
     StackAssert sa(context_);
 
@@ -185,7 +181,7 @@ void js_plugin::on_join(irccd &, const join_event &event)
     call("onJoin", 3);
 }
 
-void js_plugin::on_kick(irccd &, const kick_event &event)
+void js_plugin::on_kick(irccd& , const kick_event &event)
 {
     StackAssert sa(context_);
 
@@ -197,7 +193,7 @@ void js_plugin::on_kick(irccd &, const kick_event &event)
     call("onKick", 5);
 }
 
-void js_plugin::on_load(irccd &irccd)
+void js_plugin::on_load(irccd&)
 {
     StackAssert sa(context_);
 
@@ -216,15 +212,13 @@ void js_plugin::on_load(irccd &irccd)
     dukx_peval_file(context_, path());
     duk_pop(context_);
 
+
     /*
      * We put configuration and formats after loading the file and before
      * calling onLoad to allow the plugin adding configuration to
      * irccd.Plugin.(config|format) before the user.
      */
     put_vars();
-    set_config(irccd.plugins().config(name()));
-    set_formats(irccd.plugins().formats(name()));
-    set_paths(irccd.plugins().paths(name()));
 
     // Read metadata .
     duk_get_global_string(context_, "info");
@@ -255,7 +249,7 @@ void js_plugin::on_load(irccd &irccd)
     call("onLoad", 0);
 }
 
-void js_plugin::on_message(irccd &, const message_event &event)
+void js_plugin::on_message(irccd& , const message_event &event)
 {
     StackAssert sa(context_);
 
@@ -266,7 +260,7 @@ void js_plugin::on_message(irccd &, const message_event &event)
     call("onMessage", 4);
 }
 
-void js_plugin::on_me(irccd &, const me_event &event)
+void js_plugin::on_me(irccd& , const me_event &event)
 {
     StackAssert sa(context_);
 
@@ -277,7 +271,7 @@ void js_plugin::on_me(irccd &, const me_event &event)
     call("onMe", 4);
 }
 
-void js_plugin::on_mode(irccd &, const mode_event &event)
+void js_plugin::on_mode(irccd& , const mode_event &event)
 {
     StackAssert sa(context_);
 
@@ -287,7 +281,7 @@ void js_plugin::on_mode(irccd &, const mode_event &event)
     call("onMode", 3);
 }
 
-void js_plugin::on_names(irccd &, const names_event &event)
+void js_plugin::on_names(irccd& , const names_event &event)
 {
     StackAssert sa(context_);
 
@@ -297,7 +291,7 @@ void js_plugin::on_names(irccd &, const names_event &event)
     call("onNames", 3);
 }
 
-void js_plugin::on_nick(irccd &, const nick_event &event)
+void js_plugin::on_nick(irccd& , const nick_event &event)
 {
     StackAssert sa(context_);
 
@@ -307,7 +301,7 @@ void js_plugin::on_nick(irccd &, const nick_event &event)
     call("onNick", 3);
 }
 
-void js_plugin::on_notice(irccd &, const notice_event &event)
+void js_plugin::on_notice(irccd& , const notice_event &event)
 {
     StackAssert sa(context_);
 
@@ -317,7 +311,7 @@ void js_plugin::on_notice(irccd &, const notice_event &event)
     call("onNotice", 3);
 }
 
-void js_plugin::on_part(irccd &, const part_event &event)
+void js_plugin::on_part(irccd& , const part_event &event)
 {
     StackAssert sa(context_);
 
@@ -328,7 +322,7 @@ void js_plugin::on_part(irccd &, const part_event &event)
     call("onPart", 4);
 }
 
-void js_plugin::on_query(irccd &, const query_event &event)
+void js_plugin::on_query(irccd& , const query_event &event)
 {
     StackAssert sa(context_);
 
@@ -338,7 +332,7 @@ void js_plugin::on_query(irccd &, const query_event &event)
     call("onQuery", 3);
 }
 
-void js_plugin::on_query_command(irccd &, const query_event &event)
+void js_plugin::on_query_command(irccd& , const query_event &event)
 {
     StackAssert sa(context_);
 
@@ -348,14 +342,14 @@ void js_plugin::on_query_command(irccd &, const query_event &event)
     call("onQueryCommand", 3);
 }
 
-void js_plugin::on_reload(irccd &)
+void js_plugin::on_reload(irccd& )
 {
     StackAssert sa(context_);
 
     call("onReload");
 }
 
-void js_plugin::on_topic(irccd &, const topic_event &event)
+void js_plugin::on_topic(irccd& , const topic_event &event)
 {
     StackAssert sa(context_);
 
@@ -366,14 +360,14 @@ void js_plugin::on_topic(irccd &, const topic_event &event)
     call("onTopic", 4);
 }
 
-void js_plugin::on_unload(irccd &)
+void js_plugin::on_unload(irccd& )
 {
     StackAssert sa(context_);
 
     call("onUnload");
 }
 
-void js_plugin::on_whois(irccd &, const whois_event &event)
+void js_plugin::on_whois(irccd& , const whois_event &event)
 {
     StackAssert sa(context_);
 
@@ -392,7 +386,7 @@ void js_plugin::on_whois(irccd &, const whois_event &event)
     call("onWhois", 2);
 }
 
-js_plugin_loader::js_plugin_loader(irccd &irccd) noexcept
+js_plugin_loader::js_plugin_loader(irccd& irccd) noexcept
     : plugin_loader({}, { ".js" })
     , irccd_(irccd)
 {
@@ -416,11 +410,8 @@ std::shared_ptr<plugin> js_plugin_loader::open(const std::string& id,
     try {
         auto plugin = std::make_shared<js_plugin>(id, path);
 
-        for (const auto& mod : modules_) {
-            log::debug() << "plugin " << plugin->name() << ": ";
-            log::debug() << "loading " << mod->name() << " Javascript API" << std::endl;
+        for (const auto& mod : modules_)
             mod->load(irccd_, plugin);
-        }
 
         return plugin;
     } catch (const std::exception &ex) {
