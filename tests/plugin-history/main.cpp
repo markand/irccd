@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(fix_642)
     // Random caps.
     plugin_->on_command(irccd_, {server_, "destructor!dst@localhost", "#HiSToRy", "said JeaN"});
 
-    cmd = server_->cqueue().front();
+    cmd = server_->cqueue().back();
 
     BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
     BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "#history");

@@ -250,9 +250,12 @@ public:
  * \brief Implementation for searching Javascript plugins.
  */
 class js_plugin_loader : public plugin_loader {
+public:
+    using modules_t = std::vector<std::unique_ptr<module>>;
+
 private:
     irccd& irccd_;
-    std::vector<std::unique_ptr<module>> modules_;
+    modules_t modules_;
 
 public:
     /**
@@ -268,8 +271,29 @@ public:
     ~js_plugin_loader() noexcept;
 
     /**
+     * Get the list of modules.
+     *
+     * \return the modules
+     */
+    inline const modules_t& modules() const noexcept
+    {
+        return modules_;
+    }
+
+    /**
+     * Overloaded function.
+     *
+     * \return the modules
+     */
+    inline modules_t& modules() noexcept
+    {
+        return modules_;
+    }
+
+    /**
      * Register a new module for loading new plugins.
      *
+     * \deprecated use modules() instead
      * \param module the module to add
      */
     void add_module(std::unique_ptr<module> module);

@@ -99,7 +99,7 @@ protected:
 
     js_plugin_loader_test()
     {
-        irccd_.set_config(CMAKE_CURRENT_SOURCE_DIR "/irccd.conf");
+        irccd_.set_config(config(CMAKE_CURRENT_SOURCE_DIR "/irccd.conf"));
 
         auto loader = std::make_unique<js_plugin_loader>(irccd_);
 

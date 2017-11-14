@@ -61,10 +61,11 @@ public:
      *
      * \param path the path
      */
-    inline config(std::string path)
+    inline config(std::string path = "")
         : path_(std::move(path))
-        , document_(ini::read_file(path_))
     {
+        if (!path_.empty())
+            document_ = ini::read_file(path_);
     }
 
     /**

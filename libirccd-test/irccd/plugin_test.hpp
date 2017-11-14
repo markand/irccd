@@ -25,7 +25,7 @@
  */
 
 #include "irccd.hpp"
-#include "plugin.hpp"
+#include "js_plugin.hpp"
 #include "journal_server.hpp"
 
 namespace irccd {
@@ -38,7 +38,7 @@ namespace irccd {
 class plugin_test {
 protected:
     irccd irccd_;
-    std::shared_ptr<plugin> plugin_;
+    std::shared_ptr<js_plugin> plugin_;
     std::shared_ptr<journal_server> server_;
 
 public:

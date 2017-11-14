@@ -200,10 +200,8 @@ plugin_formats plugin_service::formats(const std::string& id)
 
 plugin_paths plugin_service::paths(const std::string& id)
 {
-    class config cfg(irccd_.config());
-
-    auto defaults = to_map<plugin_paths>(cfg, "paths");
-    auto paths = to_map<plugin_paths>(cfg, string_util::sprintf("paths.%s", id));
+    auto defaults = to_map<plugin_paths>(irccd_.config(), "paths");
+    auto paths = to_map<plugin_paths>(irccd_.config(), string_util::sprintf("paths.%s", id));
 
     // Fill defaults paths.
     if (!defaults.count("cache"))

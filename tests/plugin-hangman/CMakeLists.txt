@@ -18,7 +18,12 @@
 
 irccd_define_test(
     NAME plugin-hangman
-    SOURCES main.cpp words.conf wordlist_fix_644.conf
+    SOURCES
+        main.cpp
+        words.conf
+        wordlist_fix_644.conf
     LIBRARIES libirccd
-    FLAGS PLUGINDIR=\"${IRCCD_FAKEROOTDIR}/${WITH_PLUGINDIR}\"
+    FLAGS
+        PLUGIN_NAME="hangman"
+        PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/hangman/hangman.js"
 )

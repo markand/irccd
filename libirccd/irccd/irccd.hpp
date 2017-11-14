@@ -30,6 +30,7 @@
 #include <mutex>
 #include <vector>
 
+#include "config.hpp"
 #include "net.hpp"
 #include "sysconfig.hpp"
 
@@ -50,13 +51,13 @@ class transport_service;
  */
 class irccd {
 private:
+    // Configurations.
+    class config config_;
+
     // Main loop stuff.
     std::atomic<bool> running_{true};
     std::mutex mutex_;
     std::vector<std::function<void (irccd&)>> events_;
-
-    // Path to config.
-    std::string config_;
 
     // Services.
     std::shared_ptr<command_service> command_service_;
@@ -87,23 +88,23 @@ public:
     ~irccd();
 
     /**
-     * Get the current configuration path.
+     * Get the current configuration.
      *
-     * \return the path
+     * \return the configuration
      */
-    inline const std::string& config() const noexcept
+    inline const class config& config() const noexcept
     {
         return config_;
     }
 
     /**
-     * Set the configuration path.
+     * Set the configuration.
      *
-     * \param path the new path
+     * \param cfg the new config
      */
-    inline void set_config(std::string path) noexcept
+    inline void set_config(class config cfg) noexcept
     {
-        config_ = std::move(path);
+        config_ = std::move(cfg);
     }
 
     /**

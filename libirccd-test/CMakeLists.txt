@@ -25,8 +25,6 @@ irccd_define_library(
         ${libirccd-test_SOURCE_DIR}/irccd/command-tester.hpp
         ${libirccd-test_SOURCE_DIR}/irccd/journal_server.cpp
         ${libirccd-test_SOURCE_DIR}/irccd/journal_server.hpp
-        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin-tester.cpp>
-        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin-tester.hpp>
         $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin_test.cpp>
         $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin_test.hpp>
         $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/js_test.hpp>

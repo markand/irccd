@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cassert>
+
 #include <irccd/js_directory_module.hpp>
 #include <irccd/js_elapsed_timer_module.hpp>
 #include <irccd/js_file_module.hpp>
@@ -41,23 +43,24 @@ plugin_test::plugin_test(std::string name, std::string path)
     log::set_verbose(false);
     log::set_logger(std::make_unique<log::silent_logger>());
 
-    js_plugin_loader loader(irccd_);
+    plugin_ = std::make_unique<js_plugin>(std::move(name), std::move(path));
 
-    loader.add_module(std::make_unique<js_irccd_module>());
-    loader.add_module(std::make_unique<js_directory_module>());
-    loader.add_module(std::make_unique<js_elapsed_timer_module>());
-    loader.add_module(std::make_unique<js_file_module>());
-    loader.add_module(std::make_unique<js_logger_module>());
-    loader.add_module(std::make_unique<js_plugin_module>());
-    loader.add_module(std::make_unique<js_server_module>());
-    loader.add_module(std::make_unique<js_system_module>());
-    loader.add_module(std::make_unique<js_timer_module>());
-    loader.add_module(std::make_unique<js_unicode_module>());
-    loader.add_module(std::make_unique<js_util_module>());
-
-    plugin_ = loader.open(name, path);
     irccd_.plugins().add(plugin_);
     irccd_.servers().add(server_);
+
+    js_irccd_module().load(irccd_, plugin_);
+    js_directory_module().load(irccd_, plugin_);
+    js_elapsed_timer_module().load(irccd_, plugin_);
+    js_file_module().load(irccd_, plugin_);
+    js_logger_module().load(irccd_, plugin_);
+    js_plugin_module().load(irccd_, plugin_);
+    js_server_module().load(irccd_, plugin_);
+    js_system_module().load(irccd_, plugin_);
+    js_timer_module().load(irccd_, plugin_);
+    js_unicode_module().load(irccd_, plugin_);
+    js_util_module().load(irccd_, plugin_);
+
+    plugin_->open();
 }
 
 } // !irccd

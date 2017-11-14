@@ -289,7 +289,6 @@ Hangman.prototype.propose = function (ch, nickname)
 
 function onLoad()
 {
-    Logger.warning("TAMERE");
     Hangman.loadFormats();
     Hangman.loadWords();
 }
