@@ -16,15 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <boost/filesystem.hpp>
-
-#include "sysconfig.hpp"
-
-#if defined(HAVE_STAT)
-#  include <sys/stat.h>
-#  include <cerrno>
-#  include <cstring>
-#endif
+#include <cstring>
+#include <cerrno>
+#include <fstream>
+#include <iterator>
+#include <stdexcept>
 
 #include "irccd.hpp"
 #include "logger.hpp"
@@ -86,21 +82,11 @@ void js_plugin::call(const std::string& name, unsigned nargs)
     }
 }
 
-void js_plugin::put_vars()
-{
-    StackAssert sa(context_);
-
-    duk_push_pointer(context_, this);
-    duk_put_global_string(context_, "\xff""\xff""plugin");
-    dukx_push_std_string(context_, name());
-    duk_put_global_string(context_, "\xff""\xff""name");
-    dukx_push_std_string(context_, path());
-    duk_put_global_string(context_, "\xff""\xff""path");
-}
-
 js_plugin::js_plugin(std::string name, std::string path)
     : plugin(name, path)
 {
+    StackAssert sa(context_);
+
     /*
      * Create two special tables for configuration and formats, they are
      * referenced later as
@@ -117,6 +103,46 @@ js_plugin::js_plugin(std::string name, std::string path)
     duk_put_global_string(context_, format_property.c_str());
     duk_push_object(context_);
     duk_put_global_string(context_, paths_property.c_str());
+
+    duk_push_pointer(context_, this);
+    duk_put_global_string(context_, "\xff""\xff""plugin");
+    dukx_push_std_string(context_, name);
+    duk_put_global_string(context_, "\xff""\xff""name");
+    dukx_push_std_string(context_, path);
+    duk_put_global_string(context_, "\xff""\xff""path");
+}
+
+void js_plugin::open()
+{
+    std::ifstream input(path());
+
+    if (!input)
+        throw std::runtime_error(std::strerror(errno));
+
+    std::string data(
+        std::istreambuf_iterator<char>(input.rdbuf()),
+        std::istreambuf_iterator<char>()
+    );
+
+    if (duk_peval_string(context_, data.c_str()))
+        throw dukx_exception(context_, -1);
+
+    // Read metadata.
+    duk_get_global_string(context_, "info");
+
+    if (duk_get_type(context_, -1) == DUK_TYPE_OBJECT) {
+        duk_get_prop_string(context_, -1, "author");
+        set_author(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : author());
+        duk_get_prop_string(context_, -2, "license");
+        set_license(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : license());
+        duk_get_prop_string(context_, -3, "summary");
+        set_summary(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : summary());
+        duk_get_prop_string(context_, -4, "version");
+        set_version(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : version());
+        duk_pop_n(context_, 4);
+    }
+
+    duk_pop(context_);
 }
 
 void js_plugin::on_channel_mode(irccd& , const channel_mode_event &event)
@@ -197,55 +223,6 @@ void js_plugin::on_load(irccd&)
 {
     StackAssert sa(context_);
 
-    /*
-     * Duktape currently emit useless warnings when a file do
-     * not exists so we do a homemade access.
-     */
-#if defined(HAVE_STAT)
-    struct stat st;
-
-    if (::stat(path().c_str(), &st) < 0)
-        throw std::runtime_error(std::strerror(errno));
-#endif
-
-    // Try to load the file (does not call onLoad yet).
-    dukx_peval_file(context_, path());
-    duk_pop(context_);
-
-
-    /*
-     * We put configuration and formats after loading the file and before
-     * calling onLoad to allow the plugin adding configuration to
-     * irccd.Plugin.(config|format) before the user.
-     */
-    put_vars();
-
-    // Read metadata .
-    duk_get_global_string(context_, "info");
-
-    if (duk_get_type(context_, -1) == DUK_TYPE_OBJECT) {
-        // 'author'
-        duk_get_prop_string(context_, -1, "author");
-        set_author(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : author());
-        duk_pop(context_);
-
-        // 'license'
-        duk_get_prop_string(context_, -1, "license");
-        set_license(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : license());
-        duk_pop(context_);
-
-        // 'summary'
-        duk_get_prop_string(context_, -1, "summary");
-        set_summary(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : summary());
-        duk_pop(context_);
-
-        // 'version'
-        duk_get_prop_string(context_, -1, "version");
-        set_version(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : version());
-        duk_pop(context_);
-    }
-
-    duk_pop(context_);
     call("onLoad", 0);
 }
 
@@ -412,6 +389,8 @@ std::shared_ptr<plugin> js_plugin_loader::open(const std::string& id,
 
         for (const auto& mod : modules_)
             mod->load(irccd_, plugin);
+
+        plugin->open();
 
         return plugin;
     } catch (const std::exception &ex) {

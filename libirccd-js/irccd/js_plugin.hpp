@@ -40,6 +40,11 @@ class module;
 class js_plugin : public plugin {
 public:
     /**
+     * List of modules to enable.
+     */
+    using modules_t = std::vector<std::unique_ptr<module>>;
+
+    /**
      * Global property where to read/write plugin configuration (object).
      */
     static const std::string config_property;
@@ -62,7 +67,6 @@ private:
     std::unordered_map<std::string, std::string> get_table(const std::string&) const;
     void put_table(const std::string&, const std::unordered_map<std::string, std::string>&);
     void call(const std::string&, unsigned = 0);
-    void put_vars();
 
 public:
     /**
@@ -82,6 +86,11 @@ public:
     {
         return context_;
     }
+
+    /**
+     * Open the script file associated.
+     */
+    void open();
 
     /**
      * \copydoc Plugin::config
