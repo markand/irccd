@@ -37,7 +37,7 @@ BOOST_FIXTURE_TEST_SUITE(js_timer_suite, fixture)
 
 BOOST_AUTO_TEST_CASE(single)
 {
-    fixture f(DIRECTORY "/timer-single.js");
+    fixture f(CMAKE_CURRENT_SOURCE_DIR "/timer-single.js");
 
     boost::timer::cpu_timer timer;
 
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(single)
 
 BOOST_AUTO_TEST_CASE(repeat)
 {
-    fixture f(DIRECTORY "/timer-repeat.js");
+    fixture f(CMAKE_CURRENT_SOURCE_DIR "/timer-repeat.js");
 
     boost::timer::cpu_timer timer;
 

@@ -69,6 +69,7 @@ public:
         add<js_irccd_module>();
         add<Modules...>();
 
+        plugin_->open();
         plugin_->on_load(irccd_);
 
         // Add some CMake variables.
