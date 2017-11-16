@@ -133,7 +133,7 @@ std::shared_ptr<transport_server> load_transport_ip(const ini::section& sc)
         throw std::invalid_argument("transport: missing 'port' parameter");
 
     try {
-        port = string_util::to_number<std::uint16_t>(it->value());
+        port = string_util::to_uint<std::uint16_t>(it->value());
     } catch (const std::exception&) {
         throw std::invalid_argument(string_util::sprintf("transport: invalid port number: %s", it->value()));
     }
@@ -343,13 +343,13 @@ std::shared_ptr<server> load_server(const ini::section& sc, const config& config
     // Reconnect and ping timeout
     try {
         if ((it = sc.find("port")) != sc.end())
-            sv->set_port(string_util::to_number<std::uint16_t>(it->value()));
+            sv->set_port(string_util::to_uint<std::uint16_t>(it->value()));
         if ((it = sc.find("reconnect-tries")) != sc.end())
-            sv->set_reconnect_tries(string_util::to_number<std::int8_t>(it->value()));
+            sv->set_reconnect_tries(string_util::to_int<std::int8_t>(it->value()));
         if ((it = sc.find("reconnect-timeout")) != sc.end())
-            sv->set_reconnect_delay(string_util::to_number<std::uint16_t>(it->value()));
+            sv->set_reconnect_delay(string_util::to_uint<std::uint16_t>(it->value()));
         if ((it = sc.find("ping-timeout")) != sc.end())
-            sv->set_ping_timeout(string_util::to_number<std::uint16_t>(it->value()));
+            sv->set_ping_timeout(string_util::to_uint<std::uint16_t>(it->value()));
     } catch (const std::exception&) {
         log::warning(string_util::sprintf("server %s: invalid number for %s: %s",
             sv->name(), it->key(), it->value()));

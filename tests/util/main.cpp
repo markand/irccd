@@ -417,47 +417,58 @@ BOOST_AUTO_TEST_CASE(incorrect)
 BOOST_AUTO_TEST_SUITE_END()
 
 /*
- * string_util::to_number function
+ * string_util::to_int function
  * ------------------------------------------------------------------
  */
 
-BOOST_AUTO_TEST_SUITE(to_number)
+BOOST_AUTO_TEST_SUITE(to_int)
 
-BOOST_AUTO_TEST_CASE(correct)
+BOOST_AUTO_TEST_CASE(signed_to_int)
 {
-    /* unsigned */
-    BOOST_REQUIRE_EQUAL(50u, string_util::to_number<std::uint8_t>("50"));
-    BOOST_REQUIRE_EQUAL(5000u, string_util::to_number<std::uint16_t>("5000"));
-    BOOST_REQUIRE_EQUAL(50000u, string_util::to_number<std::uint32_t>("50000"));
-    BOOST_REQUIRE_EQUAL(500000u, string_util::to_number<std::uint64_t>("500000"));
-
-    /* signed */
-    BOOST_REQUIRE_EQUAL(-50, string_util::to_number<std::int8_t>("-50"));
-    BOOST_REQUIRE_EQUAL(-500, string_util::to_number<std::int16_t>("-500"));
-    BOOST_REQUIRE_EQUAL(-5000, string_util::to_number<std::int32_t>("-5000"));
-    BOOST_REQUIRE_EQUAL(-50000, string_util::to_number<std::int64_t>("-50000"));
+    BOOST_TEST(to_int("10")                     == 10);
+    BOOST_TEST(to_int<std::int8_t>("-10")       == -10);
+    BOOST_TEST(to_int<std::int8_t>("10")        == 10);
+    BOOST_TEST(to_int<std::int16_t>("-1000")    == -1000);
+    BOOST_TEST(to_int<std::int16_t>("1000")     == 1000);
+    BOOST_TEST(to_int<std::int32_t>("-1000")    == -1000);
+    BOOST_TEST(to_int<std::int32_t>("1000")     == 1000);
 }
 
-BOOST_AUTO_TEST_CASE(incorrect)
+BOOST_AUTO_TEST_CASE(signed_to_int64)
 {
-    /* unsigned */
-    BOOST_REQUIRE_THROW(string_util::to_number<std::uint8_t>("300"), std::out_of_range);
-    BOOST_REQUIRE_THROW(string_util::to_number<std::uint16_t>("80000"), std::out_of_range);
-    BOOST_REQUIRE_THROW(string_util::to_number<std::uint8_t>("-125"), std::out_of_range);
-    BOOST_REQUIRE_THROW(string_util::to_number<std::uint16_t>("-25000"), std::out_of_range);
+    BOOST_TEST(to_int<std::int64_t>("-9223372036854775807") == -9223372036854775807LL);
+    BOOST_TEST(to_int<std::int64_t>("9223372036854775807") == 9223372036854775807LL);
+}
 
-    /* signed */
-    BOOST_REQUIRE_THROW(string_util::to_number<std::int8_t>("300"), std::out_of_range);
-    BOOST_REQUIRE_THROW(string_util::to_number<std::int16_t>("80000"), std::out_of_range);
-    BOOST_REQUIRE_THROW(string_util::to_number<std::int8_t>("-300"), std::out_of_range);
-    BOOST_REQUIRE_THROW(string_util::to_number<std::int16_t>("-80000"), std::out_of_range);
+BOOST_AUTO_TEST_CASE(unsigned_to_uint)
+{
+    BOOST_TEST(to_uint("10")                    == 10U);
+    BOOST_TEST(to_uint<std::uint8_t>("10")       == 10U);
+    BOOST_TEST(to_uint<std::uint16_t>("1000")    == 1000U);
+    BOOST_TEST(to_uint<std::uint32_t>("1000")    == 1000U);
+}
 
-    /* not numbers */
-    BOOST_REQUIRE_THROW(string_util::to_number<std::uint8_t>("nonono"), std::invalid_argument);
+BOOST_AUTO_TEST_CASE(unsigned_to_uint64)
+{
+    BOOST_TEST(to_uint<std::uint64_t>("18446744073709551615") == 18446744073709551615ULL);
+}
 
-    /* custom ranges */
-    BOOST_REQUIRE_THROW(string_util::to_number<std::uint8_t>("50", 0, 10), std::out_of_range);
-    BOOST_REQUIRE_THROW(string_util::to_number<std::int8_t>("-50", -10, 10), std::out_of_range);
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_argument)
+{
+    BOOST_REQUIRE_THROW(to_int("plopation"), std::invalid_argument);
+    BOOST_REQUIRE_THROW(to_uint("plopation"), std::invalid_argument);
+}
+
+BOOST_AUTO_TEST_CASE(out_of_range)
+{
+    BOOST_REQUIRE_THROW(to_int<std::int8_t>("1000"), std::out_of_range);
+    BOOST_REQUIRE_THROW(to_int<std::int8_t>("-1000"), std::out_of_range);
+    BOOST_REQUIRE_THROW(to_uint<std::uint8_t>("1000"), std::out_of_range);
+    BOOST_REQUIRE_THROW(to_uint<std::uint8_t>("-1000"), std::out_of_range);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

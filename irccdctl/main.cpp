@@ -134,7 +134,7 @@ std::unique_ptr<connection> read_connect_ip(const ini::section& sc)
     if ((it = sc.find("port")) == sc.end())
         throw std::invalid_argument("missing port parameter");
 
-    port = string_util::to_number<std::uint16_t>(it->value());
+    port = string_util::to_uint<std::uint16_t>(it->value());
 
     if ((it = sc.find("ssl")) != sc.end() && string_util::is_boolean(it->value()))
 #if defined(HAVE_SSL)
@@ -310,8 +310,7 @@ std::unique_ptr<connection> parse_connect_ip(const option::result& options)
     if ((it = options.find("-p")) == options.end() && (it = options.find("--port")) == options.end())
         throw std::invalid_argument("missing port argument (-p or --port)");
 
-    auto port = string_util::to_number<std::uint16_t>(it->second);
-
+    auto port = string_util::to_uint<std::uint16_t>(it->second);
 
     return std::make_unique<ip_connection>(service, host, port);
 }

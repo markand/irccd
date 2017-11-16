@@ -69,12 +69,8 @@ void server_connect_cli::exec(ctl::controller& ctl, const std::vector<std::strin
         { "host", copy[1] }
     });
 
-    if (copy.size() == 3) {
-        if (!string_util::is_int(copy[2]))
-            throw std::invalid_argument("invalid port number");
-
-        object["port"] = std::stoi(copy[2]);
-    }
+    if (copy.size() == 3)
+        object["port"] = string_util::to_int(copy[2]);
 
     if (result.count("-S") > 0 || result.count("--ssl-verify") > 0)
         object["sslVerify"] = true;

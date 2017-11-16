@@ -73,9 +73,9 @@ void rule_add_cli::exec(ctl::controller& ctl, const std::vector<std::string>& ar
 
     // Index.
     if (result.count("-i") > 0)
-        json["index"] = string_util::to_number<unsigned>(result.find("-i")->second);
+        json["index"] = string_util::to_uint<unsigned>(result.find("-i")->second);
     if (result.count("--index") > 0)
-        json["index"] = string_util::to_number<unsigned>(result.find("--index")->second);
+        json["index"] = string_util::to_uint<unsigned>(result.find("--index")->second);
 
     // And action.
     if (copy[0] != "accept" && copy[0] != "drop")

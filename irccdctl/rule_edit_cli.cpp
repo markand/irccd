@@ -94,7 +94,7 @@ void rule_edit_cli::exec(ctl::controller& ctl, const std::vector<std::string>& a
     }
 
     // Index.
-    json["index"] = string_util::to_number<unsigned>(copy[0]);
+    json["index"] = string_util::to_uint<unsigned>(copy[0]);
 
     request(ctl, json);
 }

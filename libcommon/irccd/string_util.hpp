@@ -26,12 +26,15 @@
 
 #include "sysconfig.hpp"
 
+#include <cassert>
 #include <ctime>
 #include <initializer_list>
 #include <limits>
 #include <regex>
 #include <sstream>
+#include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 
 #include <boost/format.hpp>
@@ -366,40 +369,99 @@ std::string sprintf(const Format& format, const Args&... args)
 }
 
 /**
- * Try to convert the string into number.
- *
- * This function will try to convert the string to number in the limits of T.
- *
- * If the string is not a number or if the converted value is out of range than
- * specified boundaries, an exception is thrown.
- *
- * By default, the function will use numeric limits from T.
- *
- * \param number the string to convert
- * \param min the minimum (defaults to T minimum)
- * \param max the maximum (defaults to T maximum)
- * \return the converted value
- * \throw std::invalid_argument if number is not a string
- * \throw std::out_of_range if the number is not between min and max
+ * \cond HIDDEN_SYMBOLS
  */
-template <typename T>
-inline T to_number(const std::string& number,
-                   T min = std::numeric_limits<T>::min(),
-                   T max = std::numeric_limits<T>::max())
+
+namespace detail {
+
+inline std::invalid_argument make_invalid_argument(const std::string& str)
 {
-    static_assert(std::is_integral<T>::value, "T must be integer type");
+    std::ostringstream oss;
 
-    std::conditional_t<std::is_unsigned<T>::value, unsigned long long, long long> value;
+    oss << "invalid number '" << str << "'";
 
-    if (std::is_unsigned<T>::value)
-        value = std::stoull(number);
-    else
-        value = std::stoll(number);
+    return std::invalid_argument(oss.str());
+}
 
-    if (value < min || value > max)
-        throw std::out_of_range("out of range");
+template <typename T>
+inline std::out_of_range make_out_of_range(const std::string& str, T min, T max)
+{
+    std::ostringstream oss;
 
-    return static_cast<T>(value);
+    oss << "number '" << str << "' is out of range ";
+    oss << min << ".." << max;
+
+    return std::out_of_range(oss.str());
+}
+
+} // !detail
+
+/**
+ * \endcond
+ */
+
+/**
+ * Convert the given string into a signed integer.
+ *
+ * \param str the string to convert
+ * \param min the minimum value allowed
+ * \param max the maximum value allowed
+ * \throw std::invalid_argument if the number was not parsed
+ * \throw std::out_or_range if the argument is out of the specified range
+ */
+template <typename T = int>
+T to_int(const std::string& str, T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max())
+{
+    static_assert(std::is_signed<T>::value, "must be signed");
+
+    char* end;
+    auto v = std::strtoll(str.c_str(), &end, 10);
+
+    if (*end != '\0')
+        throw detail::make_invalid_argument(str);
+    if (v < min || v > max)
+        throw detail::make_out_of_range(str, min, max);
+
+    return static_cast<T>(v);
+}
+
+/**
+ * Convert the given string into an unsigned integer.
+ *
+ * In contrast to the [std::strtoull][strtoull] function, this functions
+ * verifies if the string starts with minus sign and throws an exception if any.
+ *
+ * Note, for this you need to have a trimmed string which contains no leading
+ * whitespaces.
+ *
+ * \pre string must be trimmed
+ * \param str the string to convert
+ * \param min the minimum value allowed
+ * \param max the maximum value allowed
+ * \throw std::invalid_argument if the number was not parsed
+ * \throw std::out_or_range if the argument is out of the specified range
+ *
+ * [strtoull]: http://en.cppreference.com/w/cpp/string/byte/strtoul
+ */
+template <typename T = unsigned>
+T to_uint(const std::string& str, T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max())
+{
+    static_assert(std::is_unsigned<T>::value, "must be unsigned");
+
+    assert(str.empty() || !std::isspace(str[0]));
+
+    if (str.size() > 0U && str[0] == '-')
+        throw detail::make_out_of_range(str, min, max);
+
+    char* end;
+    auto v = std::strtoull(str.c_str(), &end, 10);
+
+    if (*end != '\0')
+        throw detail::make_invalid_argument(str);
+    if (v < min || v > max)
+        throw detail::make_out_of_range(str, min, max);
+
+    return v;
 }
 
 } // !string_util

@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/string_util.hpp>
+
 #include "rule_move_cli.hpp"
 
 namespace irccd {
@@ -32,15 +34,8 @@ void rule_move_cli::exec(ctl::controller& ctl, const std::vector<std::string>& a
     if (args.size() < 2)
         throw std::invalid_argument("rule-move requires 2 arguments");
 
-    int from = 0;
-    int to = 0;
-
-    try {
-        from = std::stoi(args[0]);
-        to = std::stoi(args[1]);
-    } catch (...) {
-        throw std::invalid_argument("invalid number");
-    }
+    int from = string_util::to_int<int>(args[0]);
+    int to = string_util::to_int<int>(args[1]);
 
     request(ctl, {
         { "command",    "rule-move" },
