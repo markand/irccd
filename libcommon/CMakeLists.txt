@@ -22,6 +22,7 @@ find_package(Boost 1.60 REQUIRED QUIET COMPONENTS filesystem system)
 
 set(
     HEADERS
+    ${libcommon_SOURCE_DIR}/irccd/errors.hpp
     ${libcommon_SOURCE_DIR}/irccd/fs_util.hpp
     ${libcommon_SOURCE_DIR}/irccd/ini.hpp
     ${libcommon_SOURCE_DIR}/irccd/json_util.hpp
@@ -38,6 +39,7 @@ set(
 
 set(
     SOURCES
+    ${libcommon_SOURCE_DIR}/irccd/errors.cpp
     ${libcommon_SOURCE_DIR}/irccd/ini.cpp
     ${libcommon_SOURCE_DIR}/irccd/json_util.cpp
     ${libcommon_SOURCE_DIR}/irccd/logger.cpp

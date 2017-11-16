@@ -1,5 +1,5 @@
 /*
- * command-tester.hpp -- test fixture helper for remote commands
+ * local_connection.cpp -- unix domain connection for irccdctl
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,41 +16,23 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_COMMAND_TESTER_HPP
-#define IRCCD_COMMAND_TESTER_HPP
+#include "local_connection.hpp"
 
-#include <boost/timer/timer.hpp>
-
-#include <gtest/gtest.h>
-
-#include "irccd.hpp"
-#include "irccdctl.hpp"
-#include "net_util.hpp"
+#if !defined(IRCCD_SYSTEM_WINDOWS)
 
 namespace irccd {
 
-class command;
-class server;
+namespace ctl {
 
-class CommandTester : public testing::Test {
-protected:
-    irccd m_irccd;
-    Irccdctl m_irccdctl;
+void local_connection::connect(connect_t handler)
+{
+    using endpoint = boost::asio::local::stream_protocol::endpoint;
 
-public:
-    CommandTester(std::unique_ptr<command> cmd = nullptr,
-                  std::unique_ptr<server> server = nullptr);
+    socket_.async_connect(endpoint(path_), std::move(handler));
+}
 
-    template <typename Predicate>
-    void poll(Predicate &&predicate)
-    {
-        boost::timer::cpu_timer timer;
-
-        while (!predicate() && timer.elapsed().wall / 1000000LL < 30000)
-            net_util::poll(250, m_irccd, m_irccdctl);
-    }
-};
+} // !ctl
 
 } // !irccd
 
-#endif // !IRCCD_COMMAND_TESTER_HPP
+#endif // !IRCCD_SYSTEM_WINDOWS

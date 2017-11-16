@@ -23,38 +23,42 @@
 
 namespace irccd {
 
-AliasArg::AliasArg(std::string value)
+namespace ctl {
+
+alias_arg::alias_arg(std::string value)
 {
     assert(!value.empty());
 
-    if ((m_isPlaceholder = std::regex_match(value, std::regex("^%\\d+$"))))
-        m_value = value.substr(1);
+    if ((is_placeholder_ = std::regex_match(value, std::regex("^%\\d+$"))))
+        value_ = value.substr(1);
     else
-        m_value = std::move(value);
+        value_ = std::move(value);
 }
 
-unsigned AliasArg::index() const noexcept
+unsigned alias_arg::index() const noexcept
 {
-    assert(isPlaceholder());
+    assert(is_placeholder_);
 
-    return std::stoi(m_value);
+    return std::stoi(value_);
 }
 
-const std::string &AliasArg::value() const noexcept
+const std::string& alias_arg::value() const noexcept
 {
-    assert(!isPlaceholder());
+    assert(!is_placeholder_);
 
-    return m_value;
+    return value_;
 }
 
-std::ostream &operator<<(std::ostream &out, const AliasArg &arg)
+std::ostream& operator<<(std::ostream& out, const alias_arg& arg)
 {
-    if (arg.m_isPlaceholder)
-        out << "%" << arg.m_value;
+    if (arg.is_placeholder_)
+        out << "%" << arg.value_;
     else
-        out << arg.m_value;
+        out << arg.value_;
 
     return out;
 }
+
+} // !ctl
 
 } // !irccd

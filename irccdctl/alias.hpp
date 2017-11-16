@@ -32,6 +32,8 @@
 
 namespace irccd {
 
+namespace ctl {
+
 /**
  * \brief Describe an alias argument.
  *
@@ -40,10 +42,10 @@ namespace irccd {
  *
  * Placeholders are placed using %n where n is an integer starting from 0.
  */
-class AliasArg {
+class alias_arg {
 private:
-    std::string m_value;
-    bool m_isPlaceholder;
+    std::string value_;
+    bool is_placeholder_;
 
 public:
     /**
@@ -52,33 +54,33 @@ public:
      * \pre value must not be empty
      * \param value the value
      */
-    IRCCD_EXPORT AliasArg(std::string value);
+    alias_arg(std::string value);
 
     /**
      * Check if the argument is a placeholder.
      *
      * \return true if the argument is a placeholder
      */
-    inline bool isPlaceholder() const noexcept
+    inline bool is_placeholder() const noexcept
     {
-        return m_isPlaceholder;
+        return is_placeholder_;
     }
 
     /**
      * Get the placeholder index (e.g %0 returns 0)
      *
-     * \pre isPlaceholder() must return true
+     * \pre is_placeholder() must return true
      * \return the position
      */
-    IRCCD_EXPORT unsigned index() const noexcept;
+    unsigned index() const noexcept;
 
     /**
      * Get the real value.
      *
-     * \pre isPlaceholder() must return false
+     * \pre is_placeholder() must return false
      * \return the value
      */
-    IRCCD_EXPORT const std::string &value() const noexcept;
+    const std::string& value() const noexcept;
 
     /**
      * Output the alias to the stream.
@@ -86,7 +88,7 @@ public:
      * \param out the output stream
      * \return out
      */
-    IRCCD_EXPORT friend std::ostream &operator<<(std::ostream &out, const AliasArg &);
+    friend std::ostream& operator<<(std::ostream& out, const alias_arg&);
 };
 
 /**
@@ -95,10 +97,10 @@ public:
  * An alias command is just a command with a set of applied or placeholders
  * arguments.
  */
-class AliasCommand {
+class alias_command {
 private:
-    std::string m_command;
-    std::vector<AliasArg> m_args;
+    std::string command_;
+    std::vector<alias_arg> args_;
 
 public:
     /**
@@ -107,9 +109,9 @@ public:
      * \param command the command
      * \param args the arguments
      */
-    inline AliasCommand(std::string command, std::vector<AliasArg> args = {}) noexcept
-        : m_command(std::move(command))
-        , m_args(std::move(args))
+    inline alias_command(std::string command, std::vector<alias_arg> args = {}) noexcept
+        : command_(std::move(command))
+        , args_(std::move(args))
     {
     }
 
@@ -118,9 +120,9 @@ public:
      *
      * \return the command name
      */
-    inline const std::string &command() const noexcept
+    inline const std::string& command() const noexcept
     {
-        return m_command;
+        return command_;
     }
 
     /**
@@ -128,21 +130,22 @@ public:
      *
      * \return the arguments
      */
-    inline const std::vector<AliasArg> &args() const noexcept
+    inline const std::vector<alias_arg>& args() const noexcept
     {
-        return m_args;
+        return args_;
     }
 };
 
 /**
  * \brief A set of commands to execute with their arguments.
  *
- * An alias is a composition of AliasCommand, typically, the user is able to set
- * an alias that execute a list of specified commands in order they are defined.
+ * An alias is a composition of alias_command, typically, the user is able to
+ * set an alias that execute a list of specified commands in order they are
+ * defined.
  */
-class Alias : public std::vector<AliasCommand> {
+class alias : public std::vector<alias_command> {
 private:
-    std::string m_name;
+    std::string name_;
 
 public:
     /**
@@ -150,8 +153,8 @@ public:
      *
      * \param name the alias name
      */
-    inline Alias(std::string name) noexcept
-        : m_name(std::move(name))
+    inline alias(std::string name) noexcept
+        : name_(std::move(name))
     {
     }
 
@@ -160,11 +163,13 @@ public:
      *
      * \return the name
      */
-    inline const std::string &name() const noexcept
+    inline const std::string& name() const noexcept
     {
-        return m_name;
+        return name_;
     }
 };
+
+} // !ctl
 
 } // !irccd
 

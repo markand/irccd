@@ -20,14 +20,23 @@ project(libirccdctl)
 
 set(
     HEADERS
-    ${libirccdctl_SOURCE_DIR}/irccd/client.hpp
-    ${libirccdctl_SOURCE_DIR}/irccd/irccdctl.hpp
+    ${libirccdctl_SOURCE_DIR}/irccd/ctl/controller.hpp
+    ${libirccdctl_SOURCE_DIR}/irccd/ctl/connection.hpp
+    ${libirccdctl_SOURCE_DIR}/irccd/ctl/network_connection.hpp
+    ${libirccdctl_SOURCE_DIR}/irccd/ctl/ip_connection.hpp
 )
 
 set(
     SOURCES
-    ${libirccdctl_SOURCE_DIR}/irccd/client.cpp
+    ${libirccdctl_SOURCE_DIR}/irccd/ctl/controller.cpp
+    ${libirccdctl_SOURCE_DIR}/irccd/ctl/ip_connection.cpp
 )
+
+if (NOT IRCCD_SYSTEM_WINDOWS)
+    list(APPEND LIBRARIES -pthread)
+    list(APPEND HEADERS ${libirccdctl_SOURCE_DIR}/irccd/ctl/local_connection.hpp)
+    list(APPEND SOURCES ${libirccdctl_SOURCE_DIR}/irccd/ctl/local_connection.cpp)
+endif ()
 
 irccd_define_library(
     TARGET libirccdctl
@@ -35,6 +44,9 @@ irccd_define_library(
         ${libirccdctl_SOURCE_DIR}/CMakeLists.txt
         ${HEADERS}
         ${SOURCES}
-    LIBRARIES libcommon
-    PUBLIC_INCLUDES ${libirccdctl_SOURCE_DIR}/irccd
+    LIBRARIES
+        ${LIBRARIES}
+        libcommon
+    PUBLIC_INCLUDES
+        $<BUILD_INTERFACE:${libirccdctl_SOURCE_DIR}>
 )

@@ -21,8 +21,6 @@ project(libirccd-test)
 irccd_define_library(
     TARGET libirccd-test
     SOURCES
-        ${libirccd-test_SOURCE_DIR}/irccd/command-tester.cpp
-        ${libirccd-test_SOURCE_DIR}/irccd/command-tester.hpp
         ${libirccd-test_SOURCE_DIR}/irccd/journal_server.cpp
         ${libirccd-test_SOURCE_DIR}/irccd/journal_server.hpp
         $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin_test.cpp>

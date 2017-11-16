@@ -26,713 +26,541 @@
 
 namespace irccd {
 
-class Irccdctl;
+namespace ctl {
+
+class controller;
 
 /*
- * Cli.
+ * cli.
  * ------------------------------------------------------------------
  */
 
 /**
  * \brief Abstract CLI class.
  */
-class Cli {
+class cli {
+public:
+    using handler_t = std::function<void (nlohmann::json)>;
+
+private:
+    void recv_response(ctl::controller&, nlohmann::json, handler_t);
+
 protected:
-    std::string m_name;
-    std::string m_summary;
-    std::string m_usage;
-    std::string m_help;
-
     /**
-     * Check the message result and print an error if any.
+     * Convenient request helper.
      *
-     * \param result the result
-     * \throw an error if any
-     */
-    void check(const nlohmann::json &result);
-
-    /**
-     * Send a request and wait for the response.
+     * This function send and receive the response for the given request. It
+     * checks for an error code or string in the command result and throws it if
+     * any.
      *
-     * \param irccdctl the client
-     * \param args the optional arguments
-     */
-    nlohmann::json request(Irccdctl &irccdctl, nlohmann::json args = nullptr);
-
-    /**
-     * Call a command and wait for success/error response.
+     * If handler is not null, it will be called once the command result has
+     * been received.
      *
-     * \param irccdctl the client
-     * \param args the extra arguments (may be null)
+     * This function may executes successive read calls until we get the
+     * response.
+     *
+     * \param ctl the controller
+     * \param json the json object
+     * \param handler the optional handler
      */
-    void call(Irccdctl &irccdctl, nlohmann::json args);
+    void request(ctl::controller& ctl, nlohmann::json json, handler_t handler = nullptr);
 
 public:
-    inline Cli(std::string name, std::string summary, std::string usage, std::string help) noexcept
-        : m_name(std::move(name))
-        , m_summary(std::move(summary))
-        , m_usage(std::move(usage))
-        , m_help(std::move(help))
-    {
-    }
+    cli() noexcept = default;
 
-    virtual ~Cli() = default;
+    virtual ~cli() noexcept = default;
 
-    inline const std::string &name() const noexcept
-    {
-        return m_name;
-    }
+    virtual std::string name() const = 0;
 
-    inline const std::string &summary() const noexcept
-    {
-        return m_summary;
-    }
-
-    inline const std::string &usage() const noexcept
-    {
-        return m_usage;
-    }
-
-    inline const std::string &help() const noexcept
-    {
-        return m_help;
-    }
-
-    virtual void exec(Irccdctl &client, const std::vector<std::string> &args) = 0;
+    virtual void exec(ctl::controller& ctl, const std::vector<std::string>& args) = 0;
 };
-
-namespace cli {
-
-/*
- * PluginConfigCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl plugin-config.
  */
-class PluginConfigCli : public Cli {
+class plugin_config_cli : public cli {
 private:
-    void set(Irccdctl &, const std::vector<std::string> &);
-    void get(Irccdctl &, const std::vector<std::string> &);
-    void getall(Irccdctl &, const std::vector<std::string> &);
+    void set(ctl::controller&, const std::vector<std::string>&);
+    void get(ctl::controller&, const std::vector<std::string>&);
+    void getall(ctl::controller&, const std::vector<std::string>&);
 
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    PluginConfigCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * PluginInfoCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl plugin-info.
  */
-class PluginInfoCli : public Cli {
+class plugin_info_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    PluginInfoCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * PluginListCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl plugin-list.
  */
-class PluginListCli : public Cli {
+class plugin_list_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    PluginListCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * PluginLoadCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl plugin-load.
  */
-class PluginLoadCli : public Cli {
+class plugin_load_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    PluginLoadCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * PluginReloadCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl plugin-reload.
  */
-class PluginReloadCli : public Cli {
+class plugin_reload_cli : public cli {
 public:
-    PluginReloadCli();
+    /**
+     * \copydoc cli::name
+     */
+    std::string name() const override;
 
     /**
-     * \copydoc Command::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * PluginUnloadCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl plugin-unload.
  */
-class PluginUnloadCli : public Cli {
+class plugin_unload_cli : public cli {
 public:
-    PluginUnloadCli();
+    /**
+     * \copydoc cli::name
+     */
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * ServerChannelCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl server-cmode.
  */
-class ServerChannelMode : public Cli {
+class server_channel_mode_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    ServerChannelMode();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * ServerChannelNoticeCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl server-cnotice.
  */
-class ServerChannelNoticeCli : public Cli {
+class server_channel_notice_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    ServerChannelNoticeCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * ServerConnectCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl server-connect.
  */
-class ServerConnectCli : public Cli {
+class server_connect_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    ServerConnectCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * ServerDisconnectCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl server-disconnect.
  */
-class ServerDisconnectCli : public Cli {
+class server_disconnect_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    ServerDisconnectCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * ServerInfoCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl server-info.
  */
-class ServerInfoCli : public Cli {
+class server_info_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    ServerInfoCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * ServerInviteCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl server-invite.
  */
-class ServerInviteCli : public Cli {
+class server_invite_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    ServerInviteCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * ServerJoinCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl server-join.
  */
-class ServerJoinCli : public Cli {
+class server_join_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    ServerJoinCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * ServerKickCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl server-kick.
  */
-class ServerKickCli : public Cli {
+class server_kick_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    ServerKickCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * ServerListCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl server-list.
  */
-class ServerListCli : public Cli {
+class server_list_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    ServerListCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * ServerMeCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl server-me.
  */
-class ServerMeCli : public Cli {
+class server_me_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    ServerMeCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Command::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * ServerMessageCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl server-message.
  */
-class ServerMessageCli : public Cli {
+class server_message_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    ServerMessageCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * ServerModeCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl server-mode.
  */
-class ServerModeCli : public Cli {
+class server_mode_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    ServerModeCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * ServerNickCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl server-nick.
  */
-class ServerNickCli : public Cli {
+class server_nick_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    ServerNickCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * ServerNoticeCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl server-notice.
  */
-class ServerNoticeCli : public Cli {
+class server_notice_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    ServerNoticeCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * ServerPartCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl server-part.
  */
-class ServerPartCli : public Cli {
+class server_part_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    ServerPartCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * ServerReconnectCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl server-reconnect.
  */
-class ServerReconnectCli : public Cli {
+class server_reconnect_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    ServerReconnectCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &irccdctl, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * ServerTopicCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl server-topic.
  */
-class ServerTopicCli : public Cli {
+class server_topic_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    ServerTopicCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * RuleAddCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl rule-add.
  */
-class RuleAddCli : public Cli {
+class rule_add_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    RuleAddCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * RuleEditCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl rule-edit.
  */
-class RuleEditCli : public Cli {
+class rule_edit_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    RuleEditCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * RuleListCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl rule-list.
  */
-class RuleListCli : public Cli {
+class rule_list_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    RuleListCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * RuleInfoCli
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl rule-info.
  */
-class RuleInfoCli : public Cli {
+class rule_info_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    RuleInfoCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * RuleRemoveCli
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl rule-remove.
  */
-class RuleRemoveCli : public Cli {
+class rule_remove_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    RuleRemoveCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * RuleMoveCli
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl rule-move.
  */
-class RuleMoveCli : public Cli {
+class rule_move_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    RuleMoveCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
-
-/*
- * WatchCli.
- * ------------------------------------------------------------------
- */
 
 /**
  * \brief Implementation of irccdctl watch.
  */
-class WatchCli : public Cli {
+class watch_cli : public cli {
 public:
     /**
-     * Default constructor.
+     * \copydoc cli::name
      */
-    WatchCli();
+    std::string name() const override;
 
     /**
-     * \copydoc Cli::exec
+     * \copydoc cli::exec
      */
-    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
 
-} // !cli
+} // !ctl
 
 } // !irccd
 

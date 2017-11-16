@@ -16,150 +16,107 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cassert>
-#include <iostream>
-#include <sstream>
+#include <boost/system/system_error.hpp>
 
-#include <boost/timer/timer.hpp>
+#include <irccd/errors.hpp>
+#include <irccd/json_util.hpp>
+#include <irccd/options.hpp>
+#include <irccd/string_util.hpp>
 
-#include <json.hpp>
+#include <irccd/ctl/controller.hpp>
 
 #include "cli.hpp"
-#include "irccdctl.hpp"
-#include "json_util.hpp"
-#include "logger.hpp"
-#include "options.hpp"
-#include "net_util.hpp"
-#include "string_util.hpp"
-
-using namespace std::string_literals;
 
 namespace irccd {
 
-/*
- * Cli.
- * ------------------------------------------------------------------
- */
+namespace ctl {
 
-void Cli::check(const nlohmann::json &response)
+void cli::recv_response(ctl::controller& ctl, nlohmann::json req, handler_t handler)
 {
-    if (!json_util::get_bool(response, "status", false)) {
-        auto error = json_util::get_string(response, "error");
+    ctl.recv([&ctl, req, handler, this] (auto code, auto message) {
+        if (code)
+            throw boost::system::system_error(code);
 
-        if (error.empty())
-            throw std::runtime_error("command failed with an unknown error");
+        auto c = json_util::to_string(message["command"]);
 
-        throw std::runtime_error(error);
-    }
-}
+        if (c != req["command"].get<std::string>()) {
+            recv_response(ctl, std::move(req), std::move(handler));
+            return;
+        }
 
-nlohmann::json Cli::request(Irccdctl &irccdctl, nlohmann::json args)
-{
-    auto msg = nlohmann::json();
+        if (message["error"].is_number_integer())
+            throw boost::system::system_error(static_cast<network_error>(message["error"].template get<int>()));
+        if (message["error"].is_string())
+            throw std::runtime_error(message["error"].template get<std::string>());
 
-    if (!args.is_object())
-        args = nlohmann::json::object();
-
-    args.push_back({"command", m_name});
-    irccdctl.client().request(args);
-
-    auto id = irccdctl.client().onMessage.connect([&] (auto input) {
-        msg = std::move(input);
+        if (handler)
+            handler(std::move(message));
     });
-
-    try {
-        boost::timer::cpu_timer timer;
-
-        while (irccdctl.client().isConnected() && !msg.is_object() && timer.elapsed().wall / 1000000LL < 3000)
-            net_util::poll(3000 - timer.elapsed().wall / 1000000LL, irccdctl);
-    } catch (const std::exception &) {
-        irccdctl.client().onMessage.disconnect(id);
-        throw;
-    }
-
-    irccdctl.client().onMessage.disconnect(id);
-
-    if (!msg.is_object())
-        throw std::runtime_error("no response received");
-    if (json_util::get_string(msg, "command") != m_name)
-        throw std::runtime_error("unexpected command result received");
-
-    check(msg);
-
-    return msg;
 }
 
-void Cli::call(Irccdctl &irccdctl, nlohmann::json args)
+void cli::request(ctl::controller& ctl, nlohmann::json req, handler_t handler)
 {
-    check(request(irccdctl, args));
-}
+    ctl.send(req, [&ctl, req, handler, this] (auto code, auto) {
+        if (code)
+            throw boost::system::system_error(code);
 
-namespace cli {
+        recv_response(ctl, std::move(req), std::move(handler));
+    });
+}
 
 /*
- * PluginConfigCli.
+ * plugin_info_cli.
  * ------------------------------------------------------------------
  */
 
-void PluginConfigCli::set(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void plugin_config_cli::set(ctl::controller& ctl, const std::vector<std::string>&args)
 {
-    check(request(irccdctl, nlohmann::json::object({
+    request(ctl, {
         { "plugin", args[0] },
         { "variable", args[1] },
         { "value", args[2] }
-    })));
+    });
 }
 
-void PluginConfigCli::get(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void plugin_config_cli::get(ctl::controller& ctl, const std::vector<std::string>& args)
 {
-    auto result = request(irccdctl, nlohmann::json::object({
+    auto json = nlohmann::json::object({
         { "plugin", args[0] },
         { "variable", args[1] }
-    }));
+    });
 
-    check(result);
-
-    if (result["variables"].is_object())
-        std::cout << json_util::pretty(result["variables"][args[1]]) << std::endl;
+    request(ctl, std::move(json), [args] (auto result) {
+        if (result["variables"].is_object())
+            std::cout << json_util::pretty(result["variables"][args[1]]) << std::endl;
+    });
 }
 
-void PluginConfigCli::getall(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void plugin_config_cli::getall(ctl::controller& ctl, const std::vector<std::string> &args)
 {
-    auto result = request(irccdctl, nlohmann::json::object({{ "plugin", args[0] }}));
+    request(ctl, {{ "plugin", args[0] }}, [] (auto result) {
+        auto variables = result["variables"];
 
-    check(result);
-
-    auto variables = result["variables"];
-
-    for (auto v = variables.begin(); v != variables.end(); ++v)
-        std::cout << std::setw(16) << std::left << v.key() << " : " << json_util::pretty(v.value()) << std::endl;
+        for (auto v = variables.begin(); v != variables.end(); ++v)
+            std::cout << std::setw(16) << std::left << v.key() << " : " << json_util::pretty(v.value()) << std::endl;
+    });
 }
 
-PluginConfigCli::PluginConfigCli()
-    : Cli("plugin-config",
-          "configure a plugin",
-          "plugin-config plugin [variable] [value]",
-          "Get or set a plugin configuration variable.\n\n"
-          "If both variable and value are provided, sets the plugin configuration "
-          "to the\nrespective variable name and value.\n\n"
-          "If only variable is specified, shows its current value. Otherwise, list "
-          "all\nvariables and their values.\n\n"
-          "Examples:\n"
-          "\tirccdctl plugin-config ask")
+std::string plugin_config_cli::name() const
 {
+    return "plugin-config";
 }
 
-void PluginConfigCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void plugin_config_cli::exec(ctl::controller& ctl, const std::vector<std::string> &args)
 {
     switch (args.size()) {
     case 3:
-        set(irccdctl, args);
+        set(ctl, args);
         break;
     case 2:
-        get(irccdctl, args);
+        get(ctl, args);
         break;
     case 1:
-        getall(irccdctl, args);
+        getall(ctl, args);
         break;
     default:
         throw std::invalid_argument("plugin-config requires at least 1 argument");
@@ -167,188 +124,150 @@ void PluginConfigCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &a
 }
 
 /*
- * PluginInfoCli.
+ * plugin_info_cli.
  * ------------------------------------------------------------------
  */
 
-PluginInfoCli::PluginInfoCli()
-    : Cli("plugin-info",
-          "get plugin information",
-          "plugin-info plugin",
-          "Get plugin information.\n\n"
-          "Example:\n"
-          "\tirccdctl plugin-info ask"
-    )
+std::string plugin_info_cli::name() const
 {
+    return "plugin-info";
 }
 
-void PluginInfoCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void plugin_info_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 1)
         throw std::invalid_argument("plugin-info requires 1 argument");
 
-    auto result = request(irccdctl, {{ "plugin", args[0] }});
-
-    std::cout << std::boolalpha;
-    std::cout << "Author         : " << json_util::get_string(result, "author") << std::endl;
-    std::cout << "License        : " << json_util::get_string(result, "license") << std::endl;
-    std::cout << "Summary        : " << json_util::get_string(result, "summary") << std::endl;
-    std::cout << "Version        : " << json_util::get_string(result, "version") << std::endl;
+    request(ctl, {{ "plugin", args[0] }}, [] (auto result) {
+        std::cout << std::boolalpha;
+        std::cout << "Author         : " << json_util::get_string(result, "author") << std::endl;
+        std::cout << "License        : " << json_util::get_string(result, "license") << std::endl;
+        std::cout << "Summary        : " << json_util::get_string(result, "summary") << std::endl;
+        std::cout << "Version        : " << json_util::get_string(result, "version") << std::endl;
+    });
 }
 
 /*
- * PluginListCli.
+ * plugin_list_cli.
  * ------------------------------------------------------------------
  */
 
-PluginListCli::PluginListCli()
-    : Cli("plugin-list",
-          "list loaded plugins",
-          "plugin-list",
-          "Get the list of all loaded plugins.\n\n"
-          "Example:\n"
-          "\tirccdctl plugin-list")
+std::string plugin_list_cli::name() const
 {
+    return "plugin-list";
 }
 
-void PluginListCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &)
+void plugin_list_cli::exec(ctl::controller& ctl, const std::vector<std::string>&)
 {
-    auto result = request(irccdctl);
-
-    for (const auto &value : result["list"])
-        if (value.is_string())
-            std::cout << value.get<std::string>() << std::endl;
+    request(ctl, {{ "command", "plugin-list" }}, [] (auto result) {
+        for (const auto &value : result["list"])
+            if (value.is_string())
+                std::cout << value.template get<std::string>() << std::endl;
+    });
 }
 
 /*
- * PluginLoadCli.
+ * plugin_load_cli.
  * ------------------------------------------------------------------
  */
 
-PluginLoadCli::PluginLoadCli()
-    : Cli("plugin-load",
-          "load a plugin",
-          "plugin-load logger",
-          "Load a plugin into the irccd instance.\n\n"
-          "Example:\n"
-          "\tirccdctl plugin-load logger")
+std::string plugin_load_cli::name() const
 {
+    return "plugin-load";
 }
 
-void PluginLoadCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void plugin_load_cli::exec(ctl::controller& ctl, const std::vector<std::string> &args)
 {
     if (args.size() < 1)
         throw std::invalid_argument("plugin-load requires 1 argument");
 
-    check(request(irccdctl, {{"plugin", args[0]}}));
+    request(ctl, {{ "plugin", args[0] }});
 }
 
 /*
- * PluginReloadCli.
+ * plugin_reload_cli.
  * ------------------------------------------------------------------
  */
 
-PluginReloadCli::PluginReloadCli()
-    : Cli("plugin-reload",
-          "reload a plugin",
-          "plugin-reload plugin",
-          "Reload a plugin by calling the appropriate onReload event, the plugin is not\n"
-          "unloaded and must be already loaded.\n\n"
-          "Example:\n"
-          "\tirccdctl plugin-reload logger")
+std::string plugin_reload_cli::name() const
 {
+    return "plugin-reload";
 }
 
-void PluginReloadCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void plugin_reload_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 1)
         throw std::invalid_argument("plugin-reload requires 1 argument");
 
-    check(request(irccdctl, {{ "plugin", args[0] }}));
+    request(ctl, {{ "plugin", args[0] }});
 }
 
 /*
- * PluginUnloadCli.
+ * plugin_unload_cli.
  * ------------------------------------------------------------------
  */
 
-PluginUnloadCli::PluginUnloadCli()
-    : Cli("plugin-unload",
-          "unload a plugin",
-          "plugin-unload plugin",
-          "Unload a loaded plugin from the irccd instance.\n\n"
-          "Example:\n"
-          "\tirccdctl plugin-unload logger")
+std::string plugin_unload_cli::name() const
 {
+    return "plugin-unload";
 }
 
-void PluginUnloadCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void plugin_unload_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 1)
         throw std::invalid_argument("plugin-unload requires 1 argument");
 
-    check(request(irccdctl, {{ "plugin", args[0] }}));
+    request(ctl, {{ "plugin", args[0] }});
 }
 
 /*
- * ServerChannelCli.
+ * server_channel_cli.
  * ------------------------------------------------------------------
  */
 
-ServerChannelMode::ServerChannelMode()
-    : Cli("server-cmode",
-          "change channel mode",
-          "server-cmode server channel mode",
-          "Change the mode of the specified channel.\n\n"
-          "Example:\n"
-          "\tirccdctl server-cmode freenode #staff +t")
+std::string server_channel_mode_cli::name() const
 {
+    return "server-cmode";
 }
 
-void ServerChannelMode::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void server_channel_mode_cli::exec(ctl::controller& ctl, const std::vector<std::string> &args)
 {
     if (args.size() < 3)
         throw std::invalid_argument("server-cmode requires 3 arguments");
 
-    check(request(irccdctl, {
+    request(ctl, {
         { "command",    "server-cmode"  },
         { "server",     args[0]         },
         { "channel",    args[1]         },
         { "mode",       args[2]         }
-    }));
+    });
 }
 
 /*
- * ServerChannelNoticeCli.
+ * server_channel_notice_cli.
  * ------------------------------------------------------------------
  */
 
-ServerChannelNoticeCli::ServerChannelNoticeCli()
-    : Cli("server-cnotice",
-          "send a channel notice",
-          "server-cnotice server channel message",
-          "Send a notice to a public channel. This is a notice that everyone on the channel\n"
-          "will receive.\n\n"
-          "Example:\n"
-          "\tirccdctl server-cnotice freenode #staff \"Don't flood!\"")
+std::string server_channel_notice_cli::name() const
 {
+    return "server-cnotice";
 }
 
-void ServerChannelNoticeCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void server_channel_notice_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 3)
         throw std::invalid_argument("server-cnotice requires 3 arguments");
 
-    check(request(irccdctl, {
+    request(ctl, {
         { "command",    "server-cnotice"    },
         { "server",     args[0]             },
         { "channel",    args[1]             },
         { "message",    args[2]             }
-    }));
+    });
 }
 
 /*
- * ServerConnectCli.
+ * server_connect_cli.
  * ------------------------------------------------------------------
  */
 
@@ -376,25 +295,12 @@ option::result parse(std::vector<std::string> &args)
 
 } // !namespace
 
-ServerConnectCli::ServerConnectCli()
-    : Cli("server-connect",
-          "add a server",
-          "server-connect [options] id host [port]",
-          "Connect to a new IRC server.\n\n"
-          "Available options:\n"
-          "  -c, --command\t\tspecify the command char\n"
-          "  -n, --nickname\tspecify a nickname\n"
-          "  -r, --realname\tspecify a real name\n"
-          "  -S, --ssl-verify\tverify SSL\n"
-          "  -s, --ssl\t\tconnect using SSL\n"
-          "  -u, --username\tspecify a user name\n\n"
-          "Example:\n"
-          "\tirccdctl server-connect -n jean example irc.example.org\n"
-          "\tirccdctl server-connect --ssl example irc.example.org 6697")
+std::string server_connect_cli::name() const
 {
+    return "server-connect";
 }
 
-void ServerConnectCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void server_connect_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     std::vector<std::string> copy(args);
 
@@ -427,26 +333,20 @@ void ServerConnectCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &
     if ((it = result.find("-u")) != result.end() || (it = result.find("--username")) != result.end())
         object["username"] = it->second;
 
-    check(request(irccdctl, object));
+    request(ctl, object);
 }
 
 /*
- * ServerDisconnectCli.
+ * server_disconnect_cli.
  * ------------------------------------------------------------------
  */
 
-ServerDisconnectCli::ServerDisconnectCli()
-    : Cli("server-disconnect",
-          "disconnect server",
-          "server-disconnect [server]",
-          "Disconnect from a server.\n\n"
-          "If server is not specified, irccd disconnects all servers.\n\n"
-          "Example:\n"
-          "\tirccdctl server-disconnect localhost")
+std::string server_disconnect_cli::name() const
 {
+    return "server-disconnect";
 }
 
-void ServerDisconnectCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void server_disconnect_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     auto object = nlohmann::json::object({
         { "command", "server-disconnect" }
@@ -455,101 +355,85 @@ void ServerDisconnectCli::exec(Irccdctl &irccdctl, const std::vector<std::string
     if (args.size() > 0)
         object["server"] = args[0];
 
-    check(request(irccdctl, object));
+    request(ctl, object);
 }
 
 /*
- * ServerInfoCli.
+ * server_info_cli.
  * ------------------------------------------------------------------
  */
 
-ServerInfoCli::ServerInfoCli()
-    : Cli("server-info",
-          "get server information",
-          "server-info server",
-          "Get information about a server.\n\n"
-          "Example:\n"
-          "\tirccdctl server-info freenode")
+std::string server_info_cli::name() const
 {
+    return "server-info";
 }
 
-void ServerInfoCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void server_info_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 1)
         throw std::invalid_argument("server-info requires 1 argument");
 
-    auto result = request(irccdctl, {
+    auto json = nlohmann::json::object({
         { "command",    "server-info"   },
         { "server",     args[0]         }
     });
 
-    check(result);
+    request(ctl, std::move(json), [] (auto result) {
+        std::cout << std::boolalpha;
+        std::cout << "Name           : " << json_util::pretty(result["name"]) << std::endl;
+        std::cout << "Host           : " << json_util::pretty(result["host"]) << std::endl;
+        std::cout << "Port           : " << json_util::pretty(result["port"]) << std::endl;
+        std::cout << "Ipv6           : " << json_util::pretty(result["ipv6"]) << std::endl;
+        std::cout << "SSL            : " << json_util::pretty(result["ssl"]) << std::endl;
+        std::cout << "SSL verified   : " << json_util::pretty(result["sslVerify"]) << std::endl;
+        std::cout << "Channels       : ";
 
-    std::cout << std::boolalpha;
-    std::cout << "Name           : " << json_util::pretty(result["name"]) << std::endl;
-    std::cout << "Host           : " << json_util::pretty(result["host"]) << std::endl;
-    std::cout << "Port           : " << json_util::pretty(result["port"]) << std::endl;
-    std::cout << "Ipv6           : " << json_util::pretty(result["ipv6"]) << std::endl;
-    std::cout << "SSL            : " << json_util::pretty(result["ssl"]) << std::endl;
-    std::cout << "SSL verified   : " << json_util::pretty(result["sslVerify"]) << std::endl;
-    std::cout << "Channels       : ";
+        for (const auto &v : result["channels"])
+            if (v.is_string())
+                std::cout << v.template get<std::string>() << " ";
 
-    for (const auto &v : result["channels"])
-        if (v.is_string())
-            std::cout << v.get<std::string>() << " ";
+        std::cout << std::endl;
 
-    std::cout << std::endl;
-
-    std::cout << "Nickname       : " << json_util::pretty(result["nickname"]) << std::endl;
-    std::cout << "User name      : " << json_util::pretty(result["username"]) << std::endl;
-    std::cout << "Real name      : " << json_util::pretty(result["realname"]) << std::endl;
+        std::cout << "Nickname       : " << json_util::pretty(result["nickname"]) << std::endl;
+        std::cout << "User name      : " << json_util::pretty(result["username"]) << std::endl;
+        std::cout << "Real name      : " << json_util::pretty(result["realname"]) << std::endl;
+    });
 }
 
 /*
- * ServerInviteCli.
+ * server_invite_cli.
  * ------------------------------------------------------------------
  */
 
-ServerInviteCli::ServerInviteCli()
-    : Cli("server-invite",
-          "invite someone",
-          "server-invite server nickname channel",
-          "Invite the specified target on the channel.\n\n"
-          "Example:\n"
-          "\tirccdctl server-invite freenode xorg62 #staff")
+std::string server_invite_cli::name() const
 {
+    return "server-invite";
 }
 
-void ServerInviteCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void server_invite_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 3)
         throw std::invalid_argument("server-invite requires 3 arguments");
 
-    check(request(irccdctl, {
+    request(ctl, {
         { "command",    "server-invite" },
         { "server",     args[0]         },
         { "target",     args[1]         },
         { "channel",    args[2]         }
-    }));
+    });
 }
 
 /*
- * ServerJoinCli.
+ * server_join_cli.
  * ------------------------------------------------------------------
  */
 
-ServerJoinCli::ServerJoinCli()
-    : Cli("server-join",
-          "join a channel",
-          "server-join server channel [password]",
-          "Join the specified channel, the password is optional.\n\n"
-          "Example:\n"
-          "\tirccdctl server-join freenode #test\n"
-          "\tirccdctl server-join freenode #private-club secret")
+std::string server_join_cli::name() const
 {
+    return "server-join";
 }
 
-void ServerJoinCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void server_join_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 2)
         throw std::invalid_argument("server-join requires at least 2 arguments");
@@ -562,25 +446,20 @@ void ServerJoinCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &arg
     if (args.size() == 3)
         object["password"] = args[2];
 
-    check(request(irccdctl, object));
+    request(ctl, object);
 }
 
 /*
- * ServerKickCli.
+ * server_kick_cli.
  * ------------------------------------------------------------------
  */
 
-ServerKickCli::ServerKickCli()
-    : Cli("server-kick",
-          "kick someone from a channel",
-          "server-kick server target channel [reason]",
-          "Kick the specified target from the channel, the reason is optional.\n\n"
-          "Example:\n"
-          "\tirccdctl server-kick freenode jean #staff \"Stop flooding\"")
+std::string server_kick_cli::name() const
 {
+    return "server-kick";
 }
 
-void ServerKickCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void server_kick_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 3)
         throw std::invalid_argument("server-kick requires at least 3 arguments ");
@@ -594,187 +473,147 @@ void ServerKickCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &arg
     if (args.size() == 4)
         object["reason"] = args[3];
 
-    check(request(irccdctl, object));
+    request(ctl, object);
 }
 
 /*
- * ServerListCli.
+ * server_list_cli.
  * ------------------------------------------------------------------
  */
 
-ServerListCli::ServerListCli()
-    : Cli("server-list",
-          "get list of servers",
-          "server-list",
-          "Get the list of all connected servers.\n\n"
-          "Example:\n"
-          "\tirccdctl server-list")
+std::string server_list_cli::name() const
 {
+    return "server-list";
 }
 
-void ServerListCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &)
+void server_list_cli::exec(ctl::controller& ctl, const std::vector<std::string>&)
 {
-    auto response = request(irccdctl);
-
-    check(response);
-
-    for (const auto &n : response["list"])
-        if (n.is_string())
-            std::cout << n.get<std::string>() << std::endl;
+    request(ctl, {{ "command", "server-list" }}, [] (auto result) {
+        for (const auto &n : result["list"])
+            if (n.is_string())
+                std::cout << n.template get<std::string>() << std::endl;
+    });
 }
 
 /*
- * ServerMeCli.
+ * server_me_cli.
  * ------------------------------------------------------------------
  */
 
-ServerMeCli::ServerMeCli()
-    : Cli("server-me",
-          "send an action emote",
-          "server-me server target message",
-          "Send an action emote.\n\n"
-          "Example:\n"
-          "\tirccdctl server-me freenode #staff \"going back soon\"")
+std::string server_me_cli::name() const
 {
+    return "server-me";
 }
 
-void ServerMeCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void server_me_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 3)
         throw std::runtime_error("server-me requires 3 arguments");
 
-    check(request(irccdctl, {
+    request(ctl, {
         { "server",     args[0]     },
         { "target",     args[1]     },
         { "message",    args[2]     }
-    }));
+    });
 }
 
 /*
- * ServerMessageCli.
+ * server_message_cli.
  * ------------------------------------------------------------------
  */
 
-ServerMessageCli::ServerMessageCli()
-    : Cli("server-message",
-          "send a message",
-          "server-message server target message",
-          "Send a message to the specified target or channel.\n\n"
-          "Example:\n"
-          "\tirccdctl server-message freenode #staff \"Hello from irccd\"")
+std::string server_message_cli::name() const
 {
+    return "server-message";
 }
 
-void ServerMessageCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void server_message_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 3)
         throw std::invalid_argument("server-message requires 3 arguments");
 
-    check(request(irccdctl, {
+    request(ctl, {
         { "server",     args[0] },
         { "target",     args[1] },
         { "message",    args[2] }
-    }));
+    });
 }
 
 /*
- * ServerModeCli.
+ * server_mode_cli.
  * ------------------------------------------------------------------
  */
 
-ServerModeCli::ServerModeCli()
-    : Cli("server-mode",
-          "the the user mode",
-          "server-mode server mode",
-          "Set the irccd's user mode.\n\n"
-          "Example:\n"
-          "\tirccdctl server-mode +i")
+std::string server_mode_cli::name() const
 {
+    return "server-mode";
 }
 
-void ServerModeCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void server_mode_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 2)
         throw std::invalid_argument("server-mode requires 2 arguments");
 
-    check(request(irccdctl, {
+    request(ctl, {
         { "server", args[0] },
         { "mode",   args[1] }
-    }));
+    });
 }
 
 /*
- * ServerNickCli.
+ * server_nick_cli.
  * ------------------------------------------------------------------
  */
 
-ServerNickCli::ServerNickCli()
-    : Cli("server-nick",
-          "change your nickname",
-          "server-nick server nickname",
-          "Change irccd's nickname.\n\n"
-          "Example:\n"
-          "\tirccdctl server-nick freenode david")
+std::string server_nick_cli::name() const
 {
+    return "server-nick";
 }
 
-void ServerNickCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void server_nick_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 2)
         throw std::invalid_argument("server-nick requires 2 arguments");
 
-    check(request(irccdctl, {
+    request(ctl, {
         { "server",     args[0] },
         { "nickname",   args[1] }
-    }));
+    });
 }
 
 /*
- * ServerNoticeCli.
+ * server_notice_cli.
  * ------------------------------------------------------------------
  */
 
-ServerNoticeCli::ServerNoticeCli()
-    : Cli("server-notice",
-          "send a private notice",
-          "server-notice server target message",
-          "Send a private notice to the specified target.\n\n"
-          "Example:\n"
-          "\tirccdctl server-notice freenode jean \"I know you are here.\"")
+std::string server_notice_cli::name() const
 {
+    return "server-notice";
 }
 
-void ServerNoticeCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void server_notice_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 3)
         throw std::invalid_argument("server-notice requires 3 arguments");
 
-    check(request(irccdctl, {
+    request(ctl, {
         { "server",     args[0] },
         { "target",     args[1] },
         { "message",    args[2] }
-    }));
+    });
 }
 
 /*
- * ServerPartCli.
+ * server_part_cli.
  * ------------------------------------------------------------------
  */
 
-ServerPartCli::ServerPartCli()
-    : Cli("server-part",
-          "leave a channel",
-          "server-part server channel [reason]",
-          "Leave the specified channel, the reason is optional.\n\n"
-          "Not all IRC servers support giving a reason to leave a channel, do not specify\n"
-          "it if this is a concern.\n\n"
-          "Example:\n"
-          "\tirccdctl server-part freenode #staff\n"
-          "\tirccdctl server-part freenode #botwar \"too noisy\"")
+std::string server_part_cli::name() const
 {
+    return "server-part";
 }
 
-void ServerPartCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void server_part_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 2)
         throw std::invalid_argument("server-part requires at least 2 arguments");
@@ -787,27 +626,20 @@ void ServerPartCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &arg
     if (args.size() >= 3)
         object["reason"] = args[2];
 
-    check(request(irccdctl, object));
+    request(ctl, object);
 }
 
 /*
- * ServerReconnectCli.
+ * server_reconnect_cli.
  * ------------------------------------------------------------------
  */
 
-ServerReconnectCli::ServerReconnectCli()
-    : Cli("server-reconnect",
-          "force reconnection of a server",
-          "server-reconnect [server]",
-          "Force reconnection of one or all servers.\n\n"
-          "If server is not specified, all servers will try to reconnect.\n\n"
-          "Example:\n"
-          "\tirccdctl server-reconnect\n"
-          "\tirccdctl server-reconnect wanadoo")
+std::string server_reconnect_cli::name() const
 {
+    return "server-reconnect";
 }
 
-void ServerReconnectCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void server_reconnect_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     auto object = nlohmann::json::object({
         { "command", "server-reconnect" }
@@ -816,60 +648,42 @@ void ServerReconnectCli::exec(Irccdctl &irccdctl, const std::vector<std::string>
     if (args.size() >= 1)
         object["server"] = args[0];
 
-    check(request(irccdctl, object));
+    request(ctl, object);
 }
 
 /*
- * ServerTopicCli.
+ * server_topic_cli.
  * ------------------------------------------------------------------
  */
 
-ServerTopicCli::ServerTopicCli()
-    : Cli("server-topic",
-          "change channel topic",
-          "server-topic server channel topic",
-          "Change the topic of the specified channel.\n\n"
-          "Example:\n"
-          "\tirccdctl server-topic freenode #wmfs \"This is the best channel\"")
+std::string server_topic_cli::name() const
 {
+    return "server-topic";
 }
 
-void ServerTopicCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void server_topic_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 3)
         throw std::invalid_argument("server-topic requires 3 arguments");
 
-    check(request(irccdctl, {
+    request(ctl, {
         { "server",     args[0] },
         { "channel",    args[1] },
         { "topic",      args[2] }
-    }));
+    });
 }
 
 /*
- * RuleAddCli.
+ * rule_add_cli.
  * ------------------------------------------------------------------
  */
 
-RuleAddCli::RuleAddCli()
-    : Cli("rule-add",
-          "add a new rule",
-          "rule-add [options] accept|drop",
-          "Add a new rule to irccd.\n\n"
-          "If no index is specified, the rule is added to the end.\n\n"
-          "Available options:\n"
-          "  -c, --add-channel\t\tmatch a channel\n"
-          "  -e, --add-event\t\tmatch an event\n"
-          "  -i, --index\t\t\trule position\n"
-          "  -p, --add-plugin\t\tmatch a plugin\n"
-          "  -s, --add-server\t\tmatch a server\n\n"
-          "Example:\n"
-          "\tirccdctl rule-add -p hangman drop\n"
-          "\tirccdctl rule-add -s localhost -c #games -p hangman accept")
+std::string rule_add_cli::name() const
 {
+    return "rule-add";
 }
 
-void RuleAddCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void rule_add_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     static const option::options options{
         { "-c",             true },
@@ -918,41 +732,24 @@ void RuleAddCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
 
     // And action.
     if (copy[0] != "accept" && copy[0] != "drop")
-        throw std::runtime_error("invalid action '"s + copy[0] + "'");
+        throw std::runtime_error(string_util::sprintf("invalid action '%s'", copy[0]));
 
     json["action"] = copy[0];
 
-    check(request(irccdctl, json));
+    request(ctl, json);
 }
 
 /*
- * RuleEditCli.
+ * rule_edit_cli.
  * ------------------------------------------------------------------
  */
 
-RuleEditCli::RuleEditCli()
-    : Cli("rule-edit",
-          "edit an existing rule",
-          "rule-edit [options] index",
-          "Edit an existing rule in irccd.\n\n"
-          "All options can be specified multiple times.\n\n"
-          "Available options:\n"
-          "  -a, --action\t\t\tset action\n"
-          "  -c, --add-channel\t\tmatch a channel\n"
-          "  -C, --remove-channel\t\tremove a channel\n"
-          "  -e, --add-event\t\tmatch an event\n"
-          "  -E, --remove-event\t\tremove an event\n"
-          "  -p, --add-plugin\t\tmatch a plugin\n"
-          "  -P, --add-plugin\t\tremove a plugin\n"
-          "  -s, --add-server\t\tmatch a server\n"
-          "  -S, --remove-server\t\tremove a server\n\n"
-          "Example:\n"
-          "\tirccdctl rule-edit -p hangman 0\n"
-          "\tirccdctl rule-edit -S localhost -c #games -p hangman 1")
+std::string rule_edit_cli::name() const
 {
+    return "rule-edit";
 }
 
-void RuleEditCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void rule_edit_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     static const option::options options{
         { "-a",                 true },
@@ -1018,17 +815,17 @@ void RuleEditCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
     // Index.
     json["index"] = string_util::to_number<unsigned>(copy[0]);
 
-    check(request(irccdctl, json));
+    request(ctl, json);
 }
 
 /*
- * RuleListCli.
+ * rule_list_cli.
  * ------------------------------------------------------------------
  */
 
 namespace {
 
-void showRule(const nlohmann::json& json, int index)
+void show_rule(const nlohmann::json& json, int index)
 {
     assert(json.is_object());
 
@@ -1062,48 +859,34 @@ void showRule(const nlohmann::json& json, int index)
 
 } // !namespace
 
-RuleListCli::RuleListCli()
-    : Cli("rule-list",
-          "list all rules",
-          "rule-list",
-          "List all rules.\n\n"
-          "Example:\n"
-          "\tirccdctl rule-list")
+std::string rule_list_cli::name() const
 {
+    return "rule-list";
 }
 
-void RuleListCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &)
+void rule_list_cli::exec(ctl::controller& ctl, const std::vector<std::string>&)
 {
-    auto response = request(irccdctl);
-    auto pos = 0;
+    request(ctl, {{ "command", "rule-list" }}, [] (auto result) {
+        auto pos = 0;
 
-    check(response);
-
-    for (const auto &obj : response["list"]) {
-        if (!obj.is_object())
-            continue;
-
-        showRule(obj, pos++);
-    }
+        for (const auto& obj : result["list"]) {
+            if (obj.is_object())
+                show_rule(obj, pos++);
+        }
+    });
 }
 
 /*
- * RuleInfoCli.
+ * rule_info_cli.
  * ------------------------------------------------------------------
  */
 
-RuleInfoCli::RuleInfoCli()
-    : Cli("rule-info",
-          "show a rule",
-          "rule-info index",
-          "Show a rule.\n\n"
-          "Example:\n"
-          "\tirccdctl rule-info 0\n"
-          "\tirccdctl rule-info 1")
+std::string rule_info_cli::name() const
 {
+    return "rule-info";
 }
 
-void RuleInfoCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void rule_info_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 1)
         throw std::invalid_argument("rule-info requires 1 argument");
@@ -1116,32 +899,27 @@ void RuleInfoCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
         throw std::invalid_argument("invalid number '" + args[0] + "'");
     }
 
-    auto result = request(irccdctl, {
+    auto json = nlohmann::json::object({
         { "command",    "rule-info" },
         { "index",      index       }
     });
 
-    check(result);
-    showRule(result, 0);
+    request(ctl, std::move(json), [] (auto result) {
+        show_rule(result, 0);
+    });
 }
 
 /*
- * RuleRemoveCli.
+ * rule_remove_cli.
  * ------------------------------------------------------------------
  */
 
-RuleRemoveCli::RuleRemoveCli()
-    : Cli("rule-remove",
-          "remove a rule",
-          "rule-remove index",
-          "Remove an existing rule.\n\n"
-          "Example:\n"
-          "\tirccdctl rule-remove 0\n"
-          "\tirccdctl rule-remove 1")
+std::string rule_remove_cli::name() const
 {
+    return "rule-remove";
 }
 
-void RuleRemoveCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void rule_remove_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 1)
         throw std::invalid_argument("rule-remove requires 1 argument");
@@ -1154,34 +932,23 @@ void RuleRemoveCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &arg
         throw std::invalid_argument("invalid number '" + args[0] + "'");
     }
 
-    auto result = request(irccdctl, {
+    request(ctl, {
         { "command",    "rule-remove"   },
         { "index",      index           }
     });
-
-    check(result);
 }
 
 /*
- * RuleMoveCli.
+ * rule_move_cli.
  * ------------------------------------------------------------------
  */
 
-RuleMoveCli::RuleMoveCli()
-    : Cli("rule-move",
-          "move a rule to a new position",
-          "rule-move source destination",
-          "Move a rule from the given source at the specified destination index.\n\n"
-          "The rule will replace the existing one at the given destination moving\ndown every "
-          "other rules. If destination is greater or equal the number of rules,\nthe rule "
-          "is moved to the end.\n\n"
-          "Example:\n"
-          "\tirccdctl rule-move 0 5\n"
-          "\tirccdctl rule-move 4 3")
+std::string rule_move_cli::name() const
 {
+    return "rule-move";
 }
 
-void RuleMoveCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+void rule_move_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 2)
         throw std::invalid_argument("rule-move requires 2 arguments");
@@ -1196,11 +963,11 @@ void RuleMoveCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
         throw std::invalid_argument("invalid number");
     }
 
-    check(request(irccdctl, {
+    request(ctl, {
         { "command",    "rule-move" },
         { "from",       from        },
         { "to",         to          }
-    }));
+    });
 }
 
 /*
@@ -1361,7 +1128,7 @@ void onWhois(const nlohmann::json &v)
     std::cout << "realname:    " << json_util::pretty(v, "realname") << "\n";
 }
 
-const std::unordered_map<std::string, std::function<void (const nlohmann::json &)>> events{
+const std::unordered_map<std::string, std::function<void (const nlohmann::json&)>> events{
     { "onChannelMode",      onChannelMode   },
     { "onChannelNotice",    onChannelNotice },
     { "onConnect",          onConnect       },
@@ -1380,60 +1147,42 @@ const std::unordered_map<std::string, std::function<void (const nlohmann::json &
     { "onWhois",            onWhois         }
 };
 
-} // !namespace
-
-WatchCli::WatchCli()
-    : Cli("watch",
-          "watch irccd events",
-          "watch [-f|--format json|native]",
-          "Start watching irccd events.\n\n"
-          "You can use different output formats, native is human readable format, json is\n"
-          "pretty formatted json.\n\n"
-          "Example:\n"
-          "\tirccdctl watch\n"
-          "\tirccdctl watch -f json")
+void get_event(ctl::controller& ctl, std::string fmt)
 {
+    ctl.recv([&ctl, fmt] (auto code, auto message) {
+        if (code)
+            throw boost::system::system_error(code);
+
+        auto it = events.find(json_util::to_string(message["event"]));
+
+        if (it != events.end()) {
+            if (fmt == "json")
+                std::cout << message.dump(4) << std::endl;
+            else {
+                it->second(message);
+                std::cout << std::endl;
+            }
+        }
+
+        get_event(ctl, std::move(fmt));
+    });
 }
 
-void WatchCli::exec(Irccdctl& client, const std::vector<std::string>& args)
+} // !namespace
+
+std::string watch_cli::name() const
 {
-    std::string fmt = format(args);
+    return "watch";
+}
+
+void watch_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
+{
+    auto fmt = format(args);
 
     if (fmt != "native" && fmt != "json")
         throw std::invalid_argument("invalid format given: " + fmt);
 
-    auto id = client.client().onEvent.connect([&] (auto ev) {
-        try {
-            auto name = ev.find("event");
-
-            if (name == ev.end() || !name->is_string())
-                return;
-
-            auto it = events.find(*name);
-
-            // Silently ignore to avoid breaking user output.
-            if (it == events.end())
-                return;
-
-            if (fmt == "json")
-                std::cout << ev.dump(4) << std::endl;
-            else {
-                it->second(ev);
-                std::cout << std::endl;
-            }
-        } catch (...) {
-        }
-    });
-
-    try {
-        while (client.client().isConnected()) {
-            net_util::poll(500, client);
-        }
-    } catch (const std::exception &ex) {
-        log::warning() << ex.what() << std::endl;
-    }
-
-    client.client().onEvent.disconnect(id);
+    get_event(ctl, fmt);
 }
 
 } // !cli
