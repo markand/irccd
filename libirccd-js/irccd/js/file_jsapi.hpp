@@ -1,5 +1,5 @@
 /*
- * js_file_module.hpp -- Irccd.File API
+ * file_jsapi.hpp -- Irccd.File API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_FILE_MODULE_HPP
-#define IRCCD_JS_FILE_MODULE_HPP
+#ifndef IRCCD_JS_FILE_JSAPI_HPP
+#define IRCCD_JS_FILE_JSAPI_HPP
 
 /**
- * \file js_file_module.hpp
- * \brief Irccd.File JavaScript API.
+ * \file file_jsapi.hpp
+ * \brief Irccd.File Javascript API.
  */
 
 #include <cassert>
@@ -32,8 +32,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "duktape.hpp"
-#include "module.hpp"
+#include "jsapi.hpp"
 
 namespace irccd {
 
@@ -57,7 +56,7 @@ private:
 
 private:
     std::string path_;
-    std::FILE *stream_;
+    std::FILE* stream_;
     std::function<void (std::FILE*)> destructor_;
 
 public:
@@ -134,18 +133,18 @@ public:
 };
 
 /**
- * \brief Irccd.File JavaScript API.
- * \ingroup modules
+ * \brief Irccd.File Javascript API.
+ * \ingroup jsapi
  */
-class js_file_module : public module {
+class file_jsapi : public jsapi {
 public:
     /**
-     * Constructor.
+     * \copydoc jsapi::name
      */
-    js_file_module() noexcept;
+    std::string name() const override;
 
     /**
-     * \copydoc Module::load
+     * \copydoc jsapi::load
      */
     void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
@@ -160,7 +159,7 @@ public:
  * \param ctx the the context
  * \param fp the file
  */
-IRCCD_EXPORT void dukx_new_file(duk_context* ctx, file* fp);
+void dukx_new_file(duk_context* ctx, file* fp);
 
 /**
  * Push a file.
@@ -169,7 +168,7 @@ IRCCD_EXPORT void dukx_new_file(duk_context* ctx, file* fp);
  * \param ctx the the context
  * \param fp the file
  */
-IRCCD_EXPORT void dukx_push_file(duk_context* ctx, file* fp);
+void dukx_push_file(duk_context* ctx, file* fp);
 
 /**
  * Require a file. Raises a JavaScript error if not a File.
@@ -177,8 +176,8 @@ IRCCD_EXPORT void dukx_push_file(duk_context* ctx, file* fp);
  * \param ctx the context
  * \param index the index
  */
-IRCCD_EXPORT file* dukx_require_file(duk_context* ctx, duk_idx_t index);
+file* dukx_require_file(duk_context* ctx, duk_idx_t index);
 
 } // !irccd
 
-#endif // !IRCCD_JS_FILE_MODULE_HPP
+#endif // !IRCCD_JS_FILE_JSAPI_HPP

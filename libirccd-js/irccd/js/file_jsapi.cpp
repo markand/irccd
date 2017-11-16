@@ -1,5 +1,5 @@
 /*
- * js_file_module.cpp -- Irccd.File API
+ * file_jsapi.cpp -- Irccd.File API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -24,18 +26,16 @@
 
 #include <boost/filesystem.hpp>
 
-#include <irccd/sysconfig.hpp>
-
 #if defined(HAVE_STAT)
 #  include <sys/types.h>
 #  include <sys/stat.h>
 #endif
 
-#include <irccd/js_plugin.hpp>
+#include <irccd/fs_util.hpp>
 
-#include "fs_util.hpp"
-#include "js_file_module.hpp"
-#include "js_irccd_module.hpp"
+#include "file_jsapi.hpp"
+#include "irccd_jsapi.hpp"
+#include "js_plugin.hpp"
 
 namespace irccd {
 
@@ -634,12 +634,12 @@ const duk_number_list_entry constants[] = {
 
 } // !namespace
 
-js_file_module::js_file_module() noexcept
-    : module("Irccd.File")
+std::string file_jsapi::name() const
 {
+    return "Irccd.File";
 }
 
-void js_file_module::load(irccd&, std::shared_ptr<js_plugin> plugin)
+void file_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
     StackAssert sa(plugin->context());
 

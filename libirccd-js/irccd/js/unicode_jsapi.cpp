@@ -1,5 +1,5 @@
 /*
- * js_unicode_module.cpp -- Irccd.Unicode API
+ * unicode_jsapi.cpp -- Irccd.Unicode API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/js_plugin.hpp>
-
-#include "duktape.hpp"
-#include "js_unicode_module.hpp"
+#include "js_plugin.hpp"
 #include "unicode.hpp"
+#include "unicode_jsapi.hpp"
 
 namespace irccd {
 
@@ -134,12 +132,12 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-js_unicode_module::js_unicode_module() noexcept
-    : module("Irccd.Unicode")
+std::string unicode_jsapi::name() const
 {
+    return "Irccd.Unicode";
 }
 
-void js_unicode_module::load(irccd&, std::shared_ptr<js_plugin> plugin)
+void unicode_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
     StackAssert sa(plugin->context());
 

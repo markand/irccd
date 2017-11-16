@@ -21,7 +21,7 @@
 
 #include <thread>
 
-#include <irccd/js_elapsed_timer_module.hpp>
+#include <irccd/js/elapsed_timer_jsapi.hpp>
 
 #include <js_test.hpp>
 
@@ -29,7 +29,7 @@ using namespace std::chrono_literals;
 
 namespace irccd {
 
-BOOST_FIXTURE_TEST_SUITE(js_elapsed_timer_suite, js_test<js_elapsed_timer_module>)
+BOOST_FIXTURE_TEST_SUITE(elapsed_timer_jsapi_suite, js_test<elapsed_timer_jsapi>)
 
 BOOST_AUTO_TEST_CASE(standard)
 {

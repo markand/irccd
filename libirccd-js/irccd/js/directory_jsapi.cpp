@@ -1,5 +1,5 @@
 /*
- * js_directory_module.cpp -- irccd.Directory API
+ * directory_jsapi.cpp -- Irccd.Directory API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
@@ -24,12 +26,11 @@
 #include <stdexcept>
 #include <string>
 
-#include "fs_util.hpp"
-#include "duktape.hpp"
-#include "js_directory_module.hpp"
-#include "js_irccd_module.hpp"
+#include <irccd/fs_util.hpp>
+
+#include "directory_jsapi.hpp"
+#include "irccd_jsapi.hpp"
 #include "js_plugin.hpp"
-#include "sysconfig.hpp"
 
 namespace fs = boost::filesystem;
 
@@ -297,12 +298,12 @@ const duk_number_list_entry constants[] = {
 
 } // !namespace
 
-js_directory_module::js_directory_module() noexcept
-    : module("Irccd.Directory")
+std::string directory_jsapi::name() const
 {
+    return "Irccd.Directory";
 }
 
-void js_directory_module::load(irccd&, std::shared_ptr<js_plugin> plugin)
+void directory_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
     StackAssert sa(plugin->context());
 

@@ -1,5 +1,5 @@
 /*
- * js_system_module.hpp -- Irccd.System API
+ * timer_jsapi.hpp -- Irccd.Timer API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,35 +16,35 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_SYSTEM_MODULE_HPP
-#define IRCCD_JS_SYSTEM_MODULE_HPP
+#ifndef IRCCD_JS_TIMER_JSAPI_HPP
+#define IRCCD_JS_TIMER_JSAPI_HPP
 
 /**
- * \file mod-system.hpp
- * \brief irccd.System JavaScript API.
+ * \file timer_jsapi
+ * \brief Irccd.Timer Javascript API.
  */
 
-#include "module.hpp"
+#include "jsapi.hpp"
 
 namespace irccd {
 
 /**
- * \brief irccd.System JavaScript API.
- * \ingroup modules
+ * \brief Irccd.Timer Javascript API.
+ * \ingroup jsapi
  */
-class js_system_module : public module {
+class timer_jsapi : public jsapi {
 public:
     /**
-     * irccd.System.
+     * \copydoc jsapi::name
      */
-    js_system_module() noexcept;
+    std::string name() const override;
 
     /**
-     * \copydoc Module::load
+     * \copydoc jsapi::load
      */
     void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
 } // !irccd
 
-#endif // !IRCCD_JS_SYSTEM_MODULE_HPP
+#endif // !IRCCD_JS_TIMER_JSAPI_HPP

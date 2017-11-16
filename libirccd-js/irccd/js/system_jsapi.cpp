@@ -1,5 +1,5 @@
 /*
- * js_system_module.cpp -- Irccd.System API
+ * system_jsapi.cpp -- Irccd.System API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,22 +16,22 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <chrono>
 #include <cstdlib>
 #include <thread>
-
-#include <irccd/sysconfig.hpp>
 
 #if defined(HAVE_POPEN)
 #  include <cstdio>
 #endif
 
-#include <irccd/js_plugin.hpp>
 #include <irccd/system.hpp>
 
-#include "js_file_module.hpp"
-#include "js_irccd_module.hpp"
-#include "js_system_module.hpp"
+#include "file_jsapi.hpp"
+#include "irccd_jsapi.hpp"
+#include "js_plugin.hpp"
+#include "system_jsapi.hpp"
 
 namespace irccd {
 
@@ -225,12 +225,12 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-js_system_module::js_system_module() noexcept
-    : module("Irccd.System")
+std::string system_jsapi::name() const
 {
+    return "Irccd.System";
 }
 
-void js_system_module::load(irccd&, std::shared_ptr<js_plugin> plugin)
+void system_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
     StackAssert sa(plugin->context());
 

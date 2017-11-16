@@ -20,20 +20,21 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/timer/timer.hpp>
 
-#include <irccd/js_plugin_module.hpp>
-#include <irccd/js_timer_module.hpp>
 #include <irccd/net_util.hpp>
+
+#include <irccd/js/plugin_jsapi.hpp>
+#include <irccd/js/timer_jsapi.hpp>
 
 #include <js_test.hpp>
 
 namespace irccd {
 
-class fixture : public js_test<js_plugin_module, js_timer_module> {
+class fixture : public js_test<plugin_jsapi, timer_jsapi> {
 public:
     using js_test::js_test;
 };
 
-BOOST_FIXTURE_TEST_SUITE(js_timer_suite, fixture)
+BOOST_FIXTURE_TEST_SUITE(timer_jsapi_suite, fixture)
 
 BOOST_AUTO_TEST_CASE(single)
 {

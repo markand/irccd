@@ -21,9 +21,10 @@
 
 #include <irccd/irccd.hpp>
 #include <irccd/service.hpp>
-#include <irccd/js_plugin.hpp>
-#include <irccd/js_irccd_module.hpp>
-#include <irccd/js_plugin_module.hpp>
+
+#include <irccd/js/irccd_jsapi.hpp>
+#include <irccd/js/js_plugin.hpp>
+#include <irccd/js/plugin_jsapi.hpp>
 
 namespace irccd {
 
@@ -36,8 +37,8 @@ protected:
     {
         plugin_ = std::make_unique<js_plugin>(std::move(name), std::move(path));
 
-        js_irccd_module().load(irccd_, plugin_);
-        js_plugin_module().load(irccd_, plugin_);
+        irccd_jsapi().load(irccd_, plugin_);
+        plugin_jsapi().load(irccd_, plugin_);
 
         plugin_->open();
     }
@@ -103,8 +104,8 @@ protected:
 
         auto loader = std::make_unique<js_plugin_loader>(irccd_);
 
-        loader->add_module(std::make_unique<js_irccd_module>());
-        loader->add_module(std::make_unique<js_plugin_module>());
+        loader->modules().push_back(std::make_unique<irccd_jsapi>());
+        loader->modules().push_back(std::make_unique<plugin_jsapi>());
 
         irccd_.plugins().add_loader(std::move(loader));
     }

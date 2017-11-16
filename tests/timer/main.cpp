@@ -20,7 +20,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/timer/timer.hpp>
 
-#include <irccd/timer.hpp>
+#include <irccd/js/timer.hpp>
 
 using namespace std::chrono_literals;
 

@@ -1,5 +1,5 @@
 /*
- * js_server_module.cpp -- Irccd.Server API
+ * server_jsapi.cpp -- Irccd.Server API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -21,12 +21,12 @@
 #include <unordered_map>
 
 #include <irccd.hpp>
-#include <irccd/js_plugin.hpp>
 #include <irccd/server.hpp>
 #include <irccd/service.hpp>
 
-#include "js_irccd_module.hpp"
-#include "js_server_module.hpp"
+#include "irccd_jsapi.hpp"
+#include "js_plugin.hpp"
+#include "server_jsapi.hpp"
 
 namespace irccd {
 
@@ -529,12 +529,12 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-js_server_module::js_server_module() noexcept
-    : module("Irccd.Server")
+std::string server_jsapi::name() const
 {
+    return "Irccd.Server";
 }
 
-void js_server_module::load(irccd&, std::shared_ptr<js_plugin> plugin)
+void server_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
     StackAssert sa(plugin->context());
 

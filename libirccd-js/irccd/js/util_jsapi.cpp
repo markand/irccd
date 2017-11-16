@@ -1,5 +1,5 @@
 /*
- * js_util_module.cpp -- Irccd.Util API
+ * util_jsapi.cpp -- Irccd.Util API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -22,8 +22,8 @@
 
 #include <irccd/string_util.hpp>
 
-#include "js_util_module.hpp"
 #include "js_plugin.hpp"
+#include "util_jsapi.hpp"
 
 namespace irccd {
 
@@ -281,12 +281,12 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-js_util_module::js_util_module() noexcept
-    : module("Irccd.Util")
+std::string util_jsapi::name() const
 {
+    return "Irccd.Util";
 }
 
-void js_util_module::load(irccd&, std::shared_ptr<js_plugin> plugin)
+void util_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
     StackAssert sa(plugin->context());
 

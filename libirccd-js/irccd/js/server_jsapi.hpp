@@ -1,5 +1,5 @@
 /*
- * js_unicode_module.hpp -- Irccd.Unicode API
+ * server_jsapi.hpp -- Irccd.Server API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,35 +16,54 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_UNICODE_MODULE_HPP
-#define IRCCD_JS_UNICODE_MODULE_HPP
+#ifndef IRCCD_JS_SERVER_JSAPI_HPP
+#define IRCCD_JS_SERVER_JSAPI_HPP
 
 /**
- * \file js_unicode_module.hpp
- * \brief irccd.Unicode JavaScript API.
+ * \file mod-server.hpp
+ * \brief irccd.Server Javascript API.
  */
 
-#include "module.hpp"
+#include "jsapi.hpp"
+#include "server.hpp"
 
 namespace irccd {
 
 /**
- * \brief Irccd.Unicode JavaScript API.
- * \ingroup modules
+ * \brief irccd.Server Javascript API.
+ * \ingroup jsapi
  */
-class js_unicode_module : public module {
+class server_jsapi : public jsapi {
 public:
     /**
-     * Constructor.
+     * \copydoc jsapi::name
      */
-    js_unicode_module() noexcept;
+    std::string name() const override;
 
     /**
-     * \copydoc Module::load
+     * \copydoc jsapi::load
      */
     void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
+/**
+ * Push a server.
+ *
+ * \pre server != nullptr
+ * \param ctx the context
+ * \param server the server
+ */
+void dukx_push_server(duk_context* ctx, std::shared_ptr<server> server);
+
+/**
+ * Require a server. Raise a Javascript error if not a Server.
+ *
+ * \param ctx the context
+ * \param index the index
+ * \return the server
+ */
+std::shared_ptr<server> dukx_require_server(duk_context* ctx, duk_idx_t index);
+
 } // !irccd
 
-#endif // !IRCCD_JS_UNICODE_MODULE_HPP
+#endif // !IRCCD_JS_SERVER_JSAPI_HPP

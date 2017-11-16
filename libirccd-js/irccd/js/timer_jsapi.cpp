@@ -1,5 +1,5 @@
 /*
- * js_timer_module.cpp -- Irccd.timer API
+ * timer_jsapi.cpp -- Irccd.timer API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -18,13 +18,13 @@
 
 #include <irccd/irccd.hpp>
 #include <irccd/logger.hpp>
-#include <irccd/js_plugin.hpp>
 #include <irccd/string_util.hpp>
-#include <irccd/timer.hpp>
 
-#include "js_irccd_module.hpp"
-#include "js_plugin_module.hpp"
-#include "js_timer_module.hpp"
+#include "irccd_jsapi.hpp"
+#include "js_plugin.hpp"
+#include "plugin_jsapi.hpp"
+#include "timer.hpp"
+#include "timer_jsapi.hpp"
 
 namespace irccd {
 
@@ -184,12 +184,12 @@ const duk_number_list_entry constants[] = {
 
 } // !namespace
 
-js_timer_module::js_timer_module() noexcept
-    : module("Irccd.timer")
+std::string timer_jsapi::name() const
 {
+    return "Irccd.Timer";
 }
 
-void js_timer_module::load(irccd&, std::shared_ptr<js_plugin> plugin)
+void timer_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
     StackAssert sa(plugin->context());
 

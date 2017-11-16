@@ -23,7 +23,7 @@
 
 namespace irccd {
 
-BOOST_FIXTURE_TEST_SUITE(js_irccd_suite, js_test<js_irccd_module>)
+BOOST_FIXTURE_TEST_SUITE(irccd_jsapi_suite, js_test<irccd_jsapi>)
 
 BOOST_AUTO_TEST_CASE(version)
 {

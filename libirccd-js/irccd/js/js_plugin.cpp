@@ -1,5 +1,5 @@
 /*
- * plugin-js.cpp -- JavaScript plugins for irccd
+ * plugin-js.cpp -- Javascript plugins for irccd
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -24,11 +24,12 @@
 
 #include "irccd.hpp"
 #include "logger.hpp"
-#include "js_plugin_module.hpp"
-#include "js_server_module.hpp"
+//#include "plugin_module.hpp"
+//#include "server_module.hpp"
 #include "js_plugin.hpp"
 #include "service.hpp"
-#include "timer.hpp"
+#include "server_jsapi.hpp"
+//#include "timer.hpp"
 
 namespace irccd {
 
@@ -370,13 +371,6 @@ js_plugin_loader::js_plugin_loader(irccd& irccd) noexcept
 }
 
 js_plugin_loader::~js_plugin_loader() noexcept = default;
-
-void js_plugin_loader::add_module(std::unique_ptr<module> module)
-{
-    assert(module);
-
-    modules_.push_back(std::move(module));
-}
 
 std::shared_ptr<plugin> js_plugin_loader::open(const std::string& id,
                                                const std::string& path) noexcept

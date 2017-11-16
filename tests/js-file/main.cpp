@@ -21,13 +21,13 @@
 
 #include <fstream>
 
-#include <irccd/js_file_module.hpp>
+#include <irccd/js/file_jsapi.hpp>
 
 #include <js_test.hpp>
 
 namespace irccd {
 
-BOOST_FIXTURE_TEST_SUITE(js_file_suite, js_test<js_file_module>)
+BOOST_FIXTURE_TEST_SUITE(file_jsapi_suite, js_test<file_jsapi>)
 
 BOOST_AUTO_TEST_CASE(function_basename)
 {
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(function_exists)
 
     if (duk_peval_string(plugin_->context(), "result = Irccd.File.exists(directory + '/file.txt')"))
         throw dukx_exception(plugin_->context(), -1);
-    
+
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
 }
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(function_exists2)
 {
     if (duk_peval_string(plugin_->context(), "result = Irccd.File.exists('file_which_does_not_exist.txt')"))
         throw dukx_exception(plugin_->context(), -1);
-    
+
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST(!duk_get_boolean(plugin_->context(), -1));
 }

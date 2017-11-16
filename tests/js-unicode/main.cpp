@@ -23,13 +23,13 @@
 #define BOOST_TEST_MODULE "Unicode Javascript API"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/js_unicode_module.hpp>
+#include <irccd/js/unicode_jsapi.hpp>
 
 #include <js_test.hpp>
 
 namespace irccd {
 
-BOOST_FIXTURE_TEST_SUITE(js_unicode_suite, js_test<js_unicode_module>)
+BOOST_FIXTURE_TEST_SUITE(unicode_jsapi_suite, js_test<unicode_jsapi>)
 
 BOOST_AUTO_TEST_CASE(is_letter)
 {

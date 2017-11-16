@@ -19,7 +19,7 @@
 #define BOOST_TEST_MODULE "Javascript"
 #include <boost/test/unit_test.hpp>
 
-#include <duktape.hpp>
+#include <js/duktape.hpp>
 
 #include <irccd/fs_util.hpp>
 #include <irccd/util.hpp>

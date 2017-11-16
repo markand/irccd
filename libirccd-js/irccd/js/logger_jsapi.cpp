@@ -1,5 +1,5 @@
 /*
- * js_logger_module.cpp -- Irccd.Logger API
+ * logger_jsapi.cpp -- Irccd.Logger API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -19,8 +19,8 @@
 #include <irccd/logger.hpp>
 
 #include "js_plugin.hpp"
-#include "js_logger_module.hpp"
-#include "js_plugin_module.hpp"
+#include "logger_jsapi.hpp"
+#include "plugin_jsapi.hpp"
 
 namespace irccd {
 
@@ -84,12 +84,12 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-js_logger_module::js_logger_module() noexcept
-    : module("Irccd.Logger")
+std::string logger_jsapi::name() const
 {
+    return "Irccd.Logger";
 }
 
-void js_logger_module::load(irccd&, std::shared_ptr<js_plugin> plugin)
+void logger_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
     StackAssert sa(plugin->context());
 

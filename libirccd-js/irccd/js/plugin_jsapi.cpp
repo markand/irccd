@@ -1,5 +1,5 @@
 /*
- * js_plugin_module.cpp -- Irccd.Plugin API
+ * plugin_jsapi.cpp -- Irccd.Plugin API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -19,9 +19,9 @@
 #include <irccd/irccd.hpp>
 #include <irccd/service.hpp>
 
-#include "js_irccd_module.hpp"
+#include "irccd_jsapi.hpp"
 #include "js_plugin.hpp"
-#include "js_plugin_module.hpp"
+#include "plugin_jsapi.hpp"
 
 namespace irccd {
 
@@ -323,12 +323,12 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-js_plugin_module::js_plugin_module() noexcept
-    : module("Irccd.Plugin")
+std::string plugin_jsapi::name() const
 {
+    return "Irccd.Plugin";
 }
 
-void js_plugin_module::load(irccd&, std::shared_ptr<js_plugin> plugin)
+void plugin_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
     StackAssert sa(plugin->context());
 

@@ -1,5 +1,5 @@
 /*
- * js_logger_module.hpp -- Irccd.Logger API
+ * util_jsapi.hpp -- Irccd.Util API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,35 +16,35 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_LOGGER_MODULE_HPP
-#define IRCCD_JS_LOGGER_MODULE_HPP
+#ifndef IRCCD_JS_UTIL_JSAPI_HPP
+#define IRCCD_JS_UTIL_JSAPI_HPP
 
 /**
- * \file js_logger_module.hpp
- * \brief Irccd.Logger JavaScript API.
+ * \file util_jsapi.hpp
+ * \brief Irccd.Util Javascript API.
  */
 
-#include "module.hpp"
+#include "jsapi.hpp"
 
 namespace irccd {
 
 /**
- * \brief irccd.Logger JavaScript API.
- * \ingroup modules
+ * \brief Irccd.Util Javascript API.
+ * \ingroup jsapi
  */
-class js_logger_module : public module {
+class util_jsapi : public jsapi {
 public:
     /**
-     * Constructor.
+     * \copydoc jsapi::name
      */
-    js_logger_module() noexcept;
+    std::string name() const override;
 
     /**
-     * \copydoc Module::load
+     * \copydoc jsapi::load
      */
     void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
 } // !irccd
 
-#endif // !IRCCD_JS_LOGGER_MODULE_HPP
+#endif // !IRCCD_JS_UTIL_JSAPI_HPP

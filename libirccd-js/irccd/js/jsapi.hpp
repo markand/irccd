@@ -1,5 +1,5 @@
 /*
- * js_timer_module.hpp -- Irccd.Timer API
+ * jsapi.hpp -- Javascript API module
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,35 +16,60 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_TIMER_MODULE_HPP
-#define IRCCD_JS_TIMER_MODULE_HPP
+#ifndef IRCCD_JS_JSAPI_HPP
+#define IRCCD_JS_JSAPI_HPP
 
 /**
- * \file js_timer_module
- * \brief irccd.Timer JavaScript API.
+ * \file jsapi.hpp
+ * \brief Javascript API module.
  */
 
-#include "module.hpp"
+/**
+ * \defgroup Javascript modules.
+ * \brief Modules for the Javascript API.
+ */
+
+#include <memory>
+#include <string>
+
+#include "duktape.hpp"
 
 namespace irccd {
 
+class irccd;
+class js_plugin;
+
 /**
- * \brief Irccd.Timer JavaScript API.
- * \ingroup modules
+ * \brief Javascript API module.
  */
-class js_timer_module : public module {
+class jsapi {
 public:
     /**
-     * Constructor.
+     * Default constructor.
      */
-    js_timer_module() noexcept;
+    jsapi() noexcept = default;
 
     /**
-     * \copydoc module::load
+     * Virtual destructor defaulted.
      */
-    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
+    virtual ~jsapi() noexcept = default;
+
+    /**
+     * Get the module name.
+     *
+     * \return the name
+     */
+    virtual std::string name() const = 0;
+
+    /**
+     * Load the module into the Javascript plugin.
+     *
+     * \param irccd the irccd instance
+     * \param plugin the plugin
+     */
+    virtual void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) = 0;
 };
 
 } // !irccd
 
-#endif // !IRCCD_MOD_TIMER_HPP
+#endif // !IRCCD_JS_JSAPI_HPP

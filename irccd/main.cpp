@@ -43,18 +43,18 @@
 #include "irccd.hpp"
 
 #if defined(HAVE_JS)
-#   include <js_directory_module.hpp>
-#   include <js_elapsed_timer_module.hpp>
-#   include <js_file_module.hpp>
-#   include <js_irccd_module.hpp>
-#   include <js_logger_module.hpp>
-#   include <js_plugin_module.hpp>
-#   include <js_server_module.hpp>
-#   include <js_system_module.hpp>
-#   include <js_timer_module.hpp>
-#   include <js_unicode_module.hpp>
-#   include <js_util_module.hpp>
-#   include "js_plugin.hpp"
+#   include <irccd/js/directory_jsapi.hpp>
+#   include <irccd/js/elapsed_timer_jsapi.hpp>
+#   include <irccd/js/file_jsapi.hpp>
+#   include <irccd/js/irccd_jsapi.hpp>
+#   include <irccd/js/js_plugin.hpp>
+#   include <irccd/js/logger_jsapi.hpp>
+#   include <irccd/js/plugin_jsapi.hpp>
+#   include <irccd/js/server_jsapi.hpp>
+#   include <irccd/js/system_jsapi.hpp>
+#   include <irccd/js/timer_jsapi.hpp>
+#   include <irccd/js/unicode_jsapi.hpp>
+#   include <irccd/js/util_jsapi.hpp>
 #endif
 
 namespace irccd {
@@ -333,17 +333,17 @@ int main(int argc, char** argv)
 #if defined(HAVE_JS)
     auto loader = std::make_unique<js_plugin_loader>(*instance);
 
-    loader->add_module(std::make_unique<js_irccd_module>());
-    loader->add_module(std::make_unique<js_directory_module>());
-    loader->add_module(std::make_unique<js_elapsed_timer_module>());
-    loader->add_module(std::make_unique<js_file_module>());
-    loader->add_module(std::make_unique<js_logger_module>());
-    loader->add_module(std::make_unique<js_plugin_module>());
-    loader->add_module(std::make_unique<js_server_module>());
-    loader->add_module(std::make_unique<js_system_module>());
-    loader->add_module(std::make_unique<js_timer_module>());
-    loader->add_module(std::make_unique<js_unicode_module>());
-    loader->add_module(std::make_unique<js_util_module>());
+    loader->modules().push_back(std::make_unique<irccd_jsapi>());
+    loader->modules().push_back(std::make_unique<directory_jsapi>());
+    loader->modules().push_back(std::make_unique<elapsed_timer_jsapi>());
+    loader->modules().push_back(std::make_unique<file_jsapi>());
+    loader->modules().push_back(std::make_unique<logger_jsapi>());
+    loader->modules().push_back(std::make_unique<plugin_jsapi>());
+    loader->modules().push_back(std::make_unique<server_jsapi>());
+    loader->modules().push_back(std::make_unique<system_jsapi>());
+    loader->modules().push_back(std::make_unique<timer_jsapi>());
+    loader->modules().push_back(std::make_unique<unicode_jsapi>());
+    loader->modules().push_back(std::make_unique<util_jsapi>());
 
     instance->plugins().add_loader(std::move(loader));
 #endif

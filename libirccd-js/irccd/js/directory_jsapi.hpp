@@ -1,5 +1,5 @@
 /*
- * js_directory_module.hpp -- irccd.Directory API
+ * directory_jsapi.hpp -- Irccd.Directory API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,35 +16,35 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_DIRECTORY_MODULE_HPP
-#define IRCCD_JS_DIRECTORY_MODULE_HPP
+#ifndef IRCCD_JS_DIRECTORY_JSAPI_HPP
+#define IRCCD_JS_DIRECTORY_JSAPI_HPP
 
 /**
- * \file mod-directory.hpp
- * \brief irccd.Directory JavaScript API.
+ * \file directory_jsapi.hpp
+ * \brief Irccd.Directory Javascript API.
  */
 
-#include "module.hpp"
+#include "jsapi.hpp"
 
 namespace irccd {
 
 /**
- * \brief irccd.Directory JavaScript API.
- * \ingroup modules
+ * \brief Irccd.Directory Javascript API.
+ * \ingroup jsapi
  */
-class js_directory_module : public module {
+class directory_jsapi : public jsapi {
 public:
     /**
-     * Constructor.
+     * \copydoc jsapi::name
      */
-    js_directory_module() noexcept;
+    std::string name() const override;
 
     /**
-     * \copydoc Module::load
+     * \copydoc jsapi::load
      */
-    void load(irccd &irccd, std::shared_ptr<js_plugin> plugin) override;
+    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
 } // !irccd
 
-#endif // !IRCCD_JS_DIRECTORY_MODULE_HPP
+#endif // !IRCCD_JS_DIRECTORY_JSAPI_HPP

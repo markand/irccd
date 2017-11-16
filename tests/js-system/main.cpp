@@ -20,17 +20,18 @@
 #include <boost/test/unit_test.hpp>
 
 #include <irccd/irccd.hpp>
-#include <irccd/js_file_module.hpp>
-#include <irccd/js_system_module.hpp>
 #include <irccd/system.hpp>
+
+#include <irccd/js/file_jsapi.hpp>
+#include <irccd/js/system_jsapi.hpp>
 
 #include <js_test.hpp>
 
 namespace irccd {
 
-using fixture = js_test<js_file_module, js_system_module>;
+using fixture = js_test<file_jsapi, system_jsapi>;
 
-BOOST_FIXTURE_TEST_SUITE(js_system_suite, fixture)
+BOOST_FIXTURE_TEST_SUITE(system_jsapi_suite, fixture)
 
 BOOST_AUTO_TEST_CASE(home)
 {

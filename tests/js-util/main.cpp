@@ -19,13 +19,13 @@
 #define BOOST_TEST_MODULE "Unicode Javascript API"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/js_util_module.hpp>
+#include <irccd/js/util_jsapi.hpp>
 
 #include <js_test.hpp>
 
 namespace irccd {
 
-BOOST_FIXTURE_TEST_SUITE(js_util_suite, js_test<js_util_module>)
+BOOST_FIXTURE_TEST_SUITE(util_jsapi_suite, js_test<util_jsapi>)
 
 /*
  * Irccd.Util misc.

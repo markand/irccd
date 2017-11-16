@@ -18,20 +18,21 @@
 
 #include <cassert>
 
-#include <irccd/js_directory_module.hpp>
-#include <irccd/js_elapsed_timer_module.hpp>
-#include <irccd/js_file_module.hpp>
-#include <irccd/js_irccd_module.hpp>
-#include <irccd/js_logger_module.hpp>
-#include <irccd/js_plugin_module.hpp>
-#include <irccd/js_server_module.hpp>
-#include <irccd/js_system_module.hpp>
-#include <irccd/js_timer_module.hpp>
-#include <irccd/js_unicode_module.hpp>
-#include <irccd/js_util_module.hpp>
-#include <irccd/js_plugin.hpp>
 #include <irccd/logger.hpp>
 #include <irccd/service.hpp>
+
+#include <irccd/js/directory_jsapi.hpp>
+#include <irccd/js/elapsed_timer_jsapi.hpp>
+#include <irccd/js/file_jsapi.hpp>
+#include <irccd/js/irccd_jsapi.hpp>
+#include <irccd/js/js_plugin.hpp>
+#include <irccd/js/logger_jsapi.hpp>
+#include <irccd/js/plugin_jsapi.hpp>
+#include <irccd/js/server_jsapi.hpp>
+#include <irccd/js/system_jsapi.hpp>
+#include <irccd/js/timer_jsapi.hpp>
+#include <irccd/js/unicode_jsapi.hpp>
+#include <irccd/js/util_jsapi.hpp>
 
 #include "plugin_test.hpp"
 
@@ -48,17 +49,17 @@ plugin_test::plugin_test(std::string name, std::string path)
     irccd_.plugins().add(plugin_);
     irccd_.servers().add(server_);
 
-    js_irccd_module().load(irccd_, plugin_);
-    js_directory_module().load(irccd_, plugin_);
-    js_elapsed_timer_module().load(irccd_, plugin_);
-    js_file_module().load(irccd_, plugin_);
-    js_logger_module().load(irccd_, plugin_);
-    js_plugin_module().load(irccd_, plugin_);
-    js_server_module().load(irccd_, plugin_);
-    js_system_module().load(irccd_, plugin_);
-    js_timer_module().load(irccd_, plugin_);
-    js_unicode_module().load(irccd_, plugin_);
-    js_util_module().load(irccd_, plugin_);
+    irccd_jsapi().load(irccd_, plugin_);
+    directory_jsapi().load(irccd_, plugin_);
+    elapsed_timer_jsapi().load(irccd_, plugin_);
+    file_jsapi().load(irccd_, plugin_);
+    logger_jsapi().load(irccd_, plugin_);
+    plugin_jsapi().load(irccd_, plugin_);
+    server_jsapi().load(irccd_, plugin_);
+    system_jsapi().load(irccd_, plugin_);
+    timer_jsapi().load(irccd_, plugin_);
+    unicode_jsapi().load(irccd_, plugin_);
+    util_jsapi().load(irccd_, plugin_);
 
     plugin_->open();
 }

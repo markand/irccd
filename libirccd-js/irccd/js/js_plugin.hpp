@@ -31,7 +31,7 @@
 
 namespace irccd {
 
-class module;
+class jsapi;
 
 /**
  * \brief JavaScript plugins for irccd.
@@ -39,11 +39,6 @@ class module;
  */
 class js_plugin : public plugin {
 public:
-    /**
-     * List of modules to enable.
-     */
-    using modules_t = std::vector<std::unique_ptr<module>>;
-
     /**
      * Global property where to read/write plugin configuration (object).
      */
@@ -251,7 +246,7 @@ public:
  */
 class js_plugin_loader : public plugin_loader {
 public:
-    using modules_t = std::vector<std::unique_ptr<module>>;
+    using modules_t = std::vector<std::unique_ptr<jsapi>>;
 
 private:
     irccd& irccd_;
@@ -289,14 +284,6 @@ public:
     {
         return modules_;
     }
-
-    /**
-     * Register a new module for loading new plugins.
-     *
-     * \deprecated use modules() instead
-     * \param module the module to add
-     */
-    void add_module(std::unique_ptr<module> module);
 
     /**
      * \copydoc PluginLoader::open

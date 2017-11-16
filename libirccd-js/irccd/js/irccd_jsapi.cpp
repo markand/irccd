@@ -1,5 +1,5 @@
 /*
- * js_irccd_module.cpp -- Irccd API
+ * irccd_jsapi.cpp -- Irccd API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,14 +16,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <cerrno>
 #include <string>
 #include <unordered_map>
 
-#include <irccd/js_plugin.hpp>
-#include <irccd/sysconfig.hpp>
-
-#include "js_irccd_module.hpp"
+#include "irccd_jsapi.hpp"
+#include "js_plugin.hpp"
 
 namespace irccd {
 
@@ -171,12 +171,12 @@ void system_error::raise(duk_context *ctx) const
     duk_throw(ctx);
 }
 
-js_irccd_module::js_irccd_module() noexcept
-    : module("Irccd")
+std::string irccd_jsapi::name() const
 {
+    return "Irccd";
 }
 
-void js_irccd_module::load(irccd& irccd, std::shared_ptr<js_plugin> plugin)
+void irccd_jsapi::load(irccd& irccd, std::shared_ptr<js_plugin> plugin)
 {
     StackAssert sa(plugin->context());
 

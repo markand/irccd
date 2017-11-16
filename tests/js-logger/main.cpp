@@ -20,14 +20,15 @@
 #include <boost/test/unit_test.hpp>
 
 #include <irccd/logger.hpp>
-#include <irccd/js_logger_module.hpp>
-#include <irccd/js_plugin_module.hpp>
+
+#include <irccd/js/logger_jsapi.hpp>
+#include <irccd/js/plugin_jsapi.hpp>
 
 #include <js_test.hpp>
 
 namespace irccd {
 
-class logger_test : public js_test<js_logger_module, js_plugin_module> {
+class logger_test : public js_test<logger_jsapi, plugin_jsapi> {
 protected:
     std::string line_info;
     std::string line_warning;
@@ -66,7 +67,7 @@ protected:
     }
 };
 
-BOOST_FIXTURE_TEST_SUITE(js_logger_suite, logger_test)
+BOOST_FIXTURE_TEST_SUITE(logger_jsapi_suite, logger_test)
 
 BOOST_AUTO_TEST_CASE(info)
 {

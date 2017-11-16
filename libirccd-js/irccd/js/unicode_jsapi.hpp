@@ -1,5 +1,5 @@
 /*
- * plugin_test.hpp -- test fixture helper for Javascript plugins
+ * unicode_jsapi.hpp -- Irccd.Unicode API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,42 +16,35 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_PLUGIN_TEST_HPP
-#define IRCCD_PLUGIN_TEST_HPP
+#ifndef IRCCD_JS_UNICODE_JSAPI_HPP
+#define IRCCD_JS_UNICODE_JSAPI_HPP
 
 /**
- * \file plugin_test.hpp
- * \brief test fixture helper for Javascript plugins.
+ * \file unicode_jsapi.hpp
+ * \brief Irccd.Unicode Javascript API.
  */
 
-#include <js/js_plugin.hpp>
-
-#include "irccd.hpp"
-#include "journal_server.hpp"
+#include "jsapi.hpp"
 
 namespace irccd {
 
 /**
- * \brief test fixture helper for Javascript plugins.
- *
- * Holds a plugin that is opened (but not loaded).
+ * \brief Irccd.Unicode Javascript API.
+ * \ingroup jsapi
  */
-class plugin_test {
-protected:
-    irccd irccd_;
-    std::shared_ptr<js_plugin> plugin_;
-    std::shared_ptr<journal_server> server_;
-
+class unicode_jsapi : public jsapi {
 public:
     /**
-     * Construct the fixture test.
-     *
-     * \param name the plugin name (e.g. ask)
-     * \param path the full plugin path (e.g. /usr/libexec/irccd/plugins/ask.js)
+     * \copydoc jsapi::name
      */
-    plugin_test(std::string name, std::string path);
+    std::string name() const override;
+
+    /**
+     * \copydoc jsapi::load
+     */
+    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
 } // !irccd
 
-#endif // !IRCCD_PLUGIN_TESTER_HPP
+#endif // !IRCCD_JS_UNICODE_JSAPI_HPP

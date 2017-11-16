@@ -25,8 +25,9 @@
  */
 
 #include <irccd/irccd.hpp>
-#include <irccd/js_plugin.hpp>
-#include <irccd/js_irccd_module.hpp>
+
+#include <irccd/js/js_plugin.hpp>
+#include <irccd/js/irccd_jsapi.hpp>
 
 #include "journal_server.hpp"
 
@@ -66,7 +67,7 @@ public:
         , server_(new journal_server("test"))
     {
         // Irccd is mandatory at the moment.
-        add<js_irccd_module>();
+        add<irccd_jsapi>();
         add<Modules...>();
 
         plugin_->open();

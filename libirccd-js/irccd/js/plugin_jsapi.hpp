@@ -1,5 +1,5 @@
 /*
- * js_elapsed_timer_module.hpp -- irccd.ElapsedTimer API
+ * plugin_jsapi.hpp -- Irccd.Plugin API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,35 +16,43 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_ELAPSED_TIMER_MODULE_HPP
-#define IRCCD_JS_ELAPSED_TIMER_MODULE_HPP
+#ifndef IRCCD_JS_PLUGIN_JSAPI_HPP
+#define IRCCD_JS_PLUGIN_JSAPI_HPP
 
 /**
- * \file js_elapsed_timer_module.hpp
- * \brief irccd.ElapsedTimer JavaScript API.
+ * \file plugin_jsapi.hpp
+ * \brief Irccd.Plugin Javascript API.
  */
 
-#include "module.hpp"
+#include "jsapi.hpp"
 
 namespace irccd {
 
 /**
- * \brief Irccd.ElapsedTimer JavaScript API.
- * \ingroup Javascript modules
+ * \brief Irccd.Plugin Javascript API.
+ * \ingroup jsapi
  */
-class js_elapsed_timer_module : public module {
+class plugin_jsapi : public jsapi {
 public:
     /**
-     * Constructor.
+     * \copydoc jsapi::name
      */
-    js_elapsed_timer_module() noexcept;
+    std::string name() const override;
 
     /**
-     * \copydoc module::load
+     * \copydoc Module::load
      */
     void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
+/**
+ * Access the plugin stored in this context.
+ *
+ * \param ctx the context
+ * \return the plugin
+ */
+std::shared_ptr<js_plugin> dukx_get_plugin(duk_context* ctx);
+
 } // !irccd
 
-#endif // !IRCCD_JS_ELAPSED_TIMER_MODULE_HPP
+#endif // !IRCCD_JS_PLUGIN_JSAPI_HPP

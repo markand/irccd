@@ -1,5 +1,5 @@
 /*
- * js_irccd_module.hpp -- Irccd API
+ * irccd_jsapi.hpp -- Irccd API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,25 +16,24 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_IRCCD_MODULE_HPP
-#define IRCCD_JS_IRCCD_MODULE_HPP
+#ifndef IRCCD_JS_IRCCD_JSAPI_HPP
+#define IRCCD_JS_IRCCD_JSAPI_HPP
 
 /**
- * \file js_irccd_module.hpp
- * \brief irccd JavaScript API.
+ * \file irccd_jsapi.hpp
+ * \brief irccd Javascript API.
  */
 
 #include <cerrno>
 #include <cstring>
 #include <string>
 
-#include "duktape.hpp"
-#include "module.hpp"
+#include "jsapi.hpp"
 
 namespace irccd {
 
 /**
- * \brief Custom JavaScript exception for system error.
+ * \brief Custom Javascript exception for system error.
  */
 class system_error {
 private:
@@ -64,18 +63,18 @@ public:
 };
 
 /**
- * \brief Irccd JavaScript API.
- * \ingroup modules
+ * \brief Irccd Javascript API.
+ * \ingroup jsapi
  */
-class js_irccd_module : public module {
+class irccd_jsapi : public jsapi {
 public:
     /**
-     * Constructor.
+     * \copydoc jsapi::name
      */
-    js_irccd_module() noexcept;
+    std::string name() const override;
 
     /**
-     * \copydoc module::load
+     * \copydoc jsapi::load
      */
     void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
@@ -90,4 +89,4 @@ irccd& dukx_get_irccd(duk_context* ctx);
 
 } // !irccd
 
-#endif // !IRCCD_JS_IRCCD_MODULE_HPP
+#endif // !IRCCD_JS_IRCCD_JSAPI_HPP

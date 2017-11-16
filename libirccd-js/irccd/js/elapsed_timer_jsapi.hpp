@@ -1,5 +1,5 @@
 /*
- * js_server_module.hpp -- Irccd.Server API
+ * elapsed_timer_jsapi.hpp -- Irccd.ElapsedTimer API
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,55 +16,35 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_SERVER_MODULE_HPP
-#define IRCCD_JS_SERVER_MODULE_HPP
+#ifndef IRCCD_JS_ELAPSED_TIMER_JSAPI_HPP
+#define IRCCD_JS_ELAPSED_TIMER_JSAPI_HPP
 
 /**
- * \file mod-server.hpp
- * \brief irccd.Server JavaScript API.
+ * \file elapsed_timer_jsapi.hpp
+ * \brief Irccd.ElapsedTimer Javascript API.
  */
 
-#include "duktape.hpp"
-#include "module.hpp"
-#include "server.hpp"
+#include "jsapi.hpp"
 
 namespace irccd {
 
 /**
- * \brief irccd.Server JavaScript API.
- * \ingroup modules
+ * \brief Irccd.ElapsedTimer Javascript API.
+ * \ingroup Javascript jsapi
  */
-class js_server_module : public module {
+class elapsed_timer_jsapi : public jsapi {
 public:
     /**
-     * irccd.Server.
+     * \copydoc jsapi::name
      */
-    js_server_module() noexcept;
+    std::string name() const override;
 
     /**
-     * \copydoc Module::load
+     * \copydoc jsapi::load
      */
     void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
-/**
- * Push a server.
- *
- * \pre server != nullptr
- * \param ctx the context
- * \param server the server
- */
-void dukx_push_server(duk_context* ctx, std::shared_ptr<server> server);
-
-/**
- * Require a server. Raise a JavaScript error if not a Server.
- *
- * \param ctx the context
- * \param index the index
- * \return the server
- */
-std::shared_ptr<server> dukx_require_server(duk_context* ctx, duk_idx_t index);
-
 } // !irccd
 
-#endif // !IRCCD_JS_SERVER_MODULE_HPP
+#endif // !IRCCD_JS_ELAPSED_TIMER_JSAPI_HPP

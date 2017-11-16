@@ -19,17 +19,13 @@
 #define BOOST_TEST_MODULE "Directory Javascript API"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/js_directory_module.hpp>
+#include <irccd/js/directory_jsapi.hpp>
 
 #include <js_test.hpp>
 
 namespace irccd {
 
-class directory_test : public js_test<js_directory_module> {
-public:
-};
-
-BOOST_FIXTURE_TEST_SUITE(js_directory_suite, directory_test)
+BOOST_FIXTURE_TEST_SUITE(directory_jsapi_suite, js_test<directory_jsapi>)
 
 BOOST_AUTO_TEST_CASE(constructor)
 {
