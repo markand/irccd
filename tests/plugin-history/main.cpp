@@ -46,7 +46,7 @@ public:
     {
         // Add file if not there.
         if (config.count("file") == 0)
-            config.emplace("file", SOURCEDIR "/words.conf");
+            config.emplace("file", CMAKE_CURRENT_SOURCE_DIR "/words.conf");
 
         plugin_->set_config(config);
         plugin_->on_load(irccd_);
@@ -57,7 +57,7 @@ BOOST_FIXTURE_TEST_SUITE(history_test_suite, history_test)
 
 BOOST_AUTO_TEST_CASE(format_error)
 {
-    load({{"file", SOURCEDIR "/broken-conf.json"}});
+    load({{"file", CMAKE_CURRENT_SOURCE_DIR "/broken-conf.json"}});
 
     plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#history", "seen francis"});
 
@@ -72,8 +72,8 @@ BOOST_AUTO_TEST_CASE(format_seen)
 {
     const std::regex rule("seen=history:!history:test:#history:destructor!dst@localhost:destructor:jean:\\d{2}:\\d{2}");
 
-    remove(BINARYDIR "/seen.json");
-    load({{ "file", BINARYDIR "/seen.json" }});
+    remove(CMAKE_CURRENT_BINARY_DIR "/seen.json");
+    load({{ "file", CMAKE_CURRENT_BINARY_DIR "/seen.json" }});
 
     plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#history", "hello"});
     plugin_->on_command(irccd_, {server_, "destructor!dst@localhost", "#history", "seen jean"});
@@ -89,8 +89,8 @@ BOOST_AUTO_TEST_CASE(format_said)
 {
     std::regex rule("said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:\\d{2}:\\d{2}");
 
-    remove(BINARYDIR "/said.json");
-    load({{ "file", BINARYDIR "/said.json" }});
+    remove(CMAKE_CURRENT_BINARY_DIR "/said.json");
+    load({{ "file", CMAKE_CURRENT_BINARY_DIR "/said.json" }});
 
     plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#history", "hello"});
     plugin_->on_command(irccd_, {server_, "destructor!dst@localhost", "#history", "said jean"});
@@ -104,8 +104,8 @@ BOOST_AUTO_TEST_CASE(format_said)
 
 BOOST_AUTO_TEST_CASE(format_unknown)
 {
-    remove(BINARYDIR "/unknown.json");
-    load({{ "file", BINARYDIR "/unknown.json" }});
+    remove(CMAKE_CURRENT_BINARY_DIR "/unknown.json");
+    load({{ "file", CMAKE_CURRENT_BINARY_DIR "/unknown.json" }});
 
     plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#history", "hello"});
     plugin_->on_command(irccd_, {server_, "destructor!dst@localhost", "#history", "seen nobody"});
@@ -121,8 +121,8 @@ BOOST_AUTO_TEST_CASE(fix_642)
 {
     const std::regex rule("said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:\\d{2}:\\d{2}");
 
-    remove(BINARYDIR "/case.json");
-    load({{"file", BINARYDIR "/case.json"}});
+    remove(CMAKE_CURRENT_BINARY_DIR "/case.json");
+    load({{"file", CMAKE_CURRENT_BINARY_DIR "/case.json"}});
 
     plugin_->on_message(irccd_, {server_, "JeaN!JeaN@localhost", "#history", "hello"});
 

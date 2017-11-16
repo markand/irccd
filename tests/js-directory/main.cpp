@@ -30,7 +30,7 @@ BOOST_FIXTURE_TEST_SUITE(directory_jsapi_suite, js_test<directory_jsapi>)
 BOOST_AUTO_TEST_CASE(constructor)
 {
     const std::string script(
-        "d = new Irccd.Directory(TESTS_BINARY_DIR + \"/root\");"
+        "d = new Irccd.Directory(CMAKE_SOURCE_DIR + \"/tests/root\");"
         "p = d.path;"
         "l = d.entries.length;"
     );
@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(constructor)
         throw dukx_exception(plugin_->context(), -1);
 
     duk_get_global_string(plugin_->context(), "l");
-    BOOST_TEST(duk_get_int(plugin_->context(), -1) == 2);
+    BOOST_TEST(duk_get_int(plugin_->context(), -1) == 3);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

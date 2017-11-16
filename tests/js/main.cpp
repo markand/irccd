@@ -52,10 +52,10 @@ BOOST_AUTO_TEST_CASE(no_file)
 
 BOOST_AUTO_TEST_CASE(syntax_error)
 {
-    BOOST_REQUIRE_THROW(dukx_peval_file(ctx_, SOURCEDIR "/syntax-error.js"), Exception);
+    BOOST_REQUIRE_THROW(dukx_peval_file(ctx_, CMAKE_CURRENT_SOURCE_DIR "/syntax-error.js"), Exception);
 
     try {
-        dukx_peval_file(ctx_, SOURCEDIR "/syntax-error.js");
+        dukx_peval_file(ctx_, CMAKE_CURRENT_SOURCE_DIR "/syntax-error.js");
     } catch (const Exception& ex) {
         BOOST_REQUIRE_EQUAL("SyntaxError", ex.name);
         BOOST_REQUIRE_EQUAL("syntax-error.js", fs_util::base_name(ex.fileName));

@@ -35,7 +35,7 @@ class logger_test : public plugin_test {
 protected:
     std::string last() const
     {
-        std::ifstream file(BINARYDIR "/log.txt");
+        std::ifstream file(CMAKE_CURRENT_BINARY_DIR "/log.txt");
 
         return std::string(std::istreambuf_iterator<char>(file.rdbuf()), {});
     }
@@ -44,7 +44,7 @@ public:
     logger_test()
         : plugin_test(PLUGIN_NAME, PLUGIN_PATH)
     {
-        remove(BINARYDIR "/log.txt");
+        remove(CMAKE_CURRENT_BINARY_DIR "/log.txt");
 
         plugin_->set_formats({
             { "cmode", "cmode=#{server}:#{channel}:#{origin}:#{nickname}:#{mode}:#{arg}" },
@@ -64,7 +64,7 @@ public:
     void load(plugin_config config = plugin_config())
     {
         if (config.count("path") == 0)
-            config.emplace("path", BINARYDIR "/log.txt");
+            config.emplace("path", CMAKE_CURRENT_BINARY_DIR "/log.txt");
 
         plugin_->set_config(config);
         plugin_->on_load(irccd_);

@@ -71,13 +71,10 @@ function(irccd_define_test)
         PRIVATE
             ${TEST_FLAGS}
             BOOST_TEST_DYN_LINK
+            CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}"
             CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
             CMAKE_CURRENT_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}"
             CMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
-            TESTS_BINARY_DIR="${tests_BINARY_DIR}"
-            SOURCEDIR="${CMAKE_CURRENT_SOURCE_DIR}"
-            BINARYDIR="${CMAKE_CURRENT_BINARY_DIR}"
-            IRCCD_TESTS_DIRECTORY="${CMAKE_BINARY_DIR}/tests"
     )
 
     # Tests are all in the same directory

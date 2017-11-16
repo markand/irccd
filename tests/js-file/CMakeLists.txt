@@ -21,21 +21,3 @@ irccd_define_test(
     SOURCES main.cpp
     LIBRARIES libirccd-js
 )
-
-#
-# Create following tree:
-#
-# CMAKE_BINARY_DIR
-#    | tests
-#    |    |-- file.txt
-#    |    |-- lines.txt
-#    |    |-- level-1
-#    |    |    | -- file-1.txt
-#    |    |    | -- level-2
-#    |    |    |    | -- file-2.txt
-#
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/tests/level-1/level-2)
-file(WRITE ${CMAKE_BINARY_DIR}/tests/file.txt "file.txt")
-file(WRITE ${CMAKE_BINARY_DIR}/tests/lines.txt "a\nb\nc\n")
-file(WRITE ${CMAKE_BINARY_DIR}/tests/level-1/file-1.txt "file-1.txt")
-file(WRITE ${CMAKE_BINARY_DIR}/tests/level-1/level-2/file-2.txt "file-2.txt")
