@@ -19,6 +19,7 @@
 #include "irccd.hpp"
 #include "logger.hpp"
 #include "net_util.hpp"
+#include "transport_service.hpp"
 #include "service.hpp"
 #include "util.hpp"
 

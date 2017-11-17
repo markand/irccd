@@ -473,53 +473,6 @@ public:
     void clear() noexcept;
 };
 
-/*
- * transport_service.
- * ------------------------------------------------------------------
- */
-
-class transport_server;
-class transport_client;
-
-/**
- * \brief manage transport servers and clients.
- * \ingroup services
- */
-class transport_service {
-public:
-    using servers_t = std::vector<std::shared_ptr<transport_server>>;
-
-private:
-    irccd& irccd_;
-    servers_t servers_;
-
-    void handle_command(std::shared_ptr<transport_client>, const nlohmann::json&);
-    void do_accept(std::shared_ptr<transport_server>);
-
-public:
-    /**
-     * Create the transport service.
-     *
-     * \param irccd the irccd instance
-     */
-    transport_service(irccd& irccd) noexcept;
-
-    /**
-     * Add a transport server.
-     *
-     * \param ts the transport server
-     */
-    void add(std::shared_ptr<transport_server> ts);
-
-    /**
-     * Send data to all clients.
-     *
-     * \pre object.is_object()
-     * \param object the json object
-     */
-    void broadcast(const nlohmann::json& object);
-};
-
 } // !irccd
 
 #endif // !IRCCD_SERVICE_HPP

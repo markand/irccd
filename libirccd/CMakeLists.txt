@@ -32,6 +32,7 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/service.hpp
     ${libirccd_SOURCE_DIR}/irccd/transport_client.hpp
     ${libirccd_SOURCE_DIR}/irccd/transport_server.hpp
+    ${libirccd_SOURCE_DIR}/irccd/transport_service.hpp
 )
 
 set(
@@ -46,6 +47,7 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/service.cpp
     ${libirccd_SOURCE_DIR}/irccd/transport_client.cpp
     ${libirccd_SOURCE_DIR}/irccd/transport_server.cpp
+    ${libirccd_SOURCE_DIR}/irccd/transport_service.cpp
 )
 
 irccd_define_library(

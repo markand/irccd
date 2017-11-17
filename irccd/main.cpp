@@ -39,6 +39,7 @@
 #include "service.hpp"
 #include "string_util.hpp"
 #include "system.hpp"
+#include "transport_service.hpp"
 #include "config.hpp"
 #include "irccd.hpp"
 
