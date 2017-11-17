@@ -24,8 +24,9 @@
 
 namespace irccd {
 
-irccd::irccd(std::string config)
+irccd::irccd(boost::asio::io_service& service, std::string config)
     : config_(std::move(config))
+    , service_(service)
     , command_service_(std::make_unique<command_service>())
     , itr_service_(std::make_unique<interrupt_service>())
     , server_service_(std::make_unique<server_service>(*this))
@@ -47,13 +48,15 @@ void irccd::post(std::function<void (irccd&)> ev) noexcept
 
 void irccd::run()
 {
-    while (running_)
-        net_util::poll(250, *this);
+    while (running_) {
+        net_util::poll(100, *this);
+        service_.poll();
+    }
 }
 
 void irccd::prepare(fd_set& in, fd_set& out, net::Handle& max)
 {
-    net_util::prepare(in, out, max, *itr_service_, *server_service_, *tpt_service_);
+    net_util::prepare(in, out, max, *itr_service_, *server_service_);
 }
 
 void irccd::sync(fd_set& in, fd_set& out)
@@ -61,7 +64,7 @@ void irccd::sync(fd_set& in, fd_set& out)
     if (!running_)
         return;
 
-    net_util::sync(in, out, *itr_service_, *server_service_, *tpt_service_);
+    net_util::sync(in, out, *itr_service_, *server_service_);
 
     if (!running_)
         return;

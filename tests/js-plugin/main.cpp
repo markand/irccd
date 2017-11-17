@@ -17,6 +17,7 @@
  */
 
 #define BOOST_TEST_MODULE "Javascript plugin object"
+#include <boost/asio.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <irccd/irccd.hpp>
@@ -30,7 +31,8 @@ namespace irccd {
 
 class js_plugin_test {
 protected:
-    irccd irccd_;
+    boost::asio::io_service service_;
+    irccd irccd_{service_};
     std::shared_ptr<js_plugin> plugin_;
 
     void load(std::string name, std::string path)
@@ -95,7 +97,8 @@ BOOST_AUTO_TEST_SUITE_END()
 
 class js_plugin_loader_test {
 protected:
-    irccd irccd_;
+    boost::asio::io_service service_;
+    irccd irccd_{service_};
     std::shared_ptr<plugin> plugin_;
 
     js_plugin_loader_test()

@@ -24,6 +24,8 @@
  * \brief test fixture helper for Javascript plugins.
  */
 
+#include <boost/asio/io_service.hpp>
+
 #include <js/js_plugin.hpp>
 
 #include "irccd.hpp"
@@ -38,7 +40,8 @@ namespace irccd {
  */
 class plugin_test {
 protected:
-    irccd irccd_;
+    boost::asio::io_service service_;
+    irccd irccd_{service_};
     std::shared_ptr<js_plugin> plugin_;
     std::shared_ptr<journal_server> server_;
 

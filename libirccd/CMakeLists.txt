@@ -30,7 +30,8 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/rule.hpp
     ${libirccd_SOURCE_DIR}/irccd/server.hpp
     ${libirccd_SOURCE_DIR}/irccd/service.hpp
-    ${libirccd_SOURCE_DIR}/irccd/transport.hpp
+    ${libirccd_SOURCE_DIR}/irccd/transport_client.hpp
+    ${libirccd_SOURCE_DIR}/irccd/transport_server.hpp
 )
 
 set(
@@ -43,7 +44,8 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/rule.cpp
     ${libirccd_SOURCE_DIR}/irccd/server.cpp
     ${libirccd_SOURCE_DIR}/irccd/service.cpp
-    ${libirccd_SOURCE_DIR}/irccd/transport.cpp
+    ${libirccd_SOURCE_DIR}/irccd/transport_client.cpp
+    ${libirccd_SOURCE_DIR}/irccd/transport_server.cpp
 )
 
 irccd_define_library(

@@ -486,14 +486,15 @@ class transport_client;
  * \ingroup services
  */
 class transport_service {
+public:
+    using servers_t = std::vector<std::shared_ptr<transport_server>>;
+
 private:
     irccd& irccd_;
+    servers_t servers_;
 
-    std::vector<std::shared_ptr<transport_server>> servers_;
-    std::vector<std::shared_ptr<transport_client>> clients_;
-
-    void handle_command(std::weak_ptr<transport_client>, const nlohmann::json&);
-    void handle_die(std::weak_ptr<transport_client>);
+    void handle_command(std::shared_ptr<transport_client>, const nlohmann::json&);
+    void do_accept(std::shared_ptr<transport_server>);
 
 public:
     /**
@@ -502,16 +503,6 @@ public:
      * \param irccd the irccd instance
      */
     transport_service(irccd& irccd) noexcept;
-
-    /**
-     * \copydoc Service::prepare
-     */
-    void prepare(fd_set& in, fd_set& out, net::Handle& max);
-
-    /**
-     * \copydoc Service::sync
-     */
-    void sync(fd_set& in, fd_set& out);
 
     /**
      * Add a transport server.

@@ -30,7 +30,7 @@
 #include "string_util.hpp"
 #include "sysconfig.hpp"
 #include "system.hpp"
-#include "transport.hpp"
+#include "transport_server.hpp"
 
 namespace irccd {
 
@@ -119,7 +119,7 @@ std::unique_ptr<log::logger> load_log_syslog()
 #endif // !HAVE_SYSLOG
 }
 
-std::shared_ptr<transport_server> load_transport_ip(const ini::section& sc)
+std::shared_ptr<transport_server> load_transport_ip(boost::asio::io_service& service, const ini::section& sc)
 {
     assert(sc.key() == "transport");
 
@@ -144,7 +144,10 @@ std::shared_ptr<transport_server> load_transport_ip(const ini::section& sc)
     if ((it = sc.find("address")) != sc.end())
         address = it->value();
 
-    std::uint8_t mode = transport_server_ip::v4;
+    // 0011
+    //    ^ define IPv4
+    //   ^  define IPv6
+    auto mode = 1U;
 
     /*
      * Documentation stated family but code checked for 'domain' option.
@@ -154,15 +157,20 @@ std::shared_ptr<transport_server> load_transport_ip(const ini::section& sc)
      * See #637
      */
     if ((it = sc.find("domain")) != sc.end() || (it = sc.find("family")) != sc.end()) {
-        mode = 0;
-
         for (const auto& v : *it) {
             if (v == "ipv4")
-                mode |= transport_server_ip::v4;
+                mode |= (1U << 0);
             if (v == "ipv6")
-                mode |= transport_server_ip::v6;
+                mode |= (1U << 1);
         }
     }
+
+    if (mode == 0U)
+        throw std::invalid_argument("transport: family must at least have ipv4 or ipv6");
+
+    auto protocol = (mode & 0x2U)
+        ? boost::asio::ip::tcp::v4()
+        : boost::asio::ip::tcp::v6();
 
     // Optional SSL.
     std::string pkey;
@@ -180,21 +188,31 @@ std::shared_ptr<transport_server> load_transport_ip(const ini::section& sc)
         pkey = it->value();
     }
 
-    if (mode == 0)
-        throw std::invalid_argument("transport: family must at least have ipv4 or ipv6");
+    auto endpoint = (address == "*")
+        ? boost::asio::ip::tcp::endpoint(protocol, port)
+        : boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(address), port);
+
+    boost::asio::ip::tcp::acceptor acceptor(service, endpoint, true);
 
     if (pkey.empty())
-        return std::make_shared<transport_server_ip>(address, port, mode);
+        return std::make_shared<tcp_transport_server>(std::move(acceptor));
 
 #if defined(HAVE_SSL)
-    return std::make_shared<transport_server_tls>(pkey, cert, address, port, mode);
+    boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
+
+    ctx.use_private_key_file(pkey, boost::asio::ssl::context::pem);
+    ctx.use_certificate_file(cert, boost::asio::ssl::context::pem);
+
+    return std::make_shared<tls_transport_server>(std::move(acceptor), std::move(ctx));
 #else
     throw std::invalid_argument("transport: SSL disabled");
 #endif
 }
 
-std::shared_ptr<transport_server> load_transport_unix(const ini::section& sc)
+std::shared_ptr<transport_server> load_transport_unix(boost::asio::io_service& service, const ini::section& sc)
 {
+    using boost::asio::local::stream_protocol;
+
     assert(sc.key() == "transport");
 
 #if !defined(IRCCD_SYSTEM_WINDOWS)
@@ -203,7 +221,10 @@ std::shared_ptr<transport_server> load_transport_unix(const ini::section& sc)
     if (it == sc.end())
         throw std::invalid_argument("transport: missing 'path' parameter");
 
-    return std::make_shared<transport_server_local>(it->value());
+    stream_protocol::endpoint endpoint(it->value());
+    stream_protocol::acceptor acceptor(service, std::move(endpoint));
+
+    return std::make_shared<local_transport_server>(std::move(acceptor));
 #else
     (void)sc;
 
@@ -211,7 +232,7 @@ std::shared_ptr<transport_server> load_transport_unix(const ini::section& sc)
 #endif
 }
 
-std::shared_ptr<transport_server> load_transport(const ini::section& sc)
+std::shared_ptr<transport_server> load_transport(boost::asio::io_service& service, const ini::section& sc)
 {
     assert(sc.key() == "transport");
 
@@ -222,9 +243,9 @@ std::shared_ptr<transport_server> load_transport(const ini::section& sc)
         throw std::invalid_argument("transport: missing 'type' parameter");
 
     if (it->value() == "ip")
-        transport = load_transport_ip(sc);
+        transport = load_transport_ip(service, sc);
     else if (it->value() == "unix")
-        transport = load_transport_unix(sc);
+        transport = load_transport_unix(service, sc);
     else
         throw std::invalid_argument(string_util::sprintf("transport: invalid type given: %s", it->value()));
 
@@ -472,13 +493,13 @@ void config::load_formats() const
     log::set_filter(std::move(filter));
 }
 
-std::vector<std::shared_ptr<transport_server>> config::load_transports() const
+std::vector<std::shared_ptr<transport_server>> config::load_transports(irccd& irccd) const
 {
     std::vector<std::shared_ptr<transport_server>> transports;
 
     for (const auto& section : document_)
         if (section.key() == "transport")
-            transports.push_back(load_transport(section));
+            transports.push_back(load_transport(irccd.service(), section));
 
     return transports;
 }

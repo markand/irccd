@@ -27,7 +27,8 @@
 #include "service.hpp"
 #include "string_util.hpp"
 #include "system.hpp"
-#include "transport.hpp"
+#include "transport_client.hpp"
+#include "transport_server.hpp"
 
 using namespace std::string_literals;
 
@@ -923,17 +924,11 @@ void server_service::clear() noexcept
  * ------------------------------------------------------------------
  */
 
-void transport_service::handle_command(std::weak_ptr<transport_client> ptr, const nlohmann::json& object)
+void transport_service::handle_command(std::shared_ptr<transport_client> tc, const nlohmann::json& object)
 {
     assert(object.is_object());
 
     irccd_.post([=] (irccd&) {
-        // 0. Be sure the object still exists.
-        auto tc = ptr.lock();
-
-        if (!tc)
-            return;
-
         auto name = object.find("command");
         if (name == object.end() || !name->is_string()) {
             // TODO: send error.
@@ -955,15 +950,21 @@ void transport_service::handle_command(std::weak_ptr<transport_client> ptr, cons
     });
 }
 
-void transport_service::handle_die(std::weak_ptr<transport_client> ptr)
+void transport_service::do_accept(std::shared_ptr<transport_server> ts)
 {
-    irccd_.post([=] (irccd &) {
-        log::info("transport: client disconnected");
+    ts->accept([this, ts] (auto client, auto code) {
+        if (code) {
+            log::warning() << "transport: " << code.message() << std::endl;
+        } else {
+            client->recv([this, client] (auto json, auto code) {
+                if (code)
+                    log::warning() << "transport: " << code.message() << std::endl;
+                else
+                    handle_command(client, json);
+            });
+        }
 
-        auto tc = ptr.lock();
-
-        if (tc)
-            clients_.erase(std::find(clients_.begin(), clients_.end(), tc));
+        do_accept(ts);
     });
 }
 
@@ -972,58 +973,11 @@ transport_service::transport_service(irccd& irccd) noexcept
 {
 }
 
-void transport_service::prepare(fd_set& in, fd_set& out, net::Handle& max)
-{
-    // Add transport servers.
-    for (const auto& transport : servers_) {
-        FD_SET(transport->handle(), &in);
-
-        if (transport->handle() > max)
-            max = transport->handle();
-    }
-
-    // Transport clients.
-    for (const auto& client : clients_)
-        client->prepare(in, out, max);
-}
-
-void transport_service::sync(fd_set& in, fd_set& out)
-{
-    // Transport clients.
-    for (const auto& client : clients_) {
-        try {
-            client->sync(in, out);
-        } catch (const std::exception& ex) {
-            log::info() << "transport: client disconnected: " << ex.what() << std::endl;
-            handle_die(client);
-        }
-    }
-
-    // Transport servers.
-    for (const auto& transport : servers_) {
-        if (!FD_ISSET(transport->handle(), &in))
-            continue;
-
-        log::debug("transport: new client connected");
-
-        std::shared_ptr<transport_client> client = transport->accept();
-        std::weak_ptr<transport_client> ptr(client);
-
-        try {
-            // Connect signals.
-            client->on_command.connect(boost::bind(&transport_service::handle_command, this, ptr, _1));
-            client->on_die.connect(boost::bind(&transport_service::handle_die, this, ptr));
-
-            // Register it.
-            clients_.push_back(std::move(client));
-        } catch (const std::exception& ex) {
-            log::info() << "transport: client disconnected: " << ex.what() << std::endl;
-        }
-    }
-}
-
 void transport_service::add(std::shared_ptr<transport_server> ts)
 {
+    assert(ts);
+
+    do_accept(ts);
     servers_.push_back(std::move(ts));
 }
 
@@ -1031,8 +985,8 @@ void transport_service::broadcast(const nlohmann::json& json)
 {
     assert(json.is_object());
 
-    for (const auto& client : clients_)
-        if (client->state() == transport_client::state::ready)
+    for (const auto& servers : servers_)
+        for (const auto& client : servers->clients())
             client->send(json);
 }
 

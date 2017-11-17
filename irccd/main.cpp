@@ -271,7 +271,7 @@ void load(const config& config, const option::result& options)
     load_foreground(config.is_foreground(), options);
 
     // [transport]
-    for (const auto& transport : config.load_transports())
+    for (const auto& transport : config.load_transports(*instance))
         instance->transports().add(transport);
 
     // [server] section.
@@ -296,9 +296,11 @@ int main(int argc, char** argv)
 
     init(argc, argv);
 
-    option::result options = parse(argc, argv);
+    boost::asio::io_service service;
 
-    instance = std::make_unique<class irccd>();
+    auto options = parse(argc, argv);
+
+    instance = std::make_unique<class irccd>(service);
     instance->commands().add(std::make_unique<plugin_config_command>());
     instance->commands().add(std::make_unique<plugin_info_command>());
     instance->commands().add(std::make_unique<plugin_list_command>());

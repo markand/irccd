@@ -24,6 +24,8 @@
  * \brief Test fixture helper for Javascript modules.
  */
 
+#include <boost/asio.hpp>
+
 #include <irccd/irccd.hpp>
 
 #include <irccd/js/js_plugin.hpp>
@@ -53,7 +55,8 @@ private:
     }
 
 public:
-    irccd irccd_;                               //!< Irccd instance.
+    boost::asio::io_service service_;
+    irccd irccd_{service_};                     //!< Irccd instance.
     std::shared_ptr<js_plugin> plugin_;         //!< Javascript plugin.
     std::shared_ptr<journal_server> server_;    //!< A journal server.
 

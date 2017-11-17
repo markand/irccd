@@ -20,7 +20,7 @@
 #include "irccd.hpp"
 #include "json_util.hpp"
 #include "service.hpp"
-#include "transport.hpp"
+#include "transport_client.hpp"
 #include "util.hpp"
 
 using namespace std::string_literals;
@@ -66,8 +66,9 @@ void exec_get(transport_client& client, plugin& plugin, const nlohmann::json& ar
      *
      * It's easier for the client to iterate over all.
      */
-    client.success("plugin-config", {
-        { "variables", variables }
+    client.send({
+        { "command",    "plugin-config" },
+        { "variables",  variables       }
     });
 }
 
@@ -161,7 +162,8 @@ void plugin_info_command::exec(irccd& irccd, transport_client& client, const nlo
 {
     auto plugin = irccd.plugins().require(json_util::require_identifier(args, "plugin"));
 
-    client.success("plugin-info", {
+    client.send({
+        { "command",    "plugin-info"       },
         { "author",     plugin->author()    },
         { "license",    plugin->license()   },
         { "summary",    plugin->summary()   },
@@ -181,8 +183,9 @@ void plugin_list_command::exec(irccd& irccd, transport_client& client, const nlo
     for (const auto& plugin : irccd.plugins().list())
         list += plugin->name();
 
-    client.success("plugin-list", {
-        { "list", list }
+    client.send({
+        { "command",    "plugin-list"   },
+        { "list",       list            }
     });
 }
 
@@ -292,6 +295,7 @@ void server_info_command::exec(irccd& irccd, transport_client& client, const nlo
     auto server = irccd.servers().require(json_util::require_identifier(args, "server"));
 
     // General stuff.
+    response.push_back({"command", "server-info"});
     response.push_back({"name", server->name()});
     response.push_back({"host", server->host()});
     response.push_back({"port", server->port()});
@@ -308,7 +312,7 @@ void server_info_command::exec(irccd& irccd, transport_client& client, const nlo
     if (server->flags() & server::ssl_verify)
         response.push_back({"sslVerify", true});
 
-    client.success("server-info", response);
+    client.send(response);
 }
 
 server_invite_command::server_invite_command()
@@ -367,8 +371,10 @@ void server_list_command::exec(irccd& irccd, transport_client& client, const nlo
     for (const auto& server : irccd.servers().servers())
         list.push_back(server->name());
 
-    json.push_back({"list", std::move(list)});
-    client.success("server-list", json);
+    client.send({
+        { "command",    "server-list"   },
+        { "list",       std::move(json) }
+    });
 }
 
 server_me_command::server_me_command()
@@ -547,7 +553,10 @@ void rule_list_command::exec(irccd& irccd, transport_client& client, const nlohm
     for (const auto& rule : irccd.rules().list())
         array.push_back(to_json(rule));
 
-    client.success("rule-list", {{ "list", std::move(array) }});
+    client.send({
+        { "command",    "rule-list"         },
+        { "list",       std::move(array)    }
+    });
 }
 
 rule_info_command::rule_info_command()
@@ -557,7 +566,10 @@ rule_info_command::rule_info_command()
 
 void rule_info_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    client.success("rule-info", to_json(irccd.rules().require(json_util::require_uint(args, "index"))));
+    auto json = to_json(irccd.rules().require(json_util::require_uint(args, "index")));
+
+    json.push_back({"command", "rule-info"});
+    client.send(std::move(json));
 }
 
 rule_remove_command::rule_remove_command()

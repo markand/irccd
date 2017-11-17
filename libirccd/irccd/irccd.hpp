@@ -30,6 +30,8 @@
 #include <mutex>
 #include <vector>
 
+#include <boost/asio.hpp>
+
 #include "config.hpp"
 #include "net.hpp"
 #include "sysconfig.hpp"
@@ -53,6 +55,9 @@ class irccd {
 private:
     // Configurations.
     class config config_;
+
+    // Main io service.
+    boost::asio::io_service& service_;
 
     // Main loop stuff.
     std::atomic<bool> running_{true};
@@ -78,9 +83,10 @@ public:
     /**
      * Prepare standard services.
      *
+     * \param service the service
      * \param config the optional path to the configuration.
      */
-    irccd(std::string config = "");
+    irccd(boost::asio::io_service& service, std::string config = "");
 
     /**
      * Default destructor.
@@ -105,6 +111,16 @@ public:
     inline void set_config(class config cfg) noexcept
     {
         config_ = std::move(cfg);
+    }
+
+    inline const boost::asio::io_service& service() const noexcept
+    {
+        return service_;
+    }
+
+    inline boost::asio::io_service& service() noexcept
+    {
+        return service_;
     }
 
     /**
