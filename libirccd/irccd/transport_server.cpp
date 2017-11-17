@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "sysconfig.hpp"
+
 #include <cassert>
 
 #include "transport_server.hpp"
@@ -26,11 +28,8 @@ namespace irccd {
  * transport_server::do_auth_check
  * ------------------------------------------------------------------
  */
-bool transport_server::do_auth_check(std::shared_ptr<transport_client> client,
-                                     nlohmann::json message,
-                                     accept_t handler)
+bool transport_server::do_auth_check(nlohmann::json message, accept_t handler)
 {
-    assert(client);
     assert(handler);
 
     auto command = message["command"];
@@ -61,7 +60,7 @@ void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_
     client->recv([this, client, handler] (auto message, auto code) {
         if (code)
             handler(client, code);
-        if (do_auth_check(client, message, handler)) {
+        if (do_auth_check(message, handler)) {
             clients_.insert(client);
             client->set_state(transport_client::state_t::ready);
             handler(client, code);
@@ -80,7 +79,16 @@ void transport_server::do_greetings(std::shared_ptr<transport_client> client, ac
 
     // TODO: update this in irccd.
     auto greetings = nlohmann::json({
-        { "irccd", "3.0.0" }
+        { "program",    "irccd"             },
+        { "major",      IRCCD_VERSION_MAJOR },
+        { "minor",      IRCCD_VERSION_MINOR },
+        { "patch",      IRCCD_VERSION_PATCH },
+#if defined(HAVE_JS)
+        { "javascript", true                },
+#endif
+#if defined(HAVE_SSL)
+        { "ssl",        true                },
+#endif
     });
 
     client->send(greetings, [this, client, handler] (auto code) {

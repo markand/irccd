@@ -62,6 +62,15 @@ public:
      */
     using send_t = std::function<void (const boost::system::error_code&)>;
 
+    /**
+     * Client state.
+     */
+    enum class state_t {
+        authenticating,                     //!< client is authenticating
+        ready,                              //!< client is ready
+        closing                             //!< client is closing
+    };
+
 protected:
     /**
      * Handler for do_recv.
@@ -85,12 +94,7 @@ protected:
 private:
     using output_t = std::deque<std::pair<std::string, send_t>>;
 
-    enum class state_t {
-        authenticating,
-        ready,
-        closing
-    } state_{state_t::authenticating};
-
+    state_t state_{state_t::authenticating};
     input_t input_;
     output_t output_;
     transport_server& parent_;

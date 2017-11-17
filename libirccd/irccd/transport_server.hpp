@@ -53,7 +53,7 @@ private:
     client_set_t clients_;
     std::string password_;
 
-    bool do_auth_check(std::shared_ptr<transport_client>, nlohmann::json, accept_t);
+    bool do_auth_check(nlohmann::json, accept_t);
     void do_auth(std::shared_ptr<transport_client>, accept_t);
     void do_greetings(std::shared_ptr<transport_client>, accept_t);
 
