@@ -272,8 +272,7 @@ void load(const config& config, const option::result& options)
     load_foreground(config.is_foreground(), options);
 
     // [transport]
-    for (const auto& transport : config.load_transports(*instance))
-        instance->transports().add(transport);
+    config.load_transports(*instance);
 
     // [server] section.
     for (const auto& server : config.load_servers())

@@ -31,6 +31,7 @@
 #include "sysconfig.hpp"
 #include "system.hpp"
 #include "transport_server.hpp"
+#include "transport_service.hpp"
 
 namespace irccd {
 
@@ -119,11 +120,11 @@ std::unique_ptr<log::logger> load_log_syslog()
 #endif // !HAVE_SYSLOG
 }
 
-std::shared_ptr<transport_server> load_transport_ip(boost::asio::io_service& service, const ini::section& sc)
+std::unique_ptr<transport_server> load_transport_ip(boost::asio::io_service& service, const ini::section& sc)
 {
     assert(sc.key() == "transport");
 
-    std::shared_ptr<transport_server> transport;
+    std::unique_ptr<transport_server> transport;
     ini::section::const_iterator it;
 
     // Port.
@@ -195,7 +196,7 @@ std::shared_ptr<transport_server> load_transport_ip(boost::asio::io_service& ser
     boost::asio::ip::tcp::acceptor acceptor(service, endpoint, true);
 
     if (pkey.empty())
-        return std::make_shared<tcp_transport_server>(std::move(acceptor));
+        return std::make_unique<tcp_transport_server>(std::move(acceptor));
 
 #if defined(HAVE_SSL)
     boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
@@ -203,13 +204,13 @@ std::shared_ptr<transport_server> load_transport_ip(boost::asio::io_service& ser
     ctx.use_private_key_file(pkey, boost::asio::ssl::context::pem);
     ctx.use_certificate_file(cert, boost::asio::ssl::context::pem);
 
-    return std::make_shared<tls_transport_server>(std::move(acceptor), std::move(ctx));
+    return std::make_unique<tls_transport_server>(std::move(acceptor), std::move(ctx));
 #else
     throw std::invalid_argument("transport: SSL disabled");
 #endif
 }
 
-std::shared_ptr<transport_server> load_transport_unix(boost::asio::io_service& service, const ini::section& sc)
+std::unique_ptr<transport_server> load_transport_unix(boost::asio::io_service& service, const ini::section& sc)
 {
     using boost::asio::local::stream_protocol;
 
@@ -221,10 +222,13 @@ std::shared_ptr<transport_server> load_transport_unix(boost::asio::io_service& s
     if (it == sc.end())
         throw std::invalid_argument("transport: missing 'path' parameter");
 
+    // Remove the file first.
+    std::remove(it->value().c_str());
+
     stream_protocol::endpoint endpoint(it->value());
     stream_protocol::acceptor acceptor(service, std::move(endpoint));
 
-    return std::make_shared<local_transport_server>(std::move(acceptor));
+    return std::make_unique<local_transport_server>(std::move(acceptor));
 #else
     (void)sc;
 
@@ -232,11 +236,11 @@ std::shared_ptr<transport_server> load_transport_unix(boost::asio::io_service& s
 #endif
 }
 
-std::shared_ptr<transport_server> load_transport(boost::asio::io_service& service, const ini::section& sc)
+std::unique_ptr<transport_server> load_transport(boost::asio::io_service& service, const ini::section& sc)
 {
     assert(sc.key() == "transport");
 
-    std::shared_ptr<transport_server> transport;
+    std::unique_ptr<transport_server> transport;
     ini::section::const_iterator it = sc.find("type");
 
     if (it == sc.end())
@@ -493,15 +497,11 @@ void config::load_formats() const
     log::set_filter(std::move(filter));
 }
 
-std::vector<std::shared_ptr<transport_server>> config::load_transports(irccd& irccd) const
+void config::load_transports(irccd& irccd) const
 {
-    std::vector<std::shared_ptr<transport_server>> transports;
-
     for (const auto& section : document_)
         if (section.key() == "transport")
-            transports.push_back(load_transport(irccd.service(), section));
-
-    return transports;
+            irccd.transports().add(load_transport(irccd.service(), section));
 }
 
 std::vector<rule> config::load_rules() const

@@ -147,9 +147,8 @@ public:
      * Load transports.
      *
      * \param irccd the irccd instance
-     * \return the set of transports
      */
-    std::vector<std::shared_ptr<transport_server>> load_transports(irccd& irccd) const;
+    void load_transports(irccd& irccd) const;
 
     /**
      * Load rules.

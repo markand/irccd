@@ -35,14 +35,14 @@ class transport_server;
  */
 class transport_service {
 public:
-    using servers_t = std::vector<std::shared_ptr<transport_server>>;
+    using servers_t = std::vector<std::unique_ptr<transport_server>>;
 
 private:
     irccd& irccd_;
     servers_t servers_;
 
     void handle_command(std::shared_ptr<transport_client>, const nlohmann::json&);
-    void do_accept(std::shared_ptr<transport_server>);
+    void do_accept(transport_server&);
 
 public:
     /**
@@ -53,11 +53,16 @@ public:
     transport_service(irccd& irccd) noexcept;
 
     /**
+     * Default destructor.
+     */
+    ~transport_service() noexcept;
+
+    /**
      * Add a transport server.
      *
      * \param ts the transport server
      */
-    void add(std::shared_ptr<transport_server> ts);
+    void add(std::unique_ptr<transport_server> ts);
 
     /**
      * Send data to all clients.

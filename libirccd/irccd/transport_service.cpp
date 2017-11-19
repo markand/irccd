@@ -34,11 +34,8 @@ void transport_service::handle_command(std::shared_ptr<transport_client> tc, con
 
     irccd_.post([=] (irccd&) {
         auto name = object.find("command");
-        if (name == object.end() || !name->is_string()) {
-            // TODO: send error.
-            log::warning("invalid command object");
+        if (name == object.end() || !name->is_string())
             return;
-        }
 
         auto cmd = irccd_.commands().find(*name);
 
@@ -54,12 +51,12 @@ void transport_service::handle_command(std::shared_ptr<transport_client> tc, con
     });
 }
 
-void transport_service::do_accept(std::shared_ptr<transport_server> ts)
+void transport_service::do_accept(transport_server& ts)
 {
-    ts->accept([this, ts] (auto client, auto code) {
-        if (code) {
+    ts.accept([this, &ts] (auto client, auto code) {
+        if (code)
             log::warning() << "transport: " << code.message() << std::endl;
-        } else {
+        else {
             client->recv([this, client] (auto json, auto code) {
                 if (code)
                     log::warning() << "transport: " << code.message() << std::endl;
@@ -77,11 +74,13 @@ transport_service::transport_service(irccd& irccd) noexcept
 {
 }
 
-void transport_service::add(std::shared_ptr<transport_server> ts)
+transport_service::~transport_service() noexcept = default;
+
+void transport_service::add(std::unique_ptr<transport_server> ts)
 {
     assert(ts);
 
-    do_accept(ts);
+    do_accept(*ts);
     servers_.push_back(std::move(ts));
 }
 

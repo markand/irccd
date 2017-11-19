@@ -373,7 +373,7 @@ void server_list_command::exec(irccd& irccd, transport_client& client, const nlo
 
     client.send({
         { "command",    "server-list"   },
-        { "list",       std::move(json) }
+        { "list",       std::move(list) }
     });
 }
 
