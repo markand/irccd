@@ -24,10 +24,6 @@
 
 namespace irccd {
 
-/*
- * transport_server::do_auth_check
- * ------------------------------------------------------------------
- */
 bool transport_server::do_auth_check(nlohmann::json message, accept_t handler)
 {
     assert(handler);
@@ -48,10 +44,6 @@ bool transport_server::do_auth_check(nlohmann::json message, accept_t handler)
     return true;
 }
 
-/*
- * transport_server::do_auth
- * ------------------------------------------------------------------
- */
 void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_t handler)
 {
     assert(client);
@@ -68,16 +60,11 @@ void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_
     });
 }
 
-/*
- * transport_server::do_greetings
- * ------------------------------------------------------------------
- */
 void transport_server::do_greetings(std::shared_ptr<transport_client> client, accept_t handler)
 {
     assert(client);
     assert(handler);
 
-    // TODO: update this in irccd.
     auto greetings = nlohmann::json({
         { "program",    "irccd"             },
         { "major",      IRCCD_VERSION_MAJOR },
@@ -103,10 +90,6 @@ void transport_server::do_greetings(std::shared_ptr<transport_client> client, ac
     });
 }
 
-/*
- * transport_server::accept
- * ------------------------------------------------------------------
- */
 void transport_server::accept(accept_t handler)
 {
     assert(handler);
@@ -119,12 +102,6 @@ void transport_server::accept(accept_t handler)
     });
 }
 
-/*
- * tls_transport_server::do_handshake
- * ------------------------------------------------------------------
- *
- * Perform asynchronous SSL handshake.
- */
 void tls_transport_server::do_handshake(std::shared_ptr<tls_transport_client> client, accept_t handler)
 {
     client->socket().async_handshake(boost::asio::ssl::stream_base::server, [client, handler] (auto code) {
@@ -135,20 +112,12 @@ void tls_transport_server::do_handshake(std::shared_ptr<tls_transport_client> cl
     });
 }
 
-/*
- * tls_transport_server::tls_transport_server
- * ------------------------------------------------------------------
- */
 tls_transport_server::tls_transport_server(acceptor_t acceptor, context_t context)
     : tcp_transport_server(std::move(acceptor))
     , context_(std::move(context))
 {
 }
 
-/*
- * tls_transport_server::do_accept
- * ------------------------------------------------------------------
- */
 void tls_transport_server::do_accept(accept_t handler)
 {
     auto client = std::make_shared<tls_transport_client>(*this, acceptor_.get_io_service(), context_);

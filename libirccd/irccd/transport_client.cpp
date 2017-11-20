@@ -23,10 +23,6 @@
 
 namespace irccd {
 
-/*
- * transport_client::close
- * ------------------------------------------------------------------
- */
 void transport_client::close()
 {
     state_ = state_t::closing;
@@ -34,10 +30,6 @@ void transport_client::close()
     parent_.clients().erase(shared_from_this());
 }
 
-/*
- * transport_client::flush
- * ------------------------------------------------------------------
- */
 void transport_client::flush()
 {
     if (output_.empty())
@@ -59,10 +51,6 @@ void transport_client::flush()
     });
 }
 
-/*
- * transport_client::recv
- * ------------------------------------------------------------------
- */
 void transport_client::recv(recv_t handler)
 {
     assert(handler);
@@ -97,10 +85,6 @@ void transport_client::recv(recv_t handler)
     });
 }
 
-/*
- * transport_client::send
- * ------------------------------------------------------------------
- */
 void transport_client::send(const nlohmann::json& data, send_t handler)
 {
     assert(data.is_object());
@@ -116,10 +100,6 @@ void transport_client::send(const nlohmann::json& data, send_t handler)
         flush();
 }
 
-/*
- * transport_client::error
- * ------------------------------------------------------------------
- */
 void transport_client::error(const nlohmann::json& data, send_t handler)
 {
     send(std::move(data), std::move(handler));
