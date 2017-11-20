@@ -32,6 +32,8 @@ const boost::system::error_category& network_category() noexcept
         std::string message(int code) const override
         {
             switch (static_cast<network_error>(code)) {
+            case network_error::no_error:
+                return "no error";
             case network_error::invalid_program:
                 return "invalid program";
             case network_error::invalid_version:

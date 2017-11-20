@@ -34,7 +34,8 @@ namespace irccd {
  * \brief Error code for transport/irccdctl
  */
 enum class network_error {
-    invalid_program = 1,    //!< connected daemon is not irccd
+    no_error = 0,           //!< no error (default)
+    invalid_program,        //!< connected daemon is not irccd
     invalid_version,        //!< irccd daemon is incompatible
     invalid_auth,           //!< invalid credentials in auth command
     invalid_message         //!< the message was not JSON
