@@ -37,15 +37,6 @@ namespace irccd {
 class transport_server;
 
 /**
- * \brief Error for transports.
- */
-enum class transport_error : int {
-    invalid_auth = 1,       //! invalid authentication
-    invalid_message,        //! client has sent an invalid message
-    incomplete_message      //!< message requires more parameter
-};
-
-/**
  * \brief Abstract transport client class.
  *
  * This class is responsible of receiving/sending data.
@@ -363,33 +354,6 @@ public:
     }
 };
 
-/**
- * Get the transport category.
- *
- * \return the singleton category
- */
-const boost::system::error_category& transport_category() noexcept;
-
-/**
- * Wrap the creation of an error_code based on transport_server::error.
- *
- * \param e the transport_server error code
- * \return a boost::system::error_code with transport_category
- */
-boost::system::error_code make_error_code(transport_error e) noexcept;
-
 } // !irccd
-
-namespace boost {
-
-namespace system {
-
-template <>
-struct is_error_code_enum<irccd::transport_error> : public std::true_type {
-};
-
-} // !system
-
-} // !boost
 
 #endif // !IRCCD_TRANSPORT_CLIENT_HPP

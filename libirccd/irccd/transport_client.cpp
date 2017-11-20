@@ -88,11 +88,11 @@ void transport_client::recv(recv_t handler)
             auto json = nlohmann::json::parse(message);
 
             if (!json.is_object())
-                handler(nullptr, transport_error::invalid_message);
+                handler(nullptr, network_error::invalid_message);
             else
                 handler(json, code);
         } catch (...) {
-            handler(nullptr, transport_error::invalid_message);
+            handler(nullptr, network_error::invalid_message);
         }
     });
 }
@@ -124,46 +124,6 @@ void transport_client::error(const nlohmann::json& data, send_t handler)
 {
     send(std::move(data), std::move(handler));
     set_state(state_t::closing);
-}
-
-/*
- * transport_category
- * ------------------------------------------------------------------
- */
-const boost::system::error_category& transport_category() noexcept
-{
-    static const class category : public boost::system::error_category {
-    public:
-        const char* name() const noexcept override
-        {
-            return "transport";
-        }
-
-        std::string message(int e) const override
-        {
-            switch (static_cast<transport_error>(e)) {
-            case transport_error::invalid_auth:
-                return "invalid authentication";
-            case transport_error::invalid_message:
-                return "invalid message";
-            case transport_error::incomplete_message:
-                return "incomplete message";
-            }
-
-            return "unknown error";
-        }
-    } cat;
-
-    return cat;
-}
-
-/*
- * make_error_code
- * ------------------------------------------------------------------
- */
-boost::system::error_code make_error_code(transport_error e) noexcept
-{
-    return {static_cast<int>(e), transport_category()};
 }
 
 } // !irccd
