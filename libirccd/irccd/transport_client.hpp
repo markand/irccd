@@ -19,6 +19,8 @@
 #ifndef IRCCD_TRANSPORT_CLIENT_HPP
 #define IRCCD_TRANSPORT_CLIENT_HPP
 
+#include "sysconfig.hpp"
+
 #include <deque>
 #include <memory>
 #include <functional>
@@ -26,7 +28,10 @@
 #include <utility>
 
 #include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
+
+#if defined(HAVE_SSL)
+#   include <boost/asio/ssl.hpp>
+#endif
 
 #include "json.hpp"
 
@@ -334,6 +339,8 @@ void basic_transport_client<Socket>::do_send(const std::string& data, do_send_ha
     });
 }
 
+#if defined(HAVE_SSL)
+
 /**
  * \brief Secure layer client.
  */
@@ -353,6 +360,8 @@ public:
     {
     }
 };
+
+#endif // !HAVE_SSL
 
 } // !irccd
 

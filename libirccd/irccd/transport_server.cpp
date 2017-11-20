@@ -102,6 +102,8 @@ void transport_server::accept(accept_t handler)
     });
 }
 
+#if defined(HAVE_SSL)
+
 void tls_transport_server::do_handshake(std::shared_ptr<tls_transport_client> client, accept_t handler)
 {
     client->socket().async_handshake(boost::asio::ssl::stream_base::server, [client, handler] (auto code) {
@@ -129,5 +131,7 @@ void tls_transport_server::do_accept(accept_t handler)
             do_handshake(std::move(client), std::move(handler));
     });
 }
+
+#endif // !HAVE_SSL
 
 } // !irccd

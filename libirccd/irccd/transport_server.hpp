@@ -19,6 +19,8 @@
 #ifndef IRCCD_TRANSPORT_SERVER_HPP
 #define IRCCD_TRANSPORT_SERVER_HPP
 
+#include "sysconfig.hpp"
+
 #include <cassert>
 #include <functional>
 #include <memory>
@@ -26,7 +28,10 @@
 #include <type_traits>
 
 #include <boost/asio.hpp>
-#include <boost/asio/ssl.hpp>
+
+#if defined(HAVE_SSL)
+#   include <boost/asio/ssl.hpp>
+#endif
 
 #include "transport_client.hpp"
 
@@ -208,6 +213,8 @@ using local_transport_server = basic_transport_server<boost::asio::local::stream
 
 #endif // !_WIN32
 
+#if defined(HAVE_SSL)
+
 /**
  * \brief Secure layer implementation.
  */
@@ -238,6 +245,8 @@ public:
      */
     tls_transport_server(acceptor_t acceptor, context_t context);
 };
+
+#endif // !HAVE_SSL
 
 } // !irccd
 
