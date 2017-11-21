@@ -52,7 +52,7 @@ protected:
     /**
      * Callback when a new client should be accepted.
      */
-    using accept_t = std::function<void (std::shared_ptr<transport_client>, boost::system::error_code)>;
+    using accept_t = std::function<void (boost::system::error_code, std::shared_ptr<transport_client>)>;
 
 private:
     client_set_t clients_;
@@ -192,9 +192,9 @@ void basic_transport_server<Protocol>::do_accept(accept_t handler)
 
     acceptor_.async_accept(client->socket(), [client, handler] (auto code) {
         if (!code)
-            handler(std::move(client), std::move(code));
+            handler(std::move(code), std::move(client));
         else
-            handler(nullptr, code);
+            handler(std::move(code), nullptr);
     });
 }
 

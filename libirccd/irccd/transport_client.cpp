@@ -59,7 +59,7 @@ void transport_client::recv(recv_t handler)
 
     do_recv(input_, [this, self, handler] (auto code, auto xfer) {
         if (code || xfer == 0) {
-            handler("", code);
+            handler(code, nullptr);
             close();
             return;
         }
@@ -72,16 +72,18 @@ void transport_client::recv(recv_t handler)
         // Remove early in case of errors.
         input_.consume(xfer);
 
-        try {
-            auto json = nlohmann::json::parse(message);
+        nlohmann::json command;
 
-            if (!json.is_object())
-                handler(nullptr, network_errc::invalid_message);
-            else
-                handler(json, code);
+        try {
+            command = nlohmann::json::parse(message);
         } catch (...) {
-            handler(nullptr, network_errc::invalid_message);
+            handler(network_errc::invalid_message, nullptr);
         }
+
+        if (!command.is_object())
+            handler(network_errc::invalid_message, nullptr);
+        else
+            handler(network_errc::no_error, std::move(command));
     });
 }
 

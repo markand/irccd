@@ -51,12 +51,12 @@ public:
     /**
      * Callback on receive operation.
      */
-    using recv_t = std::function<void (const nlohmann::json&, const boost::system::error_code&)>;
+    using recv_t = std::function<void (boost::system::error_code, nlohmann::json)>;
 
     /**
      * Callback on send operation.
      */
-    using send_t = std::function<void (const boost::system::error_code&)>;
+    using send_t = std::function<void (boost::system::error_code)>;
 
     /**
      * Client state.
@@ -73,14 +73,14 @@ protected:
      *
      * The implementation should read until \r\n\r\n is found.
      */
-    using do_recv_handler_t = std::function<void (const boost::system::error_code&, std::size_t)>;
+    using do_recv_handler_t = std::function<void (boost::system::error_code, std::size_t)>;
 
     /**
      * Handler for do_send.
      *
      * The implementation must send the whole message.
      */
-    using do_send_handler_t = std::function<void (const boost::system::error_code&, std::size_t)>;
+    using do_send_handler_t = std::function<void (boost::system::error_code, std::size_t)>;
 
     /**
      * Input buffer.

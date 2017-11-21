@@ -109,7 +109,10 @@ void network_connection<Socket>::recv(recv_t handler)
             handler(network_errc::invalid_message, nullptr);
         }
 
-        handler(network_errc::no_error, std::move(json));
+        if (!json.is_object())
+            handler(network_errc::invalid_message, nullptr);
+        else
+            handler(network_errc::no_error, std::move(json));
     });
 }
 

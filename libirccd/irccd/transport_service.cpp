@@ -53,15 +53,15 @@ void transport_service::handle_command(std::shared_ptr<transport_client> tc, con
 
 void transport_service::do_accept(transport_server& ts)
 {
-    ts.accept([this, &ts] (auto client, auto code) {
+    ts.accept([this, &ts] (auto code, auto client) {
         if (code)
             log::warning() << "transport: " << code.message() << std::endl;
         else {
-            client->recv([this, client] (auto json, auto code) {
+            client->recv([this, client] (auto code, auto json) {
                 if (code)
                     log::warning() << "transport: " << code.message() << std::endl;
                 else
-                    handle_command(client, json);
+                    handle_command(std::move(client), json);
             });
         }
 

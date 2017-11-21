@@ -30,9 +30,11 @@ void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_
     assert(client);
     assert(handler);
 
-    client->recv([this, client, handler] (auto message, auto code) {
-        if (code)
-            handler(client, code);
+    client->recv([this, client, handler] (auto code, auto message) {
+        if (code) {
+            handler(std::move(code), std::move(client));
+            return;
+        }
 
         clients_.insert(client);
 
@@ -50,7 +52,7 @@ void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_
             code = network_errc::no_error;
         }
 
-        handler(client, code);
+        handler(std::move(code), std::move(client));
     });
 }
 
@@ -74,12 +76,12 @@ void transport_server::do_greetings(std::shared_ptr<transport_client> client, ac
 
     client->send(greetings, [this, client, handler] (auto code) {
         if (code)
-            handler(client, code);
+            handler(std::move(code), std::move(client));
         else if (!password_.empty())
             do_auth(std::move(client), std::move(handler));
         else {
             clients_.insert(client);
-            handler(client, code);
+            handler(std::move(code), std::move(client));
         }
     });
 }
@@ -88,9 +90,9 @@ void transport_server::accept(accept_t handler)
 {
     assert(handler);
 
-    do_accept([this, handler] (auto client, auto code) {
+    do_accept([this, handler] (auto code, auto client) {
         if (code)
-            handler(nullptr, code);
+            handler(std::move(code), nullptr);
         else
             do_greetings(std::move(client), std::move(handler));
     });
