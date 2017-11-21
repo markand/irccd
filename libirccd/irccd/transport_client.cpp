@@ -76,11 +76,11 @@ void transport_client::recv(recv_t handler)
             auto json = nlohmann::json::parse(message);
 
             if (!json.is_object())
-                handler(nullptr, network_error::invalid_message);
+                handler(nullptr, network_errc::invalid_message);
             else
                 handler(json, code);
         } catch (...) {
-            handler(nullptr, network_error::invalid_message);
+            handler(nullptr, network_errc::invalid_message);
         }
     });
 }

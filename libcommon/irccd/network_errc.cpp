@@ -1,5 +1,5 @@
 /*
- * errors.cpp -- describe some error codes
+ * network_errc.cpp -- describe some error codes
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "errors.hpp"
+#include "network_errc.hpp"
 
 namespace irccd {
 
@@ -31,17 +31,19 @@ const boost::system::error_category& network_category() noexcept
 
         std::string message(int code) const override
         {
-            switch (static_cast<network_error>(code)) {
-            case network_error::no_error:
+            switch (static_cast<network_errc>(code)) {
+            case network_errc::no_error:
                 return "no error";
-            case network_error::invalid_program:
+            case network_errc::invalid_program:
                 return "invalid program";
-            case network_error::invalid_version:
+            case network_errc::invalid_version:
                 return "invalid version";
-            case network_error::invalid_auth:
+            case network_errc::invalid_auth:
                 return "invalid authentication";
-            case network_error::invalid_message:
+            case network_errc::invalid_message:
                 return "invalid message";
+            case network_errc::corrupt_message:
+                return "corrupt message";
             default:
                 return "unknown error";
             }
@@ -51,7 +53,7 @@ const boost::system::error_category& network_category() noexcept
     return category;
 }
 
-boost::system::error_code make_error_code(network_error errc) noexcept
+boost::system::error_code make_error_code(network_errc errc) noexcept
 {
     return {static_cast<int>(errc), network_category()};
 }

@@ -18,8 +18,8 @@
 
 #include <boost/system/system_error.hpp>
 
-#include <irccd/errors.hpp>
 #include <irccd/json_util.hpp>
+#include <irccd/network_errc.hpp>
 #include <irccd/options.hpp>
 #include <irccd/string_util.hpp>
 
@@ -45,7 +45,7 @@ void cli::recv_response(ctl::controller& ctl, nlohmann::json req, handler_t hand
         }
 
         if (message["error"].is_number_integer())
-            throw boost::system::system_error(static_cast<network_error>(message["error"].template get<int>()));
+            throw boost::system::system_error(static_cast<network_errc>(message["error"].template get<int>()));
         if (message["error"].is_string())
             throw std::runtime_error(message["error"].template get<std::string>());
 

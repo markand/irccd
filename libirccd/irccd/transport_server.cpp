@@ -32,12 +32,12 @@ bool transport_server::do_auth_check(nlohmann::json message, accept_t handler)
     auto password = message["password"];
 
     if (!command.is_string() || !password.is_string()) {
-        handler(nullptr, network_error::invalid_message);
+        handler(nullptr, network_errc::invalid_message);
         return false;
     }
 
     if (command != "auth" || password.get<std::string>() != password_) {
-        handler(nullptr, network_error::invalid_auth);
+        handler(nullptr, network_errc::invalid_auth);
         return false;
     }
 

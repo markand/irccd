@@ -18,7 +18,7 @@
 
 #include <cassert>
 
-#include <irccd/errors.hpp>
+#include <irccd/network_errc.hpp>
 #include <irccd/sysconfig.hpp>
 #include <irccd/json_util.hpp>
 
@@ -74,7 +74,7 @@ void controller::authenticate(connect_t handler, nlohmann::json info)
 
         recv([handler, info, this] (auto code, auto message) {
             if (message["error"].is_string())
-                code = network_error::invalid_auth;
+                code = network_errc::invalid_auth;
 
             handler(std::move(code), std::move(info));
         });
@@ -90,9 +90,9 @@ void controller::verify(connect_t handler)
         }
 
         if (json_util::to_string(message["program"]) != "irccd")
-            handler(network_error::invalid_program, std::move(message));
+            handler(network_errc::invalid_program, std::move(message));
         else if (json_util::to_int(message["major"]) != IRCCD_VERSION_MAJOR)
-            handler(network_error::invalid_version, std::move(message));
+            handler(network_errc::invalid_version, std::move(message));
         else {
             if (!password_.empty())
                 authenticate(std::move(handler), message);

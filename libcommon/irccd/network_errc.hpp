@@ -1,5 +1,5 @@
 /*
- * errors.hpp -- describe some error codes
+ * network_errc.hpp -- describe some error codes
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_COMMON_ERRORS_HPP
-#define IRCCD_COMMON_ERRORS_HPP
+#ifndef IRCCD_COMMON_NETWORK_ERRC_HPP
+#define IRCCD_COMMON_NETWORK_ERRC_HPP
 
 /**
- * \file errors.hpp
+ * \file network_errc.hpp
  * \brief Describe some error codes.
  */
 
@@ -33,27 +33,28 @@ namespace irccd {
 /**
  * \brief Error code for transport/irccdctl
  */
-enum class network_error {
+enum class network_errc {
     no_error = 0,           //!< no error (default)
     invalid_program,        //!< connected daemon is not irccd
     invalid_version,        //!< irccd daemon is incompatible
     invalid_auth,           //!< invalid credentials in auth command
-    invalid_message         //!< the message was not JSON
+    invalid_message,        //!< the message was not JSON
+    corrupt_message,        //!< error occured while sending a message
 };
 
 /**
  * Get the network category singleton.
  *
- * \return the category for network_error enum
+ * \return the category for network_errc enum
  */
 const boost::system::error_category& network_category() noexcept;
 
 /**
- * Construct an error_code from network_error enum.
+ * Construct an error_code from network_errc enum.
  *
  * \return the error code
  */
-boost::system::error_code make_error_code(network_error errc) noexcept;
+boost::system::error_code make_error_code(network_errc errc) noexcept;
 
 } // !irccd
 
@@ -62,11 +63,11 @@ namespace boost {
 namespace system {
 
 template <>
-struct is_error_code_enum<irccd::network_error> : public std::true_type {
+struct is_error_code_enum<irccd::network_errc> : public std::true_type {
 };
 
 } // !system
 
 } // !boost
 
-#endif // !IRCCD_COMMON_ERRORS_HPP
+#endif // !IRCCD_COMMON_NETWORK_ERRC_HPP

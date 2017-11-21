@@ -35,7 +35,7 @@
 
 #include "json.hpp"
 
-#include "errors.hpp"
+#include "network_errc.hpp"
 
 namespace irccd {
 
@@ -250,7 +250,7 @@ public:
      * \param reason the error code
      * \param handler the optional handler
      */
-    inline void error(const std::string& cname, network_error reason, send_t handler)
+    inline void error(const std::string& cname, network_errc reason, send_t handler)
     {
         assert(!cname.empty());
 

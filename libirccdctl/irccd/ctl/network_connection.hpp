@@ -26,7 +26,7 @@
 
 #include <boost/asio.hpp>
 
-#include <irccd/errors.hpp>
+#include <irccd/network_errc.hpp>
 
 #include "connection.hpp"
 
@@ -97,7 +97,7 @@ void network_connection<Socket>::recv(recv_t handler)
         try {
             handler(code, nlohmann::json::parse(command));
         } catch (...) {
-            handler(network_error::invalid_message, nullptr);
+            handler(network_errc::invalid_message, nullptr);
         }
     });
 }
