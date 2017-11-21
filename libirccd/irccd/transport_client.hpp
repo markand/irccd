@@ -230,12 +230,14 @@ public:
      * Convenient error overload.
      *
      * \param cname the command name
+     * \pre !reason.empty()
      * \param reason the reason string
      * \param handler the optional handler
      */
     inline void error(const std::string& cname, const std::string& reason, send_t handler = nullptr)
     {
         assert(!cname.empty());
+        assert(!reason.empty());
 
         error({
             { "command",    cname   },
@@ -246,11 +248,25 @@ public:
     /**
      * Convenient error overload.
      *
+     * \pre !reason.empty()
+     * \param reason the reason string
+     * \param handler the handler
+     */
+    inline void error(const std::string& reason, send_t handler = nullptr)
+    {
+        assert(!reason.empty());
+
+        error({{ "error", reason }}, std::move(handler));
+    }
+
+    /**
+     * Convenient error overload.
+     *
      * \param cname the command name
      * \param reason the error code
      * \param handler the optional handler
      */
-    inline void error(const std::string& cname, network_errc reason, send_t handler)
+    inline void error(const std::string& cname, network_errc reason, send_t handler = nullptr)
     {
         assert(!cname.empty());
 
@@ -258,6 +274,20 @@ public:
             { "command",    cname                       },
             { "error",      static_cast<int>(reason)    }
         }, std::move(handler));
+    }
+
+    /**
+     * Convenient error overload.
+     *
+     * \pre reason != network_errc::no_error
+     * \param reason the reason string
+     * \param handler the handler
+     */
+    inline void error(network_errc reason, send_t handler = nullptr)
+    {
+        assert(reason != network_errc::no_error);
+
+        error({{ "error", static_cast<int>(reason) }}, std::move(handler));
     }
 };
 

@@ -20,29 +20,10 @@
 
 #include <cassert>
 
+#include "json_util.hpp"
 #include "transport_server.hpp"
 
 namespace irccd {
-
-bool transport_server::do_auth_check(nlohmann::json message, accept_t handler)
-{
-    assert(handler);
-
-    auto command = message["command"];
-    auto password = message["password"];
-
-    if (!command.is_string() || !password.is_string()) {
-        handler(nullptr, network_errc::invalid_message);
-        return false;
-    }
-
-    if (command != "auth" || password.get<std::string>() != password_) {
-        handler(nullptr, network_errc::invalid_auth);
-        return false;
-    }
-
-    return true;
-}
 
 void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_t handler)
 {
@@ -52,11 +33,24 @@ void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_
     client->recv([this, client, handler] (auto message, auto code) {
         if (code)
             handler(client, code);
-        if (do_auth_check(message, handler)) {
-            clients_.insert(client);
+
+        clients_.insert(client);
+
+        auto command = json_util::to_string(message["command"]);
+        auto password = json_util::to_string(message["password"]);
+
+        if (command != "auth") {
+            client->error(network_errc::auth_required);
+            code = network_errc::auth_required;
+        } else if (password != password_) {
+            client->error(network_errc::invalid_auth);
+            code = network_errc::invalid_auth;
+        } else {
             client->set_state(transport_client::state_t::ready);
-            handler(client, code);
+            code = network_errc::no_error;
         }
+
+        handler(client, code);
     });
 }
 

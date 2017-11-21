@@ -37,17 +37,17 @@ void cli::recv_response(ctl::controller& ctl, nlohmann::json req, handler_t hand
         if (code)
             throw boost::system::system_error(code);
 
+        if (message["error"].is_number_integer())
+            throw boost::system::system_error(static_cast<network_errc>(message["error"].template get<int>()));
+        if (message["error"].is_string())
+            throw std::runtime_error(message["error"].template get<std::string>());
+
         auto c = json_util::to_string(message["command"]);
 
         if (c != req["command"].get<std::string>()) {
             recv_response(ctl, std::move(req), std::move(handler));
             return;
         }
-
-        if (message["error"].is_number_integer())
-            throw boost::system::system_error(static_cast<network_errc>(message["error"].template get<int>()));
-        if (message["error"].is_string())
-            throw std::runtime_error(message["error"].template get<std::string>());
 
         if (handler)
             handler(std::move(message));

@@ -40,6 +40,7 @@ enum class network_errc {
     invalid_auth,           //!< invalid credentials in auth command
     invalid_message,        //!< the message was not JSON
     corrupt_message,        //!< error occured while sending a message
+    auth_required           //!< authentication is required and was not issued
 };
 
 /**

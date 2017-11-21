@@ -94,11 +94,22 @@ void network_connection<Socket>::recv(recv_t handler)
 
         input_.consume(xfer);
 
+        /*
+         * Only catch parse error from JSON to avoid calling the handler twice
+         * if the handler throws from itself.
+         *
+         * TODO: in json 3.0.0, you may catch nlohmann::json::parse_error
+         * instead.
+         */
+        nlohmann::json json;
+
         try {
-            handler(code, nlohmann::json::parse(command));
+            json = nlohmann::json::parse(command);
         } catch (...) {
             handler(network_errc::invalid_message, nullptr);
         }
+
+        handler(network_errc::no_error, std::move(json));
     });
 }
 

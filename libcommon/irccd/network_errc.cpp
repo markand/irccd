@@ -44,6 +44,8 @@ const boost::system::error_category& network_category() noexcept
                 return "invalid message";
             case network_errc::corrupt_message:
                 return "corrupt message";
+            case network_errc::auth_required:
+                return "auth required";
             default:
                 return "unknown error";
             }
