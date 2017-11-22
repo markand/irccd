@@ -24,13 +24,7 @@
  * \brief Main irccdctl interface.
  */
 
-#include <boost/system/error_code.hpp>
-
-#include <deque>
-#include <functional>
-#include <string>
-
-#include <json.hpp>
+#include <irccd/network_stream.hpp>
 
 namespace irccd {
 
@@ -67,34 +61,10 @@ public:
      */
     using connect_t = std::function<void (boost::system::error_code, nlohmann::json)>;
 
-    /**
-     * Receive handler.
-     *
-     * This callback is called when a message has been received. If an error
-     * occured the error_code is set and the JSON object is null, otherwise it
-     * contains the received message.
-     */
-    using recv_t = std::function<void (boost::system::error_code, nlohmann::json)>;
-
-    /**
-     * Send handler.
-     *
-     * This callback is optional and is called when a message has been sent, it
-     * is also called if an error occured.
-     */
-    using send_t = std::function<void (boost::system::error_code, nlohmann::json)>;
-
 private:
-    using recv_queue_t = std::deque<recv_t>;
-    using send_queue_t = std::deque<std::pair<nlohmann::json, send_t>>;
-
     connection& conn_;
-    recv_queue_t rqueue_;
-    send_queue_t squeue_;
     std::string password_;
 
-    void flush_recv();
-    void flush_send();
     void authenticate(connect_t, nlohmann::json);
     void verify(connect_t);
 
@@ -109,34 +79,14 @@ public:
     {
     }
 
-    /**
-     * Tells if receive requests are pending.
-     *
-     * \return true if receive queue is not empty
-     */
-    inline bool has_recv_pending() const noexcept
+    inline const connection& conn() const noexcept
     {
-        return !rqueue_.empty();
+        return conn_;
     }
 
-    /**
-     * Tells if send requests are pending.
-     *
-     * \return true if send queue is not empty
-     */
-    inline bool has_send_pending() const noexcept
+    inline connection& conn() noexcept
     {
-        return !squeue_.empty();
-    }
-
-    /**
-     * Tells if receive or send requests are pending.
-     *
-     * \return true if one of receive/send queue is not empty
-     */
-    inline bool has_pending() const noexcept
-    {
-        return has_recv_pending() || has_send_pending();
+        return conn_;
     }
 
     /**
@@ -177,7 +127,7 @@ public:
      * \pre handler != nullptr
      * \param handler the recv handler
      */
-    void recv(recv_t handler);
+    void recv(network_recv_handler handler);
 
     /**
      * Queue a send operation, if receive operations are already running, it is
@@ -187,7 +137,7 @@ public:
      * \param message the JSON message
      * \param handler the optional completion handler
      */
-    void send(nlohmann::json message, send_t handler);
+    void send(nlohmann::json message, network_send_handler handler);
 };
 
 } // !ctl

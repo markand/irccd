@@ -45,20 +45,9 @@ public:
     using connect_t = std::function<void (boost::system::error_code)>;
 
     /**
-     * Receive handler.
-     *
-     * Call the handler when you have read a JSON message from the underlying
-     * protocol.
+     * Tells if operations are in progress.
      */
-    using recv_t = std::function<void (boost::system::error_code, nlohmann::json)>;
-
-    /**
-     * Send handler.
-     *
-     * Call the handler when you have sent a JSON message to the underlying
-     * protocol.
-     */
-    using send_t = std::function<void (boost::system::error_code)>;
+    virtual bool is_active() const noexcept = 0;
 
     /**
      * Connect to the daemon.
@@ -67,20 +56,9 @@ public:
      */
     virtual void connect(connect_t handler) = 0;
 
-    /**
-     * Receive a message.
-     *
-     * \param handler the non-null handler
-     */
-    virtual void recv(recv_t) = 0;
+    virtual void recv(network_recv_handler handler) = 0;
 
-    /**
-     * Send a message.
-     *
-     * \param message the JSON message object
-     * \param handler the non-null handler
-     */
-    virtual void send(const nlohmann::json& json, send_t) = 0;
+    virtual void send(nlohmann::json json, network_send_handler handler) = 0;
 };
 
 } // !ctl

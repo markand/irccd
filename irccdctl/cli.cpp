@@ -56,7 +56,7 @@ void cli::recv_response(ctl::controller& ctl, nlohmann::json req, handler_t hand
 
 void cli::request(ctl::controller& ctl, nlohmann::json req, handler_t handler)
 {
-    ctl.send(req, [&ctl, req, handler, this] (auto code, auto) {
+    ctl.send(req, [&ctl, req, handler, this] (auto code) {
         if (code)
             throw boost::system::system_error(code);
 

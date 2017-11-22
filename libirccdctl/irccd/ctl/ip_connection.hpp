@@ -29,11 +29,7 @@
 #include <string>
 #include <cstdint>
 
-#if defined(HAVE_SSL)
-#   include <boost/asio/ssl.hpp>
-#endif
-
-#include "network_connection.hpp"
+#include "basic_connection.hpp"
 
 namespace irccd {
 
@@ -43,7 +39,7 @@ namespace ctl {
  * \brief Common class for both ip and tls connections.
  */
 template <typename Socket>
-class basic_ip_connection : public network_connection<Socket> {
+class basic_ip_connection : public basic_connection<Socket> {
 protected:
     boost::asio::ip::tcp::resolver resolver_;
     std::string host_;
@@ -64,7 +60,7 @@ public:
      */
     template <typename... Args>
     inline basic_ip_connection(boost::asio::io_service& service, std::string host, std::uint16_t port, Args&&... args)
-        : network_connection<Socket>(service, std::forward<Args>(args)...)
+        : basic_connection<Socket>(service, std::forward<Args>(args)...)
         , resolver_(service)
         , host_(std::move(host))
         , port_(std::move(port))

@@ -20,9 +20,9 @@ project(libirccdctl)
 
 set(
     HEADERS
+    ${libirccdctl_SOURCE_DIR}/irccd/ctl/basic_connection.hpp
     ${libirccdctl_SOURCE_DIR}/irccd/ctl/controller.hpp
     ${libirccdctl_SOURCE_DIR}/irccd/ctl/connection.hpp
-    ${libirccdctl_SOURCE_DIR}/irccd/ctl/network_connection.hpp
     ${libirccdctl_SOURCE_DIR}/irccd/ctl/ip_connection.hpp
 )
 

@@ -36,8 +36,6 @@ void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_
             return;
         }
 
-        clients_.insert(client);
-
         auto command = json_util::to_string(message["command"]);
         auto password = json_util::to_string(message["password"]);
 
@@ -49,6 +47,7 @@ void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_
             code = network_errc::invalid_auth;
         } else {
             client->set_state(transport_client::state_t::ready);
+            client->success("auth");
             code = network_errc::no_error;
         }
 
@@ -79,10 +78,8 @@ void transport_server::do_greetings(std::shared_ptr<transport_client> client, ac
             handler(std::move(code), std::move(client));
         else if (!password_.empty())
             do_auth(std::move(client), std::move(handler));
-        else {
-            clients_.insert(client);
+        else
             handler(std::move(code), std::move(client));
-        }
     });
 }
 
@@ -93,8 +90,10 @@ void transport_server::accept(accept_t handler)
     do_accept([this, handler] (auto code, auto client) {
         if (code)
             handler(std::move(code), nullptr);
-        else
+        else {
+            clients_.insert(client);
             do_greetings(std::move(client), std::move(handler));
+        }
     });
 }
 

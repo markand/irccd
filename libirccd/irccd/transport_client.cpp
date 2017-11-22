@@ -26,86 +26,67 @@ namespace irccd {
 void transport_client::close()
 {
     state_ = state_t::closing;
-    output_.clear();
     parent_.clients().erase(shared_from_this());
 }
 
-void transport_client::flush()
+void transport_client::recv(network_recv_handler handler)
 {
-    if (output_.empty())
-        return;
-
-    auto self = shared_from_this();
-    auto size = output_[0].first.size();
-
-    do_send(output_[0].first, [this, self, size] (auto code, auto xfer) {
-        if (output_[0].second)
-            output_[0].second(code);
-
-        output_.pop_front();
-
-        if (code || xfer != size || (output_.empty() && state_ == state_t::closing))
-            close();
-        else if (!output_.empty())
-            flush();
-    });
+    if (state_ != state_t::closing)
+        do_recv(std::move(handler));
 }
 
-void transport_client::recv(recv_t handler)
+void transport_client::send(nlohmann::json json, network_send_handler handler)
 {
-    assert(handler);
-
-    auto self = shared_from_this();
-
-    do_recv(input_, [this, self, handler] (auto code, auto xfer) {
-        if (code || xfer == 0) {
-            handler(code, nullptr);
-            close();
-            return;
-        }
-
-        std::string message(
-            boost::asio::buffers_begin(input_.data()),
-            boost::asio::buffers_begin(input_.data()) + xfer - 4
-        );
-
-        // Remove early in case of errors.
-        input_.consume(xfer);
-
-        nlohmann::json command;
-
-        try {
-            command = nlohmann::json::parse(message);
-        } catch (...) {
-            handler(network_errc::invalid_message, nullptr);
-        }
-
-        if (!command.is_object())
-            handler(network_errc::invalid_message, nullptr);
-        else
-            handler(network_errc::no_error, std::move(command));
-    });
+    if (state_ != state_t::closing)
+        do_send(std::move(json), std::move(handler));
 }
 
-void transport_client::send(const nlohmann::json& data, send_t handler)
+void transport_client::success(const std::string& cname, network_send_handler handler)
 {
-    assert(data.is_object());
+    assert(!cname.empty());
 
-    if (state_ == state_t::closing)
-        return;
-
-    auto in_progress = !output_.empty();
-
-    output_.emplace_back(data.dump() + "\r\n\r\n", std::move(handler));
-
-    if (!in_progress)
-        flush();
+    send({{ "command", cname }}, std::move(handler));
 }
 
-void transport_client::error(const nlohmann::json& data, send_t handler)
+void transport_client::error(const nlohmann::json& data, network_send_handler handler)
 {
     send(std::move(data), std::move(handler));
     set_state(state_t::closing);
+}
+
+void transport_client::error(const std::string& cname, const std::string& reason, network_send_handler handler)
+{
+    assert(!cname.empty());
+    assert(!reason.empty());
+
+    error({
+        { "command",    cname   },
+        { "error",      reason  }
+    }, std::move(handler));
+}
+
+void transport_client::error(const std::string& reason, network_send_handler handler)
+{
+    assert(!reason.empty());
+
+    error({{ "error", reason }}, std::move(handler));
+}
+
+void transport_client::error(const std::string& cname, network_errc reason, network_send_handler handler)
+{
+    assert(!cname.empty());
+
+    error({
+        { "command",    cname                       },
+        { "error",      static_cast<int>(reason)    }
+    }, std::move(handler));
+}
+
+void transport_client::error(network_errc reason, network_send_handler handler)
+{
+    assert(reason != network_errc::no_error);
+
+    error({{ "error", static_cast<int>(reason) }}, std::move(handler));
 }
 
 } // !irccd

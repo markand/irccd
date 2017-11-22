@@ -59,7 +59,7 @@ void do_resolve(const std::string& host,
 
 void ip_connection::connect(connect_t handler)
 {
-    do_resolve(host_, std::to_string(port_), socket_, resolver_, std::move(handler));
+    do_resolve(host_, std::to_string(port_), stream_.socket(), resolver_, std::move(handler));
 }
 
 #if defined(HAVE_SSL)

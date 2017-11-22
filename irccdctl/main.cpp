@@ -537,7 +537,7 @@ void do_exec(int argc, char** argv)
 
     exec(args);
 
-    while (ctl->has_pending())
+    while (ctl->conn().is_active())
         service.run();
 }
 

@@ -33,7 +33,7 @@
 #   include <boost/asio/ssl.hpp>
 #endif
 
-#include "transport_client.hpp"
+#include "basic_transport_client.hpp"
 
 namespace irccd {
 
@@ -186,15 +186,13 @@ basic_transport_server<Protocol>::basic_transport_server(acceptor_t acceptor)
 template <typename Protocol>
 void basic_transport_server<Protocol>::do_accept(accept_t handler)
 {
-    using client_type = basic_transport_client<socket_t>;
+    auto client = std::make_shared<basic_transport_client<socket_t>>(*this, acceptor_.get_io_service());
 
-    auto client = std::make_shared<client_type>(*this, acceptor_.get_io_service());
-
-    acceptor_.async_accept(client->socket(), [client, handler] (auto code) {
-        if (!code)
-            handler(std::move(code), std::move(client));
-        else
+    acceptor_.async_accept(client->stream().socket(), [this, client, handler] (auto code) {
+        if (code)
             handler(std::move(code), nullptr);
+        else
+            handler(std::move(code), std::move(client));
     });
 }
 

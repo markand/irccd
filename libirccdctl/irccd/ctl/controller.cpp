@@ -29,50 +29,22 @@ namespace irccd {
 
 namespace ctl {
 
-void controller::flush_recv()
-{
-    if (rqueue_.empty())
-        return;
-
-    conn_.recv([this] (auto code, auto json) {
-        rqueue_.front()(code, std::move(json));
-        rqueue_.pop_front();
-
-        if (!code)
-            flush_recv();
-    });
-}
-
-void controller::flush_send()
-{
-    if (squeue_.empty())
-        return;
-
-    conn_.send(squeue_.front().first, [this] (auto code) {
-        if (squeue_.front().second)
-            squeue_.front().second(code, squeue_.front().first);
-
-        squeue_.pop_front();
-
-        if (!code)
-            flush_send();
-    });
-}
-
 void controller::authenticate(connect_t handler, nlohmann::json info)
 {
     auto cmd = nlohmann::json::object({
-        { "command", "authenticate" },
+        { "command", "auth" },
         { "password", password_ }
     });
 
-    send(std::move(cmd), [handler, info, this] (auto code, auto) {
+    send(std::move(cmd), [handler, info, this] (auto code) {
         if (code) {
             handler(std::move(code), nullptr);
             return;
         }
 
         recv([handler, info, this] (auto code, auto message) {
+            if (message["error"].is_number_integer())
+                code = static_cast<network_errc>(message["error"].template get<int>());
             if (message["error"].is_string())
                 code = network_errc::invalid_auth;
 
@@ -114,28 +86,22 @@ void controller::connect(connect_t handler)
     });
 }
 
-void controller::recv(recv_t handler)
+void controller::recv(network_recv_handler handler)
 {
     assert(handler);
 
-    auto in_progress = !rqueue_.empty();
+    // TODO: ensure connected.
 
-    rqueue_.push_back(std::move(handler));
-
-    if (!in_progress)
-        flush_recv();
+    conn_.recv(std::move(handler));
 }
 
-void controller::send(nlohmann::json message, send_t handler)
+void controller::send(nlohmann::json message, network_send_handler handler)
 {
     assert(message.is_object());
 
-    auto in_progress = !squeue_.empty();
+    // TODO: ensure connected.
 
-    squeue_.emplace_back(std::move(message), std::move(handler));
-
-    if (!in_progress)
-        flush_send();
+    conn_.send(std::move(message), std::move(handler));
 }
 
 } // !ctl

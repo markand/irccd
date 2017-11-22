@@ -22,6 +22,7 @@ find_package(Boost REQUIRED QUIET COMPONENTS timer)
 
 set(
     HEADERS
+    ${libirccd_SOURCE_DIR}/irccd/basic_transport_client.hpp
     ${libirccd_SOURCE_DIR}/irccd/command.hpp
     ${libirccd_SOURCE_DIR}/irccd/config.hpp
     ${libirccd_SOURCE_DIR}/irccd/dynlib_plugin.hpp

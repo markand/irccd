@@ -24,9 +24,7 @@
  * \brief Unix domain connection for irccdctl.
  */
 
-#include <irccd/sysconfig.hpp>
-
-#include "network_connection.hpp"
+#include "basic_connection.hpp"
 
 #if !defined(IRCCD_SYSTEM_WINDOWS)
 
@@ -37,7 +35,7 @@ namespace ctl {
 /**
  * \brief Unix domain connection for irccdctl.
  */
-class local_connection : public network_connection<boost::asio::local::stream_protocol::socket> {
+class local_connection : public basic_connection<boost::asio::local::stream_protocol::socket> {
 private:
     std::string path_;
 
@@ -49,7 +47,7 @@ public:
      * \param path the path to the socket file
      */
     inline local_connection(boost::asio::io_service& service, std::string path) noexcept
-        : network_connection(service)
+        : basic_connection(service)
         , path_(std::move(path))
     {
     }
