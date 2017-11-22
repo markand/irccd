@@ -99,13 +99,10 @@ void transport_server::accept(accept_t handler)
 
 #if defined(HAVE_SSL)
 
-void tls_transport_server::do_handshake(std::shared_ptr<tls_transport_client> client, accept_t handler)
+void tls_transport_server::do_handshake(std::shared_ptr<client_t> client, accept_t handler)
 {
-    client->socket().async_handshake(boost::asio::ssl::stream_base::server, [client, handler] (auto code) {
-        if (code)
-            handler(nullptr, code);
-        else
-            handler(std::move(client), std::move(code));
+    client->stream().socket().async_handshake(boost::asio::ssl::stream_base::server, [client, handler] (auto code) {
+        handler(std::move(code), std::move(client));
     });
 }
 
@@ -117,11 +114,11 @@ tls_transport_server::tls_transport_server(acceptor_t acceptor, context_t contex
 
 void tls_transport_server::do_accept(accept_t handler)
 {
-    auto client = std::make_shared<tls_transport_client>(*this, acceptor_.get_io_service(), context_);
+    auto client = std::make_shared<client_t>(*this, acceptor_.get_io_service(), context_);
 
-    acceptor_.async_accept(client->socket().lowest_layer(), [this, client, handler] (auto code) {
+    acceptor_.async_accept(client->stream().socket().lowest_layer(), [this, client, handler] (auto code) {
         if (code)
-            handler(nullptr, code);
+            handler(std::move(code), nullptr);
         else
             do_handshake(std::move(client), std::move(handler));
     });

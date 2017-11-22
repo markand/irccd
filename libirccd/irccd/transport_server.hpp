@@ -216,13 +216,13 @@ using local_transport_server = basic_transport_server<boost::asio::local::stream
  * \brief Secure layer implementation.
  */
 class tls_transport_server : public tcp_transport_server {
-public:
-    using context_t = boost::asio::ssl::context;
-
 private:
+    using context_t = boost::asio::ssl::context;
+    using client_t = basic_transport_client<boost::asio::ssl::stream<socket_t>>;
+
     context_t context_;
 
-    void do_handshake(std::shared_ptr<tls_transport_client>, accept_t);
+    void do_handshake(std::shared_ptr<client_t>, accept_t);
 
 protected:
     /**

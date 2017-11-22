@@ -66,14 +66,14 @@ void ip_connection::connect(connect_t handler)
 
 void tls_connection::handshake(connect_t handler)
 {
-    socket_.async_handshake(boost::asio::ssl::stream_base::client, [handler] (auto code) {
+    stream_.socket().async_handshake(boost::asio::ssl::stream_base::client, [handler] (auto code) {
         handler(code);
     });
 }
 
 void tls_connection::connect(connect_t handler)
 {
-    do_resolve(host_, std::to_string(port_), socket_.lowest_layer(), resolver_, [handler, this] (auto code) {
+    do_resolve(host_, std::to_string(port_), stream_.socket().lowest_layer(), resolver_, [handler, this] (auto code) {
         if (code)
             handler(code);
         else
