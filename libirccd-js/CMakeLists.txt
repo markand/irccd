@@ -36,7 +36,6 @@ set(
     ${libirccd-js_SOURCE_DIR}/irccd/js/unicode_jsapi.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/util_jsapi.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/js_plugin.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/timer.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/unicode.hpp
 )
 
@@ -54,7 +53,6 @@ set(
     ${libirccd-js_SOURCE_DIR}/irccd/js/unicode_jsapi.cpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/util_jsapi.cpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/js_plugin.cpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/timer.cpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/unicode.cpp
 )
 

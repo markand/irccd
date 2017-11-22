@@ -113,11 +113,21 @@ public:
         config_ = std::move(cfg);
     }
 
+    /**
+     * Get the underlying io service.
+     *
+     * \return the service
+     */
     inline const boost::asio::io_service& service() const noexcept
     {
         return service_;
     }
 
+    /**
+     * Overloaded function.
+     *
+     * \return the service
+     */
     inline boost::asio::io_service& service() noexcept
     {
         return service_;

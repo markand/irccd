@@ -7,8 +7,4 @@ function onLoad()
     });
 
     t.start();
-
-    /* Force the plugin to wait so that timer push some events in the irccd's queue */
-    Irccd.System.sleep(3);
-    t.stop();
 }
