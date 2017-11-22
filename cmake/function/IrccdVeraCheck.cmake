@@ -48,7 +48,7 @@ function(irccd_vera_check target sources)
         add_custom_command(
             TARGET ${target}
             COMMAND
-                ${VERA_EXECUTABLE} -w --root ${CMAKE_SOURCE_DIR}/vera ${newsources}
+                $<TARGET_FILE:vera> -w --root ${CMAKE_SOURCE_DIR}/vera ${newsources}
             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
             VERBATIM
         )

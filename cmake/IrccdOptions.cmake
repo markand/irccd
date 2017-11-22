@@ -166,25 +166,12 @@ else ()
     set(WITH_HTML_MSG "No (disabled by user)")
 endif ()
 
-find_program(VERA_EXECUTABLE vera++)
-
-if (VERA_EXECUTABLE)
-    if (WITH_VERA)
-        execute_process(
-            COMMAND ${VERA_EXECUTABLE} --version
-            OUTPUT_VARIABLE VERA_VERSION
-        )
-
-        if (${VERA_VERSION} GREATER_EQUAL "1.3.0")
-            set(HAVE_VERA On)
-        else ()
-            set(WITH_VERA_MSG "No (1.3.0 or greater required)")
-        endif ()
-    else ()
-        set(WITH_VERA_MSG "No (disabled by user)")
-    endif ()
+if (WITH_VERA)
+    add_subdirectory(extern/vera)
+    set(HAVE_VERA On)
+    set(WITH_VERA_MSG "Yes")
 else ()
-    set(WITH_VERA_MSG "No (vera++ not found)")
+    set(WITH_VERA_MSG "No (disabled by user)")
 endif ()
 
 #
