@@ -306,7 +306,7 @@ rule load_rule(const ini::section& sc)
     };
 }
 
-std::shared_ptr<server> load_server(const ini::section& sc, const config& config)
+std::shared_ptr<server> load_server(irccd& daemon, const ini::section& sc, const config& config)
 {
     assert(sc.key() == "server");
 
@@ -318,7 +318,7 @@ std::shared_ptr<server> load_server(const ini::section& sc, const config& config
     else if (!string_util::is_identifier(it->value()))
         throw std::invalid_argument(string_util::sprintf("server: invalid identifier: %s", it->value()));
 
-    auto sv = std::make_shared<server>(it->value());
+    auto sv = std::make_shared<server>(daemon.service(), it->value());
 
     // Host
     if ((it = sc.find("host")) == sc.end())
@@ -515,7 +515,7 @@ std::vector<rule> config::load_rules() const
     return rules;
 }
 
-std::vector<std::shared_ptr<server>> config::load_servers() const
+std::vector<std::shared_ptr<server>> config::load_servers(irccd& daemon) const
 {
     std::vector<std::shared_ptr<server>> servers;
 
@@ -524,7 +524,7 @@ std::vector<std::shared_ptr<server>> config::load_servers() const
             continue;
 
         try {
-            servers.push_back(load_server(section, *this));
+            servers.push_back(load_server(daemon, section, *this));
         } catch (const std::exception& ex) {
             log::warning(ex.what());
         }

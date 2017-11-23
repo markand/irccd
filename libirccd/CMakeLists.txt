@@ -26,6 +26,7 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/command.hpp
     ${libirccd_SOURCE_DIR}/irccd/config.hpp
     ${libirccd_SOURCE_DIR}/irccd/dynlib_plugin.hpp
+    ${libirccd_SOURCE_DIR}/irccd/irc.hpp
     ${libirccd_SOURCE_DIR}/irccd/irccd.hpp
     ${libirccd_SOURCE_DIR}/irccd/plugin.hpp
     ${libirccd_SOURCE_DIR}/irccd/rule.hpp
@@ -41,6 +42,7 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/command.cpp
     ${libirccd_SOURCE_DIR}/irccd/config.cpp
     ${libirccd_SOURCE_DIR}/irccd/dynlib_plugin.cpp
+    ${libirccd_SOURCE_DIR}/irccd/irc.cpp
     ${libirccd_SOURCE_DIR}/irccd/irccd.cpp
     ${libirccd_SOURCE_DIR}/irccd/plugin.cpp
     ${libirccd_SOURCE_DIR}/irccd/rule.cpp
@@ -61,7 +63,6 @@ irccd_define_library(
         Boost::timer
         $<$<BOOL:${IRCCD_SYSTEM_LINUX}>:dl>
         $<$<BOOL:${IRCCD_SYSTEM_MAC}>:resolv>
-        extern-ircclient
         libcommon
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${libirccd_SOURCE_DIR}/irccd>

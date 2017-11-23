@@ -18,8 +18,6 @@
 
 #include <climits>
 
-#include <libircclient.h>
-
 #include <irccd/string_util.hpp>
 
 #include "js_plugin.hpp"
@@ -243,7 +241,9 @@ duk_ret_t splituser(duk_context* ctx)
     auto target = duk_require_string(ctx, 0);
     char nick[32] = {0};
 
+#if 0
     irc_target_get_nick(target, nick, sizeof (nick) -1);
+#endif
     duk_push_string(ctx, nick);
 
     return 1;
@@ -265,7 +265,9 @@ duk_ret_t splithost(duk_context* ctx)
     auto target = duk_require_string(ctx, 0);
     char host[32] = {0};
 
+#if 0
     irc_target_get_host(target, host, sizeof (host) -1);
+#endif
     duk_push_string(ctx, host);
 
     return 1;

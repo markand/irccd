@@ -821,16 +821,20 @@ server_service::server_service(irccd &irccd)
 
 void server_service::prepare(fd_set& in, fd_set& out, net::Handle& max)
 {
+#if 0
     for (auto& server : servers_) {
         server->update();
         server->prepare(in, out, max);
     }
+#endif
 }
 
 void server_service::sync(fd_set& in, fd_set& out)
 {
+#if 0
     for (auto& server : servers_)
         server->sync(in, out);
+#endif
 }
 
 bool server_service::has(const std::string& name) const noexcept
@@ -873,6 +877,7 @@ void server_service::add(std::shared_ptr<server> server)
         });
     });
 
+    server->connect();
     servers_.push_back(std::move(server));
 }
 

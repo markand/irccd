@@ -24,24 +24,20 @@
  * \brief IRC Server.
  */
 
+#include "sysconfig.hpp"
+
 #include <cstdint>
-#include <functional>
 #include <map>
 #include <memory>
-#include <queue>
 #include <set>
 #include <string>
-#include <unordered_map>
-#include <utility>
 #include <vector>
 
 #include <boost/signals2/signal.hpp>
-#include <boost/timer/timer.hpp>
 
 #include <json.hpp>
 
-#include "net.hpp"
-#include "sysconfig.hpp"
+#include "irc.hpp"
 
 namespace irccd {
 
@@ -265,11 +261,6 @@ public:
 class server : public std::enable_shared_from_this<server> {
 public:
     /**
-     * Bridge for libircclient.
-     */
-    class session;
-
-    /**
      * \brief Various options for server.
      */
     enum {
@@ -278,6 +269,17 @@ public:
         ssl_verify  = (1 << 2),             //!< Verify SSL
         auto_rejoin = (1 << 3),             //!< Auto rejoin a kick
         join_invite = (1 << 4)              //!< Join a channel on invitation
+    };
+
+    /**
+     * \brief Describe current server state.
+     */
+    enum class state_t {
+        disconnected,       //!< not connected at all,
+        connecting,         //!< network connection in progress,
+        identifying,        //!< sending nick, user and password commands,
+        waiting,            //!< waiting for reconnection,
+        connected           //!< ready for use
     };
 
     /**
@@ -420,10 +422,7 @@ public:
     boost::signals2::signal<void (whois_event)> on_whois;
 
 private:
-    class state;
-    class connected_state;
-    class connecting_state;
-    class disconnected_state;
+    state_t state_{state_t::disconnected};
 
     // Requested and joined channels.
     std::vector<channel> rchannels_;
@@ -432,7 +431,7 @@ private:
     // Identifier.
     std::string name_;
 
-    // Connection information
+    // Connection information.
     std::string host_;
     std::string password_;
     std::uint16_t port_{6667};
@@ -450,43 +449,42 @@ private:
     std::uint16_t recodelay_{30};
     std::uint16_t timeout_{1000};
 
-    // Queue of requests to send.
-    std::queue<std::function<bool ()>> queue_;
-
-    // libircclient session (bridge).
-    std::unique_ptr<session> session_;
-
-    // States.
-    std::unique_ptr<state> state_;
-    std::unique_ptr<state> state_next_;
+    // Server information.
+    std::map<channel_mode, char> modes_;
 
     // Misc.
-    boost::timer::cpu_timer timer_;
-    std::map<channel_mode, char> modes_;
+    boost::asio::io_service& service_;
+    std::unique_ptr<irc::connection> conn_;
     std::int8_t recocur_{0};
     std::map<std::string, std::set<std::string>> names_map_;
     std::map<std::string, class whois> whois_map_;
 
-    // Private helpers.
     void remove_joined_channel(const std::string& channel);
 
-    // Handle libircclient callbacks.
-    void handle_channel(const char*, const char**) noexcept;
-    void handle_channel_mode(const char*, const char**) noexcept;
-    void handle_channel_notice(const char*, const char**) noexcept;
-    void handle_connect(const char*, const char**) noexcept;
-    void handle_ctcp_action(const char*, const char**) noexcept;
-    void handle_invite(const char*, const char**) noexcept;
-    void handle_join(const char*, const char**) noexcept;
-    void handle_kick(const char*, const char**) noexcept;
-    void handle_mode(const char*, const char**) noexcept;
-    void handle_nick(const char*, const char**) noexcept;
-    void handle_notice(const char*, const char**) noexcept;
-    void handle_numeric(unsigned int, const char**, unsigned int) noexcept;
-    void handle_part(const char*, const char**) noexcept;
-    void handle_ping(const char*, const char**) noexcept;
-    void handle_query(const char*, const char**) noexcept;
-    void handle_topic(const char*, const char**) noexcept;
+    void dispatch_channel_mode(const irc::message&);
+    void dispatch_channel_notice(const irc::message&);
+    void dispatch_connect(const irc::message&);
+    void dispatch_endofnames(const irc::message&);
+    void dispatch_endofwhois(const irc::message&);
+    void dispatch_invite(const irc::message&);
+    void dispatch_isupport(const irc::message&);
+    void dispatch_join(const irc::message&);
+    void dispatch_kick(const irc::message&);
+    void dispatch_mode(const irc::message&);
+    void dispatch_namreply(const irc::message&);
+    void dispatch_nick(const irc::message&);
+    void dispatch_notice(const irc::message&);
+    void dispatch_part(const irc::message&);
+    void dispatch_ping(const irc::message&);
+    void dispatch_topic(const irc::message&);
+    void dispatch_whoischannels(const irc::message&);
+    void dispatch_whoisuser(const irc::message&);
+    void dispatch(const irc::message&);
+
+    void handle_recv(boost::system::error_code code, irc::message message);
+    void handle_connect(boost::system::error_code);
+    void recv();
+    void identify();
 
 public:
     /**
@@ -512,9 +510,10 @@ public:
     /**
      * Construct a server.
      *
+     * \param service the service
      * \param name the identifier
      */
-    server(std::string name);
+    server(boost::asio::io_service& service, std::string name);
 
     /**
      * Destructor. Close the connection if needed.
@@ -610,6 +609,10 @@ public:
      */
     inline void set_flags(std::uint8_t flags) noexcept
     {
+#if !defined(HAVE_SSL)
+        assert(!(flags & ssl));
+#endif
+
         flags_ = flags;
     }
 
@@ -787,50 +790,17 @@ public:
         return jchannels_;
     }
 
-    /**
-     * Set the next state, it is not changed immediately but on next iteration.
-     *
-     * \param state the new state
-     */
-    void next(std::unique_ptr<state> state) noexcept;
-
-    /**
-     * Get the state current id.
-     *
-     * \return the state id
-     */
-    std::string status() const noexcept;
-
-    /**
-     * Switch to next state if it has.
-     */
-    void update() noexcept;
+    virtual void connect() noexcept;
 
     /**
      * Force disconnection.
      */
-    void disconnect() noexcept;
+    virtual void disconnect() noexcept;
 
     /**
      * Asks for a reconnection.
      */
     virtual void reconnect() noexcept;
-
-    /**
-     * Prepare the IRC session.
-     *
-     * \warning Not thread-safe
-     */
-    virtual void prepare(fd_set& setinput, fd_set& setoutput, net::Handle& maxfd) noexcept;
-
-    /**
-     * Process incoming/outgoing data after selection.
-     *
-     * \param setinput
-     * \param setoutput
-     * \throw any exception that have been throw from user functions
-     */
-    virtual void sync(fd_set& setinput, fd_set& setoutput);
 
     /**
      * Determine if the nickname is the bot itself.

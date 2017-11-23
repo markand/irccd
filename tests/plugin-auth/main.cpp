@@ -36,9 +36,9 @@ protected:
 public:
     auth_test()
         : plugin_test(PLUGIN_NAME, PLUGIN_PATH)
-        , nickserv1_(std::make_shared<journal_server>("nickserv1"))
-        , nickserv2_(std::make_shared<journal_server>("nickserv2"))
-        , quakenet_(std::make_shared<journal_server>("quakenet"))
+        , nickserv1_(std::make_shared<journal_server>(service_, "nickserv1"))
+        , nickserv2_(std::make_shared<journal_server>(service_, "nickserv2"))
+        , quakenet_(std::make_shared<journal_server>(service_, "quakenet"))
     {
         plugin_->set_config({
             { "nickserv1.type", "nickserv" },

@@ -51,7 +51,7 @@ if (WITH_TESTS)
 #    add_subdirectory(cmd-server-topic)
 #    add_subdirectory(dynlib_plugin)
 
-    # Misc
+    add_subdirectory(irc)
     add_subdirectory(logger)
     add_subdirectory(rules)
     add_subdirectory(util)

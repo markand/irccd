@@ -39,7 +39,7 @@
 namespace irccd {
 
 plugin_test::plugin_test(std::string name, std::string path)
-    : server_(std::make_shared<journal_server>("test"))
+    : server_(std::make_shared<journal_server>(service_, "test"))
 {
     log::set_verbose(false);
     log::set_logger(std::make_unique<log::silent_logger>());

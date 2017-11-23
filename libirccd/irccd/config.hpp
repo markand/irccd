@@ -160,9 +160,10 @@ public:
     /**
      * Get the list of servers defined.
      *
+     * \param daemon the irccd instance
      * \return the list of servers
      */
-    std::vector<std::shared_ptr<server>> load_servers() const;
+    std::vector<std::shared_ptr<server>> load_servers(irccd& daemon) const;
 
     /**
      * Get the list of defined plugins.

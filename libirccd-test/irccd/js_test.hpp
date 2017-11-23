@@ -67,7 +67,7 @@ public:
      */
     js_test(const std::string& plugin_path = IRCCD_PLUGIN_TEST)
         : plugin_(new js_plugin("test", plugin_path))
-        , server_(new journal_server("test"))
+        , server_(new journal_server(service_, "test"))
     {
         // Irccd is mandatory at the moment.
         add<irccd_jsapi>();

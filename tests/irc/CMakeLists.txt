@@ -16,24 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(libirccd-test)
-
-irccd_define_library(
-    TARGET libirccd-test
-    SOURCES
-        ${libirccd-test_SOURCE_DIR}/irccd/journal_server.cpp
-        ${libirccd-test_SOURCE_DIR}/irccd/journal_server.hpp
-        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin_test.cpp>
-        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin_test.hpp>
-        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/js_test.hpp>
-        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin_test.js>
-    LIBRARIES
-        $<$<BOOL:${HAVE_JS}>:libirccd-js>
-        libirccd
-        libirccdctl
-        extern-gtest
-    PUBLIC_INCLUDES
-        $<BUILD_INTERFACE:${libirccd-test_SOURCE_DIR}/irccd>
-    FLAGS
-        $<BUILD_INTERFACE:IRCCD_PLUGIN_TEST="${libirccd-test_SOURCE_DIR}/irccd/plugin_test.js">
+irccd_define_test(
+    NAME irc
+    SOURCES main.cpp
+    LIBRARIES libirccd
 )

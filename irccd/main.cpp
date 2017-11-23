@@ -275,7 +275,7 @@ void load(const config& config, const option::result& options)
     config.load_transports(*instance);
 
     // [server] section.
-    for (const auto& server : config.load_servers())
+    for (const auto& server : config.load_servers(*instance))
         instance->servers().add(server);
 
     // [rule] section.
