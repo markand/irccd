@@ -16,53 +16,45 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
-#include <service.hpp>
-#include <plugin.hpp>
+#define BOOST_TEST_MODULE "plugin-list"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/command.hpp>
+#include <irccd/plugin_service.hpp>
 
-namespace {
+#include <command_test.hpp>
 
-class PluginListCommandTest : public CommandTester {
+namespace irccd {
+
+class plugin_list_test : public command_test<plugin_list_command> {
 public:
-    PluginListCommandTest()
-        : CommandTester(std::make_unique<plugin_list_command>())
+    plugin_list_test()
     {
-        m_irccd.plugins().add(std::make_unique<plugin>("t1", ""));
-        m_irccd.plugins().add(std::make_unique<plugin>("t2", ""));
+        daemon_->plugins().add(std::make_unique<plugin>("t1", ""));
+        daemon_->plugins().add(std::make_unique<plugin>("t2", ""));
     }
 };
 
-TEST_F(PluginListCommandTest, basic)
+BOOST_FIXTURE_TEST_SUITE(plugin_list_test_suite, plugin_list_test)
+
+BOOST_AUTO_TEST_CASE(basic)
 {
-    try {
-        auto response = nlohmann::json();
+    auto response = nlohmann::json();
 
-        m_irccdctl.client().onMessage.connect([&] (auto message) {
-            response = message;
-        });
-        m_irccdctl.client().request({{ "command", "plugin-list" }});
+    ctl_->send({{"command", "plugin-list"}});
+    ctl_->recv([&] (auto code, auto message) {
+        response = message;
+    });
 
-        poll([&] () {
-            return response.is_object();
-        });
+    wait_for([&] () {
+        return response.is_object();
+    });
 
-        ASSERT_TRUE(response.is_object());
-        ASSERT_EQ("t1", response["list"][0]);
-        ASSERT_EQ("t2", response["list"][1]);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(response.is_object());
+    BOOST_TEST("t1", response["list"][0]);
+    BOOST_TEST("t2", response["list"][1]);
 }
 
-} // !namespace
+BOOST_AUTO_TEST_SUITE_END()
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
-
-    return RUN_ALL_TESTS();
-}
+} // !irccd

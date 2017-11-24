@@ -16,88 +16,70 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
-#include <service.hpp>
-#include <plugin.hpp>
+#define BOOST_TEST_MODULE "plugin-info"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/command.hpp>
+#include <irccd/plugin_service.hpp>
 
-namespace {
+#include <command_test.hpp>
 
-class PluginInfoCommandTest : public CommandTester {
-public:
-    PluginInfoCommandTest()
-        : CommandTester(std::make_unique<plugin_info_command>())
-    {
-    }
-};
+namespace irccd {
 
-TEST_F(PluginInfoCommandTest, basic)
+BOOST_FIXTURE_TEST_SUITE(plugin_info_test_suite, command_test<plugin_info_command>)
+
+BOOST_AUTO_TEST_CASE(basic)
 {
-    try {
-        auto plg = std::make_unique<plugin>("test", "");
-        auto response = nlohmann::json();
+    auto plg = std::make_unique<plugin>("test", "");
+    auto response = nlohmann::json();
 
-        plg->set_author("Francis Beaugrand");
-        plg->set_license("GPL");
-        plg->set_summary("Completely useless plugin");
-        plg->set_version("0.0.0.0.0.0.0.0.1-beta5");
+    plg->set_author("Francis Beaugrand");
+    plg->set_license("GPL");
+    plg->set_summary("Completely useless plugin");
+    plg->set_version("0.0.0.0.0.0.0.0.1-beta5");
 
-        m_irccd.plugins().add(std::move(plg));
-        m_irccdctl.client().onMessage.connect([&] (auto msg) {
-            response = std::move(msg);
-        });
-        m_irccdctl.client().request({
-            { "command",    "plugin-info"       },
-            { "plugin",     "test"              },
-        });
+    daemon_->plugins().add(std::move(plg));
+    ctl_->recv([&] (auto, auto msg) {
+        response = std::move(msg);
+    });
+    ctl_->send({
+        { "command",    "plugin-info"       },
+        { "plugin",     "test"              },
+    });
 
-        poll([&] () {
-            return response.is_object();
-        });
+    wait_for([&] () {
+        return response.is_object();
+    });
 
-        ASSERT_TRUE(response.is_object());
-        ASSERT_EQ("Francis Beaugrand", response["author"]);
-        ASSERT_EQ("GPL", response["license"]);
-        ASSERT_EQ("Completely useless plugin", response["summary"]);
-        ASSERT_EQ("0.0.0.0.0.0.0.0.1-beta5", response["version"]);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(response.is_object());
+    BOOST_TEST(response["author"].get<std::string>() == "Francis Beaugrand");
+    BOOST_TEST(response["license"].get<std::string>() == "GPL");
+    BOOST_TEST(response["summary"].get<std::string>() == "Completely useless plugin");
+    BOOST_TEST(response["version"].get<std::string>() == "0.0.0.0.0.0.0.0.1-beta5");
 }
 
-TEST_F(PluginInfoCommandTest, notfound)
+BOOST_AUTO_TEST_CASE(notfound)
 {
-    try {
-        auto response = nlohmann::json();
+    auto response = nlohmann::json();
 
-        m_irccdctl.client().onMessage.connect([&] (auto msg) {
-            response = std::move(msg);
-        });
-        m_irccdctl.client().request({
-            { "command",    "plugin-info"       },
-            { "plugin",     "test"              },
-        });
+    ctl_->recv([&] (auto, auto msg) {
+        response = std::move(msg);
+    });
+    ctl_->send({
+        { "command",    "plugin-info"       },
+        { "plugin",     "test"              },
+    });
 
-        poll([&] () {
-            return response.is_object();
-        });
+    wait_for([&] () {
+        return response.is_object();
+    });
 
-        ASSERT_TRUE(response.is_object());
-        ASSERT_FALSE(response["status"]);
-        ASSERT_EQ("plugin test not found", response["error"]);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(response.is_object());
+
+    // TODO: error code here.
+    BOOST_TEST(response["error"].get<std::string>() == "plugin test not found");
 }
 
-} // !namespace
+BOOST_AUTO_TEST_SUITE_END()
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
-
-    return RUN_ALL_TESTS();
-}
+} // !irccd

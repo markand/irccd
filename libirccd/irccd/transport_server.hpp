@@ -199,7 +199,7 @@ void basic_transport_server<Protocol>::do_accept(accept_t handler)
 /**
  * Convenient type for IP/TCP
  */
-using tcp_transport_server = basic_transport_server<boost::asio::ip::tcp>;
+using ip_transport_server = basic_transport_server<boost::asio::ip::tcp>;
 
 #if !defined(_WIN32)
 
@@ -215,7 +215,7 @@ using local_transport_server = basic_transport_server<boost::asio::local::stream
 /**
  * \brief Secure layer implementation.
  */
-class tls_transport_server : public tcp_transport_server {
+class tls_transport_server : public ip_transport_server {
 private:
     using context_t = boost::asio::ssl::context;
     using client_t = basic_transport_client<boost::asio::ssl::stream<socket_t>>;

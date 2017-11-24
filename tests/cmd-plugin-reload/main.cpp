@@ -16,89 +16,83 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
-#include <service.hpp>
-#include <plugin.hpp>
+#define BOOST_TEST_MODULE "plugin-reload"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/command.hpp>
+#include <irccd/plugin_service.hpp>
+
+#include <command_test.hpp>
+
+namespace irccd {
 
 namespace {
 
-bool called = false;
-
-class CustomPlugin : public plugin {
+class custom_plugin : public plugin {
 public:
-    CustomPlugin()
+    bool reloaded{false};
+
+    custom_plugin()
         : plugin("test", "")
     {
     }
 
-    void on_reload(irccd::irccd &) override
+    void on_reload(irccd&) override
     {
-        called = true;
+        reloaded = true;
     }
 };
 
-class PluginReloadCommandTest : public CommandTester {
-public:
-    PluginReloadCommandTest()
-        : CommandTester(std::make_unique<plugin_reload_command>())
+class plugin_reload_test : public command_test<plugin_reload_command> {
+protected:
+    std::shared_ptr<custom_plugin> plugin_;
+
+    plugin_reload_test()
+        : plugin_(std::make_shared<custom_plugin>())
     {
-        called = false;
+        daemon_->plugins().add(plugin_);
     }
 };
-
-TEST_F(PluginReloadCommandTest, basic)
-{
-    try {
-        m_irccd.plugins().add(std::make_unique<CustomPlugin>());
-        m_irccdctl.client().request({
-            { "command", "plugin-reload" },
-            { "plugin", "test" }
-        });
-
-        poll([&] () {
-            return called;
-        });
-
-        ASSERT_TRUE(called);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
-}
-
-TEST_F(PluginReloadCommandTest, notfound)
-{
-    try {
-        auto response = nlohmann::json();
-
-        m_irccdctl.client().onMessage.connect([&] (auto msg) {
-            response = msg;
-        });
-        m_irccdctl.client().request({
-            { "command", "plugin-reload" },
-            { "plugin", "no" }
-        });
-
-        poll([&] () {
-            return response.is_object();
-        });
-
-        ASSERT_TRUE(response.is_object());
-        ASSERT_FALSE(response["status"]);
-        ASSERT_EQ("plugin no not found", response["error"]);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
-}
 
 } // !namespace
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_FIXTURE_TEST_SUITE(plugin_reload_test_suite, plugin_reload_test)
 
-    return RUN_ALL_TESTS();
+BOOST_AUTO_TEST_CASE(basic)
+{
+    ctl_->send({
+        { "command",    "plugin-reload" },
+        { "plugin",     "test"          }
+    });
+
+    wait_for([&] () {
+        return plugin_->reloaded;
+    });
+
+    BOOST_TEST(plugin_->reloaded);
 }
+
+BOOST_AUTO_TEST_CASE(notfound)
+{
+    auto response = nlohmann::json();
+
+    ctl_->recv([&] (auto, auto msg) {
+        response = msg;
+    });
+    ctl_->send({
+        { "command",    "plugin-reload" },
+        { "plugin",     "no"            }
+    });
+
+    wait_for([&] () {
+        return response.is_object();
+    });
+
+    // TODO: error code
+    BOOST_TEST(response.is_object());
+    BOOST_TEST(response["error"].get<std::string>() == "plugin no not found");
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+} // !irccd

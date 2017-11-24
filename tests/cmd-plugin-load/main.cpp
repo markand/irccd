@@ -16,63 +16,59 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
-#include <service.hpp>
-#include <plugin.hpp>
+#define BOOST_TEST_MODULE "plugin-load"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/command.hpp>
+#include <irccd/plugin_service.hpp>
+
+#include <command_test.hpp>
+
+namespace irccd {
 
 namespace {
 
-class CustomLoader : public plugin_loader {
+class custom_loader : public plugin_loader {
 public:
-    std::shared_ptr<plugin> open(const std::string &,
-                                 const std::string &) noexcept override
+    std::shared_ptr<plugin> open(const std::string&,
+                                 const std::string&) noexcept override
     {
         return nullptr;
     }
 
-    std::shared_ptr<plugin> find(const std::string &id) noexcept override
+    std::shared_ptr<plugin> find(const std::string& id) noexcept override
     {
         return std::make_unique<plugin>(id, "");
     }
 };
 
-class PluginLoadCommandTest : public CommandTester {
+class plugin_load_test : public command_test<plugin_load_command> {
 public:
-    PluginLoadCommandTest()
-        : CommandTester(std::make_unique<plugin_load_command>())
+    plugin_load_test()
     {
-        m_irccd.plugins().add_loader(std::make_unique<CustomLoader>());
+        daemon_->plugins().add_loader(std::make_unique<custom_loader>());
     }
 };
 
-TEST_F(PluginLoadCommandTest, basic)
+} // !irccd
+
+BOOST_FIXTURE_TEST_SUITE(plugin_load_test_suite, plugin_load_test)
+
+BOOST_AUTO_TEST_CASE(basic)
 {
-    try {
-        m_irccdctl.client().request({
-            { "command", "plugin-load" },
-            { "plugin", "foo" }
-        });
+    ctl_->send({
+        { "command", "plugin-load" },
+        { "plugin", "foo" }
+    });
 
-        poll([&] () {
-            return m_irccd.plugins().has("foo");
-        });
+    wait_for([&] () {
+        return daemon_->plugins().has("foo");
+    });
 
-        ASSERT_FALSE(m_irccd.plugins().list().empty());
-        ASSERT_TRUE(m_irccd.plugins().has("foo"));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(!daemon_->plugins().list().empty());
+    BOOST_TEST(daemon_->plugins().has("foo"));
 }
 
-} // !namespace
+BOOST_AUTO_TEST_SUITE_END()
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
-
-    return RUN_ALL_TESTS();
-}
+} // !irccd

@@ -195,7 +195,7 @@ std::unique_ptr<transport_server> load_transport_ip(boost::asio::io_service& ser
     boost::asio::ip::tcp::acceptor acceptor(service, endpoint, true);
 
     if (pkey.empty())
-        return std::make_unique<tcp_transport_server>(std::move(acceptor));
+        return std::make_unique<ip_transport_server>(std::move(acceptor));
 
 #if defined(HAVE_SSL)
     boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);

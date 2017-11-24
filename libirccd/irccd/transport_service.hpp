@@ -24,10 +24,10 @@
 
 #include <json.hpp>
 
-namespace irccd {
+#include "transport_client.hpp"
+#include "transport_server.hpp"
 
-class transport_client;
-class transport_server;
+namespace irccd {
 
 /**
  * \brief manage transport servers and clients.

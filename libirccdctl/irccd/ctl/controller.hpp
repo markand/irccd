@@ -137,7 +137,7 @@ public:
      * \param message the JSON message
      * \param handler the optional completion handler
      */
-    void send(nlohmann::json message, network_send_handler handler);
+    void send(nlohmann::json message, network_send_handler handler = nullptr);
 };
 
 } // !ctl
