@@ -21,8 +21,7 @@
 #include <unordered_map>
 
 #include <irccd.hpp>
-#include <irccd/server.hpp>
-#include <irccd/service.hpp>
+#include <irccd/server_service.hpp>
 
 #include "irccd_jsapi.hpp"
 #include "js_plugin.hpp"

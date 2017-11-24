@@ -26,10 +26,8 @@ set(
     ${libcommon_SOURCE_DIR}/irccd/ini.hpp
     ${libcommon_SOURCE_DIR}/irccd/json_util.hpp
     ${libcommon_SOURCE_DIR}/irccd/logger.hpp
-    ${libcommon_SOURCE_DIR}/irccd/net.hpp
     ${libcommon_SOURCE_DIR}/irccd/network_errc.hpp
     ${libcommon_SOURCE_DIR}/irccd/network_stream.hpp
-    ${libcommon_SOURCE_DIR}/irccd/net_util.hpp
     ${libcommon_SOURCE_DIR}/irccd/options.hpp
     ${libcommon_SOURCE_DIR}/irccd/signals.hpp
     ${libcommon_SOURCE_DIR}/irccd/string_util.hpp

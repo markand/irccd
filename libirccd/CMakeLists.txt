@@ -24,14 +24,17 @@ set(
     HEADERS
     ${libirccd_SOURCE_DIR}/irccd/basic_transport_client.hpp
     ${libirccd_SOURCE_DIR}/irccd/command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/command_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/config.hpp
     ${libirccd_SOURCE_DIR}/irccd/dynlib_plugin.hpp
     ${libirccd_SOURCE_DIR}/irccd/irc.hpp
     ${libirccd_SOURCE_DIR}/irccd/irccd.hpp
     ${libirccd_SOURCE_DIR}/irccd/plugin.hpp
+    ${libirccd_SOURCE_DIR}/irccd/plugin_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/rule.hpp
+    ${libirccd_SOURCE_DIR}/irccd/rule_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/server.hpp
-    ${libirccd_SOURCE_DIR}/irccd/service.hpp
+    ${libirccd_SOURCE_DIR}/irccd/server_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/transport_client.hpp
     ${libirccd_SOURCE_DIR}/irccd/transport_server.hpp
     ${libirccd_SOURCE_DIR}/irccd/transport_service.hpp
@@ -40,14 +43,17 @@ set(
 set(
     SOURCES
     ${libirccd_SOURCE_DIR}/irccd/command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/command_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/config.cpp
     ${libirccd_SOURCE_DIR}/irccd/dynlib_plugin.cpp
     ${libirccd_SOURCE_DIR}/irccd/irc.cpp
     ${libirccd_SOURCE_DIR}/irccd/irccd.cpp
     ${libirccd_SOURCE_DIR}/irccd/plugin.cpp
+    ${libirccd_SOURCE_DIR}/irccd/plugin_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/rule.cpp
+    ${libirccd_SOURCE_DIR}/irccd/rule_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/server.cpp
-    ${libirccd_SOURCE_DIR}/irccd/service.cpp
+    ${libirccd_SOURCE_DIR}/irccd/server_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/transport_client.cpp
     ${libirccd_SOURCE_DIR}/irccd/transport_server.cpp
     ${libirccd_SOURCE_DIR}/irccd/transport_service.cpp

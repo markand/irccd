@@ -21,8 +21,8 @@
 
 #include <irccd/irccd.hpp>
 #include <irccd/logger.hpp>
+#include <irccd/plugin_service.hpp>
 #include <irccd/server.hpp>
-#include <irccd/service.hpp>
 #include <irccd/string_util.hpp>
 
 #include "plugin_test.hpp"

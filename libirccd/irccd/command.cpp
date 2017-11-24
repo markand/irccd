@@ -19,7 +19,9 @@
 #include "command.hpp"
 #include "irccd.hpp"
 #include "json_util.hpp"
-#include "service.hpp"
+#include "rule_service.hpp"
+#include "plugin_service.hpp"
+#include "server_service.hpp"
 #include "transport_client.hpp"
 #include "util.hpp"
 

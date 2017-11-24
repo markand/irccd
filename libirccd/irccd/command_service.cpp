@@ -1,5 +1,5 @@
 /*
- * irccd.cpp -- main irccd class
+ * command_service.cpp -- command service
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -17,25 +17,33 @@
  */
 
 #include "command_service.hpp"
-#include "irccd.hpp"
-#include "plugin_service.hpp"
-#include "rule_service.hpp"
-#include "server_service.hpp"
-#include "transport_service.hpp"
 
 namespace irccd {
 
-irccd::irccd(boost::asio::io_service& service, std::string config)
-    : config_(std::move(config))
-    , service_(service)
-    , command_service_(std::make_unique<command_service>())
-    , server_service_(std::make_unique<server_service>(*this))
-    , tpt_service_(std::make_unique<transport_service>(*this))
-    , rule_service_(std::make_unique<rule_service>())
-    , plugin_service_(std::make_unique<plugin_service>(*this))
+bool command_service::contains(const std::string& name) const noexcept
 {
+    return find(name) != nullptr;
 }
 
-irccd::~irccd() = default;
+std::shared_ptr<command> command_service::find(const std::string& name) const noexcept
+{
+    auto it = std::find_if(commands_.begin(), commands_.end(), [&] (const auto& cmd) {
+        return cmd->name() == name;
+    });
+
+    return it == commands_.end() ? nullptr : *it;
+}
+
+void command_service::add(std::shared_ptr<command> command)
+{
+    auto it = std::find_if(commands_.begin(), commands_.end(), [&] (const auto& cmd) {
+        return cmd->name() == command->name();
+    });
+
+    if (it != commands_.end())
+        *it = std::move(command);
+    else
+        commands_.push_back(std::move(command));
+}
 
 } // !irccd

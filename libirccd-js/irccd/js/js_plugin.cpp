@@ -1,5 +1,5 @@
 /*
- * plugin-js.cpp -- Javascript plugins for irccd
+ * js_plugin.cpp -- Javascript plugins for irccd
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -24,12 +24,8 @@
 
 #include "irccd.hpp"
 #include "logger.hpp"
-//#include "plugin_module.hpp"
-//#include "server_module.hpp"
 #include "js_plugin.hpp"
-#include "service.hpp"
 #include "server_jsapi.hpp"
-//#include "timer.hpp"
 
 namespace irccd {
 

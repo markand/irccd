@@ -24,17 +24,13 @@
  * \brief Base class for irccd front end.
  */
 
-#include <atomic>
-#include <functional>
+#include "sysconfig.hpp"
+
 #include <memory>
-#include <mutex>
-#include <vector>
 
 #include <boost/asio.hpp>
 
 #include "config.hpp"
-#include "net.hpp"
-#include "sysconfig.hpp"
 
 /**
  * \brief Main irccd namespace
@@ -42,7 +38,6 @@
 namespace irccd {
 
 class command_service;
-class interrupt_service;
 class plugin_service;
 class rule_service;
 class server_service;
@@ -59,14 +54,8 @@ private:
     // Main io service.
     boost::asio::io_service& service_;
 
-    // Main loop stuff.
-    std::atomic<bool> running_{true};
-    std::mutex mutex_;
-    std::vector<std::function<void (irccd&)>> events_;
-
     // Services.
     std::shared_ptr<command_service> command_service_;
-    std::shared_ptr<interrupt_service> itr_service_;
     std::shared_ptr<server_service> server_service_;
     std::shared_ptr<transport_service> tpt_service_;
     std::shared_ptr<rule_service> rule_service_;
@@ -184,40 +173,18 @@ public:
     }
 
     /**
-     * Prepare the services for selection.
+     * Transient function for posting handlers.
      *
-     * \param in the input set
-     * \param out the output set
-     * \param max the maximum handle
+     * \param h the handler
+     * \deprecated do not use
      */
-    void prepare(fd_set& in, fd_set& out, net::Handle& max);
-
-    /**
-     * Synchronize the services.
-     *
-     * \param in the input set
-     * \param out the output set
-     */
-    void sync(fd_set& in, fd_set& out);
-
-    /**
-     * Add an event to the queue. This will immediately signals the event loop
-     * to interrupt itself to dispatch the pending events.
-     *
-     * \param ev the event
-     * \note Thread-safe
-     */
-    void post(std::function<void (irccd&)> ev) noexcept;
-
-    /**
-     * Loop forever by calling prepare and sync indefinitely.
-     */
-    void run();
-
-    /**
-     * Request to stop, usually from a signal.
-     */
-    void stop();
+    template <typename Handler>
+    inline void post(Handler h)
+    {
+        service_.post([this, h] () {
+            h(*this);
+        });
+    }
 };
 
 } // !irccd

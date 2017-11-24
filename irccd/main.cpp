@@ -33,15 +33,17 @@
 #include <csignal>
 #include <iostream>
 
-#include "command.hpp"
-#include "logger.hpp"
-#include "options.hpp"
-#include "service.hpp"
-#include "string_util.hpp"
-#include "system.hpp"
-#include "transport_service.hpp"
-#include "config.hpp"
-#include "irccd.hpp"
+#include <irccd/command_service.hpp>
+#include <irccd/config.hpp>
+#include <irccd/irccd.hpp>
+#include <irccd/logger.hpp>
+#include <irccd/options.hpp>
+#include <irccd/plugin_service.hpp>
+#include <irccd/rule_service.hpp>
+#include <irccd/server_service.hpp>
+#include <irccd/string_util.hpp>
+#include <irccd/system.hpp>
+#include <irccd/transport_service.hpp>
 
 #if defined(HAVE_JS)
 #   include <irccd/js/directory_jsapi.hpp>
@@ -62,6 +64,7 @@ namespace irccd {
 
 namespace {
 
+std::atomic<bool> running{true};
 std::unique_ptr<irccd> instance;
 
 void usage()
@@ -101,7 +104,7 @@ void version(const option::result& options)
 
 void stop(int)
 {
-    instance->stop();
+    running = false;
 }
 
 void init(int& argc, char**& argv)
@@ -362,6 +365,8 @@ int main(int argc, char** argv)
      * associated objects before any other static global values such as
      * loggers.
      */
-    instance->run();
+    while (running)
+        service.run();
+
     instance = nullptr;
 }

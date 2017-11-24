@@ -21,7 +21,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <irccd/irccd.hpp>
-#include <irccd/service.hpp>
+#include <irccd/plugin_service.hpp>
 
 #include <irccd/js/irccd_jsapi.hpp>
 #include <irccd/js/js_plugin.hpp>

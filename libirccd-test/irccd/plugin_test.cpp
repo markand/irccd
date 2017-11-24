@@ -19,7 +19,8 @@
 #include <cassert>
 
 #include <irccd/logger.hpp>
-#include <irccd/service.hpp>
+#include <irccd/plugin_service.hpp>
+#include <irccd/server_service.hpp>
 
 #include <irccd/js/directory_jsapi.hpp>
 #include <irccd/js/elapsed_timer_jsapi.hpp>

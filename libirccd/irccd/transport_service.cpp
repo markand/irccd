@@ -18,10 +18,9 @@
 
 #include <cassert>
 
-#include "command.hpp"
+#include "command_service.hpp"
 #include "irccd.hpp"
 #include "logger.hpp"
-#include "service.hpp"
 #include "transport_client.hpp"
 #include "transport_server.hpp"
 #include "transport_service.hpp"
