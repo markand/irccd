@@ -102,11 +102,6 @@ void version(const option::result& options)
     std::exit(0);
 }
 
-void stop(int)
-{
-    running = false;
-}
-
 void init(int& argc, char**& argv)
 {
     // Needed for some components.
@@ -114,18 +109,6 @@ void init(int& argc, char**& argv)
 
     // Default logging to console.
     log::set_verbose(false);
-
-    // Register some signals.
-    signal(SIGINT, stop);
-    signal(SIGTERM, stop);
-
-#if defined(SIGPIPE)
-    signal(SIGPIPE, SIG_IGN);
-#endif
-
-#if defined(SIGQUIT)
-    signal(SIGQUIT, stop);
-#endif
 
     -- argc;
     ++ argv;
@@ -300,6 +283,7 @@ int main(int argc, char** argv)
     init(argc, argv);
 
     boost::asio::io_service service;
+    boost::asio::signal_set sigs(service, SIGINT, SIGTERM);
 
     auto options = parse(argc, argv);
 
@@ -365,6 +349,11 @@ int main(int argc, char** argv)
      * associated objects before any other static global values such as
      * loggers.
      */
+    sigs.async_wait([&] (auto, auto) {
+        running = false;
+        service.stop();
+    });
+
     while (running)
         service.run();
 
