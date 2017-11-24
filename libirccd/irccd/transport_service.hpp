@@ -42,6 +42,7 @@ private:
     servers_t servers_;
 
     void handle_command(std::shared_ptr<transport_client>, const nlohmann::json&);
+    void do_recv(std::shared_ptr<transport_client>);
     void do_accept(transport_server&);
 
 public:

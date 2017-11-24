@@ -48,23 +48,29 @@ void transport_service::handle_command(std::shared_ptr<transport_client> tc, con
     }
 }
 
+void transport_service::do_recv(std::shared_ptr<transport_client> tc)
+{
+    tc->recv([this, tc] (auto code, auto json) {
+        if (code)
+            log::warning() << "transport: " << code.message() << std::endl;
+        else {
+            do_recv(tc);
+            handle_command(std::move(tc), json);
+        }
+    });
+}
+
 void transport_service::do_accept(transport_server& ts)
 {
     ts.accept([this, &ts] (auto code, auto client) {
         if (code)
             log::warning() << "transport: " << code.message() << std::endl;
         else {
+            do_accept(ts);
+            do_recv(std::move(client));
+
             log::info() << "transport: new client connected" << std::endl;
-
-            client->recv([this, client] (auto code, auto json) {
-                if (code)
-                    log::warning() << "transport: " << code.message() << std::endl;
-                else
-                    handle_command(std::move(client), json);
-            });
         }
-
-        do_accept(ts);
     });
 }
 
