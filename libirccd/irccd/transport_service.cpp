@@ -31,23 +31,21 @@ void transport_service::handle_command(std::shared_ptr<transport_client> tc, con
 {
     assert(object.is_object());
 
-    irccd_.post([=] (irccd&) {
-        auto name = object.find("command");
-        if (name == object.end() || !name->is_string())
-            return;
+    auto name = object.find("command");
+    if (name == object.end() || !name->is_string())
+        return;
 
-        auto cmd = irccd_.commands().find(*name);
+    auto cmd = irccd_.commands().find(*name);
 
-        if (!cmd)
-            tc->error(*name, "command does not exist");
-        else {
-            try {
-                cmd->exec(irccd_, *tc, object);
-            } catch (const std::exception& ex) {
-                tc->error(cmd->name(), ex.what());
-            }
+    if (!cmd)
+        tc->error(*name, "command does not exist");
+    else {
+        try {
+            cmd->exec(irccd_, *tc, object);
+        } catch (const std::exception& ex) {
+            tc->error(cmd->name(), ex.what());
         }
-    });
+    }
 }
 
 void transport_service::do_accept(transport_server& ts)
@@ -56,6 +54,8 @@ void transport_service::do_accept(transport_server& ts)
         if (code)
             log::warning() << "transport: " << code.message() << std::endl;
         else {
+            log::info() << "transport: new client connected" << std::endl;
+
             client->recv([this, client] (auto code, auto json) {
                 if (code)
                     log::warning() << "transport: " << code.message() << std::endl;

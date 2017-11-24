@@ -26,36 +26,36 @@
 
 namespace irccd {
 
-class event_handler {
-public:
-    std::string server;
-    std::string origin;
-    std::string target;
-    std::function<std::string (plugin &)> function_name;
-    std::function<void (plugin &)> function_exec;
+namespace {
 
-    void operator()(irccd& irccd) const
-    {
-        for (auto& plugin : irccd.plugins().list()) {
-            auto eventname = function_name(*plugin);
-            auto allowed = irccd.rules().solve(server, target, origin, plugin->name(), eventname);
+template <typename EventNameFunc, typename ExecFunc>
+void dispatch(irccd& daemon,
+              const std::string& server,
+              const std::string& origin,
+              const std::string& target,
+              EventNameFunc&& name_func,
+              ExecFunc exec_func)
+{
+    for (auto& plugin : daemon.plugins().list()) {
+        auto eventname = name_func(*plugin);
+        auto allowed = daemon.rules().solve(server, target, origin, plugin->name(), eventname);
 
-            if (!allowed) {
-                log::debug() << "rule: event skipped on match" << std::endl;
-                continue;
-            }
+        if (!allowed) {
+            log::debug() << "rule: event skipped on match" << std::endl;
+            continue;
+        }
 
-            log::debug() << "rule: event allowed" << std::endl;
+        log::debug() << "rule: event allowed" << std::endl;
 
-            // TODO: this is the responsability of plugin_service.
-            try {
-                function_exec(*plugin);
-            } catch (const std::exception& ex) {
-                log::warning() << "plugin " << plugin->name() << ": error: " << ex.what() << std::endl;
-            }
+        try {
+            exec_func(*plugin);
+        } catch (const std::exception& ex) {
+            log::warning() << "plugin " << plugin->name() << ": error: " << ex.what() << std::endl;
         }
     }
-};
+}
+
+} // !namespace
 
 void server_service::handle_channel_mode(const channel_mode_event& ev)
 {
@@ -74,14 +74,14 @@ void server_service::handle_channel_mode(const channel_mode_event& ev)
         { "argument",   ev.argument         }
     }));
 
-    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+    dispatch(irccd_, ev.server->name(), ev.origin, ev.channel,
         [=] (plugin&) -> std::string {
             return "onChannelMode";
         },
         [=] (plugin& plugin) {
             plugin.on_channel_mode(irccd_, ev);
         }
-    });
+    );
 }
 
 void server_service::handle_channel_notice(const channel_notice_event& ev)
@@ -99,14 +99,14 @@ void server_service::handle_channel_notice(const channel_notice_event& ev)
         { "message",    ev.message          }
     }));
 
-    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+    dispatch(irccd_, ev.server->name(), ev.origin, ev.channel,
         [=] (plugin&) -> std::string {
             return "onChannelNotice";
         },
         [=] (plugin& plugin) {
             plugin.on_channel_notice(irccd_, ev);
         }
-    });
+    );
 }
 
 void server_service::handle_connect(const connect_event& ev)
@@ -118,14 +118,14 @@ void server_service::handle_connect(const connect_event& ev)
         { "server",     ev.server->name()   }
     }));
 
-    irccd_.post(event_handler{ev.server->name(), /* origin */ "", /* channel */ "",
+    dispatch(irccd_, ev.server->name(), /* origin */ "", /* channel */ "",
         [=] (plugin&) -> std::string {
             return "onConnect";
         },
         [=] (plugin& plugin) {
             plugin.on_connect(irccd_, ev);
         }
-    });
+    );
 }
 
 void server_service::handle_invite(const invite_event& ev)
@@ -142,14 +142,14 @@ void server_service::handle_invite(const invite_event& ev)
         { "channel",    ev.channel          }
     }));
 
-    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+    dispatch(irccd_, ev.server->name(), ev.origin, ev.channel,
         [=] (plugin&) -> std::string {
             return "onInvite";
         },
         [=] (plugin& plugin) {
             plugin.on_invite(irccd_, ev);
         }
-    });
+    );
 }
 
 void server_service::handle_join(const join_event& ev)
@@ -165,14 +165,14 @@ void server_service::handle_join(const join_event& ev)
         { "channel",    ev.channel          }
     }));
 
-    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+    dispatch(irccd_, ev.server->name(), ev.origin, ev.channel,
         [=] (plugin&) -> std::string {
             return "onJoin";
         },
         [=] (plugin& plugin) {
             plugin.on_join(irccd_, ev);
         }
-    });
+    );
 }
 
 void server_service::handle_kick(const kick_event& ev)
@@ -192,14 +192,14 @@ void server_service::handle_kick(const kick_event& ev)
         { "reason",     ev.reason           }
     }));
 
-    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+    dispatch(irccd_, ev.server->name(), ev.origin, ev.channel,
         [=] (plugin&) -> std::string {
             return "onKick";
         },
         [=] (plugin& plugin) {
             plugin.on_kick(irccd_, ev);
         }
-    });
+    );
 }
 
 void server_service::handle_message(const message_event& ev)
@@ -217,7 +217,7 @@ void server_service::handle_message(const message_event& ev)
         { "message",    ev.message          }
     }));
 
-    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+    dispatch(irccd_, ev.server->name(), ev.origin, ev.channel,
         [=] (plugin& plugin) -> std::string {
             return string_util::parse_message(
                 ev.message,
@@ -236,7 +236,7 @@ void server_service::handle_message(const message_event& ev)
             else
                 plugin.on_message(irccd_, copy);
         }
-    });
+    );
 }
 
 void server_service::handle_me(const me_event& ev)
@@ -254,14 +254,14 @@ void server_service::handle_me(const me_event& ev)
         { "message",    ev.message          }
     }));
 
-    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+    dispatch(irccd_, ev.server->name(), ev.origin, ev.channel,
         [=] (plugin&) -> std::string {
             return "onMe";
         },
         [=] (plugin& plugin) {
             plugin.on_me(irccd_, ev);
         }
-    });
+    );
 }
 
 void server_service::handle_mode(const mode_event& ev)
@@ -277,14 +277,14 @@ void server_service::handle_mode(const mode_event& ev)
         { "mode",       ev.mode             }
     }));
 
-    irccd_.post(event_handler{ev.server->name(), ev.origin, /* channel */ "",
+    dispatch(irccd_, ev.server->name(), ev.origin, /* channel */ "",
         [=] (plugin &) -> std::string {
             return "onMode";
         },
         [=] (plugin &plugin) {
             plugin.on_mode(irccd_, ev);
         }
-    });
+    );
 }
 
 void server_service::handle_names(const names_event& ev)
@@ -305,14 +305,14 @@ void server_service::handle_names(const names_event& ev)
         { "names",      std::move(names)    }
     }));
 
-    irccd_.post(event_handler{ev.server->name(), /* origin */ "", ev.channel,
+    dispatch(irccd_, ev.server->name(), /* origin */ "", ev.channel,
         [=] (plugin&) -> std::string {
             return "onNames";
         },
         [=] (plugin& plugin) {
             plugin.on_names(irccd_, ev);
         }
-    });
+    );
 }
 
 void server_service::handle_nick(const nick_event& ev)
@@ -328,14 +328,14 @@ void server_service::handle_nick(const nick_event& ev)
         { "nickname",   ev.nickname         }
     }));
 
-    irccd_.post(event_handler{ev.server->name(), ev.origin, /* channel */ "",
+    dispatch(irccd_, ev.server->name(), ev.origin, /* channel */ "",
         [=] (plugin&) -> std::string {
             return "onNick";
         },
         [=] (plugin& plugin) {
             plugin.on_nick(irccd_, ev);
         }
-    });
+    );
 }
 
 void server_service::handle_notice(const notice_event& ev)
@@ -351,14 +351,14 @@ void server_service::handle_notice(const notice_event& ev)
         { "message",    ev.message          }
     }));
 
-    irccd_.post(event_handler{ev.server->name(), ev.origin, /* channel */ "",
+    dispatch(irccd_, ev.server->name(), ev.origin, /* channel */ "",
         [=] (plugin&) -> std::string {
             return "onNotice";
         },
         [=] (plugin& plugin) {
             plugin.on_notice(irccd_, ev);
         }
-    });
+    );
 }
 
 void server_service::handle_part(const part_event& ev)
@@ -376,14 +376,14 @@ void server_service::handle_part(const part_event& ev)
         { "reason",     ev.reason           }
     }));
 
-    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+    dispatch(irccd_, ev.server->name(), ev.origin, ev.channel,
         [=] (plugin&) -> std::string {
             return "onPart";
         },
         [=] (plugin& plugin) {
             plugin.on_part(irccd_, ev);
         }
-    });
+    );
 }
 
 void server_service::handle_query(const query_event& ev)
@@ -399,7 +399,7 @@ void server_service::handle_query(const query_event& ev)
         { "message",    ev.message          }
     }));
 
-    irccd_.post(event_handler{ev.server->name(), ev.origin, /* channel */ "",
+    dispatch(irccd_, ev.server->name(), ev.origin, /* channel */ "",
         [=] (plugin& plugin) -> std::string {
             return string_util::parse_message(
                 ev.message,
@@ -418,7 +418,7 @@ void server_service::handle_query(const query_event& ev)
             else
                 plugin.on_query(irccd_, copy);
         }
-    });
+    );
 }
 
 void server_service::handle_topic(const topic_event& ev)
@@ -436,14 +436,14 @@ void server_service::handle_topic(const topic_event& ev)
         { "topic",      ev.topic            }
     }));
 
-    irccd_.post(event_handler{ev.server->name(), ev.origin, ev.channel,
+    dispatch(irccd_, ev.server->name(), ev.origin, ev.channel,
         [=] (plugin&) -> std::string {
             return "onTopic";
         },
         [=] (plugin& plugin) {
             plugin.on_topic(irccd_, ev);
         }
-    });
+    );
 }
 
 void server_service::handle_whois(const whois_event& ev)
@@ -464,14 +464,14 @@ void server_service::handle_whois(const whois_event& ev)
         { "realname",   ev.whois.realname   }
     }));
 
-    irccd_.post(event_handler{ev.server->name(), /* origin */ "", /* channel */ "",
+    dispatch(irccd_, ev.server->name(), /* origin */ "", /* channel */ "",
         [=] (plugin&) -> std::string {
             return "onWhois";
         },
         [=] (plugin& plugin) {
             plugin.on_whois(irccd_, ev);
         }
-    });
+    );
 }
 
 server_service::server_service(irccd &irccd)
@@ -509,14 +509,12 @@ void server_service::add(std::shared_ptr<server> server)
     server->on_topic.connect(boost::bind(&server_service::handle_topic, this, _1));
     server->on_whois.connect(boost::bind(&server_service::handle_whois, this, _1));
     server->on_die.connect([this, ptr] () {
-        irccd_.post([=] (irccd&) {
-            auto server = ptr.lock();
+        auto server = ptr.lock();
 
-            if (server) {
-                log::info(string_util::sprintf("server %s: removed", server->name()));
-                servers_.erase(std::find(servers_.begin(), servers_.end(), server));
-            }
-        });
+        if (server) {
+            log::info(string_util::sprintf("server %s: removed", server->name()));
+            servers_.erase(std::find(servers_.begin(), servers_.end(), server));
+        }
     });
 
     server->connect();

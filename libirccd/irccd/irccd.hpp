@@ -171,20 +171,6 @@ public:
     {
         return *plugin_service_;
     }
-
-    /**
-     * Transient function for posting handlers.
-     *
-     * \param h the handler
-     * \deprecated do not use
-     */
-    template <typename Handler>
-    inline void post(Handler h)
-    {
-        service_.post([this, h] () {
-            h(*this);
-        });
-    }
 };
 
 } // !irccd
