@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cassert>
 #include <iterator>
 #include <sstream>
 
@@ -103,12 +104,32 @@ message message::parse(const std::string& line)
     return {std::move(prefix), std::move(command), std::move(args)};
 }
 
+bool message::is_ctcp(unsigned index) const noexcept
+{
+    auto a = arg(index);
+
+    if (a.empty())
+        return false;
+
+    return a.front() == 0x01 && a.back() == 0x01;
+}
+
+std::string message::ctcp(unsigned index) const
+{
+    assert(is_ctcp(index));
+
+    return args_[index].substr(1, args_[index].size() - 1);
+}
+
 user user::parse(const std::string& line)
 {
+    if (line.empty())
+        return {"", ""};
+
     auto pos = line.find("!");
 
     if (pos == std::string::npos)
-        return {"", ""};
+        return {line, ""};
 
     return {line.substr(0, pos), line.substr(pos + 1)};
 }

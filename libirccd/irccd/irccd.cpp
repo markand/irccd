@@ -49,19 +49,24 @@ void irccd::post(std::function<void (irccd&)> ev) noexcept
 
 void irccd::run()
 {
+    for (;;)
+        service_.run();
+
+#if 0
     while (running_) {
         net_util::poll(100, *this);
         service_.poll();
     }
+#endif
 }
 
-void irccd::prepare(fd_set& in, fd_set& out, net::Handle& max)
+void irccd::prepare(fd_set&, fd_set&, net::Handle&)
 {
-    net_util::prepare(in, out, max, *itr_service_, *server_service_);
 }
 
-void irccd::sync(fd_set& in, fd_set& out)
+void irccd::sync(fd_set& , fd_set& )
 {
+#if 0
     if (!running_)
         return;
 
@@ -89,6 +94,7 @@ void irccd::sync(fd_set& in, fd_set& out)
 
     for (auto& ev : copy)
         ev(*this);
+#endif
 }
 
 void irccd::stop()

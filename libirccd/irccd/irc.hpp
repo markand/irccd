@@ -276,6 +276,23 @@ public:
     }
 
     /**
+     * Tells if the message is a CTCP.
+     *
+     * \param index the param index (maybe out of bounds)
+     * \return true if CTCP
+     */
+    bool is_ctcp(unsigned index) const noexcept;
+
+    /**
+     * Parse a CTCP message.
+     *
+     * \pre is_ctcp(index)
+     * \param index the param index
+     * \return the CTCP command
+     */
+    std::string ctcp(unsigned index) const;
+
+    /**
      * Parse a IRC message.
      *
      * \param line the buffer content (without \r\n)
@@ -489,7 +506,8 @@ void basic_connection<Socket>::do_recv(recv_t handler)
 template <typename Socket>
 void basic_connection<Socket>::do_send(const std::string& message, send_t handler)
 {
-    boost::asio::async_write(socket_, boost::asio::buffer(message), [handler, message] (auto code, auto xfer) {
+    boost::asio::async_write(socket_, boost::asio::buffer(message), [handler, message] (auto code, auto) {
+        // TODO: xfer
         handler(code);
     });
 }

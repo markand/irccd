@@ -404,16 +404,6 @@ public:
     server_service(irccd& instance);
 
     /**
-     * \copydoc Service::prepare
-     */
-    void prepare(fd_set& in, fd_set& out, net::Handle& max);
-
-    /**
-     * \copydoc Service::sync
-     */
-    void sync(fd_set& in, fd_set& out);
-
-    /**
      * Get the list of servers
      *
      * \return the servers

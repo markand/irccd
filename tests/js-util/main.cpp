@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE(splithost)
         throw dukx_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
-    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "!~user@hyper/super/host");
+    BOOST_TEST(duk_get_string(plugin_->context(), -1) == "~user@hyper/super/host");
 }
 
 /*

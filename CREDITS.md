@@ -5,7 +5,8 @@ Libraries and projects
 ----------------------
 
 - libircclient, http://www.ulduzsoft.com/linux/libircclient
-  Very powerful and great C IRC library.
+  Very powerful and great C IRC library used until version 3.0.0, has been a
+  source of inspiration.
 
 - OpenSSL, http://openssl.org
   Free, open-source famous crypto library.

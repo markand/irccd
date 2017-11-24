@@ -476,6 +476,7 @@ private:
     void dispatch_notice(const irc::message&);
     void dispatch_part(const irc::message&);
     void dispatch_ping(const irc::message&);
+    void dispatch_privmsg(const irc::message&);
     void dispatch_topic(const irc::message&);
     void dispatch_whoischannels(const irc::message&);
     void dispatch_whoisuser(const irc::message&);
@@ -492,11 +493,12 @@ public:
      *
      * Used in JavaScript API and transport commands.
      *
+     * \param service the io service
      * \param object the object
      * \return the server
      * \throw std::exception on failures
      */
-    static std::shared_ptr<server> from_json(const nlohmann::json& object);
+    static std::shared_ptr<server> from_json(boost::asio::io_service& service, const nlohmann::json& object);
 
     /**
      * Split a channel from the form channel:password into a server_channel

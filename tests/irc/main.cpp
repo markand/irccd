@@ -65,18 +65,16 @@ BOOST_AUTO_TEST_CASE(basics)
 
     BOOST_TEST(user.nick() == "jean");
     BOOST_TEST(user.host() == "~jean@127.0.0.1");
+
+    auto usersimple = irc::user::parse("jean");
+
+    BOOST_TEST(usersimple.nick() == "jean");
+    BOOST_TEST(usersimple.host().empty());
 }
 
-BOOST_AUTO_TEST_CASE(invalid)
+BOOST_AUTO_TEST_CASE(empty)
 {
-    irc::user user("", "");
-
-    user = irc::user::parse("notavalidcombination");
-
-    BOOST_TEST(user.nick().empty());
-    BOOST_TEST(user.host().empty());
-
-    user = irc::user::parse("");
+    auto user = irc::user::parse("");
 
     BOOST_TEST(user.nick().empty());
     BOOST_TEST(user.host().empty());

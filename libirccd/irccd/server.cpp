@@ -77,6 +77,7 @@ std::map<channel_mode, char> isupport_extract_prefixes(const std::string& line)
 
     int j = 0;
     bool read_modes = true;
+
     for (size_t i = 0; i < buf.size(); ++i) {
         if (buf[i] == '(')
             continue;
@@ -110,24 +111,9 @@ void server::remove_joined_channel(const std::string& channel)
     jchannels_.erase(std::remove(jchannels_.begin(), jchannels_.end(), channel), jchannels_.end());
 }
 
-#if 0
-
-void server::handle_channel(const char* orig, const char** params) noexcept
+std::shared_ptr<server> server::from_json(boost::asio::io_service& service, const nlohmann::json& object)
 {
-    on_message({shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
-}
-
-void server::handle_ctcp_action(const char* orig, const char** params) noexcept
-{
-    on_me({shared_from_this(), strify(orig), strify(params[0]), strify(params[1])});
-}
-
-#endif
-
-std::shared_ptr<server> server::from_json(const nlohmann::json& object)
-{
-#if 0
-    auto sv = std::make_shared<server>(json_util::require_identifier(object, "name"));
+    auto sv = std::make_shared<server>(service, json_util::require_identifier(object, "name"));
 
     sv->set_host(json_util::require_string(object, "host"));
     sv->set_password(json_util::get_string(object, "password"));
@@ -153,8 +139,6 @@ std::shared_ptr<server> server::from_json(const nlohmann::json& object)
         sv->set_flags(sv->flags() | server::join_invite);
 
     return sv;
-#endif
-    return nullptr;
 }
 
 channel server::split_channel(const std::string& value)
@@ -176,16 +160,6 @@ server::server(boost::asio::io_service& service, std::string name)
 
     nickname_ = user.empty() ? "irccd" : user;
     username_ = user.empty() ? "irccd" : user;
-}
-
-void server::dispatch_channel_mode(const irc::message& msg)
-{
-    on_channel_mode({ shared_from_this(), msg.arg(0), msg.arg(1), msg.arg(2), msg.arg(3)});
-}
-
-void server::dispatch_channel_notice(const irc::message& msg)
-{
-    on_channel_notice({shared_from_this(), msg.arg(0), msg.arg(0), msg.arg(1)});
 }
 
 void server::dispatch_connect(const irc::message&)
@@ -241,6 +215,7 @@ void server::dispatch_endofwhois(const irc::message& msg)
      * params[2] == End of WHOIS list
      */
     auto it = whois_map_.find(msg.arg(1));
+
     if (it != whois_map_.end()) {
         on_whois({shared_from_this(), it->second});
 
@@ -251,11 +226,11 @@ void server::dispatch_endofwhois(const irc::message& msg)
 
 void server::dispatch_invite(const irc::message& msg)
 {
-    // If joininvite is set, join the channel.
-    if ((flags_ & join_invite) && is_self(msg.arg(1)))
-        join(msg.arg(2));
+    // If join-invite is set, join the channel.
+    if ((flags_ & join_invite) && is_self(msg.arg(0)))
+        join(msg.arg(1));
 
-    on_invite({shared_from_this(), msg.arg(0), msg.arg(2), msg.arg(1)});
+    on_invite({shared_from_this(), msg.prefix(), msg.arg(1), msg.arg(0)});
 }
 
 void server::dispatch_isupport(const irc::message& msg)
@@ -283,36 +258,36 @@ void server::dispatch_isupport(const irc::message& msg)
             break;
         }
     }
-
 }
 
 void server::dispatch_join(const irc::message& msg)
 {
-    if (is_self(msg.arg(0)))
-        jchannels_.push_back(msg.arg(1));
+    if (is_self(msg.prefix()))
+        jchannels_.push_back(msg.arg(0));
 
-    on_join({shared_from_this(), msg.arg(0), msg.arg(1)});
+    on_join({shared_from_this(), msg.prefix(), msg.arg(0)});
 }
 
 void server::dispatch_kick(const irc::message& msg)
 {
-    if (is_self(msg.arg(2))) {
+    if (is_self(msg.arg(1))) {
         // Remove the channel from the joined list.
-        remove_joined_channel(msg.arg(1));
+        remove_joined_channel(msg.arg(0));
 
         // Rejoin the channel if the option has been set and I was kicked.
         if (flags_ & auto_rejoin)
-            join(msg.arg(1));
+            join(msg.arg(0));
     }
 
-    on_kick({ shared_from_this(), msg.arg(0), msg.arg(1), msg.arg(2), msg.arg(3)});
+    on_kick({shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1), msg.arg(2)});
 }
 
 void server::dispatch_mode(const irc::message& msg)
 {
-#if 0
-    on_mode({shared_from_this(), msg.arg(0), msg.arg(1)});
-#endif
+    if (is_self(msg.arg(1)))
+        on_mode({shared_from_this(), msg.prefix(), msg.arg(1)});
+    else
+        on_channel_mode({shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1), msg.arg(2)});
 }
 
 void server::dispatch_namreply(const irc::message& msg)
@@ -341,31 +316,49 @@ void server::dispatch_namreply(const irc::message& msg)
 void server::dispatch_nick(const irc::message& msg)
 {
     // Update our nickname.
-    if (is_self(msg.arg(0)))
+    if (is_self(msg.prefix()))
         nickname_ = msg.arg(0);
 
-    on_nick({shared_from_this(), msg.arg(0), msg.arg(1)});
+    on_nick({shared_from_this(), msg.prefix(), msg.arg(0)});
 }
 
 void server::dispatch_notice(const irc::message& msg)
 {
-    on_notice({shared_from_this(), msg.arg(0), msg.arg(2)});
+    if (is_self(msg.arg(1)))
+        on_notice({shared_from_this(), msg.prefix(), msg.arg(1)});
+    else
+        on_channel_notice({shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1)});
 }
 
 void server::dispatch_part(const irc::message& msg)
 {
     // Remove the channel from the joined list if I left a channel.
-    if (is_self(msg.arg(0)))
+    if (is_self(msg.prefix()))
         remove_joined_channel(msg.arg(1));
 
-    on_part({shared_from_this(), msg.arg(0), msg.arg(1), msg.arg(2)});
+    on_part({shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1)});
 }
 
 void server::dispatch_ping(const irc::message& msg)
 {
     assert(msg.command() == "PING");
 
-    conn_->send(string_util::sprintf("PONG %s", msg.arg(1)));
+    conn_->send(string_util::sprintf("PONG %s", msg.arg(0)));
+}
+
+void server::dispatch_privmsg(const irc::message& msg)
+{
+    assert(msg.command() == "PRIVMSG");
+
+    if (msg.is_ctcp(1)) {
+        auto cmd = msg.ctcp(1);
+
+        if (cmd.compare(0, 6, "ACTION") == 0)
+            on_me({shared_from_this(), msg.prefix(), msg.arg(0), cmd.substr(7)});
+    } else if (is_self(msg.arg(0)))
+        on_query({shared_from_this(), msg.prefix(), msg.arg(1)});
+    else
+        on_message({shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1)});
 }
 
 void server::dispatch_topic(const irc::message& msg)
@@ -430,13 +423,15 @@ void server::dispatch(const irc::message& message)
     if (message.is(5))
         dispatch_isupport(message);
     else if (message.is(irc::err::nomotd) || message.is(irc::rpl::endofmotd))
-            dispatch_connect(message);
+        dispatch_connect(message);
     else if (message.command() == "INVITE")
         dispatch_invite(message);
     else if (message.command() == "JOIN")
         dispatch_join(message);
     else if (message.command() == "KICK")
         dispatch_kick(message);
+    else if (message.command() == "MODE")
+        dispatch_mode(message);
     else if (message.command() == "NICK")
         dispatch_nick(message);
     else if (message.command() == "NOTICE")
@@ -447,6 +442,8 @@ void server::dispatch(const irc::message& message)
         dispatch_part(message);
     else if (message.command() == "PING")
         dispatch_ping(message);
+    else if (message.command() == "PRIVMSG")
+        dispatch_privmsg(message);
     else if (message.is(irc::rpl::namreply))
         dispatch_namreply(message);
     else if (message.is(irc::rpl::endofnames))

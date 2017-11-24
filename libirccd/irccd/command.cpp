@@ -257,7 +257,7 @@ server_connect_command::server_connect_command()
 
 void server_connect_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto server = server::from_json(args);
+    auto server = server::from_json(irccd.service(), args);
 
     if (irccd.servers().has(server->name()))
         client.error("server-connect", "server already exists");

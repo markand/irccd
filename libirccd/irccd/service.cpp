@@ -793,7 +793,7 @@ void server_service::handle_whois(const whois_event& ev)
     log::debug() << "  username: " << ev.whois.user << "\n";
     log::debug() << "  host: " << ev.whois.host << "\n";
     log::debug() << "  realname: " << ev.whois.realname << "\n";
-    log::debug() << "  channels: " << string_util::join(ev.whois.channels.begin(), ev.whois.channels.end()) << std::endl;
+    log::debug() << "  channels: " << string_util::join(ev.whois.channels.begin(), ev.whois.channels.end(), ", ") << std::endl;
 
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onWhois"           },
@@ -817,24 +817,6 @@ void server_service::handle_whois(const whois_event& ev)
 server_service::server_service(irccd &irccd)
     : irccd_(irccd)
 {
-}
-
-void server_service::prepare(fd_set& in, fd_set& out, net::Handle& max)
-{
-#if 0
-    for (auto& server : servers_) {
-        server->update();
-        server->prepare(in, out, max);
-    }
-#endif
-}
-
-void server_service::sync(fd_set& in, fd_set& out)
-{
-#if 0
-    for (auto& server : servers_)
-        server->sync(in, out);
-#endif
 }
 
 bool server_service::has(const std::string& name) const noexcept
