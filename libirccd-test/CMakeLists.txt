@@ -32,7 +32,6 @@ irccd_define_library(
         $<$<BOOL:${HAVE_JS}>:libirccd-js>
         libirccd
         libirccdctl
-        extern-gtest
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${libirccd-test_SOURCE_DIR}/irccd>
     FLAGS

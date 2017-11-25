@@ -112,7 +112,6 @@ else ()
 endif ()
 
 if (WITH_TESTS)
-    add_subdirectory(extern/gtest)
     set(WITH_TESTS_MSG "Yes")
 else ()
     set(WITH_TESTS_MSG "No")
