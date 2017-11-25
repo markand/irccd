@@ -16,60 +16,52 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
+#define BOOST_TEST_MODULE "server-me"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/server_service.hpp>
+
+#include <journal_server.hpp>
+#include <command_test.hpp>
+
+namespace irccd {
 
 namespace {
 
-std::string target;
-std::string message;
+class server_me_test : public command_test<server_me_command> {
+protected:
+    std::shared_ptr<journal_server> server_{new journal_server(service_, "test")};
+
+    server_me_test()
+    {
+        daemon_->servers().add(server_);
+    }
+};
 
 } // !namespace
 
-class ServerMeTest : public ServerTester {
-public:
-    void me(std::string target, std::string message) override
-    {
-        ::target = target;
-        ::message = message;
-    }
-};
+BOOST_FIXTURE_TEST_SUITE(server_me_test_suite, server_me_test)
 
-class ServerMeCommandTest : public CommandTester {
-public:
-    ServerMeCommandTest()
-        : CommandTester(std::make_unique<server_me_command>(),
-                        std::make_unique<ServerMeTest>())
-    {
-        m_irccdctl.client().request({
-            { "command",    "server-me"         },
-            { "server",     "test"              },
-            { "target",     "jean"              },
-            { "message",    "hello!"            }
-        });
-    }
-};
-
-TEST_F(ServerMeCommandTest, basic)
+BOOST_AUTO_TEST_CASE(basic)
 {
-    try {
-        poll([&] () {
-            return !target.empty() && !message.empty();
-        });
+    ctl_->send({
+        { "command",    "server-me"         },
+        { "server",     "test"              },
+        { "target",     "jean"              },
+        { "message",    "hello!"            }
+    });
 
-        ASSERT_EQ("jean", target);
-        ASSERT_EQ("hello!", message);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    wait_for([this] () {
+        return !server_->cqueue().empty();
+    });
+
+    auto cmd = server_->cqueue().back();
+
+    BOOST_TEST(cmd["command"].get<std::string>() == "me");
+    BOOST_TEST(cmd["message"].get<std::string>() == "hello!");
+    BOOST_TEST(cmd["target"].get<std::string>() == "jean");
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

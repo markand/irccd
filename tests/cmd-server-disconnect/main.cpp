@@ -16,80 +16,70 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
-#include <service.hpp>
-#include <server.hpp>
+#define BOOST_TEST_MODULE "server-disconnect"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/server_service.hpp>
 
-class ServerDisconnectCommandTest : public CommandTester {
-public:
-    ServerDisconnectCommandTest()
-        : CommandTester(std::make_unique<server_disconnect_command>())
+#include <journal_server.hpp>
+#include <command_test.hpp>
+
+namespace irccd {
+
+namespace {
+
+class server_disconnect_test : public command_test<server_disconnect_command> {
+protected:
+    server_disconnect_test()
     {
+        daemon_->servers().add(std::make_unique<journal_server>(service_, "s1"));
+        daemon_->servers().add(std::make_unique<journal_server>(service_, "s2"));
     }
 };
 
-TEST_F(ServerDisconnectCommandTest, one)
+} // !namespace
+
+BOOST_FIXTURE_TEST_SUITE(server_disconnect_test_suite, server_disconnect_test)
+
+BOOST_AUTO_TEST_CASE(one)
 {
-    bool response = false;
+    nlohmann::json result;
 
-    try {
-        m_irccd.servers().add(std::make_unique<ServerTester>("s1"));
-        m_irccd.servers().add(std::make_unique<ServerTester>("s2"));
-        m_irccdctl.client().onMessage.connect([&] (const auto &msg) {
-            auto it = msg.find("command");
+    ctl_->send({
+        { "command",    "server-disconnect" },
+        { "server",     "s1"                }
+    });
+    ctl_->recv([&] (auto, auto msg) {
+        result = msg;
+    });
 
-            if (it != msg.end())
-                response = it->is_string() && *it == "server-disconnect";
-        });
-        m_irccdctl.client().request({
-            { "command",    "server-disconnect" },
-            { "server",     "s1"                }
-        });
+    wait_for([&] () {
+        return result.is_object();
+    });
 
-        poll([&] () { return response; });
-
-        ASSERT_TRUE(response);
-        ASSERT_FALSE(m_irccd.servers().has("s1"));
-        ASSERT_TRUE(m_irccd.servers().has("s2"));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(result["command"].get<std::string>() == "server-disconnect");
+    BOOST_TEST(!daemon_->servers().has("s1"));
+    BOOST_TEST(daemon_->servers().has("s2"));
 }
 
-TEST_F(ServerDisconnectCommandTest, all)
+BOOST_AUTO_TEST_CASE(all)
 {
-    bool response = false;
+    nlohmann::json result;
 
-    try {
-        m_irccd.servers().add(std::make_unique<ServerTester>("s1"));
-        m_irccd.servers().add(std::make_unique<ServerTester>("s2"));
-        m_irccdctl.client().onMessage.connect([&] (const auto &msg) {
-            auto it = msg.find("command");
+    ctl_->send({{"command", "server-disconnect"}});
+    ctl_->recv([&] (auto, auto msg) {
+        result = msg;
+    });
 
-            if (it != msg.end())
-                response = it->is_string() && *it == "server-disconnect";
-        });
-        m_irccdctl.client().request({
-            { "command",    "server-disconnect" }
-        });
+    wait_for([&] () {
+        return result.is_object();
+    });
 
-        poll([&] () { return response; });
-
-        ASSERT_TRUE(response);
-        ASSERT_FALSE(m_irccd.servers().has("s1"));
-        ASSERT_FALSE(m_irccd.servers().has("s2"));
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(result["command"].get<std::string>() == "server-disconnect");
+    BOOST_TEST(!daemon_->servers().has("s1"));
+    BOOST_TEST(!daemon_->servers().has("s2"));
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

@@ -5,7 +5,7 @@
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
+ * copyright part and this permission part appear in all copies.
  *
  * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
  * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
@@ -16,83 +16,71 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
+#define BOOST_TEST_MODULE "server-part"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/server_service.hpp>
+
+#include <journal_server.hpp>
+#include <command_test.hpp>
+
+namespace irccd {
 
 namespace {
 
-std::string cmd_channel;
-std::string cmd_reason;
+class server_part_test : public command_test<server_part_command> {
+protected:
+    std::shared_ptr<journal_server> server_{new journal_server(service_, "test")};
+
+    server_part_test()
+    {
+        daemon_->servers().add(server_);
+    }
+};
 
 } // !namespace
 
-class ServerPartTest : public ServerTester {
-public:
-    void part(std::string channel, std::string reason) override
-    {
-        ::cmd_channel = channel;
-        ::cmd_reason = reason;
-    }
-};
+BOOST_FIXTURE_TEST_SUITE(server_part_test_suite, server_part_test)
 
-class ServerPartCommandTest : public CommandTester {
-public:
-    ServerPartCommandTest()
-        : CommandTester(std::make_unique<server_part_command>(),
-                        std::make_unique<ServerPartTest>())
-    {
-        cmd_channel.clear();
-        cmd_reason.clear();
-    }
-};
-
-TEST_F(ServerPartCommandTest, basic)
+BOOST_AUTO_TEST_CASE(basic)
 {
-    try {
-        m_irccdctl.client().request({
-            { "command",    "server-part"   },
-            { "server",     "test"          },
-            { "channel",    "#staff"        },
-            { "reason",     "too noisy"     }
-        });
+    ctl_->send({
+        { "command",    "server-part"   },
+        { "server",     "test"          },
+        { "channel",    "#staff"        },
+        { "reason",     "too noisy"     }
+    });
 
-        poll([&] () {
-            return !cmd_channel.empty();
-        });
+    wait_for([this] () {
+        return !server_->cqueue().empty();
+    });
 
-        ASSERT_EQ("#staff", cmd_channel);
-        ASSERT_EQ("too noisy", cmd_reason);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    auto cmd = server_->cqueue().back();
+
+    BOOST_TEST(cmd["command"].get<std::string>() == "part");
+    BOOST_TEST(cmd["channel"].get<std::string>() == "#staff");
+    BOOST_TEST(cmd["reason"].get<std::string>() == "too noisy");
 }
 
-TEST_F(ServerPartCommandTest, noreason)
+BOOST_AUTO_TEST_CASE(noreason)
 {
-    try {
-        m_irccdctl.client().request({
-            { "command",    "server-part"   },
-            { "server",     "test"          },
-            { "channel",    "#staff"        }
-        });
+    ctl_->send({
+        { "command",    "server-part"   },
+        { "server",     "test"          },
+        { "channel",    "#staff"        }
+    });
 
-        poll([&] () {
-            return !cmd_channel.empty();
-        });
+    wait_for([this] () {
+        return !server_->cqueue().empty();
+    });
 
-        ASSERT_EQ("#staff", cmd_channel);
-        ASSERT_TRUE(cmd_reason.empty());
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    auto cmd = server_->cqueue().back();
+
+    BOOST_TEST(cmd["command"].get<std::string>() == "part");
+    BOOST_TEST(cmd["channel"].get<std::string>() == "#staff");
+    BOOST_TEST(cmd["reason"].get<std::string>() == "");
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

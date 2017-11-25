@@ -792,6 +792,9 @@ public:
         return jchannels_;
     }
 
+    /**
+     * Start connecting.
+     */
     virtual void connect() noexcept;
 
     /**

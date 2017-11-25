@@ -16,60 +16,52 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
+#define BOOST_TEST_MODULE "server-topic"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/server_service.hpp>
+
+#include <journal_server.hpp>
+#include <command_test.hpp>
+
+namespace irccd {
 
 namespace {
 
-std::string cmd_channel;
-std::string cmd_topic;
+class server_topic_test : public command_test<server_topic_command> {
+protected:
+    std::shared_ptr<journal_server> server_{new journal_server(service_, "test")};
+
+    server_topic_test()
+    {
+        daemon_->servers().add(server_);
+    }
+};
 
 } // !namespace
 
-class ServerTopicTest : public ServerTester {
-public:
-    void topic(std::string channel, std::string topic) override
-    {
-        ::cmd_channel = channel;
-        ::cmd_topic = topic;
-    }
-};
+BOOST_FIXTURE_TEST_SUITE(server_topic_test_suite, server_topic_test)
 
-class ServerTopicCommandTest : public CommandTester {
-public:
-    ServerTopicCommandTest()
-        : CommandTester(std::make_unique<server_topic_command>(),
-                        std::make_unique<ServerTopicTest>())
-    {
-        m_irccdctl.client().request({
-            { "command",    "server-topic"  },
-            { "server",     "test"          },
-            { "channel",    "#staff"        },
-            { "topic",      "new version"   }
-        });
-    }
-};
-
-TEST_F(ServerTopicCommandTest, basic)
+BOOST_AUTO_TEST_CASE(basic)
 {
-    try {
-        poll([&] () {
-            return !cmd_channel.empty() && !cmd_topic.empty();
-        });
+    ctl_->send({
+        { "command",    "server-topic"  },
+        { "server",     "test"          },
+        { "channel",    "#staff"        },
+        { "topic",      "new version"   }
+    });
 
-        ASSERT_EQ("#staff", cmd_channel);
-        ASSERT_EQ("new version", cmd_topic);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    wait_for([this] () {
+        return !server_->cqueue().empty();
+    });
+
+    auto cmd = server_->cqueue().back();
+
+    BOOST_TEST(cmd["command"].get<std::string>() == "topic");
+    BOOST_TEST(cmd["channel"].get<std::string>() == "#staff");
+    BOOST_TEST(cmd["topic"].get<std::string>() == "new version");
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

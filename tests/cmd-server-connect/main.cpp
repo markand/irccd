@@ -16,104 +16,88 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
-#include <service.hpp>
+#define BOOST_TEST_MODULE "server-connect"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/server_service.hpp>
 
-namespace {
+#include <command_test.hpp>
 
-nlohmann::json message;
+namespace irccd {
 
-} // !namespace
+BOOST_FIXTURE_TEST_SUITE(server_connect_test_suite, command_test<server_connect_command>)
 
-class ServerConnectCommandTest : public CommandTester {
-public:
-    ServerConnectCommandTest()
-        : CommandTester(std::make_unique<server_connect_command>())
-    {
-        message = nullptr;
-
-        m_irccdctl.client().onMessage.connect([&] (auto message) {
-            ::message = message;
-        });
-    }
-};
-
-TEST_F(ServerConnectCommandTest, minimal)
+BOOST_AUTO_TEST_CASE(minimal)
 {
-    try {
-        m_irccdctl.client().request({
-            { "command",    "server-connect"    },
-            { "name",       "local"             },
-            { "host",       "irc.example.org"   }
-        });
+    nlohmann::json result;
 
-        poll([&] () {
-            return message.is_object();
-        });
+    ctl_->send({
+        { "command",    "server-connect"    },
+        { "name",       "local"             },
+        { "host",       "irc.example.org"   }
+    });
+    ctl_->recv([&] (auto, auto msg) {
+        result = msg;
+    });
 
-        auto s = m_irccd.servers().get("local");
+    wait_for([&] () {
+        return result.is_object();
+    });
 
-        ASSERT_TRUE(s != nullptr);
-        ASSERT_EQ("local", s->name());
-        ASSERT_EQ("irc.example.org", s->host());
-        ASSERT_EQ(6667U, s->port());
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    auto s = daemon_->servers().get("local");
+
+    BOOST_TEST(s);
+    BOOST_TEST(s->name() == "local");
+    BOOST_TEST(s->host() == "irc.example.org");
+    BOOST_TEST(s->port() == 6667U);
 }
 
-TEST_F(ServerConnectCommandTest, full)
+BOOST_AUTO_TEST_CASE(full)
 {
-    try {
-        m_irccdctl.client().request({
-            { "command",    "server-connect"    },
-            { "name",       "local2"            },
-            { "host",       "irc.example2.org"  },
-            { "password",   "nonono"            },
-            { "nickname",   "francis"           },
-            { "realname",   "the_francis"       },
-            { "username",   "frc"               },
-            { "ctcpVersion", "ultra bot"        },
-            { "commandChar", "::"               },
-            { "port",       18000               },
-            { "ssl",        true                },
-            { "sslVerify",  true                },
-            { "autoRejoin", true                },
-            { "joinInvite", true                }
-        });
+    nlohmann::json result;
 
-        poll([&] () {
-            return message.is_object();
-        });
+    ctl_->send({
+        { "command",    "server-connect"    },
+        { "name",       "local2"            },
+        { "host",       "irc.example2.org"  },
+        { "password",   "nonono"            },
+        { "nickname",   "francis"           },
+        { "realname",   "the_francis"       },
+        { "username",   "frc"               },
+        { "ctcpVersion", "ultra bot"        },
+        { "commandChar", "::"               },
+        { "port",       18000               },
+        { "ssl",        true                },
+        { "sslVerify",  true                },
+        { "autoRejoin", true                },
+        { "joinInvite", true                }
+    });
+    ctl_->recv([&] (auto, auto msg) {
+        result = msg;
+    });
 
-        auto s = m_irccd.servers().get("local2");
+    wait_for([&] () {
+        return result.is_object();
+    });
 
-        ASSERT_TRUE(s != nullptr);
-        ASSERT_EQ("local2", s->name());
-        ASSERT_EQ("irc.example2.org", s->host());
-        ASSERT_EQ(18000U, s->port());
-        ASSERT_EQ("nonono", s->password());
-        ASSERT_EQ("francis", s->nickname());
-        ASSERT_EQ("the_francis", s->realname());
-        ASSERT_EQ("frc", s->username());
-        ASSERT_EQ("::", s->command_char());
-        ASSERT_EQ("ultra bot", s->ctcp_version());
-        ASSERT_TRUE(s->flags() & server::ssl);
-        ASSERT_TRUE(s->flags() & server::ssl_verify);
-        ASSERT_TRUE(s->flags() & server::auto_rejoin);
-        ASSERT_TRUE(s->flags() & server::join_invite);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    auto s = daemon_->servers().get("local2");
+
+    BOOST_TEST(s);
+    BOOST_TEST(s->name() == "local2");
+    BOOST_TEST(s->host() == "irc.example2.org");
+    BOOST_TEST(s->port() == 18000U);
+    BOOST_TEST(s->password() == "nonono");
+    BOOST_TEST(s->nickname() == "francis");
+    BOOST_TEST(s->realname() == "the_francis");
+    BOOST_TEST(s->username() == "frc");
+    BOOST_TEST(s->command_char() == "::");
+    BOOST_TEST(s->ctcp_version() == "ultra bot");
+    BOOST_TEST(s->flags() & server::ssl);
+    BOOST_TEST(s->flags() & server::ssl_verify);
+    BOOST_TEST(s->flags() & server::auto_rejoin);
+    BOOST_TEST(s->flags() & server::join_invite);
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

@@ -16,60 +16,52 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
+#define BOOST_TEST_MODULE "server-invite"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/server_service.hpp>
+
+#include <journal_server.hpp>
+#include <command_test.hpp>
+
+namespace irccd {
 
 namespace {
 
-std::string cmd_target;
-std::string cmd_channel;
+class server_invite_test : public command_test<server_invite_command> {
+protected:
+    std::shared_ptr<journal_server> server_{new journal_server(service_, "test")};
+
+    server_invite_test()
+    {
+        daemon_->servers().add(server_);
+    }
+};
 
 } // !namespace
 
-class ServerInviteTest : public ServerTester {
-public:
-    void invite(std::string target, std::string channel) override
-    {
-        ::cmd_target = target;
-        ::cmd_channel = channel;
-    }
-};
+BOOST_FIXTURE_TEST_SUITE(server_invite_test_suite, server_invite_test)
 
-class ServerInviteCommandTest : public CommandTester {
-public:
-    ServerInviteCommandTest()
-        : CommandTester(std::make_unique<server_invite_command>(),
-                        std::make_unique<ServerInviteTest>())
-    {
-        m_irccdctl.client().request({
-            { "command",    "server-invite"     },
-            { "server",     "test"              },
-            { "target",     "francis"           },
-            { "channel",    "#music"            }
-        });
-    }
-};
-
-TEST_F(ServerInviteCommandTest, basic)
+BOOST_AUTO_TEST_CASE(basic)
 {
-    try {
-        poll([&] () {
-            return !cmd_target.empty() && !cmd_channel.empty();
-        });
+    ctl_->send({
+        { "command",    "server-invite"     },
+        { "server",     "test"              },
+        { "target",     "francis"           },
+        { "channel",    "#music"            }
+    });
 
-        ASSERT_EQ("francis", cmd_target);
-        ASSERT_EQ("#music", cmd_channel);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    wait_for([this] () {
+        return !server_->cqueue().empty();
+    });
+
+    auto cmd = server_->cqueue().back();
+
+    BOOST_TEST(cmd["command"].get<std::string>() == "invite");
+    BOOST_TEST(cmd["channel"].get<std::string>() == "#music");
+    BOOST_TEST(cmd["target"].get<std::string>() == "francis");
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

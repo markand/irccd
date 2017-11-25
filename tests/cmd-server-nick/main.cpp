@@ -16,56 +16,53 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
+#define BOOST_TEST_MODULE "server-nick"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/server_service.hpp>
+
+#include <journal_server.hpp>
+#include <command_test.hpp>
+
+namespace irccd {
 
 namespace {
 
-std::string nick;
+class server_nick_test : public command_test<server_nick_command> {
+protected:
+    std::shared_ptr<journal_server> server_{new journal_server(service_, "test")};
+
+    server_nick_test()
+    {
+        daemon_->servers().add(server_);
+    }
+};
 
 } // !namespace
 
-class ServerNickTest : public ServerTester {
-public:
-    void set_nickname(std::string nick) override
-    {
-        ::nick = nick;
-    }
-};
+BOOST_FIXTURE_TEST_SUITE(server_nick_test_suite, server_nick_test)
 
-class ServerNickCommandTest : public CommandTester {
-public:
-    ServerNickCommandTest()
-        : CommandTester(std::make_unique<server_nick_command>(),
-                        std::make_unique<ServerNickTest>())
-    {
-        m_irccdctl.client().request({
-            { "command",    "server-nick"   },
-            { "server",     "test"          },
-            { "nickname",   "chris"         }
-        });
-    }
-};
-
-TEST_F(ServerNickCommandTest, basic)
+BOOST_AUTO_TEST_CASE(basic)
 {
-    try {
-        poll([&] () {
-            return !nick.empty();
-        });
+    nlohmann::json result;
 
-        ASSERT_EQ("chris", nick);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    ctl_->send({
+        { "command",    "server-nick"   },
+        { "server",     "test"          },
+        { "nickname",   "chris"         }
+    });
+    ctl_->recv([&] (auto, auto msg) {
+        result = msg;
+    });
+
+    wait_for([&] () {
+        return result.is_object();
+    });
+
+    BOOST_TEST(result.is_object());
+    BOOST_TEST(result.count("error") == 0U);
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

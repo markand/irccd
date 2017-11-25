@@ -16,83 +16,71 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
+#define BOOST_TEST_MODULE "server-join"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/server_service.hpp>
+
+#include <journal_server.hpp>
+#include <command_test.hpp>
+
+namespace irccd {
 
 namespace {
 
-std::string cmd_channel;
-std::string cmd_password;
+class server_join_test : public command_test<server_join_command> {
+protected:
+    std::shared_ptr<journal_server> server_{new journal_server(service_, "test")};
+
+    server_join_test()
+    {
+        daemon_->servers().add(server_);
+    }
+};
 
 } // !namespace
 
-class ServerJoinTest : public ServerTester {
-public:
-    void join(std::string channel, std::string password) override
-    {
-        ::cmd_channel = channel;
-        ::cmd_password = password;
-    }
-};
+BOOST_FIXTURE_TEST_SUITE(server_join_test_suite, server_join_test)
 
-class ServerJoinCommandTest : public CommandTester {
-public:
-    ServerJoinCommandTest()
-        : CommandTester(std::make_unique<server_join_command>(),
-                        std::make_unique<ServerJoinTest>())
-    {
-        cmd_channel.clear();
-        cmd_password.clear();
-    }
-};
-
-TEST_F(ServerJoinCommandTest, basic)
+BOOST_AUTO_TEST_CASE(basic)
 {
-    try {
-        m_irccdctl.client().request({
-            { "command",    "server-join"       },
-            { "server",     "test"              },
-            { "channel",    "#music"            },
-            { "password",   "plop"              }
-        });
+    ctl_->send({
+        { "command",    "server-join"       },
+        { "server",     "test"              },
+        { "channel",    "#music"            },
+        { "password",   "plop"              }
+    });
 
-        poll([&] () {
-            return !cmd_channel.empty();
-        });
+    wait_for([this] () {
+        return !server_->cqueue().empty();
+    });
 
-        ASSERT_EQ("#music", cmd_channel);
-        ASSERT_EQ("plop", cmd_password);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    auto cmd = server_->cqueue().back();
+
+    BOOST_TEST(cmd["command"].get<std::string>() == "join");
+    BOOST_TEST(cmd["channel"].get<std::string>() == "#music");
+    BOOST_TEST(cmd["password"].get<std::string>() == "plop");
 }
 
-TEST_F(ServerJoinCommandTest, nopassword)
+BOOST_AUTO_TEST_CASE(nopassword)
 {
-    try {
-        m_irccdctl.client().request({
-            { "command",    "server-join"       },
-            { "server",     "test"              },
-            { "channel",    "#music"            }
-        });
+    ctl_->send({
+        { "command",    "server-join"       },
+        { "server",     "test"              },
+        { "channel",    "#music"            }
+    });
 
-        poll([&] () {
-            return !cmd_channel.empty();
-        });
+    wait_for([this] () {
+        return !server_->cqueue().empty();
+    });
 
-        ASSERT_EQ("#music", cmd_channel);
-        ASSERT_EQ("", cmd_password);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    auto cmd = server_->cqueue().back();
+
+    BOOST_TEST(cmd["command"].get<std::string>() == "join");
+    BOOST_TEST(cmd["channel"].get<std::string>() == "#music");
+    BOOST_TEST(cmd["password"].get<std::string>() == "");
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

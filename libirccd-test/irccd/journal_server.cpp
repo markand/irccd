@@ -20,6 +20,13 @@
 
 namespace irccd {
 
+void journal_server::reconnect() noexcept
+{
+    cqueue_.push_back({
+        { "command",    "reconnect" }
+    });
+}
+
 void journal_server::cmode(std::string channel, std::string mode)
 {
     cqueue_.push_back({

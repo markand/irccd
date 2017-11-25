@@ -16,86 +16,66 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
-#include <service.hpp>
+#define BOOST_TEST_MODULE "server-reconnect"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/server_service.hpp>
+
+#include <journal_server.hpp>
+#include <command_test.hpp>
+
+namespace irccd {
 
 namespace {
 
-bool s1;
-bool s2;
+class server_reconnect_test : public command_test<server_reconnect_command> {
+protected:
+    std::shared_ptr<journal_server> server1_{new journal_server(service_, "s1")};
+    std::shared_ptr<journal_server> server2_{new journal_server(service_, "s2")};
+
+    server_reconnect_test()
+    {
+        daemon_->servers().add(server1_);
+        daemon_->servers().add(server2_);
+    }
+};
 
 } // !namespace
 
-class ServerReconnectTest : public ServerTester {
-private:
-    bool &m_ref;
+BOOST_FIXTURE_TEST_SUITE(server_reconnect_test_suite, server_reconnect_test)
 
-public:
-    inline ServerReconnectTest(std::string name, bool &ref) noexcept
-        : ServerTester(name)
-        , m_ref(ref)
-    {
-        m_ref = false;
-    }
-
-    void reconnect() noexcept override
-    {
-        m_ref = true;
-    }
-};
-
-class ServerReconnectCommandTest : public CommandTester {
-public:
-    ServerReconnectCommandTest()
-        : CommandTester(std::make_unique<server_reconnect_command>())
-    {
-        m_irccd.servers().add(std::make_unique<ServerReconnectTest>("s1", s1));
-        m_irccd.servers().add(std::make_unique<ServerReconnectTest>("s2", s2));
-    }
-};
-
-TEST_F(ServerReconnectCommandTest, basic)
+BOOST_AUTO_TEST_CASE(basic)
 {
-    try {
-        m_irccdctl.client().request({
-            { "command", "server-reconnect" },
-            { "server", "s1" }
-        });
+    ctl_->send({
+        { "command",    "server-reconnect"  },
+        { "server",     "s1"                }
+    });
 
-        poll([&] () {
-            return s1;
-        });
+    wait_for([this] () {
+        return !server1_->cqueue().empty();
+    });
 
-        ASSERT_TRUE(s1);
-        ASSERT_FALSE(s2);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    auto cmd1 = server1_->cqueue().back();
+
+    BOOST_TEST(cmd1["command"].get<std::string>() == "reconnect");
+    BOOST_TEST(server2_->cqueue().empty());
 }
 
-TEST_F(ServerReconnectCommandTest, all)
+BOOST_AUTO_TEST_CASE(all)
 {
-    try {
-        m_irccdctl.client().request({{ "command", "server-reconnect" }});
+    ctl_->send({{"command", "server-reconnect"}});
 
-        poll([&] () {
-            return s1 && s2;
-        });
+    wait_for([this] () {
+        return !server1_->cqueue().empty() && !server2_->cqueue().empty();
+    });
 
-        ASSERT_TRUE(s1);
-        ASSERT_TRUE(s2);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    auto cmd1 = server1_->cqueue().back();
+    auto cmd2 = server2_->cqueue().back();
+
+    BOOST_TEST(cmd1["command"].get<std::string>() == "reconnect");
+    BOOST_TEST(cmd2["command"].get<std::string>() == "reconnect");
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

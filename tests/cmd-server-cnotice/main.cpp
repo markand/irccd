@@ -16,60 +16,52 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
+#define BOOST_TEST_MODULE "server-cnotice"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/server_service.hpp>
+
+#include <journal_server.hpp>
+#include <command_test.hpp>
+
+namespace irccd {
 
 namespace {
 
-std::string cmd_channel;
-std::string cmd_message;
+class server_cnotice_test : public command_test<server_channel_notice_command> {
+protected:
+    std::shared_ptr<journal_server> server_{new journal_server(service_, "test")};
+
+    server_cnotice_test()
+    {
+        daemon_->servers().add(server_);
+    }
+};
 
 } // !namespace
 
-class ServerChannelNoticeTest : public ServerTester {
-public:
-    virtual void cnotice(std::string channel, std::string message) override
-    {
-        ::cmd_channel = channel;
-        ::cmd_message = message;
-    }
-};
+BOOST_FIXTURE_TEST_SUITE(server_cnotice_test_suite, server_cnotice_test)
 
-class ServerChannelNoticeCommandTest : public CommandTester {
-public:
-    ServerChannelNoticeCommandTest()
-        : CommandTester(std::make_unique<server_channel_notice_command>(),
-                        std::make_unique<ServerChannelNoticeTest>())
-    {
-        m_irccdctl.client().request({
-            { "command",    "server-cnotice"    },
-            { "server",     "test"              },
-            { "channel",    "#staff"            },
-            { "message",    "silence"           }
-        });
-    }
-};
-
-TEST_F(ServerChannelNoticeCommandTest, basic)
+BOOST_AUTO_TEST_CASE(basic)
 {
-    try {
-        poll([&] () {
-            return !cmd_channel.empty() && !cmd_message.empty();
-        });
+    ctl_->send({
+        { "command",    "server-cnotice"    },
+        { "server",     "test"              },
+        { "channel",    "#staff"            },
+        { "message",    "silence"           }
+    });
 
-        ASSERT_EQ("#staff", cmd_channel);
-        ASSERT_EQ("silence", cmd_message);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    wait_for([this] () {
+        return !server_->cqueue().empty();
+    });
+
+    auto cmd = server_->cqueue().back();
+
+    BOOST_TEST(cmd["command"].get<std::string>() == "cnotice");
+    BOOST_TEST(cmd["channel"].get<std::string>() == "#staff");
+    BOOST_TEST(cmd["message"].get<std::string>() == "silence");
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

@@ -85,6 +85,27 @@ public:
     }
 
     /**
+     * \copydoc server::connect
+     */
+    void connect() noexcept override
+    {
+        // avoid connecting.
+    }
+
+    /**
+     * \copydoc server::connect
+     */
+    void disconnect() noexcept override
+    {
+        // avoid disconnecting.
+    }
+
+    /**
+     * \copydoc server::reconnect
+     */
+    void reconnect() noexcept override;
+
+    /**
      * \copydoc server::cmode
      */
     void cmode(std::string channel, std::string mode) override;

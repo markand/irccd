@@ -16,90 +16,75 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
+#define BOOST_TEST_MODULE "server-kick"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/server_service.hpp>
+
+#include <journal_server.hpp>
+#include <command_test.hpp>
+
+namespace irccd {
 
 namespace {
 
-std::string cmd_target;
-std::string cmd_channel;
-std::string cmd_reason;
+class server_kick_test : public command_test<server_kick_command> {
+protected:
+    std::shared_ptr<journal_server> server_{new journal_server(service_, "test")};
+
+    server_kick_test()
+    {
+        daemon_->servers().add(server_);
+    }
+};
 
 } // !namespace
 
-class ServerKickTest : public ServerTester {
-public:
-    void kick(std::string target, std::string channel, std::string reason) override
-    {
-        ::cmd_target = target;
-        ::cmd_channel = channel;
-        ::cmd_reason = reason;
-    }
-};
+BOOST_FIXTURE_TEST_SUITE(server_kick_test_suite, server_kick_test)
 
-class ServerKickCommandTest : public CommandTester {
-public:
-    ServerKickCommandTest()
-        : CommandTester(std::make_unique<server_kick_command>(),
-                        std::make_unique<ServerKickTest>())
-    {
-        cmd_target.clear();
-        cmd_channel.clear();
-        cmd_reason.clear();
-    }
-};
-
-TEST_F(ServerKickCommandTest, basic)
+BOOST_AUTO_TEST_CASE(basic)
 {
-    try {
-        m_irccdctl.client().request({
-            { "command",    "server-kick"       },
-            { "server",     "test"              },
-            { "target",     "francis"           },
-            { "channel",    "#staff"            },
-            { "reason",     "too noisy"         }
-        });
+    ctl_->send({
+        { "command",    "server-kick"       },
+        { "server",     "test"              },
+        { "target",     "francis"           },
+        { "channel",    "#staff"            },
+        { "reason",     "too noisy"         }
+    });
 
-        poll([&] () {
-            return !cmd_target.empty() && !cmd_channel.empty();
-        });
+    wait_for([this] () {
+        return !server_->cqueue().empty();
+    });
 
-        ASSERT_EQ("francis", cmd_target);
-        ASSERT_EQ("#staff", cmd_channel);
-        ASSERT_EQ("too noisy", cmd_reason);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    auto cmd = server_->cqueue().back();
+
+    BOOST_TEST(cmd["command"].get<std::string>() == "kick");
+    BOOST_TEST(cmd["channel"].get<std::string>() == "#staff");
+    BOOST_TEST(cmd["target"].get<std::string>() == "francis");
+    BOOST_TEST(cmd["reason"].get<std::string>() == "too noisy");
 }
 
-TEST_F(ServerKickCommandTest, noreason)
+BOOST_AUTO_TEST_CASE(noreason)
 {
-    try {
-        m_irccdctl.client().request({
-            { "command",    "server-kick"       },
-            { "server",     "test"              },
-            { "target",     "francis"           },
-            { "channel",    "#staff"            }
-        });
+    ctl_->send({
+        { "command",    "server-kick"       },
+        { "server",     "test"              },
+        { "target",     "francis"           },
+        { "channel",    "#staff"            }
+    });
 
-        poll([&] () {
-            return !cmd_target.empty() && !cmd_channel.empty();
-        });
+    wait_for([this] () {
+        return !server_->cqueue().empty();
+    });
 
-        ASSERT_EQ("francis", cmd_target);
-        ASSERT_EQ("#staff", cmd_channel);
-        ASSERT_EQ("", cmd_reason);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    auto cmd = server_->cqueue().back();
+
+    BOOST_TEST(cmd["command"].get<std::string>() == "kick");
+    BOOST_TEST(cmd["channel"].get<std::string>() == "#staff");
+    BOOST_TEST(cmd["target"].get<std::string>() == "francis");
+    BOOST_TEST(cmd["reason"].get<std::string>() == "");
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

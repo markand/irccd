@@ -16,56 +16,50 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
+#define BOOST_TEST_MODULE "server-mode"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/server_service.hpp>
+
+#include <journal_server.hpp>
+#include <command_test.hpp>
+
+namespace irccd {
 
 namespace {
 
-std::string mode;
+class server_mode_test : public command_test<server_mode_command> {
+protected:
+    std::shared_ptr<journal_server> server_{new journal_server(service_, "test")};
+
+    server_mode_test()
+    {
+        daemon_->servers().add(server_);
+    }
+};
 
 } // !namespace
 
-class ServerModeTest : public ServerTester {
-public:
-    void mode(std::string mode) override
-    {
-        ::mode = mode;
-    }
-};
+BOOST_FIXTURE_TEST_SUITE(server_mode_test_suite, server_mode_test)
 
-class ServerModeCommandTest : public CommandTester {
-public:
-    ServerModeCommandTest()
-        : CommandTester(std::make_unique<server_mode_command>(),
-                        std::make_unique<ServerModeTest>())
-    {
-        m_irccdctl.client().request({
-            { "command",    "server-mode"   },
-            { "server",     "test"          },
-            { "mode",       "+t"            }
-        });
-    }
-};
-
-TEST_F(ServerModeCommandTest, basic)
+BOOST_AUTO_TEST_CASE(basic)
 {
-    try {
-        poll([&] () {
-            return !mode.empty();
-        });
+    ctl_->send({
+        { "command",    "server-mode"   },
+        { "server",     "test"          },
+        { "mode",       "+t"            }
+    });
 
-        ASSERT_EQ("+t", mode);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    wait_for([this] () {
+        return !server_->cqueue().empty();
+    });
+
+    auto cmd = server_->cqueue().back();
+
+    BOOST_TEST(cmd["command"].get<std::string>() == "mode");
+    BOOST_TEST(cmd["mode"].get<std::string>() == "+t");
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

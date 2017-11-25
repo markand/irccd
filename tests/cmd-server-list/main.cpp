@@ -16,53 +16,51 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
-#include <service.hpp>
+#define BOOST_TEST_MODULE "server-list"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/server_service.hpp>
+
+#include <journal_server.hpp>
+#include <command_test.hpp>
+
+namespace irccd {
 
 namespace {
 
-nlohmann::json result;
-
-} // !namespace
-
-class ServerListCommandTest : public CommandTester {
-public:
-    ServerListCommandTest()
-        : CommandTester(std::make_unique<server_list_command>())
+class server_list_test : public command_test<server_list_command> {
+protected:
+    server_list_test()
     {
-        m_irccd.servers().add(std::make_unique<ServerTester>("s1"));
-        m_irccd.servers().add(std::make_unique<ServerTester>("s2"));
-        m_irccdctl.client().request({{ "command", "server-list" }});
-        m_irccdctl.client().onMessage.connect([&] (auto result) {
-            ::result = result;
-        });
+        daemon_->servers().add(std::make_unique<journal_server>(service_, "s1"));
+        daemon_->servers().add(std::make_unique<journal_server>(service_, "s2"));
     }
 };
 
-TEST_F(ServerListCommandTest, basic)
-{
-    try {
-        poll([&] () {
-            return result.is_object();
-        });
+} // !namespace
 
-        ASSERT_TRUE(result.is_object());
-        ASSERT_TRUE(result["list"].is_array());
-        ASSERT_EQ(2U, result["list"].size());
-        ASSERT_EQ("s1", result["list"][0]);
-        ASSERT_EQ("s2", result["list"][1]);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+BOOST_FIXTURE_TEST_SUITE(server_list_test_suite, server_list_test)
+
+BOOST_AUTO_TEST_CASE(basic)
+{
+    nlohmann::json result;
+
+    ctl_->send({{"command", "server-list"}});
+    ctl_->recv([&] (auto, auto msg) {
+        result = msg;
+    });
+
+    wait_for([&] () {
+        return result.is_object();
+    });
+
+    BOOST_TEST(result.is_object());
+    BOOST_TEST(result["list"].is_array());
+    BOOST_TEST(result["list"].size() == 2U);
+    BOOST_TEST(result["list"][0].get<std::string>() == "s1");
+    BOOST_TEST(result["list"][1].get<std::string>() == "s2");
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

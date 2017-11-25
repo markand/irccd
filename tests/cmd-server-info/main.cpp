@@ -1,5 +1,5 @@
 /*
- * main.cpp -- test server-cmode remote command
+ * main.cpp -- test server-info remote command
  *
  * Copyright (c) 2013-2017 David Demelier <markand@malikania.fr>
  *
@@ -16,93 +16,78 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <server-tester.hpp>
-#include <service.hpp>
+#define BOOST_TEST_MODULE "server-info"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/server_service.hpp>
 
-namespace {
+#include <journal_server.hpp>
+#include <command_test.hpp>
 
-nlohmann::json message;
+namespace irccd {
 
-} // !namespace
+BOOST_FIXTURE_TEST_SUITE(server_info_test_suite, command_test<server_info_command>)
 
-class ServerInfoCommandTest : public CommandTester {
-public:
-    ServerInfoCommandTest()
-        : CommandTester(std::make_unique<server_info_command>())
-    {
-        message = nullptr;
-
-        m_irccdctl.client().onMessage.connect([&] (auto message) {
-            ::message = message;
-        });
-    }
-};
-
-TEST_F(ServerInfoCommandTest, basic)
+BOOST_AUTO_TEST_CASE(basic)
 {
-    try {
-        auto server = std::make_unique<ServerTester>();
+    auto server = std::make_unique<journal_server>(service_, "test");
 
-        server->set_host("example.org");
-        server->set_port(8765);
-        server->set_password("none");
-        server->set_nickname("pascal");
-        server->set_username("psc");
-        server->set_realname("Pascal le grand frere");
-        server->set_ctcp_version("yeah");
-        server->set_command_char("@");
-        server->set_reconnect_tries(80);
-        server->set_ping_timeout(20000);
+    server->set_host("example.org");
+    server->set_port(8765);
+    server->set_password("none");
+    server->set_nickname("pascal");
+    server->set_username("psc");
+    server->set_realname("Pascal le grand frere");
+    server->set_ctcp_version("yeah");
+    server->set_command_char("@");
+    server->set_reconnect_tries(80);
+    server->set_ping_timeout(20000);
 
-        m_irccd.servers().add(std::move(server));
-        m_irccdctl.client().request({
-            { "command",    "server-info"       },
-            { "server",     "test"              },
-        });
+    nlohmann::json result;
 
-        poll([&] () {
-            return message.is_object();
-        });
+    daemon_->servers().add(std::move(server));
+    ctl_->send({
+        { "command",    "server-info"       },
+        { "server",     "test"              },
+    });
+    ctl_->recv([&] (auto, auto msg) {
+        result = msg;
+    });
 
-        ASSERT_TRUE(message.is_object());
-        ASSERT_EQ("example.org", message["host"].get<std::string>());
-        ASSERT_EQ("test", message["name"].get<std::string>());
-        ASSERT_EQ("pascal", message["nickname"].get<std::string>());
-        ASSERT_EQ(8765, message["port"].get<int>());
-        ASSERT_EQ("Pascal le grand frere", message["realname"].get<std::string>());
-        ASSERT_EQ("psc", message["username"].get<std::string>());
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    wait_for([&] () {
+        return result.is_object();
+    });
+
+    BOOST_TEST(result.is_object());
+    BOOST_TEST(result["host"].get<std::string>() == "example.org");
+    BOOST_TEST(result["name"].get<std::string>() == "test");
+    BOOST_TEST(result["nickname"].get<std::string>() == "pascal");
+    BOOST_TEST(result["port"].get<int>() == 8765);
+    BOOST_TEST(result["realname"].get<std::string>() == "Pascal le grand frere");
+    BOOST_TEST(result["username"].get<std::string>() == "psc");
 }
 
-TEST_F(ServerInfoCommandTest, notfound)
+BOOST_AUTO_TEST_CASE(notfound)
 {
-    try {
-        m_irccdctl.client().request({
-            { "command",    "server-info"       },
-            { "server",     "test"              },
-        });
+    nlohmann::json result;
 
-        poll([&] () {
-            return message.is_object();
-        });
+    ctl_->send({
+        { "command",    "server-info"       },
+        { "server",     "test"              },
+    });
+    ctl_->recv([&] (auto, auto msg) {
+        result = msg;
+    });
 
-        ASSERT_TRUE(message.is_object());
-        ASSERT_FALSE(message["status"]);
-        ASSERT_EQ("server test not found", message["error"].get<std::string>());
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    wait_for([&] () {
+        return result.is_object();
+    });
+
+    // TODO: error code
+    BOOST_TEST(result.is_object());
+    BOOST_TEST(result.count("error"));
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd
