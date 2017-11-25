@@ -262,6 +262,22 @@ inline std::string pretty(const nlohmann::json& object, const std::string& prop)
     return pretty(*it);
 }
 
+/**
+ * Check if the array contains the given value.
+ *
+ * \param array the array
+ * \param value the JSON value to check
+ * \return true if present
+ */
+inline bool contains(const nlohmann::json& array, const nlohmann::json& value)
+{
+    for (const auto &v : array)
+        if (v == value)
+            return true;
+
+    return false;
+}
+
 } // !json_util
 
 } // !irccd

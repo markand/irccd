@@ -16,43 +16,37 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <service.hpp>
+#define BOOST_TEST_MODULE "rule-add"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/json_util.hpp>
 
-class RuleAddCommandTest : public CommandTester {
-protected:
-    nlohmann::json m_result;
+#include <irccd/command.hpp>
+#include <irccd/rule_service.hpp>
 
-    /*
-     * Rule sets are unordered so use this function to search a string in
-     * the JSON array.
-     */
-    inline bool contains(const nlohmann::json &array, const std::string &str)
-    {
-        for (const auto &v : array)
-            if (v.is_string() && v == str)
-                return true;
+#include <command_test.hpp>
 
-        return false;
-    }
+namespace irccd {
 
+namespace {
+
+class rule_add_test : public command_test<rule_add_command> {
 public:
-    RuleAddCommandTest()
-        : CommandTester(std::make_unique<rule_add_command>())
+    rule_add_test()
     {
-        m_irccd.commands().add(std::make_unique<rule_list_command>());
-        m_irccdctl.client().onMessage.connect([&] (auto result) {
-            m_result = result;
-        });
+        daemon_->commands().add(std::make_unique<rule_list_command>());
     }
 };
 
-TEST_F(RuleAddCommandTest, basic)
+} // !namespace
+
+BOOST_FIXTURE_TEST_SUITE(rule_add_test_suite, rule_add_test)
+
+BOOST_AUTO_TEST_CASE(basic)
 {
-    m_irccdctl.client().request({
+    nlohmann::json result;
+
+    ctl_->send({
         { "command",    "rule-add"          },
         { "servers",    { "s1", "s2" }      },
         { "channels",   { "c1", "c2" }      },
@@ -61,127 +55,128 @@ TEST_F(RuleAddCommandTest, basic)
         { "action",     "accept"            },
         { "index",      0                   }
     });
+    ctl_->recv([&] (auto, auto msg) {
+        result = msg;
+    });
 
-    try {
-        poll([&] () {
-            return m_result.is_object();
-        });
+    wait_for([&] () {
+        return result.is_object();
+    });
 
-        ASSERT_TRUE(m_result.is_object());
-        ASSERT_TRUE(m_result["status"].get<bool>());
+    BOOST_TEST(result.is_object());
 
-        m_result = nullptr;
-        m_irccdctl.client().request({{ "command", "rule-list" }});
+    result = nullptr;
+    ctl_->send({{"command", "rule-list"}});
+    ctl_->recv([&] (auto, auto msg) {
+        result = msg;
+    });
 
-        poll([&] () {
-            return m_result.is_object();
-        });
+    wait_for([&] () {
+        return result.is_object();
+    });
 
-        ASSERT_TRUE(m_result.is_object());
-        ASSERT_TRUE(m_result["status"].get<bool>());
+    BOOST_TEST(result.is_object());
 
-        auto servers = m_result["list"][0]["servers"];
-        auto channels = m_result["list"][0]["channels"];
-        auto plugins = m_result["list"][0]["plugins"];
-        auto events = m_result["list"][0]["events"];
+    auto servers = result["list"][0]["servers"];
+    auto channels = result["list"][0]["channels"];
+    auto plugins = result["list"][0]["plugins"];
+    auto events = result["list"][0]["events"];
 
-        ASSERT_TRUE(contains(servers, "s1"));
-        ASSERT_TRUE(contains(servers, "s2"));
-        ASSERT_TRUE(contains(channels, "c1"));
-        ASSERT_TRUE(contains(channels, "c2"));
-        ASSERT_TRUE(contains(plugins, "p1"));
-        ASSERT_TRUE(contains(plugins, "p2"));
-        ASSERT_TRUE(contains(events, "onMessage"));
-        ASSERT_EQ("accept", m_result["list"][0]["action"]);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
+    BOOST_TEST(json_util::contains(servers, "s1"));
+    BOOST_TEST(json_util::contains(servers, "s2"));
+    BOOST_TEST(json_util::contains(channels, "c1"));
+    BOOST_TEST(json_util::contains(channels, "c2"));
+    BOOST_TEST(json_util::contains(plugins, "p1"));
+    BOOST_TEST(json_util::contains(plugins, "p2"));
+    BOOST_TEST(json_util::contains(events, "onMessage"));
+    BOOST_TEST(result["list"][0]["action"].get<std::string>() == "accept");
+}
+
+BOOST_AUTO_TEST_CASE(append)
+{
+    nlohmann::json result;
+
+    ctl_->send({
+        { "command",    "rule-add"          },
+        { "servers",    { "s1" }            },
+        { "channels",   { "c1" }            },
+        { "plugins",    { "p1" }            },
+        { "events",     { "onMessage" }     },
+        { "action",     "accept"            },
+        { "index",      0                   }
+    });
+    ctl_->recv([&] (auto, auto msg) {
+        result = msg;
+    });
+
+    wait_for([&] () {
+        return result.is_object();
+    });
+
+    BOOST_TEST(result.is_object());
+
+    result = nullptr;
+    ctl_->send({
+        { "command",    "rule-add"          },
+        { "servers",    { "s2" }            },
+        { "channels",   { "c2" }            },
+        { "plugins",    { "p2" }            },
+        { "events",     { "onMessage" }     },
+        { "action",     "drop"              },
+        { "index",      1                   }
+    });
+    ctl_->recv([&] (auto, auto msg) {
+        result = msg;
+    });
+
+    wait_for([&] () {
+        return result.is_object();
+    });
+
+    BOOST_TEST(result.is_object());
+
+    result = nullptr;
+    ctl_->send({{"command", "rule-list"}});
+    ctl_->recv([&] (auto, auto msg) {
+        result = msg;
+    });
+
+    wait_for([&] () {
+        return result.is_object();
+    });
+
+    BOOST_TEST(result.is_object());
+    BOOST_TEST(result["list"].size() == 2U);
+
+    // Rule 0.
+    {
+        auto servers = result["list"][0]["servers"];
+        auto channels = result["list"][0]["channels"];
+        auto plugins = result["list"][0]["plugins"];
+        auto events = result["list"][0]["events"];
+
+        BOOST_TEST(json_util::contains(servers, "s1"));
+        BOOST_TEST(json_util::contains(channels, "c1"));
+        BOOST_TEST(json_util::contains(plugins, "p1"));
+        BOOST_TEST(json_util::contains(events, "onMessage"));
+        BOOST_TEST(result["list"][0]["action"].get<std::string>() == "accept");
+    }
+
+    // Rule 1.
+    {
+        auto servers = result["list"][1]["servers"];
+        auto channels = result["list"][1]["channels"];
+        auto plugins = result["list"][1]["plugins"];
+        auto events = result["list"][1]["events"];
+
+        BOOST_TEST(json_util::contains(servers, "s2"));
+        BOOST_TEST(json_util::contains(channels, "c2"));
+        BOOST_TEST(json_util::contains(plugins, "p2"));
+        BOOST_TEST(json_util::contains(events, "onMessage"));
+        BOOST_TEST(result["list"][1]["action"].get<std::string>() == "drop");
     }
 }
 
-TEST_F(RuleAddCommandTest, append)
-{
-    try {
-        m_irccdctl.client().request({
-            { "command",    "rule-add"          },
-            { "servers",    { "s1" }            },
-            { "channels",   { "c1" }            },
-            { "plugins",    { "p1" }            },
-            { "events",     { "onMessage" }     },
-            { "action",     "accept"            },
-            { "index",      0                   }
-        });
+BOOST_AUTO_TEST_SUITE_END()
 
-        poll([&] () {
-            return m_result.is_object();
-        });
-
-        ASSERT_TRUE(m_result.is_object());
-        ASSERT_TRUE(m_result["status"].get<bool>());
-
-        m_result = nullptr;
-        m_irccdctl.client().request({
-            { "command",    "rule-add"          },
-            { "servers",    { "s2" }            },
-            { "channels",   { "c2" }            },
-            { "plugins",    { "p2" }            },
-            { "events",     { "onMessage" }     },
-            { "action",     "drop"              },
-            { "index",      1                   }
-        });
-
-        poll([&] () {
-            return m_result.is_object();
-        });
-
-        ASSERT_TRUE(m_result.is_object());
-        ASSERT_TRUE(m_result["status"].get<bool>());
-
-        m_result = nullptr;
-        m_irccdctl.client().request({{ "command", "rule-list" }});
-
-        poll([&] () {
-            return m_result.is_object();
-        });
-
-        ASSERT_TRUE(m_result.is_object());
-        ASSERT_TRUE(m_result["status"].get<bool>());
-        ASSERT_EQ(2U, m_result["list"].size());
-
-        // Rule 0.
-        {
-            auto servers = m_result["list"][0]["servers"];
-            auto channels = m_result["list"][0]["channels"];
-            auto plugins = m_result["list"][0]["plugins"];
-            auto events = m_result["list"][0]["events"];
-
-            ASSERT_TRUE(contains(servers, "s1"));
-            ASSERT_TRUE(contains(channels, "c1"));
-            ASSERT_TRUE(contains(plugins, "p1"));
-            ASSERT_TRUE(contains(events, "onMessage"));
-            ASSERT_EQ("accept", m_result["list"][0]["action"]);
-        }
-
-        // Rule 1.
-        {
-            auto servers = m_result["list"][1]["servers"];
-            auto channels = m_result["list"][1]["channels"];
-            auto plugins = m_result["list"][1]["plugins"];
-            auto events = m_result["list"][1]["events"];
-
-            ASSERT_TRUE(contains(servers, "s2"));
-            ASSERT_TRUE(contains(channels, "c2"));
-            ASSERT_TRUE(contains(plugins, "p2"));
-            ASSERT_TRUE(contains(events, "onMessage"));
-            ASSERT_EQ("drop", m_result["list"][1]["action"]);
-        }
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
-}
-
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
-
-    return RUN_ALL_TESTS();
-}
+} // !irccd

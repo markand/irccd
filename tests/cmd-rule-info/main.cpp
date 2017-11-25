@@ -16,34 +16,25 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <command.hpp>
-#include <command-tester.hpp>
-#include <service.hpp>
+#define BOOST_TEST_MODULE "rule-info"
+#include <boost/test/unit_test.hpp>
 
-using namespace irccd;
+#include <irccd/json_util.hpp>
 
-class RuleInfoCommandTest : public CommandTester {
-protected:
-    nlohmann::json m_result;
+#include <irccd/command.hpp>
+#include <irccd/rule_service.hpp>
 
-    /*
-     * Rule sets are unordered so use this function to search a string in
-     * the JSON array.
-     */
-    inline bool contains(const nlohmann::json &array, const std::string &str)
-    {
-        for (const auto &v : array)
-            if (v.is_string() && v == str)
-                return true;
+#include <command_test.hpp>
 
-        return false;
-    }
+namespace irccd {
 
+namespace {
+
+class rule_info_test : public command_test<rule_info_command> {
 public:
-    RuleInfoCommandTest()
-        : CommandTester(std::make_unique<rule_info_command>())
+    rule_info_test()
     {
-        m_irccd.rules().add(rule(
+        daemon_->rules().add(rule(
             { "s1", "s2" },
             { "c1", "c2" },
             { "o1", "o2" },
@@ -51,7 +42,7 @@ public:
             { "onMessage", "onCommand" },
             rule::action_type::drop
         ));
-        m_irccd.rules().add(rule(
+        daemon_->rules().add(rule(
             { "s1", },
             { "c1", },
             { "o1", },
@@ -59,67 +50,68 @@ public:
             { "onMessage", },
             rule::action_type::accept
         ));
-        m_irccdctl.client().onMessage.connect([&] (auto result) {
-            m_result = result;
-        });
     }
 };
 
-TEST_F(RuleInfoCommandTest, basic)
+} // !namespace
+
+BOOST_FIXTURE_TEST_SUITE(rule_info_test_suite, rule_info_test)
+
+BOOST_AUTO_TEST_CASE(basic)
 {
-    m_irccdctl.client().request({
+    nlohmann::json result;
+
+    ctl_->send({
         { "command",    "rule-info" },
         { "index",      0           }
     });
+    ctl_->recv([&] (auto, auto msg) {
+        result = msg;
+    });
 
-    try {
-        poll([&] () {
-            return m_result.is_object();
-        });
+    wait_for([&] () {
+        return result.is_object();
+    });
 
-        ASSERT_TRUE(m_result.is_object());
+    BOOST_TEST(result.is_object());
 
-        auto servers = m_result["servers"];
-        auto channels = m_result["channels"];
-        auto plugins = m_result["plugins"];
-        auto events = m_result["events"];
+    auto servers = result["servers"];
+    auto channels = result["channels"];
+    auto plugins = result["plugins"];
+    auto events = result["events"];
 
-        ASSERT_TRUE(contains(servers, "s1"));
-        ASSERT_TRUE(contains(servers, "s2"));
-        ASSERT_TRUE(contains(channels, "c1"));
-        ASSERT_TRUE(contains(channels, "c2"));
-        ASSERT_TRUE(contains(plugins, "p1"));
-        ASSERT_TRUE(contains(plugins, "p2"));
-        ASSERT_TRUE(contains(events, "onMessage"));
-        ASSERT_TRUE(contains(events, "onCommand"));
-        ASSERT_EQ("drop", m_result["action"]);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    BOOST_TEST(json_util::contains(servers, "s1"));
+    BOOST_TEST(json_util::contains(servers, "s2"));
+    BOOST_TEST(json_util::contains(channels, "c1"));
+    BOOST_TEST(json_util::contains(channels, "c2"));
+    BOOST_TEST(json_util::contains(plugins, "p1"));
+    BOOST_TEST(json_util::contains(plugins, "p2"));
+    BOOST_TEST(json_util::contains(events, "onMessage"));
+    BOOST_TEST(json_util::contains(events, "onCommand"));
+    BOOST_TEST(result["action"].get<std::string>() == "drop");
 }
 
-TEST_F(RuleInfoCommandTest, outOfBounds)
+BOOST_AUTO_TEST_CASE(out_of_bounds)
 {
-    m_irccdctl.client().request({
+    nlohmann::json result;
+
+    ctl_->send({
         { "command",    "rule-info" },
         { "index",      123         }
     });
+    ctl_->recv([&] (auto, auto msg) {
+        result = msg;
+    });
 
-    try {
-        poll([&] () {
-            return m_result.is_object();
-        });
+    wait_for([&] () {
+        return result.is_object();
+    });
 
-        ASSERT_TRUE(m_result.is_object());
-        ASSERT_FALSE(m_result["status"]);
-    } catch (const std::exception &ex) {
-        FAIL() << ex.what();
-    }
+    // TODO: error code
+    BOOST_TEST(result.is_object());
+    BOOST_TEST(result.count("error"));
 }
 
-int main(int argc, char **argv)
-{
-    testing::InitGoogleTest(&argc, argv);
+BOOST_AUTO_TEST_SUITE_END()
 
-    return RUN_ALL_TESTS();
-}
+} // !irccd

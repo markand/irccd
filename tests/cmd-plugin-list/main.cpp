@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(basic)
     auto response = nlohmann::json();
 
     ctl_->send({{"command", "plugin-list"}});
-    ctl_->recv([&] (auto code, auto message) {
+    ctl_->recv([&] (auto, auto message) {
         response = message;
     });
 

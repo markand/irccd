@@ -48,6 +48,8 @@ protected:
     template <typename Condition>
     void wait_for(Condition&& cond)
     {
+        service_.reset();
+
         while (!cond())
             service_.poll();
     }
