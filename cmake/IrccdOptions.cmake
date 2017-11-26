@@ -125,7 +125,7 @@ endif ()
 find_package(Doxygen)
 find_package(OpenSSL)
 find_package(Pandoc)
-find_package(TCL)
+find_package(TCL QUIET)
 
 if (NOT WITH_DOCS)
     set(WITH_HTML FALSE)
