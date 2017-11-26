@@ -26,6 +26,8 @@
 
 #include <boost/asio.hpp>
 
+#include <irccd/logger.hpp>
+
 #include <irccd/irccd.hpp>
 
 #include <irccd/js/js_plugin.hpp>
@@ -69,12 +71,11 @@ public:
         : plugin_(new js_plugin("test", plugin_path))
         , server_(new journal_server(service_, "test"))
     {
+        log::set_logger(std::make_unique<log::silent_logger>());
+
         // Irccd is mandatory at the moment.
         add<irccd_jsapi>();
         add<Modules...>();
-
-        plugin_->open();
-        plugin_->on_load(irccd_);
 
         // Add some CMake variables.
         duk_push_string(plugin_->context(), CMAKE_BINARY_DIR);
