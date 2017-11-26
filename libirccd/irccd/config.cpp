@@ -333,7 +333,11 @@ std::shared_ptr<server> load_server(irccd& daemon, const ini::section& sc, const
     if ((it = sc.find("ipv6")) != sc.end() && string_util::is_boolean(it->value()))
         sv->set_flags(sv->flags() | server::ipv6);
     if ((it = sc.find("ssl")) != sc.end() && string_util::is_boolean(it->value()))
+#if defined(HAVE_SSL)
         sv->set_flags(sv->flags() | server::ssl);
+#else
+        throw std::invalid_argument(string_util::sprintf("server %s: SSL support disabled", sv->name()));
+#endif
     if ((it = sc.find("ssl-verify")) != sc.end() && string_util::is_boolean(it->value()))
         sv->set_flags(sv->flags() | server::ssl_verify);
 

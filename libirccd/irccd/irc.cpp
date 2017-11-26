@@ -31,34 +31,127 @@ namespace {
 using boost::asio::ip::tcp;
 
 template <typename Socket>
-void do_connect(Socket& socket, tcp::resolver::iterator it, connection::connect_t handler)
+void wrap_connect(Socket& socket, tcp::resolver::iterator it, connection::connect_t handler)
 {
+    assert(handler);
+
     socket.close();
     socket.async_connect(*it, [&socket, it, handler] (auto code) mutable {
-        if (code && it != tcp::resolver::iterator())
-            do_connect(socket, ++it, std::move(handler));
+        if (code && ++it != tcp::resolver::iterator())
+            wrap_connect(socket, it, std::move(handler));
         else
             handler(code);
     });
 }
 
 template <typename Socket>
-void do_resolve(const std::string& host,
+void wrap_resolve(Socket& socket,
+                tcp::resolver& resolver,
+                const std::string& host,
                 const std::string& port,
-                Socket& socket,
                 connection::connect_t handler)
 {
-    auto resolver = std::make_shared<tcp::resolver>(socket.get_io_service());
+    assert(handler);
 
-    resolver->async_resolve(tcp::resolver::query(host, port), [&socket, handler, resolver] (auto code, auto it) {
+    tcp::resolver::query query(host, port);
+
+    resolver.async_resolve(query, [&socket, handler] (auto code, auto it) {
         if (code)
             handler(code);
         else
-            do_connect(socket, it, std::move(handler));
+            wrap_connect(socket, it, std::move(handler));
+    });
+}
+
+template <typename Socket>
+void wrap_recv(Socket& socket, boost::asio::streambuf& buffer, connection::recv_t handler)
+{
+    assert(handler);
+
+    boost::asio::async_read_until(socket, buffer, "\r\n", [&socket, &buffer, handler] (auto code, auto xfer) {
+        if (code || xfer == 0U)
+            handler(std::move(code), message());
+        else {
+            std::string str(
+                boost::asio::buffers_begin(buffer.data()),
+                boost::asio::buffers_begin(buffer.data()) + xfer - 2
+            );
+
+            buffer.consume(xfer);
+            handler(std::move(code), message::parse(str));
+        }
+    });
+}
+
+template <typename Socket>
+void wrap_send(Socket& socket, const std::string& message, connection::send_t handler)
+{
+    assert(handler);
+
+    boost::asio::async_write(socket, boost::asio::buffer(message), [handler, message] (auto code, auto) {
+        // TODO: xfer
+        handler(code);
     });
 }
 
 } // !namespace
+
+void connection::rflush()
+{
+    if (input_.empty())
+        return;
+
+    do_recv(buffer_, [this] (auto code, auto message) {
+        input_.front()(code, std::move(message));
+        input_.pop_front();
+
+        if (!code)
+            rflush();
+    });
+}
+
+void connection::sflush()
+{
+    if (output_.empty())
+        return;
+
+    do_send(output_.front().first, [this] (auto code) {
+        if (output_.front().second)
+            output_.front().second(code);
+
+        output_.pop_front();
+
+        if (!code)
+            sflush();
+    });
+}
+
+void connection::connect(const std::string& host, const std::string& service, connect_t handler)
+{
+    assert(handler);
+
+    do_connect(host, service, std::move(handler));
+}
+
+void connection::recv(recv_t handler)
+{
+    auto in_progress = !input_.empty();
+
+    input_.push_back(std::move(handler));
+
+    if (!in_progress)
+        rflush();
+}
+
+void connection::send(std::string message, send_t handler)
+{
+    auto in_progress = !output_.empty();
+
+    output_.emplace_back(std::move(message + "\r\n"), std::move(handler));
+
+    if (!in_progress)
+        sflush();
+}
 
 message message::parse(const std::string& line)
 {
@@ -134,10 +227,48 @@ user user::parse(const std::string& line)
     return {line.substr(0, pos), line.substr(pos + 1)};
 }
 
-void ip_connection::connect(const std::string& host, const std::string& service, connect_t handler)
+void ip_connection::do_connect(const std::string& host, const std::string& service, connect_t handler) noexcept
 {
-    do_resolve(host, service, socket_, std::move(handler));
+    wrap_resolve(socket_, resolver_, host, service, std::move(handler));
 }
+
+void ip_connection::do_recv(boost::asio::streambuf& buffer, recv_t handler) noexcept
+{
+    wrap_recv(socket_, buffer, std::move(handler));
+}
+
+void ip_connection::do_send(const std::string& data, send_t handler) noexcept
+{
+    wrap_send(socket_, data, std::move(handler));
+}
+
+#if defined(HAVE_SSL)
+
+void tls_connection::do_connect(const std::string& host, const std::string& service, connect_t handler) noexcept
+{
+    using boost::asio::ssl::stream_base;
+
+    wrap_resolve(socket_.lowest_layer(), resolver_, host, service, [this, handler] (auto code) {
+        if (code)
+            handler(code);
+        else
+            socket_.async_handshake(stream_base::client, [this, handler] (auto code) {
+                handler(code);
+            });
+    });
+}
+
+void tls_connection::do_recv(boost::asio::streambuf& buffer, recv_t handler) noexcept
+{
+    wrap_recv(socket_, buffer, std::move(handler));
+}
+
+void tls_connection::do_send(const std::string& data, send_t handler) noexcept
+{
+    wrap_send(socket_, data, std::move(handler));
+}
+
+#endif // !HAVE_SSL
 
 } // !irc
 

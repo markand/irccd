@@ -24,6 +24,8 @@
  * \brief Low level IRC functions.
  */
 
+#include "sysconfig.hpp"
+
 #include <deque>
 #include <functional>
 #include <string>
@@ -371,6 +373,45 @@ public:
      */
     using send_t = std::function<void (boost::system::error_code)>;
 
+private:
+    using buffer_t = boost::asio::streambuf;
+    using input_t = std::deque<recv_t>;
+    using output_t = std::deque<std::pair<std::string, send_t>>;
+
+    buffer_t buffer_;
+    input_t input_;
+    output_t output_;
+
+    void rflush();
+    void sflush();
+
+protected:
+    /**
+     * Do the connection.
+     *
+     * \param host the hostname
+     * \param service the service or port number
+     * \param handler the non-null handler
+     */
+    virtual void do_connect(const std::string& host, const std::string& service, connect_t handler) noexcept = 0;
+
+    /**
+     * Receive some data.
+     *
+     * \param buffer the buffer to complete
+     * \param handler the non-null handler
+     */
+    virtual void do_recv(boost::asio::streambuf& buffer, recv_t handler) noexcept = 0;
+
+    /**
+     * Send data.
+     *
+     * \param data the data to send
+     * \param handler the non-null handler
+     */
+    virtual void do_send(const std::string& data, send_t handler) noexcept = 0;
+
+public:
     /**
      * Default constructor.
      */
@@ -384,18 +425,19 @@ public:
     /**
      * Connect to the host.
      *
+     * \pre handler the handler
      * \param host the host
      * \param service the service or port number
      * \param handler the non-null handler
      */
-    virtual void connect(const std::string& host, const std::string& service, connect_t handler) = 0;
+    void connect(const std::string& host, const std::string& service, connect_t handler);
 
     /**
      * Start receiving data.
      *
      * \param handler the handler to call
      */
-    virtual void recv(recv_t handler) = 0;
+    void recv(recv_t handler);
 
     /**
      * Start sending data.
@@ -403,149 +445,88 @@ public:
      * \param message the raw message
      * \param handler the handler to call
      */
-    virtual void send(std::string message, send_t handler = nullptr) = 0;
+    void send(std::string message, send_t handler = nullptr);
 };
 
 /**
- * \brief Implementation for Boost.Asio sockets.
- *
- * To use this class, derive from it and implement the connect function.
+ * \brief Clear TCP connection
  */
-template <typename Socket>
-class basic_connection : public connection {
-protected:
-    Socket socket_;
-
+class ip_connection : public connection {
 private:
-    using buffer_t = boost::asio::streambuf;
-    using input_t = std::deque<recv_t>;
-    using output_t = std::deque<std::pair<std::string, send_t>>;
+    boost::asio::ip::tcp::socket socket_;
+    boost::asio::ip::tcp::resolver resolver_;
 
-    buffer_t buffer_;
-    input_t input_;
-    output_t output_;
+protected:
+    /**
+     * \copydoc connection::do_connect
+     */
+    void do_connect(const std::string& host, const std::string& service, connect_t handler) noexcept override;
 
-    void rflush();
-    void sflush();
-    void do_recv(recv_t);
-    void do_send(const std::string&, send_t);
+    /**
+     * \copydoc connection::do_recv
+     */
+    void do_recv(boost::asio::streambuf& buffer, recv_t handler) noexcept override;
+
+    /**
+     * \copydoc connection::do_send
+     */
+    void do_send(const std::string& data, send_t handler) noexcept override;
 
 public:
     /**
      * Constructor.
      *
-     * \param args the arguments to pass to the socket
+     * \param service the io service
      */
-    template <typename... Args>
-    inline basic_connection(Args&&... args)
-        : socket_(std::forward<Args>(args)...)
+    inline ip_connection(boost::asio::io_service& service) noexcept
+        : socket_(service)
+        , resolver_(service)
     {
     }
-
-    /**
-     * \copydoc connection::recv
-     */
-    void recv(recv_t handler) override;
-
-    /**
-     * \copydoc connection::send
-     */
-    void send(std::string message, send_t handler = nullptr) override;
 };
 
-template <typename Socket>
-void basic_connection<Socket>::rflush()
-{
-    if (input_.empty())
-        return;
+#if defined(HAVE_SSL)
 
-    do_recv([this] (auto code, auto message) {
-        input_.front()(code, std::move(message));
-        input_.pop_front();
+/**
+ * \brief SSL connection
+ */
+class tls_connection : public connection {
+private:
+    boost::asio::ssl::context context_;
+    boost::asio::ssl::stream<boost::asio::ip::tcp::socket> socket_;
+    boost::asio::ip::tcp::resolver resolver_;
 
-        if (!code)
-            rflush();
-    });
-}
+protected:
+    /**
+     * \copydoc connection::do_connect
+     */
+    void do_connect(const std::string& host, const std::string& service, connect_t handler) noexcept override;
 
-template <typename Socket>
-void basic_connection<Socket>::sflush()
-{
-    if (output_.empty())
-        return;
+    /**
+     * \copydoc connection::do_recv
+     */
+    void do_recv(boost::asio::streambuf& buffer, recv_t handler) noexcept override;
 
-    do_send(output_.front().first, [this] (auto code) {
-        if (output_.front().second)
-            output_.front().second(code);
+    /**
+     * \copydoc connection::do_send
+     */
+    void do_send(const std::string& data, send_t handler) noexcept override;
 
-        output_.pop_front();
-
-        if (!code)
-            sflush();
-    });
-}
-
-template <typename Socket>
-void basic_connection<Socket>::do_recv(recv_t handler)
-{
-    boost::asio::async_read_until(socket_, buffer_, "\r\n", [this, handler] (auto code, auto xfer) {
-        if (code || xfer == 0U)
-            handler(std::move(code), message());
-        else {
-            std::string str(
-                boost::asio::buffers_begin(buffer_.data()),
-                boost::asio::buffers_begin(buffer_.data()) + xfer - 2
-            );
-
-            buffer_.consume(xfer);
-            handler(std::move(code), message::parse(str));
-        }
-    });
-}
-
-template <typename Socket>
-void basic_connection<Socket>::do_send(const std::string& message, send_t handler)
-{
-    boost::asio::async_write(socket_, boost::asio::buffer(message), [handler, message] (auto code, auto) {
-        // TODO: xfer
-        handler(code);
-    });
-}
-
-template <typename Socket>
-void basic_connection<Socket>::recv(recv_t handler)
-{
-    auto in_progress = !input_.empty();
-
-    input_.push_back(std::move(handler));
-
-    if (!in_progress)
-        rflush();
-}
-
-template <typename Socket>
-void basic_connection<Socket>::send(std::string message, send_t handler)
-{
-    auto in_progress = !output_.empty();
-
-    output_.emplace_back(std::move(message + "\r\n"), std::move(handler));
-
-    if (!in_progress)
-        sflush();
-}
-
-class ip_connection : public basic_connection<boost::asio::ip::tcp::socket> {
 public:
     /**
-     * Inherited constructors.
+     * Constructor.
+     *
+     * \param service the io service
      */
-    using basic_connection::basic_connection;
-
-    /**
-     * \copydoc basic_connection::connect
-     */
-    void connect(const std::string& host, const std::string& service, connect_t handler) override;
+    inline tls_connection(boost::asio::io_service& service) noexcept
+        : context_(boost::asio::ssl::context::sslv23)
+        , socket_(service, context_)
+        , resolver_(service)
+    {
+    }
 };
+
+#endif // !HAVE_SSL
 
 } // !irc
 

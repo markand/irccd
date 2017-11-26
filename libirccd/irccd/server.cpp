@@ -534,7 +534,7 @@ void server::connect() noexcept
 
     if (flags_ & ssl) {
 #if defined(HAVE_SSL)
-        //conn_ = std::make_unique<irc::tls_connection>(service_);
+        conn_ = std::make_unique<irc::tls_connection>(service_);
 #else
         /*
          * If SSL is not compiled in, the caller is responsible of not setting
