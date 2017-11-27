@@ -101,9 +101,9 @@ duk_ret_t info(duk_context* ctx)
     auto server = self(ctx);
 
     duk_push_object(ctx);
-    dukx_push_string(ctx, server->name());
+    dukx_push(ctx, server->name());
     duk_put_prop_string(ctx, -2, "name");
-    dukx_push_string(ctx, server->host());
+    dukx_push(ctx, server->host());
     duk_put_prop_string(ctx, -2, "host");
     duk_push_int(ctx, server->port());
     duk_put_prop_string(ctx, -2, "port");
@@ -111,23 +111,15 @@ duk_ret_t info(duk_context* ctx)
     duk_put_prop_string(ctx, -2, "ssl");
     duk_push_boolean(ctx, server->flags() & server::ssl_verify);
     duk_put_prop_string(ctx, -2, "sslVerify");
-    dukx_push_string(ctx, server->command_char());
+    dukx_push(ctx, server->command_char());
     duk_put_prop_string(ctx, -2, "commandChar");
-    dukx_push_string(ctx, server->realname());
+    dukx_push(ctx, server->realname());
     duk_put_prop_string(ctx, -2, "realname");
-    dukx_push_string(ctx, server->nickname());
+    dukx_push(ctx, server->nickname());
     duk_put_prop_string(ctx, -2, "nickname");
-    dukx_push_string(ctx, server->username());
+    dukx_push(ctx, server->username());
     duk_put_prop_string(ctx, -2, "username");
-
-    duk_push_array(ctx);
-
-    int i = 0;
-    for (const auto& c : server->channels()) {
-        dukx_push_string(ctx, c);
-        duk_put_prop_index(ctx, -2, i++);
-    }
-
+    dukx_push_array(ctx, server->channels().begin(), server->channels().end());
     duk_put_prop_string(ctx, -2, "channels");
 
     return 1;
@@ -162,7 +154,7 @@ duk_ret_t invite(duk_context* ctx)
  */
 duk_ret_t join(duk_context* ctx)
 {
-    self(ctx)->join(duk_require_string(ctx, 0), dukx_get_string(ctx, 1));
+    self(ctx)->join(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
 
     return 0;
 }
@@ -180,7 +172,7 @@ duk_ret_t join(duk_context* ctx)
  */
 duk_ret_t kick(duk_context* ctx)
 {
-    self(ctx)->kick(duk_require_string(ctx, 0), duk_require_string(ctx, 1), dukx_get_string(ctx, 2));
+    self(ctx)->kick(duk_require_string(ctx, 0), duk_require_string(ctx, 1), duk_get_string(ctx, 2));
 
     return 0;
 }
@@ -296,7 +288,7 @@ duk_ret_t notice(duk_context* ctx)
  */
 duk_ret_t part(duk_context* ctx)
 {
-    self(ctx)->part(duk_require_string(ctx, 0), dukx_get_string(ctx, 1));
+    self(ctx)->part(duk_require_string(ctx, 0), duk_get_string(ctx, 1));
 
     return 0;
 }
@@ -362,7 +354,7 @@ duk_ret_t whois(duk_context* ctx)
  */
 duk_ret_t toString(duk_context* ctx)
 {
-    dukx_push_string(ctx, self(ctx)->name());
+    dukx_push(ctx, self(ctx)->name());
 
     return 1;
 }

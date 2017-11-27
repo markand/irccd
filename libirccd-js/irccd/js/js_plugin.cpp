@@ -58,7 +58,7 @@ void js_plugin::put_table(const std::string& name, const std::unordered_map<std:
     duk_get_global_string(context_, name.c_str());
 
     for (const auto& pair : vars) {
-        dukx_push_string(context_, pair.second);
+        dukx_push(context_, pair.second);
         duk_put_prop_string(context_, -2, pair.first.c_str());
     }
 
@@ -77,7 +77,7 @@ void js_plugin::call(const std::string& name, unsigned nargs)
         duk_insert(context_, -nargs - 1);
 
         if (duk_pcall(context_, nargs) != 0)
-            throw dukx_get_exception(context_, -1, true);
+            throw dukx_stack(context_, -1, true);
 
         duk_pop(context_);
     }
@@ -107,9 +107,9 @@ js_plugin::js_plugin(std::string name, std::string path)
 
     duk_push_pointer(context_, this);
     duk_put_global_string(context_, "\xff""\xff""plugin");
-    dukx_push_string(context_, name);
+    dukx_push(context_, name);
     duk_put_global_string(context_, "\xff""\xff""name");
-    dukx_push_string(context_, path);
+    dukx_push(context_, path);
     duk_put_global_string(context_, "\xff""\xff""path");
 }
 
@@ -126,7 +126,7 @@ void js_plugin::open()
     );
 
     if (duk_peval_string(context_, data.c_str()))
-        throw dukx_get_exception(context_, -1);
+        throw dukx_stack(context_, -1);
 
     // Read metadata.
     duk_get_global_string(context_, "info");
@@ -151,10 +151,10 @@ void js_plugin::on_channel_mode(irccd& , const channel_mode_event &event)
     dukx_stack_assert sa(context_);
 
     dukx_push_server(context_, std::move(event.server));
-    dukx_push_string(context_, event.origin);
-    dukx_push_string(context_, event.channel);
-    dukx_push_string(context_, event.mode);
-    dukx_push_string(context_, event.argument);
+    dukx_push(context_, event.origin);
+    dukx_push(context_, event.channel);
+    dukx_push(context_, event.mode);
+    dukx_push(context_, event.argument);
     call("onChannelMode", 5);
 }
 
@@ -163,9 +163,9 @@ void js_plugin::on_channel_notice(irccd& , const channel_notice_event &event)
     dukx_stack_assert sa(context_);
 
     dukx_push_server(context_, std::move(event.server));
-    dukx_push_string(context_, event.origin);
-    dukx_push_string(context_, event.channel);
-    dukx_push_string(context_, event.message);
+    dukx_push(context_, event.origin);
+    dukx_push(context_, event.channel);
+    dukx_push(context_, event.message);
     call("onChannelNotice", 4);
 }
 
@@ -174,9 +174,9 @@ void js_plugin::on_command(irccd& , const message_event &event)
     dukx_stack_assert sa(context_);
 
     dukx_push_server(context_, std::move(event.server));
-    dukx_push_string(context_, event.origin);
-    dukx_push_string(context_, event.channel);
-    dukx_push_string(context_, event.message);
+    dukx_push(context_, event.origin);
+    dukx_push(context_, event.channel);
+    dukx_push(context_, event.message);
     call("onCommand", 4);
 }
 
@@ -193,8 +193,8 @@ void js_plugin::on_invite(irccd& , const invite_event &event)
     dukx_stack_assert sa(context_);
 
     dukx_push_server(context_, std::move(event.server));
-    dukx_push_string(context_, event.origin);
-    dukx_push_string(context_, event.channel);
+    dukx_push(context_, event.origin);
+    dukx_push(context_, event.channel);
     call("onInvite", 3);
 }
 
@@ -203,8 +203,8 @@ void js_plugin::on_join(irccd& , const join_event &event)
     dukx_stack_assert sa(context_);
 
     dukx_push_server(context_, std::move(event.server));
-    dukx_push_string(context_, event.origin);
-    dukx_push_string(context_, event.channel);
+    dukx_push(context_, event.origin);
+    dukx_push(context_, event.channel);
     call("onJoin", 3);
 }
 
@@ -213,10 +213,10 @@ void js_plugin::on_kick(irccd& , const kick_event &event)
     dukx_stack_assert sa(context_);
 
     dukx_push_server(context_, std::move(event.server));
-    dukx_push_string(context_, event.origin);
-    dukx_push_string(context_, event.channel);
-    dukx_push_string(context_, event.target);
-    dukx_push_string(context_, event.reason);
+    dukx_push(context_, event.origin);
+    dukx_push(context_, event.channel);
+    dukx_push(context_, event.target);
+    dukx_push(context_, event.reason);
     call("onKick", 5);
 }
 
@@ -232,9 +232,9 @@ void js_plugin::on_message(irccd& , const message_event &event)
     dukx_stack_assert sa(context_);
 
     dukx_push_server(context_, std::move(event.server));
-    dukx_push_string(context_, event.origin);
-    dukx_push_string(context_, event.channel);
-    dukx_push_string(context_, event.message);
+    dukx_push(context_, event.origin);
+    dukx_push(context_, event.channel);
+    dukx_push(context_, event.message);
     call("onMessage", 4);
 }
 
@@ -243,9 +243,9 @@ void js_plugin::on_me(irccd& , const me_event &event)
     dukx_stack_assert sa(context_);
 
     dukx_push_server(context_, std::move(event.server));
-    dukx_push_string(context_, event.origin);
-    dukx_push_string(context_, event.channel);
-    dukx_push_string(context_, event.message);
+    dukx_push(context_, event.origin);
+    dukx_push(context_, event.channel);
+    dukx_push(context_, event.message);
     call("onMe", 4);
 }
 
@@ -254,8 +254,8 @@ void js_plugin::on_mode(irccd& , const mode_event &event)
     dukx_stack_assert sa(context_);
 
     dukx_push_server(context_, std::move(event.server));
-    dukx_push_string(context_, event.origin);
-    dukx_push_string(context_, event.mode);
+    dukx_push(context_, event.origin);
+    dukx_push(context_, event.mode);
     call("onMode", 3);
 }
 
@@ -264,13 +264,8 @@ void js_plugin::on_names(irccd& , const names_event &event)
     dukx_stack_assert sa(context_);
 
     dukx_push_server(context_, std::move(event.server));
-    dukx_push_string(context_, event.channel);
-    duk_push_array(context_);
-
-    for (unsigned i = 0; i < event.names.size(); ++i) {
-        dukx_push_string(context_, event.names[i]);
-        duk_put_prop_index(context_, -2, i);
-    }
+    dukx_push(context_, event.channel);
+    dukx_push_array(context_, event.names.begin(), event.names.end());
 
     call("onNames", 3);
 }
@@ -280,8 +275,8 @@ void js_plugin::on_nick(irccd& , const nick_event &event)
     dukx_stack_assert sa(context_);
 
     dukx_push_server(context_, std::move(event.server));
-    dukx_push_string(context_, event.origin);
-    dukx_push_string(context_, event.nickname);
+    dukx_push(context_, event.origin);
+    dukx_push(context_, event.nickname);
     call("onNick", 3);
 }
 
@@ -290,8 +285,8 @@ void js_plugin::on_notice(irccd& , const notice_event &event)
     dukx_stack_assert sa(context_);
 
     dukx_push_server(context_, std::move(event.server));
-    dukx_push_string(context_, event.origin);
-    dukx_push_string(context_, event.message);
+    dukx_push(context_, event.origin);
+    dukx_push(context_, event.message);
     call("onNotice", 3);
 }
 
@@ -300,9 +295,9 @@ void js_plugin::on_part(irccd& , const part_event &event)
     dukx_stack_assert sa(context_);
 
     dukx_push_server(context_, std::move(event.server));
-    dukx_push_string(context_, event.origin);
-    dukx_push_string(context_, event.channel);
-    dukx_push_string(context_, event.reason);
+    dukx_push(context_, event.origin);
+    dukx_push(context_, event.channel);
+    dukx_push(context_, event.reason);
     call("onPart", 4);
 }
 
@@ -311,8 +306,8 @@ void js_plugin::on_query(irccd& , const query_event &event)
     dukx_stack_assert sa(context_);
 
     dukx_push_server(context_, std::move(event.server));
-    dukx_push_string(context_, event.origin);
-    dukx_push_string(context_, event.message);
+    dukx_push(context_, event.origin);
+    dukx_push(context_, event.message);
     call("onQuery", 3);
 }
 
@@ -321,8 +316,8 @@ void js_plugin::on_query_command(irccd& , const query_event &event)
     dukx_stack_assert sa(context_);
 
     dukx_push_server(context_, std::move(event.server));
-    dukx_push_string(context_, event.origin);
-    dukx_push_string(context_, event.message);
+    dukx_push(context_, event.origin);
+    dukx_push(context_, event.message);
     call("onQueryCommand", 3);
 }
 
@@ -338,9 +333,9 @@ void js_plugin::on_topic(irccd& , const topic_event &event)
     dukx_stack_assert sa(context_);
 
     dukx_push_server(context_, std::move(event.server));
-    dukx_push_string(context_, event.origin);
-    dukx_push_string(context_, event.channel);
-    dukx_push_string(context_, event.topic);
+    dukx_push(context_, event.origin);
+    dukx_push(context_, event.channel);
+    dukx_push(context_, event.topic);
     call("onTopic", 4);
 }
 
@@ -357,21 +352,15 @@ void js_plugin::on_whois(irccd& , const whois_event &event)
 
     dukx_push_server(context_, std::move(event.server));
     duk_push_object(context_);
-    dukx_push_string(context_, event.whois.nick);
+    dukx_push(context_, event.whois.nick);
     duk_put_prop_string(context_, -2, "nickname");
-    dukx_push_string(context_, event.whois.user);
+    dukx_push(context_, event.whois.user);
     duk_put_prop_string(context_, -2, "username");
-    dukx_push_string(context_, event.whois.realname);
+    dukx_push(context_, event.whois.realname);
     duk_put_prop_string(context_, -2, "realname");
-    dukx_push_string(context_, event.whois.host);
+    dukx_push(context_, event.whois.host);
     duk_put_prop_string(context_, -2, "host");
-    duk_push_array(context_);
-
-    for (unsigned i = 0; i < event.whois.channels.size(); ++i) {
-        dukx_push_string(context_, event.whois.channels[i]);
-        duk_put_prop_index(context_, -2, 1);
-    }
-
+    dukx_push_array(context_, event.whois.channels.begin(), event.whois.channels.end());
     duk_put_prop_string(context_, -2, "channels");
 
     call("onWhois", 2);

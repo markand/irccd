@@ -55,11 +55,11 @@ public:
     system_error(int e, std::string message);
 
     /**
-     * Raise the SystemError Javascript exception.
+     * Create the SystemError Javascript exception.
      *
      * \param ctx the context
      */
-    void raise(duk_context* ctx) const;
+    void create(duk_context* ctx) const;
 };
 
 /**

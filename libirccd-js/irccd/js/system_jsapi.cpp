@@ -38,7 +38,7 @@ namespace irccd {
 namespace {
 
 /*
- * Function: irccd.System.env(key)
+ * Function: Irccd.System.env(key)
  * ------------------------------------------------------------------
  *
  * Get an environment system variable.
@@ -50,13 +50,11 @@ namespace {
  */
 duk_ret_t env(duk_context* ctx)
 {
-    dukx_push_string(ctx, sys::env(dukx_get_string(ctx, 0)));
-
-    return 1;
+    return dukx_push(ctx, sys::env(duk_get_string(ctx, 0)));
 }
 
 /*
- * Function: irccd.System.exec(cmd)
+ * Function: Irccd.System.exec(cmd)
  * ------------------------------------------------------------------
  *
  * Execute a system command.
@@ -66,13 +64,13 @@ duk_ret_t env(duk_context* ctx)
  */
 duk_ret_t exec(duk_context* ctx)
 {
-    std::system(duk_get_string(ctx, 0));
+    std::system(duk_require_string(ctx, 0));
 
     return 0;
 }
 
 /*
- * Function: irccd.System.home()
+ * Function: Irccd.System.home()
  * ------------------------------------------------------------------
  *
  * Get the operating system user's home.
@@ -82,13 +80,11 @@ duk_ret_t exec(duk_context* ctx)
  */
 duk_ret_t home(duk_context* ctx)
 {
-    dukx_push_string(ctx, sys::home());
-
-    return 1;
+    return dukx_push(ctx, sys::home());
 }
 
 /*
- * Function: irccd.System.name()
+ * Function: Irccd.System.name()
  * ------------------------------------------------------------------
  *
  * Get the operating system name.
@@ -98,15 +94,13 @@ duk_ret_t home(duk_context* ctx)
  */
 duk_ret_t name(duk_context* ctx)
 {
-    dukx_push_string(ctx, sys::name());
-
-    return 1;
+    return dukx_push(ctx, sys::name());
 }
 
 #if defined(HAVE_POPEN)
 
 /*
- * Function: irccd.System.popen(cmd, mode) [optional]
+ * Function: Irccd.System.popen(cmd, mode) [optional]
  * ------------------------------------------------------------------
  *
  * Wrapper for popen(3) if the function is available.
@@ -134,7 +128,7 @@ duk_ret_t popen(duk_context* ctx)
 #endif // !HAVE_POPEN
 
 /*
- * Function: irccd.System.sleep(delay)
+ * Function: Irccd.System.sleep(delay)
  * ------------------------------------------------------------------
  *
  * Sleep the main loop for the specific delay in seconds.
@@ -147,7 +141,7 @@ duk_ret_t sleep(duk_context* ctx)
 }
 
 /*
- * Function: irccd.System.ticks()
+ * Function: Irccd.System.ticks()
  * ------------------------------------------------------------------
  *
  * Get the number of milliseconds since irccd was started.
@@ -202,7 +196,7 @@ duk_ret_t uptime(duk_context* ctx)
  */
 duk_ret_t version(duk_context* ctx)
 {
-    dukx_push_string(ctx, sys::version());
+    dukx_push(ctx, sys::version());
 
     return 1;
 }

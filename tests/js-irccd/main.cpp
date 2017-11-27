@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(version)
     );
 
     if (ret != 0)
-        throw dukx_get_exception(plugin_->context(), -1);
+        throw dukx_stack(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "major"));
     BOOST_TEST(IRCCD_VERSION_MAJOR == duk_get_int(plugin_->context(), -1));
@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE(from_javascript)
     );
 
     if (ret != 0)
-        throw dukx_get_exception(plugin_->context(), -1);
+        throw dukx_stack(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "errno"));
     BOOST_TEST(1 == duk_get_int(plugin_->context(), -1));
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE(from_javascript)
     BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
 }
 
-BOOST_AUTO_TEST_CASE(fromNative)
+BOOST_AUTO_TEST_CASE(from_native)
 {
     duk_push_c_function(plugin_->context(), [] (duk_context *ctx) -> duk_ret_t {
         dukx_throw(ctx, system_error(EINVAL, "hey"));
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(fromNative)
     );
 
     if (ret != 0)
-        throw dukx_get_exception(plugin_->context(), -1);
+        throw dukx_stack(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "errno"));
     BOOST_TEST(EINVAL == duk_get_int(plugin_->context(), -1));

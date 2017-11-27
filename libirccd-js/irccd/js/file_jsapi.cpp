@@ -153,9 +153,7 @@ file* self(duk_context* ctx)
  */
 duk_ret_t method_basename(duk_context* ctx)
 {
-    dukx_push_string(ctx, fs_util::base_name(self(ctx)->path()));
-
-    return 1;
+    return dukx_push(ctx, fs_util::base_name(self(ctx)->path()));
 }
 
 /*
@@ -182,9 +180,7 @@ duk_ret_t method_close(duk_context* ctx)
  */
 duk_ret_t method_dirname(duk_context* ctx)
 {
-    dukx_push_string(ctx, fs_util::dir_name(self(ctx)->path()));
-
-    return 1;
+    return dukx_push(ctx, fs_util::dir_name(self(ctx)->path()));
 }
 
 /*
@@ -213,7 +209,7 @@ duk_ret_t method_lines(duk_context* ctx)
         auto pos = buffer.find('\n');
 
         if (pos != std::string::npos) {
-            dukx_push_string(ctx, clear_crlf(buffer.substr(0, pos)));
+            dukx_push(ctx, clear_crlf(buffer.substr(0, pos)));
             duk_put_prop_index(ctx, -2, i++);
 
             buffer.erase(0, pos + 1);
@@ -226,7 +222,7 @@ duk_ret_t method_lines(duk_context* ctx)
 
     // Missing '\n' in end of file.
     if (!buffer.empty()) {
-        dukx_push_string(ctx, clear_crlf(buffer));
+        dukx_push(ctx, clear_crlf(buffer));
         duk_put_prop_index(ctx, -2, i++);
     }
 
@@ -279,7 +275,7 @@ duk_ret_t method_read(duk_context* ctx)
             data.resize(total);
         }
 
-        dukx_push_string(ctx, data);
+        dukx_push(ctx, data);
     } catch (const std::exception&) {
         dukx_throw(ctx, system_error());
     }
@@ -310,9 +306,7 @@ duk_ret_t method_readline(duk_context* ctx)
     if (std::ferror(fp))
         dukx_throw(ctx, system_error());
 
-    dukx_push_string(ctx, clear_crlf(result));
-
-    return 1;
+    return dukx_push(ctx, clear_crlf(result));
 }
 
 /*
@@ -519,9 +513,7 @@ duk_ret_t destructor(duk_context* ctx)
  */
 duk_ret_t function_basename(duk_context* ctx)
 {
-    dukx_push_string(ctx, fs_util::base_name(duk_require_string(ctx, 0)));
-
-    return 1;
+    return dukx_push(ctx, fs_util::base_name(duk_require_string(ctx, 0)));
 }
 
 /*
@@ -537,9 +529,7 @@ duk_ret_t function_basename(duk_context* ctx)
  */
 duk_ret_t function_dirname(duk_context* ctx)
 {
-    dukx_push_string(ctx, fs_util::dir_name(duk_require_string(ctx, 0)));
-
-    return 1;
+    return dukx_push(ctx, fs_util::dir_name(duk_require_string(ctx, 0)));
 }
 
 /*

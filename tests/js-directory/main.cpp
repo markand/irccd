@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(constructor)
     );
 
     if (duk_peval_string(plugin_->context(), script.c_str()) != 0)
-        throw dukx_get_exception(plugin_->context(), -1);
+        throw dukx_stack(plugin_->context(), -1);
 
     duk_get_global_string(plugin_->context(), "l");
     BOOST_TEST(duk_get_int(plugin_->context(), -1) == 3);

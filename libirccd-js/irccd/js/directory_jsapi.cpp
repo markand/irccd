@@ -46,7 +46,7 @@ std::string path(duk_context *ctx)
     if (duk_get_type(ctx, -1) != DUK_TYPE_STRING)
         duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Directory object");
 
-    auto ret = dukx_get_string(ctx, -1);
+    auto ret = dukx_get<std::string>(ctx, -1);
 
     if (ret.empty())
         duk_error(ctx, DUK_ERR_TYPE_ERROR, "directory object has empty path");
@@ -71,7 +71,7 @@ duk_ret_t find(duk_context* ctx, std::string base, bool recursive, int pattern_i
         std::string path;
 
         if (duk_is_string(ctx, pattern_index))
-            path = fs_util::find(base, dukx_get_string(ctx, pattern_index), recursive);
+            path = fs_util::find(base, dukx_get<std::string>(ctx, pattern_index), recursive);
         else {
             // Check if it's a valid RegExp object.
             duk_get_global_string(ctx, "RegExp");
@@ -91,7 +91,7 @@ duk_ret_t find(duk_context* ctx, std::string base, bool recursive, int pattern_i
         if (path.empty())
             return 0;
 
-        dukx_push_string(ctx, path);
+        dukx_push(ctx, path);
     } catch (const std::exception& ex) {
         duk_error(ctx, DUK_ERR_ERROR, "%s", ex.what());
     }
@@ -199,7 +199,7 @@ duk_ret_t constructor(duk_context* ctx)
         unsigned i = 0;
         for (const auto& entry : boost::filesystem::directory_iterator(path)) {
             duk_push_object(ctx);
-            dukx_push_string(ctx, entry.path().filename().string());
+            dukx_push(ctx, entry.path().filename().string());
             duk_put_prop_string(ctx, -2, "name");
             duk_push_int(ctx, entry.status().type());
             duk_put_prop_string(ctx, -2, "type");
@@ -209,8 +209,8 @@ duk_ret_t constructor(duk_context* ctx)
         duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
 
         // 'path' property.
-        duk_push_string(ctx, "path");
-        dukx_push_string(ctx, path);
+        dukx_push(ctx, "path");
+        dukx_push(ctx, path);
         duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
     } catch (const std::exception& ex) {
         dukx_throw(ctx, system_error(errno, ex.what()));

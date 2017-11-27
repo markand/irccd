@@ -86,7 +86,7 @@ void timer::handle()
 
     if (duk_pcall(ctx, 0)) {
         log::warning() << "plugin: " << plugin->name() << " timer error:" << std::endl;
-        log::warning() << "  " << dukx_get_exception(ctx, -1).what() << std::endl;
+        log::warning() << "  " << dukx_stack(ctx, -1).what() << std::endl;
     } else
         duk_pop(ctx);
 }

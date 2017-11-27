@@ -158,17 +158,16 @@ system_error::system_error(int e, std::string message)
 {
 }
 
-void system_error::raise(duk_context *ctx) const
+void system_error::create(duk_context *ctx) const
 {
-    dukx_stack_assert sa(ctx, 0);
+    dukx_stack_assert sa(ctx, 1);
 
     duk_get_global_string(ctx, "Irccd");
     duk_get_prop_string(ctx, -1, "SystemError");
     duk_remove(ctx, -2);
     duk_push_int(ctx, errno_);
-    dukx_push_string(ctx, message_);
+    dukx_push(ctx, message_);
     duk_new(ctx, 2);
-    duk_throw(ctx);
 }
 
 std::string irccd_jsapi::name() const

@@ -49,10 +49,14 @@ string_util::subst get_subst(duk_context* ctx, int index)
     duk_enum(ctx, index, 0);
 
     while (duk_next(ctx, -1, true)) {
-        if (dukx_get_string(ctx, -2) == "date")
+        if (dukx_get<std::string>(ctx, -2) == "date")
             params.time = static_cast<time_t>(duk_get_number(ctx, -1) / 1000);
         else
-            params.keywords.insert({dukx_get_string(ctx, -2), dukx_get_string(ctx, -1)});
+            params.keywords.insert({
+                dukx_get<std::string>(ctx, -2),
+                dukx_get<std::string>(ctx, -1)
+            });
+
 
         duk_pop_n(ctx, 2);
     }
@@ -74,7 +78,7 @@ std::vector<std::string> split(duk_context* ctx)
     std::string pattern = " \t\n";
 
     if (duk_is_string(ctx, 0))
-        result = string_util::split(dukx_get_string(ctx, 0), pattern);
+        result = string_util::split(dukx_get<std::string>(ctx, 0), pattern);
     else if (duk_is_array(ctx, 0)) {
         duk_enum(ctx, 0, DUK_ENUM_ARRAY_INDICES_ONLY);
 
@@ -201,14 +205,7 @@ duk_ret_t cut(duk_context* ctx)
         return 1;
     }
 
-    duk_push_array(ctx);
-
-    for (unsigned i = 0; i < list.size(); ++i) {
-        dukx_push_string(ctx, list[i]);
-        duk_put_prop_index(ctx, -2, i);
-    }
-
-    return 1;
+    return dukx_push_array(ctx, list.begin(), list.end());
 }
 
 /*
@@ -226,7 +223,7 @@ duk_ret_t cut(duk_context* ctx)
 duk_ret_t format(duk_context* ctx)
 {
     try {
-        dukx_push_string(ctx, string_util::format(dukx_get_string(ctx, 0), get_subst(ctx, 1)));
+        dukx_push(ctx, string_util::format(duk_get_string(ctx, 0), get_subst(ctx, 1)));
     } catch (const std::exception &ex) {
         (void)duk_error(ctx, DUK_ERR_SYNTAX_ERROR, "%s", ex.what());
     }
@@ -247,7 +244,7 @@ duk_ret_t format(duk_context* ctx)
  */
 duk_ret_t splituser(duk_context* ctx)
 {
-    dukx_push_string(ctx, irc::user::parse(duk_require_string(ctx, 0)).nick());
+    dukx_push(ctx, irc::user::parse(duk_require_string(ctx, 0)).nick());
 
     return 1;
 }
@@ -265,7 +262,7 @@ duk_ret_t splituser(duk_context* ctx)
  */
 duk_ret_t splithost(duk_context* ctx)
 {
-    dukx_push_string(ctx, irc::user::parse(duk_require_string(ctx, 0)).host());
+    dukx_push(ctx, irc::user::parse(duk_require_string(ctx, 0)).host());
 
     return 1;
 }
