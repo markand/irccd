@@ -52,6 +52,8 @@ BOOST_AUTO_TEST_CASE(minimal)
     BOOST_TEST(s->port() == 6667U);
 }
 
+#if defined(HAVE_SSL)
+
 BOOST_AUTO_TEST_CASE(full)
 {
     nlohmann::json result;
@@ -97,6 +99,8 @@ BOOST_AUTO_TEST_CASE(full)
     BOOST_TEST(s->flags() & server::auto_rejoin);
     BOOST_TEST(s->flags() & server::join_invite);
 }
+
+#endif // !HAVE_SSL
 
 BOOST_AUTO_TEST_SUITE_END()
 
