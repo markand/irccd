@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/sysconfig.hpp>
-
 #include <algorithm>
 #include <array>
 #include <cassert>
@@ -25,11 +23,6 @@
 #include <vector>
 
 #include <boost/filesystem.hpp>
-
-#if defined(HAVE_STAT)
-#  include <sys/types.h>
-#  include <sys/stat.h>
-#endif
 
 #include <irccd/fs_util.hpp>
 
@@ -44,75 +37,6 @@ namespace {
 const char *signature("\xff""\xff""irccd-file-ptr");
 const char *prototype("\xff""\xff""irccd-file-prototype");
 
-#if defined(HAVE_STAT)
-
-/*
- * push_stat
- * ------------------------------------------------------------------
- */
-
-void push_stat(duk_context* ctx, const struct stat& st)
-{
-    dukx_stack_assert sa(ctx, 1);
-
-    duk_push_object(ctx);
-
-#if defined(HAVE_STAT_ST_ATIME)
-    duk_push_int(ctx, st.st_atime);
-    duk_put_prop_string(ctx, -2, "atime");
-#endif
-#if defined(HAVE_STAT_ST_BLKSIZE)
-    duk_push_int(ctx, st.st_blksize);
-    duk_put_prop_string(ctx, -2, "blksize");
-#endif
-#if defined(HAVE_STAT_ST_BLOCKS)
-    duk_push_int(ctx, st.st_blocks);
-    duk_put_prop_string(ctx, -2, "blocks");
-#endif
-#if defined(HAVE_STAT_ST_CTIME)
-    duk_push_int(ctx, st.st_ctime);
-    duk_put_prop_string(ctx, -2, "ctime");
-#endif
-#if defined(HAVE_STAT_ST_DEV)
-    duk_push_int(ctx, st.st_dev);
-    duk_put_prop_string(ctx, -2, "dev");
-#endif
-#if defined(HAVE_STAT_ST_GID)
-    duk_push_int(ctx, st.st_gid);
-    duk_put_prop_string(ctx, -2, "gid");
-#endif
-#if defined(HAVE_STAT_ST_INO)
-    duk_push_int(ctx, st.st_ino);
-    duk_put_prop_string(ctx, -2, "ino");
-#endif
-#if defined(HAVE_STAT_ST_MODE)
-    duk_push_int(ctx, st.st_mode);
-    duk_put_prop_string(ctx, -2, "mode");
-#endif
-#if defined(HAVE_STAT_ST_MTIME)
-    duk_push_int(ctx, st.st_mtime);
-    duk_put_prop_string(ctx, -2, "mtime");
-#endif
-#if defined(HAVE_STAT_ST_NLINK)
-    duk_push_int(ctx, st.st_nlink);
-    duk_put_prop_string(ctx, -2, "nlink");
-#endif
-#if defined(HAVE_STAT_ST_RDEV)
-    duk_push_int(ctx, st.st_rdev);
-    duk_put_prop_string(ctx, -2, "rdev");
-#endif
-#if defined(HAVE_STAT_ST_SIZE)
-    duk_push_int(ctx, st.st_size);
-    duk_put_prop_string(ctx, -2, "size");
-#endif
-#if defined(HAVE_STAT_ST_UID)
-    duk_push_int(ctx, st.st_uid);
-    duk_put_prop_string(ctx, -2, "uid");
-#endif
-}
-
-#endif // !HAVE_STAT
-
 // Remove trailing \r for CRLF line style.
 inline std::string clear_crlf(std::string input)
 {
@@ -122,19 +46,19 @@ inline std::string clear_crlf(std::string input)
     return input;
 }
 
-file* self(duk_context* ctx)
+std::shared_ptr<file> self(duk_context* ctx)
 {
     dukx_stack_assert sa(ctx);
 
     duk_push_this(ctx);
     duk_get_prop_string(ctx, -1, signature);
-    auto ptr = static_cast<file*>(duk_to_pointer(ctx, -1));
+    auto ptr = static_cast<std::shared_ptr<file>*>(duk_to_pointer(ctx, -1));
     duk_pop_2(ctx);
 
     if (!ptr)
         duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a File object");
 
-    return ptr;
+    return *ptr;
 }
 
 /*
@@ -371,7 +295,7 @@ duk_ret_t method_stat(duk_context* ctx)
     if (file->handle() == nullptr && ::stat(file->path().c_str(), &st) < 0)
         dukx_throw(ctx, system_error());
     else
-        push_stat(ctx, st);
+        dukx_push(ctx, st);
 
     return 1;
 }
@@ -476,8 +400,14 @@ duk_ret_t constructor(duk_context* ctx)
         return 0;
 
     try {
-        dukx_new_file(ctx, new file(duk_require_string(ctx, 0), duk_require_string(ctx, 1)));
-    } catch (const std::exception &) {
+        auto path = dukx_require<std::string>(ctx, 0);
+        auto mode = dukx_require<std::string>(ctx, 1);
+
+        duk_push_this(ctx);
+        duk_push_pointer(ctx, new std::shared_ptr<file>(new file(path, mode)));
+        duk_put_prop_string(ctx, -2, signature);
+        duk_pop(ctx);
+    } catch (const std::exception&) {
         dukx_throw(ctx, system_error());
     }
 
@@ -493,7 +423,7 @@ duk_ret_t constructor(duk_context* ctx)
 duk_ret_t destructor(duk_context* ctx)
 {
     duk_get_prop_string(ctx, 0, signature);
-    delete static_cast<file*>(duk_to_pointer(ctx, -1));
+    delete static_cast<std::shared_ptr<file>*>(duk_to_pointer(ctx, -1));
     duk_pop(ctx);
     duk_del_prop_string(ctx, 0, signature);
 
@@ -597,9 +527,7 @@ duk_ret_t function_stat(duk_context* ctx)
     if (::stat(duk_require_string(ctx, 0), &st) < 0)
         dukx_throw(ctx, system_error());
 
-    push_stat(ctx, st);
-
-    return 1;
+    return dukx_push(ctx, st);
 }
 
 #endif // !HAVE_STAT
@@ -648,20 +576,9 @@ void file_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
     duk_pop(plugin->context());
 }
 
-void dukx_new_file(duk_context* ctx, file* fp)
-{
-    assert(ctx);
-    assert(fp);
+using file_traits = dukx_type_traits<std::shared_ptr<file>>;
 
-    dukx_stack_assert sa(ctx);
-
-    duk_push_this(ctx);
-    duk_push_pointer(ctx, fp);
-    duk_put_prop_string(ctx, -2, signature);
-    duk_pop(ctx);
-}
-
-void dukx_push_file(duk_context* ctx, file* fp)
+void file_traits::push(duk_context* ctx, std::shared_ptr<file> fp)
 {
     assert(ctx);
     assert(fp);
@@ -669,22 +586,86 @@ void dukx_push_file(duk_context* ctx, file* fp)
     dukx_stack_assert sa(ctx, 1);
 
     duk_push_object(ctx);
-    duk_push_pointer(ctx, fp);
+    duk_push_pointer(ctx, new std::shared_ptr<file>(std::move(fp)));
     duk_put_prop_string(ctx, -2, signature);
     duk_get_global_string(ctx, prototype);
     duk_set_prototype(ctx, -2);
 }
 
-file* dukx_require_file(duk_context* ctx, duk_idx_t index)
+std::shared_ptr<file> file_traits::require(duk_context* ctx, duk_idx_t index)
 {
     if (!duk_is_object(ctx, index) || !duk_has_prop_string(ctx, index, signature))
         duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a File object");
 
     duk_get_prop_string(ctx, index, signature);
-    auto fp = static_cast<file*>(duk_to_pointer(ctx, -1));
+    auto fp = static_cast<std::shared_ptr<file>*>(duk_to_pointer(ctx, -1));
     duk_pop(ctx);
 
-    return fp;
+    return *fp;
 }
+
+#if defined(HAVE_STAT)
+
+void dukx_type_traits<struct stat>::push(duk_context* ctx, const struct stat& st)
+{
+    dukx_stack_assert sa(ctx, 1);
+
+    duk_push_object(ctx);
+
+#if defined(HAVE_STAT_ST_ATIME)
+    duk_push_int(ctx, st.st_atime);
+    duk_put_prop_string(ctx, -2, "atime");
+#endif
+#if defined(HAVE_STAT_ST_BLKSIZE)
+    duk_push_int(ctx, st.st_blksize);
+    duk_put_prop_string(ctx, -2, "blksize");
+#endif
+#if defined(HAVE_STAT_ST_BLOCKS)
+    duk_push_int(ctx, st.st_blocks);
+    duk_put_prop_string(ctx, -2, "blocks");
+#endif
+#if defined(HAVE_STAT_ST_CTIME)
+    duk_push_int(ctx, st.st_ctime);
+    duk_put_prop_string(ctx, -2, "ctime");
+#endif
+#if defined(HAVE_STAT_ST_DEV)
+    duk_push_int(ctx, st.st_dev);
+    duk_put_prop_string(ctx, -2, "dev");
+#endif
+#if defined(HAVE_STAT_ST_GID)
+    duk_push_int(ctx, st.st_gid);
+    duk_put_prop_string(ctx, -2, "gid");
+#endif
+#if defined(HAVE_STAT_ST_INO)
+    duk_push_int(ctx, st.st_ino);
+    duk_put_prop_string(ctx, -2, "ino");
+#endif
+#if defined(HAVE_STAT_ST_MODE)
+    duk_push_int(ctx, st.st_mode);
+    duk_put_prop_string(ctx, -2, "mode");
+#endif
+#if defined(HAVE_STAT_ST_MTIME)
+    duk_push_int(ctx, st.st_mtime);
+    duk_put_prop_string(ctx, -2, "mtime");
+#endif
+#if defined(HAVE_STAT_ST_NLINK)
+    duk_push_int(ctx, st.st_nlink);
+    duk_put_prop_string(ctx, -2, "nlink");
+#endif
+#if defined(HAVE_STAT_ST_RDEV)
+    duk_push_int(ctx, st.st_rdev);
+    duk_put_prop_string(ctx, -2, "rdev");
+#endif
+#if defined(HAVE_STAT_ST_SIZE)
+    duk_push_int(ctx, st.st_size);
+    duk_put_prop_string(ctx, -2, "size");
+#endif
+#if defined(HAVE_STAT_ST_UID)
+    duk_push_int(ctx, st.st_uid);
+    duk_put_prop_string(ctx, -2, "uid");
+#endif
+}
+
+#endif // !HAVE_STAT
 
 } // !irccd

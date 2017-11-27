@@ -150,7 +150,7 @@ void js_plugin::on_channel_mode(irccd& , const channel_mode_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.origin);
     dukx_push(context_, event.channel);
     dukx_push(context_, event.mode);
@@ -162,7 +162,7 @@ void js_plugin::on_channel_notice(irccd& , const channel_notice_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.origin);
     dukx_push(context_, event.channel);
     dukx_push(context_, event.message);
@@ -173,7 +173,7 @@ void js_plugin::on_command(irccd& , const message_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.origin);
     dukx_push(context_, event.channel);
     dukx_push(context_, event.message);
@@ -184,7 +184,7 @@ void js_plugin::on_connect(irccd& , const connect_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     call("onConnect", 1);
 }
 
@@ -192,7 +192,7 @@ void js_plugin::on_invite(irccd& , const invite_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.origin);
     dukx_push(context_, event.channel);
     call("onInvite", 3);
@@ -202,7 +202,7 @@ void js_plugin::on_join(irccd& , const join_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.origin);
     dukx_push(context_, event.channel);
     call("onJoin", 3);
@@ -212,7 +212,7 @@ void js_plugin::on_kick(irccd& , const kick_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.origin);
     dukx_push(context_, event.channel);
     dukx_push(context_, event.target);
@@ -231,7 +231,7 @@ void js_plugin::on_message(irccd& , const message_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.origin);
     dukx_push(context_, event.channel);
     dukx_push(context_, event.message);
@@ -242,7 +242,7 @@ void js_plugin::on_me(irccd& , const me_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.origin);
     dukx_push(context_, event.channel);
     dukx_push(context_, event.message);
@@ -253,7 +253,7 @@ void js_plugin::on_mode(irccd& , const mode_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.origin);
     dukx_push(context_, event.mode);
     call("onMode", 3);
@@ -263,7 +263,7 @@ void js_plugin::on_names(irccd& , const names_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.channel);
     dukx_push_array(context_, event.names.begin(), event.names.end());
 
@@ -274,7 +274,7 @@ void js_plugin::on_nick(irccd& , const nick_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.origin);
     dukx_push(context_, event.nickname);
     call("onNick", 3);
@@ -284,7 +284,7 @@ void js_plugin::on_notice(irccd& , const notice_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.origin);
     dukx_push(context_, event.message);
     call("onNotice", 3);
@@ -294,7 +294,7 @@ void js_plugin::on_part(irccd& , const part_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.origin);
     dukx_push(context_, event.channel);
     dukx_push(context_, event.reason);
@@ -305,7 +305,7 @@ void js_plugin::on_query(irccd& , const query_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.origin);
     dukx_push(context_, event.message);
     call("onQuery", 3);
@@ -315,7 +315,7 @@ void js_plugin::on_query_command(irccd& , const query_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.origin);
     dukx_push(context_, event.message);
     call("onQueryCommand", 3);
@@ -332,7 +332,7 @@ void js_plugin::on_topic(irccd& , const topic_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.origin);
     dukx_push(context_, event.channel);
     dukx_push(context_, event.topic);
@@ -350,7 +350,7 @@ void js_plugin::on_whois(irccd& , const whois_event &event)
 {
     dukx_stack_assert sa(context_);
 
-    dukx_push_server(context_, std::move(event.server));
+    dukx_push(context_, std::move(event.server));
     duk_push_object(context_);
     dukx_push(context_, event.whois.nick);
     duk_put_prop_string(context_, -2, "nickname");

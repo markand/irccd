@@ -429,7 +429,7 @@ duk_ret_t destructor(duk_context* ctx)
  */
 duk_ret_t add(duk_context* ctx)
 {
-    dukx_get_irccd(ctx).servers().add(dukx_require_server(ctx, 0));
+    dukx_get_irccd(ctx).servers().add(dukx_require<std::shared_ptr<server>>(ctx, 0));
 
     return 0;
 }
@@ -452,7 +452,7 @@ duk_ret_t find(duk_context* ctx)
     if (!server)
         return 0;
 
-    dukx_push_server(ctx, server);
+    dukx_push(ctx, server);
 
     return 1;
 }
@@ -471,7 +471,7 @@ duk_ret_t list(duk_context* ctx)
     duk_push_object(ctx);
 
     for (const auto &server : dukx_get_irccd(ctx).servers().servers()) {
-        dukx_push_server(ctx, server);
+        dukx_push(ctx, server);
         duk_put_prop_string(ctx, -2, server->name().c_str());
     }
 
@@ -549,7 +549,9 @@ void server_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
     duk_pop(plugin->context());
 }
 
-void dukx_push_server(duk_context* ctx, std::shared_ptr<server> server)
+using server_traits = dukx_type_traits<std::shared_ptr<server>>;
+
+void server_traits::push(duk_context* ctx, std::shared_ptr<server> server)
 {
     assert(ctx);
     assert(server);
@@ -563,7 +565,7 @@ void dukx_push_server(duk_context* ctx, std::shared_ptr<server> server)
     duk_set_prototype(ctx, -2);
 }
 
-std::shared_ptr<server> dukx_require_server(duk_context* ctx, duk_idx_t index)
+std::shared_ptr<server> server_traits::require(duk_context* ctx, duk_idx_t index)
 {
     if (!duk_is_object(ctx, index) || !duk_has_prop_string(ctx, index, signature))
         duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Server object");

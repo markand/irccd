@@ -120,9 +120,7 @@ duk_ret_t popen(duk_context* ctx)
     if (fp == nullptr)
         dukx_throw(ctx, system_error());
 
-    dukx_push_file(ctx, new file(fp, [] (auto fp) { ::pclose(fp); }));
-
-    return 1;
+    return dukx_push(ctx, std::make_shared<file>(fp, [] (auto fp) { ::pclose(fp); }));
 }
 
 #endif // !HAVE_POPEN

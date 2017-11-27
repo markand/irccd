@@ -23,7 +23,7 @@
  * \file duktape.hpp
  * \brief Miscellaneous Duktape extras
  * \author David Demelier <markand@malikania.fr>
- * \version 0.1.0
+ * \version 0.2.0
  */
 
 #include <cassert>
@@ -317,6 +317,20 @@ public:
     {
         return duk_get_boolean(ctx, index);
     }
+
+    /**
+     * Require a boolean.
+     *
+     * Uses duk_require_boolean.
+     *
+     * \param ctx the Duktape context
+     * \param index the value index
+     * \return the converted value
+     */
+    static bool require(duk_context* ctx, duk_idx_t index)
+    {
+        return duk_require_boolean(ctx, index);
+    }
 };
 
 /**
@@ -350,6 +364,20 @@ public:
     static duk_double_t get(duk_context* ctx, duk_idx_t index)
     {
         return duk_get_number(ctx, index);
+    }
+
+    /**
+     * Require a double.
+     *
+     * Uses duk_require_double.
+     *
+     * \param ctx the Duktape context
+     * \param index the value index
+     * \return the converted value
+     */
+    static duk_double_t require(duk_context* ctx, duk_idx_t index)
+    {
+        return duk_require_number(ctx, index);
     }
 };
 
@@ -385,6 +413,20 @@ public:
     {
         return duk_get_int(ctx, index);
     }
+
+    /**
+     * Require an int.
+     *
+     * Uses duk_require_int.
+     *
+     * \param ctx the Duktape context
+     * \param index the value index
+     * \return the converted value
+     */
+    static duk_int_t require(duk_context* ctx, duk_idx_t index)
+    {
+        return duk_require_int(ctx, index);
+    }
 };
 
 /**
@@ -418,6 +460,20 @@ public:
     static duk_uint_t get(duk_context* ctx, duk_idx_t index)
     {
         return duk_get_uint(ctx, index);
+    }
+
+    /**
+     * Require an unsigned int.
+     *
+     * Uses duk_require_uint.
+     *
+     * \param ctx the Duktape context
+     * \param index the value index
+     * \return the converted value
+     */
+    static duk_uint_t require(duk_context* ctx, duk_idx_t index)
+    {
+        return duk_require_uint(ctx, index);
     }
 };
 
@@ -453,6 +509,20 @@ public:
     {
         return duk_get_string(ctx, index);
     }
+
+    /**
+     * Require a C string.
+     *
+     * Uses duk_require_string.
+     *
+     * \param ctx the Duktape context
+     * \param index the value index
+     * \return the converted value
+     */
+    static const char* require(duk_context* ctx, duk_idx_t index)
+    {
+        return duk_require_string(ctx, index);
+    }
 };
 
 /**
@@ -487,6 +557,23 @@ public:
     {
         duk_size_t length;
         const char* str = duk_get_lstring(ctx, index, &length);
+
+        return {str, length};
+    }
+
+    /**
+     * Require a C++ std::string.
+     *
+     * Uses duk_require_lstring.
+     *
+     * \param ctx the Duktape context
+     * \param index the value index
+     * \return the converted value
+     */
+    static std::string require(duk_context* ctx, duk_idx_t index)
+    {
+        duk_size_t length;
+        const char* str = duk_require_lstring(ctx, index, &length);
 
         return {str, length};
     }
@@ -533,6 +620,25 @@ T dukx_get(duk_context* ctx, duk_idx_t index)
 }
 
 /**
+ * Generic require function.
+ *
+ * This functions calls dukx_type_traits<T>::require if specialized.
+ *
+ * \param ctx the Duktape context
+ * \param index the value index
+ * \return the converted value
+ */
+template <typename T>
+T dukx_require(duk_context* ctx, duk_idx_t index)
+{
+    using Type = typename std::decay<T>::type;
+
+    static_assert(dukx_type_traits<Type>::value, "type T not supported");
+
+    return dukx_type_traits<Type>::require(ctx, index);
+}
+
+/**
  * Push a Javascript array to the stack.
  *
  * This function push the value using duk_push_array and dukx_push for each
@@ -542,6 +648,7 @@ T dukx_get(duk_context* ctx, duk_idx_t index)
  * \param it the input iterator
  * \param end the end iterator
  * \return 1 for convenience
+ * \warning experimental and may change in the future
  */
 template <typename InputIt>
 int dukx_push_array(duk_context* ctx, InputIt it, InputIt end)
@@ -564,6 +671,7 @@ int dukx_push_array(duk_context* ctx, InputIt it, InputIt end)
  * \param ctx the Duktape context
  * \param values the list of values
  * \return 1 for convenience
+ * \warning experimental and may change in the future
  */
 template <typename T>
 int dukx_push_array(duk_context* ctx, std::initializer_list<T> values)
@@ -583,6 +691,7 @@ int dukx_push_array(duk_context* ctx, std::initializer_list<T> values)
  * \param it the input iterator
  * \param end the end iterator
  * \return 1 for convenience
+ * \warning experimental and may change in the future
  */
 template <typename InputIt>
 int dukx_push_object(duk_context* ctx, InputIt it, InputIt end)
@@ -606,6 +715,7 @@ int dukx_push_object(duk_context* ctx, InputIt it, InputIt end)
  * \param ctx the Duktape context
  * \param values the list of key/value values
  * \return 1 for convenience
+ * \warning experimental and may change in the future
  */
 template <typename T>
 int dukx_push_object(duk_context* ctx, std::initializer_list<std::pair<std::string, T>> values)
@@ -622,6 +732,7 @@ int dukx_push_object(duk_context* ctx, std::initializer_list<std::pair<std::stri
  * \param ctx the Duktape context
  * \param index the array index
  * \param output the output iterator
+ * \warning experimental and may change in the future
  */
 template <typename T, typename OutputIt>
 void dukx_get_array(duk_context* ctx, duk_idx_t index, OutputIt output)
@@ -643,6 +754,7 @@ void dukx_get_array(duk_context* ctx, duk_idx_t index, OutputIt output)
  * \param ctx the Duktape context
  * \param index the array index
  * \return the container of values (e.g. `std::vector<int>`)
+ * \warning experimental and may change in the future
  */
 template <typename Container>
 Container dukx_get_array(duk_context* ctx, duk_idx_t index)
@@ -662,6 +774,7 @@ Container dukx_get_array(duk_context* ctx, duk_idx_t index)
  * \param ctx the Duktape context
  * \param index the object index
  * \return the container of values (e.g. `std::map<std::string, int>`)
+ * \warning experimental and may change in the future
  */
 template <typename Container>
 Container dukx_get_object(duk_context* ctx, duk_idx_t index)

@@ -47,22 +47,31 @@ public:
 };
 
 /**
- * Push a server.
+ * \brief Specialization for servers as shared_ptr.
  *
- * \pre server != nullptr
- * \param ctx the context
- * \param server the server
+ * Supports push, require.
  */
-void dukx_push_server(duk_context* ctx, std::shared_ptr<server> server);
+template <>
+class dukx_type_traits<std::shared_ptr<server>> : public std::true_type {
+public:
+    /**
+     * Push a server.
+     *
+     * \pre server != nullptr
+     * \param ctx the context
+     * \param server the server
+     */
+    static void push(duk_context* ctx, std::shared_ptr<server> server);
 
-/**
- * Require a server. Raise a Javascript error if not a Server.
- *
- * \param ctx the context
- * \param index the index
- * \return the server
- */
-std::shared_ptr<server> dukx_require_server(duk_context* ctx, duk_idx_t index);
+    /**
+     * Require a server. Raise a Javascript error if not a Server.
+     *
+     * \param ctx the context
+     * \param index the index
+     * \return the server
+     */
+    static std::shared_ptr<server> require(duk_context* ctx, duk_idx_t index);
+};
 
 } // !irccd
 

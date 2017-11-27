@@ -24,6 +24,13 @@
  * \brief Irccd.File Javascript API.
  */
 
+#include <irccd/sysconfig.hpp>
+
+#if defined(HAVE_STAT)
+#   include <sys/types.h>
+#   include <sys/stat.h>
+#endif
+
 #include <cassert>
 #include <cerrno>
 #include <cstdio>
@@ -150,33 +157,52 @@ public:
 };
 
 /**
- * Construct the file as this.
+ * \brief Specialization for generic file type as shared_ptr.
  *
- * The object prototype takes ownership of fp and will be deleted once
- * collected.
- *
- * \pre fp != nullptr
- * \param ctx the the context
- * \param fp the file
+ * Supports push, require.
  */
-void dukx_new_file(duk_context* ctx, file* fp);
+template <>
+class dukx_type_traits<std::shared_ptr<file>> : public std::true_type {
+public:
+    /**
+     * Push a file.
+     *
+     * \pre fp != nullptr
+     * \param ctx the the context
+     * \param fp the file
+     */
+    static void push(duk_context* ctx, std::shared_ptr<file> fp);
+
+    /**
+     * Require a file. Raises a JavaScript error if not a File.
+     *
+     * \param ctx the context
+     * \param index the index
+     * \return the file pointer
+     */
+    static std::shared_ptr<file> require(duk_context* ctx, duk_idx_t index);
+};
+
+#if defined(HAVE_STAT)
 
 /**
- * Push a file.
+ * \brief Specialization for struct stat.
  *
- * \pre fp != nullptr
- * \param ctx the the context
- * \param fp the file
+ * Supports push.
  */
-void dukx_push_file(duk_context* ctx, file* fp);
+template <>
+class dukx_type_traits<struct stat> : public std::true_type {
+public:
+    /**
+     * Push the stat information to the stack as Javascript object.
+     *
+     * \param ctx the context
+     * \param st the stat structure
+     */
+    static void push(duk_context* ctx, const struct stat& st);
+};
 
-/**
- * Require a file. Raises a JavaScript error if not a File.
- *
- * \param ctx the context
- * \param index the index
- */
-file* dukx_require_file(duk_context* ctx, duk_idx_t index);
+#endif // !HAVE_STAT
 
 } // !irccd
 
