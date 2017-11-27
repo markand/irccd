@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(popen)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "r"));
     BOOST_TEST(duk_get_string(plugin_->context(), -1) == IRCCD_VERSION);

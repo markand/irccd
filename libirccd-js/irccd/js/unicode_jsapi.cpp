@@ -139,7 +139,7 @@ std::string unicode_jsapi::name() const
 
 void unicode_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
-    StackAssert sa(plugin->context());
+    dukx_stack_assert sa(plugin->context());
 
     duk_get_global_string(plugin->context(), "Irccd");
     duk_push_object(plugin->context());

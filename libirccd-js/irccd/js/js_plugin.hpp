@@ -56,7 +56,7 @@ public:
 
 private:
     // JavaScript context
-    UniqueContext context_;
+    dukx_context context_;
 
     // Private helpers.
     std::unordered_map<std::string, std::string> get_table(const std::string&) const;
@@ -77,7 +77,7 @@ public:
      *
      * \return the context
      */
-    inline UniqueContext& context() noexcept
+    inline dukx_context& context() noexcept
     {
         return context_;
     }

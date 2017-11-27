@@ -160,13 +160,13 @@ system_error::system_error(int e, std::string message)
 
 void system_error::raise(duk_context *ctx) const
 {
-    StackAssert sa(ctx, 0);
+    dukx_stack_assert sa(ctx, 0);
 
     duk_get_global_string(ctx, "Irccd");
     duk_get_prop_string(ctx, -1, "SystemError");
     duk_remove(ctx, -2);
     duk_push_int(ctx, errno_);
-    dukx_push_std_string(ctx, message_);
+    dukx_push_string(ctx, message_);
     duk_new(ctx, 2);
     duk_throw(ctx);
 }
@@ -178,7 +178,7 @@ std::string irccd_jsapi::name() const
 
 void irccd_jsapi::load(irccd& irccd, std::shared_ptr<js_plugin> plugin)
 {
-    StackAssert sa(plugin->context());
+    dukx_stack_assert sa(plugin->context());
 
     // irccd.
     duk_push_object(plugin->context());
@@ -220,7 +220,7 @@ void irccd_jsapi::load(irccd& irccd, std::shared_ptr<js_plugin> plugin)
 
 irccd& dukx_get_irccd(duk_context *ctx)
 {
-    StackAssert sa(ctx);
+    dukx_stack_assert sa(ctx);
 
     duk_get_global_string(ctx, "\xff""\xff""irccd-ref");
     auto ptr = static_cast<irccd*>(duk_to_pointer(ctx, -1));

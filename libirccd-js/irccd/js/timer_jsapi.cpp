@@ -86,7 +86,7 @@ void timer::handle()
 
     if (duk_pcall(ctx, 0)) {
         log::warning() << "plugin: " << plugin->name() << " timer error:" << std::endl;
-        log::warning() << "  " << dukx_exception(ctx, -1).what() << std::endl;
+        log::warning() << "  " << dukx_get_exception(ctx, -1).what() << std::endl;
     } else
         duk_pop(ctx);
 }
@@ -122,7 +122,7 @@ void timer::stop()
 
 timer* self(duk_context* ctx)
 {
-    StackAssert sa(ctx);
+    dukx_stack_assert sa(ctx);
 
     duk_push_this(ctx);
     duk_get_prop_string(ctx, -1, signature);
@@ -175,7 +175,7 @@ const duk_function_list_entry methods[] = {
  */
 duk_ret_t destructor(duk_context* ctx)
 {
-    StackAssert sa(ctx);
+    dukx_stack_assert sa(ctx);
 
     // Get timer from this.
     duk_get_prop_string(ctx, 0, signature);
@@ -254,7 +254,7 @@ std::string timer_jsapi::name() const
 
 void timer_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
-    StackAssert sa(plugin->context());
+    dukx_stack_assert sa(plugin->context());
 
     duk_get_global_string(plugin->context(), "Irccd");
     duk_push_c_function(plugin->context(), constructor, 3);

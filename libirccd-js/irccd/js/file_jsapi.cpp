@@ -53,7 +53,7 @@ const char *prototype("\xff""\xff""irccd-file-prototype");
 
 void push_stat(duk_context* ctx, const struct stat& st)
 {
-    StackAssert sa(ctx, 1);
+    dukx_stack_assert sa(ctx, 1);
 
     duk_push_object(ctx);
 
@@ -124,7 +124,7 @@ inline std::string clear_crlf(std::string input)
 
 file* self(duk_context* ctx)
 {
-    StackAssert sa(ctx);
+    dukx_stack_assert sa(ctx);
 
     duk_push_this(ctx);
     duk_get_prop_string(ctx, -1, signature);
@@ -153,7 +153,7 @@ file* self(duk_context* ctx)
  */
 duk_ret_t method_basename(duk_context* ctx)
 {
-    dukx_push_std_string(ctx, fs_util::base_name(self(ctx)->path()));
+    dukx_push_string(ctx, fs_util::base_name(self(ctx)->path()));
 
     return 1;
 }
@@ -182,7 +182,7 @@ duk_ret_t method_close(duk_context* ctx)
  */
 duk_ret_t method_dirname(duk_context* ctx)
 {
-    dukx_push_std_string(ctx, fs_util::dir_name(self(ctx)->path()));
+    dukx_push_string(ctx, fs_util::dir_name(self(ctx)->path()));
 
     return 1;
 }
@@ -213,7 +213,7 @@ duk_ret_t method_lines(duk_context* ctx)
         auto pos = buffer.find('\n');
 
         if (pos != std::string::npos) {
-            dukx_push_std_string(ctx, clear_crlf(buffer.substr(0, pos)));
+            dukx_push_string(ctx, clear_crlf(buffer.substr(0, pos)));
             duk_put_prop_index(ctx, -2, i++);
 
             buffer.erase(0, pos + 1);
@@ -226,7 +226,7 @@ duk_ret_t method_lines(duk_context* ctx)
 
     // Missing '\n' in end of file.
     if (!buffer.empty()) {
-        dukx_push_std_string(ctx, clear_crlf(buffer));
+        dukx_push_string(ctx, clear_crlf(buffer));
         duk_put_prop_index(ctx, -2, i++);
     }
 
@@ -279,7 +279,7 @@ duk_ret_t method_read(duk_context* ctx)
             data.resize(total);
         }
 
-        dukx_push_std_string(ctx, data);
+        dukx_push_string(ctx, data);
     } catch (const std::exception&) {
         dukx_throw(ctx, system_error());
     }
@@ -310,7 +310,7 @@ duk_ret_t method_readline(duk_context* ctx)
     if (std::ferror(fp))
         dukx_throw(ctx, system_error());
 
-    dukx_push_std_string(ctx, clear_crlf(result));
+    dukx_push_string(ctx, clear_crlf(result));
 
     return 1;
 }
@@ -519,7 +519,7 @@ duk_ret_t destructor(duk_context* ctx)
  */
 duk_ret_t function_basename(duk_context* ctx)
 {
-    dukx_push_std_string(ctx, fs_util::base_name(duk_require_string(ctx, 0)));
+    dukx_push_string(ctx, fs_util::base_name(duk_require_string(ctx, 0)));
 
     return 1;
 }
@@ -537,7 +537,7 @@ duk_ret_t function_basename(duk_context* ctx)
  */
 duk_ret_t function_dirname(duk_context* ctx)
 {
-    dukx_push_std_string(ctx, fs_util::dir_name(duk_require_string(ctx, 0)));
+    dukx_push_string(ctx, fs_util::dir_name(duk_require_string(ctx, 0)));
 
     return 1;
 }
@@ -641,7 +641,7 @@ std::string file_jsapi::name() const
 
 void file_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
-    StackAssert sa(plugin->context());
+    dukx_stack_assert sa(plugin->context());
 
     duk_get_global_string(plugin->context(), "Irccd");
     duk_push_c_function(plugin->context(), constructor, 2);
@@ -663,7 +663,7 @@ void dukx_new_file(duk_context* ctx, file* fp)
     assert(ctx);
     assert(fp);
 
-    StackAssert sa(ctx);
+    dukx_stack_assert sa(ctx);
 
     duk_push_this(ctx);
     duk_push_pointer(ctx, fp);
@@ -676,7 +676,7 @@ void dukx_push_file(duk_context* ctx, file* fp)
     assert(ctx);
     assert(fp);
 
-    StackAssert sa(ctx, 1);
+    dukx_stack_assert sa(ctx, 1);
 
     duk_push_object(ctx);
     duk_push_pointer(ctx, fp);

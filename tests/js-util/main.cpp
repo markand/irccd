@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE(format_simple)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST(duk_get_string(plugin_->context(), -1) == "markand");
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(format_simple)
 BOOST_AUTO_TEST_CASE(splituser)
 {
     if (duk_peval_string(plugin_->context(), "result = Irccd.Util.splituser(\"user!~user@hyper/super/host\");") != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST(duk_get_string(plugin_->context(), -1) == "user");
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_CASE(splituser)
 BOOST_AUTO_TEST_CASE(splithost)
 {
     if (duk_peval_string(plugin_->context(), "result = Irccd.Util.splithost(\"user!~user@hyper/super/host\");") != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST(duk_get_string(plugin_->context(), -1) == "~user@hyper/super/host");
@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(cut_string_simple)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "line0"));
     BOOST_TEST(duk_get_string(plugin_->context(), -1) == "hello world");
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(cut_string_double)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "line0"));
     BOOST_TEST(duk_get_string(plugin_->context(), -1) == "hello");
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE(cut_string_dirty)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "line0"));
     BOOST_TEST(duk_get_string(plugin_->context(), -1) == "hello");
@@ -123,7 +123,7 @@ BOOST_AUTO_TEST_CASE(cut_string_too_much_lines)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "lines"));
     BOOST_TEST(duk_is_undefined(plugin_->context(), -1));
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE(cut_string_token_too_big)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "name"));
     BOOST_TEST(duk_get_string(plugin_->context(), -1) == "RangeError");
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(cut_string_negative_maxc)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "name"));
     BOOST_TEST(duk_get_string(plugin_->context(), -1) == "RangeError");
@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(cut_string_negative_maxl)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "name"));
     BOOST_TEST(duk_get_string(plugin_->context(), -1) == "RangeError");
@@ -197,7 +197,7 @@ BOOST_AUTO_TEST_CASE(cut_array_simple)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "line0"));
     BOOST_TEST(duk_get_string(plugin_->context(), -1) == "hello world");
@@ -212,7 +212,7 @@ BOOST_AUTO_TEST_CASE(cut_array_double)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "line0"));
     BOOST_TEST(duk_get_string(plugin_->context(), -1) == "hello");
@@ -229,7 +229,7 @@ BOOST_AUTO_TEST_CASE(cut_array_dirty)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "line0"));
     BOOST_TEST(duk_get_string(plugin_->context(), -1) == "hello");
@@ -249,7 +249,7 @@ BOOST_AUTO_TEST_CASE(cut_invalid_data)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "name"));
     BOOST_TEST(duk_get_string(plugin_->context(), -1) == "TypeError");

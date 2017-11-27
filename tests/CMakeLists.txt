@@ -61,7 +61,6 @@ if (WITH_TESTS)
         # Javascript plugin object.
         add_subdirectory(js-plugin)
 
-        add_subdirectory(js)
         add_subdirectory(js-elapsedtimer)
         add_subdirectory(js-directory)
         add_subdirectory(js-file)

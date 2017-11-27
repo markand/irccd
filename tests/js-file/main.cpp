@@ -27,12 +27,30 @@
 
 namespace irccd {
 
+namespace {
+
+std::vector<std::string> array(duk_context* ctx, int index)
+{
+    std::vector<std::string> result;
+    std::size_t length = duk_get_length(ctx, index);
+
+    for (std::size_t i = 0U; i < length; ++i) {
+        duk_get_prop_index(ctx, -1, i);
+        result.push_back(dukx_get_string(ctx, -1));
+        duk_pop(ctx);
+    }
+
+    return result;
+}
+
+} // !namespace
+
 BOOST_FIXTURE_TEST_SUITE(file_jsapi_suite, js_test<file_jsapi>)
 
 BOOST_AUTO_TEST_CASE(function_basename)
 {
     if (duk_peval_string(plugin_->context(), "result = Irccd.File.basename('/usr/local/etc/irccd.conf');"))
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST("irccd.conf" == duk_get_string(plugin_->context(), -1));
@@ -41,7 +59,7 @@ BOOST_AUTO_TEST_CASE(function_basename)
 BOOST_AUTO_TEST_CASE(function_dirname)
 {
     if (duk_peval_string(plugin_->context(), "result = Irccd.File.dirname('/usr/local/etc/irccd.conf');"))
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST("/usr/local/etc" == duk_get_string(plugin_->context(), -1));
@@ -51,7 +69,7 @@ BOOST_AUTO_TEST_CASE(function_dirname)
 BOOST_AUTO_TEST_CASE(function_exists)
 {
     if (duk_peval_string(plugin_->context(), "result = Irccd.File.exists(CMAKE_SOURCE_DIR + '/tests/root/file-1.txt')"))
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
@@ -60,7 +78,7 @@ BOOST_AUTO_TEST_CASE(function_exists)
 BOOST_AUTO_TEST_CASE(function_exists2)
 {
     if (duk_peval_string(plugin_->context(), "result = Irccd.File.exists('file_which_does_not_exist.txt')"))
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST(!duk_get_boolean(plugin_->context(), -1));
@@ -72,7 +90,7 @@ BOOST_AUTO_TEST_CASE(function_remove)
     std::ofstream("test-js-fs.remove");
 
     if (duk_peval_string(plugin_->context(), "Irccd.File.remove('test-js-fs.remove');") != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     std::ifstream in("test-js-fs.remove");
 
@@ -87,7 +105,7 @@ BOOST_AUTO_TEST_CASE(method_basename)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST("file-1.txt" == duk_get_string(plugin_->context(), -1));
@@ -102,7 +120,7 @@ BOOST_AUTO_TEST_CASE(method_basename_closed)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST("file-1.txt" == duk_get_string(plugin_->context(), -1));
@@ -116,7 +134,7 @@ BOOST_AUTO_TEST_CASE(method_dirname)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST(CMAKE_SOURCE_DIR "/tests/root" == duk_get_string(plugin_->context(), -1));
@@ -131,7 +149,7 @@ BOOST_AUTO_TEST_CASE(method_dirname_closed)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST(CMAKE_SOURCE_DIR "/tests/root" == duk_get_string(plugin_->context(), -1));
@@ -144,12 +162,12 @@ BOOST_AUTO_TEST_CASE(method_lines)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     std::vector<std::string> expected{"a", "b", "c"};
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
-    BOOST_TEST(expected == dukx_get_array(plugin_->context(), -1, dukx_get_std_string));
+    BOOST_TEST(expected == array(plugin_->context(), -1));
 }
 
 BOOST_AUTO_TEST_CASE(method_seek1)
@@ -161,10 +179,10 @@ BOOST_AUTO_TEST_CASE(method_seek1)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
-    BOOST_TEST(".", dukx_get_std_string(plugin_->context(), -1));
+    BOOST_TEST(".", dukx_get_string(plugin_->context(), -1));
 }
 
 BOOST_AUTO_TEST_CASE(method_seek1_closed)
@@ -178,7 +196,7 @@ BOOST_AUTO_TEST_CASE(method_seek1_closed)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
@@ -194,10 +212,10 @@ BOOST_AUTO_TEST_CASE(method_seek2)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
-    BOOST_TEST("." == dukx_get_std_string(plugin_->context(), -1));
+    BOOST_TEST("." == dukx_get_string(plugin_->context(), -1));
 }
 
 BOOST_AUTO_TEST_CASE(method_seek2c_losed)
@@ -212,7 +230,7 @@ BOOST_AUTO_TEST_CASE(method_seek2c_losed)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
@@ -227,7 +245,7 @@ BOOST_AUTO_TEST_CASE(method_seek3)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST("t" == duk_get_string(plugin_->context(), -1));
@@ -244,7 +262,7 @@ BOOST_AUTO_TEST_CASE(method_seek3_closed)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
@@ -258,7 +276,7 @@ BOOST_AUTO_TEST_CASE(method_read1)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
     BOOST_TEST("file-1.txt\n" == duk_get_string(plugin_->context(), -1));
@@ -275,12 +293,12 @@ BOOST_AUTO_TEST_CASE(method_readline)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     std::vector<std::string> expected{"a", "b", "c"};
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
-    BOOST_TEST(expected == dukx_get_array(plugin_->context(), -1, dukx_get_std_string));
+    BOOST_TEST(expected == array(plugin_->context(), -1));
 }
 
 BOOST_AUTO_TEST_CASE(method_readline_closed)
@@ -295,12 +313,12 @@ BOOST_AUTO_TEST_CASE(method_readline_closed)
     );
 
     if (ret != 0)
-        throw dukx_exception(plugin_->context(), -1);
+        throw dukx_get_exception(plugin_->context(), -1);
 
     std::vector<std::string> expected;
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
-    BOOST_TEST(expected == dukx_get_array(plugin_->context(), -1, dukx_get_std_string));
+    BOOST_TEST(expected == array(plugin_->context(), -1));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

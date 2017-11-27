@@ -46,10 +46,10 @@ duk_idx_t wrap(duk_context* ctx, int nret, Func&& func)
 
     try {
         func(dukx_get_irccd(ctx), name);
-    } catch (const std::out_of_range &ex) {
-        dukx_throw(ctx, ReferenceError(ex.what()));
+    } catch (const std::out_of_range& ex) {
+        (void)duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "%s", ex.what());
     } catch (const std::exception &ex) {
-        dukx_throw(ctx, Error(ex.what()));
+        (void)duk_error(ctx, DUK_ERR_ERROR, "%s", ex.what());
     }
 
     return nret;
@@ -222,15 +222,15 @@ duk_idx_t info(duk_context* ctx)
         return 0;
 
     duk_push_object(ctx);
-    dukx_push_std_string(ctx, plugin->name());
+    dukx_push_string(ctx, plugin->name());
     duk_put_prop_string(ctx, -2, "name");
-    dukx_push_std_string(ctx, plugin->author());
+    dukx_push_string(ctx, plugin->author());
     duk_put_prop_string(ctx, -2, "author");
-    dukx_push_std_string(ctx, plugin->license());
+    dukx_push_string(ctx, plugin->license());
     duk_put_prop_string(ctx, -2, "license");
-    dukx_push_std_string(ctx, plugin->summary());
+    dukx_push_string(ctx, plugin->summary());
     duk_put_prop_string(ctx, -2, "summary");
-    dukx_push_std_string(ctx, plugin->version());
+    dukx_push_string(ctx, plugin->version());
     duk_put_prop_string(ctx, -2, "version");
 
     return 1;
@@ -247,9 +247,14 @@ duk_idx_t info(duk_context* ctx)
  */
 duk_idx_t list(duk_context* ctx)
 {
-    dukx_push_array(ctx, dukx_get_irccd(ctx).plugins().list(), [] (auto ctx, auto plugin) {
-        dukx_push_std_string(ctx, plugin->name());
-    });
+    int i = 0;
+
+    duk_push_array(ctx);
+
+    for (const auto& p : dukx_get_irccd(ctx).plugins().list()) {
+        dukx_push_string(ctx, p->name());
+        duk_put_prop_index(ctx, -2, i++);
+    }
 
     return 1;
 }
@@ -269,7 +274,7 @@ duk_idx_t list(duk_context* ctx)
  */
 duk_idx_t load(duk_context* ctx)
 {
-    return wrap(ctx, 0, [&] (irccd &irccd, const std::string &name) {
+    return wrap(ctx, 0, [&] (irccd& irccd, const std::string& name) {
         irccd.plugins().load(name);
     });
 }
@@ -288,7 +293,7 @@ duk_idx_t load(duk_context* ctx)
  */
 duk_idx_t reload(duk_context* ctx)
 {
-    return wrap(ctx, 0, [&] (irccd &irccd, const std::string &name) {
+    return wrap(ctx, 0, [&] (irccd& irccd, const std::string& name) {
         irccd.plugins().reload(name);
     });
 }
@@ -330,7 +335,7 @@ std::string plugin_jsapi::name() const
 
 void plugin_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
-    StackAssert sa(plugin->context());
+    dukx_stack_assert sa(plugin->context());
 
     duk_push_pointer(plugin->context(), new std::weak_ptr<js_plugin>(plugin));
     duk_push_object(plugin->context());
@@ -373,7 +378,7 @@ void plugin_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 
 std::shared_ptr<js_plugin> dukx_get_plugin(duk_context* ctx)
 {
-    StackAssert sa(ctx);
+    dukx_stack_assert sa(ctx);
 
     duk_get_global_string(ctx, plugin_ref);
     auto plugin = static_cast<std::weak_ptr<js_plugin>*>(duk_to_pointer(ctx, -1));

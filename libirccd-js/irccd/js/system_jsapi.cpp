@@ -50,7 +50,7 @@ namespace {
  */
 duk_ret_t env(duk_context* ctx)
 {
-    dukx_push_std_string(ctx, sys::env(dukx_get_std_string(ctx, 0)));
+    dukx_push_string(ctx, sys::env(dukx_get_string(ctx, 0)));
 
     return 1;
 }
@@ -82,7 +82,7 @@ duk_ret_t exec(duk_context* ctx)
  */
 duk_ret_t home(duk_context* ctx)
 {
-    dukx_push_std_string(ctx, sys::home());
+    dukx_push_string(ctx, sys::home());
 
     return 1;
 }
@@ -98,7 +98,7 @@ duk_ret_t home(duk_context* ctx)
  */
 duk_ret_t name(duk_context* ctx)
 {
-    dukx_push_std_string(ctx, sys::name());
+    dukx_push_string(ctx, sys::name());
 
     return 1;
 }
@@ -202,7 +202,7 @@ duk_ret_t uptime(duk_context* ctx)
  */
 duk_ret_t version(duk_context* ctx)
 {
-    dukx_push_std_string(ctx, sys::version());
+    dukx_push_string(ctx, sys::version());
 
     return 1;
 }
@@ -232,7 +232,7 @@ std::string system_jsapi::name() const
 
 void system_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
-    StackAssert sa(plugin->context());
+    dukx_stack_assert sa(plugin->context());
 
     duk_get_global_string(plugin->context(), "Irccd");
     duk_push_object(plugin->context());

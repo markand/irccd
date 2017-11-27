@@ -29,7 +29,7 @@ const char* signature("\xff""\xff""irccd-elapsed-timer-ptr");
 
 boost::timer::cpu_timer* self(duk_context* ctx)
 {
-    StackAssert sa(ctx);
+    dukx_stack_assert sa(ctx);
 
     duk_push_this(ctx);
     duk_get_prop_string(ctx, -1, signature);
@@ -132,7 +132,7 @@ std::string elapsed_timer_jsapi::name() const
 
 void elapsed_timer_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
-    StackAssert sa(plugin->context());
+    dukx_stack_assert sa(plugin->context());
 
     duk_get_global_string(plugin->context(), "Irccd");
     duk_push_c_function(plugin->context(), constructor, 0);
