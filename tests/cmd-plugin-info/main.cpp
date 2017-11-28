@@ -58,27 +58,28 @@ BOOST_AUTO_TEST_CASE(basic)
     BOOST_TEST(response["version"].get<std::string>() == "0.0.0.0.0.0.0.0.1-beta5");
 }
 
-BOOST_AUTO_TEST_CASE(notfound)
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(not_found)
 {
-    auto response = nlohmann::json();
+    boost::system::error_code result;
 
-    ctl_->recv([&] (auto, auto msg) {
-        response = std::move(msg);
-    });
     ctl_->send({
-        { "command",    "plugin-info"       },
-        { "plugin",     "test"              },
+        { "command",    "plugin-info"   },
+        { "plugin",     "unknown"       }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
     });
 
-    wait_for([&] () {
-        return response.is_object();
+    wait_for([&] {
+        return result;
     });
 
-    BOOST_TEST(response.is_object());
-
-    // TODO: error code here.
-    BOOST_TEST(response["error"].get<std::string>() == "plugin test not found");
+    BOOST_ASSERT(result == plugin_error::not_found);
 }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 

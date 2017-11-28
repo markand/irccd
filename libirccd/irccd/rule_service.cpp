@@ -44,7 +44,7 @@ void rule_service::remove(unsigned position)
 const rule &rule_service::require(unsigned position) const
 {
     if (position >= rules_.size())
-        throw std::out_of_range("rule " + std::to_string(position) + " does not exist");
+        throw rule_error(rule_error::invalid_index);
 
     return rules_[position];
 }
@@ -52,7 +52,7 @@ const rule &rule_service::require(unsigned position) const
 rule &rule_service::require(unsigned position)
 {
     if (position >= rules_.size())
-        throw std::out_of_range("rule " + std::to_string(position) + " does not exist");
+        throw rule_error(rule_error::invalid_index);
 
     return rules_[position];
 }

@@ -90,6 +90,10 @@ public:
 
 /**
  * \brief Implementation of plugin-config transport command.
+ *
+ * Replies:
+ *
+ *   - plugin_error::not_found
  */
 class plugin_config_command : public command {
 public:
@@ -106,6 +110,10 @@ public:
 
 /**
  * \brief Implementation of plugin-info transport command.
+ *
+ * Replies:
+ *
+ *   - plugin_error::not_found
  */
 class plugin_info_command : public command {
 public:
@@ -138,6 +146,12 @@ public:
 
 /**
  * \brief Implementation of plugin-load transport command.
+ *
+ * Replies:
+ *
+ *   - plugin_error::already_exists
+ *   - plugin_error::not_found
+ *   - pluign_error::exec_error
  */
 class plugin_load_command : public command {
 public:
@@ -154,6 +168,11 @@ public:
 
 /**
  * \brief Implementation of plugin-reload transport command.
+ *
+ * Replies:
+ *
+ *   - plugin_error::not_found
+ *   - pluign_error::exec_error
  */
 class plugin_reload_command : public command {
 public:
@@ -170,6 +189,11 @@ public:
 
 /**
  * \brief Implementation of plugin-unload transport command.
+ *
+ * Replies:
+ *
+ *   - plugin_error::not_found
+ *   - pluign_error::exec_error
  */
 class plugin_unload_command : public command {
 public:

@@ -24,6 +24,7 @@
  * \brief Plugin service.
  */
 
+#include <cassert>
 #include <memory>
 #include <string>
 #include <vector>
@@ -177,6 +178,50 @@ public:
      * \throw std::exception on failures
      */
     void reload(const std::string& name);
+
+    /**
+     * Call a plugin function and throw an exception with the following errors:
+     *
+     *   - plugin_error::not_found if not loaded
+     *   - plugin_error::exec_error if function failed
+     *
+     * \pre plugin != nullptr
+     * \param plugin the plugin
+     * \param func the plugin member function (pointer to member)
+     * \param args the arguments to pass
+     */
+    template <typename Func, typename... Args>
+    void exec(std::shared_ptr<plugin> plugin, Func fn, Args&&... args)
+    {
+        assert(plugin);
+
+        // TODO: replace with C++17 std::invoke.
+        try {
+            ((*plugin).*(fn))(std::forward<Args>(args)...);
+        } catch (const std::exception& ex) {
+            throw plugin_error(plugin_error::exec_error, ex.what());
+        } catch (...) {
+            throw plugin_error(plugin_error::exec_error);
+        }
+    }
+
+    /**
+     * Overloaded function.
+     *
+     * \param name the plugin name
+     * \param func the plugin member function (pointer to member)
+     * \param args the arguments to pass
+     */
+    template <typename Func, typename... Args>
+    void exec(const std::string& name, Func fn, Args&&... args)
+    {
+        auto plugin = find(name);
+
+        if (!plugin)
+            throw plugin_error(plugin_error::not_found);
+
+        exec(plugin, fn, std::forward<Args>(args)...);
+    }
 };
 
 } // !irccd

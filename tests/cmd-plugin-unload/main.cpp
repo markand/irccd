@@ -43,6 +43,16 @@ public:
     }
 };
 
+class broken_plugin : public plugin {
+public:
+    using plugin::plugin;
+
+    void on_unload(irccd&) override
+    {
+        throw std::runtime_error("broken");
+    }
+};
+
 class plugin_unload_test : public command_test<plugin_unload_command> {
 protected:
     std::shared_ptr<custom_plugin> plugin_;
@@ -51,6 +61,7 @@ protected:
         : plugin_(std::make_shared<custom_plugin>())
     {
         daemon_->plugins().add(plugin_);
+        daemon_->plugins().add(std::make_unique<broken_plugin>("broken", ""));
     }
 };
 
@@ -71,6 +82,49 @@ BOOST_AUTO_TEST_CASE(basic)
 
     BOOST_TEST(plugin_->unloaded);
 }
+
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(not_found)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "plugin-unload" },
+        { "plugin",     "unknown"       }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == plugin_error::not_found);
+}
+
+BOOST_AUTO_TEST_CASE(exec_error)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "plugin-unload" },
+        { "plugin",     "broken"        }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == plugin_error::exec_error);
+    BOOST_ASSERT(!daemon_->plugins().has("broken"));
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 

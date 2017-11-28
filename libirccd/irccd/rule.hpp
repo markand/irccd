@@ -222,7 +222,7 @@ public:
     /**
      * \brief Rule related errors (4000..4999)
      */
-    enum class error {
+    enum error {
         //!< No error.
         no_error = 0,
 

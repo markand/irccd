@@ -208,7 +208,7 @@ plugin_reload_command::plugin_reload_command()
 
 void plugin_reload_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.plugins().require(json_util::require_identifier(args, "plugin"))->on_reload(irccd);
+    irccd.plugins().reload(json_util::require_identifier(args, "plugin"));
     client.success("plugin-reload");
 }
 

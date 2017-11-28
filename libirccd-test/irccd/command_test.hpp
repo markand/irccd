@@ -21,6 +21,8 @@
 
 #include <memory>
 
+#include <irccd/logger.hpp>
+
 #include <irccd/irccd.hpp>
 #include <irccd/command_service.hpp>
 #include <irccd/transport_service.hpp>
@@ -61,6 +63,8 @@ command_test<Command>::command_test()
     , daemon_(std::make_unique<irccd>(service_))
 {
     using boost::asio::ip::tcp;
+
+    log::set_logger(std::make_unique<log::silent_logger>());
 
     // Bind to a random port.
     tcp::endpoint ep(tcp::v4(), 0);

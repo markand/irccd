@@ -68,8 +68,10 @@ const boost::system::error_category& rule_category()
         std::string message(int e) const override
         {
             switch (static_cast<rule_error::error>(e)) {
-            case rule_error::error::invalid_action:
+            case rule_error::invalid_action:
                 return "invalid action given";
+            case rule_error::invalid_index:
+                return "invalid index";
             default:
                 return "no error";
             }

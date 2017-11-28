@@ -47,8 +47,13 @@ plugin_service::plugin_service(irccd& irccd) noexcept
 
 plugin_service::~plugin_service()
 {
-    for (const auto& plugin : plugins_)
-        plugin->on_unload(irccd_);
+    for (const auto& plugin : plugins_) {
+        try {
+            plugin->on_unload(irccd_);
+        } catch (const std::exception& ex) {
+            log::warning() << "plugin: " << plugin->name() << ": " << ex.what() << std::endl;
+        }
+    }
 }
 
 bool plugin_service::has(const std::string& name) const noexcept
@@ -152,7 +157,7 @@ std::shared_ptr<plugin> plugin_service::find(const std::string& id)
 void plugin_service::load(std::string name, std::string path)
 {
     if (has(name))
-        return;
+        throw plugin_error(plugin_error::already_exists);
 
     std::shared_ptr<plugin> plugin;
 
@@ -167,8 +172,8 @@ void plugin_service::load(std::string name, std::string path)
     plugin->set_config(config(name));
     plugin->set_formats(formats(name));
     plugin->set_paths(paths(name));
-    plugin->on_load(irccd_);
 
+    exec(plugin, &plugin::on_load, irccd_);
     add(std::move(plugin));
 }
 
@@ -176,8 +181,10 @@ void plugin_service::reload(const std::string& name)
 {
     auto plugin = get(name);
 
-    if (plugin)
-        plugin->on_reload(irccd_);
+    if (!plugin)
+        throw plugin_error(plugin_error::not_found);
+
+    exec(plugin, &plugin::on_reload, irccd_);
 }
 
 void plugin_service::unload(const std::string& name)
@@ -186,10 +193,14 @@ void plugin_service::unload(const std::string& name)
         return plugin->name() == name;
     });
 
-    if (it != plugins_.end()) {
-        (*it)->on_unload(irccd_);
-        plugins_.erase(it);
-    }
+    if (it == plugins_.end())
+        throw plugin_error(plugin_error::not_found);
+
+    // Erase first, in case of throwing.
+    auto save = *it;
+
+    plugins_.erase(it);
+    exec(save, &plugin::on_unload, irccd_);
 }
 
 } // !irccd

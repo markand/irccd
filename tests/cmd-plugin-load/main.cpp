@@ -38,7 +38,26 @@ public:
 
     std::shared_ptr<plugin> find(const std::string& id) noexcept override
     {
-        return std::make_unique<plugin>(id, "");
+        class broken : public plugin {
+        public:
+            using plugin::plugin;
+
+            void on_load(irccd&) override
+            {
+                throw std::runtime_error("broken");
+            }
+        };
+
+        /*
+         * The 'magic' plugin will be created for the unit tests, all other
+         * plugins will return null.
+         */
+        if (id == "magic")
+            return std::make_unique<plugin>(id, "");
+        if (id == "broken")
+            return std::make_unique<broken>(id, "");
+
+        return nullptr;
     }
 };
 
@@ -47,27 +66,89 @@ public:
     plugin_load_test()
     {
         daemon_->plugins().add_loader(std::make_unique<custom_loader>());
+        daemon_->plugins().add(std::make_unique<plugin>("already", ""));
     }
 };
 
-} // !irccd
+} // !namespace
 
 BOOST_FIXTURE_TEST_SUITE(plugin_load_test_suite, plugin_load_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
     ctl_->send({
-        { "command", "plugin-load" },
-        { "plugin", "foo" }
+        { "command",    "plugin-load"   },
+        { "plugin",     "magic"         }
     });
 
     wait_for([&] () {
-        return daemon_->plugins().has("foo");
+        return daemon_->plugins().has("magic");
     });
 
     BOOST_TEST(!daemon_->plugins().list().empty());
-    BOOST_TEST(daemon_->plugins().has("foo"));
+    BOOST_TEST(daemon_->plugins().has("magic"));
 }
+
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(not_found)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "plugin-load"   },
+        { "plugin",     "unknown"       }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == plugin_error::not_found);
+}
+
+BOOST_AUTO_TEST_CASE(already_exists)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "plugin-load"   },
+        { "plugin",     "already"       }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == plugin_error::already_exists);
+}
+
+BOOST_AUTO_TEST_CASE(exec_error)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "plugin-load"   },
+        { "plugin",     "broken"        }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == plugin_error::exec_error);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 

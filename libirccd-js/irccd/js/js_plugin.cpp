@@ -73,13 +73,19 @@ void js_plugin::call(const std::string& name, unsigned nargs)
         // Function not defined, remove the undefined value and all arguments.
         duk_pop_n(context_, nargs + 1);
     else {
+        std::string error;
+
         // Call the function and discard the result.
         duk_insert(context_, -nargs - 1);
 
+        // TODO: convert into a human readable string.
         if (duk_pcall(context_, nargs) != 0)
-            throw dukx_stack(context_, -1, true);
+            error = duk_safe_to_string(context_, -1);
 
         duk_pop(context_);
+
+        if (!error.empty())
+            throw plugin_error(plugin_error::exec_error, std::move(error));
     }
 }
 
