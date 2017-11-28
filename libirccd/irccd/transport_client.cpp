@@ -23,12 +23,6 @@
 
 namespace irccd {
 
-void transport_client::close()
-{
-    state_ = state_t::closing;
-    parent_.clients().erase(shared_from_this());
-}
-
 void transport_client::recv(network_recv_handler handler)
 {
     if (state_ != state_t::closing)
@@ -48,45 +42,32 @@ void transport_client::success(const std::string& cname, network_send_handler ha
     send({{ "command", cname }}, std::move(handler));
 }
 
-void transport_client::error(const nlohmann::json& data, network_send_handler handler)
+void transport_client::error(boost::system::error_code code, network_send_handler handler)
 {
-    send(std::move(data), std::move(handler));
-    set_state(state_t::closing);
+    error(std::move(code), "", std::move(handler));
 }
 
-void transport_client::error(const std::string& cname, const std::string& reason, network_send_handler handler)
+void transport_client::error(boost::system::error_code code,
+                             std::string cname,
+                             network_send_handler handler)
 {
-    assert(!cname.empty());
-    assert(!reason.empty());
+    assert(code);
 
-    error({
-        { "command",    cname   },
-        { "error",      reason  }
-    }, std::move(handler));
-}
+    auto json = nlohmann::json::object({
+        { "error", code.value() }
+    });
 
-void transport_client::error(const std::string& reason, network_send_handler handler)
-{
-    assert(!reason.empty());
+    if (!cname.empty())
+        json["command"] = std::move(cname);
 
-    error({{ "error", reason }}, std::move(handler));
-}
+    send(std::move(json), [this, handler] (auto code) {
+        if (handler)
+            handler(code);
 
-void transport_client::error(const std::string& cname, network_errc reason, network_send_handler handler)
-{
-    assert(!cname.empty());
+        parent_.clients().erase(shared_from_this());
+    });
 
-    error({
-        { "command",    cname                       },
-        { "error",      static_cast<int>(reason)    }
-    }, std::move(handler));
-}
-
-void transport_client::error(network_errc reason, network_send_handler handler)
-{
-    assert(reason != network_errc::no_error);
-
-    error({{ "error", static_cast<int>(reason) }}, std::move(handler));
+    state_ = state_t::closing;
 }
 
 } // !irccd

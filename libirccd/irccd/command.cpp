@@ -39,16 +39,15 @@ void exec_set(transport_client& client, plugin& plugin, const nlohmann::json& ar
     auto value = args.find("value");
 
     if (var == args.end() || !var->is_string())
-        client.error("plugin-config", "missing 'variable' property (string expected)");
-    else if (!value->is_string())
-        client.error("plugin-config", "invalid 'value' property (string expected)");
-    else {
-        auto config = plugin.config();
+        throw irccd_error(irccd_error::error::incomplete_message);
+    if (value == args.end() || !value->is_string())
+        throw irccd_error(irccd_error::error::incomplete_message);
 
-        config[*var] = *value;
-        plugin.set_config(config);
-        client.success("plugin-config");
-    }
+    auto config = plugin.config();
+
+    config[*var] = *value;
+    plugin.set_config(config);
+    client.success("plugin-config");
 }
 
 void exec_get(transport_client& client, plugin& plugin, const nlohmann::json& args)
@@ -262,11 +261,10 @@ void server_connect_command::exec(irccd& irccd, transport_client& client, const 
     auto server = server::from_json(irccd.service(), args);
 
     if (irccd.servers().has(server->name()))
-        client.error("server-connect", "server already exists");
-    else {
-        irccd.servers().add(std::move(server));
-        client.success("server-connect");
-    }
+        throw server_error(server_error::error::already_exists);
+
+    irccd.servers().add(std::move(server));
+    client.success("server-connect");
 }
 
 server_disconnect_command::server_disconnect_command()
@@ -280,8 +278,14 @@ void server_disconnect_command::exec(irccd& irccd, transport_client& client, con
 
     if (it == args.end())
         irccd.servers().clear();
-    else
-        irccd.servers().remove(*it);
+    else {
+        if (!it->is_string())
+            throw server_error(server_error::error::invalid_identifier);
+        if (!irccd.servers().has(it->get<std::string>()))
+            throw server_error(server_error::error::not_found);
+
+        irccd.servers().remove(it->get<std::string>());
+    }
 
     client.success("server-disconnect");
 }
@@ -523,19 +527,15 @@ void rule_edit_command::exec(irccd& irccd, transport_client& client, const nlohm
     auto action = args.find("action");
 
     if (action != args.end()) {
-        if (!action->is_string()) {
-            client.error("rule-edit", "action must be \"accept\" or \"drop\"");
-            return;
-        }
+        if (!action->is_string())
+            throw rule_error(rule_error::error::invalid_action);
 
         if (action->get<std::string>() == "accept")
             rule.set_action(rule::action_type::accept);
         else if (action->get<std::string>() == "drop")
             rule.set_action(rule::action_type::drop);
-        else {
-            client.error("rule-edit", "invalid action '"s + action->get<std::string>() + "'");
-            return;
-        }
+        else
+            throw rule_error(rule_error::error::invalid_action);
     }
 
     // All done, sync the rule.
@@ -583,14 +583,11 @@ void rule_remove_command::exec(irccd& irccd, transport_client& client, const nlo
 {
     unsigned position = json_util::require_uint(args, "index");
 
-    if (irccd.rules().length() == 0)
-        client.error("rule-remove", "rule list is empty");
-    if (position >= irccd.rules().length())
-        client.error("rule-remove", "index is out of range");
-    else {
-        irccd.rules().remove(position);
-        client.success("rule-remove");
-    }
+    if (irccd.rules().length() == 0 || position >= irccd.rules().length())
+        throw rule_error(rule_error::error::invalid_index);
+
+    irccd.rules().remove(position);
+    client.success("rule-remove");
 }
 
 rule_move_command::rule_move_command()
@@ -633,18 +630,20 @@ void rule_move_command::exec(irccd& irccd, transport_client& client, const nlohm
      * After:  [1] [2] [0]
      */
 
-    // Ignore dump input.
-    if (from == to)
+    // Ignore dumb input.
+    if (from == to) {
         client.success("rule-move");
-    else if (from >= irccd.rules().length())
-        client.error("rule-move", "rule source index is out of range");
-    else {
-        auto save = irccd.rules().list()[from];
-
-        irccd.rules().remove(from);
-        irccd.rules().insert(save, to > irccd.rules().length() ? irccd.rules().length() : to);
-        client.success("rule-move");
+        return;
     }
+
+    if (from >= irccd.rules().length())
+        throw rule_error(rule_error::error::invalid_index);
+
+    auto save = irccd.rules().list()[from];
+
+    irccd.rules().remove(from);
+    irccd.rules().insert(save, to > irccd.rules().length() ? irccd.rules().length() : to);
+    client.success("rule-move");
 }
 
 rule_add_command::rule_add_command()
@@ -658,11 +657,10 @@ void rule_add_command::exec(irccd& irccd, transport_client& client, const nlohma
     auto rule = from_json(args);
 
     if (index > irccd.rules().length())
-        client.error("rule-add", "index is out of range");
-    else {
-        irccd.rules().insert(rule, index);
-        client.success("rule-add");
-    }
+        throw rule_error(rule_error::error::invalid_index);
+
+    irccd.rules().insert(rule, index);
+    client.success("rule-add");
 }
 
 } // !irccd

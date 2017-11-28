@@ -559,6 +559,60 @@ public:
     virtual std::shared_ptr<plugin> find(const std::string& id) noexcept;
 };
 
+/**
+ * \brief Plugin error.
+ */
+class plugin_error : public boost::system::system_error {
+public:
+    /**
+     * \brief Server related errors (3000..3999)
+     */
+    enum error {
+        //!< No error.
+        no_error = 0,
+
+        //!< The specified plugin is not found.
+        not_found = 2000,
+
+        //!< The plugin was unable to run the function.
+        exec_error,
+
+        //!< The plugin is already loaded.
+        already_exists,
+    };
+
+    /**
+     * Inherited constructors.
+     */
+    using system_error::system_error;
+};
+
+/**
+ * Get the plugin error category singleton.
+ *
+ * \return the singleton
+ */
+const boost::system::error_category& server_category();
+
+/**
+ * Create a boost::system::error_code from plugin_error::error enum.
+ *
+ * \param e the error code
+ */
+boost::system::error_code make_error_code(plugin_error::error e);
+
 } // !irccd
+
+namespace boost {
+
+namespace system {
+
+template <>
+struct is_error_code_enum<irccd::plugin_error::error> : public std::true_type {
+};
+
+} // !system
+
+} // !boost
 
 #endif // !IRCCD_PLUGIN_HPP

@@ -47,6 +47,7 @@ irccd_define_library(
     LIBRARIES
         ${LIBRARIES}
         libcommon
+        libirccd
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${libirccdctl_SOURCE_DIR}>
 )

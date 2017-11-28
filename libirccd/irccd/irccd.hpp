@@ -173,6 +173,72 @@ public:
     }
 };
 
+/**
+ * \brief Irccd error.
+ */
+class irccd_error : public boost::system::system_error {
+public:
+    /**
+     * \brief Irccd related errors (1..999)
+     */
+    enum error {
+        //!< No error.
+        no_error = 0,
+
+        //!< The connected peer is not irccd.
+        not_irccd,
+
+        //!< The irccd version is too different.
+        incompatible_version,
+
+        //!< Authentication was required but not issued.
+        auth_required,
+
+        //!< Authentication was invalid.
+        invalid_auth,
+
+        //!< The message was not a valid JSON object.
+        invalid_message,
+
+        //!< The specified command does not exist.
+        invalid_command,
+
+        //!< The specified command requires more arguments.
+        incomplete_message,
+    };
+
+    /**
+     * Inherited constructors.
+     */
+    using system_error::system_error;
+};
+
+/**
+ * Get the irccd error category singleton.
+ *
+ * \return the singleton
+ */
+const boost::system::error_category& irccd_category();
+
+/**
+ * Create a boost::system::error_code from irccd_error::error enum.
+ *
+ * \param e the error code
+ */
+boost::system::error_code make_error_code(irccd_error::error e);
+
 } // !irccd
+
+namespace boost {
+
+namespace system {
+
+template <>
+struct is_error_code_enum<irccd::irccd_error::error> : public std::true_type {
+};
+
+} // !system
+
+} // !boost
 
 #endif // !IRCCD_HPP

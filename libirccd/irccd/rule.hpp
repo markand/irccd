@@ -24,11 +24,13 @@
  * \brief Rule description
  */
 
+#include "sysconfig.hpp"
+
 #include <cassert>
 #include <string>
 #include <unordered_set>
 
-#include "sysconfig.hpp"
+#include <boost/system/system_error.hpp>
 
 namespace irccd {
 
@@ -212,6 +214,57 @@ public:
     }
 };
 
+/**
+ * \brief Rule error.
+ */
+class rule_error : public boost::system::system_error {
+public:
+    /**
+     * \brief Rule related errors (4000..4999)
+     */
+    enum class error {
+        //!< No error.
+        no_error = 0,
+
+        //!< Invalid action given.
+        invalid_action = 4000,
+
+        //!< Invalid rule index.
+        invalid_index,
+    };
+
+    /**
+     * Inherited constructors.
+     */
+    using system_error::system_error;
+};
+
+/**
+ * Get the rule error category singleton.
+ *
+ * \return the singleton
+ */
+const boost::system::error_category& rule_category();
+
+/**
+ * Create a boost::system::error_code from rule_error::error enum.
+ *
+ * \param e the error code
+ */
+boost::system::error_code make_error_code(rule_error::error e);
+
 } // !irccd
+
+namespace boost {
+
+namespace system {
+
+template <>
+struct is_error_code_enum<irccd::rule_error::error> : public std::true_type {
+};
+
+} // !system
+
+} // !boost
 
 #endif // !IRCCD_RULE_HPP

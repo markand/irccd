@@ -75,7 +75,7 @@ std::shared_ptr<plugin> plugin_service::require(const std::string& name) const
     auto plugin = get(name);
 
     if (!plugin)
-        throw std::invalid_argument(string_util::sprintf("plugin %s not found", name));
+        throw plugin_error(plugin_error::not_found);
 
     return plugin;
 }
@@ -154,25 +154,22 @@ void plugin_service::load(std::string name, std::string path)
     if (has(name))
         return;
 
-    try {
-        std::shared_ptr<plugin> plugin;
+    std::shared_ptr<plugin> plugin;
 
-        if (path.empty())
-            plugin = find(name);
-        else
-            plugin = open(name, std::move(path));
+    if (path.empty())
+        plugin = find(name);
+    else
+        plugin = open(name, std::move(path));
 
-        if (plugin) {
-            plugin->set_config(config(name));
-            plugin->set_formats(formats(name));
-            plugin->set_paths(paths(name));
-            plugin->on_load(irccd_);
+    if (!plugin)
+        throw plugin_error(plugin_error::not_found);
 
-            add(std::move(plugin));
-        }
-    } catch (const std::exception& ex) {
-        log::warning(string_util::sprintf("plugin %s: %s", name, ex.what()));
-    }
+    plugin->set_config(config(name));
+    plugin->set_formats(formats(name));
+    plugin->set_paths(paths(name));
+    plugin->on_load(irccd_);
+
+    add(std::move(plugin));
 }
 
 void plugin_service::reload(const std::string& name)

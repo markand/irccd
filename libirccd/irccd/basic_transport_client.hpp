@@ -74,7 +74,13 @@ public:
      */
     void do_recv(network_recv_handler handler) override
     {
-        stream_.recv(std::move(handler));
+        assert(handler);
+
+        auto self = shared_from_this();
+
+        stream_.recv([this, self, handler] (auto msg, auto code) {
+            handler(std::move(msg), std::move(code));
+        });
     }
 
     /**
@@ -82,7 +88,12 @@ public:
      */
     void do_send(nlohmann::json json, network_send_handler handler) override
     {
-        stream_.send(std::move(json), std::move(handler));
+        auto self = shared_from_this();
+
+        stream_.send(std::move(json), [this, self, handler] (auto code) {
+            if (handler)
+                handler(std::move(code));
+        });
     }
 };
 

@@ -18,9 +18,13 @@
 
 #include <cassert>
 
-#include <irccd/network_errc.hpp>
 #include <irccd/sysconfig.hpp>
 #include <irccd/json_util.hpp>
+
+#include <irccd/irccd.hpp>
+#include <irccd/server.hpp>
+#include <irccd/plugin.hpp>
+#include <irccd/rule.hpp>
 
 #include "controller.hpp"
 #include "connection.hpp"
@@ -42,12 +46,7 @@ void controller::authenticate(connect_t handler, nlohmann::json info)
             return;
         }
 
-        recv([handler, info, this] (auto code, auto message) {
-            if (message["error"].is_number_integer())
-                code = static_cast<network_errc>(message["error"].template get<int>());
-            if (message["error"].is_string())
-                code = network_errc::invalid_auth;
-
+        recv([handler, info] (auto code, auto) {
             handler(std::move(code), std::move(info));
         });
     });
@@ -62,9 +61,9 @@ void controller::verify(connect_t handler)
         }
 
         if (json_util::to_string(message["program"]) != "irccd")
-            handler(network_errc::invalid_program, std::move(message));
+            handler(irccd_error::not_irccd, std::move(message));
         else if (json_util::to_int(message["major"]) != IRCCD_VERSION_MAJOR)
-            handler(network_errc::invalid_version, std::move(message));
+            handler(irccd_error::incompatible_version, std::move(message));
         else {
             if (!password_.empty())
                 authenticate(std::move(handler), message);
@@ -92,7 +91,26 @@ void controller::recv(network_recv_handler handler)
 
     // TODO: ensure connected.
 
-    conn_.recv(std::move(handler));
+    conn_.recv([handler] (auto code, auto msg) {
+        if (code) {
+            handler(std::move(code), std::move(msg));
+            return;
+        }
+
+        auto e = json_util::to_int(msg["error"]);
+
+        // TODO: maybe better to pass category instead of using static ranges.
+        if (e > 0 && e < 1000)
+            code = make_error_code(static_cast<irccd_error::error>(e));
+        else if (e >= 1000 && e < 2000)
+            code = make_error_code(static_cast<server_error::error>(e));
+        else if (e >= 2000 && e < 3000)
+            code = make_error_code(static_cast<plugin_error::error>(e));
+        else if (e >= 4000 && e < 4000)
+            code = make_error_code(static_cast<rule_error::error>(e));
+
+        handler(std::move(code), std::move(msg));
+    });
 }
 
 void controller::send(nlohmann::json message, network_send_handler handler)

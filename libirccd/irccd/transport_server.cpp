@@ -20,6 +20,7 @@
 
 #include <cassert>
 
+#include "irccd.hpp"
 #include "json_util.hpp"
 #include "transport_server.hpp"
 
@@ -40,15 +41,15 @@ void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_
         auto password = json_util::to_string(message["password"]);
 
         if (command != "auth") {
-            client->error(network_errc::auth_required);
-            code = network_errc::auth_required;
+            client->error(irccd_error::auth_required);
+            code = irccd_error::auth_required;
         } else if (password != password_) {
-            client->error(network_errc::invalid_auth);
-            code = network_errc::invalid_auth;
+            client->error(irccd_error::invalid_auth);
+            code = irccd_error::invalid_auth;
         } else {
             client->set_state(transport_client::state_t::ready);
             client->success("auth");
-            code = network_errc::no_error;
+            code = irccd_error::no_error;
         }
 
         handler(std::move(code), std::move(client));
@@ -78,8 +79,10 @@ void transport_server::do_greetings(std::shared_ptr<transport_client> client, ac
             handler(std::move(code), std::move(client));
         else if (!password_.empty())
             do_auth(std::move(client), std::move(handler));
-        else
+        else {
+            client->set_state(transport_client::state_t::ready);
             handler(std::move(code), std::move(client));
+        }
     });
 }
 

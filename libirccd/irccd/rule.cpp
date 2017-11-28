@@ -56,4 +56,32 @@ bool rule::match(const std::string& server,
            match_set(events_, event);
 }
 
+const boost::system::error_category& rule_category()
+{
+    static const class category : public boost::system::error_category {
+    public:
+        const char* name() const noexcept override
+        {
+            return "rule";
+        }
+
+        std::string message(int e) const override
+        {
+            switch (static_cast<rule_error::error>(e)) {
+            case rule_error::error::invalid_action:
+                return "invalid action given";
+            default:
+                return "no error";
+            }
+        }
+    } category;
+
+    return category;
+}
+
+boost::system::error_code make_error_code(rule_error::error e)
+{
+    return {static_cast<int>(e), rule_category()};
+}
+
 } // !irccd

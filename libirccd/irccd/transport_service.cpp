@@ -32,18 +32,24 @@ void transport_service::handle_command(std::shared_ptr<transport_client> tc, con
     assert(object.is_object());
 
     auto name = object.find("command");
-    if (name == object.end() || !name->is_string())
+
+    if (name == object.end() || !name->is_string()) {
+        tc->error(irccd_error::invalid_message);
         return;
+    }
 
     auto cmd = irccd_.commands().find(*name);
 
     if (!cmd)
-        tc->error(*name, "command does not exist");
+        tc->error(irccd_error::invalid_command, name->get<std::string>());
     else {
         try {
             cmd->exec(irccd_, *tc, object);
+        } catch (const boost::system::system_error& ex) {
+            tc->error(ex.code(), cmd->name());
         } catch (const std::exception& ex) {
-            tc->error(cmd->name(), ex.what());
+            log::warning() << "transport: unknown error not reported" << std::endl;
+            log::warning() << "transport: " << ex.what() << std::endl;
         }
     }
 }
@@ -51,11 +57,20 @@ void transport_service::handle_command(std::shared_ptr<transport_client> tc, con
 void transport_service::do_recv(std::shared_ptr<transport_client> tc)
 {
     tc->recv([this, tc] (auto code, auto json) {
-        if (code)
-            log::warning() << "transport: " << code.message() << std::endl;
-        else {
-            do_recv(tc);
-            handle_command(std::move(tc), json);
+        switch (code.value()) {
+        case boost::system::errc::network_down:
+            log::warning("transport: client disconnected");
+            break;
+            case boost::system::errc::invalid_argument:
+            tc->error(irccd_error::invalid_message);
+            break;
+        default:
+            handle_command(tc, json);
+
+            if (tc->state() == transport_client::state_t::ready)
+                do_recv(std::move(tc));
+
+            break;
         }
     });
 }
@@ -64,7 +79,7 @@ void transport_service::do_accept(transport_server& ts)
 {
     ts.accept([this, &ts] (auto code, auto client) {
         if (code)
-            log::warning() << "transport: " << code.message() << std::endl;
+            log::warning() << "transport: new client error: " << code.message() << std::endl;
         else {
             do_accept(ts);
             do_recv(std::move(client));

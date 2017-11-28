@@ -932,6 +932,81 @@ public:
     virtual void whois(std::string target);
 };
 
+/**
+ * \brief Server error.
+ */
+class server_error : public boost::system::system_error {
+public:
+    /**
+     * \brief Server related errors (1000..1999)
+     */
+    enum error {
+        //!< No error.
+        no_error = 0,
+
+        //!< The specified server was not found.
+        not_found = 1000,
+
+        //!< The specified identifier is invalid.
+        invalid_identifier,
+
+        //!< The server is not connected.
+        not_connected,
+
+        //!< The server is already connected.
+        already_connected,
+
+        //!< Server with same name already exists.
+        already_exists,
+
+        //!< The specified port number is invalid.
+        invalid_port_number,
+
+        //!< The specified reconnect tries number is invalid.
+        invalid_reconnect_tries_number,
+
+        //!< The specified reconnect reconnect number is invalid.
+        invalid_reconnect_timeout_number,
+
+        //!< The specified host was invalid.
+        invalid_host,
+
+        //!< SSL was requested but is disabled.
+        ssl_disabled,
+    };
+
+    /**
+     * Inherited constructors.
+     */
+    using system_error::system_error;
+};
+
+/**
+ * Get the server error category singleton.
+ *
+ * \return the singleton
+ */
+const boost::system::error_category& server_category();
+
+/**
+ * Create a boost::system::error_code from server_error::error enum.
+ *
+ * \param e the error code
+ */
+boost::system::error_code make_error_code(server_error::error e);
+
 } // !irccd
+
+namespace boost {
+
+namespace system {
+
+template <>
+struct is_error_code_enum<irccd::server_error::error> : public std::true_type {
+};
+
+} // !system
+
+} // !boost
 
 #endif // !IRCCD_SERVER_HPP

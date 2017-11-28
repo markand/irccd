@@ -707,4 +707,48 @@ void server::whois(std::string target)
     send(string_util::sprintf("WHOIS %s %s", target, target));
 }
 
+const boost::system::error_category& server_category()
+{
+    static const class category : public boost::system::error_category {
+    public:
+        const char* name() const noexcept override
+        {
+            return "server";
+        }
+
+        std::string message(int e) const override
+        {
+            switch (static_cast<server_error::error>(e)) {
+            case server_error::not_found:
+                return "server not found";
+            case server_error::error::invalid_identifier:
+                return "invalid identifier";
+            case server_error::error::not_connected:
+                return "server is not connected";
+            case server_error::error::already_connected:
+                return "server is already connected";
+            case server_error::error::invalid_port_number:
+                return "invalid port number specified";
+            case server_error::error::invalid_reconnect_tries_number:
+                return "invalid number of reconnection tries";
+            case server_error::error::invalid_reconnect_timeout_number:
+                return "invalid reconnect timeout number";
+            case server_error::error::invalid_host:
+                return "invalid hostname";
+            case server_error::error::ssl_disabled:
+                return "ssl is not enabled";
+            default:
+                return "no error";
+            }
+        }
+    } category;
+
+    return category;
+}
+
+boost::system::error_code make_error_code(server_error::error e)
+{
+    return {static_cast<int>(e), server_category()};
+}
+
 } // !irccd

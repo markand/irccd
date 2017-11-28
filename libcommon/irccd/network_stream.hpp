@@ -39,8 +39,6 @@
 
 #include <json.hpp>
 
-#include "network_errc.hpp"
-
 namespace irccd {
 
 /**
@@ -167,10 +165,8 @@ template <typename Socket>
 void network_stream<Socket>::do_recv(network_recv_handler handler)
 {
     boost::asio::async_read_until(socket_, rbuffer_, "\r\n\r\n", [this, handler] (auto code, auto xfer) {
-        if (code)
-            handler(std::move(code), nullptr);
-        else if (xfer == 0U)
-            handler(network_errc::corrupt_message, nullptr);
+        if (code || xfer == 0U)
+            handler(make_error_code(boost::system::errc::network_down), nullptr);
         else {
             std::string str(
                 boost::asio::buffers_begin(rbuffer_.data()),
@@ -188,9 +184,9 @@ void network_stream<Socket>::do_recv(network_recv_handler handler)
             } catch (...) {}
 
             if (!message.is_object())
-                handler(network_errc::invalid_message, nullptr);
+                handler(make_error_code(boost::system::errc::invalid_argument), nullptr);
             else
-                handler(network_errc::no_error, std::move(message));
+                handler(code, std::move(message));
         }
     });
 }
@@ -199,12 +195,10 @@ template <typename Socket>
 void network_stream<Socket>::do_send(const std::string& str, network_send_handler handler)
 {
     boost::asio::async_write(socket_, boost::asio::buffer(str), [handler] (auto code, auto xfer) {
-        if (code)
-            handler(std::move(code));
-        else if (xfer == 0U)
-            handler(network_errc::corrupt_message);
+        if (code || xfer == 0U)
+            handler(make_error_code(boost::system::errc::network_down));
         else
-            handler(network_errc::no_error);
+            handler(code);
     });
 }
 

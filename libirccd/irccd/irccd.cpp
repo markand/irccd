@@ -38,4 +38,44 @@ irccd::irccd(boost::asio::io_service& service, std::string config)
 
 irccd::~irccd() = default;
 
+const boost::system::error_category& irccd_category()
+{
+    static const class category : public boost::system::error_category {
+    public:
+        const char* name() const noexcept override
+        {
+            return "irccd";
+        }
+
+        std::string message(int e) const override
+        {
+            switch (static_cast<irccd_error::error>(e)) {
+            case irccd_error::error::not_irccd:
+                return "daemon is not irccd instance";
+            case irccd_error::error::incompatible_version:
+                return "major version is incompatible";
+            case irccd_error::error::auth_required:
+                return "authentication is required";
+            case irccd_error::error::invalid_auth:
+                return "invalid authentication";
+            case irccd_error::error::invalid_message:
+                return "invalid message";
+            case irccd_error::error::invalid_command:
+                return "invalid command";
+            case irccd_error::error::incomplete_message:
+                return "command requires more arguments";
+            default:
+                return "no error";
+            }
+        }
+    } category;
+
+    return category;
+}
+
+boost::system::error_code make_error_code(irccd_error::error e)
+{
+    return {static_cast<int>(e), irccd_category()};
+}
+
 } // !irccd

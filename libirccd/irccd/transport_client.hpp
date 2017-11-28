@@ -45,8 +45,6 @@ private:
     state_t state_{state_t::authenticating};
     transport_server& parent_;
 
-    void close();
-
 protected:
     /**
      * Request a receive operation.
@@ -79,6 +77,11 @@ public:
         : parent_(server)
     {
     }
+
+    /**
+     * Virtual destructor defaulted.
+     */
+    virtual ~transport_client() = default;
 
     /**
      * Get the transport server parent.
@@ -123,6 +126,11 @@ public:
     /**
      * Start receiving if not closed.
      *
+     * Possible error codes:
+     *
+     *   - boost::system::errc::network_down in case of errors,
+     *   - boost::system::errc::invalid_argument if the JSON message is invalid.
+     *
      * \pre handler != nullptr
      * \param handler the handler
      */
@@ -130,6 +138,10 @@ public:
 
     /**
      * Start sending if not closed.
+     *
+     * Possible error codes:
+     *
+     *   - boost::system::errc::network_down in case of errors,
      *
      * \param json the json message
      * \param handler the optional handler
@@ -145,58 +157,24 @@ public:
     void success(const std::string& cname, network_send_handler handler = nullptr);
 
     /**
-     * Send a error message, the state is set to closing.
+     * Send an error code to the client.
      *
-     * The invocation is similar to:
-     *
-     * ````cpp
-     * set_state(state_t::closing);
-     * send(message, handler);
-     * ````
-     *
-     * \pre message is not null
-     * \pre data.is_object()
-     * \param message the error message
-     * \param handler the handler
-     */
-    void error(const nlohmann::json& data, network_send_handler handler = nullptr);
-
-    /**
-     * Convenient error overload.
-     *
-     * \param cname the command name
-     * \pre !reason.empty()
-     * \param reason the reason string
+     * \pre code is not 0
+     * \param code the error code
      * \param handler the optional handler
      */
-    void error(const std::string& cname, const std::string& reason, network_send_handler handler = nullptr);
+    void error(boost::system::error_code code, network_send_handler handler = nullptr);
 
     /**
-     * Convenient error overload.
+     * Send an error code to the client.
      *
-     * \pre !reason.empty()
-     * \param reason the reason string
-     * \param handler the handler
-     */
-    void error(const std::string& reason, network_send_handler handler = nullptr);
-
-    /**
-     * Convenient error overload.
-     *
-     * \param cname the command name
-     * \param reason the error code
+     * \pre code is not 0
+     * \param code the error code
      * \param handler the optional handler
      */
-    void error(const std::string& cname, network_errc reason, network_send_handler handler = nullptr);
-
-    /**
-     * Convenient error overload.
-     *
-     * \pre reason != network_errc::no_error
-     * \param reason the reason string
-     * \param handler the handler
-     */
-    void error(network_errc reason, network_send_handler handler = nullptr);
+    void error(boost::system::error_code code,
+               std::string cname,
+               network_send_handler handler = nullptr);
 };
 
 } // !irccd

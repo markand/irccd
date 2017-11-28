@@ -68,4 +68,36 @@ std::shared_ptr<plugin> plugin_loader::find(const std::string& name) noexcept
     return plugin;
 }
 
+const boost::system::error_category& plugin_category()
+{
+    static const class category : public boost::system::error_category {
+    public:
+        const char* name() const noexcept override
+        {
+            return "plugin";
+        }
+
+        std::string message(int e) const override
+        {
+            switch (static_cast<plugin_error::error>(e)) {
+            case plugin_error::not_found:
+                return "plugin not found";
+            case plugin_error::exec_error:
+                return "plugin exec error";
+            case plugin_error::already_exists:
+                return "plugin already exists";
+            default:
+                return "no error";
+            }
+        }
+    } category;
+
+    return category;
+}
+
+boost::system::error_code make_error_code(plugin_error::error e)
+{
+    return {static_cast<int>(e), plugin_category()};
+}
+
 } // !irccd
