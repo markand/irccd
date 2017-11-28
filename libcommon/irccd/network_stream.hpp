@@ -71,7 +71,7 @@ class network_stream {
 private:
     using rbuffer_t = boost::asio::streambuf;
     using rqueue_t = std::deque<network_recv_handler>;
-    using squeue_t = std::deque<std::pair<nlohmann::json, network_send_handler>>;
+    using squeue_t = std::deque<std::pair<std::string, network_send_handler>>;
 
     Socket socket_;
     rbuffer_t rbuffer_;
@@ -80,8 +80,8 @@ private:
 
     void rflush();
     void sflush();
-    void do_recv(network_recv_handler handler);
-    void do_send(const nlohmann::json& json, network_send_handler);
+    void do_recv(network_recv_handler);
+    void do_send(const std::string&, network_send_handler);
 
 public:
     /**
@@ -185,9 +185,7 @@ void network_stream<Socket>::do_recv(network_recv_handler handler)
 
             try {
                 message = nlohmann::json::parse(str);
-            } catch (...) {
-                handler(network_errc::invalid_message, nullptr);
-            }
+            } catch (...) {}
 
             if (!message.is_object())
                 handler(network_errc::invalid_message, nullptr);
@@ -198,11 +196,9 @@ void network_stream<Socket>::do_recv(network_recv_handler handler)
 }
 
 template <typename Socket>
-void network_stream<Socket>::do_send(const nlohmann::json& json, network_send_handler handler)
+void network_stream<Socket>::do_send(const std::string& str, network_send_handler handler)
 {
-    auto str = std::make_shared<std::string>(json.dump(0) + "\r\n\r\n");
-
-    boost::asio::async_write(socket_, boost::asio::buffer(*str), [str, handler] (auto code, auto xfer) {
+    boost::asio::async_write(socket_, boost::asio::buffer(str), [handler] (auto code, auto xfer) {
         if (code)
             handler(std::move(code));
         else if (xfer == 0U)
@@ -219,7 +215,11 @@ void network_stream<Socket>::rflush()
         return;
 
     do_recv([this] (auto code, auto json) {
-        rqueue_.front()(code, std::move(json));
+        auto h = rqueue_.front();
+
+        if (h)
+            h(code, std::move(json));
+
         rqueue_.pop_front();
 
         if (!code)
@@ -234,8 +234,10 @@ void network_stream<Socket>::sflush()
         return;
 
     do_send(squeue_.front().first, [this] (auto code) {
-        if (squeue_.front().second)
-            squeue_.front().second(code);
+        auto h = squeue_.front().second;
+
+        if (h)
+            h(code);
 
         squeue_.pop_front();
 
@@ -247,8 +249,6 @@ void network_stream<Socket>::sflush()
 template <typename Socket>
 void network_stream<Socket>::recv(network_recv_handler handler)
 {
-    assert(handler);
-
     auto in_progress = !rqueue_.empty();
 
     rqueue_.push_back(std::move(handler));
@@ -264,7 +264,7 @@ void network_stream<Socket>::send(nlohmann::json json, network_send_handler hand
 
     auto in_progress = !squeue_.empty();
 
-    squeue_.emplace_back(std::move(json), std::move(handler));
+    squeue_.emplace_back(json.dump(0) + "\r\n\r\n", std::move(handler));
 
     if (!in_progress)
         sflush();
