@@ -127,26 +127,66 @@ BOOST_AUTO_TEST_CASE(empty)
     BOOST_TEST(result.is_object());
 }
 
-BOOST_AUTO_TEST_CASE(out_of_bounds)
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_index_1)
 {
-    nlohmann::json result;
+    boost::system::error_code result;
 
     ctl_->send({
         { "command",    "rule-remove"   },
-        { "index",      123             }
+        { "index",      -100            }
     });
-    ctl_->recv([&] (auto, auto msg) {
-        result = msg;
-    });
-
-    wait_for([&] () {
-        return result.is_object();
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
     });
 
-    // TODO: error code
-    BOOST_TEST(result.is_object());
-    BOOST_TEST(result.count("error"));
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == rule_error::invalid_index);
 }
+
+BOOST_AUTO_TEST_CASE(invalid_index_2)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "rule-remove"   },
+        { "index",      100             }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == rule_error::invalid_index);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_index_3)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "rule-remove"   },
+        { "index",      "notaint"       }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == rule_error::invalid_index);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 

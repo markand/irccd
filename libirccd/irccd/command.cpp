@@ -591,12 +591,12 @@ rule_remove_command::rule_remove_command()
 
 void rule_remove_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    unsigned position = json_util::require_uint(args, "index");
+    auto index = get_rule_index(args);
 
-    if (irccd.rules().length() == 0 || position >= irccd.rules().length())
-        throw rule_error(rule_error::error::invalid_index);
+    if (index >= irccd.rules().length())
+        throw rule_error(rule_error::invalid_index);
 
-    irccd.rules().remove(position);
+    irccd.rules().remove(index);
     client.success("rule-remove");
 }
 
