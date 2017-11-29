@@ -1,6 +1,38 @@
 IRC Client Daemon CHANGES
 =========================
 
+irccd current
+----------------------
+
+Irccd:
+
+  - The default server identity now uses the system account name if possible by
+    default (#607),
+  - New sections `[paths]` and `[paths.plugin]` have been added to control
+    standard paths for both irccd and plugins (#611),
+  - If Mercurial is found, the version is bundled in `irccd --version`.
+
+CMake:
+
+  - CMake no longer create a fake installation directory while building (#674),
+  - All targets are placed into the `bin` directory while building (#715).
+
+Network API:
+
+  - Network commands return an error code instead of a string (#739).
+
+Javascript API:
+
+  - The Irccd.Timer API now runs on top of Boost.Asio and no longer have custom
+    buggy code (#595),
+  - New Irccd.Server.isSelf function (#735).
+
+Internal:
+
+  - The code is now based on Boost for many internal parts of the core, (#593),
+    (#594), (#595), (#681), (#697),
+  - The libircclient has been replaced by a simple homemade library (#581).
+
 irccd 2.2.0 2017-09-26
 ----------------------
 
