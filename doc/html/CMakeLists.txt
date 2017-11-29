@@ -153,8 +153,6 @@ set(
     ${html_SOURCE_DIR}/irccdctl/command/rule-list.md
     ${html_SOURCE_DIR}/irccdctl/command/rule-move.md
     ${html_SOURCE_DIR}/irccdctl/command/rule-remove.md
-    ${html_SOURCE_DIR}/irccdctl/command/server-cmode.md
-    ${html_SOURCE_DIR}/irccdctl/command/server-cnotice.md
     ${html_SOURCE_DIR}/irccdctl/command/server-connect.md
     ${html_SOURCE_DIR}/irccdctl/command/server-disconnect.md
     ${html_SOURCE_DIR}/irccdctl/command/server-invite.md

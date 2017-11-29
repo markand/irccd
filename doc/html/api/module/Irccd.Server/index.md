@@ -19,8 +19,6 @@ your required actions on the server.
 ## Methods
 
   - [(constructor)](Irccd.Server.prototype.constructor.html)
-  - [cmode](Irccd.Server.prototype.cmode.html)
-  - [cnotice](Irccd.Server.prototype.cnotice.html)
   - [info](Irccd.Server.prototype.info.html)
   - [invite](Irccd.Server.prototype.invite.html)
   - [join](Irccd.Server.prototype.join.html)
@@ -33,5 +31,5 @@ your required actions on the server.
   - [notice](Irccd.Server.prototype.notice.html)
   - [part](Irccd.Server.prototype.part.html)
   - [topic](Irccd.Server.prototype.topic.html)
-  - [whois](Irccd.Server.prototype.whois.html)
   - [toString](Irccd.Server.prototype.toString.html)
+  - [whois](Irccd.Server.prototype.whois.html)

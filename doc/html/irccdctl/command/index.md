@@ -18,8 +18,6 @@ guide: yes
   - [rule-list](rule-list.html)
   - [rule-move](rule-move.html)
   - [rule-remove](rule-remove.html)
-  - [server-cmode](server-cmode.html)
-  - [server-cnotice](server-cnotice.html)
   - [server-connect](server-connect.html)
   - [server-disconnect](server-disconnect.html)
   - [server-invite](server-invite.html)
