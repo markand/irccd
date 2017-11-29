@@ -106,7 +106,7 @@ void controller::recv(network_recv_handler handler)
             code = make_error_code(static_cast<server_error::error>(e));
         else if (e >= 2000 && e < 3000)
             code = make_error_code(static_cast<plugin_error::error>(e));
-        else if (e >= 4000 && e < 4000)
+        else if (e >= 4000 && e < 5000)
             code = make_error_code(static_cast<rule_error::error>(e));
 
         handler(std::move(code), std::move(msg));

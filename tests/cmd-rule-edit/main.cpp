@@ -542,6 +542,90 @@ BOOST_AUTO_TEST_CASE(remove_event_and_server)
     BOOST_TEST(result["action"].get<std::string>() == "drop");
 }
 
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_index_1)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "rule-edit" },
+        { "index",      -100        },
+        { "action",     "drop"      }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == rule_error::invalid_index);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_index_2)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "rule-edit" },
+        { "index",      100         },
+        { "action",     "drop"      }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == rule_error::invalid_index);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_index_3)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "rule-edit" },
+        { "index",      "notaint"   },
+        { "action",     "drop"      }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == rule_error::invalid_index);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_action)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "rule-edit" },
+        { "index",      0           },
+        { "action",     "unknown"   }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == rule_error::invalid_action);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()
 
 } // !irccd

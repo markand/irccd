@@ -177,6 +177,29 @@ BOOST_AUTO_TEST_CASE(append)
     }
 }
 
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_action)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "rule-add"  },
+        { "action",     "unknown"   }
+    });
+    ctl_->recv([&] (auto code, auto msg) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == rule_error::invalid_action);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()
 
 } // !irccd

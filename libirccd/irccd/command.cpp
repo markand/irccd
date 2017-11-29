@@ -116,7 +116,7 @@ rule from_json(const nlohmann::json& json)
         auto v = object[name];
 
         if (!v.is_string())
-            throw std::runtime_error("no action given");
+            throw rule_error(rule_error::invalid_action);
 
         auto s = v.template get<std::string>();
         if (s == "accept")
@@ -124,7 +124,7 @@ rule from_json(const nlohmann::json& json)
         if (s == "drop")
             return rule::action_type::drop;
 
-        throw std::runtime_error("unknown action '"s + s + "' given");
+        throw rule_error(rule_error::invalid_action);
     };
 
     return {
@@ -135,6 +135,16 @@ rule from_json(const nlohmann::json& json)
         toset(json, "events"),
         toaction(json, "action")
     };
+}
+
+unsigned get_rule_index(const nlohmann::json& json, const std::string& key = "index")
+{
+    auto index = json.find(key);
+
+    if (index == json.end() || !index->is_number_integer() || index->get<int>() < 0)
+        throw rule_error(rule_error::invalid_index);
+
+    return index->get<int>();
 }
 
 } // !namespace
@@ -516,7 +526,7 @@ void rule_edit_command::exec(irccd& irccd, transport_client& client, const nlohm
     };
 
     // Create a copy to avoid incomplete edition in case of errors.
-    auto index = json_util::require_uint(args, "index");
+    auto index = get_rule_index(args);
     auto rule = irccd.rules().require(index);
 
     updateset(rule.channels(), args, "channels");
@@ -535,7 +545,7 @@ void rule_edit_command::exec(irccd& irccd, transport_client& client, const nlohm
         else if (action->get<std::string>() == "drop")
             rule.set_action(rule::action_type::drop);
         else
-            throw rule_error(rule_error::error::invalid_action);
+            throw rule_error(rule_error::invalid_action);
     }
 
     // All done, sync the rule.
@@ -568,7 +578,7 @@ rule_info_command::rule_info_command()
 
 void rule_info_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto json = to_json(irccd.rules().require(json_util::require_uint(args, "index")));
+    auto json = to_json(irccd.rules().require(get_rule_index(args)));
 
     json.push_back({"command", "rule-info"});
     client.send(std::move(json));
@@ -597,8 +607,8 @@ rule_move_command::rule_move_command()
 
 void rule_move_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto from = json_util::require_uint(args, "from");
-    auto to = json_util::require_uint(args, "to");
+    auto from = get_rule_index(args, "from");
+    auto to = get_rule_index(args, "to");
 
     /*
      * Examples of moves

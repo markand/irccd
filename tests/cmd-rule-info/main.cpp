@@ -91,26 +91,69 @@ BOOST_AUTO_TEST_CASE(basic)
     BOOST_TEST(result["action"].get<std::string>() == "drop");
 }
 
-BOOST_AUTO_TEST_CASE(out_of_bounds)
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_index_1)
 {
-    nlohmann::json result;
+    boost::system::error_code result;
 
     ctl_->send({
         { "command",    "rule-info" },
-        { "index",      123         }
+        { "index",      -100        },
+        { "action",     "drop"      }
     });
-    ctl_->recv([&] (auto, auto msg) {
-        result = msg;
-    });
-
-    wait_for([&] () {
-        return result.is_object();
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
     });
 
-    // TODO: error code
-    BOOST_TEST(result.is_object());
-    BOOST_TEST(result.count("error"));
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == rule_error::invalid_index);
 }
+
+BOOST_AUTO_TEST_CASE(invalid_index_2)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "rule-info" },
+        { "index",      100         },
+        { "action",     "drop"      }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == rule_error::invalid_index);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_index_3)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "rule-info" },
+        { "index",      "notaint"   },
+        { "action",     "drop"      }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == rule_error::invalid_index);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 

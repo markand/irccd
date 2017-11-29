@@ -362,27 +362,109 @@ BOOST_AUTO_TEST_CASE(beyond)
     }
 }
 
-BOOST_AUTO_TEST_CASE(out_of_bounds)
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_index_1_from)
 {
-    nlohmann::json result;
+    boost::system::error_code result;
 
     ctl_->send({
         { "command",    "rule-move" },
-        { "from",       1024        },
+        { "from",       -100        },
         { "to",         0           }
     });
-    ctl_->recv([&] (auto, auto msg) {
-        result = msg;
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
     });
 
-    wait_for([&] () {
-        return result.is_object();
+    wait_for([&] {
+        return result;
     });
 
-    // TODO: error code
-    BOOST_TEST(result.is_object());
-    BOOST_TEST(result.count("error"));
+    BOOST_ASSERT(result == rule_error::invalid_index);
 }
+
+BOOST_AUTO_TEST_CASE(invalid_index_1_to)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "rule-move" },
+        { "from",       0           },
+        { "to",         -100        }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == rule_error::invalid_index);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_index_2_from)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "rule-move" },
+        { "from",       100         },
+        { "to",         0           }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == rule_error::invalid_index);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_index_3_from)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "rule-move" },
+        { "from",       "notaint"   },
+        { "to",         0           }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == rule_error::invalid_index);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_index_3_to)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "rule-move" },
+        { "from",       0           },
+        { "to",         "notaint"   }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == rule_error::invalid_index);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 

@@ -151,7 +151,7 @@ public:
  *
  *   - plugin_error::already_exists
  *   - plugin_error::not_found
- *   - pluign_error::exec_error
+ *   - plugin_error::exec_error
  */
 class plugin_load_command : public command {
 public:
@@ -172,7 +172,7 @@ public:
  * Replies:
  *
  *   - plugin_error::not_found
- *   - pluign_error::exec_error
+ *   - plugin_error::exec_error
  */
 class plugin_reload_command : public command {
 public:
@@ -193,7 +193,7 @@ public:
  * Replies:
  *
  *   - plugin_error::not_found
- *   - pluign_error::exec_error
+ *   - plugin_error::exec_error
  */
 class plugin_unload_command : public command {
 public:
@@ -482,6 +482,11 @@ public:
 
 /**
  * \brief Implementation of rule-edit transport command.
+ *
+ * Replies:
+ *
+ *   - rule_error::invalid_index
+ *   - rule_error::invalid_action
  */
 class rule_edit_command : public command {
 public:
@@ -514,6 +519,10 @@ public:
 
 /**
  * \brief Implementation of rule-info transport command.
+ *
+ * Replies:
+ *
+ *   - rule_error::invalid_index
  */
 class rule_info_command : public command {
 public:
@@ -530,6 +539,10 @@ public:
 
 /**
  * \brief Implementation of rule-remove transport command.
+ *
+ * Replies:
+ *
+ *   - rule_error::invalid_index
  */
 class rule_remove_command : public command {
 public:
@@ -546,6 +559,10 @@ public:
 
 /**
  * \brief Implementation of rule-move transport command.
+ *
+ * Replies:
+ *
+ *   - rule_error::invalid_index
  */
 class rule_move_command : public command {
 public:
@@ -562,6 +579,10 @@ public:
 
 /**
  * \brief Implementation of rule-add transport command.
+ *
+ * Replies:
+ *
+ *   - rule_error::invalid_action
  */
 class rule_add_command : public command {
 public:
