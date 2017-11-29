@@ -99,8 +99,7 @@ BOOST_AUTO_TEST_CASE(invalid_index_1)
 
     ctl_->send({
         { "command",    "rule-info" },
-        { "index",      -100        },
-        { "action",     "drop"      }
+        { "index",      -100        }
     });
     ctl_->recv([&] (auto code, auto) {
         result = code;
@@ -119,8 +118,7 @@ BOOST_AUTO_TEST_CASE(invalid_index_2)
 
     ctl_->send({
         { "command",    "rule-info" },
-        { "index",      100         },
-        { "action",     "drop"      }
+        { "index",      100         }
     });
     ctl_->recv([&] (auto code, auto) {
         result = code;
@@ -139,8 +137,7 @@ BOOST_AUTO_TEST_CASE(invalid_index_3)
 
     ctl_->send({
         { "command",    "rule-info" },
-        { "index",      "notaint"   },
-        { "action",     "drop"      }
+        { "index",      "notaint"   }
     });
     ctl_->recv([&] (auto code, auto) {
         result = code;
