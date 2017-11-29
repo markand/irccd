@@ -75,16 +75,6 @@ void dynlib_plugin::on_connect(irccd& irccd, const connect_event& ev)
     plugin_->on_connect(irccd, ev);
 }
 
-void dynlib_plugin::on_channel_mode(irccd& irccd, const channel_mode_event& ev)
-{
-    plugin_->on_channel_mode(irccd, ev);
-}
-
-void dynlib_plugin::on_channel_notice(irccd& irccd, const channel_notice_event& ev)
-{
-    plugin_->on_channel_notice(irccd, ev);
-}
-
 void dynlib_plugin::on_invite(irccd& irccd, const invite_event& ev)
 {
     plugin_->on_invite(irccd, ev);

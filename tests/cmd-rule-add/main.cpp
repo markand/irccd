@@ -187,7 +187,7 @@ BOOST_AUTO_TEST_CASE(invalid_action)
         { "command",    "rule-add"  },
         { "action",     "unknown"   }
     });
-    ctl_->recv([&] (auto code, auto msg) {
+    ctl_->recv([&] (auto code, auto) {
         result = code;
     });
 

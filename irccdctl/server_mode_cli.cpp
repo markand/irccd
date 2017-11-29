@@ -30,12 +30,23 @@ std::string server_mode_cli::name() const
 void server_mode_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     if (args.size() < 2)
-        throw std::invalid_argument("server-mode requires 2 arguments");
+        throw std::invalid_argument("server-mode requires at least 3 arguments");
 
-    request(ctl, {
-        { "server", args[0] },
-        { "mode",   args[1] }
+    auto json = nlohmann::json({
+        { "command",    "server-mode"   },
+        { "server",     args[0]         },
+        { "channel",    args[1]         },
+        { "mode",       args[2]         }
     });
+
+    if (args.size() >= 4)
+        json["limit"] = args[3];
+    if (args.size() >= 5)
+        json["user"] = args[4];
+    if (args.size() >= 6)
+        json["mask"] = args[5];
+
+    request(ctl, std::move(json));
 }
 
 } // !ctl

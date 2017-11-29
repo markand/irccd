@@ -23,6 +23,7 @@
 #include "plugin_service.hpp"
 #include "server_service.hpp"
 #include "transport_client.hpp"
+#include "string_util.hpp"
 #include "util.hpp"
 
 using namespace std::string_literals;
@@ -147,6 +148,21 @@ unsigned get_rule_index(const nlohmann::json& json, const std::string& key = "in
     return index->get<int>();
 }
 
+std::shared_ptr<server> get_server(irccd& daemon, const nlohmann::json& args)
+{
+    auto id = json_util::get_string(args, "server");
+
+    if (!string_util::is_identifier(id))
+        throw server_error::invalid_identifier;
+
+    auto server = daemon.servers().get(id);
+
+    if (!server)
+        throw server_error::not_found;
+
+    return server;
+}
+
 } // !namespace
 
 plugin_config_command::plugin_config_command()
@@ -231,34 +247,6 @@ void plugin_unload_command::exec(irccd& irccd, transport_client& client, const n
 {
     irccd.plugins().unload(json_util::require_identifier(args, "plugin"));
     client.success("plugin-unload");
-}
-
-server_channel_mode_command::server_channel_mode_command()
-    : command("server-cmode")
-{
-}
-
-void server_channel_mode_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
-{
-    irccd.servers().require(json_util::require_identifier(args, "server"))->cmode(
-        json_util::require_string(args, "channel"),
-        json_util::require_string(args, "mode")
-    );
-    client.success("server-cmode");
-}
-
-server_channel_notice_command::server_channel_notice_command()
-    : command("server-cnotice")
-{
-}
-
-void server_channel_notice_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
-{
-    irccd.servers().require(json_util::require_string(args, "server"))->cnotice(
-        json_util::require_string(args, "channel"),
-        json_util::require_string(args, "message")
-    );
-    client.success("server-cnotice");
 }
 
 server_connect_command::server_connect_command()
@@ -428,9 +416,19 @@ server_mode_command::server_mode_command()
 
 void server_mode_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.servers().require(json_util::require_identifier(args, "server"))->mode(
-        json_util::require_string(args, "mode")
-    );
+    auto channel = json_util::get_string(args, "channel");
+    auto mode = json_util::get_string(args, "mode");
+
+    if (channel.empty())
+        throw server_error(server_error::invalid_channel);
+    if (mode.empty())
+        throw server_error(server_error::invalid_mode);
+
+    auto limit = json_util::get_string(args, "limit");
+    auto user = json_util::get_string(args, "user");
+    auto mask = json_util::get_string(args, "mask");
+
+    get_server(irccd, args)->mode(channel, mode, limit, user, mask);
     client.success("server-mode");
 }
 

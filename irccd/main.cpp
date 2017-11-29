@@ -294,8 +294,6 @@ int main(int argc, char** argv)
     instance->commands().add(std::make_unique<plugin_load_command>());
     instance->commands().add(std::make_unique<plugin_reload_command>());
     instance->commands().add(std::make_unique<plugin_unload_command>());
-    instance->commands().add(std::make_unique<server_channel_mode_command>());
-    instance->commands().add(std::make_unique<server_channel_notice_command>());
     instance->commands().add(std::make_unique<server_connect_command>());
     instance->commands().add(std::make_unique<server_disconnect_command>());
     instance->commands().add(std::make_unique<server_info_command>());

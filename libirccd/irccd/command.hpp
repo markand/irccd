@@ -209,38 +209,6 @@ public:
 };
 
 /**
- * \brief Implementation of server-cmode transport command.
- */
-class server_channel_mode_command : public command {
-public:
-    /**
-     * Constructor.
-     */
-    server_channel_mode_command();
-
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
-};
-
-/**
- * \brief Implementation of server-cnotice transport command.
- */
-class server_channel_notice_command : public command {
-public:
-    /**
-     * Constructor.
-     */
-    server_channel_notice_command();
-
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
-};
-
-/**
  * \brief Implementation of server-connect transport command.
  */
 class server_connect_command : public command {

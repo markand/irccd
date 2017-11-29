@@ -57,58 +57,6 @@ void dispatch(irccd& daemon,
 
 } // !namespace
 
-void server_service::handle_channel_mode(const channel_mode_event& ev)
-{
-    log::debug() << "server " << ev.server->name() << ": event onChannelMode:\n";
-    log::debug() << "  origin: " << ev.origin << "\n";
-    log::debug() << "  channel: " << ev.channel << "\n";
-    log::debug() << "  mode: " << ev.mode << "\n";
-    log::debug() << "  argument: " << ev.argument << std::endl;
-
-    irccd_.transports().broadcast(nlohmann::json::object({
-        { "event",      "onChannelMode"     },
-        { "server",     ev.server->name()   },
-        { "origin",     ev.origin           },
-        { "channel",    ev.channel          },
-        { "mode",       ev.mode             },
-        { "argument",   ev.argument         }
-    }));
-
-    dispatch(irccd_, ev.server->name(), ev.origin, ev.channel,
-        [=] (plugin&) -> std::string {
-            return "onChannelMode";
-        },
-        [=] (plugin& plugin) {
-            plugin.on_channel_mode(irccd_, ev);
-        }
-    );
-}
-
-void server_service::handle_channel_notice(const channel_notice_event& ev)
-{
-    log::debug() << "server " << ev.server->name() << ": event onChannelNotice:\n";
-    log::debug() << "  origin: " << ev.origin << "\n";
-    log::debug() << "  channel: " << ev.channel << "\n";
-    log::debug() << "  message: " << ev.message << std::endl;
-
-    irccd_.transports().broadcast(nlohmann::json::object({
-        { "event",      "onChannelNotice"   },
-        { "server",     ev.server->name()   },
-        { "origin",     ev.origin           },
-        { "channel",    ev.channel          },
-        { "message",    ev.message          }
-    }));
-
-    dispatch(irccd_, ev.server->name(), ev.origin, ev.channel,
-        [=] (plugin&) -> std::string {
-            return "onChannelNotice";
-        },
-        [=] (plugin& plugin) {
-            plugin.on_channel_notice(irccd_, ev);
-        }
-    );
-}
-
 void server_service::handle_connect(const connect_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onConnect" << std::endl;
@@ -268,13 +216,21 @@ void server_service::handle_mode(const mode_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onMode\n";
     log::debug() << "  origin: " << ev.origin << "\n";
-    log::debug() << "  mode: " << ev.mode << std::endl;
+    log::debug() << "  channel: " << ev.channel << "\n";
+    log::debug() << "  mode: " << ev.mode << "\n";
+    log::debug() << "  limit: " << ev.limit << "\n";
+    log::debug() << "  user: " << ev.user << "\n";
+    log::debug() << "  mask: " << ev.mask << std::endl;
 
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onMode"            },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
-        { "mode",       ev.mode             }
+        { "channel",    ev.channel          },
+        { "mode",       ev.mode             },
+        { "limit",      ev.limit            },
+        { "user",       ev.user             },
+        { "mask",       ev.mask             }
     }));
 
     dispatch(irccd_, ev.server->name(), ev.origin, /* channel */ "",
@@ -342,12 +298,14 @@ void server_service::handle_notice(const notice_event& ev)
 {
     log::debug() << "server " << ev.server->name() << ": event onNotice:\n";
     log::debug() << "  origin: " << ev.origin << "\n";
+    log::debug() << "  channel: " << ev.channel << "\n";
     log::debug() << "  message: " << ev.message << std::endl;
 
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onNotice"          },
         { "server",     ev.server->name()   },
         { "origin",     ev.origin           },
+        { "channel",    ev.channel          },
         { "message",    ev.message          }
     }));
 
@@ -382,41 +340,6 @@ void server_service::handle_part(const part_event& ev)
         },
         [=] (plugin& plugin) {
             plugin.on_part(irccd_, ev);
-        }
-    );
-}
-
-void server_service::handle_query(const query_event& ev)
-{
-    log::debug() << "server " << ev.server->name() << ": event onQuery:\n";
-    log::debug() << "  origin: " << ev.origin << "\n";
-    log::debug() << "  message: " << ev.message << std::endl;
-
-    irccd_.transports().broadcast(nlohmann::json::object({
-        { "event",      "onQuery"           },
-        { "server",     ev.server->name()   },
-        { "origin",     ev.origin           },
-        { "message",    ev.message          }
-    }));
-
-    dispatch(irccd_, ev.server->name(), ev.origin, /* channel */ "",
-        [=] (plugin& plugin) -> std::string {
-            return string_util::parse_message(
-                ev.message,
-                ev.server->command_char(),
-                plugin.name()
-            ).type == string_util::message_pack::type::command ? "onQueryCommand" : "onQuery";
-        },
-        [=] (plugin& plugin) mutable {
-            auto copy = ev;
-            auto pack = string_util::parse_message(copy.message, copy.server->command_char(), plugin.name());
-
-            copy.message = pack.message;
-
-            if (pack.type == string_util::message_pack::type::command)
-                plugin.on_query_command(irccd_, copy);
-            else
-                plugin.on_query(irccd_, copy);
         }
     );
 }
@@ -492,8 +415,6 @@ void server_service::add(std::shared_ptr<server> server)
 
     std::weak_ptr<class server> ptr(server);
 
-    server->on_channel_mode.connect(boost::bind(&server_service::handle_channel_mode, this, _1));
-    server->on_channel_notice.connect(boost::bind(&server_service::handle_channel_notice, this, _1));
     server->on_connect.connect(boost::bind(&server_service::handle_connect, this, _1));
     server->on_invite.connect(boost::bind(&server_service::handle_invite, this, _1));
     server->on_join.connect(boost::bind(&server_service::handle_join, this, _1));
@@ -505,7 +426,6 @@ void server_service::add(std::shared_ptr<server> server)
     server->on_nick.connect(boost::bind(&server_service::handle_nick, this, _1));
     server->on_notice.connect(boost::bind(&server_service::handle_notice, this, _1));
     server->on_part.connect(boost::bind(&server_service::handle_part, this, _1));
-    server->on_query.connect(boost::bind(&server_service::handle_query, this, _1));
     server->on_topic.connect(boost::bind(&server_service::handle_topic, this, _1));
     server->on_whois.connect(boost::bind(&server_service::handle_whois, this, _1));
     server->on_die.connect([this, ptr] () {

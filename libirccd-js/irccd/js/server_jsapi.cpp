@@ -50,40 +50,6 @@ std::shared_ptr<server> self(duk_context* ctx)
 }
 
 /*
- * Method: Server.cmode(channel, mode)
- * ------------------------------------------------------------------
- *
- * Change a channel mode.
- *
- * Arguments:
- *   - channel, the channel,
- *   - mode, the mode.
- */
-duk_ret_t cmode(duk_context* ctx)
-{
-    self(ctx)->cmode(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
-
-    return 0;
-}
-
-/*
- * Method: Server.cnotice(channel, message)
- * ------------------------------------------------------------------
- *
- * Send a channel notice.
- *
- * Arguments:
- *   - channel, the channel,
- *   - message, the message.
- */
-duk_ret_t cnotice(duk_context* ctx)
-{
-    self(ctx)->cnotice(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
-
-    return 0;
-}
-
-/*
  * Method: Server.info()
  * ------------------------------------------------------------------
  *
@@ -140,6 +106,15 @@ duk_ret_t invite(duk_context* ctx)
     self(ctx)->invite(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
 
     return 0;
+}
+
+/*
+ * Method: Server.isSelf(nickname)
+ * ------------------------------------------------------------------
+ */
+duk_ret_t isSelf(duk_context* ctx)
+{
+    return dukx_push(ctx, self(ctx)->is_self(duk_require_string(ctx, 0)));
 }
 
 /*
@@ -212,7 +187,7 @@ duk_ret_t message(duk_context* ctx)
 }
 
 /*
- * Method: Server.mode(mode)
+ * Method: Server.mode(channel, mode, limit, user, mask)
  * ------------------------------------------------------------------
  *
  * Change your mode.
@@ -222,7 +197,13 @@ duk_ret_t message(duk_context* ctx)
  */
 duk_ret_t mode(duk_context* ctx)
 {
-    self(ctx)->mode(duk_require_string(ctx, 0));
+    self(ctx)->mode(
+        duk_require_string(ctx, 0),
+        duk_require_string(ctx, 1),
+        duk_opt_string(ctx, 2, ""),
+        duk_opt_string(ctx, 3, ""),
+        duk_opt_string(ctx, 4, "")
+    );
 
     return 0;
 }
@@ -496,10 +477,9 @@ duk_ret_t remove(duk_context* ctx)
 }
 
 const duk_function_list_entry methods[] = {
-    { "cmode",      cmode,      2           },
-    { "cnotice",    cnotice,    2           },
     { "info",       info,       0           },
     { "invite",     invite,     2           },
+    { "isSelf",     isSelf,     1           },
     { "join",       join,       DUK_VARARGS },
     { "kick",       kick,       DUK_VARARGS },
     { "me",         me,         2           },

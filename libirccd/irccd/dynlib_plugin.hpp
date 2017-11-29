@@ -60,16 +60,6 @@ public:
     void on_connect(irccd& irccd, const connect_event& event) override;
 
     /**
-     * \copydoc plugin::on_channel_mode
-     */
-    void on_channel_mode(irccd& irccd, const channel_mode_event& event) override;
-
-    /**
-     * \copydoc plugin::on_channel_notice
-     */
-    void on_channel_notice(irccd& irccd, const channel_notice_event& event) override;
-
-    /**
      * \copydoc plugin::on_invite
      */
     void on_invite(irccd& irccd, const invite_event& event) override;

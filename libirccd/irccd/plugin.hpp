@@ -280,28 +280,6 @@ public:
     }
 
     /**
-     * On channel mode.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void on_channel_mode(irccd& irccd, const channel_mode_event& event)
-    {
-        util::unused(irccd, event);
-    }
-
-    /**
-     * On a channel notice.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void on_channel_notice(irccd& irccd, const channel_notice_event& event)
-    {
-        util::unused(irccd, event);
-    }
-
-    /**
      * On invitation.
      *
      * \param irccd the irccd instance

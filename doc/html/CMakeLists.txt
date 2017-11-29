@@ -68,7 +68,6 @@ set(
     ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.find.md
     ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.add.md
     ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.me.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.cmode.md
     ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.mode.md
     ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.part.md
     ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.message.md
@@ -78,8 +77,8 @@ set(
     ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.constructor.md
     ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.join.md
     ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.invite.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.cnotice.md
     ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.info.md
+    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.isSelf.md
     ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.notice.md
     ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.kick.md
     ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.toString.md
@@ -116,16 +115,13 @@ set(
     ${html_SOURCE_DIR}/api/event/onWhois.md
     ${html_SOURCE_DIR}/api/event/onMessage.md
     ${html_SOURCE_DIR}/api/event/onPart.md
-    ${html_SOURCE_DIR}/api/event/onQueryCommand.md
     ${html_SOURCE_DIR}/api/event/onMode.md
     ${html_SOURCE_DIR}/api/event/onNotice.md
     ${html_SOURCE_DIR}/api/event/onLoad.md
     ${html_SOURCE_DIR}/api/event/onInvite.md
-    ${html_SOURCE_DIR}/api/event/onChannelNotice.md
     ${html_SOURCE_DIR}/api/event/onCommand.md
     ${html_SOURCE_DIR}/api/event/onKick.md
     ${html_SOURCE_DIR}/api/event/onReload.md
-    ${html_SOURCE_DIR}/api/event/onChannelMode.md
     ${html_SOURCE_DIR}/api/event/onTopic.md
     ${html_SOURCE_DIR}/api/event/onConnect.md
     ${html_SOURCE_DIR}/api/event/onJoin.md
@@ -133,7 +129,6 @@ set(
     ${html_SOURCE_DIR}/api/event/onNick.md
     ${html_SOURCE_DIR}/api/event/onNames.md
     ${html_SOURCE_DIR}/api/event/onUnload.md
-    ${html_SOURCE_DIR}/api/event/onQuery.md
     ${html_SOURCE_DIR}/build/build-from-sources.md
     ${html_SOURCE_DIR}/build/build-options.md
     ${html_SOURCE_DIR}/dev/plugin-javascript-introduction.md

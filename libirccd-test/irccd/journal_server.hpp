@@ -106,16 +106,6 @@ public:
     void reconnect() noexcept override;
 
     /**
-     * \copydoc server::cmode
-     */
-    void cmode(std::string channel, std::string mode) override;
-
-    /**
-     * \copydoc server::cnotice
-     */
-    void cnotice(std::string channel, std::string message) override;
-
-    /**
      * \copydoc server::invite
      */
     void invite(std::string target, std::string channel) override;
@@ -143,7 +133,11 @@ public:
     /**
      * \copydoc server::mode
      */
-    void mode(std::string mode) override;
+    void mode(std::string channel,
+              std::string mode,
+              std::string limit = "",
+              std::string user = "",
+              std::string mask = "") override;
 
     /**
      * \copydoc server::names

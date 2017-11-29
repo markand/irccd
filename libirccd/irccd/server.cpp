@@ -284,10 +284,15 @@ void server::dispatch_kick(const irc::message& msg)
 
 void server::dispatch_mode(const irc::message& msg)
 {
-    if (is_self(msg.arg(1)))
-        on_mode({shared_from_this(), msg.prefix(), msg.arg(1)});
-    else
-        on_channel_mode({shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1), msg.arg(2)});
+    on_mode({
+        shared_from_this(),
+        msg.prefix(),
+        msg.arg(0),
+        msg.arg(1),
+        msg.arg(2),
+        msg.arg(3),
+        msg.arg(4)
+    });
 }
 
 void server::dispatch_namreply(const irc::message& msg)
@@ -324,10 +329,7 @@ void server::dispatch_nick(const irc::message& msg)
 
 void server::dispatch_notice(const irc::message& msg)
 {
-    if (is_self(msg.arg(1)))
-        on_notice({shared_from_this(), msg.prefix(), msg.arg(1)});
-    else
-        on_channel_notice({shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1)});
+    on_notice({shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1)});
 }
 
 void server::dispatch_part(const irc::message& msg)
@@ -569,22 +571,6 @@ bool server::is_self(const std::string& target) const noexcept
     return nickname_ == irc::user::parse(target).nick();
 }
 
-void server::cmode(std::string channel, std::string mode)
-{
-    assert(channel.c_str());
-    assert(mode.c_str());
-
-    if (!mode.empty())
-        send(string_util::sprintf("MODE %s :%s", channel, mode));
-    else
-        send(string_util::sprintf("MODE %s", channel));
-}
-
-void server::cnotice(std::string channel, std::string message)
-{
-    notice(std::move(channel), std::move(message));
-}
-
 void server::invite(std::string target, std::string channel)
 {
     assert(!target.empty());
@@ -639,14 +625,27 @@ void server::message(std::string target, std::string message)
     send(string_util::sprintf("PRIVMSG %s :%s", target, message));
 }
 
-void server::mode(std::string mode)
+void server::mode(std::string channel,
+                  std::string mode,
+                  std::string limit,
+                  std::string user,
+                  std::string mask)
 {
-    assert(mode.c_str());
+    assert(!channel.empty());
+    assert(!mode.empty());
 
-    if (!mode.empty())
-        send(string_util::sprintf("MODE %s :%s", nickname_, mode));
-    else
-        send(string_util::sprintf("MODE %s", nickname_));
+    std::ostringstream oss;
+
+    oss << "MODE " << channel << " " << mode;
+
+    if (!limit.empty())
+        oss << " " << limit;
+    if (!user.empty())
+        oss << " " << user;
+    if (!mask.empty())
+        oss << " " << mask;
+
+    send(oss.str());
 }
 
 void server::names(std::string channel)
@@ -676,11 +675,8 @@ void server::part(std::string channel, std::string reason)
 
 void server::send(std::string raw)
 {
+    assert(state_ == state_t::connected);
     assert(!raw.empty());
-
-    // TODO: adapt to custom exception later.
-    if (state_ != state_t::connected)
-        throw std::runtime_error("server is not connected");
 
     conn_->send(std::move(raw), [this] (auto code) {
         if (code) {
@@ -721,21 +717,25 @@ const boost::system::error_category& server_category()
             switch (static_cast<server_error::error>(e)) {
             case server_error::not_found:
                 return "server not found";
-            case server_error::error::invalid_identifier:
+            case server_error::invalid_identifier:
                 return "invalid identifier";
-            case server_error::error::not_connected:
+            case server_error::not_connected:
                 return "server is not connected";
-            case server_error::error::already_connected:
+            case server_error::already_connected:
                 return "server is already connected";
-            case server_error::error::invalid_port_number:
+            case server_error::invalid_port_number:
                 return "invalid port number specified";
-            case server_error::error::invalid_reconnect_tries_number:
+            case server_error::invalid_reconnect_tries_number:
                 return "invalid number of reconnection tries";
-            case server_error::error::invalid_reconnect_timeout_number:
+            case server_error::invalid_reconnect_timeout_number:
                 return "invalid reconnect timeout number";
-            case server_error::error::invalid_host:
+            case server_error::invalid_host:
                 return "invalid hostname";
-            case server_error::error::ssl_disabled:
+            case server_error::invalid_channel:
+                return "invalid or empty channel";
+            case server_error::invalid_mode:
+                return "invalid or empty mode";
+            case server_error::ssl_disabled:
                 return "ssl is not enabled";
             default:
                 return "no error";

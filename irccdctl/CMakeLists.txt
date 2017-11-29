@@ -54,10 +54,6 @@ set(
     ${irccdctl_SOURCE_DIR}/rule_move_cli.hpp
     ${irccdctl_SOURCE_DIR}/rule_remove_cli.cpp
     ${irccdctl_SOURCE_DIR}/rule_remove_cli.hpp
-    ${irccdctl_SOURCE_DIR}/server_channel_mode_cli.cpp
-    ${irccdctl_SOURCE_DIR}/server_channel_mode_cli.hpp
-    ${irccdctl_SOURCE_DIR}/server_channel_notice_cli.cpp
-    ${irccdctl_SOURCE_DIR}/server_channel_notice_cli.hpp
     ${irccdctl_SOURCE_DIR}/server_connect_cli.cpp
     ${irccdctl_SOURCE_DIR}/server_connect_cli.hpp
     ${irccdctl_SOURCE_DIR}/server_disconnect_cli.cpp

@@ -76,29 +76,6 @@ public:
 };
 
 /**
- * \brief Channel event.
- */
-class channel_mode_event {
-public:
-    std::shared_ptr<class server> server;   //!< The server.
-    std::string origin;                     //!< The originator.
-    std::string channel;                    //!< The channel.
-    std::string mode;                       //!< The mode.
-    std::string argument;                   //!< The mode argument (Optional).
-};
-
-/**
- * \brief Channel notice event.
- */
-class channel_notice_event {
-public:
-    std::shared_ptr<class server> server;   //!< The server.
-    std::string origin;                     //!< The originator.
-    std::string channel;                    //!< The channel.
-    std::string message;                    //!< The notice message.
-};
-
-/**
  * \brief Connection success event.
  */
 class connect_event {
@@ -168,7 +145,11 @@ class mode_event {
 public:
     std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
+    std::string channel;                    //!< The channel or target.
     std::string mode;                       //!< The mode.
+    std::string limit;                      //!< The optional limit.
+    std::string user;                       //!< The optional user.
+    std::string mask;                       //!< The optional ban mask.
 };
 
 /**
@@ -198,6 +179,7 @@ class notice_event {
 public:
     std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
+    std::string channel;                    //!< The channel or target.
     std::string message;                    //!< The message.
 };
 
@@ -281,22 +263,6 @@ public:
         waiting,            //!< waiting for reconnection,
         connected           //!< ready for use
     };
-
-    /**
-     * Signal: on_channel_mode
-     * ----------------------------------------------------------
-     *
-     * Triggered when someone changed the channel mode.
-     */
-    boost::signals2::signal<void (channel_mode_event)> on_channel_mode;
-
-    /**
-     * Signal: on_channel_notice
-     * ----------------------------------------------------------
-     *
-     * Triggered when a notice has been sent on a channel.
-     */
-    boost::signals2::signal<void (channel_notice_event)> on_channel_notice;
 
     /**
      * Signal: on_connect
@@ -461,8 +427,6 @@ private:
 
     void remove_joined_channel(const std::string& channel);
 
-    void dispatch_channel_mode(const irc::message&);
-    void dispatch_channel_notice(const irc::message&);
     void dispatch_connect(const irc::message&);
     void dispatch_endofnames(const irc::message&);
     void dispatch_endofwhois(const irc::message&);
@@ -793,6 +757,14 @@ public:
     }
 
     /**
+     * Determine if the nickname is the bot itself.
+     *
+     * \param nick the nickname to check
+     * \return true if it is the bot
+     */
+    bool is_self(const std::string& nick) const noexcept;
+
+    /**
      * Start connecting.
      */
     virtual void connect() noexcept;
@@ -806,30 +778,6 @@ public:
      * Asks for a reconnection.
      */
     virtual void reconnect() noexcept;
-
-    /**
-     * Determine if the nickname is the bot itself.
-     *
-     * \param nick the nickname to check
-     * \return true if it is the bot
-     */
-    bool is_self(const std::string& nick) const noexcept;
-
-    /**
-     * Change the channel mode.
-     *
-     * \param channel the channel
-     * \param mode the new mode
-     */
-    virtual void cmode(std::string channel, std::string mode);
-
-    /**
-     * Send a channel notice.
-     *
-     * \param channel the channel
-     * \param message message notice
-     */
-    virtual void cnotice(std::string channel, std::string message);
 
     /**
      * Invite a user to a channel.
@@ -875,11 +823,19 @@ public:
     virtual void message(std::string target, std::string message);
 
     /**
-     * Change your user mode.
+     * Change channel/user mode.
      *
+     * \param channel the channel or nickname
      * \param mode the mode
+     * \param limit the optional limit
+     * \param user the optional user
+     * \param mask the optional ban mask
      */
-    virtual void mode(std::string mode);
+    virtual void mode(std::string channel,
+                      std::string mode,
+                      std::string limit = "",
+                      std::string user = "",
+                      std::string mask = "");
 
     /**
      * Request the list of names.
@@ -911,7 +867,7 @@ public:
      * Send a raw message to the IRC server. You don't need to add
      * message terminators.
      *
-     * \warning Use this function with care
+     * \pre state() == state_t::connected
      * \param raw the raw message (without `\r\n\r\n`)
      */
     virtual void send(std::string raw);
@@ -970,6 +926,12 @@ public:
 
         //!< The specified host was invalid.
         invalid_host,
+
+        //!< The channel was empty or invalid.
+        invalid_channel,
+
+        //!< The mode given was empty.
+        invalid_mode,
 
         //!< SSL was requested but is disabled.
         ssl_disabled,

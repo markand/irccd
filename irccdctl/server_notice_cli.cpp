@@ -33,9 +33,10 @@ void server_notice_cli::exec(ctl::controller& ctl, const std::vector<std::string
         throw std::invalid_argument("server-notice requires 3 arguments");
 
     request(ctl, {
-        { "server",     args[0] },
-        { "target",     args[1] },
-        { "message",    args[2] }
+        { "command",    "server-notice" },
+        { "server",     args[0]         },
+        { "target",     args[1]         },
+        { "message",    args[2]         }
     });
 }
 

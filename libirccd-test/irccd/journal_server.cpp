@@ -27,24 +27,6 @@ void journal_server::reconnect() noexcept
     });
 }
 
-void journal_server::cmode(std::string channel, std::string mode)
-{
-    cqueue_.push_back({
-        { "command",    "cmode"     },
-        { "channel",    channel     },
-        { "mode",       mode        }
-    });
-}
-
-void journal_server::cnotice(std::string channel, std::string message)
-{
-    cqueue_.push_back({
-        { "command",    "cnotice"   },
-        { "channel",    channel     },
-        { "message",    message     }
-    });
-}
-
 void journal_server::invite(std::string target, std::string channel)
 {
     cqueue_.push_back({
@@ -91,11 +73,19 @@ void journal_server::message(std::string target, std::string message)
     });
 }
 
-void journal_server::mode(std::string mode)
+void journal_server::mode(std::string channel,
+                          std::string mode,
+                          std::string limit,
+                          std::string user,
+                          std::string mask)
 {
     cqueue_.push_back({
         { "command",    "mode"      },
-        { "mode",       mode        }
+        { "channel",    channel     },
+        { "mode",       mode        },
+        { "limit",      limit       },
+        { "user",       user        },
+        { "mask",       mask        }
     });
 }
 

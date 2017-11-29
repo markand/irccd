@@ -49,24 +49,6 @@ std::string format(std::vector<std::string> args)
     return "native";
 }
 
-void onChannelMode(const nlohmann::json &v)
-{
-    std::cout << "event:       onChannelMode\n";
-    std::cout << "server:      " << json_util::pretty(v, "server") << "\n";
-    std::cout << "origin:      " << json_util::pretty(v, "origin") << "\n";
-    std::cout << "mode:        " << json_util::pretty(v, "mode") << "\n";
-    std::cout << "argument:    " << json_util::pretty(v, "argument") << "\n";
-}
-
-void onChannelNotice(const nlohmann::json &v)
-{
-    std::cout << "event:       onChannelNotice\n";
-    std::cout << "server:      " << json_util::pretty(v, "server") << "\n";
-    std::cout << "origin:      " << json_util::pretty(v, "origin") << "\n";
-    std::cout << "channel:     " << json_util::pretty(v, "channel") << "\n";
-    std::cout << "message:     " << json_util::pretty(v, "message") << "\n";
-}
-
 void onConnect(const nlohmann::json &v)
 {
     std::cout << "event:       onConnect\n";
@@ -158,14 +140,6 @@ void onPart(const nlohmann::json &v)
     std::cout << "reason:      " << json_util::pretty(v, "reason") << "\n";
 }
 
-void onQuery(const nlohmann::json &v)
-{
-    std::cout << "event:       onQuery\n";
-    std::cout << "server:      " << json_util::pretty(v, "server") << "\n";
-    std::cout << "origin:      " << json_util::pretty(v, "origin") << "\n";
-    std::cout << "message:     " << json_util::pretty(v, "message") << "\n";
-}
-
 void onTopic(const nlohmann::json &v)
 {
     std::cout << "event:       onTopic\n";
@@ -186,8 +160,6 @@ void onWhois(const nlohmann::json &v)
 }
 
 const std::unordered_map<std::string, std::function<void (const nlohmann::json&)>> events{
-    { "onChannelMode",      onChannelMode   },
-    { "onChannelNotice",    onChannelNotice },
     { "onConnect",          onConnect       },
     { "onInvite",           onInvite        },
     { "onJoin",             onJoin          },
@@ -199,7 +171,6 @@ const std::unordered_map<std::string, std::function<void (const nlohmann::json&)
     { "onNick",             onNick          },
     { "onNotice",           onNotice        },
     { "onPart",             onPart          },
-    { "onQuery",            onQuery         },
     { "onTopic",            onTopic         },
     { "onWhois",            onWhois         }
 };

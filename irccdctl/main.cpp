@@ -50,8 +50,6 @@
 #include "rule_list_cli.hpp"
 #include "rule_move_cli.hpp"
 #include "rule_remove_cli.hpp"
-#include "server_channel_mode_cli.hpp"
-#include "server_channel_notice_cli.hpp"
 #include "server_connect_cli.hpp"
 #include "server_disconnect_cli.hpp"
 #include "server_info_cli.hpp"
@@ -480,8 +478,6 @@ void init(int &argc, char **&argv)
     add(std::make_unique<plugin_load_cli>());
     add(std::make_unique<plugin_reload_cli>());
     add(std::make_unique<plugin_unload_cli>());
-    add(std::make_unique<server_channel_mode_cli>());
-    add(std::make_unique<server_channel_notice_cli>());
     add(std::make_unique<server_connect_cli>());
     add(std::make_unique<server_disconnect_cli>());
     add(std::make_unique<server_info_cli>());

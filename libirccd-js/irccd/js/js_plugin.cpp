@@ -152,29 +152,6 @@ void js_plugin::open()
     duk_pop(context_);
 }
 
-void js_plugin::on_channel_mode(irccd& , const channel_mode_event &event)
-{
-    dukx_stack_assert sa(context_);
-
-    dukx_push(context_, std::move(event.server));
-    dukx_push(context_, event.origin);
-    dukx_push(context_, event.channel);
-    dukx_push(context_, event.mode);
-    dukx_push(context_, event.argument);
-    call("onChannelMode", 5);
-}
-
-void js_plugin::on_channel_notice(irccd& , const channel_notice_event &event)
-{
-    dukx_stack_assert sa(context_);
-
-    dukx_push(context_, std::move(event.server));
-    dukx_push(context_, event.origin);
-    dukx_push(context_, event.channel);
-    dukx_push(context_, event.message);
-    call("onChannelNotice", 4);
-}
-
 void js_plugin::on_command(irccd& , const message_event &event)
 {
     dukx_stack_assert sa(context_);

@@ -46,8 +46,6 @@ public:
         remove(CMAKE_CURRENT_BINARY_DIR "/log.txt");
 
         plugin_->set_formats({
-            { "cmode", "cmode=#{server}:#{channel}:#{origin}:#{nickname}:#{mode}:#{arg}" },
-            { "cnotice", "cnotice=#{server}:#{channel}:#{origin}:#{nickname}:#{message}" },
             { "join", "join=#{server}:#{channel}:#{origin}:#{nickname}" },
             { "kick", "kick=#{server}:#{channel}:#{origin}:#{nickname}:#{target}:#{reason}" },
             { "me", "me=#{server}:#{channel}:#{origin}:#{nickname}:#{message}" },
@@ -71,24 +69,6 @@ public:
 };
 
 BOOST_FIXTURE_TEST_SUITE(logger_test_suite, logger_test)
-
-BOOST_AUTO_TEST_CASE(format_channel_mode)
-{
-    load();
-
-    plugin_->on_channel_mode(irccd_, {server_, "jean!jean@localhost", "#staff", "+o", "jean"});
-
-    BOOST_REQUIRE_EQUAL("cmode=test:#staff:jean!jean@localhost:jean:+o:jean\n", last());
-}
-
-BOOST_AUTO_TEST_CASE(format_channel_notice)
-{
-    load();
-
-    plugin_->on_channel_notice(irccd_, {server_, "jean!jean@localhost", "#staff", "bonjour!"});
-
-    BOOST_REQUIRE_EQUAL("cnotice=test:#staff:jean!jean@localhost:jean:bonjour!\n", last());
-}
 
 BOOST_AUTO_TEST_CASE(format_join)
 {
