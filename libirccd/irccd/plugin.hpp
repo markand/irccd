@@ -400,28 +400,6 @@ public:
     }
 
     /**
-     * On user query.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void on_query(irccd& irccd, const query_event& event)
-    {
-        util::unused(irccd, event);
-    }
-
-    /**
-     * On user query command.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void on_query_command(irccd& irccd, const query_event& event)
-    {
-        util::unused(irccd, event);
-    }
-
-    /**
      * On reload.
      *
      * \param irccd the irccd instance

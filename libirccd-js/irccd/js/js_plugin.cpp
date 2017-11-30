@@ -238,8 +238,12 @@ void js_plugin::on_mode(irccd& , const mode_event &event)
 
     dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.origin);
+    dukx_push(context_, event.channel);
     dukx_push(context_, event.mode);
-    call("onMode", 3);
+    dukx_push(context_, event.limit);
+    dukx_push(context_, event.user);
+    dukx_push(context_, event.mask);
+    call("onMode", 7);
 }
 
 void js_plugin::on_names(irccd& , const names_event &event)
@@ -269,8 +273,9 @@ void js_plugin::on_notice(irccd& , const notice_event &event)
 
     dukx_push(context_, std::move(event.server));
     dukx_push(context_, event.origin);
+    dukx_push(context_, event.channel);
     dukx_push(context_, event.message);
-    call("onNotice", 3);
+    call("onNotice", 4);
 }
 
 void js_plugin::on_part(irccd& , const part_event &event)
@@ -282,26 +287,6 @@ void js_plugin::on_part(irccd& , const part_event &event)
     dukx_push(context_, event.channel);
     dukx_push(context_, event.reason);
     call("onPart", 4);
-}
-
-void js_plugin::on_query(irccd& , const query_event &event)
-{
-    dukx_stack_assert sa(context_);
-
-    dukx_push(context_, std::move(event.server));
-    dukx_push(context_, event.origin);
-    dukx_push(context_, event.message);
-    call("onQuery", 3);
-}
-
-void js_plugin::on_query_command(irccd& , const query_event &event)
-{
-    dukx_stack_assert sa(context_);
-
-    dukx_push(context_, std::move(event.server));
-    dukx_push(context_, event.origin);
-    dukx_push(context_, event.message);
-    call("onQueryCommand", 3);
 }
 
 void js_plugin::on_reload(irccd& )

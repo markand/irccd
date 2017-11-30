@@ -130,16 +130,6 @@ void dynlib_plugin::on_part(irccd& irccd, const part_event& ev)
     plugin_->on_part(irccd, ev);
 }
 
-void dynlib_plugin::on_query(irccd& irccd, const query_event& ev)
-{
-    plugin_->on_query(irccd, ev);
-}
-
-void dynlib_plugin::on_query_command(irccd& irccd, const query_event& ev)
-{
-    plugin_->on_query_command(irccd, ev);
-}
-
 void dynlib_plugin::on_reload(irccd& irccd)
 {
     plugin_->on_reload(irccd);

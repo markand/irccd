@@ -50,8 +50,8 @@ public:
             { "kick", "kick=#{server}:#{channel}:#{origin}:#{nickname}:#{target}:#{reason}" },
             { "me", "me=#{server}:#{channel}:#{origin}:#{nickname}:#{message}" },
             { "message", "message=#{server}:#{channel}:#{origin}:#{nickname}:#{message}" },
-            { "mode", "mode=#{server}:#{origin}:#{nickname}:#{mode}:#{arg}" },
-            { "notice", "notice=#{server}:#{origin}:#{nickname}:#{message}" },
+            { "mode", "mode=#{server}:#{origin}:#{channel}:#{mode}:#{limit}:#{user}:#{mask}" },
+            { "notice", "notice=#{server}:#{origin}:#{channel}:#{message}" },
             { "part", "part=#{server}:#{channel}:#{origin}:#{nickname}:#{reason}" },
             { "query", "query=#{server}:#{origin}:#{nickname}:#{message}" },
             { "topic", "topic=#{server}:#{channel}:#{origin}:#{nickname}:#{topic}" },
@@ -110,18 +110,18 @@ BOOST_AUTO_TEST_CASE(format_mode)
 {
     load();
 
-    plugin_->on_mode(irccd_, {server_, "jean!jean@localhost", "+i"});
+    plugin_->on_mode(irccd_, {server_, "jean!jean@localhost", "chris", "+i", "l", "u", "m"});
 
-    BOOST_REQUIRE_EQUAL("mode=test:jean!jean@localhost:jean:+i:\n", last());
+    BOOST_REQUIRE_EQUAL("mode=test:jean!jean@localhost:chris:+i:l:u:m\n", last());
 }
 
 BOOST_AUTO_TEST_CASE(format_notice)
 {
     load();
 
-    plugin_->on_notice(irccd_, {server_, "jean!jean@localhost", "tu veux voir mon chat ?"});
+    plugin_->on_notice(irccd_, {server_, "jean!jean@localhost", "chris", "tu veux voir mon chat ?"});
 
-    BOOST_REQUIRE_EQUAL("notice=test:jean!jean@localhost:jean:tu veux voir mon chat ?\n", last());
+    BOOST_REQUIRE_EQUAL("notice=test:jean!jean@localhost:chris:tu veux voir mon chat ?\n", last());
 }
 
 BOOST_AUTO_TEST_CASE(format_part)
@@ -131,15 +131,6 @@ BOOST_AUTO_TEST_CASE(format_part)
     plugin_->on_part(irccd_, {server_, "jean!jean@localhost", "#staff", "too noisy here"});
 
     BOOST_REQUIRE_EQUAL("part=test:#staff:jean!jean@localhost:jean:too noisy here\n", last());
-}
-
-BOOST_AUTO_TEST_CASE(format_query)
-{
-    load();
-
-    plugin_->on_query(irccd_, {server_, "jean!jean@localhost", "much irccd, wow"});
-
-    BOOST_REQUIRE_EQUAL("query=test:jean!jean@localhost:jean:much irccd, wow\n", last());
 }
 
 BOOST_AUTO_TEST_CASE(format_topic)

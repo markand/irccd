@@ -280,34 +280,34 @@ BOOST_AUTO_TEST_CASE(query)
     load();
 
     // Query mode is never collaborative.
-    plugin_->on_query_command(irccd_, {server_, "jean!jean@localhost", ""});
+    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "irccd", ""});
 
     auto cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
-    BOOST_TEST(cmd["target"].get<std::string>() == "jean");
-    BOOST_TEST(cmd["message"].get<std::string>() == "start=hangman:!hangman:test:jean:jean!jean@localhost:jean:_ _ _");
+    BOOST_TEST(cmd["target"].get<std::string>() == "jean!jean@localhost");
+    BOOST_TEST(cmd["message"].get<std::string>() == "start=hangman:!hangman:test:jean!jean@localhost:jean!jean@localhost:jean:_ _ _");
 
-    plugin_->on_query(irccd_, {server_, "jean!jean@localhost", "s"});
+    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "irccd", "s"});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
-    BOOST_TEST(cmd["target"].get<std::string>() == "jean");
-    BOOST_TEST(cmd["message"].get<std::string>() == "found=hangman:!hangman:test:jean:jean!jean@localhost:jean:s _ _");
+    BOOST_TEST(cmd["target"].get<std::string>() == "jean!jean@localhost");
+    BOOST_TEST(cmd["message"].get<std::string>() == "found=hangman:!hangman:test:jean!jean@localhost:jean!jean@localhost:jean:s _ _");
 
-    plugin_->on_query(irccd_, {server_, "jean!jean@localhost", "k"});
+    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "irccd", "k"});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
-    BOOST_TEST(cmd["target"].get<std::string>() == "jean");
-    BOOST_TEST(cmd["message"].get<std::string>() == "found=hangman:!hangman:test:jean:jean!jean@localhost:jean:s k _");
+    BOOST_TEST(cmd["target"].get<std::string>() == "jean!jean@localhost");
+    BOOST_TEST(cmd["message"].get<std::string>() == "found=hangman:!hangman:test:jean!jean@localhost:jean!jean@localhost:jean:s k _");
 
-    plugin_->on_query_command(irccd_, {server_, "jean!jean@localhost", "sky"});
+    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "irccd", "sky"});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
-    BOOST_TEST(cmd["target"].get<std::string>() == "jean");
-    BOOST_TEST(cmd["message"].get<std::string>() == "win=hangman:!hangman:test:jean:jean!jean@localhost:jean:sky");
+    BOOST_TEST(cmd["target"].get<std::string>() == "jean!jean@localhost");
+    BOOST_TEST(cmd["message"].get<std::string>() == "win=hangman:!hangman:test:jean!jean@localhost:jean!jean@localhost:jean:sky");
 }
 
 BOOST_AUTO_TEST_CASE(running)

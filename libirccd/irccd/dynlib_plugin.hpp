@@ -115,16 +115,6 @@ public:
     void on_part(irccd& irccd, const part_event& event) override;
 
     /**
-     * \copydoc plugin::on_query
-     */
-    void on_query(irccd& irccd, const query_event& event) override;
-
-    /**
-     * \copydoc plugin::on_query_command
-     */
-    void on_query_command(irccd& irccd, const query_event& event) override;
-
-    /**
      * \copydoc plugin::on_reload
      */
     void on_reload(irccd& irccd) override;

@@ -336,7 +336,12 @@ function propose(server, channel, origin, game, proposition)
 
 function onCommand(server, origin, channel, message)
 {
-    channel = channel.toLowerCase();
+    var isquery = server.isSelf(channel);
+
+    if (isquery)
+        channel = origin;
+    else
+        channel = channel.toLowerCase();
 
     var game = Hangman.find(server, channel);
     var kw = {
@@ -362,6 +367,7 @@ function onCommand(server, origin, channel, message)
         }
     } else {
         game = Hangman.create(server, channel);
+        game.query = isquery;
         kw.word = game.formatWord();
         server.message(channel, Util.format(Plugin.format["start"], kw));
     }
@@ -371,7 +377,10 @@ function onCommand(server, origin, channel, message)
 
 function onMessage(server, origin, channel, message)
 {
-    channel = channel.toLowerCase();
+    if (server.isSelf(channel))
+        channel = origin;
+    else
+        channel = channel.toLowerCase();
 
     var game = Hangman.find(server, channel);
 
@@ -380,14 +389,4 @@ function onMessage(server, origin, channel, message)
 
     if (message.length === 1 && Unicode.isLetter(message.charCodeAt(0)))
         propose(server, channel, origin, game, message.charCodeAt(0));
-}
-
-function onQueryCommand(server, origin, message)
-{
-    onCommand(server, origin, Util.splituser(origin), message).query = true;
-}
-
-function onQuery(server, origin, message)
-{
-    onMessage(server, origin, Util.splituser(origin), message);
 }

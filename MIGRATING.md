@@ -11,6 +11,15 @@ Migrating from 2.x to 3.x
   - The functions `server-cnotice` and `server-cmode` have been removed, use
     `server-notice` and `server-mode` instead.
 
+### Plugins
+
+#### Logger
+
+  - The keyword `source` has been removed and replaced by `channel`,
+  - The keyword `origin` has been added,
+  - Formats `cnotice`, `cmode`, `query` have been removed.
+
+
 ### Network API
 
   - The requests `server-cnotice` and `server-cmode` have been removed, use
@@ -31,7 +40,9 @@ Migrating from 2.x to 3.x
 #### Events
 
   - The events `onChannelMode` and `onChannelNotice` have been removed, plugins
-    must use `Server.isSelf(target)` to determine a channel/private message.
+    must use `Server.isSelf(target)` to determine a channel/private message,
+  - The event `onNotice` takes a new `channel` argument,
+  - The event `onMode` takes new `channel`, `limit`, `user`, `mask` arguments.
 
 #### Module Server
 

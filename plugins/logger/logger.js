@@ -35,14 +35,12 @@ var Util        = Irccd.Util;
  * All available formats.
  */
 Plugin.format = {
-    "cmode":    "%H:%M:%S :: #{nickname} changed the mode to: #{mode} #{arg}",
-    "cnotice":  "%H:%M:%S :: [notice] (#{channel}) #{nickname}: #{message}",
     "join":     "%H:%M:%S >> #{nickname} joined #{channel}",
     "kick":     "%H:%M:%S :: #{target} has been kicked by #{nickname} [reason: #{reason}]",
     "me":       "%H:%M:%S * #{nickname} #{message}",
     "message":  "%H:%M:%S #{nickname}: #{message}",
     "mode":     "%H:%M:%S :: #{nickname} set mode #{mode} to #{arg}",
-    "notice":   "%H:%M:%S [notice] (#{nickname}) #{message}",
+    "notice":   "%H:%M:%S [notice] #{channel} (#{nickname}) #{message}",
     "part":     "%H:%M:%S << #{nickname} left #{channel} [#{reason}]",
     "query":    "%H:%M:%S #{nickname}: #{message}",
     "topic":    "%H:%M:%S :: #{nickname} changed the topic of #{channel} to: #{topic}"
@@ -122,37 +120,12 @@ function onReload()
     loadFormats();
 }
 
-function onChannelMode(server, origin, channel, mode, arg)
-{
-    origin = origin.toLowerCase();
-    channel = channel.toLowerCase();
-
-    write("cmode", keywords(server, channel, origin, {
-        "arg":      arg,
-        "mode":     mode,
-        "source":   channel
-    }));
-}
-
-function onChannelNotice(server, origin, channel, notice)
-{
-    origin = origin.toLowerCase();
-    channel = channel.toLowerCase();
-
-    write("cnotice", keywords(server, channel, origin, {
-        "message":  notice,
-        "source":   channel
-    }));
-}
-
 function onInvite(server, origin, channel)
 {
     origin = origin.toLowerCase();
     channel = channel.toLowerCase();
 
-    write("invite", keywords(server, channel, origin, {
-        "source":   channel
-    }));
+    write("invite", keywords(server, channel, origin));
 }
 
 function onJoin(server, origin, channel)
@@ -160,9 +133,7 @@ function onJoin(server, origin, channel)
     origin = origin.toLowerCase();
     channel = channel.toLowerCase();
 
-    write("join", keywords(server, channel, origin, {
-        "source":   channel
-    }));
+    write("join", keywords(server, channel, origin));
 }
 
 function onKick(server, origin, channel, target, reason)
@@ -172,7 +143,6 @@ function onKick(server, origin, channel, target, reason)
 
     write("kick", keywords(server, channel, origin, {
         "target":   target,
-        "source":   channel,
         "reason":   reason
     }));
 }
@@ -184,7 +154,6 @@ function onMe(server, origin, channel, message)
 
     write("me", keywords(server, channel, origin, {
         "message":  message,
-        "source":   channel
     }));
 }
 
@@ -195,17 +164,18 @@ function onMessage(server, origin, channel, message)
 
     write("message", keywords(server, channel, origin, {
         "message":  message,
-        "source":   channel
     }));
 }
 
-function onMode(server, origin, mode)
+function onMode(server, origin, channel, mode, limit, user, mask)
 {
     origin = origin.toLowerCase();
 
-    write("mode", keywords(server, undefined, origin, {
+    write("mode", keywords(server, channel, origin, {
         "mode":     mode,
-        "source":   Util.splituser(origin)
+        "limit":    limit,
+        "user":     user,
+        "mask":     mask
     }));
 }
 
@@ -214,13 +184,12 @@ function onNick(server, origin, nickname)
     // TODO: write for all servers/channels a log entry
 }
 
-function onNotice(server, origin, notice)
+function onNotice(server, origin, channel, notice)
 {
     origin = origin.toLowerCase();
 
-    write("notice", keywords(server, undefined, origin, {
+    write("notice", keywords(server, channel, origin, {
         "message":  notice,
-        "source":   Util.splituser(origin)
     }));
 }
 
@@ -231,17 +200,6 @@ function onPart(server, origin, channel, reason)
 
     write("part", keywords(server, channel, origin, {
         "reason":   reason,
-        "source":   channel
-    }));
-}
-
-function onQuery(server, origin, message)
-{
-    origin = origin.toLowerCase();
-
-    write("query", keywords(server, undefined, origin, {
-        "source":   Util.splituser(origin),
-        "message":  message
     }));
 }
 
@@ -251,7 +209,6 @@ function onTopic(server, origin, channel, topic)
     channel = channel.toLowerCase();
 
     write("topic", keywords(server, channel, origin, {
-        "source":   channel,
         "topic":    topic
     }));
 }
