@@ -80,6 +80,48 @@ BOOST_AUTO_TEST_CASE(all)
     BOOST_TEST(!daemon_->servers().has("s2"));
 }
 
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_identifier)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-disconnect" },
+        { "server",     123456              }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_identifier);
+}
+
+BOOST_AUTO_TEST_CASE(not_found)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-disconnect" },
+        { "server",     "unknown"           }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::not_found);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()
 
 } // !irccd

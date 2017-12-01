@@ -62,6 +62,115 @@ BOOST_AUTO_TEST_CASE(basic)
     BOOST_TEST(cmd["topic"].get<std::string>() == "new version");
 }
 
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_identifier_1)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-topic"  },
+        { "server",     123456          },
+        { "channel",    "#music"        },
+        { "topic",      "plop"          }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_identifier);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_identifier_2)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-topic"  },
+        { "server",     ""              },
+        { "channel",    "#music"        },
+        { "topic",      "plop"          }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_identifier);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_channel_1)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-topic"  },
+        { "server",     "test"          },
+        { "channel",    ""              },
+        { "topic",      "plop"          }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_channel);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_channel_2)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-topic"  },
+        { "server",     "test"          },
+        { "channel",    123456          },
+        { "topic",      "plop"          }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_channel);
+}
+
+BOOST_AUTO_TEST_CASE(not_found)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-topic"  },
+        { "server",     "unknown"       },
+        { "channel",    "#music"        },
+        { "topic",      "plop"          }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::not_found);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()
 
 } // !irccd

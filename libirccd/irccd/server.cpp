@@ -104,6 +104,48 @@ std::map<channel_mode, char> isupport_extract_prefixes(const std::string& line)
     return modes;
 }
 
+std::string from_json_get_id(const nlohmann::json& json)
+{
+    auto id = json_util::get_string(json, "name");
+
+    if (!string_util::is_identifier(id))
+        throw server_error(server_error::invalid_identifier);
+
+    return id;
+}
+
+std::string from_json_get_host(const nlohmann::json& json)
+{
+    auto host = json_util::get_string(json, "host");
+
+    if (host.empty())
+        throw server_error(server_error::invalid_hostname);
+
+    return host;
+}
+
+template <typename T>
+T from_json_get_uint(const nlohmann::json& json,
+                     const std::string& key,
+                     server_error::error error,
+                     T fallback)
+
+{
+    auto v = json.find(key);
+
+    if (v == json.end())
+        return fallback;
+    if (!v->is_number_integer())
+        throw server_error(error);
+
+    auto n = v->get<unsigned>();
+
+    if (n > std::numeric_limits<T>::max())
+        throw server_error(error);
+
+    return static_cast<T>(n);
+}
+
 } // !namespace
 
 void server::remove_joined_channel(const std::string& channel)
@@ -113,9 +155,12 @@ void server::remove_joined_channel(const std::string& channel)
 
 std::shared_ptr<server> server::from_json(boost::asio::io_service& service, const nlohmann::json& object)
 {
-    auto sv = std::make_shared<server>(service, json_util::require_identifier(object, "name"));
+    // TODO: move this function in server_service.
+    auto sv = std::make_shared<server>(service, from_json_get_id(object));
 
-    sv->set_host(json_util::require_string(object, "host"));
+    sv->set_host(from_json_get_host(object));
+    sv->set_port(from_json_get_uint(object, "port",
+        server_error::invalid_port_number, sv->port()));
     sv->set_password(json_util::get_string(object, "password"));
     sv->set_nickname(json_util::get_string(object, "nickname", sv->nickname()));
     sv->set_realname(json_util::get_string(object, "realname", sv->realname()));
@@ -123,20 +168,21 @@ std::shared_ptr<server> server::from_json(boost::asio::io_service& service, cons
     sv->set_ctcp_version(json_util::get_string(object, "ctcpVersion", sv->ctcp_version()));
     sv->set_command_char(json_util::get_string(object, "commandChar", sv->command_char()));
 
-    if (object.find("port") != object.end())
-        sv->set_port(json_util::get_uint(object, "port"));
     if (json_util::get_bool(object, "ipv6"))
         sv->set_flags(sv->flags() | server::ipv6);
-#if defined(HAVE_SSL)
-    if (json_util::get_bool(object, "ssl"))
-        sv->set_flags(sv->flags() | server::ssl);
     if (json_util::get_bool(object, "sslVerify"))
         sv->set_flags(sv->flags() | server::ssl_verify);
-#endif
     if (json_util::get_bool(object, "autoRejoin"))
         sv->set_flags(sv->flags() | server::auto_rejoin);
     if (json_util::get_bool(object, "joinInvite"))
         sv->set_flags(sv->flags() | server::join_invite);
+
+    if (json_util::get_bool(object, "ssl"))
+#if defined(HAVE_SSL)
+        sv->set_flags(sv->flags() | server::ssl);
+#else
+        throw server_error(server_error::ssl_disabled);
+#endif
 
     return sv;
 }
@@ -729,12 +775,14 @@ const boost::system::error_category& server_category()
                 return "invalid number of reconnection tries";
             case server_error::invalid_reconnect_timeout_number:
                 return "invalid reconnect timeout number";
-            case server_error::invalid_host:
+            case server_error::invalid_hostname:
                 return "invalid hostname";
             case server_error::invalid_channel:
                 return "invalid or empty channel";
             case server_error::invalid_mode:
                 return "invalid or empty mode";
+            case server_error::invalid_nickname:
+                return "invalid nickname";
             case server_error::ssl_disabled:
                 return "ssl is not enabled";
             default:

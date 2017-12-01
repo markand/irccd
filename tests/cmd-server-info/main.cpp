@@ -67,26 +67,66 @@ BOOST_AUTO_TEST_CASE(basic)
     BOOST_TEST(result["username"].get<std::string>() == "psc");
 }
 
-BOOST_AUTO_TEST_CASE(notfound)
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_identifier_1)
 {
-    nlohmann::json result;
+    boost::system::error_code result;
 
     ctl_->send({
-        { "command",    "server-info"       },
-        { "server",     "test"              },
+        { "command",    "server-info"   },
+        { "server",     123456          }
     });
-    ctl_->recv([&] (auto, auto msg) {
-        result = msg;
-    });
-
-    wait_for([&] () {
-        return result.is_object();
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
     });
 
-    // TODO: error code
-    BOOST_TEST(result.is_object());
-    BOOST_TEST(result.count("error"));
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_identifier);
 }
+
+BOOST_AUTO_TEST_CASE(invalid_identifier_2)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-info"   },
+        { "server",     ""              }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_identifier);
+}
+
+BOOST_AUTO_TEST_CASE(not_found)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-info"   },
+        { "server",     "unknown"       }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::not_found);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 

@@ -487,6 +487,16 @@ public:
     virtual ~server();
 
     /**
+     * Get the current server state.
+     *
+     * \return the state
+     */
+    inline state_t state() const noexcept
+    {
+        return state_;
+    }
+
+    /**
      * Get the server identifier.
      *
      * \return the id
@@ -925,13 +935,16 @@ public:
         invalid_reconnect_timeout_number,
 
         //!< The specified host was invalid.
-        invalid_host,
+        invalid_hostname,
 
         //!< The channel was empty or invalid.
         invalid_channel,
 
         //!< The mode given was empty.
         invalid_mode,
+
+        //!< The nickname was empty or invalid.
+        invalid_nickname,
 
         //!< SSL was requested but is disabled.
         ssl_disabled,

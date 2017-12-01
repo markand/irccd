@@ -47,6 +47,7 @@ BOOST_AUTO_TEST_CASE(basic)
     ctl_->send({
         { "command",    "server-mode"   },
         { "server",     "test"          },
+        { "channel",    "#irccd"        },
         { "mode",       "+t"            }
     });
 
@@ -57,8 +58,159 @@ BOOST_AUTO_TEST_CASE(basic)
     auto cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "mode");
+    BOOST_TEST(cmd["channel"].get<std::string>() == "#irccd");
     BOOST_TEST(cmd["mode"].get<std::string>() == "+t");
 }
+
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_identifier_1)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-mode"   },
+        { "server",     123456          },
+        { "channel",    "#music"        },
+        { "mode",       "+i"            }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_identifier);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_identifier_2)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-mode"   },
+        { "server",     ""              },
+        { "channel",    "#music"        },
+        { "mode",       "+i"            }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_identifier);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_channel_1)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-mode"   },
+        { "server",     "test"          },
+        { "channel",    ""              },
+        { "mode",       "+i"            }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_channel);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_channel_2)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-mode"   },
+        { "server",     "test"          },
+        { "channel",    123456          },
+        { "mode",       "+i"            }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_channel);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_mode_1)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-mode"   },
+        { "server",     "test"          },
+        { "channel",    "#music"        },
+        { "mode",       ""              }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_mode);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_mode_2)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-mode"   },
+        { "server",     "test"          },
+        { "channel",    "#music"        },
+        { "mode",       123456          }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_mode);
+}
+BOOST_AUTO_TEST_CASE(not_found)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-mode"   },
+        { "server",     "unknown"       },
+        { "channel",    "#music"        },
+        { "mode",       "+i"            }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::not_found);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 

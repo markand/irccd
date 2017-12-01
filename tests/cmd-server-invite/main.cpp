@@ -62,6 +62,157 @@ BOOST_AUTO_TEST_CASE(basic)
     BOOST_TEST(cmd["target"].get<std::string>() == "francis");
 }
 
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_identifier_1)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-invite" },
+        { "server",     123456          },
+        { "target",     "francis"       },
+        { "channel",    "#music"        }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_identifier);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_identifier_2)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-invite" },
+        { "server",     ""              },
+        { "target",     "francis"       },
+        { "channel",    "#music"        }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_identifier);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_nickname_1)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-invite" },
+        { "server",     "test"          },
+        { "target",     ""              },
+        { "channel",    "#music"        }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_nickname);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_nickname_2)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-invite" },
+        { "server",     "test"          },
+        { "target",     123456          },
+        { "channel",    "#music"        }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_nickname);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_channel_1)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-invite" },
+        { "server",     "test"          },
+        { "target",     "jean"          },
+        { "channel",    ""              }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_channel);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_channel_2)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-invite" },
+        { "server",     "test"          },
+        { "target",     "jean"          },
+        { "channel",    123456          }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_channel);
+}
+
+BOOST_AUTO_TEST_CASE(not_found)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-invite" },
+        { "server",     "unknown"       },
+        { "target",     "francis"       },
+        { "channel",    "#music"        }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::not_found);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()
 
 } // !irccd

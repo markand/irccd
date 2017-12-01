@@ -210,6 +210,14 @@ public:
 
 /**
  * \brief Implementation of server-connect transport command.
+ *
+ * Replies:
+ *
+ *   - server_error::already_exists,
+ *   - server_error::invalid_hostname,
+ *   - server_error::invalid_identifier,
+ *   - server_error::invalid_port_number,
+ *   - server_error::ssl_disabled.
  */
 class server_connect_command : public command {
 public:
@@ -226,6 +234,11 @@ public:
 
 /**
  * \brief Implementation of server-disconnect transport command.
+ *
+ * Replies:
+ *
+ *   - server_error::invalid_identifier,
+ *   - server_error::not_found.
  */
 class server_disconnect_command : public command {
 public:
@@ -242,6 +255,11 @@ public:
 
 /**
  * \brief Implementation of server-info transport command.
+ *
+ * Replies:
+ *
+ *   - server_error::invalid_identifier,
+ *   - server_error::not_found.
  */
 class server_info_command : public command {
 public:
@@ -258,6 +276,13 @@ public:
 
 /**
  * \brief Implementation of server-invite transport command.
+ *
+ * Replies:
+ *
+ *   - server_error::invalid_channel,
+ *   - server_error::invalid_identifier,
+ *   - server_error::invalid_nickname,
+ *   - server_error::not_found.
  */
 class server_invite_command : public command {
 public:
@@ -274,6 +299,12 @@ public:
 
 /**
  * \brief Implementation of server-join transport command.
+ *
+ * Replies:
+ *
+ *   - server_error::invalid_channel,
+ *   - server_error::invalid_identifier,
+ *   - server_error::not_found.
  */
 class server_join_command : public command {
 public:
@@ -290,6 +321,13 @@ public:
 
 /**
  * \brief Implementation of server-kick transport command.
+ *
+ * Replies:
+ *
+ *   - server_error::invalid_channel,
+ *   - server_error::invalid_identifier,
+ *   - server_error::invalid_nickname,
+ *   - server_error::not_found.
  */
 class server_kick_command : public command {
 public:
@@ -322,6 +360,12 @@ public:
 
 /**
  * \brief Implementation of server-me transport command.
+ *
+ * Replies:
+ *
+ *   - server_error::invalid_channel,
+ *   - server_error::invalid_identifier,
+ *   - server_error::not_found.
  */
 class server_me_command : public command {
 public:
@@ -338,6 +382,12 @@ public:
 
 /**
  * \brief Implementation of server-message transport command.
+ *
+ * Replies:
+ *
+ *   - server_error::invalid_channel,
+ *   - server_error::invalid_identifier,
+ *   - server_error::not_found.
  */
 class server_message_command : public command {
 public:
@@ -354,6 +404,13 @@ public:
 
 /**
  * \brief Implementation of server-mode transport command.
+ *
+ * Replies:
+ *
+ *   - server_error::invalid_channel,
+ *   - server_error::invalid_identifier,
+ *   - server_error::invalid_mode,
+ *   - server_error::not_found.
  */
 class server_mode_command : public command {
 public:
@@ -370,6 +427,12 @@ public:
 
 /**
  * \brief Implementation of server-nick transport command.
+ *
+ * Replies:
+ *
+ *   - server_error::invalid_identifier,
+ *   - server_error::invalid_nickname,
+ *   - server_error::not_found.
  */
 class server_nick_command : public command {
 public:
@@ -386,6 +449,12 @@ public:
 
 /**
  * \brief Implementation of server-notice transport command.
+ *
+ * Replies:
+ *
+ *   - server_error::invalid_channel,
+ *   - server_error::invalid_identifier,
+ *   - server_error::not_found.
  */
 class server_notice_command : public command {
 public:
@@ -402,6 +471,12 @@ public:
 
 /**
  * \brief Implementation of server-part transport command.
+ *
+ * Replies:
+ *
+ *   - server_error::invalid_channel,
+ *   - server_error::invalid_identifier,
+ *   - server_error::not_found.
  */
 class server_part_command : public command {
 public:
@@ -418,6 +493,11 @@ public:
 
 /**
  * \brief Implementation of server-reconnect transport command.
+ *
+ * Replies:
+ *
+ *   - server_error::invalid_identifier,
+ *   - server_error::not_found.
  */
 class server_reconnect_command : public command {
 public:
@@ -434,6 +514,12 @@ public:
 
 /**
  * \brief Implementation of server-topic transport command.
+ *
+ * Replies:
+ *
+ *   - server_error::invalid_channel,
+ *   - server_error::invalid_identifier,
+ *   - server_error::not_found.
  */
 class server_topic_command : public command {
 public:

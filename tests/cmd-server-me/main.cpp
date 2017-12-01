@@ -62,6 +62,115 @@ BOOST_AUTO_TEST_CASE(basic)
     BOOST_TEST(cmd["target"].get<std::string>() == "jean");
 }
 
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_identifier_1)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-me" },
+        { "server",     123456      },
+        { "target",     "#music"    },
+        { "message",    "hello!"    }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_identifier);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_identifier_2)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-me" },
+        { "server",     ""          },
+        { "target",     "#music"    },
+        { "message",    "hello!"    }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_identifier);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_channel_1)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-me" },
+        { "server",     "test"      },
+        { "target",     ""          },
+        { "message",    "hello!"    }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_channel);
+}
+
+BOOST_AUTO_TEST_CASE(invalid_channel_2)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-me" },
+        { "server",     "test"      },
+        { "target",     123456      },
+        { "message",    "hello!"    }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::invalid_channel);
+}
+
+BOOST_AUTO_TEST_CASE(not_found)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "server-me" },
+        { "server",     "unknown"   },
+        { "target",     "#music"    },
+        { "message",    "hello!"    }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_ASSERT(result == server_error::not_found);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()
 
 } // !irccd
