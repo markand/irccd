@@ -20,5 +20,4 @@ irccd_define_test(
     NAME timer-jsapi
     SOURCES main.cpp
     LIBRARIES libirccd-js
-    FLAGS DIRECTORY=\"${CMAKE_CURRENT_SOURCE_DIR}\"
 )
