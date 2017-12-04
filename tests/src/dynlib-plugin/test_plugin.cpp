@@ -36,16 +36,6 @@ public:
         event.server->message("test", "on_connect");
     }
 
-    void on_channel_mode(irccd&, const channel_mode_event& event) override
-    {
-        event.server->message("test", "on_channel_mode");
-    }
-
-    void on_channel_notice(irccd&, const channel_notice_event& event) override
-    {
-        event.server->message("test", "on_channel_notice");
-    }
-
     void on_invite(irccd&, const invite_event& event) override
     {
         event.server->message("test", "on_invite");
@@ -94,16 +84,6 @@ public:
     void on_part(irccd&, const part_event& event) override
     {
         event.server->message("test", "on_part");
-    }
-
-    void on_query(irccd&, const query_event& event) override
-    {
-        event.server->message("test", "on_query");
-    }
-
-    void on_query_command(irccd&, const query_event& event) override
-    {
-        event.server->message("test", "on_query_command");
     }
 
     void on_topic(irccd&, const topic_event& event) override

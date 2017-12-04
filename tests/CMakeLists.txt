@@ -49,6 +49,7 @@ add_subdirectory(src/server-reconnect-command)
 add_subdirectory(src/server-topic-command)
 
 # Miscellaneous functions.
+add_subdirectory(src/dynlib-plugin)
 add_subdirectory(src/irc)
 add_subdirectory(src/logger)
 add_subdirectory(src/rules)

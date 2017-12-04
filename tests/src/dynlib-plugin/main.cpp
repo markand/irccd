@@ -36,12 +36,14 @@ namespace irccd {
 
 class fixture {
 protected:
+    boost::asio::io_service service_;
     std::shared_ptr<journal_server> server_;
     std::shared_ptr<plugin> plugin_;
     irccd irccd_;
 
     inline fixture()
-        : server_(std::make_shared<journal_server>("test"))
+        : server_(std::make_shared<journal_server>(service_, "test"))
+        , irccd_(service_)
     {
         plugin_ = dynlib_plugin_loader({CMAKE_CURRENT_BINARY_DIR}).find("test-plugin");
 
@@ -69,26 +71,6 @@ BOOST_AUTO_TEST_CASE(on_connect)
     BOOST_TEST(server_->cqueue().size() == 1U);
     BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
     BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_connect");
-    BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
-}
-
-BOOST_AUTO_TEST_CASE(on_channel_mode)
-{
-    plugin_->on_channel_mode(irccd_, {server_, "", "", "", ""});
-
-    BOOST_TEST(server_->cqueue().size() == 1U);
-    BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_channel_mode");
-    BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
-}
-
-BOOST_AUTO_TEST_CASE(on_channel_notice)
-{
-    plugin_->on_channel_notice(irccd_, {server_, "", "", ""});
-
-    BOOST_TEST(server_->cqueue().size() == 1U);
-    BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_channel_notice");
     BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
 }
 
@@ -144,7 +126,7 @@ BOOST_AUTO_TEST_CASE(on_me)
 
 BOOST_AUTO_TEST_CASE(on_mode)
 {
-    plugin_->on_mode(irccd_, {server_, "", ""});
+    plugin_->on_mode(irccd_, {server_, "", "", "", "", "", ""});
 
     BOOST_TEST(server_->cqueue().size() == 1U);
     BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
@@ -174,7 +156,7 @@ BOOST_AUTO_TEST_CASE(on_nick)
 
 BOOST_AUTO_TEST_CASE(on_notice)
 {
-    plugin_->on_notice(irccd_, {server_, "", ""});
+    plugin_->on_notice(irccd_, {server_, "", "", ""});
 
     BOOST_TEST(server_->cqueue().size() == 1U);
     BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
@@ -192,27 +174,7 @@ BOOST_AUTO_TEST_CASE(on_part)
     BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
 }
 
-BOOST_AUTO_TEST_CASE(on_query)
-{
-    plugin_->on_query(irccd_, {server_, "", ""});
-
-    BOOST_TEST(server_->cqueue().size() == 1U);
-    BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_query");
-    BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
-}
-
-BOOST_AUTO_TEST_CASE(on_query_command)
-{
-    plugin_->on_query_command(irccd_, {server_, "", ""});
-
-    BOOST_TEST(server_->cqueue().size() == 1U);
-    BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_query_command");
-    BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
-}
-
-BOOST_AUTO_TEST_CASE(on_query_topic)
+BOOST_AUTO_TEST_CASE(on_topic)
 {
     plugin_->on_topic(irccd_, {server_, "", "", ""});
 
