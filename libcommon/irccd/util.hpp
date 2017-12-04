@@ -55,7 +55,6 @@ inline void unused(Args&&...) noexcept
 {
 }
 
-
 } // !util
 
 } // !irccd

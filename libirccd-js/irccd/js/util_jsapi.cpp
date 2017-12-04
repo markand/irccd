@@ -57,7 +57,6 @@ string_util::subst get_subst(duk_context* ctx, int index)
                 dukx_get<std::string>(ctx, -1)
             });
 
-
         duk_pop_n(ctx, 2);
     }
 

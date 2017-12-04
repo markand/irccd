@@ -36,6 +36,7 @@ function(irccd_vera_check target sources)
 
         # Cleanup non relevant files.
         foreach (s ${sources})
+            get_filename_component(s ${s} ABSOLUTE)
             get_filename_component(ext ${s} EXT)
 
             foreach (e ${valid})

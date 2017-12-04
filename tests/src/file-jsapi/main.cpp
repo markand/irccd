@@ -47,7 +47,6 @@ BOOST_AUTO_TEST_CASE(function_dirname)
     BOOST_TEST("/usr/local/etc" == duk_get_string(plugin_->context(), -1));
 }
 
-
 BOOST_AUTO_TEST_CASE(function_exists)
 {
     if (duk_peval_string(plugin_->context(), "result = Irccd.File.exists(CMAKE_SOURCE_DIR + '/tests/root/file-1.txt')"))

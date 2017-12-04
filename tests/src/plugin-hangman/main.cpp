@@ -110,7 +110,6 @@ BOOST_AUTO_TEST_CASE(dead)
     BOOST_TEST(cmd["message"].get<std::string>() == "dead=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:sky");
 }
 
-
 BOOST_AUTO_TEST_CASE(found)
 {
     load({{ "collaborative", "false" }});

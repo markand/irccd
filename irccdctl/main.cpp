@@ -243,7 +243,8 @@ alias read_alias(const ini::section& sc, const std::string& name)
          * argument is a command name.
          */
         if (option.size() == 1 && option[0].empty())
-            throw std::runtime_error(string_util::sprintf("alias %s: missing command name in '%s'", name, option.key()));
+            throw std::runtime_error(string_util::sprintf("alias %s: missing command name in '%s'",
+                name, option.key()));
 
         std::string command = option[0];
         std::vector<alias_arg> args(option.begin() + 1, option.end());
@@ -416,7 +417,8 @@ void exec(const alias& alias, std::vector<std::string> args_copy)
         for (const auto& arg : cmd.args()) {
             if (arg.is_placeholder()) {
                 if (args.size() < arg.index() + 1)
-                    throw std::invalid_argument(string_util::sprintf("missing argument for placeholder %d", arg.index()));
+                    throw std::invalid_argument(
+                        string_util::sprintf("missing argument for placeholder %d", arg.index()));
 
                 cmd_args.push_back(args[arg.index()]);
 

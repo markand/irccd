@@ -376,7 +376,7 @@ void server_service::handle_whois(const whois_event& ev)
     log::debug() << "  username: " << ev.whois.user << "\n";
     log::debug() << "  host: " << ev.whois.host << "\n";
     log::debug() << "  realname: " << ev.whois.realname << "\n";
-    log::debug() << "  channels: " << string_util::join(ev.whois.channels.begin(), ev.whois.channels.end(), ", ") << std::endl;
+    log::debug() << "  channels: " << string_util::join(ev.whois.channels, ", ") << std::endl;
 
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onWhois"           },

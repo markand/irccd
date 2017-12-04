@@ -184,7 +184,10 @@ std::string subst_shell(const std::string& command)
 #endif
 }
 
-std::string substitute(std::string::const_iterator& it, std::string::const_iterator& end, char token, const subst& params)
+std::string substitute(std::string::const_iterator& it,
+                       std::string::const_iterator& end,
+                       char token,
+                       const subst& params)
 {
     assert(is_reserved(token));
 

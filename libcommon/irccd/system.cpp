@@ -39,7 +39,10 @@
 #   include <cerrno>
 #   include <climits>
 #   include <cstring>
-#elif defined(IRCCD_SYSTEM_FREEBSD) || defined(IRCCD_SYSTEM_DRAGONFLYBSD) || defined(IRCCD_SYSTEM_NETBSD) || defined(IRCCD_SYSTEM_OPENBSD)
+#elif defined(IRCCD_SYSTEM_FREEBSD)                                         \
+    || defined(IRCCD_SYSTEM_DRAGONFLYBSD)                                   \
+    || defined(IRCCD_SYSTEM_NETBSD)                                         \
+    || defined(IRCCD_SYSTEM_OPENBSD)
 #   if defined(IRCCD_SYSTEM_NETBSD)
 #       include <sys/param.h>
 #   else

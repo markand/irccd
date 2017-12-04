@@ -35,7 +35,6 @@ void plugin_unload_cli::exec(ctl::controller& ctl, const std::vector<std::string
     request(ctl, {{ "plugin", args[0] }});
 }
 
-
 } // !ctl
 
 } // !irccd

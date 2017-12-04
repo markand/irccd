@@ -70,13 +70,15 @@ bool rule_service::solve(const std::string& server,
 
     int i = 0;
     for (const auto& rule : rules_) {
+        auto action = rule.action() == rule::action_type::accept ? "accept" : "drop";
+
         log::debug() << "  candidate "   << i++ << ":\n"
-                     << "    servers: "  << string_util::join(rule.servers().begin(), rule.servers().end()) << "\n"
-                     << "    channels: " << string_util::join(rule.channels().begin(), rule.channels().end()) << "\n"
-                     << "    origins: "  << string_util::join(rule.origins().begin(), rule.origins().end()) << "\n"
-                     << "    plugins: "  << string_util::join(rule.plugins().begin(), rule.plugins().end()) << "\n"
-                     << "    events: "   << string_util::join(rule.events().begin(), rule.events().end()) << "\n"
-                     << "    action: "   << ((rule.action() == rule::action_type::accept) ? "accept" : "drop") << std::endl;
+                     << "    servers: "  << string_util::join(rule.servers()) << "\n"
+                     << "    channels: " << string_util::join(rule.channels()) << "\n"
+                     << "    origins: "  << string_util::join(rule.origins()) << "\n"
+                     << "    plugins: "  << string_util::join(rule.plugins()) << "\n"
+                     << "    events: "   << string_util::join(rule.events()) << "\n"
+                     << "    action: "   << action << std::endl;
 
         if (rule.match(server, channel, origin, plugin, event))
             result = rule.action() == rule::action_type::accept;

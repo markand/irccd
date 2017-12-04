@@ -233,6 +233,7 @@ IRCCD_EXPORT std::vector<std::string> split(const std::string& list, const std::
  * \param first the first iterator
  * \param last the last iterator
  * \param delim the optional delimiter
+ * \return the string
  */
 template <typename InputIt, typename DelimType = char>
 std::string join(InputIt first, InputIt last, DelimType delim = ':')
@@ -247,6 +248,19 @@ std::string join(InputIt first, InputIt last, DelimType delim = ':')
     }
 
     return oss.str();
+}
+
+/**
+ * Overloaded function that takes a container.
+ *
+ * \param c the container
+ * \param delim the optional delimiter
+ * \return the string
+ */
+template <typename Container, typename DelimType = char>
+std::string join(const Container& c, DelimType delim = ':')
+{
+    return join(c.begin(), c.end(), delim);
 }
 
 /**
