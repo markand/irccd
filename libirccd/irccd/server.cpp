@@ -124,6 +124,7 @@ channel server::split_channel(const std::string& value)
 server::server(boost::asio::io_service& service, std::string name)
     : name_(std::move(name))
     , service_(service)
+    , timer_(service)
 {
     // Initialize nickname and username.
     auto user = sys::username();
@@ -134,14 +135,6 @@ server::server(boost::asio::io_service& service, std::string name)
 
 void server::dispatch_connect(const irc::message&)
 {
-    recocur_ = 1;
-    jchannels_.clear();
-
-#if 0
-    timer_.start();
-#endif
-
-    // Change state and auto join requested channels.
     state_ = state_t::connected;
     on_connect({shared_from_this()});
 
@@ -460,16 +453,45 @@ void server::identify()
     conn_->send(string_util::sprintf("USER %s unknown unknown :%s", username_, realname_));
 }
 
+void server::wait()
+{
+    assert(state_ == state_t::waiting);
+
+    timer_.expires_from_now(boost::posix_time::seconds(recodelay_));
+    timer_.async_wait([this] (auto) {
+        recocur_ ++;
+        connect();
+    });
+}
+
 void server::handle_connect(boost::system::error_code code)
 {
     if (code) {
-        // TODO: reconnect happens HERE.
-        state_ = state_t::disconnected;
         conn_ = nullptr;
         log::warning(string_util::sprintf("server %s: error while connecting", name_));
         log::warning(string_util::sprintf("server %s: %s", name_, code.message()));
+
+        // Wait before reconnecting.
+        if (recotries_ != 0) {
+            if (recotries_ > 0 && recocur_ >= recotries_) {
+                log::warning() << "server " << name_ << ": giving up" << std::endl;
+
+                state_ = state_t::disconnected;
+                on_die();
+            } else {
+                log::warning() << "server " << name_ << ": retrying in " <<
+                    recodelay_ << " seconds" << std::endl;
+
+                state_ = state_t::waiting;
+                wait();
+            }
+        } else
+            state_ = state_t::disconnected;
     } else {
         state_ = state_t::identifying;
+        recocur_ = 0U;
+        jchannels_.clear();
+
         identify();
         recv();
     }
@@ -495,7 +517,7 @@ void server::set_ctcp_version(std::string ctcpversion)
 
 void server::connect() noexcept
 {
-    assert(state_ == state_t::disconnected);
+    assert(state_ == state_t::disconnected || state_ == state_t::waiting);
     /*
      * This is needed if irccd is started before DHCP or if DNS cache is
      * outdated.

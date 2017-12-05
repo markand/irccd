@@ -420,6 +420,7 @@ private:
 
     // Misc.
     boost::asio::io_service& service_;
+    boost::asio::deadline_timer timer_;
     std::unique_ptr<irc::connection> conn_;
     std::int8_t recocur_{0};
     std::map<std::string, std::set<std::string>> names_map_;
@@ -450,6 +451,7 @@ private:
     void handle_connect(boost::system::error_code);
     void recv();
     void identify();
+    void wait();
 
 public:
     /**
