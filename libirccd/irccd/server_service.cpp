@@ -184,7 +184,7 @@ std::shared_ptr<server> load_server(boost::asio::io_service& service,
 #if defined(HAVE_SSL)
         sv->set_flags(sv->flags() | server::ssl);
 #else
-        throw server_error(server_error::ssl_disabled);
+        throw server_error(server_error::ssl_disabled, sv->name());
 #endif
     }
 
@@ -611,7 +611,7 @@ std::shared_ptr<server> server_service::from_json(boost::asio::io_service& servi
 #if defined(HAVE_SSL)
         sv->set_flags(sv->flags() | server::ssl);
 #else
-        throw server_error(server_error::ssl_disabled);
+        throw server_error(server_error::ssl_disabled, sv->name());
 #endif
 
     return sv;
@@ -624,7 +624,7 @@ server_service::server_service(irccd &irccd)
 
 bool server_service::has(const std::string& name) const noexcept
 {
-    return std::count_if(servers_.cbegin(), servers_.end(), [&] (const auto& server) {
+    return std::count_if(servers_.begin(), servers_.end(), [&] (const auto& server) {
         return server->name() == name;
     }) > 0;
 }
