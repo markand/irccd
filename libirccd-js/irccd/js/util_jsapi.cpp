@@ -20,6 +20,7 @@
 
 #include <irccd/string_util.hpp>
 
+#include "duktape_vector.hpp"
 #include "js_plugin.hpp"
 #include "util_jsapi.hpp"
 
@@ -204,7 +205,7 @@ duk_ret_t cut(duk_context* ctx)
         return 1;
     }
 
-    return dukx_push_array(ctx, list.begin(), list.end());
+    return dukx_push(ctx, list);
 }
 
 /*

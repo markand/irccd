@@ -23,6 +23,7 @@ find_package(Boost REQUIRED QUIET COMPONENTS timer)
 set(
     HEADERS
     ${libirccd-js_SOURCE_DIR}/irccd/js/duktape.hpp
+    ${libirccd-js_SOURCE_DIR}/irccd/js/duktape_vector.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/directory_jsapi.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/elapsed_timer_jsapi.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/file_jsapi.hpp

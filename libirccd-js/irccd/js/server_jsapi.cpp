@@ -23,6 +23,7 @@
 #include <irccd.hpp>
 #include <irccd/server_service.hpp>
 
+#include "duktape_vector.hpp"
 #include "irccd_jsapi.hpp"
 #include "js_plugin.hpp"
 #include "server_jsapi.hpp"
@@ -85,7 +86,7 @@ duk_ret_t info(duk_context* ctx)
     duk_put_prop_string(ctx, -2, "nickname");
     dukx_push(ctx, server->username());
     duk_put_prop_string(ctx, -2, "username");
-    dukx_push_array(ctx, server->channels().begin(), server->channels().end());
+    dukx_push(ctx, server->channels());
     duk_put_prop_string(ctx, -2, "channels");
 
     return 1;

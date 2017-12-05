@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef DUKTAPE_HPP
-#define DUKTAPE_HPP
+#ifndef IRCCD_JS_DUKTAPE_HPP
+#define IRCCD_JS_DUKTAPE_HPP
 
 /**
  * \file duktape.hpp
@@ -580,6 +580,151 @@ public:
 };
 
 /**
+ * \brief Partial specialization for collections.
+ *
+ * Derive from this class to implement type traits for collections.
+ *
+ * \see duktape_vector.hpp
+ */
+template <typename Container>
+class dukx_array_type_traits : public std::true_type {
+public:
+    /**
+     * Push a Javascript array by copying values.
+     *
+     * Uses dukx_push for each T values in the collection.
+     *
+     * \param ctx the Duktape context
+     * \param c the container
+     */
+    static void push(duk_context* ctx, const Container& c)
+    {
+        using Type = typename Container::value_type;
+
+        duk_push_array(ctx);
+
+        int i = 0;
+
+        for (auto v : c) {
+            dukx_type_traits<Type>::push(ctx, v);
+            duk_put_prop_index(ctx, -2, i++);
+        }
+    }
+
+    /**
+     * Get an array from the Javascript array.
+     *
+     * \param ctx the Duktape context
+     * \param index the value index
+     * \return the container
+     */
+    static Container get(duk_context* ctx, duk_idx_t index)
+    {
+        using Type = typename Container::value_type;
+        using Size = typename Container::size_type;
+
+        Container result;
+        Size length = duk_get_length(ctx, index);
+
+        for (Size i = 0; i < length; ++i) {
+            duk_get_prop_index(ctx, index, i);
+            result.push_back(dukx_type_traits<Type>::get(ctx, -1));
+            duk_pop(ctx);
+        }
+
+        return result;
+    }
+
+    /**
+     * Require an array from the Javascript array.
+     *
+     * \param ctx the Duktape context
+     * \param index the value index
+     * \return the container
+     */
+    static Container require(duk_context* ctx, duk_idx_t index)
+    {
+        duk_check_type(ctx, index, DUK_TYPE_OBJECT);
+
+        return get(ctx, index);
+    }
+};
+
+/**
+ * \brief Partial specialization for maps.
+ *
+ * Derive from this class to implement type traits for maps.
+ *
+ * \see duktape_vector.hpp
+ */
+template <typename Container>
+class dukx_object_type_traits : public std::true_type {
+public:
+    /**
+     * Push a container by copying values.
+     *
+     * Uses dukx_push for each key/value pair in the container.
+     *
+     * \param ctx the Duktape context
+     * \param c the container
+     */
+    static void push(duk_context* ctx, const Container& c)
+    {
+        using Type = typename Container::mapped_type;
+
+        duk_push_object(ctx);
+
+        for (const auto& pair : c) {
+            dukx_type_traits<std::string>::push(ctx, pair.first);
+            dukx_type_traits<Type>::push(ctx, pair.second);
+            duk_put_prop(ctx, -3);
+        }
+    }
+
+    /**
+     * Get a object from the Javascript array.
+     *
+     * \param ctx the Duktape context
+     * \param index the value index
+     * \return the container
+     */
+    static Container get(duk_context* ctx, duk_idx_t index)
+    {
+        using Type = typename Container::mapped_type;
+
+        Container result;
+
+        duk_enum(ctx, index, 0);
+
+        while (duk_next(ctx, -1, true)) {
+            result.emplace(
+                dukx_type_traits<std::string>::get(ctx, -2),
+                dukx_type_traits<Type>::get(ctx, -1)
+            );
+            duk_pop_n(ctx, 2);
+        }
+
+        duk_pop(ctx);
+
+        return result;
+    }
+
+    /**
+     * Require a object from the Javascript array.
+     *
+     * \param ctx the Duktape context
+     * \param index the value index
+     * \return the container
+     */
+    static Container require(duk_context* ctx, duk_idx_t index)
+    {
+        duk_check_type(ctx, index, DUK_TYPE_OBJECT);
+
+        return get(ctx, index);
+    }
+};
+
+/**
  * Generic push function.
  *
  * This function calls dukx_type_traits<T>::push if specialized.
@@ -636,163 +781,6 @@ T dukx_require(duk_context* ctx, duk_idx_t index)
     static_assert(dukx_type_traits<Type>::value, "type T not supported");
 
     return dukx_type_traits<Type>::require(ctx, index);
-}
-
-/**
- * Push a Javascript array to the stack.
- *
- * This function push the value using duk_push_array and dukx_push for each
- * value between the range
- *
- * \param ctx the Duktape context
- * \param it the input iterator
- * \param end the end iterator
- * \return 1 for convenience
- * \warning experimental and may change in the future
- */
-template <typename InputIt>
-int dukx_push_array(duk_context* ctx, InputIt it, InputIt end)
-{
-    duk_push_array(ctx);
-
-    for (int i = 0; it != end; ++it) {
-        dukx_push(ctx, *it);
-        duk_put_prop_index(ctx, -2, i++);
-    }
-
-    return 1;
-}
-
-/**
- * Overloaded function.
- *
- * Alias for `dukx_push_array(ctx, values.begin(), values.end());`
- *
- * \param ctx the Duktape context
- * \param values the list of values
- * \return 1 for convenience
- * \warning experimental and may change in the future
- */
-template <typename T>
-int dukx_push_array(duk_context* ctx, std::initializer_list<T> values)
-{
-    return dukx_push_array(ctx, values.begin(), values.end());
-}
-
-/**
- * Push a Javascript object to the stack.
- *
- * Fhis function push the value using duk_push_object and dukx_push for each
- * key/value pair combination in InputIt.
- *
- * The input iterator must have first and second values (usually `std::pair`).
- *
- * \param ctx the Duktape context
- * \param it the input iterator
- * \param end the end iterator
- * \return 1 for convenience
- * \warning experimental and may change in the future
- */
-template <typename InputIt>
-int dukx_push_object(duk_context* ctx, InputIt it, InputIt end)
-{
-    duk_push_object(ctx);
-
-    while (it != end) {
-        dukx_push(ctx, it->first);
-        dukx_push(ctx, it++->second);
-        duk_put_prop(ctx, -3);
-    }
-
-    return 1;
-}
-
-/**
- * Overloaded function.
- *
- * Alias for `dukx_push_object(ctx, values.begin(), values.end());`
- *
- * \param ctx the Duktape context
- * \param values the list of key/value values
- * \return 1 for convenience
- * \warning experimental and may change in the future
- */
-template <typename T>
-int dukx_push_object(duk_context* ctx, std::initializer_list<std::pair<std::string, T>> values)
-{
-    return dukx_push_object(ctx, values.begin(), values.end());
-}
-
-/**
- * Get values from a Javascript array.
- *
- * This function uses dukx_get<T> for each value in the Javascript array and
- * append them to the output iterator.
- *
- * \param ctx the Duktape context
- * \param index the array index
- * \param output the output iterator
- * \warning experimental and may change in the future
- */
-template <typename T, typename OutputIt>
-void dukx_get_array(duk_context* ctx, duk_idx_t index, OutputIt output)
-{
-    std::size_t length = duk_get_length(ctx, index);
-
-    for (std::size_t i = 0; i < length; ++i) {
-        duk_get_prop_index(ctx, index, i);
-        *output++ = dukx_get<T>(ctx, -1);
-        duk_pop(ctx);
-    }
-}
-
-/**
- * Overloaded function.
- *
- * Construct a container and return it.
- *
- * \param ctx the Duktape context
- * \param index the array index
- * \return the container of values (e.g. `std::vector<int>`)
- * \warning experimental and may change in the future
- */
-template <typename Container>
-Container dukx_get_array(duk_context* ctx, duk_idx_t index)
-{
-    using T = typename Container::value_type;
-
-    Container result;
-
-    dukx_get_array<T>(ctx, index, std::back_inserter(result));
-
-    return result;
-}
-
-/**
- * Get values from a Javascript object.
- *
- * \param ctx the Duktape context
- * \param index the object index
- * \return the container of values (e.g. `std::map<std::string, int>`)
- * \warning experimental and may change in the future
- */
-template <typename Container>
-Container dukx_get_object(duk_context* ctx, duk_idx_t index)
-{
-    using T = typename Container::mapped_type;
-
-    Container result;
-
-    duk_enum(ctx, index, 0);
-
-    while (duk_next(ctx, -1, true)) {
-        result.emplace(dukx_get<std::string>(ctx, -2), dukx_get<T>(ctx, -1));
-        duk_pop_n(ctx, 2);
-    }
-
-    duk_pop(ctx);
-
-    return result;
 }
 
 /**
@@ -995,4 +983,4 @@ inline dukx_stack_info dukx_stack(duk_context* ctx, int index, bool pop = true)
 
 } // !irccd
 
-#endif // !DUKTAPE_HPP
+#endif // !IRCCD_JS_DUKTAPE_HPP

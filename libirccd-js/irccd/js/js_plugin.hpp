@@ -61,7 +61,17 @@ private:
     // Private helpers.
     std::unordered_map<std::string, std::string> get_table(const std::string&) const;
     void put_table(const std::string&, const std::unordered_map<std::string, std::string>&);
-    void call(const std::string&, unsigned = 0);
+
+    /*
+     * Helpers to call a Javascript function.
+     */
+    void push() noexcept;
+
+    template <typename Value, typename... Args>
+    void push(Value&& value, Args&&... args);
+
+    template <typename... Args>
+    void call(const std::string&, Args&&... args);
 
 public:
     /**
@@ -270,6 +280,12 @@ public:
      */
     std::shared_ptr<plugin> open(const std::string& id,
                                  const std::string& path) override;
+};
+
+template <>
+class dukx_type_traits<whois> : public std::true_type {
+public:
+    static void push(duk_context* ctx, const whois& who);
 };
 
 } // !irccd

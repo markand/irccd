@@ -21,6 +21,7 @@
 
 #include <fstream>
 
+#include <irccd/js/duktape_vector.hpp>
 #include <irccd/js/file_jsapi.hpp>
 
 #include <js_test.hpp>
@@ -148,7 +149,7 @@ BOOST_AUTO_TEST_CASE(method_lines)
     std::vector<std::string> expected{"a", "b", "c"};
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
-    BOOST_TEST(expected == dukx_get_array<std::vector<std::string>>(plugin_->context(), -1));
+    BOOST_TEST(expected == dukx_get<std::vector<std::string>>(plugin_->context(), -1));
 }
 
 BOOST_AUTO_TEST_CASE(method_seek1)
@@ -279,7 +280,7 @@ BOOST_AUTO_TEST_CASE(method_readline)
     std::vector<std::string> expected{"a", "b", "c"};
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
-    BOOST_TEST(expected == dukx_get_array<std::vector<std::string>>(plugin_->context(), -1));
+    BOOST_TEST(expected == dukx_get<std::vector<std::string>>(plugin_->context(), -1));
 }
 
 BOOST_AUTO_TEST_CASE(method_readline_closed)
@@ -299,7 +300,7 @@ BOOST_AUTO_TEST_CASE(method_readline_closed)
     std::vector<std::string> expected;
 
     BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
-    BOOST_TEST(expected == dukx_get_array<std::vector<std::string>>(plugin_->context(), -1));
+    BOOST_TEST(expected == dukx_get<std::vector<std::string>>(plugin_->context(), -1));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
