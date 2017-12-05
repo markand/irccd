@@ -30,6 +30,11 @@ namespace {
 
 class custom_loader : public plugin_loader {
 public:
+    custom_loader()
+        : plugin_loader({}, {".none"})
+    {
+    }
+
     std::shared_ptr<plugin> open(const std::string&,
                                  const std::string&) noexcept override
     {

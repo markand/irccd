@@ -223,7 +223,7 @@ BOOST_AUTO_TEST_CASE(invalid_port_1)
         return result;
     });
 
-    BOOST_ASSERT(result == server_error::invalid_port_number);
+    BOOST_ASSERT(result == server_error::invalid_port);
 }
 
 BOOST_AUTO_TEST_CASE(invalid_port_2)
@@ -244,7 +244,7 @@ BOOST_AUTO_TEST_CASE(invalid_port_2)
         return result;
     });
 
-    BOOST_ASSERT(result == server_error::invalid_port_number);
+    BOOST_ASSERT(result == server_error::invalid_port);
 }
 
 BOOST_AUTO_TEST_CASE(invalid_port_3)
@@ -265,7 +265,7 @@ BOOST_AUTO_TEST_CASE(invalid_port_3)
         return result;
     });
 
-    BOOST_ASSERT(result == server_error::invalid_port_number);
+    BOOST_ASSERT(result == server_error::invalid_port);
 }
 
 #if !defined(HAVE_SSL)

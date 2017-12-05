@@ -153,12 +153,12 @@ std::shared_ptr<server> get_server(irccd& daemon, const nlohmann::json& args)
     auto id = json_util::get_string(args, "server");
 
     if (!string_util::is_identifier(id))
-        throw server_error(server_error::invalid_identifier);
+        throw server_error(server_error::invalid_identifier, "");
 
     auto server = daemon.servers().get(id);
 
     if (!server)
-        throw server_error(server_error::not_found);
+        throw server_error(server_error::not_found, id);
 
     return server;
 }
@@ -256,10 +256,10 @@ server_connect_command::server_connect_command()
 
 void server_connect_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto server = server::from_json(irccd.service(), args);
+    auto server = server_service::from_json(irccd.service(), args);
 
     if (irccd.servers().has(server->name()))
-        throw server_error(server_error::error::already_exists);
+        throw server_error(server_error::error::already_exists, server->name());
 
     irccd.servers().add(std::move(server));
     client.success("server-connect");
@@ -278,14 +278,15 @@ void server_disconnect_command::exec(irccd& irccd, transport_client& client, con
         irccd.servers().clear();
     else {
         if (!it->is_string())
-            throw server_error(server_error::invalid_identifier);
+            throw server_error(server_error::invalid_identifier, "");
 
-        auto s = irccd.servers().get(it->get<std::string>());
+        auto name = it->get<std::string>();
+        auto s = irccd.servers().get(name);
 
         if (!s)
-            throw server_error(server_error::not_found);
+            throw server_error(server_error::not_found, name);
 
-        irccd.servers().remove(it->get<std::string>());
+        irccd.servers().remove(name);
     }
 
     client.success("server-disconnect");
@@ -329,15 +330,16 @@ server_invite_command::server_invite_command()
 
 void server_invite_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
+    auto server = get_server(irccd, args);
     auto target = json_util::get_string(args, "target");
     auto channel = json_util::get_string(args, "channel");
 
     if (target.empty())
-        throw server_error(server_error::invalid_nickname);
+        throw server_error(server_error::invalid_nickname, server->name());
     if (channel.empty())
-        throw server_error(server_error::invalid_channel);
+        throw server_error(server_error::invalid_channel, server->name());
 
-    get_server(irccd, args)->invite(target, channel);
+    server->invite(target, channel);
     client.success("server-invite");
 }
 
@@ -348,13 +350,14 @@ server_join_command::server_join_command()
 
 void server_join_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
+    auto server = get_server(irccd, args);
     auto channel = json_util::get_string(args, "channel");
     auto password = json_util::get_string(args, "password");
 
     if (channel.empty())
-        throw server_error(server_error::invalid_channel);
+        throw server_error(server_error::invalid_channel, server->name());
 
-    get_server(irccd, args)->join(channel, password);
+    server->join(channel, password);
     client.success("server-join");
 }
 
@@ -365,16 +368,17 @@ server_kick_command::server_kick_command()
 
 void server_kick_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
+    auto server = get_server(irccd, args);
     auto target = json_util::get_string(args, "target");
     auto channel = json_util::get_string(args, "channel");
     auto reason = json_util::get_string(args, "reason");
 
     if (target.empty())
-        throw server_error(server_error::invalid_nickname);
+        throw server_error(server_error::invalid_nickname, server->name());
     if (channel.empty())
-        throw server_error(server_error::invalid_channel);
+        throw server_error(server_error::invalid_channel, server->name());
 
-    get_server(irccd, args)->kick(target, channel, reason);
+    server->kick(target, channel, reason);
     client.success("server-kick");
 }
 
@@ -404,13 +408,14 @@ server_me_command::server_me_command()
 
 void server_me_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
+    auto server = get_server(irccd, args);
     auto channel = json_util::get_string(args, "target");
     auto message = json_util::get_string(args, "message");
 
     if (channel.empty())
-        throw server_error(server_error::invalid_channel);
+        throw server_error(server_error::invalid_channel, server->name());
 
-    get_server(irccd, args)->me(channel, message);
+    server->me(channel, message);
     client.success("server-me");
 }
 
@@ -421,13 +426,14 @@ server_message_command::server_message_command()
 
 void server_message_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
+    auto server = get_server(irccd, args);
     auto channel = json_util::get_string(args, "target");
     auto message = json_util::get_string(args, "message");
 
     if (channel.empty())
-        throw server_error(server_error::invalid_channel);
+        throw server_error(server_error::invalid_channel, server->name());
 
-    get_server(irccd, args)->message(channel, message);
+    server->message(channel, message);
     client.success("server-message");
 }
 
@@ -438,19 +444,20 @@ server_mode_command::server_mode_command()
 
 void server_mode_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
+    auto server = get_server(irccd, args);
     auto channel = json_util::get_string(args, "channel");
     auto mode = json_util::get_string(args, "mode");
 
     if (channel.empty())
-        throw server_error(server_error::invalid_channel);
+        throw server_error(server_error::invalid_channel, server->name());
     if (mode.empty())
-        throw server_error(server_error::invalid_mode);
+        throw server_error(server_error::invalid_mode, server->name());
 
     auto limit = json_util::get_string(args, "limit");
     auto user = json_util::get_string(args, "user");
     auto mask = json_util::get_string(args, "mask");
 
-    get_server(irccd, args)->mode(channel, mode, limit, user, mask);
+    server->mode(channel, mode, limit, user, mask);
     client.success("server-mode");
 }
 
@@ -461,12 +468,13 @@ server_nick_command::server_nick_command()
 
 void server_nick_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
+    auto server = get_server(irccd, args);
     auto nick = json_util::get_string(args, "nickname");
 
     if (nick.empty())
-        throw server_error(server_error::invalid_nickname);
+        throw server_error(server_error::invalid_nickname, server->name());
 
-    get_server(irccd, args)->set_nickname(nick);
+    server->set_nickname(nick);
     client.success("server-nick");
 }
 
@@ -477,13 +485,14 @@ server_notice_command::server_notice_command()
 
 void server_notice_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
+    auto server = get_server(irccd, args);
     auto channel = json_util::get_string(args, "target");
     auto message = json_util::get_string(args, "message");
 
     if (channel.empty())
-        throw server_error(server_error::invalid_channel);
+        throw server_error(server_error::invalid_channel, server->name());
 
-    get_server(irccd, args)->notice(channel, message);
+    server->notice(channel, message);
     client.success("server-notice");
 }
 
@@ -494,13 +503,14 @@ server_part_command::server_part_command()
 
 void server_part_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
+    auto server = get_server(irccd, args);
     auto channel = json_util::get_string(args, "channel");
     auto reason = json_util::get_string(args, "reason");
 
     if (channel.empty())
-        throw server_error(server_error::invalid_channel);
+        throw server_error(server_error::invalid_channel, server->name());
 
-    get_server(irccd, args)->part(channel, reason);
+    server->part(channel, reason);
     client.success("server-part");
 }
 
@@ -518,12 +528,13 @@ void server_reconnect_command::exec(irccd& irccd, transport_client& client, cons
             server->reconnect();
     } else {
         if (!server->is_string() || !string_util::is_identifier(server->get<std::string>()))
-            throw server_error(server_error::invalid_identifier);
+            throw server_error(server_error::invalid_identifier, "");
 
-        auto s = irccd.servers().get(server->get<std::string>());
+        auto name = server->get<std::string>();
+        auto s = irccd.servers().get(name);
 
         if (!s)
-            throw server_error(server_error::not_found);
+            throw server_error(server_error::not_found, name);
 
         s->reconnect();
     }
@@ -538,13 +549,14 @@ server_topic_command::server_topic_command()
 
 void server_topic_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
+    auto server = get_server(irccd, args);
     auto channel = json_util::get_string(args, "channel");
     auto topic = json_util::get_string(args, "topic");
 
     if (channel.empty())
-        throw server_error(server_error::invalid_channel);
+        throw server_error(server_error::invalid_channel, server->name());
 
-    get_server(irccd, args)->topic(channel, topic);
+    server->topic(channel, topic);
     client.success("server-topic");
 }
 

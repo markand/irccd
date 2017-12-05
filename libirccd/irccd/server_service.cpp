@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/json_util.hpp>
+
 #include "irccd.hpp"
 #include "logger.hpp"
 #include "plugin_service.hpp"
@@ -56,23 +58,77 @@ void dispatch(irccd& daemon,
 }
 
 template <typename T>
-T to_uint(const std::string& value, server_error::error errc)
-{
-    try {
-        return string_util::to_uint<T>(value);
-    } catch (...) {
-        throw server_error(errc);
-    }
-}
-
-template <typename T>
-T to_int(const std::string& value, server_error::error errc)
+T to_int(const std::string& value, const std::string& name, server_error::error errc)
 {
     try {
         return string_util::to_int<T>(value);
     } catch (...) {
-        throw server_error(errc);
+        throw server_error(errc, name);
     }
+}
+
+template <typename T>
+T to_uint(const std::string& value, const std::string& name, server_error::error errc)
+{
+    try {
+        return string_util::to_uint<T>(value);
+    } catch (...) {
+        throw server_error(errc, name);
+    }
+}
+
+template <typename T>
+T to_uint(const nlohmann::json& value, const std::string& name, server_error::error errc)
+{
+    if (!value.is_number())
+        throw server_error(errc, name);
+
+    auto n = value.get<unsigned>();
+
+    if (n > std::numeric_limits<T>::max())
+        throw server_error(errc, name);
+
+    return static_cast<T>(n);
+}
+
+std::string to_id(const ini::section& sc)
+{
+    auto id = sc.get("name");
+
+    if (!string_util::is_identifier(id.value()))
+        throw server_error(server_error::invalid_identifier, "");
+
+    return id.value();
+}
+
+std::string to_id(const nlohmann::json& object)
+{
+    auto id = json_util::get_string(object, "name");
+
+    if (!string_util::is_identifier(id))
+        throw server_error(server_error::invalid_identifier, "");
+
+    return id;
+}
+
+std::string to_host(const ini::section& sc, const std::string& name)
+{
+    auto value = sc.get("host");
+
+    if (value.empty())
+        throw server_error(server_error::invalid_hostname, name);
+
+    return name;
+}
+
+std::string to_host(const nlohmann::json& object, const std::string& name)
+{
+    auto value = json_util::get_string(object, "host");
+
+    if (value.empty())
+        throw server_error(server_error::invalid_hostname, name);
+
+    return value;
 }
 
 void load_server_identity(std::shared_ptr<server>& server,
@@ -109,23 +165,14 @@ std::shared_ptr<server> load_server(boost::asio::io_service& service,
 {
     assert(sc.key() == "server");
 
+    auto sv = std::make_shared<server>(service, to_id(sc));
+
+    // Mandatory fields.
+    sv->set_host(to_host(sc, sv->name()));
+
+    // Optional fields.
     ini::section::const_iterator it;
 
-    // Name.
-    auto name = sc.get("name").value();
-
-    if (!string_util::is_identifier(name))
-        throw server_error(server_error::invalid_identifier);
-
-    auto sv = std::make_shared<server>(service, name);
-
-    // Host
-    if ((it = sc.find("host")) == sc.end())
-        throw server_error(server_error::invalid_hostname);
-
-    sv->set_host(it->value());
-
-    // Optional password
     if ((it = sc.find("password")) != sc.end())
         sv->set_password(it->value());
 
@@ -173,13 +220,20 @@ std::shared_ptr<server> load_server(boost::asio::io_service& service,
 
     // Reconnect and ping timeout
     if ((it = sc.find("port")) != sc.end())
-        sv->set_port(to_uint<std::uint16_t>(it->value(), server_error::invalid_port));
+        sv->set_port(to_uint<std::uint16_t>(it->value(),
+            sv->name(), server_error::invalid_port));
+
     if ((it = sc.find("reconnect-tries")) != sc.end())
-        sv->set_reconnect_tries(to_int<std::int8_t>(it->value(), server_error::invalid_reconnect_tries));
+        sv->set_reconnect_tries(to_int<std::int8_t>(it->value(),
+            sv->name(), server_error::invalid_reconnect_tries));
+
     if ((it = sc.find("reconnect-timeout")) != sc.end())
-        sv->set_reconnect_delay(to_uint<std::uint16_t>(it->value(), server_error::invalid_reconnect_timeout));
+        sv->set_reconnect_delay(to_uint<std::uint16_t>(it->value(),
+            sv->name(), server_error::invalid_reconnect_timeout));
+
     if ((it = sc.find("ping-timeout")) != sc.end())
-        sv->set_ping_timeout(to_uint<std::uint16_t>(it->value(), server_error::invalid_ping_timeout));
+        sv->set_ping_timeout(to_uint<std::uint16_t>(it->value(),
+            sv->name(), server_error::invalid_ping_timeout));
 
     return sv;
 }
@@ -524,6 +578,43 @@ void server_service::handle_whois(const whois_event& ev)
             plugin.on_whois(irccd_, ev);
         }
     );
+}
+
+std::shared_ptr<server> server_service::from_json(boost::asio::io_service& service, const nlohmann::json& object)
+{
+    // TODO: move this function in server_service.
+    auto sv = std::make_shared<server>(service, to_id(object));
+
+    // Mandatory fields.
+    sv->set_host(to_host(object, sv->name()));
+
+    // Optional fields.
+    if (object.count("port"))
+        sv->set_port(to_uint<std::uint16_t>(object["port"], sv->name(), server_error::invalid_port));
+    sv->set_password(json_util::get_string(object, "password"));
+    sv->set_nickname(json_util::get_string(object, "nickname", sv->nickname()));
+    sv->set_realname(json_util::get_string(object, "realname", sv->realname()));
+    sv->set_username(json_util::get_string(object, "username", sv->username()));
+    sv->set_ctcp_version(json_util::get_string(object, "ctcpVersion", sv->ctcp_version()));
+    sv->set_command_char(json_util::get_string(object, "commandChar", sv->command_char()));
+
+    if (json_util::get_bool(object, "ipv6"))
+        sv->set_flags(sv->flags() | server::ipv6);
+    if (json_util::get_bool(object, "sslVerify"))
+        sv->set_flags(sv->flags() | server::ssl_verify);
+    if (json_util::get_bool(object, "autoRejoin"))
+        sv->set_flags(sv->flags() | server::auto_rejoin);
+    if (json_util::get_bool(object, "joinInvite"))
+        sv->set_flags(sv->flags() | server::join_invite);
+
+    if (json_util::get_bool(object, "ssl"))
+#if defined(HAVE_SSL)
+        sv->set_flags(sv->flags() | server::ssl);
+#else
+        throw server_error(server_error::ssl_disabled);
+#endif
+
+    return sv;
 }
 
 server_service::server_service(irccd &irccd)

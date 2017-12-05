@@ -453,18 +453,6 @@ private:
 
 public:
     /**
-     * Convert a JSON object as a server.
-     *
-     * Used in JavaScript API and transport commands.
-     *
-     * \param service the io service
-     * \param object the object
-     * \return the server
-     * \throw std::exception on failures
-     */
-    static std::shared_ptr<server> from_json(boost::asio::io_service& service, const nlohmann::json& object);
-
-    /**
      * Split a channel from the form channel:password into a server_channel
      * object.
      *
@@ -953,10 +941,27 @@ public:
         ssl_disabled,
     };
 
+private:
+    std::string name_;
+
+public:
     /**
-     * Inherited constructors.
+     * Constructor.
+     *
+     * \param code the error code
+     * \param name the server name
      */
-    using system_error::system_error;
+    server_error(error code, std::string name) noexcept;
+
+    /**
+     * Get the server that triggered the error.
+     *
+     * \return the name
+     */
+    inline const std::string& name() const noexcept
+    {
+        return name_;
+    }
 };
 
 /**

@@ -104,87 +104,11 @@ std::map<channel_mode, char> isupport_extract_prefixes(const std::string& line)
     return modes;
 }
 
-std::string from_json_get_id(const nlohmann::json& json)
-{
-    auto id = json_util::get_string(json, "name");
-
-    if (!string_util::is_identifier(id))
-        throw server_error(server_error::invalid_identifier);
-
-    return id;
-}
-
-std::string from_json_get_host(const nlohmann::json& json)
-{
-    auto host = json_util::get_string(json, "host");
-
-    if (host.empty())
-        throw server_error(server_error::invalid_hostname);
-
-    return host;
-}
-
-template <typename T>
-T from_json_get_uint(const nlohmann::json& json,
-                     const std::string& key,
-                     server_error::error error,
-                     T fallback)
-
-{
-    auto v = json.find(key);
-
-    if (v == json.end())
-        return fallback;
-    if (!v->is_number())
-        throw server_error(error);
-
-    auto n = v->get<unsigned>();
-
-    if (n > std::numeric_limits<T>::max())
-        throw server_error(error);
-
-    return static_cast<T>(n);
-}
-
 } // !namespace
 
 void server::remove_joined_channel(const std::string& channel)
 {
     jchannels_.erase(std::remove(jchannels_.begin(), jchannels_.end(), channel), jchannels_.end());
-}
-
-std::shared_ptr<server> server::from_json(boost::asio::io_service& service, const nlohmann::json& object)
-{
-    // TODO: move this function in server_service.
-    auto sv = std::make_shared<server>(service, from_json_get_id(object));
-
-    sv->set_host(from_json_get_host(object));
-    sv->set_port(from_json_get_uint(object, "port",
-        server_error::invalid_port, sv->port()));
-    sv->set_password(json_util::get_string(object, "password"));
-    sv->set_nickname(json_util::get_string(object, "nickname", sv->nickname()));
-    sv->set_realname(json_util::get_string(object, "realname", sv->realname()));
-    sv->set_username(json_util::get_string(object, "username", sv->username()));
-    sv->set_ctcp_version(json_util::get_string(object, "ctcpVersion", sv->ctcp_version()));
-    sv->set_command_char(json_util::get_string(object, "commandChar", sv->command_char()));
-
-    if (json_util::get_bool(object, "ipv6"))
-        sv->set_flags(sv->flags() | server::ipv6);
-    if (json_util::get_bool(object, "sslVerify"))
-        sv->set_flags(sv->flags() | server::ssl_verify);
-    if (json_util::get_bool(object, "autoRejoin"))
-        sv->set_flags(sv->flags() | server::auto_rejoin);
-    if (json_util::get_bool(object, "joinInvite"))
-        sv->set_flags(sv->flags() | server::join_invite);
-
-    if (json_util::get_bool(object, "ssl"))
-#if defined(HAVE_SSL)
-        sv->set_flags(sv->flags() | server::ssl);
-#else
-        throw server_error(server_error::ssl_disabled);
-#endif
-
-    return sv;
 }
 
 channel server::split_channel(const std::string& value)
@@ -747,6 +671,12 @@ void server::whois(std::string target)
     assert(!target.empty());
 
     send(string_util::sprintf("WHOIS %s %s", target, target));
+}
+
+server_error::server_error(error code, std::string name) noexcept
+    : system_error(make_error_code(code))
+    , name_(std::move(name))
+{
 }
 
 const boost::system::error_category& server_category()
