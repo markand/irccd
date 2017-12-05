@@ -55,6 +55,135 @@ void dispatch(irccd& daemon,
     }
 }
 
+template <typename T>
+T to_uint(const std::string& value, server_error::error errc)
+{
+    try {
+        return string_util::to_uint<T>(value);
+    } catch (...) {
+        throw server_error(errc);
+    }
+}
+
+template <typename T>
+T to_int(const std::string& value, server_error::error errc)
+{
+    try {
+        return string_util::to_int<T>(value);
+    } catch (...) {
+        throw server_error(errc);
+    }
+}
+
+void load_server_identity(std::shared_ptr<server>& server,
+                          const config& cfg,
+                          const std::string& identity)
+{
+    auto sc = std::find_if(cfg.doc().begin(), cfg.doc().end(), [&] (const auto& sc) {
+        if (sc.key() != "identity")
+            return false;
+
+        auto name = sc.find("name");
+
+        return name != sc.end() && name->value() == identity;
+    });
+
+    if (sc == cfg.doc().end())
+        return;
+
+    ini::section::const_iterator it;
+
+    if ((it = sc->find("username")) != sc->end())
+        server->set_username(it->value());
+    if ((it = sc->find("realname")) != sc->end())
+        server->set_realname(it->value());
+    if ((it = sc->find("nickname")) != sc->end())
+        server->set_nickname(it->value());
+    if ((it = sc->find("ctcp-version")) != sc->end())
+        server->set_ctcp_version(it->value());
+}
+
+std::shared_ptr<server> load_server(boost::asio::io_service& service,
+                                    const config& cfg,
+                                    const ini::section& sc)
+{
+    assert(sc.key() == "server");
+
+    ini::section::const_iterator it;
+
+    // Name.
+    auto name = sc.get("name").value();
+
+    if (!string_util::is_identifier(name))
+        throw server_error(server_error::invalid_identifier);
+
+    auto sv = std::make_shared<server>(service, name);
+
+    // Host
+    if ((it = sc.find("host")) == sc.end())
+        throw server_error(server_error::invalid_hostname);
+
+    sv->set_host(it->value());
+
+    // Optional password
+    if ((it = sc.find("password")) != sc.end())
+        sv->set_password(it->value());
+
+    // Optional flags
+    if ((it = sc.find("ipv6")) != sc.end() && string_util::is_boolean(it->value()))
+        sv->set_flags(sv->flags() | server::ipv6);
+
+    if ((it = sc.find("ssl")) != sc.end() && string_util::is_boolean(it->value())) {
+#if defined(HAVE_SSL)
+        sv->set_flags(sv->flags() | server::ssl);
+#else
+        throw server_error(server_error::ssl_disabled);
+#endif
+    }
+
+    if ((it = sc.find("ssl-verify")) != sc.end() && string_util::is_boolean(it->value()))
+        sv->set_flags(sv->flags() | server::ssl_verify);
+
+    // Optional identity
+    if ((it = sc.find("identity")) != sc.end())
+        load_server_identity(sv, cfg, it->value());
+
+    // Options
+    if ((it = sc.find("auto-rejoin")) != sc.end() && string_util::is_boolean(it->value()))
+        sv->set_flags(sv->flags() | server::auto_rejoin);
+    if ((it = sc.find("join-invite")) != sc.end() && string_util::is_boolean(it->value()))
+        sv->set_flags(sv->flags() | server::join_invite);
+
+    // Channels
+    if ((it = sc.find("channels")) != sc.end()) {
+        for (const auto& s : *it) {
+            channel channel;
+
+            if (auto pos = s.find(":") != std::string::npos) {
+                channel.name = s.substr(0, pos);
+                channel.password = s.substr(pos + 1);
+            } else
+                channel.name = s;
+
+            sv->join(channel.name, channel.password);
+        }
+    }
+    if ((it = sc.find("command-char")) != sc.end())
+        sv->set_command_char(it->value());
+
+    // Reconnect and ping timeout
+    if ((it = sc.find("port")) != sc.end())
+        sv->set_port(to_uint<std::uint16_t>(it->value(), server_error::invalid_port));
+    if ((it = sc.find("reconnect-tries")) != sc.end())
+        sv->set_reconnect_tries(to_int<std::int8_t>(it->value(), server_error::invalid_reconnect_tries));
+    if ((it = sc.find("reconnect-timeout")) != sc.end())
+        sv->set_reconnect_delay(to_uint<std::uint16_t>(it->value(), server_error::invalid_reconnect_timeout));
+    if ((it = sc.find("ping-timeout")) != sc.end())
+        sv->set_ping_timeout(to_uint<std::uint16_t>(it->value(), server_error::invalid_ping_timeout));
+
+    return sv;
+}
+
 } // !namespace
 
 void server_service::handle_connect(const connect_event& ev)
@@ -481,6 +610,21 @@ void server_service::clear() noexcept
         server->disconnect();
 
     servers_.clear();
+}
+
+void server_service::load(const config& cfg) noexcept
+{
+    for (const auto& section : cfg.doc()) {
+        if (section.key() != "server")
+            continue;
+
+        try {
+            add(load_server(irccd_.service(), cfg, section));
+        } catch (const std::exception& ex) {
+            log::warning() << "server " << section.get("name").value() << ": "
+                << ex.what() << std::endl;
+        }
+    }
 }
 
 } // !irccd

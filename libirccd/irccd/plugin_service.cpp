@@ -16,9 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/string_util.hpp>
+#include <irccd/logger.hpp>
+
 #include "config.hpp"
 #include "irccd.hpp"
-#include "logger.hpp"
 #include "plugin_service.hpp"
 #include "string_util.hpp"
 #include "system.hpp"
@@ -201,6 +203,30 @@ void plugin_service::unload(const std::string& name)
 
     plugins_.erase(it);
     exec(save, &plugin::on_unload, irccd_);
+}
+
+void plugin_service::load(const class config& cfg) noexcept
+{
+    for (const auto& option : cfg.section("plugins")) {
+        if (!string_util::is_identifier(option.key()))
+            continue;
+
+        auto name = option.key();
+        auto p = get(name);
+
+        // Reload the plugin if already loaded.
+        if (p) {
+            p->set_config(config(name));
+            p->set_formats(formats(name));
+            p->set_paths(paths(name));
+        } else {
+            try {
+                load(name, option.value());
+            } catch (const plugin_error& ex) {
+                log::warning() << "plugin " << option.key() << ": " << ex.what() << std::endl;
+            }
+        }
+    }
 }
 
 } // !irccd

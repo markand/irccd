@@ -29,6 +29,8 @@
 
 namespace irccd {
 
+class config;
+
 /**
  * \brief manage transport servers and clients.
  * \ingroup services
@@ -72,6 +74,13 @@ public:
      * \param object the json object
      */
     void broadcast(const nlohmann::json& object);
+
+    /**
+     * Load transports from the configuration.
+     *
+     * \param cfg the config
+     */
+    void load(const config& cfg) noexcept;
 };
 
 } // !irccd

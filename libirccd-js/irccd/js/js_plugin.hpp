@@ -269,7 +269,7 @@ public:
      * \copydoc PluginLoader::open
      */
     std::shared_ptr<plugin> open(const std::string& id,
-                                 const std::string& path) noexcept override;
+                                 const std::string& path) override;
 };
 
 } // !irccd

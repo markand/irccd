@@ -121,6 +121,13 @@ public:
      * All servers will be disconnected.
      */
     void clear() noexcept;
+
+    /**
+     * Load servers from the configuration.
+     *
+     * \param cfg the config
+     */
+    void load(const config& cfg) noexcept;
 };
 
 } // !irccd

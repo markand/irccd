@@ -30,12 +30,6 @@
  * \page Ini Ini
  * \brief Extended .ini file parser.
  *
- * ## Export macros
- *
- * You must define `INI_DLL` globally and `INI_BUILDING_DLL` when compiling the
- * library if you want a DLL, alternatively you can provide your own
- * `` macro instead.
- *
  *   - \subpage ini-syntax
  */
 
@@ -111,6 +105,8 @@
  * option1 = value1
  * ````
  */
+
+#include "sysconfig.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -595,7 +591,7 @@ public:
  * \return the list of tokens
  * \throws exception on errors
  */
- tokens analyse(std::istreambuf_iterator<char> it, std::istreambuf_iterator<char> end);
+tokens analyse(std::istreambuf_iterator<char> it, std::istreambuf_iterator<char> end);
 
 /**
  * Overloaded function for stream.
@@ -604,7 +600,7 @@ public:
  * \return the list of tokens
  * \throws exception on errors
  */
- tokens analyse(std::istream& stream);
+tokens analyse(std::istream& stream);
 
 /**
  * Parse the produced tokens.
@@ -614,7 +610,7 @@ public:
  * \return the document
  * \throw exception on errors
  */
- document parse(const tokens& tokens, const std::string& path = ".");
+document parse(const tokens& tokens, const std::string& path = ".");
 
 /**
  * Parse a file.
@@ -623,7 +619,7 @@ public:
  * \return the document
  * \throw exception on errors
  */
- document read_file(const std::string& filename);
+document read_file(const std::string& filename);
 
 /**
  * Parse a string.
@@ -635,17 +631,17 @@ public:
  * \return the document
  * \throw exception on exceptions
  */
- document read_string(const std::string& buffer);
+document read_string(const std::string& buffer);
 
 /**
  * Show all tokens and their description.
  *
  * \param tokens the tokens
  */
- void dump(const tokens& tokens);
+void dump(const tokens& tokens);
 
 } // !ini
 
 } // !irccd
 
-#endif // !IRCCD_INI_HPP
+#endif // !INI_HPP

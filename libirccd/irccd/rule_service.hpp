@@ -30,6 +30,8 @@
 
 namespace irccd {
 
+class config;
+
 /**
  * \brief Store and solve rules.
  * \ingroup services
@@ -113,6 +115,13 @@ public:
                const std::string& origin,
                const std::string& plugin,
                const std::string& event) noexcept;
+
+    /**
+     * Load rules from the configuration.
+     *
+     * \param cfg the config
+     */
+    void load(const config& cfg) noexcept;
 };
 
 } // !irccd

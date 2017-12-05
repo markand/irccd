@@ -24,20 +24,9 @@
  * \brief Read .ini configuration file for irccd
  */
 
-#include <memory>
-#include <string>
-#include <vector>
-
 #include "ini.hpp"
-#include "plugin.hpp"
-#include "sysconfig.hpp"
 
 namespace irccd {
-
-class irccd;
-class rule;
-class server;
-class transport_server;
 
 /**
  * \brief Read .ini configuration file for irccd
@@ -51,10 +40,11 @@ public:
     /**
      * Search the configuration file into the standard defined paths.
      *
+     * \param name the file name
      * \return the config
      * \throw std::exception on errors or if no config could be found
      */
-    static config find();
+    static config find(const std::string& name);
 
     /**
      * Load the configuration from the specified path.
@@ -88,90 +78,28 @@ public:
         return path_;
     }
 
-   /**
-     * Find an entity if defined in the configuration file.
+    /**
+     * Convenience function to access a section.
      *
-     * \pre util::isValidIdentifier(name)
-     * \param server the server to update
-     * \param name the identity name
-     * \return default identity if cannot be found
+     * \param section the section name
+     * \return the section or empty one
      */
-    void load_server_identity(server& server, const std::string& name) const;
+    inline ini::section section(const std::string& section) const noexcept
+    {
+        return document_.get(section);
+    }
 
     /**
-     * Get the path to the pidfile.
+     * Convenience function to access an ini value.
      *
-     * \return the path or empty if not defined
+     * \param section the section name
+     * \param option the option name
+     * \return the value or empty string
      */
-    std::string pidfile() const;
-
-    /**
-     * Get the uid.
-     *
-     * \return the uid or empty one if no one is set
-     */
-    std::string uid() const;
-
-    /**
-     * Get the gid.
-     *
-     * \return the gid or empty one if no one is set
-     */
-    std::string gid() const;
-
-    /**
-     * Check if verbosity is enabled.
-     *
-     * \return true if verbosity was requested
-     */
-    bool is_verbose() const noexcept;
-
-    /**
-     * Check if foreground is specified (= no daemonize).
-     *
-     * \return true if foreground was requested
-     */
-    bool is_foreground() const noexcept;
-
-    /**
-     * Load logging interface.
-     */
-    void load_logs() const;
-
-    /**
-     * Load formats for logging.
-     */
-    void load_formats() const;
-
-    /**
-     * Load transports.
-     *
-     * \param irccd the irccd instance
-     */
-    void load_transports(irccd& irccd) const;
-
-    /**
-     * Load rules.
-     *
-     * \return the rules
-     */
-    std::vector<rule> load_rules() const;
-
-    /**
-     * Get the list of servers defined.
-     *
-     * \param daemon the irccd instance
-     * \return the list of servers
-     */
-    std::vector<std::shared_ptr<server>> load_servers(irccd& daemon) const;
-
-    /**
-     * Get the list of defined plugins.
-     *
-     * \param irccd the irccd instance
-     * \return the list of plugins
-     */
-    void load_plugins(irccd& irccd) const;
+    inline std::string value(const std::string& section, const std::string& option) const noexcept
+    {
+        return document_.get(section).get(option).value();
+    }
 };
 
 } // !irccd

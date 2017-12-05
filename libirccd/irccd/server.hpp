@@ -926,13 +926,13 @@ public:
         already_exists,
 
         //!< The specified port number is invalid.
-        invalid_port_number,
+        invalid_port,
 
         //!< The specified reconnect tries number is invalid.
-        invalid_reconnect_tries_number,
+        invalid_reconnect_tries,
 
         //!< The specified reconnect reconnect number is invalid.
-        invalid_reconnect_timeout_number,
+        invalid_reconnect_timeout,
 
         //!< The specified host was invalid.
         invalid_hostname,
@@ -945,6 +945,9 @@ public:
 
         //!< The nickname was empty or invalid.
         invalid_nickname,
+
+        //!< Invalid ping timeout.
+        invalid_ping_timeout,
 
         //!< SSL was requested but is disabled.
         ssl_disabled,

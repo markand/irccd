@@ -34,6 +34,7 @@
 namespace irccd {
 
 class irccd;
+class config;
 
 /**
  * \brief Manage plugins.
@@ -222,6 +223,13 @@ public:
 
         exec(plugin, fn, std::forward<Args>(args)...);
     }
+
+    /**
+     * Load all plugins.
+     *
+     * \param cfg the config
+     */
+    void load(const class config& cfg) noexcept;
 };
 
 } // !irccd

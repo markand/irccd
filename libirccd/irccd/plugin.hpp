@@ -29,13 +29,15 @@
  * \brief Plugin management.
  */
 
+#include "sysconfig.hpp"
+
+#include <cassert>
 #include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
 #include "server.hpp"
-#include "sysconfig.hpp"
 #include "util.hpp"
 
 namespace irccd {
@@ -466,32 +468,38 @@ public:
      * If directories is not specified, a sensible default list of system and
      * user paths are searched.
      *
-     * If extensions is empty, default find function implementation does
-     * nothing.
-     *
-     * \param directories directories to search
-     * \param extensions the list of extensions supported
+     * \pre !extensions.empty()
+     * \param directories optional list of directories to search
+     * \param extensions the non empty list of extensions supported
      */
-    plugin_loader(std::vector<std::string> directories = {},
-                  std::vector<std::string> extensions = {});
+    inline plugin_loader(std::vector<std::string> directories,
+                  std::vector<std::string> extensions) noexcept
+        : directories_(std::move(directories))
+        , extensions_(std::move(extensions))
+    {
+        assert(!extensions_.empty());
+    }
 
     /**
      * Set directories where to search plugins.
      *
      * \param dirs the directories
      */
-    inline void set_directories(std::vector<std::string> dirs)
+    inline void set_directories(std::vector<std::string> directories)
     {
-        directories_ = std::move(dirs);
+        directories_ = std::move(directories);
     }
 
     /**
      * Set supported extensions for this loader.
      *
+     * \pre !extensions.empty()
      * \param extensions the extensions (with the dot)
      */
     inline void set_extensions(std::vector<std::string> extensions)
     {
+        assert(!extensions.empty());
+
         extensions_ = std::move(extensions);
     }
 
@@ -504,7 +512,7 @@ public:
      * \param file the file
      */
     virtual std::shared_ptr<plugin> open(const std::string& id,
-                                         const std::string& file) noexcept = 0;
+                                         const std::string& file) = 0;
 
     /**
      * Search for a plugin named by this id.
@@ -512,7 +520,7 @@ public:
      * \param id the plugin id
      * \return the plugin
      */
-    virtual std::shared_ptr<plugin> find(const std::string& id) noexcept;
+    virtual std::shared_ptr<plugin> find(const std::string& id);
 };
 
 /**

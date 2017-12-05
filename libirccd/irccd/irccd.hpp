@@ -54,6 +54,9 @@ private:
     // Main io service.
     boost::asio::io_service& service_;
 
+    // Tells if the configuration has already been called.
+    bool loaded_{false};
+
     // Services.
     std::shared_ptr<command_service> command_service_;
     std::shared_ptr<server_service> server_service_;
@@ -67,6 +70,13 @@ private:
 
     irccd& operator=(const irccd&) = delete;
     irccd& operator=(irccd&&) = delete;
+
+    // Load functions.
+    void load_logs();
+    void load_formats();
+    void load_pid();
+    void load_gid();
+    void load_uid();
 
 public:
     /**
@@ -171,6 +181,11 @@ public:
     {
         return *plugin_service_;
     }
+
+    /**
+     * Load and re-apply the configuration to the daemon.
+     */
+    void load() noexcept;
 };
 
 /**

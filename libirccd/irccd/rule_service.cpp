@@ -16,11 +16,66 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "logger.hpp"
+#include <stdexcept>
+
+#include <irccd/logger.hpp>
+#include <irccd/string_util.hpp>
+
+#include "config.hpp"
 #include "rule_service.hpp"
 #include "string_util.hpp"
 
 namespace irccd {
+
+namespace {
+
+rule load_rule(const ini::section& sc)
+{
+    assert(sc.key() == "rule");
+
+    // Simple converter from std::vector to std::unordered_set.
+    auto toset = [] (const auto& v) {
+        return std::unordered_set<std::string>(v.begin(), v.end());
+    };
+
+    rule::set servers, channels, origins, plugins, events;
+    rule::action_type action = rule::action_type::accept;
+
+    // Get the sets.
+    ini::section::const_iterator it;
+
+    if ((it = sc.find("servers")) != sc.end())
+        servers = toset(*it);
+    if ((it = sc.find("channels")) != sc.end())
+        channels = toset(*it);
+    if ((it = sc.find("origins")) != sc.end())
+        origins = toset(*it);
+    if ((it = sc.find("plugins")) != sc.end())
+        plugins = toset(*it);
+    if ((it = sc.find("channels")) != sc.end())
+        channels = toset(*it);
+
+    // Get the action.
+    auto actionstr = sc.get("action").value();
+
+    if (actionstr == "drop")
+        action = rule::action_type::drop;
+    else if (actionstr == "accept")
+        action = rule::action_type::accept;
+    else
+        throw rule_error(rule_error::invalid_action);
+
+    return {
+        std::move(servers),
+        std::move(channels),
+        std::move(origins),
+        std::move(plugins),
+        std::move(events),
+        action
+    };
+}
+
+} // !namespace
 
 void rule_service::add(rule rule)
 {
@@ -85,6 +140,22 @@ bool rule_service::solve(const std::string& server,
     }
 
     return result;
+}
+
+void rule_service::load(const config& cfg) noexcept
+{
+    rules_.clear();
+
+    for (const auto& section : cfg.doc()) {
+        if (section.key() != "rule")
+            continue;
+
+        try {
+            rules_.push_back(load_rule(section));
+        } catch (const std::exception& ex) {
+            log::warning() << "rule: " << ex.what() << std::endl;
+        }
+    }
 }
 
 } // !irccd

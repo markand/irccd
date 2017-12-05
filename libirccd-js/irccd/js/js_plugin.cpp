@@ -123,8 +123,9 @@ void js_plugin::open()
 {
     std::ifstream input(path());
 
+    // TODO: add error message here.
     if (!input)
-        throw std::runtime_error(std::strerror(errno));
+        throw plugin_error(plugin_error::exec_error);
 
     std::string data(
         std::istreambuf_iterator<char>(input.rdbuf()),
@@ -132,7 +133,7 @@ void js_plugin::open()
     );
 
     if (duk_peval_string(context_, data.c_str()))
-        throw dukx_stack(context_, -1);
+        throw plugin_error(plugin_error::exec_error);
 
     // Read metadata.
     duk_get_global_string(context_, "info");
@@ -343,25 +344,19 @@ js_plugin_loader::js_plugin_loader(irccd& irccd) noexcept
 js_plugin_loader::~js_plugin_loader() noexcept = default;
 
 std::shared_ptr<plugin> js_plugin_loader::open(const std::string& id,
-                                               const std::string& path) noexcept
+                                               const std::string& path)
 {
     if (path.rfind(".js") == std::string::npos)
         return nullptr;
 
-    try {
-        auto plugin = std::make_shared<js_plugin>(id, path);
+    auto plugin = std::make_shared<js_plugin>(id, path);
 
-        for (const auto& mod : modules_)
-            mod->load(irccd_, plugin);
+    for (const auto& mod : modules_)
+        mod->load(irccd_, plugin);
 
-        plugin->open();
+    plugin->open();
 
-        return plugin;
-    } catch (const std::exception &ex) {
-        log::warning() << "plugin " << id << ": " << ex.what() << std::endl;
-    }
-
-    return nullptr;
+    return plugin;
 }
 
 } // !irccd

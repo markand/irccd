@@ -135,7 +135,7 @@ T from_json_get_uint(const nlohmann::json& json,
 
     if (v == json.end())
         return fallback;
-    if (!v->is_number_integer())
+    if (!v->is_number())
         throw server_error(error);
 
     auto n = v->get<unsigned>();
@@ -160,7 +160,7 @@ std::shared_ptr<server> server::from_json(boost::asio::io_service& service, cons
 
     sv->set_host(from_json_get_host(object));
     sv->set_port(from_json_get_uint(object, "port",
-        server_error::invalid_port_number, sv->port()));
+        server_error::invalid_port, sv->port()));
     sv->set_password(json_util::get_string(object, "password"));
     sv->set_nickname(json_util::get_string(object, "nickname", sv->nickname()));
     sv->set_realname(json_util::get_string(object, "realname", sv->realname()));
@@ -769,11 +769,11 @@ const boost::system::error_category& server_category()
                 return "server is not connected";
             case server_error::already_connected:
                 return "server is already connected";
-            case server_error::invalid_port_number:
+            case server_error::invalid_port:
                 return "invalid port number specified";
-            case server_error::invalid_reconnect_tries_number:
+            case server_error::invalid_reconnect_tries:
                 return "invalid number of reconnection tries";
-            case server_error::invalid_reconnect_timeout_number:
+            case server_error::invalid_reconnect_timeout:
                 return "invalid reconnect timeout number";
             case server_error::invalid_hostname:
                 return "invalid hostname";
@@ -783,6 +783,8 @@ const boost::system::error_category& server_category()
                 return "invalid or empty mode";
             case server_error::invalid_nickname:
                 return "invalid nickname";
+            case server_error::invalid_ping_timeout:
+                return "invalid ping timeout";
             case server_error::ssl_disabled:
                 return "ssl is not enabled";
             default:

@@ -156,120 +156,10 @@ config open(const option::result& result)
 {
     auto it = result.find("-c");
 
-    if (it != result.end() || (it = result.find("--config")) != result.end()) {
-        try {
-            return config(it->second);
-        } catch (const std::exception &ex) {
-            throw std::runtime_error(string_util::sprintf("%s: %s", it->second, ex.what()));
-        }
-    }
+    if (it != result.end() || (it = result.find("--config")) != result.end())
+        return config(it->second);
 
-    return config::find();
-}
-
-void load_pid(const std::string& path)
-{
-    if (path.empty())
-        return;
-
-    try {
-#if defined(HAVE_GETPID)
-        std::ofstream out(path, std::ofstream::trunc);
-
-        if (!out)
-            throw std::runtime_error(string_util::sprintf("could not open pidfile %s: %s",
-                path, std::strerror(errno)));
-
-        log::debug() << "irccd: pid written in " << path << std::endl;
-        out << getpid() << std::endl;
-#else
-        throw std::runtime_error("pidfile option not supported on this platform");
-#endif
-    } catch (const std::exception& ex) {
-        log::warning() << "irccd: " << ex.what() << std::endl;
-    }
-}
-
-void load_gid(const std::string& gid)
-{
-    try {
-        if (!gid.empty())
-#if defined(HAVE_SETGID)
-            sys::set_gid(gid);
-#else
-            throw std::runtime_error(" gid option not supported on this platform");
-#endif
-    } catch (const std::exception& ex) {
-        log::warning() << "irccd: " << ex.what() << std::endl;
-    }
-}
-
-void load_uid(const std::string& uid)
-{
-    try {
-        if (!uid.empty())
-#if defined(HAVE_SETUID)
-            sys::set_uid(uid);
-#else
-            throw std::runtime_error("uid option not supported on this platform");
-#endif
-    } catch (const std::exception& ex) {
-        log::warning() << "irccd: " << ex.what() << std::endl;
-    }
-}
-
-void load_foreground(bool foreground, const option::result& options)
-{
-    try {
-#if defined(HAVE_DAEMON)
-        if (options.count("-f") == 0 && options.count("--foreground") == 0 && !foreground)
-            daemon(1, 0);
-#else
-        if (options.count("-f") > 0 || options.count("--foreground") > 0 || foreground)
-            throw std::runtime_error("foreground option not supported on this platform");
-#endif
-    } catch (const std::exception& ex) {
-        log::warning() << "irccd: " << ex.what() << std::endl;
-    }
-}
-
-void load(const config& config, const option::result& options)
-{
-    instance->set_config(config.path());
-
-    /*
-     * Order matters, please be careful when changing this.
-     *
-     * 1. Open logs as early as possible to use the defined outputs on any
-     *    loading errors.
-     */
-
-    // [logs] and [format] sections.
-    config.load_logs();
-    config.load_formats();
-
-    // Show message here to use the formats.
-    log::info() << "irccd: using " << config.path() << std::endl;
-
-    // [general] section.
-    load_pid(config.pidfile());
-    load_gid(config.gid());
-    load_uid(config.uid());
-    load_foreground(config.is_foreground(), options);
-
-    // [transport]
-    config.load_transports(*instance);
-
-    // [server] section.
-    for (const auto& server : config.load_servers(*instance))
-        instance->servers().add(server);
-
-    // [rule] section.
-    for (const auto& rule : config.load_rules())
-        instance->rules().add(rule);
-
-    // [plugin] section.
-    config.load_plugins(*instance);
+    return config::find("irccd.conf");
 }
 
 } // !namespace
@@ -336,9 +226,10 @@ int main(int argc, char** argv)
 #endif
 
     try {
-        load(open(options), options);
+        instance->set_config(open(options));
+        instance->load();
     } catch (const std::exception& ex) {
-        log::warning() << "error: " << ex.what() << std::endl;
+        log::warning() << "abort: " << ex.what() << std::endl;
         return 1;
     }
 

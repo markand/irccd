@@ -25,22 +25,8 @@ namespace fs = boost::filesystem;
 
 namespace irccd {
 
-namespace {
-
-} // !namespace
-
-plugin_loader::plugin_loader(std::vector<std::string> directories,
-                             std::vector<std::string> extensions)
-    : directories_(std::move(directories))
-    , extensions_(std::move(extensions))
+std::shared_ptr<plugin> plugin_loader::find(const std::string& name)
 {
-}
-
-std::shared_ptr<plugin> plugin_loader::find(const std::string& name) noexcept
-{
-    if (extensions_.empty())
-        return nullptr;
-
     std::vector<std::string> filenames;
 
     if (directories_.empty())
@@ -51,21 +37,19 @@ std::shared_ptr<plugin> plugin_loader::find(const std::string& name) noexcept
                 filenames.push_back(dir + "/" + name + ext);
     }
 
-    std::shared_ptr<plugin> plugin;
-
     for (const auto& candidate : filenames) {
         boost::system::error_code ec;
 
         if (!boost::filesystem::exists(candidate, ec) || ec)
             continue;
 
-        plugin = open(name, candidate);
+        auto plugin = open(name, candidate);
 
         if (plugin)
-            break;
+            return plugin;
     }
 
-    return plugin;
+    throw plugin_error(plugin_error::not_found);
 }
 
 const boost::system::error_category& plugin_category()

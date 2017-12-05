@@ -25,7 +25,7 @@
 #include <stdexcept>
 
 // for PathIsRelative.
-#if defined(_WIN32)
+#if defined(IRCCD_SYSTEM_WINDOWS)
 #  include <Shlwapi.h>
 #endif
 
@@ -42,7 +42,7 @@ using token_iterator = std::vector<token>::const_iterator;
 
 inline bool is_absolute(const std::string& path) noexcept
 {
-#if defined(_WIN32)
+#if defined(IRCCD_SYSTEM_WINDOWS)
     return !PathIsRelative(path.c_str());
 #else
     return path.size() > 0 && path[0] == '/';
@@ -286,7 +286,7 @@ void parse_include(document& doc, const std::string& path, token_iterator& it, t
     std::string file;
 
     if (!is_absolute(value)) {
-#if defined(_WIN32)
+#if defined(IRCCD_SYSTEM_WINDOWS)
         file = path + "\\" + value;
 #else
         file = path + "/" + value;
