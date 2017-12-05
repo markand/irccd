@@ -102,14 +102,18 @@ std::unique_ptr<transport_server> load_transport_ip(boost::asio::io_service& ser
 
     boost::asio::ip::tcp::acceptor acceptor(service, endpoint, true);
 
-    if (pkey.empty())
+    if (pkey.empty()) {
+        log::info() << "transport: listening on " << port << std::endl;
         return std::make_unique<ip_transport_server>(std::move(acceptor));
+    }
 
 #if defined(HAVE_SSL)
     boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
 
     ctx.use_private_key_file(pkey, boost::asio::ssl::context::pem);
     ctx.use_certificate_file(cert, boost::asio::ssl::context::pem);
+
+    log::info() << "transport: listening on " << port << " using SSL" << std::endl;
 
     return std::make_unique<tls_transport_server>(std::move(acceptor), std::move(ctx));
 #else
@@ -134,6 +138,8 @@ std::unique_ptr<transport_server> load_transport_unix(boost::asio::io_service& s
 
     stream_protocol::endpoint endpoint(it->value());
     stream_protocol::acceptor acceptor(service, std::move(endpoint));
+
+    log::info() << "transport: listening on " << it->value() << std::endl;
 
     return std::make_unique<local_transport_server>(std::move(acceptor));
 #else
@@ -256,8 +262,8 @@ void transport_service::broadcast(const nlohmann::json& json)
 
 void transport_service::load(const config& cfg) noexcept
 {
-    for (const auto& section : cfg.doc())
-        if (section.key() != "transport") {
+    for (const auto& section : cfg.doc()) {
+        if (section.key() != "transport")
             continue;
 
         try {
