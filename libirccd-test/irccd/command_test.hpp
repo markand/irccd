@@ -23,8 +23,9 @@
 
 #include <irccd/logger.hpp>
 
-#include <irccd/irccd.hpp>
 #include <irccd/command_service.hpp>
+#include <irccd/ip_transport_server.hpp>
+#include <irccd/irccd.hpp>
 #include <irccd/transport_service.hpp>
 
 #include <irccd/ctl/ip_connection.hpp>

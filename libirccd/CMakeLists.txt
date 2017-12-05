@@ -23,12 +23,15 @@ find_package(Boost REQUIRED QUIET COMPONENTS timer)
 set(
     HEADERS
     ${libirccd_SOURCE_DIR}/irccd/basic_transport_client.hpp
+    ${libirccd_SOURCE_DIR}/irccd/basic_transport_server.hpp
     ${libirccd_SOURCE_DIR}/irccd/command.hpp
     ${libirccd_SOURCE_DIR}/irccd/command_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/config.hpp
     ${libirccd_SOURCE_DIR}/irccd/dynlib_plugin.hpp
-    ${libirccd_SOURCE_DIR}/irccd/irc.hpp
+    ${libirccd_SOURCE_DIR}/irccd/ip_transport_server.hpp
     ${libirccd_SOURCE_DIR}/irccd/irccd.hpp
+    ${libirccd_SOURCE_DIR}/irccd/irc.hpp
+    ${libirccd_SOURCE_DIR}/irccd/local_transport_server.hpp
     ${libirccd_SOURCE_DIR}/irccd/plugin.hpp
     ${libirccd_SOURCE_DIR}/irccd/plugin_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/rule.hpp
@@ -38,6 +41,7 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/transport_client.hpp
     ${libirccd_SOURCE_DIR}/irccd/transport_server.hpp
     ${libirccd_SOURCE_DIR}/irccd/transport_service.hpp
+    $<$<BOOL:${HAVE_SSL}>:${libirccd_SOURCE_DIR}/irccd/tls_transport_server.hpp>
 )
 
 set(
@@ -46,8 +50,8 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/command_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/config.cpp
     ${libirccd_SOURCE_DIR}/irccd/dynlib_plugin.cpp
-    ${libirccd_SOURCE_DIR}/irccd/irc.cpp
     ${libirccd_SOURCE_DIR}/irccd/irccd.cpp
+    ${libirccd_SOURCE_DIR}/irccd/irc.cpp
     ${libirccd_SOURCE_DIR}/irccd/plugin.cpp
     ${libirccd_SOURCE_DIR}/irccd/plugin_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/rule.cpp
@@ -57,6 +61,7 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/transport_client.cpp
     ${libirccd_SOURCE_DIR}/irccd/transport_server.cpp
     ${libirccd_SOURCE_DIR}/irccd/transport_service.cpp
+    $<$<BOOL:${HAVE_SSL}>:${libirccd_SOURCE_DIR}/irccd/tls_transport_server.cpp>
 )
 
 irccd_define_library(

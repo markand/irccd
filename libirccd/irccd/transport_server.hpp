@@ -29,11 +29,7 @@
 
 #include <boost/asio.hpp>
 
-#if defined(HAVE_SSL)
-#   include <boost/asio/ssl.hpp>
-#endif
-
-#include "basic_transport_client.hpp"
+#include "transport_client.hpp"
 
 namespace irccd {
 
@@ -132,118 +128,6 @@ public:
         password_ = std::move(password);
     }
 };
-
-/**
- * \brief Basic implementation for IP/TCP and local sockets
- *
- * This class implements an accept function for:
- *
- *   - boost::asio::ip::tcp
- *   - boost::asio::local::stream_protocol
- */
-template <typename Protocol>
-class basic_transport_server : public transport_server {
-public:
-    /**
-     * Type for underlying socket.
-     */
-    using socket_t = typename Protocol::socket;
-
-    /**
-     * Type for underlying acceptor.
-     */
-    using acceptor_t = typename Protocol::acceptor;
-
-protected:
-    /**
-     * The acceptor object.
-     */
-    acceptor_t acceptor_;
-
-protected:
-    /**
-     * \copydoc transport_server::accept
-     */
-    void do_accept(accept_t handler) override;
-
-public:
-    /**
-     * Constructor with an acceptor in parameter.
-     *
-     * \pre acceptor.is_open()
-     * \param acceptor the already bound acceptor
-     */
-    basic_transport_server(acceptor_t acceptor);
-};
-
-template <typename Protocol>
-basic_transport_server<Protocol>::basic_transport_server(acceptor_t acceptor)
-    : acceptor_(std::move(acceptor))
-{
-    assert(acceptor_.is_open());
-}
-
-template <typename Protocol>
-void basic_transport_server<Protocol>::do_accept(accept_t handler)
-{
-    auto client = std::make_shared<basic_transport_client<socket_t>>(*this, acceptor_.get_io_service());
-
-    acceptor_.async_accept(client->stream().socket(), [this, client, handler] (auto code) {
-        if (code)
-            handler(std::move(code), nullptr);
-        else
-            handler(std::move(code), std::move(client));
-    });
-}
-
-/**
- * Convenient type for IP/TCP
- */
-using ip_transport_server = basic_transport_server<boost::asio::ip::tcp>;
-
-#if !defined(_WIN32)
-
-/**
- * Convenient type for UNIX local sockets.
- */
-using local_transport_server = basic_transport_server<boost::asio::local::stream_protocol>;
-
-#endif // !_WIN32
-
-#if defined(HAVE_SSL)
-
-/**
- * \brief Secure layer implementation.
- */
-class tls_transport_server : public ip_transport_server {
-private:
-    using context_t = boost::asio::ssl::context;
-    using client_t = basic_transport_client<boost::asio::ssl::stream<socket_t>>;
-
-    context_t context_;
-
-    void do_handshake(std::shared_ptr<client_t>, accept_t);
-
-protected:
-    /**
-     * \copydoc tcp_transport_server::do_accept
-     *
-     * This function does the same as tcp_transport_server::do_accept but it
-     * also perform a SSL handshake after a successful accept operation.
-     */
-    void do_accept(accept_t handler) override;
-
-public:
-    /**
-     * Construct a secure layer transport server.
-     *
-     * \param acceptor the acceptor
-     * \param context the SSL context
-     */
-    tls_transport_server(acceptor_t acceptor, context_t context);
-};
-
-#endif // !HAVE_SSL
 
 } // !irccd
 

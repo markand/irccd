@@ -16,16 +16,26 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <cassert>
 
 #include <irccd/string_util.hpp>
 
 #include "command_service.hpp"
 #include "irccd.hpp"
+#include "ip_transport_server.hpp"
 #include "logger.hpp"
 #include "transport_client.hpp"
-#include "transport_server.hpp"
 #include "transport_service.hpp"
+
+#if !defined(IRCCD_SYSTEM_WINDOWS)
+#   include "local_transport_server.hpp"
+#endif
+
+#if defined(HAVE_SSL)
+#   include "tls_transport_server.hpp"
+#endif
 
 namespace irccd {
 
