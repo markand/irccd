@@ -545,10 +545,48 @@ public:
         already_exists,
     };
 
+private:
+    std::string name_;
+    std::string message_;
+    std::string what_;
+
+public:
     /**
-     * Inherited constructors.
+     * Constructor.
+     *
+     * \param code the error code
+     * \param name the plugin name
+     * \param message the optional message (e.g. error from plugin)
      */
-    using system_error::system_error;
+    plugin_error(error code, std::string name, std::string message = "") noexcept;
+
+    /**
+     * Get the plugin name.
+     *
+     * \return the name
+     */
+    inline const std::string& name() const noexcept
+    {
+        return name_;
+    }
+
+    /**
+     * Get the additional message.
+     *
+     * \return the message
+     */
+    inline const std::string& message() const noexcept
+    {
+        return message_;
+    }
+
+    /**
+     * Get message appropriate for use with logger.
+     */
+    const char* what() const noexcept override
+    {
+        return what_.c_str();
+    }
 };
 
 /**

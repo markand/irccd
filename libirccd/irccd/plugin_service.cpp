@@ -82,7 +82,7 @@ std::shared_ptr<plugin> plugin_service::require(const std::string& name) const
     auto plugin = get(name);
 
     if (!plugin)
-        throw plugin_error(plugin_error::not_found);
+        throw plugin_error(plugin_error::not_found, name);
 
     return plugin;
 }
@@ -159,7 +159,7 @@ std::shared_ptr<plugin> plugin_service::find(const std::string& id)
 void plugin_service::load(std::string name, std::string path)
 {
     if (has(name))
-        throw plugin_error(plugin_error::already_exists);
+        throw plugin_error(plugin_error::already_exists, name);
 
     std::shared_ptr<plugin> plugin;
 
@@ -169,7 +169,7 @@ void plugin_service::load(std::string name, std::string path)
         plugin = open(name, std::move(path));
 
     if (!plugin)
-        throw plugin_error(plugin_error::not_found);
+        throw plugin_error(plugin_error::not_found, name);
 
     plugin->set_config(config(name));
     plugin->set_formats(formats(name));
@@ -184,7 +184,7 @@ void plugin_service::reload(const std::string& name)
     auto plugin = get(name);
 
     if (!plugin)
-        throw plugin_error(plugin_error::not_found);
+        throw plugin_error(plugin_error::not_found, name);
 
     exec(plugin, &plugin::on_reload, irccd_);
 }
@@ -196,7 +196,7 @@ void plugin_service::unload(const std::string& name)
     });
 
     if (it == plugins_.end())
-        throw plugin_error(plugin_error::not_found);
+        throw plugin_error(plugin_error::not_found, name);
 
     // Erase first, in case of throwing.
     auto save = *it;
@@ -222,8 +222,8 @@ void plugin_service::load(const class config& cfg) noexcept
         } else {
             try {
                 load(name, option.value());
-            } catch (const plugin_error& ex) {
-                log::warning() << "plugin " << option.key() << ": " << ex.what() << std::endl;
+            } catch (const std::exception& ex) {
+                log::warning(ex.what());
             }
         }
     }

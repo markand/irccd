@@ -125,7 +125,7 @@ void js_plugin::open()
 
     // TODO: add error message here.
     if (!input)
-        throw plugin_error(plugin_error::exec_error);
+        throw plugin_error(plugin_error::exec_error, name(), std::strerror(errno));
 
     std::string data(
         std::istreambuf_iterator<char>(input.rdbuf()),
@@ -133,7 +133,7 @@ void js_plugin::open()
     );
 
     if (duk_peval_string(context_, data.c_str()))
-        throw plugin_error(plugin_error::exec_error);
+        throw plugin_error(plugin_error::exec_error, name(), dukx_stack(context_, -1).stack());
 
     // Read metadata.
     duk_get_global_string(context_, "info");

@@ -18,6 +18,8 @@
 
 #include <boost/filesystem.hpp>
 
+#include <sstream>
+
 #include "plugin.hpp"
 #include "system.hpp"
 
@@ -49,7 +51,25 @@ std::shared_ptr<plugin> plugin_loader::find(const std::string& name)
             return plugin;
     }
 
-    throw plugin_error(plugin_error::not_found);
+    throw plugin_error(plugin_error::not_found, name);
+}
+
+plugin_error::plugin_error(error errc, std::string name, std::string message) noexcept
+    : system_error(make_error_code(errc))
+    , name_(std::move(name))
+    , message_(std::move(message))
+{
+    std::ostringstream oss;
+
+    oss << "plugin " << name_ << ": " << code().message();
+
+    std::istringstream iss(message_);
+    std::string line;
+
+    while (getline(iss, line))
+        oss << "\nplugin " << name_ << ": " << line;
+
+    what_ = oss.str();
 }
 
 const boost::system::error_category& plugin_category()
