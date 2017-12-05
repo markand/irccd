@@ -31,8 +31,8 @@ void do_connect(Socket& socket, resolver::iterator it, connection::connect_t han
 {
     socket.close();
     socket.async_connect(*it, [&socket, it, handler] (auto code) mutable {
-        if (code && it != resolver::iterator())
-            do_connect(socket, ++it, std::move(handler));
+        if (code && ++it != resolver::iterator())
+            do_connect(socket, it, std::move(handler));
         else
             handler(code);
     });
