@@ -26,9 +26,8 @@
 
 #include <boost/asio.hpp>
 
-#include <irccd/logger.hpp>
-
 #include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/logger.hpp>
 
 #include <irccd/js/js_plugin.hpp>
 #include <irccd/js/irccd_jsapi.hpp>
@@ -71,7 +70,7 @@ public:
         : plugin_(new js_plugin("test", plugin_path))
         , server_(new journal_server(service_, "test"))
     {
-        log::set_logger(std::make_unique<log::silent_logger>());
+        irccd_.set_log(std::make_unique<silent_logger>());
 
         // Irccd is mandatory at the moment.
         add<irccd_jsapi>();

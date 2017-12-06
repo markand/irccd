@@ -16,12 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/logger.hpp>
 #include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
 
 #include "command_service.hpp"
 #include "irccd.hpp"
+#include "logger.hpp"
 #include "plugin_service.hpp"
 #include "rule_service.hpp"
 #include "server_service.hpp"
@@ -31,7 +31,7 @@ namespace irccd {
 
 namespace {
 
-class log_filter : public log::filter {
+class log_filter : public logger_filter {
 private:
     std::string info_;
     std::string warning_;
@@ -74,7 +74,9 @@ public:
     }
 };
 
-void load_log_file(const ini::section& sc)
+} // !namespace
+
+void irccd::load_logs_file(const ini::section& sc)
 {
     /*
      * TODO: improve that with CMake options.
@@ -95,22 +97,20 @@ void load_log_file(const ini::section& sc)
         errors = it->value();
 
     try {
-        log::set_logger(std::make_unique<log::file_logger>(std::move(normal), std::move(errors)));
+        logger_ = std::make_unique<file_logger>(std::move(normal), std::move(errors));
     } catch (const std::exception& ex) {
-        log::warning() << "logs: " << ex.what() << std::endl;
+        logger_->warning() << "logs: " << ex.what() << std::endl;
     }
 }
 
-void load_log_syslog()
+void irccd::load_logs_syslog()
 {
 #if defined(HAVE_SYSLOG)
-    log::set_logger(std::make_unique<log::syslog_logger>());
+    logger_ = std::make_unique<syslog_logger>();
 #else
-    log::warning() << "logs: syslog is not available on this platform" << std::endl;
+    logger_->warning() << "logs: syslog is not available on this platform" << std::endl;
 #endif // !HAVE_SYSLOG
 }
-
-} // !namespace
 
 void irccd::load_logs()
 {
@@ -119,18 +119,18 @@ void irccd::load_logs()
     if (sc.empty())
         return;
 
-    log::set_verbose(string_util::is_identifier(sc.get("verbose").value()));
+    logger_->set_verbose(string_util::is_identifier(sc.get("verbose").value()));
 
     auto type = sc.get("type").value();
 
     if (!type.empty()) {
         // Console is the default, no test case.
         if (type == "file")
-            load_log_file(sc);
+            load_logs_file(sc);
         else if (type == "syslog")
-            load_log_syslog();
+            load_logs_syslog();
         else if (type != "console")
-            log::warning() << "logs: invalid log type '" << type << std::endl;
+            logger_->warning() << "logs: invalid log type '" << type << std::endl;
     }
 }
 
@@ -141,7 +141,7 @@ void irccd::load_formats()
     if (sc.empty())
         return;
 
-    log::set_filter(std::make_unique<log_filter>(
+    logger_->set_filter(std::make_unique<log_filter>(
         sc.get("info").value(),
         sc.get("warning").value(),
         sc.get("debug").value()
@@ -159,13 +159,13 @@ void irccd::load_pid()
     std::ofstream out(path, std::ofstream::trunc);
 
     if (!out)
-        log::warning() << "irccd: could not open" << path << ": " << std::strerror(errno) << std::endl;
+        logger_->warning() << "irccd: could not open" << path << ": " << std::strerror(errno) << std::endl;
     else {
-        log::debug() << "irccd: pid written in " << path << std::endl;
+        logger_->debug() << "irccd: pid written in " << path << std::endl;
         out << getpid() << std::endl;
     }
 #else
-    log::warning() << "irccd: pidfile not supported on this platform" << std::endl;
+    logger_->warning() << "irccd: pidfile not supported on this platform" << std::endl;
 #endif
 }
 
@@ -179,12 +179,12 @@ void irccd::load_gid()
 #if defined(HAVE_SETGID)
     try {
         sys::set_gid(gid);
-        log::info() << "irccd: setting gid to: " << gid << std::endl;
+        logger_->info() << "irccd: setting gid to: " << gid << std::endl;
     } catch (const std::exception& ex) {
-        log::warning() << "irccd: failed to set gid: " << ex.what() << std::endl;
+        logger_->warning() << "irccd: failed to set gid: " << ex.what() << std::endl;
     }
 #else
-    log::warning() << "irccd: gid option not supported" << std::endl;
+    logger_->warning() << "irccd: gid option not supported" << std::endl;
 #endif
 }
 
@@ -198,27 +198,35 @@ void irccd::load_uid()
 #if defined(HAVE_SETUID)
     try {
         sys::set_uid(uid);
-        log::info() << "irccd: setting uid to: " << uid << std::endl;
+        logger_->info() << "irccd: setting uid to: " << uid << std::endl;
     } catch (const std::exception& ex) {
-        log::warning() << "irccd: failed to set uid: " << ex.what() << std::endl;
+        logger_->warning() << "irccd: failed to set uid: " << ex.what() << std::endl;
     }
 #else
-    log::warning() << "irccd: uid option not supported" << std::endl;
+    logger_->warning() << "irccd: uid option not supported" << std::endl;
 #endif
 }
 
 irccd::irccd(boost::asio::io_service& service, std::string config)
     : config_(std::move(config))
     , service_(service)
+    , logger_(std::make_unique<console_logger>())
     , command_service_(std::make_unique<command_service>())
     , server_service_(std::make_unique<server_service>(*this))
     , tpt_service_(std::make_unique<transport_service>(*this))
-    , rule_service_(std::make_unique<rule_service>())
+    , rule_service_(std::make_unique<rule_service>(*this))
     , plugin_service_(std::make_unique<plugin_service>(*this))
 {
 }
 
 irccd::~irccd() = default;
+
+void irccd::set_log(std::unique_ptr<logger> logger) noexcept
+{
+    assert(logger);
+
+    logger_ = std::move(logger);
+}
 
 void irccd::load() noexcept
 {
@@ -234,9 +242,9 @@ void irccd::load() noexcept
     load_formats();
 
     if (!loaded_)
-        log::info() << "irccd: loading configuration from " << config_.path() << std::endl;
+        logger_->info() << "irccd: loading configuration from " << config_.path() << std::endl;
     else
-        log::info() << "irccd: reloading configuration" << std::endl;
+        logger_->info() << "irccd: reloading configuration" << std::endl;
 
     // [general] section.
     if (!loaded_) {

@@ -19,7 +19,8 @@
 #define BOOST_TEST_MODULE "Rules"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/logger.hpp>
+#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/logger.hpp>
 #include <irccd/daemon/rule_service.hpp>
 
 namespace irccd {
@@ -66,11 +67,13 @@ namespace irccd {
  */
 class rules_test {
 protected:
-    rule_service rules_;
+    boost::asio::io_service service_;
+    irccd daemon_{service_};
+    rule_service rules_{daemon_};
 
     rules_test()
     {
-        log::set_logger(std::make_unique<log::silent_logger>());
+        daemon_.set_log(std::make_unique<silent_logger>());
 
         // #1
         {

@@ -18,9 +18,8 @@
 
 #include <boost/asio.hpp>
 
-#include <irccd/logger.hpp>
-
 #include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/logger.hpp>
 
 #include "irccd_jsapi.hpp"
 #include "js_plugin.hpp"
@@ -86,8 +85,10 @@ void timer::handle()
     duk_remove(ctx, -2);
 
     if (duk_pcall(ctx, 0)) {
-        log::warning() << "plugin: " << plugin->name() << " timer error:" << std::endl;
-        log::warning() << "  " << dukx_stack(ctx, -1).what() << std::endl;
+        dukx_get_irccd(ctx).log().warning() << "plugin: " << plugin->name()
+            << " timer error:" << std::endl;
+        dukx_get_irccd(ctx).log().warning() << "  "
+            << dukx_stack(ctx, -1).what() << std::endl;
     } else
         duk_pop(ctx);
 }
@@ -188,7 +189,7 @@ duk_ret_t destructor(duk_context* ctx)
     duk_del_prop_string(ctx, -1, ptr->key().c_str());
     duk_pop(ctx);
 
-    log::debug("timer: destroyed");
+    dukx_get_irccd(ctx).log().debug("timer: destroyed");
 
     delete ptr;
 

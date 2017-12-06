@@ -21,65 +21,58 @@
 #define BOOST_TEST_MODULE "Logger"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/logger.hpp>
+#include <irccd/daemon/logger.hpp>
 
 namespace irccd {
 
-class logger_test {
+class my_logger : public logger {
 public:
     std::string line_debug;
     std::string line_info;
     std::string line_warning;
 
-    class my_logger : public log::logger {
-    private:
-        logger_test& test_;
+    void write_debug(const std::string& line) override
+    {
+        line_debug = line;
+    }
 
-    public:
-        inline my_logger(logger_test& test) noexcept
-            : test_(test)
-        {
-        }
+    void write_info(const std::string& line) override
+    {
+        line_info = line;
+    }
 
-        void debug(const std::string& line) override
-        {
-            test_.line_debug = line;
-        }
+    void write_warning(const std::string& line) override
+    {
+        line_warning = line;
+    }
+};
 
-        void info(const std::string& line) override
-        {
-            test_.line_info = line;
-        }
+class my_filter : public logger_filter {
+public:
+    std::string pre_debug(std::string input) const override
+    {
+        return std::reverse(input.begin(), input.end()), input;
+    }
 
-        void warning(const std::string& line) override
-        {
-            test_.line_warning = line;
-        }
-    };
+    std::string pre_info(std::string input) const override
+    {
+        return std::reverse(input.begin(), input.end()), input;
+    }
 
-    class my_filter : public log::filter {
-    public:
-        std::string pre_debug(std::string input) const override
-        {
-            return std::reverse(input.begin(), input.end()), input;
-        }
+    std::string pre_warning(std::string input) const override
+    {
+        return std::reverse(input.begin(), input.end()), input;
+    }
+};
 
-        std::string pre_info(std::string input) const override
-        {
-            return std::reverse(input.begin(), input.end()), input;
-        }
-
-        std::string pre_warning(std::string input) const override
-        {
-            return std::reverse(input.begin(), input.end()), input;
-        }
-    };
+class logger_test {
+public:
+    my_logger log_;
 
     logger_test()
     {
-        log::set_logger(std::make_unique<my_logger>(*this));
-        log::set_filter(std::make_unique<my_filter>());
-        log::set_verbose(true);
+        log_.set_filter(std::make_unique<my_filter>());
+        log_.set_verbose(true);
     }
 };
 
@@ -89,33 +82,33 @@ BOOST_FIXTURE_TEST_SUITE(logger_test_suite, logger_test)
 
 BOOST_AUTO_TEST_CASE(debug)
 {
-    log::debug("debug");
+    log_.debug("debug");
 
-    BOOST_REQUIRE_EQUAL("gubed", line_debug);
+    BOOST_REQUIRE_EQUAL("gubed", log_.line_debug);
 }
 
 #endif
 
 BOOST_AUTO_TEST_CASE(info)
 {
-    log::info("info");
+    log_.info("info");
 
-    BOOST_REQUIRE_EQUAL("ofni", line_info);
+    BOOST_REQUIRE_EQUAL("ofni", log_.line_info);
 }
 
 BOOST_AUTO_TEST_CASE(info_quiet)
 {
-    log::set_verbose(false);
-    log::info("info");
+    log_.set_verbose(false);
+    log_.info("info");
 
-    BOOST_REQUIRE(line_info.empty());
+    BOOST_REQUIRE(log_.line_info.empty());
 }
 
 BOOST_AUTO_TEST_CASE(warning)
 {
-    log::warning("warning");
+    log_.warning("warning");
 
-    BOOST_REQUIRE_EQUAL("gninraw", line_warning);
+    BOOST_REQUIRE_EQUAL("gninraw", log_.line_warning);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

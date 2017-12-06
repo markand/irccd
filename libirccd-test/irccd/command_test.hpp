@@ -21,11 +21,10 @@
 
 #include <memory>
 
-#include <irccd/logger.hpp>
-
 #include <irccd/daemon/command_service.hpp>
 #include <irccd/daemon/ip_transport_server.hpp>
 #include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/logger.hpp>
 #include <irccd/daemon/transport_service.hpp>
 
 #include <irccd/ctl/ip_connection.hpp>
@@ -79,8 +78,6 @@ command_test<Commands...>::command_test()
 {
     using boost::asio::ip::tcp;
 
-    log::set_logger(std::make_unique<log::silent_logger>());
-
     // Bind to a random port.
     tcp::endpoint ep(tcp::v4(), 0);
     tcp::acceptor acc(service_, ep);
@@ -91,6 +88,7 @@ command_test<Commands...>::command_test()
 
     // Add the server and the command.
     add<Commands...>();
+    daemon_->set_log(std::make_unique<silent_logger>());
     daemon_->transports().add(std::make_unique<ip_transport_server>(std::move(acc)));
 
     timer_.expires_from_now(boost::posix_time::seconds(10));

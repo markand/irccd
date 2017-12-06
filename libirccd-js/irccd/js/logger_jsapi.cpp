@@ -16,8 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/logger.hpp>
+#include <irccd/daemon/logger.hpp>
+#include <irccd/daemon/irccd.hpp>
 
+#include "irccd_jsapi.hpp"
 #include "js_plugin.hpp"
 #include "logger_jsapi.hpp"
 #include "plugin_jsapi.hpp"
@@ -44,7 +46,7 @@ duk_ret_t print(duk_context* ctx, std::ostream &out)
  */
 duk_ret_t info(duk_context* ctx)
 {
-    return print(ctx, log::info());
+    return print(ctx, dukx_get_irccd(ctx).log().info());
 }
 
 /*
@@ -58,7 +60,7 @@ duk_ret_t info(duk_context* ctx)
  */
 duk_ret_t warning(duk_context* ctx)
 {
-    return print(ctx, log::warning());
+    return print(ctx, dukx_get_irccd(ctx).log().warning());
 }
 
 /*
@@ -72,7 +74,7 @@ duk_ret_t warning(duk_context* ctx)
  */
 duk_ret_t debug(duk_context* ctx)
 {
-    return print(ctx, log::debug());
+    return print(ctx, dukx_get_irccd(ctx).log().debug());
 }
 
 const duk_function_list_entry functions[] = {

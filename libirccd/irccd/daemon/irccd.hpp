@@ -38,6 +38,7 @@
 namespace irccd {
 
 class command_service;
+class logger;
 class plugin_service;
 class rule_service;
 class server_service;
@@ -57,6 +58,9 @@ private:
     // Tells if the configuration has already been called.
     bool loaded_{false};
 
+    // Custom logger.
+    std::unique_ptr<logger> logger_;
+
     // Services.
     std::shared_ptr<command_service> command_service_;
     std::shared_ptr<server_service> server_service_;
@@ -72,6 +76,8 @@ private:
     irccd& operator=(irccd&&) = delete;
 
     // Load functions.
+    void load_logs_file(const ini::section&);
+    void load_logs_syslog();
     void load_logs();
     void load_formats();
     void load_pid();
@@ -131,6 +137,34 @@ public:
     {
         return service_;
     }
+
+    /**
+     * Access the logger.
+     *
+     * \return the logger
+     */
+    inline const logger& log() const noexcept
+    {
+        return *logger_;
+    }
+
+    /**
+     * Overloaded function.
+     *
+     * \return the logger
+     */
+    inline logger& log() noexcept
+    {
+        return *logger_;
+    }
+
+    /**
+     * Set the logger.
+     *
+     * \pre logger != nullptr
+     * \param logger the new logger
+     */
+    void set_log(std::unique_ptr<logger> logger) noexcept;
 
     /**
      * Access the command service.

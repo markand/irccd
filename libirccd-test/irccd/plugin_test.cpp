@@ -18,8 +18,7 @@
 
 #include <cassert>
 
-#include <irccd/logger.hpp>
-
+#include <irccd/daemon/logger.hpp>
 #include <irccd/daemon/plugin_service.hpp>
 #include <irccd/daemon/server_service.hpp>
 
@@ -43,12 +42,11 @@ namespace irccd {
 plugin_test::plugin_test(std::string name, std::string path)
     : server_(std::make_shared<journal_server>(service_, "test"))
 {
-    log::set_verbose(false);
-    log::set_logger(std::make_unique<log::silent_logger>());
-
     server_->set_nickname("irccd");
     plugin_ = std::make_unique<js_plugin>(std::move(name), std::move(path));
 
+    irccd_.log().set_verbose(false);
+    irccd_.set_log(std::make_unique<silent_logger>());
     irccd_.plugins().add(plugin_);
     irccd_.servers().add(server_);
 

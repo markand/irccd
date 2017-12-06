@@ -25,7 +25,6 @@
 
 #include <irccd/ini.hpp>
 #include <irccd/json_util.hpp>
-#include <irccd/logger.hpp>
 #include <irccd/options.hpp>
 #include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
@@ -85,6 +84,9 @@ boost::asio::io_service service;
 boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
 
 #endif
+
+// Global options.
+bool verbose = true;
 
 // Connection to instance.
 std::unique_ptr<connection> conn;
@@ -213,10 +215,10 @@ void read_connect(const ini::section& sc)
  */
 void read_general(const ini::section& sc)
 {
-    auto verbose = sc.find("verbose");
+    auto value = sc.find("verbose");
 
-    if (verbose != sc.end())
-        log::set_verbose(string_util::is_boolean(verbose->value()));
+    if (value != sc.end())
+        verbose = string_util::is_boolean(value->value());
 }
 
 /*
@@ -276,7 +278,7 @@ void read(const std::string& path)
             }
         }
     } catch (const std::exception &ex) {
-        log::warning() << path << ": " << ex.what() << std::endl;
+        std::cerr << path << ": " << ex.what() << std::endl;
     }
 }
 
@@ -393,9 +395,9 @@ option::result parse(int& argc, char**& argv)
             // NOTREACHED
 
         if (result.count("-v") != 0 || result.count("--verbose") != 0)
-            log::set_verbose(true);
+            verbose = true;
     } catch (const std::exception& ex) {
-        log::warning() << "irccdctl: " << ex.what() << std::endl;
+        std::cerr << "irccdctl: " << ex.what() << std::endl;
         usage();
     }
 
@@ -512,10 +514,11 @@ void do_connect()
         if (code)
             throw boost::system::system_error(code);
 
-        log::info(string_util::sprintf("connected to irccd %d.%d.%d",
-            json_util::to_int(info["major"]),
-            json_util::to_int(info["minor"]),
-            json_util::to_int(info["patch"])));
+        if (verbose)
+            std::cout << string_util::sprintf("connected to irccd %d.%d.%d\n",
+                json_util::to_int(info["major"]),
+                json_util::to_int(info["minor"]),
+                json_util::to_int(info["patch"]));
 
         connected = true;
     });
@@ -580,7 +583,7 @@ int main(int argc, char** argv)
             }
         }
     } catch (const std::exception& ex) {
-        irccd::log::warning() << "abort: " << ex.what() << std::endl;
+        std::cerr << "abort: " << ex.what() << std::endl;
         return 1;
     }
 
@@ -589,7 +592,7 @@ int main(int argc, char** argv)
         // NOTREACHED
 
     if (!irccd::ctl::ctl) {
-        irccd::log::warning("abort: no connection specified");
+        std::cerr << "abort: no connection specified" << std::endl;
         return 1;
     }
 

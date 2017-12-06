@@ -19,7 +19,6 @@
 #define BOOST_TEST_MODULE "Plugin plugin"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/logger.hpp>
 #include <irccd/string_util.hpp>
 
 #include <irccd/daemon/irccd.hpp>

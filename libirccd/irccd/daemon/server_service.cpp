@@ -43,16 +43,17 @@ void dispatch(irccd& daemon,
         auto allowed = daemon.rules().solve(server, target, origin, plugin->name(), eventname);
 
         if (!allowed) {
-            log::debug() << "rule: event skipped on match" << std::endl;
+            daemon.log().debug("rule: event skipped on match");
             continue;
         }
 
-        log::debug() << "rule: event allowed" << std::endl;
+        daemon.log().debug("rule: event allowed");
 
         try {
             exec_func(*plugin);
         } catch (const std::exception& ex) {
-            log::warning() << "plugin " << plugin->name() << ": error: " << ex.what() << std::endl;
+            daemon.log().warning() << "plugin " << plugin->name() << ": error: "
+                << ex.what() << std::endl;
         }
     }
 }
@@ -118,7 +119,7 @@ std::string to_host(const ini::section& sc, const std::string& name)
     if (value.empty())
         throw server_error(server_error::invalid_hostname, name);
 
-    return name;
+    return value.value();
 }
 
 std::string to_host(const nlohmann::json& object, const std::string& name)
@@ -242,7 +243,7 @@ std::shared_ptr<server> load_server(boost::asio::io_service& service,
 
 void server_service::handle_connect(const connect_event& ev)
 {
-    log::debug() << "server " << ev.server->name() << ": event onConnect" << std::endl;
+    irccd_.log().debug() << "server " << ev.server->name() << ": event onConnect" << std::endl;
 
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onConnect"         },
@@ -261,10 +262,10 @@ void server_service::handle_connect(const connect_event& ev)
 
 void server_service::handle_invite(const invite_event& ev)
 {
-    log::debug() << "server " << ev.server->name() << ": event onInvite:\n";
-    log::debug() << "  origin: " << ev.origin << "\n";
-    log::debug() << "  channel: " << ev.channel << "\n";
-    log::debug() << "  target: " << ev.nickname << std::endl;
+    irccd_.log().debug() << "server " << ev.server->name() << ": event onInvite:\n";
+    irccd_.log().debug() << "  origin: " << ev.origin << "\n";
+    irccd_.log().debug() << "  channel: " << ev.channel << "\n";
+    irccd_.log().debug() << "  target: " << ev.nickname << std::endl;
 
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onInvite"          },
@@ -285,9 +286,9 @@ void server_service::handle_invite(const invite_event& ev)
 
 void server_service::handle_join(const join_event& ev)
 {
-    log::debug() << "server " << ev.server->name() << ": event onJoin:\n";
-    log::debug() << "  origin: " << ev.origin << "\n";
-    log::debug() << "  channel: " << ev.channel << std::endl;
+    irccd_.log().debug() << "server " << ev.server->name() << ": event onJoin:\n";
+    irccd_.log().debug() << "  origin: " << ev.origin << "\n";
+    irccd_.log().debug() << "  channel: " << ev.channel << std::endl;
 
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onJoin"            },
@@ -308,11 +309,11 @@ void server_service::handle_join(const join_event& ev)
 
 void server_service::handle_kick(const kick_event& ev)
 {
-    log::debug() << "server " << ev.server->name() << ": event onKick:\n";
-    log::debug() << "  origin: " << ev.origin << "\n";
-    log::debug() << "  channel: " << ev.channel << "\n";
-    log::debug() << "  target: " << ev.target << "\n";
-    log::debug() << "  reason: " << ev.reason << std::endl;
+    irccd_.log().debug() << "server " << ev.server->name() << ": event onKick:\n";
+    irccd_.log().debug() << "  origin: " << ev.origin << "\n";
+    irccd_.log().debug() << "  channel: " << ev.channel << "\n";
+    irccd_.log().debug() << "  target: " << ev.target << "\n";
+    irccd_.log().debug() << "  reason: " << ev.reason << std::endl;
 
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onKick"            },
@@ -335,10 +336,10 @@ void server_service::handle_kick(const kick_event& ev)
 
 void server_service::handle_message(const message_event& ev)
 {
-    log::debug() << "server " << ev.server->name() << ": event onMessage:\n";
-    log::debug() << "  origin: " << ev.origin << "\n";
-    log::debug() << "  channel: " << ev.channel << "\n";
-    log::debug() << "  message: " << ev.message << std::endl;
+    irccd_.log().debug() << "server " << ev.server->name() << ": event onMessage:\n";
+    irccd_.log().debug() << "  origin: " << ev.origin << "\n";
+    irccd_.log().debug() << "  channel: " << ev.channel << "\n";
+    irccd_.log().debug() << "  message: " << ev.message << std::endl;
 
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onMessage"         },
@@ -372,10 +373,10 @@ void server_service::handle_message(const message_event& ev)
 
 void server_service::handle_me(const me_event& ev)
 {
-    log::debug() << "server " << ev.server->name() << ": event onMe:\n";
-    log::debug() << "  origin: " << ev.origin << "\n";
-    log::debug() << "  target: " << ev.channel << "\n";
-    log::debug() << "  message: " << ev.message << std::endl;
+    irccd_.log().debug() << "server " << ev.server->name() << ": event onMe:\n";
+    irccd_.log().debug() << "  origin: " << ev.origin << "\n";
+    irccd_.log().debug() << "  target: " << ev.channel << "\n";
+    irccd_.log().debug() << "  message: " << ev.message << std::endl;
 
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onMe"              },
@@ -397,13 +398,13 @@ void server_service::handle_me(const me_event& ev)
 
 void server_service::handle_mode(const mode_event& ev)
 {
-    log::debug() << "server " << ev.server->name() << ": event onMode\n";
-    log::debug() << "  origin: " << ev.origin << "\n";
-    log::debug() << "  channel: " << ev.channel << "\n";
-    log::debug() << "  mode: " << ev.mode << "\n";
-    log::debug() << "  limit: " << ev.limit << "\n";
-    log::debug() << "  user: " << ev.user << "\n";
-    log::debug() << "  mask: " << ev.mask << std::endl;
+    irccd_.log().debug() << "server " << ev.server->name() << ": event onMode\n";
+    irccd_.log().debug() << "  origin: " << ev.origin << "\n";
+    irccd_.log().debug() << "  channel: " << ev.channel << "\n";
+    irccd_.log().debug() << "  mode: " << ev.mode << "\n";
+    irccd_.log().debug() << "  limit: " << ev.limit << "\n";
+    irccd_.log().debug() << "  user: " << ev.user << "\n";
+    irccd_.log().debug() << "  mask: " << ev.mask << std::endl;
 
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onMode"            },
@@ -428,9 +429,9 @@ void server_service::handle_mode(const mode_event& ev)
 
 void server_service::handle_names(const names_event& ev)
 {
-    log::debug() << "server " << ev.server->name() << ": event onNames:\n";
-    log::debug() << "  channel: " << ev.channel << "\n";
-    log::debug() << "  names: " << string_util::join(ev.names.begin(), ev.names.end(), ", ") << std::endl;
+    irccd_.log().debug() << "server " << ev.server->name() << ": event onNames:\n";
+    irccd_.log().debug() << "  channel: " << ev.channel << "\n";
+    irccd_.log().debug() << "  names: " << string_util::join(ev.names.begin(), ev.names.end(), ", ") << std::endl;
 
     auto names = nlohmann::json::array();
 
@@ -456,9 +457,9 @@ void server_service::handle_names(const names_event& ev)
 
 void server_service::handle_nick(const nick_event& ev)
 {
-    log::debug() << "server " << ev.server->name() << ": event onNick:\n";
-    log::debug() << "  origin: " << ev.origin << "\n";
-    log::debug() << "  nickname: " << ev.nickname << std::endl;
+    irccd_.log().debug() << "server " << ev.server->name() << ": event onNick:\n";
+    irccd_.log().debug() << "  origin: " << ev.origin << "\n";
+    irccd_.log().debug() << "  nickname: " << ev.nickname << std::endl;
 
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onNick"            },
@@ -479,10 +480,10 @@ void server_service::handle_nick(const nick_event& ev)
 
 void server_service::handle_notice(const notice_event& ev)
 {
-    log::debug() << "server " << ev.server->name() << ": event onNotice:\n";
-    log::debug() << "  origin: " << ev.origin << "\n";
-    log::debug() << "  channel: " << ev.channel << "\n";
-    log::debug() << "  message: " << ev.message << std::endl;
+    irccd_.log().debug() << "server " << ev.server->name() << ": event onNotice:\n";
+    irccd_.log().debug() << "  origin: " << ev.origin << "\n";
+    irccd_.log().debug() << "  channel: " << ev.channel << "\n";
+    irccd_.log().debug() << "  message: " << ev.message << std::endl;
 
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onNotice"          },
@@ -504,10 +505,10 @@ void server_service::handle_notice(const notice_event& ev)
 
 void server_service::handle_part(const part_event& ev)
 {
-    log::debug() << "server " << ev.server->name() << ": event onPart:\n";
-    log::debug() << "  origin: " << ev.origin << "\n";
-    log::debug() << "  channel: " << ev.channel << "\n";
-    log::debug() << "  reason: " << ev.reason << std::endl;
+    irccd_.log().debug() << "server " << ev.server->name() << ": event onPart:\n";
+    irccd_.log().debug() << "  origin: " << ev.origin << "\n";
+    irccd_.log().debug() << "  channel: " << ev.channel << "\n";
+    irccd_.log().debug() << "  reason: " << ev.reason << std::endl;
 
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onPart"            },
@@ -529,10 +530,10 @@ void server_service::handle_part(const part_event& ev)
 
 void server_service::handle_topic(const topic_event& ev)
 {
-    log::debug() << "server " << ev.server->name() << ": event onTopic:\n";
-    log::debug() << "  origin: " << ev.origin << "\n";
-    log::debug() << "  channel: " << ev.channel << "\n";
-    log::debug() << "  topic: " << ev.topic << std::endl;
+    irccd_.log().debug() << "server " << ev.server->name() << ": event onTopic:\n";
+    irccd_.log().debug() << "  origin: " << ev.origin << "\n";
+    irccd_.log().debug() << "  channel: " << ev.channel << "\n";
+    irccd_.log().debug() << "  topic: " << ev.topic << std::endl;
 
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onTopic"           },
@@ -554,12 +555,12 @@ void server_service::handle_topic(const topic_event& ev)
 
 void server_service::handle_whois(const whois_event& ev)
 {
-    log::debug() << "server " << ev.server->name() << ": event onWhois\n";
-    log::debug() << "  nickname: " << ev.whois.nick << "\n";
-    log::debug() << "  username: " << ev.whois.user << "\n";
-    log::debug() << "  host: " << ev.whois.host << "\n";
-    log::debug() << "  realname: " << ev.whois.realname << "\n";
-    log::debug() << "  channels: " << string_util::join(ev.whois.channels, ", ") << std::endl;
+    irccd_.log().debug() << "server " << ev.server->name() << ": event onWhois\n";
+    irccd_.log().debug() << "  nickname: " << ev.whois.nick << "\n";
+    irccd_.log().debug() << "  username: " << ev.whois.user << "\n";
+    irccd_.log().debug() << "  host: " << ev.whois.host << "\n";
+    irccd_.log().debug() << "  realname: " << ev.whois.realname << "\n";
+    irccd_.log().debug() << "  channels: " << string_util::join(ev.whois.channels, ", ") << std::endl;
 
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onWhois"           },
@@ -652,7 +653,7 @@ void server_service::add(std::shared_ptr<server> server)
         auto server = ptr.lock();
 
         if (server) {
-            log::info(string_util::sprintf("server %s: removed", server->name()));
+            irccd_.log().info(string_util::sprintf("server %s: removed", server->name()));
             servers_.erase(std::find(servers_.begin(), servers_.end(), server));
         }
     });
@@ -712,7 +713,7 @@ void server_service::load(const config& cfg) noexcept
         try {
             add(load_server(irccd_.service(), cfg, section));
         } catch (const std::exception& ex) {
-            log::warning() << "server " << section.get("name").value() << ": "
+            irccd_.log().warning() << "server " << section.get("name").value() << ": "
                 << ex.what() << std::endl;
         }
     }

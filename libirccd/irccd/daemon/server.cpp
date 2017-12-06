@@ -31,7 +31,6 @@
 #endif
 
 #include "json_util.hpp"
-#include "logger.hpp"
 #include "server.hpp"
 #include "string_util.hpp"
 #include "system.hpp"
@@ -138,10 +137,8 @@ void server::dispatch_connect(const irc::message&)
     state_ = state_t::connected;
     on_connect({shared_from_this()});
 
-    for (const auto& channel : rchannels_) {
-        log::info() << "server " << name_ << ": auto joining " << channel.name << std::endl;
+    for (const auto& channel : rchannels_)
         join(channel.name, channel.password);
-    }
 }
 
 void server::dispatch_endofnames(const irc::message& msg)
@@ -202,6 +199,7 @@ void server::dispatch_isupport(const irc::message& msg)
         if (msg.arg(i).compare(0, 6, "PREFIX") == 0) {
             modes_ = isupport_extract_prefixes(msg.arg(i));
 
+#if 0
 #if !defined(NDEBUG)
             auto show = [this] (auto mode, auto title) {
                 auto it = modes_.find(mode);
@@ -217,6 +215,7 @@ void server::dispatch_isupport(const irc::message& msg)
             show(channel_mode::protection, "protection");
             show(channel_mode::voiced, "voiced");
 #endif // !NDEBUG
+#endif
 
             break;
         }
@@ -443,9 +442,6 @@ void server::identify()
 {
     assert(state_ == state_t::identifying);
 
-    log::debug(string_util::sprintf("server %s: connected, identifying", name_));
-    log::debug(string_util::sprintf("server %s: verifying server", name_));
-
     if (!password_.empty())
         conn_->send(string_util::sprintf("PASS %s", password_));
 
@@ -468,20 +464,17 @@ void server::handle_connect(boost::system::error_code code)
 {
     if (code) {
         conn_ = nullptr;
+#if 0
         log::warning(string_util::sprintf("server %s: error while connecting", name_));
         log::warning(string_util::sprintf("server %s: %s", name_, code.message()));
+#endif
 
         // Wait before reconnecting.
         if (recotries_ != 0) {
             if (recotries_ > 0 && recocur_ >= recotries_) {
-                log::warning() << "server " << name_ << ": giving up" << std::endl;
-
                 state_ = state_t::disconnected;
                 on_die();
             } else {
-                log::warning() << "server " << name_ << ": retrying in " <<
-                    recodelay_ << " seconds" << std::endl;
-
                 state_ = state_t::waiting;
                 wait();
             }
@@ -518,6 +511,7 @@ void server::set_ctcp_version(std::string ctcpversion)
 void server::connect() noexcept
 {
     assert(state_ == state_t::disconnected || state_ == state_t::waiting);
+
     /*
      * This is needed if irccd is started before DHCP or if DNS cache is
      * outdated.

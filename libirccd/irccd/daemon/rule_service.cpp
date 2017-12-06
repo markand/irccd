@@ -18,10 +18,11 @@
 
 #include <stdexcept>
 
-#include <irccd/logger.hpp>
 #include <irccd/string_util.hpp>
 
 #include "config.hpp"
+#include "irccd.hpp"
+#include "logger.hpp"
 #include "rule_service.hpp"
 #include "string_util.hpp"
 
@@ -77,6 +78,11 @@ rule load_rule(const ini::section& sc)
 
 } // !namespace
 
+rule_service::rule_service(irccd &irccd)
+    : irccd_(irccd)
+{
+}
+
 void rule_service::add(rule rule)
 {
     rules_.push_back(std::move(rule));
@@ -120,20 +126,20 @@ bool rule_service::solve(const std::string& server,
 {
     bool result = true;
 
-    log::debug(string_util::sprintf("rule: solving for server=%s, channel=%s, origin=%s, plugin=%s, event=%s",
+    irccd_.log().debug(string_util::sprintf("rule: solving for server=%s, channel=%s, origin=%s, plugin=%s, event=%s",
         server, channel, origin, plugin, event));
 
     int i = 0;
     for (const auto& rule : rules_) {
         auto action = rule.action() == rule::action_type::accept ? "accept" : "drop";
 
-        log::debug() << "  candidate "   << i++ << ":\n"
-                     << "    servers: "  << string_util::join(rule.servers()) << "\n"
-                     << "    channels: " << string_util::join(rule.channels()) << "\n"
-                     << "    origins: "  << string_util::join(rule.origins()) << "\n"
-                     << "    plugins: "  << string_util::join(rule.plugins()) << "\n"
-                     << "    events: "   << string_util::join(rule.events()) << "\n"
-                     << "    action: "   << action << std::endl;
+        irccd_.log().debug() << "  candidate "   << i++ << ":\n"
+            << "    servers: "  << string_util::join(rule.servers()) << "\n"
+            << "    channels: " << string_util::join(rule.channels()) << "\n"
+            << "    origins: "  << string_util::join(rule.origins()) << "\n"
+            << "    plugins: "  << string_util::join(rule.plugins()) << "\n"
+            << "    events: "   << string_util::join(rule.events()) << "\n"
+            << "    action: "   << action << std::endl;
 
         if (rule.match(server, channel, origin, plugin, event))
             result = rule.action() == rule::action_type::accept;
@@ -153,7 +159,7 @@ void rule_service::load(const config& cfg) noexcept
         try {
             rules_.push_back(load_rule(section));
         } catch (const std::exception& ex) {
-            log::warning() << "rule: " << ex.what() << std::endl;
+            irccd_.log().warning() << "rule: " << ex.what() << std::endl;
         }
     }
 }

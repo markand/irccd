@@ -32,6 +32,7 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/irccd.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/irc.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/local_transport_server.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/logger.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule.hpp
@@ -52,6 +53,7 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/dynlib_plugin.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/irccd.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/irc.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/logger.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule.cpp

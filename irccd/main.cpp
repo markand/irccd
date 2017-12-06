@@ -33,7 +33,6 @@
 #include <csignal>
 #include <iostream>
 
-#include <irccd/logger.hpp>
 #include <irccd/options.hpp>
 #include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
@@ -41,6 +40,7 @@
 #include <irccd/daemon/command_service.hpp>
 #include <irccd/daemon/config.hpp>
 #include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/logger.hpp>
 #include <irccd/daemon/plugin_service.hpp>
 #include <irccd/daemon/rule_service.hpp>
 #include <irccd/daemon/server_service.hpp>
@@ -109,7 +109,7 @@ void init(int& argc, char**& argv)
     sys::set_program_name("irccd");
 
     // Default logging to console.
-    log::set_verbose(false);
+    instance->log().set_verbose(false);
 
     -- argc;
     ++ argv;
@@ -143,10 +143,10 @@ option::result parse(int& argc, char**& argv)
                 version(result);
                 // NOTREACHED
             if (pair.first == "-v" || pair.first == "--verbose")
-                log::set_verbose(true);
+                instance->log().set_verbose(true);
         }
     } catch (const std::exception& ex) {
-        log::warning() << "irccd: " << ex.what() << std::endl;
+        instance->log().warning() << "irccd: " << ex.what() << std::endl;
         usage();
     }
 
@@ -171,14 +171,15 @@ int main(int argc, char** argv)
 {
     using namespace irccd;
 
-    init(argc, argv);
-
     boost::asio::io_service service;
     boost::asio::signal_set sigs(service, SIGINT, SIGTERM);
 
+    instance = std::make_unique<class irccd>(service);
+
+    init(argc, argv);
+
     auto options = parse(argc, argv);
 
-    instance = std::make_unique<class irccd>(service);
     instance->commands().add(std::make_unique<plugin_config_command>());
     instance->commands().add(std::make_unique<plugin_info_command>());
     instance->commands().add(std::make_unique<plugin_list_command>());
@@ -230,7 +231,7 @@ int main(int argc, char** argv)
         instance->set_config(open(options));
         instance->load();
     } catch (const std::exception& ex) {
-        log::warning() << "abort: " << ex.what() << std::endl;
+        std::cerr << "abort: " << ex.what() << std::endl;
         return 1;
     }
 

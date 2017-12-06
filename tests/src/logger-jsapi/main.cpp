@@ -19,7 +19,7 @@
 #define BOOST_TEST_MODULE "Logger Javascript API"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/logger.hpp>
+#include <irccd/daemon/logger.hpp>
 
 #include <irccd/js/logger_jsapi.hpp>
 #include <irccd/js/plugin_jsapi.hpp>
@@ -34,7 +34,7 @@ protected:
     std::string line_warning;
     std::string line_debug;
 
-    class my_logger : public log::logger {
+    class my_logger : public logger {
     private:
         logger_test& test_;
 
@@ -44,17 +44,17 @@ protected:
         {
         }
 
-        void info(const std::string& line) override
+        void write_info(const std::string& line) override
         {
             test_.line_info = line;
         }
 
-        void warning(const std::string& line) override
+        void write_warning(const std::string& line) override
         {
             test_.line_warning = line;
         }
 
-        void debug(const std::string& line) override
+        void write_debug(const std::string& line) override
         {
             test_.line_debug = line;
         }
@@ -62,8 +62,8 @@ protected:
 
     logger_test()
     {
-        log::set_verbose(true);
-        log::set_logger(std::make_unique<my_logger>(*this));
+        irccd_.set_log(std::make_unique<my_logger>(*this));
+        irccd_.log().set_verbose(true);
     }
 };
 

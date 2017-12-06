@@ -31,6 +31,7 @@
 namespace irccd {
 
 class config;
+class irccd;
 
 /**
  * \brief Store and solve rules.
@@ -38,9 +39,15 @@ class config;
  */
 class rule_service {
 private:
+    irccd& irccd_;
     std::vector<rule> rules_;
 
 public:
+    /**
+     * Create the rule service.
+     */
+    rule_service(irccd& instance);
+
     /**
      * Get the list of rules.
      *

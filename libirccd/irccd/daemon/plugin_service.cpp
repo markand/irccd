@@ -17,8 +17,8 @@
  */
 
 #include <irccd/string_util.hpp>
-#include <irccd/logger.hpp>
 
+#include "logger.hpp"
 #include "config.hpp"
 #include "irccd.hpp"
 #include "plugin_service.hpp"
@@ -53,7 +53,7 @@ plugin_service::~plugin_service()
         try {
             plugin->on_unload(irccd_);
         } catch (const std::exception& ex) {
-            log::warning() << "plugin: " << plugin->name() << ": " << ex.what() << std::endl;
+            irccd_.log().warning() << "plugin: " << plugin->name() << ": " << ex.what() << std::endl;
         }
     }
 }
@@ -223,7 +223,7 @@ void plugin_service::load(const class config& cfg) noexcept
             try {
                 load(name, option.value());
             } catch (const std::exception& ex) {
-                log::warning(ex.what());
+                irccd_.log().warning(ex.what());
             }
         }
     }
