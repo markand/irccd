@@ -47,13 +47,6 @@ namespace sys {
 IRCCD_EXPORT void set_program_name(std::string name) noexcept;
 
 /**
- * Get the program name.
- *
- * \return the program name
- */
-IRCCD_EXPORT const std::string& program_name() noexcept;
-
-/**
  * Get the system name.
  *
  * \return the name

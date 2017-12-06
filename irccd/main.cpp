@@ -70,7 +70,7 @@ std::unique_ptr<irccd> instance;
 
 void usage()
 {
-    std::cerr << "usage: " << sys::program_name() << " [options...]\n\n";
+    std::cerr << "usage: irccd [options...]\n\n";
     std::cerr << "Available options:\n";
     std::cerr << "  -c, --config file       specify the configuration file\n";
     std::cerr << "  -f, --foreground        do not run as a daemon\n";
@@ -146,7 +146,7 @@ option::result parse(int& argc, char**& argv)
                 log::set_verbose(true);
         }
     } catch (const std::exception& ex) {
-        log::warning() << sys::program_name() << ": " << ex.what() << std::endl;
+        log::warning() << "irccd: " << ex.what() << std::endl;
         usage();
     }
 

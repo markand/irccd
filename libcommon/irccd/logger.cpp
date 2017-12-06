@@ -216,7 +216,7 @@ void silent_logger::debug(const std::string&)
 
 syslog_logger::syslog_logger()
 {
-    openlog(sys::program_name().c_str(), LOG_PID, LOG_DAEMON);
+    openlog("irccd", LOG_PID, LOG_DAEMON);
 }
 
 syslog_logger::~syslog_logger()

@@ -115,14 +115,6 @@ namespace sys {
 namespace {
 
 /*
- * The setprogname() function keeps a pointer without copying it so when
- * main's argv is modified, we're not using the same name so create our own
- * copy.
- */
-
-std::string program_name_value;
-
-/*
  * set_privileges.
  * ------------------------------------------------------------------
  *
@@ -409,16 +401,11 @@ std::string system_directory(const std::string& component)
 
 void set_program_name(std::string name) noexcept
 {
-    program_name_value = std::move(name);
-
 #if defined(HAVE_SETPROGNAME)
-    setprogname(program_name_value.c_str());
+    setprogname(name.c_str());
+#else
+    (void)name;
 #endif
-}
-
-const std::string& program_name() noexcept
-{
-    return program_name_value;
 }
 
 std::string name()
