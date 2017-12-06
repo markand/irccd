@@ -147,7 +147,7 @@ void connection::send(std::string message, send_t handler)
 {
     auto in_progress = !output_.empty();
 
-    output_.emplace_back(std::move(message + "\r\n"), std::move(handler));
+    output_.emplace_back(message + "\r\n", std::move(handler));
 
     if (!in_progress)
         sflush();
