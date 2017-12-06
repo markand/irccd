@@ -94,10 +94,6 @@ function(irccd_define_test)
         )
     endforeach()
 
-    if (UNIX)
-        set_target_properties(test-${TEST_NAME} PROPERTIES LINK_FLAGS -pthread)
-    endif ()
-
     # And test
     add_test(
         NAME test-${TEST_NAME}

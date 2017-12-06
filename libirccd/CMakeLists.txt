@@ -74,6 +74,7 @@ irccd_define_library(
         ${SOURCES}
     LIBRARIES
         Boost::timer
+        Threads::Threads
         $<$<BOOL:${IRCCD_SYSTEM_LINUX}>:dl>
         $<$<BOOL:${IRCCD_SYSTEM_MAC}>:resolv>
         libcommon

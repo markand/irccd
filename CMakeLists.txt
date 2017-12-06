@@ -75,6 +75,8 @@ include(cmake/IrccdVersion.cmake)
 include(cmake/IrccdOptions.cmake)
 include(cmake/IrccdSystem.cmake)
 
+find_package(Threads REQUIRED)
+
 add_subdirectory(extern/json)
 add_subdirectory(doc)
 add_subdirectory(libcommon)

@@ -26,7 +26,6 @@ irccd_define_executable(
     LIBRARIES
         libirccd
         $<$<BOOL:${HAVE_JS}>:libirccd-js>
-        $<$<BOOL:${UNIX}>:-pthread>
 )
 
 if (IRCCD_SYSTEM_MAC)

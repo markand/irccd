@@ -33,7 +33,6 @@ set(
 )
 
 if (NOT IRCCD_SYSTEM_WINDOWS)
-    list(APPEND LIBRARIES -pthread)
     list(APPEND HEADERS ${libirccdctl_SOURCE_DIR}/irccd/ctl/local_connection.hpp)
     list(APPEND SOURCES ${libirccdctl_SOURCE_DIR}/irccd/ctl/local_connection.cpp)
 endif ()
@@ -45,6 +44,7 @@ irccd_define_library(
         ${HEADERS}
         ${SOURCES}
     LIBRARIES
+        Threads::Threads
         ${LIBRARIES}
         libcommon
         libirccd
