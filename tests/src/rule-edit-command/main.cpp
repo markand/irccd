@@ -21,8 +21,8 @@
 
 #include <irccd/json_util.hpp>
 
-#include <irccd/command.hpp>
-#include <irccd/rule_service.hpp>
+#include <irccd/daemon/command.hpp>
+#include <irccd/daemon/rule_service.hpp>
 
 #include <command_test.hpp>
 

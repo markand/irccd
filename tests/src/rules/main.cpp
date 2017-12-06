@@ -20,7 +20,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <irccd/logger.hpp>
-#include <irccd/rule_service.hpp>
+#include <irccd/daemon/rule_service.hpp>
 
 namespace irccd {
 

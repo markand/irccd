@@ -19,8 +19,8 @@
 #define BOOST_TEST_MODULE "Auth plugin"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/irccd.hpp>
-#include <irccd/server.hpp>
+#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/server.hpp>
 
 #include "plugin_test.hpp"
 

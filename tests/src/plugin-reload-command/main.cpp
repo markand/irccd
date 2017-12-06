@@ -19,8 +19,8 @@
 #define BOOST_TEST_MODULE "plugin-reload"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/command.hpp>
-#include <irccd/plugin_service.hpp>
+#include <irccd/daemon/command.hpp>
+#include <irccd/daemon/plugin_service.hpp>
 
 #include <command_test.hpp>
 

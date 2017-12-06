@@ -20,8 +20,8 @@
 #include <boost/asio.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/irccd.hpp>
-#include <irccd/plugin_service.hpp>
+#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/plugin_service.hpp>
 
 #include <irccd/js/irccd_jsapi.hpp>
 #include <irccd/js/js_plugin.hpp>

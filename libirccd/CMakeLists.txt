@@ -22,46 +22,46 @@ find_package(Boost REQUIRED QUIET COMPONENTS timer)
 
 set(
     HEADERS
-    ${libirccd_SOURCE_DIR}/irccd/basic_transport_client.hpp
-    ${libirccd_SOURCE_DIR}/irccd/basic_transport_server.hpp
-    ${libirccd_SOURCE_DIR}/irccd/command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/command_service.hpp
-    ${libirccd_SOURCE_DIR}/irccd/config.hpp
-    ${libirccd_SOURCE_DIR}/irccd/dynlib_plugin.hpp
-    ${libirccd_SOURCE_DIR}/irccd/ip_transport_server.hpp
-    ${libirccd_SOURCE_DIR}/irccd/irccd.hpp
-    ${libirccd_SOURCE_DIR}/irccd/irc.hpp
-    ${libirccd_SOURCE_DIR}/irccd/local_transport_server.hpp
-    ${libirccd_SOURCE_DIR}/irccd/plugin.hpp
-    ${libirccd_SOURCE_DIR}/irccd/plugin_service.hpp
-    ${libirccd_SOURCE_DIR}/irccd/rule.hpp
-    ${libirccd_SOURCE_DIR}/irccd/rule_service.hpp
-    ${libirccd_SOURCE_DIR}/irccd/server.hpp
-    ${libirccd_SOURCE_DIR}/irccd/server_service.hpp
-    ${libirccd_SOURCE_DIR}/irccd/transport_client.hpp
-    ${libirccd_SOURCE_DIR}/irccd/transport_server.hpp
-    ${libirccd_SOURCE_DIR}/irccd/transport_service.hpp
-    $<$<BOOL:${HAVE_SSL}>:${libirccd_SOURCE_DIR}/irccd/tls_transport_server.hpp>
+    ${libirccd_SOURCE_DIR}/irccd/daemon/basic_transport_client.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/basic_transport_server.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command_service.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/config.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/dynlib_plugin.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/ip_transport_server.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/irccd.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/irc.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/local_transport_server.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_service.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/rule.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_service.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/server.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/server_service.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/transport_client.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/transport_server.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/transport_service.hpp
+    $<$<BOOL:${HAVE_SSL}>:${libirccd_SOURCE_DIR}/irccd/daemon/tls_transport_server.hpp>
 )
 
 set(
     SOURCES
-    ${libirccd_SOURCE_DIR}/irccd/command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/command_service.cpp
-    ${libirccd_SOURCE_DIR}/irccd/config.cpp
-    ${libirccd_SOURCE_DIR}/irccd/dynlib_plugin.cpp
-    ${libirccd_SOURCE_DIR}/irccd/irccd.cpp
-    ${libirccd_SOURCE_DIR}/irccd/irc.cpp
-    ${libirccd_SOURCE_DIR}/irccd/plugin.cpp
-    ${libirccd_SOURCE_DIR}/irccd/plugin_service.cpp
-    ${libirccd_SOURCE_DIR}/irccd/rule.cpp
-    ${libirccd_SOURCE_DIR}/irccd/rule_service.cpp
-    ${libirccd_SOURCE_DIR}/irccd/server.cpp
-    ${libirccd_SOURCE_DIR}/irccd/server_service.cpp
-    ${libirccd_SOURCE_DIR}/irccd/transport_client.cpp
-    ${libirccd_SOURCE_DIR}/irccd/transport_server.cpp
-    ${libirccd_SOURCE_DIR}/irccd/transport_service.cpp
-    $<$<BOOL:${HAVE_SSL}>:${libirccd_SOURCE_DIR}/irccd/tls_transport_server.cpp>
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command_service.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/config.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/dynlib_plugin.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/irccd.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/irc.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_service.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/rule.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_service.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/server.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/server_service.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/transport_client.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/transport_server.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/transport_service.cpp
+    $<$<BOOL:${HAVE_SSL}>:${libirccd_SOURCE_DIR}/irccd/daemon/tls_transport_server.cpp>
 )
 
 irccd_define_library(
@@ -76,7 +76,7 @@ irccd_define_library(
         $<$<BOOL:${IRCCD_SYSTEM_MAC}>:resolv>
         libcommon
     PUBLIC_INCLUDES
-        $<BUILD_INTERFACE:${libirccd_SOURCE_DIR}/irccd>
+        $<BUILD_INTERFACE:${libirccd_SOURCE_DIR}/irccd/daemon>
         $<BUILD_INTERFACE:${libirccd_SOURCE_DIR}>
         $<INSTALL_INTERFACE:${WITH_INCLUDEDIR}>
 )

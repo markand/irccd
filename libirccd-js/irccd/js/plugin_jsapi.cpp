@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/irccd.hpp>
-#include <irccd/plugin_service.hpp>
+#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/plugin_service.hpp>
 
 #include "irccd_jsapi.hpp"
 #include "js_plugin.hpp"

@@ -21,10 +21,10 @@
 #include <irccd/sysconfig.hpp>
 #include <irccd/json_util.hpp>
 
-#include <irccd/irccd.hpp>
-#include <irccd/server.hpp>
-#include <irccd/plugin.hpp>
-#include <irccd/rule.hpp>
+#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/server.hpp>
+#include <irccd/daemon/plugin.hpp>
+#include <irccd/daemon/rule.hpp>
 
 #include "controller.hpp"
 #include "connection.hpp"

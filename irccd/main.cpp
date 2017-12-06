@@ -33,17 +33,18 @@
 #include <csignal>
 #include <iostream>
 
-#include <irccd/command_service.hpp>
-#include <irccd/config.hpp>
-#include <irccd/irccd.hpp>
 #include <irccd/logger.hpp>
 #include <irccd/options.hpp>
-#include <irccd/plugin_service.hpp>
-#include <irccd/rule_service.hpp>
-#include <irccd/server_service.hpp>
 #include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
-#include <irccd/transport_service.hpp>
+
+#include <irccd/daemon/command_service.hpp>
+#include <irccd/daemon/config.hpp>
+#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/plugin_service.hpp>
+#include <irccd/daemon/rule_service.hpp>
+#include <irccd/daemon/server_service.hpp>
+#include <irccd/daemon/transport_service.hpp>
 
 #if defined(HAVE_JS)
 #   include <irccd/js/directory_jsapi.hpp>

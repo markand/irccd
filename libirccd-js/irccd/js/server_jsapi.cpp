@@ -20,8 +20,8 @@
 #include <sstream>
 #include <unordered_map>
 
-#include <irccd.hpp>
-#include <irccd/server_service.hpp>
+#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/server_service.hpp>
 
 #include "duktape_vector.hpp"
 #include "irccd_jsapi.hpp"

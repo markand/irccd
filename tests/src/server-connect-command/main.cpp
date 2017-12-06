@@ -19,7 +19,7 @@
 #define BOOST_TEST_MODULE "server-connect"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/server_service.hpp>
+#include <irccd/daemon/server_service.hpp>
 
 #include <journal_server.hpp>
 #include <command_test.hpp>

@@ -18,8 +18,9 @@
 
 #include <boost/asio.hpp>
 
-#include <irccd/irccd.hpp>
 #include <irccd/logger.hpp>
+
+#include <irccd/daemon/irccd.hpp>
 
 #include "irccd_jsapi.hpp"
 #include "js_plugin.hpp"

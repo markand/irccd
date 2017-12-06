@@ -19,7 +19,7 @@
 #define BOOST_TEST_MODULE "irc"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/irc.hpp>
+#include <irccd/daemon/irc.hpp>
 
 namespace irccd {
 

@@ -19,8 +19,9 @@
 #define BOOST_TEST_MODULE "System Javascript API"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/irccd.hpp>
 #include <irccd/system.hpp>
+
+#include <irccd/daemon/irccd.hpp>
 
 #include <irccd/js/file_jsapi.hpp>
 #include <irccd/js/system_jsapi.hpp>

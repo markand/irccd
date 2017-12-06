@@ -23,10 +23,10 @@
 
 #include <irccd/logger.hpp>
 
-#include <irccd/command_service.hpp>
-#include <irccd/ip_transport_server.hpp>
-#include <irccd/irccd.hpp>
-#include <irccd/transport_service.hpp>
+#include <irccd/daemon/command_service.hpp>
+#include <irccd/daemon/ip_transport_server.hpp>
+#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/transport_service.hpp>
 
 #include <irccd/ctl/ip_connection.hpp>
 #include <irccd/ctl/controller.hpp>

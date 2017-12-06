@@ -28,7 +28,7 @@
 
 #include <irccd/logger.hpp>
 
-#include <irccd/irccd.hpp>
+#include <irccd/daemon/irccd.hpp>
 
 #include <irccd/js/js_plugin.hpp>
 #include <irccd/js/irccd_jsapi.hpp>
