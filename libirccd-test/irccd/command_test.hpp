@@ -33,8 +33,22 @@
 
 namespace irccd {
 
-template <typename Command>
+template <typename... Commands>
 class command_test {
+private:
+    template <typename Command>
+    inline void add()
+    {
+        daemon_->commands().add(std::make_unique<Command>());
+    }
+
+    template <typename C1, typename C2, typename... Tail>
+    inline void add()
+    {
+        add<C1>();
+        add<C2, Tail...>();
+    }
+
 protected:
     boost::asio::io_service service_;
     boost::asio::deadline_timer timer_;
@@ -58,8 +72,8 @@ protected:
     }
 };
 
-template <typename Command>
-command_test<Command>::command_test()
+template <typename... Commands>
+command_test<Commands...>::command_test()
     : timer_(service_)
     , daemon_(std::make_unique<irccd>(service_))
 {
@@ -76,7 +90,7 @@ command_test<Command>::command_test()
     ctl_ = std::make_unique<ctl::controller>(*conn_);
 
     // Add the server and the command.
-    daemon_->commands().add(std::make_unique<Command>());
+    add<Commands...>();
     daemon_->transports().add(std::make_unique<ip_transport_server>(std::move(acc)));
 
     timer_.expires_from_now(boost::posix_time::seconds(10));

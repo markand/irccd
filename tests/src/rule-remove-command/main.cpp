@@ -30,11 +30,10 @@ namespace irccd {
 
 namespace {
 
-class rule_remove_test : public command_test<rule_remove_command> {
+class rule_remove_test : public command_test<rule_remove_command, rule_list_command> {
 public:
     rule_remove_test()
     {
-        daemon_->commands().add(std::make_unique<rule_list_command>());
         daemon_->rules().add(rule(
             { "s1", "s2" },
             { "c1", "c2" },

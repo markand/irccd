@@ -30,13 +30,7 @@ namespace irccd {
 
 namespace {
 
-class rule_add_test : public command_test<rule_add_command> {
-public:
-    rule_add_test()
-    {
-        daemon_->commands().add(std::make_unique<rule_list_command>());
-    }
-};
+using rule_add_test = command_test<rule_add_command, rule_list_command>;
 
 } // !namespace
 

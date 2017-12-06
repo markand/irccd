@@ -30,11 +30,10 @@ namespace irccd {
 
 namespace {
 
-class rule_move_test : public command_test<rule_move_command> {
+class rule_move_test : public command_test<rule_move_command, rule_list_command> {
 public:
     rule_move_test()
     {
-        daemon_->commands().add(std::make_unique<rule_list_command>());
         daemon_->rules().add(rule(
             { "s0" },
             { "c0" },
