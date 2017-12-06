@@ -103,7 +103,6 @@
 #   include <unistd.h>
 #endif
 
-#include "logger.hpp"
 #include "system.hpp"
 #include "string_util.hpp"
 #include "xdg.hpp"
@@ -113,56 +112,6 @@ namespace irccd {
 namespace sys {
 
 namespace {
-
-/*
- * set_privileges.
- * ------------------------------------------------------------------
- *
- * This is an helper for setting the uid or gid. It accepts both numeric and
- * string uid and gid.
- *
- * If a name is specified as uid/group, the lookup function will be called and
- * must be getpwname or getgrname. Then, to get the id from the returned
- * structure (struct passwd, struct group), the getter function will return
- * either pw_uid or gr_gid.
- *
- * Finally, when the id is resolved, the setter function (setuid, setgid) will
- * be called.
- *
- *   - typeName the type of id (uid or gid)
- *   - value the value (numeric or name)
- *   - lookup the lookup function to resolve the name (getpwnam or getgrnam)
- *   - setter the function to apply the id (setuid or setgid)
- *   - getter the function to get the id from the informal structure
- */
-template <typename IntType, typename LookupFunc, typename SetterFunc, typename FieldGetter>
-void set_privileges(const std::string& type_name,
-                    const std::string& value,
-                    LookupFunc lookup,
-                    SetterFunc setter,
-                    FieldGetter getter)
-{
-    IntType id = 0;
-
-    if (string_util::is_int(value))
-        id = std::stoi(value);
-    else {
-        auto info = lookup(value.c_str());
-
-        if (info == nullptr) {
-            log::warning() << "irccd: invalid " << type_name << ": " << std::strerror(errno) << std::endl;
-            return;
-        } else {
-            id = getter(info);
-            log::debug() << "irccd: " << type_name << " " << value << " resolved to: " << id << std::endl;
-        }
-    }
-
-    if (setter(id) < 0)
-        log::warning() << "irccd: could not set " << type_name << ": " << std::strerror(errno) << std::endl;
-    else
-        log::info() << "irccd: setting " << type_name << " to " << value << std::endl;
-}
 
 /*
  * executable_path
@@ -524,9 +473,23 @@ std::string env(const std::string& var)
 
 void set_uid(const std::string& value)
 {
-    set_privileges<uid_t>("uid", value, &getpwnam, &setuid, [] (auto pw) {
-        return pw->pw_uid;
-    });
+    assert(value.c_str());
+
+    uid_t id;
+
+    if (string_util::is_int(value))
+        id = std::stoi(value);
+    else {
+        auto pw = getpwnam(value.c_str());
+
+        if (!pw)
+            throw std::runtime_error(string_util::sprintf("uid %s not found", value));
+
+        id = pw->pw_uid;
+    }
+
+    if (setuid(id) < 0)
+        throw std::runtime_error(std::strerror(errno));
 }
 
 #endif
@@ -535,9 +498,23 @@ void set_uid(const std::string& value)
 
 void set_gid(const std::string& value)
 {
-    set_privileges<gid_t>("gid", value, &getgrnam, &setgid, [] (auto gr) {
-        return gr->gr_gid;
-    });
+    assert(value.c_str());
+
+    gid_t id;
+
+    if (string_util::is_int(value))
+        id = std::stoi(value);
+    else {
+        auto gr = getgrnam(value.c_str());
+
+        if (!gr)
+            throw std::runtime_error(string_util::sprintf("gid %s not found", value));
+
+        id = gr->gr_gid;
+    }
+
+    if (setgid(id) < 0)
+        throw std::runtime_error(std::strerror(errno));
 }
 
 #endif

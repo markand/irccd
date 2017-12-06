@@ -179,6 +179,7 @@ void irccd::load_gid()
 #if defined(HAVE_SETGID)
     try {
         sys::set_gid(gid);
+        log::info() << "irccd: setting gid to: " << gid << std::endl;
     } catch (const std::exception& ex) {
         log::warning() << "irccd: failed to set gid: " << ex.what() << std::endl;
     }
@@ -189,7 +190,7 @@ void irccd::load_gid()
 
 void irccd::load_uid()
 {
-    auto uid = config_.value("general", "gid");
+    auto uid = config_.value("general", "uid");
 
     if (uid.empty())
         return;
@@ -197,6 +198,7 @@ void irccd::load_uid()
 #if defined(HAVE_SETUID)
     try {
         sys::set_uid(uid);
+        log::info() << "irccd: setting uid to: " << uid << std::endl;
     } catch (const std::exception& ex) {
         log::warning() << "irccd: failed to set uid: " << ex.what() << std::endl;
     }
