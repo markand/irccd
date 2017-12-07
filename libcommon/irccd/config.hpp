@@ -24,6 +24,8 @@
  * \brief Read .ini configuration file for irccd
  */
 
+#include <boost/optional.hpp>
+
 #include "ini.hpp"
 
 namespace irccd {
@@ -41,10 +43,9 @@ public:
      * Search the configuration file into the standard defined paths.
      *
      * \param name the file name
-     * \return the config
-     * \throw std::exception on errors or if no config could be found
+     * \return the config or empty if not found
      */
-    static config find(const std::string& name);
+    static boost::optional<config> find(const std::string& name);
 
     /**
      * Load the configuration from the specified path.

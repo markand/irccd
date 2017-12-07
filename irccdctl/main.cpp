@@ -23,7 +23,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/timer/timer.hpp>
 
-#include <irccd/ini.hpp>
+#include <irccd/config.hpp>
 #include <irccd/json_util.hpp>
 #include <irccd/options.hpp>
 #include <irccd/string_util.hpp>
@@ -257,28 +257,23 @@ alias read_alias(const ini::section& sc, const std::string& name)
     return alias;
 }
 
-void read(const std::string& path)
+void read(const config& cfg)
 {
-    try {
-        ini::document doc = ini::read_file(path);
-        ini::document::const_iterator it;
+    ini::document::const_iterator it;
 
-        if (!ctl && (it = doc.find("connect")) != doc.end())
-            read_connect(*it);
-        if ((it = doc.find("general")) != doc.end())
-            read_general(*it);
+    if (!ctl && (it = cfg.doc().find("connect")) != cfg.doc().end())
+        read_connect(*it);
+    if ((it = cfg.doc().find("general")) != cfg.doc().end())
+        read_general(*it);
 
-        // [alias.*] sections.
-        for (const auto& sc : doc) {
-            if (sc.key().compare(0, 6, "alias.") == 0) {
-                auto name = sc.key().substr(6);
-                auto alias = read_alias(sc, name);
+    // [alias.*] sections.
+    for (const auto& sc : cfg.doc()) {
+        if (sc.key().compare(0, 6, "alias.") == 0) {
+            auto name = sc.key().substr(6);
+            auto alias = read_alias(sc, name);
 
-                aliases.emplace(std::move(name), std::move(alias));
-            }
+            aliases.emplace(std::move(name), std::move(alias));
         }
-    } catch (const std::exception &ex) {
-        std::cerr << path << ": " << ex.what() << std::endl;
     }
 }
 
@@ -573,14 +568,8 @@ int main(int argc, char** argv)
         if (it != result.end() || (it = result.find("--config")) != result.end())
             irccd::ctl::read(it->second);
         else {
-            for (const auto& path : irccd::sys::config_filenames("irccdctl.conf")) {
-                boost::system::error_code ec;
-
-                if (boost::filesystem::exists(path, ec) && !ec) {
-                    irccd::ctl::read(path);
-                    break;
-                }
-            }
+            if (auto conf = irccd::config::find("irccdctl.conf"))
+                irccd::ctl::read(*conf);
         }
     } catch (const std::exception& ex) {
         std::cerr << "abort: " << ex.what() << std::endl;

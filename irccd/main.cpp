@@ -33,12 +33,12 @@
 #include <csignal>
 #include <iostream>
 
+#include <irccd/config.hpp>
 #include <irccd/options.hpp>
 #include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
 
 #include <irccd/daemon/command_service.hpp>
-#include <irccd/daemon/config.hpp>
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/logger.hpp>
 #include <irccd/daemon/plugin_service.hpp>
@@ -160,7 +160,12 @@ config open(const option::result& result)
     if (it != result.end() || (it = result.find("--config")) != result.end())
         return config(it->second);
 
-    return config::find("irccd.conf");
+    auto cfg = config::find("irccd.conf");
+
+    if (!cfg)
+        throw std::runtime_error("no configuration file could be found");
+
+    return *cfg;
 }
 
 } // !namespace

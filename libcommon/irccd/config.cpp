@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <stdexcept>
-
 #include <boost/filesystem.hpp>
 
 #include <irccd/system.hpp>
@@ -26,7 +24,7 @@
 
 namespace irccd {
 
-config config::find(const std::string& name)
+boost::optional<config> config::find(const std::string& name)
 {
     for (const auto& path : sys::config_filenames(name)) {
         boost::system::error_code ec;
@@ -35,7 +33,7 @@ config config::find(const std::string& name)
             return config(path);
     }
 
-    throw std::runtime_error("no configuration file found");
+    return boost::optional<config>();
 }
 
 } // !irccd

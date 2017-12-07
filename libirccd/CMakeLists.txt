@@ -26,7 +26,6 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/basic_transport_server.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/command_service.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/config.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/dynlib_plugin.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/ip_transport_server.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/irccd.hpp
@@ -49,7 +48,6 @@ set(
     SOURCES
     ${libirccd_SOURCE_DIR}/irccd/daemon/command.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/command_service.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/config.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/dynlib_plugin.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/irccd.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/irc.cpp
