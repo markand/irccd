@@ -24,7 +24,7 @@
 #include <irccd/js/duktape_vector.hpp>
 #include <irccd/js/file_jsapi.hpp>
 
-#include <js_test.hpp>
+#include <irccd/test/js_test.hpp>
 
 namespace irccd {
 

@@ -25,7 +25,7 @@
 
 #include <irccd/js/unicode_jsapi.hpp>
 
-#include <js_test.hpp>
+#include <irccd/test/js_test.hpp>
 
 namespace irccd {
 

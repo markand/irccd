@@ -23,7 +23,7 @@
 #include <irccd/js/plugin_jsapi.hpp>
 #include <irccd/js/timer_jsapi.hpp>
 
-#include <js_test.hpp>
+#include <irccd/test/js_test.hpp>
 
 #include <irccd/js/logger_jsapi.hpp>
 

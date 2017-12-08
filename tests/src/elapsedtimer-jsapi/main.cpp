@@ -23,7 +23,7 @@
 
 #include <irccd/js/elapsed_timer_jsapi.hpp>
 
-#include <js_test.hpp>
+#include <irccd/test/js_test.hpp>
 
 using namespace std::chrono_literals;
 

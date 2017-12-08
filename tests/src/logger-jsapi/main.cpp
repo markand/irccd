@@ -24,7 +24,7 @@
 #include <irccd/js/logger_jsapi.hpp>
 #include <irccd/js/plugin_jsapi.hpp>
 
-#include <js_test.hpp>
+#include <irccd/test/js_test.hpp>
 
 namespace irccd {
 

@@ -26,7 +26,7 @@
 #include <irccd/js/file_jsapi.hpp>
 #include <irccd/js/system_jsapi.hpp>
 
-#include <js_test.hpp>
+#include <irccd/test/js_test.hpp>
 
 namespace irccd {
 

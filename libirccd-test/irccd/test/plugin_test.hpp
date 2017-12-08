@@ -26,9 +26,10 @@
 
 #include <boost/asio/io_service.hpp>
 
+#include <irccd/daemon/irccd.hpp>
+
 #include <js/js_plugin.hpp>
 
-#include "irccd.hpp"
 #include "journal_server.hpp"
 
 namespace irccd {

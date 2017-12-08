@@ -18,7 +18,7 @@
 
 #include <boost/dll.hpp>
 
-#include <plugin.hpp>
+#include <irccd/daemon/plugin.hpp>
 
 namespace irccd {
 

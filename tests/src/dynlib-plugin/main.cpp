@@ -28,9 +28,10 @@
  * Functions load, unload and reload can not be tested though.
  */
 
-#include <irccd.hpp>
-#include <dynlib_plugin.hpp>
-#include <journal_server.hpp>
+#include <irccd/daemon/dynlib_plugin.hpp>
+#include <irccd/daemon/irccd.hpp>
+
+#include <irccd/test/journal_server.hpp>
 
 namespace irccd {
 

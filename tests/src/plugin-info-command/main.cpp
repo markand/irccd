@@ -22,7 +22,7 @@
 #include <irccd/daemon/command.hpp>
 #include <irccd/daemon/plugin_service.hpp>
 
-#include <command_test.hpp>
+#include <irccd/test/command_test.hpp>
 
 namespace irccd {
 

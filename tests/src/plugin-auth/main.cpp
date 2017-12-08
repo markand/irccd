@@ -22,7 +22,7 @@
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/server.hpp>
 
-#include "plugin_test.hpp"
+#include <irccd/test/plugin_test.hpp>
 
 namespace irccd {
 

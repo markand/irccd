@@ -19,7 +19,7 @@
 #define BOOST_TEST_MODULE "Irccd Javascript API"
 #include <boost/test/unit_test.hpp>
 
-#include <js_test.hpp>
+#include <irccd/test/js_test.hpp>
 
 namespace irccd {
 

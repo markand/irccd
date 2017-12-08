@@ -26,8 +26,9 @@
 
 #include <vector>
 
+#include <irccd/daemon/plugin.hpp>
+
 #include "duktape.hpp"
-#include "plugin.hpp"
 
 namespace irccd {
 

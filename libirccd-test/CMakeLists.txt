@@ -21,19 +21,19 @@ project(libirccd-test)
 irccd_define_library(
     TARGET libirccd-test
     SOURCES
-        ${libirccd-test_SOURCE_DIR}/irccd/command_test.hpp
-        ${libirccd-test_SOURCE_DIR}/irccd/journal_server.cpp
-        ${libirccd-test_SOURCE_DIR}/irccd/journal_server.hpp
-        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin_test.cpp>
-        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin_test.hpp>
-        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/js_test.hpp>
+        ${libirccd-test_SOURCE_DIR}/irccd/test/command_test.hpp
+        ${libirccd-test_SOURCE_DIR}/irccd/test/journal_server.cpp
+        ${libirccd-test_SOURCE_DIR}/irccd/test/journal_server.hpp
+        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/plugin_test.cpp>
+        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/plugin_test.hpp>
+        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/js_test.hpp>
         $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin_test.js>
     LIBRARIES
         $<$<BOOL:${HAVE_JS}>:libirccd-js>
         libirccd
         libirccdctl
     PUBLIC_INCLUDES
-        $<BUILD_INTERFACE:${libirccd-test_SOURCE_DIR}/irccd>
+        $<BUILD_INTERFACE:${libirccd-test_SOURCE_DIR}>
     FLAGS
         $<BUILD_INTERFACE:IRCCD_PLUGIN_TEST="${libirccd-test_SOURCE_DIR}/irccd/plugin_test.js">
 )

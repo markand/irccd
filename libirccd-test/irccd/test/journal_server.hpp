@@ -23,7 +23,7 @@
 
 #include <json.hpp>
 
-#include <server.hpp>
+#include <irccd/daemon/server.hpp>
 
 /**
  * \file journal_server.hpp

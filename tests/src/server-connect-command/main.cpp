@@ -21,8 +21,8 @@
 
 #include <irccd/daemon/server_service.hpp>
 
-#include <journal_server.hpp>
-#include <command_test.hpp>
+#include <irccd/test/command_test.hpp>
+#include <irccd/test/journal_server.hpp>
 
 namespace irccd {
 

@@ -77,7 +77,6 @@ irccd_define_library(
         $<$<BOOL:${IRCCD_SYSTEM_MAC}>:resolv>
         libcommon
     PUBLIC_INCLUDES
-        $<BUILD_INTERFACE:${libirccd_SOURCE_DIR}/irccd/daemon>
         $<BUILD_INTERFACE:${libirccd_SOURCE_DIR}>
         $<INSTALL_INTERFACE:${WITH_INCLUDEDIR}>
 )
