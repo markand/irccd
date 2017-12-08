@@ -27,13 +27,10 @@ irccd_define_library(
         $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/plugin_test.cpp>
         $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/plugin_test.hpp>
         $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/js_test.hpp>
-        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/plugin_test.js>
     LIBRARIES
         $<$<BOOL:${HAVE_JS}>:libirccd-js>
         libirccd
         libirccdctl
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${libirccd-test_SOURCE_DIR}>
-    FLAGS
-        $<BUILD_INTERFACE:IRCCD_PLUGIN_TEST="${libirccd-test_SOURCE_DIR}/irccd/plugin_test.js">
 )
