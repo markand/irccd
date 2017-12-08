@@ -19,196 +19,165 @@
 project(html)
 
 set(
+    HTML_API_SOURCES
+    api/module/Irccd.Directory/index.md
+    api/module/Irccd.Directory/Irccd.Directory.remove.md
+    api/module/Irccd.Directory/Irccd.Directory.mkdir.md
+    api/module/Irccd.Directory/Irccd.Directory.find.md
+    api/module/Irccd.Directory/Irccd.Directory.prototype.constructor.md
+    api/module/Irccd.Directory/Irccd.Directory.prototype.remove.md
+    api/module/Irccd.Directory/Irccd.Directory.prototype.find.md
+    api/module/Irccd.ElapsedTimer/index.md
+    api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.pause.md
+    api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.elapsed.md
+    api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.constructor.md
+    api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.restart.md
+    api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.reset.md
+    api/module/Irccd.File/index.md
+    api/module/Irccd.File/Irccd.File.stat.md
+    api/module/Irccd.File/Irccd.File.dirname.md
+    api/module/Irccd.File/Irccd.File.exists.md
+    api/module/Irccd.File/Irccd.File.remove.md
+    api/module/Irccd.File/Irccd.File.basename.md
+    api/module/Irccd.File/Irccd.File.prototype.read.md
+    api/module/Irccd.File/Irccd.File.prototype.seek.md
+    api/module/Irccd.File/Irccd.File.prototype.stat.md
+    api/module/Irccd.File/Irccd.File.prototype.constructor.md
+    api/module/Irccd.File/Irccd.File.prototype.tell.md
+    api/module/Irccd.File/Irccd.File.prototype.dirname.md
+    api/module/Irccd.File/Irccd.File.prototype.readline.md
+    api/module/Irccd.File/Irccd.File.prototype.write.md
+    api/module/Irccd.File/Irccd.File.prototype.lines.md
+    api/module/Irccd.File/Irccd.File.prototype.close.md
+    api/module/Irccd.File/Irccd.File.prototype.remove.md
+    api/module/Irccd.File/Irccd.File.prototype.basename.md
+    api/module/Irccd.Logger/index.md
+    api/module/Irccd.Logger/Irccd.Logger.warning.md
+    api/module/Irccd.Logger/Irccd.Logger.info.md
+    api/module/Irccd.Logger/Irccd.Logger.debug.md
+    api/module/Irccd.Plugin/index.md
+    api/module/Irccd.Plugin/Irccd.Plugin.unload.md
+    api/module/Irccd.Plugin/Irccd.Plugin.load.md
+    api/module/Irccd.Plugin/Irccd.Plugin.reload.md
+    api/module/Irccd.Plugin/Irccd.Plugin.info.md
+    api/module/Irccd.Plugin/Irccd.Plugin.list.md
+    api/module/Irccd.Server/index.md
+    api/module/Irccd.Server/Irccd.Server.remove.md
+    api/module/Irccd.Server/Irccd.Server.list.md
+    api/module/Irccd.Server/Irccd.Server.find.md
+    api/module/Irccd.Server/Irccd.Server.add.md
+    api/module/Irccd.Server/Irccd.Server.prototype.me.md
+    api/module/Irccd.Server/Irccd.Server.prototype.mode.md
+    api/module/Irccd.Server/Irccd.Server.prototype.part.md
+    api/module/Irccd.Server/Irccd.Server.prototype.message.md
+    api/module/Irccd.Server/Irccd.Server.prototype.topic.md
+    api/module/Irccd.Server/Irccd.Server.prototype.whois.md
+    api/module/Irccd.Server/Irccd.Server.prototype.nick.md
+    api/module/Irccd.Server/Irccd.Server.prototype.constructor.md
+    api/module/Irccd.Server/Irccd.Server.prototype.join.md
+    api/module/Irccd.Server/Irccd.Server.prototype.invite.md
+    api/module/Irccd.Server/Irccd.Server.prototype.info.md
+    api/module/Irccd.Server/Irccd.Server.prototype.isSelf.md
+    api/module/Irccd.Server/Irccd.Server.prototype.notice.md
+    api/module/Irccd.Server/Irccd.Server.prototype.kick.md
+    api/module/Irccd.Server/Irccd.Server.prototype.toString.md
+    api/module/Irccd.Server/Irccd.Server.prototype.names.md
+    api/module/Irccd.System/index.md
+    api/module/Irccd.System/Irccd.System.exec.md
+    api/module/Irccd.System/Irccd.System.sleep.md
+    api/module/Irccd.System/Irccd.System.popen.md
+    api/module/Irccd.System/Irccd.System.env.md
+    api/module/Irccd.System/Irccd.System.home.md
+    api/module/Irccd.System/Irccd.System.uptime.md
+    api/module/Irccd.System/Irccd.System.version.md
+    api/module/Irccd.System/Irccd.System.usleep.md
+    api/module/Irccd.System/Irccd.System.name.md
+    api/module/Irccd.System/Irccd.System.ticks.md
+    api/module/Irccd.Timer/index.md
+    api/module/Irccd.Timer/Irccd.Timer.prototype.start.md
+    api/module/Irccd.Timer/Irccd.Timer.prototype.constructor.md
+    api/module/Irccd.Timer/Irccd.Timer.prototype.stop.md
+    api/module/Irccd/index.md
+    api/module/Irccd.Unicode/index.md
+    api/module/Irccd.Unicode/Irccd.Unicode.isSpace.md
+    api/module/Irccd.Unicode/Irccd.Unicode.isTitle.md
+    api/module/Irccd.Unicode/Irccd.Unicode.isUpper.md
+    api/module/Irccd.Unicode/Irccd.Unicode.isLetter.md
+    api/module/Irccd.Unicode/Irccd.Unicode.isDigit.md
+    api/module/Irccd.Unicode/Irccd.Unicode.isLower.md
+    api/module/Irccd.Util/index.md
+    api/module/Irccd.Util/Irccd.Util.cut.md
+    api/module/Irccd.Util/Irccd.Util.format.md
+    api/module/Irccd.Util/Irccd.Util.splithost.md
+    api/module/Irccd.Util/Irccd.Util.splituser.md
+    api/index.md
+    api/event/onWhois.md
+    api/event/onMessage.md
+    api/event/onPart.md
+    api/event/onMode.md
+    api/event/onNotice.md
+    api/event/onLoad.md
+    api/event/onInvite.md
+    api/event/onCommand.md
+    api/event/onKick.md
+    api/event/onReload.md
+    api/event/onTopic.md
+    api/event/onConnect.md
+    api/event/onJoin.md
+    api/event/onMe.md
+    api/event/onNick.md
+    api/event/onNames.md
+    api/event/onUnload.md
+)
+
+set(
     HTML_SOURCES
-    ${html_SOURCE_DIR}/index.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Directory/index.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Directory/Irccd.Directory.remove.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Directory/Irccd.Directory.mkdir.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Directory/Irccd.Directory.find.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Directory/Irccd.Directory.prototype.constructor.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Directory/Irccd.Directory.prototype.remove.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Directory/Irccd.Directory.prototype.find.md
-    ${html_SOURCE_DIR}/api/module/Irccd.ElapsedTimer/index.md
-    ${html_SOURCE_DIR}/api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.pause.md
-    ${html_SOURCE_DIR}/api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.elapsed.md
-    ${html_SOURCE_DIR}/api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.constructor.md
-    ${html_SOURCE_DIR}/api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.restart.md
-    ${html_SOURCE_DIR}/api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.reset.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/index.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/Irccd.File.stat.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/Irccd.File.dirname.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/Irccd.File.exists.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/Irccd.File.remove.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/Irccd.File.basename.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/Irccd.File.prototype.read.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/Irccd.File.prototype.seek.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/Irccd.File.prototype.stat.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/Irccd.File.prototype.constructor.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/Irccd.File.prototype.tell.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/Irccd.File.prototype.dirname.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/Irccd.File.prototype.readline.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/Irccd.File.prototype.write.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/Irccd.File.prototype.lines.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/Irccd.File.prototype.close.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/Irccd.File.prototype.remove.md
-    ${html_SOURCE_DIR}/api/module/Irccd.File/Irccd.File.prototype.basename.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Logger/index.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Logger/Irccd.Logger.warning.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Logger/Irccd.Logger.info.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Logger/Irccd.Logger.debug.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Plugin/index.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Plugin/Irccd.Plugin.unload.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Plugin/Irccd.Plugin.load.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Plugin/Irccd.Plugin.reload.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Plugin/Irccd.Plugin.info.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Plugin/Irccd.Plugin.list.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/index.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.remove.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.list.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.find.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.add.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.me.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.mode.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.part.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.message.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.topic.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.whois.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.nick.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.constructor.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.join.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.invite.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.info.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.isSelf.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.notice.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.kick.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.toString.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Server/Irccd.Server.prototype.names.md
-    ${html_SOURCE_DIR}/api/module/Irccd.System/index.md
-    ${html_SOURCE_DIR}/api/module/Irccd.System/Irccd.System.exec.md
-    ${html_SOURCE_DIR}/api/module/Irccd.System/Irccd.System.sleep.md
-    ${html_SOURCE_DIR}/api/module/Irccd.System/Irccd.System.popen.md
-    ${html_SOURCE_DIR}/api/module/Irccd.System/Irccd.System.env.md
-    ${html_SOURCE_DIR}/api/module/Irccd.System/Irccd.System.home.md
-    ${html_SOURCE_DIR}/api/module/Irccd.System/Irccd.System.uptime.md
-    ${html_SOURCE_DIR}/api/module/Irccd.System/Irccd.System.version.md
-    ${html_SOURCE_DIR}/api/module/Irccd.System/Irccd.System.usleep.md
-    ${html_SOURCE_DIR}/api/module/Irccd.System/Irccd.System.name.md
-    ${html_SOURCE_DIR}/api/module/Irccd.System/Irccd.System.ticks.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Timer/index.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Timer/Irccd.Timer.prototype.start.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Timer/Irccd.Timer.prototype.constructor.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Timer/Irccd.Timer.prototype.stop.md
-    ${html_SOURCE_DIR}/api/module/Irccd/index.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Unicode/index.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Unicode/Irccd.Unicode.isSpace.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Unicode/Irccd.Unicode.isTitle.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Unicode/Irccd.Unicode.isUpper.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Unicode/Irccd.Unicode.isLetter.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Unicode/Irccd.Unicode.isDigit.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Unicode/Irccd.Unicode.isLower.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Util/index.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Util/Irccd.Util.cut.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Util/Irccd.Util.format.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Util/Irccd.Util.splithost.md
-    ${html_SOURCE_DIR}/api/module/Irccd.Util/Irccd.Util.splituser.md
-    ${html_SOURCE_DIR}/api/index.md
-    ${html_SOURCE_DIR}/api/event/onWhois.md
-    ${html_SOURCE_DIR}/api/event/onMessage.md
-    ${html_SOURCE_DIR}/api/event/onPart.md
-    ${html_SOURCE_DIR}/api/event/onMode.md
-    ${html_SOURCE_DIR}/api/event/onNotice.md
-    ${html_SOURCE_DIR}/api/event/onLoad.md
-    ${html_SOURCE_DIR}/api/event/onInvite.md
-    ${html_SOURCE_DIR}/api/event/onCommand.md
-    ${html_SOURCE_DIR}/api/event/onKick.md
-    ${html_SOURCE_DIR}/api/event/onReload.md
-    ${html_SOURCE_DIR}/api/event/onTopic.md
-    ${html_SOURCE_DIR}/api/event/onConnect.md
-    ${html_SOURCE_DIR}/api/event/onJoin.md
-    ${html_SOURCE_DIR}/api/event/onMe.md
-    ${html_SOURCE_DIR}/api/event/onNick.md
-    ${html_SOURCE_DIR}/api/event/onNames.md
-    ${html_SOURCE_DIR}/api/event/onUnload.md
-    ${html_SOURCE_DIR}/build/build-from-sources.md
-    ${html_SOURCE_DIR}/build/build-options.md
-    ${html_SOURCE_DIR}/dev/plugin-javascript-introduction.md
-    ${html_SOURCE_DIR}/dev/socket-commands.md
-    ${html_SOURCE_DIR}/dev/socket-protocol.md
-    ${html_SOURCE_DIR}/irccd/configuring.md
-    ${html_SOURCE_DIR}/irccd/paths.md
-    ${html_SOURCE_DIR}/irccd/usage.md
-    ${html_SOURCE_DIR}/irccdctl/configuring.md
-    ${html_SOURCE_DIR}/irccdctl/usage.md
-    ${html_SOURCE_DIR}/irccdctl/command/index.md
-    ${html_SOURCE_DIR}/irccdctl/command/help.md
-    ${html_SOURCE_DIR}/irccdctl/command/plugin-config.md
-    ${html_SOURCE_DIR}/irccdctl/command/plugin-info.md
-    ${html_SOURCE_DIR}/irccdctl/command/plugin-list.md
-    ${html_SOURCE_DIR}/irccdctl/command/plugin-load.md
-    ${html_SOURCE_DIR}/irccdctl/command/plugin-reload.md
-    ${html_SOURCE_DIR}/irccdctl/command/plugin-unload.md
-    ${html_SOURCE_DIR}/irccdctl/command/rule-add.md
-    ${html_SOURCE_DIR}/irccdctl/command/rule-edit.md
-    ${html_SOURCE_DIR}/irccdctl/command/rule-info.md
-    ${html_SOURCE_DIR}/irccdctl/command/rule-list.md
-    ${html_SOURCE_DIR}/irccdctl/command/rule-move.md
-    ${html_SOURCE_DIR}/irccdctl/command/rule-remove.md
-    ${html_SOURCE_DIR}/irccdctl/command/server-connect.md
-    ${html_SOURCE_DIR}/irccdctl/command/server-disconnect.md
-    ${html_SOURCE_DIR}/irccdctl/command/server-invite.md
-    ${html_SOURCE_DIR}/irccdctl/command/server-join.md
-    ${html_SOURCE_DIR}/irccdctl/command/server-kick.md
-    ${html_SOURCE_DIR}/irccdctl/command/server-list.md
-    ${html_SOURCE_DIR}/irccdctl/command/server-me.md
-    ${html_SOURCE_DIR}/irccdctl/command/server-message.md
-    ${html_SOURCE_DIR}/irccdctl/command/server-mode.md
-    ${html_SOURCE_DIR}/irccdctl/command/server-nick.md
-    ${html_SOURCE_DIR}/irccdctl/command/server-notice.md
-    ${html_SOURCE_DIR}/irccdctl/command/server-part.md
-    ${html_SOURCE_DIR}/irccdctl/command/server-reconnect.md
-    ${html_SOURCE_DIR}/irccdctl/command/server-topic.md
-    ${html_SOURCE_DIR}/irccdctl/command/watch.md
-    ${html_SOURCE_DIR}/misc/common-patterns-and-formatting.md
-    ${html_SOURCE_DIR}/misc/configuration-syntax.md
+    build.md
+    irccd.md
+    irccd.conf.md
+    irccdctl.md
+    irccdctl.conf.md
 )
 
 set(
     CSS
-    ${html_SOURCE_DIR}/resources/css/bootstrap.min.css
-    ${html_SOURCE_DIR}/resources/css/doc-guide.css
-    ${html_SOURCE_DIR}/resources/css/doc.css
-    ${html_SOURCE_DIR}/resources/css/tomorrow.css
+    ${html_SOURCE_DIR}/css/bootstrap.min.css
+    ${html_SOURCE_DIR}/css/doc-guide.css
+    ${html_SOURCE_DIR}/css/doc.css
+    ${html_SOURCE_DIR}/css/tomorrow.css
 )
 
 set(
     JS
-    ${html_SOURCE_DIR}/resources/js/bootstrap.min.js
-    ${html_SOURCE_DIR}/resources/js/highlight.min.js
-    ${html_SOURCE_DIR}/resources/js/jquery.min.js
+    ${html_SOURCE_DIR}/js/bootstrap.min.js
+    ${html_SOURCE_DIR}/js/highlight.min.js
+    ${html_SOURCE_DIR}/js/jquery.min.js
 )
 
-foreach (file ${HTML_SOURCES})
-    irccd_build_html(
-        SOURCE ${file}
-        OUTPUT_VAR output
-    )
-    list(APPEND OUTPUTS ${output})
+foreach (fname ${HTML_API_SOURCES} ${HTML_SOURCES})
+    # API sources require a js variable to be set.
+    if (${fname} IN_LIST HTML_API_SOURCES)
+        set(VARIABLES js:1)
+    else ()
+        set(VARIABLES guide:1)
+    endif ()
 
-    # Install this file.
-    file(RELATIVE_PATH basename ${html_SOURCE_DIR} ${file})
-    get_filename_component(dirname ${basename} DIRECTORY)
-    install(
-        FILES ${output}
+    irccd_build_html(
+        SOURCE ${doc_SOURCE_DIR}/src/${fname}
+        OUTPUT ${fname}
+        OUTPUT_VAR output
         COMPONENT docs
-        DESTINATION ${WITH_DOCDIR}/${dirname}
+        VARIABLES ${VARIABLES}
     )
+
+    list(APPEND OUTPUTS ${output})
 endforeach ()
 
 add_custom_target(
     html ALL
     SOURCES
         ${HTML_SOURCES} ${CSS} ${JS} ${OUTPUTS}
-        ${html_SOURCE_DIR}/resources/template.html
+        ${html_SOURCE_DIR}/template.html
     COMMAND
         ${CMAKE_COMMAND} -E make_directory ${html_BINARY_DIR}/css
     COMMAND

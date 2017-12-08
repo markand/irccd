@@ -1,7 +1,6 @@
----
-header: JavaScript plugin introduction
-guide: yes
----
+% introduction to Javascript plugins
+% David Demelier
+% 2017-12-08
 
 Irccd can be extended with JavaScript plugins. This chapter will tell you how
 plugins work within irccd and how to create your first plugin.
@@ -21,8 +20,6 @@ However, many aspects between Lua and JavaScript are similar:
   - It is very easy to implement your own API from C++ code.
 
 The current JavaScript interpreter is powered by [Duktape][duktape].
-
-[duktape]: http://duktape.org
 
 # Paths
 
@@ -169,6 +166,7 @@ This will output to the irccd log something like:
 plugin foo: error condition
 ```
 
+[duktape]: http://duktape.org
 [onMessage]: @baseurl@api/event/onMessage.html
 [server-api]: @baseurl@api/module/Irccd.Server/index.html
 [server-message]: @baseurl@api/module/Irccd.Server/Irccd.Server.prototype.message.html

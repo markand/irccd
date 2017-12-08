@@ -48,6 +48,7 @@ include(CMakeParseArguments)
 #   OUTPUT dev/howto-create-a-plugin
 #   SOURCE myfile.md
 #   OUTPUT_VAR output
+#   VARIABLES ... (Optional) variables to pass to pandoc
 # )
 #
 # add_custom_target(mytarget DEPENDS ${output})
@@ -57,8 +58,9 @@ include(CMakeParseArguments)
 
 macro(irccd_build_html)
     set(oneValueArgs COMPONENT OUTPUT OUTPUT_VAR SOURCE)
+    set(multiValueArgs VARIABLES)
 
-    cmake_parse_arguments(HTML "" "${oneValueArgs}" "" ${ARGN})
+    cmake_parse_arguments(HTML "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if (NOT HTML_SOURCE)
         message(FATAL_ERROR "Missing SOURCE parameter")
@@ -107,39 +109,13 @@ macro(irccd_build_html)
         @ONLY
     )
 
-    # Create a list of parents for the breadcrumb widget.
-    string(REPLACE "/" ";" parentlist "${dirname}")
-    set(parents "  -\n")
-    set(parents "${parents}    active: true\n")
-    set(parents "${parents}    name: \"Home\"\n")
-    set(parents "${parents}    path: \"${baseurl}index.html\"\n")
-
-    set(path "${baseurl}")
-    foreach (p ${parentlist})
-        set(path "${path}${p}/")
-        set(parents "${parents}  -\n")
-
-        if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${dirname}/${path}index.md)
-            set(parents "${parents}    active: true\n")
-        endif ()
-
-        set(parents "${parents}    name: \"${p}\"\n")
-        set(parents "${parents}    path: \"${path}index.html\"\n")
-    endforeach ()
-
-    configure_file(
-        ${html_SOURCE_DIR}/resources/metadata.yml
-        ${CMAKE_CURRENT_BINARY_DIR}/${dirname}/${basename}.yml
-    )
-
     # Pandoc the file.
     pandoc(
         OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${dirname}/${basename}.html
-        SOURCES
-            ${CMAKE_CURRENT_BINARY_DIR}/${dirname}/${basename}.yml
-            ${CMAKE_CURRENT_BINARY_DIR}/${dirname}/${basename}.md
+        SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${dirname}/${basename}.md
         DEPENDS ${HTML_SOURCE}
-        TEMPLATE ${html_SOURCE_DIR}/resources/template.html
+        TEMPLATE ${html_SOURCE_DIR}/template.html
+        VARIABLE baseurl:${baseurl} ${HTML_VARIABLES}
         FROM markdown
         TO html5
         STANDALONE TOC MAKE_DIRECTORY

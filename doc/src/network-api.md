@@ -1,34 +1,70 @@
----
-header: Irccd socket API
-guide: true
----
+% networking API
+% David Demelier
+% 2017-12-08
 
-# Commands
+This guide will help you controlling irccd via sockets.
 
-The following commands are available. Please note that a lot of commands require a server as the first argument, it’s
-one of defined in the **irccd.conf** file in the server section.
+Currently, irccd supports internet and unix sockets, you need at least one
+transport defined in your **irccd.conf**.
 
-## server-cnotice
+# Syntax
 
-Send a message notice on a channel.
+Irccd use JSON as protocol for sending and receiving data. A message must ends
+with `\r\n\r\n` to be complete, thus it's possible to write JSON messages in
+multiple lines.
 
-## Properties
+For example, this buffer will be parsed as two different messages.
 
-  - **command**: (string) "server-cnotice",
-  - **server**: (string) the server unique id,
-  - **channel**: (string) the channel name,
-  - **message**: (string) the notice message.
-
-## Example
+<div class="alert alert-success" role="alert">
+**Example**: two commands issued
 
 ```json
 {
-  "command": "server-cnotice",
-  "server": "myserver",
-  "channel": "#staff",
-  "message": "please be quiet"
+  "param1": "value1"
+}
+
+{
+  "param1": "value1"
+}
+
+```
+</div>
+
+Warning: please note that the `\r\n\r\n` characters are the escape characters of
+         line feed and new line, not the concatenation of `\` and `r`.
+
+## Responses
+
+All commands emit a response with the following properties:
+
+  - **command**: (string) the result of the issued command,
+  - **error**: (int) the error error code, not defined on success.
+
+## Examples
+
+Success message.
+
+```json
+{
+  "command": "server-message",
 }
 ```
+
+Command returned an error.
+
+```json
+{
+  "command": "server-message",
+  "status": "error",
+  "error": "4001"
+}
+```
+
+# List of all commands
+
+The following commands are available. Please note that a lot of commands require
+a server as the first argument, it’s one of defined in the **irccd.conf** file
+in the server section.
 
 ## server-connect
 
@@ -44,11 +80,16 @@ Connect to a server.
   - **sslVerify**: (bool) verify SSL (Optional, default: false),
   - **nickname**: (string) the nickname to use (Optional, default: irccd),
   - **username**: (string) the user name to use (Optional, default: irccd),
-  - **realname**: (string) the real name to use (Optional, default: IRC Client Daemon),
-  - **ctcpVersion**: (string) the CTCP Version to answer (Optional, default: the irccd's version),
-  - **commandChar**: (string) the command character to use to invoke commands (Optional, default: !),
-  - **reconnectTries**: (int) the number of reconnection to try (Optional, default: -1),
-  - **reconnectTimeout**: (int) the number of seconds to wait before retrying to connect (Optional, default: 30).
+  - **realname**: (string) the real name to use
+    (Optional, default: IRC Client Daemon),
+  - **ctcpVersion**: (string) the CTCP Version to answer
+    (Optional, default: the irccd's version),
+  - **commandChar**: (string) the command character to use to invoke commands
+    (Optional, default: !),
+  - **reconnectTries**: (int) the number of reconnection to try
+    (Optional, default: -1),
+  - **reconnectTimeout**: (int) the number of seconds to wait before retrying to
+    connect (Optional, default: 30).
 
 ## Example
 
@@ -310,7 +351,8 @@ Send a private notice to the specified target.
 
 Leave the specified channel, the reason is optional.
 
-Not all IRC servers support giving a reason to leave a channel, do not specify it if this is a concern.
+Not all IRC servers support giving a reason to leave a channel, do not specify
+it if this is a concern.
 
 ## Properties
 
@@ -369,17 +411,5 @@ Change the topic of the specified channel.
   "server": "myserver",
   "channel": "#staff",
   "topic": "the new topic"
-}
-```
-
-## server-umode
-
-Change your irccd user mode for the specified server.
-
-```json
-{
-  "command": "umode",
-  "server": "the server name",
-  "mode": "the mode"
 }
 ```

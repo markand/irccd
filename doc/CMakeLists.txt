@@ -23,7 +23,7 @@ if (HAVE_DOXYGEN)
 endif ()
 
 add_subdirectory(examples)
-add_subdirectory(man)
+#add_subdirectory(man)
 
 if (HAVE_HTML)
     add_subdirectory(html)

@@ -1,11 +1,9 @@
----
-header: Configuring irccdctl
-guide: yes
----
+% irccdctl.conf
+% David Demelier
+% 2017-12-08
 
-The `irccdctl` utility let you controlling a running `irccd` instance. It uses sockets to perform any operation.
-
-You need to define at least one transport before using `irccdctl`.
+The `irccdctl` utility use the same configuration file syntax and paths, see the
+manual of irccd.conf file for more information.
 
 # The general section
 
@@ -15,7 +13,7 @@ The available options:
 
 - **verbose**: (bool) enable verbose message (Optional, default: false).
 
-**Example**
+## Example
 
 ```ini
 [general]
@@ -24,8 +22,9 @@ verbose = true
 
 # The connect section
 
-The section socket permit irccdctl to connect to a specific irccd listener, only one may be defined. Just like
-transports you can connect to Unix or internet sockets.
+The section socket permit irccdctl to connect to a specific irccd transport,
+only one must be defined. Just like transports you can connect to Unix or
+internet sockets.
 
 The available options:
 
@@ -42,7 +41,7 @@ The options for **unix** type:
 
   - **path**: (string) The file path to the socket.
 
-**Example for internet transports**
+## Example for internet transports
 
 ```ini
 [connect]
@@ -52,7 +51,7 @@ port = "9999"
 family = "ipv6"
 ```
 
-**Example for unix transports**
+## Example for unix transports
 
 ```ini
 [connect]
