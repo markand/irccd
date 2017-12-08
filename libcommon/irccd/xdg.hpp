@@ -38,40 +38,42 @@ namespace irccd {
  *
  * Read and get XDG directories.
  *
- * This file should compiles on Windows to facilitate portability but its functions must not be used.
+ * This file should compiles on Windows to facilitate portability but its
+ * functions must not be used.
  */
-class Xdg {
+class xdg {
 private:
-    std::string m_configHome;
-    std::string m_dataHome;
-    std::string m_cacheHome;
-    std::string m_runtimeDir;
-    std::vector<std::string> m_configDirs;
-    std::vector<std::string> m_dataDirs;
+    std::string config_home_;
+    std::string data_home_;
+    std::string cache_home_;
+    std::string runtime_dir_;
+    std::vector<std::string> config_dirs_;
+    std::vector<std::string> data_dirs_;
 
-    bool isabsolute(const std::string &path) const noexcept
+    inline bool is_absolute(const std::string& path) const noexcept
     {
         return path.length() > 0 && path[0] == '/';
     }
 
-    std::vector<std::string> split(const std::string &arg) const
+    std::vector<std::string> split(const std::string& arg) const
     {
         std::stringstream iss(arg);
         std::string item;
         std::vector<std::string> elems;
 
-        while (std::getline(iss, item, ':'))
-            if (isabsolute(item))
+        while (std::getline(iss, item, ':')) {
+            if (is_absolute(item))
                 elems.push_back(item);
+        }
 
         return elems;
     }
 
-    std::string envOrHome(const std::string &var, const std::string &repl) const
+    std::string env_or_home(const std::string& var, const std::string& repl) const
     {
         auto value = std::getenv(var.c_str());
 
-        if (value == nullptr || !isabsolute(value)) {
+        if (value == nullptr || !is_absolute(value)) {
             auto home = std::getenv("HOME");
 
             if (home == nullptr)
@@ -83,7 +85,8 @@ private:
         return value;
     }
 
-    std::vector<std::string> listOrDefaults(const std::string &var, const std::vector<std::string> &list) const
+    std::vector<std::string> list_or_defaults(const std::string& var,
+                                              const std::vector<std::string>& list) const
     {
         auto value = std::getenv(var.c_str());
 
@@ -102,22 +105,23 @@ public:
      *
      * \throw std::runtime_error on failures
      */
-    Xdg()
+    xdg()
     {
-        m_configHome    = envOrHome("XDG_CONFIG_HOME", ".config");
-        m_dataHome      = envOrHome("XDG_DATA_HOME", ".local/share");
-        m_cacheHome     = envOrHome("XDG_CACHE_HOME", ".cache");
+        config_home_    = env_or_home("XDG_CONFIG_HOME", ".config");
+        data_home_      = env_or_home("XDG_DATA_HOME", ".local/share");
+        cache_home_     = env_or_home("XDG_CACHE_HOME", ".cache");
 
-        m_configDirs    = listOrDefaults("XDG_CONFIG_DIRS", { "/etc/xdg" });
-        m_dataDirs      = listOrDefaults("XDG_DATA_DIRS", { "/usr/local/share", "/usr/share" });
+        config_dirs_    = list_or_defaults("XDG_CONFIG_DIRS", { "/etc/xdg" });
+        data_dirs_      = list_or_defaults("XDG_DATA_DIRS", { "/usr/local/share", "/usr/share" });
 
         /*
-         * Runtime directory is a special case and does not have a replacement, the application should manage
-         * this by itself.
+         * Runtime directory is a special case and does not have a replacement,
+         * the application should manage this by itself.
          */
         auto runtime = std::getenv("XDG_RUNTIME_DIR");
-        if (runtime && isabsolute(runtime))
-            m_runtimeDir = runtime;
+
+        if (runtime && is_absolute(runtime))
+            runtime_dir_ = runtime;
     }
 
     /**
@@ -125,9 +129,9 @@ public:
      *
      * \return the config directory
      */
-    inline const std::string &configHome() const noexcept
+    inline const std::string& config_home() const noexcept
     {
-        return m_configHome;
+        return config_home_;
     }
 
     /**
@@ -135,9 +139,9 @@ public:
      *
      * \return the data directory
      */
-    inline const std::string &dataHome() const noexcept
+    inline const std::string& data_home() const noexcept
     {
-        return m_dataHome;
+        return data_home_;
     }
 
     /**
@@ -145,22 +149,22 @@ public:
      *
      * \return the cache directory
      */
-    inline const std::string &cacheHome() const noexcept
+    inline const std::string& cache_home() const noexcept
     {
-        return m_cacheHome;
+        return cache_home_;
     }
 
     /**
      * Get the runtime directory.
      *
-     * There is no replacement for XDG_RUNTIME_DIR, if it is not set, an empty valus is returned and the user is
-     * responsible of using something else.
+     * There is no replacement for XDG_RUNTIME_DIR, if it is not set, an empty
+     * value is returned and the user is responsible of using something else.
      *
      * \return the runtime directory
      */
-    inline const std::string &runtimeDir() const noexcept
+    inline const std::string& runtime_dir() const noexcept
     {
-        return m_runtimeDir;
+        return runtime_dir_;
     }
 
     /**
@@ -168,19 +172,20 @@ public:
      *
      * \return the list of config directories
      */
-    inline const std::vector<std::string> &configDirs() const noexcept
+    inline const std::vector<std::string>& config_dirs() const noexcept
     {
-        return m_configDirs;
+        return config_dirs_;
     }
 
     /**
-     * Get the data directories. ${XDG_DATA_DIRS} or { "/usr/local/share", "/usr/share" }
+     * Get the data directories. ${XDG_DATA_DIRS} or { "/usr/local/share",
+     * "/usr/share" }
      *
      * \return the list of data directories
      */
-    inline const std::vector<std::string> &dataDirs() const noexcept
+    inline const std::vector<std::string>& data_dirs() const noexcept
     {
-        return m_dataDirs;
+        return data_dirs_;
     }
 };
 

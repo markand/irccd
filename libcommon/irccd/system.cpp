@@ -216,7 +216,7 @@ void add_config_user_path(std::vector<std::string>& result, const std::string& f
         path = ".";
 #else
     try {
-        path = Xdg().configHome();
+        path = xdg().config_home();
     } catch (...) {
         path = sys::env("HOME");
         path /= ".config";
@@ -248,7 +248,7 @@ void add_plugin_user_path(std::vector<std::string>& result, const std::string& f
         path = folder + "\\irccd\\share";
 #else
     try {
-        path = Xdg().dataHome();
+        path = xdg().data_home();
     } catch (...) {
         path = sys::env("HOME");
         path /= ".local/share";
