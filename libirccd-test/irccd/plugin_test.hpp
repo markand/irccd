@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_PLUGIN_TEST_HPP
-#define IRCCD_PLUGIN_TEST_HPP
+#ifndef IRCCD_TEST_PLUGIN_TEST_HPP
+#define IRCCD_TEST_PLUGIN_TEST_HPP
 
 /**
  * \file plugin_test.hpp
@@ -57,4 +57,4 @@ public:
 
 } // !irccd
 
-#endif // !IRCCD_PLUGIN_TESTER_HPP
+#endif // !IRCCD_TEST_PLUGIN_TESTER_HPP

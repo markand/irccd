@@ -16,15 +16,16 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/json_util.hpp>
+#include <irccd/string_util.hpp>
+#include <irccd/util.hpp>
+
 #include "command.hpp"
 #include "irccd.hpp"
-#include "json_util.hpp"
 #include "rule_service.hpp"
 #include "plugin_service.hpp"
 #include "server_service.hpp"
 #include "transport_client.hpp"
-#include "string_util.hpp"
-#include "util.hpp"
 
 using namespace std::string_literals;
 

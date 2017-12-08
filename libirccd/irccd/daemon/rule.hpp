@@ -16,15 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_RULE_HPP
-#define IRCCD_RULE_HPP
+#ifndef IRCCD_DAEMON_RULE_HPP
+#define IRCCD_DAEMON_RULE_HPP
 
 /**
  * \file rule.hpp
  * \brief Rule description
  */
 
-#include "sysconfig.hpp"
+#include <irccd/sysconfig.hpp>
 
 #include <cassert>
 #include <string>
@@ -267,4 +267,4 @@ struct is_error_code_enum<irccd::rule_error::error> : public std::true_type {
 
 } // !boost
 
-#endif // !IRCCD_RULE_HPP
+#endif // !IRCCD_DAEMON_RULE_HPP

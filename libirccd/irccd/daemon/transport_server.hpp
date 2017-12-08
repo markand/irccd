@@ -16,10 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_TRANSPORT_SERVER_HPP
-#define IRCCD_TRANSPORT_SERVER_HPP
+#ifndef IRCCD_DAEMON_TRANSPORT_SERVER_HPP
+#define IRCCD_DAEMON_TRANSPORT_SERVER_HPP
 
-#include "sysconfig.hpp"
+#include <irccd/sysconfig.hpp>
 
 #include <cassert>
 #include <functional>
@@ -131,4 +131,4 @@ public:
 
 } // !irccd
 
-#endif // !IRCCD_TRANSPORT_SERVER_HPP
+#endif // !IRCCD_DAEMON_TRANSPORT_SERVER_HPP

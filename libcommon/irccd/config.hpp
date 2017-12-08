@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_CONFIG_HPP
-#define IRCCD_CONFIG_HPP
+#ifndef IRCCD_COMMON_CONFIG_HPP
+#define IRCCD_COMMON_CONFIG_HPP
 
 /**
  * \file config.hpp
@@ -105,4 +105,4 @@ public:
 
 } // !irccd
 
-#endif // !IRCCD_CONFIG_HPP
+#endif // !IRCCD_COMMON_CONFIG_HPP

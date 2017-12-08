@@ -16,19 +16,19 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_ALIAS_HPP
-#define IRCCD_ALIAS_HPP
+#ifndef IRCCD_CTL_ALIAS_HPP
+#define IRCCD_CTL_ALIAS_HPP
 
 /**
  * \file alias.hpp
  * \brief Create irccdctl aliases.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <ostream>
 #include <string>
 #include <vector>
-
-#include "sysconfig.hpp"
 
 namespace irccd {
 
@@ -173,4 +173,4 @@ public:
 
 } // !irccd
 
-#endif // !IRCCD_ALIAS_HPP
+#endif // !IRCCD_CTL_ALIAS_HPP

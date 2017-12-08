@@ -24,8 +24,9 @@
  * \brief irccd.Server Javascript API.
  */
 
+#include <irccd/daemon/server.hpp>
+
 #include "jsapi.hpp"
-#include "server.hpp"
 
 namespace irccd {
 

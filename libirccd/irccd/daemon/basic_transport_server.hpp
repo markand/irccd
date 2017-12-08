@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_BASIC_TRANSPORT_SERVER_HPP
-#define IRCCD_BASIC_TRANSPORT_SERVER_HPP
+#ifndef IRCCD_DAEMON_BASIC_TRANSPORT_SERVER_HPP
+#define IRCCD_DAEMON_BASIC_TRANSPORT_SERVER_HPP
 
 /**
  * \file basic_transport_server.hpp
@@ -94,4 +94,4 @@ void basic_transport_server<Protocol>::do_accept(accept_t handler)
 
 } // !irccd
 
-#endif // !IRCCD_BASIC_TRANSPORT_SERVER_HPP
+#endif // !IRCCD_DAEMON_BASIC_TRANSPORT_SERVER_HPP

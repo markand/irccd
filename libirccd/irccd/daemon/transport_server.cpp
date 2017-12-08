@@ -16,12 +16,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "sysconfig.hpp"
+#include <irccd/sysconfig.hpp>
 
 #include <cassert>
 
+#include <irccd/json_util.hpp>
+
 #include "irccd.hpp"
-#include "json_util.hpp"
 #include "transport_server.hpp"
 
 namespace irccd {

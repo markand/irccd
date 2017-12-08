@@ -22,9 +22,10 @@
 #include <iterator>
 #include <stdexcept>
 
+#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/logger.hpp>
+
 #include "duktape_vector.hpp"
-#include "irccd.hpp"
-#include "logger.hpp"
 #include "js_plugin.hpp"
 #include "server_jsapi.hpp"
 

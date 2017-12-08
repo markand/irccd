@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_OPTIONS_HPP
-#define IRCCD_OPTIONS_HPP
+#ifndef IRCCD_COMMON_OPTIONS_HPP
+#define IRCCD_COMMON_OPTIONS_HPP
 
 /**
  * \file options.hpp
@@ -158,4 +158,4 @@ result read(int& argc, char**& argv, const options& definition);
 
 } // !irccd
 
-#endif // !OPTIONS_HPP
+#endif // !IRCCD_COMMON_OPTIONS_HPP

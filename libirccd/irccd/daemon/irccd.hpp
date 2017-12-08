@@ -16,21 +16,21 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_HPP
-#define IRCCD_HPP
+#ifndef IRCCD_DAEMON_IRCCD_HPP
+#define IRCCD_DAEMON_IRCCD_HPP
 
 /**
  * \file irccd.hpp
  * \brief Base class for irccd front end.
  */
 
-#include "sysconfig.hpp"
+#include <irccd/sysconfig.hpp>
 
 #include <memory>
 
 #include <boost/asio.hpp>
 
-#include "config.hpp"
+#include <irccd/config.hpp>
 
 /**
  * \brief Main irccd namespace
@@ -290,4 +290,4 @@ struct is_error_code_enum<irccd::irccd_error::error> : public std::true_type {
 
 } // !boost
 
-#endif // !IRCCD_HPP
+#endif // !IRCCD_DAEMON_IRCCD_HPP

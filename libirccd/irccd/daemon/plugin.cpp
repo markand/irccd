@@ -20,8 +20,9 @@
 
 #include <sstream>
 
+#include <irccd/system.hpp>
+
 #include "plugin.hpp"
-#include "system.hpp"
 
 namespace fs = boost::filesystem;
 

@@ -18,13 +18,12 @@
 
 #include <stdexcept>
 
+#include <irccd/config.hpp>
 #include <irccd/string_util.hpp>
 
-#include "config.hpp"
 #include "irccd.hpp"
 #include "logger.hpp"
 #include "rule_service.hpp"
-#include "string_util.hpp"
 
 namespace irccd {
 

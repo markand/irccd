@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_LOCAL_TRANSPORT_SERVER_HPP
-#define IRCCD_LOCAL_TRANSPORT_SERVER_HPP
+#ifndef IRCCD_DAEMON_LOCAL_TRANSPORT_SERVER_HPP
+#define IRCCD_DAEMON_LOCAL_TRANSPORT_SERVER_HPP
 
 /**
  * \file local_transport_server.hpp
@@ -41,4 +41,4 @@ using local_transport_server = basic_transport_server<boost::asio::local::stream
 
 } // !irccd
 
-#endif // !IRCCD_LOCAL_TRANSPORT_SERVER_HPP
+#endif // !IRCCD_DAEMON_LOCAL_TRANSPORT_SERVER_HPP

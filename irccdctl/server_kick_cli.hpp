@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_SERVER_KICK_CLI_HPP
-#define IRCCD_SERVER_KICK_CLI_HPP
+#ifndef IRCCD_CTL_SERVER_KICK_CLI_HPP
+#define IRCCD_CTL_SERVER_KICK_CLI_HPP
 
 /**
  * \file server_kick_cli.hpp
@@ -50,4 +50,4 @@ public:
 
 } // !irccd
 
-#endif // !IRCCD_SERVER_KICK_CLI_HPP
+#endif // !IRCCD_CTL_SERVER_KICK_CLI_HPP

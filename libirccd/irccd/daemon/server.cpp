@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "sysconfig.hpp"
+#include <irccd/sysconfig.hpp>
 
 #include <algorithm>
 #include <cerrno>
@@ -30,10 +30,11 @@
 #  include <resolv.h>
 #endif
 
-#include "json_util.hpp"
+#include <irccd/json_util.hpp>
+#include <irccd/string_util.hpp>
+#include <irccd/system.hpp>
+
 #include "server.hpp"
-#include "string_util.hpp"
-#include "system.hpp"
 
 namespace irccd {
 

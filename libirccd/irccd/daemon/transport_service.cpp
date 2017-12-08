@@ -23,8 +23,8 @@
 #include <irccd/string_util.hpp>
 
 #include "command_service.hpp"
-#include "irccd.hpp"
 #include "ip_transport_server.hpp"
+#include "irccd.hpp"
 #include "logger.hpp"
 #include "transport_client.hpp"
 #include "transport_service.hpp"

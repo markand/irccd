@@ -16,15 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_SERVER_HPP
-#define IRCCD_SERVER_HPP
+#ifndef IRCCD_DAEMON_SERVER_HPP
+#define IRCCD_DAEMON_SERVER_HPP
 
 /**
  * \file server.hpp
  * \brief IRC Server.
  */
 
-#include "sysconfig.hpp"
+#include <irccd/sysconfig.hpp>
 
 #include <cstdint>
 #include <map>
@@ -994,4 +994,4 @@ struct is_error_code_enum<irccd::server_error::error> : public std::true_type {
 
 } // !boost
 
-#endif // !IRCCD_SERVER_HPP
+#endif // !IRCCD_DAEMON_SERVER_HPP

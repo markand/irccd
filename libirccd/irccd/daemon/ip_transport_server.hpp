@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_IP_TRANSPORT_SERVER_HPP
-#define IRCCD_IP_TRANSPORT_SERVER_HPP
+#ifndef IRCCD_DAEMON_IP_TRANSPORT_SERVER_HPP
+#define IRCCD_DAEMON_IP_TRANSPORT_SERVER_HPP
 
 /**
  * \file ip_transport_server.hpp
@@ -35,4 +35,4 @@ using ip_transport_server = basic_transport_server<boost::asio::ip::tcp>;
 
 } // !irccd
 
-#endif // !IRCCD_IP_TRANSPORT_SERVER_HPP
+#endif // !IRCCD_DAEMON_IP_TRANSPORT_SERVER_HPP

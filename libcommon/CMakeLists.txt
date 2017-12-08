@@ -65,6 +65,5 @@ irccd_define_library(
     PUBLIC_INCLUDES
         ${Boost_INCLUDE_DIRS}
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
-        $<BUILD_INTERFACE:${libcommon_SOURCE_DIR}/irccd>
         $<BUILD_INTERFACE:${libcommon_SOURCE_DIR}>
 )

@@ -17,13 +17,13 @@
  */
 
 #include <irccd/json_util.hpp>
+#include <irccd/string_util.hpp>
 
 #include "irccd.hpp"
 #include "logger.hpp"
 #include "plugin_service.hpp"
 #include "rule_service.hpp"
 #include "server_service.hpp"
-#include "string_util.hpp"
 #include "transport_service.hpp"
 
 namespace irccd {

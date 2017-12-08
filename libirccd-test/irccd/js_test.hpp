@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_TEST_HPP
-#define IRCCD_JS_TEST_HPP
+#ifndef IRCCD_TEST_JS_TEST_HPP
+#define IRCCD_TEST_JS_TEST_HPP
 
 /**
  * \file js_test.hpp
@@ -90,4 +90,4 @@ public:
 
 } // !irccd
 
-#endif // !IRCCD_JS_TEST_HPP
+#endif // !IRCCD_TEST_JS_TEST_HPP

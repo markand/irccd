@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_UNICODE_HPP
-#define IRCCD_UNICODE_HPP
+#ifndef IRCCD_JS_UNICODE_HPP
+#define IRCCD_JS_UNICODE_HPP
 
 /**
  * \file unicode.hpp
@@ -270,4 +270,4 @@ inline std::string tolower(const std::string &str)
 
 } // !irccd
 
-#endif // !IRCCD_UNICODE_HPP
+#endif // !IRCCD_JS_UNICODE_HPP

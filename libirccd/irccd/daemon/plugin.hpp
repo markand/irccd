@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_PLUGIN_HPP
-#define IRCCD_PLUGIN_HPP
+#ifndef IRCCD_DAEMON_PLUGIN_HPP
+#define IRCCD_DAEMON_PLUGIN_HPP
 
 /**
  * \file plugin.hpp
@@ -29,7 +29,7 @@
  * \brief Plugin management.
  */
 
-#include "sysconfig.hpp"
+#include <irccd/sysconfig.hpp>
 
 #include <cassert>
 #include <memory>
@@ -37,8 +37,9 @@
 #include <unordered_map>
 #include <vector>
 
+#include <irccd/util.hpp>
+
 #include "server.hpp"
-#include "util.hpp"
 
 namespace irccd {
 
@@ -617,4 +618,4 @@ struct is_error_code_enum<irccd::plugin_error::error> : public std::true_type {
 
 } // !boost
 
-#endif // !IRCCD_PLUGIN_HPP
+#endif // !IRCCD_DAEMON_PLUGIN_HPP

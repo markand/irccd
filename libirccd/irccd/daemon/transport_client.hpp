@@ -16,10 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_TRANSPORT_CLIENT_HPP
-#define IRCCD_TRANSPORT_CLIENT_HPP
+#ifndef IRCCD_DAEMON_TRANSPORT_CLIENT_HPP
+#define IRCCD_DAEMON_TRANSPORT_CLIENT_HPP
 
-#include "network_stream.hpp"
+#include <irccd/network_stream.hpp>
 
 namespace irccd {
 
@@ -179,4 +179,4 @@ public:
 
 } // !irccd
 
-#endif // !IRCCD_TRANSPORT_CLIENT_HPP
+#endif // !IRCCD_DAEMON_TRANSPORT_CLIENT_HPP

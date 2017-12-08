@@ -24,7 +24,7 @@
  * \brief Low level IRC functions.
  */
 
-#include "sysconfig.hpp"
+#include <irccd/sysconfig.hpp>
 
 #include <deque>
 #include <functional>

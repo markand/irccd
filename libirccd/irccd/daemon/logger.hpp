@@ -24,11 +24,11 @@
  * \brief Logging facilities.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <memory>
 #include <sstream>
 #include <utility>
-
-#include "sysconfig.hpp"
 
 namespace irccd {
 

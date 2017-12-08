@@ -21,8 +21,9 @@
 
 #include <boost/filesystem.hpp>
 
+#include <irccd/string_util.hpp>
+
 #include "dynlib_plugin.hpp"
-#include "string_util.hpp"
 
 #if defined(IRCCD_SYSTEM_WINDOWS)
 #   define DYNLIB_EXTENSION ".dll"

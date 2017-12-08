@@ -16,20 +16,21 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_COMMAND_HPP
-#define IRCCD_COMMAND_HPP
+#ifndef IRCCD_DAEMON_COMMAND_HPP
+#define IRCCD_DAEMON_COMMAND_HPP
 
 /**
  * \file command.hpp
  * \brief Remote commands.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <cassert>
 #include <map>
 #include <vector>
 
 #include "json.hpp"
-#include "sysconfig.hpp"
 
 namespace irccd {
 
@@ -653,4 +654,4 @@ public:
 
 } // !irccd
 
-#endif // !IRCCD_COMMAND_HPP
+#endif // !IRCCD_DAEMON_COMMAND_HPP

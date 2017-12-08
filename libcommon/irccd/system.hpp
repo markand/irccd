@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_SYSTEM_HPP
-#define IRCCD_SYSTEM_HPP
+#ifndef IRCCD_COMMON_SYSTEM_HPP
+#define IRCCD_COMMON_SYSTEM_HPP
 
 /**
  * \file system.hpp
@@ -176,4 +176,4 @@ std::vector<std::string> plugin_filenames(const std::string& name,
 
 } // !irccd
 
-#endif // !IRCCD_SYSTEM_HPP
+#endif // !IRCCD_COMMON_SYSTEM_HPP

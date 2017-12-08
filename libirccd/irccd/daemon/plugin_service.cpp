@@ -16,14 +16,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/config.hpp>
 #include <irccd/string_util.hpp>
+#include <irccd/system.hpp>
 
-#include "logger.hpp"
-#include "config.hpp"
 #include "irccd.hpp"
+#include "logger.hpp"
 #include "plugin_service.hpp"
-#include "string_util.hpp"
-#include "system.hpp"
 
 namespace irccd {
 

@@ -26,7 +26,6 @@
 #include <streambuf>
 
 #include "logger.hpp"
-#include "system.hpp"
 
 #if defined(HAVE_SYSLOG)
 #  include <syslog.h>

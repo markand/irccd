@@ -84,14 +84,14 @@
 #   include <ctime>
 #endif
 
-// For sys::setGid.
+// For sys::set_gid.
 #if defined(HAVE_SETGID)
 #   include <sys/types.h>
 #   include <unistd.h>
 #   include <grp.h>
 #endif
 
-// For sys::setUid.
+// For sys::set_uid.
 #if defined(HAVE_SETGID)
 #   include <sys/types.h>
 #   include <unistd.h>

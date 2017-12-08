@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_INI_HPP
-#define IRCCD_INI_HPP
+#ifndef IRCCD_COMMON_INI_HPP
+#define IRCCD_COMMON_INI_HPP
 
 /**
  * \file ini.hpp
@@ -644,4 +644,4 @@ void dump(const tokens& tokens);
 
 } // !irccd
 
-#endif // !INI_HPP
+#endif // !IRCCD_COMMON_INI_HPP
