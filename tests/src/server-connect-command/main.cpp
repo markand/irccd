@@ -108,6 +108,7 @@ BOOST_AUTO_TEST_SUITE(errors)
 BOOST_AUTO_TEST_CASE(already_exists)
 {
     boost::system::error_code result;
+    nlohmann::json message;
 
     daemon_->servers().add(std::make_unique<journal_server>(service_, "local"));
     ctl_->send({
@@ -115,8 +116,9 @@ BOOST_AUTO_TEST_CASE(already_exists)
         { "name",       "local"             },
         { "host",       "127.0.0.1"         }
     });
-    ctl_->recv([&] (auto code, auto) {
-        result = code;
+    ctl_->recv([&] (auto rresult, auto rmessage) {
+        result = rresult;
+        message = rmessage;
     });
 
     wait_for([&] {
@@ -124,18 +126,22 @@ BOOST_AUTO_TEST_CASE(already_exists)
     });
 
     BOOST_ASSERT(result == server_error::already_exists);
+    BOOST_ASSERT(message["error"].template get<int>() == server_error::already_exists);
+    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_hostname_1)
 {
     boost::system::error_code result;
+    nlohmann::json message;
 
     ctl_->send({
         { "command",    "server-connect"    },
         { "name",       "new"               },
     });
-    ctl_->recv([&] (auto code, auto) {
-        result = code;
+    ctl_->recv([&] (auto rresult, auto rmessage) {
+        result = rresult;
+        message = rmessage;
     });
 
     wait_for([&] {
@@ -143,19 +149,23 @@ BOOST_AUTO_TEST_CASE(invalid_hostname_1)
     });
 
     BOOST_ASSERT(result == server_error::invalid_hostname);
+    BOOST_ASSERT(message["error"].template get<int>() == server_error::invalid_hostname);
+    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_hostname_2)
 {
     boost::system::error_code result;
+    nlohmann::json message;
 
     ctl_->send({
         { "command",    "server-connect"    },
         { "name",       "new"               },
         { "host",       123456              }
     });
-    ctl_->recv([&] (auto code, auto) {
-        result = code;
+    ctl_->recv([&] (auto rresult, auto rmessage) {
+        result = rresult;
+        message = rmessage;
     });
 
     wait_for([&] {
@@ -163,19 +173,23 @@ BOOST_AUTO_TEST_CASE(invalid_hostname_2)
     });
 
     BOOST_ASSERT(result == server_error::invalid_hostname);
+    BOOST_ASSERT(message["error"].template get<int>() == server_error::invalid_hostname);
+    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_identifier_1)
 {
     boost::system::error_code result;
+    nlohmann::json message;
 
     ctl_->send({
         { "command",    "server-connect"    },
         { "name",       ""                  },
         { "host",       "127.0.0.1"         }
     });
-    ctl_->recv([&] (auto code, auto) {
-        result = code;
+    ctl_->recv([&] (auto rresult, auto rmessage) {
+        result = rresult;
+        message = rmessage;
     });
 
     wait_for([&] {
@@ -183,19 +197,23 @@ BOOST_AUTO_TEST_CASE(invalid_identifier_1)
     });
 
     BOOST_ASSERT(result == server_error::invalid_identifier);
+    BOOST_ASSERT(message["error"].template get<int>() == server_error::invalid_identifier);
+    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_identifier_2)
 {
     boost::system::error_code result;
+    nlohmann::json message;
 
     ctl_->send({
         { "command",    "server-connect"    },
         { "name",       123456              },
         { "host",       "127.0.0.1"         }
     });
-    ctl_->recv([&] (auto code, auto) {
-        result = code;
+    ctl_->recv([&] (auto rresult, auto rmessage) {
+        result = rresult;
+        message = rmessage;
     });
 
     wait_for([&] {
@@ -203,11 +221,14 @@ BOOST_AUTO_TEST_CASE(invalid_identifier_2)
     });
 
     BOOST_ASSERT(result == server_error::invalid_identifier);
+    BOOST_ASSERT(message["error"].template get<int>() == server_error::invalid_identifier);
+    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_port_1)
 {
     boost::system::error_code result;
+    nlohmann::json message;
 
     ctl_->send({
         { "command",    "server-connect"    },
@@ -215,8 +236,9 @@ BOOST_AUTO_TEST_CASE(invalid_port_1)
         { "host",       "127.0.0.1"         },
         { "port",       "notaint"           }
     });
-    ctl_->recv([&] (auto code, auto) {
-        result = code;
+    ctl_->recv([&] (auto rresult, auto rmessage) {
+        result = rresult;
+        message = rmessage;
     });
 
     wait_for([&] {
@@ -224,11 +246,14 @@ BOOST_AUTO_TEST_CASE(invalid_port_1)
     });
 
     BOOST_ASSERT(result == server_error::invalid_port);
+    BOOST_ASSERT(message["error"].template get<int>() == server_error::invalid_port);
+    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_port_2)
 {
     boost::system::error_code result;
+    nlohmann::json message;
 
     ctl_->send({
         { "command",    "server-connect"    },
@@ -236,8 +261,9 @@ BOOST_AUTO_TEST_CASE(invalid_port_2)
         { "host",       "127.0.0.1"         },
         { "port",       -123                }
     });
-    ctl_->recv([&] (auto code, auto) {
-        result = code;
+    ctl_->recv([&] (auto rresult, auto rmessage) {
+        result = rresult;
+        message = rmessage;
     });
 
     wait_for([&] {
@@ -245,11 +271,14 @@ BOOST_AUTO_TEST_CASE(invalid_port_2)
     });
 
     BOOST_ASSERT(result == server_error::invalid_port);
+    BOOST_ASSERT(message["error"].template get<int>() == server_error::invalid_port);
+    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_port_3)
 {
     boost::system::error_code result;
+    nlohmann::json message;
 
     ctl_->send({
         { "command",    "server-connect"    },
@@ -257,8 +286,9 @@ BOOST_AUTO_TEST_CASE(invalid_port_3)
         { "host",       "127.0.0.1"         },
         { "port",       1000000             }
     });
-    ctl_->recv([&] (auto code, auto) {
-        result = code;
+    ctl_->recv([&] (auto rresult, auto rmessage) {
+        result = rresult;
+        message = rmessage;
     });
 
     wait_for([&] {
@@ -266,6 +296,8 @@ BOOST_AUTO_TEST_CASE(invalid_port_3)
     });
 
     BOOST_ASSERT(result == server_error::invalid_port);
+    BOOST_ASSERT(message["error"].template get<int>() == server_error::invalid_port);
+    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
 }
 
 #if !defined(HAVE_SSL)
@@ -273,6 +305,7 @@ BOOST_AUTO_TEST_CASE(invalid_port_3)
 BOOST_AUTO_TEST_CASE(ssl_disabled)
 {
     boost::system::error_code result;
+    nlohmann::json message;
 
     ctl_->send({
         { "command",    "server-connect"    },
@@ -280,8 +313,9 @@ BOOST_AUTO_TEST_CASE(ssl_disabled)
         { "host",       "127.0.0.1"         },
         { "ssl",        true                }
     });
-    ctl_->recv([&] (auto code, auto) {
-        result = code;
+    ctl_->recv([&] (auto rresult, auto rmessage) {
+        result = rresult;
+        message = rmessage;
     });
 
     wait_for([&] {
@@ -289,6 +323,8 @@ BOOST_AUTO_TEST_CASE(ssl_disabled)
     });
 
     BOOST_ASSERT(result == server_error::ssl_disabled);
+    BOOST_ASSERT(message["error"].template get<int>() == server_error::ssl_disabled);
+    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
 }
 
 #endif

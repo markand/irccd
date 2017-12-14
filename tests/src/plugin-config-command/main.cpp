@@ -134,13 +134,15 @@ BOOST_AUTO_TEST_SUITE(errors)
 BOOST_AUTO_TEST_CASE(not_found)
 {
     boost::system::error_code result;
+    nlohmann::json message;
 
     ctl_->send({
         { "command",    "plugin-config" },
         { "plugin",     "unknown"       }
     });
-    ctl_->recv([&] (auto code, auto) {
-        result = code;
+    ctl_->recv([&] (auto rresult, auto rmessage) {
+        result = rresult;
+        message = rmessage;
     });
 
     wait_for([&] {
@@ -148,6 +150,8 @@ BOOST_AUTO_TEST_CASE(not_found)
     });
 
     BOOST_ASSERT(result == plugin_error::not_found);
+    BOOST_ASSERT(message["error"].template get<int>() == plugin_error::not_found);
+    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

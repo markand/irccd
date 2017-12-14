@@ -176,13 +176,15 @@ BOOST_AUTO_TEST_SUITE(errors)
 BOOST_AUTO_TEST_CASE(invalid_action)
 {
     boost::system::error_code result;
+    nlohmann::json message;
 
     ctl_->send({
         { "command",    "rule-add"  },
         { "action",     "unknown"   }
     });
-    ctl_->recv([&] (auto code, auto) {
-        result = code;
+    ctl_->recv([&] (auto rresult, auto rmessage) {
+        result = rresult;
+        message = rmessage;
     });
 
     wait_for([&] {
@@ -190,6 +192,8 @@ BOOST_AUTO_TEST_CASE(invalid_action)
     });
 
     BOOST_ASSERT(result == rule_error::invalid_action);
+    BOOST_ASSERT(message["error"].template get<int>() == rule_error::invalid_action);
+    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

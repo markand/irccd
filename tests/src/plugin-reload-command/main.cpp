@@ -88,13 +88,15 @@ BOOST_AUTO_TEST_SUITE(errors)
 BOOST_AUTO_TEST_CASE(not_found)
 {
     boost::system::error_code result;
+    nlohmann::json message;
 
     ctl_->send({
         { "command",    "plugin-reload" },
         { "plugin",     "unknown"       }
     });
-    ctl_->recv([&] (auto code, auto) {
-        result = code;
+    ctl_->recv([&] (auto rresult, auto rmessage) {
+        result = rresult;
+        message = rmessage;
     });
 
     wait_for([&] {
@@ -102,18 +104,22 @@ BOOST_AUTO_TEST_CASE(not_found)
     });
 
     BOOST_ASSERT(result == plugin_error::not_found);
+    BOOST_ASSERT(message["error"].template get<int>() == plugin_error::not_found);
+    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_CASE(exec_error)
 {
     boost::system::error_code result;
+    nlohmann::json message;
 
     ctl_->send({
         { "command",    "plugin-reload" },
         { "plugin",     "broken"        }
     });
-    ctl_->recv([&] (auto code, auto) {
-        result = code;
+    ctl_->recv([&] (auto rresult, auto rmessage) {
+        result = rresult;
+        message = rmessage;
     });
 
     wait_for([&] {
@@ -121,6 +127,8 @@ BOOST_AUTO_TEST_CASE(exec_error)
     });
 
     BOOST_ASSERT(result == plugin_error::exec_error);
+    BOOST_ASSERT(message["error"].template get<int>() == plugin_error::exec_error);
+    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

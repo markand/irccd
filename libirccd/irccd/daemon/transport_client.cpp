@@ -54,7 +54,9 @@ void transport_client::error(boost::system::error_code code,
     assert(code);
 
     auto json = nlohmann::json::object({
-        { "error", code.value() }
+        { "error",          code.value()            },
+        { "errorCategory",  code.category().name()  },
+        { "errorMessage",   code.message()          }
     });
 
     if (!cname.empty())
