@@ -103,9 +103,9 @@ BOOST_AUTO_TEST_CASE(not_found)
         return result;
     });
 
-    BOOST_ASSERT(result == plugin_error::not_found);
-    BOOST_ASSERT(message["error"].template get<int>() == plugin_error::not_found);
-    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "plugin");
+    BOOST_TEST(result == plugin_error::not_found);
+    BOOST_TEST(message["error"].template get<int>() == plugin_error::not_found);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_CASE(exec_error)
@@ -126,10 +126,10 @@ BOOST_AUTO_TEST_CASE(exec_error)
         return result;
     });
 
-    BOOST_ASSERT(result == plugin_error::exec_error);
-    BOOST_ASSERT(message["error"].template get<int>() == plugin_error::exec_error);
-    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "plugin");
-    BOOST_ASSERT(!daemon_->plugins().has("broken"));
+    BOOST_TEST(result == plugin_error::exec_error);
+    BOOST_TEST(message["error"].template get<int>() == plugin_error::exec_error);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "plugin");
+    BOOST_TEST(!daemon_->plugins().has("broken"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

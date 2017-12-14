@@ -100,9 +100,9 @@ BOOST_AUTO_TEST_CASE(invalid_identifier)
         return result;
     });
 
-    BOOST_ASSERT(result == server_error::invalid_identifier);
-    BOOST_ASSERT(message["error"].template get<int>() == server_error::invalid_identifier);
-    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result == server_error::invalid_identifier);
+    BOOST_TEST(message["error"].template get<int>() == server_error::invalid_identifier);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
@@ -123,9 +123,9 @@ BOOST_AUTO_TEST_CASE(not_found)
         return result;
     });
 
-    BOOST_ASSERT(result == server_error::not_found);
-    BOOST_ASSERT(message["error"].template get<int>() == server_error::not_found);
-    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result == server_error::not_found);
+    BOOST_TEST(message["error"].template get<int>() == server_error::not_found);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

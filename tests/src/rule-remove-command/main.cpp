@@ -146,9 +146,9 @@ BOOST_AUTO_TEST_CASE(invalid_index_1)
         return result;
     });
 
-    BOOST_ASSERT(result == rule_error::invalid_index);
-    BOOST_ASSERT(message["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(result == rule_error::invalid_index);
+    BOOST_TEST(message["error"].template get<int>() == rule_error::invalid_index);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_2)
@@ -169,9 +169,9 @@ BOOST_AUTO_TEST_CASE(invalid_index_2)
         return result;
     });
 
-    BOOST_ASSERT(result == rule_error::invalid_index);
-    BOOST_ASSERT(message["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(result == rule_error::invalid_index);
+    BOOST_TEST(message["error"].template get<int>() == rule_error::invalid_index);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_3)
@@ -192,9 +192,9 @@ BOOST_AUTO_TEST_CASE(invalid_index_3)
         return result;
     });
 
-    BOOST_ASSERT(result == rule_error::invalid_index);
-    BOOST_ASSERT(message["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(result == rule_error::invalid_index);
+    BOOST_TEST(message["error"].template get<int>() == rule_error::invalid_index);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -125,9 +125,9 @@ BOOST_AUTO_TEST_CASE(already_exists)
         return result;
     });
 
-    BOOST_ASSERT(result == server_error::already_exists);
-    BOOST_ASSERT(message["error"].template get<int>() == server_error::already_exists);
-    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result == server_error::already_exists);
+    BOOST_TEST(message["error"].template get<int>() == server_error::already_exists);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_hostname_1)
@@ -148,9 +148,9 @@ BOOST_AUTO_TEST_CASE(invalid_hostname_1)
         return result;
     });
 
-    BOOST_ASSERT(result == server_error::invalid_hostname);
-    BOOST_ASSERT(message["error"].template get<int>() == server_error::invalid_hostname);
-    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result == server_error::invalid_hostname);
+    BOOST_TEST(message["error"].template get<int>() == server_error::invalid_hostname);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_hostname_2)
@@ -172,9 +172,9 @@ BOOST_AUTO_TEST_CASE(invalid_hostname_2)
         return result;
     });
 
-    BOOST_ASSERT(result == server_error::invalid_hostname);
-    BOOST_ASSERT(message["error"].template get<int>() == server_error::invalid_hostname);
-    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result == server_error::invalid_hostname);
+    BOOST_TEST(message["error"].template get<int>() == server_error::invalid_hostname);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_identifier_1)
@@ -196,9 +196,9 @@ BOOST_AUTO_TEST_CASE(invalid_identifier_1)
         return result;
     });
 
-    BOOST_ASSERT(result == server_error::invalid_identifier);
-    BOOST_ASSERT(message["error"].template get<int>() == server_error::invalid_identifier);
-    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result == server_error::invalid_identifier);
+    BOOST_TEST(message["error"].template get<int>() == server_error::invalid_identifier);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_identifier_2)
@@ -220,9 +220,9 @@ BOOST_AUTO_TEST_CASE(invalid_identifier_2)
         return result;
     });
 
-    BOOST_ASSERT(result == server_error::invalid_identifier);
-    BOOST_ASSERT(message["error"].template get<int>() == server_error::invalid_identifier);
-    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result == server_error::invalid_identifier);
+    BOOST_TEST(message["error"].template get<int>() == server_error::invalid_identifier);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_port_1)
@@ -245,9 +245,9 @@ BOOST_AUTO_TEST_CASE(invalid_port_1)
         return result;
     });
 
-    BOOST_ASSERT(result == server_error::invalid_port);
-    BOOST_ASSERT(message["error"].template get<int>() == server_error::invalid_port);
-    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result == server_error::invalid_port);
+    BOOST_TEST(message["error"].template get<int>() == server_error::invalid_port);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_port_2)
@@ -270,9 +270,9 @@ BOOST_AUTO_TEST_CASE(invalid_port_2)
         return result;
     });
 
-    BOOST_ASSERT(result == server_error::invalid_port);
-    BOOST_ASSERT(message["error"].template get<int>() == server_error::invalid_port);
-    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result == server_error::invalid_port);
+    BOOST_TEST(message["error"].template get<int>() == server_error::invalid_port);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_port_3)
@@ -295,9 +295,9 @@ BOOST_AUTO_TEST_CASE(invalid_port_3)
         return result;
     });
 
-    BOOST_ASSERT(result == server_error::invalid_port);
-    BOOST_ASSERT(message["error"].template get<int>() == server_error::invalid_port);
-    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result == server_error::invalid_port);
+    BOOST_TEST(message["error"].template get<int>() == server_error::invalid_port);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
 }
 
 #if !defined(HAVE_SSL)
@@ -322,9 +322,9 @@ BOOST_AUTO_TEST_CASE(ssl_disabled)
         return result;
     });
 
-    BOOST_ASSERT(result == server_error::ssl_disabled);
-    BOOST_ASSERT(message["error"].template get<int>() == server_error::ssl_disabled);
-    BOOST_ASSERT(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result == server_error::ssl_disabled);
+    BOOST_TEST(message["error"].template get<int>() == server_error::ssl_disabled);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
 }
 
 #endif
