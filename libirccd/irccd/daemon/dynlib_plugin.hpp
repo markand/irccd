@@ -20,7 +20,7 @@
 #define IRCCD_DAEMON_DYNLIB_PLUGIN_HPP
 
 /**
- * \file plugin-dynlib.hpp
+ * \file dynlib_plugin.hpp
  * \brief Native plugin implementation.
  */
 
@@ -148,10 +148,10 @@ public:
     dynlib_plugin_loader(std::vector<std::string> directories = {}) noexcept;
 
     /**
-     * \copydoc plugin_loader::find
+     * \copydoc plugin_loader::open
      */
     std::shared_ptr<plugin> open(const std::string& id,
-                                 const std::string& path) noexcept override;
+                                 const std::string& file) noexcept override;
 };
 
 } // !irccd

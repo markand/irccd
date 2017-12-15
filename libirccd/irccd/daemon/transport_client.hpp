@@ -170,6 +170,7 @@ public:
      *
      * \pre code is not 0
      * \param code the error code
+     * \param cname the command name
      * \param handler the optional handler
      */
     void error(boost::system::error_code code,

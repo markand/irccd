@@ -49,7 +49,7 @@ public:
     /**
      * Construct the exception.
      *
-     * \param arg the argument missing
+     * \param name the argument missing
      */
     inline invalid_option(std::string name)
         : name_(std::move(name))

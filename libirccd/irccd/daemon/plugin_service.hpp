@@ -188,7 +188,7 @@ public:
      *
      * \pre plugin != nullptr
      * \param plugin the plugin
-     * \param func the plugin member function (pointer to member)
+     * \param fn the plugin member function (pointer to member)
      * \param args the arguments to pass
      */
     template <typename Func, typename... Args>
@@ -210,7 +210,7 @@ public:
      * Overloaded function.
      *
      * \param name the plugin name
-     * \param func the plugin member function (pointer to member)
+     * \param fn the plugin member function (pointer to member)
      * \param args the arguments to pass
      */
     template <typename Func, typename... Args>

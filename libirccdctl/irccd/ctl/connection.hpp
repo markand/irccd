@@ -56,8 +56,19 @@ public:
      */
     virtual void connect(connect_t handler) = 0;
 
+    /**
+     * Receive from irccd.
+     *
+     * \param handler the completion handler
+     */
     virtual void recv(network_recv_handler handler) = 0;
 
+    /**
+     * Send to irccd.
+     *
+     * \param json the json object
+     * \param handler the completion handler
+     */
     virtual void send(nlohmann::json json, network_send_handler handler) = 0;
 };
 

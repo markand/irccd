@@ -484,7 +484,7 @@ public:
     /**
      * Set directories where to search plugins.
      *
-     * \param dirs the directories
+     * \param directories the directories
      */
     inline void set_directories(std::vector<std::string> directories)
     {
@@ -510,7 +510,8 @@ public:
      * The implementation must test if the plugin is suitable for opening, by
      * testing extension for example.
      *
-     * \param file the file
+     * \param id the plugin identifier
+     * \param file the file path
      */
     virtual std::shared_ptr<plugin> open(const std::string& id,
                                          const std::string& file) = 0;

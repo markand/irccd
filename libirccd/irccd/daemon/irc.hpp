@@ -297,7 +297,7 @@ public:
     /**
      * Parse a IRC message.
      *
-     * \param line the buffer content (without \r\n)
+     * \param line the buffer content (without `\r\n`)
      * \return the message (maybe empty if line is empty)
      */
     static message parse(const std::string& line);
@@ -315,8 +315,8 @@ public:
     /**
      * Construct a user.
      *
-     * \param the nickname
-     * \param the hostname
+     * \param nick the nickname
+     * \param host the hostname
      */
     inline user(std::string nick, std::string host) noexcept
         : nick_(std::move(nick))

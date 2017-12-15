@@ -145,7 +145,7 @@ public:
      * \pre filter must not be null
      * \param filter the filter
      */
-    void set_filter(std::unique_ptr<logger_filter> newfilter) noexcept;
+    void set_filter(std::unique_ptr<logger_filter> filter) noexcept;
 
     /**
      * Get the stream for informational messages.
@@ -233,17 +233,17 @@ public:
 class console_logger : public logger {
 protected:
     /**
-     * \copydoc logger::debug
+     * \copydoc logger::write_debug
      */
     void write_debug(const std::string& line) override;
 
     /**
-     * \copydoc logger::info
+     * \copydoc logger::write_info
      */
     void write_info(const std::string& line) override;
 
     /**
-     * \copydoc logger::warning
+     * \copydoc logger::write_warning
      */
     void write_warning(const std::string& line) override;
 };
@@ -258,17 +258,17 @@ private:
 
 protected:
     /**
-     * \copydoc logger::debug
+     * \copydoc logger::write_debug
      */
     void write_debug(const std::string& line) override;
 
     /**
-     * \copydoc logger::info
+     * \copydoc logger::write_info
      */
     void write_info(const std::string& line) override;
 
     /**
-     * \copydoc logger::warning
+     * \copydoc logger::write_warning
      */
     void write_warning(const std::string& line) override;
 
@@ -290,17 +290,17 @@ public:
 class silent_logger : public logger {
 protected:
     /**
-     * \copydoc logger::debug
+     * \copydoc logger::write_debug
      */
     void write_debug(const std::string& line) override;
 
     /**
-     * \copydoc logger::info
+     * \copydoc logger::write_info
      */
     void write_info(const std::string& line) override;
 
     /**
-     * \copydoc logger::warning
+     * \copydoc logger::write_warning
      */
     void write_warning(const std::string& line) override;
 };
@@ -313,17 +313,17 @@ protected:
 class syslog_logger : public logger {
 protected:
     /**
-     * \copydoc logger::debug
+     * \copydoc logger::write_debug
      */
     void write_debug(const std::string& line) override;
 
     /**
-     * \copydoc logger::info
+     * \copydoc logger::write_info
      */
     void write_info(const std::string& line) override;
 
     /**
-     * \copydoc logger::warning
+     * \copydoc logger::write_warning
      */
     void write_warning(const std::string& line) override;
 

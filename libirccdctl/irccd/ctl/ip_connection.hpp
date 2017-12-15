@@ -56,7 +56,7 @@ public:
      * \param service the io service
      * \param host the host
      * \param port the port number
-     * \param extra args (except service) to pass to the socket constructor
+     * \param args extra arguments (except service) to pass to the socket constructor
      */
     template <typename... Args>
     inline basic_ip_connection(boost::asio::io_service& service, std::string host, std::uint16_t port, Args&&... args)

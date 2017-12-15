@@ -20,7 +20,7 @@
 #define IRCCD_COMMON_NETWORK_STREAM_HPP
 
 /**
- * \file network_stream.cpp
+ * \file network_stream.hpp
  * \brief Base shared network stream.
  */
 

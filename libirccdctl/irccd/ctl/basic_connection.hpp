@@ -56,9 +56,11 @@ public:
     }
 
     /**
-     * \copydoc connection::is_active
+     * Tells if the stream has pending actions.
+     *
+     * \return true if receiving/sending
      */
-    bool is_active() const noexcept override
+    bool is_active() const noexcept
     {
         return stream_.is_active();
     }
