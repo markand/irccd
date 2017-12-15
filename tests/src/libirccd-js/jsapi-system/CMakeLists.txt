@@ -16,14 +16,9 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# Project
-project(tests)
-
-# libirccd
-add_subdirectory(src/libirccd)
-
-# Javascript API and plugins.
-if (HAVE_JS)
-    add_subdirectory(src/plugins)
-    add_subdirectory(src/libirccd-js)
-endif ()
+irccd_define_test(
+    NAME jsapi-system
+    SOURCES main.cpp
+    LIBRARIES libirccd-js
+    FLAGS IRCCD_EXECUTABLE=\"$<TARGET_FILE:irccd>\"
+)

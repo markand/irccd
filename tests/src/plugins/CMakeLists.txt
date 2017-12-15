@@ -16,14 +16,9 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# Project
-project(tests)
-
-# libirccd
-add_subdirectory(src/libirccd)
-
-# Javascript API and plugins.
-if (HAVE_JS)
-    add_subdirectory(src/plugins)
-    add_subdirectory(src/libirccd-js)
-endif ()
+add_subdirectory(ask)
+add_subdirectory(auth)
+add_subdirectory(hangman)
+add_subdirectory(history)
+add_subdirectory(logger)
+add_subdirectory(plugin)

@@ -16,14 +16,14 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# Project
-project(tests)
+add_subdirectory(js-plugin)
 
-# libirccd
-add_subdirectory(src/libirccd)
-
-# Javascript API and plugins.
-if (HAVE_JS)
-    add_subdirectory(src/plugins)
-    add_subdirectory(src/libirccd-js)
-endif ()
+add_subdirectory(jsapi-elapsedtimer)
+add_subdirectory(jsapi-directory)
+add_subdirectory(jsapi-file)
+add_subdirectory(jsapi-irccd)
+add_subdirectory(jsapi-logger)
+add_subdirectory(jsapi-system)
+add_subdirectory(jsapi-timer)
+add_subdirectory(jsapi-unicode)
+add_subdirectory(jsapi-util)
