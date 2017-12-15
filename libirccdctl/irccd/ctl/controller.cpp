@@ -90,7 +90,6 @@ void controller::recv(network_recv_handler handler)
     assert(handler);
 
     // TODO: ensure connected.
-
     conn_.recv([handler] (auto code, auto msg) {
         if (code) {
             handler(std::move(code), std::move(msg));
@@ -98,15 +97,15 @@ void controller::recv(network_recv_handler handler)
         }
 
         auto e = json_util::to_int(msg["error"]);
+        auto c = json_util::to_string(msg["errorCategory"]);
 
-        // TODO: maybe better to pass category instead of using static ranges.
-        if (e > 0 && e < 1000)
+        if (c == "irccd")
             code = make_error_code(static_cast<irccd_error::error>(e));
-        else if (e >= 1000 && e < 2000)
+        else if (c == "server")
             code = make_error_code(static_cast<server_error::error>(e));
-        else if (e >= 2000 && e < 3000)
+        else if (c == "plugin")
             code = make_error_code(static_cast<plugin_error::error>(e));
-        else if (e >= 4000 && e < 5000)
+        else if (c == "rule")
             code = make_error_code(static_cast<rule_error::error>(e));
 
         handler(std::move(code), std::move(msg));
@@ -118,7 +117,6 @@ void controller::send(nlohmann::json message, network_send_handler handler)
     assert(message.is_object());
 
     // TODO: ensure connected.
-
     conn_.send(std::move(message), std::move(handler));
 }
 
