@@ -1,12 +1,21 @@
----
-function: info
-js: true
-summary: "Get information about a plugin."
-synopsis: "Irccd.Plugin.info(name)"
-arguments:
-  - "**name**: the plugin identifier, if not specified the current plugin is selected."
-returns: "The plugin information or undefined if the plugin was not found."
----
+# Function Irccd.Plugin.info
+
+Get information about a plugin.
+
+# Synopsis
+
+```javascript
+Irccd.Plugin.info(name)
+```
+
+# Arguments
+
+  - **name**: the plugin identifier, if not specified the current plugin is
+    selected.
+
+# Returns
+
+The plugin information or undefined if the plugin was not found.
 
 The returned object as the following properties:
 

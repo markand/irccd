@@ -1,11 +1,18 @@
----
-function: unload
-js: true
-summary: "Unload a plugin by name."
-synopsis: "Irccd.Plugin.unload(name)"
-arguments:
-  - "**name**: the plugin identifier."
-throws:
-  - "Error on errors,"
-  - "ReferenceError if the plugin was not found."
----
+# Function Irccd.Plugin.unload
+
+Unload a plugin by name.
+
+# Synopsis
+
+```javascript
+Irccd.Plugin.unload(name)
+```
+
+# Arguments
+
+  - **name**: the plugin identifier.
+
+# Throws
+
+  - Error on errors,
+  - ReferenceError if the plugin was not found.

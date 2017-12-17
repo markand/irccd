@@ -1,7 +1,15 @@
----
-method: basename
-js: true
-summary: "Synonym of [Irccd.File.basename](@baseurl@api/module/Irccd.File/function/basename.html) but with the path from the file."
-synopsis: "File.prototype.basename()"
-returns: "The base name."
----
+# Method Irccd.File.prototype.basename
+
+Synonym of [basename][] but with the path from the file.
+
+# Synopsis
+
+```javascript
+File.prototype.basename()
+```
+
+# Returns
+
+The base name.
+
+[basename]: @baseurl@api/module/Irccd.File/function/basename.html

@@ -1,8 +1,13 @@
----
-function: sleep
-js: true
-summary: "Sleep for seconds. Suspend the execution thread."
-synopsis: "Irccd.System.sleep(sec)"
-arguments:
-  - "**sec**: the number of seconds."
----
+# Function Irccd.System.sleep
+
+Sleep for seconds. Suspend the execution thread.
+
+# Synopsis
+
+```javascript
+Irccd.System.sleep(sec)
+```
+
+# Arguments
+
+  - **sec**: the number of seconds.

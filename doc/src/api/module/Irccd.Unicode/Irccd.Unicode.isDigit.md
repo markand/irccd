@@ -1,9 +1,17 @@
----
-function: isDigit
-js: true
-summary: "Check if the unicode character is a digit."
-synopsis: "ret = Irccd.Unicode.isDigit(code)"
-arguments:
-  - "**code**: the code point."
-returns: "True if digit."
----
+# Function Irccd.Unicode.isDigit
+
+Check if the unicode character is a digit.
+
+# Synopsis
+
+```javascript
+ret = Irccd.Unicode.isDigit(code)
+```
+
+# Arguments
+
+  - **code**: the code point.
+
+# Returns
+
+True if digit.

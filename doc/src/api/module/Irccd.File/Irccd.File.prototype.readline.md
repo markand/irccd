@@ -1,14 +1,19 @@
----
-method: readline
-js: true
-summary: "Read the next line available."
-synopsis: "File.prototype.readline()"
-returns: "The next line or undefined if eof."
-throws: "An [Irccd.SystemError](@baseurl@api/module/Irccd/index.html#types) on failures."
----
+# Method Irccd.File.prototype.readline
 
-## Remarks
+Read the next line available.
 
-<div class="alert alert-warning" role="alert">
-**Warning**: this method is slow and its usage is discouraged on large files.
-</div>
+Warning: this method is slow and its usage is discouraged on large files.
+
+# Synopsis
+
+```javascript
+File.prototype.readline()
+```
+
+# Returns
+
+The next line or undefined if eof.
+
+# Throws
+
+An [Irccd.SystemError](@baseurl@api/module/Irccd/index.html#types) on failures.

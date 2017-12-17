@@ -1,11 +1,17 @@
----
-method: part
-js: true
-summary: "Leave the specified channel, the reason is optional."
-synopsis: "Server.prototype.part(channel, reason)"
-arguments:
-  - "**channel**: the channel to leave,"
-  - "**reason**: an optional reason."
----
+# Method Irccd.Server.prototype.part
 
-Not all IRC servers support giving a reason to leave a channel, do not specify it if this is a concern.
+Leave the specified channel, the reason is optional.
+
+Note: not all IRC servers support giving a reason to leave a channel, do not
+      specify it if this is a concern.
+
+# Synopsis
+
+```javascript
+Server.prototype.part(channel, reason)
+```
+
+# Arguments
+
+  - **channel**: the channel to leave,
+  - **reason**: an optional reason.

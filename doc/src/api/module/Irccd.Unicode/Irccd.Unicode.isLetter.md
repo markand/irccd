@@ -1,9 +1,17 @@
----
-function: isLetter
-js: true
-summary: "Check if the unicode character is a letter."
-synopsis: "ret = Irccd.Unicode.isLetter(code)"
-arguments:
-  - "**code**: the code point."
-returns: "True if letter."
----
+# Function Irccd.Unicode.isLetter
+
+Check if the unicode character is a letter.
+
+# Synopsis
+
+```javascript
+ret = Irccd.Unicode.isLetter(code)
+```
+
+# Arguments
+
+  - **code**: the code point.
+
+# Returns
+
+True if letter.

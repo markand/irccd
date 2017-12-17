@@ -1,16 +1,18 @@
----
-function: remove
-js: true
-summary: "Remove the directory optionally recursively."
-synopsis: "Irccd.Directory.remove(path, recursive)"
-arguments:
-  - "**path**: the path to the directory,"
-  - "**recursive**: recursively or not (Optional, default: false)."
-throws: "Any exception on error."
----
+# Function Irccd.Directory.remove
 
-## Remarks
+Remove the directory optionally recursively.
 
-<div class="alert alert-danger" role="alert">
-**Danger**: use this function with care!
-</div>
+# Synopsis
+
+```javascript
+Irccd.Directory.remove(path, recursive)
+```
+
+# Arguments
+
+  - **path**: the path to the directory,
+  - **recursive**: recursively or not (Optional, default: false).
+
+# Throws
+
+Any exception on error.

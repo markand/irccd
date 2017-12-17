@@ -1,7 +1,13 @@
----
-function: version
-js: true
-summary: "Get the operating system version. This function is completely system dependent."
-synopsis: "version = Irccd.System.version()"
-returns: "The version as a string."
----
+# Function Irccd.System.version
+
+Get the operating system version. This function is completely system dependent.
+
+# Synopsis
+
+```javascript
+version = Irccd.System.version()
+```
+
+# Returns
+
+The version as a string.

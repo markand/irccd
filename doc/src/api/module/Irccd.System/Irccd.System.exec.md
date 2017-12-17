@@ -1,8 +1,15 @@
----
-function: exec
-js: true
-summary: "Execute a system command."
-synopsis: "Irccd.System.exec(cmd)"
-arguments:
-  - "**cmd**: the command to execute."
----
+# Function Irccd.System.exec
+
+# Summary
+
+Execute a system command.
+
+# Synopsis
+
+```javascript
+Irccd.System.exec(cmd)
+```
+
+# Arguments
+
+  - **cmd**: the command to execute.

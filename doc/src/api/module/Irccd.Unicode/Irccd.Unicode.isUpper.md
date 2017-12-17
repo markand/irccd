@@ -1,9 +1,17 @@
----
-function: isUpper
-js: true
-summary: "Check if the unicode character is upper case."
-synopsis: "ret = Irccd.Unicode.isUpper(code)"
-arguments:
-  - "**code**: the code point."
-returns: "True if upper case."
----
+# Function Irccd.Unicode.isUpper
+
+Check if the unicode character is upper case.
+
+# Synopsis
+
+```javascript
+ret = Irccd.Unicode.isUpper(code)
+```
+
+# Arguments
+
+  - **code**: the code point.
+
+# Returns
+
+True if upper case.

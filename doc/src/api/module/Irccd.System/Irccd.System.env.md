@@ -1,9 +1,17 @@
----
-function: env
-js: true
-summary: "Get a environment variable."
-synopsis: "home = Irccd.System.env(name)"
-arguments:
-  - "**name**: the environment variable name."
-returns: "The variable or an empty string."
----
+# Function Irccd.System.env
+
+Get a environment variable.
+
+# Synopsis
+
+```javascript
+home = Irccd.System.env(name)
+```
+
+# Arguments
+
+  - **name**: the environment variable name.
+
+# Returns
+
+The variable or an empty string.

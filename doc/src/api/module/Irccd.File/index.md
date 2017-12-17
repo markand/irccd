@@ -1,22 +1,17 @@
----
-module: Irccd.File
-js: true
-summary: "File opening and writing."
----
+# Module Irccd.File
 
-## Usage
+This class and functions are available for opening and writing files on the
+disk.
 
-This class and functions are available for opening and writing files on the disk.
+For convenience, some functions are available as free-functions and some as
+object methods.
 
-For convenience, some functions are available as free-functions and some as object methods.
+# Remarks
 
-## Remarks
+Warning: the stat function and method are optional and may not be available on
+         your system.
 
-<div class="alert alert-warning" role="alert">
-**Warning**: the stat function and method are optional and may not be available on your system.
-</div>
-
-## Constants
+# Constants
 
 The following properties are defined:
 
@@ -24,7 +19,7 @@ The following properties are defined:
   - **SeekEnd**: (int) seek from end of the file,
   - **SeekSet**: (int) seek from beginning of the file.
 
-## Functions
+# Functions
 
   - [basename](Irccd.File.basename.html)
   - [dirname](Irccd.File.dirname.html)
@@ -32,7 +27,7 @@ The following properties are defined:
   - [remove](Irccd.File.remove.html)
   - [stat](Irccd.File.stat.html) (Optional)
 
-## Methods
+# Methods
 
   - [(constructor)](Irccd.File.prototype.constructor.html)
   - [basename](Irccd.File.prototype.basename.html)

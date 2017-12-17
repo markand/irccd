@@ -1,11 +1,16 @@
----
-method: constructor
-js: true
-summary: "Construct a new server"
-synopsis: "Irccd.Server(params) /* constructor */"
-arguments:
-  - "**params**: parameters."
----
+# Function Irccd.Server (constructor)
+
+Construct a new server
+
+# Synopsis
+
+```javascript
+Irccd.Server(params)
+```
+
+# Arguments
+
+  - **params**: parameters.
 
 The params argument may have the following properties:
 
@@ -22,7 +27,7 @@ The params argument may have the following properties:
   - **realname**: "real name", (Optional, default: IRC Client Daemon)
   - **commandChar**: "!", (Optional, the command char, default: "!")
 
-## Example
+# Example
 
 ```javascript
 var s = new Irccd.Server({

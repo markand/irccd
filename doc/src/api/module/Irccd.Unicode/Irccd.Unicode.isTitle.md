@@ -1,9 +1,17 @@
----
-function: isTitle
-js: true
-summary: "Check if the unicode character is title case."
-synopsis: "ret = Irccd.Unicode.isTitle(code)"
-arguments:
-  - "**code**: the code point."
-returns: "True if title case."
----
+# Function Irccd.Unicode.isTitle
+
+Check if the unicode character is title case.
+
+# Synopsis
+
+```javascript
+ret = Irccd.Unicode.isTitle(code)
+```
+
+# Arguments
+
+  - **code**: the code point.
+
+# Returns
+
+True if title case.

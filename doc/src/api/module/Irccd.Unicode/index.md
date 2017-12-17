@@ -1,13 +1,10 @@
----
-module: Irccd.Unicode
-js: true
----
+# Module Irccd.Unicode
 
-## Usage
+# Usage
 
 Check for character categories.
 
-## Functions
+# Functions
 
   - [isDigit](Irccd.Unicode.isDigit.html)
   - [isLetter](Irccd.Unicode.isLetter.html)

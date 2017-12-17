@@ -1,10 +1,15 @@
----
-event: onNames
-js: true
-summary: "This event is triggered when a list of names has come."
-synopsis: "function onNames(server, channel, list)"
-arguments:
-  - "**server**: he current server,"
-  - "**channel**: which channel,"
-  - "**list**: a sequence with all users."
----
+# Event onNames
+
+This event is triggered when a list of names has come.
+
+# Synopsis
+
+```javascript
+function onNames(server, channel, list)
+```
+
+# Arguments
+
+  - **server**: he current server,
+  - **channel**: which channel,
+  - **list**: a sequence with all users.

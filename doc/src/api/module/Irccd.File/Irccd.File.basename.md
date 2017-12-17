@@ -1,9 +1,17 @@
----
-function: basename
-js: true
-summary: "Return the file basename as specified in `basename(3)` C function."
-synopsis: "base = Irccd.File.basename(path)"
-arguments:
-  - "**path**: the path to the file."
-returns: "The base name."
----
+# Function Irccd.File.basename
+
+Return the file basename as specified in `basename(3)` C function.
+
+# Synopsis
+
+```javascript
+base = Irccd.File.basename(path)
+```
+
+# Arguments
+
+  - **path**: the path to the file.
+
+# Returns
+
+The base name.

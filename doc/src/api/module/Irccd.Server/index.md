@@ -1,22 +1,17 @@
----
-module: Irccd.Server
-js: true
-summary: "Server management."
----
+# Module Irccd.Server
 
-## Usage
+This module is the object that you received in almost all IRC event
+(e.g. `onConnect`). You can use its methods to do your required actions on the
+server.
 
-This module is the object that you received in almost all IRC event (e.g. `onConnect`). You can use its methods to do
-your required actions on the server.
-
-## Functions
+# Functions
 
   - [add](Irccd.Server.add.html)
   - [find](Irccd.Server.find.html)
   - [list](Irccd.Server.list.html)
   - [remove](Irccd.Server.remove.html)
 
-## Methods
+# Methods
 
   - [(constructor)](Irccd.Server.prototype.constructor.html)
   - [info](Irccd.Server.prototype.info.html)

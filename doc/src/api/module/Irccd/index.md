@@ -1,12 +1,8 @@
----
-module: Irccd
----
-
-## Usage
+# Module Irccd
 
 Contains general irccd variables and functions.
 
-## Constants
+# Constants
 
 The following properties are defined:
 
@@ -15,11 +11,12 @@ The following properties are defined:
     - **minor**: (int) the minor irccd version,
     - **patch**: (int) the patch irccd version.
 
-## Types
+# Types
 
-  - **SystemError**: (function) an exception inheriting `Error` thrown by some functions.
+  - **SystemError**: (function) an exception inheriting `Error` thrown by some
+    functions.
 
-## Example
+# Example
 
 ```javascript
 var Logger = Irccd.Logger;

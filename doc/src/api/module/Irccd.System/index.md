@@ -1,14 +1,12 @@
----
-module: Irccd.System
-js: true
-summary: "System inspection."
----
+# Module Irccd.System
 
-## Usage
+System inspection.
+
+# Usage
 
 Use this module if you want to inspect the system independently.
 
-## Functions
+# Functions
 
   - [env](Irccd.System.env.html)
   - [exec](Irccd.System.exec.html)

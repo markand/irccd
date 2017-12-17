@@ -1,12 +1,17 @@
----
-event: onWhois
-js: true
-summary: "This event is triggered when irccd gets information about a user."
-synopsis: "function onWhois(server, info)"
-arguments:
-  - "**server**: the current server,"
-  - "**info**: the whois information."
----
+# Event onWhois
+
+This event is triggered when irccd gets information about a user.
+
+# Synopsis
+
+```javascript
+function onWhois(server, info)
+```
+
+# Arguments
+
+  - **server**: the current server,
+  - **info**: the whois information.
 
 The info is an object with the following properties:
 

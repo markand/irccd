@@ -1,6 +1,9 @@
----
-method: start
-js: true
-summary: "Start the timer."
-synopsis: "Timer.prototype.start()"
----
+# Method Irccd.Timer.prototype.start
+
+Start the timer.
+
+# Synopsis
+
+```javascript
+Timer.prototype.start()
+```

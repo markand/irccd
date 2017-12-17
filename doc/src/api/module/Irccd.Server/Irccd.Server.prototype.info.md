@@ -1,10 +1,16 @@
----
-method: info
-js: true
-summary: "Get server information."
-synopsis: "info = Server.prototype.info()"
-returns: "The server information."
----
+# Method Irccd.Server.prototype.info
+
+"Get server information.
+
+# Synopsis
+
+```javascript
+info = Server.prototype.info()
+```
+
+# Returns
+
+The server information.
 
 The returned object  has the following fields:
 

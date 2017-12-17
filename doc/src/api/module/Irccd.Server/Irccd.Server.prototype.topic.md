@@ -1,9 +1,14 @@
----
-method: topic
-js: true
-summary: "Change the topic of the specified channel."
-synopsis: "Server.prototype.topic(channel, topic)"
-arguments:
-  - "**channel**: the channel,"
-  - "**topic**: the new topic."
----
+# Method Irccd.Server.prototype.topic
+
+Change the topic of the specified channel.
+
+# Synopsis
+
+```javascript
+Server.prototype.topic(channel, topic)
+```
+
+# Arguments
+
+  - **channel**: the channel,
+  - **topic**: the new topic.

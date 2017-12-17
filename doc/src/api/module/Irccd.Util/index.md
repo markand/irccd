@@ -1,13 +1,10 @@
----
-module: Irccd.Util
-js: true
----
+# Module Irccd.Util
 
-## Usage
+# Usage
 
 Various utilities.
 
-## Functions
+# Functions
 
   - [cut](Irccd.Util.cut.html)
   - [format](Irccd.Util.format.html)

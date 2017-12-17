@@ -1,8 +1,17 @@
----
-method: lines
-js: true
-summary: "Read all lines and return an array."
-synopsis: "File.prototype.lines()"
-returns: "An array with all lines."
-throws: "An [Irccd.SystemError](@baseurl@api/module/Irccd/index.html#types) on failures."
----
+# Method Irccd.File.prototype.lines
+
+Read all lines and return an array.
+
+# Synopsis
+
+```javascript
+File.prototype.lines()
+```
+
+# Returns
+
+An array with all lines.
+
+# Throws
+
+An [Irccd.SystemError](@baseurl@api/module/Irccd/index.html#types) on failures.

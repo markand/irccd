@@ -1,9 +1,17 @@
----
-function: isLower
-js: true
-summary: "Check if the unicode character is lower case."
-synopsis: "ret = Irccd.Unicode.isLower(code)"
-arguments:
-  - "**code**: the code point."
-returns: "True if lower case."
----
+# Function Irccd.Unicode.isLower
+
+Check if the unicode character is lower case.
+
+# Synopsis
+
+```javascript
+ret = Irccd.Unicode.isLower(code)
+```
+
+# Arguments
+
+  - **code**: the code point.
+
+# Returns
+
+True if lower case.

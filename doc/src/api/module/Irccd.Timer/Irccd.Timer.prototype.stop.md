@@ -1,6 +1,9 @@
----
-method: stop
-js: true
-summary: "Stop the timer."
-synopsis: "Timer.prototype.stop()"
----
+# Method Irccd.Timer.prototype.stop
+
+Stop the timer.
+
+# Synopsis
+
+```javascript
+Timer.prototype.stop()
+```

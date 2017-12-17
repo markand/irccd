@@ -1,8 +1,13 @@
----
-function: usleep
-js: true
-summary: "Sleep for milliseconds. Suspend the execution thread."
-synopsis: "Irccd.System.usleep(msec)"
-arguments:
-  - "**msec**: the number of milliseconds."
----
+# Function Irccd.System.usleep
+
+Sleep for milliseconds. Suspend the execution thread.
+
+# Synopsis
+
+```javascript
+Irccd.System.usleep(msec)
+```
+
+# Arguments
+
+  - **msec**: the number of milliseconds.

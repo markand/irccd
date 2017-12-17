@@ -1,9 +1,18 @@
----
-function: splituser
-js: true
-summary: "Extract the nickname, for instance with foo!~foo@localhost, foo will be returned."
-synopsis: "nick = Irccd.Util.splituser(user)"
-arguments:
-  - "**user**: the user to split."
-returns: "The nickname."
----
+# Function Irccd.Util.splituser
+
+Extract the nickname, for instance with **foo!~foo@localhost**, **foo** will be
+returned.
+
+# Synopsis
+
+```javascript
+nick = Irccd.Util.splituser(user)
+```
+
+# Arguments
+
+  - **user**: the user to split.
+
+# Returns
+
+The nickname.

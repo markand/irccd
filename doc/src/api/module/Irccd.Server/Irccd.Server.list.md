@@ -1,12 +1,18 @@
----
-function: list
-js: true
-summary: "List all servers in a map."
-synopsis: "table = Irccd.Server.list()"
-returns: "the table of all servers."
----
+# Function Irccd.Server.list
 
-## Example
+List all servers in a map.
+
+# Synopsis
+
+```javascript
+table = Irccd.Server.list()
+```
+
+# Returns
+
+The table of all servers.
+
+# Example
 
 ```javascript
 var table = Irccd.Server.list();
@@ -14,6 +20,6 @@ var table = Irccd.Server.list();
 for (var name in table) {
     var server = table[name];
 
-    /* Use server */
+    // Use server.
 }
 ```
