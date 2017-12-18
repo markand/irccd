@@ -21,7 +21,6 @@
 
 #include <cstdint>
 
-#include <irccd/util.hpp>
 #include <irccd/fs_util.hpp>
 #include <irccd/string_util.hpp>
 #include <irccd/system.hpp>

@@ -30,7 +30,6 @@ set(
     ${libcommon_SOURCE_DIR}/irccd/options.hpp
     ${libcommon_SOURCE_DIR}/irccd/string_util.hpp
     ${libcommon_SOURCE_DIR}/irccd/system.hpp
-    ${libcommon_SOURCE_DIR}/irccd/util.hpp
     ${libcommon_SOURCE_DIR}/irccd/xdg.hpp
 )
 

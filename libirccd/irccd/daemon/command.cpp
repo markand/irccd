@@ -18,7 +18,6 @@
 
 #include <irccd/json_util.hpp>
 #include <irccd/string_util.hpp>
-#include <irccd/util.hpp>
 
 #include "command.hpp"
 #include "irccd.hpp"

@@ -28,7 +28,6 @@
 #include <irccd/options.hpp>
 #include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
-#include <irccd/util.hpp>
 
 #include <irccd/ctl/controller.hpp>
 #include <irccd/ctl/ip_connection.hpp>

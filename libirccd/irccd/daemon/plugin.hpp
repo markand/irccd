@@ -37,8 +37,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include <irccd/util.hpp>
-
 #include "server.hpp"
 
 namespace irccd {
@@ -215,7 +213,7 @@ public:
      */
     virtual void set_config(plugin_config config)
     {
-        util::unused(config);
+        (void)config;
     }
 
     /**
@@ -235,7 +233,7 @@ public:
      */
     virtual void set_formats(plugin_formats formats)
     {
-        util::unused(formats);
+        (void)formats;
     }
 
     /**
@@ -255,7 +253,7 @@ public:
      */
     virtual void set_paths(plugin_paths paths)
     {
-        util::unused(paths);
+        (void)paths;
     }
 
     /**
@@ -268,7 +266,8 @@ public:
      */
     virtual void on_command(irccd& irccd, const message_event& event)
     {
-        util::unused(irccd, event);
+        (void)irccd;
+        (void)event;
     }
 
     /**
@@ -279,7 +278,8 @@ public:
      */
     virtual void on_connect(irccd& irccd, const connect_event& event)
     {
-        util::unused(irccd, event);
+        (void)irccd;
+        (void)event;
     }
 
     /**
@@ -290,7 +290,8 @@ public:
      */
     virtual void on_invite(irccd& irccd, const invite_event& event)
     {
-        util::unused(irccd, event);
+        (void)irccd;
+        (void)event;
     }
 
     /**
@@ -301,7 +302,8 @@ public:
      */
     virtual void on_join(irccd& irccd, const join_event& event)
     {
-        util::unused(irccd, event);
+        (void)irccd;
+        (void)event;
     }
 
     /**
@@ -312,7 +314,8 @@ public:
      */
     virtual void on_kick(irccd& irccd, const kick_event& event)
     {
-        util::unused(irccd, event);
+        (void)irccd;
+        (void)event;
     }
 
     /**
@@ -322,7 +325,7 @@ public:
      */
     virtual void on_load(irccd& irccd)
     {
-        util::unused(irccd);
+        (void)irccd;
     }
 
     /**
@@ -333,7 +336,8 @@ public:
      */
     virtual void on_message(irccd& irccd, const message_event& event)
     {
-        util::unused(irccd, event);
+        (void)irccd;
+        (void)event;
     }
 
     /**
@@ -344,7 +348,8 @@ public:
      */
     virtual void on_me(irccd& irccd, const me_event& event)
     {
-        util::unused(irccd, event);
+        (void)irccd;
+        (void)event;
     }
 
     /**
@@ -355,7 +360,8 @@ public:
      */
     virtual void on_mode(irccd& irccd, const mode_event& event)
     {
-        util::unused(irccd, event);
+        (void)irccd;
+        (void)event;
     }
 
     /**
@@ -366,7 +372,8 @@ public:
      */
     virtual void on_names(irccd& irccd, const names_event& event)
     {
-        util::unused(irccd, event);
+        (void)irccd;
+        (void)event;
     }
 
     /**
@@ -377,7 +384,8 @@ public:
      */
     virtual void on_nick(irccd& irccd, const nick_event& event)
     {
-        util::unused(irccd, event);
+        (void)irccd;
+        (void)event;
     }
 
     /**
@@ -388,7 +396,8 @@ public:
      */
     virtual void on_notice(irccd& irccd, const notice_event& event)
     {
-        util::unused(irccd, event);
+        (void)irccd;
+        (void)event;
     }
 
     /**
@@ -399,7 +408,8 @@ public:
      */
     virtual void on_part(irccd& irccd, const part_event& event)
     {
-        util::unused(irccd, event);
+        (void)irccd;
+        (void)event;
     }
 
     /**
@@ -409,7 +419,7 @@ public:
      */
     virtual void on_reload(irccd& irccd)
     {
-        util::unused(irccd);
+        (void)irccd;
     }
 
     /**
@@ -420,7 +430,8 @@ public:
      */
     virtual void on_topic(irccd& irccd, const topic_event& event)
     {
-        util::unused(irccd, event);
+        (void)irccd;
+        (void)event;
     }
 
     /**
@@ -430,7 +441,7 @@ public:
      */
     virtual void on_unload(irccd& irccd)
     {
-        util::unused(irccd);
+        (void)irccd;
     }
 
     /**
@@ -441,7 +452,8 @@ public:
      */
     virtual void on_whois(irccd& irccd, const whois_event& event)
     {
-        util::unused(irccd, event);
+        (void)irccd;
+        (void)event;
     }
 };
 
