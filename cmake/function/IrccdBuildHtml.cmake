@@ -105,15 +105,18 @@ macro(irccd_build_html)
     # Replace CMake variables.
     configure_file(
         ${HTML_SOURCE}
-        ${CMAKE_CURRENT_BINARY_DIR}/${dirname}/${basename}.md
+        ${doc_BINARY_DIR}/${dirname}/${basename}.md
         @ONLY
     )
 
+    set(input ${doc_BINARY_DIR}/${dirname}/${basename}.md)
+    set(output ${doc_BINARY_DIR}/html/${dirname}/${basename}.html)
+
     # Pandoc the file.
     pandoc(
-        OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${dirname}/${basename}.html
-        SOURCES ${CMAKE_CURRENT_BINARY_DIR}/${dirname}/${basename}.md
-        DEPENDS ${HTML_SOURCE}
+        OUTPUT ${output}
+        SOURCES ${input}
+        DEPENDS ${HTML_SOURCE} ${input}
         TEMPLATE ${html_SOURCE_DIR}/template.html
         VARIABLE baseurl:${baseurl} ${HTML_VARIABLES}
         FROM markdown
@@ -124,13 +127,13 @@ macro(irccd_build_html)
     # Install the documentation file as component if provided.
     if (HTML_COMPONENT)
         install(
-            FILES ${CMAKE_CURRENT_BINARY_DIR}/${dirname}/${basename}.html
+            FILES ${output}
             COMPONENT ${HTML_COMPONENT}
             DESTINATION ${WITH_DOCDIR}/${dirname}
         )
     endif ()
 
     if (HTML_OUTPUT_VAR)
-        set(${HTML_OUTPUT_VAR} ${CMAKE_CURRENT_BINARY_DIR}/${dirname}/${basename}.html)
+        set(${HTML_OUTPUT_VAR} ${output})
     endif ()
 endmacro ()

@@ -170,13 +170,17 @@ foreach (fname ${HTML_API_SOURCES} ${HTML_SOURCES})
         VARIABLES ${VARIABLES}
     )
 
+    list(APPEND SOURCES ${doc_SOURCE_DIR}/src/${fname})
     list(APPEND OUTPUTS ${output})
 endforeach ()
 
 add_custom_target(
     html ALL
     SOURCES
-        ${HTML_SOURCES} ${CSS} ${JS} ${OUTPUTS}
+        ${CSS}
+        ${JS}
+        ${OUTPUTS}
+        ${SOURCES}
         ${html_SOURCE_DIR}/template.html
     COMMAND
         ${CMAKE_COMMAND} -E make_directory ${html_BINARY_DIR}/css

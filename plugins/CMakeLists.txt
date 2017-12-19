@@ -24,6 +24,7 @@ set(
     auth
     hangman
     history
+    joke
     logger
     plugin
     roulette
