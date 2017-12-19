@@ -95,36 +95,62 @@ function load(server, channel)
 
     try {
         var file = new File(path, "r");
+        var data = JSON.parse(file.read());
     } catch (e) {
         throw Error(path + ": " + e.message);
     }
 
-    var data = JSON.parse(file.read());
-
     if (!data || !data.length)
         throw Error(path + ": no jokes found");
 
+    // Ensure that jokes only contain strings.
     var jokes = data.filter(function (joke) {
-        return joke && joke.length <= Plugin.config["max-list-lines"];
+        if (!joke || joke.length == 0 || joke.length > parseInt(Plugin.config["max-list-lines"]))
+            return false;
+
+        for (var i = 0; i < joke.length; ++i)
+            if (typeof (joke[i]) !== "string")
+                return false;
+
+        return true;
     });
 
-    if (!jokes)
+    if (!jokes || jokes.length === 0)
         throw Error(path + ": empty jokes");
 
     return jokes;
 }
 
+/**
+ * Convert a pair server/channel into a unique identifier.
+ *
+ * \return channel@server
+ */
 function id(server, channel)
 {
     return channel + "@" + server.toString();
 }
 
+/**
+ * Show the joke in the specified channel.
+ *
+ * \warning this function does not check for max-list-lines parameter
+ * \param server the server object
+ * \param channel the channel string
+ * \param joke the joke array (array of strings)
+ */
 function show(server, channel, joke)
 {
     for (var l = 0; l < joke.length; ++l)
         server.message(channel, joke[l]);
 }
 
+/**
+ * Remove the joke from the table.
+ *
+ * \param i the server/channel identifier
+ * \param index the joke index
+ */
 function remove(i, index)
 {
     table[i].splice(index, 1);
@@ -159,4 +185,10 @@ function onCommand(server, origin, channel, message)
 
     show(server, channel, table[i][index]);
     remove(i, index);
+}
+
+function onReload()
+{
+    // This will force reload of jokes on next onCommand.
+    table = {};
 }

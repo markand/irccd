@@ -33,6 +33,10 @@ Internal:
     (#594), (#595), (#681), (#697),
   - The libircclient has been replaced by a simple homemade library (#581).
 
+Plugins:
+
+  - Introduce brand new joke plugin (#609).
+
 irccd 2.2.0 2017-09-26
 ----------------------
 

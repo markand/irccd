@@ -16,10 +16,17 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-add_subdirectory(ask)
-add_subdirectory(auth)
-add_subdirectory(hangman)
-add_subdirectory(history)
-add_subdirectory(joke)
-add_subdirectory(logger)
-add_subdirectory(plugin)
+irccd_define_test(
+    NAME plugin-joke
+    SOURCES
+        main.cpp
+        jokes-empty.json
+        jokes-invalid.json
+        jokes.json
+        jokes-not-array.json
+        jokes-toobig.json
+    LIBRARIES libirccd
+    FLAGS
+        PLUGIN_NAME="joke"
+        PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/joke/joke.js"
+)
