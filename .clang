@@ -1,0 +1,9 @@
+-Ibuild
+-Ibuild/irccd
+-Iextern/duktape
+-Iextern/json
+-Ilibcommon
+-Ilibirccd
+-Ilibirccdctl
+-Ilibirccd-js
+-Ilibirccd-test
