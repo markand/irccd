@@ -47,18 +47,7 @@
 #include <irccd/daemon/transport_service.hpp>
 
 #if defined(HAVE_JS)
-#   include <irccd/js/directory_jsapi.hpp>
-#   include <irccd/js/elapsed_timer_jsapi.hpp>
-#   include <irccd/js/file_jsapi.hpp>
-#   include <irccd/js/irccd_jsapi.hpp>
 #   include <irccd/js/js_plugin.hpp>
-#   include <irccd/js/logger_jsapi.hpp>
-#   include <irccd/js/plugin_jsapi.hpp>
-#   include <irccd/js/server_jsapi.hpp>
-#   include <irccd/js/system_jsapi.hpp>
-#   include <irccd/js/timer_jsapi.hpp>
-#   include <irccd/js/unicode_jsapi.hpp>
-#   include <irccd/js/util_jsapi.hpp>
 #endif
 
 namespace irccd {
@@ -213,23 +202,8 @@ int main(int argc, char** argv)
     instance->commands().add(std::make_unique<rule_move_command>());
     instance->commands().add(std::make_unique<rule_remove_command>());
 
-    // Load Javascript API and plugin loader.
 #if defined(HAVE_JS)
-    auto loader = std::make_unique<js_plugin_loader>(*instance);
-
-    loader->modules().push_back(std::make_unique<irccd_jsapi>());
-    loader->modules().push_back(std::make_unique<directory_jsapi>());
-    loader->modules().push_back(std::make_unique<elapsed_timer_jsapi>());
-    loader->modules().push_back(std::make_unique<file_jsapi>());
-    loader->modules().push_back(std::make_unique<logger_jsapi>());
-    loader->modules().push_back(std::make_unique<plugin_jsapi>());
-    loader->modules().push_back(std::make_unique<server_jsapi>());
-    loader->modules().push_back(std::make_unique<system_jsapi>());
-    loader->modules().push_back(std::make_unique<timer_jsapi>());
-    loader->modules().push_back(std::make_unique<unicode_jsapi>());
-    loader->modules().push_back(std::make_unique<util_jsapi>());
-
-    instance->plugins().add_loader(std::move(loader));
+    instance->plugins().add_loader(js_plugin_loader::defaults(*instance));
 #endif
 
     try {

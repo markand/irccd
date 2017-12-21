@@ -25,9 +25,19 @@
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/logger.hpp>
 
+#include "directory_jsapi.hpp"
 #include "duktape_vector.hpp"
+#include "elapsed_timer_jsapi.hpp"
+#include "file_jsapi.hpp"
+#include "irccd_jsapi.hpp"
 #include "js_plugin.hpp"
+#include "logger_jsapi.hpp"
+#include "plugin_jsapi.hpp"
 #include "server_jsapi.hpp"
+#include "system_jsapi.hpp"
+#include "timer_jsapi.hpp"
+#include "unicode_jsapi.hpp"
+#include "util_jsapi.hpp"
 
 namespace irccd {
 
@@ -246,6 +256,25 @@ void js_plugin::on_unload(irccd&)
 void js_plugin::on_whois(irccd&, const whois_event& event)
 {
     call("onWhois", event.server, event.whois);
+}
+
+std::unique_ptr<js_plugin_loader> js_plugin_loader::defaults(irccd& irccd)
+{
+    auto self = std::make_unique<js_plugin_loader>(irccd);
+
+    self->modules().push_back(std::make_unique<irccd_jsapi>());
+    self->modules().push_back(std::make_unique<directory_jsapi>());
+    self->modules().push_back(std::make_unique<elapsed_timer_jsapi>());
+    self->modules().push_back(std::make_unique<file_jsapi>());
+    self->modules().push_back(std::make_unique<logger_jsapi>());
+    self->modules().push_back(std::make_unique<plugin_jsapi>());
+    self->modules().push_back(std::make_unique<server_jsapi>());
+    self->modules().push_back(std::make_unique<system_jsapi>());
+    self->modules().push_back(std::make_unique<timer_jsapi>());
+    self->modules().push_back(std::make_unique<unicode_jsapi>());
+    self->modules().push_back(std::make_unique<util_jsapi>());
+
+    return self;
 }
 
 js_plugin_loader::js_plugin_loader(irccd& irccd) noexcept

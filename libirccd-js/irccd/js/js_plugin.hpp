@@ -245,6 +245,14 @@ private:
 
 public:
     /**
+     * Create a plugin_loader with all irccd Javascript modules.
+     *
+     * \param irccd the irccd instance
+     * \return a ready to use plugin_loader
+     */
+    static std::unique_ptr<js_plugin_loader> defaults(irccd& irccd);
+
+    /**
      * Constructor.
      *
      * \param irccd the irccd instance
