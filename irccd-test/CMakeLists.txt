@@ -16,23 +16,15 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(libirccd-test)
-
-irccd_define_library(
-    TARGET libirccd-test
-    SOURCES
-        ${libirccd-test_SOURCE_DIR}/irccd/test/command_test.hpp
-        ${libirccd-test_SOURCE_DIR}/irccd/test/debug_server.cpp
-        ${libirccd-test_SOURCE_DIR}/irccd/test/debug_server.hpp
-        ${libirccd-test_SOURCE_DIR}/irccd/test/journal_server.cpp
-        ${libirccd-test_SOURCE_DIR}/irccd/test/journal_server.hpp
-        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/plugin_test.cpp>
-        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/plugin_test.hpp>
-        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/js_test.hpp>
+irccd_define_executable(
+    TARGET irccd-test
     LIBRARIES
-        $<$<BOOL:${HAVE_JS}>:libirccd-js>
         libirccd
-        libirccdctl
-    PUBLIC_INCLUDES
-        $<BUILD_INTERFACE:${libirccd-test_SOURCE_DIR}>
+        libirccd-test
+        $<$<BOOL:${HAVE_LIBEDIT}>:${Editline_LIBRARIES}>
+        $<$<BOOL:${HAVE_JS}>:libirccd-js>
+    INCLUDES
+        $<$<BOOL:${HAVE_LIBEDIT}>:${Editline_INCLUDE_DIRS}>
+    DESCRIPTION "Plugin tester"
+    SOURCES main.cpp
 )

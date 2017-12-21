@@ -89,6 +89,7 @@ endif ()
 
 add_subdirectory(irccd)
 add_subdirectory(irccdctl)
+add_subdirectory(irccd-test)
 add_subdirectory(contrib)
 
 if (HAVE_JS)
@@ -114,6 +115,7 @@ message("    Release flags:    ${CMAKE_CXX_FLAGS_RELEASE}")
 message("")
 
 message("Compiling irccd with following options:")
+message("    Libedit:          ${WITH_LIBEDIT_MSG}")
 message("    OpenSSL:          ${WITH_SSL_MSG}")
 message("    JS:               ${WITH_JS_MSG}")
 message("    Tests:            ${WITH_TESTS_MSG}")

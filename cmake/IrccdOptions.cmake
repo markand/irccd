@@ -19,6 +19,7 @@
 #
 # Options that controls the build:
 #
+# WITH_LIBEDIT          Enable libedit support (default: on)
 # WITH_SSL              Enable OpenSSL (default: on)
 # WITH_JS               Enable JavaScript (default: on)
 # WITH_TESTS            Enable unit testing (default: off)
@@ -71,6 +72,7 @@ else ()
     set(DEFAULT_PKGCONFIG "No")
 endif ()
 
+option(WITH_LIBEDIT "Enable libedit support" On)
 option(WITH_SSL "Enable SSL" On)
 option(WITH_JS "Enable embedded Duktape" On)
 option(WITH_TESTS "Enable unit testing" Off)
@@ -126,11 +128,23 @@ find_package(Doxygen)
 find_package(OpenSSL)
 find_package(Pandoc)
 find_package(TCL QUIET)
+find_package(Editline)
 
 if (NOT WITH_DOCS)
     set(WITH_HTML FALSE)
     set(WITH_DOXYGEN FALSE)
     set(WITH_MAN FALSE)
+endif ()
+
+if (WITH_LIBEDIT)
+    if (Editline_FOUND)
+        set(HAVE_LIBEDIT On)
+        set(WITH_LIBEDIT_MSG "Yes")
+    else ()
+        set(WITH_LIBEDIT_MSG "No (libedit not found)")
+    endif ()
+else ()
+    set(WITH_LIBEDIT_MSG "No (disabled by user)")
 endif ()
 
 if (WITH_SSL)

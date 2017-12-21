@@ -73,6 +73,7 @@
 
 #cmakedefine HAVE_JS
 #cmakedefine HAVE_SSL
+#cmakedefine HAVE_LIBEDIT
 
 /*
  * Platform checks.

@@ -133,10 +133,11 @@ set(
 set(
     HTML_SOURCES
     build.md
-    irccd.md
     irccd.conf.md
-    irccdctl.md
     irccdctl.conf.md
+    irccdctl.md
+    irccd.md
+    irccd-test.md
 )
 
 set(

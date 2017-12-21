@@ -12,6 +12,11 @@ Irccd:
     standard paths for both irccd and plugins (#611),
   - If Mercurial is found, the version is bundled in `irccd --version`.
 
+Irccd test:
+
+  - A brand new `irccd-test` program has been added to tests plugins on the
+    command line (#569).
+
 CMake:
 
   - CMake no longer create a fake installation directory while building (#674),
