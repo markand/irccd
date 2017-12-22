@@ -674,16 +674,6 @@ std::shared_ptr<server> server_service::get(const std::string& name) const noexc
     return *it;
 }
 
-std::shared_ptr<server> server_service::require(const std::string& name) const
-{
-    auto server = get(name);
-
-    if (!server)
-        throw std::invalid_argument(string_util::sprintf("server %s not found", name));
-
-    return server;
-}
-
 std::shared_ptr<server> server_service::require(const nlohmann::json& args, const std::string& key)
 {
     auto id = json_util::get_string(args, key);

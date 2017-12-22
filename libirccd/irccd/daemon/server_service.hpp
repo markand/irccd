@@ -111,15 +111,6 @@ public:
     std::shared_ptr<server> get(const std::string& name) const noexcept;
 
     /**
-     * Find a server by name.
-     *
-     * \param name the server name
-     * \return the server
-     * \throw std::out_of_range if the server does not exist
-     */
-    std::shared_ptr<server> require(const std::string& name) const;
-
-    /**
      * Find a server from a JSON object.
      *
      * \pre json.is_object()
