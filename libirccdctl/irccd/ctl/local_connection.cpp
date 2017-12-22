@@ -28,7 +28,7 @@ void local_connection::connect(connect_t handler)
 {
     using endpoint = boost::asio::local::stream_protocol::endpoint;
 
-    stream_.socket().async_connect(endpoint(path_), std::move(handler));
+    stream_.get_socket().async_connect(endpoint(path_), std::move(handler));
 }
 
 } // !ctl

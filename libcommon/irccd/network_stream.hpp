@@ -98,7 +98,7 @@ public:
      *
      * \return the socket
      */
-    inline const Socket& socket() const noexcept
+    inline const Socket& get_socket() const noexcept
     {
         return socket_;
     }
@@ -108,7 +108,7 @@ public:
      *
      * \return the socket
      */
-    inline Socket& socket() noexcept
+    inline Socket& get_socket() noexcept
     {
         return socket_;
     }

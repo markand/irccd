@@ -84,7 +84,7 @@ void basic_transport_server<Protocol>::do_accept(accept_t handler)
 {
     auto client = std::make_shared<basic_transport_client<socket_t>>(*this, acceptor_.get_io_service());
 
-    acceptor_.async_accept(client->stream().socket(), [this, client, handler] (auto code) {
+    acceptor_.async_accept(client->stream().get_socket(), [this, client, handler] (auto code) {
         if (code)
             handler(std::move(code), nullptr);
         else

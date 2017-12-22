@@ -59,21 +59,23 @@ void do_resolve(const std::string& host,
 
 void ip_connection::connect(connect_t handler)
 {
-    do_resolve(host_, std::to_string(port_), stream_.socket(), resolver_, std::move(handler));
+    do_resolve(host_, std::to_string(port_), stream_.get_socket(), resolver_, std::move(handler));
 }
 
 #if defined(HAVE_SSL)
 
 void tls_connection::handshake(connect_t handler)
 {
-    stream_.socket().async_handshake(boost::asio::ssl::stream_base::client, [handler] (auto code) {
+    stream_.get_socket().async_handshake(boost::asio::ssl::stream_base::client, [handler] (auto code) {
         handler(code);
     });
 }
 
 void tls_connection::connect(connect_t handler)
 {
-    do_resolve(host_, std::to_string(port_), stream_.socket().lowest_layer(), resolver_, [handler, this] (auto code) {
+    const auto port = std::to_string(port_);
+
+    do_resolve(host_, port, stream_.get_socket().lowest_layer(), resolver_, [handler, this] (auto code) {
         if (code)
             handler(code);
         else
