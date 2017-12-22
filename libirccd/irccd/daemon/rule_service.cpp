@@ -77,6 +77,80 @@ rule load_rule(const ini::section& sc)
 
 } // !namespace
 
+rule rule_service::from_json(const nlohmann::json& json)
+{
+    auto toset = [] (auto object, auto name) {
+        rule::set result;
+
+        for (const auto& s : object[name])
+            if (s.is_string())
+                result.insert(s.template get<std::string>());
+
+        return result;
+    };
+    auto toaction = [] (auto object, auto name) {
+        auto v = object[name];
+
+        if (!v.is_string())
+            throw rule_error(rule_error::invalid_action);
+
+        auto s = v.template get<std::string>();
+        if (s == "accept")
+            return rule::action_type::accept;
+        if (s == "drop")
+            return rule::action_type::drop;
+
+        throw rule_error(rule_error::invalid_action);
+    };
+
+    return {
+        toset(json, "servers"),
+        toset(json, "channels"),
+        toset(json, "origins"),
+        toset(json, "plugins"),
+        toset(json, "events"),
+        toaction(json, "action")
+    };
+}
+
+unsigned rule_service::get_index(const nlohmann::json& json, const std::string& key)
+{
+    auto index = json.find(key);
+
+    if (index == json.end() || !index->is_number_integer() || index->get<int>() < 0)
+        throw rule_error(rule_error::invalid_index);
+
+    return index->get<int>();
+}
+
+nlohmann::json rule_service::to_json(const rule& rule)
+{
+    auto join = [] (const auto& set) {
+        auto array = nlohmann::json::array();
+
+        for (const auto& entry : set)
+            array.push_back(entry);
+
+        return array;
+    };
+    auto str = [] (auto action) {
+        switch (action) {
+        case rule::action_type::accept:
+            return "accept";
+        default:
+            return "drop";
+        }
+    };
+
+    return {
+        { "servers",    join(rule.servers())    },
+        { "channels",   join(rule.channels())   },
+        { "plugins",    join(rule.plugins())    },
+        { "events",     join(rule.events())     },
+        { "action",     str(rule.action())      }
+    };
+}
+
 rule_service::rule_service(irccd &irccd)
     : irccd_(irccd)
 {

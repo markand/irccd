@@ -19,6 +19,7 @@
 #define BOOST_TEST_MODULE "server-info"
 #include <boost/test/unit_test.hpp>
 
+#include <irccd/daemon/server_info_command.hpp>
 #include <irccd/daemon/server_service.hpp>
 
 #include <irccd/test/command_test.hpp>

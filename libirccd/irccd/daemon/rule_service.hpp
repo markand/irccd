@@ -26,6 +26,8 @@
 
 #include <vector>
 
+#include <json.hpp>
+
 #include "rule.hpp"
 
 namespace irccd {
@@ -43,6 +45,37 @@ private:
     std::vector<rule> rules_;
 
 public:
+    /**
+     * Load a rule from a JSON object.
+     *
+     * For possible use in transport commands or Javascript API.
+     *
+     * \pre json.is_object()
+     * \param json the JSON object
+     * \return the new rule
+     * \throw rule_error on errors
+     */
+    static rule from_json(const nlohmann::json& json);
+
+    /**
+     * Helper to get rule index in a JSON object.
+     *
+     * \pre json.is_object()
+     * \param json the JSON object
+     * \param key the index property
+     * \return the index
+     * \throw rule_error on errors
+     */
+    static unsigned get_index(const nlohmann::json& json, const std::string& key = "index");
+
+    /**
+     * Convert a rule into a JSON object.
+     *
+     * \param rule the rule
+     * \throw the JSON representation
+     */
+    static nlohmann::json to_json(const rule& rule);
+
     /**
      * Create the rule service.
      */
