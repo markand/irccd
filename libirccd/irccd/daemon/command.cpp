@@ -165,9 +165,9 @@ std::shared_ptr<server> get_server(irccd& daemon, const nlohmann::json& args)
 
 } // !namespace
 
-plugin_config_command::plugin_config_command()
-    : command("plugin-config")
+std::string plugin_config_command::get_name() const noexcept
 {
+    return "plugin-config";
 }
 
 void plugin_config_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -180,9 +180,9 @@ void plugin_config_command::exec(irccd& irccd, transport_client& client, const n
         exec_get(client, *plugin, args);
 }
 
-plugin_info_command::plugin_info_command()
-    : command("plugin-info")
+std::string plugin_info_command::get_name() const noexcept
 {
+    return "plugin-info";
 }
 
 void plugin_info_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -198,9 +198,9 @@ void plugin_info_command::exec(irccd& irccd, transport_client& client, const nlo
     });
 }
 
-plugin_list_command::plugin_list_command()
-    : command("plugin-list")
+std::string plugin_list_command::get_name() const noexcept
 {
+    return "plugin-list";
 }
 
 void plugin_list_command::exec(irccd& irccd, transport_client& client, const nlohmann::json&)
@@ -216,9 +216,9 @@ void plugin_list_command::exec(irccd& irccd, transport_client& client, const nlo
     });
 }
 
-plugin_load_command::plugin_load_command()
-    : command("plugin-load")
+std::string plugin_load_command::get_name() const noexcept
 {
+    return "plugin-load";
 }
 
 void plugin_load_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -227,9 +227,9 @@ void plugin_load_command::exec(irccd& irccd, transport_client& client, const nlo
     client.success("plugin-load");
 }
 
-plugin_reload_command::plugin_reload_command()
-    : command("plugin-reload")
+std::string plugin_reload_command::get_name() const noexcept
 {
+    return "plugin-reload";
 }
 
 void plugin_reload_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -238,9 +238,9 @@ void plugin_reload_command::exec(irccd& irccd, transport_client& client, const n
     client.success("plugin-reload");
 }
 
-plugin_unload_command::plugin_unload_command()
-    : command("plugin-unload")
+std::string plugin_unload_command::get_name() const noexcept
 {
+    return "plugin-unload";
 }
 
 void plugin_unload_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -249,9 +249,9 @@ void plugin_unload_command::exec(irccd& irccd, transport_client& client, const n
     client.success("plugin-unload");
 }
 
-server_connect_command::server_connect_command()
-    : command("server-connect")
+std::string server_connect_command::get_name() const noexcept
 {
+    return "server-connect";
 }
 
 void server_connect_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -265,9 +265,9 @@ void server_connect_command::exec(irccd& irccd, transport_client& client, const 
     client.success("server-connect");
 }
 
-server_disconnect_command::server_disconnect_command()
-    : command("server-disconnect")
+std::string server_disconnect_command::get_name() const noexcept
 {
+    return "server-disconnect";
 }
 
 void server_disconnect_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -292,9 +292,9 @@ void server_disconnect_command::exec(irccd& irccd, transport_client& client, con
     client.success("server-disconnect");
 }
 
-server_info_command::server_info_command()
-    : command("server-info")
+std::string server_info_command::get_name() const noexcept
 {
+    return "server-invite";
 }
 
 void server_info_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -323,9 +323,9 @@ void server_info_command::exec(irccd& irccd, transport_client& client, const nlo
     client.send(response);
 }
 
-server_invite_command::server_invite_command()
-    : command("server-invite")
+std::string server_invite_command::get_name() const noexcept
 {
+    return "server-invite";
 }
 
 void server_invite_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -343,9 +343,9 @@ void server_invite_command::exec(irccd& irccd, transport_client& client, const n
     client.success("server-invite");
 }
 
-server_join_command::server_join_command()
-    : command("server-join")
+std::string server_join_command::get_name() const noexcept
 {
+    return "server-join";
 }
 
 void server_join_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -361,9 +361,9 @@ void server_join_command::exec(irccd& irccd, transport_client& client, const nlo
     client.success("server-join");
 }
 
-server_kick_command::server_kick_command()
-    : command("server-kick")
+std::string server_kick_command::get_name() const noexcept
 {
+    return "server-kick";
 }
 
 void server_kick_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -382,9 +382,9 @@ void server_kick_command::exec(irccd& irccd, transport_client& client, const nlo
     client.success("server-kick");
 }
 
-server_list_command::server_list_command()
-    : command("server-list")
+std::string server_list_command::get_name() const noexcept
 {
+    return "server-list";
 }
 
 void server_list_command::exec(irccd& irccd, transport_client& client, const nlohmann::json&)
@@ -401,9 +401,9 @@ void server_list_command::exec(irccd& irccd, transport_client& client, const nlo
     });
 }
 
-server_me_command::server_me_command()
-    : command("server-me")
+std::string server_me_command::get_name() const noexcept
 {
+    return "server-me";
 }
 
 void server_me_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -419,9 +419,9 @@ void server_me_command::exec(irccd& irccd, transport_client& client, const nlohm
     client.success("server-me");
 }
 
-server_message_command::server_message_command()
-    : command("server-message")
+std::string server_message_command::get_name() const noexcept
 {
+    return "server-message";
 }
 
 void server_message_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -437,9 +437,9 @@ void server_message_command::exec(irccd& irccd, transport_client& client, const 
     client.success("server-message");
 }
 
-server_mode_command::server_mode_command()
-    : command("server-mode")
+std::string server_mode_command::get_name() const noexcept
 {
+    return "server-mode";
 }
 
 void server_mode_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -461,9 +461,9 @@ void server_mode_command::exec(irccd& irccd, transport_client& client, const nlo
     client.success("server-mode");
 }
 
-server_nick_command::server_nick_command()
-    : command("server-nick")
+std::string server_nick_command::get_name() const noexcept
 {
+    return "server-nick";
 }
 
 void server_nick_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -478,9 +478,9 @@ void server_nick_command::exec(irccd& irccd, transport_client& client, const nlo
     client.success("server-nick");
 }
 
-server_notice_command::server_notice_command()
-    : command("server-notice")
+std::string server_notice_command::get_name() const noexcept
 {
+    return "server-notice";
 }
 
 void server_notice_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -496,9 +496,9 @@ void server_notice_command::exec(irccd& irccd, transport_client& client, const n
     client.success("server-notice");
 }
 
-server_part_command::server_part_command()
-    : command("server-part")
+std::string server_part_command::get_name() const noexcept
 {
+    return "server-part";
 }
 
 void server_part_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -514,9 +514,9 @@ void server_part_command::exec(irccd& irccd, transport_client& client, const nlo
     client.success("server-part");
 }
 
-server_reconnect_command::server_reconnect_command()
-    : command("server-reconnect")
+std::string server_reconnect_command::get_name() const noexcept
 {
+    return "server-reconnect";
 }
 
 void server_reconnect_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -542,9 +542,9 @@ void server_reconnect_command::exec(irccd& irccd, transport_client& client, cons
     client.success("server-reconnect");
 }
 
-server_topic_command::server_topic_command()
-    : command("server-topic")
+std::string server_topic_command::get_name() const noexcept
 {
+    return "server-topic";
 }
 
 void server_topic_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -560,9 +560,9 @@ void server_topic_command::exec(irccd& irccd, transport_client& client, const nl
     client.success("server-topic");
 }
 
-rule_edit_command::rule_edit_command()
-    : command("rule-edit")
+std::string rule_edit_command::get_name() const noexcept
 {
+    return "rule-edit";
 }
 
 void rule_edit_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -606,9 +606,9 @@ void rule_edit_command::exec(irccd& irccd, transport_client& client, const nlohm
     client.success("rule-edit");
 }
 
-rule_list_command::rule_list_command()
-    : command("rule-list")
+std::string rule_list_command::get_name() const noexcept
 {
+    return "rule-list";
 }
 
 void rule_list_command::exec(irccd& irccd, transport_client& client, const nlohmann::json&)
@@ -624,9 +624,9 @@ void rule_list_command::exec(irccd& irccd, transport_client& client, const nlohm
     });
 }
 
-rule_info_command::rule_info_command()
-    : command("rule-info")
+std::string rule_info_command::get_name() const noexcept
 {
+    return "rule-info";
 }
 
 void rule_info_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -637,9 +637,9 @@ void rule_info_command::exec(irccd& irccd, transport_client& client, const nlohm
     client.send(std::move(json));
 }
 
-rule_remove_command::rule_remove_command()
-    : command("rule-remove")
+std::string rule_remove_command::get_name() const noexcept
 {
+    return "rule-remove";
 }
 
 void rule_remove_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -653,9 +653,9 @@ void rule_remove_command::exec(irccd& irccd, transport_client& client, const nlo
     client.success("rule-remove");
 }
 
-rule_move_command::rule_move_command()
-    : command("rule-move")
+std::string rule_move_command::get_name() const noexcept
 {
+    return "rule-move";
 }
 
 void rule_move_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
@@ -709,9 +709,9 @@ void rule_move_command::exec(irccd& irccd, transport_client& client, const nlohm
     client.success("rule-move");
 }
 
-rule_add_command::rule_add_command()
-    : command("rule-add")
+std::string rule_add_command::get_name() const noexcept
 {
+    return "rule-add";
 }
 
 void rule_add_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)

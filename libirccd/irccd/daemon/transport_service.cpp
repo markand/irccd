@@ -197,7 +197,7 @@ void transport_service::handle_command(std::shared_ptr<transport_client> tc, con
         try {
             cmd->exec(irccd_, *tc, object);
         } catch (const boost::system::system_error& ex) {
-            tc->error(ex.code(), cmd->name());
+            tc->error(ex.code(), cmd->get_name());
         } catch (const std::exception& ex) {
             irccd_.log().warning() << "transport: unknown error not reported" << std::endl;
             irccd_.log().warning() << "transport: " << ex.what() << std::endl;

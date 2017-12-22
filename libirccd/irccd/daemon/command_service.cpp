@@ -28,7 +28,7 @@ bool command_service::contains(const std::string& name) const noexcept
 std::shared_ptr<command> command_service::find(const std::string& name) const noexcept
 {
     auto it = std::find_if(commands_.begin(), commands_.end(), [&] (const auto& cmd) {
-        return cmd->name() == name;
+        return cmd->get_name() == name;
     });
 
     return it == commands_.end() ? nullptr : *it;
@@ -37,7 +37,7 @@ std::shared_ptr<command> command_service::find(const std::string& name) const no
 void command_service::add(std::shared_ptr<command> command)
 {
     auto it = std::find_if(commands_.begin(), commands_.end(), [&] (const auto& cmd) {
-        return cmd->name() == command->name();
+        return cmd->get_name() == command->get_name();
     });
 
     if (it != commands_.end())

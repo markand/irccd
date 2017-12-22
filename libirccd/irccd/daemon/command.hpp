@@ -42,22 +42,7 @@ class transport_client;
  * \brief Server side remote command
  */
 class command {
-private:
-    std::string name_;
-
 public:
-    /**
-     * Construct a command.
-     *
-     * \pre !name.empty()
-     * \param name the command name
-     */
-    inline command(std::string name) noexcept
-        : name_(std::move(name))
-    {
-        assert(!name_.empty());
-    }
-
     /**
      * Default destructor virtual.
      */
@@ -68,10 +53,7 @@ public:
      *
      * \return the command name
      */
-    inline const std::string& name() const noexcept
-    {
-        return name_;
-    }
+    virtual std::string get_name() const noexcept = 0;
 
     /**
      * Execute the command.
@@ -99,9 +81,9 @@ public:
 class plugin_config_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    plugin_config_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -119,9 +101,9 @@ public:
 class plugin_info_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    plugin_info_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -135,9 +117,9 @@ public:
 class plugin_list_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    plugin_list_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -157,9 +139,9 @@ public:
 class plugin_load_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    plugin_load_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -178,9 +160,9 @@ public:
 class plugin_reload_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    plugin_reload_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -199,9 +181,9 @@ public:
 class plugin_unload_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    plugin_unload_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -223,9 +205,9 @@ public:
 class server_connect_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    server_connect_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -244,9 +226,9 @@ public:
 class server_disconnect_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    server_disconnect_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -265,9 +247,9 @@ public:
 class server_info_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    server_info_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -288,9 +270,9 @@ public:
 class server_invite_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    server_invite_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -310,9 +292,9 @@ public:
 class server_join_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    server_join_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -333,9 +315,9 @@ public:
 class server_kick_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    server_kick_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -349,9 +331,9 @@ public:
 class server_list_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    server_list_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -371,9 +353,9 @@ public:
 class server_me_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    server_me_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -393,9 +375,9 @@ public:
 class server_message_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    server_message_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -416,9 +398,9 @@ public:
 class server_mode_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    server_mode_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -438,9 +420,9 @@ public:
 class server_nick_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    server_nick_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -460,9 +442,9 @@ public:
 class server_notice_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    server_notice_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -482,9 +464,9 @@ public:
 class server_part_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    server_part_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -503,9 +485,9 @@ public:
 class server_reconnect_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    server_reconnect_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -525,9 +507,9 @@ public:
 class server_topic_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    server_topic_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -546,9 +528,9 @@ public:
 class rule_edit_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    rule_edit_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -562,9 +544,9 @@ public:
 class rule_list_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    rule_list_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -582,9 +564,9 @@ public:
 class rule_info_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    rule_info_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -602,9 +584,9 @@ public:
 class rule_remove_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    rule_remove_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -622,9 +604,9 @@ public:
 class rule_move_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    rule_move_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
@@ -642,9 +624,9 @@ public:
 class rule_add_command : public command {
 public:
     /**
-     * Constructor.
+     * \copydoc command::get_name
      */
-    rule_add_command();
+    std::string get_name() const noexcept override;
 
     /**
      * \copydoc command::exec
