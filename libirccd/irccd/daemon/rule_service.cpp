@@ -39,7 +39,7 @@ rule load_rule(const ini::section& sc)
     };
 
     rule::set servers, channels, origins, plugins, events;
-    rule::action_type action = rule::action_type::accept;
+    rule::action action = rule::action::accept;
 
     // Get the sets.
     ini::section::const_iterator it;
@@ -59,9 +59,9 @@ rule load_rule(const ini::section& sc)
     auto actionstr = sc.get("action").value();
 
     if (actionstr == "drop")
-        action = rule::action_type::drop;
+        action = rule::action::drop;
     else if (actionstr == "accept")
-        action = rule::action_type::accept;
+        action = rule::action::accept;
     else
         throw rule_error(rule_error::invalid_action);
 
@@ -96,9 +96,9 @@ rule rule_service::from_json(const nlohmann::json& json)
 
         auto s = v.template get<std::string>();
         if (s == "accept")
-            return rule::action_type::accept;
+            return rule::action::accept;
         if (s == "drop")
-            return rule::action_type::drop;
+            return rule::action::drop;
 
         throw rule_error(rule_error::invalid_action);
     };
@@ -135,7 +135,7 @@ nlohmann::json rule_service::to_json(const rule& rule)
     };
     auto str = [] (auto action) {
         switch (action) {
-        case rule::action_type::accept:
+        case rule::action::accept:
             return "accept";
         default:
             return "drop";
@@ -143,11 +143,11 @@ nlohmann::json rule_service::to_json(const rule& rule)
     };
 
     return {
-        { "servers",    join(rule.servers())    },
-        { "channels",   join(rule.channels())   },
-        { "plugins",    join(rule.plugins())    },
-        { "events",     join(rule.events())     },
-        { "action",     str(rule.action())      }
+        { "servers",    join(rule.get_servers())    },
+        { "channels",   join(rule.get_channels())   },
+        { "plugins",    join(rule.get_plugins())    },
+        { "events",     join(rule.get_events())     },
+        { "action",     str(rule.get_action())      }
     };
 }
 
@@ -204,18 +204,18 @@ bool rule_service::solve(const std::string& server,
 
     int i = 0;
     for (const auto& rule : rules_) {
-        auto action = rule.action() == rule::action_type::accept ? "accept" : "drop";
+        auto action = rule.get_action() == rule::action::accept ? "accept" : "drop";
 
         irccd_.log().debug() << "  candidate "   << i++ << ":\n"
-            << "    servers: "  << string_util::join(rule.servers()) << "\n"
-            << "    channels: " << string_util::join(rule.channels()) << "\n"
-            << "    origins: "  << string_util::join(rule.origins()) << "\n"
-            << "    plugins: "  << string_util::join(rule.plugins()) << "\n"
-            << "    events: "   << string_util::join(rule.events()) << "\n"
+            << "    servers: "  << string_util::join(rule.get_servers()) << "\n"
+            << "    channels: " << string_util::join(rule.get_channels()) << "\n"
+            << "    origins: "  << string_util::join(rule.get_origins()) << "\n"
+            << "    plugins: "  << string_util::join(rule.get_plugins()) << "\n"
+            << "    events: "   << string_util::join(rule.get_events()) << "\n"
             << "    action: "   << action << std::endl;
 
         if (rule.match(server, channel, origin, plugin, event))
-            result = rule.action() == rule::action_type::accept;
+            result = rule.get_action() == rule::action::accept;
     }
 
     return result;

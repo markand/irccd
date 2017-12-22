@@ -83,7 +83,7 @@ protected:
                 rule::set{                }, // Origins
                 rule::set{                }, // Plugins
                 rule::set{ "onCommand"    }, // Events
-                rule::action_type::drop
+                rule::action::drop
             });
         }
 
@@ -95,7 +95,7 @@ protected:
                 rule::set{                },
                 rule::set{                },
                 rule::set{ "onCommand"    },
-                rule::action_type::accept
+                rule::action::accept
             });
         }
 
@@ -107,7 +107,7 @@ protected:
                 rule::set{},
                 rule::set{"game"},
                 rule::set{},
-                rule::action_type::drop
+                rule::action::drop
             });
         }
 
@@ -119,7 +119,7 @@ protected:
                 rule::set{                            },
                 rule::set{ "game"                     },
                 rule::set{ "onCommand", "onMessage"   },
-                rule::action_type::accept
+                rule::action::accept
             });
         }
     }

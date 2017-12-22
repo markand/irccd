@@ -40,7 +40,7 @@ public:
             { "o1", "o2" },
             { "p1", "p2" },
             { "onMessage", "onCommand" },
-            rule::action_type::drop
+            rule::action::drop
         ));
         daemon_->rules().add(rule(
             { "s1", },
@@ -48,7 +48,7 @@ public:
             { "o1", },
             { "p1", },
             { "onMessage", },
-            rule::action_type::accept
+            rule::action::accept
         ));
     }
 };

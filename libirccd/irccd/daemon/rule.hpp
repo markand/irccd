@@ -47,7 +47,7 @@ public:
     /**
      * \brief Rule action type.
      */
-    enum class action_type {
+    enum class action {
         accept,         //!< The event is accepted (default)
         drop            //!< The event is dropped
     };
@@ -58,7 +58,7 @@ private:
     set origins_;
     set plugins_;
     set events_;
-    action_type action_{action_type::accept};
+    action action_{action::accept};
 
     /*
      * Check if a set contains the value and return true if it is or return
@@ -83,7 +83,7 @@ public:
          set nicknames = {},
          set plugins = {},
          set events = {},
-         action_type action = action_type::accept);
+         action action = action::accept);
 
     /**
      * Check if that rule apply for the given criterias.
@@ -106,7 +106,7 @@ public:
      *
      * \return the action
      */
-    inline action_type action() const noexcept
+    inline action get_action() const noexcept
     {
         return action_;
     }
@@ -116,9 +116,9 @@ public:
      *
      * \pre action must be valid
      */
-    inline void set_action(action_type action) noexcept
+    inline void set_action(action action) noexcept
     {
-        assert(action == action_type::accept || action == action_type::drop);
+        assert(action == action::accept || action == action::drop);
 
         action_ = action;
     }
@@ -128,7 +128,7 @@ public:
      *
      * \return the servers
      */
-    inline const set& servers() const noexcept
+    inline const set& get_servers() const noexcept
     {
         return servers_;
     }
@@ -138,7 +138,7 @@ public:
      *
      * \return the servers
      */
-    inline set& servers() noexcept
+    inline set& get_servers() noexcept
     {
         return servers_;
     }
@@ -148,7 +148,7 @@ public:
      *
      * \return the channels
      */
-    inline const set& channels() const noexcept
+    inline const set& get_channels() const noexcept
     {
         return channels_;
     }
@@ -158,7 +158,7 @@ public:
      *
      * \return the channels
      */
-    inline set& channels() noexcept
+    inline set& get_channels() noexcept
     {
         return channels_;
     }
@@ -168,7 +168,17 @@ public:
      *
      * \return the origins
      */
-    inline const set& origins() const noexcept
+    inline const set& get_origins() const noexcept
+    {
+        return origins_;
+    }
+
+    /**
+     * Overloaded function.
+     *
+     * \return the origins
+     */
+    inline set& get_origins() noexcept
     {
         return origins_;
     }
@@ -178,7 +188,7 @@ public:
      *
      * \return the plugins
      */
-    inline const set& plugins() const noexcept
+    inline const set& get_plugins() const noexcept
     {
         return plugins_;
     }
@@ -188,7 +198,7 @@ public:
      *
      * \return the plugins
      */
-    inline set& plugins() noexcept
+    inline set& get_plugins() noexcept
     {
         return plugins_;
     }
@@ -198,7 +208,7 @@ public:
      *
      * \return the events
      */
-    inline const set& events() const noexcept
+    inline const set& get_events() const noexcept
     {
         return events_;
     }
@@ -208,7 +218,7 @@ public:
      *
      * \return the events
      */
-    inline set& events() noexcept
+    inline set& get_events() noexcept
     {
         return events_;
     }

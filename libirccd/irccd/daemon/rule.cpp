@@ -28,7 +28,7 @@ bool rule::match_set(const set& set, const std::string& value) const noexcept
     return value.empty() || set.empty() || set.count(value) == 1;
 }
 
-rule::rule(set servers, set channels, set origins, set plugins, set events, action_type action)
+rule::rule(set servers, set channels, set origins, set plugins, set events, action action)
     : servers_(std::move(servers))
     , channels_(std::move(channels))
     , origins_(std::move(origins))

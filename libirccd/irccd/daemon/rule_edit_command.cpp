@@ -47,10 +47,10 @@ void rule_edit_command::exec(irccd& irccd, transport_client& client, const nlohm
     auto index = irccd.rules().get_index(args);
     auto rule = irccd.rules().require(index);
 
-    updateset(rule.channels(), args, "channels");
-    updateset(rule.events(), args, "events");
-    updateset(rule.plugins(), args, "plugins");
-    updateset(rule.servers(), args, "servers");
+    updateset(rule.get_channels(), args, "channels");
+    updateset(rule.get_events(), args, "events");
+    updateset(rule.get_plugins(), args, "plugins");
+    updateset(rule.get_servers(), args, "servers");
 
     auto action = args.find("action");
 
@@ -59,9 +59,9 @@ void rule_edit_command::exec(irccd& irccd, transport_client& client, const nlohm
             throw rule_error(rule_error::error::invalid_action);
 
         if (action->get<std::string>() == "accept")
-            rule.set_action(rule::action_type::accept);
+            rule.set_action(rule::action::accept);
         else if (action->get<std::string>() == "drop")
-            rule.set_action(rule::action_type::drop);
+            rule.set_action(rule::action::drop);
         else
             throw rule_error(rule_error::invalid_action);
     }

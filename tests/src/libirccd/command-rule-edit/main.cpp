@@ -41,7 +41,7 @@ public:
             { "o1", "o2" },
             { "p1", "p2" },
             { "onMessage", "onCommand" },
-            rule::action_type::drop
+            rule::action::drop
         ));
     }
 };
