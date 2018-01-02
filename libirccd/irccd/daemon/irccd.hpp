@@ -228,7 +228,7 @@ public:
 class irccd_error : public boost::system::system_error {
 public:
     /**
-     * \brief Irccd related errors (1..999)
+     * \brief Irccd related errors.
      */
     enum error {
         //!< No error.

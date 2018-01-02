@@ -894,14 +894,14 @@ public:
 class server_error : public boost::system::system_error {
 public:
     /**
-     * \brief Server related errors (1000..1999)
+     * \brief Server related errors.
      */
     enum error {
         //!< No error.
         no_error = 0,
 
         //!< The specified server was not found.
-        not_found = 1000,
+        not_found,
 
         //!< The specified identifier is invalid.
         invalid_identifier,

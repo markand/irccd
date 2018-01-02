@@ -230,14 +230,14 @@ public:
 class rule_error : public boost::system::system_error {
 public:
     /**
-     * \brief Rule related errors (4000..4999)
+     * \brief Rule related errors.
      */
     enum error {
         //!< No error.
         no_error = 0,
 
         //!< Invalid action given.
-        invalid_action = 4000,
+        invalid_action,
 
         //!< Invalid rule index.
         invalid_index,

@@ -543,14 +543,14 @@ public:
 class plugin_error : public boost::system::system_error {
 public:
     /**
-     * \brief Server related errors (3000..3999)
+     * \brief Plugin related errors.
      */
     enum error {
         //!< No error.
         no_error = 0,
 
         //!< The specified plugin is not found.
-        not_found = 2000,
+        not_found,
 
         //!< The plugin was unable to run the function.
         exec_error,
