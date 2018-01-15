@@ -82,6 +82,7 @@ add_subdirectory(doc)
 add_subdirectory(libcommon)
 add_subdirectory(libirccd)
 add_subdirectory(libirccdctl)
+add_subdirectory(libirccd-test)
 
 if (HAVE_JS)
     add_subdirectory(libirccd-js)
@@ -104,7 +105,6 @@ endif ()
 # Tests.
 if (WITH_TESTS)
     include(CTest)
-    add_subdirectory(libirccd-test)
     add_subdirectory(tests)
 endif ()
 
