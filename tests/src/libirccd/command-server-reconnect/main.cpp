@@ -19,8 +19,8 @@
 #define BOOST_TEST_MODULE "server-reconnect"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/server_service.hpp>
 #include <irccd/daemon/server_reconnect_command.hpp>
+#include <irccd/daemon/service/server_service.hpp>
 
 #include <irccd/test/command_test.hpp>
 #include <irccd/test/journal_server.hpp>

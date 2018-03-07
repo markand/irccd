@@ -20,8 +20,9 @@
 
 #include "irccd.hpp"
 #include "rule_add_command.hpp"
-#include "rule_service.hpp"
 #include "transport_client.hpp"
+
+#include <irccd/daemon/service/rule_service.hpp>
 
 namespace irccd {
 

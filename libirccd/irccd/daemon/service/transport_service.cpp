@@ -22,19 +22,20 @@
 
 #include <irccd/string_util.hpp>
 
-#include "command_service.hpp"
-#include "ip_transport_server.hpp"
-#include "irccd.hpp"
-#include "logger.hpp"
-#include "transport_client.hpp"
-#include "transport_service.hpp"
+#include <irccd/daemon/command.hpp>
+#include <irccd/daemon/ip_transport_server.hpp>
+#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/logger.hpp>
+#include <irccd/daemon/transport_client.hpp>
+
+#include <irccd/daemon/service/transport_service.hpp>
 
 #if !defined(IRCCD_SYSTEM_WINDOWS)
-#   include "local_transport_server.hpp"
+#   include <irccd/daemon/local_transport_server.hpp>
 #endif
 
 #if defined(HAVE_SSL)
-#   include "tls_transport_server.hpp"
+#   include <irccd/daemon/tls_transport_server.hpp>
 #endif
 
 namespace irccd {
@@ -189,15 +190,17 @@ void transport_service::handle_command(std::shared_ptr<transport_client> tc, con
         return;
     }
 
-    auto cmd = irccd_.commands().find(*name);
+    auto cmd = std::find_if(commands_.begin(), commands_.end(), [&] (const auto& cptr) {
+        return cptr->get_name() == name->template get<std::string>();
+    });
 
-    if (!cmd)
+    if (cmd == commands_.end())
         tc->error(irccd_error::invalid_command, name->get<std::string>());
     else {
         try {
-            cmd->exec(irccd_, *tc, object);
+            (*cmd)->exec(irccd_, *tc, object);
         } catch (const boost::system::system_error& ex) {
-            tc->error(ex.code(), cmd->get_name());
+            tc->error(ex.code(), (*cmd)->get_name());
         } catch (const std::exception& ex) {
             irccd_.log().warning() << "transport: unknown error not reported" << std::endl;
             irccd_.log().warning() << "transport: " << ex.what() << std::endl;
@@ -212,7 +215,7 @@ void transport_service::do_recv(std::shared_ptr<transport_client> tc)
         case boost::system::errc::network_down:
             irccd_.log().warning("transport: client disconnected");
             break;
-            case boost::system::errc::invalid_argument:
+        case boost::system::errc::invalid_argument:
             tc->error(irccd_error::invalid_message);
             break;
         default:

@@ -24,11 +24,12 @@
 
 #include <json.hpp>
 
-#include "transport_client.hpp"
-#include "transport_server.hpp"
+#include <irccd/daemon/transport_client.hpp>
+#include <irccd/daemon/transport_server.hpp>
 
 namespace irccd {
 
+class command;
 class config;
 
 /**
@@ -37,10 +38,12 @@ class config;
  */
 class transport_service {
 public:
+    using commands_t = std::vector<std::unique_ptr<command>>;
     using servers_t = std::vector<std::unique_ptr<transport_server>>;
 
 private:
     irccd& irccd_;
+    commands_t commands_;
     servers_t servers_;
 
     void handle_command(std::shared_ptr<transport_client>, const nlohmann::json&);
@@ -59,6 +62,26 @@ public:
      * Default destructor.
      */
     ~transport_service() noexcept;
+
+    /**
+     * Get underlying commands.
+     *
+     * \return the commands
+     */
+    inline const commands_t& get_commands() const noexcept
+    {
+        return commands_;
+    }
+
+    /**
+     * Get underlying commands.
+     *
+     * \return the commands
+     */
+    inline commands_t& get_commands() noexcept
+    {
+        return commands_;
+    }
 
     /**
      * Add a transport server.

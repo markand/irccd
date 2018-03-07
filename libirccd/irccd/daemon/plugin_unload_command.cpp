@@ -19,9 +19,10 @@
 #include <irccd/json_util.hpp>
 
 #include "irccd.hpp"
-#include "plugin_service.hpp"
 #include "plugin_unload_command.hpp"
 #include "transport_client.hpp"
+
+#include <irccd/daemon/service/plugin_service.hpp>
 
 namespace irccd {
 

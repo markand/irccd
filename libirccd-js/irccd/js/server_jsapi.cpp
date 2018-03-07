@@ -21,7 +21,8 @@
 #include <unordered_map>
 
 #include <irccd/daemon/irccd.hpp>
-#include <irccd/daemon/server_service.hpp>
+
+#include <irccd/daemon/service/server_service.hpp>
 
 #include "duktape_vector.hpp"
 #include "irccd_jsapi.hpp"

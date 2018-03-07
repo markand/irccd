@@ -19,13 +19,13 @@
 #include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
 
-#include "command_service.hpp"
 #include "irccd.hpp"
 #include "logger.hpp"
-#include "plugin_service.hpp"
-#include "rule_service.hpp"
-#include "server_service.hpp"
-#include "transport_service.hpp"
+
+#include "service/plugin_service.hpp"
+#include "service/rule_service.hpp"
+#include "service/server_service.hpp"
+#include "service/transport_service.hpp"
 
 namespace irccd {
 
@@ -211,7 +211,6 @@ irccd::irccd(boost::asio::io_service& service, std::string config)
     : config_(std::move(config))
     , service_(service)
     , logger_(std::make_unique<console_logger>())
-    , command_service_(std::make_unique<command_service>())
     , server_service_(std::make_unique<server_service>(*this))
     , tpt_service_(std::make_unique<transport_service>(*this))
     , rule_service_(std::make_unique<rule_service>(*this))

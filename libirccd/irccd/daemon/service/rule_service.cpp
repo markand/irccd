@@ -21,9 +21,10 @@
 #include <irccd/config.hpp>
 #include <irccd/string_util.hpp>
 
-#include "irccd.hpp"
-#include "logger.hpp"
-#include "rule_service.hpp"
+#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/logger.hpp>
+
+#include <irccd/daemon/service/rule_service.hpp>
 
 namespace irccd {
 

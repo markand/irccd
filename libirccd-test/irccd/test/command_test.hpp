@@ -21,11 +21,10 @@
 
 #include <memory>
 
-#include <irccd/daemon/command_service.hpp>
 #include <irccd/daemon/ip_transport_server.hpp>
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/logger.hpp>
-#include <irccd/daemon/transport_service.hpp>
+#include <irccd/daemon/service/transport_service.hpp>
 
 #include <irccd/ctl/ip_connection.hpp>
 #include <irccd/ctl/controller.hpp>
@@ -38,7 +37,7 @@ private:
     template <typename Command>
     inline void add()
     {
-        daemon_->commands().add(std::make_unique<Command>());
+        daemon_->transports().get_commands().push_back(std::make_unique<Command>());
     }
 
     template <typename C1, typename C2, typename... Tail>

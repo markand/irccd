@@ -22,7 +22,7 @@
 #include <irccd/json_util.hpp>
 
 #include <irccd/daemon/rule_info_command.hpp>
-#include <irccd/daemon/rule_service.hpp>
+#include <irccd/daemon/service/rule_service.hpp>
 
 #include <irccd/test/command_test.hpp>
 

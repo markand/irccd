@@ -20,9 +20,10 @@
 #include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
 
-#include "irccd.hpp"
-#include "logger.hpp"
-#include "plugin_service.hpp"
+#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/logger.hpp>
+
+#include <irccd/daemon/service/plugin_service.hpp>
 
 namespace irccd {
 

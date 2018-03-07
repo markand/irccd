@@ -25,7 +25,6 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/basic_transport_client.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/basic_transport_server.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/command_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/dynlib_plugin.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/ip_transport_server.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/irccd.hpp
@@ -39,7 +38,6 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_list_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_load_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_reload_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_unload_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule_add_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule_edit_command.hpp
@@ -48,7 +46,6 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule_list_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule_move_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule_remove_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server_connect_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server_disconnect_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server.hpp
@@ -64,17 +61,18 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/server_notice_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server_part_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server_reconnect_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server_topic_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/service/plugin_service.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/service/rule_service.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/service/server_service.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/service/transport_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_client.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_server.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/transport_service.hpp
     $<$<BOOL:${HAVE_SSL}>:${libirccd_SOURCE_DIR}/irccd/daemon/tls_transport_server.hpp>
 )
 
 set(
     SOURCES
-    ${libirccd_SOURCE_DIR}/irccd/daemon/command_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/dynlib_plugin.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/irccd.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/irc.cpp
@@ -85,7 +83,6 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_list_command.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_load_command.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_reload_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_unload_command.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule_add_command.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule.cpp
@@ -94,7 +91,6 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule_list_command.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule_move_command.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule_remove_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server_connect_command.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server_disconnect_command.cpp
@@ -110,11 +106,13 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/server_notice_command.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server_part_command.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server_reconnect_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server_topic_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/service/plugin_service.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/service/rule_service.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/service/server_service.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/service/transport_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_client.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_server.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/transport_service.cpp
     $<$<BOOL:${HAVE_SSL}>:${libirccd_SOURCE_DIR}/irccd/daemon/tls_transport_server.cpp>
 )
 

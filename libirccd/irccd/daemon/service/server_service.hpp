@@ -27,7 +27,7 @@
 #include <memory>
 #include <vector>
 
-#include "server.hpp"
+#include <irccd/daemon/server.hpp>
 
 namespace irccd {
 

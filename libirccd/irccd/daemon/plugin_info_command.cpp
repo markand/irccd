@@ -20,8 +20,9 @@
 
 #include "irccd.hpp"
 #include "plugin_info_command.hpp"
-#include "plugin_service.hpp"
 #include "transport_client.hpp"
+
+#include <irccd/daemon/service/plugin_service.hpp>
 
 namespace irccd {
 

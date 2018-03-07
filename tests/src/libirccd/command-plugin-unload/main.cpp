@@ -19,8 +19,8 @@
 #define BOOST_TEST_MODULE "plugin-unload"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/plugin_service.hpp>
 #include <irccd/daemon/plugin_unload_command.hpp>
+#include <irccd/daemon/service/plugin_service.hpp>
 
 #include <irccd/test/command_test.hpp>
 

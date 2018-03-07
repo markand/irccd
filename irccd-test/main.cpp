@@ -36,8 +36,9 @@
 
 #include <irccd/daemon/dynlib_plugin.hpp>
 #include <irccd/daemon/irccd.hpp>
-#include <irccd/daemon/plugin_service.hpp>
-#include <irccd/daemon/server_service.hpp>
+
+#include <irccd/daemon/service/plugin_service.hpp>
+#include <irccd/daemon/service/server_service.hpp>
 
 #include <irccd/test/debug_server.hpp>
 

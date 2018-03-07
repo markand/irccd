@@ -18,8 +18,9 @@
 
 #include "irccd.hpp"
 #include "server_disconnect_command.hpp"
-#include "server_service.hpp"
 #include "transport_client.hpp"
+
+#include <irccd/daemon/service/server_service.hpp>
 
 namespace irccd {
 

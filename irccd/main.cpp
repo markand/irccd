@@ -38,7 +38,6 @@
 #include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
 
-#include <irccd/daemon/command_service.hpp>
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/logger.hpp>
 #include <irccd/daemon/plugin_config_command.hpp>
@@ -47,7 +46,6 @@
 #include <irccd/daemon/plugin_list_command.hpp>
 #include <irccd/daemon/plugin_load_command.hpp>
 #include <irccd/daemon/plugin_reload_command.hpp>
-#include <irccd/daemon/plugin_service.hpp>
 #include <irccd/daemon/plugin_unload_command.hpp>
 #include <irccd/daemon/rule_add_command.hpp>
 #include <irccd/daemon/rule_edit_command.hpp>
@@ -55,7 +53,6 @@
 #include <irccd/daemon/rule_list_command.hpp>
 #include <irccd/daemon/rule_move_command.hpp>
 #include <irccd/daemon/rule_remove_command.hpp>
-#include <irccd/daemon/rule_service.hpp>
 #include <irccd/daemon/server_connect_command.hpp>
 #include <irccd/daemon/server_disconnect_command.hpp>
 #include <irccd/daemon/server_info_command.hpp>
@@ -70,9 +67,12 @@
 #include <irccd/daemon/server_notice_command.hpp>
 #include <irccd/daemon/server_part_command.hpp>
 #include <irccd/daemon/server_reconnect_command.hpp>
-#include <irccd/daemon/server_service.hpp>
 #include <irccd/daemon/server_topic_command.hpp>
-#include <irccd/daemon/transport_service.hpp>
+
+#include <irccd/daemon/service/plugin_service.hpp>
+#include <irccd/daemon/service/rule_service.hpp>
+#include <irccd/daemon/service/server_service.hpp>
+#include <irccd/daemon/service/transport_service.hpp>
 
 #if defined(HAVE_JS)
 #   include <irccd/js/js_plugin.hpp>
@@ -202,33 +202,33 @@ int main(int argc, char** argv)
 
     auto options = parse(argc, argv);
 
-    instance->commands().add(std::make_unique<plugin_config_command>());
-    instance->commands().add(std::make_unique<plugin_info_command>());
-    instance->commands().add(std::make_unique<plugin_list_command>());
-    instance->commands().add(std::make_unique<plugin_load_command>());
-    instance->commands().add(std::make_unique<plugin_reload_command>());
-    instance->commands().add(std::make_unique<plugin_unload_command>());
-    instance->commands().add(std::make_unique<server_connect_command>());
-    instance->commands().add(std::make_unique<server_disconnect_command>());
-    instance->commands().add(std::make_unique<server_info_command>());
-    instance->commands().add(std::make_unique<server_invite_command>());
-    instance->commands().add(std::make_unique<server_join_command>());
-    instance->commands().add(std::make_unique<server_kick_command>());
-    instance->commands().add(std::make_unique<server_list_command>());
-    instance->commands().add(std::make_unique<server_me_command>());
-    instance->commands().add(std::make_unique<server_message_command>());
-    instance->commands().add(std::make_unique<server_mode_command>());
-    instance->commands().add(std::make_unique<server_nick_command>());
-    instance->commands().add(std::make_unique<server_notice_command>());
-    instance->commands().add(std::make_unique<server_part_command>());
-    instance->commands().add(std::make_unique<server_reconnect_command>());
-    instance->commands().add(std::make_unique<server_topic_command>());
-    instance->commands().add(std::make_unique<rule_add_command>());
-    instance->commands().add(std::make_unique<rule_edit_command>());
-    instance->commands().add(std::make_unique<rule_info_command>());
-    instance->commands().add(std::make_unique<rule_list_command>());
-    instance->commands().add(std::make_unique<rule_move_command>());
-    instance->commands().add(std::make_unique<rule_remove_command>());
+    instance->transports().get_commands().push_back(std::make_unique<plugin_config_command>());
+    instance->transports().get_commands().push_back(std::make_unique<plugin_info_command>());
+    instance->transports().get_commands().push_back(std::make_unique<plugin_list_command>());
+    instance->transports().get_commands().push_back(std::make_unique<plugin_load_command>());
+    instance->transports().get_commands().push_back(std::make_unique<plugin_reload_command>());
+    instance->transports().get_commands().push_back(std::make_unique<plugin_unload_command>());
+    instance->transports().get_commands().push_back(std::make_unique<server_connect_command>());
+    instance->transports().get_commands().push_back(std::make_unique<server_disconnect_command>());
+    instance->transports().get_commands().push_back(std::make_unique<server_info_command>());
+    instance->transports().get_commands().push_back(std::make_unique<server_invite_command>());
+    instance->transports().get_commands().push_back(std::make_unique<server_join_command>());
+    instance->transports().get_commands().push_back(std::make_unique<server_kick_command>());
+    instance->transports().get_commands().push_back(std::make_unique<server_list_command>());
+    instance->transports().get_commands().push_back(std::make_unique<server_me_command>());
+    instance->transports().get_commands().push_back(std::make_unique<server_message_command>());
+    instance->transports().get_commands().push_back(std::make_unique<server_mode_command>());
+    instance->transports().get_commands().push_back(std::make_unique<server_nick_command>());
+    instance->transports().get_commands().push_back(std::make_unique<server_notice_command>());
+    instance->transports().get_commands().push_back(std::make_unique<server_part_command>());
+    instance->transports().get_commands().push_back(std::make_unique<server_reconnect_command>());
+    instance->transports().get_commands().push_back(std::make_unique<server_topic_command>());
+    instance->transports().get_commands().push_back(std::make_unique<rule_add_command>());
+    instance->transports().get_commands().push_back(std::make_unique<rule_edit_command>());
+    instance->transports().get_commands().push_back(std::make_unique<rule_info_command>());
+    instance->transports().get_commands().push_back(std::make_unique<rule_list_command>());
+    instance->transports().get_commands().push_back(std::make_unique<rule_move_command>());
+    instance->transports().get_commands().push_back(std::make_unique<rule_remove_command>());
 
 #if defined(HAVE_JS)
     instance->plugins().add_loader(js_plugin_loader::defaults(*instance));

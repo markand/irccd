@@ -20,7 +20,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <irccd/daemon/plugin_list_command.hpp>
-#include <irccd/daemon/plugin_service.hpp>
+#include <irccd/daemon/service/plugin_service.hpp>
 
 #include <irccd/test/command_test.hpp>
 

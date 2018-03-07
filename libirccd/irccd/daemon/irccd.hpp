@@ -37,7 +37,6 @@
  */
 namespace irccd {
 
-class command_service;
 class logger;
 class plugin_service;
 class rule_service;
@@ -62,7 +61,6 @@ private:
     std::unique_ptr<logger> logger_;
 
     // Services.
-    std::shared_ptr<command_service> command_service_;
     std::shared_ptr<server_service> server_service_;
     std::shared_ptr<transport_service> tpt_service_;
     std::shared_ptr<rule_service> rule_service_;
@@ -165,16 +163,6 @@ public:
      * \param logger the new logger
      */
     void set_log(std::unique_ptr<logger> logger) noexcept;
-
-    /**
-     * Access the command service.
-     *
-     * \return the service
-     */
-    inline command_service& commands() noexcept
-    {
-        return *command_service_;
-    }
 
     /**
      * Access the server service.

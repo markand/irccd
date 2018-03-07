@@ -23,7 +23,7 @@
 
 #include <irccd/daemon/rule_edit_command.hpp>
 #include <irccd/daemon/rule_info_command.hpp>
-#include <irccd/daemon/rule_service.hpp>
+#include <irccd/daemon/service/rule_service.hpp>
 
 #include <irccd/test/command_test.hpp>
 

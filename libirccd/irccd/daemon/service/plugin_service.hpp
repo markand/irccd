@@ -29,7 +29,7 @@
 #include <string>
 #include <vector>
 
-#include "plugin.hpp"
+#include <irccd/daemon/plugin.hpp>
 
 namespace irccd {
 

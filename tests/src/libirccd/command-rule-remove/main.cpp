@@ -23,7 +23,7 @@
 
 #include <irccd/daemon/rule_remove_command.hpp>
 #include <irccd/daemon/rule_list_command.hpp>
-#include <irccd/daemon/rule_service.hpp>
+#include <irccd/daemon/service/rule_service.hpp>
 
 #include <irccd/test/command_test.hpp>
 
