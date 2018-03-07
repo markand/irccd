@@ -21,8 +21,8 @@
 
 #include <irccd/json_util.hpp>
 
-#include <irccd/daemon/rule_list_command.hpp>
-#include <irccd/daemon/rule_move_command.hpp>
+#include <irccd/daemon/command/rule_list_command.hpp>
+#include <irccd/daemon/command/rule_move_command.hpp>
 #include <irccd/daemon/service/rule_service.hpp>
 
 #include <irccd/test/command_test.hpp>

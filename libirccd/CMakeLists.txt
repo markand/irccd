@@ -25,43 +25,43 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/basic_transport_client.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/basic_transport_server.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/plugin_config_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/plugin_info_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/plugin_list_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/plugin_list_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/plugin_load_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/plugin_reload_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/plugin_unload_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/rule_add_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/rule_edit_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/rule_info_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/rule_list_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/rule_move_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/rule_remove_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_connect_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_disconnect_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_info_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_invite_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_join_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_kick_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_list_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_me_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_message_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_mode_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_nick_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_notice_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_part_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_reconnect_command.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_topic_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/dynlib_plugin.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/ip_transport_server.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/irccd.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/irc.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/local_transport_server.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/logger.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_config_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_info_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_list_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_list_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_load_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_reload_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_unload_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_add_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_edit_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_info_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_list_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_move_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_remove_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_connect_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_disconnect_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_info_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_invite_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_join_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_kick_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_list_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_me_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_message_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_mode_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_nick_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_notice_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_part_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_reconnect_command.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_topic_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/service/plugin_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/service/rule_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/service/server_service.hpp
@@ -73,40 +73,40 @@ set(
 
 set(
     SOURCES
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/plugin_config_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/plugin_info_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/plugin_list_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/plugin_load_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/plugin_reload_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/plugin_unload_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/rule_add_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/rule_edit_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/rule_info_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/rule_list_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/rule_move_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/rule_remove_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_connect_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_disconnect_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_info_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_invite_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_join_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_kick_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_list_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_me_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_message_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_mode_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_nick_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_notice_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_part_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_reconnect_command.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_topic_command.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/dynlib_plugin.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/irccd.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/irc.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/logger.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_config_command.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_info_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_list_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_load_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_reload_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_unload_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_add_command.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_edit_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_info_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_list_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_move_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_remove_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_connect_command.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_disconnect_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_info_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_invite_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_join_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_kick_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_list_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_me_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_message_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_mode_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_nick_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_notice_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_part_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_reconnect_command.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/server_topic_command.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/service/plugin_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/service/rule_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/service/server_service.cpp

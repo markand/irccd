@@ -19,7 +19,7 @@
 #define BOOST_TEST_MODULE "server-me"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/server_me_command.hpp>
+#include <irccd/daemon/command/server_me_command.hpp>
 #include <irccd/daemon/service/server_service.hpp>
 
 #include <irccd/test/command_test.hpp>

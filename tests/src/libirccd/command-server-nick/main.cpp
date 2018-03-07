@@ -19,7 +19,7 @@
 #define BOOST_TEST_MODULE "server-nick"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/server_nick_command.hpp>
+#include <irccd/daemon/command/server_nick_command.hpp>
 #include <irccd/daemon/service/server_service.hpp>
 
 #include <irccd/test/command_test.hpp>

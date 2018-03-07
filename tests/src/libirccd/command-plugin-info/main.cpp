@@ -19,7 +19,7 @@
 #define BOOST_TEST_MODULE "plugin-info"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/plugin_info_command.hpp>
+#include <irccd/daemon/command/plugin_info_command.hpp>
 #include <irccd/daemon/service/plugin_service.hpp>
 
 #include <irccd/test/command_test.hpp>
