@@ -16,27 +16,12 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(plugins)
-
-set(
-    IRCCD_PLUGINS
-    ask
-    auth
-    hangman
-    history
-    joke
-    logger
-    plugin
-    roulette
-    tictactoe
-    CACHE INTERNAL ""
+irccd_define_test(
+    NAME plugin-tictactoe
+    SOURCES main.cpp
+    LIBRARIES libirccd
+    FLAGS
+        PLUGIN_NAME="tictactoe"
+        PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/tictactoe/tictactoe.js"
 )
 
-foreach (plugin ${IRCCD_PLUGINS})
-    irccd_define_plugin(
-        NAME ${plugin}
-        TYPE JS
-        SCRIPT ${plugins_SOURCE_DIR}/${plugin}/${plugin}.js
-        DOCS ${plugins_SOURCE_DIR}/${plugin}/${plugin}.md
-    )
-endforeach ()

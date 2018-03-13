@@ -48,6 +48,7 @@ Documentation about official irccd plugins.
   - [logger](plugin/logger.html)
   - [plugin](plugin/plugin.html)
   - [roulette](plugin/roulette.html)
+  - [tictactoe](plugin/tictactoe.html)
 
 # Development
 
