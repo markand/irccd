@@ -230,6 +230,17 @@ BOOST_AUTO_TEST_CASE(random)
     }
 }
 
+BOOST_AUTO_TEST_CASE(disconnect)
+{
+    auto players = start();
+
+    server_->disconnect();
+    server_->cqueue().clear();
+    plugin_->on_message(irccd_, {server_, players.first, "#tictactoe", "a 1"});
+
+    BOOST_TEST(server_->cqueue().empty());
+}
+
 BOOST_AUTO_TEST_CASE(kick)
 {
     auto players = start();

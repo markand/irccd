@@ -84,6 +84,14 @@ public:
 };
 
 /**
+ * \brief Connection success event.
+ */
+class disconnect_event {
+public:
+    std::shared_ptr<class server> server;   //!< The server.
+};
+
+/**
  * \brief Invite event.
  */
 class invite_event {
@@ -261,7 +269,7 @@ public:
         connecting,         //!< network connection in progress,
         identifying,        //!< sending nick, user and password commands,
         waiting,            //!< waiting for reconnection,
-        connected           //!< ready for use
+        connected           //!< ready for use.
     };
 
     /**
@@ -278,7 +286,7 @@ public:
      *
      * The server is dead.
      */
-    boost::signals2::signal<void ()> on_die;
+    boost::signals2::signal<void (disconnect_event)> on_die;
 
     /**
      * Signal: on_invite

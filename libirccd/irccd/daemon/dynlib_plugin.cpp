@@ -76,6 +76,11 @@ void dynlib_plugin::on_connect(irccd& irccd, const connect_event& ev)
     plugin_->on_connect(irccd, ev);
 }
 
+void dynlib_plugin::on_disconnect(irccd& irccd, const disconnect_event& ev)
+{
+    plugin_->on_disconnect(irccd, ev);
+}
+
 void dynlib_plugin::on_invite(irccd& irccd, const invite_event& ev)
 {
     plugin_->on_invite(irccd, ev);

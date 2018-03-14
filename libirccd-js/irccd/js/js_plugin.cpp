@@ -182,6 +182,11 @@ void js_plugin::on_connect(irccd&, const connect_event& event)
     call("onConnect", event.server);
 }
 
+void js_plugin::on_disconnect(irccd&, const disconnect_event& event)
+{
+    call("onDisconnect", event.server);
+}
+
 void js_plugin::on_invite(irccd&, const invite_event& event)
 {
     call("onInvite", event.server, event.origin, event.channel);

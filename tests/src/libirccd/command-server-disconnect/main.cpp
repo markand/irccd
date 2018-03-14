@@ -29,12 +29,22 @@ namespace irccd {
 
 namespace {
 
+class no_disconnect_server : public journal_server {
+public:
+    using journal_server::journal_server;
+
+    void disconnect() noexcept override
+    {
+        // do nothing.
+    }
+};
+
 class server_disconnect_test : public command_test<server_disconnect_command> {
 protected:
     server_disconnect_test()
     {
-        daemon_->servers().add(std::make_unique<journal_server>(service_, "s1"));
-        daemon_->servers().add(std::make_unique<journal_server>(service_, "s2"));
+        daemon_->servers().add(std::make_unique<no_disconnect_server>(service_, "s1"));
+        daemon_->servers().add(std::make_unique<no_disconnect_server>(service_, "s2"));
     }
 };
 

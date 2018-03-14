@@ -99,7 +99,7 @@ public:
     void open();
 
     /**
-     * \copydoc Plugin::config
+     * \copydoc plugin::config
      */
     plugin_config config() override
     {
@@ -107,7 +107,7 @@ public:
     }
 
     /**
-     * \copydoc Plugin::setConfig
+     * \copydoc plugin::setConfig
      */
     void set_config(plugin_config config) override
     {
@@ -115,7 +115,7 @@ public:
     }
 
     /**
-     * \copydoc Plugin::formats
+     * \copydoc plugin::formats
      */
     plugin_formats formats() override
     {
@@ -123,7 +123,7 @@ public:
     }
 
     /**
-     * \copydoc Plugin::setFormats
+     * \copydoc plugin::setFormats
      */
     void set_formats(plugin_formats formats) override
     {
@@ -131,7 +131,7 @@ public:
     }
 
     /**
-     * \copydoc Plugin::paths
+     * \copydoc plugin::paths
      */
     plugin_paths paths() override
     {
@@ -139,7 +139,7 @@ public:
     }
 
     /**
-     * \copydoc Plugin::set_paths
+     * \copydoc plugin::set_paths
      */
     void set_paths(plugin_paths paths) override
     {
@@ -147,87 +147,92 @@ public:
     }
 
     /**
-     * \copydoc Plugin::on_command
+     * \copydoc plugin::on_command
      */
     void on_command(irccd& irccd, const message_event& event) override;
 
     /**
-     * \copydoc Plugin::on_connect
+     * \copydoc plugin::on_connect
      */
     void on_connect(irccd& irccd, const connect_event& event) override;
 
     /**
-     * \copydoc Plugin::on_invite
+     * \copydoc plugin::on_disconnect
+     */
+    void on_disconnect(irccd& irccd, const disconnect_event& event) override;
+
+    /**
+     * \copydoc plugin::on_invite
      */
     void on_invite(irccd& irccd, const invite_event& event) override;
 
     /**
-     * \copydoc Plugin::on_join
+     * \copydoc plugin::on_join
      */
     void on_join(irccd& irccd, const join_event& event) override;
 
     /**
-     * \copydoc Plugin::on_kick
+     * \copydoc plugin::on_kick
      */
     void on_kick(irccd& irccd, const kick_event& event) override;
 
     /**
-     * \copydoc Plugin::on_load
+     * \copydoc plugin::on_load
      */
     void on_load(irccd& irccd) override;
 
     /**
-     * \copydoc Plugin::on_message
+     * \copydoc plugin::on_message
      */
     void on_message(irccd& irccd, const message_event& event) override;
 
     /**
-     * \copydoc Plugin::on_me
+     * \copydoc plugin::on_me
      */
     void on_me(irccd& irccd, const me_event& event) override;
 
     /**
-     * \copydoc Plugin::on_mode
+     * \copydoc plugin::on_mode
      */
     void on_mode(irccd& irccd, const mode_event& event) override;
 
     /**
-     * \copydoc Plugin::on_names
+     * \copydoc plugin::on_names
      */
     void on_names(irccd& irccd, const names_event& event) override;
 
     /**
-     * \copydoc Plugin::on_nick
+     * \copydoc plugin::on_nick
      */
     void on_nick(irccd& irccd, const nick_event& event) override;
 
     /**
-     * \copydoc Plugin::on_notice
+     * \copydoc plugin::on_notice
      */
     void on_notice(irccd& irccd, const notice_event& event) override;
 
     /**
-     * \copydoc Plugin::on_part
+     * \copydoc plugin::on_part
      */
     void on_part(irccd& irccd, const part_event& event) override;
 
     /**
-     * \copydoc Plugin::on_reload
+     * \copydoc plugin::on_reload
      */
     void on_reload(irccd& irccd) override;
 
     /**
-     * \copydoc Plugin::on_topic
+     * \copydoc plugin::on_topic
      */
     void on_topic(irccd& irccd, const topic_event& event) override;
 
     /**
-     * \copydoc Plugin::on_unload
+     * \copydoc plugin::on_unload
      */
     void on_unload(irccd& irccd) override;
 
     /**
-     * \copydoc Plugin::on_whois
+     * \copydoc plugin::on_whois
      */
     void on_whois(irccd& irccd, const whois_event& event) override;
 };

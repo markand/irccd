@@ -199,25 +199,6 @@ void server::dispatch_isupport(const irc::message& msg)
     for (unsigned int i = 0; i < msg.args().size(); ++i) {
         if (msg.arg(i).compare(0, 6, "PREFIX") == 0) {
             modes_ = isupport_extract_prefixes(msg.arg(i));
-
-#if 0
-#if !defined(NDEBUG)
-            auto show = [this] (auto mode, auto title) {
-                auto it = modes_.find(mode);
-
-                if (it != modes_.end())
-                    log::debug(string_util::sprintf("  %-12s: %c", title, it->second));
-            };
-
-            log::debug(string_util::sprintf("server %s: isupport modes:", name_));
-            show(channel_mode::creator, "creator");
-            show(channel_mode::half_op, "half_op");
-            show(channel_mode::op, "op");
-            show(channel_mode::protection, "protection");
-            show(channel_mode::voiced, "voiced");
-#endif // !NDEBUG
-#endif
-
             break;
         }
     }
@@ -465,16 +446,12 @@ void server::handle_connect(boost::system::error_code code)
 {
     if (code) {
         conn_ = nullptr;
-#if 0
-        log::warning(string_util::sprintf("server %s: error while connecting", name_));
-        log::warning(string_util::sprintf("server %s: %s", name_, code.message()));
-#endif
 
         // Wait before reconnecting.
         if (recotries_ != 0) {
             if (recotries_ > 0 && recocur_ >= recotries_) {
                 state_ = state_t::disconnected;
-                on_die();
+                on_die({shared_from_this()});
             } else {
                 state_ = state_t::waiting;
                 wait();
@@ -493,7 +470,8 @@ void server::handle_connect(boost::system::error_code code)
 
 server::~server()
 {
-    disconnect();
+    conn_ = nullptr;
+    state_ = state_t::disconnected;
 }
 
 void server::set_nickname(std::string nickname)
@@ -544,7 +522,7 @@ void server::disconnect() noexcept
 {
     conn_ = nullptr;
     state_ = state_t::disconnected;
-    on_die();
+    on_die({shared_from_this()});
 }
 
 void server::reconnect() noexcept

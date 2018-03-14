@@ -283,6 +283,18 @@ public:
     }
 
     /**
+     * On disconnection.
+     *
+     * \param irccd the irccd instance
+     * \param event the event
+     */
+    virtual void on_disconnect(irccd& irccd, const disconnect_event& event)
+    {
+        (void)irccd;
+        (void)event;
+    }
+
+    /**
      * On invitation.
      *
      * \param irccd the irccd instance

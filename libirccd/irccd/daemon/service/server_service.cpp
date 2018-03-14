@@ -261,6 +261,27 @@ void server_service::handle_connect(const connect_event& ev)
     );
 }
 
+void server_service::handle_die(const disconnect_event& ev)
+{
+    // First, remove the server in case of exceptions.
+    servers_.erase(std::find(servers_.begin(), servers_.end(), ev.server));
+
+    irccd_.log().debug() << "server " << ev.server->name() << ": event onDisconnect" << std::endl;
+    irccd_.transports().broadcast(nlohmann::json::object({
+        { "event",      "onDisconnect"      },
+        { "server",     ev.server->name()   }
+    }));
+
+    dispatch(irccd_, ev.server->name(), /* origin */ "", /* channel */ "",
+        [=] (plugin&) -> std::string {
+            return "onDisconnect";
+        },
+        [=] (plugin& plugin) {
+            plugin.on_disconnect(irccd_, ev);
+        }
+    );
+}
+
 void server_service::handle_invite(const invite_event& ev)
 {
     irccd_.log().debug() << "server " << ev.server->name() << ": event onInvite:\n";
@@ -635,9 +656,8 @@ void server_service::add(std::shared_ptr<server> server)
 {
     assert(!has(server->name()));
 
-    std::weak_ptr<class server> ptr(server);
-
     server->on_connect.connect(boost::bind(&server_service::handle_connect, this, _1));
+    server->on_die.connect(boost::bind(&server_service::handle_die, this, _1));
     server->on_invite.connect(boost::bind(&server_service::handle_invite, this, _1));
     server->on_join.connect(boost::bind(&server_service::handle_join, this, _1));
     server->on_kick.connect(boost::bind(&server_service::handle_kick, this, _1));
@@ -650,15 +670,6 @@ void server_service::add(std::shared_ptr<server> server)
     server->on_part.connect(boost::bind(&server_service::handle_part, this, _1));
     server->on_topic.connect(boost::bind(&server_service::handle_topic, this, _1));
     server->on_whois.connect(boost::bind(&server_service::handle_whois, this, _1));
-    server->on_die.connect([this, ptr] () {
-        auto server = ptr.lock();
-
-        if (server) {
-            irccd_.log().info(string_util::sprintf("server %s: removed", server->name()));
-            servers_.erase(std::find(servers_.begin(), servers_.end(), server));
-        }
-    });
-
     server->connect();
     servers_.push_back(std::move(server));
 }
@@ -704,7 +715,13 @@ void server_service::remove(const std::string& name)
 
 void server_service::clear() noexcept
 {
-    for (auto &server : servers_)
+    /*
+     * Copy the array, because disconnect() may trigger on_die signal which
+     * erase the server from itself.
+     */
+    const auto save = servers_;
+
+    for (const auto& server : save)
         server->disconnect();
 
     servers_.clear();

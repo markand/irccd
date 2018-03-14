@@ -44,6 +44,7 @@ private:
     std::vector<std::shared_ptr<server>> servers_;
 
     void handle_connect(const connect_event&);
+    void handle_die(const disconnect_event&);
     void handle_invite(const invite_event&);
     void handle_join(const join_event&);
     void handle_kick(const kick_event&);

@@ -93,14 +93,6 @@ public:
     }
 
     /**
-     * \copydoc server::connect
-     */
-    void disconnect() noexcept override
-    {
-        // avoid disconnecting.
-    }
-
-    /**
      * \copydoc server::reconnect
      */
     void reconnect() noexcept override;

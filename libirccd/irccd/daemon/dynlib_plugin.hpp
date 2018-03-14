@@ -60,6 +60,11 @@ public:
     void on_connect(irccd& irccd, const connect_event& event) override;
 
     /**
+     * \copydoc plugin::on_disconnect
+     */
+    void on_disconnect(irccd& irccd, const disconnect_event& event) override;
+
+    /**
      * \copydoc plugin::on_invite
      */
     void on_invite(irccd& irccd, const invite_event& event) override;

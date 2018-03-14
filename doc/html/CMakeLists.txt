@@ -20,114 +20,115 @@ project(html)
 
 set(
     HTML_API_SOURCES
+    api/event/onCommand.md
+    api/event/onConnect.md
+    api/event/onDisconnect.md
+    api/event/onInvite.md
+    api/event/onJoin.md
+    api/event/onKick.md
+    api/event/onLoad.md
+    api/event/onMe.md
+    api/event/onMessage.md
+    api/event/onMode.md
+    api/event/onNames.md
+    api/event/onNick.md
+    api/event/onNotice.md
+    api/event/onPart.md
+    api/event/onReload.md
+    api/event/onTopic.md
+    api/event/onUnload.md
+    api/event/onWhois.md
+    api/index.md
     api/module/Irccd.Directory/index.md
-    api/module/Irccd.Directory/Irccd.Directory.remove.md
-    api/module/Irccd.Directory/Irccd.Directory.mkdir.md
     api/module/Irccd.Directory/Irccd.Directory.find.md
+    api/module/Irccd.Directory/Irccd.Directory.mkdir.md
     api/module/Irccd.Directory/Irccd.Directory.prototype.constructor.md
-    api/module/Irccd.Directory/Irccd.Directory.prototype.remove.md
     api/module/Irccd.Directory/Irccd.Directory.prototype.find.md
+    api/module/Irccd.Directory/Irccd.Directory.prototype.remove.md
+    api/module/Irccd.Directory/Irccd.Directory.remove.md
     api/module/Irccd.ElapsedTimer/index.md
-    api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.pause.md
-    api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.elapsed.md
     api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.constructor.md
-    api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.restart.md
+    api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.elapsed.md
+    api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.pause.md
     api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.reset.md
+    api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.restart.md
     api/module/Irccd.File/index.md
-    api/module/Irccd.File/Irccd.File.stat.md
+    api/module/Irccd.File/Irccd.File.basename.md
     api/module/Irccd.File/Irccd.File.dirname.md
     api/module/Irccd.File/Irccd.File.exists.md
-    api/module/Irccd.File/Irccd.File.remove.md
-    api/module/Irccd.File/Irccd.File.basename.md
+    api/module/Irccd.File/Irccd.File.prototype.basename.md
+    api/module/Irccd.File/Irccd.File.prototype.close.md
+    api/module/Irccd.File/Irccd.File.prototype.constructor.md
+    api/module/Irccd.File/Irccd.File.prototype.dirname.md
+    api/module/Irccd.File/Irccd.File.prototype.lines.md
+    api/module/Irccd.File/Irccd.File.prototype.readline.md
     api/module/Irccd.File/Irccd.File.prototype.read.md
+    api/module/Irccd.File/Irccd.File.prototype.remove.md
     api/module/Irccd.File/Irccd.File.prototype.seek.md
     api/module/Irccd.File/Irccd.File.prototype.stat.md
-    api/module/Irccd.File/Irccd.File.prototype.constructor.md
     api/module/Irccd.File/Irccd.File.prototype.tell.md
-    api/module/Irccd.File/Irccd.File.prototype.dirname.md
-    api/module/Irccd.File/Irccd.File.prototype.readline.md
     api/module/Irccd.File/Irccd.File.prototype.write.md
-    api/module/Irccd.File/Irccd.File.prototype.lines.md
-    api/module/Irccd.File/Irccd.File.prototype.close.md
-    api/module/Irccd.File/Irccd.File.prototype.remove.md
-    api/module/Irccd.File/Irccd.File.prototype.basename.md
+    api/module/Irccd.File/Irccd.File.remove.md
+    api/module/Irccd.File/Irccd.File.stat.md
+    api/module/Irccd/index.md
     api/module/Irccd.Logger/index.md
-    api/module/Irccd.Logger/Irccd.Logger.warning.md
-    api/module/Irccd.Logger/Irccd.Logger.info.md
     api/module/Irccd.Logger/Irccd.Logger.debug.md
+    api/module/Irccd.Logger/Irccd.Logger.info.md
+    api/module/Irccd.Logger/Irccd.Logger.warning.md
     api/module/Irccd.Plugin/index.md
-    api/module/Irccd.Plugin/Irccd.Plugin.unload.md
-    api/module/Irccd.Plugin/Irccd.Plugin.load.md
-    api/module/Irccd.Plugin/Irccd.Plugin.reload.md
     api/module/Irccd.Plugin/Irccd.Plugin.info.md
     api/module/Irccd.Plugin/Irccd.Plugin.list.md
+    api/module/Irccd.Plugin/Irccd.Plugin.load.md
+    api/module/Irccd.Plugin/Irccd.Plugin.reload.md
+    api/module/Irccd.Plugin/Irccd.Plugin.unload.md
     api/module/Irccd.Server/index.md
-    api/module/Irccd.Server/Irccd.Server.remove.md
-    api/module/Irccd.Server/Irccd.Server.list.md
-    api/module/Irccd.Server/Irccd.Server.find.md
     api/module/Irccd.Server/Irccd.Server.add.md
-    api/module/Irccd.Server/Irccd.Server.prototype.me.md
-    api/module/Irccd.Server/Irccd.Server.prototype.mode.md
-    api/module/Irccd.Server/Irccd.Server.prototype.part.md
-    api/module/Irccd.Server/Irccd.Server.prototype.message.md
-    api/module/Irccd.Server/Irccd.Server.prototype.topic.md
-    api/module/Irccd.Server/Irccd.Server.prototype.whois.md
-    api/module/Irccd.Server/Irccd.Server.prototype.nick.md
+    api/module/Irccd.Server/Irccd.Server.find.md
+    api/module/Irccd.Server/Irccd.Server.list.md
     api/module/Irccd.Server/Irccd.Server.prototype.constructor.md
-    api/module/Irccd.Server/Irccd.Server.prototype.join.md
-    api/module/Irccd.Server/Irccd.Server.prototype.invite.md
     api/module/Irccd.Server/Irccd.Server.prototype.info.md
+    api/module/Irccd.Server/Irccd.Server.prototype.invite.md
     api/module/Irccd.Server/Irccd.Server.prototype.isSelf.md
-    api/module/Irccd.Server/Irccd.Server.prototype.notice.md
+    api/module/Irccd.Server/Irccd.Server.prototype.join.md
     api/module/Irccd.Server/Irccd.Server.prototype.kick.md
-    api/module/Irccd.Server/Irccd.Server.prototype.toString.md
+    api/module/Irccd.Server/Irccd.Server.prototype.me.md
+    api/module/Irccd.Server/Irccd.Server.prototype.message.md
+    api/module/Irccd.Server/Irccd.Server.prototype.mode.md
     api/module/Irccd.Server/Irccd.Server.prototype.names.md
+    api/module/Irccd.Server/Irccd.Server.prototype.nick.md
+    api/module/Irccd.Server/Irccd.Server.prototype.notice.md
+    api/module/Irccd.Server/Irccd.Server.prototype.part.md
+    api/module/Irccd.Server/Irccd.Server.prototype.topic.md
+    api/module/Irccd.Server/Irccd.Server.prototype.toString.md
+    api/module/Irccd.Server/Irccd.Server.prototype.whois.md
+    api/module/Irccd.Server/Irccd.Server.remove.md
     api/module/Irccd.System/index.md
-    api/module/Irccd.System/Irccd.System.exec.md
-    api/module/Irccd.System/Irccd.System.sleep.md
-    api/module/Irccd.System/Irccd.System.popen.md
     api/module/Irccd.System/Irccd.System.env.md
+    api/module/Irccd.System/Irccd.System.exec.md
     api/module/Irccd.System/Irccd.System.home.md
-    api/module/Irccd.System/Irccd.System.uptime.md
-    api/module/Irccd.System/Irccd.System.version.md
-    api/module/Irccd.System/Irccd.System.usleep.md
     api/module/Irccd.System/Irccd.System.name.md
+    api/module/Irccd.System/Irccd.System.popen.md
+    api/module/Irccd.System/Irccd.System.sleep.md
     api/module/Irccd.System/Irccd.System.ticks.md
+    api/module/Irccd.System/Irccd.System.uptime.md
+    api/module/Irccd.System/Irccd.System.usleep.md
+    api/module/Irccd.System/Irccd.System.version.md
     api/module/Irccd.Timer/index.md
-    api/module/Irccd.Timer/Irccd.Timer.prototype.start.md
     api/module/Irccd.Timer/Irccd.Timer.prototype.constructor.md
+    api/module/Irccd.Timer/Irccd.Timer.prototype.start.md
     api/module/Irccd.Timer/Irccd.Timer.prototype.stop.md
-    api/module/Irccd/index.md
     api/module/Irccd.Unicode/index.md
+    api/module/Irccd.Unicode/Irccd.Unicode.isDigit.md
+    api/module/Irccd.Unicode/Irccd.Unicode.isLetter.md
+    api/module/Irccd.Unicode/Irccd.Unicode.isLower.md
     api/module/Irccd.Unicode/Irccd.Unicode.isSpace.md
     api/module/Irccd.Unicode/Irccd.Unicode.isTitle.md
     api/module/Irccd.Unicode/Irccd.Unicode.isUpper.md
-    api/module/Irccd.Unicode/Irccd.Unicode.isLetter.md
-    api/module/Irccd.Unicode/Irccd.Unicode.isDigit.md
-    api/module/Irccd.Unicode/Irccd.Unicode.isLower.md
     api/module/Irccd.Util/index.md
     api/module/Irccd.Util/Irccd.Util.cut.md
     api/module/Irccd.Util/Irccd.Util.format.md
     api/module/Irccd.Util/Irccd.Util.splithost.md
     api/module/Irccd.Util/Irccd.Util.splituser.md
-    api/index.md
-    api/event/onWhois.md
-    api/event/onMessage.md
-    api/event/onPart.md
-    api/event/onMode.md
-    api/event/onNotice.md
-    api/event/onLoad.md
-    api/event/onInvite.md
-    api/event/onCommand.md
-    api/event/onKick.md
-    api/event/onReload.md
-    api/event/onTopic.md
-    api/event/onConnect.md
-    api/event/onJoin.md
-    api/event/onMe.md
-    api/event/onNick.md
-    api/event/onNames.md
-    api/event/onUnload.md
 )
 
 set(

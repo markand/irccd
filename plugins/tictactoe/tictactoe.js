@@ -341,6 +341,13 @@ function onMessage(server, origin, channel, message)
         Game.remove(server, channel);
 }
 
+function onDisconnect(server)
+{
+    for (var key in Game.map)
+        if (key.endsWith(server.toString()))
+            delete Game.map[key];
+}
+
 function onKick(server, origin, channel, target)
 {
     Game.clear(server, target, channel);
