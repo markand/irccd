@@ -1,5 +1,5 @@
-PROJECT NAME CODING STYLE
-=========================
+irccd CODING STYLE
+==================
 
 C++
 ===
