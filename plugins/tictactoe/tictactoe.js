@@ -330,7 +330,7 @@ function onMessage(server, origin, channel, message)
     if (!game || !game.isTurn(nickname))
         return;
 
-    var match = /([abc]) ([123])/.exec(message);
+    var match = /^([abc]) ?([123])$/.exec(message.trim());
 
     if (!match)
         return;

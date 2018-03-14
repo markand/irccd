@@ -92,7 +92,7 @@ BOOST_FIXTURE_TEST_SUITE(test_fixture_suite, test_fixture)
 
 BOOST_AUTO_TEST_CASE(win)
 {
-    run({"a 1", "b 1", "a 2", "b 2"});
+    run({"a 1", "b1", "a 2", "b2"});
 
     const auto players = next_players();
 
