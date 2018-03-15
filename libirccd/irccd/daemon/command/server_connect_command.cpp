@@ -17,6 +17,7 @@
  */
 
 #include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/server_util.hpp>
 #include <irccd/daemon/transport_client.hpp>
 
 #include <irccd/daemon/service/server_service.hpp>
@@ -32,7 +33,7 @@ std::string server_connect_command::get_name() const noexcept
 
 void server_connect_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto server = server_service::from_json(irccd.service(), args);
+    auto server = server_util::from_json(irccd.service(), args);
 
     if (irccd.servers().has(server->name()))
         throw server_error(server_error::error::already_exists, server->name());

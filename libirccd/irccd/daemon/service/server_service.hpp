@@ -61,18 +61,6 @@ private:
 
 public:
     /**
-     * Convert a JSON object as a server.
-     *
-     * Used in JavaScript API and transport commands.
-     *
-     * \param service the io service
-     * \param object the object
-     * \return the server
-     * \throw std::exception on failures
-     */
-    static std::shared_ptr<server> from_json(boost::asio::io_service& service, const nlohmann::json& object);
-
-    /**
      * Create the server service.
      */
     server_service(irccd& instance);

@@ -62,6 +62,7 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/server_util.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/service/plugin_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/service/rule_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/service/server_service.hpp
@@ -107,6 +108,7 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/server_util.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/service/plugin_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/service/rule_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/service/server_service.cpp
