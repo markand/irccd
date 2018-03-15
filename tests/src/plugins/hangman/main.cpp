@@ -54,7 +54,7 @@ public:
             config.emplace("file", CMAKE_CURRENT_SOURCE_DIR "/words.conf");
 
         plugin_->set_config(config);
-        plugin_->on_load(irccd_);
+        plugin_->handle_load(irccd_);
     }
 };
 
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(asked)
 {
     load({{ "collaborative", "false" }});
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
 
     auto cmd = server_->cqueue().back();
 
@@ -72,14 +72,14 @@ BOOST_AUTO_TEST_CASE(asked)
     BOOST_TEST(cmd["target"].get<std::string>() == "#hangman");
     BOOST_TEST(cmd["message"].get<std::string>() == "start=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:_ _ _");
 
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "s"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "s"});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
     BOOST_TEST(cmd["target"].get<std::string>() == "#hangman");
     BOOST_TEST(cmd["message"].get<std::string>() == "found=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s _ _");
 
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "s"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "s"});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
@@ -91,17 +91,17 @@ BOOST_AUTO_TEST_CASE(dead)
 {
     load({{ "collaborative", "false" }});
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "a"});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "b"});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "c"});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "d"});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "e"});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "f"});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "g"});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "h"});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "i"});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "j"});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "a"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "b"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "c"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "d"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "e"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "f"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "g"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "h"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "i"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "j"});
 
     auto cmd = server_->cqueue().back();
 
@@ -114,8 +114,8 @@ BOOST_AUTO_TEST_CASE(found)
 {
     load({{ "collaborative", "false" }});
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "s"});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "s"});
 
     auto cmd = server_->cqueue().back();
 
@@ -128,7 +128,7 @@ BOOST_AUTO_TEST_CASE(start)
 {
     load();
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
 
     auto cmd = server_->cqueue().back();
 
@@ -141,10 +141,10 @@ BOOST_AUTO_TEST_CASE(win1)
 {
     load({{ "collaborative", "false" }});
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "s"});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "k"});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "y"});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "s"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "k"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "y"});
 
     auto cmd = server_->cqueue().back();
 
@@ -157,8 +157,8 @@ BOOST_AUTO_TEST_CASE(win2)
 {
     load({{ "collaborative", "false" }});
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", "sky"});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", "sky"});
 
     auto cmd = server_->cqueue().back();
 
@@ -171,8 +171,8 @@ BOOST_AUTO_TEST_CASE(wrong_letter)
 {
     load();
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "x"});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "x"});
 
     auto cmd = server_->cqueue().back();
 
@@ -185,8 +185,8 @@ BOOST_AUTO_TEST_CASE(wrongWord)
 {
     load();
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", "cheese"});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", "cheese"});
 
     auto cmd = server_->cqueue().back();
 
@@ -200,8 +200,8 @@ BOOST_AUTO_TEST_CASE(collaborative_disabled)
     // Disable collaborative mode.
     load({{ "collaborative", "false" }});
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "s"});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "s"});
 
     auto cmd = server_->cqueue().back();
 
@@ -209,7 +209,7 @@ BOOST_AUTO_TEST_CASE(collaborative_disabled)
     BOOST_TEST(cmd["target"].get<std::string>() == "#hangman");
     BOOST_TEST(cmd["message"].get<std::string>() == "found=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s _ _");
 
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "k"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "k"});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
@@ -222,8 +222,8 @@ BOOST_AUTO_TEST_CASE(collaborative_enabled)
     // Enable collaborative mode.
     load({{ "collaborative", "true" }});
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "s"});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "s"});
 
     auto cmd = server_->cqueue().back();
 
@@ -231,14 +231,14 @@ BOOST_AUTO_TEST_CASE(collaborative_enabled)
     BOOST_TEST(cmd["target"].get<std::string>() == "#hangman");
     BOOST_TEST(cmd["message"].get<std::string>() == "found=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s _ _");
 
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "k"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "k"});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
     BOOST_TEST(cmd["target"].get<std::string>() == "#hangman");
     BOOST_TEST(cmd["message"].get<std::string>() == "wrong-player=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:k");
 
-    plugin_->on_message(irccd_, {server_, "francis!francis@localhost", "#hangman", "k"});
+    plugin_->handle_message(irccd_, {server_, "francis!francis@localhost", "#hangman", "k"});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
@@ -250,8 +250,8 @@ BOOST_AUTO_TEST_CASE(case_fix_642)
 {
     load();
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#HANGMAN", "s"});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#HANGMAN", "s"});
 
     auto cmd = server_->cqueue().back();
 
@@ -259,14 +259,14 @@ BOOST_AUTO_TEST_CASE(case_fix_642)
     BOOST_TEST(cmd["target"].get<std::string>() == "#hangman");
     BOOST_TEST(cmd["message"].get<std::string>() == "found=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:s _ _");
 
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#HaNGMaN", "k"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#HaNGMaN", "k"});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
     BOOST_TEST(cmd["target"].get<std::string>() == "#hangman");
     BOOST_TEST(cmd["message"].get<std::string>() == "wrong-player=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:k");
 
-    plugin_->on_message(irccd_, {server_, "francis!francis@localhost", "#hAngmAn", "k"});
+    plugin_->handle_message(irccd_, {server_, "francis!francis@localhost", "#hAngmAn", "k"});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(query)
     load();
 
     // Query mode is never collaborative.
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "irccd", ""});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "irccd", ""});
 
     auto cmd = server_->cqueue().back();
 
@@ -287,21 +287,21 @@ BOOST_AUTO_TEST_CASE(query)
     BOOST_TEST(cmd["target"].get<std::string>() == "jean!jean@localhost");
     BOOST_TEST(cmd["message"].get<std::string>() == "start=hangman:!hangman:test:jean!jean@localhost:jean!jean@localhost:jean:_ _ _");
 
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "irccd", "s"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "irccd", "s"});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
     BOOST_TEST(cmd["target"].get<std::string>() == "jean!jean@localhost");
     BOOST_TEST(cmd["message"].get<std::string>() == "found=hangman:!hangman:test:jean!jean@localhost:jean!jean@localhost:jean:s _ _");
 
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "irccd", "k"});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "irccd", "k"});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
     BOOST_TEST(cmd["target"].get<std::string>() == "jean!jean@localhost");
     BOOST_TEST(cmd["message"].get<std::string>() == "found=hangman:!hangman:test:jean!jean@localhost:jean!jean@localhost:jean:s k _");
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "irccd", "sky"});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "irccd", "sky"});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
@@ -313,9 +313,9 @@ BOOST_AUTO_TEST_CASE(running)
 {
     load();
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
-    plugin_->on_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "y"});
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
+    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#hangman", "y"});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
 
     auto cmd = server_->cqueue().back();
 
@@ -351,13 +351,13 @@ BOOST_AUTO_TEST_CASE(wordlist_fix_644)
     unsigned last, current;
 
     // 1. Initial game + finish.
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
     last = server_->cqueue().back()["message"].get<std::string>().length();
     found.insert(last);
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", words[last]});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", words[last]});
 
     // 2. Current must not be the last one.
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
     current = server_->cqueue().back()["message"].get<std::string>().length();
 
     BOOST_TEST(last != current);
@@ -365,10 +365,10 @@ BOOST_AUTO_TEST_CASE(wordlist_fix_644)
 
     found.insert(current);
     last = current;
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", words[current]});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", words[current]});
 
     // 3. Last word must be the one that is kept into the map.
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#hangman", ""});
     current = server_->cqueue().back()["message"].get<std::string>().length();
 
     BOOST_TEST(last != current);

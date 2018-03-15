@@ -264,7 +264,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void on_command(irccd& irccd, const message_event& event)
+    virtual void handle_command(irccd& irccd, const message_event& event)
     {
         (void)irccd;
         (void)event;
@@ -276,7 +276,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void on_connect(irccd& irccd, const connect_event& event)
+    virtual void handle_connect(irccd& irccd, const connect_event& event)
     {
         (void)irccd;
         (void)event;
@@ -288,7 +288,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void on_disconnect(irccd& irccd, const disconnect_event& event)
+    virtual void handle_disconnect(irccd& irccd, const disconnect_event& event)
     {
         (void)irccd;
         (void)event;
@@ -300,7 +300,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void on_invite(irccd& irccd, const invite_event& event)
+    virtual void handle_invite(irccd& irccd, const invite_event& event)
     {
         (void)irccd;
         (void)event;
@@ -312,7 +312,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void on_join(irccd& irccd, const join_event& event)
+    virtual void handle_join(irccd& irccd, const join_event& event)
     {
         (void)irccd;
         (void)event;
@@ -324,7 +324,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void on_kick(irccd& irccd, const kick_event& event)
+    virtual void handle_kick(irccd& irccd, const kick_event& event)
     {
         (void)irccd;
         (void)event;
@@ -335,7 +335,7 @@ public:
      *
      * \param irccd the irccd instance
      */
-    virtual void on_load(irccd& irccd)
+    virtual void handle_load(irccd& irccd)
     {
         (void)irccd;
     }
@@ -346,7 +346,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void on_message(irccd& irccd, const message_event& event)
+    virtual void handle_message(irccd& irccd, const message_event& event)
     {
         (void)irccd;
         (void)event;
@@ -358,7 +358,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void on_me(irccd& irccd, const me_event& event)
+    virtual void handle_me(irccd& irccd, const me_event& event)
     {
         (void)irccd;
         (void)event;
@@ -370,7 +370,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void on_mode(irccd& irccd, const mode_event& event)
+    virtual void handle_mode(irccd& irccd, const mode_event& event)
     {
         (void)irccd;
         (void)event;
@@ -382,7 +382,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void on_names(irccd& irccd, const names_event& event)
+    virtual void handle_names(irccd& irccd, const names_event& event)
     {
         (void)irccd;
         (void)event;
@@ -394,7 +394,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void on_nick(irccd& irccd, const nick_event& event)
+    virtual void handle_nick(irccd& irccd, const nick_event& event)
     {
         (void)irccd;
         (void)event;
@@ -406,7 +406,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void on_notice(irccd& irccd, const notice_event& event)
+    virtual void handle_notice(irccd& irccd, const notice_event& event)
     {
         (void)irccd;
         (void)event;
@@ -418,7 +418,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void on_part(irccd& irccd, const part_event& event)
+    virtual void handle_part(irccd& irccd, const part_event& event)
     {
         (void)irccd;
         (void)event;
@@ -429,7 +429,7 @@ public:
      *
      * \param irccd the irccd instance
      */
-    virtual void on_reload(irccd& irccd)
+    virtual void handle_reload(irccd& irccd)
     {
         (void)irccd;
     }
@@ -440,7 +440,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void on_topic(irccd& irccd, const topic_event& event)
+    virtual void handle_topic(irccd& irccd, const topic_event& event)
     {
         (void)irccd;
         (void)event;
@@ -451,7 +451,7 @@ public:
      *
      * \param irccd the irccd instance
      */
-    virtual void on_unload(irccd& irccd)
+    virtual void handle_unload(irccd& irccd)
     {
         (void)irccd;
     }
@@ -462,7 +462,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void on_whois(irccd& irccd, const whois_event& event)
+    virtual void handle_whois(irccd& irccd, const whois_event& event)
     {
         (void)irccd;
         (void)event;

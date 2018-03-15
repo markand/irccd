@@ -55,143 +55,143 @@ protected:
 
 BOOST_FIXTURE_TEST_SUITE(dynlib_plugin_suite, fixture)
 
-BOOST_AUTO_TEST_CASE(on_command)
+BOOST_AUTO_TEST_CASE(handle_command)
 {
-    plugin_->on_command(irccd_, {server_, "", "", ""});
+    plugin_->handle_command(irccd_, {server_, "", "", ""});
 
     BOOST_TEST(server_->cqueue().size() == 1U);
     BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_command");
+    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "handle_command");
     BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
 }
 
-BOOST_AUTO_TEST_CASE(on_connect)
+BOOST_AUTO_TEST_CASE(handle_connect)
 {
-    plugin_->on_connect(irccd_, {server_});
+    plugin_->handle_connect(irccd_, {server_});
 
     BOOST_TEST(server_->cqueue().size() == 1U);
     BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_connect");
+    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "handle_connect");
     BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
 }
 
-BOOST_AUTO_TEST_CASE(on_invite)
+BOOST_AUTO_TEST_CASE(handle_invite)
 {
-    plugin_->on_invite(irccd_, {server_, "", "", ""});
+    plugin_->handle_invite(irccd_, {server_, "", "", ""});
 
     BOOST_TEST(server_->cqueue().size() == 1U);
     BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_invite");
+    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "handle_invite");
     BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
 }
 
-BOOST_AUTO_TEST_CASE(on_join)
+BOOST_AUTO_TEST_CASE(handle_join)
 {
-    plugin_->on_join(irccd_, {server_, "", ""});
+    plugin_->handle_join(irccd_, {server_, "", ""});
 
     BOOST_TEST(server_->cqueue().size() == 1U);
     BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_join");
+    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "handle_join");
     BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
 }
 
-BOOST_AUTO_TEST_CASE(on_kick)
+BOOST_AUTO_TEST_CASE(handle_kick)
 {
-    plugin_->on_kick(irccd_, {server_, "", "", "", ""});
+    plugin_->handle_kick(irccd_, {server_, "", "", "", ""});
 
     BOOST_TEST(server_->cqueue().size() == 1U);
     BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_kick");
+    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "handle_kick");
     BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
 }
 
-BOOST_AUTO_TEST_CASE(on_message)
+BOOST_AUTO_TEST_CASE(handle_message)
 {
-    plugin_->on_message(irccd_, {server_, "", "", ""});
+    plugin_->handle_message(irccd_, {server_, "", "", ""});
 
     BOOST_TEST(server_->cqueue().size() == 1U);
     BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_message");
+    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "handle_message");
     BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
 }
 
-BOOST_AUTO_TEST_CASE(on_me)
+BOOST_AUTO_TEST_CASE(handle_me)
 {
-    plugin_->on_me(irccd_, {server_, "", "", ""});
+    plugin_->handle_me(irccd_, {server_, "", "", ""});
 
     BOOST_TEST(server_->cqueue().size() == 1U);
     BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_me");
+    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "handle_me");
     BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
 }
 
-BOOST_AUTO_TEST_CASE(on_mode)
+BOOST_AUTO_TEST_CASE(handle_mode)
 {
-    plugin_->on_mode(irccd_, {server_, "", "", "", "", "", ""});
+    plugin_->handle_mode(irccd_, {server_, "", "", "", "", "", ""});
 
     BOOST_TEST(server_->cqueue().size() == 1U);
     BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_mode");
+    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "handle_mode");
     BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
 }
 
-BOOST_AUTO_TEST_CASE(on_names)
+BOOST_AUTO_TEST_CASE(handle_names)
 {
-    plugin_->on_names(irccd_, {server_, "", {}});
+    plugin_->handle_names(irccd_, {server_, "", {}});
 
     BOOST_TEST(server_->cqueue().size() == 1U);
     BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_names");
+    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "handle_names");
     BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
 }
 
-BOOST_AUTO_TEST_CASE(on_nick)
+BOOST_AUTO_TEST_CASE(handle_nick)
 {
-    plugin_->on_nick(irccd_, {server_, "", ""});
+    plugin_->handle_nick(irccd_, {server_, "", ""});
 
     BOOST_TEST(server_->cqueue().size() == 1U);
     BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_nick");
+    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "handle_nick");
     BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
 }
 
-BOOST_AUTO_TEST_CASE(on_notice)
+BOOST_AUTO_TEST_CASE(handle_notice)
 {
-    plugin_->on_notice(irccd_, {server_, "", "", ""});
+    plugin_->handle_notice(irccd_, {server_, "", "", ""});
 
     BOOST_TEST(server_->cqueue().size() == 1U);
     BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_notice");
+    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "handle_notice");
     BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
 }
 
-BOOST_AUTO_TEST_CASE(on_part)
+BOOST_AUTO_TEST_CASE(handle_part)
 {
-    plugin_->on_part(irccd_, {server_, "", "", ""});
+    plugin_->handle_part(irccd_, {server_, "", "", ""});
 
     BOOST_TEST(server_->cqueue().size() == 1U);
     BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_part");
+    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "handle_part");
     BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
 }
 
-BOOST_AUTO_TEST_CASE(on_topic)
+BOOST_AUTO_TEST_CASE(handle_topic)
 {
-    plugin_->on_topic(irccd_, {server_, "", "", ""});
+    plugin_->handle_topic(irccd_, {server_, "", "", ""});
 
     BOOST_TEST(server_->cqueue().size() == 1U);
     BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_topic");
+    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "handle_topic");
     BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
 }
 
-BOOST_AUTO_TEST_CASE(on_whois)
+BOOST_AUTO_TEST_CASE(handle_whois)
 {
-    plugin_->on_whois(irccd_, {server_, {"", "", "", "", {}}});
+    plugin_->handle_whois(irccd_, {server_, {"", "", "", "", {}}});
 
     BOOST_TEST(server_->cqueue().size() == 1U);
     BOOST_TEST(server_->cqueue()[0]["command"].get<std::string>() == "message");
-    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "on_whois");
+    BOOST_TEST(server_->cqueue()[0]["message"].get<std::string>() == "handle_whois");
     BOOST_TEST(server_->cqueue()[0]["target"].get<std::string>() == "test");
 }
 

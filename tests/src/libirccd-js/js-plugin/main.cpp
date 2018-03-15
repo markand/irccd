@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE(assign)
         { "path",       "none"  },
         { "verbose",    "false" }
     });
-    plugin_->on_load(irccd_);
+    plugin_->handle_load(irccd_);
 
     BOOST_TEST(plugin_->config().at("path") == "none");
     BOOST_TEST(plugin_->config().at("verbose") == "false");
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE(fill)
         { "path",       "none"  },
         { "verbose",    "false" }
     });
-    plugin_->on_load(irccd_);
+    plugin_->handle_load(irccd_);
 
     BOOST_TEST(plugin_->config().at("path") == "none");
     BOOST_TEST(plugin_->config().at("verbose") == "false");
@@ -82,7 +82,7 @@ BOOST_AUTO_TEST_CASE(merge_after)
 {
     load("test", CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
 
-    plugin_->on_load(irccd_);
+    plugin_->handle_load(irccd_);
     plugin_->set_config({
         { "path",       "none"  },
         { "verbose",    "false" }

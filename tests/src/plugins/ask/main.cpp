@@ -34,7 +34,7 @@ public:
         plugin_->set_config({
             { "file", CMAKE_CURRENT_SOURCE_DIR "/answers.conf" }
         });
-        plugin_->on_load(irccd_);
+        plugin_->handle_load(irccd_);
     }
 };
 
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE(basic)
      * answers in that amount of tries.
      */
     for (int i = 0; i < 1000; ++i) {
-        plugin_->on_command(irccd_, {server_, "tester", "#dummy", ""});
+        plugin_->handle_command(irccd_, {server_, "tester", "#dummy", ""});
 
         auto cmd = server_->cqueue().front();
 

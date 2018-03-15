@@ -256,7 +256,7 @@ void server_service::handle_connect(const connect_event& ev)
             return "onConnect";
         },
         [=] (plugin& plugin) {
-            plugin.on_connect(irccd_, ev);
+            plugin.handle_connect(irccd_, ev);
         }
     );
 }
@@ -277,7 +277,7 @@ void server_service::handle_die(const disconnect_event& ev)
             return "onDisconnect";
         },
         [=] (plugin& plugin) {
-            plugin.on_disconnect(irccd_, ev);
+            plugin.handle_disconnect(irccd_, ev);
         }
     );
 }
@@ -301,7 +301,7 @@ void server_service::handle_invite(const invite_event& ev)
             return "onInvite";
         },
         [=] (plugin& plugin) {
-            plugin.on_invite(irccd_, ev);
+            plugin.handle_invite(irccd_, ev);
         }
     );
 }
@@ -324,7 +324,7 @@ void server_service::handle_join(const join_event& ev)
             return "onJoin";
         },
         [=] (plugin& plugin) {
-            plugin.on_join(irccd_, ev);
+            plugin.handle_join(irccd_, ev);
         }
     );
 }
@@ -351,7 +351,7 @@ void server_service::handle_kick(const kick_event& ev)
             return "onKick";
         },
         [=] (plugin& plugin) {
-            plugin.on_kick(irccd_, ev);
+            plugin.handle_kick(irccd_, ev);
         }
     );
 }
@@ -386,9 +386,9 @@ void server_service::handle_message(const message_event& ev)
             copy.message = pack.message;
 
             if (pack.type == string_util::message_pack::type::command)
-                plugin.on_command(irccd_, copy);
+                plugin.handle_command(irccd_, copy);
             else
-                plugin.on_message(irccd_, copy);
+                plugin.handle_message(irccd_, copy);
         }
     );
 }
@@ -413,7 +413,7 @@ void server_service::handle_me(const me_event& ev)
             return "onMe";
         },
         [=] (plugin& plugin) {
-            plugin.on_me(irccd_, ev);
+            plugin.handle_me(irccd_, ev);
         }
     );
 }
@@ -444,7 +444,7 @@ void server_service::handle_mode(const mode_event& ev)
             return "onMode";
         },
         [=] (plugin &plugin) {
-            plugin.on_mode(irccd_, ev);
+            plugin.handle_mode(irccd_, ev);
         }
     );
 }
@@ -472,7 +472,7 @@ void server_service::handle_names(const names_event& ev)
             return "onNames";
         },
         [=] (plugin& plugin) {
-            plugin.on_names(irccd_, ev);
+            plugin.handle_names(irccd_, ev);
         }
     );
 }
@@ -495,7 +495,7 @@ void server_service::handle_nick(const nick_event& ev)
             return "onNick";
         },
         [=] (plugin& plugin) {
-            plugin.on_nick(irccd_, ev);
+            plugin.handle_nick(irccd_, ev);
         }
     );
 }
@@ -520,7 +520,7 @@ void server_service::handle_notice(const notice_event& ev)
             return "onNotice";
         },
         [=] (plugin& plugin) {
-            plugin.on_notice(irccd_, ev);
+            plugin.handle_notice(irccd_, ev);
         }
     );
 }
@@ -545,7 +545,7 @@ void server_service::handle_part(const part_event& ev)
             return "onPart";
         },
         [=] (plugin& plugin) {
-            plugin.on_part(irccd_, ev);
+            plugin.handle_part(irccd_, ev);
         }
     );
 }
@@ -570,7 +570,7 @@ void server_service::handle_topic(const topic_event& ev)
             return "onTopic";
         },
         [=] (plugin& plugin) {
-            plugin.on_topic(irccd_, ev);
+            plugin.handle_topic(irccd_, ev);
         }
     );
 }
@@ -598,7 +598,7 @@ void server_service::handle_whois(const whois_event& ev)
             return "onWhois";
         },
         [=] (plugin& plugin) {
-            plugin.on_whois(irccd_, ev);
+            plugin.handle_whois(irccd_, ev);
         }
     );
 }

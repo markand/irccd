@@ -26,74 +26,74 @@ class test_plugin : public plugin {
 public:
     using plugin::plugin;
 
-    void on_command(irccd&, const message_event& event) override
+    void handle_command(irccd&, const message_event& event) override
     {
-        event.server->message("test", "on_command");
+        event.server->message("test", "handle_command");
     }
 
-    void on_connect(irccd&, const connect_event& event) override
+    void handle_connect(irccd&, const connect_event& event) override
     {
-        event.server->message("test", "on_connect");
+        event.server->message("test", "handle_connect");
     }
 
-    void on_invite(irccd&, const invite_event& event) override
+    void handle_invite(irccd&, const invite_event& event) override
     {
-        event.server->message("test", "on_invite");
+        event.server->message("test", "handle_invite");
     }
 
-    void on_join(irccd&, const join_event& event) override
+    void handle_join(irccd&, const join_event& event) override
     {
-        event.server->message("test", "on_join");
+        event.server->message("test", "handle_join");
     }
 
-    void on_kick(irccd&, const kick_event& event) override
+    void handle_kick(irccd&, const kick_event& event) override
     {
-        event.server->message("test", "on_kick");
+        event.server->message("test", "handle_kick");
     }
 
-    void on_message(irccd&, const message_event& event) override
+    void handle_message(irccd&, const message_event& event) override
     {
-        event.server->message("test", "on_message");
+        event.server->message("test", "handle_message");
     }
 
-    void on_me(irccd&, const me_event& event) override
+    void handle_me(irccd&, const me_event& event) override
     {
-        event.server->message("test", "on_me");
+        event.server->message("test", "handle_me");
     }
 
-    void on_mode(irccd&, const mode_event& event) override
+    void handle_mode(irccd&, const mode_event& event) override
     {
-        event.server->message("test", "on_mode");
+        event.server->message("test", "handle_mode");
     }
 
-    void on_names(irccd&, const names_event& event) override
+    void handle_names(irccd&, const names_event& event) override
     {
-        event.server->message("test", "on_names");
+        event.server->message("test", "handle_names");
     }
 
-    void on_nick(irccd&, const nick_event& event) override
+    void handle_nick(irccd&, const nick_event& event) override
     {
-        event.server->message("test", "on_nick");
+        event.server->message("test", "handle_nick");
     }
 
-    void on_notice(irccd&, const notice_event& event) override
+    void handle_notice(irccd&, const notice_event& event) override
     {
-        event.server->message("test", "on_notice");
+        event.server->message("test", "handle_notice");
     }
 
-    void on_part(irccd&, const part_event& event) override
+    void handle_part(irccd&, const part_event& event) override
     {
-        event.server->message("test", "on_part");
+        event.server->message("test", "handle_part");
     }
 
-    void on_topic(irccd&, const topic_event& event) override
+    void handle_topic(irccd&, const topic_event& event) override
     {
-        event.server->message("test", "on_topic");
+        event.server->message("test", "handle_topic");
     }
 
-    void on_whois(irccd&, const whois_event& event) override
+    void handle_whois(irccd&, const whois_event& event) override
     {
-        event.server->message("test", "on_whois");
+        event.server->message("test", "handle_whois");
     }
 };
 

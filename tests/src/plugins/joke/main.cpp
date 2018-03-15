@@ -40,7 +40,7 @@ public:
             config.emplace("file", CMAKE_CURRENT_SOURCE_DIR "/jokes.json");
 
         plugin_->set_config(config);
-        plugin_->on_load(irccd_);
+        plugin_->handle_load(irccd_);
     }
 };
 
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(simple)
     load();
 
     auto call = [&] () {
-        plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
+        plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
 
         auto cmd = server_->cqueue().back();
 
@@ -105,7 +105,7 @@ BOOST_AUTO_TEST_CASE(toobig)
     };
 
     auto call = [&] () {
-        plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
+        plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
 
         auto cmd = server_->cqueue().back();
 
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE(invalid)
     };
 
     auto call = [&] () {
-        plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
+        plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
 
         auto cmd = server_->cqueue().back();
 
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(not_found)
 {
     load({{"file", "doesnotexist.json"}});
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
 
     auto cmd = server_->cqueue().back();
 
@@ -176,7 +176,7 @@ BOOST_AUTO_TEST_CASE(not_array)
 {
     load({{"file", CMAKE_CURRENT_SOURCE_DIR "/jokes-not-array.json"}});
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
 
     auto cmd = server_->cqueue().back();
 
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(empty)
 {
     load({{"file", CMAKE_CURRENT_SOURCE_DIR "/jokes-empty.json"}});
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
 
     auto cmd = server_->cqueue().back();
 

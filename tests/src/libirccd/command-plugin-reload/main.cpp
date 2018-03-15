@@ -37,7 +37,7 @@ public:
     {
     }
 
-    void on_reload(irccd&) override
+    void handle_reload(irccd&) override
     {
         reloaded = true;
     }
@@ -47,7 +47,7 @@ class broken_plugin : public plugin {
 public:
     using plugin::plugin;
 
-    void on_reload(irccd&) override
+    void handle_reload(irccd&) override
     {
         throw std::runtime_error("broken");
     }

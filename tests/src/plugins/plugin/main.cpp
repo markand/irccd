@@ -54,7 +54,7 @@ public:
             { "not-found", "not-found=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{name}" },
             { "too-long", "too-long=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}" }
         });
-        plugin_->on_load(irccd_);
+        plugin_->handle_load(irccd_);
     }
 };
 
@@ -64,21 +64,21 @@ BOOST_AUTO_TEST_CASE(format_usage)
 {
     nlohmann::json cmd;
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#staff", ""});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#staff", ""});
     cmd = server_->cqueue().front();
 
     BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
     BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "#staff");
     BOOST_REQUIRE_EQUAL(cmd["message"].get<std::string>(), "usage=plugin:!plugin:test:#staff:jean!jean@localhost:jean");
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#staff", "fail"});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#staff", "fail"});
     cmd = server_->cqueue().front();
 
     BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
     BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "#staff");
     BOOST_REQUIRE_EQUAL(cmd["message"].get<std::string>(), "usage=plugin:!plugin:test:#staff:jean!jean@localhost:jean");
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#staff", "info"});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#staff", "info"});
     cmd = server_->cqueue().front();
 
     BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(format_usage)
 
 BOOST_AUTO_TEST_CASE(format_info)
 {
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#staff", "info fake"});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#staff", "info fake"});
 
     auto cmd = server_->cqueue().front();
 
@@ -99,7 +99,7 @@ BOOST_AUTO_TEST_CASE(format_info)
 
 BOOST_AUTO_TEST_CASE(format_not_found)
 {
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#staff", "info doesnotexistsihope"});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#staff", "info doesnotexistsihope"});
 
     auto cmd = server_->cqueue().front();
 
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE(format_too_long)
     for (int i = 0; i < 100; ++i)
         irccd_.plugins().add(std::make_shared<plugin>(string_util::sprintf("plugin-n-%d", i), ""));
 
-    plugin_->on_command(irccd_, {server_, "jean!jean@localhost", "#staff", "list"});
+    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#staff", "list"});
 
     auto cmd = server_->cqueue().front();
 

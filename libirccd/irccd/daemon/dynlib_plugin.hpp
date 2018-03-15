@@ -50,94 +50,94 @@ public:
     dynlib_plugin(std::string name, std::string path);
 
     /**
-     * \copydoc plugin::on_command
+     * \copydoc plugin::handle_command
      */
-    void on_command(irccd& irccd, const message_event& event) override;
+    void handle_command(irccd& irccd, const message_event& event) override;
 
     /**
-     * \copydoc plugin::on_connect
+     * \copydoc plugin::handle_connect
      */
-    void on_connect(irccd& irccd, const connect_event& event) override;
+    void handle_connect(irccd& irccd, const connect_event& event) override;
 
     /**
-     * \copydoc plugin::on_disconnect
+     * \copydoc plugin::handle_disconnect
      */
-    void on_disconnect(irccd& irccd, const disconnect_event& event) override;
+    void handle_disconnect(irccd& irccd, const disconnect_event& event) override;
 
     /**
-     * \copydoc plugin::on_invite
+     * \copydoc plugin::handle_invite
      */
-    void on_invite(irccd& irccd, const invite_event& event) override;
+    void handle_invite(irccd& irccd, const invite_event& event) override;
 
     /**
-     * \copydoc plugin::on_join
+     * \copydoc plugin::handle_join
      */
-    void on_join(irccd& irccd, const join_event& event) override;
+    void handle_join(irccd& irccd, const join_event& event) override;
 
     /**
-     * \copydoc plugin::on_kick
+     * \copydoc plugin::handle_kick
      */
-    void on_kick(irccd& irccd, const kick_event& event) override;
+    void handle_kick(irccd& irccd, const kick_event& event) override;
 
     /**
-     * \copydoc plugin::on_load
+     * \copydoc plugin::handle_load
      */
-    void on_load(irccd& irccd) override;
+    void handle_load(irccd& irccd) override;
 
     /**
-     * \copydoc plugin::on_message
+     * \copydoc plugin::handle_message
      */
-    void on_message(irccd& irccd, const message_event& event) override;
+    void handle_message(irccd& irccd, const message_event& event) override;
 
     /**
-     * \copydoc plugin::on_me
+     * \copydoc plugin::handle_me
      */
-    void on_me(irccd& irccd, const me_event& event) override;
+    void handle_me(irccd& irccd, const me_event& event) override;
 
     /**
-     * \copydoc plugin::on_mode
+     * \copydoc plugin::handle_mode
      */
-    void on_mode(irccd& irccd, const mode_event& event) override;
+    void handle_mode(irccd& irccd, const mode_event& event) override;
 
     /**
-     * \copydoc plugin::on_names
+     * \copydoc plugin::handle_names
      */
-    void on_names(irccd& irccd, const names_event& event) override;
+    void handle_names(irccd& irccd, const names_event& event) override;
 
     /**
-     * \copydoc plugin::on_nick
+     * \copydoc plugin::handle_nick
      */
-    void on_nick(irccd& irccd, const nick_event& event) override;
+    void handle_nick(irccd& irccd, const nick_event& event) override;
 
     /**
-     * \copydoc plugin::on_notice
+     * \copydoc plugin::handle_notice
      */
-    void on_notice(irccd& irccd, const notice_event& event) override;
+    void handle_notice(irccd& irccd, const notice_event& event) override;
 
     /**
-     * \copydoc plugin::on_part
+     * \copydoc plugin::handle_part
      */
-    void on_part(irccd& irccd, const part_event& event) override;
+    void handle_part(irccd& irccd, const part_event& event) override;
 
     /**
-     * \copydoc plugin::on_reload
+     * \copydoc plugin::handle_reload
      */
-    void on_reload(irccd& irccd) override;
+    void handle_reload(irccd& irccd) override;
 
     /**
-     * \copydoc plugin::on_topic
+     * \copydoc plugin::handle_topic
      */
-    void on_topic(irccd& irccd, const topic_event& event) override;
+    void handle_topic(irccd& irccd, const topic_event& event) override;
 
     /**
-     * \copydoc plugin::on_unload
+     * \copydoc plugin::handle_unload
      */
-    void on_unload(irccd& irccd) override;
+    void handle_unload(irccd& irccd) override;
 
     /**
-     * \copydoc plugin::on_whois
+     * \copydoc plugin::handle_whois
      */
-    void on_whois(irccd& irccd, const whois_event& event) override;
+    void handle_whois(irccd& irccd, const whois_event& event) override;
 };
 
 /**

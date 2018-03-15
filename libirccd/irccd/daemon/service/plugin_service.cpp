@@ -51,7 +51,7 @@ plugin_service::~plugin_service()
 {
     for (const auto& plugin : plugins_) {
         try {
-            plugin->on_unload(irccd_);
+            plugin->handle_unload(irccd_);
         } catch (const std::exception& ex) {
             irccd_.log().warning() << "plugin: " << plugin->name() << ": " << ex.what() << std::endl;
         }
@@ -175,7 +175,7 @@ void plugin_service::load(std::string name, std::string path)
     plugin->set_formats(formats(name));
     plugin->set_paths(paths(name));
 
-    exec(plugin, &plugin::on_load, irccd_);
+    exec(plugin, &plugin::handle_load, irccd_);
     add(std::move(plugin));
 }
 
@@ -186,7 +186,7 @@ void plugin_service::reload(const std::string& name)
     if (!plugin)
         throw plugin_error(plugin_error::not_found, name);
 
-    exec(plugin, &plugin::on_reload, irccd_);
+    exec(plugin, &plugin::handle_reload, irccd_);
 }
 
 void plugin_service::unload(const std::string& name)
@@ -202,7 +202,7 @@ void plugin_service::unload(const std::string& name)
     auto save = *it;
 
     plugins_.erase(it);
-    exec(save, &plugin::on_unload, irccd_);
+    exec(save, &plugin::handle_unload, irccd_);
 }
 
 void plugin_service::load(const class config& cfg) noexcept

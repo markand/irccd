@@ -95,7 +95,7 @@ void on_command(const std::string& data)
 {
     auto args = su::split(data, " ", 4);
 
-    plugin->on_command(*daemon, {
+    plugin->handle_command(*daemon, {
         get_server(get_arg(args, 0)),
         get_arg(args, 1),
         get_arg(args, 2),
@@ -110,7 +110,7 @@ void on_connect(const std::string& data)
 {
     auto args = su::split(data, " ");
 
-    plugin->on_connect(*daemon, {get_server(get_arg(args, 0))});
+    plugin->handle_connect(*daemon, {get_server(get_arg(args, 0))});
 }
 
 /*
@@ -120,7 +120,7 @@ void on_invite(const std::string& data)
 {
     auto args = su::split(data, " ");
 
-    plugin->on_invite(*daemon, {
+    plugin->handle_invite(*daemon, {
         get_server(get_arg(args, 0)),
         get_arg(args, 1),
         get_arg(args, 2),
@@ -135,7 +135,7 @@ void on_join(const std::string& data)
 {
     auto args = su::split(data, " ");
 
-    plugin->on_join(*daemon, {
+    plugin->handle_join(*daemon, {
         get_server(get_arg(args, 0)),
         get_arg(args, 1),
         get_arg(args, 2)
@@ -149,7 +149,7 @@ void on_kick(const std::string& data)
 {
     auto args = su::split(data, " ", 5);
 
-    plugin->on_kick(*daemon, {
+    plugin->handle_kick(*daemon, {
         get_server(get_arg(args, 0)),
         get_arg(args, 1),
         get_arg(args, 2),
@@ -163,7 +163,7 @@ void on_kick(const std::string& data)
  */
 void on_load(const std::string&)
 {
-    plugin->on_load(*daemon);
+    plugin->handle_load(*daemon);
 }
 
 /*
@@ -173,7 +173,7 @@ void on_me(const std::string& data)
 {
     auto args = su::split(data, " ", 4);
 
-    plugin->on_me(*daemon, {
+    plugin->handle_me(*daemon, {
         get_server(get_arg(args, 0)),
         get_arg(args, 1),
         get_arg(args, 2),
@@ -188,7 +188,7 @@ void on_message(const std::string& data)
 {
     auto args = su::split(data, " ", 4);
 
-    plugin->on_message(*daemon, {
+    plugin->handle_message(*daemon, {
         get_server(get_arg(args, 0)),
         get_arg(args, 1),
         get_arg(args, 2),
@@ -203,7 +203,7 @@ void on_mode(const std::string& data)
 {
     auto args = su::split(data, " ", 7);
 
-    plugin->on_mode(*daemon, {
+    plugin->handle_mode(*daemon, {
         get_server(get_arg(args, 0)),
         get_arg(args, 1),
         get_arg(args, 2),
@@ -229,7 +229,7 @@ void on_names(const std::string& data)
     if (args.size() >= 3U)
         ev.names.insert(ev.names.begin(), args.begin() + 2, args.end());
 
-    plugin->on_names(*daemon, ev);
+    plugin->handle_names(*daemon, ev);
 }
 
 /*
@@ -239,7 +239,7 @@ void on_nick(const std::string& data)
 {
     auto args = su::split(data, " ");
 
-    plugin->on_nick(*daemon, {
+    plugin->handle_nick(*daemon, {
         get_server(get_arg(args, 0)),
         get_arg(args, 1),
         get_arg(args, 2)
@@ -253,7 +253,7 @@ void on_notice(const std::string& data)
 {
     auto args = su::split(data, " ", 4);
 
-    plugin->on_notice(*daemon, {
+    plugin->handle_notice(*daemon, {
         get_server(get_arg(args, 0)),
         get_arg(args, 1),
         get_arg(args, 2),
@@ -268,7 +268,7 @@ void on_part(const std::string& data)
 {
     auto args = su::split(data, " ", 4);
 
-    plugin->on_part(*daemon, {
+    plugin->handle_part(*daemon, {
         get_server(get_arg(args, 0)),
         get_arg(args, 1),
         get_arg(args, 2),
@@ -281,7 +281,7 @@ void on_part(const std::string& data)
  */
 void on_reload(const std::string&)
 {
-    plugin->on_reload(*daemon);
+    plugin->handle_reload(*daemon);
 }
 
 /*
@@ -291,7 +291,7 @@ void on_topic(const std::string& data)
 {
     auto args = su::split(data, " ", 4);
 
-    plugin->on_topic(*daemon, {
+    plugin->handle_topic(*daemon, {
         get_server(get_arg(args, 0)),
         get_arg(args, 1),
         get_arg(args, 2),
@@ -304,7 +304,7 @@ void on_topic(const std::string& data)
  */
 void on_unload(const std::string&)
 {
-    plugin->on_unload(*daemon);
+    plugin->handle_unload(*daemon);
 }
 
 /*
@@ -325,7 +325,7 @@ void on_whois(const std::string& data)
     if (args.size() >= 5)
         ev.whois.channels.insert(ev.whois.channels.begin(), args.begin() + 5, args.end());
 
-    plugin->on_whois(*daemon, ev);
+    plugin->handle_whois(*daemon, ev);
 }
 
 /*

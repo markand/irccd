@@ -66,94 +66,94 @@ dynlib_plugin::dynlib_plugin(std::string name, std::string path)
         throw std::runtime_error("plugin returned null");
 }
 
-void dynlib_plugin::on_command(irccd& irccd, const message_event& ev)
+void dynlib_plugin::handle_command(irccd& irccd, const message_event& ev)
 {
-    plugin_->on_command(irccd, ev);
+    plugin_->handle_command(irccd, ev);
 }
 
-void dynlib_plugin::on_connect(irccd& irccd, const connect_event& ev)
+void dynlib_plugin::handle_connect(irccd& irccd, const connect_event& ev)
 {
-    plugin_->on_connect(irccd, ev);
+    plugin_->handle_connect(irccd, ev);
 }
 
-void dynlib_plugin::on_disconnect(irccd& irccd, const disconnect_event& ev)
+void dynlib_plugin::handle_disconnect(irccd& irccd, const disconnect_event& ev)
 {
-    plugin_->on_disconnect(irccd, ev);
+    plugin_->handle_disconnect(irccd, ev);
 }
 
-void dynlib_plugin::on_invite(irccd& irccd, const invite_event& ev)
+void dynlib_plugin::handle_invite(irccd& irccd, const invite_event& ev)
 {
-    plugin_->on_invite(irccd, ev);
+    plugin_->handle_invite(irccd, ev);
 }
 
-void dynlib_plugin::on_join(irccd& irccd, const join_event& ev)
+void dynlib_plugin::handle_join(irccd& irccd, const join_event& ev)
 {
-    plugin_->on_join(irccd, ev);
+    plugin_->handle_join(irccd, ev);
 }
 
-void dynlib_plugin::on_kick(irccd& irccd, const kick_event& ev)
+void dynlib_plugin::handle_kick(irccd& irccd, const kick_event& ev)
 {
-    plugin_->on_kick(irccd, ev);
+    plugin_->handle_kick(irccd, ev);
 }
 
-void dynlib_plugin::on_load(irccd& irccd)
+void dynlib_plugin::handle_load(irccd& irccd)
 {
-    plugin_->on_load(irccd);
+    plugin_->handle_load(irccd);
 }
 
-void dynlib_plugin::on_message(irccd& irccd, const message_event& ev)
+void dynlib_plugin::handle_message(irccd& irccd, const message_event& ev)
 {
-    plugin_->on_message(irccd, ev);
+    plugin_->handle_message(irccd, ev);
 }
 
-void dynlib_plugin::on_me(irccd& irccd, const me_event& ev)
+void dynlib_plugin::handle_me(irccd& irccd, const me_event& ev)
 {
-    plugin_->on_me(irccd, ev);
+    plugin_->handle_me(irccd, ev);
 }
 
-void dynlib_plugin::on_mode(irccd& irccd, const mode_event& ev)
+void dynlib_plugin::handle_mode(irccd& irccd, const mode_event& ev)
 {
-    plugin_->on_mode(irccd, ev);
+    plugin_->handle_mode(irccd, ev);
 }
 
-void dynlib_plugin::on_names(irccd& irccd, const names_event& ev)
+void dynlib_plugin::handle_names(irccd& irccd, const names_event& ev)
 {
-    plugin_->on_names(irccd, ev);
+    plugin_->handle_names(irccd, ev);
 }
 
-void dynlib_plugin::on_nick(irccd& irccd, const nick_event& ev)
+void dynlib_plugin::handle_nick(irccd& irccd, const nick_event& ev)
 {
-    plugin_->on_nick(irccd, ev);
+    plugin_->handle_nick(irccd, ev);
 }
 
-void dynlib_plugin::on_notice(irccd& irccd, const notice_event& ev)
+void dynlib_plugin::handle_notice(irccd& irccd, const notice_event& ev)
 {
-    plugin_->on_notice(irccd, ev);
+    plugin_->handle_notice(irccd, ev);
 }
 
-void dynlib_plugin::on_part(irccd& irccd, const part_event& ev)
+void dynlib_plugin::handle_part(irccd& irccd, const part_event& ev)
 {
-    plugin_->on_part(irccd, ev);
+    plugin_->handle_part(irccd, ev);
 }
 
-void dynlib_plugin::on_reload(irccd& irccd)
+void dynlib_plugin::handle_reload(irccd& irccd)
 {
-    plugin_->on_reload(irccd);
+    plugin_->handle_reload(irccd);
 }
 
-void dynlib_plugin::on_topic(irccd& irccd, const topic_event& ev)
+void dynlib_plugin::handle_topic(irccd& irccd, const topic_event& ev)
 {
-    plugin_->on_topic(irccd, ev);
+    plugin_->handle_topic(irccd, ev);
 }
 
-void dynlib_plugin::on_unload(irccd& irccd)
+void dynlib_plugin::handle_unload(irccd& irccd)
 {
-    plugin_->on_unload(irccd);
+    plugin_->handle_unload(irccd);
 }
 
-void dynlib_plugin::on_whois(irccd& irccd, const whois_event& ev)
+void dynlib_plugin::handle_whois(irccd& irccd, const whois_event& ev)
 {
-    plugin_->on_whois(irccd, ev);
+    plugin_->handle_whois(irccd, ev);
 }
 
 dynlib_plugin_loader::dynlib_plugin_loader(std::vector<std::string> directories) noexcept

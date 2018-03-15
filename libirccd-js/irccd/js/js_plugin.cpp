@@ -172,93 +172,93 @@ void js_plugin::open()
     duk_pop(context_);
 }
 
-void js_plugin::on_command(irccd&, const message_event& event)
+void js_plugin::handle_command(irccd&, const message_event& event)
 {
     call("onCommand", event.server, event.origin, event.channel, event.message);
 }
 
-void js_plugin::on_connect(irccd&, const connect_event& event)
+void js_plugin::handle_connect(irccd&, const connect_event& event)
 {
     call("onConnect", event.server);
 }
 
-void js_plugin::on_disconnect(irccd&, const disconnect_event& event)
+void js_plugin::handle_disconnect(irccd&, const disconnect_event& event)
 {
     call("onDisconnect", event.server);
 }
 
-void js_plugin::on_invite(irccd&, const invite_event& event)
+void js_plugin::handle_invite(irccd&, const invite_event& event)
 {
     call("onInvite", event.server, event.origin, event.channel);
 }
 
-void js_plugin::on_join(irccd&, const join_event& event)
+void js_plugin::handle_join(irccd&, const join_event& event)
 {
     call("onJoin", event.server, event.origin, event.channel);
 }
 
-void js_plugin::on_kick(irccd&, const kick_event& event)
+void js_plugin::handle_kick(irccd&, const kick_event& event)
 {
     call("onKick", event.server, event.origin, event.channel, event.target, event.reason);
 }
 
-void js_plugin::on_load(irccd&)
+void js_plugin::handle_load(irccd&)
 {
     call("onLoad");
 }
 
-void js_plugin::on_message(irccd&, const message_event& event)
+void js_plugin::handle_message(irccd&, const message_event& event)
 {
     call("onMessage", event.server, event.origin, event.channel, event.message);
 }
 
-void js_plugin::on_me(irccd&, const me_event& event)
+void js_plugin::handle_me(irccd&, const me_event& event)
 {
     call("onMe", event.server, event.origin, event.channel, event.message);
 }
 
-void js_plugin::on_mode(irccd&, const mode_event& event)
+void js_plugin::handle_mode(irccd&, const mode_event& event)
 {
     call("onMode", event.server, event.origin, event.channel, event.mode,
         event.limit, event.user, event.mask);
 }
 
-void js_plugin::on_names(irccd&, const names_event& event)
+void js_plugin::handle_names(irccd&, const names_event& event)
 {
     call("onNames", event.server, event.channel, event.names);
 }
 
-void js_plugin::on_nick(irccd&, const nick_event& event)
+void js_plugin::handle_nick(irccd&, const nick_event& event)
 {
     call("onNick", event.server, event.origin, event.nickname);
 }
 
-void js_plugin::on_notice(irccd&, const notice_event& event)
+void js_plugin::handle_notice(irccd&, const notice_event& event)
 {
     call("onNotice", event.server, event.origin, event.channel, event.message);
 }
 
-void js_plugin::on_part(irccd&, const part_event& event)
+void js_plugin::handle_part(irccd&, const part_event& event)
 {
     call("onPart", event.server, event.origin, event.channel, event.reason);
 }
 
-void js_plugin::on_reload(irccd&)
+void js_plugin::handle_reload(irccd&)
 {
     call("onReload");
 }
 
-void js_plugin::on_topic(irccd&, const topic_event& event)
+void js_plugin::handle_topic(irccd&, const topic_event& event)
 {
     call("onTopic", event.server, event.origin, event.channel, event.topic);
 }
 
-void js_plugin::on_unload(irccd&)
+void js_plugin::handle_unload(irccd&)
 {
     call("onUnload");
 }
 
-void js_plugin::on_whois(irccd&, const whois_event& event)
+void js_plugin::handle_whois(irccd&, const whois_event& event)
 {
     call("onWhois", event.server, event.whois);
 }

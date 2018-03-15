@@ -49,7 +49,7 @@ public:
             { "quakenet.password", "hello" },
             { "quakenet.username", "mario" }
         });
-        plugin_->on_load(irccd_);
+        plugin_->handle_load(irccd_);
     }
 };
 
@@ -57,7 +57,7 @@ BOOST_FIXTURE_TEST_SUITE(auth_test_suite, auth_test)
 
 BOOST_AUTO_TEST_CASE(nickserv1)
 {
-    plugin_->on_connect(irccd_, {nickserv1_});
+    plugin_->handle_connect(irccd_, {nickserv1_});
 
     auto cmd = nickserv1_->cqueue().front();
 
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(nickserv1)
 
 BOOST_AUTO_TEST_CASE(nickserv2)
 {
-    plugin_->on_connect(irccd_, {nickserv2_});
+    plugin_->handle_connect(irccd_, {nickserv2_});
 
     auto cmd = nickserv2_->cqueue().front();
 
@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE(nickserv2)
 
 BOOST_AUTO_TEST_CASE(quakenet)
 {
-    plugin_->on_connect(irccd_, {quakenet_});
+    plugin_->handle_connect(irccd_, {quakenet_});
 
     auto cmd = quakenet_->cqueue().front();
 

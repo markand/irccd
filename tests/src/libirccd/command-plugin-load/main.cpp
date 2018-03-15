@@ -47,7 +47,7 @@ public:
         public:
             using plugin::plugin;
 
-            void on_load(irccd&) override
+            void handle_load(irccd&) override
             {
                 throw std::runtime_error("broken");
             }

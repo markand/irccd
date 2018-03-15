@@ -63,8 +63,8 @@ public:
 
     auto start()
     {
-        plugin_->on_command(irccd_, {server_, "a!a@localhost", "#tictactoe", "b"});
-        plugin_->on_names(irccd_, {server_, "#tictactoe", {"a", "b"}});
+        plugin_->handle_command(irccd_, {server_, "a!a@localhost", "#tictactoe", "b"});
+        plugin_->handle_names(irccd_, {server_, "#tictactoe", {"a", "b"}});
 
         return next_players();
     }
@@ -82,7 +82,7 @@ public:
 
         for (const auto& p : points) {
             server_->cqueue().clear();
-            plugin_->on_message(irccd_, {server_, players.first, "#tictactoe", p});
+            plugin_->handle_message(irccd_, {server_, players.first, "#tictactoe", p});
             players = next_players();
         }
     }
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE(win)
 
     const auto players = next_players();
 
-    plugin_->on_message(irccd_, {server_, players.first, "#tictactoe", "a 3"});
+    plugin_->handle_message(irccd_, {server_, players.first, "#tictactoe", "a 3"});
 
     const auto cmd = server_->cqueue().back();
 
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(draw)
 
     const auto players = next_players();
 
-    plugin_->on_message(irccd_, {server_, players.first, "#tictactoe", "b 1"});
+    plugin_->handle_message(irccd_, {server_, players.first, "#tictactoe", "b 1"});
 
     const auto cmd = server_->cqueue().back();
 
@@ -148,8 +148,8 @@ BOOST_AUTO_TEST_CASE(used)
 {
     auto players = start();
 
-    plugin_->on_message(irccd_, {server_, players.first, "#tictactoe", "a 1"});
-    plugin_->on_message(irccd_, {server_, players.second, "#tictactoe", "a 1"});
+    plugin_->handle_message(irccd_, {server_, players.first, "#tictactoe", "a 1"});
+    plugin_->handle_message(irccd_, {server_, players.second, "#tictactoe", "a 1"});
 
     const auto cmd = server_->cqueue().back();
 
@@ -172,7 +172,7 @@ BOOST_AUTO_TEST_CASE(invalid)
     nlohmann::json cmd;
 
     // empty name (no names)
-    plugin_->on_command(irccd_, {server_, "jean", "#tictactoe", ""});
+    plugin_->handle_command(irccd_, {server_, "jean", "#tictactoe", ""});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
@@ -180,7 +180,7 @@ BOOST_AUTO_TEST_CASE(invalid)
     BOOST_TEST(cmd["message"].get<std::string>() == "invalid=#tictactoe:!tictactoe:jean:jean:tictactoe:test");
 
     // bot name (no names)
-    plugin_->on_command(irccd_, {server_, "jean", "#tictactoe", "irccd"});
+    plugin_->handle_command(irccd_, {server_, "jean", "#tictactoe", "irccd"});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(invalid)
     BOOST_TEST(cmd["message"].get<std::string>() == "invalid=#tictactoe:!tictactoe:jean:jean:tictactoe:test");
 
     // target is origin (no names)
-    plugin_->on_command(irccd_, {server_, server_->nickname(), "#tictactoe", server_->nickname()});
+    plugin_->handle_command(irccd_, {server_, server_->nickname(), "#tictactoe", server_->nickname()});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
@@ -196,8 +196,8 @@ BOOST_AUTO_TEST_CASE(invalid)
     BOOST_TEST(cmd["message"].get<std::string>() == "invalid=#tictactoe:!tictactoe:irccd:irccd:tictactoe:test");
 
     // not existing (names)
-    plugin_->on_command(irccd_, {server_, server_->nickname(), "#tictactoe", server_->nickname()});
-    plugin_->on_names(irccd_, {server_, "#tictactoe", {"a", "b", "c"}});
+    plugin_->handle_command(irccd_, {server_, server_->nickname(), "#tictactoe", server_->nickname()});
+    plugin_->handle_names(irccd_, {server_, "#tictactoe", {"a", "b", "c"}});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
@@ -226,7 +226,7 @@ BOOST_AUTO_TEST_CASE(random)
         else
             b = true;
 
-        plugin_->on_message(irccd_, {server_, players.first, "#tictactoe", "a 3"});
+        plugin_->handle_message(irccd_, {server_, players.first, "#tictactoe", "a 3"});
     }
 }
 
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(disconnect)
 
     server_->disconnect();
     server_->cqueue().clear();
-    plugin_->on_message(irccd_, {server_, players.first, "#tictactoe", "a 1"});
+    plugin_->handle_message(irccd_, {server_, players.first, "#tictactoe", "a 1"});
 
     BOOST_TEST(server_->cqueue().empty());
 }
@@ -246,8 +246,8 @@ BOOST_AUTO_TEST_CASE(kick)
     auto players = start();
 
     server_->cqueue().clear();
-    plugin_->on_kick(irccd_, {server_, "kefka", "#tictactoe", players.first, ""});
-    plugin_->on_message(irccd_, {server_, players.first, "#tictactoe", "a 1"});
+    plugin_->handle_kick(irccd_, {server_, "kefka", "#tictactoe", players.first, ""});
+    plugin_->handle_message(irccd_, {server_, players.first, "#tictactoe", "a 1"});
 
     BOOST_TEST(server_->cqueue().empty());
 }
@@ -257,8 +257,8 @@ BOOST_AUTO_TEST_CASE(part)
     auto players = start();
 
     server_->cqueue().clear();
-    plugin_->on_part(irccd_, {server_, players.first, "#tictactoe", ""});
-    plugin_->on_message(irccd_, {server_, players.first, "#tictactoe", "a 1"});
+    plugin_->handle_part(irccd_, {server_, players.first, "#tictactoe", ""});
+    plugin_->handle_message(irccd_, {server_, players.first, "#tictactoe", "a 1"});
 
     BOOST_TEST(server_->cqueue().empty());
 }
