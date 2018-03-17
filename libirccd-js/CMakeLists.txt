@@ -64,7 +64,7 @@ irccd_define_library(
         ${HEADERS}
         ${SOURCES}
     LIBRARIES
-        Boost::timer
+        ${Boost_TIMER_LIBRARY}
         extern-duktape
         libirccd
     PUBLIC_INCLUDES

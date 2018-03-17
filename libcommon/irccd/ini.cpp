@@ -24,9 +24,11 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <irccd/sysconfig.hpp>
+
 // for PathIsRelative.
 #if defined(IRCCD_SYSTEM_WINDOWS)
-#  include <Shlwapi.h>
+#  include <shlwapi.h>
 #endif
 
 #include "ini.hpp"

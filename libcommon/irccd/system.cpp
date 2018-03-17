@@ -210,9 +210,10 @@ void add_config_user_path(std::vector<std::string>& result, const std::string& f
 #if defined(IRCCD_SYSTEM_WINDOWS)
     char folder[MAX_PATH] = {0};
 
-    if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, folder) == S_OK)
-        path = folder + "\\irccd\\config";
-    else
+    if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, folder) == S_OK) {
+        path /= folder;
+        path /= "\\irccd\\config";
+    } else
         path = ".";
 #else
     try {
@@ -244,8 +245,10 @@ void add_plugin_user_path(std::vector<std::string>& result, const std::string& f
 #if defined(IRCCD_SYSTEM_WINDOWS)
     char folder[MAX_PATH] = {0};
 
-    if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, folder) == S_OK)
-        path = folder + "\\irccd\\share";
+    if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, folder) == S_OK) {
+        path /= folder;
+        path /= "\\irccd\\share";
+    }
 #else
     try {
         path = xdg().data_home();

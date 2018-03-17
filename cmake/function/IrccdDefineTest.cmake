@@ -53,7 +53,7 @@ function(irccd_define_test)
         APPEND
         TEST_LIBRARIES
             libirccd-test
-            Boost::unit_test_framework
+            ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
     )
 
     # Executable

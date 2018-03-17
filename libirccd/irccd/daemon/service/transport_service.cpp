@@ -130,11 +130,11 @@ std::unique_ptr<transport_server> load_transport_ip(boost::asio::io_service& ser
 
 std::unique_ptr<transport_server> load_transport_unix(boost::asio::io_service& service, const ini::section& sc)
 {
-    using boost::asio::local::stream_protocol;
-
     assert(sc.key() == "transport");
 
 #if !defined(IRCCD_SYSTEM_WINDOWS)
+    using boost::asio::local::stream_protocol;
+
     ini::section::const_iterator it = sc.find("path");
 
     if (it == sc.end())
@@ -148,6 +148,7 @@ std::unique_ptr<transport_server> load_transport_unix(boost::asio::io_service& s
 
     return std::make_unique<local_transport_server>(std::move(acceptor));
 #else
+    (void)service;
     (void)sc;
 
     throw std::invalid_argument("unix transports not supported on on this platform");

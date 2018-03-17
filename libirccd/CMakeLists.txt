@@ -125,8 +125,9 @@ irccd_define_library(
         ${HEADERS}
         ${SOURCES}
     LIBRARIES
-        Boost::timer
         Threads::Threads
+        ${Boost_TIMER_LIBRARY}
+        $<$<BOOL:${IRCCD_SYSTEM_WINDOWS}>:mswsock>
         $<$<BOOL:${IRCCD_SYSTEM_LINUX}>:dl>
         $<$<BOOL:${IRCCD_SYSTEM_MAC}>:resolv>
         libcommon

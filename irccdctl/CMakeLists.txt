@@ -92,5 +92,5 @@ irccd_define_executable(
     TARGET irccdctl
     DESCRIPTION "Irccd controller."
     SOURCES ${SOURCES}
-    LIBRARIES Boost::timer libirccdctl
+    LIBRARIES ${Boost_TIMER_LIBRARY} libirccdctl
 )

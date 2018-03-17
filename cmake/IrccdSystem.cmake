@@ -171,10 +171,12 @@ endif ()
 # If HAVE_GETLOGIN is defined, include:
 #
 # #include <unistd.h>
-check_function_exists(getlogin HAVE_GETLOGIN)
+if (NOT IRCCD_SYSTEM_WINDOWS)
+    check_function_exists(getlogin HAVE_GETLOGIN)
 
-if (NOT HAVE_UNISTD_H)
-    set(HAVE_GETLOGIN FALSE)
+    if (NOT HAVE_UNISTD_H)
+        set(HAVE_GETLOGIN FALSE)
+    endif ()
 endif ()
 
 # getpid() function
