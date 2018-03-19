@@ -69,6 +69,7 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/service/transport_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_client.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_server.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/transport_util.hpp
     $<$<BOOL:${HAVE_SSL}>:${libirccd_SOURCE_DIR}/irccd/daemon/tls_transport_server.hpp>
 )
 
@@ -115,6 +116,7 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/service/transport_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_client.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_server.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/transport_util.cpp
     $<$<BOOL:${HAVE_SSL}>:${libirccd_SOURCE_DIR}/irccd/daemon/tls_transport_server.cpp>
 )
 
