@@ -60,6 +60,28 @@ BOOST_AUTO_TEST_CASE(basic)
 
 BOOST_AUTO_TEST_SUITE(errors)
 
+BOOST_AUTO_TEST_CASE(invalid_identifier)
+{
+    boost::system::error_code result;
+    nlohmann::json message;
+
+    ctl_->send({
+        { "command",    "plugin-info"   }
+    });
+    ctl_->recv([&] (auto rresult, auto rmessage) {
+        result = rresult;
+        message = rmessage;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_TEST(result == plugin_error::invalid_identifier);
+    BOOST_TEST(message["error"].template get<int>() == plugin_error::invalid_identifier);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "plugin");
+}
+
 BOOST_AUTO_TEST_CASE(not_found)
 {
     boost::system::error_code result;

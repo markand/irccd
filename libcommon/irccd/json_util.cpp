@@ -1,7 +1,7 @@
 /*
  * json_util.cpp -- utilities for JSON
  *
- * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2018 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -23,58 +23,136 @@ namespace irccd {
 
 namespace json_util {
 
-nlohmann::json require(const nlohmann::json& json, const std::string& key, nlohmann::json::value_t type)
+boost::optional<nlohmann::json> get(const nlohmann::json& json,
+                                    const nlohmann::json::json_pointer& key) noexcept
 {
-    auto it = json.find(key);
-    auto dummy = nlohmann::json(type);
-
-    if (it == json.end())
-        throw std::runtime_error(string_util::sprintf("missing '%s' property", key));
-    if (it->type() != type)
-        throw std::runtime_error(string_util::sprintf("invalid '%s' property (%s expected, got %s)",
-            key, it->type_name(), dummy.type_name()));
-
-    return *it;
+    // Unfortunately, there is no find using pointer yet.
+    try {
+        return json.at(key);
+    } catch (...) {
+        return boost::none;
+    }
 }
 
-std::string require_identifier(const nlohmann::json& json, const std::string& key)
+boost::optional<bool> get_bool(const nlohmann::json& json,
+                               const nlohmann::json::json_pointer& key) noexcept
 {
-    auto id = require_string(json, key);
+    const auto v = get(json, key);
 
-    if (!string_util::is_identifier(id))
-        throw std::runtime_error(string_util::sprintf("invalid '%s' identifier property", id));
+    if (!v || !v->is_boolean())
+        return boost::none;
 
-    return id;
+    return v->get<bool>();
 }
 
-std::int64_t require_int(const nlohmann::json& json, const std::string& key)
+boost::optional<std::uint64_t> get_int(const nlohmann::json& json,
+                                       const nlohmann::json::json_pointer& key) noexcept
 {
-    auto it = json.find(key);
+    const auto v = get(json, key);
 
-    if (it == json.end())
-        throw std::runtime_error(string_util::sprintf("missing '%s' property", key));
-    if (it->is_number_integer())
-        return it->get<int>();
-    if (it->is_number_unsigned() && it->get<unsigned>() <= INT_MAX)
-        return static_cast<int>(it->get<unsigned>());
+    if (!v || !v->is_number_integer())
+        return boost::none;
 
-    throw std::runtime_error(string_util::sprintf("invalid '%s' property (%s expected, got %s)",
-        key, it->type_name(), nlohmann::json(0).type_name()));
+    return v->get<std::uint64_t>();
 }
 
-std::uint64_t require_uint(const nlohmann::json& json, const std::string& key)
+boost::optional<std::uint64_t> get_uint(const nlohmann::json& json,
+                                        const nlohmann::json::json_pointer& key) noexcept
 {
-    auto it = json.find(key);
+    const auto v = get(json, key);
 
-    if (it == json.end())
-        throw std::runtime_error(string_util::sprintf("missing '%s' property", key));
-    if (it->is_number_unsigned())
-        return it->get<unsigned>();
-    if (it->is_number_integer() && it->get<int>() >= 0)
-        return static_cast<unsigned>(it->get<int>());
+    if (!v || !v->is_number_unsigned())
+        return boost::none;
 
-    throw std::runtime_error(string_util::sprintf("invalid '%s' property (%s expected, got %s)",
-        key, it->type_name(), nlohmann::json(0U).type_name()));
+    return v->get<std::uint64_t>();
+}
+
+boost::optional<std::string> get_string(const nlohmann::json& json,
+                                        const nlohmann::json::json_pointer& key) noexcept
+{
+    const auto v = get(json, key);
+
+    if (!v || !v->is_string())
+        return boost::none;
+
+    return v->get<std::string>();
+}
+
+boost::optional<bool> optional_bool(const nlohmann::json& json,
+                                    const nlohmann::json::json_pointer& key,
+                                    bool def) noexcept
+{
+    const auto v = get(json, key);
+
+    if (!v)
+        return def;
+    if (!v->is_boolean())
+        return boost::none;
+
+    return v->get<bool>();
+}
+
+boost::optional<std::int64_t> optional_int(const nlohmann::json& json,
+                                           const nlohmann::json::json_pointer& key,
+                                           std::int64_t def) noexcept
+{
+    const auto v = get(json, key);
+
+    if (!v)
+        return def;
+    if (!v->is_number_integer())
+        return boost::none;
+
+    return v->get<std::int64_t>();
+}
+
+boost::optional<std::uint64_t> optional_uint(const nlohmann::json& json,
+                                             const nlohmann::json::json_pointer& key,
+                                             std::uint64_t def) noexcept
+{
+    const auto v = get(json, key);
+
+    if (!v)
+        return def;
+    if (!v->is_number_unsigned())
+        return boost::none;
+
+    return v->get<std::uint64_t>();
+}
+
+boost::optional<std::string> optional_string(const nlohmann::json& json,
+                                             const nlohmann::json::json_pointer& key,
+                                             const std::string& def) noexcept
+{
+    const auto v = get(json, key);
+
+    if (!v)
+        return def;
+    if (!v->is_string())
+        return boost::none;
+
+    return v->get<std::string>();
+}
+
+std::string pretty(const nlohmann::json& value)
+{
+    switch (value.type()) {
+    case nlohmann::json::value_t::boolean:
+        return value.get<bool>() ? "true" : "false";
+    case nlohmann::json::value_t::string:
+        return value.get<std::string>();
+    default:
+        return value.dump();
+    }
+}
+
+bool contains(const nlohmann::json& array, const nlohmann::json& value) noexcept
+{
+    for (const auto &v : array)
+        if (v == value)
+            return true;
+
+    return false;
 }
 
 } // !json_util

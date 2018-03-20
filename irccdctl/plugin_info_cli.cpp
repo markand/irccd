@@ -36,10 +36,14 @@ void plugin_info_cli::exec(ctl::controller& ctl, const std::vector<std::string>&
 
     request(ctl, {{ "plugin", args[0] }}, [] (auto result) {
         std::cout << std::boolalpha;
-        std::cout << "Author         : " << json_util::get_string(result, "author") << std::endl;
-        std::cout << "License        : " << json_util::get_string(result, "license") << std::endl;
-        std::cout << "Summary        : " << json_util::get_string(result, "summary") << std::endl;
-        std::cout << "Version        : " << json_util::get_string(result, "version") << std::endl;
+        std::cout << "Author         : " <<
+            json_util::get_string(result, "/author"_json_pointer).value_or("(unknown)") << std::endl;
+        std::cout << "License        : " <<
+            json_util::get_string(result, "/license"_json_pointer).value_or("(unknown)") << std::endl;
+        std::cout << "Summary        : " <<
+            json_util::get_string(result, "/summary"_json_pointer).value_or("(unknown)") << std::endl;
+        std::cout << "Version        : " <<
+            json_util::get_string(result, "/version"_json_pointer).value_or("(unknown)") << std::endl;
     });
 }
 

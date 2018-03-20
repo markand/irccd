@@ -38,13 +38,13 @@ void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_
             return;
         }
 
-        auto command = json_util::to_string(message["command"]);
-        auto password = json_util::to_string(message["password"]);
+        const auto command = json_util::get_string(message, "/command"_json_pointer);
+        const auto password = json_util::get_string(message, "/password"_json_pointer);
 
-        if (command != "auth") {
+        if (!command || *command != "auth") {
             client->error(irccd_error::auth_required);
             code = irccd_error::auth_required;
-        } else if (password != password_) {
+        } else if (!password || *password != password_) {
             client->error(irccd_error::invalid_auth);
             code = irccd_error::invalid_auth;
         } else {

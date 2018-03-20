@@ -96,6 +96,24 @@ BOOST_AUTO_TEST_CASE(basic)
 
 BOOST_AUTO_TEST_SUITE(errors)
 
+BOOST_AUTO_TEST_CASE(invalid_identifier)
+{
+    boost::system::error_code result;
+
+    ctl_->send({
+        { "command",    "plugin-load"   }
+    });
+    ctl_->recv([&] (auto code, auto) {
+        result = code;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_TEST(result == plugin_error::invalid_identifier);
+}
+
 BOOST_AUTO_TEST_CASE(not_found)
 {
     boost::system::error_code result;

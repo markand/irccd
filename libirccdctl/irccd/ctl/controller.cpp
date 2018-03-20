@@ -60,9 +60,12 @@ void controller::verify(connect_t handler)
             return;
         }
 
-        if (json_util::to_string(message["program"]) != "irccd")
+        const auto program = json_util::get_string(message, "/program"_json_pointer);
+        const auto major = json_util::get_int(message, "/major"_json_pointer);
+
+        if (!program && *program != "irccd")
             handler(irccd_error::not_irccd, std::move(message));
-        else if (json_util::to_int(message["major"]) != IRCCD_VERSION_MAJOR)
+        else if (major && *major != IRCCD_VERSION_MAJOR)
             handler(irccd_error::incompatible_version, std::move(message));
         else {
             if (!password_.empty())
@@ -96,17 +99,19 @@ void controller::recv(network_recv_handler handler)
             return;
         }
 
-        auto e = json_util::to_int(msg["error"]);
-        auto c = json_util::to_string(msg["errorCategory"]);
+        const auto e = json_util::get_int(msg, "/error"_json_pointer);
+        const auto c = json_util::get_string(msg, "/errorCategory"_json_pointer);
 
-        if (c == "irccd")
-            code = make_error_code(static_cast<irccd_error::error>(e));
-        else if (c == "server")
-            code = make_error_code(static_cast<server_error::error>(e));
-        else if (c == "plugin")
-            code = make_error_code(static_cast<plugin_error::error>(e));
-        else if (c == "rule")
-            code = make_error_code(static_cast<rule_error::error>(e));
+        if (e && c) {
+            if (*c == "irccd")
+                code = make_error_code(static_cast<irccd_error::error>(*e));
+            else if (*c == "server")
+                code = make_error_code(static_cast<server_error::error>(*e));
+            else if (*c == "plugin")
+                code = make_error_code(static_cast<plugin_error::error>(*e));
+            else if (*c == "rule")
+                code = make_error_code(static_cast<rule_error::error>(*e));
+        }
 
         handler(std::move(code), std::move(msg));
     });

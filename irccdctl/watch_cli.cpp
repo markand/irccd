@@ -52,111 +52,111 @@ std::string format(std::vector<std::string> args)
 void onConnect(const nlohmann::json &v)
 {
     std::cout << "event:       onConnect\n";
-    std::cout << "server:      " << json_util::pretty(v, "server") << "\n";
+    std::cout << "server:      " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
 }
 
 void onInvite(const nlohmann::json &v)
 {
     std::cout << "event:       onInvite\n";
-    std::cout << "server:      " << json_util::pretty(v, "server") << "\n";
-    std::cout << "origin:      " << json_util::pretty(v, "origin") << "\n";
-    std::cout << "channel:     " << json_util::pretty(v, "channel") << "\n";
+    std::cout << "server:      " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
+    std::cout << "origin:      " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
+    std::cout << "channel:     " << json_util::pretty(v.value("channel", "(unknown)")) << "\n";
 }
 
 void onJoin(const nlohmann::json &v)
 {
     std::cout << "event:       onJoin\n";
-    std::cout << "server:      " << json_util::pretty(v, "server") << "\n";
-    std::cout << "origin:      " << json_util::pretty(v, "origin") << "\n";
-    std::cout << "channel:     " << json_util::pretty(v, "channel") << "\n";
+    std::cout << "server:      " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
+    std::cout << "origin:      " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
+    std::cout << "channel:     " << json_util::pretty(v.value("channel", "(unknown)")) << "\n";
 }
 
 void onKick(const nlohmann::json &v)
 {
     std::cout << "event:       onKick\n";
-    std::cout << "server:      " << json_util::pretty(v, "server") << "\n";
-    std::cout << "origin:      " << json_util::pretty(v, "origin") << "\n";
-    std::cout << "channel:     " << json_util::pretty(v, "channel") << "\n";
-    std::cout << "target:      " << json_util::pretty(v, "target") << "\n";
-    std::cout << "reason:      " << json_util::pretty(v, "reason") << "\n";
+    std::cout << "server:      " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
+    std::cout << "origin:      " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
+    std::cout << "channel:     " << json_util::pretty(v.value("channel", "(unknown)")) << "\n";
+    std::cout << "target:      " << json_util::pretty(v.value("target", "(unknown)")) << "\n";
+    std::cout << "reason:      " << json_util::pretty(v.value("reason", "(unknown)")) << "\n";
 }
 
 void onMessage(const nlohmann::json &v)
 {
     std::cout << "event:       onMessage\n";
-    std::cout << "server:      " << json_util::pretty(v, "server") << "\n";
-    std::cout << "origin:      " << json_util::pretty(v, "origin") << "\n";
-    std::cout << "channel:     " << json_util::pretty(v, "channel") << "\n";
-    std::cout << "message:     " << json_util::pretty(v, "message") << "\n";
+    std::cout << "server:      " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
+    std::cout << "origin:      " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
+    std::cout << "channel:     " << json_util::pretty(v.value("channel", "(unknown)")) << "\n";
+    std::cout << "message:     " << json_util::pretty(v.value("message", "(unknown)")) << "\n";
 }
 
 void onMe(const nlohmann::json &v)
 {
     std::cout << "event:       onMe\n";
-    std::cout << "server:      " << json_util::pretty(v, "server") << "\n";
-    std::cout << "origin:      " << json_util::pretty(v, "origin") << "\n";
-    std::cout << "target:      " << json_util::pretty(v, "target") << "\n";
-    std::cout << "message:     " << json_util::pretty(v, "message") << "\n";
+    std::cout << "server:      " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
+    std::cout << "origin:      " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
+    std::cout << "target:      " << json_util::pretty(v.value("target", "(unknown)")) << "\n";
+    std::cout << "message:     " << json_util::pretty(v.value("message", "(unknown)")) << "\n";
 }
 
 void onMode(const nlohmann::json &v)
 {
     std::cout << "event:       onMode\n";
-    std::cout << "server:      " << json_util::pretty(v, "server") << "\n";
-    std::cout << "origin:      " << json_util::pretty(v, "origin") << "\n";
-    std::cout << "mode:        " << json_util::pretty(v, "mode") << "\n";
+    std::cout << "server:      " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
+    std::cout << "origin:      " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
+    std::cout << "mode:        " << json_util::pretty(v.value("mode", "(unknown)")) << "\n";
 }
 
 void onNames(const nlohmann::json &v)
 {
     std::cout << "event:       onNames\n";
-    std::cout << "server:      " << json_util::pretty(v, "server") << "\n";
-    std::cout << "channel:     " << json_util::pretty(v, "channel") << "\n";
-    std::cout << "names:       " << json_util::pretty(v, "names") << "\n";
+    std::cout << "server:      " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
+    std::cout << "channel:     " << json_util::pretty(v.value("channel", "(unknown)")) << "\n";
+    std::cout << "names:       " << json_util::pretty(v.value("names", "(unknown)")) << "\n";
 }
 
 void onNick(const nlohmann::json &v)
 {
     std::cout << "event:       onNick\n";
-    std::cout << "server:      " << json_util::pretty(v, "server") << "\n";
-    std::cout << "origin:      " << json_util::pretty(v, "origin") << "\n";
-    std::cout << "nickname:    " << json_util::pretty(v, "nickname") << "\n";
+    std::cout << "server:      " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
+    std::cout << "origin:      " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
+    std::cout << "nickname:    " << json_util::pretty(v.value("nickname", "(unknown)")) << "\n";
 }
 
 void onNotice(const nlohmann::json &v)
 {
     std::cout << "event:       onNotice\n";
-    std::cout << "server:      " << json_util::pretty(v, "server") << "\n";
-    std::cout << "origin:      " << json_util::pretty(v, "origin") << "\n";
-    std::cout << "message:     " << json_util::pretty(v, "message") << "\n";
+    std::cout << "server:      " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
+    std::cout << "origin:      " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
+    std::cout << "message:     " << json_util::pretty(v.value("message", "(unknown)")) << "\n";
 }
 
 void onPart(const nlohmann::json &v)
 {
     std::cout << "event:       onPart\n";
-    std::cout << "server:      " << json_util::pretty(v, "server") << "\n";
-    std::cout << "origin:      " << json_util::pretty(v, "origin") << "\n";
-    std::cout << "channel:     " << json_util::pretty(v, "channel") << "\n";
-    std::cout << "reason:      " << json_util::pretty(v, "reason") << "\n";
+    std::cout << "server:      " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
+    std::cout << "origin:      " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
+    std::cout << "channel:     " << json_util::pretty(v.value("channel", "(unknown)")) << "\n";
+    std::cout << "reason:      " << json_util::pretty(v.value("reason", "(unknown)")) << "\n";
 }
 
 void onTopic(const nlohmann::json &v)
 {
     std::cout << "event:       onTopic\n";
-    std::cout << "server:      " << json_util::pretty(v, "server") << "\n";
-    std::cout << "origin:      " << json_util::pretty(v, "origin") << "\n";
-    std::cout << "channel:     " << json_util::pretty(v, "channel") << "\n";
-    std::cout << "topic:       " << json_util::pretty(v, "topic") << "\n";
+    std::cout << "server:      " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
+    std::cout << "origin:      " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
+    std::cout << "channel:     " << json_util::pretty(v.value("channel", "(unknown)")) << "\n";
+    std::cout << "topic:       " << json_util::pretty(v.value("topic", "(unknown)")) << "\n";
 }
 
 void onWhois(const nlohmann::json &v)
 {
     std::cout << "event:       onWhois\n";
-    std::cout << "server:      " << json_util::pretty(v, "server") << "\n";
-    std::cout << "nickname:    " << json_util::pretty(v, "nickname") << "\n";
-    std::cout << "username:    " << json_util::pretty(v, "username") << "\n";
-    std::cout << "host:        " << json_util::pretty(v, "host") << "\n";
-    std::cout << "realname:    " << json_util::pretty(v, "realname") << "\n";
+    std::cout << "server:      " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
+    std::cout << "nickname:    " << json_util::pretty(v.value("nickname", "(unknown)")) << "\n";
+    std::cout << "username:    " << json_util::pretty(v.value("username", "(unknown)")) << "\n";
+    std::cout << "host:        " << json_util::pretty(v.value("host", "(unknown)")) << "\n";
+    std::cout << "realname:    " << json_util::pretty(v.value("realname", "(unknown)")) << "\n";
 }
 
 const std::unordered_map<std::string, std::function<void (const nlohmann::json&)>> events{
@@ -181,7 +181,8 @@ void get_event(ctl::controller& ctl, std::string fmt)
         if (code)
             throw boost::system::system_error(code);
 
-        auto it = events.find(json_util::to_string(message["event"]));
+        const auto event = json_util::get_string(message, "/event"_json_pointer);
+        const auto it = events.find(event ? *event : "");
 
         if (it != events.end()) {
             if (fmt == "json")

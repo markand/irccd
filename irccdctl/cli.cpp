@@ -36,9 +36,9 @@ void cli::recv_response(ctl::controller& ctl, nlohmann::json req, handler_t hand
         if (code)
             throw boost::system::system_error(code);
 
-        auto c = json_util::to_string(message["command"]);
+        const auto c = json_util::get_string(message, "/command"_json_pointer);
 
-        if (c != req["command"].get<std::string>()) {
+        if (!c) {
             recv_response(ctl, std::move(req), std::move(handler));
             return;
         }

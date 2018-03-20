@@ -19,6 +19,7 @@
 #include <irccd/json_util.hpp>
 
 #include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/server_util.hpp>
 #include <irccd/daemon/transport_client.hpp>
 
 #include <irccd/daemon/service/server_service.hpp>
@@ -34,13 +35,14 @@ std::string server_nick_command::get_name() const noexcept
 
 void server_nick_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto server = irccd.servers().require(args);
-    auto nick = json_util::get_string(args, "nickname");
+    const auto id = server_util::get_identifier(args);
+    const auto server = irccd.servers().require(id);
+    const auto nick = json_util::get_string(args, "/nickname"_json_pointer);
 
-    if (nick.empty())
-        throw server_error(server_error::invalid_nickname, server->name());
+    if (!nick || nick->empty())
+        throw server_error(server->name(), server_error::invalid_nickname);
 
-    server->set_nickname(nick);
+    server->set_nickname(*nick);
     client.success("server-nick");
 }
 

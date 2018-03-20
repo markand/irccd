@@ -16,6 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/json_util.hpp>
+#include <irccd/string_util.hpp>
+
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/transport_client.hpp>
 
@@ -32,20 +35,17 @@ std::string server_disconnect_command::get_name() const noexcept
 
 void server_disconnect_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto it = args.find("server");
+    const auto it = args.find("server");
 
     if (it == args.end())
         irccd.servers().clear();
     else {
-        if (!it->is_string())
-            throw server_error(server_error::invalid_identifier, "");
+        if (!it->is_string() || !string_util::is_identifier(it->get<std::string>()))
+            throw server_error("", server_error::invalid_identifier);
 
-        auto name = it->get<std::string>();
-        auto s = irccd.servers().get(name);
+        const auto name = it->get<std::string>();
 
-        if (!s)
-            throw server_error(server_error::not_found, name);
-
+        irccd.servers().require(name);
         irccd.servers().remove(name);
     }
 

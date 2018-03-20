@@ -469,19 +469,17 @@ std::shared_ptr<server> server_service::get(const std::string& name) const noexc
     return *it;
 }
 
-std::shared_ptr<server> server_service::require(const nlohmann::json& args, const std::string& key)
+std::shared_ptr<server> server_service::require(const std::string& name) const
 {
-    auto id = json_util::get_string(args, key);
+    if (!string_util::is_identifier(name))
+        throw server_error(name, server_error::invalid_identifier);
 
-    if (!string_util::is_identifier(id))
-        throw server_error(server_error::invalid_identifier, "");
+    const auto s = get(name);
 
-    auto server = get(id);
+    if (!s)
+        throw server_error(name, server_error::not_found);
 
-    if (!server)
-        throw server_error(server_error::not_found, id);
-
-    return server;
+    return s;
 }
 
 void server_service::remove(const std::string& name)

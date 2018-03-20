@@ -17,6 +17,7 @@
  */
 
 #include <irccd/json_util.hpp>
+#include <irccd/string_util.hpp>
 
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/transport_client.hpp>
@@ -34,7 +35,12 @@ std::string plugin_unload_command::get_name() const noexcept
 
 void plugin_unload_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    irccd.plugins().unload(json_util::require_identifier(args, "plugin"));
+    const auto id = json_util::get_string(args, "/plugin"_json_pointer);
+
+    if (!id || !string_util::is_identifier(*id))
+        throw plugin_error(plugin_error::invalid_identifier);
+
+    irccd.plugins().unload(*id);
     client.success("plugin-unload");
 }
 

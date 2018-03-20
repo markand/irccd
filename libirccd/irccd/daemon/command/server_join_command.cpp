@@ -20,6 +20,7 @@
 
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/transport_client.hpp>
+#include <irccd/daemon/server_util.hpp>
 
 #include <irccd/daemon/service/server_service.hpp>
 
@@ -34,14 +35,15 @@ std::string server_join_command::get_name() const noexcept
 
 void server_join_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto server = irccd.servers().require(args);
-    auto channel = json_util::get_string(args, "channel");
-    auto password = json_util::get_string(args, "password");
+    const auto id = server_util::get_identifier(args);
+    const auto server = irccd.servers().require(id);
+    const auto channel = json_util::get_string(args, "/channel"_json_pointer);
+    const auto password = json_util::get_string(args, "/password"_json_pointer);
 
-    if (channel.empty())
-        throw server_error(server_error::invalid_channel, server->name());
+    if (!channel || channel->empty())
+        throw server_error(server->name(), server_error::invalid_channel);
 
-    server->join(channel, password);
+    server->join(*channel, password ? *password : "");
     client.success("server-join");
 }
 

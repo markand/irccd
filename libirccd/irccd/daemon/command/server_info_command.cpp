@@ -17,6 +17,7 @@
  */
 
 #include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/server_util.hpp>
 #include <irccd/daemon/transport_client.hpp>
 
 #include <irccd/daemon/service/server_service.hpp>
@@ -32,8 +33,10 @@ std::string server_info_command::get_name() const noexcept
 
 void server_info_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
+    const auto id = server_util::get_identifier(args);
+    const auto server = irccd.servers().require(id);
+
     auto response = nlohmann::json::object();
-    auto server = irccd.servers().require(args);
 
     // General stuff.
     response.push_back({"command", "server-info"});

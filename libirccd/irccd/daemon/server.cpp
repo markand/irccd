@@ -668,7 +668,7 @@ void server::whois(std::string target)
     send(string_util::sprintf("WHOIS %s %s", target, target));
 }
 
-server_error::server_error(error code, std::string name) noexcept
+server_error::server_error(std::string name, error code) noexcept
     : system_error(make_error_code(code))
     , name_(std::move(name))
 {
@@ -708,8 +708,18 @@ const boost::system::error_category& server_category()
                 return "invalid or empty mode";
             case server_error::invalid_nickname:
                 return "invalid nickname";
+            case server_error::invalid_username:
+                return "invalid username";
+            case server_error::invalid_realname:
+                return "invalid realname";
+            case server_error::invalid_password:
+                return "invalid password";
             case server_error::invalid_ping_timeout:
                 return "invalid ping timeout";
+            case server_error::invalid_ctcp_version:
+                return "invalid CTCP VERSION";
+            case server_error::invalid_command_char:
+                return "invalid character command";
             case server_error::ssl_disabled:
                 return "ssl is not enabled";
             default:

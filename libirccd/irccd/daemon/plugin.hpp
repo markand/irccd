@@ -561,6 +561,9 @@ public:
         //!< No error.
         no_error = 0,
 
+        //!< The specified identifier is invalid.
+        invalid_identifier,
+
         //!< The specified plugin is not found.
         not_found,
 
@@ -584,7 +587,7 @@ public:
      * \param name the plugin name
      * \param message the optional message (e.g. error from plugin)
      */
-    plugin_error(error code, std::string name, std::string message = "") noexcept;
+    plugin_error(error code, std::string name = "", std::string message = "") noexcept;
 
     /**
      * Get the plugin name.

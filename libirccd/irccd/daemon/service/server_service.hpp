@@ -102,12 +102,11 @@ public:
     /**
      * Find a server from a JSON object.
      *
-     * \pre json.is_object()
-     * \param json the JSON object
-     * \param key the server identifier property
+     * \param name the server name
+     * \return the server
      * \throw server_error on errors
      */
-    std::shared_ptr<server> require(const nlohmann::json& json, const std::string& key = "server");
+    std::shared_ptr<server> require(const std::string& name) const;
 
     /**
      * Remove a server from the irccd instance.

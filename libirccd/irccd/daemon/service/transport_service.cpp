@@ -20,6 +20,8 @@
 
 #include <cassert>
 
+#include <irccd/json_util.hpp>
+
 #include <irccd/daemon/command.hpp>
 #include <irccd/daemon/ip_transport_server.hpp>
 #include <irccd/daemon/irccd.hpp>
@@ -39,19 +41,19 @@ void transport_service::handle_command(std::shared_ptr<transport_client> tc, con
 {
     assert(object.is_object());
 
-    auto name = object.find("command");
+    const auto name = json_util::get_string(object, "/command"_json_pointer);
 
-    if (name == object.end() || !name->is_string()) {
+    if (!name) {
         tc->error(irccd_error::invalid_message);
         return;
     }
 
     auto cmd = std::find_if(commands_.begin(), commands_.end(), [&] (const auto& cptr) {
-        return cptr->get_name() == name->template get<std::string>();
+        return cptr->get_name() == *name;
     });
 
     if (cmd == commands_.end())
-        tc->error(irccd_error::invalid_command, name->get<std::string>());
+        tc->error(irccd_error::invalid_command, *name);
     else {
         try {
             (*cmd)->exec(irccd_, *tc, object);

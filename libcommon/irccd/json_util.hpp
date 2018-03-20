@@ -1,7 +1,7 @@
 /*
  * json_util.hpp -- utilities for JSON
  *
- * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2018 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -19,14 +19,19 @@
 #ifndef IRCCD_COMMON_JSON_UTIL_HPP
 #define IRCCD_COMMON_JSON_UTIL_HPP
 
-#include <climits>
-
-#include <json.hpp>
-
 /**
  * \file json_util.hpp
  * \brief Utilities for JSON.
  */
+
+#include <irccd/sysconfig.hpp>
+
+#include <cstdint>
+#include <string>
+
+#include <boost/optional.hpp>
+
+#include <json.hpp>
 
 namespace irccd {
 
@@ -36,196 +41,123 @@ namespace irccd {
 namespace json_util {
 
 /**
- * Require a property.
+ * Get a JSON value from the given object or array.
  *
- * \param json the json value
- * \param key the property name
- * \param type the requested property type
- * \return the value
- * \throw std::runtime_error if the property is missing
+ * \param json the JSON object/array
+ * \param key the pointer to the object
+ * \return the value or boost::none if not found
  */
-nlohmann::json require(const nlohmann::json& json, const std::string& key, nlohmann::json::value_t type);
+IRCCD_EXPORT
+boost::optional<nlohmann::json> get(const nlohmann::json& json,
+                                    const nlohmann::json::json_pointer& key) noexcept;
 
 /**
- * Convenient access for booleans.
+ * Get a bool or null if not found or invalid.
  *
- * \param json the json object
- * \param key the property key
- * \return the boolean
- * \throw std::runtime_error if the property is missing or not a boolean
+ * \param json the JSON object/array
+ * \param key the pointer to the object
+ * \return the value or boost::none if not found or invalid
  */
-inline bool require_bool(const nlohmann::json& json, const std::string& key)
-{
-    return require(json, key, nlohmann::json::value_t::boolean);
-}
+IRCCD_EXPORT
+boost::optional<bool> get_bool(const nlohmann::json& json,
+                               const nlohmann::json::json_pointer& key) noexcept;
 
 /**
- * Convenient access for unique identifiers.
+ * Get a 64 bit signed integer or null if not found or invalid.
  *
- * \param json the json object
- * \param key the property key
- * \return the identifier
- * \throw std::runtime_error if the property is invalid
+ * \param json the JSON object/array
+ * \param key the pointer to the object
+ * \return the value or boost::none if not found or invalid
  */
-std::string require_identifier(const nlohmann::json& json, const std::string& key);
+IRCCD_EXPORT
+boost::optional<std::uint64_t> get_int(const nlohmann::json& json,
+                                       const nlohmann::json::json_pointer& key) noexcept;
 
 /**
- * Convenient access for ints.
+ * Get a 64 bit unsigned integer or null if not found or invalid.
  *
- * \param json the json object
- * \param key the property key
- * \return the int
- * \throw std::runtime_error if the property is missing or not ant int
+ * \param json the JSON object/array
+ * \param key the pointer to the object
+ * \return the value or boost::none if not found or invalid
  */
-std::int64_t require_int(const nlohmann::json& json, const std::string& key);
+IRCCD_EXPORT
+boost::optional<std::uint64_t> get_uint(const nlohmann::json& json,
+                                        const nlohmann::json::json_pointer& key) noexcept;
 
 /**
- * Convenient access for unsigned ints.
+ * Get a string or null if not found or invalid.
  *
- * \param json the json object
- * \param key the property key
- * \return the unsigned int
- * \throw std::runtime_error if the property is missing or not ant int
+ * \param json the JSON object/array
+ * \param key the pointer to the object
+ * \return the value or boost::none if not found or invalid
  */
-std::uint64_t require_uint(const nlohmann::json& json, const std::string& key);
+IRCCD_EXPORT
+boost::optional<std::string> get_string(const nlohmann::json& json,
+                                        const nlohmann::json::json_pointer& key) noexcept;
 
 /**
- * Convenient access for strings.
+ * Get an optional bool.
  *
- * \param json the json object
- * \param key the property key
- * \return the string
- * \throw std::runtime_error if the property is missing or not a string
- */
-inline std::string require_string(const nlohmann::json& json, const std::string& key)
-{
-    return require(json, key, nlohmann::json::value_t::string);
-}
-
-/**
- * Convert the json value to boolean.
+ * If the property is not found, return default value. If the property is not
+ * a bool, return boost::none, otherwise return the value.
  *
- * \param json the json value
- * \param def the default value if not boolean
- * \return a boolean
- */
-inline bool to_bool(const nlohmann::json& json, bool def = false) noexcept
-{
-    return json.is_boolean() ? json.get<bool>() : def;
-}
-
-/**
- * Convert the json value to int.
- *
- * \param json the json value
- * \param def the default value if not an int
- * \return an int
- */
-inline std::int64_t to_int(const nlohmann::json& json, std::int64_t def = 0) noexcept
-{
-    return json.is_number_integer() ? json.get<std::int64_t>() : def;
-}
-
-/**
- * Convert the json value to unsigned.
- *
- * \param json the json value
- * \param def the default value if not a unsigned int
- * \return an unsigned int
- */
-inline std::uint64_t to_uint(const nlohmann::json& json, std::uint64_t def = 0) noexcept
-{
-    return json.is_number_unsigned() ? json.get<std::uint64_t>() : def;
-}
-
-/**
- * Convert the json value to string.
- *
- * \param json the json value
- * \param def the default value if not a string
- * \return a string
- */
-inline std::string to_string(const nlohmann::json& json, std::string def = "") noexcept
-{
-    return json.is_string() ? json.get<std::string>() : def;
-}
-
-/**
- * Get a property or return null one if not found or if json is not an object.
- *
- * \param json the json value
- * \param property the property key
- * \return the value or null one if not found
- */
-inline nlohmann::json get(const nlohmann::json& json, const std::string& property) noexcept
-{
-    auto it = json.find(property);
-
-    if (it == json.end())
-        return nlohmann::json();
-
-    return *it;
-}
-
-/**
- * Convenient access for boolean with default value.
- *
- * \param json the json value
- * \param key the property key
+ * \param json the JSON object/array
+ * \param key the pointer to the object
  * \param def the default value
- * \return the boolean
+ * \return the value, boost::none or def
  */
-inline bool get_bool(const nlohmann::json& json,
-                     const std::string& key,
-                     bool def = false) noexcept
-{
-    return to_bool(get(json, key), def);
-}
+IRCCD_EXPORT
+boost::optional<bool> optional_bool(const nlohmann::json& json,
+                                    const nlohmann::json::json_pointer& key,
+                                    bool def = false) noexcept;
 
 /**
- * Convenient access for ints with default value.
+ * Get an optional integer.
  *
- * \param json the json value
- * \param key the property key
+ * If the property is not found, return default value. If the property is not
+ * an integer, return boost::none, otherwise return the value.
+ *
+ * \param json the JSON object/array
+ * \param key the pointer to the object
  * \param def the default value
- * \return the int
+ * \return the value, boost::none or def
  */
-inline std::int64_t get_int(const nlohmann::json& json,
-                            const std::string& key,
-                            std::int64_t def = 0) noexcept
-{
-    return to_int(get(json, key), def);
-}
+IRCCD_EXPORT
+boost::optional<std::int64_t> optional_int(const nlohmann::json& json,
+                                           const nlohmann::json::json_pointer& key,
+                                           std::int64_t def = 0) noexcept;
 
 /**
- * Convenient access for unsigned ints with default value.
+ * Get an optional unsigned integer.
  *
- * \param json the json value
- * \param key the property key
+ * If the property is not found, return default value. If the property is not
+ * an unsigned integer, return boost::none, otherwise return the value.
+ *
+ * \param json the JSON object/array
+ * \param key the pointer to the object
  * \param def the default value
- * \return the unsigned int
+ * \return the value, boost::none or def
  */
-inline std::uint64_t get_uint(const nlohmann::json& json,
-                              const std::string& key,
-                              std::uint64_t def = 0) noexcept
-{
-    return to_uint(get(json, key), def);
-}
+IRCCD_EXPORT
+boost::optional<std::uint64_t> optional_uint(const nlohmann::json& json,
+                                             const nlohmann::json::json_pointer& key,
+                                             std::uint64_t def = 0) noexcept;
 
 /**
- * Convenient access for strings with default value.
+ * Get an optional string.
  *
- * \param json the json value
- * \param key the property key
+ * If the property is not found, return default value. If the property is not
+ * a string, return boost::none, otherwise return the value.
+ *
+ * \param json the JSON object/array
+ * \param key the pointer to the object
  * \param def the default value
- * \return the string
+ * \return the value, boost::none or def
  */
-inline std::string get_string(const nlohmann::json& json,
-                              const std::string& key,
-                              std::string def = "") noexcept
-{
-    return to_string(get(json, key), def);
-}
+IRCCD_EXPORT
+boost::optional<std::string> optional_string(const nlohmann::json& json,
+                                             const nlohmann::json::json_pointer& key,
+                                             const std::string& def = "") noexcept;
 
 /**
  * Print the value as human readable.
@@ -233,34 +165,8 @@ inline std::string get_string(const nlohmann::json& json,
  * \param value the value
  * \return the string
  */
-inline std::string pretty(const nlohmann::json& value)
-{
-    switch (value.type()) {
-    case nlohmann::json::value_t::boolean:
-        return value.get<bool>() ? "true" : "false";
-    case nlohmann::json::value_t::string:
-        return value.get<std::string>();
-    default:
-        return value.dump();
-    }
-}
-
-/**
- * Pretty print a json value in the given object.
- *
- * \param object the object
- * \param prop the property
- * \return the pretty value or empty if key does not exist
- */
-inline std::string pretty(const nlohmann::json& object, const std::string& prop)
-{
-    auto it = object.find(prop);
-
-    if (it == object.end())
-        return "";
-
-    return pretty(*it);
-}
+IRCCD_EXPORT
+std::string pretty(const nlohmann::json& value);
 
 /**
  * Check if the array contains the given value.
@@ -269,17 +175,11 @@ inline std::string pretty(const nlohmann::json& object, const std::string& prop)
  * \param value the JSON value to check
  * \return true if present
  */
-inline bool contains(const nlohmann::json& array, const nlohmann::json& value)
-{
-    for (const auto &v : array)
-        if (v == value)
-            return true;
-
-    return false;
-}
+IRCCD_EXPORT
+bool contains(const nlohmann::json& array, const nlohmann::json& value) noexcept;
 
 } // !json_util
 
 } // !irccd
 
-#endif // !IRCCD_COMMON_JSON_UTIL_HPP
+#endif // !JSON_UTIL_HPP

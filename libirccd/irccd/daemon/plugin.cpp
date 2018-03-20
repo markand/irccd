@@ -87,6 +87,8 @@ const boost::system::error_category& plugin_category()
             switch (static_cast<plugin_error::error>(e)) {
             case plugin_error::not_found:
                 return "plugin not found";
+            case plugin_error::invalid_identifier:
+                return "invalid identifier";
             case plugin_error::exec_error:
                 return "plugin exec error";
             case plugin_error::already_exists:

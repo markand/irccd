@@ -25,84 +25,115 @@
 
 #include "server_util.hpp"
 
+using nlohmann::json;
+
+using std::uint16_t;
+using std::string;
+using std::forward;
+
 namespace irccd {
 
 namespace server_util {
 
 namespace {
 
-template <typename T>
-T to_int(const std::string& value, const std::string& name, server_error::error errc)
-{
-    try {
-        return string_util::to_int<T>(value);
-    } catch (...) {
-        throw server_error(errc, name);
-    }
-}
-
-template <typename T>
-T to_uint(const std::string& value, const std::string& name, server_error::error errc)
-{
-    try {
-        return string_util::to_uint<T>(value);
-    } catch (...) {
-        throw server_error(errc, name);
-    }
-}
-
-template <typename T>
-T to_uint(const nlohmann::json& value, const std::string& name, server_error::error errc)
-{
-    if (!value.is_number())
-        throw server_error(errc, name);
-
-    auto n = value.get<unsigned>();
-
-    if (n > std::numeric_limits<T>::max())
-        throw server_error(errc, name);
-
-    return static_cast<T>(n);
-}
-
-std::string to_id(const ini::section& sc)
-{
-    auto id = sc.get("name");
-
-    if (!string_util::is_identifier(id.value()))
-        throw server_error(server_error::invalid_identifier, "");
-
-    return id.value();
-}
-
-std::string to_id(const nlohmann::json& object)
-{
-    auto id = json_util::get_string(object, "name");
-
-    if (!string_util::is_identifier(id))
-        throw server_error(server_error::invalid_identifier, "");
-
-    return id;
-}
-
-std::string to_host(const ini::section& sc, const std::string& name)
+template <typename... Args>
+std::string require_conf_host(const ini::section& sc, Args&&... args)
 {
     auto value = sc.get("host");
 
     if (value.empty())
-        throw server_error(server_error::invalid_hostname, name);
+        throw server_error(forward<Args>(args)...);
 
     return value.value();
 }
 
-std::string to_host(const nlohmann::json& object, const std::string& name)
+template <typename... Args>
+std::string require_conf_id(const ini::section& sc, Args&&... args)
 {
-    auto value = json_util::get_string(object, "host");
+    auto id = sc.get("name");
 
-    if (value.empty())
-        throw server_error(server_error::invalid_hostname, name);
+    if (!string_util::is_identifier(id.value()))
+        throw server_error(forward<Args>(args)...);
 
-    return value;
+    return id.value();
+}
+
+template <typename Int, typename... Args>
+Int optional_conf_int(const string& value, Args&&... args)
+{
+    try {
+        return string_util::to_int<Int>(value);
+    } catch (...) {
+        throw server_error(std::forward<Args>(args)...);
+    }
+}
+
+template <typename Int, typename... Args>
+Int optional_conf_uint(const string& value, Args&&... args)
+{
+    try {
+        return string_util::to_uint<Int>(value);
+    } catch (...) {
+        throw server_error(std::forward<Args>(args)...);
+    }
+}
+
+template <typename Int, typename... Args>
+Int optional_json_uint(const json& json, const json::json_pointer& key, Int def, Args&&... args)
+{
+    const auto v = json_util::optional_uint(json, key, def);
+
+    if (!v || *v > std::numeric_limits<Int>::max())
+        throw server_error(forward<Args>(args)...);
+
+    return *v;
+}
+
+bool optional_json_bool(const json& json, const json::json_pointer& key, bool def = false)
+{
+    const auto v = json_util::optional_bool(json, key, def);
+
+    if (!v)
+        return def;
+
+    return *v;
+}
+
+template <typename... Args>
+std::string optional_json_string(const json& json,
+                                 const json::json_pointer& key,
+                                 const string& def,
+                                 Args&&... args)
+{
+    const auto v = json_util::optional_string(json, key, def);
+
+    if (!v)
+        throw server_error(forward<Args>(args)...);
+
+    return *v;
+}
+
+template <typename... Args>
+std::string require_json_id(const nlohmann::json& json, Args&&... args)
+{
+    const auto id = json_util::get_string(json, "/name"_json_pointer);
+
+    if (!id || !string_util::is_identifier(*id))
+        throw server_error(forward<Args>(args)...);
+
+    return *id;
+}
+
+template <typename... Args>
+std::string require_json_host(const nlohmann::json& object, Args&&... args)
+{
+    const auto value = json_util::get_string(object, "/host"_json_pointer);
+
+    if (!value || value->empty())
+        throw server_error(forward<Args>(args)...);
+
+    return *value;
 }
 
 void load_identity(server& server, const config& cfg, const std::string& identity)
@@ -135,32 +166,39 @@ void load_identity(server& server, const config& cfg, const std::string& identit
 
 std::shared_ptr<server> from_json(boost::asio::io_service& service, const nlohmann::json& object)
 {
-    // TODO: move this function in server_service.
-    auto sv = std::make_shared<server>(service, to_id(object));
+    const auto id = require_json_id(object, "", server_error::invalid_identifier);
+    const auto sv = std::make_shared<server>(service, id);
 
     // Mandatory fields.
-    sv->set_host(to_host(object, sv->name()));
+    sv->set_host(require_json_host(object, sv->name(), server_error::invalid_hostname));
 
     // Optional fields.
-    if (object.count("port"))
-        sv->set_port(to_uint<std::uint16_t>(object["port"], sv->name(), server_error::invalid_port));
-    sv->set_password(json_util::get_string(object, "password"));
-    sv->set_nickname(json_util::get_string(object, "nickname", sv->nickname()));
-    sv->set_realname(json_util::get_string(object, "realname", sv->realname()));
-    sv->set_username(json_util::get_string(object, "username", sv->username()));
-    sv->set_ctcp_version(json_util::get_string(object, "ctcpVersion", sv->ctcp_version()));
-    sv->set_command_char(json_util::get_string(object, "commandChar", sv->command_char()));
+    sv->set_port(optional_json_uint<uint16_t>(object, "/port"_json_pointer, sv->port(),
+        sv->name(), server_error::invalid_port));
+    sv->set_password(optional_json_string(object, "/password"_json_pointer, sv->password(),
+        sv->name(), server_error::invalid_password));
+    sv->set_nickname(optional_json_string(object, "/nickname"_json_pointer, sv->nickname(),
+        sv->name(), server_error::invalid_nickname));
+    sv->set_realname(optional_json_string(object, "/realname"_json_pointer, sv->realname(),
+        sv->name(), server_error::invalid_realname));
+    sv->set_username(optional_json_string(object, "/username"_json_pointer, sv->username(),
+        sv->name(), server_error::invalid_username));
+    sv->set_ctcp_version(optional_json_string(object, "/ctcpVersion"_json_pointer, sv->ctcp_version(),
+        sv->name(), server_error::invalid_ctcp_version));
+    sv->set_command_char(optional_json_string(object, "/commandChar"_json_pointer, sv->command_char(),
+        sv->name(), server_error::invalid_command_char));
 
-    if (json_util::get_bool(object, "ipv6"))
+    // Boolean does not throw options though.
+    if (optional_json_bool(object, "/ipv6"_json_pointer))
         sv->set_flags(sv->flags() | server::ipv6);
-    if (json_util::get_bool(object, "sslVerify"))
+    if (optional_json_bool(object, "/sslVerify"_json_pointer))
         sv->set_flags(sv->flags() | server::ssl_verify);
-    if (json_util::get_bool(object, "autoRejoin"))
+    if (optional_json_bool(object, "/autoRejoin"_json_pointer))
         sv->set_flags(sv->flags() | server::auto_rejoin);
-    if (json_util::get_bool(object, "joinInvite"))
+    if (optional_json_bool(object, "/joinInvite"_json_pointer))
         sv->set_flags(sv->flags() | server::join_invite);
 
-    if (json_util::get_bool(object, "ssl"))
+    if (optional_json_bool(object, "/ssl"_json_pointer))
 #if defined(HAVE_SSL)
         sv->set_flags(sv->flags() | server::ssl);
 #else
@@ -176,10 +214,11 @@ std::shared_ptr<server> from_config(boost::asio::io_service& service,
 {
     assert(sc.key() == "server");
 
-    auto sv = std::make_shared<server>(service, to_id(sc));
+    const auto id = require_conf_id(sc, "", server_error::invalid_identifier);
+    const auto sv = std::make_shared<server>(service, id);
 
     // Mandatory fields.
-    sv->set_host(to_host(sc, sv->name()));
+    sv->set_host(require_conf_host(sc, sv->name(), server_error::invalid_hostname));
 
     // Optional fields.
     ini::section::const_iterator it;
@@ -231,22 +270,34 @@ std::shared_ptr<server> from_config(boost::asio::io_service& service,
 
     // Reconnect and ping timeout
     if ((it = sc.find("port")) != sc.end())
-        sv->set_port(to_uint<std::uint16_t>(it->value(),
+        sv->set_port(optional_conf_uint<std::uint16_t>(it->value(),
             sv->name(), server_error::invalid_port));
 
     if ((it = sc.find("reconnect-tries")) != sc.end())
-        sv->set_reconnect_tries(to_int<std::int8_t>(it->value(),
+        sv->set_reconnect_tries(optional_conf_int<std::int8_t>(it->value(),
             sv->name(), server_error::invalid_reconnect_tries));
 
     if ((it = sc.find("reconnect-timeout")) != sc.end())
-        sv->set_reconnect_delay(to_uint<std::uint16_t>(it->value(),
+        sv->set_reconnect_delay(optional_conf_uint<std::uint16_t>(it->value(),
             sv->name(), server_error::invalid_reconnect_timeout));
 
     if ((it = sc.find("ping-timeout")) != sc.end())
-        sv->set_ping_timeout(to_uint<std::uint16_t>(it->value(),
+        sv->set_ping_timeout(optional_conf_uint<std::uint16_t>(it->value(),
             sv->name(), server_error::invalid_ping_timeout));
 
     return sv;
+}
+
+std::string get_identifier(const nlohmann::json& json)
+{
+    const auto v = json_util::get_string(json, "/server"_json_pointer);
+
+    if (!v)
+        throw server_error("", server_error::invalid_identifier);
+    if (!string_util::is_identifier(*v))
+        throw server_error(*v, server_error::invalid_identifier);
+
+    return *v;
 }
 
 } // !server_util

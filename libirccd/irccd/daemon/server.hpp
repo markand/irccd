@@ -944,8 +944,23 @@ public:
         //!< The nickname was empty or invalid.
         invalid_nickname,
 
+        //!< The username was empty or invalid.
+        invalid_username,
+
+        //!< The realname was empty or invalid.
+        invalid_realname,
+
+        //!< Invalid password property.
+        invalid_password,
+
         //!< Invalid ping timeout.
         invalid_ping_timeout,
+
+        //!< Invalid ctcp version.
+        invalid_ctcp_version,
+
+        //!< Invalid command character.
+        invalid_command_char,
 
         //!< SSL was requested but is disabled.
         ssl_disabled,
@@ -958,10 +973,10 @@ public:
     /**
      * Constructor.
      *
-     * \param code the error code
      * \param name the server name
+     * \param code the error code
      */
-    server_error(error code, std::string name) noexcept;
+    server_error(std::string name, error code) noexcept;
 
     /**
      * Get the server that triggered the error.

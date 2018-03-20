@@ -19,6 +19,7 @@
 #include <irccd/json_util.hpp>
 
 #include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/server_util.hpp>
 #include <irccd/daemon/transport_client.hpp>
 
 #include <irccd/daemon/service/server_service.hpp>
@@ -34,14 +35,15 @@ std::string server_topic_command::get_name() const noexcept
 
 void server_topic_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto server = irccd.servers().require(args);
-    auto channel = json_util::get_string(args, "channel");
-    auto topic = json_util::get_string(args, "topic");
+    const auto id = server_util::get_identifier(args);
+    const auto server = irccd.servers().require(id);
+    const auto channel = json_util::get_string(args, "/channel"_json_pointer);
+    const auto topic = json_util::get_string(args, "/topic"_json_pointer);
 
-    if (channel.empty())
-        throw server_error(server_error::invalid_channel, server->name());
+    if (!channel || channel->empty())
+        throw server_error(server->name(), server_error::invalid_channel);
 
-    server->topic(channel, topic);
+    server->topic(*channel, topic ? *topic : "");
     client.success("server-topic");
 }
 

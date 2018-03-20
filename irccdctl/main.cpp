@@ -85,7 +85,7 @@ boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
 #endif
 
 // Global options.
-bool verbose = true;
+bool verbose = false;
 
 // Connection to instance.
 std::unique_ptr<connection> conn;
@@ -508,11 +508,17 @@ void do_connect()
         if (code)
             throw boost::system::system_error(code);
 
-        if (verbose)
-            std::cout << string_util::sprintf("connected to irccd %d.%d.%d\n",
-                json_util::to_int(info["major"]),
-                json_util::to_int(info["minor"]),
-                json_util::to_int(info["patch"]));
+        if (verbose) {
+            const auto major = json_util::get_int(info, "/major"_json_pointer);
+            const auto minor = json_util::get_int(info, "/minor"_json_pointer);
+            const auto patch = json_util::get_int(info, "/patch"_json_pointer);
+
+            if (!major || !minor || !patch)
+                std::cout << "connected to irccd (unknown version)" << std::endl;
+            else
+                std::cout << string_util::sprintf("connected to irccd %d.%d.%d\n",
+                    *major, *minor, *patch);
+        }
 
         connected = true;
     });
