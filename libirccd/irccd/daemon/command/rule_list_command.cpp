@@ -17,6 +17,7 @@
  */
 
 #include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/rule_util.hpp>
 #include <irccd/daemon/transport_client.hpp>
 
 #include <irccd/daemon/service/rule_service.hpp>
@@ -35,7 +36,7 @@ void rule_list_command::exec(irccd& irccd, transport_client& client, const nlohm
     auto array = nlohmann::json::array();
 
     for (const auto& rule : irccd.rules().list())
-        array.push_back(rule_service::to_json(rule));
+        array.push_back(rule_util::to_json(rule));
 
     client.send({
         { "command",    "rule-list"         },

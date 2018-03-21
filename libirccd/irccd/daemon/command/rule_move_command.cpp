@@ -16,7 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/json_util.hpp>
+
 #include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/rule_util.hpp>
 #include <irccd/daemon/transport_client.hpp>
 
 #include <irccd/daemon/service/rule_service.hpp>
@@ -32,8 +35,11 @@ std::string rule_move_command::get_name() const noexcept
 
 void rule_move_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto from = rule_service::get_index(args, "from");
-    auto to = rule_service::get_index(args, "to");
+    const auto from = json_util::get_uint(args, "/from"_json_pointer);
+    const auto to = json_util::get_uint(args, "/to"_json_pointer);
+
+    if (!from || !to)
+        throw rule_error(rule_error::invalid_index);
 
     /*
      * Examples of moves
@@ -66,18 +72,18 @@ void rule_move_command::exec(irccd& irccd, transport_client& client, const nlohm
      */
 
     // Ignore dumb input.
-    if (from == to) {
+    if (*from == *to) {
         client.success("rule-move");
         return;
     }
 
-    if (from >= irccd.rules().length())
+    if (*from >= irccd.rules().length())
         throw rule_error(rule_error::error::invalid_index);
 
-    auto save = irccd.rules().list()[from];
+    const auto save = irccd.rules().list()[*from];
 
-    irccd.rules().remove(from);
-    irccd.rules().insert(save, to > irccd.rules().length() ? irccd.rules().length() : to);
+    irccd.rules().remove(*from);
+    irccd.rules().insert(save, *to > irccd.rules().length() ? irccd.rules().length() : *to);
     client.success("rule-move");
 }
 

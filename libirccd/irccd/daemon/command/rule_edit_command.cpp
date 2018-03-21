@@ -16,7 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/json_util.hpp>
+
 #include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/rule_util.hpp>
 #include <irccd/daemon/transport_client.hpp>
 
 #include <irccd/daemon/service/rule_service.hpp>
@@ -46,8 +49,12 @@ void rule_edit_command::exec(irccd& irccd, transport_client& client, const nlohm
     };
 
     // Create a copy to avoid incomplete edition in case of errors.
-    auto index = irccd.rules().get_index(args);
-    auto rule = irccd.rules().require(index);
+    const auto index = json_util::get_uint(args, "/index"_json_pointer);
+
+    if (!index)
+        throw rule_error(rule_error::invalid_index);
+
+    auto rule = irccd.rules().require(*index);
 
     updateset(rule.get_channels(), args, "channels");
     updateset(rule.get_events(), args, "events");
@@ -69,7 +76,7 @@ void rule_edit_command::exec(irccd& irccd, transport_client& client, const nlohm
     }
 
     // All done, sync the rule.
-    irccd.rules().require(index) = rule;
+    irccd.rules().require(*index) = rule;
     client.success("rule-edit");
 }
 

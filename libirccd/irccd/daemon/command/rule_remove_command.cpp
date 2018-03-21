@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/json_util.hpp>
+
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/transport_client.hpp>
 
@@ -32,12 +34,12 @@ std::string rule_remove_command::get_name() const noexcept
 
 void rule_remove_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto index = rule_service::get_index(args);
+    const auto index = json_util::get_uint(args, "/index"_json_pointer);
 
-    if (index >= irccd.rules().length())
+    if (!index || *index >= irccd.rules().length())
         throw rule_error(rule_error::invalid_index);
 
-    irccd.rules().remove(index);
+    irccd.rules().remove(*index);
     client.success("rule-remove");
 }
 

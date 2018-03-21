@@ -23,6 +23,7 @@
 
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/logger.hpp>
+#include <irccd/daemon/rule_util.hpp>
 
 #include <irccd/daemon/service/rule_service.hpp>
 
@@ -30,127 +31,8 @@ namespace irccd {
 
 namespace {
 
-rule load_rule(const ini::section& sc)
-{
-    assert(sc.key() == "rule");
-
-    // Simple converter from std::vector to std::unordered_set.
-    auto toset = [] (const auto& v) {
-        return std::unordered_set<std::string>(v.begin(), v.end());
-    };
-
-    rule::set servers, channels, origins, plugins, events;
-    rule::action action = rule::action::accept;
-
-    // Get the sets.
-    ini::section::const_iterator it;
-
-    if ((it = sc.find("servers")) != sc.end())
-        servers = toset(*it);
-    if ((it = sc.find("channels")) != sc.end())
-        channels = toset(*it);
-    if ((it = sc.find("origins")) != sc.end())
-        origins = toset(*it);
-    if ((it = sc.find("plugins")) != sc.end())
-        plugins = toset(*it);
-    if ((it = sc.find("channels")) != sc.end())
-        channels = toset(*it);
-
-    // Get the action.
-    auto actionstr = sc.get("action").value();
-
-    if (actionstr == "drop")
-        action = rule::action::drop;
-    else if (actionstr == "accept")
-        action = rule::action::accept;
-    else
-        throw rule_error(rule_error::invalid_action);
-
-    return {
-        std::move(servers),
-        std::move(channels),
-        std::move(origins),
-        std::move(plugins),
-        std::move(events),
-        action
-    };
-}
 
 } // !namespace
-
-rule rule_service::from_json(const nlohmann::json& json)
-{
-    auto toset = [] (auto object, auto name) {
-        rule::set result;
-
-        for (const auto& s : object[name])
-            if (s.is_string())
-                result.insert(s.template get<std::string>());
-
-        return result;
-    };
-    auto toaction = [] (auto object, auto name) {
-        auto v = object[name];
-
-        if (!v.is_string())
-            throw rule_error(rule_error::invalid_action);
-
-        auto s = v.template get<std::string>();
-        if (s == "accept")
-            return rule::action::accept;
-        if (s == "drop")
-            return rule::action::drop;
-
-        throw rule_error(rule_error::invalid_action);
-    };
-
-    return {
-        toset(json, "servers"),
-        toset(json, "channels"),
-        toset(json, "origins"),
-        toset(json, "plugins"),
-        toset(json, "events"),
-        toaction(json, "action")
-    };
-}
-
-unsigned rule_service::get_index(const nlohmann::json& json, const std::string& key)
-{
-    auto index = json.find(key);
-
-    if (index == json.end() || !index->is_number_integer() || index->get<int>() < 0)
-        throw rule_error(rule_error::invalid_index);
-
-    return index->get<int>();
-}
-
-nlohmann::json rule_service::to_json(const rule& rule)
-{
-    auto join = [] (const auto& set) {
-        auto array = nlohmann::json::array();
-
-        for (const auto& entry : set)
-            array.push_back(entry);
-
-        return array;
-    };
-    auto str = [] (auto action) {
-        switch (action) {
-        case rule::action::accept:
-            return "accept";
-        default:
-            return "drop";
-        }
-    };
-
-    return {
-        { "servers",    join(rule.get_servers())    },
-        { "channels",   join(rule.get_channels())   },
-        { "plugins",    join(rule.get_plugins())    },
-        { "events",     join(rule.get_events())     },
-        { "action",     str(rule.get_action())      }
-    };
-}
 
 rule_service::rule_service(irccd &irccd)
     : irccd_(irccd)
@@ -231,7 +113,7 @@ void rule_service::load(const config& cfg) noexcept
             continue;
 
         try {
-            rules_.push_back(load_rule(section));
+            rules_.push_back(rule_util::from_config(section));
         } catch (const std::exception& ex) {
             irccd_.log().warning() << "rule: " << ex.what() << std::endl;
         }

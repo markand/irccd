@@ -16,7 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/json_util.hpp>
+
 #include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/rule_util.hpp>
 #include <irccd/daemon/transport_client.hpp>
 
 #include <irccd/daemon/service/rule_service.hpp>
@@ -32,7 +35,12 @@ std::string rule_info_command::get_name() const noexcept
 
 void rule_info_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto json = rule_service::to_json(irccd.rules().require(irccd.rules().get_index(args)));
+    const auto index = json_util::get_uint(args, "/index"_json_pointer);
+
+    if (!index)
+        throw rule_error(rule_error::invalid_index);
+
+    auto json = rule_util::to_json(irccd.rules().require(*index));
 
     json.push_back({"command", "rule-info"});
     client.send(std::move(json));

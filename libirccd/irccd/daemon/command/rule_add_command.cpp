@@ -20,6 +20,7 @@
 
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/transport_client.hpp>
+#include <irccd/daemon/rule_util.hpp>
 
 #include <irccd/daemon/service/rule_service.hpp>
 
@@ -41,7 +42,7 @@ void rule_add_command::exec(irccd& irccd, transport_client& client, const nlohma
     if (index > irccd.rules().length())
         throw rule_error(rule_error::error::invalid_index);
 
-    irccd.rules().insert(rule_service::from_json(args), *index);
+    irccd.rules().insert(rule_util::from_json(args), *index);
     client.success("rule-add");
 }
 
