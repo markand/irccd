@@ -23,6 +23,8 @@
 #include <irccd/ini.hpp>
 #include <irccd/string_util.hpp>
 
+#include <irccd/daemon/ip_transport_server.hpp>
+
 #if !defined(IRCCD_SYSTEM_WINDOWS)
 #   include <irccd/daemon/local_transport_server.hpp>
 #endif

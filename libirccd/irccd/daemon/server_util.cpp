@@ -202,7 +202,7 @@ std::shared_ptr<server> from_json(boost::asio::io_service& service, const nlohma
 #if defined(HAVE_SSL)
         sv->set_flags(sv->flags() | server::ssl);
 #else
-        throw server_error(server_error::ssl_disabled, sv->name());
+        throw server_error(sv->name(), server_error::ssl_disabled);
 #endif
 
     return sv;
@@ -234,7 +234,7 @@ std::shared_ptr<server> from_config(boost::asio::io_service& service,
 #if defined(HAVE_SSL)
         sv->set_flags(sv->flags() | server::ssl);
 #else
-        throw server_error(server_error::ssl_disabled, sv->name());
+        throw server_error(sv->name(), server_error::ssl_disabled);
 #endif
     }
 
