@@ -122,7 +122,6 @@ std::unique_ptr<connection> read_connect_ip(const ini::section& sc)
 {
     std::unique_ptr<connection> conn;
     std::string host;
-    std::uint16_t port;
     ini::section::const_iterator it;
 
     if ((it = sc.find("host")) == sc.end())
@@ -133,16 +132,19 @@ std::unique_ptr<connection> read_connect_ip(const ini::section& sc)
     if ((it = sc.find("port")) == sc.end())
         throw std::invalid_argument("missing port parameter");
 
-    port = string_util::to_uint<std::uint16_t>(it->value());
+    const auto port = string_util::to_uint<std::uint16_t>(it->value());
+
+    if (!port)
+        throw std::invalid_argument("invalid port parameter");
 
     if ((it = sc.find("ssl")) != sc.end() && string_util::is_boolean(it->value()))
 #if defined(HAVE_SSL)
-        conn = std::make_unique<tls_connection>(service, ctx, host, port);
+        conn = std::make_unique<tls_connection>(service, ctx, host, *port);
 #else
         throw std::runtime_error("SSL disabled");
 #endif
     else
-        conn = std::make_unique<ip_connection>(service, host, port);
+        conn = std::make_unique<ip_connection>(service, host, *port);
 
     return conn;
 }
@@ -305,9 +307,12 @@ std::unique_ptr<connection> parse_connect_ip(const option::result& options)
     if ((it = options.find("-p")) == options.end() && (it = options.find("--port")) == options.end())
         throw std::invalid_argument("missing port argument (-p or --port)");
 
-    auto port = string_util::to_uint<std::uint16_t>(it->second);
+    const auto port = string_util::to_uint<std::uint16_t>(it->second);
 
-    return std::make_unique<ip_connection>(service, host, port);
+    if (!port)
+        throw std::invalid_argument("invalid port argument");
+
+    return std::make_unique<ip_connection>(service, host, *port);
 }
 
 /*

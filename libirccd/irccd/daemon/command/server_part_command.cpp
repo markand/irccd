@@ -17,9 +17,9 @@
  */
 
 #include <irccd/json_util.hpp>
+#include <irccd/string_util.hpp>
 
 #include <irccd/daemon/irccd.hpp>
-#include <irccd/daemon/server_util.hpp>
 #include <irccd/daemon/transport_client.hpp>
 
 #include <irccd/daemon/service/server_service.hpp>
@@ -35,15 +35,18 @@ std::string server_part_command::get_name() const noexcept
 
 void server_part_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    const auto id = server_util::get_identifier(args);
-    const auto server = irccd.servers().require(id);
-    const auto channel = json_util::get_string(args, "/channel"_json_pointer);
-    const auto reason = json_util::get_string(args, "/reason"_json_pointer);
+    const auto id = json_util::get_string(args, "server");
+    const auto channel = json_util::get_string(args, "channel");
+    const auto reason = json_util::optional_string(args, "reason", "");
 
+    if (!id || !string_util::is_identifier(*id))
+        throw server_error(server_error::invalid_identifier);
     if (!channel || channel->empty())
-        throw server_error(server->name(), server_error::invalid_channel);
+        throw server_error(server_error::invalid_channel);
+    if (!reason)
+        throw server_error(server_error::invalid_message);
 
-    server->part(*channel, reason ? *reason : "");
+    irccd.servers().require(*id)->part(*channel, *reason);
     client.success("server-part");
 }
 

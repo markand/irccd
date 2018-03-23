@@ -38,6 +38,7 @@
 #include <unordered_map>
 
 #include <boost/format.hpp>
+#include <boost/optional.hpp>
 
 namespace irccd {
 
@@ -383,99 +384,52 @@ std::string sprintf(const Format& format, const Args&... args)
 }
 
 /**
- * \cond HIDDEN_SYMBOLS
- */
-
-namespace detail {
-
-inline std::invalid_argument make_invalid_argument(const std::string& str)
-{
-    std::ostringstream oss;
-
-    oss << "invalid number '" << str << "'";
-
-    return std::invalid_argument(oss.str());
-}
-
-template <typename T>
-inline std::out_of_range make_out_of_range(const std::string& str, T min, T max)
-{
-    std::ostringstream oss;
-
-    oss << "number '" << str << "' is out of range ";
-    oss << min << ".." << max;
-
-    return std::out_of_range(oss.str());
-}
-
-} // !detail
-
-/**
- * \endcond
- */
-
-/**
  * Convert the given string into a signed integer.
  *
  * \param str the string to convert
  * \param min the minimum value allowed
  * \param max the maximum value allowed
- * \throw std::invalid_argument if the number was not parsed
- * \throw std::out_or_range if the argument is out of the specified range
+ * \return the value or boost::none if not convertible
  */
 template <typename T = int>
-T to_int(const std::string& str, T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max())
+boost::optional<T> to_int(const std::string& str,
+                          T min = std::numeric_limits<T>::min(),
+                          T max = std::numeric_limits<T>::max()) noexcept
 {
     static_assert(std::is_signed<T>::value, "must be signed");
 
     char* end;
     auto v = std::strtoll(str.c_str(), &end, 10);
 
-    if (*end != '\0')
-        throw detail::make_invalid_argument(str);
-    if (v < min || v > max)
-        throw detail::make_out_of_range(str, min, max);
+    if (*end != '\0' || v < min || v > max)
+        return boost::none;
 
     return static_cast<T>(v);
 }
 
 /**
- * Convert the given string into an unsigned integer.
+ * Convert the given string into a unsigned integer.
  *
- * In contrast to the [std::strtoull][strtoull] function, this functions
- * verifies if the string starts with minus sign and throws an exception if any.
- *
- * Note, for this you need to have a trimmed string which contains no leading
- * whitespaces.
- *
- * \pre string must be trimmed
+ * \note invalid numbers are valid as well
  * \param str the string to convert
  * \param min the minimum value allowed
  * \param max the maximum value allowed
- * \throw std::invalid_argument if the number was not parsed
- * \throw std::out_or_range if the argument is out of the specified range
- *
- * [strtoull]: http://en.cppreference.com/w/cpp/string/byte/strtoul
+ * \return the value or boost::none if not convertible
  */
 template <typename T = unsigned>
-T to_uint(const std::string& str, T min = std::numeric_limits<T>::min(), T max = std::numeric_limits<T>::max())
+boost::optional<T> to_uint(const std::string& str,
+                           T min = std::numeric_limits<T>::min(),
+                           T max = std::numeric_limits<T>::max()) noexcept
 {
     static_assert(std::is_unsigned<T>::value, "must be unsigned");
-
-    assert(str.empty() || !std::isspace(str[0]));
-
-    if (str.size() > 0U && str[0] == '-')
-        throw detail::make_out_of_range(str, min, max);
 
     char* end;
     auto v = std::strtoull(str.c_str(), &end, 10);
 
-    if (*end != '\0')
-        throw detail::make_invalid_argument(str);
-    if (v < min || v > max)
-        throw detail::make_out_of_range(str, min, max);
+    if (*end != '\0' || v < min || v > max)
+        return boost::none;
 
-    return v;
+    return static_cast<T>(v);
 }
 
 } // !string_util

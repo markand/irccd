@@ -41,7 +41,7 @@
 namespace irccd {
 
 plugin_test::plugin_test(std::string name, std::string path)
-    : server_(std::make_shared<journal_server>(service_, "test"))
+    : server_(std::make_shared<journal_server>(service_, "test", "local"))
 {
     server_->set_nickname("irccd");
     plugin_ = std::make_unique<js_plugin>(std::move(name), std::move(path));

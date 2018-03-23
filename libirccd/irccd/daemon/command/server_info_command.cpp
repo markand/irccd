@@ -16,6 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/json_util.hpp>
+#include <irccd/string_util.hpp>
+
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/server_util.hpp>
 #include <irccd/daemon/transport_client.hpp>
@@ -33,9 +36,14 @@ std::string server_info_command::get_name() const noexcept
 
 void server_info_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    const auto id = server_util::get_identifier(args);
-    const auto server = irccd.servers().require(id);
+    const auto id = json_util::get_string(args, "server");
 
+    if (!id || !string_util::is_identifier(*id))
+        throw server_error(server_error::invalid_identifier);
+
+    const auto server = irccd.servers().require(*id);
+
+    // Construct the JSON response.
     auto response = nlohmann::json::object();
 
     // General stuff.

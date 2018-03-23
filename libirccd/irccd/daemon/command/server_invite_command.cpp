@@ -17,9 +17,9 @@
  */
 
 #include <irccd/json_util.hpp>
+#include <irccd/string_util.hpp>
 
 #include <irccd/daemon/irccd.hpp>
-#include <irccd/daemon/server_util.hpp>
 #include <irccd/daemon/transport_client.hpp>
 
 #include <irccd/daemon/service/server_service.hpp>
@@ -35,17 +35,18 @@ std::string server_invite_command::get_name() const noexcept
 
 void server_invite_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    const auto id = server_util::get_identifier(args);
-    const auto server = irccd.servers().require(id);
-    const auto target = json_util::get_string(args, "/target"_json_pointer);
-    const auto channel = json_util::get_string(args, "/channel"_json_pointer);
+    const auto id = json_util::get_string(args, "server");
+    const auto target = json_util::get_string(args, "target");
+    const auto channel = json_util::get_string(args, "channel");
 
+    if (!id || !string_util::is_identifier(*id))
+        throw server_error(server_error::invalid_identifier);
     if (!target || target->empty())
-        throw server_error(server->name(), server_error::invalid_nickname);
+        throw server_error(server_error::invalid_nickname);
     if (!channel || channel->empty())
-        throw server_error(server->name(), server_error::invalid_channel);
+        throw server_error(server_error::invalid_channel);
 
-    server->invite(*target, *channel);
+    irccd.servers().require(*id)->invite(*target, *channel);
     client.success("server-invite");
 }
 

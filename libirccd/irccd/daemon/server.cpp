@@ -121,11 +121,14 @@ channel server::split_channel(const std::string& value)
     return {value, ""};
 }
 
-server::server(boost::asio::io_service& service, std::string name)
+server::server(boost::asio::io_service& service, std::string name, std::string host)
     : name_(std::move(name))
+    , host_(std::move(host))
     , service_(service)
     , timer_(service)
 {
+    assert(!host_.empty());
+
     // Initialize nickname and username.
     auto user = sys::username();
 
@@ -668,9 +671,8 @@ void server::whois(std::string target)
     send(string_util::sprintf("WHOIS %s %s", target, target));
 }
 
-server_error::server_error(std::string name, error code) noexcept
+server_error::server_error(error code) noexcept
     : system_error(make_error_code(code))
-    , name_(std::move(name))
 {
 }
 
@@ -720,6 +722,8 @@ const boost::system::error_category& server_category()
                 return "invalid CTCP VERSION";
             case server_error::invalid_command_char:
                 return "invalid character command";
+            case server_error::invalid_message:
+                return "invalid message";
             case server_error::ssl_disabled:
                 return "ssl is not enabled";
             default:

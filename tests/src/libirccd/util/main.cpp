@@ -416,63 +416,6 @@ BOOST_AUTO_TEST_CASE(incorrect)
 BOOST_AUTO_TEST_SUITE_END()
 
 /*
- * string_util::to_int function
- * ------------------------------------------------------------------
- */
-
-BOOST_AUTO_TEST_SUITE(to_int)
-
-BOOST_AUTO_TEST_CASE(signed_to_int)
-{
-    BOOST_TEST(string_util::to_int("10")                     == 10);
-    BOOST_TEST(string_util::to_int<std::int8_t>("-10")       == -10);
-    BOOST_TEST(string_util::to_int<std::int8_t>("10")        == 10);
-    BOOST_TEST(string_util::to_int<std::int16_t>("-1000")    == -1000);
-    BOOST_TEST(string_util::to_int<std::int16_t>("1000")     == 1000);
-    BOOST_TEST(string_util::to_int<std::int32_t>("-1000")    == -1000);
-    BOOST_TEST(string_util::to_int<std::int32_t>("1000")     == 1000);
-}
-
-BOOST_AUTO_TEST_CASE(signed_to_int64)
-{
-    BOOST_TEST(string_util::to_int<std::int64_t>("-9223372036854775807") == -9223372036854775807LL);
-    BOOST_TEST(string_util::to_int<std::int64_t>("9223372036854775807") == 9223372036854775807LL);
-}
-
-BOOST_AUTO_TEST_CASE(unsigned_to_uint)
-{
-    BOOST_TEST(string_util::to_uint("10")                    == 10U);
-    BOOST_TEST(string_util::to_uint<std::uint8_t>("10")       == 10U);
-    BOOST_TEST(string_util::to_uint<std::uint16_t>("1000")    == 1000U);
-    BOOST_TEST(string_util::to_uint<std::uint32_t>("1000")    == 1000U);
-}
-
-BOOST_AUTO_TEST_CASE(unsigned_to_uint64)
-{
-    BOOST_TEST(string_util::to_uint<std::uint64_t>("18446744073709551615") == 18446744073709551615ULL);
-}
-
-BOOST_AUTO_TEST_SUITE_END()
-
-BOOST_AUTO_TEST_SUITE(errors)
-
-BOOST_AUTO_TEST_CASE(invalid_argument)
-{
-    BOOST_REQUIRE_THROW(string_util::to_int("plopation"), std::invalid_argument);
-    BOOST_REQUIRE_THROW(string_util::to_uint("plopation"), std::invalid_argument);
-}
-
-BOOST_AUTO_TEST_CASE(out_of_range)
-{
-    BOOST_REQUIRE_THROW(string_util::to_int<std::int8_t>("1000"), std::out_of_range);
-    BOOST_REQUIRE_THROW(string_util::to_int<std::int8_t>("-1000"), std::out_of_range);
-    BOOST_REQUIRE_THROW(string_util::to_uint<std::uint8_t>("1000"), std::out_of_range);
-    BOOST_REQUIRE_THROW(string_util::to_uint<std::uint8_t>("-1000"), std::out_of_range);
-}
-
-BOOST_AUTO_TEST_SUITE_END()
-
-/*
  * fs_util::find function (name)
  * ------------------------------------------------------------------
  */

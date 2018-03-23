@@ -55,6 +55,9 @@ std::unique_ptr<transport_server> load_transport_ip(boost::asio::io_service& ser
 
     auto port = string_util::to_uint<std::uint16_t>(it->value());
 
+    if (!port)
+        throw std::invalid_argument("invalid port number");
+
     // Address.
     std::string address = "*";
 
@@ -108,8 +111,8 @@ std::unique_ptr<transport_server> load_transport_ip(boost::asio::io_service& ser
     }
 
     auto endpoint = (address == "*")
-        ? boost::asio::ip::tcp::endpoint(protocol, port)
-        : boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(address), port);
+        ? boost::asio::ip::tcp::endpoint(protocol, *port)
+        : boost::asio::ip::tcp::endpoint(boost::asio::ip::address::from_string(address), *port);
 
     boost::asio::ip::tcp::acceptor acceptor(service, endpoint, true);
 

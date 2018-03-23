@@ -474,10 +474,14 @@ public:
     /**
      * Construct a server.
      *
+     * \pre !host.empty()
      * \param service the service
      * \param name the identifier
+     * \param host the hostname
      */
-    server(boost::asio::io_service& service, std::string name);
+    server(boost::asio::io_service& service,
+           std::string name,
+           std::string host = "localhost");
 
     /**
      * Destructor. Close the connection if needed.
@@ -962,31 +966,20 @@ public:
         //!< Invalid command character.
         invalid_command_char,
 
+        //!< Message (PRIVMSG) was invalid
+        invalid_message,
+
         //!< SSL was requested but is disabled.
         ssl_disabled,
     };
-
-private:
-    std::string name_;
 
 public:
     /**
      * Constructor.
      *
-     * \param name the server name
      * \param code the error code
      */
-    server_error(std::string name, error code) noexcept;
-
-    /**
-     * Get the server that triggered the error.
-     *
-     * \return the name
-     */
-    inline const std::string& name() const noexcept
-    {
-        return name_;
-    }
+    server_error(error code) noexcept;
 };
 
 /**

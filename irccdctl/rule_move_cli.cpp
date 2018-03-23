@@ -34,13 +34,18 @@ void rule_move_cli::exec(ctl::controller& ctl, const std::vector<std::string>& a
     if (args.size() < 2)
         throw std::invalid_argument("rule-move requires 2 arguments");
 
-    int from = string_util::to_int<int>(args[0]);
-    int to = string_util::to_int<int>(args[1]);
+    const auto from = string_util::to_int<int>(args[0]);
+    const auto to = string_util::to_int<int>(args[1]);
+
+    if (!from)
+        throw std::invalid_argument("invalid source argument");
+    if (!to)
+        throw std::invalid_argument("invalid destination argument");
 
     request(ctl, {
         { "command",    "rule-move" },
-        { "from",       from        },
-        { "to",         to          }
+        { "from",       *from       },
+        { "to",         *to         }
     });
 }
 

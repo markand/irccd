@@ -472,12 +472,12 @@ std::shared_ptr<server> server_service::get(const std::string& name) const noexc
 std::shared_ptr<server> server_service::require(const std::string& name) const
 {
     if (!string_util::is_identifier(name))
-        throw server_error(name, server_error::invalid_identifier);
+        throw server_error(server_error::invalid_identifier);
 
     const auto s = get(name);
 
     if (!s)
-        throw server_error(name, server_error::not_found);
+        throw server_error(server_error::not_found);
 
     return s;
 }

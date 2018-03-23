@@ -71,16 +71,6 @@ std::shared_ptr<server> from_config(boost::asio::io_service& service,
                                     const config& cfg,
                                     const ini::section& sc);
 
-/**
- * Get a server identifier from the JSON object.
- *
- * This searches for the `server` property.
- *
- * \param json the JSON object
- * \throw server_error on errors
- */
-std::string get_identifier(const nlohmann::json& json);
-
 } // !server_util
 
 } // !irccd

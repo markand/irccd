@@ -37,7 +37,6 @@ set(
     SOURCES
     ${libcommon_SOURCE_DIR}/irccd/config.cpp
     ${libcommon_SOURCE_DIR}/irccd/ini.cpp
-    ${libcommon_SOURCE_DIR}/irccd/json_util.cpp
     ${libcommon_SOURCE_DIR}/irccd/options.cpp
     ${libcommon_SOURCE_DIR}/irccd/string_util.cpp
     ${libcommon_SOURCE_DIR}/irccd/system.cpp

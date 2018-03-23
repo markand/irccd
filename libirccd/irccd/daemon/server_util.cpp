@@ -25,185 +25,203 @@
 
 #include "server_util.hpp"
 
-using nlohmann::json;
-
-using std::uint16_t;
-using std::string;
-using std::forward;
-
 namespace irccd {
 
 namespace server_util {
 
 namespace {
 
-template <typename... Args>
-std::string require_conf_host(const ini::section& sc, Args&&... args)
+// TODO: ini_util
+std::string optional_string(const ini::section& sc,
+                            const std::string& name,
+                            const std::string& def)
 {
-    auto value = sc.get("host");
+    const auto it = sc.find(name);
 
-    if (value.empty())
-        throw server_error(forward<Args>(args)...);
-
-    return value.value();
-}
-
-template <typename... Args>
-std::string require_conf_id(const ini::section& sc, Args&&... args)
-{
-    auto id = sc.get("name");
-
-    if (!string_util::is_identifier(id.value()))
-        throw server_error(forward<Args>(args)...);
-
-    return id.value();
-}
-
-template <typename Int, typename... Args>
-Int optional_conf_int(const string& value, Args&&... args)
-{
-    try {
-        return string_util::to_int<Int>(value);
-    } catch (...) {
-        throw server_error(std::forward<Args>(args)...);
-    }
-}
-
-template <typename Int, typename... Args>
-Int optional_conf_uint(const string& value, Args&&... args)
-{
-    try {
-        return string_util::to_uint<Int>(value);
-    } catch (...) {
-        throw server_error(std::forward<Args>(args)...);
-    }
-}
-
-template <typename Int, typename... Args>
-Int optional_json_uint(const json& json, const json::json_pointer& key, Int def, Args&&... args)
-{
-    const auto v = json_util::optional_uint(json, key, def);
-
-    if (!v || *v > std::numeric_limits<Int>::max())
-        throw server_error(forward<Args>(args)...);
-
-    return *v;
-}
-
-bool optional_json_bool(const json& json, const json::json_pointer& key, bool def = false)
-{
-    const auto v = json_util::optional_bool(json, key, def);
-
-    if (!v)
+    if (it == sc.end())
         return def;
 
-    return *v;
+    return it->value();
 }
 
-template <typename... Args>
-std::string optional_json_string(const json& json,
-                                 const json::json_pointer& key,
-                                 const string& def,
-                                 Args&&... args)
+// TODO: ini_util
+template <typename Int>
+boost::optional<Int> optional_uint(const ini::section& sc,
+                                   const std::string& name,
+                                   Int def)
 {
-    const auto v = json_util::optional_string(json, key, def);
+    const auto it = sc.find(name);
 
-    if (!v)
-        throw server_error(forward<Args>(args)...);
+    if (it == sc.end())
+        return def;
 
-    return *v;
+    return string_util::to_uint<Int>(it->value());
 }
 
-template <typename... Args>
-std::string require_json_id(const nlohmann::json& json, Args&&... args)
+void from_config_load_identity(server& sv, const ini::section& sc)
 {
-    const auto id = json_util::get_string(json, "/name"_json_pointer);
+    const auto username = optional_string(sc, "username", sv.username());
+    const auto realname = optional_string(sc, "realname", sv.realname());
+    const auto nickname = optional_string(sc, "nickname", sv.nickname());
+    const auto ctcp_version = optional_string(sc, "ctcp-version", sv.ctcp_version());
 
-    if (!id || !string_util::is_identifier(*id))
-        throw server_error(forward<Args>(args)...);
+    if (username.empty())
+        throw server_error(server_error::invalid_username);
+    if (realname.empty())
+        throw server_error(server_error::invalid_realname);
+    if (nickname.empty())
+        throw server_error(server_error::invalid_nickname);
+    if (ctcp_version.empty())
+        throw server_error(server_error::invalid_ctcp_version);
 
-    return *id;
+    sv.set_username(username);
+    sv.set_realname(realname);
+    sv.set_nickname(nickname);
+    sv.set_ctcp_version(ctcp_version);
 }
 
-template <typename... Args>
-std::string require_json_host(const nlohmann::json& object, Args&&... args)
+void from_config_load_channels(server& sv, const ini::section& sc)
 {
-    const auto value = json_util::get_string(object, "/host"_json_pointer);
+    for (const auto& s : sc.get("channels")) {
+        channel channel;
 
-    if (!value || value->empty())
-        throw server_error(forward<Args>(args)...);
+        if (auto pos = s.find(":") != std::string::npos) {
+            channel.name = s.substr(0, pos);
+            channel.password = s.substr(pos + 1);
+        } else
+            channel.name = s;
 
-    return *value;
+        sv.join(channel.name, channel.password);
+    }
 }
 
-void load_identity(server& server, const config& cfg, const std::string& identity)
+void from_config_load_flags(server& sv, const ini::section& sc)
 {
-    auto sc = std::find_if(cfg.doc().begin(), cfg.doc().end(), [&] (const auto& sc) {
-        if (sc.key() != "identity")
-            return false;
+    const auto ipv6 = sc.get("ipv6");
+    const auto ssl = sc.get("ssl");
+    const auto ssl_verify = sc.get("ssl-verify");
+    const auto auto_rejoin = sc.get("auto-rejoin");
+    const auto join_invite = sc.get("join-invite");
 
-        auto name = sc.find("name");
+    if (string_util::is_boolean(ipv6.value()))
+        sv.set_flags(sv.flags() | server::ipv6);
+    if (string_util::is_boolean(ssl.value()))
+        sv.set_flags(sv.flags() | server::ssl);
+    if (string_util::is_boolean(ssl_verify.value()))
+        sv.set_flags(sv.flags() | server::ssl_verify);
+    if (string_util::is_boolean(auto_rejoin.value()))
+        sv.set_flags(sv.flags() | server::auto_rejoin);
+    if (string_util::is_boolean(join_invite.value()))
+        sv.set_flags(sv.flags() | server::join_invite);
+}
 
-        return name != sc.end() && name->value() == identity;
-    });
+void from_config_load_numeric_parameters(server& sv, const ini::section& sc)
+{
+    const auto port = optional_uint<std::uint16_t>(sc, "port", sv.port());
+    const auto ping_timeout = optional_uint<uint16_t>(sc, "ping-timeout", sv.ping_timeout());
+    const auto reco_tries = optional_uint<uint8_t>(sc, "reconnect-tries", sv.reconnect_tries());
+    const auto reco_timeout = optional_uint<uint16_t>(sc, "reconnect-delay", sv.reconnect_delay());
 
-    if (sc == cfg.doc().end())
-        return;
+    if (!port)
+        throw server_error(server_error::invalid_port);
+    if (!ping_timeout)
+        throw server_error(server_error::invalid_ping_timeout);
+    if (!reco_tries)
+        throw server_error(server_error::invalid_reconnect_tries);
+    if (!reco_timeout)
+        throw server_error(server_error::invalid_reconnect_timeout);
 
-    ini::section::const_iterator it;
+    sv.set_port(*port);
+    sv.set_ping_timeout(*ping_timeout);
+    sv.set_reconnect_tries(*reco_tries);
+    sv.set_reconnect_delay(*reco_timeout);
+}
 
-    if ((it = sc->find("username")) != sc->end())
-        server.set_username(it->value());
-    if ((it = sc->find("realname")) != sc->end())
-        server.set_realname(it->value());
-    if ((it = sc->find("nickname")) != sc->end())
-        server.set_nickname(it->value());
-    if ((it = sc->find("ctcp-version")) != sc->end())
-        server.set_ctcp_version(it->value());
+void from_config_load_options(server& sv, const ini::section& sc)
+{
+    const auto password = optional_string(sc, "password", "");
+    const auto command_char = optional_string(sc, "command-char", sv.command_char());
+
+    sv.set_password(password);
+    sv.set_command_char(command_char);
+}
+
+void from_json_load_options(server& sv, const nlohmann::json& object)
+{
+    const auto port = json_util::optional_uint(object, "port", sv.port());
+    const auto nickname = json_util::optional_string(object, "nickname", sv.nickname());
+    const auto realname = json_util::optional_string(object, "realname", sv.realname());
+    const auto username = json_util::optional_string(object, "username", sv.username());
+    const auto ctcp_version = json_util::optional_string(object, "ctcpVersion", sv.ctcp_version());
+    const auto command = json_util::optional_string(object, "commandChar", sv.command_char());
+    const auto password = json_util::optional_string(object, "password", sv.password());
+
+    if (!port || *port > std::numeric_limits<std::uint16_t>::max())
+        throw server_error(server_error::invalid_port);
+    if (!nickname)
+        throw server_error(server_error::invalid_nickname);
+    if (!realname)
+        throw server_error(server_error::invalid_realname);
+    if (!username)
+        throw server_error(server_error::invalid_username);
+    if (!ctcp_version)
+        throw server_error(server_error::invalid_ctcp_version);
+    if (!command)
+        throw server_error(server_error::invalid_command_char);
+    if (!password)
+        throw server_error(server_error::invalid_password);
+
+    sv.set_port(*port);
+    sv.set_nickname(*nickname);
+    sv.set_realname(*realname);
+    sv.set_username(*username);
+    sv.set_ctcp_version(*ctcp_version);
+    sv.set_command_char(*command);
+    sv.set_password(*password);
+}
+
+void from_json_load_flags(server& sv, nlohmann::json object)
+{
+    const auto ipv6 = object["ipv6"];
+    const auto ssl = object["ssl"];
+    const auto ssl_verify = object["sslVerify"];
+    const auto auto_rejoin = object["autoRejoin"];
+    const auto join_invite = object["joinInvite"];
+
+    if (ipv6.is_boolean() && ipv6.get<bool>())
+        sv.set_flags(sv.flags() | server::ipv6);
+    if (ssl.is_boolean() && ssl.get<bool>())
+        sv.set_flags(sv.flags() | server::ssl);
+    if (ssl_verify.is_boolean() && ssl_verify.get<bool>())
+        sv.set_flags(sv.flags() | server::ssl_verify);
+    if (auto_rejoin.is_boolean() && auto_rejoin.get<bool>())
+        sv.set_flags(sv.flags() | server::auto_rejoin);
+    if (join_invite.is_boolean() && join_invite.get<bool>())
+        sv.set_flags(sv.flags() | server::join_invite);
+
+#if !defined(HAVE_SSL)
+    if (sv.flags() & server::ssl)
+        throw server_error(server_error::ssl_disabled);
+#endif
 }
 
 } // !namespace
 
 std::shared_ptr<server> from_json(boost::asio::io_service& service, const nlohmann::json& object)
 {
-    const auto id = require_json_id(object, "", server_error::invalid_identifier);
-    const auto sv = std::make_shared<server>(service, id);
+    // Mandatory parameters.
+    const auto id = json_util::get_string(object, "name");
+    const auto host = json_util::get_string(object, "host");
 
-    // Mandatory fields.
-    sv->set_host(require_json_host(object, sv->name(), server_error::invalid_hostname));
+    if (!id || !string_util::is_identifier(*id))
+        throw server_error(server_error::invalid_identifier);
+    if (!host || host->empty())
+        throw server_error(server_error::invalid_hostname);
 
-    // Optional fields.
-    sv->set_port(optional_json_uint<uint16_t>(object, "/port"_json_pointer, sv->port(),
-        sv->name(), server_error::invalid_port));
-    sv->set_password(optional_json_string(object, "/password"_json_pointer, sv->password(),
-        sv->name(), server_error::invalid_password));
-    sv->set_nickname(optional_json_string(object, "/nickname"_json_pointer, sv->nickname(),
-        sv->name(), server_error::invalid_nickname));
-    sv->set_realname(optional_json_string(object, "/realname"_json_pointer, sv->realname(),
-        sv->name(), server_error::invalid_realname));
-    sv->set_username(optional_json_string(object, "/username"_json_pointer, sv->username(),
-        sv->name(), server_error::invalid_username));
-    sv->set_ctcp_version(optional_json_string(object, "/ctcpVersion"_json_pointer, sv->ctcp_version(),
-        sv->name(), server_error::invalid_ctcp_version));
-    sv->set_command_char(optional_json_string(object, "/commandChar"_json_pointer, sv->command_char(),
-        sv->name(), server_error::invalid_command_char));
+    const auto sv = std::make_shared<server>(service, *id, *host);
 
-    // Boolean does not throw options though.
-    if (optional_json_bool(object, "/ipv6"_json_pointer))
-        sv->set_flags(sv->flags() | server::ipv6);
-    if (optional_json_bool(object, "/sslVerify"_json_pointer))
-        sv->set_flags(sv->flags() | server::ssl_verify);
-    if (optional_json_bool(object, "/autoRejoin"_json_pointer))
-        sv->set_flags(sv->flags() | server::auto_rejoin);
-    if (optional_json_bool(object, "/joinInvite"_json_pointer))
-        sv->set_flags(sv->flags() | server::join_invite);
-
-    if (optional_json_bool(object, "/ssl"_json_pointer))
-#if defined(HAVE_SSL)
-        sv->set_flags(sv->flags() | server::ssl);
-#else
-        throw server_error(sv->name(), server_error::ssl_disabled);
-#endif
+    from_json_load_options(*sv, object);
+    from_json_load_flags(*sv, object);
 
     return sv;
 }
@@ -212,92 +230,35 @@ std::shared_ptr<server> from_config(boost::asio::io_service& service,
                                     const config& cfg,
                                     const ini::section& sc)
 {
-    assert(sc.key() == "server");
+    // Mandatory parameters.
+    const auto id = sc.get("name");
+    const auto host = sc.get("hostname");
 
-    const auto id = require_conf_id(sc, "", server_error::invalid_identifier);
-    const auto sv = std::make_shared<server>(service, id);
+    if (!string_util::is_identifier(id.value()))
+        throw server_error(server_error::invalid_identifier);
+    if (host.value().empty())
+        throw server_error(server_error::invalid_hostname);
 
-    // Mandatory fields.
-    sv->set_host(require_conf_host(sc, sv->name(), server_error::invalid_hostname));
+    const auto sv = std::make_shared<server>(service, id.value(), host.value());
 
-    // Optional fields.
-    ini::section::const_iterator it;
+    from_config_load_channels(*sv, sc);
+    from_config_load_flags(*sv, sc);
+    from_config_load_numeric_parameters(*sv, sc);
+    from_config_load_options(*sv, sc);
 
-    if ((it = sc.find("password")) != sc.end())
-        sv->set_password(it->value());
+    // Identity is in a separate section
+    const auto identity = sc.get("identity");
 
-    // Optional flags
-    if ((it = sc.find("ipv6")) != sc.end() && string_util::is_boolean(it->value()))
-        sv->set_flags(sv->flags() | server::ipv6);
+    if (identity.value().size() > 0) {
+        const auto it = std::find_if(cfg.doc().begin(), cfg.doc().end(), [&] (const auto& i) {
+            return i.get("name").value() == identity.value();
+        });
 
-    if ((it = sc.find("ssl")) != sc.end() && string_util::is_boolean(it->value())) {
-#if defined(HAVE_SSL)
-        sv->set_flags(sv->flags() | server::ssl);
-#else
-        throw server_error(sv->name(), server_error::ssl_disabled);
-#endif
+        if (it != cfg.doc().end())
+            from_config_load_identity(*sv, sc);
     }
-
-    if ((it = sc.find("ssl-verify")) != sc.end() && string_util::is_boolean(it->value()))
-        sv->set_flags(sv->flags() | server::ssl_verify);
-
-    // Optional identity
-    if ((it = sc.find("identity")) != sc.end())
-        load_identity(*sv, cfg, it->value());
-
-    // Options
-    if ((it = sc.find("auto-rejoin")) != sc.end() && string_util::is_boolean(it->value()))
-        sv->set_flags(sv->flags() | server::auto_rejoin);
-    if ((it = sc.find("join-invite")) != sc.end() && string_util::is_boolean(it->value()))
-        sv->set_flags(sv->flags() | server::join_invite);
-
-    // Channels
-    if ((it = sc.find("channels")) != sc.end()) {
-        for (const auto& s : *it) {
-            channel channel;
-
-            if (auto pos = s.find(":") != std::string::npos) {
-                channel.name = s.substr(0, pos);
-                channel.password = s.substr(pos + 1);
-            } else
-                channel.name = s;
-
-            sv->join(channel.name, channel.password);
-        }
-    }
-    if ((it = sc.find("command-char")) != sc.end())
-        sv->set_command_char(it->value());
-
-    // Reconnect and ping timeout
-    if ((it = sc.find("port")) != sc.end())
-        sv->set_port(optional_conf_uint<std::uint16_t>(it->value(),
-            sv->name(), server_error::invalid_port));
-
-    if ((it = sc.find("reconnect-tries")) != sc.end())
-        sv->set_reconnect_tries(optional_conf_int<std::int8_t>(it->value(),
-            sv->name(), server_error::invalid_reconnect_tries));
-
-    if ((it = sc.find("reconnect-timeout")) != sc.end())
-        sv->set_reconnect_delay(optional_conf_uint<std::uint16_t>(it->value(),
-            sv->name(), server_error::invalid_reconnect_timeout));
-
-    if ((it = sc.find("ping-timeout")) != sc.end())
-        sv->set_ping_timeout(optional_conf_uint<std::uint16_t>(it->value(),
-            sv->name(), server_error::invalid_ping_timeout));
 
     return sv;
-}
-
-std::string get_identifier(const nlohmann::json& json)
-{
-    const auto v = json_util::get_string(json, "/server"_json_pointer);
-
-    if (!v)
-        throw server_error("", server_error::invalid_identifier);
-    if (!string_util::is_identifier(*v))
-        throw server_error(*v, server_error::invalid_identifier);
-
-    return *v;
 }
 
 } // !server_util

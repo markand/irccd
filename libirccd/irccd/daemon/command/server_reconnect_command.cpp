@@ -42,7 +42,7 @@ void server_reconnect_command::exec(irccd& irccd, transport_client& client, cons
             server->reconnect();
     } else {
         if (!it->is_string() || !string_util::is_identifier(it->get<std::string>()))
-            throw server_error("", server_error::invalid_identifier);
+            throw server_error(server_error::invalid_identifier);
 
         irccd.servers().require(it->get<std::string>())->reconnect();
     }

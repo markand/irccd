@@ -21,6 +21,8 @@
 
 #include "rule_add_cli.hpp"
 
+using irccd::string_util::to_uint;
+
 namespace irccd {
 
 namespace ctl {
@@ -72,10 +74,15 @@ void rule_add_cli::exec(ctl::controller& ctl, const std::vector<std::string>& ar
     }
 
     // Index.
-    if (result.count("-i") > 0)
-        json["index"] = string_util::to_uint<unsigned>(result.find("-i")->second);
-    if (result.count("--index") > 0)
-        json["index"] = string_util::to_uint<unsigned>(result.find("--index")->second);
+    boost::optional<unsigned> index;
+
+    if (result.count("-i") > 0 && !(index = to_uint(result.find("-i")->second)))
+        throw std::invalid_argument("invalid index argument");
+    if (result.count("--index") > 0 && !(index = to_uint(result.find("--index")->second)))
+        throw std::invalid_argument("invalid index argument");
+
+    if (index)
+        json["index"] = *index;
 
     // And action.
     if (copy[0] != "accept" && copy[0] != "drop")

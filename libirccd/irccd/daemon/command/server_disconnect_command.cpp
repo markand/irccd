@@ -41,7 +41,7 @@ void server_disconnect_command::exec(irccd& irccd, transport_client& client, con
         irccd.servers().clear();
     else {
         if (!it->is_string() || !string_util::is_identifier(it->get<std::string>()))
-            throw server_error("", server_error::invalid_identifier);
+            throw server_error(server_error::invalid_identifier);
 
         const auto name = it->get<std::string>();
 

@@ -73,7 +73,7 @@ std::shared_ptr<server> get_server(std::string name)
     auto s = daemon->servers().get(name);
 
     if (!s) {
-        s = std::make_shared<debug_server>(io, std::move(name));
+        s = std::make_shared<debug_server>(io, std::move(name), "localhost");
         daemon->servers().add(s);
     }
 
