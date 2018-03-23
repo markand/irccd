@@ -48,6 +48,7 @@ namespace transport_util {
  *
  * \param service the IO service
  * \param sc the configuration
+ * \throw transport_error on errors
  * \return the transport
  */
 std::unique_ptr<transport_server> from_config(boost::asio::io_service& service,

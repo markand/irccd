@@ -19,7 +19,7 @@
 #include <algorithm>
 
 #include <irccd/config.hpp>
-#include <irccd/ini.hpp>
+#include <irccd/ini_util.hpp>
 #include <irccd/json_util.hpp>
 #include <irccd/string_util.hpp>
 
@@ -31,39 +31,12 @@ namespace server_util {
 
 namespace {
 
-// TODO: ini_util
-std::string optional_string(const ini::section& sc,
-                            const std::string& name,
-                            const std::string& def)
-{
-    const auto it = sc.find(name);
-
-    if (it == sc.end())
-        return def;
-
-    return it->value();
-}
-
-// TODO: ini_util
-template <typename Int>
-boost::optional<Int> optional_uint(const ini::section& sc,
-                                   const std::string& name,
-                                   Int def)
-{
-    const auto it = sc.find(name);
-
-    if (it == sc.end())
-        return def;
-
-    return string_util::to_uint<Int>(it->value());
-}
-
 void from_config_load_identity(server& sv, const ini::section& sc)
 {
-    const auto username = optional_string(sc, "username", sv.username());
-    const auto realname = optional_string(sc, "realname", sv.realname());
-    const auto nickname = optional_string(sc, "nickname", sv.nickname());
-    const auto ctcp_version = optional_string(sc, "ctcp-version", sv.ctcp_version());
+    const auto username = ini_util::optional_string(sc, "username", sv.username());
+    const auto realname = ini_util::optional_string(sc, "realname", sv.realname());
+    const auto nickname = ini_util::optional_string(sc, "nickname", sv.nickname());
+    const auto ctcp_version = ini_util::optional_string(sc, "ctcp-version", sv.ctcp_version());
 
     if (username.empty())
         throw server_error(server_error::invalid_username);
@@ -117,10 +90,10 @@ void from_config_load_flags(server& sv, const ini::section& sc)
 
 void from_config_load_numeric_parameters(server& sv, const ini::section& sc)
 {
-    const auto port = optional_uint<std::uint16_t>(sc, "port", sv.port());
-    const auto ping_timeout = optional_uint<uint16_t>(sc, "ping-timeout", sv.ping_timeout());
-    const auto reco_tries = optional_uint<uint8_t>(sc, "reconnect-tries", sv.reconnect_tries());
-    const auto reco_timeout = optional_uint<uint16_t>(sc, "reconnect-delay", sv.reconnect_delay());
+    const auto port = ini_util::optional_uint<std::uint16_t>(sc, "port", sv.port());
+    const auto ping_timeout = ini_util::optional_uint<uint16_t>(sc, "ping-timeout", sv.ping_timeout());
+    const auto reco_tries = ini_util::optional_uint<uint8_t>(sc, "reconnect-tries", sv.reconnect_tries());
+    const auto reco_timeout = ini_util::optional_uint<uint16_t>(sc, "reconnect-delay", sv.reconnect_delay());
 
     if (!port)
         throw server_error(server_error::invalid_port);
@@ -139,8 +112,8 @@ void from_config_load_numeric_parameters(server& sv, const ini::section& sc)
 
 void from_config_load_options(server& sv, const ini::section& sc)
 {
-    const auto password = optional_string(sc, "password", "");
-    const auto command_char = optional_string(sc, "command-char", sv.command_char());
+    const auto password = ini_util::optional_string(sc, "password", "");
+    const auto command_char = ini_util::optional_string(sc, "command-char", sv.command_char());
 
     sv.set_password(password);
     sv.set_command_char(command_char);

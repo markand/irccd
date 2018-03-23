@@ -129,6 +129,68 @@ public:
     }
 };
 
+class transport_error : public std::system_error {
+public:
+    enum error {
+        //!< Authentication is required.
+        auth_required,
+
+        //!< Authentication was invalid.
+        invalid_auth,
+
+        //!< Invalid TCP/IP port.
+        invalid_port,
+
+        //!< Invalid TCP/IP address.
+        invalid_address,
+
+        //!< The specified host was invalid.
+        invalid_hostname,
+
+        //!< Invalid unix local path.
+        invalid_path,
+
+        //!< Invalid IPv4/IPv6 family.
+        invalid_family,
+
+        //!< Invalid certificate given.
+        invalid_certificate,
+
+        //!< Invalid private key given.
+        invalid_private_key,
+
+        //!< SSL was requested but is disabled.
+        ssl_disabled,
+
+        //!< Kind of transport not supported on this platform.
+        not_supported
+    };
+
+    transport_error(error err) noexcept;
+};
+
+/**
+ * Get the transport error category singleton.
+ *
+ * \return the singleton
+ */
+const std::error_category& transport_category() noexcept;
+
+/**
+ * Create a boost::system::error_code from server_error::error enum.
+ *
+ * \param e the error code
+ */
+std::error_code make_error_code(transport_error::error e) noexcept;
+
 } // !irccd
+
+namespace std {
+
+template <>
+struct is_error_code_enum<irccd::transport_error::error> : public std::true_type {
+};
+
+} // !std
 
 #endif // !IRCCD_DAEMON_TRANSPORT_SERVER_HPP

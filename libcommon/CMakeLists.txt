@@ -25,6 +25,7 @@ set(
     ${libcommon_SOURCE_DIR}/irccd/config.hpp
     ${libcommon_SOURCE_DIR}/irccd/fs_util.hpp
     ${libcommon_SOURCE_DIR}/irccd/ini.hpp
+    ${libcommon_SOURCE_DIR}/irccd/ini_util.hpp
     ${libcommon_SOURCE_DIR}/irccd/json_util.hpp
     ${libcommon_SOURCE_DIR}/irccd/network_stream.hpp
     ${libcommon_SOURCE_DIR}/irccd/options.hpp
