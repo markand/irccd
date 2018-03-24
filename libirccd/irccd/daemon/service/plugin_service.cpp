@@ -53,7 +53,7 @@ plugin_service::~plugin_service()
         try {
             plugin->handle_unload(irccd_);
         } catch (const std::exception& ex) {
-            irccd_.log().warning() << "plugin: " << plugin->name() << ": " << ex.what() << std::endl;
+            irccd_.log().warning() << "plugin: " << plugin->get_name() << ": " << ex.what() << std::endl;
         }
     }
 }
@@ -61,14 +61,14 @@ plugin_service::~plugin_service()
 bool plugin_service::has(const std::string& name) const noexcept
 {
     return std::count_if(plugins_.cbegin(), plugins_.cend(), [&] (const auto& plugin) {
-        return plugin->name() == name;
+        return plugin->get_name() == name;
     }) > 0;
 }
 
 std::shared_ptr<plugin> plugin_service::get(const std::string& name) const noexcept
 {
     auto it = std::find_if(plugins_.begin(), plugins_.end(), [&] (const auto& plugin) {
-        return plugin->name() == name;
+        return plugin->get_name() == name;
     });
 
     if (it == plugins_.end())
@@ -191,15 +191,15 @@ void plugin_service::reload(const std::string& name)
 
 void plugin_service::unload(const std::string& name)
 {
-    auto it = std::find_if(plugins_.begin(), plugins_.end(), [&] (const auto& plugin) {
-        return plugin->name() == name;
+    const auto it = std::find_if(plugins_.begin(), plugins_.end(), [&] (const auto& plugin) {
+        return plugin->get_name() == name;
     });
 
     if (it == plugins_.end())
         throw plugin_error(plugin_error::not_found, name);
 
     // Erase first, in case of throwing.
-    auto save = *it;
+    const auto save = *it;
 
     plugins_.erase(it);
     exec(save, &plugin::handle_unload, irccd_);

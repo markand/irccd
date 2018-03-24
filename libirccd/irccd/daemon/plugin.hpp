@@ -100,7 +100,7 @@ public:
      *
      * \return the plugin name
      */
-    inline const std::string& name() const noexcept
+    inline const std::string& get_name() const noexcept
     {
         return name_;
     }
@@ -111,7 +111,7 @@ public:
      * \return the plugin path
      * \note some plugins may not exist on the disk
      */
-    inline const std::string& path() const noexcept
+    inline const std::string& get_path() const noexcept
     {
         return path_;
     }
@@ -121,7 +121,7 @@ public:
      *
      * \return the author
      */
-    inline const std::string& author() const noexcept
+    inline const std::string& get_author() const noexcept
     {
         return author_;
     }
@@ -141,7 +141,7 @@ public:
      *
      * \return the license
      */
-    inline const std::string& license() const noexcept
+    inline const std::string& get_license() const noexcept
     {
         return license_;
     }
@@ -161,7 +161,7 @@ public:
      *
      * \return the summary
      */
-    inline const std::string& summary() const noexcept
+    inline const std::string& get_summary() const noexcept
     {
         return summary_;
     }
@@ -181,7 +181,7 @@ public:
      *
      * \return the version
      */
-    inline const std::string& version() const noexcept
+    inline const std::string& get_version() const noexcept
     {
         return version_;
     }
@@ -201,7 +201,7 @@ public:
      *
      * \return the config
      */
-    virtual plugin_config config()
+    virtual plugin_config get_config()
     {
         return {};
     }
@@ -221,7 +221,7 @@ public:
      *
      * \return the format
      */
-    virtual plugin_formats formats()
+    virtual plugin_formats get_formats()
     {
         return {};
     }
@@ -241,7 +241,7 @@ public:
      *
      * \return the paths
      */
-    virtual plugin_paths paths()
+    virtual plugin_paths get_paths()
     {
         return {};
     }

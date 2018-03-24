@@ -30,7 +30,7 @@ namespace {
 
 duk_ret_t print(duk_context* ctx, std::ostream &out)
 {
-    out << "plugin " << dukx_get_plugin(ctx)->name() << ": " << duk_require_string(ctx, 0) << std::endl;
+    out << "plugin " << dukx_get_plugin(ctx)->get_name() << ": " << duk_require_string(ctx, 0) << std::endl;
 
     return 0;
 }

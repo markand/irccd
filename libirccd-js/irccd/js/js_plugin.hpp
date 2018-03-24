@@ -101,7 +101,7 @@ public:
     /**
      * \copydoc plugin::config
      */
-    plugin_config config() override
+    plugin_config get_config() override
     {
         return get_table(config_property);
     }
@@ -117,7 +117,7 @@ public:
     /**
      * \copydoc plugin::formats
      */
-    plugin_formats formats() override
+    plugin_formats get_formats() override
     {
         return get_table(format_property);
     }
@@ -133,7 +133,7 @@ public:
     /**
      * \copydoc plugin::paths
      */
-    plugin_paths paths() override
+    plugin_paths get_paths() override
     {
         return get_table(paths_property);
     }

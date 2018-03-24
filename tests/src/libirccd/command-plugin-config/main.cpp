@@ -37,7 +37,7 @@ public:
     {
     }
 
-    plugin_config config() override
+    plugin_config get_config() override
     {
         return config_;
     }
@@ -63,10 +63,10 @@ BOOST_AUTO_TEST_CASE(set)
     });
 
     wait_for([&] {
-        return !daemon_->plugins().require("test")->config().empty();
+        return !daemon_->plugins().require("test")->get_config().empty();
     });
 
-    auto config = daemon_->plugins().require("test")->config();
+    auto config = daemon_->plugins().require("test")->get_config();
 
     BOOST_TEST(!config.empty());
     BOOST_TEST(config["verbosy"] == "falsy");

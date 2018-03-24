@@ -103,7 +103,7 @@ void js_plugin::call(const std::string& func, Args&&... args)
     push(std::forward<Args>(args)...);
 
     if (duk_pcall(context_, sizeof... (Args)) != 0)
-        throw plugin_error(plugin_error::exec_error, name(), dukx_stack(context_, -1).stack());
+        throw plugin_error(plugin_error::exec_error, get_name(), dukx_stack(context_, -1).stack());
 
     duk_pop(context_);
 }
@@ -140,11 +140,11 @@ js_plugin::js_plugin(std::string name, std::string path)
 
 void js_plugin::open()
 {
-    std::ifstream input(path());
+    std::ifstream input(get_path());
 
     // TODO: add error message here.
     if (!input)
-        throw plugin_error(plugin_error::exec_error, name(), std::strerror(errno));
+        throw plugin_error(plugin_error::exec_error, get_name(), std::strerror(errno));
 
     std::string data(
         std::istreambuf_iterator<char>(input.rdbuf()),
@@ -152,20 +152,20 @@ void js_plugin::open()
     );
 
     if (duk_peval_string(context_, data.c_str()))
-        throw plugin_error(plugin_error::exec_error, name(), dukx_stack(context_, -1).stack());
+        throw plugin_error(plugin_error::exec_error, get_name(), dukx_stack(context_, -1).stack());
 
     // Read metadata.
     duk_get_global_string(context_, "info");
 
     if (duk_get_type(context_, -1) == DUK_TYPE_OBJECT) {
         duk_get_prop_string(context_, -1, "author");
-        set_author(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : author());
+        set_author(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : get_author());
         duk_get_prop_string(context_, -2, "license");
-        set_license(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : license());
+        set_license(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : get_license());
         duk_get_prop_string(context_, -3, "summary");
-        set_summary(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : summary());
+        set_summary(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : get_summary());
         duk_get_prop_string(context_, -4, "version");
-        set_version(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : version());
+        set_version(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : get_version());
         duk_pop_n(context_, 4);
     }
 

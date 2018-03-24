@@ -35,7 +35,7 @@ void plugin_list_command::exec(irccd& irccd, transport_client& client, const nlo
     auto list = nlohmann::json::array();
 
     for (const auto& plugin : irccd.plugins().list())
-        list += plugin->name();
+        list += plugin->get_name();
 
     client.send({
         { "command",    "plugin-list"   },

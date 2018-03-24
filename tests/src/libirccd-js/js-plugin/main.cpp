@@ -58,9 +58,9 @@ BOOST_AUTO_TEST_CASE(assign)
     });
     plugin_->handle_load(irccd_);
 
-    BOOST_TEST(plugin_->config().at("path") == "none");
-    BOOST_TEST(plugin_->config().at("verbose") == "false");
-    BOOST_TEST(plugin_->config().at("hard") == "true");
+    BOOST_TEST(plugin_->get_config().at("path") == "none");
+    BOOST_TEST(plugin_->get_config().at("verbose") == "false");
+    BOOST_TEST(plugin_->get_config().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_CASE(fill)
@@ -73,9 +73,9 @@ BOOST_AUTO_TEST_CASE(fill)
     });
     plugin_->handle_load(irccd_);
 
-    BOOST_TEST(plugin_->config().at("path") == "none");
-    BOOST_TEST(plugin_->config().at("verbose") == "false");
-    BOOST_TEST(plugin_->config().at("hard") == "true");
+    BOOST_TEST(plugin_->get_config().at("path") == "none");
+    BOOST_TEST(plugin_->get_config().at("verbose") == "false");
+    BOOST_TEST(plugin_->get_config().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_CASE(merge_after)
@@ -88,9 +88,9 @@ BOOST_AUTO_TEST_CASE(merge_after)
         { "verbose",    "false" }
     });
 
-    BOOST_TEST(plugin_->config().at("path") == "none");
-    BOOST_TEST(plugin_->config().at("verbose") == "false");
-    BOOST_TEST(plugin_->config().at("hard") == "true");
+    BOOST_TEST(plugin_->get_config().at("path") == "none");
+    BOOST_TEST(plugin_->get_config().at("verbose") == "false");
+    BOOST_TEST(plugin_->get_config().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -126,27 +126,27 @@ BOOST_AUTO_TEST_CASE(assign)
 {
     load("test", CMAKE_CURRENT_SOURCE_DIR "/config-assign.js");
 
-    BOOST_TEST(plugin_->config().at("path") == "none");
-    BOOST_TEST(plugin_->config().at("verbose") == "false");
-    BOOST_TEST(plugin_->config().at("hard") == "true");
+    BOOST_TEST(plugin_->get_config().at("path") == "none");
+    BOOST_TEST(plugin_->get_config().at("verbose") == "false");
+    BOOST_TEST(plugin_->get_config().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_CASE(fill)
 {
     load("test", CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
 
-    BOOST_TEST(plugin_->config().at("path") == "none");
-    BOOST_TEST(plugin_->config().at("verbose") == "false");
-    BOOST_TEST(plugin_->config().at("hard") == "true");
+    BOOST_TEST(plugin_->get_config().at("path") == "none");
+    BOOST_TEST(plugin_->get_config().at("verbose") == "false");
+    BOOST_TEST(plugin_->get_config().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_CASE(merge_after)
 {
     load("test", CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
 
-    BOOST_TEST(plugin_->config().at("path") == "none");
-    BOOST_TEST(plugin_->config().at("verbose") == "false");
-    BOOST_TEST(plugin_->config().at("hard") == "true");
+    BOOST_TEST(plugin_->get_config().at("path") == "none");
+    BOOST_TEST(plugin_->get_config().at("verbose") == "false");
+    BOOST_TEST(plugin_->get_config().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

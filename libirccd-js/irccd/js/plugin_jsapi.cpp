@@ -223,15 +223,15 @@ duk_idx_t info(duk_context* ctx)
         return 0;
 
     duk_push_object(ctx);
-    dukx_push(ctx, plugin->name());
+    dukx_push(ctx, plugin->get_name());
     duk_put_prop_string(ctx, -2, "name");
-    dukx_push(ctx, plugin->author());
+    dukx_push(ctx, plugin->get_author());
     duk_put_prop_string(ctx, -2, "author");
-    dukx_push(ctx, plugin->license());
+    dukx_push(ctx, plugin->get_license());
     duk_put_prop_string(ctx, -2, "license");
-    dukx_push(ctx, plugin->summary());
+    dukx_push(ctx, plugin->get_summary());
     duk_put_prop_string(ctx, -2, "summary");
-    dukx_push(ctx, plugin->version());
+    dukx_push(ctx, plugin->get_version());
     duk_put_prop_string(ctx, -2, "version");
 
     return 1;
@@ -253,7 +253,7 @@ duk_idx_t list(duk_context* ctx)
     duk_push_array(ctx);
 
     for (const auto& p : dukx_get_irccd(ctx).plugins().list()) {
-        dukx_push(ctx, p->name());
+        dukx_push(ctx, p->get_name());
         duk_put_prop_index(ctx, -2, i++);
     }
 

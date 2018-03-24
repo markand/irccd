@@ -85,7 +85,7 @@ void timer::handle()
     duk_remove(ctx, -2);
 
     if (duk_pcall(ctx, 0)) {
-        dukx_get_irccd(ctx).log().warning() << "plugin: " << plugin->name()
+        dukx_get_irccd(ctx).log().warning() << "plugin: " << plugin->get_name()
             << " timer error:" << std::endl;
         dukx_get_irccd(ctx).log().warning() << "  "
             << dukx_stack(ctx, -1).what() << std::endl;

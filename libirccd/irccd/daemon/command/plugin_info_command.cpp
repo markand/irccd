@@ -40,14 +40,14 @@ void plugin_info_command::exec(irccd& irccd, transport_client& client, const nlo
     if (!id || !string_util::is_identifier(*id))
         throw plugin_error(plugin_error::invalid_identifier);
 
-    auto plugin = irccd.plugins().require(*id);
+    const auto plugin = irccd.plugins().require(*id);
 
     client.send({
-        { "command",    "plugin-info"       },
-        { "author",     plugin->author()    },
-        { "license",    plugin->license()   },
-        { "summary",    plugin->summary()   },
-        { "version",    plugin->version()   }
+        { "command",    "plugin-info"           },
+        { "author",     plugin->get_author()    },
+        { "license",    plugin->get_license()   },
+        { "summary",    plugin->get_summary()   },
+        { "version",    plugin->get_version()   }
     });
 }
 

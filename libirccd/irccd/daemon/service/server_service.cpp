@@ -42,7 +42,7 @@ void dispatch(irccd& daemon,
 {
     for (auto& plugin : daemon.plugins().list()) {
         auto eventname = name_func(*plugin);
-        auto allowed = daemon.rules().solve(server, target, origin, plugin->name(), eventname);
+        auto allowed = daemon.rules().solve(server, target, origin, plugin->get_name(), eventname);
 
         if (!allowed) {
             daemon.log().debug("rule: event skipped on match");
@@ -54,7 +54,7 @@ void dispatch(irccd& daemon,
         try {
             exec_func(*plugin);
         } catch (const std::exception& ex) {
-            daemon.log().warning() << "plugin " << plugin->name() << ": error: "
+            daemon.log().warning() << "plugin " << plugin->get_name() << ": error: "
                 << ex.what() << std::endl;
         }
     }
@@ -196,12 +196,12 @@ void server_service::handle_message(const message_event& ev)
             return string_util::parse_message(
                 ev.message,
                 ev.server->get_command_char(),
-                plugin.name()
+                plugin.get_name()
             ).type == string_util::message_pack::type::command ? "onCommand" : "onMessage";
         },
         [=] (plugin& plugin) mutable {
             auto copy = ev;
-            auto pack = string_util::parse_message(copy.message, copy.server->get_command_char(), plugin.name());
+            auto pack = string_util::parse_message(copy.message, copy.server->get_command_char(), plugin.get_name());
 
             copy.message = pack.message;
 
