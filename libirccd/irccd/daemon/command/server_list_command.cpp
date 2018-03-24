@@ -36,7 +36,7 @@ void server_list_command::exec(irccd& irccd, transport_client& client, const nlo
     auto list = nlohmann::json::array();
 
     for (const auto& server : irccd.servers().servers())
-        list.push_back(server->name());
+        list.push_back(server->get_name());
 
     client.send({
         { "command",    "server-list"   },

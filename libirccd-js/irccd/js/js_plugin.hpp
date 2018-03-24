@@ -297,9 +297,9 @@ public:
 };
 
 template <>
-class dukx_type_traits<whois> : public std::true_type {
+class dukx_type_traits<whois_info> : public std::true_type {
 public:
-    static void push(duk_context* ctx, const whois& who);
+    static void push(duk_context* ctx, const whois_info& who);
 };
 
 } // !irccd

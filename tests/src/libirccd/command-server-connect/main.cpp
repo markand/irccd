@@ -49,9 +49,9 @@ BOOST_AUTO_TEST_CASE(minimal)
     auto s = daemon_->servers().get("local");
 
     BOOST_TEST(s);
-    BOOST_TEST(s->name() == "local");
-    BOOST_TEST(s->host() == "irc.example.org");
-    BOOST_TEST(s->port() == 6667U);
+    BOOST_TEST(s->get_name() == "local");
+    BOOST_TEST(s->get_host() == "irc.example.org");
+    BOOST_TEST(s->get_port() == 6667U);
 }
 
 #if defined(HAVE_SSL)
@@ -87,19 +87,19 @@ BOOST_AUTO_TEST_CASE(full)
     auto s = daemon_->servers().get("local2");
 
     BOOST_TEST(s);
-    BOOST_TEST(s->name() == "local2");
-    BOOST_TEST(s->host() == "irc.example2.org");
-    BOOST_TEST(s->port() == 18000U);
-    BOOST_TEST(s->password() == "nonono");
-    BOOST_TEST(s->nickname() == "francis");
-    BOOST_TEST(s->realname() == "the_francis");
-    BOOST_TEST(s->username() == "frc");
-    BOOST_TEST(s->command_char() == "::");
-    BOOST_TEST(s->ctcp_version() == "ultra bot");
-    BOOST_TEST(s->flags() & server::ssl);
-    BOOST_TEST(s->flags() & server::ssl_verify);
-    BOOST_TEST(s->flags() & server::auto_rejoin);
-    BOOST_TEST(s->flags() & server::join_invite);
+    BOOST_TEST(s->get_name() == "local2");
+    BOOST_TEST(s->get_host() == "irc.example2.org");
+    BOOST_TEST(s->get_port() == 18000U);
+    BOOST_TEST(s->get_password() == "nonono");
+    BOOST_TEST(s->get_nickname() == "francis");
+    BOOST_TEST(s->get_realname() == "the_francis");
+    BOOST_TEST(s->get_username() == "frc");
+    BOOST_TEST(s->get_command_char() == "::");
+    BOOST_TEST(s->get_ctcp_version() == "ultra bot");
+    BOOST_TEST(s->get_flags() & server::ssl);
+    BOOST_TEST(s->get_flags() & server::ssl_verify);
+    BOOST_TEST(s->get_flags() & server::auto_rejoin);
+    BOOST_TEST(s->get_flags() & server::join_invite);
 }
 
 #endif // !HAVE_SSL

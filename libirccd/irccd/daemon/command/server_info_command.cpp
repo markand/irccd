@@ -48,20 +48,20 @@ void server_info_command::exec(irccd& irccd, transport_client& client, const nlo
 
     // General stuff.
     response.push_back({"command", "server-info"});
-    response.push_back({"name", server->name()});
-    response.push_back({"host", server->host()});
-    response.push_back({"port", server->port()});
-    response.push_back({"nickname", server->nickname()});
-    response.push_back({"username", server->username()});
-    response.push_back({"realname", server->realname()});
-    response.push_back({"channels", server->channels()});
+    response.push_back({"name", server->get_name()});
+    response.push_back({"host", server->get_host()});
+    response.push_back({"port", server->get_port()});
+    response.push_back({"nickname", server->get_nickname()});
+    response.push_back({"username", server->get_username()});
+    response.push_back({"realname", server->get_realname()});
+    response.push_back({"channels", server->get_channels()});
 
     // Optional stuff.
-    if (server->flags() & server::ipv6)
+    if (server->get_flags() & server::ipv6)
         response.push_back({"ipv6", true});
-    if (server->flags() & server::ssl)
+    if (server->get_flags() & server::ssl)
         response.push_back({"ssl", true});
-    if (server->flags() & server::ssl_verify)
+    if (server->get_flags() & server::ssl_verify)
         response.push_back({"sslVerify", true});
 
     client.send(response);

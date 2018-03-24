@@ -306,7 +306,7 @@ std::shared_ptr<plugin> js_plugin_loader::open(const std::string& id,
     return plugin;
 }
 
-void dukx_type_traits<whois>::push(duk_context* ctx, const whois& whois)
+void dukx_type_traits<whois_info>::push(duk_context* ctx, const whois_info& whois)
 {
     duk_push_object(ctx);
     dukx_push(ctx, whois.nick);

@@ -66,7 +66,7 @@ public:
 /**
  * \brief Describe a whois information.
  */
-class whois {
+class whois_info {
 public:
     std::string nick;                       //!< user's nickname
     std::string user;                       //!< user's user
@@ -229,7 +229,7 @@ public:
 class whois_event {
 public:
     std::shared_ptr<class server> server;   //!< The server.
-    class whois whois;                            //!< The whois information.
+    whois_info whois;                       //!< The whois information.
 };
 
 /**
@@ -432,7 +432,7 @@ private:
     std::unique_ptr<irc::connection> conn_;
     std::int8_t recocur_{0};
     std::map<std::string, std::set<std::string>> names_map_;
-    std::map<std::string, class whois> whois_map_;
+    std::map<std::string, whois_info> whois_map_;
 
     void remove_joined_channel(const std::string& channel);
 
@@ -463,15 +463,6 @@ private:
 
 public:
     /**
-     * Split a channel from the form channel:password into a server_channel
-     * object.
-     *
-     * \param value the value
-     * \return a channel
-     */
-    static channel split_channel(const std::string& value);
-
-    /**
      * Construct a server.
      *
      * \pre !host.empty()
@@ -493,7 +484,7 @@ public:
      *
      * \return the state
      */
-    inline state_t state() const noexcept
+    inline state_t get_state() const noexcept
     {
         return state_;
     }
@@ -503,7 +494,7 @@ public:
      *
      * \return the id
      */
-    inline const std::string& name() const noexcept
+    inline const std::string& get_name() const noexcept
     {
         return name_;
     }
@@ -513,7 +504,7 @@ public:
      *
      * \return the hostname
      */
-    inline const std::string& host() const noexcept
+    inline const std::string& get_host() const noexcept
     {
         return host_;
     }
@@ -533,7 +524,7 @@ public:
      *
      * \return the password
      */
-    inline const std::string& password() const noexcept
+    inline const std::string& get_password() const noexcept
     {
         return password_;
     }
@@ -555,7 +546,7 @@ public:
      *
      * \return the port
      */
-    inline std::uint16_t port() const noexcept
+    inline std::uint16_t get_port() const noexcept
     {
         return port_;
     }
@@ -575,7 +566,7 @@ public:
      *
      * \return the flags
      */
-    inline std::uint8_t flags() const noexcept
+    inline std::uint8_t get_flags() const noexcept
     {
         return flags_;
     }
@@ -599,7 +590,7 @@ public:
      *
      * \return the nickname
      */
-    inline const std::string& nickname() const noexcept
+    inline const std::string& get_nickname() const noexcept
     {
         return nickname_;
     }
@@ -619,7 +610,7 @@ public:
      *
      * \return the username
      */
-    inline const std::string& username() const noexcept
+    inline const std::string& get_username() const noexcept
     {
         return username_;
     }
@@ -640,7 +631,7 @@ public:
      *
      * \return the realname
      */
-    inline const std::string& realname() const noexcept
+    inline const std::string& get_realname() const noexcept
     {
         return realname_;
     }
@@ -661,7 +652,7 @@ public:
      *
      * \return the CTCP version
      */
-    inline const std::string& ctcp_version() const noexcept
+    inline const std::string& get_ctcp_version() const noexcept
     {
         return ctcpversion_;
     }
@@ -678,7 +669,7 @@ public:
      *
      * \return the character
      */
-    inline const std::string& command_char() const noexcept
+    inline const std::string& get_command_char() const noexcept
     {
         return command_char_;
     }
@@ -701,7 +692,7 @@ public:
      *
      * \return the number of reconnections
      */
-    inline std::int8_t reconnect_tries() const noexcept
+    inline std::int8_t get_reconnect_tries() const noexcept
     {
         return recotries_;
     }
@@ -723,7 +714,7 @@ public:
      *
      * \return the number of seconds
      */
-    inline std::uint16_t reconnect_delay() const noexcept
+    inline std::uint16_t get_reconnect_delay() const noexcept
     {
         return recodelay_;
     }
@@ -743,7 +734,7 @@ public:
      *
      * \return the ping timeout
      */
-    inline std::uint16_t ping_timeout() const noexcept
+    inline std::uint16_t get_ping_timeout() const noexcept
     {
         return timeout_;
     }
@@ -763,7 +754,7 @@ public:
      *
      * \return the channels
      */
-    inline const std::vector<std::string>& channels() const noexcept
+    inline const std::vector<std::string>& get_channels() const noexcept
     {
         return jchannels_;
     }

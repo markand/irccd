@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(basic)
     });
 
     BOOST_TEST(result.is_object());
-    BOOST_TEST(server_->nickname() == "chris");
+    BOOST_TEST(server_->get_nickname() == "chris");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)

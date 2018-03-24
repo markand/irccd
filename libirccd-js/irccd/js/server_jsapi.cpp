@@ -70,25 +70,25 @@ duk_ret_t info(duk_context* ctx)
     auto server = self(ctx);
 
     duk_push_object(ctx);
-    dukx_push(ctx, server->name());
+    dukx_push(ctx, server->get_name());
     duk_put_prop_string(ctx, -2, "name");
-    dukx_push(ctx, server->host());
+    dukx_push(ctx, server->get_host());
     duk_put_prop_string(ctx, -2, "host");
-    duk_push_int(ctx, server->port());
+    duk_push_int(ctx, server->get_port());
     duk_put_prop_string(ctx, -2, "port");
-    duk_push_boolean(ctx, server->flags() & server::ssl);
+    duk_push_boolean(ctx, server->get_flags() & server::ssl);
     duk_put_prop_string(ctx, -2, "ssl");
-    duk_push_boolean(ctx, server->flags() & server::ssl_verify);
+    duk_push_boolean(ctx, server->get_flags() & server::ssl_verify);
     duk_put_prop_string(ctx, -2, "sslVerify");
-    dukx_push(ctx, server->command_char());
+    dukx_push(ctx, server->get_command_char());
     duk_put_prop_string(ctx, -2, "commandChar");
-    dukx_push(ctx, server->realname());
+    dukx_push(ctx, server->get_realname());
     duk_put_prop_string(ctx, -2, "realname");
-    dukx_push(ctx, server->nickname());
+    dukx_push(ctx, server->get_nickname());
     duk_put_prop_string(ctx, -2, "nickname");
-    dukx_push(ctx, server->username());
+    dukx_push(ctx, server->get_username());
     duk_put_prop_string(ctx, -2, "username");
-    dukx_push(ctx, server->channels());
+    dukx_push(ctx, server->get_channels());
     duk_put_prop_string(ctx, -2, "channels");
 
     return 1;
@@ -338,7 +338,7 @@ duk_ret_t whois(duk_context* ctx)
  */
 duk_ret_t toString(duk_context* ctx)
 {
-    dukx_push(ctx, self(ctx)->name());
+    dukx_push(ctx, self(ctx)->get_name());
 
     return 1;
 }
@@ -456,7 +456,7 @@ duk_ret_t list(duk_context* ctx)
 
     for (const auto &server : dukx_get_irccd(ctx).servers().servers()) {
         dukx_push(ctx, server);
-        duk_put_prop_string(ctx, -2, server->name().c_str());
+        duk_put_prop_string(ctx, -2, server->get_name().c_str());
     }
 
     return 1;

@@ -188,7 +188,7 @@ BOOST_AUTO_TEST_CASE(invalid)
     BOOST_TEST(cmd["message"].get<std::string>() == "invalid=#tictactoe:!tictactoe:jean:jean:tictactoe:test");
 
     // target is origin (no names)
-    plugin_->handle_command(irccd_, {server_, server_->nickname(), "#tictactoe", server_->nickname()});
+    plugin_->handle_command(irccd_, {server_, server_->get_nickname(), "#tictactoe", server_->get_nickname()});
     cmd = server_->cqueue().back();
 
     BOOST_TEST(cmd["command"].get<std::string>() == "message");
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(invalid)
     BOOST_TEST(cmd["message"].get<std::string>() == "invalid=#tictactoe:!tictactoe:irccd:irccd:tictactoe:test");
 
     // not existing (names)
-    plugin_->handle_command(irccd_, {server_, server_->nickname(), "#tictactoe", server_->nickname()});
+    plugin_->handle_command(irccd_, {server_, server_->get_nickname(), "#tictactoe", server_->get_nickname()});
     plugin_->handle_names(irccd_, {server_, "#tictactoe", {"a", "b", "c"}});
     cmd = server_->cqueue().back();
 

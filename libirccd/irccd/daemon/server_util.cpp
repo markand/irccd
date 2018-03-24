@@ -33,10 +33,10 @@ namespace {
 
 void from_config_load_identity(server& sv, const ini::section& sc)
 {
-    const auto username = ini_util::optional_string(sc, "username", sv.username());
-    const auto realname = ini_util::optional_string(sc, "realname", sv.realname());
-    const auto nickname = ini_util::optional_string(sc, "nickname", sv.nickname());
-    const auto ctcp_version = ini_util::optional_string(sc, "ctcp-version", sv.ctcp_version());
+    const auto username = ini_util::optional_string(sc, "username", sv.get_username());
+    const auto realname = ini_util::optional_string(sc, "realname", sv.get_realname());
+    const auto nickname = ini_util::optional_string(sc, "nickname", sv.get_nickname());
+    const auto ctcp_version = ini_util::optional_string(sc, "ctcp-version", sv.get_ctcp_version());
 
     if (username.empty())
         throw server_error(server_error::invalid_username);
@@ -77,23 +77,23 @@ void from_config_load_flags(server& sv, const ini::section& sc)
     const auto join_invite = sc.get("join-invite");
 
     if (string_util::is_boolean(ipv6.value()))
-        sv.set_flags(sv.flags() | server::ipv6);
+        sv.set_flags(sv.get_flags() | server::ipv6);
     if (string_util::is_boolean(ssl.value()))
-        sv.set_flags(sv.flags() | server::ssl);
+        sv.set_flags(sv.get_flags() | server::ssl);
     if (string_util::is_boolean(ssl_verify.value()))
-        sv.set_flags(sv.flags() | server::ssl_verify);
+        sv.set_flags(sv.get_flags() | server::ssl_verify);
     if (string_util::is_boolean(auto_rejoin.value()))
-        sv.set_flags(sv.flags() | server::auto_rejoin);
+        sv.set_flags(sv.get_flags() | server::auto_rejoin);
     if (string_util::is_boolean(join_invite.value()))
-        sv.set_flags(sv.flags() | server::join_invite);
+        sv.set_flags(sv.get_flags() | server::join_invite);
 }
 
 void from_config_load_numeric_parameters(server& sv, const ini::section& sc)
 {
-    const auto port = ini_util::optional_uint<std::uint16_t>(sc, "port", sv.port());
-    const auto ping_timeout = ini_util::optional_uint<uint16_t>(sc, "ping-timeout", sv.ping_timeout());
-    const auto reco_tries = ini_util::optional_uint<uint8_t>(sc, "reconnect-tries", sv.reconnect_tries());
-    const auto reco_timeout = ini_util::optional_uint<uint16_t>(sc, "reconnect-delay", sv.reconnect_delay());
+    const auto port = ini_util::optional_uint<std::uint16_t>(sc, "port", sv.get_port());
+    const auto ping_timeout = ini_util::optional_uint<uint16_t>(sc, "ping-timeout", sv.get_ping_timeout());
+    const auto reco_tries = ini_util::optional_uint<uint8_t>(sc, "reconnect-tries", sv.get_reconnect_tries());
+    const auto reco_timeout = ini_util::optional_uint<uint16_t>(sc, "reconnect-delay", sv.get_reconnect_delay());
 
     if (!port)
         throw server_error(server_error::invalid_port);
@@ -113,7 +113,7 @@ void from_config_load_numeric_parameters(server& sv, const ini::section& sc)
 void from_config_load_options(server& sv, const ini::section& sc)
 {
     const auto password = ini_util::optional_string(sc, "password", "");
-    const auto command_char = ini_util::optional_string(sc, "command-char", sv.command_char());
+    const auto command_char = ini_util::optional_string(sc, "command-char", sv.get_command_char());
 
     sv.set_password(password);
     sv.set_command_char(command_char);
@@ -121,13 +121,13 @@ void from_config_load_options(server& sv, const ini::section& sc)
 
 void from_json_load_options(server& sv, const nlohmann::json& object)
 {
-    const auto port = json_util::optional_uint(object, "port", sv.port());
-    const auto nickname = json_util::optional_string(object, "nickname", sv.nickname());
-    const auto realname = json_util::optional_string(object, "realname", sv.realname());
-    const auto username = json_util::optional_string(object, "username", sv.username());
-    const auto ctcp_version = json_util::optional_string(object, "ctcpVersion", sv.ctcp_version());
-    const auto command = json_util::optional_string(object, "commandChar", sv.command_char());
-    const auto password = json_util::optional_string(object, "password", sv.password());
+    const auto port = json_util::optional_uint(object, "port", sv.get_port());
+    const auto nickname = json_util::optional_string(object, "nickname", sv.get_nickname());
+    const auto realname = json_util::optional_string(object, "realname", sv.get_realname());
+    const auto username = json_util::optional_string(object, "username", sv.get_username());
+    const auto ctcp_version = json_util::optional_string(object, "ctcpVersion", sv.get_ctcp_version());
+    const auto command = json_util::optional_string(object, "commandChar", sv.get_command_char());
+    const auto password = json_util::optional_string(object, "password", sv.get_password());
 
     if (!port || *port > std::numeric_limits<std::uint16_t>::max())
         throw server_error(server_error::invalid_port);
@@ -162,18 +162,18 @@ void from_json_load_flags(server& sv, nlohmann::json object)
     const auto join_invite = object["joinInvite"];
 
     if (ipv6.is_boolean() && ipv6.get<bool>())
-        sv.set_flags(sv.flags() | server::ipv6);
+        sv.set_flags(sv.get_flags() | server::ipv6);
     if (ssl.is_boolean() && ssl.get<bool>())
-        sv.set_flags(sv.flags() | server::ssl);
+        sv.set_flags(sv.get_flags() | server::ssl);
     if (ssl_verify.is_boolean() && ssl_verify.get<bool>())
-        sv.set_flags(sv.flags() | server::ssl_verify);
+        sv.set_flags(sv.get_flags() | server::ssl_verify);
     if (auto_rejoin.is_boolean() && auto_rejoin.get<bool>())
-        sv.set_flags(sv.flags() | server::auto_rejoin);
+        sv.set_flags(sv.get_flags() | server::auto_rejoin);
     if (join_invite.is_boolean() && join_invite.get<bool>())
-        sv.set_flags(sv.flags() | server::join_invite);
+        sv.set_flags(sv.get_flags() | server::join_invite);
 
 #if !defined(HAVE_SSL)
-    if (sv.flags() & server::ssl)
+    if (sv.get_flags() & server::ssl)
         throw server_error(server_error::ssl_disabled);
 #endif
 }

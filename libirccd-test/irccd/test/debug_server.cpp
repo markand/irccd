@@ -24,42 +24,42 @@ namespace irccd {
 
 void debug_server::connect() noexcept
 {
-    std::cout << name() << ": connect" << std::endl;
+    std::cout << get_name() << ": connect" << std::endl;
 }
 
 void debug_server::disconnect() noexcept
 {
-    std::cout << name() << ": disconnect" << std::endl;
+    std::cout << get_name() << ": disconnect" << std::endl;
 }
 
 void debug_server::reconnect() noexcept
 {
-    std::cout << name() << ": reconnect" << std::endl;
+    std::cout << get_name() << ": reconnect" << std::endl;
 }
 
 void debug_server::invite(std::string target, std::string channel)
 {
-    std::cout << name() << ": invite " << target << " " << channel << std::endl;
+    std::cout << get_name() << ": invite " << target << " " << channel << std::endl;
 }
 
 void debug_server::join(std::string channel, std::string password)
 {
-    std::cout << name() << ": join " << channel << " " << password << std::endl;
+    std::cout << get_name() << ": join " << channel << " " << password << std::endl;
 }
 
 void debug_server::kick(std::string target, std::string channel, std::string reason)
 {
-    std::cout << name() << ": kick " << target << " " << channel << " " << reason << std::endl;
+    std::cout << get_name() << ": kick " << target << " " << channel << " " << reason << std::endl;
 }
 
 void debug_server::me(std::string target, std::string message)
 {
-    std::cout << name() << ": me " << target << " " << message << std::endl;
+    std::cout << get_name() << ": me " << target << " " << message << std::endl;
 }
 
 void debug_server::message(std::string target, std::string message)
 {
-    std::cout << name() << ": message " << target << " " << message << std::endl;
+    std::cout << get_name() << ": message " << target << " " << message << std::endl;
 }
 
 void debug_server::mode(std::string channel,
@@ -68,7 +68,7 @@ void debug_server::mode(std::string channel,
           std::string user,
           std::string mask)
 {
-    std::cout << name() << ": mode "
+    std::cout << get_name() << ": mode "
               << channel << " "
               << mode << " "
               << limit << " "
@@ -78,32 +78,32 @@ void debug_server::mode(std::string channel,
 
 void debug_server::names(std::string channel)
 {
-    std::cout << name() << ": names " << channel << std::endl;
+    std::cout << get_name() << ": names " << channel << std::endl;
 }
 
 void debug_server::notice(std::string target, std::string message)
 {
-    std::cout << name() << ": notice " << target << " " << message << std::endl;
+    std::cout << get_name() << ": notice " << target << " " << message << std::endl;
 }
 
 void debug_server::part(std::string channel, std::string reason)
 {
-    std::cout << name() << ": part " << channel << " " << reason << std::endl;
+    std::cout << get_name() << ": part " << channel << " " << reason << std::endl;
 }
 
 void debug_server::send(std::string raw)
 {
-    std::cout << name() << ": send " << raw << std::endl;
+    std::cout << get_name() << ": send " << raw << std::endl;
 }
 
 void debug_server::topic(std::string channel, std::string topic)
 {
-    std::cout << name() << ": topic " << channel << " " << topic << std::endl;
+    std::cout << get_name() << ": topic " << channel << " " << topic << std::endl;
 }
 
 void debug_server::whois(std::string target)
 {
-    std::cout << name() << ": whois " << target << std::endl;
+    std::cout << get_name() << ": whois " << target << std::endl;
 }
 
 } // !irccd

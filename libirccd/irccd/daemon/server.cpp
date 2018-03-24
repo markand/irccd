@@ -111,16 +111,6 @@ void server::remove_joined_channel(const std::string& channel)
     jchannels_.erase(std::remove(jchannels_.begin(), jchannels_.end(), channel), jchannels_.end());
 }
 
-channel server::split_channel(const std::string& value)
-{
-    auto pos = value.find(':');
-
-    if (pos != std::string::npos)
-        return {value.substr(0, pos), value.substr(pos + 1)};
-
-    return {value, ""};
-}
-
 server::server(boost::asio::io_service& service, std::string name, std::string host)
     : name_(std::move(name))
     , host_(std::move(host))
@@ -178,7 +168,7 @@ void server::dispatch_endofwhois(const irc::message& msg)
      * params[1] == nickname
      * params[2] == End of WHOIS list
      */
-    auto it = whois_map_.find(msg.arg(1));
+    const auto it = whois_map_.find(msg.arg(1));
 
     if (it != whois_map_.end()) {
         on_whois({shared_from_this(), it->second});
@@ -357,7 +347,7 @@ void server::dispatch_whoisuser(const irc::message& msg)
     if (msg.args().size() < 6 || msg.arg(1) == "" || msg.arg(2) == "" || msg.arg(3) == "" || msg.arg(5) == "")
         return;
 
-    class whois info;
+    whois_info info;
 
     info.nick = msg.arg(1);
     info.user = msg.arg(2);
