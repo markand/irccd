@@ -81,7 +81,7 @@ std::string plugin_config_command::get_name() const noexcept
 
 void plugin_config_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    const auto id = json_util::get_string(args, "plugin");
+    const auto id = json_util::parser(args).get<std::string>("plugin");
 
     if (!id || !string_util::is_identifier(*id))
         throw plugin_error(plugin_error::invalid_identifier);

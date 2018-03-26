@@ -35,9 +35,10 @@ std::string server_topic_command::get_name() const noexcept
 
 void server_topic_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    const auto id = json_util::get_string(args, "server");
-    const auto channel = json_util::get_string(args, "channel");
-    const auto topic = json_util::optional_string(args, "topic", "");
+    const json_util::parser parser(args);
+    const auto id = parser.get<std::string>("server");
+    const auto channel = parser.get<std::string>("channel");
+    const auto topic = parser.optional<std::string>("topic", "");
 
     if (!id || !string_util::is_identifier(*id))
         throw server_error(server_error::invalid_identifier);

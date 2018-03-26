@@ -36,7 +36,7 @@ std::string server_info_command::get_name() const noexcept
 
 void server_info_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    const auto id = json_util::get_string(args, "server");
+    const auto id = json_util::parser(args).get<std::string>("server");
 
     if (!id || !string_util::is_identifier(*id))
         throw server_error(server_error::invalid_identifier);

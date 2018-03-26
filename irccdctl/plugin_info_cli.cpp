@@ -35,15 +35,17 @@ void plugin_info_cli::exec(ctl::controller& ctl, const std::vector<std::string>&
         throw std::invalid_argument("plugin-info requires 1 argument");
 
     request(ctl, {{ "plugin", args[0] }}, [] (auto result) {
+        const json_util::parser parser(result);
+
         std::cout << std::boolalpha;
         std::cout << "Author         : " <<
-            json_util::get_string(result, "/author"_json_pointer).value_or("(unknown)") << std::endl;
+            parser.get<std::string>("author").value_or("(unknown)") << std::endl;
         std::cout << "License        : " <<
-            json_util::get_string(result, "/license"_json_pointer).value_or("(unknown)") << std::endl;
+            parser.get<std::string>("license").value_or("(unknown)") << std::endl;
         std::cout << "Summary        : " <<
-            json_util::get_string(result, "/summary"_json_pointer).value_or("(unknown)") << std::endl;
+            parser.get<std::string>("summary").value_or("(unknown)") << std::endl;
         std::cout << "Version        : " <<
-            json_util::get_string(result, "/version"_json_pointer).value_or("(unknown)") << std::endl;
+            parser.get<std::string>("version").value_or("(unknown)") << std::endl;
     });
 }
 

@@ -35,12 +35,13 @@ std::string server_mode_command::get_name() const noexcept
 
 void server_mode_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    const auto id = json_util::get_string(args, "server");
-    const auto channel = json_util::get_string(args, "channel");
-    const auto mode = json_util::get_string(args, "mode");
-    const auto limit = json_util::optional_string(args, "limit", "");
-    const auto user = json_util::optional_string(args, "user", "");
-    const auto mask = json_util::optional_string(args, "mask", "");
+    const json_util::parser parser(args);
+    const auto id = parser.get<std::string>("server");
+    const auto channel = parser.get<std::string>("channel");
+    const auto mode = parser.get<std::string>("mode");
+    const auto limit = parser.optional<std::string>("limit", "");
+    const auto user = parser.optional<std::string>("user", "");
+    const auto mask = parser.optional<std::string>("mask", "");
 
     if (!id || !string_util::is_identifier(*id))
         throw server_error(server_error::invalid_identifier);

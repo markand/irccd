@@ -35,16 +35,19 @@ std::string server_join_command::get_name() const noexcept
 
 void server_join_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    const auto id = json_util::get_string(args, "server");
-    const auto channel = json_util::get_string(args, "channel");
-    const auto password = json_util::get_string(args, "password");
+    const json_util::parser parser(args);
+    const auto id = parser.get<std::string>("server");
+    const auto channel = parser.get<std::string>("channel");
+    const auto password = parser.optional<std::string>("password", "");
 
     if (!id || !string_util::is_identifier(*id))
         throw server_error(server_error::invalid_identifier);
     if (!channel || channel->empty())
         throw server_error(server_error::invalid_channel);
+    if (!password)
+        throw server_error(server_error::invalid_password);
 
-    irccd.servers().require(*id)->join(*channel, password ? *password : "");
+    irccd.servers().require(*id)->join(*channel, *password);
     client.success("server-join");
 }
 

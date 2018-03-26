@@ -181,7 +181,7 @@ void get_event(ctl::controller& ctl, std::string fmt)
         if (code)
             throw boost::system::system_error(code);
 
-        const auto event = json_util::get_string(message, "/event"_json_pointer);
+        const auto event = json_util::parser(message).get<std::string>("event");
         const auto it = events.find(event ? *event : "");
 
         if (it != events.end()) {

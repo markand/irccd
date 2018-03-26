@@ -41,7 +41,7 @@ void transport_service::handle_command(std::shared_ptr<transport_client> tc, con
 {
     assert(object.is_object());
 
-    const auto name = json_util::get_string(object, "/command"_json_pointer);
+    const auto name = json_util::parser(object).get<std::string>("command");
 
     if (!name) {
         tc->error(irccd_error::invalid_message);

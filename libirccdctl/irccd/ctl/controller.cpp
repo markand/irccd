@@ -60,8 +60,9 @@ void controller::verify(connect_t handler)
             return;
         }
 
-        const auto program = json_util::get_string(message, "/program"_json_pointer);
-        const auto major = json_util::get_int(message, "/major"_json_pointer);
+        const json_util::parser parser(message);
+        const auto program = parser.get<std::string>("program");
+        const auto major = parser.get<int>("major");
 
         if (!program && *program != "irccd")
             handler(irccd_error::not_irccd, std::move(message));
@@ -99,8 +100,9 @@ void controller::recv(network_recv_handler handler)
             return;
         }
 
-        const auto e = json_util::get_int(msg, "/error"_json_pointer);
-        const auto c = json_util::get_string(msg, "/errorCategory"_json_pointer);
+        const json_util::parser parser(msg);
+        const auto e = parser.get<int>("error");
+        const auto c = parser.get<std::string>("errorCategory");
 
         if (e && c) {
             if (*c == "irccd")

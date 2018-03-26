@@ -514,9 +514,10 @@ void do_connect()
             throw boost::system::system_error(code);
 
         if (verbose) {
-            const auto major = json_util::get_int(info, "/major"_json_pointer);
-            const auto minor = json_util::get_int(info, "/minor"_json_pointer);
-            const auto patch = json_util::get_int(info, "/patch"_json_pointer);
+            const json_util::parser parser(info);
+            const auto major = parser.get<int>("/major");
+            const auto minor = parser.get<int>("/minor");
+            const auto patch = parser.get<int>("/patch");
 
             if (!major || !minor || !patch)
                 std::cout << "connected to irccd (unknown version)" << std::endl;

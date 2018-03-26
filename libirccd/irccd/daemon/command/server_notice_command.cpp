@@ -35,9 +35,10 @@ std::string server_notice_command::get_name() const noexcept
 
 void server_notice_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    const auto id = json_util::get_string(args, "server");
-    const auto channel = json_util::get_string(args, "target");
-    const auto message = json_util::optional_string(args, "message", "");
+    const json_util::parser parser(args);
+    const auto id = parser.get<std::string>("server");
+    const auto channel = parser.get<std::string>("target");
+    const auto message = parser.optional<std::string>("message", "");
 
     if (!id || !string_util::is_identifier(*id))
         throw server_error(server_error::invalid_identifier);

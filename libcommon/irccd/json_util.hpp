@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_COMMON_JSON_UTIL_HPP
-#define IRCCD_COMMON_JSON_UTIL_HPP
+#ifndef IRCCD_JSON_UTIL_HPP
+#define IRCCD_JSON_UTIL_HPP
 
 /**
  * \file json_util.hpp
@@ -25,7 +25,9 @@
  */
 
 #include <cstdint>
+#include <limits>
 #include <string>
+#include <type_traits>
 
 #include <boost/optional.hpp>
 
@@ -39,214 +41,282 @@ namespace irccd {
 namespace json_util {
 
 /**
- * Get a JSON value from the given object or array.
- *
- * \param json the JSON object/array
- * \param key the pointer to the object
- * \return the value or boost::none if not found
+ * \cond JSON_UTIL_HIDDEN_SYMBOLS
  */
-inline boost::optional<nlohmann::json> get(const nlohmann::json& json,
-                                           const nlohmann::json::json_pointer& key) noexcept
-{
-    // Unfortunately, there is no find using pointer yet.
-    try {
-        return json.at(key);
-    } catch (...) {
-        return boost::none;
+
+namespace detail {
+
+template <typename Int>
+class parser_type_traits_uint : public std::true_type {
+public:
+    static boost::optional<Int> get(const nlohmann::json& value) noexcept
+    {
+        if (!value.is_number_unsigned())
+            return boost::none;
+
+        const auto ret = value.get<std::uint64_t>();
+
+        if (ret > std::numeric_limits<Int>::max())
+            return boost::none;
+
+        return static_cast<Int>(ret);
     }
-}
+};
+
+template <typename Int>
+class parser_type_traits_int : public std::true_type {
+public:
+    static boost::optional<Int> get(const nlohmann::json& value) noexcept
+    {
+        if (!value.is_number_integer())
+            return boost::none;
+
+        const auto ret = value.get<std::int64_t>();
+
+        if (ret < std::numeric_limits<Int>::min() || ret > std::numeric_limits<Int>::max())
+            return boost::none;
+
+        return static_cast<Int>(ret);
+    }
+};
+
+} // !detail
 
 /**
- * Convenient overload with simple key.
- *
- * \param json the JSON object/array
- * \param key the pointer to the object
- * \return the value or boost::none if not found
+ * \endcond
  */
-inline boost::optional<nlohmann::json> get(const nlohmann::json& json,
-                                           const std::string& key) noexcept
-{
-    const auto it = json.find(key);
-
-    if (it == json.end())
-        return boost::none;
-
-    return *it;
-}
 
 /**
- * Get a bool or null if not found or invalid.
+ * \brief Describe how to convert a JSON value.
  *
- * \param json the JSON object/array
- * \param key the pointer or property key
- * \return the value or boost::none if not found or invalid
+ * This class must be specialized for every type you want to convert from JSON
+ * to its native type.
+ *
+ * You only need to implement the get function with the following signature:
+ *
+ * ```cpp
+ * static boost::optional<T> get(const nlohmann::json& value);
+ * ```
+ *
+ * The implementation should not throw an exception but return a null optional
+ * instead.
+ *
+ * This class is already specialized for the given types:
+ *
+ * - bool
+ * - double
+ * - std::uint(8, 16, 32, 64)
+ * - std::string
  */
-template <typename Key>
-inline boost::optional<bool> get_bool(const nlohmann::json& json, const Key& key) noexcept
-{
-    const auto v = get(json, key);
-
-    if (!v || !v->is_boolean())
-        return boost::none;
-
-    return v->template get<bool>();
-}
+template <typename T>
+class parser_type_traits : public std::false_type {
+};
 
 /**
- * Get a 64 bit signed integer or null if not found or invalid.
- *
- * \param json the JSON object/array
- * \param key the pointer or property key
- * \return the value or boost::none if not found or invalid
+ * \brief Specialization for `bool`.
  */
-template <typename Key>
-inline boost::optional<std::int64_t> get_int(const nlohmann::json& json, const Key& key) noexcept
-{
-    const auto v = get(json, key);
+template <>
+class parser_type_traits<bool> : public std::true_type {
+public:
+    /**
+     * Convert the JSON value to bool.
+     *
+     * \return the bool or none if not a boolean type
+     */
+    static boost::optional<bool> get(const nlohmann::json& value) noexcept
+    {
+        if (!value.is_boolean())
+            return boost::none;
 
-    if (!v || !v->is_number_integer())
-        return boost::none;
-
-    return v->template get<std::int64_t>();
-}
+        return value.get<bool>();
+    }
+};
 
 /**
- * Get a 64 bit unsigned integer or null if not found or invalid.
- *
- * \param json the JSON object/array
- * \param key the pointer or property key
- * \return the value or boost::none if not found or invalid
+ * \brief Specialization for `double`.
  */
-template <typename Key>
-inline boost::optional<std::uint64_t> get_uint(const nlohmann::json& json, const Key& key) noexcept
-{
-    const auto v = get(json, key);
+template <>
+class parser_type_traits<double> : public std::true_type {
+public:
+    /**
+     * Convert the JSON value to bool.
+     *
+     * \return the double or none if not a double type
+     */
+    static boost::optional<double> get(const nlohmann::json& value) noexcept
+    {
+        if (!value.is_number_float())
+            return boost::none;
 
-    if (!v || !v->is_number_unsigned())
-        return boost::none;
-
-    return v->template get<std::uint64_t>();
-}
+        return value.get<double>();
+    }
+};
 
 /**
- * Get a string or null if not found or invalid.
- *
- * \param json the JSON object/array
- * \param key the pointer or property key
- * \return the value or boost::none if not found or invalid
+ * \brief Specialization for `std::string`.
  */
-template <typename Key>
-inline boost::optional<std::string> get_string(const nlohmann::json& json, const Key& key) noexcept
-{
-    const auto v = get(json, key);
+template <>
+class parser_type_traits<std::string> : public std::true_type {
+public:
+    /**
+     * Convert the JSON value to bool.
+     *
+     * \return the string or none if not a string type
+     */
+    static boost::optional<std::string> get(const nlohmann::json& value)
+    {
+        if (!value.is_string())
+            return boost::none;
 
-    if (!v || !v->is_string())
-        return boost::none;
-
-    return v->template get<std::string>();
-}
+        return value.get<std::string>();
+    }
+};
 
 /**
- * Get an optional bool.
- *
- * If the property is not found, return default value. If the property is not
- * a bool, return boost::none, otherwise return the value.
- *
- * \param json the JSON object/array
- * \param key the pointer or property key
- * \param def the default value
- * \return the value, boost::none or def
+ * \brief Specialization for `std::int8_t`.
  */
-template <typename Key>
-inline boost::optional<bool> optional_bool(const nlohmann::json& json, const Key& key, bool def = false) noexcept
-{
-    const auto v = get(json, key);
-
-    if (!v)
-        return def;
-    if (!v->is_boolean())
-        return boost::none;
-
-    return v->template get<bool>();
-}
+template <>
+class parser_type_traits<std::int8_t> : public detail::parser_type_traits_int<std::int8_t> {
+};
 
 /**
- * Get an optional integer.
- *
- * If the property is not found, return default value. If the property is not
- * an integer, return boost::none, otherwise return the value.
- *
- * \param json the JSON object/array
- * \param key the pointer or property key
- * \param def the default value
- * \return the value, boost::none or def
+ * \brief Specialization for `std::int16_t`.
  */
-template <typename Key>
-inline boost::optional<std::int64_t> optional_int(const nlohmann::json& json,
-                                                  const Key& key,
-                                                  std::int64_t def = 0) noexcept
-{
-    const auto v = get(json, key);
-
-    if (!v)
-        return def;
-    if (!v->is_number_integer())
-        return boost::none;
-
-    return v->template get<std::int64_t>();
-}
+template <>
+class parser_type_traits<std::int16_t> : public detail::parser_type_traits_int<std::int16_t> {
+};
 
 /**
- * Get an optional unsigned integer.
- *
- * If the property is not found, return default value. If the property is not
- * an unsigned integer, return boost::none, otherwise return the value.
- *
- * \param json the JSON object/array
- * \param key the pointer or property key
- * \param def the default value
- * \return the value, boost::none or def
+ * \brief Specialization for `std::int32_t`.
  */
-template <typename Key>
-inline boost::optional<std::uint64_t> optional_uint(const nlohmann::json& json,
-                                                    const Key& key,
-                                                    std::uint64_t def = 0) noexcept
-{
-    const auto v = get(json, key);
-
-    if (!v)
-        return def;
-    if (!v->is_number_unsigned())
-        return boost::none;
-
-    return v->template get<std::uint64_t>();
-}
+template <>
+class parser_type_traits<std::int32_t> : public detail::parser_type_traits_int<std::int32_t> {
+};
 
 /**
- * Get an optional string.
- *
- * If the property is not found, return default value. If the property is not
- * a string, return boost::none, otherwise return the value.
- *
- * \param json the JSON object/array
- * \param key the pointer or property key
- * \param def the default value
- * \return the value, boost::none or def
+ * \brief Specialization for `std::int64_t`.
  */
-template <typename Key>
-inline boost::optional<std::string> optional_string(const nlohmann::json& json,
-                                                    const Key& key,
-                                                    const std::string& def = "") noexcept
-{
-    const auto v = get(json, key);
+template <>
+class parser_type_traits<std::int64_t> : public std::true_type {
+public:
+    /**
+     * Convert the JSON value to std::int64_t.
+     *
+     * \return the int or none if not a int type
+     */
+    static boost::optional<std::int64_t> get(const nlohmann::json& value) noexcept
+    {
+        if (!value.is_number_integer())
+            return boost::none;
 
-    if (!v)
-        return def;
-    if (!v->is_string())
-        return boost::none;
+        return value.get<std::int64_t>();
+    }
+};
 
-    return v->template get<std::string>();
-}
+/**
+ * \brief Specialization for `std::int8_t`.
+ */
+template <>
+class parser_type_traits<std::uint8_t> : public detail::parser_type_traits_uint<std::uint8_t> {
+};
+
+/**
+ * \brief Specialization for `std::int16_t`.
+ */
+template <>
+class parser_type_traits<std::uint16_t> : public detail::parser_type_traits_uint<std::uint16_t> {
+};
+
+/**
+ * \brief Specialization for `std::int32_t`.
+ */
+template <>
+class parser_type_traits<std::uint32_t> : public detail::parser_type_traits_uint<std::uint32_t> {
+};
+
+/**
+ * \brief Specialization for `std::int64_t`.
+ */
+template <>
+class parser_type_traits<std::uint64_t> : public std::true_type {
+public:
+    /**
+     * Convert the JSON value to std::uint64_t.
+     *
+     * \return the int or none if not a int type
+     */
+    static boost::optional<std::uint64_t> get(const nlohmann::json& value) noexcept
+    {
+        if (!value.is_number_unsigned())
+            return boost::none;
+
+        return value.get<std::uint64_t>();
+    }
+};
+
+/**
+ * \brief Convenient JSON object parser
+ *
+ * This class helps destructuring insecure JSON input by returning optional
+ * values if they are not present or invalid.
+ */
+class parser {
+private:
+    nlohmann::json json_;
+
+public:
+    /**
+     * Construct the parser.
+     *
+     * \param document the document
+     */
+    inline parser(nlohmann::json document) noexcept
+        : json_(std::move(document))
+    {
+    }
+
+    /**
+     * Get a value from the document object.
+     *
+     * \param key the property key
+     * \return the value or boost::none if not found
+     */
+    template <typename Type>
+    inline boost::optional<Type> get(const std::string& key) const noexcept
+    {
+        static_assert(parser_type_traits<Type>::value, "type not supported");
+
+        const auto it = json_.find(key);
+
+        if (it == json_.end())
+            return boost::none;
+
+        return parser_type_traits<Type>::get(*it);
+    }
+
+    /**
+     * Get an optional value from the document object.
+     *
+     * If the value is undefined, the default value is returned. Otherwise, if
+     * the value is not in the given type, boost::none is returned.
+     *
+     * \param key the property key
+     * \param def the default value if property is undefined
+     * \return the value, boost::none or def
+     */
+    template <typename Type, typename DefaultValue>
+    inline boost::optional<Type> optional(const std::string& key, DefaultValue&& def) const noexcept
+    {
+        static_assert(parser_type_traits<Type>::value, "type not supported");
+
+        const auto it = json_.find(key);
+
+        if (it == json_.end())
+            return boost::optional<Type>(std::forward<DefaultValue>(def));
+
+        return parser_type_traits<Type>::get(*it);
+    }
+};
 
 /**
  * Print the value as human readable.
@@ -291,8 +361,6 @@ inline bool contains(const nlohmann::json& array, const nlohmann::json& value) n
 
     return false;
 }
-
-
 
 } // !json_util
 

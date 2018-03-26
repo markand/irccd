@@ -119,15 +119,15 @@ void from_config_load_options(server& sv, const ini::section& sc)
     sv.set_command_char(command_char);
 }
 
-void from_json_load_options(server& sv, const nlohmann::json& object)
+void from_json_load_options(server& sv, const json_util::parser& parser)
 {
-    const auto port = json_util::optional_uint(object, "port", sv.get_port());
-    const auto nickname = json_util::optional_string(object, "nickname", sv.get_nickname());
-    const auto realname = json_util::optional_string(object, "realname", sv.get_realname());
-    const auto username = json_util::optional_string(object, "username", sv.get_username());
-    const auto ctcp_version = json_util::optional_string(object, "ctcpVersion", sv.get_ctcp_version());
-    const auto command = json_util::optional_string(object, "commandChar", sv.get_command_char());
-    const auto password = json_util::optional_string(object, "password", sv.get_password());
+    const auto port = parser.optional<std::uint16_t>("port", sv.get_port());
+    const auto nickname = parser.optional<std::string>("nickname", sv.get_nickname());
+    const auto realname = parser.optional<std::string>("realname", sv.get_realname());
+    const auto username = parser.optional<std::string>("username", sv.get_username());
+    const auto ctcp_version = parser.optional<std::string>("ctcpVersion", sv.get_ctcp_version());
+    const auto command = parser.optional<std::string>("commandChar", sv.get_command_char());
+    const auto password = parser.optional<std::string>("password", sv.get_password());
 
     if (!port || *port > std::numeric_limits<std::uint16_t>::max())
         throw server_error(server_error::invalid_port);
@@ -153,29 +153,29 @@ void from_json_load_options(server& sv, const nlohmann::json& object)
     sv.set_password(*password);
 }
 
-void from_json_load_flags(server& sv, nlohmann::json object)
+void from_json_load_flags(server& sv, const json_util::parser& parser)
 {
-    const auto ipv6 = object["ipv6"];
-    const auto ssl = object["ssl"];
-    const auto ssl_verify = object["sslVerify"];
-    const auto auto_rejoin = object["autoRejoin"];
-    const auto join_invite = object["joinInvite"];
+    const auto ipv6 = parser.get<bool>("ipv6");
+    const auto auto_rejoin = parser.get<bool>("autoRejoin");
+    const auto join_invite = parser.get<bool>("joinInvite");
+    const auto ssl = parser.get<bool>("ssl");
+    const auto ssl_verify = parser.get<bool>("sslVerify");
 
-    if (ipv6.is_boolean() && ipv6.get<bool>())
+    if (ipv6.value_or(false))
         sv.set_flags(sv.get_flags() | server::ipv6);
-    if (ssl.is_boolean() && ssl.get<bool>())
-        sv.set_flags(sv.get_flags() | server::ssl);
-    if (ssl_verify.is_boolean() && ssl_verify.get<bool>())
-        sv.set_flags(sv.get_flags() | server::ssl_verify);
-    if (auto_rejoin.is_boolean() && auto_rejoin.get<bool>())
+    if (auto_rejoin.value_or(false))
         sv.set_flags(sv.get_flags() | server::auto_rejoin);
-    if (join_invite.is_boolean() && join_invite.get<bool>())
+    if (join_invite.value_or(false))
         sv.set_flags(sv.get_flags() | server::join_invite);
 
+    if (ssl.value_or(false))
 #if !defined(HAVE_SSL)
-    if (sv.get_flags() & server::ssl)
         throw server_error(server_error::ssl_disabled);
+#else
+        sv.set_flags(sv.get_flags() | server::ssl);
 #endif
+    if (ssl_verify.value_or(false))
+        sv.set_flags(sv.get_flags() | server::ssl_verify);
 }
 
 } // !namespace
@@ -183,8 +183,9 @@ void from_json_load_flags(server& sv, nlohmann::json object)
 std::shared_ptr<server> from_json(boost::asio::io_service& service, const nlohmann::json& object)
 {
     // Mandatory parameters.
-    const auto id = json_util::get_string(object, "name");
-    const auto host = json_util::get_string(object, "host");
+    const json_util::parser parser(object);
+    const auto id = parser.get<std::string>("name");
+    const auto host = parser.get<std::string>("host");
 
     if (!id || !string_util::is_identifier(*id))
         throw server_error(server_error::invalid_identifier);
@@ -193,8 +194,8 @@ std::shared_ptr<server> from_json(boost::asio::io_service& service, const nlohma
 
     const auto sv = std::make_shared<server>(service, *id, *host);
 
-    from_json_load_options(*sv, object);
-    from_json_load_flags(*sv, object);
+    from_json_load_options(*sv, parser);
+    from_json_load_flags(*sv, parser);
 
     return sv;
 }

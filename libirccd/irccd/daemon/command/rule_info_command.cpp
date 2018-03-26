@@ -35,7 +35,7 @@ std::string rule_info_command::get_name() const noexcept
 
 void rule_info_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    const auto index = json_util::get_uint(args, "index");
+    const auto index = json_util::parser(args).get<unsigned>("index");
 
     if (!index)
         throw rule_error(rule_error::invalid_index);

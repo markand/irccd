@@ -35,10 +35,11 @@ std::string server_kick_command::get_name() const noexcept
 
 void server_kick_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    const auto id = json_util::get_string(args, "server");
-    const auto target = json_util::get_string(args, "target");
-    const auto channel = json_util::get_string(args, "channel");
-    const auto reason = json_util::get_string(args, "reason");
+    const json_util::parser parser(args);
+    const auto id = parser.get<std::string>("server");
+    const auto target = parser.get<std::string>("target");
+    const auto channel = parser.get<std::string>("channel");
+    const auto reason = parser.optional<std::string>("reason", "");
 
     if (!id || !string_util::is_identifier(*id))
         throw server_error(server_error::invalid_identifier);
@@ -46,8 +47,10 @@ void server_kick_command::exec(irccd& irccd, transport_client& client, const nlo
         throw server_error(server_error::invalid_nickname);
     if (!channel || channel->empty())
         throw server_error(server_error::invalid_channel);
+    if (!reason)
+        throw server_error(server_error::invalid_message);
 
-    irccd.servers().require(*id)->kick(*target, *channel, reason ? *reason : "");
+    irccd.servers().require(*id)->kick(*target, *channel, *reason);
     client.success("server-kick");
 }
 

@@ -35,9 +35,10 @@ std::string server_invite_command::get_name() const noexcept
 
 void server_invite_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    const auto id = json_util::get_string(args, "server");
-    const auto target = json_util::get_string(args, "target");
-    const auto channel = json_util::get_string(args, "channel");
+    const json_util::parser parser(args);
+    const auto id = parser.get<std::string>("server");
+    const auto target = parser.get<std::string>("target");
+    const auto channel = parser.get<std::string>("channel");
 
     if (!id || !string_util::is_identifier(*id))
         throw server_error(server_error::invalid_identifier);
