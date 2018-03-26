@@ -238,6 +238,32 @@ BOOST_AUTO_TEST_CASE(invalid_channel_2)
     BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
 }
 
+BOOST_AUTO_TEST_CASE(invalid_message)
+{
+    boost::system::error_code result;
+    nlohmann::json message;
+
+    ctl_->send({
+        { "command",    "server-kick"   },
+        { "server",     "test"          },
+        { "target",     "jean"          },
+        { "channel",    "#staff"        },
+        { "reason",     123456          }
+    });
+    ctl_->recv([&] (auto rresult, auto rmessage) {
+        result = rresult;
+        message = rmessage;
+    });
+
+    wait_for([&] {
+        return result;
+    });
+
+    BOOST_TEST(result == server_error::invalid_message);
+    BOOST_TEST(message["error"].template get<int>() == server_error::invalid_message);
+    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
+}
+
 BOOST_AUTO_TEST_CASE(not_found)
 {
     boost::system::error_code result;
