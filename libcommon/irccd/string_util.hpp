@@ -45,30 +45,6 @@ namespace irccd {
 namespace string_util {
 
 /**
- * \brief Pack a message and its type
- *
- * On channels and queries, you may have a special command or a standard message
- * depending on the beginning of the message.
- *
- * Example: `!reminder help' may invoke the command event if a plugin reminder
- * exists.
- */
-struct message_pack {
-    /**
-     * \brief Describe which type of message has been received
-     */
-    enum class type {
-        command,                        //!< special command
-        message                         //!< standard message
-    } type;
-
-    /**
-     * Message content.
-     */
-    std::string message;
-};
-
-/**
  * \brief Disable or enable some features.
  */
 enum class subst_flags : std::uint8_t {
@@ -276,21 +252,6 @@ inline std::string join(std::initializer_list<T> list, DelimType delim = ':')
 {
     return join(list.begin(), list.end(), delim);
 }
-
-/**
- * Parse IRC message and determine if it's a command or a simple message.
- *
- * If it's a command, the plugin invocation command is removed from the
- * original message, otherwise it is copied verbatime.
- *
- * \param message the message line
- * \param cchar the command char (e.g '!')
- * \param plugin the plugin name
- * \return the pair
- */
-IRCCD_EXPORT message_pack parse_message(std::string message,
-                                        const std::string& cchar,
-                                        const std::string& plugin);
 
 /**
  * Server and identities must have strict names. This function can
