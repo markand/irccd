@@ -79,12 +79,22 @@ public:
     {
     }
 
-    inline const connection& conn() const noexcept
+    /**
+     * Access the underlying connection.
+     *
+     * \return the connection
+     */
+    inline const connection& get_conn() const noexcept
     {
         return conn_;
     }
 
-    inline connection& conn() noexcept
+    /**
+     * Overloaded function.
+     *
+     * \return the connection
+     */
+    inline connection& get_conn() noexcept
     {
         return conn_;
     }
@@ -94,7 +104,7 @@ public:
      *
      * \return the password
      */
-    inline const std::string& password() const noexcept
+    inline const std::string& get_password() const noexcept
     {
         return password_;
     }

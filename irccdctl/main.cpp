@@ -544,7 +544,7 @@ void do_exec(int argc, char** argv)
 
     exec(args);
 
-    while (ctl->conn().is_active())
+    while (ctl->get_conn().is_active())
         service.run();
 }
 
