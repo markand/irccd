@@ -79,7 +79,7 @@ void transport_service::do_recv(std::shared_ptr<transport_client> tc)
         default:
             handle_command(tc, json);
 
-            if (tc->state() == transport_client::state_t::ready)
+            if (tc->get_state() == transport_client::state_t::ready)
                 do_recv(std::move(tc));
 
             break;
@@ -121,7 +121,7 @@ void transport_service::broadcast(const nlohmann::json& json)
     assert(json.is_object());
 
     for (const auto& servers : servers_)
-        for (const auto& client : servers->clients())
+        for (const auto& client : servers->get_clients())
             client->send(json);
 }
 

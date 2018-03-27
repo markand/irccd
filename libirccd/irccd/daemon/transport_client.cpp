@@ -66,7 +66,7 @@ void transport_client::error(boost::system::error_code code,
         if (handler)
             handler(code);
 
-        parent_.clients().erase(shared_from_this());
+        parent_.get_clients().erase(shared_from_this());
     });
 
     state_ = state_t::closing;

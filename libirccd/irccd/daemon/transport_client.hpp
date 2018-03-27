@@ -88,7 +88,7 @@ public:
      *
      * \return the parent
      */
-    inline const transport_server& parent() const noexcept
+    inline const transport_server& get_parent() const noexcept
     {
         return parent_;
     }
@@ -98,7 +98,7 @@ public:
      *
      * \return the parent
      */
-    inline transport_server& parent() noexcept
+    inline transport_server& get_parent() noexcept
     {
         return parent_;
     }
@@ -108,7 +108,7 @@ public:
      *
      * \return the state
      */
-    inline state_t state() const noexcept
+    inline state_t get_state() const noexcept
     {
         return state_;
     }

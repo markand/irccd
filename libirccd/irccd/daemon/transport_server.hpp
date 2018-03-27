@@ -93,7 +93,7 @@ public:
      *
      * \return the clients
      */
-    inline const client_set_t& clients() const noexcept
+    inline const client_set_t& get_clients() const noexcept
     {
         return clients_;
     }
@@ -103,7 +103,7 @@ public:
      *
      * \return the clients
      */
-    inline client_set_t& clients() noexcept
+    inline client_set_t& get_clients() noexcept
     {
         return clients_;
     }
@@ -113,7 +113,7 @@ public:
      *
      * \return the password
      */
-    inline const std::string& password() const noexcept
+    inline const std::string& get_password() const noexcept
     {
         return password_;
     }
