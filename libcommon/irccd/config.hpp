@@ -33,10 +33,9 @@ namespace irccd {
 /**
  * \brief Read .ini configuration file for irccd
  */
-class config {
+class config : public ini::document {
 private:
     std::string path_;
-    ini::document document_;
 
 public:
     /**
@@ -45,7 +44,7 @@ public:
      * \param name the file name
      * \return the config or empty if not found
      */
-    static boost::optional<config> find(const std::string& name);
+    static boost::optional<config> search(const std::string& name);
 
     /**
      * Load the configuration from the specified path.
@@ -53,20 +52,8 @@ public:
      * \param path the path
      */
     inline config(std::string path = "")
-        : path_(std::move(path))
+        : document(path.empty() ? ini::document() : ini::read_file(path))
     {
-        if (!path_.empty())
-            document_ = ini::read_file(path_);
-    }
-
-    /**
-     * Get the underlying document.
-     *
-     * \return the document
-     */
-    inline const ini::document& doc() const noexcept
-    {
-        return document_;
     }
 
     /**
@@ -74,32 +61,9 @@ public:
      *
      * \return the path
      */
-    inline const std::string& path() const noexcept
+    inline const std::string& get_path() const noexcept
     {
         return path_;
-    }
-
-    /**
-     * Convenience function to access a section.
-     *
-     * \param section the section name
-     * \return the section or empty one
-     */
-    inline ini::section section(const std::string& section) const noexcept
-    {
-        return document_.get(section);
-    }
-
-    /**
-     * Convenience function to access an ini value.
-     *
-     * \param section the section name
-     * \param option the option name
-     * \return the value or empty string
-     */
-    inline std::string value(const std::string& section, const std::string& option) const noexcept
-    {
-        return document_.get(section).get(option).value();
     }
 };
 

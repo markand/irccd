@@ -103,7 +103,7 @@ void rule_service::load(const config& cfg) noexcept
 {
     rules_.clear();
 
-    for (const auto& section : cfg.doc()) {
+    for (const auto& section : cfg) {
         if (section.key() != "rule")
             continue;
 

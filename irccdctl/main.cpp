@@ -262,13 +262,13 @@ void read(const config& cfg)
 {
     ini::document::const_iterator it;
 
-    if (!ctl && (it = cfg.doc().find("connect")) != cfg.doc().end())
+    if (!ctl && (it = cfg.find("connect")) != cfg.end())
         read_connect(*it);
-    if ((it = cfg.doc().find("general")) != cfg.doc().end())
+    if ((it = cfg.find("general")) != cfg.end())
         read_general(*it);
 
     // [alias.*] sections.
-    for (const auto& sc : cfg.doc()) {
+    for (const auto& sc : cfg) {
         if (sc.key().compare(0, 6, "alias.") == 0) {
             auto name = sc.key().substr(6);
             auto alias = read_alias(sc, name);
@@ -579,7 +579,7 @@ int main(int argc, char** argv)
         if (it != result.end() || (it = result.find("--config")) != result.end())
             irccd::ctl::read(it->second);
         else {
-            if (auto conf = irccd::config::find("irccdctl.conf"))
+            if (auto conf = irccd::config::search("irccdctl.conf"))
                 irccd::ctl::read(*conf);
         }
     } catch (const std::exception& ex) {

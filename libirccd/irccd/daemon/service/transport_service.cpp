@@ -127,7 +127,7 @@ void transport_service::broadcast(const nlohmann::json& json)
 
 void transport_service::load(const config& cfg) noexcept
 {
-    for (const auto& section : cfg.doc()) {
+    for (const auto& section : cfg) {
         if (section.key() != "transport")
             continue;
 

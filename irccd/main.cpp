@@ -178,7 +178,7 @@ config open(const option::result& result)
     if (it != result.end() || (it = result.find("--config")) != result.end())
         return config(it->second);
 
-    auto cfg = config::find("irccd.conf");
+    auto cfg = config::search("irccd.conf");
 
     if (!cfg)
         throw std::runtime_error("no configuration file could be found");

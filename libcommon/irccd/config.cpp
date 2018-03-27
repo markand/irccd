@@ -24,7 +24,7 @@
 
 namespace irccd {
 
-boost::optional<config> config::find(const std::string& name)
+boost::optional<config> config::search(const std::string& name)
 {
     for (const auto& path : sys::config_filenames(name)) {
         boost::system::error_code ec;

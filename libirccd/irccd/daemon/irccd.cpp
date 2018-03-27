@@ -114,14 +114,14 @@ void irccd::load_logs_syslog()
 
 void irccd::load_logs()
 {
-    auto sc = config_.section("logs");
+    const auto sc = config_.get("logs");
 
     if (sc.empty())
         return;
 
     logger_->set_verbose(string_util::is_identifier(sc.get("verbose").value()));
 
-    auto type = sc.get("type").value();
+    const auto type = sc.get("type").value();
 
     if (!type.empty()) {
         // Console is the default, no test case.
@@ -136,7 +136,7 @@ void irccd::load_logs()
 
 void irccd::load_formats()
 {
-    auto sc = config_.section("format");
+    const auto sc = config_.get("format");
 
     if (sc.empty())
         return;
@@ -150,7 +150,7 @@ void irccd::load_formats()
 
 void irccd::load_pid()
 {
-    auto path = config_.value("general", "pidfile");
+    const auto path = config_.get("general").get("pidfile").value();
 
     if (path.empty())
         return;
@@ -171,7 +171,7 @@ void irccd::load_pid()
 
 void irccd::load_gid()
 {
-    auto gid = config_.value("general", "gid");
+    const auto gid = config_.get("general").get("gid").value();
 
     if (gid.empty())
         return;
@@ -190,7 +190,7 @@ void irccd::load_gid()
 
 void irccd::load_uid()
 {
-    auto uid = config_.value("general", "uid");
+    const auto uid = config_.get("general").get("uid").value();
 
     if (uid.empty())
         return;
@@ -241,7 +241,7 @@ void irccd::load() noexcept
     load_formats();
 
     if (!loaded_)
-        logger_->info() << "irccd: loading configuration from " << config_.path() << std::endl;
+        logger_->info() << "irccd: loading configuration from " << config_.get_path() << std::endl;
     else
         logger_->info() << "irccd: reloading configuration" << std::endl;
 

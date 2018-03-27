@@ -34,7 +34,7 @@ Map to_map(const config& conf, const std::string& section)
 {
     Map ret;
 
-    for (const auto& opt : conf.doc().get(section))
+    for (const auto& opt : conf.get(section))
         ret.emplace(opt.key(), opt.value());
 
     return ret;
@@ -207,7 +207,7 @@ void plugin_service::unload(const std::string& name)
 
 void plugin_service::load(const class config& cfg) noexcept
 {
-    for (const auto& option : cfg.section("plugins")) {
+    for (const auto& option : cfg.get("plugins")) {
         if (!string_util::is_identifier(option.key()))
             continue;
 

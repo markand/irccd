@@ -513,7 +513,7 @@ void server_service::clear() noexcept
 
 void server_service::load(const config& cfg) noexcept
 {
-    for (const auto& section : cfg.doc()) {
+    for (const auto& section : cfg) {
         if (section.key() != "server")
             continue;
 
