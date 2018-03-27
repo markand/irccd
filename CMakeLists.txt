@@ -35,13 +35,13 @@
 #
 # Build system is then processed in different directories:
 #
-# contrib                   - User contributions.
 # doc                       - The documentation process.
 # extern                    - External libraries.
 # lib                       - The irccd library
 # irccd                     - The irccd executable.
 # irccdctl                  - The irccdctl utility.
 # plugins                   - Official irccd plugins.
+# systemd                   - Unit file for systemd.
 # tests                     - The unit tests.
 # win32                     - Additional files for Windows platform.
 #
@@ -91,7 +91,7 @@ endif ()
 add_subdirectory(irccd)
 add_subdirectory(irccdctl)
 add_subdirectory(irccd-test)
-add_subdirectory(contrib)
+add_subdirectory(systemd)
 
 if (HAVE_JS)
     add_subdirectory(plugins)
