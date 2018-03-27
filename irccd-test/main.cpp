@@ -93,7 +93,7 @@ std::string get_arg(const std::vector<std::string>& args, unsigned index)
  */
 void on_command(const std::string& data)
 {
-    auto args = su::split(data, " ", 4);
+    const auto args = su::split(data, " ", 4);
 
     plugin->handle_command(*daemon, {
         get_server(get_arg(args, 0)),
@@ -108,7 +108,7 @@ void on_command(const std::string& data)
  */
 void on_connect(const std::string& data)
 {
-    auto args = su::split(data, " ");
+    const auto args = su::split(data, " ");
 
     plugin->handle_connect(*daemon, {get_server(get_arg(args, 0))});
 }
@@ -133,7 +133,7 @@ void on_invite(const std::string& data)
  */
 void on_join(const std::string& data)
 {
-    auto args = su::split(data, " ");
+    const auto args = su::split(data, " ");
 
     plugin->handle_join(*daemon, {
         get_server(get_arg(args, 0)),
@@ -147,7 +147,7 @@ void on_join(const std::string& data)
  */
 void on_kick(const std::string& data)
 {
-    auto args = su::split(data, " ", 5);
+    const auto args = su::split(data, " ", 5);
 
     plugin->handle_kick(*daemon, {
         get_server(get_arg(args, 0)),
@@ -171,7 +171,7 @@ void on_load(const std::string&)
  */
 void on_me(const std::string& data)
 {
-    auto args = su::split(data, " ", 4);
+    const auto args = su::split(data, " ", 4);
 
     plugin->handle_me(*daemon, {
         get_server(get_arg(args, 0)),
@@ -186,7 +186,7 @@ void on_me(const std::string& data)
  */
 void on_message(const std::string& data)
 {
-    auto args = su::split(data, " ", 4);
+    const auto args = su::split(data, " ", 4);
 
     plugin->handle_message(*daemon, {
         get_server(get_arg(args, 0)),
@@ -201,7 +201,7 @@ void on_message(const std::string& data)
  */
 void on_mode(const std::string& data)
 {
-    auto args = su::split(data, " ", 7);
+    const auto args = su::split(data, " ", 7);
 
     plugin->handle_mode(*daemon, {
         get_server(get_arg(args, 0)),
@@ -219,7 +219,7 @@ void on_mode(const std::string& data)
  */
 void on_names(const std::string& data)
 {
-    auto args = su::split(data, " ");
+    const auto args = su::split(data, " ");
 
     names_event ev;
 
@@ -237,7 +237,7 @@ void on_names(const std::string& data)
  */
 void on_nick(const std::string& data)
 {
-    auto args = su::split(data, " ");
+    const auto args = su::split(data, " ");
 
     plugin->handle_nick(*daemon, {
         get_server(get_arg(args, 0)),
@@ -251,7 +251,7 @@ void on_nick(const std::string& data)
  */
 void on_notice(const std::string& data)
 {
-    auto args = su::split(data, " ", 4);
+    const auto args = su::split(data, " ", 4);
 
     plugin->handle_notice(*daemon, {
         get_server(get_arg(args, 0)),
@@ -266,7 +266,7 @@ void on_notice(const std::string& data)
  */
 void on_part(const std::string& data)
 {
-    auto args = su::split(data, " ", 4);
+    const auto args = su::split(data, " ", 4);
 
     plugin->handle_part(*daemon, {
         get_server(get_arg(args, 0)),
@@ -289,7 +289,7 @@ void on_reload(const std::string&)
  */
 void on_topic(const std::string& data)
 {
-    auto args = su::split(data, " ", 4);
+    const auto args = su::split(data, " ", 4);
 
     plugin->handle_topic(*daemon, {
         get_server(get_arg(args, 0)),
@@ -312,7 +312,7 @@ void on_unload(const std::string&)
  */
 void on_whois(const std::string& data)
 {
-    auto args = su::split(data, " ");
+    const auto args = su::split(data, " ");
 
     whois_event ev;
 
@@ -356,8 +356,8 @@ static const functions list{
 
 void exec(const std::string& line)
 {
-    auto pos = line.find(' ');
-    auto it = list.find(line.substr(0, pos));
+    const auto pos = line.find(' ');
+    const auto it = list.find(line.substr(0, pos));
 
     if (it != list.end())
         it->second(pos == std::string::npos ? "" : line.substr(pos + 1));
@@ -449,7 +449,10 @@ void run()
 
     for (;;) {
         std::cout << "> ";
-        std::getline(std::cin, line);
+
+        if (!std::getline(std::cin, line))
+            return;
+
         exec(line);
     }
 }
