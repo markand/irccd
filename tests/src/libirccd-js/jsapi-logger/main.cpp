@@ -63,7 +63,7 @@ protected:
     logger_test()
     {
         irccd_.set_log(std::make_unique<my_logger>(*this));
-        irccd_.log().set_verbose(true);
+        irccd_.get_log().set_verbose(true);
     }
 };
 

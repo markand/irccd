@@ -46,8 +46,8 @@ plugin_test::plugin_test(std::string name, std::string path)
     server_->set_nickname("irccd");
     plugin_ = std::make_unique<js_plugin>(std::move(name), std::move(path));
 
-    irccd_.log().set_verbose(false);
     irccd_.set_log(std::make_unique<silent_logger>());
+    irccd_.get_log().set_verbose(false);
     irccd_.plugins().add(plugin_);
     irccd_.servers().add(server_);
 

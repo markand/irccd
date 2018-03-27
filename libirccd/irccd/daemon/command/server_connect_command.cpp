@@ -33,7 +33,7 @@ std::string server_connect_command::get_name() const noexcept
 
 void server_connect_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
 {
-    auto server = server_util::from_json(irccd.service(), args);
+    auto server = server_util::from_json(irccd.get_service(), args);
 
     if (irccd.servers().has(server->get_name()))
         throw server_error(server_error::already_exists);

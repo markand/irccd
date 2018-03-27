@@ -77,14 +77,16 @@ bool rule_service::solve(const std::string& server,
 {
     bool result = true;
 
-    irccd_.log().debug(string_util::sprintf("rule: solving for server=%s, channel=%s, origin=%s, plugin=%s, event=%s",
-        server, channel, origin, plugin, event));
+    irccd_.get_log().debug(string_util::sprintf(
+        "rule: solving for server=%s, channel=%s, origin=%s, plugin=%s, event=%s",
+        server, channel, origin, plugin, event
+    ));
 
     int i = 0;
     for (const auto& rule : rules_) {
         auto action = rule.get_action() == rule::action::accept ? "accept" : "drop";
 
-        irccd_.log().debug() << "  candidate "   << i++ << ":\n"
+        irccd_.get_log().debug() << "  candidate "   << i++ << ":\n"
             << "    servers: "  << string_util::join(rule.get_servers()) << "\n"
             << "    channels: " << string_util::join(rule.get_channels()) << "\n"
             << "    origins: "  << string_util::join(rule.get_origins()) << "\n"
@@ -110,7 +112,7 @@ void rule_service::load(const config& cfg) noexcept
         try {
             rules_.push_back(rule_util::from_config(section));
         } catch (const std::exception& ex) {
-            irccd_.log().warning() << "rule: " << ex.what() << std::endl;
+            irccd_.get_log().warning() << "rule: " << ex.what() << std::endl;
         }
     }
 }

@@ -53,7 +53,7 @@ plugin_service::~plugin_service()
         try {
             plugin->handle_unload(irccd_);
         } catch (const std::exception& ex) {
-            irccd_.log().warning() << "plugin: " << plugin->get_name() << ": " << ex.what() << std::endl;
+            irccd_.get_log().warning() << "plugin: " << plugin->get_name() << ": " << ex.what() << std::endl;
         }
     }
 }
@@ -99,18 +99,18 @@ void plugin_service::add_loader(std::unique_ptr<plugin_loader> loader)
 
 plugin_config plugin_service::config(const std::string& id)
 {
-    return to_map<plugin_config>(irccd_.config(), string_util::sprintf("plugin.%s", id));
+    return to_map<plugin_config>(irccd_.get_config(), string_util::sprintf("plugin.%s", id));
 }
 
 plugin_formats plugin_service::formats(const std::string& id)
 {
-    return to_map<plugin_formats>(irccd_.config(), string_util::sprintf("format.%s", id));
+    return to_map<plugin_formats>(irccd_.get_config(), string_util::sprintf("format.%s", id));
 }
 
 plugin_paths plugin_service::paths(const std::string& id)
 {
-    auto defaults = to_map<plugin_paths>(irccd_.config(), "paths");
-    auto paths = to_map<plugin_paths>(irccd_.config(), string_util::sprintf("paths.%s", id));
+    auto defaults = to_map<plugin_paths>(irccd_.get_config(), "paths");
+    auto paths = to_map<plugin_paths>(irccd_.get_config(), string_util::sprintf("paths.%s", id));
 
     // Fill defaults paths.
     if (!defaults.count("cache"))
@@ -223,7 +223,7 @@ void plugin_service::load(const class config& cfg) noexcept
             try {
                 load(name, option.value());
             } catch (const std::exception& ex) {
-                irccd_.log().warning(ex.what());
+                irccd_.get_log().warning(ex.what());
             }
         }
     }

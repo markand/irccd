@@ -373,7 +373,7 @@ duk_ret_t constructor(duk_context* ctx)
 
     try {
         auto json = duk_json_encode(ctx, 0);
-        auto s = server_util::from_json(dukx_get_irccd(ctx).service(), nlohmann::json::parse(json));
+        auto s = server_util::from_json(dukx_get_irccd(ctx).get_service(), nlohmann::json::parse(json));
 
         duk_push_this(ctx);
         duk_push_pointer(ctx, new std::shared_ptr<server>(std::move(s)));

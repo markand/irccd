@@ -85,9 +85,9 @@ void timer::handle()
     duk_remove(ctx, -2);
 
     if (duk_pcall(ctx, 0)) {
-        dukx_get_irccd(ctx).log().warning() << "plugin: " << plugin->get_name()
+        dukx_get_irccd(ctx).get_log().warning() << "plugin: " << plugin->get_name()
             << " timer error:" << std::endl;
-        dukx_get_irccd(ctx).log().warning() << "  "
+        dukx_get_irccd(ctx).get_log().warning() << "  "
             << dukx_stack(ctx, -1).what() << std::endl;
     } else
         duk_pop(ctx);
@@ -189,7 +189,7 @@ duk_ret_t destructor(duk_context* ctx)
     duk_del_prop_string(ctx, -1, ptr->key().c_str());
     duk_pop(ctx);
 
-    dukx_get_irccd(ctx).log().debug("timer: destroyed");
+    dukx_get_irccd(ctx).get_log().debug("timer: destroyed");
 
     delete ptr;
 
@@ -224,7 +224,7 @@ duk_ret_t constructor(duk_context* ctx)
         duk_error(ctx, DUK_ERR_TYPE_ERROR, "missing callback function");
 
     auto& daemon = dukx_get_irccd(ctx);
-    auto object = new timer(daemon.service(), dukx_get_plugin(ctx), delay, static_cast<timer::type_t>(type));
+    auto object = new timer(daemon.get_service(), dukx_get_plugin(ctx), delay, static_cast<timer::type_t>(type));
 
     duk_push_this(ctx);
     duk_push_pointer(ctx, object);

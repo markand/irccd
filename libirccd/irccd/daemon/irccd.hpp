@@ -48,8 +48,8 @@ class transport_service;
  */
 class irccd {
 private:
-    // Configurations.
-    class config config_;
+    // Configuration.
+    config config_;
 
     // Main io service.
     boost::asio::io_service& service_;
@@ -101,7 +101,7 @@ public:
      *
      * \return the configuration
      */
-    inline const class config& config() const noexcept
+    inline const config& get_config() const noexcept
     {
         return config_;
     }
@@ -111,7 +111,7 @@ public:
      *
      * \param cfg the new config
      */
-    inline void set_config(class config cfg) noexcept
+    inline void set_config(config cfg) noexcept
     {
         config_ = std::move(cfg);
     }
@@ -121,7 +121,7 @@ public:
      *
      * \return the service
      */
-    inline const boost::asio::io_service& service() const noexcept
+    inline const boost::asio::io_service& get_service() const noexcept
     {
         return service_;
     }
@@ -131,7 +131,7 @@ public:
      *
      * \return the service
      */
-    inline boost::asio::io_service& service() noexcept
+    inline boost::asio::io_service& get_service() noexcept
     {
         return service_;
     }
@@ -141,7 +141,7 @@ public:
      *
      * \return the logger
      */
-    inline const logger& log() const noexcept
+    inline const logger& get_log() const noexcept
     {
         return *logger_;
     }
@@ -151,7 +151,7 @@ public:
      *
      * \return the logger
      */
-    inline logger& log() noexcept
+    inline logger& get_log() noexcept
     {
         return *logger_;
     }

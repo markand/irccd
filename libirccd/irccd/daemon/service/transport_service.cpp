@@ -60,8 +60,8 @@ void transport_service::handle_command(std::shared_ptr<transport_client> tc, con
         } catch (const boost::system::system_error& ex) {
             tc->error(ex.code(), (*cmd)->get_name());
         } catch (const std::exception& ex) {
-            irccd_.log().warning() << "transport: unknown error not reported" << std::endl;
-            irccd_.log().warning() << "transport: " << ex.what() << std::endl;
+            irccd_.get_log().warning() << "transport: unknown error not reported" << std::endl;
+            irccd_.get_log().warning() << "transport: " << ex.what() << std::endl;
         }
     }
 }
@@ -71,7 +71,7 @@ void transport_service::do_recv(std::shared_ptr<transport_client> tc)
     tc->recv([this, tc] (auto code, auto json) {
         switch (code.value()) {
         case boost::system::errc::network_down:
-            irccd_.log().warning("transport: client disconnected");
+            irccd_.get_log().warning("transport: client disconnected");
             break;
         case boost::system::errc::invalid_argument:
             tc->error(irccd_error::invalid_message);
@@ -91,12 +91,12 @@ void transport_service::do_accept(transport_server& ts)
 {
     ts.accept([this, &ts] (auto code, auto client) {
         if (code)
-            irccd_.log().warning() << "transport: new client error: " << code.message() << std::endl;
+            irccd_.get_log().warning() << "transport: new client error: " << code.message() << std::endl;
         else {
             do_accept(ts);
             do_recv(std::move(client));
 
-            irccd_.log().info() << "transport: new client connected" << std::endl;
+            irccd_.get_log().info() << "transport: new client connected" << std::endl;
         }
     });
 }
@@ -132,9 +132,9 @@ void transport_service::load(const config& cfg) noexcept
             continue;
 
         try {
-            add(transport_util::from_config(irccd_.service(), section));
+            add(transport_util::from_config(irccd_.get_service(), section));
         } catch (const std::exception& ex) {
-            irccd_.log().warning() << "transport: " << ex.what() << std::endl;
+            irccd_.get_log().warning() << "transport: " << ex.what() << std::endl;
         }
     }
 }

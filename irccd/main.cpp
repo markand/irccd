@@ -127,7 +127,7 @@ void init(int& argc, char**& argv)
     sys::set_program_name("irccd");
 
     // Default logging to console.
-    instance->log().set_verbose(false);
+    instance->get_log().set_verbose(false);
 
     -- argc;
     ++ argv;
@@ -161,10 +161,10 @@ option::result parse(int& argc, char**& argv)
                 version(result);
                 // NOTREACHED
             if (pair.first == "-v" || pair.first == "--verbose")
-                instance->log().set_verbose(true);
+                instance->get_log().set_verbose(true);
         }
     } catch (const std::exception& ex) {
-        instance->log().warning() << "irccd: " << ex.what() << std::endl;
+        instance->get_log().warning() << "irccd: " << ex.what() << std::endl;
         usage();
     }
 
