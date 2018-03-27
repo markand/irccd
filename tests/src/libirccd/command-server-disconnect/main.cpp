@@ -54,39 +54,23 @@ BOOST_FIXTURE_TEST_SUITE(server_disconnect_test_suite, server_disconnect_test)
 
 BOOST_AUTO_TEST_CASE(one)
 {
-    nlohmann::json result;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "server-disconnect" },
         { "server",     "s1"                }
     });
-    ctl_->recv([&] (auto, auto msg) {
-        result = msg;
-    });
 
-    wait_for([&] () {
-        return result.is_object();
-    });
-
-    BOOST_TEST(result["command"].get<std::string>() == "server-disconnect");
+    BOOST_TEST(result.first["command"].get<std::string>() == "server-disconnect");
     BOOST_TEST(!daemon_->servers().has("s1"));
     BOOST_TEST(daemon_->servers().has("s2"));
 }
 
 BOOST_AUTO_TEST_CASE(all)
 {
-    nlohmann::json result;
-
-    ctl_->send({{"command", "server-disconnect"}});
-    ctl_->recv([&] (auto, auto msg) {
-        result = msg;
+    const auto result = request({
+        { "command", "server-disconnect" }
     });
 
-    wait_for([&] () {
-        return result.is_object();
-    });
-
-    BOOST_TEST(result["command"].get<std::string>() == "server-disconnect");
+    BOOST_TEST(result.first["command"].get<std::string>() == "server-disconnect");
     BOOST_TEST(!daemon_->servers().has("s1"));
     BOOST_TEST(!daemon_->servers().has("s2"));
 }
@@ -95,48 +79,26 @@ BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "server-disconnect" },
         { "server",     123456              }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == server_error::invalid_identifier);
-    BOOST_TEST(message["error"].template get<int>() == server_error::invalid_identifier);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result.second == server_error::invalid_identifier);
+    BOOST_TEST(result.first["error"].template get<int>() == server_error::invalid_identifier);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "server-disconnect" },
         { "server",     "unknown"           }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == server_error::not_found);
-    BOOST_TEST(message["error"].template get<int>() == server_error::not_found);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result.second == server_error::not_found);
+    BOOST_TEST(result.first["error"].template get<int>() == server_error::not_found);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

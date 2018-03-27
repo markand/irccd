@@ -81,24 +81,16 @@ BOOST_AUTO_TEST_CASE(get)
         { "x1", "10" },
         { "x2", "20" }
     });
-
     daemon_->plugins().add(std::move(plugin));
-    ctl_->send({
-        { "command", "plugin-config" },
-        { "plugin", "test" },
-        { "variable", "x1" }
-    });
-    ctl_->recv([&] (auto, auto message) {
-        json = std::move(message);
+
+    auto result = request({
+        { "command",    "plugin-config" },
+        { "plugin",     "test"          },
+        { "variable",   "x1"            }
     });
 
-    wait_for([&] {
-        return json.is_object();
-    });
-
-    BOOST_TEST(json.is_object());
-    BOOST_TEST(json["variables"]["x1"].get<std::string>() == "10");
-    BOOST_TEST(json["variables"]["x2"].is_null());
+    BOOST_TEST(result.first["variables"]["x1"].get<std::string>() == "10");
+    BOOST_TEST(result.first["variables"]["x2"].is_null());
 }
 
 BOOST_AUTO_TEST_CASE(getall)
@@ -110,70 +102,40 @@ BOOST_AUTO_TEST_CASE(getall)
         { "x1", "10" },
         { "x2", "20" }
     });
-
     daemon_->plugins().add(std::move(plugin));
-    ctl_->send({
+
+    auto result = request({
         { "command", "plugin-config" },
         { "plugin", "test" }
     });
-    ctl_->recv([&] (auto, auto message) {
-        json = std::move(message);
-    });
 
-    wait_for([&] {
-        return json.is_object();
-    });
-
-    BOOST_TEST(json.is_object());
-    BOOST_TEST(json["variables"]["x1"].get<std::string>() == "10");
-    BOOST_TEST(json["variables"]["x2"].get<std::string>() == "20");
+    BOOST_TEST(result.first["variables"]["x1"].get<std::string>() == "10");
+    BOOST_TEST(result.first["variables"]["x2"].get<std::string>() == "20");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "plugin-config" }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == plugin_error::invalid_identifier);
-    BOOST_TEST(message["error"].template get<int>() == plugin_error::invalid_identifier);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "plugin");
+    BOOST_TEST(result.second == plugin_error::invalid_identifier);
+    BOOST_TEST(result.first["error"].template get<int>() == plugin_error::invalid_identifier);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "plugin-config" },
         { "plugin",     "unknown"       }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == plugin_error::not_found);
-    BOOST_TEST(message["error"].template get<int>() == plugin_error::not_found);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "plugin");
+    BOOST_TEST(result.second == plugin_error::not_found);
+    BOOST_TEST(result.first["error"].template get<int>() == plugin_error::not_found);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

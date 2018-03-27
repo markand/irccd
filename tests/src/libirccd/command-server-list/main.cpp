@@ -44,22 +44,15 @@ BOOST_FIXTURE_TEST_SUITE(server_list_test_suite, server_list_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    nlohmann::json result;
-
-    ctl_->send({{"command", "server-list"}});
-    ctl_->recv([&] (auto, auto msg) {
-        result = msg;
+    const auto result = request({
+        { "command", "server-list" }
     });
 
-    wait_for([&] () {
-        return result.is_object();
-    });
-
-    BOOST_TEST(result.is_object());
-    BOOST_TEST(result["list"].is_array());
-    BOOST_TEST(result["list"].size() == 2U);
-    BOOST_TEST(result["list"][0].get<std::string>() == "s1");
-    BOOST_TEST(result["list"][1].get<std::string>() == "s2");
+    BOOST_TEST(result.first.is_object());
+    BOOST_TEST(result.first["list"].is_array());
+    BOOST_TEST(result.first["list"].size() == 2U);
+    BOOST_TEST(result.first["list"][0].get<std::string>() == "s1");
+    BOOST_TEST(result.first["list"][1].get<std::string>() == "s2");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

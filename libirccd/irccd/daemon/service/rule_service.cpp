@@ -29,11 +29,6 @@
 
 namespace irccd {
 
-namespace {
-
-
-} // !namespace
-
 rule_service::rule_service(irccd &irccd)
     : irccd_(irccd)
 {

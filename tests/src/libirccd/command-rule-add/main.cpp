@@ -39,9 +39,7 @@ BOOST_FIXTURE_TEST_SUITE(rule_add_test_suite, rule_add_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    nlohmann::json result;
-
-    ctl_->send({
+    request({
         { "command",    "rule-add"          },
         { "servers",    { "s1", "s2" }      },
         { "channels",   { "c1", "c2" }      },
@@ -50,32 +48,17 @@ BOOST_AUTO_TEST_CASE(basic)
         { "action",     "accept"            },
         { "index",      0                   }
     });
-    ctl_->recv([&] (auto, auto msg) {
-        result = msg;
+
+    const auto result = request({
+        { "command", "rule-list" }
     });
 
-    wait_for([&] () {
-        return result.is_object();
-    });
+    BOOST_TEST(result.first.is_object());
 
-    BOOST_TEST(result.is_object());
-
-    result = nullptr;
-    ctl_->send({{"command", "rule-list"}});
-    ctl_->recv([&] (auto, auto msg) {
-        result = msg;
-    });
-
-    wait_for([&] () {
-        return result.is_object();
-    });
-
-    BOOST_TEST(result.is_object());
-
-    auto servers = result["list"][0]["servers"];
-    auto channels = result["list"][0]["channels"];
-    auto plugins = result["list"][0]["plugins"];
-    auto events = result["list"][0]["events"];
+    auto servers = result.first["list"][0]["servers"];
+    auto channels = result.first["list"][0]["channels"];
+    auto plugins = result.first["list"][0]["plugins"];
+    auto events = result.first["list"][0]["events"];
 
     BOOST_TEST(json_util::contains(servers, "s1"));
     BOOST_TEST(json_util::contains(servers, "s2"));
@@ -84,14 +67,12 @@ BOOST_AUTO_TEST_CASE(basic)
     BOOST_TEST(json_util::contains(plugins, "p1"));
     BOOST_TEST(json_util::contains(plugins, "p2"));
     BOOST_TEST(json_util::contains(events, "onMessage"));
-    BOOST_TEST(result["list"][0]["action"].get<std::string>() == "accept");
+    BOOST_TEST(result.first["list"][0]["action"].get<std::string>() == "accept");
 }
 
 BOOST_AUTO_TEST_CASE(append)
 {
-    nlohmann::json result;
-
-    ctl_->send({
+    request({
         { "command",    "rule-add"          },
         { "servers",    { "s1" }            },
         { "channels",   { "c1" }            },
@@ -100,18 +81,8 @@ BOOST_AUTO_TEST_CASE(append)
         { "action",     "accept"            },
         { "index",      0                   }
     });
-    ctl_->recv([&] (auto, auto msg) {
-        result = msg;
-    });
 
-    wait_for([&] () {
-        return result.is_object();
-    });
-
-    BOOST_TEST(result.is_object());
-
-    result = nullptr;
-    ctl_->send({
+    request({
         { "command",    "rule-add"          },
         { "servers",    { "s2" }            },
         { "channels",   { "c2" }            },
@@ -120,55 +91,40 @@ BOOST_AUTO_TEST_CASE(append)
         { "action",     "drop"              },
         { "index",      1                   }
     });
-    ctl_->recv([&] (auto, auto msg) {
-        result = msg;
+
+    const auto result = request({
+        { "command", "rule-list" }
     });
 
-    wait_for([&] () {
-        return result.is_object();
-    });
-
-    BOOST_TEST(result.is_object());
-
-    result = nullptr;
-    ctl_->send({{"command", "rule-list"}});
-    ctl_->recv([&] (auto, auto msg) {
-        result = msg;
-    });
-
-    wait_for([&] () {
-        return result.is_object();
-    });
-
-    BOOST_TEST(result.is_object());
-    BOOST_TEST(result["list"].size() == 2U);
+    BOOST_TEST(result.first.is_object());
+    BOOST_TEST(result.first["list"].size() == 2U);
 
     // Rule 0.
     {
-        auto servers = result["list"][0]["servers"];
-        auto channels = result["list"][0]["channels"];
-        auto plugins = result["list"][0]["plugins"];
-        auto events = result["list"][0]["events"];
+        auto servers = result.first["list"][0]["servers"];
+        auto channels = result.first["list"][0]["channels"];
+        auto plugins = result.first["list"][0]["plugins"];
+        auto events = result.first["list"][0]["events"];
 
         BOOST_TEST(json_util::contains(servers, "s1"));
         BOOST_TEST(json_util::contains(channels, "c1"));
         BOOST_TEST(json_util::contains(plugins, "p1"));
         BOOST_TEST(json_util::contains(events, "onMessage"));
-        BOOST_TEST(result["list"][0]["action"].get<std::string>() == "accept");
+        BOOST_TEST(result.first["list"][0]["action"].get<std::string>() == "accept");
     }
 
     // Rule 1.
     {
-        auto servers = result["list"][1]["servers"];
-        auto channels = result["list"][1]["channels"];
-        auto plugins = result["list"][1]["plugins"];
-        auto events = result["list"][1]["events"];
+        auto servers = result.first["list"][1]["servers"];
+        auto channels = result.first["list"][1]["channels"];
+        auto plugins = result.first["list"][1]["plugins"];
+        auto events = result.first["list"][1]["events"];
 
         BOOST_TEST(json_util::contains(servers, "s2"));
         BOOST_TEST(json_util::contains(channels, "c2"));
         BOOST_TEST(json_util::contains(plugins, "p2"));
         BOOST_TEST(json_util::contains(events, "onMessage"));
-        BOOST_TEST(result["list"][1]["action"].get<std::string>() == "drop");
+        BOOST_TEST(result.first["list"][1]["action"].get<std::string>() == "drop");
     }
 }
 
@@ -176,25 +132,14 @@ BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_action)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "rule-add"  },
         { "action",     "unknown"   }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == rule_error::invalid_action);
-    BOOST_TEST(message["error"].template get<int>() == rule_error::invalid_action);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(result.second == rule_error::invalid_action);
+    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_action);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

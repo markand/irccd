@@ -60,39 +60,22 @@ BOOST_FIXTURE_TEST_SUITE(rule_remove_test_suite, rule_remove_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    nlohmann::json result;
-
-    ctl_->send({
+    request({
         { "command",    "rule-remove"   },
         { "index",      1               }
     });
-    ctl_->recv([&] (auto, auto msg) {
-        result = msg;
+
+    const auto result = request({
+        { "command", "rule-list" }
     });
 
-    wait_for([&] () {
-        return result.is_object();
-    });
+    BOOST_TEST(result.first["list"].is_array());
+    BOOST_TEST(result.first["list"].size() == 1U);
 
-    BOOST_TEST(result.is_object());
-
-    result = nullptr;
-    ctl_->send({{ "command", "rule-list" }});
-    ctl_->recv([&] (auto, auto msg) {
-        result = msg;
-    });
-
-    wait_for([&] () {
-        return result.is_object();
-    });
-
-    BOOST_TEST(result["list"].is_array());
-    BOOST_TEST(result["list"].size() == 1U);
-
-    auto servers = result["list"][0]["servers"];
-    auto channels = result["list"][0]["channels"];
-    auto plugins = result["list"][0]["plugins"];
-    auto events = result["list"][0]["events"];
+    auto servers = result.first["list"][0]["servers"];
+    auto channels = result.first["list"][0]["channels"];
+    auto plugins = result.first["list"][0]["plugins"];
+    auto events = result.first["list"][0]["events"];
 
     BOOST_TEST(json_util::contains(servers, "s1"));
     BOOST_TEST(json_util::contains(servers, "s2"));
@@ -102,100 +85,58 @@ BOOST_AUTO_TEST_CASE(basic)
     BOOST_TEST(json_util::contains(plugins, "p2"));
     BOOST_TEST(json_util::contains(events, "onMessage"));
     BOOST_TEST(json_util::contains(events, "onCommand"));
-    BOOST_TEST(result["list"][0]["action"].get<std::string>() == "drop");
+    BOOST_TEST(result.first["list"][0]["action"].get<std::string>() == "drop");
 }
 
 BOOST_AUTO_TEST_CASE(empty)
 {
-    nlohmann::json result;
-
     daemon_->rules().remove(0);
     daemon_->rules().remove(0);
 
-    ctl_->send({
+    const auto result = request({
         { "command",    "rule-remove"   },
         { "index",      1               }
     });
-    ctl_->recv([&] (auto, auto msg) {
-        result = msg;
-    });
 
-    wait_for([&] () {
-        return result.is_object();
-    });
-
-    BOOST_TEST(result.is_object());
+    BOOST_TEST(result.first.is_object());
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_index_1)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "rule-remove"   },
         { "index",      -100            }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == rule_error::invalid_index);
-    BOOST_TEST(message["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(result.second == rule_error::invalid_index);
+    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_2)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "rule-remove"   },
         { "index",      100             }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == rule_error::invalid_index);
-    BOOST_TEST(message["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(result.second == rule_error::invalid_index);
+    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_3)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "rule-remove"   },
         { "index",      "notaint"       }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == rule_error::invalid_index);
-    BOOST_TEST(message["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(result.second == rule_error::invalid_index);
+    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

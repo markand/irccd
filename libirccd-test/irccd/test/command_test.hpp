@@ -48,6 +48,11 @@ private:
     }
 
 protected:
+    /**
+     * Result for request function.
+     */
+    using result = std::pair<nlohmann::json, boost::system::error_code>;
+
     boost::asio::io_service service_;
     boost::asio::deadline_timer timer_;
 
@@ -67,6 +72,22 @@ protected:
 
         while (!cond())
             service_.poll();
+    }
+
+    result request(nlohmann::json json)
+    {
+        result r;
+
+        ctl_->send(std::move(json));
+        ctl_->recv([&] (auto result, auto message) {
+            r.first = message;
+            r.second = result;
+        });
+        wait_for([&] {
+            return r.second || r.first.is_object();
+        });
+
+        return r;
     }
 };
 

@@ -39,20 +39,13 @@ BOOST_FIXTURE_TEST_SUITE(plugin_list_test_suite, plugin_list_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    auto response = nlohmann::json();
-
-    ctl_->send({{"command", "plugin-list"}});
-    ctl_->recv([&] (auto, auto message) {
-        response = message;
+    const auto result = request({
+        { "command", "plugin-list" }
     });
 
-    wait_for([&] () {
-        return response.is_object();
-    });
-
-    BOOST_TEST(response.is_object());
-    BOOST_TEST("t1", response["list"][0]);
-    BOOST_TEST("t2", response["list"][1]);
+    BOOST_TEST(result.first.is_object());
+    BOOST_TEST(result.first["list"][0].template get<std::string>() == "t1");
+    BOOST_TEST(result.first["list"][1].template get<std::string>() == "t2");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

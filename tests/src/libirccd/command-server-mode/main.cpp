@@ -67,176 +67,99 @@ BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier_1)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "server-mode"   },
         { "server",     123456          },
         { "channel",    "#music"        },
         { "mode",       "+i"            }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == server_error::invalid_identifier);
-    BOOST_TEST(message["error"].template get<int>() == server_error::invalid_identifier);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result.second == server_error::invalid_identifier);
+    BOOST_TEST(result.first["error"].template get<int>() == server_error::invalid_identifier);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_identifier_2)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "server-mode"   },
         { "server",     ""              },
         { "channel",    "#music"        },
         { "mode",       "+i"            }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == server_error::invalid_identifier);
-    BOOST_TEST(message["error"].template get<int>() == server_error::invalid_identifier);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result.second == server_error::invalid_identifier);
+    BOOST_TEST(result.first["error"].template get<int>() == server_error::invalid_identifier);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_channel_1)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "server-mode"   },
         { "server",     "test"          },
         { "channel",    ""              },
         { "mode",       "+i"            }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == server_error::invalid_channel);
-    BOOST_TEST(message["error"].template get<int>() == server_error::invalid_channel);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result.second == server_error::invalid_channel);
+    BOOST_TEST(result.first["error"].template get<int>() == server_error::invalid_channel);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_channel_2)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "server-mode"   },
         { "server",     "test"          },
         { "channel",    123456          },
         { "mode",       "+i"            }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == server_error::invalid_channel);
-    BOOST_TEST(message["error"].template get<int>() == server_error::invalid_channel);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result.second == server_error::invalid_channel);
+    BOOST_TEST(result.first["error"].template get<int>() == server_error::invalid_channel);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_mode_1)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "server-mode"   },
         { "server",     "test"          },
         { "channel",    "#music"        },
         { "mode",       ""              }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == server_error::invalid_mode);
-    BOOST_TEST(message["error"].template get<int>() == server_error::invalid_mode);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result.second == server_error::invalid_mode);
+    BOOST_TEST(result.first["error"].template get<int>() == server_error::invalid_mode);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_mode_2)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "server-mode"   },
         { "server",     "test"          },
         { "channel",    "#music"        },
         { "mode",       123456          }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == server_error::invalid_mode);
-    BOOST_TEST(message["error"].template get<int>() == server_error::invalid_mode);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result.second == server_error::invalid_mode);
+    BOOST_TEST(result.first["error"].template get<int>() == server_error::invalid_mode);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "server");
 }
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "server-mode"   },
         { "server",     "unknown"       },
         { "channel",    "#music"        },
         { "mode",       "+i"            }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == server_error::not_found);
-    BOOST_TEST(message["error"].template get<int>() == server_error::not_found);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(result.second == server_error::not_found);
+    BOOST_TEST(result.first["error"].template get<int>() == server_error::not_found);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
