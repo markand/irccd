@@ -18,7 +18,7 @@
 
 #
 # irccd_define_executable
-# -------------------------------------------------------------------
+# -----------------------
 #
 # irccd_define_executable(
 #    TARGET target name

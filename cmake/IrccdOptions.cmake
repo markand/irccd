@@ -19,21 +19,21 @@
 #
 # Options that controls the build:
 #
-# WITH_LIBEDIT          Enable libedit support (default: on)
-# WITH_SSL              Enable OpenSSL (default: on)
-# WITH_JS               Enable JavaScript (default: on)
-# WITH_TESTS            Enable unit testing (default: off)
-# WITH_SYSTEMD          Install systemd service (default: on for Linux)
 # WITH_DOCS             Enable building of all documentation (default: on)
 # WITH_DOXYGEN          Enable internal irccd documentation (default: on)
 # WITH_HTML             Enable HTML documentation
+# WITH_JS               Enable JavaScript (default: on)
+# WITH_LIBEDIT          Enable libedit support (default: on)
 # WITH_MAN              Install manpages (default: on, off for Windows)
 # WITH_PKGCONFIG        Install pkg-config files (default: on, off for Windows (except MinGW))
 # WITH_PLUGIN_<NAME>    Enable or disable the specified plugin (default: on)
+# WITH_SSL              Enable OpenSSL (default: on)
+# WITH_SYSTEMD          Install systemd service (default: on for Linux)
+# WITH_TESTS            Enable unit testing (default: off)
 # WITH_VERA             Enable style checking using vera (default: on)
 #
-# Note: the option() commands for WITH_PLUGIN_<name> variables are defined automatically from the IRCCD_PLUGINS
-# list.
+# Note: the option() commands for WITH_PLUGIN_<name> variables are defined
+# automatically from the IRCCD_PLUGINS list.
 #
 
 #
@@ -72,16 +72,16 @@ else ()
     set(DEFAULT_PKGCONFIG "No")
 endif ()
 
-option(WITH_LIBEDIT "Enable libedit support" On)
-option(WITH_SSL "Enable SSL" On)
-option(WITH_JS "Enable embedded Duktape" On)
-option(WITH_TESTS "Enable unit testing" Off)
-option(WITH_SYSTEMD "Install systemd service" ${DEFAULT_SYSTEMD})
 option(WITH_DOCS "Enable building of all documentation" On)
-option(WITH_HTML "Enable building of HTML documentation" On)
 option(WITH_DOXYGEN "Enable doxygen" Off)
+option(WITH_HTML "Enable building of HTML documentation" On)
+option(WITH_JS "Enable embedded Duktape" On)
+option(WITH_LIBEDIT "Enable libedit support" On)
 option(WITH_MAN "Install man pages" ${DEFAULT_MAN})
 option(WITH_PKGCONFIG "Enable pkg-config file" ${DEFAULT_PKGCONFIG})
+option(WITH_SSL "Enable SSL" On)
+option(WITH_SYSTEMD "Install systemd service" ${DEFAULT_SYSTEMD})
+option(WITH_TESTS "Enable unit testing" Off)
 option(WITH_VERA "Enable vera++" On)
 
 #

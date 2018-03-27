@@ -18,7 +18,7 @@
 
 #
 # irccd_define_plugin
-# -------------------------------------------------------------------
+# -------------------
 #
 # irccd_define_plugin(
 #   NAME canonical plugin name

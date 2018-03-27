@@ -18,7 +18,7 @@
 
 #
 # irccd_indent_message
-# -------------------------------------------------------------------
+# --------------------
 #
 # irccd_indent_message(variable value padding)
 #

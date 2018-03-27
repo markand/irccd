@@ -18,7 +18,7 @@
 
 #
 # irccd_define_library
-# -------------------------------------------------------------------
+# --------------------
 #
 # irccd_define_library(
 #    TARGET target name
@@ -30,8 +30,6 @@
 #    LOCAL_INCLUDES (Optional) local includes for the target only
 #    PUBLIC_INCLUDES (Optional) includes to share with target dependencies
 # )
-#
-# Create a static library for internal use.
 #
 
 include(${CMAKE_CURRENT_LIST_DIR}/IrccdVeraCheck.cmake)

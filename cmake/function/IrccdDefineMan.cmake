@@ -16,8 +16,11 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# irccd_define_man(file man)
-# -------------------------------------------------------------------
+#
+# irccd_define_man
+# ----------------
+#
+# irccd_define_man(file, man)
 #
 # Parameters:
 #    file       The file name to build

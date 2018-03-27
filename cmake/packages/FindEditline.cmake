@@ -1,5 +1,5 @@
 # FindEditline
-# -----------
+# ------------
 #
 # Find libedit library, this modules defines:
 #

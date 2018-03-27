@@ -1,5 +1,5 @@
 /*
- * sysconfig.h -- configuration for irccd
+ * sysconfig.hpp -- configuration for irccd
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_SYSCONFIG_H
-#define IRCCD_SYSCONFIG_H
+#ifndef IRCCD_SYSCONFIG_HPP
+#define IRCCD_SYSCONFIG_HPP
 
 /*
  * Fix annoying "Please include winsock2.h before windows.h"
@@ -80,7 +80,6 @@
  * ------------------------------------------------------------------
  */
 
-#cmakedefine HAVE_ACCESS
 #cmakedefine HAVE_DAEMON
 #cmakedefine HAVE_GETLOGIN
 #cmakedefine HAVE_GETPID
@@ -125,4 +124,4 @@
 #   define IRCCD_EXPORT
 #endif
 
-#endif // !IRCCD_SYSCONFIG_H
+#endif // !IRCCD_SYSCONFIG_HPP

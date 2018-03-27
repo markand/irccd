@@ -116,7 +116,6 @@ endif ()
 #
 # The following variables are defined in irccd/sysconfig.h
 #
-# HAVE_ACCESS           True if has access(2) function (and sys/types.h and sys/stat.h),
 # HAVE_DAEMON           True if daemon(3),
 # HAVE_GETLOGIN         True if getlogin(3) function (and unistd.h)
 # HAVE_GETPID           True if has getpid(2) function (and sys/types.h and unistd.h and grp.h),
@@ -154,17 +153,6 @@ check_function_exists(daemon HAVE_DAEMON)
 #
 # #include <cstdlib>
 check_function_exists(setprogname HAVE_SETPROGNAME)
-
-# access() POSIX function
-#
-# If HAVE_ACCESS is defined, include:
-#
-# #include <unistd.h>
-check_function_exists(access HAVE_ACCESS)
-
-if (NOT HAVE_UNISTD_H)
-    set(HAVE_ACCESS FALSE)
-endif ()
 
 # getlogin() function
 #

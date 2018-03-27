@@ -20,7 +20,7 @@ include(CMakeParseArguments)
 
 #
 # irccd_build_html
-# -------------------------------------------------------------------
+# ----------------
 #
 # irccd_build_html(
 #   COMPONENT (Optional) install the output documentation as the given component
