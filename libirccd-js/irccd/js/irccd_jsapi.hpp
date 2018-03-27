@@ -69,9 +69,9 @@ public:
 class irccd_jsapi : public jsapi {
 public:
     /**
-     * \copydoc jsapi::name
+     * \copydoc jsapi::get_name
      */
-    std::string name() const override;
+    std::string get_name() const override;
 
     /**
      * \copydoc jsapi::load
@@ -80,12 +80,19 @@ public:
 };
 
 /**
- * Get irccd instance stored in this context.
- *
- * \param ctx the context
- * \return the irccd reference
+ * \brief Specialize dukx_type_traits for irccd.
  */
-irccd& dukx_get_irccd(duk_context* ctx);
+template <>
+class dukx_type_traits<irccd> : public std::true_type {
+public:
+    /**
+     * Get irccd instance stored in this context.
+     *
+     * \param ctx the context
+     * \return the irccd reference
+     */
+    static irccd& self(duk_context* ctx);
+};
 
 } // !irccd
 

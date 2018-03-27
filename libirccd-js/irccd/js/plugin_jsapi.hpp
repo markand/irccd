@@ -35,9 +35,9 @@ namespace irccd {
 class plugin_jsapi : public jsapi {
 public:
     /**
-     * \copydoc jsapi::name
+     * \copydoc jsapi::get_name
      */
-    std::string name() const override;
+    std::string get_name() const override;
 
     /**
      * \copydoc Module::load
@@ -46,12 +46,19 @@ public:
 };
 
 /**
- * Access the plugin stored in this context.
- *
- * \param ctx the context
- * \return the plugin
+ * \brief Specialize dukx_type_traits for plugin.
  */
-std::shared_ptr<js_plugin> dukx_get_plugin(duk_context* ctx);
+template <>
+class dukx_type_traits<js_plugin> : public std::true_type {
+public:
+    /**
+     * Access the plugin stored in this context.
+     *
+     * \param ctx the context
+     * \return the plugin
+     */
+    static std::shared_ptr<js_plugin> self(duk_context* ctx);
+};
 
 } // !irccd
 

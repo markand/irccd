@@ -372,8 +372,8 @@ duk_ret_t constructor(duk_context* ctx)
     duk_check_type(ctx, 0, DUK_TYPE_OBJECT);
 
     try {
-        auto json = duk_json_encode(ctx, 0);
-        auto s = server_util::from_json(dukx_get_irccd(ctx).get_service(), nlohmann::json::parse(json));
+        auto json = nlohmann::json::parse(duk_json_encode(ctx, 0));
+        auto s = server_util::from_json(dukx_type_traits<irccd>::self(ctx).get_service(), json);
 
         duk_push_this(ctx);
         duk_push_pointer(ctx, new std::shared_ptr<server>(std::move(s)));
@@ -413,7 +413,7 @@ duk_ret_t destructor(duk_context* ctx)
  */
 duk_ret_t add(duk_context* ctx)
 {
-    dukx_get_irccd(ctx).servers().add(dukx_require<std::shared_ptr<server>>(ctx, 0));
+    dukx_type_traits<irccd>::self(ctx).servers().add(dukx_require<std::shared_ptr<server>>(ctx, 0));
 
     return 0;
 }
@@ -431,7 +431,7 @@ duk_ret_t add(duk_context* ctx)
  */
 duk_ret_t find(duk_context* ctx)
 {
-    auto server = dukx_get_irccd(ctx).servers().get(duk_require_string(ctx, 0));
+    auto server = dukx_type_traits<irccd>::self(ctx).servers().get(duk_require_string(ctx, 0));
 
     if (!server)
         return 0;
@@ -454,7 +454,7 @@ duk_ret_t list(duk_context* ctx)
 {
     duk_push_object(ctx);
 
-    for (const auto &server : dukx_get_irccd(ctx).servers().servers()) {
+    for (const auto &server : dukx_type_traits<irccd>::self(ctx).servers().servers()) {
         dukx_push(ctx, server);
         duk_put_prop_string(ctx, -2, server->get_name().c_str());
     }
@@ -474,7 +474,7 @@ duk_ret_t list(duk_context* ctx)
  */
 duk_ret_t remove(duk_context* ctx)
 {
-    dukx_get_irccd(ctx).servers().remove(duk_require_string(ctx, 0));
+    dukx_type_traits<irccd>::self(ctx).servers().remove(duk_require_string(ctx, 0));
 
     return 0;
 }
@@ -509,7 +509,7 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-std::string server_jsapi::name() const
+std::string server_jsapi::get_name() const
 {
     return "Irccd.Server";
 }

@@ -33,7 +33,7 @@ boost::timer::cpu_timer* self(duk_context* ctx)
 
     duk_push_this(ctx);
     duk_get_prop_string(ctx, -1, signature);
-    auto ptr = static_cast<boost::timer::cpu_timer*>(duk_to_pointer(ctx, -1));
+    const auto ptr = static_cast<boost::timer::cpu_timer*>(duk_to_pointer(ctx, -1));
     duk_pop_2(ctx);
 
     if (!ptr)
@@ -125,7 +125,7 @@ const duk_function_list_entry methods[] = {
 
 } // !namespace
 
-std::string elapsed_timer_jsapi::name() const
+std::string elapsed_timer_jsapi::get_name() const
 {
     return "Irccd.ElapsedTimer";
 }

@@ -46,7 +46,7 @@ duk_idx_t wrap(duk_context* ctx, int nret, Func&& func)
     std::string name = duk_require_string(ctx, 0);
 
     try {
-        func(dukx_get_irccd(ctx), name);
+        func(dukx_type_traits<irccd>::self(ctx), name);
     } catch (const std::out_of_range& ex) {
         (void)duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "%s", ex.what());
     } catch (const std::exception &ex) {
@@ -215,9 +215,9 @@ duk_idx_t info(duk_context* ctx)
     std::shared_ptr<plugin> plugin;
 
     if (duk_get_top(ctx) >= 1)
-        plugin = dukx_get_irccd(ctx).plugins().get(duk_require_string(ctx, 0));
+        plugin = dukx_type_traits<irccd>::self(ctx).plugins().get(duk_require_string(ctx, 0));
     else
-        plugin = dukx_get_plugin(ctx);
+        plugin = dukx_type_traits<js_plugin>::self(ctx);
 
     if (!plugin)
         return 0;
@@ -252,7 +252,7 @@ duk_idx_t list(duk_context* ctx)
 
     duk_push_array(ctx);
 
-    for (const auto& p : dukx_get_irccd(ctx).plugins().list()) {
+    for (const auto& p : dukx_type_traits<irccd>::self(ctx).plugins().list()) {
         dukx_push(ctx, p->get_name());
         duk_put_prop_index(ctx, -2, i++);
     }
@@ -329,7 +329,7 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-std::string plugin_jsapi::name() const
+std::string plugin_jsapi::get_name() const
 {
     return "Irccd.Plugin";
 }
@@ -377,7 +377,7 @@ void plugin_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
     duk_pop(plugin->context());
 }
 
-std::shared_ptr<js_plugin> dukx_get_plugin(duk_context* ctx)
+std::shared_ptr<js_plugin> dukx_type_traits<js_plugin>::self(duk_context* ctx)
 {
     dukx_stack_assert sa(ctx);
 

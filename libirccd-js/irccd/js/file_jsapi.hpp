@@ -112,7 +112,7 @@ public:
      * \return the path
      * \warning empty when constructed from the FILE constructor
      */
-    inline const std::string& path() const noexcept
+    inline const std::string& get_path() const noexcept
     {
         return path_;
     }
@@ -122,7 +122,7 @@ public:
      *
      * \return the handle or nullptr if the stream was closed
      */
-    inline std::FILE* handle() noexcept
+    inline std::FILE* get_handle() noexcept
     {
         return stream_;
     }
@@ -146,9 +146,9 @@ public:
 class file_jsapi : public jsapi {
 public:
     /**
-     * \copydoc jsapi::name
+     * \copydoc jsapi::get_name
      */
-    std::string name() const override;
+    std::string get_name() const override;
 
     /**
      * \copydoc jsapi::load

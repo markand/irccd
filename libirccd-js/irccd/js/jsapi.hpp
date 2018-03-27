@@ -59,7 +59,7 @@ public:
      *
      * \return the name
      */
-    virtual std::string name() const = 0;
+    virtual std::string get_name() const = 0;
 
     /**
      * Load the module into the Javascript plugin.

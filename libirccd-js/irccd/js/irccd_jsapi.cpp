@@ -165,12 +165,12 @@ void system_error::create(duk_context *ctx) const
     duk_get_global_string(ctx, "Irccd");
     duk_get_prop_string(ctx, -1, "SystemError");
     duk_remove(ctx, -2);
-    duk_push_int(ctx, errno_);
+    dukx_push(ctx, errno_);
     dukx_push(ctx, message_);
     duk_new(ctx, 2);
 }
 
-std::string irccd_jsapi::name() const
+std::string irccd_jsapi::get_name() const
 {
     return "Irccd";
 }
@@ -184,11 +184,11 @@ void irccd_jsapi::load(irccd& irccd, std::shared_ptr<js_plugin> plugin)
 
     // Version.
     duk_push_object(plugin->context());
-    duk_push_int(plugin->context(), IRCCD_VERSION_MAJOR);
+    dukx_push(plugin->context(), IRCCD_VERSION_MAJOR);
     duk_put_prop_string(plugin->context(), -2, "major");
-    duk_push_int(plugin->context(), IRCCD_VERSION_MINOR);
+    dukx_push(plugin->context(), IRCCD_VERSION_MINOR);
     duk_put_prop_string(plugin->context(), -2, "minor");
-    duk_push_int(plugin->context(), IRCCD_VERSION_PATCH);
+    dukx_push(plugin->context(), IRCCD_VERSION_PATCH);
     duk_put_prop_string(plugin->context(), -2, "patch");
     duk_put_prop_string(plugin->context(), -2, "version");
 
@@ -217,12 +217,12 @@ void irccd_jsapi::load(irccd& irccd, std::shared_ptr<js_plugin> plugin)
     duk_put_global_string(plugin->context(), "\xff""\xff""irccd-ref");
 }
 
-irccd& dukx_get_irccd(duk_context *ctx)
+irccd& dukx_type_traits<irccd>::self(duk_context *ctx)
 {
     dukx_stack_assert sa(ctx);
 
     duk_get_global_string(ctx, "\xff""\xff""irccd-ref");
-    auto ptr = static_cast<irccd*>(duk_to_pointer(ctx, -1));
+    const auto ptr = static_cast<irccd*>(duk_to_pointer(ctx, -1));
     duk_pop(ctx);
 
     return *ptr;

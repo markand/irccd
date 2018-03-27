@@ -274,7 +274,7 @@ public:
      *
      * \return the modules
      */
-    inline const modules_t& modules() const noexcept
+    inline const modules_t& get_modules() const noexcept
     {
         return modules_;
     }
@@ -284,7 +284,7 @@ public:
      *
      * \return the modules
      */
-    inline modules_t& modules() noexcept
+    inline modules_t& get_modules() noexcept
     {
         return modules_;
     }

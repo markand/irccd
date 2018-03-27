@@ -132,7 +132,7 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-std::string unicode_jsapi::name() const
+std::string unicode_jsapi::get_name() const
 {
     return "Irccd.Unicode";
 }

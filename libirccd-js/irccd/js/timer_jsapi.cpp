@@ -85,10 +85,10 @@ void timer::handle()
     duk_remove(ctx, -2);
 
     if (duk_pcall(ctx, 0)) {
-        dukx_get_irccd(ctx).get_log().warning() << "plugin: " << plugin->get_name()
-            << " timer error:" << std::endl;
-        dukx_get_irccd(ctx).get_log().warning() << "  "
-            << dukx_stack(ctx, -1).what() << std::endl;
+        auto& log = dukx_type_traits<irccd>::self(ctx).get_log();
+
+        log.warning() << "plugin: " << plugin->get_name() << " timer error:" << std::endl;
+        log.warning() << "  " << dukx_stack(ctx, -1).what() << std::endl;
     } else
         duk_pop(ctx);
 }
@@ -189,7 +189,7 @@ duk_ret_t destructor(duk_context* ctx)
     duk_del_prop_string(ctx, -1, ptr->key().c_str());
     duk_pop(ctx);
 
-    dukx_get_irccd(ctx).get_log().debug("timer: destroyed");
+    dukx_type_traits<irccd>::self(ctx).get_log().debug("timer: destroyed");
 
     delete ptr;
 
@@ -223,8 +223,9 @@ duk_ret_t constructor(duk_context* ctx)
     if (!duk_is_callable(ctx, 2))
         duk_error(ctx, DUK_ERR_TYPE_ERROR, "missing callback function");
 
-    auto& daemon = dukx_get_irccd(ctx);
-    auto object = new timer(daemon.get_service(), dukx_get_plugin(ctx), delay, static_cast<timer::type_t>(type));
+    auto plugin = dukx_type_traits<js_plugin>::self(ctx);
+    auto& daemon = dukx_type_traits<irccd>::self(ctx);
+    auto object = new timer(daemon.get_service(), plugin, delay, static_cast<timer::type_t>(type));
 
     duk_push_this(ctx);
     duk_push_pointer(ctx, object);
@@ -249,7 +250,7 @@ const duk_number_list_entry constants[] = {
 
 } // !namespace
 
-std::string timer_jsapi::name() const
+std::string timer_jsapi::get_name() const
 {
     return "Irccd.Timer";
 }

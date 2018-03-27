@@ -35,9 +35,9 @@ namespace irccd {
 class logger_jsapi : public jsapi {
 public:
     /**
-     * \copydoc jsapi::name
+     * \copydoc jsapi::get_name
      */
-    std::string name() const override;
+    std::string get_name() const override;
 
     /**
      * \copydoc Module::load

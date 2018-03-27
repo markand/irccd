@@ -30,7 +30,9 @@ namespace {
 
 duk_ret_t print(duk_context* ctx, std::ostream &out)
 {
-    out << "plugin " << dukx_get_plugin(ctx)->get_name() << ": " << duk_require_string(ctx, 0) << std::endl;
+    const auto plugin = dukx_type_traits<js_plugin>::self(ctx);
+
+    out << "plugin " << plugin->get_name() << ": " << duk_require_string(ctx, 0) << std::endl;
 
     return 0;
 }
@@ -46,7 +48,7 @@ duk_ret_t print(duk_context* ctx, std::ostream &out)
  */
 duk_ret_t info(duk_context* ctx)
 {
-    return print(ctx, dukx_get_irccd(ctx).get_log().info());
+    return print(ctx, dukx_type_traits<irccd>::self(ctx).get_log().info());
 }
 
 /*
@@ -60,7 +62,7 @@ duk_ret_t info(duk_context* ctx)
  */
 duk_ret_t warning(duk_context* ctx)
 {
-    return print(ctx, dukx_get_irccd(ctx).get_log().warning());
+    return print(ctx, dukx_type_traits<irccd>::self(ctx).get_log().warning());
 }
 
 /*
@@ -74,7 +76,7 @@ duk_ret_t warning(duk_context* ctx)
  */
 duk_ret_t debug(duk_context* ctx)
 {
-    return print(ctx, dukx_get_irccd(ctx).get_log().debug());
+    return print(ctx, dukx_type_traits<irccd>::self(ctx).get_log().debug());
 }
 
 const duk_function_list_entry functions[] = {
@@ -86,7 +88,7 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-std::string logger_jsapi::name() const
+std::string logger_jsapi::get_name() const
 {
     return "Irccd.Logger";
 }

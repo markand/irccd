@@ -277,7 +277,7 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-std::string util_jsapi::name() const
+std::string util_jsapi::get_name() const
 {
     return "Irccd.Util";
 }

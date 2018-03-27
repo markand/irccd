@@ -77,7 +77,7 @@ std::shared_ptr<file> self(duk_context* ctx)
  */
 duk_ret_t method_basename(duk_context* ctx)
 {
-    return dukx_push(ctx, fs_util::base_name(self(ctx)->path()));
+    return dukx_push(ctx, fs_util::base_name(self(ctx)->get_path()));
 }
 
 /*
@@ -104,7 +104,7 @@ duk_ret_t method_close(duk_context* ctx)
  */
 duk_ret_t method_dirname(duk_context* ctx)
 {
-    return dukx_push(ctx, fs_util::dir_name(self(ctx)->path()));
+    return dukx_push(ctx, fs_util::dir_name(self(ctx)->get_path()));
 }
 
 /*
@@ -122,7 +122,7 @@ duk_ret_t method_lines(duk_context* ctx)
 {
     duk_push_array(ctx);
 
-    std::FILE* fp = self(ctx)->handle();
+    std::FILE* fp = self(ctx)->get_handle();
     std::string buffer;
     std::array<char, 128> data;
     std::int32_t i = 0;
@@ -130,7 +130,7 @@ duk_ret_t method_lines(duk_context* ctx)
     while (std::fgets(&data[0], data.size(), fp) != nullptr) {
         buffer += data.data();
 
-        auto pos = buffer.find('\n');
+        const auto pos = buffer.find('\n');
 
         if (pos != std::string::npos) {
             dukx_push(ctx, clear_crlf(buffer.substr(0, pos)));
@@ -168,10 +168,10 @@ duk_ret_t method_lines(duk_context* ctx)
  */
 duk_ret_t method_read(duk_context* ctx)
 {
-    auto file = self(ctx);
-    auto amount = duk_is_number(ctx, 0) ? duk_get_int(ctx, 0) : -1;
+    const auto fp = self(ctx)->get_handle();
+    const auto amount = duk_is_number(ctx, 0) ? duk_get_int(ctx, 0) : -1;
 
-    if (amount == 0 || file->handle() == nullptr)
+    if (amount == 0 || !fp)
         return 0;
 
     try {
@@ -182,18 +182,18 @@ duk_ret_t method_read(duk_context* ctx)
             std::array<char, 128> buffer;
             std::size_t nread;
 
-            while ((nread = std::fread(&buffer[0], sizeof (buffer[0]), buffer.size(), file->handle())) > 0) {
-                if (std::ferror(file->handle()))
+            while ((nread = std::fread(&buffer[0], sizeof (buffer[0]), buffer.size(), fp)) > 0) {
+                if (std::ferror(fp))
                     dukx_throw(ctx, system_error());
 
                 std::copy(buffer.begin(), buffer.begin() + nread, std::back_inserter(data));
                 total += nread;
             }
         } else {
-            data.resize((std::size_t)amount);
-            total = std::fread(&data[0], sizeof (data[0]), (std::size_t)amount, file->handle());
+            data.resize(static_cast<std::size_t>(amount));
+            total = std::fread(&data[0], sizeof (data[0]), static_cast<std::size_t>(amount), fp);
 
-            if (std::ferror(file->handle()))
+            if (std::ferror(fp))
                 dukx_throw(ctx, system_error());
 
             data.resize(total);
@@ -220,11 +220,13 @@ duk_ret_t method_read(duk_context* ctx)
  */
 duk_ret_t method_readline(duk_context* ctx)
 {
-    std::FILE* fp = self(ctx)->handle();
-    std::string result;
+    auto fp = self(ctx)->get_handle();
 
     if (fp == nullptr || std::feof(fp))
         return 0;
+
+    std::string result;
+
     for (int ch; (ch = std::fgetc(fp)) != EOF && ch != '\n'; )
         result += (char)ch;
     if (std::ferror(fp))
@@ -244,7 +246,7 @@ duk_ret_t method_readline(duk_context* ctx)
  */
 duk_ret_t method_remove(duk_context* ctx)
 {
-    if (::remove(self(ctx)->path().c_str()) < 0)
+    if (::remove(self(ctx)->get_path().c_str()) < 0)
         dukx_throw(ctx, system_error());
 
     return 0;
@@ -264,7 +266,7 @@ duk_ret_t method_remove(duk_context* ctx)
  */
 duk_ret_t method_seek(duk_context* ctx)
 {
-    auto fp = self(ctx)->handle();
+    auto fp = self(ctx)->get_handle();
     auto type = duk_require_int(ctx, 0);
     auto amount = duk_require_int(ctx, 1);
 
@@ -292,7 +294,7 @@ duk_ret_t method_stat(duk_context* ctx)
     auto file = self(ctx);
     struct stat st;
 
-    if (file->handle() == nullptr && ::stat(file->path().c_str(), &st) < 0)
+    if (file->get_handle() == nullptr && ::stat(file->get_path().c_str(), &st) < 0)
         dukx_throw(ctx, system_error());
     else
         dukx_push(ctx, st);
@@ -315,7 +317,7 @@ duk_ret_t method_stat(duk_context* ctx)
  */
 duk_ret_t method_tell(duk_context* ctx)
 {
-    auto fp = self(ctx)->handle();
+    auto fp = self(ctx)->get_handle();
     long pos;
 
     if (fp == nullptr)
@@ -344,13 +346,13 @@ duk_ret_t method_tell(duk_context* ctx)
  */
 duk_ret_t method_write(duk_context* ctx)
 {
-    std::FILE* fp = self(ctx)->handle();
-    std::string data = duk_require_string(ctx, 0);
+    auto fp = self(ctx)->get_handle();
+    auto data = dukx_require<std::string>(ctx, 0);
 
     if (fp == nullptr)
         return 0;
 
-    auto nwritten = std::fwrite(data.c_str(), 1, data.length(), fp);
+    const auto nwritten = std::fwrite(data.c_str(), 1, data.length(), fp);
 
     if (std::ferror(fp))
         dukx_throw(ctx, system_error());
@@ -552,7 +554,7 @@ const duk_number_list_entry constants[] = {
 
 } // !namespace
 
-std::string file_jsapi::name() const
+std::string file_jsapi::get_name() const
 {
     return "Irccd.File";
 }
@@ -598,7 +600,7 @@ std::shared_ptr<file> file_traits::require(duk_context* ctx, duk_idx_t index)
         duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a File object");
 
     duk_get_prop_string(ctx, index, signature);
-    auto fp = static_cast<std::shared_ptr<file>*>(duk_to_pointer(ctx, -1));
+    const auto fp = static_cast<std::shared_ptr<file>*>(duk_to_pointer(ctx, -1));
     duk_pop(ctx);
 
     return *fp;

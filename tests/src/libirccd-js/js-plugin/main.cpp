@@ -107,8 +107,8 @@ protected:
 
         auto loader = std::make_unique<js_plugin_loader>(irccd_);
 
-        loader->modules().push_back(std::make_unique<irccd_jsapi>());
-        loader->modules().push_back(std::make_unique<plugin_jsapi>());
+        loader->get_modules().push_back(std::make_unique<irccd_jsapi>());
+        loader->get_modules().push_back(std::make_unique<plugin_jsapi>());
 
         irccd_.plugins().add_loader(std::move(loader));
     }

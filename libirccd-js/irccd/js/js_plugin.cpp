@@ -142,7 +142,6 @@ void js_plugin::open()
 {
     std::ifstream input(get_path());
 
-    // TODO: add error message here.
     if (!input)
         throw plugin_error(plugin_error::exec_error, get_name(), std::strerror(errno));
 
@@ -267,17 +266,17 @@ std::unique_ptr<js_plugin_loader> js_plugin_loader::defaults(irccd& irccd)
 {
     auto self = std::make_unique<js_plugin_loader>(irccd);
 
-    self->modules().push_back(std::make_unique<irccd_jsapi>());
-    self->modules().push_back(std::make_unique<directory_jsapi>());
-    self->modules().push_back(std::make_unique<elapsed_timer_jsapi>());
-    self->modules().push_back(std::make_unique<file_jsapi>());
-    self->modules().push_back(std::make_unique<logger_jsapi>());
-    self->modules().push_back(std::make_unique<plugin_jsapi>());
-    self->modules().push_back(std::make_unique<server_jsapi>());
-    self->modules().push_back(std::make_unique<system_jsapi>());
-    self->modules().push_back(std::make_unique<timer_jsapi>());
-    self->modules().push_back(std::make_unique<unicode_jsapi>());
-    self->modules().push_back(std::make_unique<util_jsapi>());
+    self->get_modules().push_back(std::make_unique<irccd_jsapi>());
+    self->get_modules().push_back(std::make_unique<directory_jsapi>());
+    self->get_modules().push_back(std::make_unique<elapsed_timer_jsapi>());
+    self->get_modules().push_back(std::make_unique<file_jsapi>());
+    self->get_modules().push_back(std::make_unique<logger_jsapi>());
+    self->get_modules().push_back(std::make_unique<plugin_jsapi>());
+    self->get_modules().push_back(std::make_unique<server_jsapi>());
+    self->get_modules().push_back(std::make_unique<system_jsapi>());
+    self->get_modules().push_back(std::make_unique<timer_jsapi>());
+    self->get_modules().push_back(std::make_unique<unicode_jsapi>());
+    self->get_modules().push_back(std::make_unique<util_jsapi>());
 
     return self;
 }

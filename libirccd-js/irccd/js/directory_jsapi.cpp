@@ -46,7 +46,7 @@ std::string path(duk_context *ctx)
     if (duk_get_type(ctx, -1) != DUK_TYPE_STRING)
         duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Directory object");
 
-    auto ret = dukx_get<std::string>(ctx, -1);
+    const auto ret = dukx_get<std::string>(ctx, -1);
 
     if (ret.empty())
         duk_error(ctx, DUK_ERR_TYPE_ERROR, "directory object has empty path");
@@ -75,12 +75,12 @@ duk_ret_t find(duk_context* ctx, std::string base, bool recursive, int pattern_i
         else {
             // Check if it's a valid RegExp object.
             duk_get_global_string(ctx, "RegExp");
-            auto is_regex = duk_instanceof(ctx, pattern_index, -1);
+            const auto is_regex = duk_instanceof(ctx, pattern_index, -1);
             duk_pop(ctx);
 
             if (is_regex) {
                 duk_get_prop_string(ctx, pattern_index, "source");
-                auto pattern = duk_to_string(ctx, -1);
+                const auto pattern = duk_to_string(ctx, -1);
                 duk_pop(ctx);
 
                 path = fs_util::find(base, std::regex(pattern), recursive);
@@ -298,7 +298,7 @@ const duk_number_list_entry constants[] = {
 
 } // !namespace
 
-std::string directory_jsapi::name() const
+std::string directory_jsapi::get_name() const
 {
     return "Irccd.Directory";
 }
