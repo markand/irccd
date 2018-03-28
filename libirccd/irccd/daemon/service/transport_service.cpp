@@ -71,7 +71,7 @@ void transport_service::do_recv(std::shared_ptr<transport_client> tc)
     tc->recv([this, tc] (auto code, auto json) {
         switch (code.value()) {
         case boost::system::errc::network_down:
-            irccd_.get_log().warning("transport: client disconnected");
+            irccd_.get_log().info("transport: client disconnected");
             break;
         case boost::system::errc::invalid_argument:
             tc->error(irccd_error::invalid_message);
