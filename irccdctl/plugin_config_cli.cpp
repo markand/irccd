@@ -27,17 +27,19 @@ namespace ctl {
 void plugin_config_cli::set(ctl::controller& ctl, const std::vector<std::string>&args)
 {
     request(ctl, {
-        { "plugin", args[0] },
-        { "variable", args[1] },
-        { "value", args[2] }
+        { "command",    "plugin-config" },
+        { "plugin",     args[0]         },
+        { "variable",   args[1]         },
+        { "value",      args[2]         }
     });
 }
 
 void plugin_config_cli::get(ctl::controller& ctl, const std::vector<std::string>& args)
 {
     auto json = nlohmann::json::object({
-        { "plugin", args[0] },
-        { "variable", args[1] }
+        { "command",    "plugin-config" },
+        { "plugin",     args[0]         },
+        { "variable",   args[1]         }
     });
 
     request(ctl, std::move(json), [args] (auto result) {
@@ -48,8 +50,13 @@ void plugin_config_cli::get(ctl::controller& ctl, const std::vector<std::string>
 
 void plugin_config_cli::getall(ctl::controller& ctl, const std::vector<std::string> &args)
 {
-    request(ctl, {{ "plugin", args[0] }}, [] (auto result) {
-        auto variables = result["variables"];
+    const auto json = nlohmann::json::object({
+        { "command",    "plugin-config" },
+        { "plugin",     args[0]         }
+    });
+
+    request(ctl, json, [] (auto result) {
+        const auto variables = result["variables"];
 
         for (auto v = variables.begin(); v != variables.end(); ++v)
             std::cout << std::setw(16) << std::left << v.key() << " : " << json_util::pretty(v.value()) << std::endl;
