@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <unordered_set>
-
 #include <irccd/ini.hpp>
 
 #include <irccd/daemon/rule.hpp>
@@ -32,7 +30,7 @@ rule from_config(const ini::section& sc)
 {
     // Simple converter from std::vector to std::unordered_set.
     const auto toset = [] (const auto& v) {
-        return std::unordered_set<std::string>(v.begin(), v.end());
+        return std::set<std::string>(v.begin(), v.end());
     };
 
     rule::set servers, channels, origins, plugins, events;
@@ -51,6 +49,8 @@ rule from_config(const ini::section& sc)
         plugins = toset(*it);
     if ((it = sc.find("channels")) != sc.end())
         channels = toset(*it);
+    if ((it = sc.find("events")) != sc.end())
+        events = toset(*it);
 
     // Get the action.
     auto actionstr = sc.get("action").value();

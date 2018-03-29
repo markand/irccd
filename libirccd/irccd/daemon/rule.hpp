@@ -27,8 +27,8 @@
 #include <irccd/sysconfig.hpp>
 
 #include <cassert>
+#include <set>
 #include <string>
-#include <unordered_set>
 
 #include <boost/system/system_error.hpp>
 
@@ -42,7 +42,7 @@ public:
     /**
      * List of criterias.
      */
-    using set = std::unordered_set<std::string>;
+    using set = std::set<std::string>;
 
     /**
      * \brief Rule action type.

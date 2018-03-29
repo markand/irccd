@@ -16,14 +16,14 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# Project
 project(tests)
 
-# Configuration files for irccd/irccdctl
 set(
     CONFIGS
-    irccd-plugins.conf
     irccdctl.conf
+    irccd-multiple-rules.conf
+    irccd-plugins.conf
+    irccd-rules.conf
 )
 
 foreach (c ${CONFIGS})
@@ -34,13 +34,9 @@ foreach (c ${CONFIGS})
     )
 endforeach ()
 
-# libirccd
 add_subdirectory(src/libirccd)
-
-# irccdctl
 add_subdirectory(src/irccdctl)
 
-# Javascript API and plugins.
 if (HAVE_JS)
     add_subdirectory(src/plugins)
     add_subdirectory(src/libirccd-js)

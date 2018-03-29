@@ -99,6 +99,8 @@ void rule_edit_cli::exec(ctl::controller& ctl, const std::vector<std::string>& a
     if (!index)
         throw std::invalid_argument("invalid index argument");
 
+    json["index"] = *index;
+
     request(ctl, json);
 }
 

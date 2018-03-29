@@ -48,12 +48,12 @@ void rule_edit_command::exec(irccd& irccd, transport_client& client, const nlohm
         }
     };
 
-    // Create a copy to avoid incomplete edition in case of errors.
     const auto index = json_util::parser(args).get<unsigned>("index");
 
     if (!index)
         throw rule_error(rule_error::invalid_index);
 
+    // Create a copy to avoid incomplete edition in case of errors.
     auto rule = irccd.rules().require(*index);
 
     updateset(rule.get_channels(), args, "channels");
