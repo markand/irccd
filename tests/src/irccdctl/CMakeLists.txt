@@ -16,9 +16,11 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-add_subdirectory(cli-plugin-config)
-add_subdirectory(cli-plugin-info)
-add_subdirectory(cli-plugin-list)
-add_subdirectory(cli-plugin-load)
-add_subdirectory(cli-plugin-reload)
-add_subdirectory(cli-plugin-unload)
+if (HAVE_JS)
+    add_subdirectory(cli-plugin-config)
+    add_subdirectory(cli-plugin-info)
+    add_subdirectory(cli-plugin-list)
+    add_subdirectory(cli-plugin-load)
+    add_subdirectory(cli-plugin-reload)
+    add_subdirectory(cli-plugin-unload)
+endif ()
