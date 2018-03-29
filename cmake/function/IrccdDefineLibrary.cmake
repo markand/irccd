@@ -54,7 +54,14 @@ function(irccd_define_library)
 
     add_library(${LIB_TARGET} ${type} ${LIB_SOURCES})
     target_include_directories(${LIB_TARGET} PRIVATE ${LIB_LOCAL_INCLUDES} PUBLIC ${LIB_PUBLIC_INCLUDES})
-    target_compile_definitions(${LIB_TARGET} PUBLIC ${LIB_FLAGS})
+    target_compile_definitions(
+        ${LIB_TARGET}
+        PRIVATE
+            CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}"
+            CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+        PUBLIC
+            ${LIB_FLAGS}
+    )
     target_link_libraries(${LIB_TARGET} ${LIB_LIBRARIES})
     set_target_properties(
         ${LIB_TARGET}

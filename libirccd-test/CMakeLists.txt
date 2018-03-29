@@ -40,5 +40,4 @@ irccd_define_library(
     FLAGS
         IRCCD_EXECUTABLE="$<TARGET_FILE:irccd>"
         IRCCDCTL_EXECUTABLE="$<TARGET_FILE:irccdctl>"
-        TESTS_BINARY_DIR="${tests_BINARY_DIR}"
 )

@@ -29,7 +29,7 @@ set(
 foreach (c ${CONFIGS})
     configure_file(
         ${tests_SOURCE_DIR}/data/${c}
-        ${tests_BINARY_DIR}/${c}
+        ${CMAKE_BINARY_DIR}/tmp/${c}
         @ONLY
     )
 endforeach ()

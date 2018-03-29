@@ -36,7 +36,8 @@ void cli_test::run_irccd(const std::string& config)
 {
     std::ostringstream oss;
 
-    oss << IRCCD_EXECUTABLE << " -fc " << TESTS_BINARY_DIR << "/" << config;
+    oss << IRCCD_EXECUTABLE << " -fc ";
+    oss << CMAKE_BINARY_DIR "/tmp/" << config;
 
     irccd_ = proc::child(oss.str());
 
@@ -50,8 +51,9 @@ cli_test::outputs cli_test::run_irccdctl(const std::vector<std::string>& args)
     std::future<std::string> out;
     std::future<std::string> err;
 
-    oss << IRCCDCTL_EXECUTABLE << " -c " << TESTS_BINARY_DIR << "/irccdctl.conf "
-        << string_util::join(args, " ");
+    oss << IRCCDCTL_EXECUTABLE << " -c ";
+    oss << CMAKE_BINARY_DIR << "/tmp/irccdctl.conf ";
+    oss << string_util::join(args, " ");
 
     boost::asio::io_service io;
     proc::child irccdctl(

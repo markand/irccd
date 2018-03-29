@@ -53,6 +53,7 @@ public:
      */
     inline config(std::string path = "")
         : document(path.empty() ? ini::document() : ini::read_file(path))
+        , path_(std::move(path))
     {
     }
 
