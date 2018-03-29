@@ -25,6 +25,7 @@
 #    SOURCES the sources files
 #    LIBRARIES (Optional) libraries to link
 #    FLAGS (Optional) compilation flags
+#    DEPENDS (Optional) list of dependencies
 # )
 #
 # Create a unit test named test-${NAME}
@@ -38,7 +39,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/IrccdVeraCheck.cmake)
 
 function(irccd_define_test)
     set(oneValueArgs NAME)
-    set(multiValueArgs SOURCES LIBRARIES FLAGS)
+    set(multiValueArgs DEPENDS SOURCES LIBRARIES FLAGS)
 
     cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -56,8 +57,12 @@ function(irccd_define_test)
             ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
     )
 
-    # Executable
     add_executable(test-${TEST_NAME} ${TEST_SOURCES})
+
+    if (TEST_DEPENDS)
+        add_dependencies(test-${TEST_NAME} ${TEST_DEPENDS})
+    endif ()
+
     target_link_libraries(test-${TEST_NAME} ${TEST_LIBRARIES})
 
     target_include_directories(

@@ -21,6 +21,8 @@ project(libirccd-test)
 irccd_define_library(
     TARGET libirccd-test
     SOURCES
+        ${libirccd-test_SOURCE_DIR}/irccd/test/cli_test.cpp
+        ${libirccd-test_SOURCE_DIR}/irccd/test/cli_test.hpp
         ${libirccd-test_SOURCE_DIR}/irccd/test/command_test.hpp
         ${libirccd-test_SOURCE_DIR}/irccd/test/debug_server.cpp
         ${libirccd-test_SOURCE_DIR}/irccd/test/debug_server.hpp
@@ -35,4 +37,8 @@ irccd_define_library(
         libirccdctl
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${libirccd-test_SOURCE_DIR}>
+    FLAGS
+        IRCCD_EXECUTABLE="$<TARGET_FILE:irccd>"
+        IRCCDCTL_EXECUTABLE="$<TARGET_FILE:irccdctl>"
+        TESTS_BINARY_DIR="${tests_BINARY_DIR}"
 )

@@ -1,5 +1,5 @@
 /*
- * plugin_load_cli.cpp -- implementation of irccdctl plugin-load
+ * main.cpp -- test irccdctl plugin-info
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -16,28 +16,27 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "plugin_load_cli.hpp"
+#define BOOST_TEST_MODULE "irccdctl plugin-info"
+#include <boost/test/unit_test.hpp>
+
+#include <irccd/test/cli_test.hpp>
 
 namespace irccd {
 
-namespace ctl {
+BOOST_FIXTURE_TEST_SUITE(plugin_info_suite, cli_test)
 
-std::string plugin_load_cli::name() const
+BOOST_AUTO_TEST_CASE(simple)
 {
-    return "plugin-load";
+    const auto result = run("irccd-plugins.conf", { "plugin-info", "foo" });
+
+    BOOST_TEST(result.first.size() == 5U);
+    BOOST_TEST(result.second.size() == 0U);
+    BOOST_TEST(result.first[0] == "Author         : David Demelier <markand@malikania.fr>");
+    BOOST_TEST(result.first[1] == "License        : ISC");
+    BOOST_TEST(result.first[2] == "Summary        : foo");
+    BOOST_TEST(result.first[3] == "Version        : 0.0");
 }
 
-void plugin_load_cli::exec(ctl::controller& ctl, const std::vector<std::string> &args)
-{
-    if (args.size() < 1)
-        throw std::invalid_argument("plugin-load requires 1 argument");
-
-    request(ctl, {
-        { "command",    "plugin-load"   },
-        { "plugin",     args[0]         }
-    });
-}
-
-} // !ctl
+BOOST_AUTO_TEST_SUITE_END()
 
 } // !irccd

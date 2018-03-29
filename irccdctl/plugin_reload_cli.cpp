@@ -32,7 +32,10 @@ void plugin_reload_cli::exec(ctl::controller& ctl, const std::vector<std::string
     if (args.size() < 1)
         throw std::invalid_argument("plugin-reload requires 1 argument");
 
-    request(ctl, {{ "plugin", args[0] }});
+    request(ctl, {
+        { "command",    "plugin-reload" },
+        { "plugin",     args[0]         }
+    });
 }
 
 } // !ctl

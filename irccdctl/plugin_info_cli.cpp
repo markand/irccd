@@ -34,7 +34,12 @@ void plugin_info_cli::exec(ctl::controller& ctl, const std::vector<std::string>&
     if (args.size() < 1)
         throw std::invalid_argument("plugin-info requires 1 argument");
 
-    request(ctl, {{ "plugin", args[0] }}, [] (auto result) {
+    const auto json = nlohmann::json::object({
+        { "command",    "plugin-info"   },
+        { "plugin",     args[0]         }
+    });
+
+    request(ctl, json, [] (auto result) {
         const json_util::parser parser(result);
 
         std::cout << std::boolalpha;

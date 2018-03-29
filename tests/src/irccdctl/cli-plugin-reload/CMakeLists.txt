@@ -16,32 +16,9 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# Project
-project(tests)
-
-# Configuration files for irccd/irccdctl
-set(
-    CONFIGS
-    irccd-plugins.conf
-    irccdctl.conf
+irccd_define_test(
+    NAME cli-plugin-reload
+    SOURCES main.cpp
+    LIBRARIES libcommon
+    DEPENDS irccd irccdctl
 )
-
-foreach (c ${CONFIGS})
-    configure_file(
-        ${tests_SOURCE_DIR}/data/${c}
-        ${tests_BINARY_DIR}/${c}
-        @ONLY
-    )
-endforeach ()
-
-# libirccd
-add_subdirectory(src/libirccd)
-
-# irccdctl
-add_subdirectory(src/irccdctl)
-
-# Javascript API and plugins.
-if (HAVE_JS)
-    add_subdirectory(src/plugins)
-    add_subdirectory(src/libirccd-js)
-endif ()

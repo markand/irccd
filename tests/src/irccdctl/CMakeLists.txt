@@ -16,32 +16,9 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# Project
-project(tests)
-
-# Configuration files for irccd/irccdctl
-set(
-    CONFIGS
-    irccd-plugins.conf
-    irccdctl.conf
-)
-
-foreach (c ${CONFIGS})
-    configure_file(
-        ${tests_SOURCE_DIR}/data/${c}
-        ${tests_BINARY_DIR}/${c}
-        @ONLY
-    )
-endforeach ()
-
-# libirccd
-add_subdirectory(src/libirccd)
-
-# irccdctl
-add_subdirectory(src/irccdctl)
-
-# Javascript API and plugins.
-if (HAVE_JS)
-    add_subdirectory(src/plugins)
-    add_subdirectory(src/libirccd-js)
-endif ()
+add_subdirectory(cli-plugin-config)
+add_subdirectory(cli-plugin-info)
+add_subdirectory(cli-plugin-list)
+add_subdirectory(cli-plugin-load)
+add_subdirectory(cli-plugin-reload)
+add_subdirectory(cli-plugin-unload)

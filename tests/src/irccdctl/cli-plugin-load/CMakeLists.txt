@@ -16,32 +16,13 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# Project
-project(tests)
+if (NOT IS_ABSOLUTE WITH_PLUGINDIR)
+    file(WRITE "${CMAKE_BINARY_DIR}/${WITH_PLUGINDIR}/test-cli-plugin-load.js" "")
 
-# Configuration files for irccd/irccdctl
-set(
-    CONFIGS
-    irccd-plugins.conf
-    irccdctl.conf
-)
-
-foreach (c ${CONFIGS})
-    configure_file(
-        ${tests_SOURCE_DIR}/data/${c}
-        ${tests_BINARY_DIR}/${c}
-        @ONLY
+    irccd_define_test(
+        NAME cli-plugin-load
+        SOURCES main.cpp
+        LIBRARIES libcommon
+        DEPENDS irccd irccdctl
     )
-endforeach ()
-
-# libirccd
-add_subdirectory(src/libirccd)
-
-# irccdctl
-add_subdirectory(src/irccdctl)
-
-# Javascript API and plugins.
-if (HAVE_JS)
-    add_subdirectory(src/plugins)
-    add_subdirectory(src/libirccd-js)
 endif ()
