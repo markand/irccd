@@ -28,7 +28,7 @@
 
 namespace irccd {
 
-void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_t handler)
+void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_handler handler)
 {
     assert(client);
     assert(handler);
@@ -59,7 +59,7 @@ void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_
     });
 }
 
-void transport_server::do_greetings(std::shared_ptr<transport_client> client, accept_t handler)
+void transport_server::do_greetings(std::shared_ptr<transport_client> client, accept_handler handler)
 {
     assert(client);
     assert(handler);
@@ -89,7 +89,7 @@ void transport_server::do_greetings(std::shared_ptr<transport_client> client, ac
     });
 }
 
-void transport_server::accept(accept_t handler)
+void transport_server::accept(accept_handler handler)
 {
     assert(handler);
 

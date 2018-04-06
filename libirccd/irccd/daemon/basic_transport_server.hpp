@@ -60,7 +60,7 @@ protected:
     /**
      * \copydoc transport_server::accept
      */
-    void do_accept(accept_t handler) override;
+    void do_accept(accept_handler handler) override;
 
 public:
     /**
@@ -82,7 +82,7 @@ basic_transport_server<Protocol>::basic_transport_server(boost::asio::io_service
 }
 
 template <typename Protocol>
-void basic_transport_server<Protocol>::do_accept(accept_t handler)
+void basic_transport_server<Protocol>::do_accept(accept_handler handler)
 {
     auto client = std::make_shared<basic_transport_client<socket_t>>(*this, acceptor_.get_io_service());
 

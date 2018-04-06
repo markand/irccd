@@ -22,7 +22,7 @@
 
 namespace irccd {
 
-void tls_transport_server::do_handshake(std::shared_ptr<client_t> client, accept_t handler)
+void tls_transport_server::do_handshake(std::shared_ptr<client_t> client, accept_handler handler)
 {
     using boost::asio::ssl::stream_base;
 
@@ -37,7 +37,7 @@ tls_transport_server::tls_transport_server(boost::asio::io_service& service, acc
 {
 }
 
-void tls_transport_server::do_accept(accept_t handler)
+void tls_transport_server::do_accept(accept_handler handler)
 {
     auto client = std::make_shared<client_t>(*this, acceptor_.get_io_service(), context_);
 

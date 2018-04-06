@@ -44,7 +44,7 @@ private:
 
     context_t context_;
 
-    void do_handshake(std::shared_ptr<client_t>, accept_t);
+    void do_handshake(std::shared_ptr<client_t>, accept_handler);
 
 protected:
     /**
@@ -53,7 +53,7 @@ protected:
      * This function does the same as tcp_transport_server::do_accept but it
      * also perform a SSL handshake after a successful accept operation.
      */
-    void do_accept(accept_t handler) override;
+    void do_accept(accept_handler handler) override;
 
 public:
     /**
