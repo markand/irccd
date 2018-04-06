@@ -16,29 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(tests)
-
-set(
-    CONFIGS
-    irccdctl.conf
-    irccd-multiple-rules.conf
-    irccd-plugins.conf
-    irccd-rules.conf
+irccd_define_test(
+    NAME network-stream
+    SOURCES main.cpp
+    LIBRARIES libcommon
 )
-
-foreach (c ${CONFIGS})
-    configure_file(
-        ${tests_SOURCE_DIR}/data/${c}
-        ${CMAKE_BINARY_DIR}/tmp/${c}
-        @ONLY
-    )
-endforeach ()
-
-add_subdirectory(src/libcommon)
-add_subdirectory(src/libirccd)
-add_subdirectory(src/irccdctl)
-
-if (HAVE_JS)
-    add_subdirectory(src/plugins)
-    add_subdirectory(src/libirccd-js)
-endif ()
