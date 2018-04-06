@@ -478,11 +478,13 @@ void set_uid(const std::string& value)
 {
     assert(value.c_str());
 
-    uid_t id;
+#if defined(HAVE_SIGNED_UID_T)
+    auto id = string_util::to_int<uid_t>(value);
+#else
+    auto id = string_util::to_uint<uid_t>(value);
+#endif
 
-    if (string_util::is_int(value))
-        id = std::stoi(value);
-    else {
+    if (!id) {
         auto pw = getpwnam(value.c_str());
 
         if (!pw)
@@ -491,7 +493,7 @@ void set_uid(const std::string& value)
         id = pw->pw_uid;
     }
 
-    if (setuid(id) < 0)
+    if (setuid(*id) < 0)
         throw std::runtime_error(std::strerror(errno));
 }
 
@@ -503,11 +505,13 @@ void set_gid(const std::string& value)
 {
     assert(value.c_str());
 
-    gid_t id;
+#if defined(HAVE_SIGNED_GID_T)
+    auto id = string_util::to_int<gid_t>(value);
+#else
+    auto id = string_util::to_uint<gid_t>(value);
+#endif
 
-    if (string_util::is_int(value))
-        id = std::stoi(value);
-    else {
+    if (!id) {
         auto gr = getgrnam(value.c_str());
 
         if (!gr)
@@ -516,7 +520,7 @@ void set_gid(const std::string& value)
         id = gr->gr_gid;
     }
 
-    if (setgid(id) < 0)
+    if (setgid(*id) < 0)
         throw std::runtime_error(std::strerror(errno));
 }
 

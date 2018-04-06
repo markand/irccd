@@ -344,30 +344,6 @@ bool is_boolean(std::string value) noexcept
     return value == "1" || value == "YES" || value == "TRUE" || value == "ON";
 }
 
-bool is_int(const std::string &str, int base) noexcept
-{
-    if (str.empty())
-        return false;
-
-    char *ptr;
-
-    std::strtol(str.c_str(), &ptr, base);
-
-    return *ptr == 0;
-}
-
-bool is_real(const std::string &str) noexcept
-{
-    if (str.empty())
-        return false;
-
-    char *ptr;
-
-    std::strtod(str.c_str(), &ptr);
-
-    return *ptr == 0;
-}
-
 } // !string_util
 
 } // !util

@@ -16,6 +16,18 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-add_subdirectory(fs-util)
-add_subdirectory(network-stream)
-add_subdirectory(string-util)
+include(CheckCXXSourceCompiles)
+
+# Check if gid_t is signed.
+check_cxx_source_compiles(
+    "#include <sys/types.h>
+
+     #include <type_traits>
+
+     int main()
+     {
+        static_assert(std::is_signed<gid_t>::value, \"gid is signed\");
+     }
+    "
+    HAVE_SIGNED_GID_T
+)

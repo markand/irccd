@@ -16,8 +16,18 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-irccd_define_test(
-    NAME util
-    SOURCES main.cpp
-    LIBRARIES libirccd
+include(CheckCXXSourceCompiles)
+
+# Check if uid_t is signed.
+check_cxx_source_compiles(
+    "#include <sys/types.h>
+
+     #include <type_traits>
+
+     int main()
+     {
+        static_assert(std::is_signed<uid_t>::value, \"uid is signed\");
+     }
+    "
+    HAVE_SIGNED_UID_T
 )

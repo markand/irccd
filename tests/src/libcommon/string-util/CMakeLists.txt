@@ -16,6 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-add_subdirectory(fs-util)
-add_subdirectory(network-stream)
-add_subdirectory(string-util)
+irccd_define_test(
+    NAME string-util
+    SOURCES main.cpp
+    LIBRARIES libcommon
+)

@@ -87,7 +87,8 @@
 #cmakedefine HAVE_SETGID
 #cmakedefine HAVE_SETPROGNAME
 #cmakedefine HAVE_SETUID
-#cmakedefine HAVE_STD_PUT_TIME
+#cmakedefine HAVE_SIGNED_GID_T
+#cmakedefine HAVE_SIGNED_UID_T
 #cmakedefine HAVE_STAT
 #cmakedefine HAVE_STAT_ST_ATIME
 #cmakedefine HAVE_STAT_ST_BLKSIZE
@@ -102,6 +103,7 @@
 #cmakedefine HAVE_STAT_ST_RDEV
 #cmakedefine HAVE_STAT_ST_SIZE
 #cmakedefine HAVE_STAT_ST_UID
+#cmakedefine HAVE_STD_PUT_TIME
 #cmakedefine HAVE_SYSLOG
 
 /*

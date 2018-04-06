@@ -275,34 +275,6 @@ inline bool is_identifier(const std::string& name)
 IRCCD_EXPORT bool is_boolean(std::string value) noexcept;
 
 /**
- * Check if the string is an integer.
- *
- * \param value the input
- * \param base the optional base
- * \return true if integer
- */
-IRCCD_EXPORT bool is_int(const std::string& value, int base = 10) noexcept;
-
-/**
- * Check if the string is real.
- *
- * \param value the value
- * \return true if real
- */
-IRCCD_EXPORT bool is_real(const std::string& value) noexcept;
-
-/**
- * Check if the string is a number.
- *
- * \param value the value
- * \return true if it is a number
- */
-inline bool is_number(const std::string& value) noexcept
-{
-    return is_int(value) || is_real(value);
-}
-
-/**
  * \cond HIDDEN_SYMBOLS
  */
 

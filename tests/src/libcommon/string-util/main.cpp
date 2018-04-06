@@ -1,5 +1,5 @@
 /*
- * main.cpp -- test util functions
+ * main.cpp -- test string_util functions
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -16,42 +16,26 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define BOOST_TEST_MODULE "util"
+#define BOOST_TEST_MODULE "string_util"
 #include <boost/test/unit_test.hpp>
 
-#include <cstdint>
-
-#include <irccd/fs_util.hpp>
 #include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
 
-namespace std {
-
-std::ostream& operator<<(std::ostream& out, const std::vector<std::string>& list)
-{
-    for (const auto& s : list)
-        out << s << " ";
-
-    return out;
-}
-
-} // !std
-
 namespace irccd {
-
-BOOST_AUTO_TEST_SUITE(format)
 
 /*
  * string_util::format function
  * --------------------------------------------------------
  */
+BOOST_AUTO_TEST_SUITE(format)
 
 BOOST_AUTO_TEST_CASE(nothing)
 {
     std::string expected = "hello world!";
     std::string result = string_util::format("hello world!");
 
-    BOOST_REQUIRE_EQUAL(expected, result);
+    BOOST_TEST(expected == result);
 }
 
 BOOST_AUTO_TEST_CASE(escape)
@@ -60,16 +44,16 @@ BOOST_AUTO_TEST_CASE(escape)
 
     params.keywords.emplace("target", "hello");
 
-    BOOST_REQUIRE_EQUAL("$@#", string_util::format("$@#"));
-    BOOST_REQUIRE_EQUAL(" $ @ # ", string_util::format(" $ @ # "));
-    BOOST_REQUIRE_EQUAL("#", string_util::format("#"));
-    BOOST_REQUIRE_EQUAL(" # ", string_util::format(" # "));
-    BOOST_REQUIRE_EQUAL("#@", string_util::format("#@"));
-    BOOST_REQUIRE_EQUAL("##", string_util::format("##"));
-    BOOST_REQUIRE_EQUAL("#!", string_util::format("#!"));
-    BOOST_REQUIRE_EQUAL("#{target}", string_util::format("##{target}"));
-    BOOST_REQUIRE_EQUAL("@hello", string_util::format("@#{target}", params));
-    BOOST_REQUIRE_EQUAL("hello#", string_util::format("#{target}#", params));
+    BOOST_TEST(string_util::format("$@#") == "$@#");
+    BOOST_TEST(string_util::format(" $ @ # ") == " $ @ # ");
+    BOOST_TEST(string_util::format("#") == "#");
+    BOOST_TEST(string_util::format(" # ") == " # ");
+    BOOST_TEST(string_util::format("#@") == "#@");
+    BOOST_TEST(string_util::format("##") == "##");
+    BOOST_TEST(string_util::format("#!") == "#!");
+    BOOST_TEST(string_util::format("##{target}") == "#{target}");
+    BOOST_TEST(string_util::format("@#{target}", params) == "@hello");
+    BOOST_TEST(string_util::format("#{target}#", params) == "hello#");
     BOOST_REQUIRE_THROW(string_util::format("#{failure"), std::exception);
 }
 
@@ -79,7 +63,7 @@ BOOST_AUTO_TEST_CASE(disable_date)
 
     params.flags &= ~(string_util::subst_flags::date);
 
-    BOOST_REQUIRE_EQUAL("%H:%M", string_util::format("%H:%M", params));
+    BOOST_TEST(string_util::format("%H:%M", params) == "%H:%M");
 }
 
 BOOST_AUTO_TEST_CASE(disable_keywords)
@@ -89,7 +73,7 @@ BOOST_AUTO_TEST_CASE(disable_keywords)
     params.keywords.emplace("target", "hello");
     params.flags &= ~(string_util::subst_flags::keywords);
 
-    BOOST_REQUIRE_EQUAL("#{target}", string_util::format("#{target}", params));
+    BOOST_TEST(string_util::format("#{target}", params) == "#{target}");
 }
 
 BOOST_AUTO_TEST_CASE(disable_env)
@@ -98,7 +82,7 @@ BOOST_AUTO_TEST_CASE(disable_env)
 
     params.flags &= ~(string_util::subst_flags::env);
 
-    BOOST_REQUIRE_EQUAL("${HOME}", string_util::format("${HOME}", params));
+    BOOST_TEST(string_util::format("${HOME}", params) == "${HOME}");
 }
 
 BOOST_AUTO_TEST_CASE(keyword_simple)
@@ -110,7 +94,7 @@ BOOST_AUTO_TEST_CASE(keyword_simple)
     std::string expected = "hello irccd!";
     std::string result = string_util::format("hello #{target}!", params);
 
-    BOOST_REQUIRE_EQUAL(expected, result);
+    BOOST_TEST(expected == result);
 }
 
 BOOST_AUTO_TEST_CASE(keyword_multiple)
@@ -123,7 +107,7 @@ BOOST_AUTO_TEST_CASE(keyword_multiple)
     std::string expected = "hello irccd from nightmare!";
     std::string result = string_util::format("hello #{target} from #{source}!", params);
 
-    BOOST_REQUIRE_EQUAL(expected, result);
+    BOOST_TEST(expected == result);
 }
 
 BOOST_AUTO_TEST_CASE(keyword_adj_twice)
@@ -135,7 +119,7 @@ BOOST_AUTO_TEST_CASE(keyword_adj_twice)
     std::string expected = "hello irccdirccd!";
     std::string result = string_util::format("hello #{target}#{target}!", params);
 
-    BOOST_REQUIRE_EQUAL(expected, result);
+    BOOST_TEST(expected == result);
 }
 
 BOOST_AUTO_TEST_CASE(keyword_missing)
@@ -143,7 +127,7 @@ BOOST_AUTO_TEST_CASE(keyword_missing)
     std::string expected = "hello !";
     std::string result = string_util::format("hello #{target}!");
 
-    BOOST_REQUIRE_EQUAL(expected, result);
+    BOOST_TEST(expected == result);
 }
 
 BOOST_AUTO_TEST_CASE(env_simple)
@@ -154,7 +138,7 @@ BOOST_AUTO_TEST_CASE(env_simple)
         std::string expected = "my home is " + home;
         std::string result = string_util::format("my home is ${HOME}");
 
-        BOOST_REQUIRE_EQUAL(expected, result);
+        BOOST_TEST(expected == result);
     }
 }
 
@@ -163,7 +147,7 @@ BOOST_AUTO_TEST_CASE(env_missing)
     std::string expected = "value is ";
     std::string result = string_util::format("value is ${HOPE_THIS_VAR_NOT_EXIST}");
 
-    BOOST_REQUIRE_EQUAL(expected, result);
+    BOOST_TEST(expected == result);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -182,7 +166,7 @@ BOOST_AUTO_TEST_CASE(simple)
     list expected { "a", "b" };
     list result = string_util::split("a;b", ";");
 
-    BOOST_REQUIRE_EQUAL(expected, result);
+    BOOST_TEST(expected == result);
 }
 
 BOOST_AUTO_TEST_CASE(cut)
@@ -190,7 +174,7 @@ BOOST_AUTO_TEST_CASE(cut)
     list expected { "msg", "#staff", "foo bar baz" };
     list result = string_util::split("msg;#staff;foo bar baz", ";", 3);
 
-    BOOST_REQUIRE_EQUAL(expected, result);
+    BOOST_TEST(expected == result);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -207,7 +191,7 @@ BOOST_AUTO_TEST_CASE(left)
     std::string value = "   123";
     std::string result = string_util::strip(value);
 
-    BOOST_REQUIRE_EQUAL("123", result);
+    BOOST_TEST(result == "123");
 }
 
 BOOST_AUTO_TEST_CASE(right)
@@ -215,7 +199,7 @@ BOOST_AUTO_TEST_CASE(right)
     std::string value = "123   ";
     std::string result = string_util::strip(value);
 
-    BOOST_REQUIRE_EQUAL("123", result);
+    BOOST_TEST(result == "123");
 }
 
 BOOST_AUTO_TEST_CASE(both)
@@ -223,7 +207,7 @@ BOOST_AUTO_TEST_CASE(both)
     std::string value = "   123   ";
     std::string result = string_util::strip(value);
 
-    BOOST_REQUIRE_EQUAL("123", result);
+    BOOST_TEST(result == "123");
 }
 
 BOOST_AUTO_TEST_CASE(none)
@@ -231,7 +215,7 @@ BOOST_AUTO_TEST_CASE(none)
     std::string value = "without";
     std::string result = string_util::strip(value);
 
-    BOOST_REQUIRE_EQUAL("without", result);
+    BOOST_TEST(result == "without");
 }
 
 BOOST_AUTO_TEST_CASE(betweenEmpty)
@@ -239,7 +223,7 @@ BOOST_AUTO_TEST_CASE(betweenEmpty)
     std::string value = "one list";
     std::string result = string_util::strip(value);
 
-    BOOST_REQUIRE_EQUAL("one list", result);
+    BOOST_TEST(result == "one list");
 }
 
 BOOST_AUTO_TEST_CASE(betweenLeft)
@@ -247,7 +231,7 @@ BOOST_AUTO_TEST_CASE(betweenLeft)
     std::string value = "  space at left";
     std::string result = string_util::strip(value);
 
-    BOOST_REQUIRE_EQUAL("space at left", result);
+    BOOST_TEST(result == "space at left");
 }
 
 BOOST_AUTO_TEST_CASE(betweenRight)
@@ -255,7 +239,7 @@ BOOST_AUTO_TEST_CASE(betweenRight)
     std::string value = "space at right  ";
     std::string result = string_util::strip(value);
 
-    BOOST_REQUIRE_EQUAL("space at right", result);
+    BOOST_TEST(result == "space at right");
 }
 
 BOOST_AUTO_TEST_CASE(betweenBoth)
@@ -263,7 +247,7 @@ BOOST_AUTO_TEST_CASE(betweenBoth)
     std::string value = "  space at both  ";
     std::string result = string_util::strip(value);
 
-    BOOST_REQUIRE_EQUAL("space at both", result);
+    BOOST_TEST(result == "space at both");
 }
 
 BOOST_AUTO_TEST_CASE(empty)
@@ -271,7 +255,7 @@ BOOST_AUTO_TEST_CASE(empty)
     std::string value = "    ";
     std::string result = string_util::strip(value);
 
-    BOOST_REQUIRE_EQUAL("", result);
+    BOOST_TEST(result == "");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -288,7 +272,7 @@ BOOST_AUTO_TEST_CASE(empty)
     std::string expected = "";
     std::string result = string_util::join<int>({});
 
-    BOOST_REQUIRE_EQUAL(expected, result);
+    BOOST_TEST(expected == result);
 }
 
 BOOST_AUTO_TEST_CASE(one)
@@ -296,7 +280,7 @@ BOOST_AUTO_TEST_CASE(one)
     std::string expected = "1";
     std::string result = string_util::join({1});
 
-    BOOST_REQUIRE_EQUAL(expected, result);
+    BOOST_TEST(expected == result);
 }
 
 BOOST_AUTO_TEST_CASE(two)
@@ -304,7 +288,7 @@ BOOST_AUTO_TEST_CASE(two)
     std::string expected = "1:2";
     std::string result = string_util::join({1, 2});
 
-    BOOST_REQUIRE_EQUAL(expected, result);
+    BOOST_TEST(expected == result);
 }
 
 BOOST_AUTO_TEST_CASE(delimiterString)
@@ -312,7 +296,7 @@ BOOST_AUTO_TEST_CASE(delimiterString)
     std::string expected = "1;;2;;3";
     std::string result = string_util::join({1, 2, 3}, ";;");
 
-    BOOST_REQUIRE_EQUAL(expected, result);
+    BOOST_TEST(expected == result);
 }
 
 BOOST_AUTO_TEST_CASE(delimiterChar)
@@ -320,7 +304,7 @@ BOOST_AUTO_TEST_CASE(delimiterChar)
     std::string expected = "1@2@3@4";
     std::string result = string_util::join({1, 2, 3, 4}, '@');
 
-    BOOST_REQUIRE_EQUAL(expected, result);
+    BOOST_TEST(expected == result);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -334,20 +318,20 @@ BOOST_AUTO_TEST_SUITE(is_identifier_valid)
 
 BOOST_AUTO_TEST_CASE(correct)
 {
-    BOOST_REQUIRE(string_util::is_identifier("localhost"));
-    BOOST_REQUIRE(string_util::is_identifier("localhost2"));
-    BOOST_REQUIRE(string_util::is_identifier("localhost2-4_"));
+    BOOST_TEST(string_util::is_identifier("localhost"));
+    BOOST_TEST(string_util::is_identifier("localhost2"));
+    BOOST_TEST(string_util::is_identifier("localhost2-4_"));
 }
 
 BOOST_AUTO_TEST_CASE(incorrect)
 {
-    BOOST_REQUIRE(!string_util::is_identifier(""));
-    BOOST_REQUIRE(!string_util::is_identifier("localhost with spaces"));
-    BOOST_REQUIRE(!string_util::is_identifier("localhost*"));
-    BOOST_REQUIRE(!string_util::is_identifier("&&"));
-    BOOST_REQUIRE(!string_util::is_identifier("@'"));
-    BOOST_REQUIRE(!string_util::is_identifier("##"));
-    BOOST_REQUIRE(!string_util::is_identifier("===++"));
+    BOOST_TEST(!string_util::is_identifier(""));
+    BOOST_TEST(!string_util::is_identifier("localhost with spaces"));
+    BOOST_TEST(!string_util::is_identifier("localhost*"));
+    BOOST_TEST(!string_util::is_identifier("&&"));
+    BOOST_TEST(!string_util::is_identifier("@'"));
+    BOOST_TEST(!string_util::is_identifier("##"));
+    BOOST_TEST(!string_util::is_identifier("===++"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -362,109 +346,33 @@ BOOST_AUTO_TEST_SUITE(is_boolean)
 BOOST_AUTO_TEST_CASE(correct)
 {
     // true
-    BOOST_REQUIRE(string_util::is_boolean("true"));
-    BOOST_REQUIRE(string_util::is_boolean("True"));
-    BOOST_REQUIRE(string_util::is_boolean("TRUE"));
-    BOOST_REQUIRE(string_util::is_boolean("TruE"));
+    BOOST_TEST(string_util::is_boolean("true"));
+    BOOST_TEST(string_util::is_boolean("True"));
+    BOOST_TEST(string_util::is_boolean("TRUE"));
+    BOOST_TEST(string_util::is_boolean("TruE"));
 
     // yes
-    BOOST_REQUIRE(string_util::is_boolean("yes"));
-    BOOST_REQUIRE(string_util::is_boolean("Yes"));
-    BOOST_REQUIRE(string_util::is_boolean("YES"));
-    BOOST_REQUIRE(string_util::is_boolean("YeS"));
+    BOOST_TEST(string_util::is_boolean("yes"));
+    BOOST_TEST(string_util::is_boolean("Yes"));
+    BOOST_TEST(string_util::is_boolean("YES"));
+    BOOST_TEST(string_util::is_boolean("YeS"));
 
     // on
-    BOOST_REQUIRE(string_util::is_boolean("on"));
-    BOOST_REQUIRE(string_util::is_boolean("On"));
-    BOOST_REQUIRE(string_util::is_boolean("oN"));
-    BOOST_REQUIRE(string_util::is_boolean("ON"));
+    BOOST_TEST(string_util::is_boolean("on"));
+    BOOST_TEST(string_util::is_boolean("On"));
+    BOOST_TEST(string_util::is_boolean("oN"));
+    BOOST_TEST(string_util::is_boolean("ON"));
 
     // 1
-    BOOST_REQUIRE(string_util::is_boolean("1"));
+    BOOST_TEST(string_util::is_boolean("1"));
 }
 
 BOOST_AUTO_TEST_CASE(incorrect)
 {
-    BOOST_REQUIRE(!string_util::is_boolean("false"));
-    BOOST_REQUIRE(!string_util::is_boolean("lol"));
-    BOOST_REQUIRE(!string_util::is_boolean(""));
-    BOOST_REQUIRE(!string_util::is_boolean("0"));
-}
-
-BOOST_AUTO_TEST_SUITE_END()
-
-/*
- * string_util::is_number function
- * --------------------------------------------------------
- */
-
-BOOST_AUTO_TEST_SUITE(is_number)
-
-BOOST_AUTO_TEST_CASE(correct)
-{
-    BOOST_REQUIRE(string_util::is_number("123"));
-    BOOST_REQUIRE(string_util::is_number("-123"));
-    BOOST_REQUIRE(string_util::is_number("123.67"));
-}
-
-BOOST_AUTO_TEST_CASE(incorrect)
-{
-    BOOST_REQUIRE(!string_util::is_number("lol"));
-    BOOST_REQUIRE(!string_util::is_number("this is not a number"));
-}
-
-BOOST_AUTO_TEST_SUITE_END()
-
-/*
- * fs_util::find function (name)
- * ------------------------------------------------------------------
- */
-
-BOOST_AUTO_TEST_SUITE(fs_find_name)
-
-BOOST_AUTO_TEST_CASE(not_recursive)
-{
-    auto file1 = fs_util::find(CMAKE_SOURCE_DIR "/tests/root", "file-1.txt", false);
-    auto file2 = fs_util::find(CMAKE_SOURCE_DIR "/tests/root", "file-2.txt", false);
-
-    BOOST_TEST(file1.find("file-1.txt") != std::string::npos);
-    BOOST_TEST(file2.empty());
-}
-
-BOOST_AUTO_TEST_CASE(recursive)
-{
-    auto file1 = fs_util::find(CMAKE_SOURCE_DIR "/tests/root", "file-1.txt", true);
-    auto file2 = fs_util::find(CMAKE_SOURCE_DIR "/tests/root", "file-2.txt", true);
-
-    BOOST_TEST(file1.find("file-1.txt") != std::string::npos);
-    BOOST_TEST(file2.find("file-2.txt") != std::string::npos);
-}
-
-BOOST_AUTO_TEST_SUITE_END()
-
-/*
- * fs_util::find function (regex)
- * ------------------------------------------------------------------
- */
-
-BOOST_AUTO_TEST_SUITE(fs_find_regex)
-
-BOOST_AUTO_TEST_CASE(not_recursive)
-{
-    const std::regex regex("file-[12]\\.txt");
-
-    auto file = fs_util::find(CMAKE_SOURCE_DIR "/tests/root", regex, false);
-
-    BOOST_TEST(file.find("file-1.txt") != std::string::npos);
-}
-
-BOOST_AUTO_TEST_CASE(recursive)
-{
-    const std::regex regex("file-[12]\\.txt");
-
-    auto file = fs_util::find(CMAKE_SOURCE_DIR "/tests/root/level-1", regex, true);
-
-    BOOST_TEST(file.find("file-2.txt") != std::string::npos);
+    BOOST_TEST(!string_util::is_boolean("false"));
+    BOOST_TEST(!string_util::is_boolean("lol"));
+    BOOST_TEST(!string_util::is_boolean(""));
+    BOOST_TEST(!string_util::is_boolean("0"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
