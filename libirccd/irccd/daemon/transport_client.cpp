@@ -23,16 +23,44 @@
 
 namespace irccd {
 
+void transport_client::erase()
+{
+    const auto self = shared_from_this();
+
+    state_ = state_t::closing;
+    parent_.get_service().post([this, self] () {
+        parent_.get_clients().erase(self);
+    });
+}
+
 void transport_client::recv(network_recv_handler handler)
 {
-    if (state_ != state_t::closing)
-        do_recv(std::move(handler));
+    assert(handler);
+
+    const auto self = shared_from_this();
+
+    if (state_ != state_t::closing) {
+        do_recv([this, self, handler] (auto code, auto msg) {
+            handler(code, msg);
+
+            if (code)
+                erase();
+        });
+    }
 }
 
 void transport_client::send(nlohmann::json json, network_send_handler handler)
 {
-    if (state_ != state_t::closing)
-        do_send(std::move(json), std::move(handler));
+    const auto self = shared_from_this();
+
+    if (state_ != state_t::closing) {
+        do_send(json, [this, self, handler] (auto code) {
+            if (handler)
+                handler(std::move(code));
+            if (code)
+                erase();
+        });
+    }
 }
 
 void transport_client::success(const std::string& cname, network_send_handler handler)
@@ -66,7 +94,7 @@ void transport_client::error(boost::system::error_code code,
         if (handler)
             handler(code);
 
-        parent_.get_clients().erase(shared_from_this());
+        erase();
     });
 
     state_ = state_t::closing;

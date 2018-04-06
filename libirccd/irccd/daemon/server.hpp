@@ -281,6 +281,14 @@ public:
     boost::signals2::signal<void (connect_event)> on_connect;
 
     /**
+     * Signal: on_disconnect
+     * ----------------------------------------------------------
+     *
+     * The server was disconnected but is reconnecting.
+     */
+    boost::signals2::signal<void (disconnect_event)> on_disconnect;
+
+    /**
      * Signal: on_die
      * ----------------------------------------------------------
      *

@@ -68,18 +68,26 @@ void wrap_recv(Socket& socket, boost::asio::streambuf& buffer, connection::recv_
 {
     assert(handler);
 
-    boost::asio::async_read_until(socket, buffer, "\r\n", [&socket, &buffer, handler] (auto code, auto xfer) {
-        if (code || xfer == 0U)
+    boost::asio::async_read_until(socket, buffer, "\r\n", [&socket, &buffer, handler] (auto code, auto xfer) noexcept {
+        if (code || xfer == 0U) {
             handler(std::move(code), message());
-        else {
-            std::string str(
+            return;
+        }
+
+        std::string data;
+
+        try {
+            data = std::string(
                 boost::asio::buffers_begin(buffer.data()),
                 boost::asio::buffers_begin(buffer.data()) + xfer - 2
             );
 
             buffer.consume(xfer);
-            handler(std::move(code), message::parse(str));
+        } catch (...) {
+            code = make_error_code(boost::system::errc::not_enough_memory);
         }
+
+        handler(code, code ? message() : message::parse(data));
     });
 }
 
@@ -88,8 +96,7 @@ void wrap_send(Socket& socket, const std::string& message, connection::send_t ha
 {
     assert(handler);
 
-    boost::asio::async_write(socket, boost::asio::buffer(message), [handler, message] (auto code, auto) {
-        // TODO: xfer
+    boost::asio::async_write(socket, boost::asio::buffer(message), [handler, message] (auto code, auto) noexcept {
         handler(code);
     });
 }
@@ -102,7 +109,9 @@ void connection::rflush()
         return;
 
     do_recv(buffer_, [this] (auto code, auto message) {
-        input_.front()(code, std::move(message));
+        if (input_.front())
+            input_.front()(code, std::move(message));
+
         input_.pop_front();
 
         if (!code)

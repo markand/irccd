@@ -109,7 +109,7 @@ command_test<Commands...>::command_test()
     // Add the server and the command.
     add<Commands...>();
     daemon_->set_log(std::make_unique<silent_logger>());
-    daemon_->transports().add(std::make_unique<ip_transport_server>(std::move(acc)));
+    daemon_->transports().add(std::make_unique<ip_transport_server>(service_, std::move(acc)));
 
     timer_.expires_from_now(boost::posix_time::seconds(10));
     timer_.async_wait([] (auto code) {

@@ -67,14 +67,16 @@ public:
      * Constructor with an acceptor in parameter.
      *
      * \pre acceptor.is_open()
+     * \param service the io service
      * \param acceptor the already bound acceptor
      */
-    basic_transport_server(acceptor_t acceptor);
+    basic_transport_server(boost::asio::io_service& service, acceptor_t acceptor);
 };
 
 template <typename Protocol>
-basic_transport_server<Protocol>::basic_transport_server(acceptor_t acceptor)
-    : acceptor_(std::move(acceptor))
+basic_transport_server<Protocol>::basic_transport_server(boost::asio::io_service& service, acceptor_t acceptor)
+    : transport_server(service)
+    , acceptor_(std::move(acceptor))
 {
     assert(acceptor_.is_open());
 }

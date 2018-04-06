@@ -35,6 +35,32 @@ class basic_transport_client : public transport_client {
 private:
     network_stream<Socket> stream_;
 
+protected:
+    /**
+     * \copydoc transport_client::do_recv
+     */
+    void do_recv(network_recv_handler handler) override
+    {
+        const auto self = shared_from_this();
+
+        stream_.recv([this, self, handler] (auto msg, auto code) noexcept {
+            handler(std::move(msg), std::move(code));
+        });
+    }
+
+    /**
+     * \copydoc transport_client::do_send
+     */
+    void do_send(nlohmann::json json, network_send_handler handler) override
+    {
+        const auto self = shared_from_this();
+
+        stream_.send(std::move(json), [this, self, handler] (auto code) noexcept {
+            if (handler)
+                handler(std::move(code));
+        });
+    }
+
 public:
     /**
      * Construct the client.
@@ -67,33 +93,6 @@ public:
     inline network_stream<Socket>& stream() noexcept
     {
         return stream_;
-    }
-
-    /**
-     * \copydoc transport_client::do_recv
-     */
-    void do_recv(network_recv_handler handler) override
-    {
-        assert(handler);
-
-        auto self = shared_from_this();
-
-        stream_.recv([this, self, handler] (auto msg, auto code) {
-            handler(std::move(msg), std::move(code));
-        });
-    }
-
-    /**
-     * \copydoc transport_client::do_send
-     */
-    void do_send(nlohmann::json json, network_send_handler handler) override
-    {
-        auto self = shared_from_this();
-
-        stream_.send(std::move(json), [this, self, handler] (auto code) {
-            if (handler)
-                handler(std::move(code));
-        });
     }
 };
 

@@ -398,8 +398,13 @@ void server::dispatch(const irc::message& message)
 void server::handle_recv(boost::system::error_code code, irc::message message)
 {
     if (code) {
-        state_ = state_t::disconnected;
-        conn_ = nullptr;
+        const auto self = shared_from_this();
+
+        service_.post([this, self] () {
+            state_ = state_t::disconnected;
+            conn_ = nullptr;
+            reconnect();
+        });
     } else {
         dispatch(message);
         recv();
@@ -515,7 +520,7 @@ void server::disconnect() noexcept
 {
     conn_ = nullptr;
     state_ = state_t::disconnected;
-    on_die({shared_from_this()});
+    on_disconnect({shared_from_this()});
 }
 
 void server::reconnect() noexcept
@@ -638,8 +643,13 @@ void server::send(std::string raw)
 
     conn_->send(std::move(raw), [this] (auto code) {
         if (code) {
-            state_ = state_t::disconnected;
-            conn_ = nullptr;
+            const auto self = shared_from_this();
+
+            service_.post([this, self] () {
+                state_ = state_t::disconnected;
+                conn_ = nullptr;
+                reconnect();
+            });
         }
     });
 }

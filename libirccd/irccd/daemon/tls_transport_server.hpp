@@ -59,10 +59,11 @@ public:
     /**
      * Construct a secure layer transport server.
      *
+     * \param service the io service
      * \param acceptor the acceptor
      * \param context the SSL context
      */
-    tls_transport_server(acceptor_t acceptor, context_t context);
+    tls_transport_server(boost::asio::io_service& service, acceptor_t acceptor, context_t context);
 };
 
 } // !irccd

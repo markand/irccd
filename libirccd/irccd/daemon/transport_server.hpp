@@ -51,6 +51,7 @@ protected:
     using accept_t = std::function<void (boost::system::error_code, std::shared_ptr<transport_client>)>;
 
 private:
+    boost::asio::io_service& service_;
     client_set_t clients_;
     std::string password_;
 
@@ -71,7 +72,10 @@ public:
     /**
      * Default constructor.
      */
-    transport_server() noexcept = default;
+    inline transport_server(boost::asio::io_service& service) noexcept
+        : service_(service)
+    {
+    }
 
     /**
      * Virtual destructor defaulted.
@@ -87,6 +91,16 @@ public:
      * \param handler the handler
      */
     void accept(accept_t handler);
+
+    inline const boost::asio::io_service& get_service() const noexcept
+    {
+        return service_;
+    }
+
+    inline boost::asio::io_service& get_service() noexcept
+    {
+        return service_;
+    }
 
     /**
      * Get the clients.
@@ -129,7 +143,7 @@ public:
     }
 };
 
-class transport_error : public std::system_error {
+class transport_error : public boost::system::system_error {
 public:
     enum error {
         //!< Authentication is required.
@@ -174,23 +188,27 @@ public:
  *
  * \return the singleton
  */
-const std::error_category& transport_category() noexcept;
+const boost::system::error_category& transport_category() noexcept;
 
 /**
  * Create a boost::system::error_code from server_error::error enum.
  *
  * \param e the error code
  */
-std::error_code make_error_code(transport_error::error e) noexcept;
+boost::system::error_code make_error_code(transport_error::error e) noexcept;
 
 } // !irccd
 
-namespace std {
+namespace boost {
+
+namespace system {
 
 template <>
 struct is_error_code_enum<irccd::transport_error::error> : public std::true_type {
 };
 
-} // !std
+} // !system
+
+} // !boost
 
 #endif // !IRCCD_DAEMON_TRANSPORT_SERVER_HPP

@@ -64,7 +64,7 @@ void transport_server::do_greetings(std::shared_ptr<transport_client> client, ac
     assert(client);
     assert(handler);
 
-    auto greetings = nlohmann::json({
+    const auto greetings = nlohmann::json({
         { "program",    "irccd"             },
         { "major",      IRCCD_VERSION_MAJOR },
         { "minor",      IRCCD_VERSION_MINOR },
@@ -108,9 +108,9 @@ transport_error::transport_error(error code) noexcept
 {
 }
 
-const std::error_category& transport_category() noexcept
+const boost::system::error_category& transport_category() noexcept
 {
-    static const class category : public std::error_category {
+    static const class category : public boost::system::error_category {
     public:
         const char* name() const noexcept override
         {
@@ -151,7 +151,7 @@ const std::error_category& transport_category() noexcept
     return category;
 };
 
-std::error_code make_error_code(transport_error::error e) noexcept
+boost::system::error_code make_error_code(transport_error::error e) noexcept
 {
     return {static_cast<int>(e), transport_category()};
 }

@@ -76,8 +76,15 @@ private:
     rqueue_t rqueue_;
     squeue_t squeue_;
 
+    // Decomposition functions.
+    std::string eat(boost::system::error_code&, std::size_t) noexcept;
+    nlohmann::json parse(boost::system::error_code&, const std::string&) noexcept;
+
+    // I/O flushing.
     void rflush();
     void sflush();
+
+    // Wrap async_read_until/async_write.
     void do_recv(network_recv_handler);
     void do_send(const std::string&, network_send_handler);
 
@@ -146,6 +153,9 @@ public:
     /**
      * Request a receive operation.
      *
+     * The handler must not throw exceptions and `this` must be valid in the
+     * lifetime of the handler.
+     *
      * \pre handler != nullptr
      * \param handler the handler
      */
@@ -153,6 +163,9 @@ public:
 
     /**
      * Request a send operation.
+     *
+     * The handler must not throw exceptions and `this` must be valid in the
+     * lifetime of the handler.
      *
      * \pre json.is_object()
      * \param json the json message
@@ -162,44 +175,43 @@ public:
 };
 
 template <typename Socket>
-void network_stream<Socket>::do_recv(network_recv_handler handler)
+std::string network_stream<Socket>::eat(boost::system::error_code& code, std::size_t xfer) noexcept
 {
-    boost::asio::async_read_until(socket_, rbuffer_, "\r\n\r\n", [this, handler] (auto code, auto xfer) {
-        if (code || xfer == 0U)
-            handler(make_error_code(boost::system::errc::network_down), nullptr);
-        else {
-            std::string str(
-                boost::asio::buffers_begin(rbuffer_.data()),
-                boost::asio::buffers_begin(rbuffer_.data()) + xfer - 4
-            );
+    try {
+        std::string str(
+            boost::asio::buffers_begin(rbuffer_.data()),
+            boost::asio::buffers_begin(rbuffer_.data()) + xfer - 4
+        );
 
-            // Remove early in case of errors.
-            rbuffer_.consume(xfer);
+        // Only clean buffer here, so user can still try again later.
+        rbuffer_.consume(xfer);
+        code = make_error_code(boost::system::errc::success);
 
-            // TODO: catch nlohmann::json::parse_error when 3.0.0 is released.
-            nlohmann::json message;
-
-            try {
-                message = nlohmann::json::parse(str);
-            } catch (...) {}
-
-            if (!message.is_object())
-                handler(make_error_code(boost::system::errc::invalid_argument), nullptr);
-            else
-                handler(code, std::move(message));
-        }
-    });
+        return str;
+    } catch (...) {
+        code = make_error_code(boost::system::errc::not_enough_memory);
+        return "";
+    }
 }
 
 template <typename Socket>
-void network_stream<Socket>::do_send(const std::string& str, network_send_handler handler)
+nlohmann::json network_stream<Socket>::parse(boost::system::error_code& code, const std::string& data) noexcept
 {
-    boost::asio::async_write(socket_, boost::asio::buffer(str), [handler] (auto code, auto xfer) {
-        if (code || xfer == 0U)
-            handler(make_error_code(boost::system::errc::network_down));
-        else
-            handler(code);
-    });
+    try {
+        const auto json = nlohmann::json::parse(data);
+
+        if (!json.is_object()) {
+            code = make_error_code(boost::system::errc::invalid_argument);
+            return nullptr;
+        }
+
+        code = make_error_code(boost::system::errc::success);
+
+        return json;
+    } catch (...) {
+        code = make_error_code(boost::system::errc::invalid_argument);
+        return nullptr;
+    }
 }
 
 template <typename Socket>
@@ -208,11 +220,9 @@ void network_stream<Socket>::rflush()
     if (rqueue_.empty())
         return;
 
-    do_recv([this] (auto code, auto json) {
-        auto h = rqueue_.front();
-
-        if (h)
-            h(code, std::move(json));
+    do_recv([this] (auto code, auto json) noexcept {
+        if (rqueue_.front())
+            rqueue_.front()(code, std::move(json));
 
         rqueue_.pop_front();
 
@@ -227,16 +237,45 @@ void network_stream<Socket>::sflush()
     if (squeue_.empty())
         return;
 
-    do_send(squeue_.front().first, [this] (auto code) {
-        auto h = squeue_.front().second;
-
-        if (h)
-            h(code);
+    do_send(squeue_.front().first, [this] (auto code) noexcept {
+        if (squeue_.front().second)
+            squeue_.front().second(code);
 
         squeue_.pop_front();
 
         if (!code)
             sflush();
+    });
+}
+
+template <typename Socket>
+void network_stream<Socket>::do_recv(network_recv_handler handler)
+{
+    boost::asio::async_read_until(socket_, rbuffer_, "\r\n\r\n", [this, handler] (auto code, auto xfer) noexcept {
+        if (code || xfer == 0U) {
+            handler(make_error_code(boost::system::errc::network_down), nullptr);
+            return;
+        }
+
+        auto str = eat(code, xfer);
+
+        if (code)
+            handler(std::move(code), nullptr);
+
+        auto message = parse(code, str);
+
+        handler(std::move(code), std::move(message));
+    });
+}
+
+template <typename Socket>
+void network_stream<Socket>::do_send(const std::string& str, network_send_handler handler)
+{
+    boost::asio::async_write(socket_, boost::asio::buffer(str), [handler] (auto code, auto xfer) noexcept {
+        if (code || xfer == 0U)
+            handler(make_error_code(boost::system::errc::network_down));
+        else
+            handler(code);
     });
 }
 

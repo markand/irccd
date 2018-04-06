@@ -31,8 +31,8 @@ void tls_transport_server::do_handshake(std::shared_ptr<client_t> client, accept
     });
 }
 
-tls_transport_server::tls_transport_server(acceptor_t acceptor, context_t context)
-    : ip_transport_server(std::move(acceptor))
+tls_transport_server::tls_transport_server(boost::asio::io_service& service, acceptor_t acceptor, context_t context)
+    : ip_transport_server(service, std::move(acceptor))
     , context_(std::move(context))
 {
 }

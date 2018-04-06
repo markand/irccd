@@ -435,12 +435,18 @@ public:
     /**
      * Start receiving data.
      *
+     * The handler must not throw exceptions and `this` must be valid in the
+     * lifetime of the handler.
+     *
      * \param handler the handler to call
      */
     void recv(recv_t handler);
 
     /**
      * Start sending data.
+     *
+     * The handler must not throw exceptions and `this` must be valid in the
+     * lifetime of the handler.
      *
      * \param message the raw message
      * \param handler the handler to call

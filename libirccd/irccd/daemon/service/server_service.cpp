@@ -41,8 +41,8 @@ void dispatch(irccd& daemon,
               ExecFunc exec_func)
 {
     for (auto& plugin : daemon.plugins().list()) {
-        auto eventname = name_func(*plugin);
-        auto allowed = daemon.rules().solve(server, target, origin, plugin->get_name(), eventname);
+        const auto eventname = name_func(*plugin);
+        const auto allowed = daemon.rules().solve(server, target, origin, plugin->get_name(), eventname);
 
         if (!allowed) {
             daemon.get_log().debug("rule: event skipped on match");
@@ -80,11 +80,8 @@ void server_service::handle_connect(const connect_event& ev)
     );
 }
 
-void server_service::handle_die(const disconnect_event& ev)
+void server_service::handle_disconnect(const disconnect_event& ev)
 {
-    // First, remove the server in case of exceptions.
-    servers_.erase(std::find(servers_.begin(), servers_.end(), ev.server));
-
     irccd_.get_log().debug() << "server " << ev.server->get_name() << ": event onDisconnect" << std::endl;
     irccd_.transports().broadcast(nlohmann::json::object({
         { "event",      "onDisconnect"          },
@@ -99,6 +96,11 @@ void server_service::handle_die(const disconnect_event& ev)
             plugin.handle_disconnect(irccd_, ev);
         }
     );
+}
+
+void server_service::handle_die(const disconnect_event& ev)
+{
+    servers_.erase(std::find(servers_.begin(), servers_.end(), ev.server));
 }
 
 void server_service::handle_invite(const invite_event& ev)
@@ -443,6 +445,7 @@ void server_service::add(std::shared_ptr<server> server)
     assert(!has(server->get_name()));
 
     server->on_connect.connect(boost::bind(&server_service::handle_connect, this, _1));
+    server->on_disconnect.connect(boost::bind(&server_service::handle_disconnect, this, _1));
     server->on_die.connect(boost::bind(&server_service::handle_die, this, _1));
     server->on_invite.connect(boost::bind(&server_service::handle_invite, this, _1));
     server->on_join.connect(boost::bind(&server_service::handle_join, this, _1));
@@ -462,7 +465,7 @@ void server_service::add(std::shared_ptr<server> server)
 
 std::shared_ptr<server> server_service::get(const std::string& name) const noexcept
 {
-    auto it = std::find_if(servers_.begin(), servers_.end(), [&] (const auto& server) {
+    const auto it = std::find_if(servers_.begin(), servers_.end(), [&] (const auto& server) {
         return server->get_name() == name;
     });
 
@@ -487,7 +490,7 @@ std::shared_ptr<server> server_service::require(const std::string& name) const
 
 void server_service::remove(const std::string& name)
 {
-    auto it = std::find_if(servers_.begin(), servers_.end(), [&] (const auto& server) {
+    const auto it = std::find_if(servers_.begin(), servers_.end(), [&] (const auto& server) {
         return server->get_name() == name;
     });
 

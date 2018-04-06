@@ -45,6 +45,8 @@ private:
     state_t state_{state_t::authenticating};
     transport_server& parent_;
 
+    void erase();
+
 protected:
     /**
      * Request a receive operation.

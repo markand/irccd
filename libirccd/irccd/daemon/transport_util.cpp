@@ -119,11 +119,11 @@ std::unique_ptr<transport_server> from_config_load_ip(io_service& service, const
         ctx.use_private_key_file(key, boost::asio::ssl::context::pem);
         ctx.use_certificate_file(cert, boost::asio::ssl::context::pem);
 
-        return std::make_unique<tls_transport_server>(std::move(acceptor), std::move(ctx));
+        return std::make_unique<tls_transport_server>(service, std::move(acceptor), std::move(ctx));
 #endif
     }
 
-    return std::make_unique<ip_transport_server>(std::move(acceptor));
+    return std::make_unique<ip_transport_server>(service, std::move(acceptor));
 }
 
 std::unique_ptr<transport_server> from_config_load_unix(io_service& service, const ini::section& sc)
@@ -144,7 +144,7 @@ std::unique_ptr<transport_server> from_config_load_unix(io_service& service, con
     stream_protocol::endpoint endpoint(path);
     stream_protocol::acceptor acceptor(service, std::move(endpoint));
 
-    return std::make_unique<local_transport_server>(std::move(acceptor));
+    return std::make_unique<local_transport_server>(service, std::move(acceptor));
 #else
     (void)service;
     (void)sc;
