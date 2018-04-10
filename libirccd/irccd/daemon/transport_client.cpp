@@ -16,31 +16,45 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cassert>
-
 #include "transport_client.hpp"
 #include "transport_server.hpp"
 
 namespace irccd {
 
-void transport_client::erase()
+void transport_client::flush()
 {
+    if (queue_.empty())
+        return;
+
     const auto self = shared_from_this();
 
-    state_ = state_t::closing;
-    parent_.get_service().post([this, self] () {
-        parent_.get_clients().erase(self);
+    stream_->write(queue_.front().first, [this, self] (auto code) {
+        if (queue_.front().second)
+            queue_.front().second(code);
+
+        queue_.pop_front();
+
+        if (code)
+            erase();
+        else
+            flush();
     });
 }
 
-void transport_client::recv(network_recv_handler handler)
+void transport_client::erase()
+{
+    state_ = state_t::closing;
+    parent_.get_clients().erase(shared_from_this());
+}
+
+void transport_client::read(io::read_handler handler)
 {
     assert(handler);
 
-    const auto self = shared_from_this();
-
     if (state_ != state_t::closing) {
-        do_recv([this, self, handler] (auto code, auto msg) {
+        const auto self = shared_from_this();
+
+        stream_->read([this, self, handler] (auto code, auto msg) {
             handler(code, msg);
 
             if (code)
@@ -49,35 +63,29 @@ void transport_client::recv(network_recv_handler handler)
     }
 }
 
-void transport_client::send(nlohmann::json json, network_send_handler handler)
+void transport_client::write(nlohmann::json json, io::write_handler handler)
 {
-    const auto self = shared_from_this();
+    const auto in_progress = queue_.size() > 0;
 
-    if (state_ != state_t::closing) {
-        do_send(json, [this, self, handler] (auto code) {
-            if (handler)
-                handler(std::move(code));
-            if (code)
-                erase();
-        });
-    }
+    queue_.emplace_back(std::move(json), std::move(handler));
+
+    if (!in_progress)
+        flush();
 }
 
-void transport_client::success(const std::string& cname, network_send_handler handler)
+void transport_client::success(const std::string& cname, io::write_handler handler)
 {
     assert(!cname.empty());
 
-    send({{ "command", cname }}, std::move(handler));
+    write({{ "command", cname }}, std::move(handler));
 }
 
-void transport_client::error(boost::system::error_code code, network_send_handler handler)
+void transport_client::error(std::error_code code, io::write_handler handler)
 {
     error(std::move(code), "", std::move(handler));
 }
 
-void transport_client::error(boost::system::error_code code,
-                             std::string cname,
-                             network_send_handler handler)
+void transport_client::error(std::error_code code, std::string cname, io::write_handler handler)
 {
     assert(code);
 
@@ -90,11 +98,13 @@ void transport_client::error(boost::system::error_code code,
     if (!cname.empty())
         json["command"] = std::move(cname);
 
-    send(std::move(json), [this, handler] (auto code) {
+    const auto self = shared_from_this();
+
+    write(std::move(json), [this, handler, self] (auto code) {
+        erase();
+
         if (handler)
             handler(code);
-
-        erase();
     });
 
     state_ = state_t::closing;

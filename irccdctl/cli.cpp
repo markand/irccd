@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <boost/system/system_error.hpp>
-
 #include <irccd/json_util.hpp>
 #include <irccd/options.hpp>
 #include <irccd/string_util.hpp>
@@ -32,9 +30,9 @@ namespace ctl {
 
 void cli::recv_response(ctl::controller& ctl, nlohmann::json req, handler_t handler)
 {
-    ctl.recv([&ctl, req, handler, this] (auto code, auto message) {
+    ctl.read([&ctl, req, handler, this] (auto code, auto message) {
         if (code)
-            throw boost::system::system_error(code);
+            throw std::system_error(code);
 
         const auto c = json_util::parser(message).get<std::string>("command");
 
@@ -50,9 +48,9 @@ void cli::recv_response(ctl::controller& ctl, nlohmann::json req, handler_t hand
 
 void cli::request(ctl::controller& ctl, nlohmann::json req, handler_t handler)
 {
-    ctl.send(req, [&ctl, req, handler, this] (auto code) {
+    ctl.write(req, [&ctl, req, handler, this] (auto code) {
         if (code)
-            throw boost::system::system_error(code);
+            throw std::system_error(code);
 
         recv_response(ctl, std::move(req), std::move(handler));
     });

@@ -17,7 +17,7 @@
 #
 
 irccd_define_test(
-    NAME network-stream
+    NAME io
     SOURCES main.cpp
     LIBRARIES libcommon
 )

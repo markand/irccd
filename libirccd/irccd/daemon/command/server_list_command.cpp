@@ -38,7 +38,7 @@ void server_list_command::exec(irccd& irccd, transport_client& client, const nlo
     for (const auto& server : irccd.servers().servers())
         list.push_back(server->get_name());
 
-    client.send({
+    client.write({
         { "command",    "server-list"   },
         { "list",       std::move(list) }
     });

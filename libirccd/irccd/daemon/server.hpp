@@ -437,7 +437,7 @@ private:
     // Misc.
     boost::asio::io_service& service_;
     boost::asio::deadline_timer timer_;
-    std::unique_ptr<irc::connection> conn_;
+    std::shared_ptr<irc::connection> conn_;
     std::int8_t recocur_{0};
     std::map<std::string, std::set<std::string>> names_map_;
     std::map<std::string, whois_info> whois_map_;
@@ -902,7 +902,7 @@ public:
 /**
  * \brief Server error.
  */
-class server_error : public boost::system::system_error {
+class server_error : public std::system_error {
 public:
     /**
      * \brief Server related errors.
@@ -986,27 +986,23 @@ public:
  *
  * \return the singleton
  */
-const boost::system::error_category& server_category();
+const std::error_category& server_category();
 
 /**
  * Create a boost::system::error_code from server_error::error enum.
  *
  * \param e the error code
  */
-boost::system::error_code make_error_code(server_error::error e);
+std::error_code make_error_code(server_error::error e);
 
 } // !irccd
 
-namespace boost {
-
-namespace system {
+namespace std {
 
 template <>
 struct is_error_code_enum<irccd::server_error::error> : public std::true_type {
 };
 
-} // !system
-
-} // !boost
+} // !std
 
 #endif // !IRCCD_DAEMON_SERVER_HPP

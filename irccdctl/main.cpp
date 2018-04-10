@@ -26,15 +26,17 @@
 #include <irccd/config.hpp>
 #include <irccd/json_util.hpp>
 #include <irccd/options.hpp>
+#include <irccd/socket_connector.hpp>
 #include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
 
-#include <irccd/ctl/controller.hpp>
-#include <irccd/ctl/ip_connection.hpp>
-
-#if !defined(IRCCD_SYSTEM_WINDOWS)
-#   include <irccd/ctl/local_connection.hpp>
+#if defined(HAVE_SSL)
+#   include <irccd/tls_connector.hpp>
 #endif
+
+#include <irccd/daemon/transport_server.hpp>
+
+#include <irccd/ctl/controller.hpp>
 
 #include "plugin_config_cli.hpp"
 #include "plugin_info_cli.hpp"
@@ -68,6 +70,14 @@
 #include "alias.hpp"
 #include "cli.hpp"
 
+using boost::asio::ip::tcp;
+
+#if !defined(IRCCD_SYSTEM_WINDOWS)
+
+using boost::asio::local::stream_protocol;
+
+#endif
+
 namespace irccd {
 
 namespace ctl {
@@ -77,18 +87,10 @@ namespace {
 // Main service;
 boost::asio::io_service service;
 
-#if defined(HAVE_SSL)
-
-// For tls_connection.
-boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
-
-#endif
-
 // Global options.
 bool verbose = false;
 
 // Connection to instance.
-std::unique_ptr<connection> conn;
 std::unique_ptr<controller> ctl;
 
 // List of all commands and alias.
@@ -106,6 +108,25 @@ void usage()
 }
 
 /*
+ * resolve
+ * ------------------------------------------------------------------
+ *
+ * Block unless host/port has been resolved.
+ */
+std::vector<tcp::endpoint> resolve(const std::string& host, const std::string& name)
+{
+    std::vector<tcp::endpoint> endpoints;
+
+    tcp::resolver resolver(service);
+    tcp::resolver::query query(host, name);
+
+    for (auto it = resolver.resolve(query); it != tcp::resolver::iterator(); ++it)
+        endpoints.push_back(*it);
+
+    return endpoints;
+}
+
+/*
  * read_connect_ip
  * -------------------------------------------------------------------
  *
@@ -118,35 +139,30 @@ void usage()
  * domain = "ipv4 or ipv6" (Optional, default: ipv4)
  * ssl = true | false
  */
-std::unique_ptr<connection> read_connect_ip(const ini::section& sc)
+std::unique_ptr<io::connector> read_connect_ip(const ini::section& sc)
 {
-    std::unique_ptr<connection> conn;
-    std::string host;
-    ini::section::const_iterator it;
+    const auto host = sc.get("host").value();
+    const auto port = sc.get("port").value();
 
-    if ((it = sc.find("host")) == sc.end())
-        throw std::invalid_argument("missing host parameter");
+    if (host.empty())
+        throw transport_error(transport_error::invalid_hostname);
+    if (port.empty())
+        throw transport_error(transport_error::invalid_port);
 
-    host = it->value();
+    const auto endpoints = resolve(host, port);
 
-    if ((it = sc.find("port")) == sc.end())
-        throw std::invalid_argument("missing port parameter");
-
-    const auto port = string_util::to_uint<std::uint16_t>(it->value());
-
-    if (!port)
-        throw std::invalid_argument("invalid port parameter");
-
-    if ((it = sc.find("ssl")) != sc.end() && string_util::is_boolean(it->value()))
+    if (string_util::is_boolean(sc.get("ssl").value())) {
 #if defined(HAVE_SSL)
-        conn = std::make_unique<tls_connection>(service, ctx, host, *port);
+        // TODO: support more parameters.
+        boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
+
+        return std::make_unique<io::tls_connector<>>(std::move(ctx), service, endpoints);
 #else
         throw std::runtime_error("SSL disabled");
 #endif
-    else
-        conn = std::make_unique<ip_connection>(service, host, *port);
+    }
 
-    return conn;
+    return std::make_unique<io::ip_connector>(service, endpoints);
 }
 
 /*
@@ -159,15 +175,17 @@ std::unique_ptr<connection> read_connect_ip(const ini::section& sc)
  * type = "unix"
  * path = "path to socket file"
  */
-std::unique_ptr<connection> read_connect_local(const ini::section& sc)
+std::unique_ptr<io::connector> read_connect_local(const ini::section& sc)
 {
 #if !defined(IRCCD_SYSTEM_WINDOWS)
-    auto it = sc.find("path");
+    using boost::asio::local::stream_protocol;
+
+    const auto it = sc.find("path");
 
     if (it == sc.end())
         throw std::invalid_argument("missing path parameter");
 
-    return std::make_unique<local_connection>(service, it->value());
+    return std::make_unique<io::local_connector>(service, it->value());
 #else
     (void)sc;
 
@@ -183,20 +201,22 @@ std::unique_ptr<connection> read_connect_local(const ini::section& sc)
  */
 void read_connect(const ini::section& sc)
 {
-    auto it = sc.find("type");
+    const auto it = sc.find("type");
 
     if (it == sc.end())
         throw std::invalid_argument("missing type parameter");
 
+    std::unique_ptr<io::connector> connector;
+
     if (it->value() == "ip")
-        conn = read_connect_ip(sc);
+        connector = read_connect_ip(sc);
     else if (it->value() == "unix")
-        conn = read_connect_local(sc);
+        connector = read_connect_local(sc);
     else
         throw std::invalid_argument(string_util::sprintf("invalid type given: %s", it->value()));
 
-    if (conn) {
-        ctl = std::make_unique<controller>(*conn);
+    if (connector) {
+        ctl = std::make_unique<controller>(std::move(connector));
 
         auto password = sc.find("password");
 
@@ -216,7 +236,7 @@ void read_connect(const ini::section& sc)
  */
 void read_general(const ini::section& sc)
 {
-    auto value = sc.find("verbose");
+    const auto value = sc.find("verbose");
 
     if (value != sc.end())
         verbose = string_util::is_boolean(value->value());
@@ -293,26 +313,23 @@ void read(const config& cfg)
  * -h host or ip
  * -p port
  */
-std::unique_ptr<connection> parse_connect_ip(const option::result& options)
+std::unique_ptr<io::connector> parse_connect_ip(const option::result& options)
 {
     option::result::const_iterator it;
 
     // Host (-h or --host).
     if ((it = options.find("-h")) == options.end() && (it = options.find("--host")) == options.end())
-        throw std::invalid_argument("missing host argument (-h or --host)");
+        throw transport_error(transport_error::invalid_hostname);
 
-    auto host = it->second;
+    const auto host = it->second;
 
     // Port (-p or --port).
     if ((it = options.find("-p")) == options.end() && (it = options.find("--port")) == options.end())
-        throw std::invalid_argument("missing port argument (-p or --port)");
+        throw transport_error(transport_error::invalid_port);
 
-    const auto port = string_util::to_uint<std::uint16_t>(it->second);
+    const auto port = it->second;
 
-    if (!port)
-        throw std::invalid_argument("invalid port argument");
-
-    return std::make_unique<ip_connection>(service, host, *port);
+    return std::make_unique<io::ip_connector>(service, resolve(host, port));
 }
 
 /*
@@ -323,7 +340,7 @@ std::unique_ptr<connection> parse_connect_ip(const option::result& options)
  *
  * -P file
  */
-std::unique_ptr<connection> parse_connect_local(const option::result& options)
+std::unique_ptr<io::connector> parse_connect_local(const option::result& options)
 {
 #if !defined(IRCCD_SYSTEM_WINDOWS)
     option::result::const_iterator it;
@@ -331,7 +348,7 @@ std::unique_ptr<connection> parse_connect_local(const option::result& options)
     if ((it = options.find("-P")) == options.end() && (it = options.find("--path")) == options.end())
         throw std::invalid_argument("missing path parameter (-P or --path)");
 
-    return std::make_unique<local_connection>(service, it->second);
+    return std::make_unique<io::local_connector>(service, it->second);
 #else
     (void)options;
 
@@ -354,15 +371,17 @@ void parse_connect(const option::result& options)
     if (it == options.end())
         it = options.find("--type");
 
+    std::unique_ptr<io::connector> connector;
+
     if (it->second == "ip" || it->second == "ipv6")
-        conn = parse_connect_ip(options);
+        connector = parse_connect_ip(options);
     if (it->second == "unix")
-        conn = parse_connect_local(options);
+        connector = parse_connect_local(options);
     else
         throw std::invalid_argument(string_util::sprintf("invalid type given: %s", it->second));
 
-    if (conn)
-        ctl = std::make_unique<controller>(*conn);
+    if (connector)
+        ctl = std::make_unique<controller>(std::move(connector));
 }
 
 option::result parse(int& argc, char**& argv)
@@ -507,11 +526,9 @@ void init(int &argc, char **&argv)
 
 void do_connect()
 {
-    bool connected = false;
-
     ctl->connect([&] (auto code, auto info) {
         if (code)
-            throw boost::system::system_error(code);
+            throw std::system_error(code);
 
         if (verbose) {
             const json_util::parser parser(info);
@@ -525,13 +542,9 @@ void do_connect()
                 std::cout << string_util::sprintf("connected to irccd %d.%d.%d\n",
                     *major, *minor, *patch);
         }
-
-        connected = true;
     });
 
-    while (!connected)
-        service.run();
-
+    service.run();
     service.reset();
 }
 
@@ -543,9 +556,7 @@ void do_exec(int argc, char** argv)
         args.push_back(argv[i]);
 
     exec(args);
-
-    while (ctl->get_conn().is_active())
-        service.run();
+    service.run();
 }
 
 } // !namespace
@@ -599,7 +610,7 @@ int main(int argc, char** argv)
     try {
         irccd::ctl::do_connect();
         irccd::ctl::do_exec(argc, argv);
-    } catch (const boost::system::system_error& ex) {
+    } catch (const std::system_error& ex) {
         std::cerr << "abort: " << ex.code().message() << std::endl;
     } catch (const std::exception& ex) {
         std::cerr << "abort: " << ex.what() << std::endl;

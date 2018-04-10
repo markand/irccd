@@ -71,7 +71,7 @@ BOOST_FIXTURE_TEST_SUITE(plugin_reload_test_suite, plugin_reload_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    ctl_->send({
+    ctl_->write({
         { "command",    "plugin-reload" },
         { "plugin",     "test"          }
     });

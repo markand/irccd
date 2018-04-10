@@ -64,7 +64,7 @@ void server_info_command::exec(irccd& irccd, transport_client& client, const nlo
     if (server->get_flags() & server::ssl_verify)
         response.push_back({"sslVerify", true});
 
-    client.send(response);
+    client.write(response);
 }
 
 } // !irccd

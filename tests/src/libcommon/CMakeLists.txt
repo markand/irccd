@@ -17,5 +17,5 @@
 #
 
 add_subdirectory(fs-util)
-add_subdirectory(network-stream)
+add_subdirectory(io)
 add_subdirectory(string-util)

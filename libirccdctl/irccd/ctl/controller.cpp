@@ -27,34 +27,33 @@
 #include <irccd/daemon/rule.hpp>
 
 #include "controller.hpp"
-#include "connection.hpp"
 
 namespace irccd {
 
 namespace ctl {
 
-void controller::authenticate(connect_t handler, nlohmann::json info)
+void controller::authenticate(connect_handler handler, nlohmann::json info)
 {
-    auto cmd = nlohmann::json::object({
-        { "command", "auth" },
-        { "password", password_ }
+    const auto cmd = nlohmann::json::object({
+        { "command",    "auth"      },
+        { "password",   password_   }
     });
 
-    send(std::move(cmd), [handler, info, this] (auto code) {
+    write(cmd, [handler, info, this] (auto code) {
         if (code) {
             handler(std::move(code), nullptr);
             return;
         }
 
-        recv([handler, info] (auto code, auto) {
+        read([handler, info] (auto code, auto) {
             handler(std::move(code), std::move(info));
         });
     });
 }
 
-void controller::verify(connect_t handler)
+void controller::verify(connect_handler handler)
 {
-    recv([handler, this] (auto code, auto message) {
+    read([handler, this] (auto code, auto message) {
         if (code) {
             handler(std::move(code), std::move(message));
             return;
@@ -77,25 +76,30 @@ void controller::verify(connect_t handler)
     });
 }
 
-void controller::connect(connect_t handler)
+void controller::connect(connect_handler handler)
 {
     assert(handler);
 
-    conn_.connect([handler, this] (auto code) {
+    connector_->connect([handler, this] (auto code, auto stream) {
         if (code)
             handler(std::move(code), nullptr);
-        else
+        else {
+            stream_ = std::move(stream);
             verify(std::move(handler));
+        }
     });
 }
 
-void controller::recv(network_recv_handler handler)
+void controller::read(io::read_handler handler)
 {
     assert(handler);
+    assert(stream_);
 
-    // TODO: ensure connected.
-    conn_.recv([handler] (auto code, auto msg) {
+    auto stream = stream_;
+
+    stream_->read([this, handler, stream] (auto code, auto msg) {
         if (code) {
+            stream_ = nullptr;
             handler(std::move(code), std::move(msg));
             return;
         }
@@ -119,12 +123,19 @@ void controller::recv(network_recv_handler handler)
     });
 }
 
-void controller::send(nlohmann::json message, network_send_handler handler)
+void controller::write(nlohmann::json message, io::write_handler handler)
 {
     assert(message.is_object());
+    assert(stream_);
 
-    // TODO: ensure connected.
-    conn_.send(std::move(message), std::move(handler));
+    auto stream = stream_;
+
+    stream_->write(std::move(message), [this, stream, handler] (auto code) {
+        if (code)
+            stream_ = nullptr;
+        if (handler)
+            handler(std::move(code));
+    });
 }
 
 } // !ctl

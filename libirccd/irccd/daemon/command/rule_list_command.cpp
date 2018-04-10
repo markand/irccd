@@ -38,7 +38,7 @@ void rule_list_command::exec(irccd& irccd, transport_client& client, const nlohm
     for (const auto& rule : irccd.rules().list())
         array.push_back(rule_util::to_json(rule));
 
-    client.send({
+    client.write({
         { "command",    "rule-list"         },
         { "list",       std::move(array)    }
     });

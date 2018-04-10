@@ -263,9 +263,9 @@ void irccd::load() noexcept
     loaded_ = true;
 }
 
-const boost::system::error_category& irccd_category()
+const std::error_category& irccd_category()
 {
-    static const class category : public boost::system::error_category {
+    static const class category : public std::error_category {
     public:
         const char* name() const noexcept override
         {
@@ -298,7 +298,7 @@ const boost::system::error_category& irccd_category()
     return category;
 }
 
-boost::system::error_code make_error_code(irccd_error::error e)
+std::error_code make_error_code(irccd_error::error e)
 {
     return {static_cast<int>(e), irccd_category()};
 }

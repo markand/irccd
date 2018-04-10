@@ -76,6 +76,8 @@ function(irccd_define_test)
         PRIVATE
             ${TEST_FLAGS}
             BOOST_TEST_DYN_LINK
+            TESTS_SOURCE_DIR="${tests_SOURCE_DIR}"
+            TESTS_BINARY_DIR="${tests_SOURCE_DIR}"
             CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}"
             CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
             CMAKE_CURRENT_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}"

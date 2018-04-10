@@ -20,22 +20,13 @@ project(libirccdctl)
 
 set(
     HEADERS
-    ${libirccdctl_SOURCE_DIR}/irccd/ctl/basic_connection.hpp
     ${libirccdctl_SOURCE_DIR}/irccd/ctl/controller.hpp
-    ${libirccdctl_SOURCE_DIR}/irccd/ctl/connection.hpp
-    ${libirccdctl_SOURCE_DIR}/irccd/ctl/ip_connection.hpp
 )
 
 set(
     SOURCES
     ${libirccdctl_SOURCE_DIR}/irccd/ctl/controller.cpp
-    ${libirccdctl_SOURCE_DIR}/irccd/ctl/ip_connection.cpp
 )
-
-if (NOT IRCCD_SYSTEM_WINDOWS)
-    list(APPEND HEADERS ${libirccdctl_SOURCE_DIR}/irccd/ctl/local_connection.hpp)
-    list(APPEND SOURCES ${libirccdctl_SOURCE_DIR}/irccd/ctl/local_connection.cpp)
-endif ()
 
 irccd_define_library(
     TARGET libirccdctl

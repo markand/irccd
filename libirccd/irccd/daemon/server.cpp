@@ -499,7 +499,7 @@ void server::connect() noexcept
 
     if (flags_ & ssl) {
 #if defined(HAVE_SSL)
-        conn_ = std::make_unique<irc::tls_connection>(service_);
+        conn_ = irc::tls_connection::create(service_);
 #else
         /*
          * If SSL is not compiled in, the caller is responsible of not setting
@@ -508,7 +508,7 @@ void server::connect() noexcept
         assert(!(flags_ & ssl));
 #endif
     } else
-        conn_ = std::make_unique<irc::ip_connection>(service_);
+        conn_ = irc::ip_connection::create(service_);
 
     state_ = state_t::connecting;
     conn_->connect(host_, std::to_string(port_), [this] (auto code) {
@@ -676,9 +676,9 @@ server_error::server_error(error code) noexcept
 {
 }
 
-const boost::system::error_category& server_category()
+const std::error_category& server_category()
 {
-    static const class category : public boost::system::error_category {
+    static const class category : public std::error_category {
     public:
         const char* name() const noexcept override
         {
@@ -735,7 +735,7 @@ const boost::system::error_category& server_category()
     return category;
 }
 
-boost::system::error_code make_error_code(server_error::error e)
+std::error_code make_error_code(server_error::error e)
 {
     return {static_cast<int>(e), server_category()};
 }

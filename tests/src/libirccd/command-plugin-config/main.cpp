@@ -55,7 +55,7 @@ BOOST_FIXTURE_TEST_SUITE(plugin_config_test_suite, command_test<plugin_config_co
 BOOST_AUTO_TEST_CASE(set)
 {
     daemon_->plugins().add(std::make_unique<custom_plugin>("test"));
-    ctl_->send({
+    ctl_->write({
         { "command",    "plugin-config" },
         { "plugin",     "test"          },
         { "variable",   "verbosy"       },

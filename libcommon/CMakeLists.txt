@@ -22,15 +22,23 @@ find_package(Boost 1.60 REQUIRED QUIET COMPONENTS filesystem system)
 
 set(
     HEADERS
+    ${libcommon_SOURCE_DIR}/irccd/acceptor.hpp
     ${libcommon_SOURCE_DIR}/irccd/config.hpp
+    ${libcommon_SOURCE_DIR}/irccd/connector.hpp
     ${libcommon_SOURCE_DIR}/irccd/fs_util.hpp
     ${libcommon_SOURCE_DIR}/irccd/ini.hpp
     ${libcommon_SOURCE_DIR}/irccd/ini_util.hpp
     ${libcommon_SOURCE_DIR}/irccd/json_util.hpp
-    ${libcommon_SOURCE_DIR}/irccd/network_stream.hpp
     ${libcommon_SOURCE_DIR}/irccd/options.hpp
+    ${libcommon_SOURCE_DIR}/irccd/socket_acceptor.hpp
+    ${libcommon_SOURCE_DIR}/irccd/socket_connector.hpp
+    ${libcommon_SOURCE_DIR}/irccd/socket_stream.hpp
+    ${libcommon_SOURCE_DIR}/irccd/stream.hpp
     ${libcommon_SOURCE_DIR}/irccd/string_util.hpp
     ${libcommon_SOURCE_DIR}/irccd/system.hpp
+    ${libcommon_SOURCE_DIR}/irccd/tls_acceptor.hpp
+    ${libcommon_SOURCE_DIR}/irccd/tls_connector.hpp
+    ${libcommon_SOURCE_DIR}/irccd/tls_stream.hpp
     ${libcommon_SOURCE_DIR}/irccd/xdg.hpp
 )
 

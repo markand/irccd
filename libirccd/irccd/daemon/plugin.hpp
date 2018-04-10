@@ -552,7 +552,7 @@ public:
 /**
  * \brief Plugin error.
  */
-class plugin_error : public boost::system::system_error {
+class plugin_error : public std::system_error {
 public:
     /**
      * \brief Plugin related errors.
@@ -623,27 +623,23 @@ public:
  *
  * \return the singleton
  */
-const boost::system::error_category& server_category();
+const std::error_category& plugin_category();
 
 /**
  * Create a boost::system::error_code from plugin_error::error enum.
  *
  * \param e the error code
  */
-boost::system::error_code make_error_code(plugin_error::error e);
+std::error_code make_error_code(plugin_error::error e);
 
 } // !irccd
 
-namespace boost {
-
-namespace system {
+namespace std {
 
 template <>
 struct is_error_code_enum<irccd::plugin_error::error> : public std::true_type {
 };
 
-} // !system
-
-} // !boost
+} // !std
 
 #endif // !IRCCD_DAEMON_PLUGIN_HPP

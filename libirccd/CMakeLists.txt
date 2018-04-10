@@ -22,8 +22,6 @@ find_package(Boost REQUIRED QUIET COMPONENTS timer)
 
 set(
     HEADERS
-    ${libirccd_SOURCE_DIR}/irccd/daemon/basic_transport_client.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/basic_transport_server.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/command/plugin_config_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/command/plugin_info_command.hpp
@@ -54,10 +52,8 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_reconnect_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/command/server_topic_command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/dynlib_plugin.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/ip_transport_server.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/irccd.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/irc.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/local_transport_server.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/logger.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule.hpp
@@ -71,7 +67,6 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_client.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_server.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_util.hpp
-    $<$<BOOL:${HAVE_SSL}>:${libirccd_SOURCE_DIR}/irccd/daemon/tls_transport_server.hpp>
 )
 
 set(
@@ -119,7 +114,6 @@ set(
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_client.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_server.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_util.cpp
-    $<$<BOOL:${HAVE_SSL}>:${libirccd_SOURCE_DIR}/irccd/daemon/tls_transport_server.cpp>
 )
 
 irccd_define_library(

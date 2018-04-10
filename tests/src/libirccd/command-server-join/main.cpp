@@ -45,7 +45,7 @@ BOOST_FIXTURE_TEST_SUITE(server_join_test_suite, server_join_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    ctl_->send({
+    ctl_->write({
         { "command",    "server-join"       },
         { "server",     "test"              },
         { "channel",    "#music"            },

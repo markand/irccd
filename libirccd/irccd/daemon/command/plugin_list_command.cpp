@@ -37,7 +37,7 @@ void plugin_list_command::exec(irccd& irccd, transport_client& client, const nlo
     for (const auto& plugin : irccd.plugins().list())
         list += plugin->get_name();
 
-    client.send({
+    client.write({
         { "command",    "plugin-list"   },
         { "list",       list            }
     });

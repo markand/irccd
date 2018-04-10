@@ -33,7 +33,7 @@ void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_
     assert(client);
     assert(handler);
 
-    client->recv([this, client, handler] (auto code, auto message) {
+    client->read([this, client, handler] (auto code, auto message) {
         if (code) {
             handler(std::move(code), std::move(client));
             return;
@@ -50,6 +50,7 @@ void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_
             client->error(irccd_error::invalid_auth);
             code = irccd_error::invalid_auth;
         } else {
+            clients_.insert(client);
             client->set_state(transport_client::state_t::ready);
             client->success("auth");
             code = irccd_error::no_error;
@@ -77,12 +78,16 @@ void transport_server::do_greetings(std::shared_ptr<transport_client> client, ac
 #endif
     });
 
-    client->send(greetings, [this, client, handler] (auto code) {
-        if (code)
+    client->write(greetings, [this, client, handler] (auto code) {
+        if (code) {
             handler(std::move(code), std::move(client));
-        else if (!password_.empty())
+            return;
+        }
+
+        if (!password_.empty())
             do_auth(std::move(client), std::move(handler));
         else {
+            clients_.insert(client);
             client->set_state(transport_client::state_t::ready);
             handler(std::move(code), std::move(client));
         }
@@ -91,15 +96,16 @@ void transport_server::do_greetings(std::shared_ptr<transport_client> client, ac
 
 void transport_server::accept(accept_handler handler)
 {
-    assert(handler);
-
-    do_accept([this, handler] (auto code, auto client) {
-        if (code)
-            handler(std::move(code), nullptr);
-        else {
-            clients_.insert(client);
-            do_greetings(std::move(client), std::move(handler));
+    acceptor_->accept([this, handler] (auto code, auto stream) {
+        if (code) {
+            handler(code, nullptr);
+            return;
         }
+
+        do_greetings(
+            std::make_shared<transport_client>(*this, std::move(stream)),
+            std::move(handler)
+        );
     });
 }
 
@@ -108,9 +114,9 @@ transport_error::transport_error(error code) noexcept
 {
 }
 
-const boost::system::error_category& transport_category() noexcept
+const std::error_category& transport_category() noexcept
 {
-    static const class category : public boost::system::error_category {
+    static const class category : public std::error_category {
     public:
         const char* name() const noexcept override
         {
@@ -151,7 +157,7 @@ const boost::system::error_category& transport_category() noexcept
     return category;
 };
 
-boost::system::error_code make_error_code(transport_error::error e) noexcept
+std::error_code make_error_code(transport_error::error e) noexcept
 {
     return {static_cast<int>(e), transport_category()};
 }

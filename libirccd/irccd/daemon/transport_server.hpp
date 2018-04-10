@@ -27,7 +27,7 @@
 #include <unordered_set>
 #include <type_traits>
 
-#include <boost/asio.hpp>
+#include <irccd/acceptor.hpp>
 
 #include "transport_client.hpp"
 
@@ -130,38 +130,29 @@ public:
     using client_set = std::unordered_set<std::shared_ptr<transport_client>>;
 
     /**
-     * Callback when a new client should be accepted.
+     * Accept completion handler.
      */
-    using accept_handler = std::function<void (
-        boost::system::error_code,
-        std::shared_ptr<transport_client>
-    )>;
+    using accept_handler = std::function<void (std::error_code, std::shared_ptr<transport_client>)>;
 
 private:
-    boost::asio::io_service& service_;
     client_set clients_;
+    std::unique_ptr<io::acceptor> acceptor_;
     std::string password_;
 
     void do_auth(std::shared_ptr<transport_client>, accept_handler);
     void do_greetings(std::shared_ptr<transport_client>, accept_handler);
 
-protected:
-    /**
-     * Start accept operation, the implementation should not block and call
-     * the handler function on error or completion.
-     *
-     * \pre handler must not be null
-     * \param handler the handler function
-     */
-    virtual void do_accept(accept_handler handler) = 0;
-
 public:
     /**
-     * Default constructor.
+     * Constructor.
+     *
+     * \pre acceptor != nullptr
+     * \param acceptor the stream acceptor
      */
-    inline transport_server(boost::asio::io_service& service) noexcept
-        : service_(service)
+    inline transport_server(std::unique_ptr<io::acceptor> acceptor) noexcept
+        : acceptor_(std::move(acceptor))
     {
+        assert(acceptor_);
     }
 
     /**
@@ -170,35 +161,15 @@ public:
     virtual ~transport_server() noexcept = default;
 
     /**
-     * Accept a new client into the transport server.
+     * Accept a client.
      *
      * Also perform greetings and authentication under the hood. On success, the
      * client is added into the server and is ready to use.
      *
-     * \pre accept != nullptr
-     * \param handler the handler
+     * \pre handler != nullptr
+     * \param handler the completion handler
      */
     void accept(accept_handler handler);
-
-    /**
-     * Get the io service.
-     *
-     * \return the service
-     */
-    inline const boost::asio::io_service& get_service() const noexcept
-    {
-        return service_;
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \return the service
-     */
-    inline boost::asio::io_service& get_service() noexcept
-    {
-        return service_;
-    }
 
     /**
      * Get the clients.
@@ -244,7 +215,7 @@ public:
 /**
  * \brief Transport error.
  */
-class transport_error : public boost::system::system_error {
+class transport_error : public std::system_error {
 public:
     /**
      * \brief Transport related errors.
@@ -300,27 +271,23 @@ public:
  *
  * \return the singleton
  */
-const boost::system::error_category& transport_category() noexcept;
+const std::error_category& transport_category() noexcept;
 
 /**
  * Create a boost::system::error_code from server_error::error enum.
  *
  * \param e the error code
  */
-boost::system::error_code make_error_code(transport_error::error e) noexcept;
+std::error_code make_error_code(transport_error::error e) noexcept;
 
 } // !irccd
 
-namespace boost {
-
-namespace system {
+namespace std {
 
 template <>
 struct is_error_code_enum<irccd::transport_error::error> : public std::true_type {
 };
 
-} // !system
-
-} // !boost
+} // !std
 
 #endif // !IRCCD_DAEMON_TRANSPORT_SERVER_HPP

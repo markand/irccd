@@ -24,13 +24,14 @@
  * \brief Main irccdctl interface.
  */
 
-#include <irccd/network_stream.hpp>
+#include <cassert>
+
+#include <irccd/connector.hpp>
+#include <irccd/stream.hpp>
 
 namespace irccd {
 
 namespace ctl {
-
-class connection;
 
 /**
  * \brief Main irccdctl interface.
@@ -43,50 +44,50 @@ class connection;
  *
  * It is implemented in mind that connection are asynchronous even though this
  * is not necessary.
- *
- * \see connection
- * \see network_connection
- * \see local_connection
- * \see ip_connection
- * \see tls_connection
  */
 class controller {
 public:
     /**
-     * Connection handler.
+     * Connection completion handler.
      *
      * This callback is called when connection has been completed or failed. In
      * both case, the error code is set and the JSON object may contain the
      * irccd program information.
      */
-    using connect_t = std::function<void (boost::system::error_code, nlohmann::json)>;
+    using connect_handler = std::function<void (std::error_code, nlohmann::json)>;
 
 private:
-    connection& conn_;
+    std::unique_ptr<io::connector> connector_;
+    std::shared_ptr<io::stream> stream_;
     std::string password_;
 
-    void authenticate(connect_t, nlohmann::json);
-    void verify(connect_t);
+    void authenticate(connect_handler, nlohmann::json);
+    void verify(connect_handler);
 
 public:
     /**
      * Construct the controller with its connection.
      *
+     * \pre connector != nullptr
+     * \
      * \note no connect attempt is done
      */
-    inline controller(connection& conn) noexcept
-        : conn_(conn)
+    inline controller(std::unique_ptr<io::connector> connector) noexcept
+        : connector_(std::move(connector))
     {
+        assert(connector_);
     }
+
+#if 0
 
     /**
      * Access the underlying connection.
      *
      * \return the connection
      */
-    inline const connection& get_conn() const noexcept
+    inline const connection& get_stream() const noexcept
     {
-        return conn_;
+        return *stream_;
     }
 
     /**
@@ -94,10 +95,11 @@ public:
      *
      * \return the connection
      */
-    inline connection& get_conn() noexcept
+    inline connection& get_stream() noexcept
     {
-        return conn_;
+        return *stream_;
     }
+#endif
 
     /**
      * Get the optional password set.
@@ -128,7 +130,7 @@ public:
      * \pre handler != nullptr
      * \param handler the handler
      */
-    void connect(connect_t handler);
+    void connect(connect_handler handler);
 
     /**
      * Queue a receive operation, if receive operations are already running, it
@@ -137,7 +139,7 @@ public:
      * \pre handler != nullptr
      * \param handler the recv handler
      */
-    void recv(network_recv_handler handler);
+    void read(io::read_handler handler);
 
     /**
      * Queue a send operation, if receive operations are already running, it is
@@ -147,7 +149,7 @@ public:
      * \param message the JSON message
      * \param handler the optional completion handler
      */
-    void send(nlohmann::json message, network_send_handler handler = nullptr);
+    void write(nlohmann::json message, io::write_handler handler = nullptr);
 };
 
 } // !ctl

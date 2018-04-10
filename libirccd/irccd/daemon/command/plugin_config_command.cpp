@@ -66,7 +66,7 @@ void exec_get(transport_client& client, plugin& plugin, const nlohmann::json& ar
      *
      * It's easier for the client to iterate over all.
      */
-    client.send({
+    client.write({
         { "command",    "plugin-config" },
         { "variables",  variables       }
     });

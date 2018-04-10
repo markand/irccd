@@ -70,12 +70,12 @@ BOOST_AUTO_TEST_CASE(backward)
 {
     nlohmann::json result;
 
-    ctl_->send({
+    ctl_->write({
         { "command",    "rule-move" },
         { "from",       2           },
         { "to",         0           }
     });
-    ctl_->recv([&] (auto, auto msg) {
+    ctl_->read([&] (auto, auto msg) {
         result = msg;
     });
 
@@ -86,8 +86,8 @@ BOOST_AUTO_TEST_CASE(backward)
     BOOST_TEST(result.is_object());
 
     result = nullptr;
-    ctl_->send({{ "command", "rule-list" }});
-    ctl_->recv([&] (auto, auto msg) {
+    ctl_->write({{ "command", "rule-list" }});
+    ctl_->read([&] (auto, auto msg) {
         result = msg;
     });
 
@@ -144,12 +144,12 @@ BOOST_AUTO_TEST_CASE(upward)
 {
     nlohmann::json result;
 
-    ctl_->send({
+    ctl_->write({
         { "command",    "rule-move" },
         { "from",       0           },
         { "to",         2           }
     });
-    ctl_->recv([&] (auto, auto msg) {
+    ctl_->read([&] (auto, auto msg) {
         result = msg;
     });
 
@@ -160,8 +160,8 @@ BOOST_AUTO_TEST_CASE(upward)
     BOOST_TEST(result.is_object());
 
     result = nullptr;
-    ctl_->send({{ "command", "rule-list" }});
-    ctl_->recv([&] (auto, auto msg) {
+    ctl_->write({{ "command", "rule-list" }});
+    ctl_->read([&] (auto, auto msg) {
         result = msg;
     });
 
@@ -218,12 +218,12 @@ BOOST_AUTO_TEST_CASE(same)
 {
     nlohmann::json result;
 
-    ctl_->send({
+    ctl_->write({
         { "command",    "rule-move" },
         { "from",       1           },
         { "to",         1           }
     });
-    ctl_->recv([&] (auto, auto msg) {
+    ctl_->read([&] (auto, auto msg) {
         result = msg;
     });
 
@@ -234,8 +234,8 @@ BOOST_AUTO_TEST_CASE(same)
     BOOST_TEST(result.is_object());
 
     result = nullptr;
-    ctl_->send({{ "command", "rule-list" }});
-    ctl_->recv([&] (auto, auto msg) {
+    ctl_->write({{ "command", "rule-list" }});
+    ctl_->read([&] (auto, auto msg) {
         result = msg;
     });
 
@@ -292,12 +292,12 @@ BOOST_AUTO_TEST_CASE(beyond)
 {
     nlohmann::json result;
 
-    ctl_->send({
+    ctl_->write({
         { "command",    "rule-move" },
         { "from",       0           },
         { "to",         123         }
     });
-    ctl_->recv([&] (auto, auto msg) {
+    ctl_->read([&] (auto, auto msg) {
         result = msg;
     });
 
@@ -308,8 +308,8 @@ BOOST_AUTO_TEST_CASE(beyond)
     BOOST_TEST(result.is_object());
 
     result = nullptr;
-    ctl_->send({{ "command", "rule-list" }});
-    ctl_->recv([&] (auto, auto msg) {
+    ctl_->write({{ "command", "rule-list" }});
+    ctl_->read([&] (auto, auto msg) {
         result = msg;
     });
 
@@ -366,122 +366,67 @@ BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_index_1_from)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "rule-move" },
         { "from",       -100        },
         { "to",         0           }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == rule_error::invalid_index);
-    BOOST_TEST(message["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(result.second == rule_error::invalid_index);
+    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_1_to)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "rule-move" },
         { "from",       0           },
         { "to",         -100        }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == rule_error::invalid_index);
-    BOOST_TEST(message["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(result.second == rule_error::invalid_index);
+    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_2_from)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "rule-move" },
         { "from",       100         },
         { "to",         0           }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == rule_error::invalid_index);
-    BOOST_TEST(message["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(result.second == rule_error::invalid_index);
+    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_3_from)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "rule-move" },
         { "from",       "notaint"   },
         { "to",         0           }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == rule_error::invalid_index);
-    BOOST_TEST(message["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(result.second == rule_error::invalid_index);
+    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_3_to)
 {
-    boost::system::error_code result;
-    nlohmann::json message;
-
-    ctl_->send({
+    const auto result = request({
         { "command",    "rule-move" },
         { "from",       0           },
         { "to",         "notaint"   }
     });
-    ctl_->recv([&] (auto rresult, auto rmessage) {
-        result = rresult;
-        message = rmessage;
-    });
 
-    wait_for([&] {
-        return result;
-    });
-
-    BOOST_TEST(result == rule_error::invalid_index);
-    BOOST_TEST(message["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(message["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(result.second == rule_error::invalid_index);
+    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
+    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

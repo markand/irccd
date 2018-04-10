@@ -73,9 +73,9 @@ plugin_error::plugin_error(error errc, std::string name, std::string message) no
     what_ = oss.str();
 }
 
-const boost::system::error_category& plugin_category()
+const std::error_category& plugin_category()
 {
-    static const class category : public boost::system::error_category {
+    static const class category : public std::error_category {
     public:
         const char* name() const noexcept override
         {
@@ -102,7 +102,7 @@ const boost::system::error_category& plugin_category()
     return category;
 }
 
-boost::system::error_code make_error_code(plugin_error::error e)
+std::error_code make_error_code(plugin_error::error e)
 {
     return {static_cast<int>(e), plugin_category()};
 }

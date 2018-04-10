@@ -47,7 +47,7 @@ BOOST_FIXTURE_TEST_SUITE(server_reconnect_test_suite, server_reconnect_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    ctl_->send({
+    ctl_->write({
         { "command",    "server-reconnect"  },
         { "server",     "s1"                }
     });
@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(basic)
 
 BOOST_AUTO_TEST_CASE(all)
 {
-    ctl_->send({{"command", "server-reconnect"}});
+    ctl_->write({{"command", "server-reconnect"}});
 
     wait_for([this] () {
         return !server1_->cqueue().empty() && !server2_->cqueue().empty();

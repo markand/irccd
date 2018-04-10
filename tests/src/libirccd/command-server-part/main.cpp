@@ -45,7 +45,7 @@ BOOST_FIXTURE_TEST_SUITE(server_part_test_suite, server_part_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    ctl_->send({
+    ctl_->write({
         { "command",    "server-part"   },
         { "server",     "test"          },
         { "channel",    "#staff"        },
@@ -65,7 +65,7 @@ BOOST_AUTO_TEST_CASE(basic)
 
 BOOST_AUTO_TEST_CASE(noreason)
 {
-    ctl_->send({
+    ctl_->write({
         { "command",    "server-part"   },
         { "server",     "test"          },
         { "channel",    "#staff"        }

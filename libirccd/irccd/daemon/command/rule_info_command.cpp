@@ -43,7 +43,7 @@ void rule_info_command::exec(irccd& irccd, transport_client& client, const nlohm
     auto json = rule_util::to_json(irccd.rules().require(*index));
 
     json.push_back({"command", "rule-info"});
-    client.send(std::move(json));
+    client.write(std::move(json));
 }
 
 } // !irccd

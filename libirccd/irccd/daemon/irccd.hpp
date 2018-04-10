@@ -213,7 +213,7 @@ public:
 /**
  * \brief Irccd error.
  */
-class irccd_error : public boost::system::system_error {
+class irccd_error : public std::system_error {
 public:
     /**
      * \brief Irccd related errors.
@@ -255,27 +255,23 @@ public:
  *
  * \return the singleton
  */
-const boost::system::error_category& irccd_category();
+const std::error_category& irccd_category();
 
 /**
  * Create a boost::system::error_code from irccd_error::error enum.
  *
  * \param e the error code
  */
-boost::system::error_code make_error_code(irccd_error::error e);
+std::error_code make_error_code(irccd_error::error e);
 
 } // !irccd
 
-namespace boost {
-
-namespace system {
+namespace std {
 
 template <>
 struct is_error_code_enum<irccd::irccd_error::error> : public std::true_type {
 };
 
-} // !system
-
-} // !boost
+} // !std
 
 #endif // !IRCCD_DAEMON_IRCCD_HPP

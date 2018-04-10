@@ -42,7 +42,7 @@ void plugin_info_command::exec(irccd& irccd, transport_client& client, const nlo
 
     const auto plugin = irccd.plugins().require(*id);
 
-    client.send({
+    client.write({
         { "command",    "plugin-info"           },
         { "author",     plugin->get_author()    },
         { "license",    plugin->get_license()   },

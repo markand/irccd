@@ -19,7 +19,11 @@
 #ifndef IRCCD_DAEMON_TRANSPORT_CLIENT_HPP
 #define IRCCD_DAEMON_TRANSPORT_CLIENT_HPP
 
-#include <irccd/network_stream.hpp>
+#include <cassert>
+#include <deque>
+#include <memory>
+
+#include <irccd/stream.hpp>
 
 namespace irccd {
 
@@ -44,40 +48,25 @@ public:
 private:
     state_t state_{state_t::authenticating};
     transport_server& parent_;
+    std::shared_ptr<io::stream> stream_;
+    std::deque<std::pair<nlohmann::json, io::write_handler>> queue_;
 
+    void flush();
     void erase();
-
-protected:
-    /**
-     * Request a receive operation.
-     *
-     * The implementation must call the handler once the operation has finished
-     * even in case of errors.
-     *
-     * \param handler the non-null handler
-     */
-    virtual void do_recv(network_recv_handler handler) = 0;
-
-    /**
-     * Request a send operation.
-     *
-     * The implementation must call the handler once the operation has finished
-     * even in case of errors.
-     *
-     * \param json the json message to send
-     * \param handler the non-null handler
-     */
-    virtual void do_send(nlohmann::json json, network_send_handler handler) = 0;
 
 public:
     /**
      * Constructor.
      *
+     * \pre stream != nullptr
      * \param server the parent
+     * \param stream the I/O stream
      */
-    inline transport_client(transport_server& server) noexcept
+    inline transport_client(transport_server& server, std::shared_ptr<io::stream> stream) noexcept
         : parent_(server)
+        , stream_(std::move(stream))
     {
+        assert(stream_);
     }
 
     /**
@@ -130,13 +119,15 @@ public:
      *
      * Possible error codes:
      *
-     *   - boost::system::errc::network_down in case of errors,
-     *   - boost::system::errc::invalid_argument if the JSON message is invalid.
+     *   - std::errc::network_down in case of errors,
+     *   - std::errc::invalid_argument if the JSON message is invalid,
+     *   - std::errc::not_enough_memory in case of memory failure.
      *
      * \pre handler != nullptr
      * \param handler the handler
+     * \warning Another read operation MUST NOT be running.
      */
-    void recv(network_recv_handler handler);
+    void read(io::read_handler handler);
 
     /**
      * Start sending if not closed.
@@ -145,18 +136,21 @@ public:
      *
      *   - boost::system::errc::network_down in case of errors,
      *
+     * \pre json.is_object()
      * \param json the json message
      * \param handler the optional handler
+     * \note If a write operation is running, it is postponed once ready.
      */
-    void send(nlohmann::json json, network_send_handler handler = nullptr);
+    void write(nlohmann::json json, io::write_handler handler = nullptr);
 
     /**
      * Convenient success message.
      *
-     * \param cname the command name
+     * \param command the command name
      * \param handler the optional handler
+     * \note If a write operation is running, it is postponed once ready.
      */
-    void success(const std::string& cname, network_send_handler handler = nullptr);
+    void success(const std::string& command, io::write_handler handler = nullptr);
 
     /**
      * Send an error code to the client.
@@ -164,20 +158,20 @@ public:
      * \pre code is not 0
      * \param code the error code
      * \param handler the optional handler
+     * \note If a write operation is running, it is postponed once ready.
      */
-    void error(boost::system::error_code code, network_send_handler handler = nullptr);
+    void error(std::error_code code, io::write_handler handler = nullptr);
 
     /**
      * Send an error code to the client.
      *
      * \pre code is not 0
      * \param code the error code
-     * \param cname the command name
+     * \param command the command name
      * \param handler the optional handler
+     * \note If a write operation is running, it is postponed once ready.
      */
-    void error(boost::system::error_code code,
-               std::string cname,
-               network_send_handler handler = nullptr);
+    void error(std::error_code code, std::string command, io::write_handler handler = nullptr);
 };
 
 } // !irccd

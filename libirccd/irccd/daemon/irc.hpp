@@ -356,7 +356,7 @@ public:
 /**
  * \brief Abstract connection to a server.
  */
-class connection {
+class connection : public std::enable_shared_from_this<connection> {
 public:
     /**
      * Handler for connecting.
@@ -372,6 +372,11 @@ public:
      * Handler for sending.
      */
     using send_t = std::function<void (boost::system::error_code)>;
+
+    /**
+     * Convenient alias.
+     */
+    using ptr = std::shared_ptr<connection>;
 
 private:
     using buffer_t = boost::asio::streambuf;
@@ -411,12 +416,12 @@ protected:
      */
     virtual void do_send(const std::string& data, send_t handler) noexcept = 0;
 
-public:
     /**
      * Default constructor.
      */
     connection() = default;
 
+public:
     /**
      * Virtual destructor defaulted.
      */
@@ -478,7 +483,6 @@ protected:
      */
     void do_send(const std::string& data, send_t handler) noexcept override;
 
-public:
     /**
      * Constructor.
      *
@@ -488,6 +492,19 @@ public:
         : socket_(service)
         , resolver_(service)
     {
+    }
+
+public:
+    /**
+     * Wrap the connection as shared ptr.
+     *
+     * \param args the tls_connection constructor arguments
+     * \return the shared_ptr connection
+     */
+    template <typename... Args>
+    static inline std::shared_ptr<ip_connection> create(Args&&... args)
+    {
+        return std::shared_ptr<ip_connection>(new ip_connection(std::forward<Args>(args)...));
     }
 };
 
@@ -518,17 +535,29 @@ protected:
      */
     void do_send(const std::string& data, send_t handler) noexcept override;
 
-public:
     /**
      * Constructor.
      *
      * \param service the io service
      */
-    inline tls_connection(boost::asio::io_service& service) noexcept
+    inline tls_connection(boost::asio::io_service& service)
         : context_(boost::asio::ssl::context::sslv23)
         , socket_(service, context_)
         , resolver_(service)
     {
+    }
+
+public:
+    /**
+     * Wrap the connection as shared ptr.
+     *
+     * \param args the tls_connection constructor arguments
+     * \return the shared_ptr connection
+     */
+    template <typename... Args>
+    static inline std::shared_ptr<tls_connection> create(Args&&... args)
+    {
+        return std::shared_ptr<tls_connection>(new tls_connection(std::forward<Args>(args)...));
     }
 };
 

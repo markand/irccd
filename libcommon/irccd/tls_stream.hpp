@@ -1,5 +1,5 @@
 /*
- * local_transport_server.hpp -- server side transports (Unix support)
+ * tls_stream.hpp -- TLS/SSL streams
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -16,29 +16,49 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_DAEMON_LOCAL_TRANSPORT_SERVER_HPP
-#define IRCCD_DAEMON_LOCAL_TRANSPORT_SERVER_HPP
+#ifndef IRCCD_COMMON_TLS_STREAM_HPP
+#define IRCCD_COMMON_TLS_STREAM_HPP
 
 /**
- * \file local_transport_server.hpp
- * \brief Server side transports (Unix support).
+ * \file tls_stream.hpp
+ * \brief TLS/SSL streams.
  */
 
 #include <irccd/sysconfig.hpp>
 
-#if !defined(IRCCD_SYSTEM_WINDOWS)
+#if defined(HAVE_SSL)
 
-#include "basic_transport_server.hpp"
+#include <boost/asio/ssl.hpp>
+
+#include "socket_stream.hpp"
 
 namespace irccd {
 
-/**
- * Convenient type for UNIX local sockets.
- */
-using local_transport_server = basic_transport_server<boost::asio::local::stream_protocol>;
+namespace io {
 
-#endif // !_WIN32
+/**
+ * \brief TLS/SSL streams.
+ * \tparam Socket the Boost.Asio compatible socket.
+ */
+template <typename Socket = boost::asio::ip::tcp::socket>
+class tls_stream : public socket_stream<boost::asio::ssl::stream<Socket>> {
+public:
+    /**
+     * Constructor.
+     *
+     * \param args the arguments to boost::asio::ssl::stream<Socket>
+     */
+    template <typename... Args>
+    inline tls_stream(Args&&... args)
+        : socket_stream<boost::asio::ssl::stream<Socket>>(std::forward<Args>(args)...)
+    {
+    }
+};
+
+} // !io
 
 } // !irccd
 
-#endif // !IRCCD_DAEMON_LOCAL_TRANSPORT_SERVER_HPP
+#endif // !HAVE_SSL
+
+#endif // !IRCCD_COMMON_TLS_STREAM_HPP

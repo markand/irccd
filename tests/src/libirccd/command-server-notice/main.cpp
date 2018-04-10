@@ -45,7 +45,7 @@ BOOST_FIXTURE_TEST_SUITE(server_notice_test_suite, server_notice_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    ctl_->send({
+    ctl_->write({
         { "command",    "server-notice" },
         { "server",     "test"          },
         { "target",     "#staff"        },

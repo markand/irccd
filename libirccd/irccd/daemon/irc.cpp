@@ -108,7 +108,9 @@ void connection::rflush()
     if (input_.empty())
         return;
 
-    do_recv(buffer_, [this] (auto code, auto message) {
+    auto self = shared_from_this();
+
+    do_recv(buffer_, [this, self] (auto code, auto message) {
         if (input_.front())
             input_.front()(code, std::move(message));
 
@@ -124,7 +126,9 @@ void connection::sflush()
     if (output_.empty())
         return;
 
-    do_send(output_.front().first, [this] (auto code) {
+    auto self = shared_from_this();
+
+    do_send(output_.front().first, [this, self] (auto code) {
         if (output_.front().second)
             output_.front().second(code);
 

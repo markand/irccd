@@ -177,9 +177,9 @@ const std::unordered_map<std::string, std::function<void (const nlohmann::json&)
 
 void get_event(ctl::controller& ctl, std::string fmt)
 {
-    ctl.recv([&ctl, fmt] (auto code, auto message) {
+    ctl.read([&ctl, fmt] (auto code, auto message) {
         if (code)
-            throw boost::system::system_error(code);
+            throw std::system_error(code);
 
         const auto event = json_util::parser(message).get<std::string>("event");
         const auto it = events.find(event ? *event : "");

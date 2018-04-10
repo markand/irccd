@@ -227,7 +227,7 @@ public:
 /**
  * \brief Rule error.
  */
-class rule_error : public boost::system::system_error {
+class rule_error : public std::system_error {
 public:
     /**
      * \brief Rule related errors.
@@ -254,27 +254,23 @@ public:
  *
  * \return the singleton
  */
-const boost::system::error_category& rule_category();
+const std::error_category& rule_category();
 
 /**
  * Create a boost::system::error_code from rule_error::error enum.
  *
  * \param e the error code
  */
-boost::system::error_code make_error_code(rule_error::error e);
+std::error_code make_error_code(rule_error::error e);
 
 } // !irccd
 
-namespace boost {
-
-namespace system {
+namespace std {
 
 template <>
 struct is_error_code_enum<irccd::rule_error::error> : public std::true_type {
 };
 
-} // !system
-
-} // !boost
+} // !std
 
 #endif // !IRCCD_DAEMON_RULE_HPP

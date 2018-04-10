@@ -22,18 +22,14 @@
 
 #include <irccd/ini_util.hpp>
 #include <irccd/string_util.hpp>
-
-#include <irccd/daemon/ip_transport_server.hpp>
-
-#if !defined(IRCCD_SYSTEM_WINDOWS)
-#   include <irccd/daemon/local_transport_server.hpp>
-#endif
+#include <irccd/socket_acceptor.hpp>
 
 #if defined(HAVE_SSL)
-#   include <irccd/daemon/tls_transport_server.hpp>
+#   include <irccd/tls_acceptor.hpp>
 #endif
 
 #include "transport_util.hpp"
+#include "transport_server.hpp"
 
 using namespace boost::asio;
 using namespace boost::asio::ip;
@@ -119,11 +115,13 @@ std::unique_ptr<transport_server> from_config_load_ip(io_service& service, const
         ctx.use_private_key_file(key, boost::asio::ssl::context::pem);
         ctx.use_certificate_file(cert, boost::asio::ssl::context::pem);
 
-        return std::make_unique<tls_transport_server>(service, std::move(acceptor), std::move(ctx));
+        return std::make_unique<transport_server>(
+            std::make_unique<io::tls_acceptor<>>(std::move(ctx), std::move(acceptor)));
 #endif
     }
 
-    return std::make_unique<ip_transport_server>(service, std::move(acceptor));
+    return std::make_unique<transport_server>(
+        std::make_unique<io::ip_acceptor>(std::move(acceptor)));
 }
 
 std::unique_ptr<transport_server> from_config_load_unix(io_service& service, const ini::section& sc)
@@ -144,7 +142,8 @@ std::unique_ptr<transport_server> from_config_load_unix(io_service& service, con
     stream_protocol::endpoint endpoint(path);
     stream_protocol::acceptor acceptor(service, std::move(endpoint));
 
-    return std::make_unique<local_transport_server>(service, std::move(acceptor));
+    return std::make_unique<transport_server>(
+        std::make_unique<io::local_acceptor>(std::move(acceptor)));
 #else
     (void)service;
     (void)sc;
