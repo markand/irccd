@@ -77,8 +77,8 @@ private:
     std::string output_;
 
 #if !defined(NDEBUG)
-    bool is_receiving{false};
-    bool is_sending{false};
+    bool is_receiving_{false};
+    bool is_sending_{false};
 #endif
 
     void handle_read(boost::system::error_code, std::size_t, read_handler);
@@ -133,7 +133,7 @@ void socket_stream<Socket>::handle_read(boost::system::error_code code,
                                         read_handler handler)
 {
 #if !defined(NDEBUG)
-    is_receiving = false;
+    is_receiving_ = false;
 #endif
 
     if (xfer == 0U) {
@@ -182,7 +182,7 @@ void socket_stream<Socket>::handle_write(boost::system::error_code code,
                                          write_handler handler)
 {
 #if !defined(NDEBUG)
-    is_sending = false;
+    is_sending_ = false;
 #endif
 
     if (xfer == 0)
@@ -195,10 +195,10 @@ template <typename Socket>
 void socket_stream<Socket>::read(read_handler handler)
 {
 #if !defined(NDEBUG)
-    assert(!is_receiving);
+    assert(!is_receiving_);
     assert(handler);
 
-    is_receiving = true;
+    is_receiving_ = true;
 #endif
 
     boost::asio::async_read_until(get_socket(), input_, "\r\n\r\n", [this, handler] (auto code, auto xfer) {
@@ -210,10 +210,10 @@ template <typename Socket>
 void socket_stream<Socket>::write(const nlohmann::json& json, write_handler handler)
 {
 #if !defined(NDEBUG)
-    assert(!is_sending);
+    assert(!is_sending_);
     assert(handler);
 
-    is_sending = true;
+    is_sending_ = true;
 #endif
 
     output_ = json.dump(0) + "\r\n\r\n";

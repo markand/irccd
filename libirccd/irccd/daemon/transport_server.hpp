@@ -19,6 +19,11 @@
 #ifndef IRCCD_DAEMON_TRANSPORT_SERVER_HPP
 #define IRCCD_DAEMON_TRANSPORT_SERVER_HPP
 
+/**
+ * \file transport_server.hpp
+ * \brief Server side transports.
+ */
+
 #include <irccd/sysconfig.hpp>
 
 #include <cassert>
@@ -156,22 +161,6 @@ public:
     }
 
     /**
-     * Virtual destructor defaulted.
-     */
-    virtual ~transport_server() noexcept = default;
-
-    /**
-     * Accept a client.
-     *
-     * Also perform greetings and authentication under the hood. On success, the
-     * client is added into the server and is ready to use.
-     *
-     * \pre handler != nullptr
-     * \param handler the completion handler
-     */
-    void accept(accept_handler handler);
-
-    /**
      * Get the clients.
      *
      * \return the clients
@@ -210,6 +199,17 @@ public:
     {
         password_ = std::move(password);
     }
+
+    /**
+     * Accept a client.
+     *
+     * Also perform greetings and authentication under the hood. On success, the
+     * client is added into the server and is ready to use.
+     *
+     * \pre handler != nullptr
+     * \param handler the completion handler
+     */
+    void accept(accept_handler handler);
 };
 
 /**

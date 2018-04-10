@@ -78,29 +78,6 @@ public:
         assert(connector_);
     }
 
-#if 0
-
-    /**
-     * Access the underlying connection.
-     *
-     * \return the connection
-     */
-    inline const connection& get_stream() const noexcept
-    {
-        return *stream_;
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \return the connection
-     */
-    inline connection& get_stream() noexcept
-    {
-        return *stream_;
-    }
-#endif
-
     /**
      * Get the optional password set.
      *

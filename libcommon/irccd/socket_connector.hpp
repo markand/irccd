@@ -129,6 +129,7 @@ void socket_connector<Protocol>::do_connect(Socket& socket, Handler handler)
 {
 #if !defined(NDEBUG)
     assert(!is_connecting_);
+
     is_connecting_ = true;
 #endif
 

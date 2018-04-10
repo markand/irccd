@@ -117,6 +117,8 @@ void socket_acceptor<Protocol>::do_accept(Socket& socket, Handler handler)
 {
 #if !defined(NDEBUG)
     assert(!is_accepting_);
+
+    is_accepting_ = true;
 #endif
 
     acceptor_.async_accept(socket, [this, handler] (auto code) {

@@ -70,11 +70,6 @@ public:
     }
 
     /**
-     * Virtual destructor defaulted.
-     */
-    virtual ~transport_client() = default;
-
-    /**
      * Get the transport server parent.
      *
      * \return the parent
