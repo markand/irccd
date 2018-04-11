@@ -45,6 +45,7 @@ private:
         string_util::subst params;
 
         params.flags &= ~(string_util::subst_flags::irc_attrs);
+        params.flags |= string_util::subst_flags::shell_attrs;
         params.keywords.emplace("message", std::move(input));
 
         return string_util::format(tmpl, params);

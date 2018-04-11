@@ -38,7 +38,7 @@ namespace string_util {
 
 namespace {
 
-const std::unordered_map<std::string, int> colors{
+const std::unordered_map<std::string, int> irc_colors{
     { "white",      0   },
     { "black",      1   },
     { "blue",       2   },
@@ -57,7 +57,7 @@ const std::unordered_map<std::string, int> colors{
     { "lightgrey",  15  }
 };
 
-const std::unordered_map<std::string, char> attributes{
+const std::unordered_map<std::string, char> irc_attributes{
     { "bold",       '\x02'  },
     { "italic",     '\x09'  },
     { "strike",     '\x13'  },
@@ -65,6 +65,27 @@ const std::unordered_map<std::string, char> attributes{
     { "underline",  '\x15'  },
     { "underline2", '\x1f'  },
     { "reverse",    '\x16'  }
+};
+
+const std::unordered_map<std::string, unsigned> shell_colors{
+    { "black",      30  },
+    { "red",        31  },
+    { "green",      32  },
+    { "orange",     33  },
+    { "blue",       34  },
+    { "purple",     35  },
+    { "cyan",       36  },
+    { "white",      37  },
+    { "default",    39  },
+};
+
+const std::unordered_map<std::string, unsigned> shell_attributes{
+    { "bold",       1   },
+    { "dim",        2   },
+    { "underline",  4   },
+    { "blink",      5   },
+    { "reverse",    7   },
+    { "hidden",     8   }
 };
 
 inline bool is_reserved(char token) noexcept
@@ -113,14 +134,15 @@ std::string subst_env(const std::string& content)
     return "";
 }
 
-std::string subst_attrs(const std::string& content)
+std::string subst_irc_attrs(const std::string& content)
 {
-    std::stringstream oss;
-    std::vector<std::string> list = split(content, ",");
+    auto list = split(content, ",");
 
     // @{} means reset.
     if (list.empty())
-        return std::string(1, attributes.at("reset"));
+        return std::string(1, irc_attributes.at("reset"));
+
+    std::ostringstream oss;
 
     // Remove useless spaces.
     std::transform(list.begin(), list.end(), list.begin(), strip);
@@ -136,24 +158,78 @@ std::string subst_attrs(const std::string& content)
         oss << '\x03';
 
         // Foreground.
-        auto it = colors.find(foreground);
-        if (it != colors.end())
+        auto it = irc_colors.find(foreground);
+        if (it != irc_colors.end())
             oss << it->second;
 
         // Background.
-        if (list.size() >= 2 && (it = colors.find(list[1])) != colors.end())
+        if (list.size() >= 2 && (it = irc_colors.find(list[1])) != irc_colors.end())
             oss << "," << it->second;
 
         // Attributes.
         for (std::size_t i = 2; i < list.size(); ++i) {
-            auto attribute = attributes.find(list[i]);
+            auto attribute = irc_attributes.find(list[i]);
 
-            if (attribute != attributes.end())
+            if (attribute != irc_attributes.end())
                 oss << attribute->second;
         }
     }
 
     return oss.str();
+}
+
+std::string subst_shell_attrs(const std::string& content)
+{
+#if !defined(IRCCD_SYSTEM_WINDOWS)
+    auto list = split(content, ",");
+
+    if (list.empty())
+        return "[0m";
+    if (list.size() > 3)
+        return "";
+
+    std::vector<std::string> seq;
+
+    /*
+     * Shell sequence looks like this:
+     *
+     * [attributes;foreground;backgroundm
+     */
+    if (list.size() >= 3) {
+        const auto it = shell_attributes.find(list[2]);
+
+        if (it != shell_attributes.end())
+            seq.push_back(std::to_string(it->second));
+        else
+            return "";
+    }
+    if (list.size() >= 1) {
+        const auto it = shell_colors.find(list[0]);
+
+        if (it != shell_colors.end())
+            seq.push_back(std::to_string(it->second));
+        else
+            return "";
+    }
+    if (list.size() >= 2) {
+        const auto it = shell_colors.find(list[1]);
+
+        if (it != shell_colors.end())
+            seq.push_back(std::to_string(it->second + 10));
+        else
+            return "";
+    }
+
+    std::ostringstream oss;
+
+    oss << "[";
+    oss << string_util::join(seq, ';');
+    oss << "m";
+
+    return oss.str();
+#else
+    return "";
+#endif
 }
 
 std::string subst_shell(const std::string& command)
@@ -218,7 +294,9 @@ std::string substitute(std::string::const_iterator& it,
         break;
     case '@':
         if ((params.flags & subst_flags::irc_attrs) == subst_flags::irc_attrs)
-            value = subst_attrs(content);
+            value = subst_irc_attrs(content);
+        else if ((params.flags & subst_flags::shell_attrs) == subst_flags::shell_attrs)
+            value = subst_shell_attrs(content);
         break;
     case '!':
         if ((params.flags & subst_flags::shell) == subst_flags::shell)

@@ -127,7 +127,7 @@ system.
 Only one keyword is defined, `message` which contains the message that irccd
 wants to output.
 
-**Note:** colors and attributes are not supported.
+**Note:** colors and attributes are not supported on Windows.
 
 The available options:
 

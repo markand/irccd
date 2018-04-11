@@ -52,7 +52,8 @@ enum class subst_flags : std::uint8_t {
     keywords    = (1 << 1),     //!< keywords
     env         = (1 << 2),     //!< environment variables
     shell       = (1 << 3),     //!< command line command
-    irc_attrs   = (1 << 4)      //!< IRC escape codes
+    irc_attrs   = (1 << 4),     //!< IRC escape codes
+    shell_attrs = (1 << 5)      //!< shell attributes
 };
 
 /**

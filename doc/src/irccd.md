@@ -96,7 +96,7 @@ so for the hours and minutes, you can use **%H:%M**.
 If supported, you can use environment variables like **${HOME}**. Please note
 that braces are mandatory.
 
-## Attributes
+## IRC attributes
 
 The attribute format is composed of three parts, foreground, background and
 modifiers, each separated by a comma.
@@ -134,6 +134,34 @@ Warning: do not use colors and attributes outside IRC (e.g. for storing text in
   - underline,
   - underline2,
   - reverse.
+
+## Shell attributes
+
+Like IRC attributes, it's possible to specify colors and attributes in some
+places such as logger configuration.
+
+Warning: colors are not supported on all platforms.
+
+### Available colors
+
+  - black,
+  - red,
+  - green,
+  - orange,
+  - blue,
+  - purple,
+  - cyan,
+  - white,
+  - default.
+
+### Available attributes
+
+  - bold,
+  - dim,
+  - underline,
+  - blink,
+  - reverse,
+  - hidden.
 
 ## Keywords
 
