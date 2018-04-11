@@ -225,11 +225,14 @@ std::shared_ptr<server> from_config(boost::asio::io_service& service,
 
     if (identity.value().size() > 0) {
         const auto it = std::find_if(cfg.begin(), cfg.end(), [&] (const auto& i) {
+            if (i.key() != "identity")
+                return false;
+
             return i.get("name").value() == identity.value();
         });
 
         if (it != cfg.end())
-            from_config_load_identity(*sv, sc);
+            from_config_load_identity(*sv, *it);
     }
 
     return sv;
