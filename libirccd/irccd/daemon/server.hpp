@@ -264,7 +264,7 @@ public:
     /**
      * \brief Describe current server state.
      */
-    enum class state_t {
+    enum class state {
         disconnected,       //!< not connected at all,
         connecting,         //!< network connection in progress,
         identifying,        //!< sending nick, user and password commands,
@@ -404,7 +404,7 @@ public:
     boost::signals2::signal<void (whois_event)> on_whois;
 
 private:
-    state_t state_{state_t::disconnected};
+    state state_{state::disconnected};
 
     // Requested and joined channels.
     std::vector<channel> rchannels_;
@@ -492,7 +492,7 @@ public:
      *
      * \return the state
      */
-    inline state_t get_state() const noexcept
+    inline state get_state() const noexcept
     {
         return state_;
     }
@@ -795,6 +795,7 @@ public:
      *
      * \param target the target nickname
      * \param channel the channel
+     * \throw server_error on errors
      */
     virtual void invite(std::string target, std::string channel);
 
@@ -803,6 +804,7 @@ public:
      *
      * \param channel the channel to join
      * \param password the optional password
+     * \throw server_error on errors
      */
     virtual void join(std::string channel, std::string password = "");
 
@@ -813,6 +815,7 @@ public:
      * \param target the target to kick
      * \param channel from which channel
      * \param reason the optional reason
+     * \throw server_error on errors
      */
     virtual void kick(std::string target, std::string channel, std::string reason = "");
 
@@ -822,6 +825,7 @@ public:
      *
      * \param target the nickname or the channel
      * \param message the message
+     * \throw server_error on errors
      */
     virtual void me(std::string target, std::string message);
 
@@ -830,6 +834,7 @@ public:
      *
      * \param target the target
      * \param message the message
+     * \throw server_error on errors
      */
     virtual void message(std::string target, std::string message);
 
@@ -841,6 +846,7 @@ public:
      * \param limit the optional limit
      * \param user the optional user
      * \param mask the optional ban mask
+     * \throw server_error on errors
      */
     virtual void mode(std::string channel,
                       std::string mode,
@@ -852,6 +858,7 @@ public:
      * Request the list of names.
      *
      * \param channel the channel
+     * \throw server_error on errors
      */
     virtual void names(std::string channel);
 
@@ -860,6 +867,7 @@ public:
      *
      * \param target the target
      * \param message the notice message
+     * \throw server_error on errors
      */
     virtual void notice(std::string target, std::string message);
 
@@ -871,6 +879,7 @@ public:
      *
      * \param channel the channel to leave
      * \param reason the optional reason
+     * \throw server_error on errors
      */
     virtual void part(std::string channel, std::string reason = "");
 
@@ -878,8 +887,9 @@ public:
      * Send a raw message to the IRC server. You don't need to add
      * message terminators.
      *
-     * \pre state() == state_t::connected
+     * \pre state() == state::connected
      * \param raw the raw message (without `\r\n\r\n`)
+     * \throw server_error on errors
      */
     virtual void send(std::string raw);
 
@@ -888,6 +898,7 @@ public:
      *
      * \param channel the channel
      * \param topic the desired topic
+     * \throw server_error on errors
      */
     virtual void topic(std::string channel, std::string topic);
 
@@ -895,6 +906,7 @@ public:
      * Request for whois information.
      *
      * \param target the target nickname
+     * \throw server_error on errors
      */
     virtual void whois(std::string target);
 };

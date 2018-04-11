@@ -128,7 +128,7 @@ server::server(boost::asio::io_service& service, std::string name, std::string h
 
 void server::dispatch_connect(const irc::message&)
 {
-    state_ = state_t::connected;
+    state_ = state::connected;
     on_connect({shared_from_this()});
 
     for (const auto& channel : rchannels_)
@@ -401,7 +401,7 @@ void server::handle_recv(boost::system::error_code code, irc::message message)
         const auto self = shared_from_this();
 
         service_.post([this, self] () {
-            state_ = state_t::disconnected;
+            state_ = state::disconnected;
             conn_ = nullptr;
             reconnect();
         });
@@ -413,6 +413,9 @@ void server::handle_recv(boost::system::error_code code, irc::message message)
 
 void server::recv()
 {
+    if (state_ != state::connected)
+        throw server_error(server_error::not_connected);
+
     conn_->recv([this] (auto code, auto message) {
         handle_recv(std::move(code), std::move(message));
     });
@@ -420,7 +423,7 @@ void server::recv()
 
 void server::identify()
 {
-    assert(state_ == state_t::identifying);
+    assert(state_ == state::identifying);
 
     if (!password_.empty())
         conn_->send(string_util::sprintf("PASS %s", password_));
@@ -431,7 +434,7 @@ void server::identify()
 
 void server::wait()
 {
-    assert(state_ == state_t::waiting);
+    assert(state_ == state::waiting);
 
     timer_.expires_from_now(boost::posix_time::seconds(recodelay_));
     timer_.async_wait([this] (auto) {
@@ -448,16 +451,16 @@ void server::handle_connect(boost::system::error_code code)
         // Wait before reconnecting.
         if (recotries_ != 0) {
             if (recotries_ > 0 && recocur_ >= recotries_) {
-                state_ = state_t::disconnected;
+                state_ = state::disconnected;
                 on_die({shared_from_this()});
             } else {
-                state_ = state_t::waiting;
+                state_ = state::waiting;
                 wait();
             }
         } else
-            state_ = state_t::disconnected;
+            state_ = state::disconnected;
     } else {
-        state_ = state_t::identifying;
+        state_ = state::identifying;
         recocur_ = 0U;
         jchannels_.clear();
 
@@ -469,12 +472,12 @@ void server::handle_connect(boost::system::error_code code)
 server::~server()
 {
     conn_ = nullptr;
-    state_ = state_t::disconnected;
+    state_ = state::disconnected;
 }
 
 void server::set_nickname(std::string nickname)
 {
-    if (state_ == state_t::connected)
+    if (state_ == state::connected)
         conn_->send(string_util::sprintf("NICK %s", nickname));
     else
         nickname_ = std::move(nickname);
@@ -487,7 +490,7 @@ void server::set_ctcp_version(std::string ctcpversion)
 
 void server::connect() noexcept
 {
-    assert(state_ == state_t::disconnected || state_ == state_t::waiting);
+    assert(state_ == state::disconnected || state_ == state::waiting);
 
     /*
      * This is needed if irccd is started before DHCP or if DNS cache is
@@ -510,7 +513,7 @@ void server::connect() noexcept
     } else
         conn_ = irc::ip_connection::create(service_);
 
-    state_ = state_t::connecting;
+    state_ = state::connecting;
     conn_->connect(host_, std::to_string(port_), [this] (auto code) {
         handle_connect(std::move(code));
     });
@@ -519,7 +522,7 @@ void server::connect() noexcept
 void server::disconnect() noexcept
 {
     conn_ = nullptr;
-    state_ = state_t::disconnected;
+    state_ = state::disconnected;
     on_disconnect({shared_from_this()});
 }
 
@@ -553,7 +556,7 @@ void server::join(std::string channel, std::string password)
     else
         *it = { channel, password };
 
-    if (state_ == state_t::connected) {
+    if (state_ == state::connected) {
         if (password.empty())
             send(string_util::sprintf("JOIN %s", channel));
         else
@@ -638,15 +641,17 @@ void server::part(std::string channel, std::string reason)
 
 void server::send(std::string raw)
 {
-    assert(state_ == state_t::connected);
     assert(!raw.empty());
+
+    if (state_ != state::connected)
+        throw server_error(server_error::not_connected);
 
     conn_->send(std::move(raw), [this] (auto code) {
         if (code) {
             const auto self = shared_from_this();
 
             service_.post([this, self] () {
-                state_ = state_t::disconnected;
+                state_ = state::disconnected;
                 conn_ = nullptr;
                 reconnect();
             });
