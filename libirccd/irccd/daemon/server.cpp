@@ -147,7 +147,7 @@ void server::dispatch_endofnames(const irc::message& msg)
     if (msg.args().size() < 3 || msg.arg(1) == "")
         return;
 
-    auto it = names_map_.find(msg.arg(1));
+    const auto it = names_map_.find(msg.arg(1));
 
     if (it != names_map_.end()) {
         std::vector<std::string> list(it->second.begin(), it->second.end());
@@ -282,7 +282,7 @@ void server::dispatch_ping(const irc::message& msg)
 {
     assert(msg.command() == "PING");
 
-    conn_->send(string_util::sprintf("PONG %s", msg.arg(0)));
+    send(string_util::sprintf("PONG %s", msg.arg(0)));
 }
 
 void server::dispatch_privmsg(const irc::message& msg)
@@ -395,49 +395,61 @@ void server::dispatch(const irc::message& message)
         dispatch_whoisuser(message);
 }
 
-void server::handle_recv(boost::system::error_code code, irc::message message)
-{
-    if (code) {
-        const auto self = shared_from_this();
-
-        service_.post([this, self] () {
-            state_ = state::disconnected;
-            conn_ = nullptr;
-            reconnect();
-        });
-    } else {
-        dispatch(message);
-        recv();
-    }
-}
-
 void server::recv()
 {
-    if (state_ != state::connected)
-        throw server_error(server_error::not_connected);
+    conn_->recv([this, conn = conn_] (auto code, auto message) {
+        if (code)
+            wait();
+        else {
+            dispatch(message);
+            recv();
+        }
+    });
+}
 
-    conn_->recv([this] (auto code, auto message) {
-        handle_recv(std::move(code), std::move(message));
+void server::flush()
+{
+    if (queue_.empty())
+        return;
+
+    conn_->send(queue_.front(), [this, conn = conn_] (auto code) {
+        queue_.pop_front();
+
+        if (code)
+            wait();
+        else
+            flush();
     });
 }
 
 void server::identify()
 {
-    assert(state_ == state::identifying);
+    state_ = state::identifying;
+    recocur_ = 0U;
+    jchannels_.clear();
 
     if (!password_.empty())
-        conn_->send(string_util::sprintf("PASS %s", password_));
+        send(string_util::sprintf("PASS %s", password_));
 
-    conn_->send(string_util::sprintf("NICK %s", nickname_));
-    conn_->send(string_util::sprintf("USER %s unknown unknown :%s", username_, realname_));
+    send(string_util::sprintf("NICK %s", nickname_));
+    send(string_util::sprintf("USER %s unknown unknown :%s", username_, realname_));
 }
 
 void server::wait()
 {
-    assert(state_ == state::waiting);
+    /*
+     * This function maybe called from a recv(), send() or even connect() call
+     * so be sure to only wait one at a time.
+     */
+    if (state_ == state::waiting)
+        return;
 
+    state_ = state::waiting;
     timer_.expires_from_now(boost::posix_time::seconds(recodelay_));
-    timer_.async_wait([this] (auto) {
+    timer_.async_wait([this] (auto code) {
+        if (code == boost::asio::error::operation_aborted)
+            return;
+
         recocur_ ++;
         connect();
     });
@@ -445,25 +457,21 @@ void server::wait()
 
 void server::handle_connect(boost::system::error_code code)
 {
-    if (code) {
-        conn_ = nullptr;
+    // Cancel connect timer.
+    timer_.cancel();
 
+    if (code) {
         // Wait before reconnecting.
         if (recotries_ != 0) {
             if (recotries_ > 0 && recocur_ >= recotries_) {
-                state_ = state::disconnected;
-                on_die({shared_from_this()});
+                disconnect();
             } else {
                 state_ = state::waiting;
                 wait();
             }
         } else
-            state_ = state::disconnected;
+            disconnect();
     } else {
-        state_ = state::identifying;
-        recocur_ = 0U;
-        jchannels_.clear();
-
         identify();
         recv();
     }
@@ -478,7 +486,7 @@ server::~server()
 void server::set_nickname(std::string nickname)
 {
     if (state_ == state::connected)
-        conn_->send(string_util::sprintf("NICK %s", nickname));
+        send(string_util::sprintf("NICK %s", nickname));
     else
         nickname_ = std::move(nickname);
 }
@@ -502,7 +510,7 @@ void server::connect() noexcept
 
     if (flags_ & ssl) {
 #if defined(HAVE_SSL)
-        conn_ = irc::tls_connection::create(service_);
+        conn_ = std::make_shared<irc::tls_connection>(service_);
 #else
         /*
          * If SSL is not compiled in, the caller is responsible of not setting
@@ -511,10 +519,10 @@ void server::connect() noexcept
         assert(!(flags_ & ssl));
 #endif
     } else
-        conn_ = irc::ip_connection::create(service_);
+        conn_ = std::make_shared<irc::ip_connection>(service_);
 
     state_ = state::connecting;
-    conn_->connect(host_, std::to_string(port_), [this] (auto code) {
+    conn_->connect(host_, std::to_string(port_), [this, conn = conn_] (auto code) {
         handle_connect(std::move(code));
     });
 }
@@ -643,20 +651,15 @@ void server::send(std::string raw)
 {
     assert(!raw.empty());
 
-    if (state_ != state::connected)
-        throw server_error(server_error::not_connected);
+    if (state_ == state::identifying || state_ == state::connected) {
+        const auto in_progress = queue_.size() > 0;
 
-    conn_->send(std::move(raw), [this] (auto code) {
-        if (code) {
-            const auto self = shared_from_this();
+        queue_.push_back(std::move(raw));
 
-            service_.post([this, self] () {
-                state_ = state::disconnected;
-                conn_ = nullptr;
-                reconnect();
-            });
-        }
-    });
+        if (!in_progress)
+            flush();
+    } else
+        queue_.push_back(std::move(raw));
 }
 
 void server::topic(std::string channel, std::string topic)

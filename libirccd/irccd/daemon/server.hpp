@@ -27,6 +27,7 @@
 #include <irccd/sysconfig.hpp>
 
 #include <cstdint>
+#include <deque>
 #include <map>
 #include <memory>
 #include <set>
@@ -438,6 +439,7 @@ private:
     boost::asio::io_service& service_;
     boost::asio::deadline_timer timer_;
     std::shared_ptr<irc::connection> conn_;
+    std::deque<std::string> queue_;
     std::int8_t recocur_{0};
     std::map<std::string, std::set<std::string>> names_map_;
     std::map<std::string, whois_info> whois_map_;
@@ -463,9 +465,9 @@ private:
     void dispatch_whoisuser(const irc::message&);
     void dispatch(const irc::message&);
 
-    void handle_recv(boost::system::error_code code, irc::message message);
     void handle_connect(boost::system::error_code);
     void recv();
+    void flush();
     void identify();
     void wait();
 
@@ -795,7 +797,6 @@ public:
      *
      * \param target the target nickname
      * \param channel the channel
-     * \throw server_error on errors
      */
     virtual void invite(std::string target, std::string channel);
 
@@ -804,7 +805,6 @@ public:
      *
      * \param channel the channel to join
      * \param password the optional password
-     * \throw server_error on errors
      */
     virtual void join(std::string channel, std::string password = "");
 
@@ -815,7 +815,6 @@ public:
      * \param target the target to kick
      * \param channel from which channel
      * \param reason the optional reason
-     * \throw server_error on errors
      */
     virtual void kick(std::string target, std::string channel, std::string reason = "");
 
@@ -825,7 +824,6 @@ public:
      *
      * \param target the nickname or the channel
      * \param message the message
-     * \throw server_error on errors
      */
     virtual void me(std::string target, std::string message);
 
@@ -834,7 +832,6 @@ public:
      *
      * \param target the target
      * \param message the message
-     * \throw server_error on errors
      */
     virtual void message(std::string target, std::string message);
 
@@ -846,7 +843,6 @@ public:
      * \param limit the optional limit
      * \param user the optional user
      * \param mask the optional ban mask
-     * \throw server_error on errors
      */
     virtual void mode(std::string channel,
                       std::string mode,
@@ -858,7 +854,6 @@ public:
      * Request the list of names.
      *
      * \param channel the channel
-     * \throw server_error on errors
      */
     virtual void names(std::string channel);
 
@@ -867,7 +862,6 @@ public:
      *
      * \param target the target
      * \param message the notice message
-     * \throw server_error on errors
      */
     virtual void notice(std::string target, std::string message);
 
@@ -879,7 +873,6 @@ public:
      *
      * \param channel the channel to leave
      * \param reason the optional reason
-     * \throw server_error on errors
      */
     virtual void part(std::string channel, std::string reason = "");
 
@@ -887,9 +880,10 @@ public:
      * Send a raw message to the IRC server. You don't need to add
      * message terminators.
      *
-     * \pre state() == state::connected
+     * If the server is not yet connected, the command is postponed and will be
+     * ran when ready.
+     *
      * \param raw the raw message (without `\r\n\r\n`)
-     * \throw server_error on errors
      */
     virtual void send(std::string raw);
 
@@ -898,7 +892,6 @@ public:
      *
      * \param channel the channel
      * \param topic the desired topic
-     * \throw server_error on errors
      */
     virtual void topic(std::string channel, std::string topic);
 
@@ -906,7 +899,6 @@ public:
      * Request for whois information.
      *
      * \param target the target nickname
-     * \throw server_error on errors
      */
     virtual void whois(std::string target);
 };

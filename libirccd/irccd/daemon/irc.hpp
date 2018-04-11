@@ -356,72 +356,104 @@ public:
 /**
  * \brief Abstract connection to a server.
  */
-class connection : public std::enable_shared_from_this<connection> {
+class connection {
 public:
     /**
      * Handler for connecting.
      */
-    using connect_t = std::function<void (boost::system::error_code)>;
+    using connect_handler = std::function<void (boost::system::error_code)>;
 
     /**
      * Handler for receiving.
      */
-    using recv_t = std::function<void (boost::system::error_code, message)>;
+    using recv_handler = std::function<void (boost::system::error_code, message)>;
 
     /**
      * Handler for sending.
      */
-    using send_t = std::function<void (boost::system::error_code)>;
-
-    /**
-     * Convenient alias.
-     */
-    using ptr = std::shared_ptr<connection>;
+    using send_handler = std::function<void (boost::system::error_code)>;
 
 private:
-    using buffer_t = boost::asio::streambuf;
-    using input_t = std::deque<recv_t>;
-    using output_t = std::deque<std::pair<std::string, send_t>>;
+    boost::asio::ip::tcp::resolver resolver_;
+    boost::asio::streambuf input_;
+    boost::asio::streambuf output_;
 
-    buffer_t buffer_;
-    input_t input_;
-    output_t output_;
-
-    void rflush();
-    void sflush();
+#if !defined(NDEBUG)
+    bool is_connecting_{false};
+    bool is_receiving_{false};
+    bool is_sending_{false};
+#endif
 
 protected:
     /**
+     * Use boost::asio::async_resolve and boost::asio::async_connect on the
+     * given real socket type.
+     *
+     * \param socket the socket
+     * \param host the hostname
+     * \param service the service or port number
+     * \param handler the non-null handler
+     */
+    template <typename Socket>
+    void wrap_connect(Socket& socket,
+                      const std::string& host,
+                      const std::string& service,
+                      const connect_handler& handler) noexcept;
+
+    /**
+     * Use boost::asio::asynd_read_until on the given real socket type.
+     *
+     * \param socket the socket
+     * \param handler the non-null handler
+     */
+    template <typename Socket>
+    void wrap_recv(Socket& socket, const recv_handler& handler) noexcept;
+
+    /**
+     * Use boost::asio::asynd_write on the given real socket type.
+     *
+     * \param socket the socket
+     * \param handler the non-null handler
+     */
+    template <typename Socket>
+    void wrap_send(Socket& socket, const send_handler& handler) noexcept;
+
+    /**
      * Do the connection.
+     *
+     * Derived implementation may call wrap_connect on its underlying socket.
      *
      * \param host the hostname
      * \param service the service or port number
      * \param handler the non-null handler
      */
-    virtual void do_connect(const std::string& host, const std::string& service, connect_t handler) noexcept = 0;
+    virtual void do_connect(const std::string& host,
+                            const std::string& service,
+                            const connect_handler& handler) noexcept = 0;
 
     /**
      * Receive some data.
      *
-     * \param buffer the buffer to complete
      * \param handler the non-null handler
      */
-    virtual void do_recv(boost::asio::streambuf& buffer, recv_t handler) noexcept = 0;
+    virtual void do_recv(const recv_handler& handler) noexcept = 0;
 
     /**
      * Send data.
      *
-     * \param data the data to send
      * \param handler the non-null handler
      */
-    virtual void do_send(const std::string& data, send_t handler) noexcept = 0;
+    virtual void do_send(const send_handler& handler) noexcept = 0;
 
+public:
     /**
      * Default constructor.
      */
-    connection() = default;
+    inline connection(boost::asio::io_service& service)
+        : resolver_(service)
+    {
+    }
 
-public:
     /**
      * Virtual destructor defaulted.
      */
@@ -431,11 +463,14 @@ public:
      * Connect to the host.
      *
      * \pre handler the handler
+     * \pre another connect operation must not be running
      * \param host the host
      * \param service the service or port number
      * \param handler the non-null handler
      */
-    void connect(const std::string& host, const std::string& service, connect_t handler);
+    void connect(const std::string& host,
+                 const std::string& service,
+                 const connect_handler& handler) noexcept;
 
     /**
      * Start receiving data.
@@ -443,9 +478,11 @@ public:
      * The handler must not throw exceptions and `this` must be valid in the
      * lifetime of the handler.
      *
+     * \pre another recv operation must not be running
+     * \pre handler != nullptr
      * \param handler the handler to call
      */
-    void recv(recv_t handler);
+    void recv(const recv_handler& handler) noexcept;
 
     /**
      * Start sending data.
@@ -453,10 +490,12 @@ public:
      * The handler must not throw exceptions and `this` must be valid in the
      * lifetime of the handler.
      *
+     * \pre another send operation must not be running
+     * \pre handler != nullptr
      * \param message the raw message
      * \param handler the handler to call
      */
-    void send(std::string message, send_t handler = nullptr);
+    void send(std::string message, const send_handler& handler);
 };
 
 /**
@@ -465,46 +504,35 @@ public:
 class ip_connection : public connection {
 private:
     boost::asio::ip::tcp::socket socket_;
-    boost::asio::ip::tcp::resolver resolver_;
 
 protected:
     /**
      * \copydoc connection::do_connect
      */
-    void do_connect(const std::string& host, const std::string& service, connect_t handler) noexcept override;
+    void do_connect(const std::string& host,
+                    const std::string& service,
+                    const connect_handler& handler) noexcept override;
 
     /**
      * \copydoc connection::do_recv
      */
-    void do_recv(boost::asio::streambuf& buffer, recv_t handler) noexcept override;
+    void do_recv(const recv_handler& handler) noexcept override;
 
     /**
      * \copydoc connection::do_send
      */
-    void do_send(const std::string& data, send_t handler) noexcept override;
+    void do_send(const send_handler& handler) noexcept override;
 
+public:
     /**
      * Constructor.
      *
      * \param service the io service
      */
-    inline ip_connection(boost::asio::io_service& service) noexcept
-        : socket_(service)
-        , resolver_(service)
+    inline ip_connection(boost::asio::io_service& service)
+        : connection(service)
+        , socket_(service)
     {
-    }
-
-public:
-    /**
-     * Wrap the connection as shared ptr.
-     *
-     * \param args the tls_connection constructor arguments
-     * \return the shared_ptr connection
-     */
-    template <typename... Args>
-    static inline std::shared_ptr<ip_connection> create(Args&&... args)
-    {
-        return std::shared_ptr<ip_connection>(new ip_connection(std::forward<Args>(args)...));
     }
 };
 
@@ -517,47 +545,36 @@ class tls_connection : public connection {
 private:
     boost::asio::ssl::context context_;
     boost::asio::ssl::stream<boost::asio::ip::tcp::socket> socket_;
-    boost::asio::ip::tcp::resolver resolver_;
 
 protected:
     /**
      * \copydoc connection::do_connect
      */
-    void do_connect(const std::string& host, const std::string& service, connect_t handler) noexcept override;
+    void do_connect(const std::string& host,
+                    const std::string& service,
+                    const connect_handler& handler) noexcept override;
 
     /**
      * \copydoc connection::do_recv
      */
-    void do_recv(boost::asio::streambuf& buffer, recv_t handler) noexcept override;
+    void do_recv(const recv_handler& handler) noexcept override;
 
     /**
      * \copydoc connection::do_send
      */
-    void do_send(const std::string& data, send_t handler) noexcept override;
+    void do_send(const send_handler& handler) noexcept override;
 
+public:
     /**
      * Constructor.
      *
      * \param service the io service
      */
     inline tls_connection(boost::asio::io_service& service)
-        : context_(boost::asio::ssl::context::sslv23)
+        : connection(service)
+        , context_(boost::asio::ssl::context::sslv23)
         , socket_(service, context_)
-        , resolver_(service)
     {
-    }
-
-public:
-    /**
-     * Wrap the connection as shared ptr.
-     *
-     * \param args the tls_connection constructor arguments
-     * \return the shared_ptr connection
-     */
-    template <typename... Args>
-    static inline std::shared_ptr<tls_connection> create(Args&&... args)
-    {
-        return std::shared_ptr<tls_connection>(new tls_connection(std::forward<Args>(args)...));
     }
 };
 

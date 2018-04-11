@@ -83,7 +83,6 @@ namespace irccd {
 
 namespace {
 
-std::atomic<bool> running{true};
 std::unique_ptr<irccd> instance;
 
 void usage()
@@ -249,12 +248,15 @@ int main(int argc, char** argv)
      * loggers.
      */
     sigs.async_wait([&] (auto, auto) {
-        running = false;
         service.stop();
     });
 
-    while (running)
+    try {
         service.run();
+    } catch (const std::exception& ex) {
+        std::cerr << "abort: " << ex.what() << std::endl;
+        return 1;
+    }
 
     instance = nullptr;
 }
