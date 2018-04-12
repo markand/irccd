@@ -704,6 +704,8 @@ const std::error_category& server_category()
                 return "server is not connected";
             case server_error::already_connected:
                 return "server is already connected";
+            case server_error::already_exists:
+                return "server already exists";
             case server_error::invalid_port:
                 return "invalid port number specified";
             case server_error::invalid_reconnect_tries:

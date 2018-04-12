@@ -521,7 +521,12 @@ void server_service::load(const config& cfg) noexcept
             continue;
 
         try {
-            add(server_util::from_config(irccd_.get_service(), cfg, section));
+            auto server = server_util::from_config(irccd_.get_service(), cfg, section);
+
+            if (has(server->get_name()))
+                throw server_error(server_error::already_exists);
+
+            add(std::move(server));
         } catch (const std::exception& ex) {
             irccd_.get_log().warning() << "server " << section.get("name").value() << ": "
                 << ex.what() << std::endl;
