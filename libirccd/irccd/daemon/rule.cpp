@@ -44,7 +44,7 @@ bool rule::match(const std::string& server,
                  const std::string& plugin,
                  const std::string& event) const noexcept
 {
-    auto tolower = [] (auto str) {
+    const auto tolower = [] (auto str) {
         std::transform(str.begin(), str.end(), str.begin(), ::tolower);
         return str;
     };
