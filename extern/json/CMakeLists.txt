@@ -18,6 +18,6 @@
 
 project(json)
 
-add_library(extern-json INTERFACE)
-target_sources(extern-json INTERFACE ${json_SOURCE_DIR}/json.hpp)
-target_include_directories(extern-json INTERFACE ${json_SOURCE_DIR})
+add_library(libextern-json INTERFACE)
+target_sources(libextern-json INTERFACE ${json_SOURCE_DIR}/json.hpp)
+target_include_directories(libextern-json INTERFACE ${json_SOURCE_DIR})

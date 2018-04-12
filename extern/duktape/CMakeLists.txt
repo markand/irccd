@@ -18,6 +18,7 @@
 
 cmake_minimum_required(VERSION 3.0)
 project(duktape)
-add_library(extern-duktape STATIC duk_config.h duktape.cpp duktape.h)
-target_include_directories(extern-duktape PUBLIC ${duktape_SOURCE_DIR})
-target_compile_definitions(extern-duktape PUBLIC DUK_OPT_CPP_EXCEPTIONS)
+add_library(libextern-duktape STATIC duk_config.h duktape.cpp duktape.h)
+target_include_directories(libextern-duktape PUBLIC ${duktape_SOURCE_DIR})
+target_compile_definitions(libextern-duktape PUBLIC DUK_OPT_CPP_EXCEPTIONS)
+set_target_properties(libextern-duktape PROPERTIES PREFIX "")

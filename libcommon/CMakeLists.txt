@@ -63,7 +63,7 @@ irccd_define_library(
         ${SOURCES}
     FLAGS ${FLAGS}
     LIBRARIES
-        extern-json
+        libextern-json
         ${Boost_LIBRARIES}
         $<$<BOOL:${WIN32}>:shlwapi>
         $<$<BOOL:${WIN32}>:ws2_32>
