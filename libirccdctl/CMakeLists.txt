@@ -35,9 +35,6 @@ irccd_define_library(
         ${HEADERS}
         ${SOURCES}
     LIBRARIES
-        Threads::Threads
-        ${LIBRARIES}
-        libcommon
         libirccd
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${libirccdctl_SOURCE_DIR}>

@@ -64,10 +64,9 @@ irccd_define_library(
         ${HEADERS}
         ${SOURCES}
     LIBRARIES
-        ${Boost_TIMER_LIBRARY}
+        Boost::timer
         libextern-duktape
         libirccd
     PUBLIC_INCLUDES
-        $<BUILD_INTERFACE:${libirccd-js_SOURCE_DIR}/irccd>
         $<BUILD_INTERFACE:${libirccd-js_SOURCE_DIR}>
 )

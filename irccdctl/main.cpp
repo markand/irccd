@@ -21,7 +21,6 @@
 #include <unordered_map>
 
 #include <boost/filesystem.hpp>
-#include <boost/timer/timer.hpp>
 
 #include <irccd/config.hpp>
 #include <irccd/json_util.hpp>

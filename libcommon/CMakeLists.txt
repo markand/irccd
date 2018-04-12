@@ -51,26 +51,25 @@ set(
     ${libcommon_SOURCE_DIR}/irccd/system.cpp
 )
 
-if (NOT HAVE_SSL)
-    list(APPEND FLAGS NET_NO_SSL)
-endif ()
-
 irccd_define_library(
     TARGET libcommon
     SOURCES
         ${libcommon_SOURCE_DIR}/CMakeLists.txt
         ${HEADERS}
         ${SOURCES}
-    FLAGS ${FLAGS}
     LIBRARIES
         libextern-json
-        ${Boost_LIBRARIES}
+        Threads::Threads
+        Boost::filesystem
+        Boost::system
+        $<$<BOOL:${HAVE_SSL}>:OpenSSL::Crypto>
+        $<$<BOOL:${HAVE_SSL}>:OpenSSL::SSL>
+        $<$<BOOL:${IRCCD_SYSTEM_LINUX}>:dl>
+        $<$<BOOL:${IRCCD_SYSTEM_MAC}>:resolv>
+        $<$<BOOL:${IRCCD_SYSTEM_WINDOWS}>:mswsock>
         $<$<BOOL:${WIN32}>:shlwapi>
         $<$<BOOL:${WIN32}>:ws2_32>
-        $<$<BOOL:${HAVE_SSL}>:OpenSSL::SSL>
-        $<$<BOOL:${HAVE_SSL}>:OpenSSL::Crypto>
     PUBLIC_INCLUDES
-        ${Boost_INCLUDE_DIRS}
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
         $<BUILD_INTERFACE:${libcommon_SOURCE_DIR}>
 )

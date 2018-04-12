@@ -37,7 +37,10 @@
 #
 # doc                       - The documentation process.
 # extern                    - External libraries.
-# lib                       - The irccd library
+# libirccdctl               - The irccdctl library.
+# libirccd-js               - Javascript bindings library.
+# libirccd-test             - Helpers for unit tests.
+# libirccd                  - The irccd library.
 # irccd                     - The irccd executable.
 # irccdctl                  - The irccdctl utility.
 # plugins                   - Official irccd plugins.

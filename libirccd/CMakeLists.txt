@@ -18,8 +18,6 @@
 
 project(libirccd)
 
-find_package(Boost REQUIRED QUIET COMPONENTS timer)
-
 set(
     HEADERS
     ${libirccd_SOURCE_DIR}/irccd/daemon/command.hpp
@@ -123,11 +121,6 @@ irccd_define_library(
         ${HEADERS}
         ${SOURCES}
     LIBRARIES
-        Threads::Threads
-        ${Boost_TIMER_LIBRARY}
-        $<$<BOOL:${IRCCD_SYSTEM_WINDOWS}>:mswsock>
-        $<$<BOOL:${IRCCD_SYSTEM_LINUX}>:dl>
-        $<$<BOOL:${IRCCD_SYSTEM_MAC}>:resolv>
         libcommon
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${libirccd_SOURCE_DIR}>

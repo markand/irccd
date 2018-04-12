@@ -28,7 +28,7 @@
 
 #include <irccd/daemon/irccd.hpp>
 
-#include <js/js_plugin.hpp>
+#include <irccd/js/js_plugin.hpp>
 
 #include "journal_server.hpp"
 

@@ -18,8 +18,6 @@
 
 project(irccdctl)
 
-find_package(Boost REQUIRED QUIET COMPONENTS timer)
-
 set(
     SOURCES
     ${irccdctl_SOURCE_DIR}/CMakeLists.txt
@@ -92,5 +90,5 @@ irccd_define_executable(
     TARGET irccdctl
     DESCRIPTION "Irccd controller."
     SOURCES ${SOURCES}
-    LIBRARIES ${Boost_TIMER_LIBRARY} libirccdctl
+    LIBRARIES libirccdctl
 )
