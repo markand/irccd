@@ -16,13 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <atomic>
 #include <cassert>
-#include <cerrno>
-#include <cstring>
 #include <fstream>
 #include <iostream>
-#include <stdexcept>
 #include <streambuf>
 
 #include "logger.hpp"
