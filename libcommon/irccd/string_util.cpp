@@ -184,7 +184,7 @@ std::string subst_shell_attrs(const std::string& content)
     auto list = split(content, ",");
 
     if (list.empty())
-        return "[0m";
+        return "\033[0m";
     if (list.size() > 3)
         return "";
 
@@ -193,7 +193,7 @@ std::string subst_shell_attrs(const std::string& content)
     /*
      * Shell sequence looks like this:
      *
-     * [attributes;foreground;backgroundm
+     * ^[[attributes;foreground;backgroundm
      */
     if (list.size() >= 3) {
         const auto it = shell_attributes.find(list[2]);
@@ -222,7 +222,7 @@ std::string subst_shell_attrs(const std::string& content)
 
     std::ostringstream oss;
 
-    oss << "[";
+    oss << "\033[";
     oss << string_util::join(seq, ';');
     oss << "m";
 
