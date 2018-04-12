@@ -6,6 +6,8 @@
 
 # vim/emacs specific.
 ^tags$
+^tags\.lock$
+^tags\.temp$
 \.swp$
 \.swo$
 
