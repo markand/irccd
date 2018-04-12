@@ -31,6 +31,7 @@ namespace irccd {
 
 class command;
 class config;
+class irccd;
 
 /**
  * \brief manage transport servers and clients.

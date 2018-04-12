@@ -19,19 +19,38 @@
 #define BOOST_TEST_MODULE "irccdctl rule-edit"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/test/cli_test.hpp>
+#include <irccd/test/rule_cli_test.hpp>
 
 namespace irccd {
 
-BOOST_FIXTURE_TEST_SUITE(rule_edit_suite, cli_test)
+namespace {
+
+class custom_rule_cli_test : public rule_cli_test {
+public:
+    custom_rule_cli_test()
+    {
+        irccd_.rules().add({
+            { "s1", "s2" },
+            { "c1", "c2" },
+            { "o1", "o2" },
+            { "p1", "p2" },
+            { "onCommand", "onMessage" },
+            rule::action::drop
+        });
+    }
+};
+
+} // !namespace
+
+BOOST_FIXTURE_TEST_SUITE(rule_edit_suite, custom_rule_cli_test)
 
 BOOST_AUTO_TEST_CASE(server)
 {
-    run_irccd("irccd-rules.conf");
+    start();
 
     {
-        const auto result = run_irccdctl({ "rule-edit",
-            "-s ts1",  "--add-server ts2",
+        const auto result = exec({ "rule-edit",
+            "-s ts1",   "--add-server ts2",
             "-S s1",    "--remove-server s2",
             "0"
         });
@@ -41,9 +60,9 @@ BOOST_AUTO_TEST_CASE(server)
     }
 
     {
-        const auto result = run_irccdctl({ "rule-list" });
+        const auto result = exec({ "rule-list" });
 
-        BOOST_TEST(result.first.size() == 8U);
+        BOOST_TEST(result.first.size() == 7U);
         BOOST_TEST(result.second.size() == 0U);
         BOOST_TEST(result.first[0]  == "rule:        0");
         BOOST_TEST(result.first[1]  == "servers:     ts1 ts2 ");
@@ -56,10 +75,10 @@ BOOST_AUTO_TEST_CASE(server)
 
 BOOST_AUTO_TEST_CASE(channel)
 {
-    run_irccd("irccd-rules.conf");
+    start();
 
     {
-        const auto result = run_irccdctl({ "rule-edit",
+        const auto result = exec({ "rule-edit",
             "-c tc1",   "--add-channel tc2",
             "-C c1",    "--remove-channel c2",
             "0"
@@ -70,9 +89,9 @@ BOOST_AUTO_TEST_CASE(channel)
     }
 
     {
-        const auto result = run_irccdctl({ "rule-list" });
+        const auto result = exec({ "rule-list" });
 
-        BOOST_TEST(result.first.size() == 8U);
+        BOOST_TEST(result.first.size() == 7U);
         BOOST_TEST(result.second.size() == 0U);
         BOOST_TEST(result.first[0]  == "rule:        0");
         BOOST_TEST(result.first[1]  == "servers:     s1 s2 ");
@@ -85,10 +104,10 @@ BOOST_AUTO_TEST_CASE(channel)
 
 BOOST_AUTO_TEST_CASE(plugin)
 {
-    run_irccd("irccd-rules.conf");
+    start();
 
     {
-        const auto result = run_irccdctl({ "rule-edit",
+        const auto result = exec({ "rule-edit",
             "-p tp1",   "--add-plugin tp2",
             "-P p1",    "--remove-plugin p2",
             "0"
@@ -99,9 +118,9 @@ BOOST_AUTO_TEST_CASE(plugin)
     }
 
     {
-        const auto result = run_irccdctl({ "rule-list" });
+        const auto result = exec({ "rule-list" });
 
-        BOOST_TEST(result.first.size() == 8U);
+        BOOST_TEST(result.first.size() == 7U);
         BOOST_TEST(result.second.size() == 0U);
         BOOST_TEST(result.first[0]  == "rule:        0");
         BOOST_TEST(result.first[1]  == "servers:     s1 s2 ");
@@ -114,10 +133,10 @@ BOOST_AUTO_TEST_CASE(plugin)
 
 BOOST_AUTO_TEST_CASE(event)
 {
-    run_irccd("irccd-rules.conf");
+    start();
 
     {
-        const auto result = run_irccdctl({ "rule-edit",
+        const auto result = exec({ "rule-edit",
             "-e onKick",    "--add-event onNickname",
             "-E onMessage", "--remove-event onCommand",
             "0"
@@ -128,9 +147,9 @@ BOOST_AUTO_TEST_CASE(event)
     }
 
     {
-        const auto result = run_irccdctl({ "rule-list" });
+        const auto result = exec({ "rule-list" });
 
-        BOOST_TEST(result.first.size() == 8U);
+        BOOST_TEST(result.first.size() == 7U);
         BOOST_TEST(result.second.size() == 0U);
         BOOST_TEST(result.first[0]  == "rule:        0");
         BOOST_TEST(result.first[1]  == "servers:     s1 s2 ");
@@ -143,19 +162,19 @@ BOOST_AUTO_TEST_CASE(event)
 
 BOOST_AUTO_TEST_CASE(action_1)
 {
-    run_irccd("irccd-rules.conf");
+    start();
 
     {
-        const auto result = run_irccdctl({ "rule-edit", "-a accept", "0" });
+        const auto result = exec({ "rule-edit", "-a accept", "0" });
 
         BOOST_TEST(result.first.size() == 0U);
         BOOST_TEST(result.second.size() == 0U);
     }
 
     {
-        const auto result = run_irccdctl({ "rule-list" });
+        const auto result = exec({ "rule-list" });
 
-        BOOST_TEST(result.first.size() == 8U);
+        BOOST_TEST(result.first.size() == 7U);
         BOOST_TEST(result.second.size() == 0U);
         BOOST_TEST(result.first[0]  == "rule:        0");
         BOOST_TEST(result.first[1]  == "servers:     s1 s2 ");
@@ -168,19 +187,19 @@ BOOST_AUTO_TEST_CASE(action_1)
 
 BOOST_AUTO_TEST_CASE(action_2)
 {
-    run_irccd("irccd-rules.conf");
+    start();
 
     {
-        const auto result = run_irccdctl({ "rule-edit", "--action accept", "0" });
+        const auto result = exec({ "rule-edit", "--action accept", "0" });
 
         BOOST_TEST(result.first.size() == 0U);
         BOOST_TEST(result.second.size() == 0U);
     }
 
     {
-        const auto result = run_irccdctl({ "rule-list" });
+        const auto result = exec({ "rule-list" });
 
-        BOOST_TEST(result.first.size() == 8U);
+        BOOST_TEST(result.first.size() == 7U);
         BOOST_TEST(result.second.size() == 0U);
         BOOST_TEST(result.first[0]  == "rule:        0");
         BOOST_TEST(result.first[1]  == "servers:     s1 s2 ");
@@ -194,4 +213,3 @@ BOOST_AUTO_TEST_CASE(action_2)
 BOOST_AUTO_TEST_SUITE_END()
 
 } // !irccd
-

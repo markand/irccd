@@ -17,14 +17,12 @@
  */
 
 #include <chrono>
-#include <future>
 #include <sstream>
-#include <thread>
-
-#include <boost/asio.hpp>
-#include <boost/process.hpp>
 
 #include <irccd/string_util.hpp>
+#include <irccd/socket_acceptor.hpp>
+
+#include <irccd/daemon/service/transport_service.hpp>
 
 #include "cli_test.hpp"
 
@@ -32,56 +30,59 @@ namespace proc = boost::process;
 
 namespace irccd {
 
-void cli_test::run_irccd(const std::string& config)
+cli_test::cli_test()
 {
-    std::ostringstream oss;
+    std::remove(CMAKE_BINARY_DIR "/tmp/irccd.sock");
 
-    oss << IRCCD_EXECUTABLE << " -fc ";
-    oss << CMAKE_BINARY_DIR "/tmp/" << config;
+    io::local_acceptor::endpoint endpoint(CMAKE_BINARY_DIR "/tmp/irccd.sock");
+    io::local_acceptor::acceptor acceptor(service_, std::move(endpoint));
 
-    irccd_ = proc::child(oss.str());
-
-    // Let irccd bind correctly to the socket.
-    std::this_thread::sleep_for(std::chrono::milliseconds(250U));
+    irccd_.transports().add(std::make_unique<transport_server>(
+        std::make_unique<io::local_acceptor>(std::move(acceptor))));
 }
 
-cli_test::outputs cli_test::run_irccdctl(const std::vector<std::string>& args)
+cli_test::~cli_test()
 {
-    std::ostringstream oss;
-    std::future<std::string> out;
-    std::future<std::string> err;
+    service_.stop();
+    thread_.join();
+}
 
-    oss << IRCCDCTL_EXECUTABLE << " -c ";
-    oss << CMAKE_BINARY_DIR << "/tmp/irccdctl.conf ";
+void cli_test::start()
+{
+    thread_ = std::thread([this] { service_.run(); });
+
+    // Let irccd bind correctly.
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+}
+
+cli_test::outputs cli_test::exec(const std::vector<std::string>& args)
+{
+    static const std::string irccdctl = IRCCDCTL_EXECUTABLE;
+    static const std::string conf = CMAKE_BINARY_DIR "/tmp/irccdctl.conf";
+
+    std::ostringstream oss;
+
+    oss << irccdctl << " -c " << conf << " ";
     oss << string_util::join(args, " ");
 
-    boost::asio::io_service io;
-    proc::child irccdctl(
+    proc::ipstream out;
+    proc::ipstream err;
+
+    proc::system(
         oss.str(),
         proc::std_in.close(),
         proc::std_out > out,
-        proc::std_err > err,
-        io
+        proc::std_err > err
     );
 
-    io.run();
+    outputs result;
 
-    auto result = std::make_pair(
-        string_util::split(out.get(), "\n"),
-        string_util::split(err.get(), "\n")
-    );
-
-    irccdctl.join();
+    for (std::string line; out && std::getline(out, line); )
+        result.first.push_back(line);
+    for (std::string line; err && std::getline(err, line); )
+        result.second.push_back(line);
 
     return result;
-}
-
-cli_test::outputs cli_test::run(const std::string& config,
-                                const std::vector<std::string>& args)
-{
-    run_irccd(config);
-
-    return run_irccdctl(args);
 }
 
 } // !irccd

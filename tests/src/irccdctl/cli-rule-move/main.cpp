@@ -19,27 +19,62 @@
 #define BOOST_TEST_MODULE "irccdctl rule-move"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/test/cli_test.hpp>
+#include <irccd/test/rule_cli_test.hpp>
 
 namespace irccd {
 
-BOOST_FIXTURE_TEST_SUITE(rule_move_suite, cli_test)
+namespace {
+
+class custom_rule_cli_test : public rule_cli_test {
+public:
+    custom_rule_cli_test()
+    {
+        irccd_.rules().add({
+            { "s1" },
+            { "c1" },
+            { "o1" },
+            { "p1" },
+            { "onTopic" },
+            rule::action::accept
+        });
+        irccd_.rules().add({
+            { "s2" },
+            { "c2" },
+            { "o2" },
+            { "p2" },
+            { "onCommand" },
+            rule::action::drop
+        });
+        irccd_.rules().add({
+            { "s3" },
+            { "c3" },
+            { "o3" },
+            { "p3" },
+            { "onMessage" },
+            rule::action::accept
+        });
+    }
+};
+
+} // !namespace
+
+BOOST_FIXTURE_TEST_SUITE(rule_move_suite, custom_rule_cli_test)
 
 BOOST_AUTO_TEST_CASE(from_0_to_1)
 {
-    run_irccd("irccd-multiple-rules.conf");
+    start();
 
     {
-        const auto result = run_irccdctl({ "rule-move", "0", "1" });
+        const auto result = exec({ "rule-move", "0", "1" });
 
         BOOST_TEST(result.first.size() == 0U);
         BOOST_TEST(result.second.size() == 0U);
     }
 
     {
-        const auto result = run_irccdctl({ "rule-list" });
+        const auto result = exec({ "rule-list" });
 
-        BOOST_TEST(result.first.size() == 22U);
+        BOOST_TEST(result.first.size() == 21U);
         BOOST_TEST(result.second.size() == 0U);
         BOOST_TEST(result.first[0]  == "rule:        0");
         BOOST_TEST(result.first[1]  == "servers:     s2 ");
@@ -67,19 +102,19 @@ BOOST_AUTO_TEST_CASE(from_0_to_1)
 
 BOOST_AUTO_TEST_CASE(from_2_to_0)
 {
-    run_irccd("irccd-multiple-rules.conf");
+    start();
 
     {
-        const auto result = run_irccdctl({ "rule-move", "2", "0" });
+        const auto result = exec({ "rule-move", "2", "0" });
 
         BOOST_TEST(result.first.size() == 0U);
         BOOST_TEST(result.second.size() == 0U);
     }
 
     {
-        const auto result = run_irccdctl({ "rule-list" });
+        const auto result = exec({ "rule-list" });
 
-        BOOST_TEST(result.first.size() == 22U);
+        BOOST_TEST(result.first.size() == 21U);
         BOOST_TEST(result.second.size() == 0U);
         BOOST_TEST(result.first[0]  == "rule:        0");
         BOOST_TEST(result.first[1]  == "servers:     s3 ");
@@ -107,19 +142,19 @@ BOOST_AUTO_TEST_CASE(from_2_to_0)
 
 BOOST_AUTO_TEST_CASE(same)
 {
-    run_irccd("irccd-multiple-rules.conf");
+    start();
 
     {
-        const auto result = run_irccdctl({ "rule-move", "2", "2" });
+        const auto result = exec({ "rule-move", "2", "2" });
 
         BOOST_TEST(result.first.size() == 0U);
         BOOST_TEST(result.second.size() == 0U);
     }
 
     {
-        const auto result = run_irccdctl({ "rule-list" });
+        const auto result = exec({ "rule-list" });
 
-        BOOST_TEST(result.first.size() == 22U);
+        BOOST_TEST(result.first.size() == 21U);
         BOOST_TEST(result.second.size() == 0U);
         BOOST_TEST(result.first[0]  == "rule:        0");
         BOOST_TEST(result.first[1]  == "servers:     s1 ");

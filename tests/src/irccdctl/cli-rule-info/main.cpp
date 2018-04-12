@@ -19,17 +19,27 @@
 #define BOOST_TEST_MODULE "irccdctl rule-info"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/test/cli_test.hpp>
+#include <irccd/test/rule_cli_test.hpp>
 
 namespace irccd {
 
-BOOST_FIXTURE_TEST_SUITE(rule_info_suite, cli_test)
+BOOST_FIXTURE_TEST_SUITE(rule_info_suite, rule_cli_test)
 
 BOOST_AUTO_TEST_CASE(info)
 {
-    const auto result = run("irccd-rules.conf", { "rule-info", "0" });
+    irccd_.rules().add({
+        { "s1", "s2" },
+        { "c1", "c2" },
+        { "o1", "o2" },
+        { "p1", "p2" },
+        { "onCommand", "onMessage" },
+        rule::action::drop
+    });
+    start();
 
-    BOOST_TEST(result.first.size() == 8U);
+    const auto result = exec({ "rule-info", "0" });
+
+    BOOST_TEST(result.first.size() == 7U);
     BOOST_TEST(result.second.size() == 0U);
     BOOST_TEST(result.first[0]  == "rule:        0");
     BOOST_TEST(result.first[1]  == "servers:     s1 s2 ");

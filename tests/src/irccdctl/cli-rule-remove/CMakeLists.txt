@@ -16,18 +16,9 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-if (HAVE_JS)
-    add_subdirectory(cli-plugin-config)
-    add_subdirectory(cli-plugin-info)
-    add_subdirectory(cli-plugin-list)
-    add_subdirectory(cli-plugin-load)
-    add_subdirectory(cli-plugin-reload)
-    add_subdirectory(cli-plugin-unload)
-endif ()
-
-add_subdirectory(cli-rule-add)
-add_subdirectory(cli-rule-edit)
-add_subdirectory(cli-rule-info)
-add_subdirectory(cli-rule-list)
-add_subdirectory(cli-rule-move)
-add_subdirectory(cli-rule-remove)
+irccd_define_test(
+    NAME cli-rule-remove
+    SOURCES main.cpp
+    LIBRARIES libcommon
+    DEPENDS irccd irccdctl
+)

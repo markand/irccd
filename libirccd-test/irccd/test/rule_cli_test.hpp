@@ -1,5 +1,5 @@
 /*
- * main.cpp -- test irccdctl plugin-list
+ * rule_cli_test.hpp -- test fixture for irccdctl frontend (rule support)
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -16,29 +16,35 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define BOOST_TEST_MODULE "irccdctl plugin-list"
-#include <boost/test/unit_test.hpp>
+#ifndef IRCCD_TEST_RULE_CLI_TEST_HPP
+#define IRCCD_TEST_RULE_CLI_TEST_HPP
 
-#include <irccd/test/plugin_cli_test.hpp>
+/**
+ * \file rule_cli_test.hpp
+ * \brief Test fixture for irccdctl frontend (rule support).
+ */
+
+#include <irccd/daemon/service/rule_service.hpp>
+
+#include <irccd/daemon/rule.hpp>
+
+#include "cli_test.hpp"
 
 namespace irccd {
 
-BOOST_FIXTURE_TEST_SUITE(plugin_list_suite, plugin_cli_test)
-
-BOOST_AUTO_TEST_CASE(output)
-{
-    irccd_.plugins().add(std::make_unique<plugin>("p1", "local"));
-    irccd_.plugins().add(std::make_unique<plugin>("p2", "local"));
-    start();
-
-    const auto result = exec({ "plugin-list" });
-
-    BOOST_TEST(result.first.size() == 2U);
-    BOOST_TEST(result.second.size() == 0U);
-    BOOST_TEST(result.first[0] == "p1");
-    BOOST_TEST(result.first[1] == "p2");
-}
-
-BOOST_AUTO_TEST_SUITE_END()
+/**
+ * \file rule_cli_test.hpp
+ *
+ * This class adds all rule related transport commands to irccd.
+ */
+class rule_cli_test : public cli_test {
+public:
+    /**
+     * Default constructor.
+     */
+    rule_cli_test();
+};
 
 } // !irccd
+
+#endif // !IRCCD_TEST_RULE_CLI_TEST_HPP

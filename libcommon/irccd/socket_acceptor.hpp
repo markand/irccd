@@ -46,6 +46,11 @@ template <typename Protocol>
 class socket_acceptor : public acceptor {
 public:
     /**
+     * Convenient endpoint alias.
+     */
+    using endpoint = typename Protocol::endpoint;
+
+    /**
      * Convenient acceptor alias.
      */
     using acceptor = typename Protocol::acceptor;

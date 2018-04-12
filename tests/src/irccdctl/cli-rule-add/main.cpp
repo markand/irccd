@@ -19,22 +19,22 @@
 #define BOOST_TEST_MODULE "irccdctl rule-add"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/test/cli_test.hpp>
+#include <irccd/test/rule_cli_test.hpp>
 
 namespace irccd {
 
-BOOST_FIXTURE_TEST_SUITE(rule_add_suite, cli_test)
+BOOST_FIXTURE_TEST_SUITE(rule_add_suite, rule_cli_test)
 
 BOOST_AUTO_TEST_CASE(all)
 {
-    run_irccd("irccd-rules.conf");
+    start();
 
     {
-        const auto result = run_irccdctl({ "rule-add",
-            "-c tc1",       "--add-channel tc2",
+        const auto result = exec({ "rule-add",
+            "-c c1",        "--add-channel c2",
             "-e onMessage", "--add-event onCommand",
-            "-p tp1",       "--add-plugin tp2",
-            "-s ts1",       "--add-server ts2",
+            "-p p1",        "--add-plugin p2",
+            "-s s1",        "--add-server s2",
             "drop"
         });
 
@@ -43,9 +43,9 @@ BOOST_AUTO_TEST_CASE(all)
     }
 
     {
-        const auto result = run_irccdctl({ "rule-list" });
+        const auto result = exec({ "rule-list" });
 
-        BOOST_TEST(result.first.size() == 15U);
+        BOOST_TEST(result.first.size() == 7U);
         BOOST_TEST(result.second.size() == 0U);
         BOOST_TEST(result.first[0]  == "rule:        0");
         BOOST_TEST(result.first[1]  == "servers:     s1 s2 ");
@@ -53,141 +53,106 @@ BOOST_AUTO_TEST_CASE(all)
         BOOST_TEST(result.first[3]  == "plugins:     p1 p2 ");
         BOOST_TEST(result.first[4]  == "events:      onCommand onMessage ");
         BOOST_TEST(result.first[5]  == "action:      drop");
-        BOOST_TEST(result.first[6]  == "");
-        BOOST_TEST(result.first[7]  == "rule:        1");
-        BOOST_TEST(result.first[8]  == "servers:     ts1 ts2 ");
-        BOOST_TEST(result.first[9]  == "channels:    tc1 tc2 ");
-        BOOST_TEST(result.first[10] == "plugins:     tp1 tp2 ");
-        BOOST_TEST(result.first[11] == "events:      onCommand onMessage ");
-        BOOST_TEST(result.first[12] == "action:      drop");
     }
 }
 
 BOOST_AUTO_TEST_CASE(server)
 {
-    run_irccd("irccd-rules.conf");
+    start();
 
     {
-        const auto result = run_irccdctl({ "rule-add", "-s ts1", "--add-server ts2", "drop" });
+        const auto result = exec({ "rule-add", "-s s1", "--add-server s2", "drop" });
 
         BOOST_TEST(result.first.size() == 0U);
         BOOST_TEST(result.second.size() == 0U);
     }
 
     {
-        const auto result = run_irccdctl({ "rule-list" });
+        const auto result = exec({ "rule-list" });
 
-        BOOST_TEST(result.first.size() == 15U);
+        BOOST_TEST(result.first.size() == 7U);
         BOOST_TEST(result.second.size() == 0U);
         BOOST_TEST(result.first[0]  == "rule:        0");
         BOOST_TEST(result.first[1]  == "servers:     s1 s2 ");
-        BOOST_TEST(result.first[2]  == "channels:    c1 c2 ");
-        BOOST_TEST(result.first[3]  == "plugins:     p1 p2 ");
-        BOOST_TEST(result.first[4]  == "events:      onCommand onMessage ");
+        BOOST_TEST(result.first[2]  == "channels:    ");
+        BOOST_TEST(result.first[3]  == "plugins:     ");
+        BOOST_TEST(result.first[4]  == "events:      ");
         BOOST_TEST(result.first[5]  == "action:      drop");
-        BOOST_TEST(result.first[6]  == "");
-        BOOST_TEST(result.first[7]  == "rule:        1");
-        BOOST_TEST(result.first[8]  == "servers:     ts1 ts2 ");
-        BOOST_TEST(result.first[9]  == "channels:    ");
-        BOOST_TEST(result.first[10] == "plugins:     ");
-        BOOST_TEST(result.first[11] == "events:      ");
-        BOOST_TEST(result.first[12] == "action:      drop");
     }
 }
 
 BOOST_AUTO_TEST_CASE(channel)
 {
-    run_irccd("irccd-rules.conf");
+    start();
 
     {
-        const auto result = run_irccdctl({ "rule-add", "-c tc1", "--add-channel tc2", "drop" });
+        const auto result = exec({ "rule-add", "-c c1", "--add-channel c2", "drop" });
 
         BOOST_TEST(result.first.size() == 0U);
         BOOST_TEST(result.second.size() == 0U);
     }
 
     {
-        const auto result = run_irccdctl({ "rule-list" });
+        const auto result = exec({ "rule-list" });
 
-        BOOST_TEST(result.first.size() == 15U);
+        BOOST_TEST(result.first.size() == 7U);
         BOOST_TEST(result.second.size() == 0U);
         BOOST_TEST(result.first[0]  == "rule:        0");
-        BOOST_TEST(result.first[1]  == "servers:     s1 s2 ");
+        BOOST_TEST(result.first[1]  == "servers:     ");
         BOOST_TEST(result.first[2]  == "channels:    c1 c2 ");
-        BOOST_TEST(result.first[3]  == "plugins:     p1 p2 ");
-        BOOST_TEST(result.first[4]  == "events:      onCommand onMessage ");
+        BOOST_TEST(result.first[3]  == "plugins:     ");
+        BOOST_TEST(result.first[4]  == "events:      ");
         BOOST_TEST(result.first[5]  == "action:      drop");
-        BOOST_TEST(result.first[6]  == "");
-        BOOST_TEST(result.first[7]  == "rule:        1");
-        BOOST_TEST(result.first[8]  == "servers:     ");
-        BOOST_TEST(result.first[9]  == "channels:    tc1 tc2 ");
-        BOOST_TEST(result.first[10] == "plugins:     ");
-        BOOST_TEST(result.first[11] == "events:      ");
-        BOOST_TEST(result.first[12] == "action:      drop");
     }
 }
 
 BOOST_AUTO_TEST_CASE(plugin)
 {
-    run_irccd("irccd-rules.conf");
+    start();
 
     {
-        const auto result = run_irccdctl({ "rule-add", "-p tp1", "--add-plugin tp2", "drop" });
+        const auto result = exec({ "rule-add", "-p p1", "--add-plugin p2", "drop" });
 
         BOOST_TEST(result.first.size() == 0U);
         BOOST_TEST(result.second.size() == 0U);
     }
 
     {
-        const auto result = run_irccdctl({ "rule-list" });
+        const auto result = exec({ "rule-list" });
 
-        BOOST_TEST(result.first.size() == 15U);
+        BOOST_TEST(result.first.size() == 7U);
         BOOST_TEST(result.second.size() == 0U);
         BOOST_TEST(result.first[0]  == "rule:        0");
-        BOOST_TEST(result.first[1]  == "servers:     s1 s2 ");
-        BOOST_TEST(result.first[2]  == "channels:    c1 c2 ");
+        BOOST_TEST(result.first[1]  == "servers:     ");
+        BOOST_TEST(result.first[2]  == "channels:    ");
         BOOST_TEST(result.first[3]  == "plugins:     p1 p2 ");
-        BOOST_TEST(result.first[4]  == "events:      onCommand onMessage ");
+        BOOST_TEST(result.first[4]  == "events:      ");
         BOOST_TEST(result.first[5]  == "action:      drop");
-        BOOST_TEST(result.first[6]  == "");
-        BOOST_TEST(result.first[7]  == "rule:        1");
-        BOOST_TEST(result.first[8]  == "servers:     ");
-        BOOST_TEST(result.first[9]  == "channels:    ");
-        BOOST_TEST(result.first[10] == "plugins:     tp1 tp2 ");
-        BOOST_TEST(result.first[11] == "events:      ");
-        BOOST_TEST(result.first[12] == "action:      drop");
     }
 }
 
 BOOST_AUTO_TEST_CASE(event)
 {
-    run_irccd("irccd-rules.conf");
+    start();
 
     {
-        const auto result = run_irccdctl({ "rule-add", "-e onMessage", "--add-event onCommand", "drop" });
+        const auto result = exec({ "rule-add", "-e onMessage", "--add-event onCommand", "drop" });
 
         BOOST_TEST(result.first.size() == 0U);
         BOOST_TEST(result.second.size() == 0U);
     }
 
     {
-        const auto result = run_irccdctl({ "rule-list" });
+        const auto result = exec({ "rule-list" });
 
-        BOOST_TEST(result.first.size() == 15U);
+        BOOST_TEST(result.first.size() == 7U);
         BOOST_TEST(result.second.size() == 0U);
         BOOST_TEST(result.first[0]  == "rule:        0");
-        BOOST_TEST(result.first[1]  == "servers:     s1 s2 ");
-        BOOST_TEST(result.first[2]  == "channels:    c1 c2 ");
-        BOOST_TEST(result.first[3]  == "plugins:     p1 p2 ");
+        BOOST_TEST(result.first[1]  == "servers:     ");
+        BOOST_TEST(result.first[2]  == "channels:    ");
+        BOOST_TEST(result.first[3]  == "plugins:     ");
         BOOST_TEST(result.first[4]  == "events:      onCommand onMessage ");
         BOOST_TEST(result.first[5]  == "action:      drop");
-        BOOST_TEST(result.first[6]  == "");
-        BOOST_TEST(result.first[7]  == "rule:        1");
-        BOOST_TEST(result.first[8]  == "servers:     ");
-        BOOST_TEST(result.first[9]  == "channels:    ");
-        BOOST_TEST(result.first[10] == "plugins:     ");
-        BOOST_TEST(result.first[11] == "events:      onCommand onMessage ");
-        BOOST_TEST(result.first[12] == "action:      drop");
     }
 }
 

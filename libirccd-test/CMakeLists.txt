@@ -28,6 +28,10 @@ irccd_define_library(
         ${libirccd-test_SOURCE_DIR}/irccd/test/debug_server.hpp
         ${libirccd-test_SOURCE_DIR}/irccd/test/journal_server.cpp
         ${libirccd-test_SOURCE_DIR}/irccd/test/journal_server.hpp
+        ${libirccd-test_SOURCE_DIR}/irccd/test/plugin_cli_test.cpp
+        ${libirccd-test_SOURCE_DIR}/irccd/test/plugin_cli_test.hpp
+        ${libirccd-test_SOURCE_DIR}/irccd/test/rule_cli_test.cpp
+        ${libirccd-test_SOURCE_DIR}/irccd/test/rule_cli_test.hpp
         $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/plugin_test.cpp>
         $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/plugin_test.hpp>
         $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/js_test.hpp>

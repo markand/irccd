@@ -19,30 +19,43 @@
 #define BOOST_TEST_MODULE "irccdctl plugin-unload"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/test/cli_test.hpp>
+#include <irccd/test/plugin_cli_test.hpp>
 
 namespace irccd {
 
-BOOST_FIXTURE_TEST_SUITE(plugin_unload_suite, cli_test)
+namespace {
+
+class custom_plugin : public plugin {
+public:
+    bool unloaded_{false};
+
+    custom_plugin()
+        : plugin("p", "local")
+    {
+    }
+
+    void handle_unload(irccd&) override
+    {
+        unloaded_ = true;
+    }
+};
+
+} // !namespace
+
+BOOST_FIXTURE_TEST_SUITE(plugin_unload_suite, plugin_cli_test)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-    run_irccd("irccd-plugins.conf");
+    const auto plugin = std::make_shared<custom_plugin>();
 
-    {
-        const auto result = run_irccdctl({ "plugin-unload", "foo" });
+    irccd_.plugins().add(plugin);
+    start();
 
-        BOOST_TEST(result.first.size() == 0U);
-        BOOST_TEST(result.second.size() == 0U);
-    }
+    const auto result = exec({ "plugin-unload", "p" });
 
-    {
-        const auto result = run_irccdctl({ "plugin-list" });
-
-        BOOST_TEST(result.first.size() == 2U);
-        BOOST_TEST(result.second.size() == 0U);
-        BOOST_TEST(result.first[0] == "bar");
-    }
+    BOOST_TEST(result.first.size() == 0U);
+    BOOST_TEST(result.second.size() == 0U);
+    BOOST_TEST(!irccd_.plugins().has("p"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

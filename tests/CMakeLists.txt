@@ -18,21 +18,11 @@
 
 project(tests)
 
-set(
-    CONFIGS
-    irccdctl.conf
-    irccd-multiple-rules.conf
-    irccd-plugins.conf
-    irccd-rules.conf
+# for test-cli-* tests.
+configure_file(
+    ${tests_SOURCE_DIR}/data/irccdctl.conf
+    ${CMAKE_BINARY_DIR}/tmp/irccdctl.conf
 )
-
-foreach (c ${CONFIGS})
-    configure_file(
-        ${tests_SOURCE_DIR}/data/${c}
-        ${CMAKE_BINARY_DIR}/tmp/${c}
-        @ONLY
-    )
-endforeach ()
 
 add_subdirectory(src/libcommon)
 add_subdirectory(src/libirccd)

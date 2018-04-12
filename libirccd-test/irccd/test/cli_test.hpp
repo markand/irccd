@@ -24,19 +24,41 @@
  * \brief Test fixture for irccdctl frontend.
  */
 
+#include <thread>
 #include <utility>
 #include <vector>
 
+#include <irccd/daemon/irccd.hpp>
+
+#include <boost/asio.hpp>
 #include <boost/process.hpp>
 
 namespace irccd {
 
 /**
  * \brief Test fixture for irccdctl frontend.
+ *
+ * This class will run irccd daemon in a thread when member function `start` is
+ * called.
+ *
+ * Before starting the daemon, the test can manually modify irccd instance
+ * through `irccd_` member variable. Once started, call `exec` with arguments
+ * you want to pass through irccdctl utility.
  */
 class cli_test {
 private:
-    boost::process::child irccd_;
+    using io_service = boost::asio::io_service;
+
+    std::thread thread_;
+    io_service service_;
+
+protected:
+    /**
+     * Irccd instance.
+     *
+     * \warning Do not modify once `start()` has been called.
+     */
+    irccd irccd_{service_};
 
 public:
     /**
@@ -50,26 +72,30 @@ public:
     using outputs = std::pair<output, output>;
 
     /**
-     * Start irccd daemon with the configuration file (relative to tests/data).
-     *
-     * \param config the path to the config
+     * Construct and initialize and irccd daemon running in a thread.
      */
-    void run_irccd(const std::string& config);
+    cli_test();
 
     /**
-     * Start irccdctl and returns its stdout/stderr.
-     *
-     * \param args the arguments to irccdctl
+     * Stop irccd and close everything.
      */
-    outputs run_irccdctl(const std::vector<std::string>& args);
+    ~cli_test();
 
     /**
-     * Convenient function that starts irccd and irccdctl for oneshot tests.
+     * Start irccd daemon.
      *
-     * \param config the base configuration name for irccd
-     * \param args the arguments to irccdctl
+     * A thread will be running and closed when the destructor is called, you
+     * MUST not modify irccd while running.
      */
-    outputs run(const std::string& config, const std::vector<std::string>& args);
+    void start();
+
+    /**
+     * Execute irccdctl.
+     *
+     * \param args the arguments to irccdctl
+     * \return the stdout/stderr result pair
+     */
+    outputs exec(const std::vector<std::string>& args);
 };
 
 } // !irccd

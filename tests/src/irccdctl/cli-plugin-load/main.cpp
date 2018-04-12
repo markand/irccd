@@ -19,19 +19,44 @@
 #define BOOST_TEST_MODULE "irccdctl plugin-load"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/test/cli_test.hpp>
+#include <irccd/test/plugin_cli_test.hpp>
 
 namespace irccd {
 
-BOOST_FIXTURE_TEST_SUITE(plugin_load_suite, cli_test)
+namespace {
+
+class custom_plugin_loader : public plugin_loader {
+public:
+    custom_plugin_loader()
+        : plugin_loader({}, { "none" })
+    {
+    }
+
+    std::shared_ptr<plugin> find(const std::string& id) override
+    {
+        return std::make_unique<plugin>(id, "local");
+    }
+
+    std::shared_ptr<plugin> open(const std::string& id, const std::string& path) override
+    {
+        return std::make_unique<plugin>(id, path);
+    }
+};
+
+} // !namespace
+
+BOOST_FIXTURE_TEST_SUITE(plugin_load_suite, plugin_cli_test)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-    run_irccd("irccd-plugins.conf");
+    irccd_.plugins().add(std::make_unique<plugin>("p1", "local"));
+    irccd_.plugins().add(std::make_unique<plugin>("p2", "local"));
+    irccd_.plugins().add_loader(std::make_unique<custom_plugin_loader>());
+    start();
 
     // Load a plugin first.
     {
-        const auto result = run_irccdctl({ "plugin-load", "test-cli-plugin-load" });
+        const auto result = exec({ "plugin-load", "test-cli-plugin-load" });
 
         BOOST_TEST(result.first.size() == 0U);
         BOOST_TEST(result.second.size() == 0U);
@@ -39,13 +64,13 @@ BOOST_AUTO_TEST_CASE(simple)
 
     // Get the new list of plugins.
     {
-        const auto result = run_irccdctl({ "plugin-list" });
+        const auto result = exec({ "plugin-list" });
 
-    BOOST_TEST(result.first.size() == 4U);
-    BOOST_TEST(result.second.size() == 0U);
-    BOOST_TEST(result.first[0] == "foo");
-    BOOST_TEST(result.first[1] == "bar");
-    BOOST_TEST(result.first[2] == "test-cli-plugin-load");
+        BOOST_TEST(result.first.size() == 3U);
+        BOOST_TEST(result.second.size() == 0U);
+        BOOST_TEST(result.first[0] == "p1");
+        BOOST_TEST(result.first[1] == "p2");
+        BOOST_TEST(result.first[2] == "test-cli-plugin-load");
     }
 }
 

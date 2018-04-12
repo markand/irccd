@@ -19,19 +19,58 @@
 #define BOOST_TEST_MODULE "irccdctl plugin-config"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/test/cli_test.hpp>
+#include <irccd/test/plugin_cli_test.hpp>
 
 namespace irccd {
 
-BOOST_FIXTURE_TEST_SUITE(plugin_config_suite, cli_test)
+namespace {
+
+class custom_plugin : public plugin {
+private:
+    plugin_config config_;
+
+public:
+    using plugin::plugin;
+
+    plugin_config get_config() override
+    {
+        return config_;
+    }
+
+    void set_config(plugin_config config) override
+    {
+        config_ = std::move(config);
+    }
+};
+
+class custom_plugin_cli_test : public plugin_cli_test {
+public:
+    custom_plugin_cli_test()
+    {
+        auto conf1 = std::make_unique<custom_plugin>("conf1", "local");
+        auto conf2 = std::make_unique<custom_plugin>("conf2", "local");
+
+        conf1->set_config({
+            { "v1", "123" },
+            { "v2", "456" }
+        });
+
+        irccd_.plugins().add(std::move(conf1));
+        irccd_.plugins().add(std::move(conf2));
+    }
+};
+
+} // !namespace
+
+BOOST_FIXTURE_TEST_SUITE(plugin_config_suite, custom_plugin_cli_test)
 
 BOOST_AUTO_TEST_CASE(set_and_get)
 {
-    run_irccd("irccd-plugins.conf");
+    start();
 
     // First, configure. No output yet
     {
-        const auto result = run_irccdctl({ "plugin-config", "foo", "verbose", "false" });
+        const auto result = exec({ "plugin-config", "conf2", "verbose", "false" });
 
         // no output yet.
         BOOST_TEST(result.first.size() == 0U);
@@ -40,9 +79,9 @@ BOOST_AUTO_TEST_CASE(set_and_get)
 
     // Get the newly created value.
     {
-        const auto result = run_irccdctl({ "plugin-config", "foo", "verbose" });
+        const auto result = exec({ "plugin-config", "conf2", "verbose" });
 
-        BOOST_TEST(result.first.size() == 2U);
+        BOOST_TEST(result.first.size() == 1U);
         BOOST_TEST(result.second.size() == 0U);
         BOOST_TEST(result.first[0] == "false");
     }
@@ -50,9 +89,11 @@ BOOST_AUTO_TEST_CASE(set_and_get)
 
 BOOST_AUTO_TEST_CASE(getall)
 {
-    const auto result = run("irccd-plugins.conf", { "plugin-config", "bar" });
+    start();
 
-    BOOST_TEST(result.first.size() == 3U);
+    const auto result = exec({ "plugin-config", "conf1" });
+
+    BOOST_TEST(result.first.size() == 2U);
     BOOST_TEST(result.second.size() == 0U);
     BOOST_TEST(result.first[0] == "v1               : 123");
     BOOST_TEST(result.first[1] == "v2               : 456");

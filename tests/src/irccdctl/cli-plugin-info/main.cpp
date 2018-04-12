@@ -19,17 +19,27 @@
 #define BOOST_TEST_MODULE "irccdctl plugin-info"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/test/cli_test.hpp>
+#include <irccd/test/plugin_cli_test.hpp>
 
 namespace irccd {
 
-BOOST_FIXTURE_TEST_SUITE(plugin_info_suite, cli_test)
+BOOST_FIXTURE_TEST_SUITE(plugin_info_suite, plugin_cli_test)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-    const auto result = run("irccd-plugins.conf", { "plugin-info", "foo" });
+    auto p = std::make_unique<plugin>("p", "local");
 
-    BOOST_TEST(result.first.size() == 5U);
+    p->set_author("David Demelier <markand@malikania.fr>");
+    p->set_license("ISC");
+    p->set_summary("foo");
+    p->set_version("0.0");
+
+    irccd_.plugins().add(std::move(p));
+    start();
+
+    const auto result = exec({ "plugin-info", "p" });
+
+    BOOST_TEST(result.first.size() == 4U);
     BOOST_TEST(result.second.size() == 0U);
     BOOST_TEST(result.first[0] == "Author         : David Demelier <markand@malikania.fr>");
     BOOST_TEST(result.first[1] == "License        : ISC");

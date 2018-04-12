@@ -19,31 +19,43 @@
 #define BOOST_TEST_MODULE "irccdctl plugin-reload"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/test/cli_test.hpp>
+#include <irccd/test/plugin_cli_test.hpp>
 
 namespace irccd {
 
-BOOST_FIXTURE_TEST_SUITE(plugin_reload_suite, cli_test)
+namespace {
+
+class custom_plugin : public plugin {
+public:
+    bool reloaded_{false};
+
+    custom_plugin()
+        : plugin("p", "local")
+    {
+    }
+
+    void handle_reload(irccd&) override
+    {
+        reloaded_ = true;
+    }
+};
+
+} // !namespace
+
+BOOST_FIXTURE_TEST_SUITE(plugin_reload_suite, plugin_cli_test)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-    run_irccd("irccd-plugins.conf");
+    const auto plugin = std::make_shared<custom_plugin>();
 
-    {
-        // onReload will update the config.
-        const auto result = run_irccdctl({ "plugin-reload", "foo" });
+    irccd_.plugins().add(plugin);
+    start();
 
-        BOOST_TEST(result.first.size() == 0U);
-        BOOST_TEST(result.second.size() == 0U);
-    }
+    const auto result = exec({ "plugin-reload", "p" });
 
-    {
-        const auto result = run_irccdctl({ "plugin-config", "foo", "reloaded" });
-
-        BOOST_TEST(result.first.size() == 2U);
-        BOOST_TEST(result.second.size() == 0U);
-        BOOST_TEST(result.first[0] == "true");
-    }
+    BOOST_TEST(result.first.size() == 0U);
+    BOOST_TEST(result.second.size() == 0U);
+    BOOST_TEST(plugin->reloaded_);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
