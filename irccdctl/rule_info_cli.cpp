@@ -77,8 +77,8 @@ void rule_info_cli::exec(ctl::controller& ctl, const std::vector<std::string>& a
         { "index",      index       }
     });
 
-    request(ctl, std::move(json), [] (auto result) {
-        print(result, 0);
+    request(ctl, std::move(json), [index] (auto result) {
+        print(result, index);
     });
 }
 
