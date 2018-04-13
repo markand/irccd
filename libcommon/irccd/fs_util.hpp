@@ -31,12 +31,15 @@
 
 namespace irccd {
 
+/**
+ * \brief Filesystem utilities.
+ */
 namespace fs_util {
 
 /**
  * Get the base name from a path.
  *
- * Example, baseName("/etc/foo.conf") // foo.conf
+ * Example, base_name("/etc/foo.conf") returns foo.conf
  *
  * \param path the path
  * \return the base name
@@ -49,12 +52,12 @@ inline std::string base_name(const std::string& path)
 /**
  * Get the parent directory from a path.
  *
- * Example, dirName("/etc/foo.conf") // /etc
+ * Example, dir_name("/etc/foo.conf") returns /etc
  *
  * \param path the path
  * \return the parent directory
  */
-inline std::string dir_name(std::string path)
+inline std::string dir_name(const std::string& path)
 {
     return boost::filesystem::path(path).parent_path().string();
 }
@@ -73,12 +76,12 @@ inline std::string dir_name(std::string path)
  * \param predicate the predicate
  * \param recursive true to do recursive search
  * \return the full path name to the file or empty string if never found
- * \throw std::runtime_error on read errors
+ * \throw boost::system::system_error on errors
  */
 template <typename Predicate>
 std::string find_if(const std::string& base, bool recursive, Predicate&& predicate)
 {
-    auto find = [&] (auto it) -> std::string {
+    const auto find = [&] (auto it) -> std::string {
         for (const auto& entry : it)
             if (predicate(entry))
                 return entry.path().string();
@@ -86,10 +89,9 @@ std::string find_if(const std::string& base, bool recursive, Predicate&& predica
         return "";
     };
 
-    if (recursive)
-        return find(boost::filesystem::recursive_directory_iterator(base));
-
-    return find(boost::filesystem::directory_iterator(base));
+    return recursive
+        ? find(boost::filesystem::recursive_directory_iterator(base))
+        : find(boost::filesystem::directory_iterator(base));
 }
 
 /**
@@ -99,7 +101,7 @@ std::string find_if(const std::string& base, bool recursive, Predicate&& predica
  * \param name the file name
  * \param recursive true to do recursive search
  * \return the full path name to the file or empty string if never found
- * \throw std::runtime_error on read errors
+ * \throw boost::system::system_error on errors
  */
 inline std::string find(const std::string& base, const std::string& name, bool recursive = false)
 {
@@ -115,7 +117,7 @@ inline std::string find(const std::string& base, const std::string& name, bool r
  * \param regex the regular expression
  * \param recursive true to do recursive search
  * \return the full path name to the file or empty string if never found
- * \throw std::runtime_error on read errors
+ * \throw boost::system::system_error on errors
  */
 inline std::string find(const std::string& base, const std::regex& regex, bool recursive = false)
 {
