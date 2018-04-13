@@ -19,7 +19,7 @@
 #include <cctype>
 #include <algorithm>
 
-#include <boost/filesystem.hpp>
+#include <boost/dll.hpp>
 
 #include <irccd/string_util.hpp>
 
@@ -35,126 +35,23 @@
 
 namespace irccd {
 
-dynlib_plugin::dynlib_plugin(std::string name, std::string path)
-    : plugin(name, path)
-    , dso_(path)
+namespace {
+
+std::string symbol(std::string id) noexcept
 {
-    using load_t = std::unique_ptr<plugin>(std::string, std::string);
+    std::transform(id.begin(), id.end(), id.begin(), [] (auto c) {
+        return c == '-' ? '_' : c;
+    });
 
-    /*
-     * Function name is determined from the plugin filename where all non
-     * alphabetic characters are removed.
-     *
-     * Example: foo_bar-baz___.so becomes irccd_foobarbaz_load.
-     */
-    auto base = boost::filesystem::path(path).stem().string();
-    auto need_remove = [] (auto c) {
-        return !std::isalnum(c);
-    };
-
-    base.erase(std::remove_if(base.begin(), base.end(), need_remove), base.end());
-
-    auto fname = string_util::sprintf("irccd_%s_load", base);
-    auto load = dso_.get<load_t>(fname);
-
-    if (!load)
-        throw std::runtime_error(string_util::sprintf("missing plugin entry function '%s'", fname));
-
-    plugin_ = load(name, path);
-
-    if (!plugin_)
-        throw std::runtime_error("plugin returned null");
+    return string_util::sprintf("irccd_plugin_%s", id);
 }
 
-void dynlib_plugin::handle_command(irccd& irccd, const message_event& ev)
+std::shared_ptr<plugin> wrap(boost::shared_ptr<plugin> ptr) noexcept
 {
-    plugin_->handle_command(irccd, ev);
+    return std::shared_ptr<plugin>(ptr.get(), [ptr] (auto) mutable { ptr.reset(); });
 }
 
-void dynlib_plugin::handle_connect(irccd& irccd, const connect_event& ev)
-{
-    plugin_->handle_connect(irccd, ev);
-}
-
-void dynlib_plugin::handle_disconnect(irccd& irccd, const disconnect_event& ev)
-{
-    plugin_->handle_disconnect(irccd, ev);
-}
-
-void dynlib_plugin::handle_invite(irccd& irccd, const invite_event& ev)
-{
-    plugin_->handle_invite(irccd, ev);
-}
-
-void dynlib_plugin::handle_join(irccd& irccd, const join_event& ev)
-{
-    plugin_->handle_join(irccd, ev);
-}
-
-void dynlib_plugin::handle_kick(irccd& irccd, const kick_event& ev)
-{
-    plugin_->handle_kick(irccd, ev);
-}
-
-void dynlib_plugin::handle_load(irccd& irccd)
-{
-    plugin_->handle_load(irccd);
-}
-
-void dynlib_plugin::handle_message(irccd& irccd, const message_event& ev)
-{
-    plugin_->handle_message(irccd, ev);
-}
-
-void dynlib_plugin::handle_me(irccd& irccd, const me_event& ev)
-{
-    plugin_->handle_me(irccd, ev);
-}
-
-void dynlib_plugin::handle_mode(irccd& irccd, const mode_event& ev)
-{
-    plugin_->handle_mode(irccd, ev);
-}
-
-void dynlib_plugin::handle_names(irccd& irccd, const names_event& ev)
-{
-    plugin_->handle_names(irccd, ev);
-}
-
-void dynlib_plugin::handle_nick(irccd& irccd, const nick_event& ev)
-{
-    plugin_->handle_nick(irccd, ev);
-}
-
-void dynlib_plugin::handle_notice(irccd& irccd, const notice_event& ev)
-{
-    plugin_->handle_notice(irccd, ev);
-}
-
-void dynlib_plugin::handle_part(irccd& irccd, const part_event& ev)
-{
-    plugin_->handle_part(irccd, ev);
-}
-
-void dynlib_plugin::handle_reload(irccd& irccd)
-{
-    plugin_->handle_reload(irccd);
-}
-
-void dynlib_plugin::handle_topic(irccd& irccd, const topic_event& ev)
-{
-    plugin_->handle_topic(irccd, ev);
-}
-
-void dynlib_plugin::handle_unload(irccd& irccd)
-{
-    plugin_->handle_unload(irccd);
-}
-
-void dynlib_plugin::handle_whois(irccd& irccd, const whois_event& ev)
-{
-    plugin_->handle_whois(irccd, ev);
-}
+} // !namespace
 
 dynlib_plugin_loader::dynlib_plugin_loader(std::vector<std::string> directories) noexcept
     : plugin_loader(std::move(directories), { DYNLIB_EXTENSION })
@@ -164,7 +61,7 @@ dynlib_plugin_loader::dynlib_plugin_loader(std::vector<std::string> directories)
 std::shared_ptr<plugin> dynlib_plugin_loader::open(const std::string& id,
                                                    const std::string& path) noexcept
 {
-    return std::make_unique<dynlib_plugin>(id, path);
+    return wrap(boost::dll::import<plugin>(path, symbol(id)));
 }
 
 } // !irccd

@@ -23,88 +23,105 @@
 namespace irccd {
 
 class test_plugin : public plugin {
+private:
+    plugin_config config_;
+
 public:
     using plugin::plugin;
 
-    void handle_command(irccd&, const message_event& event) override
+    plugin_config get_config() override
     {
-        event.server->message("test", "handle_command");
+        return config_;
     }
 
-    void handle_connect(irccd&, const connect_event& event) override
+    void handle_command(irccd&, const message_event&) override
     {
-        event.server->message("test", "handle_connect");
+        config_["command"] = "true";
     }
 
-    void handle_invite(irccd&, const invite_event& event) override
+    void handle_connect(irccd&, const connect_event&) override
     {
-        event.server->message("test", "handle_invite");
+        config_["connect"] = "true";
     }
 
-    void handle_join(irccd&, const join_event& event) override
+    void handle_invite(irccd&, const invite_event&) override
     {
-        event.server->message("test", "handle_join");
+        config_["invite"] = "true";
     }
 
-    void handle_kick(irccd&, const kick_event& event) override
+    void handle_join(irccd&, const join_event&) override
     {
-        event.server->message("test", "handle_kick");
+        config_["join"] = "true";
     }
 
-    void handle_message(irccd&, const message_event& event) override
+    void handle_kick(irccd&, const kick_event&) override
     {
-        event.server->message("test", "handle_message");
+        config_["kick"] = "true";
     }
 
-    void handle_me(irccd&, const me_event& event) override
+    void handle_load(irccd&) override
     {
-        event.server->message("test", "handle_me");
+        config_["load"] = "true";
     }
 
-    void handle_mode(irccd&, const mode_event& event) override
+    void handle_message(irccd&, const message_event&) override
     {
-        event.server->message("test", "handle_mode");
+        config_["message"] = "true";
     }
 
-    void handle_names(irccd&, const names_event& event) override
+    void handle_me(irccd&, const me_event&) override
     {
-        event.server->message("test", "handle_names");
+        config_["me"] = "true";
     }
 
-    void handle_nick(irccd&, const nick_event& event) override
+    void handle_mode(irccd&, const mode_event&) override
     {
-        event.server->message("test", "handle_nick");
+        config_["mode"] = "true";
     }
 
-    void handle_notice(irccd&, const notice_event& event) override
+    void handle_names(irccd&, const names_event&) override
     {
-        event.server->message("test", "handle_notice");
+        config_["names"] = "true";
     }
 
-    void handle_part(irccd&, const part_event& event) override
+    void handle_nick(irccd&, const nick_event&) override
     {
-        event.server->message("test", "handle_part");
+        config_["nick"] = "true";
     }
 
-    void handle_topic(irccd&, const topic_event& event) override
+    void handle_notice(irccd&, const notice_event&) override
     {
-        event.server->message("test", "handle_topic");
+        config_["notice"] = "true";
     }
 
-    void handle_whois(irccd&, const whois_event& event) override
+    void handle_part(irccd&, const part_event&) override
     {
-        event.server->message("test", "handle_whois");
+        config_["part"] = "true";
+    }
+
+    void handle_reload(irccd&) override
+    {
+        config_["reload"] = "true";
+    }
+
+    void handle_topic(irccd&, const topic_event&) override
+    {
+        config_["topic"] = "true";
+    }
+
+    void handle_unload(irccd&) override
+    {
+        config_["unload"] = "true";
+    }
+
+    void handle_whois(irccd&, const whois_event&) override
+    {
+        config_["whois"] = "true";
     }
 };
 
+extern "C" BOOST_SYMBOL_EXPORT test_plugin irccd_plugin_test_plugin;
+
+test_plugin irccd_plugin_test_plugin("test", "");
+
 } // !irccd
-
-extern "C" {
-
-BOOST_SYMBOL_EXPORT
-std::unique_ptr<irccd::plugin> irccd_testplugin_load(std::string name, std::string path)
-{
-    return std::make_unique<irccd::test_plugin>(name, path);
-}
-
-} // !C

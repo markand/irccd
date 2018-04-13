@@ -40,4 +40,5 @@ irccd_define_test(
     NAME dynlib-plugin
     SOURCES main.cpp
     LIBRARIES libirccd libirccd-test
+    DEPENDS test-plugin
 )
