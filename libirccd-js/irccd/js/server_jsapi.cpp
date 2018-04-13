@@ -52,8 +52,24 @@ std::shared_ptr<server> self(duk_context* ctx)
     return *static_cast<std::shared_ptr<server>*>(ptr);
 }
 
+template <typename Handler>
+duk_ret_t wrap(duk_context* ctx, Handler handler)
+{
+    try {
+        return handler(ctx);
+    } catch (const server_error& ex) {
+        dukx_throw(ctx, ex);
+    } catch (const std::exception& ex) {
+        dukx_throw(ctx, ex);
+    }
+
+    return 0;
+}
+
+// {{{ Irccd.Server.prototype.info
+
 /*
- * Method: Server.info()
+ * Method: Irccd.Server.prototype.info()
  * ------------------------------------------------------------------
  *
  * Get the server information as an object containing the following properties:
@@ -65,9 +81,9 @@ std::shared_ptr<server> self(duk_context* ctx)
  * sslVerify: true if ssl was verified
  * channels: an array of all channels
  */
-duk_ret_t info(duk_context* ctx)
+duk_ret_t Server_prototype_info(duk_context* ctx)
 {
-    auto server = self(ctx);
+    const auto server = self(ctx);
 
     duk_push_object(ctx);
     dukx_push(ctx, server->get_name());
@@ -94,8 +110,12 @@ duk_ret_t info(duk_context* ctx)
     return 1;
 }
 
+// }}}
+
+// {{{ Irccd.Server.prototype.invite
+
 /*
- * Method: Server.invite(target, channel)
+ * Method: Irccd.Server.prototype.invite(target, channel)
  * ------------------------------------------------------------------
  *
  * Invite someone to a channel.
@@ -103,25 +123,55 @@ duk_ret_t info(duk_context* ctx)
  * Arguments:
  *   - target, the target to invite,
  *   - channel, the channel.
+ * Throws:
+ *   - Irccd.ServerError on server related errors,
+ *   - Irccd.SystemError on other errors.
  */
-duk_ret_t invite(duk_context* ctx)
+duk_ret_t Server_prototype_invite(duk_context* ctx)
 {
-    self(ctx)->invite(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
+    return wrap(ctx, [] (auto ctx) {
+        auto target = dukx_require<std::string>(ctx, 0);
+        auto channel = dukx_require<std::string>(ctx, 1);
 
-    return 0;
+        if (target.empty())
+            throw server_error(server_error::invalid_nickname);
+        if (channel.empty())
+            throw server_error(server_error::invalid_channel);
+
+        self(ctx)->invite(std::move(target), std::move(channel));
+
+        return 0;
+    });
 }
 
+// }}}
+
+// {{{ Irccd.Server.prototype.isSelf
+
 /*
- * Method: Server.isSelf(nickname)
+ * Method: Irccd.Server.prototype.isSelf(nickname)
  * ------------------------------------------------------------------
+ *
+ * Arguments:
+ *   - nickname, the nickname to check.
+ * Returns:
+ *   True if the nickname targets this server.
+ * Throws:
+ *   - Irccd.SystemError on errors.
  */
-duk_ret_t isSelf(duk_context* ctx)
+duk_ret_t Server_prototype_isSelf(duk_context* ctx)
 {
-    return dukx_push(ctx, self(ctx)->is_self(duk_require_string(ctx, 0)));
+    return wrap(ctx, [] (auto ctx) {
+        return dukx_push(ctx, self(ctx)->is_self(dukx_require<std::string>(ctx, 0)));
+    });
 }
 
+// }}}
+
+// {{{ Irccd.Server.prototype.join
+
 /*
- * Method: Server.join(channel, password = undefined)
+ * Method: Irccd.Server.prototype.join(channel, password = undefined)
  * ------------------------------------------------------------------
  *
  * Join a channel with an optional password.
@@ -129,16 +179,31 @@ duk_ret_t isSelf(duk_context* ctx)
  * Arguments:
  *   - channel, the channel to join,
  *   - password, the password or undefined to not use.
+ * Throws:
+ *   - Irccd.ServerError on server related errors,
+ *   - Irccd.SystemError on other errors.
  */
-duk_ret_t join(duk_context* ctx)
+duk_ret_t Server_prototype_join(duk_context* ctx)
 {
-    self(ctx)->join(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
+    return wrap(ctx, [] (auto ctx) {
+        auto channel = dukx_require<std::string>(ctx, 0);
+        auto password = dukx_get<std::string>(ctx, 1);
 
-    return 0;
+        if (channel.empty())
+            throw server_error(server_error::invalid_channel);
+
+        self(ctx)->join(std::move(channel), std::move(password));
+
+        return 0;
+    });
 }
 
+// }}}
+
+// {{{ Irccd.Server.prototype.kick
+
 /*
- * Method: Server.kick(target, channel, reason = undefined)
+ * Method: Irccd.Server.prototype.kick(target, channel, reason = undefined)
  * ------------------------------------------------------------------
  *
  * Kick someone from a channel.
@@ -147,16 +212,34 @@ duk_ret_t join(duk_context* ctx)
  *   - target, the target to kick,
  *   - channel, the channel,
  *   - reason, the optional reason or undefined to not set.
+ * Throws:
+ *   - Irccd.ServerError on server related errors,
+ *   - Irccd.SystemError on other errors.
  */
-duk_ret_t kick(duk_context* ctx)
+duk_ret_t Server_prototype_kick(duk_context* ctx)
 {
-    self(ctx)->kick(duk_require_string(ctx, 0), duk_require_string(ctx, 1), duk_get_string(ctx, 2));
+    return wrap(ctx, [] (auto ctx) {
+        auto target = dukx_require<std::string>(ctx, 0);
+        auto channel = dukx_require<std::string>(ctx, 1);
+        auto reason = dukx_get<std::string>(ctx, 2);
 
-    return 0;
+        if (target.empty())
+            throw server_error(server_error::invalid_nickname);
+        if (channel.empty())
+            throw server_error(server_error::invalid_channel);
+
+        self(ctx)->kick(std::move(target), std::move(channel), std::move(reason));
+
+        return 0;
+    });
 }
 
+// }}}
+
+// {{{ Irccd.Server.prototype.me
+
 /*
- * Method: Server.me(target, message)
+ * Method: Irccd.Server.prototype.me(target, message)
  * ------------------------------------------------------------------
  *
  * Send a CTCP Action.
@@ -164,16 +247,31 @@ duk_ret_t kick(duk_context* ctx)
  * Arguments:
  *   - target, the target or a channel,
  *   - message, the message.
+ * Throws:
+ *   - Irccd.ServerError on server related errors,
+ *   - Irccd.SystemError on other errors.
  */
-duk_ret_t me(duk_context* ctx)
+duk_ret_t Server_prototype_me(duk_context* ctx)
 {
-    self(ctx)->me(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
+    return wrap(ctx, [] (auto ctx) {
+        auto target = dukx_require<std::string>(ctx, 0);
+        auto message = dukx_get<std::string>(ctx, 1);
 
-    return 0;
+        if (target.empty())
+            throw server_error(server_error::invalid_nickname);
+
+        self(ctx)->me(std::move(target), std::move(message));
+
+        return 0;
+    });
 }
 
+// }}}
+
+// {{{ Irccd.Server.prototype.message
+
 /*
- * Method: Server.message(target, message)
+ * Method: Irccd.Server.prototype.message(target, message)
  * ------------------------------------------------------------------
  *
  * Send a message.
@@ -181,70 +279,133 @@ duk_ret_t me(duk_context* ctx)
  * Arguments:
  *   - target, the target or a channel,
  *   - message, the message.
+ * Throws:
+ *   - Irccd.ServerError on server related errors,
+ *   - Irccd.SystemError on other errors.
  */
-duk_ret_t message(duk_context* ctx)
+duk_ret_t Server_prototype_message(duk_context* ctx)
 {
-    self(ctx)->message(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
+    return wrap(ctx, [] (auto ctx) {
+        auto target = dukx_require<std::string>(ctx, 0);
+        auto message = dukx_get<std::string>(ctx, 1);
 
-    return 0;
+        if (target.empty())
+            throw server_error(server_error::invalid_nickname);
+
+        self(ctx)->message(std::move(target), std::move(message));
+
+        return 0;
+    });
 }
 
+// }}}
+
+// {{{ Irccd.Server.prototype.mode
+
 /*
- * Method: Server.mode(channel, mode, limit, user, mask)
+ * Method: Irccd.Server.prototype.mode(channel, mode, limit, user, mask)
  * ------------------------------------------------------------------
  *
  * Change your mode.
  *
  * Arguments:
  *   - mode, the new mode.
+ * Throws:
+ *   - Irccd.ServerError on server related errors,
+ *   - Irccd.SystemError on other errors.
  */
-duk_ret_t mode(duk_context* ctx)
+duk_ret_t Server_prototype_mode(duk_context* ctx)
 {
-    self(ctx)->mode(
-        duk_require_string(ctx, 0),
-        duk_require_string(ctx, 1),
-        duk_opt_string(ctx, 2, ""),
-        duk_opt_string(ctx, 3, ""),
-        duk_opt_string(ctx, 4, "")
-    );
+    return wrap(ctx, [] (auto ctx) {
+        auto channel = dukx_require<std::string>(ctx, 0);
+        auto mode = dukx_require<std::string>(ctx, 1);
+        auto limit = dukx_get<std::string>(ctx, 2);
+        auto user = dukx_get<std::string>(ctx, 3);
+        auto mask = dukx_get<std::string>(ctx, 4);
 
-    return 0;
+        if (channel.empty())
+            throw server_error(server_error::invalid_channel);
+        if (mode.empty())
+            throw server_error(server_error::invalid_mode);
+
+        self(ctx)->mode(
+            std::move(channel),
+            std::move(mode),
+            std::move(limit),
+            std::move(user),
+            std::move(mask)
+        );
+
+        return 0;
+    });
 }
 
+// }}}
+
+// {{{ Irccd.Server.prototype.names
+
 /*
- * Method: Server.names(channel)
+ * Method: Irccd.Server.prototype.names(channel)
  * ------------------------------------------------------------------
  *
  * Get the list of names from a channel.
  *
  * Arguments:
  *   - channel, the channel.
+ * Throws:
+ *   - Irccd.ServerError on server related errors,
+ *   - Irccd.SystemError on other errors.
  */
-duk_ret_t names(duk_context* ctx)
+duk_ret_t Server_prototype_names(duk_context* ctx)
 {
-    self(ctx)->names(duk_require_string(ctx, 0));
+    return wrap(ctx, [] (auto ctx) {
+        auto channel = dukx_require<std::string>(ctx, 0);
 
-    return 0;
+        if (channel.empty())
+            throw server_error(server_error::invalid_channel);
+
+        self(ctx)->names(std::move(channel));
+
+        return 0;
+    });
 }
 
+// }}}
+
+// {{{ Irccd.Server.prototype.nick
+
 /*
- * Method: Server.nick(nickname)
+ * Method: Irccd.Server.prototype.nick(nickname)
  * ------------------------------------------------------------------
  *
  * Change the nickname.
  *
  * Arguments:
  *   - nickname, the nickname.
+ * Throws:
+ *   - Irccd.ServerError on server related errors,
+ *   - Irccd.SystemError on other errors.
  */
-duk_ret_t nick(duk_context* ctx)
+duk_ret_t Server_prototype_nick(duk_context* ctx)
 {
-    self(ctx)->set_nickname(duk_require_string(ctx, 0));
+    return wrap(ctx, [] (auto ctx) {
+        auto nickname = dukx_require<std::string>(ctx, 0);
 
-    return 0;
+        if (nickname.empty())
+            throw server_error(server_error::invalid_nickname);
+
+        self(ctx)->set_nickname(std::move(nickname));
+
+        return 0;
+    });
 }
 
+// }}}
+
+// {{{ Irccd.Server.prototype.notice
+
 /*
- * Method: Server.notice(target, message)
+ * Method: Irccd.Server.prototype.notice(target, message)
  * ------------------------------------------------------------------
  *
  * Send a private notice.
@@ -252,16 +413,31 @@ duk_ret_t nick(duk_context* ctx)
  * Arguments:
  *   - target, the target,
  *   - message, the notice message.
+ * Throws:
+ *   - Irccd.ServerError on server related errors,
+ *   - Irccd.SystemError on other errors.
  */
-duk_ret_t notice(duk_context* ctx)
+duk_ret_t Server_prototype_notice(duk_context* ctx)
 {
-    self(ctx)->notice(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
+    return wrap(ctx, [] (auto ctx) {
+        auto target = dukx_require<std::string>(ctx, 0);
+        auto message = dukx_get<std::string>(ctx, 1);
 
-    return 0;
+        if (target.empty())
+            throw server_error(server_error::invalid_nickname);
+
+        self(ctx)->notice(std::move(target), std::move(message));
+
+        return 0;
+    });
 }
 
+// }}}
+
+// {{{ Irccd.Server.prototype.part
+
 /*
- * Method: Server.part(channel, reason = undefined)
+ * Method: Irccd.Server.prototype.part(channel, reason = undefined)
  * ------------------------------------------------------------------
  *
  * Leave a channel.
@@ -269,32 +445,61 @@ duk_ret_t notice(duk_context* ctx)
  * Arguments:
  *   - channel, the channel to leave,
  *   - reason, the optional reason, keep undefined for portability.
+ * Throws:
+ *   - Irccd.ServerError on server related errors,
+ *   - Irccd.SystemError on other errors.
  */
-duk_ret_t part(duk_context* ctx)
+duk_ret_t Server_prototype_part(duk_context* ctx)
 {
-    self(ctx)->part(duk_require_string(ctx, 0), duk_get_string(ctx, 1));
+    return wrap(ctx, [] (auto ctx) {
+        auto channel = dukx_require<std::string>(ctx, 0);
+        auto reason = dukx_get<std::string>(ctx, 1);
 
-    return 0;
+        if (channel.empty())
+            throw server_error(server_error::invalid_channel);
+
+        self(ctx)->part(std::move(channel), std::move(reason));
+
+        return 0;
+    });
 }
 
+// }}}
+
+// {{{ Irccd.Server.prototype.send
+
 /*
- * Method: Server.send(raw)
+ * Method: Irccd.Server.prototype.send(raw)
  * ------------------------------------------------------------------
  *
  * Send a raw message to the IRC server.
  *
  * Arguments:
  *   - raw, the raw message (without terminators).
+ * Throws:
+ *   - Irccd.ServerError on server related errors,
+ *   - Irccd.SystemError on other errors.
  */
-duk_ret_t send(duk_context* ctx)
+duk_ret_t Server_prototype_send(duk_context* ctx)
 {
-    self(ctx)->send(duk_require_string(ctx, 0));
+    return wrap(ctx, [] (auto ctx) {
+        auto raw = dukx_require<std::string>(ctx, 0);
 
-    return 0;
+        if (raw.empty())
+            throw server_error(server_error::invalid_message);
+
+        self(ctx)->send(std::move(raw));
+
+        return 0;
+    });
 }
 
+// }}}
+
+// {{{ Irccd.Server.prototype.topic
+
 /*
- * Method: Server.topic(channel, topic)
+ * Method: Server.prototype.topic(channel, topic)
  * ------------------------------------------------------------------
  *
  * Change a channel topic.
@@ -302,46 +507,83 @@ duk_ret_t send(duk_context* ctx)
  * Arguments:
  *   - channel, the channel,
  *   - topic, the new topic.
+ * Throws:
+ *   - Irccd.ServerError on server related errors,
+ *   - Irccd.SystemError on other errors.
  */
-duk_ret_t topic(duk_context* ctx)
+duk_ret_t Server_prototype_topic(duk_context* ctx)
 {
-    self(ctx)->topic(duk_require_string(ctx, 0), duk_require_string(ctx, 1));
+    return wrap(ctx, [] (auto ctx) {
+        auto channel = dukx_require<std::string>(ctx, 0);
+        auto topic = dukx_get<std::string>(ctx, 1);
 
-    return 0;
+        if (channel.empty())
+            throw server_error(server_error::invalid_channel);
+
+        self(ctx)->topic(std::move(channel), std::move(topic));
+
+        return 0;
+    });
 }
 
+// }}}
+
+// {{{ Irccd.Server.prototype.whois
+
 /*
- * Method: Server.whois(target)
+ * Method: Irccd.Server.prototype.whois(target)
  * ------------------------------------------------------------------
  *
  * Get whois information.
  *
  * Arguments:
  *   - target, the target.
+ * Throws:
+ *   - Irccd.ServerError on server related errors,
+ *   - Irccd.SystemError on other errors.
  */
-duk_ret_t whois(duk_context* ctx)
+duk_ret_t Server_prototype_whois(duk_context* ctx)
 {
-    self(ctx)->whois(duk_require_string(ctx, 0));
+    return wrap(ctx, [] (auto ctx) {
+        auto target = dukx_require<std::string>(ctx, 0);
 
-    return 0;
+        if (target.empty())
+            throw server_error(server_error::invalid_nickname);
+
+        self(ctx)->whois(std::move(target));
+
+        return 0;
+    });
 }
 
+// }}}
+
+// {{{ Irccd.Server.prototype.toString
+
 /*
- * Method: Server.toString()
+ * Method: Irccd.Server.prototype.toString()
  * ------------------------------------------------------------------
  *
  * Convert the object to std::string, convenience for adding the object
  * as property key.
  *
- * duk_ret_turns:
+ * Returns:
  *   The server name (unique).
+ * Throws:
+ *   - Irccd.SystemError on errors.
  */
-duk_ret_t toString(duk_context* ctx)
+duk_ret_t Server_prototype_toString(duk_context* ctx)
 {
-    dukx_push(ctx, self(ctx)->get_name());
+    return wrap(ctx, [] (auto ctx) {
+        dukx_push(ctx, self(ctx)->get_name());
 
-    return 1;
+        return 1;
+    });
 }
+
+// }}}
+
+// {{{ Irccd.Server [constructor]
 
 /*
  * Function: Irccd.Server(params) [constructor]
@@ -363,15 +605,21 @@ duk_ret_t toString(duk_context* ctx)
  * username: "user name",       (Optional, default: irccd)
  * realname: "real name",       (Optional, default: IRC Client Daemon)
  * commandChar: "!",            (Optional, the command char, default: "!")
+ *
+ * Arguments:
+ *   - params, the server properties
+ * Throws:
+ *   - Irccd.ServerError on server related errors,
+ *   - Irccd.SystemError on other errors.
  */
-duk_ret_t constructor(duk_context* ctx)
+duk_ret_t Server_constructor(duk_context* ctx)
 {
-    if (!duk_is_constructor_call(ctx))
-        return 0;
+    return wrap(ctx, [] (auto ctx) {
+        if (!duk_is_constructor_call(ctx))
+            return 0;
 
-    duk_check_type(ctx, 0, DUK_TYPE_OBJECT);
+        duk_check_type(ctx, 0, DUK_TYPE_OBJECT);
 
-    try {
         auto json = nlohmann::json::parse(duk_json_encode(ctx, 0));
         auto s = server_util::from_json(dukx_type_traits<irccd>::self(ctx).get_service(), json);
 
@@ -379,12 +627,14 @@ duk_ret_t constructor(duk_context* ctx)
         duk_push_pointer(ctx, new std::shared_ptr<server>(std::move(s)));
         duk_put_prop_string(ctx, -2, signature);
         duk_pop(ctx);
-    } catch (const std::exception& ex) {
-        duk_error(ctx, DUK_ERR_ERROR, "%s", ex.what());
-    }
 
-    return 0;
+        return 0;
+    });
 }
+
+// }}}
+
+// {{{ Irccd.Server [destructor]
 
 /*
  * Function: Irccd.Server() [destructor]
@@ -392,7 +642,7 @@ duk_ret_t constructor(duk_context* ctx)
  *
  * Delete the property.
  */
-duk_ret_t destructor(duk_context* ctx)
+duk_ret_t Server_destructor(duk_context* ctx)
 {
     duk_get_prop_string(ctx, 0, signature);
     delete static_cast<std::shared_ptr<server>*>(duk_to_pointer(ctx, -1));
@@ -402,6 +652,10 @@ duk_ret_t destructor(duk_context* ctx)
     return 0;
 }
 
+// }}}
+
+// {{{ Irccd.Server.add
+
 /*
  * Function: Irccd.Server.add(s)
  * ------------------------------------------------------------------
@@ -410,13 +664,22 @@ duk_ret_t destructor(duk_context* ctx)
  *
  * Arguments:
  *   - s, the server to add.
+ * Throws:
+ *   - Irccd.SystemError on errors.
  */
-duk_ret_t add(duk_context* ctx)
+duk_ret_t Server_add(duk_context* ctx)
 {
-    dukx_type_traits<irccd>::self(ctx).servers().add(dukx_require<std::shared_ptr<server>>(ctx, 0));
+    return wrap(ctx, [] (auto ctx) {
+        dukx_type_traits<irccd>::self(ctx).servers().add(
+            dukx_require<std::shared_ptr<server>>(ctx, 0));
 
-    return 0;
+        return 0;
+    });
 }
+
+// }}}
+
+// {{{ Irccd.Server.find
 
 /*
  * Function: Irccd.Server.find(name)
@@ -426,20 +689,29 @@ duk_ret_t add(duk_context* ctx)
  *
  * Arguments:
  *   - name, the server name
- * duk_ret_turns:
+ * Returns:
  *   The server object or undefined if not found.
+ * Throws:
+ *   - Irccd.SystemError on errors.
  */
-duk_ret_t find(duk_context* ctx)
+duk_ret_t Server_find(duk_context* ctx)
 {
-    auto server = dukx_type_traits<irccd>::self(ctx).servers().get(duk_require_string(ctx, 0));
+    return wrap(ctx, [] (auto ctx) {
+        auto id = dukx_require<std::string>(ctx, 0);
+        auto server = dukx_type_traits<irccd>::self(ctx).servers().get(id);
 
-    if (!server)
-        return 0;
+        if (!server)
+            return 0;
 
-    dukx_push(ctx, server);
+        dukx_push(ctx, server);
 
-    return 1;
+        return 1;
+    });
 }
+
+// }}}
+
+// {{{ Irccd.Server.list
 
 /*
  * Function: Irccd.Server.list()
@@ -447,14 +719,14 @@ duk_ret_t find(duk_context* ctx)
  *
  * Get the map of all loaded servers.
  *
- * duk_ret_turns:
+ * Returns:
  *   An object with string-to-servers pairs.
  */
-duk_ret_t list(duk_context* ctx)
+duk_ret_t Server_list(duk_context* ctx)
 {
     duk_push_object(ctx);
 
-    for (const auto &server : dukx_type_traits<irccd>::self(ctx).servers().servers()) {
+    for (const auto& server : dukx_type_traits<irccd>::self(ctx).servers().servers()) {
         dukx_push(ctx, server);
         duk_put_prop_string(ctx, -2, server->get_name().c_str());
     }
@@ -462,8 +734,12 @@ duk_ret_t list(duk_context* ctx)
     return 1;
 }
 
+// }}}
+
+// {{{ Irccd.Server.remove
+
 /*
- * Function: irccd.Server.remove(name)
+ * Function: Irccd.Server.remove(name)
  * ------------------------------------------------------------------
  *
  * Remove a server from the irccd instance. You can pass the server object since
@@ -472,39 +748,69 @@ duk_ret_t list(duk_context* ctx)
  * Arguments:
  *   - name the server name.
  */
-duk_ret_t remove(duk_context* ctx)
+duk_ret_t Server_remove(duk_context* ctx)
 {
     dukx_type_traits<irccd>::self(ctx).servers().remove(duk_require_string(ctx, 0));
 
     return 0;
 }
 
+// }}}
+
+// {{{ Irccd.ServerError
+
+/*
+ * Function: Irccd.ServerError(code, message)
+ * ------------------------------------------------------------------
+ *
+ * Create an Irccd.ServerError object.
+ *
+ * Arguments:
+ *   - code, the error code,
+ *   - message, the error message.
+ */
+duk_ret_t ServerError_constructor(duk_context* ctx)
+{
+    duk_push_this(ctx);
+    duk_push_int(ctx, duk_require_int(ctx, 0));
+    duk_put_prop_string(ctx, -2, "code");
+    duk_push_string(ctx, duk_require_string(ctx, 1));
+    duk_put_prop_string(ctx, -2, "message");
+    duk_push_string(ctx, "ServerError");
+    duk_put_prop_string(ctx, -2, "name");
+    duk_pop(ctx);
+
+    return 0;
+}
+
+// }}}
+
 const duk_function_list_entry methods[] = {
-    { "info",       info,       0           },
-    { "invite",     invite,     2           },
-    { "isSelf",     isSelf,     1           },
-    { "join",       join,       DUK_VARARGS },
-    { "kick",       kick,       DUK_VARARGS },
-    { "me",         me,         2           },
-    { "message",    message,    2           },
-    { "mode",       mode,       1           },
-    { "names",      names,      1           },
-    { "nick",       nick,       1           },
-    { "notice",     notice,     2           },
-    { "part",       part,       DUK_VARARGS },
-    { "send",       send,       1           },
-    { "topic",      topic,      2           },
-    { "whois",      whois,      1           },
-    { "toString",   toString,   0           },
-    { nullptr,      nullptr,    0           }
+    { "info",       Server_prototype_info,      0           },
+    { "invite",     Server_prototype_invite,    2           },
+    { "isSelf",     Server_prototype_isSelf,    1           },
+    { "join",       Server_prototype_join,      DUK_VARARGS },
+    { "kick",       Server_prototype_kick,      DUK_VARARGS },
+    { "me",         Server_prototype_me,        2           },
+    { "message",    Server_prototype_message,   2           },
+    { "mode",       Server_prototype_mode,      1           },
+    { "names",      Server_prototype_names,     1           },
+    { "nick",       Server_prototype_nick,      1           },
+    { "notice",     Server_prototype_notice,    2           },
+    { "part",       Server_prototype_part,      DUK_VARARGS },
+    { "send",       Server_prototype_send,      1           },
+    { "topic",      Server_prototype_topic,     2           },
+    { "toString",   Server_prototype_toString,  0           },
+    { "whois",      Server_prototype_whois,     1           },
+    { nullptr,      nullptr,                    0           }
 };
 
 const duk_function_list_entry functions[] = {
-    { "add",        add,        1           },
-    { "find",       find,       1           },
-    { "list",       list,       0           },
-    { "remove",     remove,     1           },
-    { nullptr,      nullptr,    0           }
+    { "add",        Server_add,                 1           },
+    { "find",       Server_find,                1           },
+    { "list",       Server_list,                0           },
+    { "remove",     Server_remove,              1           },
+    { nullptr,      nullptr,                    0           }
 };
 
 } // !namespace
@@ -519,11 +825,23 @@ void server_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
     dukx_stack_assert sa(plugin->context());
 
     duk_get_global_string(plugin->context(), "Irccd");
-    duk_push_c_function(plugin->context(), constructor, 1);
+
+    // ServerError function.
+    duk_push_c_function(plugin->context(), ServerError_constructor, 2);
+    duk_push_object(plugin->context());
+    duk_get_global_string(plugin->context(), "Error");
+    duk_get_prop_string(plugin->context(), -1, "prototype");
+    duk_remove(plugin->context(), -2);
+    duk_set_prototype(plugin->context(), -2);
+    duk_put_prop_string(plugin->context(), -2, "prototype");
+    duk_put_prop_string(plugin->context(), -2, "ServerError");
+
+    // Server constructor.
+    duk_push_c_function(plugin->context(), Server_constructor, 1);
     duk_put_function_list(plugin->context(), -1, functions);
     duk_push_object(plugin->context());
     duk_put_function_list(plugin->context(), -1, methods);
-    duk_push_c_function(plugin->context(), destructor, 1);
+    duk_push_c_function(plugin->context(), Server_destructor, 1);
     duk_set_finalizer(plugin->context(), -2);
     duk_dup_top(plugin->context());
     duk_put_global_string(plugin->context(), prototype);
@@ -533,6 +851,7 @@ void server_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 }
 
 using server_traits = dukx_type_traits<std::shared_ptr<server>>;
+using server_error_traits = dukx_type_traits<server_error>;
 
 void server_traits::push(duk_context* ctx, std::shared_ptr<server> server)
 {
@@ -558,6 +877,20 @@ std::shared_ptr<server> server_traits::require(duk_context* ctx, duk_idx_t index
     duk_pop(ctx);
 
     return file;
+}
+
+void server_error_traits::raise(duk_context* ctx, const server_error& ex)
+{
+    dukx_stack_assert sa(ctx, 1);
+
+    duk_get_global_string(ctx, "Irccd");
+    duk_get_prop_string(ctx, -1, "ServerError");
+    duk_remove(ctx, -2);
+    dukx_push(ctx, ex.code().value());
+    dukx_push(ctx, ex.code().message());
+    duk_new(ctx, 2);
+
+    (void)duk_throw(ctx);
 }
 
 } // !irccd

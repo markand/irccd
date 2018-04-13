@@ -27,6 +27,8 @@ namespace {
 
 const char* signature("\xff""\xff""irccd-elapsed-timer-ptr");
 
+// {{{ self
+
 boost::timer::cpu_timer* self(duk_context* ctx)
 {
     dukx_stack_assert sa(ctx);
@@ -42,34 +44,46 @@ boost::timer::cpu_timer* self(duk_context* ctx)
     return ptr;
 }
 
+// }}}
+
+// {{{ Irccd.ElapsedTimer.prototype.pause
+
 /*
- * Method: ElapsedTimer.pause
+ * Method: ElapsedTimer.prototype.pause
  * ------------------------------------------------------------------
  *
  * Pause the timer, without resetting the current elapsed time stored.
  */
-duk_ret_t pause(duk_context* ctx)
+duk_ret_t ElapsedTimer_prototype_pause(duk_context* ctx)
 {
     self(ctx)->stop();
 
     return 0;
 }
 
+// }}}
+
+// {{{ Irccd.ElapsedTimer.prototype.restart
+
 /*
- * Method: ElapsedTimer.restart
+ * Method: Irccd.ElapsedTimer.prototype.restart
  * ------------------------------------------------------------------
  *
  * Restart the timer without resetting the current elapsed time.
  */
-duk_ret_t restart(duk_context* ctx)
+duk_ret_t ElapsedTimer_prototype_restart(duk_context* ctx)
 {
     self(ctx)->resume();
 
     return 0;
 }
 
+// }}}
+
+// {{{ Irccd.ElapsedTimer.prototype.elapsed
+
 /*
- * Method: ElapsedTimer.elapsed
+ * Method: ElapsedTimer.prototype.elapsed
  * ------------------------------------------------------------------
  *
  * Get the number of elapsed milliseconds.
@@ -77,12 +91,16 @@ duk_ret_t restart(duk_context* ctx)
  * Returns:
  *   The time elapsed.
  */
-duk_ret_t elapsed(duk_context* ctx)
+duk_ret_t ElapsedTimer_prototype_elapsed(duk_context* ctx)
 {
     duk_push_uint(ctx, self(ctx)->elapsed().wall / 1000000LL);
 
     return 1;
 }
+
+// }}}
+
+// {{{ Irccd.ElapsedTimer [constructor]
 
 /*
  * Function: Irccd.ElapsedTimer [constructor]
@@ -90,7 +108,7 @@ duk_ret_t elapsed(duk_context* ctx)
  *
  * Construct a new ElapsedTimer object.
  */
-duk_ret_t constructor(duk_context* ctx)
+duk_ret_t ElapsedTimer_constructor(duk_context* ctx)
 {
     duk_push_this(ctx);
     duk_push_pointer(ctx, new boost::timer::cpu_timer);
@@ -100,13 +118,17 @@ duk_ret_t constructor(duk_context* ctx)
     return 0;
 }
 
+// }}}
+
+// {{{ Irccd.ElapsedTimer [destructor]
+
 /*
  * Function: Irccd.ElapsedTimer [destructor]
  * ------------------------------------------------------------------
  *
  * Delete the property.
  */
-duk_ret_t destructor(duk_context* ctx)
+duk_ret_t ElapsedTimer_destructor(duk_context* ctx)
 {
     duk_get_prop_string(ctx, 0, signature);
     delete static_cast<boost::timer::cpu_timer*>(duk_to_pointer(ctx, -1));
@@ -116,11 +138,13 @@ duk_ret_t destructor(duk_context* ctx)
     return 0;
 }
 
+// }}}
+
 const duk_function_list_entry methods[] = {
-    { "elapsed",    elapsed,    0 },
-    { "pause",      pause,      0 },
-    { "restart",    restart,    0 },
-    { nullptr,      nullptr,    0 }
+    { "elapsed",    ElapsedTimer_prototype_elapsed, 0 },
+    { "pause",      ElapsedTimer_prototype_pause,   0 },
+    { "restart",    ElapsedTimer_prototype_restart, 0 },
+    { nullptr,      nullptr,                        0 }
 };
 
 } // !namespace
@@ -135,10 +159,10 @@ void elapsed_timer_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
     dukx_stack_assert sa(plugin->context());
 
     duk_get_global_string(plugin->context(), "Irccd");
-    duk_push_c_function(plugin->context(), constructor, 0);
+    duk_push_c_function(plugin->context(), ElapsedTimer_constructor, 0);
     duk_push_object(plugin->context());
     duk_put_function_list(plugin->context(), -1, methods);
-    duk_push_c_function(plugin->context(), destructor, 1);
+    duk_push_c_function(plugin->context(), ElapsedTimer_destructor, 1);
     duk_set_finalizer(plugin->context(), -2);
     duk_put_prop_string(plugin->context(), -2, "prototype");
     duk_put_prop_string(plugin->context(), -2, "ElapsedTimer");

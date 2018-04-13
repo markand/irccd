@@ -28,14 +28,23 @@ namespace irccd {
 
 namespace {
 
+// {{{ print
+
 duk_ret_t print(duk_context* ctx, std::ostream &out)
 {
-    const auto plugin = dukx_type_traits<js_plugin>::self(ctx);
-
-    out << "plugin " << plugin->get_name() << ": " << duk_require_string(ctx, 0) << std::endl;
+    try {
+        out << "plugin " << dukx_type_traits<js_plugin>::self(ctx)->get_name() << ": ";
+        out << duk_require_string(ctx, 0) << std::endl;
+    } catch (const std::exception& ex) {
+        dukx_throw(ctx, ex);
+    }
 
     return 0;
 }
+
+// }}}
+
+// {{{ Irccd.Logger.info
 
 /*
  * Function: Irccd.Logger.info(message)
@@ -45,45 +54,61 @@ duk_ret_t print(duk_context* ctx, std::ostream &out)
  *
  * Arguments:
  *   - message, the message.
+ * Throws:
+ *   - Irccd.SystemError on errors
  */
-duk_ret_t info(duk_context* ctx)
+duk_ret_t Logger_info(duk_context* ctx)
 {
     return print(ctx, dukx_type_traits<irccd>::self(ctx).get_log().info());
 }
 
+// }}}
+
+// {{{ Irccd.Logger.warning
+
 /*
- * Function: irccd.Logger.warning(message)
+ * Function: Irccd.Logger.warning(message)
  * --------------------------------------------------------
  *
  * Write a warning message.
  *
  * Arguments:
  *   - message, the warning.
+ * Throws:
+ *   - Irccd.SystemError on errors
  */
-duk_ret_t warning(duk_context* ctx)
+duk_ret_t Logger_warning(duk_context* ctx)
 {
     return print(ctx, dukx_type_traits<irccd>::self(ctx).get_log().warning());
 }
 
+// }}}
+
+// {{{ Irccd.Logger.debug
+
 /*
- * Function: Logger.debug(message)
+ * Function: Irccd.Logger.debug(message)
  * --------------------------------------------------------
  *
  * Write a debug message, only shown if irccd is compiled in debug.
  *
  * Arguments:
  *   - message, the message.
+ * Throws:
+ *   - Irccd.SystemError on errors
  */
-duk_ret_t debug(duk_context* ctx)
+duk_ret_t Logger_debug(duk_context* ctx)
 {
     return print(ctx, dukx_type_traits<irccd>::self(ctx).get_log().debug());
 }
 
+// }}}
+
 const duk_function_list_entry functions[] = {
-    { "info",       info,       1 },
-    { "warning",    warning,    1 },
-    { "debug",      debug,      1 },
-    { nullptr,      nullptr,    0 }
+    { "info",       Logger_info,    1 },
+    { "warning",    Logger_warning, 1 },
+    { "debug",      Logger_debug,   1 },
+    { nullptr,      nullptr,        0 }
 };
 
 } // !namespace

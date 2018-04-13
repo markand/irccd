@@ -29,6 +29,21 @@ namespace irccd {
 
 namespace {
 
+template <typename Error>
+void do_raise(duk_context* ctx, const Error& ex)
+{
+    dukx_stack_assert sa(ctx, 1);
+
+    duk_get_global_string(ctx, "Irccd");
+    duk_get_prop_string(ctx, -1, "SystemError");
+    duk_remove(ctx, -2);
+    dukx_push(ctx, ex.code().value());
+    dukx_push(ctx, ex.code().message());
+    duk_new(ctx, 2);
+
+    (void)duk_throw(ctx);
+}
+
 const std::unordered_map<std::string, int> errors{
     { "E2BIG",              E2BIG           },
     { "EACCES",             EACCES          },
@@ -146,28 +161,14 @@ duk_ret_t constructor(duk_context* ctx)
 
 } // !namespace
 
-system_error::system_error()
-    : errno_(errno)
-    , message_(std::strerror(errno_))
+void dukx_type_traits<std::system_error>::raise(duk_context* ctx, const std::system_error& ex)
 {
+    do_raise(ctx, ex);
 }
 
-system_error::system_error(int e, std::string message)
-    : errno_(e)
-    , message_(std::move(message))
+void dukx_type_traits<boost::system::system_error>::raise(duk_context* ctx, const boost::system::system_error& ex)
 {
-}
-
-void system_error::create(duk_context *ctx) const
-{
-    dukx_stack_assert sa(ctx, 1);
-
-    duk_get_global_string(ctx, "Irccd");
-    duk_get_prop_string(ctx, -1, "SystemError");
-    duk_remove(ctx, -2);
-    dukx_push(ctx, errno_);
-    dukx_push(ctx, message_);
-    duk_new(ctx, 2);
+    do_raise(ctx, ex);
 }
 
 std::string irccd_jsapi::get_name() const

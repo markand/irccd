@@ -25,6 +25,7 @@
  */
 
 #include "jsapi.hpp"
+#include "js_plugin.hpp"
 
 namespace irccd {
 
@@ -58,6 +59,21 @@ public:
      * \return the plugin
      */
     static std::shared_ptr<js_plugin> self(duk_context* ctx);
+};
+
+/**
+ * \brief Specialization for plugin_error.
+ */
+template <>
+class dukx_type_traits<plugin_error> : public std::true_type {
+public:
+    /**
+     * Raise a plugin_error.
+     *
+     * \param ctx the context
+     * \param error the error
+     */
+    static void raise(duk_context* ctx, const plugin_error& error);
 };
 
 } // !irccd

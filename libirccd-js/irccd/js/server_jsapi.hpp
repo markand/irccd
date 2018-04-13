@@ -74,6 +74,21 @@ public:
     static std::shared_ptr<server> require(duk_context* ctx, duk_idx_t index);
 };
 
+/**
+ * \brief Specialization for server_error.
+ */
+template <>
+class dukx_type_traits<server_error> : public std::true_type {
+public:
+    /**
+     * Raise a server_error.
+     *
+     * \param ctx the context
+     * \param error the error
+     */
+    static void raise(duk_context* ctx, const server_error& error);
+};
+
 } // !irccd
 
 #endif // !IRCCD_JS_SERVER_JSAPI_HPP

@@ -21,6 +21,7 @@
 #include <irccd/string_util.hpp>
 
 #include "duktape_vector.hpp"
+#include "irccd_jsapi.hpp"
 #include "js_plugin.hpp"
 #include "util_jsapi.hpp"
 
@@ -28,8 +29,10 @@ namespace irccd {
 
 namespace {
 
+// {{{ subst
+
 /*
- * Read parameters for irccd.Util.format function, the object is defined as
+ * Read parameters for Irccd.Util.format function, the object is defined as
  * following:
  *
  * {
@@ -40,7 +43,7 @@ namespace {
  *   fieldn: ...
  * }
  */
-string_util::subst get_subst(duk_context* ctx, int index)
+string_util::subst subst(duk_context* ctx, int index)
 {
     string_util::subst params;
 
@@ -64,6 +67,10 @@ string_util::subst get_subst(duk_context* ctx, int index)
     return params;
 }
 
+// }}}
+
+// {{{ split
+
 /*
  * split (for Irccd.Util.cut)
  * ------------------------------------------------------------------
@@ -84,7 +91,7 @@ std::vector<std::string> split(duk_context* ctx)
 
         while (duk_next(ctx, -1, 1)) {
             // Split individual tokens as array if spaces are found.
-            auto tmp = string_util::split(duk_to_string(ctx, -1), pattern);
+            const auto tmp = string_util::split(duk_to_string(ctx, -1), pattern);
 
             result.insert(result.end(), tmp.begin(), tmp.end());
             duk_pop_2(ctx);
@@ -93,6 +100,10 @@ std::vector<std::string> split(duk_context* ctx)
 
     return result;
 }
+
+// }}}
+
+// {{{ limit
 
 /*
  * limit (for Irccd.Util.cut)
@@ -114,6 +125,10 @@ int limit(duk_context* ctx, int index, const char* name, int value)
 
     return value;
 }
+
+// }}}
+
+// {{{ lines
 
 /*
  * lines (for Irccd.Util.cut)
@@ -159,6 +174,28 @@ std::vector<std::string> lines(duk_context* ctx, const std::vector<std::string>&
     return result;
 }
 
+// }}}
+
+// {{{ wrap
+
+template <typename Handler>
+duk_ret_t wrap(duk_context* ctx, Handler handler)
+{
+    try {
+        return handler();
+    } catch (const std::system_error& ex) {
+        dukx_throw(ctx, ex);
+    } catch (const std::exception& ex) {
+        dukx_throw(ctx, ex);
+    }
+
+    return 0;
+}
+
+// }}}
+
+// {{{ Irccd.Util.cut
+
 /*
  * Function: Irccd.Util.cut(data, maxc, maxl)
  * --------------------------------------------------------
@@ -189,24 +226,31 @@ std::vector<std::string> lines(duk_context* ctx, const std::vector<std::string>&
  * Throws:
  *   - RangeError if maxl or maxc are negative numbers,
  *   - RangeError if one word length was bigger than maxc,
- *   - TypeError if data is not a string or a list of strings.
+ *   - TypeError if data is not a string or a list of strings,
+ *   - Irccd.SystemError on other errors.
  */
-duk_ret_t cut(duk_context* ctx)
+duk_ret_t Util_cut(duk_context* ctx)
 {
-    auto list = lines(ctx, split(ctx), limit(ctx, 1, "maxc", 72));
-    auto maxl = limit(ctx, 2, "maxl", INT_MAX);
+    return wrap(ctx, [&] {
+        const auto list = lines(ctx, split(ctx), limit(ctx, 1, "maxc", 72));
+        const auto maxl = limit(ctx, 2, "maxl", INT_MAX);
 
-    if (list.size() > static_cast<std::size_t>(maxl))
-        return 0;
+        if (list.size() > static_cast<std::size_t>(maxl))
+            return 0;
 
-    // Empty list but lines() returns at least one.
-    if (list.size() == 1 && list[0].empty()) {
-        duk_push_array(ctx);
-        return 1;
-    }
+        // Empty list but lines() returns at least one.
+        if (list.size() == 1 && list[0].empty()) {
+            duk_push_array(ctx);
+            return 1;
+        }
 
-    return dukx_push(ctx, list);
+        return dukx_push(ctx, list);
+    });
 }
+
+// }}}
+
+// {{{ Irccd.Util.format
 
 /*
  * Function: Irccd.Util.format(text, parameters)
@@ -219,17 +263,19 @@ duk_ret_t cut(duk_context* ctx)
  *   - params, the parameters.
  * Returns:
  *   The converted text.
+ * Throws:
+ *   - Irccd.SystemError on errors.
  */
-duk_ret_t format(duk_context* ctx)
+duk_ret_t Util_format(duk_context* ctx)
 {
-    try {
-        dukx_push(ctx, string_util::format(duk_get_string(ctx, 0), get_subst(ctx, 1)));
-    } catch (const std::exception &ex) {
-        (void)duk_error(ctx, DUK_ERR_SYNTAX_ERROR, "%s", ex.what());
-    }
-
-    return 1;
+    return wrap(ctx, [&] {
+        return dukx_push(ctx, string_util::format(dukx_get<std::string>(ctx, 0), subst(ctx, 1)));
+    });
 }
+
+// }}}
+
+// {{{ Irccd.Util.splituser
 
 /*
  * Function: Irccd.Util.splituser(ident)
@@ -241,13 +287,19 @@ duk_ret_t format(duk_context* ctx)
  *   - ident, the full identity.
  * Returns:
  *   The nickname.
+ * Throws:
+ *   - Irccd.SystemError on errors.
  */
-duk_ret_t splituser(duk_context* ctx)
+duk_ret_t Util_splituser(duk_context* ctx)
 {
-    dukx_push(ctx, irc::user::parse(duk_require_string(ctx, 0)).nick());
-
-    return 1;
+    return wrap(ctx, [&] {
+        return dukx_push(ctx, irc::user::parse(dukx_require<std::string>(ctx, 0)).nick());
+    });
 }
+
+// }}}
+
+// {{{ Irccd.Util.splithost
 
 /*
  * Function: Irccd.Util.splithost(ident)
@@ -259,20 +311,24 @@ duk_ret_t splituser(duk_context* ctx)
  *   - ident, the full identity.
  * Returns:
  *   The hostname.
+ * Throws:
+ *   - Irccd.SystemError on errors.
  */
-duk_ret_t splithost(duk_context* ctx)
+duk_ret_t Util_splithost(duk_context* ctx)
 {
-    dukx_push(ctx, irc::user::parse(duk_require_string(ctx, 0)).host());
-
-    return 1;
+    return wrap(ctx, [&] {
+        return dukx_push(ctx, irc::user::parse(dukx_require<std::string>(ctx, 0)).host());
+    });
 }
 
+// }}}
+
 const duk_function_list_entry functions[] = {
-    { "cut",        cut,        DUK_VARARGS },
-    { "format",     format,     DUK_VARARGS },
-    { "splituser",  splituser,  1           },
-    { "splithost",  splithost,  1           },
-    { nullptr,      nullptr,    0           }
+    { "cut",        Util_cut,       DUK_VARARGS },
+    { "format",     Util_format,    DUK_VARARGS },
+    { "splituser",  Util_splituser, 1           },
+    { "splithost",  Util_splithost, 1           },
+    { nullptr,      nullptr,        0           }
 };
 
 } // !namespace

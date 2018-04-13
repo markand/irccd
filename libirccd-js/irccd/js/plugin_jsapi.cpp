@@ -30,30 +30,20 @@ namespace {
 
 const char plugin_ref[] = "\xff""\xff""irccd-plugin-ptr";
 
-/*
- * wrap
- * ------------------------------------------------------------------
- *
- * Wrap function for these functions because they all takes the same arguments.
- *
- * - load,
- * - reload,
- * - unload.
- */
-template <typename Func>
-duk_idx_t wrap(duk_context* ctx, int nret, Func&& func)
+template <typename Handler>
+duk_idx_t wrap(duk_context* ctx, Handler handler)
 {
-    std::string name = duk_require_string(ctx, 0);
-
     try {
-        func(dukx_type_traits<irccd>::self(ctx), name);
-    } catch (const std::out_of_range& ex) {
-        (void)duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "%s", ex.what());
-    } catch (const std::exception &ex) {
-        (void)duk_error(ctx, DUK_ERR_ERROR, "%s", ex.what());
+        return handler();
+    } catch (const plugin_error& ex) {
+        dukx_throw(ctx, ex);
+    } catch (const std::system_error& ex) {
+        dukx_throw(ctx, ex);
+    } catch (const std::exception& ex) {
+        dukx_throw(ctx, ex);
     }
 
-    return nret;
+    return 0;
 }
 
 /*
@@ -190,6 +180,8 @@ duk_ret_t get_paths(duk_context* ctx)
     return get(ctx, js_plugin::paths_property);
 }
 
+// {{{ Irccd.Plugin.info
+
 /*
  * Function: Irccd.Plugin.info([name])
  * ------------------------------------------------------------------
@@ -209,33 +201,41 @@ duk_ret_t get_paths(duk_context* ctx)
  *     selected.
  * Returns:
  *   The plugin information or undefined if the plugin was not found.
+ * Throws:
+ *   - Irccd.SystemError on errors.
  */
-duk_idx_t info(duk_context* ctx)
+duk_idx_t Plugin_info(duk_context* ctx)
 {
-    std::shared_ptr<plugin> plugin;
+    return wrap(ctx, [&] {
+        std::shared_ptr<plugin> plugin;
 
-    if (duk_get_top(ctx) >= 1)
-        plugin = dukx_type_traits<irccd>::self(ctx).plugins().get(duk_require_string(ctx, 0));
-    else
-        plugin = dukx_type_traits<js_plugin>::self(ctx);
+        if (duk_get_top(ctx) >= 1)
+            plugin = dukx_type_traits<irccd>::self(ctx).plugins().get(duk_require_string(ctx, 0));
+        else
+            plugin = dukx_type_traits<js_plugin>::self(ctx);
 
-    if (!plugin)
-        return 0;
+        if (!plugin)
+            return 0;
 
-    duk_push_object(ctx);
-    dukx_push(ctx, plugin->get_name());
-    duk_put_prop_string(ctx, -2, "name");
-    dukx_push(ctx, plugin->get_author());
-    duk_put_prop_string(ctx, -2, "author");
-    dukx_push(ctx, plugin->get_license());
-    duk_put_prop_string(ctx, -2, "license");
-    dukx_push(ctx, plugin->get_summary());
-    duk_put_prop_string(ctx, -2, "summary");
-    dukx_push(ctx, plugin->get_version());
-    duk_put_prop_string(ctx, -2, "version");
+        duk_push_object(ctx);
+        dukx_push(ctx, plugin->get_name());
+        duk_put_prop_string(ctx, -2, "name");
+        dukx_push(ctx, plugin->get_author());
+        duk_put_prop_string(ctx, -2, "author");
+        dukx_push(ctx, plugin->get_license());
+        duk_put_prop_string(ctx, -2, "license");
+        dukx_push(ctx, plugin->get_summary());
+        duk_put_prop_string(ctx, -2, "summary");
+        dukx_push(ctx, plugin->get_version());
+        duk_put_prop_string(ctx, -2, "version");
 
-    return 1;
+        return 1;
+    });
 }
+
+// }}}
+
+// {{{ Irccd.Plugin.list
 
 /*
  * Function: Irccd.Plugin.list()
@@ -246,7 +246,7 @@ duk_idx_t info(duk_context* ctx)
  * Returns:
  *   The list of all plugin names.
  */
-duk_idx_t list(duk_context* ctx)
+duk_idx_t Plugin_list(duk_context* ctx)
 {
     int i = 0;
 
@@ -260,6 +260,10 @@ duk_idx_t list(duk_context* ctx)
     return 1;
 }
 
+// }}}
+
+// {{{ Irccd.Plugin.load
+
 /*
  * Function: Irccd.Plugin.load(name)
  * ------------------------------------------------------------------
@@ -270,15 +274,21 @@ duk_idx_t list(duk_context* ctx)
  * Arguments:
  *   - name, the plugin identifier.
  * Throws:
- *   - Error on errors,
- *   - ReferenceError if the plugin was not found.
+ *   - Irccd.PluginError on plugin related errors,
+ *   - Irccd.SystemError on other errors.
  */
-duk_idx_t load(duk_context* ctx)
+duk_idx_t Plugin_load(duk_context* ctx)
 {
-    return wrap(ctx, 0, [&] (irccd& irccd, const std::string& name) {
-        irccd.plugins().load(name);
+    return wrap(ctx, [&] {
+        dukx_type_traits<irccd>::self(ctx).plugins().load(dukx_require<std::string>(ctx, 0));
+
+        return 0;
     });
 }
+
+// }}}
+
+// {{{ Irccd.Plugin.reload
 
 /*
  * Function: Irccd.Plugin.reload(name)
@@ -289,15 +299,21 @@ duk_idx_t load(duk_context* ctx)
  * Arguments:
  *   - name, the plugin identifier.
  * Throws:
- *   - Error on errors,
- *   - ReferenceError if the plugin was not found.
+ *   - Irccd.PluginError on plugin related errors,
+ *   - Irccd.SystemError on other errors.
  */
-duk_idx_t reload(duk_context* ctx)
+duk_idx_t Plugin_reload(duk_context* ctx)
 {
-    return wrap(ctx, 0, [&] (irccd& irccd, const std::string& name) {
-        irccd.plugins().reload(name);
+    return wrap(ctx, [&] {
+        dukx_type_traits<irccd>::self(ctx).plugins().reload(dukx_require<std::string>(ctx, 0));
+
+        return 0;
     });
 }
+
+// }}}
+
+// {{{ Irccd.Plugin.unload
 
 /*
  * Function: Irccd.Plugin.unload(name)
@@ -308,23 +324,55 @@ duk_idx_t reload(duk_context* ctx)
  * Arguments:
  *   - name, the plugin identifier.
  * Throws:
- *   - Error on errors,
- *   - ReferenceError if the plugin was not found.
+ *   - Irccd.PluginError on plugin related errors,
+ *   - Irccd.SystemError on other errors.
  */
-duk_idx_t unload(duk_context* ctx)
+duk_idx_t Plugin_unload(duk_context* ctx)
 {
-    return wrap(ctx, 0, [&] (irccd &irccd, const std::string &name) {
-        irccd.plugins().unload(name);
+    return wrap(ctx, [&] {
+        dukx_type_traits<irccd>::self(ctx).plugins().unload(dukx_require<std::string>(ctx, 0));
+
+        return 0;
     });
 }
 
+// }}}
+
+// {{{ Irccd.PluginError [constructor]
+
+/*
+ * Function: Irccd.PluginError(code, message)
+ * ------------------------------------------------------------------
+ *
+ * Create an Irccd.PluginError object.
+ *
+ * Arguments:
+ *   - code, the error code,
+ *   - message, the error message.
+ */
+duk_ret_t PluginError_constructor(duk_context* ctx)
+{
+    duk_push_this(ctx);
+    duk_push_int(ctx, duk_require_int(ctx, 0));
+    duk_put_prop_string(ctx, -2, "code");
+    duk_push_string(ctx, duk_require_string(ctx, 1));
+    duk_put_prop_string(ctx, -2, "message");
+    duk_push_string(ctx, "PluginError");
+    duk_put_prop_string(ctx, -2, "name");
+    duk_pop(ctx);
+
+    return 0;
+}
+
+// }}}
+
 const duk_function_list_entry functions[] = {
-    { "info",   info,       DUK_VARARGS     },
-    { "list",   list,       0               },
-    { "load",   load,       1               },
-    { "reload", reload,     1               },
-    { "unload", unload,     1               },
-    { nullptr,  nullptr,    0               }
+    { "info",   Plugin_info,    DUK_VARARGS },
+    { "list",   Plugin_list,    0           },
+    { "load",   Plugin_load,    1           },
+    { "reload", Plugin_reload,  1           },
+    { "unload", Plugin_unload,  1           },
+    { nullptr,  nullptr,        0           }
 };
 
 } // !namespace
@@ -373,9 +421,22 @@ void plugin_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
     duk_push_c_function(plugin->context(), set_paths, 1);
     duk_def_prop(plugin->context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
 
+    // PluginError function.
+    duk_push_c_function(plugin->context(), PluginError_constructor, 2);
+    duk_push_object(plugin->context());
+    duk_get_global_string(plugin->context(), "Error");
+    duk_get_prop_string(plugin->context(), -1, "prototype");
+    duk_remove(plugin->context(), -2);
+    duk_set_prototype(plugin->context(), -2);
+    duk_put_prop_string(plugin->context(), -2, "prototype");
+    duk_put_prop_string(plugin->context(), -2, "PluginError");
+
     duk_put_prop_string(plugin->context(), -2, "Plugin");
     duk_pop(plugin->context());
 }
+
+using plugin_traits = dukx_type_traits<js_plugin>;
+using plugin_error_traits = dukx_type_traits<plugin_error>;
 
 std::shared_ptr<js_plugin> dukx_type_traits<js_plugin>::self(duk_context* ctx)
 {
@@ -386,6 +447,20 @@ std::shared_ptr<js_plugin> dukx_type_traits<js_plugin>::self(duk_context* ctx)
     duk_pop(ctx);
 
     return plugin->lock();
+}
+
+void plugin_error_traits::raise(duk_context* ctx, const plugin_error& ex)
+{
+    dukx_stack_assert sa(ctx, 1);
+
+    duk_get_global_string(ctx, "Irccd");
+    duk_get_prop_string(ctx, -1, "PluginError");
+    duk_remove(ctx, -2);
+    dukx_push(ctx, ex.code().value());
+    dukx_push(ctx, ex.code().message());
+    duk_new(ctx, 2);
+
+    (void)duk_throw(ctx);
 }
 
 } // !irccd

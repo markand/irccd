@@ -24,6 +24,8 @@ namespace irccd {
 
 namespace {
 
+// {{{ Irccd.Unicode.isDigit
+
 /*
  * Function: Irccd.Unicode.isDigit(code)
  * --------------------------------------------------------
@@ -33,12 +35,14 @@ namespace {
  * Returns:
  *   True if the code is in the digit category.
  */
-duk_ret_t is_digit(duk_context* ctx)
+duk_ret_t Unicode_isDigit(duk_context* ctx) noexcept
 {
-    duk_push_boolean(ctx, unicode::isdigit(duk_get_int(ctx, 0)));
-
-    return 1;
+    return dukx_push(ctx, unicode::isdigit(duk_get_int(ctx, 0)));
 }
+
+// }}}
+
+// {{{ Irccd.Unicode.isLetter
 
 /*
  * Function: Irccd.Unicode.isLetter(code)
@@ -49,12 +53,14 @@ duk_ret_t is_digit(duk_context* ctx)
  * Returns:
  *   True if the code is in the letter category.
  */
-duk_ret_t is_letter(duk_context* ctx)
+duk_ret_t Unicode_isLetter(duk_context* ctx) noexcept
 {
-    duk_push_boolean(ctx, unicode::isalpha(duk_get_int(ctx, 0)));
-
-    return 1;
+    return dukx_push(ctx, unicode::isalpha(duk_get_int(ctx, 0)));
 }
+
+// }}}
+
+// {{{ Irccd.Unicode.isLower
 
 /*
  * Function: Irccd.Unicode.isLower(code)
@@ -65,12 +71,14 @@ duk_ret_t is_letter(duk_context* ctx)
  * Returns:
  *   True if the code is lower case.
  */
-duk_ret_t is_lower(duk_context* ctx)
+duk_ret_t Unicode_isLower(duk_context* ctx) noexcept
 {
-    duk_push_boolean(ctx, unicode::islower(duk_get_int(ctx, 0)));
-
-    return 1;
+    return dukx_push(ctx, unicode::islower(duk_get_int(ctx, 0)));
 }
+
+// }}}
+
+// {{{ Irccd.Unicode.isSpace
 
 /*
  * Function: Irccd.Unicode.isSpace(code)
@@ -81,12 +89,14 @@ duk_ret_t is_lower(duk_context* ctx)
  * Returns:
  *   True if the code is in the space category.
  */
-duk_ret_t is_space(duk_context* ctx)
+duk_ret_t Unicode_isSpace(duk_context* ctx) noexcept
 {
-    duk_push_boolean(ctx, unicode::isspace(duk_get_int(ctx, 0)));
-
-    return 1;
+    return dukx_push(ctx, unicode::isspace(duk_get_int(ctx, 0)));
 }
+
+// }}}
+
+// {{{ Irccd.Unicode.isTitle
 
 /*
  * Function: Irccd.Unicode.isTitle(code)
@@ -97,12 +107,14 @@ duk_ret_t is_space(duk_context* ctx)
  * Returns:
  *   True if the code is title case.
  */
-duk_ret_t is_title(duk_context* ctx)
+duk_ret_t Unicode_isTitle(duk_context* ctx) noexcept
 {
-    duk_push_boolean(ctx, unicode::istitle(duk_get_int(ctx, 0)));
-
-    return 1;
+    return dukx_push(ctx, unicode::istitle(duk_get_int(ctx, 0)));
 }
+
+// }}}
+
+// {{{ Irccd.Unicode.isUpper
 
 /*
  * Function: Irccd.Unicode.isUpper(code)
@@ -113,21 +125,21 @@ duk_ret_t is_title(duk_context* ctx)
  * Returns:
  *   True if the code is upper case.
  */
-duk_ret_t is_upper(duk_context* ctx)
+duk_ret_t Unicode_isUpper(duk_context* ctx) noexcept
 {
-    duk_push_boolean(ctx, unicode::isupper(duk_get_int(ctx, 0)));
-
-    return 1;
+    return dukx_push(ctx, unicode::isupper(duk_get_int(ctx, 0)));
 }
 
+// }}}
+
 const duk_function_list_entry functions[] = {
-    { "isDigit",        is_digit,   1 },
-    { "isLetter",       is_letter,  1 },
-    { "isLower",        is_lower,   1 },
-    { "isSpace",        is_space,   1 },
-    { "isTitle",        is_title,   1 },
-    { "isUpper",        is_upper,   1 },
-    { nullptr,          nullptr,    0 }
+    { "isDigit",        Unicode_isDigit,    1 },
+    { "isLetter",       Unicode_isLetter,   1 },
+    { "isLower",        Unicode_isLower,    1 },
+    { "isSpace",        Unicode_isSpace,    1 },
+    { "isTitle",        Unicode_isTitle,    1 },
+    { "isUpper",        Unicode_isUpper,    1 },
+    { nullptr,          nullptr,            0 }
 };
 
 } // !namespace

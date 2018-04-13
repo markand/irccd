@@ -76,7 +76,7 @@ BOOST_AUTO_TEST_CASE(from_javascript)
 BOOST_AUTO_TEST_CASE(from_native)
 {
     duk_push_c_function(plugin_->context(), [] (duk_context *ctx) -> duk_ret_t {
-        dukx_throw(ctx, system_error(EINVAL, "hey"));
+        dukx_throw(ctx, std::system_error(make_error_code(std::errc::invalid_argument)));
 
         return 0;
     }, 0);
@@ -89,7 +89,6 @@ BOOST_AUTO_TEST_CASE(from_native)
         "} catch (e) {"
         "  errno = e.errno;"
         "  name = e.name;"
-        "  message = e.message;"
         "  v1 = (e instanceof Error);"
         "  v2 = (e instanceof Irccd.SystemError);"
         "}"
@@ -102,8 +101,6 @@ BOOST_AUTO_TEST_CASE(from_native)
     BOOST_TEST(EINVAL == duk_get_int(plugin_->context(), -1));
     BOOST_TEST(duk_get_global_string(plugin_->context(), "name"));
     BOOST_TEST("SystemError" == duk_get_string(plugin_->context(), -1));
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "message"));
-    BOOST_TEST("hey" == duk_get_string(plugin_->context(), -1));
     BOOST_TEST(duk_get_global_string(plugin_->context(), "v1"));
     BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
     BOOST_TEST(duk_get_global_string(plugin_->context(), "v2"));

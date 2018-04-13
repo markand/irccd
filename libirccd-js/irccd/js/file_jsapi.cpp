@@ -38,12 +38,17 @@ const char *signature("\xff""\xff""irccd-file-ptr");
 const char *prototype("\xff""\xff""irccd-file-prototype");
 
 // Remove trailing \r for CRLF line style.
-inline std::string clear_crlf(std::string input)
+std::string clear_crlf(std::string input) noexcept
 {
     if (input.length() > 0 && input.back() == '\r')
         input.pop_back();
 
     return input;
+}
+
+std::system_error from_errno() noexcept
+{
+    return std::system_error(make_error_code(static_cast<std::errc>(errno)));
 }
 
 std::shared_ptr<file> self(duk_context* ctx)
@@ -61,120 +66,157 @@ std::shared_ptr<file> self(duk_context* ctx)
     return *ptr;
 }
 
-/*
- * File methods.
- * ------------------------------------------------------------------
- */
-
-/*
- * Method: File.basename()
- * --------------------------------------------------------
- *
- * Synonym of `irccd.File.basename(path)` but with the path from the file.
- *
- * duk_ret_turns:
- *   The base name.
- */
-duk_ret_t method_basename(duk_context* ctx)
+template <typename Handler>
+duk_ret_t wrap(duk_context* ctx, Handler handler)
 {
-    return dukx_push(ctx, fs_util::base_name(self(ctx)->get_path()));
-}
-
-/*
- * Method: File.close()
- * --------------------------------------------------------
- *
- * Force close of the file, automatically called when object is collected.
- */
-duk_ret_t method_close(duk_context* ctx)
-{
-    self(ctx)->close();
+    try {
+        return handler();
+    } catch (const boost::system::system_error& ex) {
+        dukx_throw(ctx, ex);
+    } catch (const std::system_error& ex) {
+        dukx_throw(ctx, ex);
+    } catch (const std::exception& ex) {
+        dukx_throw(ctx, ex);
+    }
 
     return 0;
 }
 
-/*
- * Method: File.dirname()
- * --------------------------------------------------------
- *
- * Synonym of `irccd.File.dirname(path)` but with the path from the file.
- *
- * duk_ret_turns:
- *   The directory name.
- */
-duk_ret_t method_dirname(duk_context* ctx)
-{
-    return dukx_push(ctx, fs_util::dir_name(self(ctx)->get_path()));
-}
+// {{{ Irccd.File.prototype.basename
 
 /*
- * Method: File.lines()
+ * Method: Irccd.File.prototype.basename()
+ * --------------------------------------------------------
+ *
+ * Synonym of `Irccd.File.basename(path)` but with the path from the file.
+ *
+ * Returns:
+ *   The base name.
+ */
+duk_ret_t File_prototype_basename(duk_context* ctx)
+{
+    return wrap(ctx, [&] {
+        return dukx_push(ctx, fs_util::base_name(self(ctx)->get_path()));
+    });
+}
+
+// }}}
+
+// {{{ Irccd.File.prototype.close
+
+/*
+ * Method: Irccd.File.prototype.close()
+ * --------------------------------------------------------
+ *
+ * Force close of the file, automatically called when object is collected.
+ */
+duk_ret_t File_prototype_close(duk_context* ctx)
+{
+    return wrap(ctx, [&] {
+        self(ctx)->close();
+
+        return 0;
+    });
+}
+
+// }}}
+
+// {{{ Irccd.File.prototype.dirname
+
+/*
+ * Method: Irccd.File.prototype.dirname()
+ * --------------------------------------------------------
+ *
+ * Synonym of `Irccd.File.dirname(path)` but with the path from the file.
+ *
+ * Returns:
+ *   The directory name.
+ */
+duk_ret_t File_prototype_dirname(duk_context* ctx)
+{
+    return wrap(ctx, [&] {
+        return dukx_push(ctx, fs_util::dir_name(self(ctx)->get_path()));
+    });
+}
+
+// }}}
+
+// {{{ Irccd.File.prototype.lines
+
+/*
+ * Method: Irccd.File.prototype.lines()
  * --------------------------------------------------------
  *
  * Read all lines and return an array.
  *
- * duk_ret_turns:
+ * Returns:
  *   An array with all lines.
  * Throws
  *   - Any exception on error.
  */
-duk_ret_t method_lines(duk_context* ctx)
+duk_ret_t File_prototype_lines(duk_context* ctx)
 {
-    duk_push_array(ctx);
+    return wrap(ctx, [&] {
+        duk_push_array(ctx);
 
-    std::FILE* fp = self(ctx)->get_handle();
-    std::string buffer;
-    std::array<char, 128> data;
-    std::int32_t i = 0;
+        std::FILE* fp = self(ctx)->get_handle();
+        std::string buffer;
+        std::array<char, 128> data;
+        std::int32_t i = 0;
 
-    while (std::fgets(&data[0], data.size(), fp) != nullptr) {
-        buffer += data.data();
+        while (std::fgets(&data[0], data.size(), fp) != nullptr) {
+            buffer += data.data();
 
-        const auto pos = buffer.find('\n');
+            const auto pos = buffer.find('\n');
 
-        if (pos != std::string::npos) {
-            dukx_push(ctx, clear_crlf(buffer.substr(0, pos)));
-            duk_put_prop_index(ctx, -2, i++);
+            if (pos != std::string::npos) {
+                dukx_push(ctx, clear_crlf(buffer.substr(0, pos)));
+                duk_put_prop_index(ctx, -2, i++);
 
-            buffer.erase(0, pos + 1);
+                buffer.erase(0, pos + 1);
+            }
         }
-    }
 
-    // Maybe an error in the stream.
-    if (std::ferror(fp))
-        dukx_throw(ctx, system_error());
+        // Maybe an error in the stream.
+        if (std::ferror(fp))
+            throw from_errno();
 
-    // Missing '\n' in end of file.
-    if (!buffer.empty()) {
-        dukx_push(ctx, clear_crlf(buffer));
-        duk_put_prop_index(ctx, -2, i++);
-    }
+        // Missing '\n' in end of file.
+        if (!buffer.empty()) {
+            dukx_push(ctx, clear_crlf(buffer));
+            duk_put_prop_index(ctx, -2, i++);
+        }
 
-    return 1;
+        return 1;
+    });
 }
 
+// }}}
+
+// {{{ Irccd.File.prototype.read
+
 /*
- * Method: File.read(amount)
+ * Method: Irccd.File.prototype.read(amount)
  * --------------------------------------------------------
  *
  * Read the specified amount of characters or the whole file.
  *
  * Arguments:
  *   - amount, the amount of characters or -1 to read all (Optional, default: -1).
- * duk_ret_turns:
+ * Returns:
  *   The string.
  * Throws:
- *   - Any exception on error.
+ *   - Irccd.SystemError on errors
  */
-duk_ret_t method_read(duk_context* ctx)
+duk_ret_t File_prototype_read(duk_context* ctx)
 {
-    const auto fp = self(ctx)->get_handle();
-    const auto amount = duk_is_number(ctx, 0) ? duk_get_int(ctx, 0) : -1;
+    return wrap(ctx, [&] {
+        const auto fp = self(ctx)->get_handle();
+        const auto amount = duk_is_number(ctx, 0) ? duk_get_int(ctx, 0) : -1;
 
-    if (amount == 0 || !fp)
-        return 0;
+        if (amount == 0 || !fp)
+            return 0;
 
-    try {
         std::string data;
         std::size_t total = 0;
 
@@ -184,7 +226,7 @@ duk_ret_t method_read(duk_context* ctx)
 
             while ((nread = std::fread(&buffer[0], sizeof (buffer[0]), buffer.size(), fp)) > 0) {
                 if (std::ferror(fp))
-                    dukx_throw(ctx, system_error());
+                    throw from_errno();
 
                 std::copy(buffer.begin(), buffer.begin() + nread, std::back_inserter(data));
                 total += nread;
@@ -194,66 +236,77 @@ duk_ret_t method_read(duk_context* ctx)
             total = std::fread(&data[0], sizeof (data[0]), static_cast<std::size_t>(amount), fp);
 
             if (std::ferror(fp))
-                dukx_throw(ctx, system_error());
+                throw from_errno();
 
             data.resize(total);
         }
 
-        dukx_push(ctx, data);
-    } catch (const std::exception&) {
-        dukx_throw(ctx, system_error());
-    }
-
-    return 1;
+        return dukx_push(ctx, data);
+    });
 }
 
+// }}}
+
+// {{{ Irccd.File.prototype.readline
+
 /*
- * Method: File.readline()
+ * Method: Irccd.File.prototype.readline()
  * --------------------------------------------------------
  *
  * Read the next line available.
  *
- * duk_ret_turns:
+ * Returns:
  *   The next line or undefined if eof.
  * Throws:
- *   - Any exception on error.
+ *   - Irccd.SystemError on errors
  */
-duk_ret_t method_readline(duk_context* ctx)
+duk_ret_t File_prototype_readline(duk_context* ctx)
 {
-    auto fp = self(ctx)->get_handle();
+    return wrap(ctx, [&] {
+        auto fp = self(ctx)->get_handle();
 
-    if (fp == nullptr || std::feof(fp))
-        return 0;
+        if (fp == nullptr || std::feof(fp))
+            return 0;
 
-    std::string result;
+        std::string result;
 
-    for (int ch; (ch = std::fgetc(fp)) != EOF && ch != '\n'; )
-        result += (char)ch;
-    if (std::ferror(fp))
-        dukx_throw(ctx, system_error());
+        for (int ch; (ch = std::fgetc(fp)) != EOF && ch != '\n'; )
+            result += (char)ch;
+        if (std::ferror(fp))
+            throw from_errno();
 
-    return dukx_push(ctx, clear_crlf(result));
+        return dukx_push(ctx, clear_crlf(result));
+    });
 }
 
+// }}}
+
+// {{{ Irccd.File.prototype.remove
+
 /*
- * Method: File.remove()
+ * Method: Irccd.File.prototype.remove()
  * --------------------------------------------------------
  *
- * Synonym of File.remove(path) but with the path from the file.
+ * Synonym of Irccd.File.prototype.remove(path) but with the path from the file.
  *
  * Throws:
- *   - Any exception on error.
+ *   - Irccd.SystemError on errors
  */
-duk_ret_t method_remove(duk_context* ctx)
+duk_ret_t File_prototype_remove(duk_context* ctx)
 {
-    if (::remove(self(ctx)->get_path().c_str()) < 0)
-        dukx_throw(ctx, system_error());
+    return wrap(ctx, [&] {
+        boost::filesystem::remove(self(ctx)->get_path());
 
-    return 0;
+        return 0;
+    });
 }
 
+// }}}
+
+// {{{ Irccd.File.prototype.seek
+
 /*
- * Method: File.seek(type, amount)
+ * Method: Irccd.File.prototype.seek(type, amount)
  * --------------------------------------------------------
  *
  * Sets the position in the file.
@@ -262,127 +315,129 @@ duk_ret_t method_remove(duk_context* ctx)
  *   - type, the type of setting (File.SeekSet, File.SeekCur, File.SeekSet),
  *   - amount, the new offset.
  * Throws:
- *   - Any exception on error.
+ *   - Irccd.SystemError on errors
  */
-duk_ret_t method_seek(duk_context* ctx)
+duk_ret_t File_prototype_seek(duk_context* ctx)
 {
-    auto fp = self(ctx)->get_handle();
-    auto type = duk_require_int(ctx, 0);
-    auto amount = duk_require_int(ctx, 1);
+    return wrap(ctx, [&] {
+        auto fp = self(ctx)->get_handle();
+        auto type = duk_require_int(ctx, 0);
+        auto amount = duk_require_int(ctx, 1);
 
-    if (fp != nullptr && std::fseek(fp, amount, type) != 0)
-        dukx_throw(ctx, system_error());
+        if (fp != nullptr && std::fseek(fp, amount, type) != 0)
+            throw from_errno();
 
-    return 0;
+        return 0;
+    });
 }
+
+// }}}
+
+// {{{ Irccd.File.prototype.stat
 
 #if defined(HAVE_STAT)
 
 /*
- * Method: File.stat() [optional]
+ * Method: Irccd.File.prototype.stat() [optional]
  * --------------------------------------------------------
  *
  * Synonym of File.stat(path) but with the path from the file.
  *
- * duk_ret_turns:
+ * Returns:
  *   The stat information.
  * Throws:
- *   - Any exception on error.
+ *   - Irccd.SystemError on errors
  */
-duk_ret_t method_stat(duk_context* ctx)
+duk_ret_t File_prototype_stat(duk_context* ctx)
 {
-    auto file = self(ctx);
-    struct stat st;
+    return wrap(ctx, [&] {
+        auto file = self(ctx);
+        struct stat st;
 
-    if (file->get_handle() == nullptr && ::stat(file->get_path().c_str(), &st) < 0)
-        dukx_throw(ctx, system_error());
-    else
+        if (file->get_handle() == nullptr && ::stat(file->get_path().c_str(), &st) < 0)
+            throw from_errno();
+
         dukx_push(ctx, st);
 
-    return 1;
+        return 1;
+    });
 }
 
 #endif // !HAVE_STAT
 
+// }}}
+
+// {{{ Irccd.File.prototype.tell
+
 /*
- * Method: File.tell()
+ * Method: Irccd.File.prototype.tell()
  * --------------------------------------------------------
  *
  * Get the actual position in the file.
  *
- * duk_ret_turns:
+ * Returns:
  *   The position.
  * Throws:
- *   - Any exception on error.
+ *   - Irccd.SystemError on errors
  */
-duk_ret_t method_tell(duk_context* ctx)
+duk_ret_t File_prototype_tell(duk_context* ctx)
 {
-    auto fp = self(ctx)->get_handle();
-    long pos;
+    return wrap(ctx, [&] {
+        auto fp = self(ctx)->get_handle();
+        long pos;
 
-    if (fp == nullptr)
-        return 0;
+        if (fp == nullptr)
+            return 0;
 
-    if ((pos = std::ftell(fp)) == -1L)
-        dukx_throw(ctx, system_error());
-    else
+        if ((pos = std::ftell(fp)) == -1L)
+            throw from_errno();
+
         duk_push_int(ctx, pos);
 
-    return 1;
+        return 1;
+    });
 }
 
+// }}}
+
+// {{{ Irccd.File.prototype.write
+
 /*
- * Method: File.write(data)
+ * Method: Irccd.File.prototype.write(data)
  * --------------------------------------------------------
  *
  * Write some characters to the file.
  *
  * Arguments:
  *   - data, the character to write.
- * duk_ret_turns:
+ * Returns:
  *   The number of bytes written.
  * Throws:
- *   - Any exception on error.
+ *   - Irccd.SystemError on errors
  */
-duk_ret_t method_write(duk_context* ctx)
+duk_ret_t File_prototype_write(duk_context* ctx)
 {
-    auto fp = self(ctx)->get_handle();
-    auto data = dukx_require<std::string>(ctx, 0);
+    return wrap(ctx, [&] {
+        auto fp = self(ctx)->get_handle();
+        auto data = dukx_require<std::string>(ctx, 0);
 
-    if (fp == nullptr)
-        return 0;
+        if (fp == nullptr)
+            return 0;
 
-    const auto nwritten = std::fwrite(data.c_str(), 1, data.length(), fp);
+        const auto nwritten = std::fwrite(data.c_str(), 1, data.length(), fp);
 
-    if (std::ferror(fp))
-        dukx_throw(ctx, system_error());
+        if (std::ferror(fp))
+            throw from_errno();
 
-    duk_push_uint(ctx, nwritten);
+        duk_push_uint(ctx, nwritten);
 
-    return 1;
+        return 1;
+    });
 }
 
-const duk_function_list_entry methods[] = {
-    { "basename",   method_basename,    0 },
-    { "close",      method_close,       0 },
-    { "dirname",    method_dirname,     0 },
-    { "lines",      method_lines,       0 },
-    { "read",       method_read,        1 },
-    { "readline",   method_readline,    0 },
-    { "remove",     method_remove,      0 },
-    { "seek",       method_seek,        2 },
-#if defined(HAVE_STAT)
-    { "stat",       method_stat,        0 },
-#endif
-    { "tell",       method_tell,        0 },
-    { "write",      method_write,       1 },
-    { nullptr,      nullptr,            0 }
-};
+// }}}
 
-/*
- * File "static" functions
- * ------------------------------------------------------------------
- */
+// {{{ Irccd.File [constructor]
 
 /*
  * Function: Irccd.File(path, mode) [constructor]
@@ -394,27 +449,29 @@ const duk_function_list_entry methods[] = {
  *   - path, the path to the file,
  *   - mode, the mode string.
  * Throws:
- *   - Any exception on error.
+ *   - Irccd.SystemError on errors
  */
-duk_ret_t constructor(duk_context* ctx)
+duk_ret_t File_constructor(duk_context* ctx)
 {
-    if (!duk_is_constructor_call(ctx))
-        return 0;
+    return wrap(ctx, [&] {
+        if (!duk_is_constructor_call(ctx))
+            return 0;
 
-    try {
-        auto path = dukx_require<std::string>(ctx, 0);
-        auto mode = dukx_require<std::string>(ctx, 1);
+        const auto path = dukx_require<std::string>(ctx, 0);
+        const auto mode = dukx_require<std::string>(ctx, 1);
 
         duk_push_this(ctx);
         duk_push_pointer(ctx, new std::shared_ptr<file>(new file(path, mode)));
         duk_put_prop_string(ctx, -2, signature);
         duk_pop(ctx);
-    } catch (const std::exception&) {
-        dukx_throw(ctx, system_error());
-    }
 
-    return 0;
+        return 0;
+    });
 }
+
+// }}}
+
+// {{{ Irccd.File [destructor]
 
 /*
  * Function: Irccd.File() [destructor]
@@ -422,7 +479,7 @@ duk_ret_t constructor(duk_context* ctx)
  *
  * Delete the property.
  */
-duk_ret_t destructor(duk_context* ctx)
+duk_ret_t File_destructor(duk_context* ctx)
 {
     duk_get_prop_string(ctx, 0, signature);
     delete static_cast<std::shared_ptr<file>*>(duk_to_pointer(ctx, -1));
@@ -432,6 +489,10 @@ duk_ret_t destructor(duk_context* ctx)
     return 0;
 }
 
+// }}}
+
+// {{{ Irccd.File.basename
+
 /*
  * Function: Irccd.File.basename(path)
  * --------------------------------------------------------
@@ -440,13 +501,21 @@ duk_ret_t destructor(duk_context* ctx)
  *
  * Arguments:
  *   - path, the path to the file.
- * duk_ret_turns:
+ * Returns:
  *   The base name.
+ * Throws:
+ *   - Irccd.SystemError on errors
  */
-duk_ret_t function_basename(duk_context* ctx)
+duk_ret_t File_basename(duk_context* ctx)
 {
-    return dukx_push(ctx, fs_util::base_name(duk_require_string(ctx, 0)));
+    return wrap(ctx, [&] {
+        return dukx_push(ctx, fs_util::base_name(duk_require_string(ctx, 0)));
+    });
 }
+
+// }}}
+
+// {{{ Irccd.File.dirname
 
 /*
  * Function: Irccd.File.dirname(path)
@@ -456,13 +525,19 @@ duk_ret_t function_basename(duk_context* ctx)
  *
  * Arguments:
  *   - path, the path to the file.
- * duk_ret_turns:
- *   The directory name.
+ * Throws:
+ *   - Irccd.SystemError on errors
  */
-duk_ret_t function_dirname(duk_context* ctx)
+duk_ret_t File_dirname(duk_context* ctx)
 {
-    return dukx_push(ctx, fs_util::dir_name(duk_require_string(ctx, 0)));
+    return wrap(ctx, [&] {
+        return dukx_push(ctx, fs_util::dir_name(duk_require_string(ctx, 0)));
+    });
 }
+
+// }}}
+
+// {{{ Irccd.File.exists
 
 /*
  * Function: Irccd.File.exists(path)
@@ -472,21 +547,21 @@ duk_ret_t function_dirname(duk_context* ctx)
  *
  * Arguments:
  *   - path, the path to the file.
- * duk_ret_turns:
+ * Returns:
  *   True if exists.
  * Throws:
- *   - Any exception if we don't have access.
+ *   - Irccd.SystemError on errors
  */
-duk_ret_t function_exists(duk_context* ctx)
+duk_ret_t File_exists(duk_context* ctx)
 {
-    try {
-        duk_push_boolean(ctx, boost::filesystem::exists(duk_require_string(ctx, 0)));
-    } catch (...) {
-        duk_push_boolean(ctx, false);
-    }
-
-    return 1;
+    return wrap(ctx, [&] {
+        return dukx_push(ctx, boost::filesystem::exists(duk_require_string(ctx, 0)));
+    });
 }
+
+// }}}
+
+// {{{ Irccd.File.remove
 
 /*
  * function Irccd.File.remove(path)
@@ -497,15 +572,20 @@ duk_ret_t function_exists(duk_context* ctx)
  * Arguments:
  *   - path, the path to the file.
  * Throws:
- *   - Any exception on error.
+ *   - Irccd.SystemError on errors
  */
-duk_ret_t function_remove(duk_context* ctx)
+duk_ret_t File_remove(duk_context* ctx)
 {
-    if (::remove(duk_require_string(ctx, 0)) < 0)
-        dukx_throw(ctx, system_error());
+    return wrap(ctx, [&] {
+        boost::filesystem::remove(dukx_require<std::string>(ctx, 0));
 
-    return 0;
+        return 0;
+    });
 }
+
+// }}}
+
+// {{{ Irccd.File.stat
 
 #if defined(HAVE_STAT)
 
@@ -517,32 +597,53 @@ duk_ret_t function_remove(duk_context* ctx)
  *
  * Arguments:
  *   - path, the path to the file.
- * duk_ret_turns:
+ * Returns:
  *   The stat information.
  * Throws:
- *   - Any exception on error.
+ *   - Irccd.SystemError on errors
  */
-duk_ret_t function_stat(duk_context* ctx)
+duk_ret_t File_stat(duk_context* ctx)
 {
-    struct stat st;
+    return wrap(ctx, [&] {
+        struct stat st;
 
-    if (::stat(duk_require_string(ctx, 0), &st) < 0)
-        dukx_throw(ctx, system_error());
+        if (::stat(duk_require_string(ctx, 0), &st) < 0)
+            throw from_errno();
 
-    return dukx_push(ctx, st);
+        return dukx_push(ctx, st);
+    });
 }
 
 #endif // !HAVE_STAT
 
-const duk_function_list_entry functions[] = {
-    { "basename",   function_basename,  1 },
-    { "dirname",    function_dirname,   1 },
-    { "exists",     function_exists,    1 },
-    { "remove",     function_remove,    1 },
+// }}}
+
+const duk_function_list_entry methods[] = {
+    { "basename",   File_prototype_basename,    0 },
+    { "close",      File_prototype_close,       0 },
+    { "dirname",    File_prototype_dirname,     0 },
+    { "lines",      File_prototype_lines,       0 },
+    { "read",       File_prototype_read,        1 },
+    { "readline",   File_prototype_readline,    0 },
+    { "remove",     File_prototype_remove,      0 },
+    { "seek",       File_prototype_seek,        2 },
 #if defined(HAVE_STAT)
-    { "stat",       function_stat,      1 },
+    { "stat",       File_prototype_stat,        0 },
 #endif
-    { nullptr,      nullptr,            0 }
+    { "tell",       File_prototype_tell,        0 },
+    { "write",      File_prototype_write,       1 },
+    { nullptr,      nullptr,                    0 }
+};
+
+const duk_function_list_entry functions[] = {
+    { "basename",   File_basename,              1 },
+    { "dirname",    File_dirname,               1 },
+    { "exists",     File_exists,                1 },
+    { "remove",     File_remove,                1 },
+#if defined(HAVE_STAT)
+    { "stat",       File_stat,                  1 },
+#endif
+    { nullptr,      nullptr,                    0 }
 };
 
 const duk_number_list_entry constants[] = {
@@ -564,12 +665,12 @@ void file_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
     dukx_stack_assert sa(plugin->context());
 
     duk_get_global_string(plugin->context(), "Irccd");
-    duk_push_c_function(plugin->context(), constructor, 2);
+    duk_push_c_function(plugin->context(), File_constructor, 2);
     duk_put_number_list(plugin->context(), -1, constants);
     duk_put_function_list(plugin->context(), -1, functions);
     duk_push_object(plugin->context());
     duk_put_function_list(plugin->context(), -1, methods);
-    duk_push_c_function(plugin->context(), destructor, 1);
+    duk_push_c_function(plugin->context(), File_destructor, 1);
     duk_set_finalizer(plugin->context(), -2);
     duk_dup(plugin->context(), -1);
     duk_put_global_string(plugin->context(), prototype);

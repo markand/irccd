@@ -255,6 +255,162 @@ public:
 };
 
 /**
+ * \brief Base ECMAScript error class.
+ * \warning Override the function create for your own exceptions
+ */
+class dukx_error {
+private:
+    int type_{DUK_ERR_ERROR};
+    std::string message_;
+
+protected:
+    /**
+     * Constructor with a type of error specified, specially designed for
+     * derived errors.
+     *
+     * \param type of error (e.g. DUK_ERR_ERROR)
+     * \param message the message
+     */
+    inline dukx_error(int type, std::string message) noexcept
+        : type_(type)
+        , message_(std::move(message))
+    {
+    }
+
+public:
+    /**
+     * Constructor with a message.
+     *
+     * \param message the message
+     */
+    inline dukx_error(std::string message) noexcept
+        : message_(std::move(message))
+    {
+    }
+
+    /**
+     * Virtual destructor defaulted.
+     */
+    virtual ~dukx_error() = default;
+
+    /**
+     * Get internal Duktape error (e.g. DUK_ERR_TYPE_ERROR)
+     *
+     * \return the type
+     */
+    inline int get_type() const noexcept
+    {
+        return type_;
+    }
+
+    /**
+     * Get the error message.
+     *
+     * \return the message
+     */
+    inline const std::string& get_message() const noexcept
+    {
+        return message_;
+    }
+};
+
+/**
+ * \brief Error in eval() function.
+ */
+class dukx_eval_error : public dukx_error {
+public:
+    /**
+     * Construct an EvalError.
+     *
+     * \param message the message
+     */
+    inline dukx_eval_error(std::string message) noexcept
+        : dukx_error(DUK_ERR_EVAL_ERROR, std::move(message))
+    {
+    }
+};
+
+/**
+ * \brief Value is out of range.
+ */
+class dukx_range_error : public dukx_error {
+public:
+    /**
+     * Construct an RangeError.
+     *
+     * \param message the message
+     */
+    inline dukx_range_error(std::string message) noexcept
+        : dukx_error(DUK_ERR_RANGE_ERROR, std::move(message))
+    {
+    }
+};
+
+/**
+ * \brief Trying to use a variable that does not exist.
+ */
+class dukx_reference_error : public dukx_error {
+public:
+    /**
+     * Construct an ReferenceError.
+     *
+     * \param message the message
+     */
+    inline dukx_reference_error(std::string message) noexcept
+        : dukx_error(DUK_ERR_REFERENCE_ERROR, std::move(message))
+    {
+    }
+};
+
+/**
+ * \brief Syntax error in the script.
+ */
+class dukx_syntax_error : public dukx_error {
+public:
+    /**
+     * Construct an SyntaxError.
+     *
+     * \param message the message
+     */
+    inline dukx_syntax_error(std::string message) noexcept
+        : dukx_error(DUK_ERR_SYNTAX_ERROR, std::move(message))
+    {
+    }
+};
+
+/**
+ * \brief Invalid type given.
+ */
+class dukx_type_error : public dukx_error {
+public:
+    /**
+     * Construct an TypeError.
+     *
+     * \param message the message
+     */
+    inline dukx_type_error(std::string message) noexcept
+        : dukx_error(DUK_ERR_TYPE_ERROR, std::move(message))
+    {
+    }
+};
+
+/**
+ * \brief URI manipulation failure.
+ */
+class dukx_uri_error : public dukx_error {
+public:
+    /**
+     * Construct an URIError.
+     *
+     * \param message the message
+     */
+    inline dukx_uri_error(std::string message) noexcept
+        : dukx_error(DUK_ERR_URI_ERROR, std::move(message))
+    {
+    }
+};
+
+/**
  * \brief Operations on different types.
  *
  * This class provides some functions for the given type, depending on the
@@ -280,6 +436,20 @@ public:
  *   - `duk_double_t`,
  *   - `const char*`,
  *   - `std::string`
+ *
+ * It is also specialized for all exceptions types:
+ *
+ *   - `dukx_error`,
+ *   - `dukx_eval_error`,
+ *   - `dukx_range_error`,
+ *   - `dukx_reference_error`,
+ *   - `dukx_syntax_error`,
+ *   - `dukx_type_error`,
+ *   - `dukx_uri_error`.
+ *
+ * And more general std::exception:
+ *
+ *   - `std::exception`.
  */
 template <typename T>
 class dukx_type_traits : public std::false_type {
@@ -580,6 +750,83 @@ public:
 };
 
 /**
+ * \brief Specialization for dukx_error.
+ */
+template <>
+class dukx_type_traits<dukx_error> : public std::true_type {
+public:
+    /**
+     * Create the exception on the stack.
+     *
+     * \param ctx the context
+     * \param ex the error
+     */
+    static void raise(duk_context* ctx, const dukx_error& ex)
+    {
+        duk_error(ctx, ex.get_type(), "%s", ex.get_message().c_str());
+    }
+};
+
+/**
+ * \brief Specialization for dukx_eval_error.
+ */
+template <>
+class dukx_type_traits<dukx_eval_error> : public dukx_type_traits<dukx_error> {
+};
+
+/**
+ * \brief Specialization for dukx_range_error.
+ */
+template <>
+class dukx_type_traits<dukx_range_error> : public dukx_type_traits<dukx_error> {
+};
+
+/**
+ * \brief Specialization for dukx_reference_error.
+ */
+template <>
+class dukx_type_traits<dukx_reference_error> : public dukx_type_traits<dukx_error> {
+};
+
+/**
+ * \brief Specialization for dukx_syntax_error.
+ */
+template <>
+class dukx_type_traits<dukx_syntax_error> : public dukx_type_traits<dukx_error> {
+};
+
+/**
+ * \brief Specialization for dukx_type_error.
+ */
+template <>
+class dukx_type_traits<dukx_type_error> : public dukx_type_traits<dukx_error> {
+};
+
+/**
+ * \brief Specialization for dukx_uri_error.
+ */
+template <>
+class dukx_type_traits<dukx_uri_error> : public dukx_type_traits<dukx_error> {
+};
+
+/**
+ * \brief Specialization for std::exception.
+ */
+template <>
+class dukx_type_traits<std::exception> : public std::true_type {
+public:
+    /**
+     * Raise std::exception as general DUK_ERR_ERROR.
+     *
+     * \param ctx the context
+     * \param ex the exception
+     */
+    static void raise(duk_context* ctx, const std::exception& ex) {
+        duk_error(ctx, DUK_ERR_ERROR, "%s", ex.what());
+    }
+};
+
+/**
  * \brief Partial specialization for collections.
  *
  * Derive from this class to implement type traits for collections.
@@ -784,154 +1031,13 @@ T dukx_require(duk_context* ctx, duk_idx_t index)
 }
 
 /**
- * \brief Base ECMAScript error class.
- * \warning Override the function create for your own exceptions
- */
-class dukx_error {
-private:
-    int type_{DUK_ERR_ERROR};
-    std::string message_;
-
-protected:
-    /**
-     * Constructor with a type of error specified, specially designed for
-     * derived errors.
-     *
-     * \param type of error (e.g. DUK_ERR_ERROR)
-     * \param message the message
-     */
-    inline dukx_error(int type, std::string message) noexcept
-        : type_(type)
-        , message_(std::move(message))
-    {
-    }
-
-public:
-    /**
-     * Constructor with a message.
-     *
-     * \param message the message
-     */
-    inline dukx_error(std::string message) noexcept
-        : message_(std::move(message))
-    {
-    }
-
-    /**
-     * Virtual destructor defaulted.
-     */
-    virtual ~dukx_error() = default;
-
-    /**
-     * Create the exception on the stack.
-     *
-     * \note the default implementation search for the global variables
-     * \param ctx the context
-     */
-    void create(duk_context* ctx) const
-    {
-        duk_push_error_object(ctx, type_, "%s", message_.c_str());
-    }
-};
-
-/**
- * \brief Error in eval() function.
- */
-class dukx_eval_error : public dukx_error {
-public:
-    /**
-     * Construct an EvalError.
-     *
-     * \param message the message
-     */
-    inline dukx_eval_error(std::string message) noexcept
-        : dukx_error(DUK_ERR_EVAL_ERROR, std::move(message))
-    {
-    }
-};
-
-/**
- * \brief Value is out of range.
- */
-class dukx_range_error : public dukx_error {
-public:
-    /**
-     * Construct an RangeError.
-     *
-     * \param message the message
-     */
-    inline dukx_range_error(std::string message) noexcept
-        : dukx_error(DUK_ERR_RANGE_ERROR, std::move(message))
-    {
-    }
-};
-
-/**
- * \brief Trying to use a variable that does not exist.
- */
-class dukx_reference_error : public dukx_error {
-public:
-    /**
-     * Construct an ReferenceError.
-     *
-     * \param message the message
-     */
-    inline dukx_reference_error(std::string message) noexcept
-        : dukx_error(DUK_ERR_REFERENCE_ERROR, std::move(message))
-    {
-    }
-};
-
-/**
- * \brief Syntax error in the script.
- */
-class dukx_syntax_error : public dukx_error {
-public:
-    /**
-     * Construct an SyntaxError.
-     *
-     * \param message the message
-     */
-    inline dukx_syntax_error(std::string message) noexcept
-        : dukx_error(DUK_ERR_SYNTAX_ERROR, std::move(message))
-    {
-    }
-};
-
-/**
- * \brief Invalid type given.
- */
-class dukx_type_error : public dukx_error {
-public:
-    /**
-     * Construct an TypeError.
-     *
-     * \param message the message
-     */
-    inline dukx_type_error(std::string message) noexcept
-        : dukx_error(DUK_ERR_TYPE_ERROR, std::move(message))
-    {
-    }
-};
-
-/**
- * \brief URI manipulation failure.
- */
-class dukx_uri_error : public dukx_error {
-public:
-    /**
-     * Construct an URIError.
-     *
-     * \param message the message
-     */
-    inline dukx_uri_error(std::string message) noexcept
-        : dukx_error(DUK_ERR_URI_ERROR, std::move(message))
-    {
-    }
-};
-
-/**
  * Create an exception into the stack and throws it.
+ *
+ * The dukx_type_traits<Error> must have the following function:
+ *
+ * ```
+ * static void raise(const Error&);
+ * ```
  *
  * \param ctx the Duktape context
  * \param error the error object
@@ -939,9 +1045,9 @@ public:
 template <typename Error>
 void dukx_throw(duk_context* ctx, const Error& error)
 {
-    error.create(ctx);
+    static_assert(dukx_type_traits<Error>::value, "type T not supported");
 
-    (void)duk_throw(ctx);
+    dukx_type_traits<Error>::raise(ctx, error);
 }
 
 /**

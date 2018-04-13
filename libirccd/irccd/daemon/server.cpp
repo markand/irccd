@@ -555,6 +555,8 @@ void server::invite(std::string target, std::string channel)
 
 void server::join(std::string channel, std::string password)
 {
+    assert(!channel.empty());
+
     auto it = std::find_if(rchannels_.begin(), rchannels_.end(), [&] (const auto& c) {
         return c.name == channel;
     });

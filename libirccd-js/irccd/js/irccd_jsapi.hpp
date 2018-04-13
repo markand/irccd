@@ -27,40 +27,13 @@
 #include <cerrno>
 #include <cstring>
 #include <string>
+#include <system_error>
+
+#include <boost/system/system_error.hpp>
 
 #include "jsapi.hpp"
 
 namespace irccd {
-
-/**
- * \brief Custom Javascript exception for system error.
- */
-class system_error {
-private:
-    int errno_;
-    std::string message_;
-
-public:
-    /**
-     * Create a system error from the current errno value.
-     */
-    system_error();
-
-    /**
-     * Create a system error with the given errno and message.
-     *
-     * \param e the errno number
-     * \param message the message
-     */
-    system_error(int e, std::string message);
-
-    /**
-     * Create the SystemError Javascript exception.
-     *
-     * \param ctx the context
-     */
-    void create(duk_context* ctx) const;
-};
 
 /**
  * \brief Irccd Javascript API.
@@ -92,6 +65,36 @@ public:
      * \return the irccd reference
      */
     static irccd& self(duk_context* ctx);
+};
+
+/**
+ * \brief Specialize dukx_type_traits for std::system_error.
+ */
+template <>
+class dukx_type_traits<std::system_error> : public std::true_type {
+public:
+    /**
+     * Raise an Irccd.SystemError.
+     *
+     * \param ctx the context
+     * param ex the exception
+     */
+    static void raise(duk_context* ctx, const std::system_error& ex);
+};
+
+/**
+ * \brief Specialize dukx_type_traits for boost::system::system_error.
+ */
+template <>
+class dukx_type_traits<boost::system::system_error> : public std::true_type {
+public:
+    /**
+     * Raise an Irccd.SystemError.
+     *
+     * \param ctx the context
+     * param ex the exception
+     */
+    static void raise(duk_context* ctx, const boost::system::system_error& ex);
 };
 
 } // !irccd
