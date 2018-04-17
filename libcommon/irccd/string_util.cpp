@@ -26,6 +26,7 @@
 #   include <memory>
 #endif
 
+#include <cassert>
 #include <iomanip>
 
 #include "string_util.hpp"
@@ -35,6 +36,8 @@ using namespace std::string_literals;
 namespace irccd {
 
 namespace string_util {
+
+// {{{ subst
 
 namespace {
 
@@ -372,15 +375,23 @@ std::string format(std::string text, const subst& params)
     return oss.str();
 }
 
-std::string strip(std::string str)
+// }}}
+
+// {{{ strip
+
+std::string strip(std::string str) noexcept
 {
-    auto test = [] (char c) { return !std::isspace(c); };
+    const auto test = [] (auto c) { return !std::isspace(c); };
 
     str.erase(str.begin(), std::find_if(str.begin(), str.end(), test));
     str.erase(std::find_if(str.rbegin(), str.rend(), test).base(), str.end());
 
     return str;
 }
+
+// }}}
+
+// {{{ split
 
 std::vector<std::string> split(const std::string& list, const std::string& delimiters, int max)
 {
@@ -413,6 +424,10 @@ std::vector<std::string> split(const std::string& list, const std::string& delim
     return result;
 }
 
+// }}}
+
+// {{{ is_boolean
+
 bool is_boolean(std::string value) noexcept
 {
     std::transform(value.begin(), value.end(), value.begin(), [] (auto c) {
@@ -421,6 +436,8 @@ bool is_boolean(std::string value) noexcept
 
     return value == "1" || value == "YES" || value == "TRUE" || value == "ON";
 }
+
+// }}}
 
 } // !string_util
 

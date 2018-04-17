@@ -24,8 +24,6 @@
  * \brief Native plugin implementation.
  */
 
-#include <boost/dll.hpp>
-
 #include "plugin.hpp"
 
 namespace irccd {

@@ -26,6 +26,8 @@
 
 #include <irccd/sysconfig.hpp>
 
+#include <string>
+
 #include "json.hpp"
 
 namespace irccd {

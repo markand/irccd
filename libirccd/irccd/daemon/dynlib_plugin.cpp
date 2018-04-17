@@ -16,7 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <cctype>
 #include <algorithm>
 
 #include <boost/dll.hpp>
@@ -39,7 +38,7 @@ namespace {
 
 std::string symbol(std::string id) noexcept
 {
-    std::transform(id.begin(), id.end(), id.begin(), [] (auto c) {
+    std::transform(id.begin(), id.end(), id.begin(), [] (auto c) noexcept {
         return c == '-' ? '_' : c;
     });
 

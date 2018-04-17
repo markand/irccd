@@ -26,7 +26,6 @@
 
 #include "sysconfig.hpp"
 
-#include <cassert>
 #include <ctime>
 #include <initializer_list>
 #include <limits>
@@ -42,12 +41,18 @@
 
 namespace irccd {
 
+/**
+ * \file string_util.hpp
+ * \brief String utilities.
+ */
 namespace string_util {
+
+// {{{ subst
 
 /**
  * \brief Disable or enable some features.
  */
-enum class subst_flags : std::uint8_t {
+enum class subst_flags : unsigned {
     date        = (1 << 0),     //!< date templates
     keywords    = (1 << 1),     //!< keywords
     env         = (1 << 2),     //!< environment variables
@@ -150,7 +155,7 @@ public:
  * - <strong>\${name}</strong>: name will be substituted from the environment
  *   variable,
  * - <strong>\@{attributes}</strong>: the attributes will be substituted to IRC
- *   colors (see below),
+ *   or shell colors (see below),
  * - <strong>%</strong>, any format accepted by strftime(3).
  *
  * ## Attributes
@@ -187,13 +192,21 @@ public:
  */
 IRCCD_EXPORT std::string format(std::string text, const subst& params = {});
 
+// }}}
+
+// {{{ strip
+
 /**
  * Remove leading and trailing spaces.
  *
  * \param str the string
  * \return the removed white spaces
  */
-IRCCD_EXPORT std::string strip(std::string str);
+IRCCD_EXPORT std::string strip(std::string str) noexcept;
+
+// }}}
+
+// {{{ split
 
 /**
  * Split a string by delimiters.
@@ -204,6 +217,10 @@ IRCCD_EXPORT std::string strip(std::string str);
  * \return a list of string splitted
  */
 IRCCD_EXPORT std::vector<std::string> split(const std::string& list, const std::string& delimiters, int max = -1);
+
+// }}}
+
+// {{{ join
 
 /**
  * Join values by a separator and return a string.
@@ -254,9 +271,12 @@ inline std::string join(std::initializer_list<T> list, DelimType delim = ':')
     return join(list.begin(), list.end(), delim);
 }
 
+// }}}
+
+// {{{ is_identifier
+
 /**
- * Server and identities must have strict names. This function can
- * be used to ensure that they are valid.
+ * Check if a string is a valid irccd identifier.
  *
  * \param name the identifier name
  * \return true if is valid
@@ -266,6 +286,10 @@ inline bool is_identifier(const std::string& name)
     return std::regex_match(name, std::regex("[A-Za-z0-9-_]+"));
 }
 
+// }}}
+
+// {{{ is_boolean
+
 /**
  * Check if the value is a boolean, 1, yes and true are accepted.
  *
@@ -274,6 +298,10 @@ inline bool is_identifier(const std::string& name)
  * \note this function is case-insensitive
  */
 IRCCD_EXPORT bool is_boolean(std::string value) noexcept;
+
+// }}}
+
+// {{{ sprintf
 
 /**
  * \cond HIDDEN_SYMBOLS
@@ -286,7 +314,7 @@ inline void sprintf(boost::format&)
 }
 
 template <typename Arg, typename... Args>
-void sprintf(boost::format& fmter, const Arg& arg, const Args&... args)
+inline void sprintf(boost::format& fmter, const Arg& arg, const Args&... args)
 {
     fmter % arg;
     sprintf(fmter, args...);
@@ -317,6 +345,10 @@ std::string sprintf(const Format& format, const Args&... args)
     return fmter.str();
 }
 
+// }}}
+
+// {{{ to_int
+
 /**
  * Convert the given string into a signed integer.
  *
@@ -340,6 +372,10 @@ boost::optional<T> to_int(const std::string& str,
 
     return static_cast<T>(v);
 }
+
+// }}}
+
+// {{{ to_uint
 
 /**
  * Convert the given string into a unsigned integer.
@@ -365,6 +401,8 @@ boost::optional<T> to_uint(const std::string& str,
 
     return static_cast<T>(v);
 }
+
+// }}}
 
 } // !string_util
 

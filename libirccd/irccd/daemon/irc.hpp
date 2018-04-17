@@ -26,7 +26,6 @@
 
 #include <irccd/sysconfig.hpp>
 
-#include <deque>
 #include <functional>
 #include <string>
 #include <utility>

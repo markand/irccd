@@ -28,8 +28,6 @@
 #include <string>
 #include <vector>
 
-#include <boost/filesystem.hpp>
-
 #include "sysconfig.hpp"
 
 namespace irccd {

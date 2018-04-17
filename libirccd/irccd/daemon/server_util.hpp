@@ -56,7 +56,8 @@ namespace server_util {
  * Example: `!reminder help' may invoke the command event if a plugin reminder
  * exists.
  */
-struct message_pack {
+class message_pack {
+public:
     /**
      * \brief Describe which type of message has been received
      */

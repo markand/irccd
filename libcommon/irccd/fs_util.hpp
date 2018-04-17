@@ -36,6 +36,8 @@ namespace irccd {
  */
 namespace fs_util {
 
+// {{{ base_name
+
 /**
  * Get the base name from a path.
  *
@@ -49,6 +51,10 @@ inline std::string base_name(const std::string& path)
     return boost::filesystem::path(path).filename().string();
 }
 
+// }}}
+
+// {{{ dir_name
+
 /**
  * Get the parent directory from a path.
  *
@@ -61,6 +67,10 @@ inline std::string dir_name(const std::string& path)
 {
     return boost::filesystem::path(path).parent_path().string();
 }
+
+// }}}
+
+// {{{ find_if
 
 /**
  * Search an item recursively.
@@ -94,6 +104,10 @@ std::string find_if(const std::string& base, bool recursive, Predicate&& predica
         : find(boost::filesystem::directory_iterator(base));
 }
 
+// }}}
+
+// {{{ find
+
 /**
  * Find a file by name recursively.
  *
@@ -125,6 +139,8 @@ inline std::string find(const std::string& base, const std::regex& regex, bool r
         return std::regex_match(entry.path().filename().string(), regex);
     });
 }
+
+// }}}
 
 } // !fs_util
 

@@ -34,14 +34,28 @@
 #include <cassert>
 #include <memory>
 #include <string>
+#include <system_error>
 #include <unordered_map>
 #include <vector>
-
-#include "server.hpp"
 
 namespace irccd {
 
 class irccd;
+
+class connect_event;
+class disconnect_event;
+class invite_event;
+class join_event;
+class kick_event;
+class me_event;
+class message_event;
+class mode_event;
+class names_event;
+class nick_event;
+class notice_event;
+class part_event;
+class topic_event;
+class whois_event;
 
 /**
  * \brief Configuration map extract from config file.

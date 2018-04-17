@@ -29,7 +29,6 @@
 #include <cstddef>
 #include <cassert>
 #include <string>
-#include <system_error>
 #include <utility>
 
 #include <boost/asio.hpp>

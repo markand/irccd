@@ -29,8 +29,7 @@
 #include <cassert>
 #include <set>
 #include <string>
-
-#include <boost/system/system_error.hpp>
+#include <system_error>
 
 namespace irccd {
 

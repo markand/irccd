@@ -25,6 +25,7 @@
  */
 
 #include <irccd/daemon/dynlib_plugin.hpp>
+#include <irccd/daemon/server.hpp>
 #include <irccd/daemon/irccd.hpp>
 
 namespace irccd {

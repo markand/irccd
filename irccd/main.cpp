@@ -85,6 +85,8 @@ namespace {
 
 std::unique_ptr<irccd> instance;
 
+// {{{ usage
+
 void usage()
 {
     std::cerr << "usage: irccd [options...]\n\n";
@@ -96,6 +98,10 @@ void usage()
     std::cerr << "      --version           show the version\n";
     std::exit(1);
 }
+
+// }}}
+
+// {{{ version
 
 void version(const option::result& options)
 {
@@ -120,6 +126,10 @@ void version(const option::result& options)
     std::exit(0);
 }
 
+// }}}
+
+// {{{ init
+
 void init(int& argc, char**& argv)
 {
     // Needed for some components.
@@ -131,6 +141,10 @@ void init(int& argc, char**& argv)
     -- argc;
     ++ argv;
 }
+
+// }}}
+
+// {{{ parse
 
 option::result parse(int& argc, char**& argv)
 {
@@ -170,6 +184,10 @@ option::result parse(int& argc, char**& argv)
     return result;
 }
 
+// }}}
+
+// {{{ open
+
 config open(const option::result& result)
 {
     auto it = result.find("-c");
@@ -184,6 +202,8 @@ config open(const option::result& result)
 
     return *cfg;
 }
+
+// }}}
 
 } // !namespace
 
