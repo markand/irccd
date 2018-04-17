@@ -19,6 +19,7 @@
 #include <algorithm>
 
 #include <boost/dll.hpp>
+#include <boost/filesystem.hpp>
 
 #include <irccd/string_util.hpp>
 
@@ -36,8 +37,16 @@ namespace irccd {
 
 namespace {
 
-std::string symbol(std::string id) noexcept
+std::string symbol(const std::string& path) noexcept
 {
+    auto id = boost::filesystem::path(path).stem().string();
+
+    // Remove forbidden characters.
+    id.erase(std::remove_if(id.begin(), id.end(), [] (auto c) {
+        return !isalnum(c) && c != '-' && c != '_';
+    }), id.end());
+
+    // Transform - to _.
     std::transform(id.begin(), id.end(), id.begin(), [] (auto c) noexcept {
         return c == '-' ? '_' : c;
     });
