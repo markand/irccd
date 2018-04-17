@@ -25,7 +25,7 @@
 #include <unordered_map>
 
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/filesystem/path.hpp>
+#include <boost/filesystem.hpp>
 
 #if defined(HAVE_LIBEDIT)
 #   include <histedit.h>
@@ -57,276 +57,28 @@ boost::asio::io_service io;
 std::unique_ptr<irccd> daemon;
 std::shared_ptr<plugin> plugin;
 
-void usage()
-{
-    std::cerr << "usage: irccd-test [-c config] plugin-name" << std::endl;
-    std::exit(1);
-}
-
-std::shared_ptr<server> get_server(std::string name)
-{
-    name = boost::algorithm::trim_copy(name);
-
-    if (name.empty())
-        name = "test";
-
-    auto s = daemon->servers().get(name);
-
-    if (!s) {
-        s = std::make_shared<debug_server>(io, std::move(name), "localhost");
-        daemon->servers().add(s);
-    }
-
-    return s;
-}
-
-std::string get_arg(const std::vector<std::string>& args, unsigned index)
-{
-    if (index >= args.size())
-        return "";
-
-    return args[index];
-}
+// {{{ function table
 
 /*
- * onCommand server origin channel message
+ * Forward declarations of handlers.
  */
-void on_command(const std::string& data)
-{
-    const auto args = su::split(data, " ", 4);
-
-    plugin->handle_command(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3)
-    });
-}
-
-/*
- * onConnect server
- */
-void on_connect(const std::string& data)
-{
-    const auto args = su::split(data, " ");
-
-    plugin->handle_connect(*daemon, {get_server(get_arg(args, 0))});
-}
-
-/*
- * onInvite server origin channel target
- */
-void on_invite(const std::string& data)
-{
-    auto args = su::split(data, " ");
-
-    plugin->handle_invite(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3),
-    });
-}
-
-/*
- * onJoin server origin channel
- */
-void on_join(const std::string& data)
-{
-    const auto args = su::split(data, " ");
-
-    plugin->handle_join(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2)
-    });
-}
-
-/*
- * onKick server origin channel reason
- */
-void on_kick(const std::string& data)
-{
-    const auto args = su::split(data, " ", 5);
-
-    plugin->handle_kick(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3),
-        get_arg(args, 4),
-    });
-}
-
-/*
- * onLoad
- */
-void on_load(const std::string&)
-{
-    plugin->handle_load(*daemon);
-}
-
-/*
- * onMe server origin channel message
- */
-void on_me(const std::string& data)
-{
-    const auto args = su::split(data, " ", 4);
-
-    plugin->handle_me(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3)
-    });
-}
-
-/*
- * onMessage server origin channel message
- */
-void on_message(const std::string& data)
-{
-    const auto args = su::split(data, " ", 4);
-
-    plugin->handle_message(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3)
-    });
-}
-
-/*
- * onMode server origin channel mode limit user mask
- */
-void on_mode(const std::string& data)
-{
-    const auto args = su::split(data, " ", 7);
-
-    plugin->handle_mode(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3),
-        get_arg(args, 4),
-        get_arg(args, 5),
-        get_arg(args, 6),
-    });
-}
-
-/*
- * onNames server channel nick1 nick2 nickN
- */
-void on_names(const std::string& data)
-{
-    const auto args = su::split(data, " ");
-
-    names_event ev;
-
-    ev.server = get_server(get_arg(args, 0));
-    ev.channel = get_arg(args, 1);
-
-    if (args.size() >= 3U)
-        ev.names.insert(ev.names.begin(), args.begin() + 2, args.end());
-
-    plugin->handle_names(*daemon, ev);
-}
-
-/*
- * onNick server origin nickname
- */
-void on_nick(const std::string& data)
-{
-    const auto args = su::split(data, " ");
-
-    plugin->handle_nick(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2)
-    });
-}
-
-/*
- * onNotice server origin channel nickname
- */
-void on_notice(const std::string& data)
-{
-    const auto args = su::split(data, " ", 4);
-
-    plugin->handle_notice(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3)
-    });
-}
-
-/*
- * onPart server origin channel reason
- */
-void on_part(const std::string& data)
-{
-    const auto args = su::split(data, " ", 4);
-
-    plugin->handle_part(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3),
-    });
-}
-
-/*
- * onReload
- */
-void on_reload(const std::string&)
-{
-    plugin->handle_reload(*daemon);
-}
-
-/*
- * onTopic server origin channel topic
- */
-void on_topic(const std::string& data)
-{
-    const auto args = su::split(data, " ", 4);
-
-    plugin->handle_topic(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3)
-    });
-}
-
-/*
- * onUnload
- */
-void on_unload(const std::string&)
-{
-    plugin->handle_unload(*daemon);
-}
-
-/*
- * onWhois server nick user host realname chan1 chan2 chanN
- */
-void on_whois(const std::string& data)
-{
-    const auto args = su::split(data, " ");
-
-    whois_event ev;
-
-    ev.server = get_server(get_arg(args, 0));
-    ev.whois.nick = get_arg(args, 1);
-    ev.whois.user = get_arg(args, 2);
-    ev.whois.host = get_arg(args, 3);
-    ev.whois.realname = get_arg(args, 4);
-
-    if (args.size() >= 5)
-        ev.whois.channels.insert(ev.whois.channels.begin(), args.begin() + 5, args.end());
-
-    plugin->handle_whois(*daemon, ev);
-}
+void on_command(const std::string&);
+void on_connect(const std::string&);
+void on_invite(const std::string&);
+void on_join(const std::string&);
+void on_kick(const std::string&);
+void on_load(const std::string&);
+void on_me(const std::string&);
+void on_message(const std::string&);
+void on_mode(const std::string&);
+void on_names(const std::string&);
+void on_nick(const std::string&);
+void on_notice(const std::string&);
+void on_part(const std::string&);
+void on_reload(const std::string&);
+void on_topic(const std::string&);
+void on_unload(const std::string&);
+void on_whois(const std::string&);
 
 /*
  * Table of user functions.
@@ -354,6 +106,361 @@ static const functions list{
     { "onWhois",    &(on_whois)     }
 };
 
+// }}}
+
+// {{{ usage
+
+void usage()
+{
+    std::cerr << "usage: irccd-test [-c config] plugin-name" << std::endl;
+    std::exit(1);
+}
+
+// }}}
+
+// {{{ get_server
+
+std::shared_ptr<server> get_server(std::string name)
+{
+    name = boost::algorithm::trim_copy(name);
+
+    if (name.empty())
+        name = "test";
+
+    auto s = daemon->servers().get(name);
+
+    if (!s) {
+        s = std::make_shared<debug_server>(io, std::move(name), "localhost");
+        daemon->servers().add(s);
+    }
+
+    return s;
+}
+
+// }}}
+
+// {{{ get_arg
+
+std::string get_arg(const std::vector<std::string>& args, unsigned index)
+{
+    if (index >= args.size())
+        return "";
+
+    return args[index];
+}
+
+// }}}
+
+// {{{ on_command
+
+/*
+ * onCommand server origin channel message
+ */
+void on_command(const std::string& data)
+{
+    const auto args = su::split(data, " ", 4);
+
+    plugin->handle_command(*daemon, {
+        get_server(get_arg(args, 0)),
+        get_arg(args, 1),
+        get_arg(args, 2),
+        get_arg(args, 3)
+    });
+}
+
+// }}}
+
+// {{{ on_connect
+
+/*
+ * onConnect server
+ */
+void on_connect(const std::string& data)
+{
+    const auto args = su::split(data, " ");
+
+    plugin->handle_connect(*daemon, {get_server(get_arg(args, 0))});
+}
+
+// }}}
+
+// {{{ on_invite
+
+/*
+ * onInvite server origin channel target
+ */
+void on_invite(const std::string& data)
+{
+    const auto args = su::split(data, " ");
+
+    plugin->handle_invite(*daemon, {
+        get_server(get_arg(args, 0)),
+        get_arg(args, 1),
+        get_arg(args, 2),
+        get_arg(args, 3),
+    });
+}
+
+// }}}
+
+// {{{ on_join
+
+/*
+ * onJoin server origin channel
+ */
+void on_join(const std::string& data)
+{
+    const auto args = su::split(data, " ");
+
+    plugin->handle_join(*daemon, {
+        get_server(get_arg(args, 0)),
+        get_arg(args, 1),
+        get_arg(args, 2)
+    });
+}
+
+// }}}
+
+// {{{ on_kick
+
+/*
+ * onKick server origin channel reason
+ */
+void on_kick(const std::string& data)
+{
+    const auto args = su::split(data, " ", 5);
+
+    plugin->handle_kick(*daemon, {
+        get_server(get_arg(args, 0)),
+        get_arg(args, 1),
+        get_arg(args, 2),
+        get_arg(args, 3),
+        get_arg(args, 4),
+    });
+}
+
+// }}}
+
+// {{{ on_load
+
+/*
+ * onLoad
+ */
+void on_load(const std::string&)
+{
+    plugin->handle_load(*daemon);
+}
+
+// }}}
+
+// {{{ on_me
+
+/*
+ * onMe server origin channel message
+ */
+void on_me(const std::string& data)
+{
+    const auto args = su::split(data, " ", 4);
+
+    plugin->handle_me(*daemon, {
+        get_server(get_arg(args, 0)),
+        get_arg(args, 1),
+        get_arg(args, 2),
+        get_arg(args, 3)
+    });
+}
+
+// }}}
+
+// {{{ on_message
+
+/*
+ * onMessage server origin channel message
+ */
+void on_message(const std::string& data)
+{
+    const auto args = su::split(data, " ", 4);
+
+    plugin->handle_message(*daemon, {
+        get_server(get_arg(args, 0)),
+        get_arg(args, 1),
+        get_arg(args, 2),
+        get_arg(args, 3)
+    });
+}
+
+// }}}
+
+// {{{ on_mode
+
+/*
+ * onMode server origin channel mode limit user mask
+ */
+void on_mode(const std::string& data)
+{
+    const auto args = su::split(data, " ", 7);
+
+    plugin->handle_mode(*daemon, {
+        get_server(get_arg(args, 0)),
+        get_arg(args, 1),
+        get_arg(args, 2),
+        get_arg(args, 3),
+        get_arg(args, 4),
+        get_arg(args, 5),
+        get_arg(args, 6),
+    });
+}
+
+// }}}
+
+// {{{ on_names
+
+/*
+ * onNames server channel nick1 nick2 nickN
+ */
+void on_names(const std::string& data)
+{
+    const auto args = su::split(data, " ");
+
+    names_event ev;
+
+    ev.server = get_server(get_arg(args, 0));
+    ev.channel = get_arg(args, 1);
+
+    if (args.size() >= 3U)
+        ev.names.insert(ev.names.begin(), args.begin() + 2, args.end());
+
+    plugin->handle_names(*daemon, ev);
+}
+
+// }}}
+
+// {{{ on_nick
+
+/*
+ * onNick server origin nickname
+ */
+void on_nick(const std::string& data)
+{
+    const auto args = su::split(data, " ");
+
+    plugin->handle_nick(*daemon, {
+        get_server(get_arg(args, 0)),
+        get_arg(args, 1),
+        get_arg(args, 2)
+    });
+}
+
+// }}}
+
+// {{{ on_notice
+
+/*
+ * onNotice server origin channel nickname
+ */
+void on_notice(const std::string& data)
+{
+    const auto args = su::split(data, " ", 4);
+
+    plugin->handle_notice(*daemon, {
+        get_server(get_arg(args, 0)),
+        get_arg(args, 1),
+        get_arg(args, 2),
+        get_arg(args, 3)
+    });
+}
+
+// }}}
+
+// {{{ on_part
+
+/*
+ * onPart server origin channel reason
+ */
+void on_part(const std::string& data)
+{
+    const auto args = su::split(data, " ", 4);
+
+    plugin->handle_part(*daemon, {
+        get_server(get_arg(args, 0)),
+        get_arg(args, 1),
+        get_arg(args, 2),
+        get_arg(args, 3),
+    });
+}
+
+// }}}
+
+// {{{ on_reload
+
+/*
+ * onReload
+ */
+void on_reload(const std::string&)
+{
+    plugin->handle_reload(*daemon);
+}
+
+// }}}
+
+// {{{ on_topic
+
+/*
+ * onTopic server origin channel topic
+ */
+void on_topic(const std::string& data)
+{
+    const auto args = su::split(data, " ", 4);
+
+    plugin->handle_topic(*daemon, {
+        get_server(get_arg(args, 0)),
+        get_arg(args, 1),
+        get_arg(args, 2),
+        get_arg(args, 3)
+    });
+}
+
+// }}}
+
+// {{{ on_unload
+
+/*
+ * onUnload
+ */
+void on_unload(const std::string&)
+{
+    plugin->handle_unload(*daemon);
+}
+
+// }}}
+
+// {{{ on_whois
+
+/*
+ * onWhois server nick user host realname chan1 chan2 chanN
+ */
+void on_whois(const std::string& data)
+{
+    const auto args = su::split(data, " ");
+
+    whois_event ev;
+
+    ev.server = get_server(get_arg(args, 0));
+    ev.whois.nick = get_arg(args, 1);
+    ev.whois.user = get_arg(args, 2);
+    ev.whois.host = get_arg(args, 3);
+    ev.whois.realname = get_arg(args, 4);
+
+    if (args.size() >= 5)
+        ev.whois.channels.insert(ev.whois.channels.begin(), args.begin() + 5, args.end());
+
+    plugin->handle_whois(*daemon, ev);
+}
+
+// }}}
+
+// {{{ exec
+
 void exec(const std::string& line)
 {
     const auto pos = line.find(' ');
@@ -363,7 +470,11 @@ void exec(const std::string& line)
         it->second(pos == std::string::npos ? "" : line.substr(pos + 1));
 }
 
+// }}}
+
 #if defined(HAVE_LIBEDIT)
+
+// {{{ prompt (libedit version)
 
 const char* prompt(EditLine*)
 {
@@ -441,7 +552,11 @@ void run()
     }
 }
 
+// }}}
+
 #else
+
+// {{{ run (standard version)
 
 void run()
 {
@@ -457,7 +572,11 @@ void run()
     }
 }
 
+// }}}
+
 #endif
+
+// {{{ load_plugins
 
 void load_plugins(int argc, char** argv)
 {
@@ -467,6 +586,10 @@ void load_plugins(int argc, char** argv)
     daemon->plugins().load("test", boost::filesystem::exists(argv[0]) ? argv[0] : "");
     plugin = daemon->plugins().get("test");
 }
+
+// }}}
+
+// {{{ load_options
 
 void load_options(int& argc, char**& argv)
 {
@@ -489,6 +612,10 @@ void load_options(int& argc, char**& argv)
     }
 }
 
+// }}}
+
+// {{{ load
+
 void load(int argc, char** argv)
 {
     daemon = std::make_unique<irccd>(io);
@@ -500,6 +627,8 @@ void load(int argc, char** argv)
     load_options(argc, argv);
     load_plugins(argc, argv);
 }
+
+// }}}
 
 } // !namespace
 
