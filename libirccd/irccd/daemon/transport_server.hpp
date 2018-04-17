@@ -127,7 +127,7 @@ namespace irccd {
  * \see transport_client
  * \see transport_service
  */
-class transport_server {
+class transport_server : public std::enable_shared_from_this<transport_server> {
 public:
     /**
      * Set of clients.

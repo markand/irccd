@@ -40,7 +40,7 @@ class irccd;
 class transport_service {
 public:
     using commands_t = std::vector<std::unique_ptr<command>>;
-    using servers_t = std::vector<std::unique_ptr<transport_server>>;
+    using servers_t = std::vector<std::shared_ptr<transport_server>>;
 
 private:
     irccd& irccd_;
@@ -89,7 +89,7 @@ public:
      *
      * \param ts the transport server
      */
-    void add(std::unique_ptr<transport_server> ts);
+    void add(std::shared_ptr<transport_server> ts);
 
     /**
      * Send data to all clients.

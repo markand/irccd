@@ -47,7 +47,7 @@ public:
 
 private:
     state_t state_{state_t::authenticating};
-    transport_server& parent_;
+    std::weak_ptr<transport_server> parent_;
     std::shared_ptr<io::stream> stream_;
     std::deque<std::pair<nlohmann::json, io::write_handler>> queue_;
 
@@ -62,31 +62,11 @@ public:
      * \param server the parent
      * \param stream the I/O stream
      */
-    inline transport_client(transport_server& server, std::shared_ptr<io::stream> stream) noexcept
+    inline transport_client(std::weak_ptr<transport_server> server, std::shared_ptr<io::stream> stream) noexcept
         : parent_(server)
         , stream_(std::move(stream))
     {
         assert(stream_);
-    }
-
-    /**
-     * Get the transport server parent.
-     *
-     * \return the parent
-     */
-    inline const transport_server& get_parent() const noexcept
-    {
-        return parent_;
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \return the parent
-     */
-    inline transport_server& get_parent() noexcept
-    {
-        return parent_;
     }
 
     /**

@@ -108,7 +108,7 @@ transport_service::transport_service(irccd& irccd) noexcept
 
 transport_service::~transport_service() noexcept = default;
 
-void transport_service::add(std::unique_ptr<transport_server> ts)
+void transport_service::add(std::shared_ptr<transport_server> ts)
 {
     assert(ts);
 

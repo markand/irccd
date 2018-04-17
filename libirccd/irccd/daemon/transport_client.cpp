@@ -44,7 +44,9 @@ void transport_client::flush()
 void transport_client::erase()
 {
     state_ = state_t::closing;
-    parent_.get_clients().erase(shared_from_this());
+
+    if (auto parent = parent_.lock())
+        parent->get_clients().erase(shared_from_this());
 }
 
 void transport_client::read(io::read_handler handler)

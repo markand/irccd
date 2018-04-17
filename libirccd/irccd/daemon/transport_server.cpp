@@ -103,7 +103,7 @@ void transport_server::accept(accept_handler handler)
         }
 
         do_greetings(
-            std::make_shared<transport_client>(*this, std::move(stream)),
+            std::make_shared<transport_client>(shared_from_this(), std::move(stream)),
             std::move(handler)
         );
     });
