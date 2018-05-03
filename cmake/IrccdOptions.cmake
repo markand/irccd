@@ -97,7 +97,7 @@ set(WITH_DOCDIR "share/doc/irccd" CACHE STRING "Documentation directory")
 set(WITH_MANDIR "share/man" CACHE STRING "Man directory")
 set(WITH_PKGCONFIGDIR "lib/pkgconfig" CACHE STRING "Directory for pkg-config file")
 set(WITH_PLUGINDIR "libexec/irccd/plugins" CACHE STRING "Module prefix where to install")
-set(WITH_SYSCONFDIR "etc" CACHE STRING "Configuration directory")
+set(WITH_SYSCONFDIR "etc/irccd" CACHE STRING "Configuration directory")
 set(WITH_SYSTEMDDIR "/usr/lib/systemd/system" CACHE STRING "Absolute path where to install systemd files")
 
 #

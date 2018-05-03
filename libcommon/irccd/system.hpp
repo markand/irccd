@@ -28,6 +28,8 @@
 #include <string>
 #include <vector>
 
+#include <boost/filesystem.hpp>
+
 #include "sysconfig.hpp"
 
 namespace irccd {
@@ -120,7 +122,7 @@ IRCCD_EXPORT void set_gid(const std::string& value);
  * \see datadir
  * \see configdir
  */
-std::string cachedir();
+boost::filesystem::path cachedir();
 
 /**
  * Like cachedir but for WITH_DATADIR.
@@ -129,7 +131,7 @@ std::string cachedir();
  * \see cachedir
  * \see datadir
  */
-std::string datadir();
+boost::filesystem::path datadir();
 
 /**
  * Like cachedir but for WITH_SYSCONFIGDIR.
@@ -139,7 +141,16 @@ std::string datadir();
  * \see datadir
  * \note use config_filenames for irccd.conf, irccdctl.conf files
  */
-std::string sysconfigdir();
+ boost::filesystem::path sysconfdir();
+
+/**
+ * Like cachedir but for WITH_PLUGINDIR.
+ *
+ * \return the evaluated system plugin directory.
+ * \see cachedir
+ * \see datadir
+ */
+boost::filesystem::path plugindir();
 
 /**
  * Get user account login or empty if not available.

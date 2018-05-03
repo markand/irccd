@@ -114,11 +114,11 @@ plugin_paths plugin_service::paths(const std::string& id)
 
     // Fill defaults paths.
     if (!defaults.count("cache"))
-        defaults.emplace("cache", sys::cachedir() + "/plugin/" + id);
+        defaults.emplace("cache", (sys::cachedir() / "plugin" / id).string());
     if (!defaults.count("data"))
-        paths.emplace("data", sys::datadir() + "/plugin/" + id);
+        paths.emplace("data", (sys::datadir() / "plugin" / id).string());
     if (!defaults.count("config"))
-        paths.emplace("config", sys::sysconfigdir() + "/plugin/" + id);
+        paths.emplace("config", (sys::sysconfdir() / "plugin" / id).string());
 
     // Now fill missing fields.
     if (!paths.count("cache"))

@@ -16,89 +16,47 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <algorithm>
 #include <cassert>
+#include <cerrno>
 #include <cstdlib>
+#include <cstring>
 #include <ctime>
 #include <stdexcept>
 #include <string>
 
+#include <boost/dll.hpp>
 #include <boost/filesystem.hpp>
 
 #include "sysconfig.hpp"
 
-#if defined(HAVE_SETPROGNAME)
-#   include <cstdlib>
+#if defined(IRCCD_SYSTEM_WINDOWS)
+#   include <sys/timeb.h>
+#   include <shlobj.h>
+#else
+#   include <sys/utsname.h>
+#   include <sys/types.h>
+#   include <sys/param.h>
+#   include <sys/time.h>
+#   include <unistd.h>
 #endif
 
 #if defined(IRCCD_SYSTEM_LINUX)
 #   include <sys/sysinfo.h>
+#endif
 
-#   include <unistd.h>
-
-#   include <cerrno>
-#   include <climits>
-#   include <cstring>
-#elif defined(IRCCD_SYSTEM_FREEBSD)                                         \
-    || defined(IRCCD_SYSTEM_DRAGONFLYBSD)                                   \
-    || defined(IRCCD_SYSTEM_NETBSD)                                         \
-    || defined(IRCCD_SYSTEM_OPENBSD)
-#   if defined(IRCCD_SYSTEM_NETBSD)
-#       include <sys/param.h>
-#   else
-#       include <sys/types.h>
-#   endif
-
-#   if defined(IRCCD_SYSTEM_OPENBSD)
-#       include <unistd.h>
-#   endif
-
+#if defined(IRCCD_SYSTEM_MAC)
 #   include <sys/sysctl.h>
-
-#   include <cerrno>
-#   include <climits>
-#   include <cstddef>
-#   include <cstdlib>
-#   include <cstring>
-#elif defined(IRCCD_SYSTEM_MAC)
-#   include <sys/sysctl.h>
-#   include <cerrno>
-#   include <cstring>
 #   include <libproc.h>
-#   include <unistd.h>
-#elif defined(IRCCD_SYSTEM_WINDOWS)
-#   include <sys/types.h>
-#   include <sys/timeb.h>
-#   include <windows.h>
-#   include <shlobj.h>
 #endif
 
-#if !defined(IRCCD_SYSTEM_WINDOWS)
-#   include <sys/utsname.h>
-#   include <sys/time.h>
-#   include <sys/types.h>
-#   include <unistd.h>
-
-#   include <cerrno>
-#   include <cstring>
-#   include <ctime>
-#endif
-
-// For sys::set_gid.
 #if defined(HAVE_SETGID)
-#   include <sys/types.h>
-#   include <unistd.h>
 #   include <grp.h>
 #endif
 
-// For sys::set_uid.
 #if defined(HAVE_SETGID)
-#   include <sys/types.h>
-#   include <unistd.h>
 #   include <pwd.h>
 #endif
 
-// For sys::username
 #if defined(HAVE_GETLOGIN)
 #   include <unistd.h>
 #endif
@@ -113,97 +71,89 @@ namespace sys {
 
 namespace {
 
+// {{{ base_directory
+
 /*
- * executable_path
+ * base_directory
  * ------------------------------------------------------------------
  *
- * Get the executable path.
+ * Get the base program directory.
  *
- * Example:
+ * If irccd has been compiled with relative paths, the base directory is
+ * evaluated by climbing the `bindir' directory from the executable path.
  *
- * /usr/local/bin/irccd -> /usr/local/bin
+ * Otherwise, use the installation prefix.
  */
-std::string executable_path()
+boost::filesystem::path base_directory()
 {
-    std::string result;
+    static const boost::filesystem::path bindir(WITH_BINDIR);
+    static const boost::filesystem::path prefix(PREFIX);
 
-#if defined(IRCCD_SYSTEM_LINUX)
-    char path[PATH_MAX + 1] = {0};
+    boost::filesystem::path path(".");
 
-    if (readlink("/proc/self/exe", path, sizeof (path) - 1) < 0)
-        throw std::runtime_error(std::strerror(errno));
+    if (bindir.is_relative()) {
+        try {
+            path = boost::dll::program_location();
+            path = path.parent_path();
+        } catch (...) {
+            path = ".";
+        }
 
-    result = path;
-#elif defined(IRCCD_SYSTEM_FREEBSD) || defined(IRCCD_SYSTEM_DRAGONFLYBSD)
-    int mib[] = { CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1 };
-    char path[PATH_MAX + 1] = {0};
-    size_t size = PATH_MAX;
+        // Compute relative base directory.
+        for (auto len = std::distance(bindir.begin(), bindir.end()); len > 0; len--)
+            path = path.parent_path();
+        if (path.empty())
+            path = ".";
+    } else
+        path = prefix;
 
-    if (sysctl(mib, 4, path, &size, nullptr, 0) < 0)
-        throw std::runtime_error(std::strerror(errno));
-
-    result = path;
-#elif defined(IRCCD_SYSTEM_MAC)
-    char path[PROC_PIDPATHINFO_MAXSIZE + 1] = {0};
-
-    if ((proc_pidpath(getpid(), path, sizeof (path) - 1)) == 0)
-        throw std::runtime_error(std::strerror(errno));
-
-    result = path;
-#elif defined(IRCCD_SYSTEM_WINDOWS)
-    char path[PATH_MAX + 1] = {0};
-
-    if (GetModuleFileNameA(nullptr, path, sizeof (path) - 1) == 0)
-        throw std::runtime_error("GetModuleFileName error");
-
-    result = path;
-#elif defined(IRCCD_SYSTEM_NETBSD)
-    char path[4096 + 1] = {0};
-
-#   if defined(KERN_PROC_PATHNAME)
-    int mib[] = { CTL_KERN, KERN_PROC_ARGS, -1, KERN_PROC_PATHNAME };
-    int size = sizeof (path) - 1;
-
-    if (sysctl(mib, 4, path, &size, nullptr, 0) < 0)
-        throw std::runtime_error(std::strerror(errno));
-#   else
-    if (readlink("/proc/curproc/exe", path, sizeof (path) - 1) < 0)
-        throw std::runtime_error(std::strerror(errno));
-#   endif
-
-    result = path;
-#elif defined(IRCCD_SYSTEM_OPENBSD)
-    char **paths, path[PATH_MAX + 1] = {0};
-    int mib[] = { CTL_KERN, KERN_PROC_ARGS, getpid(), KERN_PROC_ARGV };
-    size_t length = 0;
-
-    if (sysctl(mib, 4, 0, &length, 0, 0) < 0)
-        throw std::runtime_error(std::strerror(errno));
-    if (!(paths = static_cast<char**>(std::malloc(length))))
-        throw std::runtime_error(std::strerror(errno));
-    if (sysctl(mib, 4, paths, &length, 0, 0) < 0) {
-        std::free(paths);
-        throw std::runtime_error(std::strerror(errno));
-    }
-
-    realpath(paths[0], path);
-    result = path;
-
-    std::free(paths);
-#endif
-
-    return result;
+    return path;
 }
 
+// }}}
+
+// {{{ system_directory
+
 /*
- * add_config_user_path
+ * system_directory
  * ------------------------------------------------------------------
  *
- * Referenced by: config_filenames.
+ * Compute the system directory path for the given component.
  *
- * Add user config path.
+ * Use with the build options like WITH_CACHEDIR, WITH_PLUGINDIR, ...
+ *
+ * Referenced by:
+ *   - cachedir,
+ *   - datadir,
+ *   - sysconfigdir,
+ *   - plugindir.
  */
-void add_config_user_path(std::vector<std::string>& result, const std::string& file)
+std::string system_directory(const std::string& component)
+{
+    boost::filesystem::path path(component);
+
+    if (path.is_relative())
+        path = base_directory() / component;
+
+    return path.string();
+}
+
+// }}}
+
+// {{{ user_config_directory
+
+/*
+ * user_config_directory
+ * ------------------------------------------------------------------
+ *
+ * Get user configuration directory.
+ *
+ * Referenced by:   config_filenames.
+ * Requires:
+ *   - Windows:
+ *     - <shlobj.h>
+ */
+boost::filesystem::path user_config_directory()
 {
     boost::filesystem::path path;
 
@@ -226,19 +176,25 @@ void add_config_user_path(std::vector<std::string>& result, const std::string& f
     path /= "irccd";
 #endif
 
-    path /= file;
-    result.push_back(path.string());
+    return path;
 }
 
+// }}}
+
+// {{{ user_plugin_directory
+
 /*
- * add_plugin_user_path
+ * user_plugin_directory
  * ------------------------------------------------------------------
  *
- * Referenced by: plugin_filenames.
+ * Referenced by:   plugin_filenames.
+ * Requires:
+ *   - Windows:
+ *     - <shlobj.h>
  *
- * Like add add_config_user_path but for plugins.
+ * Like add user_config_directory but for plugins.
  */
-void add_plugin_user_path(std::vector<std::string>& result, const std::string& file)
+boost::filesystem::path user_plugin_directory()
 {
     boost::filesystem::path path;
 
@@ -260,105 +216,29 @@ void add_plugin_user_path(std::vector<std::string>& result, const std::string& f
     path /= "irccd";
 #endif
 
-    path /= file;
-    result.push_back(path.string());
+    return path / "plugins";
 }
 
-/*
- * base_directory
- * ------------------------------------------------------------------
- *
- * Get the base program directory.
- *
- * If irccd has been compiled with relative paths, the base directory is
- * evaluated by climbing the `bindir' directory from the executable path.
- *
- * Otherwise, use the installation prefix.
- */
-boost::filesystem::path base_directory()
-{
-    static const boost::filesystem::path bindir(WITH_BINDIR);
-    static const boost::filesystem::path prefix(PREFIX);
-
-    boost::filesystem::path path(".");
-
-    if (bindir.is_relative()) {
-        try {
-            path = executable_path();
-            path = path.parent_path();
-        } catch (...) {
-            path = "./";
-        }
-
-        // Compute relative base directory.
-        for (auto len = std::distance(bindir.begin(), bindir.end()); len > 0; len--)
-            path = path.parent_path();
-        if (path.empty())
-            path = ".";
-    } else
-        path = prefix;
-
-    return path;
-}
-
-/*
- * add_system_path
- * ------------------------------------------------------------------
- *
- * Referenced by: config_filenames,
- *                plugin_filenames
- *
- * Add system path into the result list.
- */
-void add_system_path(std::vector<std::string>& result,
-                     const std::string& file,
-                     const boost::filesystem::path& component)
-{
-    boost::filesystem::path path;
-
-    if (component.is_absolute())
-        path = component;
-    else {
-        path = base_directory();
-        path /= component;
-    }
-
-    path /= file;
-    result.push_back(path.string());
-}
-
-/*
- * system_directory
- * ------------------------------------------------------------------
- *
- * Compute the system wise directory path for the given component.
- *
- * Referenced by: cachedir,
- *                datadir,
- *                sysconfigdir
- */
-std::string system_directory(const std::string& component)
-{
-    boost::filesystem::path path(component);
-
-    if (path.is_relative()) {
-        path = base_directory();
-        path /= component;
-    }
-
-    return path.string();
-}
+// }}}
 
 } // !namespace
+
+// {{{ set_program_name
 
 void set_program_name(std::string name) noexcept
 {
 #if defined(HAVE_SETPROGNAME)
-    setprogname(name.c_str());
+    static std::string save = name;
+
+    setprogname(save.c_str());
 #else
     (void)name;
 #endif
 }
+
+// }}}
+
+// {{{ name
 
 std::string name()
 {
@@ -381,25 +261,52 @@ std::string name()
 #endif
 }
 
+// }}}
+
+// {{{ version
+
+/*
+ * Requires:
+ *   - Windows:
+ *     - <windows.h>
+ *   - Others:
+ *     - <sys/utsname.h>
+ */
 std::string version()
 {
 #if defined(IRCCD_SYSTEM_WINDOWS)
-    auto version = GetVersion();
-    auto major = (DWORD)(LOBYTE(LOWORD(version)));
-    auto minor = (DWORD)(HIBYTE(LOWORD(version)));
+    const auto version = GetVersion();
+    const auto major = (DWORD)(LOBYTE(LOWORD(version)));
+    const auto minor = (DWORD)(HIBYTE(LOWORD(version)));
 
     return std::to_string(major) + "." + std::to_string(minor);
 #else
     struct utsname uts;
 
-    if (uname(&uts) < 0)
+    if (::uname(&uts) < 0)
         throw std::runtime_error(std::strerror(errno));
 
     return std::string(uts.release);
 #endif
 }
 
-uint64_t uptime()
+// }}}
+
+// {{{ uptime
+
+/*
+ * Requires:
+ *   - Windows:
+ *     - <windows.h>
+ *   - Linux:
+ *     - <sys/sysinfo.h>
+ *   - Mac:
+ *     - <sys/types.h>
+ *     - <sys/sysctl.h>
+ *   - Others:
+ *     - <ctime>
+ */
+std::uint64_t uptime()
 {
 #if defined(IRCCD_SYSTEM_WINDOWS)
     return ::GetTickCount64() / 1000;
@@ -431,7 +338,18 @@ uint64_t uptime()
 #endif
 }
 
-uint64_t ticks()
+// }}}
+
+// {{{ ticks
+
+/*
+ * Requires:
+ *   - Windows:
+ *     - <sys/timeb.h>
+ *   - Others:
+ *     - <sys/times.h>
+ */
+std::uint64_t ticks()
 {
 #if defined(IRCCD_SYSTEM_WINDOWS)
     _timeb tp;
@@ -448,6 +366,15 @@ uint64_t ticks()
 #endif
 }
 
+// }}}
+
+// {{{ home
+
+/*
+ * Requires:
+ *   - Windows:
+ *     - <shlobj.h>
+ */
 std::string home()
 {
 #if defined(IRCCD_SYSTEM_WINDOWS)
@@ -462,9 +389,17 @@ std::string home()
 #endif
 }
 
+// }}}
+
+// {{{ env
+
+/*
+ * Requires:
+ *   - <cstdlib>
+ */
 std::string env(const std::string& var)
 {
-    auto value = std::getenv(var.c_str());
+    const auto value = std::getenv(var.c_str());
 
     if (value == nullptr)
         return "";
@@ -472,8 +407,17 @@ std::string env(const std::string& var)
     return value;
 }
 
+// }}}
+
+// {{{ set_uid
+
 #if defined(HAVE_SETUID)
 
+/*
+ * Requires:
+ *   - <sys/types.h>
+ *   - <unistd.h>
+ */
 void set_uid(const std::string& value)
 {
     assert(value.c_str());
@@ -497,10 +441,19 @@ void set_uid(const std::string& value)
         throw std::runtime_error(std::strerror(errno));
 }
 
-#endif
+#endif // !HAVE_SETUID
+
+// }}}
+
+// {{{ set_gid
 
 #if defined(HAVE_SETGID)
 
+/*
+ * Requires:
+ *   - <sys/types.h>
+ *   - <unistd.h>
+ */
 void set_gid(const std::string& value)
 {
     assert(value.c_str());
@@ -524,23 +477,52 @@ void set_gid(const std::string& value)
         throw std::runtime_error(std::strerror(errno));
 }
 
-#endif
+#endif // !HAVE_SETGID
 
-std::string cachedir()
+// }}}
+
+// {{{ cachedir
+
+boost::filesystem::path cachedir()
 {
     return system_directory(WITH_CACHEDIR);
 }
 
-std::string datadir()
+// }}}
+
+// {{{ datadir
+
+boost::filesystem::path datadir()
 {
     return system_directory(WITH_DATADIR);
 }
 
-std::string sysconfigdir()
+// }}}
+
+// {{{ sysconfdir
+
+boost::filesystem::path sysconfdir()
 {
     return system_directory(WITH_SYSCONFDIR);
 }
 
+// }}}
+
+// {{{ plugindir
+
+boost::filesystem::path plugindir()
+{
+    return system_directory(WITH_PLUGINDIR);
+}
+
+// }}}
+
+// {{{ username
+
+/*
+ * Requires:
+ *   - <unistd.h>
+ */
 std::string username()
 {
 #if defined(HAVE_GETLOGIN)
@@ -553,15 +535,21 @@ std::string username()
     return "";
 }
 
+// }}}
+
+// {{{ config_filenames
+
 std::vector<std::string> config_filenames(std::string file)
 {
-    std::vector<std::string> result;
-
-    add_config_user_path(result, file);
-    add_system_path(result, file, WITH_SYSCONFDIR);
-
-    return result;
+    return {
+        (user_config_directory() / file).string(),
+        (sysconfdir() / file).string()
+    };
 }
+
+// }}}
+
+// {{{ plugin_filenames
 
 std::vector<std::string> plugin_filenames(const std::string& name,
                                           const std::vector<std::string>& extensions)
@@ -571,12 +559,14 @@ std::vector<std::string> plugin_filenames(const std::string& name,
     std::vector<std::string> result;
 
     for (const auto& ext : extensions)
-        add_plugin_user_path(result, name + ext);
+        result.push_back((user_plugin_directory() / (name + ext)).string());
     for (const auto& ext : extensions)
-        add_system_path(result, name + ext, WITH_PLUGINDIR);
+        result.push_back((plugindir() / (name + ext)).string());
 
     return result;
 }
+
+// }}}
 
 } // !sys
 
