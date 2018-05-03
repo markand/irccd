@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <iostream>
+
 #include <irccd/json_util.hpp>
 
 #include "plugin_config_cli.hpp"

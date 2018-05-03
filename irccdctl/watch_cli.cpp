@@ -17,6 +17,7 @@
  */
 
 #include <functional>
+#include <iostream>
 #include <unordered_map>
 
 #include <irccd/json_util.hpp>
