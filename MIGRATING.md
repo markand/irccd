@@ -19,7 +19,6 @@ Migrating from 2.x to 3.x
   - The keyword `origin` has been added,
   - Formats `cnotice`, `cmode`, `query` have been removed.
 
-
 ### Network API
 
   - The requests `server-cnotice` and `server-cmode` have been removed, use
