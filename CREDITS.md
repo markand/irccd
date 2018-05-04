@@ -17,14 +17,11 @@ Libraries and projects
 - CMake, http://cmake.org
   The best build system ever.
 
-- Google Test, https://github.com/google/googletest
-  A nice and easy C++ test framework.
-
 - Pandoc, http://pandoc.org
   Powerful document converter.
 
 - Niels Lohmann JSON library, https://github.com/nlohmann/json
   The best C++ JSON library.
 
-- fmtlib, http://fmtlib.net/latest/index.html
-  Convenient formatting library for C++.
+- Boost, http://boost.org
+  Powerful and portable libraries.
