@@ -1,16 +1,14 @@
 IRC Client Daemon INSTALL
 =========================
 
-This guide will help you to install irccd on your computer. For a better guide
-with more details see:
-
-    http://projects.malikania.fr/irccd//build/build-from-sources.html
+This guide will help you to install irccd on your computer.
 
 Requirements
 ------------
 
   - GCC 5.1 or Clang 3.4,
-  - [CMake](http://www.cmake.org). Used to build irccd.
+  - [Boost](http://boost.org),
+  - [CMake](http://www.cmake.org).
 
 Optional:
 
@@ -27,8 +25,8 @@ This is the quick way to install irccd.
 
     tar xvzf irccd-x.y.z-tar.xz
     cd irccd-x.y.z
-    mkdir _build_
-    cd _build_
+    mkdir build
+    cd build
     cmake .. -DCMAKE_BUILD_TYPE=Release
     make
     sudo make install
