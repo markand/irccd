@@ -59,9 +59,9 @@ void controller::verify(connect_handler handler)
             return;
         }
 
-        const json_util::parser parser(message);
-        const auto program = parser.get<std::string>("program");
-        const auto major = parser.get<int>("major");
+        const json_util::document doc(message);
+        const auto program = doc.get<std::string>("program");
+        const auto major = doc.get<int>("major");
 
         if (!program && *program != "irccd")
             handler(irccd_error::not_irccd, std::move(message));
@@ -104,9 +104,9 @@ void controller::read(io::read_handler handler)
             return;
         }
 
-        const json_util::parser parser(msg);
-        const auto e = parser.get<int>("error");
-        const auto c = parser.get<std::string>("errorCategory");
+        const json_util::document doc(msg);
+        const auto e = doc.get<int>("error");
+        const auto c = doc.get<std::string>("errorCategory");
 
         if (e && c) {
             if (*c == "irccd")

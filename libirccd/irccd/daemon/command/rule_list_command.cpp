@@ -31,7 +31,7 @@ std::string rule_list_command::get_name() const noexcept
     return "rule-list";
 }
 
-void rule_list_command::exec(irccd& irccd, transport_client& client, const nlohmann::json&)
+void rule_list_command::exec(irccd& irccd, transport_client& client, const document&)
 {
     auto array = nlohmann::json::array();
 

@@ -42,17 +42,17 @@ void plugin_info_cli::exec(ctl::controller& ctl, const std::vector<std::string>&
     });
 
     request(ctl, json, [] (auto result) {
-        const json_util::parser parser(result);
+        const json_util::document doc(result);
 
         std::cout << std::boolalpha;
         std::cout << "Author         : " <<
-            parser.get<std::string>("author").value_or("(unknown)") << std::endl;
+            doc.get<std::string>("author").value_or("(unknown)") << std::endl;
         std::cout << "License        : " <<
-            parser.get<std::string>("license").value_or("(unknown)") << std::endl;
+            doc.get<std::string>("license").value_or("(unknown)") << std::endl;
         std::cout << "Summary        : " <<
-            parser.get<std::string>("summary").value_or("(unknown)") << std::endl;
+            doc.get<std::string>("summary").value_or("(unknown)") << std::endl;
         std::cout << "Version        : " <<
-            parser.get<std::string>("version").value_or("(unknown)") << std::endl;
+            doc.get<std::string>("version").value_or("(unknown)") << std::endl;
     });
 }
 

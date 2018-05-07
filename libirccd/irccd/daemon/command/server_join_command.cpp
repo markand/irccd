@@ -33,12 +33,11 @@ std::string server_join_command::get_name() const noexcept
     return "server-join";
 }
 
-void server_join_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
+void server_join_command::exec(irccd& irccd, transport_client& client, const document& args)
 {
-    const json_util::parser parser(args);
-    const auto id = parser.get<std::string>("server");
-    const auto channel = parser.get<std::string>("channel");
-    const auto password = parser.optional<std::string>("password", "");
+    const auto id = args.get<std::string>("server");
+    const auto channel = args.get<std::string>("channel");
+    const auto password = args.optional<std::string>("password", "");
 
     if (!id || !string_util::is_identifier(*id))
         throw server_error(server_error::invalid_identifier);

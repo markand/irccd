@@ -119,7 +119,7 @@ void from_config_load_options(server& sv, const ini::section& sc)
     sv.set_command_char(command_char);
 }
 
-void from_json_load_options(server& sv, const json_util::parser& parser)
+void from_json_load_options(server& sv, const json_util::document& parser)
 {
     const auto port = parser.optional<std::uint16_t>("port", sv.get_port());
     const auto nickname = parser.optional<std::string>("nickname", sv.get_nickname());
@@ -153,7 +153,7 @@ void from_json_load_options(server& sv, const json_util::parser& parser)
     sv.set_password(*password);
 }
 
-void from_json_load_flags(server& sv, const json_util::parser& parser)
+void from_json_load_flags(server& sv, const json_util::document& parser)
 {
     const auto ipv6 = parser.get<bool>("ipv6");
     const auto auto_rejoin = parser.get<bool>("autoRejoin");
@@ -183,7 +183,7 @@ void from_json_load_flags(server& sv, const json_util::parser& parser)
 std::shared_ptr<server> from_json(boost::asio::io_service& service, const nlohmann::json& object)
 {
     // Mandatory parameters.
-    const json_util::parser parser(object);
+    const json_util::document parser(object);
     const auto id = parser.get<std::string>("name");
     const auto host = parser.get<std::string>("host");
 

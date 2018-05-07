@@ -34,9 +34,9 @@ std::string server_info_command::get_name() const noexcept
     return "server-info";
 }
 
-void server_info_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
+void server_info_command::exec(irccd& irccd, transport_client& client, const document& args)
 {
-    const auto id = json_util::parser(args).get<std::string>("server");
+    const auto id = args.get<std::string>("server");
 
     if (!id || !string_util::is_identifier(*id))
         throw server_error(server_error::invalid_identifier);
@@ -44,7 +44,7 @@ void server_info_command::exec(irccd& irccd, transport_client& client, const nlo
     const auto server = irccd.servers().require(*id);
 
     // Construct the JSON response.
-    auto response = nlohmann::json::object();
+    auto response = document::object();
 
     // General stuff.
     response.push_back({"command", "server-info"});

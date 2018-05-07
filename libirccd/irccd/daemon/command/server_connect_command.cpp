@@ -31,7 +31,7 @@ std::string server_connect_command::get_name() const noexcept
     return "server-connect";
 }
 
-void server_connect_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
+void server_connect_command::exec(irccd& irccd, transport_client& client, const document& args)
 {
     auto server = server_util::from_json(irccd.get_service(), args);
 

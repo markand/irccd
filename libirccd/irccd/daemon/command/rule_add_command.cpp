@@ -33,9 +33,9 @@ std::string rule_add_command::get_name() const noexcept
     return "rule-add";
 }
 
-void rule_add_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
+void rule_add_command::exec(irccd& irccd, transport_client& client, const document& args)
 {
-    const auto index = json_util::parser(args).optional<unsigned>("index", irccd.rules().length());
+    const auto index = args.optional<unsigned>("index", irccd.rules().length());
 
     if (!index || *index > irccd.rules().length())
         throw rule_error(rule_error::error::invalid_index);

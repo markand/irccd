@@ -30,7 +30,7 @@ std::string server_list_command::get_name() const noexcept
     return "server-list";
 }
 
-void server_list_command::exec(irccd& irccd, transport_client& client, const nlohmann::json&)
+void server_list_command::exec(irccd& irccd, transport_client& client, const document&)
 {
     auto json = nlohmann::json::object();
     auto list = nlohmann::json::array();

@@ -33,13 +33,12 @@ std::string server_kick_command::get_name() const noexcept
     return "server-kick";
 }
 
-void server_kick_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
+void server_kick_command::exec(irccd& irccd, transport_client& client, const document& args)
 {
-    const json_util::parser parser(args);
-    const auto id = parser.get<std::string>("server");
-    const auto target = parser.get<std::string>("target");
-    const auto channel = parser.get<std::string>("channel");
-    const auto reason = parser.optional<std::string>("reason", "");
+    const auto id = args.get<std::string>("server");
+    const auto target = args.get<std::string>("target");
+    const auto channel = args.get<std::string>("channel");
+    const auto reason = args.optional<std::string>("reason", "");
 
     if (!id || !string_util::is_identifier(*id))
         throw server_error(server_error::invalid_identifier);

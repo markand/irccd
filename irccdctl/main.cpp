@@ -531,10 +531,10 @@ void do_connect()
             throw std::system_error(code);
 
         if (verbose) {
-            const json_util::parser parser(info);
-            const auto major = parser.get<int>("/major");
-            const auto minor = parser.get<int>("/minor");
-            const auto patch = parser.get<int>("/patch");
+            const json_util::document doc(info);
+            const auto major = doc.get<int>("/major");
+            const auto minor = doc.get<int>("/minor");
+            const auto patch = doc.get<int>("/patch");
 
             if (!major || !minor || !patch)
                 std::cout << "connected to irccd (unknown version)" << std::endl;

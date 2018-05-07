@@ -39,9 +39,9 @@ void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_
             return;
         }
 
-        const json_util::parser parser(message);
-        const auto command = parser.get<std::string>("command");
-        const auto password = parser.get<std::string>("password");
+        const json_util::document doc(message);
+        const auto command = doc.get<std::string>("command");
+        const auto password = doc.get<std::string>("password");
 
         if (!command || *command != "auth") {
             client->error(irccd_error::auth_required);

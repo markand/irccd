@@ -33,11 +33,10 @@ std::string server_nick_command::get_name() const noexcept
     return "server-nick";
 }
 
-void server_nick_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
+void server_nick_command::exec(irccd& irccd, transport_client& client, const document& args)
 {
-    const json_util::parser parser(args);
-    const auto id = parser.get<std::string>("server");
-    const auto nick = parser.get<std::string>("nickname");
+    const auto id = args.get<std::string>("server");
+    const auto nick = args.get<std::string>("nickname");
 
     if (!id || !string_util::is_identifier(*id))
         throw server_error(server_error::invalid_identifier);

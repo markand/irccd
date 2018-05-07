@@ -33,7 +33,7 @@ std::string server_disconnect_command::get_name() const noexcept
     return "server-disconnect";
 }
 
-void server_disconnect_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
+void server_disconnect_command::exec(irccd& irccd, transport_client& client, const document& args)
 {
     const auto it = args.find("server");
 

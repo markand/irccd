@@ -45,7 +45,7 @@ public:
     /**
      * \copydoc command::exec
      */
-    void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) override;
+    void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 } // !irccd

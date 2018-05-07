@@ -24,11 +24,10 @@
  * \brief Remote commands.
  */
 
-#include <irccd/sysconfig.hpp>
-
 #include <string>
 
-#include "json.hpp"
+#include <irccd/sysconfig.hpp>
+#include <irccd/json_util.hpp>
 
 namespace irccd {
 
@@ -41,6 +40,11 @@ class transport_client;
  */
 class command {
 public:
+    /**
+     * Convenient alias.
+     */
+    using document = json_util::document;
+
     /**
      * Default destructor virtual.
      */
@@ -66,7 +70,7 @@ public:
      * \param client the client
      * \param args the client arguments
      */
-    virtual void exec(irccd& irccd, transport_client& client, const nlohmann::json& args) = 0;
+    virtual void exec(irccd& irccd, transport_client& client, const document& args) = 0;
 };
 
 } // !irccd

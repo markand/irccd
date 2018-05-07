@@ -32,9 +32,9 @@ std::string rule_remove_command::get_name() const noexcept
     return "rule-remove";
 }
 
-void rule_remove_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
+void rule_remove_command::exec(irccd& irccd, transport_client& client, const document& args)
 {
-    const auto index = json_util::parser(args).get<unsigned>("index");
+    const auto index = args.get<unsigned>("index");
 
     if (!index || *index >= irccd.rules().length())
         throw rule_error(rule_error::invalid_index);

@@ -33,7 +33,7 @@ std::string server_reconnect_command::get_name() const noexcept
     return "server-reconnect";
 }
 
-void server_reconnect_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
+void server_reconnect_command::exec(irccd& irccd, transport_client& client, const document& args)
 {
     const auto it = args.find("server");
 

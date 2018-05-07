@@ -32,15 +32,12 @@
 
 namespace irccd {
 
-namespace {
-
-} // !namespace
-
 void transport_service::handle_command(std::shared_ptr<transport_client> tc, const nlohmann::json& object)
 {
     assert(object.is_object());
 
-    const auto name = json_util::parser(object).get<std::string>("command");
+    const json_util::document doc(object);
+    const auto name = doc.get<std::string>("command");
 
     if (!name) {
         tc->error(irccd_error::invalid_message);
@@ -55,7 +52,7 @@ void transport_service::handle_command(std::shared_ptr<transport_client> tc, con
         tc->error(irccd_error::invalid_command, *name);
     else {
         try {
-            (*cmd)->exec(irccd_, *tc, object);
+            (*cmd)->exec(irccd_, *tc, doc);
         } catch (const std::system_error& ex) {
             tc->error(ex.code(), (*cmd)->get_name());
         } catch (const std::exception& ex) {

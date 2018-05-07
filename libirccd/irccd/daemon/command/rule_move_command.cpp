@@ -33,11 +33,10 @@ std::string rule_move_command::get_name() const noexcept
     return "rule-move";
 }
 
-void rule_move_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
+void rule_move_command::exec(irccd& irccd, transport_client& client, const document& args)
 {
-    const json_util::parser parser(args);
-    const auto from = parser.get<unsigned>("from");
-    const auto to = parser.get<unsigned>("to");
+    const auto from = args.get<unsigned>("from");
+    const auto to = args.get<unsigned>("to");
 
     if (!from || !to)
         throw rule_error(rule_error::invalid_index);

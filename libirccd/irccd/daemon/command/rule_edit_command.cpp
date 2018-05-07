@@ -35,7 +35,7 @@ std::string rule_edit_command::get_name() const noexcept
     return "rule-edit";
 }
 
-void rule_edit_command::exec(irccd& irccd, transport_client& client, const nlohmann::json& args)
+void rule_edit_command::exec(irccd& irccd, transport_client& client, const document& args)
 {
     static const auto updateset = [] (auto& set, auto args, const auto& key) {
         for (const auto& v : args["remove-"s + key]) {
@@ -48,7 +48,7 @@ void rule_edit_command::exec(irccd& irccd, transport_client& client, const nlohm
         }
     };
 
-    const auto index = json_util::parser(args).get<unsigned>("index");
+    const auto index = args.get<unsigned>("index");
 
     if (!index)
         throw rule_error(rule_error::invalid_index);

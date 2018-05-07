@@ -260,18 +260,15 @@ public:
  * This class helps destructuring insecure JSON input by returning optional
  * values if they are not present or invalid.
  */
-class parser {
-private:
-    nlohmann::json json_;
-
+class document : public nlohmann::json {
 public:
     /**
-     * Construct the parser.
+     * Constructor.
      *
-     * \param document the document
+     * \param object the object
      */
-    inline parser(nlohmann::json document) noexcept
-        : json_(std::move(document))
+    inline document(nlohmann::json object)
+        : nlohmann::json(std::move(object))
     {
     }
 
@@ -279,16 +276,16 @@ public:
      * Get a value from the document object.
      *
      * \param key the property key
-     * \return the value or boost::none if not found
+     * \return the value or boost::none if not found or not convertible
      */
     template <typename Type>
     inline boost::optional<Type> get(const std::string& key) const noexcept
     {
         static_assert(parser_type_traits<Type>::value, "type not supported");
 
-        const auto it = json_.find(key);
+        const auto it = find(key);
 
-        if (it == json_.end())
+        if (it == end())
             return boost::none;
 
         return parser_type_traits<Type>::get(*it);
@@ -309,9 +306,9 @@ public:
     {
         static_assert(parser_type_traits<Type>::value, "type not supported");
 
-        const auto it = json_.find(key);
+        const auto it = find(key);
 
-        if (it == json_.end())
+        if (it == end())
             return boost::optional<Type>(std::forward<DefaultValue>(def));
 
         return parser_type_traits<Type>::get(*it);
@@ -361,6 +358,7 @@ inline bool contains(const nlohmann::json& array, const nlohmann::json& value) n
 
     return false;
 }
+
 
 } // !json_util
 

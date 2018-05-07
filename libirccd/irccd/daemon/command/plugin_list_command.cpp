@@ -30,7 +30,7 @@ std::string plugin_list_command::get_name() const noexcept
     return "plugin-list";
 }
 
-void plugin_list_command::exec(irccd& irccd, transport_client& client, const nlohmann::json&)
+void plugin_list_command::exec(irccd& irccd, transport_client& client, const document&)
 {
     auto list = nlohmann::json::array();
 
