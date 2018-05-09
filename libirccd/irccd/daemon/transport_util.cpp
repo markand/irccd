@@ -20,6 +20,8 @@
 
 #include <cassert>
 
+#include <boost/predef/os.h>
+
 #include <irccd/ini_util.hpp>
 #include <irccd/string_util.hpp>
 #include <irccd/socket_acceptor.hpp>
@@ -128,7 +130,7 @@ std::unique_ptr<transport_server> from_config_load_unix(io_service& service, con
 {
     assert(sc.key() == "transport");
 
-#if !defined(IRCCD_SYSTEM_WINDOWS)
+#if !BOOST_OS_WINDOWS
     using boost::asio::local::stream_protocol;
 
     const auto path = sc.get("path").value();

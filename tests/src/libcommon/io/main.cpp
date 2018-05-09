@@ -19,6 +19,7 @@
 #define BOOST_TEST_MODULE "io"
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
+#include <boost/predef/os.h>
 
 #include <irccd/sysconfig.hpp>
 
@@ -39,7 +40,7 @@ using boost::asio::ip::tcp;
 using boost::asio::ssl::context;
 #endif
 
-#if !defined(IRCCD_SYSTEM_WINDOWS)
+#if !BOOST_OS_WINDOWS
 using boost::asio::local::stream_protocol;
 #endif
 
@@ -145,7 +146,7 @@ protected:
 
 #endif // !HAVE_SSL
 
-#if !defined(IRCCD_SYSTEM_WINDOWS)
+#if !BOOST_OS_WINDOWS
 
 class local_io_test : public io_test {
 public:
@@ -170,7 +171,7 @@ public:
     }
 };
 
-#endif // !IRCCD_SYSTEM_WINDOWS
+#endif // !BOOST_OS_WINDOWS
 
 /**
  * List of fixtures to tests.
@@ -180,7 +181,7 @@ using list = boost::mpl::list<
 #if defined(HAVE_SSL)
     , ssl_io_test
 #endif
-#if !defined(IRCCD_SYSTEM_WINDOWS)
+#if !BOOST_OS_WINDOWS
     , local_io_test
 #endif
 >;

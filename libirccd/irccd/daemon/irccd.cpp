@@ -18,6 +18,8 @@
 
 #include <fstream>
 
+#include <boost/predef/os.h>
+
 #include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
 
@@ -84,7 +86,7 @@ void irccd::load_logs_file(const ini::section& sc)
     /*
      * TODO: improve that with CMake options.
      */
-#if defined(IRCCD_SYSTEM_WINDOWS)
+#if BOOST_OS_WINDOWS
     std::string normal = "log.txt";
     std::string errors = "errors.txt";
 #else

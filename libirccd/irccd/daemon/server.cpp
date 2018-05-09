@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <boost/predef/os.h>
+
 #include <irccd/sysconfig.hpp>
 
 #include <algorithm>
@@ -23,7 +25,7 @@
 #include <cstring>
 #include <stdexcept>
 
-#if !defined(IRCCD_SYSTEM_WINDOWS)
+#if !BOOST_OS_WINDOWS
 #  include <sys/types.h>
 #  include <netinet/in.h>
 #  include <arpa/nameser.h>
@@ -504,7 +506,7 @@ void server::connect() noexcept
      * This is needed if irccd is started before DHCP or if DNS cache is
      * outdated.
      */
-#if !defined(IRCCD_SYSTEM_WINDOWS)
+#if !BOOST_OS_WINDOWS
     (void)res_init();
 #endif
 

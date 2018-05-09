@@ -26,8 +26,10 @@
 
 #include <irccd/sysconfig.hpp>
 
+#include <boost/predef.h>
+
 // for PathIsRelative.
-#if defined(IRCCD_SYSTEM_WINDOWS)
+#if BOOST_OS_WINDOWS
 #  include <shlwapi.h>
 #endif
 
@@ -44,7 +46,7 @@ using token_iterator = std::vector<token>::const_iterator;
 
 inline bool is_absolute(const std::string& path) noexcept
 {
-#if defined(IRCCD_SYSTEM_WINDOWS)
+#if BOOST_OS_WINDOWS
     return !PathIsRelative(path.c_str());
 #else
     return path.size() > 0 && path[0] == '/';
@@ -288,7 +290,7 @@ void parse_include(document& doc, const std::string& path, token_iterator& it, t
     std::string file;
 
     if (!is_absolute(value)) {
-#if defined(IRCCD_SYSTEM_WINDOWS)
+#if BOOST_OS_WINDOWS
         file = path + "\\" + value;
 #else
         file = path + "/" + value;

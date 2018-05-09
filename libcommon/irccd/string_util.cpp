@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <boost/predef/os.h>
+
 #include "sysconfig.hpp"
 
 #if defined(HAVE_POPEN)
@@ -183,7 +185,7 @@ std::string subst_irc_attrs(const std::string& content)
 
 std::string subst_shell_attrs(const std::string& content)
 {
-#if !defined(IRCCD_SYSTEM_WINDOWS)
+#if !BOOST_OS_WINDOWS
     auto list = split(content, ",");
 
     if (list.empty())

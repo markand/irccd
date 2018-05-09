@@ -32,6 +32,7 @@
 #include <utility>
 
 #include <boost/asio.hpp>
+#include <boost/predef/os.h>
 
 #include "stream.hpp"
 
@@ -229,7 +230,7 @@ void socket_stream<Socket>::write(const nlohmann::json& json, write_handler hand
  */
 using ip_stream = socket_stream<boost::asio::ip::tcp::socket>;
 
-#if !defined(IRCCD_SYSTEM_WINDOWS)
+#if !BOOST_OS_WINDOWS
 
 /**
  * Convenient Unix stream type.

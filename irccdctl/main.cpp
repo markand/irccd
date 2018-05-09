@@ -21,6 +21,7 @@
 #include <iostream>
 #include <unordered_map>
 
+#include <boost/predef/os.h>
 #include <boost/filesystem.hpp>
 
 #include <irccd/config.hpp>
@@ -72,7 +73,7 @@
 
 using boost::asio::ip::tcp;
 
-#if !defined(IRCCD_SYSTEM_WINDOWS)
+#if !BOOST_OS_WINDOWS
 
 using boost::asio::local::stream_protocol;
 
@@ -177,7 +178,7 @@ std::unique_ptr<io::connector> read_connect_ip(const ini::section& sc)
  */
 std::unique_ptr<io::connector> read_connect_local(const ini::section& sc)
 {
-#if !defined(IRCCD_SYSTEM_WINDOWS)
+#if !BOOST_OS_WINDOWS
     using boost::asio::local::stream_protocol;
 
     const auto it = sc.find("path");
@@ -342,7 +343,7 @@ std::unique_ptr<io::connector> parse_connect_ip(const option::result& options)
  */
 std::unique_ptr<io::connector> parse_connect_local(const option::result& options)
 {
-#if !defined(IRCCD_SYSTEM_WINDOWS)
+#if !BOOST_OS_WINDOWS
     option::result::const_iterator it;
 
     if ((it = options.find("-P")) == options.end() && (it = options.find("--path")) == options.end())

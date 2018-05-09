@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <boost/predef/os.h>
+
 #include <irccd/sysconfig.hpp>
 
 #include <cerrno>
@@ -356,7 +358,7 @@ void directory_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
     duk_put_number_list(plugin->context(), -1, constants);
     duk_put_function_list(plugin->context(), -1, functions);
 
-#if defined(IRCCD_SYSTEM_WINDOWS)
+#if BOOST_OS_WINDOWS
     duk_push_string(plugin->context(), "\\");
 #else
     duk_push_string(plugin->context(), "/");

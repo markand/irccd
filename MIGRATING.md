@@ -58,7 +58,7 @@ Migrating from 2.x to 3.x
 
   - The property `Directory.count` has been removed.
 
-### Module Plugin
+#### Module Plugin
 
 The following properties in `Irccd.Plugin` has been renamed:
 
@@ -69,3 +69,6 @@ The following properties in `Irccd.Plugin` has been renamed:
 Note: these paths are no more automatically detected and set with the new
       `[paths]` and `[paths.<name>]` sections.
 
+#### Module System
+
+  - The function `Irccd.System.name` has now well defined return value.

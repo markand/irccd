@@ -20,14 +20,15 @@
 
 #include <boost/dll.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/predef/os.h>
 
 #include <irccd/string_util.hpp>
 
 #include "dynlib_plugin.hpp"
 
-#if defined(IRCCD_SYSTEM_WINDOWS)
+#if BOOST_OS_WINDOWS
 #   define DYNLIB_EXTENSION ".dll"
-#elif defined(IRCCD_SYSTEM_MAC)
+#elif BOOST_OS_MACOS
 #   define DYNLIB_EXTENSION ".dylib"
 #else
 #   define DYNLIB_EXTENSION ".so"

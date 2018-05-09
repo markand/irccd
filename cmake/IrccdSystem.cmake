@@ -73,27 +73,6 @@ else ()
 endif ()
 
 #
-# System identification.
-# -------------------------------------------------------------------
-#
-
-if (WIN32)
-    set(IRCCD_SYSTEM_WINDOWS TRUE)
-elseif (APPLE)
-    set(IRCCD_SYSTEM_MAC TRUE)
-elseif (CMAKE_SYSTEM_NAME MATCHES "FreeBSD")
-    set(IRCCD_SYSTEM_FREEBSD TRUE)
-elseif (CMAKE_SYSTEM_NAME MATCHES "DragonFly")
-    set(IRCCD_SYSTEM_DRAGONFLYBSD TRUE)
-elseif (CMAKE_SYSTEM_NAME MATCHES "NetBSD")
-    set(IRCCD_SYSTEM_NETBSD TRUE)
-elseif (CMAKE_SYSTEM_NAME MATCHES "OpenBSD")
-    set(IRCCD_SYSTEM_OPENBSD TRUE)
-elseif (CMAKE_SYSTEM_NAME MATCHES "Linux")
-    set(IRCCD_SYSTEM_LINUX TRUE)
-endif ()
-
-#
 # Portability requirements.
 # -------------------------------------------------------------------
 #
@@ -159,12 +138,10 @@ check_function_exists(setprogname HAVE_SETPROGNAME)
 # If HAVE_GETLOGIN is defined, include:
 #
 # #include <unistd.h>
-if (NOT IRCCD_SYSTEM_WINDOWS)
-    check_function_exists(getlogin HAVE_GETLOGIN)
+check_function_exists(getlogin HAVE_GETLOGIN)
 
-    if (NOT HAVE_UNISTD_H)
-        set(HAVE_GETLOGIN FALSE)
-    endif ()
+if (NOT HAVE_UNISTD_H)
+    set(HAVE_GETLOGIN FALSE)
 endif ()
 
 # getpid() function

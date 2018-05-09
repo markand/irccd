@@ -31,8 +31,6 @@
 #include "connector.hpp"
 #include "socket_stream.hpp"
 
-#include <boost/asio.hpp>
-
 namespace irccd {
 
 namespace io {
@@ -162,7 +160,7 @@ void socket_connector<Protocol>::connect(connect_handler handler)
  */
 using ip_connector = socket_connector<boost::asio::ip::tcp>;
 
-#if !defined(IRCCD_SYSTEM_WINDOWS)
+#if !BOOST_OS_WINDOWS
 
 /**
  * Convenient Unix conncetor type.

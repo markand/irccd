@@ -26,8 +26,6 @@
 
 #include <irccd/sysconfig.hpp>
 
-#include <boost/asio.hpp>
-
 #include "acceptor.hpp"
 #include "socket_stream.hpp"
 
@@ -148,7 +146,7 @@ void socket_acceptor<Protocol>::accept(accept_handler handler)
  */
 using ip_acceptor = socket_acceptor<boost::asio::ip::tcp>;
 
-#if !defined(IRCCD_SYSTEM_WINDOWS)
+#if !BOOST_OS_WINDOWS
 
 /**
  * Convenient Unix acceptor type.

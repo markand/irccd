@@ -64,11 +64,11 @@ irccd_define_library(
         Boost::system
         $<$<BOOL:${HAVE_SSL}>:OpenSSL::Crypto>
         $<$<BOOL:${HAVE_SSL}>:OpenSSL::SSL>
-        $<$<BOOL:${IRCCD_SYSTEM_LINUX}>:dl>
-        $<$<BOOL:${IRCCD_SYSTEM_MAC}>:resolv>
-        $<$<BOOL:${IRCCD_SYSTEM_WINDOWS}>:mswsock>
+        $<$<BOOL:${APPLE}>:resolv>
+        $<$<BOOL:${WIN32}>:mswsock>
         $<$<BOOL:${WIN32}>:shlwapi>
         $<$<BOOL:${WIN32}>:ws2_32>
+        $<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:dl>
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
         $<BUILD_INTERFACE:${libcommon_SOURCE_DIR}>

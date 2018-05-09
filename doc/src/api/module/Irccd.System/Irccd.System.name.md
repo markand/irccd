@@ -1,6 +1,20 @@
 # Function Irccd.System.name
 
-Get the operating system name. Usually Windows, FreeBSD, Linux and such.
+Get the operating system name. Returns one of:
+
+- Linux
+- Windows
+- FreeBSD
+- DragonFlyBSD
+- OpenBSD
+- NetBSD
+- macOS
+- Android
+- Aix
+- Haiku
+- iOS
+- Solaris
+- Unknown
 
 # Synopsis
 

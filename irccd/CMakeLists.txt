@@ -23,11 +23,9 @@ irccd_define_executable(
     DESCRIPTION "The main irccd daemon."
     SOURCES CMakeLists.txt main.cpp
     INCLUDES ${irccd_SOURCE_DIR}
+    OPTIONS
+        $<$<BOOL:APPLE>:-Wno-deprecated-declarations>
     LIBRARIES
         libirccd
         $<$<BOOL:${HAVE_JS}>:libirccd-js>
 )
-
-if (IRCCD_SYSTEM_MAC)
-    target_compile_options(irccd PRIVATE -Wno-deprecated-declarations)
-endif ()

@@ -26,10 +26,11 @@
 
 #include <boost/dll.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/predef/os.h>
 
 #include "sysconfig.hpp"
 
-#if defined(IRCCD_SYSTEM_WINDOWS)
+#if BOOST_OS_WINDOWS
 #   include <sys/timeb.h>
 #   include <shlobj.h>
 #else
@@ -40,11 +41,11 @@
 #   include <unistd.h>
 #endif
 
-#if defined(IRCCD_SYSTEM_LINUX)
+#if BOOST_OS_LINUX
 #   include <sys/sysinfo.h>
 #endif
 
-#if defined(IRCCD_SYSTEM_MAC)
+#if BOOST_OS_MACOS
 #   include <sys/sysctl.h>
 #   include <libproc.h>
 #endif
@@ -157,7 +158,7 @@ boost::filesystem::path user_config_directory()
 {
     boost::filesystem::path path;
 
-#if defined(IRCCD_SYSTEM_WINDOWS)
+#if BOOST_OS_WINDOWS
     char folder[MAX_PATH] = {0};
 
     if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, folder) == S_OK) {
@@ -198,7 +199,7 @@ boost::filesystem::path user_plugin_directory()
 {
     boost::filesystem::path path;
 
-#if defined(IRCCD_SYSTEM_WINDOWS)
+#if BOOST_OS_WINDOWS
     char folder[MAX_PATH] = {0};
 
     if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, folder) == S_OK) {
@@ -242,20 +243,30 @@ void set_program_name(std::string name) noexcept
 
 std::string name()
 {
-#if defined(IRCCD_SYSTEM_LINUX)
+#if BOOST_OS_LINUX
     return "Linux";
-#elif defined(IRCCD_SYSTEM_WINDOWS)
+#elif BOOST_OS_WINDOWS
     return "Windows";
-#elif defined(IRCCD_SYSTEM_FREEBSD)
+#elif BOOST_OS_BSD_FREE
     return "FreeBSD";
-#elif defined(IRCCD_SYSTEM_DRAGONFLYBSD)
+#elif BOOST_OS_BSD_DRAGONFLY
     return "DragonFlyBSD";
-#elif defined(IRCCD_SYSTEM_OPENBSD)
+#elif BOOST_OS_BSD_OPEN
     return "OpenBSD";
-#elif defined(IRCCD_SYSTEM_NETBSD)
+#elif BOOST_OS_BSD_NET
     return "NetBSD";
-#elif defined(IRCCD_SYSTEM_MAC)
-    return "Mac";
+#elif BOOST_OS_MACOS
+    return "macOS";
+#elif BOOST_OS_ANDROID
+    return "Android";
+#elif BOOST_OS_AIX
+    return "Aix";
+#elif BOOST_OS_HAIKU
+    return "Haiku";
+#elif BOOST_OS_IOS
+    return "iOS";
+#elif BOOST_OS_SOLARIS
+    return "Solaris";
 #else
     return "Unknown";
 #endif
@@ -274,7 +285,7 @@ std::string name()
  */
 std::string version()
 {
-#if defined(IRCCD_SYSTEM_WINDOWS)
+#if BOOST_OS_WINDOWS
     const auto version = GetVersion();
     const auto major = (DWORD)(LOBYTE(LOWORD(version)));
     const auto minor = (DWORD)(HIBYTE(LOWORD(version)));
@@ -308,16 +319,16 @@ std::string version()
  */
 std::uint64_t uptime()
 {
-#if defined(IRCCD_SYSTEM_WINDOWS)
+#if BOOST_OS_WINDOWS
     return ::GetTickCount64() / 1000;
-#elif defined(IRCCD_SYSTEM_LINUX)
+#elif BOOST_OS_LINUX
     struct sysinfo info;
 
     if (sysinfo(&info) < 0)
         throw std::runtime_error(std::strerror(errno));
 
     return info.uptime;
-#elif defined(IRCCD_SYSTEM_MAC)
+#elif BOOST_OS_MACOS
     struct timeval boottime;
     size_t length = sizeof (boottime);
     int mib[2] = { CTL_KERN, KERN_BOOTTIME };
@@ -351,7 +362,7 @@ std::uint64_t uptime()
  */
 std::uint64_t ticks()
 {
-#if defined(IRCCD_SYSTEM_WINDOWS)
+#if BOOST_OS_WINDOWS
     _timeb tp;
 
     _ftime(&tp);
@@ -377,7 +388,7 @@ std::uint64_t ticks()
  */
 std::string home()
 {
-#if defined(IRCCD_SYSTEM_WINDOWS)
+#if BOOST_OS_WINDOWS
     char path[MAX_PATH];
 
     if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, path) != S_OK)

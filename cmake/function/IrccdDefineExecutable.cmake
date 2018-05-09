@@ -37,7 +37,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/IrccdVeraCheck.cmake)
 function(irccd_define_executable)
     set(options "")
     set(oneValueArgs DESCRIPTION TARGET)
-    set(multiValueArgs SOURCES FLAGS LIBRARIES INCLUDES)
+    set(multiValueArgs SOURCES FLAGS LIBRARIES INCLUDES OPTIONS)
 
     cmake_parse_arguments(EXE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -54,6 +54,7 @@ function(irccd_define_executable)
     add_executable(${EXE_TARGET} ${EXE_SOURCES})
     target_include_directories(${EXE_TARGET} PRIVATE ${EXE_INCLUDES})
     target_compile_definitions(${EXE_TARGET} PRIVATE ${EXE_FLAGS})
+    target_compile_options(${EXE_TARGET} PRIVATE ${EXE_OPTIONS})
     target_link_libraries(${EXE_TARGET} ${EXE_LIBRARIES})
 
     set_target_properties(
