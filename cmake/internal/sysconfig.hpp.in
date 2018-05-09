@@ -106,24 +106,4 @@
 #cmakedefine HAVE_STD_PUT_TIME
 #cmakedefine HAVE_SYSLOG
 
-/*
- * Export stuff.
- * ------------------------------------------------------------------
- */
-#cmakedefine BUILD_SHARED_LIBS
-
-#if defined(_WIN32)
-#   if defined(BUILD_SHARED_LIBS)
-#       if defined(IRCCD_BUILDING_DLL)
-#           define IRCCD_EXPORT __declspec(dllexport)
-#       else
-#           define IRCCD_EXPORT __declspec(dllimport)
-#       endif
-#   else
-#       define IRCCD_EXPORT
-#   endif
-#else
-#   define IRCCD_EXPORT
-#endif
-
 #endif // !IRCCD_SYSCONFIG_HPP

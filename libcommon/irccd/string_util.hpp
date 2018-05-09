@@ -190,7 +190,7 @@ public:
  *   - <strong>\@{white,black,bold,underline}</strong>: will write white text on
  *     black in both bold and underline.
  */
-IRCCD_EXPORT std::string format(std::string text, const subst& params = {});
+std::string format(std::string text, const subst& params = {});
 
 // }}}
 
@@ -202,7 +202,7 @@ IRCCD_EXPORT std::string format(std::string text, const subst& params = {});
  * \param str the string
  * \return the removed white spaces
  */
-IRCCD_EXPORT std::string strip(std::string str) noexcept;
+std::string strip(std::string str) noexcept;
 
 // }}}
 
@@ -216,7 +216,7 @@ IRCCD_EXPORT std::string strip(std::string str) noexcept;
  * \param max max number of split
  * \return a list of string splitted
  */
-IRCCD_EXPORT std::vector<std::string> split(const std::string& list, const std::string& delimiters, int max = -1);
+std::vector<std::string> split(const std::string& list, const std::string& delimiters, int max = -1);
 
 // }}}
 
@@ -297,7 +297,7 @@ inline bool is_identifier(const std::string& name)
  * \return true if is boolean
  * \note this function is case-insensitive
  */
-IRCCD_EXPORT bool is_boolean(std::string value) noexcept;
+bool is_boolean(std::string value) noexcept;
 
 // }}}
 
