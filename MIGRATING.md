@@ -27,7 +27,9 @@ Migrating from 2.x to 3.x
 
 ### CMake options
 
-  - `WITH_CONFDIR` has been renamed to `WITH_SYSCONFDIR`.
+  - All options are now starting with `IRCCD_` for better compatibility with
+    external projects,
+  - `IRCCD_WITH_CONFDIR` has been renamed to `IRCCD_WITH_SYSCONFDIR`.
 
 ### Paths
 

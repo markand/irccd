@@ -65,7 +65,7 @@ function(_irccd_define_javascript_plugin)
     install(
         FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}
         COMPONENT ${PLG_NAME}
-        DESTINATION ${WITH_PLUGINDIR}
+        DESTINATION ${IRCCD_WITH_PLUGINDIR}
     )
 
     add_custom_target(
@@ -86,7 +86,7 @@ function(_irccd_define_native_plugin)
     install(
         TARGETS plugin-${PLG_NAME}
         COMPONENT ${PLG_NAME}
-        LIBRARY DESTINATION ${WITH_PLUGINDIR}
+        LIBRARY DESTINATION ${IRCCD_WITH_PLUGINDIR}
     )
 endfunction()
 
@@ -102,12 +102,12 @@ function(irccd_define_plugin)
     endif ()
 
     string(TOUPPER ${PLG_NAME} PLG_UPPER_NAME)
-    option(WITH_PLUGIN_${PLG_UPPER_NAME} "Enable ${PLG_NAME} plugin" On)
+    option(IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME} "Enable ${PLG_NAME} plugin" On)
 
-    if (NOT WITH_PLUGIN_${PLG_UPPER_NAME})
-        setg(WITH_PLUGIN_${PLG_UPPER_NAME}_MSG "No (disabled by user)")
+    if (NOT IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME})
+        setg(IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME}_MSG "No (disabled by user)")
     else ()
-        setg(WITH_PLUGIN_${PLG_UPPER_NAME}_MSG "Yes")
+        setg(IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME}_MSG "Yes")
 
         # Optional documentation.
         if (PLG_DOCS AND HAVE_HTML)

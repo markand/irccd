@@ -70,10 +70,10 @@ void transport_server::do_greetings(std::shared_ptr<transport_client> client, ac
         { "major",      IRCCD_VERSION_MAJOR },
         { "minor",      IRCCD_VERSION_MINOR },
         { "patch",      IRCCD_VERSION_PATCH },
-#if defined(HAVE_JS)
+#if defined(IRCCD_HAVE_JS)
         { "javascript", true                },
 #endif
-#if defined(HAVE_SSL)
+#if defined(IRCCD_HAVE_SSL)
         { "ssl",        true                },
 #endif
     });

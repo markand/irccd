@@ -24,14 +24,14 @@
 #
 # Check the style source code using vera++.
 #
-# No-op if HAVE_VERA is Off.
+# No-op if IRCCD_HAVE_VERA is Off.
 #
 # This macro add a post-build command to call vera++ program on the specified
 # sources file for the given target.
 #
 
 function(irccd_vera_check target sources)
-    if (HAVE_VERA)
+    if (IRCCD_HAVE_VERA)
         set(valid ".cpp;.c;.hpp;.h")
 
         # Cleanup non relevant files.

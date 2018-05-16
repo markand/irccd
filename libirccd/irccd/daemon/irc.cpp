@@ -239,7 +239,7 @@ void ip_connection::do_send(const send_handler& handler) noexcept
     wrap_send(socket_, handler);
 }
 
-#if defined(HAVE_SSL)
+#if defined(IRCCD_HAVE_SSL)
 
 void tls_connection::do_connect(const std::string& host,
                                 const std::string& service,
@@ -268,7 +268,7 @@ void tls_connection::do_send(const send_handler& handler) noexcept
     wrap_send(socket_, handler);
 }
 
-#endif // !HAVE_SSL
+#endif // !IRCCD_HAVE_SSL
 
 } // !irc
 

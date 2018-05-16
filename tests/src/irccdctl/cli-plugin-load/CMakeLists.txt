@@ -16,13 +16,9 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-if (NOT IS_ABSOLUTE WITH_PLUGINDIR)
-    file(WRITE "${CMAKE_BINARY_DIR}/${WITH_PLUGINDIR}/test-cli-plugin-load.js" "")
-
-    irccd_define_test(
-        NAME cli-plugin-load
-        SOURCES main.cpp
-        LIBRARIES libcommon
-        DEPENDS irccd irccdctl
-    )
-endif ()
+irccd_define_test(
+    NAME cli-plugin-load
+    SOURCES main.cpp
+    LIBRARIES libcommon
+    DEPENDS irccd irccdctl
+)

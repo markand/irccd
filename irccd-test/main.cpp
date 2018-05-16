@@ -27,7 +27,7 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/filesystem.hpp>
 
-#if defined(HAVE_LIBEDIT)
+#if defined(IRCCD_HAVE_LIBEDIT)
 #   include <histedit.h>
 #endif
 
@@ -42,7 +42,7 @@
 
 #include <irccd/test/debug_server.hpp>
 
-#if defined(HAVE_JS)
+#if defined(IRCCD_HAVE_JS)
 #   include <irccd/js/js_plugin.hpp>
 #endif
 
@@ -472,7 +472,7 @@ void exec(const std::string& line)
 
 // }}}
 
-#if defined(HAVE_LIBEDIT)
+#if defined(IRCCD_HAVE_LIBEDIT)
 
 // {{{ prompt (libedit version)
 
@@ -620,7 +620,7 @@ void load(int argc, char** argv)
 {
     daemon = std::make_unique<irccd>(io);
 
-#if defined(HAVE_JS)
+#if defined(IRCCD_HAVE_JS)
     daemon->plugins().add_loader(js_plugin_loader::defaults(*daemon));
 #endif
 

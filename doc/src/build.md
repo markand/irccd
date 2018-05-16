@@ -39,7 +39,7 @@ You can configure some features when compiling irccd.
 
 You can disable JavaScript support.
 
-    $ cmake .. -DWITH_JS=Off
+    $ cmake .. -DIRCCD_WITH_JS=Off
 
 ## Disabling SSL
 
@@ -48,13 +48,20 @@ found.
 
 **Warning**: this is not recommended.
 
-    $ cmake .. -DWITH_SSL=Off
+    $ cmake .. -DIRCCD_WITH_SSL=Off
+
+## Disabling libedit
+
+If for some reasons, you don't want auto-completion in `irccd-test`, you can
+disable it.
+
+    $ cmake .. -DIRCCD_WITH_LIBEDIT=Off
 
 ## Disabling all documentation
 
 You can disable all the documentation.
 
-    $ cmake .. -DWITH_DOCS=Off
+    $ cmake .. -DIRCCD_WITH_DOCS=Off
 
 See below to disable only specific parts of the documentation.
 
@@ -69,7 +76,7 @@ disable it.
 
 You can disable installation of manuals.
 
-    $ cmake .. -DWITH_MAN=Off
+    $ cmake .. -DIRCCD_WITH_MAN=Off
 
 ## Installation path
 
@@ -89,4 +96,4 @@ By default, irccd use **${CMAKE_INSTALL_PREFIX}/share/man** for manual pages.
 
 For example, on FreeBSD the typical use would be:
 
-    $ cmake .. -DWITH_MANDIR=/usr/local/man
+    $ cmake .. -DIRCCD_WITH_MANDIR=/usr/local/man

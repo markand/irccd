@@ -27,16 +27,16 @@
 #include <irccd/socket_connector.hpp>
 #include <irccd/socket_stream.hpp>
 
-#if defined(HAVE_SSL)
+#if defined(IRCCD_HAVE_SSL)
 #   include <irccd/tls_acceptor.hpp>
 #   include <irccd/tls_connector.hpp>
 #   include <irccd/tls_stream.hpp>
-#endif // !HAVE_SSL
+#endif // !IRCCD_HAVE_SSL
 
 using boost::asio::io_service;
 using boost::asio::ip::tcp;
 
-#if defined(HAVE_SSL)
+#if defined(IRCCD_HAVE_SSL)
 using boost::asio::ssl::context;
 #endif
 
@@ -110,7 +110,7 @@ protected:
     }
 };
 
-#if defined(HAVE_SSL)
+#if defined(IRCCD_HAVE_SSL)
 
 class ssl_io_test : public io_test {
 private:
@@ -144,7 +144,7 @@ protected:
     }
 };
 
-#endif // !HAVE_SSL
+#endif // !IRCCD_HAVE_SSL
 
 #if !BOOST_OS_WINDOWS
 
@@ -178,7 +178,7 @@ public:
  */
 using list = boost::mpl::list<
     ip_io_test
-#if defined(HAVE_SSL)
+#if defined(IRCCD_HAVE_SSL)
     , ssl_io_test
 #endif
 #if !BOOST_OS_WINDOWS

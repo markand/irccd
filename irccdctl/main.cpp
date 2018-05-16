@@ -31,7 +31,7 @@
 #include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
 
-#if defined(HAVE_SSL)
+#if defined(IRCCD_HAVE_SSL)
 #   include <irccd/tls_connector.hpp>
 #endif
 
@@ -153,7 +153,7 @@ std::unique_ptr<io::connector> read_connect_ip(const ini::section& sc)
     const auto endpoints = resolve(host, port);
 
     if (string_util::is_boolean(sc.get("ssl").value())) {
-#if defined(HAVE_SSL)
+#if defined(IRCCD_HAVE_SSL)
         // TODO: support more parameters.
         boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
 

@@ -75,7 +75,7 @@
 #include <irccd/daemon/service/server_service.hpp>
 #include <irccd/daemon/service/transport_service.hpp>
 
-#if defined(HAVE_JS)
+#if defined(IRCCD_HAVE_JS)
 #   include <irccd/js/js_plugin.hpp>
 #endif
 
@@ -111,10 +111,10 @@ void version(const option::result& options)
         bool ssl = false;
         bool js = false;
 
-#if defined(HAVE_SSL)
+#if defined(IRCCD_HAVE_SSL)
         ssl = true;
 #endif
-#if defined(HAVE_JS)
+#if defined(IRCCD_HAVE_JS)
         js = true;
 #endif
 
@@ -250,7 +250,7 @@ int main(int argc, char** argv)
     instance->transports().get_commands().push_back(std::make_unique<rule_move_command>());
     instance->transports().get_commands().push_back(std::make_unique<rule_remove_command>());
 
-#if defined(HAVE_JS)
+#if defined(IRCCD_HAVE_JS)
     instance->plugins().add_loader(js_plugin_loader::defaults(*instance));
 #endif
 

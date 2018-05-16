@@ -33,7 +33,7 @@
 
 #include <boost/asio.hpp>
 
-#if defined(HAVE_SSL)
+#if defined(IRCCD_HAVE_SSL)
 #   include <boost/asio/ssl.hpp>
 #endif
 
@@ -535,7 +535,7 @@ public:
     }
 };
 
-#if defined(HAVE_SSL)
+#if defined(IRCCD_HAVE_SSL)
 
 /**
  * \brief SSL connection
@@ -577,7 +577,7 @@ public:
     }
 };
 
-#endif // !HAVE_SSL
+#endif // !IRCCD_HAVE_SSL
 
 } // !irc
 

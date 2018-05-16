@@ -511,7 +511,7 @@ void server::connect() noexcept
 #endif
 
     if (flags_ & ssl) {
-#if defined(HAVE_SSL)
+#if defined(IRCCD_HAVE_SSL)
         conn_ = std::make_shared<irc::tls_connection>(service_);
 #else
         /*

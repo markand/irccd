@@ -27,5 +27,5 @@ irccd_define_executable(
         $<$<BOOL:APPLE>:-Wno-deprecated-declarations>
     LIBRARIES
         libirccd
-        $<$<BOOL:${HAVE_JS}>:libirccd-js>
+        $<$<BOOL:${IRCCD_HAVE_JS}>:libirccd-js>
 )

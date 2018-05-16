@@ -28,7 +28,7 @@ add_subdirectory(src/libcommon)
 add_subdirectory(src/libirccd)
 add_subdirectory(src/irccdctl)
 
-if (HAVE_JS)
+if (IRCCD_HAVE_JS)
     add_subdirectory(src/plugins)
     add_subdirectory(src/libirccd-js)
 endif ()

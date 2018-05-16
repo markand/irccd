@@ -588,7 +588,7 @@ public:
      */
     inline void set_flags(std::uint8_t flags) noexcept
     {
-#if !defined(HAVE_SSL)
+#if !defined(IRCCD_HAVE_SSL)
         assert(!(flags & ssl));
 #endif
 

@@ -112,8 +112,8 @@ void set_gid(const std::string& value);
 #endif
 
 /**
- * Get the cache directory as specified as compile time option WITH_CACHEDIR, if
- * the value is absolute, it is returned as-is.
+ * Get the cache directory as specified as compile time option
+ * IRCCD_WITH_CACHEDIR, if the value is absolute, it is returned as-is.
  *
  * If the component is relative, it is evaluated using the binary executable
  * path.
@@ -125,7 +125,7 @@ void set_gid(const std::string& value);
 boost::filesystem::path cachedir();
 
 /**
- * Like cachedir but for WITH_DATADIR.
+ * Like cachedir but for IRCCD_WITH_DATADIR.
  *
  * \return the evaluated data directory.
  * \see cachedir
@@ -134,7 +134,7 @@ boost::filesystem::path cachedir();
 boost::filesystem::path datadir();
 
 /**
- * Like cachedir but for WITH_SYSCONFIGDIR.
+ * Like cachedir but for IRCCD_WITH_SYSCONFIGDIR.
  *
  * \return the evaluated config directory.
  * \see cachedir
@@ -144,7 +144,7 @@ boost::filesystem::path datadir();
  boost::filesystem::path sysconfdir();
 
 /**
- * Like cachedir but for WITH_PLUGINDIR.
+ * Like cachedir but for IRCCD_WITH_PLUGINDIR.
  *
  * \return the evaluated system plugin directory.
  * \see cachedir

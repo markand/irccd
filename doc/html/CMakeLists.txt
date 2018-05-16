@@ -198,12 +198,12 @@ add_custom_target(
 install(
     FILES ${CSS}
     COMPONENT docs
-    DESTINATION ${WITH_DOCDIR}/css
+    DESTINATION ${IRCCD_WITH_DOCDIR}/css
 )
 install(
     FILES ${JS}
     COMPONENT docs
-    DESTINATION ${WITH_DOCDIR}/js
+    DESTINATION ${IRCCD_WITH_DOCDIR}/js
 )
 
 setg(CPACK_COMPONENT_DOCS_DISPLAY_NAME "Documentation")

@@ -21,10 +21,10 @@ irccd_define_executable(
     LIBRARIES
         libirccd
         libirccd-test
-        $<$<BOOL:${HAVE_LIBEDIT}>:${Editline_LIBRARIES}>
-        $<$<BOOL:${HAVE_JS}>:libirccd-js>
+        $<$<BOOL:${IRCCD_HAVE_LIBEDIT}>:${Editline_LIBRARIES}>
+        $<$<BOOL:${IRCCD_HAVE_JS}>:libirccd-js>
     INCLUDES
-        $<$<BOOL:${HAVE_LIBEDIT}>:${Editline_INCLUDE_DIRS}>
+        $<$<BOOL:${IRCCD_HAVE_LIBEDIT}>:${Editline_INCLUDE_DIRS}>
     DESCRIPTION "Plugin tester"
     SOURCES main.cpp
 )

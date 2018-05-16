@@ -18,13 +18,13 @@
 
 project(doc)
 
-if (HAVE_DOXYGEN)
+if (IRCCD_HAVE_DOXYGEN)
     add_subdirectory(doxygen)
 endif ()
 
 add_subdirectory(examples)
 #add_subdirectory(man)
 
-if (HAVE_HTML)
+if (IRCCD_HAVE_HTML)
     add_subdirectory(html)
 endif ()

@@ -32,11 +32,11 @@ irccd_define_library(
         ${libirccd-test_SOURCE_DIR}/irccd/test/plugin_cli_test.hpp
         ${libirccd-test_SOURCE_DIR}/irccd/test/rule_cli_test.cpp
         ${libirccd-test_SOURCE_DIR}/irccd/test/rule_cli_test.hpp
-        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/plugin_test.cpp>
-        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/plugin_test.hpp>
-        $<$<BOOL:${HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/js_test.hpp>
+        $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/plugin_test.cpp>
+        $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/plugin_test.hpp>
+        $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/js_test.hpp>
     LIBRARIES
-        $<$<BOOL:${HAVE_JS}>:libirccd-js>
+        $<$<BOOL:${IRCCD_HAVE_JS}>:libirccd-js>
         libirccd
         libirccdctl
     PUBLIC_INCLUDES

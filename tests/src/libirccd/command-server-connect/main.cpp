@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(minimal)
     BOOST_TEST(s->get_port() == 6667U);
 }
 
-#if defined(HAVE_SSL)
+#if defined(IRCCD_HAVE_SSL)
 
 BOOST_AUTO_TEST_CASE(full)
 {
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(full)
     BOOST_TEST(s->get_flags() & server::join_invite);
 }
 
-#endif // !HAVE_SSL
+#endif // !IRCCD_HAVE_SSL
 
 BOOST_AUTO_TEST_SUITE(errors)
 
@@ -196,7 +196,7 @@ BOOST_AUTO_TEST_CASE(invalid_port_3)
     BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "server");
 }
 
-#if !defined(HAVE_SSL)
+#if !defined(IRCCD_HAVE_SSL)
 
 BOOST_AUTO_TEST_CASE(ssl_disabled)
 {

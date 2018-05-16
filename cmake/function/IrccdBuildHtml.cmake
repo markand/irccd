@@ -129,7 +129,7 @@ macro(irccd_build_html)
         install(
             FILES ${output}
             COMPONENT ${HTML_COMPONENT}
-            DESTINATION ${WITH_DOCDIR}/${dirname}
+            DESTINATION ${IRCCD_WITH_DOCDIR}/${dirname}
         )
     endif ()
 

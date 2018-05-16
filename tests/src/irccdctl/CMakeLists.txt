@@ -16,7 +16,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-if (HAVE_JS)
+if (IRCCD_HAVE_JS)
     add_subdirectory(cli-plugin-config)
     add_subdirectory(cli-plugin-info)
     add_subdirectory(cli-plugin-list)

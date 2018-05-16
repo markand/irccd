@@ -26,7 +26,7 @@
 
 #include <irccd/sysconfig.hpp>
 
-#if defined(HAVE_SSL)
+#if defined(IRCCD_HAVE_SSL)
 
 #include <boost/asio/ssl.hpp>
 
@@ -59,6 +59,6 @@ public:
 
 } // !irccd
 
-#endif // !HAVE_SSL
+#endif // !IRCCD_HAVE_SSL
 
 #endif // !IRCCD_COMMON_TLS_STREAM_HPP

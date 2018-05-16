@@ -62,8 +62,8 @@ irccd_define_library(
         Threads::Threads
         Boost::filesystem
         Boost::system
-        $<$<BOOL:${HAVE_SSL}>:OpenSSL::Crypto>
-        $<$<BOOL:${HAVE_SSL}>:OpenSSL::SSL>
+        $<$<BOOL:${IRCCD_HAVE_SSL}>:OpenSSL::Crypto>
+        $<$<BOOL:${IRCCD_HAVE_SSL}>:OpenSSL::SSL>
         $<$<BOOL:${APPLE}>:resolv>
         $<$<BOOL:${WIN32}>:mswsock>
         $<$<BOOL:${WIN32}>:shlwapi>

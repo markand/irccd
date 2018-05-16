@@ -26,7 +26,7 @@
 #include <irccd/string_util.hpp>
 #include <irccd/socket_acceptor.hpp>
 
-#if defined(HAVE_SSL)
+#if defined(IRCCD_HAVE_SSL)
 #   include <irccd/tls_acceptor.hpp>
 #endif
 
@@ -101,7 +101,7 @@ std::unique_ptr<transport_server> from_config_load_ip(io_service& service, const
     auto acceptor = from_config_load_ip_acceptor(service, sc);
 
     if (string_util::is_boolean(sc.get("ssl").value())) {
-#if !defined(HAVE_SSL)
+#if !defined(IRCCD_HAVE_SSL)
         throw transport_error(transport_error::ssl_disabled);
 #else
         const auto key = sc.get("key").value();

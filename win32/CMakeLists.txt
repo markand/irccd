@@ -46,7 +46,7 @@ endif ()
 # -------------------------------------------------------------------
 #
 
-if (HAVE_SSL)
+if (IRCCD_HAVE_SSL)
     set(SSL_EAY_DLL libeay32.dll)
     set(SSL_LIB_DLL ssleay32.dll)
     list(APPEND DLLS SSL_EAY_DLL SSL_LIB_DLL)
@@ -55,37 +55,37 @@ endif ()
 #
 # Find DLL to copy/install by iterating DLLS value.
 #
-# Creates a cache WITH_<NAME> variable with the path to the DLL if found,
+# Creates a cache IRCCD_WITH_<NAME> variable with the path to the DLL if found,
 # otherwise, set to not found.
 #
-# If found, WITH_<NAME> is appended to IRCCD_DLLS global variable and set as
+# If found, IRCCD_WITH_<NAME> is appended to IRCCD_DLLS global variable and set as
 # parent scope.
 #
-# If not found, WITH_<NAME> is appended to IRCCD_DLLS_NOT_FOUND variable.
+# If not found, IRCCD_WITH_<NAME> is appended to IRCCD_DLLS_NOT_FOUND variable.
 #
 
 foreach (name ${DLLS})
     find_program(
-        WITH_${name}
+        IRCCD_WITH_${name}
         NAMES ${${name}}
         DOC "Path to DLL"
     )
 
-    if (EXISTS ${WITH_${name}})
+    if (EXISTS ${IRCCD_WITH_${name}})
         file(
-            COPY ${WITH_${name}}
-            DESTINATION ${IRCCD_FAKEROOTDIR}/${WITH_BINDIR}
+            COPY ${IRCCD_WITH_${name}}
+            DESTINATION ${IRCCD_FAKEROOTDIR}/${IRCCD_WITH_BINDIR}
         )
         install(
-            PROGRAMS ${WITH_${name}}
+            PROGRAMS ${IRCCD_WITH_${name}}
             COMPONENT libirccd
             DESTINATION bin
         )
-        list(APPEND IRCCD_DLLS WITH_${name})
+        list(APPEND IRCCD_DLLS IRCCD_WITH_${name})
     else ()
         set(IRCCD_PACKAGE Off PARENT_SCOPE)
         set(IRCCD_PACKAGE_MSG "No (some .dll were not found)" PARENT_SCOPE)
-        list(APPEND IRCCD_DLLS_NOT_FOUND WITH_${name})
+        list(APPEND IRCCD_DLLS_NOT_FOUND IRCCD_WITH_${name})
     endif ()
 endforeach ()
 

@@ -26,7 +26,7 @@
 
 #include <irccd/sysconfig.hpp>
 
-#if defined(HAVE_SSL)
+#if defined(IRCCD_HAVE_SSL)
 
 #include "socket_connector.hpp"
 #include "tls_stream.hpp"
@@ -90,6 +90,6 @@ void tls_connector<Protocol>::connect(connect_handler handler)
 
 } // !irccd
 
-#endif // !HAVE_SSL
+#endif // !IRCCD_HAVE_SSL
 
 #endif // !IRCCD_COMMON_TLS_CONNECTOR_HPP

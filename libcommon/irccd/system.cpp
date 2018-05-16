@@ -87,7 +87,7 @@ namespace {
  */
 boost::filesystem::path base_directory()
 {
-    static const boost::filesystem::path bindir(WITH_BINDIR);
+    static const boost::filesystem::path bindir(IRCCD_WITH_BINDIR);
     static const boost::filesystem::path prefix(PREFIX);
 
     boost::filesystem::path path(".");
@@ -121,7 +121,8 @@ boost::filesystem::path base_directory()
  *
  * Compute the system directory path for the given component.
  *
- * Use with the build options like WITH_CACHEDIR, WITH_PLUGINDIR, ...
+ * Use with the build options like IRCCD_WITH_CACHEDIR, IRCCD_WITH_PLUGINDIR,
+ * ...
  *
  * Referenced by:
  *   - cachedir,
@@ -496,7 +497,7 @@ void set_gid(const std::string& value)
 
 boost::filesystem::path cachedir()
 {
-    return system_directory(WITH_CACHEDIR);
+    return system_directory(IRCCD_WITH_CACHEDIR);
 }
 
 // }}}
@@ -505,7 +506,7 @@ boost::filesystem::path cachedir()
 
 boost::filesystem::path datadir()
 {
-    return system_directory(WITH_DATADIR);
+    return system_directory(IRCCD_WITH_DATADIR);
 }
 
 // }}}
@@ -514,7 +515,7 @@ boost::filesystem::path datadir()
 
 boost::filesystem::path sysconfdir()
 {
-    return system_directory(WITH_SYSCONFDIR);
+    return system_directory(IRCCD_WITH_SYSCONFDIR);
 }
 
 // }}}
@@ -523,7 +524,7 @@ boost::filesystem::path sysconfdir()
 
 boost::filesystem::path plugindir()
 {
-    return system_directory(WITH_PLUGINDIR);
+    return system_directory(IRCCD_WITH_PLUGINDIR);
 }
 
 // }}}

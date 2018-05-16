@@ -51,15 +51,15 @@
  * ------------------------------------------------------------------
  */
 
-#define WITH_CACHEDIR       "@WITH_CACHEDIR@"
-#define WITH_DATADIR        "@WITH_DATADIR@"
-#define WITH_BINDIR         "@WITH_BINDIR@"
-#define WITH_SYSCONFDIR     "@WITH_SYSCONFDIR@"
-#define WITH_PLUGINDIR      "@WITH_PLUGINDIR@"
+#define IRCCD_WITH_CACHEDIR       "@IRCCD_WITH_CACHEDIR@"
+#define IRCCD_WITH_DATADIR        "@IRCCD_WITH_DATADIR@"
+#define IRCCD_WITH_BINDIR         "@IRCCD_WITH_BINDIR@"
+#define IRCCD_WITH_SYSCONFDIR     "@IRCCD_WITH_SYSCONFDIR@"
+#define IRCCD_WITH_PLUGINDIR      "@IRCCD_WITH_PLUGINDIR@"
 
-#cmakedefine HAVE_JS
-#cmakedefine HAVE_SSL
-#cmakedefine HAVE_LIBEDIT
+#cmakedefine IRCCD_HAVE_JS
+#cmakedefine IRCCD_HAVE_SSL
+#cmakedefine IRCCD_HAVE_LIBEDIT
 
 /*
  * Platform checks.

@@ -169,7 +169,7 @@ void from_json_load_flags(server& sv, const json_util::document& parser)
         sv.set_flags(sv.get_flags() | server::join_invite);
 
     if (ssl.value_or(false))
-#if !defined(HAVE_SSL)
+#if !defined(IRCCD_HAVE_SSL)
         throw server_error(server_error::ssl_disabled);
 #else
         sv.set_flags(sv.get_flags() | server::ssl);
