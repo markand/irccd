@@ -67,10 +67,10 @@ dynlib_plugin_loader::dynlib_plugin_loader(std::vector<std::string> directories)
 {
 }
 
-std::shared_ptr<plugin> dynlib_plugin_loader::open(const std::string& id,
+std::shared_ptr<plugin> dynlib_plugin_loader::open(const std::string&,
                                                    const std::string& path) noexcept
 {
-    return wrap(boost::dll::import<plugin>(path, symbol(id)));
+    return wrap(boost::dll::import<plugin>(path, symbol(path)));
 }
 
 } // !irccd
