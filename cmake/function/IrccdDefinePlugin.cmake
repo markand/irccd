@@ -83,6 +83,24 @@ function(_irccd_define_native_plugin)
 
     add_library(plugin-${PLG_NAME} MODULE ${PLG_SOURCES} ${PLG_OUTPUT_DOC} ${PLG_DOCS})
     target_link_libraries(plugin-${PLG_NAME} libirccd)
+
+    # Change output name.
+    set_target_properties(
+        plugin-${PLG_NAME}
+        PROPERTIES
+            PREFIX ""
+            OUTPUT_NAME ${PLG_NAME}
+    )
+    foreach (cfg ${CMAKE_CONFIGURATION_TYPES})
+        string(TOUPPER ${cfg} CFG)
+        set_target_properties(
+            plugin-${PLG_NAME}
+            PROPERTIES
+                PREFIX ""
+                OUTPUT_NAME_${CFG} ${PLG_NAME}
+        )
+    endforeach ()
+
     install(
         TARGETS plugin-${PLG_NAME}
         COMPONENT ${PLG_NAME}
