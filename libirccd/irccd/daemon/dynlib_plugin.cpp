@@ -38,7 +38,7 @@ namespace irccd {
 
 namespace {
 
-std::string symbol(const std::string& path) noexcept
+auto symbol(const std::string& path) -> std::pair<std::string, std::string>
 {
     auto id = boost::filesystem::path(path).stem().string();
 
@@ -52,12 +52,10 @@ std::string symbol(const std::string& path) noexcept
         return c == '-' ? '_' : c;
     });
 
-    return string_util::sprintf("irccd_plugin_%s", id);
-}
-
-std::shared_ptr<plugin> wrap(boost::shared_ptr<plugin> ptr) noexcept
-{
-    return std::shared_ptr<plugin>(ptr.get(), [ptr] (auto) mutable { ptr.reset(); });
+    return {
+        string_util::sprintf("irccd_abi_%s", id),
+        string_util::sprintf("irccd_init_%s", id)
+    };
 }
 
 } // !namespace
@@ -67,10 +65,32 @@ dynlib_plugin_loader::dynlib_plugin_loader(std::vector<std::string> directories)
 {
 }
 
-std::shared_ptr<plugin> dynlib_plugin_loader::open(const std::string&,
-                                                   const std::string& path) noexcept
+auto dynlib_plugin_loader::open(const std::string& id,
+                                const std::string& path) -> std::shared_ptr<plugin>
 {
-    return wrap(boost::dll::import<plugin>(path, symbol(path)));
+    const auto [ abisym, initsym ] = symbol(path);
+
+    using abisym_func_type = unsigned ();
+    using initsym_func_type = std::unique_ptr<plugin> ();
+
+    const auto abi = boost::dll::import<abisym_func_type>(path, abisym);
+    const auto init = boost::dll::import<initsym_func_type>(path, initsym);
+
+    if (abi() != IRCCD_VERSION_SHLIB)
+        throw plugin_error(plugin_error::exec_error, id, "incompatible version");
+
+    auto plg = init();
+
+    if (!plg)
+        throw plugin_error(plugin_error::exec_error, id, "invalid plugin");
+
+    /*
+     * We need to keep a reference to `init' variable for the whole plugin
+     * lifetime.
+     */
+    return std::shared_ptr<plugin>(plg.release(), [init] (auto ptr) mutable {
+        delete ptr;
+    });
 }
 
 } // !irccd

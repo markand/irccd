@@ -424,8 +424,20 @@ void links_plugin::handle_message(irccd& irccd, const message_event& ev)
 
 } // !namespace
 
-extern "C" BOOST_SYMBOL_EXPORT links_plugin irccd_plugin_links;
+extern "C" {
 
-links_plugin irccd_plugin_links("links", "");
+BOOST_SYMBOL_EXPORT
+auto irccd_abi_links() -> unsigned
+{
+    return IRCCD_VERSION_SHLIB;
+}
+
+BOOST_SYMBOL_EXPORT
+auto irccd_init_links() -> std::unique_ptr<plugin>
+{
+    return std::make_unique<links_plugin>("links", "");
+}
+
+} // !C
 
 } // !irccd
