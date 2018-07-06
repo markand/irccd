@@ -359,7 +359,6 @@ inline bool contains(const nlohmann::json& array, const nlohmann::json& value) n
     return false;
 }
 
-
 } // !json_util
 
 } // !irccd
