@@ -19,7 +19,7 @@
 project(plugins)
 
 set(
-    IRCCD_PLUGINS
+    IRCCD_JAVASCRIPT_PLUGINS
     ask
     auth
     hangman
@@ -29,14 +29,34 @@ set(
     plugin
     roulette
     tictactoe
+)
+
+set(
+    IRCCD_NATIVE_PLUGINS
+    links
+)
+
+set(
+    IRCCD_PLUGINS
+    ${IRCCD_JAVASCRIPT_PLUGINS}
+    ${IRCCD_NATIVE_PLUGINS}
     CACHE INTERNAL ""
 )
 
-foreach (plugin ${IRCCD_PLUGINS})
+foreach (plugin ${IRCCD_JAVASCRIPT_PLUGINS})
     irccd_define_plugin(
         NAME ${plugin}
         TYPE JS
         SCRIPT ${plugins_SOURCE_DIR}/${plugin}/${plugin}.js
+        DOCS ${plugins_SOURCE_DIR}/${plugin}/${plugin}.md
+    )
+endforeach ()
+
+foreach (plugin ${IRCCD_NATIVE_PLUGINS})
+    irccd_define_plugin(
+        NAME ${plugin}
+        TYPE NATIVE
+        SOURCES ${plugins_SOURCE_DIR}/${plugin}/${plugin}.cpp
         DOCS ${plugins_SOURCE_DIR}/${plugin}/${plugin}.md
     )
 endforeach ()

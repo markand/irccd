@@ -38,6 +38,7 @@
 #include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
 
+#include <irccd/daemon/dynlib_plugin.hpp>
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/logger.hpp>
 
@@ -253,6 +254,8 @@ int main(int argc, char** argv)
 #if defined(IRCCD_HAVE_JS)
     instance->plugins().add_loader(js_plugin_loader::defaults(*instance));
 #endif
+
+    instance->plugins().add_loader(std::make_unique<dynlib_plugin_loader>());
 
     try {
         instance->set_config(open(options));

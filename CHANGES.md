@@ -41,7 +41,8 @@ Internal:
 Plugins:
 
   - Introduce brand new joke plugin (#609),
-  - Introduce brand new tictactoe plugin (#393).
+  - Introduce brand new tictactoe plugin (#393),
+  - Introduce brand new links plugin (#872).
 
 irccd 2.2.0 2017-09-26
 ----------------------
