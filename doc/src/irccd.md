@@ -33,17 +33,17 @@ The following directories are searched in the specified order for configuration
 files. For example, the files `irccd.conf` and `irccdctl.conf` will be searched
 there.
 
-  - \(W) `%APPDATA%/irccd/config`
-  - \(U) `${XDG_CONFIG_HOME}/irccd`
-  - \(U) `${HOME}/.config/irccd` (if `XDG_CONFIG_HOME` is not set)
-  - `installation-directory/etc`
+  - \(W) %APPDATA%/irccd/config
+  - \(U) ${XDG\_CONFIG\_HOME}/irccd
+  - \(U) ${HOME}/.config/irccd (if XDG\_CONFIG\_HOME is not set)
+  - CMAKE\_INSTALL\_SYSCONFDIR/irccd
 
 Examples:
 
-  - `/home/john/.config/irccd/irccd.conf`
-  - `/usr/local/etc/irccd.conf`
-  - `C:/Program Files/irccd/etc/irccd.conf`
-  - `C:/Users/john/AppData/irccd/config`
+  - /home/john/.config/irccd/irccd.conf
+  - /usr/local/etc/irccd.conf
+  - C:/Program Files/irccd/etc/irccd/irccd.conf
+  - C:/Users/john/AppData/irccd/config
 
 # Plugins
 
@@ -51,18 +51,17 @@ These directories are searched in the following order to load plugins when they
 are not specified by full paths.
 
   - current working directory
-  - \(W) `%APPDATA%/irccd/share/plugins`
-  - \(U) `${XDG_DATA_HOME}/irccd/plugins`
-  - \(U) `${HOME}/.local/share/irccd/plugins` (if `XDG_DATA_HOME` is not set)
-  - \(W) `installation-directory/share/plugins`
-  - \(U) `installation-directory/share/irccd/plugins`
+  - \(W) %APPDATA%/irccd/share/plugins
+  - \(U) ${XDG\_DATA\_HOME}/irccd/plugins
+  - \(U) ${HOME}/.local/share/irccd/plugins (if XDG\_DATA\_HOME is not set)
+  - CMAKE\_INSTALL\_LIBDIR/irccd (both native and Javascript)
 
 Examples:
 
-  - `/home/john/.local/share/irccd/plugins/ask.js`
-  - `/usr/local/share/irccd/plugins/ask.js`
-  - `C:/Users/john/AppDAta/irccd/share/plugins/ask.js`
-  - `C:/Program Files/irccd/share/plugins/ask.js`
+  - /home/john/.local/share/irccd/plugins/ask.js
+  - /usr/local/lib/irccd/plugins/ask.js
+  - C:/Users/john/AppData/irccd/share/plugins/ask.js
+  - C:/Program Files/irccd/lib/irccd/plugins/ask.js
 
 # Templates and formatting
 

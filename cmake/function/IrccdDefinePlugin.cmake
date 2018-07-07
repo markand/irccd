@@ -65,7 +65,7 @@ function(_irccd_define_javascript_plugin)
     install(
         FILES ${CMAKE_CURRENT_BINARY_DIR}/${name}
         COMPONENT ${PLG_NAME}
-        DESTINATION ${IRCCD_WITH_PLUGINDIR}
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/irccd
     )
 
     add_custom_target(
@@ -104,7 +104,7 @@ function(_irccd_define_native_plugin)
     install(
         TARGETS plugin-${PLG_NAME}
         COMPONENT ${PLG_NAME}
-        LIBRARY DESTINATION ${IRCCD_WITH_PLUGINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/irccd
     )
 endfunction()
 

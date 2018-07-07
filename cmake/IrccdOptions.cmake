@@ -36,21 +36,6 @@
 # defined automatically from the IRCCD_PLUGINS list.
 #
 
-#
-# Options that controls both installations and the irccd runtime:
-#
-# IRCCD_WITH_BINDIR         Binary directory for irccd, irccdctl
-# IRCCD_WITH_CACHEDIR       Path where to store temporary files
-# IRCCD_WITH_CMAKEDIR       Path where to install CMake configuration files
-# IRCCD_WITH_DATADIR        Path for data files
-# IRCCD_WITH_DOCDIR         Path where to install documentation
-# IRCCD_WITH_MANDIR         Path where to install manuals
-# IRCCD_WITH_PKGCONFIGDIR   Path where to install pkg-config files
-# IRCCD_WITH_PLUGINDIR      Path where plugins must be installed
-# IRCCD_WITH_SYSCONFDIR     Path where to install configuration files
-# IRCCD_WITH_SYSTEMDDIR     Path where to install systemd unit file
-#
-
 # Manual pages on Windows are pretty useless.
 if (WIN32)
     set(DEFAULT_MAN "No")
@@ -83,22 +68,6 @@ option(IRCCD_WITH_SSL "Enable SSL" On)
 option(IRCCD_WITH_SYSTEMD "Install systemd service" ${DEFAULT_SYSTEMD})
 option(IRCCD_WITH_TESTS "Enable unit testing" Off)
 option(IRCCD_WITH_VERA "Enable vera++" On)
-
-#
-# Installation paths.
-# -------------------------------------------------------------------
-#
-
-set(IRCCD_WITH_BINDIR "bin" CACHE STRING "Binary directory")
-set(IRCCD_WITH_CACHEDIR "var/cache/irccd" CACHE STRING "Cache directory")
-set(IRCCD_WITH_CMAKEDIR "lib/cmake" CACHE STRING "Directory for CMake modules")
-set(IRCCD_WITH_DATADIR "share/irccd" CACHE STRING "Directory for additional data")
-set(IRCCD_WITH_DOCDIR "share/doc/irccd" CACHE STRING "Documentation directory")
-set(IRCCD_WITH_MANDIR "share/man" CACHE STRING "Man directory")
-set(IRCCD_WITH_PKGCONFIGDIR "lib/pkgconfig" CACHE STRING "Directory for pkg-config file")
-set(IRCCD_WITH_PLUGINDIR "libexec/irccd/plugins" CACHE STRING "Module prefix where to install")
-set(IRCCD_WITH_SYSCONFDIR "etc/irccd" CACHE STRING "Configuration directory")
-set(IRCCD_WITH_SYSTEMDDIR "/usr/lib/systemd/system" CACHE STRING "Absolute path where to install systemd files")
 
 #
 # Internal dependencies.

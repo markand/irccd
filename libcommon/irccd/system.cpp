@@ -50,14 +50,6 @@
 #   include <libproc.h>
 #endif
 
-#if defined(HAVE_SETGID)
-#   include <grp.h>
-#endif
-
-#if defined(HAVE_SETGID)
-#   include <pwd.h>
-#endif
-
 #if defined(HAVE_GETLOGIN)
 #   include <unistd.h>
 #endif
@@ -87,8 +79,8 @@ namespace {
  */
 boost::filesystem::path base_directory()
 {
-    static const boost::filesystem::path bindir(IRCCD_WITH_BINDIR);
-    static const boost::filesystem::path prefix(PREFIX);
+    static const boost::filesystem::path bindir(CMAKE_INSTALL_BINDIR);
+    static const boost::filesystem::path prefix(CMAKE_INSTALL_PREFIX);
 
     boost::filesystem::path path(".");
 
@@ -121,16 +113,13 @@ boost::filesystem::path base_directory()
  *
  * Compute the system directory path for the given component.
  *
- * Use with the build options like IRCCD_WITH_CACHEDIR, IRCCD_WITH_PLUGINDIR,
- * ...
- *
  * Referenced by:
  *   - cachedir,
  *   - datadir,
  *   - sysconfigdir,
  *   - plugindir.
  */
-std::string system_directory(const std::string& component)
+boost::filesystem::path system_directory(const std::string& component)
 {
     boost::filesystem::path path(component);
 
@@ -425,7 +414,7 @@ std::string env(const std::string& var)
 
 boost::filesystem::path cachedir()
 {
-    return system_directory(IRCCD_WITH_CACHEDIR);
+    return system_directory(CMAKE_INSTALL_LOCALSTATEDIR) / "cache/irccd";
 }
 
 // }}}
@@ -434,7 +423,7 @@ boost::filesystem::path cachedir()
 
 boost::filesystem::path datadir()
 {
-    return system_directory(IRCCD_WITH_DATADIR);
+    return system_directory(CMAKE_INSTALL_DATADIR);
 }
 
 // }}}
@@ -443,7 +432,7 @@ boost::filesystem::path datadir()
 
 boost::filesystem::path sysconfdir()
 {
-    return system_directory(IRCCD_WITH_SYSCONFDIR);
+    return system_directory(CMAKE_INSTALL_SYSCONFDIR) / "irccd";
 }
 
 // }}}
@@ -452,7 +441,7 @@ boost::filesystem::path sysconfdir()
 
 boost::filesystem::path plugindir()
 {
-    return system_directory(IRCCD_WITH_PLUGINDIR);
+    return system_directory(CMAKE_INSTALL_LIBDIR) / "irccd";
 }
 
 // }}}

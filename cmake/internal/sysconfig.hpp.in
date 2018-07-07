@@ -39,8 +39,6 @@
  * ------------------------------------------------------------------
  */
 
-#define PREFIX                  "@CMAKE_INSTALL_PREFIX@"
-
 #define IRCCD_VERSION_MAJOR     @IRCCD_VERSION_MAJOR@
 #define IRCCD_VERSION_MINOR     @IRCCD_VERSION_MINOR@
 #define IRCCD_VERSION_PATCH     @IRCCD_VERSION_PATCH@
@@ -52,11 +50,12 @@
  * ------------------------------------------------------------------
  */
 
-#define IRCCD_WITH_CACHEDIR       "@IRCCD_WITH_CACHEDIR@"
-#define IRCCD_WITH_DATADIR        "@IRCCD_WITH_DATADIR@"
-#define IRCCD_WITH_BINDIR         "@IRCCD_WITH_BINDIR@"
-#define IRCCD_WITH_SYSCONFDIR     "@IRCCD_WITH_SYSCONFDIR@"
-#define IRCCD_WITH_PLUGINDIR      "@IRCCD_WITH_PLUGINDIR@"
+#define CMAKE_INSTALL_PREFIX        "@CMAKE_INSTALL_PREFIX@"
+#define CMAKE_INSTALL_LOCALSTATEDIR "@CMAKE_INSTALL_LOCALSTATEDIR@"
+#define CMAKE_INSTALL_DATADIR       "@CMAKE_INSTALL_DATADIR@"
+#define CMAKE_INSTALL_BINDIR        "@CMAKE_INSTALL_BINDIR@"
+#define CMAKE_INSTALL_LIBDIR        "@CMAKE_INSTALL_LIBDIR@"
+#define CMAKE_INSTALL_SYSCONFDIR    "@CMAKE_INSTALL_SYSCONFDIR@"
 
 #cmakedefine IRCCD_HAVE_JS
 #cmakedefine IRCCD_HAVE_SSL

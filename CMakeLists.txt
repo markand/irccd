@@ -66,6 +66,7 @@ set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS On)
 set_property(GLOBAL PROPERTY USE_FOLDERS On)
 
 include(CMakeParseArguments)
+include(GNUInstallDirs)
 
 include(cmake/function/IrccdBuildHtml.cmake)
 include(cmake/function/IrccdDefineExecutable.cmake)

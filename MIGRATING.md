@@ -29,12 +29,13 @@ Migrating from 2.x to 3.x
 
   - All options are now starting with `IRCCD_` for better compatibility with
     external projects,
-  - `IRCCD_WITH_CONFDIR` has been renamed to `IRCCD_WITH_SYSCONFDIR`.
+  - CMake now use GNUInstallDirs module to specify installation paths, all
+    IRCCD_WITH_ options have been replaced by CMAKE_INSTALL_ equivalents.
 
 ### Paths
 
   - The default plugins path has been changed from **share/irccd/plugins** to
-    **libexec/irccd/plugins**.
+    **lib64/irccd**.
 
 ### Javascript API
 

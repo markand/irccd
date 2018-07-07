@@ -74,7 +74,7 @@ function(irccd_define_executable)
     install(
         TARGETS ${EXE_TARGET}
         COMPONENT ${EXE_TARGET}
-        RUNTIME DESTINATION ${IRCCD_WITH_BINDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
 
     # Put the application into a cpack group.

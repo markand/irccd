@@ -33,7 +33,7 @@ install(
         ${examples_SOURCE_DIR}/irccd.conf.sample
         ${examples_SOURCE_DIR}/irccdctl.conf.sample
     COMPONENT examples
-    DESTINATION ${IRCCD_WITH_SYSCONFDIR}
+    DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}
 )
 
 setg(CPACK_COMPONENT_EXAMPLES_HIDDEN On)
