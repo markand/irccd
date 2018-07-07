@@ -88,6 +88,7 @@ set(
 
 irccd_define_executable(
     TARGET irccdctl
+    EXPORT
     DESCRIPTION "Irccd controller."
     SOURCES ${SOURCES}
     LIBRARIES libirccdctl

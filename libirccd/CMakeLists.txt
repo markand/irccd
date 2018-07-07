@@ -116,13 +116,14 @@ set(
 
 irccd_define_library(
     TARGET libirccd
+    EXPORT
+    HEADERS ${HEADERS}
+    HEADERS_DIRECTORY irccd/daemon
     SOURCES
         ${libirccd_SOURCE_DIR}/CMakeLists.txt
-        ${HEADERS}
         ${SOURCES}
     LIBRARIES
         libcommon
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${libirccd_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:${WITH_INCLUDEDIR}>
 )

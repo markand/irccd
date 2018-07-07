@@ -22,6 +22,7 @@
 #
 # irccd_define_executable(
 #    TARGET target name
+#    EXPORT (Optional) export executable through CMake
 #    DESCRIPTION short description (Required if installed)
 #    SOURCES src1, src2, srcn
 #    FLAGS (Optional) C/C++ flags (without -D)
@@ -35,7 +36,7 @@
 include(${CMAKE_CURRENT_LIST_DIR}/IrccdVeraCheck.cmake)
 
 function(irccd_define_executable)
-    set(options "")
+    set(options EXPORT)
     set(oneValueArgs DESCRIPTION TARGET)
     set(multiValueArgs SOURCES FLAGS LIBRARIES INCLUDES OPTIONS)
 
@@ -71,11 +72,14 @@ function(irccd_define_executable)
         )
     endforeach()
 
-    install(
-        TARGETS ${EXE_TARGET}
-        COMPONENT ${EXE_TARGET}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    )
+    if (EXE_EXPORT)
+        install(
+            TARGETS ${EXE_TARGET}
+            EXPORT irccd-targets
+            COMPONENT ${EXE_TARGET}
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        )
+    endif ()
 
     # Put the application into a cpack group.
     string(TOUPPER ${EXE_TARGET} CMP)

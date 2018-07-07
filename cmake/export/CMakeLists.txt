@@ -16,17 +16,25 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(irccd)
+include(CMakePackageConfigHelpers)
 
-irccd_define_executable(
-    TARGET irccd
-    EXPORT
-    DESCRIPTION "The main irccd daemon."
-    SOURCES CMakeLists.txt main.cpp
-    INCLUDES ${irccd_SOURCE_DIR}
-    OPTIONS
-        $<$<BOOL:APPLE>:-Wno-deprecated-declarations>
-    LIBRARIES
-        libirccd
-        $<$<BOOL:${IRCCD_HAVE_JS}>:libirccd-js>
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/irccd-config-version.cmake
+    VERSION ${IRCCD_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+install(
+    EXPORT irccd-targets
+    FILE irccd-targets.cmake
+    NAMESPACE irccd::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/irccd
+)
+
+install(
+    FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/irccd-config.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/irccd-config-version.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/irccd
+    COMPONENT Devel
 )

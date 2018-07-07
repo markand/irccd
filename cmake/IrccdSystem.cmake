@@ -197,3 +197,8 @@ include_directories(
     ${CMAKE_BINARY_DIR}
     ${CMAKE_BINARY_DIR}/irccd
 )
+
+install(
+    FILES ${CMAKE_BINARY_DIR}/irccd/sysconfig.hpp
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/irccd
+)

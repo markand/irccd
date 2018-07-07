@@ -147,10 +147,14 @@ std::shared_ptr<plugin> plugin_service::open(const std::string& id,
 std::shared_ptr<plugin> plugin_service::find(const std::string& id)
 {
     for (const auto& loader : loaders_) {
-        auto plugin = loader->find(id);
+        try {
+            auto plugin = loader->find(id);
 
-        if (plugin)
-            return plugin;
+            if (plugin)
+                return plugin;
+        } catch (const std::exception& ex) {
+            irccd_.get_log().warning() << "plugin " << id << ": " << ex.what() << std::endl;
+        }
     }
 
     return nullptr;

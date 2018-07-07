@@ -53,12 +53,14 @@ set(
 
 irccd_define_library(
     TARGET libcommon
+    EXPORT
+    HEADERS ${HEADERS}
+    HEADERS_DIRECTORY irccd
     SOURCES
         ${libcommon_SOURCE_DIR}/CMakeLists.txt
-        ${HEADERS}
         ${SOURCES}
     LIBRARIES
-        libextern-json
+        libjson
         Threads::Threads
         Boost::filesystem
         Boost::system
@@ -72,4 +74,6 @@ irccd_define_library(
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
         $<BUILD_INTERFACE:${libcommon_SOURCE_DIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/irccd/extern>
 )

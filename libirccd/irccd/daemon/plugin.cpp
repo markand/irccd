@@ -16,9 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <boost/filesystem.hpp>
-
 #include <sstream>
+
+#include <boost/filesystem.hpp>
 
 #include <irccd/system.hpp>
 
@@ -52,7 +52,7 @@ std::shared_ptr<plugin> plugin_loader::find(const std::string& name)
             return plugin;
     }
 
-    throw plugin_error(plugin_error::not_found, name);
+    return nullptr;
 }
 
 plugin_error::plugin_error(error errc, std::string name, std::string message) noexcept

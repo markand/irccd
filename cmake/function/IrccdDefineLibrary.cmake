@@ -22,9 +22,11 @@
 #
 # irccd_define_library(
 #    TARGET target name
+#    EXPORT (Optional) set to true to export library through irccd
+#    EXTERN (Optional) set to true to mark library as external
+#    HEADERS (Optional) headers to install
+#    HEADERS_DIRECTORY (Optional) subdirectory where to install headers
 #    SOURCES src1, src2, srcn
-#    LOCAL (Optional) set to true to build a static library
-#    EXTERNAL (Optional) set to true if library is third party
 #    FLAGS (Optional) C/C++ flags (without -D)
 #    LIBRARIES (Optional) libraries to link
 #    LOCAL_INCLUDES (Optional) local includes for the target only
@@ -35,10 +37,9 @@
 include(${CMAKE_CURRENT_LIST_DIR}/IrccdVeraCheck.cmake)
 
 function(irccd_define_library)
-    set(options EXTERNAL LOCAL)
-    set(oneValueArgs TARGET)
-    set(multiValueArgs SOURCES FLAGS LIBRARIES LOCAL_INCLUDES PUBLIC_INCLUDES)
-    set(mandatory TARGET SOURCES)
+    set(options EXPORT)
+    set(oneValueArgs HEADERS_DIRECTORY TARGET)
+    set(multiValueArgs HEADERS SOURCES FLAGS LIBRARIES LOCAL_INCLUDES PUBLIC_INCLUDES)
 
     cmake_parse_arguments(LIB "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -48,11 +49,8 @@ function(irccd_define_library)
     if (NOT LIB_SOURCES)
         message(FATAL_ERROR "Please set SOURCES")
     endif ()
-    if (LIB_LOCAL)
-        set(type STATIC)
-    endif ()
 
-    add_library(${LIB_TARGET} ${type} ${LIB_SOURCES})
+    add_library(${LIB_TARGET} ${LIB_SOURCES} ${LIB_HEADERS})
     target_include_directories(${LIB_TARGET} PRIVATE ${LIB_LOCAL_INCLUDES} PUBLIC ${LIB_PUBLIC_INCLUDES})
     target_compile_definitions(
         ${LIB_TARGET}
@@ -78,7 +76,28 @@ function(irccd_define_library)
         )
     endforeach()
 
-    if (NOT ${LIB_EXTERNAL})
+    if (NOT ${LIB_EXTERN})
         irccd_vera_check(${LIB_TARGET} "${LIB_SOURCES}")
+    endif ()
+
+    if (${LIB_EXPORT})
+        install(
+            TARGETS ${LIB_TARGET}
+            EXPORT irccd-targets
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        )
+    endif ()
+
+    if (LIB_HEADERS)
+        if (NOT LIB_HEADERS_DIRECTORY)
+            message(FATAL_ERROR "HEADERS_DIRECTORY must be defined")
+        endif ()
+
+        install(
+            FILES ${LIB_HEADERS}
+            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${LIB_HEADERS_DIRECTORY}
+        )
     endif ()
 endfunction()

@@ -30,9 +30,11 @@ set(
 
 irccd_define_library(
     TARGET libirccdctl
+    EXPORT
+    HEADERS ${HEADERS}
+    HEADERS_DIRECTORY irccd/ctl
     SOURCES
         ${libirccdctl_SOURCE_DIR}/CMakeLists.txt
-        ${HEADERS}
         ${SOURCES}
     LIBRARIES
         libirccd

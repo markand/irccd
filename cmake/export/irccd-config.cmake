@@ -16,17 +16,10 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(irccd)
+include(CMakeFindDependencyMacro)
 
-irccd_define_executable(
-    TARGET irccd
-    EXPORT
-    DESCRIPTION "The main irccd daemon."
-    SOURCES CMakeLists.txt main.cpp
-    INCLUDES ${irccd_SOURCE_DIR}
-    OPTIONS
-        $<$<BOOL:APPLE>:-Wno-deprecated-declarations>
-    LIBRARIES
-        libirccd
-        $<$<BOOL:${IRCCD_HAVE_JS}>:libirccd-js>
-)
+find_dependency(Boost COMPONENTS filesystem program_options system timer)
+find_dependency(Threads)
+find_dependency(OpenSSL)
+
+include("${CMAKE_CURRENT_LIST_DIR}/irccd-targets.cmake")

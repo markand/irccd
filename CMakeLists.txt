@@ -49,7 +49,7 @@
 # win32                     - Additional files for Windows platform.
 #
 
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.10)
 project(irccd CXX)
 
 # Helper to set global internal variables.
@@ -114,6 +114,8 @@ if (IRCCD_WITH_TESTS)
     include(CTest)
     add_subdirectory(tests)
 endif ()
+
+add_subdirectory(cmake/export)
 
 message("Compiling with the following flags:")
 message("    General flags:    ${CMAKE_CXX_FLAGS}")

@@ -59,14 +59,19 @@ set(
 
 irccd_define_library(
     TARGET libirccd-js
+    EXPORT
+    HEADERS ${HEADERS}
+    HEADERS_DIRECTORY irccd/js
     SOURCES
         ${libirccd-js_SOURCE_DIR}/CMakeLists.txt
-        ${HEADERS}
         ${SOURCES}
+        $<TARGET_OBJECTS:libduktape>
+    FLAGS
+        DUK_OPT_CPP_EXCEPTIONS
     LIBRARIES
         Boost::timer
-        libextern-duktape
         libirccd
     PUBLIC_INCLUDES
+        $<BUILD_INTERFACE:${duktape_SOURCE_DIR}>
         $<BUILD_INTERFACE:${libirccd-js_SOURCE_DIR}>
 )
