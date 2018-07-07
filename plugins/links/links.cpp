@@ -22,8 +22,6 @@
 #include <string>
 #include <variant>
 
-#include <boost/algorithm/string/trim_all.hpp>
-
 #include <boost/dll.hpp>
 
 #include <boost/asio.hpp>
@@ -159,7 +157,7 @@ private:
     requester(io_context&, shared_ptr<server>, string, string, url);
 
 public:
-    static void run(io_context&, const message_event&);
+    static void run(io_context&, shared_ptr<server>, string, string, string);
 };
 
 void requester::notify(const string& title)
@@ -198,12 +196,10 @@ void requester::handle_read(const error_code& code)
         return;
 
     // Request again in case of relocation.
-    if (res_.result() == status::moved_permanently) {
-        const string host(res_[field::location].data());
+    if (const auto it = res_.find(field::location); it != res_.end()) {
+        const string location(it->value().data(), it->value().size());
 
-        // Clean '\r\n'
-        url_ = url::parse(boost::algorithm::trim_all_copy(host));
-        start();
+        run(timer_.get_io_service(), server_, origin_, channel_, location);
     } else
         parse();
 }
@@ -380,14 +376,14 @@ requester::requester(io_context& io,
 {
 }
 
-void requester::run(io_context& io, const message_event& ev)
+void requester::run(io_context& io, shared_ptr<server> server, string origin, string channel, string link)
 {
-    auto url = url::parse(ev.message);
+    auto url = url::parse(link);
 
     if (url.protocol.empty() || url.host.empty())
         return;
 
-    shared_ptr<requester>(new requester(io, ev.server, ev.channel, ev.origin, move(url)))->start();
+    shared_ptr<requester>(new requester(io, server, channel, origin, move(url)))->start();
 }
 
 // }}}
@@ -417,7 +413,7 @@ void links_plugin::set_formats(plugin_formats formats)
 
 void links_plugin::handle_message(irccd& irccd, const message_event& ev)
 {
-    requester::run(irccd.get_service(), ev);
+    requester::run(irccd.get_service(), ev.server, ev.origin, ev.channel, ev.message);
 }
 
 // }}}
