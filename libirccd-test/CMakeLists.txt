@@ -53,7 +53,7 @@ irccd_define_library(
     LIBRARIES
         ${LIBRARIES}
         libirccd
-        libirccdctl
+        libirccd-ctl
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${libirccd-test_SOURCE_DIR}>
     FLAGS

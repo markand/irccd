@@ -28,8 +28,8 @@
 # cmake/IrccdSystem.cmake   - Contains some platforms checks and compile flags.
 # cmake/IrccdVersion.cmake  - Defines the Irccd version and its plugins.
 # cmake/check               - Platform checks in separate files.
+# cmake/export              - CMake and pkg-config exports.
 # cmake/function            - Custom CMake functions.
-# cmake/installer           - Some files for the QtIFW installer.
 # cmake/internal            - Some internal files (e.g. the sysconfig.h)
 # cmake/packages            - Additional find_package modules.
 #
@@ -37,7 +37,8 @@
 #
 # doc                       - The documentation process.
 # extern                    - External libraries.
-# libirccdctl               - The irccdctl library.
+# libirccd-core             - Common code.
+# libirccd-ctl              - The irccdctl library.
 # libirccd-js               - Javascript bindings library.
 # libirccd-test             - Helpers for unit tests.
 # libirccd                  - The irccd library.
@@ -86,9 +87,9 @@ find_package(Threads REQUIRED)
 
 add_subdirectory(extern/json)
 add_subdirectory(doc)
-add_subdirectory(libcommon)
+add_subdirectory(libirccd-core)
 add_subdirectory(libirccd)
-add_subdirectory(libirccdctl)
+add_subdirectory(libirccd-ctl)
 add_subdirectory(libirccd-test)
 
 if (IRCCD_HAVE_JS)

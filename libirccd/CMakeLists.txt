@@ -123,7 +123,7 @@ irccd_define_library(
         ${libirccd_SOURCE_DIR}/CMakeLists.txt
         ${SOURCES}
     LIBRARIES
-        libcommon
+        libirccd-core
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${libirccd_SOURCE_DIR}>
 )

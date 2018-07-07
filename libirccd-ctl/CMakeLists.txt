@@ -16,28 +16,28 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(libirccdctl)
+project(libirccd-ctl)
 
 set(
     HEADERS
-    ${libirccdctl_SOURCE_DIR}/irccd/ctl/controller.hpp
+    ${libirccd-ctl_SOURCE_DIR}/irccd/ctl/controller.hpp
 )
 
 set(
     SOURCES
-    ${libirccdctl_SOURCE_DIR}/irccd/ctl/controller.cpp
+    ${libirccd-ctl_SOURCE_DIR}/irccd/ctl/controller.cpp
 )
 
 irccd_define_library(
-    TARGET libirccdctl
+    TARGET libirccd-ctl
     EXPORT
     HEADERS ${HEADERS}
     HEADERS_DIRECTORY irccd/ctl
     SOURCES
-        ${libirccdctl_SOURCE_DIR}/CMakeLists.txt
+        ${libirccd-ctl_SOURCE_DIR}/CMakeLists.txt
         ${SOURCES}
     LIBRARIES
         libirccd
     PUBLIC_INCLUDES
-        $<BUILD_INTERFACE:${libirccdctl_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${libirccd-ctl_SOURCE_DIR}>
 )

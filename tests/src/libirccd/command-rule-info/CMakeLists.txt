@@ -19,5 +19,5 @@
 irccd_define_test(
     NAME command-rule-info
     SOURCES main.cpp
-    LIBRARIES libirccd libirccdctl
+    LIBRARIES libirccd libirccd-ctl
 )

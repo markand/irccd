@@ -19,5 +19,5 @@
 irccd_define_test(
     NAME command-server-connect
     SOURCES main.cpp
-    LIBRARIES libirccd libirccdctl
+    LIBRARIES libirccd libirccd-ctl
 )

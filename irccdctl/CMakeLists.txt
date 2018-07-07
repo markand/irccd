@@ -91,5 +91,5 @@ irccd_define_executable(
     EXPORT
     DESCRIPTION "Irccd controller."
     SOURCES ${SOURCES}
-    LIBRARIES libirccdctl
+    LIBRARIES libirccd-ctl
 )

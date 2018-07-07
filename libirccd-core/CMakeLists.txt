@@ -16,48 +16,48 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(libcommon)
+project(libirccd-core)
 
 find_package(Boost 1.60 REQUIRED QUIET COMPONENTS filesystem system)
 
 set(
     HEADERS
-    ${libcommon_SOURCE_DIR}/irccd/acceptor.hpp
-    ${libcommon_SOURCE_DIR}/irccd/config.hpp
-    ${libcommon_SOURCE_DIR}/irccd/connector.hpp
-    ${libcommon_SOURCE_DIR}/irccd/fs_util.hpp
-    ${libcommon_SOURCE_DIR}/irccd/ini.hpp
-    ${libcommon_SOURCE_DIR}/irccd/ini_util.hpp
-    ${libcommon_SOURCE_DIR}/irccd/json_util.hpp
-    ${libcommon_SOURCE_DIR}/irccd/options.hpp
-    ${libcommon_SOURCE_DIR}/irccd/socket_acceptor.hpp
-    ${libcommon_SOURCE_DIR}/irccd/socket_connector.hpp
-    ${libcommon_SOURCE_DIR}/irccd/socket_stream.hpp
-    ${libcommon_SOURCE_DIR}/irccd/stream.hpp
-    ${libcommon_SOURCE_DIR}/irccd/string_util.hpp
-    ${libcommon_SOURCE_DIR}/irccd/system.hpp
-    ${libcommon_SOURCE_DIR}/irccd/tls_acceptor.hpp
-    ${libcommon_SOURCE_DIR}/irccd/tls_connector.hpp
-    ${libcommon_SOURCE_DIR}/irccd/tls_stream.hpp
-    ${libcommon_SOURCE_DIR}/irccd/xdg.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/acceptor.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/config.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/connector.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/fs_util.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/ini.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/ini_util.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/json_util.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/options.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/socket_acceptor.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/socket_connector.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/socket_stream.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/stream.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/string_util.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/system.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/tls_acceptor.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/tls_connector.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/tls_stream.hpp
+    ${libirccd-core_SOURCE_DIR}/irccd/xdg.hpp
 )
 
 set(
     SOURCES
-    ${libcommon_SOURCE_DIR}/irccd/config.cpp
-    ${libcommon_SOURCE_DIR}/irccd/ini.cpp
-    ${libcommon_SOURCE_DIR}/irccd/options.cpp
-    ${libcommon_SOURCE_DIR}/irccd/string_util.cpp
-    ${libcommon_SOURCE_DIR}/irccd/system.cpp
+    ${libirccd-core_SOURCE_DIR}/irccd/config.cpp
+    ${libirccd-core_SOURCE_DIR}/irccd/ini.cpp
+    ${libirccd-core_SOURCE_DIR}/irccd/options.cpp
+    ${libirccd-core_SOURCE_DIR}/irccd/string_util.cpp
+    ${libirccd-core_SOURCE_DIR}/irccd/system.cpp
 )
 
 irccd_define_library(
-    TARGET libcommon
+    TARGET libirccd-core
     EXPORT
     HEADERS ${HEADERS}
     HEADERS_DIRECTORY irccd
     SOURCES
-        ${libcommon_SOURCE_DIR}/CMakeLists.txt
+        ${libirccd-core_SOURCE_DIR}/CMakeLists.txt
         ${SOURCES}
     LIBRARIES
         libjson
@@ -73,7 +73,7 @@ irccd_define_library(
         $<$<STREQUAL:${CMAKE_SYSTEM_NAME},Linux>:dl>
     PUBLIC_INCLUDES
         $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}>
-        $<BUILD_INTERFACE:${libcommon_SOURCE_DIR}>
+        $<BUILD_INTERFACE:${libirccd-core_SOURCE_DIR}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/irccd/extern>
 )

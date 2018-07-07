@@ -18,6 +18,7 @@
 
 include(CMakePackageConfigHelpers)
 
+# CMake export files.
 write_basic_package_version_file(
     ${CMAKE_CURRENT_BINARY_DIR}/irccd-config-version.cmake
     VERSION ${IRCCD_VERSION}
@@ -38,3 +39,26 @@ install(
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/irccd
     COMPONENT Devel
 )
+
+# pkg-config files.
+if (IRCCD_WITH_PKGCONFIG)
+    # Since javascript is optional, add it only if required.
+    if (IRCCD_HAVE_JS)
+        set(IRCCD_EXTRA_REQUIRES libirccd-js)
+    endif ()
+    if (IRCCD_HAVE_SSL)
+        set(IRCCD_EXTRA_LIBS "-lssl -lcrypto")
+    endif ()
+
+    foreach (pkg libirccd-core libirccd libirccd-ctl libirccd-js libirccd-test)
+        configure_file(
+            ${CMAKE_CURRENT_SOURCE_DIR}/${pkg}.pc
+            ${CMAKE_CURRENT_BINARY_DIR}/${pkg}.pc
+            @ONLY
+        )
+        install(
+            FILES ${CMAKE_CURRENT_BINARY_DIR}/${pkg}.pc
+            DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+        )
+    endforeach ()
+endif ()
