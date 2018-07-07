@@ -95,13 +95,9 @@ endif ()
 #
 # The following variables are defined in irccd/sysconfig.h
 #
-# HAVE_DAEMON           True if daemon(3),
 # HAVE_GETLOGIN         True if getlogin(3) function (and unistd.h)
-# HAVE_GETPID           True if has getpid(2) function (and sys/types.h and unistd.h and grp.h),
 # HAVE_POPEN            True if has popen(3) function (in stdio.h)
-# HAVE_SETGID           True if has setgid(2) function and getgrnam(3) (and sys/types.h and unistd.h and pwd.h),
 # HAVE_SETPROGNAME      True if setprogname(3) is available from C library,
-# HAVE_SETUID           True if has setuid(2) function and getpwnam(3) (and sys/types.h and unistd.h and pwd.h),
 # HAVE_STAT             True if has stat(2) function (and sys/types.h and sys/stat.h),
 # HAVE_STAT_ST_DEV      The struct stat has st_dev field,
 # HAVE_STAT_ST_INO      The struct stat has st_ino field,
@@ -123,11 +119,6 @@ check_include_file(unistd.h HAVE_UNISTD_H)
 # Check for sys/types.h
 check_include_file(sys/types.h HAVE_SYS_TYPES_H)
 
-# Check for daemon(3) function, include:
-#
-# #include <cstdlib>
-check_function_exists(daemon HAVE_DAEMON)
-
 # Check of setprogname(3) function, include:
 #
 # #include <cstdlib>
@@ -144,54 +135,12 @@ if (NOT HAVE_UNISTD_H)
     set(HAVE_GETLOGIN FALSE)
 endif ()
 
-# getpid() function
-#
-# If HAVE_GETPID is defined, include:
-#
-# #include <sys/types.h>
-# #include <unistd.h>
-check_function_exists(getpid HAVE_GETPID)
-
-if (NOT HAVE_UNISTD_H OR NOT HAVE_SYS_TYPES_H)
-    set(HAVE_GETPID FALSE)
-endif ()
-
-# setgid() function (and getgrnam)
-#
-# If HAVE_SETGID is defined, include:
-#
-# #include <sys/types.h>
-# #include <unistd.h>
-# #include <grp.h>        // only for getgrnam
-check_include_file(grp.h HAVE_GRP_H)
-check_function_exists(getgrnam HAVE_GETGRNAM)
-check_function_exists(setgid HAVE_SETGID)
-
-if (NOT HAVE_UNISTD_H OR NOT HAVE_SYS_TYPES_H OR NOT HAVE_GETGRNAM OR NOT HAVE_GRP_H)
-    set(HAVE_SETGID FALSE)
-endif ()
-
 # popen() function
 #
 # If HAVE_POPEN is defined, include;
 #
 # #include <cstdio>
 check_function_exists(popen HAVE_POPEN)
-
-# setuid() function (and getpwnam)
-#
-# If HAVE_SETUID is defined, include:
-#
-# #include <sys/types.h>
-# #include <unistd.h>
-# #include <pwd.h>        // only for getpwnam
-check_include_file(pwd.h HAVE_PWD_H)
-check_function_exists(getpwnam HAVE_GETPWNAM)
-check_function_exists(setuid HAVE_SETUID)
-
-if (NOT HAVE_UNISTD_H OR NOT HAVE_SYS_TYPES_H OR NOT HAVE_GETPWNAM OR NOT HAVE_PWD_H)
-    set(HAVE_SETUID FALSE)
-endif ()
 
 # stat(2) function
 #

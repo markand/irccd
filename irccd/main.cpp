@@ -18,18 +18,6 @@
 
 #include "sysconfig.hpp"
 
-#if defined(HAVE_GETPID)
-#  include <sys/types.h>
-#  include <unistd.h>
-#  include <cerrno>
-#  include <cstring>
-#  include <fstream>
-#endif
-
-#if defined(HAVE_DAEMON)
-#  include <cstdlib>
-#endif
-
 #include <csignal>
 #include <iostream>
 
@@ -93,7 +81,6 @@ void usage()
     std::cerr << "usage: irccd [options...]\n\n";
     std::cerr << "Available options:\n";
     std::cerr << "  -c, --config file       specify the configuration file\n";
-    std::cerr << "  -f, --foreground        do not run as a daemon\n";
     std::cerr << "  -h, --help              show this help\n";
     std::cerr << "  -v, --verbose           be verbose\n";
     std::cerr << "      --version           show the version\n";
@@ -156,8 +143,6 @@ option::result parse(int& argc, char**& argv)
         option::options options{
             { "-c",             true    },
             { "--config",       true    },
-            { "-f",             false   },
-            { "--foreground",   false   },
             { "-h",             false   },
             { "--help",         false   },
             { "-v",             false   },

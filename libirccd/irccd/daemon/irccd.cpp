@@ -153,65 +153,6 @@ void irccd::load_formats()
     ));
 }
 
-void irccd::load_pid()
-{
-    const auto path = config_.get("general").get("pidfile").value();
-
-    if (path.empty())
-        return;
-
-#if defined(HAVE_GETPID)
-    std::ofstream out(path, std::ofstream::trunc);
-
-    if (!out)
-        logger_->warning() << "irccd: could not open" << path << ": " << std::strerror(errno) << std::endl;
-    else {
-        logger_->debug() << "irccd: pid written in " << path << std::endl;
-        out << getpid() << std::endl;
-    }
-#else
-    logger_->warning() << "irccd: pidfile not supported on this platform" << std::endl;
-#endif
-}
-
-void irccd::load_gid()
-{
-    const auto gid = config_.get("general").get("gid").value();
-
-    if (gid.empty())
-        return;
-
-#if defined(HAVE_SETGID)
-    try {
-        sys::set_gid(gid);
-        logger_->info() << "irccd: setting gid to: " << gid << std::endl;
-    } catch (const std::exception& ex) {
-        logger_->warning() << "irccd: failed to set gid: " << ex.what() << std::endl;
-    }
-#else
-    logger_->warning() << "irccd: gid option not supported" << std::endl;
-#endif
-}
-
-void irccd::load_uid()
-{
-    const auto uid = config_.get("general").get("uid").value();
-
-    if (uid.empty())
-        return;
-
-#if defined(HAVE_SETUID)
-    try {
-        sys::set_uid(uid);
-        logger_->info() << "irccd: setting uid to: " << uid << std::endl;
-    } catch (const std::exception& ex) {
-        logger_->warning() << "irccd: failed to set uid: " << ex.what() << std::endl;
-    }
-#else
-    logger_->warning() << "irccd: uid option not supported" << std::endl;
-#endif
-}
-
 irccd::irccd(boost::asio::io_service& service, std::string config)
     : config_(std::move(config))
     , service_(service)
@@ -249,13 +190,6 @@ void irccd::load() noexcept
         logger_->info() << "irccd: loading configuration from " << config_.get_path() << std::endl;
     else
         logger_->info() << "irccd: reloading configuration" << std::endl;
-
-    // [general] section.
-    if (!loaded_) {
-        load_pid();
-        load_gid();
-        load_uid();
-    }
 
     if (!loaded_)
         tpt_service_->load(config_);

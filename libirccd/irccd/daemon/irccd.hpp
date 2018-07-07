@@ -79,9 +79,6 @@ private:
     void load_logs_syslog();
     void load_logs();
     void load_formats();
-    void load_pid();
-    void load_gid();
-    void load_uid();
 
 public:
     /**

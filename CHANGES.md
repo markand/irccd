@@ -10,7 +10,8 @@ Irccd:
     default (#607),
   - New sections `[paths]` and `[paths.plugin]` have been added to control
     standard paths for both irccd and plugins (#611),
-  - If Mercurial is found, the version is bundled in `irccd --version`.
+  - If Mercurial is found, the version is bundled in `irccd --version`,
+  - Irccd no longer supports uid, gid, pid and daemon features (#846).
 
 Irccd test:
 

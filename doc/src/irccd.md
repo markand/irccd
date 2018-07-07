@@ -14,7 +14,6 @@ dispatches events to plugins.
 The following options are available:
 
   - `-c, --config file`: specify the configuration file,
-  - `-f, --foreground`: do not run as a daemon,
   - `-v, --verbose`: be verbose,
   - `--version`: show the version.
 

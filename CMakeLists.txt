@@ -76,8 +76,6 @@ include(cmake/function/IrccdDefineTest.cmake)
 include(cmake/function/IrccdIndentMessage.cmake)
 
 include(cmake/check/PutTime.cmake)
-include(cmake/check/UidIsSigned.cmake)
-include(cmake/check/GidIsSigned.cmake)
 
 include(cmake/IrccdVersion.cmake)
 include(cmake/IrccdOptions.cmake)

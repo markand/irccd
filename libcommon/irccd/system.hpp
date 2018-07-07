@@ -89,28 +89,6 @@ std::string env(const std::string& var);
  */
 std::string home();
 
-#if defined(HAVE_SETUID)
-
-/**
- * Set the effective uid by name or numeric value.
- *
- * \param value the value
- */
-void set_uid(const std::string& value);
-
-#endif
-
-#if defined(HAVE_SETGID)
-
-/**
- * Set the effective gid by name or numeric value.
- *
- * \param value the value
- */
-void set_gid(const std::string& value);
-
-#endif
-
 /**
  * Get the cache directory as specified as compile time option
  * IRCCD_WITH_CACHEDIR, if the value is absolute, it is returned as-is.

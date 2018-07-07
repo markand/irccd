@@ -67,31 +67,6 @@ Example:
   - abc
   - server-tz2
 
-# The general section
-
-This section contains global options that are used in the whole irccd
-application.
-
-The available options:
-
-  - **uid**: (string or number) the user id to use (Optional, default: none),
-  - **gid**: (string or number) the group id to use (Optional, default: none),
-  - **foreground**: (bool) set to true to not daemonize
-    (Optional, default: false)
-  - **pidfile**: (string) path to a file where to store the irccd pid
-    (Optional, default: none).
-
-**Warning:** these options are available only if the system supports them.
-
-## Example
-
-```ini
-[general]
-pidfile = "/var/run/irccd/pid"
-uid = "nobody"
-gid = 1002
-```
-
 # The logs section
 
 This section can let you configure how irccd should log the messages.

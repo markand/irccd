@@ -2,18 +2,6 @@
 # irccd.conf -- config file for irccd
 #
 
-# Section general:
-#    This section describe global options used by irccd.
-#
-# [general]
-# uid = "nobody"                # (string or number) the user id to use (Optional, default: none),
-# gid = "nobody"                # (string or number) the group id to use (Optional, default: none),
-# foreground = false            # (bool) set to true to not daemonize (Optional, default: false),
-# pidfile = "/tmp/irccd.pid"    # (string) path to a file where to store the irccd pid (Optional, default: none).
-
-[general]
-foreground = true
-
 # Section plugins:
 #    Load plugins by name or by paths.
 #
