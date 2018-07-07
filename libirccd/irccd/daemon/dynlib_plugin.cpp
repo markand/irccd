@@ -70,13 +70,16 @@ auto dynlib_plugin_loader::open(const std::string& id,
 {
     const auto [ abisym, initsym ] = symbol(path);
 
-    using abisym_func_type = unsigned ();
+    using abisym_func_type = version ();
     using initsym_func_type = std::unique_ptr<plugin> ();
 
     const auto abi = boost::dll::import<abisym_func_type>(path, abisym);
     const auto init = boost::dll::import<initsym_func_type>(path, initsym);
 
-    if (abi() != IRCCD_VERSION_SHLIB)
+    // The abi version is reset after new major version, check for both.
+    const version current;
+
+    if (current.major != abi().major || current.abi != abi().abi)
         throw plugin_error(plugin_error::exec_error, id, "incompatible version");
 
     auto plg = init();

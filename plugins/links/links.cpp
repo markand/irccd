@@ -427,9 +427,9 @@ void links_plugin::handle_message(irccd& irccd, const message_event& ev)
 extern "C" {
 
 BOOST_SYMBOL_EXPORT
-auto irccd_abi_links() -> unsigned
+auto irccd_abi_links() -> version
 {
-    return IRCCD_VERSION_SHLIB;
+    return version();
 }
 
 BOOST_SYMBOL_EXPORT

@@ -120,8 +120,20 @@ public:
     }
 };
 
-extern "C" BOOST_SYMBOL_EXPORT test_plugin irccd_plugin_test_plugin;
+extern "C" {
 
-test_plugin irccd_plugin_test_plugin("test", "");
+BOOST_SYMBOL_EXPORT
+auto irccd_abi_test_plugin() -> version
+{
+    return version();
+}
+
+BOOST_SYMBOL_EXPORT
+auto irccd_init_test_plugin() -> std::unique_ptr<plugin>
+{
+    return std::make_unique<test_plugin>("testplugin", "");
+}
+
+} // !C
 
 } // !irccd

@@ -93,4 +93,14 @@
 #cmakedefine HAVE_STD_PUT_TIME
 #cmakedefine HAVE_SYSLOG
 
+/**
+ * \brief Describe irccd version.
+ */
+struct version {
+    unsigned major{IRCCD_VERSION_MAJOR};    //!< major
+    unsigned minor{IRCCD_VERSION_MINOR};    //!< minor
+    unsigned patch{IRCCD_VERSION_PATCH};    //!< patch
+    unsigned abi{IRCCD_VERSION_SHLIB};      //!< ABI compatibility
+};
+
 #endif // !IRCCD_SYSCONFIG_HPP
