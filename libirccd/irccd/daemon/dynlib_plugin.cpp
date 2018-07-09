@@ -73,8 +73,8 @@ auto dynlib_plugin_loader::open(const std::string& id,
     using abisym_func_type = version ();
     using initsym_func_type = std::unique_ptr<plugin> ();
 
-    const auto abi = boost::dll::import<abisym_func_type>(path, abisym);
-    const auto init = boost::dll::import<initsym_func_type>(path, initsym);
+    const auto abi = boost::dll::import_alias<abisym_func_type>(path, abisym);
+    const auto init = boost::dll::import_alias<initsym_func_type>(path, initsym);
 
     // The abi version is reset after new major version, check for both.
     const version current;

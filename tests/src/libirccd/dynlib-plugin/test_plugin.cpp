@@ -118,22 +118,19 @@ public:
     {
         config_["whois"] = "true";
     }
+
+    static auto abi() -> version
+    {
+        return version();
+    }
+
+    static auto init() -> std::unique_ptr<plugin>
+    {
+        return std::make_unique<test_plugin>("testplugin", "");
+    }
 };
 
-extern "C" {
-
-BOOST_SYMBOL_EXPORT
-auto irccd_abi_test_plugin() -> version
-{
-    return version();
-}
-
-BOOST_SYMBOL_EXPORT
-auto irccd_init_test_plugin() -> std::unique_ptr<plugin>
-{
-    return std::make_unique<test_plugin>("testplugin", "");
-}
-
-} // !C
+BOOST_DLL_ALIAS(test_plugin::abi, irccd_abi_test_plugin)
+BOOST_DLL_ALIAS(test_plugin::init, irccd_init_test_plugin)
 
 } // !irccd

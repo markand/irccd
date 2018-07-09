@@ -395,8 +395,14 @@ public:
     using plugin::plugin;
 
     void set_config(plugin_config) override;
+
     void set_formats(plugin_formats) override;
+
     void handle_message(irccd&, const message_event&) override;
+
+    static auto abi() -> version;
+
+    static auto init() -> std::unique_ptr<plugin>;
 };
 
 void links_plugin::set_config(plugin_config conf)
@@ -416,24 +422,21 @@ void links_plugin::handle_message(irccd& irccd, const message_event& ev)
     requester::run(irccd.get_service(), ev.server, ev.origin, ev.channel, ev.message);
 }
 
-// }}}
-
-} // !namespace
-
-extern "C" {
-
-BOOST_SYMBOL_EXPORT
-auto irccd_abi_links() -> version
+auto links_plugin::abi() -> version
 {
     return version();
 }
 
-BOOST_SYMBOL_EXPORT
-auto irccd_init_links() -> std::unique_ptr<plugin>
+auto links_plugin::init() -> std::unique_ptr<plugin>
 {
     return std::make_unique<links_plugin>("links", "");
 }
 
-} // !C
+BOOST_DLL_ALIAS(links_plugin::abi, irccd_abi_links)
+BOOST_DLL_ALIAS(links_plugin::init, irccd_init_links)
+
+// }}}
+
+} // !namespace
 
 } // !irccd
