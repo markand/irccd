@@ -18,13 +18,12 @@
 
 #include <boost/filesystem.hpp>
 
-#include <irccd/system.hpp>
-
 #include "config.hpp"
+#include "system.hpp"
 
 namespace irccd {
 
-boost::optional<config> config::search(const std::string& name)
+auto config::search(std::string_view name) -> std::optional<config>
 {
     for (const auto& path : sys::config_filenames(name)) {
         boost::system::error_code ec;
@@ -33,7 +32,18 @@ boost::optional<config> config::search(const std::string& name)
             return config(path);
     }
 
-    return boost::optional<config>();
+    return std::nullopt;
+}
+
+config::config(std::string path)
+    : document(path.empty() ? ini::document() : ini::read_file(path))
+    , path_(std::move(path))
+{
+}
+
+auto config::get_path() const noexcept -> const std::string&
+{
+    return path_;
 }
 
 } // !irccd

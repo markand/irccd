@@ -24,7 +24,8 @@
  * \brief Read .ini configuration file for irccd
  */
 
-#include <boost/optional.hpp>
+#include <optional>
+#include <string_view>
 
 #include "ini.hpp"
 
@@ -44,28 +45,21 @@ public:
      * \param name the file name
      * \return the config or empty if not found
      */
-    static boost::optional<config> search(const std::string& name);
+    static auto search(std::string_view name) -> std::optional<config>;
 
     /**
      * Load the configuration from the specified path.
      *
      * \param path the path
      */
-    inline config(std::string path = "")
-        : document(path.empty() ? ini::document() : ini::read_file(path))
-        , path_(std::move(path))
-    {
-    }
+    config(std::string path = "");
 
     /**
      * Get the path to the configuration file.
      *
      * \return the path
      */
-    inline const std::string& get_path() const noexcept
-    {
-        return path_;
-    }
+    auto get_path() const noexcept -> const std::string&;
 };
 
 } // !irccd

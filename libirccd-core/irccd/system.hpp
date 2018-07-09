@@ -26,6 +26,7 @@
 
 #include <cstdint>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <boost/filesystem.hpp>
@@ -148,7 +149,7 @@ std::string username();
  * \param file the filename to append for convenience
  * \return the list of paths to check in order
  */
-std::vector<std::string> config_filenames(std::string file);
+std::vector<std::string> config_filenames(std::string_view file);
 
 /**
  * Construct a list of paths for reading plugins.

@@ -468,11 +468,14 @@ std::string username()
 
 // {{{ config_filenames
 
-std::vector<std::string> config_filenames(std::string file)
+std::vector<std::string> config_filenames(std::string_view file)
 {
+    // TODO: remove this once we can use std::filesystem.
+    const std::string filename(file);
+
     return {
-        (user_config_directory() / file).string(),
-        (sysconfdir() / file).string()
+        (user_config_directory() / filename).string(),
+        (sysconfdir() / filename).string()
     };
 }
 
