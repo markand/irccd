@@ -19,5 +19,5 @@
 irccd_define_test(
     NAME string-util
     SOURCES main.cpp
-    LIBRARIES libcommon
+    LIBRARIES libirccd-core
 )
