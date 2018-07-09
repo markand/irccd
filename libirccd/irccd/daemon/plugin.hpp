@@ -520,6 +520,11 @@ public:
     }
 
     /**
+     * Virtual destructor defaulted.
+     */
+    virtual ~plugin_loader() = default;
+
+    /**
      * Set directories where to search plugins.
      *
      * \param directories the directories
