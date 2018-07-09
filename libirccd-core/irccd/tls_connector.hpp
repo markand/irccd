@@ -74,7 +74,7 @@ void tls_connector<Protocol>::connect(connect_handler handler)
 
     const auto stream = std::make_shared<tls_stream<socket>>(this->get_io_service(), context_);
 
-    socket_connector<Protocol>::do_connect(stream->get_socket().lowest_layer(), [this, handler, stream] (auto code) {
+    socket_connector<Protocol>::do_connect(stream->get_socket().lowest_layer(), [handler, stream] (auto code) {
         if (code) {
             handler(code, nullptr);
             return;

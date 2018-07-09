@@ -128,7 +128,7 @@ void connection::wrap_connect(Socket& socket,
 template <typename Socket>
 void connection::wrap_recv(Socket& socket, const recv_handler& handler) noexcept
 {
-    async_read_until(socket, input_, "\r\n", [this, &socket, handler] (auto code, auto xfer) {
+    async_read_until(socket, input_, "\r\n", [this, handler] (auto code, auto xfer) {
         if (xfer == 0U)
             return handler(make_error_code(boost::asio::error::eof), message());
         else if (code)
@@ -251,7 +251,7 @@ void tls_connection::do_connect(const std::string& host,
         if (code) {
             handler(code);
         } else {
-            socket_.async_handshake(stream_base::client, [this, handler] (auto code) {
+            socket_.async_handshake(stream_base::client, [handler] (auto code) {
                 handler(code);
             });
         }

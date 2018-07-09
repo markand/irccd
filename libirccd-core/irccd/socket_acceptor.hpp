@@ -136,7 +136,7 @@ void socket_acceptor<Protocol>::accept(accept_handler handler)
 
     const auto client = std::make_shared<socket_stream<socket>>(acceptor_.get_io_service());
 
-    do_accept(client->get_socket(), [this, client, handler] (auto code) {
+    do_accept(client->get_socket(), [client, handler] (auto code) {
         handler(std::move(code), code ? nullptr : std::move(client));
     });
 }
