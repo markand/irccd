@@ -33,8 +33,9 @@ void server_part_cli::exec(ctl::controller& ctl, const std::vector<std::string>&
         throw std::invalid_argument("server-part requires at least 2 arguments");
 
     auto object = nlohmann::json::object({
-        { "server",     args[0] },
-        { "channel",    args[1] }
+        { "command",    "server-part"   },
+        { "server",     args[0]         },
+        { "channel",    args[1]         }
     });
 
     if (args.size() >= 3)

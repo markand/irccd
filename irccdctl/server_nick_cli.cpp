@@ -33,8 +33,9 @@ void server_nick_cli::exec(ctl::controller& ctl, const std::vector<std::string>&
         throw std::invalid_argument("server-nick requires 2 arguments");
 
     request(ctl, {
-        { "server",     args[0] },
-        { "nickname",   args[1] }
+        { "command",    "server-nick"   },
+        { "server",     args[0]         },
+        { "nickname",   args[1]         }
     });
 }
 

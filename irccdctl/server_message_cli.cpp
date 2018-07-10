@@ -33,9 +33,10 @@ void server_message_cli::exec(ctl::controller& ctl, const std::vector<std::strin
         throw std::invalid_argument("server-message requires 3 arguments");
 
     request(ctl, {
-        { "server",     args[0] },
-        { "target",     args[1] },
-        { "message",    args[2] }
+        { "command",    "server-message"    },
+        { "server",     args[0]             },
+        { "target",     args[1]             },
+        { "message",    args[2]             }
     });
 }
 

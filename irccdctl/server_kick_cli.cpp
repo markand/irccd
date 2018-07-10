@@ -33,9 +33,10 @@ void server_kick_cli::exec(ctl::controller& ctl, const std::vector<std::string>&
         throw std::invalid_argument("server-kick requires at least 3 arguments ");
 
     auto object = nlohmann::json::object({
-        { "server",     args[0] },
-        { "target",     args[1] },
-        { "channel",    args[2] }
+        { "command",    "server-kick"   },
+        { "server",     args[0]         },
+        { "target",     args[1]         },
+        { "channel",    args[2]         }
     });
 
     if (args.size() == 4)

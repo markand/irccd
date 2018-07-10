@@ -33,9 +33,10 @@ void server_topic_cli::exec(ctl::controller& ctl, const std::vector<std::string>
         throw std::invalid_argument("server-topic requires 3 arguments");
 
     request(ctl, {
-        { "server",     args[0] },
-        { "channel",    args[1] },
-        { "topic",      args[2] }
+        { "command",    "server-topic"  },
+        { "server",     args[0]         },
+        { "channel",    args[1]         },
+        { "topic",      args[2]         }
     });
 }
 

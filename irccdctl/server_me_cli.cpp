@@ -33,6 +33,7 @@ void server_me_cli::exec(ctl::controller& ctl, const std::vector<std::string>& a
         throw std::runtime_error("server-me requires 3 arguments");
 
     request(ctl, {
+        { "command",    "server-me" },
         { "server",     args[0]     },
         { "target",     args[1]     },
         { "message",    args[2]     }

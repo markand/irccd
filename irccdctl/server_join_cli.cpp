@@ -33,6 +33,7 @@ void server_join_cli::exec(ctl::controller& ctl, const std::vector<std::string>&
         throw std::invalid_argument("server-join requires at least 2 arguments");
 
     auto object = nlohmann::json::object({
+        { "command",    "server-join"   },
         { "server",     args[0]         },
         { "channel",    args[1]         }
     });

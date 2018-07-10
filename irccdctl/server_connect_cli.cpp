@@ -65,8 +65,9 @@ void server_connect_cli::exec(ctl::controller& ctl, const std::vector<std::strin
         throw std::invalid_argument("server-connect requires at least 2 arguments");
 
     auto object = nlohmann::json::object({
-        { "name", copy[0] },
-        { "host", copy[1] }
+        { "command",    "server-connect"    },
+        { "name",       copy[0]             },
+        { "host",       copy[1]             }
     });
 
     if (copy.size() == 3) {
