@@ -31,9 +31,7 @@
 #include "socket_connector.hpp"
 #include "tls_stream.hpp"
 
-namespace irccd {
-
-namespace io {
+namespace irccd::io {
 
 /**
  * \brief TLS/SSL connectors.
@@ -86,9 +84,7 @@ void tls_connector<Protocol>::connect(connect_handler handler)
     });
 }
 
-} // !io
-
-} // !irccd
+} // !irccd::io
 
 #endif // !IRCCD_HAVE_SSL
 

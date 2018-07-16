@@ -31,9 +31,7 @@
 #include "connector.hpp"
 #include "socket_stream.hpp"
 
-namespace irccd {
-
-namespace io {
+namespace irccd::io {
 
 /**
  * \brief Socket connection interface.
@@ -169,8 +167,6 @@ using local_connector = socket_connector<boost::asio::local::stream_protocol>;
 
 #endif
 
-} // !io
-
-} // !irccd
+} // !irccd::io
 
 #endif // !IRCCD_COMMON_SOCKET_CONNECTOR_HPP

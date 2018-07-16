@@ -31,9 +31,7 @@
 #include "socket_acceptor.hpp"
 #include "tls_stream.hpp"
 
-namespace irccd {
-
-namespace io {
+namespace irccd::io {
 
 /**
  * \brief TLS/SSL acceptors.
@@ -87,9 +85,7 @@ void tls_acceptor<Protocol>::accept(accept_handler handler)
     });
 }
 
-} // !io
-
-} // !irccd
+} // !irccd::io
 
 #endif // !IRCCD_HAVE_SSL
 

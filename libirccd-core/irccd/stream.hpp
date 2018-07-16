@@ -29,9 +29,7 @@
 
 #include "json.hpp"
 
-namespace irccd {
-
-namespace io {
+namespace irccd::io {
 
 /**
  * \brief Read completion handler.
@@ -84,8 +82,6 @@ public:
     virtual void write(const nlohmann::json& json, write_handler handler) = 0;
 };
 
-} // !io
-
-} // !irccd
+} // !irccd::io
 
 #endif // !IRCCD_COMMON_STREAM_HPP

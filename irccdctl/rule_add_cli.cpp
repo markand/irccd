@@ -74,7 +74,7 @@ void rule_add_cli::exec(ctl::controller& ctl, const std::vector<std::string>& ar
     }
 
     // Index.
-    boost::optional<unsigned> index;
+    std::optional<unsigned> index;
 
     if (result.count("-i") > 0 && !(index = to_uint(result.find("-i")->second)))
         throw std::invalid_argument("invalid index argument");

@@ -28,9 +28,7 @@
 #include <memory>
 #include <system_error>
 
-namespace irccd {
-
-namespace io {
+namespace irccd::io {
 
 class stream;
 
@@ -70,8 +68,6 @@ public:
     virtual void accept(accept_handler handler) = 0;
 };
 
-} // !io
-
-} // !irccd
+} // !irccd::io
 
 #endif // !IRCCD_COMMON_ACCEPTOR_HPP

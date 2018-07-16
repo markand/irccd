@@ -29,12 +29,10 @@
 
 #include <boost/filesystem.hpp>
 
-namespace irccd {
-
 /**
  * \brief Filesystem utilities.
  */
-namespace fs_util {
+namespace irccd::fs_util {
 
 // {{{ base_name
 
@@ -142,8 +140,6 @@ inline std::string find(const std::string& base, const std::regex& regex, bool r
 
 // }}}
 
-} // !fs_util
-
-} // !irccd
+} // !irccd::fs_util
 
 #endif // !IRCCD_COMMON_FS_UTIL_HPP

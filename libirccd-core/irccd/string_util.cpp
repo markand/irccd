@@ -30,6 +30,7 @@
 
 #include <cassert>
 #include <iomanip>
+#include <regex>
 
 #include "string_util.hpp"
 
@@ -43,7 +44,7 @@ namespace string_util {
 
 namespace {
 
-const std::unordered_map<std::string, int> irc_colors{
+const std::unordered_map<std::string_view, int> irc_colors{
     { "white",      0   },
     { "black",      1   },
     { "blue",       2   },
@@ -62,7 +63,7 @@ const std::unordered_map<std::string, int> irc_colors{
     { "lightgrey",  15  }
 };
 
-const std::unordered_map<std::string, char> irc_attributes{
+const std::unordered_map<std::string_view, char> irc_attributes{
     { "bold",       '\x02'  },
     { "italic",     '\x09'  },
     { "strike",     '\x13'  },
@@ -72,7 +73,7 @@ const std::unordered_map<std::string, char> irc_attributes{
     { "reverse",    '\x16'  }
 };
 
-const std::unordered_map<std::string, unsigned> shell_colors{
+const std::unordered_map<std::string_view, unsigned> shell_colors{
     { "black",      30  },
     { "red",        31  },
     { "green",      32  },
@@ -84,7 +85,7 @@ const std::unordered_map<std::string, unsigned> shell_colors{
     { "default",    39  },
 };
 
-const std::unordered_map<std::string, unsigned> shell_attributes{
+const std::unordered_map<std::string_view, unsigned> shell_attributes{
     { "bold",       1   },
     { "dim",        2   },
     { "underline",  4   },
@@ -93,12 +94,12 @@ const std::unordered_map<std::string, unsigned> shell_attributes{
     { "hidden",     8   }
 };
 
-inline bool is_reserved(char token) noexcept
+auto is_reserved(char token) noexcept -> bool
 {
     return token == '#' || token == '@' || token == '$' || token == '!';
 }
 
-std::string subst_date(const std::string& text, const subst& params)
+auto subst_date(const std::string& text, const subst& params) -> std::string
 {
     std::ostringstream oss;
 
@@ -119,9 +120,9 @@ std::string subst_date(const std::string& text, const subst& params)
     return oss.str();
 }
 
-std::string subst_keywords(const std::string& content, const subst& params)
+auto subst_keywords(const std::string& content, const subst& params) -> std::string
 {
-    auto value = params.keywords.find(content);
+    auto value = params.keywords.find(std::string(content));
 
     if (value != params.keywords.end())
         return value->second;
@@ -383,7 +384,7 @@ std::string format(std::string text, const subst& params)
 
 std::string strip(std::string str) noexcept
 {
-    const auto test = [] (auto c) { return !std::isspace(c); };
+    const auto test = [] (auto c) noexcept { return !std::isspace(c); };
 
     str.erase(str.begin(), std::find_if(str.begin(), str.end(), test));
     str.erase(std::find_if(str.rbegin(), str.rend(), test).base(), str.end());
@@ -395,7 +396,7 @@ std::string strip(std::string str) noexcept
 
 // {{{ split
 
-std::vector<std::string> split(const std::string& list, const std::string& delimiters, int max)
+auto split(std::string_view list, const std::string& delimiters, int max) -> std::vector<std::string>
 {
     std::vector<std::string> result;
     std::size_t next = -1, current;
@@ -428,11 +429,22 @@ std::vector<std::string> split(const std::string& list, const std::string& delim
 
 // }}}
 
+// {{{ is_identifier
+
+auto is_identifier(std::string_view name) noexcept -> bool
+{
+    static const std::regex regex("[A-Za-z0-9-_]+");
+
+    return std::regex_match(std::string(name), regex);
+}
+
+// }}}
+
 // {{{ is_boolean
 
-bool is_boolean(std::string value) noexcept
+auto is_boolean(std::string value) noexcept -> bool
 {
-    std::transform(value.begin(), value.end(), value.begin(), [] (auto c) {
+    std::transform(value.begin(), value.end(), value.begin(), [] (auto c) noexcept {
         return toupper(c);
     });
 

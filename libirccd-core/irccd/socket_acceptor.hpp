@@ -29,9 +29,7 @@
 #include "acceptor.hpp"
 #include "socket_stream.hpp"
 
-namespace irccd {
-
-namespace io {
+namespace irccd::io {
 
 /**
  * \brief Socket stream acceptor interface.
@@ -155,8 +153,6 @@ using local_acceptor = socket_acceptor<boost::asio::local::stream_protocol>;
 
 #endif
 
-} // !io
-
-} // !irccd
+} // !irccd::io
 
 #endif // !IRCCD_COMMON_SOCKET_ACCEPTOR_HPP

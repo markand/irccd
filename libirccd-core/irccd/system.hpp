@@ -33,12 +33,10 @@
 
 #include "sysconfig.hpp"
 
-namespace irccd {
-
 /**
  * \brief Namespace for system functions.
  */
-namespace sys {
+namespace irccd::sys {
 
 /**
  * Set the program name, needed for some functions or some systems.
@@ -160,8 +158,6 @@ std::vector<std::string> config_filenames(std::string_view file);
 std::vector<std::string> plugin_filenames(const std::string& name,
                                           const std::vector<std::string>& extensions);
 
-} // !sys
-
-} // !irccd
+} // !irccd::sys
 
 #endif // !IRCCD_COMMON_SYSTEM_HPP

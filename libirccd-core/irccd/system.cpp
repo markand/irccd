@@ -58,9 +58,7 @@
 #include "string_util.hpp"
 #include "xdg.hpp"
 
-namespace irccd {
-
-namespace sys {
+namespace irccd::sys {
 
 namespace {
 
@@ -500,6 +498,4 @@ std::vector<std::string> plugin_filenames(const std::string& name,
 
 // }}}
 
-} // !sys
-
-} // !irccd
+} // !irccd::sys

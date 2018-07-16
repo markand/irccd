@@ -32,9 +32,7 @@
 
 #include "socket_stream.hpp"
 
-namespace irccd {
-
-namespace io {
+namespace irccd::io {
 
 /**
  * \brief TLS/SSL streams.
@@ -55,9 +53,7 @@ public:
     }
 };
 
-} // !io
-
-} // !irccd
+} // !irccd::io
 
 #endif // !IRCCD_HAVE_SSL
 

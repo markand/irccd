@@ -36,9 +36,7 @@
 
 #include "stream.hpp"
 
-namespace irccd {
-
-namespace io {
+namespace irccd::io {
 
 /**
  * \cond HIDDEN_SYMBOLS
@@ -239,8 +237,6 @@ using local_stream = socket_stream<boost::asio::local::stream_protocol::socket>;
 
 #endif
 
-} // !io
-
-} // !irccd
+} // !irccd::io
 
 #endif // !IRCCD_COMMON_SOCKET_STREAM_HPP

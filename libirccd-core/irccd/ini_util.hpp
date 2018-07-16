@@ -24,7 +24,7 @@
  * \brief Ini utilities.
  */
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include "ini.hpp"
 #include "string_util.hpp"
@@ -44,7 +44,7 @@ namespace ini_util {
  * \return the value or none if not able to convert
  */
 template <typename Int>
-inline boost::optional<Int> get_uint(const ini::section& sc, const std::string& name) noexcept
+inline std::optional<Int> get_uint(const ini::section& sc, const std::string& name) noexcept
 {
     return string_util::to_uint<Int>(sc.get(name).value());
 }
@@ -78,7 +78,7 @@ inline std::string optional_string(const ini::section& sc,
  * \return the value or none if not able to convert
  */
 template <typename Int>
-inline boost::optional<Int> optional_uint(const ini::section& sc,
+inline std::optional<Int> optional_uint(const ini::section& sc,
                                           const std::string& name,
                                           Int def) noexcept
 {

@@ -29,23 +29,20 @@
 #include <ctime>
 #include <initializer_list>
 #include <limits>
-#include <regex>
+#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <unordered_map>
 
 #include <boost/format.hpp>
-#include <boost/optional.hpp>
-
-namespace irccd {
 
 /**
- * \file string_util.hpp
  * \brief String utilities.
  */
-namespace string_util {
+namespace irccd::string_util {
 
 // {{{ subst
 
@@ -190,7 +187,7 @@ public:
  *   - <strong>\@{white,black,bold,underline}</strong>: will write white text on
  *     black in both bold and underline.
  */
-std::string format(std::string text, const subst& params = {});
+auto format(std::string text, const subst& params = {}) -> std::string;
 
 // }}}
 
@@ -202,7 +199,7 @@ std::string format(std::string text, const subst& params = {});
  * \param str the string
  * \return the removed white spaces
  */
-std::string strip(std::string str) noexcept;
+auto strip(std::string str) noexcept -> std::string;
 
 // }}}
 
@@ -216,7 +213,7 @@ std::string strip(std::string str) noexcept;
  * \param max max number of split
  * \return a list of string splitted
  */
-std::vector<std::string> split(const std::string& list, const std::string& delimiters, int max = -1);
+auto split(std::string_view list, const std::string& delimiters, int max = -1) -> std::vector<std::string>;
 
 // }}}
 
@@ -231,7 +228,7 @@ std::vector<std::string> split(const std::string& list, const std::string& delim
  * \return the string
  */
 template <typename InputIt, typename DelimType = char>
-std::string join(InputIt first, InputIt last, DelimType delim = ':')
+auto join(InputIt first, InputIt last, DelimType delim = ':') -> std::string
 {
     std::ostringstream oss;
 
@@ -253,7 +250,7 @@ std::string join(InputIt first, InputIt last, DelimType delim = ':')
  * \return the string
  */
 template <typename Container, typename DelimType = char>
-std::string join(const Container& c, DelimType delim = ':')
+auto join(const Container& c, DelimType delim = ':') -> std::string
 {
     return join(c.begin(), c.end(), delim);
 }
@@ -266,7 +263,7 @@ std::string join(const Container& c, DelimType delim = ':')
  * \return the string
  */
 template <typename T, typename DelimType = char>
-inline std::string join(std::initializer_list<T> list, DelimType delim = ':')
+auto join(std::initializer_list<T> list, DelimType delim = ':') -> std::string
 {
     return join(list.begin(), list.end(), delim);
 }
@@ -281,10 +278,7 @@ inline std::string join(std::initializer_list<T> list, DelimType delim = ':')
  * \param name the identifier name
  * \return true if is valid
  */
-inline bool is_identifier(const std::string& name)
-{
-    return std::regex_match(name, std::regex("[A-Za-z0-9-_]+"));
-}
+auto is_identifier(std::string_view name) noexcept -> bool;
 
 // }}}
 
@@ -297,7 +291,7 @@ inline bool is_identifier(const std::string& name)
  * \return true if is boolean
  * \note this function is case-insensitive
  */
-bool is_boolean(std::string value) noexcept;
+auto is_boolean(std::string value) noexcept -> bool;
 
 // }}}
 
@@ -336,7 +330,7 @@ inline void sprintf(boost::format& fmter, const Arg& arg, const Args&... args)
  * \return the string
  */
 template <typename Format, typename... Args>
-std::string sprintf(const Format& format, const Args&... args)
+auto sprintf(const Format& format, const Args&... args) -> std::string
 {
     boost::format fmter(format);
 
@@ -358,9 +352,9 @@ std::string sprintf(const Format& format, const Args&... args)
  * \return the value or boost::none if not convertible
  */
 template <typename T = int>
-boost::optional<T> to_int(const std::string& str,
-                          T min = std::numeric_limits<T>::min(),
-                          T max = std::numeric_limits<T>::max()) noexcept
+auto to_int(const std::string& str,
+            T min = std::numeric_limits<T>::min(),
+            T max = std::numeric_limits<T>::max()) noexcept -> std::optional<T>
 {
     static_assert(std::is_signed<T>::value, "must be signed");
 
@@ -368,7 +362,7 @@ boost::optional<T> to_int(const std::string& str,
     auto v = std::strtoll(str.c_str(), &end, 10);
 
     if (*end != '\0' || v < min || v > max)
-        return boost::none;
+        return std::nullopt;
 
     return static_cast<T>(v);
 }
@@ -387,9 +381,9 @@ boost::optional<T> to_int(const std::string& str,
  * \return the value or boost::none if not convertible
  */
 template <typename T = unsigned>
-boost::optional<T> to_uint(const std::string& str,
-                           T min = std::numeric_limits<T>::min(),
-                           T max = std::numeric_limits<T>::max()) noexcept
+auto to_uint(const std::string& str,
+             T min = std::numeric_limits<T>::min(),
+             T max = std::numeric_limits<T>::max()) noexcept -> std::optional<T>
 {
     static_assert(std::is_unsigned<T>::value, "must be unsigned");
 
@@ -397,15 +391,13 @@ boost::optional<T> to_uint(const std::string& str,
     auto v = std::strtoull(str.c_str(), &end, 10);
 
     if (*end != '\0' || v < min || v > max)
-        return boost::none;
+        return std::nullopt;
 
     return static_cast<T>(v);
 }
 
 // }}}
 
-} // !string_util
-
-} // !irccd
+} // !irccd::string_util
 
 #endif // !IRCCD_COMMON_STRING_UTIL_HPP
