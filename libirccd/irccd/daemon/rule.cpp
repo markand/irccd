@@ -38,22 +38,23 @@ rule::rule(set servers, set channels, set origins, set plugins, set events, acti
 {
 }
 
-bool rule::match(const std::string& server,
-                 const std::string& channel,
-                 const std::string& nick,
-                 const std::string& plugin,
-                 const std::string& event) const noexcept
+bool rule::match(std::string_view server,
+                 std::string_view channel,
+                 std::string_view nick,
+                 std::string_view plugin,
+                 std::string_view event) const noexcept
 {
-    const auto tolower = [] (auto str) noexcept {
-        std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-        return str;
+    const auto tolower = [] (auto str) noexcept -> std::string {
+        std::string ret(str);
+        std::transform(ret.begin(), ret.end(), ret.begin(), ::tolower);
+        return ret;
     };
 
     return match_set(servers_, tolower(server)) &&
            match_set(channels_, tolower(channel)) &&
            match_set(origins_, tolower(nick)) &&
            match_set(plugins_, tolower(plugin)) &&
-           match_set(events_, event);
+           match_set(events_, std::string(event));
 }
 
 const std::error_category& rule_category()

@@ -50,10 +50,9 @@ public:
     /**
      * Construct the fixture test.
      *
-     * \param name the plugin name (e.g. ask)
-     * \param path the full plugin path (e.g. /usr/libexec/irccd/plugins/ask.js)
+     * \param path the full plugin path (e.g. /usr/lib64/irccd/ask.js)
      */
-    plugin_test(std::string name, std::string path);
+    plugin_test(std::string path);
 };
 
 } // !irccd

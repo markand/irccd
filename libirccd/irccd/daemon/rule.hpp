@@ -94,11 +94,11 @@ public:
      * \param event the event
      * \return true if match
      */
-    bool match(const std::string& server,
-               const std::string& channel,
-               const std::string& nick,
-               const std::string& plugin,
-               const std::string& event) const noexcept;
+    bool match(std::string_view server,
+               std::string_view channel,
+               std::string_view nick,
+               std::string_view plugin,
+               std::string_view event) const noexcept;
 
     /**
      * Get the action.

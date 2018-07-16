@@ -33,35 +33,35 @@ BOOST_FIXTURE_TEST_SUITE(unicode_jsapi_suite, js_test<unicode_jsapi>)
 
 BOOST_AUTO_TEST_CASE(is_letter)
 {
-    duk_peval_string_noresult(plugin_->context(), "result = Irccd.Unicode.isLetter(String('é').charCodeAt(0));");
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
-    BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
+    duk_peval_string_noresult(plugin_->get_context(), "result = Irccd.Unicode.isLetter(String('é').charCodeAt(0));");
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "result"));
+    BOOST_TEST(duk_get_boolean(plugin_->get_context(), -1));
 
-    duk_peval_string_noresult(plugin_->context(), "result = Irccd.Unicode.isLetter(String('€').charCodeAt(0));");
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
-    BOOST_TEST(!duk_get_boolean(plugin_->context(), -1));
+    duk_peval_string_noresult(plugin_->get_context(), "result = Irccd.Unicode.isLetter(String('€').charCodeAt(0));");
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "result"));
+    BOOST_TEST(!duk_get_boolean(plugin_->get_context(), -1));
 }
 
 BOOST_AUTO_TEST_CASE(is_lower)
 {
-    duk_peval_string_noresult(plugin_->context(), "result = Irccd.Unicode.isLower(String('é').charCodeAt(0));");
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
-    BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
+    duk_peval_string_noresult(plugin_->get_context(), "result = Irccd.Unicode.isLower(String('é').charCodeAt(0));");
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "result"));
+    BOOST_TEST(duk_get_boolean(plugin_->get_context(), -1));
 
-    duk_peval_string_noresult(plugin_->context(), "result = Irccd.Unicode.isLower(String('É').charCodeAt(0));");
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
-    BOOST_TEST(!duk_get_boolean(plugin_->context(), -1));
+    duk_peval_string_noresult(plugin_->get_context(), "result = Irccd.Unicode.isLower(String('É').charCodeAt(0));");
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "result"));
+    BOOST_TEST(!duk_get_boolean(plugin_->get_context(), -1));
 }
 
 BOOST_AUTO_TEST_CASE(is_upper)
 {
-    duk_peval_string_noresult(plugin_->context(), "result = Irccd.Unicode.isUpper(String('É').charCodeAt(0));");
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
-    BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
+    duk_peval_string_noresult(plugin_->get_context(), "result = Irccd.Unicode.isUpper(String('É').charCodeAt(0));");
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "result"));
+    BOOST_TEST(duk_get_boolean(plugin_->get_context(), -1));
 
-    duk_peval_string_noresult(plugin_->context(), "result = Irccd.Unicode.isUpper(String('é').charCodeAt(0));");
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "result"));
-    BOOST_TEST(!duk_get_boolean(plugin_->context(), -1));
+    duk_peval_string_noresult(plugin_->get_context(), "result = Irccd.Unicode.isUpper(String('é').charCodeAt(0));");
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "result"));
+    BOOST_TEST(!duk_get_boolean(plugin_->get_context(), -1));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -34,12 +34,12 @@ protected:
 
 public:
     auth_test()
-        : plugin_test(PLUGIN_NAME, PLUGIN_PATH)
+        : plugin_test(PLUGIN_PATH)
         , nickserv1_(std::make_shared<journal_server>(service_, "nickserv1"))
         , nickserv2_(std::make_shared<journal_server>(service_, "nickserv2"))
         , quakenet_(std::make_shared<journal_server>(service_, "quakenet"))
     {
-        plugin_->set_config({
+        plugin_->set_options({
             { "nickserv1.type", "nickserv" },
             { "nickserv1.password", "plopation" },
             { "nickserv2.type", "nickserv" },

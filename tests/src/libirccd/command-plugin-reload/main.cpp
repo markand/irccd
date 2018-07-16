@@ -28,13 +28,13 @@ namespace irccd {
 
 namespace {
 
-class custom_plugin : public plugin {
+class reloadable_plugin : public plugin {
 public:
     bool reloaded{false};
 
-    custom_plugin()
-        : plugin("test", "")
+    auto get_name() const noexcept -> std::string_view override
     {
+        return "reload";
     }
 
     void handle_reload(irccd&) override
@@ -45,7 +45,10 @@ public:
 
 class broken_plugin : public plugin {
 public:
-    using plugin::plugin;
+    auto get_name() const noexcept -> std::string_view override
+    {
+        return "broken";
+    }
 
     void handle_reload(irccd&) override
     {
@@ -55,13 +58,13 @@ public:
 
 class plugin_reload_test : public command_test<plugin_reload_command> {
 protected:
-    std::shared_ptr<custom_plugin> plugin_;
+    std::shared_ptr<reloadable_plugin> plugin_;
 
     plugin_reload_test()
-        : plugin_(std::make_shared<custom_plugin>())
+        : plugin_(std::make_shared<reloadable_plugin>())
     {
-        daemon_->plugins().add(plugin_);
-        daemon_->plugins().add(std::make_unique<broken_plugin>("broken", ""));
+        daemon_->plugins().add("test", plugin_);
+        daemon_->plugins().add("broken", std::make_unique<broken_plugin>());
     }
 };
 

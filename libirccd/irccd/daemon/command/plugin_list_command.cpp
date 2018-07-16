@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <algorithm>
+
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/transport_client.hpp>
 
@@ -34,8 +36,10 @@ void plugin_list_command::exec(irccd& irccd, transport_client& client, const doc
 {
     auto list = nlohmann::json::array();
 
-    for (const auto& plugin : irccd.plugins().list())
-        list += plugin->get_name();
+    for (const auto& [key, _] : irccd.plugins().all())
+        list += key;
+
+    std::sort(list.begin(), list.end());
 
     client.write({
         { "command",    "plugin-list"   },

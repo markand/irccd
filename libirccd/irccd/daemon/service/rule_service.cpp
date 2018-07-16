@@ -69,11 +69,11 @@ rule &rule_service::require(unsigned position)
     return rules_[position];
 }
 
-bool rule_service::solve(const std::string& server,
-                         const std::string& channel,
-                         const std::string& origin,
-                         const std::string& plugin,
-                         const std::string& event) noexcept
+bool rule_service::solve(std::string_view server,
+                         std::string_view channel,
+                         std::string_view origin,
+                         std::string_view plugin,
+                         std::string_view event) noexcept
 {
     bool result = true;
 

@@ -34,13 +34,13 @@ namespace {
 
 template <typename EventNameFunc, typename ExecFunc>
 void dispatch(irccd& daemon,
-              const std::string& server,
-              const std::string& origin,
-              const std::string& target,
+              std::string_view server,
+              std::string_view origin,
+              std::string_view target,
               EventNameFunc&& name_func,
               ExecFunc exec_func)
 {
-    for (auto& plugin : daemon.plugins().list()) {
+    for (auto& [_, plugin] : daemon.plugins().all()) {
         const auto eventname = name_func(*plugin);
         const auto allowed = daemon.rules().solve(server, target, origin, plugin->get_name(), eventname);
 

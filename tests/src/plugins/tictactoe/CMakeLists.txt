@@ -20,8 +20,6 @@ irccd_define_test(
     NAME plugin-tictactoe
     SOURCES main.cpp
     LIBRARIES libirccd
-    FLAGS
-        PLUGIN_NAME="tictactoe"
-        PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/tictactoe/tictactoe.js"
+    FLAGS PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/tictactoe/tictactoe.js"
 )
 

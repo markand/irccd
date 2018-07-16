@@ -23,18 +23,43 @@
 
 namespace irccd {
 
+namespace {
+
+class sample : public plugin {
+public:
+    auto get_name() const noexcept -> std::string_view override
+    {
+        return "sample";
+    }
+
+    auto get_author() const noexcept -> std::string_view override
+    {
+        return "David Demelier <markand@malikania.fr>";
+    }
+
+    auto get_license() const noexcept -> std::string_view override
+    {
+        return "ISC";
+    }
+
+    auto get_summary() const noexcept -> std::string_view override
+    {
+        return "foo";
+    }
+
+    auto get_version() const noexcept -> std::string_view override
+    {
+        return "0.0";
+    }
+};
+
 BOOST_FIXTURE_TEST_SUITE(plugin_info_suite, plugin_cli_test)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-    auto p = std::make_unique<plugin>("p", "local");
+    auto p = std::make_unique<sample>();
 
-    p->set_author("David Demelier <markand@malikania.fr>");
-    p->set_license("ISC");
-    p->set_summary("foo");
-    p->set_version("0.0");
-
-    irccd_.plugins().add(std::move(p));
+    irccd_.plugins().add("p", std::move(p));
     start();
 
     const auto result = exec({ "plugin-info", "p" });
@@ -48,5 +73,7 @@ BOOST_AUTO_TEST_CASE(simple)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

@@ -26,12 +26,14 @@
 
 namespace irccd {
 
+namespace {
+
 class ask_test : public plugin_test {
 public:
-    inline ask_test()
-        : plugin_test(PLUGIN_NAME, PLUGIN_PATH)
+    ask_test()
+        : plugin_test(PLUGIN_PATH)
     {
-        plugin_->set_config({
+        plugin_->set_options({
             { "file", CMAKE_CURRENT_SOURCE_DIR "/answers.conf" }
         });
         plugin_->handle_load(irccd_);
@@ -72,5 +74,7 @@ BOOST_AUTO_TEST_CASE(basic)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

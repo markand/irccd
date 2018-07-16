@@ -26,18 +26,44 @@
 
 namespace irccd {
 
+namespace {
+
+class sample_plugin : public plugin {
+public:
+    auto get_name() const noexcept -> std::string_view
+    {
+        return "test";
+    }
+
+    auto get_author() const noexcept -> std::string_view override
+    {
+        return "Francis Beaugrand";
+    }
+
+    auto get_license() const noexcept -> std::string_view override
+    {
+        return "GPL";
+    }
+
+    auto get_summary() const noexcept -> std::string_view override
+    {
+        return "Completely useless plugin";
+    }
+
+    auto get_version() const noexcept -> std::string_view override
+    {
+        return "0.0.0.0.0.0.0.0.1-beta5";
+    }
+};
+
 BOOST_FIXTURE_TEST_SUITE(plugin_info_test_suite, command_test<plugin_info_command>)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    auto plg = std::make_unique<plugin>("test", "");
+    auto plg = std::make_unique<sample_plugin>();
     auto response = nlohmann::json();
 
-    plg->set_author("Francis Beaugrand");
-    plg->set_license("GPL");
-    plg->set_summary("Completely useless plugin");
-    plg->set_version("0.0.0.0.0.0.0.0.1-beta5");
-    daemon_->plugins().add(std::move(plg));
+    daemon_->plugins().add("test", std::move(plg));
 
     const auto result = request({
         { "command",    "plugin-info"       },
@@ -78,5 +104,7 @@ BOOST_AUTO_TEST_CASE(not_found)
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

@@ -61,6 +61,7 @@ protected:
     };
 
     logger_test()
+        : js_test(CMAKE_CURRENT_SOURCE_DIR "/empty.js")
     {
         irccd_.set_log(std::make_unique<my_logger>(*this));
         irccd_.get_log().set_verbose(true);
@@ -71,16 +72,16 @@ BOOST_FIXTURE_TEST_SUITE(logger_jsapi_suite, logger_test)
 
 BOOST_AUTO_TEST_CASE(info)
 {
-    if (duk_peval_string(plugin_->context(), "Irccd.Logger.info(\"hello!\");") != 0)
-        throw dukx_stack(plugin_->context(), -1);
+    if (duk_peval_string(plugin_->get_context(), "Irccd.Logger.info(\"hello!\");") != 0)
+        throw dukx_stack(plugin_->get_context(), -1);
 
     BOOST_TEST("plugin test: hello!" == line_info);
 }
 
 BOOST_AUTO_TEST_CASE(warning)
 {
-    if (duk_peval_string(plugin_->context(), "Irccd.Logger.warning(\"FAIL!\");") != 0)
-        throw dukx_stack(plugin_->context(), -1);
+    if (duk_peval_string(plugin_->get_context(), "Irccd.Logger.warning(\"FAIL!\");") != 0)
+        throw dukx_stack(plugin_->get_context(), -1);
 
     BOOST_TEST("plugin test: FAIL!" == line_warning);
 }
@@ -89,8 +90,8 @@ BOOST_AUTO_TEST_CASE(warning)
 
 BOOST_AUTO_TEST_CASE(debug)
 {
-    if (duk_peval_string(plugin_->context(), "Irccd.Logger.debug(\"starting\");") != 0)
-        throw dukx_stack(plugin_->context(), -1);
+    if (duk_peval_string(plugin_->get_context(), "Irccd.Logger.debug(\"starting\");") != 0)
+        throw dukx_stack(plugin_->get_context(), -1);
 
     BOOST_TEST("plugin test: starting" == line_debug);
 }

@@ -27,26 +27,26 @@ BOOST_FIXTURE_TEST_SUITE(irccd_jsapi_suite, js_test<irccd_jsapi>)
 
 BOOST_AUTO_TEST_CASE(version)
 {
-    auto ret = duk_peval_string(plugin_->context(),
+    auto ret = duk_peval_string(plugin_->get_context(),
         "major = Irccd.version.major;"
         "minor = Irccd.version.minor;"
         "patch = Irccd.version.patch;"
     );
 
     if (ret != 0)
-        throw dukx_stack(plugin_->context(), -1);
+        throw dukx_stack(plugin_->get_context(), -1);
 
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "major"));
-    BOOST_TEST(IRCCD_VERSION_MAJOR == duk_get_int(plugin_->context(), -1));
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "minor"));
-    BOOST_TEST(IRCCD_VERSION_MINOR == duk_get_int(plugin_->context(), -1));
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "patch"));
-    BOOST_TEST(IRCCD_VERSION_PATCH == duk_get_int(plugin_->context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "major"));
+    BOOST_TEST(IRCCD_VERSION_MAJOR == duk_get_int(plugin_->get_context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "minor"));
+    BOOST_TEST(IRCCD_VERSION_MINOR == duk_get_int(plugin_->get_context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "patch"));
+    BOOST_TEST(IRCCD_VERSION_PATCH == duk_get_int(plugin_->get_context(), -1));
 }
 
 BOOST_AUTO_TEST_CASE(from_javascript)
 {
-    auto ret = duk_peval_string(plugin_->context(),
+    auto ret = duk_peval_string(plugin_->get_context(),
         "try {"
         "  throw new Irccd.SystemError(1, 'test');"
         "} catch (e) {"
@@ -59,31 +59,31 @@ BOOST_AUTO_TEST_CASE(from_javascript)
     );
 
     if (ret != 0)
-        throw dukx_stack(plugin_->context(), -1);
+        throw dukx_stack(plugin_->get_context(), -1);
 
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "errno"));
-    BOOST_TEST(1 == duk_get_int(plugin_->context(), -1));
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "name"));
-    BOOST_TEST("SystemError" == duk_get_string(plugin_->context(), -1));
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "message"));
-    BOOST_TEST("test" == duk_get_string(plugin_->context(), -1));
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "v1"));
-    BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "v2"));
-    BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "errno"));
+    BOOST_TEST(1 == duk_get_int(plugin_->get_context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "name"));
+    BOOST_TEST("SystemError" == duk_get_string(plugin_->get_context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "message"));
+    BOOST_TEST("test" == duk_get_string(plugin_->get_context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "v1"));
+    BOOST_TEST(duk_get_boolean(plugin_->get_context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "v2"));
+    BOOST_TEST(duk_get_boolean(plugin_->get_context(), -1));
 }
 
 BOOST_AUTO_TEST_CASE(from_native)
 {
-    duk_push_c_function(plugin_->context(), [] (duk_context *ctx) -> duk_ret_t {
+    duk_push_c_function(plugin_->get_context(), [] (duk_context *ctx) -> duk_ret_t {
         dukx_throw(ctx, std::system_error(make_error_code(std::errc::invalid_argument)));
 
         return 0;
     }, 0);
 
-    duk_put_global_string(plugin_->context(), "f");
+    duk_put_global_string(plugin_->get_context(), "f");
 
-    auto ret = duk_peval_string(plugin_->context(),
+    auto ret = duk_peval_string(plugin_->get_context(),
         "try {"
         "  f();"
         "} catch (e) {"
@@ -95,16 +95,16 @@ BOOST_AUTO_TEST_CASE(from_native)
     );
 
     if (ret != 0)
-        throw dukx_stack(plugin_->context(), -1);
+        throw dukx_stack(plugin_->get_context(), -1);
 
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "errno"));
-    BOOST_TEST(EINVAL == duk_get_int(plugin_->context(), -1));
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "name"));
-    BOOST_TEST("SystemError" == duk_get_string(plugin_->context(), -1));
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "v1"));
-    BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "v2"));
-    BOOST_TEST(duk_get_boolean(plugin_->context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "errno"));
+    BOOST_TEST(EINVAL == duk_get_int(plugin_->get_context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "name"));
+    BOOST_TEST("SystemError" == duk_get_string(plugin_->get_context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "v1"));
+    BOOST_TEST(duk_get_boolean(plugin_->get_context(), -1));
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "v2"));
+    BOOST_TEST(duk_get_boolean(plugin_->get_context(), -1));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

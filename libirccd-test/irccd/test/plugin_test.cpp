@@ -40,15 +40,15 @@
 
 namespace irccd {
 
-plugin_test::plugin_test(std::string name, std::string path)
+plugin_test::plugin_test(std::string path)
     : server_(std::make_shared<journal_server>(service_, "test", "local"))
 {
     server_->set_nickname("irccd");
-    plugin_ = std::make_unique<js_plugin>(std::move(name), std::move(path));
+    plugin_ = std::make_unique<js_plugin>(std::move(path));
 
     irccd_.set_log(std::make_unique<silent_logger>());
     irccd_.get_log().set_verbose(false);
-    irccd_.plugins().add(plugin_);
+    irccd_.plugins().add("test", plugin_);
     irccd_.servers().add(server_);
 
     irccd_jsapi().load(irccd_, plugin_);

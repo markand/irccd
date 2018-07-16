@@ -26,12 +26,22 @@
 
 namespace irccd {
 
+namespace {
+
+class sample_plugin : public plugin {
+public:
+    auto get_name() const noexcept -> std::string_view override
+    {
+        return "sample";
+    }
+};
+
 class plugin_list_test : public command_test<plugin_list_command> {
 public:
     plugin_list_test()
     {
-        daemon_->plugins().add(std::make_unique<plugin>("t1", ""));
-        daemon_->plugins().add(std::make_unique<plugin>("t2", ""));
+        daemon_->plugins().add("t1", std::make_unique<sample_plugin>());
+        daemon_->plugins().add("t2", std::make_unique<sample_plugin>());
     }
 };
 
@@ -39,15 +49,18 @@ BOOST_FIXTURE_TEST_SUITE(plugin_list_test_suite, plugin_list_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    const auto result = request({
+    const auto [ result, code ] = request({
         { "command", "plugin-list" }
     });
 
-    BOOST_TEST(result.first.is_object());
-    BOOST_TEST(result.first["list"][0].template get<std::string>() == "t1");
-    BOOST_TEST(result.first["list"][1].template get<std::string>() == "t2");
+    BOOST_TEST(!code);
+    BOOST_TEST(result.is_object());
+    BOOST_TEST(result["list"][0].template get<std::string>() == "t1");
+    BOOST_TEST(result["list"][1].template get<std::string>() == "t2");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

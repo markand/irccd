@@ -32,7 +32,7 @@ namespace irccd {
 class test_fixture : public plugin_test {
 public:
     test_fixture()
-        : plugin_test(PLUGIN_NAME, PLUGIN_PATH)
+        : plugin_test(PLUGIN_PATH)
     {
         plugin_->set_formats({
             { "draw",       "draw=#{channel}:#{command}:#{nickname}:#{plugin}:#{server}"                },

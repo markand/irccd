@@ -40,11 +40,11 @@ public:
 
     void set_type(const std::string& name)
     {
-        duk_get_global_string(plugin_->context(), "Irccd");
-        duk_get_prop_string(plugin_->context(), -1, "Timer");
-        duk_get_prop_string(plugin_->context(), -1, name.c_str());
-        duk_put_global_string(plugin_->context(), "type");
-        duk_pop_n(plugin_->context(), 2);
+        duk_get_global_string(plugin_->get_context(), "Irccd");
+        duk_get_prop_string(plugin_->get_context(), -1, "Timer");
+        duk_get_prop_string(plugin_->get_context(), -1, name.c_str());
+        duk_put_global_string(plugin_->get_context(), "type");
+        duk_pop_n(plugin_->get_context(), 2);
 
         plugin_->open();
         plugin_->handle_load(irccd_);
@@ -66,8 +66,8 @@ BOOST_AUTO_TEST_CASE(single)
         service_.poll();
     }
 
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "count"));
-    BOOST_TEST(duk_get_int(plugin_->context(), -1) == 1);
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "count"));
+    BOOST_TEST(duk_get_int(plugin_->get_context(), -1) == 1);
 }
 
 BOOST_AUTO_TEST_CASE(repeat)
@@ -81,8 +81,8 @@ BOOST_AUTO_TEST_CASE(repeat)
         service_.poll();
     }
 
-    BOOST_TEST(duk_get_global_string(plugin_->context(), "count"));
-    BOOST_TEST(duk_get_int(plugin_->context(), -1) >= 5);
+    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "count"));
+    BOOST_TEST(duk_get_int(plugin_->get_context(), -1) >= 5);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

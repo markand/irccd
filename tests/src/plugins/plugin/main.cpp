@@ -29,24 +29,42 @@
 
 namespace irccd {
 
+namespace {
+
 class fake_plugin : public plugin {
 public:
-    fake_plugin()
-        : plugin("fake", "")
+    auto get_name() const noexcept -> std::string_view override
     {
-        set_author("jean");
-        set_version("0.0.0.0.0.1");
-        set_license("BEER");
-        set_summary("Fake White Beer 2000");
+        return "fake";
+    }
+
+    auto get_author() const noexcept -> std::string_view override
+    {
+        return "jean";
+    }
+
+    auto get_version() const noexcept -> std::string_view override
+    {
+        return "0.0.0.0.0.1";
+    }
+
+    auto get_license() const noexcept -> std::string_view override
+    {
+        return "BEER";
+    }
+
+    auto get_summary() const noexcept -> std::string_view override
+    {
+        return "Fake White Beer 2000";
     }
 };
 
 class test_fixture : public plugin_test {
 public:
     test_fixture()
-        : plugin_test(PLUGIN_NAME, PLUGIN_PATH)
+        : plugin_test(PLUGIN_PATH)
     {
-        irccd_.plugins().add(std::make_shared<fake_plugin>());
+        irccd_.plugins().add("fake", std::make_shared<fake_plugin>());
 
         plugin_->set_formats({
             { "usage", "usage=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}" },
@@ -111,7 +129,7 @@ BOOST_AUTO_TEST_CASE(format_not_found)
 BOOST_AUTO_TEST_CASE(format_too_long)
 {
     for (int i = 0; i < 100; ++i)
-        irccd_.plugins().add(std::make_shared<plugin>(string_util::sprintf("plugin-n-%d", i), ""));
+        irccd_.plugins().add(string_util::sprintf("plugin-n-%d", i), std::make_shared<fake_plugin>());
 
     plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#staff", "list"});
 
@@ -123,5 +141,7 @@ BOOST_AUTO_TEST_CASE(format_too_long)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

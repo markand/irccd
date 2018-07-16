@@ -392,11 +392,19 @@ void requester::run(io_context& io, shared_ptr<server> server, string origin, st
 
 class links_plugin : public plugin {
 public:
-    using plugin::plugin;
+    auto get_name() const noexcept -> std::string_view override;
 
-    void set_config(plugin_config) override;
+    auto get_author() const noexcept -> std::string_view override;
 
-    void set_formats(plugin_formats) override;
+    auto get_license() const noexcept -> std::string_view override;
+
+    auto get_summary() const noexcept -> std::string_view override;
+
+    auto get_version() const noexcept -> std::string_view override;
+
+    void set_options(const map&) override;
+
+    void set_formats(const map&) override;
 
     void handle_message(irccd&, const message_event&) override;
 
@@ -405,13 +413,39 @@ public:
     static auto init() -> std::unique_ptr<plugin>;
 };
 
-void links_plugin::set_config(plugin_config conf)
+auto links_plugin::get_name() const noexcept -> std::string_view
 {
-    if (const auto v = string_util::to_uint(conf["timeout"]); v)
-        config::timeout = *v;
+    return "links";
 }
 
-void links_plugin::set_formats(plugin_formats formats)
+auto links_plugin::get_author() const noexcept -> std::string_view
+{
+    return "David Demelier <markand@malikania.fr>";
+}
+
+auto links_plugin::get_license() const noexcept -> std::string_view
+{
+    return "ISC";
+}
+
+auto links_plugin::get_summary() const noexcept -> std::string_view
+{
+    return "show webpage title";
+}
+
+auto links_plugin::get_version() const noexcept -> std::string_view
+{
+    return IRCCD_VERSION;
+}
+
+void links_plugin::set_options(const map& conf)
+{
+    if (const auto it = conf.find("timeout"); it != conf.end())
+        if (const auto v = string_util::to_uint(it->second); v)
+            config::timeout = *v;
+}
+
+void links_plugin::set_formats(const map& formats)
 {
     if (const auto it = formats.find("info"); it != formats.end())
         formats::info = it->second;
@@ -429,7 +463,7 @@ auto links_plugin::abi() -> version
 
 auto links_plugin::init() -> std::unique_ptr<plugin>
 {
-    return std::make_unique<links_plugin>("links", "");
+    return std::make_unique<links_plugin>();
 }
 
 BOOST_DLL_ALIAS(links_plugin::abi, irccd_abi_links)

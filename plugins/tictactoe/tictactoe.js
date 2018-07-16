@@ -18,6 +18,7 @@
 
 // Plugin information.
 info = {
+    name: "tictactoe",
     author: "David Demelier <markand@malikania.fr>",
     license: "ISC",
     summary: "A tictactoe game for IRC",

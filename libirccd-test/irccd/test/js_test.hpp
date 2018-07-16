@@ -43,17 +43,10 @@ template <typename... Modules>
 class js_test {
 private:
     template <typename Module>
-    inline void add()
-    {
-        Module().load(irccd_, plugin_);
-    }
+    void add();
 
     template <typename M1, typename M2, typename... Tail>
-    inline void add()
-    {
-        add<M1>();
-        add<M2, Tail...>();
-    }
+    void add();
 
 public:
     boost::asio::io_service service_;
@@ -66,27 +59,48 @@ public:
      *
      * Create a server and a test plugin.
      */
-    js_test(const std::string& plugin_path = "")
-        : plugin_(new js_plugin("test", plugin_path))
-        , server_(new journal_server(service_, "test"))
-    {
-        irccd_.set_log(std::make_unique<silent_logger>());
-
-        // Irccd is mandatory at the moment.
-        add<irccd_jsapi>();
-        add<Modules...>();
-
-        // Add some CMake variables.
-        duk_push_string(plugin_->context(), CMAKE_BINARY_DIR);
-        duk_put_global_string(plugin_->context(), "CMAKE_BINARY_DIR");
-        duk_push_string(plugin_->context(), CMAKE_SOURCE_DIR);
-        duk_put_global_string(plugin_->context(), "CMAKE_SOURCE_DIR");
-        duk_push_string(plugin_->context(), CMAKE_CURRENT_BINARY_DIR);
-        duk_put_global_string(plugin_->context(), "CMAKE_CURRENT_BINARY_DIR");
-        duk_push_string(plugin_->context(), CMAKE_CURRENT_SOURCE_DIR);
-        duk_put_global_string(plugin_->context(), "CMAKE_CURRENT_SOURCE_DIR");
-    }
+    js_test(const std::string& plugin_path = "");
 };
+
+template <typename... Modules>
+template <typename Module>
+void js_test<Modules...>::add()
+{
+    Module().load(irccd_, plugin_);
+}
+
+template <typename... Modules>
+template <typename M1, typename M2, typename... Tail>
+void js_test<Modules...>::add()
+{
+    add<M1>();
+    add<M2, Tail...>();
+}
+
+template <typename... Modules>
+js_test<Modules...>::js_test(const std::string& plugin_path)
+    : plugin_(new js_plugin(plugin_path))
+    , server_(new journal_server(service_, "test"))
+{
+    irccd_.set_log(std::make_unique<silent_logger>());
+
+    // Irccd is mandatory at the moment.
+    add<irccd_jsapi>();
+    add<Modules...>();
+
+    // Add some CMake variables.
+    duk_push_string(plugin_->get_context(), CMAKE_BINARY_DIR);
+    duk_put_global_string(plugin_->get_context(), "CMAKE_BINARY_DIR");
+    duk_push_string(plugin_->get_context(), CMAKE_SOURCE_DIR);
+    duk_put_global_string(plugin_->get_context(), "CMAKE_SOURCE_DIR");
+    duk_push_string(plugin_->get_context(), CMAKE_CURRENT_BINARY_DIR);
+    duk_put_global_string(plugin_->get_context(), "CMAKE_CURRENT_BINARY_DIR");
+    duk_push_string(plugin_->get_context(), CMAKE_CURRENT_SOURCE_DIR);
+    duk_put_global_string(plugin_->get_context(), "CMAKE_CURRENT_SOURCE_DIR");
+
+    if (!plugin_path.empty())
+        plugin_->open();
+}
 
 } // !irccd
 

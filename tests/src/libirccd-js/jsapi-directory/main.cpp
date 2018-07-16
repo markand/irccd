@@ -35,11 +35,11 @@ BOOST_AUTO_TEST_CASE(constructor)
         "l = d.entries.length;"
     );
 
-    if (duk_peval_string(plugin_->context(), script.c_str()) != 0)
-        throw dukx_stack(plugin_->context(), -1);
+    if (duk_peval_string(plugin_->get_context(), script.c_str()) != 0)
+        throw dukx_stack(plugin_->get_context(), -1);
 
-    duk_get_global_string(plugin_->context(), "l");
-    BOOST_TEST(duk_get_int(plugin_->context(), -1) == 3);
+    duk_get_global_string(plugin_->get_context(), "l");
+    BOOST_TEST(duk_get_int(plugin_->get_context(), -1) == 3);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

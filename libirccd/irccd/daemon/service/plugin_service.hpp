@@ -27,6 +27,7 @@
 #include <cassert>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <irccd/daemon/plugin.hpp>
@@ -41,10 +42,21 @@ class config;
  * \ingroup services
  */
 class plugin_service {
+public:
+    /**
+     * \brief Map of plugins.
+     */
+    using plugins = std::unordered_map<std::string, std::shared_ptr<plugin>>;
+
+    /**
+     * \brief List of loaders.
+     */
+    using plugin_loaders = std::vector<std::unique_ptr<plugin_loader>>;
+
 private:
     irccd& irccd_;
-    std::vector<std::shared_ptr<plugin>> plugins_;
-    std::vector<std::unique_ptr<plugin_loader>> loaders_;
+    plugins plugins_;
+    plugin_loaders loaders_;
 
 public:
     /**
@@ -57,17 +69,14 @@ public:
     /**
      * Destroy plugins.
      */
-    ~plugin_service();
+    virtual ~plugin_service();
 
     /**
      * Get the list of plugins.
      *
      * \return the list of plugins
      */
-    inline const std::vector<std::shared_ptr<plugin>>& list() const noexcept
-    {
-        return plugins_;
-    }
+    auto all() const noexcept -> plugins;
 
     /**
      * Check if a plugin is loaded.
@@ -75,7 +84,7 @@ public:
      * \param name the plugin id
      * \return true if has plugin
      */
-    bool has(const std::string& name) const noexcept;
+    auto has(const std::string& name) const noexcept -> bool;
 
     /**
      * Get a loaded plugin or null if not found.
@@ -83,29 +92,32 @@ public:
      * \param name the plugin id
      * \return the plugin or empty one if not found
      */
-    std::shared_ptr<plugin> get(const std::string& name) const noexcept;
+    auto get(const std::string& name) const noexcept -> std::shared_ptr<plugin>;
 
     /**
      * Find a loaded plugin.
      *
      * \param name the plugin id
      * \return the plugin
-     * \throws std::out_of_range if not found
+     * \throw plugin_error on errors
      */
-    std::shared_ptr<plugin> require(const std::string& name) const;
+    auto require(const std::string& name) const -> std::shared_ptr<plugin>;
 
     /**
      * Add the specified plugin to the registry.
      *
+     * \pre id is valid
      * \pre plugin != nullptr
+     * \param id the unique plugin identifier
      * \param plugin the plugin
      * \note the plugin is only added to the list, no action is performed on it
      */
-    void add(std::shared_ptr<plugin> plugin);
+    void add(std::string id, std::shared_ptr<plugin> plugin);
 
     /**
      * Add a loader.
      *
+     * \pre loader != nullptr
      * \param loader the loader
      */
     void add_loader(std::unique_ptr<plugin_loader> loader);
@@ -115,14 +127,14 @@ public:
      *
      * \return the configuration
      */
-    plugin_config config(const std::string& id);
+    auto get_options(const std::string& id) -> plugin::map;
 
     /**
      * Get the formats for the specified plugin.
      *
      * \return the formats
      */
-    plugin_formats formats(const std::string& id);
+    auto get_formats(const std::string& id) -> plugin::map;
 
     /**
      * Get the paths for the specified plugin.
@@ -131,7 +143,7 @@ public:
      *
      * \return the paths
      */
-    plugin_paths paths(const std::string& id);
+    auto get_paths(const std::string& id) -> plugin::map;
 
     /**
      * Generic function for opening the plugin at the given path.
@@ -143,8 +155,8 @@ public:
      * \param path the path to the file
      * \return the plugin or nullptr on failures
      */
-    std::shared_ptr<plugin> open(const std::string& id,
-                                 const std::string& path);
+    auto open(const std::string& id,
+              const std::string& path) -> std::shared_ptr<plugin>;
 
     /**
      * Generic function for finding a plugin.
@@ -152,18 +164,18 @@ public:
      * \param id the plugin id
      * \return the plugin or nullptr on failures
      */
-    std::shared_ptr<plugin> find(const std::string& id);
+    auto find(const std::string& id) -> std::shared_ptr<plugin>;
 
     /**
-     * Convenient wrapper that loads a plugin, call onLoad and add it to the
-     * registry.
+     * Convenient wrapper that loads a plugin, call handle_load and add it to
+     * the registry.
      *
      * Any errors are printed using logger.
      *
      * \param name the name
      * \param path the optional path (searched if empty)
      */
-    void load(std::string name, std::string path = "");
+    void load(const std::string& name, const std::string& path = "");
 
     /**
      * Unload a plugin and remove it.
@@ -229,7 +241,7 @@ public:
      *
      * \param cfg the config
      */
-    void load(const class config& cfg) noexcept;
+    void load(const config& cfg) noexcept;
 };
 
 } // !irccd

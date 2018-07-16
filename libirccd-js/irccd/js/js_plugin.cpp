@@ -41,41 +41,58 @@
 
 namespace irccd {
 
-const std::string js_plugin::config_property{"\xff""\xff""irccd-plugin-config"};
-const std::string js_plugin::format_property{"\xff""\xff""irccd-plugin-format"};
-const std::string js_plugin::paths_property{"\xff""\xff""irccd-plugin-paths"};
+namespace {
 
-std::unordered_map<std::string, std::string> js_plugin::get_table(const std::string& name) const
+auto get_metadata(dukx_context& ctx, std::string_view name) -> std::string_view
 {
-    dukx_stack_assert sa(context_);
-    std::unordered_map<std::string, std::string> result;
+    std::string_view ret;
 
-    duk_get_global_string(context_, name.c_str());
-    duk_enum(context_, -1, 0);
+    dukx_stack_assert guard(ctx);
+    duk_get_global_string(ctx, "info");
 
-    while (duk_next(context_, -1, true)) {
-        result.emplace(duk_to_string(context_, -2), duk_to_string(context_, -1));
-        duk_pop_n(context_, 2);
+    if (duk_get_type(ctx, -1) == DUK_TYPE_OBJECT) {
+        duk_get_prop_string(ctx, -1, name.data());
+        ret = duk_get_string(ctx, -1);
+        duk_pop(ctx);
     }
 
-    duk_pop_n(context_, 2);
+    duk_pop(ctx);
+
+    return ret;
+}
+
+auto get_table(dukx_context& ctx, std::string_view name) -> plugin::map
+{
+    plugin::map result;
+
+    dukx_stack_assert sa(ctx);
+    duk_get_global_string(ctx, name.data());
+    duk_enum(ctx, -1, 0);
+
+    while (duk_next(ctx, -1, true)) {
+        result.emplace(duk_to_string(ctx, -2), duk_to_string(ctx, -1));
+        duk_pop_n(ctx, 2);
+    }
+
+    duk_pop_n(ctx, 2);
 
     return result;
 }
 
-void js_plugin::put_table(const std::string& name, const std::unordered_map<std::string, std::string>& vars)
+void set_table(dukx_context& ctx, std::string_view name, const plugin::map& vars)
 {
-    dukx_stack_assert sa(context_);
-
-    duk_get_global_string(context_, name.c_str());
+    dukx_stack_assert sa(ctx);
+    duk_get_global_string(ctx, name.data());
 
     for (const auto& pair : vars) {
-        dukx_push(context_, pair.second);
-        duk_put_prop_string(context_, -2, pair.first.c_str());
+        dukx_push(ctx, pair.second);
+        duk_put_prop_string(ctx, -2, pair.first.c_str());
     }
 
-    duk_pop(context_);
+    duk_pop(ctx);
 }
+
+} // !namespace
 
 void js_plugin::push() noexcept
 {
@@ -108,8 +125,8 @@ void js_plugin::call(const std::string& func, Args&&... args)
     duk_pop(context_);
 }
 
-js_plugin::js_plugin(std::string name, std::string path)
-    : plugin(name, path)
+js_plugin::js_plugin(std::string_view path)
+    : path_(path)
 {
     dukx_stack_assert sa(context_);
 
@@ -124,23 +141,81 @@ js_plugin::js_plugin(std::string name, std::string path)
      * In js_plugin_module.cpp.
      */
     duk_push_object(context_);
-    duk_put_global_string(context_, config_property.c_str());
+    duk_put_global_string(context_, config_property.data());
     duk_push_object(context_);
-    duk_put_global_string(context_, format_property.c_str());
+    duk_put_global_string(context_, format_property.data());
     duk_push_object(context_);
-    duk_put_global_string(context_, paths_property.c_str());
+    duk_put_global_string(context_, paths_property.data());
 
     duk_push_pointer(context_, this);
     duk_put_global_string(context_, "\xff""\xff""plugin");
-    dukx_push(context_, name);
-    duk_put_global_string(context_, "\xff""\xff""name");
     dukx_push(context_, path);
     duk_put_global_string(context_, "\xff""\xff""path");
 }
 
+auto js_plugin::get_context() noexcept -> dukx_context&
+{
+    return context_;
+}
+
+auto js_plugin::get_name() const noexcept -> std::string_view
+{
+    return get_metadata(context_, "name");
+}
+
+auto js_plugin::get_author() const noexcept -> std::string_view
+{
+    return get_metadata(context_, "author");
+}
+
+auto js_plugin::get_license() const noexcept -> std::string_view
+{
+    return get_metadata(context_, "license");
+}
+
+auto js_plugin::get_summary() const noexcept -> std::string_view
+{
+    return get_metadata(context_, "summary");
+}
+
+auto js_plugin::get_version() const noexcept -> std::string_view
+{
+    return get_metadata(context_, "version");
+}
+
+auto js_plugin::get_options() const -> map
+{
+    return get_table(context_, config_property);
+}
+
+void js_plugin::set_options(const map& map)
+{
+    set_table(context_, config_property, map);
+}
+
+auto js_plugin::get_formats() const -> map
+{
+    return get_table(context_, format_property);
+}
+
+void js_plugin::set_formats(const map& map)
+{
+    set_table(context_, format_property, map);
+}
+
+auto js_plugin::get_paths() const -> map
+{
+    return get_table(context_, paths_property);
+}
+
+void js_plugin::set_paths(const map& map)
+{
+    set_table(context_, paths_property, map);
+}
+
 void js_plugin::open()
 {
-    std::ifstream input(get_path());
+    std::ifstream input(path_);
 
     if (!input)
         throw plugin_error(plugin_error::exec_error, get_name(), std::strerror(errno));
@@ -152,23 +227,6 @@ void js_plugin::open()
 
     if (duk_peval_string(context_, data.c_str()))
         throw plugin_error(plugin_error::exec_error, get_name(), dukx_stack(context_, -1).stack());
-
-    // Read metadata.
-    duk_get_global_string(context_, "info");
-
-    if (duk_get_type(context_, -1) == DUK_TYPE_OBJECT) {
-        duk_get_prop_string(context_, -1, "author");
-        set_author(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : get_author());
-        duk_get_prop_string(context_, -2, "license");
-        set_license(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : get_license());
-        duk_get_prop_string(context_, -3, "summary");
-        set_summary(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : get_summary());
-        duk_get_prop_string(context_, -4, "version");
-        set_version(duk_is_string(context_, -1) ? duk_get_string(context_, -1) : get_version());
-        duk_pop_n(context_, 4);
-    }
-
-    duk_pop(context_);
 }
 
 void js_plugin::handle_command(irccd&, const message_event& event)
@@ -262,7 +320,7 @@ void js_plugin::handle_whois(irccd&, const whois_event& event)
     call("onWhois", event.server, event.whois);
 }
 
-std::unique_ptr<js_plugin_loader> js_plugin_loader::defaults(irccd& irccd)
+auto js_plugin_loader::defaults(irccd& irccd) -> std::unique_ptr<js_plugin_loader>
 {
     auto self = std::make_unique<js_plugin_loader>(irccd);
 
@@ -289,13 +347,22 @@ js_plugin_loader::js_plugin_loader(irccd& irccd) noexcept
 
 js_plugin_loader::~js_plugin_loader() noexcept = default;
 
-std::shared_ptr<plugin> js_plugin_loader::open(const std::string& id,
-                                               const std::string& path)
+auto js_plugin_loader::get_modules() const noexcept -> const modules_t&
+{
+    return modules_;
+}
+
+auto js_plugin_loader::get_modules() noexcept -> modules_t&
+{
+    return modules_;
+}
+
+auto js_plugin_loader::open(std::string_view, std::string_view path) -> std::shared_ptr<plugin>
 {
     if (path.rfind(".js") == std::string::npos)
         return nullptr;
 
-    auto plugin = std::make_shared<js_plugin>(id, path);
+    auto plugin = std::make_shared<js_plugin>(path);
 
     for (const auto& mod : modules_)
         mod->load(irccd_, plugin);

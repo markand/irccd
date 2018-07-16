@@ -119,11 +119,11 @@ public:
      * \param event the event name (e.g onKick)
      * \return true if the plugin must be called
      */
-    bool solve(const std::string& server,
-               const std::string& channel,
-               const std::string& origin,
-               const std::string& plugin,
-               const std::string& event) noexcept;
+    bool solve(std::string_view server,
+               std::string_view channel,
+               std::string_view origin,
+               std::string_view plugin,
+               std::string_view event) noexcept;
 
     /**
      * Load rules from the configuration.

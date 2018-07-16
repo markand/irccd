@@ -18,6 +18,7 @@
 
 // Plugin information.
 info = {
+    auth: "auth",
     author: "David Demelier <markand@malikania.fr>",
     license: "ISC",
     summary: "Generic plugin to authenticate to services",

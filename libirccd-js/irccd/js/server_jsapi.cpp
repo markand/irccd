@@ -822,32 +822,32 @@ std::string server_jsapi::get_name() const
 
 void server_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
-    dukx_stack_assert sa(plugin->context());
+    dukx_stack_assert sa(plugin->get_context());
 
-    duk_get_global_string(plugin->context(), "Irccd");
+    duk_get_global_string(plugin->get_context(), "Irccd");
 
     // ServerError function.
-    duk_push_c_function(plugin->context(), ServerError_constructor, 2);
-    duk_push_object(plugin->context());
-    duk_get_global_string(plugin->context(), "Error");
-    duk_get_prop_string(plugin->context(), -1, "prototype");
-    duk_remove(plugin->context(), -2);
-    duk_set_prototype(plugin->context(), -2);
-    duk_put_prop_string(plugin->context(), -2, "prototype");
-    duk_put_prop_string(plugin->context(), -2, "ServerError");
+    duk_push_c_function(plugin->get_context(), ServerError_constructor, 2);
+    duk_push_object(plugin->get_context());
+    duk_get_global_string(plugin->get_context(), "Error");
+    duk_get_prop_string(plugin->get_context(), -1, "prototype");
+    duk_remove(plugin->get_context(), -2);
+    duk_set_prototype(plugin->get_context(), -2);
+    duk_put_prop_string(plugin->get_context(), -2, "prototype");
+    duk_put_prop_string(plugin->get_context(), -2, "ServerError");
 
     // Server constructor.
-    duk_push_c_function(plugin->context(), Server_constructor, 1);
-    duk_put_function_list(plugin->context(), -1, functions);
-    duk_push_object(plugin->context());
-    duk_put_function_list(plugin->context(), -1, methods);
-    duk_push_c_function(plugin->context(), Server_destructor, 1);
-    duk_set_finalizer(plugin->context(), -2);
-    duk_dup_top(plugin->context());
-    duk_put_global_string(plugin->context(), prototype);
-    duk_put_prop_string(plugin->context(), -2, "prototype");
-    duk_put_prop_string(plugin->context(), -2, "Server");
-    duk_pop(plugin->context());
+    duk_push_c_function(plugin->get_context(), Server_constructor, 1);
+    duk_put_function_list(plugin->get_context(), -1, functions);
+    duk_push_object(plugin->get_context());
+    duk_put_function_list(plugin->get_context(), -1, methods);
+    duk_push_c_function(plugin->get_context(), Server_destructor, 1);
+    duk_set_finalizer(plugin->get_context(), -2);
+    duk_dup_top(plugin->get_context());
+    duk_put_global_string(plugin->get_context(), prototype);
+    duk_put_prop_string(plugin->get_context(), -2, "prototype");
+    duk_put_prop_string(plugin->get_context(), -2, "Server");
+    duk_pop(plugin->get_context());
 }
 
 using server_traits = dukx_type_traits<std::shared_ptr<server>>;

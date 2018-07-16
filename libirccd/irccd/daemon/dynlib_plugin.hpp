@@ -43,8 +43,7 @@ public:
     /**
      * \copydoc plugin_loader::open
      */
-    auto open(const std::string& id,
-              const std::string& file) -> std::shared_ptr<plugin> override;
+    auto open(std::string_view id, std::string_view file) -> std::shared_ptr<plugin> override;
 };
 
 } // !irccd

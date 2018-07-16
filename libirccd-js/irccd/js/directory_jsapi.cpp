@@ -351,26 +351,26 @@ std::string directory_jsapi::get_name() const
 
 void directory_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
-    dukx_stack_assert sa(plugin->context());
+    dukx_stack_assert sa(plugin->get_context());
 
-    duk_get_global_string(plugin->context(), "Irccd");
-    duk_push_c_function(plugin->context(), Directory_constructor, 2);
-    duk_put_number_list(plugin->context(), -1, constants);
-    duk_put_function_list(plugin->context(), -1, functions);
+    duk_get_global_string(plugin->get_context(), "Irccd");
+    duk_push_c_function(plugin->get_context(), Directory_constructor, 2);
+    duk_put_number_list(plugin->get_context(), -1, constants);
+    duk_put_function_list(plugin->get_context(), -1, functions);
 
 #if BOOST_OS_WINDOWS
-    duk_push_string(plugin->context(), "\\");
+    duk_push_string(plugin->get_context(), "\\");
 #else
-    duk_push_string(plugin->context(), "/");
+    duk_push_string(plugin->get_context(), "/");
 #endif
 
-    duk_put_prop_string(plugin->context(), -2, "separator");
+    duk_put_prop_string(plugin->get_context(), -2, "separator");
 
-    duk_push_object(plugin->context());
-    duk_put_function_list(plugin->context(), -1, methods);
-    duk_put_prop_string(plugin->context(), -2, "prototype");
-    duk_put_prop_string(plugin->context(), -2, "Directory");
-    duk_pop(plugin->context());
+    duk_push_object(plugin->get_context());
+    duk_put_function_list(plugin->get_context(), -1, methods);
+    duk_put_prop_string(plugin->get_context(), -2, "prototype");
+    duk_put_prop_string(plugin->get_context(), -2, "Directory");
+    duk_pop(plugin->get_context());
 }
 
 } // !irccd

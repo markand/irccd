@@ -24,20 +24,26 @@
 
 #include "plugin.hpp"
 
-namespace fs = boost::filesystem;
-
 namespace irccd {
 
-std::shared_ptr<plugin> plugin_loader::find(const std::string& name)
+plugin_loader::plugin_loader(std::vector<std::string> directories,
+              std::vector<std::string> extensions) noexcept
+    : directories_(std::move(directories))
+    , extensions_(std::move(extensions))
+{
+    assert(!extensions_.empty());
+}
+
+auto plugin_loader::find(std::string_view name) -> std::shared_ptr<plugin>
 {
     std::vector<std::string> filenames;
 
     if (directories_.empty())
-        filenames = sys::plugin_filenames(name, extensions_);
+        filenames = sys::plugin_filenames(std::string(name), extensions_);
     else {
         for (const auto& dir : directories_)
             for (const auto& ext : extensions_)
-                filenames.push_back(dir + "/" + name + ext);
+                filenames.push_back(dir + std::string("/") + std::string(name) + ext);
     }
 
     for (const auto& candidate : filenames) {
@@ -55,7 +61,7 @@ std::shared_ptr<plugin> plugin_loader::find(const std::string& name)
     return nullptr;
 }
 
-plugin_error::plugin_error(error errc, std::string name, std::string message) noexcept
+plugin_error::plugin_error(error errc, std::string_view name, std::string_view message)
     : system_error(make_error_code(errc))
     , name_(std::move(name))
     , message_(std::move(message))
@@ -73,16 +79,31 @@ plugin_error::plugin_error(error errc, std::string name, std::string message) no
     what_ = oss.str();
 }
 
-const std::error_category& plugin_category()
+auto plugin_error::get_name() const noexcept -> const std::string&
+{
+    return name_;
+}
+
+auto plugin_error::get_message() const noexcept -> const std::string&
+{
+    return message_;
+}
+
+auto plugin_error::what() const noexcept -> const char*
+{
+    return what_.c_str();
+}
+
+auto plugin_category() -> const std::error_category&
 {
     static const class category : public std::error_category {
     public:
-        const char* name() const noexcept override
+        auto name() const noexcept -> const char* override
         {
             return "plugin";
         }
 
-        std::string message(int e) const override
+        auto message(int e) const -> std::string override
         {
             switch (static_cast<plugin_error::error>(e)) {
             case plugin_error::not_found:
@@ -102,7 +123,7 @@ const std::error_category& plugin_category()
     return category;
 }
 
-std::error_code make_error_code(plugin_error::error e)
+auto make_error_code(plugin_error::error e) -> std::error_code
 {
     return {static_cast<int>(e), plugin_category()};
 }

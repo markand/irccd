@@ -318,13 +318,13 @@ std::string system_jsapi::get_name() const
 
 void system_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
-    dukx_stack_assert sa(plugin->context());
+    dukx_stack_assert sa(plugin->get_context());
 
-    duk_get_global_string(plugin->context(), "Irccd");
-    duk_push_object(plugin->context());
-    duk_put_function_list(plugin->context(), -1, functions);
-    duk_put_prop_string(plugin->context(), -2, "System");
-    duk_pop(plugin->context());
+    duk_get_global_string(plugin->get_context(), "Irccd");
+    duk_push_object(plugin->get_context());
+    duk_put_function_list(plugin->get_context(), -1, functions);
+    duk_put_prop_string(plugin->get_context(), -2, "System");
+    duk_pop(plugin->get_context());
 }
 
 } // !irccd

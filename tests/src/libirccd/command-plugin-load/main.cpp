@@ -28,39 +28,64 @@ namespace irccd {
 
 namespace {
 
-class custom_loader : public plugin_loader {
+class broken : public plugin {
 public:
-    custom_loader()
-        : plugin_loader({}, {".none"})
+    auto get_name() const noexcept -> std::string_view override
+    {
+        return "broken";
+    }
+
+    void handle_load(irccd&) override
+    {
+        throw std::runtime_error("broken");
+    }
+};
+
+class broken_loader : public plugin_loader {
+public:
+    broken_loader()
+        : plugin_loader({}, { ".none" })
     {
     }
 
-    std::shared_ptr<plugin> open(const std::string&,
-                                 const std::string&) noexcept override
+    auto open(std::string_view, std::string_view) -> std::shared_ptr<plugin> override
     {
         return nullptr;
     }
 
-    std::shared_ptr<plugin> find(const std::string& id) noexcept override
+    auto find(std::string_view id) noexcept -> std::shared_ptr<plugin> override
     {
-        class broken : public plugin {
-        public:
-            using plugin::plugin;
-
-            void handle_load(irccd&) override
-            {
-                throw std::runtime_error("broken");
-            }
-        };
-
-        /*
-         * The 'magic' plugin will be created for the unit tests, all other
-         * plugins will return null.
-         */
-        if (id == "magic")
-            return std::make_unique<plugin>(id, "");
         if (id == "broken")
-            return std::make_unique<broken>(id, "");
+            return std::make_unique<broken>();
+
+        return nullptr;
+    }
+};
+
+class sample : public plugin {
+public:
+    auto get_name() const noexcept -> std::string_view override
+    {
+        return "test";
+    }
+};
+
+class sample_loader : public plugin_loader {
+public:
+    sample_loader()
+        : plugin_loader({}, {".none"})
+    {
+    }
+
+    auto open(std::string_view, std::string_view) -> std::shared_ptr<plugin> override
+    {
+        return nullptr;
+    }
+
+    auto find(std::string_view id) noexcept -> std::shared_ptr<plugin> override
+    {
+        if (id == "test")
+            return std::make_unique<sample>();
 
         return nullptr;
     }
@@ -70,8 +95,9 @@ class plugin_load_test : public command_test<plugin_load_command> {
 public:
     plugin_load_test()
     {
-        daemon_->plugins().add_loader(std::make_unique<custom_loader>());
-        daemon_->plugins().add(std::make_unique<plugin>("already", ""));
+        daemon_->plugins().add_loader(std::make_unique<sample_loader>());
+        daemon_->plugins().add_loader(std::make_unique<broken_loader>());
+        daemon_->plugins().add("already", std::make_unique<sample>());
     }
 };
 
@@ -83,15 +109,15 @@ BOOST_AUTO_TEST_CASE(basic)
 {
     ctl_->write({
         { "command",    "plugin-load"   },
-        { "plugin",     "magic"         }
+        { "plugin",     "test"          }
     });
 
     wait_for([&] () {
-        return daemon_->plugins().has("magic");
+        return daemon_->plugins().has("test");
     });
 
-    BOOST_TEST(!daemon_->plugins().list().empty());
-    BOOST_TEST(daemon_->plugins().has("magic"));
+    BOOST_TEST(!daemon_->plugins().all().empty());
+    BOOST_TEST(daemon_->plugins().has("test"));
 }
 
 BOOST_AUTO_TEST_SUITE(errors)

@@ -18,6 +18,7 @@
 
 // Plugin information.
 info = {
+    name: "plugin",
     author: "David Demelier <markand@malikania.fr>",
     license: "ISC",
     summary: "A plugin to inspect plugins",

@@ -35,9 +35,9 @@ protected:
     irccd irccd_{service_};
     std::shared_ptr<js_plugin> plugin_;
 
-    void load(std::string name, std::string path)
+    void load(std::string path)
     {
-        plugin_ = std::make_unique<js_plugin>(std::move(name), std::move(path));
+        plugin_ = std::make_unique<js_plugin>(std::move(path));
 
         irccd_jsapi().load(irccd_, plugin_);
         plugin_jsapi().load(irccd_, plugin_);
@@ -50,47 +50,47 @@ BOOST_FIXTURE_TEST_SUITE(js_plugin_test_suite, js_plugin_test)
 
 BOOST_AUTO_TEST_CASE(assign)
 {
-    load("test", CMAKE_CURRENT_SOURCE_DIR "/config-assign.js");
+    load(CMAKE_CURRENT_SOURCE_DIR "/config-assign.js");
 
-    plugin_->set_config({
+    plugin_->set_options({
         { "path",       "none"  },
         { "verbose",    "false" }
     });
     plugin_->handle_load(irccd_);
 
-    BOOST_TEST(plugin_->get_config().at("path") == "none");
-    BOOST_TEST(plugin_->get_config().at("verbose") == "false");
-    BOOST_TEST(plugin_->get_config().at("hard") == "true");
+    BOOST_TEST(plugin_->get_options().at("path") == "none");
+    BOOST_TEST(plugin_->get_options().at("verbose") == "false");
+    BOOST_TEST(plugin_->get_options().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_CASE(fill)
 {
-    load("test", CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
+    load(CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
 
-    plugin_->set_config({
+    plugin_->set_options({
         { "path",       "none"  },
         { "verbose",    "false" }
     });
     plugin_->handle_load(irccd_);
 
-    BOOST_TEST(plugin_->get_config().at("path") == "none");
-    BOOST_TEST(plugin_->get_config().at("verbose") == "false");
-    BOOST_TEST(plugin_->get_config().at("hard") == "true");
+    BOOST_TEST(plugin_->get_options().at("path") == "none");
+    BOOST_TEST(plugin_->get_options().at("verbose") == "false");
+    BOOST_TEST(plugin_->get_options().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_CASE(merge_after)
 {
-    load("test", CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
+    load(CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
 
     plugin_->handle_load(irccd_);
-    plugin_->set_config({
+    plugin_->set_options({
         { "path",       "none"  },
         { "verbose",    "false" }
     });
 
-    BOOST_TEST(plugin_->get_config().at("path") == "none");
-    BOOST_TEST(plugin_->get_config().at("verbose") == "false");
-    BOOST_TEST(plugin_->get_config().at("hard") == "true");
+    BOOST_TEST(plugin_->get_options().at("path") == "none");
+    BOOST_TEST(plugin_->get_options().at("verbose") == "false");
+    BOOST_TEST(plugin_->get_options().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -126,27 +126,27 @@ BOOST_AUTO_TEST_CASE(assign)
 {
     load("test", CMAKE_CURRENT_SOURCE_DIR "/config-assign.js");
 
-    BOOST_TEST(plugin_->get_config().at("path") == "none");
-    BOOST_TEST(plugin_->get_config().at("verbose") == "false");
-    BOOST_TEST(plugin_->get_config().at("hard") == "true");
+    BOOST_TEST(plugin_->get_options().at("path") == "none");
+    BOOST_TEST(plugin_->get_options().at("verbose") == "false");
+    BOOST_TEST(plugin_->get_options().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_CASE(fill)
 {
     load("test", CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
 
-    BOOST_TEST(plugin_->get_config().at("path") == "none");
-    BOOST_TEST(plugin_->get_config().at("verbose") == "false");
-    BOOST_TEST(plugin_->get_config().at("hard") == "true");
+    BOOST_TEST(plugin_->get_options().at("path") == "none");
+    BOOST_TEST(plugin_->get_options().at("verbose") == "false");
+    BOOST_TEST(plugin_->get_options().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_CASE(merge_after)
 {
     load("test", CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
 
-    BOOST_TEST(plugin_->get_config().at("path") == "none");
-    BOOST_TEST(plugin_->get_config().at("verbose") == "false");
-    BOOST_TEST(plugin_->get_config().at("hard") == "true");
+    BOOST_TEST(plugin_->get_options().at("path") == "none");
+    BOOST_TEST(plugin_->get_options().at("verbose") == "false");
+    BOOST_TEST(plugin_->get_options().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

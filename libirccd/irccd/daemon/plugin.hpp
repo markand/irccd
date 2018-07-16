@@ -31,9 +31,9 @@
 
 #include <irccd/sysconfig.hpp>
 
-#include <cassert>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <system_error>
 #include <unordered_map>
 #include <vector>
@@ -58,51 +58,19 @@ class topic_event;
 class whois_event;
 
 /**
- * \brief Configuration map extract from config file.
- */
-using plugin_config = std::unordered_map<std::string, std::string>;
-
-/**
- * \brief Formats for plugins.
- */
-using plugin_formats = std::unordered_map<std::string, std::string>;
-
-/**
- * \brief Paths for plugins.
- */
-using plugin_paths = std::unordered_map<std::string, std::string>;
-
-/**
  * \ingroup plugins
  * \brief Abstract plugin.
  *
  * A plugin is identified by name and can be loaded and unloaded at runtime.
  */
 class plugin : public std::enable_shared_from_this<plugin> {
-private:
-    // Plugin information
-    std::string name_;
-    std::string path_;
-
-    // Metadata
-    std::string author_{"unknown"};
-    std::string license_{"unknown"};
-    std::string summary_{"unknown"};
-    std::string version_{"unknown"};
-
 public:
     /**
-     * Constructor.
+     * Map for key/value pairs.
      *
-     * \param name the plugin id
-     * \param path the fully resolved path to the plugin
-     * \throws std::runtime_error on errors
+     * Used in options, formats and paths.
      */
-    inline plugin(std::string name, std::string path) noexcept
-        : name_(std::move(name))
-        , path_(std::move(path))
-    {
-    }
+    using map = std::unordered_map<std::string, std::string>;
 
     /**
      * Temporary, close all timers.
@@ -114,40 +82,16 @@ public:
      *
      * \return the plugin name
      */
-    inline const std::string& get_name() const noexcept
-    {
-        return name_;
-    }
-
-    /**
-     * Get the plugin path.
-     *
-     * \return the plugin path
-     * \note some plugins may not exist on the disk
-     */
-    inline const std::string& get_path() const noexcept
-    {
-        return path_;
-    }
+    virtual auto get_name() const noexcept -> std::string_view = 0;
 
     /**
      * Get the author.
      *
      * \return the author
      */
-    inline const std::string& get_author() const noexcept
+    virtual auto get_author() const noexcept -> std::string_view
     {
-        return author_;
-    }
-
-    /**
-     * Set the author.
-     *
-     * \param author the author
-     */
-    inline void set_author(std::string author) noexcept
-    {
-        author_ = std::move(author);
+        return "unknown";
     }
 
     /**
@@ -155,19 +99,9 @@ public:
      *
      * \return the license
      */
-    inline const std::string& get_license() const noexcept
+    virtual auto get_license() const noexcept -> std::string_view
     {
-        return license_;
-    }
-
-    /**
-     * Set the license.
-     *
-     * \param license the license
-     */
-    inline void set_license(std::string license) noexcept
-    {
-        license_ = std::move(license);
+        return "unknown";
     }
 
     /**
@@ -175,19 +109,9 @@ public:
      *
      * \return the summary
      */
-    inline const std::string& get_summary() const noexcept
+    virtual auto get_summary() const noexcept -> std::string_view
     {
-        return summary_;
-    }
-
-    /**
-     * Set the summary.
-     *
-     * \param summary the summary
-     */
-    inline void set_summary(std::string summary) noexcept
-    {
-        summary_ = std::move(summary);
+        return "unknown";
     }
 
     /**
@@ -195,79 +119,69 @@ public:
      *
      * \return the version
      */
-    inline const std::string& get_version() const noexcept
+    virtual auto get_version() const noexcept -> std::string_view
     {
-        return version_;
+        return "unknown";
     }
 
     /**
-     * Set the version.
+     * Get all options.
      *
-     * \param version the version
+     * \return options
      */
-    inline void set_version(std::string version) noexcept
-    {
-        version_ = std::move(version);
-    }
-
-    /**
-     * Access the plugin configuration.
-     *
-     * \return the config
-     */
-    virtual plugin_config get_config()
+    virtual auto get_options() const -> map
     {
         return {};
     }
 
     /**
-     * Set the configuration.
+     * Set all options.
      *
-     * \param config the configuration
+     * \param map the options
      */
-    virtual void set_config(plugin_config config)
+    virtual void set_options(const map& map)
     {
-        (void)config;
+        (void)map;
     }
 
     /**
-     * Access the plugin formats.
+     * Get all formats.
      *
-     * \return the format
+     * \return formats
      */
-    virtual plugin_formats get_formats()
+    virtual auto get_formats() const -> map
     {
         return {};
     }
 
     /**
-     * Set the formats.
+     * Set all formats.
      *
-     * \param formats the formats
+     * \param map the formats
      */
-    virtual void set_formats(plugin_formats formats)
+    virtual void set_formats(const map& map)
     {
-        (void)formats;
+        (void)map;
     }
 
     /**
-     * Access the plugin paths.
+     * Get all paths.
      *
-     * \return the paths
+     * \return paths
      */
-    virtual plugin_paths get_paths()
+    virtual auto get_paths() const -> map
     {
         return {};
     }
 
     /**
-     * Set the paths.
+     * Set all paths.
      *
-     * \param paths the paths
+     * \param map the paths
      */
-    virtual void set_paths(plugin_paths paths)
+    virtual void set_paths(const map& map)
     {
-        (void)paths;
+        (void)map;
     }
 
     /**
@@ -511,41 +425,8 @@ public:
      * \param directories optional list of directories to search
      * \param extensions the non empty list of extensions supported
      */
-    inline plugin_loader(std::vector<std::string> directories,
-                  std::vector<std::string> extensions) noexcept
-        : directories_(std::move(directories))
-        , extensions_(std::move(extensions))
-    {
-        assert(!extensions_.empty());
-    }
-
-    /**
-     * Virtual destructor defaulted.
-     */
-    virtual ~plugin_loader() = default;
-
-    /**
-     * Set directories where to search plugins.
-     *
-     * \param directories the directories
-     */
-    inline void set_directories(std::vector<std::string> directories)
-    {
-        directories_ = std::move(directories);
-    }
-
-    /**
-     * Set supported extensions for this loader.
-     *
-     * \pre !extensions.empty()
-     * \param extensions the extensions (with the dot)
-     */
-    inline void set_extensions(std::vector<std::string> extensions)
-    {
-        assert(!extensions.empty());
-
-        extensions_ = std::move(extensions);
-    }
+    plugin_loader(std::vector<std::string> directories,
+                  std::vector<std::string> extensions) noexcept;
 
     /**
      * Try to open the plugin specified by path.
@@ -555,17 +436,18 @@ public:
      *
      * \param id the plugin identifier
      * \param file the file path
+     * \throw plugin_error on errors
      */
-    virtual std::shared_ptr<plugin> open(const std::string& id,
-                                         const std::string& file) = 0;
+    virtual auto open(std::string_view id, std::string_view file) -> std::shared_ptr<plugin> = 0;
 
     /**
      * Search for a plugin named by this id.
      *
      * \param id the plugin id
      * \return the plugin
+     * \throw plugin_error on errors
      */
-    virtual std::shared_ptr<plugin> find(const std::string& id);
+    virtual auto find(std::string_view id) -> std::shared_ptr<plugin>;
 };
 
 /**
@@ -606,35 +488,26 @@ public:
      * \param name the plugin name
      * \param message the optional message (e.g. error from plugin)
      */
-    plugin_error(error code, std::string name = "", std::string message = "") noexcept;
+    plugin_error(error code, std::string_view name = "", std::string_view message = "");
 
     /**
      * Get the plugin name.
      *
      * \return the name
      */
-    inline const std::string& name() const noexcept
-    {
-        return name_;
-    }
+    auto get_name() const noexcept -> const std::string&;
 
     /**
      * Get the additional message.
      *
      * \return the message
      */
-    inline const std::string& message() const noexcept
-    {
-        return message_;
-    }
+    auto get_message() const noexcept -> const std::string&;
 
     /**
      * Get message appropriate for use with logger.
      */
-    const char* what() const noexcept override
-    {
-        return what_.c_str();
-    }
+    auto what() const noexcept -> const char* override;
 };
 
 /**
@@ -642,14 +515,14 @@ public:
  *
  * \return the singleton
  */
-const std::error_category& plugin_category();
+auto plugin_category() -> const std::error_category&;
 
 /**
  * Create a boost::system::error_code from plugin_error::error enum.
  *
  * \param e the error code
  */
-std::error_code make_error_code(plugin_error::error e);
+auto make_error_code(plugin_error::error e) -> std::error_code ;
 
 } // !irccd
 

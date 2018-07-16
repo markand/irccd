@@ -80,7 +80,7 @@ void timer::handle()
     if (!plugin)
         return;
 
-    auto& ctx = plugin->context();
+    auto& ctx = plugin->get_context();
 
     duk_get_global_string(ctx, table);
     duk_get_prop_string(ctx, -1, key().c_str());
@@ -285,18 +285,18 @@ std::string timer_jsapi::get_name() const
 
 void timer_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
-    dukx_stack_assert sa(plugin->context());
+    dukx_stack_assert sa(plugin->get_context());
 
-    duk_get_global_string(plugin->context(), "Irccd");
-    duk_push_c_function(plugin->context(), Timer_constructor, 3);
-    duk_put_number_list(plugin->context(), -1, constants);
-    duk_push_object(plugin->context());
-    duk_put_function_list(plugin->context(), -1, methods);
-    duk_put_prop_string(plugin->context(), -2, "prototype");
-    duk_put_prop_string(plugin->context(), -2, "Timer");
-    duk_pop(plugin->context());
-    duk_push_object(plugin->context());
-    duk_put_global_string(plugin->context(), table);
+    duk_get_global_string(plugin->get_context(), "Irccd");
+    duk_push_c_function(plugin->get_context(), Timer_constructor, 3);
+    duk_put_number_list(plugin->get_context(), -1, constants);
+    duk_push_object(plugin->get_context());
+    duk_put_function_list(plugin->get_context(), -1, methods);
+    duk_put_prop_string(plugin->get_context(), -2, "prototype");
+    duk_put_prop_string(plugin->get_context(), -2, "Timer");
+    duk_pop(plugin->get_context());
+    duk_push_object(plugin->get_context());
+    duk_put_global_string(plugin->get_context(), table);
 }
 
 } // !irccd

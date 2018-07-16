@@ -80,13 +80,13 @@ duk_idx_t wrap(duk_context* ctx, Handler handler)
  *      path: "/var"
  * };
  */
-duk_ret_t set(duk_context* ctx, const std::string& name)
+duk_ret_t set(duk_context* ctx, std::string_view name)
 {
     if (!duk_is_object(ctx, 0))
-        duk_error(ctx, DUK_ERR_TYPE_ERROR, "'%s' property must be object", name.c_str());
+        duk_error(ctx, DUK_ERR_TYPE_ERROR, "'%s' property must be object", name.data());
 
     // Merge old table with new one.
-    duk_get_global_string(ctx, name.c_str());
+    duk_get_global_string(ctx, name.data());
     duk_enum(ctx, -1, 0);
 
     while (duk_next(ctx, -1, true))
@@ -96,7 +96,7 @@ duk_ret_t set(duk_context* ctx, const std::string& name)
     duk_pop_2(ctx);
 
     // Replace the old table with the new assigned one.
-    duk_put_global_string(ctx, name.c_str());
+    duk_put_global_string(ctx, name.data());
 
     return 0;
 }
@@ -107,9 +107,9 @@ duk_ret_t set(duk_context* ctx, const std::string& name)
  *
  * Get the Irccd.Plugin.(config|format|paths) property.
  */
-duk_ret_t get(duk_context* ctx, const std::string& name)
+duk_ret_t get(duk_context* ctx, std::string_view name)
 {
-    duk_get_global_string(ctx, name.c_str());
+    duk_get_global_string(ctx, name.data());
 
     return 1;
 }
@@ -252,8 +252,8 @@ duk_idx_t Plugin_list(duk_context* ctx)
 
     duk_push_array(ctx);
 
-    for (const auto& p : dukx_type_traits<irccd>::self(ctx).plugins().list()) {
-        dukx_push(ctx, p->get_name());
+    for (const auto& [k, _] : dukx_type_traits<irccd>::self(ctx).plugins().all()) {
+        dukx_push(ctx, k);
         duk_put_prop_index(ctx, -2, i++);
     }
 
@@ -384,11 +384,11 @@ std::string plugin_jsapi::get_name() const
 
 void plugin_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
-    dukx_stack_assert sa(plugin->context());
+    dukx_stack_assert sa(plugin->get_context());
 
-    duk_push_pointer(plugin->context(), new std::weak_ptr<js_plugin>(plugin));
-    duk_push_object(plugin->context());
-    duk_push_c_function(plugin->context(), [] (auto ctx) -> duk_ret_t {
+    duk_push_pointer(plugin->get_context(), new std::weak_ptr<js_plugin>(plugin));
+    duk_push_object(plugin->get_context());
+    duk_push_c_function(plugin->get_context(), [] (auto ctx) -> duk_ret_t {
         duk_get_global_string(ctx, plugin_ref);
         delete static_cast<std::shared_ptr<js_plugin>*>(duk_to_pointer(ctx, -1));
         duk_pop(ctx);
@@ -396,43 +396,43 @@ void plugin_jsapi::load(irccd&, std::shared_ptr<js_plugin> plugin)
         duk_put_global_string(ctx, plugin_ref);
         return 0;
     }, 1);
-    duk_set_finalizer(plugin->context(), -2);
-    duk_put_global_string(plugin->context(), "\xff""\xff""dummy-shared-ptr");
-    duk_put_global_string(plugin->context(), plugin_ref);
-    duk_get_global_string(plugin->context(), "Irccd");
-    duk_push_object(plugin->context());
-    duk_put_function_list(plugin->context(), -1, functions);
+    duk_set_finalizer(plugin->get_context(), -2);
+    duk_put_global_string(plugin->get_context(), "\xff""\xff""dummy-shared-ptr");
+    duk_put_global_string(plugin->get_context(), plugin_ref);
+    duk_get_global_string(plugin->get_context(), "Irccd");
+    duk_push_object(plugin->get_context());
+    duk_put_function_list(plugin->get_context(), -1, functions);
 
     // 'config' property.
-    duk_push_string(plugin->context(), "config");
-    duk_push_c_function(plugin->context(), get_config, 0);
-    duk_push_c_function(plugin->context(), set_config, 1);
-    duk_def_prop(plugin->context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
+    duk_push_string(plugin->get_context(), "config");
+    duk_push_c_function(plugin->get_context(), get_config, 0);
+    duk_push_c_function(plugin->get_context(), set_config, 1);
+    duk_def_prop(plugin->get_context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
 
     // 'format' property.
-    duk_push_string(plugin->context(), "format");
-    duk_push_c_function(plugin->context(), get_format, 0);
-    duk_push_c_function(plugin->context(), set_format, 1);
-    duk_def_prop(plugin->context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
+    duk_push_string(plugin->get_context(), "format");
+    duk_push_c_function(plugin->get_context(), get_format, 0);
+    duk_push_c_function(plugin->get_context(), set_format, 1);
+    duk_def_prop(plugin->get_context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
 
     // 'format' property.
-    duk_push_string(plugin->context(), "paths");
-    duk_push_c_function(plugin->context(), get_paths, 0);
-    duk_push_c_function(plugin->context(), set_paths, 1);
-    duk_def_prop(plugin->context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
+    duk_push_string(plugin->get_context(), "paths");
+    duk_push_c_function(plugin->get_context(), get_paths, 0);
+    duk_push_c_function(plugin->get_context(), set_paths, 1);
+    duk_def_prop(plugin->get_context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
 
     // PluginError function.
-    duk_push_c_function(plugin->context(), PluginError_constructor, 2);
-    duk_push_object(plugin->context());
-    duk_get_global_string(plugin->context(), "Error");
-    duk_get_prop_string(plugin->context(), -1, "prototype");
-    duk_remove(plugin->context(), -2);
-    duk_set_prototype(plugin->context(), -2);
-    duk_put_prop_string(plugin->context(), -2, "prototype");
-    duk_put_prop_string(plugin->context(), -2, "PluginError");
+    duk_push_c_function(plugin->get_context(), PluginError_constructor, 2);
+    duk_push_object(plugin->get_context());
+    duk_get_global_string(plugin->get_context(), "Error");
+    duk_get_prop_string(plugin->get_context(), -1, "prototype");
+    duk_remove(plugin->get_context(), -2);
+    duk_set_prototype(plugin->get_context(), -2);
+    duk_put_prop_string(plugin->get_context(), -2, "prototype");
+    duk_put_prop_string(plugin->get_context(), -2, "PluginError");
 
-    duk_put_prop_string(plugin->context(), -2, "Plugin");
-    duk_pop(plugin->context());
+    duk_put_prop_string(plugin->get_context(), -2, "Plugin");
+    duk_pop(plugin->get_context());
 }
 
 using plugin_traits = dukx_type_traits<js_plugin>;

@@ -40,7 +40,7 @@ protected:
 
 public:
     logger_test()
-        : plugin_test(PLUGIN_NAME, PLUGIN_PATH)
+        : plugin_test(PLUGIN_PATH)
     {
         remove(CMAKE_CURRENT_BINARY_DIR "/log.txt");
 
@@ -57,12 +57,12 @@ public:
         });
     }
 
-    void load(plugin_config config = plugin_config())
+    void load(plugin::map config = {})
     {
         if (config.count("path") == 0)
             config.emplace("path", CMAKE_CURRENT_BINARY_DIR "/log.txt");
 
-        plugin_->set_config(config);
+        plugin_->set_options(config);
         plugin_->handle_load(irccd_);
     }
 };

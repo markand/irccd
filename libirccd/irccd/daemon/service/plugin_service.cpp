@@ -29,10 +29,9 @@ namespace irccd {
 
 namespace {
 
-template <typename Map>
-Map to_map(const config& conf, const std::string& section)
+auto to_map(const config& conf, const std::string& section) -> plugin::map
 {
-    Map ret;
+    plugin::map ret;
 
     for (const auto& opt : conf.get(section))
         ret.emplace(opt.key(), opt.value());
@@ -49,7 +48,7 @@ plugin_service::plugin_service(irccd& irccd) noexcept
 
 plugin_service::~plugin_service()
 {
-    for (const auto& plugin : plugins_) {
+    for (const auto& [_, plugin] : plugins_) {
         try {
             plugin->handle_unload(irccd_);
         } catch (const std::exception& ex) {
@@ -58,26 +57,25 @@ plugin_service::~plugin_service()
     }
 }
 
-bool plugin_service::has(const std::string& name) const noexcept
+auto plugin_service::all() const noexcept -> plugins
 {
-    return std::count_if(plugins_.cbegin(), plugins_.cend(), [&] (const auto& plugin) {
-        return plugin->get_name() == name;
-    }) > 0;
+    return plugins_;
 }
 
-std::shared_ptr<plugin> plugin_service::get(const std::string& name) const noexcept
+auto plugin_service::has(const std::string& name) const noexcept -> bool
 {
-    auto it = std::find_if(plugins_.begin(), plugins_.end(), [&] (const auto& plugin) {
-        return plugin->get_name() == name;
-    });
-
-    if (it == plugins_.end())
-        return nullptr;
-
-    return *it;
+    return plugins_.find(name) != plugins_.end();
 }
 
-std::shared_ptr<plugin> plugin_service::require(const std::string& name) const
+auto plugin_service::get(const std::string& name) const noexcept -> std::shared_ptr<plugin>
+{
+    if (auto it = plugins_.find(name); it != plugins_.end())
+        return it->second;
+
+    return nullptr;
+}
+
+auto plugin_service::require(const std::string& name) const -> std::shared_ptr<plugin>
 {
     auto plugin = get(name);
 
@@ -87,38 +85,40 @@ std::shared_ptr<plugin> plugin_service::require(const std::string& name) const
     return plugin;
 }
 
-void plugin_service::add(std::shared_ptr<plugin> plugin)
+void plugin_service::add(std::string id, std::shared_ptr<plugin> plugin)
 {
-    plugins_.push_back(std::move(plugin));
+    plugins_.emplace(std::move(id), std::move(plugin));
 }
 
 void plugin_service::add_loader(std::unique_ptr<plugin_loader> loader)
 {
+    assert(loader);
+
     loaders_.push_back(std::move(loader));
 }
 
-plugin_config plugin_service::config(const std::string& id)
+auto plugin_service::get_options(const std::string& id) -> plugin::map
 {
-    return to_map<plugin_config>(irccd_.get_config(), string_util::sprintf("plugin.%s", id));
+    return to_map(irccd_.get_config(), string_util::sprintf("plugin.%s", id));
 }
 
-plugin_formats plugin_service::formats(const std::string& id)
+auto plugin_service::get_formats(const std::string& id) -> plugin::map
 {
-    return to_map<plugin_formats>(irccd_.get_config(), string_util::sprintf("format.%s", id));
+    return to_map(irccd_.get_config(), string_util::sprintf("format.%s", id));
 }
 
-plugin_paths plugin_service::paths(const std::string& id)
+auto plugin_service::get_paths(const std::string& id) -> plugin::map
 {
-    auto defaults = to_map<plugin_paths>(irccd_.get_config(), "paths");
-    auto paths = to_map<plugin_paths>(irccd_.get_config(), string_util::sprintf("paths.%s", id));
+    auto defaults = to_map(irccd_.get_config(), "paths");
+    auto paths = to_map(irccd_.get_config(), string_util::sprintf("paths.%s", id));
 
     // Fill defaults paths.
     if (!defaults.count("cache"))
-        defaults.emplace("cache", (sys::cachedir() / "plugin" / id).string());
+        defaults.emplace("cache", (sys::cachedir() / "plugin" / std::string(id)).string());
     if (!defaults.count("data"))
-        paths.emplace("data", (sys::datadir() / "plugin" / id).string());
+        paths.emplace("data", (sys::datadir() / "plugin" / std::string(id)).string());
     if (!defaults.count("config"))
-        paths.emplace("config", (sys::sysconfdir() / "plugin" / id).string());
+        paths.emplace("config", (sys::sysconfdir() / "plugin" / std::string(id)).string());
 
     // Now fill missing fields.
     if (!paths.count("cache"))
@@ -131,8 +131,8 @@ plugin_paths plugin_service::paths(const std::string& id)
     return paths;
 }
 
-std::shared_ptr<plugin> plugin_service::open(const std::string& id,
-                                             const std::string& path)
+auto plugin_service::open(const std::string& id,
+                          const std::string& path) -> std::shared_ptr<plugin>
 {
     for (const auto& loader : loaders_) {
         auto plugin = loader->open(id, path);
@@ -144,7 +144,7 @@ std::shared_ptr<plugin> plugin_service::open(const std::string& id,
     return nullptr;
 }
 
-std::shared_ptr<plugin> plugin_service::find(const std::string& id)
+auto plugin_service::find(const std::string& id) -> std::shared_ptr<plugin>
 {
     for (const auto& loader : loaders_) {
         try {
@@ -160,27 +160,27 @@ std::shared_ptr<plugin> plugin_service::find(const std::string& id)
     return nullptr;
 }
 
-void plugin_service::load(std::string name, std::string path)
+void plugin_service::load(const std::string& id, const std::string& path)
 {
-    if (has(name))
-        throw plugin_error(plugin_error::already_exists, name);
+    if (has(id))
+        throw plugin_error(plugin_error::already_exists, id);
 
     std::shared_ptr<plugin> plugin;
 
     if (path.empty())
-        plugin = find(name);
+        plugin = find(id);
     else
-        plugin = open(name, std::move(path));
+        plugin = open(id, std::move(path));
 
     if (!plugin)
-        throw plugin_error(plugin_error::not_found, name);
+        throw plugin_error(plugin_error::not_found, id);
 
-    plugin->set_config(config(name));
-    plugin->set_formats(formats(name));
-    plugin->set_paths(paths(name));
+    plugin->set_options(get_options(id));
+    plugin->set_formats(get_formats(id));
+    plugin->set_paths(get_paths(id));
 
     exec(plugin, &plugin::handle_load, irccd_);
-    add(std::move(plugin));
+    add(std::move(id), std::move(plugin));
 }
 
 void plugin_service::reload(const std::string& name)
@@ -193,23 +193,21 @@ void plugin_service::reload(const std::string& name)
     exec(plugin, &plugin::handle_reload, irccd_);
 }
 
-void plugin_service::unload(const std::string& name)
+void plugin_service::unload(const std::string& id)
 {
-    const auto it = std::find_if(plugins_.begin(), plugins_.end(), [&] (const auto& plugin) {
-        return plugin->get_name() == name;
-    });
+    const auto it = plugins_.find(id);
 
     if (it == plugins_.end())
-        throw plugin_error(plugin_error::not_found, name);
+        throw plugin_error(plugin_error::not_found, id);
 
     // Erase first, in case of throwing.
-    const auto save = *it;
+    const auto save = it->second;
 
     plugins_.erase(it);
-    exec(save, &plugin::handle_unload, irccd_);
+    exec(it->second, &plugin::handle_unload, irccd_);
 }
 
-void plugin_service::load(const class config& cfg) noexcept
+void plugin_service::load(const config& cfg) noexcept
 {
     for (const auto& option : cfg.get("plugins")) {
         if (!string_util::is_identifier(option.key()))
@@ -220,9 +218,9 @@ void plugin_service::load(const class config& cfg) noexcept
 
         // Reload the plugin if already loaded.
         if (p) {
-            p->set_config(config(name));
-            p->set_formats(formats(name));
-            p->set_paths(paths(name));
+            p->set_options(get_options(name));
+            p->set_formats(get_formats(name));
+            p->set_paths(get_paths(name));
         } else {
             try {
                 load(name, option.value());

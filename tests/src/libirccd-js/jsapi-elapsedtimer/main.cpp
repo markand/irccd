@@ -33,17 +33,17 @@ BOOST_FIXTURE_TEST_SUITE(elapsed_timer_jsapi_suite, js_test<elapsed_timer_jsapi>
 
 BOOST_AUTO_TEST_CASE(standard)
 {
-    if (duk_peval_string(plugin_->context(), "timer = new Irccd.ElapsedTimer();") != 0)
-        throw dukx_stack(plugin_->context(), -1);
+    if (duk_peval_string(plugin_->get_context(), "timer = new Irccd.ElapsedTimer();") != 0)
+        throw dukx_stack(plugin_->get_context(), -1);
 
     std::this_thread::sleep_for(300ms);
 
-    if (duk_peval_string(plugin_->context(), "result = timer.elapsed();") != 0)
-        throw dukx_stack(plugin_->context(), -1);
+    if (duk_peval_string(plugin_->get_context(), "result = timer.elapsed();") != 0)
+        throw dukx_stack(plugin_->get_context(), -1);
 
-    BOOST_REQUIRE(duk_get_global_string(plugin_->context(), "result"));
-    BOOST_REQUIRE_GE(duk_get_int(plugin_->context(), -1), 250);
-    BOOST_REQUIRE_LE(duk_get_int(plugin_->context(), -1), 350);
+    BOOST_REQUIRE(duk_get_global_string(plugin_->get_context(), "result"));
+    BOOST_REQUIRE_GE(duk_get_int(plugin_->get_context(), -1), 250);
+    BOOST_REQUIRE_LE(duk_get_int(plugin_->get_context(), -1), 350);
 }
 
 } // !irccd

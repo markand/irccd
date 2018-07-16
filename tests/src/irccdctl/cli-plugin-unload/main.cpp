@@ -25,30 +25,28 @@ namespace irccd {
 
 namespace {
 
-class custom_plugin : public plugin {
+class unloadable_plugin : public plugin {
 public:
-    bool unloaded_{false};
+    bool unloaded{false};
 
-    custom_plugin()
-        : plugin("p", "local")
+    auto get_name() const noexcept -> std::string_view override
     {
+        return "unload";
     }
 
     void handle_unload(irccd&) override
     {
-        unloaded_ = true;
+        unloaded = true;
     }
 };
-
-} // !namespace
 
 BOOST_FIXTURE_TEST_SUITE(plugin_unload_suite, plugin_cli_test)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-    const auto plugin = std::make_shared<custom_plugin>();
+    const auto plugin = std::make_shared<unloadable_plugin>();
 
-    irccd_.plugins().add(plugin);
+    irccd_.plugins().add("p", plugin);
     start();
 
     const auto result = exec({ "plugin-unload", "p" });
@@ -59,5 +57,7 @@ BOOST_AUTO_TEST_CASE(simple)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

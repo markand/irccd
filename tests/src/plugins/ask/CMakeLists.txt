@@ -22,7 +22,5 @@ irccd_define_test(
         ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/answers.conf
     LIBRARIES libirccd
-    FLAGS
-        PLUGIN_NAME="ask"
-        PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/ask/ask.js"
+    FLAGS PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/ask/ask.js"
 )

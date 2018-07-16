@@ -42,10 +42,10 @@ void exec_set(transport_client& client, plugin& plugin, const nlohmann::json& ar
     if (value == args.end() || !value->is_string())
         throw irccd_error(irccd_error::error::incomplete_message);
 
-    auto config = plugin.get_config();
+    auto config = plugin.get_options();
 
     config[*var] = *value;
-    plugin.set_config(config);
+    plugin.set_options(config);
     client.success("plugin-config");
 }
 
@@ -55,9 +55,9 @@ void exec_get(transport_client& client, plugin& plugin, const nlohmann::json& ar
     auto var = args.find("variable");
 
     if (var != args.end() && var->is_string())
-        variables[var->get<std::string>()] = plugin.get_config()[*var];
+        variables[var->get<std::string>()] = plugin.get_options()[*var];
     else
-        for (const auto& pair : plugin.get_config())
+        for (const auto& pair : plugin.get_options())
             variables[pair.first] = pair.second;
 
     /*

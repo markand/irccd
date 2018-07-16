@@ -18,6 +18,7 @@
 
 // Plugin information.
 info = {
+    name: "history",
     author: "David Demelier <markand@malikania.fr>",
     license: "ISC",
     summary: "track nickname's history",

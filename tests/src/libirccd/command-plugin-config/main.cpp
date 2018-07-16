@@ -30,21 +30,21 @@ namespace {
 
 class custom_plugin : public plugin {
 public:
-    plugin_config config_;
+    map config_;
 
-    custom_plugin(std::string name = "test")
-        : plugin(std::move(name), "")
+    auto get_name() const noexcept -> std::string_view override
     {
+        return "test";
     }
 
-    plugin_config get_config() override
+    auto get_options() const -> map override
     {
         return config_;
     }
 
-    void set_config(plugin_config config) override
+    void set_options(const map& options) override
     {
-        config_ = std::move(config);
+        config_ = std::move(options);
     }
 };
 
@@ -54,7 +54,7 @@ BOOST_FIXTURE_TEST_SUITE(plugin_config_test_suite, command_test<plugin_config_co
 
 BOOST_AUTO_TEST_CASE(set)
 {
-    daemon_->plugins().add(std::make_unique<custom_plugin>("test"));
+    daemon_->plugins().add("test", std::make_unique<custom_plugin>());
     ctl_->write({
         { "command",    "plugin-config" },
         { "plugin",     "test"          },
@@ -63,10 +63,10 @@ BOOST_AUTO_TEST_CASE(set)
     });
 
     wait_for([&] {
-        return !daemon_->plugins().require("test")->get_config().empty();
+        return !daemon_->plugins().require("test")->get_options().empty();
     });
 
-    auto config = daemon_->plugins().require("test")->get_config();
+    auto config = daemon_->plugins().require("test")->get_options();
 
     BOOST_TEST(!config.empty());
     BOOST_TEST(config["verbosy"] == "falsy");
@@ -74,14 +74,14 @@ BOOST_AUTO_TEST_CASE(set)
 
 BOOST_AUTO_TEST_CASE(get)
 {
-    auto plugin = std::make_unique<custom_plugin>("test");
+    auto plugin = std::make_unique<custom_plugin>();
     auto json = nlohmann::json();
 
-    plugin->set_config({
+    plugin->set_options({
         { "x1", "10" },
         { "x2", "20" }
     });
-    daemon_->plugins().add(std::move(plugin));
+    daemon_->plugins().add("test", std::move(plugin));
 
     auto result = request({
         { "command",    "plugin-config" },
@@ -95,14 +95,14 @@ BOOST_AUTO_TEST_CASE(get)
 
 BOOST_AUTO_TEST_CASE(getall)
 {
-    auto plugin = std::make_unique<custom_plugin>("test");
+    auto plugin = std::make_unique<custom_plugin>();
     auto json = nlohmann::json();
 
-    plugin->set_config({
+    plugin->set_options({
         { "x1", "10" },
         { "x2", "20" }
     });
-    daemon_->plugins().add(std::move(plugin));
+    daemon_->plugins().add("test", std::move(plugin));
 
     auto result = request({
         { "command", "plugin-config" },

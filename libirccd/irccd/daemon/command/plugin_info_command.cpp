@@ -43,11 +43,11 @@ void plugin_info_command::exec(irccd& irccd, transport_client& client, const doc
     const auto plugin = irccd.plugins().require(*id);
 
     client.write({
-        { "command",    "plugin-info"           },
-        { "author",     plugin->get_author()    },
-        { "license",    plugin->get_license()   },
-        { "summary",    plugin->get_summary()   },
-        { "version",    plugin->get_version()   }
+        { "command",    "plugin-info"                       },
+        { "author",     std::string(plugin->get_author())   },
+        { "license",    std::string(plugin->get_license())  },
+        { "summary",    std::string(plugin->get_summary())  },
+        { "version",    std::string(plugin->get_version())  }
     });
 }
 

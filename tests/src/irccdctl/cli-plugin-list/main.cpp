@@ -23,12 +23,22 @@
 
 namespace irccd {
 
+namespace {
+
+class sample : public plugin {
+public:
+    auto get_name() const noexcept -> std::string_view override
+    {
+        return "sample";
+    }
+};
+
 BOOST_FIXTURE_TEST_SUITE(plugin_list_suite, plugin_cli_test)
 
 BOOST_AUTO_TEST_CASE(output)
 {
-    irccd_.plugins().add(std::make_unique<plugin>("p1", "local"));
-    irccd_.plugins().add(std::make_unique<plugin>("p2", "local"));
+    irccd_.plugins().add("p1", std::make_unique<sample>());
+    irccd_.plugins().add("p2", std::make_unique<sample>());
     start();
 
     const auto result = exec({ "plugin-list" });
@@ -40,5 +50,7 @@ BOOST_AUTO_TEST_CASE(output)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

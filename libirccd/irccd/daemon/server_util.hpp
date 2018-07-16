@@ -107,9 +107,7 @@ std::shared_ptr<server> from_config(boost::asio::io_service& service,
  * \param plugin the plugin name
  * \return the pair
  */
-message_pack parse_message(std::string message,
-                           const std::string& cchar,
-                           const std::string& plugin);
+message_pack parse_message(std::string_view message, std::string_view cchar, std::string_view plugin);
 
 } // !server_util
 

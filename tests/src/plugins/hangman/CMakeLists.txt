@@ -23,7 +23,5 @@ irccd_define_test(
         words.conf
         wordlist_fix_644.conf
     LIBRARIES libirccd
-    FLAGS
-        PLUGIN_NAME="hangman"
-        PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/hangman/hangman.js"
+    FLAGS PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/hangman/hangman.js"
 )

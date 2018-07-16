@@ -238,9 +238,11 @@ std::shared_ptr<server> from_config(boost::asio::io_service& service,
     return sv;
 }
 
-message_pack parse_message(std::string message, const std::string& cc, const std::string& name)
+message_pack parse_message(std::string_view message, std::string_view cchar, std::string_view plugin)
 {
-    auto result = message;
+    auto result = std::string(message);
+    auto cc = std::string(cchar);
+    auto name = std::string(plugin);
     auto iscommand = false;
 
     // handle special commands "!<plugin> command"

@@ -25,39 +25,39 @@ namespace irccd {
 
 namespace {
 
-class custom_plugin : public plugin {
+class reloadable_plugin : public plugin {
 public:
-    bool reloaded_{false};
+    bool reloaded{false};
 
-    custom_plugin()
-        : plugin("p", "local")
+    auto get_name() const noexcept -> std::string_view override
     {
+        return "reload";
     }
 
     void handle_reload(irccd&) override
     {
-        reloaded_ = true;
+        reloaded = true;
     }
 };
-
-} // !namespace
 
 BOOST_FIXTURE_TEST_SUITE(plugin_reload_suite, plugin_cli_test)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-    const auto plugin = std::make_shared<custom_plugin>();
+    const auto plugin = std::make_shared<reloadable_plugin>();
 
-    irccd_.plugins().add(plugin);
+    irccd_.plugins().add("p", plugin);
     start();
 
     const auto result = exec({ "plugin-reload", "p" });
 
     BOOST_TEST(result.first.size() == 0U);
     BOOST_TEST(result.second.size() == 0U);
-    BOOST_TEST(plugin->reloaded_);
+    BOOST_TEST(plugin->reloaded);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

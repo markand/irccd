@@ -24,8 +24,6 @@
  * \brief JavaScript plugins for irccd.
  */
 
-#include <vector>
-
 #include <irccd/daemon/plugin.hpp>
 #include <irccd/daemon/server.hpp>
 
@@ -44,25 +42,24 @@ public:
     /**
      * Global property where to read/write plugin configuration (object).
      */
-    static const std::string config_property;
+    static inline const std::string_view config_property{"\xff\xff""config"};
 
     /**
      * Global property where to read/write plugin formats (object).
      */
-    static const std::string format_property;
+    static inline const std::string_view format_property{"\xff\xff""formats"};
 
     /**
      * Global property where paths are defined (object).
      */
-    static const std::string paths_property;
+    static inline const std::string_view paths_property{"\xff\xff""paths"};
 
 private:
-    // JavaScript context
-    dukx_context context_;
+    // JavaScript context.
+    mutable dukx_context context_;
 
-    // Private helpers.
-    std::unordered_map<std::string, std::string> get_table(const std::string&) const;
-    void put_table(const std::string&, const std::unordered_map<std::string, std::string>&);
+    // Path to Javascript script file.
+    std::string path_;
 
     /*
      * Helpers to call a Javascript function.
@@ -79,20 +76,16 @@ public:
     /**
      * Constructor.
      *
-     * \param name the plugin name
      * \param path the path to the plugin
      */
-    js_plugin(std::string name, std::string path);
+    js_plugin(std::string_view path);
 
     /**
      * Access the Duktape context.
      *
      * \return the context
      */
-    inline dukx_context& context() noexcept
-    {
-        return context_;
-    }
+    auto get_context() noexcept -> dukx_context&;
 
     /**
      * Open the script file associated.
@@ -100,52 +93,59 @@ public:
     void open();
 
     /**
-     * \copydoc plugin::config
+     * \copydoc plugin::get_name
      */
-    plugin_config get_config() override
-    {
-        return get_table(config_property);
-    }
+    auto get_name() const noexcept -> std::string_view override;
 
     /**
-     * \copydoc plugin::setConfig
+     * \copydoc plugin::get_author
      */
-    void set_config(plugin_config config) override
-    {
-        put_table(config_property, config);
-    }
+    auto get_author() const noexcept -> std::string_view override;
 
     /**
-     * \copydoc plugin::formats
+     * \copydoc plugin::get_license
      */
-    plugin_formats get_formats() override
-    {
-        return get_table(format_property);
-    }
+    auto get_license() const noexcept -> std::string_view override;
 
     /**
-     * \copydoc plugin::setFormats
+     * \copydoc plugin::get_summary
      */
-    void set_formats(plugin_formats formats) override
-    {
-        put_table(format_property, formats);
-    }
+    auto get_summary() const noexcept -> std::string_view override;
 
     /**
-     * \copydoc plugin::paths
+     * \copydoc plugin::get_version
      */
-    plugin_paths get_paths() override
-    {
-        return get_table(paths_property);
-    }
+    auto get_version() const noexcept -> std::string_view override;
 
     /**
-     * \copydoc plugin::set_paths
+     * \copydoc plugin::get_options
      */
-    void set_paths(plugin_paths paths) override
-    {
-        put_table(paths_property, std::move(paths));
-    }
+    auto get_options() const -> map override;
+
+    /**
+     * \copydoc plugin::set_options
+     */
+    void set_options(const map& map) override;
+
+    /**
+     * \copydoc plugin::get_formats
+     */
+    auto get_formats() const -> map override;
+
+    /**
+     * \copydoc plugin::set_formats
+     */
+    void set_formats(const map& map) override;
+
+    /**
+     * \copydoc plugin::get_paths
+     */
+    auto get_paths() const -> map override;
+
+    /**
+     * \copydoc plugin::set_path
+     */
+    void set_paths(const map& map) override;
 
     /**
      * \copydoc plugin::handle_command
@@ -256,7 +256,7 @@ public:
      * \param irccd the irccd instance
      * \return a ready to use plugin_loader
      */
-    static std::unique_ptr<js_plugin_loader> defaults(irccd& irccd);
+    static auto defaults(irccd& irccd) -> std::unique_ptr<js_plugin_loader>;
 
     /**
      * Constructor.
@@ -275,26 +275,19 @@ public:
      *
      * \return the modules
      */
-    inline const modules_t& get_modules() const noexcept
-    {
-        return modules_;
-    }
+    auto get_modules() const noexcept -> const modules_t&;
 
     /**
      * Overloaded function.
      *
      * \return the modules
      */
-    inline modules_t& get_modules() noexcept
-    {
-        return modules_;
-    }
+    auto get_modules() noexcept -> modules_t&;
 
     /**
-     * \copydoc PluginLoader::open
+     * \copydoc plugin_loader::open
      */
-    std::shared_ptr<plugin> open(const std::string& id,
-                                 const std::string& path) override;
+    auto open(std::string_view id, std::string_view path) -> std::shared_ptr<plugin>;
 };
 
 template <>

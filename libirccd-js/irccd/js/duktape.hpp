@@ -32,6 +32,7 @@
 #include <iterator>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 
@@ -741,6 +742,60 @@ public:
      * \return the converted value
      */
     static std::string require(duk_context* ctx, duk_idx_t index)
+    {
+        duk_size_t length;
+        const char* str = duk_require_lstring(ctx, index, &length);
+
+        return {str, length};
+    }
+};
+
+/**
+ * \brief Specialization for C++ std::string_view.
+ */
+template <>
+class dukx_type_traits<std::string_view> : public std::true_type {
+public:
+    /**
+     * Push a C++ std::string_view.
+     *
+     * Uses duk_push_lstring
+     *
+     * \param ctx the Duktape context
+     * \param value the value
+     */
+    static void push(duk_context* ctx, std::string_view value)
+    {
+        duk_push_lstring(ctx, value.data(), value.size());
+    }
+
+    /**
+     * Get a C++ std::string_view.
+     *
+     * Uses duk_get_lstring.
+     *
+     * \param ctx the Duktape context
+     * \param index the value index
+     * \return the converted value
+     */
+    static std::string_view get(duk_context* ctx, duk_idx_t index)
+    {
+        duk_size_t length;
+        const char* str = duk_get_lstring(ctx, index, &length);
+
+        return {str, length};
+    }
+
+    /**
+     * Require a C++ std::string_view.
+     *
+     * Uses duk_require_lstring.
+     *
+     * \param ctx the Duktape context
+     * \param index the value index
+     * \return the converted value
+     */
+    static std::string_view require(duk_context* ctx, duk_idx_t index)
     {
         duk_size_t length;
         const char* str = duk_require_lstring(ctx, index, &length);

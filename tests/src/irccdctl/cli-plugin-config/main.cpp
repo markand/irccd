@@ -25,44 +25,45 @@ namespace irccd {
 
 namespace {
 
-class custom_plugin : public plugin {
+class configurable_plugin : public plugin {
 private:
-    plugin_config config_;
+    map config_;
 
 public:
-    using plugin::plugin;
+    auto get_name() const noexcept -> std::string_view override
+    {
+        return "config";
+    }
 
-    plugin_config get_config() override
+    auto get_options() const -> map override
     {
         return config_;
     }
 
-    void set_config(plugin_config config) override
+    void set_options(const map& config) override
     {
         config_ = std::move(config);
     }
 };
 
-class custom_plugin_cli_test : public plugin_cli_test {
+class configurable_plugin_cli_test : public plugin_cli_test {
 public:
-    custom_plugin_cli_test()
+    configurable_plugin_cli_test()
     {
-        auto conf1 = std::make_unique<custom_plugin>("conf1", "local");
-        auto conf2 = std::make_unique<custom_plugin>("conf2", "local");
+        auto conf1 = std::make_unique<configurable_plugin>();
+        auto conf2 = std::make_unique<configurable_plugin>();
 
-        conf1->set_config({
+        conf1->set_options({
             { "v1", "123" },
             { "v2", "456" }
         });
 
-        irccd_.plugins().add(std::move(conf1));
-        irccd_.plugins().add(std::move(conf2));
+        irccd_.plugins().add("conf1", std::move(conf1));
+        irccd_.plugins().add("conf2", std::move(conf2));
     }
 };
 
-} // !namespace
-
-BOOST_FIXTURE_TEST_SUITE(plugin_config_suite, custom_plugin_cli_test)
+BOOST_FIXTURE_TEST_SUITE(plugin_config_suite, configurable_plugin_cli_test)
 
 BOOST_AUTO_TEST_CASE(set_and_get)
 {
@@ -100,5 +101,7 @@ BOOST_AUTO_TEST_CASE(getall)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

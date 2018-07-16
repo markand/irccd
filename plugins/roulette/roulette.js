@@ -18,6 +18,7 @@
 
 // Plugin information.
 info = {
+    name: "roulette",
     author: "David Demelier <markand@malikania.fr>",
     license: "ISC",
     summary: "A russian roulette for IRC",

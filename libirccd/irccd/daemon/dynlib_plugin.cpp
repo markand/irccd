@@ -38,9 +38,9 @@ namespace irccd {
 
 namespace {
 
-auto symbol(const std::string& path) -> std::pair<std::string, std::string>
+auto symbol(std::string_view path) -> std::pair<std::string, std::string>
 {
-    auto id = boost::filesystem::path(path).stem().string();
+    auto id = boost::filesystem::path(std::string(path)).stem().string();
 
     // Remove forbidden characters.
     id.erase(std::remove_if(id.begin(), id.end(), [] (auto c) {
@@ -65,27 +65,29 @@ dynlib_plugin_loader::dynlib_plugin_loader(std::vector<std::string> directories)
 {
 }
 
-auto dynlib_plugin_loader::open(const std::string& id,
-                                const std::string& path) -> std::shared_ptr<plugin>
+auto dynlib_plugin_loader::open(std::string_view id, std::string_view path) -> std::shared_ptr<plugin>
 {
-    const auto [ abisym, initsym ] = symbol(path);
+    const std::string idstr(id);
+    const std::string pathstr(path);
+
+    const auto [ abisym, initsym ] = symbol(pathstr);
 
     using abisym_func_type = version ();
     using initsym_func_type = std::unique_ptr<plugin> ();
 
-    const auto abi = boost::dll::import_alias<abisym_func_type>(path, abisym);
-    const auto init = boost::dll::import_alias<initsym_func_type>(path, initsym);
+    const auto abi = boost::dll::import_alias<abisym_func_type>(pathstr, abisym);
+    const auto init = boost::dll::import_alias<initsym_func_type>(pathstr, initsym);
 
     // The abi version is reset after new major version, check for both.
     const version current;
 
     if (current.major != abi().major || current.abi != abi().abi)
-        throw plugin_error(plugin_error::exec_error, id, "incompatible version");
+        throw plugin_error(plugin_error::exec_error, idstr, "incompatible version");
 
     auto plg = init();
 
     if (!plg)
-        throw plugin_error(plugin_error::exec_error, id, "invalid plugin");
+        throw plugin_error(plugin_error::exec_error, idstr, "invalid plugin");
 
     /*
      * We need to keep a reference to `init' variable for the whole plugin

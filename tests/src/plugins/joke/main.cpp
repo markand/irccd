@@ -26,20 +26,20 @@ namespace irccd {
 class joke_test : public plugin_test {
 public:
     joke_test()
-        : plugin_test(PLUGIN_NAME, PLUGIN_PATH)
+        : plugin_test(PLUGIN_PATH)
     {
         plugin_->set_formats({
             { "error", "error=#{server}:#{channel}:#{origin}:#{nickname}" }
         });
     }
 
-    void load(plugin_config config = {})
+    void load(plugin::map config = {})
     {
         // Add file if not there.
         if (config.count("file") == 0)
             config.emplace("file", CMAKE_CURRENT_SOURCE_DIR "/jokes.json");
 
-        plugin_->set_config(config);
+        plugin_->set_options(config);
         plugin_->handle_load(irccd_);
     }
 };

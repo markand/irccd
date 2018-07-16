@@ -24,14 +24,17 @@ namespace irccd {
 
 class test_plugin : public plugin {
 private:
-    plugin_config config_;
+    map config_;
 
 public:
-    using plugin::plugin;
-
-    plugin_config get_config() override
+    auto get_options() const -> map override
     {
         return config_;
+    }
+
+    auto get_name() const noexcept -> std::string_view override
+    {
+        return "test";
     }
 
     void handle_command(irccd&, const message_event&) override
@@ -126,7 +129,7 @@ public:
 
     static auto init() -> std::unique_ptr<plugin>
     {
-        return std::make_unique<test_plugin>("testplugin", "");
+        return std::make_unique<test_plugin>();
     }
 };
 

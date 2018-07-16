@@ -26,7 +26,5 @@ irccd_define_test(
         jokes-not-array.json
         jokes-toobig.json
     LIBRARIES libirccd
-    FLAGS
-        PLUGIN_NAME="joke"
-        PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/joke/joke.js"
+    FLAGS PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/joke/joke.js"
 )

@@ -28,13 +28,13 @@ namespace irccd {
 
 namespace {
 
-class custom_plugin : public plugin {
+class unloadable_plugin : public plugin {
 public:
     bool unloaded{false};
 
-    custom_plugin()
-        : plugin("test", "")
+    auto get_name() const noexcept -> std::string_view override
     {
+        return "unload";
     }
 
     void handle_unload(irccd &) override
@@ -45,7 +45,10 @@ public:
 
 class broken_plugin : public plugin {
 public:
-    using plugin::plugin;
+    auto get_name() const noexcept -> std::string_view override
+    {
+        return "broken";
+    }
 
     void handle_unload(irccd&) override
     {
@@ -55,13 +58,13 @@ public:
 
 class plugin_unload_test : public command_test<plugin_unload_command> {
 protected:
-    std::shared_ptr<custom_plugin> plugin_;
+    std::shared_ptr<unloadable_plugin> plugin_;
 
     plugin_unload_test()
-        : plugin_(std::make_shared<custom_plugin>())
+        : plugin_(std::make_shared<unloadable_plugin>())
     {
-        daemon_->plugins().add(plugin_);
-        daemon_->plugins().add(std::make_unique<broken_plugin>("broken", ""));
+        daemon_->plugins().add("test", plugin_);
+        daemon_->plugins().add("broken", std::make_unique<broken_plugin>());
     }
 };
 
