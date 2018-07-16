@@ -58,8 +58,7 @@ enum class channel_mode {
 /**
  * \brief A channel to join with an optional password.
  */
-class channel {
-public:
+struct channel {
     std::string name;                       //!< the channel to join
     std::string password;                   //!< the optional password
 };
@@ -67,8 +66,7 @@ public:
 /**
  * \brief Describe a whois information.
  */
-class whois_info {
-public:
+struct whois_info {
     std::string nick;                       //!< user's nickname
     std::string user;                       //!< user's user
     std::string host;                       //!< hostname
@@ -79,24 +77,21 @@ public:
 /**
  * \brief Connection success event.
  */
-class connect_event {
-public:
+struct connect_event {
     std::shared_ptr<class server> server;   //!< The server.
 };
 
 /**
  * \brief Connection success event.
  */
-class disconnect_event {
-public:
+struct disconnect_event {
     std::shared_ptr<class server> server;   //!< The server.
 };
 
 /**
  * \brief Invite event.
  */
-class invite_event {
-public:
+struct invite_event {
     std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel.
@@ -106,8 +101,7 @@ public:
 /**
  * \brief Join event.
  */
-class join_event {
-public:
+struct join_event {
     std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel.
@@ -116,8 +110,7 @@ public:
 /**
  * \brief Kick event.
  */
-class kick_event {
-public:
+struct kick_event {
     std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel.
@@ -128,8 +121,7 @@ public:
 /**
  * \brief Message event.
  */
-class message_event {
-public:
+struct message_event {
     std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel.
@@ -139,8 +131,7 @@ public:
 /**
  * \brief CTCP action event.
  */
-class me_event {
-public:
+struct me_event {
     std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel.
@@ -150,8 +141,7 @@ public:
 /**
  * \brief Mode event.
  */
-class mode_event {
-public:
+struct mode_event {
     std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel or target.
@@ -164,8 +154,7 @@ public:
 /**
  * \brief Names listing event.
  */
-class names_event {
-public:
+struct names_event {
     std::shared_ptr<class server> server;   //!< The server.
     std::string channel;                    //!< The channel.
     std::vector<std::string> names;         //!< The names.
@@ -174,8 +163,7 @@ public:
 /**
  * \brief Nick change event.
  */
-class nick_event {
-public:
+struct nick_event {
     std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string nickname;                   //!< The new nickname.
@@ -184,8 +172,7 @@ public:
 /**
  * \brief Notice event.
  */
-class notice_event {
-public:
+struct notice_event {
     std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel or target.
@@ -195,8 +182,7 @@ public:
 /**
  * \brief Part event.
  */
-class part_event {
-public:
+struct part_event {
     std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel.
@@ -206,8 +192,7 @@ public:
 /**
  * \brief Query event.
  */
-class query_event {
-public:
+struct query_event {
     std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string message;                    //!< The message.
@@ -216,8 +201,7 @@ public:
 /**
  * \brief Topic event.
  */
-class topic_event {
-public:
+struct topic_event {
     std::shared_ptr<class server> server;   //!< The server.
     std::string origin;                     //!< The originator.
     std::string channel;                    //!< The channel.
@@ -227,8 +211,7 @@ public:
 /**
  * \brief Whois event.
  */
-class whois_event {
-public:
+struct whois_event {
     std::shared_ptr<class server> server;   //!< The server.
     whois_info whois;                       //!< The whois information.
 };
