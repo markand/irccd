@@ -33,8 +33,6 @@ namespace {
 
 using rule_add_test = command_test<rule_add_command, rule_list_command>;
 
-} // !namespace
-
 BOOST_FIXTURE_TEST_SUITE(rule_add_test_suite, rule_add_test)
 
 BOOST_AUTO_TEST_CASE(basic)
@@ -145,5 +143,7 @@ BOOST_AUTO_TEST_CASE(invalid_action)
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

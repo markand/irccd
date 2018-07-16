@@ -28,6 +28,8 @@
 
 namespace irccd {
 
+namespace {
+
 class logger_test : public js_test<logger_jsapi, plugin_jsapi> {
 protected:
     std::string line_info;
@@ -99,5 +101,7 @@ BOOST_AUTO_TEST_CASE(debug)
 #endif
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

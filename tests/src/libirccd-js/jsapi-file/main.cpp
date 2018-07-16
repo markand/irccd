@@ -28,6 +28,8 @@
 
 namespace irccd {
 
+namespace {
+
 BOOST_FIXTURE_TEST_SUITE(file_jsapi_suite, js_test<file_jsapi>)
 
 BOOST_AUTO_TEST_CASE(function_basename)
@@ -304,5 +306,7 @@ BOOST_AUTO_TEST_CASE(method_readline_closed)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

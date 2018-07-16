@@ -40,8 +40,6 @@ public:
     }
 };
 
-} // !namespace
-
 BOOST_FIXTURE_TEST_SUITE(rule_edit_suite, custom_rule_cli_test)
 
 BOOST_AUTO_TEST_CASE(server)
@@ -211,5 +209,7 @@ BOOST_AUTO_TEST_CASE(action_2)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

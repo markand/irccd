@@ -53,8 +53,6 @@ public:
     }
 };
 
-} // !namespace
-
 BOOST_FIXTURE_TEST_SUITE(rule_list_test_suite, rule_list_test)
 
 BOOST_AUTO_TEST_CASE(basic)
@@ -115,5 +113,7 @@ BOOST_AUTO_TEST_CASE(empty)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

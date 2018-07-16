@@ -29,6 +29,8 @@
 
 namespace irccd {
 
+namespace {
+
 class test_fixture : public plugin_test {
 public:
     test_fixture()
@@ -264,5 +266,7 @@ BOOST_AUTO_TEST_CASE(part)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

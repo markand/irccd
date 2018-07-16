@@ -41,8 +41,6 @@ protected:
     }
 };
 
-} // !namespace
-
 BOOST_FIXTURE_TEST_SUITE(server_reconnect_test_suite, server_reconnect_test)
 
 BOOST_AUTO_TEST_CASE(basic)
@@ -118,5 +116,7 @@ BOOST_AUTO_TEST_CASE(not_found)
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

@@ -28,6 +28,8 @@
 
 namespace irccd {
 
+namespace {
+
 class history_test : public plugin_test {
 public:
     history_test()
@@ -145,5 +147,7 @@ BOOST_AUTO_TEST_CASE(fix_642)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

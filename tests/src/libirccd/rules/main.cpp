@@ -25,6 +25,8 @@
 
 namespace irccd {
 
+namespace {
+
 /*
  * Simulate the following rules configuration:
  *
@@ -242,5 +244,7 @@ BOOST_AUTO_TEST_CASE(fix_645)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

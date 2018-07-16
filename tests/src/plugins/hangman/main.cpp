@@ -29,6 +29,8 @@
 
 namespace irccd {
 
+namespace {
+
 class hangman_test : public plugin_test {
 public:
     hangman_test()
@@ -376,5 +378,7 @@ BOOST_AUTO_TEST_CASE(wordlist_fix_644)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

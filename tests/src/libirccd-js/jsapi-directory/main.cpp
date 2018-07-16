@@ -25,6 +25,8 @@
 
 namespace irccd {
 
+namespace {
+
 BOOST_FIXTURE_TEST_SUITE(directory_jsapi_suite, js_test<directory_jsapi>)
 
 BOOST_AUTO_TEST_CASE(constructor)
@@ -43,5 +45,7 @@ BOOST_AUTO_TEST_CASE(constructor)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

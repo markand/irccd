@@ -29,6 +29,8 @@
 
 namespace irccd {
 
+namespace {
+
 class js_plugin_test {
 protected:
     boost::asio::io_service service_;
@@ -150,5 +152,7 @@ BOOST_AUTO_TEST_CASE(merge_after)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

@@ -29,6 +29,8 @@
 
 namespace irccd {
 
+namespace {
+
 BOOST_FIXTURE_TEST_SUITE(unicode_jsapi_suite, js_test<unicode_jsapi>)
 
 BOOST_AUTO_TEST_CASE(is_letter)
@@ -65,5 +67,7 @@ BOOST_AUTO_TEST_CASE(is_upper)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

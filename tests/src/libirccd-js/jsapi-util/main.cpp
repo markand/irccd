@@ -25,6 +25,8 @@
 
 namespace irccd {
 
+namespace {
+
 BOOST_FIXTURE_TEST_SUITE(util_jsapi_suite, js_test<util_jsapi>)
 
 /*
@@ -256,5 +258,7 @@ BOOST_AUTO_TEST_CASE(cut_invalid_data)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

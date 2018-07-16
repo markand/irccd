@@ -46,8 +46,6 @@ public:
     }
 };
 
-} // !namespace
-
 BOOST_FIXTURE_TEST_SUITE(rule_edit_test_suite, rule_edit_test)
 
 BOOST_AUTO_TEST_CASE(add_server)
@@ -390,5 +388,7 @@ BOOST_AUTO_TEST_CASE(invalid_action)
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

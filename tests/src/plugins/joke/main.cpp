@@ -23,6 +23,8 @@
 
 namespace irccd {
 
+namespace {
+
 class joke_test : public plugin_test {
 public:
     joke_test()
@@ -201,5 +203,7 @@ BOOST_AUTO_TEST_CASE(empty)
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

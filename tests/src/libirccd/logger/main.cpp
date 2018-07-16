@@ -25,6 +25,8 @@
 
 namespace irccd {
 
+namespace {
+
 class my_logger : public logger {
 public:
     std::string line_debug;
@@ -112,5 +114,7 @@ BOOST_AUTO_TEST_CASE(warning)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

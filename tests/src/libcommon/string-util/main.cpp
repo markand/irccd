@@ -24,6 +24,8 @@
 
 namespace irccd {
 
+namespace {
+
 /*
  * string_util::format function
  * --------------------------------------------------------
@@ -376,5 +378,7 @@ BOOST_AUTO_TEST_CASE(incorrect)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

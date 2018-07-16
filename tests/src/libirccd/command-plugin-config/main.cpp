@@ -48,8 +48,6 @@ public:
     }
 };
 
-} // !namespace
-
 BOOST_FIXTURE_TEST_SUITE(plugin_config_test_suite, command_test<plugin_config_command>)
 
 BOOST_AUTO_TEST_CASE(set)
@@ -141,5 +139,7 @@ BOOST_AUTO_TEST_CASE(not_found)
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

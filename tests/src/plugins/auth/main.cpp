@@ -26,6 +26,8 @@
 
 namespace irccd {
 
+namespace {
+
 class auth_test : public plugin_test {
 protected:
     std::shared_ptr<journal_server> nickserv1_;
@@ -89,5 +91,7 @@ BOOST_AUTO_TEST_CASE(quakenet)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

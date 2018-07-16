@@ -27,6 +27,8 @@
 
 namespace irccd {
 
+namespace {
+
 BOOST_FIXTURE_TEST_SUITE(server_info_test_suite, command_test<server_info_command>)
 
 BOOST_AUTO_TEST_CASE(basic)
@@ -101,5 +103,7 @@ BOOST_AUTO_TEST_CASE(not_found)
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

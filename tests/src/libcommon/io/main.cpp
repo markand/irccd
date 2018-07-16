@@ -46,6 +46,8 @@ using boost::asio::local::stream_protocol;
 
 namespace irccd {
 
+namespace {
+
 class io_test {
 public:
     io_service service_;
@@ -220,5 +222,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(network_down, Test, list)
     fixture.stream2_ = nullptr;
     fixture.service_.run();
 }
+
+} // !namespace
 
 } // !irccd

@@ -23,6 +23,8 @@
 
 namespace irccd {
 
+namespace {
+
 BOOST_FIXTURE_TEST_SUITE(rule_info_suite, rule_cli_test)
 
 BOOST_AUTO_TEST_CASE(info)
@@ -50,5 +52,7 @@ BOOST_AUTO_TEST_CASE(info)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

@@ -30,6 +30,8 @@
 
 namespace irccd {
 
+namespace {
+
 using fixture = js_test<file_jsapi, system_jsapi>;
 
 BOOST_FIXTURE_TEST_SUITE(system_jsapi_suite, fixture)
@@ -61,5 +63,7 @@ BOOST_AUTO_TEST_CASE(popen)
 #endif
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

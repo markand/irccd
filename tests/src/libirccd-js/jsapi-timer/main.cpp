@@ -51,8 +51,6 @@ public:
     }
 };
 
-} // !namespace
-
 BOOST_FIXTURE_TEST_SUITE(js_timer_test_suite, js_timer_test)
 
 BOOST_AUTO_TEST_CASE(single)
@@ -86,5 +84,7 @@ BOOST_AUTO_TEST_CASE(repeat)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

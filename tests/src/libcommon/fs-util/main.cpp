@@ -24,6 +24,8 @@
 
 namespace irccd {
 
+namespace {
+
 /*
  * fs_util::find function (name)
  * ------------------------------------------------------------------
@@ -75,5 +77,7 @@ BOOST_AUTO_TEST_CASE(recursive)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

@@ -29,6 +29,8 @@ using namespace std::chrono_literals;
 
 namespace irccd {
 
+namespace {
+
 BOOST_FIXTURE_TEST_SUITE(elapsed_timer_jsapi_suite, js_test<elapsed_timer_jsapi>)
 
 BOOST_AUTO_TEST_CASE(standard)
@@ -46,6 +48,8 @@ BOOST_AUTO_TEST_CASE(standard)
     BOOST_REQUIRE_LE(duk_get_int(plugin_->get_context(), -1), 350);
 }
 
-} // !irccd
-
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
+
+} // !irccd

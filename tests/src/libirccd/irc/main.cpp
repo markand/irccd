@@ -23,6 +23,8 @@
 
 namespace irccd {
 
+namespace {
+
 BOOST_AUTO_TEST_SUITE(message_parse)
 
 BOOST_AUTO_TEST_CASE(no_prefix)
@@ -81,5 +83,7 @@ BOOST_AUTO_TEST_CASE(empty)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

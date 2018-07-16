@@ -27,6 +27,8 @@
 
 namespace irccd {
 
+namespace {
+
 BOOST_FIXTURE_TEST_SUITE(server_connect_test_suite, command_test<server_connect_command>)
 
 BOOST_AUTO_TEST_CASE(minimal)
@@ -217,5 +219,7 @@ BOOST_AUTO_TEST_CASE(ssl_disabled)
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

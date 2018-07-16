@@ -30,6 +30,8 @@
 
 namespace irccd {
 
+namespace {
+
 class fixture {
 protected:
     boost::asio::io_service service_;
@@ -184,5 +186,7 @@ BOOST_AUTO_TEST_CASE(handle_whois)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

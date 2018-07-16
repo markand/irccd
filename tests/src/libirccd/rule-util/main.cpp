@@ -39,8 +39,6 @@ ini::document open(const std::string& config)
     return ini::read_file(path.string());
 }
 
-} // !namespace
-
 BOOST_AUTO_TEST_SUITE(from_config)
 
 BOOST_AUTO_TEST_SUITE(valid)
@@ -107,5 +105,7 @@ BOOST_AUTO_TEST_SUITE_END()
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd

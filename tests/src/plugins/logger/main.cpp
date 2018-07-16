@@ -29,6 +29,8 @@
 
 namespace irccd {
 
+namespace {
+
 class logger_test : public plugin_test {
 protected:
     std::string last() const
@@ -151,5 +153,7 @@ BOOST_AUTO_TEST_CASE(fix_642)
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+} // !namespace
 
 } // !irccd
