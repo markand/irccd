@@ -42,20 +42,20 @@ namespace irccd {
 
 class irccd;
 
-class connect_event;
-class disconnect_event;
-class invite_event;
-class join_event;
-class kick_event;
-class me_event;
-class message_event;
-class mode_event;
-class names_event;
-class nick_event;
-class notice_event;
-class part_event;
-class topic_event;
-class whois_event;
+struct connect_event;
+struct disconnect_event;
+struct invite_event;
+struct join_event;
+struct kick_event;
+struct me_event;
+struct message_event;
+struct mode_event;
+struct names_event;
+struct nick_event;
+struct notice_event;
+struct part_event;
+struct topic_event;
+struct whois_event;
 
 /**
  * \ingroup plugins
