@@ -429,6 +429,11 @@ public:
                   std::vector<std::string> extensions) noexcept;
 
     /**
+     * Virtual destructor defaulted.
+     */
+    virtual ~plugin_loader() = default;
+
+    /**
      * Try to open the plugin specified by path.
      *
      * The implementation must test if the plugin is suitable for opening, by
