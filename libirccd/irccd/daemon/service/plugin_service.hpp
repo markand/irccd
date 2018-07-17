@@ -27,6 +27,7 @@
 #include <cassert>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -243,6 +244,35 @@ public:
      */
     void load(const config& cfg) noexcept;
 };
+
+namespace logger {
+
+template <typename T>
+struct loggable_traits;
+
+/**
+ * \brief Implement Loggable traits for plugin.
+ */
+template <>
+struct loggable_traits<plugin> {
+    /**
+     * Return "plugin"
+     *
+     * \param plugin the plugin
+     * \return the category
+     */
+    static auto get_category(const plugin& plugin) -> std::string_view;
+
+    /**
+     * Return the plugin id.
+     *
+     * \param plugin the plugin
+     * \return the plugin id
+     */
+    static auto get_component(const plugin& plugin) -> std::string_view;
+};
+
+} // !logger
 
 } // !irccd
 

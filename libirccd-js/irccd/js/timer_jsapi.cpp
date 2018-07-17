@@ -20,6 +20,7 @@
 
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/logger.hpp>
+#include <irccd/daemon/service/plugin_service.hpp>
 
 #include "irccd_jsapi.hpp"
 #include "js_plugin.hpp"
@@ -75,12 +76,12 @@ public:
 
 void timer::handle()
 {
-    auto plugin = plugin_.lock();
+    auto plg = plugin_.lock();
 
-    if (!plugin)
+    if (!plg)
         return;
 
-    auto& ctx = plugin->get_context();
+    auto& ctx = plg->get_context();
 
     duk_get_global_string(ctx, table);
     duk_get_prop_string(ctx, -1, key().c_str());
@@ -89,8 +90,8 @@ void timer::handle()
     if (duk_pcall(ctx, 0)) {
         auto& log = dukx_type_traits<irccd>::self(ctx).get_log();
 
-        log.warning() << "plugin: " << plugin->get_name() << " timer error:" << std::endl;
-        log.warning() << "  " << dukx_stack(ctx, -1).what() << std::endl;
+        log.warning(static_cast<const plugin&>(*plg)) << "timer error:" << std::endl;
+        log.warning(static_cast<const plugin&>(*plg)) << "  " << dukx_stack(ctx, -1).what() << std::endl;
     } else
         duk_pop(ctx);
 }
@@ -200,8 +201,6 @@ duk_ret_t Timer_destructor(duk_context* ctx)
     duk_get_global_string(ctx, table);
     duk_del_prop_string(ctx, -1, ptr->key().c_str());
     duk_pop(ctx);
-
-    dukx_type_traits<irccd>::self(ctx).get_log().debug("timer: destroyed");
 
     delete ptr;
 

@@ -163,7 +163,7 @@ option::result parse(int& argc, char**& argv)
                 instance->get_log().set_verbose(true);
         }
     } catch (const std::exception& ex) {
-        instance->get_log().warning() << "irccd: " << ex.what() << std::endl;
+        instance->get_log().warning("irccd", "") << "abort: " << ex.what() << std::endl;
         usage();
     }
 

@@ -52,7 +52,7 @@ plugin_service::~plugin_service()
         try {
             plugin->handle_unload(irccd_);
         } catch (const std::exception& ex) {
-            irccd_.get_log().warning() << "plugin: " << plugin->get_name() << ": " << ex.what() << std::endl;
+            irccd_.get_log().warning(*plugin) << ex.what() << std::endl;
         }
     }
 }
@@ -153,7 +153,7 @@ auto plugin_service::find(const std::string& id) -> std::shared_ptr<plugin>
             if (plugin)
                 return plugin;
         } catch (const std::exception& ex) {
-            irccd_.get_log().warning() << "plugin " << id << ": " << ex.what() << std::endl;
+            irccd_.get_log().warning("plugin", id) << ex.what() << std::endl;
         }
     }
 
@@ -225,10 +225,25 @@ void plugin_service::load(const config& cfg) noexcept
             try {
                 load(name, option.value());
             } catch (const std::exception& ex) {
-                irccd_.get_log().warning(ex.what());
+                irccd_.get_log().warning("plugin", name) << ex.what() << std::endl;
             }
         }
     }
 }
+
+namespace logger {
+
+auto loggable_traits<plugin>::get_category(const plugin&) -> std::string_view
+{
+    return "plugin";
+}
+
+auto loggable_traits<plugin>::get_component(const plugin& plugin) -> std::string_view
+{
+    // TODO: get id instead.
+    return plugin.get_name();
+}
+
+} // !logger
 
 } // !irccd

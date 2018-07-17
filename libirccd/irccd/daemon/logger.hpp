@@ -29,11 +29,49 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <utility>
 
-namespace irccd {
+namespace irccd::logger {
 
-class logger_filter;
+class filter;
+class sink;
+
+/**
+ * \brief Traits for loggable objects.
+ *
+ * Specialize this structure and add the following static functions to be able
+ * to log object with convenience:
+ *
+ * ```cpp
+ * static auto get_category(const T&) noexcept -> std::string_view;
+ * static auto get_component(const T&) noexcept -> std::string_view;
+ * ```
+ */
+template <typename T>
+struct loggable_traits;
+
+class logger : public std::ostream, public std::stringbuf {
+private:
+    friend class sink;
+
+    enum class level {
+        debug,
+        info,
+        warning
+    } level_;
+
+    sink& parent_;
+
+    std::string_view category_;
+    std::string_view component_;
+
+    void debug(const std::string&);
+    void info(const std::string&);
+    void warning(const std::string&);
+    auto sync() -> int override;
+    logger(sink&, level, std::string_view, std::string_view) noexcept;
+};
 
 /**
  * \brief Interface to implement new logger mechanisms.
@@ -41,48 +79,18 @@ class logger_filter;
  * Derive from this class and implement write_info, write_warning and
  * write_debug functions.
  *
- * \see file_logger
- * \see console_logger
- * \see syslog_logger
- * \see silent_logger
+ * \see file_sink
+ * \see console_sink
+ * \see syslog_sink
+ * \see silent_sink
  */
-class logger {
+class sink {
 private:
-    class buffer : public std::stringbuf {
-    public:
-        enum class level {
-            debug,
-            info,
-            warning
-        };
-
-    private:
-        logger& parent_;
-        level level_;
-
-        void debug(std::string line);
-        void info(std::string line);
-        void warning(std::string line);
-
-    public:
-        buffer(logger& parent, level level) noexcept;
-
-        virtual int sync() override;
-    };
-
-    // Buffers.
-    buffer buffer_info_;
-    buffer buffer_warning_;
-    buffer buffer_debug_;
-
-    // Stream outputs.
-    std::ostream stream_info_;
-    std::ostream stream_warning_;
-    std::ostream stream_debug_;
+    friend class logger;
 
     // User options.
     bool verbose_{false};
-    std::unique_ptr<logger_filter> filter_;
+    std::unique_ptr<filter> filter_;
 
 protected:
     /**
@@ -119,19 +127,19 @@ public:
     /**
      * Default constructor.
      */
-    logger();
+    sink();
 
     /**
      * Virtual destructor defaulted.
      */
-    virtual ~logger() = default;
+    virtual ~sink() = default;
 
     /**
      * Tells if logger is verbose.
      *
      * \return true if verbose
      */
-    bool is_verbose() const noexcept;
+    auto is_verbose() const noexcept -> bool;
 
     /**
      * Set the verbosity mode.
@@ -146,92 +154,158 @@ public:
      * \pre filter must not be null
      * \param filter the filter
      */
-    void set_filter(std::unique_ptr<logger_filter> filter) noexcept;
+    void set_filter(std::unique_ptr<filter> filter) noexcept;
 
     /**
      * Get the stream for informational messages.
      *
      * If message is specified, a new line character is appended.
      *
-     * \param message the optional message to write
-     * \return the stream
+     * \param category the category subsystem
+     * \param component the optional component
+     * \return the output stream
      * \note Has no effect if verbose is set to false.
      */
-    std::ostream& info(const std::string& message = "");
+    auto info(std::string_view category, std::string_view component) -> logger;
+
+    /**
+     * Convenient function with loggable objects.
+     *
+     * \param loggable the loggable object
+     * \return the output stream
+     * \see loggable_traits
+     */
+    template <typename Loggable>
+    auto info(const Loggable& loggable) -> logger
+    {
+        return info(
+            loggable_traits<Loggable>::get_category(loggable),
+            loggable_traits<Loggable>::get_component(loggable)
+        );
+    }
 
     /**
      * Get the stream for warnings.
      *
      * If message is specified, a new line character is appended.
      *
-     * \param message the optional message to write
-     * \return the stream
+     * \param category the category subsystem
+     * \param component the optional component
+     * \return the output stream
      */
-    std::ostream& warning(const std::string& message = "");
+    auto warning(std::string_view category, std::string_view component) -> logger;
+
+    /**
+     * Convenient function with loggable objects.
+     *
+     * \param loggable the loggable object
+     * \return the output stream
+     * \see loggable_traits
+     */
+    template <typename Loggable>
+    auto warning(const Loggable& loggable) -> logger
+    {
+        return warning(
+            loggable_traits<Loggable>::get_category(loggable),
+            loggable_traits<Loggable>::get_component(loggable)
+        );
+    }
 
     /**
      * Get the stream for debug messages.
      *
      * If message is specified, a new line character is appended.
      *
-     * \param message the optional message to write
-     * \return the stream
+     * \param category the category subsystem
+     * \param component the optional component
+     * \return the output stream
      * \note Has no effect if compiled in release mode.
      */
-    std::ostream& debug(const std::string& message = "");
+    auto debug(std::string_view category, std::string_view component) -> logger;
+
+    /**
+     * Convenient function with loggable objects.
+     *
+     * \param loggable the loggable object
+     * \return the output stream
+     * \see loggable_traits
+     */
+    template <typename Loggable>
+    auto debug(const Loggable& loggable) -> logger
+    {
+        return debug(
+            loggable_traits<Loggable>::get_category(loggable),
+            loggable_traits<Loggable>::get_component(loggable)
+        );
+    }
 };
 
 /**
  * \brief Filter messages before printing them.
- *
- * Derive from this class and use log::setFilter.
  */
-class logger_filter {
+class filter {
+private:
 public:
     /**
      * Virtual destructor defaulted.
      */
-    virtual ~logger_filter() = default;
+    virtual ~filter() = default;
+
+    /**
+     * Default function called for each virtual ones.
+     *
+     * \param category the category subsystem
+     * \param component the optional component
+     * \param message the message
+     * \return default formatted message
+     */
+    auto pre(std::string_view category,
+             std::string_view component,
+             std::string_view message) const -> std::string;
+
 
     /**
      * Update the debug message.
      *
-     * \param input the message
-     * \return the updated message
+     * \param category the category subsystem
+     * \param component the optional component
+     * \param message the message
+     * \return the message
      */
-    virtual std::string pre_debug(std::string input) const
-    {
-        return input;
-    }
+    virtual auto pre_debug(std::string_view category,
+                           std::string_view component,
+                           std::string_view message) const -> std::string;
 
     /**
      * Update the information message.
      *
-     * \param input the message
+     * \param category the category subsystem
+     * \param component the optional component
+     * \param message the message
      * \return the updated message
      */
-    virtual std::string pre_info(std::string input) const
-    {
-        return input;
-    }
+    virtual auto pre_info(std::string_view category,
+                          std::string_view component,
+                          std::string_view message) const -> std::string;
 
     /**
      * Update the warning message.
      *
-     * \param input the message
+     * \param category the category subsystem
+     * \param component the optional component
+     * \param message the message
      * \return the updated message
      */
-    virtual std::string pre_warning(std::string input) const
-    {
-        return input;
-    }
+    virtual auto pre_warning(std::string_view category,
+                             std::string_view component,
+                             std::string_view message) const -> std::string;
 };
 
 /**
  * \brief Logger implementation for console output using std::cout and
  *        std::cerr.
  */
-class console_logger : public logger {
+class console_sink : public sink {
 protected:
     /**
      * \copydoc logger::write_debug
@@ -252,7 +326,7 @@ protected:
 /**
  * \brief Output to a files.
  */
-class file_logger : public logger {
+class file_sink : public sink {
 private:
     std::string output_normal_;
     std::string output_error_;
@@ -280,7 +354,7 @@ public:
      * \param normal the path to the normal logs
      * \param errors the path to the errors logs
      */
-    file_logger(std::string normal, std::string errors);
+    file_sink(std::string normal, std::string errors);
 };
 
 /**
@@ -288,7 +362,7 @@ public:
  *
  * Useful for unit tests when some classes may emits log.
  */
-class silent_logger : public logger {
+class silent_sink : public sink {
 protected:
     /**
      * \copydoc logger::write_debug
@@ -311,7 +385,7 @@ protected:
 /**
  * \brief Implements logger into syslog.
  */
-class syslog_logger : public logger {
+class syslog_sink : public sink {
 protected:
     /**
      * \copydoc logger::write_debug
@@ -332,16 +406,16 @@ public:
     /**
      * Open the syslog.
      */
-    syslog_logger();
+    syslog_sink();
 
     /**
      * Close the syslog.
      */
-    ~syslog_logger();
+    ~syslog_sink();
 };
 
 #endif // !HAVE_SYSLOG
 
-} // !irccd
+} // !irccd::logger
 
 #endif // !IRCCD_DAEMON_LOGGER_HPP

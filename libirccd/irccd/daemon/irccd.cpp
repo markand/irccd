@@ -35,49 +35,70 @@ namespace irccd {
 
 namespace {
 
-class log_filter : public logger_filter {
+class format_filter : public logger::filter {
 private:
     std::string info_;
     std::string warning_;
     std::string debug_;
 
-    std::string convert(const std::string& tmpl, std::string input) const
-    {
-        if (tmpl.empty())
-            return input;
-
-        string_util::subst params;
-
-        params.flags &= ~(string_util::subst_flags::irc_attrs);
-        params.flags |= string_util::subst_flags::shell_attrs;
-        params.keywords.emplace("message", std::move(input));
-
-        return string_util::format(tmpl, params);
-    }
+    auto convert(const std::string&,
+                 std::string_view,
+                 std::string_view,
+                 std::string_view) const -> std::string;
 
 public:
-    inline log_filter(std::string info, std::string warning, std::string debug) noexcept
-        : info_(std::move(info))
-        , warning_(std::move(warning))
-        , debug_(std::move(debug))
-    {
-    }
-
-    std::string pre_debug(std::string input) const override
-    {
-        return convert(debug_, std::move(input));
-    }
-
-    std::string pre_info(std::string input) const override
-    {
-        return convert(info_, std::move(input));
-    }
-
-    std::string pre_warning(std::string input) const override
-    {
-        return convert(warning_, std::move(input));
-    }
+    format_filter(std::string info, std::string warning, std::string debug) noexcept;
+    auto pre_debug(std::string_view, std::string_view, std::string_view) const -> std::string override;
+    auto pre_info(std::string_view, std::string_view, std::string_view) const -> std::string override;
+    auto pre_warning(std::string_view, std::string_view, std::string_view) const -> std::string override;
 };
+
+auto format_filter::convert(const std::string& tmpl,
+                            std::string_view category,
+                            std::string_view component,
+                            std::string_view message) const -> std::string
+{
+    if (tmpl.empty())
+        return pre(category, component, message);
+
+    string_util::subst params;
+
+    params.flags &= ~(string_util::subst_flags::irc_attrs);
+    params.flags |= string_util::subst_flags::shell_attrs;
+    params.keywords.emplace("category", std::string(category));
+    params.keywords.emplace("component", std::string(component));
+    params.keywords.emplace("message", std::string(message));
+
+    return string_util::format(tmpl, params);
+}
+
+format_filter::format_filter(std::string info, std::string warning, std::string debug) noexcept
+    : info_(std::move(info))
+    , warning_(std::move(warning))
+    , debug_(std::move(debug))
+{
+}
+
+auto format_filter::pre_debug(std::string_view category,
+                              std::string_view component,
+                              std::string_view message) const -> std::string
+{
+    return convert(debug_, category, component, message);
+}
+
+auto format_filter::pre_info(std::string_view category,
+                             std::string_view component,
+                             std::string_view message) const -> std::string
+{
+    return convert(info_, category, component, message);
+}
+
+auto format_filter::pre_warning(std::string_view category,
+                                std::string_view component,
+                                std::string_view message) const -> std::string
+{
+    return convert(warning_, category, component, message);
+}
 
 } // !namespace
 
@@ -102,18 +123,18 @@ void irccd::load_logs_file(const ini::section& sc)
         errors = it->value();
 
     try {
-        logger_ = std::make_unique<file_logger>(std::move(normal), std::move(errors));
+        sink_ = std::make_unique<logger::file_sink>(std::move(normal), std::move(errors));
     } catch (const std::exception& ex) {
-        logger_->warning() << "logs: " << ex.what() << std::endl;
+        sink_->warning("logs", "") << ex.what() << std::endl;
     }
 }
 
 void irccd::load_logs_syslog()
 {
 #if defined(HAVE_SYSLOG)
-    logger_ = std::make_unique<syslog_logger>();
+    sink_ = std::make_unique<logger::syslog_sink>();
 #else
-    logger_->warning() << "logs: syslog is not available on this platform" << std::endl;
+    sink_->warning() << "logs: syslog is not available on this platform" << std::endl;
 #endif // !HAVE_SYSLOG
 }
 
@@ -124,7 +145,7 @@ void irccd::load_logs()
     if (sc.empty())
         return;
 
-    logger_->set_verbose(string_util::is_identifier(sc.get("verbose").value()));
+    sink_->set_verbose(string_util::is_identifier(sc.get("verbose").value()));
 
     const auto type = sc.get("type").value();
 
@@ -135,7 +156,7 @@ void irccd::load_logs()
         else if (type == "syslog")
             load_logs_syslog();
         else if (type != "console")
-            logger_->warning() << "logs: invalid log type '" << type << std::endl;
+            sink_->warning("logs", "") << "invalid log type '" << type << std::endl;
     }
 }
 
@@ -146,7 +167,7 @@ void irccd::load_formats()
     if (sc.empty())
         return;
 
-    logger_->set_filter(std::make_unique<log_filter>(
+    sink_->set_filter(std::make_unique<format_filter>(
         sc.get("info").value(),
         sc.get("warning").value(),
         sc.get("debug").value()
@@ -156,7 +177,7 @@ void irccd::load_formats()
 irccd::irccd(boost::asio::io_service& service, std::string config)
     : config_(std::move(config))
     , service_(service)
-    , logger_(std::make_unique<console_logger>())
+    , sink_(std::make_unique<logger::console_sink>())
     , server_service_(std::make_unique<server_service>(*this))
     , tpt_service_(std::make_unique<transport_service>(*this))
     , rule_service_(std::make_unique<rule_service>(*this))
@@ -166,11 +187,11 @@ irccd::irccd(boost::asio::io_service& service, std::string config)
 
 irccd::~irccd() = default;
 
-void irccd::set_log(std::unique_ptr<logger> logger) noexcept
+void irccd::set_log(std::unique_ptr<logger::sink> sink) noexcept
 {
-    assert(logger);
+    assert(sink);
 
-    logger_ = std::move(logger);
+    sink_ = std::move(sink);
 }
 
 void irccd::load() noexcept
@@ -187,9 +208,9 @@ void irccd::load() noexcept
     load_formats();
 
     if (!loaded_)
-        logger_->info() << "irccd: loading configuration from " << config_.get_path() << std::endl;
+        sink_->info("irccd", "") << "loading configuration from " << config_.get_path() << std::endl;
     else
-        logger_->info() << "irccd: reloading configuration" << std::endl;
+        sink_->info("irccd", "") << "reloading configuration" << std::endl;
 
     if (!loaded_)
         tpt_service_->load(config_);

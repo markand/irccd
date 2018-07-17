@@ -82,7 +82,7 @@ js_test<Modules...>::js_test(const std::string& plugin_path)
     : plugin_(new js_plugin(plugin_path))
     , server_(new journal_server(service_, "test"))
 {
-    irccd_.set_log(std::make_unique<silent_logger>());
+    irccd_.set_log(std::make_unique<logger::silent_sink>());
 
     // Irccd is mandatory at the moment.
     add<irccd_jsapi>();

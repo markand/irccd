@@ -36,12 +36,12 @@ protected:
     std::string line_warning;
     std::string line_debug;
 
-    class my_logger : public logger {
+    class sample_sink : public logger::sink {
     private:
         logger_test& test_;
 
     public:
-        inline my_logger(logger_test& test) noexcept
+        inline sample_sink(logger_test& test) noexcept
             : test_(test)
         {
         }
@@ -65,7 +65,7 @@ protected:
     logger_test()
         : js_test(CMAKE_CURRENT_SOURCE_DIR "/empty.js")
     {
-        irccd_.set_log(std::make_unique<my_logger>(*this));
+        irccd_.set_log(std::make_unique<sample_sink>(*this));
         irccd_.get_log().set_verbose(true);
     }
 };

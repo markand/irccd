@@ -20,14 +20,18 @@
 
 #define BOOST_TEST_MODULE "Logger"
 #include <boost/test/unit_test.hpp>
+#include <boost/format.hpp>
 
 #include <irccd/daemon/logger.hpp>
+
+using boost::format;
+using boost::str;
 
 namespace irccd {
 
 namespace {
 
-class my_logger : public logger {
+class sample_sink : public logger::sink {
 public:
     std::string line_debug;
     std::string line_info;
@@ -49,31 +53,37 @@ public:
     }
 };
 
-class my_filter : public logger_filter {
+class sample_filter : public logger::filter {
 public:
-    std::string pre_debug(std::string input) const override
+    auto pre_debug(std::string_view category,
+                   std::string_view component,
+                   std::string_view message) const -> std::string override
     {
-        return std::reverse(input.begin(), input.end()), input;
+        return str(format("DEBUG %s:%s:%s") % category % component % message);
     }
 
-    std::string pre_info(std::string input) const override
+    auto pre_info(std::string_view category,
+                  std::string_view component,
+                  std::string_view message) const -> std::string override
     {
-        return std::reverse(input.begin(), input.end()), input;
+        return str(format("INFO %s:%s:%s") % category % component % message);
     }
 
-    std::string pre_warning(std::string input) const override
+    auto pre_warning(std::string_view category,
+                     std::string_view component,
+                     std::string_view message) const -> std::string override
     {
-        return std::reverse(input.begin(), input.end()), input;
+        return str(format("WARN %s:%s:%s") % category % component % message);
     }
 };
 
 class logger_test {
 public:
-    my_logger log_;
+    sample_sink log_;
 
     logger_test()
     {
-        log_.set_filter(std::make_unique<my_filter>());
+        log_.set_filter(std::make_unique<sample_filter>());
         log_.set_verbose(true);
     }
 };
@@ -84,33 +94,33 @@ BOOST_FIXTURE_TEST_SUITE(logger_test_suite, logger_test)
 
 BOOST_AUTO_TEST_CASE(debug)
 {
-    log_.debug("debug");
+    log_.debug("test", "debug") << "success" << std::endl;
 
-    BOOST_REQUIRE_EQUAL("gubed", log_.line_debug);
+    BOOST_TEST(log_.line_debug == "DEBUG test:debug:success");
 }
 
 #endif
 
 BOOST_AUTO_TEST_CASE(info)
 {
-    log_.info("info");
+    log_.info("test", "info") << "success" << std::endl;
 
-    BOOST_REQUIRE_EQUAL("ofni", log_.line_info);
+    BOOST_TEST(log_.line_info == "INFO test:info:success");
 }
 
 BOOST_AUTO_TEST_CASE(info_quiet)
 {
     log_.set_verbose(false);
-    log_.info("info");
+    log_.info("test", "info") << "success" << std::endl;
 
     BOOST_REQUIRE(log_.line_info.empty());
 }
 
 BOOST_AUTO_TEST_CASE(warning)
 {
-    log_.warning("warning");
+    log_.warning("test", "warning") << "success" << std::endl;
 
-    BOOST_REQUIRE_EQUAL("gninraw", log_.line_warning);
+    BOOST_TEST(log_.line_warning == "WARN test:warning:success");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -38,7 +38,12 @@
  */
 namespace irccd {
 
-class logger;
+namespace logger {
+
+class sink;
+
+} // !logger
+
 class plugin_service;
 class rule_service;
 class server_service;
@@ -59,7 +64,7 @@ private:
     bool loaded_{false};
 
     // Custom logger.
-    std::unique_ptr<logger> logger_;
+    std::unique_ptr<logger::sink> sink_;
 
     // Services.
     std::shared_ptr<server_service> server_service_;
@@ -139,9 +144,9 @@ public:
      *
      * \return the logger
      */
-    inline const logger& get_log() const noexcept
+    inline const logger::sink& get_log() const noexcept
     {
-        return *logger_;
+        return *sink_;
     }
 
     /**
@@ -149,9 +154,9 @@ public:
      *
      * \return the logger
      */
-    inline logger& get_log() noexcept
+    inline logger::sink& get_log() noexcept
     {
-        return *logger_;
+        return *sink_;
     }
 
     /**
@@ -160,7 +165,7 @@ public:
      * \pre logger != nullptr
      * \param logger the new logger
      */
-    void set_log(std::unique_ptr<logger> logger) noexcept;
+    void set_log(std::unique_ptr<logger::sink> sink) noexcept;
 
     /**
      * Access the server service.

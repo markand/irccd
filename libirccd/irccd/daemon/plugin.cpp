@@ -68,13 +68,13 @@ plugin_error::plugin_error(error errc, std::string_view name, std::string_view m
 {
     std::ostringstream oss;
 
-    oss << "plugin " << name_ << ": " << code().message();
+    oss << code().message();
 
     std::istringstream iss(message_);
     std::string line;
 
     while (getline(iss, line))
-        oss << "\nplugin " << name_ << ": " << line;
+        oss << "\n" << line;
 
     what_ = oss.str();
 }

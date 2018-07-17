@@ -75,7 +75,7 @@ protected:
 
     rules_test()
     {
-        daemon_.set_log(std::make_unique<silent_logger>());
+        daemon_.set_log(std::make_unique<logger::silent_sink>());
 
         // #1
         {

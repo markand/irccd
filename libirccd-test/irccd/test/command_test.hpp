@@ -108,7 +108,7 @@ command_test<Commands...>::command_test()
 
     // Add the server and the command.
     add<Commands...>();
-    daemon_->set_log(std::make_unique<silent_logger>());
+    daemon_->set_log(std::make_unique<logger::silent_sink>());
 
     // Wait for controller to connect.
     boost::asio::deadline_timer timer(service_);

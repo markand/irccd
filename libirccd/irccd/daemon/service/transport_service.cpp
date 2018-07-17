@@ -56,8 +56,9 @@ void transport_service::handle_command(std::shared_ptr<transport_client> tc, con
         } catch (const std::system_error& ex) {
             tc->error(ex.code(), (*cmd)->get_name());
         } catch (const std::exception& ex) {
-            irccd_.get_log().warning() << "transport: unknown error not reported" << std::endl;
-            irccd_.get_log().warning() << "transport: " << ex.what() << std::endl;
+            irccd_.get_log().warning("transport", "")
+                << "unknown error not reported: "
+                << ex.what() << std::endl;
         }
     }
 }
@@ -67,7 +68,7 @@ void transport_service::do_recv(std::shared_ptr<transport_client> tc)
     tc->read([this, tc] (auto code, auto json) {
         switch (static_cast<std::errc>(code.value())) {
         case std::errc::not_connected:
-            irccd_.get_log().info("transport: client disconnected");
+            irccd_.get_log().info("transport", "") << "client disconnected" << std::endl;
             break;
         case std::errc::invalid_argument:
             tc->error(irccd_error::invalid_message);
@@ -93,7 +94,7 @@ void transport_service::do_accept(transport_server& ts)
             do_accept(ts);
             do_recv(std::move(client));
 
-            irccd_.get_log().info() << "transport: new client connected" << std::endl;
+            irccd_.get_log().info("transport", "") << "new client connected" << std::endl;
         }
     });
 }
@@ -131,7 +132,7 @@ void transport_service::load(const config& cfg) noexcept
         try {
             add(transport_util::from_config(irccd_.get_service(), section));
         } catch (const std::exception& ex) {
-            irccd_.get_log().warning() << "transport: " << ex.what() << std::endl;
+            irccd_.get_log().warning("transport", "") << ex.what() << std::endl;
         }
     }
 }

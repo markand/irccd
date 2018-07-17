@@ -16,8 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/daemon/logger.hpp>
 #include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/logger.hpp>
+#include <irccd/daemon/service/plugin_service.hpp>
 
 #include "irccd_jsapi.hpp"
 #include "js_plugin.hpp"
@@ -30,11 +31,25 @@ namespace {
 
 // {{{ print
 
-duk_ret_t print(duk_context* ctx, std::ostream &out)
+duk_ret_t print(duk_context* ctx, unsigned level)
 {
+    assert(level >= 0 && level <= 2);
+
     try {
-        out << "plugin " << dukx_type_traits<js_plugin>::self(ctx)->get_name() << ": ";
-        out << duk_require_string(ctx, 0) << std::endl;
+        auto& sink = dukx_type_traits<irccd>::self(ctx).get_log();
+        auto self = dukx_type_traits<js_plugin>::self(ctx);
+
+        switch (level) {
+        case 0:
+            sink.debug(static_cast<const plugin&>(*self)) << duk_require_string(ctx, 0) << std::endl;
+            break;
+        case 1:
+            sink.info(static_cast<const plugin&>(*self)) << duk_require_string(ctx, 0) << std::endl;
+            break;
+        default:
+            sink.warning(static_cast<const plugin&>(*self)) << duk_require_string(ctx, 0) << std::endl;
+            break;
+        }
     } catch (const std::exception& ex) {
         dukx_throw(ctx, ex);
     }
@@ -59,7 +74,7 @@ duk_ret_t print(duk_context* ctx, std::ostream &out)
  */
 duk_ret_t Logger_info(duk_context* ctx)
 {
-    return print(ctx, dukx_type_traits<irccd>::self(ctx).get_log().info());
+    return print(ctx, 1);
 }
 
 // }}}
@@ -79,7 +94,7 @@ duk_ret_t Logger_info(duk_context* ctx)
  */
 duk_ret_t Logger_warning(duk_context* ctx)
 {
-    return print(ctx, dukx_type_traits<irccd>::self(ctx).get_log().warning());
+    return print(ctx, 2);
 }
 
 // }}}
@@ -99,7 +114,7 @@ duk_ret_t Logger_warning(duk_context* ctx)
  */
 duk_ret_t Logger_debug(duk_context* ctx)
 {
-    return print(ctx, dukx_type_traits<irccd>::self(ctx).get_log().debug());
+    return print(ctx, 0);
 }
 
 // }}}

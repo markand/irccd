@@ -133,6 +133,20 @@ public:
     void load(const config& cfg) noexcept;
 };
 
+namespace logger {
+
+template <typename T>
+struct loggable_traits;
+
+template <>
+struct loggable_traits<rule> {
+    static auto get_category(const rule& rule) -> std::string_view;
+
+    static auto get_component(const rule& rule) -> std::string_view;
+};
+
+} // !logger
+
 } // !irccd
 
 #endif // !IRCCD_DAEMON_RULE_SERVICE_HPP
