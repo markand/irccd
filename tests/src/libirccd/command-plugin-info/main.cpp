@@ -30,7 +30,7 @@ namespace {
 
 class sample_plugin : public plugin {
 public:
-    auto get_name() const noexcept -> std::string_view
+    auto get_name() const noexcept -> std::string_view override
     {
         return "test";
     }
