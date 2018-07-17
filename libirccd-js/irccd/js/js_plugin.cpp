@@ -45,14 +45,17 @@ namespace {
 
 auto get_metadata(dukx_context& ctx, std::string_view name) -> std::string_view
 {
-    std::string_view ret;
+    std::string_view ret("unknown");
 
     dukx_stack_assert guard(ctx);
     duk_get_global_string(ctx, "info");
 
     if (duk_get_type(ctx, -1) == DUK_TYPE_OBJECT) {
         duk_get_prop_string(ctx, -1, name.data());
-        ret = duk_get_string(ctx, -1);
+
+        if (duk_get_type(ctx, -1) == DUK_TYPE_STRING)
+            ret = duk_get_string(ctx, -1);
+
         duk_pop(ctx);
     }
 
