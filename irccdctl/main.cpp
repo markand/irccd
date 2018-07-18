@@ -21,8 +21,9 @@
 #include <iostream>
 #include <unordered_map>
 
-#include <boost/predef/os.h>
 #include <boost/filesystem.hpp>
+#include <boost/format.hpp>
+#include <boost/predef/os.h>
 
 #include <irccd/config.hpp>
 #include <irccd/json_util.hpp>
@@ -70,6 +71,9 @@
 
 #include "alias.hpp"
 #include "cli.hpp"
+
+using boost::format;
+using boost::str;
 
 using boost::asio::ip::tcp;
 
@@ -214,7 +218,7 @@ void read_connect(const ini::section& sc)
     else if (it->value() == "unix")
         connector = read_connect_local(sc);
     else
-        throw std::invalid_argument(string_util::sprintf("invalid type given: %s", it->value()));
+        throw std::invalid_argument(str(format("invalid type given: %1%") % it->value()));
 
     if (connector) {
         ctl = std::make_unique<controller>(std::move(connector));
@@ -267,8 +271,8 @@ alias read_alias(const ini::section& sc, const std::string& name)
          * argument is a command name.
          */
         if (option.size() == 1 && option[0].empty())
-            throw std::runtime_error(string_util::sprintf("alias %s: missing command name in '%s'",
-                name, option.key()));
+            throw std::runtime_error(str(format("alias %1%: missing command name in '%2%'")
+                % name % option.key()));
 
         std::string command = option[0];
         std::vector<alias_arg> args(option.begin() + 1, option.end());
@@ -379,7 +383,7 @@ void parse_connect(const option::result& options)
     if (it->second == "unix")
         connector = parse_connect_local(options);
     else
-        throw std::invalid_argument(string_util::sprintf("invalid type given: %s", it->second));
+        throw std::invalid_argument(str(format("invalid type given: %1%") % it->second));
 
     if (connector)
         ctl = std::make_unique<controller>(std::move(connector));
@@ -439,7 +443,7 @@ void exec(const alias& alias, std::vector<std::string> args_copy)
             if (arg.is_placeholder()) {
                 if (args.size() < arg.index() + 1)
                     throw std::invalid_argument(
-                        string_util::sprintf("missing argument for placeholder %d", arg.index()));
+                        str(format("missing argument for placeholder %1%") % arg.index()));
 
                 cmd_args.push_back(args[arg.index()]);
 
@@ -540,8 +544,10 @@ void do_connect()
             if (!major || !minor || !patch)
                 std::cout << "connected to irccd (unknown version)" << std::endl;
             else
-                std::cout << string_util::sprintf("connected to irccd %d.%d.%d\n",
-                    *major, *minor, *patch);
+                std::cout << "connected to irccd "
+                          << *major << "."
+                          << *minor << "."
+                          << *patch << std::endl;
         }
     });
 

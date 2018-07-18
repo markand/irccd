@@ -36,8 +36,7 @@
 #include <string_view>
 #include <type_traits>
 #include <unordered_map>
-
-#include <boost/format.hpp>
+#include <vector>
 
 /**
  * \brief String utilities.
@@ -292,52 +291,6 @@ auto is_identifier(std::string_view name) noexcept -> bool;
  * \note this function is case-insensitive
  */
 auto is_boolean(std::string value) noexcept -> bool;
-
-// }}}
-
-// {{{ sprintf
-
-/**
- * \cond HIDDEN_SYMBOLS
- */
-
-namespace detail {
-
-inline void sprintf(boost::format&)
-{
-}
-
-template <typename Arg, typename... Args>
-inline void sprintf(boost::format& fmter, const Arg& arg, const Args&... args)
-{
-    fmter % arg;
-    sprintf(fmter, args...);
-}
-
-} // !detail
-
-/**
- * \endcond
- */
-
-/**
- * Convenient wrapper arount boost::format in sprintf style.
- *
- * This is identical as calling boost::format(format) % arg1 % arg2 % argN.
- *
- * \param format the format string
- * \param args the arguments
- * \return the string
- */
-template <typename Format, typename... Args>
-auto sprintf(const Format& format, const Args&... args) -> std::string
-{
-    boost::format fmter(format);
-
-    detail::sprintf(fmter, args...);
-
-    return fmter.str();
-}
 
 // }}}
 

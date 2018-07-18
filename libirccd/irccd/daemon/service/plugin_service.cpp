@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <boost/format.hpp>
+
 #include <irccd/config.hpp>
 #include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
@@ -24,6 +26,9 @@
 #include <irccd/daemon/logger.hpp>
 
 #include <irccd/daemon/service/plugin_service.hpp>
+
+using boost::format;
+using boost::str;
 
 namespace irccd {
 
@@ -99,18 +104,18 @@ void plugin_service::add_loader(std::unique_ptr<plugin_loader> loader)
 
 auto plugin_service::get_options(const std::string& id) -> plugin::map
 {
-    return to_map(irccd_.get_config(), string_util::sprintf("plugin.%s", id));
+    return to_map(irccd_.get_config(), str(format("plugin.%1%") % id));
 }
 
 auto plugin_service::get_formats(const std::string& id) -> plugin::map
 {
-    return to_map(irccd_.get_config(), string_util::sprintf("format.%s", id));
+    return to_map(irccd_.get_config(), str(format("format.%1%") % id));
 }
 
 auto plugin_service::get_paths(const std::string& id) -> plugin::map
 {
     auto defaults = to_map(irccd_.get_config(), "paths");
-    auto paths = to_map(irccd_.get_config(), string_util::sprintf("paths.%s", id));
+    auto paths = to_map(irccd_.get_config(), str(format("paths.%1%") % id));
 
     // Fill defaults paths.
     if (!defaults.count("cache"))
@@ -201,10 +206,10 @@ void plugin_service::unload(const std::string& id)
         throw plugin_error(plugin_error::not_found, id);
 
     // Erase first, in case of throwing.
-    const auto save = it->second;
+    const auto plg = it->second;
 
     plugins_.erase(it);
-    exec(it->second, &plugin::handle_unload, irccd_);
+    exec(plg, &plugin::handle_unload, irccd_);
 }
 
 void plugin_service::load(const config& cfg) noexcept

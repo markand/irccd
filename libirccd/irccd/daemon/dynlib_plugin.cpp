@@ -21,8 +21,7 @@
 #include <boost/dll.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/predef/os.h>
-
-#include <irccd/string_util.hpp>
+#include <boost/format.hpp>
 
 #include "dynlib_plugin.hpp"
 
@@ -33,6 +32,9 @@
 #else
 #   define DYNLIB_EXTENSION ".so"
 #endif
+
+using boost::format;
+using boost::str;
 
 namespace irccd {
 
@@ -53,8 +55,8 @@ auto symbol(std::string_view path) -> std::pair<std::string, std::string>
     });
 
     return {
-        string_util::sprintf("irccd_abi_%s", id),
-        string_util::sprintf("irccd_init_%s", id)
+        str(format("irccd_abi_%1%") % id),
+        str(format("irccd_init_%1%") % id)
     };
 }
 

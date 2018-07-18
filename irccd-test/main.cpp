@@ -26,6 +26,7 @@
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/format.hpp>
 
 #if defined(IRCCD_HAVE_LIBEDIT)
 #   include <histedit.h>
@@ -45,6 +46,9 @@
 #if defined(IRCCD_HAVE_JS)
 #   include <irccd/js/js_plugin.hpp>
 #endif
+
+using boost::format;
+using boost::str;
 
 namespace irccd {
 
@@ -607,7 +611,7 @@ void load_options(int& argc, char**& argv)
         try {
             daemon->set_config(it->second);
         } catch (const std::exception& ex) {
-            throw std::runtime_error(su::sprintf("%s: %s", it->second, ex.what()));
+            throw std::runtime_error(str(format("%1%: %2%") % it->second % ex.what()));
         }
     }
 }

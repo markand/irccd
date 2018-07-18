@@ -16,9 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <boost/predef/os.h>
-
 #include <irccd/sysconfig.hpp>
+
+#include <boost/predef/os.h>
+#include <boost/format.hpp>
 
 #include <algorithm>
 #include <cerrno>
@@ -37,6 +38,9 @@
 #include <irccd/system.hpp>
 
 #include "server.hpp"
+
+using boost::format;
+using boost::str;
 
 namespace irccd {
 
@@ -284,7 +288,7 @@ void server::dispatch_ping(const irc::message& msg)
 {
     assert(msg.command() == "PING");
 
-    send(string_util::sprintf("PONG %s", msg.arg(0)));
+    send(str(format("PONG %1%") % msg.arg(0)));
 }
 
 void server::dispatch_privmsg(const irc::message& msg)
@@ -431,10 +435,10 @@ void server::identify()
     jchannels_.clear();
 
     if (!password_.empty())
-        send(string_util::sprintf("PASS %s", password_));
+        send(str(format("PASS %1%") % password_));
 
-    send(string_util::sprintf("NICK %s", nickname_));
-    send(string_util::sprintf("USER %s unknown unknown :%s", username_, realname_));
+    send(str(format("NICK %1%") % nickname_));
+    send(str(format("USER %1% unknown unknown :%2%") % username_ % realname_));
 }
 
 void server::wait()
@@ -488,7 +492,7 @@ server::~server()
 void server::set_nickname(std::string nickname)
 {
     if (state_ == state::connected)
-        send(string_util::sprintf("NICK %s", nickname));
+        send(str(format("NICK %1%") % nickname));
     else
         nickname_ = std::move(nickname);
 }
@@ -552,7 +556,7 @@ void server::invite(std::string target, std::string channel)
     assert(!target.empty());
     assert(!channel.empty());
 
-    send(string_util::sprintf("INVITE %s %s", target, channel));
+    send(str(format("INVITE %1% %2%") % target % channel));
 }
 
 void server::join(std::string channel, std::string password)
@@ -570,9 +574,9 @@ void server::join(std::string channel, std::string password)
 
     if (state_ == state::connected) {
         if (password.empty())
-            send(string_util::sprintf("JOIN %s", channel));
+            send(str(format("JOIN %1%") % channel));
         else
-            send(string_util::sprintf("JOIN %s :%s", channel, password));
+            send(str(format("JOIN %1% :%2%") % channel % password));
     }
 }
 
@@ -582,9 +586,9 @@ void server::kick(std::string target, std::string channel, std::string reason)
     assert(!channel.empty());
 
     if (!reason.empty())
-        send(string_util::sprintf("KICK %s %s :%s", channel, target, reason));
+        send(str(format("KICK %1% %2% :%3%") % channel % target % reason));
     else
-        send(string_util::sprintf("KICK %s %s", channel, target));
+        send(str(format("KICK %1% %2%") % channel % target));
 }
 
 void server::me(std::string target, std::string message)
@@ -592,7 +596,7 @@ void server::me(std::string target, std::string message)
     assert(!target.empty());
     assert(!message.empty());
 
-    send(string_util::sprintf("PRIVMSG %s :\x01" "ACTION %s\x01", target, message));
+    send(str(format("PRIVMSG %1% :\x01" "ACTION %2%\x01") % target % message));
 }
 
 void server::message(std::string target, std::string message)
@@ -600,7 +604,7 @@ void server::message(std::string target, std::string message)
     assert(!target.empty());
     assert(!message.empty());
 
-    send(string_util::sprintf("PRIVMSG %s :%s", target, message));
+    send(str(format("PRIVMSG %1% :%2%") % target % message));
 }
 
 void server::mode(std::string channel,
@@ -630,7 +634,7 @@ void server::names(std::string channel)
 {
     assert(channel.c_str());
 
-    send(string_util::sprintf("NAMES %s", channel));
+    send(str(format("NAMES %1%") % channel));
 }
 
 void server::notice(std::string target, std::string message)
@@ -638,7 +642,7 @@ void server::notice(std::string target, std::string message)
     assert(!target.empty());
     assert(!message.empty());
 
-    send(string_util::sprintf("NOTICE %s :%s", target, message));
+    send(str(format("NOTICE %1% :%2%") % target % message));
 }
 
 void server::part(std::string channel, std::string reason)
@@ -646,9 +650,9 @@ void server::part(std::string channel, std::string reason)
     assert(!channel.empty());
 
     if (!reason.empty())
-        send(string_util::sprintf("PART %s :%s", channel, reason));
+        send(str(format("PART %1% :%2%") % channel % reason));
     else
-        send(string_util::sprintf("PART %s", channel));
+        send(str(format("PART %1%") % channel));
 }
 
 void server::send(std::string raw)
@@ -671,16 +675,16 @@ void server::topic(std::string channel, std::string topic)
     assert(!channel.empty());
 
     if (!topic.empty())
-        send(string_util::sprintf("TOPIC %s :%s", channel, topic));
+        send(str(format("TOPIC %1% :%2%") % channel % topic));
     else
-        send(string_util::sprintf("TOPIC %s", channel));
+        send(str(format("TOPIC %1%") % channel));
 }
 
 void server::whois(std::string target)
 {
     assert(!target.empty());
 
-    send(string_util::sprintf("WHOIS %s %s", target, target));
+    send(str(format("WHOIS %1% %2%") % target % target));
 }
 
 server_error::server_error(error code) noexcept

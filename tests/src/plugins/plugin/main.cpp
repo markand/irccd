@@ -18,6 +18,7 @@
 
 #define BOOST_TEST_MODULE "Plugin plugin"
 #include <boost/test/unit_test.hpp>
+#include <boost/format.hpp>
 
 #include <irccd/string_util.hpp>
 
@@ -26,6 +27,9 @@
 #include <irccd/daemon/service/plugin_service.hpp>
 
 #include <irccd/test/plugin_test.hpp>
+
+using boost::format;
+using boost::str;
 
 namespace irccd {
 
@@ -129,7 +133,7 @@ BOOST_AUTO_TEST_CASE(format_not_found)
 BOOST_AUTO_TEST_CASE(format_too_long)
 {
     for (int i = 0; i < 100; ++i)
-        irccd_.plugins().add(string_util::sprintf("plugin-n-%d", i), std::make_shared<fake_plugin>());
+        irccd_.plugins().add(str(format("plugin-n-%1%") % i), std::make_shared<fake_plugin>());
 
     plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#staff", "list"});
 
