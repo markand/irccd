@@ -52,7 +52,7 @@ public:
      * \param args the socket_acceptor arguments
      */
     template <typename... Args>
-    inline tls_acceptor(boost::asio::ssl::context context, Args&&... args)
+    tls_acceptor(boost::asio::ssl::context context, Args&&... args)
         : socket_acceptor<Protocol>(std::forward<Args>(args)...)
         , context_(std::move(context))
     {

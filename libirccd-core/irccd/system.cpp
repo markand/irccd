@@ -75,7 +75,7 @@ namespace {
  *
  * Otherwise, use the installation prefix.
  */
-boost::filesystem::path base_directory()
+auto base_directory() -> boost::filesystem::path
 {
     static const boost::filesystem::path bindir(CMAKE_INSTALL_BINDIR);
     static const boost::filesystem::path prefix(CMAKE_INSTALL_PREFIX);
@@ -117,7 +117,7 @@ boost::filesystem::path base_directory()
  *   - sysconfigdir,
  *   - plugindir.
  */
-boost::filesystem::path system_directory(const std::string& component)
+auto system_directory(const std::string& component) -> boost::filesystem::path
 {
     boost::filesystem::path path(component);
 
@@ -142,7 +142,7 @@ boost::filesystem::path system_directory(const std::string& component)
  *   - Windows:
  *     - <shlobj.h>
  */
-boost::filesystem::path user_config_directory()
+auto user_config_directory() -> boost::filesystem::path
 {
     boost::filesystem::path path;
 
@@ -183,7 +183,7 @@ boost::filesystem::path user_config_directory()
  *
  * Like add user_config_directory but for plugins.
  */
-boost::filesystem::path user_plugin_directory()
+auto user_plugin_directory() -> boost::filesystem::path
 {
     boost::filesystem::path path;
 
@@ -229,7 +229,7 @@ void set_program_name(std::string name) noexcept
 
 // {{{ name
 
-std::string name()
+auto name() -> std::string
 {
 #if BOOST_OS_LINUX
     return "Linux";
@@ -271,7 +271,7 @@ std::string name()
  *   - Others:
  *     - <sys/utsname.h>
  */
-std::string version()
+auto version() -> std::string
 {
 #if BOOST_OS_WINDOWS
     const auto version = GetVersion();
@@ -305,7 +305,7 @@ std::string version()
  *   - Others:
  *     - <ctime>
  */
-std::uint64_t uptime()
+auto uptime() -> std::uint64_t
 {
 #if BOOST_OS_WINDOWS
     return ::GetTickCount64() / 1000;
@@ -348,7 +348,7 @@ std::uint64_t uptime()
  *   - Others:
  *     - <sys/times.h>
  */
-std::uint64_t ticks()
+auto ticks() -> std::uint64_t
 {
 #if BOOST_OS_WINDOWS
     _timeb tp;
@@ -374,7 +374,7 @@ std::uint64_t ticks()
  *   - Windows:
  *     - <shlobj.h>
  */
-std::string home()
+auto home() -> std::string
 {
 #if BOOST_OS_WINDOWS
     char path[MAX_PATH];
@@ -396,7 +396,7 @@ std::string home()
  * Requires:
  *   - <cstdlib>
  */
-std::string env(const std::string& var)
+auto env(const std::string& var) -> std::string
 {
     const auto value = std::getenv(var.c_str());
 
@@ -410,7 +410,7 @@ std::string env(const std::string& var)
 
 // {{{ cachedir
 
-boost::filesystem::path cachedir()
+auto cachedir() -> boost::filesystem::path
 {
     return system_directory(CMAKE_INSTALL_LOCALSTATEDIR) / "cache/irccd";
 }
@@ -419,7 +419,7 @@ boost::filesystem::path cachedir()
 
 // {{{ datadir
 
-boost::filesystem::path datadir()
+auto datadir() -> boost::filesystem::path
 {
     return system_directory(CMAKE_INSTALL_DATADIR);
 }
@@ -428,7 +428,7 @@ boost::filesystem::path datadir()
 
 // {{{ sysconfdir
 
-boost::filesystem::path sysconfdir()
+auto sysconfdir() -> boost::filesystem::path
 {
     return system_directory(CMAKE_INSTALL_SYSCONFDIR) / "irccd";
 }
@@ -437,7 +437,7 @@ boost::filesystem::path sysconfdir()
 
 // {{{ plugindir
 
-boost::filesystem::path plugindir()
+auto plugindir() -> boost::filesystem::path
 {
     return system_directory(CMAKE_INSTALL_LIBDIR) / "irccd";
 }
@@ -450,7 +450,7 @@ boost::filesystem::path plugindir()
  * Requires:
  *   - <unistd.h>
  */
-std::string username()
+auto username() -> std::string
 {
 #if defined(HAVE_GETLOGIN)
     auto v = getlogin();
@@ -466,7 +466,7 @@ std::string username()
 
 // {{{ config_filenames
 
-std::vector<std::string> config_filenames(std::string_view file)
+auto config_filenames(std::string_view file) -> std::vector<std::string>
 {
     // TODO: remove this once we can use std::filesystem.
     const std::string filename(file);
@@ -481,8 +481,8 @@ std::vector<std::string> config_filenames(std::string_view file)
 
 // {{{ plugin_filenames
 
-std::vector<std::string> plugin_filenames(const std::string& name,
-                                          const std::vector<std::string>& extensions)
+auto plugin_filenames(const std::string& name,
+                      const std::vector<std::string>& extensions) -> std::vector<std::string>
 {
     assert(!extensions.empty());
 

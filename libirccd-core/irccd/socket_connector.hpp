@@ -75,7 +75,7 @@ public:
      * \param service the service
      * \param endpoint the unique endpoint
      */
-    inline socket_connector(boost::asio::io_service& service, endpoint endpoint) noexcept
+    socket_connector(boost::asio::io_service& service, endpoint endpoint) noexcept
         : service_(service)
         , endpoints_{std::move(endpoint)}
     {
@@ -87,7 +87,7 @@ public:
      * \param service the service
      * \param eps the endpoints
      */
-    inline socket_connector(boost::asio::io_service& service, std::vector<endpoint> eps) noexcept
+    socket_connector(boost::asio::io_service& service, std::vector<endpoint> eps) noexcept
         : service_(service)
         , endpoints_(std::move(eps))
     {
@@ -98,7 +98,7 @@ public:
      *
      * \return the I/O service
      */
-    inline const boost::asio::io_service& get_io_service() const noexcept
+    auto get_io_service() const noexcept -> const boost::asio::io_service&
     {
         return service_;
     }
@@ -108,7 +108,7 @@ public:
      *
      * \return the I/O service
      */
-    inline boost::asio::io_service& get_io_service() noexcept
+    auto get_io_service() noexcept -> boost::asio::io_service&
     {
         return service_;
     }

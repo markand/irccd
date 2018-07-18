@@ -45,6 +45,7 @@ set(
 set(
     SOURCES
     ${libirccd-core_SOURCE_DIR}/irccd/config.cpp
+    ${libirccd-core_SOURCE_DIR}/irccd/fs_util.cpp
     ${libirccd-core_SOURCE_DIR}/irccd/ini.cpp
     ${libirccd-core_SOURCE_DIR}/irccd/options.cpp
     ${libirccd-core_SOURCE_DIR}/irccd/string_util.cpp

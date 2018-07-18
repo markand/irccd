@@ -77,7 +77,7 @@ public:
      * \pre acceptor must be ready (is_open() returns true)
      * \param acceptor the Boost.Asio acceptor
      */
-    inline socket_acceptor(acceptor acceptor) noexcept
+    socket_acceptor(acceptor acceptor) noexcept
         : acceptor_(std::move(acceptor))
     {
         assert(acceptor_.is_open());
@@ -88,7 +88,7 @@ public:
      *
      * \return the acceptor
      */
-    inline const acceptor& get_acceptor() const noexcept
+    auto get_acceptor() const noexcept -> const acceptor&
     {
         return acceptor_;
     }
@@ -98,7 +98,7 @@ public:
      *
      * \return the acceptor
      */
-    inline acceptor& get_acceptor() noexcept
+    auto get_acceptor() noexcept -> acceptor&
     {
         return acceptor_;
     }

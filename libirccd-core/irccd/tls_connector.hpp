@@ -50,7 +50,7 @@ public:
      * \param args the arguments to socket_connector<Socket> constructor
      */
     template <typename... Args>
-    inline tls_connector(boost::asio::ssl::context context, Args&&... args)
+    tls_connector(boost::asio::ssl::context context, Args&&... args)
         : socket_connector<Protocol>(std::forward<Args>(args)...)
         , context_(std::move(context))
     {

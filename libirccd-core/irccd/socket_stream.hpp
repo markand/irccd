@@ -50,7 +50,7 @@ namespace detail {
  * \param code the error code
  * \return the std::error_code
  */
-inline std::error_code convert(boost::system::error_code code) noexcept
+inline auto convert(boost::system::error_code code) noexcept -> std::error_code
 {
     return std::error_code(code.value(), std::system_category());
 }
@@ -89,7 +89,7 @@ public:
      * \param args the Socket constructor arguments
      */
     template <typename... Args>
-    inline socket_stream(Args&&... args)
+    socket_stream(Args&&... args)
         : socket_(std::forward<Args>(args)...)
     {
     }
@@ -99,7 +99,7 @@ public:
      *
      * \return the socket
      */
-    inline const Socket& get_socket() const noexcept
+    auto get_socket() const noexcept -> const Socket&
     {
         return socket_;
     }
@@ -109,7 +109,7 @@ public:
      *
      * \return the socket
      */
-    inline Socket& get_socket() noexcept
+    auto get_socket() noexcept -> Socket&
     {
         return socket_;
     }

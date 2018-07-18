@@ -44,10 +44,7 @@ namespace irccd::fs_util {
  * \param path the path
  * \return the base name
  */
-inline std::string base_name(const std::string& path)
-{
-    return boost::filesystem::path(path).filename().string();
-}
+auto base_name(const std::string& path) -> std::string;
 
 // }}}
 
@@ -61,10 +58,7 @@ inline std::string base_name(const std::string& path)
  * \param path the path
  * \return the parent directory
  */
-inline std::string dir_name(const std::string& path)
-{
-    return boost::filesystem::path(path).parent_path().string();
-}
+auto dir_name(const std::string& path) -> std::string;
 
 // }}}
 
@@ -87,7 +81,7 @@ inline std::string dir_name(const std::string& path)
  * \throw boost::system::system_error on errors
  */
 template <typename Predicate>
-std::string find_if(const std::string& base, bool recursive, Predicate&& predicate)
+auto find_if(const std::string& base, bool recursive, Predicate&& predicate) -> std::string
 {
     const auto find = [&] (auto it) -> std::string {
         for (const auto& entry : it)
@@ -115,12 +109,7 @@ std::string find_if(const std::string& base, bool recursive, Predicate&& predica
  * \return the full path name to the file or empty string if never found
  * \throw boost::system::system_error on errors
  */
-inline std::string find(const std::string& base, const std::string& name, bool recursive = false)
-{
-    return find_if(base, recursive, [&] (const auto& entry) {
-        return entry.path().filename().string() == name;
-    });
-}
+auto find(const std::string& base, const std::string& name, bool recursive = false) -> std::string;
 
 /**
  * Overload by regular expression.
@@ -131,12 +120,7 @@ inline std::string find(const std::string& base, const std::string& name, bool r
  * \return the full path name to the file or empty string if never found
  * \throw boost::system::system_error on errors
  */
-inline std::string find(const std::string& base, const std::regex& regex, bool recursive = false)
-{
-    return find_if(base, recursive, [&] (const auto& entry) {
-        return std::regex_match(entry.path().filename().string(), regex);
-    });
-}
+auto find(const std::string& base, const std::regex& regex, bool recursive = false) -> std::string;
 
 // }}}
 

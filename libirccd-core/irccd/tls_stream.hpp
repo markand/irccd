@@ -47,7 +47,7 @@ public:
      * \param args the arguments to boost::asio::ssl::stream<Socket>
      */
     template <typename... Args>
-    inline tls_stream(Args&&... args)
+    tls_stream(Args&&... args)
         : socket_stream<boost::asio::ssl::stream<Socket>>(std::forward<Args>(args)...)
     {
     }

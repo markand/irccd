@@ -50,21 +50,21 @@ void set_program_name(std::string name) noexcept;
  *
  * \return the name
  */
-std::string name();
+auto name() -> std::string;
 
 /**
  * Get the system version.
  *
  * \return the version
  */
-std::string version();
+auto version() -> std::string;
 
 /**
  * Get the number of seconds elapsed since the boottime.
  *
  * \return the number of seconds
  */
-std::uint64_t uptime();
+auto uptime() -> std::uint64_t;
 
 /**
  * Get the milliseconds elapsed since the application
@@ -72,21 +72,21 @@ std::uint64_t uptime();
  *
  * \return the milliseconds
  */
-std::uint64_t ticks();
+auto ticks() -> std::uint64_t;
 
 /**
  * Get an environment variable.
  *
  * \return the value or empty string
  */
-std::string env(const std::string& var);
+auto env(const std::string& var) -> std::string;
 
 /**
  * Get home directory usually /home/foo
  *
  * \return the home directory
  */
-std::string home();
+auto home() -> std::string;
 
 /**
  * Get the cache directory as specified as compile time option
@@ -99,7 +99,7 @@ std::string home();
  * \see datadir
  * \see configdir
  */
-boost::filesystem::path cachedir();
+auto cachedir() -> boost::filesystem::path;
 
 /**
  * Like cachedir but for CMAKE_INSTALL_DATADIR.
@@ -108,7 +108,7 @@ boost::filesystem::path cachedir();
  * \see cachedir
  * \see datadir
  */
-boost::filesystem::path datadir();
+auto datadir() -> boost::filesystem::path;
 
 /**
  * Like cachedir but for CMAKE_INSTALL_SYSCONFDIR.
@@ -118,7 +118,7 @@ boost::filesystem::path datadir();
  * \see datadir
  * \note use config_filenames for irccd.conf, irccdctl.conf files
  */
- boost::filesystem::path sysconfdir();
+auto sysconfdir() -> boost::filesystem::path;
 
 /**
  * Like cachedir but for CMAKE_INSTALL_LIBDIR.
@@ -127,14 +127,14 @@ boost::filesystem::path datadir();
  * \see cachedir
  * \see datadir
  */
-boost::filesystem::path plugindir();
+auto plugindir() -> boost::filesystem::path;
 
 /**
  * Get user account login or empty if not available.
  *
  * \return the user account name
  */
-std::string username();
+auto username() -> std::string;
 
 /**
  * Construct a list of paths to read configuration files from.
@@ -147,7 +147,7 @@ std::string username();
  * \param file the filename to append for convenience
  * \return the list of paths to check in order
  */
-std::vector<std::string> config_filenames(std::string_view file);
+auto config_filenames(std::string_view file) -> std::vector<std::string>;
 
 /**
  * Construct a list of paths for reading plugins.
@@ -155,8 +155,8 @@ std::vector<std::string> config_filenames(std::string_view file);
  * \param name the plugin id (without extension)
  * \param extensions the list of extensions supported
  */
-std::vector<std::string> plugin_filenames(const std::string& name,
-                                          const std::vector<std::string>& extensions);
+auto plugin_filenames(const std::string& name,
+                      const std::vector<std::string>& extensions) -> std::vector<std::string>;
 
 } // !irccd::sys
 
