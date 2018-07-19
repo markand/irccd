@@ -33,9 +33,8 @@ BOOST_FIXTURE_TEST_SUITE(server_info_test_suite, command_test<server_info_comman
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    auto server = std::make_unique<journal_server>(service_, "test");
+    auto server = std::make_unique<journal_server>(service_, "test", "example.org");
 
-    server->set_host("example.org");
     server->set_port(8765);
     server->set_password("none");
     server->set_nickname("pascal");

@@ -237,7 +237,8 @@ public:
     /**
      * \brief Various options for server.
      */
-    enum {
+    enum class options : std::uint8_t {
+        none        = 0,                    //!< No options
         ipv6        = (1 << 0),             //!< Connect using IPv6
         ssl         = (1 << 1),             //!< Use SSL
         ssl_verify  = (1 << 2),             //!< Verify SSL
@@ -248,7 +249,7 @@ public:
     /**
      * \brief Describe current server state.
      */
-    enum class state {
+    enum class state : std::uint8_t {
         disconnected,       //!< not connected at all,
         connecting,         //!< network connection in progress,
         identifying,        //!< sending nick, user and password commands,
@@ -395,13 +396,13 @@ private:
     std::vector<std::string> jchannels_;
 
     // Identifier.
-    std::string name_;
+    std::string id_;
 
     // Connection information.
     std::string host_;
     std::string password_;
     std::uint16_t port_{6667};
-    std::uint8_t flags_{0};
+    options flags_{options::none};
 
     // Identity.
     std::string nickname_;
@@ -427,7 +428,7 @@ private:
     std::map<std::string, std::set<std::string>> names_map_;
     std::map<std::string, whois_info> whois_map_;
 
-    void remove_joined_channel(const std::string& channel);
+    void remove_joined_channel(const std::string&);
 
     void dispatch_connect(const irc::message&);
     void dispatch_endofnames(const irc::message&);
@@ -463,9 +464,7 @@ public:
      * \param name the identifier
      * \param host the hostname
      */
-    server(boost::asio::io_service& service,
-           std::string name,
-           std::string host = "localhost");
+    server(boost::asio::io_service& service, std::string id, std::string host = "localhost");
 
     /**
      * Destructor. Close the connection if needed.
@@ -477,50 +476,28 @@ public:
      *
      * \return the state
      */
-    inline state get_state() const noexcept
-    {
-        return state_;
-    }
+    auto get_state() const noexcept -> state;
 
     /**
      * Get the server identifier.
      *
      * \return the id
      */
-    inline const std::string& get_name() const noexcept
-    {
-        return name_;
-    }
+    auto get_id() const noexcept -> const std::string&;
 
     /**
      * Get the hostname.
      *
      * \return the hostname
      */
-    inline const std::string& get_host() const noexcept
-    {
-        return host_;
-    }
-
-    /**
-     * Set the hostname.
-     *
-     * \param host the hostname
-     */
-    inline void set_host(std::string host) noexcept
-    {
-        host_ = std::move(host);
-    }
+    auto get_host() const noexcept -> const std::string&;
 
     /**
      * Get the password.
      *
      * \return the password
      */
-    inline const std::string& get_password() const noexcept
-    {
-        return password_;
-    }
+    auto get_password() const noexcept -> const std::string&;
 
     /**
      * Set the password.
@@ -529,70 +506,48 @@ public:
      *
      * \param password the password
      */
-    inline void set_password(std::string password) noexcept
-    {
-        password_ = std::move(password);
-    }
+    void set_password(std::string password) noexcept;
 
     /**
      * Get the port.
      *
      * \return the port
      */
-    inline std::uint16_t get_port() const noexcept
-    {
-        return port_;
-    }
+    auto get_port() const noexcept -> std::uint16_t;
 
     /**
      * Set the port.
      *
      * \param port the port
      */
-    inline void set_port(std::uint16_t port) noexcept
-    {
-        port_ = port;
-    }
+    void set_port(std::uint16_t port) noexcept;
 
     /**
-     * Get the flags.
+     * Get the options flags.
      *
      * \return the flags
      */
-    inline std::uint8_t get_flags() const noexcept
-    {
-        return flags_;
-    }
+    auto get_options() const noexcept -> options;
 
     /**
-     * Set the flags.
+     * Set the options flags.
      *
      * \param flags the flags
      */
-    inline void set_flags(std::uint8_t flags) noexcept
-    {
-#if !defined(IRCCD_HAVE_SSL)
-        assert(!(flags & ssl));
-#endif
-
-        flags_ = flags;
-    }
+    void set_options(options flags) noexcept;
 
     /**
      * Get the nickname.
      *
      * \return the nickname
      */
-    inline const std::string& get_nickname() const noexcept
-    {
-        return nickname_;
-    }
+    auto get_nickname() const noexcept -> const std::string&;
 
     /**
      * Set the nickname.
      *
      * If the server is connected, send a nickname command to the IRC server,
-     * otherwise change it locally.
+     * otherwise change it instantly.
      *
      * \param nickname the nickname
      */
@@ -603,10 +558,7 @@ public:
      *
      * \return the username
      */
-    inline const std::string& get_username() const noexcept
-    {
-        return username_;
-    }
+    auto get_username() const noexcept -> const std::string&;
 
     /**
      * Set the username.
@@ -614,20 +566,14 @@ public:
      * \param name the username
      * \note the username will be changed on the next connection
      */
-    inline void set_username(std::string name) noexcept
-    {
-        username_ = std::move(name);
-    }
+    void set_username(std::string name) noexcept;
 
     /**
      * Get the realname.
      *
      * \return the realname
      */
-    inline const std::string& get_realname() const noexcept
-    {
-        return realname_;
-    }
+    auto get_realname() const noexcept -> const std::string&;
 
     /**
      * Set the realname.
@@ -635,20 +581,14 @@ public:
      * \param realname the username
      * \note the username will be changed on the next connection
      */
-    inline void set_realname(std::string realname) noexcept
-    {
-        realname_ = std::move(realname);
-    }
+    void set_realname(std::string realname) noexcept;
 
     /**
      * Get the CTCP version.
      *
      * \return the CTCP version
      */
-    inline const std::string& get_ctcp_version() const noexcept
-    {
-        return ctcpversion_;
-    }
+    auto get_ctcp_version() const noexcept -> const std::string&;
 
     /**
      * Set the CTCP version.
@@ -662,10 +602,7 @@ public:
      *
      * \return the character
      */
-    inline const std::string& get_command_char() const noexcept
-    {
-        return command_char_;
-    }
+    auto get_command_char() const noexcept -> const std::string&;
 
     /**
      * Set the command character.
@@ -673,22 +610,14 @@ public:
      * \pre !command_char_.empty()
      * \param command_char the command character
      */
-    inline void set_command_char(std::string command_char) noexcept
-    {
-        assert(!command_char.empty());
-
-        command_char_ = std::move(command_char);
-    }
+    void set_command_char(std::string command_char) noexcept;
 
     /**
      * Get the number of reconnections before giving up.
      *
      * \return the number of reconnections
      */
-    inline std::int8_t get_reconnect_tries() const noexcept
-    {
-        return recotries_;
-    }
+    auto get_reconnect_tries() const noexcept -> std::int8_t;
 
     /**
      * Set the number of reconnections to test before giving up.
@@ -697,60 +626,42 @@ public:
      *
      * \param reconnect_tries the number of reconnections
      */
-    inline void set_reconnect_tries(std::int8_t reconnect_tries) noexcept
-    {
-        recotries_ = reconnect_tries;
-    }
+    void set_reconnect_tries(std::int8_t reconnect_tries) noexcept;
 
     /**
      * Get the reconnection delay before retrying.
      *
      * \return the number of seconds
      */
-    inline std::uint16_t get_reconnect_delay() const noexcept
-    {
-        return recodelay_;
-    }
+    auto get_reconnect_delay() const noexcept -> std::uint16_t;
 
     /**
      * Set the number of seconds before retrying.
      *
      * \param reconnect_delay the number of seconds
      */
-    inline void set_reconnect_delay(std::uint16_t reconnect_delay) noexcept
-    {
-        recodelay_ = reconnect_delay;
-    }
+    void set_reconnect_delay(std::uint16_t reconnect_delay) noexcept;
 
     /**
      * Get the ping timeout.
      *
      * \return the ping timeout
      */
-    inline std::uint16_t get_ping_timeout() const noexcept
-    {
-        return timeout_;
-    }
+    auto get_ping_timeout() const noexcept -> std::uint16_t;
 
     /**
      * Set the ping timeout before considering a server as dead.
      *
      * \param ping_timeout the delay in seconds
      */
-    inline void set_ping_timeout(std::uint16_t ping_timeout) noexcept
-    {
-        timeout_ = ping_timeout;
-    }
+    void set_ping_timeout(std::uint16_t ping_timeout) noexcept;
 
     /**
      * Get the list of channels joined.
      *
      * \return the channels
      */
-    inline const std::vector<std::string>& get_channels() const noexcept
-    {
-        return jchannels_;
-    }
+    auto get_channels() const noexcept -> const std::vector<std::string>&;
 
     /**
      * Determine if the nickname is the bot itself.
@@ -758,7 +669,7 @@ public:
      * \param nick the nickname to check
      * \return true if it is the bot
      */
-    bool is_self(const std::string& nick) const noexcept;
+    auto is_self(const std::string& nick) const noexcept -> bool;
 
     /**
      * Start connecting.
@@ -887,6 +798,97 @@ public:
 };
 
 /**
+ * \cond IRCCD_HIDDEN_SYMBOLS
+ */
+
+/**
+ * Apply bitwise XOR.
+ *
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
+ */
+inline auto operator^(server::options v1, server::options v2) noexcept -> server::options
+{
+    return static_cast<server::options>(static_cast<unsigned>(v1) ^ static_cast<unsigned>(v2));
+}
+
+/**
+ * Apply bitwise AND.
+ *
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
+ */
+inline auto operator&(server::options v1, server::options v2) noexcept -> server::options
+{
+    return static_cast<server::options>(static_cast<unsigned>(v1) & static_cast<unsigned>(v2));
+}
+
+/**
+ * Apply bitwise OR.
+ *
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
+ */
+inline auto operator|(server::options v1, server::options v2) noexcept -> server::options
+{
+    return static_cast<server::options>(static_cast<unsigned>(v1) | static_cast<unsigned>(v2));
+}
+
+/**
+ * Apply bitwise NOT.
+ *
+ * \param v the value
+ * \return the complement
+ */
+inline auto operator~(server::options v) noexcept -> server::options
+{
+    return static_cast<server::options>(~static_cast<unsigned>(v));
+}
+
+/**
+ * Assign bitwise OR.
+ *
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
+ */
+inline auto operator|=(server::options& v1, server::options v2) noexcept -> server::options&
+{
+    return v1 = v1 | v2;
+}
+
+/**
+ * Assign bitwise AND.
+ *
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
+ */
+inline auto operator&=(server::options& v1, server::options v2) noexcept -> server::options&
+{
+    return v1 = v1 & v2;
+}
+
+/**
+ * Assign bitwise XOR.
+ *
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
+ */
+inline auto operator^=(server::options& v1, server::options v2) noexcept -> server::options&
+{
+    return v1 = v1 ^ v2;
+}
+
+/**
+ * \endcond
+ */
+
+/**
  * \brief Server error.
  */
 class server_error : public std::system_error {
@@ -973,14 +975,14 @@ public:
  *
  * \return the singleton
  */
-const std::error_category& server_category();
+auto server_category() -> const std::error_category&;
 
 /**
  * Create a boost::system::error_code from server_error::error enum.
  *
  * \param e the error code
  */
-std::error_code make_error_code(server_error::error e);
+auto make_error_code(server_error::error e) -> std::error_code;
 
 } // !irccd
 

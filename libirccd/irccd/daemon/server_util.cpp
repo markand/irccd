@@ -77,15 +77,15 @@ void from_config_load_flags(server& sv, const ini::section& sc)
     const auto join_invite = sc.get("join-invite");
 
     if (string_util::is_boolean(ipv6.value()))
-        sv.set_flags(sv.get_flags() | server::ipv6);
+        sv.set_options(sv.get_options() | server::options::ipv6);
     if (string_util::is_boolean(ssl.value()))
-        sv.set_flags(sv.get_flags() | server::ssl);
+        sv.set_options(sv.get_options() | server::options::ssl);
     if (string_util::is_boolean(ssl_verify.value()))
-        sv.set_flags(sv.get_flags() | server::ssl_verify);
+        sv.set_options(sv.get_options() | server::options::ssl_verify);
     if (string_util::is_boolean(auto_rejoin.value()))
-        sv.set_flags(sv.get_flags() | server::auto_rejoin);
+        sv.set_options(sv.get_options() | server::options::auto_rejoin);
     if (string_util::is_boolean(join_invite.value()))
-        sv.set_flags(sv.get_flags() | server::join_invite);
+        sv.set_options(sv.get_options() | server::options::join_invite);
 }
 
 void from_config_load_numeric_parameters(server& sv, const ini::section& sc)
@@ -162,20 +162,20 @@ void from_json_load_flags(server& sv, const json_util::document& parser)
     const auto ssl_verify = parser.get<bool>("sslVerify");
 
     if (ipv6.value_or(false))
-        sv.set_flags(sv.get_flags() | server::ipv6);
+        sv.set_options(sv.get_options() | server::options::ipv6);
     if (auto_rejoin.value_or(false))
-        sv.set_flags(sv.get_flags() | server::auto_rejoin);
+        sv.set_options(sv.get_options() | server::options::auto_rejoin);
     if (join_invite.value_or(false))
-        sv.set_flags(sv.get_flags() | server::join_invite);
+        sv.set_options(sv.get_options() | server::options::join_invite);
 
     if (ssl.value_or(false))
 #if !defined(IRCCD_HAVE_SSL)
         throw server_error(server_error::ssl_disabled);
 #else
-        sv.set_flags(sv.get_flags() | server::ssl);
+        sv.set_options(sv.get_options() | server::options::ssl);
 #endif
     if (ssl_verify.value_or(false))
-        sv.set_flags(sv.get_flags() | server::ssl_verify);
+        sv.set_options(sv.get_options() | server::options::ssl_verify);
 }
 
 } // !namespace

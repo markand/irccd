@@ -48,7 +48,7 @@ void server_info_command::exec(irccd& irccd, transport_client& client, const doc
 
     // General stuff.
     response.push_back({"command", "server-info"});
-    response.push_back({"name", server->get_name()});
+    response.push_back({"name", server->get_id()});
     response.push_back({"host", server->get_host()});
     response.push_back({"port", server->get_port()});
     response.push_back({"nickname", server->get_nickname()});
@@ -57,11 +57,11 @@ void server_info_command::exec(irccd& irccd, transport_client& client, const doc
     response.push_back({"channels", server->get_channels()});
 
     // Optional stuff.
-    if (server->get_flags() & server::ipv6)
+    if ((server->get_options() & server::options::ipv6) == server::options::ipv6)
         response.push_back({"ipv6", true});
-    if (server->get_flags() & server::ssl)
+    if ((server->get_options() & server::options::ssl) == server::options::ssl)
         response.push_back({"ssl", true});
-    if (server->get_flags() & server::ssl_verify)
+    if ((server->get_options() & server::options::ssl_verify) == server::options::ssl_verify)
         response.push_back({"sslVerify", true});
 
     client.write(response);

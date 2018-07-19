@@ -35,7 +35,7 @@ void server_connect_command::exec(irccd& irccd, transport_client& client, const 
 {
     auto server = server_util::from_json(irccd.get_service(), args);
 
-    if (irccd.servers().has(server->get_name()))
+    if (irccd.servers().has(server->get_id()))
         throw server_error(server_error::already_exists);
 
     irccd.servers().add(std::move(server));

@@ -53,7 +53,7 @@ namespace {
  * Remove the user prefix only if it is present in the mode table, for example
  * removes @ from @irccd if and only if @ is a character mode (e.g. operator).
  */
-std::string clean_prefix(const std::map<channel_mode, char>& modes, std::string nickname)
+auto clean_prefix(const std::map<channel_mode, char>& modes, std::string nickname) -> std::string
 {
     if (nickname.length() == 0)
         return nickname;
@@ -71,7 +71,7 @@ std::string clean_prefix(const std::map<channel_mode, char>& modes, std::string 
  *
  * Read modes from the IRC event numeric.
  */
-std::map<channel_mode, char> isupport_extract_prefixes(const std::string& line)
+auto isupport_extract_prefixes(const std::string& line) -> std::map<channel_mode, char>
 {
     // FIXME: what if line has different size?
     std::pair<char, char> table[16];
@@ -115,21 +115,6 @@ std::map<channel_mode, char> isupport_extract_prefixes(const std::string& line)
 void server::remove_joined_channel(const std::string& channel)
 {
     jchannels_.erase(std::remove(jchannels_.begin(), jchannels_.end(), channel), jchannels_.end());
-}
-
-server::server(boost::asio::io_service& service, std::string name, std::string host)
-    : name_(std::move(name))
-    , host_(std::move(host))
-    , service_(service)
-    , timer_(service)
-{
-    assert(!host_.empty());
-
-    // Initialize nickname and username.
-    auto user = sys::username();
-
-    nickname_ = user.empty() ? "irccd" : user;
-    username_ = user.empty() ? "irccd" : user;
 }
 
 void server::dispatch_connect(const irc::message&)
@@ -187,7 +172,7 @@ void server::dispatch_endofwhois(const irc::message& msg)
 void server::dispatch_invite(const irc::message& msg)
 {
     // If join-invite is set, join the channel.
-    if ((flags_ & join_invite) && is_self(msg.arg(0)))
+    if ((flags_ & options::join_invite) == options::join_invite && is_self(msg.arg(0)))
         join(msg.arg(1));
 
     on_invite({shared_from_this(), msg.prefix(), msg.arg(1), msg.arg(0)});
@@ -218,7 +203,7 @@ void server::dispatch_kick(const irc::message& msg)
         remove_joined_channel(msg.arg(0));
 
         // Rejoin the channel if the option has been set and I was kicked.
-        if (flags_ & auto_rejoin)
+        if ((flags_ & options::auto_rejoin) == options::auto_rejoin)
             join(msg.arg(0));
     }
 
@@ -483,10 +468,79 @@ void server::handle_connect(boost::system::error_code code)
     }
 }
 
+server::server(boost::asio::io_service& service, std::string id, std::string host)
+    : id_(std::move(id))
+    , host_(std::move(host))
+    , service_(service)
+    , timer_(service)
+{
+    assert(!host_.empty());
+
+    // Initialize nickname and username.
+    auto user = sys::username();
+
+    nickname_ = user.empty() ? "irccd" : user;
+    username_ = user.empty() ? "irccd" : user;
+}
+
 server::~server()
 {
     conn_ = nullptr;
     state_ = state::disconnected;
+}
+
+auto server::get_state() const noexcept -> state
+{
+    return state_;
+}
+
+auto server::get_id() const noexcept -> const std::string&
+{
+    return id_;
+}
+
+auto server::get_host() const noexcept -> const std::string&
+{
+    return host_;
+}
+
+auto server::get_password() const noexcept -> const std::string&
+{
+    return password_;
+}
+
+void server::set_password(std::string password) noexcept
+{
+    password_ = std::move(password);
+}
+
+auto server::get_port() const noexcept -> std::uint16_t
+{
+    return port_;
+}
+
+void server::set_port(std::uint16_t port) noexcept
+{
+    port_ = port;
+}
+
+auto server::get_options() const noexcept -> options
+{
+    return flags_;
+}
+
+void server::set_options(options flags) noexcept
+{
+#if !defined(IRCCD_HAVE_SSL)
+    assert(!(flags & ssl));
+#endif
+
+    flags_ = flags;
+}
+
+auto server::get_nickname() const noexcept -> const std::string&
+{
+    return nickname_;
 }
 
 void server::set_nickname(std::string nickname)
@@ -497,9 +551,86 @@ void server::set_nickname(std::string nickname)
         nickname_ = std::move(nickname);
 }
 
+auto server::get_username() const noexcept -> const std::string&
+{
+    return username_;
+}
+
+void server::set_username(std::string name) noexcept
+{
+    username_ = std::move(name);
+}
+
+auto server::get_realname() const noexcept -> const std::string&
+{
+    return realname_;
+}
+
+void server::set_realname(std::string realname) noexcept
+{
+    realname_ = std::move(realname);
+}
+
+auto server::get_ctcp_version() const noexcept -> const std::string&
+{
+    return ctcpversion_;
+}
+
 void server::set_ctcp_version(std::string ctcpversion)
 {
     ctcpversion_ = std::move(ctcpversion);
+}
+
+auto server::get_command_char() const noexcept -> const std::string&
+{
+    return command_char_;
+}
+
+void server::set_command_char(std::string command_char) noexcept
+{
+    assert(!command_char.empty());
+
+    command_char_ = std::move(command_char);
+}
+
+auto server::get_reconnect_tries() const noexcept -> std::int8_t
+{
+    return recotries_;
+}
+
+void server::set_reconnect_tries(std::int8_t reconnect_tries) noexcept
+{
+    recotries_ = reconnect_tries;
+}
+
+auto server::get_reconnect_delay() const noexcept -> std::uint16_t
+{
+    return recodelay_;
+}
+
+void server::set_reconnect_delay(std::uint16_t reconnect_delay) noexcept
+{
+    recodelay_ = reconnect_delay;
+}
+
+auto server::get_ping_timeout() const noexcept -> std::uint16_t
+{
+    return timeout_;
+}
+
+void server::set_ping_timeout(std::uint16_t ping_timeout) noexcept
+{
+    timeout_ = ping_timeout;
+}
+
+auto server::get_channels() const noexcept -> const std::vector<std::string>&
+{
+    return jchannels_;
+}
+
+auto server::is_self(const std::string& target) const noexcept -> bool
+{
+    return nickname_ == irc::user::parse(target).nick();
 }
 
 void server::connect() noexcept
@@ -514,7 +645,7 @@ void server::connect() noexcept
     (void)res_init();
 #endif
 
-    if (flags_ & ssl) {
+    if ((flags_ & options::ssl) == options::ssl) {
 #if defined(IRCCD_HAVE_SSL)
         conn_ = std::make_shared<irc::tls_connection>(service_);
 #else
@@ -522,7 +653,7 @@ void server::connect() noexcept
          * If SSL is not compiled in, the caller is responsible of not setting
          * the flag.
          */
-        assert(!(flags_ & ssl));
+        assert((flags_ & options::ssl) != options::ssl);
 #endif
     } else
         conn_ = std::make_shared<irc::ip_connection>(service_);
@@ -537,6 +668,7 @@ void server::disconnect() noexcept
 {
     conn_ = nullptr;
     state_ = state::disconnected;
+    queue_.clear();
     on_disconnect({shared_from_this()});
 }
 
@@ -544,11 +676,6 @@ void server::reconnect() noexcept
 {
     disconnect();
     connect();
-}
-
-bool server::is_self(const std::string& target) const noexcept
-{
-    return nickname_ == irc::user::parse(target).nick();
 }
 
 void server::invite(std::string target, std::string channel)
@@ -692,7 +819,7 @@ server_error::server_error(error code) noexcept
 {
 }
 
-const std::error_category& server_category()
+auto server_category() -> const std::error_category&
 {
     static const class category : public std::error_category {
     public:
@@ -753,7 +880,7 @@ const std::error_category& server_category()
     return category;
 }
 
-std::error_code make_error_code(server_error::error e)
+auto make_error_code(server_error::error e) -> std::error_code
 {
     return {static_cast<int>(e), server_category()};
 }

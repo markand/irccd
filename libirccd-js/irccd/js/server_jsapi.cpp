@@ -86,15 +86,17 @@ duk_ret_t Server_prototype_info(duk_context* ctx)
     const auto server = self(ctx);
 
     duk_push_object(ctx);
-    dukx_push(ctx, server->get_name());
+    dukx_push(ctx, server->get_id());
     duk_put_prop_string(ctx, -2, "name");
     dukx_push(ctx, server->get_host());
     duk_put_prop_string(ctx, -2, "host");
     duk_push_int(ctx, server->get_port());
     duk_put_prop_string(ctx, -2, "port");
-    duk_push_boolean(ctx, server->get_flags() & server::ssl);
+    duk_push_boolean(ctx,
+        (server->get_options() & server::options::ssl) == server::options::ssl);
     duk_put_prop_string(ctx, -2, "ssl");
-    duk_push_boolean(ctx, server->get_flags() & server::ssl_verify);
+    duk_push_boolean(ctx,
+        (server->get_options() & server::options::ssl_verify) == server::options::ssl_verify);
     duk_put_prop_string(ctx, -2, "sslVerify");
     dukx_push(ctx, server->get_command_char());
     duk_put_prop_string(ctx, -2, "commandChar");
@@ -575,7 +577,7 @@ duk_ret_t Server_prototype_whois(duk_context* ctx)
 duk_ret_t Server_prototype_toString(duk_context* ctx)
 {
     return wrap(ctx, [] (auto ctx) {
-        dukx_push(ctx, self(ctx)->get_name());
+        dukx_push(ctx, self(ctx)->get_id());
 
         return 1;
     });
@@ -728,7 +730,7 @@ duk_ret_t Server_list(duk_context* ctx)
 
     for (const auto& server : dukx_type_traits<irccd>::self(ctx).servers().servers()) {
         dukx_push(ctx, server);
-        duk_put_prop_string(ctx, -2, server->get_name().c_str());
+        duk_put_prop_string(ctx, -2, server->get_id().c_str());
     }
 
     return 1;
