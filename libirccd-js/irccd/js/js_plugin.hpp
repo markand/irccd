@@ -76,9 +76,10 @@ public:
     /**
      * Constructor.
      *
+     * \param id the plugin id
      * \param path the path to the plugin
      */
-    js_plugin(std::string_view path);
+    js_plugin(std::string id, std::string path);
 
     /**
      * Access the Duktape context.

@@ -39,7 +39,7 @@ protected:
 
     void load(std::string path)
     {
-        plugin_ = std::make_unique<js_plugin>(std::move(path));
+        plugin_ = std::make_unique<js_plugin>("test", std::move(path));
 
         irccd_jsapi().load(irccd_, plugin_);
         plugin_jsapi().load(irccd_, plugin_);

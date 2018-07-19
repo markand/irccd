@@ -252,8 +252,8 @@ duk_idx_t Plugin_list(duk_context* ctx)
 
     duk_push_array(ctx);
 
-    for (const auto& [k, _] : dukx_type_traits<irccd>::self(ctx).plugins().all()) {
-        dukx_push(ctx, k);
+    for (const auto& plg : dukx_type_traits<irccd>::self(ctx).plugins().all()) {
+        dukx_push(ctx, plg->get_id());
         duk_put_prop_index(ctx, -2, i++);
     }
 
@@ -280,7 +280,8 @@ duk_idx_t Plugin_list(duk_context* ctx)
 duk_idx_t Plugin_load(duk_context* ctx)
 {
     return wrap(ctx, [&] {
-        dukx_type_traits<irccd>::self(ctx).plugins().load(dukx_require<std::string>(ctx, 0));
+        dukx_type_traits<irccd>::self(ctx).plugins().load(
+            dukx_require<std::string_view>(ctx, 0), "");
 
         return 0;
     });

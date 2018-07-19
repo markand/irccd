@@ -79,7 +79,7 @@ void js_test<Modules...>::add()
 
 template <typename... Modules>
 js_test<Modules...>::js_test(const std::string& plugin_path)
-    : plugin_(new js_plugin(plugin_path))
+    : plugin_(new js_plugin("test", plugin_path))
     , server_(new journal_server(service_, "test"))
 {
     irccd_.set_log(std::make_unique<logger::silent_sink>());

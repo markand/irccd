@@ -28,7 +28,6 @@
 #include <memory>
 #include <string>
 #include <string_view>
-#include <unordered_map>
 #include <vector>
 
 #include <irccd/daemon/plugin.hpp>
@@ -47,7 +46,7 @@ public:
     /**
      * \brief Map of plugins.
      */
-    using plugins = std::unordered_map<std::string, std::shared_ptr<plugin>>;
+    using plugins = std::vector<std::shared_ptr<plugin>>;
 
     /**
      * \brief List of loaders.
@@ -82,38 +81,36 @@ public:
     /**
      * Check if a plugin is loaded.
      *
-     * \param name the plugin id
+     * \param id the plugin id
      * \return true if has plugin
      */
-    auto has(const std::string& name) const noexcept -> bool;
+    auto has(std::string_view id) const noexcept -> bool;
 
     /**
      * Get a loaded plugin or null if not found.
      *
-     * \param name the plugin id
+     * \param id the plugin id
      * \return the plugin or empty one if not found
      */
-    auto get(const std::string& name) const noexcept -> std::shared_ptr<plugin>;
+    auto get(std::string_view id) const noexcept -> std::shared_ptr<plugin>;
 
     /**
      * Find a loaded plugin.
      *
-     * \param name the plugin id
+     * \param id the plugin id
      * \return the plugin
      * \throw plugin_error on errors
      */
-    auto require(const std::string& name) const -> std::shared_ptr<plugin>;
+    auto require(std::string_view id) const -> std::shared_ptr<plugin>;
 
     /**
      * Add the specified plugin to the registry.
      *
-     * \pre id is valid
-     * \pre plugin != nullptr
-     * \param id the unique plugin identifier
-     * \param plugin the plugin
+     * \pre plg != nullptr
+     * \param plg the plugin
      * \note the plugin is only added to the list, no action is performed on it
      */
-    void add(std::string id, std::shared_ptr<plugin> plugin);
+    void add(std::shared_ptr<plugin> plg);
 
     /**
      * Add a loader.
@@ -126,25 +123,28 @@ public:
     /**
      * Get the configuration for the specified plugin.
      *
+     * \param id the plugin id
      * \return the configuration
      */
-    auto get_options(const std::string& id) -> plugin::map;
+    auto get_options(std::string_view id) -> plugin::map;
 
     /**
      * Get the formats for the specified plugin.
      *
+     * \param id the plugin id
      * \return the formats
      */
-    auto get_formats(const std::string& id) -> plugin::map;
+    auto get_formats(std::string_view id) -> plugin::map;
 
     /**
      * Get the paths for the specified plugin.
      *
      * If none is defined, return the default ones.
      *
+     * \param id the plugin id
      * \return the paths
      */
-    auto get_paths(const std::string& id) -> plugin::map;
+    auto get_paths(std::string_view id) -> plugin::map;
 
     /**
      * Generic function for opening the plugin at the given path.
@@ -156,8 +156,7 @@ public:
      * \param path the path to the file
      * \return the plugin or nullptr on failures
      */
-    auto open(const std::string& id,
-              const std::string& path) -> std::shared_ptr<plugin>;
+    auto open(std::string_view id, std::string_view path) -> std::shared_ptr<plugin>;
 
     /**
      * Generic function for finding a plugin.
@@ -165,7 +164,7 @@ public:
      * \param id the plugin id
      * \return the plugin or nullptr on failures
      */
-    auto find(const std::string& id) -> std::shared_ptr<plugin>;
+    auto find(std::string_view id) -> std::shared_ptr<plugin>;
 
     /**
      * Convenient wrapper that loads a plugin, call handle_load and add it to
@@ -173,25 +172,26 @@ public:
      *
      * Any errors are printed using logger.
      *
-     * \param name the name
+     * \param id the plugin id
      * \param path the optional path (searched if empty)
      */
-    void load(const std::string& name, const std::string& path = "");
+    void load(std::string_view name, std::string_view path = "");
 
     /**
      * Unload a plugin and remove it.
      *
+     * \param id the plugin id
      * \param name the plugin id
      */
-    void unload(const std::string& name);
+    void unload(std::string_view id);
 
     /**
      * Reload a plugin by calling onReload.
      *
-     * \param name the plugin name
+     * \param id the plugin id
      * \throw std::exception on failures
      */
-    void reload(const std::string& name);
+    void reload(std::string_view id);
 
     /**
      * Call a plugin function and throw an exception with the following errors:

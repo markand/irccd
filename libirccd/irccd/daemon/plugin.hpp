@@ -72,10 +72,29 @@ public:
      */
     using map = std::unordered_map<std::string, std::string>;
 
+private:
+    std::string id_;
+
+public:
+    /**
+     * Construct a plugin.
+     *
+     * \pre id must be a valid identifier
+     * \param id the plugin id
+     */
+    plugin(std::string id) noexcept;
+
     /**
      * Temporary, close all timers.
      */
     virtual ~plugin() = default;
+
+    /**
+     * Get user unique id.
+     *
+     * \return the plugin id
+     */
+    auto get_id() const noexcept -> const std::string&;
 
     /**
      * Get the plugin name.
@@ -89,100 +108,70 @@ public:
      *
      * \return the author
      */
-    virtual auto get_author() const noexcept -> std::string_view
-    {
-        return "unknown";
-    }
+    virtual auto get_author() const noexcept -> std::string_view;
 
     /**
      * Get the license.
      *
      * \return the license
      */
-    virtual auto get_license() const noexcept -> std::string_view
-    {
-        return "unknown";
-    }
+    virtual auto get_license() const noexcept -> std::string_view;
 
     /**
      * Get the summary.
      *
      * \return the summary
      */
-    virtual auto get_summary() const noexcept -> std::string_view
-    {
-        return "unknown";
-    }
+    virtual auto get_summary() const noexcept -> std::string_view;
 
     /**
      * Get the version.
      *
      * \return the version
      */
-    virtual auto get_version() const noexcept -> std::string_view
-    {
-        return "unknown";
-    }
+    virtual auto get_version() const noexcept -> std::string_view;
 
     /**
      * Get all options.
      *
      * \return options
      */
-    virtual auto get_options() const -> map
-    {
-        return {};
-    }
+    virtual auto get_options() const -> map;
 
     /**
      * Set all options.
      *
      * \param map the options
      */
-    virtual void set_options(const map& map)
-    {
-        (void)map;
-    }
+    virtual void set_options(const map& map);
 
     /**
      * Get all formats.
      *
      * \return formats
      */
-    virtual auto get_formats() const -> map
-    {
-        return {};
-    }
+    virtual auto get_formats() const -> map;
 
     /**
      * Set all formats.
      *
      * \param map the formats
      */
-    virtual void set_formats(const map& map)
-    {
-        (void)map;
-    }
+    virtual void set_formats(const map& map);
 
     /**
      * Get all paths.
      *
      * \return paths
      */
-    virtual auto get_paths() const -> map
-    {
-        return {};
-    }
+    virtual auto get_paths() const -> map;
 
     /**
      * Set all paths.
      *
      * \param map the paths
      */
-    virtual void set_paths(const map& map)
-    {
-        (void)map;
-    }
+    virtual void set_paths(const map& map);
 
     /**
      * On channel message. This event will call onMessage or
@@ -192,11 +181,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void handle_command(irccd& irccd, const message_event& event)
-    {
-        (void)irccd;
-        (void)event;
-    }
+    virtual void handle_command(irccd& irccd, const message_event& event);
 
     /**
      * On successful connection.
@@ -204,11 +189,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void handle_connect(irccd& irccd, const connect_event& event)
-    {
-        (void)irccd;
-        (void)event;
-    }
+    virtual void handle_connect(irccd& irccd, const connect_event& event);
 
     /**
      * On disconnection.
@@ -216,11 +197,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void handle_disconnect(irccd& irccd, const disconnect_event& event)
-    {
-        (void)irccd;
-        (void)event;
-    }
+    virtual void handle_disconnect(irccd& irccd, const disconnect_event& event);
 
     /**
      * On invitation.
@@ -228,11 +205,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void handle_invite(irccd& irccd, const invite_event& event)
-    {
-        (void)irccd;
-        (void)event;
-    }
+    virtual void handle_invite(irccd& irccd, const invite_event& event);
 
     /**
      * On join.
@@ -240,11 +213,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void handle_join(irccd& irccd, const join_event& event)
-    {
-        (void)irccd;
-        (void)event;
-    }
+    virtual void handle_join(irccd& irccd, const join_event& event);
 
     /**
      * On kick.
@@ -252,21 +221,14 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void handle_kick(irccd& irccd, const kick_event& event)
-    {
-        (void)irccd;
-        (void)event;
-    }
+    virtual void handle_kick(irccd& irccd, const kick_event& event);
 
     /**
      * On load.
      *
      * \param irccd the irccd instance
      */
-    virtual void handle_load(irccd& irccd)
-    {
-        (void)irccd;
-    }
+    virtual void handle_load(irccd& irccd);
 
     /**
      * On channel message.
@@ -274,11 +236,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void handle_message(irccd& irccd, const message_event& event)
-    {
-        (void)irccd;
-        (void)event;
-    }
+    virtual void handle_message(irccd& irccd, const message_event& event);
 
     /**
      * On CTCP Action.
@@ -286,11 +244,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void handle_me(irccd& irccd, const me_event& event)
-    {
-        (void)irccd;
-        (void)event;
-    }
+    virtual void handle_me(irccd& irccd, const me_event& event);
 
     /**
      * On user mode change.
@@ -298,11 +252,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void handle_mode(irccd& irccd, const mode_event& event)
-    {
-        (void)irccd;
-        (void)event;
-    }
+    virtual void handle_mode(irccd& irccd, const mode_event& event);
 
     /**
      * On names listing.
@@ -310,11 +260,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void handle_names(irccd& irccd, const names_event& event)
-    {
-        (void)irccd;
-        (void)event;
-    }
+    virtual void handle_names(irccd& irccd, const names_event& event);
 
     /**
      * On nick change.
@@ -322,11 +268,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void handle_nick(irccd& irccd, const nick_event& event)
-    {
-        (void)irccd;
-        (void)event;
-    }
+    virtual void handle_nick(irccd& irccd, const nick_event& event);
 
     /**
      * On user notice.
@@ -334,11 +276,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void handle_notice(irccd& irccd, const notice_event& event)
-    {
-        (void)irccd;
-        (void)event;
-    }
+    virtual void handle_notice(irccd& irccd, const notice_event& event);
 
     /**
      * On part.
@@ -346,21 +284,14 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void handle_part(irccd& irccd, const part_event& event)
-    {
-        (void)irccd;
-        (void)event;
-    }
+    virtual void handle_part(irccd& irccd, const part_event& event);
 
     /**
      * On reload.
      *
      * \param irccd the irccd instance
      */
-    virtual void handle_reload(irccd& irccd)
-    {
-        (void)irccd;
-    }
+    virtual void handle_reload(irccd& irccd);
 
     /**
      * On topic change.
@@ -368,21 +299,14 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void handle_topic(irccd& irccd, const topic_event& event)
-    {
-        (void)irccd;
-        (void)event;
-    }
+    virtual void handle_topic(irccd& irccd, const topic_event& event);
 
     /**
      * On unload.
      *
      * \param irccd the irccd instance
      */
-    virtual void handle_unload(irccd& irccd)
-    {
-        (void)irccd;
-    }
+    virtual void handle_unload(irccd& irccd);
 
     /**
      * On whois information.
@@ -390,11 +314,7 @@ public:
      * \param irccd the irccd instance
      * \param event the event
      */
-    virtual void handle_whois(irccd& irccd, const whois_event& event)
-    {
-        (void)irccd;
-        (void)event;
-    }
+    virtual void handle_whois(irccd& irccd, const whois_event& event);
 };
 
 /**

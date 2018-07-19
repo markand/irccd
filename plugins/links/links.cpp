@@ -392,6 +392,8 @@ void requester::run(io_context& io, shared_ptr<server> server, string origin, st
 
 class links_plugin : public plugin {
 public:
+    using plugin::plugin;
+
     auto get_name() const noexcept -> std::string_view override;
 
     auto get_author() const noexcept -> std::string_view override;
@@ -410,7 +412,7 @@ public:
 
     static auto abi() -> version;
 
-    static auto init() -> std::unique_ptr<plugin>;
+    static auto init(std::string) -> std::unique_ptr<plugin>;
 };
 
 auto links_plugin::get_name() const noexcept -> std::string_view
@@ -461,9 +463,9 @@ auto links_plugin::abi() -> version
     return version();
 }
 
-auto links_plugin::init() -> std::unique_ptr<plugin>
+auto links_plugin::init(std::string id) -> std::unique_ptr<plugin>
 {
-    return std::make_unique<links_plugin>();
+    return std::make_unique<links_plugin>(std::move(id));
 }
 
 BOOST_DLL_ALIAS(links_plugin::abi, irccd_abi_links)

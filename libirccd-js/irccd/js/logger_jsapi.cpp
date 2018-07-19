@@ -33,7 +33,7 @@ namespace {
 
 duk_ret_t print(duk_context* ctx, unsigned level)
 {
-    assert(level >= 0 && level <= 2);
+    assert(level <= 2);
 
     try {
         auto& sink = dukx_type_traits<irccd>::self(ctx).get_log();
@@ -41,13 +41,13 @@ duk_ret_t print(duk_context* ctx, unsigned level)
 
         switch (level) {
         case 0:
-            sink.debug(static_cast<const plugin&>(*self)) << duk_require_string(ctx, 0) << std::endl;
+            sink.debug<plugin>(*self) << duk_require_string(ctx, 0) << std::endl;
             break;
         case 1:
-            sink.info(static_cast<const plugin&>(*self)) << duk_require_string(ctx, 0) << std::endl;
+            sink.info<plugin>(*self) << duk_require_string(ctx, 0) << std::endl;
             break;
         default:
-            sink.warning(static_cast<const plugin&>(*self)) << duk_require_string(ctx, 0) << std::endl;
+            sink.warning<plugin>(*self) << duk_require_string(ctx, 0) << std::endl;
             break;
         }
     } catch (const std::exception& ex) {

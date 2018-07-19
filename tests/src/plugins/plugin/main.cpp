@@ -37,6 +37,8 @@ namespace {
 
 class fake_plugin : public plugin {
 public:
+    using plugin::plugin;
+
     auto get_name() const noexcept -> std::string_view override
     {
         return "fake";
@@ -68,7 +70,7 @@ public:
     test_fixture()
         : plugin_test(PLUGIN_PATH)
     {
-        irccd_.plugins().add("fake", std::make_shared<fake_plugin>());
+        irccd_.plugins().add(std::make_shared<fake_plugin>("fake"));
 
         plugin_->set_formats({
             { "usage", "usage=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}" },
@@ -133,7 +135,7 @@ BOOST_AUTO_TEST_CASE(format_not_found)
 BOOST_AUTO_TEST_CASE(format_too_long)
 {
     for (int i = 0; i < 100; ++i)
-        irccd_.plugins().add(str(format("plugin-n-%1%") % i), std::make_shared<fake_plugin>());
+        irccd_.plugins().add(std::make_shared<fake_plugin>(str(format("plugin-n-%1%") % i)));
 
     plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#staff", "list"});
 

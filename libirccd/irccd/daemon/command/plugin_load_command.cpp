@@ -40,7 +40,7 @@ void plugin_load_command::exec(irccd& irccd, transport_client& client, const doc
     if (!id || !string_util::is_identifier(*id))
         throw plugin_error(plugin_error::invalid_identifier);
 
-    irccd.plugins().load(*id);
+    irccd.plugins().load(*id, "");
     client.success("plugin-load");
 }
 

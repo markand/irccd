@@ -27,6 +27,11 @@ private:
     map config_;
 
 public:
+    test_plugin()
+        : plugin("test")
+    {
+    }
+
     auto get_options() const -> map override
     {
         return config_;
@@ -127,7 +132,7 @@ public:
         return version();
     }
 
-    static auto init() -> std::unique_ptr<plugin>
+    static auto init(std::string) -> std::unique_ptr<plugin>
     {
         return std::make_unique<test_plugin>();
     }

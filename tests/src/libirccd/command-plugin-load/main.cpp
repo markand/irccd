@@ -30,6 +30,11 @@ namespace {
 
 class broken : public plugin {
 public:
+    broken()
+        : plugin("broken")
+    {
+    }
+
     auto get_name() const noexcept -> std::string_view override
     {
         return "broken";
@@ -64,6 +69,8 @@ public:
 
 class sample : public plugin {
 public:
+    using plugin::plugin;
+
     auto get_name() const noexcept -> std::string_view override
     {
         return "test";
@@ -85,7 +92,7 @@ public:
     auto find(std::string_view id) noexcept -> std::shared_ptr<plugin> override
     {
         if (id == "test")
-            return std::make_unique<sample>();
+            return std::make_unique<sample>("test");
 
         return nullptr;
     }
@@ -97,7 +104,7 @@ public:
     {
         daemon_->plugins().add_loader(std::make_unique<sample_loader>());
         daemon_->plugins().add_loader(std::make_unique<broken_loader>());
-        daemon_->plugins().add("already", std::make_unique<sample>());
+        daemon_->plugins().add(std::make_unique<sample>("already"));
     }
 };
 

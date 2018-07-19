@@ -32,6 +32,11 @@ class custom_plugin : public plugin {
 public:
     map config_;
 
+    custom_plugin()
+        : plugin("test")
+    {
+    }
+
     auto get_name() const noexcept -> std::string_view override
     {
         return "test";
@@ -52,7 +57,7 @@ BOOST_FIXTURE_TEST_SUITE(plugin_config_test_suite, command_test<plugin_config_co
 
 BOOST_AUTO_TEST_CASE(set)
 {
-    daemon_->plugins().add("test", std::make_unique<custom_plugin>());
+    daemon_->plugins().add(std::make_unique<custom_plugin>());
     ctl_->write({
         { "command",    "plugin-config" },
         { "plugin",     "test"          },
@@ -79,7 +84,7 @@ BOOST_AUTO_TEST_CASE(get)
         { "x1", "10" },
         { "x2", "20" }
     });
-    daemon_->plugins().add("test", std::move(plugin));
+    daemon_->plugins().add(std::move(plugin));
 
     auto result = request({
         { "command",    "plugin-config" },
@@ -100,7 +105,7 @@ BOOST_AUTO_TEST_CASE(getall)
         { "x1", "10" },
         { "x2", "20" }
     });
-    daemon_->plugins().add("test", std::move(plugin));
+    daemon_->plugins().add(std::move(plugin));
 
     auto result = request({
         { "command", "plugin-config" },

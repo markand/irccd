@@ -27,6 +27,11 @@ namespace {
 
 class sample : public plugin {
 public:
+    sample()
+        : plugin("test")
+    {
+    }
+
     auto get_name() const noexcept -> std::string_view override
     {
         return "sample";
@@ -59,10 +64,10 @@ BOOST_AUTO_TEST_CASE(simple)
 {
     auto p = std::make_unique<sample>();
 
-    irccd_.plugins().add("p", std::move(p));
+    irccd_.plugins().add(std::move(p));
     start();
 
-    const auto result = exec({ "plugin-info", "p" });
+    const auto result = exec({ "plugin-info", "test" });
 
     BOOST_TEST(result.first.size() == 4U);
     BOOST_TEST(result.second.size() == 0U);

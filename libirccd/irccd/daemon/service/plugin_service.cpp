@@ -53,11 +53,11 @@ plugin_service::plugin_service(irccd& irccd) noexcept
 
 plugin_service::~plugin_service()
 {
-    for (const auto& [_, plugin] : plugins_) {
+    for (const auto& plg : plugins_) {
         try {
-            plugin->handle_unload(irccd_);
+            plg->handle_unload(irccd_);
         } catch (const std::exception& ex) {
-            irccd_.get_log().warning(*plugin) << ex.what() << std::endl;
+            irccd_.get_log().warning(*plg) << ex.what() << std::endl;
         }
     }
 }
@@ -67,32 +67,38 @@ auto plugin_service::all() const noexcept -> plugins
     return plugins_;
 }
 
-auto plugin_service::has(const std::string& name) const noexcept -> bool
+auto plugin_service::has(std::string_view id) const noexcept -> bool
 {
-    return plugins_.find(name) != plugins_.end();
+    return get(id) != nullptr;
 }
 
-auto plugin_service::get(const std::string& name) const noexcept -> std::shared_ptr<plugin>
+auto plugin_service::get(std::string_view id) const noexcept -> std::shared_ptr<plugin>
 {
-    if (auto it = plugins_.find(name); it != plugins_.end())
-        return it->second;
+    const auto find = [id] (const auto& plg) {
+        return plg->get_id() == id;
+    };
+
+    if (const auto it = std::find_if(plugins_.begin(), plugins_.end(), find); it != plugins_.end())
+        return *it;
 
     return nullptr;
 }
 
-auto plugin_service::require(const std::string& name) const -> std::shared_ptr<plugin>
+auto plugin_service::require(std::string_view id) const -> std::shared_ptr<plugin>
 {
-    auto plugin = get(name);
+    auto plugin = get(id);
 
     if (!plugin)
-        throw plugin_error(plugin_error::not_found, name);
+        throw plugin_error(plugin_error::not_found, id);
 
     return plugin;
 }
 
-void plugin_service::add(std::string id, std::shared_ptr<plugin> plugin)
+void plugin_service::add(std::shared_ptr<plugin> plugin)
 {
-    plugins_.emplace(std::move(id), std::move(plugin));
+    assert(plugin);
+
+    plugins_.push_back(std::move(plugin));
 }
 
 void plugin_service::add_loader(std::unique_ptr<plugin_loader> loader)
@@ -102,17 +108,17 @@ void plugin_service::add_loader(std::unique_ptr<plugin_loader> loader)
     loaders_.push_back(std::move(loader));
 }
 
-auto plugin_service::get_options(const std::string& id) -> plugin::map
+auto plugin_service::get_options(std::string_view id) -> plugin::map
 {
     return to_map(irccd_.get_config(), str(format("plugin.%1%") % id));
 }
 
-auto plugin_service::get_formats(const std::string& id) -> plugin::map
+auto plugin_service::get_formats(std::string_view id) -> plugin::map
 {
     return to_map(irccd_.get_config(), str(format("format.%1%") % id));
 }
 
-auto plugin_service::get_paths(const std::string& id) -> plugin::map
+auto plugin_service::get_paths(std::string_view id) -> plugin::map
 {
     auto defaults = to_map(irccd_.get_config(), "paths");
     auto paths = to_map(irccd_.get_config(), str(format("paths.%1%") % id));
@@ -136,8 +142,7 @@ auto plugin_service::get_paths(const std::string& id) -> plugin::map
     return paths;
 }
 
-auto plugin_service::open(const std::string& id,
-                          const std::string& path) -> std::shared_ptr<plugin>
+auto plugin_service::open(std::string_view id, std::string_view path) -> std::shared_ptr<plugin>
 {
     for (const auto& loader : loaders_) {
         auto plugin = loader->open(id, path);
@@ -149,7 +154,7 @@ auto plugin_service::open(const std::string& id,
     return nullptr;
 }
 
-auto plugin_service::find(const std::string& id) -> std::shared_ptr<plugin>
+auto plugin_service::find(std::string_view id) -> std::shared_ptr<plugin>
 {
     for (const auto& loader : loaders_) {
         try {
@@ -165,7 +170,7 @@ auto plugin_service::find(const std::string& id) -> std::shared_ptr<plugin>
     return nullptr;
 }
 
-void plugin_service::load(const std::string& id, const std::string& path)
+void plugin_service::load(std::string_view id, std::string_view path)
 {
     if (has(id))
         throw plugin_error(plugin_error::already_exists, id);
@@ -185,31 +190,35 @@ void plugin_service::load(const std::string& id, const std::string& path)
     plugin->set_paths(get_paths(id));
 
     exec(plugin, &plugin::handle_load, irccd_);
-    add(std::move(id), std::move(plugin));
+    add(std::move(plugin));
 }
 
-void plugin_service::reload(const std::string& name)
+void plugin_service::reload(std::string_view id)
 {
-    auto plugin = get(name);
+    auto plugin = get(id);
 
     if (!plugin)
-        throw plugin_error(plugin_error::not_found, name);
+        throw plugin_error(plugin_error::not_found, id);
 
     exec(plugin, &plugin::handle_reload, irccd_);
 }
 
-void plugin_service::unload(const std::string& id)
+void plugin_service::unload(std::string_view id)
 {
-    const auto it = plugins_.find(id);
+    const auto find = [id] (const auto& plg) {
+        return plg->get_id() == id;
+    };
+
+    const auto it = std::find_if(plugins_.begin(), plugins_.end(), find);
 
     if (it == plugins_.end())
         throw plugin_error(plugin_error::not_found, id);
 
     // Erase first, in case of throwing.
-    const auto plg = it->second;
+    const auto save = *it;
 
     plugins_.erase(it);
-    exec(plg, &plugin::handle_unload, irccd_);
+    exec(save, &plugin::handle_unload, irccd_);
 }
 
 void plugin_service::load(const config& cfg) noexcept
@@ -218,19 +227,19 @@ void plugin_service::load(const config& cfg) noexcept
         if (!string_util::is_identifier(option.key()))
             continue;
 
-        auto name = option.key();
-        auto p = get(name);
+        auto id = option.key();
+        auto p = get(id);
 
         // Reload the plugin if already loaded.
         if (p) {
-            p->set_options(get_options(name));
-            p->set_formats(get_formats(name));
-            p->set_paths(get_paths(name));
+            p->set_options(get_options(id));
+            p->set_formats(get_formats(id));
+            p->set_paths(get_paths(id));
         } else {
             try {
-                load(name, option.value());
+                load(id, option.value());
             } catch (const std::exception& ex) {
-                irccd_.get_log().warning("plugin", name) << ex.what() << std::endl;
+                irccd_.get_log().warning("plugin", id) << ex.what() << std::endl;
             }
         }
     }
@@ -245,8 +254,7 @@ auto loggable_traits<plugin>::get_category(const plugin&) -> std::string_view
 
 auto loggable_traits<plugin>::get_component(const plugin& plugin) -> std::string_view
 {
-    // TODO: get id instead.
-    return plugin.get_name();
+    return plugin.get_id();
 }
 
 } // !logger

@@ -30,6 +30,11 @@ namespace {
 
 class sample_plugin : public plugin {
 public:
+    sample_plugin()
+        : plugin("test")
+    {
+    }
+
     auto get_name() const noexcept -> std::string_view override
     {
         return "test";
@@ -63,7 +68,7 @@ BOOST_AUTO_TEST_CASE(basic)
     auto plg = std::make_unique<sample_plugin>();
     auto response = nlohmann::json();
 
-    daemon_->plugins().add("test", std::move(plg));
+    daemon_->plugins().add(std::move(plg));
 
     const auto result = request({
         { "command",    "plugin-info"       },

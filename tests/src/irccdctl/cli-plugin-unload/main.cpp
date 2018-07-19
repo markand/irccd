@@ -29,6 +29,11 @@ class unloadable_plugin : public plugin {
 public:
     bool unloaded{false};
 
+    unloadable_plugin()
+        : plugin("test")
+    {
+    }
+
     auto get_name() const noexcept -> std::string_view override
     {
         return "unload";
@@ -46,10 +51,10 @@ BOOST_AUTO_TEST_CASE(simple)
 {
     const auto plugin = std::make_shared<unloadable_plugin>();
 
-    irccd_.plugins().add("p", plugin);
+    irccd_.plugins().add(plugin);
     start();
 
-    const auto result = exec({ "plugin-unload", "p" });
+    const auto result = exec({ "plugin-unload", "test" });
 
     BOOST_TEST(result.first.size() == 0U);
     BOOST_TEST(result.second.size() == 0U);

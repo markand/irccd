@@ -30,6 +30,8 @@ namespace {
 
 class sample_plugin : public plugin {
 public:
+    using plugin::plugin;
+
     auto get_name() const noexcept -> std::string_view override
     {
         return "sample";
@@ -40,8 +42,8 @@ class plugin_list_test : public command_test<plugin_list_command> {
 public:
     plugin_list_test()
     {
-        daemon_->plugins().add("t1", std::make_unique<sample_plugin>());
-        daemon_->plugins().add("t2", std::make_unique<sample_plugin>());
+        daemon_->plugins().add(std::make_unique<sample_plugin>("t1"));
+        daemon_->plugins().add(std::make_unique<sample_plugin>("t2"));
     }
 };
 

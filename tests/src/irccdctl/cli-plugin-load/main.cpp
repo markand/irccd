@@ -27,6 +27,8 @@ namespace {
 
 class sample : public plugin {
 public:
+    using plugin::plugin;
+
     auto get_name() const noexcept -> std::string_view override
     {
         return "sample";
@@ -40,14 +42,14 @@ public:
     {
     }
 
-    auto find(std::string_view) -> std::shared_ptr<plugin> override
+    auto find(std::string_view id) -> std::shared_ptr<plugin> override
     {
-        return std::make_unique<sample>();
+        return std::make_unique<sample>(std::string(id));
     }
 
-    auto open(std::string_view, std::string_view) -> std::shared_ptr<plugin> override
+    auto open(std::string_view id, std::string_view) -> std::shared_ptr<plugin> override
     {
-        return std::make_unique<sample>();
+        return std::make_unique<sample>(std::string(id));
     }
 };
 
@@ -57,8 +59,8 @@ BOOST_FIXTURE_TEST_SUITE(plugin_load_suite, plugin_cli_test)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-    irccd_.plugins().add("p1", std::make_unique<sample>());
-    irccd_.plugins().add("p2", std::make_unique<sample>());
+    irccd_.plugins().add(std::make_unique<sample>("p1"));
+    irccd_.plugins().add(std::make_unique<sample>("p2"));
     irccd_.plugins().add_loader(std::make_unique<custom_plugin_loader>());
     start();
 

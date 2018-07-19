@@ -29,6 +29,11 @@ class reloadable_plugin : public plugin {
 public:
     bool reloaded{false};
 
+    reloadable_plugin()
+        : plugin("test")
+    {
+    }
+
     auto get_name() const noexcept -> std::string_view override
     {
         return "reload";
@@ -46,10 +51,10 @@ BOOST_AUTO_TEST_CASE(simple)
 {
     const auto plugin = std::make_shared<reloadable_plugin>();
 
-    irccd_.plugins().add("p", plugin);
+    irccd_.plugins().add(plugin);
     start();
 
-    const auto result = exec({ "plugin-reload", "p" });
+    const auto result = exec({ "plugin-reload", "test" });
 
     BOOST_TEST(result.first.size() == 0U);
     BOOST_TEST(result.second.size() == 0U);

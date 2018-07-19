@@ -16,15 +16,147 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cassert>
 #include <sstream>
 
 #include <boost/filesystem.hpp>
 
 #include <irccd/system.hpp>
+#include <irccd/string_util.hpp>
 
 #include "plugin.hpp"
 
 namespace irccd {
+
+plugin::plugin(std::string id) noexcept
+    : id_(std::move(id))
+{
+    assert(string_util::is_identifier(id_));
+}
+
+auto plugin::get_id() const noexcept -> const std::string&
+{
+    return id_;
+}
+
+auto plugin::get_author() const noexcept -> std::string_view
+{
+    return "unknown";
+}
+
+auto plugin::get_license() const noexcept -> std::string_view
+{
+    return "unknown";
+}
+
+auto plugin::get_summary() const noexcept -> std::string_view
+{
+    return "unknown";
+}
+
+auto plugin::get_version() const noexcept -> std::string_view
+{
+    return "unknown";
+}
+
+auto plugin::get_options() const -> map
+{
+    return {};
+}
+
+void plugin::set_options(const map&)
+{
+}
+
+auto plugin::get_formats() const -> map
+{
+    return {};
+}
+
+void plugin::set_formats(const map&)
+{
+}
+
+auto plugin::get_paths() const -> map
+{
+    return {};
+}
+
+void plugin::set_paths(const map&)
+{
+}
+
+void plugin::handle_command(irccd&, const message_event&)
+{
+}
+
+void plugin::handle_connect(irccd&, const connect_event&)
+{
+}
+
+void plugin::handle_disconnect(irccd&, const disconnect_event&)
+{
+}
+
+void plugin::handle_invite(irccd&, const invite_event&)
+{
+}
+
+void plugin::handle_join(irccd&, const join_event&)
+{
+}
+
+void plugin::handle_kick(irccd&, const kick_event&)
+{
+}
+
+void plugin::handle_load(irccd&)
+{
+}
+
+void plugin::handle_message(irccd&, const message_event&)
+{
+}
+
+void plugin::handle_me(irccd&, const me_event&)
+{
+}
+
+void plugin::handle_mode(irccd&, const mode_event&)
+{
+}
+
+void plugin::handle_names(irccd&, const names_event&)
+{
+}
+
+void plugin::handle_nick(irccd&, const nick_event&)
+{
+}
+
+void plugin::handle_notice(irccd&, const notice_event&)
+{
+}
+
+void plugin::handle_part(irccd&, const part_event&)
+{
+}
+
+void plugin::handle_reload(irccd&)
+{
+}
+
+void plugin::handle_topic(irccd&, const topic_event&)
+{
+}
+
+void plugin::handle_unload(irccd&)
+{
+}
+
+void plugin::handle_whois(irccd&, const whois_event&)
+{
+}
 
 plugin_loader::plugin_loader(std::vector<std::string> directories,
               std::vector<std::string> extensions) noexcept

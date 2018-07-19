@@ -32,6 +32,11 @@ class reloadable_plugin : public plugin {
 public:
     bool reloaded{false};
 
+    reloadable_plugin()
+        : plugin("test")
+    {
+    }
+
     auto get_name() const noexcept -> std::string_view override
     {
         return "reload";
@@ -45,6 +50,11 @@ public:
 
 class broken_plugin : public plugin {
 public:
+    broken_plugin()
+        : plugin("broken")
+    {
+    }
+
     auto get_name() const noexcept -> std::string_view override
     {
         return "broken";
@@ -63,8 +73,8 @@ protected:
     plugin_reload_test()
         : plugin_(std::make_shared<reloadable_plugin>())
     {
-        daemon_->plugins().add("test", plugin_);
-        daemon_->plugins().add("broken", std::make_unique<broken_plugin>());
+        daemon_->plugins().add(plugin_);
+        daemon_->plugins().add(std::make_unique<broken_plugin>());
     }
 };
 

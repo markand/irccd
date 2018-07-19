@@ -27,6 +27,11 @@ namespace {
 
 class sample : public plugin {
 public:
+    sample(std::string id)
+        : plugin(std::move(id))
+    {
+    }
+
     auto get_name() const noexcept -> std::string_view override
     {
         return "sample";
@@ -37,8 +42,8 @@ BOOST_FIXTURE_TEST_SUITE(plugin_list_suite, plugin_cli_test)
 
 BOOST_AUTO_TEST_CASE(output)
 {
-    irccd_.plugins().add("p1", std::make_unique<sample>());
-    irccd_.plugins().add("p2", std::make_unique<sample>());
+    irccd_.plugins().add(std::make_unique<sample>("p1"));
+    irccd_.plugins().add(std::make_unique<sample>("p2"));
     start();
 
     const auto result = exec({ "plugin-list" });

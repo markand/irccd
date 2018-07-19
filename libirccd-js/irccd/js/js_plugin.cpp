@@ -128,8 +128,9 @@ void js_plugin::call(const std::string& func, Args&&... args)
     duk_pop(context_);
 }
 
-js_plugin::js_plugin(std::string_view path)
-    : path_(path)
+js_plugin::js_plugin(std::string id, std::string path)
+    : plugin(std::move(id))
+    , path_(path)
 {
     dukx_stack_assert sa(context_);
 
@@ -360,12 +361,12 @@ auto js_plugin_loader::get_modules() noexcept -> modules_t&
     return modules_;
 }
 
-auto js_plugin_loader::open(std::string_view, std::string_view path) -> std::shared_ptr<plugin>
+auto js_plugin_loader::open(std::string_view id, std::string_view path) -> std::shared_ptr<plugin>
 {
     if (path.rfind(".js") == std::string::npos)
         return nullptr;
 
-    auto plugin = std::make_shared<js_plugin>(path);
+    auto plugin = std::make_shared<js_plugin>(std::string(id), std::string(path));
 
     for (const auto& mod : modules_)
         mod->load(irccd_, plugin);

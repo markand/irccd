@@ -30,6 +30,8 @@ private:
     map config_;
 
 public:
+    using plugin::plugin;
+
     auto get_name() const noexcept -> std::string_view override
     {
         return "config";
@@ -50,16 +52,16 @@ class configurable_plugin_cli_test : public plugin_cli_test {
 public:
     configurable_plugin_cli_test()
     {
-        auto conf1 = std::make_unique<configurable_plugin>();
-        auto conf2 = std::make_unique<configurable_plugin>();
+        auto conf1 = std::make_unique<configurable_plugin>("conf1");
+        auto conf2 = std::make_unique<configurable_plugin>("conf2");
 
         conf1->set_options({
             { "v1", "123" },
             { "v2", "456" }
         });
 
-        irccd_.plugins().add("conf1", std::move(conf1));
-        irccd_.plugins().add("conf2", std::move(conf2));
+        irccd_.plugins().add(std::move(conf1));
+        irccd_.plugins().add(std::move(conf2));
     }
 };
 
