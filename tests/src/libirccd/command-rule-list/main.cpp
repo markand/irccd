@@ -57,20 +57,19 @@ BOOST_FIXTURE_TEST_SUITE(rule_list_test_suite, rule_list_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    const auto result = request({
-        { "command", "rule-list" }
-    });
+    const auto [json, code] = request({{ "command", "rule-list" }});
 
-    BOOST_TEST(result.first.is_object());
-    BOOST_TEST(result.first["list"].is_array());
-    BOOST_TEST(result.first["list"].size() == 2U);
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
+    BOOST_TEST(json["list"].is_array());
+    BOOST_TEST(json["list"].size() == 2U);
 
     // Rule 0.
     {
-        auto servers = result.first["list"][0]["servers"];
-        auto channels = result.first["list"][0]["channels"];
-        auto plugins = result.first["list"][0]["plugins"];
-        auto events = result.first["list"][0]["events"];
+        auto servers = json["list"][0]["servers"];
+        auto channels = json["list"][0]["channels"];
+        auto plugins = json["list"][0]["plugins"];
+        auto events = json["list"][0]["events"];
 
         BOOST_TEST(json_util::contains(servers, "s1"));
         BOOST_TEST(json_util::contains(servers, "s2"));
@@ -80,21 +79,21 @@ BOOST_AUTO_TEST_CASE(basic)
         BOOST_TEST(json_util::contains(plugins, "p2"));
         BOOST_TEST(json_util::contains(events, "onMessage"));
         BOOST_TEST(json_util::contains(events, "onCommand"));
-        BOOST_TEST(result.first["list"][0]["action"].get<std::string>() == "drop");
+        BOOST_TEST(json["list"][0]["action"].get<std::string>() == "drop");
     }
 
     // Rule 1.
     {
-        auto servers = result.first["list"][1]["servers"];
-        auto channels = result.first["list"][1]["channels"];
-        auto plugins = result.first["list"][1]["plugins"];
-        auto events = result.first["list"][1]["events"];
+        auto servers = json["list"][1]["servers"];
+        auto channels = json["list"][1]["channels"];
+        auto plugins = json["list"][1]["plugins"];
+        auto events = json["list"][1]["events"];
 
         BOOST_TEST(json_util::contains(servers, "s1"));
         BOOST_TEST(json_util::contains(channels, "c1"));
         BOOST_TEST(json_util::contains(plugins, "p1"));
         BOOST_TEST(json_util::contains(events, "onMessage"));
-        BOOST_TEST(result.first["list"][1]["action"].get<std::string>() == "accept");
+        BOOST_TEST(json["list"][1]["action"].get<std::string>() == "accept");
     }
 }
 
@@ -103,13 +102,12 @@ BOOST_AUTO_TEST_CASE(empty)
     daemon_->rules().remove(0);
     daemon_->rules().remove(0);
 
-    const auto result = request({
-        { "command", "rule-list" }
-    });
+    const auto [json, code] = request({{ "command", "rule-list" }});
 
-    BOOST_TEST(result.first.is_object());
-    BOOST_TEST(result.first["list"].is_array());
-    BOOST_TEST(result.first["list"].empty());
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
+    BOOST_TEST(json["list"].is_array());
+    BOOST_TEST(json["list"].empty());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

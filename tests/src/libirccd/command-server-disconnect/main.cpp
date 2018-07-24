@@ -47,12 +47,13 @@ BOOST_FIXTURE_TEST_SUITE(server_disconnect_test_suite, server_disconnect_test)
 
 BOOST_AUTO_TEST_CASE(one)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "server-disconnect" },
         { "server",     "s1"                }
     });
 
-    BOOST_TEST(result.first["command"].get<std::string>() == "server-disconnect");
+    BOOST_TEST(!code);
+    BOOST_TEST(json["command"].get<std::string>() == "server-disconnect");
     BOOST_TEST(s1_->find("disconnect").size() == 1U);
     BOOST_TEST(!daemon_->servers().has("s1"));
     BOOST_TEST(daemon_->servers().has("s2"));
@@ -60,11 +61,10 @@ BOOST_AUTO_TEST_CASE(one)
 
 BOOST_AUTO_TEST_CASE(all)
 {
-    const auto result = request({
-        { "command", "server-disconnect" }
-    });
+    const auto [json, code] = request({{ "command", "server-disconnect" }});
 
-    BOOST_TEST(result.first["command"].get<std::string>() == "server-disconnect");
+    BOOST_TEST(!code);
+    BOOST_TEST(json["command"].get<std::string>() == "server-disconnect");
     BOOST_TEST(s1_->find("disconnect").size() == 1U);
     BOOST_TEST(s2_->find("disconnect").size() == 1U);
     BOOST_TEST(!daemon_->servers().has("s1"));
@@ -75,26 +75,26 @@ BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "server-disconnect" },
         { "server",     123456              }
     });
 
-    BOOST_TEST(result.second == server_error::invalid_identifier);
-    BOOST_TEST(result.first["error"].template get<int>() == server_error::invalid_identifier);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(code == server_error::invalid_identifier);
+    BOOST_TEST(json["error"].get<int>() == server_error::invalid_identifier);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "server-disconnect" },
         { "server",     "unknown"           }
     });
 
-    BOOST_TEST(result.second == server_error::not_found);
-    BOOST_TEST(result.first["error"].template get<int>() == server_error::not_found);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(code == server_error::not_found);
+    BOOST_TEST(json["error"].get<int>() == server_error::not_found);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

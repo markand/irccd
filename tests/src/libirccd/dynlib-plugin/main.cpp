@@ -38,7 +38,7 @@ protected:
     std::shared_ptr<plugin> plugin_;
     irccd irccd_{service_};
 
-    inline fixture()
+    fixture()
     {
         plugin_ = dynlib_plugin_loader({CMAKE_CURRENT_BINARY_DIR}).find("test-plugin");
 

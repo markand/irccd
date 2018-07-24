@@ -42,15 +42,16 @@ BOOST_FIXTURE_TEST_SUITE(server_list_test_suite, server_list_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command", "server-list" }
     });
 
-    BOOST_TEST(result.first.is_object());
-    BOOST_TEST(result.first["list"].is_array());
-    BOOST_TEST(result.first["list"].size() == 2U);
-    BOOST_TEST(result.first["list"][0].get<std::string>() == "s1");
-    BOOST_TEST(result.first["list"][1].get<std::string>() == "s2");
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
+    BOOST_TEST(json["list"].is_array());
+    BOOST_TEST(json["list"].size() == 2U);
+    BOOST_TEST(json["list"][0].get<std::string>() == "s1");
+    BOOST_TEST(json["list"][1].get<std::string>() == "s2");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -51,14 +51,14 @@ BOOST_FIXTURE_TEST_SUITE(plugin_list_test_suite, plugin_list_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    const auto [ result, code ] = request({
+    const auto [json, code] = request({
         { "command", "plugin-list" }
     });
 
     BOOST_TEST(!code);
-    BOOST_TEST(result.is_object());
-    BOOST_TEST(result["list"][0].template get<std::string>() == "t1");
-    BOOST_TEST(result["list"][1].template get<std::string>() == "t2");
+    BOOST_TEST(json.is_object());
+    BOOST_TEST(json["list"][0].get<std::string>() == "t1");
+    BOOST_TEST(json["list"][1].get<std::string>() == "t2");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -23,15 +23,14 @@
 #include <irccd/daemon/service/plugin_service.hpp>
 
 #include <irccd/test/command_test.hpp>
+#include <irccd/test/mock.hpp>
 
 namespace irccd {
 
 namespace {
 
-class unloadable_plugin : public plugin {
+class unloadable_plugin : public mock, public plugin {
 public:
-    bool unloaded{false};
-
     unloadable_plugin()
         : plugin("test")
     {
@@ -42,9 +41,9 @@ public:
         return "unload";
     }
 
-    void handle_unload(irccd &) override
+    void handle_unload(irccd&) override
     {
-        unloaded = true;
+        push("handle_unload");
     }
 };
 
@@ -82,53 +81,50 @@ BOOST_FIXTURE_TEST_SUITE(plugin_unload_test_suite, plugin_unload_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    ctl_->write({
+    const auto [json, code] = request({
         { "command",    "plugin-unload" },
         { "plugin",     "test"          }
     });
 
-    wait_for([&] () {
-        return plugin_->unloaded;
-    });
-
-    BOOST_TEST(plugin_->unloaded);
+    BOOST_TEST(!code);
+    BOOST_TEST(plugin_->find("handle_unload").size() == 1U);
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "plugin-unload" }
     });
 
-    BOOST_TEST(result.second == plugin_error::invalid_identifier);
-    BOOST_TEST(result.first["error"].template get<int>() == plugin_error::invalid_identifier);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "plugin");
+    BOOST_TEST(code == plugin_error::invalid_identifier);
+    BOOST_TEST(json["error"].get<int>() == plugin_error::invalid_identifier);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "plugin-unload" },
         { "plugin",     "unknown"       }
     });
 
-    BOOST_TEST(result.second == plugin_error::not_found);
-    BOOST_TEST(result.first["error"].template get<int>() == plugin_error::not_found);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "plugin");
+    BOOST_TEST(code == plugin_error::not_found);
+    BOOST_TEST(json["error"].get<int>() == plugin_error::not_found);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_CASE(exec_error)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "plugin-unload" },
         { "plugin",     "broken"        }
     });
 
-    BOOST_TEST(result.second == plugin_error::exec_error);
-    BOOST_TEST(result.first["error"].template get<int>() == plugin_error::exec_error);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "plugin");
+    BOOST_TEST(code == plugin_error::exec_error);
+    BOOST_TEST(json["error"].get<int>() == plugin_error::exec_error);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
     BOOST_TEST(!daemon_->plugins().has("broken"));
 }
 

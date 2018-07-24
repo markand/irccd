@@ -58,27 +58,24 @@ BOOST_FIXTURE_TEST_SUITE(plugin_config_test_suite, command_test<plugin_config_co
 BOOST_AUTO_TEST_CASE(set)
 {
     daemon_->plugins().add(std::make_unique<custom_plugin>());
-    ctl_->write({
+
+    const auto [json, code] = request({
         { "command",    "plugin-config" },
         { "plugin",     "test"          },
         { "variable",   "verbosy"       },
         { "value",      "falsy"         }
     });
 
-    wait_for([&] {
-        return !daemon_->plugins().require("test")->get_options().empty();
-    });
+    const auto config = daemon_->plugins().require("test")->get_options();
 
-    auto config = daemon_->plugins().require("test")->get_options();
-
+    BOOST_TEST(!code);
     BOOST_TEST(!config.empty());
-    BOOST_TEST(config["verbosy"] == "falsy");
+    BOOST_TEST(config.at("verbosy") == "falsy");
 }
 
 BOOST_AUTO_TEST_CASE(get)
 {
     auto plugin = std::make_unique<custom_plugin>();
-    auto json = nlohmann::json();
 
     plugin->set_options({
         { "x1", "10" },
@@ -86,20 +83,20 @@ BOOST_AUTO_TEST_CASE(get)
     });
     daemon_->plugins().add(std::move(plugin));
 
-    auto result = request({
+    const auto [json, code] = request({
         { "command",    "plugin-config" },
         { "plugin",     "test"          },
         { "variable",   "x1"            }
     });
 
-    BOOST_TEST(result.first["variables"]["x1"].get<std::string>() == "10");
-    BOOST_TEST(result.first["variables"]["x2"].is_null());
+    BOOST_TEST(!code);
+    BOOST_TEST(json["variables"]["x1"].get<std::string>() == "10");
+    BOOST_TEST(json["variables"].count("x2") == 0U);
 }
 
 BOOST_AUTO_TEST_CASE(getall)
 {
     auto plugin = std::make_unique<custom_plugin>();
-    auto json = nlohmann::json();
 
     plugin->set_options({
         { "x1", "10" },
@@ -107,38 +104,39 @@ BOOST_AUTO_TEST_CASE(getall)
     });
     daemon_->plugins().add(std::move(plugin));
 
-    auto result = request({
-        { "command", "plugin-config" },
-        { "plugin", "test" }
+    const auto [json, code] = request({
+        { "command",    "plugin-config" },
+        { "plugin",     "test"          }
     });
 
-    BOOST_TEST(result.first["variables"]["x1"].get<std::string>() == "10");
-    BOOST_TEST(result.first["variables"]["x2"].get<std::string>() == "20");
+    BOOST_TEST(!code);
+    BOOST_TEST(json["variables"]["x1"].get<std::string>() == "10");
+    BOOST_TEST(json["variables"]["x2"].get<std::string>() == "20");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "plugin-config" }
     });
 
-    BOOST_TEST(result.second == plugin_error::invalid_identifier);
-    BOOST_TEST(result.first["error"].template get<int>() == plugin_error::invalid_identifier);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "plugin");
+    BOOST_TEST(code == plugin_error::invalid_identifier);
+    BOOST_TEST(json["error"].get<int>() == plugin_error::invalid_identifier);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "plugin-config" },
         { "plugin",     "unknown"       }
     });
 
-    BOOST_TEST(result.second == plugin_error::not_found);
-    BOOST_TEST(result.first["error"].template get<int>() == plugin_error::not_found);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "plugin");
+    BOOST_TEST(code == plugin_error::not_found);
+    BOOST_TEST(json["error"].get<int>() == plugin_error::not_found);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

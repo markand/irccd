@@ -56,22 +56,23 @@ BOOST_AUTO_TEST_CASE(add_server)
         { "index",          0               }
     });
 
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",        "rule-info"     },
         { "index",          0               }
     });
 
-    BOOST_TEST(result.first.is_object());
-    BOOST_TEST(json_util::contains(result.first["servers"], "s1"));
-    BOOST_TEST(json_util::contains(result.first["servers"], "s2"));
-    BOOST_TEST(json_util::contains(result.first["servers"], "new-s3"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c1"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c2"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p1"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p2"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onMessage"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onCommand"));
-    BOOST_TEST(result.first["action"].get<std::string>() == "drop");
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
+    BOOST_TEST(json_util::contains(json["servers"], "s1"));
+    BOOST_TEST(json_util::contains(json["servers"], "s2"));
+    BOOST_TEST(json_util::contains(json["servers"], "new-s3"));
+    BOOST_TEST(json_util::contains(json["channels"], "c1"));
+    BOOST_TEST(json_util::contains(json["channels"], "c2"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p1"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p2"));
+    BOOST_TEST(json_util::contains(json["events"], "onMessage"));
+    BOOST_TEST(json_util::contains(json["events"], "onCommand"));
+    BOOST_TEST(json["action"].get<std::string>() == "drop");
 }
 
 BOOST_AUTO_TEST_CASE(add_channel)
@@ -82,22 +83,23 @@ BOOST_AUTO_TEST_CASE(add_channel)
         { "index",          0               }
     });
 
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",        "rule-info"     },
         { "index",          0               }
     });
 
-    BOOST_TEST(result.first.is_object());
-    BOOST_TEST(json_util::contains(result.first["servers"], "s1"));
-    BOOST_TEST(json_util::contains(result.first["servers"], "s2"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c1"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c2"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "new-c3"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p1"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p2"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onMessage"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onCommand"));
-    BOOST_TEST(result.first["action"].get<std::string>() == "drop");
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
+    BOOST_TEST(json_util::contains(json["servers"], "s1"));
+    BOOST_TEST(json_util::contains(json["servers"], "s2"));
+    BOOST_TEST(json_util::contains(json["channels"], "c1"));
+    BOOST_TEST(json_util::contains(json["channels"], "c2"));
+    BOOST_TEST(json_util::contains(json["channels"], "new-c3"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p1"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p2"));
+    BOOST_TEST(json_util::contains(json["events"], "onMessage"));
+    BOOST_TEST(json_util::contains(json["events"], "onCommand"));
+    BOOST_TEST(json["action"].get<std::string>() == "drop");
 }
 
 BOOST_AUTO_TEST_CASE(add_plugin)
@@ -108,22 +110,23 @@ BOOST_AUTO_TEST_CASE(add_plugin)
         { "index",          0               }
     });
 
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",        "rule-info"     },
         { "index",          0               }
     });
 
-    BOOST_TEST(result.first.is_object());
-    BOOST_TEST(json_util::contains(result.first["servers"], "s1"));
-    BOOST_TEST(json_util::contains(result.first["servers"], "s2"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c1"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c2"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p1"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p2"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "new-p3"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onMessage"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onCommand"));
-    BOOST_TEST(result.first["action"].get<std::string>() == "drop");
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
+    BOOST_TEST(json_util::contains(json["servers"], "s1"));
+    BOOST_TEST(json_util::contains(json["servers"], "s2"));
+    BOOST_TEST(json_util::contains(json["channels"], "c1"));
+    BOOST_TEST(json_util::contains(json["channels"], "c2"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p1"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p2"));
+    BOOST_TEST(json_util::contains(json["plugins"], "new-p3"));
+    BOOST_TEST(json_util::contains(json["events"], "onMessage"));
+    BOOST_TEST(json_util::contains(json["events"], "onCommand"));
+    BOOST_TEST(json["action"].get<std::string>() == "drop");
 }
 
 BOOST_AUTO_TEST_CASE(add_event)
@@ -134,22 +137,23 @@ BOOST_AUTO_TEST_CASE(add_event)
         { "index",          0               }
     });
 
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",        "rule-info"     },
         { "index",          0               }
     });
 
-    BOOST_TEST(result.first.is_object());
-    BOOST_TEST(json_util::contains(result.first["servers"], "s1"));
-    BOOST_TEST(json_util::contains(result.first["servers"], "s2"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c1"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c2"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p1"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p2"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onMessage"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onCommand"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onQuery"));
-    BOOST_TEST(result.first["action"].get<std::string>() == "drop");
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
+    BOOST_TEST(json_util::contains(json["servers"], "s1"));
+    BOOST_TEST(json_util::contains(json["servers"], "s2"));
+    BOOST_TEST(json_util::contains(json["channels"], "c1"));
+    BOOST_TEST(json_util::contains(json["channels"], "c2"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p1"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p2"));
+    BOOST_TEST(json_util::contains(json["events"], "onMessage"));
+    BOOST_TEST(json_util::contains(json["events"], "onCommand"));
+    BOOST_TEST(json_util::contains(json["events"], "onQuery"));
+    BOOST_TEST(json["action"].get<std::string>() == "drop");
 }
 
 BOOST_AUTO_TEST_CASE(add_event_and_server)
@@ -161,23 +165,24 @@ BOOST_AUTO_TEST_CASE(add_event_and_server)
         { "index",          0               }
     });
 
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",        "rule-info"     },
         { "index",          0               }
     });
 
-    BOOST_TEST(result.first.is_object());
-    BOOST_TEST(json_util::contains(result.first["servers"], "s1"));
-    BOOST_TEST(json_util::contains(result.first["servers"], "s2"));
-    BOOST_TEST(json_util::contains(result.first["servers"], "new-s3"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c1"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c2"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p1"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p2"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onMessage"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onCommand"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onQuery"));
-    BOOST_TEST(result.first["action"].get<std::string>() == "drop");
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
+    BOOST_TEST(json_util::contains(json["servers"], "s1"));
+    BOOST_TEST(json_util::contains(json["servers"], "s2"));
+    BOOST_TEST(json_util::contains(json["servers"], "new-s3"));
+    BOOST_TEST(json_util::contains(json["channels"], "c1"));
+    BOOST_TEST(json_util::contains(json["channels"], "c2"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p1"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p2"));
+    BOOST_TEST(json_util::contains(json["events"], "onMessage"));
+    BOOST_TEST(json_util::contains(json["events"], "onCommand"));
+    BOOST_TEST(json_util::contains(json["events"], "onQuery"));
+    BOOST_TEST(json["action"].get<std::string>() == "drop");
 }
 
 BOOST_AUTO_TEST_CASE(change_action)
@@ -188,21 +193,22 @@ BOOST_AUTO_TEST_CASE(change_action)
         { "index",          0               }
     });
 
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",        "rule-info"     },
         { "index",          0               }
     });
 
-    BOOST_TEST(result.first.is_object());
-    BOOST_TEST(json_util::contains(result.first["servers"], "s1"));
-    BOOST_TEST(json_util::contains(result.first["servers"], "s2"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c1"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c2"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p1"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p2"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onMessage"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onCommand"));
-    BOOST_TEST(result.first["action"].get<std::string>() == "accept");
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
+    BOOST_TEST(json_util::contains(json["servers"], "s1"));
+    BOOST_TEST(json_util::contains(json["servers"], "s2"));
+    BOOST_TEST(json_util::contains(json["channels"], "c1"));
+    BOOST_TEST(json_util::contains(json["channels"], "c2"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p1"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p2"));
+    BOOST_TEST(json_util::contains(json["events"], "onMessage"));
+    BOOST_TEST(json_util::contains(json["events"], "onCommand"));
+    BOOST_TEST(json["action"].get<std::string>() == "accept");
 }
 
 BOOST_AUTO_TEST_CASE(remove_server)
@@ -213,21 +219,22 @@ BOOST_AUTO_TEST_CASE(remove_server)
         { "index",          0               }
     });
 
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",        "rule-info"     },
         { "index",          0               }
     });
 
-    BOOST_TEST(result.first.is_object());
-    BOOST_TEST(json_util::contains(result.first["servers"], "s1"));
-    BOOST_TEST(!json_util::contains(result.first["servers"], "s2"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c1"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c2"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p1"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p2"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onMessage"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onCommand"));
-    BOOST_TEST(result.first["action"].get<std::string>() == "drop");
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
+    BOOST_TEST(json_util::contains(json["servers"], "s1"));
+    BOOST_TEST(!json_util::contains(json["servers"], "s2"));
+    BOOST_TEST(json_util::contains(json["channels"], "c1"));
+    BOOST_TEST(json_util::contains(json["channels"], "c2"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p1"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p2"));
+    BOOST_TEST(json_util::contains(json["events"], "onMessage"));
+    BOOST_TEST(json_util::contains(json["events"], "onCommand"));
+    BOOST_TEST(json["action"].get<std::string>() == "drop");
 }
 
 BOOST_AUTO_TEST_CASE(remove_channel)
@@ -238,21 +245,22 @@ BOOST_AUTO_TEST_CASE(remove_channel)
         { "index",          0               }
     });
 
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",        "rule-info"     },
         { "index",          0               }
     });
 
-    BOOST_TEST(result.first.is_object());
-    BOOST_TEST(json_util::contains(result.first["servers"], "s1"));
-    BOOST_TEST(json_util::contains(result.first["servers"], "s2"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c1"));
-    BOOST_TEST(!json_util::contains(result.first["channels"], "c2"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p1"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p2"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onMessage"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onCommand"));
-    BOOST_TEST(result.first["action"].get<std::string>() == "drop");
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
+    BOOST_TEST(json_util::contains(json["servers"], "s1"));
+    BOOST_TEST(json_util::contains(json["servers"], "s2"));
+    BOOST_TEST(json_util::contains(json["channels"], "c1"));
+    BOOST_TEST(!json_util::contains(json["channels"], "c2"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p1"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p2"));
+    BOOST_TEST(json_util::contains(json["events"], "onMessage"));
+    BOOST_TEST(json_util::contains(json["events"], "onCommand"));
+    BOOST_TEST(json["action"].get<std::string>() == "drop");
 }
 
 BOOST_AUTO_TEST_CASE(remove_plugin)
@@ -263,21 +271,22 @@ BOOST_AUTO_TEST_CASE(remove_plugin)
         { "index",          0               }
     });
 
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",        "rule-info"     },
         { "index",          0               }
     });
 
-    BOOST_TEST(result.first.is_object());
-    BOOST_TEST(json_util::contains(result.first["servers"], "s1"));
-    BOOST_TEST(json_util::contains(result.first["servers"], "s2"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c1"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c2"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p1"));
-    BOOST_TEST(!json_util::contains(result.first["plugins"], "p2"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onMessage"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onCommand"));
-    BOOST_TEST(result.first["action"].get<std::string>() == "drop");
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
+    BOOST_TEST(json_util::contains(json["servers"], "s1"));
+    BOOST_TEST(json_util::contains(json["servers"], "s2"));
+    BOOST_TEST(json_util::contains(json["channels"], "c1"));
+    BOOST_TEST(json_util::contains(json["channels"], "c2"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p1"));
+    BOOST_TEST(!json_util::contains(json["plugins"], "p2"));
+    BOOST_TEST(json_util::contains(json["events"], "onMessage"));
+    BOOST_TEST(json_util::contains(json["events"], "onCommand"));
+    BOOST_TEST(json["action"].get<std::string>() == "drop");
 }
 
 BOOST_AUTO_TEST_CASE(remove_event)
@@ -288,21 +297,22 @@ BOOST_AUTO_TEST_CASE(remove_event)
         { "index",          0               }
     });
 
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",        "rule-info"     },
         { "index",          0               }
     });
 
-    BOOST_TEST(result.first.is_object());
-    BOOST_TEST(json_util::contains(result.first["servers"], "s1"));
-    BOOST_TEST(json_util::contains(result.first["servers"], "s2"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c1"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c2"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p1"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p2"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onMessage"));
-    BOOST_TEST(!json_util::contains(result.first["events"], "onCommand"));
-    BOOST_TEST(result.first["action"].get<std::string>() == "drop");
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
+    BOOST_TEST(json_util::contains(json["servers"], "s1"));
+    BOOST_TEST(json_util::contains(json["servers"], "s2"));
+    BOOST_TEST(json_util::contains(json["channels"], "c1"));
+    BOOST_TEST(json_util::contains(json["channels"], "c2"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p1"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p2"));
+    BOOST_TEST(json_util::contains(json["events"], "onMessage"));
+    BOOST_TEST(!json_util::contains(json["events"], "onCommand"));
+    BOOST_TEST(json["action"].get<std::string>() == "drop");
 }
 
 BOOST_AUTO_TEST_CASE(remove_event_and_server)
@@ -314,75 +324,76 @@ BOOST_AUTO_TEST_CASE(remove_event_and_server)
         { "index",          0               }
     });
 
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",        "rule-info"     },
         { "index",          0               }
     });
 
-    BOOST_TEST(result.first.is_object());
-    BOOST_TEST(json_util::contains(result.first["servers"], "s1"));
-    BOOST_TEST(!json_util::contains(result.first["servers"], "s2"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c1"));
-    BOOST_TEST(json_util::contains(result.first["channels"], "c2"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p1"));
-    BOOST_TEST(json_util::contains(result.first["plugins"], "p2"));
-    BOOST_TEST(json_util::contains(result.first["events"], "onMessage"));
-    BOOST_TEST(!json_util::contains(result.first["events"], "onCommand"));
-    BOOST_TEST(result.first["action"].get<std::string>() == "drop");
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
+    BOOST_TEST(json_util::contains(json["servers"], "s1"));
+    BOOST_TEST(!json_util::contains(json["servers"], "s2"));
+    BOOST_TEST(json_util::contains(json["channels"], "c1"));
+    BOOST_TEST(json_util::contains(json["channels"], "c2"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p1"));
+    BOOST_TEST(json_util::contains(json["plugins"], "p2"));
+    BOOST_TEST(json_util::contains(json["events"], "onMessage"));
+    BOOST_TEST(!json_util::contains(json["events"], "onCommand"));
+    BOOST_TEST(json["action"].get<std::string>() == "drop");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_index_1)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "rule-edit" },
         { "index",      -100        },
         { "action",     "drop"      }
     });
 
-    BOOST_TEST(result.second == rule_error::invalid_index);
-    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(code == rule_error::invalid_index);
+    BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_2)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "rule-edit" },
         { "index",      100         },
         { "action",     "drop"      }
     });
 
-    BOOST_TEST(result.second == rule_error::invalid_index);
-    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(code == rule_error::invalid_index);
+    BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_3)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "rule-edit" },
         { "index",      "notaint"   },
         { "action",     "drop"      }
     });
 
-    BOOST_TEST(result.second == rule_error::invalid_index);
-    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(code == rule_error::invalid_index);
+    BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_action)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "rule-edit" },
         { "index",      0           },
         { "action",     "unknown"   }
     });
 
-    BOOST_TEST(result.second == rule_error::invalid_action);
-    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_action);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(code == rule_error::invalid_action);
+    BOOST_TEST(json["error"].get<int>() == rule_error::invalid_action);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

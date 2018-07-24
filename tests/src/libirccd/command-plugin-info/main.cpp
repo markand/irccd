@@ -65,45 +65,43 @@ BOOST_FIXTURE_TEST_SUITE(plugin_info_test_suite, command_test<plugin_info_comman
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    auto plg = std::make_unique<sample_plugin>();
-    auto response = nlohmann::json();
+    daemon_->plugins().add(std::make_unique<sample_plugin>());
 
-    daemon_->plugins().add(std::move(plg));
-
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "plugin-info"       },
         { "plugin",     "test"              },
     });
 
-    BOOST_TEST(result.first["author"].get<std::string>() == "Francis Beaugrand");
-    BOOST_TEST(result.first["license"].get<std::string>() == "GPL");
-    BOOST_TEST(result.first["summary"].get<std::string>() == "Completely useless plugin");
-    BOOST_TEST(result.first["version"].get<std::string>() == "0.0.0.0.0.0.0.0.1-beta5");
+    BOOST_TEST(!code);
+    BOOST_TEST(json["author"].get<std::string>() == "Francis Beaugrand");
+    BOOST_TEST(json["license"].get<std::string>() == "GPL");
+    BOOST_TEST(json["summary"].get<std::string>() == "Completely useless plugin");
+    BOOST_TEST(json["version"].get<std::string>() == "0.0.0.0.0.0.0.0.1-beta5");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "plugin-info"   }
     });
 
-    BOOST_TEST(result.second == plugin_error::invalid_identifier);
-    BOOST_TEST(result.first["error"].template get<int>() == plugin_error::invalid_identifier);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "plugin");
+    BOOST_TEST(code == plugin_error::invalid_identifier);
+    BOOST_TEST(json["error"].get<int>() == plugin_error::invalid_identifier);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "plugin-info"   },
         { "plugin",     "unknown"       }
     });
 
-    BOOST_TEST(result.second == plugin_error::not_found);
-    BOOST_TEST(result.first["error"].template get<int>() == plugin_error::not_found);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "plugin");
+    BOOST_TEST(code == plugin_error::not_found);
+    BOOST_TEST(json["error"].get<int>() == plugin_error::not_found);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

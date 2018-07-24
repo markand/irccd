@@ -57,16 +57,17 @@ BOOST_FIXTURE_TEST_SUITE(rule_info_test_suite, rule_info_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "rule-info" },
         { "index",      0           }
     });
 
-    auto servers = result.first["servers"];
-    auto channels = result.first["channels"];
-    auto plugins = result.first["plugins"];
-    auto events = result.first["events"];
+    auto servers = json["servers"];
+    auto channels = json["channels"];
+    auto plugins = json["plugins"];
+    auto events = json["events"];
 
+    BOOST_TEST(!code);
     BOOST_TEST(json_util::contains(servers, "s1"));
     BOOST_TEST(json_util::contains(servers, "s2"));
     BOOST_TEST(json_util::contains(channels, "c1"));
@@ -75,45 +76,45 @@ BOOST_AUTO_TEST_CASE(basic)
     BOOST_TEST(json_util::contains(plugins, "p2"));
     BOOST_TEST(json_util::contains(events, "onMessage"));
     BOOST_TEST(json_util::contains(events, "onCommand"));
-    BOOST_TEST(result.first["action"].get<std::string>() == "drop");
+    BOOST_TEST(json["action"].get<std::string>() == "drop");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_index_1)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "rule-info" },
         { "index",      -100        }
     });
 
-    BOOST_TEST(result.second == rule_error::invalid_index);
-    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(code == rule_error::invalid_index);
+    BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_2)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "rule-info" },
         { "index",      100         }
     });
 
-    BOOST_TEST(result.second == rule_error::invalid_index);
-    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(code == rule_error::invalid_index);
+    BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_3)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "rule-info" },
         { "index",      "notaint"   }
     });
 
-    BOOST_TEST(result.second == rule_error::invalid_index);
-    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(code == rule_error::invalid_index);
+    BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

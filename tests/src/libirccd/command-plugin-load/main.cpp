@@ -114,16 +114,12 @@ BOOST_FIXTURE_TEST_SUITE(plugin_load_test_suite, plugin_load_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    ctl_->write({
+    const auto [json, code] = request({
         { "command",    "plugin-load"   },
         { "plugin",     "test"          }
     });
 
-    wait_for([&] () {
-        return daemon_->plugins().has("test");
-    });
-
-    BOOST_TEST(!daemon_->plugins().all().empty());
+    BOOST_TEST(!code);
     BOOST_TEST(daemon_->plugins().has("test"));
 }
 
@@ -131,49 +127,49 @@ BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "plugin-load"   }
     });
 
-    BOOST_TEST(result.second == plugin_error::invalid_identifier);
-    BOOST_TEST(result.first["error"].template get<int>() == plugin_error::invalid_identifier);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "plugin");
+    BOOST_TEST(code == plugin_error::invalid_identifier);
+    BOOST_TEST(json["error"].get<int>() == plugin_error::invalid_identifier);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "plugin-load"   },
         { "plugin",     "unknown"       }
     });
 
-    BOOST_TEST(result.second == plugin_error::not_found);
-    BOOST_TEST(result.first["error"].template get<int>() == plugin_error::not_found);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "plugin");
+    BOOST_TEST(code == plugin_error::not_found);
+    BOOST_TEST(json["error"].get<int>() == plugin_error::not_found);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_CASE(already_exists)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "plugin-load"   },
         { "plugin",     "already"       }
     });
 
-    BOOST_TEST(result.second == plugin_error::already_exists);
-    BOOST_TEST(result.first["error"].template get<int>() == plugin_error::already_exists);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "plugin");
+    BOOST_TEST(code == plugin_error::already_exists);
+    BOOST_TEST(json["error"].get<int>() == plugin_error::already_exists);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_CASE(exec_error)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "plugin-load"   },
         { "plugin",     "broken"        }
     });
 
-    BOOST_TEST(result.second == plugin_error::exec_error);
-    BOOST_TEST(result.first["error"].template get<int>() == plugin_error::exec_error);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "plugin");
+    BOOST_TEST(code == plugin_error::exec_error);
+    BOOST_TEST(json["error"].get<int>() == plugin_error::exec_error);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

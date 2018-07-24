@@ -66,297 +66,225 @@ BOOST_FIXTURE_TEST_SUITE(rule_move_test_suite, rule_move_test)
 
 BOOST_AUTO_TEST_CASE(backward)
 {
-    nlohmann::json result;
-
-    ctl_->write({
+    request({
         { "command",    "rule-move" },
         { "from",       2           },
         { "to",         0           }
     });
-    ctl_->read([&] (auto, auto msg) {
-        result = msg;
-    });
 
-    wait_for([&] () {
-        return result.is_object();
-    });
+    const auto [json, code] = request({{ "command", "rule-list" }});
 
-    BOOST_TEST(result.is_object());
-
-    result = nullptr;
-    ctl_->write({{ "command", "rule-list" }});
-    ctl_->read([&] (auto, auto msg) {
-        result = msg;
-    });
-
-    wait_for([&] () {
-        return result.is_object();
-    });
-
-    BOOST_TEST(result.is_object());
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
 
     // Rule 2.
     {
-        auto servers = result["list"][0]["servers"];
-        auto channels = result["list"][0]["channels"];
-        auto plugins = result["list"][0]["plugins"];
-        auto events = result["list"][0]["events"];
+        auto servers = json["list"][0]["servers"];
+        auto channels = json["list"][0]["channels"];
+        auto plugins = json["list"][0]["plugins"];
+        auto events = json["list"][0]["events"];
 
         BOOST_TEST(json_util::contains(servers, "s2"));
         BOOST_TEST(json_util::contains(channels, "c2"));
         BOOST_TEST(json_util::contains(plugins, "p2"));
         BOOST_TEST(json_util::contains(events, "onMessage"));
-        BOOST_TEST(result["list"][0]["action"].get<std::string>() == "accept");
+        BOOST_TEST(json["list"][0]["action"].get<std::string>() == "accept");
     }
 
     // Rule 0.
     {
-        auto servers = result["list"][1]["servers"];
-        auto channels = result["list"][1]["channels"];
-        auto plugins = result["list"][1]["plugins"];
-        auto events = result["list"][1]["events"];
+        auto servers = json["list"][1]["servers"];
+        auto channels = json["list"][1]["channels"];
+        auto plugins = json["list"][1]["plugins"];
+        auto events = json["list"][1]["events"];
 
         BOOST_TEST(json_util::contains(servers, "s0"));
         BOOST_TEST(json_util::contains(channels, "c0"));
         BOOST_TEST(json_util::contains(plugins, "p0"));
         BOOST_TEST(json_util::contains(events, "onMessage"));
-        BOOST_TEST(result["list"][1]["action"].get<std::string>() == "drop");
+        BOOST_TEST(json["list"][1]["action"].get<std::string>() == "drop");
     }
 
     // Rule 1.
     {
-        auto servers = result["list"][2]["servers"];
-        auto channels = result["list"][2]["channels"];
-        auto plugins = result["list"][2]["plugins"];
-        auto events = result["list"][2]["events"];
+        auto servers = json["list"][2]["servers"];
+        auto channels = json["list"][2]["channels"];
+        auto plugins = json["list"][2]["plugins"];
+        auto events = json["list"][2]["events"];
 
         BOOST_TEST(json_util::contains(servers, "s1"));
         BOOST_TEST(json_util::contains(channels, "c1"));
         BOOST_TEST(json_util::contains(plugins, "p1"));
         BOOST_TEST(json_util::contains(events, "onMessage"));
-        BOOST_TEST(result["list"][2]["action"].get<std::string>() == "accept");
+        BOOST_TEST(json["list"][2]["action"].get<std::string>() == "accept");
     }
 }
 
 BOOST_AUTO_TEST_CASE(upward)
 {
-    nlohmann::json result;
-
-    ctl_->write({
+    request({
         { "command",    "rule-move" },
         { "from",       0           },
         { "to",         2           }
     });
-    ctl_->read([&] (auto, auto msg) {
-        result = msg;
-    });
 
-    wait_for([&] () {
-        return result.is_object();
-    });
+    const auto [json, code] = request({{ "command", "rule-list" }});
 
-    BOOST_TEST(result.is_object());
-
-    result = nullptr;
-    ctl_->write({{ "command", "rule-list" }});
-    ctl_->read([&] (auto, auto msg) {
-        result = msg;
-    });
-
-    wait_for([&] () {
-        return result.is_object();
-    });
-
-    BOOST_TEST(result.is_object());
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
 
     // Rule 1.
     {
-        auto servers = result["list"][0]["servers"];
-        auto channels = result["list"][0]["channels"];
-        auto plugins = result["list"][0]["plugins"];
-        auto events = result["list"][0]["events"];
+        auto servers = json["list"][0]["servers"];
+        auto channels = json["list"][0]["channels"];
+        auto plugins = json["list"][0]["plugins"];
+        auto events = json["list"][0]["events"];
 
         BOOST_TEST(json_util::contains(servers, "s1"));
         BOOST_TEST(json_util::contains(channels, "c1"));
         BOOST_TEST(json_util::contains(plugins, "p1"));
         BOOST_TEST(json_util::contains(events, "onMessage"));
-        BOOST_TEST(result["list"][0]["action"].get<std::string>() == "accept");
+        BOOST_TEST(json["list"][0]["action"].get<std::string>() == "accept");
     }
 
     // Rule 2.
     {
-        auto servers = result["list"][1]["servers"];
-        auto channels = result["list"][1]["channels"];
-        auto plugins = result["list"][1]["plugins"];
-        auto events = result["list"][1]["events"];
+        auto servers = json["list"][1]["servers"];
+        auto channels = json["list"][1]["channels"];
+        auto plugins = json["list"][1]["plugins"];
+        auto events = json["list"][1]["events"];
 
         BOOST_TEST(json_util::contains(servers, "s2"));
         BOOST_TEST(json_util::contains(channels, "c2"));
         BOOST_TEST(json_util::contains(plugins, "p2"));
         BOOST_TEST(json_util::contains(events, "onMessage"));
-        BOOST_TEST(result["list"][1]["action"].get<std::string>() == "accept");
+        BOOST_TEST(json["list"][1]["action"].get<std::string>() == "accept");
     }
 
     // Rule 0.
     {
-        auto servers = result["list"][2]["servers"];
-        auto channels = result["list"][2]["channels"];
-        auto plugins = result["list"][2]["plugins"];
-        auto events = result["list"][2]["events"];
+        auto servers = json["list"][2]["servers"];
+        auto channels = json["list"][2]["channels"];
+        auto plugins = json["list"][2]["plugins"];
+        auto events = json["list"][2]["events"];
 
         BOOST_TEST(json_util::contains(servers, "s0"));
         BOOST_TEST(json_util::contains(channels, "c0"));
         BOOST_TEST(json_util::contains(plugins, "p0"));
         BOOST_TEST(json_util::contains(events, "onMessage"));
-        BOOST_TEST(result["list"][2]["action"].get<std::string>() == "drop");
+        BOOST_TEST(json["list"][2]["action"].get<std::string>() == "drop");
     }
 }
 
 BOOST_AUTO_TEST_CASE(same)
 {
-    nlohmann::json result;
-
-    ctl_->write({
+    request({
         { "command",    "rule-move" },
         { "from",       1           },
         { "to",         1           }
     });
-    ctl_->read([&] (auto, auto msg) {
-        result = msg;
-    });
 
-    wait_for([&] () {
-        return result.is_object();
-    });
+    const auto [json, code] = request({{ "command", "rule-list" }});
 
-    BOOST_TEST(result.is_object());
-
-    result = nullptr;
-    ctl_->write({{ "command", "rule-list" }});
-    ctl_->read([&] (auto, auto msg) {
-        result = msg;
-    });
-
-    wait_for([&] () {
-        return result.is_object();
-    });
-
-    BOOST_TEST(result.is_object());
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
 
     // Rule 0.
     {
-        auto servers = result["list"][0]["servers"];
-        auto channels = result["list"][0]["channels"];
-        auto plugins = result["list"][0]["plugins"];
-        auto events = result["list"][0]["events"];
+        auto servers = json["list"][0]["servers"];
+        auto channels = json["list"][0]["channels"];
+        auto plugins = json["list"][0]["plugins"];
+        auto events = json["list"][0]["events"];
 
         BOOST_TEST(json_util::contains(servers, "s0"));
         BOOST_TEST(json_util::contains(channels, "c0"));
         BOOST_TEST(json_util::contains(plugins, "p0"));
         BOOST_TEST(json_util::contains(events, "onMessage"));
-        BOOST_TEST(result["list"][0]["action"].get<std::string>() == "drop");
+        BOOST_TEST(json["list"][0]["action"].get<std::string>() == "drop");
     }
 
     // Rule 1.
     {
-        auto servers = result["list"][1]["servers"];
-        auto channels = result["list"][1]["channels"];
-        auto plugins = result["list"][1]["plugins"];
-        auto events = result["list"][1]["events"];
+        auto servers = json["list"][1]["servers"];
+        auto channels = json["list"][1]["channels"];
+        auto plugins = json["list"][1]["plugins"];
+        auto events = json["list"][1]["events"];
 
         BOOST_TEST(json_util::contains(servers, "s1"));
         BOOST_TEST(json_util::contains(channels, "c1"));
         BOOST_TEST(json_util::contains(plugins, "p1"));
         BOOST_TEST(json_util::contains(events, "onMessage"));
-        BOOST_TEST(result["list"][1]["action"].get<std::string>() == "accept");
+        BOOST_TEST(json["list"][1]["action"].get<std::string>() == "accept");
     }
 
     // Rule 2.
     {
-        auto servers = result["list"][2]["servers"];
-        auto channels = result["list"][2]["channels"];
-        auto plugins = result["list"][2]["plugins"];
-        auto events = result["list"][2]["events"];
+        auto servers = json["list"][2]["servers"];
+        auto channels = json["list"][2]["channels"];
+        auto plugins = json["list"][2]["plugins"];
+        auto events = json["list"][2]["events"];
 
         BOOST_TEST(json_util::contains(servers, "s2"));
         BOOST_TEST(json_util::contains(channels, "c2"));
         BOOST_TEST(json_util::contains(plugins, "p2"));
         BOOST_TEST(json_util::contains(events, "onMessage"));
-        BOOST_TEST(result["list"][2]["action"].get<std::string>() == "accept");
+        BOOST_TEST(json["list"][2]["action"].get<std::string>() == "accept");
     }
 }
 
 BOOST_AUTO_TEST_CASE(beyond)
 {
-    nlohmann::json result;
-
-    ctl_->write({
+    request({
         { "command",    "rule-move" },
         { "from",       0           },
         { "to",         123         }
     });
-    ctl_->read([&] (auto, auto msg) {
-        result = msg;
-    });
 
-    wait_for([&] () {
-        return result.is_object();
-    });
+    const auto [json, code] = request({{ "command", "rule-list" }});
 
-    BOOST_TEST(result.is_object());
-
-    result = nullptr;
-    ctl_->write({{ "command", "rule-list" }});
-    ctl_->read([&] (auto, auto msg) {
-        result = msg;
-    });
-
-    wait_for([&] () {
-        return result.is_object();
-    });
-
-    BOOST_TEST(result.is_object());
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
 
     // Rule 1.
     {
-        auto servers = result["list"][0]["servers"];
-        auto channels = result["list"][0]["channels"];
-        auto plugins = result["list"][0]["plugins"];
-        auto events = result["list"][0]["events"];
+        auto servers = json["list"][0]["servers"];
+        auto channels = json["list"][0]["channels"];
+        auto plugins = json["list"][0]["plugins"];
+        auto events = json["list"][0]["events"];
 
         BOOST_TEST(json_util::contains(servers, "s1"));
         BOOST_TEST(json_util::contains(channels, "c1"));
         BOOST_TEST(json_util::contains(plugins, "p1"));
         BOOST_TEST(json_util::contains(events, "onMessage"));
-        BOOST_TEST(result["list"][0]["action"].get<std::string>() == "accept");
+        BOOST_TEST(json["list"][0]["action"].get<std::string>() == "accept");
     }
 
     // Rule 2.
     {
-        auto servers = result["list"][1]["servers"];
-        auto channels = result["list"][1]["channels"];
-        auto plugins = result["list"][1]["plugins"];
-        auto events = result["list"][1]["events"];
+        auto servers = json["list"][1]["servers"];
+        auto channels = json["list"][1]["channels"];
+        auto plugins = json["list"][1]["plugins"];
+        auto events = json["list"][1]["events"];
 
         BOOST_TEST(json_util::contains(servers, "s2"));
         BOOST_TEST(json_util::contains(channels, "c2"));
         BOOST_TEST(json_util::contains(plugins, "p2"));
         BOOST_TEST(json_util::contains(events, "onMessage"));
-        BOOST_TEST(result["list"][1]["action"].get<std::string>() == "accept");
+        BOOST_TEST(json["list"][1]["action"].get<std::string>() == "accept");
     }
 
     // Rule 0.
     {
-        auto servers = result["list"][2]["servers"];
-        auto channels = result["list"][2]["channels"];
-        auto plugins = result["list"][2]["plugins"];
-        auto events = result["list"][2]["events"];
+        auto servers = json["list"][2]["servers"];
+        auto channels = json["list"][2]["channels"];
+        auto plugins = json["list"][2]["plugins"];
+        auto events = json["list"][2]["events"];
 
         BOOST_TEST(json_util::contains(servers, "s0"));
         BOOST_TEST(json_util::contains(channels, "c0"));
         BOOST_TEST(json_util::contains(plugins, "p0"));
         BOOST_TEST(json_util::contains(events, "onMessage"));
-        BOOST_TEST(result["list"][2]["action"].get<std::string>() == "drop");
+        BOOST_TEST(json["list"][2]["action"].get<std::string>() == "drop");
     }
 }
 
@@ -364,67 +292,67 @@ BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_index_1_from)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "rule-move" },
         { "from",       -100        },
         { "to",         0           }
     });
 
-    BOOST_TEST(result.second == rule_error::invalid_index);
-    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(code == rule_error::invalid_index);
+    BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_1_to)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "rule-move" },
         { "from",       0           },
         { "to",         -100        }
     });
 
-    BOOST_TEST(result.second == rule_error::invalid_index);
-    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(code == rule_error::invalid_index);
+    BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_2_from)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "rule-move" },
         { "from",       100         },
         { "to",         0           }
     });
 
-    BOOST_TEST(result.second == rule_error::invalid_index);
-    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(code == rule_error::invalid_index);
+    BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_3_from)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "rule-move" },
         { "from",       "notaint"   },
         { "to",         0           }
     });
 
-    BOOST_TEST(result.second == rule_error::invalid_index);
-    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(code == rule_error::invalid_index);
+    BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_3_to)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "rule-move" },
         { "from",       0           },
         { "to",         "notaint"   }
     });
 
-    BOOST_TEST(result.second == rule_error::invalid_index);
-    BOOST_TEST(result.first["error"].template get<int>() == rule_error::invalid_index);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "rule");
+    BOOST_TEST(code == rule_error::invalid_index);
+    BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

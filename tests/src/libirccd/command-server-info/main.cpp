@@ -46,56 +46,57 @@ BOOST_AUTO_TEST_CASE(basic)
 
     daemon_->servers().add(std::move(server));
 
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "server-info"       },
         { "server",     "test"              },
     });
 
-    BOOST_TEST(result.first.is_object());
-    BOOST_TEST(result.first["host"].get<std::string>() == "example.org");
-    BOOST_TEST(result.first["name"].get<std::string>() == "test");
-    BOOST_TEST(result.first["nickname"].get<std::string>() == "pascal");
-    BOOST_TEST(result.first["port"].get<int>() == 8765);
-    BOOST_TEST(result.first["realname"].get<std::string>() == "Pascal le grand frere");
-    BOOST_TEST(result.first["username"].get<std::string>() == "psc");
+    BOOST_TEST(!code);
+    BOOST_TEST(json.is_object());
+    BOOST_TEST(json["host"].get<std::string>() == "example.org");
+    BOOST_TEST(json["name"].get<std::string>() == "test");
+    BOOST_TEST(json["nickname"].get<std::string>() == "pascal");
+    BOOST_TEST(json["port"].get<int>() == 8765);
+    BOOST_TEST(json["realname"].get<std::string>() == "Pascal le grand frere");
+    BOOST_TEST(json["username"].get<std::string>() == "psc");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier_1)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "server-info"   },
         { "server",     123456          }
     });
 
-    BOOST_TEST(result.second == server_error::invalid_identifier);
-    BOOST_TEST(result.first["error"].template get<int>() == server_error::invalid_identifier);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(code == server_error::invalid_identifier);
+    BOOST_TEST(json["error"].get<int>() == server_error::invalid_identifier);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_identifier_2)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "server-info"   },
         { "server",     ""              }
     });
 
-    BOOST_TEST(result.second == server_error::invalid_identifier);
-    BOOST_TEST(result.first["error"].template get<int>() == server_error::invalid_identifier);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(code == server_error::invalid_identifier);
+    BOOST_TEST(json["error"].get<int>() == server_error::invalid_identifier);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    const auto result = request({
+    const auto [json, code] = request({
         { "command",    "server-info"   },
         { "server",     "unknown"       }
     });
 
-    BOOST_TEST(result.second == server_error::not_found);
-    BOOST_TEST(result.first["error"].template get<int>() == server_error::not_found);
-    BOOST_TEST(result.first["errorCategory"].template get<std::string>() == "server");
+    BOOST_TEST(code == server_error::not_found);
+    BOOST_TEST(json["error"].get<int>() == server_error::not_found);
+    BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
