@@ -67,14 +67,14 @@ BOOST_AUTO_TEST_CASE(simple)
     irccd_.plugins().add(std::move(p));
     start();
 
-    const auto result = exec({ "plugin-info", "test" });
+    const auto [out, err] = exec({ "plugin-info", "test" });
 
-    BOOST_TEST(result.first.size() == 4U);
-    BOOST_TEST(result.second.size() == 0U);
-    BOOST_TEST(result.first[0] == "Author         : David Demelier <markand@malikania.fr>");
-    BOOST_TEST(result.first[1] == "License        : ISC");
-    BOOST_TEST(result.first[2] == "Summary        : foo");
-    BOOST_TEST(result.first[3] == "Version        : 0.0");
+    BOOST_TEST(out.size() == 4U);
+    BOOST_TEST(err.size() == 0U);
+    BOOST_TEST(out[0] == "Author         : David Demelier <markand@malikania.fr>");
+    BOOST_TEST(out[1] == "License        : ISC");
+    BOOST_TEST(out[2] == "Summary        : foo");
+    BOOST_TEST(out[3] == "Version        : 0.0");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

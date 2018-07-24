@@ -66,21 +66,21 @@ BOOST_AUTO_TEST_CASE(simple)
 
     // Load a plugin first.
     {
-        const auto result = exec({ "plugin-load", "test-cli-plugin-load" });
+        const auto [out, err] = exec({ "plugin-load", "sample" });
 
-        BOOST_TEST(result.first.size() == 0U);
-        BOOST_TEST(result.second.size() == 0U);
+        BOOST_TEST(out.size() == 0U);
+        BOOST_TEST(err.size() == 0U);
     }
 
     // Get the new list of plugins.
     {
-        const auto result = exec({ "plugin-list" });
+        const auto [out, err] = exec({ "plugin-list" });
 
-        BOOST_TEST(result.first.size() == 3U);
-        BOOST_TEST(result.second.size() == 0U);
-        BOOST_TEST(result.first[0] == "p1");
-        BOOST_TEST(result.first[1] == "p2");
-        BOOST_TEST(result.first[2] == "test-cli-plugin-load");
+        BOOST_TEST(out.size() == 3U);
+        BOOST_TEST(err.size() == 0U);
+        BOOST_TEST(out[0] == "p1");
+        BOOST_TEST(out[1] == "p2");
+        BOOST_TEST(out[2] == "sample");
     }
 }
 

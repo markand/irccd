@@ -63,31 +63,31 @@ BOOST_AUTO_TEST_CASE(simple)
     start();
 
     {
-        const auto result = exec({ "rule-remove", "0" });
+        const auto [out, err] = exec({ "rule-remove", "0" });
 
-        BOOST_TEST(result.first.size() == 0U);
-        BOOST_TEST(result.second.size() == 0U);
+        BOOST_TEST(out.size() == 0U);
+        BOOST_TEST(err.size() == 0U);
     }
 
     {
-        const auto result = exec({ "rule-list" });
+        const auto [out, err] = exec({ "rule-list" });
 
-        BOOST_TEST(result.first.size() == 14U);
-        BOOST_TEST(result.second.size() == 0U);
-        BOOST_TEST(result.first[0]  == "rule:        0");
-        BOOST_TEST(result.first[1]  == "servers:     s2 ");
-        BOOST_TEST(result.first[2]  == "channels:    c2 ");
-        BOOST_TEST(result.first[3]  == "plugins:     p2 ");
-        BOOST_TEST(result.first[4]  == "events:      onCommand ");
-        BOOST_TEST(result.first[5]  == "action:      drop");
-        BOOST_TEST(result.first[6]  == "");
-        BOOST_TEST(result.first[7]  == "rule:        1");
-        BOOST_TEST(result.first[8]  == "servers:     s3 ");
-        BOOST_TEST(result.first[9]  == "channels:    c3 ");
-        BOOST_TEST(result.first[10] == "plugins:     p3 ");
-        BOOST_TEST(result.first[11] == "events:      onMessage ");
-        BOOST_TEST(result.first[12] == "action:      accept");
-        BOOST_TEST(result.first[13] == "");
+        BOOST_TEST(out.size() == 14U);
+        BOOST_TEST(err.size() == 0U);
+        BOOST_TEST(out[0]  == "rule:        0");
+        BOOST_TEST(out[1]  == "servers:     s2 ");
+        BOOST_TEST(out[2]  == "channels:    c2 ");
+        BOOST_TEST(out[3]  == "plugins:     p2 ");
+        BOOST_TEST(out[4]  == "events:      onCommand ");
+        BOOST_TEST(out[5]  == "action:      drop");
+        BOOST_TEST(out[6]  == "");
+        BOOST_TEST(out[7]  == "rule:        1");
+        BOOST_TEST(out[8]  == "servers:     s3 ");
+        BOOST_TEST(out[9]  == "channels:    c3 ");
+        BOOST_TEST(out[10] == "plugins:     p3 ");
+        BOOST_TEST(out[11] == "events:      onMessage ");
+        BOOST_TEST(out[12] == "action:      accept");
+        BOOST_TEST(out[13] == "");
     }
 }
 

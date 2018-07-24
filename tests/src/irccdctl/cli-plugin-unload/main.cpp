@@ -20,15 +20,14 @@
 #include <boost/test/unit_test.hpp>
 
 #include <irccd/test/plugin_cli_test.hpp>
+#include <irccd/test/mock.hpp>
 
 namespace irccd {
 
 namespace {
 
-class unloadable_plugin : public plugin {
+class unloadable_plugin : public mock, public plugin {
 public:
-    bool unloaded{false};
-
     unloadable_plugin()
         : plugin("test")
     {
@@ -41,7 +40,7 @@ public:
 
     void handle_unload(irccd&) override
     {
-        unloaded = true;
+        push("handle_unload");
     }
 };
 
@@ -54,10 +53,11 @@ BOOST_AUTO_TEST_CASE(simple)
     irccd_.plugins().add(plugin);
     start();
 
-    const auto result = exec({ "plugin-unload", "test" });
+    const auto [out, err] = exec({ "plugin-unload", "test" });
 
-    BOOST_TEST(result.first.size() == 0U);
-    BOOST_TEST(result.second.size() == 0U);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 0U);
+    BOOST_TEST(plugin->find("handle_unload").size() == 1U);
     BOOST_TEST(!irccd_.plugins().has("p"));
 }
 

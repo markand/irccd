@@ -20,15 +20,14 @@
 #include <boost/test/unit_test.hpp>
 
 #include <irccd/test/plugin_cli_test.hpp>
+#include <irccd/test/mock.hpp>
 
 namespace irccd {
 
 namespace {
 
-class reloadable_plugin : public plugin {
+class reloadable_plugin : public mock, public plugin {
 public:
-    bool reloaded{false};
-
     reloadable_plugin()
         : plugin("test")
     {
@@ -41,7 +40,7 @@ public:
 
     void handle_reload(irccd&) override
     {
-        reloaded = true;
+        push("handle_reload");
     }
 };
 
@@ -54,11 +53,11 @@ BOOST_AUTO_TEST_CASE(simple)
     irccd_.plugins().add(plugin);
     start();
 
-    const auto result = exec({ "plugin-reload", "test" });
+    const auto [out, err] = exec({ "plugin-reload", "test" });
 
-    BOOST_TEST(result.first.size() == 0U);
-    BOOST_TEST(result.second.size() == 0U);
-    BOOST_TEST(plugin->reloaded);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 0U);
+    BOOST_TEST(plugin->find("handle_reload").size() == 1U);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -46,12 +46,12 @@ BOOST_AUTO_TEST_CASE(output)
     irccd_.plugins().add(std::make_unique<sample>("p2"));
     start();
 
-    const auto result = exec({ "plugin-list" });
+    const auto [out, err] = exec({ "plugin-list" });
 
-    BOOST_TEST(result.first.size() == 2U);
-    BOOST_TEST(result.second.size() == 0U);
-    BOOST_TEST(result.first[0] == "p1");
-    BOOST_TEST(result.first[1] == "p2");
+    BOOST_TEST(out.size() == 2U);
+    BOOST_TEST(err.size() == 0U);
+    BOOST_TEST(out[0] == "p1");
+    BOOST_TEST(out[1] == "p2");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
