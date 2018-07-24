@@ -2,7 +2,7 @@
 -Ibuild/irccd
 -Iextern/duktape
 -Iextern/json
--Ilibcommon
+-Ilibirccd-core
 -Ilibirccd
 -Ilibirccdctl
 -Ilibirccd-js

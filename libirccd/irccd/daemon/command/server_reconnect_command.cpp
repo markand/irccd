@@ -37,14 +37,13 @@ void server_reconnect_command::exec(irccd& irccd, transport_client& client, cons
 {
     const auto it = args.find("server");
 
-    if (it == args.end()) {
-        for (const auto& server : irccd.servers().servers())
-            server->reconnect();
-    } else {
+    if (it == args.end())
+        irccd.servers().reconnect();
+    else {
         if (!it->is_string() || !string_util::is_identifier(it->get<std::string>()))
             throw server_error(server_error::invalid_identifier);
 
-        irccd.servers().require(it->get<std::string>())->reconnect();
+        irccd.servers().reconnect(it->get<std::string>());
     }
 
     client.success("server-reconnect");

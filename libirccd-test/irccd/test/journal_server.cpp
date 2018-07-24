@@ -20,123 +20,130 @@
 
 namespace irccd {
 
-void journal_server::reconnect() noexcept
+void journal_server::connect(connect_handler) noexcept
 {
     cqueue_.push_back({
-        { "command",    "reconnect" }
+        { "command",    "connect"               },
     });
 }
 
-void journal_server::invite(std::string target, std::string channel)
+void journal_server::disconnect() noexcept
 {
     cqueue_.push_back({
-        { "command",    "invite"    },
-        { "target",     target      },
-        { "channel",    channel     }
+        { "command",    "disconnect"            },
     });
 }
 
-void journal_server::join(std::string channel, std::string password)
+void journal_server::invite(std::string_view target, std::string_view channel)
 {
     cqueue_.push_back({
-        { "command",    "join"      },
-        { "channel",    channel     },
-        { "password",   password    }
+        { "command",    "invite"                },
+        { "target",     std::string(target)     },
+        { "channel",    std::string(channel)    }
     });
 }
 
-void journal_server::kick(std::string target, std::string channel, std::string reason)
+void journal_server::join(std::string_view channel, std::string_view password)
 {
     cqueue_.push_back({
-        { "command",    "kick"      },
-        { "target",     target      },
-        { "channel",    channel     },
-        { "reason",     reason      }
+        { "command",    "join"                  },
+        { "channel",    std::string(channel)    },
+        { "password",   std::string(password)   }
     });
 }
 
-void journal_server::me(std::string target, std::string message)
+void journal_server::kick(std::string_view target, std::string_view channel, std::string_view reason)
 {
     cqueue_.push_back({
-        { "command",    "me"        },
-        { "target",     target      },
-        { "message",    message     }
+        { "command",    "kick"                  },
+        { "target",     std::string(target)     },
+        { "channel",    std::string(channel)    },
+        { "reason",     std::string(reason)     }
     });
 }
 
-void journal_server::message(std::string target, std::string message)
+void journal_server::me(std::string_view target, std::string_view message)
 {
     cqueue_.push_back({
-        { "command",    "message"   },
-        { "target",     target      },
-        { "message",    message     }
+        { "command",    "me"                    },
+        { "target",     std::string(target)     },
+        { "message",    std::string(message)    }
     });
 }
 
-void journal_server::mode(std::string channel,
-                          std::string mode,
-                          std::string limit,
-                          std::string user,
-                          std::string mask)
+void journal_server::message(std::string_view target, std::string_view message)
 {
     cqueue_.push_back({
-        { "command",    "mode"      },
-        { "channel",    channel     },
-        { "mode",       mode        },
-        { "limit",      limit       },
-        { "user",       user        },
-        { "mask",       mask        }
+        { "command",    "message"               },
+        { "target",     std::string(target)     },
+        { "message",    std::string(message)    }
     });
 }
 
-void journal_server::names(std::string channel)
+void journal_server::mode(std::string_view channel,
+                          std::string_view mode,
+                          std::string_view limit,
+                          std::string_view user,
+                          std::string_view mask)
 {
     cqueue_.push_back({
-        { "command",    "names"     },
-        { "channel",    channel     }
+        { "command",    "mode"                  },
+        { "channel",    std::string(channel)    },
+        { "mode",       std::string(mode)       },
+        { "limit",      std::string(limit)      },
+        { "user",       std::string(user)       },
+        { "mask",       std::string(mask)       }
     });
 }
 
-void journal_server::notice(std::string target, std::string message)
+void journal_server::names(std::string_view channel)
 {
     cqueue_.push_back({
-        { "command",    "notice"    },
-        { "target",     target      },
-        { "message",    message     }
+        { "command",    "names"                 },
+        { "channel",    std::string(channel)    }
     });
 }
 
-void journal_server::part(std::string channel, std::string reason)
+void journal_server::notice(std::string_view target, std::string_view message)
 {
     cqueue_.push_back({
-        { "command",    "part"      },
-        { "channel",    channel     },
-        { "reason",     reason      }
+        { "command",    "notice"                },
+        { "target",     std::string(target)     },
+        { "message",    std::string(message)    }
     });
 }
 
-void journal_server::send(std::string raw)
+void journal_server::part(std::string_view channel, std::string_view reason)
 {
     cqueue_.push_back({
-        { "command",    "send"      },
-        { "raw",        raw         }
+        { "command",    "part"                  },
+        { "channel",    std::string(channel)    },
+        { "reason",     std::string(reason)     }
     });
 }
 
-void journal_server::topic(std::string channel, std::string topic)
+void journal_server::send(std::string_view raw)
 {
     cqueue_.push_back({
-        { "command",    "topic"     },
-        { "channel",    channel     },
-        { "topic",      topic       }
+        { "command",    "send"                  },
+        { "raw",        std::string(raw)        }
     });
 }
 
-void journal_server::whois(std::string target)
+void journal_server::topic(std::string_view channel, std::string_view topic)
 {
     cqueue_.push_back({
-        { "command",    "whois"     },
-        { "target",     target      }
+        { "command",    "topic"                 },
+        { "channel",    std::string(channel)    },
+        { "topic",      std::string(topic)      }
+    });
+}
+
+void journal_server::whois(std::string_view target)
+{
+    cqueue_.push_back({
+        { "command",    "whois"                 },
+        { "target",     std::string(target)     }
     });
 }
 

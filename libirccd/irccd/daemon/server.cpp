@@ -112,21 +112,16 @@ auto isupport_extract_prefixes(const std::string& line) -> std::map<channel_mode
 
 } // !namespace
 
-void server::remove_joined_channel(const std::string& channel)
-{
-    jchannels_.erase(std::remove(jchannels_.begin(), jchannels_.end(), channel), jchannels_.end());
-}
-
-void server::dispatch_connect(const irc::message&)
+void server::dispatch_connect(const irc::message&, const recv_handler& handler)
 {
     state_ = state::connected;
-    on_connect({shared_from_this()});
+    handler({}, connect_event{shared_from_this()});
 
     for (const auto& channel : rchannels_)
         join(channel.name, channel.password);
 }
 
-void server::dispatch_endofnames(const irc::message& msg)
+void server::dispatch_endofnames(const irc::message& msg, const recv_handler& handler)
 {
     /*
      * Called when end of name listing has finished on a channel.
@@ -143,14 +138,14 @@ void server::dispatch_endofnames(const irc::message& msg)
     if (it != names_map_.end()) {
         std::vector<std::string> list(it->second.begin(), it->second.end());
 
-        on_names({shared_from_this(), msg.arg(1), std::move(list)});
+        handler({}, names_event{shared_from_this(), msg.arg(1), std::move(list)});
 
         // Don't forget to remove the list.
         names_map_.erase(it);
     }
 }
 
-void server::dispatch_endofwhois(const irc::message& msg)
+void server::dispatch_endofwhois(const irc::message& msg, const recv_handler& handler)
 {
     /*
      * Called when whois is finished.
@@ -162,20 +157,20 @@ void server::dispatch_endofwhois(const irc::message& msg)
     const auto it = whois_map_.find(msg.arg(1));
 
     if (it != whois_map_.end()) {
-        on_whois({shared_from_this(), it->second});
+        handler({}, whois_event{shared_from_this(), it->second});
 
         // Don't forget to remove.
         whois_map_.erase(it);
     }
 }
 
-void server::dispatch_invite(const irc::message& msg)
+void server::dispatch_invite(const irc::message& msg, const recv_handler& handler)
 {
     // If join-invite is set, join the channel.
     if ((flags_ & options::join_invite) == options::join_invite && is_self(msg.arg(0)))
         join(msg.arg(1));
 
-    on_invite({shared_from_this(), msg.prefix(), msg.arg(1), msg.arg(0)});
+    handler({}, invite_event{shared_from_this(), msg.prefix(), msg.arg(1), msg.arg(0)});
 }
 
 void server::dispatch_isupport(const irc::message& msg)
@@ -188,31 +183,31 @@ void server::dispatch_isupport(const irc::message& msg)
     }
 }
 
-void server::dispatch_join(const irc::message& msg)
+void server::dispatch_join(const irc::message& msg, const recv_handler& handler)
 {
     if (is_self(msg.prefix()))
-        jchannels_.push_back(msg.arg(0));
+        jchannels_.insert(msg.arg(0));
 
-    on_join({shared_from_this(), msg.prefix(), msg.arg(0)});
+    handler({}, join_event{shared_from_this(), msg.prefix(), msg.arg(0)});
 }
 
-void server::dispatch_kick(const irc::message& msg)
+void server::dispatch_kick(const irc::message& msg, const recv_handler& handler)
 {
     if (is_self(msg.arg(1))) {
         // Remove the channel from the joined list.
-        remove_joined_channel(msg.arg(0));
+        jchannels_.erase(msg.arg(0));
 
         // Rejoin the channel if the option has been set and I was kicked.
         if ((flags_ & options::auto_rejoin) == options::auto_rejoin)
             join(msg.arg(0));
     }
 
-    on_kick({shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1), msg.arg(2)});
+    handler({}, kick_event{shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1), msg.arg(2)});
 }
 
-void server::dispatch_mode(const irc::message& msg)
+void server::dispatch_mode(const irc::message& msg, const recv_handler& handler)
 {
-    on_mode({
+    handler({}, mode_event{
         shared_from_this(),
         msg.prefix(),
         msg.arg(0),
@@ -246,27 +241,27 @@ void server::dispatch_namreply(const irc::message& msg)
         names_map_[msg.arg(2)].insert(clean_prefix(modes_, u));
 }
 
-void server::dispatch_nick(const irc::message& msg)
+void server::dispatch_nick(const irc::message& msg, const recv_handler& handler)
 {
     // Update our nickname.
     if (is_self(msg.prefix()))
         nickname_ = msg.arg(0);
 
-    on_nick({shared_from_this(), msg.prefix(), msg.arg(0)});
+    handler({}, nick_event{shared_from_this(), msg.prefix(), msg.arg(0)});
 }
 
-void server::dispatch_notice(const irc::message& msg)
+void server::dispatch_notice(const irc::message& msg, const recv_handler& handler)
 {
-    on_notice({shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1)});
+    handler({}, notice_event{shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1)});
 }
 
-void server::dispatch_part(const irc::message& msg)
+void server::dispatch_part(const irc::message& msg, const recv_handler& handler)
 {
     // Remove the channel from the joined list if I left a channel.
     if (is_self(msg.prefix()))
-        remove_joined_channel(msg.arg(1));
+        jchannels_.erase(msg.arg(1));
 
-    on_part({shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1)});
+    handler({}, part_event{shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1)});
 }
 
 void server::dispatch_ping(const irc::message& msg)
@@ -276,7 +271,7 @@ void server::dispatch_ping(const irc::message& msg)
     send(str(format("PONG %1%") % msg.arg(0)));
 }
 
-void server::dispatch_privmsg(const irc::message& msg)
+void server::dispatch_privmsg(const irc::message& msg, const recv_handler& handler)
 {
     assert(msg.command() == "PRIVMSG");
 
@@ -284,18 +279,16 @@ void server::dispatch_privmsg(const irc::message& msg)
         auto cmd = msg.ctcp(1);
 
         if (cmd.compare(0, 6, "ACTION") == 0)
-            on_me({shared_from_this(), msg.prefix(), msg.arg(0), cmd.substr(7)});
-    } else if (is_self(msg.arg(0)))
-        on_query({shared_from_this(), msg.prefix(), msg.arg(1)});
-    else
-        on_message({shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1)});
+            handler({}, me_event{shared_from_this(), msg.prefix(), msg.arg(0), cmd.substr(7)});
+    } else
+        handler({}, message_event{shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1)});
 }
 
-void server::dispatch_topic(const irc::message& msg)
+void server::dispatch_topic(const irc::message& msg, const recv_handler& handler)
 {
     assert(msg.command() == "TOPIC");
 
-    on_topic({shared_from_this(), msg.arg(0), msg.arg(1), msg.arg(2)});
+    handler({}, topic_event{shared_from_this(), msg.arg(0), msg.arg(1), msg.arg(2)});
 }
 
 void server::dispatch_whoischannels(const irc::message& msg)
@@ -348,76 +341,89 @@ void server::dispatch_whoisuser(const irc::message& msg)
     whois_map_.emplace(info.nick, info);
 }
 
-void server::dispatch(const irc::message& message)
+void server::dispatch(const irc::message& message, const recv_handler& handler)
 {
     if (message.is(5))
         dispatch_isupport(message);
     else if (message.is(irc::err::nomotd) || message.is(irc::rpl::endofmotd))
-        dispatch_connect(message);
+        dispatch_connect(message, handler);
     else if (message.command() == "INVITE")
-        dispatch_invite(message);
+        dispatch_invite(message, handler);
     else if (message.command() == "JOIN")
-        dispatch_join(message);
+        dispatch_join(message, handler);
     else if (message.command() == "KICK")
-        dispatch_kick(message);
+        dispatch_kick(message, handler);
     else if (message.command() == "MODE")
-        dispatch_mode(message);
+        dispatch_mode(message, handler);
     else if (message.command() == "NICK")
-        dispatch_nick(message);
+        dispatch_nick(message, handler);
     else if (message.command() == "NOTICE")
-        dispatch_notice(message);
+        dispatch_notice(message, handler);
     else if (message.command() == "TOPIC")
-        dispatch_topic(message);
+        dispatch_topic(message, handler);
     else if (message.command() == "PART")
-        dispatch_part(message);
+        dispatch_part(message, handler);
     else if (message.command() == "PING")
         dispatch_ping(message);
     else if (message.command() == "PRIVMSG")
-        dispatch_privmsg(message);
+        dispatch_privmsg(message, handler);
     else if (message.is(irc::rpl::namreply))
         dispatch_namreply(message);
     else if (message.is(irc::rpl::endofnames))
-        dispatch_endofnames(message);
+        dispatch_endofnames(message, handler);
     else if (message.is(irc::rpl::endofwhois))
-        dispatch_endofwhois(message);
+        dispatch_endofwhois(message, handler);
     else if (message.is(irc::rpl::whoischannels))
         dispatch_whoischannels(message);
     else if (message.is(irc::rpl::whoisuser))
         dispatch_whoisuser(message);
 }
 
-void server::recv()
+void server::handle_send(const boost::system::error_code& code)
 {
-    conn_->recv([this, conn = conn_] (auto code, auto message) {
-        if (code)
-            wait();
-        else {
-            dispatch(message);
-            recv();
-        }
+    /*
+     * We don't notify server_service in case of error because in any case the
+     * pending recv() will complete with an error.
+     */
+    queue_.pop_front();
+
+    if (!code)
+        flush();
+}
+
+void server::handle_recv(const boost::system::error_code& code,
+                         const irc::message& message,
+                         const recv_handler& handler)
+{
+    if (code) {
+        disconnect();
+        handler(std::move(code), event(std::monostate()));
+    } else
+        dispatch(message, handler);
+}
+
+void server::recv(recv_handler handler) noexcept
+{
+    conn_->recv([this, handler] (auto code, auto message) {
+        handle_recv(std::move(code), message, handler);
     });
 }
 
 void server::flush()
 {
-    if (queue_.empty())
+    if (queue_.empty() || state_ != state::connected)
         return;
 
-    conn_->send(queue_.front(), [this, conn = conn_] (auto code) {
-        queue_.pop_front();
+    const auto self = shared_from_this();
 
-        if (code)
-            wait();
-        else
-            flush();
+    conn_->send(queue_.front(), [this, self] (auto code) {
+        handle_send(std::move(code));
     });
 }
 
 void server::identify()
 {
     state_ = state::identifying;
-    recocur_ = 0U;
-    jchannels_.clear();
 
     if (!password_.empty())
         send(str(format("PASS %1%") % password_));
@@ -426,46 +432,21 @@ void server::identify()
     send(str(format("USER %1% unknown unknown :%2%") % username_ % realname_));
 }
 
-void server::wait()
+void server::handle_wait(const boost::system::error_code& code, const connect_handler& handler)
 {
-    /*
-     * This function maybe called from a recv(), send() or even connect() call
-     * so be sure to only wait one at a time.
-     */
-    if (state_ == state::waiting)
-        return;
-
-    state_ = state::waiting;
-    timer_.expires_from_now(boost::posix_time::seconds(recodelay_));
-    timer_.async_wait([this] (auto code) {
-        if (code == boost::asio::error::operation_aborted)
-            return;
-
-        recocur_ ++;
-        connect();
-    });
+    if (code && code != boost::asio::error::operation_aborted)
+        handler(code);
 }
 
-void server::handle_connect(boost::system::error_code code)
+void server::handle_connect(const boost::system::error_code& code, const connect_handler& handler)
 {
-    // Cancel connect timer.
     timer_.cancel();
 
     if (code) {
-        // Wait before reconnecting.
-        if (recotries_ != 0) {
-            if (recotries_ > 0 && recocur_ >= recotries_) {
-                disconnect();
-            } else {
-                state_ = state::waiting;
-                wait();
-            }
-        } else
-            disconnect();
-    } else {
+        disconnect();
+        handler(code);
+    } else
         identify();
-        recv();
-    }
 }
 
 server::server(boost::asio::io_service& service, std::string id, std::string host)
@@ -593,16 +574,6 @@ void server::set_command_char(std::string command_char) noexcept
     command_char_ = std::move(command_char);
 }
 
-auto server::get_reconnect_tries() const noexcept -> std::int8_t
-{
-    return recotries_;
-}
-
-void server::set_reconnect_tries(std::int8_t reconnect_tries) noexcept
-{
-    recotries_ = reconnect_tries;
-}
-
 auto server::get_reconnect_delay() const noexcept -> std::uint16_t
 {
     return recodelay_;
@@ -623,19 +594,19 @@ void server::set_ping_timeout(std::uint16_t ping_timeout) noexcept
     timeout_ = ping_timeout;
 }
 
-auto server::get_channels() const noexcept -> const std::vector<std::string>&
+auto server::get_channels() const noexcept -> const std::set<std::string>&
 {
     return jchannels_;
 }
 
-auto server::is_self(const std::string& target) const noexcept -> bool
+auto server::is_self(std::string_view target) const noexcept -> bool
 {
     return nickname_ == irc::user::parse(target).nick();
 }
 
-void server::connect() noexcept
+void server::connect(connect_handler handler) noexcept
 {
-    assert(state_ == state::disconnected || state_ == state::waiting);
+    assert(state_ == state::disconnected);
 
     /*
      * This is needed if irccd is started before DHCP or if DNS cache is
@@ -647,7 +618,7 @@ void server::connect() noexcept
 
     if ((flags_ & options::ssl) == options::ssl) {
 #if defined(IRCCD_HAVE_SSL)
-        conn_ = std::make_shared<irc::tls_connection>(service_);
+        conn_ = std::make_unique<irc::tls_connection>(service_);
 #else
         /*
          * If SSL is not compiled in, the caller is responsible of not setting
@@ -656,11 +627,18 @@ void server::connect() noexcept
         assert((flags_ & options::ssl) != options::ssl);
 #endif
     } else
-        conn_ = std::make_shared<irc::ip_connection>(service_);
+        conn_ = std::make_unique<irc::ip_connection>(service_);
 
+    jchannels_.clear();
     state_ = state::connecting;
-    conn_->connect(host_, std::to_string(port_), [this, conn = conn_] (auto code) {
-        handle_connect(std::move(code));
+
+    timer_.expires_from_now(boost::posix_time::seconds(timeout_));
+    timer_.async_wait([this, handler] (auto code) {
+        handle_wait(code, handler);
+    });
+
+    conn_->connect(host_, std::to_string(port_), [this, handler] (auto code) {
+        handle_connect(code, handler);
     });
 }
 
@@ -669,16 +647,9 @@ void server::disconnect() noexcept
     conn_ = nullptr;
     state_ = state::disconnected;
     queue_.clear();
-    on_disconnect({shared_from_this()});
 }
 
-void server::reconnect() noexcept
-{
-    disconnect();
-    connect();
-}
-
-void server::invite(std::string target, std::string channel)
+void server::invite(std::string_view target, std::string_view channel)
 {
     assert(!target.empty());
     assert(!channel.empty());
@@ -686,7 +657,7 @@ void server::invite(std::string target, std::string channel)
     send(str(format("INVITE %1% %2%") % target % channel));
 }
 
-void server::join(std::string channel, std::string password)
+void server::join(std::string_view channel, std::string_view password)
 {
     assert(!channel.empty());
 
@@ -695,9 +666,9 @@ void server::join(std::string channel, std::string password)
     });
 
     if (it == rchannels_.end())
-        rchannels_.push_back({ channel, password });
+        rchannels_.push_back({ std::string(channel), std::string(password) });
     else
-        *it = { channel, password };
+        *it = { std::string(channel), std::string(password) };
 
     if (state_ == state::connected) {
         if (password.empty())
@@ -707,7 +678,7 @@ void server::join(std::string channel, std::string password)
     }
 }
 
-void server::kick(std::string target, std::string channel, std::string reason)
+void server::kick(std::string_view target, std::string_view channel, std::string_view reason)
 {
     assert(!target.empty());
     assert(!channel.empty());
@@ -718,7 +689,7 @@ void server::kick(std::string target, std::string channel, std::string reason)
         send(str(format("KICK %1% %2%") % channel % target));
 }
 
-void server::me(std::string target, std::string message)
+void server::me(std::string_view target, std::string_view message)
 {
     assert(!target.empty());
     assert(!message.empty());
@@ -726,7 +697,7 @@ void server::me(std::string target, std::string message)
     send(str(format("PRIVMSG %1% :\x01" "ACTION %2%\x01") % target % message));
 }
 
-void server::message(std::string target, std::string message)
+void server::message(std::string_view target, std::string_view message)
 {
     assert(!target.empty());
     assert(!message.empty());
@@ -734,11 +705,11 @@ void server::message(std::string target, std::string message)
     send(str(format("PRIVMSG %1% :%2%") % target % message));
 }
 
-void server::mode(std::string channel,
-                  std::string mode,
-                  std::string limit,
-                  std::string user,
-                  std::string mask)
+void server::mode(std::string_view channel,
+                  std::string_view mode,
+                  std::string_view limit,
+                  std::string_view user,
+                  std::string_view mask)
 {
     assert(!channel.empty());
     assert(!mode.empty());
@@ -757,14 +728,14 @@ void server::mode(std::string channel,
     send(oss.str());
 }
 
-void server::names(std::string channel)
+void server::names(std::string_view channel)
 {
-    assert(channel.c_str());
+    assert(!channel.empty());
 
     send(str(format("NAMES %1%") % channel));
 }
 
-void server::notice(std::string target, std::string message)
+void server::notice(std::string_view target, std::string_view message)
 {
     assert(!target.empty());
     assert(!message.empty());
@@ -772,7 +743,7 @@ void server::notice(std::string target, std::string message)
     send(str(format("NOTICE %1% :%2%") % target % message));
 }
 
-void server::part(std::string channel, std::string reason)
+void server::part(std::string_view channel, std::string_view reason)
 {
     assert(!channel.empty());
 
@@ -782,22 +753,22 @@ void server::part(std::string channel, std::string reason)
         send(str(format("PART %1%") % channel));
 }
 
-void server::send(std::string raw)
+void server::send(std::string_view raw)
 {
     assert(!raw.empty());
 
     if (state_ == state::identifying || state_ == state::connected) {
         const auto in_progress = queue_.size() > 0;
 
-        queue_.push_back(std::move(raw));
+        queue_.push_back(std::string(raw));
 
         if (!in_progress)
             flush();
     } else
-        queue_.push_back(std::move(raw));
+        queue_.push_back(std::string(raw));
 }
 
-void server::topic(std::string channel, std::string topic)
+void server::topic(std::string_view channel, std::string_view topic)
 {
     assert(!channel.empty());
 
@@ -807,7 +778,7 @@ void server::topic(std::string channel, std::string topic)
         send(str(format("TOPIC %1%") % channel));
 }
 
-void server::whois(std::string target)
+void server::whois(std::string_view target)
 {
     assert(!target.empty());
 
@@ -843,10 +814,8 @@ auto server_category() -> const std::error_category&
                 return "server already exists";
             case server_error::invalid_port:
                 return "invalid port number specified";
-            case server_error::invalid_reconnect_tries:
-                return "invalid number of reconnection tries";
-            case server_error::invalid_reconnect_timeout:
-                return "invalid reconnect timeout number";
+            case server_error::invalid_reconnect_delay:
+                return "invalid reconnect delay number";
             case server_error::invalid_hostname:
                 return "invalid hostname";
             case server_error::invalid_channel:

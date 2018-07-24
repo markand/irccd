@@ -91,7 +91,7 @@ std::string message::ctcp(unsigned index) const
     return args_[index].substr(1, args_[index].size() - 1);
 }
 
-user user::parse(const std::string& line)
+user user::parse(std::string_view line)
 {
     if (line.empty())
         return {"", ""};
@@ -99,9 +99,12 @@ user user::parse(const std::string& line)
     const auto pos = line.find("!");
 
     if (pos == std::string::npos)
-        return {line, ""};
+        return {std::string(line), ""};
 
-    return {line.substr(0, pos), line.substr(pos + 1)};
+    return {
+        std::string(line.substr(0, pos)),
+        std::string(line.substr(pos + 1))
+    };
 }
 
 template <typename Socket>

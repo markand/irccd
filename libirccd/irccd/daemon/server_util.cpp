@@ -74,6 +74,7 @@ void from_config_load_flags(server& sv, const ini::section& sc)
     const auto ssl = sc.get("ssl");
     const auto ssl_verify = sc.get("ssl-verify");
     const auto auto_rejoin = sc.get("auto-rejoin");
+    const auto auto_reconnect = sc.get("auto-reconnect");
     const auto join_invite = sc.get("join-invite");
 
     if (string_util::is_boolean(ipv6.value()))
@@ -84,6 +85,8 @@ void from_config_load_flags(server& sv, const ini::section& sc)
         sv.set_options(sv.get_options() | server::options::ssl_verify);
     if (string_util::is_boolean(auto_rejoin.value()))
         sv.set_options(sv.get_options() | server::options::auto_rejoin);
+    if (string_util::is_boolean(auto_reconnect.value()))
+        sv.set_options(sv.get_options() | server::options::auto_reconnect);
     if (string_util::is_boolean(join_invite.value()))
         sv.set_options(sv.get_options() | server::options::join_invite);
 }
@@ -92,21 +95,17 @@ void from_config_load_numeric_parameters(server& sv, const ini::section& sc)
 {
     const auto port = ini_util::optional_uint<std::uint16_t>(sc, "port", sv.get_port());
     const auto ping_timeout = ini_util::optional_uint<uint16_t>(sc, "ping-timeout", sv.get_ping_timeout());
-    const auto reco_tries = ini_util::optional_uint<uint8_t>(sc, "reconnect-tries", sv.get_reconnect_tries());
-    const auto reco_timeout = ini_util::optional_uint<uint16_t>(sc, "reconnect-delay", sv.get_reconnect_delay());
+    const auto reco_timeout = ini_util::optional_uint<uint16_t>(sc, "auto-reconnect-delay", sv.get_reconnect_delay());
 
     if (!port)
         throw server_error(server_error::invalid_port);
     if (!ping_timeout)
         throw server_error(server_error::invalid_ping_timeout);
-    if (!reco_tries)
-        throw server_error(server_error::invalid_reconnect_tries);
     if (!reco_timeout)
-        throw server_error(server_error::invalid_reconnect_timeout);
+        throw server_error(server_error::invalid_reconnect_delay);
 
     sv.set_port(*port);
     sv.set_ping_timeout(*ping_timeout);
-    sv.set_reconnect_tries(*reco_tries);
     sv.set_reconnect_delay(*reco_timeout);
 }
 

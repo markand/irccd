@@ -28,6 +28,7 @@
 
 #include <functional>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -349,7 +350,7 @@ public:
      * \param line the line to parse
      * \return a user
      */
-    static user parse(const std::string& line);
+    static user parse(std::string_view line);
 };
 
 /**

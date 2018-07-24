@@ -28,13 +28,13 @@
 
 #include <cstdint>
 #include <deque>
+#include <functional>
 #include <map>
 #include <memory>
 #include <set>
 #include <string>
+#include <variant>
 #include <vector>
-
-#include <boost/signals2/signal.hpp>
 
 #include <json.hpp>
 
@@ -190,15 +190,6 @@ struct part_event {
 };
 
 /**
- * \brief Query event.
- */
-struct query_event {
-    std::shared_ptr<class server> server;   //!< The server.
-    std::string origin;                     //!< The originator.
-    std::string message;                    //!< The message.
-};
-
-/**
  * \brief Topic event.
  */
 struct topic_event {
@@ -217,183 +208,73 @@ struct whois_event {
 };
 
 /**
- * \brief The class that connect to a IRC server
+ * \brief Store all possible events.
+ */
+using event = std::variant<
+    std::monostate,
+    connect_event,
+    disconnect_event,
+    invite_event,
+    join_event,
+    kick_event,
+    me_event,
+    message_event,
+    mode_event,
+    names_event,
+    nick_event,
+    notice_event,
+    part_event,
+    topic_event,
+    whois_event
+>;
+
+/**
+ * \brief The class that connect to a IRC server.
  *
- * The server is a class that stores callbacks which will be called on IRC
- * events. It is the lowest part of the connection to a server, it can be used
- * directly by the user to connect to a server.
- *
- * The server has several signals that will be emitted when data has arrived.
- *
- * When adding a server to the ServerService in irccd, these signals are
- * connected to generate events that will be dispatched to the plugins and to
- * the transports.
- *
- * Note: the server is set in non blocking mode, commands are placed in a queue
- * and sent when only when they are ready.
+ * This class is higher level than irc connection, it does identify process,
+ * parsing message, translating messages and queue'ing user requests.
  */
 class server : public std::enable_shared_from_this<server> {
 public:
     /**
+     * Completion handler once network connection is complete.
+     */
+    using connect_handler = std::function<void (std::error_code)>;
+
+    /**
+     * Completion handler once a network message has arrived.
+     */
+    using recv_handler = std::function<void (std::error_code, event)>;
+
+    /**
      * \brief Various options for server.
      */
     enum class options : std::uint8_t {
-        none        = 0,                    //!< No options
-        ipv6        = (1 << 0),             //!< Connect using IPv6
-        ssl         = (1 << 1),             //!< Use SSL
-        ssl_verify  = (1 << 2),             //!< Verify SSL
-        auto_rejoin = (1 << 3),             //!< Auto rejoin a kick
-        join_invite = (1 << 4)              //!< Join a channel on invitation
+        none            = 0,            //!< No options
+        ipv6            = (1 << 0),     //!< Connect using IPv6
+        ssl             = (1 << 1),     //!< Use SSL
+        ssl_verify      = (1 << 2),     //!< Verify SSL
+        auto_rejoin     = (1 << 3),     //!< Auto rejoin a kick
+        auto_reconnect  = (1 << 4),     //!< Auto reconnect on disconnection
+        join_invite     = (1 << 5)      //!< Join a channel on invitation
     };
 
     /**
      * \brief Describe current server state.
      */
     enum class state : std::uint8_t {
-        disconnected,       //!< not connected at all,
-        connecting,         //!< network connection in progress,
-        identifying,        //!< sending nick, user and password commands,
-        waiting,            //!< waiting for reconnection,
-        connected           //!< ready for use.
+        disconnected,                   //!< not connected at all,
+        connecting,                     //!< network connection in progress,
+        identifying,                    //!< sending nick, user and password commands,
+        connected                       //!< ready for use.
     };
-
-    /**
-     * Signal: on_connect
-     * ----------------------------------------------------------
-     *
-     * Triggered when the server is successfully connected.
-     */
-    boost::signals2::signal<void (connect_event)> on_connect;
-
-    /**
-     * Signal: on_disconnect
-     * ----------------------------------------------------------
-     *
-     * The server was disconnected but is reconnecting.
-     */
-    boost::signals2::signal<void (disconnect_event)> on_disconnect;
-
-    /**
-     * Signal: on_die
-     * ----------------------------------------------------------
-     *
-     * The server is dead.
-     */
-    boost::signals2::signal<void (disconnect_event)> on_die;
-
-    /**
-     * Signal: on_invite
-     * ----------------------------------------------------------
-     *
-     * Triggered when an invite has been sent to you (the bot).
-     */
-    boost::signals2::signal<void (invite_event)> on_invite;
-
-    /**
-     * Signal: on_join
-     * ----------------------------------------------------------
-     *
-     * Triggered when a user has joined the channel, it also includes you.
-     */
-    boost::signals2::signal<void (join_event)> on_join;
-
-    /**
-     * Signal: on_kick
-     * ----------------------------------------------------------
-     *
-     * Triggered when someone has been kicked from a channel.
-     */
-    boost::signals2::signal<void (kick_event)> on_kick;
-
-    /**
-     * Signal: on_message
-     * ----------------------------------------------------------
-     *
-     * Triggered when a message on a channel has been sent.
-     */
-    boost::signals2::signal<void (message_event)> on_message;
-
-    /**
-     * Signal: on_me
-     * ----------------------------------------------------------
-     *
-     * Triggered on a CTCP Action.
-     *
-     * This is both used in a channel and in a private message so the target may
-     * be a channel or your nickname.
-     */
-    boost::signals2::signal<void (me_event)> on_me;
-
-    /**
-     * Signal: on_mode
-     * ----------------------------------------------------------
-     *
-     * Triggered when the server changed your user mode.
-     */
-    boost::signals2::signal<void (mode_event)> on_mode;
-
-    /**
-     * Signal: on_names
-     * ----------------------------------------------------------
-     *
-     * Triggered when names listing has finished on a channel.
-     */
-    boost::signals2::signal<void (names_event)> on_names;
-
-    /**
-     * Signal: on_nick
-     * ----------------------------------------------------------
-     *
-     * Triggered when someone changed its nickname, it also includes you.
-     */
-    boost::signals2::signal<void (nick_event)> on_nick;
-
-    /**
-     * Signal: on_notice
-     * ----------------------------------------------------------
-     *
-     * Triggered when someone has sent a notice to you.
-     */
-    boost::signals2::signal<void (notice_event)> on_notice;
-
-    /**
-     * Signal: on_part
-     * ----------------------------------------------------------
-     *
-     * Triggered when someone has left the channel.
-     */
-    boost::signals2::signal<void (part_event)> on_part;
-
-    /**
-     * Signal: on_query
-     * ----------------------------------------------------------
-     *
-     * Triggered when someone has sent you a private message.
-     */
-    boost::signals2::signal<void (query_event)> on_query;
-
-    /**
-     * Signal: on_topic
-     * ----------------------------------------------------------
-     *
-     * Triggered when someone changed the channel topic.
-     */
-    boost::signals2::signal<void (topic_event)> on_topic;
-
-    /**
-     * Signal: on_whois
-     * ----------------------------------------------------------
-     *
-     * Triggered when whois information has been received.
-     */
-    boost::signals2::signal<void (whois_event)> on_whois;
 
 private:
     state state_{state::disconnected};
 
     // Requested and joined channels.
     std::vector<channel> rchannels_;
-    std::vector<std::string> jchannels_;
+    std::set<std::string> jchannels_;
 
     // Identifier.
     std::string id_;
@@ -412,7 +293,6 @@ private:
 
     // Settings.
     std::string command_char_{"!"};
-    std::int8_t recotries_{-1};
     std::uint16_t recodelay_{30};
     std::uint16_t timeout_{1000};
 
@@ -422,38 +302,37 @@ private:
     // Misc.
     boost::asio::io_service& service_;
     boost::asio::deadline_timer timer_;
-    std::shared_ptr<irc::connection> conn_;
+    std::unique_ptr<irc::connection> conn_;
     std::deque<std::string> queue_;
-    std::int8_t recocur_{0};
     std::map<std::string, std::set<std::string>> names_map_;
     std::map<std::string, whois_info> whois_map_;
 
-    void remove_joined_channel(const std::string&);
-
-    void dispatch_connect(const irc::message&);
-    void dispatch_endofnames(const irc::message&);
-    void dispatch_endofwhois(const irc::message&);
-    void dispatch_invite(const irc::message&);
+    void dispatch_connect(const irc::message&, const recv_handler&);
+    void dispatch_endofnames(const irc::message&, const recv_handler&);
+    void dispatch_endofwhois(const irc::message&, const recv_handler&);
+    void dispatch_invite(const irc::message&, const recv_handler&);
     void dispatch_isupport(const irc::message&);
-    void dispatch_join(const irc::message&);
-    void dispatch_kick(const irc::message&);
-    void dispatch_mode(const irc::message&);
+    void dispatch_join(const irc::message&, const recv_handler&);
+    void dispatch_kick(const irc::message&, const recv_handler&);
+    void dispatch_mode(const irc::message&, const recv_handler&);
     void dispatch_namreply(const irc::message&);
-    void dispatch_nick(const irc::message&);
-    void dispatch_notice(const irc::message&);
-    void dispatch_part(const irc::message&);
+    void dispatch_nick(const irc::message&, const recv_handler&);
+    void dispatch_notice(const irc::message&, const recv_handler&);
+    void dispatch_part(const irc::message&, const recv_handler&);
     void dispatch_ping(const irc::message&);
-    void dispatch_privmsg(const irc::message&);
-    void dispatch_topic(const irc::message&);
+    void dispatch_privmsg(const irc::message&, const recv_handler&);
+    void dispatch_topic(const irc::message&, const recv_handler&);
     void dispatch_whoischannels(const irc::message&);
     void dispatch_whoisuser(const irc::message&);
-    void dispatch(const irc::message&);
+    void dispatch(const irc::message&, const recv_handler&);
 
-    void handle_connect(boost::system::error_code);
-    void recv();
+    // I/O and connection.
     void flush();
     void identify();
-    void wait();
+    void handle_send(const boost::system::error_code&);
+    void handle_recv(const boost::system::error_code&, const irc::message&, const recv_handler&);
+    void handle_wait(const boost::system::error_code&, const connect_handler&);
+    void handle_connect(const boost::system::error_code&, const connect_handler&);
 
 public:
     /**
@@ -613,22 +492,6 @@ public:
     void set_command_char(std::string command_char) noexcept;
 
     /**
-     * Get the number of reconnections before giving up.
-     *
-     * \return the number of reconnections
-     */
-    auto get_reconnect_tries() const noexcept -> std::int8_t;
-
-    /**
-     * Set the number of reconnections to test before giving up.
-     *
-     * A value less than 0 means infinite.
-     *
-     * \param reconnect_tries the number of reconnections
-     */
-    void set_reconnect_tries(std::int8_t reconnect_tries) noexcept;
-
-    /**
      * Get the reconnection delay before retrying.
      *
      * \return the number of seconds
@@ -661,7 +524,7 @@ public:
      *
      * \return the channels
      */
-    auto get_channels() const noexcept -> const std::vector<std::string>&;
+    auto get_channels() const noexcept -> const std::set<std::string>&;
 
     /**
      * Determine if the nickname is the bot itself.
@@ -669,12 +532,20 @@ public:
      * \param nick the nickname to check
      * \return true if it is the bot
      */
-    auto is_self(const std::string& nick) const noexcept -> bool;
+    auto is_self(std::string_view nick) const noexcept -> bool;
 
     /**
      * Start connecting.
+     *
+     * This only initiate TCP connection and/or SSL handshaking, the identifying
+     * process may take some time and you must repeatedly call recv() to wait
+     * for connect_event.
+     *
+     * \pre handler != nullptr
+     * \param handler the completion handler
+     * \note the server must be kept alive until completion
      */
-    virtual void connect() noexcept;
+    virtual void connect(connect_handler handler) noexcept;
 
     /**
      * Force disconnection.
@@ -682,9 +553,13 @@ public:
     virtual void disconnect() noexcept;
 
     /**
-     * Asks for a reconnection.
+     * Receive next event.
+     *
+     * \pre handler != nullptr
+     * \param handler the handler
+     * \note the server must be kept alive until completion
      */
-    virtual void reconnect() noexcept;
+    virtual void recv(recv_handler handler) noexcept;
 
     /**
      * Invite a user to a channel.
@@ -692,7 +567,7 @@ public:
      * \param target the target nickname
      * \param channel the channel
      */
-    virtual void invite(std::string target, std::string channel);
+    virtual void invite(std::string_view target, std::string_view channel);
 
     /**
      * Join a channel, the password is optional and can be kept empty.
@@ -700,7 +575,7 @@ public:
      * \param channel the channel to join
      * \param password the optional password
      */
-    virtual void join(std::string channel, std::string password = "");
+    virtual void join(std::string_view channel, std::string_view password = "");
 
     /**
      * Kick someone from the channel. Please be sure to have the rights
@@ -710,7 +585,9 @@ public:
      * \param channel from which channel
      * \param reason the optional reason
      */
-    virtual void kick(std::string target, std::string channel, std::string reason = "");
+    virtual void kick(std::string_view target,
+                      std::string_view channel,
+                      std::string_view reason = "");
 
     /**
      * Send a CTCP Action as known as /me. The target may be either a
@@ -719,7 +596,7 @@ public:
      * \param target the nickname or the channel
      * \param message the message
      */
-    virtual void me(std::string target, std::string message);
+    virtual void me(std::string_view target, std::string_view message);
 
     /**
      * Send a message to the specified target or channel.
@@ -727,7 +604,7 @@ public:
      * \param target the target
      * \param message the message
      */
-    virtual void message(std::string target, std::string message);
+    virtual void message(std::string_view target, std::string_view message);
 
     /**
      * Change channel/user mode.
@@ -738,18 +615,18 @@ public:
      * \param user the optional user
      * \param mask the optional ban mask
      */
-    virtual void mode(std::string channel,
-                      std::string mode,
-                      std::string limit = "",
-                      std::string user = "",
-                      std::string mask = "");
+    virtual void mode(std::string_view channel,
+                      std::string_view mode,
+                      std::string_view limit = "",
+                      std::string_view user = "",
+                      std::string_view mask = "");
 
     /**
      * Request the list of names.
      *
      * \param channel the channel
      */
-    virtual void names(std::string channel);
+    virtual void names(std::string_view channel);
 
     /**
      * Send a private notice.
@@ -757,7 +634,7 @@ public:
      * \param target the target
      * \param message the notice message
      */
-    virtual void notice(std::string target, std::string message);
+    virtual void notice(std::string_view target, std::string_view message);
 
     /**
      * Part from a channel.
@@ -768,7 +645,7 @@ public:
      * \param channel the channel to leave
      * \param reason the optional reason
      */
-    virtual void part(std::string channel, std::string reason = "");
+    virtual void part(std::string_view channel, std::string_view reason = "");
 
     /**
      * Send a raw message to the IRC server. You don't need to add
@@ -779,7 +656,7 @@ public:
      *
      * \param raw the raw message (without `\r\n\r\n`)
      */
-    virtual void send(std::string raw);
+    virtual void send(std::string_view raw);
 
     /**
      * Change the channel topic.
@@ -787,14 +664,14 @@ public:
      * \param channel the channel
      * \param topic the desired topic
      */
-    virtual void topic(std::string channel, std::string topic);
+    virtual void topic(std::string_view channel, std::string_view topic);
 
     /**
      * Request for whois information.
      *
      * \param target the target nickname
      */
-    virtual void whois(std::string target);
+    virtual void whois(std::string_view target);
 };
 
 /**
@@ -918,11 +795,8 @@ public:
         //!< The specified port number is invalid.
         invalid_port,
 
-        //!< The specified reconnect tries number is invalid.
-        invalid_reconnect_tries,
-
-        //!< The specified reconnect reconnect number is invalid.
-        invalid_reconnect_timeout,
+        //!< The specified reconnect delay number is invalid.
+        invalid_reconnect_delay,
 
         //!< The specified host was invalid.
         invalid_hostname,

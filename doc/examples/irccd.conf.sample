@@ -67,9 +67,8 @@ family = ( "ipv4", "ipv6" )
 # command-char = "!"            # (string) the prefix for invoking special commands (Optional, default: !),
 # ssl = false                   # (bool) enable or disable SSL (Optional, default: false),
 # ssl-verify = false            # (bool) verify the SSL certificates (Optional, default: true),
-# reconnect = true              # (bool) enable reconnection after failure (Optional, default: true),
-# reconnect-tries = 0           # (int) number of tries before giving up. A value of 0 means indefinitely (Optional, default: 0),
-# reconnect-timeout = 5         # (int) number of seconds to wait before retrying (Optional, default: 30).
+# auto-reconnect = true         # (bool) enable reconnection after failure (Optional, default: true),
+# auto-reconnect-timeout = 5    # (int) number of seconds to wait before retrying (Optional, default: 30).
 
 [server]
 identity = "default"

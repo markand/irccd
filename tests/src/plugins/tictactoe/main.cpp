@@ -1,5 +1,5 @@
 /*
- * main.cpp -- test plugin plugin
+ * main.cpp -- test tictactoe plugin
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(disconnect)
 {
     auto players = start();
 
-    server_->disconnect();
+    plugin_->handle_disconnect(irccd_, {server_});
     server_->cqueue().clear();
     plugin_->handle_message(irccd_, {server_, players.first, "#tictactoe", "a 1"});
 

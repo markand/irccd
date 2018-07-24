@@ -75,3 +75,11 @@ Note: these paths are no more automatically detected and set with the new
 #### Module System
 
   - The function `Irccd.System.name` has now well defined return value.
+
+### Irccd
+
+#### Configuration
+
+- The option `reconnect-tries` has been removed from `[server]` section, use
+  `auto-reconnect` boolean option instead.
+- The option `reconnect-timeout` has been renamed to `auto-reconnect-delay`.

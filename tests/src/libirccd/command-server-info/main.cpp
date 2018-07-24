@@ -42,7 +42,6 @@ BOOST_AUTO_TEST_CASE(basic)
     server->set_realname("Pascal le grand frere");
     server->set_ctcp_version("yeah");
     server->set_command_char("@");
-    server->set_reconnect_tries(80);
     server->set_ping_timeout(20000);
 
     daemon_->servers().add(std::move(server));

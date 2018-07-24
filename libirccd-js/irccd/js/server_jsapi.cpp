@@ -84,6 +84,7 @@ duk_ret_t wrap(duk_context* ctx, Handler handler)
 duk_ret_t Server_prototype_info(duk_context* ctx)
 {
     const auto server = self(ctx);
+    const auto& channels = server->get_channels();
 
     duk_push_object(ctx);
     dukx_push(ctx, server->get_id());
@@ -106,7 +107,7 @@ duk_ret_t Server_prototype_info(duk_context* ctx)
     duk_put_prop_string(ctx, -2, "nickname");
     dukx_push(ctx, server->get_username());
     duk_put_prop_string(ctx, -2, "username");
-    dukx_push(ctx, server->get_channels());
+    dukx_push(ctx, std::vector<std::string>(channels.begin(), channels.end()));
     duk_put_prop_string(ctx, -2, "channels");
 
     return 1;
@@ -728,7 +729,7 @@ duk_ret_t Server_list(duk_context* ctx)
 {
     duk_push_object(ctx);
 
-    for (const auto& server : dukx_type_traits<irccd>::self(ctx).servers().servers()) {
+    for (const auto& server : dukx_type_traits<irccd>::self(ctx).servers().all()) {
         dukx_push(ctx, server);
         duk_put_prop_string(ctx, -2, server->get_id().c_str());
     }

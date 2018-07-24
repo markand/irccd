@@ -32,36 +32,68 @@ namespace irccd {
 
 namespace {
 
+class dispatcher {
+private:
+    irccd& irccd_;
+
+    template <typename EventNameFunc, typename ExecFunc>
+    void dispatch(std::string_view, std::string_view, std::string_view, EventNameFunc&&, ExecFunc);
+
+public:
+    dispatcher(irccd& irccd);
+    void operator()(const std::monostate&);
+    void operator()(const connect_event&);
+    void operator()(const disconnect_event&);
+    void operator()(const invite_event&);
+    void operator()(const join_event&);
+    void operator()(const kick_event&);
+    void operator()(const message_event&);
+    void operator()(const me_event&);
+    void operator()(const mode_event&);
+    void operator()(const names_event&);
+    void operator()(const nick_event&);
+    void operator()(const notice_event&);
+    void operator()(const part_event&);
+    void operator()(const topic_event&);
+    void operator()(const whois_event&);
+};
+
 template <typename EventNameFunc, typename ExecFunc>
-void dispatch(irccd& daemon,
-              std::string_view server,
-              std::string_view origin,
-              std::string_view target,
-              EventNameFunc&& name_func,
-              ExecFunc exec_func)
+void dispatcher::dispatch(std::string_view server,
+                          std::string_view origin,
+                          std::string_view target,
+                          EventNameFunc&& name_func,
+                          ExecFunc exec_func)
 {
-    for (const auto& plugin : daemon.plugins().all()) {
+    for (const auto& plugin : irccd_.plugins().all()) {
         const auto eventname = name_func(*plugin);
-        const auto allowed = daemon.rules().solve(server, target, origin, plugin->get_name(), eventname);
+        const auto allowed = irccd_.rules().solve(server, target, origin, plugin->get_name(), eventname);
 
         if (!allowed) {
-            daemon.get_log().debug("rule", "") << "event skipped on match" << std::endl;
+            irccd_.get_log().debug("rule", "") << "event skipped on match" << std::endl;
             continue;
         }
 
-        daemon.get_log().debug("rule", "") << "event allowed" << std::endl;
+        irccd_.get_log().debug("rule", "") << "event allowed" << std::endl;
 
         try {
             exec_func(*plugin);
         } catch (const std::exception& ex) {
-            daemon.get_log().warning(*plugin) << ex.what() << std::endl;
+            irccd_.get_log().warning(*plugin) << ex.what() << std::endl;
         }
     }
 }
 
-} // !namespace
+dispatcher::dispatcher(irccd& irccd)
+    : irccd_(irccd)
+{
+}
 
-void server_service::handle_connect(const connect_event& ev)
+void dispatcher::operator()(const std::monostate&)
+{
+}
+
+void dispatcher::operator()(const connect_event& ev)
 {
     irccd_.get_log().debug(*ev.server) << "event onConnect" << std::endl;
     irccd_.transports().broadcast(nlohmann::json::object({
@@ -69,7 +101,7 @@ void server_service::handle_connect(const connect_event& ev)
         { "server",     ev.server->get_id() }
     }));
 
-    dispatch(irccd_, ev.server->get_id(), /* origin */ "", /* channel */ "",
+    dispatch(ev.server->get_id(), /* origin */ "", /* channel */ "",
         [=] (plugin&) -> std::string {
             return "onConnect";
         },
@@ -79,7 +111,7 @@ void server_service::handle_connect(const connect_event& ev)
     );
 }
 
-void server_service::handle_disconnect(const disconnect_event& ev)
+void dispatcher::operator()(const disconnect_event& ev)
 {
     irccd_.get_log().debug(*ev.server) << "event onDisconnect" << std::endl;
     irccd_.transports().broadcast(nlohmann::json::object({
@@ -87,7 +119,7 @@ void server_service::handle_disconnect(const disconnect_event& ev)
         { "server",     ev.server->get_id() }
     }));
 
-    dispatch(irccd_, ev.server->get_id(), /* origin */ "", /* channel */ "",
+    dispatch(ev.server->get_id(), /* origin */ "", /* channel */ "",
         [=] (plugin&) -> std::string {
             return "onDisconnect";
         },
@@ -97,12 +129,7 @@ void server_service::handle_disconnect(const disconnect_event& ev)
     );
 }
 
-void server_service::handle_die(const disconnect_event& ev)
-{
-    servers_.erase(std::find(servers_.begin(), servers_.end(), ev.server));
-}
-
-void server_service::handle_invite(const invite_event& ev)
+void dispatcher::operator()(const invite_event& ev)
 {
     irccd_.get_log().debug(*ev.server) << "event onInvite:" << std::endl;
     irccd_.get_log().debug(*ev.server) << "  origin: " << ev.origin << std::endl;
@@ -116,7 +143,7 @@ void server_service::handle_invite(const invite_event& ev)
         { "channel",    ev.channel          }
     }));
 
-    dispatch(irccd_, ev.server->get_id(), ev.origin, ev.channel,
+    dispatch(ev.server->get_id(), ev.origin, ev.channel,
         [=] (plugin&) -> std::string {
             return "onInvite";
         },
@@ -126,7 +153,7 @@ void server_service::handle_invite(const invite_event& ev)
     );
 }
 
-void server_service::handle_join(const join_event& ev)
+void dispatcher::operator()(const join_event& ev)
 {
     irccd_.get_log().debug(*ev.server) << "event onJoin:" << std::endl;
     irccd_.get_log().debug(*ev.server) << "  origin: " << ev.origin << std::endl;
@@ -139,7 +166,7 @@ void server_service::handle_join(const join_event& ev)
         { "channel",    ev.channel          }
     }));
 
-    dispatch(irccd_, ev.server->get_id(), ev.origin, ev.channel,
+    dispatch(ev.server->get_id(), ev.origin, ev.channel,
         [=] (plugin&) -> std::string {
             return "onJoin";
         },
@@ -149,7 +176,7 @@ void server_service::handle_join(const join_event& ev)
     );
 }
 
-void server_service::handle_kick(const kick_event& ev)
+void dispatcher::operator()(const kick_event& ev)
 {
     irccd_.get_log().debug(*ev.server) << "event onKick:" << std::endl;
     irccd_.get_log().debug(*ev.server) << "  origin: " << ev.origin << std::endl;
@@ -166,7 +193,7 @@ void server_service::handle_kick(const kick_event& ev)
         { "reason",     ev.reason           }
     }));
 
-    dispatch(irccd_, ev.server->get_id(), ev.origin, ev.channel,
+    dispatch(ev.server->get_id(), ev.origin, ev.channel,
         [=] (plugin&) -> std::string {
             return "onKick";
         },
@@ -176,7 +203,7 @@ void server_service::handle_kick(const kick_event& ev)
     );
 }
 
-void server_service::handle_message(const message_event& ev)
+void dispatcher::operator()(const message_event& ev)
 {
     irccd_.get_log().debug(*ev.server) << "event onMessage:" << std::endl;
     irccd_.get_log().debug(*ev.server) << "  origin: " << ev.origin << std::endl;
@@ -191,7 +218,7 @@ void server_service::handle_message(const message_event& ev)
         { "message",    ev.message          }
     }));
 
-    dispatch(irccd_, ev.server->get_id(), ev.origin, ev.channel,
+    dispatch(ev.server->get_id(), ev.origin, ev.channel,
         [=] (plugin& plugin) -> std::string {
             return server_util::parse_message(
                 ev.message,
@@ -217,7 +244,7 @@ void server_service::handle_message(const message_event& ev)
     );
 }
 
-void server_service::handle_me(const me_event& ev)
+void dispatcher::operator()(const me_event& ev)
 {
     irccd_.get_log().debug(*ev.server) << "event onMe:" << std::endl;
     irccd_.get_log().debug(*ev.server) << "  origin: " << ev.origin << std::endl;
@@ -232,7 +259,7 @@ void server_service::handle_me(const me_event& ev)
         { "message",    ev.message          }
     }));
 
-    dispatch(irccd_, ev.server->get_id(), ev.origin, ev.channel,
+    dispatch(ev.server->get_id(), ev.origin, ev.channel,
         [=] (plugin&) -> std::string {
             return "onMe";
         },
@@ -242,7 +269,7 @@ void server_service::handle_me(const me_event& ev)
     );
 }
 
-void server_service::handle_mode(const mode_event& ev)
+void dispatcher::operator()(const mode_event& ev)
 {
     irccd_.get_log().debug(*ev.server) << "event onMode" << std::endl;
     irccd_.get_log().debug(*ev.server) << "  origin: " << ev.origin << std::endl;
@@ -263,7 +290,7 @@ void server_service::handle_mode(const mode_event& ev)
         { "mask",       ev.mask             }
     }));
 
-    dispatch(irccd_, ev.server->get_id(), ev.origin, /* channel */ "",
+    dispatch(ev.server->get_id(), ev.origin, /* channel */ "",
         [=] (plugin &) -> std::string {
             return "onMode";
         },
@@ -273,7 +300,7 @@ void server_service::handle_mode(const mode_event& ev)
     );
 }
 
-void server_service::handle_names(const names_event& ev)
+void dispatcher::operator()(const names_event& ev)
 {
     irccd_.get_log().debug(*ev.server) << "event onNames:" << std::endl;
     irccd_.get_log().debug(*ev.server) << "  channel: " << ev.channel << std::endl;
@@ -291,7 +318,7 @@ void server_service::handle_names(const names_event& ev)
         { "names",      std::move(names)    }
     }));
 
-    dispatch(irccd_, ev.server->get_id(), /* origin */ "", ev.channel,
+    dispatch(ev.server->get_id(), /* origin */ "", ev.channel,
         [=] (plugin&) -> std::string {
             return "onNames";
         },
@@ -301,7 +328,7 @@ void server_service::handle_names(const names_event& ev)
     );
 }
 
-void server_service::handle_nick(const nick_event& ev)
+void dispatcher::operator()(const nick_event& ev)
 {
     irccd_.get_log().debug(*ev.server) << "event onNick:" << std::endl;
     irccd_.get_log().debug(*ev.server) << "  origin: " << ev.origin << std::endl;
@@ -314,7 +341,7 @@ void server_service::handle_nick(const nick_event& ev)
         { "nickname",   ev.nickname         }
     }));
 
-    dispatch(irccd_, ev.server->get_id(), ev.origin, /* channel */ "",
+    dispatch(ev.server->get_id(), ev.origin, /* channel */ "",
         [=] (plugin&) -> std::string {
             return "onNick";
         },
@@ -324,7 +351,7 @@ void server_service::handle_nick(const nick_event& ev)
     );
 }
 
-void server_service::handle_notice(const notice_event& ev)
+void dispatcher::operator()(const notice_event& ev)
 {
     irccd_.get_log().debug(*ev.server) << "event onNotice:" << std::endl;
     irccd_.get_log().debug(*ev.server) << "  origin: " << ev.origin << std::endl;
@@ -339,7 +366,7 @@ void server_service::handle_notice(const notice_event& ev)
         { "message",    ev.message          }
     }));
 
-    dispatch(irccd_, ev.server->get_id(), ev.origin, /* channel */ "",
+    dispatch(ev.server->get_id(), ev.origin, /* channel */ "",
         [=] (plugin&) -> std::string {
             return "onNotice";
         },
@@ -349,7 +376,7 @@ void server_service::handle_notice(const notice_event& ev)
     );
 }
 
-void server_service::handle_part(const part_event& ev)
+void dispatcher::operator()(const part_event& ev)
 {
     irccd_.get_log().debug(*ev.server) << "event onPart:" << std::endl;
     irccd_.get_log().debug(*ev.server) << "  origin: " << ev.origin << std::endl;
@@ -364,7 +391,7 @@ void server_service::handle_part(const part_event& ev)
         { "reason",     ev.reason           }
     }));
 
-    dispatch(irccd_, ev.server->get_id(), ev.origin, ev.channel,
+    dispatch(ev.server->get_id(), ev.origin, ev.channel,
         [=] (plugin&) -> std::string {
             return "onPart";
         },
@@ -374,7 +401,7 @@ void server_service::handle_part(const part_event& ev)
     );
 }
 
-void server_service::handle_topic(const topic_event& ev)
+void dispatcher::operator()(const topic_event& ev)
 {
     irccd_.get_log().debug(*ev.server) << "event onTopic:" << std::endl;
     irccd_.get_log().debug(*ev.server) << "  origin: " << ev.origin << std::endl;
@@ -389,7 +416,7 @@ void server_service::handle_topic(const topic_event& ev)
         { "topic",      ev.topic            }
     }));
 
-    dispatch(irccd_, ev.server->get_id(), ev.origin, ev.channel,
+    dispatch(ev.server->get_id(), ev.origin, ev.channel,
         [=] (plugin&) -> std::string {
             return "onTopic";
         },
@@ -399,7 +426,7 @@ void server_service::handle_topic(const topic_event& ev)
     );
 }
 
-void server_service::handle_whois(const whois_event& ev)
+void dispatcher::operator()(const whois_event& ev)
 {
     irccd_.get_log().debug(*ev.server) << "event onWhois" << std::endl;
     irccd_.get_log().debug(*ev.server) << "  nickname: " << ev.whois.nick << std::endl;
@@ -417,7 +444,7 @@ void server_service::handle_whois(const whois_event& ev)
         { "realname",   ev.whois.realname   }
     }));
 
-    dispatch(irccd_, ev.server->get_id(), /* origin */ "", /* channel */ "",
+    dispatch(ev.server->get_id(), /* origin */ "", /* channel */ "",
         [=] (plugin&) -> std::string {
             return "onWhois";
         },
@@ -427,12 +454,111 @@ void server_service::handle_whois(const whois_event& ev)
     );
 }
 
+} // !namespace
+
+void server_service::handle_error(const std::shared_ptr<server>& server,
+                                  const std::error_code& code)
+{
+    assert(server);
+
+    irccd_.get_log().warning(*server) << code.message() << std::endl;
+
+    irccd_.get_log().warning(*server) << int(server->get_options()) << std::endl;
+
+    if ((server->get_options() & server::options::auto_reconnect) != server::options::auto_reconnect)
+        remove(server->get_id());
+    else {
+        irccd_.get_log().info(*server) << "reconnecting in "
+            << server->get_reconnect_delay() << " second(s)" << std::endl;
+        wait(server);
+    }
+}
+
+void server_service::handle_wait(const std::shared_ptr<server>& server, const std::error_code& code)
+{
+    /*
+     * The timer runs on his own control, it will complete either if the delay
+     * was reached, there was an error or if the io_context was called to cancel
+     * all pending operations.
+     *
+     * This means while the timer is running someone may already have ask a
+     * server for explicit reconnection (e.g. remote command, plugin). Thus we
+     * check for server state and if it is still present in service.
+     */
+    if (code && code != std::errc::operation_canceled) {
+        irccd_.get_log().warning(*server) << code.message() << std::endl;
+        return;
+    }
+
+    if (server->get_state() == server::state::connected || !has(server->get_id()))
+        return;
+
+    connect(server);
+}
+
+void server_service::handle_recv(const std::shared_ptr<server>& server,
+                                 const std::error_code& code,
+                                 const event& event)
+{
+    assert(server);
+
+    if (code)
+        handle_error(server, code);
+    else {
+        recv(server);
+        std::visit(dispatcher(irccd_), event);
+    }
+}
+
+void server_service::handle_connect(const std::shared_ptr<server>& server, const std::error_code& code)
+{
+    if (code)
+        handle_error(server, code);
+    else
+        recv(server);
+}
+
+void server_service::wait(const std::shared_ptr<server>& server)
+{
+    assert(server);
+
+    auto timer = std::make_shared<boost::asio::deadline_timer>(irccd_.get_service());
+
+    timer->expires_from_now(boost::posix_time::seconds(server->get_reconnect_delay()));
+    timer->async_wait([this, server, timer] (auto code) {
+        handle_wait(server, code);
+    });
+}
+
+void server_service::recv(const std::shared_ptr<server>& server)
+{
+    assert(server);
+
+    server->recv([this, server] (auto code, auto event) {
+        handle_recv(server, code, event);
+    });
+}
+
+void server_service::connect(const std::shared_ptr<server>& server)
+{
+    assert(server);
+
+    server->connect([this, server] (auto code) {
+        handle_connect(server, code);
+    });
+}
+
 server_service::server_service(irccd &irccd)
     : irccd_(irccd)
 {
 }
 
-bool server_service::has(const std::string& name) const noexcept
+auto server_service::all() const noexcept -> const std::vector<std::shared_ptr<server>>&
+{
+    return servers_;
+}
+
+auto server_service::has(const std::string& name) const noexcept -> bool
 {
     return std::count_if(servers_.begin(), servers_.end(), [&] (const auto& server) {
         return server->get_id() == name;
@@ -441,28 +567,14 @@ bool server_service::has(const std::string& name) const noexcept
 
 void server_service::add(std::shared_ptr<server> server)
 {
+    assert(server);
     assert(!has(server->get_id()));
 
-    server->on_connect.connect(boost::bind(&server_service::handle_connect, this, _1));
-    server->on_disconnect.connect(boost::bind(&server_service::handle_disconnect, this, _1));
-    server->on_die.connect(boost::bind(&server_service::handle_die, this, _1));
-    server->on_invite.connect(boost::bind(&server_service::handle_invite, this, _1));
-    server->on_join.connect(boost::bind(&server_service::handle_join, this, _1));
-    server->on_kick.connect(boost::bind(&server_service::handle_kick, this, _1));
-    server->on_message.connect(boost::bind(&server_service::handle_message, this, _1));
-    server->on_me.connect(boost::bind(&server_service::handle_me, this, _1));
-    server->on_mode.connect(boost::bind(&server_service::handle_mode, this, _1));
-    server->on_names.connect(boost::bind(&server_service::handle_names, this, _1));
-    server->on_nick.connect(boost::bind(&server_service::handle_nick, this, _1));
-    server->on_notice.connect(boost::bind(&server_service::handle_notice, this, _1));
-    server->on_part.connect(boost::bind(&server_service::handle_part, this, _1));
-    server->on_topic.connect(boost::bind(&server_service::handle_topic, this, _1));
-    server->on_whois.connect(boost::bind(&server_service::handle_whois, this, _1));
-    server->connect();
-    servers_.push_back(std::move(server));
+    servers_.push_back(server);
+    connect(server);
 }
 
-std::shared_ptr<server> server_service::get(const std::string& name) const noexcept
+auto server_service::get(std::string_view name) const noexcept -> std::shared_ptr<server>
 {
     const auto it = std::find_if(servers_.begin(), servers_.end(), [&] (const auto& server) {
         return server->get_id() == name;
@@ -474,7 +586,7 @@ std::shared_ptr<server> server_service::get(const std::string& name) const noexc
     return *it;
 }
 
-std::shared_ptr<server> server_service::require(const std::string& name) const
+auto server_service::require(std::string_view name) const -> std::shared_ptr<server>
 {
     if (!string_util::is_identifier(name))
         throw server_error(server_error::invalid_identifier);
@@ -487,7 +599,34 @@ std::shared_ptr<server> server_service::require(const std::string& name) const
     return s;
 }
 
-void server_service::remove(const std::string& name)
+void server_service::disconnect(std::string_view id)
+{
+    const auto s = require(id);
+
+    s->disconnect();
+    dispatcher{irccd_}(disconnect_event{s});
+}
+
+void server_service::reconnect(std::string_view id)
+{
+    disconnect(id);
+    connect(require(id));
+}
+
+void server_service::reconnect()
+{
+    for (const auto& s : servers_) {
+        try {
+            s->disconnect();
+            dispatcher{irccd_}(disconnect_event{s});
+            connect(s);
+        } catch (const server_error& ex) {
+            irccd_.get_log().warning(*s) << ex.what() << std::endl;
+        }
+    }
+}
+
+void server_service::remove(std::string_view name)
 {
     const auto it = std::find_if(servers_.begin(), servers_.end(), [&] (const auto& server) {
         return server->get_id() == name;

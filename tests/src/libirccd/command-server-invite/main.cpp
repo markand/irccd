@@ -36,6 +36,7 @@ protected:
     server_invite_test()
     {
         daemon_->servers().add(server_);
+        server_->cqueue().clear();
     }
 };
 

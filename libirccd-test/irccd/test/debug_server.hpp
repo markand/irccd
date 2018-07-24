@@ -41,7 +41,7 @@ public:
     /**
      * \copydoc server::connect
      */
-    void connect() noexcept override;
+    void connect(connect_handler) noexcept override;
 
     /**
      * \copydoc server::connect
@@ -49,73 +49,68 @@ public:
     void disconnect() noexcept override;
 
     /**
-     * \copydoc server::reconnect
-     */
-    void reconnect() noexcept override;
-
-    /**
      * \copydoc server::invite
      */
-    void invite(std::string target, std::string channel) override;
+    void invite(std::string_view target, std::string_view channel) override;
 
     /**
      * \copydoc server::join
      */
-    void join(std::string channel, std::string password = "") override;
+    void join(std::string_view channel, std::string_view password = "") override;
 
     /**
      * \copydoc server::kick
      */
-    void kick(std::string target, std::string channel, std::string reason = "") override;
+    void kick(std::string_view target, std::string_view channel, std::string_view reason = "") override;
 
     /**
      * \copydoc server::me
      */
-    void me(std::string target, std::string message) override;
+    void me(std::string_view target, std::string_view message) override;
 
     /**
      * \copydoc server::message
      */
-    void message(std::string target, std::string message) override;
+    void message(std::string_view target, std::string_view message) override;
 
     /**
      * \copydoc server::mode
      */
-    void mode(std::string channel,
-              std::string mode,
-              std::string limit = "",
-              std::string user = "",
-              std::string mask = "") override;
+    void mode(std::string_view channel,
+              std::string_view mode,
+              std::string_view limit = "",
+              std::string_view user = "",
+              std::string_view mask = "") override;
 
     /**
      * \copydoc server::names
      */
-    void names(std::string channel) override;
+    void names(std::string_view channel) override;
 
     /**
      * \copydoc server::notice
      */
-    void notice(std::string target, std::string message) override;
+    void notice(std::string_view target, std::string_view message) override;
 
     /**
      * \copydoc server::part
      */
-    void part(std::string channel, std::string reason = "") override;
+    void part(std::string_view channel, std::string_view reason = "") override;
 
     /**
      * \copydoc server::send
      */
-    void send(std::string raw) override;
+    void send(std::string_view raw) override;
 
     /**
      * \copydoc server::topic
      */
-    void topic(std::string channel, std::string topic) override;
+    void topic(std::string_view channel, std::string_view topic) override;
 
     /**
      * \copydoc server::whois
      */
-    void whois(std::string target) override;
+    void whois(std::string_view target) override;
 };
 
 } // !irccd

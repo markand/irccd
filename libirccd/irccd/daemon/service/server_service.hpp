@@ -25,6 +25,7 @@
  */
 
 #include <memory>
+#include <system_error>
 #include <vector>
 
 #include <irccd/daemon/server.hpp>
@@ -43,22 +44,14 @@ private:
     irccd& irccd_;
     std::vector<std::shared_ptr<server>> servers_;
 
-    void handle_connect(const connect_event&);
-    void handle_disconnect(const disconnect_event&);
-    void handle_die(const disconnect_event&);
-    void handle_invite(const invite_event&);
-    void handle_join(const join_event&);
-    void handle_kick(const kick_event&);
-    void handle_message(const message_event&);
-    void handle_me(const me_event&);
-    void handle_mode(const mode_event&);
-    void handle_names(const names_event&);
-    void handle_nick(const nick_event&);
-    void handle_notice(const notice_event&);
-    void handle_part(const part_event&);
-    void handle_query(const query_event&);
-    void handle_topic(const topic_event&);
-    void handle_whois(const whois_event&);
+    void handle_error(const std::shared_ptr<server>&, const std::error_code&);
+    void handle_wait(const std::shared_ptr<server>&, const std::error_code&);
+    void handle_recv(const std::shared_ptr<server>&, const std::error_code&, const event&);
+    void handle_connect(const std::shared_ptr<server>&, const std::error_code&);
+
+    void wait(const std::shared_ptr<server>&);
+    void recv(const std::shared_ptr<server>&);
+    void connect(const std::shared_ptr<server>&);
 
 public:
     /**
@@ -71,10 +64,7 @@ public:
      *
      * \return the servers
      */
-    inline const std::vector<std::shared_ptr<server>>& servers() const noexcept
-    {
-        return servers_;
-    }
+    auto all() const noexcept -> const std::vector<std::shared_ptr<server>>&;;
 
     /**
      * Check if a server exists.
@@ -82,7 +72,7 @@ public:
      * \param name the name
      * \return true if exists
      */
-    bool has(const std::string& name) const noexcept;
+    auto has(const std::string& name) const noexcept -> bool;
 
     /**
      * Add a new server to the application.
@@ -98,7 +88,7 @@ public:
      * \param name the server name
      * \return the server or empty one if not found
      */
-    std::shared_ptr<server> get(const std::string& name) const noexcept;
+    auto get(std::string_view name) const noexcept -> std::shared_ptr<server>;
 
     /**
      * Find a server from a JSON object.
@@ -107,7 +97,29 @@ public:
      * \return the server
      * \throw server_error on errors
      */
-    std::shared_ptr<server> require(const std::string& name) const;
+    auto require(std::string_view name) const -> std::shared_ptr<server>;
+
+    /**
+     * Force disconnection, this also call plugin::handle_disconnect handler.
+     *
+     * \param id the server id
+     * \throw server_error on errors
+     */
+    void disconnect(std::string_view id);
+
+    /**
+     * Force reconnection, this also call plugin::handle_disconnect handler.
+     *
+     * \param id the server id
+     * \return the server
+     * \throw server_error on errors
+     */
+    void reconnect(std::string_view id);
+
+    /**
+     * Force reconnection of all servers.
+     */
+    void reconnect();
 
     /**
      * Remove a server from the irccd instance.
@@ -116,7 +128,7 @@ public:
      *
      * \param name the server name
      */
-    void remove(const std::string& name);
+    void remove(std::string_view name);
 
     /**
      * Remove all servers.

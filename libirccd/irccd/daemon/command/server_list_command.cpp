@@ -35,7 +35,7 @@ void server_list_command::exec(irccd& irccd, transport_client& client, const doc
     auto json = nlohmann::json::object();
     auto list = nlohmann::json::array();
 
-    for (const auto& server : irccd.servers().servers())
+    for (const auto& server : irccd.servers().all())
         list.push_back(server->get_id());
 
     client.write({
