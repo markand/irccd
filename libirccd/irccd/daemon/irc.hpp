@@ -361,17 +361,17 @@ public:
     /**
      * Handler for connecting.
      */
-    using connect_handler = std::function<void (boost::system::error_code)>;
+    using connect_handler = std::function<void (std::error_code)>;
 
     /**
      * Handler for receiving.
      */
-    using recv_handler = std::function<void (boost::system::error_code, message)>;
+    using recv_handler = std::function<void (std::error_code, message)>;
 
     /**
      * Handler for sending.
      */
-    using send_handler = std::function<void (boost::system::error_code)>;
+    using send_handler = std::function<void (std::error_code)>;
 
 private:
     boost::asio::ip::tcp::resolver resolver_;

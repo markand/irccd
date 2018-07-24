@@ -137,7 +137,7 @@ void socket_connector<Protocol>::do_connect(Socket& socket, Handler handler)
         if (ep == endpoints_.end())
             handler(make_error_code(std::errc::host_unreachable));
         else
-            handler(detail::convert(code));
+            handler(code);
     });
 }
 

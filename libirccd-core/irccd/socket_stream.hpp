@@ -39,29 +39,6 @@
 namespace irccd::io {
 
 /**
- * \cond HIDDEN_SYMBOLS
- */
-
-namespace detail {
-
-/**
- * Convert boost::system::error_code to std.
- *
- * \param code the error code
- * \return the std::error_code
- */
-inline auto convert(boost::system::error_code code) noexcept -> std::error_code
-{
-    return std::error_code(code.value(), std::system_category());
-}
-
-} // !detail
-
-/**
- * \endcond
- */
-
-/**
  * \brief Socket implementation interface.
  * \tparam Socket the Boost.Asio compatible socket.
  *
@@ -79,8 +56,8 @@ private:
     bool is_sending_{false};
 #endif
 
-    void handle_read(boost::system::error_code, std::size_t, read_handler);
-    void handle_write(boost::system::error_code, std::size_t, write_handler);
+    void handle_read(std::error_code, std::size_t, read_handler);
+    void handle_write(std::error_code, std::size_t, write_handler);
 
 public:
     /**
@@ -126,7 +103,7 @@ public:
 };
 
 template <typename Socket>
-void socket_stream<Socket>::handle_read(boost::system::error_code code,
+void socket_stream<Socket>::handle_read(std::error_code code,
                                         std::size_t xfer,
                                         read_handler handler)
 {
@@ -139,7 +116,7 @@ void socket_stream<Socket>::handle_read(boost::system::error_code code,
         return;
     }
     if (code) {
-        handler(detail::convert(code), nullptr);
+        handler(code, nullptr);
         return;
     }
 
@@ -175,7 +152,7 @@ void socket_stream<Socket>::handle_read(boost::system::error_code code,
 }
 
 template <typename Socket>
-void socket_stream<Socket>::handle_write(boost::system::error_code code,
+void socket_stream<Socket>::handle_write(std::error_code code,
                                          std::size_t xfer,
                                          write_handler handler)
 {
@@ -186,7 +163,7 @@ void socket_stream<Socket>::handle_write(boost::system::error_code code,
     if (xfer == 0)
         handler(make_error_code(std::errc::not_connected));
     else
-        handler(detail::convert(code));
+        handler(code);
 }
 
 template <typename Socket>

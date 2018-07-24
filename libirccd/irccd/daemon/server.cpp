@@ -379,7 +379,7 @@ void server::dispatch(const irc::message& message, const recv_handler& handler)
         dispatch_whoisuser(message);
 }
 
-void server::handle_send(const boost::system::error_code& code)
+void server::handle_send(const std::error_code& code)
 {
     /*
      * We don't notify server_service in case of error because in any case the
@@ -391,7 +391,7 @@ void server::handle_send(const boost::system::error_code& code)
         flush();
 }
 
-void server::handle_recv(const boost::system::error_code& code,
+void server::handle_recv(const std::error_code& code,
                          const irc::message& message,
                          const recv_handler& handler)
 {
@@ -432,13 +432,13 @@ void server::identify()
     send(str(format("USER %1% unknown unknown :%2%") % username_ % realname_));
 }
 
-void server::handle_wait(const boost::system::error_code& code, const connect_handler& handler)
+void server::handle_wait(const std::error_code& code, const connect_handler& handler)
 {
-    if (code && code != boost::asio::error::operation_aborted)
+    if (code && code != std::errc::operation_canceled)
         handler(code);
 }
 
-void server::handle_connect(const boost::system::error_code& code, const connect_handler& handler)
+void server::handle_connect(const std::error_code& code, const connect_handler& handler)
 {
     timer_.cancel();
 

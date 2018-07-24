@@ -329,10 +329,10 @@ private:
     // I/O and connection.
     void flush();
     void identify();
-    void handle_send(const boost::system::error_code&);
-    void handle_recv(const boost::system::error_code&, const irc::message&, const recv_handler&);
-    void handle_wait(const boost::system::error_code&, const connect_handler&);
-    void handle_connect(const boost::system::error_code&, const connect_handler&);
+    void handle_send(const std::error_code&);
+    void handle_recv(const std::error_code&, const irc::message&, const recv_handler&);
+    void handle_wait(const std::error_code&, const connect_handler&);
+    void handle_connect(const std::error_code&, const connect_handler&);
 
 public:
     /**
@@ -852,7 +852,7 @@ public:
 auto server_category() -> const std::error_category&;
 
 /**
- * Create a boost::system::error_code from server_error::error enum.
+ * Create a std::error_code from server_error::error enum.
  *
  * \param e the error code
  */

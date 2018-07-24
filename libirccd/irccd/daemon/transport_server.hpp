@@ -274,7 +274,7 @@ public:
 const std::error_category& transport_category() noexcept;
 
 /**
- * Create a boost::system::error_code from server_error::error enum.
+ * Create a std::error_code from server_error::error enum.
  *
  * \param e the error code
  */

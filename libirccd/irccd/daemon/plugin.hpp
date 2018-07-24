@@ -443,7 +443,7 @@ public:
 auto plugin_category() -> const std::error_category&;
 
 /**
- * Create a boost::system::error_code from plugin_error::error enum.
+ * Create a std::error_code from plugin_error::error enum.
  *
  * \param e the error code
  */

@@ -80,7 +80,7 @@ void tls_acceptor<Protocol>::accept(accept_handler handler)
         }
 
         client->get_socket().async_handshake(stream_base::server, [handler, client] (auto code) {
-            handler(detail::convert(code), code ? nullptr : std::move(client));
+            handler(code, code ? nullptr : std::move(client));
         });
     });
 }

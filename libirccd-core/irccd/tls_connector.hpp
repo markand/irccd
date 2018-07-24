@@ -79,7 +79,7 @@ void tls_connector<Protocol>::connect(connect_handler handler)
         }
 
         stream->get_socket().async_handshake(stream_base::client, [handler, stream] (auto code) {
-            handler(detail::convert(code), code ? nullptr : std::move(stream));
+            handler(code, code ? nullptr : std::move(stream));
         });
     });
 }

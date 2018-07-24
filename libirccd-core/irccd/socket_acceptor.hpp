@@ -123,7 +123,7 @@ void socket_acceptor<Protocol>::do_accept(Socket& socket, Handler handler)
 #if !defined(NDEBUG)
         is_accepting_ = false;
 #endif
-        handler(detail::convert(code));
+        handler(code);
     });
 }
 
