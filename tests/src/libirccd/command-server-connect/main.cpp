@@ -23,7 +23,7 @@
 #include <irccd/daemon/service/server_service.hpp>
 
 #include <irccd/test/command_test.hpp>
-#include <irccd/test/journal_server.hpp>
+#include <irccd/test/mock_server.hpp>
 
 namespace irccd {
 
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(already_exists)
 {
-    daemon_->servers().add(std::make_unique<journal_server>(service_, "local"));
+    daemon_->servers().add(std::make_unique<mock_server>(service_, "local"));
 
     const auto result = request({
         { "command",    "server-connect"    },

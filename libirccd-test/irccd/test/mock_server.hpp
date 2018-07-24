@@ -1,5 +1,5 @@
 /*
- * journal_server.hpp -- journaled server that logs every command
+ * mock_server.hpp -- mock server
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -16,48 +16,24 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_TEST_JOURNAL_SERVER_HPP
-#define IRCCD_TEST_JOURNAL_SERVER_HPP
+#ifndef IRCCD_TEST_MOCK_SERVER_HPP
+#define IRCCD_TEST_MOCK_SERVER_HPP
 
-#include <deque>
-
-#include <json.hpp>
+/**
+ * \file mock_server.hpp
+ * \brief Mock server.
+ */
 
 #include <irccd/daemon/server.hpp>
 
-/**
- * \file journal_server.hpp
- * \brief Journaled server that logs every command.
- */
+#include "mock.hpp"
 
 namespace irccd {
 
 /**
- * \brief Journaled server that logs every command.
- *
- * This class is used for unit testing, it logs every user command such as
- * message, invite.
- *
- * Each command store exactly the function name, parameter names in a json
- * object in a FIFO queue, don't forget to clear that queue when you don't need
- * it anymore.
- *
- * Example with message:
- *
- * ````json
- * {
- *     "command": "message",
- *     "target": "<argument value>",
- *     "message": "<argument value>"
- * }
- * ````
- *
- * \see cqueue()
+ * \brief Mock server.
  */
-class journal_server : public server {
-private:
-    std::deque<nlohmann::json> cqueue_;
-
+class mock_server : public server, public mock {
 public:
     /**
      * Inherited constructors.
@@ -65,33 +41,13 @@ public:
     using server::server;
 
     /**
-     * Access the command queue.
-     *
-     * \return the queue
-     */
-    inline const std::deque<nlohmann::json>& cqueue() const noexcept
-    {
-        return cqueue_;
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \return the queue
-     */
-    inline std::deque<nlohmann::json>& cqueue() noexcept
-    {
-        return cqueue_;
-    }
-
-    /**
      * \copydoc server::connect
      */
     void connect(connect_handler handler) noexcept override;
+
     /**
      * \copydoc server::disconnect
      */
-
     void disconnect() noexcept override;
 
     /**
@@ -161,4 +117,4 @@ public:
 
 } // !irccd
 
-#endif // !IRCCD_TEST_JOURNAL_SERVER_HPP
+#endif // !IRCCD_TEST_MOCK_SERVER_HPP

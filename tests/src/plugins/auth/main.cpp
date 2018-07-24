@@ -30,26 +30,26 @@ namespace {
 
 class auth_test : public plugin_test {
 protected:
-    std::shared_ptr<journal_server> nickserv1_;
-    std::shared_ptr<journal_server> nickserv2_;
-    std::shared_ptr<journal_server> quakenet_;
+    std::shared_ptr<mock_server> nickserv1_;
+    std::shared_ptr<mock_server> nickserv2_;
+    std::shared_ptr<mock_server> quakenet_;
 
 public:
     auth_test()
         : plugin_test(PLUGIN_PATH)
-        , nickserv1_(std::make_shared<journal_server>(service_, "nickserv1"))
-        , nickserv2_(std::make_shared<journal_server>(service_, "nickserv2"))
-        , quakenet_(std::make_shared<journal_server>(service_, "quakenet"))
+        , nickserv1_(std::make_shared<mock_server>(service_, "nickserv1", "localhost"))
+        , nickserv2_(std::make_shared<mock_server>(service_, "nickserv2", "localhost"))
+        , quakenet_(std::make_shared<mock_server>(service_, "quakenet", "localhost"))
     {
         plugin_->set_options({
-            { "nickserv1.type", "nickserv" },
-            { "nickserv1.password", "plopation" },
-            { "nickserv2.type", "nickserv" },
-            { "nickserv2.password", "something" },
-            { "nickserv2.username", "jean" },
-            { "quakenet.type", "quakenet" },
-            { "quakenet.password", "hello" },
-            { "quakenet.username", "mario" }
+            { "nickserv1.type",     "nickserv"      },
+            { "nickserv1.password", "plopation"     },
+            { "nickserv2.type",     "nickserv"      },
+            { "nickserv2.password", "something"     },
+            { "nickserv2.username", "jean"          },
+            { "quakenet.type",      "quakenet"      },
+            { "quakenet.password",  "hello"         },
+            { "quakenet.username",  "mario"         }
         });
         plugin_->handle_load(irccd_);
     }
@@ -59,35 +59,32 @@ BOOST_FIXTURE_TEST_SUITE(auth_test_suite, auth_test)
 
 BOOST_AUTO_TEST_CASE(nickserv1)
 {
-    plugin_->handle_connect(irccd_, {nickserv1_});
+    plugin_->handle_connect(irccd_, { nickserv1_ });
 
-    auto cmd = nickserv1_->cqueue().front();
+    const auto cmd = nickserv1_->find("message").front();
 
-    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
-    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "NickServ");
-    BOOST_REQUIRE_EQUAL(cmd["message"].get<std::string>(), "identify plopation");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "NickServ");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "identify plopation");
 }
 
 BOOST_AUTO_TEST_CASE(nickserv2)
 {
-    plugin_->handle_connect(irccd_, {nickserv2_});
+    plugin_->handle_connect(irccd_, { nickserv2_ });
 
-    auto cmd = nickserv2_->cqueue().front();
+    const auto cmd = nickserv2_->find("message").front();
 
-    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
-    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "NickServ");
-    BOOST_REQUIRE_EQUAL(cmd["message"].get<std::string>(), "identify jean something");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "NickServ");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "identify jean something");
 }
 
 BOOST_AUTO_TEST_CASE(quakenet)
 {
-    plugin_->handle_connect(irccd_, {quakenet_});
+    plugin_->handle_connect(irccd_, { quakenet_ });
 
-    auto cmd = quakenet_->cqueue().front();
+    const auto cmd = quakenet_->find("message").front();
 
-    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
-    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "Q@CServe.quakenet.org");
-    BOOST_REQUIRE_EQUAL(cmd["message"].get<std::string>(), "AUTH mario hello");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "Q@CServe.quakenet.org");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "AUTH mario hello");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

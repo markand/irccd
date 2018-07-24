@@ -23,7 +23,7 @@
 #include <irccd/daemon/service/server_service.hpp>
 
 #include <irccd/test/command_test.hpp>
-#include <irccd/test/journal_server.hpp>
+#include <irccd/test/mock_server.hpp>
 
 namespace irccd {
 
@@ -33,8 +33,8 @@ class server_list_test : public command_test<server_list_command> {
 protected:
     server_list_test()
     {
-        daemon_->servers().add(std::make_unique<journal_server>(service_, "s1"));
-        daemon_->servers().add(std::make_unique<journal_server>(service_, "s2"));
+        daemon_->servers().add(std::make_unique<mock_server>(service_, "s1", "localhost"));
+        daemon_->servers().add(std::make_unique<mock_server>(service_, "s2", "localhost"));
     }
 };
 

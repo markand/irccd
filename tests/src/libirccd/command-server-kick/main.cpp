@@ -23,7 +23,7 @@
 #include <irccd/daemon/service/server_service.hpp>
 
 #include <irccd/test/command_test.hpp>
-#include <irccd/test/journal_server.hpp>
+#include <irccd/test/mock_server.hpp>
 
 namespace irccd {
 
@@ -31,12 +31,13 @@ namespace {
 
 class server_kick_test : public command_test<server_kick_command> {
 protected:
-    std::shared_ptr<journal_server> server_{new journal_server(service_, "test")};
+    std::shared_ptr<mock_server> server_;
 
     server_kick_test()
+        : server_(new mock_server(service_, "test", "localhost"))
     {
         daemon_->servers().add(server_);
-        server_->cqueue().clear();
+        server_->clear();
     }
 };
 
@@ -44,7 +45,7 @@ BOOST_FIXTURE_TEST_SUITE(server_kick_test_suite, server_kick_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    ctl_->write({
+    const auto result = request({
         { "command",    "server-kick"       },
         { "server",     "test"              },
         { "target",     "francis"           },
@@ -52,37 +53,27 @@ BOOST_AUTO_TEST_CASE(basic)
         { "reason",     "too noisy"         }
     });
 
-    wait_for([this] () {
-        return !server_->cqueue().empty();
-    });
+    const auto cmd = server_->find("kick").back();
 
-    auto cmd = server_->cqueue().back();
-
-    BOOST_TEST(cmd["command"].get<std::string>() == "kick");
-    BOOST_TEST(cmd["channel"].get<std::string>() == "#staff");
-    BOOST_TEST(cmd["target"].get<std::string>() == "francis");
-    BOOST_TEST(cmd["reason"].get<std::string>() == "too noisy");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "#staff");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "francis");
+    BOOST_TEST(std::any_cast<std::string>(cmd[2]) == "too noisy");
 }
 
 BOOST_AUTO_TEST_CASE(noreason)
 {
-    ctl_->write({
+    const auto result = request({
         { "command",    "server-kick"       },
         { "server",     "test"              },
         { "target",     "francis"           },
         { "channel",    "#staff"            }
     });
 
-    wait_for([this] () {
-        return !server_->cqueue().empty();
-    });
+    const auto cmd = server_->find("kick").back();
 
-    auto cmd = server_->cqueue().back();
-
-    BOOST_TEST(cmd["command"].get<std::string>() == "kick");
-    BOOST_TEST(cmd["channel"].get<std::string>() == "#staff");
-    BOOST_TEST(cmd["target"].get<std::string>() == "francis");
-    BOOST_TEST(cmd["reason"].get<std::string>() == "");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "#staff");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "francis");
+    BOOST_TEST(std::any_cast<std::string>(cmd[2]) == "");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)

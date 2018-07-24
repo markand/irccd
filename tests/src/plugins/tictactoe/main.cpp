@@ -46,13 +46,15 @@ public:
         });
     }
 
-    auto next_players() const
+    auto next_players() const -> std::pair<std::string, std::string>
     {
-        if (server_->cqueue().size() == 0)
+        const auto functions = server_->find("message");
+
+        if (functions.size() == 0U)
             throw std::runtime_error("no message");
 
-        const auto cmd = server_->cqueue().back();
-        const auto list = string_util::split(cmd["message"].get<std::string>(), ":");
+        const auto cmd = functions.back();
+        const auto list = string_util::split(std::any_cast<std::string>(cmd[1]), ":");
 
         BOOST_TEST(list.size() == 5U);
         BOOST_TEST(list[0] == "turn=#tictactoe");
@@ -65,8 +67,8 @@ public:
 
     auto start()
     {
-        plugin_->handle_command(irccd_, {server_, "a!a@localhost", "#tictactoe", "b"});
-        plugin_->handle_names(irccd_, {server_, "#tictactoe", {"a", "b"}});
+        plugin_->handle_command(irccd_, { server_, "a!a@localhost", "#tictactoe", "b" });
+        plugin_->handle_names(irccd_, { server_, "#tictactoe", { "a", "b" }});
 
         return next_players();
     }
@@ -83,8 +85,8 @@ public:
         auto players = start();
 
         for (const auto& p : points) {
-            server_->cqueue().clear();
-            plugin_->handle_message(irccd_, {server_, players.first, "#tictactoe", p});
+            server_->clear();
+            plugin_->handle_message(irccd_, { server_, players.first, "#tictactoe", p });
             players = next_players();
         }
     }
@@ -94,19 +96,17 @@ BOOST_FIXTURE_TEST_SUITE(test_fixture_suite, test_fixture)
 
 BOOST_AUTO_TEST_CASE(win)
 {
-    run({"a 1", "b1", "a 2", "b2"});
+    run({ "a 1", "b1", "a 2", "b2" });
 
     const auto players = next_players();
 
-    plugin_->handle_message(irccd_, {server_, players.first, "#tictactoe", "a 3"});
+    plugin_->handle_message(irccd_, { server_, players.first, "#tictactoe", "a 3" });
 
-    const auto cmd = server_->cqueue().back();
+    const auto cmd = server_->find("message").back();
 
-    BOOST_TEST(cmd.is_object());
-    BOOST_TEST(cmd["command"].get<std::string>() == "message");
-    BOOST_TEST(cmd["target"].get<std::string>() == "#tictactoe");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#tictactoe");
 
-    const auto parts = string_util::split(cmd["message"].get<std::string>(), ":");
+    const auto parts = string_util::split(std::any_cast<std::string>(cmd[1]), ":");
 
     BOOST_TEST(parts.size() == 5U);
     BOOST_TEST(parts[0] == "win=#tictactoe");
@@ -128,15 +128,13 @@ BOOST_AUTO_TEST_CASE(draw)
 
     const auto players = next_players();
 
-    plugin_->handle_message(irccd_, {server_, players.first, "#tictactoe", "b 1"});
+    plugin_->handle_message(irccd_, { server_, players.first, "#tictactoe", "b 1" });
 
-    const auto cmd = server_->cqueue().back();
+    const auto cmd = server_->find("message").back();
 
-    BOOST_TEST(cmd.is_object());
-    BOOST_TEST(cmd["command"].get<std::string>() == "message");
-    BOOST_TEST(cmd["target"].get<std::string>() == "#tictactoe");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#tictactoe");
 
-    const auto parts = string_util::split(cmd["message"].get<std::string>(), ":");
+    const auto parts = string_util::split(std::any_cast<std::string>(cmd[1]), ":");
 
     BOOST_TEST(parts.size() == 5U);
     BOOST_TEST(parts[0] == "draw=#tictactoe");
@@ -150,16 +148,14 @@ BOOST_AUTO_TEST_CASE(used)
 {
     auto players = start();
 
-    plugin_->handle_message(irccd_, {server_, players.first, "#tictactoe", "a 1"});
-    plugin_->handle_message(irccd_, {server_, players.second, "#tictactoe", "a 1"});
+    plugin_->handle_message(irccd_, { server_, players.first, "#tictactoe", "a 1" });
+    plugin_->handle_message(irccd_, { server_, players.second, "#tictactoe", "a 1" });
 
-    const auto cmd = server_->cqueue().back();
+    const auto cmd = server_->find("message").back();
 
-    BOOST_TEST(cmd.is_object());
-    BOOST_TEST(cmd["command"].get<std::string>() == "message");
-    BOOST_TEST(cmd["target"].get<std::string>() == "#tictactoe");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#tictactoe");
 
-    const auto parts = string_util::split(cmd["message"].get<std::string>(), ":");
+    const auto parts = string_util::split(std::any_cast<std::string>(cmd[1]), ":");
 
     BOOST_TEST(parts[0] == "used=#tictactoe");
     BOOST_TEST(parts[1] == "!tictactoe");
@@ -171,40 +167,35 @@ BOOST_AUTO_TEST_CASE(used)
 
 BOOST_AUTO_TEST_CASE(invalid)
 {
-    nlohmann::json cmd;
-
     // empty name (no names)
-    plugin_->handle_command(irccd_, {server_, "jean", "#tictactoe", ""});
-    cmd = server_->cqueue().back();
+    plugin_->handle_command(irccd_, { server_, "jean", "#tictactoe", "" });
 
-    BOOST_TEST(cmd["command"].get<std::string>() == "message");
-    BOOST_TEST(cmd["target"].get<std::string>() == "#tictactoe");
-    BOOST_TEST(cmd["message"].get<std::string>() == "invalid=#tictactoe:!tictactoe:jean:jean:tictactoe:test");
+    auto cmd = server_->find("message").back();
+
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#tictactoe");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "invalid=#tictactoe:!tictactoe:jean:jean:tictactoe:test");
 
     // bot name (no names)
-    plugin_->handle_command(irccd_, {server_, "jean", "#tictactoe", "irccd"});
-    cmd = server_->cqueue().back();
+    plugin_->handle_command(irccd_, { server_, "jean", "#tictactoe", "irccd" });
+    cmd = server_->find("message").back();
 
-    BOOST_TEST(cmd["command"].get<std::string>() == "message");
-    BOOST_TEST(cmd["target"].get<std::string>() == "#tictactoe");
-    BOOST_TEST(cmd["message"].get<std::string>() == "invalid=#tictactoe:!tictactoe:jean:jean:tictactoe:test");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#tictactoe");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "invalid=#tictactoe:!tictactoe:jean:jean:tictactoe:test");
 
     // target is origin (no names)
-    plugin_->handle_command(irccd_, {server_, server_->get_nickname(), "#tictactoe", server_->get_nickname()});
-    cmd = server_->cqueue().back();
+    plugin_->handle_command(irccd_, { server_, server_->get_nickname(), "#tictactoe", server_->get_nickname() });
+    cmd = server_->find("message").back();
 
-    BOOST_TEST(cmd["command"].get<std::string>() == "message");
-    BOOST_TEST(cmd["target"].get<std::string>() == "#tictactoe");
-    BOOST_TEST(cmd["message"].get<std::string>() == "invalid=#tictactoe:!tictactoe:irccd:irccd:tictactoe:test");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#tictactoe");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "invalid=#tictactoe:!tictactoe:irccd:irccd:tictactoe:test");
 
     // not existing (names)
-    plugin_->handle_command(irccd_, {server_, server_->get_nickname(), "#tictactoe", server_->get_nickname()});
-    plugin_->handle_names(irccd_, {server_, "#tictactoe", {"a", "b", "c"}});
-    cmd = server_->cqueue().back();
+    plugin_->handle_command(irccd_, { server_, server_->get_nickname(), "#tictactoe", server_->get_nickname() });
+    plugin_->handle_names(irccd_, { server_, "#tictactoe", { "a", "b", "c" }});
+    cmd = server_->find("message").back();
 
-    BOOST_TEST(cmd["command"].get<std::string>() == "message");
-    BOOST_TEST(cmd["target"].get<std::string>() == "#tictactoe");
-    BOOST_TEST(cmd["message"].get<std::string>() == "invalid=#tictactoe:!tictactoe:irccd:irccd:tictactoe:test");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#tictactoe");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "invalid=#tictactoe:!tictactoe:irccd:irccd:tictactoe:test");
 }
 
 BOOST_AUTO_TEST_CASE(random)
@@ -219,50 +210,50 @@ BOOST_AUTO_TEST_CASE(random)
 
     // Last player turn is the winner.
     while (!a && !b && count++ < 1000000U) {
-        run({"a 1", "b 1", "a 2", "b 2"});
+        run({ "a 1", "b 1", "a 2", "b 2" });
 
         const auto players = next_players();
 
-        if (players.first == std::string("a"))
+        if (players.first == "a")
             a = true;
         else
             b = true;
 
-        plugin_->handle_message(irccd_, {server_, players.first, "#tictactoe", "a 3"});
+        plugin_->handle_message(irccd_, { server_, players.first, "#tictactoe", "a 3" });
     }
 }
 
 BOOST_AUTO_TEST_CASE(disconnect)
 {
-    auto players = start();
+    const auto players = start();
 
-    plugin_->handle_disconnect(irccd_, {server_});
-    server_->cqueue().clear();
-    plugin_->handle_message(irccd_, {server_, players.first, "#tictactoe", "a 1"});
+    plugin_->handle_disconnect(irccd_, { server_ });
+    server_->clear();
+    plugin_->handle_message(irccd_, { server_, players.first, "#tictactoe", "a 1" });
 
-    BOOST_TEST(server_->cqueue().empty());
+    BOOST_TEST(server_->empty());
 }
 
 BOOST_AUTO_TEST_CASE(kick)
 {
-    auto players = start();
+    const auto players = start();
 
-    server_->cqueue().clear();
-    plugin_->handle_kick(irccd_, {server_, "kefka", "#tictactoe", players.first, ""});
-    plugin_->handle_message(irccd_, {server_, players.first, "#tictactoe", "a 1"});
+    server_->clear();
+    plugin_->handle_kick(irccd_, { server_, "kefka", "#tictactoe", players.first, "" });
+    plugin_->handle_message(irccd_, { server_, players.first, "#tictactoe", "a 1" });
 
-    BOOST_TEST(server_->cqueue().empty());
+    BOOST_TEST(server_->empty());
 }
 
 BOOST_AUTO_TEST_CASE(part)
 {
-    auto players = start();
+    const auto players = start();
 
-    server_->cqueue().clear();
-    plugin_->handle_part(irccd_, {server_, players.first, "#tictactoe", ""});
-    plugin_->handle_message(irccd_, {server_, players.first, "#tictactoe", "a 1"});
+    server_->clear();
+    plugin_->handle_part(irccd_, { server_, players.first, "#tictactoe", "" });
+    plugin_->handle_message(irccd_, { server_, players.first, "#tictactoe", "a 1" });
 
-    BOOST_TEST(server_->cqueue().empty());
+    BOOST_TEST(server_->empty());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

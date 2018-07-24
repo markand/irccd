@@ -22,29 +22,24 @@
 #include <irccd/daemon/command/server_disconnect_command.hpp>
 #include <irccd/daemon/service/server_service.hpp>
 
-#include <irccd/test/journal_server.hpp>
+#include <irccd/test/mock_server.hpp>
 #include <irccd/test/command_test.hpp>
 
 namespace irccd {
 
 namespace {
 
-class no_disconnect_server : public journal_server {
-public:
-    using journal_server::journal_server;
-
-    void disconnect() noexcept override
-    {
-        // do nothing.
-    }
-};
-
 class server_disconnect_test : public command_test<server_disconnect_command> {
 protected:
+    std::shared_ptr<mock_server> s1_;
+    std::shared_ptr<mock_server> s2_;
+
     server_disconnect_test()
+        : s1_(new mock_server(service_, "s1", "localhost"))
+        , s2_(new mock_server(service_, "s2", "localhost"))
     {
-        daemon_->servers().add(std::make_unique<no_disconnect_server>(service_, "s1"));
-        daemon_->servers().add(std::make_unique<no_disconnect_server>(service_, "s2"));
+        daemon_->servers().add(s1_);
+        daemon_->servers().add(s2_);
     }
 };
 
@@ -58,6 +53,7 @@ BOOST_AUTO_TEST_CASE(one)
     });
 
     BOOST_TEST(result.first["command"].get<std::string>() == "server-disconnect");
+    BOOST_TEST(s1_->find("disconnect").size() == 1U);
     BOOST_TEST(!daemon_->servers().has("s1"));
     BOOST_TEST(daemon_->servers().has("s2"));
 }
@@ -69,6 +65,8 @@ BOOST_AUTO_TEST_CASE(all)
     });
 
     BOOST_TEST(result.first["command"].get<std::string>() == "server-disconnect");
+    BOOST_TEST(s1_->find("disconnect").size() == 1U);
+    BOOST_TEST(s2_->find("disconnect").size() == 1U);
     BOOST_TEST(!daemon_->servers().has("s1"));
     BOOST_TEST(!daemon_->servers().has("s2"));
 }

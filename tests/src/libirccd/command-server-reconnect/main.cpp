@@ -23,7 +23,7 @@
 #include <irccd/daemon/service/server_service.hpp>
 
 #include <irccd/test/command_test.hpp>
-#include <irccd/test/journal_server.hpp>
+#include <irccd/test/mock_server.hpp>
 
 namespace irccd {
 
@@ -31,13 +31,17 @@ namespace {
 
 class server_reconnect_test : public command_test<server_reconnect_command> {
 protected:
-    std::shared_ptr<journal_server> server1_{new journal_server(service_, "s1")};
-    std::shared_ptr<journal_server> server2_{new journal_server(service_, "s2")};
+    std::shared_ptr<mock_server> s1_;
+    std::shared_ptr<mock_server> s2_;
 
     server_reconnect_test()
+        : s1_(new mock_server(service_, "s1", "localhost"))
+        , s2_(new mock_server(service_, "s2", "localhost"))
     {
-        daemon_->servers().add(server1_);
-        daemon_->servers().add(server2_);
+        daemon_->servers().add(s1_);
+        daemon_->servers().add(s2_);
+        s1_->clear();
+        s2_->clear();
     }
 };
 
@@ -45,38 +49,24 @@ BOOST_FIXTURE_TEST_SUITE(server_reconnect_test_suite, server_reconnect_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    ctl_->write({
+    const auto result = request({
         { "command",    "server-reconnect"  },
         { "server",     "s1"                }
     });
 
-    wait_for([this] () {
-        return !server1_->cqueue().empty();
-    });
-
-    auto cmd1 = server1_->cqueue().back();
-
-#if 0
-    BOOST_TEST(cmd1["command"].get<std::string>() == "reconnect");
-    BOOST_TEST(server2_->cqueue().empty());
-#endif
+    BOOST_TEST(s1_->find("disconnect").size() == 1U);
+    BOOST_TEST(s1_->find("connect").size() == 1U);
+    BOOST_TEST(s2_->empty());
 }
 
 BOOST_AUTO_TEST_CASE(all)
 {
-    ctl_->write({{"command", "server-reconnect"}});
+    request({{ "command", "server-reconnect" }});
 
-    wait_for([this] () {
-        return !server1_->cqueue().empty() && !server2_->cqueue().empty();
-    });
-
-    auto cmd1 = server1_->cqueue().back();
-    auto cmd2 = server2_->cqueue().back();
-
-#if 0
-    BOOST_TEST(cmd1["command"].get<std::string>() == "reconnect");
-    BOOST_TEST(cmd2["command"].get<std::string>() == "reconnect");
-#endif
+    BOOST_TEST(s1_->find("disconnect").size() == 1U);
+    BOOST_TEST(s1_->find("connect").size() == 1U);
+    BOOST_TEST(s2_->find("disconnect").size() == 1U);
+    BOOST_TEST(s2_->find("connect").size() == 1U);
 }
 
 BOOST_AUTO_TEST_SUITE(errors)

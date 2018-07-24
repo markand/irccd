@@ -54,23 +54,22 @@ BOOST_AUTO_TEST_CASE(basic)
     for (int i = 0; i < 1000; ++i) {
         plugin_->handle_command(irccd_, {server_, "tester", "#dummy", ""});
 
-        auto cmd = server_->cqueue().front();
+        const auto cmd = server_->find("message").back();
 
-        BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
-        BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "#dummy");
+        BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#dummy");
 
-        auto msg = cmd["message"].get<std::string>();
+        const auto msg = std::any_cast<std::string>(cmd[1]);
 
         if (msg == "tester, YES")
             yes = true;
         if (msg == "tester, NO")
             no = true;
 
-        server_->cqueue().clear();
+        server_->clear();
     }
 
-    BOOST_REQUIRE(no);
-    BOOST_REQUIRE(yes);
+    BOOST_TEST(no);
+    BOOST_TEST(yes);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

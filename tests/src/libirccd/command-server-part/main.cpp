@@ -23,7 +23,7 @@
 #include <irccd/daemon/service/server_service.hpp>
 
 #include <irccd/test/command_test.hpp>
-#include <irccd/test/journal_server.hpp>
+#include <irccd/test/mock_server.hpp>
 
 namespace irccd {
 
@@ -31,12 +31,13 @@ namespace {
 
 class server_part_test : public command_test<server_part_command> {
 protected:
-    std::shared_ptr<journal_server> server_{new journal_server(service_, "test")};
+    std::shared_ptr<mock_server> server_;
 
     server_part_test()
+        : server_(new mock_server(service_, "test"))
     {
         daemon_->servers().add(server_);
-        server_->cqueue().clear();
+        server_->clear();
     }
 };
 
@@ -44,41 +45,31 @@ BOOST_FIXTURE_TEST_SUITE(server_part_test_suite, server_part_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    ctl_->write({
+    const auto result = request({
         { "command",    "server-part"   },
         { "server",     "test"          },
         { "channel",    "#staff"        },
         { "reason",     "too noisy"     }
     });
 
-    wait_for([this] () {
-        return !server_->cqueue().empty();
-    });
+    const auto cmd = server_->find("part").back();
 
-    auto cmd = server_->cqueue().back();
-
-    BOOST_TEST(cmd["command"].get<std::string>() == "part");
-    BOOST_TEST(cmd["channel"].get<std::string>() == "#staff");
-    BOOST_TEST(cmd["reason"].get<std::string>() == "too noisy");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#staff");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "too noisy");
 }
 
 BOOST_AUTO_TEST_CASE(noreason)
 {
-    ctl_->write({
+    const auto result = request({
         { "command",    "server-part"   },
         { "server",     "test"          },
         { "channel",    "#staff"        }
     });
 
-    wait_for([this] () {
-        return !server_->cqueue().empty();
-    });
+    const auto cmd = server_->find("part").back();
 
-    auto cmd = server_->cqueue().back();
-
-    BOOST_TEST(cmd["command"].get<std::string>() == "part");
-    BOOST_TEST(cmd["channel"].get<std::string>() == "#staff");
-    BOOST_TEST(cmd["reason"].get<std::string>() == "");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#staff");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)

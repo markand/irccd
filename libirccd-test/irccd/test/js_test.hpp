@@ -32,7 +32,7 @@
 #include <irccd/js/js_plugin.hpp>
 #include <irccd/js/irccd_jsapi.hpp>
 
-#include "journal_server.hpp"
+#include "mock_server.hpp"
 
 namespace irccd {
 
@@ -48,11 +48,11 @@ private:
     template <typename M1, typename M2, typename... Tail>
     void add();
 
-public:
+protected:
     boost::asio::io_service service_;
     irccd irccd_{service_};                     //!< Irccd instance.
     std::shared_ptr<js_plugin> plugin_;         //!< Javascript plugin.
-    std::shared_ptr<journal_server> server_;    //!< A journal server.
+    std::shared_ptr<mock_server> server_;       //!< A mock server.
 
     /**
      * Constructor.
@@ -80,7 +80,7 @@ void js_test<Modules...>::add()
 template <typename... Modules>
 js_test<Modules...>::js_test(const std::string& plugin_path)
     : plugin_(new js_plugin("test", plugin_path))
-    , server_(new journal_server(service_, "test"))
+    , server_(new mock_server(service_, "test", "localhost"))
 {
     irccd_.set_log(std::make_unique<logger::silent_sink>());
 

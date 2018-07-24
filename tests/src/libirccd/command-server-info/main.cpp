@@ -23,7 +23,7 @@
 #include <irccd/daemon/service/server_service.hpp>
 
 #include <irccd/test/command_test.hpp>
-#include <irccd/test/journal_server.hpp>
+#include <irccd/test/mock_server.hpp>
 
 namespace irccd {
 
@@ -33,7 +33,7 @@ BOOST_FIXTURE_TEST_SUITE(server_info_test_suite, command_test<server_info_comman
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    auto server = std::make_unique<journal_server>(service_, "test", "example.org");
+    auto server = std::make_unique<mock_server>(service_, "test", "example.org");
 
     server->set_port(8765);
     server->set_password("none");

@@ -23,7 +23,7 @@
 #include <irccd/daemon/service/server_service.hpp>
 
 #include <irccd/test/command_test.hpp>
-#include <irccd/test/journal_server.hpp>
+#include <irccd/test/mock_server.hpp>
 
 namespace irccd {
 
@@ -31,12 +31,13 @@ namespace {
 
 class server_message_test : public command_test<server_message_command> {
 protected:
-    std::shared_ptr<journal_server> server_{new journal_server(service_, "test")};
+    std::shared_ptr<mock_server> server_;
 
     server_message_test()
+        : server_(new mock_server(service_, "test"))
     {
         daemon_->servers().add(server_);
-        server_->cqueue().clear();
+        server_->clear();
     }
 };
 
@@ -51,11 +52,10 @@ BOOST_AUTO_TEST_CASE(basic)
         { "message",    "plop!"             }
     });
 
-    auto cmd = server_->cqueue().back();
+    const auto cmd = server_->find("message").back();
 
-    BOOST_TEST(cmd["command"].get<std::string>() == "message");
-    BOOST_TEST(cmd["message"].get<std::string>() == "plop!");
-    BOOST_TEST(cmd["target"].get<std::string>() == "#staff");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "plop!");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#staff");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)

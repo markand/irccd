@@ -1,5 +1,5 @@
 /*
- * plugin_test.hpp -- test fixture helper for Javascript plugins
+ * mock.cpp -- keep track of function invocations
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -16,43 +16,36 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_TEST_PLUGIN_TEST_HPP
-#define IRCCD_TEST_PLUGIN_TEST_HPP
-
-/**
- * \file plugin_test.hpp
- * \brief test fixture helper for Javascript plugins.
- */
-
-#include <irccd/daemon/irccd.hpp>
-
-#include <irccd/js/js_plugin.hpp>
-
-#include "mock_server.hpp"
+#include "mock.hpp"
 
 namespace irccd {
 
-/**
- * \brief test fixture helper for Javascript plugins.
- *
- * Holds a plugin that is opened (but not loaded).
- */
-class plugin_test {
-protected:
-    boost::asio::io_service service_;
-    irccd irccd_{service_};
-    std::shared_ptr<js_plugin> plugin_;
-    std::shared_ptr<mock_server> server_;
+void mock::push(std::string name, args args)
+{
+    table_[name].push_back(std::move(args));
+}
 
-public:
-    /**
-     * Construct the fixture test.
-     *
-     * \param path the full plugin path (e.g. /usr/lib64/irccd/ask.js)
-     */
-    plugin_test(std::string path);
-};
+auto mock::find(const std::string& name) -> std::vector<args>
+{
+    if (const auto it = table_.find(name); it != table_.end())
+        return it->second;
+
+    return {};
+}
+
+void mock::clear(const std::string& name) noexcept
+{
+    table_.erase(name);
+}
+
+void mock::clear() noexcept
+{
+    table_.clear();
+}
+
+auto mock::empty() const noexcept -> bool
+{
+    return table_.empty();
+}
 
 } // !irccd
-
-#endif // !IRCCD_TEST_PLUGIN_TEST_HPP

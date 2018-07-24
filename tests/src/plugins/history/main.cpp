@@ -60,30 +60,28 @@ BOOST_AUTO_TEST_CASE(format_error)
 {
     load({{"file", CMAKE_CURRENT_SOURCE_DIR "/broken-conf.json"}});
 
-    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#history", "seen francis"});
+    plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#history", "seen francis" });
 
-    auto cmd = server_->cqueue().front();
+    const auto cmd = server_->find("message").front();
 
-    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
-    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "#history");
-    BOOST_REQUIRE_EQUAL(cmd["message"].get<std::string>(), "error=history:!history:test:#history:jean!jean@localhost:jean");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#history");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "error=history:!history:test:#history:jean!jean@localhost:jean");
 }
 
 BOOST_AUTO_TEST_CASE(format_seen)
 {
-    const std::regex rule("seen=history:!history:test:#history:destructor!dst@localhost:destructor:jean:\\d{2}:\\d{2}");
+    static const std::regex rule("seen=history:!history:test:#history:destructor!dst@localhost:destructor:jean:\\d{2}:\\d{2}");
 
     remove(CMAKE_CURRENT_BINARY_DIR "/seen.json");
     load({{ "file", CMAKE_CURRENT_BINARY_DIR "/seen.json" }});
 
-    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#history", "hello"});
-    plugin_->handle_command(irccd_, {server_, "destructor!dst@localhost", "#history", "seen jean"});
+    plugin_->handle_message(irccd_, { server_, "jean!jean@localhost", "#history", "hello" });
+    plugin_->handle_command(irccd_, { server_, "destructor!dst@localhost", "#history", "seen jean" });
 
-    auto cmd = server_->cqueue().front();
+    auto cmd = server_->find("message").front();
 
-    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
-    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "#history");
-    BOOST_REQUIRE(std::regex_match(cmd["message"].get<std::string>(), rule));
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#history");
+    BOOST_TEST(std::regex_match(std::any_cast<std::string>(cmd[1]), rule));
 }
 
 BOOST_AUTO_TEST_CASE(format_said)
@@ -93,14 +91,13 @@ BOOST_AUTO_TEST_CASE(format_said)
     remove(CMAKE_CURRENT_BINARY_DIR "/said.json");
     load({{ "file", CMAKE_CURRENT_BINARY_DIR "/said.json" }});
 
-    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#history", "hello"});
-    plugin_->handle_command(irccd_, {server_, "destructor!dst@localhost", "#history", "said jean"});
+    plugin_->handle_message(irccd_, { server_, "jean!jean@localhost", "#history", "hello" });
+    plugin_->handle_command(irccd_, { server_, "destructor!dst@localhost", "#history", "said jean" });
 
-    auto cmd = server_->cqueue().front();
+    const auto cmd = server_->find("message").front();
 
-    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
-    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "#history");
-    BOOST_REQUIRE(std::regex_match(cmd["message"].get<std::string>(), rule));
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#history");
+    BOOST_TEST(std::regex_match(std::any_cast<std::string>(cmd[1]), rule));
 }
 
 BOOST_AUTO_TEST_CASE(format_unknown)
@@ -108,42 +105,38 @@ BOOST_AUTO_TEST_CASE(format_unknown)
     remove(CMAKE_CURRENT_BINARY_DIR "/unknown.json");
     load({{ "file", CMAKE_CURRENT_BINARY_DIR "/unknown.json" }});
 
-    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#history", "hello"});
-    plugin_->handle_command(irccd_, {server_, "destructor!dst@localhost", "#history", "seen nobody"});
+    plugin_->handle_message(irccd_, { server_, "jean!jean@localhost", "#history", "hello" });
+    plugin_->handle_command(irccd_, { server_, "destructor!dst@localhost", "#history", "seen nobody" });
 
-    auto cmd = server_->cqueue().front();
+    const auto cmd = server_->find("message").front();
 
-    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
-    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "#history");
-    BOOST_REQUIRE_EQUAL(cmd["message"].get<std::string>(), "unknown=history:!history:test:#history:destructor!dst@localhost:destructor:nobody");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#history");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "unknown=history:!history:test:#history:destructor!dst@localhost:destructor:nobody");
 }
 
 BOOST_AUTO_TEST_CASE(fix_642)
 {
-    const std::regex rule("said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:\\d{2}:\\d{2}");
+    static const std::regex rule("said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:\\d{2}:\\d{2}");
 
     remove(CMAKE_CURRENT_BINARY_DIR "/case.json");
     load({{"file", CMAKE_CURRENT_BINARY_DIR "/case.json"}});
 
-    plugin_->handle_message(irccd_, {server_, "JeaN!JeaN@localhost", "#history", "hello"});
+    plugin_->handle_message(irccd_, { server_, "JeaN!JeaN@localhost", "#history", "hello" });
 
     // Full caps.
-    plugin_->handle_command(irccd_, {server_, "destructor!dst@localhost", "#HISTORY", "said JEAN"});
+    plugin_->handle_command(irccd_, { server_, "destructor!dst@localhost", "#HISTORY", "said JEAN" });
 
-    auto cmd = server_->cqueue().front();
+    auto cmd = server_->find("message").front();
 
-    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
-    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "#history");
-    BOOST_REQUIRE(std::regex_match(cmd["message"].get<std::string>(), rule));
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#history");
+    BOOST_TEST(std::regex_match(std::any_cast<std::string>(cmd[1]), rule));
 
     // Random caps.
-    plugin_->handle_command(irccd_, {server_, "destructor!dst@localhost", "#HiSToRy", "said JeaN"});
+    plugin_->handle_command(irccd_, { server_, "destructor!dst@localhost", "#HiSToRy", "said JeaN" });
+    cmd = server_->find("message").back();
 
-    cmd = server_->cqueue().back();
-
-    BOOST_REQUIRE_EQUAL(cmd["command"].get<std::string>(), "message");
-    BOOST_REQUIRE_EQUAL(cmd["target"].get<std::string>(), "#history");
-    BOOST_REQUIRE(std::regex_match(cmd["message"].get<std::string>(), rule));
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#history");
+    BOOST_TEST(std::regex_match(std::any_cast<std::string>(cmd[1]), rule));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

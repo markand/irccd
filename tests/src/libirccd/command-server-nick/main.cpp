@@ -23,7 +23,7 @@
 #include <irccd/daemon/service/server_service.hpp>
 
 #include <irccd/test/command_test.hpp>
-#include <irccd/test/journal_server.hpp>
+#include <irccd/test/mock_server.hpp>
 
 namespace irccd {
 
@@ -31,12 +31,13 @@ namespace {
 
 class server_nick_test : public command_test<server_nick_command> {
 protected:
-    std::shared_ptr<journal_server> server_{new journal_server(service_, "test")};
+    std::shared_ptr<mock_server> server_;
 
     server_nick_test()
+        : server_(new mock_server(service_, "test", "localhost"))
     {
         daemon_->servers().add(server_);
-        server_->cqueue().clear();
+        server_->clear();
     }
 };
 

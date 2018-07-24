@@ -23,7 +23,7 @@
 #include <irccd/daemon/service/server_service.hpp>
 
 #include <irccd/test/command_test.hpp>
-#include <irccd/test/journal_server.hpp>
+#include <irccd/test/mock_server.hpp>
 
 namespace irccd {
 
@@ -31,12 +31,13 @@ namespace {
 
 class server_mode_test : public command_test<server_mode_command> {
 protected:
-    std::shared_ptr<journal_server> server_{new journal_server(service_, "test")};
+    std::shared_ptr<mock_server> server_;
 
     server_mode_test()
+        : server_(new mock_server(service_, "test", "localhost"))
     {
         daemon_->servers().add(server_);
-        server_->cqueue().clear();
+        server_->clear();
     }
 };
 
@@ -44,22 +45,17 @@ BOOST_FIXTURE_TEST_SUITE(server_mode_test_suite, server_mode_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    ctl_->write({
+    const auto result = request({
         { "command",    "server-mode"   },
         { "server",     "test"          },
         { "channel",    "#irccd"        },
         { "mode",       "+t"            }
     });
 
-    wait_for([this] () {
-        return !server_->cqueue().empty();
-    });
+    const auto cmd = server_->find("mode").back();
 
-    auto cmd = server_->cqueue().back();
-
-    BOOST_TEST(cmd["command"].get<std::string>() == "mode");
-    BOOST_TEST(cmd["channel"].get<std::string>() == "#irccd");
-    BOOST_TEST(cmd["mode"].get<std::string>() == "+t");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#irccd");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "+t");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)

@@ -23,7 +23,7 @@
 #include <irccd/daemon/service/server_service.hpp>
 
 #include <irccd/test/command_test.hpp>
-#include <irccd/test/journal_server.hpp>
+#include <irccd/test/mock_server.hpp>
 
 namespace irccd {
 
@@ -31,12 +31,13 @@ namespace {
 
 class server_join_test : public command_test<server_join_command> {
 protected:
-    std::shared_ptr<journal_server> server_{new journal_server(service_, "test")};
+    std::shared_ptr<mock_server> server_;
 
     server_join_test()
+        : server_(new mock_server(service_, "test", "localhost"))
     {
         daemon_->servers().add(server_);
-        server_->cqueue().clear();
+        server_->clear();
     }
 };
 
@@ -44,22 +45,17 @@ BOOST_FIXTURE_TEST_SUITE(server_join_test_suite, server_join_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    ctl_->write({
+    const auto result = request({
         { "command",    "server-join"       },
         { "server",     "test"              },
         { "channel",    "#music"            },
         { "password",   "plop"              }
     });
 
-    wait_for([this] () {
-        return !server_->cqueue().empty();
-    });
+    const auto cmd = server_->find("join").back();
 
-    auto cmd = server_->cqueue().back();
-
-    BOOST_TEST(cmd["command"].get<std::string>() == "join");
-    BOOST_TEST(cmd["channel"].get<std::string>() == "#music");
-    BOOST_TEST(cmd["password"].get<std::string>() == "plop");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#music");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "plop");
 }
 
 BOOST_AUTO_TEST_CASE(nopassword)
@@ -70,11 +66,10 @@ BOOST_AUTO_TEST_CASE(nopassword)
         { "channel",    "#music"            }
     });
 
-    auto cmd = server_->cqueue().back();
+    const auto cmd = server_->find("join").back();
 
-    BOOST_TEST(cmd["command"].get<std::string>() == "join");
-    BOOST_TEST(cmd["channel"].get<std::string>() == "#music");
-    BOOST_TEST(cmd["password"].get<std::string>() == "");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#music");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)

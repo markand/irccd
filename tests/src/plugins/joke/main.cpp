@@ -61,29 +61,29 @@ BOOST_AUTO_TEST_CASE(simple)
      * bbbb
      */
     std::unordered_map<std::string, int> said{
-        { "aaa", 0 },
-        { "bbbb", 0 }
+        { "aaa",    0 },
+        { "bbbb",   0 }
     };
 
     load();
 
-    auto call = [&] () {
-        plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
+    const auto call = [&] () {
+        plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#joke", "" });
 
-        auto cmd = server_->cqueue().back();
+        const auto cmd = server_->find("message").back();
+        const auto msg = std::any_cast<std::string>(cmd[1]);
 
         // "bbbb" is two lines.
-        if (cmd["message"] == "bbbb") {
-            auto first = server_->cqueue().front();
+        if (msg == "bbbb") {
+            const auto first = server_->find("message").front();
 
-            BOOST_TEST(first["command"].template get<std::string>() == "message");
-            BOOST_TEST(first["target"].template get<std::string>() == "#joke");
-            BOOST_TEST(first["message"].template get<std::string>() == "bbbb");
+            BOOST_TEST(std::any_cast<std::string>(first[0]) == "#joke");
+            BOOST_TEST(std::any_cast<std::string>(first[1]) == "bbbb");
         } else
-            BOOST_TEST(cmd["message"].template get<std::string>() == "aaa");
+            BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "aaa");
 
-        said[cmd["message"].template get<std::string>()] += 1;
-        server_->cqueue().clear();
+        said[msg] += 1;
+        server_->clear();
     };
 
     call();
@@ -106,17 +106,16 @@ BOOST_AUTO_TEST_CASE(toobig)
         { "a", 0 }
     };
 
-    auto call = [&] () {
-        plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
+    const auto call = [&] () {
+        plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#joke", "" });
 
-        auto cmd = server_->cqueue().back();
+        const auto cmd = server_->find("message").back();
 
-        BOOST_TEST(cmd["command"].template get<std::string>() == "message");
-        BOOST_TEST(cmd["target"].template get<std::string>() == "#joke");
-        BOOST_TEST(cmd["message"].template get<std::string>() == "a");
+        BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#joke");
+        BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "a");
 
-        said[cmd["message"].template get<std::string>()] += 1;
-        server_->cqueue().clear();
+        said[std::any_cast<std::string>(cmd[1])] += 1;
+        server_->clear();
     };
 
     call();
@@ -138,17 +137,16 @@ BOOST_AUTO_TEST_CASE(invalid)
         { "a", 0 }
     };
 
-    auto call = [&] () {
-        plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
+    const auto call = [&] () {
+        plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#joke", "" });
 
-        auto cmd = server_->cqueue().back();
+        const auto cmd = server_->find("message").back();
 
-        BOOST_TEST(cmd["command"].template get<std::string>() == "message");
-        BOOST_TEST(cmd["target"].template get<std::string>() == "#joke");
-        BOOST_TEST(cmd["message"].template get<std::string>() == "a");
+        BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#joke");
+        BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "a");
 
-        server_->cqueue().clear();
-        said[cmd["message"].template get<std::string>()] += 1;
+        server_->clear();
+        said[std::any_cast<std::string>(cmd[1])] += 1;
     };
 
     call();
@@ -165,26 +163,24 @@ BOOST_AUTO_TEST_CASE(not_found)
 {
     load({{"file", "doesnotexist.json"}});
 
-    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
+    plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#joke", "" });
 
-    auto cmd = server_->cqueue().back();
+    const auto cmd = server_->find("message").back();
 
-    BOOST_TEST(cmd["command"].get<std::string>() == "message");
-    BOOST_TEST(cmd["target"].get<std::string>() == "#joke");
-    BOOST_TEST(cmd["message"].get<std::string>() == "error=test:#joke:jean!jean@localhost:jean");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#joke");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "error=test:#joke:jean!jean@localhost:jean");
 }
 
 BOOST_AUTO_TEST_CASE(not_array)
 {
     load({{"file", CMAKE_CURRENT_SOURCE_DIR "/jokes-not-array.json"}});
 
-    plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
+    plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#joke", "" });
 
-    auto cmd = server_->cqueue().back();
+    const auto cmd = server_->find("message").back();
 
-    BOOST_TEST(cmd["command"].get<std::string>() == "message");
-    BOOST_TEST(cmd["target"].get<std::string>() == "#joke");
-    BOOST_TEST(cmd["message"].get<std::string>() == "error=test:#joke:jean!jean@localhost:jean");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#joke");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "error=test:#joke:jean!jean@localhost:jean");
 }
 
 BOOST_AUTO_TEST_CASE(empty)
@@ -193,11 +189,10 @@ BOOST_AUTO_TEST_CASE(empty)
 
     plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
 
-    auto cmd = server_->cqueue().back();
+    const auto cmd = server_->find("message").back();
 
-    BOOST_TEST(cmd["command"].get<std::string>() == "message");
-    BOOST_TEST(cmd["target"].get<std::string>() == "#joke");
-    BOOST_TEST(cmd["message"].get<std::string>() == "error=test:#joke:jean!jean@localhost:jean");
+    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#joke");
+    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "error=test:#joke:jean!jean@localhost:jean");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
