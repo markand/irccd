@@ -98,7 +98,7 @@ BOOST_AUTO_TEST_CASE(toobig)
 {
     // xxx and yyy are both 3-lines which we disallow. only a must be said.
     load({
-        { "file", CMAKE_CURRENT_SOURCE_DIR "/jokes-toobig.json" },
+        { "file", CMAKE_CURRENT_SOURCE_DIR "/error-toobig.json" },
         { "max-list-lines", "2" }
     });
 
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(invalid)
 {
     // Only a is the valid joke in this file.
     load({
-        { "file", CMAKE_CURRENT_SOURCE_DIR "/jokes-invalid.json" },
+        { "file", CMAKE_CURRENT_SOURCE_DIR "/error-invalid.json" },
     });
 
     std::unordered_map<std::string, int> said{
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE(not_found)
 
 BOOST_AUTO_TEST_CASE(not_array)
 {
-    load({{"file", CMAKE_CURRENT_SOURCE_DIR "/jokes-not-array.json"}});
+    load({{"file", CMAKE_CURRENT_SOURCE_DIR "/error-not-array.json"}});
 
     plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#joke", "" });
 
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(not_array)
 
 BOOST_AUTO_TEST_CASE(empty)
 {
-    load({{"file", CMAKE_CURRENT_SOURCE_DIR "/jokes-empty.json"}});
+    load({{"file", CMAKE_CURRENT_SOURCE_DIR "/error-empty.json"}});
 
     plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
 

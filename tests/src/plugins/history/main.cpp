@@ -58,7 +58,7 @@ BOOST_FIXTURE_TEST_SUITE(history_test_suite, history_test)
 
 BOOST_AUTO_TEST_CASE(format_error)
 {
-    load({{"file", CMAKE_CURRENT_SOURCE_DIR "/broken-conf.json"}});
+    load({{"file", CMAKE_CURRENT_SOURCE_DIR "/error.json"}});
 
     plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#history", "seen francis" });
 
@@ -114,12 +114,12 @@ BOOST_AUTO_TEST_CASE(format_unknown)
     BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "unknown=history:!history:test:#history:destructor!dst@localhost:destructor:nobody");
 }
 
-BOOST_AUTO_TEST_CASE(fix_642)
+BOOST_AUTO_TEST_CASE(issue_642)
 {
     static const std::regex rule("said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:\\d{2}:\\d{2}");
 
-    remove(CMAKE_CURRENT_BINARY_DIR "/case.json");
-    load({{"file", CMAKE_CURRENT_BINARY_DIR "/case.json"}});
+    remove(CMAKE_CURRENT_BINARY_DIR "/issue-642.json");
+    load({{"file", CMAKE_CURRENT_BINARY_DIR "/issue-642.json"}});
 
     plugin_->handle_message(irccd_, { server_, "JeaN!JeaN@localhost", "#history", "hello" });
 

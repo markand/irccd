@@ -174,7 +174,7 @@ BOOST_AUTO_TEST_CASE(wrong_letter)
     BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "wrong-letter=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:x");
 }
 
-BOOST_AUTO_TEST_CASE(wrongWord)
+BOOST_AUTO_TEST_CASE(wrong_word)
 {
     load();
 
@@ -233,7 +233,7 @@ BOOST_AUTO_TEST_CASE(collaborative_enabled)
     BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "found=hangman:!hangman:test:#hangman:francis!francis@localhost:francis:s k _");
 }
 
-BOOST_AUTO_TEST_CASE(case_fix_642)
+BOOST_AUTO_TEST_CASE(issue_642)
 {
     load();
 
@@ -303,7 +303,7 @@ BOOST_AUTO_TEST_CASE(running)
     BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "running=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:_ _ y");
 }
 
-BOOST_AUTO_TEST_CASE(wordlist_fix_644)
+BOOST_AUTO_TEST_CASE(issue_644)
 {
     /*
      * To be sure that the selection use the same list, we create a list of
@@ -314,7 +314,7 @@ BOOST_AUTO_TEST_CASE(wordlist_fix_644)
      *
      * This is not very accurate but it's better than nothing.
      */
-    load({{ "file", CMAKE_CURRENT_SOURCE_DIR "/wordlist_fix_644.conf" }});
+    load({{ "file", CMAKE_CURRENT_SOURCE_DIR "/issue-644.conf" }});
 
     std::unordered_map<unsigned, std::string> words{
         { 5, "abc"     },

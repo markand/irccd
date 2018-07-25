@@ -19,12 +19,12 @@
 irccd_define_test(
     NAME plugin-joke
     SOURCES
-        main.cpp
-        jokes-empty.json
-        jokes-invalid.json
+        error-empty.json
+        error-invalid.json
+        error-not-array.json
+        error-toobig.json
         jokes.json
-        jokes-not-array.json
-        jokes-toobig.json
+        main.cpp
     LIBRARIES libirccd
     FLAGS PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/joke/joke.js"
 )
