@@ -25,7 +25,7 @@
  */
 
 #include <thread>
-#include <utility>
+#include <tuple>
 #include <vector>
 
 #include <irccd/daemon/irccd.hpp>
@@ -64,12 +64,12 @@ public:
     /**
      * Type for all lines printed.
      */
-    using output = std::vector<std::string>;
+    using outputs = std::vector<std::string>;
 
     /**
      * Collection of output from stdout/stderr respectively.
      */
-    using outputs = std::pair<output, output>;
+    using result = std::tuple<int, outputs, outputs>;
 
     /**
      * Construct and initialize and irccd daemon running in a thread.
@@ -93,9 +93,9 @@ public:
      * Execute irccdctl.
      *
      * \param args the arguments to irccdctl
-     * \return the stdout/stderr result pair
+     * \return the stdout/stderr and exit code
      */
-    outputs exec(const std::vector<std::string>& args);
+    auto exec(const std::vector<std::string>& args) -> result;
 };
 
 } // !irccd

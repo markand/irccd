@@ -34,8 +34,9 @@ BOOST_AUTO_TEST_CASE(output)
     irccd_.plugins().add(std::make_unique<mock_plugin>("p2"));
     start();
 
-    const auto [out, err] = exec({ "plugin-list" });
+    const auto [code, out, err] = exec({ "plugin-list" });
 
+    BOOST_TEST(!code);
     BOOST_TEST(out.size() == 2U);
     BOOST_TEST(err.size() == 0U);
     BOOST_TEST(out[0] == "p1");

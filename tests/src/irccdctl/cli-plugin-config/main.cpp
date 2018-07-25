@@ -51,17 +51,19 @@ BOOST_AUTO_TEST_CASE(set_and_get)
 
     // First, configure. No output yet
     {
-        const auto [out, err] = exec({ "plugin-config", "conf2", "verbose", "false" });
+        const auto [code, out, err] = exec({ "plugin-config", "conf2", "verbose", "false" });
 
         // no output yet.
+        BOOST_TEST(!code);
         BOOST_TEST(out.size() == 0U);
         BOOST_TEST(err.size() == 0U);
     }
 
     // Get the newly created value.
     {
-        const auto [out, err] = exec({ "plugin-config", "conf2", "verbose" });
+        const auto [code, out, err] = exec({ "plugin-config", "conf2", "verbose" });
 
+        BOOST_TEST(!code);
         BOOST_TEST(out.size() == 1U);
         BOOST_TEST(err.size() == 0U);
         BOOST_TEST(out[0] == "false");
@@ -72,8 +74,9 @@ BOOST_AUTO_TEST_CASE(getall)
 {
     start();
 
-    const auto [out, err] = exec({ "plugin-config", "conf1" });
+    const auto [code, out, err] = exec({ "plugin-config", "conf1" });
 
+    BOOST_TEST(!code);
     BOOST_TEST(out.size() == 2U);
     BOOST_TEST(err.size() == 0U);
     BOOST_TEST(out[0] == "v1               : 123");

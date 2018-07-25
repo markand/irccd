@@ -63,15 +63,17 @@ BOOST_AUTO_TEST_CASE(simple)
     start();
 
     {
-        const auto [out, err] = exec({ "rule-remove", "0" });
+        const auto [code, out, err] = exec({ "rule-remove", "0" });
 
+        BOOST_TEST(!code);
         BOOST_TEST(out.size() == 0U);
         BOOST_TEST(err.size() == 0U);
     }
 
     {
-        const auto [out, err] = exec({ "rule-list" });
+        const auto [code, out, err] = exec({ "rule-list" });
 
+        BOOST_TEST(!code);
         BOOST_TEST(out.size() == 14U);
         BOOST_TEST(err.size() == 0U);
         BOOST_TEST(out[0]  == "rule:        0");

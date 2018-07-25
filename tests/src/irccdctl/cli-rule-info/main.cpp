@@ -39,8 +39,9 @@ BOOST_AUTO_TEST_CASE(info)
     });
     start();
 
-    const auto [out, err] = exec({ "rule-info", "0" });
+    const auto [code, out, err] = exec({ "rule-info", "0" });
 
+    BOOST_TEST(!code);
     BOOST_TEST(out.size() == 7U);
     BOOST_TEST(err.size() == 0U);
     BOOST_TEST(out[0]  == "rule:        0");

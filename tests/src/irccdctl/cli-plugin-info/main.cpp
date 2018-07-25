@@ -33,8 +33,9 @@ BOOST_AUTO_TEST_CASE(simple)
     irccd_.plugins().add(std::make_unique<mock_plugin>("test"));
     start();
 
-    const auto [out, err] = exec({ "plugin-info", "test" });
+    const auto [code, out, err] = exec({ "plugin-info", "test" });
 
+    BOOST_TEST(!code);
     BOOST_TEST(out.size() == 4U);
     BOOST_TEST(err.size() == 0U);
     BOOST_TEST(out[0] == "Author         : David Demelier <markand@malikania.fr>");

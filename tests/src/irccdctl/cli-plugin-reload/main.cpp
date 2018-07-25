@@ -53,8 +53,9 @@ BOOST_AUTO_TEST_CASE(simple)
     irccd_.plugins().add(plugin);
     start();
 
-    const auto [out, err] = exec({ "plugin-reload", "test" });
+    const auto [code, out, err] = exec({ "plugin-reload", "test" });
 
+    BOOST_TEST(!code);
     BOOST_TEST(out.size() == 0U);
     BOOST_TEST(err.size() == 0U);
     BOOST_TEST(plugin->find("handle_reload").size() == 1U);

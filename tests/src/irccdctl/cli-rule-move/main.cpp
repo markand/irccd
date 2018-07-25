@@ -63,15 +63,17 @@ BOOST_AUTO_TEST_CASE(from_0_to_1)
     start();
 
     {
-        const auto [out, err] = exec({ "rule-move", "0", "1" });
+        const auto [code, out, err] = exec({ "rule-move", "0", "1" });
 
+        BOOST_TEST(!code);
         BOOST_TEST(out.size() == 0U);
         BOOST_TEST(err.size() == 0U);
     }
 
     {
-        const auto [out, err] = exec({ "rule-list" });
+        const auto [code, out, err] = exec({ "rule-list" });
 
+        BOOST_TEST(!code);
         BOOST_TEST(out.size() == 21U);
         BOOST_TEST(err.size() == 0U);
         BOOST_TEST(out[0]  == "rule:        0");
@@ -103,15 +105,17 @@ BOOST_AUTO_TEST_CASE(from_2_to_0)
     start();
 
     {
-        const auto [out, err] = exec({ "rule-move", "2", "0" });
+        const auto [code, out, err] = exec({ "rule-move", "2", "0" });
 
+        BOOST_TEST(!code);
         BOOST_TEST(out.size() == 0U);
         BOOST_TEST(err.size() == 0U);
     }
 
     {
-        const auto [out, err] = exec({ "rule-list" });
+        const auto [code, out, err] = exec({ "rule-list" });
 
+        BOOST_TEST(!code);
         BOOST_TEST(out.size() == 21U);
         BOOST_TEST(err.size() == 0U);
         BOOST_TEST(out[0]  == "rule:        0");
@@ -143,15 +147,17 @@ BOOST_AUTO_TEST_CASE(same)
     start();
 
     {
-        const auto [out, err] = exec({ "rule-move", "2", "2" });
+        const auto [code, out, err] = exec({ "rule-move", "2", "2" });
 
+        BOOST_TEST(!code);
         BOOST_TEST(out.size() == 0U);
         BOOST_TEST(err.size() == 0U);
     }
 
     {
-        const auto [out, err] = exec({ "rule-list" });
+        const auto [code, out, err] = exec({ "rule-list" });
 
+        BOOST_TEST(!code);
         BOOST_TEST(out.size() == 21U);
         BOOST_TEST(err.size() == 0U);
         BOOST_TEST(out[0]  == "rule:        0");

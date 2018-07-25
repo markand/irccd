@@ -55,7 +55,7 @@ void cli_test::start()
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
 }
 
-cli_test::outputs cli_test::exec(const std::vector<std::string>& args)
+auto cli_test::exec(const std::vector<std::string>& args) -> result
 {
     static const std::string irccdctl = IRCCDCTL_EXECUTABLE;
     static const std::string conf = CMAKE_BINARY_DIR "/tmp/irccdctl.conf";
@@ -65,24 +65,23 @@ cli_test::outputs cli_test::exec(const std::vector<std::string>& args)
     oss << irccdctl << " -c " << conf << " ";
     oss << string_util::join(args, " ");
 
-    proc::ipstream out;
-    proc::ipstream err;
+    proc::ipstream stream_out, stream_err;
 
-    proc::system(
+    const auto ret = proc::system(
         oss.str(),
         proc::std_in.close(),
-        proc::std_out > out,
-        proc::std_err > err
+        proc::std_out > stream_out,
+        proc::std_err > stream_err
     );
 
-    outputs result;
+    outputs out, err;
 
-    for (std::string line; out && std::getline(out, line); )
-        result.first.push_back(line);
-    for (std::string line; err && std::getline(err, line); )
-        result.second.push_back(line);
+    for (std::string line; stream_out && std::getline(stream_out, line); )
+        out.push_back(line);
+    for (std::string line; stream_err && std::getline(stream_err, line); )
+        err.push_back(line);
 
-    return result;
+    return {ret, out, err};
 }
 
 } // !irccd
