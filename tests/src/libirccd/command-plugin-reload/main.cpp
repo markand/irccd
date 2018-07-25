@@ -23,29 +23,11 @@
 #include <irccd/daemon/service/plugin_service.hpp>
 
 #include <irccd/test/command_test.hpp>
-#include <irccd/test/mock.hpp>
+#include <irccd/test/mock_plugin.hpp>
 
 namespace irccd {
 
 namespace {
-
-class reloadable_plugin : public mock, public plugin {
-public:
-    reloadable_plugin()
-        : plugin("test")
-    {
-    }
-
-    auto get_name() const noexcept -> std::string_view override
-    {
-        return "reload";
-    }
-
-    void handle_reload(irccd&) override
-    {
-        push("handle_reload");
-    }
-};
 
 class broken_plugin : public plugin {
 public:
@@ -67,10 +49,10 @@ public:
 
 class plugin_reload_test : public command_test<plugin_reload_command> {
 protected:
-    std::shared_ptr<reloadable_plugin> plugin_;
+    std::shared_ptr<mock_plugin> plugin_;
 
     plugin_reload_test()
-        : plugin_(std::make_shared<reloadable_plugin>())
+        : plugin_(std::make_shared<mock_plugin>("test"))
     {
         daemon_->plugins().add(plugin_);
         daemon_->plugins().add(std::make_unique<broken_plugin>());

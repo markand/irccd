@@ -20,20 +20,11 @@
 #include <boost/test/unit_test.hpp>
 
 #include <irccd/test/plugin_cli_test.hpp>
+#include <irccd/test/mock_plugin.hpp>
 
 namespace irccd {
 
 namespace {
-
-class sample : public plugin {
-public:
-    using plugin::plugin;
-
-    auto get_name() const noexcept -> std::string_view override
-    {
-        return "sample";
-    }
-};
 
 class custom_plugin_loader : public plugin_loader {
 public:
@@ -44,12 +35,12 @@ public:
 
     auto find(std::string_view id) -> std::shared_ptr<plugin> override
     {
-        return std::make_unique<sample>(std::string(id));
+        return std::make_unique<mock_plugin>(std::string(id));
     }
 
     auto open(std::string_view id, std::string_view) -> std::shared_ptr<plugin> override
     {
-        return std::make_unique<sample>(std::string(id));
+        return std::make_unique<mock_plugin>(std::string(id));
     }
 };
 
@@ -59,14 +50,14 @@ BOOST_FIXTURE_TEST_SUITE(plugin_load_suite, plugin_cli_test)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-    irccd_.plugins().add(std::make_unique<sample>("p1"));
-    irccd_.plugins().add(std::make_unique<sample>("p2"));
+    irccd_.plugins().add(std::make_unique<mock_plugin>("p1"));
+    irccd_.plugins().add(std::make_unique<mock_plugin>("p2"));
     irccd_.plugins().add_loader(std::make_unique<custom_plugin_loader>());
     start();
 
     // Load a plugin first.
     {
-        const auto [out, err] = exec({ "plugin-load", "sample" });
+        const auto [out, err] = exec({ "plugin-load", "test" });
 
         BOOST_TEST(out.size() == 0U);
         BOOST_TEST(err.size() == 0U);
@@ -80,7 +71,7 @@ BOOST_AUTO_TEST_CASE(simple)
         BOOST_TEST(err.size() == 0U);
         BOOST_TEST(out[0] == "p1");
         BOOST_TEST(out[1] == "p2");
-        BOOST_TEST(out[2] == "sample");
+        BOOST_TEST(out[2] == "test");
     }
 }
 

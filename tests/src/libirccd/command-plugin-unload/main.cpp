@@ -23,29 +23,11 @@
 #include <irccd/daemon/service/plugin_service.hpp>
 
 #include <irccd/test/command_test.hpp>
-#include <irccd/test/mock.hpp>
+#include <irccd/test/mock_plugin.hpp>
 
 namespace irccd {
 
 namespace {
-
-class unloadable_plugin : public mock, public plugin {
-public:
-    unloadable_plugin()
-        : plugin("test")
-    {
-    }
-
-    auto get_name() const noexcept -> std::string_view override
-    {
-        return "unload";
-    }
-
-    void handle_unload(irccd&) override
-    {
-        push("handle_unload");
-    }
-};
 
 class broken_plugin : public plugin {
 public:
@@ -67,10 +49,10 @@ public:
 
 class plugin_unload_test : public command_test<plugin_unload_command> {
 protected:
-    std::shared_ptr<unloadable_plugin> plugin_;
+    std::shared_ptr<mock_plugin> plugin_;
 
     plugin_unload_test()
-        : plugin_(std::make_shared<unloadable_plugin>())
+        : plugin_(std::make_shared<mock_plugin>("test"))
     {
         daemon_->plugins().add(plugin_);
         daemon_->plugins().add(std::make_unique<broken_plugin>());

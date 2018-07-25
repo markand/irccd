@@ -23,27 +23,18 @@
 #include <irccd/daemon/service/plugin_service.hpp>
 
 #include <irccd/test/command_test.hpp>
+#include <irccd/test/mock_plugin.hpp>
 
 namespace irccd {
 
 namespace {
 
-class sample_plugin : public plugin {
-public:
-    using plugin::plugin;
-
-    auto get_name() const noexcept -> std::string_view override
-    {
-        return "sample";
-    }
-};
-
 class plugin_list_test : public command_test<plugin_list_command> {
 public:
     plugin_list_test()
     {
-        daemon_->plugins().add(std::make_unique<sample_plugin>("t1"));
-        daemon_->plugins().add(std::make_unique<sample_plugin>("t2"));
+        daemon_->plugins().add(std::make_unique<mock_plugin>("t1"));
+        daemon_->plugins().add(std::make_unique<mock_plugin>("t2"));
     }
 };
 

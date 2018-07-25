@@ -20,51 +20,17 @@
 #include <boost/test/unit_test.hpp>
 
 #include <irccd/test/plugin_cli_test.hpp>
+#include <irccd/test/mock_plugin.hpp>
 
 namespace irccd {
 
 namespace {
 
-class sample : public plugin {
-public:
-    sample()
-        : plugin("test")
-    {
-    }
-
-    auto get_name() const noexcept -> std::string_view override
-    {
-        return "sample";
-    }
-
-    auto get_author() const noexcept -> std::string_view override
-    {
-        return "David Demelier <markand@malikania.fr>";
-    }
-
-    auto get_license() const noexcept -> std::string_view override
-    {
-        return "ISC";
-    }
-
-    auto get_summary() const noexcept -> std::string_view override
-    {
-        return "foo";
-    }
-
-    auto get_version() const noexcept -> std::string_view override
-    {
-        return "0.0";
-    }
-};
-
 BOOST_FIXTURE_TEST_SUITE(plugin_info_suite, plugin_cli_test)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-    auto p = std::make_unique<sample>();
-
-    irccd_.plugins().add(std::move(p));
+    irccd_.plugins().add(std::make_unique<mock_plugin>("test"));
     start();
 
     const auto [out, err] = exec({ "plugin-info", "test" });
@@ -73,8 +39,8 @@ BOOST_AUTO_TEST_CASE(simple)
     BOOST_TEST(err.size() == 0U);
     BOOST_TEST(out[0] == "Author         : David Demelier <markand@malikania.fr>");
     BOOST_TEST(out[1] == "License        : ISC");
-    BOOST_TEST(out[2] == "Summary        : foo");
-    BOOST_TEST(out[3] == "Version        : 0.0");
+    BOOST_TEST(out[2] == "Summary        : mock plugin");
+    BOOST_TEST(out[3] == "Version        : 1.0");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

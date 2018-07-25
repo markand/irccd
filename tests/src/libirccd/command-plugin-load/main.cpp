@@ -23,6 +23,7 @@
 #include <irccd/daemon/service/plugin_service.hpp>
 
 #include <irccd/test/command_test.hpp>
+#include <irccd/test/mock_plugin.hpp>
 
 namespace irccd {
 
@@ -67,20 +68,10 @@ public:
     }
 };
 
-class sample : public plugin {
-public:
-    using plugin::plugin;
-
-    auto get_name() const noexcept -> std::string_view override
-    {
-        return "test";
-    }
-};
-
 class sample_loader : public plugin_loader {
 public:
     sample_loader()
-        : plugin_loader({}, {".none"})
+        : plugin_loader({}, { ".none" })
     {
     }
 
@@ -92,7 +83,7 @@ public:
     auto find(std::string_view id) noexcept -> std::shared_ptr<plugin> override
     {
         if (id == "test")
-            return std::make_unique<sample>("test");
+            return std::make_unique<mock_plugin>("test");
 
         return nullptr;
     }
@@ -104,7 +95,7 @@ public:
     {
         daemon_->plugins().add_loader(std::make_unique<sample_loader>());
         daemon_->plugins().add_loader(std::make_unique<broken_loader>());
-        daemon_->plugins().add(std::make_unique<sample>("already"));
+        daemon_->plugins().add(std::make_unique<mock_plugin>("already"));
     }
 };
 

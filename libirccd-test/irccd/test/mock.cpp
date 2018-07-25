@@ -20,12 +20,12 @@
 
 namespace irccd {
 
-void mock::push(std::string name, args args)
+void mock::push(std::string name, args args) const
 {
     table_[name].push_back(std::move(args));
 }
 
-auto mock::find(const std::string& name) -> std::vector<args>
+auto mock::find(const std::string& name) const -> std::vector<args>
 {
     if (const auto it = table_.find(name); it != table_.end())
         return it->second;
@@ -33,12 +33,12 @@ auto mock::find(const std::string& name) -> std::vector<args>
     return {};
 }
 
-void mock::clear(const std::string& name) noexcept
+void mock::clear(const std::string& name) const noexcept
 {
     table_.erase(name);
 }
 
-void mock::clear() noexcept
+void mock::clear() const noexcept
 {
     table_.clear();
 }

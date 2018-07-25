@@ -23,49 +23,17 @@
 #include <irccd/daemon/service/plugin_service.hpp>
 
 #include <irccd/test/command_test.hpp>
+#include <irccd/test/mock_plugin.hpp>
 
 namespace irccd {
 
 namespace {
 
-class sample_plugin : public plugin {
-public:
-    sample_plugin()
-        : plugin("test")
-    {
-    }
-
-    auto get_name() const noexcept -> std::string_view override
-    {
-        return "test";
-    }
-
-    auto get_author() const noexcept -> std::string_view override
-    {
-        return "Francis Beaugrand";
-    }
-
-    auto get_license() const noexcept -> std::string_view override
-    {
-        return "GPL";
-    }
-
-    auto get_summary() const noexcept -> std::string_view override
-    {
-        return "Completely useless plugin";
-    }
-
-    auto get_version() const noexcept -> std::string_view override
-    {
-        return "0.0.0.0.0.0.0.0.1-beta5";
-    }
-};
-
 BOOST_FIXTURE_TEST_SUITE(plugin_info_test_suite, command_test<plugin_info_command>)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    daemon_->plugins().add(std::make_unique<sample_plugin>());
+    daemon_->plugins().add(std::make_unique<mock_plugin>("test"));
 
     const auto [json, code] = request({
         { "command",    "plugin-info"       },
@@ -73,10 +41,10 @@ BOOST_AUTO_TEST_CASE(basic)
     });
 
     BOOST_TEST(!code);
-    BOOST_TEST(json["author"].get<std::string>() == "Francis Beaugrand");
-    BOOST_TEST(json["license"].get<std::string>() == "GPL");
-    BOOST_TEST(json["summary"].get<std::string>() == "Completely useless plugin");
-    BOOST_TEST(json["version"].get<std::string>() == "0.0.0.0.0.0.0.0.1-beta5");
+    BOOST_TEST(json["author"].get<std::string>() == "David Demelier <markand@malikania.fr>");
+    BOOST_TEST(json["license"].get<std::string>() == "ISC");
+    BOOST_TEST(json["summary"].get<std::string>() == "mock plugin");
+    BOOST_TEST(json["version"].get<std::string>() == "1.0");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)

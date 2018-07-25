@@ -24,6 +24,7 @@ set(
     ${libirccd-test_SOURCE_DIR}/irccd/test/command_test.hpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/debug_server.hpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/mock.hpp
+    ${libirccd-test_SOURCE_DIR}/irccd/test/mock_plugin.hpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/mock_server.hpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/plugin_cli_test.hpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/rule_cli_test.hpp
@@ -36,6 +37,7 @@ set(
     ${libirccd-test_SOURCE_DIR}/irccd/test/cli_test.cpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/debug_server.cpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/mock.cpp
+    ${libirccd-test_SOURCE_DIR}/irccd/test/mock_plugin.cpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/mock_server.cpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/plugin_cli_test.cpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/rule_cli_test.cpp

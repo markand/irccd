@@ -48,7 +48,7 @@ public:
     using functions = std::unordered_map<std::string, std::vector<args>>;
 
 private:
-    functions table_;
+    mutable functions table_;
 
 public:
     /**
@@ -57,7 +57,7 @@ public:
      * \param name the function name
      * \param args the arguments list
      */
-    void push(std::string name, args args = {});
+    void push(std::string name, args args = {}) const;
 
     /**
      * Get all function invocations by name.
@@ -65,19 +65,19 @@ public:
      * \param name the function name
      * \return the list of functions and their arguments or empty if not called
      */
-    auto find(const std::string& name) -> std::vector<args>;
+    auto find(const std::string& name) const -> std::vector<args>;
 
     /**
      * Clear all function invocations by name.
      *
      * \param name the function name
      */
-    void clear(const std::string& name) noexcept;
+    void clear(const std::string& name) const noexcept;
 
     /**
      * Clear all function invocations.
      */
-    void clear() noexcept;
+    void clear() const noexcept;
 
     /**
      * Tells if no functions have been called.

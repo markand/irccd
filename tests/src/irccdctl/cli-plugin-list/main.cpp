@@ -20,30 +20,18 @@
 #include <boost/test/unit_test.hpp>
 
 #include <irccd/test/plugin_cli_test.hpp>
+#include <irccd/test/mock_plugin.hpp>
 
 namespace irccd {
 
 namespace {
 
-class sample : public plugin {
-public:
-    sample(std::string id)
-        : plugin(std::move(id))
-    {
-    }
-
-    auto get_name() const noexcept -> std::string_view override
-    {
-        return "sample";
-    }
-};
-
 BOOST_FIXTURE_TEST_SUITE(plugin_list_suite, plugin_cli_test)
 
 BOOST_AUTO_TEST_CASE(output)
 {
-    irccd_.plugins().add(std::make_unique<sample>("p1"));
-    irccd_.plugins().add(std::make_unique<sample>("p2"));
+    irccd_.plugins().add(std::make_unique<mock_plugin>("p1"));
+    irccd_.plugins().add(std::make_unique<mock_plugin>("p2"));
     start();
 
     const auto [out, err] = exec({ "plugin-list" });

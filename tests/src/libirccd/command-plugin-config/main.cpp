@@ -23,41 +23,17 @@
 #include <irccd/daemon/service/plugin_service.hpp>
 
 #include <irccd/test/command_test.hpp>
+#include <irccd/test/mock_plugin.hpp>
 
 namespace irccd {
 
 namespace {
 
-class custom_plugin : public plugin {
-public:
-    map config_;
-
-    custom_plugin()
-        : plugin("test")
-    {
-    }
-
-    auto get_name() const noexcept -> std::string_view override
-    {
-        return "test";
-    }
-
-    auto get_options() const -> map override
-    {
-        return config_;
-    }
-
-    void set_options(const map& options) override
-    {
-        config_ = std::move(options);
-    }
-};
-
 BOOST_FIXTURE_TEST_SUITE(plugin_config_test_suite, command_test<plugin_config_command>)
 
 BOOST_AUTO_TEST_CASE(set)
 {
-    daemon_->plugins().add(std::make_unique<custom_plugin>());
+    daemon_->plugins().add(std::make_unique<mock_plugin>("test"));
 
     const auto [json, code] = request({
         { "command",    "plugin-config" },
@@ -75,7 +51,7 @@ BOOST_AUTO_TEST_CASE(set)
 
 BOOST_AUTO_TEST_CASE(get)
 {
-    auto plugin = std::make_unique<custom_plugin>();
+    auto plugin = std::make_unique<mock_plugin>("test");
 
     plugin->set_options({
         { "x1", "10" },
@@ -96,7 +72,7 @@ BOOST_AUTO_TEST_CASE(get)
 
 BOOST_AUTO_TEST_CASE(getall)
 {
-    auto plugin = std::make_unique<custom_plugin>();
+    auto plugin = std::make_unique<mock_plugin>("test");
 
     plugin->set_options({
         { "x1", "10" },

@@ -20,40 +20,18 @@
 #include <boost/test/unit_test.hpp>
 
 #include <irccd/test/plugin_cli_test.hpp>
+#include <irccd/test/mock_plugin.hpp>
 
 namespace irccd {
 
 namespace {
 
-class configurable_plugin : public plugin {
-private:
-    map config_;
-
-public:
-    using plugin::plugin;
-
-    auto get_name() const noexcept -> std::string_view override
-    {
-        return "config";
-    }
-
-    auto get_options() const -> map override
-    {
-        return config_;
-    }
-
-    void set_options(const map& config) override
-    {
-        config_ = std::move(config);
-    }
-};
-
 class configurable_plugin_cli_test : public plugin_cli_test {
 public:
     configurable_plugin_cli_test()
     {
-        auto conf1 = std::make_unique<configurable_plugin>("conf1");
-        auto conf2 = std::make_unique<configurable_plugin>("conf2");
+        auto conf1 = std::make_unique<mock_plugin>("conf1");
+        auto conf2 = std::make_unique<mock_plugin>("conf2");
 
         conf1->set_options({
             { "v1", "123" },
