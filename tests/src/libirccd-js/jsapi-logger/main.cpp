@@ -63,7 +63,6 @@ protected:
     };
 
     logger_test()
-        : js_test(CMAKE_CURRENT_SOURCE_DIR "/empty.js")
     {
         irccd_.set_log(std::make_unique<sample_sink>(*this));
         irccd_.get_log().set_verbose(true);
