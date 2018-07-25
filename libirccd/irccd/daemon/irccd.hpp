@@ -29,7 +29,7 @@
 #include <memory>
 #include <system_error>
 
-#include <boost/asio.hpp>
+#include <boost/asio/io_service.hpp>
 
 #include <irccd/config.hpp>
 
@@ -67,17 +67,17 @@ private:
     std::unique_ptr<logger::sink> sink_;
 
     // Services.
-    std::shared_ptr<server_service> server_service_;
-    std::shared_ptr<transport_service> tpt_service_;
-    std::shared_ptr<rule_service> rule_service_;
-    std::shared_ptr<plugin_service> plugin_service_;
+    std::unique_ptr<server_service> server_service_;
+    std::unique_ptr<transport_service> tpt_service_;
+    std::unique_ptr<rule_service> rule_service_;
+    std::unique_ptr<plugin_service> plugin_service_;
 
-    // Not copyable and not movable because services has references to irccd.
+    // Not copyable and not movable because services have references to irccd.
     irccd(const irccd&) = delete;
     irccd(irccd&&) = delete;
 
-    irccd& operator=(const irccd&) = delete;
-    irccd& operator=(irccd&&) = delete;
+    void operator=(const irccd&) = delete;
+    void operator=(irccd&&) = delete;
 
     // Load functions.
     void load_logs_file(const ini::section&);
@@ -104,60 +104,42 @@ public:
      *
      * \return the configuration
      */
-    inline const config& get_config() const noexcept
-    {
-        return config_;
-    }
+    auto get_config() const noexcept -> const config&;
 
     /**
      * Set the configuration.
      *
      * \param cfg the new config
      */
-    inline void set_config(config cfg) noexcept
-    {
-        config_ = std::move(cfg);
-    }
+    void set_config(config cfg) noexcept;
 
     /**
      * Get the underlying io service.
      *
      * \return the service
      */
-    inline const boost::asio::io_service& get_service() const noexcept
-    {
-        return service_;
-    }
+    auto get_service() const noexcept -> const boost::asio::io_service&;
 
     /**
      * Overloaded function.
      *
      * \return the service
      */
-    inline boost::asio::io_service& get_service() noexcept
-    {
-        return service_;
-    }
+    auto get_service() noexcept -> boost::asio::io_service&;
 
     /**
      * Access the logger.
      *
      * \return the logger
      */
-    inline const logger::sink& get_log() const noexcept
-    {
-        return *sink_;
-    }
+    auto get_log() const noexcept -> const logger::sink&;
 
     /**
      * Overloaded function.
      *
      * \return the logger
      */
-    inline logger::sink& get_log() noexcept
-    {
-        return *sink_;
-    }
+    auto get_log() noexcept -> logger::sink&;
 
     /**
      * Set the logger.
@@ -172,40 +154,28 @@ public:
      *
      * \return the service
      */
-    inline server_service& servers() noexcept
-    {
-        return *server_service_;
-    }
+    auto servers() noexcept -> server_service&;
 
     /**
      * Access the transport service.
      *
      * \return the service
      */
-    inline transport_service& transports() noexcept
-    {
-        return *tpt_service_;
-    }
+    auto transports() noexcept -> transport_service&;
 
     /**
      * Access the rule service.
      *
      * \return the service
      */
-    inline rule_service& rules() noexcept
-    {
-        return *rule_service_;
-    }
+    auto rules() noexcept -> rule_service&;
 
     /**
      * Access the plugin service.
      *
      * \return the service
      */
-    inline plugin_service& plugins() noexcept
-    {
-        return *plugin_service_;
-    }
+    auto plugins() noexcept -> plugin_service&;
 
     /**
      * Load and re-apply the configuration to the daemon.
@@ -258,14 +228,14 @@ public:
  *
  * \return the singleton
  */
-const std::error_category& irccd_category();
+auto irccd_category() noexcept -> const std::error_category&;
 
 /**
  * Create a std::error_code from irccd_error::error enum.
  *
  * \param e the error code
  */
-std::error_code make_error_code(irccd_error::error e);
+auto make_error_code(irccd_error::error e) noexcept -> std::error_code;
 
 } // !irccd
 

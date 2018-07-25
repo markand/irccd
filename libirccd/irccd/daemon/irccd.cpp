@@ -48,9 +48,18 @@ private:
 
 public:
     format_filter(std::string info, std::string warning, std::string debug) noexcept;
-    auto pre_debug(std::string_view, std::string_view, std::string_view) const -> std::string override;
-    auto pre_info(std::string_view, std::string_view, std::string_view) const -> std::string override;
-    auto pre_warning(std::string_view, std::string_view, std::string_view) const -> std::string override;
+
+    auto pre_debug(std::string_view,
+                   std::string_view,
+                   std::string_view) const -> std::string override;
+
+    auto pre_info(std::string_view,
+                  std::string_view,
+                  std::string_view) const -> std::string override;
+
+    auto pre_warning(std::string_view,
+                     std::string_view,
+                     std::string_view) const -> std::string override;
 };
 
 auto format_filter::convert(const std::string& tmpl,
@@ -187,6 +196,56 @@ irccd::irccd(boost::asio::io_service& service, std::string config)
 
 irccd::~irccd() = default;
 
+auto irccd::get_config() const noexcept -> const config&
+{
+    return config_;
+}
+
+void irccd::set_config(config cfg) noexcept
+{
+    config_ = std::move(cfg);
+}
+
+auto irccd::get_service() const noexcept -> const boost::asio::io_service&
+{
+    return service_;
+}
+
+auto irccd::get_service() noexcept -> boost::asio::io_service&
+{
+    return service_;
+}
+
+auto irccd::get_log() const noexcept -> const logger::sink&
+{
+    return *sink_;
+}
+
+auto irccd::get_log() noexcept -> logger::sink&
+{
+    return *sink_;
+}
+
+auto irccd::servers() noexcept -> server_service&
+{
+    return *server_service_;
+}
+
+auto irccd::transports() noexcept -> transport_service&
+{
+    return *tpt_service_;
+}
+
+auto irccd::rules() noexcept -> rule_service&
+{
+    return *rule_service_;
+}
+
+auto irccd::plugins() noexcept -> plugin_service&
+{
+    return *plugin_service_;
+}
+
 void irccd::set_log(std::unique_ptr<logger::sink> sink) noexcept
 {
     assert(sink);
@@ -223,7 +282,7 @@ void irccd::load() noexcept
     loaded_ = true;
 }
 
-const std::error_category& irccd_category()
+auto irccd_category() noexcept -> const std::error_category&
 {
     static const class category : public std::error_category {
     public:
@@ -258,7 +317,7 @@ const std::error_category& irccd_category()
     return category;
 }
 
-std::error_code make_error_code(irccd_error::error e)
+auto make_error_code(irccd_error::error e) noexcept -> std::error_code
 {
     return {static_cast<int>(e), irccd_category()};
 }
