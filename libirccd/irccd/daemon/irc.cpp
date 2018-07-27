@@ -180,6 +180,7 @@ void connection::connect(const std::string& host,
 #if !defined(NDEBUG)
         is_connecting_ = false;
 #endif
+        (void)this;
         handler(std::move(code));
     });
 }
@@ -197,7 +198,7 @@ void connection::recv(const recv_handler& handler) noexcept
 #if !defined(NDEBUG)
         is_receiving_ = false;
 #endif
-
+        (void)this;
         handler(std::move(code), std::move(message));
     });
 }
@@ -220,7 +221,7 @@ void connection::send(std::string message, const send_handler& handler)
 #if !defined(NDEBUG)
         is_sending_ = false;
 #endif
-
+        (void)this;
         handler(std::move(code));
     });
 }

@@ -29,6 +29,8 @@ BOOST_FIXTURE_TEST_SUITE(server_info_suite, server_cli_test)
 
 BOOST_AUTO_TEST_CASE(output)
 {
+    server_->set_username("francis");
+    server_->set_nickname("francis");
     start();
 
     const auto [code, out, err] = exec({ "server-info", "test" });
@@ -43,8 +45,8 @@ BOOST_AUTO_TEST_CASE(output)
     BOOST_TEST(out[4] == "SSL            : null");
     BOOST_TEST(out[5] == "SSL verified   : null");
     BOOST_TEST(out[6] == "Channels       : ");
-    BOOST_TEST(out[7] == "Nickname       : irccd");
-    BOOST_TEST(out[8] == "User name      : irccd");
+    BOOST_TEST(out[7] == "Nickname       : francis");
+    BOOST_TEST(out[8] == "User name      : francis");
     BOOST_TEST(out[9] == "Real name      : IRC Client Daemon");
 }
 
