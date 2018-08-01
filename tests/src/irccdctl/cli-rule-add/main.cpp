@@ -168,6 +168,22 @@ BOOST_AUTO_TEST_CASE(event)
     }
 }
 
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_action)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "rule-add", "-p p1", "--add-plugin p2", "break" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: invalid rule action");
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace

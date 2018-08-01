@@ -241,7 +241,7 @@ auto plugin_category() -> const std::error_category&
             case plugin_error::not_found:
                 return "plugin not found";
             case plugin_error::invalid_identifier:
-                return "invalid identifier";
+                return "invalid plugin identifier";
             case plugin_error::exec_error:
                 return "plugin exec error";
             case plugin_error::already_exists:

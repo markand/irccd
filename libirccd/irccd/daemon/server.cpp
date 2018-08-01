@@ -805,7 +805,7 @@ auto server_category() -> const std::error_category&
             case server_error::not_found:
                 return "server not found";
             case server_error::invalid_identifier:
-                return "invalid identifier";
+                return "invalid server identifier";
             case server_error::not_connected:
                 return "server is not connected";
             case server_error::already_connected:

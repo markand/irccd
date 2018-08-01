@@ -19,6 +19,8 @@
 #include <irccd/options.hpp>
 #include <irccd/string_util.hpp>
 
+#include <irccd/daemon/service/rule_service.hpp>
+
 #include "rule_edit_cli.hpp"
 
 namespace irccd {
@@ -97,7 +99,7 @@ void rule_edit_cli::exec(ctl::controller& ctl, const std::vector<std::string>& a
     const auto index = string_util::to_uint(copy[0]);
 
     if (!index)
-        throw std::invalid_argument("invalid index argument");
+        throw rule_error(rule_error::invalid_index);
 
     json["index"] = *index;
 

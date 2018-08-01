@@ -16,15 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <boost/format.hpp>
-
 #include <irccd/options.hpp>
 #include <irccd/string_util.hpp>
 
 #include "rule_add_cli.hpp"
-
-using boost::format;
-using boost::str;
 
 using irccd::string_util::to_uint;
 
@@ -88,10 +83,6 @@ void rule_add_cli::exec(ctl::controller& ctl, const std::vector<std::string>& ar
 
     if (index)
         json["index"] = *index;
-
-    // And action.
-    if (copy[0] != "accept" && copy[0] != "drop")
-        throw std::runtime_error(str(format("invalid action '%1%'") % copy[0]));
 
     json["action"] = copy[0];
 

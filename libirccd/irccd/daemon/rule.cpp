@@ -70,9 +70,9 @@ const std::error_category& rule_category()
         {
             switch (static_cast<rule_error::error>(e)) {
             case rule_error::invalid_action:
-                return "invalid action given";
+                return "invalid rule action";
             case rule_error::invalid_index:
-                return "invalid index";
+                return "invalid rule index";
             default:
                 return "no error";
             }

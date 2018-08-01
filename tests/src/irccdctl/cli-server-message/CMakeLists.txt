@@ -20,5 +20,5 @@ irccd_define_test(
     NAME cli-server-message
     SOURCES main.cpp
     LIBRARIES libirccd-core
-    DEPENDS irccd
+    DEPENDS irccd irccdctl
 )

@@ -52,6 +52,34 @@ BOOST_AUTO_TEST_CASE(info)
     BOOST_TEST(out[5]  == "action:      drop");
 }
 
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_index_1)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "rule-info", "100" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: invalid rule index");
+}
+
+BOOST_AUTO_TEST_CASE(invalid_index_2)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "rule-info", "notaint" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: invalid rule index");
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace

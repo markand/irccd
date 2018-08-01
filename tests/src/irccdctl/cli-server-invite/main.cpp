@@ -44,6 +44,58 @@ BOOST_AUTO_TEST_CASE(output)
     BOOST_TEST(std::any_cast<std::string>(cmd[0][1]) == "#staff");
 }
 
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_identifier_1)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "server-invite", "+++", "francis", "#staff" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: invalid server identifier");
+}
+
+BOOST_AUTO_TEST_CASE(not_found)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "server-invite", "unknown", "francis", "#staff" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: server not found");
+}
+
+BOOST_AUTO_TEST_CASE(invalid_nickname)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "server-invite", "test", "\"\"", "#staff" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: invalid nickname");
+}
+
+BOOST_AUTO_TEST_CASE(invalid_channel)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "server-invite", "test", "francis", "\"\"" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: invalid or empty channel");
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace

@@ -20,5 +20,5 @@ irccd_define_test(
     NAME cli-server-reconnect
     SOURCES main.cpp
     LIBRARIES libirccd-core
-    DEPENDS irccd
+    DEPENDS irccd irccdctl
 )

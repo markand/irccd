@@ -18,6 +18,10 @@
 
 #include <iostream>
 
+#include <irccd/string_util.hpp>
+
+#include <irccd/daemon/service/rule_service.hpp>
+
 #include "rule_info_cli.hpp"
 
 namespace irccd {
@@ -28,7 +32,7 @@ void rule_info_cli::print(const nlohmann::json& json, int index)
 {
     assert(json.is_object());
 
-    auto unjoin = [] (auto array) {
+    const auto unjoin = [] (auto array) {
         std::ostringstream oss;
 
         for (auto it = array.begin(); it != array.end(); ++it) {
@@ -40,7 +44,7 @@ void rule_info_cli::print(const nlohmann::json& json, int index)
 
         return oss.str();
     };
-    auto unstr = [] (auto action) {
+    const auto unstr = [] (auto action) {
         if (action.is_string() && action == "accept")
             return "accept";
         else
@@ -66,21 +70,18 @@ void rule_info_cli::exec(ctl::controller& ctl, const std::vector<std::string>& a
     if (args.size() < 1)
         throw std::invalid_argument("rule-info requires 1 argument");
 
-    int index = 0;
+    const auto index = string_util::to_int(args[0]);
 
-    try {
-        index = std::stoi(args[0]);
-    } catch (...) {
-        throw std::invalid_argument("invalid number '" + args[0] + "'");
-    }
+    if (!index)
+        throw rule_error(rule_error::invalid_index);
 
-    auto json = nlohmann::json::object({
+    const auto json = nlohmann::json::object({
         { "command",    "rule-info" },
-        { "index",      index       }
+        { "index",      *index      }
     });
 
-    request(ctl, std::move(json), [index] (auto result) {
-        print(result, index);
+    request(ctl, json, [index] (auto result) {
+        print(result, *index);
     });
 }
 

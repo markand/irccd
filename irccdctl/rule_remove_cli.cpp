@@ -16,6 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/string_util.hpp>
+
+#include <irccd/daemon/service/rule_service.hpp>
+
 #include "rule_remove_cli.hpp"
 
 namespace irccd {
@@ -32,17 +36,14 @@ void rule_remove_cli::exec(ctl::controller& ctl, const std::vector<std::string>&
     if (args.size() < 1)
         throw std::invalid_argument("rule-remove requires 1 argument");
 
-    int index = 0;
+    const auto index = string_util::to_int(args[0]);
 
-    try {
-        index = std::stoi(args[0]);
-    } catch (...) {
-        throw std::invalid_argument("invalid number '" + args[0] + "'");
-    }
+    if (!index)
+        throw rule_error(rule_error::invalid_index);
 
     request(ctl, {
         { "command",    "rule-remove"   },
-        { "index",      index           }
+        { "index",      *index          }
     });
 }
 

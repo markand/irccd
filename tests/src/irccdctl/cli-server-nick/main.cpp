@@ -29,11 +29,52 @@ BOOST_FIXTURE_TEST_SUITE(server_nick_suite, server_cli_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
+    start();
     /*
      * TODO: we will make server::set_nickname call raw() instead of being
      * virtual.
      */
 }
+
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_identifier_1)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "server-nick", "+++", "francis" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: invalid server identifier");
+}
+
+BOOST_AUTO_TEST_CASE(not_found)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "server-nick", "unknown", "francis" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: server not found");
+}
+
+BOOST_AUTO_TEST_CASE(invalid_nickname)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "server-nick", "test", "\"\"" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: invalid nickname");
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 

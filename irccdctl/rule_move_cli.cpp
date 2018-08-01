@@ -18,6 +18,8 @@
 
 #include <irccd/string_util.hpp>
 
+#include <irccd/daemon/service/rule_service.hpp>
+
 #include "rule_move_cli.hpp"
 
 namespace irccd {
@@ -38,9 +40,9 @@ void rule_move_cli::exec(ctl::controller& ctl, const std::vector<std::string>& a
     const auto to = string_util::to_int<int>(args[1]);
 
     if (!from)
-        throw std::invalid_argument("invalid source argument");
+        throw rule_error(rule_error::invalid_index);
     if (!to)
-        throw std::invalid_argument("invalid destination argument");
+        throw rule_error(rule_error::invalid_index);
 
     request(ctl, {
         { "command",    "rule-move" },

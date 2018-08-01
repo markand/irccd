@@ -219,6 +219,46 @@ BOOST_AUTO_TEST_CASE(action_2)
     }
 }
 
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_index_1)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "rule-edit", "-p p1", "100" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: invalid rule index");
+}
+
+BOOST_AUTO_TEST_CASE(invalid_index_2)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "rule-edit", "-p p1", "notaint" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: invalid rule index");
+}
+
+BOOST_AUTO_TEST_CASE(invalid_action)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "rule-edit", "--action break", "0" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: invalid rule action");
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace

@@ -184,6 +184,46 @@ BOOST_AUTO_TEST_CASE(same)
     }
 }
 
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_index_1_from)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "rule-move", "100", "0" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: invalid rule index");
+}
+
+BOOST_AUTO_TEST_CASE(invalid_index_2_from)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "rule-move", "notaint", "0" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: invalid rule index");
+}
+
+BOOST_AUTO_TEST_CASE(invalid_index_to)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "rule-move", "0", "notaint" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: invalid rule index");
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace

@@ -83,6 +83,34 @@ BOOST_AUTO_TEST_CASE(getall)
     BOOST_TEST(out[1] == "v2               : 456");
 }
 
+BOOST_AUTO_TEST_SUITE(errors)
+
+BOOST_AUTO_TEST_CASE(invalid_identifier)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "plugin-config", "+++" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: invalid plugin identifier");
+}
+
+BOOST_AUTO_TEST_CASE(not_found)
+{
+    start();
+
+    const auto [code, out, err] = exec({ "plugin-config", "unknown" });
+
+    BOOST_TEST(code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 1U);
+    BOOST_TEST(err[0] == "abort: plugin not found");
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
 BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
