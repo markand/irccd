@@ -26,11 +26,33 @@ using boost::asio::async_connect;
 using boost::asio::async_read_until;
 using boost::asio::async_write;
 
-namespace irccd {
+namespace irccd::irc {
 
-namespace irc {
+auto message::get(unsigned short index) const noexcept -> const std::string&
+{
+    static const std::string dummy;
 
-message message::parse(const std::string& line)
+    return (index >= args.size()) ? dummy : args[index];
+}
+
+auto message::is_ctcp(unsigned index) const noexcept -> bool
+{
+    const auto a = get(index);
+
+    if (a.empty())
+        return false;
+
+    return a.front() == 0x01 && a.back() == 0x01;
+}
+
+auto message::ctcp(unsigned index) const -> std::string
+{
+    assert(is_ctcp(index));
+
+    return args[index].substr(1, args[index].size() - 1);
+}
+
+auto message::parse(const std::string& line) -> message
 {
     std::istringstream iss(line);
     std::string prefix;
@@ -71,35 +93,18 @@ message message::parse(const std::string& line)
         args.push_back(std::move(arg));
     }
 
-    return {std::move(prefix), std::move(command), std::move(args)};
+    return { std::move(prefix), std::move(command), std::move(args) };
 }
 
-bool message::is_ctcp(unsigned index) const noexcept
-{
-    const auto a = arg(index);
-
-    if (a.empty())
-        return false;
-
-    return a.front() == 0x01 && a.back() == 0x01;
-}
-
-std::string message::ctcp(unsigned index) const
-{
-    assert(is_ctcp(index));
-
-    return args_[index].substr(1, args_[index].size() - 1);
-}
-
-user user::parse(std::string_view line)
+auto user::parse(std::string_view line) -> user
 {
     if (line.empty())
-        return {"", ""};
+        return { "", "" };
 
     const auto pos = line.find("!");
 
     if (pos == std::string::npos)
-        return {std::string(line), ""};
+        return { std::string(line), "" };
 
     return {
         std::string(line.substr(0, pos)),
@@ -274,6 +279,4 @@ void tls_connection::do_send(const send_handler& handler) noexcept
 
 #endif // !IRCCD_HAVE_SSL
 
-} // !irc
-
-} // !irccd
+} // !irccd::irc

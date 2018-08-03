@@ -293,7 +293,7 @@ duk_ret_t Util_format(duk_context* ctx)
 duk_ret_t Util_splituser(duk_context* ctx)
 {
     return wrap(ctx, [&] {
-        return dukx_push(ctx, irc::user::parse(dukx_require<std::string>(ctx, 0)).nick());
+        return dukx_push(ctx, irc::user::parse(dukx_require<std::string>(ctx, 0)).nick);
     });
 }
 
@@ -317,7 +317,7 @@ duk_ret_t Util_splituser(duk_context* ctx)
 duk_ret_t Util_splithost(duk_context* ctx)
 {
     return wrap(ctx, [&] {
-        return dukx_push(ctx, irc::user::parse(dukx_require<std::string>(ctx, 0)).host());
+        return dukx_push(ctx, irc::user::parse(dukx_require<std::string>(ctx, 0)).host);
     });
 }
 

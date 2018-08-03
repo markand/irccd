@@ -165,7 +165,7 @@ void requester::notify(const string& title)
     string_util::subst subst;
 
     subst.keywords.emplace("channel", channel_);
-    subst.keywords.emplace("nickname", irc::user::parse(origin_).nick());
+    subst.keywords.emplace("nickname", irc::user::parse(origin_).nick);
     subst.keywords.emplace("origin", origin_);
     subst.keywords.emplace("server", server_->get_id());
     subst.keywords.emplace("title", title);

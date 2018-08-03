@@ -29,32 +29,24 @@ BOOST_AUTO_TEST_SUITE(message_parse)
 
 BOOST_AUTO_TEST_CASE(no_prefix)
 {
-    irc::message m;
+    const auto m = irc::message::parse("PRIVMSG jean :bonjour à toi");
 
-    BOOST_TEST(!m);
-
-    m = irc::message::parse("PRIVMSG jean :bonjour à toi");
-    BOOST_TEST(m);
-    BOOST_TEST(m.prefix().empty());
-    BOOST_TEST(m.command() == "PRIVMSG");
-    BOOST_TEST(m.args().size() == 2U);
-    BOOST_TEST(m.args()[0] == "jean");
-    BOOST_TEST(m.args()[1] == "bonjour à toi");
+    BOOST_TEST(m.prefix.empty());
+    BOOST_TEST(m.command == "PRIVMSG");
+    BOOST_TEST(m.args.size() == 2U);
+    BOOST_TEST(m.args[0] == "jean");
+    BOOST_TEST(m.args[1] == "bonjour à toi");
 }
 
 BOOST_AUTO_TEST_CASE(prefix)
 {
-    irc::message m;
+    const auto m = irc::message::parse(":127.0.0.1 PRIVMSG jean :bonjour à toi");
 
-    BOOST_TEST(!m);
-
-    m = irc::message::parse(":127.0.0.1 PRIVMSG jean :bonjour à toi");
-    BOOST_TEST(m);
-    BOOST_TEST(m.prefix() == "127.0.0.1");
-    BOOST_TEST(m.command() == "PRIVMSG");
-    BOOST_TEST(m.args().size() == 2U);
-    BOOST_TEST(m.args()[0] == "jean");
-    BOOST_TEST(m.args()[1] == "bonjour à toi");
+    BOOST_TEST(m.prefix == "127.0.0.1");
+    BOOST_TEST(m.command == "PRIVMSG");
+    BOOST_TEST(m.args.size() == 2U);
+    BOOST_TEST(m.args[0] == "jean");
+    BOOST_TEST(m.args[1] == "bonjour à toi");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -63,23 +55,23 @@ BOOST_AUTO_TEST_SUITE(user_parse)
 
 BOOST_AUTO_TEST_CASE(basics)
 {
-    auto user = irc::user::parse("jean!~jean@127.0.0.1");
+    const auto user = irc::user::parse("jean!~jean@127.0.0.1");
 
-    BOOST_TEST(user.nick() == "jean");
-    BOOST_TEST(user.host() == "~jean@127.0.0.1");
+    BOOST_TEST(user.nick == "jean");
+    BOOST_TEST(user.host == "~jean@127.0.0.1");
 
-    auto usersimple = irc::user::parse("jean");
+    const auto usersimple = irc::user::parse("jean");
 
-    BOOST_TEST(usersimple.nick() == "jean");
-    BOOST_TEST(usersimple.host().empty());
+    BOOST_TEST(usersimple.nick == "jean");
+    BOOST_TEST(usersimple.host.empty());
 }
 
 BOOST_AUTO_TEST_CASE(empty)
 {
-    auto user = irc::user::parse("");
+    const auto user = irc::user::parse("");
 
-    BOOST_TEST(user.nick().empty());
-    BOOST_TEST(user.host().empty());
+    BOOST_TEST(user.nick.empty());
+    BOOST_TEST(user.host.empty());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

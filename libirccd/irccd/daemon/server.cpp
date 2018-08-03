@@ -132,15 +132,15 @@ auto server::dispatch_endofnames(const irc::message& msg, const recv_handler& ha
      * params[1] == channel
      * params[2] == End of NAMES list
      */
-    if (msg.args().size() < 3 || msg.arg(1) == "")
+    if (msg.args.size() < 3 || msg.get(1) == "")
         return false;
 
-    const auto it = names_map_.find(msg.arg(1));
+    const auto it = names_map_.find(msg.get(1));
 
     if (it != names_map_.end()) {
         handler({}, names_event{
             shared_from_this(),
-            msg.arg(1),
+            msg.get(1),
             std::vector<std::string>(it->second.begin(), it->second.end())
         });
 
@@ -159,7 +159,7 @@ auto server::dispatch_endofwhois(const irc::message& msg, const recv_handler& ha
      * params[1] == nickname
      * params[2] == End of WHOIS list
      */
-    const auto it = whois_map_.find(msg.arg(1));
+    const auto it = whois_map_.find(msg.get(1));
 
     if (it != whois_map_.end()) {
         handler({}, whois_event{shared_from_this(), it->second});
@@ -172,19 +172,19 @@ auto server::dispatch_endofwhois(const irc::message& msg, const recv_handler& ha
 auto server::dispatch_invite(const irc::message& msg, const recv_handler& handler) -> bool
 {
     // If join-invite is set, join the channel.
-    if ((flags_ & options::join_invite) == options::join_invite && is_self(msg.arg(0)))
-        join(msg.arg(1));
+    if ((flags_ & options::join_invite) == options::join_invite && is_self(msg.get(0)))
+        join(msg.get(1));
 
-    handler({}, invite_event{shared_from_this(), msg.prefix(), msg.arg(1), msg.arg(0)});
+    handler({}, invite_event{shared_from_this(), msg.prefix, msg.get(1), msg.get(0)});
 
     return true;
 }
 
 auto server::dispatch_isupport(const irc::message& msg) -> bool
 {
-    for (unsigned int i = 0; i < msg.args().size(); ++i) {
-        if (msg.arg(i).compare(0, 6, "PREFIX") == 0) {
-            modes_ = isupport_extract_prefixes(msg.arg(i));
+    for (unsigned int i = 0; i < msg.args.size(); ++i) {
+        if (msg.get(i).compare(0, 6, "PREFIX") == 0) {
+            modes_ = isupport_extract_prefixes(msg.get(i));
             break;
         }
     }
@@ -194,26 +194,26 @@ auto server::dispatch_isupport(const irc::message& msg) -> bool
 
 auto server::dispatch_join(const irc::message& msg, const recv_handler& handler) -> bool
 {
-    if (is_self(msg.prefix()))
-        jchannels_.insert(msg.arg(0));
+    if (is_self(msg.prefix))
+        jchannels_.insert(msg.get(0));
 
-    handler({}, join_event{shared_from_this(), msg.prefix(), msg.arg(0)});
+    handler({}, join_event{shared_from_this(), msg.prefix, msg.get(0)});
 
     return true;
 }
 
 auto server::dispatch_kick(const irc::message& msg, const recv_handler& handler) -> bool
 {
-    if (is_self(msg.arg(1))) {
+    if (is_self(msg.get(1))) {
         // Remove the channel from the joined list.
-        jchannels_.erase(msg.arg(0));
+        jchannels_.erase(msg.get(0));
 
         // Rejoin the channel if the option has been set and I was kicked.
         if ((flags_ & options::auto_rejoin) == options::auto_rejoin)
-            join(msg.arg(0));
+            join(msg.get(0));
     }
 
-    handler({}, kick_event{shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1), msg.arg(2)});
+    handler({}, kick_event{shared_from_this(), msg.prefix, msg.get(0), msg.get(1), msg.get(2)});
 
     return true;
 }
@@ -222,12 +222,12 @@ auto server::dispatch_mode(const irc::message& msg, const recv_handler& handler)
 {
     handler({}, mode_event{
         shared_from_this(),
-        msg.prefix(),
-        msg.arg(0),
-        msg.arg(1),
-        msg.arg(2),
-        msg.arg(3),
-        msg.arg(4)
+        msg.prefix,
+        msg.get(0),
+        msg.get(1),
+        msg.get(2),
+        msg.get(3),
+        msg.get(4)
     });
 
     return true;
@@ -246,14 +246,14 @@ auto server::dispatch_namreply(const irc::message& msg) -> bool
      * IDEA for the future: maybe give the appropriate mode as a second
      * parameter in onNames.
      */
-    if (msg.args().size() < 4 || msg.arg(2) == "" || msg.arg(3) == "")
+    if (msg.args.size() < 4 || msg.get(2) == "" || msg.get(3) == "")
         return false;
 
-    auto users = string_util::split(msg.arg(3), " \t");
+    auto users = string_util::split(msg.get(3), " \t");
 
     // The listing may add some prefixes, remove them if needed.
     for (const auto& u : users)
-        names_map_[msg.arg(2)].insert(clean_prefix(modes_, u));
+        names_map_[msg.get(2)].insert(clean_prefix(modes_, u));
 
     return false;
 }
@@ -261,17 +261,17 @@ auto server::dispatch_namreply(const irc::message& msg) -> bool
 auto server::dispatch_nick(const irc::message& msg, const recv_handler& handler) -> bool
 {
     // Update our nickname.
-    if (is_self(msg.prefix()))
-        nickname_ = msg.arg(0);
+    if (is_self(msg.prefix))
+        nickname_ = msg.get(0);
 
-    handler({}, nick_event{shared_from_this(), msg.prefix(), msg.arg(0)});
+    handler({}, nick_event{shared_from_this(), msg.prefix, msg.get(0)});
 
     return true;
 }
 
 auto server::dispatch_notice(const irc::message& msg, const recv_handler& handler) -> bool
 {
-    handler({}, notice_event{shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1)});
+    handler({}, notice_event{shared_from_this(), msg.prefix, msg.get(0), msg.get(1)});
 
     return true;
 }
@@ -279,45 +279,45 @@ auto server::dispatch_notice(const irc::message& msg, const recv_handler& handle
 auto server::dispatch_part(const irc::message& msg, const recv_handler& handler) -> bool
 {
     // Remove the channel from the joined list if I left a channel.
-    if (is_self(msg.prefix()))
-        jchannels_.erase(msg.arg(1));
+    if (is_self(msg.prefix))
+        jchannels_.erase(msg.get(1));
 
-    handler({}, part_event{shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1)});
+    handler({}, part_event{shared_from_this(), msg.prefix, msg.get(0), msg.get(1)});
 
     return true;
 }
 
 auto server::dispatch_ping(const irc::message& msg) -> bool
 {
-    assert(msg.command() == "PING");
+    assert(msg.command == "PING");
 
-    send(str(format("PONG %1%") % msg.arg(0)));
+    send(str(format("PONG %1%") % msg.get(0)));
 
     return false;
 }
 
 auto server::dispatch_privmsg(const irc::message& msg, const recv_handler& handler) -> bool
 {
-    assert(msg.command() == "PRIVMSG");
+    assert(msg.command == "PRIVMSG");
 
     if (msg.is_ctcp(1)) {
         auto cmd = msg.ctcp(1);
 
         if (cmd.compare(0, 6, "ACTION") == 0)
-            handler({}, me_event{shared_from_this(), msg.prefix(), msg.arg(0), cmd.substr(7)});
+            handler({}, me_event{shared_from_this(), msg.prefix, msg.get(0), cmd.substr(7)});
         else
             return false;
     } else
-        handler({}, message_event{shared_from_this(), msg.prefix(), msg.arg(0), msg.arg(1)});
+        handler({}, message_event{shared_from_this(), msg.prefix, msg.get(0), msg.get(1)});
 
     return true;
 }
 
 auto server::dispatch_topic(const irc::message& msg, const recv_handler& handler) -> bool
 {
-    assert(msg.command() == "TOPIC");
+    assert(msg.command == "TOPIC");
 
-    handler({}, topic_event{shared_from_this(), msg.arg(0), msg.arg(1), msg.arg(2)});
+    handler({}, topic_event{shared_from_this(), msg.get(0), msg.get(1), msg.get(2)});
 
     return true;
 }
@@ -331,13 +331,13 @@ auto server::dispatch_whoischannels(const irc::message& msg) -> bool
      * params[1] == nickname
      * params[2] == list of channels with their prefixes
      */
-    if (msg.args().size() < 3 || msg.arg(1) == "" || msg.arg(2) == "")
+    if (msg.args.size() < 3 || msg.get(1) == "" || msg.get(2) == "")
         return false;
 
-    auto it = whois_map_.find(msg.arg(1));
+    auto it = whois_map_.find(msg.get(1));
 
     if (it != whois_map_.end()) {
-        auto channels = string_util::split(msg.arg(2), " \t");
+        auto channels = string_util::split(msg.get(2), " \t");
 
         // Clean their prefixes.
         for (auto& s : channels)
@@ -361,15 +361,15 @@ auto server::dispatch_whoisuser(const irc::message& msg) -> bool
      * params[4] == * (no idea what is that)
      * params[5] == realname
      */
-    if (msg.args().size() < 6 || msg.arg(1) == "" || msg.arg(2) == "" || msg.arg(3) == "" || msg.arg(5) == "")
+    if (msg.args.size() < 6 || msg.get(1) == "" || msg.get(2) == "" || msg.get(3) == "" || msg.get(5) == "")
         return false;
 
     whois_info info;
 
-    info.nick = msg.arg(1);
-    info.user = msg.arg(2);
-    info.host = msg.arg(3);
-    info.realname = msg.arg(5);
+    info.nick = msg.get(1);
+    info.user = msg.get(2);
+    info.host = msg.get(3);
+    info.realname = msg.get(5);
 
     whois_map_.emplace(info.nick, info);
 
@@ -384,25 +384,25 @@ auto server::dispatch(const irc::message& message, const recv_handler& handler) 
         handled = dispatch_isupport(message);
     else if (message.is(irc::err::nomotd) || message.is(irc::rpl::endofmotd))
         handled = dispatch_connect(message, handler);
-    else if (message.command() == "INVITE")
+    else if (message.command == "INVITE")
         handled = dispatch_invite(message, handler);
-    else if (message.command() == "JOIN")
+    else if (message.command == "JOIN")
         handled = dispatch_join(message, handler);
-    else if (message.command() == "KICK")
+    else if (message.command == "KICK")
         handled = dispatch_kick(message, handler);
-    else if (message.command() == "MODE")
+    else if (message.command == "MODE")
         handled = dispatch_mode(message, handler);
-    else if (message.command() == "NICK")
+    else if (message.command == "NICK")
         handled = dispatch_nick(message, handler);
-    else if (message.command() == "NOTICE")
+    else if (message.command == "NOTICE")
         handled = dispatch_notice(message, handler);
-    else if (message.command() == "TOPIC")
+    else if (message.command == "TOPIC")
         handled = dispatch_topic(message, handler);
-    else if (message.command() == "PART")
+    else if (message.command == "PART")
         handled = dispatch_part(message, handler);
-    else if (message.command() == "PING")
+    else if (message.command == "PING")
         handled = dispatch_ping(message);
-    else if (message.command() == "PRIVMSG")
+    else if (message.command == "PRIVMSG")
         handled = dispatch_privmsg(message, handler);
     else if (message.is(irc::rpl::namreply))
         handled = dispatch_namreply(message);
@@ -649,7 +649,7 @@ auto server::get_channels() const noexcept -> const std::set<std::string>&
 
 auto server::is_self(std::string_view target) const noexcept -> bool
 {
-    return nickname_ == irc::user::parse(target).nick();
+    return nickname_ == irc::user::parse(target).nick;
 }
 
 void server::connect(connect_handler handler) noexcept
