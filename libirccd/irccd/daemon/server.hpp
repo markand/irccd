@@ -307,24 +307,24 @@ private:
     std::map<std::string, std::set<std::string>> names_map_;
     std::map<std::string, whois_info> whois_map_;
 
-    void dispatch_connect(const irc::message&, const recv_handler&);
-    void dispatch_endofnames(const irc::message&, const recv_handler&);
-    void dispatch_endofwhois(const irc::message&, const recv_handler&);
-    void dispatch_invite(const irc::message&, const recv_handler&);
-    void dispatch_isupport(const irc::message&);
-    void dispatch_join(const irc::message&, const recv_handler&);
-    void dispatch_kick(const irc::message&, const recv_handler&);
-    void dispatch_mode(const irc::message&, const recv_handler&);
-    void dispatch_namreply(const irc::message&);
-    void dispatch_nick(const irc::message&, const recv_handler&);
-    void dispatch_notice(const irc::message&, const recv_handler&);
-    void dispatch_part(const irc::message&, const recv_handler&);
-    void dispatch_ping(const irc::message&);
-    void dispatch_privmsg(const irc::message&, const recv_handler&);
-    void dispatch_topic(const irc::message&, const recv_handler&);
-    void dispatch_whoischannels(const irc::message&);
-    void dispatch_whoisuser(const irc::message&);
-    void dispatch(const irc::message&, const recv_handler&);
+    auto dispatch_connect(const irc::message&, const recv_handler&) -> bool;
+    auto dispatch_endofnames(const irc::message&, const recv_handler&) -> bool;
+    auto dispatch_endofwhois(const irc::message&, const recv_handler&) -> bool;
+    auto dispatch_invite(const irc::message&, const recv_handler&) -> bool;
+    auto dispatch_isupport(const irc::message&) -> bool;
+    auto dispatch_join(const irc::message&, const recv_handler&) -> bool;
+    auto dispatch_kick(const irc::message&, const recv_handler&) -> bool;
+    auto dispatch_mode(const irc::message&, const recv_handler&) -> bool;
+    auto dispatch_namreply(const irc::message&) -> bool;
+    auto dispatch_nick(const irc::message&, const recv_handler&) -> bool;
+    auto dispatch_notice(const irc::message&, const recv_handler&) -> bool;
+    auto dispatch_part(const irc::message&, const recv_handler&) -> bool;
+    auto dispatch_ping(const irc::message&) -> bool;
+    auto dispatch_privmsg(const irc::message&, const recv_handler&) -> bool;
+    auto dispatch_topic(const irc::message&, const recv_handler&) -> bool;
+    auto dispatch_whoischannels(const irc::message&) -> bool;
+    auto dispatch_whoisuser(const irc::message&) -> bool;
+    auto dispatch(const irc::message&, const recv_handler&) -> bool;
 
     // I/O and connection.
     void flush();
