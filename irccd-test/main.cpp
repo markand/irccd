@@ -593,26 +593,35 @@ void load_plugins(int argc, char** argv)
 
 // }}}
 
+// {{{ load_config
+
+auto load_config(const option::result& result) -> config
+{
+    auto it = result.find("-c");
+
+    if (it != result.end() || (it = result.find("--config")) != result.end())
+        return config(it->second);
+
+    auto cfg = config::search("irccd.conf");
+
+    return *cfg;
+}
+
+// }}}
+
 // {{{ load_options
 
 void load_options(int& argc, char**& argv)
 {
-    const option::options def{
+    static const option::options def{
         { "-c",         true    },
         { "--config",   true    }
     };
 
-    auto result = option::read(argc, argv, def);
-    auto it = result.find("-c");
-
-    if (it == result.end())
-        it = result.find("--config");
-    if (it != result.end()) {
-        try {
-            daemon->set_config(it->second);
-        } catch (const std::exception& ex) {
-            throw std::runtime_error(str(format("%1%: %2%") % it->second % ex.what()));
-        }
+    try {
+        daemon->set_config(load_config(option::read(argc, argv, def)));
+    } catch (const std::exception& ex) {
+        throw std::runtime_error(str(format("%1%") % ex.what()));
     }
 }
 
