@@ -125,19 +125,23 @@ auto plugin_service::get_paths(std::string_view id) -> plugin::map
 
     // Fill defaults paths.
     if (!defaults.count("cache"))
-        defaults.emplace("cache", (sys::cachedir() / "plugin" / std::string(id)).string());
+        defaults.emplace("cache", sys::cachedir().string());
     if (!defaults.count("data"))
-        paths.emplace("data", (sys::datadir() / "plugin" / std::string(id)).string());
+        defaults.emplace("data", sys::datadir().string());
     if (!defaults.count("config"))
-        paths.emplace("config", (sys::sysconfdir() / "plugin" / std::string(id)).string());
+        defaults.emplace("config", sys::sysconfdir().string());
+
+    const auto join = [id] (auto path) {
+        return (boost::filesystem::path(path) / "plugin" / std::string(id)).string();
+    };
 
     // Now fill missing fields.
     if (!paths.count("cache"))
-        paths.emplace("cache", defaults["cache"]);
+        paths.emplace("cache", join(defaults["cache"]));
     if (!paths.count("data"))
-        paths.emplace("data", defaults["data"]);
+        paths.emplace("data", join(defaults["data"]));
     if (!paths.count("config"))
-        paths.emplace("config", defaults["config"]);
+        paths.emplace("config", join(defaults["config"]));
 
     return paths;
 }
