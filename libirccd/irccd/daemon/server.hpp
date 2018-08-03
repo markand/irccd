@@ -302,7 +302,7 @@ private:
     // Misc.
     boost::asio::io_service& service_;
     boost::asio::deadline_timer timer_;
-    std::unique_ptr<irc::connection> conn_;
+    std::shared_ptr<irc::connection> conn_;
     std::deque<std::string> queue_;
     std::map<std::string, std::set<std::string>> names_map_;
     std::map<std::string, whois_info> whois_map_;

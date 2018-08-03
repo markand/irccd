@@ -449,7 +449,9 @@ void server::handle_recv(const std::error_code& code,
 
 void server::recv(recv_handler handler) noexcept
 {
-    conn_->recv([this, handler] (auto code, auto message) {
+    const auto self = shared_from_this();
+
+    conn_->recv([this, handler, self, c = conn_] (auto code, auto message) {
         handle_recv(std::move(code), message, handler);
     });
 }
@@ -461,7 +463,7 @@ void server::flush()
 
     const auto self = shared_from_this();
 
-    conn_->send(queue_.front(), [this, self] (auto code) {
+    conn_->send(queue_.front(), [this, self, c = conn_] (auto code) {
         handle_send(std::move(code));
     });
 }
@@ -683,7 +685,9 @@ void server::connect(connect_handler handler) noexcept
         handle_wait(code, handler);
     });
 
-    conn_->connect(host_, std::to_string(port_), [this, handler] (auto code) {
+    const auto self = shared_from_this();
+
+    conn_->connect(host_, std::to_string(port_), [this, handler, c = conn_] (auto code) {
         handle_connect(code, handler);
     });
 }
