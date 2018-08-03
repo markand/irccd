@@ -19,7 +19,6 @@
 #define BOOST_TEST_MODULE "server-kick"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/command/server_kick_command.hpp>
 #include <irccd/daemon/service/server_service.hpp>
 
 #include <irccd/test/command_test.hpp>

@@ -22,6 +22,7 @@
 #include <cassert>
 #include <deque>
 #include <memory>
+#include <string_view>
 
 #include <irccd/stream.hpp>
 
@@ -146,7 +147,7 @@ public:
      * \param handler the optional handler
      * \note If a write operation is running, it is postponed once ready.
      */
-    void error(std::error_code code, std::string command, io::write_handler handler = nullptr);
+    void error(std::error_code code, std::string_view command, io::write_handler handler = nullptr);
 };
 
 } // !irccd

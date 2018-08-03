@@ -19,7 +19,6 @@
 #define BOOST_TEST_MODULE "server-disconnect"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/command/server_disconnect_command.hpp>
 #include <irccd/daemon/service/server_service.hpp>
 
 #include <irccd/test/mock_server.hpp>

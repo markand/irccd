@@ -24,6 +24,7 @@
 #include <irccd/socket_acceptor.hpp>
 #include <irccd/socket_connector.hpp>
 
+#include <irccd/daemon/command.hpp>
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/logger.hpp>
 #include <irccd/daemon/service/transport_service.hpp>

@@ -19,7 +19,6 @@
 #define BOOST_TEST_MODULE "plugin-config"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/command/plugin_config_command.hpp>
 #include <irccd/daemon/service/plugin_service.hpp>
 
 #include <irccd/test/command_test.hpp>

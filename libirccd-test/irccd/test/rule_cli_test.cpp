@@ -16,14 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/daemon/command/rule_add_command.hpp>
-#include <irccd/daemon/command/rule_edit_command.hpp>
-#include <irccd/daemon/command/rule_info_command.hpp>
-#include <irccd/daemon/command/rule_list_command.hpp>
-#include <irccd/daemon/command/rule_move_command.hpp>
-#include <irccd/daemon/command/rule_remove_command.hpp>
-
 #include <irccd/daemon/service/transport_service.hpp>
+#include <irccd/daemon/command.hpp>
 
 #include "rule_cli_test.hpp"
 

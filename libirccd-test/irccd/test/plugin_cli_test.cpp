@@ -16,14 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/daemon/command/plugin_config_command.hpp>
-#include <irccd/daemon/command/plugin_info_command.hpp>
-#include <irccd/daemon/command/plugin_list_command.hpp>
-#include <irccd/daemon/command/plugin_load_command.hpp>
-#include <irccd/daemon/command/plugin_reload_command.hpp>
-#include <irccd/daemon/command/plugin_unload_command.hpp>
-
 #include <irccd/daemon/service/transport_service.hpp>
+#include <irccd/daemon/command.hpp>
 
 #include "plugin_cli_test.hpp"
 

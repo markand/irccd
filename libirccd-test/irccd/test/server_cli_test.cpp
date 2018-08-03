@@ -16,23 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/daemon/command/server_connect_command.hpp>
-#include <irccd/daemon/command/server_disconnect_command.hpp>
-#include <irccd/daemon/command/server_info_command.hpp>
-#include <irccd/daemon/command/server_invite_command.hpp>
-#include <irccd/daemon/command/server_join_command.hpp>
-#include <irccd/daemon/command/server_kick_command.hpp>
-#include <irccd/daemon/command/server_list_command.hpp>
-#include <irccd/daemon/command/server_me_command.hpp>
-#include <irccd/daemon/command/server_message_command.hpp>
-#include <irccd/daemon/command/server_mode_command.hpp>
-#include <irccd/daemon/command/server_nick_command.hpp>
-#include <irccd/daemon/command/server_notice_command.hpp>
-#include <irccd/daemon/command/server_part_command.hpp>
-#include <irccd/daemon/command/server_reconnect_command.hpp>
-#include <irccd/daemon/command/server_topic_command.hpp>
-
 #include <irccd/daemon/service/transport_service.hpp>
+#include <irccd/daemon/command.hpp>
 
 #include "server_cli_test.hpp"
 

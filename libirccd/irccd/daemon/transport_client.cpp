@@ -87,7 +87,7 @@ void transport_client::error(std::error_code code, io::write_handler handler)
     error(std::move(code), "", std::move(handler));
 }
 
-void transport_client::error(std::error_code code, std::string cname, io::write_handler handler)
+void transport_client::error(std::error_code code, std::string_view cname, io::write_handler handler)
 {
     assert(code);
 
@@ -97,8 +97,9 @@ void transport_client::error(std::error_code code, std::string cname, io::write_
         { "errorMessage",   code.message()          }
     });
 
+    // TODO: check newer version of JSON for string_view support.
     if (!cname.empty())
-        json["command"] = std::move(cname);
+        json["command"] = std::string(cname);
 
     const auto self = shared_from_this();
 
