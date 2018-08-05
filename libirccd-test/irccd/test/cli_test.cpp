@@ -22,7 +22,8 @@
 #include <irccd/string_util.hpp>
 #include <irccd/socket_acceptor.hpp>
 
-#include <irccd/daemon/service/transport_service.hpp>
+#include <irccd/daemon/transport_service.hpp>
+#include <irccd/daemon/transport_server.hpp>
 
 #include "cli_test.hpp"
 

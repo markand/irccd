@@ -30,7 +30,7 @@
 #include <string_view>
 #include <vector>
 
-#include <irccd/daemon/plugin.hpp>
+#include "plugin.hpp"
 
 namespace irccd {
 

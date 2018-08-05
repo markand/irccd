@@ -24,9 +24,8 @@
  * \brief Test fixture for irccdctl frontend (plugins support).
  */
 
-#include <irccd/daemon/service/plugin_service.hpp>
-
 #include <irccd/daemon/plugin.hpp>
+#include <irccd/daemon/plugin_service.hpp>
 
 #include "cli_test.hpp"
 

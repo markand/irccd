@@ -24,7 +24,7 @@
 
 #include <irccd/ctl/controller.hpp>
 
-#include <irccd/daemon/service/rule_service.hpp>
+#include <irccd/daemon/rule_service.hpp>
 
 #include "cli.hpp"
 

@@ -24,14 +24,13 @@
 
 #include <json.hpp>
 
-#include <irccd/daemon/transport_client.hpp>
-#include <irccd/daemon/transport_server.hpp>
-
 namespace irccd {
 
 class command;
 class config;
 class irccd;
+class transport_client;
+class transport_server;
 
 /**
  * \brief manage transport servers and clients.

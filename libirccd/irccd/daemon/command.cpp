@@ -16,21 +16,19 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/daemon/service/plugin_service.hpp>
-#include <irccd/daemon/service/rule_service.hpp>
-#include <irccd/daemon/service/server_service.hpp>
-
-#include <irccd/daemon/irccd.hpp>
-#include <irccd/daemon/plugin.hpp>
-#include <irccd/daemon/rule.hpp>
-#include <irccd/daemon/rule_util.hpp>
-#include <irccd/daemon/server.hpp>
-#include <irccd/daemon/server_util.hpp>
-#include <irccd/daemon/transport_client.hpp>
-
 #include <irccd/string_util.hpp>
 
 #include "command.hpp"
+#include "irccd.hpp"
+#include "plugin.hpp"
+#include "plugin_service.hpp"
+#include "rule.hpp"
+#include "rule_service.hpp"
+#include "rule_util.hpp"
+#include "server.hpp"
+#include "server_service.hpp"
+#include "server_util.hpp"
+#include "transport_client.hpp"
 
 using namespace std::string_literals;
 

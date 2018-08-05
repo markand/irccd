@@ -17,8 +17,7 @@
  */
 
 #include <irccd/daemon/irccd.hpp>
-
-#include <irccd/daemon/service/plugin_service.hpp>
+#include <irccd/daemon/plugin_service.hpp>
 
 #include "irccd_jsapi.hpp"
 #include "js_plugin.hpp"

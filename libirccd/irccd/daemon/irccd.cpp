@@ -25,11 +25,10 @@
 
 #include "irccd.hpp"
 #include "logger.hpp"
-
-#include "service/plugin_service.hpp"
-#include "service/rule_service.hpp"
-#include "service/server_service.hpp"
-#include "service/transport_service.hpp"
+#include "plugin_service.hpp"
+#include "rule_service.hpp"
+#include "server_service.hpp"
+#include "transport_service.hpp"
 
 namespace irccd {
 

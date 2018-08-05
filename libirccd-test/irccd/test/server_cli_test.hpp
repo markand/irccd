@@ -24,7 +24,7 @@
  * \brief Test fixture for irccdctl frontend (server support).
  */
 
-#include <irccd/daemon/service/server_service.hpp>
+#include <irccd/daemon/server_service.hpp>
 
 #include <irccd/test/mock_server.hpp>
 

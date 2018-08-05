@@ -24,6 +24,7 @@
 #include <irccd/json_util.hpp>
 
 #include "irccd.hpp"
+#include "transport_client.hpp"
 #include "transport_server.hpp"
 
 namespace irccd {

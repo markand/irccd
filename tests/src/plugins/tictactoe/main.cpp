@@ -22,8 +22,8 @@
 #include <irccd/string_util.hpp>
 
 #include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/plugin_service.hpp>
 #include <irccd/daemon/server.hpp>
-#include <irccd/daemon/service/plugin_service.hpp>
 
 #include <irccd/test/plugin_test.hpp>
 

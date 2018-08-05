@@ -22,20 +22,20 @@ set(
     HEADERS
     ${libirccd_SOURCE_DIR}/irccd/daemon/command.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/dynlib_plugin.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/irccd.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/irc.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/irccd.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/logger.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule_util.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/server_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server_util.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/service/plugin_service.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/service/rule_service.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/service/server_service.hpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/service/transport_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_client.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_server.hpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/transport_service.hpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_util.hpp
 )
 
@@ -43,20 +43,20 @@ set(
     SOURCES
     ${libirccd_SOURCE_DIR}/irccd/daemon/command.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/dynlib_plugin.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/irccd.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/irc.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/irccd.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/logger.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/plugin.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/plugin_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/rule_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/rule_util.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/server_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/server_util.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/service/plugin_service.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/service/rule_service.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/service/server_service.cpp
-    ${libirccd_SOURCE_DIR}/irccd/daemon/service/transport_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_client.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_server.cpp
+    ${libirccd_SOURCE_DIR}/irccd/daemon/transport_service.cpp
     ${libirccd_SOURCE_DIR}/irccd/daemon/transport_util.cpp
 )
 

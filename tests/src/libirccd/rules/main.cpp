@@ -21,7 +21,7 @@
 
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/logger.hpp>
-#include <irccd/daemon/service/rule_service.hpp>
+#include <irccd/daemon/rule_service.hpp>
 
 namespace irccd {
 

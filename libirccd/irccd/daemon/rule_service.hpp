@@ -28,7 +28,7 @@
 
 #include <json.hpp>
 
-#include <irccd/daemon/rule.hpp>
+#include "rule.hpp"
 
 namespace irccd {
 

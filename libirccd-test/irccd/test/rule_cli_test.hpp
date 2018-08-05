@@ -24,9 +24,8 @@
  * \brief Test fixture for irccdctl frontend (rule support).
  */
 
-#include <irccd/daemon/service/rule_service.hpp>
-
 #include <irccd/daemon/rule.hpp>
+#include <irccd/daemon/rule_service.hpp>
 
 #include "cli_test.hpp"
 

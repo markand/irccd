@@ -28,7 +28,7 @@
 #include <system_error>
 #include <vector>
 
-#include <irccd/daemon/server.hpp>
+#include "server.hpp"
 
 namespace irccd {
 

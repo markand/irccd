@@ -19,14 +19,14 @@
 #include <irccd/json_util.hpp>
 #include <irccd/string_util.hpp>
 
-#include <irccd/daemon/irccd.hpp>
-#include <irccd/daemon/logger.hpp>
-#include <irccd/daemon/server_util.hpp>
-
-#include <irccd/daemon/service/plugin_service.hpp>
-#include <irccd/daemon/service/rule_service.hpp>
-#include <irccd/daemon/service/server_service.hpp>
-#include <irccd/daemon/service/transport_service.hpp>
+#include "irccd.hpp"
+#include "logger.hpp"
+#include "plugin_service.hpp"
+#include "rule_service.hpp"
+#include "server.hpp"
+#include "server_service.hpp"
+#include "server_util.hpp"
+#include "transport_service.hpp"
 
 namespace irccd {
 

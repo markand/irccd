@@ -18,8 +18,7 @@
 
 #include <irccd/ini.hpp>
 
-#include <irccd/daemon/rule.hpp>
-
+#include "rule.hpp"
 #include "rule_util.hpp"
 
 namespace irccd {

@@ -30,8 +30,6 @@
 
 #include <json.hpp>
 
-#include <irccd/daemon/server.hpp>
-
 namespace irccd {
 
 namespace ini {
@@ -41,6 +39,7 @@ class section;
 } // !ini
 
 class config;
+class server;
 
 /**
  * \brief Server utilities.

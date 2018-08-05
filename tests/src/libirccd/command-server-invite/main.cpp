@@ -19,7 +19,7 @@
 #define BOOST_TEST_MODULE "server-invite"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/service/server_service.hpp>
+#include <irccd/daemon/server_service.hpp>
 
 #include <irccd/test/command_test.hpp>
 #include <irccd/test/mock_server.hpp>

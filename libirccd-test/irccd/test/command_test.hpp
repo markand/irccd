@@ -27,7 +27,8 @@
 #include <irccd/daemon/command.hpp>
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/logger.hpp>
-#include <irccd/daemon/service/transport_service.hpp>
+#include <irccd/daemon/transport_server.hpp>
+#include <irccd/daemon/transport_service.hpp>
 
 #include <irccd/ctl/controller.hpp>
 

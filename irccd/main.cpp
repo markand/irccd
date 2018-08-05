@@ -30,11 +30,10 @@
 #include <irccd/daemon/dynlib_plugin.hpp>
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/logger.hpp>
-
-#include <irccd/daemon/service/plugin_service.hpp>
-#include <irccd/daemon/service/rule_service.hpp>
-#include <irccd/daemon/service/server_service.hpp>
-#include <irccd/daemon/service/transport_service.hpp>
+#include <irccd/daemon/plugin_service.hpp>
+#include <irccd/daemon/rule_service.hpp>
+#include <irccd/daemon/server_service.hpp>
+#include <irccd/daemon/transport_service.hpp>
 
 #if defined(IRCCD_HAVE_JS)
 #   include <irccd/js/js_plugin.hpp>

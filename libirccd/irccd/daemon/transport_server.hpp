@@ -34,9 +34,9 @@
 
 #include <irccd/acceptor.hpp>
 
-#include "transport_client.hpp"
-
 namespace irccd {
+
+class transport_client;
 
 /**
  * \brief Abstract transport server class.

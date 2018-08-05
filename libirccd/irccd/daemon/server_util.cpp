@@ -23,6 +23,7 @@
 #include <irccd/json_util.hpp>
 #include <irccd/string_util.hpp>
 
+#include "server.hpp"
 #include "server_util.hpp"
 
 namespace irccd {
