@@ -51,7 +51,7 @@
 #
 
 cmake_minimum_required(VERSION 3.10)
-project(irccd CXX)
+project(irccd)
 
 # Helper to set global internal variables.
 function(setg var value)
