@@ -40,35 +40,6 @@
 
 #include <irccd/ctl/controller.hpp>
 
-#include "plugin_config_cli.hpp"
-#include "plugin_info_cli.hpp"
-#include "plugin_list_cli.hpp"
-#include "plugin_load_cli.hpp"
-#include "plugin_reload_cli.hpp"
-#include "plugin_unload_cli.hpp"
-#include "rule_add_cli.hpp"
-#include "rule_edit_cli.hpp"
-#include "rule_info_cli.hpp"
-#include "rule_list_cli.hpp"
-#include "rule_move_cli.hpp"
-#include "rule_remove_cli.hpp"
-#include "server_connect_cli.hpp"
-#include "server_disconnect_cli.hpp"
-#include "server_info_cli.hpp"
-#include "server_invite_cli.hpp"
-#include "server_join_cli.hpp"
-#include "server_kick_cli.hpp"
-#include "server_list_cli.hpp"
-#include "server_me_cli.hpp"
-#include "server_message_cli.hpp"
-#include "server_mode_cli.hpp"
-#include "server_nick_cli.hpp"
-#include "server_notice_cli.hpp"
-#include "server_part_cli.hpp"
-#include "server_reconnect_cli.hpp"
-#include "server_topic_cli.hpp"
-#include "watch_cli.hpp"
-
 #include "alias.hpp"
 #include "cli.hpp"
 
@@ -495,8 +466,8 @@ void init(int &argc, char **&argv)
     -- argc;
     ++ argv;
 
-    auto add = [] (auto c) {
-        commands.emplace(c->name(), std::move(c));
+    const auto add = [] (auto c) {
+        commands.emplace(c->get_name(), std::move(c));
     };
 
     add(std::make_unique<plugin_config_cli>());

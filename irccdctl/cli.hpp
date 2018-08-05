@@ -21,15 +21,16 @@
 
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <json.hpp>
 
-namespace irccd {
-
-namespace ctl {
+namespace irccd::ctl {
 
 class controller;
+
+// {{{ cli
 
 /**
  * \brief Abstract CLI class.
@@ -80,7 +81,7 @@ public:
      *
      * \return the name
      */
-    virtual std::string name() const = 0;
+    virtual auto get_name() const noexcept -> std::string_view = 0;
 
     /**
      * Execute the command.
@@ -91,8 +92,581 @@ public:
     virtual void exec(ctl::controller& ctl, const std::vector<std::string>& args) = 0;
 };
 
-} // !ctl
+// }}}
 
-} // !irccd
+// {{{ plugin_config_cli
+
+/**
+ * \brief Implementation of irccdctl plugin-config.
+ */
+class plugin_config_cli : public cli {
+private:
+    void set(ctl::controller&, const std::vector<std::string>&);
+    void get(ctl::controller&, const std::vector<std::string>&);
+    void getall(ctl::controller&, const std::vector<std::string>&);
+
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ plugin_info_cli
+
+/**
+ * \brief Implementation of irccdctl plugin-info.
+ */
+class plugin_info_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ plugin_list_cli
+
+/**
+ * \brief Implementation of irccdctl plugin-list.
+ */
+class plugin_list_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ plugin_load_cli
+
+/**
+ * \brief Implementation of irccdctl plugin-load.
+ */
+class plugin_load_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ plugin_reload_cli
+
+/**
+ * \brief Implementation of irccdctl plugin-reload.
+ */
+class plugin_reload_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ plugin_unload_cli
+
+/**
+ * \brief Implementation of irccdctl plugin-unload.
+ */
+class plugin_unload_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ rule_add_cli
+
+/**
+ * \brief Implementation of irccdctl rule-add.
+ */
+class rule_add_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ rule_edit_cli
+
+/**
+ * \brief Implementation of irccdctl rule-edit.
+ */
+class rule_edit_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ rule_info_cli
+
+/**
+ * \brief Implementation of irccdctl rule-info.
+ */
+class rule_info_cli : public cli {
+public:
+    /**
+     * Pretty print a rule to stdout.
+     *
+     * \param json the rule information
+     * \param index the rule index
+     */
+    static void print(const nlohmann::json& json, int index = 0);
+
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ rule_list_cli
+
+/**
+ * \brief Implementation of irccdctl rule-list.
+ */
+class rule_list_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ rule_move_cli
+
+/**
+ * \brief Implementation of irccdctl rule-move.
+ */
+class rule_move_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ rule_remove_cli
+
+/**
+ * \brief Implementation of irccdctl rule-remove.
+ */
+class rule_remove_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ server_connect_cli
+
+/**
+ * \brief Implementation of irccdctl server-connect.
+ */
+class server_connect_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ server_disconnect_cli
+
+/**
+ * \brief Implementation of irccdctl server-disconnect.
+ */
+class server_disconnect_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ server_info_cli
+
+/**
+ * \brief Implementation of irccdctl server-info.
+ */
+class server_info_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ server_invite_cli
+
+/**
+ * \brief Implementation of irccdctl server-invite.
+ */
+class server_invite_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ server_join_cli
+
+/**
+ * \brief Implementation of irccdctl server-join.
+ */
+class server_join_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ server_kick_cli
+
+/**
+ * \brief Implementation of irccdctl server-kick.
+ */
+class server_kick_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ server_list_cli
+
+/**
+ * \brief Implementation of irccdctl server-list.
+ */
+class server_list_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ server_me_cli
+
+/**
+ * \brief Implementation of irccdctl server-me.
+ */
+class server_me_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ server_message_cli
+
+/**
+ * \brief Implementation of irccdctl server-message.
+ */
+class server_message_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ server_mode_cli
+
+/**
+ * \brief Implementation of irccdctl server-mode.
+ */
+class server_mode_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ server_nick_cli
+
+/**
+ * \brief Implementation of irccdctl server-nick.
+ */
+class server_nick_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ server_notice_cli
+
+/**
+ * \brief Implementation of irccdctl server-notice.
+ */
+class server_notice_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ server_part_cli
+
+/**
+ * \brief Implementation of irccdctl server-part.
+ */
+class server_part_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ server_reconnect_cli
+
+/**
+ * \brief Implementation of irccdctl server-reconnect.
+ */
+class server_reconnect_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ server_topic_cli
+
+/**
+ * \brief Implementation of irccdctl server-topic.
+ */
+class server_topic_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ watch_cli
+
+/**
+ * \brief Implementation of irccdctl watch.
+ */
+class watch_cli : public cli {
+public:
+    /**
+     * \copydoc cli::get_name
+     */
+    auto get_name() const noexcept -> std::string_view override;
+
+    /**
+     * \copydoc cli::exec
+     */
+    void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+} // !irccd::ctl
 
 #endif // !IRCCD_CTL_CLI_HPP

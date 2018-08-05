@@ -24,66 +24,8 @@ set(
     ${irccdctl_SOURCE_DIR}/alias.cpp
     ${irccdctl_SOURCE_DIR}/alias.hpp
     ${irccdctl_SOURCE_DIR}/cli.cpp
-    ${irccdctl_SOURCE_DIR}/cli.cpp
-    ${irccdctl_SOURCE_DIR}/cli.hpp
     ${irccdctl_SOURCE_DIR}/cli.hpp
     ${irccdctl_SOURCE_DIR}/main.cpp
-    ${irccdctl_SOURCE_DIR}/plugin_config_cli.cpp
-    ${irccdctl_SOURCE_DIR}/plugin_config_cli.hpp
-    ${irccdctl_SOURCE_DIR}/plugin_info_cli.cpp
-    ${irccdctl_SOURCE_DIR}/plugin_info_cli.hpp
-    ${irccdctl_SOURCE_DIR}/plugin_list_cli.cpp
-    ${irccdctl_SOURCE_DIR}/plugin_list_cli.hpp
-    ${irccdctl_SOURCE_DIR}/plugin_load_cli.cpp
-    ${irccdctl_SOURCE_DIR}/plugin_load_cli.hpp
-    ${irccdctl_SOURCE_DIR}/plugin_reload_cli.cpp
-    ${irccdctl_SOURCE_DIR}/plugin_reload_cli.hpp
-    ${irccdctl_SOURCE_DIR}/plugin_unload_cli.cpp
-    ${irccdctl_SOURCE_DIR}/plugin_unload_cli.hpp
-    ${irccdctl_SOURCE_DIR}/rule_add_cli.cpp
-    ${irccdctl_SOURCE_DIR}/rule_add_cli.hpp
-    ${irccdctl_SOURCE_DIR}/rule_edit_cli.cpp
-    ${irccdctl_SOURCE_DIR}/rule_edit_cli.hpp
-    ${irccdctl_SOURCE_DIR}/rule_info_cli.cpp
-    ${irccdctl_SOURCE_DIR}/rule_info_cli.hpp
-    ${irccdctl_SOURCE_DIR}/rule_list_cli.cpp
-    ${irccdctl_SOURCE_DIR}/rule_list_cli.hpp
-    ${irccdctl_SOURCE_DIR}/rule_move_cli.cpp
-    ${irccdctl_SOURCE_DIR}/rule_move_cli.hpp
-    ${irccdctl_SOURCE_DIR}/rule_remove_cli.cpp
-    ${irccdctl_SOURCE_DIR}/rule_remove_cli.hpp
-    ${irccdctl_SOURCE_DIR}/server_connect_cli.cpp
-    ${irccdctl_SOURCE_DIR}/server_connect_cli.hpp
-    ${irccdctl_SOURCE_DIR}/server_disconnect_cli.cpp
-    ${irccdctl_SOURCE_DIR}/server_disconnect_cli.hpp
-    ${irccdctl_SOURCE_DIR}/server_info_cli.cpp
-    ${irccdctl_SOURCE_DIR}/server_info_cli.hpp
-    ${irccdctl_SOURCE_DIR}/server_invite_cli.cpp
-    ${irccdctl_SOURCE_DIR}/server_invite_cli.hpp
-    ${irccdctl_SOURCE_DIR}/server_join_cli.cpp
-    ${irccdctl_SOURCE_DIR}/server_join_cli.hpp
-    ${irccdctl_SOURCE_DIR}/server_kick_cli.cpp
-    ${irccdctl_SOURCE_DIR}/server_kick_cli.hpp
-    ${irccdctl_SOURCE_DIR}/server_list_cli.cpp
-    ${irccdctl_SOURCE_DIR}/server_list_cli.hpp
-    ${irccdctl_SOURCE_DIR}/server_me_cli.cpp
-    ${irccdctl_SOURCE_DIR}/server_me_cli.hpp
-    ${irccdctl_SOURCE_DIR}/server_message_cli.cpp
-    ${irccdctl_SOURCE_DIR}/server_message_cli.hpp
-    ${irccdctl_SOURCE_DIR}/server_mode_cli.cpp
-    ${irccdctl_SOURCE_DIR}/server_mode_cli.hpp
-    ${irccdctl_SOURCE_DIR}/server_nick_cli.cpp
-    ${irccdctl_SOURCE_DIR}/server_nick_cli.hpp
-    ${irccdctl_SOURCE_DIR}/server_notice_cli.cpp
-    ${irccdctl_SOURCE_DIR}/server_notice_cli.hpp
-    ${irccdctl_SOURCE_DIR}/server_part_cli.cpp
-    ${irccdctl_SOURCE_DIR}/server_part_cli.hpp
-    ${irccdctl_SOURCE_DIR}/server_reconnect_cli.cpp
-    ${irccdctl_SOURCE_DIR}/server_reconnect_cli.hpp
-    ${irccdctl_SOURCE_DIR}/server_topic_cli.cpp
-    ${irccdctl_SOURCE_DIR}/server_topic_cli.hpp
-    ${irccdctl_SOURCE_DIR}/watch_cli.cpp
-    ${irccdctl_SOURCE_DIR}/watch_cli.hpp
 )
 
 irccd_define_executable(
