@@ -142,7 +142,7 @@ void irccd::load_logs_syslog()
 #if defined(HAVE_SYSLOG)
     sink_ = std::make_unique<logger::syslog_sink>();
 #else
-    sink_->warning() << "logs: syslog is not available on this platform" << std::endl;
+    sink_->warning("logs", "") << "logs: syslog is not available on this platform" << std::endl;
 #endif // !HAVE_SYSLOG
 }
 
