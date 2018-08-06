@@ -324,25 +324,6 @@ void js_plugin::handle_whois(irccd&, const whois_event& event)
     call("onWhois", event.server, event.whois);
 }
 
-auto js_plugin_loader::defaults(irccd& irccd) -> std::unique_ptr<js_plugin_loader>
-{
-    auto self = std::make_unique<js_plugin_loader>(irccd);
-
-    self->get_modules().push_back(std::make_unique<irccd_jsapi>());
-    self->get_modules().push_back(std::make_unique<directory_jsapi>());
-    self->get_modules().push_back(std::make_unique<elapsed_timer_jsapi>());
-    self->get_modules().push_back(std::make_unique<file_jsapi>());
-    self->get_modules().push_back(std::make_unique<logger_jsapi>());
-    self->get_modules().push_back(std::make_unique<plugin_jsapi>());
-    self->get_modules().push_back(std::make_unique<server_jsapi>());
-    self->get_modules().push_back(std::make_unique<system_jsapi>());
-    self->get_modules().push_back(std::make_unique<timer_jsapi>());
-    self->get_modules().push_back(std::make_unique<unicode_jsapi>());
-    self->get_modules().push_back(std::make_unique<util_jsapi>());
-
-    return self;
-}
-
 js_plugin_loader::js_plugin_loader(irccd& irccd) noexcept
     : plugin_loader({}, { ".js" })
     , irccd_(irccd)
@@ -351,12 +332,12 @@ js_plugin_loader::js_plugin_loader(irccd& irccd) noexcept
 
 js_plugin_loader::~js_plugin_loader() noexcept = default;
 
-auto js_plugin_loader::get_modules() const noexcept -> const modules_t&
+auto js_plugin_loader::get_modules() const noexcept -> const modules&
 {
     return modules_;
 }
 
-auto js_plugin_loader::get_modules() noexcept -> modules_t&
+auto js_plugin_loader::get_modules() noexcept -> modules&
 {
     return modules_;
 }

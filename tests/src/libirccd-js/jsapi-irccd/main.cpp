@@ -19,17 +19,17 @@
 #define BOOST_TEST_MODULE "Irccd Javascript API"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/test/js_test.hpp>
+#include <irccd/test/javascript_fixture.hpp>
 
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
-BOOST_FIXTURE_TEST_SUITE(irccd_jsapi_suite, js_test<irccd_jsapi>)
+BOOST_FIXTURE_TEST_SUITE(irccd_jsapi_suite, javascript_fixture)
 
 BOOST_AUTO_TEST_CASE(version)
 {
-    auto ret = duk_peval_string(plugin_->get_context(),
+    const auto ret = duk_peval_string(plugin_->get_context(),
         "major = Irccd.version.major;"
         "minor = Irccd.version.minor;"
         "patch = Irccd.version.patch;"
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE(version)
 
 BOOST_AUTO_TEST_CASE(from_javascript)
 {
-    auto ret = duk_peval_string(plugin_->get_context(),
+    const auto ret = duk_peval_string(plugin_->get_context(),
         "try {"
         "  throw new Irccd.SystemError(1, 'test');"
         "} catch (e) {"
@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE(from_native)
 
     duk_put_global_string(plugin_->get_context(), "f");
 
-    auto ret = duk_peval_string(plugin_->get_context(),
+    const auto ret = duk_peval_string(plugin_->get_context(),
         "try {"
         "  f();"
         "} catch (e) {"
@@ -113,4 +113,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

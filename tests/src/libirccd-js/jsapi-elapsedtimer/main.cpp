@@ -21,17 +21,15 @@
 
 #include <thread>
 
-#include <irccd/js/elapsed_timer_jsapi.hpp>
-
-#include <irccd/test/js_test.hpp>
+#include <irccd/test/javascript_fixture.hpp>
 
 using namespace std::chrono_literals;
 
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
-BOOST_FIXTURE_TEST_SUITE(elapsed_timer_jsapi_suite, js_test<elapsed_timer_jsapi>)
+BOOST_FIXTURE_TEST_SUITE(elapsed_timer_jsapi_suite, javascript_fixture)
 
 BOOST_AUTO_TEST_CASE(standard)
 {
@@ -52,4 +50,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

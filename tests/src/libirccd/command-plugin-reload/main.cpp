@@ -19,12 +19,9 @@
 #define BOOST_TEST_MODULE "plugin-reload"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/plugin_service.hpp>
+#include <irccd/test/command_fixture.hpp>
 
-#include <irccd/test/command_test.hpp>
-#include <irccd/test/mock_plugin.hpp>
-
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
@@ -46,21 +43,20 @@ public:
     }
 };
 
-class plugin_reload_test : public command_test<plugin_reload_command> {
+class plugin_reload_fixture : public command_fixture {
 protected:
     std::shared_ptr<mock_plugin> plugin_;
 
-    plugin_reload_test()
+    plugin_reload_fixture()
         : plugin_(std::make_shared<mock_plugin>("test"))
     {
-        daemon_->plugins().add(plugin_);
-        daemon_->plugins().add(std::make_unique<broken_plugin>());
+        irccd_.plugins().clear();
+        irccd_.plugins().add(plugin_);
+        irccd_.plugins().add(std::make_unique<broken_plugin>());
     }
 };
 
-} // !namespace
-
-BOOST_FIXTURE_TEST_SUITE(plugin_reload_test_suite, plugin_reload_test)
+BOOST_FIXTURE_TEST_SUITE(plugin_reload_fixture_suite, plugin_reload_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
@@ -114,4 +110,6 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 
-} // !irccd
+} // !namespace
+
+} // !irccd::test

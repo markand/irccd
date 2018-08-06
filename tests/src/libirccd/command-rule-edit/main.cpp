@@ -21,19 +21,17 @@
 
 #include <irccd/json_util.hpp>
 
-#include <irccd/daemon/rule_service.hpp>
+#include <irccd/test/command_fixture.hpp>
 
-#include <irccd/test/command_test.hpp>
-
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
-class rule_edit_test : public command_test<rule_edit_command, rule_info_command> {
+class rule_edit_fixture : public command_fixture {
 public:
-    rule_edit_test()
+    rule_edit_fixture()
     {
-        daemon_->rules().add(rule(
+        irccd_.rules().add(rule(
             { "s1", "s2" },
             { "c1", "c2" },
             { "o1", "o2" },
@@ -44,7 +42,7 @@ public:
     }
 };
 
-BOOST_FIXTURE_TEST_SUITE(rule_edit_test_suite, rule_edit_test)
+BOOST_FIXTURE_TEST_SUITE(rule_edit_fixture_suite, rule_edit_fixture)
 
 BOOST_AUTO_TEST_CASE(add_server)
 {
@@ -400,4 +398,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

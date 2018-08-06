@@ -19,12 +19,9 @@
 #define BOOST_TEST_MODULE "plugin-load"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/plugin_service.hpp>
+#include <irccd/test/command_fixture.hpp>
 
-#include <irccd/test/command_test.hpp>
-#include <irccd/test/mock_plugin.hpp>
-
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
@@ -88,19 +85,20 @@ public:
     }
 };
 
-class plugin_load_test : public command_test<plugin_load_command> {
+class plugin_load_fixture : public command_fixture {
 public:
-    plugin_load_test()
+    plugin_load_fixture()
     {
-        daemon_->plugins().add_loader(std::make_unique<sample_loader>());
-        daemon_->plugins().add_loader(std::make_unique<broken_loader>());
-        daemon_->plugins().add(std::make_unique<mock_plugin>("already"));
+        irccd_.plugins().add_loader(std::make_unique<sample_loader>());
+        irccd_.plugins().add_loader(std::make_unique<broken_loader>());
+        irccd_.plugins().clear();
+        irccd_.plugins().add(std::make_unique<mock_plugin>("already"));
     }
 };
 
 } // !namespace
 
-BOOST_FIXTURE_TEST_SUITE(plugin_load_test_suite, plugin_load_test)
+BOOST_FIXTURE_TEST_SUITE(plugin_load_fixture_suite, plugin_load_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
@@ -110,7 +108,7 @@ BOOST_AUTO_TEST_CASE(basic)
     });
 
     BOOST_TEST(!code);
-    BOOST_TEST(daemon_->plugins().has("test"));
+    BOOST_TEST(irccd_.plugins().has("test"));
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
@@ -166,4 +164,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE_END()
 
-} // !irccd
+} // !irccd::test

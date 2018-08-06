@@ -19,21 +19,16 @@
 #define BOOST_TEST_MODULE "plugin-info"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/plugin_service.hpp>
+#include <irccd/test/command_fixture.hpp>
 
-#include <irccd/test/command_test.hpp>
-#include <irccd/test/mock_plugin.hpp>
-
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
-BOOST_FIXTURE_TEST_SUITE(plugin_info_test_suite, command_test<plugin_info_command>)
+BOOST_FIXTURE_TEST_SUITE(plugin_info_test_suite, command_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    daemon_->plugins().add(std::make_unique<mock_plugin>("test"));
-
     const auto [json, code] = request({
         { "command",    "plugin-info"       },
         { "plugin",     "test"              },
@@ -77,4 +72,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

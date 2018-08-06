@@ -19,28 +19,13 @@
 #define BOOST_TEST_MODULE "server-join"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/server_service.hpp>
+#include <irccd/test/command_fixture.hpp>
 
-#include <irccd/test/command_test.hpp>
-#include <irccd/test/mock_server.hpp>
-
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
-class server_join_test : public command_test<server_join_command> {
-protected:
-    std::shared_ptr<mock_server> server_;
-
-    server_join_test()
-        : server_(new mock_server(service_, "test", "localhost"))
-    {
-        daemon_->servers().add(server_);
-        server_->clear();
-    }
-};
-
-BOOST_FIXTURE_TEST_SUITE(server_join_test_suite, server_join_test)
+BOOST_FIXTURE_TEST_SUITE(server_join_fixture_suite, command_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
@@ -160,4 +145,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

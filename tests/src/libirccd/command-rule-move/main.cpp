@@ -21,19 +21,17 @@
 
 #include <irccd/json_util.hpp>
 
-#include <irccd/daemon/rule_service.hpp>
+#include <irccd/test/command_fixture.hpp>
 
-#include <irccd/test/command_test.hpp>
-
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
-class rule_move_test : public command_test<rule_move_command, rule_list_command> {
+class rule_move_fixture : public command_fixture {
 public:
-    rule_move_test()
+    rule_move_fixture()
     {
-        daemon_->rules().add(rule(
+        irccd_.rules().add(rule(
             { "s0" },
             { "c0" },
             { "o0" },
@@ -41,7 +39,7 @@ public:
             { "onMessage" },
             rule::action::drop
         ));
-        daemon_->rules().add(rule(
+        irccd_.rules().add(rule(
             { "s1", },
             { "c1", },
             { "o1", },
@@ -49,7 +47,7 @@ public:
             { "onMessage", },
             rule::action::accept
         ));
-        daemon_->rules().add(rule(
+        irccd_.rules().add(rule(
             { "s2", },
             { "c2", },
             { "o2", },
@@ -60,7 +58,7 @@ public:
     }
 };
 
-BOOST_FIXTURE_TEST_SUITE(rule_move_test_suite, rule_move_test)
+BOOST_FIXTURE_TEST_SUITE(rule_move_fixture_suite, rule_move_fixture)
 
 BOOST_AUTO_TEST_CASE(backward)
 {
@@ -359,4 +357,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

@@ -19,15 +19,13 @@
 #define BOOST_TEST_MODULE "Unicode Javascript API"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/js/util_jsapi.hpp>
+#include <irccd/test/javascript_fixture.hpp>
 
-#include <irccd/test/js_test.hpp>
-
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
-BOOST_FIXTURE_TEST_SUITE(util_jsapi_suite, js_test<util_jsapi>)
+BOOST_FIXTURE_TEST_SUITE(util_jsapi_suite, javascript_fixture)
 
 /*
  * Irccd.Util misc.
@@ -36,7 +34,7 @@ BOOST_FIXTURE_TEST_SUITE(util_jsapi_suite, js_test<util_jsapi>)
 
 BOOST_AUTO_TEST_CASE(format_simple)
 {
-    auto ret = duk_peval_string(plugin_->get_context(),
+    const auto ret = duk_peval_string(plugin_->get_context(),
         "result = Irccd.Util.format(\"#{target}\", { target: \"markand\" })"
     );
 
@@ -72,7 +70,7 @@ BOOST_AUTO_TEST_CASE(splithost)
 
 BOOST_AUTO_TEST_CASE(cut_string_simple)
 {
-    auto ret = duk_peval_string(plugin_->get_context(),
+    const auto ret = duk_peval_string(plugin_->get_context(),
         "lines = Irccd.Util.cut('hello world');\n"
         "line0 = lines[0];\n"
     );
@@ -86,7 +84,7 @@ BOOST_AUTO_TEST_CASE(cut_string_simple)
 
 BOOST_AUTO_TEST_CASE(cut_string_double)
 {
-    auto ret = duk_peval_string(plugin_->get_context(),
+    const auto ret = duk_peval_string(plugin_->get_context(),
         "lines = Irccd.Util.cut('hello world', 5);\n"
         "line0 = lines[0];\n"
         "line1 = lines[1];\n"
@@ -103,7 +101,7 @@ BOOST_AUTO_TEST_CASE(cut_string_double)
 
 BOOST_AUTO_TEST_CASE(cut_string_dirty)
 {
-    auto ret = duk_peval_string(plugin_->get_context(),
+    const auto ret = duk_peval_string(plugin_->get_context(),
         "lines = Irccd.Util.cut('     hello    world     ', 5);\n"
         "line0 = lines[0];\n"
         "line1 = lines[1];\n"
@@ -120,7 +118,7 @@ BOOST_AUTO_TEST_CASE(cut_string_dirty)
 
 BOOST_AUTO_TEST_CASE(cut_string_too_much_lines)
 {
-    auto ret = duk_peval_string(plugin_->get_context(),
+    const auto ret = duk_peval_string(plugin_->get_context(),
         "lines = Irccd.Util.cut('abc def ghi jkl', 3, 3);\n"
     );
 
@@ -133,7 +131,7 @@ BOOST_AUTO_TEST_CASE(cut_string_too_much_lines)
 
 BOOST_AUTO_TEST_CASE(cut_string_token_too_big)
 {
-    auto ret = duk_peval_string(plugin_->get_context(),
+    const auto ret = duk_peval_string(plugin_->get_context(),
         "try {\n"
         "  lines = Irccd.Util.cut('hello world', 3);\n"
         "} catch (e) {\n"
@@ -153,7 +151,7 @@ BOOST_AUTO_TEST_CASE(cut_string_token_too_big)
 
 BOOST_AUTO_TEST_CASE(cut_string_negative_maxc)
 {
-    auto ret = duk_peval_string(plugin_->get_context(),
+    const auto ret = duk_peval_string(plugin_->get_context(),
         "try {\n"
         "  lines = Irccd.Util.cut('hello world', -3);\n"
         "} catch (e) {\n"
@@ -173,7 +171,7 @@ BOOST_AUTO_TEST_CASE(cut_string_negative_maxc)
 
 BOOST_AUTO_TEST_CASE(cut_string_negative_maxl)
 {
-    auto ret = duk_peval_string(plugin_->get_context(),
+    const auto ret = duk_peval_string(plugin_->get_context(),
         "try {\n"
         "  lines = Irccd.Util.cut('hello world', undefined, -1);\n"
         "} catch (e) {\n"
@@ -193,7 +191,7 @@ BOOST_AUTO_TEST_CASE(cut_string_negative_maxl)
 
 BOOST_AUTO_TEST_CASE(cut_array_simple)
 {
-    auto ret = duk_peval_string(plugin_->get_context(),
+    const auto ret = duk_peval_string(plugin_->get_context(),
         "lines = Irccd.Util.cut([ 'hello', 'world' ]);\n"
         "line0 = lines[0];\n"
     );
@@ -207,7 +205,7 @@ BOOST_AUTO_TEST_CASE(cut_array_simple)
 
 BOOST_AUTO_TEST_CASE(cut_array_double)
 {
-    auto ret = duk_peval_string(plugin_->get_context(),
+    const auto ret = duk_peval_string(plugin_->get_context(),
         "lines = Irccd.Util.cut([ 'hello', 'world' ], 5);\n"
         "line0 = lines[0];\n"
         "line1 = lines[1];\n"
@@ -224,7 +222,7 @@ BOOST_AUTO_TEST_CASE(cut_array_double)
 
 BOOST_AUTO_TEST_CASE(cut_array_dirty)
 {
-    auto ret = duk_peval_string(plugin_->get_context(),
+    const auto ret = duk_peval_string(plugin_->get_context(),
         "lines = Irccd.Util.cut([ '   ', ' hello  ', '  world ', '    '], 5);\n"
         "line0 = lines[0];\n"
         "line1 = lines[1];\n"
@@ -241,7 +239,7 @@ BOOST_AUTO_TEST_CASE(cut_array_dirty)
 
 BOOST_AUTO_TEST_CASE(cut_invalid_data)
 {
-    auto ret = duk_peval_string(plugin_->get_context(),
+    const auto ret = duk_peval_string(plugin_->get_context(),
         "try {\n"
         "  lines = Irccd.Util.cut(123);\n"
         "} catch (e) {\n"
@@ -261,4 +259,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

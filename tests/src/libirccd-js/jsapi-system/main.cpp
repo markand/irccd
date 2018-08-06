@@ -21,20 +21,13 @@
 
 #include <irccd/system.hpp>
 
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/test/javascript_fixture.hpp>
 
-#include <irccd/js/file_jsapi.hpp>
-#include <irccd/js/system_jsapi.hpp>
-
-#include <irccd/test/js_test.hpp>
-
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
-using fixture = js_test<file_jsapi, system_jsapi>;
-
-BOOST_FIXTURE_TEST_SUITE(system_jsapi_suite, fixture)
+BOOST_FIXTURE_TEST_SUITE(system_jsapi_suite, javascript_fixture)
 
 BOOST_AUTO_TEST_CASE(home)
 {
@@ -66,4 +59,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

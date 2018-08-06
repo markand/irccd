@@ -19,15 +19,22 @@
 #define BOOST_TEST_MODULE "Directory Javascript API"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/js/directory_jsapi.hpp>
+#include <irccd/test/javascript_fixture.hpp>
 
-#include <irccd/test/js_test.hpp>
-
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
-BOOST_FIXTURE_TEST_SUITE(directory_jsapi_suite, js_test<directory_jsapi>)
+class directory_javascript_fixture : public javascript_fixture {
+public:
+    directory_javascript_fixture()
+    {
+        dukx_push(plugin_->get_context(), CMAKE_SOURCE_DIR);
+        duk_put_global_string(plugin_->get_context(), "CMAKE_SOURCE_DIR");
+    }
+};
+
+BOOST_FIXTURE_TEST_SUITE(directory_jsapi_suite, directory_javascript_fixture)
 
 BOOST_AUTO_TEST_CASE(constructor)
 {
@@ -48,4 +55,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

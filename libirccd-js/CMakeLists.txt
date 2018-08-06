@@ -22,22 +22,22 @@ find_package(Boost REQUIRED QUIET COMPONENTS timer)
 
 set(
     HEADERS
+    ${libirccd-js_SOURCE_DIR}/irccd/js/directory_jsapi.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/duktape.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/duktape_vector.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/directory_jsapi.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/elapsed_timer_jsapi.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/file_jsapi.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/irccd_jsapi.hpp
+    ${libirccd-js_SOURCE_DIR}/irccd/js/js_plugin.hpp
+    ${libirccd-js_SOURCE_DIR}/irccd/js/jsapi.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/logger_jsapi.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/plugin_jsapi.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/server_jsapi.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/system_jsapi.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/timer_jsapi.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/jsapi.hpp
+    ${libirccd-js_SOURCE_DIR}/irccd/js/unicode.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/unicode_jsapi.hpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/util_jsapi.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/js_plugin.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/unicode.hpp
 )
 
 set(
@@ -46,15 +46,16 @@ set(
     ${libirccd-js_SOURCE_DIR}/irccd/js/elapsed_timer_jsapi.cpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/file_jsapi.cpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/irccd_jsapi.cpp
+    ${libirccd-js_SOURCE_DIR}/irccd/js/js_plugin.cpp
+    ${libirccd-js_SOURCE_DIR}/irccd/js/jsapi.cpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/logger_jsapi.cpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/plugin_jsapi.cpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/server_jsapi.cpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/system_jsapi.cpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/timer_jsapi.cpp
+    ${libirccd-js_SOURCE_DIR}/irccd/js/unicode.cpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/unicode_jsapi.cpp
     ${libirccd-js_SOURCE_DIR}/irccd/js/util_jsapi.cpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/js_plugin.cpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/unicode.cpp
 )
 
 irccd_define_library(

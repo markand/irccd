@@ -21,9 +21,10 @@
 #include <csignal>
 #include <iostream>
 
+#include <boost/asio.hpp>
+
 #include <irccd/config.hpp>
 #include <irccd/options.hpp>
-#include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
 
 #include <irccd/daemon/command.hpp>
@@ -31,12 +32,11 @@
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/logger.hpp>
 #include <irccd/daemon/plugin_service.hpp>
-#include <irccd/daemon/rule_service.hpp>
-#include <irccd/daemon/server_service.hpp>
 #include <irccd/daemon/transport_service.hpp>
 
-#if defined(IRCCD_HAVE_JS)
+#if defined(HAVE_JS)
 #   include <irccd/js/js_plugin.hpp>
+#   include <irccd/js/jsapi.hpp>
 #endif
 
 namespace irccd {
@@ -176,41 +176,23 @@ int main(int argc, char** argv)
 
     init(argc, argv);
 
-    const auto options = parse(argc, argv);
+    // 1. Load commands.
+    for (const auto& f : command::registry)
+        instance->transports().get_commands().push_back(f());
 
-    instance->transports().get_commands().push_back(std::make_unique<plugin_config_command>());
-    instance->transports().get_commands().push_back(std::make_unique<plugin_info_command>());
-    instance->transports().get_commands().push_back(std::make_unique<plugin_list_command>());
-    instance->transports().get_commands().push_back(std::make_unique<plugin_load_command>());
-    instance->transports().get_commands().push_back(std::make_unique<plugin_reload_command>());
-    instance->transports().get_commands().push_back(std::make_unique<plugin_unload_command>());
-    instance->transports().get_commands().push_back(std::make_unique<server_connect_command>());
-    instance->transports().get_commands().push_back(std::make_unique<server_disconnect_command>());
-    instance->transports().get_commands().push_back(std::make_unique<server_info_command>());
-    instance->transports().get_commands().push_back(std::make_unique<server_invite_command>());
-    instance->transports().get_commands().push_back(std::make_unique<server_join_command>());
-    instance->transports().get_commands().push_back(std::make_unique<server_kick_command>());
-    instance->transports().get_commands().push_back(std::make_unique<server_list_command>());
-    instance->transports().get_commands().push_back(std::make_unique<server_me_command>());
-    instance->transports().get_commands().push_back(std::make_unique<server_message_command>());
-    instance->transports().get_commands().push_back(std::make_unique<server_mode_command>());
-    instance->transports().get_commands().push_back(std::make_unique<server_nick_command>());
-    instance->transports().get_commands().push_back(std::make_unique<server_notice_command>());
-    instance->transports().get_commands().push_back(std::make_unique<server_part_command>());
-    instance->transports().get_commands().push_back(std::make_unique<server_reconnect_command>());
-    instance->transports().get_commands().push_back(std::make_unique<server_topic_command>());
-    instance->transports().get_commands().push_back(std::make_unique<rule_add_command>());
-    instance->transports().get_commands().push_back(std::make_unique<rule_edit_command>());
-    instance->transports().get_commands().push_back(std::make_unique<rule_info_command>());
-    instance->transports().get_commands().push_back(std::make_unique<rule_list_command>());
-    instance->transports().get_commands().push_back(std::make_unique<rule_move_command>());
-    instance->transports().get_commands().push_back(std::make_unique<rule_remove_command>());
+    // 2. Load plugin loaders.
+    instance->plugins().add_loader(std::make_unique<dynlib_plugin_loader>());
 
-#if defined(IRCCD_HAVE_JS)
-    instance->plugins().add_loader(js_plugin_loader::defaults(*instance));
+#if defined(HAVE_JS)
+    auto loader = std::make_unique<js_plugin_loader>();
+
+    for (const auto& f : jsapi::registry)
+        loader->get_modules().push_back(f());
+
+    instance->plugins().add_loader(std::move(loader));
 #endif
 
-    instance->plugins().add_loader(std::make_unique<dynlib_plugin_loader>());
+    const auto options = parse(argc, argv);
 
     try {
         instance->set_config(open(options));

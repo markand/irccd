@@ -19,12 +19,9 @@
 #define BOOST_TEST_MODULE "plugin-unload"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/plugin_service.hpp>
+#include <irccd/test/command_fixture.hpp>
 
-#include <irccd/test/command_test.hpp>
-#include <irccd/test/mock_plugin.hpp>
-
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
@@ -46,19 +43,20 @@ public:
     }
 };
 
-class plugin_unload_test : public command_test<plugin_unload_command> {
+class plugin_unload_fixture : public command_fixture {
 protected:
     std::shared_ptr<mock_plugin> plugin_;
 
-    plugin_unload_test()
+    plugin_unload_fixture()
         : plugin_(std::make_shared<mock_plugin>("test"))
     {
-        daemon_->plugins().add(plugin_);
-        daemon_->plugins().add(std::make_unique<broken_plugin>());
+        irccd_.plugins().clear();
+        irccd_.plugins().add(plugin_);
+        irccd_.plugins().add(std::make_unique<broken_plugin>());
     }
 };
 
-BOOST_FIXTURE_TEST_SUITE(plugin_unload_test_suite, plugin_unload_test)
+BOOST_FIXTURE_TEST_SUITE(plugin_unload_fixture_suite, plugin_unload_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
@@ -106,7 +104,7 @@ BOOST_AUTO_TEST_CASE(exec_error)
     BOOST_TEST(code == plugin_error::exec_error);
     BOOST_TEST(json["error"].get<int>() == plugin_error::exec_error);
     BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
-    BOOST_TEST(!daemon_->plugins().has("broken"));
+    BOOST_TEST(!irccd_.plugins().has("broken"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -115,4 +113,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

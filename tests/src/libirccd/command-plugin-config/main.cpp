@@ -19,21 +19,16 @@
 #define BOOST_TEST_MODULE "plugin-config"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/plugin_service.hpp>
+#include <irccd/test/command_fixture.hpp>
 
-#include <irccd/test/command_test.hpp>
-#include <irccd/test/mock_plugin.hpp>
-
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
-BOOST_FIXTURE_TEST_SUITE(plugin_config_test_suite, command_test<plugin_config_command>)
+BOOST_FIXTURE_TEST_SUITE(plugin_config_test_suite, command_fixture)
 
 BOOST_AUTO_TEST_CASE(set)
 {
-    daemon_->plugins().add(std::make_unique<mock_plugin>("test"));
-
     const auto [json, code] = request({
         { "command",    "plugin-config" },
         { "plugin",     "test"          },
@@ -41,7 +36,7 @@ BOOST_AUTO_TEST_CASE(set)
         { "value",      "falsy"         }
     });
 
-    const auto config = daemon_->plugins().require("test")->get_options();
+    const auto config = irccd_.plugins().require("test")->get_options();
 
     BOOST_TEST(!code);
     BOOST_TEST(!config.empty());
@@ -56,7 +51,8 @@ BOOST_AUTO_TEST_CASE(get)
         { "x1", "10" },
         { "x2", "20" }
     });
-    daemon_->plugins().add(std::move(plugin));
+    irccd_.plugins().clear();
+    irccd_.plugins().add(std::move(plugin));
 
     const auto [json, code] = request({
         { "command",    "plugin-config" },
@@ -77,7 +73,8 @@ BOOST_AUTO_TEST_CASE(getall)
         { "x1", "10" },
         { "x2", "20" }
     });
-    daemon_->plugins().add(std::move(plugin));
+    irccd_.plugins().clear();
+    irccd_.plugins().add(std::move(plugin));
 
     const auto [json, code] = request({
         { "command",    "plugin-config" },
@@ -120,4 +117,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

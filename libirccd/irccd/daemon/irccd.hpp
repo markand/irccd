@@ -87,10 +87,14 @@ private:
 
 public:
     /**
-     * Prepare standard services.
+     * Constructor.
+     *
+     * This only create a barebone irccd instance.
      *
      * \param service the service
      * \param config the optional path to the configuration.
+     * \see load_all
+     * \see load_config
      */
     irccd(boost::asio::io_service& service, std::string config = "");
 

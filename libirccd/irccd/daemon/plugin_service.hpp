@@ -238,6 +238,11 @@ public:
     }
 
     /**
+     * Remove all plugins.
+     */
+    void clear() noexcept;
+
+    /**
      * Load all plugins.
      *
      * \param cfg the config

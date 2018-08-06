@@ -78,7 +78,46 @@ void exec_get(transport_client& client, plugin& plugin, const nlohmann::json& ar
     });
 }
 
+template <typename T>
+auto bind() noexcept -> command::constructor
+{
+    return [] () noexcept {
+        return std::make_unique<T>();
+    };
+}
+
 } // !namespace
+
+const std::vector<command::constructor> command::registry{
+    bind<plugin_config_command>(),
+    bind<plugin_info_command>(),
+    bind<plugin_list_command>(),
+    bind<plugin_load_command>(),
+    bind<plugin_reload_command>(),
+    bind<plugin_unload_command>(),
+    bind<rule_add_command>(),
+    bind<rule_edit_command>(),
+    bind<rule_info_command>(),
+    bind<rule_info_command>(),
+    bind<rule_list_command>(),
+    bind<rule_move_command>(),
+    bind<rule_remove_command>(),
+    bind<server_connect_command>(),
+    bind<server_disconnect_command>(),
+    bind<server_info_command>(),
+    bind<server_invite_command>(),
+    bind<server_join_command>(),
+    bind<server_kick_command>(),
+    bind<server_list_command>(),
+    bind<server_me_command>(),
+    bind<server_message_command>(),
+    bind<server_mode_command>(),
+    bind<server_nick_command>(),
+    bind<server_notice_command>(),
+    bind<server_part_command>(),
+    bind<server_reconnect_command>(),
+    bind<server_topic_command>(),
+};
 
 // {{{ plugin_config_command
 

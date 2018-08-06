@@ -29,8 +29,10 @@
  * \brief Modules for the Javascript API.
  */
 
+#include <functional>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "duktape.hpp"
 
@@ -44,6 +46,16 @@ class js_plugin;
  */
 class jsapi {
 public:
+    /**
+     * \brief Command constructor factory.
+     */
+    using factory = std::function<auto () -> std::unique_ptr<jsapi>>;
+
+    /**
+     * \brief Registry of all commands.
+     */
+    static const std::vector<factory> registry;
+
     /**
      * Default constructor.
      */

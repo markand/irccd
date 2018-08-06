@@ -631,9 +631,15 @@ void load_options(int& argc, char**& argv)
 void load(int argc, char** argv)
 {
     daemon = std::make_unique<irccd>(io);
+    daemon->plugins().add_loader(std::make_unique<dynlib_plugin_loader>());
 
-#if defined(IRCCD_HAVE_JS)
-    daemon->plugins().add_loader(js_plugin_loader::defaults(*daemon));
+#if defined(HAVE_JS)
+    auto loader = std::make_unique<js_plugin_loader>();
+
+    for (const auto& f : jsapi::registry)
+        daemon->get_modules().push_back(f());
+
+    daemon->plugins().add_loader(std::move(loader));
 #endif
 
     load_options(argc, argv);

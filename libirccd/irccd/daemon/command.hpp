@@ -26,7 +26,10 @@
 
 #include <irccd/sysconfig.hpp>
 
+#include <functional>
+#include <memory>
 #include <string_view>
+#include <vector>
 
 #include <irccd/json_util.hpp>
 
@@ -43,9 +46,19 @@ class transport_client;
 class command {
 public:
     /**
-     * Convenient alias.
+     * \brief Convenient alias.
      */
     using document = json_util::document;
+
+    /**
+     * \brief Command constructor factory.
+     */
+    using constructor = std::function<auto () -> std::unique_ptr<command>>;
+
+    /**
+     * \brief Registry of all commands.
+     */
+    static const std::vector<constructor> registry;
 
     /**
      * Default destructor virtual.

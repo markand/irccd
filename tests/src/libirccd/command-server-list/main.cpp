@@ -19,25 +19,23 @@
 #define BOOST_TEST_MODULE "server-list"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/server_service.hpp>
+#include <irccd/test/command_fixture.hpp>
 
-#include <irccd/test/command_test.hpp>
-#include <irccd/test/mock_server.hpp>
-
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
-class server_list_test : public command_test<server_list_command> {
+class server_list_fixture : public command_fixture {
 protected:
-    server_list_test()
+    server_list_fixture()
     {
-        daemon_->servers().add(std::make_unique<mock_server>(service_, "s1", "localhost"));
-        daemon_->servers().add(std::make_unique<mock_server>(service_, "s2", "localhost"));
+        irccd_.servers().clear();
+        irccd_.servers().add(std::make_unique<mock_server>(ctx_, "s1", "localhost"));
+        irccd_.servers().add(std::make_unique<mock_server>(ctx_, "s2", "localhost"));
     }
 };
 
-BOOST_FIXTURE_TEST_SUITE(server_list_test_suite, server_list_test)
+BOOST_FIXTURE_TEST_SUITE(server_list_fixture_suite, server_list_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
@@ -57,4 +55,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

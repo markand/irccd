@@ -19,25 +19,23 @@
 #define BOOST_TEST_MODULE "plugin-list"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/plugin_service.hpp>
+#include <irccd/test/command_fixture.hpp>
 
-#include <irccd/test/command_test.hpp>
-#include <irccd/test/mock_plugin.hpp>
-
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
-class plugin_list_test : public command_test<plugin_list_command> {
+class plugin_list_fixture : public command_fixture {
 public:
-    plugin_list_test()
+    plugin_list_fixture()
     {
-        daemon_->plugins().add(std::make_unique<mock_plugin>("t1"));
-        daemon_->plugins().add(std::make_unique<mock_plugin>("t2"));
+        irccd_.plugins().clear();
+        irccd_.plugins().add(std::make_unique<mock_plugin>("t1"));
+        irccd_.plugins().add(std::make_unique<mock_plugin>("t2"));
     }
 };
 
-BOOST_FIXTURE_TEST_SUITE(plugin_list_test_suite, plugin_list_test)
+BOOST_FIXTURE_TEST_SUITE(plugin_list_fixture_suite, plugin_list_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
@@ -55,4 +53,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

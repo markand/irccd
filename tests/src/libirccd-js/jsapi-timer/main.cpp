@@ -20,21 +20,16 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/timer/timer.hpp>
 
-#include <irccd/js/plugin_jsapi.hpp>
-#include <irccd/js/timer_jsapi.hpp>
+#include <irccd/test/javascript_fixture.hpp>
 
-#include <irccd/test/js_test.hpp>
-
-#include <irccd/js/logger_jsapi.hpp>
-
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
-class js_timer_test : public js_test<plugin_jsapi, timer_jsapi> {
+class javascript_timer_fixture : public javascript_fixture {
 public:
-    js_timer_test()
-        : js_test(CMAKE_CURRENT_SOURCE_DIR "/timer.js")
+    javascript_timer_fixture()
+        : javascript_fixture(CMAKE_CURRENT_SOURCE_DIR "/timer.js")
     {
     }
 
@@ -51,7 +46,7 @@ public:
     }
 };
 
-BOOST_FIXTURE_TEST_SUITE(js_timer_test_suite, js_timer_test)
+BOOST_FIXTURE_TEST_SUITE(js_timer_test_suite, javascript_timer_fixture)
 
 BOOST_AUTO_TEST_CASE(single)
 {
@@ -60,8 +55,8 @@ BOOST_AUTO_TEST_CASE(single)
     set_type("Single");
 
     while (timer.elapsed().wall / 1000000LL < 3000) {
-        service_.reset();
-        service_.poll();
+        ctx_.reset();
+        ctx_.poll();
     }
 
     BOOST_TEST(duk_get_global_string(plugin_->get_context(), "count"));
@@ -75,8 +70,8 @@ BOOST_AUTO_TEST_CASE(repeat)
     set_type("Repeat");
 
     while (timer.elapsed().wall / 1000000LL < 3000) {
-        service_.reset();
-        service_.poll();
+        ctx_.reset();
+        ctx_.poll();
     }
 
     BOOST_TEST(duk_get_global_string(plugin_->get_context(), "count"));
@@ -87,4 +82,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

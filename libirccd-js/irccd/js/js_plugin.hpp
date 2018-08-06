@@ -244,21 +244,13 @@ public:
  */
 class js_plugin_loader : public plugin_loader {
 public:
-    using modules_t = std::vector<std::unique_ptr<jsapi>>;
+    using modules = std::vector<std::unique_ptr<jsapi>>;
 
 private:
     irccd& irccd_;
-    modules_t modules_;
+    modules modules_;
 
 public:
-    /**
-     * Create a plugin_loader with all irccd Javascript modules.
-     *
-     * \param irccd the irccd instance
-     * \return a ready to use plugin_loader
-     */
-    static auto defaults(irccd& irccd) -> std::unique_ptr<js_plugin_loader>;
-
     /**
      * Constructor.
      *
@@ -276,14 +268,14 @@ public:
      *
      * \return the modules
      */
-    auto get_modules() const noexcept -> const modules_t&;
+    auto get_modules() const noexcept -> const modules&;
 
     /**
      * Overloaded function.
      *
      * \return the modules
      */
-    auto get_modules() noexcept -> modules_t&;
+    auto get_modules() noexcept -> modules&;
 
     /**
      * \copydoc plugin_loader::open

@@ -224,6 +224,19 @@ void plugin_service::unload(std::string_view id)
     exec(save, &plugin::handle_unload, irccd_);
 }
 
+void plugin_service::clear() noexcept
+{
+    while (plugins_.size() > 0) {
+        const auto plugin = plugins_[0];
+
+        try {
+            unload(plugin->get_id());
+        } catch (const std::exception& ex) {
+            irccd_.get_log().warning(*plugin) << ex.what() << std::endl;
+        }
+    }
+}
+
 void plugin_service::load(const config& cfg) noexcept
 {
     for (const auto& option : cfg.get("plugins")) {

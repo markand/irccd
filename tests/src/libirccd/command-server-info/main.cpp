@@ -19,20 +19,17 @@
 #define BOOST_TEST_MODULE "server-info"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/server_service.hpp>
+#include <irccd/test/command_fixture.hpp>
 
-#include <irccd/test/command_test.hpp>
-#include <irccd/test/mock_server.hpp>
-
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
-BOOST_FIXTURE_TEST_SUITE(server_info_test_suite, command_test<server_info_command>)
+BOOST_FIXTURE_TEST_SUITE(server_info_fixture_suite, command_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    auto server = std::make_unique<mock_server>(service_, "test", "example.org");
+    auto server = std::make_unique<mock_server>(ctx_, "test", "example.org");
 
     server->set_port(8765);
     server->set_password("none");
@@ -43,7 +40,8 @@ BOOST_AUTO_TEST_CASE(basic)
     server->set_command_char("@");
     server->set_ping_timeout(20000);
 
-    daemon_->servers().add(std::move(server));
+    irccd_.servers().clear();
+    irccd_.servers().add(std::move(server));
 
     const auto [json, code] = request({
         { "command",    "server-info"       },
@@ -104,4 +102,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

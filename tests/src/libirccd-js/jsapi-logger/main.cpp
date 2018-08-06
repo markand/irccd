@@ -21,16 +21,13 @@
 
 #include <irccd/daemon/logger.hpp>
 
-#include <irccd/js/logger_jsapi.hpp>
-#include <irccd/js/plugin_jsapi.hpp>
+#include <irccd/test/javascript_fixture.hpp>
 
-#include <irccd/test/js_test.hpp>
-
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
-class logger_test : public js_test<logger_jsapi, plugin_jsapi> {
+class logger_fixture : public javascript_fixture {
 protected:
     std::string line_info;
     std::string line_warning;
@@ -38,10 +35,10 @@ protected:
 
     class sample_sink : public logger::sink {
     private:
-        logger_test& test_;
+        logger_fixture& test_;
 
     public:
-        inline sample_sink(logger_test& test) noexcept
+        sample_sink(logger_fixture& test) noexcept
             : test_(test)
         {
         }
@@ -62,14 +59,14 @@ protected:
         }
     };
 
-    logger_test()
+    logger_fixture()
     {
         irccd_.set_log(std::make_unique<sample_sink>(*this));
         irccd_.get_log().set_verbose(true);
     }
 };
 
-BOOST_FIXTURE_TEST_SUITE(logger_jsapi_suite, logger_test)
+BOOST_FIXTURE_TEST_SUITE(logger_jsapi_suite, logger_fixture)
 
 BOOST_AUTO_TEST_CASE(info)
 {
@@ -103,4 +100,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

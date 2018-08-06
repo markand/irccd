@@ -19,16 +19,13 @@
 #define BOOST_TEST_MODULE "server-connect"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/server_service.hpp>
+#include <irccd/test/command_fixture.hpp>
 
-#include <irccd/test/command_test.hpp>
-#include <irccd/test/mock_server.hpp>
-
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
-BOOST_FIXTURE_TEST_SUITE(server_connect_test_suite, command_test<server_connect_command>)
+BOOST_FIXTURE_TEST_SUITE(server_connect_fixture_suite, command_fixture)
 
 BOOST_AUTO_TEST_CASE(minimal)
 {
@@ -38,7 +35,7 @@ BOOST_AUTO_TEST_CASE(minimal)
         { "host",       "irc.example.org"   }
     });
 
-    const auto s = daemon_->servers().get("local");
+    const auto s = irccd_.servers().get("local");
 
     BOOST_TEST(!code);
     BOOST_TEST(s);
@@ -68,7 +65,7 @@ BOOST_AUTO_TEST_CASE(full)
         { "joinInvite", true                }
     });
 
-    const auto s = daemon_->servers().get("local2");
+    const auto s = irccd_.servers().get("local2");
 
     BOOST_TEST(!code);
     BOOST_TEST(s);
@@ -93,7 +90,7 @@ BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(already_exists)
 {
-    daemon_->servers().add(std::make_unique<mock_server>(service_, "local"));
+    irccd_.servers().add(std::make_unique<mock_server>(ctx_, "local"));
 
     const auto [json, code] = request({
         { "command",    "server-connect"    },
@@ -223,4 +220,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

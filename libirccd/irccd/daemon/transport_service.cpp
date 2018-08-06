@@ -22,15 +22,13 @@
 
 #include <irccd/json_util.hpp>
 
-#include <irccd/daemon/command.hpp>
-#include <irccd/daemon/irccd.hpp>
-#include <irccd/daemon/logger.hpp>
-#include <irccd/daemon/transport_util.hpp>
-#include <irccd/daemon/transport_client.hpp>
-#include <irccd/daemon/transport_server.hpp>
-
-
+#include "command.hpp"
+#include "irccd.hpp"
+#include "logger.hpp"
+#include "transport_client.hpp"
+#include "transport_server.hpp"
 #include "transport_service.hpp"
+#include "transport_util.hpp"
 
 namespace irccd {
 
