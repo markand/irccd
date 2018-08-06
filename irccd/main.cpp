@@ -105,9 +105,8 @@ void init(int& argc, char**& argv)
 
 // {{{ parse
 
-option::result parse(int& argc, char**& argv)
+auto parse(int& argc, char**& argv) -> option::result
 {
-    // Parse command line options.
     option::result result;
 
     try {
@@ -145,14 +144,14 @@ option::result parse(int& argc, char**& argv)
 
 // {{{ open
 
-config open(const option::result& result)
+auto open(const option::result& result) -> config
 {
     auto it = result.find("-c");
 
     if (it != result.end() || (it = result.find("--config")) != result.end())
         return config(it->second);
 
-    auto cfg = config::search("irccd.conf");
+    const auto cfg = config::search("irccd.conf");
 
     if (!cfg)
         throw std::runtime_error("no configuration file could be found");
@@ -177,7 +176,7 @@ int main(int argc, char** argv)
 
     init(argc, argv);
 
-    auto options = parse(argc, argv);
+    const auto options = parse(argc, argv);
 
     instance->transports().get_commands().push_back(std::make_unique<plugin_config_command>());
     instance->transports().get_commands().push_back(std::make_unique<plugin_info_command>());
