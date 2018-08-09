@@ -22,16 +22,16 @@
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/server.hpp>
 
-#include <irccd/test/plugin_test.hpp>
+#include <irccd/test/js_plugin_fixture.hpp>
 
 namespace irccd {
 
 namespace {
 
-class ask_test : public plugin_test {
+class ask_test : public js_plugin_fixture {
 public:
     ask_test()
-        : plugin_test(PLUGIN_PATH)
+        : js_plugin_fixture(PLUGIN_PATH)
     {
         plugin_->set_options({
             { "file", CMAKE_CURRENT_SOURCE_DIR "/answers.conf" }

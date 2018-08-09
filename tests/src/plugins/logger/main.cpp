@@ -25,13 +25,13 @@
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/server.hpp>
 
-#include <irccd/test/plugin_test.hpp>
+#include <irccd/test/js_plugin_fixture.hpp>
 
 namespace irccd {
 
 namespace {
 
-class logger_test : public plugin_test {
+class logger_test : public js_plugin_fixture {
 protected:
     std::string last() const
     {
@@ -42,7 +42,7 @@ protected:
 
 public:
     logger_test()
-        : plugin_test(PLUGIN_PATH)
+        : js_plugin_fixture(PLUGIN_PATH)
     {
         remove(CMAKE_CURRENT_BINARY_DIR "/log.txt");
 

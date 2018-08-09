@@ -1,5 +1,5 @@
 /*
- * plugin_test.cpp -- test fixture helper for Javascript plugins
+ * js_plugin_fixture.cpp -- test fixture helper for Javascript plugins
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -35,11 +35,11 @@
 #include <irccd/js/unicode_js_api.hpp>
 #include <irccd/js/util_js_api.hpp>
 
-#include "plugin_test.hpp"
+#include "js_plugin_fixture.hpp"
 
 namespace irccd {
 
-plugin_test::plugin_test(std::string path)
+js_plugin_fixture::js_plugin_fixture(std::string path)
     : server_(std::make_shared<mock_server>(service_, "test", "local"))
 {
     plugin_ = std::make_unique<js::js_plugin>("test", std::move(path));

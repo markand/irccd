@@ -26,7 +26,7 @@
 #include <irccd/daemon/plugin_service.hpp>
 #include <irccd/daemon/server.hpp>
 
-#include <irccd/test/plugin_test.hpp>
+#include <irccd/test/js_plugin_fixture.hpp>
 
 using boost::format;
 using boost::str;
@@ -65,10 +65,10 @@ public:
     }
 };
 
-class test_fixture : public plugin_test {
+class test_fixture : public js_plugin_fixture {
 public:
     test_fixture()
-        : plugin_test(PLUGIN_PATH)
+        : js_plugin_fixture(PLUGIN_PATH)
     {
         irccd_.plugins().add(std::make_shared<fake_plugin>("fake"));
 

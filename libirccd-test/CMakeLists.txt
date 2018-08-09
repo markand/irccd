@@ -28,7 +28,7 @@ set(
     ${libirccd-test_SOURCE_DIR}/irccd/test/mock_plugin.hpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/mock_server.hpp
     $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/js_fixture.hpp>
-    $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/plugin_test.hpp>
+    $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/js_plugin_fixture.hpp>
 )
 
 set(
@@ -41,7 +41,7 @@ set(
     ${libirccd-test_SOURCE_DIR}/irccd/test/mock_plugin.cpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/mock_server.cpp
     $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/js_fixture.cpp>
-    $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/plugin_test.cpp>
+    $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/js_plugin_fixture.cpp>
 )
 
 if (${IRCCD_HAVE_JS})

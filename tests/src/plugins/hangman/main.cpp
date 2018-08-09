@@ -25,16 +25,16 @@
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/server.hpp>
 
-#include <irccd/test/plugin_test.hpp>
+#include <irccd/test/js_plugin_fixture.hpp>
 
 namespace irccd {
 
 namespace {
 
-class hangman_test : public plugin_test {
+class hangman_test : public js_plugin_fixture {
 public:
     hangman_test()
-        : plugin_test(PLUGIN_PATH)
+        : js_plugin_fixture(PLUGIN_PATH)
     {
         plugin_->set_formats({
             { "asked", "asked=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{letter}" },

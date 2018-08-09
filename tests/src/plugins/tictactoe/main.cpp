@@ -25,16 +25,16 @@
 #include <irccd/daemon/plugin_service.hpp>
 #include <irccd/daemon/server.hpp>
 
-#include <irccd/test/plugin_test.hpp>
+#include <irccd/test/js_plugin_fixture.hpp>
 
 namespace irccd {
 
 namespace {
 
-class test_fixture : public plugin_test {
+class test_fixture : public js_plugin_fixture {
 public:
     test_fixture()
-        : plugin_test(PLUGIN_PATH)
+        : js_plugin_fixture(PLUGIN_PATH)
     {
         plugin_->set_formats({
             { "draw",       "draw=#{channel}:#{command}:#{nickname}:#{plugin}:#{server}"                },

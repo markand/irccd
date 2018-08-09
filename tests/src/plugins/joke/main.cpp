@@ -19,16 +19,16 @@
 #define BOOST_TEST_MODULE "Joke plugin"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/test/plugin_test.hpp>
+#include <irccd/test/js_plugin_fixture.hpp>
 
 namespace irccd {
 
 namespace {
 
-class joke_test : public plugin_test {
+class joke_test : public js_plugin_fixture {
 public:
     joke_test()
-        : plugin_test(PLUGIN_PATH)
+        : js_plugin_fixture(PLUGIN_PATH)
     {
         plugin_->set_formats({
             { "error", "error=#{server}:#{channel}:#{origin}:#{nickname}" }

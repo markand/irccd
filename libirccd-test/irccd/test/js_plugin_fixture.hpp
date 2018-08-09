@@ -1,5 +1,5 @@
 /*
- * plugin_test.hpp -- test fixture helper for Javascript plugins
+ * js_plugin_fixture.hpp -- test fixture helper for Javascript plugins
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_TEST_PLUGIN_TEST_HPP
-#define IRCCD_TEST_PLUGIN_TEST_HPP
+#ifndef IRCCD_TEST_JS_PLUGIN_FIXTURE_HPP
+#define IRCCD_TEST_JS_PLUGIN_FIXTURE_HPP
 
 /**
- * \file plugin_test.hpp
+ * \file js_plugin_fixture.hpp
  * \brief test fixture helper for Javascript plugins.
  */
 
@@ -37,7 +37,7 @@ namespace irccd {
  *
  * Holds a plugin that is opened (but not loaded).
  */
-class plugin_test {
+class js_plugin_fixture {
 protected:
     boost::asio::io_service service_;
     irccd irccd_{service_};
@@ -50,9 +50,9 @@ public:
      *
      * \param path the full plugin path (e.g. /usr/lib64/irccd/ask.js)
      */
-    plugin_test(std::string path);
+    js_plugin_fixture(std::string path);
 };
 
 } // !irccd
 
-#endif // !IRCCD_TEST_PLUGIN_TEST_HPP
+#endif // !IRCCD_TEST_JS_PLUGIN_FIXTURE_HPP

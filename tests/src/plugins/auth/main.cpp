@@ -22,13 +22,13 @@
 #include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/server.hpp>
 
-#include <irccd/test/plugin_test.hpp>
+#include <irccd/test/js_plugin_fixture.hpp>
 
 namespace irccd {
 
 namespace {
 
-class auth_test : public plugin_test {
+class auth_test : public js_plugin_fixture {
 protected:
     std::shared_ptr<mock_server> nickserv1_;
     std::shared_ptr<mock_server> nickserv2_;
@@ -36,7 +36,7 @@ protected:
 
 public:
     auth_test()
-        : plugin_test(PLUGIN_PATH)
+        : js_plugin_fixture(PLUGIN_PATH)
         , nickserv1_(std::make_shared<mock_server>(service_, "nickserv1", "localhost"))
         , nickserv2_(std::make_shared<mock_server>(service_, "nickserv2", "localhost"))
         , quakenet_(std::make_shared<mock_server>(service_, "quakenet", "localhost"))
