@@ -23,31 +23,20 @@
 #include <stdexcept>
 
 #include <irccd/daemon/irccd.hpp>
-#include <irccd/daemon/logger.hpp>
 
-#include "directory_jsapi.hpp"
-#include "duktape_vector.hpp"
-#include "elapsed_timer_jsapi.hpp"
-#include "file_jsapi.hpp"
-#include "irccd_jsapi.hpp"
+#include "js_api.hpp"
 #include "js_plugin.hpp"
-#include "logger_jsapi.hpp"
-#include "plugin_jsapi.hpp"
-#include "server_jsapi.hpp"
-#include "system_jsapi.hpp"
-#include "timer_jsapi.hpp"
-#include "unicode_jsapi.hpp"
-#include "util_jsapi.hpp"
+#include "server_js_api.hpp"
 
-namespace irccd {
+namespace irccd::js {
 
 namespace {
 
-auto get_metadata(dukx_context& ctx, std::string_view name) -> std::string_view
+auto get_metadata(duk::context& ctx, std::string_view name) -> std::string_view
 {
     std::string_view ret("unknown");
 
-    dukx_stack_assert guard(ctx);
+    duk::stack_guard guard(ctx);
     duk_get_global_string(ctx, "info");
 
     if (duk_get_type(ctx, -1) == DUK_TYPE_OBJECT) {
@@ -64,11 +53,11 @@ auto get_metadata(dukx_context& ctx, std::string_view name) -> std::string_view
     return ret;
 }
 
-auto get_table(dukx_context& ctx, std::string_view name) -> plugin::map
+auto get_table(duk::context& ctx, std::string_view name) -> plugin::map
 {
     plugin::map result;
 
-    dukx_stack_assert sa(ctx);
+    duk::stack_guard sa(ctx);
     duk_get_global_string(ctx, name.data());
     duk_enum(ctx, -1, 0);
 
@@ -82,13 +71,13 @@ auto get_table(dukx_context& ctx, std::string_view name) -> plugin::map
     return result;
 }
 
-void set_table(dukx_context& ctx, std::string_view name, const plugin::map& vars)
+void set_table(duk::context& ctx, std::string_view name, const plugin::map& vars)
 {
-    dukx_stack_assert sa(ctx);
+    duk::stack_guard sa(ctx);
     duk_get_global_string(ctx, name.data());
 
     for (const auto& pair : vars) {
-        dukx_push(ctx, pair.second);
+        duk::push(ctx, pair.second);
         duk_put_prop_string(ctx, -2, pair.first.c_str());
     }
 
@@ -104,14 +93,14 @@ void js_plugin::push() noexcept
 template <typename Value, typename... Args>
 void js_plugin::push(Value&& value, Args&&... args)
 {
-    dukx_push(context_, std::forward<Value>(value));
+    duk::push(context_, std::forward<Value>(value));
     push(std::forward<Args>(args)...);
 }
 
 template <typename... Args>
 void js_plugin::call(const std::string& func, Args&&... args)
 {
-    dukx_stack_assert sa(context_);
+    duk::stack_guard sa(context_);
 
     duk_get_global_string(context_, func.c_str());
 
@@ -123,7 +112,7 @@ void js_plugin::call(const std::string& func, Args&&... args)
     push(std::forward<Args>(args)...);
 
     if (duk_pcall(context_, sizeof... (Args)) != 0)
-        throw plugin_error(plugin_error::exec_error, get_name(), dukx_stack(context_, -1).stack());
+        throw plugin_error(plugin_error::exec_error, get_name(), duk::get_stack(context_, -1).get_stack());
 
     duk_pop(context_);
 }
@@ -132,7 +121,7 @@ js_plugin::js_plugin(std::string id, std::string path)
     : plugin(std::move(id))
     , path_(path)
 {
-    dukx_stack_assert sa(context_);
+    duk::stack_guard sa(context_);
 
     /*
      * Create two special tables for configuration and formats, they are
@@ -153,11 +142,11 @@ js_plugin::js_plugin(std::string id, std::string path)
 
     duk_push_pointer(context_, this);
     duk_put_global_string(context_, "\xff""\xff""plugin");
-    dukx_push(context_, path);
+    duk::push(context_, path);
     duk_put_global_string(context_, "\xff""\xff""path");
 }
 
-auto js_plugin::get_context() noexcept -> dukx_context&
+auto js_plugin::get_context() noexcept -> duk::context&
 {
     return context_;
 }
@@ -230,7 +219,7 @@ void js_plugin::open()
     );
 
     if (duk_peval_string(context_, data.c_str()))
-        throw plugin_error(plugin_error::exec_error, get_name(), dukx_stack(context_, -1).stack());
+        throw plugin_error(plugin_error::exec_error, get_name(), duk::get_stack(context_, -1).get_stack());
 }
 
 void js_plugin::handle_command(irccd&, const message_event& event)
@@ -357,19 +346,19 @@ auto js_plugin_loader::open(std::string_view id, std::string_view path) -> std::
     return plugin;
 }
 
-void dukx_type_traits<whois_info>::push(duk_context* ctx, const whois_info& whois)
+void duk::type_traits<whois_info>::push(duk_context* ctx, const whois_info& whois)
 {
     duk_push_object(ctx);
-    dukx_push(ctx, whois.nick);
+    duk::push(ctx, whois.nick);
     duk_put_prop_string(ctx, -2, "nickname");
-    dukx_push(ctx, whois.user);
+    duk::push(ctx, whois.user);
     duk_put_prop_string(ctx, -2, "username");
-    dukx_push(ctx, whois.realname);
+    duk::push(ctx, whois.realname);
     duk_put_prop_string(ctx, -2, "realname");
-    dukx_push(ctx, whois.host);
+    duk::push(ctx, whois.host);
     duk_put_prop_string(ctx, -2, "host");
-    dukx_push(ctx, whois.channels);
+    duk::push(ctx, whois.channels);
     duk_put_prop_string(ctx, -2, "channels");
 }
 
-} // !irccd
+} // !irccd::js

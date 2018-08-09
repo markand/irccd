@@ -19,6 +19,7 @@
 #ifndef IRCCD_CTL_CLI_HPP
 #define IRCCD_CTL_CLI_HPP
 
+#include <functional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -38,9 +39,19 @@ class controller;
 class cli {
 public:
     /**
-     * Convenient handler for request function.
+     * \brief Convenient handler for request function.
      */
     using handler_t = std::function<void (nlohmann::json)>;
+
+    /**
+     * \brief Command constructor factory.
+     */
+    using constructor = std::function<auto () -> std::unique_ptr<cli>>;
+
+    /**
+     * \brief Registry of all commands.
+     */
+    static const std::vector<constructor> registry;
 
 private:
     void recv_response(ctl::controller&, nlohmann::json, handler_t);

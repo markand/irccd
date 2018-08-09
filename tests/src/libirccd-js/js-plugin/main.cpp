@@ -17,38 +17,35 @@
  */
 
 #define BOOST_TEST_MODULE "Javascript plugin object"
-#include <boost/asio.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/irccd.hpp>
 #include <irccd/daemon/plugin_service.hpp>
 
-#include <irccd/js/irccd_jsapi.hpp>
+#include <irccd/js/js_api.hpp>
 #include <irccd/js/js_plugin.hpp>
-#include <irccd/js/plugin_jsapi.hpp>
 
-namespace irccd {
+#include <irccd/test/irccd_fixture.hpp>
+
+namespace irccd::test {
 
 namespace {
 
-class js_plugin_test {
+class js_plugin_fixture : public irccd_fixture {
 protected:
-    boost::asio::io_service service_;
-    irccd irccd_{service_};
-    std::shared_ptr<js_plugin> plugin_;
+    std::shared_ptr<js::js_plugin> plugin_;
 
-    void load(std::string path)
+    void load(const std::string& path)
     {
-        plugin_ = std::make_unique<js_plugin>("test", std::move(path));
+        plugin_ = std::make_unique<js::js_plugin>("test", path);
 
-        irccd_jsapi().load(irccd_, plugin_);
-        plugin_jsapi().load(irccd_, plugin_);
+        for (const auto& f : js::js_api::registry)
+            f()->load(irccd_, plugin_);
 
         plugin_->open();
     }
 };
 
-BOOST_FIXTURE_TEST_SUITE(js_plugin_test_suite, js_plugin_test)
+BOOST_FIXTURE_TEST_SUITE(js_plugin_suite, js_plugin_fixture)
 
 BOOST_AUTO_TEST_CASE(assign)
 {
@@ -97,20 +94,18 @@ BOOST_AUTO_TEST_CASE(merge_after)
 
 BOOST_AUTO_TEST_SUITE_END()
 
-class js_plugin_loader_test {
+class js_plugin_loader_fixture : public irccd_fixture {
 protected:
-    boost::asio::io_service service_;
-    irccd irccd_{service_};
     std::shared_ptr<plugin> plugin_;
 
-    js_plugin_loader_test()
+    js_plugin_loader_fixture()
     {
         irccd_.set_config(config(CMAKE_CURRENT_SOURCE_DIR "/irccd.conf"));
 
-        auto loader = std::make_unique<js_plugin_loader>(irccd_);
+        auto loader = std::make_unique<js::js_plugin_loader>(irccd_);
 
-        loader->get_modules().push_back(std::make_unique<irccd_jsapi>());
-        loader->get_modules().push_back(std::make_unique<plugin_jsapi>());
+        for (const auto& f : js::js_api::registry)
+            loader->get_modules().push_back(f());
 
         irccd_.plugins().add_loader(std::move(loader));
     }
@@ -122,7 +117,7 @@ protected:
     }
 };
 
-BOOST_FIXTURE_TEST_SUITE(js_plugin_loader_test_suite, js_plugin_loader_test)
+BOOST_FIXTURE_TEST_SUITE(js_plugin_loader_test_suite, js_plugin_loader_fixture)
 
 BOOST_AUTO_TEST_CASE(assign)
 {
@@ -155,4 +150,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

@@ -27,11 +27,11 @@
 #include <irccd/daemon/plugin.hpp>
 #include <irccd/daemon/server.hpp>
 
-#include "duktape.hpp"
+#include "duk.hpp"
 
-namespace irccd {
+namespace irccd::js {
 
-class jsapi;
+class js_api;
 
 /**
  * \brief JavaScript plugins for irccd.
@@ -56,14 +56,11 @@ public:
 
 private:
     // JavaScript context.
-    mutable dukx_context context_;
+    mutable duk::context context_;
 
     // Path to Javascript script file.
     std::string path_;
 
-    /*
-     * Helpers to call a Javascript function.
-     */
     void push() noexcept;
 
     template <typename Value, typename... Args>
@@ -86,7 +83,7 @@ public:
      *
      * \return the context
      */
-    auto get_context() noexcept -> dukx_context&;
+    auto get_context() noexcept -> duk::context&;
 
     /**
      * Open the script file associated.
@@ -244,7 +241,7 @@ public:
  */
 class js_plugin_loader : public plugin_loader {
 public:
-    using modules = std::vector<std::unique_ptr<jsapi>>;
+    using modules = std::vector<std::unique_ptr<js_api>>;
 
 private:
     irccd& irccd_;
@@ -283,12 +280,24 @@ public:
     auto open(std::string_view id, std::string_view path) -> std::shared_ptr<plugin>;
 };
 
+namespace duk {
+
+/**
+ * \brief Specialization for type_traits<whois_info>
+ */
 template <>
-class dukx_type_traits<whois_info> : public std::true_type {
-public:
+struct type_traits<whois_info> : public std::true_type {
+    /**
+     * Push a whois_info.
+     *
+     * \param ctx the Duktape context
+     * \param who the information
+     */
     static void push(duk_context* ctx, const whois_info& who);
 };
 
-} // !irccd
+} // !duk
+
+} // !irccd::js
 
 #endif // !IRCCD_PLUGIN_JS_HPP

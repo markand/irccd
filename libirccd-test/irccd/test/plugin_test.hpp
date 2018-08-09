@@ -41,7 +41,7 @@ class plugin_test {
 protected:
     boost::asio::io_service service_;
     irccd irccd_{service_};
-    std::shared_ptr<js_plugin> plugin_;
+    std::shared_ptr<js::js_plugin> plugin_;
     std::shared_ptr<mock_server> server_;
 
 public:

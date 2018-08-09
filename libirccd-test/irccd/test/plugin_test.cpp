@@ -22,18 +22,18 @@
 #include <irccd/daemon/plugin_service.hpp>
 #include <irccd/daemon/server_service.hpp>
 
-#include <irccd/js/directory_jsapi.hpp>
-#include <irccd/js/elapsed_timer_jsapi.hpp>
-#include <irccd/js/file_jsapi.hpp>
-#include <irccd/js/irccd_jsapi.hpp>
+#include <irccd/js/directory_js_api.hpp>
+#include <irccd/js/elapsed_timer_js_api.hpp>
+#include <irccd/js/file_js_api.hpp>
+#include <irccd/js/irccd_js_api.hpp>
 #include <irccd/js/js_plugin.hpp>
-#include <irccd/js/logger_jsapi.hpp>
-#include <irccd/js/plugin_jsapi.hpp>
-#include <irccd/js/server_jsapi.hpp>
-#include <irccd/js/system_jsapi.hpp>
-#include <irccd/js/timer_jsapi.hpp>
-#include <irccd/js/unicode_jsapi.hpp>
-#include <irccd/js/util_jsapi.hpp>
+#include <irccd/js/logger_js_api.hpp>
+#include <irccd/js/plugin_js_api.hpp>
+#include <irccd/js/server_js_api.hpp>
+#include <irccd/js/system_js_api.hpp>
+#include <irccd/js/timer_js_api.hpp>
+#include <irccd/js/unicode_js_api.hpp>
+#include <irccd/js/util_js_api.hpp>
 
 #include "plugin_test.hpp"
 
@@ -42,7 +42,7 @@ namespace irccd {
 plugin_test::plugin_test(std::string path)
     : server_(std::make_shared<mock_server>(service_, "test", "local"))
 {
-    plugin_ = std::make_unique<js_plugin>("test", std::move(path));
+    plugin_ = std::make_unique<js::js_plugin>("test", std::move(path));
 
     irccd_.set_log(std::make_unique<logger::silent_sink>());
     irccd_.get_log().set_verbose(false);
@@ -52,17 +52,8 @@ plugin_test::plugin_test(std::string path)
     server_->set_nickname("irccd");
     server_->clear();
 
-    irccd_jsapi().load(irccd_, plugin_);
-    directory_jsapi().load(irccd_, plugin_);
-    elapsed_timer_jsapi().load(irccd_, plugin_);
-    file_jsapi().load(irccd_, plugin_);
-    logger_jsapi().load(irccd_, plugin_);
-    plugin_jsapi().load(irccd_, plugin_);
-    server_jsapi().load(irccd_, plugin_);
-    system_jsapi().load(irccd_, plugin_);
-    timer_jsapi().load(irccd_, plugin_);
-    unicode_jsapi().load(irccd_, plugin_);
-    util_jsapi().load(irccd_, plugin_);
+    for (const auto& f : js::js_api::registry)
+        f()->load(irccd_, plugin_);
 
     plugin_->open();
 }

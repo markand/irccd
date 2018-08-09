@@ -19,8 +19,10 @@
 #define BOOST_TEST_MODULE "irccdctl plugin-load"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/test/plugin_cli_test.hpp>
+#include <irccd/test/cli_fixture.hpp>
 #include <irccd/test/mock_plugin.hpp>
+
+using namespace irccd::test;
 
 namespace irccd {
 
@@ -46,7 +48,7 @@ public:
 
 } // !namespace
 
-BOOST_FIXTURE_TEST_SUITE(plugin_load_suite, plugin_cli_test)
+BOOST_FIXTURE_TEST_SUITE(plugin_load_suite, cli_fixture)
 
 BOOST_AUTO_TEST_CASE(simple)
 {

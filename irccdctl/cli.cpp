@@ -34,6 +34,14 @@ namespace irccd::ctl {
 
 namespace {
 
+template <typename T>
+auto bind() noexcept -> cli::constructor
+{
+    return [] () noexcept {
+        return std::make_unique<T>();
+    };
+}
+
 auto format(std::vector<std::string> args) -> std::string
 {
     auto result = option::read(args, {
@@ -222,6 +230,38 @@ auto parse(std::vector<std::string> &args) -> option::result
 // }}}
 
 // {{{ cli
+
+const std::vector<cli::constructor> cli::registry{
+    bind<plugin_config_cli>(),
+    bind<plugin_info_cli>(),
+    bind<plugin_list_cli>(),
+    bind<plugin_load_cli>(),
+    bind<plugin_reload_cli>(),
+    bind<plugin_unload_cli>(),
+    bind<rule_add_cli>(),
+    bind<rule_edit_cli>(),
+    bind<rule_info_cli>(),
+    bind<rule_info_cli>(),
+    bind<rule_list_cli>(),
+    bind<rule_move_cli>(),
+    bind<rule_remove_cli>(),
+    bind<server_connect_cli>(),
+    bind<server_disconnect_cli>(),
+    bind<server_info_cli>(),
+    bind<server_invite_cli>(),
+    bind<server_join_cli>(),
+    bind<server_kick_cli>(),
+    bind<server_list_cli>(),
+    bind<server_me_cli>(),
+    bind<server_message_cli>(),
+    bind<server_mode_cli>(),
+    bind<server_nick_cli>(),
+    bind<server_notice_cli>(),
+    bind<server_part_cli>(),
+    bind<server_reconnect_cli>(),
+    bind<server_topic_cli>(),
+    bind<watch_cli>()
+};
 
 void cli::recv_response(ctl::controller& ctl, nlohmann::json req, handler_t handler)
 {

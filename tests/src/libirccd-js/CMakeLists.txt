@@ -17,13 +17,12 @@
 #
 
 add_subdirectory(js-plugin)
-
-add_subdirectory(jsapi-elapsedtimer)
-add_subdirectory(jsapi-directory)
-add_subdirectory(jsapi-file)
-add_subdirectory(jsapi-irccd)
-add_subdirectory(jsapi-logger)
-add_subdirectory(jsapi-system)
-add_subdirectory(jsapi-timer)
-add_subdirectory(jsapi-unicode)
-add_subdirectory(jsapi-util)
+add_subdirectory(js-api-elapsedtimer)
+add_subdirectory(js-api-directory)
+add_subdirectory(js-api-file)
+add_subdirectory(js-api-irccd)
+add_subdirectory(js-api-logger)
+add_subdirectory(js-api-system)
+add_subdirectory(js-api-timer)
+add_subdirectory(js-api-unicode)
+add_subdirectory(js-api-util)

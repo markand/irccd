@@ -19,13 +19,15 @@
 #define BOOST_TEST_MODULE "irccdctl rule-list"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/test/rule_cli_test.hpp>
+#include <irccd/test/cli_fixture.hpp>
+
+using namespace irccd::test;
 
 namespace irccd {
 
 namespace {
 
-BOOST_FIXTURE_TEST_SUITE(rule_list_suite, rule_cli_test)
+BOOST_FIXTURE_TEST_SUITE(rule_list_suite, cli_fixture)
 
 BOOST_AUTO_TEST_CASE(simple)
 {

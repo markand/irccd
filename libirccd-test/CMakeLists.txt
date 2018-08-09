@@ -20,34 +20,28 @@ project(libirccd-test)
 
 set(
     HEADERS
-    ${libirccd-test_SOURCE_DIR}/irccd/test/cli_test.hpp
+    ${libirccd-test_SOURCE_DIR}/irccd/test/cli_fixture.hpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/command_fixture.hpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/irccd_fixture.hpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/debug_server.hpp
+    ${libirccd-test_SOURCE_DIR}/irccd/test/irccd_fixture.hpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/mock.hpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/mock_plugin.hpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/mock_server.hpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/plugin_cli_test.hpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/rule_cli_test.hpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/server_cli_test.hpp
+    $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/js_fixture.hpp>
     $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/plugin_test.hpp>
-    $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/javascript_fixture.hpp>
 )
 
 set(
     SOURCES
+    ${libirccd-test_SOURCE_DIR}/irccd/test/cli_fixture.cpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/command_fixture.cpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/irccd_fixture.cpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/cli_test.cpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/debug_server.cpp
+    ${libirccd-test_SOURCE_DIR}/irccd/test/irccd_fixture.cpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/mock.cpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/mock_plugin.cpp
     ${libirccd-test_SOURCE_DIR}/irccd/test/mock_server.cpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/plugin_cli_test.cpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/rule_cli_test.cpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/server_cli_test.cpp
+    $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/js_fixture.cpp>
     $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/plugin_test.cpp>
-    $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/javascript_fixture.cpp>
 )
 
 if (${IRCCD_HAVE_JS})

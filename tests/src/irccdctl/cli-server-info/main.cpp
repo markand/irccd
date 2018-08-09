@@ -19,13 +19,15 @@
 #define BOOST_TEST_MODULE "irccdctl server-info"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/test/server_cli_test.hpp>
+#include <irccd/test/cli_fixture.hpp>
+
+using namespace irccd::test;
 
 namespace irccd {
 
 namespace {
 
-BOOST_FIXTURE_TEST_SUITE(server_info_suite, server_cli_test)
+BOOST_FIXTURE_TEST_SUITE(server_info_suite, cli_fixture)
 
 BOOST_AUTO_TEST_CASE(output)
 {

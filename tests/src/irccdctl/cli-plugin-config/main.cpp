@@ -19,16 +19,16 @@
 #define BOOST_TEST_MODULE "irccdctl plugin-config"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/test/plugin_cli_test.hpp>
+#include <irccd/test/cli_fixture.hpp>
 #include <irccd/test/mock_plugin.hpp>
 
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
-class configurable_plugin_cli_test : public plugin_cli_test {
+class configurable_plugin_cli_fixture : public cli_fixture {
 public:
-    configurable_plugin_cli_test()
+    configurable_plugin_cli_fixture()
     {
         auto conf1 = std::make_unique<mock_plugin>("conf1");
         auto conf2 = std::make_unique<mock_plugin>("conf2");
@@ -43,7 +43,7 @@ public:
     }
 };
 
-BOOST_FIXTURE_TEST_SUITE(plugin_config_suite, configurable_plugin_cli_test)
+BOOST_FIXTURE_TEST_SUITE(plugin_config_suite, configurable_plugin_cli_fixture)
 
 BOOST_AUTO_TEST_CASE(set_and_get)
 {
@@ -115,4 +115,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test

@@ -19,15 +19,17 @@
 #define BOOST_TEST_MODULE "irccdctl rule-move"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/test/rule_cli_test.hpp>
+#include <irccd/test/cli_fixture.hpp>
+
+using namespace irccd::test;
 
 namespace irccd {
 
 namespace {
 
-class custom_rule_cli_test : public rule_cli_test {
+class custom_cli_fixture : public cli_fixture {
 public:
-    custom_rule_cli_test()
+    custom_cli_fixture()
     {
         irccd_.rules().add({
             { "s1" },
@@ -56,7 +58,7 @@ public:
     }
 };
 
-BOOST_FIXTURE_TEST_SUITE(rule_move_suite, custom_rule_cli_test)
+BOOST_FIXTURE_TEST_SUITE(rule_move_suite, custom_cli_fixture)
 
 BOOST_AUTO_TEST_CASE(from_0_to_1)
 {

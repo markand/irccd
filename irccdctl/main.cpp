@@ -466,38 +466,11 @@ void init(int &argc, char **&argv)
     -- argc;
     ++ argv;
 
-    const auto add = [] (auto c) {
-        commands.emplace(c->get_name(), std::move(c));
-    };
+    for (const auto& f : cli::registry) {
+        auto c = f();
 
-    add(std::make_unique<plugin_config_cli>());
-    add(std::make_unique<plugin_info_cli>());
-    add(std::make_unique<plugin_list_cli>());
-    add(std::make_unique<plugin_load_cli>());
-    add(std::make_unique<plugin_reload_cli>());
-    add(std::make_unique<plugin_unload_cli>());
-    add(std::make_unique<server_connect_cli>());
-    add(std::make_unique<server_disconnect_cli>());
-    add(std::make_unique<server_info_cli>());
-    add(std::make_unique<server_invite_cli>());
-    add(std::make_unique<server_join_cli>());
-    add(std::make_unique<server_kick_cli>());
-    add(std::make_unique<server_list_cli>());
-    add(std::make_unique<server_me_cli>());
-    add(std::make_unique<server_message_cli>());
-    add(std::make_unique<server_mode_cli>());
-    add(std::make_unique<server_nick_cli>());
-    add(std::make_unique<server_notice_cli>());
-    add(std::make_unique<server_part_cli>());
-    add(std::make_unique<server_reconnect_cli>());
-    add(std::make_unique<server_topic_cli>());
-    add(std::make_unique<rule_add_cli>());
-    add(std::make_unique<rule_edit_cli>());
-    add(std::make_unique<rule_list_cli>());
-    add(std::make_unique<rule_info_cli>());
-    add(std::make_unique<rule_move_cli>());
-    add(std::make_unique<rule_remove_cli>());
-    add(std::make_unique<watch_cli>());
+        commands.emplace(c->get_name(), std::move(c));
+    }
 }
 
 void do_connect()
