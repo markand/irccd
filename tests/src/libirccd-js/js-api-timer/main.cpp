@@ -22,7 +22,9 @@
 
 #include <irccd/test/js_fixture.hpp>
 
-namespace irccd::test {
+using namespace irccd::test;
+
+namespace irccd {
 
 namespace {
 
@@ -82,4 +84,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd::test
+} // !irccd

@@ -48,7 +48,7 @@ namespace irccd {
 
 namespace {
 
-class io_test {
+class io_fixture {
 public:
     io_service service_;
 
@@ -58,9 +58,9 @@ public:
     std::shared_ptr<io::stream> stream1_;
     std::shared_ptr<io::stream> stream2_;
 
-    virtual std::unique_ptr<io::acceptor> create_acceptor() = 0;
+    virtual auto create_acceptor() -> std::unique_ptr<io::acceptor> = 0;
 
-    virtual std::unique_ptr<io::connector> create_connector() = 0;
+    virtual auto create_connector() -> std::unique_ptr<io::connector> = 0;
 
     void init()
     {
@@ -85,15 +85,15 @@ public:
     }
 };
 
-class ip_io_test : public io_test {
+class ip_io_fixture : public io_fixture {
 private:
     tcp::endpoint endpoint_;
 
 protected:
     /**
-     * \copydoc io_test::create_acceptor
+     * \copydoc io_fixture::create_acceptor
      */
-    std::unique_ptr<io::acceptor> create_acceptor() override
+    auto create_acceptor() -> std::unique_ptr<io::acceptor> override
     {
         tcp::endpoint endpoint(tcp::v4(), 0U);
         tcp::acceptor acceptor(service_, std::move(endpoint));
@@ -104,9 +104,9 @@ protected:
     }
 
     /**
-     * \copydoc io_test::create_connector
+     * \copydoc io_fixture::create_connector
      */
-    std::unique_ptr<io::connector> create_connector() override
+    auto create_connector() -> std::unique_ptr<io::connector> override
     {
         return std::make_unique<io::ip_connector>(service_, endpoint_);
     }
@@ -114,15 +114,15 @@ protected:
 
 #if defined(IRCCD_HAVE_SSL)
 
-class ssl_io_test : public io_test {
+class ssl_io_fixture : public io_fixture {
 private:
     tcp::endpoint endpoint_;
 
 protected:
     /**
-     * \copydoc io_test::create_acceptor
+     * \copydoc io_fixture::create_acceptor
      */
-    std::unique_ptr<io::acceptor> create_acceptor() override
+    auto create_acceptor() -> std::unique_ptr<io::acceptor> override
     {
         context context(context::sslv23);
 
@@ -138,9 +138,9 @@ protected:
     }
 
     /**
-     * \copydoc io_test::create_connector
+     * \copydoc io_fixture::create_connector
      */
-    std::unique_ptr<io::connector> create_connector() override
+    auto create_connector() -> std::unique_ptr<io::connector> override
     {
         return std::make_unique<io::tls_connector<>>(context(context::sslv23), service_, endpoint_);
     }
@@ -150,12 +150,12 @@ protected:
 
 #if !BOOST_OS_WINDOWS
 
-class local_io_test : public io_test {
+class local_io_fixture : public io_fixture {
 public:
     /**
-     * \copydoc io_test::create_acceptor
+     * \copydoc io_fixture::create_acceptor
      */
-    std::unique_ptr<io::acceptor> create_acceptor() override
+    auto create_acceptor() -> std::unique_ptr<io::acceptor> override
     {
         std::remove(CMAKE_BINARY_DIR "/tmp/io-test.sock");
 
@@ -165,9 +165,9 @@ public:
     }
 
     /**
-     * \copydoc io_test::create_connector
+     * \copydoc io_fixture::create_connector
      */
-    std::unique_ptr<io::connector> create_connector() override
+    auto create_connector() -> std::unique_ptr<io::connector> override
     {
         return std::make_unique<io::local_connector>(service_, CMAKE_BINARY_DIR "/tmp/io-test.sock");
     }
@@ -179,12 +179,12 @@ public:
  * List of fixtures to tests.
  */
 using list = boost::mpl::list<
-    ip_io_test
+    ip_io_fixture
 #if defined(IRCCD_HAVE_SSL)
-    , ssl_io_test
+    , ssl_io_fixture
 #endif
 #if !BOOST_OS_WINDOWS
-    , local_io_test
+    , local_io_fixture
 #endif
 >;
 

@@ -29,7 +29,7 @@ namespace irccd {
 
 namespace {
 
-ini::document open(const std::string& config)
+auto open(const std::string& config) -> ini::document
 {
     boost::filesystem::path path;
 

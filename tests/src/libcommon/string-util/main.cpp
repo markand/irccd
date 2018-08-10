@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(none)
     BOOST_TEST(result == "without");
 }
 
-BOOST_AUTO_TEST_CASE(betweenEmpty)
+BOOST_AUTO_TEST_CASE(between_empty)
 {
     std::string value = "one list";
     std::string result = string_util::strip(value);
@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE(betweenEmpty)
     BOOST_TEST(result == "one list");
 }
 
-BOOST_AUTO_TEST_CASE(betweenLeft)
+BOOST_AUTO_TEST_CASE(between_left)
 {
     std::string value = "  space at left";
     std::string result = string_util::strip(value);
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE(betweenLeft)
     BOOST_TEST(result == "space at left");
 }
 
-BOOST_AUTO_TEST_CASE(betweenRight)
+BOOST_AUTO_TEST_CASE(between_right)
 {
     std::string value = "space at right  ";
     std::string result = string_util::strip(value);
@@ -244,7 +244,7 @@ BOOST_AUTO_TEST_CASE(betweenRight)
     BOOST_TEST(result == "space at right");
 }
 
-BOOST_AUTO_TEST_CASE(betweenBoth)
+BOOST_AUTO_TEST_CASE(between_both)
 {
     std::string value = "  space at both  ";
     std::string result = string_util::strip(value);
@@ -293,7 +293,7 @@ BOOST_AUTO_TEST_CASE(two)
     BOOST_TEST(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(delimiterString)
+BOOST_AUTO_TEST_CASE(delimiter_string)
 {
     std::string expected = "1;;2;;3";
     std::string result = string_util::join({1, 2, 3}, ";;");
@@ -301,7 +301,7 @@ BOOST_AUTO_TEST_CASE(delimiterString)
     BOOST_TEST(expected == result);
 }
 
-BOOST_AUTO_TEST_CASE(delimiterChar)
+BOOST_AUTO_TEST_CASE(delimiter_char)
 {
     std::string expected = "1@2@3@4";
     std::string result = string_util::join({1, 2, 3, 4}, '@');
