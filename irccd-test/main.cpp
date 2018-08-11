@@ -43,6 +43,7 @@
 #include <irccd/test/debug_server.hpp>
 
 #if defined(IRCCD_HAVE_JS)
+#   include <irccd/js/js_api.hpp>
 #   include <irccd/js/js_plugin.hpp>
 #endif
 
@@ -633,11 +634,11 @@ void load(int argc, char** argv)
     daemon = std::make_unique<irccd>(io);
     daemon->plugins().add_loader(std::make_unique<dynlib_plugin_loader>());
 
-#if defined(HAVE_JS)
-    auto loader = std::make_unique<js_plugin_loader>();
+#if defined(IRCCD_HAVE_JS)
+    auto loader = std::make_unique<js::js_plugin_loader>(*daemon);
 
-    for (const auto& f : jsapi::registry)
-        daemon->get_modules().push_back(f());
+    for (const auto& f : js::js_api::registry)
+        loader->get_modules().push_back(f());
 
     daemon->plugins().add_loader(std::move(loader));
 #endif

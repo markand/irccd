@@ -34,9 +34,9 @@
 #include <irccd/daemon/plugin_service.hpp>
 #include <irccd/daemon/transport_service.hpp>
 
-#if defined(HAVE_JS)
+#if defined(IRCCD_HAVE_JS)
+#   include <irccd/js/js_api.hpp>
 #   include <irccd/js/js_plugin.hpp>
-#   include <irccd/js/jsapi.hpp>
 #endif
 
 namespace irccd {
@@ -183,10 +183,10 @@ int main(int argc, char** argv)
     // 2. Load plugin loaders.
     instance->plugins().add_loader(std::make_unique<dynlib_plugin_loader>());
 
-#if defined(HAVE_JS)
-    auto loader = std::make_unique<js_plugin_loader>();
+#if defined(IRCCD_HAVE_JS)
+    auto loader = std::make_unique<js::js_plugin_loader>(*instance);
 
-    for (const auto& f : jsapi::registry)
+    for (const auto& f : js::js_api::registry)
         loader->get_modules().push_back(f());
 
     instance->plugins().add_loader(std::move(loader));
