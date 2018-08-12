@@ -20,7 +20,7 @@
 
 #include "sysconfig.hpp"
 
-#if defined(HAVE_POPEN)
+#if defined(IRCCD_HAVE_POPEN)
 #   include <array>
 #   include <cerrno>
 #   include <cstring>
@@ -103,7 +103,7 @@ auto subst_date(const std::string& text, const subst& params) -> std::string
 {
     std::ostringstream oss;
 
-#if defined(HAVE_STD_PUT_TIME)
+#if defined(IRCCD_HAVE_STD_PUT_TIME)
     oss << std::put_time(std::localtime(&params.time), text.c_str());
 #else
     /*
@@ -240,7 +240,7 @@ std::string subst_shell_attrs(const std::string& content)
 
 std::string subst_shell(const std::string& command)
 {
-#if defined(HAVE_POPEN)
+#if defined(IRCCD_HAVE_POPEN)
     std::unique_ptr<FILE, std::function<int (FILE*)>> fp(popen(command.c_str(), "r"), pclose);
 
     if (fp == nullptr)

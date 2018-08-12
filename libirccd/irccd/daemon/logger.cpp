@@ -23,9 +23,9 @@
 
 #include "logger.hpp"
 
-#if defined(HAVE_SYSLOG)
+#if defined(IRCCD_HAVE_SYSLOG)
 #  include <syslog.h>
-#endif // !HAVE_SYSLOG
+#endif // !IRCCD_HAVE_SYSLOG
 
 namespace irccd::logger {
 
@@ -140,7 +140,7 @@ void silent_sink::write_debug(const std::string&)
 {
 }
 
-#if defined(HAVE_SYSLOG)
+#if defined(IRCCD_HAVE_SYSLOG)
 
 syslog_sink::syslog_sink()
 {
@@ -167,7 +167,7 @@ void syslog_sink::write_debug(const std::string& line)
     syslog(LOG_DEBUG | LOG_USER, "%s", line.c_str());
 }
 
-#endif // !HAVE_SYSLOG
+#endif // !IRCCD_HAVE_SYSLOG
 
 sink::sink()
     : filter_(new filter)

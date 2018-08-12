@@ -380,7 +380,7 @@ protected:
     void write_warning(const std::string& line) override;
 };
 
-#if defined(HAVE_SYSLOG)
+#if defined(IRCCD_HAVE_SYSLOG)
 
 /**
  * \brief Implements logger into syslog.
@@ -414,7 +414,7 @@ public:
     ~syslog_sink();
 };
 
-#endif // !HAVE_SYSLOG
+#endif // !IRCCD_HAVE_SYSLOG
 
 } // !irccd::logger
 

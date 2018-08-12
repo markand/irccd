@@ -77,113 +77,109 @@ endif ()
 # -------------------------------------------------------------------
 #
 
-check_type_size(int8_t HAVE_INT8)
-check_type_size(uint8_t HAVE_UINT8)
-check_type_size(int16_t HAVE_INT16)
-check_type_size(uint16_t HAVE_UINT16)
-check_type_size(int32_t HAVE_INT32)
-check_type_size(uint32_t HAVE_UINT32)
-check_type_size(int64_t HAVE_INT64)
-check_type_size(uint64_t HAVE_UINT64)
-
-if (NOT HAVE_STDINT_H)
-    message("irccd requires stdint.h or cstdint header")
-endif ()
+check_type_size(int8_t IRCCD_HAVE_INT8)
+check_type_size(uint8_t IRCCD_HAVE_UINT8)
+check_type_size(int16_t IRCCD_HAVE_INT16)
+check_type_size(uint16_t IRCCD_HAVE_UINT16)
+check_type_size(int32_t IRCCD_HAVE_INT32)
+check_type_size(uint32_t IRCCD_HAVE_UINT32)
+check_type_size(int64_t IRCCD_HAVE_INT64)
+check_type_size(uint64_t IRCCD_HAVE_UINT64)
 
 #
 # Where any of these function / feature is required, include the <irccd/sysconfig.h> file.
 #
 # The following variables are defined in irccd/sysconfig.h
 #
-# HAVE_GETLOGIN         True if getlogin(3) function (and unistd.h)
-# HAVE_POPEN            True if has popen(3) function (in stdio.h)
-# HAVE_SETPROGNAME      True if setprogname(3) is available from C library,
-# HAVE_STAT             True if has stat(2) function (and sys/types.h and sys/stat.h),
-# HAVE_STAT_ST_DEV      The struct stat has st_dev field,
-# HAVE_STAT_ST_INO      The struct stat has st_ino field,
-# HAVE_STAT_ST_NLINK    The struct stat has st_nlink field,
-# HAVE_STAT_ST_UID      The struct stat has st_uid field,
-# HAVE_STAT_ST_GID      The struct stat has st_gid field,
-# HAVE_STAT_ST_ATIME    The struct stat has st_atime field,
-# HAVE_STAT_ST_MTIME    The struct stat has st_mtime field,
-# HAVE_STAT_ST_CTIME    The struct stat has st_ctime field,
-# HAVE_STAT_ST_SIZE     The struct stat has st_size field,
-# HAVE_STAT_ST_BLKSIZE  The struct stat has st_blksize field,
-# HAVE_STAT_ST_BLOCKS   The struct stat has st_blocks field,
-# HAVE_SYSLOG           True if syslog functions are available (and syslog.h),
+# IRCCD_HAVE_GETLOGIN           True if getlogin(3) function (and unistd.h)
+# IRCCD_HAVE_POPEN              True if has popen(3) function (in stdio.h)
+# IRCCD_HAVE_SETPROGNAME        True if setprogname(3) is available from C library,
+# IRCCD_HAVE_STAT               True if has stat(2) function (and sys/types.h and sys/stat.h),
+# IRCCD_HAVE_STAT_ST_DEV        The struct stat has st_dev field,
+# IRCCD_HAVE_STAT_ST_INO        The struct stat has st_ino field,
+# IRCCD_HAVE_STAT_ST_NLINK      The struct stat has st_nlink field,
+# IRCCD_HAVE_STAT_ST_UID        The struct stat has st_uid field,
+# IRCCD_HAVE_STAT_ST_GID        The struct stat has st_gid field,
+# IRCCD_HAVE_STAT_ST_ATIME      The struct stat has st_atime field,
+# IRCCD_HAVE_STAT_ST_MTIME      The struct stat has st_mtime field,
+# IRCCD_HAVE_STAT_ST_CTIME      The struct stat has st_ctime field,
+# IRCCD_HAVE_STAT_ST_SIZE       The struct stat has st_size field,
+# IRCCD_HAVE_STAT_ST_BLKSIZE    The struct stat has st_blksize field,
+# IRCCD_HAVE_STAT_ST_BLOCKS     The struct stat has st_blocks field,
+# IRCCD_HAVE_SYSLOG             True if syslog functions are available (and syslog.h),
 #
 
 # Check for unistd.h
-check_include_file(unistd.h HAVE_UNISTD_H)
+check_include_file(unistd.h IRCCD_HAVE_UNISTD_H)
 
 # Check for sys/types.h
-check_include_file(sys/types.h HAVE_SYS_TYPES_H)
+check_include_file(sys/types.h IRCCD_HAVE_SYS_TYPES_H)
 
 # Check of setprogname(3) function, include:
 #
 # #include <cstdlib>
-check_function_exists(setprogname HAVE_SETPROGNAME)
+check_function_exists(setprogname IRCCD_HAVE_SETPROGNAME)
 
 # getlogin() function
 #
-# If HAVE_GETLOGIN is defined, include:
+# If IRCCD_HAVE_GETLOGIN is defined, include:
 #
 # #include <unistd.h>
-check_function_exists(getlogin HAVE_GETLOGIN)
+check_function_exists(getlogin IRCCD_HAVE_GETLOGIN)
 
-if (NOT HAVE_UNISTD_H)
-    set(HAVE_GETLOGIN FALSE)
+if (NOT IRCCD_HAVE_UNISTD_H)
+    set(IRCCD_HAVE_GETLOGIN FALSE)
 endif ()
 
 # popen() function
 #
-# If HAVE_POPEN is defined, include;
+# If IRCCD_HAVE_POPEN is defined, include;
 #
 # #include <cstdio>
-check_function_exists(popen HAVE_POPEN)
+check_function_exists(popen IRCCD_HAVE_POPEN)
 
 # stat(2) function
 #
-# If HAVE_STAT is defined, include:
+# If IRCCD_HAVE_STAT is defined, include:
 #
 # #include <sys/types.h>
 # #include <sys/stat.h>
-check_include_file(sys/stat.h HAVE_SYS_STAT_H)
-check_function_exists(stat HAVE_STAT)
+check_include_file(sys/stat.h IRCCD_HAVE_SYS_STAT_H)
+check_function_exists(stat IRCCD_HAVE_STAT)
 
 # If the sys/stat.h is not found, we disable stat(2)
-if (NOT HAVE_SYS_STAT_H OR NOT HAVE_SYS_TYPES_H)
-    set(HAVE_STAT FALSE)
+if (NOT IRCCD_HAVE_SYS_STAT_H OR NOT IRCCD_HAVE_SYS_TYPES_H)
+    set(IRCCD_HAVE_STAT FALSE)
 endif ()
 
 # syslog functions
 #
-# If HAVE_SYSLOG is defined, include:
+# If IRCCD_HAVE_SYSLOG is defined, include:
 #
 # #include <syslog.h>
-check_include_file(syslog.h HAVE_SYSLOG_H)
-check_function_exists(openlog HAVE_OPENLOG)
-check_function_exists(syslog HAVE_SYSLOG)
-check_function_exists(closelog HAVE_CLOSELOG)
+check_include_file(syslog.h IRCCD_HAVE_SYSLOG_H)
+check_function_exists(openlog IRCCD_HAVE_OPENLOG)
+check_function_exists(syslog IRCCD_HAVE_SYSLOG)
+check_function_exists(closelog IRCCD_HAVE_CLOSELOG)
 
-if (NOT HAVE_SYSLOG_H OR NOT HAVE_OPENLOG OR NOT HAVE_CLOSELOG)
-    set(HAVE_SYSLOG FALSE)
+if (NOT IRCCD_HAVE_SYSLOG_H OR NOT IRCCD_HAVE_OPENLOG OR NOT IRCCD_HAVE_CLOSELOG)
+    set(IRCCD_HAVE_SYSLOG FALSE)
 endif ()
 
 # Check for struct stat fields.
-check_struct_has_member("struct stat" st_atime sys/stat.h HAVE_STAT_ST_ATIME)
-check_struct_has_member("struct stat" st_blksize sys/stat.h HAVE_STAT_ST_BLKSIZE)
-check_struct_has_member("struct stat" st_blocks sys/stat.h HAVE_STAT_ST_BLOCKS)
-check_struct_has_member("struct stat" st_ctime sys/stat.h HAVE_STAT_ST_CTIME)
-check_struct_has_member("struct stat" st_dev sys/stat.h HAVE_STAT_ST_DEV)
-check_struct_has_member("struct stat" st_gid sys/stat.h HAVE_STAT_ST_GID)
-check_struct_has_member("struct stat" st_ino sys/stat.h HAVE_STAT_ST_INO)
-check_struct_has_member("struct stat" st_mode sys/stat.h HAVE_STAT_ST_MODE)
-check_struct_has_member("struct stat" st_mtime sys/stat.h HAVE_STAT_ST_MTIME)
-check_struct_has_member("struct stat" st_nlink sys/stat.h HAVE_STAT_ST_NLINK)
-check_struct_has_member("struct stat" st_rdev sys/stat.h HAVE_STAT_ST_RDEV)
-check_struct_has_member("struct stat" st_size sys/stat.h HAVE_STAT_ST_SIZE)
-check_struct_has_member("struct stat" st_uid sys/stat.h HAVE_STAT_ST_UID)
+check_struct_has_member("struct stat" st_atime sys/stat.h IRCCD_HAVE_STAT_ST_ATIME)
+check_struct_has_member("struct stat" st_blksize sys/stat.h IRCCD_HAVE_STAT_ST_BLKSIZE)
+check_struct_has_member("struct stat" st_blocks sys/stat.h IRCCD_HAVE_STAT_ST_BLOCKS)
+check_struct_has_member("struct stat" st_ctime sys/stat.h IRCCD_HAVE_STAT_ST_CTIME)
+check_struct_has_member("struct stat" st_dev sys/stat.h IRCCD_HAVE_STAT_ST_DEV)
+check_struct_has_member("struct stat" st_gid sys/stat.h IRCCD_HAVE_STAT_ST_GID)
+check_struct_has_member("struct stat" st_ino sys/stat.h IRCCD_HAVE_STAT_ST_INO)
+check_struct_has_member("struct stat" st_mode sys/stat.h IRCCD_HAVE_STAT_ST_MODE)
+check_struct_has_member("struct stat" st_mtime sys/stat.h IRCCD_HAVE_STAT_ST_MTIME)
+check_struct_has_member("struct stat" st_nlink sys/stat.h IRCCD_HAVE_STAT_ST_NLINK)
+check_struct_has_member("struct stat" st_rdev sys/stat.h IRCCD_HAVE_STAT_ST_RDEV)
+check_struct_has_member("struct stat" st_size sys/stat.h IRCCD_HAVE_STAT_ST_SIZE)
+check_struct_has_member("struct stat" st_uid sys/stat.h IRCCD_HAVE_STAT_ST_UID)
 
 # Configuration file.
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/irccd)

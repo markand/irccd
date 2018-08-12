@@ -139,11 +139,11 @@ void irccd::load_logs_file(const ini::section& sc)
 
 void irccd::load_logs_syslog()
 {
-#if defined(HAVE_SYSLOG)
+#if defined(IRCCD_HAVE_SYSLOG)
     sink_ = std::make_unique<logger::syslog_sink>();
 #else
     sink_->warning("logs", "") << "logs: syslog is not available on this platform" << std::endl;
-#endif // !HAVE_SYSLOG
+#endif // !IRCCD_HAVE_SYSLOG
 }
 
 void irccd::load_logs()

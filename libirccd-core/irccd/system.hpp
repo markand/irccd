@@ -90,7 +90,7 @@ auto home() -> std::string;
 
 /**
  * Get the cache directory as specified as compile time option
- * CMAKE_INSTALL_LOCALSTATEDIR, if the value is absolute, it is returned as-is.
+ * IRCCD_INSTALL_LOCALSTATEDIR, if the value is absolute, it is returned as-is.
  *
  * If the component is relative, it is evaluated using the binary executable
  * path.
@@ -102,7 +102,7 @@ auto home() -> std::string;
 auto cachedir() -> boost::filesystem::path;
 
 /**
- * Like cachedir but for CMAKE_INSTALL_DATADIR.
+ * Like cachedir but for IRCCD_INSTALL_DATADIR.
  *
  * \return the evaluated data directory.
  * \see cachedir
@@ -111,7 +111,7 @@ auto cachedir() -> boost::filesystem::path;
 auto datadir() -> boost::filesystem::path;
 
 /**
- * Like cachedir but for CMAKE_INSTALL_SYSCONFDIR.
+ * Like cachedir but for IRCCD_INSTALL_SYSCONFDIR.
  *
  * \return the evaluated config directory.
  * \see cachedir
@@ -121,7 +121,7 @@ auto datadir() -> boost::filesystem::path;
 auto sysconfdir() -> boost::filesystem::path;
 
 /**
- * Like cachedir but for CMAKE_INSTALL_LIBDIR.
+ * Like cachedir but for IRCCD_INSTALL_LIBDIR.
  *
  * \return the evaluated system plugin directory.
  * \see cachedir

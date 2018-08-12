@@ -22,7 +22,7 @@
 #include <cstdlib>
 #include <thread>
 
-#if defined(HAVE_POPEN)
+#if defined(IRCCD_HAVE_POPEN)
 #  include <cstdio>
 #endif
 
@@ -147,7 +147,7 @@ auto System_name(duk_context* ctx) -> duk_ret_t
 
 // {{{ Irccd.System.popen
 
-#if defined(HAVE_POPEN)
+#if defined(IRCCD_HAVE_POPEN)
 
 /*
  * Function: Irccd.System.popen(cmd, mode) [optional]
@@ -175,7 +175,7 @@ auto System_popen(duk_context* ctx) -> duk_ret_t
     });
 }
 
-#endif // !HAVE_POPEN
+#endif // !IRCCD_HAVE_POPEN
 
 // }}}
 
@@ -298,7 +298,7 @@ const duk_function_list_entry functions[] = {
     { "exec",       System_exec,    1 },
     { "home",       System_home,    0 },
     { "name",       System_name,    0 },
-#if defined(HAVE_POPEN)
+#if defined(IRCCD_HAVE_POPEN)
     { "popen",      System_popen,   2 },
 #endif
     { "sleep",      System_sleep,   1 },

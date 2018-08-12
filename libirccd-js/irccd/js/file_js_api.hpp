@@ -26,7 +26,7 @@
 
 #include <irccd/sysconfig.hpp>
 
-#if defined(HAVE_STAT)
+#if defined(IRCCD_HAVE_STAT)
 #   include <sys/types.h>
 #   include <sys/stat.h>
 #endif
@@ -184,7 +184,7 @@ struct type_traits<std::shared_ptr<file>> {
     static auto require(duk_context* ctx, duk_idx_t index) -> std::shared_ptr<file>;
 };
 
-#if defined(HAVE_STAT)
+#if defined(IRCCD_HAVE_STAT)
 
 /**
  * \brief Specialization for struct stat.
@@ -202,7 +202,7 @@ struct type_traits<struct stat> {
     static void push(duk_context* ctx, const struct stat& st);
 };
 
-#endif // !HAVE_STAT
+#endif // !IRCCD_HAVE_STAT
 
 } // !duk
 

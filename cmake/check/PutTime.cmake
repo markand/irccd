@@ -32,5 +32,5 @@ check_cxx_source_compiles(
         return 0;
      }
     "
-    HAVE_STD_PUT_TIME
+    IRCCD_HAVE_STD_PUT_TIME
 )

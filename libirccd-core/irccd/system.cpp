@@ -50,7 +50,7 @@
 #   include <libproc.h>
 #endif
 
-#if defined(HAVE_GETLOGIN)
+#if defined(IRCCD_HAVE_GETLOGIN)
 #   include <unistd.h>
 #endif
 
@@ -77,8 +77,8 @@ namespace {
  */
 auto base_directory() -> boost::filesystem::path
 {
-    static const boost::filesystem::path bindir(CMAKE_INSTALL_BINDIR);
-    static const boost::filesystem::path prefix(CMAKE_INSTALL_PREFIX);
+    static const boost::filesystem::path bindir(IRCCD_INSTALL_BINDIR);
+    static const boost::filesystem::path prefix(IRCCD_INSTALL_PREFIX);
 
     boost::filesystem::path path(".");
 
@@ -216,7 +216,7 @@ auto user_plugin_directory() -> boost::filesystem::path
 
 void set_program_name(std::string name) noexcept
 {
-#if defined(HAVE_SETPROGNAME)
+#if defined(IRCCD_HAVE_SETPROGNAME)
     static std::string save = name;
 
     setprogname(save.c_str());
@@ -412,7 +412,7 @@ auto env(const std::string& var) -> std::string
 
 auto cachedir() -> boost::filesystem::path
 {
-    return system_directory(CMAKE_INSTALL_LOCALSTATEDIR) / "cache/irccd";
+    return system_directory(IRCCD_INSTALL_LOCALSTATEDIR) / "cache/irccd";
 }
 
 // }}}
@@ -421,7 +421,7 @@ auto cachedir() -> boost::filesystem::path
 
 auto datadir() -> boost::filesystem::path
 {
-    return system_directory(CMAKE_INSTALL_DATADIR);
+    return system_directory(IRCCD_INSTALL_DATADIR);
 }
 
 // }}}
@@ -430,7 +430,7 @@ auto datadir() -> boost::filesystem::path
 
 auto sysconfdir() -> boost::filesystem::path
 {
-    return system_directory(CMAKE_INSTALL_SYSCONFDIR) / "irccd";
+    return system_directory(IRCCD_INSTALL_SYSCONFDIR) / "irccd";
 }
 
 // }}}
@@ -439,7 +439,7 @@ auto sysconfdir() -> boost::filesystem::path
 
 auto plugindir() -> boost::filesystem::path
 {
-    return system_directory(CMAKE_INSTALL_LIBDIR) / "irccd";
+    return system_directory(IRCCD_INSTALL_LIBDIR) / "irccd";
 }
 
 // }}}
@@ -452,7 +452,7 @@ auto plugindir() -> boost::filesystem::path
  */
 auto username() -> std::string
 {
-#if defined(HAVE_GETLOGIN)
+#if defined(IRCCD_HAVE_GETLOGIN)
     auto v = getlogin();
 
     if (v)

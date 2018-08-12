@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(home)
     BOOST_TEST(duk_get_string(plugin_->get_context(), -1) == sys::home());
 }
 
-#if defined(HAVE_POPEN)
+#if defined(IRCCD_HAVE_POPEN)
 
 BOOST_AUTO_TEST_CASE(popen)
 {

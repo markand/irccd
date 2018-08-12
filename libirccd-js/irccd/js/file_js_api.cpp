@@ -350,7 +350,7 @@ auto File_prototype_seek(duk_context* ctx) -> duk_ret_t
 
 // {{{ Irccd.File.prototype.stat
 
-#if defined(HAVE_STAT)
+#if defined(IRCCD_HAVE_STAT)
 
 /*
  * Method: Irccd.File.prototype.stat() [optional]
@@ -378,7 +378,7 @@ auto File_prototype_stat(duk_context* ctx) -> duk_ret_t
     });
 }
 
-#endif // !HAVE_STAT
+#endif // !IRCCD_HAVE_STAT
 
 // }}}
 
@@ -602,7 +602,7 @@ auto File_remove(duk_context* ctx) -> duk_ret_t
 
 // {{{ Irccd.File.stat
 
-#if defined(HAVE_STAT)
+#if defined(IRCCD_HAVE_STAT)
 
 /*
  * Function Irccd.File.stat(path) [optional]
@@ -629,7 +629,7 @@ auto File_stat(duk_context* ctx) -> duk_ret_t
     });
 }
 
-#endif // !HAVE_STAT
+#endif // !IRCCD_HAVE_STAT
 
 // }}}
 
@@ -644,7 +644,7 @@ const duk_function_list_entry methods[] = {
     { "readline",   File_prototype_readline,    0 },
     { "remove",     File_prototype_remove,      0 },
     { "seek",       File_prototype_seek,        2 },
-#if defined(HAVE_STAT)
+#if defined(IRCCD_HAVE_STAT)
     { "stat",       File_prototype_stat,        0 },
 #endif
     { "tell",       File_prototype_tell,        0 },
@@ -657,7 +657,7 @@ const duk_function_list_entry functions[] = {
     { "dirname",    File_dirname,               1 },
     { "exists",     File_exists,                1 },
     { "remove",     File_remove,                1 },
-#if defined(HAVE_STAT)
+#if defined(IRCCD_HAVE_STAT)
     { "stat",       File_stat,                  1 },
 #endif
     { nullptr,      nullptr,                    0 }
@@ -736,7 +736,7 @@ auto file_traits::require(duk_context* ctx, duk_idx_t index) -> std::shared_ptr<
 
 // {{{ duk::type_traits<struct stat>
 
-#if defined(HAVE_STAT)
+#if defined(IRCCD_HAVE_STAT)
 
 void duk::type_traits<struct stat>::push(duk_context* ctx, const struct stat& st)
 {
@@ -744,61 +744,61 @@ void duk::type_traits<struct stat>::push(duk_context* ctx, const struct stat& st
 
     duk_push_object(ctx);
 
-#if defined(HAVE_STAT_ST_ATIME)
+#if defined(IRCCD_HAVE_STAT_ST_ATIME)
     duk_push_int(ctx, st.st_atime);
     duk_put_prop_string(ctx, -2, "atime");
 #endif
-#if defined(HAVE_STAT_ST_BLKSIZE)
+#if defined(IRCCD_HAVE_STAT_ST_BLKSIZE)
     duk_push_int(ctx, st.st_blksize);
     duk_put_prop_string(ctx, -2, "blksize");
 #endif
-#if defined(HAVE_STAT_ST_BLOCKS)
+#if defined(IRCCD_HAVE_STAT_ST_BLOCKS)
     duk_push_int(ctx, st.st_blocks);
     duk_put_prop_string(ctx, -2, "blocks");
 #endif
-#if defined(HAVE_STAT_ST_CTIME)
+#if defined(IRCCD_HAVE_STAT_ST_CTIME)
     duk_push_int(ctx, st.st_ctime);
     duk_put_prop_string(ctx, -2, "ctime");
 #endif
-#if defined(HAVE_STAT_ST_DEV)
+#if defined(IRCCD_HAVE_STAT_ST_DEV)
     duk_push_int(ctx, st.st_dev);
     duk_put_prop_string(ctx, -2, "dev");
 #endif
-#if defined(HAVE_STAT_ST_GID)
+#if defined(IRCCD_HAVE_STAT_ST_GID)
     duk_push_int(ctx, st.st_gid);
     duk_put_prop_string(ctx, -2, "gid");
 #endif
-#if defined(HAVE_STAT_ST_INO)
+#if defined(IRCCD_HAVE_STAT_ST_INO)
     duk_push_int(ctx, st.st_ino);
     duk_put_prop_string(ctx, -2, "ino");
 #endif
-#if defined(HAVE_STAT_ST_MODE)
+#if defined(IRCCD_HAVE_STAT_ST_MODE)
     duk_push_int(ctx, st.st_mode);
     duk_put_prop_string(ctx, -2, "mode");
 #endif
-#if defined(HAVE_STAT_ST_MTIME)
+#if defined(IRCCD_HAVE_STAT_ST_MTIME)
     duk_push_int(ctx, st.st_mtime);
     duk_put_prop_string(ctx, -2, "mtime");
 #endif
-#if defined(HAVE_STAT_ST_NLINK)
+#if defined(IRCCD_HAVE_STAT_ST_NLINK)
     duk_push_int(ctx, st.st_nlink);
     duk_put_prop_string(ctx, -2, "nlink");
 #endif
-#if defined(HAVE_STAT_ST_RDEV)
+#if defined(IRCCD_HAVE_STAT_ST_RDEV)
     duk_push_int(ctx, st.st_rdev);
     duk_put_prop_string(ctx, -2, "rdev");
 #endif
-#if defined(HAVE_STAT_ST_SIZE)
+#if defined(IRCCD_HAVE_STAT_ST_SIZE)
     duk_push_int(ctx, st.st_size);
     duk_put_prop_string(ctx, -2, "size");
 #endif
-#if defined(HAVE_STAT_ST_UID)
+#if defined(IRCCD_HAVE_STAT_ST_UID)
     duk_push_int(ctx, st.st_uid);
     duk_put_prop_string(ctx, -2, "uid");
 #endif
 }
 
-#endif // !HAVE_STAT
+#endif // !IRCCD_HAVE_STAT
 
 // }}}
 
