@@ -25,6 +25,7 @@
  */
 
 #include <memory>
+#include <string_view>
 
 #include <boost/asio/io_service.hpp>
 
@@ -55,8 +56,7 @@ namespace server_util {
  * Example: `!reminder help' may invoke the command event if a plugin reminder
  * exists.
  */
-class message_pack {
-public:
+struct message_type {
     /**
      * \brief Describe which type of message has been received
      */
@@ -69,6 +69,21 @@ public:
      * Message content.
      */
     std::string message;
+
+    /**
+     * Parse IRC message and determine if it's a command or a simple message.
+     *
+     * If it's a command, the plugin invocation command is removed from the
+     * original message, otherwise it is copied verbatime.
+     *
+     * \param message the message line
+     * \param cchar the command char (e.g '!')
+     * \param plugin the plugin name
+     * \return the pair
+     */
+    static auto parse(std::string_view message,
+                      std::string_view cchar,
+                      std::string_view plugin) -> message_type;
 };
 
 /**
@@ -79,8 +94,8 @@ public:
  * \return the server
  * \throw server_error on errors
  */
-std::shared_ptr<server> from_json(boost::asio::io_service& service,
-                                  const nlohmann::json& object);
+auto from_json(boost::asio::io_service& service,
+               const nlohmann::json& object) -> std::shared_ptr<server>;
 
 /**
  * Convert a INI section to a server.
@@ -91,22 +106,9 @@ std::shared_ptr<server> from_json(boost::asio::io_service& service,
  * \return the server
  * \throw server_error on errors
  */
-std::shared_ptr<server> from_config(boost::asio::io_service& service,
-                                    const config& cfg,
-                                    const ini::section& sc);
-
-/**
- * Parse IRC message and determine if it's a command or a simple message.
- *
- * If it's a command, the plugin invocation command is removed from the
- * original message, otherwise it is copied verbatime.
- *
- * \param message the message line
- * \param cchar the command char (e.g '!')
- * \param plugin the plugin name
- * \return the pair
- */
-message_pack parse_message(std::string_view message, std::string_view cchar, std::string_view plugin);
+auto from_config(boost::asio::io_service& service,
+                 const config& cfg,
+                 const ini::section& sc) -> std::shared_ptr<server>;
 
 } // !server_util
 

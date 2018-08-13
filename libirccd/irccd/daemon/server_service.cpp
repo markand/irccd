@@ -220,15 +220,15 @@ void dispatcher::operator()(const message_event& ev)
 
     dispatch(ev.server->get_id(), ev.origin, ev.channel,
         [=] (plugin& plugin) -> std::string {
-            return server_util::parse_message(
+            return server_util::message_type::parse(
                 ev.message,
                 ev.server->get_command_char(),
                 plugin.get_id()
-            ).type == server_util::message_pack::type::command ? "onCommand" : "onMessage";
+            ).type == server_util::message_type::type::command ? "onCommand" : "onMessage";
         },
         [=] (plugin& plugin) mutable {
             auto copy = ev;
-            auto pack = server_util::parse_message(
+            auto pack = server_util::message_type::parse(
                 copy.message,
                 copy.server->get_command_char(),
                 plugin.get_id()
@@ -236,7 +236,7 @@ void dispatcher::operator()(const message_event& ev)
 
             copy.message = pack.message;
 
-            if (pack.type == server_util::message_pack::type::command)
+            if (pack.type == server_util::message_type::type::command)
                 plugin.handle_command(irccd_, copy);
             else
                 plugin.handle_message(irccd_, copy);

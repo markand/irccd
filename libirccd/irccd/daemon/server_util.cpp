@@ -26,9 +26,7 @@
 #include "server.hpp"
 #include "server_util.hpp"
 
-namespace irccd {
-
-namespace server_util {
+namespace irccd::server_util {
 
 namespace {
 
@@ -180,65 +178,9 @@ void from_json_load_flags(server& sv, const json_util::document& parser)
 
 } // !namespace
 
-std::shared_ptr<server> from_json(boost::asio::io_service& service, const nlohmann::json& object)
-{
-    // Mandatory parameters.
-    const json_util::document parser(object);
-    const auto id = parser.get<std::string>("name");
-    const auto host = parser.get<std::string>("host");
-
-    if (!id || !string_util::is_identifier(*id))
-        throw server_error(server_error::invalid_identifier);
-    if (!host || host->empty())
-        throw server_error(server_error::invalid_hostname);
-
-    const auto sv = std::make_shared<server>(service, *id, *host);
-
-    from_json_load_options(*sv, parser);
-    from_json_load_flags(*sv, parser);
-
-    return sv;
-}
-
-std::shared_ptr<server> from_config(boost::asio::io_service& service,
-                                    const config& cfg,
-                                    const ini::section& sc)
-{
-    // Mandatory parameters.
-    const auto id = sc.get("name");
-    const auto host = sc.get("hostname");
-
-    if (!string_util::is_identifier(id.value()))
-        throw server_error(server_error::invalid_identifier);
-    if (host.value().empty())
-        throw server_error(server_error::invalid_hostname);
-
-    const auto sv = std::make_shared<server>(service, id.value(), host.value());
-
-    from_config_load_channels(*sv, sc);
-    from_config_load_flags(*sv, sc);
-    from_config_load_numeric_parameters(*sv, sc);
-    from_config_load_options(*sv, sc);
-
-    // Identity is in a separate section
-    const auto identity = sc.get("identity");
-
-    if (identity.value().size() > 0) {
-        const auto it = std::find_if(cfg.begin(), cfg.end(), [&] (const auto& i) {
-            if (i.key() != "identity")
-                return false;
-
-            return i.get("name").value() == identity.value();
-        });
-
-        if (it != cfg.end())
-            from_config_load_identity(*sv, *it);
-    }
-
-    return sv;
-}
-
-message_pack parse_message(std::string_view message, std::string_view cchar, std::string_view plugin)
+auto message_type::parse(std::string_view message,
+                         std::string_view cchar,
+                         std::string_view plugin) -> message_type
 {
     auto result = std::string(message);
     auto cc = std::string(cchar);
@@ -274,11 +216,67 @@ message_pack parse_message(std::string_view message, std::string_view cchar, std
     }
 
     return {
-        iscommand ? message_pack::type::command : message_pack::type::message,
+        iscommand ? message_type::type::command : message_type::type::message,
         result
     };
 }
 
-} // !server_util
+auto from_json(boost::asio::io_service& service, const nlohmann::json& object) -> std::shared_ptr<server>
+{
+    // Mandatory parameters.
+    const json_util::document parser(object);
+    const auto id = parser.get<std::string>("name");
+    const auto host = parser.get<std::string>("host");
 
-} // !irccd
+    if (!id || !string_util::is_identifier(*id))
+        throw server_error(server_error::invalid_identifier);
+    if (!host || host->empty())
+        throw server_error(server_error::invalid_hostname);
+
+    const auto sv = std::make_shared<server>(service, *id, *host);
+
+    from_json_load_options(*sv, parser);
+    from_json_load_flags(*sv, parser);
+
+    return sv;
+}
+
+auto from_config(boost::asio::io_service& service,
+                 const config& cfg,
+                 const ini::section& sc) -> std::shared_ptr<server>
+{
+    // Mandatory parameters.
+    const auto id = sc.get("name");
+    const auto host = sc.get("hostname");
+
+    if (!string_util::is_identifier(id.value()))
+        throw server_error(server_error::invalid_identifier);
+    if (host.value().empty())
+        throw server_error(server_error::invalid_hostname);
+
+    const auto sv = std::make_shared<server>(service, id.value(), host.value());
+
+    from_config_load_channels(*sv, sc);
+    from_config_load_flags(*sv, sc);
+    from_config_load_numeric_parameters(*sv, sc);
+    from_config_load_options(*sv, sc);
+
+    // Identity is in a separate section.
+    const auto identity = sc.get("identity");
+
+    if (identity.value().size() > 0) {
+        const auto it = std::find_if(cfg.begin(), cfg.end(), [&] (const auto& i) {
+            if (i.key() != "identity")
+                return false;
+
+            return i.get("name").value() == identity.value();
+        });
+
+        if (it != cfg.end())
+            from_config_load_identity(*sv, *it);
+    }
+
+    return sv;
+}
+
+} // !irccd::server_util
