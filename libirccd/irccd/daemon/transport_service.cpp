@@ -74,7 +74,7 @@ void transport_service::do_recv(std::shared_ptr<transport_client> tc)
             tc->error(irccd_error::invalid_message);
             break;
         default:
-            // Other error may still happen.
+            // Other errors.
             if (!code) {
                 handle_command(tc, json);
 
@@ -105,6 +105,16 @@ transport_service::transport_service(irccd& irccd) noexcept
 }
 
 transport_service::~transport_service() noexcept = default;
+
+auto transport_service::get_commands() const noexcept -> const commands&
+{
+    return commands_;
+}
+
+auto transport_service::get_commands() noexcept -> commands&
+{
+    return commands_;
+}
 
 void transport_service::add(std::shared_ptr<transport_server> ts)
 {

@@ -38,13 +38,13 @@ class transport_server;
  */
 class transport_service {
 public:
-    using commands_t = std::vector<std::unique_ptr<command>>;
-    using servers_t = std::vector<std::shared_ptr<transport_server>>;
+    using commands = std::vector<std::unique_ptr<command>>;
+    using servers = std::vector<std::shared_ptr<transport_server>>;
 
 private:
     irccd& irccd_;
-    commands_t commands_;
-    servers_t servers_;
+    commands commands_;
+    servers servers_;
 
     void handle_command(std::shared_ptr<transport_client>, const nlohmann::json&);
     void do_recv(std::shared_ptr<transport_client>);
@@ -68,20 +68,14 @@ public:
      *
      * \return the commands
      */
-    inline const commands_t& get_commands() const noexcept
-    {
-        return commands_;
-    }
+    auto get_commands() const noexcept -> const commands&;
 
     /**
      * Get underlying commands.
      *
      * \return the commands
      */
-    inline commands_t& get_commands() noexcept
-    {
-        return commands_;
-    }
+    auto get_commands() noexcept -> commands&;
 
     /**
      * Add a transport server.
