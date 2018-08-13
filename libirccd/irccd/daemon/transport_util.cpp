@@ -33,16 +33,13 @@
 #include "transport_util.hpp"
 #include "transport_server.hpp"
 
-using namespace boost::asio;
-using namespace boost::asio::ip;
+namespace asio = boost::asio;
 
-namespace irccd {
-
-namespace transport_util {
+namespace irccd::transport_util {
 
 namespace {
 
-tcp from_config_load_ip_protocol(const ini::section& sc)
+auto from_config_load_ip_protocol(const ini::section& sc) -> asio::ip::tcp
 {
     bool ipv4 = true, ipv6 = false;
 
@@ -69,10 +66,10 @@ tcp from_config_load_ip_protocol(const ini::section& sc)
     if (!ipv4 && !ipv6)
         throw transport_error(transport_error::invalid_family);
 
-    return ipv4 ? tcp::v4() : tcp::v6();
+    return ipv4 ? asio::ip::tcp::v4() : asio::ip::tcp::v6();
 }
 
-tcp::endpoint from_config_load_ip_endpoint(const ini::section& sc)
+auto from_config_load_ip_endpoint(const ini::section& sc) -> asio::ip::tcp::endpoint
 {
     const auto port = ini_util::get_uint<std::uint16_t>(sc, "port");
     const auto address = ini_util::optional_string(sc, "address", "*");
@@ -85,16 +82,16 @@ tcp::endpoint from_config_load_ip_endpoint(const ini::section& sc)
     const auto protocol = from_config_load_ip_protocol(sc);
 
     return address == "*"
-        ? tcp::endpoint(protocol, *port)
-        : tcp::endpoint(address::from_string(address), *port);
+        ? asio::ip::tcp::endpoint(protocol, *port)
+        : asio::ip::tcp::endpoint(asio::ip::address::from_string(address), *port);
 }
 
-tcp::acceptor from_config_load_ip_acceptor(io_service& service, const ini::section& sc)
+auto from_config_load_ip_acceptor(asio::io_service& service, const ini::section& sc) -> asio::ip::tcp::acceptor
 {
-    return tcp::acceptor(service, from_config_load_ip_endpoint(sc), true);
+    return asio::ip::tcp::acceptor(service, from_config_load_ip_endpoint(sc), true);
 }
 
-std::unique_ptr<transport_server> from_config_load_ip(io_service& service, const ini::section& sc)
+auto from_config_load_ip(asio::io_service& service, const ini::section& sc) -> std::unique_ptr<transport_server>
 {
     assert(sc.key() == "transport");
 
@@ -126,7 +123,7 @@ std::unique_ptr<transport_server> from_config_load_ip(io_service& service, const
         std::make_unique<io::ip_acceptor>(std::move(acceptor)));
 }
 
-std::unique_ptr<transport_server> from_config_load_unix(io_service& service, const ini::section& sc)
+auto from_config_load_unix(asio::io_service& service, const ini::section& sc) -> std::unique_ptr<transport_server>
 {
     assert(sc.key() == "transport");
 
@@ -156,7 +153,7 @@ std::unique_ptr<transport_server> from_config_load_unix(io_service& service, con
 
 } // !namespace
 
-std::unique_ptr<transport_server> from_config(io_service& service, const ini::section& sc)
+auto from_config(asio::io_service& service, const ini::section& sc) -> std::unique_ptr<transport_server>
 {
     assert(sc.key() == "transport");
 
@@ -180,6 +177,4 @@ std::unique_ptr<transport_server> from_config(io_service& service, const ini::se
     return transport;
 }
 
-} // !transport_util
-
-} // !irccd
+} // !irccd::transport_util

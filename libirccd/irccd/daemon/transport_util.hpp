@@ -51,8 +51,8 @@ namespace transport_util {
  * \throw transport_error on errors
  * \return the transport
  */
-std::unique_ptr<transport_server> from_config(boost::asio::io_service& service,
-                                              const ini::section& sc);
+auto from_config(boost::asio::io_service& service,
+                 const ini::section& sc) -> std::unique_ptr<transport_server>;
 
 } // !transport_util
 
