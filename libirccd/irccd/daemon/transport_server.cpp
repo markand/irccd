@@ -52,7 +52,7 @@ void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_
             code = irccd_error::invalid_auth;
         } else {
             clients_.insert(client);
-            client->set_state(transport_client::state_t::ready);
+            client->set_state(transport_client::state::ready);
             client->success("auth");
             code = irccd_error::no_error;
         }
@@ -89,10 +89,36 @@ void transport_server::do_greetings(std::shared_ptr<transport_client> client, ac
             do_auth(std::move(client), std::move(handler));
         else {
             clients_.insert(client);
-            client->set_state(transport_client::state_t::ready);
+            client->set_state(transport_client::state::ready);
             handler(std::move(code), std::move(client));
         }
     });
+}
+
+transport_server::transport_server(std::unique_ptr<io::acceptor> acceptor) noexcept
+    : acceptor_(std::move(acceptor))
+{
+    assert(acceptor_);
+}
+
+auto transport_server::get_clients() const noexcept -> const client_set&
+{
+    return clients_;
+}
+
+auto transport_server::get_clients() noexcept -> client_set&
+{
+    return clients_;
+}
+
+auto transport_server::get_password() const noexcept -> const std::string&
+{
+    return password_;
+}
+
+void transport_server::set_password(std::string password) noexcept
+{
+    password_ = std::move(password);
 }
 
 void transport_server::accept(accept_handler handler)
@@ -115,7 +141,7 @@ transport_error::transport_error(error code) noexcept
 {
 }
 
-const std::error_category& transport_category() noexcept
+auto transport_category() noexcept -> const std::error_category&
 {
     static const class category : public std::error_category {
     public:
@@ -158,7 +184,7 @@ const std::error_category& transport_category() noexcept
     return category;
 };
 
-std::error_code make_error_code(transport_error::error e) noexcept
+auto make_error_code(transport_error::error e) noexcept -> std::error_code
 {
     return {static_cast<int>(e), transport_category()};
 }

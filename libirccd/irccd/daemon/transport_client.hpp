@@ -19,7 +19,6 @@
 #ifndef IRCCD_DAEMON_TRANSPORT_CLIENT_HPP
 #define IRCCD_DAEMON_TRANSPORT_CLIENT_HPP
 
-#include <cassert>
 #include <deque>
 #include <memory>
 #include <string_view>
@@ -40,14 +39,14 @@ public:
     /**
      * Client state.
      */
-    enum class state_t {
+    enum class state {
         authenticating,                     //!< client is authenticating
         ready,                              //!< client is ready
         closing                             //!< client is closing
     };
 
 private:
-    state_t state_{state_t::authenticating};
+    state state_{state::authenticating};
     std::weak_ptr<transport_server> parent_;
     std::shared_ptr<io::stream> stream_;
     std::deque<std::pair<nlohmann::json, io::write_handler>> queue_;
@@ -63,32 +62,21 @@ public:
      * \param server the parent
      * \param stream the I/O stream
      */
-    inline transport_client(std::weak_ptr<transport_server> server, std::shared_ptr<io::stream> stream) noexcept
-        : parent_(server)
-        , stream_(std::move(stream))
-    {
-        assert(stream_);
-    }
+    transport_client(std::weak_ptr<transport_server> server, std::shared_ptr<io::stream> stream) noexcept;
 
     /**
      * Get the current client state.
      *
      * \return the state
      */
-    inline state_t get_state() const noexcept
-    {
-        return state_;
-    }
+    auto get_state() const noexcept -> state;
 
     /**
      * Set the client state.
      *
      * \param state the new state
      */
-    inline void set_state(state_t state) noexcept
-    {
-        state_ = state;
-    }
+    void set_state(state state) noexcept;
 
     /**
      * Start receiving if not closed.

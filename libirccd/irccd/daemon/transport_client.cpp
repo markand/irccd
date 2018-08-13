@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cassert>
+
 #include "transport_client.hpp"
 #include "transport_server.hpp"
 
@@ -43,17 +45,34 @@ void transport_client::flush()
 
 void transport_client::erase()
 {
-    state_ = state_t::closing;
+    state_ = state::closing;
 
     if (auto parent = parent_.lock())
         parent->get_clients().erase(shared_from_this());
+}
+
+transport_client::transport_client(std::weak_ptr<transport_server> server, std::shared_ptr<io::stream> stream) noexcept
+    : parent_(server)
+    , stream_(std::move(stream))
+{
+    assert(stream_);
+}
+
+auto transport_client::get_state() const noexcept -> state
+{
+    return state_;
+}
+
+void transport_client::set_state(state state) noexcept
+{
+    state_ = state;
 }
 
 void transport_client::read(io::read_handler handler)
 {
     assert(handler);
 
-    if (state_ != state_t::closing) {
+    if (state_ != state::closing) {
         const auto self = shared_from_this();
 
         stream_->read([this, self, handler] (auto code, auto msg) {
@@ -110,7 +129,7 @@ void transport_client::error(std::error_code code, std::string_view cname, io::w
             handler(code);
     });
 
-    state_ = state_t::closing;
+    state_ = state::closing;
 }
 
 } // !irccd

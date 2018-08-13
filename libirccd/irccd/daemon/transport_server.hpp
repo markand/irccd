@@ -26,7 +26,6 @@
 
 #include <irccd/sysconfig.hpp>
 
-#include <cassert>
 #include <functional>
 #include <memory>
 #include <unordered_set>
@@ -154,51 +153,35 @@ public:
      * \pre acceptor != nullptr
      * \param acceptor the stream acceptor
      */
-    inline transport_server(std::unique_ptr<io::acceptor> acceptor) noexcept
-        : acceptor_(std::move(acceptor))
-    {
-        assert(acceptor_);
-    }
+    transport_server(std::unique_ptr<io::acceptor> acceptor) noexcept;
 
     /**
      * Get the clients.
      *
      * \return the clients
      */
-    inline const client_set& get_clients() const noexcept
-    {
-        return clients_;
-    }
+    auto get_clients() const noexcept -> const client_set&;
 
     /**
      * Overloaded function.
      *
      * \return the clients
      */
-    inline client_set& get_clients() noexcept
-    {
-        return clients_;
-    }
+    auto get_clients() noexcept -> client_set&;
 
     /**
      * Get the current password, empty string means no password.
      *
      * \return the password
      */
-    inline const std::string& get_password() const noexcept
-    {
-        return password_;
-    }
+    auto get_password() const noexcept -> const std::string&;
 
     /**
      * Set an optional password, empty string means no password.
      *
      * \param password the password
      */
-    inline void set_password(std::string password) noexcept
-    {
-        password_ = std::move(password);
-    }
+    void set_password(std::string password) noexcept;
 
     /**
      * Accept a client.
@@ -271,14 +254,14 @@ public:
  *
  * \return the singleton
  */
-const std::error_category& transport_category() noexcept;
+auto transport_category() noexcept -> const std::error_category&;
 
 /**
  * Create a std::error_code from server_error::error enum.
  *
  * \param e the error code
  */
-std::error_code make_error_code(transport_error::error e) noexcept;
+auto make_error_code(transport_error::error e) noexcept -> std::error_code;
 
 } // !irccd
 

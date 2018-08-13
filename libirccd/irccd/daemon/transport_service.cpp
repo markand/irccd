@@ -78,7 +78,7 @@ void transport_service::do_recv(std::shared_ptr<transport_client> tc)
             if (!code) {
                 handle_command(tc, json);
 
-                if (tc->get_state() == transport_client::state_t::ready)
+                if (tc->get_state() == transport_client::state::ready)
                     do_recv(std::move(tc));
             }
 
