@@ -29,14 +29,40 @@ namespace {
 
 BOOST_FIXTURE_TEST_SUITE(server_nick_suite, cli_fixture)
 
-BOOST_AUTO_TEST_CASE(basic)
+BOOST_AUTO_TEST_CASE(not_connected)
 {
     start();
-    /*
-     * TODO: we will make server::set_nickname call raw() instead of being
-     * virtual.
-     */
+    server_->disconnect();
+
+    const auto [code, out, err] = exec({ "server-nick", "test", "new" });
+
+    BOOST_TEST(!code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 0U);
+
+    const auto cmd = server_->find("raw");
+
+    BOOST_TEST(cmd.size() == 0U);
+    BOOST_TEST(server_->get_nickname() == "new");
 }
+
+BOOST_AUTO_TEST_CASE(connected)
+{
+    start();
+    server_->connect([] (auto) {});
+
+    const auto [code, out, err] = exec({ "server-nick", "test", "new" });
+
+    BOOST_TEST(!code);
+    BOOST_TEST(out.size() == 0U);
+    BOOST_TEST(err.size() == 0U);
+
+    const auto cmd = server_->find("send");
+
+    BOOST_TEST(cmd.size() == 1U);
+    BOOST_TEST(std::any_cast<std::string>(cmd[0][0]) == "NICK new");
+}
+
 
 BOOST_AUTO_TEST_SUITE(errors)
 

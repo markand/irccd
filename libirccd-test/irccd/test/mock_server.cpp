@@ -22,11 +22,13 @@ namespace irccd {
 
 void mock_server::connect(connect_handler) noexcept
 {
+    state_ = state::connected;
     push("connect");
 }
 
 void mock_server::disconnect() noexcept
 {
+    state_ = state::disconnected;
     push("disconnect");
 }
 

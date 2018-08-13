@@ -49,6 +49,7 @@ js_plugin_fixture::js_plugin_fixture(std::string path)
     irccd_.plugins().add(plugin_);
     irccd_.servers().add(server_);
 
+    server_->disconnect();
     server_->set_nickname("irccd");
     server_->clear();
 

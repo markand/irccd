@@ -48,6 +48,7 @@ cli_fixture::cli_fixture()
     irccd_.servers().add(server_);
     irccd_.transports().add(std::make_unique<transport_server>(
         std::make_unique<io::local_acceptor>(std::move(acceptor))));
+    server_->disconnect();
     server_->clear();
 }
 

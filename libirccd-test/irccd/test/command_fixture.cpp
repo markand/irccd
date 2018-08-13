@@ -101,6 +101,7 @@ command_fixture::command_fixture()
 
     irccd_.servers().add(server_);
     irccd_.plugins().add(plugin_);
+    server_->disconnect();
     server_->clear();
     plugin_->clear();
 }

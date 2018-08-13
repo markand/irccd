@@ -269,9 +269,13 @@ public:
         connected                       //!< ready for use.
     };
 
-private:
+protected:
+    /*
+     * \brief Server state.
+     */
     state state_{state::disconnected};
 
+private:
     // Requested and joined channels.
     std::vector<channel> rchannels_;
     std::set<std::string> jchannels_;
@@ -430,7 +434,7 @@ public:
      *
      * \param nickname the nickname
      */
-    virtual void set_nickname(std::string nickname);
+    void set_nickname(std::string nickname);
 
     /**
      * Get the username.
