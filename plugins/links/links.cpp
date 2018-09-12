@@ -125,6 +125,8 @@ class requester : public enable_shared_from_this<requester> {
 private:
     using socket = variant<monostate, tcp::socket, stream<tcp::socket>>;
 
+    unsigned level_{0U};
+
     shared_ptr<server> server_;
     string channel_;
     string origin_;
@@ -154,10 +156,10 @@ private:
     void timer();
     void start();
 
-    requester(io_context&, shared_ptr<server>, string, string, url);
+    requester(unsigned, io_context&, shared_ptr<server>, string, string, url);
 
 public:
-    static void run(io_context&, shared_ptr<server>, string, string, string);
+    static void run(unsigned, io_context&, shared_ptr<server>, string, string, string);
 };
 
 void requester::notify(const string& title)
@@ -199,7 +201,8 @@ void requester::handle_read(const error_code& code)
     if (const auto it = res_.find(field::location); it != res_.end()) {
         const string location(it->value().data(), it->value().size());
 
-        run(timer_.get_io_service(), server_, origin_, channel_, location);
+        if (level_ < 32U)
+            run(++level_, timer_.get_io_service(), server_, origin_, channel_, location);
     } else
         parse();
 }
@@ -362,12 +365,14 @@ void requester::start()
     resolve();
 }
 
-requester::requester(io_context& io,
+requester::requester(unsigned level,
+                     io_context& io,
                      shared_ptr<server> server,
                      string channel,
                      string origin,
                      url url)
-    : server_(move(server))
+    : level_(level)
+    , server_(move(server))
     , channel_(move(channel))
     , origin_(move(origin))
     , url_(move(url))
@@ -376,14 +381,19 @@ requester::requester(io_context& io,
 {
 }
 
-void requester::run(io_context& io, shared_ptr<server> server, string origin, string channel, string link)
+void requester::run(unsigned level,
+                    io_context& io,
+                    shared_ptr<server> server,
+                    string origin,
+                    string channel,
+                    string link)
 {
     auto url = url::parse(link);
 
     if (url.protocol.empty() || url.host.empty())
         return;
 
-    shared_ptr<requester>(new requester(io, server, channel, origin, move(url)))->start();
+    shared_ptr<requester>(new requester(level, io, server, channel, origin, move(url)))->start();
 }
 
 // }}}
@@ -455,7 +465,7 @@ void links_plugin::set_formats(const map& formats)
 
 void links_plugin::handle_message(irccd& irccd, const message_event& ev)
 {
-    requester::run(irccd.get_service(), ev.server, ev.origin, ev.channel, ev.message);
+    requester::run(0U, irccd.get_service(), ev.server, ev.origin, ev.channel, ev.message);
 }
 
 auto links_plugin::abi() -> version
