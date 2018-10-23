@@ -203,7 +203,7 @@ void requester::handle_read(const error_code& code)
 
         if (level_ < 32U)
             run(++level_, timer_.get_io_service(), server_, origin_, channel_, location);
-    } else
+    } else if (res_.result() == status::ok)
         parse();
 }
 
