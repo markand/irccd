@@ -32,6 +32,7 @@
 #   Options for TYPE NATIVE:
 #
 #   SOURCES c++ source files
+#   LIBRARIES additional libraries
 #
 # Create a Javascript or Native plugin.
 #
@@ -82,7 +83,7 @@ function(_irccd_define_native_plugin)
     endif ()
 
     add_library(plugin-${PLG_NAME} MODULE ${PLG_SOURCES} ${PLG_OUTPUT_DOC} ${PLG_DOCS})
-    target_link_libraries(plugin-${PLG_NAME} libirccd)
+    target_link_libraries(plugin-${PLG_NAME} libirccd ${PLG_LIBRARIES})
 
     # Change output name.
     set_target_properties(
@@ -111,7 +112,7 @@ endfunction()
 function(irccd_define_plugin)
     set(options "")
     set(oneValueArgs NAME DOCS TYPE SCRIPT)
-    set(multiValueArgs SOURCES)
+    set(multiValueArgs SOURCES LIBRARIES)
 
     cmake_parse_arguments(PLG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 

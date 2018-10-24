@@ -16,40 +16,21 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(plugins)
+project(plugin-links)
 
-set(
-    IRCCD_JAVASCRIPT_PLUGINS
-    ask
-    auth
-    hangman
-    history
-    joke
-    logger
-    plugin
-    roulette
-    tictactoe
+add_subdirectory(extern/uriparser)
+
+irccd_define_plugin(
+    NAME links
+    TYPE NATIVE
+    SOURCES
+        ${plugin-links_SOURCE_DIR}/links.cpp
+        ${plugin-links_SOURCE_DIR}/links.hpp
+        ${plugin-links_SOURCE_DIR}/requester.cpp
+        ${plugin-links_SOURCE_DIR}/requester.hpp
+        ${plugin-links_SOURCE_DIR}/scope_exit.cpp
+        ${plugin-links_SOURCE_DIR}/scope_exit.hpp
+        ${plugin-links_SOURCE_DIR}/uri.cpp
+        ${plugin-links_SOURCE_DIR}/uri.hpp
+    LIBRARIES liburiparser
 )
-
-set(
-    IRCCD_NATIVE_PLUGINS
-    links
-)
-
-set(
-    IRCCD_PLUGINS
-    ${IRCCD_JAVASCRIPT_PLUGINS}
-    ${IRCCD_NATIVE_PLUGINS}
-    CACHE INTERNAL ""
-)
-
-foreach (plugin ${IRCCD_JAVASCRIPT_PLUGINS})
-    irccd_define_plugin(
-        NAME ${plugin}
-        TYPE JS
-        SCRIPT ${plugins_SOURCE_DIR}/${plugin}/${plugin}.js
-        DOCS ${plugins_SOURCE_DIR}/${plugin}/${plugin}.md
-    )
-endforeach ()
-
-add_subdirectory(links)
