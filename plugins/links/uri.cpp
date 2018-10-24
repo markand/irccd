@@ -76,6 +76,10 @@ auto uri::parse(const string& link) noexcept -> optional<uri>
         ret.path += string(p->text.first, p->text.afterLast - p->text.first);
     }
 
+    // Correct path if empty.
+    if (ret.path.empty())
+        ret.path = "/";
+
     return ret;
 }
 
