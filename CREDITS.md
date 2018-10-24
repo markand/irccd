@@ -25,3 +25,6 @@ Libraries and projects
 
 - Boost, http://boost.org
   Powerful and portable libraries.
+
+- uriparser, https://uriparser.github.io
+  Simple URI parser.
