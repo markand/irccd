@@ -45,47 +45,47 @@ class transport_client;
  */
 class command {
 public:
-    /**
-     * \brief Convenient alias.
-     */
-    using document = json_util::document;
+	/**
+	 * \brief Convenient alias.
+	 */
+	using document = json_util::deserializer;
 
-    /**
-     * \brief Command constructor factory.
-     */
-    using constructor = std::function<auto () -> std::unique_ptr<command>>;
+	/**
+	 * \brief Command constructor factory.
+	 */
+	using constructor = std::function<auto () -> std::unique_ptr<command>>;
 
-    /**
-     * \brief Registry of all commands.
-     */
-    static const std::vector<constructor> registry;
+	/**
+	 * \brief Registry of all commands.
+	 */
+	static const std::vector<constructor> registry;
 
-    /**
-     * Default destructor virtual.
-     */
-    virtual ~command() = default;
+	/**
+	 * Default destructor virtual.
+	 */
+	virtual ~command() = default;
 
-    /**
-     * Return the command name, must not have spaces.
-     *
-     * \return the command name
-     */
-    virtual auto get_name() const noexcept -> std::string_view = 0;
+	/**
+	 * Return the command name, must not have spaces.
+	 *
+	 * \return the command name
+	 */
+	virtual auto get_name() const noexcept -> std::string_view = 0;
 
-    /**
-     * Execute the command.
-     *
-     * If the command throw an exception, the error is sent to the client so be
-     * careful about sensitive information.
-     *
-     * The implementation should use client.success() or client.error() to send
-     * some data.
-     *
-     * \param irccd the irccd instance
-     * \param client the client
-     * \param args the client arguments
-     */
-    virtual void exec(irccd& irccd, transport_client& client, const document& args) = 0;
+	/**
+	 * Execute the command.
+	 *
+	 * If the command throw an exception, the error is sent to the client so be
+	 * careful about sensitive information.
+	 *
+	 * The implementation should use client.success() or client.error() to send
+	 * some data.
+	 *
+	 * \param irccd the irccd instance
+	 * \param client the client
+	 * \param args the client arguments
+	 */
+	virtual void exec(irccd& irccd, transport_client& client, const document& args) = 0;
 };
 
 // }}}
@@ -101,15 +101,15 @@ public:
  */
 class plugin_config_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -125,15 +125,15 @@ public:
  */
 class plugin_info_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -145,15 +145,15 @@ public:
  */
 class plugin_list_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -171,15 +171,15 @@ public:
  */
 class plugin_load_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -196,15 +196,15 @@ public:
  */
 class plugin_reload_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -221,15 +221,15 @@ public:
  */
 class plugin_unload_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -245,15 +245,15 @@ public:
  */
 class rule_add_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -270,15 +270,15 @@ public:
  */
 class rule_edit_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -294,15 +294,15 @@ public:
  */
 class rule_info_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -314,15 +314,15 @@ public:
  */
 class rule_list_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -338,15 +338,15 @@ public:
  */
 class rule_move_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -362,15 +362,15 @@ public:
  */
 class rule_remove_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -390,15 +390,15 @@ public:
  */
 class server_connect_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -415,15 +415,15 @@ public:
  */
 class server_disconnect_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -440,15 +440,15 @@ public:
  */
 class server_info_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -467,15 +467,15 @@ public:
  */
 class server_invite_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -493,15 +493,15 @@ public:
  */
 class server_join_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -520,15 +520,15 @@ public:
  */
 class server_kick_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -540,15 +540,15 @@ public:
  */
 class server_list_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -566,15 +566,15 @@ public:
  */
 class server_me_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -592,15 +592,15 @@ public:
  */
 class server_message_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -619,15 +619,15 @@ public:
  */
 class server_mode_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -645,15 +645,15 @@ public:
  */
 class server_nick_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -671,15 +671,15 @@ public:
  */
 class server_notice_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -697,15 +697,15 @@ public:
  */
 class server_part_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -722,15 +722,15 @@ public:
  */
 class server_reconnect_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}
@@ -748,15 +748,15 @@ public:
  */
 class server_topic_command : public command {
 public:
-    /**
-     * \copydoc command::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc command::exec
-     */
-    void exec(irccd& irccd, transport_client& client, const document& args) override;
+	/**
+	 * \copydoc command::exec
+	 */
+	void exec(irccd& irccd, transport_client& client, const document& args) override;
 };
 
 // }}}

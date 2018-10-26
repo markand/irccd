@@ -35,84 +35,84 @@ namespace irccd {
  */
 class mock_server : public server, public mock {
 public:
-    /**
-     * Inherited constructors.
-     */
-    using server::server;
+	/**
+	 * Inherited constructors.
+	 */
+	using server::server;
 
-    /**
-     * \copydoc server::connect
-     */
-    void connect(connect_handler handler) noexcept override;
+	/**
+	 * \copydoc server::connect
+	 */
+	void connect(connect_handler handler) noexcept override;
 
-    /**
-     * \copydoc server::disconnect
-     */
-    void disconnect() noexcept override;
+	/**
+	 * \copydoc server::disconnect
+	 */
+	void disconnect() noexcept override;
 
-    /**
-     * \copydoc server::invite
-     */
-    void invite(std::string_view target, std::string_view channel) override;
+	/**
+	 * \copydoc server::invite
+	 */
+	void invite(std::string_view target, std::string_view channel) override;
 
-    /**
-     * \copydoc server::join
-     */
-    void join(std::string_view channel, std::string_view password = "") override;
+	/**
+	 * \copydoc server::join
+	 */
+	void join(std::string_view channel, std::string_view password = "") override;
 
-    /**
-     * \copydoc server::kick
-     */
-    void kick(std::string_view target, std::string_view channel, std::string_view reason = "") override;
+	/**
+	 * \copydoc server::kick
+	 */
+	void kick(std::string_view target, std::string_view channel, std::string_view reason = "") override;
 
-    /**
-     * \copydoc server::me
-     */
-    void me(std::string_view target, std::string_view message) override;
+	/**
+	 * \copydoc server::me
+	 */
+	void me(std::string_view target, std::string_view message) override;
 
-    /**
-     * \copydoc server::message
-     */
-    void message(std::string_view target, std::string_view message) override;
+	/**
+	 * \copydoc server::message
+	 */
+	void message(std::string_view target, std::string_view message) override;
 
-    /**
-     * \copydoc server::mode
-     */
-    void mode(std::string_view channel,
-              std::string_view mode,
-              std::string_view limit = "",
-              std::string_view user = "",
-              std::string_view mask = "") override;
+	/**
+	 * \copydoc server::mode
+	 */
+	void mode(std::string_view channel,
+                  std::string_view mode,
+                  std::string_view limit = "",
+                  std::string_view user = "",
+                  std::string_view mask = "") override;
 
-    /**
-     * \copydoc server::names
-     */
-    void names(std::string_view channel) override;
+	/**
+	 * \copydoc server::names
+	 */
+	void names(std::string_view channel) override;
 
-    /**
-     * \copydoc server::notice
-     */
-    void notice(std::string_view target, std::string_view message) override;
+	/**
+	 * \copydoc server::notice
+	 */
+	void notice(std::string_view target, std::string_view message) override;
 
-    /**
-     * \copydoc server::part
-     */
-    void part(std::string_view channel, std::string_view reason = "") override;
+	/**
+	 * \copydoc server::part
+	 */
+	void part(std::string_view channel, std::string_view reason = "") override;
 
-    /**
-     * \copydoc server::send
-     */
-    void send(std::string_view raw) override;
+	/**
+	 * \copydoc server::send
+	 */
+	void send(std::string_view raw) override;
 
-    /**
-     * \copydoc server::topic
-     */
-    void topic(std::string_view channel, std::string_view topic) override;
+	/**
+	 * \copydoc server::topic
+	 */
+	void topic(std::string_view channel, std::string_view topic) override;
 
-    /**
-     * \copydoc server::whois
-     */
-    void whois(std::string_view target) override;
+	/**
+	 * \copydoc server::whois
+	 */
+	void whois(std::string_view target) override;
 };
 
 } // !irccd

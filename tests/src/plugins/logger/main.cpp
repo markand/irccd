@@ -33,123 +33,123 @@ namespace {
 
 class logger_test : public js_plugin_fixture {
 protected:
-    std::string last() const
-    {
-        std::ifstream file(CMAKE_CURRENT_BINARY_DIR "/log.txt");
+	std::string last() const
+	{
+		std::ifstream file(CMAKE_CURRENT_BINARY_DIR "/log.txt");
 
-        return std::string(std::istreambuf_iterator<char>(file.rdbuf()), {});
-    }
+		return std::string(std::istreambuf_iterator<char>(file.rdbuf()), {});
+	}
 
 public:
-    logger_test()
-        : js_plugin_fixture(PLUGIN_PATH)
-    {
-        remove(CMAKE_CURRENT_BINARY_DIR "/log.txt");
+	logger_test()
+		: js_plugin_fixture(PLUGIN_PATH)
+	{
+		remove(CMAKE_CURRENT_BINARY_DIR "/log.txt");
 
-        plugin_->set_formats({
-            { "join", "join=#{server}:#{channel}:#{origin}:#{nickname}" },
-            { "kick", "kick=#{server}:#{channel}:#{origin}:#{nickname}:#{target}:#{reason}" },
-            { "me", "me=#{server}:#{channel}:#{origin}:#{nickname}:#{message}" },
-            { "message", "message=#{server}:#{channel}:#{origin}:#{nickname}:#{message}" },
-            { "mode", "mode=#{server}:#{origin}:#{channel}:#{mode}:#{limit}:#{user}:#{mask}" },
-            { "notice", "notice=#{server}:#{origin}:#{channel}:#{message}" },
-            { "part", "part=#{server}:#{channel}:#{origin}:#{nickname}:#{reason}" },
-            { "query", "query=#{server}:#{origin}:#{nickname}:#{message}" },
-            { "topic", "topic=#{server}:#{channel}:#{origin}:#{nickname}:#{topic}" },
-        });
-    }
+		plugin_->set_formats({
+			{ "join", "join=#{server}:#{channel}:#{origin}:#{nickname}" },
+			{ "kick", "kick=#{server}:#{channel}:#{origin}:#{nickname}:#{target}:#{reason}" },
+			{ "me", "me=#{server}:#{channel}:#{origin}:#{nickname}:#{message}" },
+			{ "message", "message=#{server}:#{channel}:#{origin}:#{nickname}:#{message}" },
+			{ "mode", "mode=#{server}:#{origin}:#{channel}:#{mode}:#{limit}:#{user}:#{mask}" },
+			{ "notice", "notice=#{server}:#{origin}:#{channel}:#{message}" },
+			{ "part", "part=#{server}:#{channel}:#{origin}:#{nickname}:#{reason}" },
+			{ "query", "query=#{server}:#{origin}:#{nickname}:#{message}" },
+			{ "topic", "topic=#{server}:#{channel}:#{origin}:#{nickname}:#{topic}" },
+		});
+	}
 
-    void load(plugin::map config = {})
-    {
-        if (config.count("path") == 0)
-            config.emplace("path", CMAKE_CURRENT_BINARY_DIR "/log.txt");
+	void load(plugin::map config = {})
+	{
+		if (config.count("path") == 0)
+			config.emplace("path", CMAKE_CURRENT_BINARY_DIR "/log.txt");
 
-        plugin_->set_options(config);
-        plugin_->handle_load(irccd_);
-    }
+		plugin_->set_options(config);
+		plugin_->handle_load(irccd_);
+	}
 };
 
 BOOST_FIXTURE_TEST_SUITE(logger_test_suite, logger_test)
 
 BOOST_AUTO_TEST_CASE(format_join)
 {
-    load();
+	load();
 
-    plugin_->handle_join(irccd_, {server_, "jean!jean@localhost", "#staff"});
+	plugin_->handle_join(irccd_, {server_, "jean!jean@localhost", "#staff"});
 
-    BOOST_REQUIRE_EQUAL("join=test:#staff:jean!jean@localhost:jean\n", last());
+	BOOST_REQUIRE_EQUAL("join=test:#staff:jean!jean@localhost:jean\n", last());
 }
 
 BOOST_AUTO_TEST_CASE(format_kick)
 {
-    load();
+	load();
 
-    plugin_->handle_kick(irccd_, {server_, "jean!jean@localhost", "#staff", "badboy", "please do not flood"});
+	plugin_->handle_kick(irccd_, {server_, "jean!jean@localhost", "#staff", "badboy", "please do not flood"});
 
-    BOOST_REQUIRE_EQUAL("kick=test:#staff:jean!jean@localhost:jean:badboy:please do not flood\n", last());
+	BOOST_REQUIRE_EQUAL("kick=test:#staff:jean!jean@localhost:jean:badboy:please do not flood\n", last());
 }
 
 BOOST_AUTO_TEST_CASE(format_me)
 {
-    load();
+	load();
 
-    plugin_->handle_me(irccd_, {server_, "jean!jean@localhost", "#staff", "is drinking water"});
+	plugin_->handle_me(irccd_, {server_, "jean!jean@localhost", "#staff", "is drinking water"});
 
-    BOOST_REQUIRE_EQUAL("me=test:#staff:jean!jean@localhost:jean:is drinking water\n", last());
+	BOOST_REQUIRE_EQUAL("me=test:#staff:jean!jean@localhost:jean:is drinking water\n", last());
 }
 
 BOOST_AUTO_TEST_CASE(format_message)
 {
-    load();
+	load();
 
-    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#staff", "hello guys"});
+	plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#staff", "hello guys"});
 
-    BOOST_REQUIRE_EQUAL("message=test:#staff:jean!jean@localhost:jean:hello guys\n", last());
+	BOOST_REQUIRE_EQUAL("message=test:#staff:jean!jean@localhost:jean:hello guys\n", last());
 }
 
 BOOST_AUTO_TEST_CASE(format_mode)
 {
-    load();
+	load();
 
-    plugin_->handle_mode(irccd_, {server_, "jean!jean@localhost", "chris", "+i", "l", "u", "m"});
+	plugin_->handle_mode(irccd_, {server_, "jean!jean@localhost", "chris", "+i", "l", "u", "m"});
 
-    BOOST_REQUIRE_EQUAL("mode=test:jean!jean@localhost:chris:+i:l:u:m\n", last());
+	BOOST_REQUIRE_EQUAL("mode=test:jean!jean@localhost:chris:+i:l:u:m\n", last());
 }
 
 BOOST_AUTO_TEST_CASE(format_notice)
 {
-    load();
+	load();
 
-    plugin_->handle_notice(irccd_, {server_, "jean!jean@localhost", "chris", "tu veux voir mon chat ?"});
+	plugin_->handle_notice(irccd_, {server_, "jean!jean@localhost", "chris", "tu veux voir mon chat ?"});
 
-    BOOST_REQUIRE_EQUAL("notice=test:jean!jean@localhost:chris:tu veux voir mon chat ?\n", last());
+	BOOST_REQUIRE_EQUAL("notice=test:jean!jean@localhost:chris:tu veux voir mon chat ?\n", last());
 }
 
 BOOST_AUTO_TEST_CASE(format_part)
 {
-    load();
+	load();
 
-    plugin_->handle_part(irccd_, {server_, "jean!jean@localhost", "#staff", "too noisy here"});
+	plugin_->handle_part(irccd_, {server_, "jean!jean@localhost", "#staff", "too noisy here"});
 
-    BOOST_REQUIRE_EQUAL("part=test:#staff:jean!jean@localhost:jean:too noisy here\n", last());
+	BOOST_REQUIRE_EQUAL("part=test:#staff:jean!jean@localhost:jean:too noisy here\n", last());
 }
 
 BOOST_AUTO_TEST_CASE(format_topic)
 {
-    load();
+	load();
 
-    plugin_->handle_topic(irccd_, {server_, "jean!jean@localhost", "#staff", "oh yeah yeaaaaaaaah"});
+	plugin_->handle_topic(irccd_, {server_, "jean!jean@localhost", "#staff", "oh yeah yeaaaaaaaah"});
 
-    BOOST_REQUIRE_EQUAL("topic=test:#staff:jean!jean@localhost:jean:oh yeah yeaaaaaaaah\n", last());
+	BOOST_REQUIRE_EQUAL("topic=test:#staff:jean!jean@localhost:jean:oh yeah yeaaaaaaaah\n", last());
 }
 
 BOOST_AUTO_TEST_CASE(fix_642)
 {
-    load();
+	load();
 
-    plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#STAFF", "hello guys"});
+	plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#STAFF", "hello guys"});
 
-    BOOST_REQUIRE_EQUAL("message=test:#staff:jean!jean@localhost:jean:hello guys\n", last());
+	BOOST_REQUIRE_EQUAL("message=test:#staff:jean!jean@localhost:jean:hello guys\n", last());
 }
 
 BOOST_AUTO_TEST_SUITE_END()

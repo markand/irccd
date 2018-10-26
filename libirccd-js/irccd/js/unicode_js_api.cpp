@@ -37,7 +37,7 @@ namespace {
  */
 auto Unicode_isDigit(duk_context* ctx) noexcept -> duk_ret_t
 {
-    return duk::push(ctx, unicode::isdigit(duk_get_int(ctx, 0)));
+	return duk::push(ctx, unicode::isdigit(duk_get_int(ctx, 0)));
 }
 
 // }}}
@@ -55,7 +55,7 @@ auto Unicode_isDigit(duk_context* ctx) noexcept -> duk_ret_t
  */
 auto Unicode_isLetter(duk_context* ctx) noexcept -> duk_ret_t
 {
-    return duk::push(ctx, unicode::isalpha(duk_get_int(ctx, 0)));
+	return duk::push(ctx, unicode::isalpha(duk_get_int(ctx, 0)));
 }
 
 // }}}
@@ -73,7 +73,7 @@ auto Unicode_isLetter(duk_context* ctx) noexcept -> duk_ret_t
  */
 auto Unicode_isLower(duk_context* ctx) noexcept -> duk_ret_t
 {
-    return duk::push(ctx, unicode::islower(duk_get_int(ctx, 0)));
+	return duk::push(ctx, unicode::islower(duk_get_int(ctx, 0)));
 }
 
 // }}}
@@ -91,7 +91,7 @@ auto Unicode_isLower(duk_context* ctx) noexcept -> duk_ret_t
  */
 auto Unicode_isSpace(duk_context* ctx) noexcept -> duk_ret_t
 {
-    return duk::push(ctx, unicode::isspace(duk_get_int(ctx, 0)));
+	return duk::push(ctx, unicode::isspace(duk_get_int(ctx, 0)));
 }
 
 // }}}
@@ -109,7 +109,7 @@ auto Unicode_isSpace(duk_context* ctx) noexcept -> duk_ret_t
  */
 auto Unicode_isTitle(duk_context* ctx) noexcept -> duk_ret_t
 {
-    return duk::push(ctx, unicode::istitle(duk_get_int(ctx, 0)));
+	return duk::push(ctx, unicode::istitle(duk_get_int(ctx, 0)));
 }
 
 // }}}
@@ -127,37 +127,37 @@ auto Unicode_isTitle(duk_context* ctx) noexcept -> duk_ret_t
  */
 auto Unicode_isUpper(duk_context* ctx) noexcept -> duk_ret_t
 {
-    return duk::push(ctx, unicode::isupper(duk_get_int(ctx, 0)));
+	return duk::push(ctx, unicode::isupper(duk_get_int(ctx, 0)));
 }
 
 // }}}
 
 const duk_function_list_entry functions[] = {
-    { "isDigit",        Unicode_isDigit,    1 },
-    { "isLetter",       Unicode_isLetter,   1 },
-    { "isLower",        Unicode_isLower,    1 },
-    { "isSpace",        Unicode_isSpace,    1 },
-    { "isTitle",        Unicode_isTitle,    1 },
-    { "isUpper",        Unicode_isUpper,    1 },
-    { nullptr,          nullptr,            0 }
+	{ "isDigit",            Unicode_isDigit,        1 },
+	{ "isLetter",           Unicode_isLetter,       1 },
+	{ "isLower",            Unicode_isLower,        1 },
+	{ "isSpace",            Unicode_isSpace,        1 },
+	{ "isTitle",            Unicode_isTitle,        1 },
+	{ "isUpper",            Unicode_isUpper,        1 },
+	{ nullptr,              nullptr,                0 }
 };
 
 } // !namespace
 
 auto unicode_js_api::get_name() const noexcept -> std::string_view
 {
-    return "Irccd.Unicode";
+	return "Irccd.Unicode";
 }
 
 void unicode_js_api::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
-    duk::stack_guard sa(plugin->get_context());
+	duk::stack_guard sa(plugin->get_context());
 
-    duk_get_global_string(plugin->get_context(), "Irccd");
-    duk_push_object(plugin->get_context());
-    duk_put_function_list(plugin->get_context(), -1, functions);
-    duk_put_prop_string(plugin->get_context(), -2, "Unicode");
-    duk_pop(plugin->get_context());
+	duk_get_global_string(plugin->get_context(), "Irccd");
+	duk_push_object(plugin->get_context());
+	duk_put_function_list(plugin->get_context(), -1, functions);
+	duk_put_prop_string(plugin->get_context(), -2, "Unicode");
+	duk_pop(plugin->get_context());
 }
 
 } // !irccd::js

@@ -44,9 +44,9 @@ namespace ini_util {
  * \return the value or none if not able to convert
  */
 template <typename Int>
-inline std::optional<Int> get_uint(const ini::section& sc, const std::string& name) noexcept
+inline auto get_uint(const ini::section& sc, std::string_view name) noexcept -> std::optional<Int>
 {
-    return string_util::to_uint<Int>(sc.get(name).value());
+	return string_util::to_uint<Int>(sc.get(name).get_value());
 }
 
 /**
@@ -57,16 +57,16 @@ inline std::optional<Int> get_uint(const ini::section& sc, const std::string& na
  * \param def the default value
  * \return the value or def if not found
  */
-inline std::string optional_string(const ini::section& sc,
-                                   const std::string& name,
-                                   const std::string& def) noexcept
+inline auto optional_string(const ini::section& sc,
+                            std::string_view name,
+                            std::string_view def) noexcept -> std::string
 {
-    const auto it = sc.find(name);
+	const auto it = sc.find(name);
 
-    if (it == sc.end())
-        return def;
+	if (it == sc.end())
+		return std::string(def);
 
-    return it->value();
+	return it->get_value();
 }
 
 /**
@@ -78,16 +78,16 @@ inline std::string optional_string(const ini::section& sc,
  * \return the value or none if not able to convert
  */
 template <typename Int>
-inline std::optional<Int> optional_uint(const ini::section& sc,
-                                          const std::string& name,
-                                          Int def) noexcept
+inline auto optional_uint(const ini::section& sc,
+                          std::string_view name,
+                          Int def) noexcept -> std::optional<Int>
 {
-    const auto it = sc.find(name);
+	const auto it = sc.find(name);
 
-    if (it == sc.end())
-        return def;
+	if (it == sc.end())
+		return def;
 
-    return string_util::to_uint<Int>(it->value());
+	return string_util::to_uint<Int>(it->get_value());
 }
 
 } // !ini_util

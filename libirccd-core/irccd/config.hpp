@@ -36,30 +36,30 @@ namespace irccd {
  */
 class config : public ini::document {
 private:
-    std::string path_;
+	std::string path_;
 
 public:
-    /**
-     * Search the configuration file into the standard defined paths.
-     *
-     * \param name the file name
-     * \return the config or empty if not found
-     */
-    static auto search(std::string_view name) -> std::optional<config>;
+	/**
+	 * Search the configuration file into the standard defined paths.
+	 *
+	 * \param name the file name
+	 * \return the config or empty if not found
+	 */
+	static auto search(std::string_view name) -> std::optional<config>;
 
-    /**
-     * Load the configuration from the specified path.
-     *
-     * \param path the path
-     */
-    config(std::string path = "");
+	/**
+	 * Load the configuration from the specified path.
+	 *
+	 * \param path the path
+	 */
+	config(std::string path = "");
 
-    /**
-     * Get the path to the configuration file.
-     *
-     * \return the path
-     */
-    auto get_path() const noexcept -> const std::string&;
+	/**
+	 * Get the path to the configuration file.
+	 *
+	 * \return the path
+	 */
+	auto get_path() const noexcept -> const std::string&;
 };
 
 } // !irccd

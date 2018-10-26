@@ -17,7 +17,7 @@
 #
 
 irccd_define_test(
-    NAME command-rule-move
-    SOURCES main.cpp
-    LIBRARIES libirccd libirccd-ctl
+	NAME command-rule-move
+	SOURCES main.cpp
+	LIBRARIES libirccd libirccd-ctl
 )

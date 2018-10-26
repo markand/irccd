@@ -34,118 +34,118 @@ namespace {
 
 class js_plugin_fixture : public irccd_fixture {
 protected:
-    std::shared_ptr<js::js_plugin> plugin_;
+	std::shared_ptr<js::js_plugin> plugin_;
 
-    void load(const std::string& path)
-    {
-        plugin_ = std::make_unique<js::js_plugin>("test", path);
+	void load(const std::string& path)
+	{
+		plugin_ = std::make_unique<js::js_plugin>("test", path);
 
-        for (const auto& f : js::js_api::registry)
-            f()->load(irccd_, plugin_);
+		for (const auto& f : js::js_api::registry)
+			f()->load(irccd_, plugin_);
 
-        plugin_->open();
-    }
+		plugin_->open();
+	}
 };
 
 BOOST_FIXTURE_TEST_SUITE(js_plugin_suite, js_plugin_fixture)
 
 BOOST_AUTO_TEST_CASE(assign)
 {
-    load(CMAKE_CURRENT_SOURCE_DIR "/config-assign.js");
+	load(CMAKE_CURRENT_SOURCE_DIR "/config-assign.js");
 
-    plugin_->set_options({
-        { "path",       "none"  },
-        { "verbose",    "false" }
-    });
-    plugin_->handle_load(irccd_);
+	plugin_->set_options({
+		{ "path",	   "none"  },
+		{ "verbose",	"false" }
+	});
+	plugin_->handle_load(irccd_);
 
-    BOOST_TEST(plugin_->get_options().at("path") == "none");
-    BOOST_TEST(plugin_->get_options().at("verbose") == "false");
-    BOOST_TEST(plugin_->get_options().at("hard") == "true");
+	BOOST_TEST(plugin_->get_options().at("path") == "none");
+	BOOST_TEST(plugin_->get_options().at("verbose") == "false");
+	BOOST_TEST(plugin_->get_options().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_CASE(fill)
 {
-    load(CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
+	load(CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
 
-    plugin_->set_options({
-        { "path",       "none"  },
-        { "verbose",    "false" }
-    });
-    plugin_->handle_load(irccd_);
+	plugin_->set_options({
+		{ "path",	   "none"  },
+		{ "verbose",	"false" }
+	});
+	plugin_->handle_load(irccd_);
 
-    BOOST_TEST(plugin_->get_options().at("path") == "none");
-    BOOST_TEST(plugin_->get_options().at("verbose") == "false");
-    BOOST_TEST(plugin_->get_options().at("hard") == "true");
+	BOOST_TEST(plugin_->get_options().at("path") == "none");
+	BOOST_TEST(plugin_->get_options().at("verbose") == "false");
+	BOOST_TEST(plugin_->get_options().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_CASE(merge_after)
 {
-    load(CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
+	load(CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
 
-    plugin_->handle_load(irccd_);
-    plugin_->set_options({
-        { "path",       "none"  },
-        { "verbose",    "false" }
-    });
+	plugin_->handle_load(irccd_);
+	plugin_->set_options({
+		{ "path",	   "none"  },
+		{ "verbose",	"false" }
+	});
 
-    BOOST_TEST(plugin_->get_options().at("path") == "none");
-    BOOST_TEST(plugin_->get_options().at("verbose") == "false");
-    BOOST_TEST(plugin_->get_options().at("hard") == "true");
+	BOOST_TEST(plugin_->get_options().at("path") == "none");
+	BOOST_TEST(plugin_->get_options().at("verbose") == "false");
+	BOOST_TEST(plugin_->get_options().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
 class js_plugin_loader_fixture : public irccd_fixture {
 protected:
-    std::shared_ptr<plugin> plugin_;
+	std::shared_ptr<plugin> plugin_;
 
-    js_plugin_loader_fixture()
-    {
-        irccd_.set_config(config(CMAKE_CURRENT_SOURCE_DIR "/irccd.conf"));
+	js_plugin_loader_fixture()
+	{
+		irccd_.set_config(config(CMAKE_CURRENT_SOURCE_DIR "/irccd.conf"));
 
-        auto loader = std::make_unique<js::js_plugin_loader>(irccd_);
+		auto loader = std::make_unique<js::js_plugin_loader>(irccd_);
 
-        for (const auto& f : js::js_api::registry)
-            loader->get_modules().push_back(f());
+		for (const auto& f : js::js_api::registry)
+			loader->get_modules().push_back(f());
 
-        irccd_.plugins().add_loader(std::move(loader));
-    }
+		irccd_.plugins().add_loader(std::move(loader));
+	}
 
-    void load(std::string name, std::string path)
-    {
-        irccd_.plugins().load(name, path);
-        plugin_ = irccd_.plugins().require(name);
-    }
+	void load(std::string name, std::string path)
+	{
+		irccd_.plugins().load(name, path);
+		plugin_ = irccd_.plugins().require(name);
+	}
 };
 
 BOOST_FIXTURE_TEST_SUITE(js_plugin_loader_test_suite, js_plugin_loader_fixture)
 
 BOOST_AUTO_TEST_CASE(assign)
 {
-    load("test", CMAKE_CURRENT_SOURCE_DIR "/config-assign.js");
+	load("test", CMAKE_CURRENT_SOURCE_DIR "/config-assign.js");
 
-    BOOST_TEST(plugin_->get_options().at("path") == "none");
-    BOOST_TEST(plugin_->get_options().at("verbose") == "false");
-    BOOST_TEST(plugin_->get_options().at("hard") == "true");
+	BOOST_TEST(plugin_->get_options().at("path") == "none");
+	BOOST_TEST(plugin_->get_options().at("verbose") == "false");
+	BOOST_TEST(plugin_->get_options().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_CASE(fill)
 {
-    load("test", CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
+	load("test", CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
 
-    BOOST_TEST(plugin_->get_options().at("path") == "none");
-    BOOST_TEST(plugin_->get_options().at("verbose") == "false");
-    BOOST_TEST(plugin_->get_options().at("hard") == "true");
+	BOOST_TEST(plugin_->get_options().at("path") == "none");
+	BOOST_TEST(plugin_->get_options().at("verbose") == "false");
+	BOOST_TEST(plugin_->get_options().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_CASE(merge_after)
 {
-    load("test", CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
+	load("test", CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
 
-    BOOST_TEST(plugin_->get_options().at("path") == "none");
-    BOOST_TEST(plugin_->get_options().at("verbose") == "false");
-    BOOST_TEST(plugin_->get_options().at("hard") == "true");
+	BOOST_TEST(plugin_->get_options().at("path") == "none");
+	BOOST_TEST(plugin_->get_options().at("verbose") == "false");
+	BOOST_TEST(plugin_->get_options().at("hard") == "true");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

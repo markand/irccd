@@ -34,15 +34,15 @@ namespace irccd::js {
  */
 class logger_js_api : public js_api {
 public:
-    /**
-     * \copydoc js_api::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc js_api::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc Module::load
-     */
-    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
+	/**
+	 * \copydoc Module::load
+	 */
+	void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
 } // !irccd::js

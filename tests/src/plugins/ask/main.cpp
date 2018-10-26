@@ -30,46 +30,46 @@ namespace {
 
 class ask_test : public js_plugin_fixture {
 public:
-    ask_test()
-        : js_plugin_fixture(PLUGIN_PATH)
-    {
-        plugin_->set_options({
-            { "file", CMAKE_CURRENT_SOURCE_DIR "/answers.conf" }
-        });
-        plugin_->handle_load(irccd_);
-    }
+	ask_test()
+		: js_plugin_fixture(PLUGIN_PATH)
+	{
+		plugin_->set_options({
+			{ "file", CMAKE_CURRENT_SOURCE_DIR "/answers.conf" }
+		});
+		plugin_->handle_load(irccd_);
+	}
 };
 
 BOOST_FIXTURE_TEST_SUITE(ask_test_suite, ask_test)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    bool no = false;
-    bool yes = false;
+	bool no = false;
+	bool yes = false;
 
-    /*
-     * Invoke the plugin 1000 times, it will be very unlucky to not have both
-     * answers in that amount of tries.
-     */
-    for (int i = 0; i < 1000; ++i) {
-        plugin_->handle_command(irccd_, {server_, "tester", "#dummy", ""});
+	/*
+	 * Invoke the plugin 1000 times, it will be very unlucky to not have
+	 * both answers in that amount of tries.
+	 */
+	for (int i = 0; i < 1000; ++i) {
+		plugin_->handle_command(irccd_, {server_, "tester", "#dummy", ""});
 
-        const auto cmd = server_->find("message").back();
+		const auto cmd = server_->find("message").back();
 
-        BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#dummy");
+		BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#dummy");
 
-        const auto msg = std::any_cast<std::string>(cmd[1]);
+		const auto msg = std::any_cast<std::string>(cmd[1]);
 
-        if (msg == "tester, YES")
-            yes = true;
-        if (msg == "tester, NO")
-            no = true;
+		if (msg == "tester, YES")
+			yes = true;
+		if (msg == "tester, NO")
+			no = true;
 
-        server_->clear();
-    }
+		server_->clear();
+	}
 
-    BOOST_TEST(no);
-    BOOST_TEST(yes);
+	BOOST_TEST(no);
+	BOOST_TEST(yes);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

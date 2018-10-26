@@ -35,26 +35,26 @@ namespace {
 template <typename T>
 auto bind() noexcept -> js_api::factory
 {
-    return [] () noexcept {
-        return std::make_unique<T>();
-    };
+	return [] () noexcept {
+		return std::make_unique<T>();
+	};
 }
 
 } // !namespace
 
 const std::vector<js_api::factory> js_api::registry{
-    // Irccd API must be loaded first.
-    bind<irccd_js_api>(),
-    bind<directory_js_api>(),
-    bind<elapsed_timer_js_api>(),
-    bind<file_js_api>(),
-    bind<logger_js_api>(),
-    bind<plugin_js_api>(),
-    bind<server_js_api>(),
-    bind<system_js_api>(),
-    bind<timer_js_api>(),
-    bind<unicode_js_api>(),
-    bind<util_js_api>()
+	// Irccd API must be loaded first.
+	bind<irccd_js_api>(),
+	bind<directory_js_api>(),
+	bind<elapsed_timer_js_api>(),
+	bind<file_js_api>(),
+	bind<logger_js_api>(),
+	bind<plugin_js_api>(),
+	bind<server_js_api>(),
+	bind<system_js_api>(),
+	bind<timer_js_api>(),
+	bind<unicode_js_api>(),
+	bind<util_js_api>()
 };
 
 } // !irccd::js

@@ -31,41 +31,41 @@ BOOST_FIXTURE_TEST_SUITE(plugin_info_test_suite, command_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    const auto [json, code] = request({
-        { "command",    "plugin-info"       },
-        { "plugin",     "test"              },
-    });
+	const auto [json, code] = request({
+		{ "command",    "plugin-info"   },
+		{ "plugin",     "test"          },
+	});
 
-    BOOST_TEST(!code);
-    BOOST_TEST(json["author"].get<std::string>() == "David Demelier <markand@malikania.fr>");
-    BOOST_TEST(json["license"].get<std::string>() == "ISC");
-    BOOST_TEST(json["summary"].get<std::string>() == "mock plugin");
-    BOOST_TEST(json["version"].get<std::string>() == "1.0");
+	BOOST_TEST(!code);
+	BOOST_TEST(json["author"].get<std::string>() == "David Demelier <markand@malikania.fr>");
+	BOOST_TEST(json["license"].get<std::string>() == "ISC");
+	BOOST_TEST(json["summary"].get<std::string>() == "mock plugin");
+	BOOST_TEST(json["version"].get<std::string>() == "1.0");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier)
 {
-    const auto [json, code] = request({
-        { "command",    "plugin-info"   }
-    });
+	const auto [json, code] = request({
+		{ "command", "plugin-info" }
+	});
 
-    BOOST_TEST(code == plugin_error::invalid_identifier);
-    BOOST_TEST(json["error"].get<int>() == plugin_error::invalid_identifier);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
+	BOOST_TEST(code == plugin_error::invalid_identifier);
+	BOOST_TEST(json["error"].get<int>() == plugin_error::invalid_identifier);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    const auto [json, code] = request({
-        { "command",    "plugin-info"   },
-        { "plugin",     "unknown"       }
-    });
+	const auto [json, code] = request({
+		{ "command",    "plugin-info"   },
+		{ "plugin",     "unknown"       }
+	});
 
-    BOOST_TEST(code == plugin_error::not_found);
-    BOOST_TEST(json["error"].get<int>() == plugin_error::not_found);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
+	BOOST_TEST(code == plugin_error::not_found);
+	BOOST_TEST(json["error"].get<int>() == plugin_error::not_found);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

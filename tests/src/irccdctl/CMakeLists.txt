@@ -17,12 +17,12 @@
 #
 
 if (IRCCD_HAVE_JS)
-    add_subdirectory(cli-plugin-config)
-    add_subdirectory(cli-plugin-info)
-    add_subdirectory(cli-plugin-list)
-    add_subdirectory(cli-plugin-load)
-    add_subdirectory(cli-plugin-reload)
-    add_subdirectory(cli-plugin-unload)
+	add_subdirectory(cli-plugin-config)
+	add_subdirectory(cli-plugin-info)
+	add_subdirectory(cli-plugin-list)
+	add_subdirectory(cli-plugin-load)
+	add_subdirectory(cli-plugin-reload)
+	add_subdirectory(cli-plugin-unload)
 endif ()
 
 add_subdirectory(cli-rule-add)

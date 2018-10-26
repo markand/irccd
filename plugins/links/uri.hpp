@@ -33,18 +33,18 @@ namespace irccd {
  * \file uri.hpp
  */
 struct uri {
-    std::string scheme;     //!< scheme (e.g. http)
-    std::string host;       //!< host (e.g. example.org)
-    std::string port;       //!< port (e.g. 8080)
-    std::string path;       //!< path (e.g. /foo/bar)
+	std::string scheme;     //!< scheme (e.g. http)
+	std::string host;       //!< host (e.g. example.org)
+	std::string port;       //!< port (e.g. 8080)
+	std::string path;       //!< path (e.g. /foo/bar)
 
-    /**
-     * Try to parse the uri from the link text.
-     *
-     * \param link the link
-     * \return the uri or nullopt if not parseable
-     */
-    static auto parse(const std::string& link) noexcept -> std::optional<uri>;
+	/**
+	 * Try to parse the uri from the link text.
+	 *
+	 * \param link the link
+	 * \return the uri or nullopt if not parseable
+	 */
+	static auto parse(const std::string& link) noexcept -> std::optional<uri>;
 };
 
 } // !irccd

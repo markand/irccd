@@ -30,54 +30,54 @@ namespace {
 
 class js_timer_fixture : public js_fixture {
 public:
-    js_timer_fixture()
-        : js_fixture(CMAKE_CURRENT_SOURCE_DIR "/timer.js")
-    {
-    }
+	js_timer_fixture()
+		: js_fixture(CMAKE_CURRENT_SOURCE_DIR "/timer.js")
+	{
+	}
 
-    void set_type(const std::string& name)
-    {
-        duk_get_global_string(plugin_->get_context(), "Irccd");
-        duk_get_prop_string(plugin_->get_context(), -1, "Timer");
-        duk_get_prop_string(plugin_->get_context(), -1, name.c_str());
-        duk_put_global_string(plugin_->get_context(), "type");
-        duk_pop_n(plugin_->get_context(), 2);
+	void set_type(const std::string& name)
+	{
+		duk_get_global_string(plugin_->get_context(), "Irccd");
+		duk_get_prop_string(plugin_->get_context(), -1, "Timer");
+		duk_get_prop_string(plugin_->get_context(), -1, name.c_str());
+		duk_put_global_string(plugin_->get_context(), "type");
+		duk_pop_n(plugin_->get_context(), 2);
 
-        plugin_->open();
-        plugin_->handle_load(irccd_);
-    }
+		plugin_->open();
+		plugin_->handle_load(irccd_);
+	}
 };
 
 BOOST_FIXTURE_TEST_SUITE(js_timer_api_suite, js_timer_fixture)
 
 BOOST_AUTO_TEST_CASE(single)
 {
-    boost::timer::cpu_timer timer;
+	boost::timer::cpu_timer timer;
 
-    set_type("Single");
+	set_type("Single");
 
-    while (timer.elapsed().wall / 1000000LL < 3000) {
-        ctx_.reset();
-        ctx_.poll();
-    }
+	while (timer.elapsed().wall / 1000000LL < 3000) {
+		ctx_.reset();
+		ctx_.poll();
+	}
 
-    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "count"));
-    BOOST_TEST(duk_get_int(plugin_->get_context(), -1) == 1);
+	BOOST_TEST(duk_get_global_string(plugin_->get_context(), "count"));
+	BOOST_TEST(duk_get_int(plugin_->get_context(), -1) == 1);
 }
 
 BOOST_AUTO_TEST_CASE(repeat)
 {
-    boost::timer::cpu_timer timer;
+	boost::timer::cpu_timer timer;
 
-    set_type("Repeat");
+	set_type("Repeat");
 
-    while (timer.elapsed().wall / 1000000LL < 3000) {
-        ctx_.reset();
-        ctx_.poll();
-    }
+	while (timer.elapsed().wall / 1000000LL < 3000) {
+		ctx_.reset();
+		ctx_.poll();
+	}
 
-    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "count"));
-    BOOST_TEST(duk_get_int(plugin_->get_context(), -1) >= 5);
+	BOOST_TEST(duk_get_global_string(plugin_->get_context(), "count"));
+	BOOST_TEST(duk_get_int(plugin_->get_context(), -1) >= 5);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

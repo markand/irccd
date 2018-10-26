@@ -49,57 +49,99 @@ namespace irccd::string_util {
  * \brief Disable or enable some features.
  */
 enum class subst_flags : unsigned {
-    date        = (1 << 0),     //!< date templates
-    keywords    = (1 << 1),     //!< keywords
-    env         = (1 << 2),     //!< environment variables
-    shell       = (1 << 3),     //!< command line command
-    irc_attrs   = (1 << 4),     //!< IRC escape codes
-    shell_attrs = (1 << 5)      //!< shell attributes
+	date            = (1 << 0),      //!< date templates
+	keywords        = (1 << 1),      //!< keywords
+	env             = (1 << 2),      //!< environment variables
+	shell           = (1 << 3),      //!< command line command
+	irc_attrs       = (1 << 4),      //!< IRC escape codes
+	shell_attrs     = (1 << 5)      //!< shell attributes
 };
 
 /**
- * \cond ENUM_HIDDEN_SYMBOLS
+ * \cond IRCCD_ENUM_HIDDEN_SYMBOLS
  */
 
-inline subst_flags operator^(subst_flags v1, subst_flags v2) noexcept
+/**
+ * Apply bitwise XOR.
+ *
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
+ */
+inline auto operator^(subst_flags v1, subst_flags v2) noexcept -> subst_flags
 {
-    return static_cast<subst_flags>(static_cast<unsigned>(v1) ^ static_cast<unsigned>(v2));
+	return static_cast<subst_flags>(static_cast<unsigned>(v1) ^ static_cast<unsigned>(v2));
 }
 
-inline subst_flags operator&(subst_flags v1, subst_flags v2) noexcept
+/**
+ * Apply bitwise AND.
+ *
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
+ */
+inline auto operator&(subst_flags v1, subst_flags v2) noexcept -> subst_flags
 {
-    return static_cast<subst_flags>(static_cast<unsigned>(v1)&  static_cast<unsigned>(v2));
+	return static_cast<subst_flags>(static_cast<unsigned>(v1) & static_cast<unsigned>(v2));
 }
 
-inline subst_flags operator|(subst_flags v1, subst_flags v2) noexcept
+/**
+ * Apply bitwise OR.
+ *
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
+ */
+inline auto operator|(subst_flags v1, subst_flags v2) noexcept -> subst_flags
 {
-    return static_cast<subst_flags>(static_cast<unsigned>(v1) | static_cast<unsigned>(v2));
+	return static_cast<subst_flags>(static_cast<unsigned>(v1) | static_cast<unsigned>(v2));
 }
 
-inline subst_flags operator~(subst_flags v) noexcept
+/**
+ * Apply bitwise NOT.
+ *
+ * \param v the value
+ * \return the complement
+ */
+inline auto operator~(subst_flags v) noexcept -> subst_flags
 {
-    return static_cast<subst_flags>(~static_cast<unsigned>(v));
+	return static_cast<subst_flags>(~static_cast<unsigned>(v));
 }
 
-inline subst_flags& operator|=(subst_flags& v1, subst_flags v2) noexcept
+/**
+ * Assign bitwise OR.
+ *
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
+ */
+inline auto operator|=(subst_flags& v1, subst_flags v2) noexcept -> subst_flags&
 {
-    v1 = static_cast<subst_flags>(static_cast<unsigned>(v1) | static_cast<unsigned>(v2));
-
-    return v1;
+	return v1 = v1 | v2;
 }
 
-inline subst_flags& operator&=(subst_flags& v1, subst_flags v2) noexcept
+/**
+ * Assign bitwise AND.
+ *
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
+ */
+inline auto operator&=(subst_flags& v1, subst_flags v2) noexcept -> subst_flags&
 {
-    v1 = static_cast<subst_flags>(static_cast<unsigned>(v1)&  static_cast<unsigned>(v2));
-
-    return v1;
+	return v1 = v1 & v2;
 }
 
-inline subst_flags& operator^=(subst_flags& v1, subst_flags v2) noexcept
+/**
+ * Assign bitwise XOR.
+ *
+ * \param v1 the first value
+ * \param v2 the second value
+ * \return the new value
+ */
+inline auto operator^=(subst_flags& v1, subst_flags v2) noexcept -> subst_flags&
 {
-    v1 = static_cast<subst_flags>(static_cast<unsigned>(v1) ^ static_cast<unsigned>(v2));
-
-    return v1;
+	return v1 = v1 ^ v2;
 }
 
 /**
@@ -111,25 +153,25 @@ inline subst_flags& operator^=(subst_flags& v1, subst_flags v2) noexcept
  */
 class subst {
 public:
-    /**
-     * Flags for selecting templates.
-     */
-    subst_flags flags{
-        subst_flags::date |
-        subst_flags::keywords |
-        subst_flags::env |
-        subst_flags::irc_attrs
-    };
+	/**
+	 * Flags for selecting templates.
+	 */
+	subst_flags flags{
+		subst_flags::date |
+		subst_flags::keywords |
+		subst_flags::env |
+		subst_flags::irc_attrs
+	};
 
-    /**
-     * Fill that field if you want a date.
-     */
-    std::time_t time{std::time(nullptr)};
+	/**
+	 * Fill that field if you want a date.
+	 */
+	std::time_t time{std::time(nullptr)};
 
-    /**
-     * Fill that map if you want to replace keywords.
-     */
-    std::unordered_map<std::string, std::string> keywords;
+	/**
+	 * Fill that map if you want to replace keywords.
+	 */
+	std::unordered_map<std::string, std::string> keywords;
 };
 
 /**
@@ -166,25 +208,25 @@ public:
  *
  * ### Valid constructs
  *
- *   - <strong>\#{target}, welcome</strong>: if target is set to "irccd",
- *     becomes "irccd, welcome",
- *   - <strong>\@{red}\#{target}</strong>: if target is specified, it is written
- *     in red,
+ * - <strong>\#{target}, welcome</strong>: if target is set to "irccd",
+ *   becomes "irccd, welcome",
+ * - <strong>\@{red}\#{target}</strong>: if target is specified, it is written
+ *   in red,
  *
  * ### Invalid or literals constructs
  *
- *   - <strong>\#\#{target}</strong>: will output "\#{target}",
- *   - <strong>\#\#</strong>: will output "\#\#",
- *   - <strong>\#target</strong>: will output "\#target",
- *   - <strong>\#{target</strong>: will throw std::invalid_argument.
+ * - <strong>\#\#{target}</strong>: will output "\#{target}",
+ * - <strong>\#\#</strong>: will output "\#\#",
+ * - <strong>\#target</strong>: will output "\#target",
+ * - <strong>\#{target</strong>: will throw std::invalid_argument.
  *
  * ### Colors & attributes
  *
- *   - <strong>\@{red,blue}</strong>: will write text red on blue background,
- *   - <strong>\@{default,yellow}</strong>: will write default color text on
- *     yellow background,
- *   - <strong>\@{white,black,bold,underline}</strong>: will write white text on
- *     black in both bold and underline.
+ * - <strong>\@{red,blue}</strong>: will write text red on blue background,
+ * - <strong>\@{default,yellow}</strong>: will write default color text on
+ *   yellow background,
+ * - <strong>\@{white,black,bold,underline}</strong>: will write white text on
+ *   black in both bold and underline.
  */
 auto format(std::string text, const subst& params = {}) -> std::string;
 
@@ -229,16 +271,16 @@ auto split(std::string_view list, const std::string& delimiters, int max = -1) -
 template <typename InputIt, typename DelimType = char>
 auto join(InputIt first, InputIt last, DelimType delim = ':') -> std::string
 {
-    std::ostringstream oss;
+	std::ostringstream oss;
 
-    if (first != last) {
-        oss << *first;
+	if (first != last) {
+		oss << *first;
 
-        while (++first != last)
-            oss << delim << *first;
-    }
+		while (++first != last)
+			oss << delim << *first;
+	}
 
-    return oss.str();
+	return oss.str();
 }
 
 /**
@@ -251,7 +293,7 @@ auto join(InputIt first, InputIt last, DelimType delim = ':') -> std::string
 template <typename Container, typename DelimType = char>
 auto join(const Container& c, DelimType delim = ':') -> std::string
 {
-    return join(c.begin(), c.end(), delim);
+	return join(c.begin(), c.end(), delim);
 }
 
 /**
@@ -264,7 +306,7 @@ auto join(const Container& c, DelimType delim = ':') -> std::string
 template <typename T, typename DelimType = char>
 auto join(std::initializer_list<T> list, DelimType delim = ':') -> std::string
 {
-    return join(list.begin(), list.end(), delim);
+	return join(list.begin(), list.end(), delim);
 }
 
 // }}}
@@ -309,15 +351,15 @@ auto to_int(const std::string& str,
             T min = std::numeric_limits<T>::min(),
             T max = std::numeric_limits<T>::max()) noexcept -> std::optional<T>
 {
-    static_assert(std::is_signed<T>::value, "must be signed");
+	static_assert(std::is_signed<T>::value, "must be signed");
 
-    char* end;
-    auto v = std::strtoll(str.c_str(), &end, 10);
+	char* end;
+	auto v = std::strtoll(str.c_str(), &end, 10);
 
-    if (*end != '\0' || v < min || v > max)
-        return std::nullopt;
+	if (*end != '\0' || v < min || v > max)
+		return std::nullopt;
 
-    return static_cast<T>(v);
+	return static_cast<T>(v);
 }
 
 // }}}
@@ -338,15 +380,15 @@ auto to_uint(const std::string& str,
              T min = std::numeric_limits<T>::min(),
              T max = std::numeric_limits<T>::max()) noexcept -> std::optional<T>
 {
-    static_assert(std::is_unsigned<T>::value, "must be unsigned");
+	static_assert(std::is_unsigned<T>::value, "must be unsigned");
 
-    char* end;
-    auto v = std::strtoull(str.c_str(), &end, 10);
+	char* end;
+	auto v = std::strtoull(str.c_str(), &end, 10);
 
-    if (*end != '\0' || v < min || v > max)
-        return std::nullopt;
+	if (*end != '\0' || v < min || v > max)
+		return std::nullopt;
 
-    return static_cast<T>(v);
+	return static_cast<T>(v);
 }
 
 // }}}

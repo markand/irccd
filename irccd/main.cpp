@@ -35,8 +35,8 @@
 #include <irccd/daemon/transport_service.hpp>
 
 #if defined(IRCCD_HAVE_JS)
-#   include <irccd/js/js_api.hpp>
-#   include <irccd/js/js_plugin.hpp>
+#	include <irccd/js/js_api.hpp>
+#	include <irccd/js/js_plugin.hpp>
 #endif
 
 namespace irccd {
@@ -49,13 +49,13 @@ std::unique_ptr<irccd> instance;
 
 void usage()
 {
-    std::cerr << "usage: irccd [options...]\n\n";
-    std::cerr << "Available options:\n";
-    std::cerr << "  -c, --config file       specify the configuration file\n";
-    std::cerr << "  -h, --help              show this help\n";
-    std::cerr << "  -v, --verbose           be verbose\n";
-    std::cerr << "      --version           show the version\n";
-    std::exit(1);
+	std::cerr << "usage: irccd [options...]\n\n";
+	std::cerr << "Available options:\n";
+	std::cerr << "  -c, --config file       specify the configuration file\n";
+	std::cerr << "  -h, --help              show this help\n";
+	std::cerr << "  -v, --verbose           be verbose\n";
+	std::cerr << "      --version           show the version\n";
+	std::exit(1);
 }
 
 // }}}
@@ -64,25 +64,25 @@ void usage()
 
 void version(const option::result& options)
 {
-    std::cout << IRCCD_VERSION << std::endl;
+	std::cout << IRCCD_VERSION << std::endl;
 
-    if (options.count("-v") > 0 || options.count("--verbose") > 0) {
-        bool ssl = false;
-        bool js = false;
+	if (options.count("-v") > 0 || options.count("--verbose") > 0) {
+		bool ssl = false;
+		bool js = false;
 
 #if defined(IRCCD_HAVE_SSL)
-        ssl = true;
+		ssl = true;
 #endif
 #if defined(IRCCD_HAVE_JS)
-        js = true;
+		js = true;
 #endif
 
-        std::cout << std::boolalpha << std::endl;
-        std::cout << "ssl:          " << ssl << std::endl;
-        std::cout << "javascript:   " << js << std::endl;
-    }
+		std::cout << std::boolalpha << std::endl;
+		std::cout << "ssl:		  " << ssl << std::endl;
+		std::cout << "javascript:   " << js << std::endl;
+	}
 
-    std::exit(0);
+	std::exit(0);
 }
 
 // }}}
@@ -91,14 +91,14 @@ void version(const option::result& options)
 
 void init(int& argc, char**& argv)
 {
-    // Needed for some components.
-    sys::set_program_name("irccd");
+	// Needed for some components.
+	sys::set_program_name("irccd");
 
-    // Default logging to console.
-    instance->get_log().set_verbose(false);
+	// Default logging to console.
+	instance->get_log().set_verbose(false);
 
-    -- argc;
-    ++ argv;
+	-- argc;
+	++ argv;
 }
 
 // }}}
@@ -107,37 +107,37 @@ void init(int& argc, char**& argv)
 
 auto parse(int& argc, char**& argv) -> option::result
 {
-    option::result result;
+	option::result result;
 
-    try {
-        option::options options{
-            { "-c",             true    },
-            { "--config",       true    },
-            { "-h",             false   },
-            { "--help",         false   },
-            { "-v",             false   },
-            { "--verbose",      false   },
-            { "--version",      false   }
-        };
+	try {
+		option::options options{
+			{ "-c",         true    },
+			{ "--config",   true    },
+			{ "-h",         false   },
+			{ "--help",     false   },
+			{ "-v",         false   },
+			{ "--verbose",  false   },
+			{ "--version",  false   }
+		};
 
-        result = option::read(argc, argv, options);
+		result = option::read(argc, argv, options);
 
-        for (const auto& pair : result) {
-            if (pair.first == "-h" || pair.first == "--help")
-                usage();
-                // NOTREACHED
-            if (pair.first == "--version")
-                version(result);
-                // NOTREACHED
-            if (pair.first == "-v" || pair.first == "--verbose")
-                instance->get_log().set_verbose(true);
-        }
-    } catch (const std::exception& ex) {
-        instance->get_log().warning("irccd", "") << "abort: " << ex.what() << std::endl;
-        usage();
-    }
+		for (const auto& pair : result) {
+			if (pair.first == "-h" || pair.first == "--help")
+				usage();
+				// NOTREACHED
+			if (pair.first == "--version")
+				version(result);
+				// NOTREACHED
+			if (pair.first == "-v" || pair.first == "--verbose")
+				instance->get_log().set_verbose(true);
+		}
+	} catch (const std::exception& ex) {
+		instance->get_log().warning("irccd", "") << "abort: " << ex.what() << std::endl;
+		usage();
+	}
 
-    return result;
+	return result;
 }
 
 // }}}
@@ -146,17 +146,17 @@ auto parse(int& argc, char**& argv) -> option::result
 
 auto open(const option::result& result) -> config
 {
-    auto it = result.find("-c");
+	auto it = result.find("-c");
 
-    if (it != result.end() || (it = result.find("--config")) != result.end())
-        return config(it->second);
+	if (it != result.end() || (it = result.find("--config")) != result.end())
+		return config(it->second);
 
-    const auto cfg = config::search("irccd.conf");
+	const auto cfg = config::search("irccd.conf");
 
-    if (!cfg)
-        throw std::runtime_error("no configuration file could be found");
+	if (!cfg)
+		throw std::runtime_error("no configuration file could be found");
 
-    return *cfg;
+	return *cfg;
 }
 
 // }}}
@@ -167,56 +167,56 @@ auto open(const option::result& result) -> config
 
 int main(int argc, char** argv)
 {
-    using namespace irccd;
+	using namespace irccd;
 
-    boost::asio::io_service service;
-    boost::asio::signal_set sigs(service, SIGINT, SIGTERM);
+	boost::asio::io_service service;
+	boost::asio::signal_set sigs(service, SIGINT, SIGTERM);
 
-    instance = std::make_unique<class irccd>(service);
+	instance = std::make_unique<class irccd>(service);
 
-    init(argc, argv);
+	init(argc, argv);
 
-    // 1. Load commands.
-    for (const auto& f : command::registry)
-        instance->transports().get_commands().push_back(f());
+	// 1. Load commands.
+	for (const auto& f : command::registry)
+		instance->transports().get_commands().push_back(f());
 
-    // 2. Load plugin loaders.
-    instance->plugins().add_loader(std::make_unique<dynlib_plugin_loader>());
+	// 2. Load plugin loaders.
+	instance->plugins().add_loader(std::make_unique<dynlib_plugin_loader>());
 
 #if defined(IRCCD_HAVE_JS)
-    auto loader = std::make_unique<js::js_plugin_loader>(*instance);
+	auto loader = std::make_unique<js::js_plugin_loader>(*instance);
 
-    for (const auto& f : js::js_api::registry)
-        loader->get_modules().push_back(f());
+	for (const auto& f : js::js_api::registry)
+		loader->get_modules().push_back(f());
 
-    instance->plugins().add_loader(std::move(loader));
+	instance->plugins().add_loader(std::move(loader));
 #endif
 
-    const auto options = parse(argc, argv);
+	const auto options = parse(argc, argv);
 
-    try {
-        instance->set_config(open(options));
-        instance->load();
-    } catch (const std::exception& ex) {
-        std::cerr << "abort: " << ex.what() << std::endl;
-        return 1;
-    }
+	try {
+		instance->set_config(open(options));
+		instance->load();
+	} catch (const std::exception& ex) {
+		std::cerr << "abort: " << ex.what() << std::endl;
+		return 1;
+	}
 
-    /*
-     * Assign instance to nullptr to force deletion of irccd and all its
-     * associated objects before any other static global values such as
-     * loggers.
-     */
-    sigs.async_wait([&] (auto, auto) {
-        service.stop();
-    });
+	/*
+	 * Assign instance to nullptr to force deletion of irccd and all its
+	 * associated objects before any other static global values such as
+	 * loggers.
+	 */
+	sigs.async_wait([&] (auto, auto) {
+		service.stop();
+	});
 
-    try {
-        service.run();
-    } catch (const std::exception& ex) {
-        std::cerr << "abort: " << ex.what() << std::endl;
-        return 1;
-    }
+	try {
+		service.run();
+	} catch (const std::exception& ex) {
+		std::cerr << "abort: " << ex.what() << std::endl;
+		return 1;
+	}
 
-    instance = nullptr;
+	instance = nullptr;
 }

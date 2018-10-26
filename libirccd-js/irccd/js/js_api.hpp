@@ -49,40 +49,40 @@ class js_plugin;
  */
 class js_api {
 public:
-    /**
-     * \brief Command constructor factory.
-     */
-    using factory = std::function<auto () -> std::unique_ptr<js_api>>;
+	/**
+	 * \brief Command constructor factory.
+	 */
+	using factory = std::function<auto () -> std::unique_ptr<js_api>>;
 
-    /**
-     * \brief Registry of all commands.
-     */
-    static const std::vector<factory> registry;
+	/**
+	 * \brief Registry of all commands.
+	 */
+	static const std::vector<factory> registry;
 
-    /**
-     * Default constructor.
-     */
-    js_api() noexcept = default;
+	/**
+	 * Default constructor.
+	 */
+	js_api() noexcept = default;
 
-    /**
-     * Virtual destructor defaulted.
-     */
-    virtual ~js_api() noexcept = default;
+	/**
+	 * Virtual destructor defaulted.
+	 */
+	virtual ~js_api() noexcept = default;
 
-    /**
-     * Get the module name.
-     *
-     * \return the name
-     */
-    virtual auto get_name() const noexcept -> std::string_view = 0;
+	/**
+	 * Get the module name.
+	 *
+	 * \return the name
+	 */
+	virtual auto get_name() const noexcept -> std::string_view = 0;
 
-    /**
-     * Load the module into the Javascript plugin.
-     *
-     * \param irccd the irccd instance
-     * \param plugin the plugin
-     */
-    virtual void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) = 0;
+	/**
+	 * Load the module into the Javascript plugin.
+	 *
+	 * \param irccd the irccd instance
+	 * \param plugin the plugin
+	 */
+	virtual void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) = 0;
 };
 
 } // !js

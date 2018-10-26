@@ -51,60 +51,60 @@ namespace irccd::test {
  */
 class cli_fixture {
 private:
-    using io_service = boost::asio::io_service;
+	using io_service = boost::asio::io_service;
 
-    std::thread thread_;
-    io_service service_;
+	std::thread thread_;
+	io_service service_;
 
 protected:
-    /**
-     * Irccd instance.
-     *
-     * \warning Do not modify once `start()` has been called.
-     */
-    irccd irccd_{service_};
+	/**
+	 * Irccd instance.
+	 *
+	 * \warning Do not modify once `start()` has been called.
+	 */
+	irccd irccd_{service_};
 
-    /**
-     * Server automatically added as "test".
-     */
-    std::shared_ptr<mock_server> server_;
+	/**
+	 * Server automatically added as "test".
+	 */
+	std::shared_ptr<mock_server> server_;
 
 public:
-    /**
-     * Type for all lines printed.
-     */
-    using outputs = std::vector<std::string>;
+	/**
+	 * Type for all lines printed.
+	 */
+	using outputs = std::vector<std::string>;
 
-    /**
-     * Collection of output from stdout/stderr respectively.
-     */
-    using result = std::tuple<int, outputs, outputs>;
+	/**
+	 * Collection of output from stdout/stderr respectively.
+	 */
+	using result = std::tuple<int, outputs, outputs>;
 
-    /**
-     * Construct and initialize and irccd daemon running in a thread.
-     */
-    cli_fixture();
+	/**
+	 * Construct and initialize and irccd daemon running in a thread.
+	 */
+	cli_fixture();
 
-    /**
-     * Stop irccd and close everything.
-     */
-    ~cli_fixture();
+	/**
+	 * Stop irccd and close everything.
+	 */
+	~cli_fixture();
 
-    /**
-     * Start irccd daemon.
-     *
-     * A thread will be running and closed when the destructor is called, you
-     * MUST not modify irccd while running.
-     */
-    void start();
+	/**
+	 * Start irccd daemon.
+	 *
+	 * A thread will be running and closed when the destructor is called, you
+	 * MUST not modify irccd while running.
+	 */
+	void start();
 
-    /**
-     * Execute irccdctl.
-     *
-     * \param args the arguments to irccdctl
-     * \return the stdout/stderr and exit code
-     */
-    auto exec(const std::vector<std::string>& args) -> result;
+	/**
+	 * Execute irccdctl.
+	 *
+	 * \param args the arguments to irccdctl
+	 * \return the stdout/stderr and exit code
+	 */
+	auto exec(const std::vector<std::string>& args) -> result;
 };
 
 } // !irccd::test

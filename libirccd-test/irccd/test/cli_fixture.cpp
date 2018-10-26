@@ -35,64 +35,64 @@ namespace proc = boost::process;
 namespace irccd::test {
 
 cli_fixture::cli_fixture()
-    : server_(new mock_server(irccd_.get_service(), "test", "localhost"))
+	: server_(new mock_server(irccd_.get_service(), "test", "localhost"))
 {
-    std::remove(CMAKE_BINARY_DIR "/tmp/irccd.sock");
+	std::remove(CMAKE_BINARY_DIR "/tmp/irccd.sock");
 
-    io::local_acceptor::endpoint endpoint(CMAKE_BINARY_DIR "/tmp/irccd.sock");
-    io::local_acceptor::acceptor acceptor(service_, std::move(endpoint));
+	local_acceptor::endpoint endpoint(CMAKE_BINARY_DIR "/tmp/irccd.sock");
+	local_acceptor::acceptor acceptor(service_, std::move(endpoint));
 
-    for (const auto& f : command::registry)
-        irccd_.transports().get_commands().push_back(f());
+	for (const auto& f : command::registry)
+		irccd_.transports().get_commands().push_back(f());
 
-    irccd_.servers().add(server_);
-    irccd_.transports().add(std::make_unique<transport_server>(
-        std::make_unique<io::local_acceptor>(std::move(acceptor))));
-    server_->disconnect();
-    server_->clear();
+	irccd_.servers().add(server_);
+	irccd_.transports().add(std::make_unique<transport_server>(
+		std::make_unique<local_acceptor>(std::move(acceptor))));
+	server_->disconnect();
+	server_->clear();
 }
 
 cli_fixture::~cli_fixture()
 {
-    service_.stop();
-    thread_.join();
+	service_.stop();
+	thread_.join();
 }
 
 void cli_fixture::start()
 {
-    thread_ = std::thread([this] { service_.run(); });
+	thread_ = std::thread([this] { service_.run(); });
 
-    // Let irccd bind correctly.
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+	// Let irccd bind correctly.
+	std::this_thread::sleep_for(std::chrono::milliseconds(250));
 }
 
 auto cli_fixture::exec(const std::vector<std::string>& args) -> result
 {
-    static const std::string irccdctl = IRCCDCTL_EXECUTABLE;
-    static const std::string conf = CMAKE_BINARY_DIR "/tmp/irccdctl.conf";
+	static const std::string irccdctl = IRCCDCTL_EXECUTABLE;
+	static const std::string conf = CMAKE_BINARY_DIR "/tmp/irccdctl.conf";
 
-    std::ostringstream oss;
+	std::ostringstream oss;
 
-    oss << irccdctl << " -c " << conf << " ";
-    oss << string_util::join(args, " ");
+	oss << irccdctl << " -c " << conf << " ";
+	oss << string_util::join(args, " ");
 
-    proc::ipstream stream_out, stream_err;
+	proc::ipstream stream_out, stream_err;
 
-    const auto ret = proc::system(
-        oss.str(),
-        proc::std_in.close(),
-        proc::std_out > stream_out,
-        proc::std_err > stream_err
-    );
+	const auto ret = proc::system(
+		oss.str(),
+		proc::std_in.close(),
+		proc::std_out > stream_out,
+		proc::std_err > stream_err
+	);
 
-    outputs out, err;
+	outputs out, err;
 
-    for (std::string line; stream_out && std::getline(stream_out, line); )
-        out.push_back(line);
-    for (std::string line; stream_err && std::getline(stream_err, line); )
-        err.push_back(line);
+	for (std::string line; stream_out && std::getline(stream_out, line); )
+		out.push_back(line);
+	for (std::string line; stream_err && std::getline(stream_err, line); )
+		err.push_back(line);
 
-    return { ret, out, err };
+	return { ret, out, err };
 }
 
 } // !irccd::test

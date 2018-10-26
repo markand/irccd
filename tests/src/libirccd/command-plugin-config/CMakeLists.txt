@@ -17,7 +17,7 @@
 #
 
 irccd_define_test(
-    NAME command-plugin-config
-    SOURCES main.cpp
-    LIBRARIES libirccd libirccd-ctl
+	NAME command-plugin-config
+	SOURCES main.cpp
+	LIBRARIES libirccd libirccd-ctl
 )

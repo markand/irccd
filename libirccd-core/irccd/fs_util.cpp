@@ -24,7 +24,7 @@ namespace irccd::fs_util {
 
 auto base_name(const std::string& path) -> std::string
 {
-    return boost::filesystem::path(path).filename().string();
+	return boost::filesystem::path(path).filename().string();
 }
 
 // }}}
@@ -33,7 +33,7 @@ auto base_name(const std::string& path) -> std::string
 
 auto dir_name(const std::string& path) -> std::string
 {
-    return boost::filesystem::path(path).parent_path().string();
+	return boost::filesystem::path(path).parent_path().string();
 }
 
 // }}}
@@ -42,16 +42,16 @@ auto dir_name(const std::string& path) -> std::string
 
 auto find(const std::string& base, const std::string& name, bool recursive) -> std::string
 {
-    return find_if(base, recursive, [&] (const auto& entry) {
-        return entry.path().filename().string() == name;
-    });
+	return find_if(base, recursive, [&] (const auto& entry) {
+		return entry.path().filename().string() == name;
+	});
 }
 
 auto find(const std::string& base, const std::regex& regex, bool recursive) -> std::string
 {
-    return find_if(base, recursive, [&] (const auto& entry) {
-        return std::regex_match(entry.path().filename().string(), regex);
-    });
+	return find_if(base, recursive, [&] (const auto& entry) {
+		return std::regex_match(entry.path().filename().string(), regex);
+	});
 }
 
 // }}}

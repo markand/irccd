@@ -1,3 +1,3 @@
 Irccd.Plugin.config = {
-    "hard": "true"
+	"hard": "true"
 };

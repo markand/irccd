@@ -22,39 +22,39 @@ namespace irccd {
 
 void mock_server::connect(connect_handler) noexcept
 {
-    state_ = state::connected;
-    push("connect");
+	state_ = state::connected;
+	push("connect");
 }
 
 void mock_server::disconnect() noexcept
 {
-    state_ = state::disconnected;
-    push("disconnect");
+	state_ = state::disconnected;
+	push("disconnect");
 }
 
 void mock_server::invite(std::string_view target, std::string_view channel)
 {
-    push("invite", { std::string(target), std::string(channel) });
+	push("invite", { std::string(target), std::string(channel) });
 }
 
 void mock_server::join(std::string_view channel, std::string_view password)
 {
-    push("join", { std::string(channel), std::string(password) });
+	push("join", { std::string(channel), std::string(password) });
 }
 
 void mock_server::kick(std::string_view target, std::string_view channel, std::string_view reason)
 {
-    push("kick", { std::string(target), std::string(channel), std::string(reason) });
+	push("kick", { std::string(target), std::string(channel), std::string(reason) });
 }
 
 void mock_server::me(std::string_view target, std::string_view message)
 {
-    push("me", { std::string(target), std::string(message) });
+	push("me", { std::string(target), std::string(message) });
 }
 
 void mock_server::message(std::string_view target, std::string_view message)
 {
-    push("message", { std::string(target), std::string(message) });
+	push("message", { std::string(target), std::string(message) });
 }
 
 void mock_server::mode(std::string_view channel,
@@ -63,43 +63,43 @@ void mock_server::mode(std::string_view channel,
                        std::string_view user,
                        std::string_view mask)
 {
-    push("mode", {
-        std::string(channel),
-        std::string(mode),
-        std::string(limit),
-        std::string(user),
-        std::string(mask)
-    });
+	push("mode", {
+		std::string(channel),
+		std::string(mode),
+		std::string(limit),
+		std::string(user),
+		std::string(mask)
+	});
 }
 
 void mock_server::names(std::string_view channel)
 {
-    push("names", { std::string(channel) });
+	push("names", { std::string(channel) });
 }
 
 void mock_server::notice(std::string_view target, std::string_view message)
 {
-    push("notice", { std::string(target), std::string(message) });
+	push("notice", { std::string(target), std::string(message) });
 }
 
 void mock_server::part(std::string_view channel, std::string_view reason)
 {
-    push("part", { std::string(channel), std::string(reason) });
+	push("part", { std::string(channel), std::string(reason) });
 }
 
 void mock_server::send(std::string_view raw)
 {
-    push("send", { std::string(raw) });
+	push("send", { std::string(raw) });
 }
 
 void mock_server::topic(std::string_view channel, std::string_view topic)
 {
-    push("topic", { std::string(channel), std::string(topic) });
+	push("topic", { std::string(channel), std::string(topic) });
 }
 
 void mock_server::whois(std::string_view target)
 {
-    push("whois", { std::string(target) });
+	push("whois", { std::string(target) });
 }
 
 } // !irccd

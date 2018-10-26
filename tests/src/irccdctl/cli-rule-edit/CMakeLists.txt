@@ -17,8 +17,8 @@
 #
 
 irccd_define_test(
-    NAME cli-rule-edit
-    SOURCES main.cpp
-    LIBRARIES libirccd-core
-    DEPENDS irccd irccdctl
+	NAME cli-rule-edit
+	SOURCES main.cpp
+	LIBRARIES libirccd-core
+	DEPENDS irccd irccdctl
 )

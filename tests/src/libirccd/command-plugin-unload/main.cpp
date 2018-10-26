@@ -29,84 +29,84 @@ namespace {
 
 class broken_plugin : public plugin {
 public:
-    broken_plugin()
-        : plugin("broken")
-    {
-    }
+	broken_plugin()
+		: plugin("broken")
+	{
+	}
 
-    auto get_name() const noexcept -> std::string_view override
-    {
-        return "broken";
-    }
+	auto get_name() const noexcept -> std::string_view override
+	{
+		return "broken";
+	}
 
-    void handle_unload(irccd&) override
-    {
-        throw std::runtime_error("broken");
-    }
+	void handle_unload(irccd&) override
+	{
+		throw std::runtime_error("broken");
+	}
 };
 
 class plugin_unload_fixture : public command_fixture {
 protected:
-    std::shared_ptr<mock_plugin> plugin_;
+	std::shared_ptr<mock_plugin> plugin_;
 
-    plugin_unload_fixture()
-        : plugin_(std::make_shared<mock_plugin>("test"))
-    {
-        irccd_.plugins().clear();
-        irccd_.plugins().add(plugin_);
-        irccd_.plugins().add(std::make_unique<broken_plugin>());
-    }
+	plugin_unload_fixture()
+		: plugin_(std::make_shared<mock_plugin>("test"))
+	{
+		irccd_.plugins().clear();
+		irccd_.plugins().add(plugin_);
+		irccd_.plugins().add(std::make_unique<broken_plugin>());
+	}
 };
 
 BOOST_FIXTURE_TEST_SUITE(plugin_unload_fixture_suite, plugin_unload_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    const auto [json, code] = request({
-        { "command",    "plugin-unload" },
-        { "plugin",     "test"          }
-    });
+	const auto [json, code] = request({
+		{ "command",    "plugin-unload" },
+		{ "plugin",     "test"          }
+	});
 
-    BOOST_TEST(!code);
-    BOOST_TEST(plugin_->find("handle_unload").size() == 1U);
+	BOOST_TEST(!code);
+	BOOST_TEST(plugin_->find("handle_unload").size() == 1U);
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier)
 {
-    const auto [json, code] = request({
-        { "command",    "plugin-unload" }
-    });
+	const auto [json, code] = request({
+		{ "command", "plugin-unload" }
+	});
 
-    BOOST_TEST(code == plugin_error::invalid_identifier);
-    BOOST_TEST(json["error"].get<int>() == plugin_error::invalid_identifier);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
+	BOOST_TEST(code == plugin_error::invalid_identifier);
+	BOOST_TEST(json["error"].get<int>() == plugin_error::invalid_identifier);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    const auto [json, code] = request({
-        { "command",    "plugin-unload" },
-        { "plugin",     "unknown"       }
-    });
+	const auto [json, code] = request({
+		{ "command",    "plugin-unload" },
+		{ "plugin",     "unknown"       }
+	});
 
-    BOOST_TEST(code == plugin_error::not_found);
-    BOOST_TEST(json["error"].get<int>() == plugin_error::not_found);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
+	BOOST_TEST(code == plugin_error::not_found);
+	BOOST_TEST(json["error"].get<int>() == plugin_error::not_found);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_CASE(exec_error)
 {
-    const auto [json, code] = request({
-        { "command",    "plugin-unload" },
-        { "plugin",     "broken"        }
-    });
+	const auto [json, code] = request({
+		{ "command",    "plugin-unload" },
+		{ "plugin",     "broken"        }
+	});
 
-    BOOST_TEST(code == plugin_error::exec_error);
-    BOOST_TEST(json["error"].get<int>() == plugin_error::exec_error);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
-    BOOST_TEST(!irccd_.plugins().has("broken"));
+	BOOST_TEST(code == plugin_error::exec_error);
+	BOOST_TEST(json["error"].get<int>() == plugin_error::exec_error);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
+	BOOST_TEST(!irccd_.plugins().has("broken"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

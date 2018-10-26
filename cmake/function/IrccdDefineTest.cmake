@@ -21,11 +21,11 @@
 # -----------------
 #
 # irccd_define_test(
-#    NAME the test name
-#    SOURCES the sources files
-#    LIBRARIES (Optional) libraries to link
-#    FLAGS (Optional) compilation flags
-#    DEPENDS (Optional) list of dependencies
+#   NAME        the test name
+#   SOURCES     the sources files
+#   LIBRARIES   (Optional) libraries to link
+#   FLAGS       (Optional) compilation flags
+#   DEPENDS     (Optional) list of dependencies
 # )
 #
 # Create a unit test named test-${NAME}
@@ -38,75 +38,75 @@ find_package(Boost REQUIRED QUIET COMPONENTS unit_test_framework)
 include(${CMAKE_CURRENT_LIST_DIR}/IrccdVeraCheck.cmake)
 
 function(irccd_define_test)
-    set(oneValueArgs NAME)
-    set(multiValueArgs DEPENDS SOURCES LIBRARIES FLAGS)
+	set(oneValueArgs NAME)
+	set(multiValueArgs DEPENDS SOURCES LIBRARIES FLAGS)
 
-    cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+	cmake_parse_arguments(TEST "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    if (NOT TEST_NAME)
-        message(FATAL_ERROR "Please set NAME")
-    endif ()
-    if (NOT TEST_SOURCES)
-        message(FATAL_ERROR "Please set SOURCES")
-    endif ()
+	if (NOT TEST_NAME)
+		message(FATAL_ERROR "Please set NAME")
+	endif ()
+	if (NOT TEST_SOURCES)
+		message(FATAL_ERROR "Please set SOURCES")
+	endif ()
 
-    list(
-        APPEND
-        TEST_LIBRARIES
-            libirccd-test
-            ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
-    )
+	list(
+		APPEND
+		TEST_LIBRARIES
+			libirccd-test
+			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+	)
 
-    add_executable(test-${TEST_NAME} ${TEST_SOURCES})
+	add_executable(test-${TEST_NAME} ${TEST_SOURCES})
 
-    if (TEST_DEPENDS)
-        add_dependencies(test-${TEST_NAME} ${TEST_DEPENDS})
-    endif ()
+	if (TEST_DEPENDS)
+		add_dependencies(test-${TEST_NAME} ${TEST_DEPENDS})
+	endif ()
 
-    target_link_libraries(test-${TEST_NAME} ${TEST_LIBRARIES})
+	target_link_libraries(test-${TEST_NAME} ${TEST_LIBRARIES})
 
-    target_include_directories(
-        test-${TEST_NAME}
-        PRIVATE
-            ${irccd_SOURCE_DIR}
-    )
+	target_include_directories(
+		test-${TEST_NAME}
+		PRIVATE
+			${irccd_SOURCE_DIR}
+	)
 
-    target_compile_definitions(
-        test-${TEST_NAME}
-        PRIVATE
-            ${TEST_FLAGS}
-            BOOST_TEST_DYN_LINK
-            TESTS_SOURCE_DIR="${tests_SOURCE_DIR}"
-            TESTS_BINARY_DIR="${tests_SOURCE_DIR}"
-            CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}"
-            CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
-            CMAKE_CURRENT_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}"
-            CMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
-    )
+	target_compile_definitions(
+		test-${TEST_NAME}
+		PRIVATE
+			${TEST_FLAGS}
+			BOOST_TEST_DYN_LINK
+			TESTS_SOURCE_DIR="${tests_SOURCE_DIR}"
+			TESTS_BINARY_DIR="${tests_SOURCE_DIR}"
+			CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}"
+			CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+			CMAKE_CURRENT_BINARY_DIR="${CMAKE_CURRENT_BINARY_DIR}"
+			CMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
+	)
 
-    # Tests are all in the same directory
-    set_target_properties(
-        test-${TEST_NAME}
-        PROPERTIES
-            PROJECT_LABEL ${TEST_NAME}
-            FOLDER test
-            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-    )
-    foreach (c ${CMAKE_CONFIGURATION_TYPES})
-        string(TOUPPER ${c} cu)
-        set_target_properties(
-            test-${TEST_NAME}
-            PROPERTIES
-                RUNTIME_OUTPUT_DIRECTORY_${cu} ${CMAKE_BINARY_DIR}/bin/${c}
-        )
-    endforeach()
+	# Tests are all in the same directory
+	set_target_properties(
+		test-${TEST_NAME}
+		PROPERTIES
+			PROJECT_LABEL ${TEST_NAME}
+			FOLDER test
+			RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+	)
+	foreach (c ${CMAKE_CONFIGURATION_TYPES})
+		string(TOUPPER ${c} cu)
+		set_target_properties(
+			test-${TEST_NAME}
+			PROPERTIES
+				RUNTIME_OUTPUT_DIRECTORY_${cu} ${CMAKE_BINARY_DIR}/bin/${c}
+		)
+	endforeach()
 
-    # And test
-    add_test(
-        NAME test-${TEST_NAME}
-        COMMAND test-${TEST_NAME}
-        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests
-    )
+	# And test
+	add_test(
+		NAME test-${TEST_NAME}
+		COMMAND test-${TEST_NAME}
+		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests
+	)
 
-    irccd_vera_check(test-${TEST_NAME} "${TEST_SOURCES}")
+	irccd_vera_check(test-${TEST_NAME} "${TEST_SOURCES}")
 endfunction()

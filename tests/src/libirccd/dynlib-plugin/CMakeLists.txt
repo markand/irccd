@@ -21,24 +21,24 @@ find_package(Boost REQUIRED QUIET)
 add_library(test-plugin MODULE test_plugin.cpp)
 target_link_libraries(test-plugin libirccd Boost::boost)
 set_target_properties(
-    test-plugin
-    PROPERTIES
-        PREFIX ""
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+	test-plugin
+	PROPERTIES
+		PREFIX ""
+		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 foreach (c ${CMAKE_CONFIGURATION_TYPES})
-    string(TOUPPER ${c} c)
-    set_target_properties(
-        test-plugin
-        PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY_${c} ${CMAKE_CURRENT_BINARY_DIR}
-    )
+	string(TOUPPER ${c} c)
+	set_target_properties(
+		test-plugin
+		PROPERTIES
+			RUNTIME_OUTPUT_DIRECTORY_${c} ${CMAKE_CURRENT_BINARY_DIR}
+	)
 endforeach ()
 
 irccd_define_test(
-    NAME dynlib-plugin
-    SOURCES main.cpp
-    LIBRARIES libirccd libirccd-test
-    DEPENDS test-plugin
+	NAME dynlib-plugin
+	SOURCES main.cpp
+	LIBRARIES libirccd libirccd-test
+	DEPENDS test-plugin
 )

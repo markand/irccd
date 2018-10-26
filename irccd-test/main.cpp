@@ -29,7 +29,7 @@
 #include <boost/format.hpp>
 
 #if defined(IRCCD_HAVE_LIBEDIT)
-#   include <histedit.h>
+#	include <histedit.h>
 #endif
 
 #include <irccd/options.hpp>
@@ -43,8 +43,8 @@
 #include <irccd/test/debug_server.hpp>
 
 #if defined(IRCCD_HAVE_JS)
-#   include <irccd/js/js_api.hpp>
-#   include <irccd/js/js_plugin.hpp>
+#	include <irccd/js/js_api.hpp>
+#	include <irccd/js/js_plugin.hpp>
 #endif
 
 using boost::format;
@@ -91,23 +91,23 @@ using function = std::function<void (const std::string&)>;
 using functions = std::unordered_map<std::string, function>;
 
 static const functions list{
-    { "onCommand",  &(on_command)   },
-    { "onConnect",  &(on_connect)   },
-    { "onInvite",   &(on_invite)    },
-    { "onJoin",     &(on_join)      },
-    { "onKick",     &(on_kick)      },
-    { "onLoad",     &(on_load)      },
-    { "onMe",       &(on_me)        },
-    { "onMessage",  &(on_message)   },
-    { "onMode",     &(on_mode)      },
-    { "onNames",    &(on_names)     },
-    { "onNick",     &(on_nick)      },
-    { "onNotice",   &(on_notice)    },
-    { "onPart",     &(on_part)      },
-    { "onReload",   &(on_reload)    },
-    { "onTopic",    &(on_topic)     },
-    { "onUnload",   &(on_unload)    },
-    { "onWhois",    &(on_whois)     }
+	{ "onCommand",  &(on_command)   },
+	{ "onConnect",  &(on_connect)   },
+	{ "onInvite",   &(on_invite)    },
+	{ "onJoin",     &(on_join)      },
+	{ "onKick",     &(on_kick)      },
+	{ "onLoad",     &(on_load)      },
+	{ "onMe",       &(on_me)        },
+	{ "onMessage",  &(on_message)   },
+	{ "onMode",     &(on_mode)      },
+	{ "onNames",    &(on_names)     },
+	{ "onNick",     &(on_nick)      },
+	{ "onNotice",   &(on_notice)    },
+	{ "onPart",     &(on_part)      },
+	{ "onReload",   &(on_reload)    },
+	{ "onTopic",    &(on_topic)     },
+	{ "onUnload",   &(on_unload)    },
+	{ "onWhois",    &(on_whois)     }
 };
 
 // }}}
@@ -116,41 +116,41 @@ static const functions list{
 
 void usage()
 {
-    std::cerr << "usage: irccd-test [-c config] plugin-name" << std::endl;
-    std::exit(1);
+	std::cerr << "usage: irccd-test [-c config] plugin-name" << std::endl;
+	std::exit(1);
 }
 
 // }}}
 
 // {{{ get_server
 
-std::shared_ptr<server> get_server(std::string name)
+auto get_server(std::string name) -> std::shared_ptr<server>
 {
-    name = boost::algorithm::trim_copy(name);
+	name = boost::algorithm::trim_copy(name);
 
-    if (name.empty())
-        name = "test";
+	if (name.empty())
+		name = "test";
 
-    auto s = daemon->servers().get(name);
+	auto s = daemon->servers().get(name);
 
-    if (!s) {
-        s = std::make_shared<debug_server>(io, std::move(name), "localhost");
-        daemon->servers().add(s);
-    }
+	if (!s) {
+		s = std::make_shared<debug_server>(io, std::move(name), "localhost");
+		daemon->servers().add(s);
+	}
 
-    return s;
+	return s;
 }
 
 // }}}
 
 // {{{ get_arg
 
-std::string get_arg(const std::vector<std::string>& args, unsigned index)
+auto get_arg(const std::vector<std::string>& args, unsigned index) -> std::string
 {
-    if (index >= args.size())
-        return "";
+	if (index >= args.size())
+		return "";
 
-    return args[index];
+	return args[index];
 }
 
 // }}}
@@ -162,14 +162,14 @@ std::string get_arg(const std::vector<std::string>& args, unsigned index)
  */
 void on_command(const std::string& data)
 {
-    const auto args = su::split(data, " ", 4);
+	const auto args = su::split(data, " ", 4);
 
-    plugin->handle_command(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3)
-    });
+	plugin->handle_command(*daemon, {
+		get_server(get_arg(args, 0)),
+		get_arg(args, 1),
+		get_arg(args, 2),
+		get_arg(args, 3)
+	});
 }
 
 // }}}
@@ -181,9 +181,9 @@ void on_command(const std::string& data)
  */
 void on_connect(const std::string& data)
 {
-    const auto args = su::split(data, " ");
+	const auto args = su::split(data, " ");
 
-    plugin->handle_connect(*daemon, {get_server(get_arg(args, 0))});
+	plugin->handle_connect(*daemon, {get_server(get_arg(args, 0))});
 }
 
 // }}}
@@ -195,14 +195,14 @@ void on_connect(const std::string& data)
  */
 void on_invite(const std::string& data)
 {
-    const auto args = su::split(data, " ");
+	const auto args = su::split(data, " ");
 
-    plugin->handle_invite(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3),
-    });
+	plugin->handle_invite(*daemon, {
+		get_server(get_arg(args, 0)),
+		get_arg(args, 1),
+		get_arg(args, 2),
+		get_arg(args, 3),
+	});
 }
 
 // }}}
@@ -214,13 +214,13 @@ void on_invite(const std::string& data)
  */
 void on_join(const std::string& data)
 {
-    const auto args = su::split(data, " ");
+	const auto args = su::split(data, " ");
 
-    plugin->handle_join(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2)
-    });
+	plugin->handle_join(*daemon, {
+		get_server(get_arg(args, 0)),
+		get_arg(args, 1),
+		get_arg(args, 2)
+	});
 }
 
 // }}}
@@ -232,15 +232,15 @@ void on_join(const std::string& data)
  */
 void on_kick(const std::string& data)
 {
-    const auto args = su::split(data, " ", 5);
+	const auto args = su::split(data, " ", 5);
 
-    plugin->handle_kick(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3),
-        get_arg(args, 4),
-    });
+	plugin->handle_kick(*daemon, {
+		get_server(get_arg(args, 0)),
+		get_arg(args, 1),
+		get_arg(args, 2),
+		get_arg(args, 3),
+		get_arg(args, 4),
+	});
 }
 
 // }}}
@@ -252,7 +252,7 @@ void on_kick(const std::string& data)
  */
 void on_load(const std::string&)
 {
-    plugin->handle_load(*daemon);
+	plugin->handle_load(*daemon);
 }
 
 // }}}
@@ -264,14 +264,14 @@ void on_load(const std::string&)
  */
 void on_me(const std::string& data)
 {
-    const auto args = su::split(data, " ", 4);
+	const auto args = su::split(data, " ", 4);
 
-    plugin->handle_me(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3)
-    });
+	plugin->handle_me(*daemon, {
+		get_server(get_arg(args, 0)),
+		get_arg(args, 1),
+		get_arg(args, 2),
+		get_arg(args, 3)
+	});
 }
 
 // }}}
@@ -283,14 +283,14 @@ void on_me(const std::string& data)
  */
 void on_message(const std::string& data)
 {
-    const auto args = su::split(data, " ", 4);
+	const auto args = su::split(data, " ", 4);
 
-    plugin->handle_message(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3)
-    });
+	plugin->handle_message(*daemon, {
+		get_server(get_arg(args, 0)),
+		get_arg(args, 1),
+		get_arg(args, 2),
+		get_arg(args, 3)
+	});
 }
 
 // }}}
@@ -302,17 +302,17 @@ void on_message(const std::string& data)
  */
 void on_mode(const std::string& data)
 {
-    const auto args = su::split(data, " ", 7);
+	const auto args = su::split(data, " ", 7);
 
-    plugin->handle_mode(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3),
-        get_arg(args, 4),
-        get_arg(args, 5),
-        get_arg(args, 6),
-    });
+	plugin->handle_mode(*daemon, {
+		get_server(get_arg(args, 0)),
+		get_arg(args, 1),
+		get_arg(args, 2),
+		get_arg(args, 3),
+		get_arg(args, 4),
+		get_arg(args, 5),
+		get_arg(args, 6),
+	});
 }
 
 // }}}
@@ -324,17 +324,17 @@ void on_mode(const std::string& data)
  */
 void on_names(const std::string& data)
 {
-    const auto args = su::split(data, " ");
+	const auto args = su::split(data, " ");
 
-    names_event ev;
+	names_event ev;
 
-    ev.server = get_server(get_arg(args, 0));
-    ev.channel = get_arg(args, 1);
+	ev.server = get_server(get_arg(args, 0));
+	ev.channel = get_arg(args, 1);
 
-    if (args.size() >= 3U)
-        ev.names.insert(ev.names.begin(), args.begin() + 2, args.end());
+	if (args.size() >= 3U)
+		ev.names.insert(ev.names.begin(), args.begin() + 2, args.end());
 
-    plugin->handle_names(*daemon, ev);
+	plugin->handle_names(*daemon, ev);
 }
 
 // }}}
@@ -346,13 +346,13 @@ void on_names(const std::string& data)
  */
 void on_nick(const std::string& data)
 {
-    const auto args = su::split(data, " ");
+	const auto args = su::split(data, " ");
 
-    plugin->handle_nick(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2)
-    });
+	plugin->handle_nick(*daemon, {
+		get_server(get_arg(args, 0)),
+		get_arg(args, 1),
+		get_arg(args, 2)
+	});
 }
 
 // }}}
@@ -364,14 +364,14 @@ void on_nick(const std::string& data)
  */
 void on_notice(const std::string& data)
 {
-    const auto args = su::split(data, " ", 4);
+	const auto args = su::split(data, " ", 4);
 
-    plugin->handle_notice(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3)
-    });
+	plugin->handle_notice(*daemon, {
+		get_server(get_arg(args, 0)),
+		get_arg(args, 1),
+		get_arg(args, 2),
+		get_arg(args, 3)
+	});
 }
 
 // }}}
@@ -383,14 +383,14 @@ void on_notice(const std::string& data)
  */
 void on_part(const std::string& data)
 {
-    const auto args = su::split(data, " ", 4);
+	const auto args = su::split(data, " ", 4);
 
-    plugin->handle_part(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3),
-    });
+	plugin->handle_part(*daemon, {
+		get_server(get_arg(args, 0)),
+		get_arg(args, 1),
+		get_arg(args, 2),
+		get_arg(args, 3),
+	});
 }
 
 // }}}
@@ -402,7 +402,7 @@ void on_part(const std::string& data)
  */
 void on_reload(const std::string&)
 {
-    plugin->handle_reload(*daemon);
+	plugin->handle_reload(*daemon);
 }
 
 // }}}
@@ -414,14 +414,14 @@ void on_reload(const std::string&)
  */
 void on_topic(const std::string& data)
 {
-    const auto args = su::split(data, " ", 4);
+	const auto args = su::split(data, " ", 4);
 
-    plugin->handle_topic(*daemon, {
-        get_server(get_arg(args, 0)),
-        get_arg(args, 1),
-        get_arg(args, 2),
-        get_arg(args, 3)
-    });
+	plugin->handle_topic(*daemon, {
+		get_server(get_arg(args, 0)),
+		get_arg(args, 1),
+		get_arg(args, 2),
+		get_arg(args, 3)
+	});
 }
 
 // }}}
@@ -433,7 +433,7 @@ void on_topic(const std::string& data)
  */
 void on_unload(const std::string&)
 {
-    plugin->handle_unload(*daemon);
+	plugin->handle_unload(*daemon);
 }
 
 // }}}
@@ -445,20 +445,20 @@ void on_unload(const std::string&)
  */
 void on_whois(const std::string& data)
 {
-    const auto args = su::split(data, " ");
+	const auto args = su::split(data, " ");
 
-    whois_event ev;
+	whois_event ev;
 
-    ev.server = get_server(get_arg(args, 0));
-    ev.whois.nick = get_arg(args, 1);
-    ev.whois.user = get_arg(args, 2);
-    ev.whois.host = get_arg(args, 3);
-    ev.whois.realname = get_arg(args, 4);
+	ev.server = get_server(get_arg(args, 0));
+	ev.whois.nick = get_arg(args, 1);
+	ev.whois.user = get_arg(args, 2);
+	ev.whois.host = get_arg(args, 3);
+	ev.whois.realname = get_arg(args, 4);
 
-    if (args.size() >= 5)
-        ev.whois.channels.insert(ev.whois.channels.begin(), args.begin() + 5, args.end());
+	if (args.size() >= 5)
+		ev.whois.channels.insert(ev.whois.channels.begin(), args.begin() + 5, args.end());
 
-    plugin->handle_whois(*daemon, ev);
+	plugin->handle_whois(*daemon, ev);
 }
 
 // }}}
@@ -467,11 +467,11 @@ void on_whois(const std::string& data)
 
 void exec(const std::string& line)
 {
-    const auto pos = line.find(' ');
-    const auto it = list.find(line.substr(0, pos));
+	const auto pos = line.find(' ');
+	const auto it = list.find(line.substr(0, pos));
 
-    if (it != list.end())
-        it->second(pos == std::string::npos ? "" : line.substr(pos + 1));
+	if (it != list.end())
+		it->second(pos == std::string::npos ? "" : line.substr(pos + 1));
 }
 
 // }}}
@@ -480,80 +480,80 @@ void exec(const std::string& line)
 
 // {{{ prompt (libedit version)
 
-const char* prompt(EditLine*)
+auto prompt(EditLine*) -> const char*
 {
-    static const char* text = "> ";
+	static const char* text = "> ";
 
-    return text;
+	return text;
 }
 
-std::string clean(std::string input)
+auto clean(std::string input) -> std::string
 {
-    while (!input.empty() && (input.back() == '\n' || input.back() == '\r'))
-        input.pop_back();
+	while (!input.empty() && (input.back() == '\n' || input.back() == '\r'))
+		input.pop_back();
 
-    return input;
+	return input;
 }
 
-std::vector<std::string> matches(const std::string& name)
+auto matches(const std::string& name) -> std::vector<std::string>
 {
-    std::vector<std::string> result;
+	std::vector<std::string> result;
 
-    for (const auto& pair : list)
-        if (pair.first.compare(0U, name.size(), name) == 0U)
-            result.push_back(pair.first);
+	for (const auto& pair : list)
+		if (pair.first.compare(0U, name.size(), name) == 0U)
+			result.push_back(pair.first);
 
-    return result;
+	return result;
 }
 
-unsigned char complete(EditLine* el, int)
+auto complete(EditLine* el, int) -> unsigned char
 {
-    const auto* lf = el_line(el);
-    const auto args = su::split(std::string(lf->buffer, lf->cursor), " ");
+	const auto* lf = el_line(el);
+	const auto args = su::split(std::string(lf->buffer, lf->cursor), " ");
 
-    if (args.size() == 0U)
-        return CC_REFRESH;
+	if (args.size() == 0U)
+		return CC_REFRESH;
 
-    const auto found = matches(args[0]);
+	const auto found = matches(args[0]);
 
-    if (found.size() != 1U)
-        return CC_REFRESH;
+	if (found.size() != 1U)
+		return CC_REFRESH;
 
-    // Insert the missing text, e.g. onCom -> onCommand.
-    if (el_insertstr(el, &found[0].c_str()[args[0].size()]) < 0)
-        return CC_ERROR;
+	// Insert the missing text, e.g. onCom -> onCommand.
+	if (el_insertstr(el, &found[0].c_str()[args[0].size()]) < 0)
+		return CC_ERROR;
 
-    return CC_REFRESH;
+	return CC_REFRESH;
 }
 
 void run()
 {
-    std::unique_ptr<EditLine, void (*)(EditLine*)> el(
-        el_init("irccd-test", stdin, stdout, stderr),
-        el_end
-    );
-    std::unique_ptr<History, void (*)(History*)> hist(
-        history_init(),
-        history_end
-    );
-    HistEvent hev;
+	std::unique_ptr<EditLine, void (*)(EditLine*)> el(
+		el_init("irccd-test", stdin, stdout, stderr),
+		el_end
+	);
+	std::unique_ptr<History, void (*)(History*)> hist(
+		history_init(),
+		history_end
+	);
+	HistEvent hev;
 
-    history(hist.get(), &hev, H_SETSIZE, 1024);
-    el_set(el.get(), EL_EDITOR, "emacs");
-    el_set(el.get(), EL_PROMPT, prompt);
-    el_set(el.get(), EL_HIST, history, hist.get());
-    el_set(el.get(), EL_ADDFN, "ed-complete", "Complete command", complete);
-    el_set(el.get(), EL_BIND, "^I", "ed-complete", nullptr);
+	history(hist.get(), &hev, H_SETSIZE, 1024);
+	el_set(el.get(), EL_EDITOR, "emacs");
+	el_set(el.get(), EL_PROMPT, prompt);
+	el_set(el.get(), EL_HIST, history, hist.get());
+	el_set(el.get(), EL_ADDFN, "ed-complete", "Complete command", complete);
+	el_set(el.get(), EL_BIND, "^I", "ed-complete", nullptr);
 
-    const char* s;
-    int size;
+	const char* s;
+	int size;
 
-    while ((s = el_gets(el.get(), &size)) && size >= 0) {
-        if (size > 0)
-            history(hist.get(), &hev, H_ENTER, s);
+	while ((s = el_gets(el.get(), &size)) && size >= 0) {
+		if (size > 0)
+			history(hist.get(), &hev, H_ENTER, s);
 
-        exec(clean(s));
-    }
+		exec(clean(s));
+	}
 }
 
 // }}}
@@ -564,16 +564,16 @@ void run()
 
 void run()
 {
-    std::string line;
+	std::string line;
 
-    for (;;) {
-        std::cout << "> ";
+	for (;;) {
+		std::cout << "> ";
 
-        if (!std::getline(std::cin, line))
-            return;
+		if (!std::getline(std::cin, line))
+			return;
 
-        exec(line);
-    }
+		exec(line);
+	}
 }
 
 // }}}
@@ -584,11 +584,11 @@ void run()
 
 void load_plugins(int argc, char** argv)
 {
-    if (argc <= 0)
-        usage();
+	if (argc <= 0)
+		usage();
 
-    daemon->plugins().load("test", boost::filesystem::exists(argv[0]) ? argv[0] : "");
-    plugin = daemon->plugins().get("test");
+	daemon->plugins().load("test", boost::filesystem::exists(argv[0]) ? argv[0] : "");
+	plugin = daemon->plugins().get("test");
 }
 
 // }}}
@@ -597,14 +597,14 @@ void load_plugins(int argc, char** argv)
 
 auto load_config(const option::result& result) -> config
 {
-    auto it = result.find("-c");
+	auto it = result.find("-c");
 
-    if (it != result.end() || (it = result.find("--config")) != result.end())
-        return config(it->second);
+	if (it != result.end() || (it = result.find("--config")) != result.end())
+		return config(it->second);
 
-    auto cfg = config::search("irccd.conf");
+	auto cfg = config::search("irccd.conf");
 
-    return *cfg;
+	return *cfg;
 }
 
 // }}}
@@ -613,16 +613,16 @@ auto load_config(const option::result& result) -> config
 
 void load_options(int& argc, char**& argv)
 {
-    static const option::options def{
-        { "-c",         true    },
-        { "--config",   true    }
-    };
+	static const option::options def{
+		{ "-c",		 true	},
+		{ "--config",   true	}
+	};
 
-    try {
-        daemon->set_config(load_config(option::read(argc, argv, def)));
-    } catch (const std::exception& ex) {
-        throw std::runtime_error(str(format("%1%") % ex.what()));
-    }
+	try {
+		daemon->set_config(load_config(option::read(argc, argv, def)));
+	} catch (const std::exception& ex) {
+		throw std::runtime_error(str(format("%1%") % ex.what()));
+	}
 }
 
 // }}}
@@ -631,20 +631,20 @@ void load_options(int& argc, char**& argv)
 
 void load(int argc, char** argv)
 {
-    daemon = std::make_unique<irccd>(io);
-    daemon->plugins().add_loader(std::make_unique<dynlib_plugin_loader>());
+	daemon = std::make_unique<irccd>(io);
+	daemon->plugins().add_loader(std::make_unique<dynlib_plugin_loader>());
 
 #if defined(IRCCD_HAVE_JS)
-    auto loader = std::make_unique<js::js_plugin_loader>(*daemon);
+	auto loader = std::make_unique<js::js_plugin_loader>(*daemon);
 
-    for (const auto& f : js::js_api::registry)
-        loader->get_modules().push_back(f());
+	for (const auto& f : js::js_api::registry)
+		loader->get_modules().push_back(f());
 
-    daemon->plugins().add_loader(std::move(loader));
+	daemon->plugins().add_loader(std::move(loader));
 #endif
 
-    load_options(argc, argv);
-    load_plugins(argc, argv);
+	load_options(argc, argv);
+	load_plugins(argc, argv);
 }
 
 // }}}
@@ -655,11 +655,11 @@ void load(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-    try {
-        irccd::load(--argc, ++argv);
-        irccd::run();
-    } catch (const std::exception& ex) {
-        std::cerr << "abort: " << ex.what() << std::endl;
-        return 1;
-    }
+	try {
+		irccd::load(--argc, ++argv);
+		irccd::run();
+	} catch (const std::exception& ex) {
+		std::cerr << "abort: " << ex.what() << std::endl;
+		return 1;
+	}
 }

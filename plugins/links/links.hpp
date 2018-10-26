@@ -33,72 +33,72 @@ namespace irccd {
  */
 class links_plugin : public plugin {
 public:
-    // options.
-    static inline unsigned conf_timeout{30U};
+	// options.
+	static inline unsigned conf_timeout{30U};
 
-    // formats.
-    static inline std::string format_info{"#{title}"};
+	// formats.
+	static inline std::string format_info{"#{title}"};
 
 public:
-    /**
-     * Inherited constructors.
-     */
-    using plugin::plugin;
+	/**
+	 * Inherited constructors.
+	 */
+	using plugin::plugin;
 
-    /**
-     * \copydoc plugin::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc plugin::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc plugin::get_author
-     */
-    auto get_author() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc plugin::get_author
+	 */
+	auto get_author() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc plugin::get_license
-     */
-    auto get_license() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc plugin::get_license
+	 */
+	auto get_license() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc plugin::get_summary
-     */
-    auto get_summary() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc plugin::get_summary
+	 */
+	auto get_summary() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc plugin::get_version
-     */
-    auto get_version() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc plugin::get_version
+	 */
+	auto get_version() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc plugin::set_options
-     */
-    void set_options(const map&) override;
+	/**
+	 * \copydoc plugin::set_options
+	 */
+	void set_options(const map&) override;
 
-    /**
-     * \copydoc plugin::set_formats
-     */
-    void set_formats(const map&) override;
+	/**
+	 * \copydoc plugin::set_formats
+	 */
+	void set_formats(const map&) override;
 
-    /**
-     * \copydoc plugin::handle_message
-     */
-    void handle_message(irccd&, const message_event&) override;
+	/**
+	 * \copydoc plugin::handle_message
+	 */
+	void handle_message(irccd&, const message_event&) override;
 
-    /**
-     * Export ABI.
-     *
-     * \return the compiled version
-     */
-    static auto abi() -> version;
+	/**
+	 * Export ABI.
+	 *
+	 * \return the compiled version
+	 */
+	static auto abi() -> version;
 
-    /**
-     * Create the plugin
-     *
-     * \param id the plugin id
-     * \return the compiled version
-     */
-    static auto init(std::string) -> std::unique_ptr<plugin>;
+	/**
+	 * Create the plugin
+	 *
+	 * \param id the plugin id
+	 * \return the compiled version
+	 */
+	static auto init(std::string) -> std::unique_ptr<plugin>;
 };
 
 } // !irccd

@@ -28,14 +28,9 @@
 #include <memory>
 #include <system_error>
 
-namespace irccd::io {
+namespace irccd {
 
 class stream;
-
-/**
- * \brief Connect completion handler.
- */
-using connect_handler = std::function<void (std::error_code, std::shared_ptr<stream>)>;
 
 /**
  * \brief Abstract connection interface.
@@ -47,29 +42,34 @@ using connect_handler = std::function<void (std::error_code, std::shared_ptr<str
  */
 class connector {
 public:
-    /**
-     * Default constructor.
-     */
-    connector() = default;
+	/**
+	 * \brief Connect completion handler.
+	 */
+	using handler = std::function<void (std::error_code, std::shared_ptr<stream>)>;
 
-    /**
-     * Virtual destructor defaulted.
-     */
-    virtual ~connector() = default;
+	/**
+	 * Default constructor.
+	 */
+	connector() = default;
 
-    /**
-     * Start asynchronous connect.
-     *
-     * Once the client is connected, the original acceptor must be kept until it
-     * is destroyed.
-     *
-     * \pre another connect operation must not be running
-     * \pre handler != nullptr
-     * \param handler the handler
-     */
-    virtual void connect(connect_handler handler) = 0;
+	/**
+	 * Virtual destructor defaulted.
+	 */
+	virtual ~connector() = default;
+
+	/**
+	 * Start asynchronous connect.
+	 *
+	 * Once the client is connected, the original acceptor must be kept until it
+	 * is destroyed.
+	 *
+	 * \pre another connect operation must not be running
+	 * \pre handler != nullptr
+	 * \param handler the handler
+	 */
+	virtual void connect(handler handler) = 0;
 };
 
-} // !irccd::io
+} // !irccd
 
 #endif // !IRCCD_COMMON_CONNECTOR_HPP

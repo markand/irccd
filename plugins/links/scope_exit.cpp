@@ -27,14 +27,14 @@ using std::move;
 namespace irccd {
 
 scope_exit::scope_exit(function<void ()> func) noexcept
-    : func_(move(func))
+	: func_(move(func))
 {
-    assert(func_);
+	assert(func_);
 }
 
 scope_exit::~scope_exit() noexcept
 {
-    func_();
+	func_();
 }
 
 } // !irccd

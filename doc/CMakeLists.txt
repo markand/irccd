@@ -19,12 +19,12 @@
 project(doc)
 
 if (IRCCD_HAVE_DOXYGEN)
-    add_subdirectory(doxygen)
+	add_subdirectory(doxygen)
 endif ()
 
 add_subdirectory(examples)
 #add_subdirectory(man)
 
 if (IRCCD_HAVE_HTML)
-    add_subdirectory(html)
+	add_subdirectory(html)
 endif ()

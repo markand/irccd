@@ -31,27 +31,27 @@
 #include "sysconfig.hpp"
 
 #if BOOST_OS_WINDOWS
-#   include <sys/timeb.h>
-#   include <shlobj.h>
+#	include <sys/timeb.h>
+#	include <shlobj.h>
 #else
-#   include <sys/utsname.h>
-#   include <sys/types.h>
-#   include <sys/param.h>
-#   include <sys/time.h>
-#   include <unistd.h>
+#	include <sys/utsname.h>
+#	include <sys/types.h>
+#	include <sys/param.h>
+#	include <sys/time.h>
+#	include <unistd.h>
 #endif
 
 #if BOOST_OS_LINUX
-#   include <sys/sysinfo.h>
+#	include <sys/sysinfo.h>
 #endif
 
 #if BOOST_OS_MACOS
-#   include <sys/sysctl.h>
-#   include <libproc.h>
+#	include <sys/sysctl.h>
+#	include <libproc.h>
 #endif
 
 #if defined(IRCCD_HAVE_GETLOGIN)
-#   include <unistd.h>
+#	include <unistd.h>
 #endif
 
 #include "system.hpp"
@@ -77,28 +77,28 @@ namespace {
  */
 auto base_directory() -> boost::filesystem::path
 {
-    static const boost::filesystem::path bindir(IRCCD_INSTALL_BINDIR);
-    static const boost::filesystem::path prefix(IRCCD_INSTALL_PREFIX);
+	static const boost::filesystem::path bindir(IRCCD_INSTALL_BINDIR);
+	static const boost::filesystem::path prefix(IRCCD_INSTALL_PREFIX);
 
-    boost::filesystem::path path(".");
+	boost::filesystem::path path(".");
 
-    if (bindir.is_relative()) {
-        try {
-            path = boost::dll::program_location();
-            path = path.parent_path();
-        } catch (...) {
-            path = ".";
-        }
+	if (bindir.is_relative()) {
+		try {
+			path = boost::dll::program_location();
+			path = path.parent_path();
+		} catch (...) {
+			path = ".";
+		}
 
-        // Compute relative base directory.
-        for (auto len = std::distance(bindir.begin(), bindir.end()); len > 0; len--)
-            path = path.parent_path();
-        if (path.empty())
-            path = ".";
-    } else
-        path = prefix;
+		// Compute relative base directory.
+		for (auto len = std::distance(bindir.begin(), bindir.end()); len > 0; len--)
+			path = path.parent_path();
+		if (path.empty())
+			path = ".";
+	} else
+		path = prefix;
 
-    return path;
+	return path;
 }
 
 // }}}
@@ -119,12 +119,12 @@ auto base_directory() -> boost::filesystem::path
  */
 auto system_directory(const std::string& component) -> boost::filesystem::path
 {
-    boost::filesystem::path path(component);
+	boost::filesystem::path path(component);
 
-    if (path.is_relative())
-        path = base_directory() / component;
+	if (path.is_relative())
+		path = base_directory() / component;
 
-    return path.string();
+	return path.string();
 }
 
 // }}}
@@ -140,32 +140,32 @@ auto system_directory(const std::string& component) -> boost::filesystem::path
  * Referenced by:   config_filenames.
  * Requires:
  *   - Windows:
- *     - <shlobj.h>
+ *	 - <shlobj.h>
  */
 auto user_config_directory() -> boost::filesystem::path
 {
-    boost::filesystem::path path;
+	boost::filesystem::path path;
 
 #if BOOST_OS_WINDOWS
-    char folder[MAX_PATH] = {0};
+	char folder[MAX_PATH] = {0};
 
-    if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, folder) == S_OK) {
-        path /= folder;
-        path /= "\\irccd\\config";
-    } else
-        path = ".";
+	if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, folder) == S_OK) {
+		path /= folder;
+		path /= "\\irccd\\config";
+	} else
+		path = ".";
 #else
-    try {
-        path = xdg().config_home();
-    } catch (...) {
-        path = sys::env("HOME");
-        path /= ".config";
-    }
+	try {
+		path = xdg().get_config_home();
+	} catch (...) {
+		path = sys::env("HOME");
+		path /= ".config";
+	}
 
-    path /= "irccd";
+	path /= "irccd";
 #endif
 
-    return path;
+	return path;
 }
 
 // }}}
@@ -179,33 +179,33 @@ auto user_config_directory() -> boost::filesystem::path
  * Referenced by:   plugin_filenames.
  * Requires:
  *   - Windows:
- *     - <shlobj.h>
+ *	 - <shlobj.h>
  *
  * Like add user_config_directory but for plugins.
  */
 auto user_plugin_directory() -> boost::filesystem::path
 {
-    boost::filesystem::path path;
+	boost::filesystem::path path;
 
 #if BOOST_OS_WINDOWS
-    char folder[MAX_PATH] = {0};
+	char folder[MAX_PATH] = {0};
 
-    if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, folder) == S_OK) {
-        path /= folder;
-        path /= "\\irccd\\share";
-    }
+	if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, folder) == S_OK) {
+		path /= folder;
+		path /= "\\irccd\\share";
+	}
 #else
-    try {
-        path = xdg().data_home();
-    } catch (...) {
-        path = sys::env("HOME");
-        path /= ".local/share";
-    }
+	try {
+		path = xdg().get_data_home();
+	} catch (...) {
+		path = sys::env("HOME");
+		path /= ".local/share";
+	}
 
-    path /= "irccd";
+	path /= "irccd";
 #endif
 
-    return path / "plugins";
+	return path / "plugins";
 }
 
 // }}}
@@ -217,11 +217,11 @@ auto user_plugin_directory() -> boost::filesystem::path
 void set_program_name(std::string name) noexcept
 {
 #if defined(IRCCD_HAVE_SETPROGNAME)
-    static std::string save = name;
+	static std::string save = name;
 
-    setprogname(save.c_str());
+	setprogname(save.c_str());
 #else
-    (void)name;
+	(void)name;
 #endif
 }
 
@@ -232,31 +232,31 @@ void set_program_name(std::string name) noexcept
 auto name() -> std::string
 {
 #if BOOST_OS_LINUX
-    return "Linux";
+	return "Linux";
 #elif BOOST_OS_WINDOWS
-    return "Windows";
+	return "Windows";
 #elif BOOST_OS_BSD_FREE
-    return "FreeBSD";
+	return "FreeBSD";
 #elif BOOST_OS_BSD_DRAGONFLY
-    return "DragonFlyBSD";
+	return "DragonFlyBSD";
 #elif BOOST_OS_BSD_OPEN
-    return "OpenBSD";
+	return "OpenBSD";
 #elif BOOST_OS_BSD_NET
-    return "NetBSD";
+	return "NetBSD";
 #elif BOOST_OS_MACOS
-    return "macOS";
+	return "macOS";
 #elif BOOST_OS_ANDROID
-    return "Android";
+	return "Android";
 #elif BOOST_OS_AIX
-    return "Aix";
+	return "Aix";
 #elif BOOST_OS_HAIKU
-    return "Haiku";
+	return "Haiku";
 #elif BOOST_OS_IOS
-    return "iOS";
+	return "iOS";
 #elif BOOST_OS_SOLARIS
-    return "Solaris";
+	return "Solaris";
 #else
-    return "Unknown";
+	return "Unknown";
 #endif
 }
 
@@ -267,25 +267,25 @@ auto name() -> std::string
 /*
  * Requires:
  *   - Windows:
- *     - <windows.h>
+ *	 - <windows.h>
  *   - Others:
- *     - <sys/utsname.h>
+ *	 - <sys/utsname.h>
  */
 auto version() -> std::string
 {
 #if BOOST_OS_WINDOWS
-    const auto version = GetVersion();
-    const auto major = (DWORD)(LOBYTE(LOWORD(version)));
-    const auto minor = (DWORD)(HIBYTE(LOWORD(version)));
+	const auto version = GetVersion();
+	const auto major = (DWORD)(LOBYTE(LOWORD(version)));
+	const auto minor = (DWORD)(HIBYTE(LOWORD(version)));
 
-    return std::to_string(major) + "." + std::to_string(minor);
+	return std::to_string(major) + "." + std::to_string(minor);
 #else
-    struct utsname uts;
+	struct utsname uts;
 
-    if (::uname(&uts) < 0)
-        throw std::runtime_error(std::strerror(errno));
+	if (::uname(&uts) < 0)
+		throw std::runtime_error(std::strerror(errno));
 
-    return std::string(uts.release);
+	return std::string(uts.release);
 #endif
 }
 
@@ -296,44 +296,44 @@ auto version() -> std::string
 /*
  * Requires:
  *   - Windows:
- *     - <windows.h>
+ *	 - <windows.h>
  *   - Linux:
- *     - <sys/sysinfo.h>
+ *	 - <sys/sysinfo.h>
  *   - Mac:
- *     - <sys/types.h>
- *     - <sys/sysctl.h>
+ *	 - <sys/types.h>
+ *	 - <sys/sysctl.h>
  *   - Others:
- *     - <ctime>
+ *	 - <ctime>
  */
 auto uptime() -> std::uint64_t
 {
 #if BOOST_OS_WINDOWS
-    return ::GetTickCount64() / 1000;
+	return ::GetTickCount64() / 1000;
 #elif BOOST_OS_LINUX
-    struct sysinfo info;
+	struct sysinfo info;
 
-    if (sysinfo(&info) < 0)
-        throw std::runtime_error(std::strerror(errno));
+	if (sysinfo(&info) < 0)
+		throw std::runtime_error(std::strerror(errno));
 
-    return info.uptime;
+	return info.uptime;
 #elif BOOST_OS_MACOS
-    struct timeval boottime;
-    size_t length = sizeof (boottime);
-    int mib[2] = { CTL_KERN, KERN_BOOTTIME };
+	struct timeval boottime;
+	size_t length = sizeof (boottime);
+	int mib[2] = { CTL_KERN, KERN_BOOTTIME };
 
-    if (sysctl(mib, 2, &boottime, &length, nullptr, 0) < 0)
-        throw std::runtime_error(std::strerror(errno));
+	if (sysctl(mib, 2, &boottime, &length, nullptr, 0) < 0)
+		throw std::runtime_error(std::strerror(errno));
 
-    time_t bsec = boottime.tv_sec, csec = time(nullptr);
+	time_t bsec = boottime.tv_sec, csec = time(nullptr);
 
-    return difftime(csec, bsec);
+	return difftime(csec, bsec);
 #else
-    struct timespec ts;
+	struct timespec ts;
 
-    if (clock_gettime(CLOCK_UPTIME, &ts) < 0)
-        throw std::runtime_error(std::strerror(errno));
+	if (clock_gettime(CLOCK_UPTIME, &ts) < 0)
+		throw std::runtime_error(std::strerror(errno));
 
-    return ts.tv_sec;
+	return ts.tv_sec;
 #endif
 }
 
@@ -344,24 +344,24 @@ auto uptime() -> std::uint64_t
 /*
  * Requires:
  *   - Windows:
- *     - <sys/timeb.h>
+ *	 - <sys/timeb.h>
  *   - Others:
- *     - <sys/times.h>
+ *	 - <sys/times.h>
  */
 auto ticks() -> std::uint64_t
 {
 #if BOOST_OS_WINDOWS
-    _timeb tp;
+	_timeb tp;
 
-    _ftime(&tp);
+	_ftime(&tp);
 
-    return tp.time * 1000LL + tp.millitm;
+	return tp.time * 1000LL + tp.millitm;
 #else
-    struct timeval tp;
+	struct timeval tp;
 
-    gettimeofday(&tp, NULL);
+	gettimeofday(&tp, NULL);
 
-    return tp.tv_sec * 1000LL + tp.tv_usec / 1000;
+	return tp.tv_sec * 1000LL + tp.tv_usec / 1000;
 #endif
 }
 
@@ -372,19 +372,19 @@ auto ticks() -> std::uint64_t
 /*
  * Requires:
  *   - Windows:
- *     - <shlobj.h>
+ *	 - <shlobj.h>
  */
 auto home() -> std::string
 {
 #if BOOST_OS_WINDOWS
-    char path[MAX_PATH];
+	char path[MAX_PATH];
 
-    if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, path) != S_OK)
-        return "";
+	if (SHGetFolderPathA(nullptr, CSIDL_LOCAL_APPDATA, nullptr, 0, path) != S_OK)
+		return "";
 
-    return std::string(path);
+	return std::string(path);
 #else
-    return env("HOME");
+	return env("HOME");
 #endif
 }
 
@@ -398,12 +398,12 @@ auto home() -> std::string
  */
 auto env(const std::string& var) -> std::string
 {
-    const auto value = std::getenv(var.c_str());
+	const auto value = std::getenv(var.c_str());
 
-    if (value == nullptr)
-        return "";
+	if (value == nullptr)
+		return "";
 
-    return value;
+	return value;
 }
 
 // }}}
@@ -412,7 +412,7 @@ auto env(const std::string& var) -> std::string
 
 auto cachedir() -> boost::filesystem::path
 {
-    return system_directory(IRCCD_INSTALL_LOCALSTATEDIR) / "cache/irccd";
+	return system_directory(IRCCD_INSTALL_LOCALSTATEDIR) / "cache/irccd";
 }
 
 // }}}
@@ -421,7 +421,7 @@ auto cachedir() -> boost::filesystem::path
 
 auto datadir() -> boost::filesystem::path
 {
-    return system_directory(IRCCD_INSTALL_DATADIR);
+	return system_directory(IRCCD_INSTALL_DATADIR);
 }
 
 // }}}
@@ -430,7 +430,7 @@ auto datadir() -> boost::filesystem::path
 
 auto sysconfdir() -> boost::filesystem::path
 {
-    return system_directory(IRCCD_INSTALL_SYSCONFDIR) / "irccd";
+	return system_directory(IRCCD_INSTALL_SYSCONFDIR) / "irccd";
 }
 
 // }}}
@@ -439,7 +439,7 @@ auto sysconfdir() -> boost::filesystem::path
 
 auto plugindir() -> boost::filesystem::path
 {
-    return system_directory(IRCCD_INSTALL_LIBDIR) / "irccd";
+	return system_directory(IRCCD_INSTALL_LIBDIR) / "irccd";
 }
 
 // }}}
@@ -453,13 +453,13 @@ auto plugindir() -> boost::filesystem::path
 auto username() -> std::string
 {
 #if defined(IRCCD_HAVE_GETLOGIN)
-    auto v = getlogin();
+	auto v = getlogin();
 
-    if (v)
-        return v;
+	if (v)
+		return v;
 #endif
 
-    return "";
+	return "";
 }
 
 // }}}
@@ -468,13 +468,13 @@ auto username() -> std::string
 
 auto config_filenames(std::string_view file) -> std::vector<std::string>
 {
-    // TODO: remove this once we can use std::filesystem.
-    const std::string filename(file);
+	// TODO: remove this once we can use std::filesystem.
+	const std::string filename(file);
 
-    return {
-        (user_config_directory() / filename).string(),
-        (sysconfdir() / filename).string()
-    };
+	return {
+		(user_config_directory() / filename).string(),
+		(sysconfdir() / filename).string()
+	};
 }
 
 // }}}
@@ -484,16 +484,16 @@ auto config_filenames(std::string_view file) -> std::vector<std::string>
 auto plugin_filenames(const std::string& name,
                       const std::vector<std::string>& extensions) -> std::vector<std::string>
 {
-    assert(!extensions.empty());
+	assert(!extensions.empty());
 
-    std::vector<std::string> result;
+	std::vector<std::string> result;
 
-    for (const auto& ext : extensions)
-        result.push_back((user_plugin_directory() / (name + ext)).string());
-    for (const auto& ext : extensions)
-        result.push_back((plugindir() / (name + ext)).string());
+	for (const auto& ext : extensions)
+		result.push_back((user_plugin_directory() / (name + ext)).string());
+	for (const auto& ext : extensions)
+		result.push_back((plugindir() / (name + ext)).string());
 
-    return result;
+	return result;
 }
 
 // }}}

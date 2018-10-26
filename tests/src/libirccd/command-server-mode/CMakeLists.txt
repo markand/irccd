@@ -17,7 +17,7 @@
 #
 
 irccd_define_test(
-    NAME command-server-mode
-    SOURCES main.cpp
-    LIBRARIES libirccd libirccd-ctl
+	NAME command-server-mode
+	SOURCES main.cpp
+	LIBRARIES libirccd libirccd-ctl
 )

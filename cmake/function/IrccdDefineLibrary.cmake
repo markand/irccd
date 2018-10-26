@@ -21,83 +21,78 @@
 # --------------------
 #
 # irccd_define_library(
-#    TARGET target name
-#    EXPORT (Optional) set to true to export library through irccd
-#    EXTERN (Optional) set to true to mark library as external
-#    HEADERS (Optional) headers to install
-#    HEADERS_DIRECTORY (Optional) subdirectory where to install headers
-#    SOURCES src1, src2, srcn
-#    FLAGS (Optional) C/C++ flags (without -D)
-#    LIBRARIES (Optional) libraries to link
-#    LOCAL_INCLUDES (Optional) local includes for the target only
-#    PUBLIC_INCLUDES (Optional) includes to share with target dependencies
+#   TARGET              target name
+#   SOURCES             src1, src2, srcn
+#   EXPORT              (Optional) set to true to export library through irccd
+#   HEADERS             (Optional) headers to install
+#   HEADERS_DIRECTORY   (Optional) subdirectory where to install headers
+#   FLAGS               (Optional) C/C++ flags (without -D)
+#   LIBRARIES           (Optional) libraries to link
+#   LOCAL_INCLUDES      (Optional) local includes for the target only
+#   PUBLIC_INCLUDES     (Optional) includes to share with target dependencies
 # )
 #
 
 include(${CMAKE_CURRENT_LIST_DIR}/IrccdVeraCheck.cmake)
 
 function(irccd_define_library)
-    set(options EXPORT)
-    set(oneValueArgs HEADERS_DIRECTORY TARGET)
-    set(multiValueArgs HEADERS SOURCES FLAGS LIBRARIES LOCAL_INCLUDES PUBLIC_INCLUDES)
+	set(options EXPORT)
+	set(oneValueArgs HEADERS_DIRECTORY TARGET)
+	set(multiValueArgs HEADERS SOURCES FLAGS LIBRARIES LOCAL_INCLUDES PUBLIC_INCLUDES)
 
-    cmake_parse_arguments(LIB "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+	cmake_parse_arguments(LIB "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    if (NOT LIB_TARGET)
-        message(FATAL_ERROR "Please set TARGET")
-    endif ()
-    if (NOT LIB_SOURCES)
-        message(FATAL_ERROR "Please set SOURCES")
-    endif ()
+	if (NOT LIB_TARGET)
+		message(FATAL_ERROR "Please set TARGET")
+	endif ()
+	if (NOT LIB_SOURCES)
+		message(FATAL_ERROR "Please set SOURCES")
+	endif ()
 
-    add_library(${LIB_TARGET} ${LIB_SOURCES} ${LIB_HEADERS})
-    target_include_directories(${LIB_TARGET} PRIVATE ${LIB_LOCAL_INCLUDES} PUBLIC ${LIB_PUBLIC_INCLUDES})
-    target_compile_definitions(
-        ${LIB_TARGET}
-        PRIVATE
-            CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}"
-            CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
-        PUBLIC
-            ${LIB_FLAGS}
-    )
-    target_link_libraries(${LIB_TARGET} ${LIB_LIBRARIES})
-    set_target_properties(
-        ${LIB_TARGET}
-        PROPERTIES
-            PREFIX ""
-            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-    )
-    foreach (c ${CMAKE_CONFIGURATION_TYPES})
-        string(TOUPPER ${c} cu)
-        set_target_properties(
-            ${LIB_TARGET}
-            PROPERTIES
-                RUNTIME_OUTPUT_DIRECTORY_${cu} ${CMAKE_BINARY_DIR}/bin/${c}
-        )
-    endforeach()
+	add_library(${LIB_TARGET} ${LIB_SOURCES} ${LIB_HEADERS})
+	target_include_directories(${LIB_TARGET} PRIVATE ${LIB_LOCAL_INCLUDES} PUBLIC ${LIB_PUBLIC_INCLUDES})
+	target_compile_definitions(
+		${LIB_TARGET}
+		PRIVATE
+			CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}"
+			CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+		PUBLIC
+			${LIB_FLAGS}
+	)
+	target_link_libraries(${LIB_TARGET} ${LIB_LIBRARIES})
+	set_target_properties(
+		${LIB_TARGET}
+		PROPERTIES
+			PREFIX ""
+			RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+	)
+	foreach (c ${CMAKE_CONFIGURATION_TYPES})
+		string(TOUPPER ${c} cu)
+		set_target_properties(
+			${LIB_TARGET}
+			PROPERTIES
+				RUNTIME_OUTPUT_DIRECTORY_${cu} ${CMAKE_BINARY_DIR}/bin/${c}
+		)
+	endforeach()
 
-    if (NOT ${LIB_EXTERN})
-        irccd_vera_check(${LIB_TARGET} "${LIB_SOURCES}")
-    endif ()
+	if (${LIB_EXPORT})
+		install(
+			TARGETS ${LIB_TARGET}
+			EXPORT irccd-targets
+			RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+			ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+			LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+		)
+	endif ()
 
-    if (${LIB_EXPORT})
-        install(
-            TARGETS ${LIB_TARGET}
-            EXPORT irccd-targets
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        )
-    endif ()
+	if (LIB_HEADERS)
+		if (NOT LIB_HEADERS_DIRECTORY)
+			message(FATAL_ERROR "HEADERS_DIRECTORY must be defined")
+		endif ()
 
-    if (LIB_HEADERS)
-        if (NOT LIB_HEADERS_DIRECTORY)
-            message(FATAL_ERROR "HEADERS_DIRECTORY must be defined")
-        endif ()
-
-        install(
-            FILES ${LIB_HEADERS}
-            DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${LIB_HEADERS_DIRECTORY}
-        )
-    endif ()
+		install(
+			FILES ${LIB_HEADERS}
+			DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${LIB_HEADERS_DIRECTORY}
+		)
+	endif ()
 endfunction()

@@ -21,58 +21,58 @@ project(libirccd-js)
 find_package(Boost REQUIRED QUIET COMPONENTS timer)
 
 set(
-    HEADERS
-    ${libirccd-js_SOURCE_DIR}/irccd/js/directory_js_api.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/duk.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/elapsed_timer_js_api.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/file_js_api.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/irccd_js_api.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/js_plugin.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/js_api.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/logger_js_api.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/plugin_js_api.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/server_js_api.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/system_js_api.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/timer_js_api.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/unicode.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/unicode_js_api.hpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/util_js_api.hpp
+	HEADERS
+	${libirccd-js_SOURCE_DIR}/irccd/js/directory_js_api.hpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/duk.hpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/elapsed_timer_js_api.hpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/file_js_api.hpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/irccd_js_api.hpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/js_plugin.hpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/js_api.hpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/logger_js_api.hpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/plugin_js_api.hpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/server_js_api.hpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/system_js_api.hpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/timer_js_api.hpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/unicode.hpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/unicode_js_api.hpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/util_js_api.hpp
 )
 
 set(
-    SOURCES
-    ${libirccd-js_SOURCE_DIR}/irccd/js/duk.cpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/directory_js_api.cpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/elapsed_timer_js_api.cpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/file_js_api.cpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/irccd_js_api.cpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/js_plugin.cpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/js_api.cpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/logger_js_api.cpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/plugin_js_api.cpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/server_js_api.cpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/system_js_api.cpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/timer_js_api.cpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/unicode.cpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/unicode_js_api.cpp
-    ${libirccd-js_SOURCE_DIR}/irccd/js/util_js_api.cpp
+	SOURCES
+	${libirccd-js_SOURCE_DIR}/irccd/js/duk.cpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/directory_js_api.cpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/elapsed_timer_js_api.cpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/file_js_api.cpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/irccd_js_api.cpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/js_plugin.cpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/js_api.cpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/logger_js_api.cpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/plugin_js_api.cpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/server_js_api.cpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/system_js_api.cpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/timer_js_api.cpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/unicode.cpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/unicode_js_api.cpp
+	${libirccd-js_SOURCE_DIR}/irccd/js/util_js_api.cpp
 )
 
 irccd_define_library(
-    TARGET libirccd-js
-    EXPORT
-    HEADERS ${HEADERS}
-    HEADERS_DIRECTORY irccd/js
-    SOURCES
-        ${libirccd-js_SOURCE_DIR}/CMakeLists.txt
-        ${SOURCES}
-        $<TARGET_OBJECTS:libduktape>
-    FLAGS
-        DUK_OPT_CPP_EXCEPTIONS
-    LIBRARIES
-        Boost::timer
-        libirccd
-    PUBLIC_INCLUDES
-        $<BUILD_INTERFACE:${duktape_SOURCE_DIR}>
-        $<BUILD_INTERFACE:${libirccd-js_SOURCE_DIR}>
+	TARGET libirccd-js
+	EXPORT
+	HEADERS ${HEADERS}
+	HEADERS_DIRECTORY irccd/js
+	SOURCES
+		${libirccd-js_SOURCE_DIR}/CMakeLists.txt
+		${SOURCES}
+		$<TARGET_OBJECTS:libduktape>
+	FLAGS
+		DUK_OPT_CPP_EXCEPTIONS
+	LIBRARIES
+		Boost::timer
+		libirccd
+	PUBLIC_INCLUDES
+		$<BUILD_INTERFACE:${duktape_SOURCE_DIR}>
+		$<BUILD_INTERFACE:${libirccd-js_SOURCE_DIR}>
 )

@@ -31,70 +31,70 @@ BOOST_FIXTURE_TEST_SUITE(server_disconnect_suite, cli_fixture)
 
 BOOST_AUTO_TEST_CASE(one)
 {
-    const auto s1 = std::make_shared<mock_server>(irccd_.get_service(), "s1", "localhost");
-    const auto s2 = std::make_shared<mock_server>(irccd_.get_service(), "s2", "localhost");
+	const auto s1 = std::make_shared<mock_server>(irccd_.get_service(), "s1", "localhost");
+	const auto s2 = std::make_shared<mock_server>(irccd_.get_service(), "s2", "localhost");
 
-    irccd_.servers().add(s1);
-    irccd_.servers().add(s2);
-    s1->clear();
-    s2->clear();
-    start();
+	irccd_.servers().add(s1);
+	irccd_.servers().add(s2);
+	s1->clear();
+	s2->clear();
+	start();
 
-    const auto [code, out, err] = exec({ "server-disconnect", "test" });
+	const auto [code, out, err] = exec({ "server-disconnect", "test" });
 
-    BOOST_TEST(!code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 0U);
-    BOOST_TEST(server_->find("disconnect").size() == 1U);
-    BOOST_TEST(s1->find("disconnect").size() == 0U);
-    BOOST_TEST(s2->find("disconnect").size() == 0U);
+	BOOST_TEST(!code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 0U);
+	BOOST_TEST(server_->find("disconnect").size() == 1U);
+	BOOST_TEST(s1->find("disconnect").size() == 0U);
+	BOOST_TEST(s2->find("disconnect").size() == 0U);
 }
 
 BOOST_AUTO_TEST_CASE(all)
 {
-    const auto s1 = std::make_shared<mock_server>(irccd_.get_service(), "s1", "localhost");
-    const auto s2 = std::make_shared<mock_server>(irccd_.get_service(), "s2", "localhost");
+	const auto s1 = std::make_shared<mock_server>(irccd_.get_service(), "s1", "localhost");
+	const auto s2 = std::make_shared<mock_server>(irccd_.get_service(), "s2", "localhost");
 
-    irccd_.servers().add(s1);
-    irccd_.servers().add(s2);
-    s1->clear();
-    s2->clear();
-    start();
+	irccd_.servers().add(s1);
+	irccd_.servers().add(s2);
+	s1->clear();
+	s2->clear();
+	start();
 
-    const auto [code, out, err] = exec({ "server-disconnect" });
+	const auto [code, out, err] = exec({ "server-disconnect" });
 
-    BOOST_TEST(!code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 0U);
-    BOOST_TEST(server_->find("disconnect").size() == 1U);
-    BOOST_TEST(s1->find("disconnect").size() == 1U);
-    BOOST_TEST(s2->find("disconnect").size() == 1U);
+	BOOST_TEST(!code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 0U);
+	BOOST_TEST(server_->find("disconnect").size() == 1U);
+	BOOST_TEST(s1->find("disconnect").size() == 1U);
+	BOOST_TEST(s2->find("disconnect").size() == 1U);
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-disconnect", "+++" });
+	const auto [code, out, err] = exec({ "server-disconnect", "+++" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: invalid server identifier");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: invalid server identifier");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-disconnect", "unknown" });
+	const auto [code, out, err] = exec({ "server-disconnect", "unknown" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: server not found");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: server not found");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

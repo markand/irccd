@@ -34,73 +34,73 @@ namespace irccd {
 
 void transport_service::handle_command(std::shared_ptr<transport_client> tc, const nlohmann::json& object)
 {
-    assert(object.is_object());
+	assert(object.is_object());
 
-    const json_util::document doc(object);
-    const auto name = doc.get<std::string>("command");
+	const json_util::deserializer doc(object);
+	const auto name = doc.get<std::string>("command");
 
-    if (!name) {
-        tc->error(irccd_error::invalid_message);
-        return;
-    }
+	if (!name) {
+		tc->error(irccd_error::invalid_message);
+		return;
+	}
 
-    const auto cmd = std::find_if(commands_.begin(), commands_.end(), [&] (const auto& cptr) {
-        return cptr->get_name() == *name;
-    });
+	const auto cmd = std::find_if(commands_.begin(), commands_.end(), [&] (const auto& cptr) {
+		return cptr->get_name() == *name;
+	});
 
-    if (cmd == commands_.end())
-        tc->error(irccd_error::invalid_command, *name);
-    else {
-        try {
-            (*cmd)->exec(irccd_, *tc, doc);
-        } catch (const std::system_error& ex) {
-            tc->error(ex.code(), (*cmd)->get_name());
-        } catch (const std::exception& ex) {
-            irccd_.get_log().warning("transport", "")
-                << "unknown error not reported: "
-                << ex.what() << std::endl;
-        }
-    }
+	if (cmd == commands_.end())
+		tc->error(irccd_error::invalid_command, *name);
+	else {
+		try {
+			(*cmd)->exec(irccd_, *tc, doc);
+		} catch (const std::system_error& ex) {
+			tc->error(ex.code(), (*cmd)->get_name());
+		} catch (const std::exception& ex) {
+			irccd_.get_log().warning("transport", "")
+				<< "unknown error not reported: "
+				<< ex.what() << std::endl;
+		}
+	}
 }
 
 void transport_service::do_recv(std::shared_ptr<transport_client> tc)
 {
-    tc->read([this, tc] (auto code, auto json) {
-        switch (static_cast<std::errc>(code.value())) {
-        case std::errc::not_connected:
-            irccd_.get_log().info("transport", "") << "client disconnected" << std::endl;
-            break;
-        case std::errc::invalid_argument:
-            tc->error(irccd_error::invalid_message);
-            break;
-        default:
-            // Other errors.
-            if (!code) {
-                handle_command(tc, json);
+	tc->read([this, tc] (auto code, auto json) {
+		switch (static_cast<std::errc>(code.value())) {
+		case std::errc::not_connected:
+			irccd_.get_log().info("transport", "") << "client disconnected" << std::endl;
+			break;
+		case std::errc::invalid_argument:
+			tc->error(irccd_error::invalid_message);
+			break;
+		default:
+			// Other errors.
+			if (!code) {
+				handle_command(tc, json);
 
-                if (tc->get_state() == transport_client::state::ready)
-                    do_recv(std::move(tc));
-            }
+				if (tc->get_state() == transport_client::state::ready)
+					do_recv(std::move(tc));
+			}
 
-            break;
-        }
-    });
+			break;
+		}
+	});
 }
 
 void transport_service::do_accept(transport_server& ts)
 {
-    ts.accept([this, &ts] (auto code, auto client) {
-        if (!code) {
-            do_accept(ts);
-            do_recv(std::move(client));
+	ts.accept([this, &ts] (auto code, auto client) {
+		if (!code) {
+			do_accept(ts);
+			do_recv(std::move(client));
 
-            irccd_.get_log().info("transport", "") << "new client connected" << std::endl;
-        }
-    });
+			irccd_.get_log().info("transport", "") << "new client connected" << std::endl;
+		}
+	});
 }
 
 transport_service::transport_service(irccd& irccd) noexcept
-    : irccd_(irccd)
+	: irccd_(irccd)
 {
 }
 
@@ -108,43 +108,43 @@ transport_service::~transport_service() noexcept = default;
 
 auto transport_service::get_commands() const noexcept -> const commands&
 {
-    return commands_;
+	return commands_;
 }
 
 auto transport_service::get_commands() noexcept -> commands&
 {
-    return commands_;
+	return commands_;
 }
 
 void transport_service::add(std::shared_ptr<transport_server> ts)
 {
-    assert(ts);
+	assert(ts);
 
-    do_accept(*ts);
-    servers_.push_back(std::move(ts));
+	do_accept(*ts);
+	servers_.push_back(std::move(ts));
 }
 
 void transport_service::broadcast(const nlohmann::json& json)
 {
-    assert(json.is_object());
+	assert(json.is_object());
 
-    for (const auto& servers : servers_)
-        for (const auto& client : servers->get_clients())
-            client->write(json);
+	for (const auto& servers : servers_)
+		for (const auto& client : servers->get_clients())
+			client->write(json);
 }
 
 void transport_service::load(const config& cfg) noexcept
 {
-    for (const auto& section : cfg) {
-        if (section.key() != "transport")
-            continue;
+	for (const auto& section : cfg) {
+		if (section.get_key() != "transport")
+			continue;
 
-        try {
-            add(transport_util::from_config(irccd_.get_service(), section));
-        } catch (const std::exception& ex) {
-            irccd_.get_log().warning("transport", "") << ex.what() << std::endl;
-        }
-    }
+		try {
+			add(transport_util::from_config(irccd_.get_service(), section));
+		} catch (const std::exception& ex) {
+			irccd_.get_log().warning("transport", "") << ex.what() << std::endl;
+		}
+	}
 }
 
 } // !irccd

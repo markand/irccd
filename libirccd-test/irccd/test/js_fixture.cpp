@@ -21,13 +21,13 @@
 namespace irccd::test {
 
 js_fixture::js_fixture(const std::string& path)
-    : plugin_(new js::js_plugin("test", path))
+	: plugin_(new js::js_plugin("test", path))
 {
-    for (const auto& f : js::js_api::registry)
-        f()->load(irccd_, plugin_);
+	for (const auto& f : js::js_api::registry)
+		f()->load(irccd_, plugin_);
 
-    if (!path.empty())
-        plugin_->open();
+	if (!path.empty())
+		plugin_->open();
 }
 
 } // !irccd::test

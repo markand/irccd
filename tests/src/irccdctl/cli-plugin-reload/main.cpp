@@ -30,37 +30,37 @@ namespace {
 
 class reloadable_plugin : public mock, public plugin {
 public:
-    reloadable_plugin()
-        : plugin("test")
-    {
-    }
+	reloadable_plugin()
+		: plugin("test")
+	{
+	}
 
-    auto get_name() const noexcept -> std::string_view override
-    {
-        return "reload";
-    }
+	auto get_name() const noexcept -> std::string_view override
+	{
+		return "reload";
+	}
 
-    void handle_reload(irccd&) override
-    {
-        push("handle_reload");
-    }
+	void handle_reload(irccd&) override
+	{
+		push("handle_reload");
+	}
 };
 
 BOOST_FIXTURE_TEST_SUITE(plugin_reload_suite, cli_fixture)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-    const auto plugin = std::make_shared<reloadable_plugin>();
+	const auto plugin = std::make_shared<reloadable_plugin>();
 
-    irccd_.plugins().add(plugin);
-    start();
+	irccd_.plugins().add(plugin);
+	start();
 
-    const auto [code, out, err] = exec({ "plugin-reload", "test" });
+	const auto [code, out, err] = exec({ "plugin-reload", "test" });
 
-    BOOST_TEST(!code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 0U);
-    BOOST_TEST(plugin->find("handle_reload").size() == 1U);
+	BOOST_TEST(!code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 0U);
+	BOOST_TEST(plugin->find("handle_reload").size() == 1U);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

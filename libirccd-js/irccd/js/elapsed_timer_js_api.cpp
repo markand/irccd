@@ -31,17 +31,17 @@ const std::string_view signature("\xff""\xff""Irccd.ElapsedTimer");
 
 auto self(duk_context* ctx) -> boost::timer::cpu_timer*
 {
-    duk::stack_guard sa(ctx);
+	duk::stack_guard sa(ctx);
 
-    duk_push_this(ctx);
-    duk_get_prop_string(ctx, -1, signature.data());
-    const auto ptr = static_cast<boost::timer::cpu_timer*>(duk_to_pointer(ctx, -1));
-    duk_pop_2(ctx);
+	duk_push_this(ctx);
+	duk_get_prop_string(ctx, -1, signature.data());
+	const auto ptr = static_cast<boost::timer::cpu_timer*>(duk_to_pointer(ctx, -1));
+	duk_pop_2(ctx);
 
-    if (!ptr)
-        duk_error(ctx, DUK_ERR_TYPE_ERROR, "not an ElapsedTimer object");
+	if (!ptr)
+		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not an ElapsedTimer object");
 
-    return ptr;
+	return ptr;
 }
 
 // }}}
@@ -56,9 +56,9 @@ auto self(duk_context* ctx) -> boost::timer::cpu_timer*
  */
 auto ElapsedTimer_prototype_pause(duk_context* ctx) -> duk_ret_t
 {
-    self(ctx)->stop();
+	self(ctx)->stop();
 
-    return 0;
+	return 0;
 }
 
 // }}}
@@ -73,9 +73,9 @@ auto ElapsedTimer_prototype_pause(duk_context* ctx) -> duk_ret_t
  */
 auto ElapsedTimer_prototype_restart(duk_context* ctx) -> duk_ret_t
 {
-    self(ctx)->resume();
+	self(ctx)->resume();
 
-    return 0;
+	return 0;
 }
 
 // }}}
@@ -93,9 +93,9 @@ auto ElapsedTimer_prototype_restart(duk_context* ctx) -> duk_ret_t
  */
 auto ElapsedTimer_prototype_elapsed(duk_context* ctx) -> duk_ret_t
 {
-    duk_push_uint(ctx, self(ctx)->elapsed().wall / 1000000LL);
+	duk_push_uint(ctx, self(ctx)->elapsed().wall / 1000000LL);
 
-    return 1;
+	return 1;
 }
 
 // }}}
@@ -110,12 +110,12 @@ auto ElapsedTimer_prototype_elapsed(duk_context* ctx) -> duk_ret_t
  */
 auto ElapsedTimer_constructor(duk_context* ctx) -> duk_ret_t
 {
-    duk_push_this(ctx);
-    duk_push_pointer(ctx, new boost::timer::cpu_timer);
-    duk_put_prop_string(ctx, -2, signature.data());
-    duk_pop(ctx);
+	duk_push_this(ctx);
+	duk_push_pointer(ctx, new boost::timer::cpu_timer);
+	duk_put_prop_string(ctx, -2, signature.data());
+	duk_pop(ctx);
 
-    return 0;
+	return 0;
 }
 
 // }}}
@@ -130,12 +130,12 @@ auto ElapsedTimer_constructor(duk_context* ctx) -> duk_ret_t
  */
 auto ElapsedTimer_destructor(duk_context* ctx) -> duk_ret_t
 {
-    duk_get_prop_string(ctx, 0, signature.data());
-    delete static_cast<boost::timer::cpu_timer*>(duk_to_pointer(ctx, -1));
-    duk_pop(ctx);
-    duk_del_prop_string(ctx, 0, signature.data());
+	duk_get_prop_string(ctx, 0, signature.data());
+	delete static_cast<boost::timer::cpu_timer*>(duk_to_pointer(ctx, -1));
+	duk_pop(ctx);
+	duk_del_prop_string(ctx, 0, signature.data());
 
-    return 0;
+	return 0;
 }
 
 // }}}
@@ -143,10 +143,10 @@ auto ElapsedTimer_destructor(duk_context* ctx) -> duk_ret_t
 // {{{ definitions
 
 const duk_function_list_entry methods[] = {
-    { "elapsed",    ElapsedTimer_prototype_elapsed, 0 },
-    { "pause",      ElapsedTimer_prototype_pause,   0 },
-    { "restart",    ElapsedTimer_prototype_restart, 0 },
-    { nullptr,      nullptr,                        0 }
+	{ "elapsed",    ElapsedTimer_prototype_elapsed, 0 },
+	{ "pause",      ElapsedTimer_prototype_pause,   0 },
+	{ "restart",    ElapsedTimer_prototype_restart, 0 },
+	{ nullptr,      nullptr,                        0 }
 };
 
 // }}}
@@ -157,22 +157,22 @@ const duk_function_list_entry methods[] = {
 
 auto elapsed_timer_js_api::get_name() const noexcept -> std::string_view
 {
-    return "Irccd.ElapsedTimer";
+	return "Irccd.ElapsedTimer";
 }
 
 void elapsed_timer_js_api::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
-    duk::stack_guard sa(plugin->get_context());
+	duk::stack_guard sa(plugin->get_context());
 
-    duk_get_global_string(plugin->get_context(), "Irccd");
-    duk_push_c_function(plugin->get_context(), ElapsedTimer_constructor, 0);
-    duk_push_object(plugin->get_context());
-    duk_put_function_list(plugin->get_context(), -1, methods);
-    duk_push_c_function(plugin->get_context(), ElapsedTimer_destructor, 1);
-    duk_set_finalizer(plugin->get_context(), -2);
-    duk_put_prop_string(plugin->get_context(), -2, "prototype");
-    duk_put_prop_string(plugin->get_context(), -2, "ElapsedTimer");
-    duk_pop(plugin->get_context());
+	duk_get_global_string(plugin->get_context(), "Irccd");
+	duk_push_c_function(plugin->get_context(), ElapsedTimer_constructor, 0);
+	duk_push_object(plugin->get_context());
+	duk_put_function_list(plugin->get_context(), -1, methods);
+	duk_push_c_function(plugin->get_context(), ElapsedTimer_destructor, 1);
+	duk_set_finalizer(plugin->get_context(), -2);
+	duk_put_prop_string(plugin->get_context(), -2, "prototype");
+	duk_put_prop_string(plugin->get_context(), -2, "ElapsedTimer");
+	duk_pop(plugin->get_context());
 }
 
 // }}}

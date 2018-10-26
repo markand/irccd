@@ -65,256 +65,256 @@ struct whois_event;
  */
 class plugin : public std::enable_shared_from_this<plugin> {
 public:
-    /**
-     * Map for key/value pairs.
-     *
-     * Used in options, formats and paths.
-     */
-    using map = std::unordered_map<std::string, std::string>;
+	/**
+	 * Map for key/value pairs.
+	 *
+	 * Used in options, formats and paths.
+	 */
+	using map = std::unordered_map<std::string, std::string>;
 
 private:
-    std::string id_;
+	std::string id_;
 
 public:
-    /**
-     * Construct a plugin.
-     *
-     * \pre id must be a valid identifier
-     * \param id the plugin id
-     */
-    plugin(std::string id) noexcept;
+	/**
+	 * Construct a plugin.
+	 *
+	 * \pre id must be a valid identifier
+	 * \param id the plugin id
+	 */
+	plugin(std::string id) noexcept;
 
-    /**
-     * Temporary, close all timers.
-     */
-    virtual ~plugin() = default;
+	/**
+	 * Temporary, close all timers.
+	 */
+	virtual ~plugin() = default;
 
-    /**
-     * Get user unique id.
-     *
-     * \return the plugin id
-     */
-    auto get_id() const noexcept -> const std::string&;
+	/**
+	 * Get user unique id.
+	 *
+	 * \return the plugin id
+	 */
+	auto get_id() const noexcept -> const std::string&;
 
-    /**
-     * Get the plugin name.
-     *
-     * \return the plugin name
-     */
-    virtual auto get_name() const noexcept -> std::string_view = 0;
+	/**
+	 * Get the plugin name.
+	 *
+	 * \return the plugin name
+	 */
+	virtual auto get_name() const noexcept -> std::string_view = 0;
 
-    /**
-     * Get the author.
-     *
-     * \return the author
-     */
-    virtual auto get_author() const noexcept -> std::string_view;
+	/**
+	 * Get the author.
+	 *
+	 * \return the author
+	 */
+	virtual auto get_author() const noexcept -> std::string_view;
 
-    /**
-     * Get the license.
-     *
-     * \return the license
-     */
-    virtual auto get_license() const noexcept -> std::string_view;
+	/**
+	 * Get the license.
+	 *
+	 * \return the license
+	 */
+	virtual auto get_license() const noexcept -> std::string_view;
 
-    /**
-     * Get the summary.
-     *
-     * \return the summary
-     */
-    virtual auto get_summary() const noexcept -> std::string_view;
+	/**
+	 * Get the summary.
+	 *
+	 * \return the summary
+	 */
+	virtual auto get_summary() const noexcept -> std::string_view;
 
-    /**
-     * Get the version.
-     *
-     * \return the version
-     */
-    virtual auto get_version() const noexcept -> std::string_view;
+	/**
+	 * Get the version.
+	 *
+	 * \return the version
+	 */
+	virtual auto get_version() const noexcept -> std::string_view;
 
-    /**
-     * Get all options.
-     *
-     * \return options
-     */
-    virtual auto get_options() const -> map;
+	/**
+	 * Get all options.
+	 *
+	 * \return options
+	 */
+	virtual auto get_options() const -> map;
 
-    /**
-     * Set all options.
-     *
-     * \param map the options
-     */
-    virtual void set_options(const map& map);
+	/**
+	 * Set all options.
+	 *
+	 * \param map the options
+	 */
+	virtual void set_options(const map& map);
 
-    /**
-     * Get all formats.
-     *
-     * \return formats
-     */
-    virtual auto get_formats() const -> map;
+	/**
+	 * Get all formats.
+	 *
+	 * \return formats
+	 */
+	virtual auto get_formats() const -> map;
 
-    /**
-     * Set all formats.
-     *
-     * \param map the formats
-     */
-    virtual void set_formats(const map& map);
+	/**
+	 * Set all formats.
+	 *
+	 * \param map the formats
+	 */
+	virtual void set_formats(const map& map);
 
-    /**
-     * Get all paths.
-     *
-     * \return paths
-     */
-    virtual auto get_paths() const -> map;
+	/**
+	 * Get all paths.
+	 *
+	 * \return paths
+	 */
+	virtual auto get_paths() const -> map;
 
-    /**
-     * Set all paths.
-     *
-     * \param map the paths
-     */
-    virtual void set_paths(const map& map);
+	/**
+	 * Set all paths.
+	 *
+	 * \param map the paths
+	 */
+	virtual void set_paths(const map& map);
 
-    /**
-     * On channel message. This event will call onMessage or
-     * onCommand if the messages starts with the command character
-     * plus the plugin name.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void handle_command(irccd& irccd, const message_event& event);
+	/**
+	 * On channel message. This event will call onMessage or
+	 * onCommand if the messages starts with the command character
+	 * plus the plugin name.
+	 *
+	 * \param irccd the irccd instance
+	 * \param event the event
+	 */
+	virtual void handle_command(irccd& irccd, const message_event& event);
 
-    /**
-     * On successful connection.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void handle_connect(irccd& irccd, const connect_event& event);
+	/**
+	 * On successful connection.
+	 *
+	 * \param irccd the irccd instance
+	 * \param event the event
+	 */
+	virtual void handle_connect(irccd& irccd, const connect_event& event);
 
-    /**
-     * On disconnection.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void handle_disconnect(irccd& irccd, const disconnect_event& event);
+	/**
+	 * On disconnection.
+	 *
+	 * \param irccd the irccd instance
+	 * \param event the event
+	 */
+	virtual void handle_disconnect(irccd& irccd, const disconnect_event& event);
 
-    /**
-     * On invitation.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void handle_invite(irccd& irccd, const invite_event& event);
+	/**
+	 * On invitation.
+	 *
+	 * \param irccd the irccd instance
+	 * \param event the event
+	 */
+	virtual void handle_invite(irccd& irccd, const invite_event& event);
 
-    /**
-     * On join.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void handle_join(irccd& irccd, const join_event& event);
+	/**
+	 * On join.
+	 *
+	 * \param irccd the irccd instance
+	 * \param event the event
+	 */
+	virtual void handle_join(irccd& irccd, const join_event& event);
 
-    /**
-     * On kick.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void handle_kick(irccd& irccd, const kick_event& event);
+	/**
+	 * On kick.
+	 *
+	 * \param irccd the irccd instance
+	 * \param event the event
+	 */
+	virtual void handle_kick(irccd& irccd, const kick_event& event);
 
-    /**
-     * On load.
-     *
-     * \param irccd the irccd instance
-     */
-    virtual void handle_load(irccd& irccd);
+	/**
+	 * On load.
+	 *
+	 * \param irccd the irccd instance
+	 */
+	virtual void handle_load(irccd& irccd);
 
-    /**
-     * On channel message.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void handle_message(irccd& irccd, const message_event& event);
+	/**
+	 * On channel message.
+	 *
+	 * \param irccd the irccd instance
+	 * \param event the event
+	 */
+	virtual void handle_message(irccd& irccd, const message_event& event);
 
-    /**
-     * On CTCP Action.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void handle_me(irccd& irccd, const me_event& event);
+	/**
+	 * On CTCP Action.
+	 *
+	 * \param irccd the irccd instance
+	 * \param event the event
+	 */
+	virtual void handle_me(irccd& irccd, const me_event& event);
 
-    /**
-     * On user mode change.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void handle_mode(irccd& irccd, const mode_event& event);
+	/**
+	 * On user mode change.
+	 *
+	 * \param irccd the irccd instance
+	 * \param event the event
+	 */
+	virtual void handle_mode(irccd& irccd, const mode_event& event);
 
-    /**
-     * On names listing.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void handle_names(irccd& irccd, const names_event& event);
+	/**
+	 * On names listing.
+	 *
+	 * \param irccd the irccd instance
+	 * \param event the event
+	 */
+	virtual void handle_names(irccd& irccd, const names_event& event);
 
-    /**
-     * On nick change.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void handle_nick(irccd& irccd, const nick_event& event);
+	/**
+	 * On nick change.
+	 *
+	 * \param irccd the irccd instance
+	 * \param event the event
+	 */
+	virtual void handle_nick(irccd& irccd, const nick_event& event);
 
-    /**
-     * On user notice.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void handle_notice(irccd& irccd, const notice_event& event);
+	/**
+	 * On user notice.
+	 *
+	 * \param irccd the irccd instance
+	 * \param event the event
+	 */
+	virtual void handle_notice(irccd& irccd, const notice_event& event);
 
-    /**
-     * On part.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void handle_part(irccd& irccd, const part_event& event);
+	/**
+	 * On part.
+	 *
+	 * \param irccd the irccd instance
+	 * \param event the event
+	 */
+	virtual void handle_part(irccd& irccd, const part_event& event);
 
-    /**
-     * On reload.
-     *
-     * \param irccd the irccd instance
-     */
-    virtual void handle_reload(irccd& irccd);
+	/**
+	 * On reload.
+	 *
+	 * \param irccd the irccd instance
+	 */
+	virtual void handle_reload(irccd& irccd);
 
-    /**
-     * On topic change.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void handle_topic(irccd& irccd, const topic_event& event);
+	/**
+	 * On topic change.
+	 *
+	 * \param irccd the irccd instance
+	 * \param event the event
+	 */
+	virtual void handle_topic(irccd& irccd, const topic_event& event);
 
-    /**
-     * On unload.
-     *
-     * \param irccd the irccd instance
-     */
-    virtual void handle_unload(irccd& irccd);
+	/**
+	 * On unload.
+	 *
+	 * \param irccd the irccd instance
+	 */
+	virtual void handle_unload(irccd& irccd);
 
-    /**
-     * On whois information.
-     *
-     * \param irccd the irccd instance
-     * \param event the event
-     */
-    virtual void handle_whois(irccd& irccd, const whois_event& event);
+	/**
+	 * On whois information.
+	 *
+	 * \param irccd the irccd instance
+	 * \param event the event
+	 */
+	virtual void handle_whois(irccd& irccd, const whois_event& event);
 };
 
 /**
@@ -331,48 +331,48 @@ public:
  */
 class plugin_loader {
 private:
-    std::vector<std::string> directories_;
-    std::vector<std::string> extensions_;
+	std::vector<std::string> directories_;
+	std::vector<std::string> extensions_;
 
 public:
-    /**
-     * Construct the loader with a predefined set of directories and extensions.
-     *
-     * If directories is not specified, a sensible default list of system and
-     * user paths are searched.
-     *
-     * \pre !extensions.empty()
-     * \param directories optional list of directories to search
-     * \param extensions the non empty list of extensions supported
-     */
-    plugin_loader(std::vector<std::string> directories,
-                  std::vector<std::string> extensions) noexcept;
+	/**
+	 * Construct the loader with a predefined set of directories and extensions.
+	 *
+	 * If directories is not specified, a sensible default list of system and
+	 * user paths are searched.
+	 *
+	 * \pre !extensions.empty()
+	 * \param directories optional list of directories to search
+	 * \param extensions the non empty list of extensions supported
+	 */
+	plugin_loader(std::vector<std::string> directories,
+				  std::vector<std::string> extensions) noexcept;
 
-    /**
-     * Virtual destructor defaulted.
-     */
-    virtual ~plugin_loader() = default;
+	/**
+	 * Virtual destructor defaulted.
+	 */
+	virtual ~plugin_loader() = default;
 
-    /**
-     * Try to open the plugin specified by path.
-     *
-     * The implementation must test if the plugin is suitable for opening, by
-     * testing extension for example.
-     *
-     * \param id the plugin identifier
-     * \param file the file path
-     * \throw plugin_error on errors
-     */
-    virtual auto open(std::string_view id, std::string_view file) -> std::shared_ptr<plugin> = 0;
+	/**
+	 * Try to open the plugin specified by path.
+	 *
+	 * The implementation must test if the plugin is suitable for opening, by
+	 * testing extension for example.
+	 *
+	 * \param id the plugin identifier
+	 * \param file the file path
+	 * \throw plugin_error on errors
+	 */
+	virtual auto open(std::string_view id, std::string_view file) -> std::shared_ptr<plugin> = 0;
 
-    /**
-     * Search for a plugin named by this id.
-     *
-     * \param id the plugin id
-     * \return the plugin
-     * \throw plugin_error on errors
-     */
-    virtual auto find(std::string_view id) -> std::shared_ptr<plugin>;
+	/**
+	 * Search for a plugin named by this id.
+	 *
+	 * \param id the plugin id
+	 * \return the plugin
+	 * \throw plugin_error on errors
+	 */
+	virtual auto find(std::string_view id) -> std::shared_ptr<plugin>;
 };
 
 /**
@@ -380,59 +380,59 @@ public:
  */
 class plugin_error : public std::system_error {
 public:
-    /**
-     * \brief Plugin related errors.
-     */
-    enum error {
-        //!< No error.
-        no_error = 0,
+	/**
+	 * \brief Plugin related errors.
+	 */
+	enum error {
+		//!< No error.
+		no_error = 0,
 
-        //!< The specified identifier is invalid.
-        invalid_identifier,
+		//!< The specified identifier is invalid.
+		invalid_identifier,
 
-        //!< The specified plugin is not found.
-        not_found,
+		//!< The specified plugin is not found.
+		not_found,
 
-        //!< The plugin was unable to run the function.
-        exec_error,
+		//!< The plugin was unable to run the function.
+		exec_error,
 
-        //!< The plugin is already loaded.
-        already_exists,
-    };
+		//!< The plugin is already loaded.
+		already_exists,
+	};
 
 private:
-    std::string name_;
-    std::string message_;
-    std::string what_;
+	std::string name_;
+	std::string message_;
+	std::string what_;
 
 public:
-    /**
-     * Constructor.
-     *
-     * \param code the error code
-     * \param name the plugin name
-     * \param message the optional message (e.g. error from plugin)
-     */
-    plugin_error(error code, std::string_view name = "", std::string_view message = "");
+	/**
+	 * Constructor.
+	 *
+	 * \param code the error code
+	 * \param name the plugin name
+	 * \param message the optional message (e.g. error from plugin)
+	 */
+	plugin_error(error code, std::string_view name = "", std::string_view message = "");
 
-    /**
-     * Get the plugin name.
-     *
-     * \return the name
-     */
-    auto get_name() const noexcept -> const std::string&;
+	/**
+	 * Get the plugin name.
+	 *
+	 * \return the name
+	 */
+	auto get_name() const noexcept -> const std::string&;
 
-    /**
-     * Get the additional message.
-     *
-     * \return the message
-     */
-    auto get_message() const noexcept -> const std::string&;
+	/**
+	 * Get the additional message.
+	 *
+	 * \return the message
+	 */
+	auto get_message() const noexcept -> const std::string&;
 
-    /**
-     * Get message appropriate for use with logger.
-     */
-    auto what() const noexcept -> const char* override;
+	/**
+	 * Get message appropriate for use with logger.
+	 */
+	auto what() const noexcept -> const char* override;
 };
 
 /**

@@ -17,8 +17,8 @@
 #
 
 irccd_define_test(
-    NAME plugin-plugin
-    SOURCES main.cpp
-    LIBRARIES libirccd
-    FLAGS PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/plugin/plugin.js"
+	NAME plugin-plugin
+	SOURCES main.cpp
+	LIBRARIES libirccd
+	FLAGS PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/plugin/plugin.js"
 )

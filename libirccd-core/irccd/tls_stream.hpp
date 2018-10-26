@@ -32,7 +32,7 @@
 
 #include "socket_stream.hpp"
 
-namespace irccd::io {
+namespace irccd {
 
 /**
  * \brief TLS/SSL streams.
@@ -41,19 +41,19 @@ namespace irccd::io {
 template <typename Socket = boost::asio::ip::tcp::socket>
 class tls_stream : public socket_stream<boost::asio::ssl::stream<Socket>> {
 public:
-    /**
-     * Constructor.
-     *
-     * \param args the arguments to boost::asio::ssl::stream<Socket>
-     */
-    template <typename... Args>
-    tls_stream(Args&&... args)
-        : socket_stream<boost::asio::ssl::stream<Socket>>(std::forward<Args>(args)...)
-    {
-    }
+	/**
+	 * Constructor.
+	 *
+	 * \param args the arguments to boost::asio::ssl::stream<Socket>
+	 */
+	template <typename... Args>
+	tls_stream(Args&&... args)
+		: socket_stream<boost::asio::ssl::stream<Socket>>(std::forward<Args>(args)...)
+	{
+	}
 };
 
-} // !irccd::io
+} // !irccd
 
 #endif // !IRCCD_HAVE_SSL
 

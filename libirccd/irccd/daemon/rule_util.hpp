@@ -35,7 +35,8 @@ class section;
 } // !ini
 
 class config;
-class rule;
+
+struct rule;
 
 /**
  * \brief Rule utilities.
@@ -52,7 +53,7 @@ namespace rule_util {
  * \return the new rule
  * \throw rule_error on errors
  */
-rule from_json(const nlohmann::json& json);
+auto from_json(const nlohmann::json& json) -> rule;
 
 /**
  * Load a rule from a INI section.
@@ -61,7 +62,7 @@ rule from_json(const nlohmann::json& json);
  * \return the rule
  * \throw rule_error on errors
  */
-rule from_config(const ini::section& sc);
+auto from_config(const ini::section& sc) -> rule;
 
 /**
  * Convert a rule into a JSON object.
@@ -69,7 +70,7 @@ rule from_config(const ini::section& sc);
  * \param rule the rule
  * \throw the JSON representation
  */
-nlohmann::json to_json(const rule& rule);
+auto to_json(const rule& rule) -> nlohmann::json;
 
 } // !rule_util
 

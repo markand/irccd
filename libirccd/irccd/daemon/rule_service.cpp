@@ -29,105 +29,110 @@
 namespace irccd {
 
 rule_service::rule_service(irccd &irccd)
-    : irccd_(irccd)
+	: irccd_(irccd)
 {
+}
+
+auto rule_service::list() const noexcept -> const std::vector<rule>&
+{
+	return rules_;
 }
 
 void rule_service::add(rule rule)
 {
-    rules_.push_back(std::move(rule));
+	rules_.push_back(std::move(rule));
 }
 
 void rule_service::insert(rule rule, unsigned position)
 {
-    assert(position <= rules_.size());
+	assert(position <= rules_.size());
 
-    rules_.insert(rules_.begin() + position, std::move(rule));
+	rules_.insert(rules_.begin() + position, std::move(rule));
 }
 
 void rule_service::remove(unsigned position)
 {
-    assert(position < rules_.size());
+	assert(position < rules_.size());
 
-    rules_.erase(rules_.begin() + position);
+	rules_.erase(rules_.begin() + position);
 }
 
-const rule &rule_service::require(unsigned position) const
+auto rule_service::require(unsigned position) const -> const rule&
 {
-    if (position >= rules_.size())
-        throw rule_error(rule_error::invalid_index);
+	if (position >= rules_.size())
+		throw rule_error(rule_error::invalid_index);
 
-    return rules_[position];
+	return rules_[position];
 }
 
-rule &rule_service::require(unsigned position)
+auto rule_service::require(unsigned position) -> rule&
 {
-    if (position >= rules_.size())
-        throw rule_error(rule_error::invalid_index);
+	if (position >= rules_.size())
+		throw rule_error(rule_error::invalid_index);
 
-    return rules_[position];
+	return rules_[position];
 }
 
-bool rule_service::solve(std::string_view server,
+auto rule_service::solve(std::string_view server,
                          std::string_view channel,
                          std::string_view origin,
                          std::string_view plugin,
-                         std::string_view event) noexcept
+                         std::string_view event) noexcept -> bool
 {
-    bool result = true;
+	bool result = true;
 
-    irccd_.get_log().debug("rule", "")
-        << "solving for server=" << server
-        << ", channel=" << channel
-        << ", origin=" << origin
-        << ", plugin=" << plugin
-        << ", event=" << event << std::endl;
+	irccd_.get_log().debug("rule", "")
+		<< "solving for server=" << server
+		<< ", channel=" << channel
+		<< ", origin=" << origin
+		<< ", plugin=" << plugin
+		<< ", event=" << event << std::endl;
 
-    int i = 0;
-    for (const auto& rule : rules_) {
-        auto action = rule.get_action() == rule::action::accept ? "accept" : "drop";
+	int i = 0;
+	for (const auto& rule : rules_) {
+		auto action = rule.action == rule::action_type::accept ? "accept" : "drop";
 
-        irccd_.get_log().debug(rule) << "candidate "  << i++ << ":" << std::endl;
-        irccd_.get_log().debug(rule) << "  servers: "  << string_util::join(rule.get_servers()) << std::endl;
-        irccd_.get_log().debug(rule) << "  channels: " << string_util::join(rule.get_channels()) << std::endl;
-        irccd_.get_log().debug(rule) << "  origins: "  << string_util::join(rule.get_origins()) << std::endl;
-        irccd_.get_log().debug(rule) << "  plugins: "  << string_util::join(rule.get_plugins()) << std::endl;
-        irccd_.get_log().debug(rule) << "  events: "   << string_util::join(rule.get_events()) << std::endl;
-        irccd_.get_log().debug(rule) << "  action: "   << action << std::endl;
+		irccd_.get_log().debug(rule) << "candidate "  << i++ << ":" << std::endl;
+		irccd_.get_log().debug(rule) << "  servers: "  << string_util::join(rule.servers) << std::endl;
+		irccd_.get_log().debug(rule) << "  channels: " << string_util::join(rule.channels) << std::endl;
+		irccd_.get_log().debug(rule) << "  origins: "  << string_util::join(rule.origins) << std::endl;
+		irccd_.get_log().debug(rule) << "  plugins: "  << string_util::join(rule.plugins) << std::endl;
+		irccd_.get_log().debug(rule) << "  events: "   << string_util::join(rule.events) << std::endl;
+		irccd_.get_log().debug(rule) << "  action: "   << action << std::endl;
 
-        if (rule.match(server, channel, origin, plugin, event))
-            result = rule.get_action() == rule::action::accept;
-    }
+		if (rule.match(server, channel, origin, plugin, event))
+			result = rule.action == rule::action_type::accept;
+	}
 
-    return result;
+	return result;
 }
 
 void rule_service::load(const config& cfg) noexcept
 {
-    rules_.clear();
+	rules_.clear();
 
-    for (const auto& section : cfg) {
-        if (section.key() != "rule")
-            continue;
+	for (const auto& section : cfg) {
+		if (section.get_key() != "rule")
+			continue;
 
-        try {
-            rules_.push_back(rule_util::from_config(section));
-        } catch (const std::exception& ex) {
-            irccd_.get_log().warning("rule", "") << ex.what() << std::endl;
-        }
-    }
+		try {
+			rules_.push_back(rule_util::from_config(section));
+		} catch (const std::exception& ex) {
+			irccd_.get_log().warning("rule", "") << ex.what() << std::endl;
+		}
+	}
 }
 
 namespace logger {
 
 auto loggable_traits<rule>::get_category(const rule&) -> std::string_view
 {
-    return "rule";
+	return "rule";
 }
 
 auto loggable_traits<rule>::get_component(const rule&) -> std::string_view
 {
-    return "";
+	return "";
 }
 
 } // !logger

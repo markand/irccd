@@ -17,7 +17,7 @@
 #
 
 irccd_define_test(
-    NAME fs-util
-    SOURCES main.cpp
-    LIBRARIES libirccd-core
+	NAME fs-util
+	SOURCES main.cpp
+	LIBRARIES libirccd-core
 )

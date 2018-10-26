@@ -31,7 +31,7 @@
 #include "socket_connector.hpp"
 #include "tls_stream.hpp"
 
-namespace irccd::io {
+namespace irccd {
 
 /**
  * \brief TLS/SSL connectors.
@@ -40,51 +40,55 @@ namespace irccd::io {
 template <typename Protocol = boost::asio::ip::tcp>
 class tls_connector : public socket_connector<Protocol> {
 private:
-    boost::asio::ssl::context context_;
+	boost::asio::ssl::context context_;
 
 public:
-    /**
-     * Construct a secure layer transport server.
-     *
-     * \param context the SSL context
-     * \param args the arguments to socket_connector<Socket> constructor
-     */
-    template <typename... Args>
-    tls_connector(boost::asio::ssl::context context, Args&&... args)
-        : socket_connector<Protocol>(std::forward<Args>(args)...)
-        , context_(std::move(context))
-    {
-    }
+	/**
+	 * Construct a secure layer transport server.
+	 *
+	 * \param context the SSL context
+	 * \param args the arguments to socket_connector<Socket> constructor
+	 */
+	template <typename... Args>
+	tls_connector(boost::asio::ssl::context context, Args&&... args);
 
-    /**
-     * \copydoc socket_connector::connect
-     */
-    void connect(connect_handler handler) override;
+	/**
+	 * \copydoc socket_connector::connect
+	 */
+	void connect(connector::handler handler) override;
 };
 
 template <typename Protocol>
-void tls_connector<Protocol>::connect(connect_handler handler)
+template <typename... Args>
+tls_connector<Protocol>::tls_connector(boost::asio::ssl::context context, Args&&... args)
+	: socket_connector<Protocol>(std::forward<Args>(args)...)
+	, context_(std::move(context))
 {
-    using boost::asio::ssl::stream_base;
-    using socket = typename Protocol::socket;
-
-    assert(handler);
-
-    const auto stream = std::make_shared<tls_stream<socket>>(this->get_io_service(), context_);
-
-    socket_connector<Protocol>::do_connect(stream->get_socket().lowest_layer(), [handler, stream] (auto code) {
-        if (code) {
-            handler(code, nullptr);
-            return;
-        }
-
-        stream->get_socket().async_handshake(stream_base::client, [handler, stream] (auto code) {
-            handler(code, code ? nullptr : std::move(stream));
-        });
-    });
 }
 
-} // !irccd::io
+template <typename Protocol>
+void tls_connector<Protocol>::connect(connector::handler handler)
+{
+	using boost::asio::ssl::stream_base;
+	using socket = typename Protocol::socket;
+
+	assert(handler);
+
+	const auto stream = std::make_shared<tls_stream<socket>>(this->get_io_service(), context_);
+
+	socket_connector<Protocol>::do_connect(stream->get_socket().lowest_layer(), [handler, stream] (auto code) {
+		if (code) {
+			handler(code, nullptr);
+			return;
+		}
+
+		stream->get_socket().async_handshake(stream_base::client, [handler, stream] (auto code) {
+			handler(code, code ? nullptr : std::move(stream));
+		});
+	});
+}
+
+} // !irccd
 
 #endif // !IRCCD_HAVE_SSL
 

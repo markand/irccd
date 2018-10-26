@@ -31,86 +31,86 @@ BOOST_FIXTURE_TEST_SUITE(plugin_config_test_suite, command_fixture)
 
 BOOST_AUTO_TEST_CASE(set)
 {
-    const auto [json, code] = request({
-        { "command",    "plugin-config" },
-        { "plugin",     "test"          },
-        { "variable",   "verbosy"       },
-        { "value",      "falsy"         }
-    });
+	const auto [json, code] = request({
+		{ "command",    "plugin-config" },
+		{ "plugin",     "test"          },
+		{ "variable",   "verbosy"       },
+		{ "value",      "falsy"         }
+	});
 
-    const auto config = irccd_.plugins().require("test")->get_options();
+	const auto config = irccd_.plugins().require("test")->get_options();
 
-    BOOST_TEST(!code);
-    BOOST_TEST(!config.empty());
-    BOOST_TEST(config.at("verbosy") == "falsy");
+	BOOST_TEST(!code);
+	BOOST_TEST(!config.empty());
+	BOOST_TEST(config.at("verbosy") == "falsy");
 }
 
 BOOST_AUTO_TEST_CASE(get)
 {
-    auto plugin = std::make_unique<mock_plugin>("test");
+	auto plugin = std::make_unique<mock_plugin>("test");
 
-    plugin->set_options({
-        { "x1", "10" },
-        { "x2", "20" }
-    });
-    irccd_.plugins().clear();
-    irccd_.plugins().add(std::move(plugin));
+	plugin->set_options({
+		{ "x1", "10" },
+		{ "x2", "20" }
+	});
+	irccd_.plugins().clear();
+	irccd_.plugins().add(std::move(plugin));
 
-    const auto [json, code] = request({
-        { "command",    "plugin-config" },
-        { "plugin",     "test"          },
-        { "variable",   "x1"            }
-    });
+	const auto [json, code] = request({
+		{ "command",    "plugin-config" },
+		{ "plugin",     "test"          },
+		{ "variable",   "x1"            }
+	});
 
-    BOOST_TEST(!code);
-    BOOST_TEST(json["variables"]["x1"].get<std::string>() == "10");
-    BOOST_TEST(json["variables"].count("x2") == 0U);
+	BOOST_TEST(!code);
+	BOOST_TEST(json["variables"]["x1"].get<std::string>() == "10");
+	BOOST_TEST(json["variables"].count("x2") == 0U);
 }
 
 BOOST_AUTO_TEST_CASE(getall)
 {
-    auto plugin = std::make_unique<mock_plugin>("test");
+	auto plugin = std::make_unique<mock_plugin>("test");
 
-    plugin->set_options({
-        { "x1", "10" },
-        { "x2", "20" }
-    });
-    irccd_.plugins().clear();
-    irccd_.plugins().add(std::move(plugin));
+	plugin->set_options({
+		{ "x1", "10" },
+		{ "x2", "20" }
+	});
+	irccd_.plugins().clear();
+	irccd_.plugins().add(std::move(plugin));
 
-    const auto [json, code] = request({
-        { "command",    "plugin-config" },
-        { "plugin",     "test"          }
-    });
+	const auto [json, code] = request({
+		{ "command",    "plugin-config" },
+		{ "plugin",     "test"          }
+	});
 
-    BOOST_TEST(!code);
-    BOOST_TEST(json["variables"]["x1"].get<std::string>() == "10");
-    BOOST_TEST(json["variables"]["x2"].get<std::string>() == "20");
+	BOOST_TEST(!code);
+	BOOST_TEST(json["variables"]["x1"].get<std::string>() == "10");
+	BOOST_TEST(json["variables"]["x2"].get<std::string>() == "20");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier)
 {
-    const auto [json, code] = request({
-        { "command",    "plugin-config" }
-    });
+	const auto [json, code] = request({
+		{ "command", "plugin-config" }
+	});
 
-    BOOST_TEST(code == plugin_error::invalid_identifier);
-    BOOST_TEST(json["error"].get<int>() == plugin_error::invalid_identifier);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
+	BOOST_TEST(code == plugin_error::invalid_identifier);
+	BOOST_TEST(json["error"].get<int>() == plugin_error::invalid_identifier);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    const auto [json, code] = request({
-        { "command",    "plugin-config" },
-        { "plugin",     "unknown"       }
-    });
+	const auto [json, code] = request({
+		{ "command",    "plugin-config" },
+		{ "plugin",     "unknown"       }
+	});
 
-    BOOST_TEST(code == plugin_error::not_found);
-    BOOST_TEST(json["error"].get<int>() == plugin_error::not_found);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
+	BOOST_TEST(code == plugin_error::not_found);
+	BOOST_TEST(json["error"].get<int>() == plugin_error::not_found);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

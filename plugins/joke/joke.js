@@ -18,18 +18,18 @@
 
 // Plugin information.
 info = {
-    name: "joke",
-    author: "David Demelier <markand@malikania.fr>",
-    license: "ISC",
-    summary: "display some jokes",
-    version: "@IRCCD_VERSION@"
+	name: "joke",
+	author: "David Demelier <markand@malikania.fr>",
+	license: "ISC",
+	summary: "display some jokes",
+	version: "@IRCCD_VERSION@"
 };
 
 // Modules.
-var File    = Irccd.File;
-var Logger  = Irccd.Logger;
-var Plugin  = Irccd.Plugin;
-var Util    = Irccd.Util;
+var File = Irccd.File;
+var Logger = Irccd.Logger;
+var Plugin = Irccd.Plugin;
+var Util = Irccd.Util;
 
 Plugin.config["max-list-lines"] = 5;
 Plugin.format["error"] = "#{nickname}: no jokes available";
@@ -84,42 +84,42 @@ var table = {};
  */
 function load(server, channel)
 {
-    var path = Plugin.config.file
-        ? Plugin.config.file
-        : Plugin.paths.data + "/jokes.json";
+	var path = Plugin.config.file
+		? Plugin.config.file
+		: Plugin.paths.data + "/jokes.json";
 
-    // Allow formatting to select different jokes per server/channel.
-    path = Util.format(path, {
-        server: server.toString(),
-        channel: channel
-    });
+	// Allow formatting to select different jokes per server/channel.
+	path = Util.format(path, {
+		server: server.toString(),
+		channel: channel
+	});
 
-    try {
-        var file = new File(path, "r");
-        var data = JSON.parse(file.read());
-    } catch (e) {
-        throw Error(path + ": " + e.message);
-    }
+	try {
+		var file = new File(path, "r");
+		var data = JSON.parse(file.read());
+	} catch (e) {
+		throw Error(path + ": " + e.message);
+	}
 
-    if (!data || !data.length)
-        throw Error(path + ": no jokes found");
+	if (!data || !data.length)
+		throw Error(path + ": no jokes found");
 
-    // Ensure that jokes only contain strings.
-    var jokes = data.filter(function (joke) {
-        if (!joke || joke.length == 0 || joke.length > parseInt(Plugin.config["max-list-lines"]))
-            return false;
+	// Ensure that jokes only contain strings.
+	var jokes = data.filter(function (joke) {
+		if (!joke || joke.length == 0 || joke.length > parseInt(Plugin.config["max-list-lines"]))
+			return false;
 
-        for (var i = 0; i < joke.length; ++i)
-            if (typeof (joke[i]) !== "string")
-                return false;
+		for (var i = 0; i < joke.length; ++i)
+			if (typeof (joke[i]) !== "string")
+				return false;
 
-        return true;
-    });
+		return true;
+	});
 
-    if (!jokes || jokes.length === 0)
-        throw Error(path + ": empty jokes");
+	if (!jokes || jokes.length === 0)
+		throw Error(path + ": empty jokes");
 
-    return jokes;
+	return jokes;
 }
 
 /**
@@ -129,7 +129,7 @@ function load(server, channel)
  */
 function id(server, channel)
 {
-    return channel + "@" + server.toString();
+	return channel + "@" + server.toString();
 }
 
 /**
@@ -142,8 +142,8 @@ function id(server, channel)
  */
 function show(server, channel, joke)
 {
-    for (var l = 0; l < joke.length; ++l)
-        server.message(channel, joke[l]);
+	for (var l = 0; l < joke.length; ++l)
+		server.message(channel, joke[l]);
 }
 
 /**
@@ -154,42 +154,42 @@ function show(server, channel, joke)
  */
 function remove(i, index)
 {
-    table[i].splice(index, 1);
+	table[i].splice(index, 1);
 
-    if (table[i].length == 0)
-        delete table[i];
+	if (table[i].length == 0)
+		delete table[i];
 }
 
 function onCommand(server, origin, channel, message)
 {
-    var i = id(server, channel);
+	var i = id(server, channel);
 
-    if (!table[i]) {
-        Logger.debug("reloading for " + i);
+	if (!table[i]) {
+		Logger.debug("reloading for " + i);
 
-        try {
-            table[i] = load(server, channel);
-        } catch (e) {
-            Logger.warning(e.message);
-            server.message(channel, Util.format(Plugin.format.error, {
-                server: server.toString(),
-                channel: channel,
-                origin: origin,
-                nickname: Util.splituser(origin)
-            }));
+		try {
+			table[i] = load(server, channel);
+		} catch (e) {
+			Logger.warning(e.message);
+			server.message(channel, Util.format(Plugin.format.error, {
+				server: server.toString(),
+				channel: channel,
+				origin: origin,
+				nickname: Util.splituser(origin)
+			}));
 
-            return;
-        }
-    }
+			return;
+		}
+	}
 
-    var index = Math.floor(Math.random() * table[i].length);
+	var index = Math.floor(Math.random() * table[i].length);
 
-    show(server, channel, table[i][index]);
-    remove(i, index);
+	show(server, channel, table[i][index]);
+	remove(i, index);
 }
 
 function onReload()
 {
-    // This will force reload of jokes on next onCommand.
-    table = {};
+	// This will force reload of jokes on next onCommand.
+	table = {};
 }

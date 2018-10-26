@@ -30,38 +30,38 @@ namespace {
 
 class unloadable_plugin : public mock, public plugin {
 public:
-    unloadable_plugin()
-        : plugin("test")
-    {
-    }
+	unloadable_plugin()
+		: plugin("test")
+	{
+	}
 
-    auto get_name() const noexcept -> std::string_view override
-    {
-        return "unload";
-    }
+	auto get_name() const noexcept -> std::string_view override
+	{
+		return "unload";
+	}
 
-    void handle_unload(irccd&) override
-    {
-        push("handle_unload");
-    }
+	void handle_unload(irccd&) override
+	{
+		push("handle_unload");
+	}
 };
 
 BOOST_FIXTURE_TEST_SUITE(plugin_unload_suite, cli_fixture)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-    const auto plugin = std::make_shared<unloadable_plugin>();
+	const auto plugin = std::make_shared<unloadable_plugin>();
 
-    irccd_.plugins().add(plugin);
-    start();
+	irccd_.plugins().add(plugin);
+	start();
 
-    const auto [code, out, err] = exec({ "plugin-unload", "test" });
+	const auto [code, out, err] = exec({ "plugin-unload", "test" });
 
-    BOOST_TEST(!code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 0U);
-    BOOST_TEST(plugin->find("handle_unload").size() == 1U);
-    BOOST_TEST(!irccd_.plugins().has("p"));
+	BOOST_TEST(!code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 0U);
+	BOOST_TEST(plugin->find("handle_unload").size() == 1U);
+	BOOST_TEST(!irccd_.plugins().has("p"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

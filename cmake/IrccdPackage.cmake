@@ -43,11 +43,11 @@ set(CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/LICENSE.md)
 #
 
 if (WIN32)
-    set(CPACK_GENERATOR "NSIS")
+	set(CPACK_GENERATOR "NSIS")
 
-    if (IRCCD_64BITS)
-        set(CPACK_PACKAGE_FILE_NAME "irccd-${IRCCD_VERSION}-Windows-amd64")
-    else ()
-        set(CPACK_PACKAGE_FILE_NAME "irccd-${IRCCD_VERSION}-Windows-x86")
-    endif ()
+	if (IRCCD_64BITS)
+		set(CPACK_PACKAGE_FILE_NAME "irccd-${IRCCD_VERSION}-Windows-amd64")
+	else ()
+		set(CPACK_PACKAGE_FILE_NAME "irccd-${IRCCD_VERSION}-Windows-x86")
+	endif ()
 endif ()

@@ -24,7 +24,7 @@ namespace irccd::test {
 
 irccd_fixture::irccd_fixture()
 {
-    irccd_.set_log(std::make_unique<logger::silent_sink>());
+	irccd_.set_log(std::make_unique<logger::silent_sink>());
 }
 
 } // !irccd

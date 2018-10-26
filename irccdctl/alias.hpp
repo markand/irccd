@@ -44,52 +44,49 @@ namespace ctl {
  */
 class alias_arg {
 private:
-    std::string value_;
-    bool is_placeholder_;
+	std::string value_;
+	bool is_placeholder_;
 
 public:
-    /**
-     * Construct an argument.
-     *
-     * \pre value must not be empty
-     * \param value the value
-     */
-    alias_arg(std::string value);
+	/**
+	 * Construct an argument.
+	 *
+	 * \pre value must not be empty
+	 * \param value the value
+	 */
+	alias_arg(std::string value);
 
-    /**
-     * Check if the argument is a placeholder.
-     *
-     * \return true if the argument is a placeholder
-     */
-    inline bool is_placeholder() const noexcept
-    {
-        return is_placeholder_;
-    }
+	/**
+	 * Check if the argument is a placeholder.
+	 *
+	 * \return true if the argument is a placeholder
+	 */
+	auto is_placeholder() const noexcept -> bool;
 
-    /**
-     * Get the placeholder index (e.g %0 returns 0)
-     *
-     * \pre is_placeholder() must return true
-     * \return the position
-     */
-    unsigned index() const noexcept;
+	/**
+	 * Get the placeholder index (e.g %0 returns 0)
+	 *
+	 * \pre is_placeholder() must return true
+	 * \return the position
+	 */
+	auto get_index() const noexcept -> unsigned;
 
-    /**
-     * Get the real value.
-     *
-     * \pre is_placeholder() must return false
-     * \return the value
-     */
-    const std::string& value() const noexcept;
-
-    /**
-     * Output the alias to the stream.
-     *
-     * \param out the output stream
-     * \return out
-     */
-    friend std::ostream& operator<<(std::ostream& out, const alias_arg&);
+	/**
+	 * Get the real value.
+	 *
+	 * \pre is_placeholder() must return false
+	 * \return the value
+	 */
+	auto get_value() const noexcept -> const std::string&;
 };
+
+/**
+ * Output the alias to the stream.
+ *
+ * \param out the output stream
+ * \return out
+ */
+auto operator<<(std::ostream& out, const alias_arg&) -> std::ostream&;
 
 /**
  * \brief Describe a user-provided alias command.
@@ -99,41 +96,31 @@ public:
  */
 class alias_command {
 private:
-    std::string command_;
-    std::vector<alias_arg> args_;
+	std::string command_;
+	std::vector<alias_arg> args_;
 
 public:
-    /**
-     * Create an alias command.
-     *
-     * \param command the command
-     * \param args the arguments
-     */
-    inline alias_command(std::string command, std::vector<alias_arg> args = {}) noexcept
-        : command_(std::move(command))
-        , args_(std::move(args))
-    {
-    }
+	/**
+	 * Create an alias command.
+	 *
+	 * \param command the command
+	 * \param args the arguments
+	 */
+	alias_command(std::string command, std::vector<alias_arg> args = {}) noexcept;
 
-    /**
-     * Get the command to execute.
-     *
-     * \return the command name
-     */
-    inline const std::string& command() const noexcept
-    {
-        return command_;
-    }
+	/**
+	 * Get the command to execute.
+	 *
+	 * \return the command name
+	 */
+	auto get_command() const noexcept -> const std::string&;
 
-    /**
-     * Get the arguments.
-     *
-     * \return the arguments
-     */
-    inline const std::vector<alias_arg>& args() const noexcept
-    {
-        return args_;
-    }
+	/**
+	 * Get the arguments.
+	 *
+	 * \return the arguments
+	 */
+	auto get_args() const noexcept -> const std::vector<alias_arg>&;
 };
 
 /**
@@ -145,28 +132,22 @@ public:
  */
 class alias : public std::vector<alias_command> {
 private:
-    std::string name_;
+	std::string name_;
 
 public:
-    /**
-     * Create an alias.
-     *
-     * \param name the alias name
-     */
-    inline alias(std::string name) noexcept
-        : name_(std::move(name))
-    {
-    }
+	/**
+	 * Create an alias.
+	 *
+	 * \param name the alias name
+	 */
+	alias(std::string name) noexcept;
 
-    /**
-     * Get the alias name.
-     *
-     * \return the name
-     */
-    inline const std::string& name() const noexcept
-    {
-        return name_;
-    }
+	/**
+	 * Get the alias name.
+	 *
+	 * \return the name
+	 */
+	auto get_name() const noexcept -> const std::string&;
 };
 
 } // !ctl

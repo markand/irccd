@@ -31,7 +31,7 @@
 #include "socket_acceptor.hpp"
 #include "tls_stream.hpp"
 
-namespace irccd::io {
+namespace irccd {
 
 /**
  * \brief TLS/SSL acceptors.
@@ -40,52 +40,56 @@ namespace irccd::io {
 template <typename Protocol = boost::asio::ip::tcp>
 class tls_acceptor : public socket_acceptor<Protocol> {
 private:
-    using socket = typename Protocol::socket;
+	using socket = typename Protocol::socket;
 
-    boost::asio::ssl::context context_;
+	boost::asio::ssl::context context_;
 
 public:
-    /**
-     * Construct a secure layer transport server.
-     *
-     * \param context the SSL context
-     * \param args the socket_acceptor arguments
-     */
-    template <typename... Args>
-    tls_acceptor(boost::asio::ssl::context context, Args&&... args)
-        : socket_acceptor<Protocol>(std::forward<Args>(args)...)
-        , context_(std::move(context))
-    {
-    }
+	/**
+	 * Construct a secure layer transport server.
+	 *
+	 * \param context the SSL context
+	 * \param args the socket_acceptor arguments
+	 */
+	template <typename... Args>
+	tls_acceptor(boost::asio::ssl::context context, Args&&... args);
 
-    /**
-     * \copydoc acceptor::accept
-     */
-    void accept(accept_handler handler) override;
+	/**
+	 * \copydoc acceptor::accept
+	 */
+	void accept(acceptor::handler handler) override;
 };
 
 template <typename Protocol>
-void tls_acceptor<Protocol>::accept(accept_handler handler)
+void tls_acceptor<Protocol>::accept(acceptor::handler handler)
 {
-    assert(handler);
+	assert(handler);
 
-    auto client = std::make_shared<tls_stream<socket>>(this->get_acceptor().get_io_service(), this->context_);
+	auto client = std::make_shared<tls_stream<socket>>(this->get_acceptor().get_io_service(), this->context_);
 
-    socket_acceptor<Protocol>::do_accept(client->get_socket().lowest_layer(), [handler, client] (auto code) {
-        using boost::asio::ssl::stream_base;
+	socket_acceptor<Protocol>::do_accept(client->get_socket().lowest_layer(), [handler, client] (auto code) {
+		using boost::asio::ssl::stream_base;
 
-        if (code) {
-            handler(code, nullptr);
-            return;
-        }
+		if (code) {
+			handler(code, nullptr);
+			return;
+		}
 
-        client->get_socket().async_handshake(stream_base::server, [handler, client] (auto code) {
-            handler(code, code ? nullptr : std::move(client));
-        });
-    });
+		client->get_socket().async_handshake(stream_base::server, [handler, client] (auto code) {
+			handler(code, code ? nullptr : std::move(client));
+		});
+	});
 }
 
-} // !irccd::io
+template <typename Protocol>
+template <typename... Args>
+tls_acceptor<Protocol>::tls_acceptor(boost::asio::ssl::context context, Args&&... args)
+	: socket_acceptor<Protocol>(std::forward<Args>(args)...)
+	, context_(std::move(context))
+{
+}
+
+} // !irccd
 
 #endif // !IRCCD_HAVE_SSL
 

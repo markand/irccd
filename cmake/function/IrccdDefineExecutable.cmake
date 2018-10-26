@@ -21,13 +21,13 @@
 # -----------------------
 #
 # irccd_define_executable(
-#    TARGET target name
-#    EXPORT (Optional) export executable through CMake
-#    DESCRIPTION short description (Required if installed)
-#    SOURCES src1, src2, srcn
-#    FLAGS (Optional) C/C++ flags (without -D)
-#    LIBRARIES (Optional) libraries to link
-#    INCLUDES (Optional) includes for the target
+#   TARGET      target name
+#   EXPORT      (Optional) export executable through CMake
+#   DESCRIPTION short description (Required if installed)
+#   SOURCES     src1, src2, srcn
+#   FLAGS       (Optional) C/C++ flags (without -D)
+#   LIBRARIES   (Optional) libraries to link
+#   INCLUDES    (Optional) includes for the target
 # )
 #
 # Create an executable that can be installed or not.
@@ -36,56 +36,56 @@
 include(${CMAKE_CURRENT_LIST_DIR}/IrccdVeraCheck.cmake)
 
 function(irccd_define_executable)
-    set(options EXPORT)
-    set(oneValueArgs DESCRIPTION TARGET)
-    set(multiValueArgs SOURCES FLAGS LIBRARIES INCLUDES OPTIONS)
+	set(options EXPORT)
+	set(oneValueArgs DESCRIPTION TARGET)
+	set(multiValueArgs SOURCES FLAGS LIBRARIES INCLUDES OPTIONS)
 
-    cmake_parse_arguments(EXE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+	cmake_parse_arguments(EXE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    if (NOT EXE_TARGET)
-        message(FATAL_ERROR "Please set TARGET")
-    endif ()
-    if (NOT EXE_SOURCES)
-        message(FATAL_ERROR "Please set SOURCES")
-    endif ()
-    if (NOT EXE_DESCRIPTION)
-        message(FATAL_ERROR "DESCRIPTION required")
-    endif ()
+	if (NOT EXE_TARGET)
+		message(FATAL_ERROR "Please set TARGET")
+	endif ()
+	if (NOT EXE_SOURCES)
+		message(FATAL_ERROR "Please set SOURCES")
+	endif ()
+	if (NOT EXE_DESCRIPTION)
+		message(FATAL_ERROR "DESCRIPTION required")
+	endif ()
 
-    add_executable(${EXE_TARGET} ${EXE_SOURCES})
-    target_include_directories(${EXE_TARGET} PRIVATE ${EXE_INCLUDES})
-    target_compile_definitions(${EXE_TARGET} PRIVATE ${EXE_FLAGS})
-    target_compile_options(${EXE_TARGET} PRIVATE ${EXE_OPTIONS})
-    target_link_libraries(${EXE_TARGET} ${EXE_LIBRARIES})
+	add_executable(${EXE_TARGET} ${EXE_SOURCES})
+	target_include_directories(${EXE_TARGET} PRIVATE ${EXE_INCLUDES})
+	target_compile_definitions(${EXE_TARGET} PRIVATE ${EXE_FLAGS})
+	target_compile_options(${EXE_TARGET} PRIVATE ${EXE_OPTIONS})
+	target_link_libraries(${EXE_TARGET} ${EXE_LIBRARIES})
 
-    set_target_properties(
-        ${EXE_TARGET}
-        PROPERTIES
-            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
-    )
-    foreach (c ${CMAKE_CONFIGURATION_TYPES})
-        string(TOUPPER ${c} cu)
-        set_target_properties(
-            ${EXE_TARGET}
-            PROPERTIES
-                RUNTIME_OUTPUT_DIRECTORY_${cu} ${CMAKE_BINARY_DIR}/bin/${c}
-        )
-    endforeach()
+	set_target_properties(
+		${EXE_TARGET}
+		PROPERTIES
+			RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+	)
+	foreach (c ${CMAKE_CONFIGURATION_TYPES})
+		string(TOUPPER ${c} cu)
+		set_target_properties(
+			${EXE_TARGET}
+			PROPERTIES
+				RUNTIME_OUTPUT_DIRECTORY_${cu} ${CMAKE_BINARY_DIR}/bin/${c}
+		)
+	endforeach()
 
-    if (EXE_EXPORT)
-        install(
-            TARGETS ${EXE_TARGET}
-            EXPORT irccd-targets
-            COMPONENT ${EXE_TARGET}
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        )
-    endif ()
+	if (EXE_EXPORT)
+		install(
+			TARGETS ${EXE_TARGET}
+			EXPORT irccd-targets
+			COMPONENT ${EXE_TARGET}
+			RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+		)
+	endif ()
 
-    # Put the application into a cpack group.
-    string(TOUPPER ${EXE_TARGET} CMP)
-    setg(CPACK_COMPONENT_${CMP}_DISPLAY_NAME "${EXE_TARGET} executable")
-    setg(CPACK_COMPONENT_${CMP}_DESCRIPTION ${EXE_DESCRIPTION})
-    setg(CPACK_COMPONENT_${CMP}_GROUP "Applications")
+	# Put the application into a cpack group.
+	string(TOUPPER ${EXE_TARGET} CMP)
+	setg(CPACK_COMPONENT_${CMP}_DISPLAY_NAME "${EXE_TARGET} executable")
+	setg(CPACK_COMPONENT_${CMP}_DESCRIPTION ${EXE_DESCRIPTION})
+	setg(CPACK_COMPONENT_${CMP}_GROUP "Applications")
 
-    irccd_vera_check(${EXE_TARGET} "${EXE_SOURCES}")
+	irccd_vera_check(${EXE_TARGET} "${EXE_SOURCES}")
 endfunction()

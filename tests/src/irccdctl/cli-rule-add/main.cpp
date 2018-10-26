@@ -31,157 +31,157 @@ BOOST_FIXTURE_TEST_SUITE(rule_add_suite, cli_fixture)
 
 BOOST_AUTO_TEST_CASE(all)
 {
-    start();
+	start();
 
-    {
-        const auto [code, out, err] = exec({ "rule-add",
-            "-c c1",        "--add-channel c2",
-            "-e onMessage", "--add-event onCommand",
-            "-p p1",        "--add-plugin p2",
-            "-s s1",        "--add-server s2",
-            "drop"
-        });
+	{
+		const auto [code, out, err] = exec({ "rule-add",
+			"-c c1",        "--add-channel c2",
+			"-e onMessage", "--add-event onCommand",
+			"-p p1",        "--add-plugin p2",
+			"-s s1",        "--add-server s2",
+			"drop"
+		});
 
-        BOOST_TEST(!code);
-        BOOST_TEST(out.size() == 0U);
-        BOOST_TEST(err.size() == 0U);
-    }
+		BOOST_TEST(!code);
+		BOOST_TEST(out.size() == 0U);
+		BOOST_TEST(err.size() == 0U);
+	}
 
-    {
-        const auto [code, out, err] = exec({ "rule-list" });
+	{
+		const auto [code, out, err] = exec({ "rule-list" });
 
-        BOOST_TEST(!code);
-        BOOST_TEST(out.size() == 7U);
-        BOOST_TEST(err.size() == 0U);
-        BOOST_TEST(out[0]  == "rule:        0");
-        BOOST_TEST(out[1]  == "servers:     s1 s2 ");
-        BOOST_TEST(out[2]  == "channels:    c1 c2 ");
-        BOOST_TEST(out[3]  == "plugins:     p1 p2 ");
-        BOOST_TEST(out[4]  == "events:      onCommand onMessage ");
-        BOOST_TEST(out[5]  == "action:      drop");
-    }
+		BOOST_TEST(!code);
+		BOOST_TEST(out.size() == 7U);
+		BOOST_TEST(err.size() == 0U);
+		BOOST_TEST(out[0]  == "rule:        0");
+		BOOST_TEST(out[1]  == "servers:     s1 s2 ");
+		BOOST_TEST(out[2]  == "channels:    c1 c2 ");
+		BOOST_TEST(out[3]  == "plugins:     p1 p2 ");
+		BOOST_TEST(out[4]  == "events:      onCommand onMessage ");
+		BOOST_TEST(out[5]  == "action:      drop");
+	}
 }
 
 BOOST_AUTO_TEST_CASE(server)
 {
-    start();
+	start();
 
-    {
-        const auto [code, out, err] = exec({ "rule-add", "-s s1", "--add-server s2", "drop" });
+	{
+		const auto [code, out, err] = exec({ "rule-add", "-s s1", "--add-server s2", "drop" });
 
-        BOOST_TEST(!code);
-        BOOST_TEST(out.size() == 0U);
-        BOOST_TEST(err.size() == 0U);
-    }
+		BOOST_TEST(!code);
+		BOOST_TEST(out.size() == 0U);
+		BOOST_TEST(err.size() == 0U);
+	}
 
-    {
-        const auto [code, out, err] = exec({ "rule-list" });
+	{
+		const auto [code, out, err] = exec({ "rule-list" });
 
-        BOOST_TEST(!code);
-        BOOST_TEST(out.size() == 7U);
-        BOOST_TEST(err.size() == 0U);
-        BOOST_TEST(out[0]  == "rule:        0");
-        BOOST_TEST(out[1]  == "servers:     s1 s2 ");
-        BOOST_TEST(out[2]  == "channels:    ");
-        BOOST_TEST(out[3]  == "plugins:     ");
-        BOOST_TEST(out[4]  == "events:      ");
-        BOOST_TEST(out[5]  == "action:      drop");
-    }
+		BOOST_TEST(!code);
+		BOOST_TEST(out.size() == 7U);
+		BOOST_TEST(err.size() == 0U);
+		BOOST_TEST(out[0]  == "rule:        0");
+		BOOST_TEST(out[1]  == "servers:     s1 s2 ");
+		BOOST_TEST(out[2]  == "channels:    ");
+		BOOST_TEST(out[3]  == "plugins:     ");
+		BOOST_TEST(out[4]  == "events:      ");
+		BOOST_TEST(out[5]  == "action:      drop");
+	}
 }
 
 BOOST_AUTO_TEST_CASE(channel)
-{
-    start();
+	{
+	start();
 
-    {
-        const auto [code, out, err] = exec({ "rule-add", "-c c1", "--add-channel c2", "drop" });
+	{
+		const auto [code, out, err] = exec({ "rule-add", "-c c1", "--add-channel c2", "drop" });
 
-        BOOST_TEST(!code);
-        BOOST_TEST(out.size() == 0U);
-        BOOST_TEST(err.size() == 0U);
-    }
+		BOOST_TEST(!code);
+		BOOST_TEST(out.size() == 0U);
+		BOOST_TEST(err.size() == 0U);
+	}
 
-    {
-        const auto [code, out, err] = exec({ "rule-list" });
+	{
+		const auto [code, out, err] = exec({ "rule-list" });
 
-        BOOST_TEST(!code);
-        BOOST_TEST(out.size() == 7U);
-        BOOST_TEST(err.size() == 0U);
-        BOOST_TEST(out[0]  == "rule:        0");
-        BOOST_TEST(out[1]  == "servers:     ");
-        BOOST_TEST(out[2]  == "channels:    c1 c2 ");
-        BOOST_TEST(out[3]  == "plugins:     ");
-        BOOST_TEST(out[4]  == "events:      ");
-        BOOST_TEST(out[5]  == "action:      drop");
-    }
+		BOOST_TEST(!code);
+		BOOST_TEST(out.size() == 7U);
+		BOOST_TEST(err.size() == 0U);
+		BOOST_TEST(out[0]  == "rule:        0");
+		BOOST_TEST(out[1]  == "servers:     ");
+		BOOST_TEST(out[2]  == "channels:    c1 c2 ");
+		BOOST_TEST(out[3]  == "plugins:     ");
+		BOOST_TEST(out[4]  == "events:      ");
+		BOOST_TEST(out[5]  == "action:      drop");
+	}
 }
 
 BOOST_AUTO_TEST_CASE(plugin)
 {
-    start();
+	start();
 
-    {
-        const auto [code, out, err] = exec({ "rule-add", "-p p1", "--add-plugin p2", "drop" });
+	{
+		const auto [code, out, err] = exec({ "rule-add", "-p p1", "--add-plugin p2", "drop" });
 
-        BOOST_TEST(!code);
-        BOOST_TEST(out.size() == 0U);
-        BOOST_TEST(err.size() == 0U);
-    }
+		BOOST_TEST(!code);
+		BOOST_TEST(out.size() == 0U);
+		BOOST_TEST(err.size() == 0U);
+	}
 
-    {
-        const auto [code, out, err] = exec({ "rule-list" });
+	{
+		const auto [code, out, err] = exec({ "rule-list" });
 
-        BOOST_TEST(!code);
-        BOOST_TEST(out.size() == 7U);
-        BOOST_TEST(err.size() == 0U);
-        BOOST_TEST(out[0]  == "rule:        0");
-        BOOST_TEST(out[1]  == "servers:     ");
-        BOOST_TEST(out[2]  == "channels:    ");
-        BOOST_TEST(out[3]  == "plugins:     p1 p2 ");
-        BOOST_TEST(out[4]  == "events:      ");
-        BOOST_TEST(out[5]  == "action:      drop");
-    }
+		BOOST_TEST(!code);
+		BOOST_TEST(out.size() == 7U);
+		BOOST_TEST(err.size() == 0U);
+		BOOST_TEST(out[0]  == "rule:        0");
+		BOOST_TEST(out[1]  == "servers:     ");
+		BOOST_TEST(out[2]  == "channels:    ");
+		BOOST_TEST(out[3]  == "plugins:     p1 p2 ");
+		BOOST_TEST(out[4]  == "events:      ");
+		BOOST_TEST(out[5]  == "action:      drop");
+	}
 }
 
 BOOST_AUTO_TEST_CASE(event)
 {
-    start();
+	start();
 
-    {
-        const auto [code, out, err] = exec({ "rule-add", "-e onMessage", "--add-event onCommand", "drop" });
+	{
+		const auto [code, out, err] = exec({ "rule-add", "-e onMessage", "--add-event onCommand", "drop" });
 
-        BOOST_TEST(!code);
-        BOOST_TEST(out.size() == 0U);
-        BOOST_TEST(err.size() == 0U);
-    }
+		BOOST_TEST(!code);
+		BOOST_TEST(out.size() == 0U);
+		BOOST_TEST(err.size() == 0U);
+	}
 
-    {
-        const auto [code, out, err] = exec({ "rule-list" });
+	{
+		const auto [code, out, err] = exec({ "rule-list" });
 
-        BOOST_TEST(!code);
-        BOOST_TEST(out.size() == 7U);
-        BOOST_TEST(err.size() == 0U);
-        BOOST_TEST(out[0]  == "rule:        0");
-        BOOST_TEST(out[1]  == "servers:     ");
-        BOOST_TEST(out[2]  == "channels:    ");
-        BOOST_TEST(out[3]  == "plugins:     ");
-        BOOST_TEST(out[4]  == "events:      onCommand onMessage ");
-        BOOST_TEST(out[5]  == "action:      drop");
-    }
+		BOOST_TEST(!code);
+		BOOST_TEST(out.size() == 7U);
+		BOOST_TEST(err.size() == 0U);
+		BOOST_TEST(out[0]  == "rule:        0");
+		BOOST_TEST(out[1]  == "servers:     ");
+		BOOST_TEST(out[2]  == "channels:    ");
+		BOOST_TEST(out[3]  == "plugins:     ");
+		BOOST_TEST(out[4]  == "events:      onCommand onMessage ");
+		BOOST_TEST(out[5]  == "action:      drop");
+	}
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_action)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "rule-add", "-p p1", "--add-plugin p2", "break" });
+	const auto [code, out, err] = exec({ "rule-add", "-p p1", "--add-plugin p2", "break" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: invalid rule action");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: invalid rule action");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

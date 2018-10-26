@@ -53,24 +53,24 @@ struct loggable_traits;
 
 class logger : public std::ostream, public std::stringbuf {
 private:
-    friend class sink;
+	friend class sink;
 
-    enum class level {
-        debug,
-        info,
-        warning
-    } level_;
+	enum class level {
+		debug,
+		info,
+		warning
+	} level_;
 
-    sink& parent_;
+	sink& parent_;
 
-    std::string_view category_;
-    std::string_view component_;
+	std::string_view category_;
+	std::string_view component_;
 
-    void debug(const std::string&);
-    void info(const std::string&);
-    void warning(const std::string&);
-    auto sync() -> int override;
-    logger(sink&, level, std::string_view, std::string_view) noexcept;
+	void debug(const std::string&);
+	void info(const std::string&);
+	void warning(const std::string&);
+	auto sync() -> int override;
+	logger(sink&, level, std::string_view, std::string_view) noexcept;
 };
 
 /**
@@ -86,158 +86,158 @@ private:
  */
 class sink {
 private:
-    friend class logger;
+	friend class logger;
 
-    // User options.
-    bool verbose_{false};
-    std::unique_ptr<filter> filter_;
+	// User options.
+	bool verbose_{false};
+	std::unique_ptr<filter> filter_;
 
 protected:
-    /**
-     * Write a debug message.
-     *
-     * This function is called only if NDEBUG is not defined.
-     *
-     * \param line the data
-     * \see log::debug
-     */
-    virtual void write_debug(const std::string& line) = 0;
+	/**
+	 * Write a debug message.
+	 *
+	 * This function is called only if NDEBUG is not defined.
+	 *
+	 * \param line the data
+	 * \see log::debug
+	 */
+	virtual void write_debug(const std::string& line) = 0;
 
-    /**
-     * Write a information message.
-     *
-     * The function is called only if verbose is true.
-     *
-     * \param line the data
-     * \see log::info
-     */
-    virtual void write_info(const std::string& line) = 0;
+	/**
+	 * Write a information message.
+	 *
+	 * The function is called only if verbose is true.
+	 *
+	 * \param line the data
+	 * \see log::info
+	 */
+	virtual void write_info(const std::string& line) = 0;
 
-    /**
-     * Write an error message.
-     *
-     * This function is always called.
-     *
-     * \param line the data
-     * \see log::warning
-     */
-    virtual void write_warning(const std::string& line) = 0;
+	/**
+	 * Write an error message.
+	 *
+	 * This function is always called.
+	 *
+	 * \param line the data
+	 * \see log::warning
+	 */
+	virtual void write_warning(const std::string& line) = 0;
 
 public:
-    /**
-     * Default constructor.
-     */
-    sink();
+	/**
+	 * Default constructor.
+	 */
+	sink();
 
-    /**
-     * Virtual destructor defaulted.
-     */
-    virtual ~sink() = default;
+	/**
+	 * Virtual destructor defaulted.
+	 */
+	virtual ~sink() = default;
 
-    /**
-     * Tells if logger is verbose.
-     *
-     * \return true if verbose
-     */
-    auto is_verbose() const noexcept -> bool;
+	/**
+	 * Tells if logger is verbose.
+	 *
+	 * \return true if verbose
+	 */
+	auto is_verbose() const noexcept -> bool;
 
-    /**
-     * Set the verbosity mode.
-     *
-     * \param mode the new mode
-     */
-    void set_verbose(bool mode) noexcept;
+	/**
+	 * Set the verbosity mode.
+	 *
+	 * \param mode the new mode
+	 */
+	void set_verbose(bool mode) noexcept;
 
-    /**
-     * Set an optional filter.
-     *
-     * \pre filter must not be null
-     * \param filter the filter
-     */
-    void set_filter(std::unique_ptr<filter> filter) noexcept;
+	/**
+	 * Set an optional filter.
+	 *
+	 * \pre filter must not be null
+	 * \param filter the filter
+	 */
+	void set_filter(std::unique_ptr<filter> filter) noexcept;
 
-    /**
-     * Get the stream for informational messages.
-     *
-     * If message is specified, a new line character is appended.
-     *
-     * \param category the category subsystem
-     * \param component the optional component
-     * \return the output stream
-     * \note Has no effect if verbose is set to false.
-     */
-    auto info(std::string_view category, std::string_view component) -> logger;
+	/**
+	 * Get the stream for informational messages.
+	 *
+	 * If message is specified, a new line character is appended.
+	 *
+	 * \param category the category subsystem
+	 * \param component the optional component
+	 * \return the output stream
+	 * \note Has no effect if verbose is set to false.
+	 */
+	auto info(std::string_view category, std::string_view component) -> logger;
 
-    /**
-     * Convenient function with loggable objects.
-     *
-     * \param loggable the loggable object
-     * \return the output stream
-     * \see loggable_traits
-     */
-    template <typename Loggable>
-    auto info(const Loggable& loggable) -> logger
-    {
-        return info(
-            loggable_traits<Loggable>::get_category(loggable),
-            loggable_traits<Loggable>::get_component(loggable)
-        );
-    }
+	/**
+	 * Convenient function with loggable objects.
+	 *
+	 * \param loggable the loggable object
+	 * \return the output stream
+	 * \see loggable_traits
+	 */
+	template <typename Loggable>
+	auto info(const Loggable& loggable) -> logger
+	{
+		return info(
+			loggable_traits<Loggable>::get_category(loggable),
+			loggable_traits<Loggable>::get_component(loggable)
+		);
+	}
 
-    /**
-     * Get the stream for warnings.
-     *
-     * If message is specified, a new line character is appended.
-     *
-     * \param category the category subsystem
-     * \param component the optional component
-     * \return the output stream
-     */
-    auto warning(std::string_view category, std::string_view component) -> logger;
+	/**
+	 * Get the stream for warnings.
+	 *
+	 * If message is specified, a new line character is appended.
+	 *
+	 * \param category the category subsystem
+	 * \param component the optional component
+	 * \return the output stream
+	 */
+	auto warning(std::string_view category, std::string_view component) -> logger;
 
-    /**
-     * Convenient function with loggable objects.
-     *
-     * \param loggable the loggable object
-     * \return the output stream
-     * \see loggable_traits
-     */
-    template <typename Loggable>
-    auto warning(const Loggable& loggable) -> logger
-    {
-        return warning(
-            loggable_traits<Loggable>::get_category(loggable),
-            loggable_traits<Loggable>::get_component(loggable)
-        );
-    }
+	/**
+	 * Convenient function with loggable objects.
+	 *
+	 * \param loggable the loggable object
+	 * \return the output stream
+	 * \see loggable_traits
+	 */
+	template <typename Loggable>
+	auto warning(const Loggable& loggable) -> logger
+	{
+		return warning(
+			loggable_traits<Loggable>::get_category(loggable),
+			loggable_traits<Loggable>::get_component(loggable)
+		);
+	}
 
-    /**
-     * Get the stream for debug messages.
-     *
-     * If message is specified, a new line character is appended.
-     *
-     * \param category the category subsystem
-     * \param component the optional component
-     * \return the output stream
-     * \note Has no effect if compiled in release mode.
-     */
-    auto debug(std::string_view category, std::string_view component) -> logger;
+	/**
+	 * Get the stream for debug messages.
+	 *
+	 * If message is specified, a new line character is appended.
+	 *
+	 * \param category the category subsystem
+	 * \param component the optional component
+	 * \return the output stream
+	 * \note Has no effect if compiled in release mode.
+	 */
+	auto debug(std::string_view category, std::string_view component) -> logger;
 
-    /**
-     * Convenient function with loggable objects.
-     *
-     * \param loggable the loggable object
-     * \return the output stream
-     * \see loggable_traits
-     */
-    template <typename Loggable>
-    auto debug(const Loggable& loggable) -> logger
-    {
-        return debug(
-            loggable_traits<Loggable>::get_category(loggable),
-            loggable_traits<Loggable>::get_component(loggable)
-        );
-    }
+	/**
+	 * Convenient function with loggable objects.
+	 *
+	 * \param loggable the loggable object
+	 * \return the output stream
+	 * \see loggable_traits
+	 */
+	template <typename Loggable>
+	auto debug(const Loggable& loggable) -> logger
+	{
+		return debug(
+			loggable_traits<Loggable>::get_category(loggable),
+			loggable_traits<Loggable>::get_component(loggable)
+		);
+	}
 };
 
 /**
@@ -246,81 +246,81 @@ public:
 class filter {
 private:
 public:
-    /**
-     * Virtual destructor defaulted.
-     */
-    virtual ~filter() = default;
+	/**
+	 * Virtual destructor defaulted.
+	 */
+	virtual ~filter() = default;
 
-    /**
-     * Default function called for each virtual ones.
-     *
-     * \param category the category subsystem
-     * \param component the optional component
-     * \param message the message
-     * \return default formatted message
-     */
-    auto pre(std::string_view category,
-             std::string_view component,
-             std::string_view message) const -> std::string;
+	/**
+	 * Default function called for each virtual ones.
+	 *
+	 * \param category the category subsystem
+	 * \param component the optional component
+	 * \param message the message
+	 * \return default formatted message
+	 */
+	auto pre(std::string_view category,
+	         std::string_view component,
+	         std::string_view message) const -> std::string;
 
 
-    /**
-     * Update the debug message.
-     *
-     * \param category the category subsystem
-     * \param component the optional component
-     * \param message the message
-     * \return the message
-     */
-    virtual auto pre_debug(std::string_view category,
-                           std::string_view component,
-                           std::string_view message) const -> std::string;
+	/**
+	 * Update the debug message.
+	 *
+	 * \param category the category subsystem
+	 * \param component the optional component
+	 * \param message the message
+	 * \return the message
+	 */
+	virtual auto pre_debug(std::string_view category,
+	                       std::string_view component,
+	                       std::string_view message) const -> std::string;
 
-    /**
-     * Update the information message.
-     *
-     * \param category the category subsystem
-     * \param component the optional component
-     * \param message the message
-     * \return the updated message
-     */
-    virtual auto pre_info(std::string_view category,
-                          std::string_view component,
-                          std::string_view message) const -> std::string;
+	/**
+	 * Update the information message.
+	 *
+	 * \param category the category subsystem
+	 * \param component the optional component
+	 * \param message the message
+	 * \return the updated message
+	 */
+	virtual auto pre_info(std::string_view category,
+	                      std::string_view component,
+	                      std::string_view message) const -> std::string;
 
-    /**
-     * Update the warning message.
-     *
-     * \param category the category subsystem
-     * \param component the optional component
-     * \param message the message
-     * \return the updated message
-     */
-    virtual auto pre_warning(std::string_view category,
-                             std::string_view component,
-                             std::string_view message) const -> std::string;
+	/**
+	 * Update the warning message.
+	 *
+	 * \param category the category subsystem
+	 * \param component the optional component
+	 * \param message the message
+	 * \return the updated message
+	 */
+	virtual auto pre_warning(std::string_view category,
+	                         std::string_view component,
+	                         std::string_view message) const -> std::string;
 };
 
 /**
  * \brief Logger implementation for console output using std::cout and
- *        std::cerr.
+ *		std::cerr.
  */
 class console_sink : public sink {
 protected:
-    /**
-     * \copydoc logger::write_debug
-     */
-    void write_debug(const std::string& line) override;
+	/**
+	 * \copydoc logger::write_debug
+	 */
+	void write_debug(const std::string& line) override;
 
-    /**
-     * \copydoc logger::write_info
-     */
-    void write_info(const std::string& line) override;
+	/**
+	 * \copydoc logger::write_info
+	 */
+	void write_info(const std::string& line) override;
 
-    /**
-     * \copydoc logger::write_warning
-     */
-    void write_warning(const std::string& line) override;
+	/**
+	 * \copydoc logger::write_warning
+	 */
+	void write_warning(const std::string& line) override;
 };
 
 /**
@@ -328,33 +328,33 @@ protected:
  */
 class file_sink : public sink {
 private:
-    std::string output_normal_;
-    std::string output_error_;
+	std::string output_normal_;
+	std::string output_error_;
 
 protected:
-    /**
-     * \copydoc logger::write_debug
-     */
-    void write_debug(const std::string& line) override;
+	/**
+	 * \copydoc logger::write_debug
+	 */
+	void write_debug(const std::string& line) override;
 
-    /**
-     * \copydoc logger::write_info
-     */
-    void write_info(const std::string& line) override;
+	/**
+	 * \copydoc logger::write_info
+	 */
+	void write_info(const std::string& line) override;
 
-    /**
-     * \copydoc logger::write_warning
-     */
-    void write_warning(const std::string& line) override;
+	/**
+	 * \copydoc logger::write_warning
+	 */
+	void write_warning(const std::string& line) override;
 
 public:
-    /**
-     * Outputs to files.
-     *
-     * \param normal the path to the normal logs
-     * \param errors the path to the errors logs
-     */
-    file_sink(std::string normal, std::string errors);
+	/**
+	 * Outputs to files.
+	 *
+	 * \param normal the path to the normal logs
+	 * \param errors the path to the errors logs
+	 */
+	file_sink(std::string normal, std::string errors);
 };
 
 /**
@@ -364,20 +364,20 @@ public:
  */
 class silent_sink : public sink {
 protected:
-    /**
-     * \copydoc logger::write_debug
-     */
-    void write_debug(const std::string& line) override;
+	/**
+	 * \copydoc logger::write_debug
+	 */
+	void write_debug(const std::string& line) override;
 
-    /**
-     * \copydoc logger::write_info
-     */
-    void write_info(const std::string& line) override;
+	/**
+	 * \copydoc logger::write_info
+	 */
+	void write_info(const std::string& line) override;
 
-    /**
-     * \copydoc logger::write_warning
-     */
-    void write_warning(const std::string& line) override;
+	/**
+	 * \copydoc logger::write_warning
+	 */
+	void write_warning(const std::string& line) override;
 };
 
 #if defined(IRCCD_HAVE_SYSLOG)
@@ -387,31 +387,31 @@ protected:
  */
 class syslog_sink : public sink {
 protected:
-    /**
-     * \copydoc logger::write_debug
-     */
-    void write_debug(const std::string& line) override;
+	/**
+	 * \copydoc logger::write_debug
+	 */
+	void write_debug(const std::string& line) override;
 
-    /**
-     * \copydoc logger::write_info
-     */
-    void write_info(const std::string& line) override;
+	/**
+	 * \copydoc logger::write_info
+	 */
+	void write_info(const std::string& line) override;
 
-    /**
-     * \copydoc logger::write_warning
-     */
-    void write_warning(const std::string& line) override;
+	/**
+	 * \copydoc logger::write_warning
+	 */
+	void write_warning(const std::string& line) override;
 
 public:
-    /**
-     * Open the syslog.
-     */
-    syslog_sink();
+	/**
+	 * Open the syslog.
+	 */
+	syslog_sink();
 
-    /**
-     * Close the syslog.
-     */
-    ~syslog_sink();
+	/**
+	 * Close the syslog.
+	 */
+	~syslog_sink();
 };
 
 #endif // !IRCCD_HAVE_SYSLOG

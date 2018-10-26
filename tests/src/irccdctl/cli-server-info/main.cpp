@@ -31,51 +31,51 @@ BOOST_FIXTURE_TEST_SUITE(server_info_suite, cli_fixture)
 
 BOOST_AUTO_TEST_CASE(output)
 {
-    server_->set_username("francis");
-    server_->set_nickname("francis");
-    start();
+	server_->set_username("francis");
+	server_->set_nickname("francis");
+	start();
 
-    const auto [code, out, err] = exec({ "server-info", "test" });
+	const auto [code, out, err] = exec({ "server-info", "test" });
 
-    BOOST_TEST(!code);
-    BOOST_TEST(out.size() == 10U);
-    BOOST_TEST(err.size() == 0U);
-    BOOST_TEST(out[0] == "Name           : test");
-    BOOST_TEST(out[1] == "Host           : localhost");
-    BOOST_TEST(out[2] == "Port           : 6667");
-    BOOST_TEST(out[3] == "Ipv6           : null");
-    BOOST_TEST(out[4] == "SSL            : null");
-    BOOST_TEST(out[5] == "SSL verified   : null");
-    BOOST_TEST(out[6] == "Channels       : ");
-    BOOST_TEST(out[7] == "Nickname       : francis");
-    BOOST_TEST(out[8] == "User name      : francis");
-    BOOST_TEST(out[9] == "Real name      : IRC Client Daemon");
+	BOOST_TEST(!code);
+	BOOST_TEST(out.size() == 10U);
+	BOOST_TEST(err.size() == 0U);
+	BOOST_TEST(out[0] == "Name           : test");
+	BOOST_TEST(out[1] == "Host           : localhost");
+	BOOST_TEST(out[2] == "Port           : 6667");
+	BOOST_TEST(out[3] == "Ipv6           : null");
+	BOOST_TEST(out[4] == "SSL            : null");
+	BOOST_TEST(out[5] == "SSL verified   : null");
+	BOOST_TEST(out[6] == "Channels       : ");
+	BOOST_TEST(out[7] == "Nickname       : francis");
+	BOOST_TEST(out[8] == "User name      : francis");
+	BOOST_TEST(out[9] == "Real name      : IRC Client Daemon");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-info", "+++" });
+	const auto [code, out, err] = exec({ "server-info", "+++" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: invalid server identifier");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: invalid server identifier");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-info", "unknown" });
+	const auto [code, out, err] = exec({ "server-info", "unknown" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: server not found");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: server not found");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -47,86 +47,76 @@ namespace ctl {
  */
 class controller {
 public:
-    /**
-     * Connection completion handler.
-     *
-     * This callback is called when connection has been completed or failed. In
-     * both case, the error code is set and the JSON object may contain the
-     * irccd program information.
-     */
-    using connect_handler = std::function<void (std::error_code, nlohmann::json)>;
+	/**
+	 * Connection completion handler.
+	 *
+	 * This callback is called when connection has been completed or failed. In
+	 * both case, the error code is set and the JSON object may contain the
+	 * irccd program information.
+	 */
+	using connect_handler = std::function<void (std::error_code, nlohmann::json)>;
 
 private:
-    std::unique_ptr<io::connector> connector_;
-    std::shared_ptr<io::stream> stream_;
-    std::string password_;
+	std::unique_ptr<connector> connector_;
+	std::shared_ptr<stream> stream_;
+	std::string password_;
 
-    void authenticate(connect_handler, nlohmann::json);
-    void verify(connect_handler);
+	void authenticate(connect_handler, nlohmann::json);
+	void verify(connect_handler);
 
 public:
-    /**
-     * Construct the controller with its connection.
-     *
-     * \pre connector != nullptr
-     * \
-     * \note no connect attempt is done
-     */
-    inline controller(std::unique_ptr<io::connector> connector) noexcept
-        : connector_(std::move(connector))
-    {
-        assert(connector_);
-    }
+	/**
+	 * Construct the controller with its connection.
+	 *
+	 * \pre connector != nullptr
+	 * \
+	 * \note no connect attempt is done
+	 */
+	controller(std::unique_ptr<connector> connector) noexcept;
 
-    /**
-     * Get the optional password set.
-     *
-     * \return the password
-     */
-    inline const std::string& get_password() const noexcept
-    {
-        return password_;
-    }
+	/**
+	 * Get the optional password set.
+	 *
+	 * \return the password
+	 */
+	auto get_password() const noexcept -> const std::string&;
 
-    /**
-     * Set an optional password.
-     *
-     * An empty password means no authentication (default).
-     *
-     * \param password the password
-     * \note this must be called before connect
-     */
-    inline void set_password(std::string password) noexcept
-    {
-        password_ = std::move(password);
-    }
+	/**
+	 * Set an optional password.
+	 *
+	 * An empty password means no authentication (default).
+	 *
+	 * \param password the password
+	 * \note this must be called before connect
+	 */
+	void set_password(std::string password) noexcept;
 
-    /**
-     * Attempt to connect to the irccd daemon.
-     *
-     * \pre handler != nullptr
-     * \param handler the handler
-     */
-    void connect(connect_handler handler);
+	/**
+	 * Attempt to connect to the irccd daemon.
+	 *
+	 * \pre handler != nullptr
+	 * \param handler the handler
+	 */
+	void connect(connect_handler handler);
 
-    /**
-     * Queue a receive operation, if receive operations are already running, it
-     * is queued and ran once ready.
-     *
-     * \pre handler != nullptr
-     * \param handler the recv handler
-     */
-    void read(io::read_handler handler);
+	/**
+	 * Queue a receive operation, if receive operations are already running,
+	 * it is queued and ran once ready.
+	 *
+	 * \pre handler != nullptr
+	 * \param handler the recv handler
+	 */
+	void read(stream::read_handler handler);
 
-    /**
-     * Queue a send operation, if receive operations are already running, it is
-     * queued and ran once ready.
-     *
-     * \pre message.is_object()
-     * \param message the JSON message
-     * \param handler the optional completion handler
-     */
-    void write(nlohmann::json message, io::write_handler handler = nullptr);
+	/**
+	 * Queue a send operation, if receive operations are already running, it
+	 * is queued and ran once ready.
+	 *
+	 * \pre message.is_object()
+	 * \param message the JSON message
+	 * \param handler the optional completion handler
+	 */
+	void write(nlohmann::json message, stream::write_handler handler = nullptr);
 };
 
 } // !ctl

@@ -34,26 +34,26 @@ BOOST_FIXTURE_TEST_SUITE(system_js_api_suite, js_fixture)
 
 BOOST_AUTO_TEST_CASE(home)
 {
-    duk_peval_string_noresult(plugin_->get_context(), "result = Irccd.System.home();");
+	duk_peval_string_noresult(plugin_->get_context(), "result = Irccd.System.home();");
 
-    BOOST_TEST(duk_get_global_string(plugin_->get_context(),"result"));
-    BOOST_TEST(duk_get_string(plugin_->get_context(), -1) == sys::home());
+	BOOST_TEST(duk_get_global_string(plugin_->get_context(),"result"));
+	BOOST_TEST(duk_get_string(plugin_->get_context(), -1) == sys::home());
 }
 
 #if defined(IRCCD_HAVE_POPEN)
 
 BOOST_AUTO_TEST_CASE(popen)
 {
-    auto ret = duk_peval_string(plugin_->get_context(),
-        "f = Irccd.System.popen(\"" IRCCD_EXECUTABLE " --version\", \"r\");"
-        "r = f.readline();"
-    );
+	auto ret = duk_peval_string(plugin_->get_context(),
+		"f = Irccd.System.popen(\"" IRCCD_EXECUTABLE " --version\", \"r\");"
+		"r = f.readline();"
+	);
 
-    if (ret != 0)
-        throw duk::get_stack(plugin_->get_context(), -1);
+	if (ret != 0)
+		throw duk::get_stack(plugin_->get_context(), -1);
 
-    BOOST_TEST(duk_get_global_string(plugin_->get_context(), "r"));
-    BOOST_TEST(duk_get_string(plugin_->get_context(), -1) == IRCCD_VERSION);
+	BOOST_TEST(duk_get_global_string(plugin_->get_context(), "r"));
+	BOOST_TEST(duk_get_string(plugin_->get_context(), -1) == IRCCD_VERSION);
 }
 
 #endif

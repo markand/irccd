@@ -19,21 +19,21 @@
 project(examples)
 
 configure_file(
-    ${examples_SOURCE_DIR}/irccd.conf.sample
-    ${examples_BINARY_DIR}/irccd.conf
+	${examples_SOURCE_DIR}/irccd.conf.sample
+	${examples_BINARY_DIR}/irccd.conf
 )
 
 configure_file(
-    ${examples_SOURCE_DIR}/irccdctl.conf.sample
-    ${examples_BINARY_DIR}/irccdctl.conf
+	${examples_SOURCE_DIR}/irccdctl.conf.sample
+	${examples_BINARY_DIR}/irccdctl.conf
 )
 
 install(
-    FILES
-        ${examples_SOURCE_DIR}/irccd.conf.sample
-        ${examples_SOURCE_DIR}/irccdctl.conf.sample
-    COMPONENT examples
-    DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}
+	FILES
+		${examples_SOURCE_DIR}/irccd.conf.sample
+		${examples_SOURCE_DIR}/irccdctl.conf.sample
+	COMPONENT examples
+	DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}
 )
 
 setg(CPACK_COMPONENT_EXAMPLES_HIDDEN On)

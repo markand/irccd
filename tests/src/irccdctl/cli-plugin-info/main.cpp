@@ -32,44 +32,44 @@ BOOST_FIXTURE_TEST_SUITE(plugin_info_suite, cli_fixture)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-    irccd_.plugins().add(std::make_unique<mock_plugin>("test"));
-    start();
+	irccd_.plugins().add(std::make_unique<mock_plugin>("test"));
+	start();
 
-    const auto [code, out, err] = exec({ "plugin-info", "test" });
+	const auto [code, out, err] = exec({ "plugin-info", "test" });
 
-    BOOST_TEST(!code);
-    BOOST_TEST(out.size() == 4U);
-    BOOST_TEST(err.size() == 0U);
-    BOOST_TEST(out[0] == "Author         : David Demelier <markand@malikania.fr>");
-    BOOST_TEST(out[1] == "License        : ISC");
-    BOOST_TEST(out[2] == "Summary        : mock plugin");
-    BOOST_TEST(out[3] == "Version        : 1.0");
+	BOOST_TEST(!code);
+	BOOST_TEST(out.size() == 4U);
+	BOOST_TEST(err.size() == 0U);
+	BOOST_TEST(out[0] == "Author         : David Demelier <markand@malikania.fr>");
+	BOOST_TEST(out[1] == "License        : ISC");
+	BOOST_TEST(out[2] == "Summary        : mock plugin");
+	BOOST_TEST(out[3] == "Version        : 1.0");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "plugin-info", "+++" });
+	const auto [code, out, err] = exec({ "plugin-info", "+++" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: invalid plugin identifier");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: invalid plugin identifier");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "plugin-info", "unknown" });
+	const auto [code, out, err] = exec({ "plugin-info", "unknown" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: plugin not found");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: plugin not found");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

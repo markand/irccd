@@ -17,8 +17,8 @@
 #
 
 irccd_define_test(
-    NAME plugin-auth
-    SOURCES main.cpp
-    LIBRARIES libirccd
-    FLAGS PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/auth/auth.js"
+	NAME plugin-auth
+	SOURCES main.cpp
+	LIBRARIES libirccd
+	FLAGS PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/auth/auth.js"
 )

@@ -17,7 +17,7 @@
 #
 
 irccd_define_test(
-    NAME command-server-invite
-    SOURCES main.cpp
-    LIBRARIES libirccd libirccd-ctl
+	NAME command-server-invite
+	SOURCES main.cpp
+	LIBRARIES libirccd libirccd-ctl
 )

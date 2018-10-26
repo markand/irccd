@@ -23,15 +23,15 @@
  * Fix annoying "Please include winsock2.h before windows.h"
  */
 #if defined(_WIN32)
-#   if !defined(WIN32_MEAN_AND_LEAN)
-#       define WIN32_MEAN_AND_LEAN
-#   endif
-#   if !defined(NOMINMAX)
-#       define NOMINMAX
-#   endif
+#	if !defined(WIN32_MEAN_AND_LEAN)
+#		define WIN32_MEAN_AND_LEAN
+#	endif
+#	if !defined(NOMINMAX)
+#		define NOMINMAX
+#	endif
 
-#   include <winsock2.h>
-#   include <windows.h>
+#	include <winsock2.h>
+#	include <windows.h>
 #endif
 
 namespace irccd {
@@ -41,23 +41,23 @@ namespace irccd {
  * ------------------------------------------------------------------
  */
 
-#define IRCCD_VERSION_MAJOR         @IRCCD_VERSION_MAJOR@
-#define IRCCD_VERSION_MINOR         @IRCCD_VERSION_MINOR@
-#define IRCCD_VERSION_PATCH         @IRCCD_VERSION_PATCH@
-#define IRCCD_VERSION_SHLIB         @IRCCD_VERSION_SHLIB@
-#define IRCCD_VERSION               "@IRCCD_VERSION@"
+#define IRCCD_VERSION_MAJOR             @IRCCD_VERSION_MAJOR@
+#define IRCCD_VERSION_MINOR             @IRCCD_VERSION_MINOR@
+#define IRCCD_VERSION_PATCH             @IRCCD_VERSION_PATCH@
+#define IRCCD_VERSION_SHLIB             @IRCCD_VERSION_SHLIB@
+#define IRCCD_VERSION                   "@IRCCD_VERSION@"
 
 /*
  * User definable options.
  * ------------------------------------------------------------------
  */
 
-#define IRCCD_INSTALL_PREFIX        "@CMAKE_INSTALL_PREFIX@"
-#define IRCCD_INSTALL_LOCALSTATEDIR "@CMAKE_INSTALL_LOCALSTATEDIR@"
-#define IRCCD_INSTALL_DATADIR       "@CMAKE_INSTALL_DATADIR@"
-#define IRCCD_INSTALL_BINDIR        "@CMAKE_INSTALL_BINDIR@"
-#define IRCCD_INSTALL_LIBDIR        "@CMAKE_INSTALL_LIBDIR@"
-#define IRCCD_INSTALL_SYSCONFDIR    "@CMAKE_INSTALL_SYSCONFDIR@"
+#define IRCCD_INSTALL_PREFIX            "@CMAKE_INSTALL_PREFIX@"
+#define IRCCD_INSTALL_LOCALSTATEDIR     "@CMAKE_INSTALL_LOCALSTATEDIR@"
+#define IRCCD_INSTALL_DATADIR           "@CMAKE_INSTALL_DATADIR@"
+#define IRCCD_INSTALL_BINDIR            "@CMAKE_INSTALL_BINDIR@"
+#define IRCCD_INSTALL_LIBDIR            "@CMAKE_INSTALL_LIBDIR@"
+#define IRCCD_INSTALL_SYSCONFDIR        "@CMAKE_INSTALL_SYSCONFDIR@"
 
 #cmakedefine IRCCD_HAVE_JS
 #cmakedefine IRCCD_HAVE_SSL
@@ -92,10 +92,10 @@ namespace irccd {
  * \brief Describe irccd version.
  */
 struct version {
-    const unsigned major{IRCCD_VERSION_MAJOR};  //!< major
-    const unsigned minor{IRCCD_VERSION_MINOR};  //!< minor
-    const unsigned patch{IRCCD_VERSION_PATCH};  //!< patch
-    const unsigned abi{IRCCD_VERSION_SHLIB};    //!< ABI compatibility
+	const unsigned major{IRCCD_VERSION_MAJOR};      //!< major
+	const unsigned minor{IRCCD_VERSION_MINOR};      //!< minor
+	const unsigned patch{IRCCD_VERSION_PATCH};      //!< patch
+	const unsigned abi{IRCCD_VERSION_SHLIB};        //!< ABI compatibility
 };
 
 } // !irccd

@@ -33,59 +33,59 @@ namespace {
 
 class sample_sink : public logger::sink {
 public:
-    std::string line_debug;
-    std::string line_info;
-    std::string line_warning;
+	std::string line_debug;
+	std::string line_info;
+	std::string line_warning;
 
-    void write_debug(const std::string& line) override
-    {
-        line_debug = line;
-    }
+	void write_debug(const std::string& line) override
+	{
+		line_debug = line;
+	}
 
-    void write_info(const std::string& line) override
-    {
-        line_info = line;
-    }
+	void write_info(const std::string& line) override
+	{
+		line_info = line;
+	}
 
-    void write_warning(const std::string& line) override
-    {
-        line_warning = line;
-    }
+	void write_warning(const std::string& line) override
+	{
+		line_warning = line;
+	}
 };
 
 class sample_filter : public logger::filter {
 public:
-    auto pre_debug(std::string_view category,
-                   std::string_view component,
-                   std::string_view message) const -> std::string override
-    {
-        return str(format("DEBUG %s:%s:%s") % category % component % message);
-    }
+	auto pre_debug(std::string_view category,
+	               std::string_view component,
+	               std::string_view message) const -> std::string override
+	{
+		return str(format("DEBUG %s:%s:%s") % category % component % message);
+	}
 
-    auto pre_info(std::string_view category,
-                  std::string_view component,
-                  std::string_view message) const -> std::string override
-    {
-        return str(format("INFO %s:%s:%s") % category % component % message);
-    }
+	auto pre_info(std::string_view category,
+	              std::string_view component,
+	              std::string_view message) const -> std::string override
+	{
+		return str(format("INFO %s:%s:%s") % category % component % message);
+	}
 
-    auto pre_warning(std::string_view category,
-                     std::string_view component,
-                     std::string_view message) const -> std::string override
-    {
-        return str(format("WARN %s:%s:%s") % category % component % message);
-    }
+	auto pre_warning(std::string_view category,
+	                 std::string_view component,
+	                 std::string_view message) const -> std::string override
+	{
+		return str(format("WARN %s:%s:%s") % category % component % message);
+	}
 };
 
 class logger_test {
 public:
-    sample_sink log_;
+	sample_sink log_;
 
-    logger_test()
-    {
-        log_.set_filter(std::make_unique<sample_filter>());
-        log_.set_verbose(true);
-    }
+	logger_test()
+	{
+		log_.set_filter(std::make_unique<sample_filter>());
+		log_.set_verbose(true);
+	}
 };
 
 BOOST_FIXTURE_TEST_SUITE(logger_test_suite, logger_test)
@@ -94,33 +94,33 @@ BOOST_FIXTURE_TEST_SUITE(logger_test_suite, logger_test)
 
 BOOST_AUTO_TEST_CASE(debug)
 {
-    log_.debug("test", "debug") << "success" << std::endl;
+	log_.debug("test", "debug") << "success" << std::endl;
 
-    BOOST_TEST(log_.line_debug == "DEBUG test:debug:success");
+	BOOST_TEST(log_.line_debug == "DEBUG test:debug:success");
 }
 
 #endif
 
 BOOST_AUTO_TEST_CASE(info)
 {
-    log_.info("test", "info") << "success" << std::endl;
+	log_.info("test", "info") << "success" << std::endl;
 
-    BOOST_TEST(log_.line_info == "INFO test:info:success");
+	BOOST_TEST(log_.line_info == "INFO test:info:success");
 }
 
 BOOST_AUTO_TEST_CASE(info_quiet)
 {
-    log_.set_verbose(false);
-    log_.info("test", "info") << "success" << std::endl;
+	log_.set_verbose(false);
+	log_.info("test", "info") << "success" << std::endl;
 
-    BOOST_REQUIRE(log_.line_info.empty());
+	BOOST_REQUIRE(log_.line_info.empty());
 }
 
 BOOST_AUTO_TEST_CASE(warning)
 {
-    log_.warning("test", "warning") << "success" << std::endl;
+	log_.warning("test", "warning") << "success" << std::endl;
 
-    BOOST_TEST(log_.line_warning == "WARN test:warning:success");
+	BOOST_TEST(log_.line_warning == "WARN test:warning:success");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

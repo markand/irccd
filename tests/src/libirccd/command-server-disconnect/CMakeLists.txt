@@ -17,7 +17,7 @@
 #
 
 irccd_define_test(
-    NAME command-server-disconnect
-    SOURCES main.cpp
-    LIBRARIES libirccd libirccd-ctl
+	NAME command-server-disconnect
+	SOURCES main.cpp
+	LIBRARIES libirccd libirccd-ctl
 )

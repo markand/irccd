@@ -16,15 +16,19 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+if (IRCCD_HAVE_LIBEDIT)
+	list(APPEND LIBRARIES ${Editline_LIBRARIES})
+	list(APPEND INCLUDES ${Editline_LIBRARIES})
+endif ()
+
+if (IRCCD_HAVE_JS)
+	list(APPEND LIBRARIES libirccd-js)
+endif ()
+
 irccd_define_executable(
-    TARGET irccd-test
-    LIBRARIES
-        libirccd
-        libirccd-test
-        $<$<BOOL:${IRCCD_HAVE_LIBEDIT}>:${Editline_LIBRARIES}>
-        $<$<BOOL:${IRCCD_HAVE_JS}>:libirccd-js>
-    INCLUDES
-        $<$<BOOL:${IRCCD_HAVE_LIBEDIT}>:${Editline_INCLUDE_DIRS}>
-    DESCRIPTION "Plugin tester"
-    SOURCES main.cpp
+	TARGET irccd-test
+	LIBRARIES libirccd libirccd-test ${LIBRARIES}
+	INCLUDES ${INCLUDES}
+	DESCRIPTION "Plugin tester"
+	SOURCES main.cpp
 )

@@ -19,50 +19,58 @@
 project(libirccd-test)
 
 set(
-    HEADERS
-    ${libirccd-test_SOURCE_DIR}/irccd/test/cli_fixture.hpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/command_fixture.hpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/debug_server.hpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/irccd_fixture.hpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/mock.hpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/mock_plugin.hpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/mock_server.hpp
-    $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/js_fixture.hpp>
-    $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/js_plugin_fixture.hpp>
+	HEADERS
+	${libirccd-test_SOURCE_DIR}/irccd/test/cli_fixture.hpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/command_fixture.hpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/debug_server.hpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/irccd_fixture.hpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/mock.hpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/mock_plugin.hpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/mock_server.hpp
 )
 
 set(
-    SOURCES
-    ${libirccd-test_SOURCE_DIR}/irccd/test/cli_fixture.cpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/command_fixture.cpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/debug_server.cpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/irccd_fixture.cpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/mock.cpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/mock_plugin.cpp
-    ${libirccd-test_SOURCE_DIR}/irccd/test/mock_server.cpp
-    $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/js_fixture.cpp>
-    $<$<BOOL:${IRCCD_HAVE_JS}>:${libirccd-test_SOURCE_DIR}/irccd/test/js_plugin_fixture.cpp>
+	SOURCES
+	${libirccd-test_SOURCE_DIR}/irccd/test/cli_fixture.cpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/command_fixture.cpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/debug_server.cpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/irccd_fixture.cpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/mock.cpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/mock_plugin.cpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/mock_server.cpp
 )
 
 if (${IRCCD_HAVE_JS})
-    list(APPEND LIBRARIES libirccd-js)
+	list(
+		APPEND
+		HEADERS
+		${libirccd-test_SOURCE_DIR}/irccd/test/js_fixture.hpp
+		${libirccd-test_SOURCE_DIR}/irccd/test/js_plugin_fixture.hpp
+	)
+	list(
+		APPEND
+		SOURCES
+		${libirccd-test_SOURCE_DIR}/irccd/test/js_fixture.cpp
+		${libirccd-test_SOURCE_DIR}/irccd/test/js_plugin_fixture.cpp
+	)
+	list(APPEND LIBRARIES libirccd-js)
 endif ()
 
 irccd_define_library(
-    TARGET libirccd-test
-    EXPORT
-    HEADERS ${HEADERS}
-    HEADERS_DIRECTORY irccd/test
-    SOURCES ${SOURCES}
-    LIBRARIES
-        ${LIBRARIES}
-        libirccd
-        libirccd-ctl
-    PUBLIC_INCLUDES
-        $<BUILD_INTERFACE:${libirccd-test_SOURCE_DIR}>
-    FLAGS
-        $<BUILD_INTERFACE:IRCCD_EXECUTABLE="$<TARGET_FILE:irccd>">
-        $<BUILD_INTERFACE:IRCCDCTL_EXECUTABLE="$<TARGET_FILE:irccdctl>">
-        $<INSTALL_INTERFACE:IRCCD_EXECUTABLE="$<TARGET_FILE:irccd::irccd>">
-        $<INSTALL_INTERFACE:IRCCDCTL_EXECUTABLE="$<TARGET_FILE:irccd::irccdctl>">
+	TARGET libirccd-test
+	EXPORT
+	HEADERS ${HEADERS}
+	HEADERS_DIRECTORY irccd/test
+	SOURCES ${SOURCES}
+	LIBRARIES
+		${LIBRARIES}
+		libirccd
+		libirccd-ctl
+	PUBLIC_INCLUDES
+		$<BUILD_INTERFACE:${libirccd-test_SOURCE_DIR}>
+	FLAGS
+		$<BUILD_INTERFACE:IRCCD_EXECUTABLE="$<TARGET_FILE:irccd>">
+		$<BUILD_INTERFACE:IRCCDCTL_EXECUTABLE="$<TARGET_FILE:irccdctl>">
+		$<INSTALL_INTERFACE:IRCCD_EXECUTABLE="$<TARGET_FILE:irccd::irccd>">
+		$<INSTALL_INTERFACE:IRCCDCTL_EXECUTABLE="$<TARGET_FILE:irccd::irccdctl>">
 )

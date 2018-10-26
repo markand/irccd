@@ -128,71 +128,71 @@ class transport_client;
  */
 class transport_server : public std::enable_shared_from_this<transport_server> {
 public:
-    /**
-     * Set of clients.
-     */
-    using client_set = std::unordered_set<std::shared_ptr<transport_client>>;
+	/**
+	 * Set of clients.
+	 */
+	using client_set = std::unordered_set<std::shared_ptr<transport_client>>;
 
-    /**
-     * Accept completion handler.
-     */
-    using accept_handler = std::function<void (std::error_code, std::shared_ptr<transport_client>)>;
+	/**
+	 * Accept completion handler.
+	 */
+	using accept_handler = std::function<void (std::error_code, std::shared_ptr<transport_client>)>;
 
 private:
-    client_set clients_;
-    std::unique_ptr<io::acceptor> acceptor_;
-    std::string password_;
+	client_set clients_;
+	std::unique_ptr<acceptor> acceptor_;
+	std::string password_;
 
-    void do_auth(std::shared_ptr<transport_client>, accept_handler);
-    void do_greetings(std::shared_ptr<transport_client>, accept_handler);
+	void do_auth(std::shared_ptr<transport_client>, accept_handler);
+	void do_greetings(std::shared_ptr<transport_client>, accept_handler);
 
 public:
-    /**
-     * Constructor.
-     *
-     * \pre acceptor != nullptr
-     * \param acceptor the stream acceptor
-     */
-    transport_server(std::unique_ptr<io::acceptor> acceptor) noexcept;
+	/**
+	 * Constructor.
+	 *
+	 * \pre acceptor != nullptr
+	 * \param acceptor the stream acceptor
+	 */
+	transport_server(std::unique_ptr<acceptor> acceptor) noexcept;
 
-    /**
-     * Get the clients.
-     *
-     * \return the clients
-     */
-    auto get_clients() const noexcept -> const client_set&;
+	/**
+	 * Get the clients.
+	 *
+	 * \return the clients
+	 */
+	auto get_clients() const noexcept -> const client_set&;
 
-    /**
-     * Overloaded function.
-     *
-     * \return the clients
-     */
-    auto get_clients() noexcept -> client_set&;
+	/**
+	 * Overloaded function.
+	 *
+	 * \return the clients
+	 */
+	auto get_clients() noexcept -> client_set&;
 
-    /**
-     * Get the current password, empty string means no password.
-     *
-     * \return the password
-     */
-    auto get_password() const noexcept -> const std::string&;
+	/**
+	 * Get the current password, empty string means no password.
+	 *
+	 * \return the password
+	 */
+	auto get_password() const noexcept -> const std::string&;
 
-    /**
-     * Set an optional password, empty string means no password.
-     *
-     * \param password the password
-     */
-    void set_password(std::string password) noexcept;
+	/**
+	 * Set an optional password, empty string means no password.
+	 *
+	 * \param password the password
+	 */
+	void set_password(std::string password) noexcept;
 
-    /**
-     * Accept a client.
-     *
-     * Also perform greetings and authentication under the hood. On success, the
-     * client is added into the server and is ready to use.
-     *
-     * \pre handler != nullptr
-     * \param handler the completion handler
-     */
-    void accept(accept_handler handler);
+	/**
+	 * Accept a client.
+	 *
+	 * Also perform greetings and authentication under the hood. On success, the
+	 * client is added into the server and is ready to use.
+	 *
+	 * \pre handler != nullptr
+	 * \param handler the completion handler
+	 */
+	void accept(accept_handler handler);
 };
 
 /**
@@ -200,53 +200,53 @@ public:
  */
 class transport_error : public std::system_error {
 public:
-    /**
-     * \brief Transport related errors.
-     */
-    enum error {
-        //!< No error.
-        no_error = 0,
+	/**
+	 * \brief Transport related errors.
+	 */
+	enum error {
+		//!< No error.
+		no_error = 0,
 
-        //!< Authentication is required.
-        auth_required,
+		//!< Authentication is required.
+		auth_required,
 
-        //!< Authentication was invalid.
-        invalid_auth,
+		//!< Authentication was invalid.
+		invalid_auth,
 
-        //!< Invalid TCP/IP port.
-        invalid_port,
+		//!< Invalid TCP/IP port.
+		invalid_port,
 
-        //!< Invalid TCP/IP address.
-        invalid_address,
+		//!< Invalid TCP/IP address.
+		invalid_address,
 
-        //!< The specified host was invalid.
-        invalid_hostname,
+		//!< The specified host was invalid.
+		invalid_hostname,
 
-        //!< Invalid unix local path.
-        invalid_path,
+		//!< Invalid unix local path.
+		invalid_path,
 
-        //!< Invalid IPv4/IPv6 family.
-        invalid_family,
+		//!< Invalid IPv4/IPv6 family.
+		invalid_family,
 
-        //!< Invalid certificate given.
-        invalid_certificate,
+		//!< Invalid certificate given.
+		invalid_certificate,
 
-        //!< Invalid private key given.
-        invalid_private_key,
+		//!< Invalid private key given.
+		invalid_private_key,
 
-        //!< SSL was requested but is disabled.
-        ssl_disabled,
+		//!< SSL was requested but is disabled.
+		ssl_disabled,
 
-        //!< Kind of transport not supported on this platform.
-        not_supported
-    };
+		//!< Kind of transport not supported on this platform.
+		not_supported
+	};
 
-    /**
-     * Constructor.
-     *
-     * \param code the error code
-     */
-    transport_error(error code) noexcept;
+	/**
+	 * Constructor.
+	 *
+	 * \param code the error code
+	 */
+	transport_error(error code) noexcept;
 };
 
 /**

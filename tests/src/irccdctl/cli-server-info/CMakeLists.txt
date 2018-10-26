@@ -17,8 +17,8 @@
 #
 
 irccd_define_test(
-    NAME cli-server-info
-    SOURCES main.cpp
-    LIBRARIES libirccd-core
-    DEPENDS irccd irccdctl
+	NAME cli-server-info
+	SOURCES main.cpp
+	LIBRARIES libirccd-core
+	DEPENDS irccd irccdctl
 )

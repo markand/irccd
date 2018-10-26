@@ -41,15 +41,15 @@ namespace irccd::js {
  */
 class irccd_js_api : public js_api {
 public:
-    /**
-     * \copydoc js_api::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc js_api::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc js_api::load
-     */
-    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
+	/**
+	 * \copydoc js_api::load
+	 */
+	void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
 namespace duk {
@@ -59,27 +59,27 @@ namespace duk {
  */
 template <>
 struct type_traits<irccd> {
-    /**
-     * Get irccd instance stored in this context.
-     *
-     * \param ctx the context
-     * \return the irccd reference
-     */
-    static auto self(duk_context* ctx) -> irccd&;
+	/**
+	 * Get irccd instance stored in this context.
+	 *
+	 * \param ctx the context
+	 * \return the irccd reference
+	 */
+	static auto self(duk_context* ctx) -> irccd&;
 };
 
 /**
- * \brief Specialize dukx_type_traits for std::system_error.
+ * \brief Specialize dukx_type_traits for boost::system::system_error.
  */
 template <>
 struct type_traits<std::system_error> {
-    /**
-     * Raise an Irccd.SystemError.
-     *
-     * \param ctx the context
-     * param ex the exception
-     */
-    static void raise(duk_context* ctx, const std::system_error& ex);
+	/**
+	 * Raise an Irccd.SystemError.
+	 *
+	 * \param ctx the context
+	 * param ex the exception
+	 */
+	static void raise(duk_context* ctx, const std::system_error& ex);
 };
 
 /**
@@ -87,13 +87,13 @@ struct type_traits<std::system_error> {
  */
 template <>
 struct type_traits<boost::system::system_error> {
-    /**
-     * Raise an Irccd.SystemError.
-     *
-     * \param ctx the context
-     * param ex the exception
-     */
-    static void raise(duk_context* ctx, const boost::system::system_error& ex);
+	/**
+	 * Raise an Irccd.SystemError.
+	 *
+	 * \param ctx the context
+	 * param ex the exception
+	 */
+	static void raise(duk_context* ctx, const boost::system::system_error& ex);
 };
 
 } // !duk

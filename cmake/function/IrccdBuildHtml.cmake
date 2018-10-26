@@ -23,10 +23,10 @@ include(CMakeParseArguments)
 # ----------------
 #
 # irccd_build_html(
-#   COMPONENT (Optional) install the output documentation as the given component
-#   OUTPUT (Optional) override output path
-#   OUTPUT_VAR (Optional) store the output file in the output variable
-#   SOURCE the source markdown file
+#   COMPONENT           (Optional) install the output documentation as the given component
+#   OUTPUT              (Optional) override output path
+#   OUTPUT_VAR          (Optional) store the output file in the output variable
+#   SOURCE              the source markdown file
 # )
 #
 # Create a rule to build the markdown file specified by SOURCE parameter.
@@ -48,7 +48,6 @@ include(CMakeParseArguments)
 #   OUTPUT dev/howto-create-a-plugin
 #   SOURCE myfile.md
 #   OUTPUT_VAR output
-#   VARIABLES ... (Optional) variables to pass to pandoc
 # )
 #
 # add_custom_target(mytarget DEPENDS ${output})
@@ -57,83 +56,83 @@ include(CMakeParseArguments)
 #
 
 macro(irccd_build_html)
-    set(oneValueArgs COMPONENT OUTPUT OUTPUT_VAR SOURCE)
-    set(multiValueArgs VARIABLES)
+	set(oneValueArgs COMPONENT OUTPUT OUTPUT_VAR SOURCE)
+	set(multiValueArgs VARIABLES)
 
-    cmake_parse_arguments(HTML "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+	cmake_parse_arguments(HTML "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    if (NOT HTML_SOURCE)
-        message(FATAL_ERROR "Missing SOURCE parameter")
-    endif ()
+	if (NOT HTML_SOURCE)
+		message(FATAL_ERROR "Missing SOURCE parameter")
+	endif ()
 
-    #
-    # Example with SOURCES set to CMAKE_CURRENT_SOURCE_DIR/api/event/onMessage.md
-    #
-    # Extract the following variables:
-    #
-    # dirname:      api/event
-    # basename:     onMessage
-    # baseurl:      ../../
-    #
-    if (HTML_OUTPUT)
-        if (IS_ABSOLUTE ${HTML_OUTPUT})
-            message(FATAL_ERROR "OUTPUT variable must not be absolute")
-        endif ()
+	#
+	# Example with SOURCES set to CMAKE_CURRENT_SOURCE_DIR/api/event/onMessage.md
+	#
+	# Extract the following variables:
+	#
+	# dirname:	  api/event
+	# basename:	 onMessage
+	# baseurl:	  ../../
+	#
+	if (HTML_OUTPUT)
+		if (IS_ABSOLUTE ${HTML_OUTPUT})
+			message(FATAL_ERROR "OUTPUT variable must not be absolute")
+		endif ()
 
-        get_filename_component(dirname ${HTML_OUTPUT} DIRECTORY)
-        get_filename_component(basename ${HTML_OUTPUT} NAME)
-    else()
-        get_filename_component(dirname ${HTML_SOURCE} DIRECTORY)
-        file(RELATIVE_PATH dirname ${CMAKE_CURRENT_SOURCE_DIR} ${dirname})
-        get_filename_component(basename ${HTML_SOURCE} NAME)
-    endif ()
+		get_filename_component(dirname ${HTML_OUTPUT} DIRECTORY)
+		get_filename_component(basename ${HTML_OUTPUT} NAME)
+	else()
+		get_filename_component(dirname ${HTML_SOURCE} DIRECTORY)
+		file(RELATIVE_PATH dirname ${CMAKE_CURRENT_SOURCE_DIR} ${dirname})
+		get_filename_component(basename ${HTML_SOURCE} NAME)
+	endif ()
 
-    # Remove extension from basename.
-    string(REGEX REPLACE "^(.*)\\.md$" "\\1" basename ${basename})
+	# Remove extension from basename.
+	string(REGEX REPLACE "^(.*)\\.md$" "\\1" basename ${basename})
 
-    file(
-        RELATIVE_PATH
-        baseurl
-        ${CMAKE_CURRENT_BINARY_DIR}/${dirname}
-        ${CMAKE_CURRENT_BINARY_DIR}/
-    )
+	file(
+		RELATIVE_PATH
+		baseurl
+		${CMAKE_CURRENT_BINARY_DIR}/${dirname}
+		${CMAKE_CURRENT_BINARY_DIR}/
+	)
 
-    if (baseurl STREQUAL "")
-        set(baseurl "./")
-    endif ()
+	if (baseurl STREQUAL "")
+		set(baseurl "./")
+	endif ()
 
-    # Replace CMake variables.
-    configure_file(
-        ${HTML_SOURCE}
-        ${doc_BINARY_DIR}/${dirname}/${basename}.md
-        @ONLY
-    )
+	# Replace CMake variables.
+	configure_file(
+		${HTML_SOURCE}
+		${doc_BINARY_DIR}/${dirname}/${basename}.md
+		@ONLY
+	)
 
-    set(input ${doc_BINARY_DIR}/${dirname}/${basename}.md)
-    set(output ${doc_BINARY_DIR}/html/${dirname}/${basename}.html)
+	set(input ${doc_BINARY_DIR}/${dirname}/${basename}.md)
+	set(output ${doc_BINARY_DIR}/html/${dirname}/${basename}.html)
 
-    # Pandoc the file.
-    pandoc(
-        OUTPUT ${output}
-        SOURCES ${input}
-        DEPENDS ${HTML_SOURCE} ${input}
-        TEMPLATE ${html_SOURCE_DIR}/template.html
-        VARIABLE baseurl:${baseurl} ${HTML_VARIABLES}
-        FROM markdown
-        TO html5
-        STANDALONE TOC MAKE_DIRECTORY
-    )
+	# Pandoc the file.
+	pandoc(
+		OUTPUT ${output}
+		SOURCES ${input}
+		DEPENDS ${HTML_SOURCE} ${input}
+		TEMPLATE ${html_SOURCE_DIR}/template.html
+		VARIABLE baseurl:${baseurl} ${HTML_VARIABLES}
+		FROM markdown
+		TO html5
+		STANDALONE TOC MAKE_DIRECTORY
+	)
 
-    # Install the documentation file as component if provided.
-    if (HTML_COMPONENT)
-        install(
-            FILES ${output}
-            COMPONENT ${HTML_COMPONENT}
-            DESTINATION ${CMAKE_INSTALL_DOCDIR}/${dirname}
-        )
-    endif ()
+	# Install the documentation file as component if provided.
+	if (HTML_COMPONENT)
+		install(
+			FILES ${output}
+			COMPONENT ${HTML_COMPONENT}
+			DESTINATION ${CMAKE_INSTALL_DOCDIR}/${dirname}
+		)
+	endif ()
 
-    if (HTML_OUTPUT_VAR)
-        set(${HTML_OUTPUT_VAR} ${output})
-    endif ()
+	if (HTML_OUTPUT_VAR)
+		set(${HTML_OUTPUT_VAR} ${output})
+	endif ()
 endmacro ()

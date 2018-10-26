@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_COMMON_INI_HPP
-#define IRCCD_COMMON_INI_HPP
+#ifndef IRCCD_CORE_INI_HPP
+#define IRCCD_CORE_INI_HPP
 
 /**
  * \file ini.hpp
@@ -29,8 +29,7 @@
 /**
  * \page Ini Ini
  * \brief Extended .ini file parser.
- *
- *   - \subpage ini-syntax
+ * - \subpage ini-syntax
  */
 
 /**
@@ -39,14 +38,14 @@
  *
  * The syntax is similar to most of `.ini` implementations as:
  *
- *   - a section is delimited by `[name]` can be redefined multiple times,
- *   - an option **must** always be defined in a section,
- *   - empty options must be surrounded by quotes,
- *   - lists can not include trailing commas,
- *   - include statements must always live at the beginning of files
- *     (in no sections),
- *   - comments start with # until the end of line,
- *   - options with spaces **must** use quotes.
+ * - a section is delimited by `[name]` can be redefined multiple times,
+ * - an option **must** always be defined in a section,
+ * - empty options must be surrounded by quotes,
+ * - lists can not include trailing commas,
+ * - include statements must always live at the beginning of files
+ *   (in no sections),
+ * - comments start with # until the end of line,
+ * - options with spaces **must** use quotes.
  *
  * # Basic file
  *
@@ -54,7 +53,7 @@
  * # This is a comment.
  * [section]
  * option1 = value1
- * option2 = "value 2 with spaces"    # comment is also allowed here
+ * option2 = "value 2 with spaces"	# comment is also allowed here
  * ````
  *
  * # Redefinition
@@ -106,21 +105,17 @@
  * ````
  */
 
-#include "sysconfig.hpp"
-
 #include <algorithm>
-#include <cassert>
 #include <exception>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <vector>
-
-namespace irccd {
 
 /**
  * Namespace for ini related classes.
  */
-namespace ini {
+namespace irccd::ini {
 
 class document;
 
@@ -129,54 +124,40 @@ class document;
  */
 class exception : public std::exception {
 private:
-    int line_;
-    int column_;
-    std::string message_;
+	unsigned line_;
+	unsigned column_;
+	std::string message_;
 
 public:
-    /**
-     * Constructor.
-     *
-     * \param line the line
-     * \param column the column
-     * \param msg the message
-     */
-    inline exception(int line, int column, std::string msg) noexcept
-        : line_(line)
-        , column_(column)
-        , message_(std::move(msg))
-    {
-    }
+	/**
+	 * Constructor.
+	 *
+	 * \param line the line
+	 * \param column the column
+	 * \param msg the message
+	 */
+	exception(unsigned line, unsigned column, std::string msg) noexcept;
 
-    /**
-     * Get the line number.
-     *
-     * \return the line
-     */
-    inline int line() const noexcept
-    {
-        return line_;
-    }
+	/**
+	 * Get the line number.
+	 *
+	 * \return the line
+	 */
+	auto line() const noexcept -> unsigned;
 
-    /**
-     * Get the column number.
-     *
-     * \return the column
-     */
-    inline int column() const noexcept
-    {
-        return column_;
-    }
+	/**
+	 * Get the column number.
+	 *
+	 * \return the column
+	 */
+	auto column() const noexcept -> unsigned;
 
-    /**
-     * Return the raw exception message (no line and column shown).
-     *
-     * \return the exception message
-     */
-    const char* what() const noexcept override
-    {
-        return message_.c_str();
-    }
+	/**
+	 * Return the raw exception message (no line and column shown).
+	 *
+	 * \return the exception message
+	 */
+	auto what() const noexcept -> const char* override;
 };
 
 /**
@@ -188,106 +169,66 @@ public:
  */
 class token {
 public:
-    /**
-     * \brief token type.
-     */
-    enum type {
-        include,                //!< include statement
-        section,                //!< [section]
-        word,                   //!< word without quotes
-        quoted_word,            //!< word with quotes
-        assign,                 //!< = assignment
-        list_begin,             //!< begin of list (
-        list_end,               //!< end of list )
-        comma                   //!< list separation
-    };
+	/**
+	 * \brief token type.
+	 */
+	enum type {
+		include,                //!< include statement
+		tryinclude,             //!< tryinclude statement
+		section,                //!< [section]
+		word,                   //!< word without quotes
+		quoted_word,            //!< word with quotes
+		assign,                 //!< = assignment
+		list_begin,             //!< begin of list (
+		list_end,               //!< end of list )
+		comma                   //!< list separation
+	};
 
 private:
-    type type_;
-    int line_;
-    int column_;
-    std::string value_;
+	type type_;
+	unsigned line_;
+	unsigned column_;
+	std::string value_;
 
 public:
-    /**
-     * Construct a token.
-     *
-     * \param type the type
-     * \param line the line
-     * \param column the column
-     * \param value the value
-     */
-    token(type type, int line, int column, std::string value = "") noexcept
-        : type_(type)
-        , line_(line)
-        , column_(column)
-    {
-        switch (type) {
-        case include:
-            value_ = "@include";
-            break;
-        case section:
-        case word:
-        case quoted_word:
-            value_ = value;
-            break;
-        case assign:
-            value_ = "=";
-            break;
-        case list_begin:
-            value_ = "(";
-            break;
-        case list_end:
-            value_ = ")";
-            break;
-        case comma:
-            value_ = ",";
-            break;
-        default:
-            break;
-        }
-    }
+	/**
+	 * Construct a token.
+	 *
+	 * \param type the type
+	 * \param line the line
+	 * \param column the column
+	 * \param value the value
+	 */
+	token(type type, unsigned line, unsigned column, std::string value = "") noexcept;
 
-    /**
-     * Get the type.
-     *
-     * \return the type
-     */
-    inline type type() const noexcept
-    {
-        return type_;
-    }
+	/**
+	 * Get the type.
+	 *
+	 * \return the type
+	 */
+	auto get_type() const noexcept -> type;
 
-    /**
-     * Get the line.
-     *
-     * \return the line
-     */
-    inline int line() const noexcept
-    {
-        return line_;
-    }
+	/**
+	 * Get the line.
+	 *
+	 * \return the line
+	 */
+	auto get_line() const noexcept -> unsigned;
 
-    /**
-     * Get the column.
-     *
-     * \return the column
-     */
-    inline int column() const noexcept
-    {
-        return column_;
-    }
+	/**
+	 * Get the column.
+	 *
+	 * \return the column
+	 */
+	auto get_column() const noexcept -> unsigned;
 
-    /**
-     * Get the value. For words, quoted words and section, the value is the
-     * content. Otherwise it's the characters parsed.
-     *
-     * \return the value
-     */
-    inline const std::string& value() const noexcept
-    {
-        return value_;
-    }
+	/**
+	 * Get the value. For words, quoted words and section, the value is the
+	 * content. Otherwise it's the characters parsed.
+	 *
+	 * \return the value
+	 */
+	auto get_value() const noexcept -> const std::string&;
 };
 
 /**
@@ -300,72 +241,48 @@ using tokens = std::vector<token>;
  */
 class option : public std::vector<std::string> {
 private:
-    std::string key_;
+	std::string key_;
 
 public:
-    /**
-     * Construct an empty option.
-     *
-     * \pre key must not be empty
-     * \param key the key
-     */
-    inline option(std::string key) noexcept
-        : std::vector<std::string>()
-        , key_(std::move(key))
-    {
-        assert(!key_.empty());
-    }
+	/**
+	 * Construct an empty option.
+	 *
+	 * \pre key must not be empty
+	 * \param key the key
+	 */
+	option(std::string key) noexcept;
 
-    /**
-     * Construct a single option.
-     *
-     * \pre key must not be empty
-     * \param key the key
-     * \param value the value
-     */
-    inline option(std::string key, std::string value) noexcept
-        : key_(std::move(key))
-    {
-        assert(!key_.empty());
+	/**
+	 * Construct a single option.
+	 *
+	 * \pre key must not be empty
+	 * \param key the key
+	 * \param value the value
+	 */
+	option(std::string key, std::string value) noexcept;
 
-        push_back(std::move(value));
-    }
+	/**
+	 * Construct a list option.
+	 *
+	 * \pre key must not be empty
+	 * \param key the key
+	 * \param values the values
+	 */
+	option(std::string key, std::vector<std::string> values) noexcept;
 
-    /**
-     * Construct a list option.
-     *
-     * \pre key must not be empty
-     * \param key the key
-     * \param values the values
-     */
-    inline option(std::string key, std::vector<std::string> values) noexcept
-        : std::vector<std::string>(std::move(values))
-        , key_(std::move(key))
-    {
-        assert(!key_.empty());
-    }
+	/**
+	 * Get the option key.
+	 *
+	 * \return the key
+	 */
+	auto get_key() const noexcept -> const std::string&;
 
-    /**
-     * Get the option key.
-     *
-     * \return the key
-     */
-    inline const std::string& key() const noexcept
-    {
-        return key_;
-    }
-
-    /**
-     * Get the option value.
-     *
-     * \return the value
-     */
-    inline const std::string& value() const noexcept
-    {
-        static std::string dummy;
-
-        return empty() ? dummy : (*this)[0];
-    }
+	/**
+	 * Get the option value.
+	 *
+	 * \return the value
+	 */
+	auto get_value() const noexcept -> const std::string&;
 };
 
 /**
@@ -373,116 +290,78 @@ public:
  */
 class section : public std::vector<option> {
 private:
-    std::string key_;
+	std::string key_;
 
 public:
-    /**
-     * Construct a section with its name.
-     *
-     * \pre key must not be empty
-     * \param key the key
-     */
-    inline section(std::string key) noexcept
-        : key_(std::move(key))
-    {
-        assert(!key_.empty());
-    }
+	/**
+	 * Construct a section with its name.
+	 *
+	 * \pre key must not be empty
+	 * \param key the key
+	 */
+	section(std::string key) noexcept;
 
-    /**
-     * Get the section key.
-     *
-     * \return the key
-     */
-    inline const std::string& key() const noexcept
-    {
-        return key_;
-    }
+	/**
+	 * Get the section key.
+	 *
+	 * \return the key
+	 */
+	auto get_key() const noexcept -> const std::string&;
 
-    /**
-     * Check if the section contains a specific option.
-     *
-     * \param key the option key
-     * \return true if the option exists
-     */
-    inline bool contains(const std::string& key) const noexcept
-    {
-        return find(key) != end();
-    }
+	/**
+	 * Check if the section contains a specific option.
+	 *
+	 * \param key the option key
+	 * \return true if the option exists
+	 */
+	auto contains(std::string_view key) const noexcept -> bool;
 
-    /**
-     * Find an option or return an empty one if not found.
-     *
-     * \param key the key
-     * \return the option or empty one if not found
-     */
-    inline option get(const std::string& key) const noexcept
-    {
-        auto it = find(key);
+	/**
+	 * Find an option or return an empty one if not found.
+	 *
+	 * \param key the key
+	 * \return the option or empty one if not found
+	 */
+	auto get(std::string_view key) const noexcept -> option;
 
-        if (it == end())
-            return option(key);
+	/**
+	 * Find an option by key and return an iterator.
+	 *
+	 * \param key the key
+	 * \return the iterator or end() if not found
+	 */
+	auto find(std::string_view key) noexcept -> iterator;
 
-        return *it;
-    }
+	/**
+	 * Find an option by key and return an iterator.
+	 *
+	 * \param key the key
+	 * \return the iterator or end() if not found
+	 */
+	auto find(std::string_view key) const noexcept -> const_iterator;
 
-    /**
-     * Find an option by key and return an iterator.
-     *
-     * \param key the key
-     * \return the iterator or end() if not found
-     */
-    inline iterator find(const std::string& key) noexcept
-    {
-        return std::find_if(begin(), end(), [&] (const auto& o) {
-            return o.key() == key;
-        });
-    }
+	/**
+	 * Access an option at the specified key.
+	 *
+	 * \param key the key
+	 * \return the option
+	 * \pre contains(key) must return true
+	 */
+	auto operator[](std::string_view key) -> option&;
 
-    /**
-     * Find an option by key and return an iterator.
-     *
-     * \param key the key
-     * \return the iterator or end() if not found
-     */
-    inline const_iterator find(const std::string& key) const noexcept
-    {
-        return std::find_if(cbegin(), cend(), [&] (const auto& o) {
-            return o.key() == key;
-        });
-    }
+	/**
+	 * Overloaded function.
+	 *
+	 * \param key the key
+	 * \return the option
+	 * \pre contains(key) must return true
+	 */
+	auto operator[](std::string_view key) const -> const option&;
 
-    /**
-     * Access an option at the specified key.
-     *
-     * \param key the key
-     * \return the option
-     * \pre contains(key) must return true
-     */
-    inline option& operator[](const std::string& key)
-    {
-        assert(contains(key));
-
-        return *find(key);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \param key the key
-     * \return the option
-     * \pre contains(key) must return true
-     */
-    inline const option& operator[](const std::string& key) const
-    {
-        assert(contains(key));
-
-        return *find(key);
-    }
-
-    /**
-     * Inherited operators.
-     */
-    using std::vector<option>::operator[];
+	/**
+	 * Inherited operators.
+	 */
+	using std::vector<option>::operator[];
 };
 
 /**
@@ -492,91 +371,60 @@ public:
  */
 class document : public std::vector<section> {
 public:
-    /**
-     * Check if a document has a specific section.
-     *
-     * \param key the key
-     * \return true if the document contains the section
-     */
-    inline bool contains(const std::string& key) const noexcept
-    {
-        return find(key) != end();
-    }
+	/**
+	 * Check if a document has a specific section.
+	 *
+	 * \param key the key
+	 * \return true if the document contains the section
+	 */
+	auto contains(std::string_view key) const noexcept -> bool;
 
-    /**
-     * Find a section or return an empty one if not found.
-     *
-     * \param key the key
-     * \return the section or empty one if not found
-     */
-    inline section get(const std::string& key) const noexcept
-    {
-        auto it = find(key);
+	/**
+	 * Find a section or return an empty one if not found.
+	 *
+	 * \param key the key
+	 * \return the section or empty one if not found
+	 */
+	auto get(std::string_view key) const noexcept -> section;
 
-        if (it == end())
-            return section(key);
+	/**
+	 * Find a section by key and return an iterator.
+	 *
+	 * \param key the key
+	 * \return the iterator or end() if not found
+	 */
+	auto find(std::string_view key) noexcept -> iterator;
 
-        return *it;
-    }
+	/**
+	 * Find a section by key and return an iterator.
+	 *
+	 * \param key the key
+	 * \return the iterator or end() if not found
+	 */
+	auto find(std::string_view key) const noexcept -> const_iterator;
 
-    /**
-     * Find a section by key and return an iterator.
-     *
-     * \param key the key
-     * \return the iterator or end() if not found
-     */
-    inline iterator find(const std::string& key) noexcept
-    {
-        return std::find_if(begin(), end(), [&] (const auto& o) {
-            return o.key() == key;
-        });
-    }
+	/**
+	 * Access a section at the specified key.
+	 *
+	 * \param key the key
+	 * \return the section
+	 * \pre contains(key) must return true
+	 */
+	auto operator[](std::string_view key) -> section&;
 
-    /**
-     * Find a section by key and return an iterator.
-     *
-     * \param key the key
-     * \return the iterator or end() if not found
-     */
-    inline const_iterator find(const std::string& key) const noexcept
-    {
-        return std::find_if(cbegin(), cend(), [&] (const auto& o) {
-            return o.key() == key;
-        });
-    }
+	/**
+	 * Overloaded function.
+	 *
+	 * \param key the key
+	 * \return the section
+	 * \pre contains(key) must return true
+	 */
+	auto operator[](std::string_view key) const -> const section&;
 
-    /**
-     * Access a section at the specified key.
-     *
-     * \param key the key
-     * \return the section
-     * \pre contains(key) must return true
-     */
-    inline section& operator[](const std::string& key)
-    {
-        assert(contains(key));
-
-        return *find(key);
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \param key the key
-     * \return the section
-     * \pre contains(key) must return true
-     */
-    inline const section& operator[](const std::string& key) const
-    {
-        assert(contains(key));
-
-        return *find(key);
-    }
-
-    /**
-     * Inherited operators.
-     */
-    using std::vector<section>::operator[];
+	/**
+	 * Inherited operators.
+	 */
+	using std::vector<section>::operator[];
 };
 
 /**
@@ -640,8 +488,6 @@ document read_string(const std::string& buffer);
  */
 void dump(const tokens& tokens);
 
-} // !ini
+} // !irccd::ini
 
-} // !irccd
-
-#endif // !IRCCD_COMMON_INI_HPP
+#endif // !IRCCD_INI_HPP

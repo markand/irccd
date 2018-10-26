@@ -31,92 +31,92 @@ BOOST_FIXTURE_TEST_SUITE(server_mode_suite, cli_fixture)
 
 BOOST_AUTO_TEST_CASE(user)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-mode", "test", "irccd", "+i" });
+	const auto [code, out, err] = exec({ "server-mode", "test", "irccd", "+i" });
 
-    BOOST_TEST(!code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 0U);
+	BOOST_TEST(!code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 0U);
 
-    const auto cmd = server_->find("mode");
+	const auto cmd = server_->find("mode");
 
-    BOOST_TEST(cmd.size() == 1U);
-    BOOST_TEST(std::any_cast<std::string>(cmd[0][0]) == "irccd");
-    BOOST_TEST(std::any_cast<std::string>(cmd[0][1]) == "+i");
-    BOOST_TEST(std::any_cast<std::string>(cmd[0][2]) == "");
-    BOOST_TEST(std::any_cast<std::string>(cmd[0][3]) == "");
-    BOOST_TEST(std::any_cast<std::string>(cmd[0][4]) == "");
+	BOOST_TEST(cmd.size() == 1U);
+	BOOST_TEST(std::any_cast<std::string>(cmd[0][0]) == "irccd");
+	BOOST_TEST(std::any_cast<std::string>(cmd[0][1]) == "+i");
+	BOOST_TEST(std::any_cast<std::string>(cmd[0][2]) == "");
+	BOOST_TEST(std::any_cast<std::string>(cmd[0][3]) == "");
+	BOOST_TEST(std::any_cast<std::string>(cmd[0][4]) == "");
 }
 
 BOOST_AUTO_TEST_CASE(channel)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-mode", "test", "#staff", "+b", "francis" });
+	const auto [code, out, err] = exec({ "server-mode", "test", "#staff", "+b", "francis" });
 
-    BOOST_TEST(!code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 0U);
+	BOOST_TEST(!code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 0U);
 
-    const auto cmd = server_->find("mode");
+	const auto cmd = server_->find("mode");
 
-    BOOST_TEST(cmd.size() == 1U);
-    BOOST_TEST(std::any_cast<std::string>(cmd[0][0]) == "#staff");
-    BOOST_TEST(std::any_cast<std::string>(cmd[0][1]) == "+b");
-    BOOST_TEST(std::any_cast<std::string>(cmd[0][2]) == "francis");
-    BOOST_TEST(std::any_cast<std::string>(cmd[0][3]) == "");
-    BOOST_TEST(std::any_cast<std::string>(cmd[0][4]) == "");
+	BOOST_TEST(cmd.size() == 1U);
+	BOOST_TEST(std::any_cast<std::string>(cmd[0][0]) == "#staff");
+	BOOST_TEST(std::any_cast<std::string>(cmd[0][1]) == "+b");
+	BOOST_TEST(std::any_cast<std::string>(cmd[0][2]) == "francis");
+	BOOST_TEST(std::any_cast<std::string>(cmd[0][3]) == "");
+	BOOST_TEST(std::any_cast<std::string>(cmd[0][4]) == "");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier_1)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-mode", "+++", "#staff", "+t" });
+	const auto [code, out, err] = exec({ "server-mode", "+++", "#staff", "+t" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: invalid server identifier");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: invalid server identifier");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-mode", "unknown", "#staff", "+t" });
+	const auto [code, out, err] = exec({ "server-mode", "unknown", "#staff", "+t" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: server not found");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: server not found");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_channel)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-mode", "test", "\"\"", "+t" });
+	const auto [code, out, err] = exec({ "server-mode", "test", "\"\"", "+t" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: invalid or empty channel");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: invalid or empty channel");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_mode)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-mode", "test", "#staff", "\"\"" });
+	const auto [code, out, err] = exec({ "server-mode", "test", "#staff", "\"\"" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: invalid or empty mode");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: invalid or empty mode");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

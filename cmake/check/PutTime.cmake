@@ -22,15 +22,15 @@ include(CheckCXXSourceCompiles)
 # std::put_time does not exists on Debian 8, probably too old libstdc++.
 #
 check_cxx_source_compiles(
-    "#include <iomanip>
-     #include <iostream>
+	"#include <iomanip>
+	 #include <iostream>
 
-     int main()
-     {
-        std::cout << std::put_time(nullptr, \"\");
+	 int main()
+	 {
+		std::cout << std::put_time(nullptr, \"\");
 
-        return 0;
-     }
-    "
-    IRCCD_HAVE_STD_PUT_TIME
+		return 0;
+	 }
+	"
+	IRCCD_HAVE_STD_PUT_TIME
 )

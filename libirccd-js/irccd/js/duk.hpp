@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef DUKTAPE_HPP
-#define DUKTAPE_HPP
+#ifndef IRCCD_JS_DUK_HPP
+#define IRCCD_JS_DUK_HPP
 
 /**
  * \file duk.hpp
@@ -55,28 +55,28 @@ namespace irccd::js::duk {
 class stack_guard {
 #if !defined(NDEBUG)
 private:
-    duk_context* context_;
-    unsigned expected_;
-    int at_start_;
+	duk_context* context_;
+	unsigned expected_;
+	int at_start_;
 #endif
 
 public:
-    /**
-     * Create the stack checker.
-     *
-     * No-op if NDEBUG is set.
-     *
-     * \param ctx the context
-     * \param expected the size expected relative to the already existing values
-     */
-    stack_guard(duk_context* ctx, unsigned expected = 0) noexcept;
+	/**
+	 * Create the stack checker.
+	 *
+	 * No-op if NDEBUG is set.
+	 *
+	 * \param ctx the context
+	 * \param expected the size expected relative to the already existing values
+	 */
+	stack_guard(duk_context* ctx, unsigned expected = 0) noexcept;
 
-    /**
-     * Verify the expected size.
-     *
-     * No-op if NDEBUG is set.
-     */
-    ~stack_guard() noexcept;
+	/**
+	 * Verify the expected size.
+	 *
+	 * No-op if NDEBUG is set.
+	 */
+	~stack_guard() noexcept;
 };
 
 // }}}
@@ -90,42 +90,42 @@ public:
  */
 class context {
 private:
-    std::unique_ptr<duk_context, void (*)(duk_context*)> handle_;
+	std::unique_ptr<duk_context, void (*)(duk_context*)> handle_;
 
-    context(const context&) = delete;
-    void operator=(const context&) = delete;
+	context(const context&) = delete;
+	void operator=(const context&) = delete;
 
 public:
-    /**
-     * Create default context.
-     */
-    context() noexcept;
+	/**
+	 * Create default context.
+	 */
+	context() noexcept;
 
-    /**
-     * Default move constructor.
-     */
-    context(context&&) noexcept = default;
+	/**
+	 * Default move constructor.
+	 */
+	context(context&&) noexcept = default;
 
-    /**
-     * Convert the context to the native Duktape/C type.
-     *
-     * \return the duk_context
-     */
-    operator duk_context*() noexcept;
+	/**
+	 * Convert the context to the native Duktape/C type.
+	 *
+	 * \return the duk_context
+	 */
+	operator duk_context*() noexcept;
 
-    /**
-     * Convert the context to the native Duktape/C type.
-     *
-     * \return the duk_context
-     */
-    operator duk_context*() const noexcept;
+	/**
+	 * Convert the context to the native Duktape/C type.
+	 *
+	 * \return the duk_context
+	 */
+	operator duk_context*() const noexcept;
 
-    /**
-     * Default move assignment operator.
-     *
-     * \return this
-     */
-    auto operator=(context&&) noexcept -> context& = default;
+	/**
+	 * Default move assignment operator.
+	 *
+	 * \return this
+	 */
+	auto operator=(context&&) noexcept -> context& = default;
 };
 
 // }}}
@@ -139,69 +139,69 @@ public:
  */
 class stack_info : public std::exception {
 private:
-    std::string name_;
-    std::string message_;
-    std::string stack_;
-    std::string file_name_;
-    unsigned line_number_;
+	std::string name_;
+	std::string message_;
+	std::string stack_;
+	std::string file_name_;
+	unsigned line_number_;
 
 public:
-    /**
-     * Construct the stack information.
-     *
-     * \param name the exception name (e.g. ReferenceError)
-     * \param message the error message
-     * \param stack the stack trace
-     * \param file_name the optional filename
-     * \param line_number the optional line number
-     */
-    stack_info(std::string name,
-               std::string message,
-               std::string stack,
-               std::string file_name,
-               unsigned line_number = 0) noexcept;
+	/**
+	 * Construct the stack information.
+	 *
+	 * \param name the exception name (e.g. ReferenceError)
+	 * \param message the error message
+	 * \param stack the stack trace
+	 * \param file_name the optional filename
+	 * \param line_number the optional line number
+	 */
+	stack_info(std::string name,
+	           std::string message,
+	           std::string stack,
+	           std::string file_name,
+	           unsigned line_number = 0) noexcept;
 
-    /**
-     * Get the exception name.
-     *
-     * \return the exception name (e.g. ReferenceError)
-     */
-    auto get_name() const noexcept -> const std::string&;
+	/**
+	 * Get the exception name.
+	 *
+	 * \return the exception name (e.g. ReferenceError)
+	 */
+	auto get_name() const noexcept -> const std::string&;
 
-    /**
-     * Get the error message.
-     *
-     * \return the message
-     */
-    auto get_message() const noexcept -> const std::string&;
+	/**
+	 * Get the error message.
+	 *
+	 * \return the message
+	 */
+	auto get_message() const noexcept -> const std::string&;
 
-    /**
-     * Get the stack trace.
-     *
-     * \return the stack
-     */
-    auto get_stack() const noexcept -> const std::string&;
+	/**
+	 * Get the stack trace.
+	 *
+	 * \return the stack
+	 */
+	auto get_stack() const noexcept -> const std::string&;
 
-    /**
-     * Get the optional file name.
-     *
-     * \return the file name
-     */
-    auto get_file_name() const noexcept -> const std::string&;
+	/**
+	 * Get the optional file name.
+	 *
+	 * \return the file name
+	 */
+	auto get_file_name() const noexcept -> const std::string&;
 
-    /**
-     * Get the line number.
-     *
-     * \return the line number
-     */
-    auto get_line_number() const noexcept -> unsigned;
+	/**
+	 * Get the line number.
+	 *
+	 * \return the line number
+	 */
+	auto get_line_number() const noexcept -> unsigned;
 
-    /**
-     * Get the error message. This effectively returns message field.
-     *
-     * \return the message
-     */
-    auto what() const noexcept -> const char* override;
+	/**
+	 * Get the error message. This effectively returns message field.
+	 *
+	 * \return the message
+	 */
+	auto what() const noexcept -> const char* override;
 };
 
 // }}}
@@ -222,8 +222,8 @@ public:
  * Example:
  *
  * ```cpp
- * push(ctx, 123);     // Uses type_traits<int>
- * push(ctx, true);    // Uses type_traits<bool>
+ * push(ctx, 123);	 // Uses type_traits<int>
+ * push(ctx, true);	// Uses type_traits<bool>
  * ```
  *
  * This class is specialized for the following types:
@@ -265,11 +265,11 @@ struct type_traits;
 template <typename T>
 auto push(duk_context* ctx, T&& value) -> int
 {
-    using Type = typename std::decay<T>::type;
+	using Type = typename std::decay<T>::type;
 
-    type_traits<Type>::push(ctx, std::forward<T>(value));
+	type_traits<Type>::push(ctx, std::forward<T>(value));
 
-    return 1;
+	return 1;
 }
 
 // }}}
@@ -288,9 +288,9 @@ auto push(duk_context* ctx, T&& value) -> int
 template <typename T>
 auto get(duk_context* ctx, duk_idx_t index)
 {
-    using Type = typename std::decay<T>::type;
+	using Type = typename std::decay<T>::type;
 
-    return type_traits<Type>::get(ctx, index);
+	return type_traits<Type>::get(ctx, index);
 }
 
 // }}}
@@ -309,9 +309,9 @@ auto get(duk_context* ctx, duk_idx_t index)
 template <typename T>
 auto require(duk_context* ctx, duk_idx_t index)
 {
-    using Type = typename std::decay<T>::type;
+	using Type = typename std::decay<T>::type;
 
-    return type_traits<Type>::require(ctx, index);
+	return type_traits<Type>::require(ctx, index);
 }
 
 // }}}
@@ -324,39 +324,39 @@ auto require(duk_context* ctx, duk_idx_t index)
  */
 class error {
 private:
-    int type_{DUK_ERR_ERROR};
-    std::string message_;
+	int type_{DUK_ERR_ERROR};
+	std::string message_;
 
 protected:
-    /**
-     * Constructor with a type of error specified, specially designed for
-     * derived errors.
-     *
-     * \param type of error (e.g. DUK_ERR_ERROR)
-     * \param message the message
-     */
-    error(int type, std::string message) noexcept;
+	/**
+	 * Constructor with a type of error specified, specially designed for
+	 * derived errors.
+	 *
+	 * \param type of error (e.g. DUK_ERR_ERROR)
+	 * \param message the message
+	 */
+	error(int type, std::string message) noexcept;
 
 public:
-    /**
-     * Constructor with a message.
-     *
-     * \param message the message
-     */
-    error(std::string message) noexcept;
+	/**
+	 * Constructor with a message.
+	 *
+	 * \param message the message
+	 */
+	error(std::string message) noexcept;
 
-    /**
-     * Virtual destructor defaulted.
-     */
-    ~error() = default;
+	/**
+	 * Virtual destructor defaulted.
+	 */
+	~error() = default;
 
-    /**
-     * Create the exception on the stack.
-     *
-     * \note the default implementation search for the global variables
-     * \param ctx the context
-     */
-    void create(duk_context* ctx) const;
+	/**
+	 * Create the exception on the stack.
+	 *
+	 * \note the default implementation search for the global variables
+	 * \param ctx the context
+	 */
+	void create(duk_context* ctx) const;
 };
 
 // }}}
@@ -368,12 +368,12 @@ public:
  */
 class eval_error : public error {
 public:
-    /**
-     * Construct an EvalError.
-     *
-     * \param message the message
-     */
-    eval_error(std::string message) noexcept;
+	/**
+	 * Construct an EvalError.
+	 *
+	 * \param message the message
+	 */
+	eval_error(std::string message) noexcept;
 };
 
 // }}}
@@ -385,12 +385,12 @@ public:
  */
 class range_error : public error {
 public:
-    /**
-     * Construct an RangeError.
-     *
-     * \param message the message
-     */
-    range_error(std::string message) noexcept;
+	/**
+	 * Construct an RangeError.
+	 *
+	 * \param message the message
+	 */
+	range_error(std::string message) noexcept;
 };
 
 // }}}
@@ -402,12 +402,12 @@ public:
  */
 class reference_error : public error {
 public:
-    /**
-     * Construct an ReferenceError.
-     *
-     * \param message the message
-     */
-    reference_error(std::string message) noexcept;
+	/**
+	 * Construct an ReferenceError.
+	 *
+	 * \param message the message
+	 */
+	reference_error(std::string message) noexcept;
 };
 
 // }}}
@@ -419,12 +419,12 @@ public:
  */
 class syntax_error : public error {
 public:
-    /**
-     * Construct an SyntaxError.
-     *
-     * \param message the message
-     */
-    syntax_error(std::string message) noexcept;
+	/**
+	 * Construct an SyntaxError.
+	 *
+	 * \param message the message
+	 */
+	syntax_error(std::string message) noexcept;
 };
 
 // }}}
@@ -436,12 +436,12 @@ public:
  */
 class type_error : public error {
 public:
-    /**
-     * Construct an TypeError.
-     *
-     * \param message the message
-     */
-    type_error(std::string message) noexcept;
+	/**
+	 * Construct an TypeError.
+	 *
+	 * \param message the message
+	 */
+	type_error(std::string message) noexcept;
 };
 
 // }}}
@@ -453,12 +453,12 @@ public:
  */
 class uri_error : public error {
 public:
-    /**
-     * Construct an URIError.
-     *
-     * \param message the message
-     */
-    uri_error(std::string message) noexcept;
+	/**
+	 * Construct an URIError.
+	 *
+	 * \param message the message
+	 */
+	uri_error(std::string message) noexcept;
 };
 
 // }}}
@@ -482,9 +482,9 @@ public:
 template <typename Error>
 void raise(duk_context* ctx, Error&& error)
 {
-    using type = std::decay_t<Error>;
+	using type = std::decay_t<Error>;
 
-    type_traits<type>::raise(ctx, std::forward<Error>(error));
+	type_traits<type>::raise(ctx, std::forward<Error>(error));
 }
 
 // }}}
@@ -511,13 +511,13 @@ auto get_stack(duk_context* ctx, int index, bool pop = true) -> stack_info;
  */
 template <>
 struct type_traits<std::exception> {
-    /**
-     * Raise a Error object.
-     *
-     * \param ctx the Duktape context
-     * \param ex the exception
-     */
-    static void raise(duk_context* ctx, const std::exception& ex);
+	/**
+	 * Raise a Error object.
+	 *
+	 * \param ctx the Duktape context
+	 * \param ex the exception
+	 */
+	static void raise(duk_context* ctx, const std::exception& ex);
 };
 
 // }}}
@@ -529,13 +529,13 @@ struct type_traits<std::exception> {
  */
 template <>
 struct type_traits<error> {
-    /**
-     * Raise a error.
-     *
-     * \param ctx the Duktape context
-     * \param ex the exception
-     */
-    static void raise(duk_context* ctx, const error& ex);
+	/**
+	 * Raise a error.
+	 *
+	 * \param ctx the Duktape context
+	 * \param ex the exception
+	 */
+	static void raise(duk_context* ctx, const error& ex);
 };
 
 // }}}
@@ -547,37 +547,37 @@ struct type_traits<error> {
  */
 template <>
 struct type_traits<bool> {
-    /**
-     * Push a boolean.
-     *
-     * Uses duk_push_boolean
-     *
-     * \param ctx the Duktape context
-     * \param value the value
-     */
-    static void push(duk_context* ctx, bool value);
+	/**
+	 * Push a boolean.
+	 *
+	 * Uses duk_push_boolean
+	 *
+	 * \param ctx the Duktape context
+	 * \param value the value
+	 */
+	static void push(duk_context* ctx, bool value);
 
-    /**
-     * Get a boolean.
-     *
-     * Uses duk_get_boolean.
-     *
-     * \param ctx the Duktape context
-     * \param index the value index
-     * \return the converted value
-     */
-    static auto get(duk_context* ctx, duk_idx_t index) -> bool;
+	/**
+	 * Get a boolean.
+	 *
+	 * Uses duk_get_boolean.
+	 *
+	 * \param ctx the Duktape context
+	 * \param index the value index
+	 * \return the converted value
+	 */
+	static auto get(duk_context* ctx, duk_idx_t index) -> bool;
 
-    /**
-     * Require a boolean.
-     *
-     * Uses duk_require_boolean.
-     *
-     * \param ctx the Duktape context
-     * \param index the value index
-     * \return the converted value
-     */
-    static auto require(duk_context* ctx, duk_idx_t index) -> bool;
+	/**
+	 * Require a boolean.
+	 *
+	 * Uses duk_require_boolean.
+	 *
+	 * \param ctx the Duktape context
+	 * \param index the value index
+	 * \return the converted value
+	 */
+	static auto require(duk_context* ctx, duk_idx_t index) -> bool;
 };
 
 // }}}
@@ -589,37 +589,37 @@ struct type_traits<bool> {
  */
 template <>
 struct type_traits<duk_double_t> {
-    /**
-     * Push a double.
-     *
-     * Uses duk_push_number
-     *
-     * \param ctx the Duktape context
-     * \param value the value
-     */
-    static void push(duk_context* ctx, duk_double_t value);
+	/**
+	 * Push a double.
+	 *
+	 * Uses duk_push_number
+	 *
+	 * \param ctx the Duktape context
+	 * \param value the value
+	 */
+	static void push(duk_context* ctx, duk_double_t value);
 
-    /**
-     * Get a double.
-     *
-     * Uses duk_get_number.
-     *
-     * \param ctx the Duktape context
-     * \param index the value index
-     * \return the converted value
-     */
-    static auto get(duk_context* ctx, duk_idx_t index) -> duk_double_t;
+	/**
+	 * Get a double.
+	 *
+	 * Uses duk_get_number.
+	 *
+	 * \param ctx the Duktape context
+	 * \param index the value index
+	 * \return the converted value
+	 */
+	static auto get(duk_context* ctx, duk_idx_t index) -> duk_double_t;
 
-    /**
-     * Require a double.
-     *
-     * Uses duk_require_double.
-     *
-     * \param ctx the Duktape context
-     * \param index the value index
-     * \return the converted value
-     */
-    static auto require(duk_context* ctx, duk_idx_t index) -> duk_double_t;
+	/**
+	 * Require a double.
+	 *
+	 * Uses duk_require_double.
+	 *
+	 * \param ctx the Duktape context
+	 * \param index the value index
+	 * \return the converted value
+	 */
+	static auto require(duk_context* ctx, duk_idx_t index) -> duk_double_t;
 };
 
 // }}}
@@ -631,37 +631,37 @@ struct type_traits<duk_double_t> {
  */
 template <>
 struct type_traits<duk_int_t> {
-    /**
-     * Push an int.
-     *
-     * Uses duk_push_int
-     *
-     * \param ctx the Duktape context
-     * \param value the value
-     */
-    static void push(duk_context* ctx, duk_int_t value);
+	/**
+	 * Push an int.
+	 *
+	 * Uses duk_push_int
+	 *
+	 * \param ctx the Duktape context
+	 * \param value the value
+	 */
+	static void push(duk_context* ctx, duk_int_t value);
 
-    /**
-     * Get an int.
-     *
-     * Uses duk_get_number.
-     *
-     * \param ctx the Duktape context
-     * \param index the value index
-     * \return the converted value
-     */
-    static auto get(duk_context* ctx, duk_idx_t index) -> duk_int_t;
+	/**
+	 * Get an int.
+	 *
+	 * Uses duk_get_number.
+	 *
+	 * \param ctx the Duktape context
+	 * \param index the value index
+	 * \return the converted value
+	 */
+	static auto get(duk_context* ctx, duk_idx_t index) -> duk_int_t;
 
-    /**
-     * Require an int.
-     *
-     * Uses duk_require_int.
-     *
-     * \param ctx the Duktape context
-     * \param index the value index
-     * \return the converted value
-     */
-    static auto require(duk_context* ctx, duk_idx_t index) -> duk_int_t;
+	/**
+	 * Require an int.
+	 *
+	 * Uses duk_require_int.
+	 *
+	 * \param ctx the Duktape context
+	 * \param index the value index
+	 * \return the converted value
+	 */
+	static auto require(duk_context* ctx, duk_idx_t index) -> duk_int_t;
 };
 
 // }}}
@@ -673,37 +673,37 @@ struct type_traits<duk_int_t> {
  */
 template <>
 struct type_traits<duk_uint_t> {
-    /**
-     * Push an unsigned int.
-     *
-     * Uses duk_push_uint
-     *
-     * \param ctx the Duktape context
-     * \param value the value
-     */
-    static void push(duk_context* ctx, duk_uint_t value);
+	/**
+	 * Push an unsigned int.
+	 *
+	 * Uses duk_push_uint
+	 *
+	 * \param ctx the Duktape context
+	 * \param value the value
+	 */
+	static void push(duk_context* ctx, duk_uint_t value);
 
-    /**
-     * Get an unsigned int.
-     *
-     * Uses duk_get_uint.
-     *
-     * \param ctx the Duktape context
-     * \param index the value index
-     * \return the converted value
-     */
-    static auto get(duk_context* ctx, duk_idx_t index) -> duk_uint_t;
+	/**
+	 * Get an unsigned int.
+	 *
+	 * Uses duk_get_uint.
+	 *
+	 * \param ctx the Duktape context
+	 * \param index the value index
+	 * \return the converted value
+	 */
+	static auto get(duk_context* ctx, duk_idx_t index) -> duk_uint_t;
 
-    /**
-     * Require an unsigned int.
-     *
-     * Uses duk_require_uint.
-     *
-     * \param ctx the Duktape context
-     * \param index the value index
-     * \return the converted value
-     */
-    static auto require(duk_context* ctx, duk_idx_t index) -> duk_uint_t;
+	/**
+	 * Require an unsigned int.
+	 *
+	 * Uses duk_require_uint.
+	 *
+	 * \param ctx the Duktape context
+	 * \param index the value index
+	 * \return the converted value
+	 */
+	static auto require(duk_context* ctx, duk_idx_t index) -> duk_uint_t;
 };
 
 // }}}
@@ -715,37 +715,37 @@ struct type_traits<duk_uint_t> {
  */
 template <>
 struct type_traits<const char*> {
-    /**
-     * Push a C string.
-     *
-     * Uses duk_push_string
-     *
-     * \param ctx the Duktape context
-     * \param value the value
-     */
-    static void push(duk_context* ctx, const char* value);
+	/**
+	 * Push a C string.
+	 *
+	 * Uses duk_push_string
+	 *
+	 * \param ctx the Duktape context
+	 * \param value the value
+	 */
+	static void push(duk_context* ctx, const char* value);
 
-    /**
-     * Get a C string.
-     *
-     * Uses duk_get_string.
-     *
-     * \param ctx the Duktape context
-     * \param index the value index
-     * \return the converted value
-     */
-    static auto get(duk_context* ctx, duk_idx_t index) -> const char*;
+	/**
+	 * Get a C string.
+	 *
+	 * Uses duk_get_string.
+	 *
+	 * \param ctx the Duktape context
+	 * \param index the value index
+	 * \return the converted value
+	 */
+	static auto get(duk_context* ctx, duk_idx_t index) -> const char*;
 
-    /**
-     * Require a C string.
-     *
-     * Uses duk_require_string.
-     *
-     * \param ctx the Duktape context
-     * \param index the value index
-     * \return the converted value
-     */
-    static auto require(duk_context* ctx, duk_idx_t index) -> const char*;
+	/**
+	 * Require a C string.
+	 *
+	 * Uses duk_require_string.
+	 *
+	 * \param ctx the Duktape context
+	 * \param index the value index
+	 * \return the converted value
+	 */
+	static auto require(duk_context* ctx, duk_idx_t index) -> const char*;
 };
 
 // }}}
@@ -757,37 +757,37 @@ struct type_traits<const char*> {
  */
 template <>
 struct type_traits<std::string> {
-    /**
-     * Push a C++ std::string.
-     *
-     * Uses duk_push_lstring
-     *
-     * \param ctx the Duktape context
-     * \param value the value
-     */
-    static void push(duk_context* ctx, const std::string& value);
+	/**
+	 * Push a C++ std::string.
+	 *
+	 * Uses duk_push_lstring
+	 *
+	 * \param ctx the Duktape context
+	 * \param value the value
+	 */
+	static void push(duk_context* ctx, const std::string& value);
 
-    /**
-     * Get a C++ std::string.
-     *
-     * Uses duk_get_lstring.
-     *
-     * \param ctx the Duktape context
-     * \param index the value index
-     * \return the converted value
-     */
-    static auto get(duk_context* ctx, duk_idx_t index) -> std::string;
+	/**
+	 * Get a C++ std::string.
+	 *
+	 * Uses duk_get_lstring.
+	 *
+	 * \param ctx the Duktape context
+	 * \param index the value index
+	 * \return the converted value
+	 */
+	static auto get(duk_context* ctx, duk_idx_t index) -> std::string;
 
-    /**
-     * Require a C++ std::string.
-     *
-     * Uses duk_require_lstring.
-     *
-     * \param ctx the Duktape context
-     * \param index the value index
-     * \return the converted value
-     */
-    static auto require(duk_context* ctx, duk_idx_t index) -> std::string;
+	/**
+	 * Require a C++ std::string.
+	 *
+	 * Uses duk_require_lstring.
+	 *
+	 * \param ctx the Duktape context
+	 * \param index the value index
+	 * \return the converted value
+	 */
+	static auto require(duk_context* ctx, duk_idx_t index) -> std::string;
 };
 
 // }}}
@@ -799,37 +799,37 @@ struct type_traits<std::string> {
  */
 template <>
 struct type_traits<std::string_view> : public std::true_type {
-    /**
-     * Push a C++ std::string_view.
-     *
-     * Uses duk_push_lstring
-     *
-     * \param ctx the Duktape context
-     * \param value the value
-     */
-    static void push(duk_context* ctx, std::string_view value);
+	/**
+	 * Push a C++ std::string_view.
+	 *
+	 * Uses duk_push_lstring
+	 *
+	 * \param ctx the Duktape context
+	 * \param value the value
+	 */
+	static void push(duk_context* ctx, std::string_view value);
 
-    /**
-     * Get a C++ std::string_view.
-     *
-     * Uses duk_get_lstring.
-     *
-     * \param ctx the Duktape context
-     * \param index the value index
-     * \return the converted value
-     */
-    static auto get(duk_context* ctx, duk_idx_t index) -> std::string_view;
+	/**
+	 * Get a C++ std::string_view.
+	 *
+	 * Uses duk_get_lstring.
+	 *
+	 * \param ctx the Duktape context
+	 * \param index the value index
+	 * \return the converted value
+	 */
+	static auto get(duk_context* ctx, duk_idx_t index) -> std::string_view;
 
-    /**
-     * Require a C++ std::string_view.
-     *
-     * Uses duk_require_lstring.
-     *
-     * \param ctx the Duktape context
-     * \param index the value index
-     * \return the converted value
-     */
-    static auto require(duk_context* ctx, duk_idx_t index) -> std::string_view;
+	/**
+	 * Require a C++ std::string_view.
+	 *
+	 * Uses duk_require_lstring.
+	 *
+	 * \param ctx the Duktape context
+	 * \param index the value index
+	 * \return the converted value
+	 */
+	static auto require(duk_context* ctx, duk_idx_t index) -> std::string_view;
 };
 
 // }}}
@@ -837,49 +837,53 @@ struct type_traits<std::string_view> : public std::true_type {
 // {{{ type_traits<std::vector<T>>
 
 /**
- * \brief Specialization for std::vector.
+ * \brief Specialization for std::vector<T>
  */
 template <typename T>
-struct type_traits<std::vector<T>> {
-    /**
-     * Push a vector.
-     *
-     * Uses duk_push_lstring
-     *
-     * \param ctx the Duktape context
-     * \param value the value
-     */
-    static void push(duk_context* ctx, const std::vector<T>& values)
-    {
-        using size_type = typename std::vector<T>::size_type;
+struct type_traits<std::vector<T>> : public std::true_type {
+	/**
+	 * Push a C++ std::vector<T>.
+	 *
+	 * \param ctx the Duktape context
+	 * \param value the value
+	 */
+	static void push(duk_context* ctx, const std::vector<T>& values)
+	{
+		duk_push_array(ctx);
 
-        duk_push_array(ctx);
+		for (std::size_t i = 0; i < values.size(); ++i) {
+			type_traits<T>::push(ctx, values[i]);
+			duk_put_prop_index(ctx, -2, i);
+		}
+	}
 
-        for (size_type i = 0; i < values.size(); ++i) {
-            type_traits<T>::push(ctx, values[i]);
-            duk_put_prop_index(ctx, -2, i);
-        }
-    }
+	/**
+	 * Get a C++ std::vector<T>.
+	 *
+	 * \param ctx the Duktape context
+	 * \param index the value index
+	 * \return the converted value
+	 */
+	static auto get(duk_context* ctx, duk_idx_t index) -> std::vector<T>
+	{
+		const auto length = duk_get_length(ctx, index);
 
-    static auto get(duk_context* ctx, duk_idx_t index) -> std::vector<T>
-    {
-        using size_type = typename std::vector<T>::size_type;
+		std::vector<T> result;
 
-        std::vector<T> result;
-        size_type length = duk_get_length(ctx, index);
+		result.reserve(length);
 
-        for (size_type i = 0; i < length; ++i) {
-            duk_get_prop_index(ctx, index, i);
-            result.push_back(type_traits<T>::get(ctx, -1));
-            duk_pop(ctx);
-        }
+		for (auto i = 0U; i < length; ++i) {
+			duk_get_prop_index(ctx, index, i);
+			result.push_back(type_traits<T>::get(ctx, -1));
+			duk_pop(ctx);
+		}
 
-        return result;
-    }
+		return result;
+	}
 };
 
 // }}}
 
 } // !irccd::js::duk
 
-#endif // !DUKTAPE_HPP
+#endif // !IRCCD_JS_DUK_HPP

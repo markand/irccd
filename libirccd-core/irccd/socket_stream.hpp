@@ -36,7 +36,7 @@
 
 #include "stream.hpp"
 
-namespace irccd::io {
+namespace irccd {
 
 /**
  * \brief Socket implementation interface.
@@ -47,157 +47,167 @@ namespace irccd::io {
 template <typename Socket>
 class socket_stream : public stream {
 private:
-    Socket socket_;
-    boost::asio::streambuf input_;
-    std::string output_;
+	Socket socket_;
+	boost::asio::streambuf input_;
+	std::string output_;
 
 #if !defined(NDEBUG)
-    bool is_receiving_{false};
-    bool is_sending_{false};
+	bool is_receiving_{false};
+	bool is_sending_{false};
 #endif
 
-    void handle_read(std::error_code, std::size_t, read_handler);
-    void handle_write(std::error_code, std::size_t, write_handler);
+	void handle_read(std::error_code, std::size_t, stream::read_handler);
+	void handle_write(std::error_code, std::size_t, stream::write_handler);
 
 public:
-    /**
-     * Create the socket stream.
-     *
-     * \param args the Socket constructor arguments
-     */
-    template <typename... Args>
-    socket_stream(Args&&... args)
-        : socket_(std::forward<Args>(args)...)
-    {
-    }
+	/**
+	 * Create the socket stream.
+	 *
+	 * \param args the Socket constructor arguments
+	 */
+	template <typename... Args>
+	socket_stream(Args&&... args);
 
-    /**
-     * Get the underlying socket.
-     *
-     * \return the socket
-     */
-    auto get_socket() const noexcept -> const Socket&
-    {
-        return socket_;
-    }
+	/**
+	 * Get the underlying socket.
+	 *
+	 * \return the socket
+	 */
+	auto get_socket() const noexcept -> const Socket&;
 
-    /**
-     * Overloaded function
-     *
-     * \return the socket
-     */
-    auto get_socket() noexcept -> Socket&
-    {
-        return socket_;
-    }
+	/**
+	 * Overloaded function
+	 *
+	 * \return the socket
+	 */
+	auto get_socket() noexcept -> Socket&;
 
-    /**
-     * \copydoc stream::read
-     */
-    void read(read_handler handler) override;
+	/**
+	 * \copydoc stream::read
+	 */
+	void read(read_handler handler) override;
 
-    /**
-     * \copydoc stream::write
-     */
-    void write(const nlohmann::json& json, write_handler handler) override;
+	/**
+	 * \copydoc stream::write
+	 */
+	void write(const nlohmann::json& json, write_handler handler) override;
 };
 
 template <typename Socket>
 void socket_stream<Socket>::handle_read(std::error_code code,
                                         std::size_t xfer,
-                                        read_handler handler)
+                                        stream::read_handler handler)
 {
 #if !defined(NDEBUG)
-    is_receiving_ = false;
+	is_receiving_ = false;
 #endif
 
-    if (xfer == 0U) {
-        handler(make_error_code(std::errc::not_connected), nullptr);
-        return;
-    }
-    if (code) {
-        handler(code, nullptr);
-        return;
-    }
+	if (xfer == 0U) {
+		handler(make_error_code(std::errc::not_connected), nullptr);
+		return;
+	}
+	if (code) {
+		handler(code, nullptr);
+		return;
+	}
 
-    // 1. Convert the buffer safely.
-    std::string buffer;
+	// 1. Convert the buffer safely.
+	std::string buffer;
 
-    try {
-        buffer = std::string(
-            boost::asio::buffers_begin(input_.data()),
-            boost::asio::buffers_begin(input_.data()) + xfer - /* \r\n\r\n */ 4
-        );
+	try {
+		buffer = std::string(
+			boost::asio::buffers_begin(input_.data()),
+			boost::asio::buffers_begin(input_.data()) + xfer - /* \r\n\r\n */ 4
+		);
 
-        input_.consume(xfer);
-    } catch (const std::bad_alloc&) {
-        handler(make_error_code(std::errc::not_enough_memory), nullptr);
-        return;
-    }
+		input_.consume(xfer);
+	} catch (const std::bad_alloc&) {
+		handler(make_error_code(std::errc::not_enough_memory), nullptr);
+		return;
+	}
 
-    // 2. Convert to JSON.
-    nlohmann::json doc;
+	// 2. Convert to JSON.
+	nlohmann::json doc;
 
-    try {
-        doc = nlohmann::json::parse(buffer);
-    } catch (const std::exception&) {
-        handler(make_error_code(std::errc::invalid_argument), nullptr);
-        return;
-    }
+	try {
+		doc = nlohmann::json::parse(buffer);
+	} catch (const std::exception&) {
+		handler(make_error_code(std::errc::invalid_argument), nullptr);
+		return;
+	}
 
-    if (!doc.is_object())
-        handler(make_error_code(std::errc::invalid_argument), nullptr);
-    else
-        handler(std::error_code(), std::move(doc));
+	if (!doc.is_object())
+		handler(make_error_code(std::errc::invalid_argument), nullptr);
+	else
+		handler(std::error_code(), std::move(doc));
 }
 
 template <typename Socket>
 void socket_stream<Socket>::handle_write(std::error_code code,
                                          std::size_t xfer,
-                                         write_handler handler)
+                                         stream::write_handler handler)
 {
 #if !defined(NDEBUG)
-    is_sending_ = false;
+	is_sending_ = false;
 #endif
 
-    if (xfer == 0)
-        handler(make_error_code(std::errc::not_connected));
-    else
-        handler(code);
+	if (xfer == 0)
+		handler(make_error_code(std::errc::not_connected));
+	else
+		handler(code);
 }
 
 template <typename Socket>
-void socket_stream<Socket>::read(read_handler handler)
+template <typename... Args>
+socket_stream<Socket>::socket_stream(Args&&... args)
+	: socket_(std::forward<Args>(args)...)
 {
-#if !defined(NDEBUG)
-    assert(!is_receiving_);
-    assert(handler);
-
-    is_receiving_ = true;
-#endif
-
-    boost::asio::async_read_until(get_socket(), input_, "\r\n\r\n", [this, handler] (auto code, auto xfer) {
-        handle_read(code, xfer, std::move(handler));
-    });
 }
 
 template <typename Socket>
-void socket_stream<Socket>::write(const nlohmann::json& json, write_handler handler)
+auto socket_stream<Socket>::get_socket() const noexcept -> const Socket&
+{
+	return socket_;
+}
+
+template <typename Socket>
+auto socket_stream<Socket>::get_socket() noexcept -> Socket&
+{
+	return socket_;
+}
+
+template <typename Socket>
+void socket_stream<Socket>::read(stream::read_handler handler)
 {
 #if !defined(NDEBUG)
-    assert(!is_sending_);
-    assert(handler);
+	assert(!is_receiving_);
+	assert(handler);
 
-    is_sending_ = true;
+	is_receiving_ = true;
 #endif
 
-    output_ = json.dump(0) + "\r\n\r\n";
+	boost::asio::async_read_until(get_socket(), input_, "\r\n\r\n", [this, handler] (auto code, auto xfer) {
+		handle_read(code, xfer, std::move(handler));
+	});
+}
 
-    const auto buffer = boost::asio::buffer(output_.data(), output_.size());
+template <typename Socket>
+void socket_stream<Socket>::write(const nlohmann::json& json, stream::write_handler handler)
+{
+#if !defined(NDEBUG)
+	assert(!is_sending_);
+	assert(handler);
 
-    boost::asio::async_write(get_socket(), buffer, [this, handler] (auto code, auto xfer) {
-        handle_write(code, xfer, std::move(handler));
-    });
+	is_sending_ = true;
+#endif
+
+	output_ = json.dump(0) + "\r\n\r\n";
+
+	const auto buffer = boost::asio::buffer(output_.data(), output_.size());
+
+	boost::asio::async_write(get_socket(), buffer, [this, handler] (auto code, auto xfer) {
+		handle_write(code, xfer, std::move(handler));
+	});
 }
 
 /**
@@ -214,6 +224,6 @@ using local_stream = socket_stream<boost::asio::local::stream_protocol::socket>;
 
 #endif
 
-} // !irccd::io
+} // !irccd
 
 #endif // !IRCCD_COMMON_SOCKET_STREAM_HPP

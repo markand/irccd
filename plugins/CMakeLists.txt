@@ -19,37 +19,37 @@
 project(plugins)
 
 set(
-    IRCCD_JAVASCRIPT_PLUGINS
-    ask
-    auth
-    hangman
-    history
-    joke
-    logger
-    plugin
-    roulette
-    tictactoe
+	IRCCD_JAVASCRIPT_PLUGINS
+	ask
+	auth
+	hangman
+	history
+	joke
+	logger
+	plugin
+	roulette
+	tictactoe
 )
 
 set(
-    IRCCD_NATIVE_PLUGINS
-    links
+	IRCCD_NATIVE_PLUGINS
+	links
 )
 
 set(
-    IRCCD_PLUGINS
-    ${IRCCD_JAVASCRIPT_PLUGINS}
-    ${IRCCD_NATIVE_PLUGINS}
-    CACHE INTERNAL ""
+	IRCCD_PLUGINS
+	${IRCCD_JAVASCRIPT_PLUGINS}
+	${IRCCD_NATIVE_PLUGINS}
+	CACHE INTERNAL ""
 )
 
 foreach (plugin ${IRCCD_JAVASCRIPT_PLUGINS})
-    irccd_define_plugin(
-        NAME ${plugin}
-        TYPE JS
-        SCRIPT ${plugins_SOURCE_DIR}/${plugin}/${plugin}.js
-        DOCS ${plugins_SOURCE_DIR}/${plugin}/${plugin}.md
-    )
+	irccd_define_plugin(
+		NAME ${plugin}
+		TYPE JS
+		SCRIPT ${plugins_SOURCE_DIR}/${plugin}/${plugin}.js
+		DOCS ${plugins_SOURCE_DIR}/${plugin}/${plugin}.md
+	)
 endforeach ()
 
 add_subdirectory(links)

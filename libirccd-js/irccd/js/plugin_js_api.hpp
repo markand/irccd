@@ -35,15 +35,15 @@ namespace irccd::js {
  */
 class plugin_js_api : public js_api {
 public:
-    /**
-     * \copydoc js_api::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc js_api::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc Module::load
-     */
-    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
+	/**
+	 * \copydoc Module::load
+	 */
+	void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
 namespace duk {
@@ -53,13 +53,13 @@ namespace duk {
  */
 template <>
 struct type_traits<js_plugin> {
-    /**
-     * Access the plugin stored in this context.
-     *
-     * \param ctx the context
-     * \return the plugin
-     */
-    static auto self(duk_context* ctx) -> js_plugin&;
+	/**
+	 * Access the plugin stored in this context.
+	 *
+	 * \param ctx the context
+	 * \return the plugin
+	 */
+	static auto self(duk_context* ctx) -> js_plugin&;
 };
 
 /**
@@ -67,13 +67,13 @@ struct type_traits<js_plugin> {
  */
 template <>
 struct type_traits<plugin_error> {
-    /**
-     * Raise a plugin_error.
-     *
-     * \param ctx the context
-     * \param error the error
-     */
-    static void raise(duk_context* ctx, const plugin_error& error);
+	/**
+	 * Raise a plugin_error.
+	 *
+	 * \param ctx the context
+	 * \param error the error
+	 */
+	static void raise(duk_context* ctx, const plugin_error& error);
 };
 
 } // !duk

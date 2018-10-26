@@ -29,39 +29,39 @@
 namespace irccd {
 
 plugin::plugin(std::string id) noexcept
-    : id_(std::move(id))
+	: id_(std::move(id))
 {
-    assert(string_util::is_identifier(id_));
+	assert(string_util::is_identifier(id_));
 }
 
 auto plugin::get_id() const noexcept -> const std::string&
 {
-    return id_;
+	return id_;
 }
 
 auto plugin::get_author() const noexcept -> std::string_view
 {
-    return "unknown";
+	return "unknown";
 }
 
 auto plugin::get_license() const noexcept -> std::string_view
 {
-    return "unknown";
+	return "unknown";
 }
 
 auto plugin::get_summary() const noexcept -> std::string_view
 {
-    return "unknown";
+	return "unknown";
 }
 
 auto plugin::get_version() const noexcept -> std::string_view
 {
-    return "unknown";
+	return "unknown";
 }
 
 auto plugin::get_options() const -> map
 {
-    return {};
+	return {};
 }
 
 void plugin::set_options(const map&)
@@ -70,7 +70,7 @@ void plugin::set_options(const map&)
 
 auto plugin::get_formats() const -> map
 {
-    return {};
+	return {};
 }
 
 void plugin::set_formats(const map&)
@@ -79,7 +79,7 @@ void plugin::set_formats(const map&)
 
 auto plugin::get_paths() const -> map
 {
-    return {};
+	return {};
 }
 
 void plugin::set_paths(const map&)
@@ -159,105 +159,105 @@ void plugin::handle_whois(irccd&, const whois_event&)
 }
 
 plugin_loader::plugin_loader(std::vector<std::string> directories,
-              std::vector<std::string> extensions) noexcept
-    : directories_(std::move(directories))
-    , extensions_(std::move(extensions))
+			  std::vector<std::string> extensions) noexcept
+	: directories_(std::move(directories))
+	, extensions_(std::move(extensions))
 {
-    assert(!extensions_.empty());
+	assert(!extensions_.empty());
 }
 
 auto plugin_loader::find(std::string_view name) -> std::shared_ptr<plugin>
 {
-    std::vector<std::string> filenames;
+	std::vector<std::string> filenames;
 
-    if (directories_.empty())
-        filenames = sys::plugin_filenames(std::string(name), extensions_);
-    else {
-        for (const auto& dir : directories_)
-            for (const auto& ext : extensions_)
-                filenames.push_back(dir + std::string("/") + std::string(name) + ext);
-    }
+	if (directories_.empty())
+		filenames = sys::plugin_filenames(std::string(name), extensions_);
+	else {
+		for (const auto& dir : directories_)
+			for (const auto& ext : extensions_)
+				filenames.push_back(dir + std::string("/") + std::string(name) + ext);
+	}
 
-    for (const auto& candidate : filenames) {
-        boost::system::error_code ec;
+	for (const auto& candidate : filenames) {
+		boost::system::error_code ec;
 
-        if (!boost::filesystem::exists(candidate, ec) || ec)
-            continue;
+		if (!boost::filesystem::exists(candidate, ec) || ec)
+			continue;
 
-        auto plugin = open(name, candidate);
+		auto plugin = open(name, candidate);
 
-        if (plugin)
-            return plugin;
-    }
+		if (plugin)
+			return plugin;
+	}
 
-    return nullptr;
+	return nullptr;
 }
 
 plugin_error::plugin_error(error errc, std::string_view name, std::string_view message)
-    : system_error(make_error_code(errc))
-    , name_(std::move(name))
-    , message_(std::move(message))
+	: system_error(make_error_code(errc))
+	, name_(std::move(name))
+	, message_(std::move(message))
 {
-    std::ostringstream oss;
+	std::ostringstream oss;
 
-    oss << code().message();
+	oss << code().message();
 
-    std::istringstream iss(message_);
-    std::string line;
+	std::istringstream iss(message_);
+	std::string line;
 
-    while (getline(iss, line))
-        oss << "\n" << line;
+	while (getline(iss, line))
+		oss << "\n" << line;
 
-    what_ = oss.str();
+	what_ = oss.str();
 }
 
 auto plugin_error::get_name() const noexcept -> const std::string&
 {
-    return name_;
+	return name_;
 }
 
 auto plugin_error::get_message() const noexcept -> const std::string&
 {
-    return message_;
+	return message_;
 }
 
 auto plugin_error::what() const noexcept -> const char*
 {
-    return what_.c_str();
+	return what_.c_str();
 }
 
 auto plugin_category() -> const std::error_category&
 {
-    static const class category : public std::error_category {
-    public:
-        auto name() const noexcept -> const char* override
-        {
-            return "plugin";
-        }
+	static const class category : public std::error_category {
+	public:
+		auto name() const noexcept -> const char* override
+		{
+			return "plugin";
+		}
 
-        auto message(int e) const -> std::string override
-        {
-            switch (static_cast<plugin_error::error>(e)) {
-            case plugin_error::not_found:
-                return "plugin not found";
-            case plugin_error::invalid_identifier:
-                return "invalid plugin identifier";
-            case plugin_error::exec_error:
-                return "plugin exec error";
-            case plugin_error::already_exists:
-                return "plugin already exists";
-            default:
-                return "no error";
-            }
-        }
-    } category;
+		auto message(int e) const -> std::string override
+		{
+			switch (static_cast<plugin_error::error>(e)) {
+			case plugin_error::not_found:
+				return "plugin not found";
+			case plugin_error::invalid_identifier:
+				return "invalid plugin identifier";
+			case plugin_error::exec_error:
+				return "plugin exec error";
+			case plugin_error::already_exists:
+				return "plugin already exists";
+			default:
+				return "no error";
+			}
+		}
+	} category;
 
-    return category;
+	return category;
 }
 
 auto make_error_code(plugin_error::error e) -> std::error_code
 {
-    return {static_cast<int>(e), plugin_category()};
+	return {static_cast<int>(e), plugin_category()};
 }
 
 } // !irccd

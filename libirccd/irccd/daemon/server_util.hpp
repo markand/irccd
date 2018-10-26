@@ -57,33 +57,33 @@ namespace server_util {
  * exists.
  */
 struct message_type {
-    /**
-     * \brief Describe which type of message has been received
-     */
-    enum class type {
-        command,                        //!< special command
-        message                         //!< standard message
-    } type;
+	/**
+	 * \brief Describe which type of message has been received
+	 */
+	enum class type {
+		command,        //!< special command
+		message         //!< standard message
+	} type;
 
-    /**
-     * Message content.
-     */
-    std::string message;
+	/**
+	 * Message content.
+	 */
+	std::string message;
 
-    /**
-     * Parse IRC message and determine if it's a command or a simple message.
-     *
-     * If it's a command, the plugin invocation command is removed from the
-     * original message, otherwise it is copied verbatime.
-     *
-     * \param message the message line
-     * \param cchar the command char (e.g '!')
-     * \param plugin the plugin name
-     * \return the pair
-     */
-    static auto parse(std::string_view message,
-                      std::string_view cchar,
-                      std::string_view plugin) -> message_type;
+	/**
+	 * Parse IRC message and determine if it's a command or a simple message.
+	 *
+	 * If it's a command, the plugin invocation command is removed from the
+	 * original message, otherwise it is copied verbatime.
+	 *
+	 * \param message the message line
+	 * \param cchar the command char (e.g '!')
+	 * \param plugin the plugin name
+	 * \return the pair
+	 */
+	static auto parse(std::string_view message,
+	                  std::string_view cchar,
+	                  std::string_view plugin) -> message_type;
 };
 
 /**

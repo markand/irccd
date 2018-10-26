@@ -30,28 +30,28 @@ namespace {
 
 class directory_js_fixture : public js_fixture {
 public:
-    directory_js_fixture()
-    {
-        duk::push(plugin_->get_context(), CMAKE_SOURCE_DIR);
-        duk_put_global_string(plugin_->get_context(), "CMAKE_SOURCE_DIR");
-    }
+	directory_js_fixture()
+	{
+		duk::push(plugin_->get_context(), CMAKE_SOURCE_DIR);
+		duk_put_global_string(plugin_->get_context(), "CMAKE_SOURCE_DIR");
+	}
 };
 
 BOOST_FIXTURE_TEST_SUITE(directory_js_api_suite, directory_js_fixture)
 
 BOOST_AUTO_TEST_CASE(constructor)
 {
-    const std::string script(
-        "d = new Irccd.Directory(CMAKE_SOURCE_DIR + \"/tests/root\");"
-        "p = d.path;"
-        "l = d.entries.length;"
-    );
+	const std::string script(
+		"d = new Irccd.Directory(CMAKE_SOURCE_DIR + \"/tests/root\");"
+		"p = d.path;"
+		"l = d.entries.length;"
+	);
 
-    if (duk_peval_string(plugin_->get_context(), script.c_str()) != 0)
-        throw duk::get_stack(plugin_->get_context(), -1);
+	if (duk_peval_string(plugin_->get_context(), script.c_str()) != 0)
+		throw duk::get_stack(plugin_->get_context(), -1);
 
-    duk_get_global_string(plugin_->get_context(), "l");
-    BOOST_TEST(duk_get_int(plugin_->get_context(), -1) == 3);
+	duk_get_global_string(plugin_->get_context(), "l");
+	BOOST_TEST(duk_get_int(plugin_->get_context(), -1) == 3);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -30,15 +30,15 @@ project(win32)
 #
 
 if (MINGW)
-    if (IRCCD_64BITS)
-        set(LIBGCC_DLL libgcc_s_seh-1.dll)
-    else ()
-        set(LIBGCC_DLL libgcc_s_sjlj-1.dll)
-    endif ()
+	if (IRCCD_64BITS)
+		set(LIBGCC_DLL libgcc_s_seh-1.dll)
+	else ()
+		set(LIBGCC_DLL libgcc_s_sjlj-1.dll)
+	endif ()
 
-    set(LIBWINPTHREAD_DLL libwinpthread-1.dll)
-    set(LIBSTDCPP_DLL libstdc++-6.dll)
-    list(APPEND DLLS LIBGCC_DLL LIBWINPTHREAD_DLL LIBSTDCPP_DLL)
+	set(LIBWINPTHREAD_DLL libwinpthread-1.dll)
+	set(LIBSTDCPP_DLL libstdc++-6.dll)
+	list(APPEND DLLS LIBGCC_DLL LIBWINPTHREAD_DLL LIBSTDCPP_DLL)
 endif ()
 
 #
@@ -47,9 +47,9 @@ endif ()
 #
 
 if (IRCCD_HAVE_SSL)
-    set(SSL_EAY_DLL libeay32.dll)
-    set(SSL_LIB_DLL ssleay32.dll)
-    list(APPEND DLLS SSL_EAY_DLL SSL_LIB_DLL)
+	set(SSL_EAY_DLL libeay32.dll)
+	set(SSL_LIB_DLL ssleay32.dll)
+	list(APPEND DLLS SSL_EAY_DLL SSL_LIB_DLL)
 endif ()
 
 #
@@ -65,28 +65,28 @@ endif ()
 #
 
 foreach (name ${DLLS})
-    find_program(
-        IRCCD_WITH_${name}
-        NAMES ${${name}}
-        DOC "Path to DLL"
-    )
+	find_program(
+		IRCCD_WITH_${name}
+		NAMES ${${name}}
+		DOC "Path to DLL"
+	)
 
-    if (EXISTS ${IRCCD_WITH_${name}})
-        file(
-            COPY ${IRCCD_WITH_${name}}
-            DESTINATION ${IRCCD_FAKEROOTDIR}/${IRCCD_WITH_BINDIR}
-        )
-        install(
-            PROGRAMS ${IRCCD_WITH_${name}}
-            COMPONENT libirccd
-            DESTINATION bin
-        )
-        list(APPEND IRCCD_DLLS IRCCD_WITH_${name})
-    else ()
-        set(IRCCD_PACKAGE Off PARENT_SCOPE)
-        set(IRCCD_PACKAGE_MSG "No (some .dll were not found)" PARENT_SCOPE)
-        list(APPEND IRCCD_DLLS_NOT_FOUND IRCCD_WITH_${name})
-    endif ()
+	if (EXISTS ${IRCCD_WITH_${name}})
+		file(
+			COPY ${IRCCD_WITH_${name}}
+			DESTINATION ${IRCCD_FAKEROOTDIR}/${IRCCD_WITH_BINDIR}
+		)
+		install(
+			PROGRAMS ${IRCCD_WITH_${name}}
+			COMPONENT libirccd
+			DESTINATION bin
+		)
+		list(APPEND IRCCD_DLLS IRCCD_WITH_${name})
+	else ()
+		set(IRCCD_PACKAGE Off PARENT_SCOPE)
+		set(IRCCD_PACKAGE_MSG "No (some .dll were not found)" PARENT_SCOPE)
+		list(APPEND IRCCD_DLLS_NOT_FOUND IRCCD_WITH_${name})
+	endif ()
 endforeach ()
 
 set(IRCCD_DLLS ${IRCCD_DLLS} PARENT_SCOPE)

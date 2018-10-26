@@ -41,10 +41,10 @@ const std::string_view prototype("\xff""\xff""Irccd.File.prototype");
 
 auto clear_crlf(std::string input) noexcept -> std::string
 {
-    if (input.length() > 0 && input.back() == '\r')
-        input.pop_back();
+	if (input.length() > 0 && input.back() == '\r')
+		input.pop_back();
 
-    return input;
+	return input;
 }
 
 // }}}
@@ -53,7 +53,7 @@ auto clear_crlf(std::string input) noexcept -> std::string
 
 auto from_errno() noexcept -> std::system_error
 {
-    return std::system_error(make_error_code(static_cast<std::errc>(errno)));
+	return std::system_error(make_error_code(static_cast<std::errc>(errno)));
 }
 
 // }}}
@@ -62,17 +62,17 @@ auto from_errno() noexcept -> std::system_error
 
 auto self(duk_context* ctx) -> std::shared_ptr<file>
 {
-    duk::stack_guard sa(ctx);
+	duk::stack_guard sa(ctx);
 
-    duk_push_this(ctx);
-    duk_get_prop_string(ctx, -1, signature.data());
-    auto ptr = static_cast<std::shared_ptr<file>*>(duk_to_pointer(ctx, -1));
-    duk_pop_2(ctx);
+	duk_push_this(ctx);
+	duk_get_prop_string(ctx, -1, signature.data());
+	auto ptr = static_cast<std::shared_ptr<file>*>(duk_to_pointer(ctx, -1));
+	duk_pop_2(ctx);
 
-    if (!ptr)
-        duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a File object");
+	if (!ptr)
+		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a File object");
 
-    return *ptr;
+	return *ptr;
 }
 
 // }}}
@@ -82,17 +82,17 @@ auto self(duk_context* ctx) -> std::shared_ptr<file>
 template <typename Handler>
 auto wrap(duk_context* ctx, Handler handler) -> duk_ret_t
 {
-    try {
-        return handler();
-    } catch (const boost::system::system_error& ex) {
-        duk::raise(ctx, ex);
-    } catch (const std::system_error& ex) {
-        duk::raise(ctx, ex);
-    } catch (const std::exception& ex) {
-        duk::raise(ctx, ex);
-    }
+	try {
+		return handler();
+	} catch (const boost::system::system_error& ex) {
+		duk::raise(ctx, ex);
+	} catch (const std::system_error& ex) {
+		duk::raise(ctx, ex);
+	} catch (const std::exception& ex) {
+		duk::raise(ctx, ex);
+	}
 
-    return 0;
+	return 0;
 }
 
 // }}}
@@ -110,9 +110,9 @@ auto wrap(duk_context* ctx, Handler handler) -> duk_ret_t
  */
 auto File_prototype_basename(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        return duk::push(ctx, fs_util::base_name(self(ctx)->get_path()));
-    });
+	return wrap(ctx, [&] {
+		return duk::push(ctx, fs_util::base_name(self(ctx)->get_path()));
+	});
 }
 
 // }}}
@@ -127,11 +127,11 @@ auto File_prototype_basename(duk_context* ctx) -> duk_ret_t
  */
 auto File_prototype_close(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        self(ctx)->close();
+	return wrap(ctx, [&] {
+		self(ctx)->close();
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -149,9 +149,9 @@ auto File_prototype_close(duk_context* ctx) -> duk_ret_t
  */
 auto File_prototype_dirname(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        return duk::push(ctx, fs_util::dir_name(self(ctx)->get_path()));
-    });
+	return wrap(ctx, [&] {
+		return duk::push(ctx, fs_util::dir_name(self(ctx)->get_path()));
+	});
 }
 
 // }}}
@@ -171,39 +171,39 @@ auto File_prototype_dirname(duk_context* ctx) -> duk_ret_t
  */
 auto File_prototype_lines(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        duk_push_array(ctx);
+	return wrap(ctx, [&] {
+		duk_push_array(ctx);
 
-        std::FILE* fp = self(ctx)->get_handle();
-        std::string buffer;
-        std::array<char, 128> data;
-        std::int32_t i = 0;
+		std::FILE* fp = self(ctx)->get_handle();
+		std::string buffer;
+		std::array<char, 128> data;
+		std::int32_t i = 0;
 
-        while (std::fgets(&data[0], data.size(), fp) != nullptr) {
-            buffer += data.data();
+		while (std::fgets(&data[0], data.size(), fp) != nullptr) {
+			buffer += data.data();
 
-            const auto pos = buffer.find('\n');
+			const auto pos = buffer.find('\n');
 
-            if (pos != std::string::npos) {
-                duk::push(ctx, clear_crlf(buffer.substr(0, pos)));
-                duk_put_prop_index(ctx, -2, i++);
+			if (pos != std::string::npos) {
+				duk::push(ctx, clear_crlf(buffer.substr(0, pos)));
+				duk_put_prop_index(ctx, -2, i++);
 
-                buffer.erase(0, pos + 1);
-            }
-        }
+				buffer.erase(0, pos + 1);
+			}
+		}
 
-        // Maybe an error in the stream.
-        if (std::ferror(fp))
-            throw from_errno();
+		// Maybe an error in the stream.
+		if (std::ferror(fp))
+			throw from_errno();
 
-        // Missing '\n' in end of file.
-        if (!buffer.empty()) {
-            duk::push(ctx, clear_crlf(buffer));
-            duk_put_prop_index(ctx, -2, i++);
-        }
+		// Missing '\n' in end of file.
+		if (!buffer.empty()) {
+			duk::push(ctx, clear_crlf(buffer));
+			duk_put_prop_index(ctx, -2, i++);
+		}
 
-        return 1;
-    });
+		return 1;
+	});
 }
 
 // }}}
@@ -225,39 +225,39 @@ auto File_prototype_lines(duk_context* ctx) -> duk_ret_t
  */
 auto File_prototype_read(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        const auto fp = self(ctx)->get_handle();
-        const auto amount = duk_is_number(ctx, 0) ? duk_get_int(ctx, 0) : -1;
+	return wrap(ctx, [&] {
+		const auto fp = self(ctx)->get_handle();
+		const auto amount = duk_is_number(ctx, 0) ? duk_get_int(ctx, 0) : -1;
 
-        if (amount == 0 || !fp)
-            return 0;
+		if (amount == 0 || !fp)
+			return 0;
 
-        std::string data;
-        std::size_t total = 0;
+		std::string data;
+		std::size_t total = 0;
 
-        if (amount < 0) {
-            std::array<char, 128> buffer;
-            std::size_t nread;
+		if (amount < 0) {
+			std::array<char, 128> buffer;
+			std::size_t nread;
 
-            while ((nread = std::fread(&buffer[0], sizeof (buffer[0]), buffer.size(), fp)) > 0) {
-                if (std::ferror(fp))
-                    throw from_errno();
+			while ((nread = std::fread(&buffer[0], sizeof (buffer[0]), buffer.size(), fp)) > 0) {
+				if (std::ferror(fp))
+					throw from_errno();
 
-                std::copy(buffer.begin(), buffer.begin() + nread, std::back_inserter(data));
-                total += nread;
-            }
-        } else {
-            data.resize(static_cast<std::size_t>(amount));
-            total = std::fread(&data[0], sizeof (data[0]), static_cast<std::size_t>(amount), fp);
+				std::copy(buffer.begin(), buffer.begin() + nread, std::back_inserter(data));
+				total += nread;
+			}
+		} else {
+			data.resize(static_cast<std::size_t>(amount));
+			total = std::fread(&data[0], sizeof (data[0]), static_cast<std::size_t>(amount), fp);
 
-            if (std::ferror(fp))
-                throw from_errno();
+			if (std::ferror(fp))
+				throw from_errno();
 
-            data.resize(total);
-        }
+			data.resize(total);
+		}
 
-        return duk::push(ctx, data);
-    });
+		return duk::push(ctx, data);
+	});
 }
 
 // }}}
@@ -277,21 +277,21 @@ auto File_prototype_read(duk_context* ctx) -> duk_ret_t
  */
 auto File_prototype_readline(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        auto fp = self(ctx)->get_handle();
+	return wrap(ctx, [&] {
+		auto fp = self(ctx)->get_handle();
 
-        if (fp == nullptr || std::feof(fp))
-            return 0;
+		if (fp == nullptr || std::feof(fp))
+			return 0;
 
-        std::string result;
+		std::string result;
 
-        for (int ch; (ch = std::fgetc(fp)) != EOF && ch != '\n'; )
-            result += (char)ch;
-        if (std::ferror(fp))
-            throw from_errno();
+		for (int ch; (ch = std::fgetc(fp)) != EOF && ch != '\n'; )
+			result += (char)ch;
+		if (std::ferror(fp))
+			throw from_errno();
 
-        return duk::push(ctx, clear_crlf(result));
-    });
+		return duk::push(ctx, clear_crlf(result));
+	});
 }
 
 // }}}
@@ -309,11 +309,11 @@ auto File_prototype_readline(duk_context* ctx) -> duk_ret_t
  */
 auto File_prototype_remove(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        boost::filesystem::remove(self(ctx)->get_path());
+	return wrap(ctx, [&] {
+		boost::filesystem::remove(self(ctx)->get_path());
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -334,16 +334,16 @@ auto File_prototype_remove(duk_context* ctx) -> duk_ret_t
  */
 auto File_prototype_seek(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        auto fp = self(ctx)->get_handle();
-        auto type = duk_require_int(ctx, 0);
-        auto amount = duk_require_int(ctx, 1);
+	return wrap(ctx, [&] {
+		auto fp = self(ctx)->get_handle();
+		auto type = duk_require_int(ctx, 0);
+		auto amount = duk_require_int(ctx, 1);
 
-        if (fp != nullptr && std::fseek(fp, amount, type) != 0)
-            throw from_errno();
+		if (fp != nullptr && std::fseek(fp, amount, type) != 0)
+			throw from_errno();
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -365,17 +365,17 @@ auto File_prototype_seek(duk_context* ctx) -> duk_ret_t
  */
 auto File_prototype_stat(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        auto file = self(ctx);
-        struct stat st;
+	return wrap(ctx, [&] {
+		auto file = self(ctx);
+		struct stat st;
 
-        if (file->get_handle() == nullptr && ::stat(file->get_path().c_str(), &st) < 0)
-            throw from_errno();
+		if (file->get_handle() == nullptr && ::stat(file->get_path().c_str(), &st) < 0)
+			throw from_errno();
 
-        duk::push(ctx, st);
+		duk::push(ctx, st);
 
-        return 1;
-    });
+		return 1;
+	});
 }
 
 #endif // !IRCCD_HAVE_STAT
@@ -397,20 +397,20 @@ auto File_prototype_stat(duk_context* ctx) -> duk_ret_t
  */
 auto File_prototype_tell(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        auto fp = self(ctx)->get_handle();
-        long pos;
+	return wrap(ctx, [&] {
+		auto fp = self(ctx)->get_handle();
+		long pos;
 
-        if (fp == nullptr)
-            return 0;
+		if (fp == nullptr)
+			return 0;
 
-        if ((pos = std::ftell(fp)) == -1L)
-            throw from_errno();
+		if ((pos = std::ftell(fp)) == -1L)
+			throw from_errno();
 
-        duk_push_int(ctx, pos);
+		duk_push_int(ctx, pos);
 
-        return 1;
-    });
+		return 1;
+	});
 }
 
 // }}}
@@ -432,22 +432,22 @@ auto File_prototype_tell(duk_context* ctx) -> duk_ret_t
  */
 auto File_prototype_write(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        auto fp = self(ctx)->get_handle();
-        auto data = duk::require<std::string>(ctx, 0);
+	return wrap(ctx, [&] {
+		auto fp = self(ctx)->get_handle();
+		auto data = duk::require<std::string>(ctx, 0);
 
-        if (fp == nullptr)
-            return 0;
+		if (fp == nullptr)
+			return 0;
 
-        const auto nwritten = std::fwrite(data.c_str(), 1, data.length(), fp);
+		const auto nwritten = std::fwrite(data.c_str(), 1, data.length(), fp);
 
-        if (std::ferror(fp))
-            throw from_errno();
+		if (std::ferror(fp))
+			throw from_errno();
 
-        duk_push_uint(ctx, nwritten);
+		duk_push_uint(ctx, nwritten);
 
-        return 1;
-    });
+		return 1;
+	});
 }
 
 // }}}
@@ -468,20 +468,20 @@ auto File_prototype_write(duk_context* ctx) -> duk_ret_t
  */
 auto File_constructor(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        if (!duk_is_constructor_call(ctx))
-            return 0;
+	return wrap(ctx, [&] {
+		if (!duk_is_constructor_call(ctx))
+			return 0;
 
-        const auto path = duk::require<std::string>(ctx, 0);
-        const auto mode = duk::require<std::string>(ctx, 1);
+		const auto path = duk::require<std::string>(ctx, 0);
+		const auto mode = duk::require<std::string>(ctx, 1);
 
-        duk_push_this(ctx);
-        duk_push_pointer(ctx, new std::shared_ptr<file>(new file(path, mode)));
-        duk_put_prop_string(ctx, -2, signature.data());
-        duk_pop(ctx);
+		duk_push_this(ctx);
+		duk_push_pointer(ctx, new std::shared_ptr<file>(new file(path, mode)));
+		duk_put_prop_string(ctx, -2, signature.data());
+		duk_pop(ctx);
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -496,12 +496,12 @@ auto File_constructor(duk_context* ctx) -> duk_ret_t
  */
 auto File_destructor(duk_context* ctx) -> duk_ret_t
 {
-    duk_get_prop_string(ctx, 0, signature.data());
-    delete static_cast<std::shared_ptr<file>*>(duk_to_pointer(ctx, -1));
-    duk_pop(ctx);
-    duk_del_prop_string(ctx, 0, signature.data());
+	duk_get_prop_string(ctx, 0, signature.data());
+	delete static_cast<std::shared_ptr<file>*>(duk_to_pointer(ctx, -1));
+	duk_pop(ctx);
+	duk_del_prop_string(ctx, 0, signature.data());
 
-    return 0;
+	return 0;
 }
 
 // }}}
@@ -523,9 +523,9 @@ auto File_destructor(duk_context* ctx) -> duk_ret_t
  */
 auto File_basename(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        return duk::push(ctx, fs_util::base_name(duk_require_string(ctx, 0)));
-    });
+	return wrap(ctx, [&] {
+		return duk::push(ctx, fs_util::base_name(duk_require_string(ctx, 0)));
+	});
 }
 
 // }}}
@@ -545,9 +545,9 @@ auto File_basename(duk_context* ctx) -> duk_ret_t
  */
 auto File_dirname(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        return duk::push(ctx, fs_util::dir_name(duk_require_string(ctx, 0)));
-    });
+	return wrap(ctx, [&] {
+		return duk::push(ctx, fs_util::dir_name(duk_require_string(ctx, 0)));
+	});
 }
 
 // }}}
@@ -569,9 +569,9 @@ auto File_dirname(duk_context* ctx) -> duk_ret_t
  */
 auto File_exists(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        return duk::push(ctx, boost::filesystem::exists(duk_require_string(ctx, 0)));
-    });
+	return wrap(ctx, [&] {
+		return duk::push(ctx, boost::filesystem::exists(duk_require_string(ctx, 0)));
+	});
 }
 
 // }}}
@@ -591,11 +591,11 @@ auto File_exists(duk_context* ctx) -> duk_ret_t
  */
 auto File_remove(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        boost::filesystem::remove(duk::require<std::string>(ctx, 0));
+	return wrap(ctx, [&] {
+		boost::filesystem::remove(duk::require<std::string>(ctx, 0));
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -619,14 +619,14 @@ auto File_remove(duk_context* ctx) -> duk_ret_t
  */
 auto File_stat(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        struct stat st;
+	return wrap(ctx, [&] {
+		struct stat st;
 
-        if (::stat(duk_require_string(ctx, 0), &st) < 0)
-            throw from_errno();
+		if (::stat(duk_require_string(ctx, 0), &st) < 0)
+			throw from_errno();
 
-        return duk::push(ctx, st);
-    });
+		return duk::push(ctx, st);
+	});
 }
 
 #endif // !IRCCD_HAVE_STAT
@@ -636,38 +636,38 @@ auto File_stat(duk_context* ctx) -> duk_ret_t
 // {{{ definitions
 
 const duk_function_list_entry methods[] = {
-    { "basename",   File_prototype_basename,    0 },
-    { "close",      File_prototype_close,       0 },
-    { "dirname",    File_prototype_dirname,     0 },
-    { "lines",      File_prototype_lines,       0 },
-    { "read",       File_prototype_read,        1 },
-    { "readline",   File_prototype_readline,    0 },
-    { "remove",     File_prototype_remove,      0 },
-    { "seek",       File_prototype_seek,        2 },
+	{ "basename",   File_prototype_basename,        0 },
+	{ "close",      File_prototype_close,           0 },
+	{ "dirname",    File_prototype_dirname,         0 },
+	{ "lines",      File_prototype_lines,           0 },
+	{ "read",       File_prototype_read,            1 },
+	{ "readline",   File_prototype_readline,        0 },
+	{ "remove",     File_prototype_remove,          0 },
+	{ "seek",       File_prototype_seek,            2 },
 #if defined(IRCCD_HAVE_STAT)
-    { "stat",       File_prototype_stat,        0 },
+	{ "stat",       File_prototype_stat,            0 },
 #endif
-    { "tell",       File_prototype_tell,        0 },
-    { "write",      File_prototype_write,       1 },
-    { nullptr,      nullptr,                    0 }
+	{ "tell",       File_prototype_tell,            0 },
+	{ "write",      File_prototype_write,           1 },
+	{ nullptr,      nullptr,                        0 }
 };
 
 const duk_function_list_entry functions[] = {
-    { "basename",   File_basename,              1 },
-    { "dirname",    File_dirname,               1 },
-    { "exists",     File_exists,                1 },
-    { "remove",     File_remove,                1 },
+	{ "basename",   File_basename,                  1 },
+	{ "dirname",    File_dirname,                   1 },
+	{ "exists",     File_exists,                    1 },
+	{ "remove",     File_remove,                    1 },
 #if defined(IRCCD_HAVE_STAT)
-    { "stat",       File_stat,                  1 },
+	{ "stat",       File_stat,                      1 },
 #endif
-    { nullptr,      nullptr,                    0 }
+	{ nullptr,      nullptr,                        0 }
 };
 
 const duk_number_list_entry constants[] = {
-    { "SeekCur",    SEEK_CUR },
-    { "SeekEnd",    SEEK_END },
-    { "SeekSet",    SEEK_SET },
-    { nullptr,      0        }
+	{ "SeekCur",    SEEK_CUR                          },
+	{ "SeekEnd",    SEEK_END                          },
+	{ "SeekSet",    SEEK_SET                          },
+	{ nullptr,      0                                 }
 };
 
 // }}}
@@ -678,26 +678,26 @@ const duk_number_list_entry constants[] = {
 
 auto file_js_api::get_name() const noexcept -> std::string_view
 {
-    return "Irccd.File";
+	return "Irccd.File";
 }
 
 void file_js_api::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
-    duk::stack_guard sa(plugin->get_context());
+	duk::stack_guard sa(plugin->get_context());
 
-    duk_get_global_string(plugin->get_context(), "Irccd");
-    duk_push_c_function(plugin->get_context(), File_constructor, 2);
-    duk_put_number_list(plugin->get_context(), -1, constants);
-    duk_put_function_list(plugin->get_context(), -1, functions);
-    duk_push_object(plugin->get_context());
-    duk_put_function_list(plugin->get_context(), -1, methods);
-    duk_push_c_function(plugin->get_context(), File_destructor, 1);
-    duk_set_finalizer(plugin->get_context(), -2);
-    duk_dup(plugin->get_context(), -1);
-    duk_put_global_string(plugin->get_context(), prototype.data());
-    duk_put_prop_string(plugin->get_context(), -2, "prototype");
-    duk_put_prop_string(plugin->get_context(), -2, "File");
-    duk_pop(plugin->get_context());
+	duk_get_global_string(plugin->get_context(), "Irccd");
+	duk_push_c_function(plugin->get_context(), File_constructor, 2);
+	duk_put_number_list(plugin->get_context(), -1, constants);
+	duk_put_function_list(plugin->get_context(), -1, functions);
+	duk_push_object(plugin->get_context());
+	duk_put_function_list(plugin->get_context(), -1, methods);
+	duk_push_c_function(plugin->get_context(), File_destructor, 1);
+	duk_set_finalizer(plugin->get_context(), -2);
+	duk_dup(plugin->get_context(), -1);
+	duk_put_global_string(plugin->get_context(), prototype.data());
+	duk_put_prop_string(plugin->get_context(), -2, "prototype");
+	duk_put_prop_string(plugin->get_context(), -2, "File");
+	duk_pop(plugin->get_context());
 }
 
 // }}}
@@ -708,28 +708,28 @@ using file_traits = duk::type_traits<std::shared_ptr<file>>;
 
 void file_traits::push(duk_context* ctx, std::shared_ptr<file> fp)
 {
-    assert(ctx);
-    assert(fp);
+	assert(ctx);
+	assert(fp);
 
-    duk::stack_guard sa(ctx, 1);
+	duk::stack_guard sa(ctx, 1);
 
-    duk_push_object(ctx);
-    duk_push_pointer(ctx, new std::shared_ptr<file>(std::move(fp)));
-    duk_put_prop_string(ctx, -2, signature.data());
-    duk_get_global_string(ctx, prototype.data());
-    duk_set_prototype(ctx, -2);
+	duk_push_object(ctx);
+	duk_push_pointer(ctx, new std::shared_ptr<file>(std::move(fp)));
+	duk_put_prop_string(ctx, -2, signature.data());
+	duk_get_global_string(ctx, prototype.data());
+	duk_set_prototype(ctx, -2);
 }
 
 auto file_traits::require(duk_context* ctx, duk_idx_t index) -> std::shared_ptr<file>
 {
-    if (!duk_is_object(ctx, index) || !duk_has_prop_string(ctx, index, signature.data()))
-        duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a File object");
+	if (!duk_is_object(ctx, index) || !duk_has_prop_string(ctx, index, signature.data()))
+		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a File object");
 
-    duk_get_prop_string(ctx, index, signature.data());
-    const auto fp = static_cast<std::shared_ptr<file>*>(duk_to_pointer(ctx, -1));
-    duk_pop(ctx);
+	duk_get_prop_string(ctx, index, signature.data());
+	const auto fp = static_cast<std::shared_ptr<file>*>(duk_to_pointer(ctx, -1));
+	duk_pop(ctx);
 
-    return *fp;
+	return *fp;
 }
 
 // }}}
@@ -740,61 +740,61 @@ auto file_traits::require(duk_context* ctx, duk_idx_t index) -> std::shared_ptr<
 
 void duk::type_traits<struct stat>::push(duk_context* ctx, const struct stat& st)
 {
-    duk::stack_guard sa(ctx, 1);
+	duk::stack_guard sa(ctx, 1);
 
-    duk_push_object(ctx);
+	duk_push_object(ctx);
 
 #if defined(IRCCD_HAVE_STAT_ST_ATIME)
-    duk_push_int(ctx, st.st_atime);
-    duk_put_prop_string(ctx, -2, "atime");
+	duk_push_int(ctx, st.st_atime);
+	duk_put_prop_string(ctx, -2, "atime");
 #endif
 #if defined(IRCCD_HAVE_STAT_ST_BLKSIZE)
-    duk_push_int(ctx, st.st_blksize);
-    duk_put_prop_string(ctx, -2, "blksize");
+	duk_push_int(ctx, st.st_blksize);
+	duk_put_prop_string(ctx, -2, "blksize");
 #endif
 #if defined(IRCCD_HAVE_STAT_ST_BLOCKS)
-    duk_push_int(ctx, st.st_blocks);
-    duk_put_prop_string(ctx, -2, "blocks");
+	duk_push_int(ctx, st.st_blocks);
+	duk_put_prop_string(ctx, -2, "blocks");
 #endif
 #if defined(IRCCD_HAVE_STAT_ST_CTIME)
-    duk_push_int(ctx, st.st_ctime);
-    duk_put_prop_string(ctx, -2, "ctime");
+	duk_push_int(ctx, st.st_ctime);
+	duk_put_prop_string(ctx, -2, "ctime");
 #endif
 #if defined(IRCCD_HAVE_STAT_ST_DEV)
-    duk_push_int(ctx, st.st_dev);
-    duk_put_prop_string(ctx, -2, "dev");
+	duk_push_int(ctx, st.st_dev);
+	duk_put_prop_string(ctx, -2, "dev");
 #endif
 #if defined(IRCCD_HAVE_STAT_ST_GID)
-    duk_push_int(ctx, st.st_gid);
-    duk_put_prop_string(ctx, -2, "gid");
+	duk_push_int(ctx, st.st_gid);
+	duk_put_prop_string(ctx, -2, "gid");
 #endif
 #if defined(IRCCD_HAVE_STAT_ST_INO)
-    duk_push_int(ctx, st.st_ino);
-    duk_put_prop_string(ctx, -2, "ino");
+	duk_push_int(ctx, st.st_ino);
+	duk_put_prop_string(ctx, -2, "ino");
 #endif
 #if defined(IRCCD_HAVE_STAT_ST_MODE)
-    duk_push_int(ctx, st.st_mode);
-    duk_put_prop_string(ctx, -2, "mode");
+	duk_push_int(ctx, st.st_mode);
+	duk_put_prop_string(ctx, -2, "mode");
 #endif
 #if defined(IRCCD_HAVE_STAT_ST_MTIME)
-    duk_push_int(ctx, st.st_mtime);
-    duk_put_prop_string(ctx, -2, "mtime");
+	duk_push_int(ctx, st.st_mtime);
+	duk_put_prop_string(ctx, -2, "mtime");
 #endif
 #if defined(IRCCD_HAVE_STAT_ST_NLINK)
-    duk_push_int(ctx, st.st_nlink);
-    duk_put_prop_string(ctx, -2, "nlink");
+	duk_push_int(ctx, st.st_nlink);
+	duk_put_prop_string(ctx, -2, "nlink");
 #endif
 #if defined(IRCCD_HAVE_STAT_ST_RDEV)
-    duk_push_int(ctx, st.st_rdev);
-    duk_put_prop_string(ctx, -2, "rdev");
+	duk_push_int(ctx, st.st_rdev);
+	duk_put_prop_string(ctx, -2, "rdev");
 #endif
 #if defined(IRCCD_HAVE_STAT_ST_SIZE)
-    duk_push_int(ctx, st.st_size);
-    duk_put_prop_string(ctx, -2, "size");
+	duk_push_int(ctx, st.st_size);
+	duk_put_prop_string(ctx, -2, "size");
 #endif
 #if defined(IRCCD_HAVE_STAT_ST_UID)
-    duk_push_int(ctx, st.st_uid);
-    duk_put_prop_string(ctx, -2, "uid");
+	duk_push_int(ctx, st.st_uid);
+	duk_put_prop_string(ctx, -2, "uid");
 #endif
 }
 

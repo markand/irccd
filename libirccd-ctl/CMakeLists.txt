@@ -19,25 +19,23 @@
 project(libirccd-ctl)
 
 set(
-    HEADERS
-    ${libirccd-ctl_SOURCE_DIR}/irccd/ctl/controller.hpp
+	HEADERS
+	${libirccd-ctl_SOURCE_DIR}/irccd/ctl/controller.hpp
 )
 
 set(
-    SOURCES
-    ${libirccd-ctl_SOURCE_DIR}/irccd/ctl/controller.cpp
+	SOURCES
+	${libirccd-ctl_SOURCE_DIR}/irccd/ctl/controller.cpp
 )
 
 irccd_define_library(
-    TARGET libirccd-ctl
-    EXPORT
-    HEADERS ${HEADERS}
-    HEADERS_DIRECTORY irccd/ctl
-    SOURCES
-        ${libirccd-ctl_SOURCE_DIR}/CMakeLists.txt
-        ${SOURCES}
-    LIBRARIES
-        libirccd
-    PUBLIC_INCLUDES
-        $<BUILD_INTERFACE:${libirccd-ctl_SOURCE_DIR}>
+	TARGET libirccd-ctl
+	EXPORT
+	HEADERS ${HEADERS}
+	HEADERS_DIRECTORY irccd/ctl
+	SOURCES ${SOURCES}
+	LIBRARIES
+		libirccd
+	PUBLIC_INCLUDES
+		$<BUILD_INTERFACE:${libirccd-ctl_SOURCE_DIR}>
 )

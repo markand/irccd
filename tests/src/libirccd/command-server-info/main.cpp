@@ -31,71 +31,71 @@ BOOST_FIXTURE_TEST_SUITE(server_info_fixture_suite, command_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    auto server = std::make_unique<mock_server>(ctx_, "test", "example.org");
+	auto server = std::make_unique<mock_server>(ctx_, "test", "example.org");
 
-    server->set_port(8765);
-    server->set_password("none");
-    server->set_nickname("pascal");
-    server->set_username("psc");
-    server->set_realname("Pascal le grand frere");
-    server->set_ctcp_version("yeah");
-    server->set_command_char("@");
-    server->set_ping_timeout(20000);
+	server->set_port(8765);
+	server->set_password("none");
+	server->set_nickname("pascal");
+	server->set_username("psc");
+	server->set_realname("Pascal le grand frere");
+	server->set_ctcp_version("yeah");
+	server->set_command_char("@");
+	server->set_ping_timeout(20000);
 
-    irccd_.servers().clear();
-    irccd_.servers().add(std::move(server));
+	irccd_.servers().clear();
+	irccd_.servers().add(std::move(server));
 
-    const auto [json, code] = request({
-        { "command",    "server-info"       },
-        { "server",     "test"              },
-    });
+	const auto [json, code] = request({
+		{ "command",    "server-info"   },
+		{ "server",     "test"          },
+	});
 
-    BOOST_TEST(!code);
-    BOOST_TEST(json.is_object());
-    BOOST_TEST(json["host"].get<std::string>() == "example.org");
-    BOOST_TEST(json["name"].get<std::string>() == "test");
-    BOOST_TEST(json["nickname"].get<std::string>() == "pascal");
-    BOOST_TEST(json["port"].get<int>() == 8765);
-    BOOST_TEST(json["realname"].get<std::string>() == "Pascal le grand frere");
-    BOOST_TEST(json["username"].get<std::string>() == "psc");
+	BOOST_TEST(!code);
+	BOOST_TEST(json.is_object());
+	BOOST_TEST(json["host"].get<std::string>() == "example.org");
+	BOOST_TEST(json["name"].get<std::string>() == "test");
+	BOOST_TEST(json["nickname"].get<std::string>() == "pascal");
+	BOOST_TEST(json["port"].get<int>() == 8765);
+	BOOST_TEST(json["realname"].get<std::string>() == "Pascal le grand frere");
+	BOOST_TEST(json["username"].get<std::string>() == "psc");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier_1)
 {
-    const auto [json, code] = request({
-        { "command",    "server-info"   },
-        { "server",     123456          }
-    });
+	const auto [json, code] = request({
+		{ "command",    "server-info"   },
+		{ "server",     123456          }
+	});
 
-    BOOST_TEST(code == server_error::invalid_identifier);
-    BOOST_TEST(json["error"].get<int>() == server_error::invalid_identifier);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
+	BOOST_TEST(code == server_error::invalid_identifier);
+	BOOST_TEST(json["error"].get<int>() == server_error::invalid_identifier);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_identifier_2)
 {
-    const auto [json, code] = request({
-        { "command",    "server-info"   },
-        { "server",     ""              }
-    });
+	const auto [json, code] = request({
+		{ "command",    "server-info"   },
+		{ "server",     ""              }
+	});
 
-    BOOST_TEST(code == server_error::invalid_identifier);
-    BOOST_TEST(json["error"].get<int>() == server_error::invalid_identifier);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
+	BOOST_TEST(code == server_error::invalid_identifier);
+	BOOST_TEST(json["error"].get<int>() == server_error::invalid_identifier);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    const auto [json, code] = request({
-        { "command",    "server-info"   },
-        { "server",     "unknown"       }
-    });
+	const auto [json, code] = request({
+		{ "command",    "server-info"   },
+		{ "server",     "unknown"       }
+	});
 
-    BOOST_TEST(code == server_error::not_found);
-    BOOST_TEST(json["error"].get<int>() == server_error::not_found);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
+	BOOST_TEST(code == server_error::not_found);
+	BOOST_TEST(json["error"].get<int>() == server_error::not_found);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

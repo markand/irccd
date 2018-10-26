@@ -18,15 +18,15 @@
 
 project(irccd)
 
+if (IRCCD_HAVE_JS)
+	list(APPEND LIBRARIES libirccd-js)
+endif ()
+
 irccd_define_executable(
-    TARGET irccd
-    EXPORT
-    DESCRIPTION "The main irccd daemon."
-    SOURCES CMakeLists.txt main.cpp
-    INCLUDES ${irccd_SOURCE_DIR}
-    OPTIONS
-        $<$<BOOL:APPLE>:-Wno-deprecated-declarations>
-    LIBRARIES
-        libirccd
-        $<$<BOOL:${IRCCD_HAVE_JS}>:libirccd-js>
+	TARGET irccd
+	EXPORT
+	DESCRIPTION "The main irccd daemon."
+	SOURCES CMakeLists.txt main.cpp
+	INCLUDES ${irccd_SOURCE_DIR}
+	LIBRARIES libirccd ${LIBRARIES}
 )

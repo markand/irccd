@@ -33,17 +33,17 @@ namespace irccd {
  */
 class dynlib_plugin_loader : public plugin_loader {
 public:
-    /**
-     * Constructor.
-     *
-     * \param directories optional directories to search, if empty use defaults.
-     */
-    dynlib_plugin_loader(std::vector<std::string> directories = {}) noexcept;
+	/**
+	 * Constructor.
+	 *
+	 * \param directories optional directories to search, if empty use defaults.
+	 */
+	dynlib_plugin_loader(std::vector<std::string> directories = {}) noexcept;
 
-    /**
-     * \copydoc plugin_loader::open
-     */
-    auto open(std::string_view id, std::string_view file) -> std::shared_ptr<plugin> override;
+	/**
+	 * \copydoc plugin_loader::open
+	 */
+	auto open(std::string_view id, std::string_view file) -> std::shared_ptr<plugin> override;
 };
 
 } // !irccd

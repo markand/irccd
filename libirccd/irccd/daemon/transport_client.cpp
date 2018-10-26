@@ -25,111 +25,112 @@ namespace irccd {
 
 void transport_client::flush()
 {
-    if (queue_.empty())
-        return;
+	if (queue_.empty())
+		return;
 
-    const auto self = shared_from_this();
+	const auto self = shared_from_this();
 
-    stream_->write(queue_.front().first, [this, self] (auto code) {
-        if (queue_.front().second)
-            queue_.front().second(code);
+	stream_->write(queue_.front().first, [this, self] (auto code) {
+		if (queue_.front().second)
+			queue_.front().second(code);
 
-        queue_.pop_front();
+		queue_.pop_front();
 
-        if (code)
-            erase();
-        else
-            flush();
-    });
+		if (code)
+			erase();
+		else
+			flush();
+	});
 }
 
 void transport_client::erase()
 {
-    state_ = state::closing;
+	state_ = state::closing;
 
-    if (auto parent = parent_.lock())
-        parent->get_clients().erase(shared_from_this());
+	if (auto parent = parent_.lock())
+		parent->get_clients().erase(shared_from_this());
 }
 
-transport_client::transport_client(std::weak_ptr<transport_server> server, std::shared_ptr<io::stream> stream) noexcept
-    : parent_(server)
-    , stream_(std::move(stream))
+transport_client::transport_client(std::weak_ptr<transport_server> server,
+                                   std::shared_ptr<stream> stream) noexcept
+	: parent_(server)
+	, stream_(std::move(stream))
 {
-    assert(stream_);
+	assert(stream_);
 }
 
 auto transport_client::get_state() const noexcept -> state
 {
-    return state_;
+	return state_;
 }
 
 void transport_client::set_state(state state) noexcept
 {
-    state_ = state;
+	state_ = state;
 }
 
-void transport_client::read(io::read_handler handler)
+void transport_client::read(stream::read_handler handler)
 {
-    assert(handler);
+	assert(handler);
 
-    if (state_ != state::closing) {
-        const auto self = shared_from_this();
+	if (state_ != state::closing) {
+		const auto self = shared_from_this();
 
-        stream_->read([this, self, handler] (auto code, auto msg) {
-            handler(code, msg);
+		stream_->read([this, self, handler] (auto code, auto msg) {
+			handler(code, msg);
 
-            if (code)
-                erase();
-        });
-    }
+			if (code)
+				erase();
+		});
+	}
 }
 
-void transport_client::write(nlohmann::json json, io::write_handler handler)
+void transport_client::write(nlohmann::json json, stream::write_handler handler)
 {
-    const auto in_progress = queue_.size() > 0;
+	const auto in_progress = queue_.size() > 0;
 
-    queue_.emplace_back(std::move(json), std::move(handler));
+	queue_.emplace_back(std::move(json), std::move(handler));
 
-    if (!in_progress)
-        flush();
+	if (!in_progress)
+		flush();
 }
 
-void transport_client::success(const std::string& cname, io::write_handler handler)
+void transport_client::success(const std::string& cname, stream::write_handler handler)
 {
-    assert(!cname.empty());
+	assert(!cname.empty());
 
-    write({{ "command", cname }}, std::move(handler));
+	write({{ "command", cname }}, std::move(handler));
 }
 
-void transport_client::error(std::error_code code, io::write_handler handler)
+void transport_client::error(std::error_code code, stream::write_handler handler)
 {
-    error(std::move(code), "", std::move(handler));
+	error(std::move(code), "", std::move(handler));
 }
 
-void transport_client::error(std::error_code code, std::string_view cname, io::write_handler handler)
+void transport_client::error(std::error_code code, std::string_view cname, stream::write_handler handler)
 {
-    assert(code);
+	assert(code);
 
-    auto json = nlohmann::json::object({
-        { "error",          code.value()            },
-        { "errorCategory",  code.category().name()  },
-        { "errorMessage",   code.message()          }
-    });
+	auto json = nlohmann::json::object({
+		{ "error",              code.value()            },
+		{ "errorCategory",      code.category().name()  },
+		{ "errorMessage",       code.message()          }
+	});
 
-    // TODO: check newer version of JSON for string_view support.
-    if (!cname.empty())
-        json["command"] = std::string(cname);
+	// TODO: check newer version of JSON for string_view support.
+	if (!cname.empty())
+		json["command"] = std::string(cname);
 
-    const auto self = shared_from_this();
+	const auto self = shared_from_this();
 
-    write(std::move(json), [this, handler, self] (auto code) {
-        erase();
+	write(std::move(json), [this, handler, self] (auto code) {
+		erase();
 
-        if (handler)
-            handler(code);
-    });
+		if (handler)
+			handler(code);
+	});
 
-    state_ = state::closing;
+	state_ = state::closing;
 }
 
 } // !irccd

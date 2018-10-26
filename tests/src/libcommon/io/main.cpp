@@ -28,9 +28,9 @@
 #include <irccd/socket_stream.hpp>
 
 #if defined(IRCCD_HAVE_SSL)
-#   include <irccd/tls_acceptor.hpp>
-#   include <irccd/tls_connector.hpp>
-#   include <irccd/tls_stream.hpp>
+#	include <irccd/tls_acceptor.hpp>
+#	include <irccd/tls_connector.hpp>
+#	include <irccd/tls_stream.hpp>
 #endif // !IRCCD_HAVE_SSL
 
 using boost::asio::io_service;
@@ -50,100 +50,100 @@ namespace {
 
 class io_fixture {
 public:
-    io_service service_;
+	io_service service_;
 
-    std::unique_ptr<io::acceptor> acceptor_;
-    std::unique_ptr<io::connector> connector_;
+	std::unique_ptr<acceptor> acceptor_;
+	std::unique_ptr<connector> connector_;
 
-    std::shared_ptr<io::stream> stream1_;
-    std::shared_ptr<io::stream> stream2_;
+	std::shared_ptr<stream> stream1_;
+	std::shared_ptr<stream> stream2_;
 
-    virtual auto create_acceptor() -> std::unique_ptr<io::acceptor> = 0;
+	virtual auto create_acceptor() -> std::unique_ptr<acceptor> = 0;
 
-    virtual auto create_connector() -> std::unique_ptr<io::connector> = 0;
+	virtual auto create_connector() -> std::unique_ptr<connector> = 0;
 
-    void init()
-    {
-        acceptor_ = create_acceptor();
-        connector_ = create_connector();
+	void init()
+	{
+		acceptor_ = create_acceptor();
+		connector_ = create_connector();
 
-        acceptor_->accept([this] (auto code, auto stream) {
-            if (code)
-                throw std::system_error(code);
+		acceptor_->accept([this] (auto code, auto stream) {
+			if (code)
+				throw std::system_error(code);
 
-            stream1_ = std::move(stream);
-        });
-        connector_->connect([this] (auto code, auto stream) {
-            if (code)
-                throw std::system_error(code);
+			stream1_ = std::move(stream);
+		});
+		connector_->connect([this] (auto code, auto stream) {
+			if (code)
+				throw std::system_error(code);
 
-            stream2_ = std::move(stream);
-        });
+			stream2_ = std::move(stream);
+		});
 
-        service_.run();
-        service_.reset();
-    }
+		service_.run();
+		service_.reset();
+	}
 };
 
 class ip_io_fixture : public io_fixture {
 private:
-    tcp::endpoint endpoint_;
+	tcp::endpoint endpoint_;
 
 protected:
-    /**
-     * \copydoc io_fixture::create_acceptor
-     */
-    auto create_acceptor() -> std::unique_ptr<io::acceptor> override
-    {
-        tcp::endpoint endpoint(tcp::v4(), 0U);
-        tcp::acceptor acceptor(service_, std::move(endpoint));
+	/**
+	 * \copydoc io_fixture::create_acceptor
+	 */
+	auto create_acceptor() -> std::unique_ptr<acceptor> override
+	{
+		tcp::endpoint endpoint(tcp::v4(), 0U);
+		tcp::acceptor acceptor(service_, std::move(endpoint));
 
-        endpoint_ = acceptor.local_endpoint();
+		endpoint_ = acceptor.local_endpoint();
 
-        return std::make_unique<io::ip_acceptor>(std::move(acceptor));
-    }
+		return std::make_unique<ip_acceptor>(std::move(acceptor));
+	}
 
-    /**
-     * \copydoc io_fixture::create_connector
-     */
-    auto create_connector() -> std::unique_ptr<io::connector> override
-    {
-        return std::make_unique<io::ip_connector>(service_, endpoint_);
-    }
+	/**
+	 * \copydoc io_fixture::create_connector
+	 */
+	auto create_connector() -> std::unique_ptr<connector> override
+	{
+		return std::make_unique<ip_connector>(service_, endpoint_);
+	}
 };
 
 #if defined(IRCCD_HAVE_SSL)
 
 class ssl_io_fixture : public io_fixture {
 private:
-    tcp::endpoint endpoint_;
+	tcp::endpoint endpoint_;
 
 protected:
-    /**
-     * \copydoc io_fixture::create_acceptor
-     */
-    auto create_acceptor() -> std::unique_ptr<io::acceptor> override
-    {
-        context context(context::sslv23);
+	/**
+	 * \copydoc io_fixture::create_acceptor
+	 */
+	auto create_acceptor() -> std::unique_ptr<acceptor> override
+	{
+		context context(context::sslv23);
 
-        context.use_certificate_file(TESTS_SOURCE_DIR "/data/test.crt", context::pem);
-        context.use_private_key_file(TESTS_SOURCE_DIR "/data/test.key", context::pem);
+		context.use_certificate_file(TESTS_SOURCE_DIR "/data/test.crt", context::pem);
+		context.use_private_key_file(TESTS_SOURCE_DIR "/data/test.key", context::pem);
 
-        tcp::endpoint endpoint(tcp::v4(), 0U);
-        tcp::acceptor acceptor(service_, std::move(endpoint));
+		tcp::endpoint endpoint(tcp::v4(), 0U);
+		tcp::acceptor acceptor(service_, std::move(endpoint));
 
-        endpoint_ = acceptor.local_endpoint();
+		endpoint_ = acceptor.local_endpoint();
 
-        return std::make_unique<io::tls_acceptor<>>(std::move(context), std::move(acceptor));
-    }
+		return std::make_unique<tls_acceptor<>>(std::move(context), std::move(acceptor));
+	}
 
-    /**
-     * \copydoc io_fixture::create_connector
-     */
-    auto create_connector() -> std::unique_ptr<io::connector> override
-    {
-        return std::make_unique<io::tls_connector<>>(context(context::sslv23), service_, endpoint_);
-    }
+	/**
+	 * \copydoc io_fixture::create_connector
+	 */
+	auto create_connector() -> std::unique_ptr<connector> override
+	{
+		return std::make_unique<tls_connector<>>(context(context::sslv23), service_, endpoint_);
+	}
 };
 
 #endif // !IRCCD_HAVE_SSL
@@ -152,25 +152,25 @@ protected:
 
 class local_io_fixture : public io_fixture {
 public:
-    /**
-     * \copydoc io_fixture::create_acceptor
-     */
-    auto create_acceptor() -> std::unique_ptr<io::acceptor> override
-    {
-        std::remove(CMAKE_BINARY_DIR "/tmp/io-test.sock");
+	/**
+	 * \copydoc io_fixture::create_acceptor
+	 */
+	auto create_acceptor() -> std::unique_ptr<acceptor> override
+	{
+		std::remove(CMAKE_BINARY_DIR "/tmp/io-test.sock");
 
-        stream_protocol::acceptor acceptor(service_, CMAKE_BINARY_DIR "/tmp/io-test.sock");
+		stream_protocol::acceptor acceptor(service_, CMAKE_BINARY_DIR "/tmp/io-test.sock");
 
-        return std::make_unique<io::local_acceptor>(std::move(acceptor));
-    }
+		return std::make_unique<local_acceptor>(std::move(acceptor));
+	}
 
-    /**
-     * \copydoc io_fixture::create_connector
-     */
-    auto create_connector() -> std::unique_ptr<io::connector> override
-    {
-        return std::make_unique<io::local_connector>(service_, CMAKE_BINARY_DIR "/tmp/io-test.sock");
-    }
+	/**
+	 * \copydoc io_fixture::create_connector
+	 */
+	auto create_connector() -> std::unique_ptr<connector> override
+	{
+		return std::make_unique<local_connector>(service_, CMAKE_BINARY_DIR "/tmp/io-test.sock");
+	}
 };
 
 #endif // !BOOST_OS_WINDOWS
@@ -179,48 +179,48 @@ public:
  * List of fixtures to tests.
  */
 using list = boost::mpl::list<
-    ip_io_fixture
+	ip_io_fixture
 #if defined(IRCCD_HAVE_SSL)
-    , ssl_io_fixture
+	, ssl_io_fixture
 #endif
 #if !BOOST_OS_WINDOWS
-    , local_io_fixture
+	, local_io_fixture
 #endif
 >;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(invalid_argument, Test, list)
 {
-    Test fixture;
+	Test fixture;
 
-    const nlohmann::json message{
-        { "abc", 123 },
-        { "def", 456 }
-    };
+	const nlohmann::json message{
+		{ "abc", 123 },
+		{ "def", 456 }
+	};
 
-    fixture.init();
-    fixture.stream1_->read([] (auto code, auto message) {
-        BOOST_TEST(!code);
-        BOOST_TEST(message.is_object());
-        BOOST_TEST(message["abc"].template get<int>() == 123);
-        BOOST_TEST(message["def"].template get<int>() == 456);
-    });
-    fixture.stream2_->write(message, [] (auto code) {
-        BOOST_TEST(!code);
-    });
-    fixture.service_.run();
+	fixture.init();
+	fixture.stream1_->read([] (auto code, auto message) {
+		BOOST_TEST(!code);
+		BOOST_TEST(message.is_object());
+		BOOST_TEST(message["abc"].template get<int>() == 123);
+		BOOST_TEST(message["def"].template get<int>() == 456);
+	});
+	fixture.stream2_->write(message, [] (auto code) {
+		BOOST_TEST(!code);
+	});
+	fixture.service_.run();
 }
 
 BOOST_AUTO_TEST_CASE_TEMPLATE(network_down, Test, list)
 {
-    Test fixture;
+	Test fixture;
 
-    fixture.init();
-    fixture.stream1_->read([] (auto code, auto message) {
-        BOOST_TEST(code.value() == static_cast<int>(std::errc::not_connected));
-        BOOST_TEST(message.is_null());
-    });
-    fixture.stream2_ = nullptr;
-    fixture.service_.run();
+	fixture.init();
+	fixture.stream1_->read([] (auto code, auto message) {
+		BOOST_TEST(code.value() == static_cast<int>(std::errc::not_connected));
+		BOOST_TEST(message.is_null());
+	});
+	fixture.stream2_ = nullptr;
+	fixture.service_.run();
 }
 
 } // !namespace

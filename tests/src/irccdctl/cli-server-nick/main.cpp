@@ -31,75 +31,74 @@ BOOST_FIXTURE_TEST_SUITE(server_nick_suite, cli_fixture)
 
 BOOST_AUTO_TEST_CASE(not_connected)
 {
-    start();
-    server_->disconnect();
+	start();
+	server_->disconnect();
 
-    const auto [code, out, err] = exec({ "server-nick", "test", "new" });
+	const auto [code, out, err] = exec({ "server-nick", "test", "new" });
 
-    BOOST_TEST(!code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 0U);
+	BOOST_TEST(!code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 0U);
 
-    const auto cmd = server_->find("raw");
+	const auto cmd = server_->find("raw");
 
-    BOOST_TEST(cmd.size() == 0U);
-    BOOST_TEST(server_->get_nickname() == "new");
+	BOOST_TEST(cmd.size() == 0U);
+	BOOST_TEST(server_->get_nickname() == "new");
 }
 
 BOOST_AUTO_TEST_CASE(connected)
 {
-    start();
-    server_->connect([] (auto) {});
+	start();
+	server_->connect([] (auto) {});
 
-    const auto [code, out, err] = exec({ "server-nick", "test", "new" });
+	const auto [code, out, err] = exec({ "server-nick", "test", "new" });
 
-    BOOST_TEST(!code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 0U);
+	BOOST_TEST(!code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 0U);
 
-    const auto cmd = server_->find("send");
+	const auto cmd = server_->find("send");
 
-    BOOST_TEST(cmd.size() == 1U);
-    BOOST_TEST(std::any_cast<std::string>(cmd[0][0]) == "NICK new");
+	BOOST_TEST(cmd.size() == 1U);
+	BOOST_TEST(std::any_cast<std::string>(cmd[0][0]) == "NICK new");
 }
-
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier_1)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-nick", "+++", "francis" });
+	const auto [code, out, err] = exec({ "server-nick", "+++", "francis" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: invalid server identifier");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: invalid server identifier");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-nick", "unknown", "francis" });
+	const auto [code, out, err] = exec({ "server-nick", "unknown", "francis" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: server not found");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: server not found");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_nickname)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-nick", "test", "\"\"" });
+	const auto [code, out, err] = exec({ "server-nick", "test", "\"\"" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: invalid nickname");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: invalid nickname");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

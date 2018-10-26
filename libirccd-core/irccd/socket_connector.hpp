@@ -31,7 +31,7 @@
 #include "connector.hpp"
 #include "socket_stream.hpp"
 
-namespace irccd::io {
+namespace irccd {
 
 /**
  * \brief Socket connection interface.
@@ -40,83 +40,69 @@ namespace irccd::io {
 template <typename Protocol>
 class socket_connector : public connector {
 public:
-    /**
-     * Convenient endpoint alias.
-     */
-    using endpoint = typename Protocol::endpoint;
+	/**
+	 * Convenient endpoint alias.
+	 */
+	using endpoint = typename Protocol::endpoint;
 
-    /**
-     * Convenient socket alias.
-     */
-    using socket = typename Protocol::socket;
+	/**
+	 * Convenient socket alias.
+	 */
+	using socket = typename Protocol::socket;
 
 private:
-    boost::asio::io_service& service_;
-    std::vector<endpoint> endpoints_;
+	boost::asio::io_service& service_;
+	std::vector<endpoint> endpoints_;
 
 #if !defined(NDEBUG)
-    bool is_connecting_{false};
+	bool is_connecting_{false};
 #endif
 
 protected:
-    /**
-     * Start trying to connect to all endpoints.
-     *
-     * \param socket the underlying socket
-     * \param handler handler with `void f(std::error_code)` signature
-     */
-    template <typename Socket, typename Handler>
-    void do_connect(Socket& socket, Handler handler);
+	/**
+	 * Start trying to connect to all endpoints.
+	 *
+	 * \param socket the underlying socket
+	 * \param handler handler with `void f(std::error_code)` signature
+	 */
+	template <typename Socket, typename Handler>
+	void do_connect(Socket& socket, Handler handler);
 
 public:
-    /**
-     * Construct the socket connector with only one endpoint.
-     *
-     * \param service the service
-     * \param endpoint the unique endpoint
-     */
-    socket_connector(boost::asio::io_service& service, endpoint endpoint) noexcept
-        : service_(service)
-        , endpoints_{std::move(endpoint)}
-    {
-    }
+	/**
+	 * Construct the socket connector with only one endpoint.
+	 *
+	 * \param service the service
+	 * \param endpoint the unique endpoint
+	 */
+	socket_connector(boost::asio::io_service& service, endpoint endpoint) noexcept;
 
-    /**
-     * Construct the socket connection.
-     *
-     * \param service the service
-     * \param eps the endpoints
-     */
-    socket_connector(boost::asio::io_service& service, std::vector<endpoint> eps) noexcept
-        : service_(service)
-        , endpoints_(std::move(eps))
-    {
-    }
+	/**
+	 * Construct the socket connection.
+	 *
+	 * \param service the service
+	 * \param eps the endpoints
+	 */
+	socket_connector(boost::asio::io_service& service, std::vector<endpoint> eps) noexcept;
 
-    /**
-     * Get the underlying I/O service.
-     *
-     * \return the I/O service
-     */
-    auto get_io_service() const noexcept -> const boost::asio::io_service&
-    {
-        return service_;
-    }
+	/**
+	 * Get the underlying I/O service.
+	 *
+	 * \return the I/O service
+	 */
+	auto get_io_service() const noexcept -> const boost::asio::io_service&;
 
-    /**
-     * Overloaded function.
-     *
-     * \return the I/O service
-     */
-    auto get_io_service() noexcept -> boost::asio::io_service&
-    {
-        return service_;
-    }
+	/**
+	 * Overloaded function.
+	 *
+	 * \return the I/O service
+	 */
+	auto get_io_service() noexcept -> boost::asio::io_service&;
 
-    /**
-     * \copydoc connector::connect
-     */
-    void connect(connect_handler handler);
+	/**
+	 * \copydoc connector::connect
+	 */
+	void connect(handler handler);
 };
 
 template <typename Protocol>
@@ -124,33 +110,59 @@ template <typename Socket, typename Handler>
 void socket_connector<Protocol>::do_connect(Socket& socket, Handler handler)
 {
 #if !defined(NDEBUG)
-    assert(!is_connecting_);
+	assert(!is_connecting_);
 
-    is_connecting_ = true;
+	is_connecting_ = true;
 #endif
 
-    boost::asio::async_connect(socket, endpoints_.begin(), endpoints_.end(), [this, handler] (auto code, auto ep) {
+	boost::asio::async_connect(socket, endpoints_.begin(), endpoints_.end(), [this, handler] (auto code, auto ep) {
 #if !defined(NDEBUG)
-        is_connecting_ = false;
+		is_connecting_ = false;
 #endif
 
-        if (ep == endpoints_.end())
-            handler(make_error_code(std::errc::host_unreachable));
-        else
-            handler(code);
-    });
+		if (ep == endpoints_.end())
+			handler(make_error_code(std::errc::host_unreachable));
+		else
+			handler(code);
+	});
 }
 
 template <typename Protocol>
-void socket_connector<Protocol>::connect(connect_handler handler)
+socket_connector<Protocol>::socket_connector(boost::asio::io_service& service, endpoint endpoint) noexcept
+	: service_(service)
+	, endpoints_{std::move(endpoint)}
 {
-    assert(handler);
+}
 
-    const auto stream = std::make_shared<socket_stream<socket>>(service_);
+template <typename Protocol>
+socket_connector<Protocol>::socket_connector(boost::asio::io_service& service, std::vector<endpoint> eps) noexcept
+	: service_(service)
+	, endpoints_(std::move(eps))
+{
+}
 
-    do_connect(stream->get_socket(), [handler, stream] (auto code) {
-        handler(code, code ? nullptr : std::move(stream));
-    });
+template <typename Protocol>
+auto socket_connector<Protocol>::get_io_service() const noexcept -> const boost::asio::io_service&
+{
+	return service_;
+}
+
+template <typename Protocol>
+auto socket_connector<Protocol>::get_io_service() noexcept -> boost::asio::io_service&
+{
+	return service_;
+}
+
+template <typename Protocol>
+void socket_connector<Protocol>::connect(handler handler)
+{
+	assert(handler);
+
+	const auto stream = std::make_shared<socket_stream<socket>>(service_);
+
+	do_connect(stream->get_socket(), [handler, stream] (auto code) {
+		handler(code, code ? nullptr : std::move(stream));
+	});
 }
 
 /**
@@ -167,6 +179,6 @@ using local_connector = socket_connector<boost::asio::local::stream_protocol>;
 
 #endif
 
-} // !irccd::io
+} // !irccd
 
 #endif // !IRCCD_COMMON_SOCKET_CONNECTOR_HPP

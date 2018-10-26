@@ -36,15 +36,15 @@ namespace irccd::js {
  */
 class server_js_api : public js_api {
 public:
-    /**
-     * \copydoc js_api::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc js_api::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc js_api::load
-     */
-    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
+	/**
+	 * \copydoc js_api::load
+	 */
+	void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
 namespace duk {
@@ -56,23 +56,23 @@ namespace duk {
  */
 template <>
 struct type_traits<std::shared_ptr<server>> {
-    /**
-     * Push a server.
-     *
-     * \pre server != nullptr
-     * \param ctx the context
-     * \param server the server
-     */
-    static void push(duk_context* ctx, std::shared_ptr<server> server);
+	/**
+	 * Push a server.
+	 *
+	 * \pre server != nullptr
+	 * \param ctx the context
+	 * \param server the server
+	 */
+	static void push(duk_context* ctx, std::shared_ptr<server> server);
 
-    /**
-     * Require a server. Raise a Javascript error if not a Server.
-     *
-     * \param ctx the context
-     * \param index the index
-     * \return the server
-     */
-    static auto require(duk_context* ctx, duk_idx_t index) -> std::shared_ptr<server>;
+	/**
+	 * Require a server. Raise a Javascript error if not a Server.
+	 *
+	 * \param ctx the context
+	 * \param index the index
+	 * \return the server
+	 */
+	static auto require(duk_context* ctx, duk_idx_t index) -> std::shared_ptr<server>;
 };
 
 /**
@@ -80,13 +80,13 @@ struct type_traits<std::shared_ptr<server>> {
  */
 template <>
 struct type_traits<server_error> {
-    /**
-     * Raise a server_error.
-     *
-     * \param ctx the context
-     * \param error the error
-     */
-    static void raise(duk_context* ctx, const server_error& error);
+	/**
+	 * Raise a server_error.
+	 *
+	 * \param ctx the context
+	 * \param error the error
+	 */
+	static void raise(duk_context* ctx, const server_error& error);
 };
 
 } // !duk

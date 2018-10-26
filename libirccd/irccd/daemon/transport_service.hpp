@@ -38,66 +38,66 @@ class transport_server;
  */
 class transport_service {
 public:
-    using commands = std::vector<std::unique_ptr<command>>;
-    using servers = std::vector<std::shared_ptr<transport_server>>;
+	using commands = std::vector<std::unique_ptr<command>>;
+	using servers = std::vector<std::shared_ptr<transport_server>>;
 
 private:
-    irccd& irccd_;
-    commands commands_;
-    servers servers_;
+	irccd& irccd_;
+	commands commands_;
+	servers servers_;
 
-    void handle_command(std::shared_ptr<transport_client>, const nlohmann::json&);
-    void do_recv(std::shared_ptr<transport_client>);
-    void do_accept(transport_server&);
+	void handle_command(std::shared_ptr<transport_client>, const nlohmann::json&);
+	void do_recv(std::shared_ptr<transport_client>);
+	void do_accept(transport_server&);
 
 public:
-    /**
-     * Create the transport service.
-     *
-     * \param irccd the irccd instance
-     */
-    transport_service(irccd& irccd) noexcept;
+	/**
+	 * Create the transport service.
+	 *
+	 * \param irccd the irccd instance
+	 */
+	transport_service(irccd& irccd) noexcept;
 
-    /**
-     * Default destructor.
-     */
-    ~transport_service() noexcept;
+	/**
+	 * Default destructor.
+	 */
+	~transport_service() noexcept;
 
-    /**
-     * Get underlying commands.
-     *
-     * \return the commands
-     */
-    auto get_commands() const noexcept -> const commands&;
+	/**
+	 * Get underlying commands.
+	 *
+	 * \return the commands
+	 */
+	auto get_commands() const noexcept -> const commands&;
 
-    /**
-     * Get underlying commands.
-     *
-     * \return the commands
-     */
-    auto get_commands() noexcept -> commands&;
+	/**
+	 * Get underlying commands.
+	 *
+	 * \return the commands
+	 */
+	auto get_commands() noexcept -> commands&;
 
-    /**
-     * Add a transport server.
-     *
-     * \param ts the transport server
-     */
-    void add(std::shared_ptr<transport_server> ts);
+	/**
+	 * Add a transport server.
+	 *
+	 * \param ts the transport server
+	 */
+	void add(std::shared_ptr<transport_server> ts);
 
-    /**
-     * Send data to all clients.
-     *
-     * \pre object.is_object()
-     * \param object the json object
-     */
-    void broadcast(const nlohmann::json& object);
+	/**
+	 * Send data to all clients.
+	 *
+	 * \pre object.is_object()
+	 * \param object the json object
+	 */
+	void broadcast(const nlohmann::json& object);
 
-    /**
-     * Load transports from the configuration.
-     *
-     * \param cfg the config
-     */
-    void load(const config& cfg) noexcept;
+	/**
+	 * Load transports from the configuration.
+	 *
+	 * \param cfg the config
+	 */
+	void load(const config& cfg) noexcept;
 };
 
 } // !irccd

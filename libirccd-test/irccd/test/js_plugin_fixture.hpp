@@ -39,18 +39,18 @@ namespace irccd {
  */
 class js_plugin_fixture {
 protected:
-    boost::asio::io_service service_;
-    irccd irccd_{service_};
-    std::shared_ptr<js::js_plugin> plugin_;
-    std::shared_ptr<mock_server> server_;
+	boost::asio::io_service service_;
+	irccd irccd_{service_};
+	std::shared_ptr<js::js_plugin> plugin_;
+	std::shared_ptr<mock_server> server_;
 
 public:
-    /**
-     * Construct the fixture test.
-     *
-     * \param path the full plugin path (e.g. /usr/lib64/irccd/ask.js)
-     */
-    js_plugin_fixture(std::string path);
+	/**
+	 * Construct the fixture test.
+	 *
+	 * \param path the full plugin path (e.g. /usr/lib64/irccd/ask.js)
+	 */
+	js_plugin_fixture(std::string path);
 };
 
 } // !irccd

@@ -31,88 +31,88 @@ BOOST_FIXTURE_TEST_SUITE(server_kick_suite, cli_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-kick", "test", "francis", "#staff" });
+	const auto [code, out, err] = exec({ "server-kick", "test", "francis", "#staff" });
 
-    BOOST_TEST(!code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 0U);
+	BOOST_TEST(!code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 0U);
 
-    const auto cmd = server_->find("kick");
+	const auto cmd = server_->find("kick");
 
-    BOOST_TEST(cmd.size() == 1U);
-    BOOST_TEST(std::any_cast<std::string>(cmd[0][0]) == "francis");
-    BOOST_TEST(std::any_cast<std::string>(cmd[0][1]) == "#staff");
-    BOOST_TEST(std::any_cast<std::string>(cmd[0][2]) == "");
+	BOOST_TEST(cmd.size() == 1U);
+	BOOST_TEST(std::any_cast<std::string>(cmd[0][0]) == "francis");
+	BOOST_TEST(std::any_cast<std::string>(cmd[0][1]) == "#staff");
+	BOOST_TEST(std::any_cast<std::string>(cmd[0][2]) == "");
 }
 
 BOOST_AUTO_TEST_CASE(with_reason)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-kick", "test", "francis", "#staff", "shhh" });
+	const auto [code, out, err] = exec({ "server-kick", "test", "francis", "#staff", "shhh" });
 
-    BOOST_TEST(!code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 0U);
+	BOOST_TEST(!code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 0U);
 
-    const auto cmd = server_->find("kick");
+	const auto cmd = server_->find("kick");
 
-    BOOST_TEST(cmd.size() == 1U);
-    BOOST_TEST(std::any_cast<std::string>(cmd[0][0]) == "francis");
-    BOOST_TEST(std::any_cast<std::string>(cmd[0][1]) == "#staff");
-    BOOST_TEST(std::any_cast<std::string>(cmd[0][2]) == "shhh");
+	BOOST_TEST(cmd.size() == 1U);
+	BOOST_TEST(std::any_cast<std::string>(cmd[0][0]) == "francis");
+	BOOST_TEST(std::any_cast<std::string>(cmd[0][1]) == "#staff");
+	BOOST_TEST(std::any_cast<std::string>(cmd[0][2]) == "shhh");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier_1)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-kick", "+++", "francis", "#staff" });
+	const auto [code, out, err] = exec({ "server-kick", "+++", "francis", "#staff" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: invalid server identifier");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: invalid server identifier");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-kick", "unknown", "francis", "#staff" });
+	const auto [code, out, err] = exec({ "server-kick", "unknown", "francis", "#staff" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: server not found");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: server not found");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_nickname)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-kick", "test", "\"\"", "#staff" });
+	const auto [code, out, err] = exec({ "server-kick", "test", "\"\"", "#staff" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: invalid nickname");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: invalid nickname");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_channel)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "server-kick", "test", "francis", "\"\"" });
+	const auto [code, out, err] = exec({ "server-kick", "test", "francis", "\"\"" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: invalid or empty channel");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: invalid or empty channel");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

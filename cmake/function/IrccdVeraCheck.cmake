@@ -31,27 +31,27 @@
 #
 
 function(irccd_vera_check target sources)
-    if (IRCCD_HAVE_VERA)
-        set(valid ".cpp;.c;.hpp;.h")
+	if (IRCCD_HAVE_VERA)
+		set(valid ".cpp;.c;.hpp;.h")
 
-        # Cleanup non relevant files.
-        foreach (s ${sources})
-            get_filename_component(s ${s} ABSOLUTE)
-            get_filename_component(ext ${s} EXT)
+		# Cleanup non relevant files.
+		foreach (s ${sources})
+			get_filename_component(s ${s} ABSOLUTE)
+			get_filename_component(ext ${s} EXT)
 
-            foreach (e ${valid})
-                if (${ext} STREQUAL ${e})
-                    list(APPEND newsources ${s})
-                endif ()
-            endforeach ()
-        endforeach ()
+			foreach (e ${valid})
+				if (${ext} STREQUAL ${e})
+					list(APPEND newsources ${s})
+				endif ()
+			endforeach ()
+		endforeach ()
 
-        add_custom_command(
-            TARGET ${target}
-            COMMAND
-                $<TARGET_FILE:vera> -w --root ${CMAKE_SOURCE_DIR}/vera ${newsources}
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            VERBATIM
-        )
-    endif ()
+		add_custom_command(
+			TARGET ${target}
+			COMMAND
+				$<TARGET_FILE:vera> -w --root ${CMAKE_SOURCE_DIR}/vera ${newsources}
+			WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+			VERBATIM
+		)
+	endif ()
 endfunction()

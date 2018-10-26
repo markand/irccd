@@ -19,19 +19,19 @@
 project(irccdctl)
 
 set(
-    SOURCES
-    ${irccdctl_SOURCE_DIR}/CMakeLists.txt
-    ${irccdctl_SOURCE_DIR}/alias.cpp
-    ${irccdctl_SOURCE_DIR}/alias.hpp
-    ${irccdctl_SOURCE_DIR}/cli.cpp
-    ${irccdctl_SOURCE_DIR}/cli.hpp
-    ${irccdctl_SOURCE_DIR}/main.cpp
+	SOURCES
+	${irccdctl_SOURCE_DIR}/CMakeLists.txt
+	${irccdctl_SOURCE_DIR}/alias.cpp
+	${irccdctl_SOURCE_DIR}/alias.hpp
+	${irccdctl_SOURCE_DIR}/cli.cpp
+	${irccdctl_SOURCE_DIR}/cli.hpp
+	${irccdctl_SOURCE_DIR}/main.cpp
 )
 
 irccd_define_executable(
-    TARGET irccdctl
-    EXPORT
-    DESCRIPTION "Irccd controller."
-    SOURCES ${SOURCES}
-    LIBRARIES libirccd-ctl
+	TARGET irccdctl
+	EXPORT
+	DESCRIPTION "Irccd controller."
+	SOURCES ${SOURCES}
+	LIBRARIES libirccd-ctl
 )

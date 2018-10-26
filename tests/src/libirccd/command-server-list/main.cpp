@@ -29,28 +29,28 @@ namespace {
 
 class server_list_fixture : public command_fixture {
 protected:
-    server_list_fixture()
-    {
-        irccd_.servers().clear();
-        irccd_.servers().add(std::make_unique<mock_server>(ctx_, "s1", "localhost"));
-        irccd_.servers().add(std::make_unique<mock_server>(ctx_, "s2", "localhost"));
-    }
+	server_list_fixture()
+	{
+		irccd_.servers().clear();
+		irccd_.servers().add(std::make_unique<mock_server>(ctx_, "s1", "localhost"));
+		irccd_.servers().add(std::make_unique<mock_server>(ctx_, "s2", "localhost"));
+	}
 };
 
 BOOST_FIXTURE_TEST_SUITE(server_list_fixture_suite, server_list_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    const auto [json, code] = request({
-        { "command", "server-list" }
-    });
+	const auto [json, code] = request({
+		{ "command", "server-list" }
+	});
 
-    BOOST_TEST(!code);
-    BOOST_TEST(json.is_object());
-    BOOST_TEST(json["list"].is_array());
-    BOOST_TEST(json["list"].size() == 2U);
-    BOOST_TEST(json["list"][0].get<std::string>() == "s1");
-    BOOST_TEST(json["list"][1].get<std::string>() == "s2");
+	BOOST_TEST(!code);
+	BOOST_TEST(json.is_object());
+	BOOST_TEST(json["list"].is_array());
+	BOOST_TEST(json["list"].size() == 2U);
+	BOOST_TEST(json["list"][0].get<std::string>() == "s1");
+	BOOST_TEST(json["list"][1].get<std::string>() == "s2");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -32,69 +32,69 @@ namespace {
 
 class logger_fixture : public js_fixture {
 protected:
-    std::string line_info;
-    std::string line_warning;
-    std::string line_debug;
+	std::string line_info;
+	std::string line_warning;
+	std::string line_debug;
 
-    class sample_sink : public logger::sink {
-    private:
-        logger_fixture& test_;
+	class sample_sink : public logger::sink {
+	private:
+		logger_fixture& test_;
 
-    public:
-        sample_sink(logger_fixture& test) noexcept
-            : test_(test)
-        {
-        }
+	public:
+		sample_sink(logger_fixture& test) noexcept
+			: test_(test)
+		{
+		}
 
-        void write_info(const std::string& line) override
-        {
-            test_.line_info = line;
-        }
+		void write_info(const std::string& line) override
+		{
+			test_.line_info = line;
+		}
 
-        void write_warning(const std::string& line) override
-        {
-            test_.line_warning = line;
-        }
+		void write_warning(const std::string& line) override
+		{
+			test_.line_warning = line;
+		}
 
-        void write_debug(const std::string& line) override
-        {
-            test_.line_debug = line;
-        }
-    };
+		void write_debug(const std::string& line) override
+		{
+			test_.line_debug = line;
+		}
+	};
 
-    logger_fixture()
-    {
-        irccd_.set_log(std::make_unique<sample_sink>(*this));
-        irccd_.get_log().set_verbose(true);
-    }
+	logger_fixture()
+	{
+		irccd_.set_log(std::make_unique<sample_sink>(*this));
+		irccd_.get_log().set_verbose(true);
+	}
 };
 
 BOOST_FIXTURE_TEST_SUITE(logger_js_api_suite, logger_fixture)
 
 BOOST_AUTO_TEST_CASE(info)
 {
-    if (duk_peval_string(plugin_->get_context(), "Irccd.Logger.info(\"hello!\");") != 0)
-        throw duk::get_stack(plugin_->get_context(), -1);
+	if (duk_peval_string(plugin_->get_context(), "Irccd.Logger.info(\"hello!\");") != 0)
+		throw duk::get_stack(plugin_->get_context(), -1);
 
-    BOOST_TEST("plugin test: hello!" == line_info);
+	BOOST_TEST("plugin test: hello!" == line_info);
 }
 
 BOOST_AUTO_TEST_CASE(warning)
 {
-    if (duk_peval_string(plugin_->get_context(), "Irccd.Logger.warning(\"FAIL!\");") != 0)
-        throw duk::get_stack(plugin_->get_context(), -1);
+	if (duk_peval_string(plugin_->get_context(), "Irccd.Logger.warning(\"FAIL!\");") != 0)
+		throw duk::get_stack(plugin_->get_context(), -1);
 
-    BOOST_TEST("plugin test: FAIL!" == line_warning);
+	BOOST_TEST("plugin test: FAIL!" == line_warning);
 }
 
 #if !defined(NDEBUG)
 
 BOOST_AUTO_TEST_CASE(debug)
 {
-    if (duk_peval_string(plugin_->get_context(), "Irccd.Logger.debug(\"starting\");") != 0)
-        throw duk::get_stack(plugin_->get_context(), -1);
+	if (duk_peval_string(plugin_->get_context(), "Irccd.Logger.debug(\"starting\");") != 0)
+		throw duk::get_stack(plugin_->get_context(), -1);
 
-    BOOST_TEST("plugin test: starting" == line_debug);
+	BOOST_TEST("plugin test: starting" == line_debug);
 }
 
 #endif

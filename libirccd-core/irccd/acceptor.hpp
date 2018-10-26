@@ -28,14 +28,9 @@
 #include <memory>
 #include <system_error>
 
-namespace irccd::io {
+namespace irccd {
 
 class stream;
-
-/**
- * \brief Accept completion handler.
- */
-using accept_handler = std::function<void (std::error_code, std::shared_ptr<stream>)>;
 
 /**
  * \brief Abstract stream acceptor interface.
@@ -45,29 +40,35 @@ using accept_handler = std::function<void (std::error_code, std::shared_ptr<stre
  */
 class acceptor {
 public:
-    /**
-     * Default constructor.
-     */
-    acceptor() = default;
+	/**
+	 * \brief Accept completion handler.
+	 */
+	using handler = std::function<void (std::error_code, std::shared_ptr<stream>)>;
 
-    /**
-     * Virtual destructor defaulted.
-     */
-    virtual ~acceptor() = default;
+public:
+	/**
+	 * Default constructor.
+	 */
+	acceptor() = default;
 
-    /**
-     * Start asynchronous accept.
-     *
-     * Once the client is accepted, the original acceptor must be kept until it
-     * is destroyed.
-     *
-     * \pre another accept operation must not be running
-     * \pre handler != nullptr
-     * \param handler the handler
-     */
-    virtual void accept(accept_handler handler) = 0;
+	/**
+	 * Virtual destructor defaulted.
+	 */
+	virtual ~acceptor() = default;
+
+	/**
+	 * Start asynchronous accept.
+	 *
+	 * Once the client is accepted, the original acceptor must be kept until it
+	 * is destroyed.
+	 *
+	 * \pre another accept operation must not be running
+	 * \pre handler != nullptr
+	 * \param handler the handler
+	 */
+	virtual void accept(handler handler) = 0;
 };
 
-} // !irccd::io
+} // !irccd
 
 #endif // !IRCCD_COMMON_ACCEPTOR_HPP

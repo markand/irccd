@@ -54,137 +54,137 @@ class transport_service;
  */
 class irccd {
 private:
-    // Configuration.
-    config config_;
+	// Configuration.
+	config config_;
 
-    // Main io service.
-    boost::asio::io_service& service_;
+	// Main io service.
+	boost::asio::io_service& service_;
 
-    // Tells if the configuration has already been called.
-    bool loaded_{false};
+	// Tells if the configuration has already been called.
+	bool loaded_{false};
 
-    // Custom logger.
-    std::unique_ptr<logger::sink> sink_;
+	// Custom logger.
+	std::unique_ptr<logger::sink> sink_;
 
-    // Services.
-    std::unique_ptr<server_service> server_service_;
-    std::unique_ptr<transport_service> tpt_service_;
-    std::unique_ptr<rule_service> rule_service_;
-    std::unique_ptr<plugin_service> plugin_service_;
+	// Services.
+	std::unique_ptr<server_service> server_service_;
+	std::unique_ptr<transport_service> tpt_service_;
+	std::unique_ptr<rule_service> rule_service_;
+	std::unique_ptr<plugin_service> plugin_service_;
 
-    // Not copyable and not movable because services have references to irccd.
-    irccd(const irccd&) = delete;
-    irccd(irccd&&) = delete;
+	// Not copyable and not movable because services have references to irccd.
+	irccd(const irccd&) = delete;
+	irccd(irccd&&) = delete;
 
-    void operator=(const irccd&) = delete;
-    void operator=(irccd&&) = delete;
+	void operator=(const irccd&) = delete;
+	void operator=(irccd&&) = delete;
 
-    // Load functions.
-    void load_logs_file(const ini::section&);
-    void load_logs_syslog();
-    void load_logs();
-    void load_formats();
+	// Load functions.
+	void load_logs_file(const ini::section&);
+	void load_logs_syslog();
+	void load_logs();
+	void load_formats();
 
 public:
-    /**
-     * Constructor.
-     *
-     * This only create a barebone irccd instance.
-     *
-     * \param service the service
-     * \param config the optional path to the configuration.
-     * \see load_all
-     * \see load_config
-     */
-    irccd(boost::asio::io_service& service, std::string config = "");
+	/**
+	 * Constructor.
+	 *
+	 * This only create a barebone irccd instance.
+	 *
+	 * \param service the service
+	 * \param config the optional path to the configuration.
+	 * \see load_all
+	 * \see load_config
+	 */
+	irccd(boost::asio::io_service& service, std::string config = "");
 
-    /**
-     * Default destructor.
-     */
-    ~irccd();
+	/**
+	 * Default destructor.
+	 */
+	~irccd();
 
-    /**
-     * Get the current configuration.
-     *
-     * \return the configuration
-     */
-    auto get_config() const noexcept -> const config&;
+	/**
+	 * Get the current configuration.
+	 *
+	 * \return the configuration
+	 */
+	auto get_config() const noexcept -> const config&;
 
-    /**
-     * Set the configuration.
-     *
-     * \param cfg the new config
-     */
-    void set_config(config cfg) noexcept;
+	/**
+	 * Set the configuration.
+	 *
+	 * \param cfg the new config
+	 */
+	void set_config(config cfg) noexcept;
 
-    /**
-     * Get the underlying io service.
-     *
-     * \return the service
-     */
-    auto get_service() const noexcept -> const boost::asio::io_service&;
+	/**
+	 * Get the underlying io service.
+	 *
+	 * \return the service
+	 */
+	auto get_service() const noexcept -> const boost::asio::io_service&;
 
-    /**
-     * Overloaded function.
-     *
-     * \return the service
-     */
-    auto get_service() noexcept -> boost::asio::io_service&;
+	/**
+	 * Overloaded function.
+	 *
+	 * \return the service
+	 */
+	auto get_service() noexcept -> boost::asio::io_service&;
 
-    /**
-     * Access the logger.
-     *
-     * \return the logger
-     */
-    auto get_log() const noexcept -> const logger::sink&;
+	/**
+	 * Access the logger.
+	 *
+	 * \return the logger
+	 */
+	auto get_log() const noexcept -> const logger::sink&;
 
-    /**
-     * Overloaded function.
-     *
-     * \return the logger
-     */
-    auto get_log() noexcept -> logger::sink&;
+	/**
+	 * Overloaded function.
+	 *
+	 * \return the logger
+	 */
+	auto get_log() noexcept -> logger::sink&;
 
-    /**
-     * Set the logger.
-     *
-     * \pre logger != nullptr
-     * \param logger the new logger
-     */
-    void set_log(std::unique_ptr<logger::sink> sink) noexcept;
+	/**
+	 * Set the logger.
+	 *
+	 * \pre logger != nullptr
+	 * \param logger the new logger
+	 */
+	void set_log(std::unique_ptr<logger::sink> sink) noexcept;
 
-    /**
-     * Access the server service.
-     *
-     * \return the service
-     */
-    auto servers() noexcept -> server_service&;
+	/**
+	 * Access the server service.
+	 *
+	 * \return the service
+	 */
+	auto servers() noexcept -> server_service&;
 
-    /**
-     * Access the transport service.
-     *
-     * \return the service
-     */
-    auto transports() noexcept -> transport_service&;
+	/**
+	 * Access the transport service.
+	 *
+	 * \return the service
+	 */
+	auto transports() noexcept -> transport_service&;
 
-    /**
-     * Access the rule service.
-     *
-     * \return the service
-     */
-    auto rules() noexcept -> rule_service&;
+	/**
+	 * Access the rule service.
+	 *
+	 * \return the service
+	 */
+	auto rules() noexcept -> rule_service&;
 
-    /**
-     * Access the plugin service.
-     *
-     * \return the service
-     */
-    auto plugins() noexcept -> plugin_service&;
+	/**
+	 * Access the plugin service.
+	 *
+	 * \return the service
+	 */
+	auto plugins() noexcept -> plugin_service&;
 
-    /**
-     * Load and re-apply the configuration to the daemon.
-     */
-    void load() noexcept;
+	/**
+	 * Load and re-apply the configuration to the daemon.
+	 */
+	void load() noexcept;
 };
 
 /**
@@ -192,39 +192,39 @@ public:
  */
 class irccd_error : public std::system_error {
 public:
-    /**
-     * \brief Irccd related errors.
-     */
-    enum error {
-        //!< No error.
-        no_error = 0,
+	/**
+	 * \brief Irccd related errors.
+	 */
+	enum error {
+		//!< No error.
+		no_error = 0,
 
-        //!< The connected peer is not irccd.
-        not_irccd,
+		//!< The connected peer is not irccd.
+		not_irccd,
 
-        //!< The irccd version is too different.
-        incompatible_version,
+		//!< The irccd version is too different.
+		incompatible_version,
 
-        //!< Authentication was required but not issued.
-        auth_required,
+		//!< Authentication was required but not issued.
+		auth_required,
 
-        //!< Authentication was invalid.
-        invalid_auth,
+		//!< Authentication was invalid.
+		invalid_auth,
 
-        //!< The message was not a valid JSON object.
-        invalid_message,
+		//!< The message was not a valid JSON object.
+		invalid_message,
 
-        //!< The specified command does not exist.
-        invalid_command,
+		//!< The specified command does not exist.
+		invalid_command,
 
-        //!< The specified command requires more arguments.
-        incomplete_message,
-    };
+		//!< The specified command requires more arguments.
+		incomplete_message,
+	};
 
-    /**
-     * Inherited constructors.
-     */
-    using system_error::system_error;
+	/**
+	 * Inherited constructors.
+	 */
+	using system_error::system_error;
 };
 
 /**

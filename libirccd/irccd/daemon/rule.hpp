@@ -36,191 +36,48 @@ namespace irccd {
 /**
  * \brief Manage rule to activate or deactive events.
  */
-class rule {
-public:
-    /**
-     * List of criterias.
-     */
-    using set = std::set<std::string>;
+struct rule {
+	/**
+	 * List of criterias.
+	 */
+	using set = std::set<std::string>;
 
-    /**
-     * \brief Rule action type.
-     */
-    enum class action {
-        accept,         //!< The event is accepted (default)
-        drop            //!< The event is dropped
-    };
+	/**
+	 * \brief Rule action type.
+	 */
+	enum class action_type {
+		accept,         //!< The event is accepted (default)
+		drop            //!< The event is dropped
+	};
 
-private:
-    set servers_;
-    set channels_;
-    set origins_;
-    set plugins_;
-    set events_;
-    action action_{action::accept};
+	set servers;
+	set channels;
+	set origins;
+	set plugins;
+	set events;
+	action_type action{action_type::accept};
 
-    /*
-     * Check if a set contains the value and return true if it is or return
-     * true if value is empty (which means applicable).
-     */
-    bool match_set(const set&, const std::string&) const noexcept;
+	/*
+	 * Check if a set contains the value and return true if it is or return
+	 * true if value is empty (which means applicable).
+	 */
+	auto match_set(const set&, const std::string&) const noexcept -> bool;
 
-public:
-    /**
-     * Rule constructor.
-     *
-     * \param servers the server list
-     * \param channels the channels
-     * \param nicknames the nicknames
-     * \param plugins the plugins
-     * \param events the events
-     * \param action the rule action
-     * \throw std::invalid_argument if events are invalid
-     */
-    rule(set servers = {},
-         set channels = {},
-         set nicknames = {},
-         set plugins = {},
-         set events = {},
-         action action = action::accept);
-
-    /**
-     * Check if that rule apply for the given criterias.
-     *
-     * \param server the server
-     * \param channel the channel
-     * \param nick the origin
-     * \param plugin the plugin
-     * \param event the event
-     * \return true if match
-     */
-    bool match(std::string_view server,
-               std::string_view channel,
-               std::string_view nick,
-               std::string_view plugin,
-               std::string_view event) const noexcept;
-
-    /**
-     * Get the action.
-     *
-     * \return the action
-     */
-    inline action get_action() const noexcept
-    {
-        return action_;
-    }
-
-    /**
-     * Set the action.
-     *
-     * \pre action must be valid
-     */
-    inline void set_action(action action) noexcept
-    {
-        assert(action == action::accept || action == action::drop);
-
-        action_ = action;
-    }
-
-    /**
-     * Get the servers.
-     *
-     * \return the servers
-     */
-    inline const set& get_servers() const noexcept
-    {
-        return servers_;
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \return the servers
-     */
-    inline set& get_servers() noexcept
-    {
-        return servers_;
-    }
-
-    /**
-     * Get the channels.
-     *
-     * \return the channels
-     */
-    inline const set& get_channels() const noexcept
-    {
-        return channels_;
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \return the channels
-     */
-    inline set& get_channels() noexcept
-    {
-        return channels_;
-    }
-
-    /**
-     * Get the origins.
-     *
-     * \return the origins
-     */
-    inline const set& get_origins() const noexcept
-    {
-        return origins_;
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \return the origins
-     */
-    inline set& get_origins() noexcept
-    {
-        return origins_;
-    }
-
-    /**
-     * Get the plugins.
-     *
-     * \return the plugins
-     */
-    inline const set& get_plugins() const noexcept
-    {
-        return plugins_;
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \return the plugins
-     */
-    inline set& get_plugins() noexcept
-    {
-        return plugins_;
-    }
-
-    /**
-     * Get the events.
-     *
-     * \return the events
-     */
-    inline const set& get_events() const noexcept
-    {
-        return events_;
-    }
-
-    /**
-     * Overloaded function.
-     *
-     * \return the events
-     */
-    inline set& get_events() noexcept
-    {
-        return events_;
-    }
+	/**
+	 * Check if that rule apply for the given criterias.
+	 *
+	 * \param server the server
+	 * \param channel the channel
+	 * \param nick the origin
+	 * \param plugin the plugin
+	 * \param event the event
+	 * \return true if match
+	 */
+	auto match(std::string_view server,
+	           std::string_view channel,
+	           std::string_view nick,
+	           std::string_view plugin,
+	           std::string_view event) const noexcept -> bool;
 };
 
 /**
@@ -228,24 +85,24 @@ public:
  */
 class rule_error : public std::system_error {
 public:
-    /**
-     * \brief Rule related errors.
-     */
-    enum error {
-        //!< No error.
-        no_error = 0,
+	/**
+	 * \brief Rule related errors.
+	 */
+	enum error {
+		//!< No error.
+		no_error = 0,
 
-        //!< Invalid action given.
-        invalid_action,
+		//!< Invalid action given.
+		invalid_action,
 
-        //!< Invalid rule index.
-        invalid_index,
-    };
+		//!< Invalid rule index.
+		invalid_index,
+	};
 
-    /**
-     * Inherited constructors.
-     */
-    using system_error::system_error;
+	/**
+	 * Inherited constructors.
+	 */
+	using system_error::system_error;
 };
 
 /**
@@ -253,14 +110,14 @@ public:
  *
  * \return the singleton
  */
-const std::error_category& rule_category();
+auto rule_category() -> const std::error_category&;
 
 /**
  * Create a std::error_code from rule_error::error enum.
  *
  * \param e the error code
  */
-std::error_code make_error_code(rule_error::error e);
+auto make_error_code(rule_error::error e) -> std::error_code;
 
 } // !irccd
 

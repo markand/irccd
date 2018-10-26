@@ -31,94 +31,94 @@ namespace {
 
 class rule_remove_fixture : public command_fixture {
 public:
-    rule_remove_fixture()
-    {
-        irccd_.rules().add(rule(
-            { "s1", "s2" },
-            { "c1", "c2" },
-            { "o1", "o2" },
-            { "p1", "p2" },
-            { "onMessage", "onCommand" },
-            rule::action::drop
-        ));
-        irccd_.rules().add(rule(
-            { "s1", },
-            { "c1", },
-            { "o1", },
-            { "p1", },
-            { "onMessage", },
-            rule::action::accept
-        ));
-    }
+	rule_remove_fixture()
+	{
+		irccd_.rules().add(rule{
+			{ "s1", "s2" },
+			{ "c1", "c2" },
+			{ "o1", "o2" },
+			{ "p1", "p2" },
+			{ "onMessage", "onCommand" },
+			rule::action_type::drop
+		});
+		irccd_.rules().add(rule{
+			{ "s1", },
+			{ "c1", },
+			{ "o1", },
+			{ "p1", },
+			{ "onMessage", },
+			rule::action_type::accept
+		});
+	}
 };
 
 BOOST_FIXTURE_TEST_SUITE(rule_remove_fixture_suite, rule_remove_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    request({
-        { "command",    "rule-remove"   },
-        { "index",      1               }
-    });
+	request({
+		{ "command",    "rule-remove"   },
+		{ "index",      1               }
+	});
 
-    const auto [json, code] = request({{ "command", "rule-list" }});
+	const auto [json, code] = request({{ "command", "rule-list" }});
 
-    BOOST_TEST(!code);
-    BOOST_TEST(json["list"].is_array());
-    BOOST_TEST(json["list"].size() == 1U);
+	BOOST_TEST(!code);
+	BOOST_TEST(json["list"].is_array());
+	BOOST_TEST(json["list"].size() == 1U);
 
-    auto servers = json["list"][0]["servers"];
-    auto channels = json["list"][0]["channels"];
-    auto plugins = json["list"][0]["plugins"];
-    auto events = json["list"][0]["events"];
+	auto servers = json["list"][0]["servers"];
+	auto channels = json["list"][0]["channels"];
+	auto plugins = json["list"][0]["plugins"];
+	auto events = json["list"][0]["events"];
 
-    BOOST_TEST(json_util::contains(servers, "s1"));
-    BOOST_TEST(json_util::contains(servers, "s2"));
-    BOOST_TEST(json_util::contains(channels, "c1"));
-    BOOST_TEST(json_util::contains(channels, "c2"));
-    BOOST_TEST(json_util::contains(plugins, "p1"));
-    BOOST_TEST(json_util::contains(plugins, "p2"));
-    BOOST_TEST(json_util::contains(events, "onMessage"));
-    BOOST_TEST(json_util::contains(events, "onCommand"));
-    BOOST_TEST(json["list"][0]["action"].get<std::string>() == "drop");
+	BOOST_TEST(json_util::contains(servers, "s1"));
+	BOOST_TEST(json_util::contains(servers, "s2"));
+	BOOST_TEST(json_util::contains(channels, "c1"));
+	BOOST_TEST(json_util::contains(channels, "c2"));
+	BOOST_TEST(json_util::contains(plugins, "p1"));
+	BOOST_TEST(json_util::contains(plugins, "p2"));
+	BOOST_TEST(json_util::contains(events, "onMessage"));
+	BOOST_TEST(json_util::contains(events, "onCommand"));
+	BOOST_TEST(json["list"][0]["action"].get<std::string>() == "drop");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_index_1)
 {
-    const auto [json, code] = request({
-        { "command",    "rule-remove"   },
-        { "index",      -100            }
-    });
+	const auto [json, code] = request({
+		{ "command",    "rule-remove"   },
+		{ "index",      -100            }
+	});
 
-    BOOST_TEST(code == rule_error::invalid_index);
-    BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
+	BOOST_TEST(code == rule_error::invalid_index);
+	BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_2)
 {
-    const auto [json, code] = request({
-        { "command",    "rule-remove"   },
-        { "index",      100             }
-    });
+	const auto [json, code] = request({
+		{ "command",    "rule-remove"   },
+		{ "index",      100             }
+	});
 
-    BOOST_TEST(code == rule_error::invalid_index);
-    BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
+	BOOST_TEST(code == rule_error::invalid_index);
+	BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_3)
 {
-    const auto [json, code] = request({
-        { "command",    "rule-remove"   },
-        { "index",      "notaint"       }
-    });
+	const auto [json, code] = request({
+		{ "command",    "rule-remove"   },
+		{ "index",      "notaint"       }
+	});
 
-    BOOST_TEST(code == rule_error::invalid_index);
-    BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
+	BOOST_TEST(code == rule_error::invalid_index);
+	BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -29,26 +29,26 @@ namespace {
 
 class plugin_list_fixture : public command_fixture {
 public:
-    plugin_list_fixture()
-    {
-        irccd_.plugins().clear();
-        irccd_.plugins().add(std::make_unique<mock_plugin>("t1"));
-        irccd_.plugins().add(std::make_unique<mock_plugin>("t2"));
-    }
+	plugin_list_fixture()
+	{
+		irccd_.plugins().clear();
+		irccd_.plugins().add(std::make_unique<mock_plugin>("t1"));
+		irccd_.plugins().add(std::make_unique<mock_plugin>("t2"));
+	}
 };
 
 BOOST_FIXTURE_TEST_SUITE(plugin_list_fixture_suite, plugin_list_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    const auto [json, code] = request({
-        { "command", "plugin-list" }
-    });
+	const auto [json, code] = request({
+		{ "command", "plugin-list" }
+	});
 
-    BOOST_TEST(!code);
-    BOOST_TEST(json.is_object());
-    BOOST_TEST(json["list"][0].get<std::string>() == "t1");
-    BOOST_TEST(json["list"][1].get<std::string>() == "t2");
+	BOOST_TEST(!code);
+	BOOST_TEST(json.is_object());
+	BOOST_TEST(json["list"][0].get<std::string>() == "t1");
+	BOOST_TEST(json["list"][1].get<std::string>() == "t2");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

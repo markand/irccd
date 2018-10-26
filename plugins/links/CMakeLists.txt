@@ -21,16 +21,16 @@ project(plugin-links)
 add_subdirectory(extern/uriparser)
 
 irccd_define_plugin(
-    NAME links
-    TYPE NATIVE
-    SOURCES
-        ${plugin-links_SOURCE_DIR}/links.cpp
-        ${plugin-links_SOURCE_DIR}/links.hpp
-        ${plugin-links_SOURCE_DIR}/requester.cpp
-        ${plugin-links_SOURCE_DIR}/requester.hpp
-        ${plugin-links_SOURCE_DIR}/scope_exit.cpp
-        ${plugin-links_SOURCE_DIR}/scope_exit.hpp
-        ${plugin-links_SOURCE_DIR}/uri.cpp
-        ${plugin-links_SOURCE_DIR}/uri.hpp
-    LIBRARIES liburiparser
+	NAME links
+	TYPE NATIVE
+	SOURCES
+		${plugin-links_SOURCE_DIR}/links.cpp
+		${plugin-links_SOURCE_DIR}/links.hpp
+		${plugin-links_SOURCE_DIR}/requester.cpp
+		${plugin-links_SOURCE_DIR}/requester.hpp
+		${plugin-links_SOURCE_DIR}/scope_exit.cpp
+		${plugin-links_SOURCE_DIR}/scope_exit.hpp
+		${plugin-links_SOURCE_DIR}/uri.cpp
+		${plugin-links_SOURCE_DIR}/uri.hpp
+	LIBRARIES liburiparser
 )

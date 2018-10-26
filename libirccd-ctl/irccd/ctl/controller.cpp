@@ -30,112 +30,130 @@
 
 namespace irccd {
 
+using json_util::deserializer;
+
 namespace ctl {
 
 void controller::authenticate(connect_handler handler, nlohmann::json info)
 {
-    const auto cmd = nlohmann::json::object({
-        { "command",    "auth"      },
-        { "password",   password_   }
-    });
+	const auto cmd = nlohmann::json::object({
+		{ "command",    "auth"          },
+		{ "password",   password_       }
+	});
 
-    write(cmd, [handler, info, this] (auto code) {
-        if (code) {
-            handler(std::move(code), nullptr);
-            return;
-        }
+	write(cmd, [handler, info, this] (auto code) {
+		if (code) {
+			handler(std::move(code), nullptr);
+			return;
+		}
 
-        read([handler, info] (auto code, auto) {
-            handler(std::move(code), std::move(info));
-        });
-    });
+		read([handler, info] (auto code, auto) {
+			handler(std::move(code), std::move(info));
+		});
+	});
 }
 
 void controller::verify(connect_handler handler)
 {
-    read([handler, this] (auto code, auto message) {
-        if (code) {
-            handler(std::move(code), std::move(message));
-            return;
-        }
+	read([handler, this] (auto code, auto message) {
+		if (code) {
+			handler(std::move(code), std::move(message));
+			return;
+		}
 
-        const json_util::document doc(message);
-        const auto program = doc.get<std::string>("program");
-        const auto major = doc.get<int>("major");
+		const deserializer doc(message);
+		const auto program = doc.get<std::string>("program");
+		const auto major = doc.get<int>("major");
 
-        if (!program && *program != "irccd")
-            handler(irccd_error::not_irccd, std::move(message));
-        else if (major && *major != IRCCD_VERSION_MAJOR)
-            handler(irccd_error::incompatible_version, std::move(message));
-        else {
-            if (!password_.empty())
-                authenticate(std::move(handler), message);
-            else
-                handler(code, std::move(message));
-        }
-    });
+		if (!program && *program != "irccd")
+			handler(irccd_error::not_irccd, std::move(message));
+		else if (major && *major != IRCCD_VERSION_MAJOR)
+			handler(irccd_error::incompatible_version, std::move(message));
+		else {
+			if (!password_.empty())
+				authenticate(std::move(handler), message);
+			else
+				handler(code, std::move(message));
+		}
+	});
+}
+
+controller::controller(std::unique_ptr<connector> connector) noexcept
+	: connector_(std::move(connector))
+{
+	assert(connector_);
+}
+
+auto controller::get_password() const noexcept -> const std::string&
+{
+	return password_;
+}
+
+void controller::set_password(std::string password) noexcept
+{
+	password_ = std::move(password);
 }
 
 void controller::connect(connect_handler handler)
 {
-    assert(handler);
+	assert(handler);
 
-    connector_->connect([handler, this] (auto code, auto stream) {
-        if (code)
-            handler(std::move(code), nullptr);
-        else {
-            stream_ = std::move(stream);
-            verify(std::move(handler));
-        }
-    });
+	connector_->connect([handler, this] (auto code, auto stream) {
+		if (code)
+			handler(std::move(code), nullptr);
+		else {
+			stream_ = std::move(stream);
+			verify(std::move(handler));
+		}
+	});
 }
 
-void controller::read(io::read_handler handler)
+void controller::read(stream::read_handler handler)
 {
-    assert(handler);
-    assert(stream_);
+	assert(handler);
+	assert(stream_);
 
-    auto stream = stream_;
+	auto stream = stream_;
 
-    stream_->read([this, handler, stream] (auto code, auto msg) {
-        if (code) {
-            stream_ = nullptr;
-            handler(std::move(code), std::move(msg));
-            return;
-        }
+	stream_->read([this, handler, stream] (auto code, auto msg) {
+		if (code) {
+			stream_ = nullptr;
+			handler(std::move(code), std::move(msg));
+			return;
+		}
 
-        const json_util::document doc(msg);
-        const auto e = doc.get<int>("error");
-        const auto c = doc.get<std::string>("errorCategory");
+		const deserializer doc(msg);
+		const auto e = doc.get<int>("error");
+		const auto c = doc.get<std::string>("errorCategory");
 
-        if (e && c) {
-            if (*c == "irccd")
-                code = make_error_code(static_cast<irccd_error::error>(*e));
-            else if (*c == "server")
-                code = make_error_code(static_cast<server_error::error>(*e));
-            else if (*c == "plugin")
-                code = make_error_code(static_cast<plugin_error::error>(*e));
-            else if (*c == "rule")
-                code = make_error_code(static_cast<rule_error::error>(*e));
-        }
+		if (e && c) {
+			if (*c == "irccd")
+				code = make_error_code(static_cast<irccd_error::error>(*e));
+			else if (*c == "server")
+				code = make_error_code(static_cast<server_error::error>(*e));
+			else if (*c == "plugin")
+				code = make_error_code(static_cast<plugin_error::error>(*e));
+			else if (*c == "rule")
+				code = make_error_code(static_cast<rule_error::error>(*e));
+		}
 
-        handler(std::move(code), std::move(msg));
-    });
+		handler(std::move(code), std::move(msg));
+	});
 }
 
-void controller::write(nlohmann::json message, io::write_handler handler)
+void controller::write(nlohmann::json message, stream::write_handler handler)
 {
-    assert(message.is_object());
-    assert(stream_);
+	assert(message.is_object());
+	assert(stream_);
 
-    auto stream = stream_;
+	auto stream = stream_;
 
-    stream_->write(std::move(message), [this, stream, handler] (auto code) {
-        if (code)
-            stream_ = nullptr;
-        if (handler)
-            handler(std::move(code));
-    });
+	stream_->write(std::move(message), [this, stream, handler] (auto code) {
+		if (code)
+			stream_ = nullptr;
+		if (handler)
+			handler(std::move(code));
+	});
 }
 
 } // !ctl

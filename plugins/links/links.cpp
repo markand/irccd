@@ -38,55 +38,55 @@ using string_util::to_uint;
 
 auto links_plugin::get_name() const noexcept -> string_view
 {
-    return "links";
+	return "links";
 }
 
 auto links_plugin::get_author() const noexcept -> string_view
 {
-    return "David Demelier <markand@malikania.fr>";
+	return "David Demelier <markand@malikania.fr>";
 }
 
 auto links_plugin::get_license() const noexcept -> string_view
 {
-    return "ISC";
+	return "ISC";
 }
 
 auto links_plugin::get_summary() const noexcept -> string_view
 {
-    return "show webpage title";
+	return "show webpage title";
 }
 
 auto links_plugin::get_version() const noexcept -> string_view
 {
-    return IRCCD_VERSION;
+	return IRCCD_VERSION;
 }
 
 void links_plugin::set_options(const map& conf)
 {
-    if (const auto it = conf.find("timeout"); it != conf.end())
-        if (const auto v = to_uint(it->second); v)
-            conf_timeout = *v;
+	if (const auto it = conf.find("timeout"); it != conf.end())
+		if (const auto v = to_uint(it->second); v)
+			conf_timeout = *v;
 }
 
 void links_plugin::set_formats(const map& formats)
 {
-    if (const auto it = formats.find("info"); it != formats.end())
-        format_info = it->second;
+	if (const auto it = formats.find("info"); it != formats.end())
+		format_info = it->second;
 }
 
 void links_plugin::handle_message(irccd& irccd, const message_event& ev)
 {
-    requester::run(irccd.get_service(), ev.server, ev.origin, ev.channel, ev.message);
+	requester::run(irccd.get_service(), ev.server, ev.origin, ev.channel, ev.message);
 }
 
 auto links_plugin::abi() -> version
 {
-    return version();
+	return version();
 }
 
 auto links_plugin::init(string id) -> unique_ptr<plugin>
 {
-    return make_unique<links_plugin>(move(id));
+	return make_unique<links_plugin>(move(id));
 }
 
 BOOST_DLL_ALIAS(links_plugin::abi, irccd_abi_links)

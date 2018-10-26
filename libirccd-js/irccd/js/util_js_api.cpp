@@ -44,26 +44,26 @@ namespace {
  */
 auto subst(duk_context* ctx, int index) -> string_util::subst
 {
-    string_util::subst params;
+	string_util::subst params;
 
-    if (!duk_is_object(ctx, index))
-        return params;
+	if (!duk_is_object(ctx, index))
+		return params;
 
-    duk_enum(ctx, index, 0);
+	duk_enum(ctx, index, 0);
 
-    while (duk_next(ctx, -1, true)) {
-        if (duk::get<std::string>(ctx, -2) == "date")
-            params.time = static_cast<time_t>(duk_get_number(ctx, -1) / 1000);
-        else
-            params.keywords.insert({
-                duk::get<std::string>(ctx, -2),
-                duk::get<std::string>(ctx, -1)
-            });
+	while (duk_next(ctx, -1, true)) {
+		if (duk::get<std::string>(ctx, -2) == "date")
+			params.time = static_cast<time_t>(duk_get_number(ctx, -1) / 1000);
+		else
+			params.keywords.insert({
+				duk::get<std::string>(ctx, -2),
+				duk::get<std::string>(ctx, -1)
+			});
 
-        duk_pop_n(ctx, 2);
-    }
+		duk_pop_n(ctx, 2);
+	}
 
-    return params;
+	return params;
 }
 
 // }}}
@@ -78,26 +78,26 @@ auto subst(duk_context* ctx, int index) -> string_util::subst
  */
 auto split(duk_context* ctx) -> std::vector<std::string>
 {
-    duk_require_type_mask(ctx, 0, DUK_TYPE_MASK_OBJECT | DUK_TYPE_MASK_STRING);
+	duk_require_type_mask(ctx, 0, DUK_TYPE_MASK_OBJECT | DUK_TYPE_MASK_STRING);
 
-    std::vector<std::string> result;
-    std::string pattern = " \t\n";
+	std::vector<std::string> result;
+	std::string pattern = " \t\n";
 
-    if (duk_is_string(ctx, 0))
-        result = string_util::split(duk::get<std::string>(ctx, 0), pattern);
-    else if (duk_is_array(ctx, 0)) {
-        duk_enum(ctx, 0, DUK_ENUM_ARRAY_INDICES_ONLY);
+	if (duk_is_string(ctx, 0))
+		result = string_util::split(duk::get<std::string>(ctx, 0), pattern);
+	else if (duk_is_array(ctx, 0)) {
+		duk_enum(ctx, 0, DUK_ENUM_ARRAY_INDICES_ONLY);
 
-        while (duk_next(ctx, -1, 1)) {
-            // Split individual tokens as array if spaces are found.
-            const auto tmp = string_util::split(duk_to_string(ctx, -1), pattern);
+		while (duk_next(ctx, -1, 1)) {
+			// Split individual tokens as array if spaces are found.
+			const auto tmp = string_util::split(duk_to_string(ctx, -1), pattern);
 
-            result.insert(result.end(), tmp.begin(), tmp.end());
-            duk_pop_2(ctx);
-        }
-    }
+			result.insert(result.end(), tmp.begin(), tmp.end());
+			duk_pop_2(ctx);
+		}
+	}
 
-    return result;
+	return result;
 }
 
 // }}}
@@ -114,15 +114,15 @@ auto split(duk_context* ctx) -> std::vector<std::string>
  */
 auto limit(duk_context* ctx, int index, const char* name, int value) -> int
 {
-    if (duk_get_top(ctx) < index || !duk_is_number(ctx, index))
-        return value;
+	if (duk_get_top(ctx) < index || !duk_is_number(ctx, index))
+		return value;
 
-    value = duk_to_int(ctx, index);
+	value = duk_to_int(ctx, index);
 
-    if (value <= 0)
-        duk_error(ctx, DUK_ERR_RANGE_ERROR, "argument %d (%s) must be positive", index, name);
+	if (value <= 0)
+		duk_error(ctx, DUK_ERR_RANGE_ERROR, "argument %d (%s) must be positive", index, name);
 
-    return value;
+	return value;
 }
 
 // }}}
@@ -140,37 +140,37 @@ auto limit(duk_context* ctx, int index, const char* name, int value) -> int
  *   - s is the current line
  *   - abc is the token to add
  *
- * s   = ""                 (new line)
+ * s   = ""				 (new line)
  * s  -> "abc"
  *
- * s   = "hello world"      (enough room)
+ * s   = "hello world"	  (enough room)
  * s  -> "hello world abc"
  *
- * s   = "hello world"      (not enough room: maxc is smaller)
+ * s   = "hello world"	  (not enough room: maxc is smaller)
  * s+1 = "abc"
  */
 auto lines(duk_context* ctx, const std::vector<std::string>& tokens, int maxc) -> std::vector<std::string>
 {
-    std::vector<std::string> result{""};
+	std::vector<std::string> result{""};
 
-    for (const auto& s : tokens) {
-        if (s.length() > static_cast<std::size_t>(maxc))
-            duk_error(ctx, DUK_ERR_RANGE_ERROR, "word '%s' could not fit in maxc limit (%d)", s.c_str(), maxc);
+	for (const auto& s : tokens) {
+		if (s.length() > static_cast<std::size_t>(maxc))
+			duk_error(ctx, DUK_ERR_RANGE_ERROR, "word '%s' could not fit in maxc limit (%d)", s.c_str(), maxc);
 
-        // Compute the length required (prepend a space if needed)
-        auto required = s.length() + (result.back().empty() ? 0 : 1);
+		// Compute the length required (prepend a space if needed)
+		auto required = s.length() + (result.back().empty() ? 0 : 1);
 
-        if (result.back().length() + required > static_cast<std::size_t>(maxc))
-            result.push_back(s);
-        else {
-            if (!result.back().empty())
-                result.back() += ' ';
+		if (result.back().length() + required > static_cast<std::size_t>(maxc))
+			result.push_back(s);
+		else {
+			if (!result.back().empty())
+				result.back() += ' ';
 
-            result.back() += s;
-        }
-    }
+			result.back() += s;
+		}
+	}
 
-    return result;
+	return result;
 }
 
 // }}}
@@ -180,15 +180,15 @@ auto lines(duk_context* ctx, const std::vector<std::string>& tokens, int maxc) -
 template <typename Handler>
 auto wrap(duk_context* ctx, Handler handler) -> duk_ret_t
 {
-    try {
-        return handler();
-    } catch (const std::system_error& ex) {
-        duk::raise(ctx, ex);
-    } catch (const std::exception& ex) {
-        duk::raise(ctx, ex);
-    }
+	try {
+		return handler();
+	} catch (const std::system_error& ex) {
+		duk::raise(ctx, ex);
+	} catch (const std::exception& ex) {
+		duk::raise(ctx, ex);
+	}
 
-    return 0;
+	return 0;
 }
 
 // }}}
@@ -230,21 +230,21 @@ auto wrap(duk_context* ctx, Handler handler) -> duk_ret_t
  */
 auto Util_cut(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        const auto list = lines(ctx, split(ctx), limit(ctx, 1, "maxc", 72));
-        const auto maxl = limit(ctx, 2, "maxl", INT_MAX);
+	return wrap(ctx, [&] {
+		const auto list = lines(ctx, split(ctx), limit(ctx, 1, "maxc", 72));
+		const auto maxl = limit(ctx, 2, "maxl", INT_MAX);
 
-        if (list.size() > static_cast<std::size_t>(maxl))
-            return 0;
+		if (list.size() > static_cast<std::size_t>(maxl))
+			return 0;
 
-        // Empty list but lines() returns at least one.
-        if (list.size() == 1 && list[0].empty()) {
-            duk_push_array(ctx);
-            return 1;
-        }
+		// Empty list but lines() returns at least one.
+		if (list.size() == 1 && list[0].empty()) {
+			duk_push_array(ctx);
+			return 1;
+		}
 
-        return duk::push(ctx, list);
-    });
+		return duk::push(ctx, list);
+	});
 }
 
 // }}}
@@ -267,9 +267,9 @@ auto Util_cut(duk_context* ctx) -> duk_ret_t
  */
 auto Util_format(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        return duk::push(ctx, string_util::format(duk::get<std::string>(ctx, 0), subst(ctx, 1)));
-    });
+	return wrap(ctx, [&] {
+		return duk::push(ctx, string_util::format(duk::get<std::string>(ctx, 0), subst(ctx, 1)));
+	});
 }
 
 // }}}
@@ -291,9 +291,9 @@ auto Util_format(duk_context* ctx) -> duk_ret_t
  */
 auto Util_splituser(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        return duk::push(ctx, irc::user::parse(duk::require<std::string>(ctx, 0)).nick);
-    });
+	return wrap(ctx, [&] {
+		return duk::push(ctx, irc::user::parse(duk::require<std::string>(ctx, 0)).nick);
+	});
 }
 
 // }}}
@@ -315,37 +315,37 @@ auto Util_splituser(duk_context* ctx) -> duk_ret_t
  */
 auto Util_splithost(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [&] {
-        return duk::push(ctx, irc::user::parse(duk::require<std::string>(ctx, 0)).host);
-    });
+	return wrap(ctx, [&] {
+		return duk::push(ctx, irc::user::parse(duk::require<std::string>(ctx, 0)).host);
+	});
 }
 
 // }}}
 
 const duk_function_list_entry functions[] = {
-    { "cut",        Util_cut,       DUK_VARARGS },
-    { "format",     Util_format,    DUK_VARARGS },
-    { "splituser",  Util_splituser, 1           },
-    { "splithost",  Util_splithost, 1           },
-    { nullptr,      nullptr,        0           }
+	{ "cut",        Util_cut,       DUK_VARARGS     },
+	{ "format",     Util_format,    DUK_VARARGS     },
+	{ "splituser",  Util_splituser, 1               },
+	{ "splithost",  Util_splithost, 1               },
+	{ nullptr,      nullptr,        0               }
 };
 
 } // !namespace
 
 auto util_js_api::get_name() const noexcept -> std::string_view
 {
-    return "Irccd.Util";
+	return "Irccd.Util";
 }
 
 void util_js_api::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
-    duk::stack_guard sa(plugin->get_context());
+	duk::stack_guard sa(plugin->get_context());
 
-    duk_get_global_string(plugin->get_context(), "Irccd");
-    duk_push_object(plugin->get_context());
-    duk_put_function_list(plugin->get_context(), -1, functions);
-    duk_put_prop_string(plugin->get_context(), -2, "Util");
-    duk_pop(plugin->get_context());
+	duk_get_global_string(plugin->get_context(), "Irccd");
+	duk_push_object(plugin->get_context());
+	duk_put_function_list(plugin->get_context(), -1, functions);
+	duk_put_prop_string(plugin->get_context(), -2, "Util");
+	duk_pop(plugin->get_context());
 }
 
 } // !irccd::js

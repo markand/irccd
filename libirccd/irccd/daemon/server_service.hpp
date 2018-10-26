@@ -41,108 +41,108 @@ class irccd;
  */
 class server_service {
 private:
-    irccd& irccd_;
-    std::vector<std::shared_ptr<server>> servers_;
+	irccd& irccd_;
+	std::vector<std::shared_ptr<server>> servers_;
 
-    void handle_error(const std::shared_ptr<server>&, const std::error_code&);
-    void handle_wait(const std::shared_ptr<server>&, const std::error_code&);
-    void handle_recv(const std::shared_ptr<server>&, const std::error_code&, const event&);
-    void handle_connect(const std::shared_ptr<server>&, const std::error_code&);
+	void handle_error(const std::shared_ptr<server>&, const std::error_code&);
+	void handle_wait(const std::shared_ptr<server>&, const std::error_code&);
+	void handle_recv(const std::shared_ptr<server>&, const std::error_code&, const event&);
+	void handle_connect(const std::shared_ptr<server>&, const std::error_code&);
 
-    void wait(const std::shared_ptr<server>&);
-    void recv(const std::shared_ptr<server>&);
-    void connect(const std::shared_ptr<server>&);
+	void wait(const std::shared_ptr<server>&);
+	void recv(const std::shared_ptr<server>&);
+	void connect(const std::shared_ptr<server>&);
 
 public:
-    /**
-     * Create the server service.
-     */
-    server_service(irccd& instance);
+	/**
+	 * Create the server service.
+	 */
+	server_service(irccd& instance);
 
-    /**
-     * Get the list of servers
-     *
-     * \return the servers
-     */
-    auto all() const noexcept -> const std::vector<std::shared_ptr<server>>&;
+	/**
+	 * Get the list of servers
+	 *
+	 * \return the servers
+	 */
+	auto all() const noexcept -> const std::vector<std::shared_ptr<server>>&;
 
-    /**
-     * Check if a server exists.
-     *
-     * \param name the name
-     * \return true if exists
-     */
-    auto has(const std::string& name) const noexcept -> bool;
+	/**
+	 * Check if a server exists.
+	 *
+	 * \param name the name
+	 * \return true if exists
+	 */
+	auto has(const std::string& name) const noexcept -> bool;
 
-    /**
-     * Add a new server to the application.
-     *
-     * \pre hasServer must return false
-     * \param sv the server
-     */
-    void add(std::shared_ptr<server> sv);
+	/**
+	 * Add a new server to the application.
+	 *
+	 * \pre hasServer must return false
+	 * \param sv the server
+	 */
+	void add(std::shared_ptr<server> sv);
 
-    /**
-     * Get a server or empty one if not found
-     *
-     * \param name the server name
-     * \return the server or empty one if not found
-     */
-    auto get(std::string_view name) const noexcept -> std::shared_ptr<server>;
+	/**
+	 * Get a server or empty one if not found
+	 *
+	 * \param name the server name
+	 * \return the server or empty one if not found
+	 */
+	auto get(std::string_view name) const noexcept -> std::shared_ptr<server>;
 
-    /**
-     * Find a server from a JSON object.
-     *
-     * \param name the server name
-     * \return the server
-     * \throw server_error on errors
-     */
-    auto require(std::string_view name) const -> std::shared_ptr<server>;
+	/**
+	 * Find a server from a JSON object.
+	 *
+	 * \param name the server name
+	 * \return the server
+	 * \throw server_error on errors
+	 */
+	auto require(std::string_view name) const -> std::shared_ptr<server>;
 
-    /**
-     * Force disconnection, this also call plugin::handle_disconnect handler.
-     *
-     * \param id the server id
-     * \throw server_error on errors
-     */
-    void disconnect(std::string_view id);
+	/**
+	 * Force disconnection, this also call plugin::handle_disconnect handler.
+	 *
+	 * \param id the server id
+	 * \throw server_error on errors
+	 */
+	void disconnect(std::string_view id);
 
-    /**
-     * Force reconnection, this also call plugin::handle_disconnect handler.
-     *
-     * \param id the server id
-     * \return the server
-     * \throw server_error on errors
-     */
-    void reconnect(std::string_view id);
+	/**
+	 * Force reconnection, this also call plugin::handle_disconnect handler.
+	 *
+	 * \param id the server id
+	 * \return the server
+	 * \throw server_error on errors
+	 */
+	void reconnect(std::string_view id);
 
-    /**
-     * Force reconnection of all servers.
-     */
-    void reconnect();
+	/**
+	 * Force reconnection of all servers.
+	 */
+	void reconnect();
 
-    /**
-     * Remove a server from the irccd instance.
-     *
-     * The server if any, will be disconnected.
-     *
-     * \param name the server name
-     */
-    void remove(std::string_view name);
+	/**
+	 * Remove a server from the irccd instance.
+	 *
+	 * The server if any, will be disconnected.
+	 *
+	 * \param name the server name
+	 */
+	void remove(std::string_view name);
 
-    /**
-     * Remove all servers.
-     *
-     * All servers will be disconnected.
-     */
-    void clear() noexcept;
+	/**
+	 * Remove all servers.
+	 *
+	 * All servers will be disconnected.
+	 */
+	void clear() noexcept;
 
-    /**
-     * Load servers from the configuration.
-     *
-     * \param cfg the config
-     */
-    void load(const config& cfg) noexcept;
+	/**
+	 * Load servers from the configuration.
+	 *
+	 * \param cfg the config
+	 */
+	void load(const config& cfg) noexcept;
 };
 
 namespace logger {
@@ -152,9 +152,9 @@ struct loggable_traits;
 
 template <>
 struct loggable_traits<server> {
-    static auto get_category(const server& server) -> std::string_view;
+	static auto get_category(const server& server) -> std::string_view;
 
-    static auto get_component(const server& server) -> std::string_view;
+	static auto get_component(const server& server) -> std::string_view;
 };
 
 } // !logger

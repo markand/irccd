@@ -33,21 +33,21 @@ namespace irccd {
  */
 class scope_exit {
 private:
-    std::function<void ()> func_;
+	std::function<void ()> func_;
 
 public:
-    /**
-     * Constructor.
-     *
-     * \pre func != nullptr
-     * \param func the function to call
-     */
-    scope_exit(std::function<void ()> func) noexcept;
+	/**
+	 * Constructor.
+	 *
+	 * \pre func != nullptr
+	 * \param func the function to call
+	 */
+	scope_exit(std::function<void ()> func) noexcept;
 
-    /**
-     * Execute the handler.
-     */
-    ~scope_exit() noexcept;
+	/**
+	 * Execute the handler.
+	 */
+	~scope_exit() noexcept;
 };
 
 } // !irccd

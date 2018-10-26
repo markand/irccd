@@ -35,12 +35,12 @@
 #
 
 function(irccd_indent_message var value padding)
-    string(LENGTH "${var}" length)
+	string(LENGTH "${var}" length)
 
-    while (${length} LESS ${padding})
-        math(EXPR length "${length} + 1")
-        set(space "${space} ")
-    endwhile ()
+	while (${length} LESS ${padding})
+		math(EXPR length "${length} + 1")
+		set(space "${space} ")
+	endwhile ()
 
-    message("${var}${space}${value}")
+	message("${var}${space}${value}")
 endfunction()

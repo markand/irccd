@@ -34,15 +34,15 @@ namespace irccd::js {
  */
 class unicode_js_api : public js_api {
 public:
-    /**
-     * \copydoc js_api::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc js_api::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc js_api::load
-     */
-    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
+	/**
+	 * \copydoc js_api::load
+	 */
+	void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
 } // !irccd::js

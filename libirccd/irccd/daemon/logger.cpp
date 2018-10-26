@@ -31,101 +31,101 @@ namespace irccd::logger {
 
 void logger::debug(const std::string& line)
 {
-    // Print only in debug mode, the buffer is flushed anyway.
+	// Print only in debug mode, the buffer is flushed anyway.
 #if !defined(NDEBUG)
-    parent_.write_debug(parent_.filter_->pre_debug(category_, component_, line));
+	parent_.write_debug(parent_.filter_->pre_debug(category_, component_, line));
 #else
-    (void)line;
+	(void)line;
 #endif
 }
 
 void logger::info(const std::string& line)
 {
-    // Print only if verbose, the buffer will be flushed anyway.
-    if (parent_.verbose_)
-        parent_.write_info(parent_.filter_->pre_info(category_, component_, line));
+	// Print only if verbose, the buffer will be flushed anyway.
+	if (parent_.verbose_)
+		parent_.write_info(parent_.filter_->pre_info(category_, component_, line));
 }
 
 void logger::warning(const std::string& line)
 {
-    parent_.write_warning(parent_.filter_->pre_warning(category_, component_, line));
+	parent_.write_warning(parent_.filter_->pre_warning(category_, component_, line));
 }
 
 logger::logger(sink& parent, level level, std::string_view category, std::string_view component) noexcept
-    : std::ostream(this)
-    , level_(level)
-    , parent_(parent)
-    , category_(category)
-    , component_(component)
+	: std::ostream(this)
+	, level_(level)
+	, parent_(parent)
+	, category_(category)
+	, component_(component)
 {
-    assert(level >= level::debug && level <= level::warning);
+	assert(level >= level::debug && level <= level::warning);
 }
 
 int logger::sync()
 {
-    std::string buffer = str();
-    std::string::size_type pos;
+	std::string buffer = str();
+	std::string::size_type pos;
 
-    while ((pos = buffer.find("\n")) != std::string::npos) {
-        auto line = buffer.substr(0, pos);
+	while ((pos = buffer.find("\n")) != std::string::npos) {
+		auto line = buffer.substr(0, pos);
 
-        // Remove this line.
-        buffer.erase(buffer.begin(), buffer.begin() + pos + 1);
+		// Remove this line.
+		buffer.erase(buffer.begin(), buffer.begin() + pos + 1);
 
-        switch (level_) {
-        case level::debug:
-            debug(line);
-            break;
-        case level::info:
-            info(line);
-            break;
-        case level::warning:
-            warning(line);
-            break;
-        default:
-            break;
-        }
-    }
+		switch (level_) {
+		case level::debug:
+			debug(line);
+			break;
+		case level::info:
+			info(line);
+			break;
+		case level::warning:
+			warning(line);
+			break;
+		default:
+			break;
+		}
+	}
 
-    str(buffer);
+	str(buffer);
 
-    return 0;
+	return 0;
 }
 
 void console_sink::write_info(const std::string& line)
 {
-    std::cout << line << std::endl;
+	std::cout << line << std::endl;
 }
 
 void console_sink::write_warning(const std::string& line)
 {
-    std::cerr << line << std::endl;
+	std::cerr << line << std::endl;
 }
 
 void console_sink::write_debug(const std::string& line)
 {
-    std::cout << line << std::endl;
+	std::cout << line << std::endl;
 }
 
 file_sink::file_sink(std::string normal, std::string errors)
-    : output_normal_(std::move(normal))
-    , output_error_(std::move(errors))
+	: output_normal_(std::move(normal))
+	, output_error_(std::move(errors))
 {
 }
 
 void file_sink::write_info(const std::string& line)
 {
-    std::ofstream(output_normal_, std::ofstream::out | std::ofstream::app) << line << std::endl;
+	std::ofstream(output_normal_, std::ofstream::out | std::ofstream::app) << line << std::endl;
 }
 
 void file_sink::write_warning(const std::string& line)
 {
-    std::ofstream(output_error_, std::ofstream::out | std::ofstream::app) << line << std::endl;
+	std::ofstream(output_error_, std::ofstream::out | std::ofstream::app) << line << std::endl;
 }
 
 void file_sink::write_debug(const std::string& line)
 {
-    std::ofstream(output_normal_, std::ofstream::out | std::ofstream::app) << line << std::endl;
+	std::ofstream(output_normal_, std::ofstream::out | std::ofstream::app) << line << std::endl;
 }
 
 void silent_sink::write_info(const std::string&)
@@ -144,104 +144,104 @@ void silent_sink::write_debug(const std::string&)
 
 syslog_sink::syslog_sink()
 {
-    openlog("irccd", LOG_PID, LOG_DAEMON);
+	openlog("irccd", LOG_PID, LOG_DAEMON);
 }
 
 syslog_sink::~syslog_sink()
 {
-    closelog();
+	closelog();
 }
 
 void syslog_sink::write_info(const std::string& line)
 {
-    syslog(LOG_INFO | LOG_USER, "%s", line.c_str());
+	syslog(LOG_INFO | LOG_USER, "%s", line.c_str());
 }
 
 void syslog_sink::write_warning(const std::string& line)
 {
-    syslog(LOG_WARNING | LOG_USER, "%s", line.c_str());
+	syslog(LOG_WARNING | LOG_USER, "%s", line.c_str());
 }
 
 void syslog_sink::write_debug(const std::string& line)
 {
-    syslog(LOG_DEBUG | LOG_USER, "%s", line.c_str());
+	syslog(LOG_DEBUG | LOG_USER, "%s", line.c_str());
 }
 
 #endif // !IRCCD_HAVE_SYSLOG
 
 sink::sink()
-    : filter_(new filter)
+	: filter_(new filter)
 {
 }
 
 auto sink::is_verbose() const noexcept -> bool
 {
-    return verbose_;
+	return verbose_;
 }
 
 void sink::set_verbose(bool mode) noexcept
 {
-    verbose_ = mode;
+	verbose_ = mode;
 }
 
 void sink::set_filter(std::unique_ptr<filter> filter) noexcept
 {
-    assert(filter);
+	assert(filter);
 
-    filter_ = std::move(filter);
+	filter_ = std::move(filter);
 }
 
 auto sink::info(std::string_view category, std::string_view component) -> logger
 {
-    return logger(*this, logger::level::info, category, component);;
+	return logger(*this, logger::level::info, category, component);;
 }
 
 auto sink::warning(std::string_view category, std::string_view component) -> logger
 {
-    return logger(*this, logger::level::warning, category, component);;
+	return logger(*this, logger::level::warning, category, component);;
 }
 
 auto sink::debug(std::string_view category, std::string_view component) -> logger
 {
-    return logger(*this, logger::level::debug, category, component);;
+	return logger(*this, logger::level::debug, category, component);;
 }
 
 auto filter::pre(std::string_view category,
                  std::string_view component,
                  std::string_view message) const -> std::string
 {
-    std::ostringstream oss;
+	std::ostringstream oss;
 
-    oss << category;
+	oss << category;
 
-    if (!component.empty())
-        oss << " " << component;
+	if (!component.empty())
+		oss << " " << component;
 
-    oss << ": ";
-    oss << message;
+	oss << ": ";
+	oss << message;
 
-    return oss.str();
+	return oss.str();
 }
 
 auto filter::pre_debug(std::string_view category,
                        std::string_view component,
                        std::string_view message) const -> std::string
 {
-    return pre(category, component, message);
+	return pre(category, component, message);
 }
 
 auto filter::pre_info(std::string_view category,
                       std::string_view component,
                       std::string_view message) const -> std::string
 {
-    return pre(category, component, message);
+	return pre(category, component, message);
 }
 
 auto filter::pre_warning(std::string_view category,
-                        std::string_view component,
-                        std::string_view message) const -> std::string
+                         std::string_view component,
+                         std::string_view message) const -> std::string
 {
-    return pre(category, component, message);
+	return pre(category, component, message);
 }
 
 } // !irccd::logger

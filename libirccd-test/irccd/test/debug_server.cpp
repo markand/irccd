@@ -24,37 +24,37 @@ namespace irccd {
 
 void debug_server::connect(connect_handler) noexcept
 {
-    std::cout << get_id() << ": connect" << std::endl;
+	std::cout << get_id() << ": connect" << std::endl;
 }
 
 void debug_server::disconnect() noexcept
 {
-    std::cout << get_id() << ": disconnect" << std::endl;
+	std::cout << get_id() << ": disconnect" << std::endl;
 }
 
 void debug_server::invite(std::string_view target, std::string_view channel)
 {
-    std::cout << get_id() << ": invite " << target << " " << channel << std::endl;
+	std::cout << get_id() << ": invite " << target << " " << channel << std::endl;
 }
 
 void debug_server::join(std::string_view channel, std::string_view password)
 {
-    std::cout << get_id() << ": join " << channel << " " << password << std::endl;
+	std::cout << get_id() << ": join " << channel << " " << password << std::endl;
 }
 
 void debug_server::kick(std::string_view target, std::string_view channel, std::string_view reason)
 {
-    std::cout << get_id() << ": kick " << target << " " << channel << " " << reason << std::endl;
+	std::cout << get_id() << ": kick " << target << " " << channel << " " << reason << std::endl;
 }
 
 void debug_server::me(std::string_view target, std::string_view message)
 {
-    std::cout << get_id() << ": me " << target << " " << message << std::endl;
+	std::cout << get_id() << ": me " << target << " " << message << std::endl;
 }
 
 void debug_server::message(std::string_view target, std::string_view message)
 {
-    std::cout << get_id() << ": message " << target << " " << message << std::endl;
+	std::cout << get_id() << ": message " << target << " " << message << std::endl;
 }
 
 void debug_server::mode(std::string_view channel,
@@ -63,42 +63,42 @@ void debug_server::mode(std::string_view channel,
                         std::string_view user,
                         std::string_view mask)
 {
-    std::cout << get_id() << ": mode "
-              << channel << " "
-              << mode << " "
-              << limit << " "
-              << user << " "
-              << mask << std::endl;
+	std::cout << get_id() << ": mode "
+	          << channel << " "
+	          << mode << " "
+	          << limit << " "
+	          << user << " "
+	          << mask << std::endl;
 }
 
 void debug_server::names(std::string_view channel)
 {
-    std::cout << get_id() << ": names " << channel << std::endl;
+	std::cout << get_id() << ": names " << channel << std::endl;
 }
 
 void debug_server::notice(std::string_view target, std::string_view message)
 {
-    std::cout << get_id() << ": notice " << target << " " << message << std::endl;
+	std::cout << get_id() << ": notice " << target << " " << message << std::endl;
 }
 
 void debug_server::part(std::string_view channel, std::string_view reason)
 {
-    std::cout << get_id() << ": part " << channel << " " << reason << std::endl;
+	std::cout << get_id() << ": part " << channel << " " << reason << std::endl;
 }
 
 void debug_server::send(std::string_view raw)
 {
-    std::cout << get_id() << ": send " << raw << std::endl;
+	std::cout << get_id() << ": send " << raw << std::endl;
 }
 
 void debug_server::topic(std::string_view channel, std::string_view topic)
 {
-    std::cout << get_id() << ": topic " << channel << " " << topic << std::endl;
+	std::cout << get_id() << ": topic " << channel << " " << topic << std::endl;
 }
 
 void debug_server::whois(std::string_view target)
 {
-    std::cout << get_id() << ": whois " << target << std::endl;
+	std::cout << get_id() << ": whois " << target << std::endl;
 }
 
 } // !irccd

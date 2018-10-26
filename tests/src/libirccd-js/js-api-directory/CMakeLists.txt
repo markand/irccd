@@ -17,7 +17,7 @@
 #
 
 irccd_define_test(
-    NAME js-api-directory
-    SOURCES main.cpp
-    LIBRARIES libirccd-js
+	NAME js-api-directory
+	SOURCES main.cpp
+	LIBRARIES libirccd-js
 )

@@ -34,53 +34,53 @@ namespace irccd {
 
 auto uri::parse(const string& link) noexcept -> optional<uri>
 {
-    /*
-     * The message may contain additional text, example:
-     *
-     * markand: http://example.org check this site
-     */
-    regex regex("^(https?:\\/\\/[^\\s]+).*$");
-    smatch match;
+	/*
+	 * The message may contain additional text, example:
+	 *
+	 * markand: http://example.org check this site
+	 */
+	regex regex("^(https?:\\/\\/[^\\s]+).*$");
+	smatch match;
 
-    if (!regex_match(link, match, regex))
-        return nullopt;
+	if (!regex_match(link, match, regex))
+		return nullopt;
 
-    UriParserStateA state;
-    UriUriA hnd;
-    uri ret;
-    scope_exit exit([&hnd] { uriFreeUriMembersA(&hnd); });
+	UriParserStateA state;
+	UriUriA hnd;
+	uri ret;
+	scope_exit exit([&hnd] { uriFreeUriMembersA(&hnd); });
 
-    state.uri = &hnd;
+	state.uri = &hnd;
 
-    if (uriParseUriA(&state, match[1].str().c_str()) != URI_SUCCESS)
-        return nullopt;
+	if (uriParseUriA(&state, match[1].str().c_str()) != URI_SUCCESS)
+		return nullopt;
 
-    if (hnd.scheme.first)
-        ret.scheme = string(hnd.scheme.first, hnd.scheme.afterLast - hnd.scheme.first);
+	if (hnd.scheme.first)
+		ret.scheme = string(hnd.scheme.first, hnd.scheme.afterLast - hnd.scheme.first);
 
-    // We're only interested in http and https.
-    if (ret.scheme != "http" && ret.scheme != "https")
-        return nullopt;
+	// We're only interested in http and https.
+	if (ret.scheme != "http" && ret.scheme != "https")
+		return nullopt;
 
-    // Correct port if not specified.
-    if (ret.port.empty())
-        ret.port = ret.scheme == "http" ? "80" : "443";
+	// Correct port if not specified.
+	if (ret.port.empty())
+		ret.port = ret.scheme == "http" ? "80" : "443";
 
-    if (hnd.hostText.first)
-        ret.host = string(hnd.hostText.first, hnd.hostText.afterLast - hnd.hostText.first);
-    if (hnd.portText.first)
-        ret.port = string(hnd.portText.first, hnd.portText.afterLast - hnd.portText.first);
+	if (hnd.hostText.first)
+		ret.host = string(hnd.hostText.first, hnd.hostText.afterLast - hnd.hostText.first);
+	if (hnd.portText.first)
+		ret.port = string(hnd.portText.first, hnd.portText.afterLast - hnd.portText.first);
 
-    for (auto p = hnd.pathHead; p != nullptr; p = p->next) {
-        ret.path += "/";
-        ret.path += string(p->text.first, p->text.afterLast - p->text.first);
-    }
+	for (auto p = hnd.pathHead; p != nullptr; p = p->next) {
+		ret.path += "/";
+		ret.path += string(p->text.first, p->text.afterLast - p->text.first);
+	}
 
-    // Correct path if empty.
-    if (ret.path.empty())
-        ret.path = "/";
+	// Correct path if empty.
+	if (ret.path.empty())
+		ret.path = "/";
 
-    return ret;
+	return ret;
 }
 
 } // !irccd

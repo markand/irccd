@@ -17,7 +17,7 @@
 #
 
 irccd_define_test(
-    NAME logger
-    SOURCES main.cpp
-    LIBRARIES libirccd
+	NAME logger
+	SOURCES main.cpp
+	LIBRARIES libirccd
 )

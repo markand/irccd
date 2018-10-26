@@ -37,54 +37,54 @@ namespace irccd {
  */
 class mock {
 public:
-    /**
-     * \brief Functions arguments.
-     */
-    using args = std::vector<std::any>;
+	/**
+	 * \brief Functions arguments.
+	 */
+	using args = std::vector<std::any>;
 
-    /**
-     * \brief Map of all functions.
-     */
-    using functions = std::unordered_map<std::string, std::vector<args>>;
+	/**
+	 * \brief Map of all functions.
+	 */
+	using functions = std::unordered_map<std::string, std::vector<args>>;
 
 private:
-    mutable functions table_;
+	mutable functions table_;
 
 public:
-    /**
-     * Register a new function invocation.
-     *
-     * \param name the function name
-     * \param args the arguments list
-     */
-    void push(std::string name, args args = {}) const;
+	/**
+	 * Register a new function invocation.
+	 *
+	 * \param name the function name
+	 * \param args the arguments list
+	 */
+	void push(std::string name, args args = {}) const;
 
-    /**
-     * Get all function invocations by name.
-     *
-     * \param name the function name
-     * \return the list of functions and their arguments or empty if not called
-     */
-    auto find(const std::string& name) const -> std::vector<args>;
+	/**
+	 * Get all function invocations by name.
+	 *
+	 * \param name the function name
+	 * \return the list of functions and their arguments or empty if not called
+	 */
+	auto find(const std::string& name) const -> std::vector<args>;
 
-    /**
-     * Clear all function invocations by name.
-     *
-     * \param name the function name
-     */
-    void clear(const std::string& name) const noexcept;
+	/**
+	 * Clear all function invocations by name.
+	 *
+	 * \param name the function name
+	 */
+	void clear(const std::string& name) const noexcept;
 
-    /**
-     * Clear all function invocations.
-     */
-    void clear() const noexcept;
+	/**
+	 * Clear all function invocations.
+	 */
+	void clear() const noexcept;
 
-    /**
-     * Tells if no functions have been called.
-     *
-     * \return true if no functions have been called
-     */
-    auto empty() const noexcept -> bool;
+	/**
+	 * Tells if no functions have been called.
+	 *
+	 * \return true if no functions have been called
+	 */
+	auto empty() const noexcept -> bool;
 };
 
 } // !irccd

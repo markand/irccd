@@ -37,31 +37,31 @@ const std::string_view prototype("\xff""\xff""Irccd.Server.prototype");
 
 auto self(duk_context* ctx) -> std::shared_ptr<server>
 {
-    duk::stack_guard sa(ctx);
+	duk::stack_guard sa(ctx);
 
-    duk_push_this(ctx);
-    duk_get_prop_string(ctx, -1, signature.data());
-    auto ptr = duk_to_pointer(ctx, -1);
-    duk_pop_2(ctx);
+	duk_push_this(ctx);
+	duk_get_prop_string(ctx, -1, signature.data());
+	auto ptr = duk_to_pointer(ctx, -1);
+	duk_pop_2(ctx);
 
-    if (!ptr)
-        duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Server object");
+	if (!ptr)
+		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Server object");
 
-    return *static_cast<std::shared_ptr<server>*>(ptr);
+	return *static_cast<std::shared_ptr<server>*>(ptr);
 }
 
 template <typename Handler>
 auto wrap(duk_context* ctx, Handler handler) -> duk_ret_t
 {
-    try {
-        return handler(ctx);
-    } catch (const server_error& ex) {
-        duk::raise(ctx, ex);
-    } catch (const std::exception& ex) {
-        duk::raise(ctx, ex);
-    }
+	try {
+		return handler(ctx);
+	} catch (const server_error& ex) {
+		duk::raise(ctx, ex);
+	} catch (const std::exception& ex) {
+		duk::raise(ctx, ex);
+	}
 
-    return 0;
+	return 0;
 }
 
 // {{{ Irccd.Server.prototype.info
@@ -81,34 +81,34 @@ auto wrap(duk_context* ctx, Handler handler) -> duk_ret_t
  */
 auto Server_prototype_info(duk_context* ctx) -> duk_ret_t
 {
-    const auto server = self(ctx);
-    const auto& channels = server->get_channels();
+	const auto server = self(ctx);
+	const auto& channels = server->get_channels();
 
-    duk_push_object(ctx);
-    duk::push(ctx, server->get_id());
-    duk_put_prop_string(ctx, -2, "name");
-    duk::push(ctx, server->get_host());
-    duk_put_prop_string(ctx, -2, "host");
-    duk_push_int(ctx, server->get_port());
-    duk_put_prop_string(ctx, -2, "port");
-    duk_push_boolean(ctx,
-        (server->get_options() & server::options::ssl) == server::options::ssl);
-    duk_put_prop_string(ctx, -2, "ssl");
-    duk_push_boolean(ctx,
-        (server->get_options() & server::options::ssl_verify) == server::options::ssl_verify);
-    duk_put_prop_string(ctx, -2, "sslVerify");
-    duk::push(ctx, server->get_command_char());
-    duk_put_prop_string(ctx, -2, "commandChar");
-    duk::push(ctx, server->get_realname());
-    duk_put_prop_string(ctx, -2, "realname");
-    duk::push(ctx, server->get_nickname());
-    duk_put_prop_string(ctx, -2, "nickname");
-    duk::push(ctx, server->get_username());
-    duk_put_prop_string(ctx, -2, "username");
-    duk::push(ctx, std::vector<std::string>(channels.begin(), channels.end()));
-    duk_put_prop_string(ctx, -2, "channels");
+	duk_push_object(ctx);
+	duk::push(ctx, server->get_id());
+	duk_put_prop_string(ctx, -2, "name");
+	duk::push(ctx, server->get_host());
+	duk_put_prop_string(ctx, -2, "host");
+	duk_push_int(ctx, server->get_port());
+	duk_put_prop_string(ctx, -2, "port");
+	duk_push_boolean(ctx,
+		(server->get_options() & server::options::ssl) == server::options::ssl);
+	duk_put_prop_string(ctx, -2, "ssl");
+	duk_push_boolean(ctx,
+		(server->get_options() & server::options::ssl_verify) == server::options::ssl_verify);
+	duk_put_prop_string(ctx, -2, "sslVerify");
+	duk::push(ctx, server->get_command_char());
+	duk_put_prop_string(ctx, -2, "commandChar");
+	duk::push(ctx, server->get_realname());
+	duk_put_prop_string(ctx, -2, "realname");
+	duk::push(ctx, server->get_nickname());
+	duk_put_prop_string(ctx, -2, "nickname");
+	duk::push(ctx, server->get_username());
+	duk_put_prop_string(ctx, -2, "username");
+	duk::push(ctx, std::vector<std::string>(channels.begin(), channels.end()));
+	duk_put_prop_string(ctx, -2, "channels");
 
-    return 1;
+	return 1;
 }
 
 // }}}
@@ -130,19 +130,19 @@ auto Server_prototype_info(duk_context* ctx) -> duk_ret_t
  */
 auto Server_prototype_invite(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        auto target = duk::require<std::string>(ctx, 0);
-        auto channel = duk::require<std::string>(ctx, 1);
+	return wrap(ctx, [] (auto ctx) {
+		auto target = duk::require<std::string>(ctx, 0);
+		auto channel = duk::require<std::string>(ctx, 1);
 
-        if (target.empty())
-            throw server_error(server_error::invalid_nickname);
-        if (channel.empty())
-            throw server_error(server_error::invalid_channel);
+		if (target.empty())
+			throw server_error(server_error::invalid_nickname);
+		if (channel.empty())
+			throw server_error(server_error::invalid_channel);
 
-        self(ctx)->invite(std::move(target), std::move(channel));
+		self(ctx)->invite(std::move(target), std::move(channel));
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -162,9 +162,9 @@ auto Server_prototype_invite(duk_context* ctx) -> duk_ret_t
  */
 auto Server_prototype_isSelf(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        return duk::push(ctx, self(ctx)->is_self(duk::require<std::string>(ctx, 0)));
-    });
+	return wrap(ctx, [] (auto ctx) {
+		return duk::push(ctx, self(ctx)->is_self(duk::require<std::string>(ctx, 0)));
+	});
 }
 
 // }}}
@@ -186,17 +186,17 @@ auto Server_prototype_isSelf(duk_context* ctx) -> duk_ret_t
  */
 auto Server_prototype_join(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        auto channel = duk::require<std::string>(ctx, 0);
-        auto password = duk::get<std::string>(ctx, 1);
+	return wrap(ctx, [] (auto ctx) {
+		auto channel = duk::require<std::string>(ctx, 0);
+		auto password = duk::get<std::string>(ctx, 1);
 
-        if (channel.empty())
-            throw server_error(server_error::invalid_channel);
+		if (channel.empty())
+			throw server_error(server_error::invalid_channel);
 
-        self(ctx)->join(std::move(channel), std::move(password));
+		self(ctx)->join(std::move(channel), std::move(password));
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -219,20 +219,20 @@ auto Server_prototype_join(duk_context* ctx) -> duk_ret_t
  */
 auto Server_prototype_kick(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        auto target = duk::require<std::string>(ctx, 0);
-        auto channel = duk::require<std::string>(ctx, 1);
-        auto reason = duk::get<std::string>(ctx, 2);
+	return wrap(ctx, [] (auto ctx) {
+		auto target = duk::require<std::string>(ctx, 0);
+		auto channel = duk::require<std::string>(ctx, 1);
+		auto reason = duk::get<std::string>(ctx, 2);
 
-        if (target.empty())
-            throw server_error(server_error::invalid_nickname);
-        if (channel.empty())
-            throw server_error(server_error::invalid_channel);
+		if (target.empty())
+			throw server_error(server_error::invalid_nickname);
+		if (channel.empty())
+			throw server_error(server_error::invalid_channel);
 
-        self(ctx)->kick(std::move(target), std::move(channel), std::move(reason));
+		self(ctx)->kick(std::move(target), std::move(channel), std::move(reason));
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -254,17 +254,17 @@ auto Server_prototype_kick(duk_context* ctx) -> duk_ret_t
  */
 auto Server_prototype_me(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        auto target = duk::require<std::string>(ctx, 0);
-        auto message = duk::get<std::string>(ctx, 1);
+	return wrap(ctx, [] (auto ctx) {
+		auto target = duk::require<std::string>(ctx, 0);
+		auto message = duk::get<std::string>(ctx, 1);
 
-        if (target.empty())
-            throw server_error(server_error::invalid_nickname);
+		if (target.empty())
+			throw server_error(server_error::invalid_nickname);
 
-        self(ctx)->me(std::move(target), std::move(message));
+		self(ctx)->me(std::move(target), std::move(message));
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -286,17 +286,17 @@ auto Server_prototype_me(duk_context* ctx) -> duk_ret_t
  */
 auto Server_prototype_message(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        auto target = duk::require<std::string>(ctx, 0);
-        auto message = duk::get<std::string>(ctx, 1);
+	return wrap(ctx, [] (auto ctx) {
+		auto target = duk::require<std::string>(ctx, 0);
+		auto message = duk::get<std::string>(ctx, 1);
 
-        if (target.empty())
-            throw server_error(server_error::invalid_nickname);
+		if (target.empty())
+			throw server_error(server_error::invalid_nickname);
 
-        self(ctx)->message(std::move(target), std::move(message));
+		self(ctx)->message(std::move(target), std::move(message));
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -317,28 +317,28 @@ auto Server_prototype_message(duk_context* ctx) -> duk_ret_t
  */
 auto Server_prototype_mode(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        auto channel = duk::require<std::string>(ctx, 0);
-        auto mode = duk::require<std::string>(ctx, 1);
-        auto limit = duk::get<std::string>(ctx, 2);
-        auto user = duk::get<std::string>(ctx, 3);
-        auto mask = duk::get<std::string>(ctx, 4);
+	return wrap(ctx, [] (auto ctx) {
+		auto channel = duk::require<std::string>(ctx, 0);
+		auto mode = duk::require<std::string>(ctx, 1);
+		auto limit = duk::get<std::string>(ctx, 2);
+		auto user = duk::get<std::string>(ctx, 3);
+		auto mask = duk::get<std::string>(ctx, 4);
 
-        if (channel.empty())
-            throw server_error(server_error::invalid_channel);
-        if (mode.empty())
-            throw server_error(server_error::invalid_mode);
+		if (channel.empty())
+			throw server_error(server_error::invalid_channel);
+		if (mode.empty())
+			throw server_error(server_error::invalid_mode);
 
-        self(ctx)->mode(
-            std::move(channel),
-            std::move(mode),
-            std::move(limit),
-            std::move(user),
-            std::move(mask)
-        );
+		self(ctx)->mode(
+			std::move(channel),
+			std::move(mode),
+			std::move(limit),
+			std::move(user),
+			std::move(mask)
+		);
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -359,16 +359,16 @@ auto Server_prototype_mode(duk_context* ctx) -> duk_ret_t
  */
 auto Server_prototype_names(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        auto channel = duk::require<std::string>(ctx, 0);
+	return wrap(ctx, [] (auto ctx) {
+		auto channel = duk::require<std::string>(ctx, 0);
 
-        if (channel.empty())
-            throw server_error(server_error::invalid_channel);
+		if (channel.empty())
+			throw server_error(server_error::invalid_channel);
 
-        self(ctx)->names(std::move(channel));
+		self(ctx)->names(std::move(channel));
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -389,16 +389,16 @@ auto Server_prototype_names(duk_context* ctx) -> duk_ret_t
  */
 auto Server_prototype_nick(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        auto nickname = duk::require<std::string>(ctx, 0);
+	return wrap(ctx, [] (auto ctx) {
+		auto nickname = duk::require<std::string>(ctx, 0);
 
-        if (nickname.empty())
-            throw server_error(server_error::invalid_nickname);
+		if (nickname.empty())
+			throw server_error(server_error::invalid_nickname);
 
-        self(ctx)->set_nickname(std::move(nickname));
+		self(ctx)->set_nickname(std::move(nickname));
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -420,17 +420,17 @@ auto Server_prototype_nick(duk_context* ctx) -> duk_ret_t
  */
 auto Server_prototype_notice(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        auto target = duk::require<std::string>(ctx, 0);
-        auto message = duk::get<std::string>(ctx, 1);
+	return wrap(ctx, [] (auto ctx) {
+		auto target = duk::require<std::string>(ctx, 0);
+		auto message = duk::get<std::string>(ctx, 1);
 
-        if (target.empty())
-            throw server_error(server_error::invalid_nickname);
+		if (target.empty())
+			throw server_error(server_error::invalid_nickname);
 
-        self(ctx)->notice(std::move(target), std::move(message));
+		self(ctx)->notice(std::move(target), std::move(message));
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -452,17 +452,17 @@ auto Server_prototype_notice(duk_context* ctx) -> duk_ret_t
  */
 auto Server_prototype_part(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        auto channel = duk::require<std::string>(ctx, 0);
-        auto reason = duk::get<std::string>(ctx, 1);
+	return wrap(ctx, [] (auto ctx) {
+		auto channel = duk::require<std::string>(ctx, 0);
+		auto reason = duk::get<std::string>(ctx, 1);
 
-        if (channel.empty())
-            throw server_error(server_error::invalid_channel);
+		if (channel.empty())
+			throw server_error(server_error::invalid_channel);
 
-        self(ctx)->part(std::move(channel), std::move(reason));
+		self(ctx)->part(std::move(channel), std::move(reason));
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -483,16 +483,16 @@ auto Server_prototype_part(duk_context* ctx) -> duk_ret_t
  */
 auto Server_prototype_send(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        auto raw = duk::require<std::string>(ctx, 0);
+	return wrap(ctx, [] (auto ctx) {
+		auto raw = duk::require<std::string>(ctx, 0);
 
-        if (raw.empty())
-            throw server_error(server_error::invalid_message);
+		if (raw.empty())
+			throw server_error(server_error::invalid_message);
 
-        self(ctx)->send(std::move(raw));
+		self(ctx)->send(std::move(raw));
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -514,17 +514,17 @@ auto Server_prototype_send(duk_context* ctx) -> duk_ret_t
  */
 auto Server_prototype_topic(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        auto channel = duk::require<std::string>(ctx, 0);
-        auto topic = duk::get<std::string>(ctx, 1);
+	return wrap(ctx, [] (auto ctx) {
+		auto channel = duk::require<std::string>(ctx, 0);
+		auto topic = duk::get<std::string>(ctx, 1);
 
-        if (channel.empty())
-            throw server_error(server_error::invalid_channel);
+		if (channel.empty())
+			throw server_error(server_error::invalid_channel);
 
-        self(ctx)->topic(std::move(channel), std::move(topic));
+		self(ctx)->topic(std::move(channel), std::move(topic));
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -545,16 +545,16 @@ auto Server_prototype_topic(duk_context* ctx) -> duk_ret_t
  */
 auto Server_prototype_whois(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        auto target = duk::require<std::string>(ctx, 0);
+	return wrap(ctx, [] (auto ctx) {
+		auto target = duk::require<std::string>(ctx, 0);
 
-        if (target.empty())
-            throw server_error(server_error::invalid_nickname);
+		if (target.empty())
+			throw server_error(server_error::invalid_nickname);
 
-        self(ctx)->whois(std::move(target));
+		self(ctx)->whois(std::move(target));
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -575,11 +575,11 @@ auto Server_prototype_whois(duk_context* ctx) -> duk_ret_t
  */
 auto Server_prototype_toString(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        duk::push(ctx, self(ctx)->get_id());
+	return wrap(ctx, [] (auto ctx) {
+		duk::push(ctx, self(ctx)->get_id());
 
-        return 1;
-    });
+		return 1;
+	});
 }
 
 // }}}
@@ -615,22 +615,22 @@ auto Server_prototype_toString(duk_context* ctx) -> duk_ret_t
  */
 auto Server_constructor(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        if (!duk_is_constructor_call(ctx))
-            return 0;
+	return wrap(ctx, [] (auto ctx) {
+		if (!duk_is_constructor_call(ctx))
+			return 0;
 
-        duk_check_type(ctx, 0, DUK_TYPE_OBJECT);
+		duk_check_type(ctx, 0, DUK_TYPE_OBJECT);
 
-        auto json = nlohmann::json::parse(duk_json_encode(ctx, 0));
-        auto s = server_util::from_json(duk::type_traits<irccd>::self(ctx).get_service(), json);
+		auto json = nlohmann::json::parse(duk_json_encode(ctx, 0));
+		auto s = server_util::from_json(duk::type_traits<irccd>::self(ctx).get_service(), json);
 
-        duk_push_this(ctx);
-        duk_push_pointer(ctx, new std::shared_ptr<server>(std::move(s)));
-        duk_put_prop_string(ctx, -2, signature.data());
-        duk_pop(ctx);
+		duk_push_this(ctx);
+		duk_push_pointer(ctx, new std::shared_ptr<server>(std::move(s)));
+		duk_put_prop_string(ctx, -2, signature.data());
+		duk_pop(ctx);
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -645,12 +645,12 @@ auto Server_constructor(duk_context* ctx) -> duk_ret_t
  */
 auto Server_destructor(duk_context* ctx) -> duk_ret_t
 {
-    duk_get_prop_string(ctx, 0, signature.data());
-    delete static_cast<std::shared_ptr<server>*>(duk_to_pointer(ctx, -1));
-    duk_pop(ctx);
-    duk_del_prop_string(ctx, 0, signature.data());
+	duk_get_prop_string(ctx, 0, signature.data());
+	delete static_cast<std::shared_ptr<server>*>(duk_to_pointer(ctx, -1));
+	duk_pop(ctx);
+	duk_del_prop_string(ctx, 0, signature.data());
 
-    return 0;
+	return 0;
 }
 
 // }}}
@@ -670,12 +670,12 @@ auto Server_destructor(duk_context* ctx) -> duk_ret_t
  */
 auto Server_add(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        duk::type_traits<irccd>::self(ctx).servers().add(
-            duk::require<std::shared_ptr<server>>(ctx, 0));
+	return wrap(ctx, [] (auto ctx) {
+		duk::type_traits<irccd>::self(ctx).servers().add(
+			duk::require<std::shared_ptr<server>>(ctx, 0));
 
-        return 0;
-    });
+		return 0;
+	});
 }
 
 // }}}
@@ -697,17 +697,17 @@ auto Server_add(duk_context* ctx) -> duk_ret_t
  */
 auto Server_find(duk_context* ctx) -> duk_ret_t
 {
-    return wrap(ctx, [] (auto ctx) {
-        auto id = duk::require<std::string>(ctx, 0);
-        auto server = duk::type_traits<irccd>::self(ctx).servers().get(id);
+	return wrap(ctx, [] (auto ctx) {
+		auto id = duk::require<std::string>(ctx, 0);
+		auto server = duk::type_traits<irccd>::self(ctx).servers().get(id);
 
-        if (!server)
-            return 0;
+		if (!server)
+			return 0;
 
-        duk::push(ctx, server);
+		duk::push(ctx, server);
 
-        return 1;
-    });
+		return 1;
+	});
 }
 
 // }}}
@@ -725,14 +725,14 @@ auto Server_find(duk_context* ctx) -> duk_ret_t
  */
 auto Server_list(duk_context* ctx) -> duk_ret_t
 {
-    duk_push_object(ctx);
+	duk_push_object(ctx);
 
-    for (const auto& server : duk::type_traits<irccd>::self(ctx).servers().all()) {
-        duk::push(ctx, server);
-        duk_put_prop_string(ctx, -2, server->get_id().c_str());
-    }
+	for (const auto& server : duk::type_traits<irccd>::self(ctx).servers().all()) {
+		duk::push(ctx, server);
+		duk_put_prop_string(ctx, -2, server->get_id().c_str());
+	}
 
-    return 1;
+	return 1;
 }
 
 // }}}
@@ -751,9 +751,9 @@ auto Server_list(duk_context* ctx) -> duk_ret_t
  */
 auto Server_remove(duk_context* ctx) -> duk_ret_t
 {
-    duk::type_traits<irccd>::self(ctx).servers().remove(duk_require_string(ctx, 0));
+	duk::type_traits<irccd>::self(ctx).servers().remove(duk_require_string(ctx, 0));
 
-    return 0;
+	return 0;
 }
 
 // }}}
@@ -772,125 +772,125 @@ auto Server_remove(duk_context* ctx) -> duk_ret_t
  */
 auto ServerError_constructor(duk_context* ctx) -> duk_ret_t
 {
-    duk_push_this(ctx);
-    duk_push_int(ctx, duk_require_int(ctx, 0));
-    duk_put_prop_string(ctx, -2, "code");
-    duk_push_string(ctx, duk_require_string(ctx, 1));
-    duk_put_prop_string(ctx, -2, "message");
-    duk_push_string(ctx, "ServerError");
-    duk_put_prop_string(ctx, -2, "name");
-    duk_pop(ctx);
+	duk_push_this(ctx);
+	duk_push_int(ctx, duk_require_int(ctx, 0));
+	duk_put_prop_string(ctx, -2, "code");
+	duk_push_string(ctx, duk_require_string(ctx, 1));
+	duk_put_prop_string(ctx, -2, "message");
+	duk_push_string(ctx, "ServerError");
+	duk_put_prop_string(ctx, -2, "name");
+	duk_pop(ctx);
 
-    return 0;
+	return 0;
 }
 
 // }}}
 
 const duk_function_list_entry methods[] = {
-    { "info",       Server_prototype_info,      0           },
-    { "invite",     Server_prototype_invite,    2           },
-    { "isSelf",     Server_prototype_isSelf,    1           },
-    { "join",       Server_prototype_join,      DUK_VARARGS },
-    { "kick",       Server_prototype_kick,      DUK_VARARGS },
-    { "me",         Server_prototype_me,        2           },
-    { "message",    Server_prototype_message,   2           },
-    { "mode",       Server_prototype_mode,      1           },
-    { "names",      Server_prototype_names,     1           },
-    { "nick",       Server_prototype_nick,      1           },
-    { "notice",     Server_prototype_notice,    2           },
-    { "part",       Server_prototype_part,      DUK_VARARGS },
-    { "send",       Server_prototype_send,      1           },
-    { "topic",      Server_prototype_topic,     2           },
-    { "toString",   Server_prototype_toString,  0           },
-    { "whois",      Server_prototype_whois,     1           },
-    { nullptr,      nullptr,                    0           }
+	{ "info",       Server_prototype_info,          0               },
+	{ "invite",     Server_prototype_invite,        2               },
+	{ "isSelf",     Server_prototype_isSelf,        1               },
+	{ "join",       Server_prototype_join,          DUK_VARARGS     },
+	{ "kick",       Server_prototype_kick,          DUK_VARARGS     },
+	{ "me",         Server_prototype_me,            2               },
+	{ "message",    Server_prototype_message,       2               },
+	{ "mode",       Server_prototype_mode,          1               },
+	{ "names",      Server_prototype_names,         1               },
+	{ "nick",       Server_prototype_nick,          1               },
+	{ "notice",     Server_prototype_notice,        2               },
+	{ "part",       Server_prototype_part,          DUK_VARARGS     },
+	{ "send",       Server_prototype_send,          1               },
+	{ "topic",      Server_prototype_topic,         2               },
+	{ "toString",   Server_prototype_toString,      0               },
+	{ "whois",      Server_prototype_whois,         1               },
+	{ nullptr,      nullptr,                        0               }
 };
 
 const duk_function_list_entry functions[] = {
-    { "add",        Server_add,                 1           },
-    { "find",       Server_find,                1           },
-    { "list",       Server_list,                0           },
-    { "remove",     Server_remove,              1           },
-    { nullptr,      nullptr,                    0           }
+	{ "add",        Server_add,                     1               },
+	{ "find",       Server_find,                    1               },
+	{ "list",       Server_list,                    0               },
+	{ "remove",     Server_remove,                  1               },
+	{ nullptr,      nullptr,                        0               }
 };
 
 } // !namespace
 
 auto server_js_api::get_name() const noexcept -> std::string_view
 {
-    return "Irccd.Server";
+	return "Irccd.Server";
 }
 
 void server_js_api::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
-    duk::stack_guard sa(plugin->get_context());
+	duk::stack_guard sa(plugin->get_context());
 
-    duk_get_global_string(plugin->get_context(), "Irccd");
+	duk_get_global_string(plugin->get_context(), "Irccd");
 
-    // ServerError function.
-    duk_push_c_function(plugin->get_context(), ServerError_constructor, 2);
-    duk_push_object(plugin->get_context());
-    duk_get_global_string(plugin->get_context(), "Error");
-    duk_get_prop_string(plugin->get_context(), -1, "prototype");
-    duk_remove(plugin->get_context(), -2);
-    duk_set_prototype(plugin->get_context(), -2);
-    duk_put_prop_string(plugin->get_context(), -2, "prototype");
-    duk_put_prop_string(plugin->get_context(), -2, "ServerError");
+	// ServerError function.
+	duk_push_c_function(plugin->get_context(), ServerError_constructor, 2);
+	duk_push_object(plugin->get_context());
+	duk_get_global_string(plugin->get_context(), "Error");
+	duk_get_prop_string(plugin->get_context(), -1, "prototype");
+	duk_remove(plugin->get_context(), -2);
+	duk_set_prototype(plugin->get_context(), -2);
+	duk_put_prop_string(plugin->get_context(), -2, "prototype");
+	duk_put_prop_string(plugin->get_context(), -2, "ServerError");
 
-    // Server constructor.
-    duk_push_c_function(plugin->get_context(), Server_constructor, 1);
-    duk_put_function_list(plugin->get_context(), -1, functions);
-    duk_push_object(plugin->get_context());
-    duk_put_function_list(plugin->get_context(), -1, methods);
-    duk_push_c_function(plugin->get_context(), Server_destructor, 1);
-    duk_set_finalizer(plugin->get_context(), -2);
-    duk_dup_top(plugin->get_context());
-    duk_put_global_string(plugin->get_context(), prototype.data());
-    duk_put_prop_string(plugin->get_context(), -2, "prototype");
-    duk_put_prop_string(plugin->get_context(), -2, "Server");
-    duk_pop(plugin->get_context());
+	// Server constructor.
+	duk_push_c_function(plugin->get_context(), Server_constructor, 1);
+	duk_put_function_list(plugin->get_context(), -1, functions);
+	duk_push_object(plugin->get_context());
+	duk_put_function_list(plugin->get_context(), -1, methods);
+	duk_push_c_function(plugin->get_context(), Server_destructor, 1);
+	duk_set_finalizer(plugin->get_context(), -2);
+	duk_dup_top(plugin->get_context());
+	duk_put_global_string(plugin->get_context(), prototype.data());
+	duk_put_prop_string(plugin->get_context(), -2, "prototype");
+	duk_put_prop_string(plugin->get_context(), -2, "Server");
+	duk_pop(plugin->get_context());
 }
 
 namespace duk {
 
 void type_traits<std::shared_ptr<server>>::push(duk_context* ctx, std::shared_ptr<server> server)
 {
-    assert(ctx);
-    assert(server);
+	assert(ctx);
+	assert(server);
 
-    duk::stack_guard sa(ctx, 1);
+	duk::stack_guard sa(ctx, 1);
 
-    duk_push_object(ctx);
-    duk_push_pointer(ctx, new std::shared_ptr<class server>(std::move(server)));
-    duk_put_prop_string(ctx, -2, signature.data());
-    duk_get_global_string(ctx, prototype.data());
-    duk_set_prototype(ctx, -2);
+	duk_push_object(ctx);
+	duk_push_pointer(ctx, new std::shared_ptr<class server>(std::move(server)));
+	duk_put_prop_string(ctx, -2, signature.data());
+	duk_get_global_string(ctx, prototype.data());
+	duk_set_prototype(ctx, -2);
 }
 
 auto type_traits<std::shared_ptr<server>>::require(duk_context* ctx, duk_idx_t index) -> std::shared_ptr<server>
 {
-    if (!duk_is_object(ctx, index) || !duk_has_prop_string(ctx, index, signature.data()))
-        duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Server object");
+	if (!duk_is_object(ctx, index) || !duk_has_prop_string(ctx, index, signature.data()))
+		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Server object");
 
-    duk_get_prop_string(ctx, index, signature.data());
-    auto file = *static_cast<std::shared_ptr<server>*>(duk_to_pointer(ctx, -1));
-    duk_pop(ctx);
+	duk_get_prop_string(ctx, index, signature.data());
+	auto file = *static_cast<std::shared_ptr<server>*>(duk_to_pointer(ctx, -1));
+	duk_pop(ctx);
 
-    return file;
+	return file;
 }
 
 void type_traits<server_error>::raise(duk_context* ctx, const server_error& ex)
 {
-    duk::stack_guard sa(ctx, 1);
+	duk::stack_guard sa(ctx, 1);
 
-    duk_get_global_string(ctx, "Irccd");
-    duk_get_prop_string(ctx, -1, "ServerError");
-    duk_remove(ctx, -2);
-    duk::push(ctx, ex.code().value());
-    duk::push(ctx, ex.code().message());
-    duk_new(ctx, 2);
+	duk_get_global_string(ctx, "Irccd");
+	duk_get_prop_string(ctx, -1, "ServerError");
+	duk_remove(ctx, -2);
+	duk::push(ctx, ex.code().value());
+	duk::push(ctx, ex.code().message());
+	duk_new(ctx, 2);
 
-    (void)duk_throw(ctx);
+	(void)duk_throw(ctx);
 }
 
 } // !duk

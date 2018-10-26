@@ -25,25 +25,25 @@ namespace irccd {
 
 auto config::search(std::string_view name) -> std::optional<config>
 {
-    for (const auto& path : sys::config_filenames(name)) {
-        boost::system::error_code ec;
+	for (const auto& path : sys::config_filenames(name)) {
+		boost::system::error_code ec;
 
-        if (boost::filesystem::exists(path, ec) && !ec)
-            return config(path);
-    }
+		if (boost::filesystem::exists(path, ec) && !ec)
+			return config(path);
+	}
 
-    return std::nullopt;
+	return std::nullopt;
 }
 
 config::config(std::string path)
-    : document(path.empty() ? ini::document() : ini::read_file(path))
-    , path_(std::move(path))
+	: document(path.empty() ? ini::document() : ini::read_file(path))
+	, path_(std::move(path))
 {
 }
 
 auto config::get_path() const noexcept -> const std::string&
 {
-    return path_;
+	return path_;
 }
 
 } // !irccd

@@ -44,42 +44,42 @@ namespace irccd::test {
  */
 class command_fixture : public irccd_fixture {
 private:
-    template <typename Condition>
-    void wait_for(Condition&&);
+	template <typename Condition>
+	void wait_for(Condition&&);
 
 protected:
-    /**
-     * \brief Result for request function.
-     */
-    using result = std::pair<nlohmann::json, std::error_code>;
+	/**
+	 * \brief Result for request function.
+	 */
+	using result = std::pair<nlohmann::json, std::error_code>;
 
-    /**
-     * \brief Irccd controller
-     */
-    std::unique_ptr<ctl::controller> ctl_;
+	/**
+	 * \brief Irccd controller
+	 */
+	std::unique_ptr<ctl::controller> ctl_;
 
-    /**
-     * \brief Mock server object.
-     */
-    std::shared_ptr<mock_server> server_;
+	/**
+	 * \brief Mock server object.
+	 */
+	std::shared_ptr<mock_server> server_;
 
-    /**
-     * \brief Mock plugin object.
-     */
-    std::shared_ptr<mock_plugin> plugin_;
+	/**
+	 * \brief Mock plugin object.
+	 */
+	std::shared_ptr<mock_plugin> plugin_;
 
-    /**
-     * Constructor.
-     */
-    command_fixture();
+	/**
+	 * Constructor.
+	 */
+	command_fixture();
 
-    /**
-     * Get result from irccd.
-     *
-     * \param json the request
-     * \return the result/error pair
-     */
-    auto request(nlohmann::json json) -> result;
+	/**
+	 * Get result from irccd.
+	 *
+	 * \param json the request
+	 * \return the result/error pair
+	 */
+	auto request(nlohmann::json json) -> result;
 };
 
 } // !irccd::test

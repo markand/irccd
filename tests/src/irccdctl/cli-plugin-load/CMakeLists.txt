@@ -17,8 +17,8 @@
 #
 
 irccd_define_test(
-    NAME cli-plugin-load
-    SOURCES main.cpp
-    LIBRARIES libirccd-core
-    DEPENDS irccd irccdctl
+	NAME cli-plugin-load
+	SOURCES main.cpp
+	LIBRARIES libirccd-core
+	DEPENDS irccd irccdctl
 )

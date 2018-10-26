@@ -29,17 +29,7 @@
 
 #include "json.hpp"
 
-namespace irccd::io {
-
-/**
- * \brief Read completion handler.
- */
-using read_handler = std::function<void (std::error_code, nlohmann::json)>;
-
-/**
- * \brief Write completion handler.
- */
-using write_handler = std::function<void (std::error_code)>;
+namespace irccd {
 
 /**
  * \brief Abstract stream interface
@@ -51,6 +41,16 @@ using write_handler = std::function<void (std::error_code)>;
  */
 class stream {
 public:
+	/**
+	 * \brief Read completion handler.
+	 */
+	using read_handler = std::function<void (std::error_code, nlohmann::json)>;
+
+	/**
+	 * \brief Write completion handler.
+	 */
+	using write_handler = std::function<void (std::error_code)>;
+
     /**
      * Default constructor.
      */
@@ -82,6 +82,6 @@ public:
     virtual void write(const nlohmann::json& json, write_handler handler) = 0;
 };
 
-} // !irccd::io
+} // !irccd
 
 #endif // !IRCCD_COMMON_STREAM_HPP

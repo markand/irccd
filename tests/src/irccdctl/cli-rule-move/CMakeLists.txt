@@ -17,8 +17,8 @@
 #
 
 irccd_define_test(
-    NAME cli-rule-move
-    SOURCES main.cpp
-    LIBRARIES libirccd-core
-    DEPENDS irccd irccdctl
+	NAME cli-rule-move
+	SOURCES main.cpp
+	LIBRARIES libirccd-core
+	DEPENDS irccd irccdctl
 )

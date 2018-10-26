@@ -23,17 +23,17 @@
 # irccd_define_man(file, man)
 #
 # Parameters:
-#    file       The file name to build
-#    man        The man section
+#   file        The file name to build
+#   man         The man section
 #
 # This function configure the manual and install it if IRCCD_WITH_MAN is set.
 #
 
 function(irccd_define_man file man)
-    if (IRCCD_WITH_MAN)
-        set(input ${doc_SOURCE_DIR}/man/${file}.in)
-        set(output ${CMAKE_CURRENT_BINARY_DIR}/${file})
-        configure_file(${input} ${output} @ONLY)
-        install(FILES ${output} DESTINATION ${CMAKE_INSTALL_MANDIR}/${man})
-    endif ()
+	if (IRCCD_WITH_MAN)
+		set(input ${doc_SOURCE_DIR}/man/${file}.in)
+		set(output ${CMAKE_CURRENT_BINARY_DIR}/${file})
+		configure_file(${input} ${output} @ONLY)
+		install(FILES ${output} DESTINATION ${CMAKE_INSTALL_MANDIR}/${man})
+	endif ()
 endfunction()

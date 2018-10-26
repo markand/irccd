@@ -33,22 +33,22 @@ namespace irccd::test {
  */
 class irccd_fixture {
 protected:
-    /**
-     * \brief Boost.Asio context.
-     */
-    boost::asio::io_context ctx_;
+	/**
+	 * \brief Boost.Asio context.
+	 */
+	boost::asio::io_context ctx_;
 
-    /**
-     * \brief Main irccd daemon.
-     */
-    irccd irccd_{ctx_};
+	/**
+	 * \brief Main irccd daemon.
+	 */
+	irccd irccd_{ctx_};
 
-    /**
-     * Default constructor.
-     *
-     * Initialize the logger with a silent sink.
-     */
-    irccd_fixture();
+	/**
+	 * Default constructor.
+	 *
+	 * Initialize the logger with a silent sink.
+	 */
+	irccd_fixture();
 };
 
 } // !irccd::test

@@ -17,10 +17,10 @@
 #
 
 irccd_define_test(
-    NAME plugin-ask
-    SOURCES
-        ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/answers.conf
-    LIBRARIES libirccd
-    FLAGS PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/ask/ask.js"
+	NAME plugin-ask
+	SOURCES
+		${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/answers.conf
+	LIBRARIES libirccd
+	FLAGS PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/ask/ask.js"
 )

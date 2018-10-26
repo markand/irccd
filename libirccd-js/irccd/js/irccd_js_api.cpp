@@ -34,16 +34,16 @@ namespace {
 template <typename Error>
 void do_raise(duk_context* ctx, const Error& ex)
 {
-    duk::stack_guard sa(ctx, 1);
+	duk::stack_guard sa(ctx, 1);
 
-    duk_get_global_string(ctx, "Irccd");
-    duk_get_prop_string(ctx, -1, "SystemError");
-    duk_remove(ctx, -2);
-    duk::push(ctx, ex.code().value());
-    duk::push(ctx, ex.code().message());
-    duk_new(ctx, 2);
+	duk_get_global_string(ctx, "Irccd");
+	duk_get_prop_string(ctx, -1, "SystemError");
+	duk_remove(ctx, -2);
+	duk::push(ctx, ex.code().value());
+	duk::push(ctx, ex.code().message());
+	duk_new(ctx, 2);
 
-    (void)duk_throw(ctx);
+	(void)duk_throw(ctx);
 }
 
 // }}}
@@ -52,16 +52,16 @@ void do_raise(duk_context* ctx, const Error& ex)
 
 auto constructor(duk_context* ctx) -> duk_ret_t
 {
-    duk_push_this(ctx);
-    duk_push_int(ctx, duk_require_int(ctx, 0));
-    duk_put_prop_string(ctx, -2, "errno");
-    duk_push_string(ctx, duk_require_string(ctx, 1));
-    duk_put_prop_string(ctx, -2, "message");
-    duk_push_string(ctx, "SystemError");
-    duk_put_prop_string(ctx, -2, "name");
-    duk_pop(ctx);
+	duk_push_this(ctx);
+	duk_push_int(ctx, duk_require_int(ctx, 0));
+	duk_put_prop_string(ctx, -2, "errno");
+	duk_push_string(ctx, duk_require_string(ctx, 1));
+	duk_put_prop_string(ctx, -2, "message");
+	duk_push_string(ctx, "SystemError");
+	duk_put_prop_string(ctx, -2, "name");
+	duk_pop(ctx);
 
-    return 0;
+	return 0;
 }
 
 // }}}
@@ -69,104 +69,104 @@ auto constructor(duk_context* ctx) -> duk_ret_t
 // {{{ definitions
 
 const std::unordered_map<std::string, int> errors{
-    { "E2BIG",              E2BIG           },
-    { "EACCES",             EACCES          },
-    { "EADDRINUSE",         EADDRINUSE      },
-    { "EADDRNOTAVAIL",      EADDRNOTAVAIL   },
-    { "EAFNOSUPPORT",       EAFNOSUPPORT    },
-    { "EAGAIN",             EAGAIN          },
-    { "EALREADY",           EALREADY        },
-    { "EBADF",              EBADF           },
+	{ "E2BIG",              E2BIG           },
+	{ "EACCES",             EACCES          },
+	{ "EADDRINUSE",         EADDRINUSE      },
+	{ "EADDRNOTAVAIL",      EADDRNOTAVAIL   },
+	{ "EAFNOSUPPORT",       EAFNOSUPPORT    },
+	{ "EAGAIN",             EAGAIN          },
+	{ "EALREADY",           EALREADY        },
+	{ "EBADF",              EBADF           },
 #if defined(EBADMSG)
-    { "EBADMSG",            EBADMSG         },
+	{ "EBADMSG",            EBADMSG         },
 #endif
-    { "EBUSY",              EBUSY           },
-    { "ECANCELED",          ECANCELED       },
-    { "ECHILD",             ECHILD          },
-    { "ECONNABORTED",       ECONNABORTED    },
-    { "ECONNREFUSED",       ECONNREFUSED    },
-    { "ECONNRESET",         ECONNRESET      },
-    { "EDEADLK",            EDEADLK         },
-    { "EDESTADDRREQ",       EDESTADDRREQ    },
-    { "EDOM",               EDOM            },
-    { "EEXIST",             EEXIST          },
-    { "EFAULT",             EFAULT          },
-    { "EFBIG",              EFBIG           },
-    { "EHOSTUNREACH",       EHOSTUNREACH    },
+	{ "EBUSY",              EBUSY           },
+	{ "ECANCELED",          ECANCELED       },
+	{ "ECHILD",             ECHILD          },
+	{ "ECONNABORTED",       ECONNABORTED    },
+	{ "ECONNREFUSED",       ECONNREFUSED    },
+	{ "ECONNRESET",         ECONNRESET      },
+	{ "EDEADLK",            EDEADLK         },
+	{ "EDESTADDRREQ",       EDESTADDRREQ    },
+	{ "EDOM",               EDOM            },
+	{ "EEXIST",             EEXIST          },
+	{ "EFAULT",             EFAULT          },
+	{ "EFBIG",              EFBIG           },
+	{ "EHOSTUNREACH",       EHOSTUNREACH    },
 #if defined(EIDRM)
-    { "EIDRM",              EIDRM           },
+	{ "EIDRM",              EIDRM           },
 #endif
-    { "EILSEQ",             EILSEQ          },
-    { "EINPROGRESS",        EINPROGRESS     },
-    { "EINTR",              EINTR           },
-    { "EINVAL",             EINVAL          },
-    { "EIO",                EIO             },
-    { "EISCONN",            EISCONN         },
-    { "EISDIR",             EISDIR          },
-    { "ELOOP",              ELOOP           },
-    { "EMFILE",             EMFILE          },
-    { "EMLINK",             EMLINK          },
-    { "EMSGSIZE",           EMSGSIZE        },
-    { "ENAMETOOLONG",       ENAMETOOLONG    },
-    { "ENETDOWN",           ENETDOWN        },
-    { "ENETRESET",          ENETRESET       },
-    { "ENETUNREACH",        ENETUNREACH     },
-    { "ENFILE",             ENFILE          },
-    { "ENOBUFS",            ENOBUFS         },
+	{ "EILSEQ",             EILSEQ          },
+	{ "EINPROGRESS",        EINPROGRESS     },
+	{ "EINTR",              EINTR           },
+	{ "EINVAL",             EINVAL          },
+	{ "EIO",                EIO             },
+	{ "EISCONN",            EISCONN         },
+	{ "EISDIR",             EISDIR          },
+	{ "ELOOP",              ELOOP           },
+	{ "EMFILE",             EMFILE          },
+	{ "EMLINK",             EMLINK          },
+	{ "EMSGSIZE",           EMSGSIZE        },
+	{ "ENAMETOOLONG",       ENAMETOOLONG    },
+	{ "ENETDOWN",           ENETDOWN        },
+	{ "ENETRESET",          ENETRESET       },
+	{ "ENETUNREACH",        ENETUNREACH     },
+	{ "ENFILE",             ENFILE          },
+	{ "ENOBUFS",            ENOBUFS         },
 #if defined(ENODATA)
-    { "ENODATA",            ENODATA         },
+	{ "ENODATA",            ENODATA         },
 #endif
-    { "ENODEV",             ENODEV          },
-    { "ENOENT",             ENOENT          },
-    { "ENOEXEC",            ENOEXEC         },
-    { "ENOLCK",             ENOLCK          },
+	{ "ENODEV",             ENODEV          },
+	{ "ENOENT",             ENOENT          },
+	{ "ENOEXEC",            ENOEXEC         },
+	{ "ENOLCK",             ENOLCK          },
 #if defined(ENOLINK)
-    { "ENOLINK",            ENOLINK         },
+	{ "ENOLINK",            ENOLINK         },
 #endif
-    { "ENOMEM",             ENOMEM          },
+	{ "ENOMEM",             ENOMEM          },
 #if defined(ENOMSG)
-    { "ENOMSG",             ENOMSG          },
+	{ "ENOMSG",             ENOMSG          },
 #endif
-    { "ENOPROTOOPT",        ENOPROTOOPT     },
-    { "ENOSPC",             ENOSPC          },
+	{ "ENOPROTOOPT",        ENOPROTOOPT     },
+	{ "ENOSPC",             ENOSPC          },
 #if defined(ENOSR)
-    { "ENOSR",              ENOSR           },
+	{ "ENOSR",              ENOSR           },
 #endif
 #if defined(ENOSTR)
-    { "ENOSTR",             ENOSTR          },
+	{ "ENOSTR",             ENOSTR          },
 #endif
-    { "ENOSYS",             ENOSYS          },
-    { "ENOTCONN",           ENOTCONN        },
-    { "ENOTDIR",            ENOTDIR         },
-    { "ENOTEMPTY",          ENOTEMPTY       },
+	{ "ENOSYS",             ENOSYS          },
+	{ "ENOTCONN",           ENOTCONN        },
+	{ "ENOTDIR",            ENOTDIR         },
+	{ "ENOTEMPTY",          ENOTEMPTY       },
 #if defined(ENOTRECOVERABLE)
-    { "ENOTRECOVERABLE",    ENOTRECOVERABLE },
+	{ "ENOTRECOVERABLE",    ENOTRECOVERABLE },
 #endif
-    { "ENOTSOCK",           ENOTSOCK        },
-    { "ENOTSUP",            ENOTSUP         },
-    { "ENOTTY",             ENOTTY          },
-    { "ENXIO",              ENXIO           },
-    { "EOPNOTSUPP",         EOPNOTSUPP      },
-    { "EOVERFLOW",          EOVERFLOW       },
-    { "EOWNERDEAD",         EOWNERDEAD      },
-    { "EPERM",              EPERM           },
-    { "EPIPE",              EPIPE           },
-    { "EPROTO",             EPROTO          },
-    { "EPROTONOSUPPORT",    EPROTONOSUPPORT },
-    { "EPROTOTYPE",         EPROTOTYPE      },
-    { "ERANGE",             ERANGE          },
-    { "EROFS",              EROFS           },
-    { "ESPIPE",             ESPIPE          },
-    { "ESRCH",              ESRCH           },
+	{ "ENOTSOCK",           ENOTSOCK        },
+	{ "ENOTSUP",            ENOTSUP         },
+	{ "ENOTTY",             ENOTTY          },
+	{ "ENXIO",              ENXIO           },
+	{ "EOPNOTSUPP",         EOPNOTSUPP      },
+	{ "EOVERFLOW",          EOVERFLOW       },
+	{ "EOWNERDEAD",         EOWNERDEAD      },
+	{ "EPERM",              EPERM           },
+	{ "EPIPE",              EPIPE           },
+	{ "EPROTO",             EPROTO          },
+	{ "EPROTONOSUPPORT",    EPROTONOSUPPORT },
+	{ "EPROTOTYPE",         EPROTOTYPE      },
+	{ "ERANGE",             ERANGE          },
+	{ "EROFS",              EROFS           },
+	{ "ESPIPE",             ESPIPE          },
+	{ "ESRCH",              ESRCH           },
 #if defined(ETIME)
-    { "ETIME",              ETIME           },
+	{ "ETIME",              ETIME           },
 #endif
-    { "ETIMEDOUT",          ETIMEDOUT       },
+	{ "ETIMEDOUT",          ETIMEDOUT       },
 #if defined(ETXTBSY)
-    { "ETXTBSY",            ETXTBSY         },
+	{ "ETXTBSY",            ETXTBSY         },
 #endif
-    { "EWOULDBLOCK",        EWOULDBLOCK     },
-    { "EXDEV",              EXDEV           }
+	{ "EWOULDBLOCK",        EWOULDBLOCK     },
+	{ "EXDEV",              EXDEV           }
 };
 
 // }}}
@@ -175,70 +175,70 @@ const std::unordered_map<std::string, int> errors{
 
 void duk::type_traits<std::system_error>::raise(duk_context* ctx, const std::system_error& ex)
 {
-    do_raise(ctx, ex);
+	do_raise(ctx, ex);
 }
 
 void duk::type_traits<boost::system::system_error>::raise(duk_context* ctx, const boost::system::system_error& ex)
 {
-    do_raise(ctx, ex);
+	do_raise(ctx, ex);
 }
 
 auto irccd_js_api::get_name() const noexcept -> std::string_view
 {
-    return "Irccd";
+	return "Irccd";
 }
 
 void irccd_js_api::load(irccd& irccd, std::shared_ptr<js_plugin> plugin)
 {
-    duk::stack_guard sa(plugin->get_context());
+	duk::stack_guard sa(plugin->get_context());
 
-    // irccd.
-    duk_push_object(plugin->get_context());
+	// irccd.
+	duk_push_object(plugin->get_context());
 
-    // Version.
-    duk_push_object(plugin->get_context());
-    duk::push(plugin->get_context(), IRCCD_VERSION_MAJOR);
-    duk_put_prop_string(plugin->get_context(), -2, "major");
-    duk::push(plugin->get_context(), IRCCD_VERSION_MINOR);
-    duk_put_prop_string(plugin->get_context(), -2, "minor");
-    duk::push(plugin->get_context(), IRCCD_VERSION_PATCH);
-    duk_put_prop_string(plugin->get_context(), -2, "patch");
-    duk_put_prop_string(plugin->get_context(), -2, "version");
+	// Version.
+	duk_push_object(plugin->get_context());
+	duk::push(plugin->get_context(), IRCCD_VERSION_MAJOR);
+	duk_put_prop_string(plugin->get_context(), -2, "major");
+	duk::push(plugin->get_context(), IRCCD_VERSION_MINOR);
+	duk_put_prop_string(plugin->get_context(), -2, "minor");
+	duk::push(plugin->get_context(), IRCCD_VERSION_PATCH);
+	duk_put_prop_string(plugin->get_context(), -2, "patch");
+	duk_put_prop_string(plugin->get_context(), -2, "version");
 
-    // Create the system_error that inherits from Error.
-    duk_push_c_function(plugin->get_context(), constructor, 2);
+	// Create the system_error that inherits from Error.
+	duk_push_c_function(plugin->get_context(), constructor, 2);
 
-    // Put errno codes into the irccd.system_error object.
-    for (const auto& [k, v] : errors) {
-        duk_push_int(plugin->get_context(), v);
-        duk_put_prop_string(plugin->get_context(), -2, k.c_str());
-    }
+	// Put errno codes into the irccd.system_error object.
+	for (const auto& [k, v] : errors) {
+		duk_push_int(plugin->get_context(), v);
+		duk_put_prop_string(plugin->get_context(), -2, k.c_str());
+	}
 
-    duk_push_object(plugin->get_context());
-    duk_get_global_string(plugin->get_context(), "Error");
-    duk_get_prop_string(plugin->get_context(), -1, "prototype");
-    duk_remove(plugin->get_context(), -2);
-    duk_set_prototype(plugin->get_context(), -2);
-    duk_put_prop_string(plugin->get_context(), -2, "prototype");
-    duk_put_prop_string(plugin->get_context(), -2, "SystemError");
+	duk_push_object(plugin->get_context());
+	duk_get_global_string(plugin->get_context(), "Error");
+	duk_get_prop_string(plugin->get_context(), -1, "prototype");
+	duk_remove(plugin->get_context(), -2);
+	duk_set_prototype(plugin->get_context(), -2);
+	duk_put_prop_string(plugin->get_context(), -2, "prototype");
+	duk_put_prop_string(plugin->get_context(), -2, "SystemError");
 
-    // Set irccd as global.
-    duk_put_global_string(plugin->get_context(), "Irccd");
+	// Set irccd as global.
+	duk_put_global_string(plugin->get_context(), "Irccd");
 
-    // Store global instance.
-    duk_push_pointer(plugin->get_context(), &irccd);
-    duk_put_global_string(plugin->get_context(), "\xff""\xff""irccd-ref");
+	// Store global instance.
+	duk_push_pointer(plugin->get_context(), &irccd);
+	duk_put_global_string(plugin->get_context(), "\xff""\xff""irccd-ref");
 }
 
 auto duk::type_traits<irccd>::self(duk_context *ctx) -> irccd&
 {
-    duk::stack_guard sa(ctx);
+	duk::stack_guard sa(ctx);
 
-    duk_get_global_string(ctx, "\xff""\xff""irccd-ref");
-    const auto ptr = static_cast<irccd*>(duk_to_pointer(ctx, -1));
-    duk_pop(ctx);
+	duk_get_global_string(ctx, "\xff""\xff""irccd-ref");
+	const auto ptr = static_cast<irccd*>(duk_to_pointer(ctx, -1));
+	duk_pop(ctx);
 
-    return *ptr;
+	return *ptr;
 }
 
 } // !irccd::js

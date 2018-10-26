@@ -27,36 +27,67 @@ namespace ctl {
 
 alias_arg::alias_arg(std::string value)
 {
-    assert(!value.empty());
+	assert(!value.empty());
 
-    if ((is_placeholder_ = std::regex_match(value, std::regex("^%\\d+$"))))
-        value_ = value.substr(1);
-    else
-        value_ = std::move(value);
+	if ((is_placeholder_ = std::regex_match(value, std::regex("^%\\d+$"))))
+		value_ = value.substr(1);
+	else
+		value_ = std::move(value);
 }
 
-unsigned alias_arg::index() const noexcept
+auto alias_arg::is_placeholder() const noexcept -> bool
 {
-    assert(is_placeholder_);
-
-    return std::stoi(value_);
+	return is_placeholder_;
 }
 
-const std::string& alias_arg::value() const noexcept
+unsigned alias_arg::get_index() const noexcept
 {
-    assert(!is_placeholder_);
+	assert(is_placeholder_);
 
-    return value_;
+	return std::stoi(value_);
+}
+
+const std::string& alias_arg::get_value() const noexcept
+{
+	assert(!is_placeholder_);
+
+	return value_;
 }
 
 std::ostream& operator<<(std::ostream& out, const alias_arg& arg)
 {
-    if (arg.is_placeholder_)
-        out << "%" << arg.value_;
-    else
-        out << arg.value_;
+	if (arg.is_placeholder())
+		out << "%" << arg.get_value();
+	else
+		out << arg.get_value();
 
-    return out;
+	return out;
+}
+
+alias_command::alias_command(std::string command, std::vector<alias_arg> args) noexcept
+	: command_(std::move(command))
+	, args_(std::move(args))
+{
+}
+
+auto alias_command::get_command() const noexcept -> const std::string&
+{
+	return command_;
+}
+
+auto alias_command::get_args() const noexcept -> const std::vector<alias_arg>&
+{
+	return args_;
+}
+
+alias::alias(std::string name) noexcept
+	: name_(std::move(name))
+{
+}
+
+auto alias::get_name() const noexcept -> const std::string&
+{
+	return name_;
 }
 
 } // !ctl

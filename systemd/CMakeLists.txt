@@ -19,15 +19,15 @@
 project(contrib)
 
 if (IRCCD_WITH_SYSTEMD)
-    set(PATH "${CMAKE_INSTALL_FULL_BINDIR}/irccd")
+	set(PATH "${CMAKE_INSTALL_FULL_BINDIR}/irccd")
 
-    configure_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/irccd.service
-        ${CMAKE_CURRENT_BINARY_DIR}/irccd.service
-    )
+	configure_file(
+		${CMAKE_CURRENT_SOURCE_DIR}/irccd.service
+		${CMAKE_CURRENT_BINARY_DIR}/irccd.service
+	)
 
-    install(
-        FILES ${CMAKE_CURRENT_BINARY_DIR}/irccd.service
-        DESTINATION "/usr/lib/systemd/system"
-    )
+	install(
+		FILES ${CMAKE_CURRENT_BINARY_DIR}/irccd.service
+		DESTINATION "/usr/lib/systemd/system"
+	)
 endif()

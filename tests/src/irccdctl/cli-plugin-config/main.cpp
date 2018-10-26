@@ -30,85 +30,85 @@ namespace {
 
 class configurable_plugin_cli_fixture : public cli_fixture {
 public:
-    configurable_plugin_cli_fixture()
-    {
-        auto conf1 = std::make_unique<mock_plugin>("conf1");
-        auto conf2 = std::make_unique<mock_plugin>("conf2");
+	configurable_plugin_cli_fixture()
+	{
+		auto conf1 = std::make_unique<mock_plugin>("conf1");
+		auto conf2 = std::make_unique<mock_plugin>("conf2");
 
-        conf1->set_options({
-            { "v1", "123" },
-            { "v2", "456" }
-        });
+		conf1->set_options({
+			{ "v1", "123" },
+			{ "v2", "456" }
+		});
 
-        irccd_.plugins().add(std::move(conf1));
-        irccd_.plugins().add(std::move(conf2));
-    }
+		irccd_.plugins().add(std::move(conf1));
+		irccd_.plugins().add(std::move(conf2));
+	}
 };
 
 BOOST_FIXTURE_TEST_SUITE(plugin_config_suite, configurable_plugin_cli_fixture)
 
 BOOST_AUTO_TEST_CASE(set_and_get)
 {
-    start();
+	start();
 
-    // First, configure. No output yet
-    {
-        const auto [code, out, err] = exec({ "plugin-config", "conf2", "verbose", "false" });
+	// First, configure. No output yet
+	{
+		const auto [code, out, err] = exec({ "plugin-config", "conf2", "verbose", "false" });
 
-        // no output yet.
-        BOOST_TEST(!code);
-        BOOST_TEST(out.size() == 0U);
-        BOOST_TEST(err.size() == 0U);
-    }
+		// no output yet.
+		BOOST_TEST(!code);
+		BOOST_TEST(out.size() == 0U);
+		BOOST_TEST(err.size() == 0U);
+	}
 
-    // Get the newly created value.
-    {
-        const auto [code, out, err] = exec({ "plugin-config", "conf2", "verbose" });
+	// Get the newly created value.
+	{
+		const auto [code, out, err] = exec({ "plugin-config", "conf2", "verbose" });
 
-        BOOST_TEST(!code);
-        BOOST_TEST(out.size() == 1U);
-        BOOST_TEST(err.size() == 0U);
-        BOOST_TEST(out[0] == "false");
-    }
+		BOOST_TEST(!code);
+		BOOST_TEST(out.size() == 1U);
+		BOOST_TEST(err.size() == 0U);
+		BOOST_TEST(out[0] == "false");
+	}
 }
 
 BOOST_AUTO_TEST_CASE(getall)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "plugin-config", "conf1" });
+	const auto [code, out, err] = exec({ "plugin-config", "conf1" });
 
-    BOOST_TEST(!code);
-    BOOST_TEST(out.size() == 2U);
-    BOOST_TEST(err.size() == 0U);
-    BOOST_TEST(out[0] == "v1               : 123");
-    BOOST_TEST(out[1] == "v2               : 456");
+	BOOST_TEST(!code);
+	BOOST_TEST(out.size() == 2U);
+	BOOST_TEST(err.size() == 0U);
+	BOOST_TEST(out[0] == "v1               : 123");
+	BOOST_TEST(out[1] == "v2               : 456");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "plugin-config", "+++" });
+	const auto [code, out, err] = exec({ "plugin-config", "+++" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: invalid plugin identifier");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: invalid plugin identifier");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    start();
+	start();
 
-    const auto [code, out, err] = exec({ "plugin-config", "unknown" });
+	const auto [code, out, err] = exec({ "plugin-config", "unknown" });
 
-    BOOST_TEST(code);
-    BOOST_TEST(out.size() == 0U);
-    BOOST_TEST(err.size() == 1U);
-    BOOST_TEST(err[0] == "abort: plugin not found");
+	BOOST_TEST(code);
+	BOOST_TEST(out.size() == 0U);
+	BOOST_TEST(err.size() == 1U);
+	BOOST_TEST(err[0] == "abort: plugin not found");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

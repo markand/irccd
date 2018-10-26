@@ -55,7 +55,7 @@ project(irccd)
 
 # Helper to set global internal variables.
 function(setg var value)
-    set("${var}" "${value}" CACHE INTERNAL "")
+	set("${var}" "${value}" CACHE INTERNAL "")
 endfunction ()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${irccd_SOURCE_DIR}/cmake/packages)
@@ -93,7 +93,7 @@ add_subdirectory(libirccd-ctl)
 add_subdirectory(libirccd-test)
 
 if (IRCCD_HAVE_JS)
-    add_subdirectory(libirccd-js)
+	add_subdirectory(libirccd-js)
 endif ()
 
 add_subdirectory(irccd)
@@ -102,60 +102,60 @@ add_subdirectory(irccd-test)
 add_subdirectory(systemd)
 
 if (IRCCD_HAVE_JS)
-    add_subdirectory(plugins)
+	add_subdirectory(plugins)
 endif ()
 
 # Platform specific.
 if (WIN32)
-    add_subdirectory(win32)
+	add_subdirectory(win32)
 endif ()
 
 # Tests.
 if (IRCCD_WITH_TESTS)
-    include(CTest)
-    add_subdirectory(tests)
+	include(CTest)
+	add_subdirectory(tests)
 endif ()
 
 add_subdirectory(cmake/export)
 
 message("Compiling with the following flags:")
-message("    General flags:    ${CMAKE_CXX_FLAGS}")
-message("    Debug flags:      ${CMAKE_CXX_FLAGS_DEBUG}")
-message("    Release flags:    ${CMAKE_CXX_FLAGS_RELEASE}")
+message("       General flags:  ${CMAKE_CXX_FLAGS}")
+message("       Debug flags:    ${CMAKE_CXX_FLAGS_DEBUG}")
+message("       Release flags:  ${CMAKE_CXX_FLAGS_RELEASE}")
 message("")
 
 message("Compiling irccd with following options:")
-message("    Libedit:          ${IRCCD_WITH_LIBEDIT_MSG}")
-message("    OpenSSL:          ${IRCCD_WITH_SSL_MSG}")
-message("    Javascript:       ${IRCCD_WITH_JS_MSG}")
-message("    Tests:            ${IRCCD_WITH_TESTS_MSG}")
-message("    User docs:        ${IRCCD_WITH_HTML_MSG}")
-message("    Doxygen:          ${IRCCD_WITH_DOXYGEN_MSG}")
-message("    Package:          ${IRCCD_PACKAGE_MSG}")
-message("    Vera:             ${IRCCD_WITH_VERA_MSG}")
+message("       Libedit:        ${IRCCD_WITH_LIBEDIT_MSG}")
+message("       OpenSSL:        ${IRCCD_WITH_SSL_MSG}")
+message("       Javascript:     ${IRCCD_WITH_JS_MSG}")
+message("       Tests:          ${IRCCD_WITH_TESTS_MSG}")
+message("       User docs:      ${IRCCD_WITH_HTML_MSG}")
+message("       Doxygen:        ${IRCCD_WITH_DOXYGEN_MSG}")
+message("       Package:        ${IRCCD_PACKAGE_MSG}")
+message("       Vera:           ${IRCCD_WITH_VERA_MSG}")
 message("")
 
 message("Installing plugins:")
 foreach (plugin ${IRCCD_PLUGINS})
-    string(TOUPPER ${plugin} name)
-    irccd_indent_message("    ${plugin}: " "${IRCCD_WITH_PLUGIN_${name}_MSG}" 22)
+	string(TOUPPER ${plugin} name)
+	irccd_indent_message("       ${plugin}: " "${IRCCD_WITH_PLUGIN_${name}_MSG}" 22)
 endforeach ()
 message("")
 
 if (WIN32)
-    message("Installing these DLLs:")
-    foreach (name ${IRCCD_DLLS})
-        irccd_indent_message("    ${name}: " "${${name}}" 30)
-    endforeach ()
-    message("")
+	message("Installing these DLLs:")
+	foreach (name ${IRCCD_DLLS})
+		irccd_indent_message("       ${name}: " "${${name}}" 30)
+	endforeach ()
+	message("")
 
-    if (IRCCD_DLLS_NOT_FOUND)
-        message("The following DLLs were not found:")
-        foreach (name ${IRCCD_DLLS_NOT_FOUND})
-            message("    ${name}")
-        endforeach ()
-        message("")
-    endif ()
+	if (IRCCD_DLLS_NOT_FOUND)
+		message("The following DLLs were not found:")
+		foreach (name ${IRCCD_DLLS_NOT_FOUND})
+			message("       ${name}")
+		endforeach ()
+		message("")
+	endif ()
 endif ()
 
 include(cmake/IrccdPackage.cmake)
@@ -163,13 +163,13 @@ include(CPack)
 
 # Metadata files
 add_custom_target(
-    metadata
-    SOURCES
-        ${CMAKE_SOURCE_DIR}/CHANGES.md
-        ${CMAKE_SOURCE_DIR}/CONTRIBUTE.md
-        ${CMAKE_SOURCE_DIR}/CREDITS.md
-        ${CMAKE_SOURCE_DIR}/INSTALL.md
-        ${CMAKE_SOURCE_DIR}/MIGRATING.md
-        ${CMAKE_SOURCE_DIR}/README.md
-        ${CMAKE_SOURCE_DIR}/STYLE.md
+	metadata
+	SOURCES
+		${CMAKE_SOURCE_DIR}/CHANGES.md
+		${CMAKE_SOURCE_DIR}/CONTRIBUTE.md
+		${CMAKE_SOURCE_DIR}/CREDITS.md
+		${CMAKE_SOURCE_DIR}/INSTALL.md
+		${CMAKE_SOURCE_DIR}/MIGRATING.md
+		${CMAKE_SOURCE_DIR}/README.md
+		${CMAKE_SOURCE_DIR}/STYLE.md
 )

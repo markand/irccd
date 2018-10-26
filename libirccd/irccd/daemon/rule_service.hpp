@@ -41,96 +41,83 @@ class irccd;
  */
 class rule_service {
 private:
-    irccd& irccd_;
-    std::vector<rule> rules_;
+	irccd& irccd_;
+	std::vector<rule> rules_;
 
 public:
-    /**
-     * Create the rule service.
-     */
-    rule_service(irccd& instance);
+	/**
+	 * Create the rule service.
+	 */
+	rule_service(irccd& instance);
 
-    /**
-     * Get the list of rules.
-     *
-     * \return the list of rules
-     */
-    inline const std::vector<rule>& list() const noexcept
-    {
-        return rules_;
-    }
+	/**
+	 * Get the list of rules.
+	 *
+	 * \return the list of rules
+	 */
+	auto list() const noexcept -> const std::vector<rule>&;
 
-    /**
-     * Get the number of rules.
-     *
-     * \return the number of rules
-     */
-    inline std::size_t length() const noexcept
-    {
-        return rules_.size();
-    }
+	/**
+	 * Append a rule.
+	 *
+	 * \param rule the rule to append
+	 */
+	void add(rule rule);
 
-    /**
-     * Append a rule.
-     *
-     * \param rule the rule to append
-     */
-    void add(rule rule);
+	/**
+	 * Insert a new rule at the specified position.
+	 *
+	 * \param rule the rule
+	 * \param position the position
+	 */
+	void insert(rule rule, unsigned position);
 
-    /**
-     * Insert a new rule at the specified position.
-     *
-     * \param rule the rule
-     * \param position the position
-     */
-    void insert(rule rule, unsigned position);
+	/**
+	 * Remove a new rule from the specified position.
+	 *
+	 * \pre position must be valid
+	 * \param position the position
+	 */
+	void remove(unsigned position);
 
-    /**
-     * Remove a new rule from the specified position.
-     *
-     * \pre position must be valid
-     * \param position the position
-     */
-    void remove(unsigned position);
+	/**
+	 * Get a rule at the specified index or throw an exception if not found.
+	 *
+	 * \param position the position
+	 * \return the rule
+	 * \throw std::out_of_range if position is invalid
+	 */
+	auto require(unsigned position) const -> const rule&;
 
-    /**
-     * Get a rule at the specified index or throw an exception if not found.
-     *
-     * \param position the position
-     * \return the rule
-     * \throw std::out_of_range if position is invalid
-     */
-    const rule& require(unsigned position) const;
+	/**
+	 * Overloaded function.
+	 *
+	 * \copydoc require
+	 */
+	auto require(unsigned position) -> rule&;
 
-    /**
-     * Overloaded function.
-     *
-     * \copydoc require
-     */
-    rule& require(unsigned position);
+	/**
+	 * Resolve the action to execute with the specified list of rules.
+	 *
+	 * \param server the server name
+	 * \param channel the channel name
+	 * \param origin the origin
+	 * \param plugin the plugin name
+	 * \param event the event name (e.g onKick)
+	 * \return true if the plugin must be called
+	 */
+	auto solve(std::string_view server,
+	           std::string_view channel,
+	           std::string_view origin,
+	           std::string_view plugin,
+	           std::string_view event) noexcept -> bool;
 
-    /**
-     * Resolve the action to execute with the specified list of rules.
-     *
-     * \param server the server name
-     * \param channel the channel name
-     * \param origin the origin
-     * \param plugin the plugin name
-     * \param event the event name (e.g onKick)
-     * \return true if the plugin must be called
-     */
-    bool solve(std::string_view server,
-               std::string_view channel,
-               std::string_view origin,
-               std::string_view plugin,
-               std::string_view event) noexcept;
-
-    /**
-     * Load rules from the configuration.
-     *
-     * \param cfg the config
-     */
-    void load(const config& cfg) noexcept;
+	/**
+	 * Load rules from the configuration.
+	 *
+	 * \param cfg the config
+	 */
+	void load(const config& cfg) noexcept;
 };
 
 namespace logger {
@@ -140,9 +127,9 @@ struct loggable_traits;
 
 template <>
 struct loggable_traits<rule> {
-    static auto get_category(const rule& rule) -> std::string_view;
+	static auto get_category(const rule& rule) -> std::string_view;
 
-    static auto get_component(const rule& rule) -> std::string_view;
+	static auto get_component(const rule& rule) -> std::string_view;
 };
 
 } // !logger

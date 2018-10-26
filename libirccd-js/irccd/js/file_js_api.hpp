@@ -55,88 +55,88 @@ namespace irccd::js {
  */
 class file {
 private:
-    file(const file&) = delete;
-    file& operator=(const file&) = delete;
+	file(const file&) = delete;
+	file& operator=(const file&) = delete;
 
-    file(file&&) = delete;
-    file& operator=(file&&) = delete;
+	file(file&&) = delete;
+	file& operator=(file&&) = delete;
 
 private:
-    std::string path_;
-    std::FILE* stream_;
-    std::function<void (std::FILE*)> destructor_;
+	std::string path_;
+	std::FILE* stream_;
+	std::function<void (std::FILE*)> destructor_;
 
 public:
-    /**
-     * Construct a file specified by path
-     *
-     * \param path the path
-     * \param mode the mode string (for std::fopen)
-     * \throw std::runtime_error on failures
-     */
-    inline file(std::string path, const std::string& mode)
-        : path_(std::move(path))
-        , destructor_([] (std::FILE* fp) { std::fclose(fp); })
-    {
-        if ((stream_ = std::fopen(path_.c_str(), mode.c_str())) == nullptr)
-            throw std::runtime_error(std::strerror(errno));
-    }
+	/**
+	 * Construct a file specified by path
+	 *
+	 * \param path the path
+	 * \param mode the mode string (for std::fopen)
+	 * \throw std::runtime_error on failures
+	 */
+	inline file(std::string path, const std::string& mode)
+		: path_(std::move(path))
+		, destructor_([] (std::FILE* fp) { std::fclose(fp); })
+	{
+		if ((stream_ = std::fopen(path_.c_str(), mode.c_str())) == nullptr)
+			throw std::runtime_error(std::strerror(errno));
+	}
 
-    /**
-     * Construct a file from a already created FILE pointer (e.g. popen).
-     *
-     * The class takes ownership of fp and will close it.
-     *
-     * \pre destructor must not be null
-     * \param fp the file pointer
-     * \param destructor the function to close fp (e.g. std::fclose)
-     */
-    inline file(std::FILE* fp, std::function<void (std::FILE*)> destructor) noexcept
-        : stream_(fp)
-        , destructor_(std::move(destructor))
-    {
-        assert(destructor_ != nullptr);
-    }
+	/**
+	 * Construct a file from a already created FILE pointer (e.g. popen).
+	 *
+	 * The class takes ownership of fp and will close it.
+	 *
+	 * \pre destructor must not be null
+	 * \param fp the file pointer
+	 * \param destructor the function to close fp (e.g. std::fclose)
+	 */
+	inline file(std::FILE* fp, std::function<void (std::FILE*)> destructor) noexcept
+		: stream_(fp)
+		, destructor_(std::move(destructor))
+	{
+		assert(destructor_ != nullptr);
+	}
 
-    /**
-     * Closes the file.
-     */
-    virtual ~file() noexcept
-    {
-        close();
-    }
+	/**
+	 * Closes the file.
+	 */
+	virtual ~file() noexcept
+	{
+		close();
+	}
 
-    /**
-     * Get the path.
-     *
-     * \return the path
-     * \warning empty when constructed from the FILE constructor
-     */
-    inline const std::string& get_path() const noexcept
-    {
-        return path_;
-    }
+	/**
+	 * Get the path.
+	 *
+	 * \return the path
+	 * \warning empty when constructed from the FILE constructor
+	 */
+	inline const std::string& get_path() const noexcept
+	{
+		return path_;
+	}
 
-    /**
-     * Get the handle.
-     *
-     * \return the handle or nullptr if the stream was closed
-     */
-    inline std::FILE* get_handle() noexcept
-    {
-        return stream_;
-    }
+	/**
+	 * Get the handle.
+	 *
+	 * \return the handle or nullptr if the stream was closed
+	 */
+	inline std::FILE* get_handle() noexcept
+	{
+		return stream_;
+	}
 
-    /**
-     * Force close, can be safely called multiple times.
-     */
-    inline void close() noexcept
-    {
-        if (stream_) {
-            destructor_(stream_);
-            stream_ = nullptr;
-        }
-    }
+	/**
+	 * Force close, can be safely called multiple times.
+	 */
+	inline void close() noexcept
+	{
+		if (stream_) {
+			destructor_(stream_);
+			stream_ = nullptr;
+		}
+	}
 };
 
 /**
@@ -145,15 +145,15 @@ public:
  */
 class file_js_api : public js_api {
 public:
-    /**
-     * \copydoc js_api::get_name
-     */
-    auto get_name() const noexcept -> std::string_view override;
+	/**
+	 * \copydoc js_api::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
 
-    /**
-     * \copydoc js_api::load
-     */
-    void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
+	/**
+	 * \copydoc js_api::load
+	 */
+	void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };
 
 namespace duk {
@@ -165,23 +165,23 @@ namespace duk {
  */
 template <>
 struct type_traits<std::shared_ptr<file>> {
-    /**
-     * Push a file.
-     *
-     * \pre fp != nullptr
-     * \param ctx the the context
-     * \param fp the file
-     */
-    static void push(duk_context* ctx, std::shared_ptr<file> fp);
+	/**
+	 * Push a file.
+	 *
+	 * \pre fp != nullptr
+	 * \param ctx the the context
+	 * \param fp the file
+	 */
+	static void push(duk_context* ctx, std::shared_ptr<file> fp);
 
-    /**
-     * Require a file. Raises a JavaScript error if not a File.
-     *
-     * \param ctx the context
-     * \param index the index
-     * \return the file pointer
-     */
-    static auto require(duk_context* ctx, duk_idx_t index) -> std::shared_ptr<file>;
+	/**
+	 * Require a file. Raises a JavaScript error if not a File.
+	 *
+	 * \param ctx the context
+	 * \param index the index
+	 * \return the file pointer
+	 */
+	static auto require(duk_context* ctx, duk_idx_t index) -> std::shared_ptr<file>;
 };
 
 #if defined(IRCCD_HAVE_STAT)
@@ -193,13 +193,13 @@ struct type_traits<std::shared_ptr<file>> {
  */
 template <>
 struct type_traits<struct stat> {
-    /**
-     * Push the stat information to the stack as Javascript object.
-     *
-     * \param ctx the context
-     * \param st the stat structure
-     */
-    static void push(duk_context* ctx, const struct stat& st);
+	/**
+	 * Push the stat information to the stack as Javascript object.
+	 *
+	 * \param ctx the context
+	 * \param st the stat structure
+	 */
+	static void push(duk_context* ctx, const struct stat& st);
 };
 
 #endif // !IRCCD_HAVE_STAT

@@ -17,11 +17,11 @@
 #
 
 irccd_define_test(
-    NAME plugin-hangman
-    SOURCES
-        main.cpp
-        words.conf
-        issue-644.conf
-    LIBRARIES libirccd
-    FLAGS PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/hangman/hangman.js"
+	NAME plugin-hangman
+	SOURCES
+		main.cpp
+		words.conf
+		issue-644.conf
+	LIBRARIES libirccd
+	FLAGS PLUGIN_PATH="${CMAKE_SOURCE_DIR}/plugins/hangman/hangman.js"
 )

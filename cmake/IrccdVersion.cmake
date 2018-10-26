@@ -20,11 +20,11 @@
 find_program(HG_EXECUTABLE hg)
 
 if (HG_EXECUTABLE)
-    execute_process(
-        COMMAND hg log -r . -T " ({rev}:{node|short})"
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        OUTPUT_VARIABLE HG_REV
-    )
+	execute_process(
+		COMMAND hg log -r . -T " ({rev}:{node|short})"
+		WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+		OUTPUT_VARIABLE HG_REV
+	)
 endif ()
 
 # Irccd version.

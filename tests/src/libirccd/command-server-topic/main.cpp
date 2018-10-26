@@ -31,90 +31,90 @@ BOOST_FIXTURE_TEST_SUITE(server_topic_fixture_suite, command_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-    const auto [json, code] = request({
-        { "command",    "server-topic"  },
-        { "server",     "test"          },
-        { "channel",    "#staff"        },
-        { "topic",      "new version"   }
-    });
+	const auto [json, code] = request({
+		{ "command",    "server-topic"  },
+		{ "server",     "test"          },
+		{ "channel",    "#staff"        },
+		{ "topic",      "new version"   }
+	});
 
-    const auto cmd = server_->find("topic").back();
+	const auto cmd = server_->find("topic").back();
 
-    BOOST_TEST(!code);
-    BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#staff");
-    BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "new version");
+	BOOST_TEST(!code);
+	BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#staff");
+	BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "new version");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier_1)
 {
-    const auto [json, code] = request({
-        { "command",    "server-topic"  },
-        { "server",     123456          },
-        { "channel",    "#music"        },
-        { "topic",      "plop"          }
-    });
+	const auto [json, code] = request({
+		{ "command",    "server-topic"  },
+		{ "server",     123456          },
+		{ "channel",    "#music"        },
+		{ "topic",      "plop"          }
+	});
 
-    BOOST_TEST(code == server_error::invalid_identifier);
-    BOOST_TEST(json["error"].get<int>() == server_error::invalid_identifier);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
+	BOOST_TEST(code == server_error::invalid_identifier);
+	BOOST_TEST(json["error"].get<int>() == server_error::invalid_identifier);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_identifier_2)
 {
-    const auto [json, code] = request({
-        { "command",    "server-topic"  },
-        { "server",     ""              },
-        { "channel",    "#music"        },
-        { "topic",      "plop"          }
-    });
+	const auto [json, code] = request({
+		{ "command",    "server-topic"  },
+		{ "server",     ""              },
+		{ "channel",    "#music"        },
+		{ "topic",      "plop"          }
+	});
 
-    BOOST_TEST(code == server_error::invalid_identifier);
-    BOOST_TEST(json["error"].get<int>() == server_error::invalid_identifier);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
+	BOOST_TEST(code == server_error::invalid_identifier);
+	BOOST_TEST(json["error"].get<int>() == server_error::invalid_identifier);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_channel_1)
 {
-    const auto [json, code] = request({
-        { "command",    "server-topic"  },
-        { "server",     "test"          },
-        { "channel",    ""              },
-        { "topic",      "plop"          }
-    });
+	const auto [json, code] = request({
+		{ "command",    "server-topic"  },
+		{ "server",     "test"          },
+		{ "channel",    ""              },
+		{ "topic",      "plop"          }
+	});
 
-    BOOST_TEST(code == server_error::invalid_channel);
-    BOOST_TEST(json["error"].get<int>() == server_error::invalid_channel);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
+	BOOST_TEST(code == server_error::invalid_channel);
+	BOOST_TEST(json["error"].get<int>() == server_error::invalid_channel);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_channel_2)
 {
-    const auto [json, code] = request({
-        { "command",    "server-topic"  },
-        { "server",     "test"          },
-        { "channel",    123456          },
-        { "topic",      "plop"          }
-    });
+	const auto [json, code] = request({
+		{ "command",    "server-topic"  },
+		{ "server",     "test"          },
+		{ "channel",    123456          },
+		{ "topic",      "plop"          }
+	});
 
-    BOOST_TEST(code == server_error::invalid_channel);
-    BOOST_TEST(json["error"].get<int>() == server_error::invalid_channel);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
+	BOOST_TEST(code == server_error::invalid_channel);
+	BOOST_TEST(json["error"].get<int>() == server_error::invalid_channel);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-    const auto [json, code] = request({
-        { "command",    "server-topic"  },
-        { "server",     "unknown"       },
-        { "channel",    "#music"        },
-        { "topic",      "plop"          }
-    });
+	const auto [json, code] = request({
+		{ "command",    "server-topic"  },
+		{ "server",     "unknown"       },
+		{ "channel",    "#music"        },
+		{ "topic",      "plop"          }
+	});
 
-    BOOST_TEST(code == server_error::not_found);
-    BOOST_TEST(json["error"].get<int>() == server_error::not_found);
-    BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
+	BOOST_TEST(code == server_error::not_found);
+	BOOST_TEST(json["error"].get<int>() == server_error::not_found);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

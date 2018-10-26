@@ -83,17 +83,17 @@ auto dir_name(const std::string& path) -> std::string;
 template <typename Predicate>
 auto find_if(const std::string& base, bool recursive, Predicate&& predicate) -> std::string
 {
-    const auto find = [&] (auto it) -> std::string {
-        for (const auto& entry : it)
-            if (predicate(entry))
-                return entry.path().string();
+	const auto find = [&] (auto it) -> std::string {
+		for (const auto& entry : it)
+			if (predicate(entry))
+				return entry.path().string();
 
-        return "";
-    };
+		return "";
+	};
 
-    return recursive
-        ? find(boost::filesystem::recursive_directory_iterator(base))
-        : find(boost::filesystem::directory_iterator(base));
+	return recursive
+		? find(boost::filesystem::recursive_directory_iterator(base))
+		: find(boost::filesystem::directory_iterator(base));
 }
 
 // }}}

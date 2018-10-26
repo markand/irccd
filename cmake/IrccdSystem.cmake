@@ -27,49 +27,14 @@ include(CheckTypeSize)
 # -------------------------------------------------------------------
 #
 
-#
-# Recent versions of CMake has nice C++ feature detection for modern
-# C++ but they are still a bit buggy so we use this
-# instead.
-#
-if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-    #
-    # For GCC, we require at least GCC 5.1
-    #
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.1")
-        message(FATAL_ERROR "You need at least GCC 5.1")
-    endif ()
-
-    set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 ${CMAKE_CXX_FLAGS}")
-elseif (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    #
-    # LLVM/clang implemented C++14 starting from version 3.4 but the
-    # switch -std=c++14 was not available.
-    #
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.4")
-        message(FATAL_ERROR "You need at least Clang 3.4")
-    endif ()
-
-    if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS "3.5")
-        set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++1y ${CMAKE_CXX_FLAGS}")
-    else ()
-        set(CMAKE_CXX_FLAGS "-Wall -Wextra -std=c++14 ${CMAKE_CXX_FLAGS}")
-    endif ()
-elseif (MSVC14)
-    set(CMAKE_C_FLAGS "/DWIN32_LEAN_AND_MEAN /DNOMINMAX /wd4267 /wd4800 /D_CRT_SECURE_NO_WARNINGS ${CMAKE_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "/DWIN32_LEAN_AND_MEAN /DNOMINMAX /wd4267 /wd4800 /D_CRT_SECURE_NO_WARNINGS /EHsc ${CMAKE_CXX_FLAGS}")
-else ()
-    message(WARNING "Unsupported ${CMAKE_CXX_COMPILER_ID}, may not build correctly.")
-endif ()
-
 if (MINGW)
-    set(CMAKE_CXX_FLAGS "-D_WIN32_WINNT=0x0600 ${CMAKE_CXX_FLAGS}")
+	set(CMAKE_CXX_FLAGS "-D_WIN32_WINNT=0x0600 ${CMAKE_CXX_FLAGS}")
 endif ()
 
 if (CMAKE_SIZEOF_VOID_P MATCHES "8")
-    set(IRCCD_64BITS TRUE)
+	set(IRCCD_64BITS TRUE)
 else ()
-    set(IRCCD_64BITS FALSE)
+	set(IRCCD_64BITS FALSE)
 endif ()
 
 #
@@ -128,7 +93,7 @@ check_function_exists(setprogname IRCCD_HAVE_SETPROGNAME)
 check_function_exists(getlogin IRCCD_HAVE_GETLOGIN)
 
 if (NOT IRCCD_HAVE_UNISTD_H)
-    set(IRCCD_HAVE_GETLOGIN FALSE)
+	set(IRCCD_HAVE_GETLOGIN FALSE)
 endif ()
 
 # popen() function
@@ -149,7 +114,7 @@ check_function_exists(stat IRCCD_HAVE_STAT)
 
 # If the sys/stat.h is not found, we disable stat(2)
 if (NOT IRCCD_HAVE_SYS_STAT_H OR NOT IRCCD_HAVE_SYS_TYPES_H)
-    set(IRCCD_HAVE_STAT FALSE)
+	set(IRCCD_HAVE_STAT FALSE)
 endif ()
 
 # syslog functions
@@ -163,7 +128,7 @@ check_function_exists(syslog IRCCD_HAVE_SYSLOG)
 check_function_exists(closelog IRCCD_HAVE_CLOSELOG)
 
 if (NOT IRCCD_HAVE_SYSLOG_H OR NOT IRCCD_HAVE_OPENLOG OR NOT IRCCD_HAVE_CLOSELOG)
-    set(IRCCD_HAVE_SYSLOG FALSE)
+	set(IRCCD_HAVE_SYSLOG FALSE)
 endif ()
 
 # Check for struct stat fields.
@@ -185,16 +150,16 @@ check_struct_has_member("struct stat" st_uid sys/stat.h IRCCD_HAVE_STAT_ST_UID)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/irccd)
 
 configure_file(
-    ${CMAKE_CURRENT_LIST_DIR}/internal/sysconfig.hpp.in
-    ${CMAKE_BINARY_DIR}/irccd/sysconfig.hpp
+	${CMAKE_CURRENT_LIST_DIR}/internal/sysconfig.hpp.in
+	${CMAKE_BINARY_DIR}/irccd/sysconfig.hpp
 )
 
 include_directories(
-    ${CMAKE_BINARY_DIR}
-    ${CMAKE_BINARY_DIR}/irccd
+	${CMAKE_BINARY_DIR}
+	${CMAKE_BINARY_DIR}/irccd
 )
 
 install(
-    FILES ${CMAKE_BINARY_DIR}/irccd/sysconfig.hpp
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/irccd
+	FILES ${CMAKE_BINARY_DIR}/irccd/sysconfig.hpp
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/irccd
 )

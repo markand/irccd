@@ -38,19 +38,19 @@ namespace irccd::test {
  */
 class js_fixture : public irccd_fixture {
 protected:
-    /**
-     * \brief Javascript plugin.
-     */
-    std::shared_ptr<js::js_plugin> plugin_;
+	/**
+	 * \brief Javascript plugin.
+	 */
+	std::shared_ptr<js::js_plugin> plugin_;
 
-    /**
-     * Constructor.
-     *
-     * Initialize a Javascript plugin with all Javascript API modules.
-     *
-     * \param path the path to a Javascript file if required
-     */
-    js_fixture(const std::string& path = "");
+	/**
+	 * Constructor.
+	 *
+	 * Initialize a Javascript plugin with all Javascript API modules.
+	 *
+	 * \param path the path to a Javascript file if required
+	 */
+	js_fixture(const std::string& path = "");
 };
 
 } // !irccd::test

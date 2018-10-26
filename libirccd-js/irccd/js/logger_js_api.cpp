@@ -33,28 +33,28 @@ namespace {
 
 auto print(duk_context* ctx, unsigned level) -> duk_ret_t
 {
-    assert(level <= 2);
+	assert(level <= 2);
 
-    try {
-        auto& sink = duk::type_traits<irccd>::self(ctx).get_log();
-        auto& self = duk::type_traits<js_plugin>::self(ctx);
+	try {
+		auto& sink = duk::type_traits<irccd>::self(ctx).get_log();
+		auto& self = duk::type_traits<js_plugin>::self(ctx);
 
-        switch (level) {
-        case 0:
-            sink.debug<plugin>(self) << duk_require_string(ctx, 0) << std::endl;
-            break;
-        case 1:
-            sink.info<plugin>(self) << duk_require_string(ctx, 0) << std::endl;
-            break;
-        default:
-            sink.warning<plugin>(self) << duk_require_string(ctx, 0) << std::endl;
-            break;
-        }
-    } catch (const std::exception& ex) {
-        duk::raise(ctx, ex);
-    }
+		switch (level) {
+		case 0:
+			sink.debug<plugin>(self) << duk_require_string(ctx, 0) << std::endl;
+			break;
+		case 1:
+			sink.info<plugin>(self) << duk_require_string(ctx, 0) << std::endl;
+			break;
+		default:
+			sink.warning<plugin>(self) << duk_require_string(ctx, 0) << std::endl;
+			break;
+		}
+	} catch (const std::exception& ex) {
+		duk::raise(ctx, ex);
+	}
 
-    return 0;
+	return 0;
 }
 
 // }}}
@@ -74,7 +74,7 @@ auto print(duk_context* ctx, unsigned level) -> duk_ret_t
  */
 auto Logger_info(duk_context* ctx) -> duk_ret_t
 {
-    return print(ctx, 1);
+	return print(ctx, 1);
 }
 
 // }}}
@@ -94,7 +94,7 @@ auto Logger_info(duk_context* ctx) -> duk_ret_t
  */
 auto Logger_warning(duk_context* ctx) -> duk_ret_t
 {
-    return print(ctx, 2);
+	return print(ctx, 2);
 }
 
 // }}}
@@ -114,34 +114,34 @@ auto Logger_warning(duk_context* ctx) -> duk_ret_t
  */
 auto Logger_debug(duk_context* ctx) -> duk_ret_t
 {
-    return print(ctx, 0);
+	return print(ctx, 0);
 }
 
 // }}}
 
 const duk_function_list_entry functions[] = {
-    { "info",       Logger_info,    1 },
-    { "warning",    Logger_warning, 1 },
-    { "debug",      Logger_debug,   1 },
-    { nullptr,      nullptr,        0 }
+	{ "info",       Logger_info,    1 },
+	{ "warning",    Logger_warning, 1 },
+	{ "debug",      Logger_debug,   1 },
+	{ nullptr,      nullptr,        0 }
 };
 
 } // !namespace
 
 auto logger_js_api::get_name() const noexcept -> std::string_view
 {
-    return "Irccd.Logger";
+	return "Irccd.Logger";
 }
 
 void logger_js_api::load(irccd&, std::shared_ptr<js_plugin> plugin)
 {
-    duk::stack_guard sa(plugin->get_context());
+	duk::stack_guard sa(plugin->get_context());
 
-    duk_get_global_string(plugin->get_context(), "Irccd");
-    duk_push_object(plugin->get_context());
-    duk_put_function_list(plugin->get_context(), -1, functions);
-    duk_put_prop_string(plugin->get_context(), -2, "Logger");
-    duk_pop(plugin->get_context());
+	duk_get_global_string(plugin->get_context(), "Irccd");
+	duk_push_object(plugin->get_context());
+	duk_put_function_list(plugin->get_context(), -1, functions);
+	duk_put_prop_string(plugin->get_context(), -2, "Logger");
+	duk_pop(plugin->get_context());
 }
 
 } // !irccd::js
