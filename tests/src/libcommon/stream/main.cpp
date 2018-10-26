@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define BOOST_TEST_MODULE "io"
+#define BOOST_TEST_MODULE "stream"
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
 #include <boost/predef/os.h>
@@ -48,7 +48,7 @@ namespace irccd {
 
 namespace {
 
-class io_fixture {
+class stream_fixture {
 public:
 	io_service service_;
 
@@ -85,7 +85,7 @@ public:
 	}
 };
 
-class ip_io_fixture : public io_fixture {
+class ip_stream_fixture : public stream_fixture {
 private:
 	tcp::endpoint endpoint_;
 
@@ -114,7 +114,7 @@ protected:
 
 #if defined(IRCCD_HAVE_SSL)
 
-class ssl_io_fixture : public io_fixture {
+class ssl_stream_fixture : public stream_fixture {
 private:
 	tcp::endpoint endpoint_;
 
@@ -150,7 +150,7 @@ protected:
 
 #if !BOOST_OS_WINDOWS
 
-class local_io_fixture : public io_fixture {
+class local_stream_fixture : public stream_fixture {
 public:
 	/**
 	 * \copydoc io_fixture::create_acceptor
@@ -179,12 +179,12 @@ public:
  * List of fixtures to tests.
  */
 using list = boost::mpl::list<
-	ip_io_fixture
+	ip_stream_fixture
 #if defined(IRCCD_HAVE_SSL)
-	, ssl_io_fixture
+	, ssl_stream_fixture
 #endif
 #if !BOOST_OS_WINDOWS
-	, local_io_fixture
+	, local_stream_fixture
 #endif
 >;
 

@@ -42,7 +42,7 @@ BOOST_FIXTURE_TEST_SUITE(directory_js_api_suite, directory_js_fixture)
 BOOST_AUTO_TEST_CASE(constructor)
 {
 	const std::string script(
-		"d = new Irccd.Directory(CMAKE_SOURCE_DIR + \"/tests/root\");"
+		"d = new Irccd.Directory(CMAKE_SOURCE_DIR + \"/tests/data/root\");"
 		"p = d.path;"
 		"l = d.entries.length;"
 	);

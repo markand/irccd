@@ -61,7 +61,7 @@ BOOST_AUTO_TEST_CASE(function_dirname)
 
 BOOST_AUTO_TEST_CASE(function_exists)
 {
-	if (duk_peval_string(plugin_->get_context(), "result = Irccd.File.exists(CMAKE_SOURCE_DIR + '/tests/root/file-1.txt')"))
+	if (duk_peval_string(plugin_->get_context(), "result = Irccd.File.exists(CMAKE_SOURCE_DIR + '/tests/data/root/file-1.txt')"))
 		throw duk::get_stack(plugin_->get_context(), -1);
 
 	BOOST_TEST(duk_get_global_string(plugin_->get_context(), "result"));
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(function_remove)
 BOOST_AUTO_TEST_CASE(method_basename)
 {
 	const auto ret = duk_peval_string(plugin_->get_context(),
-		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/root/file-1.txt', 'r');"
+		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/data/root/file-1.txt', 'r');"
 		"result = f.basename();"
 	);
 
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE(method_basename)
 BOOST_AUTO_TEST_CASE(method_basename_closed)
 {
 	const auto ret = duk_peval_string(plugin_->get_context(),
-		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/root/file-1.txt', 'r');"
+		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/data/root/file-1.txt', 'r');"
 		"f.close();"
 		"result = f.basename();"
 	);
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(method_basename_closed)
 BOOST_AUTO_TEST_CASE(method_dirname)
 {
 	const auto ret = duk_peval_string(plugin_->get_context(),
-		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/root/file-1.txt', 'r');"
+		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/data/root/file-1.txt', 'r');"
 		"result = f.dirname();"
 	);
 
@@ -130,13 +130,13 @@ BOOST_AUTO_TEST_CASE(method_dirname)
 		throw duk::get_stack(plugin_->get_context(), -1);
 
 	BOOST_TEST(duk_get_global_string(plugin_->get_context(), "result"));
-	BOOST_TEST(CMAKE_SOURCE_DIR "/tests/root" == duk_get_string(plugin_->get_context(), -1));
+	BOOST_TEST(CMAKE_SOURCE_DIR "/tests/data/root" == duk_get_string(plugin_->get_context(), -1));
 }
 
 BOOST_AUTO_TEST_CASE(method_dirname_closed)
 {
 	const auto ret = duk_peval_string(plugin_->get_context(),
-		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/root/file-1.txt', 'r');"
+		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/data/root/file-1.txt', 'r');"
 		"f.close();"
 		"result = f.dirname();"
 	);
@@ -145,13 +145,13 @@ BOOST_AUTO_TEST_CASE(method_dirname_closed)
 		throw duk::get_stack(plugin_->get_context(), -1);
 
 	BOOST_TEST(duk_get_global_string(plugin_->get_context(), "result"));
-	BOOST_TEST(CMAKE_SOURCE_DIR "/tests/root" == duk_get_string(plugin_->get_context(), -1));
+	BOOST_TEST(CMAKE_SOURCE_DIR "/tests/data/root" == duk_get_string(plugin_->get_context(), -1));
 }
 
 BOOST_AUTO_TEST_CASE(method_lines)
 {
 	const auto ret = duk_peval_string(plugin_->get_context(),
-		"result = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/root/lines.txt', 'r').lines();"
+		"result = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/data/root/lines.txt', 'r').lines();"
 	);
 
 	if (ret != 0)
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(method_lines)
 BOOST_AUTO_TEST_CASE(method_seek1)
 {
 	const auto ret = duk_peval_string(plugin_->get_context(),
-		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/root/file-1.txt', 'r');"
+		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/data/root/file-1.txt', 'r');"
 		"f.seek(Irccd.File.SeekSet, 6);"
 		"result = f.read(1);"
 	);
@@ -181,7 +181,7 @@ BOOST_AUTO_TEST_CASE(method_seek1)
 BOOST_AUTO_TEST_CASE(method_seek1_closed)
 {
 	const auto ret = duk_peval_string(plugin_->get_context(),
-		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/root/file-1.txt', 'r');"
+		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/data/root/file-1.txt', 'r');"
 		"f.close();"
 		"f.seek(Irccd.File.SeekSet, 4);"
 		"result = f.read(1);"
@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE(method_seek1_closed)
 BOOST_AUTO_TEST_CASE(method_seek2)
 {
 	const auto ret = duk_peval_string(plugin_->get_context(),
-		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/root/file-1.txt', 'r');"
+		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/data/root/file-1.txt', 'r');"
 		"f.seek(Irccd.File.SeekSet, 2);"
 		"f.seek(Irccd.File.SeekCur, 4);"
 		"result = f.read(1);"
@@ -214,7 +214,7 @@ BOOST_AUTO_TEST_CASE(method_seek2)
 BOOST_AUTO_TEST_CASE(method_seek2c_losed)
 {
 	const auto ret = duk_peval_string(plugin_->get_context(),
-		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/root/file-1.txt', 'r');"
+		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/data/root/file-1.txt', 'r');"
 		"f.close();"
 		"f.seek(Irccd.File.SeekSet, 2);"
 		"f.seek(Irccd.File.SeekCur, 2);"
@@ -232,7 +232,7 @@ BOOST_AUTO_TEST_CASE(method_seek2c_losed)
 BOOST_AUTO_TEST_CASE(method_seek3)
 {
 	const auto ret = duk_peval_string(plugin_->get_context(),
-		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/root/file-1.txt', 'r');"
+		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/data/root/file-1.txt', 'r');"
 		"f.seek(Irccd.File.SeekEnd, -2);"
 		"result = f.read(1);"
 	);
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(method_seek3)
 BOOST_AUTO_TEST_CASE(method_seek3_closed)
 {
 	const auto ret = duk_peval_string(plugin_->get_context(),
-		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/root/file-1.txt', 'r');"
+		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/data/root/file-1.txt', 'r');"
 		"f.close();"
 		"f.seek(Irccd.File.SeekEnd, -2);"
 		"result = f.read(1);"
@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE(method_seek3_closed)
 BOOST_AUTO_TEST_CASE(method_read1)
 {
 	const auto ret = duk_peval_string(plugin_->get_context(),
-		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/root/file-1.txt', 'r');"
+		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/data/root/file-1.txt', 'r');"
 		"result = f.read();"
 	);
 
@@ -279,7 +279,7 @@ BOOST_AUTO_TEST_CASE(method_readline)
 {
 	const auto ret = duk_peval_string(plugin_->get_context(),
 		"result = [];"
-		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/root/lines.txt', 'r');"
+		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/data/root/lines.txt', 'r');"
 		"for (var s; s = f.readline(); ) {"
 		"  result.push(s);"
 		"}"
@@ -298,7 +298,7 @@ BOOST_AUTO_TEST_CASE(method_readline_closed)
 {
 	const auto ret = duk_peval_string(plugin_->get_context(),
 		"result = [];"
-		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/root/lines.txt', 'r');"
+		"f = new Irccd.File(CMAKE_SOURCE_DIR + '/tests/data/root/lines.txt', 'r');"
 		"f.close();"
 		"for (var s; s = f.readline(); ) {"
 		"  result.push(s);"
