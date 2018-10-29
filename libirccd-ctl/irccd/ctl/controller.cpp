@@ -28,11 +28,9 @@
 
 #include "controller.hpp"
 
-namespace irccd {
+using irccd::json_util::deserializer;
 
-using json_util::deserializer;
-
-namespace ctl {
+namespace irccd::ctl {
 
 void controller::authenticate(connect_handler handler, nlohmann::json info)
 {
@@ -156,6 +154,4 @@ void controller::write(nlohmann::json message, stream::write_handler handler)
 	});
 }
 
-} // !ctl
-
-} // !irccd
+} // !irccd::ctl

@@ -97,7 +97,7 @@ public:
  *
  * Replies:
  *
- *   - plugin_error::not_found
+ * - plugin_error::not_found
  */
 class plugin_config_command : public command {
 public:
@@ -121,7 +121,7 @@ public:
  *
  * Replies:
  *
- *   - plugin_error::not_found
+ * - plugin_error::not_found
  */
 class plugin_info_command : public command {
 public:
@@ -165,9 +165,9 @@ public:
  *
  * Replies:
  *
- *   - plugin_error::already_exists
- *   - plugin_error::not_found
- *   - plugin_error::exec_error
+ * - plugin_error::already_exists
+ * - plugin_error::not_found
+ * - plugin_error::exec_error
  */
 class plugin_load_command : public command {
 public:
@@ -191,8 +191,8 @@ public:
  *
  * Replies:
  *
- *   - plugin_error::not_found
- *   - plugin_error::exec_error
+ * - plugin_error::not_found
+ * - plugin_error::exec_error
  */
 class plugin_reload_command : public command {
 public:
@@ -216,8 +216,8 @@ public:
  *
  * Replies:
  *
- *   - plugin_error::not_found
- *   - plugin_error::exec_error
+ * - plugin_error::not_found
+ * - plugin_error::exec_error
  */
 class plugin_unload_command : public command {
 public:
@@ -241,7 +241,7 @@ public:
  *
  * Replies:
  *
- *   - rule_error::invalid_action
+ * - rule_error::invalid_action
  */
 class rule_add_command : public command {
 public:
@@ -265,8 +265,8 @@ public:
  *
  * Replies:
  *
- *   - rule_error::invalid_index
- *   - rule_error::invalid_action
+ * - rule_error::invalid_index
+ * - rule_error::invalid_action
  */
 class rule_edit_command : public command {
 public:
@@ -290,7 +290,7 @@ public:
  *
  * Replies:
  *
- *   - rule_error::invalid_index
+ * - rule_error::invalid_index
  */
 class rule_info_command : public command {
 public:
@@ -334,7 +334,7 @@ public:
  *
  * Replies:
  *
- *   - rule_error::invalid_index
+ * - rule_error::invalid_index
  */
 class rule_move_command : public command {
 public:
@@ -358,7 +358,7 @@ public:
  *
  * Replies:
  *
- *   - rule_error::invalid_index
+ * - rule_error::invalid_index
  */
 class rule_remove_command : public command {
 public:
@@ -382,11 +382,11 @@ public:
  *
  * Replies:
  *
- *   - server_error::already_exists,
- *   - server_error::invalid_hostname,
- *   - server_error::invalid_identifier,
- *   - server_error::invalid_port_number,
- *   - server_error::ssl_disabled.
+ * - server_error::already_exists,
+ * - server_error::invalid_hostname,
+ * - server_error::invalid_identifier,
+ * - server_error::invalid_port_number,
+ * - server_error::ssl_disabled.
  */
 class server_connect_command : public command {
 public:
@@ -410,8 +410,8 @@ public:
  *
  * Replies:
  *
- *   - server_error::invalid_identifier,
- *   - server_error::not_found.
+ * - server_error::invalid_identifier,
+ * - server_error::not_found.
  */
 class server_disconnect_command : public command {
 public:
@@ -435,8 +435,8 @@ public:
  *
  * Replies:
  *
- *   - server_error::invalid_identifier,
- *   - server_error::not_found.
+ * - server_error::invalid_identifier,
+ * - server_error::not_found.
  */
 class server_info_command : public command {
 public:
@@ -460,10 +460,10 @@ public:
  *
  * Replies:
  *
- *   - server_error::invalid_channel,
- *   - server_error::invalid_identifier,
- *   - server_error::invalid_nickname,
- *   - server_error::not_found.
+ * - server_error::invalid_channel,
+ * - server_error::invalid_identifier,
+ * - server_error::invalid_nickname,
+ * - server_error::not_found.
  */
 class server_invite_command : public command {
 public:
@@ -487,9 +487,9 @@ public:
  *
  * Replies:
  *
- *   - server_error::invalid_channel,
- *   - server_error::invalid_identifier,
- *   - server_error::not_found.
+ * - server_error::invalid_channel,
+ * - server_error::invalid_identifier,
+ * - server_error::not_found.
  */
 class server_join_command : public command {
 public:
@@ -513,10 +513,10 @@ public:
  *
  * Replies:
  *
- *   - server_error::invalid_channel,
- *   - server_error::invalid_identifier,
- *   - server_error::invalid_nickname,
- *   - server_error::not_found.
+ * - server_error::invalid_channel,
+ * - server_error::invalid_identifier,
+ * - server_error::invalid_nickname,
+ * - server_error::not_found.
  */
 class server_kick_command : public command {
 public:
@@ -560,9 +560,9 @@ public:
  *
  * Replies:
  *
- *   - server_error::invalid_channel,
- *   - server_error::invalid_identifier,
- *   - server_error::not_found.
+ * - server_error::invalid_channel,
+ * - server_error::invalid_identifier,
+ * - server_error::not_found.
  */
 class server_me_command : public command {
 public:
@@ -586,9 +586,9 @@ public:
  *
  * Replies:
  *
- *   - server_error::invalid_channel,
- *   - server_error::invalid_identifier,
- *   - server_error::not_found.
+ * - server_error::invalid_channel,
+ * - server_error::invalid_identifier,
+ * - server_error::not_found.
  */
 class server_message_command : public command {
 public:
@@ -612,10 +612,10 @@ public:
  *
  * Replies:
  *
- *   - server_error::invalid_channel,
- *   - server_error::invalid_identifier,
- *   - server_error::invalid_mode,
- *   - server_error::not_found.
+ * - server_error::invalid_channel,
+ * - server_error::invalid_identifier,
+ * - server_error::invalid_mode,
+ * - server_error::not_found.
  */
 class server_mode_command : public command {
 public:
@@ -639,9 +639,9 @@ public:
  *
  * Replies:
  *
- *   - server_error::invalid_identifier,
- *   - server_error::invalid_nickname,
- *   - server_error::not_found.
+ * - server_error::invalid_identifier,
+ * - server_error::invalid_nickname,
+ * - server_error::not_found.
  */
 class server_nick_command : public command {
 public:
@@ -665,9 +665,9 @@ public:
  *
  * Replies:
  *
- *   - server_error::invalid_channel,
- *   - server_error::invalid_identifier,
- *   - server_error::not_found.
+ * - server_error::invalid_channel,
+ * - server_error::invalid_identifier,
+ * - server_error::not_found.
  */
 class server_notice_command : public command {
 public:
@@ -691,9 +691,9 @@ public:
  *
  * Replies:
  *
- *   - server_error::invalid_channel,
- *   - server_error::invalid_identifier,
- *   - server_error::not_found.
+ * - server_error::invalid_channel,
+ * - server_error::invalid_identifier,
+ * - server_error::not_found.
  */
 class server_part_command : public command {
 public:
@@ -717,8 +717,8 @@ public:
  *
  * Replies:
  *
- *   - server_error::invalid_identifier,
- *   - server_error::not_found.
+ * - server_error::invalid_identifier,
+ * - server_error::not_found.
  */
 class server_reconnect_command : public command {
 public:
@@ -742,9 +742,9 @@ public:
  *
  * Replies:
  *
- *   - server_error::invalid_channel,
- *   - server_error::invalid_identifier,
- *   - server_error::not_found.
+ * - server_error::invalid_channel,
+ * - server_error::invalid_identifier,
+ * - server_error::not_found.
  */
 class server_topic_command : public command {
 public:

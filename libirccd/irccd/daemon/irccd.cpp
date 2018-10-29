@@ -258,7 +258,7 @@ void irccd::load() noexcept
 	 * Order matters, please be careful when changing this.
 	 *
 	 * 1. Open logs as early as possible to use the defined outputs on any
-	 *	loading errors.
+	 *    loading errors.
 	 */
 
 	// [logs] and [format] sections.
@@ -285,12 +285,12 @@ auto irccd_category() noexcept -> const std::error_category&
 {
 	static const class category : public std::error_category {
 	public:
-		const char* name() const noexcept override
+		auto name() const noexcept -> const char* override
 		{
 			return "irccd";
 		}
 
-		std::string message(int e) const override
+		auto message(int e) const -> std::string override
 		{
 			switch (static_cast<irccd_error::error>(e)) {
 			case irccd_error::error::not_irccd:
@@ -318,7 +318,7 @@ auto irccd_category() noexcept -> const std::error_category&
 
 auto make_error_code(irccd_error::error e) noexcept -> std::error_code
 {
-	return {static_cast<int>(e), irccd_category()};
+	return { static_cast<int>(e), irccd_category() };
 }
 
 } // !irccd

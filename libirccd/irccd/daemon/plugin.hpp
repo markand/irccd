@@ -346,7 +346,7 @@ public:
 	 * \param extensions the non empty list of extensions supported
 	 */
 	plugin_loader(std::vector<std::string> directories,
-				  std::vector<std::string> extensions) noexcept;
+	              std::vector<std::string> extensions) noexcept;
 
 	/**
 	 * Virtual destructor defaulted.

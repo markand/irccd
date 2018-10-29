@@ -159,7 +159,7 @@ void plugin::handle_whois(irccd&, const whois_event&)
 }
 
 plugin_loader::plugin_loader(std::vector<std::string> directories,
-			  std::vector<std::string> extensions) noexcept
+                             std::vector<std::string> extensions) noexcept
 	: directories_(std::move(directories))
 	, extensions_(std::move(extensions))
 {
@@ -257,7 +257,7 @@ auto plugin_category() -> const std::error_category&
 
 auto make_error_code(plugin_error::error e) -> std::error_code
 {
-	return {static_cast<int>(e), plugin_category()};
+	return { static_cast<int>(e), plugin_category() };
 }
 
 } // !irccd

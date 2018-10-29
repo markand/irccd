@@ -553,7 +553,7 @@ server_service::server_service(irccd &irccd)
 {
 }
 
-auto server_service::all() const noexcept -> const std::vector<std::shared_ptr<server>>&
+auto server_service::list() const noexcept -> const std::vector<std::shared_ptr<server>>&
 {
 	return servers_;
 }

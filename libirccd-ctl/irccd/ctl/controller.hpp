@@ -29,9 +29,7 @@
 #include <irccd/connector.hpp>
 #include <irccd/stream.hpp>
 
-namespace irccd {
-
-namespace ctl {
+namespace irccd::ctl {
 
 /**
  * \brief Main irccdctl interface.
@@ -119,8 +117,6 @@ public:
 	void write(nlohmann::json message, stream::write_handler handler = nullptr);
 };
 
-} // !ctl
-
-} // !irccd
+} // !irccd::ctl
 
 #endif // !IRCCD_CTL_CONTROLLER_HPP

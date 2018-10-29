@@ -76,7 +76,7 @@ public:
 	 *
 	 * \return the list of plugins
 	 */
-	auto all() const noexcept -> plugins;
+	auto list() const noexcept -> plugins;
 
 	/**
 	 * Check if a plugin is loaded.

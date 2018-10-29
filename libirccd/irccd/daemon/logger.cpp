@@ -24,7 +24,7 @@
 #include "logger.hpp"
 
 #if defined(IRCCD_HAVE_SYSLOG)
-#  include <syslog.h>
+#	include <syslog.h>
 #endif // !IRCCD_HAVE_SYSLOG
 
 namespace irccd::logger {

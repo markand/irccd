@@ -110,10 +110,10 @@ auto get_index(const nlohmann::json& json, const std::string& key) -> unsigned
 {
 	const auto index = json.find(key);
 
-	if (index == json.end() || !index->is_number_integer() || index->get<int>() < 0)
+	if (index == json.end() || !index->is_number_unsigned())
 		throw rule_error(rule_error::invalid_index);
 
-	return index->get<int>();
+	return index->get<unsigned>();
 }
 
 auto to_json(const rule& rule) -> nlohmann::json

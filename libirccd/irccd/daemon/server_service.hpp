@@ -64,7 +64,7 @@ public:
 	 *
 	 * \return the servers
 	 */
-	auto all() const noexcept -> const std::vector<std::shared_ptr<server>>&;
+	auto list() const noexcept -> const std::vector<std::shared_ptr<server>>&;
 
 	/**
 	 * Check if a server exists.

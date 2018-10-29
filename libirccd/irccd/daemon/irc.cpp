@@ -35,7 +35,7 @@ auto message::get(unsigned short index) const noexcept -> const std::string&
 	return (index >= args.size()) ? dummy : args[index];
 }
 
-auto message::is_ctcp(unsigned index) const noexcept -> bool
+auto message::is_ctcp(unsigned short index) const noexcept -> bool
 {
 	const auto a = get(index);
 
@@ -45,7 +45,7 @@ auto message::is_ctcp(unsigned index) const noexcept -> bool
 	return a.front() == 0x01 && a.back() == 0x01;
 }
 
-auto message::ctcp(unsigned index) const -> std::string
+auto message::ctcp(unsigned short index) const -> std::string
 {
 	assert(is_ctcp(index));
 

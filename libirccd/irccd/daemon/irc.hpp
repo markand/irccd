@@ -35,7 +35,7 @@
 #include <boost/asio.hpp>
 
 #if defined(IRCCD_HAVE_SSL)
-#   include <boost/asio/ssl.hpp>
+#	include <boost/asio/ssl.hpp>
 #endif
 
 namespace irccd::irc {
@@ -1195,8 +1195,8 @@ enum class rpl {
  * \brief Describe a IRC message
  */
 struct message {
-	std::string prefix;			 //!< optional prefix
-	std::string command;			//!< command (maybe string or code)
+	std::string prefix;             //!< optional prefix
+	std::string command;            //!< command (maybe string or code)
 	std::vector<std::string> args;  //!< parameters
 
 	/**
@@ -1229,7 +1229,7 @@ struct message {
 	 * \param index the param index (maybe out of bounds)
 	 * \return true if CTCP
 	 */
-	auto is_ctcp(unsigned index) const noexcept -> bool;
+	auto is_ctcp(unsigned short index) const noexcept -> bool;
 
 	/**
 	 * Parse a CTCP message.
@@ -1238,7 +1238,7 @@ struct message {
 	 * \param index the param index
 	 * \return the CTCP command
 	 */
-	auto ctcp(unsigned index) const -> std::string;
+	auto ctcp(unsigned short index) const -> std::string;
 
 	/**
 	 * Parse a IRC message.
@@ -1381,8 +1381,8 @@ public:
 	 * \param handler the non-null handler
 	 */
 	void connect(const std::string& host,
-				 const std::string& service,
-				 const connect_handler& handler) noexcept;
+	             const std::string& service,
+	             const connect_handler& handler) noexcept;
 
 	/**
 	 * Start receiving data.

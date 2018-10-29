@@ -145,12 +145,12 @@ auto transport_category() noexcept -> const std::error_category&
 {
 	static const class category : public std::error_category {
 	public:
-		const char* name() const noexcept override
+		auto name() const noexcept -> const char* override
 		{
 			return "transport";
 		}
 
-		std::string message(int e) const override
+		auto message(int e) const -> std::string override
 		{
 			switch (static_cast<transport_error::error>(e)) {
 			case transport_error::auth_required:

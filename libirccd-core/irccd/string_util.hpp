@@ -54,7 +54,7 @@ enum class subst_flags : unsigned {
 	env             = (1 << 2),      //!< environment variables
 	shell           = (1 << 3),      //!< command line command
 	irc_attrs       = (1 << 4),      //!< IRC escape codes
-	shell_attrs     = (1 << 5)      //!< shell attributes
+	shell_attrs     = (1 << 5)       //!< shell attributes
 };
 
 /**

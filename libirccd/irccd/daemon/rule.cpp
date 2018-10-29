@@ -51,12 +51,12 @@ auto rule_category() -> const std::error_category&
 {
 	static const class category : public std::error_category {
 	public:
-		const char* name() const noexcept override
+		auto name() const noexcept -> const char* override
 		{
 			return "rule";
 		}
 
-		std::string message(int e) const override
+		auto message(int e) const -> std::string override
 		{
 			switch (static_cast<rule_error::error>(e)) {
 			case rule_error::invalid_action:
@@ -74,7 +74,7 @@ auto rule_category() -> const std::error_category&
 
 auto make_error_code(rule_error::error e) -> std::error_code
 {
-	return {static_cast<int>(e), rule_category()};
+	return { static_cast<int>(e), rule_category() };
 }
 
 } // !irccd

@@ -51,35 +51,35 @@ public:
 	 */
 	using write_handler = std::function<void (std::error_code)>;
 
-    /**
-     * Default constructor.
-     */
-    stream() = default;
+	/**
+	 * Default constructor.
+	 */
+	stream() = default;
 
-    /**
-     * Virtual destructor defaulted.
-     */
-    virtual ~stream() = default;
+	/**
+	 * Virtual destructor defaulted.
+	 */
+	virtual ~stream() = default;
 
-    /**
-     * Start asynchronous read.
-     *
-     * \pre another read operation must not be running
-     * \pre handler != nullptr
-     * \param handler the handler
-     */
-    virtual void read(read_handler handler) = 0;
+	/**
+	 * Start asynchronous read.
+	 *
+	 * \pre another read operation must not be running
+	 * \pre handler != nullptr
+	 * \param handler the handler
+	 */
+	virtual void read(read_handler handler) = 0;
 
-    /**
-     * Start asynchronous write.
-     *
-     * \pre json.is_object()
-     * \pre another write operation must not be running
-     * \pre handler != nullptr
-     * \param json the JSON message
-     * \param handler the handler
-     */
-    virtual void write(const nlohmann::json& json, write_handler handler) = 0;
+	/**
+	 * Start asynchronous write.
+	 *
+	 * \pre json.is_object()
+	 * \pre another write operation must not be running
+	 * \pre handler != nullptr
+	 * \param json the JSON message
+	 * \param handler the handler
+	 */
+	virtual void write(const nlohmann::json& json, write_handler handler) = 0;
 };
 
 } // !irccd

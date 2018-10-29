@@ -61,7 +61,7 @@ plugin_service::~plugin_service()
 	}
 }
 
-auto plugin_service::all() const noexcept -> plugins
+auto plugin_service::list() const noexcept -> plugins
 {
 	return plugins_;
 }

@@ -112,10 +112,11 @@ auto base_directory() -> boost::filesystem::path
  * Compute the system directory path for the given component.
  *
  * Referenced by:
- *   - cachedir,
- *   - datadir,
- *   - sysconfigdir,
- *   - plugindir.
+ *
+ * - cachedir,
+ * - datadir,
+ * - sysconfigdir,
+ * - plugindir.
  */
 auto system_directory(const std::string& component) -> boost::filesystem::path
 {
@@ -137,10 +138,14 @@ auto system_directory(const std::string& component) -> boost::filesystem::path
  *
  * Get user configuration directory.
  *
- * Referenced by:   config_filenames.
+ * Referenced by:
+ *
+ * - config_filenames.
+ *
  * Requires:
- *   - Windows:
- *	 - <shlobj.h>
+ *
+ * - Windows:
+ *   - <shlobj.h>
  */
 auto user_config_directory() -> boost::filesystem::path
 {
@@ -176,10 +181,14 @@ auto user_config_directory() -> boost::filesystem::path
  * user_plugin_directory
  * ------------------------------------------------------------------
  *
- * Referenced by:   plugin_filenames.
+ * Referenced by:
+ *
+ * - plugin_filenames.
+ *
  * Requires:
- *   - Windows:
- *	 - <shlobj.h>
+ *
+ * - Windows:
+ *   - <shlobj.h>
  *
  * Like add user_config_directory but for plugins.
  */
@@ -266,10 +275,11 @@ auto name() -> std::string
 
 /*
  * Requires:
- *   - Windows:
- *	 - <windows.h>
- *   - Others:
- *	 - <sys/utsname.h>
+ *
+ * - Windows:
+ *   - <windows.h>
+ * - Others:
+ *   - <sys/utsname.h>
  */
 auto version() -> std::string
 {
@@ -295,15 +305,16 @@ auto version() -> std::string
 
 /*
  * Requires:
- *   - Windows:
- *	 - <windows.h>
- *   - Linux:
- *	 - <sys/sysinfo.h>
- *   - Mac:
- *	 - <sys/types.h>
- *	 - <sys/sysctl.h>
- *   - Others:
- *	 - <ctime>
+ *
+ * - Windows:
+ *   - <windows.h>
+ * - Linux:
+ *   - <sys/sysinfo.h>
+ * - Mac:
+ *   - <sys/types.h>
+ *   - <sys/sysctl.h>
+ * - Others:
+ *   - <ctime>
  */
 auto uptime() -> std::uint64_t
 {
@@ -343,10 +354,11 @@ auto uptime() -> std::uint64_t
 
 /*
  * Requires:
- *   - Windows:
- *	 - <sys/timeb.h>
- *   - Others:
- *	 - <sys/times.h>
+ *
+ * - Windows:
+ *   - <sys/timeb.h>
+ * - Others:
+ *   - <sys/times.h>
  */
 auto ticks() -> std::uint64_t
 {
@@ -371,8 +383,9 @@ auto ticks() -> std::uint64_t
 
 /*
  * Requires:
- *   - Windows:
- *	 - <shlobj.h>
+ *
+ * - Windows:
+ *   - <shlobj.h>
  */
 auto home() -> std::string
 {
@@ -394,7 +407,8 @@ auto home() -> std::string
 
 /*
  * Requires:
- *   - <cstdlib>
+ *
+ * - <cstdlib>
  */
 auto env(const std::string& var) -> std::string
 {
