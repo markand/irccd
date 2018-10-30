@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_COMMON_ACCEPTOR_HPP
-#define IRCCD_COMMON_ACCEPTOR_HPP
+#ifndef IRCCD_ACCEPTOR_HPP
+#define IRCCD_ACCEPTOR_HPP
 
 /**
  * \file acceptor.hpp
@@ -71,4 +71,4 @@ public:
 
 } // !irccd
 
-#endif // !IRCCD_COMMON_ACCEPTOR_HPP
+#endif // !IRCCD_ACCEPTOR_HPP

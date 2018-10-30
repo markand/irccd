@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_COMMON_FS_UTIL_HPP
-#define IRCCD_COMMON_FS_UTIL_HPP
+#ifndef IRCCD_FS_UTIL_HPP
+#define IRCCD_FS_UTIL_HPP
 
 /**
  * \file fs_util.hpp
@@ -126,4 +126,4 @@ auto find(const std::string& base, const std::regex& regex, bool recursive = fal
 
 } // !irccd::fs_util
 
-#endif // !IRCCD_COMMON_FS_UTIL_HPP
+#endif // !IRCCD_FS_UTIL_HPP

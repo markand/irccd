@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_COMMON_SOCKET_STREAM_HPP
-#define IRCCD_COMMON_SOCKET_STREAM_HPP
+#ifndef IRCCD_SOCKET_STREAM_HPP
+#define IRCCD_SOCKET_STREAM_HPP
 
 /**
  * \file socket_stream.hpp
@@ -226,4 +226,4 @@ using local_stream = socket_stream<boost::asio::local::stream_protocol::socket>;
 
 } // !irccd
 
-#endif // !IRCCD_COMMON_SOCKET_STREAM_HPP
+#endif // !IRCCD_SOCKET_STREAM_HPP

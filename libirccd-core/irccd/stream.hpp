@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_COMMON_STREAM_HPP
-#define IRCCD_COMMON_STREAM_HPP
+#ifndef IRCCD_STREAM_HPP
+#define IRCCD_STREAM_HPP
 
 /**
  * \file stream.hpp
@@ -84,4 +84,4 @@ public:
 
 } // !irccd
 
-#endif // !IRCCD_COMMON_STREAM_HPP
+#endif // !IRCCD_STREAM_HPP

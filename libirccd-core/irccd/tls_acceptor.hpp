@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_COMMON_TLS_ACCEPTOR_HPP
-#define IRCCD_COMMON_TLS_ACCEPTOR_HPP
+#ifndef IRCCD_TLS_ACCEPTOR_HPP
+#define IRCCD_TLS_ACCEPTOR_HPP
 
 /**
  * \file tls_acceptor.hpp
@@ -93,4 +93,4 @@ tls_acceptor<Protocol>::tls_acceptor(boost::asio::ssl::context context, Args&&..
 
 #endif // !IRCCD_HAVE_SSL
 
-#endif // !IRCCD_COMMON_TLS_ACCEPTOR_HPP
+#endif // !IRCCD_TLS_ACCEPTOR_HPP

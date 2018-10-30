@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_COMMON_STRING_UTIL_HPP
-#define IRCCD_COMMON_STRING_UTIL_HPP
+#ifndef IRCCD_STRING_UTIL_HPP
+#define IRCCD_STRING_UTIL_HPP
 
 /**
  * \file string_util.hpp
@@ -395,4 +395,4 @@ auto to_uint(const std::string& str,
 
 } // !irccd::string_util
 
-#endif // !IRCCD_COMMON_STRING_UTIL_HPP
+#endif // !IRCCD_STRING_UTIL_HPP

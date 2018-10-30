@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_COMMON_INI_UTIL_HPP
-#define IRCCD_COMMON_INI_UTIL_HPP
+#ifndef IRCCD_INI_UTIL_HPP
+#define IRCCD_INI_UTIL_HPP
 
 /**
  * \file ini_util.hpp
@@ -94,4 +94,4 @@ inline auto optional_uint(const ini::section& sc,
 
 } // !irccd
 
-#endif // !IRCCD_COMMON_INI_UTIL_HPP
+#endif // !IRCCD_INI_UTIL_HPP

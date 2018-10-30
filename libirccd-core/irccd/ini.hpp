@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_CORE_INI_HPP
-#define IRCCD_CORE_INI_HPP
+#ifndef IRCCD_INI_HPP
+#define IRCCD_INI_HPP
 
 /**
  * \file ini.hpp

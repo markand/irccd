@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_COMMON_TLS_CONNECTOR_HPP
-#define IRCCD_COMMON_TLS_CONNECTOR_HPP
+#ifndef IRCCD_TLS_CONNECTOR_HPP
+#define IRCCD_TLS_CONNECTOR_HPP
 
 /**
  * \file tls_connector.hpp
@@ -92,4 +92,4 @@ void tls_connector<Protocol>::connect(connector::handler handler)
 
 #endif // !IRCCD_HAVE_SSL
 
-#endif // !IRCCD_COMMON_TLS_CONNECTOR_HPP
+#endif // !IRCCD_TLS_CONNECTOR_HPP

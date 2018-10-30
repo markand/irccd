@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_CORE_XDG_HPP
-#define IRCCD_CORE_XDG_HPP
+#ifndef IRCCD_XDG_HPP
+#define IRCCD_XDG_HPP
 
 /**
  * \file xdg.hpp
@@ -189,4 +189,4 @@ public:
 
 } // !irccd
 
-#endif // !IRCCD_CORE_XDG_HPP
+#endif // !IRCCD_XDG_HPP

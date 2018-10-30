@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_COMMON_SOCKET_ACCEPTOR_HPP
-#define IRCCD_COMMON_SOCKET_ACCEPTOR_HPP
+#ifndef IRCCD_SOCKET_ACCEPTOR_HPP
+#define IRCCD_SOCKET_ACCEPTOR_HPP
 
 /**
  * \file socket_acceptor.hpp
@@ -166,4 +166,4 @@ using local_acceptor = socket_acceptor<boost::asio::local::stream_protocol>;
 
 } // !irccd
 
-#endif // !IRCCD_COMMON_SOCKET_ACCEPTOR_HPP
+#endif // !IRCCD_SOCKET_ACCEPTOR_HPP

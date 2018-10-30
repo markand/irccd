@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_COMMON_CONNECTOR_HPP
-#define IRCCD_COMMON_CONNECTOR_HPP
+#ifndef IRCCD_CONNECTOR_HPP
+#define IRCCD_CONNECTOR_HPP
 
 /**
  * \file connector.hpp
@@ -72,4 +72,4 @@ public:
 
 } // !irccd
 
-#endif // !IRCCD_COMMON_CONNECTOR_HPP
+#endif // !IRCCD_CONNECTOR_HPP
