@@ -48,11 +48,12 @@ auto uri::parse(const string& link) noexcept -> optional<uri>
 	UriParserStateA state;
 	UriUriA hnd;
 	uri ret;
+	string copy = match[1].str();
 	scope_exit exit([&hnd] { uriFreeUriMembersA(&hnd); });
 
 	state.uri = &hnd;
 
-	if (uriParseUriA(&state, match[1].str().c_str()) != URI_SUCCESS)
+	if (uriParseUriA(&state, copy.c_str()) != URI_SUCCESS)
 		return nullopt;
 
 	if (hnd.scheme.first)
@@ -79,6 +80,12 @@ auto uri::parse(const string& link) noexcept -> optional<uri>
 	// Correct path if empty.
 	if (ret.path.empty())
 		ret.path = "/";
+
+	// Add query if needed.
+	if (hnd.query.first) {
+		ret.path += "?";
+		ret.path += string(hnd.query.first, hnd.query.afterLast - hnd.query.first);
+	}
 
 	return ret;
 }
