@@ -727,7 +727,7 @@ auto Server_list(duk_context* ctx) -> duk_ret_t
 {
 	duk_push_object(ctx);
 
-	for (const auto& server : duk::type_traits<irccd>::self(ctx).servers().all()) {
+	for (const auto& server : duk::type_traits<irccd>::self(ctx).servers().list()) {
 		duk::push(ctx, server);
 		duk_put_prop_string(ctx, -2, server->get_id().c_str());
 	}

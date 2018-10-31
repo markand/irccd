@@ -251,7 +251,7 @@ auto Plugin_list(duk_context* ctx) -> duk_idx_t
 
 	duk_push_array(ctx);
 
-	for (const auto& plg : duk::type_traits<irccd>::self(ctx).plugins().all()) {
+	for (const auto& plg : duk::type_traits<irccd>::self(ctx).plugins().list()) {
 		duk::push(ctx, plg->get_id());
 		duk_put_prop_index(ctx, -2, i++);
 	}

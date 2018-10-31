@@ -65,7 +65,7 @@ void dispatcher::dispatch(std::string_view server,
                           EventNameFunc&& name_func,
                           ExecFunc exec_func)
 {
-	for (const auto& plugin : irccd_.plugins().all()) {
+	for (const auto& plugin : irccd_.plugins().list()) {
 		const auto eventname = name_func(*plugin);
 		const auto allowed = irccd_.rules().solve(server, target, origin, plugin->get_name(), eventname);
 

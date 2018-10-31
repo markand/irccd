@@ -18,7 +18,7 @@
 
 if (IRCCD_HAVE_LIBEDIT)
 	list(APPEND LIBRARIES ${Editline_LIBRARIES})
-	list(APPEND INCLUDES ${Editline_LIBRARIES})
+	list(APPEND INCLUDES ${Editline_INCLUDE_DIRS})
 endif ()
 
 if (IRCCD_HAVE_JS)

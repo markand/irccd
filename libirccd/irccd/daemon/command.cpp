@@ -67,8 +67,8 @@ void exec_get(transport_client& client, plugin& plugin, const nlohmann::json& ar
 			variables[pair.first] = pair.second;
 
 	/*
-	 * Don't put all variables into the response, put them into a sub property
-	 * 'variables' instead.
+	 * Don't put all variables into the response, put them into a sub
+         * property 'variables' instead.
 	 *
 	 * It's easier for the client to iterate over all.
 	 */
@@ -181,12 +181,12 @@ void plugin_list_command::exec(irccd& irccd, transport_client& client, const doc
 {
 	auto list = nlohmann::json::array();
 
-	for (const auto& plg : irccd.plugins().all())
+	for (const auto& plg : irccd.plugins().list())
 		list += plg->get_id();
 
 	client.write({
-		{ "command",	"plugin-list"   },
-		{ "list",	   list			}
+		{ "command",    "plugin-list"   },
+		{ "list",       list            }
 	});
 }
 
@@ -636,7 +636,7 @@ void server_list_command::exec(irccd& irccd, transport_client& client, const doc
 	auto json = nlohmann::json::object();
 	auto list = nlohmann::json::array();
 
-	for (const auto& server : irccd.servers().all())
+	for (const auto& server : irccd.servers().list())
 		list.push_back(server->get_id());
 
 	client.write({
