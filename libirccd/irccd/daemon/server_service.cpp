@@ -224,7 +224,7 @@ void dispatcher::operator()(const message_event& ev)
 				ev.message,
 				ev.server->get_command_char(),
 				plugin.get_id()
-			).type == server_util::message_type::type::command ? "onCommand" : "onMessage";
+			).type == server_util::message_type::is_command ? "onCommand" : "onMessage";
 		},
 		[=] (plugin& plugin) mutable {
 			auto copy = ev;
@@ -236,7 +236,7 @@ void dispatcher::operator()(const message_event& ev)
 
 			copy.message = pack.message;
 
-			if (pack.type == server_util::message_type::type::command)
+			if (pack.type == server_util::message_type::is_command)
 				plugin.handle_command(irccd_, copy);
 			else
 				plugin.handle_message(irccd_, copy);
@@ -462,7 +462,6 @@ void server_service::handle_error(const std::shared_ptr<server>& server,
 	assert(server);
 
 	irccd_.get_log().warning(*server) << code.message() << std::endl;
-
 	irccd_.get_log().warning(*server) << int(server->get_options()) << std::endl;
 
 	if ((server->get_options() & server::options::auto_reconnect) != server::options::auto_reconnect)
@@ -661,7 +660,7 @@ void server_service::load(const config& cfg) noexcept
 		const auto id = section.get("name").get_value();
 
 		try {
-			auto server = server_util::from_config(irccd_.get_service(), cfg, section);
+			auto server = server_util::from_config(irccd_.get_service(), section);
 
 			if (has(server->get_id()))
 				throw server_error(server_error::already_exists);

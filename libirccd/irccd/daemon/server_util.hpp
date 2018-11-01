@@ -60,9 +60,9 @@ struct message_type {
 	/**
 	 * \brief Describe which type of message has been received
 	 */
-	enum class type {
-		command,        //!< special command
-		message         //!< standard message
+	enum kind {
+		is_command,     //!< special command
+		is_message      //!< standard message
 	} type;
 
 	/**
@@ -107,7 +107,6 @@ auto from_json(boost::asio::io_service& service,
  * \throw server_error on errors
  */
 auto from_config(boost::asio::io_service& service,
-                 const config& cfg,
                  const ini::section& sc) -> std::shared_ptr<server>;
 
 } // !server_util

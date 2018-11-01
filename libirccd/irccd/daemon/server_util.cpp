@@ -26,9 +26,9 @@
 #include "server.hpp"
 #include "server_util.hpp"
 
-namespace irccd::server_util {
+using irccd::json_util::deserializer;
 
-using json_util::deserializer;
+namespace irccd::server_util {
 
 namespace {
 
@@ -187,7 +187,7 @@ auto message_type::parse(std::string_view message,
 	auto result = std::string(message);
 	auto cc = std::string(cchar);
 	auto name = std::string(plugin);
-	auto iscommand = false;
+	auto type = is_message;
 
 	// handle special commands "!<plugin> command"
 	if (cc.length() > 0) {
@@ -201,11 +201,11 @@ auto message_type::parse(std::string_view message,
 		 * typing "!foo123123" will trigger foo plugin.
 		 */
 		if (pos == std::string::npos)
-			iscommand = result == fullcommand;
-		else
-			iscommand = result.length() >= fullcommand.length() && result.compare(0, pos, fullcommand) == 0;
+			type = result == fullcommand ? is_command : is_message;
+		else if (result.length() >= fullcommand.length() && result.compare(0, pos, fullcommand) == 0)
+			type = is_command;
 
-		if (iscommand) {
+		if (type == is_command) {
 			/*
 			 * If no space is found we just set the message to "" otherwise
 			 * the plugin name will be passed through onCommand
@@ -217,10 +217,7 @@ auto message_type::parse(std::string_view message,
 		}
 	}
 
-	return {
-		iscommand ? message_type::type::command : message_type::type::message,
-		result
-	};
+	return {type, result};
 }
 
 auto from_json(boost::asio::io_service& service, const nlohmann::json& object) -> std::shared_ptr<server>
@@ -244,7 +241,6 @@ auto from_json(boost::asio::io_service& service, const nlohmann::json& object) -
 }
 
 auto from_config(boost::asio::io_service& service,
-                 const config& cfg,
                  const ini::section& sc) -> std::shared_ptr<server>
 {
 	// Mandatory parameters.
@@ -262,21 +258,7 @@ auto from_config(boost::asio::io_service& service,
 	from_config_load_flags(*sv, sc);
 	from_config_load_numeric_parameters(*sv, sc);
 	from_config_load_options(*sv, sc);
-
-	// Identity is in a separate section
-	const auto identity = sc.get("identity");
-
-	if (identity.get_value().size() > 0) {
-		const auto it = std::find_if(cfg.begin(), cfg.end(), [&] (const auto& i) {
-			if (i.get_key() != "identity")
-				return false;
-
-			return i.get("name").get_value() == identity.get_value();
-		});
-
-		if (it != cfg.end())
-			from_config_load_identity(*sv, *it);
-	}
+	from_config_load_identity(*sv, sc);
 
 	return sv;
 }

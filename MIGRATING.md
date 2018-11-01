@@ -83,3 +83,5 @@ Note: these paths are no more automatically detected and set with the new
 - The option `reconnect-tries` has been removed from `[server]` section, use
   `auto-reconnect` boolean option instead.
 - The option `reconnect-timeout` has been renamed to `auto-reconnect-delay`.
+- The section `[identity]` has been removed, instead move those values inside
+  each server in their `[server]` section.

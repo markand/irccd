@@ -9,23 +9,6 @@
 # abc = ""                      # This will search for abc
 # ask = /tmp/ask.js             # This use /tmp/ask.js to load the plugin
 
-# Section identities:
-#    This describe identities, you can add any number you want they are used with servers so you can reuse an
-#    identity for one or more servers if you want.
-#
-# [identity]
-# name = "id"                   # (id) the identity unique id,
-# nickname = "foo"              # (string) the nickname (Optional, default: irccd),
-# username = "bar"              # (string) the realname (Optional, default: IRC Client daemon),
-# realname = "Jean"             # (string) the username name (Optional, default: irccd),
-# ctcp-version = "irccd"        # (string) what version to respond to CTCP VERSION (Optional, default: IRC Client Daemon),
-
-[identity]
-name = "default"
-nickname = "superbot"
-username = "superbot"
-realname = "Superbot"
-
 # Section transport:
 #    You can use transport to wait for any input you want. Unix and internet sockets are supported. Unix are used
 #    for file based socket while internet bind to standard address plus a specific port.
@@ -59,7 +42,10 @@ family = ( "ipv4", "ipv6" )
 # name = "id"                   # (id) the unique id,
 # host = "chat.foo.com"         # (string) the server address,
 # port = "4321"                 # (int) the server port (Optional, default: 6667),
-# identity = "default"          # (string) an identity to use (Optional, default: irccd's default),
+# nickname = "foo"              # (string) the nickname (Optional, default: irccd),
+# username = "bar"              # (string) the realname (Optional, default: IRC Client daemon),
+# realname = "Jean"             # (string) the username name (Optional, default: irccd),
+# ctcp-version = "irccd"        # (string) what version to respond to CTCP VERSION (Optional, default: IRC Client Daemon),
 # password = "secret"           # (string) an optional password (Optional, default: none),
 # auto-rejoin = false           # (bool) auto rejoin a channel after being kicked (Optional, default: false),
 # join-invite = false           # (bool) join channels upon invitation (Optional, default: false),

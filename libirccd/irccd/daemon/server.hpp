@@ -268,6 +268,7 @@ public:
 		identifying,                    //!< sending nick, user and password commands,
 		connected                       //!< ready for use.
 	};
+
 protected:
 	/*
 	 * \brief Server state.
@@ -433,7 +434,7 @@ public:
 	 *
 	 * \param nickname the nickname
 	 */
-	virtual void set_nickname(std::string nickname);
+	void set_nickname(std::string nickname);
 
 	/**
 	 * Get the username.
