@@ -48,9 +48,14 @@ using boost::asio::async_connect;
 using boost::asio::deadline_timer;
 using boost::asio::io_context;
 using boost::asio::ip::tcp;
+
+#if defined(IRCCD_HAVE_SSL)
+
 using boost::asio::ssl::context;
 using boost::asio::ssl::stream;
 using boost::asio::ssl::stream_base;
+
+#endif
 
 using boost::posix_time::seconds;
 
