@@ -49,7 +49,7 @@ private:
 	state state_{state::authenticating};
 	std::weak_ptr<transport_server> parent_;
 	std::shared_ptr<stream> stream_;
-	std::deque<std::pair<nlohmann::json, stream::write_handler>> queue_;
+	std::deque<std::pair<nlohmann::json, stream::send_handler>> queue_;
 
 	void flush();
 	void erase();
@@ -92,7 +92,7 @@ public:
 	 * \param handler the handler
 	 * \warning Another read operation MUST NOT be running.
 	 */
-	void read(stream::read_handler handler);
+	void read(stream::recv_handler handler);
 
 	/**
 	 * Start sending if not closed.
@@ -106,7 +106,7 @@ public:
 	 * \param handler the optional handler
 	 * \note If a write operation is running, it is postponed once ready.
 	 */
-	void write(nlohmann::json json, stream::write_handler handler = nullptr);
+	void write(nlohmann::json json, stream::send_handler handler = nullptr);
 
 	/**
 	 * Convenient success message.
@@ -115,7 +115,7 @@ public:
 	 * \param handler the optional handler
 	 * \note If a write operation is running, it is postponed once ready.
 	 */
-	void success(const std::string& command, stream::write_handler handler = nullptr);
+	void success(const std::string& command, stream::send_handler handler = nullptr);
 
 	/**
 	 * Send an error code to the client.
@@ -125,7 +125,7 @@ public:
 	 * \param handler the optional handler
 	 * \note If a write operation is running, it is postponed once ready.
 	 */
-	void error(std::error_code code, stream::write_handler handler = nullptr);
+	void error(std::error_code code, stream::send_handler handler = nullptr);
 
 	/**
 	 * Send an error code to the client.
@@ -136,7 +136,7 @@ public:
 	 * \param handler the optional handler
 	 * \note If a write operation is running, it is postponed once ready.
 	 */
-	void error(std::error_code code, std::string_view command, stream::write_handler handler = nullptr);
+	void error(std::error_code code, std::string_view command, stream::send_handler handler = nullptr);
 };
 
 } // !irccd

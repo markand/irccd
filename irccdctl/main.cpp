@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-// TODO: don't create a temporary list of endpoints.
-
 #include <irccd/sysconfig.hpp>
 
 #include <iostream>
@@ -28,15 +26,11 @@
 #include <boost/predef/os.h>
 
 #include <irccd/config.hpp>
+#include <irccd/connector.hpp>
 #include <irccd/json_util.hpp>
 #include <irccd/options.hpp>
-#include <irccd/socket_connector.hpp>
 #include <irccd/string_util.hpp>
 #include <irccd/system.hpp>
-
-#if defined(IRCCD_HAVE_SSL)
-#	include <irccd/tls_connector.hpp>
-#endif
 
 #include <irccd/daemon/transport_server.hpp>
 
@@ -48,17 +42,7 @@
 using boost::format;
 using boost::str;
 
-using boost::asio::ip::tcp;
-
-#if !BOOST_OS_WINDOWS
-
-using boost::asio::local::stream_protocol;
-
-#endif
-
-namespace irccd {
-
-namespace ctl {
+namespace irccd::ctl {
 
 namespace {
 
@@ -86,25 +70,6 @@ void usage()
 }
 
 /*
- * resolve
- * ------------------------------------------------------------------
- *
- * Block unless host/port has been resolved.
- */
-auto resolve(const std::string& host, const std::string& name) -> std::vector<tcp::endpoint>
-{
-	std::vector<tcp::endpoint> endpoints;
-
-	tcp::resolver resolver(service);
-	tcp::resolver::query query(host, name);
-
-	for (auto it = resolver.resolve(query); it != tcp::resolver::iterator(); ++it)
-		endpoints.push_back(*it);
-
-	return endpoints;
-}
-
-/*
  * read_connect_ip
  * -------------------------------------------------------------------
  *
@@ -112,35 +77,49 @@ auto resolve(const std::string& host, const std::string& name) -> std::vector<tc
  *
  * [connect]
  * type = "ip"
- * host = "ip or hostname"
+ * hostname = "ip or hostname"
  * port = "port number or service"
- * domain = "ipv4 or ipv6" (Optional, default: ipv4)
+ * family = "ipv4, ipv6" (Optional, default: ipv4)
  * ssl = true | false
  */
 auto read_connect_ip(const ini::section& sc) -> std::unique_ptr<connector>
 {
-	const auto host = sc.get("host").get_value();
+	const auto hostname = sc.get("hostname").get_value();
 	const auto port = sc.get("port").get_value();
+	bool ipv4 = true;
+	bool ipv6 = true;
 
-	if (host.empty())
+	if (auto it = sc.find("family"); it != sc.end()) {
+		ipv4 = ipv6 = false;
+
+		for (auto v : *it) {
+			if (v == "ipv4")
+				ipv4 = true;
+			else if (v == "ipv6")
+				ipv6 = true;
+		}
+	}
+
+	if (!ipv4 && !ipv6)
+		throw transport_error(transport_error::invalid_family);
+	if (hostname.empty())
 		throw transport_error(transport_error::invalid_hostname);
 	if (port.empty())
 		throw transport_error(transport_error::invalid_port);
 
-	const auto endpoints = resolve(host, port);
-
 	if (string_util::is_boolean(sc.get("ssl").get_value())) {
 #if defined(IRCCD_HAVE_SSL)
 		// TODO: support more parameters.
-		boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
+		boost::asio::ssl::context ctx(boost::asio::ssl::context::tlsv12);
 
-		return std::make_unique<tls_connector<>>(std::move(ctx), service, endpoints);
+		return std::make_unique<tls_ip_connector>(std::move(ctx),
+			service, hostname, port, ipv4, ipv6);
 #else
 		throw std::runtime_error("SSL disabled");
 #endif
 	}
 
-	return std::make_unique<ip_connector>(service, endpoints);
+	return std::make_unique<ip_connector>(service, hostname, port, ipv4, ipv6);
 }
 
 /*
@@ -162,6 +141,17 @@ auto read_connect_local(const ini::section& sc) -> std::unique_ptr<connector>
 
 	if (it == sc.end())
 		throw std::invalid_argument("missing path parameter");
+
+	if (string_util::is_boolean(sc.get("ssl").get_value())) {
+#if defined(IRCCD_HAVE_SSL)
+		// TODO: support more parameters.
+		boost::asio::ssl::context ctx(boost::asio::ssl::context::tlsv12);
+
+		return std::make_unique<tls_local_connector>(std::move(ctx), service, it->get_value());
+#else
+		throw std::runtime_error("SSL disabled");
+#endif
+	}
 
 	return std::make_unique<local_connector>(service, it->get_value());
 #else
@@ -291,7 +281,7 @@ void read(const config& cfg)
  * -h host or ip
  * -p port
  */
-auto parse_connect_ip(const option::result& options) -> std::unique_ptr<connector>
+auto parse_connect_ip(std::string_view type, const option::result& options) -> std::unique_ptr<connector>
 {
 	option::result::const_iterator it;
 
@@ -299,7 +289,7 @@ auto parse_connect_ip(const option::result& options) -> std::unique_ptr<connecto
 	if ((it = options.find("-h")) == options.end() && (it = options.find("--host")) == options.end())
 		throw transport_error(transport_error::invalid_hostname);
 
-	const auto host = it->second;
+	const auto hostname = it->second;
 
 	// Port (-p or --port).
 	if ((it = options.find("-p")) == options.end() && (it = options.find("--port")) == options.end())
@@ -307,7 +297,11 @@ auto parse_connect_ip(const option::result& options) -> std::unique_ptr<connecto
 
 	const auto port = it->second;
 
-	return std::make_unique<ip_connector>(service, resolve(host, port));
+	// Type (-t or --type).
+	const auto ipv4 = type == "ip";
+	const auto ipv6 = type == "ipv6";
+
+	return std::make_unique<ip_connector>(service, hostname, port, ipv4, ipv6);
 }
 
 /*
@@ -352,7 +346,7 @@ void parse_connect(const option::result& options)
 	std::unique_ptr<connector> connector;
 
 	if (it->second == "ip" || it->second == "ipv6")
-		connector = parse_connect_ip(options);
+		connector = parse_connect_ip(it->second, options);
 	if (it->second == "unix")
 		connector = parse_connect_local(options);
 	else
@@ -483,9 +477,9 @@ void do_connect()
 
 		if (verbose) {
 			const json_util::deserializer doc(info);
-			const auto major = doc.get<int>("/major");
-			const auto minor = doc.get<int>("/minor");
-			const auto patch = doc.get<int>("/patch");
+			const auto major = doc.get<int>("major");
+			const auto minor = doc.get<int>("minor");
+			const auto patch = doc.get<int>("patch");
 
 			if (!major || !minor || !patch)
 				std::cout << "connected to irccd (unknown version)" << std::endl;
@@ -514,9 +508,7 @@ void do_exec(int argc, char** argv)
 
 } // !namespace
 
-} // !ctl
-
-} // !irccd
+} // !irccd::ctl
 
 int main(int argc, char** argv)
 {

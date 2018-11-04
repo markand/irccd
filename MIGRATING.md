@@ -9,7 +9,8 @@ Migrating from 2.x to 3.x
 ### Irccdctl
 
   - The functions `server-cnotice` and `server-cmode` have been removed, use
-    `server-notice` and `server-mode` instead.
+    `server-notice` and `server-mode` instead,
+  - The option `connect.host` has been renamed to `connect.hostname` (#941).
 
 ### Plugins
 

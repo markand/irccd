@@ -30,15 +30,9 @@ set(
 	${libirccd-core_SOURCE_DIR}/irccd/ini_util.hpp
 	${libirccd-core_SOURCE_DIR}/irccd/json_util.hpp
 	${libirccd-core_SOURCE_DIR}/irccd/options.hpp
-	${libirccd-core_SOURCE_DIR}/irccd/socket_acceptor.hpp
-	${libirccd-core_SOURCE_DIR}/irccd/socket_connector.hpp
-	${libirccd-core_SOURCE_DIR}/irccd/socket_stream.hpp
 	${libirccd-core_SOURCE_DIR}/irccd/stream.hpp
 	${libirccd-core_SOURCE_DIR}/irccd/string_util.hpp
 	${libirccd-core_SOURCE_DIR}/irccd/system.hpp
-	${libirccd-core_SOURCE_DIR}/irccd/tls_acceptor.hpp
-	${libirccd-core_SOURCE_DIR}/irccd/tls_connector.hpp
-	${libirccd-core_SOURCE_DIR}/irccd/tls_stream.hpp
 	${libirccd-core_SOURCE_DIR}/irccd/xdg.hpp
 )
 

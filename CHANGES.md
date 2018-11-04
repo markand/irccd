@@ -12,7 +12,8 @@ Irccd:
   standard paths for both irccd and plugins (#611),
 - If Mercurial is found, the version is bundled in `irccd --version`,
 - Irccd no longer supports uid, gid, pid and daemon features (#846).
-- Sections `[identity]` and `[server]` have been merged (#905).
+- Sections `[identity]` and `[server]` have been merged (#905),
+- Local transports support SSL too (#939).
 
 Irccd test:
 

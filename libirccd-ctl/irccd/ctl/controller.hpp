@@ -104,7 +104,7 @@ public:
 	 * \pre handler != nullptr
 	 * \param handler the recv handler
 	 */
-	void read(stream::read_handler handler);
+	void read(stream::recv_handler handler);
 
 	/**
 	 * Queue a send operation, if receive operations are already running, it
@@ -114,7 +114,7 @@ public:
 	 * \param message the JSON message
 	 * \param handler the optional completion handler
 	 */
-	void write(nlohmann::json message, stream::write_handler handler = nullptr);
+	void write(nlohmann::json message, stream::send_handler handler = nullptr);
 };
 
 } // !irccd::ctl

@@ -22,7 +22,7 @@
 #include <boost/process.hpp>
 
 #include <irccd/string_util.hpp>
-#include <irccd/socket_acceptor.hpp>
+#include <irccd/acceptor.hpp>
 
 #include <irccd/daemon/command.hpp>
 #include <irccd/daemon/transport_service.hpp>
@@ -37,17 +37,13 @@ namespace irccd::test {
 cli_fixture::cli_fixture()
 	: server_(new mock_server(irccd_.get_service(), "test", "localhost"))
 {
-	std::remove(CMAKE_BINARY_DIR "/tmp/irccd.sock");
-
-	local_acceptor::endpoint endpoint(CMAKE_BINARY_DIR "/tmp/irccd.sock");
-	local_acceptor::acceptor acceptor(service_, std::move(endpoint));
+	auto acceptor = std::make_unique<local_acceptor>(irccd_.get_service(), CMAKE_BINARY_DIR "/tmp/irccd.sock");
 
 	for (const auto& f : command::registry)
 		irccd_.transports().get_commands().push_back(f());
 
 	irccd_.servers().add(server_);
-	irccd_.transports().add(std::make_unique<transport_server>(
-		std::make_unique<local_acceptor>(std::move(acceptor))));
+	irccd_.transports().add(std::make_unique<transport_server>(std::move(acceptor)));
 	server_->disconnect();
 	server_->clear();
 }

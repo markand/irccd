@@ -106,14 +106,14 @@ void controller::connect(connect_handler handler)
 	});
 }
 
-void controller::read(stream::read_handler handler)
+void controller::read(stream::recv_handler handler)
 {
 	assert(handler);
 	assert(stream_);
 
 	auto stream = stream_;
 
-	stream_->read([this, handler, stream] (auto code, auto msg) {
+	stream_->recv([this, handler, stream] (auto code, auto msg) {
 		if (code) {
 			stream_ = nullptr;
 			handler(std::move(code), std::move(msg));
@@ -139,14 +139,14 @@ void controller::read(stream::read_handler handler)
 	});
 }
 
-void controller::write(nlohmann::json message, stream::write_handler handler)
+void controller::write(nlohmann::json message, stream::send_handler handler)
 {
 	assert(message.is_object());
 	assert(stream_);
 
 	auto stream = stream_;
 
-	stream_->write(std::move(message), [this, stream, handler] (auto code) {
+	stream_->send(std::move(message), [this, stream, handler] (auto code) {
 		if (code)
 			stream_ = nullptr;
 		if (handler)

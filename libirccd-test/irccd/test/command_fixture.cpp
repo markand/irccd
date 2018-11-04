@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/socket_acceptor.hpp>
-#include <irccd/socket_connector.hpp>
+#include <irccd/acceptor.hpp>
+#include <irccd/connector.hpp>
 
 #include <irccd/daemon/command.hpp>
 #include <irccd/daemon/transport_server.hpp>
@@ -56,23 +56,20 @@ command_fixture::command_fixture()
 	: server_(new mock_server(ctx_, "test", "localhost"))
 	, plugin_(new mock_plugin("test"))
 {
-	using boost::asio::ip::tcp;
+	const auto path = CMAKE_BINARY_DIR "/tmp/irccd.sock";
+
+	auto acceptor = std::make_unique<local_acceptor>(irccd_.get_service(), path);
+	auto connector = std::make_unique<local_connector>(irccd_.get_service(), path);
 
 	// 1. Add all commands.
 	for (const auto& f : command::registry)
 		irccd_.transports().get_commands().push_back(f());
 
-	// 2. Bind to a random port.
-	tcp::endpoint ep(tcp::v4(), 0);
-	tcp::acceptor acc(ctx_, ep);
+	// 2. Create controller and transport server.
+	ctl_ = std::make_unique<ctl::controller>(std::move(connector));
+	irccd_.transports().add(std::make_unique<transport_server>(std::move(acceptor)));
 
-	// 3. Create controller and transport server.
-	ctl_ = std::make_unique<ctl::controller>(
-		std::make_unique<ip_connector>(ctx_, acc.local_endpoint()));
-	irccd_.transports().add(std::make_unique<transport_server>(
-		std::make_unique<ip_acceptor>(std::move(acc))));
-
-	// Wait for controller to connect.
+	// 3. Wait for controller to connect.
 	boost::asio::deadline_timer timer(ctx_);
 
 	timer.expires_from_now(boost::posix_time::seconds(10));

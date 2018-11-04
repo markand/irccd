@@ -1,5 +1,5 @@
 /*
- * main.cpp -- test io classes
+ * main.cpp -- test network classes
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -23,25 +23,15 @@
 
 #include <irccd/sysconfig.hpp>
 
-#include <irccd/socket_acceptor.hpp>
-#include <irccd/socket_connector.hpp>
-#include <irccd/socket_stream.hpp>
-
-#if defined(IRCCD_HAVE_SSL)
-#	include <irccd/tls_acceptor.hpp>
-#	include <irccd/tls_connector.hpp>
-#	include <irccd/tls_stream.hpp>
-#endif // !IRCCD_HAVE_SSL
+#include <irccd/acceptor.hpp>
+#include <irccd/connector.hpp>
+#include <irccd/stream.hpp>
 
 using boost::asio::io_service;
 using boost::asio::ip::tcp;
 
 #if defined(IRCCD_HAVE_SSL)
 using boost::asio::ssl::context;
-#endif
-
-#if !BOOST_OS_WINDOWS
-using boost::asio::local::stream_protocol;
 #endif
 
 namespace irccd {
@@ -100,7 +90,7 @@ protected:
 
 		endpoint_ = acceptor.local_endpoint();
 
-		return std::make_unique<ip_acceptor>(std::move(acceptor));
+		return std::make_unique<ip_acceptor>(service_, std::move(acceptor));
 	}
 
 	/**
@@ -108,13 +98,16 @@ protected:
 	 */
 	auto create_connector() -> std::unique_ptr<connector> override
 	{
-		return std::make_unique<ip_connector>(service_, endpoint_);
+		const auto hostname = "127.0.0.1";
+		const auto port = std::to_string(endpoint_.port());
+
+		return std::make_unique<ip_connector>(service_, hostname, port, true, false);
 	}
 };
 
 #if defined(IRCCD_HAVE_SSL)
 
-class ssl_stream_fixture : public stream_fixture {
+class tls_ip_stream_fixture : public stream_fixture {
 private:
 	tcp::endpoint endpoint_;
 
@@ -124,7 +117,7 @@ protected:
 	 */
 	auto create_acceptor() -> std::unique_ptr<acceptor> override
 	{
-		context context(context::sslv23);
+		context context(context::tlsv12);
 
 		context.use_certificate_file(TESTS_SOURCE_DIR "/data/test.crt", context::pem);
 		context.use_private_key_file(TESTS_SOURCE_DIR "/data/test.key", context::pem);
@@ -134,7 +127,7 @@ protected:
 
 		endpoint_ = acceptor.local_endpoint();
 
-		return std::make_unique<tls_acceptor<>>(std::move(context), std::move(acceptor));
+		return std::make_unique<tls_acceptor<ip_acceptor>>(std::move(context), service_, std::move(acceptor));
 	}
 
 	/**
@@ -142,26 +135,32 @@ protected:
 	 */
 	auto create_connector() -> std::unique_ptr<connector> override
 	{
-		return std::make_unique<tls_connector<>>(context(context::sslv23), service_, endpoint_);
+		context context(context::tlsv12);
+
+		const auto hostname = "127.0.0.1";
+		const auto port = std::to_string(endpoint_.port());
+
+		return std::make_unique<tls_connector<ip_connector>>(std::move(context),
+			service_, hostname, port, true, false);
 	}
 };
 
 #endif // !IRCCD_HAVE_SSL
 
-#if !BOOST_OS_WINDOWS
+#if defined(BOOST_ASIO_HAS_LOCAL_SOCKETS)
 
 class local_stream_fixture : public stream_fixture {
+private:
+	const std::string path_{CMAKE_BINARY_DIR "/tmp/stream-test.sock"};
+
 public:
+
 	/**
 	 * \copydoc io_fixture::create_acceptor
 	 */
 	auto create_acceptor() -> std::unique_ptr<acceptor> override
 	{
-		std::remove(CMAKE_BINARY_DIR "/tmp/io-test.sock");
-
-		stream_protocol::acceptor acceptor(service_, CMAKE_BINARY_DIR "/tmp/io-test.sock");
-
-		return std::make_unique<local_acceptor>(std::move(acceptor));
+		return std::make_unique<local_acceptor>(service_, path_);
 	}
 
 	/**
@@ -169,11 +168,43 @@ public:
 	 */
 	auto create_connector() -> std::unique_ptr<connector> override
 	{
-		return std::make_unique<local_connector>(service_, CMAKE_BINARY_DIR "/tmp/io-test.sock");
+		return std::make_unique<local_connector>(service_, path_);
 	}
 };
 
-#endif // !BOOST_OS_WINDOWS
+#if defined(IRCCD_HAVE_SSL)
+
+class tls_local_stream_fixture : public stream_fixture {
+private:
+	const std::string path_{CMAKE_BINARY_DIR "/tmp/stream-test.sock"};
+
+public:
+
+	/**
+	 * \copydoc io_fixture::create_acceptor
+	 */
+	auto create_acceptor() -> std::unique_ptr<acceptor> override
+	{
+		context context(context::tlsv12);
+
+		context.use_certificate_file(TESTS_SOURCE_DIR "/data/test.crt", context::pem);
+		context.use_private_key_file(TESTS_SOURCE_DIR "/data/test.key", context::pem);
+
+		return std::make_unique<tls_acceptor<local_acceptor>>(std::move(context), service_, path_);
+	}
+
+	/**
+	 * \copydoc io_fixture::create_connector
+	 */
+	auto create_connector() -> std::unique_ptr<connector> override
+	{
+		return std::make_unique<tls_connector<local_connector>>(context(context::tlsv12), service_, path_);
+	}
+};
+
+#endif // !IRCCD_HAVE_SSL
+
+#endif // !BOOST_ASIO_HAS_LOCAL_SOCKETS
 
 /**
  * List of fixtures to tests.
@@ -181,10 +212,13 @@ public:
 using list = boost::mpl::list<
 	ip_stream_fixture
 #if defined(IRCCD_HAVE_SSL)
-	, ssl_stream_fixture
+	, tls_ip_stream_fixture
 #endif
-#if !BOOST_OS_WINDOWS
+#if defined(BOOST_ASIO_HAS_LOCAL_SOCKETS)
 	, local_stream_fixture
+#	if defined(IRCCD_HAVE_SSL)
+	, tls_local_stream_fixture
+#	endif
 #endif
 >;
 
@@ -198,25 +232,25 @@ BOOST_AUTO_TEST_CASE_TEMPLATE(invalid_argument, Test, list)
 	};
 
 	fixture.init();
-	fixture.stream1_->read([] (auto code, auto message) {
+	fixture.stream1_->recv([] (auto code, auto message) {
 		BOOST_TEST(!code);
 		BOOST_TEST(message.is_object());
 		BOOST_TEST(message["abc"].template get<int>() == 123);
 		BOOST_TEST(message["def"].template get<int>() == 456);
 	});
-	fixture.stream2_->write(message, [] (auto code) {
+	fixture.stream2_->send(message, [] (auto code) {
 		BOOST_TEST(!code);
 	});
 	fixture.service_.run();
 }
 
-BOOST_AUTO_TEST_CASE_TEMPLATE(network_down, Test, list)
+BOOST_AUTO_TEST_CASE_TEMPLATE(connection_reset, Test, list)
 {
 	Test fixture;
 
 	fixture.init();
-	fixture.stream1_->read([] (auto code, auto message) {
-		BOOST_TEST(code.value() == static_cast<int>(std::errc::not_connected));
+	fixture.stream1_->recv([] (auto code, auto message) {
+		BOOST_TEST(code.value() == static_cast<int>(std::errc::connection_reset));
 		BOOST_TEST(message.is_null());
 	});
 	fixture.stream2_ = nullptr;

@@ -561,7 +561,7 @@ auto server::get_options() const noexcept -> options
 void server::set_options(options flags) noexcept
 {
 #if !defined(IRCCD_HAVE_SSL)
-	assert(!(flags & ssl));
+	assert((flags & options::ssl) != options::ssl);
 #endif
 
 	flags_ = flags;

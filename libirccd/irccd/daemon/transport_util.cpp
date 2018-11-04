@@ -20,15 +20,9 @@
 
 #include <cassert>
 
-#include <boost/predef/os.h>
-
+#include <irccd/acceptor.hpp>
 #include <irccd/ini_util.hpp>
 #include <irccd/string_util.hpp>
-#include <irccd/socket_acceptor.hpp>
-
-#if defined(IRCCD_HAVE_SSL)
-#	include <irccd/tls_acceptor.hpp>
-#endif
 
 #include "transport_util.hpp"
 #include "transport_server.hpp"
@@ -39,7 +33,7 @@ namespace irccd::transport_util {
 
 namespace {
 
-auto from_config_load_ip_protocol(const ini::section& sc) -> asio::ip::tcp
+auto from_config_load_ip_protocols(const ini::section& sc) -> std::pair<bool, bool>
 {
 	bool ipv4 = true, ipv6 = false;
 
@@ -66,89 +60,79 @@ auto from_config_load_ip_protocol(const ini::section& sc) -> asio::ip::tcp
 	if (!ipv4 && !ipv6)
 		throw transport_error(transport_error::invalid_family);
 
-	return ipv4 ? asio::ip::tcp::v4() : asio::ip::tcp::v6();
+	return { ipv4, ipv6 };
 }
 
-auto from_config_load_ip_endpoint(const ini::section& sc) -> asio::ip::tcp::endpoint
+#if defined(IRCCD_HAVE_SSL)
+
+auto from_config_load_ssl(const ini::section& sc) -> boost::asio::ssl::context
 {
+	const auto key = sc.get("key").get_value();
+	const auto cert = sc.get("certificate").get_value();
+
+	if (key.empty())
+		throw transport_error(transport_error::invalid_private_key);
+	if (cert.empty())
+		throw transport_error(transport_error::invalid_certificate);
+
+	boost::asio::ssl::context ctx(boost::asio::ssl::context::tlsv12);
+
+	ctx.use_private_key_file(key, boost::asio::ssl::context::pem);
+	ctx.use_certificate_file(cert, boost::asio::ssl::context::pem);
+
+	return ctx;
+}
+
+#endif // !IRCCD_HAVE_SSL
+
+auto from_config_load_ip(asio::io_service& service, const ini::section& sc) -> std::unique_ptr<acceptor>
+{
+	assert(sc.get_key() == "transport");
+
 	const auto port = ini_util::get_uint<std::uint16_t>(sc, "port");
 	const auto address = ini_util::optional_string(sc, "address", "*");
+	const auto [ ipv4, ipv6 ] = from_config_load_ip_protocols(sc);
 
 	if (!port)
 		throw transport_error(transport_error::invalid_port);
 	if (address.empty())
 		throw transport_error(transport_error::invalid_address);
 
-	const auto protocol = from_config_load_ip_protocol(sc);
-
-	return address == "*"
-		? asio::ip::tcp::endpoint(protocol, *port)
-		: asio::ip::tcp::endpoint(asio::ip::address::from_string(address), *port);
-}
-
-auto from_config_load_ip_acceptor(asio::io_service& service, const ini::section& sc) -> asio::ip::tcp::acceptor
-{
-	return asio::ip::tcp::acceptor(service, from_config_load_ip_endpoint(sc), true);
-}
-
-auto from_config_load_ip(asio::io_service& service, const ini::section& sc) -> std::unique_ptr<transport_server>
-{
-	assert(sc.get_key() == "transport");
-
-	auto acceptor = from_config_load_ip_acceptor(service, sc);
-
-	if (string_util::is_boolean(sc.get("ssl").get_value())) {
+	if (string_util::is_boolean(sc.get("ssl").get_value()))
 #if !defined(IRCCD_HAVE_SSL)
-		throw transport_error(transport_error::ssl_disabled);
+	throw transport_error(transport_error::ssl_disabled);
 #else
-		const auto key = sc.get("key").get_value();
-		const auto cert = sc.get("certificate").get_value();
+		return std::make_unique<tls_ip_acceptor>(from_config_load_ssl(sc),
+			service, address, *port, ipv4, ipv6);
+#endif // !IRCCD_HAVE_SSL
 
-		if (key.empty())
-			throw transport_error(transport_error::invalid_private_key);
-		if (cert.empty())
-			throw transport_error(transport_error::invalid_certificate);
-
-		boost::asio::ssl::context ctx(boost::asio::ssl::context::sslv23);
-
-		ctx.use_private_key_file(key, boost::asio::ssl::context::pem);
-		ctx.use_certificate_file(cert, boost::asio::ssl::context::pem);
-
-		return std::make_unique<transport_server>(
-			std::make_unique<tls_acceptor<>>(std::move(ctx), std::move(acceptor)));
-#endif
-	}
-
-	return std::make_unique<transport_server>(
-		std::make_unique<ip_acceptor>(std::move(acceptor)));
+	return std::make_unique<ip_acceptor>(service, address, *port, ipv4, ipv6);
 }
 
-auto from_config_load_unix(asio::io_service& service, const ini::section& sc) -> std::unique_ptr<transport_server>
+auto from_config_load_local(asio::io_service& service, const ini::section& sc) -> std::unique_ptr<acceptor>
 {
 	assert(sc.get_key() == "transport");
 
-#if !BOOST_OS_WINDOWS
-	using boost::asio::local::stream_protocol;
-
+#if defined(BOOST_ASIO_HAS_LOCAL_SOCKETS)
 	const auto path = sc.get("path").get_value();
 
 	if (path.empty())
 		throw transport_error(transport_error::invalid_path);
 
-	// Remove the file first.
-	std::remove(path.c_str());
+	if (string_util::is_boolean(sc.get("ssl").get_value()))
+#if !defined(IRCCD_HAVE_SSL)
+	throw transport_error(transport_error::ssl_disabled);
+#else
+		return std::make_unique<tls_local_acceptor>(from_config_load_ssl(sc), service, path);
+#endif // !IRCCD_HAVE_SSL
 
-	stream_protocol::endpoint endpoint(path);
-	stream_protocol::acceptor acceptor(service, std::move(endpoint));
-
-	return std::make_unique<transport_server>(
-		std::make_unique<local_acceptor>(std::move(acceptor)));
+	return std::make_unique<local_acceptor>(service, path);
 #else
 	(void)service;
 	(void)sc;
 
 	throw transport_error(transport_error::not_supported);
-#endif
+#endif // !BOOST_ASIO_HAS_LOCAL_SOCKETS
 }
 
 } // !namespace
@@ -163,14 +147,16 @@ auto from_config(asio::io_service& service, const ini::section& sc) -> std::uniq
 	if (type.empty())
 		throw transport_error(transport_error::not_supported);
 
-	std::unique_ptr<transport_server> transport;
+	std::unique_ptr<acceptor> acceptor;
 
 	if (type == "ip")
-		transport = from_config_load_ip(service, sc);
+		acceptor = from_config_load_ip(service, sc);
 	else if (type == "unix")
-		transport = from_config_load_unix(service, sc);
+		acceptor = from_config_load_local(service, sc);
 	else
 		throw transport_error(transport_error::not_supported);
+
+	auto transport = std::make_unique<transport_server>(std::move(acceptor));
 
 	transport->set_password(password);
 

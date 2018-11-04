@@ -30,7 +30,7 @@ void transport_client::flush()
 
 	const auto self = shared_from_this();
 
-	stream_->write(queue_.front().first, [this, self] (auto code) {
+	stream_->send(queue_.front().first, [this, self] (auto code) {
 		if (queue_.front().second)
 			queue_.front().second(code);
 
@@ -69,14 +69,14 @@ void transport_client::set_state(state state) noexcept
 	state_ = state;
 }
 
-void transport_client::read(stream::read_handler handler)
+void transport_client::read(stream::recv_handler handler)
 {
 	assert(handler);
 
 	if (state_ != state::closing) {
 		const auto self = shared_from_this();
 
-		stream_->read([this, self, handler] (auto code, auto msg) {
+		stream_->recv([this, self, handler] (auto code, auto msg) {
 			handler(code, msg);
 
 			if (code)
@@ -85,7 +85,7 @@ void transport_client::read(stream::read_handler handler)
 	}
 }
 
-void transport_client::write(nlohmann::json json, stream::write_handler handler)
+void transport_client::write(nlohmann::json json, stream::send_handler handler)
 {
 	const auto in_progress = queue_.size() > 0;
 
@@ -95,19 +95,19 @@ void transport_client::write(nlohmann::json json, stream::write_handler handler)
 		flush();
 }
 
-void transport_client::success(const std::string& cname, stream::write_handler handler)
+void transport_client::success(const std::string& cname, stream::send_handler handler)
 {
 	assert(!cname.empty());
 
 	write({{ "command", cname }}, std::move(handler));
 }
 
-void transport_client::error(std::error_code code, stream::write_handler handler)
+void transport_client::error(std::error_code code, stream::send_handler handler)
 {
 	error(std::move(code), "", std::move(handler));
 }
 
-void transport_client::error(std::error_code code, std::string_view cname, stream::write_handler handler)
+void transport_client::error(std::error_code code, std::string_view cname, stream::send_handler handler)
 {
 	assert(code);
 
