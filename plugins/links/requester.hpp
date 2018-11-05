@@ -69,7 +69,7 @@ private:
 	boost::asio::ssl::context ctx_{boost::asio::ssl::context::sslv23};
 #endif
 
-	boost::beast::flat_buffer buffer_;
+	boost::beast::flat_buffer buffer_{163840};
 	boost::beast::http::request<boost::beast::http::empty_body> req_;
 	boost::beast::http::response<boost::beast::http::string_body> res_;
 	boost::asio::deadline_timer timer_;
