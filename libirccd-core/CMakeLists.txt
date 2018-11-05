@@ -58,6 +58,12 @@ set(
 
 if (CMAKE_SYSTEM_NAME MATCHES Windows)
 	list(APPEND LIBRARIES mswsock shlwapi ws2_32)
+elseif (CMAKE_SYSTEM_NAME MATCHES "Linux")
+	#
+	# Disable epoll in boost until it get fixed:
+	# https://github.com/boostorg/asio/issues/150
+	#
+	list(APPEND FLAGS "BOOST_ASIO_DISABLE_EPOLL")
 elseif (APPLE)
 	list(APPEND LIBRARIES resolv)
 endif ()
@@ -69,6 +75,7 @@ endif ()
 irccd_define_library(
 	TARGET libirccd-core
 	EXPORT
+	FLAGS ${FLAGS}
 	HEADERS ${HEADERS}
 	HEADERS_DIRECTORY irccd
 	SOURCES ${SOURCES}
