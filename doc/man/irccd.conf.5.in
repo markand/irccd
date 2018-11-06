@@ -113,8 +113,6 @@ redefinable, you can create one or more.
 (string) the username name (Optional, default: irccd).
 .It ctcp-version
 (string) what version to respond to CTCP VERSION (Optional, default: IRC Client Daemon).
-.It ctcp-autoreply
-(bool) enable auto CTCP VERSION reply, (Optional, default: true).
 .El
 .\" SERVER
 .Ss server

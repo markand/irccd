@@ -65,6 +65,7 @@ public:
             { "dead", "dead=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{word}" },
             { "found", "found=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{word}" },
             { "start", "start=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{word}" },
+            { "running", "running=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{word}" },
             { "win", "win=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{word}" },
             { "wrong-letter", "wrong-letter=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{letter}" },
             { "wrong-player", "wrong-player=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{letter}" },
@@ -227,6 +228,16 @@ TEST_F(HangmanTest, query)
     ASSERT_EQ("jean:found=hangman:!hangman:test:jean:jean!jean@localhost:jean:s k _", m_server->last());
     m_plugin->onQueryCommand(m_irccd, QueryEvent{m_server, "jean!jean@localhost", "sky"});
     ASSERT_EQ("jean:win=hangman:!hangman:test:jean:jean!jean@localhost:jean:sky", m_server->last());
+}
+
+TEST_F(HangmanTest, running)
+{
+    load();
+
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", ""});
+    m_plugin->onMessage(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", "y"});
+    m_plugin->onCommand(m_irccd, MessageEvent{m_server, "jean!jean@localhost", "#hangman", ""});
+    ASSERT_EQ("#hangman:running=hangman:!hangman:test:#hangman:jean!jean@localhost:jean:_ _ y", m_server->last());
 }
 
 TEST_F(HangmanTest, wordlist_fix_644)

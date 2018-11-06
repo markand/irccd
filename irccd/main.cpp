@@ -320,6 +320,12 @@ int main(int argc, char **argv)
     instance->commands().add(std::make_unique<command::ServerPartCommand>());
     instance->commands().add(std::make_unique<command::ServerReconnectCommand>());
     instance->commands().add(std::make_unique<command::ServerTopicCommand>());
+    instance->commands().add(std::make_unique<command::RuleAddCommand>());
+    instance->commands().add(std::make_unique<command::RuleEditCommand>());
+    instance->commands().add(std::make_unique<command::RuleInfoCommand>());
+    instance->commands().add(std::make_unique<command::RuleListCommand>());
+    instance->commands().add(std::make_unique<command::RuleMoveCommand>());
+    instance->commands().add(std::make_unique<command::RuleRemoveCommand>());
 
     // Load Javascript API and plugin loader.
 #if defined(WITH_JS)

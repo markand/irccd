@@ -39,20 +39,12 @@
 #
 # WITH_BINDIR           Binary directory for irccd, irccdctl
 # WITH_PLUGINDIR        Path where plugins must be installed
-# WITH_NPLUGINDIR       Path where native plugins must be installed
 # WITH_DOCDIR           Path where to install documentation
 # WITH_MANDIR           Path where to install manuals
 # WITH_CONFDIR          Path where to search configuration files
 # WITH_CACHEDIR         Path where to store temporary files
 # WITH_PKGCONFIGDIR     Path where to install pkg-config files
 # WITH_SYSTEMDDIR       Path where to install systemd unit file
-#
-
-#
-# Options for unit tests only:
-#
-# WITH_TEST_IRCHOST     Which IRC server to use for tests (default: 127.0.0.1)
-# WITH_TEST_IRCPORT     Which IRC server port to use for tests (default: 6667)
 #
 
 # Manual pages on Windows are pretty useless.
@@ -86,9 +78,6 @@ option(WITH_DOXYGEN "Enable doxygen" Off)
 option(WITH_MAN "Install man pages" ${DEFAULT_MAN})
 option(WITH_PKGCONFIG "Enable pkg-config file" ${DEFAULT_PKGCONFIG})
 
-set(WITH_TEST_IRCHOST "127.0.0.1" CACHE STRING "IRC host for tests")
-set(WITH_TEST_IRCPORT 6667 CACHE STRING "IRC port for test")
-
 #
 # Installation paths.
 # -------------------------------------------------------------------
@@ -109,13 +98,11 @@ if (WIN32)
     set(WITH_DATADIR "share" CACHE STRING "Data directory")
     set(WITH_CACHEDIR "var" CACHE STRING "Temporary files directory")
     set(WITH_PLUGINDIR "share/plugins" CACHE STRING "Module prefix where to install")
-    set(WITH_NPLUGINDIR "lib/irccd/plugins" CACHE STRING "Directory for native plugins")
     set(WITH_DOCDIR "share/doc" CACHE STRING "Documentation directory")
 else ()
     set(WITH_DATADIR "share/irccd" CACHE STRING "Data directory")
     set(WITH_CACHEDIR "var/irccd" CACHE STRING "Temporary files directory")
     set(WITH_PLUGINDIR "share/irccd/plugins" CACHE STRING "Module prefix where to install")
-    set(WITH_NPLUGINDIR "lib/irccd/plugins" CACHE STRING "Directory for native plugins")
     set(WITH_DOCDIR "share/doc/irccd" CACHE STRING "Documentation directory")
 endif ()
 

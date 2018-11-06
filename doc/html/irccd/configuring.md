@@ -114,8 +114,7 @@ The available options:
   - **nickname**: (string) the nickname (Optional, default: irccd),
   - **realname**: (string) the realname (Optional, default: IRC Client Daemon),
   - **username**: (string) the username name (Optional, default: irccd),
-  - **ctcp-version**: (string) what version to respond to CTCP VERSION (Optional, default: IRC Client Daemon),
-  - **ctcp-autoreply**: (bool) enable auto CTCP VERSION reply, (Optional, default: true).
+  - **ctcp-version**: (string) what version to respond to CTCP VERSION (Optional, default: IRC Client Daemon).
 
 **Example**
 

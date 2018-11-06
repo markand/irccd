@@ -577,7 +577,7 @@ void Server::setNickname(std::string nickname)
 void Server::setCtcpVersion(std::string ctcpversion)
 {
     m_ctcpversion = std::move(ctcpversion);
-    irc_set_ctcp_version(*m_session, ctcpversion.c_str());
+    irc_set_ctcp_version(*m_session, m_ctcpversion.c_str());
 }
 
 void Server::next(std::unique_ptr<State> state) noexcept

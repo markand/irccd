@@ -347,6 +347,22 @@ public:
     IRCCD_EXPORT void remove(unsigned position);
 
     /**
+     * Get a rule at the specified index or throw an exception if not found.
+     *
+     * \param position the position
+     * \return the rule
+     * \throw std::out_of_range if position is invalid
+     */
+    IRCCD_EXPORT const Rule &require(unsigned position) const;
+
+    /**
+     * Overloaded function.
+     *
+     * \copydoc require
+     */
+    IRCCD_EXPORT Rule& require(unsigned position);
+
+    /**
      * Resolve the action to execute with the specified list of rules.
      *
      * \param server the server name

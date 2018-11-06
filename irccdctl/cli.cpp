@@ -16,7 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <cassert>
 #include <iostream>
+#include <sstream>
 
 #include <json.hpp>
 
@@ -26,6 +28,8 @@
 #include "logger.hpp"
 #include "options.hpp"
 #include "util.hpp"
+
+using namespace std::string_literals;
 
 namespace irccd {
 
@@ -836,6 +840,363 @@ void ServerTopicCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &ar
         { "server",     args[0] },
         { "channel",    args[1] },
         { "topic",      args[2] }
+    }));
+}
+
+/*
+ * RuleAddCli.
+ * ------------------------------------------------------------------
+ */
+
+RuleAddCli::RuleAddCli()
+    : Cli("rule-add",
+          "add a new rule",
+          "rule-add [options] accept|drop",
+          "Add a new rule to irccd.\n\n"
+          "If no index is specified, the rule is added to the end.\n\n"
+          "Available options:\n"
+          "  -c, --add-channel\t\tmatch a channel\n"
+          "  -e, --add-event\t\tmatch an event\n"
+          "  -i, --index\t\t\trule position\n"
+          "  -p, --add-plugin\t\tmatch a plugin\n"
+          "  -s, --add-server\t\tmatch a server\n\n"
+          "Example:\n"
+          "\tirccdctl rule-add -p hangman drop\n"
+          "\tirccdctl rule-add -s localhost -c #games -p hangman accept")
+{
+}
+
+void RuleAddCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+{
+    static const option::Options options{
+        { "-c",             true },
+        { "--add-channel",  true },
+        { "-e",             true },
+        { "--add-event",    true },
+        { "-i",             true },
+        { "--index",        true },
+        { "-p",             true },
+        { "--add-plugin",   true },
+        { "-s",             true },
+        { "--add-server",   true }
+    };
+
+    auto copy = args;
+    auto result = option::read(copy, options);
+
+    if (copy.size() < 1)
+        throw std::invalid_argument("rule-add requires at least 1 argument");
+
+    auto json = nlohmann::json::object({
+        { "command",    "rule-add"              },
+        { "channels",   nlohmann::json::array() },
+        { "events",     nlohmann::json::array() },
+        { "plugins",    nlohmann::json::array() },
+        { "servers",    nlohmann::json::array() }
+    });
+
+    // All sets.
+    for (const auto& pair : result) {
+        if (pair.first == "-c" || pair.first == "--add-channel")
+            json["channels"].push_back(pair.second);
+        if (pair.first == "-e" || pair.first == "--add-event")
+            json["events"].push_back(pair.second);
+        if (pair.first == "-p" || pair.first == "--add-plugin")
+            json["plugins"].push_back(pair.second);
+        if (pair.first == "-s" || pair.first == "--add-server")
+            json["servers"].push_back(pair.second);
+    }
+
+    // Index.
+    if (result.count("-i") > 0)
+        json["index"] = util::toNumber<unsigned>(result.find("-i")->second);
+    if (result.count("--index") > 0)
+        json["index"] = util::toNumber<unsigned>(result.find("--index")->second);
+
+    // And action.
+    if (copy[0] != "accept" && copy[0] != "drop")
+        throw std::runtime_error("invalid action '"s + copy[0] + "'");
+
+    json["action"] = copy[0];
+
+    check(request(irccdctl, json));
+}
+
+/*
+ * RuleEditCli.
+ * ------------------------------------------------------------------
+ */
+
+RuleEditCli::RuleEditCli()
+    : Cli("rule-edit",
+          "edit an existing rule",
+          "rule-edit [options] index",
+          "Edit an existing rule in irccd.\n\n"
+          "All options can be specified multiple times.\n\n"
+          "Available options:\n"
+          "  -a, --action\t\t\tset action\n"
+          "  -c, --add-channel\t\tmatch a channel\n"
+          "  -C, --remove-channel\t\tremove a channel\n"
+          "  -e, --add-event\t\tmatch an event\n"
+          "  -E, --remove-event\t\tremove an event\n"
+          "  -p, --add-plugin\t\tmatch a plugin\n"
+          "  -P, --add-plugin\t\tremove a plugin\n"
+          "  -s, --add-server\t\tmatch a server\n"
+          "  -S, --remove-server\t\tremove a server\n\n"
+          "Example:\n"
+          "\tirccdctl rule-edit -p hangman 0\n"
+          "\tirccdctl rule-edit -S localhost -c #games -p hangman 1")
+{
+}
+
+void RuleEditCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+{
+    static const option::Options options{
+        { "-a",                 true },
+        { "--action",           true },
+        { "-c",                 true },
+        { "--add-channel",      true },
+        { "-C",                 true },
+        { "--remove-channel",   true },
+        { "-e",                 true },
+        { "--add-event",        true },
+        { "-E",                 true },
+        { "--remove-event",     true },
+        { "-p",                 true },
+        { "--add-plugin",       true },
+        { "-P",                 true },
+        { "--remove-plugin",    true },
+        { "-s",                 true },
+        { "--add-server",       true },
+        { "-S",                 true },
+        { "--remove-server",    true },
+    };
+
+    auto copy = args;
+    auto result = option::read(copy, options);
+
+    if (copy.size() < 1)
+        throw std::invalid_argument("rule-edit requires at least 1 argument");
+
+    auto json = nlohmann::json::object({
+        { "command",    "rule-edit"             },
+        { "channels",   nlohmann::json::array() },
+        { "events",     nlohmann::json::array() },
+        { "plugins",    nlohmann::json::array() },
+        { "servers",    nlohmann::json::array() }
+    });
+
+    for (const auto& pair : result) {
+        // Action.
+        if (pair.first == "-a" || pair.first == "--action")
+            json["action"] = pair.second;
+
+        // Additions.
+        if (pair.first == "-c" || pair.first == "--add-channel")
+            json["add-channels"].push_back(pair.second);
+        if (pair.first == "-e" || pair.first == "--add-event")
+            json["add-events"].push_back(pair.second);
+        if (pair.first == "-p" || pair.first == "--add-plugin")
+            json["add-plugins"].push_back(pair.second);
+        if (pair.first == "-s" || pair.first == "--add-server")
+            json["add-servers"].push_back(pair.second);
+
+        // Removals.
+        if (pair.first == "-C" || pair.first == "--remove-channel")
+            json["remove-channels"].push_back(pair.second);
+        if (pair.first == "-E" || pair.first == "--remove-event")
+            json["remove-events"].push_back(pair.second);
+        if (pair.first == "-P" || pair.first == "--remove-plugin")
+            json["remove-plugins"].push_back(pair.second);
+        if (pair.first == "-S" || pair.first == "--remove-server")
+            json["remove-servers"].push_back(pair.second);
+    }
+
+    // Index.
+    json["index"] = util::toNumber<unsigned>(copy[0]);
+
+    check(request(irccdctl, json));
+}
+
+/*
+ * RuleListCli.
+ * ------------------------------------------------------------------
+ */
+
+namespace {
+
+void showRule(const nlohmann::json& json, int index)
+{
+    assert(json.is_object());
+
+    auto unjoin = [] (auto array) {
+        std::ostringstream oss;
+
+        for (auto it = array.begin(); it != array.end(); ++it) {
+            if (!it->is_string())
+                continue;
+
+            oss << it->template get<std::string>() << " ";
+        }
+
+        return oss.str();
+    };
+    auto unstr = [] (auto action) {
+        if (action.is_string() && action == "accept")
+            return "accept";
+        else
+            return "drop";
+    };
+
+    std::cout << "rule:        " << index << std::endl;
+    std::cout << "servers:     " << unjoin(json["servers"]) << std::endl;
+    std::cout << "channels:    " << unjoin(json["channels"]) << std::endl;
+    std::cout << "plugins:     " << unjoin(json["plugins"]) << std::endl;
+    std::cout << "events:      " << unjoin(json["events"]) << std::endl;
+    std::cout << "action:      " << unstr(json["action"]) << std::endl;
+    std::cout << std::endl;
+}
+
+} // !namespace
+
+RuleListCli::RuleListCli()
+    : Cli("rule-list",
+          "list all rules",
+          "rule-list",
+          "List all rules.\n\n"
+          "Example:\n"
+          "\tirccdctl rule-list")
+{
+}
+
+void RuleListCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &)
+{
+    auto response = request(irccdctl);
+    auto pos = 0;
+
+    check(response);
+
+    for (const auto &obj : response["list"]) {
+        if (!obj.is_object())
+            continue;
+
+        showRule(obj, pos++);
+    }
+}
+
+/*
+ * RuleInfoCli.
+ * ------------------------------------------------------------------
+ */
+
+RuleInfoCli::RuleInfoCli()
+    : Cli("rule-info",
+          "show a rule",
+          "rule-info index",
+          "Show a rule.\n\n"
+          "Example:\n"
+          "\tirccdctl rule-info 0\n"
+          "\tirccdctl rule-info 1")
+{
+}
+
+void RuleInfoCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+{
+    if (args.size() < 1)
+        throw std::invalid_argument("rule-info requires 1 argument");
+
+    int index = 0;
+
+    try {
+        index = std::stoi(args[0]);
+    } catch (...) {
+        throw std::invalid_argument("invalid number '" + args[0] + "'");
+    }
+
+    auto result = request(irccdctl, {
+        { "command",    "rule-info" },
+        { "index",      index       }
+    });
+
+    check(result);
+    showRule(result, 0);
+}
+
+/*
+ * RuleRemoveCli.
+ * ------------------------------------------------------------------
+ */
+
+RuleRemoveCli::RuleRemoveCli()
+    : Cli("rule-remove",
+          "remove a rule",
+          "rule-remove index",
+          "Remove an existing rule.\n\n"
+          "Example:\n"
+          "\tirccdctl rule-remove 0\n"
+          "\tirccdctl rule-remove 1")
+{
+}
+
+void RuleRemoveCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+{
+    if (args.size() < 1)
+        throw std::invalid_argument("rule-remove requires 1 argument");
+
+    int index = 0;
+
+    try {
+        index = std::stoi(args[0]);
+    } catch (...) {
+        throw std::invalid_argument("invalid number '" + args[0] + "'");
+    }
+
+    auto result = request(irccdctl, {
+        { "command",    "rule-remove"   },
+        { "index",      index           }
+    });
+
+    check(result);
+}
+
+/*
+ * RuleMoveCli.
+ * ------------------------------------------------------------------
+ */
+
+RuleMoveCli::RuleMoveCli()
+    : Cli("rule-move",
+          "move a rule to a new position",
+          "rule-move source destination",
+          "Move a rule from the given source at the specified destination index.\n\n"
+          "The rule will replace the existing one at the given destination moving\ndown every "
+          "other rules. If destination is greater or equal the number of rules,\nthe rule "
+          "is moved to the end.\n\n"
+          "Example:\n"
+          "\tirccdctl rule-move 0 5\n"
+          "\tirccdctl rule-move 4 3")
+{
+}
+
+void RuleMoveCli::exec(Irccdctl &irccdctl, const std::vector<std::string> &args)
+{
+    if (args.size() < 2)
+        throw std::invalid_argument("rule-move requires 2 arguments");
+
+    int from = 0;
+    int to = 0;
+
+    try {
+        from = std::stoi(args[0]);
+        to = std::stoi(args[1]);
+    } catch (...) {
+        throw std::invalid_argument("invalid number");
+    }
+
+    check(request(irccdctl, {
+        { "command",    "rule-move" },
+        { "from",       from        },
+        { "to",         to          }
     }));
 }
 

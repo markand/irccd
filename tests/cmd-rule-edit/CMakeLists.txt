@@ -16,22 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# Irccd version.
-set(IRCCD_VERSION_MAJOR "2")
-set(IRCCD_VERSION_MINOR "2")
-set(IRCCD_VERSION_PATCH "0")
-set(IRCCD_VERSION "${IRCCD_VERSION_MAJOR}.${IRCCD_VERSION_MINOR}.${IRCCD_VERSION_PATCH}")
-set(IRCCD_VERSION_SHLIB "2")
-
-#
-# Irccd release date.
-# -------------------------------------------------------------------
-#
-# IRCCD_RELEASE_DATE_YEAR       4 digits
-# IRCCD_RELEASE_DATE_MONTH      2 digits (01 = January)
-# IRCCD_RELEASE_DATE_DAY        2 digits (01 = first day of month)
-#
-set(IRCCD_RELEASE_DATE_YEAR 2017)
-set(IRCCD_RELEASE_DATE_MONTH 09)
-set(IRCCD_RELEASE_DATE_DAY 26)
-set(IRCCD_RELEASE_DATE "${IRCCD_RELEASE_DATE_YEAR}-${IRCCD_RELEASE_DATE_MONTH}-${IRCCD_RELEASE_DATE_DAY}")
+irccd_define_test(
+    NAME cmd-rule-edit
+    SOURCES main.cpp
+    LIBRARIES libirccd libirccdctl
+)

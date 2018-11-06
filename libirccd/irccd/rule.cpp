@@ -93,6 +93,13 @@ RuleAction Rule::action() const noexcept
     return m_action;
 }
 
+void Rule::setAction(RuleAction action) noexcept
+{
+    assert(action == RuleAction::Accept || action == RuleAction::Drop);
+
+    m_action = action;
+}
+
 const RuleSet &Rule::servers() const noexcept
 {
     return m_servers;

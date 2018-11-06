@@ -522,6 +522,12 @@ void init(int &argc, char **&argv)
     commands.push_back(std::make_unique<cli::ServerPartCli>());
     commands.push_back(std::make_unique<cli::ServerReconnectCli>());
     commands.push_back(std::make_unique<cli::ServerTopicCli>());
+    commands.push_back(std::make_unique<cli::RuleAddCli>());
+    commands.push_back(std::make_unique<cli::RuleEditCli>());
+    commands.push_back(std::make_unique<cli::RuleListCli>());
+    commands.push_back(std::make_unique<cli::RuleInfoCli>());
+    commands.push_back(std::make_unique<cli::RuleMoveCli>());
+    commands.push_back(std::make_unique<cli::RuleRemoveCli>());
     commands.push_back(std::make_unique<cli::WatchCli>());
 }
 

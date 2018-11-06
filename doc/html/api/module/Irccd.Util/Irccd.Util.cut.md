@@ -1,5 +1,5 @@
 ---
-function: format
+function: cut
 js: true
 summary: "Cut a piece of data into several lines."
 synopsis: "lines = Irccd.Util.cut(data, maxc, maxl)"

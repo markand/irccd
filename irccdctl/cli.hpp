@@ -586,6 +586,132 @@ public:
 };
 
 /*
+ * RuleAddCli.
+ * ------------------------------------------------------------------
+ */
+
+/**
+ * \brief Implementation of irccdctl rule-add.
+ */
+class RuleAddCli : public Cli {
+public:
+    /**
+     * Default constructor.
+     */
+    RuleAddCli();
+
+    /**
+     * \copydoc Cli::exec
+     */
+    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+};
+
+/*
+ * RuleEditCli.
+ * ------------------------------------------------------------------
+ */
+
+/**
+ * \brief Implementation of irccdctl rule-edit.
+ */
+class RuleEditCli : public Cli {
+public:
+    /**
+     * Default constructor.
+     */
+    RuleEditCli();
+
+    /**
+     * \copydoc Cli::exec
+     */
+    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+};
+
+/*
+ * RuleListCli.
+ * ------------------------------------------------------------------
+ */
+
+/**
+ * \brief Implementation of irccdctl rule-list.
+ */
+class RuleListCli : public Cli {
+public:
+    /**
+     * Default constructor.
+     */
+    RuleListCli();
+
+    /**
+     * \copydoc Cli::exec
+     */
+    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+};
+
+/*
+ * RuleInfoCli
+ * ------------------------------------------------------------------
+ */
+
+/**
+ * \brief Implementation of irccdctl rule-info.
+ */
+class RuleInfoCli : public Cli {
+public:
+    /**
+     * Default constructor.
+     */
+    RuleInfoCli();
+
+    /**
+     * \copydoc Cli::exec
+     */
+    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+};
+
+/*
+ * RuleRemoveCli
+ * ------------------------------------------------------------------
+ */
+
+/**
+ * \brief Implementation of irccdctl rule-remove.
+ */
+class RuleRemoveCli : public Cli {
+public:
+    /**
+     * Default constructor.
+     */
+    RuleRemoveCli();
+
+    /**
+     * \copydoc Cli::exec
+     */
+    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+};
+
+/*
+ * RuleMoveCli
+ * ------------------------------------------------------------------
+ */
+
+/**
+ * \brief Implementation of irccdctl rule-move.
+ */
+class RuleMoveCli : public Cli {
+public:
+    /**
+     * Default constructor.
+     */
+    RuleMoveCli();
+
+    /**
+     * \copydoc Cli::exec
+     */
+    void exec(Irccdctl &client, const std::vector<std::string> &args) override;
+};
+
+/*
  * WatchCli.
  * ------------------------------------------------------------------
  */

@@ -458,6 +458,99 @@ public:
     void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
 };
 
+class IRCCD_EXPORT RuleEditCommand : public Command {
+public:
+    /**
+     * Constructor.
+     */
+    RuleEditCommand();
+
+    /**
+     * \copydoc Command::exec
+     */
+    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+};
+
+/**
+ * \brief Implementation of rule-list transport command.
+ */
+class IRCCD_EXPORT RuleListCommand : public Command {
+public:
+    /**
+     * Constructor.
+     */
+    RuleListCommand();
+
+    /**
+     * \copydoc Command::exec
+     */
+    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+};
+
+/**
+ * \brief Implementation of rule-info transport command.
+ */
+class IRCCD_EXPORT RuleInfoCommand : public Command {
+public:
+    /**
+     * Constructor.
+     */
+    RuleInfoCommand();
+
+    /**
+     * \copydoc Command::exec
+     */
+    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+};
+
+/**
+ * \brief Implementation of rule-remove transport command.
+ */
+class IRCCD_EXPORT RuleRemoveCommand : public Command {
+public:
+    /**
+     * Constructor.
+     */
+    RuleRemoveCommand();
+
+    /**
+     * \copydoc Command::exec
+     */
+    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+};
+
+/**
+ * \brief Implementation of rule-move transport command.
+ */
+class IRCCD_EXPORT RuleMoveCommand : public Command {
+public:
+    /**
+     * Constructor.
+     */
+    RuleMoveCommand();
+
+    /**
+     * \copydoc Command::exec
+     */
+    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+};
+
+/**
+ * \brief Implementation of rule-add transport command.
+ */
+class IRCCD_EXPORT RuleAddCommand : public Command {
+public:
+    /**
+     * Constructor.
+     */
+    RuleAddCommand();
+
+    /**
+     * \copydoc Command::exec
+     */
+    void exec(Irccd &irccd, TransportClient &client, const nlohmann::json &args) override;
+};
+
 } // !command
 
 } // !irccd
