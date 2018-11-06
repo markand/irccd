@@ -1,7 +1,7 @@
 IRC Client Daemon CHANGES
 =========================
 
-irccd current
+irccd 2.2.0 2017-09-26
 ----------------------
 
   - Add new Irccd.Util.cut function (#635),
