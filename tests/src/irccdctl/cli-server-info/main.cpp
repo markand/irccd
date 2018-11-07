@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(output)
 	BOOST_TEST(out.size() == 10U);
 	BOOST_TEST(err.size() == 0U);
 	BOOST_TEST(out[0] == "Name           : test");
-	BOOST_TEST(out[1] == "Host           : localhost");
+	BOOST_TEST(out[1] == "Hostname       : localhost");
 	BOOST_TEST(out[2] == "Port           : 6667");
 	BOOST_TEST(out[3] == "Ipv6           : null");
 	BOOST_TEST(out[4] == "SSL            : null");

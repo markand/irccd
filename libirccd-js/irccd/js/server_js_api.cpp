@@ -87,8 +87,8 @@ auto Server_prototype_info(duk_context* ctx) -> duk_ret_t
 	duk_push_object(ctx);
 	duk::push(ctx, server->get_id());
 	duk_put_prop_string(ctx, -2, "name");
-	duk::push(ctx, server->get_host());
-	duk_put_prop_string(ctx, -2, "host");
+	duk::push(ctx, server->get_hostname());
+	duk_put_prop_string(ctx, -2, "hostname");
 	duk_push_int(ctx, server->get_port());
 	duk_put_prop_string(ctx, -2, "port");
 	duk_push_boolean(ctx,
@@ -595,7 +595,7 @@ auto Server_prototype_toString(duk_context* ctx) -> duk_ret_t
  * Params must be filled with the following properties:
  *
  * name: the name,
- * host: the host,
+ * hostname: the hostname,
  * ipv6: true to use ipv6,      (Optional: default false)
  * port: the port number,       (Optional: default 6667)
  * password: the password,      (Optional: default none)

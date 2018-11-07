@@ -225,14 +225,14 @@ auto from_json(boost::asio::io_service& service, const nlohmann::json& object) -
 	// Mandatory parameters.
 	const deserializer parser(object);
 	const auto id = parser.get<std::string>("name");
-	const auto host = parser.get<std::string>("host");
+	const auto hostname = parser.get<std::string>("hostname");
 
 	if (!id || !string_util::is_identifier(*id))
 		throw server_error(server_error::invalid_identifier);
-	if (!host || host->empty())
+	if (!hostname || hostname->empty())
 		throw server_error(server_error::invalid_hostname);
 
-	const auto sv = std::make_shared<server>(service, *id, *host);
+	const auto sv = std::make_shared<server>(service, *id, *hostname);
 
 	from_json_load_options(*sv, parser);
 	from_json_load_flags(*sv, parser);
@@ -245,14 +245,14 @@ auto from_config(boost::asio::io_service& service,
 {
 	// Mandatory parameters.
 	const auto id = sc.get("name");
-	const auto host = sc.get("hostname");
+	const auto hostname = sc.get("hostname");
 
 	if (!string_util::is_identifier(id.get_value()))
 		throw server_error(server_error::invalid_identifier);
-	if (host.get_value().empty())
+	if (hostname.get_value().empty())
 		throw server_error(server_error::invalid_hostname);
 
-	const auto sv = std::make_shared<server>(service, id.get_value(), host.get_value());
+	const auto sv = std::make_shared<server>(service, id.get_value(), hostname.get_value());
 
 	from_config_load_channels(*sv, sc);
 	from_config_load_flags(*sv, sc);

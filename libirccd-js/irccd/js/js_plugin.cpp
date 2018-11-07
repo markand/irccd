@@ -355,8 +355,8 @@ void duk::type_traits<whois_info>::push(duk_context* ctx, const whois_info& whoi
 	duk_put_prop_string(ctx, -2, "username");
 	duk::push(ctx, whois.realname);
 	duk_put_prop_string(ctx, -2, "realname");
-	duk::push(ctx, whois.host);
-	duk_put_prop_string(ctx, -2, "host");
+	duk::push(ctx, whois.hostname);
+	duk_put_prop_string(ctx, -2, "hostname");
 	duk::push(ctx, whois.channels);
 	duk_put_prop_string(ctx, -2, "channels");
 }

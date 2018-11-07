@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE(minimal)
 	const auto [json, code] = request({
 		{ "command",    "server-connect"    },
 		{ "name",       "local"             },
-		{ "host",       "irc.example.org"   }
+		{ "hostname",   "irc.example.org"   }
 	});
 
 	const auto s = irccd_.servers().get("local");
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(minimal)
 	BOOST_TEST(!code);
 	BOOST_TEST(s);
 	BOOST_TEST(s->get_id() == "local");
-	BOOST_TEST(s->get_host() == "irc.example.org");
+	BOOST_TEST(s->get_hostname() == "irc.example.org");
 	BOOST_TEST(s->get_port() == 6667U);
 }
 
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE(full)
 	const auto [json, code] = request({
 		{ "command",    "server-connect"    },
 		{ "name",       "local2"            },
-		{ "host",       "irc.example2.org"  },
+		{ "hostname",   "irc.example2.org"  },
 		{ "password",   "nonono"            },
 		{ "nickname",   "francis"           },
 		{ "realname",   "the_francis"       },
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(full)
 	BOOST_TEST(!code);
 	BOOST_TEST(s);
 	BOOST_TEST(s->get_id() == "local2");
-	BOOST_TEST(s->get_host() == "irc.example2.org");
+	BOOST_TEST(s->get_hostname() == "irc.example2.org");
 	BOOST_TEST(s->get_port() == 18000U);
 	BOOST_TEST(s->get_password() == "nonono");
 	BOOST_TEST(s->get_nickname() == "francis");
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE(already_exists)
 	const auto [json, code] = request({
 		{ "command",    "server-connect"    },
 		{ "name",       "local"             },
-		{ "host",       "127.0.0.1"         }
+		{ "hostname",   "127.0.0.1"         }
 	});
 
 	BOOST_TEST(code == server_error::already_exists);
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE(invalid_hostname_2)
 	const auto [json, code] = request({
 		{ "command",    "server-connect"    },
 		{ "name",       "new"               },
-		{ "host",       123456              }
+		{ "hostname",   123456              }
 	});
 
 	BOOST_TEST(code == server_error::invalid_hostname);
@@ -135,7 +135,7 @@ BOOST_AUTO_TEST_CASE(invalid_identifier_1)
 	const auto [json, code] = request({
 		{ "command",    "server-connect"    },
 		{ "name",       ""                  },
-		{ "host",       "127.0.0.1"         }
+		{ "hostname",   "127.0.0.1"         }
 	});
 
 	BOOST_TEST(code == server_error::invalid_identifier);
@@ -148,7 +148,7 @@ BOOST_AUTO_TEST_CASE(invalid_identifier_2)
 	const auto [json, code] = request({
 		{ "command",    "server-connect"    },
 		{ "name",       123456              },
-		{ "host",       "127.0.0.1"         }
+		{ "hostname",   "127.0.0.1"         }
 	});
 
 	BOOST_TEST(code == server_error::invalid_identifier);
@@ -161,7 +161,7 @@ BOOST_AUTO_TEST_CASE(invalid_port_1)
 	const auto [json, code] = request({
 		{ "command",    "server-connect"    },
 		{ "name",       "new"               },
-		{ "host",       "127.0.0.1"         },
+		{ "hostname",   "127.0.0.1"         },
 		{ "port",       "notaint"           }
 	});
 
@@ -175,7 +175,7 @@ BOOST_AUTO_TEST_CASE(invalid_port_2)
 	const auto [json, code] = request({
 		{ "command",    "server-connect"    },
 		{ "name",       "new"               },
-		{ "host",       "127.0.0.1"         },
+		{ "hostname",   "127.0.0.1"         },
 		{ "port",       -123                }
 	});
 
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(invalid_port_3)
 	const auto [json, code] = request({
 		{ "command",    "server-connect"    },
 		{ "name",       "new"               },
-		{ "host",       "127.0.0.1"         },
+		{ "hostname",   "127.0.0.1"         },
 		{ "port",       1000000             }
 	});
 
@@ -205,7 +205,7 @@ BOOST_AUTO_TEST_CASE(ssl_disabled)
 	const auto [json, code] = request({
 		{ "command",    "server-connect"    },
 		{ "name",       "new"               },
-		{ "host",       "127.0.0.1"         },
+		{ "hostname",   "127.0.0.1"         },
 		{ "ssl",        true                }
 	});
 

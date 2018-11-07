@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(full)
 	const auto sv = server_util::from_config(ctx_, open_config("full.conf")[0]);
 
 	BOOST_TEST(sv->get_id() == "localhost");
-	BOOST_TEST(sv->get_host() == "irc.localhost");
+	BOOST_TEST(sv->get_hostname() == "irc.localhost");
 	BOOST_TEST(sv->get_port() == 3344U);
 	BOOST_TEST(sv->get_password() == "secret");
 	BOOST_TEST(sv->get_nickname() == "superbot");
@@ -106,7 +106,7 @@ BOOST_AUTO_TEST_CASE(ssl)
 	const auto sv = server_util::from_config(ctx_, open_config("ssl.conf")[0]);
 
 	BOOST_TEST(sv->get_id() == "localhost");
-	BOOST_TEST(sv->get_host() == "irc.localhost");
+	BOOST_TEST(sv->get_hostname() == "irc.localhost");
 	BOOST_TEST(sv->get_port() == 6697U);
 	BOOST_TEST(sv->get_password() == "secret");
 	BOOST_TEST(sv->get_nickname() == "secure");
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(full)
 	const auto sv = server_util::from_json(ctx_, open_json("full.json"));
 
 	BOOST_TEST(sv->get_id() == "localhost");
-	BOOST_TEST(sv->get_host() == "irc.localhost");
+	BOOST_TEST(sv->get_hostname() == "irc.localhost");
 	BOOST_TEST(sv->get_port() == 3344U);
 	BOOST_TEST(sv->get_password() == "secret");
 	BOOST_TEST(sv->get_nickname() == "superbot");

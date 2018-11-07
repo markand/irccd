@@ -34,7 +34,7 @@ namespace irccd {
  */
 struct uri {
 	std::string scheme;     //!< scheme (e.g. http)
-	std::string host;       //!< host (e.g. example.org)
+	std::string hostname;   //!< host (e.g. example.org)
 	std::string port;       //!< port (e.g. 8080)
 	std::string path;       //!< path (e.g. /foo/bar)
 

@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(basic)
 
 	BOOST_TEST(!code);
 	BOOST_TEST(json.is_object());
-	BOOST_TEST(json["host"].get<std::string>() == "example.org");
+	BOOST_TEST(json["hostname"].get<std::string>() == "example.org");
 	BOOST_TEST(json["name"].get<std::string>() == "test");
 	BOOST_TEST(json["nickname"].get<std::string>() == "pascal");
 	BOOST_TEST(json["port"].get<int>() == 8765);

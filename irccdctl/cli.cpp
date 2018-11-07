@@ -165,7 +165,7 @@ void onWhois(const nlohmann::json &v)
 	std::cout << "server:   " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
 	std::cout << "nickname: " << json_util::pretty(v.value("nickname", "(unknown)")) << "\n";
 	std::cout << "username: " << json_util::pretty(v.value("username", "(unknown)")) << "\n";
-	std::cout << "host:     " << json_util::pretty(v.value("host", "(unknown)")) << "\n";
+	std::cout << "hostname: " << json_util::pretty(v.value("hostname", "(unknown)")) << "\n";
 	std::cout << "realname: " << json_util::pretty(v.value("realname", "(unknown)")) << "\n";
 }
 
@@ -775,7 +775,7 @@ void server_connect_cli::exec(ctl::controller& ctl, const std::vector<std::strin
 	auto object = nlohmann::json::object({
 		{ "command",    "server-connect"        },
 		{ "name",       copy[0]                 },
-		{ "host",       copy[1]                 }
+		{ "hostname",   copy[1]                 }
 	});
 
 	if (copy.size() == 3) {
@@ -844,7 +844,7 @@ void server_info_cli::exec(ctl::controller& ctl, const std::vector<std::string>&
 	request(ctl, std::move(json), [] (auto result) {
 		std::cout << std::boolalpha;
 		std::cout << "Name           : " << json_util::pretty(result["name"]) << std::endl;
-		std::cout << "Host           : " << json_util::pretty(result["host"]) << std::endl;
+		std::cout << "Hostname       : " << json_util::pretty(result["hostname"]) << std::endl;
 		std::cout << "Port           : " << json_util::pretty(result["port"]) << std::endl;
 		std::cout << "Ipv6           : " << json_util::pretty(result["ipv6"]) << std::endl;
 		std::cout << "SSL            : " << json_util::pretty(result["ssl"]) << std::endl;

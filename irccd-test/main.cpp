@@ -452,7 +452,7 @@ void on_whois(const std::string& data)
 	ev.server = get_server(get_arg(args, 0));
 	ev.whois.nick = get_arg(args, 1);
 	ev.whois.user = get_arg(args, 2);
-	ev.whois.host = get_arg(args, 3);
+	ev.whois.hostname = get_arg(args, 3);
 	ev.whois.realname = get_arg(args, 4);
 
 	if (args.size() >= 5)

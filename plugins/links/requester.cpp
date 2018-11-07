@@ -149,7 +149,7 @@ void requester::write()
 	req_.version(11);
 	req_.method(verb::get);
 	req_.target(uri_.path);
-	req_.set(field::host, uri_.host);
+	req_.set(field::host, uri_.hostname);
 	req_.set(field::user_agent, BOOST_BEAST_VERSION_STRING);
 
 	const auto self = shared_from_this();
@@ -247,7 +247,7 @@ void requester::resolve()
 	auto self = shared_from_this();
 
 	timer();
-	resolver_.async_resolve(uri_.host, uri_.port, [self] (auto code, auto eps) {
+	resolver_.async_resolve(uri_.hostname, uri_.port, [self] (auto code, auto eps) {
 		self->handle_resolve(code, eps);
 	});
 }

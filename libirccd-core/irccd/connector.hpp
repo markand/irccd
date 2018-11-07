@@ -203,13 +203,13 @@ inline void ip_connector::resolve(Handler handler)
 }
 
 inline ip_connector::ip_connector(boost::asio::io_context& service,
-                                  std::string host,
+                                  std::string hostname,
                                   std::string port,
                                   bool ipv4,
                                   bool ipv6) noexcept
 	: socket_connector_base(service)
 	, resolver_(service)
-	, hostname_(std::move(host))
+	, hostname_(std::move(hostname))
 	, port_(std::move(port))
 	, ipv4_(ipv4)
 	, ipv6_(ipv6)

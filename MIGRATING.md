@@ -8,74 +8,88 @@ Migrating from 2.x to 3.x
 
 ### Irccdctl
 
-  - The functions `server-cnotice` and `server-cmode` have been removed, use
-    `server-notice` and `server-mode` instead,
-  - The option `connect.host` has been renamed to `connect.hostname` (#941).
+- The functions `server-cnotice` and `server-cmode` have been removed, use
+  `server-notice` and `server-mode` instead,
+- The option `connect.host` has been renamed to `connect.hostname`,
+- The option `--host` has been renamed to `--hostname`.
 
 ### Plugins
 
 #### Logger
 
-  - The keyword `source` has been removed and replaced by `channel`,
-  - The keyword `origin` has been added,
-  - Formats `cnotice`, `cmode`, `query` have been removed.
+- The keyword `source` has been removed and replaced by `channel`,
+- The keyword `origin` has been added,
+- Formats `cnotice`, `cmode`, `query` have been removed.
 
 ### Network API
 
-  - The requests `server-cnotice` and `server-cmode` have been removed, use
-    `server-notice` and `server-mode` instead,
-  - The request `server-mode` command requires a new argument `channel`.
+- The requests `server-cnotice` and `server-cmode` have been removed, use
+  `server-notice` and `server-mode` instead,
+- The request `server-mode` command requires a new argument `channel`.
+- The property `host` in request `server-connect` has been renamed to
+  `hostname`,
+- The request `server-info` sends `hostname` property instead of `host`,
+- The event `onWhois` sends `hostname` property instead of `host`.
 
 ### CMake options
 
-  - All options are now starting with `IRCCD_` for better compatibility with
-    external projects,
-  - CMake now use GNUInstallDirs module to specify installation paths, all
-    IRCCD_WITH_ options have been replaced by CMAKE_INSTALL_ equivalents.
+- All options are now starting with `IRCCD_` for better compatibility with
+  external projects,
+- CMake now use GNUInstallDirs module to specify installation paths, all
+  IRCCD\_WITH\_ options have been replaced by CMAKE\_INSTALL\_ equivalents.
 
 ### Paths
 
-  - The default plugins path has been changed from **share/irccd/plugins** to
-    **lib64/irccd**.
+- The default plugins path has been changed from **share/irccd/plugins** to
+  **lib64/irccd**.
 
 ### Javascript API
 
 #### Events
 
-  - The events `onChannelMode` and `onChannelNotice` have been removed, plugins
-    must use `Server.isSelf(target)` to determine a channel/private message,
-  - The event `onNotice` takes a new `channel` argument,
-  - The event `onMode` takes new `channel`, `limit`, `user`, `mask` arguments.
+- The events `onChannelMode` and `onChannelNotice` have been removed, plugins
+  must use `Server.isSelf(target)` to determine a channel/private message,
+- The event `onNotice` takes a new `channel` argument,
+- The event `onMode` takes new `channel`, `limit`, `user`, `mask` arguments,
+- The object information in `onWhois` event now has `hostname` property instead
+  of `host`.
 
 #### Module Server
 
-  - The methods `Server.cmode` and `Server.cnotice` have been removed, use
-    `Server.mode` and `Server.notice` instead,
-  - The method `Server.mode` requires a new argument `channel`.
+- The methods `Server.cmode` and `Server.cnotice` have been removed, use
+  `Server.mode` and `Server.notice` instead,
+- The method `Server.mode` requires a new argument `channel`,
+- The object returned in the method `Server.info` now has a `hostname` property
+  instead of `host`.
 
 #### Module ElapsedTimer
 
-  - The method ElapsedTimer.reset has been removed, just use `start` instead
-    when you want to accumulate time.
+- The method ElapsedTimer.reset has been removed, just use `start` instead
+  when you want to accumulate time.
 
 #### Module Directory
 
-  - The property `Directory.count` has been removed.
+- The property `Directory.count` has been removed.
 
 #### Module Plugin
 
 The following properties in `Irccd.Plugin` has been renamed:
 
-  - **cachePath** renamed to **paths.cache**,
-  - **configPath** renamed to **paths.config**,
-  - **dataPath renamed** to **paths.data**.
+- **cachePath** renamed to **paths.cache**,
+- **configPath** renamed to **paths.config**,
+- **dataPath** renamed to **paths.data**.
 
 Note: these paths are no more automatically detected and set with the new
       `[paths]` and `[paths.<name>]` sections.
 
+#### Module Server
+
+- The property `host` in the function `Irccd.Server` has been renamed to
+  `hostname`.
+
 #### Module System
 
-  - The function `Irccd.System.name` has now well defined return value.
+- The function `Irccd.System.name` has now well defined return value.
 
 ### Irccd
 

@@ -68,7 +68,7 @@ auto uri::parse(const string& link) noexcept -> optional<uri>
 		ret.port = ret.scheme == "http" ? "80" : "443";
 
 	if (hnd.hostText.first)
-		ret.host = string(hnd.hostText.first, hnd.hostText.afterLast - hnd.hostText.first);
+		ret.hostname = string(hnd.hostText.first, hnd.hostText.afterLast - hnd.hostText.first);
 	if (hnd.portText.first)
 		ret.port = string(hnd.portText.first, hnd.portText.afterLast - hnd.portText.first);
 

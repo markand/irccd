@@ -79,8 +79,8 @@ void usage()
  * type = "ip"
  * hostname = "ip or hostname"
  * port = "port number or service"
- * family = "ipv4, ipv6" (Optional, default: ipv4)
- * ssl = true | false
+ * family = "ipv4, ipv6" (Optional, default: ipv4, ipv6)
+ * ssl = true | false (Optional, default: false)
  */
 auto read_connect_ip(const ini::section& sc) -> std::unique_ptr<connector>
 {
@@ -278,7 +278,7 @@ void read(const config& cfg)
  * Parse internet connection from command line.
  *
  * -t ip | ipv6
- * -h host or ip
+ * -h hostname or ip
  * -p port
  */
 auto parse_connect_ip(std::string_view type, const option::result& options) -> std::unique_ptr<connector>
@@ -286,7 +286,7 @@ auto parse_connect_ip(std::string_view type, const option::result& options) -> s
 	option::result::const_iterator it;
 
 	// Host (-h or --host).
-	if ((it = options.find("-h")) == options.end() && (it = options.find("--host")) == options.end())
+	if ((it = options.find("-h")) == options.end() && (it = options.find("--hostname")) == options.end())
 		throw transport_error(transport_error::invalid_hostname);
 
 	const auto hostname = it->second;
@@ -364,7 +364,7 @@ auto parse(int& argc, char**& argv) -> option::result
 		{ "--config",   true    },
 		{ "-h",         true    },
 		{ "--help",     false   },
-		{ "--host",     true    },
+		{ "--hostname", true    },
 		{ "-p",         true    },
 		{ "--port",     true    },
 		{ "-P",         true    },

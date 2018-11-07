@@ -523,7 +523,7 @@ void server_info_command::exec(irccd& irccd, transport_client& client, const doc
 	// General stuff.
 	response.push_back({"command", "server-info"});
 	response.push_back({"name", server->get_id()});
-	response.push_back({"host", server->get_host()});
+	response.push_back({"hostname", server->get_hostname()});
 	response.push_back({"port", server->get_port()});
 	response.push_back({"nickname", server->get_nickname()});
 	response.push_back({"username", server->get_username()});

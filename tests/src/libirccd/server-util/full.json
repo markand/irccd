@@ -1,6 +1,6 @@
 {
 	"name": "localhost",
-	"host": "irc.localhost",
+	"hostname": "irc.localhost",
 	"port": 3344,
 	"password": "secret",
 	"nickname": "superbot",

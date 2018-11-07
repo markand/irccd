@@ -69,7 +69,7 @@ struct channel {
 struct whois_info {
 	std::string nick;                       //!< user's nickname
 	std::string user;                       //!< user's user
-	std::string host;                       //!< hostname
+	std::string hostname;                   //!< hostname
 	std::string realname;                   //!< realname
 	std::vector<std::string> channels;      //!< the channels where the user is
 };
@@ -284,7 +284,7 @@ private:
 	std::string id_;
 
 	// Connection information.
-	std::string host_;
+	std::string hostname_;
 	std::string password_;
 	std::uint16_t port_{6667};
 	options flags_{options::none};
@@ -345,9 +345,9 @@ public:
 	 * \pre !host.empty()
 	 * \param service the service
 	 * \param name the identifier
-	 * \param host the hostname
+	 * \param hostname the hostname
 	 */
-	server(boost::asio::io_service& service, std::string id, std::string host = "localhost");
+	server(boost::asio::io_service& service, std::string id, std::string hostname = "localhost");
 
 	/**
 	 * Destructor. Close the connection if needed.
@@ -373,7 +373,7 @@ public:
 	 *
 	 * \return the hostname
 	 */
-	auto get_host() const noexcept -> const std::string&;
+	auto get_hostname() const noexcept -> const std::string&;
 
 	/**
 	 * Get the password.

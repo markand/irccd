@@ -431,7 +431,7 @@ void dispatcher::operator()(const whois_event& ev)
 	irccd_.get_log().debug(*ev.server) << "event onWhois" << std::endl;
 	irccd_.get_log().debug(*ev.server) << "  nickname: " << ev.whois.nick << std::endl;
 	irccd_.get_log().debug(*ev.server) << "  username: " << ev.whois.user << std::endl;
-	irccd_.get_log().debug(*ev.server) << "  host: " << ev.whois.host << std::endl;
+	irccd_.get_log().debug(*ev.server) << "  hostname: " << ev.whois.hostname << std::endl;
 	irccd_.get_log().debug(*ev.server) << "  realname: " << ev.whois.realname << std::endl;
 	irccd_.get_log().debug(*ev.server) << "  channels: " << string_util::join(ev.whois.channels, ", ") << std::endl;
 
@@ -440,7 +440,7 @@ void dispatcher::operator()(const whois_event& ev)
 		{ "server",     ev.server->get_id()     },
 		{ "nickname",   ev.whois.nick           },
 		{ "username",   ev.whois.user           },
-		{ "host",       ev.whois.host           },
+		{ "hostname",   ev.whois.hostname       },
 		{ "realname",   ev.whois.realname       }
 	}));
 

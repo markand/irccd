@@ -357,7 +357,7 @@ auto server::dispatch_whoisuser(const irc::message& msg) -> bool
 	 * params[0] == originator
 	 * params[1] == nickname
 	 * params[2] == username
-	 * params[3] == host
+	 * params[3] == hostname
 	 * params[4] == * (no idea what is that)
 	 * params[5] == realname
 	 */
@@ -368,7 +368,7 @@ auto server::dispatch_whoisuser(const irc::message& msg) -> bool
 
 	info.nick = msg.get(1);
 	info.user = msg.get(2);
-	info.host = msg.get(3);
+	info.hostname = msg.get(3);
 	info.realname = msg.get(5);
 
 	whois_map_.emplace(info.nick, info);
@@ -497,13 +497,13 @@ void server::handle_connect(const std::error_code& code, const connect_handler& 
 	handler(code);
 }
 
-server::server(boost::asio::io_service& service, std::string id, std::string host)
+server::server(boost::asio::io_service& service, std::string id, std::string hostname)
 	: id_(std::move(id))
-	, host_(std::move(host))
+	, hostname_(std::move(hostname))
 	, service_(service)
 	, timer_(service)
 {
-	assert(!host_.empty());
+	assert(!hostname_.empty());
 
 	// Initialize nickname and username.
 	auto user = sys::username();
@@ -528,9 +528,9 @@ auto server::get_id() const noexcept -> const std::string&
 	return id_;
 }
 
-auto server::get_host() const noexcept -> const std::string&
+auto server::get_hostname() const noexcept -> const std::string&
 {
-	return host_;
+	return hostname_;
 }
 
 auto server::get_password() const noexcept -> const std::string&
@@ -687,7 +687,7 @@ void server::connect(connect_handler handler) noexcept
 
 	const auto self = shared_from_this();
 
-	conn_->connect(host_, std::to_string(port_), [this, handler, c = conn_] (auto code) {
+	conn_->connect(hostname_, std::to_string(port_), [this, handler, c = conn_] (auto code) {
 		handle_connect(code, handler);
 	});
 }
