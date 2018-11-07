@@ -1286,9 +1286,20 @@ public:
 	using send_handler = std::function<void (std::error_code)>;
 
 private:
-	boost::asio::ip::tcp::resolver resolver_;
-	boost::asio::streambuf input_;
+	boost::asio::io_context& service_;
+	boost::asio::ip::tcp::socket socket_{service_};
+	boost::asio::ip::tcp::resolver resolver_{service_};
+	boost::asio::streambuf input_{1024};
 	boost::asio::streambuf output_;
+
+	bool ipv4_{true};
+	bool ipv6_{true};
+	bool ssl_{false};
+
+#if defined(IRCCD_HAVE_SSL)
+	boost::asio::ssl::context context_{boost::asio::ssl::context::tlsv12};
+	boost::asio::ssl::stream<boost::asio::ip::tcp::socket&> ssl_socket_{socket_, context_};
+#endif
 
 #if !defined(NDEBUG)
 	bool is_connecting_{false};
@@ -1296,75 +1307,17 @@ private:
 	bool is_sending_{false};
 #endif
 
-protected:
-	/**
-	 * Use boost::asio::async_resolve and boost::asio::async_connect on the
-	 * given real socket type.
-	 *
-	 * \param socket the socket
-	 * \param host the hostname
-	 * \param service the service or port number
-	 * \param handler the non-null handler
-	 */
-	template <typename Socket>
-	void wrap_connect(Socket& socket,
-	                  const std::string& host,
-	                  const std::string& service,
-	                  const connect_handler& handler) noexcept;
-
-	/**
-	 * Use boost::asio::asynd_read_until on the given real socket type.
-	 *
-	 * \param socket the socket
-	 * \param handler the non-null handler
-	 */
-	template <typename Socket>
-	void wrap_recv(Socket& socket, const recv_handler& handler) noexcept;
-
-	/**
-	 * Use boost::asio::asynd_write on the given real socket type.
-	 *
-	 * \param socket the socket
-	 * \param handler the non-null handler
-	 */
-	template <typename Socket>
-	void wrap_send(Socket& socket, const send_handler& handler) noexcept;
-
-	/**
-	 * Do the connection.
-	 *
-	 * Derived implementation may call wrap_connect on its underlying socket.
-	 *
-	 * \param host the hostname
-	 * \param service the service or port number
-	 * \param handler the non-null handler
-	 */
-	virtual void do_connect(const std::string& host,
-	                        const std::string& service,
-	                        const connect_handler& handler) noexcept = 0;
-
-	/**
-	 * Receive some data.
-	 *
-	 * \param handler the non-null handler
-	 */
-	virtual void do_recv(const recv_handler& handler) noexcept = 0;
-
-	/**
-	 * Send data.
-	 *
-	 * \param handler the non-null handler
-	 */
-	virtual void do_send(const send_handler& handler) noexcept = 0;
+	void handshake(const connect_handler&);
+	void connect(const boost::asio::ip::tcp::resolver::results_type&, const connect_handler&);
+	void resolve(std::string_view, std::string_view, const connect_handler&);
 
 public:
 	/**
 	 * Default constructor.
+	 *
+	 * \param service the I/O service
 	 */
-	inline connection(boost::asio::io_service& service)
-		: resolver_(service)
-	{
-	}
+	connection(boost::asio::io_service& service);
 
 	/**
 	 * Virtual destructor defaulted.
@@ -1372,17 +1325,38 @@ public:
 	virtual ~connection() = default;
 
 	/**
+	 * Enable IPv4
+	 *
+	 * \param enable true to enable
+	 */
+	void use_ipv4(bool enable = true) noexcept;
+
+	/**
+	 * Enable IPv6
+	 *
+	 * \param enable true to enable
+	 */
+	void use_ipv6(bool enable = true) noexcept;
+
+	/**
+	 * Enable TLS.
+	 *
+	 * \pre IRCCD_HAVE_SSL must be defined
+	 * \param enable true to enable
+	 */
+	void use_ssl(bool enable = true) noexcept;
+
+	/**
 	 * Connect to the host.
 	 *
 	 * \pre handler the handler
 	 * \pre another connect operation must not be running
-	 * \param host the host
+	 * \pre ipv4 or ipv6 must be set
+	 * \param hostname the hostname
 	 * \param service the service or port number
 	 * \param handler the non-null handler
 	 */
-	void connect(const std::string& host,
-	             const std::string& service,
-	             const connect_handler& handler) noexcept;
+	void connect(std::string_view hostname, std::string_view service, connect_handler handler);
 
 	/**
 	 * Start receiving data.
@@ -1394,7 +1368,7 @@ public:
 	 * \pre handler != nullptr
 	 * \param handler the handler to call
 	 */
-	void recv(const recv_handler& handler) noexcept;
+	void recv(recv_handler handler);
 
 	/**
 	 * Start sending data.
@@ -1407,90 +1381,8 @@ public:
 	 * \param message the raw message
 	 * \param handler the handler to call
 	 */
-	void send(std::string message, const send_handler& handler);
+	void send(std::string_view message, send_handler handler);
 };
-
-/**
- * \brief Clear TCP connection
- */
-class ip_connection : public connection {
-private:
-	boost::asio::ip::tcp::socket socket_;
-
-protected:
-	/**
-	 * \copydoc connection::do_connect
-	 */
-	void do_connect(const std::string& host,
-	                const std::string& service,
-	                const connect_handler& handler) noexcept override;
-
-	/**
-	 * \copydoc connection::do_recv
-	 */
-	void do_recv(const recv_handler& handler) noexcept override;
-
-	/**
-	 * \copydoc connection::do_send
-	 */
-	void do_send(const send_handler& handler) noexcept override;
-
-public:
-	/**
-	 * Constructor.
-	 *
-	 * \param service the io service
-	 */
-	inline ip_connection(boost::asio::io_service& service)
-		: connection(service)
-		, socket_(service)
-	{
-	}
-};
-
-#if defined(IRCCD_HAVE_SSL)
-
-/**
- * \brief SSL connection
- */
-class tls_connection : public connection {
-private:
-	boost::asio::ssl::context context_;
-	boost::asio::ssl::stream<boost::asio::ip::tcp::socket> socket_;
-
-protected:
-	/**
-	 * \copydoc connection::do_connect
-	 */
-	void do_connect(const std::string& host,
-	                const std::string& service,
-	                const connect_handler& handler) noexcept override;
-
-	/**
-	 * \copydoc connection::do_recv
-	 */
-	void do_recv(const recv_handler& handler) noexcept override;
-
-	/**
-	 * \copydoc connection::do_send
-	 */
-	void do_send(const send_handler& handler) noexcept override;
-
-public:
-	/**
-	 * Constructor.
-	 *
-	 * \param service the io service
-	 */
-	inline tls_connection(boost::asio::io_service& service)
-		: connection(service)
-		, context_(boost::asio::ssl::context::sslv23)
-		, socket_(service, context_)
-	{
-	}
-};
-
-#endif // !IRCCD_HAVE_SSL
 
 } // !irccd::irc
 

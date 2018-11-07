@@ -664,18 +664,9 @@ void server::connect(connect_handler handler) noexcept
 	(void)res_init();
 #endif
 
-	if ((flags_ & options::ssl) == options::ssl) {
-#if defined(IRCCD_HAVE_SSL)
-		conn_ = std::make_unique<irc::tls_connection>(service_);
-#else
-		/*
-		 * If SSL is not compiled in, the caller is responsible of not setting
-		 * the flag.
-		 */
-		assert((flags_ & options::ssl) != options::ssl);
-#endif
-	} else
-		conn_ = std::make_unique<irc::ip_connection>(service_);
+	// TODO: use_ipv4, use_ipv6.
+	conn_ = std::make_unique<irc::connection>(service_);
+	conn_->use_ssl((flags_ & options::ssl) == options::ssl);
 
 	jchannels_.clear();
 	state_ = state::connecting;

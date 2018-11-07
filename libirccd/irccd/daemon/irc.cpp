@@ -22,15 +22,34 @@
 
 #include "irc.hpp"
 
+using std::errc;
+using std::flush;
+using std::isspace;
+using std::istreambuf_iterator;
+using std::istringstream;
+using std::move;
+using std::ostream;
+using std::string;
+using std::string_view;
+using std::vector;
+
 using boost::asio::async_connect;
 using boost::asio::async_read_until;
 using boost::asio::async_write;
+using boost::asio::io_service;
+using boost::asio::ip::tcp;
+
+#if defined(IRCCD_HAVE_SSL)
+
+using boost::asio::ssl::stream_base;
+
+#endif
 
 namespace irccd::irc {
 
-auto message::get(unsigned short index) const noexcept -> const std::string&
+auto message::get(unsigned short index) const noexcept -> const string&
 {
-	static const std::string dummy;
+	static const string dummy;
 
 	return (index >= args.size()) ? dummy : args[index];
 }
@@ -45,17 +64,17 @@ auto message::is_ctcp(unsigned short index) const noexcept -> bool
 	return a.front() == 0x01 && a.back() == 0x01;
 }
 
-auto message::ctcp(unsigned short index) const -> std::string
+auto message::ctcp(unsigned short index) const -> string
 {
 	assert(is_ctcp(index));
 
 	return args[index].substr(1, args[index].size() - 1);
 }
 
-auto message::parse(const std::string& line) -> message
+auto message::parse(const string& line) -> message
 {
-	std::istringstream iss(line);
-	std::string prefix;
+	istringstream iss(line);
+	string prefix;
 
 	if (line.empty())
 		return {};
@@ -68,19 +87,19 @@ auto message::parse(const std::string& line) -> message
 	}
 
 	// Command.
-	std::string command;
+	string command;
 	iss >> command;
 	iss.ignore(1);
 
 	// Arguments.
-	std::vector<std::string> args;
-	std::istreambuf_iterator<char> it(iss), end;
+	vector<std::string> args;
+	istreambuf_iterator<char> it(iss), end;
 
 	while (it != end) {
 		std::string arg;
 
 		if (*it == ':')
-			arg = std::string(++it, end);
+			arg = string(++it, end);
 		else {
 			while (!isspace(*it) && it != end)
 				arg.push_back(*it++);
@@ -90,193 +109,192 @@ auto message::parse(const std::string& line) -> message
 				++it;
 		}
 
-		args.push_back(std::move(arg));
+		args.push_back(move(arg));
 	}
 
-	return { std::move(prefix), std::move(command), std::move(args) };
+	return { move(prefix), move(command), move(args) };
 }
 
-auto user::parse(std::string_view line) -> user
+auto user::parse(string_view line) -> user
 {
 	if (line.empty())
 		return { "", "" };
 
 	const auto pos = line.find("!");
 
-	if (pos == std::string::npos)
-		return { std::string(line), "" };
+	if (pos == string::npos)
+		return { string(line), "" };
 
-	return {
-		std::string(line.substr(0, pos)),
-		std::string(line.substr(pos + 1))
-	};
+	return { string(line.substr(0, pos)), string(line.substr(pos + 1)) };
 }
 
-template <typename Socket>
-void connection::wrap_connect(Socket& socket,
-                              const std::string& host,
-                              const std::string& service,
-                              const connect_handler& handler) noexcept
+void connection::handshake(const connect_handler& handler)
 {
-	using boost::asio::ip::tcp;
+	if (!ssl_) {
+		handler({});
+		return;
+	}
 
-	tcp::resolver::query query(host, service);
+#if defined(IRCCD_HAVE_SSL)
+	ssl_socket_.async_handshake(stream_base::client, [handler] (auto code) {
+		handler(std::move(code));
+	});
+#endif
+}
 
-	resolver_.async_resolve(query, [&socket, handler] (auto code, auto it) {
+void connection::connect(const tcp::resolver::results_type& endpoints, const connect_handler& handler)
+{
+	async_connect(socket_, endpoints, [this, handler] (auto code, auto) {
 		if (code) {
-			handler(code);
-		} else {
-			async_connect(socket, it, [handler] (auto code, auto) {
-				handler(code);
-			});
-		}
-	});
-}
-
-template <typename Socket>
-void connection::wrap_recv(Socket& socket, const recv_handler& handler) noexcept
-{
-	async_read_until(socket, input_, "\r\n", [this, handler] (auto code, auto xfer) {
-		if (xfer == 0U)
-			return handler(make_error_code(boost::asio::error::eof), message());
-		else if (code)
-			return handler(std::move(code), message());
-
-		std::string data;
-
-		try {
-			data = std::string(
-				boost::asio::buffers_begin(input_.data()),
-				boost::asio::buffers_begin(input_.data()) + xfer - 2
-			);
-
-			input_.consume(xfer);
-		} catch (...) {
-			code = make_error_code(boost::system::errc::not_enough_memory);
+			handler(move(code));
+			return;
 		}
 
-		handler(code, code ? message() : message::parse(data));
+		handshake(handler);
 	});
 }
 
-template <typename Socket>
-void connection::wrap_send(Socket& socket, const send_handler& handler) noexcept
+void connection::resolve(string_view hostname, string_view port, const connect_handler& handler)
 {
-	boost::asio::async_write(socket, output_, [handler] (auto code, auto xfer) {
-		if (xfer == 0U)
-			return handler(make_error_code(boost::asio::error::eof));
+	auto chain = [this, handler] (auto code, auto eps) {
+		if (code)
+			handler(std::move(code));
+		else
+			connect(eps, std::move(handler));
+	};
 
-		handler(code);
-	});
+	if (ipv6_ && ipv4_)
+		resolver_.async_resolve(hostname, port, move(chain));
+	else if (ipv6_)
+		resolver_.async_resolve(tcp::v6(), hostname, port, move(chain));
+	else
+		resolver_.async_resolve(tcp::v4(), hostname, port, move(chain));
 }
 
-void connection::connect(const std::string& host,
-                         const std::string& service,
-                         const connect_handler& handler) noexcept
+connection::connection(io_service& service)
+	: service_(service)
+	, resolver_(service)
 {
+}
+
+void connection::use_ipv4(bool enable) noexcept
+{
+	ipv4_ = enable;
+}
+
+void connection::use_ipv6(bool enable) noexcept
+{
+	ipv6_ = enable;
+}
+
+void connection::use_ssl(bool enable) noexcept
+{
+	ssl_ = enable;
+}
+
+void connection::connect(string_view hostname, string_view service, connect_handler handler)
+{
+#if !defined(IRCCD_HAVE_SSL)
+	assert(!ssl_);
+#endif
 #if !defined(NDEBUG)
-	assert(handler);
 	assert(!is_connecting_);
 
 	is_connecting_ = true;
 #endif
+	assert(handler);
+	assert(ipv4_ || ipv6_);
 
-	do_connect(host, service, [this, handler] (auto code) {
+	auto chain = [this, handler] (auto code) {
 #if !defined(NDEBUG)
 		is_connecting_ = false;
 #endif
 		(void)this;
-		handler(std::move(code));
-	});
+
+		handler(move(code));
+	};
+
+	resolve(hostname, service, move(chain));
 }
 
-void connection::recv(const recv_handler& handler) noexcept
+void connection::recv(recv_handler handler)
 {
 #if !defined(NDEBUG)
-	assert(handler);
 	assert(!is_receiving_);
 
 	is_receiving_ = true;
 #endif
 
-	do_recv([this, handler] (auto code, auto message) {
+	auto chain = [this, handler] (auto code, auto xfer) {
 #if !defined(NDEBUG)
 		is_receiving_ = false;
 #endif
 		(void)this;
-		handler(std::move(code), std::move(message));
-	});
+
+		if (code == boost::asio::error::not_found)
+			return handler(make_error_code(errc::argument_list_too_long), message());
+		if (code == boost::asio::error::eof || xfer == 0)
+			return handler(make_error_code(errc::connection_reset), message());
+		else if (code)
+			return handler(move(code), message());
+
+		string data;
+
+		// 1. Convert the buffer safely.
+		try {
+			data = string(
+				buffers_begin(input_.data()),
+				buffers_begin(input_.data()) + xfer - 2
+			);
+
+			input_.consume(xfer);
+		} catch (...) {
+			return handler(make_error_code(errc::not_enough_memory), message());
+		}
+
+		handler(move(code), message::parse(data));
+	};
+
+#if defined(IRCCD_HAVE_SSL)
+	if (ssl_)
+		async_read_until(ssl_socket_, input_, "\r\n", move(chain));
+	else
+#endif
+		async_read_until(socket_, input_, "\r\n", move(chain));
 }
 
-void connection::send(std::string message, const send_handler& handler)
+void connection::send(string_view message, send_handler handler)
 {
 #if !defined(NDEBUG)
-	assert(handler);
 	assert(!is_sending_);
 
 	is_sending_ = true;
 #endif
 
-	std::ostream out(&output_);
-
-	out << std::move(message);
-	out << "\r\n";
-
-	do_send([this, handler] (auto code) {
+	auto chain = [this, handler] (auto code, auto xfer) {
 #if !defined(NDEBUG)
 		is_sending_ = false;
 #endif
 		(void)this;
-		handler(std::move(code));
-	});
-}
 
-void ip_connection::do_connect(const std::string& host,
-                               const std::string& service,
-                               const connect_handler& handler) noexcept
-{
-	wrap_connect(socket_, host, service, handler);
-}
+		if (code == boost::asio::error::eof || xfer == 0)
+			return handler(make_error_code(errc::connection_reset));
 
-void ip_connection::do_recv(const recv_handler& handler) noexcept
-{
-	wrap_recv(socket_, handler);
-}
+		handler(move(code));
+	};
 
-void ip_connection::do_send(const send_handler& handler) noexcept
-{
-	wrap_send(socket_, handler);
-}
+	ostream out(&output_);
+
+	out << message;
+	out << "\r\n";
+	out << flush;
 
 #if defined(IRCCD_HAVE_SSL)
-
-void tls_connection::do_connect(const std::string& host,
-                                const std::string& service,
-                                const connect_handler& handler) noexcept
-{
-	using boost::asio::ssl::stream_base;
-
-	wrap_connect(socket_.lowest_layer(), host, service, [this, handler] (auto code) {
-		if (code) {
-			handler(code);
-		} else {
-			socket_.async_handshake(stream_base::client, [handler] (auto code) {
-				handler(code);
-			});
-		}
-	});
+	if (ssl_)
+		async_write(ssl_socket_, output_, move(chain));
+	else
+#endif
+		async_write(socket_, output_, move(chain));
 }
-
-void tls_connection::do_recv(const recv_handler& handler) noexcept
-{
-	wrap_recv(socket_, handler);
-}
-
-void tls_connection::do_send(const send_handler& handler) noexcept
-{
-	wrap_send(socket_, handler);
-}
-
-#endif // !IRCCD_HAVE_SSL
 
 } // !irccd::irc
