@@ -91,16 +91,20 @@ Note: the recommended way is to create one unique revision.
 
 Commit messages are written using the following syntax:
 
-    Topic: short message less than 80 characters
+    topic: short message less than 80 characters
 
     Optional additional description if needed.
 
-Replace `Topic` with one of the following:
+Replace `topic` with one of the following:
 
-- **CMake**: for the build system,
-- **Docs**: for the documentation,
-- **Misc**: for miscellaneous files,
-- **Tests**: for the unit tests.
+- **cmake**: for the build system,
+- **doc**: for the documentation,
+- **irccd**: irccd libraries and frontend,
+- **irccdctl**: irccd libraries and frontend.
+- **misc**: for miscellaneous files,
+- **plugin xyz**: plugin named xyz.
+- **release**: release management,
+- **tests**: for the unit tests,
 
 ### Quick way
 
@@ -149,18 +153,18 @@ looks like this:
     tag:         tip
     user:        François Jean <fj@gmail.com>
     date:        Thu Dec 08 16:08:40 2016 +0100
-    summary:     Topic: some other changes
+    summary:     topic: some other changes
 
     changeset:   21:f27e577c5504
     user:        François Jean <fj@gmail.com>
     date:        Thu Dec 08 16:03:06 2016 +0100
-    summary:     Topic: some changes
+    summary:     topic: some changes
 
     changeset:   20:777023816ff9
     bookmark:    @
     user:        David Demelier <markand@malikania.fr>
     date:        Thu Dec 08 16:02:26 2016 +0100
-    summary:     Misc: fix a bug
+    summary:     misc: fix a bug
 
 The two revisions I want to export are 21 and 22, so I use `hg email -r 21:22`,
 once done, see the section below.
