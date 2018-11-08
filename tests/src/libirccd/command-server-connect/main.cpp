@@ -58,6 +58,7 @@ BOOST_AUTO_TEST_CASE(full)
 		{ "nickname",   "francis"           },
 		{ "realname",   "the_francis"       },
 		{ "username",   "frc"               },
+		{ "family",     { "ipv6" }          },
 		{ "ctcpVersion", "ultra bot"        },
 		{ "commandChar", "::"               },
 		{ "port",       18000               },
@@ -80,6 +81,8 @@ BOOST_AUTO_TEST_CASE(full)
 	BOOST_TEST(s->get_username() == "frc");
 	BOOST_TEST(s->get_command_char() == "::");
 	BOOST_TEST(s->get_ctcp_version() == "ultra bot");
+	BOOST_TEST(!static_cast<bool>(s->get_options() & server::options::ipv4));
+	BOOST_TEST(static_cast<bool>(s->get_options() & server::options::ipv6));
 	BOOST_TEST(static_cast<bool>(s->get_options() & server::options::ssl));
 	BOOST_TEST(static_cast<bool>(s->get_options() & server::options::ssl_verify));
 	BOOST_TEST(static_cast<bool>(s->get_options() & server::options::auto_rejoin));
@@ -215,6 +218,36 @@ BOOST_AUTO_TEST_CASE(ssl_disabled)
 }
 
 #endif
+
+BOOST_AUTO_TEST_CASE(invalid_family_1)
+{
+	const auto [json, code] = request({
+		{ "command",    "server-connect"    },
+		{ "name",       "new"               },
+		{ "hostname",   "127.0.0.1"         },
+		{ "port",       1000000             },
+		{ "family",     "invalid"           }
+	});
+
+	BOOST_TEST(code == server_error::invalid_family);
+	BOOST_TEST(json["error"].get<int>() == server_error::invalid_family);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
+}
+
+BOOST_AUTO_TEST_CASE(invalid_family_2)
+{
+	const auto [json, code] = request({
+		{ "command",    "server-connect"    },
+		{ "name",       "new"               },
+		{ "hostname",   "127.0.0.1"         },
+		{ "port",       1000000             },
+		{ "family",     { 123, 456 }        }
+	});
+
+	BOOST_TEST(code == server_error::invalid_family);
+	BOOST_TEST(json["error"].get<int>() == server_error::invalid_family);
+	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
+}
 
 BOOST_AUTO_TEST_SUITE_END()
 

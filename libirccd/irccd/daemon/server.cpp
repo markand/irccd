@@ -172,7 +172,7 @@ auto server::dispatch_endofwhois(const irc::message& msg, const recv_handler& ha
 auto server::dispatch_invite(const irc::message& msg, const recv_handler& handler) -> bool
 {
 	// If join-invite is set, join the channel.
-	if ((flags_ & options::join_invite) == options::join_invite && is_self(msg.get(0)))
+	if ((options_ & options::join_invite) == options::join_invite && is_self(msg.get(0)))
 		join(msg.get(1));
 
 	handler({}, invite_event{shared_from_this(), msg.prefix, msg.get(1), msg.get(0)});
@@ -209,7 +209,7 @@ auto server::dispatch_kick(const irc::message& msg, const recv_handler& handler)
 		jchannels_.erase(msg.get(0));
 
 		// Rejoin the channel if the option has been set and I was kicked.
-		if ((flags_ & options::auto_rejoin) == options::auto_rejoin)
+		if ((options_ & options::auto_rejoin) == options::auto_rejoin)
 			join(msg.get(0));
 	}
 
@@ -500,6 +500,7 @@ void server::handle_connect(const std::error_code& code, const connect_handler& 
 server::server(boost::asio::io_service& service, std::string id, std::string hostname)
 	: id_(std::move(id))
 	, hostname_(std::move(hostname))
+	, options_(options::ipv4 | options::ipv6)
 	, service_(service)
 	, timer_(service)
 {
@@ -555,7 +556,7 @@ void server::set_port(std::uint16_t port) noexcept
 
 auto server::get_options() const noexcept -> options
 {
-	return flags_;
+	return options_;
 }
 
 void server::set_options(options flags) noexcept
@@ -564,7 +565,7 @@ void server::set_options(options flags) noexcept
 	assert((flags & options::ssl) != options::ssl);
 #endif
 
-	flags_ = flags;
+	options_ = flags;
 }
 
 auto server::get_nickname() const noexcept -> const std::string&
@@ -655,6 +656,7 @@ auto server::is_self(std::string_view target) const noexcept -> bool
 void server::connect(connect_handler handler) noexcept
 {
 	assert(state_ == state::disconnected);
+	assert((options_ & options::ipv4) == options::ipv4 || (options_ & options::ipv6) == options::ipv6);
 
 	/*
 	 * This is needed if irccd is started before DHCP or if DNS cache is
@@ -664,9 +666,10 @@ void server::connect(connect_handler handler) noexcept
 	(void)res_init();
 #endif
 
-	// TODO: use_ipv4, use_ipv6.
 	conn_ = std::make_unique<irc::connection>(service_);
-	conn_->use_ssl((flags_ & options::ssl) == options::ssl);
+	conn_->use_ssl((options_ & options::ssl) == options::ssl);
+	conn_->use_ipv4((options_ & options::ipv4) == options::ipv4);
+	conn_->use_ipv6((options_ & options::ipv6) == options::ipv6);
 
 	jchannels_.clear();
 	state_ = state::connecting;
@@ -881,6 +884,8 @@ auto server_category() -> const std::error_category&
 				return "invalid message";
 			case server_error::ssl_disabled:
 				return "ssl is not enabled";
+			case server_error::invalid_family:
+				return "invalid family";
 			default:
 				return "no error";
 			}

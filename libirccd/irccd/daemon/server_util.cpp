@@ -71,15 +71,28 @@ void from_config_load_channels(server& sv, const ini::section& sc)
 
 void from_config_load_flags(server& sv, const ini::section& sc)
 {
-	const auto ipv6 = sc.get("ipv6");
 	const auto ssl = sc.get("ssl");
 	const auto ssl_verify = sc.get("ssl-verify");
 	const auto auto_rejoin = sc.get("auto-rejoin");
 	const auto auto_reconnect = sc.get("auto-reconnect");
 	const auto join_invite = sc.get("join-invite");
 
-	if (string_util::is_boolean(ipv6.get_value()))
-		sv.set_options(sv.get_options() | server::options::ipv6);
+	if (const auto family = sc.find("family"); family != sc.end()) {
+		sv.set_options(sv.get_options() & ~(server::options::ipv4));
+		sv.set_options(sv.get_options() & ~(server::options::ipv6));
+
+		for (const auto& v : *family) {
+			if (v == "ipv4")
+				sv.set_options(sv.get_options() | server::options::ipv4);
+			if (v == "ipv6")
+				sv.set_options(sv.get_options() | server::options::ipv6);
+		}
+	}
+
+	if ((sv.get_options() & server::options::ipv4) != server::options::ipv4 &&
+	    (sv.get_options() & server::options::ipv6) != server::options::ipv6)
+		throw server_error(server_error::invalid_family);
+
 	if (string_util::is_boolean(ssl.get_value()))
 		sv.set_options(sv.get_options() | server::options::ssl);
 	if (string_util::is_boolean(ssl_verify.get_value()))
@@ -129,6 +142,25 @@ void from_json_load_options(server& sv, const deserializer& parser)
 	const auto command = parser.optional<std::string>("commandChar", sv.get_command_char());
 	const auto password = parser.optional<std::string>("password", sv.get_password());
 
+	if (const auto family = parser.find("family"); family != parser.end()) {
+		if (!family->is_array())
+			throw server_error(server_error::invalid_family);
+
+		sv.set_options(sv.get_options() & ~(server::options::ipv4));
+		sv.set_options(sv.get_options() & ~(server::options::ipv6));
+
+		for (const auto& v : *family) {
+			if (v.is_string() && v.get<std::string>() == "ipv4")
+				sv.set_options(sv.get_options() | server::options::ipv4);
+			if (v.is_string() && v.get<std::string>() == "ipv6")
+				sv.set_options(sv.get_options() | server::options::ipv6);
+		}
+	}
+
+	if ((sv.get_options() & server::options::ipv4) != server::options::ipv4 &&
+	    (sv.get_options() & server::options::ipv6) != server::options::ipv6)
+		throw server_error(server_error::invalid_family);
+
 	if (!port || *port > std::numeric_limits<std::uint16_t>::max())
 		throw server_error(server_error::invalid_port);
 	if (!nickname)
@@ -155,14 +187,11 @@ void from_json_load_options(server& sv, const deserializer& parser)
 
 void from_json_load_flags(server& sv, const deserializer& parser)
 {
-	const auto ipv6 = parser.get<bool>("ipv6");
 	const auto auto_rejoin = parser.get<bool>("autoRejoin");
 	const auto join_invite = parser.get<bool>("joinInvite");
 	const auto ssl = parser.get<bool>("ssl");
 	const auto ssl_verify = parser.get<bool>("sslVerify");
 
-	if (ipv6.value_or(false))
-		sv.set_options(sv.get_options() | server::options::ipv6);
 	if (auto_rejoin.value_or(false))
 		sv.set_options(sv.get_options() | server::options::auto_rejoin);
 	if (join_invite.value_or(false))

@@ -210,6 +210,8 @@ void get_event(ctl::controller& ctl, std::string fmt)
 auto parse(std::vector<std::string> &args) -> option::result
 {
 	option::options options{
+		{ "-4",                 false   },
+                { "-6",                 false   },
 		{ "-c",                 true    },
 		{ "--command",          true    },
 		{ "-n",                 true    },
@@ -775,7 +777,7 @@ void server_connect_cli::exec(ctl::controller& ctl, const std::vector<std::strin
 	auto object = nlohmann::json::object({
 		{ "command",    "server-connect"        },
 		{ "name",       copy[0]                 },
-		{ "hostname",   copy[1]                 }
+		{ "hostname",   copy[1]                 },
 	});
 
 	if (copy.size() == 3) {
@@ -797,6 +799,12 @@ void server_connect_cli::exec(ctl::controller& ctl, const std::vector<std::strin
 		object["realname"] = it->second;
 	if ((it = result.find("-u")) != result.end() || (it = result.find("--username")) != result.end())
 		object["username"] = it->second;
+
+        // Mutually exclusive.
+        if ((it = result.find("-4")) != result.end())
+                object["family"] = nlohmann::json::array({ "ipv4" });
+        if ((it = result.find("-6")) != result.end())
+                object["family"] = nlohmann::json::array({ "ipv6" });
 
 	request(ctl, object);
 }
