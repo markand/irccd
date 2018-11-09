@@ -20,6 +20,7 @@ project(libirccd-test)
 
 set(
 	HEADERS
+	${libirccd-test_SOURCE_DIR}/irccd/test/command_fixture.hpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/debug_server.hpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/irccd_fixture.hpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/mock.hpp
@@ -29,6 +30,7 @@ set(
 
 set(
 	SOURCES
+	${libirccd-test_SOURCE_DIR}/irccd/test/command_fixture.cpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/debug_server.cpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/irccd_fixture.cpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/mock.cpp
@@ -42,14 +44,12 @@ if (NOT CMAKE_SYSTEM_NAME MATCHES Windows)
 		APPEND
 		HEADERS
 		${libirccd-test_SOURCE_DIR}/irccd/test/cli_fixture.hpp
-		${libirccd-test_SOURCE_DIR}/irccd/test/command_fixture.hpp
 	)
 
 	list(
 		APPEND
 		SOURCES
 		${libirccd-test_SOURCE_DIR}/irccd/test/cli_fixture.cpp
-		${libirccd-test_SOURCE_DIR}/irccd/test/command_fixture.cpp
 	)
 endif ()
 

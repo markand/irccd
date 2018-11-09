@@ -18,18 +18,9 @@
 
 project(tests)
 
-# for test-cli-* tests.
-configure_file(
-	${tests_SOURCE_DIR}/data/irccdctl.conf
-	${CMAKE_BINARY_DIR}/tmp/irccdctl.conf
-)
-
 add_subdirectory(src/libcommon)
 add_subdirectory(src/libirccd)
-
-if (NOT CMAKE_SYSTEM_NAME MATCHES Windows)
-	add_subdirectory(src/irccdctl)
-endif ()
+add_subdirectory(src/irccdctl)
 
 if (IRCCD_HAVE_JS)
 	add_subdirectory(src/plugins)

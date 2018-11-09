@@ -25,6 +25,8 @@
 
 #include "command_fixture.hpp"
 
+using boost::asio::ip::tcp;
+
 namespace irccd::test {
 
 template <typename Condition>
@@ -56,10 +58,12 @@ command_fixture::command_fixture()
 	: server_(new mock_server(ctx_, "test", "localhost"))
 	, plugin_(new mock_plugin("test"))
 {
-	const auto path = CMAKE_BINARY_DIR "/tmp/irccd.sock";
+	tcp::endpoint ep(tcp::v4(), 0U);
+	tcp::acceptor raw_acceptor(irccd_.get_service(), std::move(ep));
 
-	auto acceptor = std::make_unique<local_acceptor>(irccd_.get_service(), path);
-	auto connector = std::make_unique<local_connector>(irccd_.get_service(), path);
+	auto service = std::to_string(raw_acceptor.local_endpoint().port());
+	auto acceptor = std::make_unique<ip_acceptor>(irccd_.get_service(), std::move(raw_acceptor));
+	auto connector = std::make_unique<ip_connector>(irccd_.get_service(), "127.0.0.1", service, true, false);
 
 	// 1. Add all commands.
 	for (const auto& f : command::registry)

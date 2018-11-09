@@ -54,6 +54,7 @@ private:
 	using io_service = boost::asio::io_service;
 
 	std::thread thread_;
+	std::uint16_t port_{0U};
 	io_service service_;
 
 protected:

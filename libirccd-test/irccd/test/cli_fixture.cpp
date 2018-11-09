@@ -37,7 +37,14 @@ namespace irccd::test {
 cli_fixture::cli_fixture()
 	: server_(new mock_server(irccd_.get_service(), "test", "localhost"))
 {
-	auto acceptor = std::make_unique<local_acceptor>(irccd_.get_service(), CMAKE_BINARY_DIR "/tmp/irccd.sock");
+	using boost::asio::ip::tcp;
+
+	tcp::endpoint ep(tcp::v4(), 0U);
+	tcp::acceptor raw_acceptor(irccd_.get_service(), std::move(ep));
+
+	port_ = raw_acceptor.local_endpoint().port();
+
+	auto acceptor = std::make_unique<ip_acceptor>(irccd_.get_service(), std::move(raw_acceptor));
 
 	for (const auto& f : command::registry)
 		irccd_.transports().get_commands().push_back(f());
@@ -64,12 +71,9 @@ void cli_fixture::start()
 
 auto cli_fixture::exec(const std::vector<std::string>& args) -> result
 {
-	static const std::string irccdctl = IRCCDCTL_EXECUTABLE;
-	static const std::string conf = CMAKE_BINARY_DIR "/tmp/irccdctl.conf";
-
 	std::ostringstream oss;
 
-	oss << irccdctl << " -c " << conf << " ";
+	oss << IRCCDCTL_EXECUTABLE << " -t ip --hostname 127.0.0.1 -p " << port_ << " ";
 	oss << string_util::join(args, " ");
 
 	proc::ipstream stream_out, stream_err;
