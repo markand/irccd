@@ -20,8 +20,8 @@
 #define IRCCD_JS_SERVER_JS_API_HPP
 
 /**
- * \file mod-server.hpp
- * \brief irccd.Server Javascript API.
+ * \file server_js_api.hpp
+ * \brief Irccd.Server Javascript API.
  */
 
 #include <irccd/daemon/server.hpp>
@@ -31,8 +31,8 @@
 namespace irccd::js {
 
 /**
- * \brief irccd.Server Javascript API.
- * \ingroup js_api
+ * \ingroup jsapi
+ * \brief Irccd.Server Javascript API.
  */
 class server_js_api : public js_api {
 public:

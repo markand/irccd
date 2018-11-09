@@ -113,7 +113,7 @@
 #include <vector>
 
 /**
- * Namespace for ini related classes.
+ * \brief Namespace for ini related classes.
  */
 namespace irccd::ini {
 
@@ -439,7 +439,7 @@ public:
  * \return the list of tokens
  * \throws exception on errors
  */
-tokens analyse(std::istreambuf_iterator<char> it, std::istreambuf_iterator<char> end);
+auto analyse(std::istreambuf_iterator<char> it, std::istreambuf_iterator<char> end) -> tokens;
 
 /**
  * Overloaded function for stream.
@@ -448,7 +448,7 @@ tokens analyse(std::istreambuf_iterator<char> it, std::istreambuf_iterator<char>
  * \return the list of tokens
  * \throws exception on errors
  */
-tokens analyse(std::istream& stream);
+auto analyse(std::istream& stream) -> tokens;
 
 /**
  * Parse the produced tokens.
@@ -458,7 +458,7 @@ tokens analyse(std::istream& stream);
  * \return the document
  * \throw exception on errors
  */
-document parse(const tokens& tokens, const std::string& path = ".");
+auto parse(const tokens& tokens, const std::string& path = ".") -> document;
 
 /**
  * Parse a file.
@@ -467,7 +467,7 @@ document parse(const tokens& tokens, const std::string& path = ".");
  * \return the document
  * \throw exception on errors
  */
-document read_file(const std::string& filename);
+auto read_file(const std::string& filename) -> document;
 
 /**
  * Parse a string.
@@ -479,7 +479,7 @@ document read_file(const std::string& filename);
  * \return the document
  * \throw exception on exceptions
  */
-document read_string(const std::string& buffer);
+auto read_string(const std::string& buffer) -> document;
 
 /**
  * Show all tokens and their description.

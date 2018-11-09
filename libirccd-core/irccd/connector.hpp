@@ -86,6 +86,9 @@ public:
  */
 class socket_connector_base : public connector {
 protected:
+	/**
+	 * \brief The I/O service.
+	 */
 	boost::asio::io_context& service_;
 
 public:
@@ -358,6 +361,9 @@ inline void local_connector::connect(handler handler)
 template <typename SocketConnector>
 class tls_connector : public connector {
 public:
+	/**
+	 * \brief the underlying socket type.
+	 */
 	using socket_type = typename SocketConnector::socket_type;
 
 private:
@@ -375,7 +381,7 @@ public:
 	tls_connector(boost::asio::ssl::context context, Args&&... args);
 
 	/**
-	 * \copydoc socket_connector::connect
+	 * \copydoc connector::connect
 	 */
 	void connect(handler handler) override;
 };

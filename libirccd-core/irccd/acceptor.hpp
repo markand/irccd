@@ -338,6 +338,10 @@ inline void ip_acceptor::accept(handler handler)
 
 #if defined(BOOST_ASIO_HAS_LOCAL_SOCKETS)
 
+/**
+ * \brief Local acceptor.
+ * \note Only available if BOOST_ASIO_HAS_LOCAL_SOCKETS is defined
+ */
 class local_acceptor : public basic_socket_acceptor<boost::asio::local::stream_protocol::acceptor> {
 public:
 	/**

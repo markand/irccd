@@ -20,7 +20,7 @@
 #define IRCCD_JS_TIMER_JS_API_HPP
 
 /**
- * \file timer_js_api
+ * \file timer_js_api.hpp
  * \brief Irccd.Timer Javascript API.
  */
 
@@ -29,8 +29,8 @@
 namespace irccd::js {
 
 /**
+ * \ingroup jsapi
  * \brief Irccd.Timer Javascript API.
- * \ingroup js_api
  */
 class timer_js_api : public js_api {
 public:

@@ -29,6 +29,7 @@
 namespace irccd {
 
 /**
+ * \ingroup plugins
  * \brief Implementation for searching native plugins.
  */
 class dynlib_plugin_loader : public plugin_loader {

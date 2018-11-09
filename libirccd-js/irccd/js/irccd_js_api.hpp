@@ -36,8 +36,8 @@
 namespace irccd::js {
 
 /**
+ * \ingroup jsapi
  * \brief Irccd Javascript API.
- * \ingroup js_api
  */
 class irccd_js_api : public js_api {
 public:
@@ -77,7 +77,7 @@ struct type_traits<std::system_error> {
 	 * Raise an Irccd.SystemError.
 	 *
 	 * \param ctx the context
-	 * param ex the exception
+	 * \param ex the exception
 	 */
 	static void raise(duk_context* ctx, const std::system_error& ex);
 };
@@ -91,7 +91,7 @@ struct type_traits<boost::system::system_error> {
 	 * Raise an Irccd.SystemError.
 	 *
 	 * \param ctx the context
-	 * param ex the exception
+	 * \param ex the exception
 	 */
 	static void raise(duk_context* ctx, const boost::system::system_error& ex);
 };

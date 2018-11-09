@@ -227,6 +227,10 @@ public:
  *   yellow background,
  * - <strong>\@{white,black,bold,underline}</strong>: will write white text on
  *   black in both bold and underline.
+ *
+ * \param text the text to format
+ * \param params the additional options
+ * \return the modified text
  */
 auto format(std::string text, const subst& params = {}) -> std::string;
 

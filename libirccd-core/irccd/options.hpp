@@ -138,6 +138,7 @@ using options = std::map<std::string, bool>;
  * \warning the arguments vector is modified in place to remove parsed options
  * \throw missing_value
  * \throw invalid_option
+ * \return the result
  */
 result read(std::vector<std::string>& args, const options& definition);
 
@@ -151,6 +152,7 @@ result read(std::vector<std::string>& args, const options& definition);
  * \warning the argc and argv are modified in place to remove parsed options
  * \throw missing_value
  * \throw invalid_option
+ * \return the result
  */
 result read(int& argc, char**& argv, const options& definition);
 

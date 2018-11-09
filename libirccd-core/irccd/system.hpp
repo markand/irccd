@@ -77,6 +77,7 @@ auto ticks() -> std::uint64_t;
 /**
  * Get an environment variable.
  *
+ * \param var the environment variable
  * \return the value or empty string
  */
 auto env(const std::string& var) -> std::string;
@@ -154,6 +155,7 @@ auto config_filenames(std::string_view file) -> std::vector<std::string>;
  *
  * \param name the plugin id (without extension)
  * \param extensions the list of extensions supported
+ * \return the list of filenames to check
  */
 auto plugin_filenames(const std::string& name,
                       const std::vector<std::string>& extensions) -> std::vector<std::string>;

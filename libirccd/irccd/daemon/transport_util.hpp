@@ -16,6 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+/**
+ * \file transport_util.hpp
+ * \brief Transport utilities.
+ */
+
 #ifndef IRCCD_DAEMON_TRANSPORT_UTIL_HPP
 #define IRCCD_DAEMON_TRANSPORT_UTIL_HPP
 

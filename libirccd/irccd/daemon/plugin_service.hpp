@@ -167,21 +167,20 @@ public:
 	auto find(std::string_view id) -> std::shared_ptr<plugin>;
 
 	/**
-	 * Convenient wrapper that loads a plugin, call handle_load and add it to
-	 * the registry.
+	 * Convenient wrapper that loads a plugin, call handle_load and add it
+	 * to the registry.
 	 *
 	 * Any errors are printed using logger.
 	 *
 	 * \param id the plugin id
 	 * \param path the optional path (searched if empty)
 	 */
-	void load(std::string_view name, std::string_view path = "");
+	void load(std::string_view id, std::string_view path = "");
 
 	/**
 	 * Unload a plugin and remove it.
 	 *
 	 * \param id the plugin id
-	 * \param name the plugin id
 	 */
 	void unload(std::string_view id);
 

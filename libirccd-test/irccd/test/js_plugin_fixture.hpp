@@ -39,10 +39,10 @@ namespace irccd {
  */
 class js_plugin_fixture {
 protected:
-	boost::asio::io_service service_;
-	irccd irccd_{service_};
-	std::shared_ptr<js::js_plugin> plugin_;
-	std::shared_ptr<mock_server> server_;
+	boost::asio::io_service service_;               //!< The I/O service.
+	irccd irccd_{service_};                         //!< The irccd instance.
+	std::shared_ptr<js::js_plugin> plugin_;         //!< The plugin to test.
+	std::shared_ptr<mock_server> server_;           //!< A mock server.
 
 public:
 	/**

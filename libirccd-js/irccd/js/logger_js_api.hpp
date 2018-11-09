@@ -29,8 +29,8 @@
 namespace irccd::js {
 
 /**
+ * \ingroup jsapi
  * \brief irccd.Logger Javascript API.
- * \ingroup js_api
  */
 class logger_js_api : public js_api {
 public:
@@ -40,7 +40,7 @@ public:
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc Module::load
+	 * \copydoc js_api::load
 	 */
 	void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
 };

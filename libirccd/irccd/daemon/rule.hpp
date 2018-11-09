@@ -50,18 +50,26 @@ struct rule {
 		drop            //!< The event is dropped
 	};
 
-	set servers;
-	set channels;
-	set origins;
-	set plugins;
-	set events;
+	set servers;            //!< The list of servers
+	set channels;           //!< The list of channels
+	set origins;            //!< The list of originators
+	set plugins;            //!< The list of plugins
+	set events;             //!< The list of events
+
+	/**
+	 * The action.
+	 */
 	action_type action{action_type::accept};
 
-	/*
+	/**
 	 * Check if a set contains the value and return true if it is or return
 	 * true if value is empty (which means applicable).
+	 *
+	 * \param set the set to test
+	 * \param value the value
+	 * \return true if match
 	 */
-	auto match_set(const set&, const std::string&) const noexcept -> bool;
+	auto match_set(const set& set, const std::string& value) const noexcept -> bool;
 
 	/**
 	 * Check if that rule apply for the given criterias.
@@ -116,6 +124,7 @@ auto rule_category() -> const std::error_category&;
  * Create a std::error_code from rule_error::error enum.
  *
  * \param e the error code
+ * \return the error code
  */
 auto make_error_code(rule_error::error e) -> std::error_code;
 

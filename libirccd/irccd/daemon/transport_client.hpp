@@ -19,6 +19,11 @@
 #ifndef IRCCD_DAEMON_TRANSPORT_CLIENT_HPP
 #define IRCCD_DAEMON_TRANSPORT_CLIENT_HPP
 
+/**
+ * \file transport_client.hpp
+ * \brief Server side transport clients.
+ */
+
 #include <deque>
 #include <memory>
 #include <string_view>

@@ -58,12 +58,17 @@ namespace server_util {
  */
 struct message_type {
 	/**
-	 * \brief Describe which type of message has been received
+	 * \brief Describe which type of message has been received.
 	 */
 	enum kind {
 		is_command,     //!< special command
 		is_message      //!< standard message
-	} type;
+	};
+
+	/**
+	 * Message kind.
+	 */
+	kind type;
 
 	/**
 	 * Message content.
@@ -101,7 +106,6 @@ auto from_json(boost::asio::io_service& service,
  * Convert a INI section to a server.
  *
  * \param service the io service
- * \param cfg the whole configuration
  * \param sc the server section
  * \return the server
  * \throw server_error on errors

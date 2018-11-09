@@ -29,8 +29,8 @@
 namespace irccd::js {
 
 /**
+ * \ingroup jsapi
  * \brief Irccd.ElapsedTimer Javascript API.
- * \ingroup Javascript js_api
  */
 class elapsed_timer_js_api : public js_api {
 public:

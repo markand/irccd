@@ -140,8 +140,8 @@ public:
 };
 
 /**
+ * \ingroup jsapi
  * \brief Irccd.File Javascript API.
- * \ingroup js_api
  */
 class file_js_api : public js_api {
 public:

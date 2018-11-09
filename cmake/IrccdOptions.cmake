@@ -99,12 +99,6 @@ find_package(Pandoc)
 find_package(TCL QUIET)
 find_package(Editline)
 
-if (NOT IRCCD_WITH_DOCS)
-	set(IRCCD_WITH_HTML FALSE)
-	set(IRCCD_WITH_DOXYGEN FALSE)
-	set(IRCCD_WITH_MAN FALSE)
-endif ()
-
 if (IRCCD_WITH_LIBEDIT)
 	if (Editline_FOUND)
 		set(IRCCD_HAVE_LIBEDIT On)

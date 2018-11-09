@@ -224,6 +224,8 @@ class deserializer : public nlohmann::json {
 public:
 	/**
 	 * Constructor.
+	 *
+	 * \param obj the JSON object
 	 */
 	deserializer(const nlohmann::json& obj)
 		: nlohmann::json(obj)

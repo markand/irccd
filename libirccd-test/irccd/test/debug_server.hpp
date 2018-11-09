@@ -41,10 +41,10 @@ public:
 	/**
 	 * \copydoc server::connect
 	 */
-	void connect(connect_handler) noexcept override;
+	void connect(connect_handler handler) noexcept override;
 
 	/**
-	 * \copydoc server::connect
+	 * \copydoc server::disconnect
 	 */
 	void disconnect() noexcept override;
 

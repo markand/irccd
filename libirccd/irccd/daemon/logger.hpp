@@ -51,8 +51,14 @@ class sink;
 template <typename T>
 struct loggable_traits;
 
+/**
+ * \brief Logger object.
+ */
 class logger : public std::ostream, public std::stringbuf {
 private:
+	/**
+	 * \brief Make sink friend.
+	 */
 	friend class sink;
 
 	enum class level {
@@ -86,6 +92,9 @@ private:
  */
 class sink {
 private:
+	/**
+	 * \brief Make logger friend.
+	 */
 	friend class logger;
 
 	// User options.
@@ -308,17 +317,17 @@ public:
 class console_sink : public sink {
 protected:
 	/**
-	 * \copydoc logger::write_debug
+	 * \copydoc sink::write_debug
 	 */
 	void write_debug(const std::string& line) override;
 
 	/**
-	 * \copydoc logger::write_info
+	 * \copydoc sink::write_info
 	 */
 	void write_info(const std::string& line) override;
 
 	/**
-	 * \copydoc logger::write_warning
+	 * \copydoc sink::write_warning
 	 */
 	void write_warning(const std::string& line) override;
 };
@@ -333,17 +342,17 @@ private:
 
 protected:
 	/**
-	 * \copydoc logger::write_debug
+	 * \copydoc sink::write_debug
 	 */
 	void write_debug(const std::string& line) override;
 
 	/**
-	 * \copydoc logger::write_info
+	 * \copydoc sink::write_info
 	 */
 	void write_info(const std::string& line) override;
 
 	/**
-	 * \copydoc logger::write_warning
+	 * \copydoc sink::write_warning
 	 */
 	void write_warning(const std::string& line) override;
 
@@ -365,17 +374,17 @@ public:
 class silent_sink : public sink {
 protected:
 	/**
-	 * \copydoc logger::write_debug
+	 * \copydoc sink::write_debug
 	 */
 	void write_debug(const std::string& line) override;
 
 	/**
-	 * \copydoc logger::write_info
+	 * \copydoc sink::write_info
 	 */
 	void write_info(const std::string& line) override;
 
 	/**
-	 * \copydoc logger::write_warning
+	 * \copydoc sink::write_warning
 	 */
 	void write_warning(const std::string& line) override;
 };
@@ -388,17 +397,17 @@ protected:
 class syslog_sink : public sink {
 protected:
 	/**
-	 * \copydoc logger::write_debug
+	 * \copydoc sink::write_debug
 	 */
 	void write_debug(const std::string& line) override;
 
 	/**
-	 * \copydoc logger::write_info
+	 * \copydoc sink::write_info
 	 */
 	void write_info(const std::string& line) override;
 
 	/**
-	 * \copydoc logger::write_warning
+	 * \copydoc sink::write_warning
 	 */
 	void write_warning(const std::string& line) override;
 

@@ -318,6 +318,7 @@ public:
 };
 
 /**
+ * \ingroup plugins
  * \brief Abstract interface for searching plugins.
  *
  * This class is used to make loading of plugins extensible, the plugin_service
@@ -361,6 +362,7 @@ public:
 	 *
 	 * \param id the plugin identifier
 	 * \param file the file path
+	 * \return the plugin
 	 * \throw plugin_error on errors
 	 */
 	virtual auto open(std::string_view id, std::string_view file) -> std::shared_ptr<plugin> = 0;
@@ -376,6 +378,7 @@ public:
 };
 
 /**
+ * \ingroup plugins
  * \brief Plugin error.
  */
 class plugin_error : public std::system_error {
@@ -431,6 +434,8 @@ public:
 
 	/**
 	 * Get message appropriate for use with logger.
+	 *
+	 * \return the error message
 	 */
 	auto what() const noexcept -> const char* override;
 };
@@ -446,8 +451,9 @@ auto plugin_category() -> const std::error_category&;
  * Create a std::error_code from plugin_error::error enum.
  *
  * \param e the error code
+ * \return the error code
  */
-auto make_error_code(plugin_error::error e) -> std::error_code ;
+auto make_error_code(plugin_error::error e) -> std::error_code;
 
 } // !irccd
 

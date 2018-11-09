@@ -19,6 +19,11 @@
 #ifndef IRCCD_DAEMON_TRANSPORT_SERVICE_HPP
 #define IRCCD_DAEMON_TRANSPORT_SERVICE_HPP
 
+/**
+ * \file transport_service.hpp
+ * \brief Transport service.
+ */
+
 #include <memory>
 #include <vector>
 
@@ -38,7 +43,14 @@ class transport_server;
  */
 class transport_service {
 public:
+	/**
+	 * \brief the list of transport commands.
+	 */
 	using commands = std::vector<std::unique_ptr<command>>;
+
+	/**
+	 * \brief The list of transport acceptors.
+	 */
 	using servers = std::vector<std::shared_ptr<transport_server>>;
 
 private:

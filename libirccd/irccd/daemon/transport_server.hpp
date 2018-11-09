@@ -260,6 +260,7 @@ auto transport_category() noexcept -> const std::error_category&;
  * Create a std::error_code from server_error::error enum.
  *
  * \param e the error code
+ * \return the error code
  */
 auto make_error_code(transport_error::error e) noexcept -> std::error_code;
 

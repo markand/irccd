@@ -1202,6 +1202,7 @@ struct message {
 	/**
 	 * Check if the command is of the given enum number.
 	 *
+	 * \param e the code
 	 * \return true if command is a number and equals to e
 	 */
 	template <typename Enum>
@@ -1253,8 +1254,8 @@ struct message {
  * \brief Describe a user.
  */
 struct user {
-	std::string nick;
-	std::string host;
+	std::string nick;       //!< The nickname
+	std::string host;       //!< The hostname
 
 	/**
 	 * Parse a nick/host combination.

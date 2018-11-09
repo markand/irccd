@@ -148,8 +148,8 @@ public:
 	/**
 	 * Set the logger.
 	 *
-	 * \pre logger != nullptr
-	 * \param logger the new logger
+	 * \pre sink != nullptr
+	 * \param sink the new sink
 	 */
 	void set_log(std::unique_ptr<logger::sink> sink) noexcept;
 
@@ -238,6 +238,7 @@ auto irccd_category() noexcept -> const std::error_category&;
  * Create a std::error_code from irccd_error::error enum.
  *
  * \param e the error code
+ * \return the error code
  */
 auto make_error_code(irccd_error::error e) noexcept -> std::error_code;
 

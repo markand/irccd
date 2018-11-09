@@ -47,6 +47,8 @@ private:
 public:
 	/**
 	 * Create the rule service.
+	 *
+	 * \param instance the irccd instance
 	 */
 	rule_service(irccd& instance);
 
@@ -125,10 +127,25 @@ namespace logger {
 template <typename T>
 struct loggable_traits;
 
+/**
+ * \brief Specialization for rule.
+ */
 template <>
 struct loggable_traits<rule> {
+	/**
+	 * Get 'rule' category.
+	 *
+	 * \param rule the rule
+	 * \return rule
+	 */
 	static auto get_category(const rule& rule) -> std::string_view;
 
+	/**
+	 * Returns nothing for the moment.
+	 *
+	 * \param rule the rule
+	 * \return nothing
+	 */
 	static auto get_component(const rule& rule) -> std::string_view;
 };
 

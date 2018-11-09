@@ -25,7 +25,7 @@
  */
 
 /**
- * \defgroup Javascript modules.
+ * \defgroup jsapi Javascript APIs
  * \brief Modules for the Javascript API.
  */
 

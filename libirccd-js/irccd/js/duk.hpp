@@ -845,7 +845,7 @@ struct type_traits<std::vector<T>> : public std::true_type {
 	 * Push a C++ std::vector<T>.
 	 *
 	 * \param ctx the Duktape context
-	 * \param value the value
+	 * \param values the array
 	 */
 	static void push(duk_context* ctx, const std::vector<T>& values)
 	{

@@ -16,27 +16,37 @@
 
 project(doxygen)
 
-if (NOT DOXYGEN_DOT_FOUND)
-	set(DOXYGEN_HAVE_DOT "NO")
-	set(DOXYGEN_DOT_PATH "")
-else ()
-	set(DOXYGEN_HAVE_DOT "YES")
-	set(DOXYGEN_DOT_PATH "\"${DOXYGEN_DOT_EXECUTABLE}\"")
-endif ()
+set(DOXYGEN_FILE_PATTERNS "*.hpp")
+set(DOXYGEN_PREDEFINED BOOST_ASIO_HAS_LOCAL_SOCKETS IRCCD_HAVE_SSL IRCCD_HAVE_JS)
+set(DOXYGEN_PROJECT_NAME irccd)
+set(DOXYGEN_PROJECT_NUMBER ${IRCCD_VERSION})
+set(DOXYGEN_QUIET YES)
+set(DOXYGEN_WARN_AS_ERROR YES)
+set(DOXYGEN_WARN_NO_PARAMDOC YES)
 
-configure_file(
-	${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in
-	${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+set(DOXYGEN_STRIP_FROM_PATH
+	libirccd/irccd
+	libirccd-core/irccd
+	libirccd-ctl/irccd
+	libirccd-js/irccd
+	libirccd-test/irccd
 )
 
-add_custom_target(
-	doxygen
-	ALL
-	COMMENT "Generating doxygen documentation"
-	COMMAND
-		${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}
-	COMMAND
-		${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-	WORKING_DIRECTORY
-		${CMAKE_SOURCE_DIR}
+doxygen_add_docs(
+	docs-doxygen
+	${CMAKE_CURRENT_SOURCE_DIR}/mainpage.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/page-overview-irccd.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/page-overview-plugins.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/page-overview-rules.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/page-overview-servers.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/page-overview-transports.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/page-overview.cpp
+	${CMAKE_SOURCE_DIR}/libirccd
+	${CMAKE_SOURCE_DIR}/libirccd-core
+	${CMAKE_SOURCE_DIR}/libirccd-ctl
+	${CMAKE_SOURCE_DIR}/libirccd-js
+	${CMAKE_SOURCE_DIR}/libirccd-test
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
+
+add_dependencies(docs docs-doxygen)

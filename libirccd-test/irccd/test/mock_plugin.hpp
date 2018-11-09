@@ -93,7 +93,7 @@ public:
 	auto get_paths() const -> map override;
 
 	/**
-	 * \copydoc plugin::set_path
+	 * \copydoc plugin::set_paths
 	 */
 	void set_paths(const map& map) override;
 

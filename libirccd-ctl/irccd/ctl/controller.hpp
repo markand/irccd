@@ -67,8 +67,8 @@ public:
 	 * Construct the controller with its connection.
 	 *
 	 * \pre connector != nullptr
-	 * \
 	 * \note no connect attempt is done
+	 * \param connector the abstract connector
 	 */
 	controller(std::unique_ptr<connector> connector) noexcept;
 

@@ -29,8 +29,8 @@
 namespace irccd::js {
 
 /**
+ * \ingroup jsapi
  * \brief Irccd.Util Javascript API.
- * \ingroup js_api
  */
 class util_js_api : public js_api {
 public:

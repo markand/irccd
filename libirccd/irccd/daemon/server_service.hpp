@@ -56,6 +56,8 @@ private:
 public:
 	/**
 	 * Create the server service.
+	 *
+	 * \param instance the irccd instance
 	 */
 	server_service(irccd& instance);
 
@@ -150,10 +152,25 @@ namespace logger {
 template <typename T>
 struct loggable_traits;
 
+/**
+ * \brief Specialization for server.
+ */
 template <>
 struct loggable_traits<server> {
+	/**
+	 * Get 'server' category.
+	 *
+	 * \param server the server
+	 * \return server
+	 */
 	static auto get_category(const server& server) -> std::string_view;
 
+	/**
+	 * Get the server name.
+	 *
+	 * \param server the server
+	 * \return the server
+	 */
 	static auto get_component(const server& server) -> std::string_view;
 };
 

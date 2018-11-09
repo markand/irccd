@@ -24,6 +24,11 @@
  * \brief IRC Server.
  */
 
+/**
+ * \defgroup events IRC events
+ * \brief Describe all IRC events.
+ */
+
 #include <irccd/sysconfig.hpp>
 
 #include <cstdint>
@@ -64,6 +69,7 @@ struct channel {
 };
 
 /**
+ * \ingroup events
  * \brief Describe a whois information.
  */
 struct whois_info {
@@ -75,6 +81,7 @@ struct whois_info {
 };
 
 /**
+ * \ingroup events
  * \brief Connection success event.
  */
 struct connect_event {
@@ -82,6 +89,7 @@ struct connect_event {
 };
 
 /**
+ * \ingroup events
  * \brief Connection success event.
  */
 struct disconnect_event {
@@ -89,6 +97,7 @@ struct disconnect_event {
 };
 
 /**
+ * \ingroup events
  * \brief Invite event.
  */
 struct invite_event {
@@ -99,6 +108,7 @@ struct invite_event {
 };
 
 /**
+ * \ingroup events
  * \brief Join event.
  */
 struct join_event {
@@ -108,6 +118,7 @@ struct join_event {
 };
 
 /**
+ * \ingroup events
  * \brief Kick event.
  */
 struct kick_event {
@@ -119,6 +130,7 @@ struct kick_event {
 };
 
 /**
+ * \ingroup events
  * \brief Message event.
  */
 struct message_event {
@@ -129,6 +141,7 @@ struct message_event {
 };
 
 /**
+ * \ingroup events
  * \brief CTCP action event.
  */
 struct me_event {
@@ -139,6 +152,7 @@ struct me_event {
 };
 
 /**
+ * \ingroup events
  * \brief Mode event.
  */
 struct mode_event {
@@ -152,6 +166,7 @@ struct mode_event {
 };
 
 /**
+ * \ingroup events
  * \brief Names listing event.
  */
 struct names_event {
@@ -161,6 +176,7 @@ struct names_event {
 };
 
 /**
+ * \ingroup events
  * \brief Nick change event.
  */
 struct nick_event {
@@ -170,6 +186,7 @@ struct nick_event {
 };
 
 /**
+ * \ingroup events
  * \brief Notice event.
  */
 struct notice_event {
@@ -180,6 +197,7 @@ struct notice_event {
 };
 
 /**
+ * \ingroup events
  * \brief Part event.
  */
 struct part_event {
@@ -190,6 +208,7 @@ struct part_event {
 };
 
 /**
+ * \ingroup events
  * \brief Topic event.
  */
 struct topic_event {
@@ -200,6 +219,7 @@ struct topic_event {
 };
 
 /**
+ * \ingroup events
  * \brief Whois event.
  */
 struct whois_event {
@@ -208,6 +228,7 @@ struct whois_event {
 };
 
 /**
+ * \ingroup events
  * \brief Store all possible events.
  */
 using event = std::variant<
@@ -271,7 +292,7 @@ public:
 	};
 
 protected:
-	/*
+	/**
 	 * \brief Server state.
 	 */
 	state state_{state::disconnected};
@@ -345,7 +366,7 @@ public:
 	 *
 	 * \pre !host.empty()
 	 * \param service the service
-	 * \param name the identifier
+	 * \param id the identifier
 	 * \param hostname the hostname
 	 */
 	server(boost::asio::io_service& service, std::string id, std::string hostname = "localhost");
@@ -863,6 +884,7 @@ auto server_category() -> const std::error_category&;
  * Create a std::error_code from server_error::error enum.
  *
  * \param e the error code
+ * \return the error code
  */
 auto make_error_code(server_error::error e) -> std::error_code;
 

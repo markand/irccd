@@ -29,13 +29,16 @@
 
 #include "duk.hpp"
 
+/**
+ * \brief Javascript namespace
+ */
 namespace irccd::js {
 
 class js_api;
 
 /**
- * \brief JavaScript plugins for irccd.
  * \ingroup plugins
+ * \brief JavaScript plugins for irccd.
  */
 class js_plugin : public plugin {
 public:
@@ -141,7 +144,7 @@ public:
 	auto get_paths() const -> map override;
 
 	/**
-	 * \copydoc plugin::set_path
+	 * \copydoc plugin::set_paths
 	 */
 	void set_paths(const map& map) override;
 
@@ -237,10 +240,14 @@ public:
 };
 
 /**
+ * \ingroup plugins
  * \brief Implementation for searching Javascript plugins.
  */
 class js_plugin_loader : public plugin_loader {
 public:
+	/**
+	 * \brief The list of Javascript API modules.
+	 */
 	using modules = std::vector<std::unique_ptr<js_api>>;
 
 private:
@@ -277,7 +284,7 @@ public:
 	/**
 	 * \copydoc plugin_loader::open
 	 */
-	auto open(std::string_view id, std::string_view path) -> std::shared_ptr<plugin>;
+	auto open(std::string_view id, std::string_view file) -> std::shared_ptr<plugin>;
 };
 
 namespace duk {

@@ -69,6 +69,7 @@ auto from_config(const ini::section& sc) -> rule;
  *
  * \param rule the rule
  * \throw the JSON representation
+ * \return the JSON representation
  */
 auto to_json(const rule& rule) -> nlohmann::json;
 
