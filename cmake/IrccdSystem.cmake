@@ -56,7 +56,6 @@ check_type_size(uint64_t IRCCD_HAVE_UINT64)
 #
 # The following variables are defined in irccd/sysconfig.h
 #
-# IRCCD_HAVE_GETLOGIN           True if getlogin(3) function (and unistd.h)
 # IRCCD_HAVE_POPEN              True if has popen(3) function (in stdio.h)
 # IRCCD_HAVE_SETPROGNAME        True if setprogname(3) is available from C library,
 # IRCCD_HAVE_STAT               True if has stat(2) function (and sys/types.h and sys/stat.h),
@@ -84,17 +83,6 @@ check_include_file(sys/types.h IRCCD_HAVE_SYS_TYPES_H)
 #
 # #include <cstdlib>
 check_function_exists(setprogname IRCCD_HAVE_SETPROGNAME)
-
-# getlogin() function
-#
-# If IRCCD_HAVE_GETLOGIN is defined, include:
-#
-# #include <unistd.h>
-check_function_exists(getlogin IRCCD_HAVE_GETLOGIN)
-
-if (NOT IRCCD_HAVE_UNISTD_H)
-	set(IRCCD_HAVE_GETLOGIN FALSE)
-endif ()
 
 # popen() function
 #

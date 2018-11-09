@@ -312,8 +312,8 @@ private:
 	options options_;
 
 	// Identity.
-	std::string nickname_;
-	std::string username_;
+	std::string nickname_{"irccd"};
+	std::string username_{"irccd"};
 	std::string realname_{"IRC Client Daemon"};
 	std::string ctcpversion_{"IRC Client Daemon"};
 

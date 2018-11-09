@@ -50,10 +50,6 @@
 #	include <libproc.h>
 #endif
 
-#if defined(IRCCD_HAVE_GETLOGIN)
-#	include <unistd.h>
-#endif
-
 #include "system.hpp"
 #include "string_util.hpp"
 #include "xdg.hpp"
@@ -454,26 +450,6 @@ auto sysconfdir() -> boost::filesystem::path
 auto plugindir() -> boost::filesystem::path
 {
 	return system_directory(IRCCD_INSTALL_LIBDIR) / "irccd";
-}
-
-// }}}
-
-// {{{ username
-
-/*
- * Requires:
- *   - <unistd.h>
- */
-auto username() -> std::string
-{
-#if defined(IRCCD_HAVE_GETLOGIN)
-	auto v = getlogin();
-
-	if (v)
-		return v;
-#endif
-
-	return "";
 }
 
 // }}}

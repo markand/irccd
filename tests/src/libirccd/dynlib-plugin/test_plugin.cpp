@@ -16,9 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <boost/dll.hpp>
-
-#include <irccd/daemon/plugin.hpp>
+#include <irccd/daemon/dynlib_plugin.hpp>
 
 namespace irccd {
 

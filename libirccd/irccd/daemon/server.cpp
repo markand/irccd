@@ -35,7 +35,6 @@
 
 #include <irccd/json_util.hpp>
 #include <irccd/string_util.hpp>
-#include <irccd/system.hpp>
 
 #include "server.hpp"
 
@@ -505,12 +504,6 @@ server::server(boost::asio::io_service& service, std::string id, std::string hos
 	, timer_(service)
 {
 	assert(!hostname_.empty());
-
-	// Initialize nickname and username.
-	auto user = sys::username();
-
-	nickname_ = user.empty() ? "irccd" : user;
-	username_ = user.empty() ? "irccd" : user;
 }
 
 server::~server()

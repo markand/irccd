@@ -26,7 +26,10 @@ configure_file(
 
 add_subdirectory(src/libcommon)
 add_subdirectory(src/libirccd)
-add_subdirectory(src/irccdctl)
+
+if (NOT CMAKE_SYSTEM_NAME MATCHES Windows)
+	add_subdirectory(src/irccdctl)
+endif ()
 
 if (IRCCD_HAVE_JS)
 	add_subdirectory(src/plugins)

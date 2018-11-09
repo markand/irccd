@@ -68,7 +68,6 @@ namespace irccd {
  * ------------------------------------------------------------------
  */
 
-#cmakedefine IRCCD_HAVE_GETLOGIN
 #cmakedefine IRCCD_HAVE_POPEN
 #cmakedefine IRCCD_HAVE_SETPROGNAME
 #cmakedefine IRCCD_HAVE_STAT

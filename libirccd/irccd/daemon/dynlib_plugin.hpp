@@ -24,6 +24,9 @@
  * \brief Native plugin implementation.
  */
 
+#define BOOST_DLL_FORCE_ALIAS_INSTANTIATION
+#include <boost/dll.hpp>
+
 #include "plugin.hpp"
 
 namespace irccd {

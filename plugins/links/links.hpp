@@ -24,7 +24,7 @@
  * \brief Links plugin.
  */
 
-#include <irccd/daemon/plugin.hpp>
+#include <irccd/daemon/dynlib_plugin.hpp>
 
 namespace irccd {
 

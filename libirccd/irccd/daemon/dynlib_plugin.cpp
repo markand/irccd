@@ -23,6 +23,7 @@
 #include <boost/predef/os.h>
 #include <boost/format.hpp>
 
+#define BOOST_DLL_FORCE_ALIAS_INSTANTIATION
 #include "dynlib_plugin.hpp"
 
 #if BOOST_OS_WINDOWS
@@ -74,6 +75,8 @@ auto dynlib_plugin_loader::open(std::string_view id, std::string_view path) -> s
 
 	const auto [ abisym, initsym ] = symbol(pathstr);
 
+	printf("abisym: %s\n", abisym.c_str());
+	printf("initsym: %s\n", initsym.c_str());
 	using abisym_func_type = version ();
 	using initsym_func_type = std::unique_ptr<plugin> (std::string);
 
