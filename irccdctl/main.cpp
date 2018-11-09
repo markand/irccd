@@ -347,7 +347,7 @@ void parse_connect(const option::result& options)
 
 	if (it->second == "ip" || it->second == "ipv6")
 		connector = parse_connect_ip(it->second, options);
-	if (it->second == "unix")
+	else if (it->second == "unix")
 		connector = parse_connect_local(options);
 	else
 		throw std::invalid_argument(str(format("invalid type given: %1%") % it->second));
