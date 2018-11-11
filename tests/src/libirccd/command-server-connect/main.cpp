@@ -51,21 +51,22 @@ BOOST_AUTO_TEST_CASE(minimal)
 BOOST_AUTO_TEST_CASE(full)
 {
 	const auto [json, code] = request({
-		{ "command",    "server-connect"    },
-		{ "name",       "local2"            },
-		{ "hostname",   "irc.example2.org"  },
-		{ "password",   "nonono"            },
-		{ "nickname",   "francis"           },
-		{ "realname",   "the_francis"       },
-		{ "username",   "frc"               },
-		{ "family",     { "ipv6" }          },
-		{ "ctcpVersion", "ultra bot"        },
-		{ "commandChar", "::"               },
-		{ "port",       18000               },
-		{ "ssl",        true                },
-		{ "sslVerify",  true                },
-		{ "autoRejoin", true                },
-		{ "joinInvite", true                }
+		{ "command",            "server-connect"        },
+		{ "name",               "local2"                },
+		{ "hostname",           "irc.example2.org"      },
+		{ "password",           "nonono"                },
+		{ "nickname",           "francis"               },
+		{ "realname",           "the_francis"           },
+		{ "username",           "frc"                   },
+		{ "ipv4",               false                   },
+		{ "ipv6",               true                    },
+		{ "ctcpVersion",        "ultra bot"             },
+		{ "commandChar",        "::"                    },
+		{ "port",               18000                   },
+		{ "ssl",                true                    },
+		{ "sslVerify",          true                    },
+		{ "autoRejoin",         true                    },
+		{ "joinInvite",         true                    }
 	});
 
 	const auto s = irccd_.servers().get("local2");
@@ -98,9 +99,9 @@ BOOST_AUTO_TEST_CASE(already_exists)
 	irccd_.servers().add(std::make_unique<mock_server>(ctx_, "local"));
 
 	const auto [json, code] = request({
-		{ "command",    "server-connect"    },
-		{ "name",       "local"             },
-		{ "hostname",   "127.0.0.1"         }
+		{ "command",    "server-connect"        },
+		{ "name",       "local"                 },
+		{ "hostname",   "127.0.0.1"             }
 	});
 
 	BOOST_TEST(code == server_error::already_exists);
@@ -111,8 +112,8 @@ BOOST_AUTO_TEST_CASE(already_exists)
 BOOST_AUTO_TEST_CASE(invalid_hostname_1)
 {
 	const auto [json, code] = request({
-		{ "command",    "server-connect"    },
-		{ "name",       "new"               },
+		{ "command",    "server-connect"        },
+		{ "name",       "new"                   },
 	});
 
 	BOOST_TEST(code == server_error::invalid_hostname);
@@ -123,9 +124,9 @@ BOOST_AUTO_TEST_CASE(invalid_hostname_1)
 BOOST_AUTO_TEST_CASE(invalid_hostname_2)
 {
 	const auto [json, code] = request({
-		{ "command",    "server-connect"    },
-		{ "name",       "new"               },
-		{ "hostname",   123456              }
+		{ "command",    "server-connect"        },
+		{ "name",       "new"                   },
+		{ "hostname",   123456                  }
 	});
 
 	BOOST_TEST(code == server_error::invalid_hostname);
@@ -136,9 +137,9 @@ BOOST_AUTO_TEST_CASE(invalid_hostname_2)
 BOOST_AUTO_TEST_CASE(invalid_identifier_1)
 {
 	const auto [json, code] = request({
-		{ "command",    "server-connect"    },
-		{ "name",       ""                  },
-		{ "hostname",   "127.0.0.1"         }
+		{ "command",    "server-connect"        },
+		{ "name",       ""                      },
+		{ "hostname",   "127.0.0.1"             }
 	});
 
 	BOOST_TEST(code == server_error::invalid_identifier);
@@ -149,9 +150,9 @@ BOOST_AUTO_TEST_CASE(invalid_identifier_1)
 BOOST_AUTO_TEST_CASE(invalid_identifier_2)
 {
 	const auto [json, code] = request({
-		{ "command",    "server-connect"    },
-		{ "name",       123456              },
-		{ "hostname",   "127.0.0.1"         }
+		{ "command",    "server-connect"        },
+		{ "name",       123456                  },
+		{ "hostname",   "127.0.0.1"             }
 	});
 
 	BOOST_TEST(code == server_error::invalid_identifier);
@@ -162,10 +163,10 @@ BOOST_AUTO_TEST_CASE(invalid_identifier_2)
 BOOST_AUTO_TEST_CASE(invalid_port_1)
 {
 	const auto [json, code] = request({
-		{ "command",    "server-connect"    },
-		{ "name",       "new"               },
-		{ "hostname",   "127.0.0.1"         },
-		{ "port",       "notaint"           }
+		{ "command",    "server-connect"        },
+		{ "name",       "new"                   },
+		{ "hostname",   "127.0.0.1"             },
+		{ "port",       "notaint"               }
 	});
 
 	BOOST_TEST(code == server_error::invalid_port);
@@ -176,10 +177,10 @@ BOOST_AUTO_TEST_CASE(invalid_port_1)
 BOOST_AUTO_TEST_CASE(invalid_port_2)
 {
 	const auto [json, code] = request({
-		{ "command",    "server-connect"    },
-		{ "name",       "new"               },
-		{ "hostname",   "127.0.0.1"         },
-		{ "port",       -123                }
+		{ "command",    "server-connect"        },
+		{ "name",       "new"                   },
+		{ "hostname",   "127.0.0.1"             },
+		{ "port",       -123                    }
 	});
 
 	BOOST_TEST(code == server_error::invalid_port);
@@ -190,10 +191,10 @@ BOOST_AUTO_TEST_CASE(invalid_port_2)
 BOOST_AUTO_TEST_CASE(invalid_port_3)
 {
 	const auto [json, code] = request({
-		{ "command",    "server-connect"    },
-		{ "name",       "new"               },
-		{ "hostname",   "127.0.0.1"         },
-		{ "port",       1000000             }
+		{ "command",    "server-connect"        },
+		{ "name",       "new"                   },
+		{ "hostname",   "127.0.0.1"             },
+		{ "port",       1000000                 }
 	});
 
 	BOOST_TEST(code == server_error::invalid_port);
@@ -206,10 +207,10 @@ BOOST_AUTO_TEST_CASE(invalid_port_3)
 BOOST_AUTO_TEST_CASE(ssl_disabled)
 {
 	const auto [json, code] = request({
-		{ "command",    "server-connect"    },
-		{ "name",       "new"               },
-		{ "hostname",   "127.0.0.1"         },
-		{ "ssl",        true                }
+		{ "command",    "server-connect"        },
+		{ "name",       "new"                   },
+		{ "hostname",   "127.0.0.1"             },
+		{ "ssl",        true                    }
 	});
 
 	BOOST_TEST(code == server_error::ssl_disabled);
@@ -222,11 +223,11 @@ BOOST_AUTO_TEST_CASE(ssl_disabled)
 BOOST_AUTO_TEST_CASE(invalid_family_1)
 {
 	const auto [json, code] = request({
-		{ "command",    "server-connect"    },
-		{ "name",       "new"               },
-		{ "hostname",   "127.0.0.1"         },
-		{ "port",       1000000             },
-		{ "family",     "invalid"           }
+		{ "command",    "server-connect"        },
+		{ "name",       "new"                   },
+		{ "hostname",   "127.0.0.1"             },
+		{ "port",       6667                    },
+		{ "ipv4",       "invalid"               }
 	});
 
 	BOOST_TEST(code == server_error::invalid_family);
@@ -237,11 +238,11 @@ BOOST_AUTO_TEST_CASE(invalid_family_1)
 BOOST_AUTO_TEST_CASE(invalid_family_2)
 {
 	const auto [json, code] = request({
-		{ "command",    "server-connect"    },
-		{ "name",       "new"               },
-		{ "hostname",   "127.0.0.1"         },
-		{ "port",       1000000             },
-		{ "family",     { 123, 456 }        }
+		{ "command",    "server-connect"        },
+		{ "name",       "new"                   },
+		{ "hostname",   "127.0.0.1"             },
+		{ "port",       6667                    },
+		{ "ipv6",       1234                    }
 	});
 
 	BOOST_TEST(code == server_error::invalid_family);

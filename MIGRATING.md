@@ -10,7 +10,6 @@ Migrating from 2.x to 3.x
 
 - The option `reconnect-tries` has been removed from `[server]` section, use
   `auto-reconnect` boolean option instead,
-- The option `ipv6` has been removed, use `family` instead,
 - The option `reconnect-timeout` has been renamed to `auto-reconnect-delay`.
 - The section `[identity]` has been removed, instead move those values inside
   each server in their `[server]` section.
@@ -37,8 +36,6 @@ Migrating from 2.x to 3.x
 - The request `server-mode` command requires a new argument `channel`.
 - The property `host` in request `server-connect` has been renamed to
   `hostname`,
-- The property `ipv6` in request `server-connect` has been renamed to
-  `family`,
 - The request `server-info` sends `hostname` property instead of `host`,
 - The event `onWhois` sends `hostname` property instead of `host`,
 
@@ -73,9 +70,7 @@ Migrating from 2.x to 3.x
 - The object returned in the method `Server.info` now has a `hostname` property
   instead of `host`.
 - The property `host` in constructor `Server` has been renamed to
-  `hostname`,
-- The property `ipv6` in constructor `Server` has been renamed to
-  `family`,
+  `hostname`.
 
 #### Module ElapsedTimer
 

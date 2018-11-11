@@ -12,7 +12,13 @@ irccd:
 - Irccd no longer supports uid, gid, pid and daemon features (#846),
 - Sections `[identity]` and `[server]` have been merged (#905),
 - Local transports support SSL (#939),
-- The origin in rule is now first class value (#947).
+- The origin in rule is now first class value (#947),
+- New option `ipv4` in `[transport]` (#945),
+- New option `ipv4` in `[server]` (#945).
+
+irccdctl:
+
+- New option `ipv4` in `[connect]` (#945).
 
 irccd-test:
 

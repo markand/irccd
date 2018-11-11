@@ -79,7 +79,8 @@ void usage()
  * type = "ip"
  * hostname = "ip or hostname"
  * port = "port number or service"
- * family = "ipv4, ipv6" (Optional, default: ipv4, ipv6)
+ * ipv4 = try IPv4 (Optional, default: true)
+ * ipv6 = try IPv6 (Optional, default: true)
  * ssl = true | false (Optional, default: false)
  */
 auto read_connect_ip(const ini::section& sc) -> std::unique_ptr<connector>
@@ -89,16 +90,10 @@ auto read_connect_ip(const ini::section& sc) -> std::unique_ptr<connector>
 	bool ipv4 = true;
 	bool ipv6 = true;
 
-	if (auto it = sc.find("family"); it != sc.end()) {
-		ipv4 = ipv6 = false;
-
-		for (auto v : *it) {
-			if (v == "ipv4")
-				ipv4 = true;
-			else if (v == "ipv6")
-				ipv6 = true;
-		}
-	}
+	if (const auto it = sc.find("ipv4"); it != sc.end())
+		ipv4 = string_util::is_boolean(it->get_value());
+	if (const auto it = sc.find("ipv6"); it != sc.end())
+		ipv6 = string_util::is_boolean(it->get_value());
 
 	if (!ipv4 && !ipv6)
 		throw transport_error(transport_error::invalid_family);

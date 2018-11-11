@@ -35,27 +35,12 @@ namespace {
 
 auto from_config_load_ip_protocols(const ini::section& sc) -> std::pair<bool, bool>
 {
-	bool ipv4 = true, ipv6 = false;
+	bool ipv4 = true, ipv6 = true;
 
-	/*
-	 * Documentation stated family but code checked for 'domain' option.
-	 *
-	 * As irccdctl uses domain, accept both and unify the option name to 'family'.
-	 *
-	 * See #637
-	 */
-	ini::section::const_iterator it;
-
-	if ((it = sc.find("domain")) != sc.end() || (it = sc.find("family")) != sc.end()) {
-		ipv4 = ipv6 = false;
-
-		for (const auto& v : *it) {
-			if (v == "ipv4")
-				ipv4 = true;
-			if (v == "ipv6")
-				ipv6 = true;
-		}
-	}
+	if (const auto it = sc.find("ipv4"); it != sc.end())
+		ipv4 = string_util::is_boolean(it->get_value());
+	if (const auto it = sc.find("ipv6"); it != sc.end())
+		ipv6 = string_util::is_boolean(it->get_value());
 
 	if (!ipv4 && !ipv6)
 		throw transport_error(transport_error::invalid_family);

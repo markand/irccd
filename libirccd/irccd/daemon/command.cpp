@@ -533,6 +533,8 @@ void server_info_command::exec(irccd& irccd, transport_client& client, const doc
 	// Optional stuff.
 	if ((server->get_options() & server::options::ipv6) == server::options::ipv6)
 		response.push_back({"ipv6", true});
+	if ((server->get_options() & server::options::ipv6) == server::options::ipv6)
+		response.push_back({"ipv6", true});
 	if ((server->get_options() & server::options::ssl) == server::options::ssl)
 		response.push_back({"ssl", true});
 	if ((server->get_options() & server::options::ssl_verify) == server::options::ssl_verify)
