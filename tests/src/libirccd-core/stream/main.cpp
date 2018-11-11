@@ -151,7 +151,7 @@ protected:
 
 class local_stream_fixture : public stream_fixture {
 private:
-	const std::string path_{CMAKE_BINARY_DIR "/tmp/stream-test.sock"};
+	const std::string path_{CMAKE_CURRENT_BINARY_DIR "/stream-test.sock"};
 
 public:
 
@@ -176,7 +176,7 @@ public:
 
 class tls_local_stream_fixture : public stream_fixture {
 private:
-	const std::string path_{CMAKE_BINARY_DIR "/tmp/stream-test.sock"};
+	const std::string path_{CMAKE_CURRENT_BINARY_DIR "/stream-test.sock"};
 
 public:
 
