@@ -24,8 +24,7 @@
 #   TARGET              target name
 #   SOURCES             src1, src2, srcn
 #   EXPORT              (Optional) set to true to export library through irccd
-#   HEADERS             (Optional) headers to install
-#   HEADERS_DIRECTORY   (Optional) subdirectory where to install headers
+#   HEADERS             (Optional) directory of headers to install
 #   FLAGS               (Optional) C/C++ flags (without -D)
 #   LIBRARIES           (Optional) libraries to link
 #   LOCAL_INCLUDES      (Optional) local includes for the target only
@@ -37,7 +36,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/IrccdVeraCheck.cmake)
 
 function(irccd_define_library)
 	set(options EXPORT)
-	set(oneValueArgs HEADERS_DIRECTORY TARGET)
+	set(oneValueArgs TARGET)
 	set(multiValueArgs HEADERS SOURCES FLAGS LIBRARIES LOCAL_INCLUDES PUBLIC_INCLUDES)
 
 	cmake_parse_arguments(LIB "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
@@ -86,13 +85,9 @@ function(irccd_define_library)
 	endif ()
 
 	if (LIB_HEADERS)
-		if (NOT LIB_HEADERS_DIRECTORY)
-			message(FATAL_ERROR "HEADERS_DIRECTORY must be defined")
-		endif ()
-
 		install(
-			FILES ${LIB_HEADERS}
-			DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${LIB_HEADERS_DIRECTORY}
+			DIRECTORY ${LIB_HEADERS}
+			DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/irccd
 		)
 	endif ()
 endfunction()

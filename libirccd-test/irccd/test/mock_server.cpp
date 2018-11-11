@@ -18,7 +18,7 @@
 
 #include "mock_server.hpp"
 
-namespace irccd {
+namespace irccd::test {
 
 void mock_server::connect(connect_handler) noexcept
 {
@@ -102,4 +102,4 @@ void mock_server::whois(std::string_view target)
 	push("whois", { std::string(target) });
 }
 
-} // !irccd
+} // !irccd::test

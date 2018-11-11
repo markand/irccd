@@ -30,7 +30,7 @@
 
 #include "mock_server.hpp"
 
-namespace irccd {
+namespace irccd::test {
 
 /**
  * \brief test fixture helper for Javascript plugins.
@@ -53,6 +53,6 @@ public:
 	js_plugin_fixture(std::string path);
 };
 
-} // !irccd
+} // !irccd::test
 
 #endif // !IRCCD_TEST_JS_PLUGIN_FIXTURE_HPP

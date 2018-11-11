@@ -19,57 +19,48 @@
 project(libirccd)
 
 set(
-	HEADERS
-	${libirccd_SOURCE_DIR}/irccd/daemon/command.hpp
-	${libirccd_SOURCE_DIR}/irccd/daemon/dynlib_plugin.hpp
-	${libirccd_SOURCE_DIR}/irccd/daemon/irc.hpp
-	${libirccd_SOURCE_DIR}/irccd/daemon/irccd.hpp
-	${libirccd_SOURCE_DIR}/irccd/daemon/logger.hpp
-	${libirccd_SOURCE_DIR}/irccd/daemon/plugin.hpp
-	${libirccd_SOURCE_DIR}/irccd/daemon/plugin_service.hpp
-	${libirccd_SOURCE_DIR}/irccd/daemon/rule.hpp
-	${libirccd_SOURCE_DIR}/irccd/daemon/rule_service.hpp
-	${libirccd_SOURCE_DIR}/irccd/daemon/rule_util.hpp
-	${libirccd_SOURCE_DIR}/irccd/daemon/server.hpp
-	${libirccd_SOURCE_DIR}/irccd/daemon/server_service.hpp
-	${libirccd_SOURCE_DIR}/irccd/daemon/server_util.hpp
-	${libirccd_SOURCE_DIR}/irccd/daemon/transport_client.hpp
-	${libirccd_SOURCE_DIR}/irccd/daemon/transport_server.hpp
-	${libirccd_SOURCE_DIR}/irccd/daemon/transport_service.hpp
-	${libirccd_SOURCE_DIR}/irccd/daemon/transport_util.hpp
-)
-
-set(
 	SOURCES
 	${libirccd_SOURCE_DIR}/irccd/daemon/command.cpp
+	${libirccd_SOURCE_DIR}/irccd/daemon/command.hpp
 	${libirccd_SOURCE_DIR}/irccd/daemon/dynlib_plugin.cpp
+	${libirccd_SOURCE_DIR}/irccd/daemon/dynlib_plugin.hpp
 	${libirccd_SOURCE_DIR}/irccd/daemon/irc.cpp
+	${libirccd_SOURCE_DIR}/irccd/daemon/irc.hpp
 	${libirccd_SOURCE_DIR}/irccd/daemon/irccd.cpp
+	${libirccd_SOURCE_DIR}/irccd/daemon/irccd.hpp
 	${libirccd_SOURCE_DIR}/irccd/daemon/logger.cpp
+	${libirccd_SOURCE_DIR}/irccd/daemon/logger.hpp
 	${libirccd_SOURCE_DIR}/irccd/daemon/plugin.cpp
+	${libirccd_SOURCE_DIR}/irccd/daemon/plugin.hpp
 	${libirccd_SOURCE_DIR}/irccd/daemon/plugin_service.cpp
+	${libirccd_SOURCE_DIR}/irccd/daemon/plugin_service.hpp
 	${libirccd_SOURCE_DIR}/irccd/daemon/rule.cpp
+	${libirccd_SOURCE_DIR}/irccd/daemon/rule.hpp
 	${libirccd_SOURCE_DIR}/irccd/daemon/rule_service.cpp
+	${libirccd_SOURCE_DIR}/irccd/daemon/rule_service.hpp
 	${libirccd_SOURCE_DIR}/irccd/daemon/rule_util.cpp
+	${libirccd_SOURCE_DIR}/irccd/daemon/rule_util.hpp
 	${libirccd_SOURCE_DIR}/irccd/daemon/server.cpp
+	${libirccd_SOURCE_DIR}/irccd/daemon/server.hpp
 	${libirccd_SOURCE_DIR}/irccd/daemon/server_service.cpp
+	${libirccd_SOURCE_DIR}/irccd/daemon/server_service.hpp
 	${libirccd_SOURCE_DIR}/irccd/daemon/server_util.cpp
+	${libirccd_SOURCE_DIR}/irccd/daemon/server_util.hpp
 	${libirccd_SOURCE_DIR}/irccd/daemon/transport_client.cpp
+	${libirccd_SOURCE_DIR}/irccd/daemon/transport_client.hpp
 	${libirccd_SOURCE_DIR}/irccd/daemon/transport_server.cpp
+	${libirccd_SOURCE_DIR}/irccd/daemon/transport_server.hpp
 	${libirccd_SOURCE_DIR}/irccd/daemon/transport_service.cpp
+	${libirccd_SOURCE_DIR}/irccd/daemon/transport_service.hpp
 	${libirccd_SOURCE_DIR}/irccd/daemon/transport_util.cpp
+	${libirccd_SOURCE_DIR}/irccd/daemon/transport_util.hpp
 )
 
 irccd_define_library(
 	TARGET libirccd
 	EXPORT
-	HEADERS ${HEADERS}
-	HEADERS_DIRECTORY irccd/daemon
-	SOURCES
-		${libirccd_SOURCE_DIR}/CMakeLists.txt
-		${SOURCES}
-	LIBRARIES
-		libirccd-core
-	PUBLIC_INCLUDES
-		$<BUILD_INTERFACE:${libirccd_SOURCE_DIR}>
+	HEADERS ${libirccd_SOURCE_DIR}/irccd/daemon
+	SOURCES ${SOURCES}
+	LIBRARIES libirccd-core
+	PUBLIC_INCLUDES $<BUILD_INTERFACE:${libirccd_SOURCE_DIR}>
 )

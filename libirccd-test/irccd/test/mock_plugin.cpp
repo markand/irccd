@@ -20,7 +20,7 @@
 
 #include "mock_plugin.hpp"
 
-namespace irccd {
+namespace irccd::test {
 
 auto mock_plugin::get_name() const noexcept -> std::string_view
 {
@@ -189,4 +189,4 @@ void mock_plugin::handle_whois(irccd&, const whois_event& event)
 	push("handle_whois", { event });
 }
 
-} // !irccd
+} // !irccd::test

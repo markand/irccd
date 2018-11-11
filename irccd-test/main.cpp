@@ -50,7 +50,7 @@
 using boost::format;
 using boost::str;
 
-namespace irccd {
+namespace irccd::test {
 
 namespace su = string_util;
 
@@ -651,13 +651,13 @@ void load(int argc, char** argv)
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test
 
 int main(int argc, char** argv)
 {
 	try {
-		irccd::load(--argc, ++argv);
-		irccd::run();
+		irccd::test::load(--argc, ++argv);
+		irccd::test::run();
 	} catch (const std::exception& ex) {
 		std::cerr << "abort: " << ex.what() << std::endl;
 		return 1;

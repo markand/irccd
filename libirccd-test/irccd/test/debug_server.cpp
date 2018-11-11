@@ -20,7 +20,7 @@
 
 #include "debug_server.hpp"
 
-namespace irccd {
+namespace irccd::test {
 
 void debug_server::connect(connect_handler) noexcept
 {
@@ -101,4 +101,4 @@ void debug_server::whois(std::string_view target)
 	std::cout << get_id() << ": whois " << target << std::endl;
 }
 
-} // !irccd
+} // !irccd::test

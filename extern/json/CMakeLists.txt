@@ -22,7 +22,7 @@ target_include_directories(
     libjson
     INTERFACE
         $<BUILD_INTERFACE:${json_SOURCE_DIR}>
-        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR/irccd/extern}>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/irccd/extern>
 )
 install(TARGETS libjson EXPORT irccd-targets)
 install(FILES json.hpp DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/irccd/extern)

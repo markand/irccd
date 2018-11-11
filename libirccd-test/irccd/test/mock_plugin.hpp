@@ -28,7 +28,7 @@
 
 #include "mock.hpp"
 
-namespace irccd {
+namespace irccd::test {
 
 /**
  * \brief Mock plugin.
@@ -188,6 +188,6 @@ public:
 	void handle_whois(irccd& irccd, const whois_event& event) override;
 };
 
-} // !irccd
+} // !irccd::test
 
 #endif // !IRCCD_TEST_MOCK_PLUGIN_HPP

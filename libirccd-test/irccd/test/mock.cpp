@@ -18,7 +18,7 @@
 
 #include "mock.hpp"
 
-namespace irccd {
+namespace irccd::test {
 
 void mock::push(std::string name, args args) const
 {
@@ -48,4 +48,4 @@ auto mock::empty() const noexcept -> bool
 	return table_.empty();
 }
 
-} // !irccd
+} // !irccd::test

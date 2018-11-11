@@ -19,20 +19,15 @@
 project(libirccd-ctl)
 
 set(
-	HEADERS
-	${libirccd-ctl_SOURCE_DIR}/irccd/ctl/controller.hpp
-)
-
-set(
 	SOURCES
 	${libirccd-ctl_SOURCE_DIR}/irccd/ctl/controller.cpp
+	${libirccd-ctl_SOURCE_DIR}/irccd/ctl/controller.hpp
 )
 
 irccd_define_library(
 	TARGET libirccd-ctl
 	EXPORT
-	HEADERS ${HEADERS}
-	HEADERS_DIRECTORY irccd/ctl
+	HEADERS ${libirccd-ctl_SOURCE_DIR}/irccd/ctl
 	SOURCES ${SOURCES}
 	LIBRARIES
 		libirccd

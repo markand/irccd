@@ -26,7 +26,7 @@
 
 #include <irccd/daemon/server.hpp>
 
-namespace irccd {
+namespace irccd::test {
 
 /**
  * \brief Server which prints everything in the console.
@@ -113,6 +113,6 @@ public:
 	void whois(std::string_view target) override;
 };
 
-} // !irccd
+} // !irccd::test
 
 #endif // !IRCCD_TEST_DEBUG_SERVER_HPP

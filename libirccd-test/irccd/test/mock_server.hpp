@@ -28,7 +28,7 @@
 
 #include "mock.hpp"
 
-namespace irccd {
+namespace irccd::test {
 
 /**
  * \brief Mock server.
@@ -115,6 +115,6 @@ public:
 	void whois(std::string_view target) override;
 };
 
-} // !irccd
+} // !irccd::test
 
 #endif // !IRCCD_TEST_MOCK_SERVER_HPP

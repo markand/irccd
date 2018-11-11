@@ -30,7 +30,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace irccd {
+namespace irccd::test {
 
 /**
  * \brief Keep track of function invocations.
@@ -87,6 +87,6 @@ public:
 	auto empty() const noexcept -> bool;
 };
 
-} // !irccd
+} // !irccd::test
 
 #endif // !IRCCD_TEST_MOCK_HPP

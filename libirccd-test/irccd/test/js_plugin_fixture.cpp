@@ -37,7 +37,7 @@
 
 #include "js_plugin_fixture.hpp"
 
-namespace irccd {
+namespace irccd::test {
 
 js_plugin_fixture::js_plugin_fixture(std::string path)
 	: server_(std::make_shared<mock_server>(service_, "test", "local"))
@@ -59,4 +59,4 @@ js_plugin_fixture::js_plugin_fixture(std::string path)
 	plugin_->open();
 }
 
-} // !irccd
+} // !irccd::test

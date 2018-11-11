@@ -18,10 +18,26 @@
 
 cmake_minimum_required(VERSION 3.0)
 project(duktape)
-add_library(libduktape OBJECT duktape.h duktape.cpp)
+add_library(libduktape duktape.h duktape.cpp)
 install(
-    FILES
-        duktape.h
-        duk_config.h
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/irccd/extern
+	TARGETS libduktape
+	EXPORT irccd-targets
+	RUNTIME DESTINATION bin
+	LIBRARY DESTINATION lib
+	ARCHIVE DESTINATION lib
 )
+
+install(
+	FILES
+		duktape.h
+		duk_config.h
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/irccd/extern
+)
+target_include_directories(
+	libduktape
+	PUBLIC
+		$<BUILD_INTERFACE:${duktape_SOURCE_DIR}>
+		$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/irccd/extern>
+)
+target_compile_definitions(libduktape PUBLIC DUK_OPT_CPP_EXCEPTIONS)
+set_target_properties(libduktape PROPERTIES OUTPUT_NAME irccd-duktape)
