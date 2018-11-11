@@ -18,7 +18,7 @@
 
 project(tests)
 
-add_subdirectory(src/libcommon)
+add_subdirectory(src/libirccd-core)
 add_subdirectory(src/libirccd)
 add_subdirectory(src/irccdctl)
 
