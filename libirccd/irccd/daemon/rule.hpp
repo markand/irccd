@@ -76,14 +76,14 @@ struct rule {
 	 *
 	 * \param server the server
 	 * \param channel the channel
-	 * \param nick the origin
+	 * \param origin the origin
 	 * \param plugin the plugin
 	 * \param event the event
 	 * \return true if match
 	 */
 	auto match(std::string_view server,
 	           std::string_view channel,
-	           std::string_view nick,
+	           std::string_view origin,
 	           std::string_view plugin,
 	           std::string_view event) const noexcept -> bool;
 };

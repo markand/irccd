@@ -138,6 +138,7 @@ auto to_json(const rule& rule) -> nlohmann::json
 	return {
 		{ "servers",    join(rule.servers)      },
 		{ "channels",   join(rule.channels)     },
+		{ "origins",    join(rule.origins)      },
 		{ "plugins",    join(rule.plugins)      },
 		{ "events",     join(rule.events)       },
 		{ "action",     str(rule.action)        }

@@ -25,7 +25,7 @@ namespace irccd {
 
 auto rule::match_set(const set& set, const std::string& value) const noexcept -> bool
 {
-	return value.empty() || set.empty() || set.count(value) == 1;
+	return set.empty() || set.count(value) == 1;
 }
 
 auto rule::match(std::string_view server,

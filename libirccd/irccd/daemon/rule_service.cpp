@@ -81,28 +81,9 @@ auto rule_service::solve(std::string_view server,
 {
 	bool result = true;
 
-	irccd_.get_log().debug("rule", "")
-		<< "solving for server=" << server
-		<< ", channel=" << channel
-		<< ", origin=" << origin
-		<< ", plugin=" << plugin
-		<< ", event=" << event << std::endl;
-
-	int i = 0;
-	for (const auto& rule : rules_) {
-		auto action = rule.action == rule::action_type::accept ? "accept" : "drop";
-
-		irccd_.get_log().debug(rule) << "candidate "  << i++ << ":" << std::endl;
-		irccd_.get_log().debug(rule) << "  servers: "  << string_util::join(rule.servers) << std::endl;
-		irccd_.get_log().debug(rule) << "  channels: " << string_util::join(rule.channels) << std::endl;
-		irccd_.get_log().debug(rule) << "  origins: "  << string_util::join(rule.origins) << std::endl;
-		irccd_.get_log().debug(rule) << "  plugins: "  << string_util::join(rule.plugins) << std::endl;
-		irccd_.get_log().debug(rule) << "  events: "   << string_util::join(rule.events) << std::endl;
-		irccd_.get_log().debug(rule) << "  action: "   << action << std::endl;
-
+	for (const auto& rule : rules_)
 		if (rule.match(server, channel, origin, plugin, event))
 			result = rule.action == rule::action_type::accept;
-	}
 
 	return result;
 }

@@ -4,44 +4,43 @@ IRC Client Daemon CHANGES
 irccd current
 ----------------------
 
-Irccd:
+irccd:
 
-- The default server identity now uses the system account name if possible by
-  default (#607),
 - New sections `[paths]` and `[paths.plugin]` have been added to control
   standard paths for both irccd and plugins (#611),
 - If Mercurial is found, the version is bundled in `irccd --version`,
-- Irccd no longer supports uid, gid, pid and daemon features (#846).
+- Irccd no longer supports uid, gid, pid and daemon features (#846),
 - Sections `[identity]` and `[server]` have been merged (#905),
-- Local transports support SSL too (#939).
+- Local transports support SSL (#939),
+- The origin in rule is now first class value (#947).
 
-Irccd test:
+irccd-test:
 
 - A brand new `irccd-test` program has been added to tests plugins on the
   command line (#569).
 
-CMake:
+cmake:
 
 - CMake no longer create a fake installation directory while building (#674),
 - All targets are placed into the `bin` directory while building (#715).
 
-Network API:
+network API:
 
 - Network commands return an error code instead of a string (#739).
 
-Javascript API:
+javascript API:
 
 - The Irccd.Timer API now runs on top of Boost.Asio and no longer have custom
   buggy code (#595),
 - New Irccd.Server.isSelf function (#735).
 
-Internal:
+internal:
 
 - The code is now based on Boost for many internal parts of the core, (#593),
   (#594), (#595), (#681), (#697),
 - The libircclient has been replaced by a simple homemade library (#581).
 
-Plugins:
+plugins:
 
 - Introduce brand new joke plugin (#609),
 - Introduce brand new tictactoe plugin (#393),
@@ -81,41 +80,41 @@ irccd 2.1.1 2017-03-07
 irccd 2.1.0 2017-02-01
 ----------------------
 
-Irccd:
+irccd:
 
 - Add SSL support in transports,
 - Add authentication support in transports,
 - Fix a warning about daemon on macOS.
 
-Javascript API:
+javascript API:
 
 - New Irccd.File.lines function,
 - Various improvements in Irccd.File API.
 
-Plugins:
+plugins:
 
 - Add new format section for plugins,
 - Add unit tests for plugins.
 
-Irccdctl:
+irccdctl:
 
 - Added brand new plugin-config command,
 - Added aliases,
 - Added unit tests for irccdctl commands.
 
-Libraries:
+libraries:
 
 - Replaced jansson with Niels Lohmann's JSON library,
 - Updated Duktape to 1.5.1.
 
-Misc:
+misc:
 
 - Patterns can now use shell escape sequences,
 - Added .editorconfig file,
 - Split documentation into topics,
 - The code is now split into several individual libraries.
 
-Windows:
+windows:
 
 - Get rid of QtIFW and uses NSIS, WIX on Windows,
 - Installer have components,

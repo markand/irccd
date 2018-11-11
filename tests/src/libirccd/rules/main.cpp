@@ -136,8 +136,8 @@ BOOST_AUTO_TEST_CASE(basic_match1)
 	/*
 	 * [rule]
 	 */
-	BOOST_REQUIRE(m.match("freenode", "#test", "a", "", ""));
-	BOOST_REQUIRE(m.match("", "", "", "", ""));
+	BOOST_TEST(m.match("freenode", "#test", "a", "", ""));
+	BOOST_TEST(m.match("", "", "", "", ""));
 }
 
 BOOST_AUTO_TEST_CASE(basic_match2)
@@ -149,9 +149,9 @@ BOOST_AUTO_TEST_CASE(basic_match2)
 	 * servers	= "freenode"
 	 */
 
-	BOOST_REQUIRE(m.match("freenode", "#test", "a", "", ""));
-	BOOST_REQUIRE(!m.match("malikania", "#test", "a", "", ""));
-	BOOST_REQUIRE(m.match("freenode", "", "jean", "", "onMessage"));
+	BOOST_TEST(m.match("freenode", "#test", "a", "", ""));
+	BOOST_TEST(!m.match("malikania", "#test", "a", "", ""));
+	BOOST_TEST(m.match("freenode", "", "jean", "", "onMessage"));
 }
 
 BOOST_AUTO_TEST_CASE(basic_match3)
@@ -164,9 +164,9 @@ BOOST_AUTO_TEST_CASE(basic_match3)
 	 * channels	= "#staff"
 	 */
 
-	BOOST_REQUIRE(m.match("freenode", "#staff", "a", "", ""));
-	BOOST_REQUIRE(!m.match("freenode", "#test", "a", "", ""));
-	BOOST_REQUIRE(!m.match("malikania", "#staff", "a", "", ""));
+	BOOST_TEST(m.match("freenode", "#staff", "a", "", ""));
+	BOOST_TEST(!m.match("freenode", "#test", "a", "", ""));
+	BOOST_TEST(!m.match("malikania", "#staff", "a", "", ""));
 }
 
 BOOST_AUTO_TEST_CASE(basic_match4)
@@ -180,9 +180,9 @@ BOOST_AUTO_TEST_CASE(basic_match4)
 	 * plugins	= "a"
 	 */
 
-	BOOST_REQUIRE(m.match("malikania", "#staff", "a", "",""));
-	BOOST_REQUIRE(!m.match("malikania", "#staff", "b", "", ""));
-	BOOST_REQUIRE(!m.match("freenode", "#staff", "a", "", ""));
+	BOOST_TEST(m.match("malikania", "#staff", "a", "",""));
+	BOOST_TEST(!m.match("malikania", "#staff", "b", "", ""));
+	BOOST_TEST(!m.match("freenode", "#staff", "a", "", ""));
 }
 
 BOOST_AUTO_TEST_CASE(complex_match1)
@@ -194,53 +194,74 @@ BOOST_AUTO_TEST_CASE(complex_match1)
 	 * servers	= "malikania freenode"
 	 */
 
-	BOOST_REQUIRE(m.match("malikania", "", "", "", ""));
-	BOOST_REQUIRE(m.match("freenode", "", "", "", ""));
-	BOOST_REQUIRE(!m.match("no", "", "", "", ""));
+	BOOST_TEST(m.match("malikania", "", "", "", ""));
+	BOOST_TEST(m.match("freenode", "", "", "", ""));
+	BOOST_TEST(!m.match("no", "", "", "", ""));
+}
+
+BOOST_AUTO_TEST_CASE(origin_match)
+{
+	rule m{
+		rule::set{"malikania"},
+		rule::set{},
+		rule::set{"markand"},
+		rule::set{},
+		rule::set{},
+		rule::action_type::accept
+	};
+
+	/*
+	 * [rule]
+	 * servers = "malikania"
+	 * origins = "markand"
+	 */
+	BOOST_TEST(m.match("malikania", "#staff", "markand", "system", "onCommand"));
+	BOOST_TEST(!m.match("malikania", "#staff", "", "system", "onNames"));
+	BOOST_TEST(!m.match("malikania", "#staff", "jean", "system", "onMessage"));
 }
 
 BOOST_AUTO_TEST_CASE(basic_solve)
 {
 	/* Allowed */
-	BOOST_REQUIRE(rules_.solve("malikania", "#staff", "", "a", "onMessage"));
+	BOOST_TEST(rules_.solve("malikania", "#staff", "", "a", "onMessage"));
 
 	/* Allowed */
-	BOOST_REQUIRE(rules_.solve("freenode", "#staff", "", "b", "onTopic"));
+	BOOST_TEST(rules_.solve("freenode", "#staff", "", "b", "onTopic"));
 
 	/* Not allowed */
-	BOOST_REQUIRE(!rules_.solve("malikania", "#staff", "", "", "onCommand"));
+	BOOST_TEST(!rules_.solve("malikania", "#staff", "", "", "onCommand"));
 
 	/* Not allowed */
-	BOOST_REQUIRE(!rules_.solve("freenode", "#staff", "", "c", "onCommand"));
+	BOOST_TEST(!rules_.solve("freenode", "#staff", "", "c", "onCommand"));
 
 	/* Allowed */
-	BOOST_REQUIRE(rules_.solve("unsafe", "#staff", "", "c", "onCommand"));
+	BOOST_TEST(rules_.solve("unsafe", "#staff", "", "c", "onCommand"));
 }
 
 BOOST_AUTO_TEST_CASE(games_solve)
 {
 	/* Allowed */
-	BOOST_REQUIRE(rules_.solve("malikania", "#games", "", "game", "onMessage"));
+	BOOST_TEST(rules_.solve("malikania", "#games", "", "game", "onMessage"));
 
 	/* Allowed */
-	BOOST_REQUIRE(rules_.solve("localhost", "#games", "", "game", "onMessage"));
+	BOOST_TEST(rules_.solve("localhost", "#games", "", "game", "onMessage"));
 
 	/* Allowed */
-	BOOST_REQUIRE(rules_.solve("malikania", "#games", "", "game", "onCommand"));
+	BOOST_TEST(rules_.solve("malikania", "#games", "", "game", "onCommand"));
 
 	/* Not allowed */
-	BOOST_REQUIRE(!rules_.solve("malikania", "#games", "", "game", "onQuery"));
+	BOOST_TEST(!rules_.solve("malikania", "#games", "", "game", "onQuery"));
 
 	/* Not allowed */
-	BOOST_REQUIRE(!rules_.solve("freenode", "#no", "", "game", "onMessage"));
+	BOOST_TEST(!rules_.solve("freenode", "#no", "", "game", "onMessage"));
 
 	/* Not allowed */
-	BOOST_REQUIRE(!rules_.solve("malikania", "#test", "", "game", "onMessage"));
+	BOOST_TEST(!rules_.solve("malikania", "#test", "", "game", "onMessage"));
 }
 
 BOOST_AUTO_TEST_CASE(fix_645)
 {
-	BOOST_REQUIRE(!rules_.solve("MALIKANIA", "#STAFF", "", "SYSTEM", "onCommand"));
+	BOOST_TEST(!rules_.solve("MALIKANIA", "#STAFF", "", "SYSTEM", "onCommand"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
