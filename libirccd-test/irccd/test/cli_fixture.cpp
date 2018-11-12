@@ -34,6 +34,18 @@ namespace proc = boost::process;
 
 namespace irccd::test {
 
+namespace {
+
+auto clear(std::string input) -> std::string
+{
+	while (input.size() > 0U && (input.back() == '\r' || input.back() == '\n'))
+		input.pop_back();
+
+	return input;
+}
+
+} // !namespace
+
 cli_fixture::cli_fixture()
 	: server_(new mock_server(irccd_.get_service(), "test", "localhost"))
 {
@@ -69,6 +81,7 @@ void cli_fixture::start()
 	std::this_thread::sleep_for(std::chrono::milliseconds(250));
 }
 
+
 auto cli_fixture::exec(const std::vector<std::string>& args) -> result
 {
 	std::ostringstream oss;
@@ -88,9 +101,9 @@ auto cli_fixture::exec(const std::vector<std::string>& args) -> result
 	outputs out, err;
 
 	for (std::string line; stream_out && std::getline(stream_out, line); )
-		out.push_back(line);
+		out.push_back(clear(line));
 	for (std::string line; stream_err && std::getline(stream_err, line); )
-		err.push_back(line);
+		err.push_back(clear(line));
 
 	return { ret, out, err };
 }

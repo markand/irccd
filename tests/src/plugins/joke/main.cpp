@@ -21,7 +21,7 @@
 
 #include <irccd/test/js_plugin_fixture.hpp>
 
-namespace irccd {
+namespace irccd::test {
 
 namespace {
 
@@ -199,4 +199,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::test
