@@ -48,9 +48,9 @@ public:
 	/**
 	 * Connection completion handler.
 	 *
-	 * This callback is called when connection has been completed or failed. In
-	 * both case, the error code is set and the JSON object may contain the
-	 * irccd program information.
+	 * This callback is called when connection has been completed or failed.
+	 * In both case, the error code is set and the JSON object may contain
+	 * the * irccd program information.
 	 */
 	using connect_handler = std::function<void (std::error_code, nlohmann::json)>;
 
@@ -92,29 +92,31 @@ public:
 	/**
 	 * Attempt to connect to the irccd daemon.
 	 *
+	 * \pre another connect operation must not be running
 	 * \pre handler != nullptr
 	 * \param handler the handler
 	 */
 	void connect(connect_handler handler);
 
 	/**
-	 * Queue a receive operation, if receive operations are already running,
-	 * it is queued and ran once ready.
+	 * Request a message.
 	 *
+	 * \pre another recv operation must not be running
 	 * \pre handler != nullptr
 	 * \param handler the recv handler
 	 */
-	void read(stream::recv_handler handler);
+	void recv(stream::recv_handler handler);
 
 	/**
-	 * Queue a send operation, if receive operations are already running, it
-	 * is queued and ran once ready.
+	 * Send a message.
 	 *
+	 * \pre another send operation must not be running
 	 * \pre message.is_object()
+	 * \pre handler != nullptr
 	 * \param message the JSON message
 	 * \param handler the optional completion handler
 	 */
-	void write(nlohmann::json message, stream::send_handler handler = nullptr);
+	void send(nlohmann::json message, stream::send_handler handler);
 };
 
 } // !irccd::ctl

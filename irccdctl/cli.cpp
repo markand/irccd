@@ -187,7 +187,7 @@ const std::unordered_map<std::string_view, std::function<void (const nlohmann::j
 
 void get_event(ctl::controller& ctl, std::string fmt)
 {
-	ctl.read([&ctl, fmt] (auto code, auto message) {
+	ctl.recv([&ctl, fmt] (auto code, auto message) {
 		if (code)
 			throw std::system_error(code);
 
@@ -268,25 +268,22 @@ const std::vector<cli::constructor> cli::registry{
 
 void cli::recv_response(ctl::controller& ctl, nlohmann::json req, handler_t handler)
 {
-	ctl.read([&ctl, req, handler, this] (auto code, auto message) {
+	ctl.recv([&ctl, req, handler, this] (auto code, auto message) {
 		if (code)
 			throw std::system_error(code);
 
 		const auto c = deserializer(message).get<std::string>("command");
 
-		if (!c) {
+		if (!c)
 			recv_response(ctl, std::move(req), std::move(handler));
-			return;
-		}
-
-		if (handler)
+		else if (handler)
 			handler(std::move(message));
 	});
 }
 
 void cli::request(ctl::controller& ctl, nlohmann::json req, handler_t handler)
 {
-	ctl.write(req, [&ctl, req, handler, this] (auto code) {
+	ctl.send(req, [&ctl, req, handler, this] (auto code) {
 		if (code)
 			throw std::system_error(code);
 

@@ -59,6 +59,9 @@ std::unique_ptr<controller> ctl;
 std::unordered_map<std::string, alias> aliases;
 std::unordered_map<std::string, std::unique_ptr<cli>> commands;
 
+// Vector of commands to execute.
+std::vector<std::function<void ()>> requests;
+
 /*
  * Configuration file parsing.
  * -------------------------------------------------------------------
@@ -389,9 +392,9 @@ auto parse(int& argc, char**& argv) -> option::result
 	return result;
 }
 
-void exec(std::vector<std::string>);
+void enqueue(std::vector<std::string>);
 
-void exec(const alias& alias, std::vector<std::string> args_copy)
+void enqueue(const alias& alias, std::vector<std::string> args_copy)
 {
 	for (const auto& cmd : alias) {
 		std::vector<std::string> args(args_copy);
@@ -424,11 +427,11 @@ void exec(const alias& alias, std::vector<std::string> args_copy)
 		std::copy(args.begin(), args.end(), std::back_inserter(cmd_args));
 
 		// 4. Finally try to execute.
-		exec(cmd_args);
+		enqueue(cmd_args);
 	}
 }
 
-void exec(std::vector<std::string> args)
+void enqueue(std::vector<std::string> args)
 {
 	assert(args.size() > 0);
 
@@ -438,16 +441,19 @@ void exec(std::vector<std::string> args)
 	// Remove name.
 	args.erase(args.begin());
 
-	if (alias != aliases.end())
-		exec(alias->second, args);
-	else {
-		auto cmd = commands.find(name);
-
-		if (cmd != commands.end())
-			cmd->second->exec(*ctl, args);
-		else
-			throw std::invalid_argument("no alias or command named " + name);
+	if (alias != aliases.end()) {
+		enqueue(alias->second, args);
+		return;
 	}
+
+	const auto cmd = commands.find(name);
+
+	if (cmd != commands.end())
+		requests.push_back([args, cmd] () {
+			cmd->second->exec(*ctl, args);
+		});
+	else
+		throw std::invalid_argument("no alias or command named " + name);
 }
 
 void init(int &argc, char **&argv)
@@ -497,8 +503,13 @@ void do_exec(int argc, char** argv)
 	for (int i = 0; i < argc; ++i)
 		args.push_back(argv[i]);
 
-	exec(args);
-	service.run();
+	enqueue(args);
+
+	for (const auto& req : requests) {
+		req();
+		service.run();
+		service.reset();
+	}
 }
 
 } // !namespace
@@ -510,7 +521,7 @@ int main(int argc, char** argv)
 	irccd::ctl::init(argc, argv);
 
 	// 1. Read command line arguments.
-	auto result = irccd::ctl::parse(argc, argv);
+	const auto result = irccd::ctl::parse(argc, argv);
 
 	/*
 	 * 2. Open optional config by command line or by searching it

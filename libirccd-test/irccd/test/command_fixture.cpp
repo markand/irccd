@@ -42,10 +42,13 @@ auto command_fixture::request(nlohmann::json json) -> result
 {
 	result r;
 
-	ctl_->write(std::move(json));
-	ctl_->read([&] (auto result, auto message) {
+	ctl_->send(std::move(json), [] (auto code) {
+		if (code)
+			throw std::system_error(std::move(code));
+	});
+	ctl_->recv([&] (auto code, auto message) {
 		r.first = message;
-		r.second = result;
+		r.second = code;
 	});
 	wait_for([&] {
 		return r.second || r.first.is_object();

@@ -39,13 +39,13 @@ void controller::authenticate(connect_handler handler, nlohmann::json info)
 		{ "password",   password_       }
 	});
 
-	write(cmd, [handler, info, this] (auto code) {
+	send(cmd, [handler, info, this] (auto code) {
 		if (code) {
 			handler(std::move(code), nullptr);
 			return;
 		}
 
-		read([handler, info] (auto code, auto) {
+		recv([handler, info] (auto code, auto) {
 			handler(std::move(code), std::move(info));
 		});
 	});
@@ -53,7 +53,7 @@ void controller::authenticate(connect_handler handler, nlohmann::json info)
 
 void controller::verify(connect_handler handler)
 {
-	read([handler, this] (auto code, auto message) {
+	recv([handler, this] (auto code, auto message) {
 		if (code) {
 			handler(std::move(code), std::move(message));
 			return;
@@ -106,10 +106,10 @@ void controller::connect(connect_handler handler)
 	});
 }
 
-void controller::read(stream::recv_handler handler)
+void controller::recv(stream::recv_handler handler)
 {
-	assert(handler);
 	assert(stream_);
+	assert(handler);
 
 	auto stream = stream_;
 
@@ -139,10 +139,11 @@ void controller::read(stream::recv_handler handler)
 	});
 }
 
-void controller::write(nlohmann::json message, stream::send_handler handler)
+void controller::send(nlohmann::json message, stream::send_handler handler)
 {
-	assert(message.is_object());
 	assert(stream_);
+	assert(message.is_object());
+	assert(handler);
 
 	auto stream = stream_;
 
