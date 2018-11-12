@@ -39,6 +39,7 @@ class config;
 
 /**
  * \brief Manage plugins.
+ * \ingroup plugins
  * \ingroup services
  */
 class plugin_service {
@@ -256,6 +257,7 @@ struct loggable_traits;
 
 /**
  * \brief Implement Loggable traits for plugin.
+ * \ingroup logger-traits
  */
 template <>
 struct loggable_traits<plugin> {

@@ -24,6 +24,11 @@
  * \brief Transport service.
  */
 
+/**
+ * \defgroup transports Transports
+ * \brief Transport client and servers
+ */
+
 #include <memory>
 #include <vector>
 
@@ -38,8 +43,9 @@ class transport_client;
 class transport_server;
 
 /**
- * \brief manage transport servers and clients.
+ * \brief Manage transport servers and clients.
  * \ingroup services
+ * \ingroup transports
  */
 class transport_service {
 public:

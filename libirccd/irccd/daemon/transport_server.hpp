@@ -39,8 +39,7 @@ class transport_client;
 
 /**
  * \brief Abstract transport server class.
- *
- * # Synopsis
+ * \ingroup transports
  *
  * The transport_server class is an abstract interface that waits for clients to
  * connect and store them locally. It does not know the underlying
@@ -49,7 +48,7 @@ class transport_client;
  * As only constraint the implementation must provide an asynchronous operation
  * to avoid blocking the daemon.
  *
- * The derived class only have to implement do_accept function which is only
+ * The derived class only have to implement accept function which is only
  * responsible of getting a client ready for I/O (receiving and sending), the
  * transport_server does authentication and greeting by itself.
  *
@@ -57,7 +56,7 @@ class transport_client;
  *
  * The connection procedure looks like this:
  *
- * ```
+ * ~~~
  *            o (transport_server::accept is called)
  *            |
  *            v                          [error]
@@ -83,7 +82,7 @@ class transport_client;
  *   +---------------------------------------+  [incorrect]              |
  *   | client is added to the list and ready ]-------------------------- +
  *   +---------------------------------------+
- * ```
+ * ~~~
  *
  * # I/O procedures
  *

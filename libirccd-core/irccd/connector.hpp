@@ -24,6 +24,12 @@
  * \brief Abstract connection interface.
  */
 
+/**
+ * \defgroup connectors Generic I/O connectors
+ * \ingroup networking
+ * \brief Generic I/O connectors.
+ */
+
 #include <cassert>
 #include <functional>
 #include <memory>
@@ -43,6 +49,7 @@ namespace irccd {
 
 /**
  * \brief Abstract connection interface.
+ * \ingroup connectors
  *
  * This class is used to connect to a stream end point (usually sockets) in an
  * asynchronous manner.
@@ -83,6 +90,7 @@ public:
 
 /**
  * \brief Provide convenient functions for connectors.
+ * \ingroup connectors
  */
 class socket_connector_base : public connector {
 protected:
@@ -135,6 +143,7 @@ inline auto socket_connector_base::get_service() noexcept -> boost::asio::io_con
 
 /**
  * \brief TCP/IP connector.
+ * \ingroup connectors
  */
 class ip_connector : public socket_connector_base {
 public:
@@ -268,6 +277,7 @@ inline void ip_connector::connect(handler handler)
 
 /**
  * \brief Unix domain connector.
+ * \ingroup connectors
  */
 class local_connector : public socket_connector_base {
 public:
@@ -356,6 +366,7 @@ inline void local_connector::connect(handler handler)
 
 /**
  * \brief TLS/SSL connectors.
+ * \ingroup connectors
  * \tparam SocketConnector the socket connector (e.g. ip_connector)
  */
 template <typename SocketConnector>

@@ -36,6 +36,7 @@ class transport_server;
 
 /**
  * \brief Abstract transport client class.
+ * \ingroup transports
  *
  * This class is responsible of receiving/sending data.
  */

@@ -24,6 +24,16 @@
  * \brief Remote commands.
  */
 
+/**
+ * \defgroup commands Commands
+ * \brief Remote transport commands.
+ *
+ * The remote commands are server-side functions that can be called by clients
+ * connected to irccd.
+ *
+ * Example, the \ref irccd::server_message_command is used to send a message.
+ */
+
 #include <irccd/sysconfig.hpp>
 
 #include <functional>
@@ -42,6 +52,7 @@ class transport_client;
 
 /**
  * \brief Server side remote command
+ * \ingroup commands
  */
 class command {
 public:
@@ -94,6 +105,7 @@ public:
 
 /**
  * \brief Implementation of plugin-config transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -118,6 +130,7 @@ public:
 
 /**
  * \brief Implementation of plugin-info transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -142,6 +155,7 @@ public:
 
 /**
  * \brief Implementation of plugin-list transport command.
+ * \ingroup commands
  */
 class plugin_list_command : public command {
 public:
@@ -162,6 +176,7 @@ public:
 
 /**
  * \brief Implementation of plugin-load transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -188,6 +203,7 @@ public:
 
 /**
  * \brief Implementation of plugin-reload transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -213,6 +229,7 @@ public:
 
 /**
  * \brief Implementation of plugin-unload transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -238,6 +255,7 @@ public:
 
 /**
  * \brief Implementation of rule-add transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -262,6 +280,7 @@ public:
 
 /**
  * \brief Implementation of rule-edit transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -287,6 +306,7 @@ public:
 
 /**
  * \brief Implementation of rule-info transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -311,6 +331,7 @@ public:
 
 /**
  * \brief Implementation of rule-list transport command.
+ * \ingroup commands
  */
 class rule_list_command : public command {
 public:
@@ -331,6 +352,7 @@ public:
 
 /**
  * \brief Implementation of rule-move transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -355,6 +377,7 @@ public:
 
 /**
  * \brief Implementation of rule-remove transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -379,6 +402,7 @@ public:
 
 /**
  * \brief Implementation of server-connect transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -407,6 +431,7 @@ public:
 
 /**
  * \brief Implementation of server-disconnect transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -432,6 +457,7 @@ public:
 
 /**
  * \brief Implementation of server-info transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -457,6 +483,7 @@ public:
 
 /**
  * \brief Implementation of server-invite transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -484,6 +511,7 @@ public:
 
 /**
  * \brief Implementation of server-join transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -510,6 +538,7 @@ public:
 
 /**
  * \brief Implementation of server-kick transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -537,6 +566,7 @@ public:
 
 /**
  * \brief Implementation of server-list transport command.
+ * \ingroup commands
  */
 class server_list_command : public command {
 public:
@@ -557,6 +587,7 @@ public:
 
 /**
  * \brief Implementation of server-me transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -583,6 +614,7 @@ public:
 
 /**
  * \brief Implementation of server-message transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -609,6 +641,7 @@ public:
 
 /**
  * \brief Implementation of server-mode transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -636,6 +669,7 @@ public:
 
 /**
  * \brief Implementation of server-nick transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -662,6 +696,7 @@ public:
 
 /**
  * \brief Implementation of server-notice transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -688,6 +723,7 @@ public:
 
 /**
  * \brief Implementation of server-part transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -714,6 +750,7 @@ public:
 
 /**
  * \brief Implementation of server-reconnect transport command.
+ * \ingroup commands
  *
  * Replies:
  *
@@ -739,6 +776,7 @@ public:
 
 /**
  * \brief Implementation of server-topic transport command.
+ * \ingroup commands
  *
  * Replies:
  *

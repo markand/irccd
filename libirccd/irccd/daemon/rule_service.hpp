@@ -129,6 +129,7 @@ struct loggable_traits;
 
 /**
  * \brief Specialization for rule.
+ * \ingroup logger-traits
  */
 template <>
 struct loggable_traits<rule> {

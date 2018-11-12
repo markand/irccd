@@ -24,6 +24,11 @@
  * \brief Base class for irccd front end.
  */
 
+/**
+ * \defgroup services Services
+ * \brief All irccd services.
+ */
+
 #include <irccd/sysconfig.hpp>
 
 #include <memory>

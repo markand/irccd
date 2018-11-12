@@ -154,6 +154,7 @@ struct loggable_traits;
 
 /**
  * \brief Specialization for server.
+ * \ingroup logger-traits
  */
 template <>
 struct loggable_traits<server> {

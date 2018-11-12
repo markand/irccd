@@ -25,8 +25,14 @@
  */
 
 /**
- * \defgroup events IRC events
+ * \defgroup servers Servers
+ * \brief Everything you need for IRC server connection
+ */
+
+/**
+ * \defgroup events Events
  * \brief Describe all IRC events.
+ * \ingroup servers
  */
 
 #include <irccd/sysconfig.hpp>
@@ -51,6 +57,7 @@ class server;
 
 /**
  * \brief Prefixes for nicknames.
+ * \ingroup servers
  */
 enum class channel_mode {
 	creator         = 'O',                  //!< Channel creator
@@ -62,6 +69,7 @@ enum class channel_mode {
 
 /**
  * \brief A channel to join with an optional password.
+ * \ingroup servers
  */
 struct channel {
 	std::string name;                       //!< the channel to join
@@ -69,8 +77,8 @@ struct channel {
 };
 
 /**
- * \ingroup events
  * \brief Describe a whois information.
+ * \ingroup events
  */
 struct whois_info {
 	std::string nick;                       //!< user's nickname
@@ -81,24 +89,24 @@ struct whois_info {
 };
 
 /**
- * \ingroup events
  * \brief Connection success event.
+ * \ingroup events
  */
 struct connect_event {
 	std::shared_ptr<class server> server;   //!< The server.
 };
 
 /**
- * \ingroup events
  * \brief Connection success event.
+ * \ingroup events
  */
 struct disconnect_event {
 	std::shared_ptr<class server> server;   //!< The server.
 };
 
 /**
- * \ingroup events
  * \brief Invite event.
+ * \ingroup events
  */
 struct invite_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -108,8 +116,8 @@ struct invite_event {
 };
 
 /**
- * \ingroup events
  * \brief Join event.
+ * \ingroup events
  */
 struct join_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -118,8 +126,8 @@ struct join_event {
 };
 
 /**
- * \ingroup events
  * \brief Kick event.
+ * \ingroup events
  */
 struct kick_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -130,8 +138,8 @@ struct kick_event {
 };
 
 /**
- * \ingroup events
  * \brief Message event.
+ * \ingroup events
  */
 struct message_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -141,8 +149,8 @@ struct message_event {
 };
 
 /**
- * \ingroup events
  * \brief CTCP action event.
+ * \ingroup events
  */
 struct me_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -152,8 +160,8 @@ struct me_event {
 };
 
 /**
- * \ingroup events
  * \brief Mode event.
+ * \ingroup events
  */
 struct mode_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -166,8 +174,8 @@ struct mode_event {
 };
 
 /**
- * \ingroup events
  * \brief Names listing event.
+ * \ingroup events
  */
 struct names_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -176,8 +184,8 @@ struct names_event {
 };
 
 /**
- * \ingroup events
  * \brief Nick change event.
+ * \ingroup events
  */
 struct nick_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -186,8 +194,8 @@ struct nick_event {
 };
 
 /**
- * \ingroup events
  * \brief Notice event.
+ * \ingroup events
  */
 struct notice_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -197,8 +205,8 @@ struct notice_event {
 };
 
 /**
- * \ingroup events
  * \brief Part event.
+ * \ingroup events
  */
 struct part_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -208,8 +216,8 @@ struct part_event {
 };
 
 /**
- * \ingroup events
  * \brief Topic event.
+ * \ingroup events
  */
 struct topic_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -219,8 +227,8 @@ struct topic_event {
 };
 
 /**
- * \ingroup events
  * \brief Whois event.
+ * \ingroup events
  */
 struct whois_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -228,8 +236,8 @@ struct whois_event {
 };
 
 /**
- * \ingroup events
  * \brief Store all possible events.
+ * \ingroup events
  */
 using event = std::variant<
 	std::monostate,
@@ -251,6 +259,7 @@ using event = std::variant<
 
 /**
  * \brief The class that connect to a IRC server.
+ * \ingroup server
  *
  * This class is higher level than irc connection, it does identify process,
  * parsing message, translating messages and queue'ing user requests.
@@ -890,6 +899,10 @@ auto make_error_code(server_error::error e) -> std::error_code;
 
 } // !irccd
 
+/**
+ * \cond IRCCD_HIDDEN_SYMBOLS
+ */
+
 namespace std {
 
 template <>
@@ -897,5 +910,9 @@ struct is_error_code_enum<irccd::server_error::error> : public std::true_type {
 };
 
 } // !std
+
+/**
+ * \endcond
+ */
 
 #endif // !IRCCD_DAEMON_SERVER_HPP

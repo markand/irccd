@@ -24,6 +24,12 @@
  * \brief Abstract stream acceptor interface.
  */
 
+/**
+ * \defgroup acceptors Generic I/O acceptors
+ * \ingroup networking
+ * \brief Generic I/O acceptors.
+ */
+
 #include <irccd/sysconfig.hpp>
 
 #include <cassert>
@@ -44,6 +50,7 @@ namespace irccd {
 
 /**
  * \brief Abstract stream acceptor interface.
+ * \ingroup acceptors
  *
  * This class is used to wait a new client in an asynchronous manner. Derived
  * classes must implement a non-blocking accept function.
@@ -83,6 +90,7 @@ public:
 
 /**
  * \brief Convenient acceptor owner.
+ * \ingroup acceptors
  */
 template <typename Acceptor>
 class basic_socket_acceptor : public acceptor {
@@ -230,6 +238,7 @@ inline void basic_socket_acceptor<Acceptor>::accept(Socket& sc, Handler handler)
 
 /**
  * \brief TCP/IP acceptor.
+ * \ingroup acceptors
  */
 class ip_acceptor : public basic_socket_acceptor<boost::asio::ip::tcp::acceptor> {
 private:
@@ -239,6 +248,13 @@ private:
 
 public:
 	/**
+	 * Construct a TCP/IP acceptor.
+	 *
+	 * If both ipv4 and ipv6 are set, the acceptor will listen on the two
+	 * protocols.
+	 *
+	 * To listen to any address, you can use "*" as address argument.
+	 *
 	 * \pre at least ipv4 or ipv6 must be true
 	 * \param service the I/O service
 	 * \param address the address to bind or * for any
@@ -340,6 +356,7 @@ inline void ip_acceptor::accept(handler handler)
 
 /**
  * \brief Local acceptor.
+ * \ingroup acceptors
  * \note Only available if BOOST_ASIO_HAS_LOCAL_SOCKETS is defined
  */
 class local_acceptor : public basic_socket_acceptor<boost::asio::local::stream_protocol::acceptor> {
@@ -405,6 +422,7 @@ inline void local_acceptor::accept(handler handler)
 
 /**
  * \brief TLS/SSL acceptors.
+ * \ingroup acceptors
  * \tparam SocketAcceptor the socket connector (e.g. ip_acceptor)
  *
  * Wrap a SocketAcceptor object.

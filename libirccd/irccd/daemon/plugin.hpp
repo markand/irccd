@@ -457,6 +457,10 @@ auto make_error_code(plugin_error::error e) -> std::error_code;
 
 } // !irccd
 
+/**
+ * \cond IRCCD_HIDDEN_SYMBOLS
+ */
+
 namespace std {
 
 template <>
@@ -464,5 +468,9 @@ struct is_error_code_enum<irccd::plugin_error::error> : public std::true_type {
 };
 
 } // !std
+
+/**
+ * \endcond
+ */
 
 #endif // !IRCCD_DAEMON_PLUGIN_HPP

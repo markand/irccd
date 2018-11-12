@@ -130,6 +130,10 @@ auto make_error_code(rule_error::error e) -> std::error_code;
 
 } // !irccd
 
+/**
+ * \cond IRCCD_HIDDEN_SYMBOLS
+ */
+
 namespace std {
 
 template <>
@@ -137,5 +141,9 @@ struct is_error_code_enum<irccd::rule_error::error> : public std::true_type {
 };
 
 } // !std
+
+/**
+ * \endcond
+ */
 
 #endif // !IRCCD_DAEMON_RULE_HPP

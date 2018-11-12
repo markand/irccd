@@ -24,6 +24,23 @@
  * \brief Logging facilities.
  */
 
+/**
+ * \brief Irccd logging system.
+ * \defgroup logger Loggers
+ */
+
+/**
+ * \brief Predefined logger sinks.
+ * \defgroup logger-sinks Predefined logger sinks
+ * \ingroup logger
+ */
+
+/**
+ * \brief Specialized loggable traits.
+ * \defgroup logger-traits Specialized loggable traits
+ * \ingroup logger
+ */
+
 #include <irccd/sysconfig.hpp>
 
 #include <memory>
@@ -39,12 +56,32 @@ class sink;
 
 /**
  * \brief Traits for loggable objects.
+ * \ingroup logger-traits
  *
  * Specialize this structure and add the following static functions to be able
  * to log object with convenience:
  *
+ * ## get_category
+ *
+ * The get_category function should return a single word that describe the
+ * message entry category.
+ *
+ * Synopsis:
+ *
  * ```cpp
  * static auto get_category(const T&) noexcept -> std::string_view;
+ * ```
+ *
+ * ## get_component
+ *
+ * The get_component function should return the identifier or any valid
+ * information about the given object that is useful for the user.
+ *
+ * If no information could be provided, an empty string can be returned.
+ *
+ * Synopsis:
+ *
+ * ```cpp
  * static auto get_component(const T&) noexcept -> std::string_view;
  * ```
  */
@@ -53,6 +90,7 @@ struct loggable_traits;
 
 /**
  * \brief Logger object.
+ * \ingroup logger
  */
 class logger : public std::ostream, public std::stringbuf {
 private:
@@ -81,6 +119,7 @@ private:
 
 /**
  * \brief Interface to implement new logger mechanisms.
+ * \ingroup logger-sinks
  *
  * Derive from this class and implement write_info, write_warning and
  * write_debug functions.
@@ -251,6 +290,7 @@ public:
 
 /**
  * \brief Filter messages before printing them.
+ * \ingroup logger
  */
 class filter {
 private:
@@ -312,7 +352,8 @@ public:
 
 /**
  * \brief Logger implementation for console output using std::cout and
- *		std::cerr.
+ *        std::cerr.
+ * \ingroup logger-sinks
  */
 class console_sink : public sink {
 protected:
@@ -334,6 +375,7 @@ protected:
 
 /**
  * \brief Output to a files.
+ * \ingroup logger-sinks
  */
 class file_sink : public sink {
 private:
@@ -368,6 +410,7 @@ public:
 
 /**
  * \brief Use to disable logs.
+ * \ingroup logger-sinks
  *
  * Useful for unit tests when some classes may emits log.
  */
@@ -393,6 +436,7 @@ protected:
 
 /**
  * \brief Implements logger into syslog.
+ * \ingroup logger-sinks
  */
 class syslog_sink : public sink {
 protected:

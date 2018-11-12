@@ -24,6 +24,30 @@
  * \brief Abstract stream interface.
  */
 
+/**
+ * \defgroup networking Networking
+ * \brief Networking
+ *
+ * Each irccd instance is controllable via sockets using JSON messages.
+ *
+ * This mechanism is offered via the triplet stream/acceptor/connector. Irccd
+ * uses different acceptors to wait for clients to connect and then construct
+ * a stream of it. Once ready, streams are ready to receive and send messages.
+ *
+ * On the client side (e.g. irccdctl), a generic connector is created to connect
+ * to the irccd instance. Once ready, a stream is also created and ready to
+ * perform the same receive and send messages.
+ *
+ * By default, irccd provides predefined implementations for TCP/IP, local unix
+ * sockets and optionally TLS over those.
+ */
+
+/**
+ * \defgroup streams Generic I/O streams
+ * \ingroup networking
+ * \brief Generic I/O streams.
+ */
+
 #include <irccd/sysconfig.hpp>
 
 #include <cassert>
@@ -46,6 +70,7 @@ namespace irccd {
 
 /**
  * \brief Abstract stream interface
+ * \ingroup streams
  *
  * Abstract I/O interface that allows reading/writing from a stream in an
  * asynchronous manner.
@@ -99,6 +124,7 @@ public:
 
 /**
  * \brief Abstract base interface for Boost.Asio sockets.
+ * \ingroup streams
  *
  * This class provides convenient functions for underlying sockets.
  *
@@ -251,6 +277,7 @@ inline void socket_stream_base::send(const nlohmann::json& json, Socket& sc, sen
 
 /**
  * \brief Complete implementation for basic sockets
+ * \ingroup streams
  * \tparam Socket Boost.Asio socket (e.g. boost::asio::ip::tcp::socket)
  */
 template <typename Socket>
@@ -327,6 +354,7 @@ inline void basic_socket_stream<Socket>::send(const nlohmann::json& json, send_h
 
 /**
  * \brief Convenient alias for boost::asio::ip::tcp::socket
+ * \ingroup streams
  */
 using ip_stream = basic_socket_stream<boost::asio::ip::tcp::socket>;
 
@@ -338,6 +366,7 @@ using ip_stream = basic_socket_stream<boost::asio::ip::tcp::socket>;
 
 /**
  * \brief Convenient alias for boost::asio::local::stream_protocol::socket
+ * \ingroup streams
  */
 using local_stream = basic_socket_stream<boost::asio::local::stream_protocol::socket>;
 
@@ -351,6 +380,7 @@ using local_stream = basic_socket_stream<boost::asio::local::stream_protocol::so
 
 /**
  * \brief TLS/SSL streams.
+ * \ingroup streams
  * \tparam Socket the Boost.Asio compatible socket.
  */
 template <typename Socket>
