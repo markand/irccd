@@ -30,7 +30,6 @@
 # IRCCD_WITH_SSL            Enable OpenSSL (default: on)
 # IRCCD_WITH_SYSTEMD        Install systemd service (default: on for Linux)
 # IRCCD_WITH_TESTS          Enable unit testing (default: off)
-# IRCCD_WITH_VERA           Enable style checking using vera (default: on)
 #
 # Note: the option() commands for IRCCD_WITH_PLUGIN_<name> variables are
 # defined automatically from the IRCCD_PLUGINS list.
@@ -67,7 +66,6 @@ option(IRCCD_WITH_PKGCONFIG "Enable pkg-config file" ${DEFAULT_PKGCONFIG})
 option(IRCCD_WITH_SSL "Enable SSL" On)
 option(IRCCD_WITH_SYSTEMD "Install systemd service" ${DEFAULT_SYSTEMD})
 option(IRCCD_WITH_TESTS "Enable unit testing" Off)
-option(IRCCD_WITH_VERA "Enable vera++" On)
 
 #
 # Internal dependencies.
@@ -141,18 +139,6 @@ if (IRCCD_WITH_HTML)
 	endif ()
 else ()
 	set(IRCCD_WITH_HTML_MSG "No (disabled by user)")
-endif ()
-
-if (IRCCD_WITH_VERA)
-	if (TCL_FOUND)
-		add_subdirectory(extern/vera)
-		set(IRCCD_HAVE_VERA On)
-		set(IRCCD_WITH_VERA_MSG "Yes")
-	else ()
-		set(IRCCD_WITH_VERA_MSG "No (TCL not found)")
-	endif ()
-else ()
-	set(IRCCD_WITH_VERA_MSG "No (disabled by user)")
 endif ()
 
 #

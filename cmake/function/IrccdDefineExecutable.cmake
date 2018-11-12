@@ -33,8 +33,6 @@
 # Create an executable that can be installed or not.
 #
 
-include(${CMAKE_CURRENT_LIST_DIR}/IrccdVeraCheck.cmake)
-
 function(irccd_define_executable)
 	set(options EXPORT)
 	set(oneValueArgs DESCRIPTION TARGET)
@@ -86,6 +84,4 @@ function(irccd_define_executable)
 	setg(CPACK_COMPONENT_${CMP}_DISPLAY_NAME "${EXE_TARGET} executable")
 	setg(CPACK_COMPONENT_${CMP}_DESCRIPTION ${EXE_DESCRIPTION})
 	setg(CPACK_COMPONENT_${CMP}_GROUP "Applications")
-
-	irccd_vera_check(${EXE_TARGET} "${EXE_SOURCES}")
 endfunction()

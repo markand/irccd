@@ -32,8 +32,6 @@
 # )
 #
 
-include(${CMAKE_CURRENT_LIST_DIR}/IrccdVeraCheck.cmake)
-
 function(irccd_define_library)
 	set(options EXPORT)
 	set(oneValueArgs TARGET)

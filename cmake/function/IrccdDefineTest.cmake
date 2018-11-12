@@ -35,8 +35,6 @@
 
 find_package(Boost REQUIRED QUIET COMPONENTS unit_test_framework)
 
-include(${CMAKE_CURRENT_LIST_DIR}/IrccdVeraCheck.cmake)
-
 function(irccd_define_test)
 	set(oneValueArgs NAME)
 	set(multiValueArgs DEPENDS SOURCES LIBRARIES FLAGS)
@@ -107,6 +105,4 @@ function(irccd_define_test)
 		COMMAND test-${TEST_NAME}
 		WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/tests
 	)
-
-	irccd_vera_check(test-${TEST_NAME} "${TEST_SOURCES}")
 endfunction()
