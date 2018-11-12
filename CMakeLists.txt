@@ -47,7 +47,6 @@
 # plugins                   - Official irccd plugins.
 # systemd                   - Unit file for systemd.
 # tests                     - The unit tests.
-# win32                     - Additional files for Windows platform.
 #
 
 cmake_minimum_required(VERSION 3.10)
@@ -105,11 +104,6 @@ if (IRCCD_HAVE_JS)
 	add_subdirectory(plugins)
 endif ()
 
-# Platform specific.
-if (WIN32)
-	add_subdirectory(win32)
-endif ()
-
 # Tests.
 if (IRCCD_WITH_TESTS)
 	include(CTest)
@@ -117,6 +111,10 @@ if (IRCCD_WITH_TESTS)
 endif ()
 
 add_subdirectory(cmake/export)
+
+if (CMAKE_SYSTEM_NAME MATCHES "Windows")
+	add_subdirectory(cmake/windows)
+endif ()
 
 message("Compiling with the following flags:")
 message("       General flags:  ${CMAKE_CXX_FLAGS}")
@@ -132,7 +130,6 @@ message("       Tests:          ${IRCCD_WITH_TESTS_MSG}")
 message("       User docs:      ${IRCCD_WITH_HTML_MSG}")
 message("       Doxygen:        ${IRCCD_WITH_DOXYGEN_MSG}")
 message("       Package:        ${IRCCD_PACKAGE_MSG}")
-message("       Vera:           ${IRCCD_WITH_VERA_MSG}")
 message("")
 
 message("Installing plugins:")
@@ -142,7 +139,7 @@ foreach (plugin ${IRCCD_PLUGINS})
 endforeach ()
 message("")
 
-if (WIN32)
+if (CMAKE_SYSTEM_NAME MATCHES "Windows")
 	message("Installing these DLLs:")
 	foreach (name ${IRCCD_DLLS})
 		irccd_indent_message("       ${name}: " "${${name}}" 30)

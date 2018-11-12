@@ -22,7 +22,7 @@
 # It currently only supports MinGW.
 #
 
-project(win32)
+project(windows)
 
 #
 # MinGW libraries.
@@ -39,17 +39,12 @@ if (MINGW)
 	set(LIBWINPTHREAD_DLL libwinpthread-1.dll)
 	set(LIBSTDCPP_DLL libstdc++-6.dll)
 	list(APPEND DLLS LIBGCC_DLL LIBWINPTHREAD_DLL LIBSTDCPP_DLL)
-endif ()
 
-#
-# SSL libraries.
-# -------------------------------------------------------------------
-#
-
-if (IRCCD_HAVE_SSL)
-	set(SSL_EAY_DLL libeay32.dll)
-	set(SSL_LIB_DLL ssleay32.dll)
-	list(APPEND DLLS SSL_EAY_DLL SSL_LIB_DLL)
+	if (IRCCD_HAVE_SSL)
+		set(CRYPTO_DLL libcrypto.dll)
+		set(SSL_DLL libssl.dll)
+		list(APPEND DLLS CRYPTO_DLL SSL_DLL)
+	endif ()
 endif ()
 
 #
@@ -58,8 +53,8 @@ endif ()
 # Creates a cache IRCCD_WITH_<NAME> variable with the path to the DLL if found,
 # otherwise, set to not found.
 #
-# If found, IRCCD_WITH_<NAME> is appended to IRCCD_DLLS global variable and set as
-# parent scope.
+# If found, IRCCD_WITH_<NAME> is appended to IRCCD_DLLS global variable and set
+# as parent scope.
 #
 # If not found, IRCCD_WITH_<NAME> is appended to IRCCD_DLLS_NOT_FOUND variable.
 #
@@ -68,26 +63,26 @@ foreach (name ${DLLS})
 	find_program(
 		IRCCD_WITH_${name}
 		NAMES ${${name}}
-		DOC "Path to DLL"
+		DOC "Path to ${name} DLL"
 	)
 
 	if (EXISTS ${IRCCD_WITH_${name}})
 		file(
 			COPY ${IRCCD_WITH_${name}}
-			DESTINATION ${IRCCD_FAKEROOTDIR}/${IRCCD_WITH_BINDIR}
+			DESTINATION ${CMAKE_BINARY_DIR}/bin
 		)
 		install(
 			PROGRAMS ${IRCCD_WITH_${name}}
 			COMPONENT libirccd
 			DESTINATION bin
 		)
-		list(APPEND IRCCD_DLLS IRCCD_WITH_${name})
+		list(APPEND FOUND IRCCD_WITH_${name})
 	else ()
-		set(IRCCD_PACKAGE Off PARENT_SCOPE)
-		set(IRCCD_PACKAGE_MSG "No (some .dll were not found)" PARENT_SCOPE)
-		list(APPEND IRCCD_DLLS_NOT_FOUND IRCCD_WITH_${name})
+		setg(IRCCD_PACKAGE Off)
+		setg(IRCCD_PACKAGE_MSG "No (some .dll were not found)")
+		list(APPEND NOT_FOUND IRCCD_WITH_${name})
 	endif ()
 endforeach ()
 
-set(IRCCD_DLLS ${IRCCD_DLLS} PARENT_SCOPE)
-set(IRCCD_DLLS_NOT_FOUND ${IRCCD_DLLS_NOT_FOUND} PARENT_SCOPE)
+setg(IRCCD_DLLS "${FOUND}")
+setg(IRCCD_DLLS_NOT_FOUND "${NOT_FOUND}")
