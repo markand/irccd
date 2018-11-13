@@ -27,9 +27,10 @@ namespace irccd {
 
 namespace {
 
-class custom_cli_fixture : public cli_fixture {
+class rule_edit_fixture : public cli_fixture {
 public:
-	custom_cli_fixture()
+	rule_edit_fixture()
+		: cli_fixture(IRCCDCTL_EXECUTABLE)
 	{
 		irccd_.rules().add({
 			{ "s1", "s2" },
@@ -42,7 +43,7 @@ public:
 	}
 };
 
-BOOST_FIXTURE_TEST_SUITE(rule_edit_suite, custom_cli_fixture)
+BOOST_FIXTURE_TEST_SUITE(rule_edit_suite, rule_edit_fixture)
 
 BOOST_AUTO_TEST_CASE(server)
 {

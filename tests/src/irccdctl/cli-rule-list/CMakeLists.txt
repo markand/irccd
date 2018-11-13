@@ -21,4 +21,5 @@ irccd_define_test(
 	SOURCES main.cpp
 	LIBRARIES libirccd-core
 	DEPENDS irccd irccdctl
+	FLAGS IRCCDCTL_EXECUTABLE="$<TARGET_FILE:irccdctl>"
 )

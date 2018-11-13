@@ -46,8 +46,9 @@ auto clear(std::string input) -> std::string
 
 } // !namespace
 
-cli_fixture::cli_fixture()
-	: server_(new mock_server(irccd_.get_service(), "test", "localhost"))
+cli_fixture::cli_fixture(std::string irccdctl)
+	: irccdctl_(std::move(irccdctl))
+	, server_(new mock_server(irccd_.get_service(), "test", "localhost"))
 {
 	using boost::asio::ip::tcp;
 
@@ -86,7 +87,7 @@ auto cli_fixture::exec(const std::vector<std::string>& args) -> result
 {
 	std::ostringstream oss;
 
-	oss << IRCCDCTL_EXECUTABLE << " -t ip --hostname 127.0.0.1 -p " << port_ << " ";
+	oss << irccdctl_ << " -t ip --hostname 127.0.0.1 -p " << port_ << " ";
 	oss << string_util::join(args, " ");
 
 	proc::ipstream stream_out, stream_err;

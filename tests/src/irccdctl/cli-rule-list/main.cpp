@@ -27,7 +27,15 @@ namespace irccd {
 
 namespace {
 
-BOOST_FIXTURE_TEST_SUITE(rule_list_suite, cli_fixture)
+class rule_list_fixture : public cli_fixture {
+public:
+	rule_list_fixture()
+		: cli_fixture(IRCCDCTL_EXECUTABLE)
+	{
+	}
+};
+
+BOOST_FIXTURE_TEST_SUITE(rule_list_suite, rule_list_fixture)
 
 BOOST_AUTO_TEST_CASE(simple)
 {

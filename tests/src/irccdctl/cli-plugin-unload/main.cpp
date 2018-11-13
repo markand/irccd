@@ -46,7 +46,15 @@ public:
 	}
 };
 
-BOOST_FIXTURE_TEST_SUITE(plugin_unload_suite, cli_fixture)
+class plugin_unload_fixture : public cli_fixture {
+public:
+	plugin_unload_fixture()
+		: cli_fixture(IRCCDCTL_EXECUTABLE)
+	{
+	}
+};
+
+BOOST_FIXTURE_TEST_SUITE(plugin_unload_suite, plugin_unload_fixture)
 
 BOOST_AUTO_TEST_CASE(simple)
 {

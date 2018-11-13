@@ -27,7 +27,15 @@ namespace irccd {
 
 namespace {
 
-BOOST_FIXTURE_TEST_SUITE(server_reconnect_suite, cli_fixture)
+class server_reconnect_fixture : public cli_fixture {
+public:
+	server_reconnect_fixture()
+		: cli_fixture(IRCCDCTL_EXECUTABLE)
+	{
+	}
+};
+
+BOOST_FIXTURE_TEST_SUITE(server_reconnect_suite, server_reconnect_fixture)
 
 BOOST_AUTO_TEST_CASE(one)
 {

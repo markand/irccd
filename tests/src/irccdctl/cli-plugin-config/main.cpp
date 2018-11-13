@@ -28,9 +28,10 @@ namespace irccd {
 
 namespace {
 
-class configurable_plugin_cli_fixture : public cli_fixture {
+class plugin_config_fixture : public cli_fixture {
 public:
-	configurable_plugin_cli_fixture()
+	plugin_config_fixture()
+		: cli_fixture(IRCCDCTL_EXECUTABLE)
 	{
 		auto conf1 = std::make_unique<mock_plugin>("conf1");
 		auto conf2 = std::make_unique<mock_plugin>("conf2");
@@ -45,7 +46,7 @@ public:
 	}
 };
 
-BOOST_FIXTURE_TEST_SUITE(plugin_config_suite, configurable_plugin_cli_fixture)
+BOOST_FIXTURE_TEST_SUITE(plugin_config_suite, plugin_config_fixture)
 
 BOOST_AUTO_TEST_CASE(set_and_get)
 {

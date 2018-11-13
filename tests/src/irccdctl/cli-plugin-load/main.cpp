@@ -46,9 +46,17 @@ public:
 	}
 };
 
+class plugin_list_fixture : public cli_fixture {
+public:
+	plugin_list_fixture()
+		: cli_fixture(IRCCDCTL_EXECUTABLE)
+	{
+	}
+};
+
 } // !namespace
 
-BOOST_FIXTURE_TEST_SUITE(plugin_load_suite, cli_fixture)
+BOOST_FIXTURE_TEST_SUITE(plugin_load_suite, plugin_list_fixture)
 
 BOOST_AUTO_TEST_CASE(simple)
 {

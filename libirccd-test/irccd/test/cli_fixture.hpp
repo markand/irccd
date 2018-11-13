@@ -53,6 +53,7 @@ class cli_fixture {
 private:
 	using io_service = boost::asio::io_service;
 
+	std::string irccdctl_;
 	std::thread thread_;
 	std::uint16_t port_{0U};
 	io_service service_;
@@ -83,8 +84,10 @@ public:
 
 	/**
 	 * Construct and initialize and irccd daemon running in a thread.
+	 *
+	 * \param irccdctl path to irccdctl
 	 */
-	cli_fixture();
+	cli_fixture(std::string irccdctl);
 
 	/**
 	 * Stop irccd and close everything.
