@@ -48,17 +48,16 @@ BOOST_AUTO_TEST_CASE(output)
 	BOOST_TEST(!code);
 	BOOST_TEST(out.size() == 10U);
 	BOOST_TEST(err.size() == 0U);
-	BOOST_TEST(out[0] == "Name           : test");
-	BOOST_TEST(out[1] == "Hostname       : localhost");
-	BOOST_TEST(out[2] == "Port           : 6667");
-	// TODO: find appropriate style.
-	//BOOST_TEST(out[3] == "Ipv6           : null");
-	BOOST_TEST(out[4] == "SSL            : null");
-	BOOST_TEST(out[5] == "SSL verified   : null");
-	BOOST_TEST(out[6] == "Channels       : ");
-	BOOST_TEST(out[7] == "Nickname       : francis");
-	BOOST_TEST(out[8] == "User name      : francis");
-	BOOST_TEST(out[9] == "Real name      : IRC Client Daemon");
+	BOOST_TEST(out[0] == "name:           test");
+	BOOST_TEST(out[1] == "hostname:       localhost");
+	BOOST_TEST(out[2] == "port:           6667");
+	BOOST_TEST(out[3] == "nickname:       francis");
+	BOOST_TEST(out[4] == "username:       francis");
+	BOOST_TEST(out[5] == "realname:       IRC Client Daemon");
+	BOOST_TEST(out[6] == "ipv4:           true");
+	BOOST_TEST(out[7] == "ipv6:           true");
+	BOOST_TEST(out[8] == "ssl:            false");
+	BOOST_TEST(out[9] == "channels:       ");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)

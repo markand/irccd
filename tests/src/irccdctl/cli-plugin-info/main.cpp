@@ -48,10 +48,10 @@ BOOST_AUTO_TEST_CASE(simple)
 	BOOST_TEST(!code);
 	BOOST_TEST(out.size() == 4U);
 	BOOST_TEST(err.size() == 0U);
-	BOOST_TEST(out[0] == "Author         : David Demelier <markand@malikania.fr>");
-	BOOST_TEST(out[1] == "License        : ISC");
-	BOOST_TEST(out[2] == "Summary        : mock plugin");
-	BOOST_TEST(out[3] == "Version        : 1.0");
+	BOOST_TEST(out[0] == "author:         David Demelier <markand@malikania.fr>");
+	BOOST_TEST(out[1] == "license:        ISC");
+	BOOST_TEST(out[2] == "summary:        mock plugin");
+	BOOST_TEST(out[3] == "version:        1.0");
 }
 
 BOOST_AUTO_TEST_SUITE(errors)

@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <iomanip>
+#include <ios>
 #include <iostream>
 
 #include <irccd/json_util.hpp>
@@ -29,12 +31,22 @@
 #include "cli.hpp"
 
 using irccd::json_util::deserializer;
+using irccd::json_util::pretty;
 
 namespace irccd::ctl {
 
 // {{{ helpers
 
 namespace {
+
+template <typename T>
+auto operator<<(std::ostream& out, const std::optional<T>& value) -> std::ostream&
+{
+	if (value)
+		out << pretty(*value);
+
+	return out;
+}
 
 template <typename T>
 auto bind() noexcept -> cli::constructor
@@ -59,114 +71,121 @@ auto format(std::vector<std::string> args) -> std::string
 	return "native";
 }
 
-void onConnect(const nlohmann::json &v)
+auto align(std::string_view topic) -> std::ostream&
 {
-	std::cout << "event:    onConnect\n";
-	std::cout << "server:   " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
+	assert(topic.size() <= 16);
+
+	return std::cout << std::setw(16) << std::left << topic;
 }
 
-void onInvite(const nlohmann::json &v)
+void onConnect(const deserializer& v)
 {
-	std::cout << "event:    onInvite\n";
-	std::cout << "server:   " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
-	std::cout << "origin:   " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
-	std::cout << "channel:  " << json_util::pretty(v.value("channel", "(unknown)")) << "\n";
+	align("event:")  << "onConnect\n";
+	align("server:") << v.get<std::string>("server") << "\n";
 }
 
-void onJoin(const nlohmann::json &v)
+void onInvite(const deserializer& v)
 {
-	std::cout << "event:    onJoin\n";
-	std::cout << "server:   " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
-	std::cout << "origin:   " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
-	std::cout << "channel:  " << json_util::pretty(v.value("channel", "(unknown)")) << "\n";
+	align("event:")   << "onInvite\n";
+	align("server:")  << v.get<std::string>("server") << "\n";
+	align("origin:")  << v.get<std::string>("origin") << "\n";
+	align("channel:") << v.get<std::string>("channel") << "\n";
 }
 
-void onKick(const nlohmann::json &v)
+void onJoin(const deserializer& v)
 {
-	std::cout << "event:    onKick\n";
-	std::cout << "server:   " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
-	std::cout << "origin:   " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
-	std::cout << "channel:  " << json_util::pretty(v.value("channel", "(unknown)")) << "\n";
-	std::cout << "target:   " << json_util::pretty(v.value("target", "(unknown)")) << "\n";
-	std::cout << "reason:   " << json_util::pretty(v.value("reason", "(unknown)")) << "\n";
+	align("event:")   << "onJoin\n";
+	align("server:")  << v.get<std::string>("server") << "\n";
+	align("origin:")  << v.get<std::string>("origin") << "\n";
+	align("channel:") << v.get<std::string>("channel") << "\n";
 }
 
-void onMessage(const nlohmann::json &v)
+void onKick(const deserializer& v)
 {
-	std::cout << "event:    onMessage\n";
-	std::cout << "server:   " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
-	std::cout << "origin:   " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
-	std::cout << "channel:  " << json_util::pretty(v.value("channel", "(unknown)")) << "\n";
-	std::cout << "message:  " << json_util::pretty(v.value("message", "(unknown)")) << "\n";
+	align("event:")   << "onKick\n";
+	align("server:")  << v.get<std::string>("server") << "\n";
+	align("origin:")  << v.get<std::string>("origin") << "\n";
+	align("channel:") << v.get<std::string>("channel") << "\n";
+	align("target:")  << v.get<std::string>("target") << "\n";
+	align("reason:")  << v.get<std::string>("reason") << "\n";
 }
 
-void onMe(const nlohmann::json &v)
+void onMessage(const deserializer& v)
 {
-	std::cout << "event:    onMe\n";
-	std::cout << "server:   " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
-	std::cout << "origin:   " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
-	std::cout << "target:   " << json_util::pretty(v.value("target", "(unknown)")) << "\n";
-	std::cout << "message:  " << json_util::pretty(v.value("message", "(unknown)")) << "\n";
+	align("event:")   << "onMessage\n";
+	align("server:")  << v.get<std::string>("server") << "\n";
+	align("origin:")  << v.get<std::string>("origin") << "\n";
+	align("channel:") << v.get<std::string>("channel") << "\n";
+	align("message:") << v.get<std::string>("message") << "\n";
 }
 
-void onMode(const nlohmann::json &v)
+void onMe(const deserializer& v)
 {
-	std::cout << "event:    onMode\n";
-	std::cout << "server:   " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
-	std::cout << "origin:   " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
-	std::cout << "mode:     " << json_util::pretty(v.value("mode", "(unknown)")) << "\n";
+	align("event:")   << "onMe\n";
+	align("server:")  << v.get<std::string>("server") << "\n";
+	align("origin:")  << v.get<std::string>("origin") << "\n";
+	align("target:")  << v.get<std::string>("target") << "\n";
+	align("message:") << v.get<std::string>("message") << "\n";
 }
 
-void onNames(const nlohmann::json &v)
+void onMode(const deserializer& v)
 {
-	std::cout << "event:    onNames\n";
-	std::cout << "server:   " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
-	std::cout << "channel:  " << json_util::pretty(v.value("channel", "(unknown)")) << "\n";
-	std::cout << "names:    " << json_util::pretty(v.value("names", "(unknown)")) << "\n";
+	align("event:")  << "onMode\n";
+	align("server:") << v.get<std::string>("server") << "\n";
+	align("origin:") << v.get<std::string>("origin") << "\n";
+	align("mode:")   << v.get<std::string>("mode") << "\n";
 }
 
-void onNick(const nlohmann::json &v)
+void onNames(const deserializer& v)
 {
-	std::cout << "event:    onNick\n";
-	std::cout << "server:   " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
-	std::cout << "origin:   " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
-	std::cout << "nickname: " << json_util::pretty(v.value("nickname", "(unknown)")) << "\n";
+	align("event:")   << "onNames\n";
+	align("server:")  << v.get<std::string>("server") << "\n";
+	align("channel:") << v.get<std::string>("channel") << "\n";
+	align("names:")   << v.get<std::string>("names") << "\n";
 }
 
-void onNotice(const nlohmann::json &v)
+void onNick(const deserializer& v)
 {
-	std::cout << "event:    onNotice\n";
-	std::cout << "server:   " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
-	std::cout << "origin:   " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
-	std::cout << "message:  " << json_util::pretty(v.value("message", "(unknown)")) << "\n";
+	align("event:")    << "onNick\n";
+	align("server:")   << v.get<std::string>("server") << "\n";
+	align("origin:")   << v.get<std::string>("origin") << "\n";
+	align("nickname:") << v.get<std::string>("nickname") << "\n";
 }
 
-void onPart(const nlohmann::json &v)
+void onNotice(const deserializer& v)
 {
-	std::cout << "event:    onPart\n";
-	std::cout << "server:   " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
-	std::cout << "origin:   " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
-	std::cout << "channel:  " << json_util::pretty(v.value("channel", "(unknown)")) << "\n";
-	std::cout << "reason:   " << json_util::pretty(v.value("reason", "(unknown)")) << "\n";
+	align("event:")   << "onNotice\n";
+	align("server:")  << v.get<std::string>("server") << "\n";
+	align("origin:")  << v.get<std::string>("origin") << "\n";
+	align("message:") << v.get<std::string>("message") << "\n";
 }
 
-void onTopic(const nlohmann::json &v)
+void onPart(const deserializer& v)
 {
-	std::cout << "event:    onTopic\n";
-	std::cout << "server:   " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
-	std::cout << "origin:   " << json_util::pretty(v.value("origin", "(unknown)")) << "\n";
-	std::cout << "channel:  " << json_util::pretty(v.value("channel", "(unknown)")) << "\n";
-	std::cout << "topic:    " << json_util::pretty(v.value("topic", "(unknown)")) << "\n";
+	align("event:")   << "onPart\n";
+	align("server:")  << v.get<std::string>("server") << "\n";
+	align("origin:")  << v.get<std::string>("origin") << "\n";
+	align("channel:") << v.get<std::string>("channel") << "\n";
+	align("reason:")  << v.get<std::string>("reason") << "\n";
 }
 
-void onWhois(const nlohmann::json &v)
+void onTopic(const deserializer& v)
 {
-	std::cout << "event:    onWhois\n";
-	std::cout << "server:   " << json_util::pretty(v.value("server", "(unknown)")) << "\n";
-	std::cout << "nickname: " << json_util::pretty(v.value("nickname", "(unknown)")) << "\n";
-	std::cout << "username: " << json_util::pretty(v.value("username", "(unknown)")) << "\n";
-	std::cout << "hostname: " << json_util::pretty(v.value("hostname", "(unknown)")) << "\n";
-	std::cout << "realname: " << json_util::pretty(v.value("realname", "(unknown)")) << "\n";
+	align("event:")   << "onTopic\n";
+	align("server:")  << v.get<std::string>("server") << "\n";
+	align("origin:")  << v.get<std::string>("origin") << "\n";
+	align("channel:") << v.get<std::string>("channel") << "\n";
+	align("topic:")   << v.get<std::string>("topic") << "\n";
+}
+
+void onWhois(const deserializer& v)
+{
+	align("event:")    << "onWhois\n";
+	align("server:")   << v.get<std::string>("server") << "\n";
+	align("nickname:") << v.get<std::string>("nickname") << "\n";
+	align("username:") << v.get<std::string>("username") << "\n";
+	align("hostname:") << v.get<std::string>("hostname") << "\n";
+	align("realname:") << v.get<std::string>("realname") << "\n";
 }
 
 const std::unordered_map<std::string_view, std::function<void (const nlohmann::json&)>> events{
@@ -188,17 +207,19 @@ const std::unordered_map<std::string_view, std::function<void (const nlohmann::j
 void get_event(ctl::controller& ctl, std::string fmt)
 {
 	ctl.recv([&ctl, fmt] (auto code, auto message) {
+		const deserializer doc(message);
+
 		if (code)
 			throw std::system_error(code);
 
-		const auto event = deserializer(message).get<std::string>("event");
+		const auto event = doc.get<std::string>("event");
 		const auto it = events.find(event ? *event : "");
 
 		if (it != events.end()) {
 			if (fmt == "json")
 				std::cout << message.dump(4) << std::endl;
 			else {
-				it->second(message);
+				it->second(doc);
 				std::cout << std::endl;
 			}
 		}
@@ -315,7 +336,7 @@ void plugin_config_cli::get(ctl::controller& ctl, const std::vector<std::string>
 
 	request(ctl, std::move(json), [args] (auto result) {
 		if (result["variables"].is_object())
-			std::cout << json_util::pretty(result["variables"][args[1]]) << std::endl;
+			std::cout << pretty(result["variables"][args[1]]) << std::endl;
 	});
 }
 
@@ -330,7 +351,7 @@ void plugin_config_cli::getall(ctl::controller& ctl, const std::vector<std::stri
 		const auto variables = result["variables"];
 
 		for (auto v = variables.begin(); v != variables.end(); ++v)
-			std::cout << std::setw(16) << std::left << v.key() << " : " << json_util::pretty(v.value()) << std::endl;
+			std::cout << std::setw(16) << std::left << v.key() << " : " << pretty(v.value()) << std::endl;
 	});
 }
 
@@ -378,15 +399,10 @@ void plugin_info_cli::exec(ctl::controller& ctl, const std::vector<std::string>&
 	request(ctl, json, [] (auto result) {
 		const deserializer doc(result);
 
-		std::cout << std::boolalpha;
-		std::cout << "Author         : "
-		          << doc.get<std::string>("author").value_or("(unknown)") << std::endl;
-		std::cout << "License        : "
-		          << doc.get<std::string>("license").value_or("(unknown)") << std::endl;
-		std::cout << "Summary        : "
-		          << doc.get<std::string>("summary").value_or("(unknown)") << std::endl;
-		std::cout << "Version        : "
-		          << doc.get<std::string>("version").value_or("(unknown)") << std::endl;
+		align("author:")  << doc.get<std::string>("author") << std::endl;
+		align("license:") << doc.get<std::string>("license") << std::endl;
+		align("summary:") << doc.get<std::string>("summary") << std::endl;
+		align("version:") << doc.get<std::string>("version") << std::endl;
 	});
 }
 
@@ -644,13 +660,12 @@ void rule_info_cli::print(const nlohmann::json& json, int index)
 			return "drop";
 	};
 
-	std::cout << "rule:        " << index << std::endl;
-	std::cout << "servers:     " << unjoin(json["servers"]) << std::endl;
-	std::cout << "channels:    " << unjoin(json["channels"]) << std::endl;
-	std::cout << "plugins:     " << unjoin(json["plugins"]) << std::endl;
-	std::cout << "events:      " << unjoin(json["events"]) << std::endl;
-	std::cout << "action:      " << unstr(json["action"]) << std::endl;
-	std::cout << std::endl;
+	align("rule:") << index << std::endl;
+	align("servers:") << unjoin(json["servers"]) << std::endl;
+	align("channels:") << unjoin(json["channels"]) << std::endl;
+	align("plugins:") << unjoin(json["plugins"]) << std::endl;
+	align("events:") << unjoin(json["events"]) << std::endl;
+	align("action:") << unstr(json["action"]) << std::endl;
 }
 
 auto rule_info_cli::get_name() const noexcept -> std::string_view
@@ -691,10 +706,17 @@ void rule_list_cli::exec(ctl::controller& ctl, const std::vector<std::string>&)
 {
 	request(ctl, {{ "command", "rule-list" }}, [] (auto result) {
 		auto pos = 0;
+		auto length = result["list"].size();
 
-		for (const auto& obj : result["list"])
-			if (obj.is_object())
-				rule_info_cli::print(obj, pos++);
+		for (const auto& obj : result["list"]) {
+			if (!obj.is_object())
+				continue;
+
+			rule_info_cli::print(obj, pos++);
+
+			if (pos < length)
+				std::cout << std::endl;
+		}
 	});
 }
 
@@ -847,24 +869,24 @@ void server_info_cli::exec(ctl::controller& ctl, const std::vector<std::string>&
 	});
 
 	request(ctl, std::move(json), [] (auto result) {
-		std::cout << std::boolalpha;
-		std::cout << "Name           : " << json_util::pretty(result["name"]) << std::endl;
-		std::cout << "Hostname       : " << json_util::pretty(result["hostname"]) << std::endl;
-		std::cout << "Port           : " << json_util::pretty(result["port"]) << std::endl;
-		std::cout << "Ipv6           : " << json_util::pretty(result["ipv6"]) << std::endl;
-		std::cout << "SSL            : " << json_util::pretty(result["ssl"]) << std::endl;
-		std::cout << "SSL verified   : " << json_util::pretty(result["sslVerify"]) << std::endl;
-		std::cout << "Channels       : ";
+		const deserializer doc(result);
+
+		align("name:")     << doc.get<std::string>("name") << std::endl;
+		align("hostname:") << doc.get<std::string>("hostname") << std::endl;
+		align("port:")     << doc.get<std::uint64_t>("port") << std::endl;
+		align("nickname:") << doc.get<std::string>("nickname") << std::endl;
+		align("username:") << doc.get<std::string>("username") << std::endl;
+		align("realname:") << doc.get<std::string>("realname") << std::endl;
+		align("ipv4:")     << doc.get<bool>("ipv4") << std::endl;
+		align("ipv6:")     << doc.get<bool>("ipv6") << std::endl;
+		align("ssl:")      << doc.get<bool>("ssl") << std::endl;
+		align("channels:");
 
 		for (const auto& v : result["channels"])
 			if (v.is_string())
 				std::cout << v.template get<std::string>() << " ";
 
 		std::cout << std::endl;
-
-		std::cout << "Nickname       : " << json_util::pretty(result["nickname"]) << std::endl;
-		std::cout << "User name      : " << json_util::pretty(result["username"]) << std::endl;
-		std::cout << "Real name      : " << json_util::pretty(result["realname"]) << std::endl;
 	});
 }
 

@@ -19,7 +19,8 @@ Migrating from 2.x to 3.x
 - The functions `server-cnotice` and `server-cmode` have been removed, use
   `server-notice` and `server-mode` instead,
 - The option `connect.host` has been renamed to `connect.hostname`,
-- The option `--host` has been renamed to `--hostname`.
+- The option `--host` has been renamed to `--hostname`,
+- The output style has been unified.
 
 ### Plugins
 

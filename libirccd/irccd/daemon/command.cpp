@@ -531,14 +531,9 @@ void server_info_command::exec(irccd& irccd, transport_client& client, const doc
 	response.push_back({"channels", server->get_channels()});
 
 	// Optional stuff.
-	if ((server->get_options() & server::options::ipv6) == server::options::ipv6)
-		response.push_back({"ipv6", true});
-	if ((server->get_options() & server::options::ipv6) == server::options::ipv6)
-		response.push_back({"ipv6", true});
-	if ((server->get_options() & server::options::ssl) == server::options::ssl)
-		response.push_back({"ssl", true});
-	if ((server->get_options() & server::options::ssl_verify) == server::options::ssl_verify)
-		response.push_back({"sslVerify", true});
+	response.push_back({"ipv4", static_cast<bool>(server->get_options() & server::options::ipv4)});
+	response.push_back({"ipv6", static_cast<bool>(server->get_options() & server::options::ipv6)});
+	response.push_back({"ssl", static_cast<bool>(server->get_options() & server::options::ssl)});
 
 	client.write(response);
 }
