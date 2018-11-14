@@ -337,14 +337,15 @@ private:
 
 public:
 	/**
-	 * Construct the loader with a predefined set of directories and extensions.
+	 * Construct the loader with a predefined set of directories and
+	 * extensions.
 	 *
-	 * If directories is not specified, a sensible default list of system and
-	 * user paths are searched.
+	 * If directories is not specified, a sensible default list of system
+	 * and user paths are searched.
 	 *
 	 * \pre !extensions.empty()
 	 * \param directories optional list of directories to search
-	 * \param extensions the non empty list of extensions supported
+	 * \param extensions optional list of extensions
 	 */
 	plugin_loader(std::vector<std::string> directories,
 	              std::vector<std::string> extensions) noexcept;
@@ -353,6 +354,14 @@ public:
 	 * Virtual destructor defaulted.
 	 */
 	virtual ~plugin_loader() = default;
+
+	/**
+	 * Tells if the plugin should be opened by checking file extension.
+	 *
+	 * \param path the path
+	 * \return true if the extension matches
+	 */
+	virtual auto is_supported(std::string_view path) noexcept -> bool;
 
 	/**
 	 * Try to open the plugin specified by path.

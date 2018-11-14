@@ -259,8 +259,12 @@ public:
 	 * Constructor.
 	 *
 	 * \param irccd the irccd instance
+	 * \param directories directories to search
+	 * \param extensions extensions to search
 	 */
-	js_plugin_loader(irccd& irccd) noexcept;
+	js_plugin_loader(irccd& irccd,
+	                 std::vector<std::string> directories = {},
+	                 std::vector<std::string> extensions = {".js"}) noexcept;
 
 	/**
 	 * Destructor defaulted.

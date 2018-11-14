@@ -148,6 +148,9 @@ auto plugin_service::get_paths(std::string_view id) -> plugin::map
 auto plugin_service::open(std::string_view id, std::string_view path) -> std::shared_ptr<plugin>
 {
 	for (const auto& loader : loaders_) {
+		if (!loader->is_supported(path))
+			continue;
+
 		auto plugin = loader->open(id, path);
 
 		if (plugin)
@@ -193,7 +196,9 @@ void plugin_service::load(std::string_view id, std::string_view path)
 	plugin->set_paths(get_paths(id));
 
 	exec(plugin, &plugin::handle_load, irccd_);
-	add(std::move(plugin));
+	add(plugin);
+
+	irccd_.get_log().info(*plugin) << "loaded version " << plugin->get_version() << std::endl;
 }
 
 void plugin_service::reload(std::string_view id)

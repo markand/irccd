@@ -313,8 +313,10 @@ void js_plugin::handle_whois(irccd&, const whois_event& event)
 	call("onWhois", event.server, event.whois);
 }
 
-js_plugin_loader::js_plugin_loader(irccd& irccd) noexcept
-	: plugin_loader({}, { ".js" })
+js_plugin_loader::js_plugin_loader(irccd& irccd,
+                                   std::vector<std::string> directories,
+                                   std::vector<std::string> extensions) noexcept
+	: plugin_loader(std::move(directories), std::move(extensions))
 	, irccd_(irccd)
 {
 }
@@ -333,9 +335,6 @@ auto js_plugin_loader::get_modules() noexcept -> modules&
 
 auto js_plugin_loader::open(std::string_view id, std::string_view path) -> std::shared_ptr<plugin>
 {
-	if (path.rfind(".js") == std::string::npos)
-		return nullptr;
-
 	auto plugin = std::make_shared<js_plugin>(std::string(id), std::string(path));
 
 	for (const auto& mod : modules_)

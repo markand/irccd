@@ -163,7 +163,21 @@ plugin_loader::plugin_loader(std::vector<std::string> directories,
 	: directories_(std::move(directories))
 	, extensions_(std::move(extensions))
 {
-	assert(!extensions_.empty());
+}
+
+auto plugin_loader::is_supported(std::string_view path) noexcept -> bool
+{
+	const std::string name(path);
+
+	for (const auto& ext : extensions_)
+		if (boost::filesystem::path(name).extension() == ext)
+			return true;
+
+	/*
+	 * If extensions are not specified, let plugin_loader::open a chance
+	 * to be called anyway.
+	 */
+	return extensions_.empty();
 }
 
 auto plugin_loader::find(std::string_view name) -> std::shared_ptr<plugin>
