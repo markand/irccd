@@ -36,6 +36,7 @@
 #   TYPE        NATIVE
 #   DOCS        documentation files in markdown
 #   SOURCES     c++ source files
+#   INCLUDES    additional includes
 #   LIBRARIES   additional libraries
 # )
 #
@@ -89,6 +90,7 @@ function(_irccd_define_native_plugin)
 
 	add_library(plugin-${PLG_NAME} MODULE ${PLG_SOURCES} ${PLG_OUTPUT_DOC} ${PLG_DOCS})
 	target_link_libraries(plugin-${PLG_NAME} libirccd ${PLG_LIBRARIES})
+	target_include_directories(plugin-${PLG_NAME} PRIVATE ${PLG_INCLUDES})
 
 	# Change output name.
 	set_target_properties(
@@ -117,7 +119,7 @@ endfunction()
 function(irccd_define_plugin)
 	set(options "")
 	set(oneValueArgs NAME DOCS TYPE SCRIPT)
-	set(multiValueArgs SOURCES LIBRARIES)
+	set(multiValueArgs SOURCES INCLUDES LIBRARIES)
 
 	cmake_parse_arguments(PLG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 

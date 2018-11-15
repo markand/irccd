@@ -18,19 +18,24 @@
 
 project(plugin-links)
 
-add_subdirectory(extern/uriparser)
+find_package(Uriparser)
 
-irccd_define_plugin(
-	NAME links
-	TYPE NATIVE
-	SOURCES
-		${plugin-links_SOURCE_DIR}/links.cpp
-		${plugin-links_SOURCE_DIR}/links.hpp
-		${plugin-links_SOURCE_DIR}/requester.cpp
-		${plugin-links_SOURCE_DIR}/requester.hpp
-		${plugin-links_SOURCE_DIR}/scope_exit.cpp
-		${plugin-links_SOURCE_DIR}/scope_exit.hpp
-		${plugin-links_SOURCE_DIR}/uri.cpp
-		${plugin-links_SOURCE_DIR}/uri.hpp
-	LIBRARIES liburiparser
-)
+if (NOT Uriparser_FOUND)
+	setg(IRCCD_WITH_PLUGIN_LINKS_MSG "No (uriparser not found)")
+else ()
+	irccd_define_plugin(
+		NAME links
+		TYPE NATIVE
+		SOURCES
+			${plugin-links_SOURCE_DIR}/links.cpp
+			${plugin-links_SOURCE_DIR}/links.hpp
+			${plugin-links_SOURCE_DIR}/requester.cpp
+			${plugin-links_SOURCE_DIR}/requester.hpp
+			${plugin-links_SOURCE_DIR}/scope_exit.cpp
+			${plugin-links_SOURCE_DIR}/scope_exit.hpp
+			${plugin-links_SOURCE_DIR}/uri.cpp
+			${plugin-links_SOURCE_DIR}/uri.hpp
+		INCLUDES ${Uriparser_INCLUDE_DIRS}
+		LIBRARIES ${Uriparser_LIBRARIES}
+	)
+endif ()
