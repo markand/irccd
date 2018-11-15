@@ -85,7 +85,6 @@ BOOST_AUTO_TEST_CASE(full)
 	BOOST_TEST(!static_cast<bool>(s->get_options() & server::options::ipv4));
 	BOOST_TEST(static_cast<bool>(s->get_options() & server::options::ipv6));
 	BOOST_TEST(static_cast<bool>(s->get_options() & server::options::ssl));
-	BOOST_TEST(static_cast<bool>(s->get_options() & server::options::ssl_verify));
 	BOOST_TEST(static_cast<bool>(s->get_options() & server::options::auto_rejoin));
 	BOOST_TEST(static_cast<bool>(s->get_options() & server::options::join_invite));
 }

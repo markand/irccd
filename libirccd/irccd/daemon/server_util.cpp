@@ -80,7 +80,6 @@ void from_config_load_channels(server& sv, const ini::section& sc)
 void from_config_load_flags(server& sv, const ini::section& sc)
 {
 	const auto ssl = sc.find("ssl");
-	const auto ssl_verify = sc.find("ssl-verify");
 	const auto auto_rejoin = sc.find("auto-rejoin");
 	const auto auto_reconnect = sc.find("auto-reconnect");
 	const auto join_invite = sc.find("join-invite");
@@ -89,8 +88,6 @@ void from_config_load_flags(server& sv, const ini::section& sc)
 
 	if (ssl != sc.end())
 		toggle(sv, server::options::ssl, string_util::is_boolean(ssl->get_value()));
-	if (ssl_verify != sc.end())
-		toggle(sv, server::options::ssl_verify, string_util::is_boolean(ssl_verify->get_value()));
 	if (auto_rejoin != sc.end())
 		toggle(sv, server::options::auto_rejoin, string_util::is_boolean(auto_rejoin->get_value()));
 	if (auto_reconnect != sc.end())
@@ -173,7 +170,6 @@ void from_json_load_options(server& sv, const deserializer& parser)
 	const auto auto_rejoin = parser.get<bool>("autoRejoin");
 	const auto join_invite = parser.get<bool>("joinInvite");
 	const auto ssl = parser.get<bool>("ssl");
-	const auto ssl_verify = parser.get<bool>("sslVerify");
 	const auto ipv4 = parser.optional<bool>("ipv4", true);
 	const auto ipv6 = parser.optional<bool>("ipv6", true);
 
@@ -182,20 +178,14 @@ void from_json_load_options(server& sv, const deserializer& parser)
 
 	toggle(sv, server::options::ipv4, *ipv4);
 	toggle(sv, server::options::ipv6, *ipv6);
+	toggle(sv, server::options::auto_rejoin, *auto_rejoin);
+	toggle(sv, server::options::join_invite, *join_invite);
+	toggle(sv, server::options::ssl, *ssl);
 
-	if (auto_rejoin.value_or(false))
-		sv.set_options(sv.get_options() | server::options::auto_rejoin);
-	if (join_invite.value_or(false))
-		sv.set_options(sv.get_options() | server::options::join_invite);
-
-	if (ssl.value_or(false))
 #if !defined(IRCCD_HAVE_SSL)
+	if ((server::get_options() & server::options::ssl) == server::options::ssl)
 		throw server_error(server_error::ssl_disabled);
-#else
-		sv.set_options(sv.get_options() | server::options::ssl);
 #endif
-	if (ssl_verify.value_or(false))
-		sv.set_options(sv.get_options() | server::options::ssl_verify);
 
 	// Verify that at least IPv4 or IPv6 is set.
 	if ((sv.get_options() & server::options::ipv4) != server::options::ipv4 &&

@@ -91,12 +91,8 @@ auto Server_prototype_info(duk_context* ctx) -> duk_ret_t
 	duk_put_prop_string(ctx, -2, "hostname");
 	duk_push_int(ctx, server->get_port());
 	duk_put_prop_string(ctx, -2, "port");
-	duk_push_boolean(ctx,
-		(server->get_options() & server::options::ssl) == server::options::ssl);
+	duk_push_boolean(ctx, (server->get_options() & server::options::ssl) == server::options::ssl);
 	duk_put_prop_string(ctx, -2, "ssl");
-	duk_push_boolean(ctx,
-		(server->get_options() & server::options::ssl_verify) == server::options::ssl_verify);
-	duk_put_prop_string(ctx, -2, "sslVerify");
 	duk::push(ctx, server->get_command_char());
 	duk_put_prop_string(ctx, -2, "commandChar");
 	duk::push(ctx, server->get_realname());
@@ -601,7 +597,6 @@ auto Server_prototype_toString(duk_context* ctx) -> duk_ret_t
  * password: the password,      (Optional: default none)
  * channels: array of channels  (Optiona: default empty)
  * ssl: true to use ssl,        (Optional: default false)
- * sslVerify: true to verify    (Optional: default true)
  * nickname: "nickname",        (Optional, default: irccd)
  * username: "user name",       (Optional, default: irccd)
  * realname: "real name",       (Optional, default: IRC Client Daemon)

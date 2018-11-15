@@ -239,8 +239,6 @@ auto parse(std::vector<std::string> &args) -> option::result
 		{ "--nickname",         true    },
 		{ "-r",                 true    },
 		{ "--realname",         true    },
-		{ "-S",                 false   },
-		{ "--ssl-verify",       false   },
 		{ "-s",                 false   },
 		{ "--ssl",              false   },
 		{ "-u",                 true    },
@@ -808,8 +806,6 @@ void server_connect_cli::exec(ctl::controller& ctl, const std::vector<std::strin
 		object["port"] = *port;
 	}
 
-	if (result.count("-S") > 0 || result.count("--ssl-verify") > 0)
-		object["sslVerify"] = true;
 	if (result.count("-s") > 0 || result.count("--ssl") > 0)
 		object["ssl"] = true;
 	if ((it = result.find("-n")) != result.end() || (it = result.find("--nickname")) != result.end())

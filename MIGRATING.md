@@ -20,7 +20,8 @@ Migrating from 2.x to 3.x
   `server-notice` and `server-mode` instead,
 - The option `connect.host` has been renamed to `connect.hostname`,
 - The option `--host` has been renamed to `--hostname`,
-- The output style has been unified.
+- The output style has been unified,
+- Options `-S` and `--ssl-verify` in server-connect have been removed.
 
 ### Plugins
 
@@ -71,7 +72,8 @@ Migrating from 2.x to 3.x
 - The object returned in the method `Server.info` now has a `hostname` property
   instead of `host`.
 - The property `host` in constructor `Server` has been renamed to
-  `hostname`.
+  `hostname`,
+- The property `sslVerify` in `Server` constructor has been removed.
 
 #### Module ElapsedTimer
 

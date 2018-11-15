@@ -284,10 +284,9 @@ public:
 		ipv4            = (1 << 0),     //!< Connect using IPv4
 		ipv6            = (1 << 1),     //!< Connect using IPv6
 		ssl             = (1 << 2),     //!< Use SSL
-		ssl_verify      = (1 << 3),     //!< Verify SSL
-		auto_rejoin     = (1 << 4),     //!< Auto rejoin a kick
-		auto_reconnect  = (1 << 5),     //!< Auto reconnect on disconnection
-		join_invite     = (1 << 6)      //!< Join a channel on invitation
+		auto_rejoin     = (1 << 3),     //!< Auto rejoin a kick
+		auto_reconnect  = (1 << 4),     //!< Auto reconnect on disconnection
+		join_invite     = (1 << 5)      //!< Join a channel on invitation
 	};
 
 	/**
