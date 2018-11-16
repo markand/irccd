@@ -462,7 +462,6 @@ void server_service::handle_error(const std::shared_ptr<server>& server,
 	assert(server);
 
 	bot_.get_log().warning(*server) << code.message() << std::endl;
-	bot_.get_log().warning(*server) << int(server->get_options()) << std::endl;
 
 	if ((server->get_options() & server::options::auto_reconnect) != server::options::auto_reconnect)
 		remove(server->get_id());
