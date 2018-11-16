@@ -430,6 +430,20 @@ inline void tls_stream<Socket>::send(const nlohmann::json& json, send_handler ha
 	socket_stream_base::send(json, socket_, handler);
 }
 
+/**
+ * \brief Convenient alias.
+ */
+using tls_ip_stream = tls_stream<boost::asio::ip::tcp::socket>;
+
+#if defined(BOOST_ASIO_HAS_LOCAL_SOCKETS)
+
+/**
+ * \brief Convenient alias.
+ */
+using tls_local_stream = tls_stream<boost::asio::local::stream_protocol::socket>;
+
+#endif // !BOOST_ASIO_HAS_LOCAL_SOCKETS
+
 #endif // !IRCCD_HAVE_SSL
 
 // }}}
