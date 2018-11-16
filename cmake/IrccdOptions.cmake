@@ -94,7 +94,6 @@ endif ()
 find_package(Doxygen)
 find_package(OpenSSL)
 find_package(Pandoc)
-find_package(TCL QUIET)
 find_package(Editline)
 
 if (IRCCD_WITH_LIBEDIT)
