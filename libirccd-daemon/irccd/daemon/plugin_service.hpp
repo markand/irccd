@@ -256,14 +256,14 @@ public:
 namespace logger {
 
 template <typename T>
-struct loggable_traits;
+struct type_traits;
 
 /**
  * \brief Implement Loggable traits for plugin.
  * \ingroup logger-traits
  */
 template <>
-struct loggable_traits<plugin> {
+struct type_traits<plugin> {
 	/**
 	 * Return "plugin"
 	 *

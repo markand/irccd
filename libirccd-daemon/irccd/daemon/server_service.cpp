@@ -674,12 +674,12 @@ void server_service::load(const config& cfg) noexcept
 
 namespace logger {
 
-auto loggable_traits<server>::get_category(const server&) -> std::string_view
+auto type_traits<server>::get_category(const server&) -> std::string_view
 {
 	return "server";
 }
 
-auto loggable_traits<server>::get_component(const server& sv) -> std::string_view
+auto type_traits<server>::get_component(const server& sv) -> std::string_view
 {
 	return sv.get_id();
 }

@@ -128,14 +128,14 @@ public:
 namespace logger {
 
 template <typename T>
-struct loggable_traits;
+struct type_traits;
 
 /**
  * \brief Specialization for rule.
  * \ingroup logger-traits
  */
 template <>
-struct loggable_traits<rule> {
+struct type_traits<rule> {
 	/**
 	 * Get 'rule' category.
 	 *

@@ -268,12 +268,12 @@ void plugin_service::load(const config& cfg) noexcept
 
 namespace logger {
 
-auto loggable_traits<plugin>::get_category(const plugin&) -> std::string_view
+auto type_traits<plugin>::get_category(const plugin&) -> std::string_view
 {
 	return "plugin";
 }
 
-auto loggable_traits<plugin>::get_component(const plugin& plugin) -> std::string_view
+auto type_traits<plugin>::get_component(const plugin& plugin) -> std::string_view
 {
 	return plugin.get_id();
 }

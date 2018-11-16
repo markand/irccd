@@ -106,12 +106,12 @@ void rule_service::load(const config& cfg) noexcept
 
 namespace logger {
 
-auto loggable_traits<rule>::get_category(const rule&) -> std::string_view
+auto type_traits<rule>::get_category(const rule&) -> std::string_view
 {
 	return "rule";
 }
 
-auto loggable_traits<rule>::get_component(const rule&) -> std::string_view
+auto type_traits<rule>::get_component(const rule&) -> std::string_view
 {
 	return "";
 }

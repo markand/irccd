@@ -153,14 +153,14 @@ public:
 namespace logger {
 
 template <typename T>
-struct loggable_traits;
+struct type_traits;
 
 /**
  * \brief Specialization for server.
  * \ingroup logger-traits
  */
 template <>
-struct loggable_traits<server> {
+struct type_traits<server> {
 	/**
 	 * Get 'server' category.
 	 *

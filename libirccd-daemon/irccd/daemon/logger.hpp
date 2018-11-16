@@ -69,7 +69,7 @@ class sink;
  * ```
  */
 template <typename T>
-struct loggable_traits;
+struct type_traits;
 
 /**
  * \brief Logger object.
@@ -204,14 +204,14 @@ public:
 	 *
 	 * \param loggable the loggable object
 	 * \return the output stream
-	 * \see loggable_traits
+	 * \see type_traits
 	 */
 	template <typename Loggable>
 	auto info(const Loggable& loggable) -> logger
 	{
 		return info(
-			loggable_traits<Loggable>::get_category(loggable),
-			loggable_traits<Loggable>::get_component(loggable)
+		        type_traits<Loggable>::get_category(loggable),
+		        type_traits<Loggable>::get_component(loggable)
 		);
 	}
 
@@ -231,14 +231,14 @@ public:
 	 *
 	 * \param loggable the loggable object
 	 * \return the output stream
-	 * \see loggable_traits
+	 * \see type_traits
 	 */
 	template <typename Loggable>
 	auto warning(const Loggable& loggable) -> logger
 	{
 		return warning(
-			loggable_traits<Loggable>::get_category(loggable),
-			loggable_traits<Loggable>::get_component(loggable)
+		        type_traits<Loggable>::get_category(loggable),
+		        type_traits<Loggable>::get_component(loggable)
 		);
 	}
 
@@ -259,14 +259,14 @@ public:
 	 *
 	 * \param loggable the loggable object
 	 * \return the output stream
-	 * \see loggable_traits
+	 * \see type_traits
 	 */
 	template <typename Loggable>
 	auto debug(const Loggable& loggable) -> logger
 	{
 		return debug(
-			loggable_traits<Loggable>::get_category(loggable),
-			loggable_traits<Loggable>::get_component(loggable)
+		        type_traits<Loggable>::get_category(loggable),
+		        type_traits<Loggable>::get_component(loggable)
 		);
 	}
 };
