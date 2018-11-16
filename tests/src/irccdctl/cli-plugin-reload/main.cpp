@@ -20,41 +20,26 @@
 #include <boost/test/unit_test.hpp>
 
 #include <irccd/test/cli_fixture.hpp>
-#include <irccd/test/mock.hpp>
-
-using irccd::test::cli_fixture;
-using irccd::test::mock;
+#include <irccd/test/mock_plugin.hpp>
 
 using irccd::daemon::bot;
 using irccd::daemon::plugin;
+
+using irccd::test::cli_fixture;
+using irccd::test::mock_plugin;
 
 namespace irccd {
 
 namespace {
 
-class reloadable_plugin : public mock, public plugin {
-public:
-	reloadable_plugin()
-		: plugin("test")
-	{
-	}
-
-	auto get_name() const noexcept -> std::string_view override
-	{
-		return "reload";
-	}
-
-	void handle_reload(bot&) override
-	{
-		push("handle_reload");
-	}
-};
-
 class plugin_reload_fixture : public cli_fixture {
-public:
+protected:
+	std::shared_ptr<mock_plugin> plugin_{new mock_plugin("test")};
+
 	plugin_reload_fixture()
 		: cli_fixture(IRCCDCTL_EXECUTABLE)
 	{
+		bot_.plugins().add(plugin_);
 	}
 };
 
@@ -62,9 +47,6 @@ BOOST_FIXTURE_TEST_SUITE(plugin_reload_suite, plugin_reload_fixture)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-	const auto plugin = std::make_shared<reloadable_plugin>();
-
-	bot_.plugins().add(plugin);
 	start();
 
 	const auto [code, out, err] = exec({ "plugin-reload", "test" });
@@ -72,7 +54,7 @@ BOOST_AUTO_TEST_CASE(simple)
 	BOOST_TEST(!code);
 	BOOST_TEST(out.size() == 0U);
 	BOOST_TEST(err.size() == 0U);
-	BOOST_TEST(plugin->find("handle_reload").size() == 1U);
+	BOOST_TEST(plugin_->find("handle_reload").size() == 1U);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

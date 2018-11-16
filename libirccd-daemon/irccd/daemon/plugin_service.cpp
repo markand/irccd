@@ -163,6 +163,10 @@ auto plugin_service::open(std::string_view id, std::string_view path) -> std::sh
 auto plugin_service::find(std::string_view id) -> std::shared_ptr<plugin>
 {
 	for (const auto& loader : loaders_) {
+		/*
+		 * Protect loader->find function to continue searching other
+		 * appropriate plugins.
+		 */
 		try {
 			auto plugin = loader->find(id);
 
@@ -183,21 +187,28 @@ void plugin_service::load(std::string_view id, std::string_view path)
 
 	std::shared_ptr<plugin> plugin;
 
-	if (path.empty())
-		plugin = find(id);
-	else
-		plugin = open(id, std::move(path));
+	try {
+		if (path.empty())
+			plugin = find(id);
+		else
+			plugin = open(id, std::move(path));
+	} catch (...) {
+		throw plugin_error(plugin_error::exec_error, id);
+	}
 
 	if (!plugin)
 		throw plugin_error(plugin_error::not_found, id);
 
-	plugin->set_options(get_options(id));
-	plugin->set_formats(get_formats(id));
-	plugin->set_paths(get_paths(id));
+	try {
+		plugin->set_options(get_options(id));
+		plugin->set_formats(get_formats(id));
+		plugin->set_paths(get_paths(id));
+	} catch (...) {
+		throw plugin_error(plugin_error::exec_error, id);
+	}
 
 	exec(plugin, &plugin::handle_load, bot_);
 	add(plugin);
-
 	bot_.get_log().info(*plugin) << "loaded version " << plugin->get_version() << std::endl;
 }
 

@@ -342,8 +342,8 @@ public:
 	 * \param directories optional list of directories to search
 	 * \param extensions optional list of extensions
 	 */
-	plugin_loader(std::vector<std::string> directories,
-	              std::vector<std::string> extensions) noexcept;
+	plugin_loader(std::vector<std::string> directories = {},
+	              std::vector<std::string> extensions = {}) noexcept;
 
 	/**
 	 * Virtual destructor defaulted.

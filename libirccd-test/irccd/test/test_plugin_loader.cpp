@@ -1,5 +1,5 @@
 /*
- * test.hpp -- libirccd-test convenience header
+ * test_plugin_loader.cpp -- special plugin loader for unit tests
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -16,26 +16,43 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_TEST_HPP
-#define IRCCD_TEST_HPP
+#include "broken_plugin.hpp"
+#include "mock_plugin.hpp"
+#include "test_plugin_loader.hpp"
 
-/**
- * \file test.hpp
- * \brief libirccd-test convenience header.
- */
+using std::make_shared;
+using std::shared_ptr;
+using std::string;
+using std::string_view;
 
-#include "sysconfig.hpp"
+using irccd::daemon::plugin;
 
-#include "test/broken_plugin.hpp"
-#include "test/cli_fixture.hpp"
-#include "test/command_fixture.hpp"
-#include "test/debug_server.hpp"
-#include "test/irccd_fixture.hpp"
-#include "test/js_fixture.hpp"
-#include "test/js_plugin_fixture.hpp"
-#include "test/mock.hpp"
-#include "test/mock_plugin.hpp"
-#include "test/mock_server.hpp"
-#include "test/test_plugin_loader.hpp"
+namespace irccd::test {
 
-#endif // !IRCCD_TEST_HPP
+namespace {
+
+auto create(string_view id) -> shared_ptr<plugin>
+{
+	string strid(id);
+
+	if (id == "broken")
+		return make_shared<broken_plugin>(strid);
+	if (id == "mock")
+		return make_shared<mock_plugin>(strid);
+
+	return nullptr;
+}
+
+} // !namespace
+
+auto test_plugin_loader::open(string_view id, string_view) -> shared_ptr<plugin>
+{
+	return create(id);
+}
+
+auto test_plugin_loader::find(string_view id) -> shared_ptr<plugin>
+{
+	return create(id);
+}
+
+} // !irccd::test

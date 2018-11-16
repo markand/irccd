@@ -19,8 +19,10 @@
 #define BOOST_TEST_MODULE "plugin-unload"
 #include <boost/test/unit_test.hpp>
 
+#include <irccd/test/broken_plugin.hpp>
 #include <irccd/test/command_fixture.hpp>
 
+using irccd::test::broken_plugin;
 using irccd::test::command_fixture;
 using irccd::test::mock_plugin;
 
@@ -33,34 +35,15 @@ namespace irccd {
 
 namespace {
 
-class broken_plugin : public plugin {
-public:
-	broken_plugin()
-		: plugin("broken")
-	{
-	}
-
-	auto get_name() const noexcept -> std::string_view override
-	{
-		return "broken";
-	}
-
-	void handle_unload(bot&) override
-	{
-		throw std::runtime_error("broken");
-	}
-};
-
 class plugin_unload_fixture : public command_fixture {
 protected:
-	std::shared_ptr<mock_plugin> plugin_;
+	std::shared_ptr<mock_plugin> plugin_{new mock_plugin("test")};
 
 	plugin_unload_fixture()
-		: plugin_(std::make_shared<mock_plugin>("test"))
 	{
 		bot_.plugins().clear();
 		bot_.plugins().add(plugin_);
-		bot_.plugins().add(std::make_unique<broken_plugin>());
+		bot_.plugins().add(std::make_unique<broken_plugin>("broken"));
 	}
 };
 

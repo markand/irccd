@@ -29,6 +29,7 @@
 #include <irccd/daemon/transport_server.hpp>
 
 #include "cli_fixture.hpp"
+#include "test_plugin_loader.hpp"
 
 namespace proc = boost::process;
 
@@ -68,6 +69,7 @@ cli_fixture::cli_fixture(std::string irccdctl)
 
 	bot_.servers().add(server_);
 	bot_.transports().add(std::make_unique<transport_server>(std::move(acceptor)));
+	bot_.plugins().add_loader(std::make_unique<test_plugin_loader>());
 	server_->disconnect();
 	server_->clear();
 }
@@ -85,7 +87,6 @@ void cli_fixture::start()
 	// Let irccd bind correctly.
 	std::this_thread::sleep_for(std::chrono::milliseconds(250));
 }
-
 
 auto cli_fixture::exec(const std::vector<std::string>& args) -> result
 {

@@ -17,14 +17,21 @@
  */
 
 #include <irccd/daemon/logger.hpp>
+#include <irccd/daemon/plugin_service.hpp>
 
 #include "irccd_fixture.hpp"
+#include "test_plugin_loader.hpp"
+
+using irccd::daemon::logger::silent_sink;
+
+using std::make_unique;
 
 namespace irccd::test {
 
 irccd_fixture::irccd_fixture()
 {
-	bot_.set_log(std::make_unique<daemon::logger::silent_sink>());
+	bot_.set_log(make_unique<silent_sink>());
+	bot_.plugins().add_loader(make_unique<test_plugin_loader>());
 }
 
 } // !irccd

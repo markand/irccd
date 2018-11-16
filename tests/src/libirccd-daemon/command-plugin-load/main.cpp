@@ -33,72 +33,10 @@ namespace irccd {
 
 namespace {
 
-class broken : public plugin {
-public:
-	broken()
-		: plugin("broken")
-	{
-	}
-
-	auto get_name() const noexcept -> std::string_view override
-	{
-		return "broken";
-	}
-
-	void handle_load(bot&) override
-	{
-		throw std::runtime_error("broken");
-	}
-};
-
-class broken_loader : public plugin_loader {
-public:
-	broken_loader()
-		: plugin_loader({}, { ".none" })
-	{
-	}
-
-	auto open(std::string_view, std::string_view) -> std::shared_ptr<plugin> override
-	{
-		return nullptr;
-	}
-
-	auto find(std::string_view id) noexcept -> std::shared_ptr<plugin> override
-	{
-		if (id == "broken")
-			return std::make_unique<broken>();
-
-		return nullptr;
-	}
-};
-
-class sample_loader : public plugin_loader {
-public:
-	sample_loader()
-		: plugin_loader({}, { ".none" })
-	{
-	}
-
-	auto open(std::string_view, std::string_view) -> std::shared_ptr<plugin> override
-	{
-		return nullptr;
-	}
-
-	auto find(std::string_view id) noexcept -> std::shared_ptr<plugin> override
-	{
-		if (id == "test")
-			return std::make_unique<mock_plugin>("test");
-
-		return nullptr;
-	}
-};
-
 class plugin_load_fixture : public command_fixture {
 public:
 	plugin_load_fixture()
 	{
-		bot_.plugins().add_loader(std::make_unique<sample_loader>());
-		bot_.plugins().add_loader(std::make_unique<broken_loader>());
 		bot_.plugins().clear();
 		bot_.plugins().add(std::make_unique<mock_plugin>("already"));
 	}
@@ -112,11 +50,11 @@ BOOST_AUTO_TEST_CASE(basic)
 {
 	const auto [json, code] = request({
 		{ "command",    "plugin-load"   },
-		{ "plugin",     "test"          }
+		{ "plugin",     "mock"          }
 	});
 
 	BOOST_TEST(!code);
-	BOOST_TEST(bot_.plugins().has("test"));
+	BOOST_TEST(bot_.plugins().has("mock"));
 }
 
 BOOST_AUTO_TEST_SUITE(errors)

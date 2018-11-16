@@ -32,24 +32,6 @@ namespace irccd {
 
 namespace {
 
-class custom_plugin_loader : public plugin_loader {
-public:
-	custom_plugin_loader()
-		: plugin_loader({}, { "none" })
-	{
-	}
-
-	auto find(std::string_view id) -> std::shared_ptr<plugin> override
-	{
-		return std::make_unique<mock_plugin>(std::string(id));
-	}
-
-	auto open(std::string_view id, std::string_view) -> std::shared_ptr<plugin> override
-	{
-		return std::make_unique<mock_plugin>(std::string(id));
-	}
-};
-
 class plugin_list_fixture : public cli_fixture {
 public:
 	plugin_list_fixture()
@@ -66,12 +48,11 @@ BOOST_AUTO_TEST_CASE(simple)
 {
 	bot_.plugins().add(std::make_unique<mock_plugin>("p1"));
 	bot_.plugins().add(std::make_unique<mock_plugin>("p2"));
-	bot_.plugins().add_loader(std::make_unique<custom_plugin_loader>());
 	start();
 
 	// Load a plugin first.
 	{
-		const auto [code, out, err] = exec({ "plugin-load", "test" });
+		const auto [code, out, err] = exec({ "plugin-load", "mock" });
 
 		BOOST_TEST(!code);
 		BOOST_TEST(out.size() == 0U);
@@ -87,9 +68,12 @@ BOOST_AUTO_TEST_CASE(simple)
 		BOOST_TEST(err.size() == 0U);
 		BOOST_TEST(out[0] == "p1");
 		BOOST_TEST(out[1] == "p2");
-		BOOST_TEST(out[2] == "test");
+		BOOST_TEST(out[2] == "mock");
 	}
 }
+
+// TODO: not_found
+// TODO: exec_error
 
 BOOST_AUTO_TEST_SUITE_END()
 

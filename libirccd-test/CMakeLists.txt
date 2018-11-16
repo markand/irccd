@@ -21,6 +21,8 @@ project(libirccd-test)
 set(
 	SOURCES
 	${libirccd-test_SOURCE_DIR}/irccd/test.hpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/broken_plugin.cpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/broken_plugin.hpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/cli_fixture.cpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/cli_fixture.hpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/command_fixture.cpp
@@ -35,6 +37,8 @@ set(
 	${libirccd-test_SOURCE_DIR}/irccd/test/mock_plugin.hpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/mock_server.cpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/mock_server.hpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/test_plugin_loader.cpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/test_plugin_loader.hpp
 )
 
 if (${IRCCD_HAVE_JS})
