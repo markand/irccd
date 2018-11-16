@@ -20,6 +20,7 @@ project(libirccd-ctl)
 
 set(
 	SOURCES
+	${libirccd-ctl_SOURCE_DIR}/irccd/ctl.hpp
 	${libirccd-ctl_SOURCE_DIR}/irccd/ctl/controller.cpp
 	${libirccd-ctl_SOURCE_DIR}/irccd/ctl/controller.hpp
 )
@@ -27,7 +28,7 @@ set(
 irccd_define_library(
 	TARGET libirccd-ctl
 	EXPORT
-	HEADERS ${libirccd-ctl_SOURCE_DIR}/irccd/ctl
+	HEADERS ${libirccd-ctl_SOURCE_DIR}/irccd/
 	SOURCES ${SOURCES}
 	LIBRARIES
 		libirccd-daemon

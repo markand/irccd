@@ -22,6 +22,7 @@ find_package(Boost REQUIRED QUIET COMPONENTS timer)
 
 set(
 	SOURCES
+	${libirccd-js_SOURCE_DIR}/irccd/js.hpp
 	${libirccd-js_SOURCE_DIR}/irccd/js/directory_js_api.cpp
 	${libirccd-js_SOURCE_DIR}/irccd/js/directory_js_api.hpp
 	${libirccd-js_SOURCE_DIR}/irccd/js/duk.cpp
@@ -57,7 +58,7 @@ set(
 irccd_define_library(
 	TARGET libirccd-js
 	EXPORT
-	HEADERS ${libirccd-js_SOURCE_DIR}/irccd/js
+	HEADERS ${libirccd-js_SOURCE_DIR}/irccd/
 	SOURCES
 		${SOURCES}
 	LIBRARIES

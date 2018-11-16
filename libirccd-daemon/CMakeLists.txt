@@ -20,6 +20,7 @@ project(libirccd-daemon)
 
 set(
 	SOURCES
+	${libirccd-daemon_SOURCE_DIR}/irccd/daemon.hpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/bot.cpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/bot.hpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/command.cpp
@@ -59,7 +60,7 @@ set(
 irccd_define_library(
 	TARGET libirccd-daemon
 	EXPORT
-	HEADERS ${libirccd-daemon_SOURCE_DIR}/irccd/daemon
+	HEADERS ${libirccd-daemon_SOURCE_DIR}/irccd/
 	SOURCES ${SOURCES}
 	LIBRARIES libirccd
 	PUBLIC_INCLUDES $<BUILD_INTERFACE:${libirccd-daemon_SOURCE_DIR}>

@@ -26,6 +26,7 @@ set(
 	${libirccd_SOURCE_DIR}/irccd/config.cpp
 	${libirccd_SOURCE_DIR}/irccd/config.hpp
 	${libirccd_SOURCE_DIR}/irccd/connector.hpp
+	${libirccd_SOURCE_DIR}/irccd/core.hpp
 	${libirccd_SOURCE_DIR}/irccd/fs_util.cpp
 	${libirccd_SOURCE_DIR}/irccd/fs_util.hpp
 	${libirccd_SOURCE_DIR}/irccd/ini.cpp

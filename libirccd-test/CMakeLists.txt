@@ -20,6 +20,7 @@ project(libirccd-test)
 
 set(
 	SOURCES
+	${libirccd-test_SOURCE_DIR}/irccd/test.hpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/cli_fixture.cpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/cli_fixture.hpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/command_fixture.cpp
@@ -55,7 +56,7 @@ endif ()
 irccd_define_library(
 	TARGET libirccd-test
 	EXPORT
-	HEADERS ${libirccd-test_SOURCE_DIR}/irccd/test
+	HEADERS ${libirccd-test_SOURCE_DIR}/irccd/
 	SOURCES ${SOURCES}
 	LIBRARIES
 		${LIBRARIES}
