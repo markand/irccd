@@ -33,10 +33,16 @@
 
 #include "js_api.hpp"
 
+namespace irccd::daemon {
+
+class bot;
+
+} // !irccd
+
 namespace irccd::js {
 
 /**
- * \ingroup jsapi
+ * \ingroup js-api
  * \brief Irccd Javascript API.
  */
 class irccd_js_api : public js_api {
@@ -49,23 +55,23 @@ public:
 	/**
 	 * \copydoc js_api::load
 	 */
-	void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
+	void load(daemon::bot& bot, std::shared_ptr<js_plugin> plugin) override;
 };
 
 namespace duk {
 
 /**
- * \brief Specialize dukx_type_traits for irccd.
+ * \brief Specialize dukx_type_traits for bot.
  */
 template <>
-struct type_traits<irccd> {
+struct type_traits<daemon::bot> {
 	/**
 	 * Get irccd instance stored in this context.
 	 *
 	 * \param ctx the context
 	 * \return the irccd reference
 	 */
-	static auto self(duk_context* ctx) -> irccd&;
+	static auto self(duk_context* ctx) -> daemon::bot&;
 };
 
 /**

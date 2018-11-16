@@ -22,7 +22,11 @@
 #include <irccd/test/cli_fixture.hpp>
 #include <irccd/test/mock_plugin.hpp>
 
-using namespace irccd::test;
+using irccd::daemon::plugin;
+using irccd::daemon::plugin_loader;
+
+using irccd::test::mock_plugin;
+using irccd::test::cli_fixture;
 
 namespace irccd {
 
@@ -60,9 +64,9 @@ BOOST_FIXTURE_TEST_SUITE(plugin_load_suite, plugin_list_fixture)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-	irccd_.plugins().add(std::make_unique<mock_plugin>("p1"));
-	irccd_.plugins().add(std::make_unique<mock_plugin>("p2"));
-	irccd_.plugins().add_loader(std::make_unique<custom_plugin_loader>());
+	bot_.plugins().add(std::make_unique<mock_plugin>("p1"));
+	bot_.plugins().add(std::make_unique<mock_plugin>("p2"));
+	bot_.plugins().add_loader(std::make_unique<custom_plugin_loader>());
 	start();
 
 	// Load a plugin first.

@@ -24,7 +24,7 @@
  * \brief Test fixture for irccd.
  */
 
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/bot.hpp>
 
 namespace irccd::test {
 
@@ -41,7 +41,7 @@ protected:
 	/**
 	 * \brief Main irccd daemon.
 	 */
-	irccd irccd_{ctx_};
+	daemon::bot bot_{ctx_};
 
 	/**
 	 * Default constructor.

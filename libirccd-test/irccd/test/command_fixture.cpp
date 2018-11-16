@@ -27,6 +27,9 @@
 
 using boost::asio::ip::tcp;
 
+using irccd::daemon::command;
+using irccd::daemon::transport_server;
+
 namespace irccd::test {
 
 template <typename Condition>
@@ -62,19 +65,19 @@ command_fixture::command_fixture()
 	, plugin_(new mock_plugin("test"))
 {
 	tcp::endpoint ep(tcp::v4(), 0U);
-	tcp::acceptor raw_acceptor(irccd_.get_service(), std::move(ep));
+	tcp::acceptor raw_acceptor(bot_.get_service(), std::move(ep));
 
 	auto service = std::to_string(raw_acceptor.local_endpoint().port());
-	auto acceptor = std::make_unique<ip_acceptor>(irccd_.get_service(), std::move(raw_acceptor));
-	auto connector = std::make_unique<ip_connector>(irccd_.get_service(), "127.0.0.1", service, true, false);
+	auto acceptor = std::make_unique<ip_acceptor>(bot_.get_service(), std::move(raw_acceptor));
+	auto connector = std::make_unique<ip_connector>(bot_.get_service(), "127.0.0.1", service, true, false);
 
 	// 1. Add all commands.
 	for (const auto& f : command::registry)
-		irccd_.transports().get_commands().push_back(f());
+		bot_.transports().get_commands().push_back(f());
 
 	// 2. Create controller and transport server.
 	ctl_ = std::make_unique<ctl::controller>(std::move(connector));
-	irccd_.transports().add(std::make_unique<transport_server>(std::move(acceptor)));
+	bot_.transports().add(std::make_unique<transport_server>(std::move(acceptor)));
 
 	// 3. Wait for controller to connect.
 	boost::asio::deadline_timer timer(ctx_);
@@ -103,8 +106,8 @@ command_fixture::command_fixture()
 	while (!connected)
 		ctx_.poll();
 
-	irccd_.servers().add(server_);
-	irccd_.plugins().add(plugin_);
+	bot_.servers().add(server_);
+	bot_.plugins().add(plugin_);
 	server_->disconnect();
 	server_->clear();
 	plugin_->clear();

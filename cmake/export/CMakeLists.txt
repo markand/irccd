@@ -50,7 +50,7 @@ if (IRCCD_WITH_PKGCONFIG)
 		set(IRCCD_EXTRA_LIBS "-lssl -lcrypto")
 	endif ()
 
-	foreach (pkg libirccd-core libirccd libirccd-ctl libirccd-js libirccd-test)
+	foreach (pkg libirccd libirccd-daemon libirccd-ctl libirccd-js libirccd-test)
 		configure_file(
 			${CMAKE_CURRENT_SOURCE_DIR}/${pkg}.pc
 			${CMAKE_CURRENT_BINARY_DIR}/${pkg}.pc

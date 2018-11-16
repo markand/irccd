@@ -39,8 +39,8 @@ BOOST_FIXTURE_TEST_SUITE(server_list_suite, server_list_fixture)
 
 BOOST_AUTO_TEST_CASE(output)
 {
-	irccd_.servers().add(std::make_unique<mock_server>(irccd_.get_service(), "s1", "localhost"));
-	irccd_.servers().add(std::make_unique<mock_server>(irccd_.get_service(), "s2", "localhost"));
+	bot_.servers().add(std::make_unique<mock_server>(bot_.get_service(), "s1", "localhost"));
+	bot_.servers().add(std::make_unique<mock_server>(bot_.get_service(), "s2", "localhost"));
 	start();
 
 	const auto [code, out, err] = exec({ "server-list" });

@@ -22,7 +22,7 @@
 
 #include <irccd/string_util.hpp>
 
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/plugin_service.hpp>
 #include <irccd/daemon/server.hpp>
 
@@ -31,7 +31,11 @@
 using boost::format;
 using boost::str;
 
-namespace irccd::test {
+using irccd::daemon::plugin;
+
+using irccd::test::js_plugin_fixture;
+
+namespace irccd {
 
 namespace {
 
@@ -70,7 +74,7 @@ public:
 	test_fixture()
 		: js_plugin_fixture(PLUGIN_PATH)
 	{
-		irccd_.plugins().add(std::make_shared<fake_plugin>("fake"));
+		bot_.plugins().add(std::make_shared<fake_plugin>("fake"));
 
 		plugin_->set_formats({
 			{ "usage", "usage=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}" },
@@ -78,7 +82,7 @@ public:
 			{ "not-found", "not-found=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{name}" },
 			{ "too-long", "too-long=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}" }
 		});
-		plugin_->handle_load(irccd_);
+		plugin_->handle_load(bot_);
 	}
 };
 
@@ -86,20 +90,20 @@ BOOST_FIXTURE_TEST_SUITE(test_fixture_suite, test_fixture)
 
 BOOST_AUTO_TEST_CASE(format_usage)
 {
-	plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#staff", "" });
+	plugin_->handle_command(bot_, { server_, "jean!jean@localhost", "#staff", "" });
 
 	auto cmd = server_->find("message").front();
 
 	BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#staff");
 	BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "usage=plugin:!plugin:test:#staff:jean!jean@localhost:jean");
 
-	plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#staff", "fail" });
+	plugin_->handle_command(bot_, { server_, "jean!jean@localhost", "#staff", "fail" });
 	cmd = server_->find("message").front();
 
 	BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#staff");
 	BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "usage=plugin:!plugin:test:#staff:jean!jean@localhost:jean");
 
-	plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#staff", "info" });
+	plugin_->handle_command(bot_, { server_, "jean!jean@localhost", "#staff", "info" });
 	cmd = server_->find("message").front();
 
 	BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#staff");
@@ -108,7 +112,7 @@ BOOST_AUTO_TEST_CASE(format_usage)
 
 BOOST_AUTO_TEST_CASE(format_info)
 {
-	plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#staff", "info fake" });
+	plugin_->handle_command(bot_, { server_, "jean!jean@localhost", "#staff", "info fake" });
 
 	const auto cmd = server_->find("message").front();
 
@@ -118,7 +122,7 @@ BOOST_AUTO_TEST_CASE(format_info)
 
 BOOST_AUTO_TEST_CASE(format_not_found)
 {
-	plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#staff", "info doesnotexistsihope" });
+	plugin_->handle_command(bot_, { server_, "jean!jean@localhost", "#staff", "info doesnotexistsihope" });
 
 	const auto cmd = server_->find("message").front();
 
@@ -129,9 +133,9 @@ BOOST_AUTO_TEST_CASE(format_not_found)
 BOOST_AUTO_TEST_CASE(format_too_long)
 {
 	for (int i = 0; i < 100; ++i)
-		irccd_.plugins().add(std::make_shared<fake_plugin>(str(format("plugin-n-%1%") % i)));
+		bot_.plugins().add(std::make_shared<fake_plugin>(str(format("plugin-n-%1%") % i)));
 
-	plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#staff", "list" });
+	plugin_->handle_command(bot_, { server_, "jean!jean@localhost", "#staff", "list" });
 
 	const auto cmd = server_->find("message").front();
 
@@ -143,4 +147,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd::test
+} // !irccd

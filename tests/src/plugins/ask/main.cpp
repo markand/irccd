@@ -19,12 +19,14 @@
 #define BOOST_TEST_MODULE "Ask plugin"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/server.hpp>
 
 #include <irccd/test/js_plugin_fixture.hpp>
 
-namespace irccd::test {
+using irccd::test::js_plugin_fixture;
+
+namespace irccd {
 
 namespace {
 
@@ -36,7 +38,7 @@ public:
 		plugin_->set_options({
 			{ "file", CMAKE_CURRENT_SOURCE_DIR "/answers.conf" }
 		});
-		plugin_->handle_load(irccd_);
+		plugin_->handle_load(bot_);
 	}
 };
 
@@ -52,7 +54,7 @@ BOOST_AUTO_TEST_CASE(basic)
 	 * both answers in that amount of tries.
 	 */
 	for (int i = 0; i < 1000; ++i) {
-		plugin_->handle_command(irccd_, {server_, "tester", "#dummy", ""});
+		plugin_->handle_command(bot_, {server_, "tester", "#dummy", ""});
 
 		const auto cmd = server_->find("message").back();
 
@@ -76,4 +78,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd::test
+} // !irccd

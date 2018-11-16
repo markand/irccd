@@ -24,6 +24,9 @@
 #include "js_plugin.hpp"
 #include "util_js_api.hpp"
 
+using irccd::daemon::bot;
+using irccd::daemon::irc::user;
+
 namespace irccd::js {
 
 namespace {
@@ -292,7 +295,7 @@ auto Util_format(duk_context* ctx) -> duk_ret_t
 auto Util_splituser(duk_context* ctx) -> duk_ret_t
 {
 	return wrap(ctx, [&] {
-		return duk::push(ctx, irc::user::parse(duk::require<std::string>(ctx, 0)).nick);
+		return duk::push(ctx, user::parse(duk::require<std::string>(ctx, 0)).nick);
 	});
 }
 
@@ -316,7 +319,7 @@ auto Util_splituser(duk_context* ctx) -> duk_ret_t
 auto Util_splithost(duk_context* ctx) -> duk_ret_t
 {
 	return wrap(ctx, [&] {
-		return duk::push(ctx, irc::user::parse(duk::require<std::string>(ctx, 0)).host);
+		return duk::push(ctx, user::parse(duk::require<std::string>(ctx, 0)).host);
 	});
 }
 
@@ -337,7 +340,7 @@ auto util_js_api::get_name() const noexcept -> std::string_view
 	return "Irccd.Util";
 }
 
-void util_js_api::load(irccd&, std::shared_ptr<js_plugin> plugin)
+void util_js_api::load(bot&, std::shared_ptr<js_plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 

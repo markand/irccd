@@ -26,7 +26,7 @@ set(DOXYGEN_WARN_NO_PARAMDOC YES)
 
 set(DOXYGEN_STRIP_FROM_PATH
 	libirccd/irccd
-	libirccd-core/irccd
+	libirccd-daemon/irccd
 	libirccd-ctl/irccd
 	libirccd-js/irccd
 	libirccd-test/irccd
@@ -35,14 +35,10 @@ set(DOXYGEN_STRIP_FROM_PATH
 doxygen_add_docs(
 	docs-doxygen
 	${CMAKE_CURRENT_SOURCE_DIR}/mainpage.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/page-overview-irccd.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/page-overview-plugins.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/page-overview-rules.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/page-overview-servers.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/page-overview-transports.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/page-overview.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/modules.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/pages.cpp
 	${CMAKE_SOURCE_DIR}/libirccd
-	${CMAKE_SOURCE_DIR}/libirccd-core
+	${CMAKE_SOURCE_DIR}/libirccd-daemon
 	${CMAKE_SOURCE_DIR}/libirccd-ctl
 	${CMAKE_SOURCE_DIR}/libirccd-js
 	${CMAKE_SOURCE_DIR}/libirccd-test

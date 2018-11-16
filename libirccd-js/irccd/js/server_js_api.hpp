@@ -31,7 +31,7 @@
 namespace irccd::js {
 
 /**
- * \ingroup jsapi
+ * \ingroup js-api
  * \brief Irccd.Server Javascript API.
  */
 class server_js_api : public js_api {
@@ -44,7 +44,7 @@ public:
 	/**
 	 * \copydoc js_api::load
 	 */
-	void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
+	void load(daemon::bot& bot, std::shared_ptr<js_plugin> plugin) override;
 };
 
 namespace duk {
@@ -55,7 +55,7 @@ namespace duk {
  * Supports push, require.
  */
 template <>
-struct type_traits<std::shared_ptr<server>> {
+struct type_traits<std::shared_ptr<daemon::server>> {
 	/**
 	 * Push a server.
 	 *
@@ -63,7 +63,7 @@ struct type_traits<std::shared_ptr<server>> {
 	 * \param ctx the context
 	 * \param server the server
 	 */
-	static void push(duk_context* ctx, std::shared_ptr<server> server);
+	static void push(duk_context* ctx, std::shared_ptr<daemon::server> server);
 
 	/**
 	 * Require a server. Raise a Javascript error if not a Server.
@@ -72,21 +72,21 @@ struct type_traits<std::shared_ptr<server>> {
 	 * \param index the index
 	 * \return the server
 	 */
-	static auto require(duk_context* ctx, duk_idx_t index) -> std::shared_ptr<server>;
+	static auto require(duk_context* ctx, duk_idx_t index) -> std::shared_ptr<daemon::server>;
 };
 
 /**
  * \brief Specialization for server_error.
  */
 template <>
-struct type_traits<server_error> {
+struct type_traits<daemon::server_error> {
 	/**
 	 * Raise a server_error.
 	 *
 	 * \param ctx the context
 	 * \param error the error
 	 */
-	static void raise(duk_context* ctx, const server_error& error);
+	static void raise(duk_context* ctx, const daemon::server_error& error);
 };
 
 } // !duk

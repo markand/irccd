@@ -31,7 +31,7 @@ namespace irccd {
 /**
  * \brief Links plugin.
  */
-class links_plugin : public plugin {
+class links_plugin : public daemon::plugin {
 public:
 	// options.
 	static inline unsigned conf_timeout{30U};
@@ -83,7 +83,7 @@ public:
 	/**
 	 * \copydoc plugin::handle_message
 	 */
-	void handle_message(irccd&, const message_event&) override;
+	void handle_message(daemon::bot&, const daemon::message_event&) override;
 
 	/**
 	 * Export ABI.
@@ -98,7 +98,7 @@ public:
 	 * \param id the plugin id
 	 * \return the compiled version
 	 */
-	static auto init(std::string) -> std::unique_ptr<plugin>;
+	static auto init(std::string) -> std::unique_ptr<daemon::plugin>;
 };
 
 } // !irccd

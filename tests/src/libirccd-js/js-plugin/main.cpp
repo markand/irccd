@@ -26,7 +26,12 @@
 
 #include <irccd/test/irccd_fixture.hpp>
 
-using namespace irccd::test;
+using irccd::daemon::plugin;
+
+using irccd::test::irccd_fixture;
+
+using irccd::js::js_plugin;
+using irccd::js::js_api;
 
 namespace irccd {
 
@@ -34,14 +39,14 @@ namespace {
 
 class js_plugin_fixture : public irccd_fixture {
 protected:
-	std::shared_ptr<js::js_plugin> plugin_;
+	std::shared_ptr<js_plugin> plugin_;
 
 	void load(const std::string& path)
 	{
-		plugin_ = std::make_unique<js::js_plugin>("test", path);
+		plugin_ = std::make_unique<js_plugin>("test", path);
 
-		for (const auto& f : js::js_api::registry)
-			f()->load(irccd_, plugin_);
+		for (const auto& f : js_api::registry)
+			f()->load(bot_, plugin_);
 
 		plugin_->open();
 	}
@@ -57,7 +62,7 @@ BOOST_AUTO_TEST_CASE(assign)
 		{ "path",	   "none"  },
 		{ "verbose",	"false" }
 	});
-	plugin_->handle_load(irccd_);
+	plugin_->handle_load(bot_);
 
 	BOOST_TEST(plugin_->get_options().at("path") == "none");
 	BOOST_TEST(plugin_->get_options().at("verbose") == "false");
@@ -72,7 +77,7 @@ BOOST_AUTO_TEST_CASE(fill)
 		{ "path",	   "none"  },
 		{ "verbose",	"false" }
 	});
-	plugin_->handle_load(irccd_);
+	plugin_->handle_load(bot_);
 
 	BOOST_TEST(plugin_->get_options().at("path") == "none");
 	BOOST_TEST(plugin_->get_options().at("verbose") == "false");
@@ -83,7 +88,7 @@ BOOST_AUTO_TEST_CASE(merge_after)
 {
 	load(CMAKE_CURRENT_SOURCE_DIR "/config-fill.js");
 
-	plugin_->handle_load(irccd_);
+	plugin_->handle_load(bot_);
 	plugin_->set_options({
 		{ "path",	   "none"  },
 		{ "verbose",	"false" }
@@ -102,20 +107,20 @@ protected:
 
 	js_plugin_loader_fixture()
 	{
-		irccd_.set_config(config(CMAKE_CURRENT_SOURCE_DIR "/irccd.conf"));
+		bot_.set_config(config(CMAKE_CURRENT_SOURCE_DIR "/irccd.conf"));
 
-		auto loader = std::make_unique<js::js_plugin_loader>(irccd_);
+		auto loader = std::make_unique<js::js_plugin_loader>(bot_);
 
 		for (const auto& f : js::js_api::registry)
 			loader->get_modules().push_back(f());
 
-		irccd_.plugins().add_loader(std::move(loader));
+		bot_.plugins().add_loader(std::move(loader));
 	}
 
 	void load(std::string name, std::string path)
 	{
-		irccd_.plugins().load(name, path);
-		plugin_ = irccd_.plugins().require(name);
+		bot_.plugins().load(name, path);
+		plugin_ = bot_.plugins().require(name);
 	}
 };
 

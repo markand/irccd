@@ -89,7 +89,7 @@ function(_irccd_define_native_plugin)
 	endif ()
 
 	add_library(plugin-${PLG_NAME} MODULE ${PLG_SOURCES} ${PLG_OUTPUT_DOC} ${PLG_DOCS})
-	target_link_libraries(plugin-${PLG_NAME} libirccd ${PLG_LIBRARIES})
+	target_link_libraries(plugin-${PLG_NAME} libirccd-daemon ${PLG_LIBRARIES})
 	target_include_directories(plugin-${PLG_NAME} PRIVATE ${PLG_INCLUDES})
 
 	# Change output name.

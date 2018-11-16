@@ -21,7 +21,11 @@
 
 #include <irccd/test/js_plugin_fixture.hpp>
 
-namespace irccd::test {
+using irccd::daemon::plugin;
+
+using irccd::test::js_plugin_fixture;
+
+namespace irccd {
 
 namespace {
 
@@ -42,7 +46,7 @@ public:
 			config.emplace("file", CMAKE_CURRENT_SOURCE_DIR "/jokes.json");
 
 		plugin_->set_options(config);
-		plugin_->handle_load(irccd_);
+		plugin_->handle_load(bot_);
 	}
 };
 
@@ -68,7 +72,7 @@ BOOST_AUTO_TEST_CASE(simple)
 	load();
 
 	const auto call = [&] () {
-		plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#joke", "" });
+		plugin_->handle_command(bot_, { server_, "jean!jean@localhost", "#joke", "" });
 
 		const auto cmd = server_->find("message").back();
 		const auto msg = std::any_cast<std::string>(cmd[1]);
@@ -107,7 +111,7 @@ BOOST_AUTO_TEST_CASE(toobig)
 	};
 
 	const auto call = [&] () {
-		plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#joke", "" });
+		plugin_->handle_command(bot_, { server_, "jean!jean@localhost", "#joke", "" });
 
 		const auto cmd = server_->find("message").back();
 
@@ -136,7 +140,7 @@ BOOST_AUTO_TEST_CASE(invalid)
 	};
 
 	const auto call = [&] () {
-		plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#joke", "" });
+		plugin_->handle_command(bot_, { server_, "jean!jean@localhost", "#joke", "" });
 
 		const auto cmd = server_->find("message").back();
 
@@ -161,7 +165,7 @@ BOOST_AUTO_TEST_CASE(not_found)
 {
 	load({{"file", "doesnotexist.json"}});
 
-	plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#joke", "" });
+	plugin_->handle_command(bot_, { server_, "jean!jean@localhost", "#joke", "" });
 
 	const auto cmd = server_->find("message").back();
 
@@ -173,7 +177,7 @@ BOOST_AUTO_TEST_CASE(not_array)
 {
 	load({{"file", CMAKE_CURRENT_SOURCE_DIR "/error-not-array.json"}});
 
-	plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#joke", "" });
+	plugin_->handle_command(bot_, { server_, "jean!jean@localhost", "#joke", "" });
 
 	const auto cmd = server_->find("message").back();
 
@@ -185,7 +189,7 @@ BOOST_AUTO_TEST_CASE(empty)
 {
 	load({{"file", CMAKE_CURRENT_SOURCE_DIR "/error-empty.json"}});
 
-	plugin_->handle_command(irccd_, {server_, "jean!jean@localhost", "#joke", ""});
+	plugin_->handle_command(bot_, {server_, "jean!jean@localhost", "#joke", ""});
 
 	const auto cmd = server_->find("message").back();
 
@@ -199,4 +203,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd::test
+} // !irccd

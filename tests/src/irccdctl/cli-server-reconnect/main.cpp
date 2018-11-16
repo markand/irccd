@@ -39,11 +39,11 @@ BOOST_FIXTURE_TEST_SUITE(server_reconnect_suite, server_reconnect_fixture)
 
 BOOST_AUTO_TEST_CASE(one)
 {
-	const auto s1 = std::make_shared<mock_server>(irccd_.get_service(), "s1", "localhost");
-	const auto s2 = std::make_shared<mock_server>(irccd_.get_service(), "s2", "localhost");
+	const auto s1 = std::make_shared<mock_server>(bot_.get_service(), "s1", "localhost");
+	const auto s2 = std::make_shared<mock_server>(bot_.get_service(), "s2", "localhost");
 
-	irccd_.servers().add(s1);
-	irccd_.servers().add(s2);
+	bot_.servers().add(s1);
+	bot_.servers().add(s2);
 	s1->clear();
 	s2->clear();
 	start();
@@ -63,11 +63,11 @@ BOOST_AUTO_TEST_CASE(one)
 
 BOOST_AUTO_TEST_CASE(all)
 {
-	const auto s1 = std::make_shared<mock_server>(irccd_.get_service(), "s1", "localhost");
-	const auto s2 = std::make_shared<mock_server>(irccd_.get_service(), "s2", "localhost");
+	const auto s1 = std::make_shared<mock_server>(bot_.get_service(), "s1", "localhost");
+	const auto s2 = std::make_shared<mock_server>(bot_.get_service(), "s2", "localhost");
 
-	irccd_.servers().add(s1);
-	irccd_.servers().add(s2);
+	bot_.servers().add(s1);
+	bot_.servers().add(s2);
 	s1->clear();
 	s2->clear();
 	start();

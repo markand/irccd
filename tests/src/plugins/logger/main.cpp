@@ -22,12 +22,16 @@
 #define BOOST_TEST_MODULE "Logger plugin"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/server.hpp>
 
 #include <irccd/test/js_plugin_fixture.hpp>
 
-namespace irccd::test {
+using irccd::daemon::plugin;
+
+using irccd::test::js_plugin_fixture;
+
+namespace irccd {
 
 namespace {
 
@@ -65,7 +69,7 @@ public:
 			config.emplace("path", CMAKE_CURRENT_BINARY_DIR "/log.txt");
 
 		plugin_->set_options(config);
-		plugin_->handle_load(irccd_);
+		plugin_->handle_load(bot_);
 	}
 };
 
@@ -75,7 +79,7 @@ BOOST_AUTO_TEST_CASE(format_join)
 {
 	load();
 
-	plugin_->handle_join(irccd_, {server_, "jean!jean@localhost", "#staff"});
+	plugin_->handle_join(bot_, {server_, "jean!jean@localhost", "#staff"});
 
 	BOOST_REQUIRE_EQUAL("join=test:#staff:jean!jean@localhost:jean\n", last());
 }
@@ -84,7 +88,7 @@ BOOST_AUTO_TEST_CASE(format_kick)
 {
 	load();
 
-	plugin_->handle_kick(irccd_, {server_, "jean!jean@localhost", "#staff", "badboy", "please do not flood"});
+	plugin_->handle_kick(bot_, {server_, "jean!jean@localhost", "#staff", "badboy", "please do not flood"});
 
 	BOOST_REQUIRE_EQUAL("kick=test:#staff:jean!jean@localhost:jean:badboy:please do not flood\n", last());
 }
@@ -93,7 +97,7 @@ BOOST_AUTO_TEST_CASE(format_me)
 {
 	load();
 
-	plugin_->handle_me(irccd_, {server_, "jean!jean@localhost", "#staff", "is drinking water"});
+	plugin_->handle_me(bot_, {server_, "jean!jean@localhost", "#staff", "is drinking water"});
 
 	BOOST_REQUIRE_EQUAL("me=test:#staff:jean!jean@localhost:jean:is drinking water\n", last());
 }
@@ -102,7 +106,7 @@ BOOST_AUTO_TEST_CASE(format_message)
 {
 	load();
 
-	plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#staff", "hello guys"});
+	plugin_->handle_message(bot_, {server_, "jean!jean@localhost", "#staff", "hello guys"});
 
 	BOOST_REQUIRE_EQUAL("message=test:#staff:jean!jean@localhost:jean:hello guys\n", last());
 }
@@ -111,7 +115,7 @@ BOOST_AUTO_TEST_CASE(format_mode)
 {
 	load();
 
-	plugin_->handle_mode(irccd_, {server_, "jean!jean@localhost", "chris", "+i", "l", "u", "m"});
+	plugin_->handle_mode(bot_, {server_, "jean!jean@localhost", "chris", "+i", "l", "u", "m"});
 
 	BOOST_REQUIRE_EQUAL("mode=test:jean!jean@localhost:chris:+i:l:u:m\n", last());
 }
@@ -120,7 +124,7 @@ BOOST_AUTO_TEST_CASE(format_notice)
 {
 	load();
 
-	plugin_->handle_notice(irccd_, {server_, "jean!jean@localhost", "chris", "tu veux voir mon chat ?"});
+	plugin_->handle_notice(bot_, {server_, "jean!jean@localhost", "chris", "tu veux voir mon chat ?"});
 
 	BOOST_REQUIRE_EQUAL("notice=test:jean!jean@localhost:chris:tu veux voir mon chat ?\n", last());
 }
@@ -129,7 +133,7 @@ BOOST_AUTO_TEST_CASE(format_part)
 {
 	load();
 
-	plugin_->handle_part(irccd_, {server_, "jean!jean@localhost", "#staff", "too noisy here"});
+	plugin_->handle_part(bot_, {server_, "jean!jean@localhost", "#staff", "too noisy here"});
 
 	BOOST_REQUIRE_EQUAL("part=test:#staff:jean!jean@localhost:jean:too noisy here\n", last());
 }
@@ -138,7 +142,7 @@ BOOST_AUTO_TEST_CASE(format_topic)
 {
 	load();
 
-	plugin_->handle_topic(irccd_, {server_, "jean!jean@localhost", "#staff", "oh yeah yeaaaaaaaah"});
+	plugin_->handle_topic(bot_, {server_, "jean!jean@localhost", "#staff", "oh yeah yeaaaaaaaah"});
 
 	BOOST_REQUIRE_EQUAL("topic=test:#staff:jean!jean@localhost:jean:oh yeah yeaaaaaaaah\n", last());
 }
@@ -147,7 +151,7 @@ BOOST_AUTO_TEST_CASE(fix_642)
 {
 	load();
 
-	plugin_->handle_message(irccd_, {server_, "jean!jean@localhost", "#STAFF", "hello guys"});
+	plugin_->handle_message(bot_, {server_, "jean!jean@localhost", "#STAFF", "hello guys"});
 
 	BOOST_REQUIRE_EQUAL("message=test:#staff:jean!jean@localhost:jean:hello guys\n", last());
 }
@@ -156,4 +160,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd::test
+} // !irccd

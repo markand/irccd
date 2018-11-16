@@ -140,7 +140,7 @@ public:
 };
 
 /**
- * \ingroup jsapi
+ * \ingroup js-api
  * \brief Irccd.File Javascript API.
  */
 class file_js_api : public js_api {
@@ -153,7 +153,7 @@ public:
 	/**
 	 * \copydoc js_api::load
 	 */
-	void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
+	void load(daemon::bot& bot, std::shared_ptr<js_plugin> plugin) override;
 };
 
 namespace duk {

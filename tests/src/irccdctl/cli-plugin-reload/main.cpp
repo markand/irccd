@@ -22,7 +22,11 @@
 #include <irccd/test/cli_fixture.hpp>
 #include <irccd/test/mock.hpp>
 
-using namespace irccd::test;
+using irccd::test::cli_fixture;
+using irccd::test::mock;
+
+using irccd::daemon::bot;
+using irccd::daemon::plugin;
 
 namespace irccd {
 
@@ -40,7 +44,7 @@ public:
 		return "reload";
 	}
 
-	void handle_reload(irccd&) override
+	void handle_reload(bot&) override
 	{
 		push("handle_reload");
 	}
@@ -60,7 +64,7 @@ BOOST_AUTO_TEST_CASE(simple)
 {
 	const auto plugin = std::make_shared<reloadable_plugin>();
 
-	irccd_.plugins().add(plugin);
+	bot_.plugins().add(plugin);
 	start();
 
 	const auto [code, out, err] = exec({ "plugin-reload", "test" });

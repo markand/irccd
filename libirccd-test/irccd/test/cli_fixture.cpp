@@ -32,6 +32,10 @@
 
 namespace proc = boost::process;
 
+using irccd::daemon::bot;
+using irccd::daemon::command;
+using irccd::daemon::transport_server;
+
 namespace irccd::test {
 
 namespace {
@@ -48,22 +52,22 @@ auto clear(std::string input) -> std::string
 
 cli_fixture::cli_fixture(std::string irccdctl)
 	: irccdctl_(std::move(irccdctl))
-	, server_(new mock_server(irccd_.get_service(), "test", "localhost"))
+	, server_(new mock_server(bot_.get_service(), "test", "localhost"))
 {
 	using boost::asio::ip::tcp;
 
 	tcp::endpoint ep(tcp::v4(), 0U);
-	tcp::acceptor raw_acceptor(irccd_.get_service(), std::move(ep));
+	tcp::acceptor raw_acceptor(bot_.get_service(), std::move(ep));
 
 	port_ = raw_acceptor.local_endpoint().port();
 
-	auto acceptor = std::make_unique<ip_acceptor>(irccd_.get_service(), std::move(raw_acceptor));
+	auto acceptor = std::make_unique<ip_acceptor>(bot_.get_service(), std::move(raw_acceptor));
 
 	for (const auto& f : command::registry)
-		irccd_.transports().get_commands().push_back(f());
+		bot_.transports().get_commands().push_back(f());
 
-	irccd_.servers().add(server_);
-	irccd_.transports().add(std::make_unique<transport_server>(std::move(acceptor)));
+	bot_.servers().add(server_);
+	bot_.transports().add(std::make_unique<transport_server>(std::move(acceptor)));
 	server_->disconnect();
 	server_->clear();
 }

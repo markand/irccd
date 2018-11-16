@@ -63,7 +63,7 @@ irccd_define_library(
 	LIBRARIES
 		Boost::timer
 		libduktape
-		libirccd
+		libirccd-daemon
 	PUBLIC_INCLUDES
 		$<BUILD_INTERFACE:${libirccd-js_SOURCE_DIR}>
 

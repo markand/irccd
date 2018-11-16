@@ -30,7 +30,7 @@ irccd_define_library(
 	HEADERS ${libirccd-ctl_SOURCE_DIR}/irccd/ctl
 	SOURCES ${SOURCES}
 	LIBRARIES
-		libirccd
+		libirccd-daemon
 	PUBLIC_INCLUDES
 		$<BUILD_INTERFACE:${libirccd-ctl_SOURCE_DIR}>
 )

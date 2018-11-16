@@ -12,13 +12,13 @@
  *
  * The irccd libraries are split and described as following:
  *
- * | Library       | Description                                     | Dependencies         |
- * |---------------|-------------------------------------------------|----------------------|
- * | libirccd-core | Common utilities                                | libjson              |
- * | libirccd-ctl  | Classes to connect to irccd instance            | libirccd             |
- * | libirccd-test | Tools to create unit tests                      | libirccd,libirccd-js |
- * | libirccd-js   | Libraries to create Javascript APIs and plugins | libirccd, libduktape |
- * | libirccd      | Everything related to irccd instance            | libirccd-core        |
+ * | Library         | Description                                     | Dependencies                 |
+ * |-----------------|-------------------------------------------------|------------------------------|
+ * | libirccd        | Common utilities                                | libjson                      |
+ * | libirccd-ctl    | Classes to connect to irccd instance            | libirccd-daemon              |
+ * | libirccd-test   | Tools to create unit tests                      | libirccd-daemon, libirccd-js |
+ * | libirccd-js     | Libraries to create Javascript APIs and plugins | libirccd-daemon, libduktape  |
+ * | libirccd-daemon | Everything related to irccd instance            | libirccd                     |
  *
  * There is also external libraries shipped with irccd:
  *

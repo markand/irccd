@@ -27,7 +27,7 @@ endif ()
 
 irccd_define_executable(
 	TARGET irccd-test
-	LIBRARIES libirccd libirccd-test ${LIBRARIES}
+	LIBRARIES libirccd-test ${LIBRARIES}
 	INCLUDES ${INCLUDES}
 	DESCRIPTION "Plugin tester"
 	SOURCES main.cpp

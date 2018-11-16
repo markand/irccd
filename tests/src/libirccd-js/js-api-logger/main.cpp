@@ -23,8 +23,11 @@
 
 #include <irccd/test/js_fixture.hpp>
 
-using namespace irccd::js;
-using namespace irccd::test;
+using irccd::daemon::logger::sink;
+
+using irccd::js::duk::get_stack;
+
+using irccd::test::js_fixture;
 
 namespace irccd {
 
@@ -36,7 +39,7 @@ protected:
 	std::string line_warning;
 	std::string line_debug;
 
-	class sample_sink : public logger::sink {
+	class sample_sink : public sink {
 	private:
 		logger_fixture& test_;
 
@@ -64,8 +67,8 @@ protected:
 
 	logger_fixture()
 	{
-		irccd_.set_log(std::make_unique<sample_sink>(*this));
-		irccd_.get_log().set_verbose(true);
+		bot_.set_log(std::make_unique<sample_sink>(*this));
+		bot_.get_log().set_verbose(true);
 	}
 };
 
@@ -74,7 +77,7 @@ BOOST_FIXTURE_TEST_SUITE(logger_js_api_suite, logger_fixture)
 BOOST_AUTO_TEST_CASE(info)
 {
 	if (duk_peval_string(plugin_->get_context(), "Irccd.Logger.info(\"hello!\");") != 0)
-		throw duk::get_stack(plugin_->get_context(), -1);
+		throw get_stack(plugin_->get_context(), -1);
 
 	BOOST_TEST("plugin test: hello!" == line_info);
 }
@@ -82,7 +85,7 @@ BOOST_AUTO_TEST_CASE(info)
 BOOST_AUTO_TEST_CASE(warning)
 {
 	if (duk_peval_string(plugin_->get_context(), "Irccd.Logger.warning(\"FAIL!\");") != 0)
-		throw duk::get_stack(plugin_->get_context(), -1);
+		throw get_stack(plugin_->get_context(), -1);
 
 	BOOST_TEST("plugin test: FAIL!" == line_warning);
 }
@@ -92,7 +95,7 @@ BOOST_AUTO_TEST_CASE(warning)
 BOOST_AUTO_TEST_CASE(debug)
 {
 	if (duk_peval_string(plugin_->get_context(), "Irccd.Logger.debug(\"starting\");") != 0)
-		throw duk::get_stack(plugin_->get_context(), -1);
+		throw get_stack(plugin_->get_context(), -1);
 
 	BOOST_TEST("plugin test: starting" == line_debug);
 }

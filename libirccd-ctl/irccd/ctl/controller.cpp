@@ -21,7 +21,7 @@
 #include <irccd/sysconfig.hpp>
 #include <irccd/json_util.hpp>
 
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/server.hpp>
 #include <irccd/daemon/plugin.hpp>
 #include <irccd/daemon/rule.hpp>
@@ -29,6 +29,11 @@
 #include "controller.hpp"
 
 using irccd::json_util::deserializer;
+
+using irccd::daemon::bot_error;
+using irccd::daemon::plugin_error;
+using irccd::daemon::rule_error;
+using irccd::daemon::server_error;
 
 namespace irccd::ctl {
 
@@ -64,9 +69,9 @@ void controller::verify(connect_handler handler)
 		const auto major = doc.get<int>("major");
 
 		if (!program && *program != "irccd")
-			handler(irccd_error::not_irccd, std::move(message));
+			handler(bot_error::not_irccd, std::move(message));
 		else if (major && *major != IRCCD_VERSION_MAJOR)
-			handler(irccd_error::incompatible_version, std::move(message));
+			handler(bot_error::incompatible_version, std::move(message));
 		else {
 			if (!password_.empty())
 				authenticate(std::move(handler), message);
@@ -126,7 +131,7 @@ void controller::recv(stream::recv_handler handler)
 
 		if (e && c) {
 			if (*c == "irccd")
-				code = make_error_code(static_cast<irccd_error::error>(*e));
+				code = make_error_code(static_cast<bot_error::error>(*e));
 			else if (*c == "server")
 				code = make_error_code(static_cast<server_error::error>(*e));
 			else if (*c == "plugin")

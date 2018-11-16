@@ -21,7 +21,9 @@
 
 #include <irccd/test/cli_fixture.hpp>
 
-using namespace irccd::test;
+using irccd::test::cli_fixture;
+
+using irccd::daemon::rule;
 
 namespace irccd {
 
@@ -32,7 +34,7 @@ public:
 	rule_move_fixture()
 		: cli_fixture(IRCCDCTL_EXECUTABLE)
 	{
-		irccd_.rules().add({
+		bot_.rules().add({
 			{ "s1" },
 			{ "c1" },
 			{ "o1" },
@@ -40,7 +42,7 @@ public:
 			{ "onTopic" },
 			rule::action_type::accept
 		});
-		irccd_.rules().add({
+		bot_.rules().add({
 			{ "s2" },
 			{ "c2" },
 			{ "o2" },
@@ -48,7 +50,7 @@ public:
 			{ "onCommand" },
 			rule::action_type::drop
 		});
-		irccd_.rules().add({
+		bot_.rules().add({
 			{ "s3" },
 			{ "c3" },
 			{ "o3" },

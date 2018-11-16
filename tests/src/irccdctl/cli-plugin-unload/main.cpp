@@ -22,7 +22,11 @@
 #include <irccd/test/cli_fixture.hpp>
 #include <irccd/test/mock.hpp>
 
-using namespace irccd::test;
+using irccd::test::cli_fixture;
+using irccd::test::mock;
+
+using irccd::daemon::bot;
+using irccd::daemon::plugin;
 
 namespace irccd {
 
@@ -40,7 +44,7 @@ public:
 		return "unload";
 	}
 
-	void handle_unload(irccd&) override
+	void handle_unload(bot&) override
 	{
 		push("handle_unload");
 	}
@@ -60,7 +64,7 @@ BOOST_AUTO_TEST_CASE(simple)
 {
 	const auto plugin = std::make_shared<unloadable_plugin>();
 
-	irccd_.plugins().add(plugin);
+	bot_.plugins().add(plugin);
 	start();
 
 	const auto [code, out, err] = exec({ "plugin-unload", "test" });
@@ -69,7 +73,7 @@ BOOST_AUTO_TEST_CASE(simple)
 	BOOST_TEST(out.size() == 0U);
 	BOOST_TEST(err.size() == 0U);
 	BOOST_TEST(plugin->find("handle_unload").size() == 1U);
-	BOOST_TEST(!irccd_.plugins().has("p"));
+	BOOST_TEST(!bot_.plugins().has("p"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

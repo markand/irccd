@@ -18,7 +18,7 @@
 
 #include <boost/asio.hpp>
 
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/logger.hpp>
 #include <irccd/daemon/plugin_service.hpp>
 
@@ -28,6 +28,9 @@
 #include "timer_js_api.hpp"
 
 namespace asio = boost::asio;
+
+using irccd::daemon::bot;
+using irccd::daemon::plugin;
 
 namespace irccd::js {
 
@@ -79,7 +82,7 @@ void timer::handle()
 	duk_remove(plugin_.get_context(), -2);
 
 	if (duk_pcall(plugin_.get_context(), 0)) {
-		auto& log = duk::type_traits<irccd>::self(plugin_.get_context()).get_log();
+		auto& log = duk::type_traits<bot>::self(plugin_.get_context()).get_log();
 
 		log.warning(static_cast<const plugin&>(plugin_)) << "timer error:" << std::endl;
 		log.warning(static_cast<const plugin&>(plugin_)) << "  " << duk::get_stack(plugin_.get_context(), -1).what() << std::endl;
@@ -248,7 +251,7 @@ auto Timer_constructor(duk_context* ctx) -> duk_ret_t
 			duk_error(ctx, DUK_ERR_TYPE_ERROR, "missing callback function");
 
 		auto& plugin = duk::type_traits<js_plugin>::self(ctx);
-		auto& daemon = duk::type_traits<irccd>::self(ctx);
+		auto& daemon = duk::type_traits<bot>::self(ctx);
 		auto object = new timer(daemon.get_service(), plugin, static_cast<timer::type>(type), delay);
 
 		duk_push_this(ctx);
@@ -293,7 +296,7 @@ auto timer_js_api::get_name() const noexcept -> std::string_view
 	return "Irccd.Timer";
 }
 
-void timer_js_api::load(irccd&, std::shared_ptr<js_plugin> plugin)
+void timer_js_api::load(bot&, std::shared_ptr<js_plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 

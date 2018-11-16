@@ -33,6 +33,8 @@
 #include "js_plugin.hpp"
 #include "system_js_api.hpp"
 
+using irccd::daemon::bot;
+
 namespace irccd::js {
 
 namespace {
@@ -316,7 +318,7 @@ auto system_js_api::get_name() const noexcept -> std::string_view
 	return "Irccd.System";
 }
 
-void system_js_api::load(irccd&, std::shared_ptr<js_plugin> plugin)
+void system_js_api::load(bot&, std::shared_ptr<js_plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 

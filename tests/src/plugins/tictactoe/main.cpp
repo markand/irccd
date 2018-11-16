@@ -21,13 +21,15 @@
 
 #include <irccd/string_util.hpp>
 
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/plugin_service.hpp>
 #include <irccd/daemon/server.hpp>
 
 #include <irccd/test/js_plugin_fixture.hpp>
 
-namespace irccd::test {
+using irccd::test::js_plugin_fixture;
+
+namespace irccd {
 
 namespace {
 
@@ -67,8 +69,8 @@ public:
 
 	auto start()
 	{
-		plugin_->handle_command(irccd_, { server_, "a!a@localhost", "#tictactoe", "b" });
-		plugin_->handle_names(irccd_, { server_, "#tictactoe", { "a", "b" }});
+		plugin_->handle_command(bot_, { server_, "a!a@localhost", "#tictactoe", "b" });
+		plugin_->handle_names(bot_, { server_, "#tictactoe", { "a", "b" }});
 
 		return next_players();
 	}
@@ -86,7 +88,7 @@ public:
 
 		for (const auto& p : points) {
 			server_->clear();
-			plugin_->handle_message(irccd_, { server_, players.first, "#tictactoe", p });
+			plugin_->handle_message(bot_, { server_, players.first, "#tictactoe", p });
 			players = next_players();
 		}
 	}
@@ -100,7 +102,7 @@ BOOST_AUTO_TEST_CASE(win)
 
 	const auto players = next_players();
 
-	plugin_->handle_message(irccd_, { server_, players.first, "#tictactoe", "a 3" });
+	plugin_->handle_message(bot_, { server_, players.first, "#tictactoe", "a 3" });
 
 	const auto cmd = server_->find("message").back();
 
@@ -128,7 +130,7 @@ BOOST_AUTO_TEST_CASE(draw)
 
 	const auto players = next_players();
 
-	plugin_->handle_message(irccd_, { server_, players.first, "#tictactoe", "b 1" });
+	plugin_->handle_message(bot_, { server_, players.first, "#tictactoe", "b 1" });
 
 	const auto cmd = server_->find("message").back();
 
@@ -148,8 +150,8 @@ BOOST_AUTO_TEST_CASE(used)
 {
 	auto players = start();
 
-	plugin_->handle_message(irccd_, { server_, players.first, "#tictactoe", "a 1" });
-	plugin_->handle_message(irccd_, { server_, players.second, "#tictactoe", "a 1" });
+	plugin_->handle_message(bot_, { server_, players.first, "#tictactoe", "a 1" });
+	plugin_->handle_message(bot_, { server_, players.second, "#tictactoe", "a 1" });
 
 	const auto cmd = server_->find("message").back();
 
@@ -168,7 +170,7 @@ BOOST_AUTO_TEST_CASE(used)
 BOOST_AUTO_TEST_CASE(invalid)
 {
 	// empty name (no names)
-	plugin_->handle_command(irccd_, { server_, "jean", "#tictactoe", "" });
+	plugin_->handle_command(bot_, { server_, "jean", "#tictactoe", "" });
 
 	auto cmd = server_->find("message").back();
 
@@ -176,22 +178,22 @@ BOOST_AUTO_TEST_CASE(invalid)
 	BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "invalid=#tictactoe:!tictactoe:jean:jean:tictactoe:test");
 
 	// bot name (no names)
-	plugin_->handle_command(irccd_, { server_, "jean", "#tictactoe", "irccd" });
+	plugin_->handle_command(bot_, { server_, "jean", "#tictactoe", "irccd" });
 	cmd = server_->find("message").back();
 
 	BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#tictactoe");
 	BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "invalid=#tictactoe:!tictactoe:jean:jean:tictactoe:test");
 
 	// target is origin (no names)
-	plugin_->handle_command(irccd_, { server_, server_->get_nickname(), "#tictactoe", server_->get_nickname() });
+	plugin_->handle_command(bot_, { server_, server_->get_nickname(), "#tictactoe", server_->get_nickname() });
 	cmd = server_->find("message").back();
 
 	BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#tictactoe");
 	BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "invalid=#tictactoe:!tictactoe:irccd:irccd:tictactoe:test");
 
 	// not existing (names)
-	plugin_->handle_command(irccd_, { server_, server_->get_nickname(), "#tictactoe", server_->get_nickname() });
-	plugin_->handle_names(irccd_, { server_, "#tictactoe", { "a", "b", "c" }});
+	plugin_->handle_command(bot_, { server_, server_->get_nickname(), "#tictactoe", server_->get_nickname() });
+	plugin_->handle_names(bot_, { server_, "#tictactoe", { "a", "b", "c" }});
 	cmd = server_->find("message").back();
 
 	BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#tictactoe");
@@ -219,7 +221,7 @@ BOOST_AUTO_TEST_CASE(random)
 		else
 			b = true;
 
-		plugin_->handle_message(irccd_, { server_, players.first, "#tictactoe", "a 3" });
+		plugin_->handle_message(bot_, { server_, players.first, "#tictactoe", "a 3" });
 	}
 }
 
@@ -227,9 +229,9 @@ BOOST_AUTO_TEST_CASE(disconnect)
 {
 	const auto players = start();
 
-	plugin_->handle_disconnect(irccd_, { server_ });
+	plugin_->handle_disconnect(bot_, { server_ });
 	server_->clear();
-	plugin_->handle_message(irccd_, { server_, players.first, "#tictactoe", "a 1" });
+	plugin_->handle_message(bot_, { server_, players.first, "#tictactoe", "a 1" });
 
 	BOOST_TEST(server_->empty());
 }
@@ -239,8 +241,8 @@ BOOST_AUTO_TEST_CASE(kick)
 	const auto players = start();
 
 	server_->clear();
-	plugin_->handle_kick(irccd_, { server_, "kefka", "#tictactoe", players.first, "" });
-	plugin_->handle_message(irccd_, { server_, players.first, "#tictactoe", "a 1" });
+	plugin_->handle_kick(bot_, { server_, "kefka", "#tictactoe", players.first, "" });
+	plugin_->handle_message(bot_, { server_, players.first, "#tictactoe", "a 1" });
 
 	BOOST_TEST(server_->empty());
 }
@@ -250,8 +252,8 @@ BOOST_AUTO_TEST_CASE(part)
 	const auto players = start();
 
 	server_->clear();
-	plugin_->handle_part(irccd_, { server_, players.first, "#tictactoe", "" });
-	plugin_->handle_message(irccd_, { server_, players.first, "#tictactoe", "a 1" });
+	plugin_->handle_part(bot_, { server_, players.first, "#tictactoe", "" });
+	plugin_->handle_message(bot_, { server_, players.first, "#tictactoe", "a 1" });
 
 	BOOST_TEST(server_->empty());
 }
@@ -260,4 +262,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd::test
+} // !irccd

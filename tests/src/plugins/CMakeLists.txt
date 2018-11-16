@@ -16,11 +16,13 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-add_subdirectory(ask)
-add_subdirectory(auth)
-add_subdirectory(hangman)
-add_subdirectory(history)
-add_subdirectory(joke)
-add_subdirectory(logger)
-add_subdirectory(plugin)
-add_subdirectory(tictactoe)
+if (IRCCD_HAVE_JS)
+	add_subdirectory(ask)
+	add_subdirectory(auth)
+	add_subdirectory(hangman)
+	add_subdirectory(history)
+	add_subdirectory(joke)
+	add_subdirectory(logger)
+	add_subdirectory(plugin)
+	add_subdirectory(tictactoe)
+endif ()

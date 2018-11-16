@@ -19,7 +19,7 @@
 irccd_define_test(
 	NAME cli-rule-remove
 	SOURCES main.cpp
-	LIBRARIES libirccd-core
+	LIBRARIES libirccd
 	DEPENDS irccd irccdctl
 	FLAGS IRCCDCTL_EXECUTABLE="$<TARGET_FILE:irccdctl>"
 )

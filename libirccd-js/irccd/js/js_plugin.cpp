@@ -22,11 +22,30 @@
 #include <iterator>
 #include <stdexcept>
 
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/bot.hpp>
 
 #include "js_api.hpp"
 #include "js_plugin.hpp"
 #include "server_js_api.hpp"
+
+using irccd::daemon::bot;
+using irccd::daemon::connect_event;
+using irccd::daemon::disconnect_event;
+using irccd::daemon::invite_event;
+using irccd::daemon::join_event;
+using irccd::daemon::kick_event;
+using irccd::daemon::me_event;
+using irccd::daemon::message_event;
+using irccd::daemon::mode_event;
+using irccd::daemon::names_event;
+using irccd::daemon::nick_event;
+using irccd::daemon::notice_event;
+using irccd::daemon::part_event;
+using irccd::daemon::plugin;
+using irccd::daemon::plugin_error;
+using irccd::daemon::topic_event;
+using irccd::daemon::whois_event;
+using irccd::daemon::whois_info;
 
 namespace irccd::js {
 
@@ -222,102 +241,102 @@ void js_plugin::open()
 		throw plugin_error(plugin_error::exec_error, get_name(), duk::get_stack(context_, -1).get_stack());
 }
 
-void js_plugin::handle_command(irccd&, const message_event& event)
+void js_plugin::handle_command(bot&, const message_event& event)
 {
 	call("onCommand", event.server, event.origin, event.channel, event.message);
 }
 
-void js_plugin::handle_connect(irccd&, const connect_event& event)
+void js_plugin::handle_connect(bot&, const connect_event& event)
 {
 	call("onConnect", event.server);
 }
 
-void js_plugin::handle_disconnect(irccd&, const disconnect_event& event)
+void js_plugin::handle_disconnect(bot&, const disconnect_event& event)
 {
 	call("onDisconnect", event.server);
 }
 
-void js_plugin::handle_invite(irccd&, const invite_event& event)
+void js_plugin::handle_invite(bot&, const invite_event& event)
 {
 	call("onInvite", event.server, event.origin, event.channel);
 }
 
-void js_plugin::handle_join(irccd&, const join_event& event)
+void js_plugin::handle_join(bot&, const join_event& event)
 {
 	call("onJoin", event.server, event.origin, event.channel);
 }
 
-void js_plugin::handle_kick(irccd&, const kick_event& event)
+void js_plugin::handle_kick(bot&, const kick_event& event)
 {
 	call("onKick", event.server, event.origin, event.channel, event.target, event.reason);
 }
 
-void js_plugin::handle_load(irccd&)
+void js_plugin::handle_load(bot&)
 {
 	call("onLoad");
 }
 
-void js_plugin::handle_message(irccd&, const message_event& event)
+void js_plugin::handle_message(bot&, const message_event& event)
 {
 	call("onMessage", event.server, event.origin, event.channel, event.message);
 }
 
-void js_plugin::handle_me(irccd&, const me_event& event)
+void js_plugin::handle_me(bot&, const me_event& event)
 {
 	call("onMe", event.server, event.origin, event.channel, event.message);
 }
 
-void js_plugin::handle_mode(irccd&, const mode_event& event)
+void js_plugin::handle_mode(bot&, const mode_event& event)
 {
 	call("onMode", event.server, event.origin, event.channel, event.mode,
 		event.limit, event.user, event.mask);
 }
 
-void js_plugin::handle_names(irccd&, const names_event& event)
+void js_plugin::handle_names(bot&, const names_event& event)
 {
 	call("onNames", event.server, event.channel, event.names);
 }
 
-void js_plugin::handle_nick(irccd&, const nick_event& event)
+void js_plugin::handle_nick(bot&, const nick_event& event)
 {
 	call("onNick", event.server, event.origin, event.nickname);
 }
 
-void js_plugin::handle_notice(irccd&, const notice_event& event)
+void js_plugin::handle_notice(bot&, const notice_event& event)
 {
 	call("onNotice", event.server, event.origin, event.channel, event.message);
 }
 
-void js_plugin::handle_part(irccd&, const part_event& event)
+void js_plugin::handle_part(bot&, const part_event& event)
 {
 	call("onPart", event.server, event.origin, event.channel, event.reason);
 }
 
-void js_plugin::handle_reload(irccd&)
+void js_plugin::handle_reload(bot&)
 {
 	call("onReload");
 }
 
-void js_plugin::handle_topic(irccd&, const topic_event& event)
+void js_plugin::handle_topic(bot&, const topic_event& event)
 {
 	call("onTopic", event.server, event.origin, event.channel, event.topic);
 }
 
-void js_plugin::handle_unload(irccd&)
+void js_plugin::handle_unload(bot&)
 {
 	call("onUnload");
 }
 
-void js_plugin::handle_whois(irccd&, const whois_event& event)
+void js_plugin::handle_whois(bot&, const whois_event& event)
 {
 	call("onWhois", event.server, event.whois);
 }
 
-js_plugin_loader::js_plugin_loader(irccd& irccd,
+js_plugin_loader::js_plugin_loader(bot& bot,
                                    std::vector<std::string> directories,
                                    std::vector<std::string> extensions) noexcept
 	: plugin_loader(std::move(directories), std::move(extensions))
-	, irccd_(irccd)
+	, bot_(bot)
 {
 }
 
@@ -338,7 +357,7 @@ auto js_plugin_loader::open(std::string_view id, std::string_view path) -> std::
 	auto plugin = std::make_shared<js_plugin>(std::string(id), std::string(path));
 
 	for (const auto& mod : modules_)
-		mod->load(irccd_, plugin);
+		mod->load(bot_, plugin);
 
 	plugin->open();
 

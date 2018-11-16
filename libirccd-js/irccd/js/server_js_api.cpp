@@ -20,13 +20,18 @@
 #include <sstream>
 #include <unordered_map>
 
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/server_service.hpp>
 #include <irccd/daemon/server_util.hpp>
 
 #include "irccd_js_api.hpp"
 #include "js_plugin.hpp"
 #include "server_js_api.hpp"
+
+using irccd::daemon::bot;
+using irccd::daemon::server;
+using irccd::daemon::server_error;
+using irccd::daemon::server_util::from_json;
 
 namespace irccd::js {
 
@@ -617,7 +622,7 @@ auto Server_constructor(duk_context* ctx) -> duk_ret_t
 		duk_check_type(ctx, 0, DUK_TYPE_OBJECT);
 
 		auto json = nlohmann::json::parse(duk_json_encode(ctx, 0));
-		auto s = server_util::from_json(duk::type_traits<irccd>::self(ctx).get_service(), json);
+		auto s = from_json(duk::type_traits<bot>::self(ctx).get_service(), json);
 
 		duk_push_this(ctx);
 		duk_push_pointer(ctx, new std::shared_ptr<server>(std::move(s)));
@@ -666,7 +671,7 @@ auto Server_destructor(duk_context* ctx) -> duk_ret_t
 auto Server_add(duk_context* ctx) -> duk_ret_t
 {
 	return wrap(ctx, [] (auto ctx) {
-		duk::type_traits<irccd>::self(ctx).servers().add(
+		duk::type_traits<bot>::self(ctx).servers().add(
 			duk::require<std::shared_ptr<server>>(ctx, 0));
 
 		return 0;
@@ -694,7 +699,7 @@ auto Server_find(duk_context* ctx) -> duk_ret_t
 {
 	return wrap(ctx, [] (auto ctx) {
 		auto id = duk::require<std::string>(ctx, 0);
-		auto server = duk::type_traits<irccd>::self(ctx).servers().get(id);
+		auto server = duk::type_traits<bot>::self(ctx).servers().get(id);
 
 		if (!server)
 			return 0;
@@ -722,7 +727,7 @@ auto Server_list(duk_context* ctx) -> duk_ret_t
 {
 	duk_push_object(ctx);
 
-	for (const auto& server : duk::type_traits<irccd>::self(ctx).servers().list()) {
+	for (const auto& server : duk::type_traits<bot>::self(ctx).servers().list()) {
 		duk::push(ctx, server);
 		duk_put_prop_string(ctx, -2, server->get_id().c_str());
 	}
@@ -746,7 +751,7 @@ auto Server_list(duk_context* ctx) -> duk_ret_t
  */
 auto Server_remove(duk_context* ctx) -> duk_ret_t
 {
-	duk::type_traits<irccd>::self(ctx).servers().remove(duk_require_string(ctx, 0));
+	duk::type_traits<bot>::self(ctx).servers().remove(duk_require_string(ctx, 0));
 
 	return 0;
 }
@@ -816,7 +821,7 @@ auto server_js_api::get_name() const noexcept -> std::string_view
 	return "Irccd.Server";
 }
 
-void server_js_api::load(irccd&, std::shared_ptr<js_plugin> plugin)
+void server_js_api::load(bot&, std::shared_ptr<js_plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 

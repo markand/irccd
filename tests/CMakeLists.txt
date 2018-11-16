@@ -18,11 +18,16 @@
 
 project(tests)
 
-add_subdirectory(src/libirccd-core)
+# Libraries.
 add_subdirectory(src/libirccd)
-add_subdirectory(src/irccdctl)
+add_subdirectory(src/libirccd-daemon)
 
 if (IRCCD_HAVE_JS)
-	add_subdirectory(src/plugins)
 	add_subdirectory(src/libirccd-js)
 endif ()
+
+# Tools.
+add_subdirectory(src/irccdctl)
+
+# Plugins.
+add_subdirectory(src/plugins)

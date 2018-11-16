@@ -4,8 +4,7 @@ includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
 libdir=@CMAKE_INSTALL_FULL_LIBDIR@
 
 Name: libirccd
-Description: irccd (daemon library)
+Description: irccd (core library)
 Version: @IRCCD_VERSION@
 Cflags: -I${includedir} -I${includedir}/irccd/extern
-Libs: -L${libdir} -lirccd
-Requires: libirccd-core
+Libs: -L${libdir} -lirccd -lboost_system -lboost_filesystem -pthread @IRCCD_EXTRA_LIBS@

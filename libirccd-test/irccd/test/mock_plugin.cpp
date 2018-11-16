@@ -20,6 +20,23 @@
 
 #include "mock_plugin.hpp"
 
+using irccd::daemon::connect_event;
+using irccd::daemon::disconnect_event;
+using irccd::daemon::invite_event;
+using irccd::daemon::bot;
+using irccd::daemon::join_event;
+using irccd::daemon::kick_event;
+using irccd::daemon::me_event;
+using irccd::daemon::message_event;
+using irccd::daemon::mode_event;
+using irccd::daemon::names_event;
+using irccd::daemon::nick_event;
+using irccd::daemon::notice_event;
+using irccd::daemon::part_event;
+using irccd::daemon::plugin;
+using irccd::daemon::topic_event;
+using irccd::daemon::whois_event;
+
 namespace irccd::test {
 
 auto mock_plugin::get_name() const noexcept -> std::string_view
@@ -99,92 +116,92 @@ void mock_plugin::set_paths(const map& map)
 	paths_ = map;
 }
 
-void mock_plugin::handle_command(irccd&, const message_event& event)
+void mock_plugin::handle_command(bot&, const message_event& event)
 {
 	push("handle_command", { event });
 }
 
-void mock_plugin::handle_connect(irccd&, const connect_event& event)
+void mock_plugin::handle_connect(bot&, const connect_event& event)
 {
 	push("handle_connect", { event });
 }
 
-void mock_plugin::handle_disconnect(irccd&, const disconnect_event& event)
+void mock_plugin::handle_disconnect(bot&, const disconnect_event& event)
 {
 	push("handle_disconnect", { event });
 }
 
-void mock_plugin::handle_invite(irccd&, const invite_event& event)
+void mock_plugin::handle_invite(bot&, const invite_event& event)
 {
 	push("handle_invite", { event });
 }
 
-void mock_plugin::handle_join(irccd&, const join_event& event)
+void mock_plugin::handle_join(bot&, const join_event& event)
 {
 	push("handle_join", { event });
 }
 
-void mock_plugin::handle_kick(irccd&, const kick_event& event)
+void mock_plugin::handle_kick(bot&, const kick_event& event)
 {
 	push("handle_kick", { event });
 }
 
-void mock_plugin::handle_load(irccd&)
+void mock_plugin::handle_load(bot&)
 {
 	push("handle_load");
 }
 
-void mock_plugin::handle_message(irccd&, const message_event& event)
+void mock_plugin::handle_message(bot&, const message_event& event)
 {
 	push("handle_message", { event });
 }
 
-void mock_plugin::handle_me(irccd&, const me_event& event)
+void mock_plugin::handle_me(bot&, const me_event& event)
 {
 	push("handle_me", { event });
 }
 
-void mock_plugin::handle_mode(irccd&, const mode_event& event)
+void mock_plugin::handle_mode(bot&, const mode_event& event)
 {
 	push("handle_mode", { event });
 }
 
-void mock_plugin::handle_names(irccd&, const names_event& event)
+void mock_plugin::handle_names(bot&, const names_event& event)
 {
 	push("handle_names", { event });
 }
 
-void mock_plugin::handle_nick(irccd&, const nick_event& event)
+void mock_plugin::handle_nick(bot&, const nick_event& event)
 {
 	push("handle_nick", { event });
 }
 
-void mock_plugin::handle_notice(irccd&, const notice_event& event)
+void mock_plugin::handle_notice(bot&, const notice_event& event)
 {
 	push("handle_notice", { event });
 }
 
-void mock_plugin::handle_part(irccd&, const part_event& event)
+void mock_plugin::handle_part(bot&, const part_event& event)
 {
 	push("handle_part", { event });
 }
 
-void mock_plugin::handle_reload(irccd&)
+void mock_plugin::handle_reload(bot&)
 {
 	push("handle_reload");
 }
 
-void mock_plugin::handle_topic(irccd&, const topic_event& event)
+void mock_plugin::handle_topic(bot&, const topic_event& event)
 {
 	push("handle_topic", { event });
 }
 
-void mock_plugin::handle_unload(irccd&)
+void mock_plugin::handle_unload(bot&)
 {
 	push("handle_unload");
 }
 
-void mock_plugin::handle_whois(irccd&, const whois_event& event)
+void mock_plugin::handle_whois(bot&, const whois_event& event)
 {
 	push("handle_whois", { event });
 }

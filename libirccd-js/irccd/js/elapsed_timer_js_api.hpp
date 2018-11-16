@@ -29,7 +29,7 @@
 namespace irccd::js {
 
 /**
- * \ingroup jsapi
+ * \ingroup js-api
  * \brief Irccd.ElapsedTimer Javascript API.
  */
 class elapsed_timer_js_api : public js_api {
@@ -42,7 +42,7 @@ public:
 	/**
 	 * \copydoc js_api::load
 	 */
-	void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
+	void load(daemon::bot& bot, std::shared_ptr<js_plugin> plugin) override;
 };
 
 } // !irccd::js

@@ -37,10 +37,11 @@ namespace irccd::js {
 class js_api;
 
 /**
- * \ingroup plugins
+ * \ingroup js
+ * \ingroup daemon-plugins
  * \brief JavaScript plugins for irccd.
  */
-class js_plugin : public plugin {
+class js_plugin : public daemon::plugin {
 public:
 	/**
 	 * Global property where to read/write plugin configuration (object).
@@ -94,156 +95,156 @@ public:
 	void open();
 
 	/**
-	 * \copydoc plugin::get_name
+	 * \copydoc daemon::plugin::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc plugin::get_author
+	 * \copydoc daemon::plugin::get_author
 	 */
 	auto get_author() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc plugin::get_license
+	 * \copydoc daemon::plugin::get_license
 	 */
 	auto get_license() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc plugin::get_summary
+	 * \copydoc daemon::plugin::get_summary
 	 */
 	auto get_summary() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc plugin::get_version
+	 * \copydoc daemon::plugin::get_version
 	 */
 	auto get_version() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc plugin::get_options
+	 * \copydoc daemon::plugin::get_options
 	 */
 	auto get_options() const -> map override;
 
 	/**
-	 * \copydoc plugin::set_options
+	 * \copydoc daemon::plugin::set_options
 	 */
 	void set_options(const map& map) override;
 
 	/**
-	 * \copydoc plugin::get_formats
+	 * \copydoc daemon::plugin::get_formats
 	 */
 	auto get_formats() const -> map override;
 
 	/**
-	 * \copydoc plugin::set_formats
+	 * \copydoc daemon::plugin::set_formats
 	 */
 	void set_formats(const map& map) override;
 
 	/**
-	 * \copydoc plugin::get_paths
+	 * \copydoc daemon::plugin::get_paths
 	 */
 	auto get_paths() const -> map override;
 
 	/**
-	 * \copydoc plugin::set_paths
+	 * \copydoc daemon::plugin::set_paths
 	 */
 	void set_paths(const map& map) override;
 
 	/**
-	 * \copydoc plugin::handle_command
+	 * \copydoc daemon::plugin::handle_command
 	 */
-	void handle_command(irccd& irccd, const message_event& event) override;
+	void handle_command(daemon::bot& bot, const daemon::message_event& event) override;
 
 	/**
-	 * \copydoc plugin::handle_connect
+	 * \copydoc daemon::plugin::handle_connect
 	 */
-	void handle_connect(irccd& irccd, const connect_event& event) override;
+	void handle_connect(daemon::bot& bot, const daemon::connect_event& event) override;
 
 	/**
-	 * \copydoc plugin::handle_disconnect
+	 * \copydoc daemon::plugin::handle_disconnect
 	 */
-	void handle_disconnect(irccd& irccd, const disconnect_event& event) override;
+	void handle_disconnect(daemon::bot& bot, const daemon::disconnect_event& event) override;
 
 	/**
-	 * \copydoc plugin::handle_invite
+	 * \copydoc daemon::plugin::handle_invite
 	 */
-	void handle_invite(irccd& irccd, const invite_event& event) override;
+	void handle_invite(daemon::bot& bot, const daemon::invite_event& event) override;
 
 	/**
-	 * \copydoc plugin::handle_join
+	 * \copydoc daemon::plugin::handle_join
 	 */
-	void handle_join(irccd& irccd, const join_event& event) override;
+	void handle_join(daemon::bot& bot, const daemon::join_event& event) override;
 
 	/**
-	 * \copydoc plugin::handle_kick
+	 * \copydoc daemon::plugin::handle_kick
 	 */
-	void handle_kick(irccd& irccd, const kick_event& event) override;
+	void handle_kick(daemon::bot& bot, const daemon::kick_event& event) override;
 
 	/**
-	 * \copydoc plugin::handle_load
+	 * \copydoc daemon::plugin::handle_load
 	 */
-	void handle_load(irccd& irccd) override;
+	void handle_load(daemon::bot& bot) override;
 
 	/**
-	 * \copydoc plugin::handle_message
+	 * \copydoc daemon::plugin::handle_message
 	 */
-	void handle_message(irccd& irccd, const message_event& event) override;
+	void handle_message(daemon::bot& bot, const daemon::message_event& event) override;
 
 	/**
-	 * \copydoc plugin::handle_me
+	 * \copydoc daemon::plugin::handle_me
 	 */
-	void handle_me(irccd& irccd, const me_event& event) override;
+	void handle_me(daemon::bot& bot, const daemon::me_event& event) override;
 
 	/**
-	 * \copydoc plugin::handle_mode
+	 * \copydoc daemon::plugin::handle_mode
 	 */
-	void handle_mode(irccd& irccd, const mode_event& event) override;
+	void handle_mode(daemon::bot& bot, const daemon::mode_event& event) override;
 
 	/**
-	 * \copydoc plugin::handle_names
+	 * \copydoc daemon::plugin::handle_names
 	 */
-	void handle_names(irccd& irccd, const names_event& event) override;
+	void handle_names(daemon::bot& bot, const daemon::names_event& event) override;
 
 	/**
-	 * \copydoc plugin::handle_nick
+	 * \copydoc daemon::plugin::handle_nick
 	 */
-	void handle_nick(irccd& irccd, const nick_event& event) override;
+	void handle_nick(daemon::bot& bot, const daemon::nick_event& event) override;
 
 	/**
-	 * \copydoc plugin::handle_notice
+	 * \copydoc daemon::plugin::handle_notice
 	 */
-	void handle_notice(irccd& irccd, const notice_event& event) override;
+	void handle_notice(daemon::bot& bot, const daemon::notice_event& event) override;
 
 	/**
-	 * \copydoc plugin::handle_part
+	 * \copydoc daemon::plugin::handle_part
 	 */
-	void handle_part(irccd& irccd, const part_event& event) override;
+	void handle_part(daemon::bot& bot, const daemon::part_event& event) override;
 
 	/**
-	 * \copydoc plugin::handle_reload
+	 * \copydoc daemon::plugin::handle_reload
 	 */
-	void handle_reload(irccd& irccd) override;
+	void handle_reload(daemon::bot& bot) override;
 
 	/**
-	 * \copydoc plugin::handle_topic
+	 * \copydoc daemon::plugin::handle_topic
 	 */
-	void handle_topic(irccd& irccd, const topic_event& event) override;
+	void handle_topic(daemon::bot& bot, const daemon::topic_event& event) override;
 
 	/**
-	 * \copydoc plugin::handle_unload
+	 * \copydoc daemon::plugin::handle_unload
 	 */
-	void handle_unload(irccd& irccd) override;
+	void handle_unload(daemon::bot& bot) override;
 
 	/**
-	 * \copydoc plugin::handle_whois
+	 * \copydoc daemon::plugin::handle_whois
 	 */
-	void handle_whois(irccd& irccd, const whois_event& event) override;
+	void handle_whois(daemon::bot& bot, const daemon::whois_event& event) override;
 };
 
 /**
  * \ingroup plugins
  * \brief Implementation for searching Javascript plugins.
  */
-class js_plugin_loader : public plugin_loader {
+class js_plugin_loader : public daemon::plugin_loader {
 public:
 	/**
 	 * \brief The list of Javascript API modules.
@@ -251,18 +252,18 @@ public:
 	using modules = std::vector<std::unique_ptr<js_api>>;
 
 private:
-	irccd& irccd_;
+	daemon::bot& bot_;
 	modules modules_;
 
 public:
 	/**
 	 * Constructor.
 	 *
-	 * \param irccd the irccd instance
+	 * \param bot the irccd instance
 	 * \param directories directories to search
 	 * \param extensions extensions to search
 	 */
-	js_plugin_loader(irccd& irccd,
+	js_plugin_loader(daemon::bot& bot,
 	                 std::vector<std::string> directories = {},
 	                 std::vector<std::string> extensions = {".js"}) noexcept;
 
@@ -286,9 +287,9 @@ public:
 	auto get_modules() noexcept -> modules&;
 
 	/**
-	 * \copydoc plugin_loader::open
+	 * \copydoc daemon::plugin_loader::open
 	 */
-	auto open(std::string_view id, std::string_view file) -> std::shared_ptr<plugin>;
+	auto open(std::string_view id, std::string_view file) -> std::shared_ptr<daemon::plugin>;
 };
 
 namespace duk {
@@ -297,14 +298,14 @@ namespace duk {
  * \brief Specialization for type_traits<whois_info>
  */
 template <>
-struct type_traits<whois_info> : public std::true_type {
+struct type_traits<daemon::whois_info> : public std::true_type {
 	/**
 	 * Push a whois_info.
 	 *
 	 * \param ctx the Duktape context
 	 * \param who the information
 	 */
-	static void push(duk_context* ctx, const whois_info& who);
+	static void push(duk_context* ctx, const daemon::whois_info& who);
 };
 
 } // !duk

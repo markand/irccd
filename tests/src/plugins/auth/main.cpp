@@ -19,12 +19,15 @@
 #define BOOST_TEST_MODULE "Auth plugin"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/server.hpp>
 
 #include <irccd/test/js_plugin_fixture.hpp>
 
-namespace irccd::test {
+using irccd::test::js_plugin_fixture;
+using irccd::test::mock_server;
+
+namespace irccd {
 
 namespace {
 
@@ -51,7 +54,7 @@ public:
 			{ "quakenet.password",  "hello"         },
 			{ "quakenet.username",  "mario"         }
 		});
-		plugin_->handle_load(irccd_);
+		plugin_->handle_load(bot_);
 	}
 };
 
@@ -59,7 +62,7 @@ BOOST_FIXTURE_TEST_SUITE(auth_test_suite, auth_test)
 
 BOOST_AUTO_TEST_CASE(nickserv1)
 {
-	plugin_->handle_connect(irccd_, { nickserv1_ });
+	plugin_->handle_connect(bot_, { nickserv1_ });
 
 	const auto cmd = nickserv1_->find("message").front();
 
@@ -69,7 +72,7 @@ BOOST_AUTO_TEST_CASE(nickserv1)
 
 BOOST_AUTO_TEST_CASE(nickserv2)
 {
-	plugin_->handle_connect(irccd_, { nickserv2_ });
+	plugin_->handle_connect(bot_, { nickserv2_ });
 
 	const auto cmd = nickserv2_->find("message").front();
 
@@ -79,7 +82,7 @@ BOOST_AUTO_TEST_CASE(nickserv2)
 
 BOOST_AUTO_TEST_CASE(quakenet)
 {
-	plugin_->handle_connect(irccd_, { quakenet_ });
+	plugin_->handle_connect(bot_, { quakenet_ });
 
 	const auto cmd = quakenet_->find("message").front();
 
@@ -91,4 +94,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd::test
+} // !irccd

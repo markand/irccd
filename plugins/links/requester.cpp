@@ -59,17 +59,20 @@ using boost::asio::ssl::stream_base;
 
 using boost::posix_time::seconds;
 
-namespace irccd {
+using irccd::string_util::subst;
+using irccd::string_util::format;
 
-using string_util::subst;
-using string_util::format;
+using irccd::daemon::irc::user;
+using irccd::daemon::server;
+
+namespace irccd {
 
 void requester::notify(const string& title)
 {
 	subst subst;
 
 	subst.keywords.emplace("channel", channel_);
-	subst.keywords.emplace("nickname", irc::user::parse(origin_).nick);
+	subst.keywords.emplace("nickname", user::parse(origin_).nick);
 	subst.keywords.emplace("origin", origin_);
 	subst.keywords.emplace("server", server_->get_id());
 	subst.keywords.emplace("title", title);

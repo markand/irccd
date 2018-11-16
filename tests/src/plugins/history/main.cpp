@@ -21,12 +21,16 @@
 #define BOOST_TEST_MODULE "History plugin"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/server.hpp>
 
 #include <irccd/test/js_plugin_fixture.hpp>
 
-namespace irccd::test {
+using irccd::daemon::plugin;
+
+using irccd::test::js_plugin_fixture;
+
+namespace irccd {
 
 namespace {
 
@@ -50,7 +54,7 @@ public:
 			config.emplace("file", CMAKE_CURRENT_SOURCE_DIR "/words.conf");
 
 		plugin_->set_options(config);
-		plugin_->handle_load(irccd_);
+		plugin_->handle_load(bot_);
 	}
 };
 
@@ -60,7 +64,7 @@ BOOST_AUTO_TEST_CASE(format_error)
 {
 	load({{"file", CMAKE_CURRENT_SOURCE_DIR "/error.json"}});
 
-	plugin_->handle_command(irccd_, { server_, "jean!jean@localhost", "#history", "seen francis" });
+	plugin_->handle_command(bot_, { server_, "jean!jean@localhost", "#history", "seen francis" });
 
 	const auto cmd = server_->find("message").front();
 
@@ -75,8 +79,8 @@ BOOST_AUTO_TEST_CASE(format_seen)
 	remove(CMAKE_CURRENT_BINARY_DIR "/seen.json");
 	load({{ "file", CMAKE_CURRENT_BINARY_DIR "/seen.json" }});
 
-	plugin_->handle_message(irccd_, { server_, "jean!jean@localhost", "#history", "hello" });
-	plugin_->handle_command(irccd_, { server_, "destructor!dst@localhost", "#history", "seen jean" });
+	plugin_->handle_message(bot_, { server_, "jean!jean@localhost", "#history", "hello" });
+	plugin_->handle_command(bot_, { server_, "destructor!dst@localhost", "#history", "seen jean" });
 
 	auto cmd = server_->find("message").front();
 
@@ -91,8 +95,8 @@ BOOST_AUTO_TEST_CASE(format_said)
 	remove(CMAKE_CURRENT_BINARY_DIR "/said.json");
 	load({{ "file", CMAKE_CURRENT_BINARY_DIR "/said.json" }});
 
-	plugin_->handle_message(irccd_, { server_, "jean!jean@localhost", "#history", "hello" });
-	plugin_->handle_command(irccd_, { server_, "destructor!dst@localhost", "#history", "said jean" });
+	plugin_->handle_message(bot_, { server_, "jean!jean@localhost", "#history", "hello" });
+	plugin_->handle_command(bot_, { server_, "destructor!dst@localhost", "#history", "said jean" });
 
 	const auto cmd = server_->find("message").front();
 
@@ -105,8 +109,8 @@ BOOST_AUTO_TEST_CASE(format_unknown)
 	remove(CMAKE_CURRENT_BINARY_DIR "/unknown.json");
 	load({{ "file", CMAKE_CURRENT_BINARY_DIR "/unknown.json" }});
 
-	plugin_->handle_message(irccd_, { server_, "jean!jean@localhost", "#history", "hello" });
-	plugin_->handle_command(irccd_, { server_, "destructor!dst@localhost", "#history", "seen nobody" });
+	plugin_->handle_message(bot_, { server_, "jean!jean@localhost", "#history", "hello" });
+	plugin_->handle_command(bot_, { server_, "destructor!dst@localhost", "#history", "seen nobody" });
 
 	const auto cmd = server_->find("message").front();
 
@@ -121,10 +125,10 @@ BOOST_AUTO_TEST_CASE(issue_642)
 	remove(CMAKE_CURRENT_BINARY_DIR "/issue-642.json");
 	load({{"file", CMAKE_CURRENT_BINARY_DIR "/issue-642.json"}});
 
-	plugin_->handle_message(irccd_, { server_, "JeaN!JeaN@localhost", "#history", "hello" });
+	plugin_->handle_message(bot_, { server_, "JeaN!JeaN@localhost", "#history", "hello" });
 
 	// Full caps.
-	plugin_->handle_command(irccd_, { server_, "destructor!dst@localhost", "#HISTORY", "said JEAN" });
+	plugin_->handle_command(bot_, { server_, "destructor!dst@localhost", "#HISTORY", "said JEAN" });
 
 	auto cmd = server_->find("message").front();
 
@@ -132,7 +136,7 @@ BOOST_AUTO_TEST_CASE(issue_642)
 	BOOST_TEST(std::regex_match(std::any_cast<std::string>(cmd[1]), rule));
 
 	// Random caps.
-	plugin_->handle_command(irccd_, { server_, "destructor!dst@localhost", "#HiSToRy", "said JeaN" });
+	plugin_->handle_command(bot_, { server_, "destructor!dst@localhost", "#HiSToRy", "said JeaN" });
 	cmd = server_->find("message").back();
 
 	BOOST_TEST(std::any_cast<std::string>(cmd[0]) == "#history");
@@ -143,4 +147,4 @@ BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd::test
+} // !irccd

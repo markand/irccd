@@ -16,12 +16,16 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/plugin_service.hpp>
 
 #include "irccd_js_api.hpp"
 #include "js_plugin.hpp"
 #include "plugin_js_api.hpp"
+
+using irccd::daemon::bot;
+using irccd::daemon::plugin_error;
+using irccd::daemon::plugin;
 
 namespace irccd::js {
 
@@ -209,7 +213,7 @@ auto Plugin_info(duk_context* ctx) -> duk_idx_t
 		plugin* plugin;
 
 		if (duk_get_top(ctx) >= 1)
-			plugin = duk::type_traits<irccd>::self(ctx).plugins().get(duk_require_string(ctx, 0)).get();
+			plugin = duk::type_traits<bot>::self(ctx).plugins().get(duk_require_string(ctx, 0)).get();
 		else
 			plugin = std::addressof(duk::type_traits<js_plugin>::self(ctx));
 
@@ -251,7 +255,7 @@ auto Plugin_list(duk_context* ctx) -> duk_idx_t
 
 	duk_push_array(ctx);
 
-	for (const auto& plg : duk::type_traits<irccd>::self(ctx).plugins().list()) {
+	for (const auto& plg : duk::type_traits<bot>::self(ctx).plugins().list()) {
 		duk::push(ctx, plg->get_id());
 		duk_put_prop_index(ctx, -2, i++);
 	}
@@ -279,7 +283,7 @@ auto Plugin_list(duk_context* ctx) -> duk_idx_t
 auto Plugin_load(duk_context* ctx) -> duk_idx_t
 {
 	return wrap(ctx, [&] {
-		duk::type_traits<irccd>::self(ctx).plugins().load(
+		duk::type_traits<bot>::self(ctx).plugins().load(
 			duk::require<std::string_view>(ctx, 0), "");
 
 		return 0;
@@ -305,7 +309,7 @@ auto Plugin_load(duk_context* ctx) -> duk_idx_t
 auto Plugin_reload(duk_context* ctx) -> duk_idx_t
 {
 	return wrap(ctx, [&] {
-		duk::type_traits<irccd>::self(ctx).plugins().reload(duk::require<std::string>(ctx, 0));
+		duk::type_traits<bot>::self(ctx).plugins().reload(duk::require<std::string>(ctx, 0));
 
 		return 0;
 	});
@@ -330,7 +334,7 @@ auto Plugin_reload(duk_context* ctx) -> duk_idx_t
 auto Plugin_unload(duk_context* ctx) -> duk_idx_t
 {
 	return wrap(ctx, [&] {
-		duk::type_traits<irccd>::self(ctx).plugins().unload(duk::require<std::string>(ctx, 0));
+		duk::type_traits<bot>::self(ctx).plugins().unload(duk::require<std::string>(ctx, 0));
 
 		return 0;
 	});
@@ -382,7 +386,7 @@ auto plugin_js_api::get_name() const noexcept -> std::string_view
 	return "Irccd.Plugin";
 }
 
-void plugin_js_api::load(irccd&, std::shared_ptr<js_plugin> plugin)
+void plugin_js_api::load(bot&, std::shared_ptr<js_plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 

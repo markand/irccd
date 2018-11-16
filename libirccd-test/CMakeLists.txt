@@ -59,7 +59,7 @@ irccd_define_library(
 	SOURCES ${SOURCES}
 	LIBRARIES
 		${LIBRARIES}
-		libirccd
+		libirccd-daemon
 		libirccd-ctl
 	PUBLIC_INCLUDES
 		$<BUILD_INTERFACE:${libirccd-test_SOURCE_DIR}>

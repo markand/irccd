@@ -21,7 +21,9 @@
 
 #include <irccd/test/cli_fixture.hpp>
 
-using namespace irccd::test;
+using irccd::test::cli_fixture;
+
+using irccd::daemon::rule;
 
 namespace irccd {
 
@@ -39,7 +41,7 @@ BOOST_FIXTURE_TEST_SUITE(rule_info_suite, rule_info_fixture)
 
 BOOST_AUTO_TEST_CASE(info)
 {
-	irccd_.rules().add({
+	bot_.rules().add({
 		{ "s1", "s2" },
 		{ "c1", "c2" },
 		{ "o1", "o2" },

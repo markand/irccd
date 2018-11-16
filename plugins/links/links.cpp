@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/server.hpp>
 
 #include <irccd/string_util.hpp>
@@ -30,9 +30,12 @@ using std::string;
 using std::string_view;
 using std::unique_ptr;
 
-namespace irccd {
+using irccd::string_util::to_uint;
 
-using string_util::to_uint;
+using irccd::daemon::bot;
+using irccd::daemon::message_event;
+
+namespace irccd {
 
 auto links_plugin::get_name() const noexcept -> string_view
 {
@@ -72,9 +75,9 @@ void links_plugin::set_formats(const map& formats)
 		format_info = it->second;
 }
 
-void links_plugin::handle_message(irccd& irccd, const message_event& ev)
+void links_plugin::handle_message(bot& bot, const message_event& ev)
 {
-	requester::run(irccd.get_service(), ev.server, ev.origin, ev.channel, ev.message);
+	requester::run(bot.get_service(), ev.server, ev.origin, ev.channel, ev.message);
 }
 
 auto links_plugin::abi() -> version

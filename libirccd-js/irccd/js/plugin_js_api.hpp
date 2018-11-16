@@ -30,7 +30,7 @@
 namespace irccd::js {
 
 /**
- * \ingroup jsapi
+ * \ingroup js-api
  * \brief Irccd.Plugin Javascript API.
  */
 class plugin_js_api : public js_api {
@@ -43,7 +43,7 @@ public:
 	/**
 	 * \copydoc js_api::load
 	 */
-	void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
+	void load(daemon::bot& bot, std::shared_ptr<js_plugin> plugin) override;
 };
 
 namespace duk {
@@ -66,14 +66,14 @@ struct type_traits<js_plugin> {
  * \brief Specialization for plugin_error.
  */
 template <>
-struct type_traits<plugin_error> {
+struct type_traits<daemon::plugin_error> {
 	/**
 	 * Raise a plugin_error.
 	 *
 	 * \param ctx the context
 	 * \param error the error
 	 */
-	static void raise(duk_context* ctx, const plugin_error& error);
+	static void raise(duk_context* ctx, const daemon::plugin_error& error);
 };
 
 } // !duk

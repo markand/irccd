@@ -33,6 +33,8 @@
 using irccd::json_util::deserializer;
 using irccd::json_util::pretty;
 
+using irccd::daemon::rule_error;
+
 namespace irccd::ctl {
 
 // {{{ helpers

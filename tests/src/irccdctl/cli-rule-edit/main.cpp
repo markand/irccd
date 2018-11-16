@@ -21,7 +21,9 @@
 
 #include <irccd/test/cli_fixture.hpp>
 
-using namespace irccd::test;
+using irccd::test::cli_fixture;
+
+using irccd::daemon::rule;
 
 namespace irccd {
 
@@ -32,7 +34,7 @@ public:
 	rule_edit_fixture()
 		: cli_fixture(IRCCDCTL_EXECUTABLE)
 	{
-		irccd_.rules().add({
+		bot_.rules().add({
 			{ "s1", "s2" },
 			{ "c1", "c2" },
 			{ "o1", "o2" },

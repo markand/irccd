@@ -16,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/logger.hpp>
 #include <irccd/daemon/plugin_service.hpp>
 
@@ -24,6 +24,9 @@
 #include "js_plugin.hpp"
 #include "logger_js_api.hpp"
 #include "plugin_js_api.hpp"
+
+using irccd::daemon::bot;
+using irccd::daemon::plugin;
 
 namespace irccd::js {
 
@@ -36,7 +39,7 @@ auto print(duk_context* ctx, unsigned level) -> duk_ret_t
 	assert(level <= 2);
 
 	try {
-		auto& sink = duk::type_traits<irccd>::self(ctx).get_log();
+		auto& sink = duk::type_traits<bot>::self(ctx).get_log();
 		auto& self = duk::type_traits<js_plugin>::self(ctx);
 
 		switch (level) {
@@ -133,7 +136,7 @@ auto logger_js_api::get_name() const noexcept -> std::string_view
 	return "Irccd.Logger";
 }
 
-void logger_js_api::load(irccd&, std::shared_ptr<js_plugin> plugin)
+void logger_js_api::load(bot&, std::shared_ptr<js_plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 

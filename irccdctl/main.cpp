@@ -42,6 +42,8 @@
 using boost::format;
 using boost::str;
 
+using irccd::daemon::transport_error;
+
 namespace irccd::ctl {
 
 namespace {

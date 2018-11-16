@@ -29,7 +29,7 @@
 
 #include <irccd/daemon/command.hpp>
 #include <irccd/daemon/dynlib_plugin.hpp>
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/logger.hpp>
 #include <irccd/daemon/plugin_service.hpp>
 #include <irccd/daemon/transport_service.hpp>
@@ -39,11 +39,11 @@
 #	include <irccd/js/js_plugin.hpp>
 #endif
 
-namespace irccd {
+namespace irccd::daemon {
 
 namespace {
 
-std::unique_ptr<irccd> instance;
+std::unique_ptr<bot> instance;
 
 // {{{ usage
 
@@ -163,16 +163,17 @@ auto open(const option::result& result) -> config
 
 } // !namespace
 
-} // !irccd
+} // !irccd::daemon
 
 int main(int argc, char** argv)
 {
 	using namespace irccd;
+	using namespace irccd::daemon;
 
 	boost::asio::io_service service;
 	boost::asio::signal_set sigs(service, SIGINT, SIGTERM);
 
-	instance = std::make_unique<class irccd>(service);
+	instance = std::make_unique<bot>(service);
 
 	init(argc, argv);
 

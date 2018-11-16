@@ -30,7 +30,7 @@
 
 #include <boost/asio.hpp>
 
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/plugin_service.hpp>
 #include <irccd/daemon/rule_service.hpp>
 #include <irccd/daemon/server_service.hpp>
@@ -46,17 +46,16 @@ namespace irccd::test {
  * called.
  *
  * Before starting the daemon, the test can manually modify irccd instance
- * through `irccd_` member variable. Once started, call `exec` with arguments
+ * through `bot_` member variable. Once started, call `exec` with arguments
  * you want to pass through irccdctl utility.
  */
 class cli_fixture {
 private:
-	using io_service = boost::asio::io_service;
-
 	std::string irccdctl_;
 	std::thread thread_;
 	std::uint16_t port_{0U};
-	io_service service_;
+
+	boost::asio::io_context service_;
 
 protected:
 	/**
@@ -64,7 +63,7 @@ protected:
 	 *
 	 * \warning Do not modify once `start()` has been called.
 	 */
-	irccd irccd_{service_};
+	daemon::bot bot_{service_};
 
 	/**
 	 * Server automatically added as "test".

@@ -24,11 +24,6 @@
  * \brief Javascript API module.
  */
 
-/**
- * \defgroup jsapi Javascript APIs
- * \brief Modules for the Javascript API.
- */
-
 #include <functional>
 #include <memory>
 #include <string_view>
@@ -38,13 +33,18 @@
 
 namespace irccd {
 
-class irccd;
+namespace daemon {
+
+class bot;
+
+} // !daemon
 
 namespace js {
 
 class js_plugin;
 
 /**
+ * \ingroup js-api
  * \brief Javascript API module.
  */
 class js_api {
@@ -79,10 +79,10 @@ public:
 	/**
 	 * Load the module into the Javascript plugin.
 	 *
-	 * \param irccd the irccd instance
+	 * \param bot the irccd instance
 	 * \param plugin the plugin
 	 */
-	virtual void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) = 0;
+	virtual void load(daemon::bot& bot, std::shared_ptr<js_plugin> plugin) = 0;
 };
 
 } // !js

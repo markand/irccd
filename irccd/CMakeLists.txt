@@ -25,8 +25,8 @@ endif ()
 irccd_define_executable(
 	TARGET irccd
 	EXPORT
-	DESCRIPTION "The main irccd daemon."
+	DESCRIPTION "The main irccd bot."
 	SOURCES CMakeLists.txt main.cpp
 	INCLUDES ${irccd_SOURCE_DIR}
-	LIBRARIES libirccd ${LIBRARIES}
+	LIBRARIES libirccd-daemon ${LIBRARIES}
 )

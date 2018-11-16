@@ -25,6 +25,8 @@
 #include "irccd_js_api.hpp"
 #include "js_plugin.hpp"
 
+using irccd::daemon::bot;
+
 namespace irccd::js {
 
 namespace {
@@ -188,7 +190,7 @@ auto irccd_js_api::get_name() const noexcept -> std::string_view
 	return "Irccd";
 }
 
-void irccd_js_api::load(irccd& irccd, std::shared_ptr<js_plugin> plugin)
+void irccd_js_api::load(bot& bot, std::shared_ptr<js_plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 
@@ -226,16 +228,16 @@ void irccd_js_api::load(irccd& irccd, std::shared_ptr<js_plugin> plugin)
 	duk_put_global_string(plugin->get_context(), "Irccd");
 
 	// Store global instance.
-	duk_push_pointer(plugin->get_context(), &irccd);
+	duk_push_pointer(plugin->get_context(), &bot);
 	duk_put_global_string(plugin->get_context(), "\xff""\xff""irccd-ref");
 }
 
-auto duk::type_traits<irccd>::self(duk_context *ctx) -> irccd&
+auto duk::type_traits<bot>::self(duk_context *ctx) -> bot&
 {
 	duk::stack_guard sa(ctx);
 
 	duk_get_global_string(ctx, "\xff""\xff""irccd-ref");
-	const auto ptr = static_cast<irccd*>(duk_to_pointer(ctx, -1));
+	const auto ptr = static_cast<bot*>(duk_to_pointer(ctx, -1));
 	duk_pop(ctx);
 
 	return *ptr;

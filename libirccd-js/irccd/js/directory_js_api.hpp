@@ -30,7 +30,7 @@ namespace irccd::js {
 
 /**
  * \brief Irccd.Directory Javascript API.
- * \ingroup js_api
+ * \ingroup js-api
  */
 class directory_js_api : public js_api {
 public:
@@ -42,7 +42,7 @@ public:
 	/**
 	 * \copydoc js_api::load
 	 */
-	void load(irccd& irccd, std::shared_ptr<js_plugin> plugin) override;
+	void load(daemon::bot& bot, std::shared_ptr<js_plugin> plugin) override;
 };
 
 } // !irccd::js

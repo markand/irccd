@@ -37,24 +37,28 @@
 
 #include "js_plugin_fixture.hpp"
 
+using irccd::js::js_plugin;
+
+using irccd::daemon::logger::silent_sink;
+
 namespace irccd::test {
 
 js_plugin_fixture::js_plugin_fixture(std::string path)
 	: server_(std::make_shared<mock_server>(service_, "test", "local"))
 {
-	plugin_ = std::make_unique<js::js_plugin>("test", std::move(path));
+	plugin_ = std::make_unique<js_plugin>("test", std::move(path));
 
-	irccd_.set_log(std::make_unique<logger::silent_sink>());
-	irccd_.get_log().set_verbose(false);
-	irccd_.plugins().add(plugin_);
-	irccd_.servers().add(server_);
+	bot_.set_log(std::make_unique<silent_sink>());
+	bot_.get_log().set_verbose(false);
+	bot_.plugins().add(plugin_);
+	bot_.servers().add(server_);
 
 	server_->disconnect();
 	server_->set_nickname("irccd");
 	server_->clear();
 
 	for (const auto& f : js::js_api::registry)
-		f()->load(irccd_, plugin_);
+		f()->load(bot_, plugin_);
 
 	plugin_->open();
 }

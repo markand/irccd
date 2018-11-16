@@ -43,7 +43,11 @@
 
 namespace irccd {
 
+namespace daemon {
+
 class server;
+
+} // !daemon
 
 /**
  * \brief Convenient HTTP get requester.
@@ -59,7 +63,7 @@ private:
 	> socket_;
 
 	std::size_t level_{0U};
-	std::shared_ptr<server> server_;
+	std::shared_ptr<daemon::server> server_;
 	std::string channel_;
 	std::string origin_;
 
@@ -92,7 +96,7 @@ private:
 	void start();
 
 	requester(boost::asio::io_context&,
-	          std::shared_ptr<server>,
+	          std::shared_ptr<daemon::server>,
 	          std::string,
 	          std::string,
 	          uri,
@@ -109,7 +113,7 @@ public:
 	 * \param message the message text
 	 */
 	static void run(boost::asio::io_context& ctx,
-	                std::shared_ptr<server> sv,
+	                std::shared_ptr<daemon::server> sv,
 	                std::string origin,
 	                std::string channel,
 	                std::string message);

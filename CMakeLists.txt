@@ -37,11 +37,11 @@
 #
 # doc                       - The documentation process.
 # extern                    - External libraries.
-# libirccd-core             - Common code.
+# libirccd                  - Common code.
 # libirccd-ctl              - The irccdctl library.
 # libirccd-js               - Javascript bindings library.
 # libirccd-test             - Helpers for unit tests.
-# libirccd                  - The irccd library.
+# libirccd-daemon           - The irccd bot library.
 # irccd                     - The irccd executable.
 # irccdctl                  - The irccdctl utility.
 # plugins                   - Official irccd plugins.
@@ -86,8 +86,8 @@ find_package(Threads REQUIRED)
 
 add_subdirectory(extern/json)
 add_subdirectory(doc)
-add_subdirectory(libirccd-core)
 add_subdirectory(libirccd)
+add_subdirectory(libirccd-daemon)
 add_subdirectory(libirccd-ctl)
 add_subdirectory(libirccd-test)
 

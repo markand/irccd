@@ -36,7 +36,7 @@
 #include <irccd/string_util.hpp>
 
 #include <irccd/daemon/dynlib_plugin.hpp>
-#include <irccd/daemon/irccd.hpp>
+#include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/plugin_service.hpp>
 #include <irccd/daemon/server_service.hpp>
 
@@ -50,15 +50,25 @@
 using boost::format;
 using boost::str;
 
-namespace irccd::test {
+using irccd::string_util::split;
 
-namespace su = string_util;
+using irccd::daemon::bot;
+using irccd::daemon::names_event;
+using irccd::daemon::plugin;
+using irccd::daemon::server;
+using irccd::daemon::whois_event;
+using irccd::daemon::dynlib_plugin_loader;
+
+using irccd::js::js_plugin_loader;
+using irccd::js::js_api;
+
+namespace irccd::test {
 
 namespace {
 
 boost::asio::io_service io;
 
-std::unique_ptr<irccd> daemon;
+std::unique_ptr<bot> daemon;
 std::shared_ptr<plugin> plugin;
 
 // {{{ function table
@@ -162,7 +172,7 @@ auto get_arg(const std::vector<std::string>& args, unsigned index) -> std::strin
  */
 void on_command(const std::string& data)
 {
-	const auto args = su::split(data, " ", 4);
+	const auto args = split(data, " ", 4);
 
 	plugin->handle_command(*daemon, {
 		get_server(get_arg(args, 0)),
@@ -181,7 +191,7 @@ void on_command(const std::string& data)
  */
 void on_connect(const std::string& data)
 {
-	const auto args = su::split(data, " ");
+	const auto args = split(data, " ");
 
 	plugin->handle_connect(*daemon, {get_server(get_arg(args, 0))});
 }
@@ -195,7 +205,7 @@ void on_connect(const std::string& data)
  */
 void on_invite(const std::string& data)
 {
-	const auto args = su::split(data, " ");
+	const auto args = split(data, " ");
 
 	plugin->handle_invite(*daemon, {
 		get_server(get_arg(args, 0)),
@@ -214,7 +224,7 @@ void on_invite(const std::string& data)
  */
 void on_join(const std::string& data)
 {
-	const auto args = su::split(data, " ");
+	const auto args = split(data, " ");
 
 	plugin->handle_join(*daemon, {
 		get_server(get_arg(args, 0)),
@@ -232,7 +242,7 @@ void on_join(const std::string& data)
  */
 void on_kick(const std::string& data)
 {
-	const auto args = su::split(data, " ", 5);
+	const auto args = split(data, " ", 5);
 
 	plugin->handle_kick(*daemon, {
 		get_server(get_arg(args, 0)),
@@ -264,7 +274,7 @@ void on_load(const std::string&)
  */
 void on_me(const std::string& data)
 {
-	const auto args = su::split(data, " ", 4);
+	const auto args = split(data, " ", 4);
 
 	plugin->handle_me(*daemon, {
 		get_server(get_arg(args, 0)),
@@ -283,7 +293,7 @@ void on_me(const std::string& data)
  */
 void on_message(const std::string& data)
 {
-	const auto args = su::split(data, " ", 4);
+	const auto args = split(data, " ", 4);
 
 	plugin->handle_message(*daemon, {
 		get_server(get_arg(args, 0)),
@@ -302,7 +312,7 @@ void on_message(const std::string& data)
  */
 void on_mode(const std::string& data)
 {
-	const auto args = su::split(data, " ", 7);
+	const auto args = split(data, " ", 7);
 
 	plugin->handle_mode(*daemon, {
 		get_server(get_arg(args, 0)),
@@ -324,7 +334,7 @@ void on_mode(const std::string& data)
  */
 void on_names(const std::string& data)
 {
-	const auto args = su::split(data, " ");
+	const auto args = split(data, " ");
 
 	names_event ev;
 
@@ -346,7 +356,7 @@ void on_names(const std::string& data)
  */
 void on_nick(const std::string& data)
 {
-	const auto args = su::split(data, " ");
+	const auto args = split(data, " ");
 
 	plugin->handle_nick(*daemon, {
 		get_server(get_arg(args, 0)),
@@ -364,7 +374,7 @@ void on_nick(const std::string& data)
  */
 void on_notice(const std::string& data)
 {
-	const auto args = su::split(data, " ", 4);
+	const auto args = split(data, " ", 4);
 
 	plugin->handle_notice(*daemon, {
 		get_server(get_arg(args, 0)),
@@ -383,7 +393,7 @@ void on_notice(const std::string& data)
  */
 void on_part(const std::string& data)
 {
-	const auto args = su::split(data, " ", 4);
+	const auto args = split(data, " ", 4);
 
 	plugin->handle_part(*daemon, {
 		get_server(get_arg(args, 0)),
@@ -414,7 +424,7 @@ void on_reload(const std::string&)
  */
 void on_topic(const std::string& data)
 {
-	const auto args = su::split(data, " ", 4);
+	const auto args = split(data, " ", 4);
 
 	plugin->handle_topic(*daemon, {
 		get_server(get_arg(args, 0)),
@@ -445,7 +455,7 @@ void on_unload(const std::string&)
  */
 void on_whois(const std::string& data)
 {
-	const auto args = su::split(data, " ");
+	const auto args = split(data, " ");
 
 	whois_event ev;
 
@@ -509,7 +519,7 @@ auto matches(const std::string& name) -> std::vector<std::string>
 auto complete(EditLine* el, int) -> unsigned char
 {
 	const auto* lf = el_line(el);
-	const auto args = su::split(std::string(lf->buffer, lf->cursor), " ");
+	const auto args = split(std::string(lf->buffer, lf->cursor), " ");
 
 	if (args.size() == 0U)
 		return CC_REFRESH;
@@ -631,13 +641,13 @@ void load_options(int& argc, char**& argv)
 
 void load(int argc, char** argv)
 {
-	daemon = std::make_unique<irccd>(io);
+	daemon = std::make_unique<bot>(io);
 	daemon->plugins().add_loader(std::make_unique<dynlib_plugin_loader>());
 
 #if defined(IRCCD_HAVE_JS)
-	auto loader = std::make_unique<js::js_plugin_loader>(*daemon);
+	auto loader = std::make_unique<js_plugin_loader>(*daemon);
 
-	for (const auto& f : js::js_api::registry)
+	for (const auto& f : js_api::registry)
 		loader->get_modules().push_back(f());
 
 	daemon->plugins().add_loader(std::move(loader));

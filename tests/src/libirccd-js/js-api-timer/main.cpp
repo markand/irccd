@@ -44,7 +44,7 @@ public:
 		duk_pop_n(plugin_->get_context(), 2);
 
 		plugin_->open();
-		plugin_->handle_load(irccd_);
+		plugin_->handle_load(bot_);
 	}
 };
 
