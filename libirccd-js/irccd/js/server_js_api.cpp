@@ -37,8 +37,8 @@ namespace irccd::js {
 
 namespace {
 
-const std::string_view signature("\xff""\xff""Irccd.Server");
-const std::string_view prototype("\xff""\xff""Irccd.Server.prototype");
+const std::string_view signature(DUK_HIDDEN_SYMBOL("Irccd.Server"));
+const std::string_view prototype(DUK_HIDDEN_SYMBOL("Irccd.Server.prototype"));
 
 auto self(duk_context* ctx) -> std::shared_ptr<server>
 {

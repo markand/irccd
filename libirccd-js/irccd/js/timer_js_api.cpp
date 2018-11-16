@@ -36,8 +36,8 @@ namespace irccd::js {
 
 namespace {
 
-const std::string_view signature("\xff""\xff""Irccd.Timer");
-const std::string_view table("\xff""\xff""Irccd.Timer.callbacks");
+const std::string_view signature(DUK_HIDDEN_SYMBOL("Irccd.Timer"));
+const std::string_view table(DUK_HIDDEN_SYMBOL("Irccd.Timer.callbacks"));
 
 // {{{ timer
 

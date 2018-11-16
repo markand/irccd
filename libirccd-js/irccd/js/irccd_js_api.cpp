@@ -229,14 +229,14 @@ void irccd_js_api::load(bot& bot, std::shared_ptr<js_plugin> plugin)
 
 	// Store global instance.
 	duk_push_pointer(plugin->get_context(), &bot);
-	duk_put_global_string(plugin->get_context(), "\xff""\xff""irccd-ref");
+	duk_put_global_string(plugin->get_context(), DUK_HIDDEN_SYMBOL("irccd-ref"));
 }
 
 auto duk::type_traits<bot>::self(duk_context *ctx) -> bot&
 {
 	duk::stack_guard sa(ctx);
 
-	duk_get_global_string(ctx, "\xff""\xff""irccd-ref");
+	duk_get_global_string(ctx, DUK_HIDDEN_SYMBOL("irccd-ref"));
 	const auto ptr = static_cast<bot*>(duk_to_pointer(ctx, -1));
 	duk_pop(ctx);
 

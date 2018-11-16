@@ -46,17 +46,17 @@ public:
 	/**
 	 * Global property where to read/write plugin configuration (object).
 	 */
-	static inline const std::string_view config_property{"\xff\xff""config"};
+	static inline const std::string_view config_property{DUK_HIDDEN_SYMBOL("config")};
 
 	/**
 	 * Global property where to read/write plugin formats (object).
 	 */
-	static inline const std::string_view format_property{"\xff\xff""formats"};
+	static inline const std::string_view format_property{DUK_HIDDEN_SYMBOL("formats")};
 
 	/**
 	 * Global property where paths are defined (object).
 	 */
-	static inline const std::string_view paths_property{"\xff\xff""paths"};
+	static inline const std::string_view paths_property{DUK_HIDDEN_SYMBOL("paths")};
 
 private:
 	// JavaScript context.

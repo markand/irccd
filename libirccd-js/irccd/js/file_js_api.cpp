@@ -36,8 +36,8 @@ namespace irccd::js {
 
 namespace {
 
-const std::string_view signature("\xff""\xff""Irccd.File");
-const std::string_view prototype("\xff""\xff""Irccd.File.prototype");
+const std::string_view signature(DUK_HIDDEN_SYMBOL("Irccd.File"));
+const std::string_view prototype(DUK_HIDDEN_SYMBOL("Irccd.File.prototype"));
 
 // {{{ clear_crlf
 

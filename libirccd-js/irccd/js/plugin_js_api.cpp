@@ -31,7 +31,7 @@ namespace irccd::js {
 
 namespace {
 
-const std::string_view signature("\xff""\xff""Irccd.Plugin");
+const std::string_view signature(DUK_HIDDEN_SYMBOL("Irccd.Plugin"));
 
 template <typename Handler>
 auto wrap(duk_context* ctx, Handler handler) -> duk_idx_t

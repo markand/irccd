@@ -160,9 +160,9 @@ js_plugin::js_plugin(std::string id, std::string path)
 	duk_put_global_string(context_, paths_property.data());
 
 	duk_push_pointer(context_, this);
-	duk_put_global_string(context_, "\xff""\xff""plugin");
+	duk_put_global_string(context_, DUK_HIDDEN_SYMBOL("plugin"));
 	duk::push(context_, path);
-	duk_put_global_string(context_, "\xff""\xff""path");
+	duk_put_global_string(context_, DUK_HIDDEN_SYMBOL("path"));
 }
 
 auto js_plugin::get_context() noexcept -> duk::context&

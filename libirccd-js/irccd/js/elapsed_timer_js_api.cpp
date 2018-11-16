@@ -27,7 +27,7 @@ namespace irccd::js {
 
 namespace {
 
-const std::string_view signature("\xff""\xff""Irccd.ElapsedTimer");
+const std::string_view signature(DUK_HIDDEN_SYMBOL("Irccd.ElapsedTimer"));
 
 // {{{ self
 
