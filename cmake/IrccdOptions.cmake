@@ -93,7 +93,7 @@ endif ()
 
 find_package(Doxygen)
 find_package(OpenSSL)
-find_package(Pandoc)
+find_package(marker)
 find_package(Editline)
 
 if (IRCCD_WITH_LIBEDIT)
@@ -127,17 +127,6 @@ if (IRCCD_WITH_DOXYGEN)
 	endif ()
 else ()
 	set(IRCCD_WITH_DOXYGEN_MSG "No (disabled by user)")
-endif ()
-
-if (IRCCD_WITH_HTML)
-	if (Pandoc_FOUND)
-		set(IRCCD_HAVE_HTML On)
-		set(IRCCD_WITH_HTML_MSG "Yes")
-	else ()
-		set(IRCCD_WITH_HTML_MSG "No (pandoc not found)")
-	endif ()
-else ()
-	set(IRCCD_WITH_HTML_MSG "No (disabled by user)")
 endif ()
 
 #

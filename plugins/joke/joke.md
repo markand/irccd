@@ -1,8 +1,4 @@
----
-title: "Joke plugin"
-header: "Joke plugin"
-guide: yes
----
+# Joke plugin
 
 The plugin **joke** is a convenient command to display jokes in a random order
 without displaying always the same.
@@ -10,7 +6,7 @@ without displaying always the same.
 It loads jokes per channel/server pair and display a unique joke each time it is
 invoked.
 
-# Installation
+## Installation
 
 The plugin **joke** is distributed with irccd. To enable it add the following to
 your `plugins` section:
@@ -56,8 +52,8 @@ irccd: Ask a Windows user to quit vim.
 
 The following options are available under the `[plugin.history]` section:
 
-  - **file**: (string) path to the JSON jokes files (Optional: defaults to data
-              directory/jokes.json)
+- **file**: (string) path to the JSON jokes files (Optional: defaults to data
+            directory/jokes.json)
 
 ### Keywords supported
 
@@ -74,7 +70,7 @@ Warning: if you use keywords in the **file** parameter, you won't have a default
 
 The **joke** plugin supports the following formats in `[format.joke]` section:
 
-  - **error**: (string) format when an internal error occured.
+- error: (string) format when an internal error occured.
 
 ### Keywords supported
 

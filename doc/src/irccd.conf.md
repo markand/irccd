@@ -1,7 +1,3 @@
-% irccd.conf
-% David Demelier
-% 2017-12-08
-
 Both `irccd` and `irccdctl` use configuration file in a extended [INI][ini]
 format.
 
@@ -9,20 +5,23 @@ format.
 
 The file syntax has following rules:
 
-  1. Each option is stored in a section,
-  2. Some sections may be redefined multiple times,
-  3. Empty option must have quotes (e.g. `option = ""`).
+1. Each option is stored in a section,
+2. Some sections may be redefined multiple times,
+3. Empty option must have quotes (e.g. `option = ""`).
 
-# The @include statement
+# The @include and @tryinclude statements
 
 Irccd adds an extension to this format by adding an `@include` keyword which
 let you splitting your configuration file.
 
-Note: this `@include` statement must be at the beginning of the file and must be
+note: this `@include` statement must be at the beginning of the file and must be
       surrounded by quotes if the file name has spaces.
 
 You can use both relative or absolute paths. If relative paths are used, they
 are relative to the current file being parsed.
+
+The alternative `@tryinclude` keyword is similar but does not fails if the
+requested file is not found.
 
 ## Example
 
@@ -55,8 +54,6 @@ servers = "only-one-server"
 
 Note: spaces are completely optional.
 
-Options that have a default value are optional and can be omitted.
-
 # Identifiers
 
 Some sections require an identifier (specified as id) as parameter. They must be
@@ -64,8 +61,8 @@ unique, not empty and can only contain characters, numbers, '-' and '_'.
 
 Example:
 
-  - abc
-  - server-tz2
+- abc
+- server-tz2
 
 # The logs section
 
@@ -73,16 +70,16 @@ This section can let you configure how irccd should log the messages.
 
 The available options:
 
-  - **verbose**: (bool) be verbose (Optional, default: false),
-  - **type**: (string) which kind of logging, console, file or syslog
-    (Optional, default: console).
+- verbose: (bool) be verbose (Optional, default: false),
+- type: (string) which kind of logging, console, file or syslog
+  (Optional, default: console).
 
 The options for **file** type:
 
-  - **path-logs**: (string) path to the normal messages,
-  - **path-errors**: (string) path to the error messages.
+- path-logs: (string) path to the normal messages,
+- path-errors: (string) path to the error messages.
 
-**Note:** syslog is not available on all platforms.
+note: syslog is not available on all platforms.
 
 ## Example
 
@@ -102,16 +99,16 @@ system.
 Only one keyword is defined, `message` which contains the message that irccd
 wants to output.
 
-**Note:** colors and attributes are not supported on Windows.
+note: colors and attributes are not supported on Windows.
 
 The available options:
 
-  - **debug**: (string) template to use to format debug messages
-    (Optional, default: none),
-  - **info**: (string) template to use to format information messages
-    (Optional, default: none),
-  - **warning**: (string) template to use to format warnings
-    (Optional, default: none).
+- debug: (string) template to use to format debug messages
+  (Optional, default: none),
+- info: (string) template to use to format information messages
+  (Optional, default: none),
+- warning: (string) template to use to format warnings
+  (Optional, default: none).
 
 ## Example
 
@@ -122,79 +119,49 @@ info = "%H:%M info: #{message}"
 warning = "%H:%M warning: #{message}"
 ```
 
-# The identity section
-
-This section is completely optional, if you don't provide one, irccd will use a
-default identity with your system account name as nickname and username. If
-irccd was unable to get your account name, it uses **irccd** as a fallback.
-
-This section is redefinable, you can create one or more.
-
-The available options:
-
-  - **name**: (id) the identity unique id,
-  - **nickname**: (string) the nickname
-    (Optional, default: system username if available or irccd),
-  - **realname**: (string) the realname
-    (Optional, default: IRC Client Daemon),
-  - **username**: (string) the username name
-    (Optional, default: system username if available or irccd),
-  - **ctcp-version**: (string) what version to respond to CTCP VERSION
-    (Optional, default: IRC Client Daemon).
-
-## Example
-
-```ini
-[identity]
-name = "default"
-nickname = "jean"
-
-[identity]
-name = "development"
-nickname = "unstable"
-username = "un"
-```
-
 # The server section
 
 This section is used to connect to one or more server.
 
-This section is redefinable, you can create one or more.
-
 The available options:
 
-  - **name**: (id) the unique id,
-  - **host**: (string) the server address,
-  - **port**: (int) the server port (Optional, default: 6667),
-  - **identity**: (string) an identity to use
-    (Optional, default: irccd's default),
-  - **password**: (string) an optional password
-    (Optional, default: none),
-  - **join-invite**: (bool) join channels upon invitation
-    (Optional, default: false),
-  - **channels**: (list) list of channels to auto join
-    (Optional, default: empty),
-  - **command-char**: (string) the prefix for invoking special commands
-    (Optional, default: !),
-  - **ssl**: (bool) enable or disable SSL (Optional, default: false),
-  - **ssl-verify**: (bool) verify the SSL certificates
-    (Optional, default: true),
-  - **auto-reconnect**: (bool) enable reconnection after failure
-    (Optional, default: true),
-  - **auto-reconnect-delay**: (int) number of seconds to wait before retrying
-    (Optional, default: 30),
-  - **ping-timeout** (int) number of seconds before ping timeout
-    (Optional, default: 300).
+- name: (id) the unique id,
+- hostname: (string) the server address,
+- port: (int) the server port (Optional, default: 6667),
+- password: (string) an optional password
+  (Optional, default: none),
+- join-invite: (bool) join channels upon invitation
+  (Optional, default: false),
+- channels: (list) list of channels to auto join
+  (Optional, default: empty),
+- command-char: (string) the prefix for invoking special commands
+  (Optional, default: !),
+- ssl: (bool) enable or disable SSL (Optional, default: false),
+  (Optional, default: true),
+- auto-reconnect: (bool) enable reconnection after failure
+  (Optional, default: true),
+- auto-reconnect-delay: (int) number of seconds to wait before retrying
+  (Optional, default: 30),
+- ping-timeout (int) number of seconds before ping timeout
+  (Optional, default: 300).
+- nickname: (string) the nickname
+  (Optional, default: system username if available or irccd),
+- realname: (string) the realname
+  (Optional, default: IRC Client Daemon),
+- username: (string) the username name
+  (Optional, default: system username if available or irccd),
+- ctcp-version: (string) what version to respond to CTCP VERSION
+  (Optional, default: IRC Client Daemon).
 
-**Note:** if a channel requires a password, add it after a colon
-          (e.g. "#channel:password").
+note: if a channel requires a password, add it after a colon
+      (e.g. "#channel:password").
 
 ## Example
 
 ```ini
 [server]
 name = "local"
-host = "localhost"
+hostname = "localhost"
 port = 6667
 channels = ( "#staff", "#club:secret" )
 ```
@@ -206,9 +173,9 @@ The paths section defines common paths used as defaults for all plugins.
 Any option in this section can be defined altough the following are used as
 common convention used in all plugins:
 
-  - **cache**: (string) path for data files written by the plugin,
-  - **data**: (string) path for data files provided by the user,
-  - **config**: (string) path for additional configuration from the user.
+- cache: (string) path for data files written by the plugin,
+- data: (string) path for data files provided by the user,
+- config: (string) path for additional configuration from the user.
 
 For each of these paths, **plugin/name** is appended with the appropriate
 plugin name when loaded.
@@ -247,7 +214,7 @@ Just add any key you like to load a plugin. If the value is not specified, the
 plugin is searched through the standard directories, otherwise, provide the full
 path (including the .js extension).
 
-**Warning:** remember to add an empty string for searching plugins.
+warning: remember to add an empty string for searching plugins.
 
 ## Example
 
@@ -271,27 +238,31 @@ this transport on IRC events.
 
 There are two type of listeners availables:
 
-  1. Internet sockets, IPv4 and IPv6,
-  2. Unix sockets, based on files (not available on Windows).
+1. Internet sockets, IPv4 and IPv6,
+2. Unix sockets, based on files (not available on Windows).
+
+If SSL support was built in, both internet and unix sockets can be set to use
+encrypted connections.
 
 The available options:
 
-  - **type**: (string) type of listener "ip" or "unix".
-  - **password**: (string) an authentication password (Optional, default: none).
+- type: (string) type of listener "ip" or "unix".
+- password: (string) an authentication password (Optional, default: none).
+- ssl: (bool) enable SSL (Optional, default: false),
+- key: (string) path to private key file (Required if ssl is true)
+- certificate: (string) path to certificate (Required if ssl is true)
 
 The options for **ip** type:
 
-  - **port**: (int) port number,
-  - **address**: (string) address to bind or "\*" for any
-    (Optional, default: \*),
-  - **family**: (list) ipv6, ipv4. Both are accepted (Optional, default: ipv4),
-  - **ssl**: (bool) enable SSL (Optional, default: false),
-  - **key**: (string) path to private key file (Optional, default: none),
-  - **certificate**: (string) path to certificate (Optional, default: none).
+- port: (int) port number,
+- address: (string) address to bind or "\*" for any
+  (Optional, default: \*),
+- ipv4: (bool) bind on IPv4 (Optional, default true),
+- ipv6: (bool) bind on IPv6 (Optional, default true),
 
 The options for **unix** type:
 
-  - **path**: (string) the file path to the socket.
+- path: (string) the file path to the socket.
 
 ## Example of internet transports
 
@@ -299,17 +270,16 @@ The options for **unix** type:
 [transport]
 type = "ip"
 address = "*"
-family = ( "ipv4", "ipv6" )
 port = 9999
 ```
 
 This will let you controlling irccd on port 9999 with both IPv4 and IPv6
 families.
 
-**Warning**: consider using internet sockets with care, especially if you are
-             running your bot on a server with multiple users. If your bot has
-             operator rights and you bind on any address, almost every users
-             can do a kick or a ban.
+warning: consider using internet sockets with care, especially if you are
+         running your bot on a server with multiple users. If your bot has
+         operator rights and you bind on any address, almost every users
+         can do a kick or a ban.
 
 ## Example of unix transports
 
@@ -332,13 +302,18 @@ you can override rules.
 
 The available options:
 
-  - **servers**, (list) a list of servers that will match the rule
-    (Optional, default: empty),
-  - **channels**, (list) a list of channel (Optional, default: empty),
-  - **plugins**, (list) which plugins (Optional, default: empty),
-  - **events**, (list) which events (e.g onCommand, onMessage, ...)
-    (Optional, default: empty),
-  - **action**, (string) set to **accept** or **drop**.
+- servers, (list) a list of servers that will match the rule
+  (Optional, default: empty),
+- channels, (list) a list of channel (Optional, default: empty),
+- origins, (list) a list of nicknames to check (Optional, default: empty),
+- plugins, (list) which plugins (Optional, default: empty),
+- events, (list) which events (e.g onCommand, onMessage, ...)
+  (Optional, default: empty),
+- action, (string) set to **accept** or **drop**.
+
+warning: don't make sensitive rules on **origins** option, irccd does not have
+         any kind of nickname authentication. Thus, it may be very easy for
+         someone to use a temporary nickname.
 
 ## Basic rules example
 
@@ -367,35 +342,30 @@ action = accept
 # Add a transport that bind only to IPv6.
 [transport]
 type = ip
+ipv4 = false
+ipv6 = true
 family = ipv6
 port = 12000
 
 # A transport that binds to both IPv4 and IPv6.
 [transport]
 type = ip
-family = ( ipv4, ipv6 )
 port = 15000
-
-# Identity reused by many servers.
-[identity]
-name = "myIdentity"
-nickname = "superbot"
-realname = "SuperBot v1.0"
-username = "sp"
 
 # A server.
 [server]
 name = "foo"
 host = "irc.foo.org"
 port = "6667"
-identity = myIdentity
+nickname = "superbot"
+realname = "SuperBot v1.0"
+username = "sp"
 
 # An other server.
 [server]
 name = "wanadoo"
 host = "chat.wanadoo.fr"
 port = "6667"
-identity = myIdentity
 
 # Load some plugins.
 [plugins]

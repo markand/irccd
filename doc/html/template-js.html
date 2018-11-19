@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>#{title}</title>
+		<link rel="stylesheet" href="#{baseurl}bulma.min.css"/>
+		<link rel="stylesheet" href="#{baseurl}github-gist.css">
+		<script src="#{baseurl}/highlight.min.js"></script>
+	</head>
+
+	<body>
+		<section class="columns is-full-width">
+			<aside class="column is-2 is-narrow-mobile is-fullheight section is-hidden-mobile">
+				<p class="menu-label">
+					Events
+				</p>
+				<ul class="menu-list">
+					<li><a href="#{baseurl}js/event/onCommand.html">onCommand</a></li>
+					<li><a href="#{baseurl}js/event/onConnect.html">onConnect</a></li>
+					<li><a href="#{baseurl}js/event/onDisconnect.html">onDisconnect</a></li>
+					<li><a href="#{baseurl}js/event/onInvite.html">onInvite</a></li>
+					<li><a href="#{baseurl}js/event/onJoin.html">onJoin</a></li>
+					<li><a href="#{baseurl}js/event/onKick.html">onKick</a></li>
+					<li><a href="#{baseurl}js/event/onLoad.html">onLoad</a></li>
+					<li><a href="#{baseurl}js/event/onMe.html">onMe</a></li>
+					<li><a href="#{baseurl}js/event/onMessage.html">onMessage</a></li>
+					<li><a href="#{baseurl}js/event/onMode.html">onMode</a></li>
+					<li><a href="#{baseurl}js/event/onNames.html">onNames</a></li>
+					<li><a href="#{baseurl}js/event/onNick.html">onNick</a></li>
+					<li><a href="#{baseurl}js/event/onNotice.html">onNotice</a></li>
+					<li><a href="#{baseurl}js/event/onPart.html">onPart</a></li>
+					<li><a href="#{baseurl}js/event/onReload.html">onReload</a></li>
+					<li><a href="#{baseurl}js/event/onTopic.html">onTopic</a></li>
+					<li><a href="#{baseurl}js/event/onUnload.html">onUnload</a></li>
+					<li><a href="#{baseurl}js/event/onWhois.html">onWhois</a></li>
+				</ul>
+
+				<p class="menu-label">
+					Modules
+				</p>
+				<ul class="menu-list">
+					<li><a href="#{baseurl}js/module/Irccd/index.html">Irccd</a></li>
+					<li><a href="#{baseurl}js/module/Irccd.Directory/index.html">Irccd.Directory</a></li>
+					<li><a href="#{baseurl}js/module/Irccd.ElapsedTimer/index.html">Irccd.ElapsedTimer</a></li>
+					<li><a href="#{baseurl}js/module/Irccd.File/index.html">Irccd.File</a></li>
+					<li><a href="#{baseurl}js/module/Irccd.Logger/index.html">Irccd.Logger</a></li>
+					<li><a href="#{baseurl}js/module/Irccd.Plugin/index.html">Irccd.Plugin</a></li>
+					<li><a href="#{baseurl}js/module/Irccd.Server/index.html">Irccd.Server</a></li>
+					<li><a href="#{baseurl}js/module/Irccd.System/index.html">Irccd.System</a></li>
+					<li><a href="#{baseurl}js/module/Irccd.Timer/index.html">Irccd.Timer</a></li>
+					<li><a href="#{baseurl}js/module/Irccd.Unicode/index.html">Irccd.Unicode</a></li>
+					<li><a href="#{baseurl}js/module/Irccd.Util/index.html">Irccd.Util</a></li>
+				</ul>
+
+				<p class="menu-label">
+					Topics
+				</p>
+
+				<ul class="menu-list">
+					<li><a>Getting Started</a></li>
+					<li><a>Guidelines</a></li>
+					<li><a>FAQ</a></li>
+				</ul>
+			</aside>
+
+			<div class="container column is-10">
+				<h1 class="title is-1">
+					#{title}
+				</h1>
+				#{body}
+			</div>
+		</section>
+	</body>
+
+	<script>hljs.initHighlightingOnLoad();</script>
+	<style>
+	pre {
+		background-color: transparent;
+	}
+	</style>
+</html>

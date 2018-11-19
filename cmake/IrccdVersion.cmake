@@ -36,7 +36,6 @@ set(IRCCD_VERSION_SHLIB "1")
 
 #
 # Irccd release date.
-# -------------------------------------------------------------------
 #
 # IRCCD_RELEASE_DATE_YEAR       4 digits
 # IRCCD_RELEASE_DATE_MONTH      2 digits (01 = January)
@@ -46,3 +45,6 @@ set(IRCCD_RELEASE_DATE_YEAR 2018)
 set(IRCCD_RELEASE_DATE_MONTH 09)
 set(IRCCD_RELEASE_DATE_DAY 26)
 set(IRCCD_RELEASE_DATE "${IRCCD_RELEASE_DATE_YEAR}-${IRCCD_RELEASE_DATE_MONTH}-${IRCCD_RELEASE_DATE_DAY}")
+
+# Irccd release data (manual version).
+set(IRCCD_MAN_DATE "September 26, 2018")

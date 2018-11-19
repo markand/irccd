@@ -1,8 +1,4 @@
----
-title: "Tictactoe plugin"
-header: "Tictactoe plugin"
-guide: yes
----
+# Tictactoe plugin
 
 This plugin let you play tictactoe over IRC.
 
@@ -79,12 +75,12 @@ And then, placing tokens.
 The **tictactoe** plugin supports the following formats in `[format.tictactoe]`
 section:
 
-  - **draw**: when the game ended with no winner,
-  - **invalid**: the opponent does not exist or is not valid,
-  - **running**: the game is already running,
-  - **turn**: message sent when current player change,
-  - **used**: the cell requested is already used,
-  - **win**: game ended with a winner.
+- draw: when the game ended with no winner,
+- invalid: the opponent does not exist or is not valid,
+- running: the game is already running,
+- turn: message sent when current player change,
+- used: the cell requested is already used,
+- win: game ended with a winner.
 
 ### Keywords supported
 

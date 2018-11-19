@@ -1,0 +1,17 @@
+# Function Irccd.File.basename
+
+Return the file basename as specified in `basename(3)` C function.
+
+# Synopsis
+
+```javascript
+base = Irccd.File.basename(path)
+```
+
+# Arguments
+
+- path: the path to the file.
+
+# Returns
+
+The base name.

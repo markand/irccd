@@ -16,111 +16,123 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-include(CMakeParseArguments)
-
 #
 # irccd_build_html
 # ----------------
 #
 # irccd_build_html(
-#   COMPONENT           (Optional) install the output documentation as the given component
-#   OUTPUT              (Optional) override output path
-#   OUTPUT_VAR          (Optional) store the output file in the output variable
 #   SOURCE              the source markdown file
+#   TEMPLATE            specify template file
+#   OUTPUT_DIR          the output directory (relative to base doc dir)
+#   OUTPUT_VAR          (Optional) store the output file in the output variable
+#   COMPONENT           (Optional) install the output as the given component
 # )
 #
 # Create a rule to build the markdown file specified by SOURCE parameter.
 #
-# By default, the output file is built in the same directory relative to the
-# current project. Specifying /foo/bar/baz/foo.md as SOURCE from the
-# directory /foo/var ends in an output file baz/foo.html.
-#
-# The output file path can be overriden with the OUTPUT variable which must be
-# relative and must contain the filename without extension (e.g. api/misc/Foo).
+# The SOURCE file will be written in
+# ${CMAKE_BINARY_DIR}/html/${OUTPUT}/<basename>.html where basename is the file
+# name taken from SOURCE with extension replaced with html.
 #
 # This macro does not create a target, just the output rule and the output file
 # can be retrieved using the OUTPUT_VAR variable.
 #
+# If component is set, a CPack component is created for that output file and
+# will be grouped together.
+#
 # Example:
 #
 # irccd_build_html(
+#   SOURCE onMessage.md
+#   TEMPLATE template.html
 #   COMPONENT documentation
-#   OUTPUT dev/howto-create-a-plugin
-#   SOURCE myfile.md
-#   OUTPUT_VAR output
+#   OUTPUT_DIR event
+#   OUTPUT_VAR myvar
 # )
 #
-# add_custom_target(mytarget DEPENDS ${output})
+# add_custom_target(mytarget DEPENDS ${myvar})
 #
 # It's perfectly safe to call this macro multiple times with the same COMPONENT.
 #
 
-macro(irccd_build_html)
-	set(oneValueArgs COMPONENT OUTPUT OUTPUT_VAR SOURCE)
-	set(multiValueArgs VARIABLES)
+option(IRCCD_WITH_HTML "Enable building of HTML documentation" On)
 
-	cmake_parse_arguments(HTML "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+find_package(marker QUIET)
+
+if (IRCCD_WITH_HTML)
+	if (marker_FOUND)
+		set(IRCCD_HAVE_HTML On)
+		set(IRCCD_WITH_HTML_MSG "Yes")
+	else ()
+		set(IRCCD_WITH_HTML_MSG "No (marker not found)")
+	endif ()
+else ()
+	set(IRCCD_WITH_HTML_MSG "No (disabled by user)")
+endif ()
+
+macro(irccd_build_html)
+	if (NOT IRCCD_HAVE_HTML)
+		return ()
+	endif ()
+
+	set(options "")
+	set(oneValueArgs "COMPONENT;OUTPUT_DIR;OUTPUT_VAR;SOURCE;TEMPLATE")
+	set(multiValueArgs "VARIABLES")
+
+	cmake_parse_arguments(HTML "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
 	if (NOT HTML_SOURCE)
 		message(FATAL_ERROR "Missing SOURCE parameter")
 	endif ()
-
-	#
-	# Example with SOURCES set to CMAKE_CURRENT_SOURCE_DIR/api/event/onMessage.md
-	#
-	# Extract the following variables:
-	#
-	# dirname:	  api/event
-	# basename:	 onMessage
-	# baseurl:	  ../../
-	#
-	if (HTML_OUTPUT)
-		if (IS_ABSOLUTE ${HTML_OUTPUT})
-			message(FATAL_ERROR "OUTPUT variable must not be absolute")
-		endif ()
-
-		get_filename_component(dirname ${HTML_OUTPUT} DIRECTORY)
-		get_filename_component(basename ${HTML_OUTPUT} NAME)
-	else()
-		get_filename_component(dirname ${HTML_SOURCE} DIRECTORY)
-		file(RELATIVE_PATH dirname ${CMAKE_CURRENT_SOURCE_DIR} ${dirname})
-		get_filename_component(basename ${HTML_SOURCE} NAME)
+	if (NOT HTML_TEMPLATE)
+		message(FATAL_ERROR "Missing TEMPLATE parameter")
+	endif ()
+	if (IS_ABSOLUTE ${HTML_OUTPUT_DIR})
+		message(FATAL_ERROR "OUTPUT_DIR variable must not be absolute")
 	endif ()
 
-	# Remove extension from basename.
-	string(REGEX REPLACE "^(.*)\\.md$" "\\1" basename ${basename})
+	#
+	# Get the basename, use string REGEX REPLACE because
+	# get_filename_component will remove all extensions while we only want
+	# to remove md. (e.g. irccd.conf.md becomes irccd.conf).
+	#
+	get_filename_component(filename ${HTML_SOURCE} NAME)
+	string(REGEX REPLACE "^(.*)\\.md$" "\\1" filename ${filename})
 
+	# Compute baseurl.
 	file(
 		RELATIVE_PATH
 		baseurl
-		${CMAKE_CURRENT_BINARY_DIR}/${dirname}
-		${CMAKE_CURRENT_BINARY_DIR}/
+		${CMAKE_BINARY_DIR}/html/${HTML_OUTPUT_DIR}
+		${CMAKE_BINARY_DIR}/html
 	)
 
 	if (baseurl STREQUAL "")
 		set(baseurl "./")
 	endif ()
+	if (NOT HTML_OUTPUT_DIR OR HTML_OUTPUT_DIR STREQUAL "")
+		set(HTML_OUTPUT_DIR ".")
+	endif ()
 
-	# Replace CMake variables.
-	configure_file(
-		${HTML_SOURCE}
-		${doc_BINARY_DIR}/${dirname}/${basename}.md
-		@ONLY
-	)
+	# Filname path to output directory and files.
+	set(outputdir ${CMAKE_BINARY_DIR}/html/${HTML_OUTPUT_DIR})
+	set(output ${outputdir}/${filename}.html)
 
-	set(input ${doc_BINARY_DIR}/${dirname}/${basename}.md)
-	set(output ${doc_BINARY_DIR}/html/${dirname}/${basename}.html)
+	# Build arguments.
+	if (HTML_TEMPLATE)
+		set(args -t ${HTML_TEMPLATE} -v baseurl="${baseurl}")
+	endif ()
 
-	# Pandoc the file.
-	pandoc(
+	add_custom_command(
 		OUTPUT ${output}
-		SOURCES ${input}
-		DEPENDS ${HTML_SOURCE} ${input}
-		TEMPLATE ${html_SOURCE_DIR}/template.html
-		VARIABLE baseurl:${baseurl} ${HTML_VARIABLES}
-		FROM markdown
-		TO html5
-		STANDALONE TOC MAKE_DIRECTORY
+		COMMAND
+			${CMAKE_COMMAND} -E make_directory ${outputdir}
+		COMMAND
+			$<TARGET_FILE:marker::marker> ${args} ${HTML_VARIABLES}
+			$<TARGET_FILE:marker::libmarker-bulma> ${output} ${HTML_SOURCE}
+		DEPENDS
+			${HTML_SOURCE}
+			${HTML_TEMPLATE}
 	)
 
 	# Install the documentation file as component if provided.
@@ -128,7 +140,7 @@ macro(irccd_build_html)
 		install(
 			FILES ${output}
 			COMPONENT ${HTML_COMPONENT}
-			DESTINATION ${CMAKE_INSTALL_DOCDIR}/${dirname}
+			DESTINATION ${CMAKE_INSTALL_DOCDIR}/${HTML_OUTPUT_DIR}
 		)
 	endif ()
 

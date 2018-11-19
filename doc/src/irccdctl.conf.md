@@ -1,7 +1,3 @@
-% irccdctl.conf
-% David Demelier
-% 2017-12-08
-
 The `irccdctl` utility use the same configuration file syntax and paths, see the
 manual of irccd.conf file for more information.
 
@@ -11,7 +7,7 @@ This section defines the global irccdctl parameters.
 
 The available options:
 
-- **verbose**: (bool) enable verbose message (Optional, default: false).
+- verbose: (bool) enable verbose message (Optional, default: false).
 
 ## Example
 
@@ -28,18 +24,19 @@ internet sockets.
 
 The available options:
 
-  - **type**: (string) connection type: "ip" or "unix".
-  - **password**: (string) an authentication password (Optional, default: none).
+- type: (string) connection type: "ip" or "unix".
+- password: (string) an authentication password (Optional, default: none).
 
 The options for **ip** type:
 
-  - **host**: (string) host to connect,
-  - **port**: (int) port number,
-  - **family**: (string) internet family: ipv6 or ipv4 (Optional, default: ipv4).
+- hostname: (string) host to connect,
+- port: (int) port number,
+- ipv4: (bool) try to connect with ipv4 (Optional: default true),
+- ipv6: (bool) try to connect with ipv6 (Optional: default true).
 
 The options for **unix** type:
 
-  - **path**: (string) The file path to the socket.
+- path: (string) The file path to the socket.
 
 ## Example for internet transports
 
@@ -48,7 +45,6 @@ The options for **unix** type:
 type = "internet"
 host = "localhost"
 port = "9999"
-family = "ipv6"
 ```
 
 ## Example for unix transports
@@ -79,8 +75,8 @@ warning = ( "server-me", "localhost", "#staff", "is a bot")
 
 This example defines an alias `present` that will:
 
-  1. Send a message on the channel #staff in the server localhost
-  2. Send an action emote on the same channel
+1. Send a message on the channel #staff in the server localhost
+2. Send an action emote on the same channel
 
 To use this alias, call `irccdctl present`.
 

@@ -18,117 +18,120 @@
 
 project(html)
 
+set(IRCCD_WITH_HTML_TEMPLATE ${html_SOURCE_DIR}/template.html
+	CACHE STRING "HTML marker template")
+
 set(
-	HTML_API_SOURCES
-	api/event/onCommand.md
-	api/event/onConnect.md
-	api/event/onDisconnect.md
-	api/event/onInvite.md
-	api/event/onJoin.md
-	api/event/onKick.md
-	api/event/onLoad.md
-	api/event/onMe.md
-	api/event/onMessage.md
-	api/event/onMode.md
-	api/event/onNames.md
-	api/event/onNick.md
-	api/event/onNotice.md
-	api/event/onPart.md
-	api/event/onReload.md
-	api/event/onTopic.md
-	api/event/onUnload.md
-	api/event/onWhois.md
-	api/index.md
-	api/module/Irccd.Directory/index.md
-	api/module/Irccd.Directory/Irccd.Directory.find.md
-	api/module/Irccd.Directory/Irccd.Directory.mkdir.md
-	api/module/Irccd.Directory/Irccd.Directory.prototype.constructor.md
-	api/module/Irccd.Directory/Irccd.Directory.prototype.find.md
-	api/module/Irccd.Directory/Irccd.Directory.prototype.remove.md
-	api/module/Irccd.Directory/Irccd.Directory.remove.md
-	api/module/Irccd.ElapsedTimer/index.md
-	api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.constructor.md
-	api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.elapsed.md
-	api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.pause.md
-	api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.reset.md
-	api/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.restart.md
-	api/module/Irccd.File/index.md
-	api/module/Irccd.File/Irccd.File.basename.md
-	api/module/Irccd.File/Irccd.File.dirname.md
-	api/module/Irccd.File/Irccd.File.exists.md
-	api/module/Irccd.File/Irccd.File.prototype.basename.md
-	api/module/Irccd.File/Irccd.File.prototype.close.md
-	api/module/Irccd.File/Irccd.File.prototype.constructor.md
-	api/module/Irccd.File/Irccd.File.prototype.dirname.md
-	api/module/Irccd.File/Irccd.File.prototype.lines.md
-	api/module/Irccd.File/Irccd.File.prototype.readline.md
-	api/module/Irccd.File/Irccd.File.prototype.read.md
-	api/module/Irccd.File/Irccd.File.prototype.remove.md
-	api/module/Irccd.File/Irccd.File.prototype.seek.md
-	api/module/Irccd.File/Irccd.File.prototype.stat.md
-	api/module/Irccd.File/Irccd.File.prototype.tell.md
-	api/module/Irccd.File/Irccd.File.prototype.write.md
-	api/module/Irccd.File/Irccd.File.remove.md
-	api/module/Irccd.File/Irccd.File.stat.md
-	api/module/Irccd/index.md
-	api/module/Irccd.Logger/index.md
-	api/module/Irccd.Logger/Irccd.Logger.debug.md
-	api/module/Irccd.Logger/Irccd.Logger.info.md
-	api/module/Irccd.Logger/Irccd.Logger.warning.md
-	api/module/Irccd.Plugin/index.md
-	api/module/Irccd.Plugin/Irccd.Plugin.info.md
-	api/module/Irccd.Plugin/Irccd.Plugin.list.md
-	api/module/Irccd.Plugin/Irccd.Plugin.load.md
-	api/module/Irccd.Plugin/Irccd.Plugin.reload.md
-	api/module/Irccd.Plugin/Irccd.Plugin.unload.md
-	api/module/Irccd.Server/index.md
-	api/module/Irccd.Server/Irccd.Server.add.md
-	api/module/Irccd.Server/Irccd.Server.find.md
-	api/module/Irccd.Server/Irccd.Server.list.md
-	api/module/Irccd.Server/Irccd.Server.prototype.constructor.md
-	api/module/Irccd.Server/Irccd.Server.prototype.info.md
-	api/module/Irccd.Server/Irccd.Server.prototype.invite.md
-	api/module/Irccd.Server/Irccd.Server.prototype.isSelf.md
-	api/module/Irccd.Server/Irccd.Server.prototype.join.md
-	api/module/Irccd.Server/Irccd.Server.prototype.kick.md
-	api/module/Irccd.Server/Irccd.Server.prototype.me.md
-	api/module/Irccd.Server/Irccd.Server.prototype.message.md
-	api/module/Irccd.Server/Irccd.Server.prototype.mode.md
-	api/module/Irccd.Server/Irccd.Server.prototype.names.md
-	api/module/Irccd.Server/Irccd.Server.prototype.nick.md
-	api/module/Irccd.Server/Irccd.Server.prototype.notice.md
-	api/module/Irccd.Server/Irccd.Server.prototype.part.md
-	api/module/Irccd.Server/Irccd.Server.prototype.topic.md
-	api/module/Irccd.Server/Irccd.Server.prototype.toString.md
-	api/module/Irccd.Server/Irccd.Server.prototype.whois.md
-	api/module/Irccd.Server/Irccd.Server.remove.md
-	api/module/Irccd.System/index.md
-	api/module/Irccd.System/Irccd.System.env.md
-	api/module/Irccd.System/Irccd.System.exec.md
-	api/module/Irccd.System/Irccd.System.home.md
-	api/module/Irccd.System/Irccd.System.name.md
-	api/module/Irccd.System/Irccd.System.popen.md
-	api/module/Irccd.System/Irccd.System.sleep.md
-	api/module/Irccd.System/Irccd.System.ticks.md
-	api/module/Irccd.System/Irccd.System.uptime.md
-	api/module/Irccd.System/Irccd.System.usleep.md
-	api/module/Irccd.System/Irccd.System.version.md
-	api/module/Irccd.Timer/index.md
-	api/module/Irccd.Timer/Irccd.Timer.prototype.constructor.md
-	api/module/Irccd.Timer/Irccd.Timer.prototype.start.md
-	api/module/Irccd.Timer/Irccd.Timer.prototype.stop.md
-	api/module/Irccd.Unicode/index.md
-	api/module/Irccd.Unicode/Irccd.Unicode.isDigit.md
-	api/module/Irccd.Unicode/Irccd.Unicode.isLetter.md
-	api/module/Irccd.Unicode/Irccd.Unicode.isLower.md
-	api/module/Irccd.Unicode/Irccd.Unicode.isSpace.md
-	api/module/Irccd.Unicode/Irccd.Unicode.isTitle.md
-	api/module/Irccd.Unicode/Irccd.Unicode.isUpper.md
-	api/module/Irccd.Util/index.md
-	api/module/Irccd.Util/Irccd.Util.cut.md
-	api/module/Irccd.Util/Irccd.Util.format.md
-	api/module/Irccd.Util/Irccd.Util.splithost.md
-	api/module/Irccd.Util/Irccd.Util.splituser.md
+	HTML_JS_SOURCES
+	js/event/onCommand.md
+	js/event/onConnect.md
+	js/event/onDisconnect.md
+	js/event/onInvite.md
+	js/event/onJoin.md
+	js/event/onKick.md
+	js/event/onLoad.md
+	js/event/onMe.md
+	js/event/onMessage.md
+	js/event/onMode.md
+	js/event/onNames.md
+	js/event/onNick.md
+	js/event/onNotice.md
+	js/event/onPart.md
+	js/event/onReload.md
+	js/event/onTopic.md
+	js/event/onUnload.md
+	js/event/onWhois.md
+	js/index.md
+	js/module/Irccd.Directory/index.md
+	js/module/Irccd.Directory/Irccd.Directory.find.md
+	js/module/Irccd.Directory/Irccd.Directory.mkdir.md
+	js/module/Irccd.Directory/Irccd.Directory.prototype.constructor.md
+	js/module/Irccd.Directory/Irccd.Directory.prototype.find.md
+	js/module/Irccd.Directory/Irccd.Directory.prototype.remove.md
+	js/module/Irccd.Directory/Irccd.Directory.remove.md
+	js/module/Irccd.ElapsedTimer/index.md
+	js/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.constructor.md
+	js/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.elapsed.md
+	js/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.pause.md
+	js/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.reset.md
+	js/module/Irccd.ElapsedTimer/Irccd.ElapsedTimer.prototype.restart.md
+	js/module/Irccd.File/index.md
+	js/module/Irccd.File/Irccd.File.basename.md
+	js/module/Irccd.File/Irccd.File.dirname.md
+	js/module/Irccd.File/Irccd.File.exists.md
+	js/module/Irccd.File/Irccd.File.prototype.basename.md
+	js/module/Irccd.File/Irccd.File.prototype.close.md
+	js/module/Irccd.File/Irccd.File.prototype.constructor.md
+	js/module/Irccd.File/Irccd.File.prototype.dirname.md
+	js/module/Irccd.File/Irccd.File.prototype.lines.md
+	js/module/Irccd.File/Irccd.File.prototype.readline.md
+	js/module/Irccd.File/Irccd.File.prototype.read.md
+	js/module/Irccd.File/Irccd.File.prototype.remove.md
+	js/module/Irccd.File/Irccd.File.prototype.seek.md
+	js/module/Irccd.File/Irccd.File.prototype.stat.md
+	js/module/Irccd.File/Irccd.File.prototype.tell.md
+	js/module/Irccd.File/Irccd.File.prototype.write.md
+	js/module/Irccd.File/Irccd.File.remove.md
+	js/module/Irccd.File/Irccd.File.stat.md
+	js/module/Irccd/index.md
+	js/module/Irccd.Logger/index.md
+	js/module/Irccd.Logger/Irccd.Logger.debug.md
+	js/module/Irccd.Logger/Irccd.Logger.info.md
+	js/module/Irccd.Logger/Irccd.Logger.warning.md
+	js/module/Irccd.Plugin/index.md
+	js/module/Irccd.Plugin/Irccd.Plugin.info.md
+	js/module/Irccd.Plugin/Irccd.Plugin.list.md
+	js/module/Irccd.Plugin/Irccd.Plugin.load.md
+	js/module/Irccd.Plugin/Irccd.Plugin.reload.md
+	js/module/Irccd.Plugin/Irccd.Plugin.unload.md
+	js/module/Irccd.Server/index.md
+	js/module/Irccd.Server/Irccd.Server.add.md
+	js/module/Irccd.Server/Irccd.Server.find.md
+	js/module/Irccd.Server/Irccd.Server.list.md
+	js/module/Irccd.Server/Irccd.Server.prototype.constructor.md
+	js/module/Irccd.Server/Irccd.Server.prototype.info.md
+	js/module/Irccd.Server/Irccd.Server.prototype.invite.md
+	js/module/Irccd.Server/Irccd.Server.prototype.isSelf.md
+	js/module/Irccd.Server/Irccd.Server.prototype.join.md
+	js/module/Irccd.Server/Irccd.Server.prototype.kick.md
+	js/module/Irccd.Server/Irccd.Server.prototype.me.md
+	js/module/Irccd.Server/Irccd.Server.prototype.message.md
+	js/module/Irccd.Server/Irccd.Server.prototype.mode.md
+	js/module/Irccd.Server/Irccd.Server.prototype.names.md
+	js/module/Irccd.Server/Irccd.Server.prototype.nick.md
+	js/module/Irccd.Server/Irccd.Server.prototype.notice.md
+	js/module/Irccd.Server/Irccd.Server.prototype.part.md
+	js/module/Irccd.Server/Irccd.Server.prototype.topic.md
+	js/module/Irccd.Server/Irccd.Server.prototype.toString.md
+	js/module/Irccd.Server/Irccd.Server.prototype.whois.md
+	js/module/Irccd.Server/Irccd.Server.remove.md
+	js/module/Irccd.System/index.md
+	js/module/Irccd.System/Irccd.System.env.md
+	js/module/Irccd.System/Irccd.System.exec.md
+	js/module/Irccd.System/Irccd.System.home.md
+	js/module/Irccd.System/Irccd.System.name.md
+	js/module/Irccd.System/Irccd.System.popen.md
+	js/module/Irccd.System/Irccd.System.sleep.md
+	js/module/Irccd.System/Irccd.System.ticks.md
+	js/module/Irccd.System/Irccd.System.uptime.md
+	js/module/Irccd.System/Irccd.System.usleep.md
+	js/module/Irccd.System/Irccd.System.version.md
+	js/module/Irccd.Timer/index.md
+	js/module/Irccd.Timer/Irccd.Timer.prototype.constructor.md
+	js/module/Irccd.Timer/Irccd.Timer.prototype.start.md
+	js/module/Irccd.Timer/Irccd.Timer.prototype.stop.md
+	js/module/Irccd.Unicode/index.md
+	js/module/Irccd.Unicode/Irccd.Unicode.isDigit.md
+	js/module/Irccd.Unicode/Irccd.Unicode.isLetter.md
+	js/module/Irccd.Unicode/Irccd.Unicode.isLower.md
+	js/module/Irccd.Unicode/Irccd.Unicode.isSpace.md
+	js/module/Irccd.Unicode/Irccd.Unicode.isTitle.md
+	js/module/Irccd.Unicode/Irccd.Unicode.isUpper.md
+	js/module/Irccd.Util/index.md
+	js/module/Irccd.Util/Irccd.Util.cut.md
+	js/module/Irccd.Util/Irccd.Util.format.md
+	js/module/Irccd.Util/Irccd.Util.splithost.md
+	js/module/Irccd.Util/Irccd.Util.splituser.md
 )
 
 set(
@@ -141,71 +144,57 @@ set(
 	irccd-test.md
 )
 
+foreach (file ${HTML_SOURCES} ${HTML_JS_SOURCES})
+	get_filename_component(directory ${file} DIRECTORY)
+
+	if (${file} IN_LIST HTML_SOURCES)
+		set(template ${html_SOURCE_DIR}/template.html)
+	else ()
+		set(template ${html_SOURCE_DIR}/template-js.html)
+	endif ()
+
+	irccd_build_html(
+		SOURCE ${doc_SOURCE_DIR}/src/${file}
+		OUTPUT_DIR ${directory}
+		TEMPLATE ${template}
+		OUTPUT_VAR output
+		COMPONENT html
+	)
+
+	list(APPEND SOURCES ${doc_SOURCE_DIR}/src/${file})
+	list(APPEND OUTPUTS ${output})
+endforeach ()
+
 set(
 	CSS
-	${html_SOURCE_DIR}/css/bootstrap.min.css
-	${html_SOURCE_DIR}/css/doc-guide.css
-	${html_SOURCE_DIR}/css/doc.css
-	${html_SOURCE_DIR}/css/tomorrow.css
+	${html_SOURCE_DIR}/css/github-gist.css
+	${html_SOURCE_DIR}/css/bulma.min.css
 )
 
 set(
 	JS
-	${html_SOURCE_DIR}/js/bootstrap.min.js
 	${html_SOURCE_DIR}/js/highlight.min.js
-	${html_SOURCE_DIR}/js/jquery.min.js
 )
-
-foreach (fname ${HTML_API_SOURCES} ${HTML_SOURCES})
-	# API sources require a js variable to be set.
-	if (${fname} IN_LIST HTML_API_SOURCES)
-		set(VARIABLES js:1)
-	else ()
-		set(VARIABLES guide:1)
-	endif ()
-
-	irccd_build_html(
-		SOURCE ${doc_SOURCE_DIR}/src/${fname}
-		OUTPUT ${fname}
-		OUTPUT_VAR output
-		COMPONENT docs
-		VARIABLES ${VARIABLES}
-	)
-
-	list(APPEND SOURCES ${doc_SOURCE_DIR}/src/${fname})
-	list(APPEND OUTPUTS ${output})
-endforeach ()
 
 add_custom_target(
 	html ALL
+	COMMAND
+		${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/html
+	COMMAND
+		${CMAKE_COMMAND} -E copy ${CSS} ${JS} ${CMAKE_BINARY_DIR}/html
 	SOURCES
-		${CSS}
-		${JS}
 		${OUTPUTS}
 		${SOURCES}
 		${html_SOURCE_DIR}/template.html
-	COMMAND
-		${CMAKE_COMMAND} -E make_directory ${html_BINARY_DIR}/css
-	COMMAND
-		${CMAKE_COMMAND} -E make_directory ${html_BINARY_DIR}/js
-	COMMAND
-		${CMAKE_COMMAND} -E copy ${CSS} ${html_BINARY_DIR}/css
-	COMMAND
-		${CMAKE_COMMAND} -E copy ${JS} ${html_BINARY_DIR}/js
 )
 
 # Install resources files.
 install(
-	FILES ${CSS}
-	COMPONENT docs
-	DESTINATION ${IRCCD_WITH_DOCDIR}/css
-)
-install(
-	FILES ${JS}
-	COMPONENT docs
-	DESTINATION ${IRCCD_WITH_DOCDIR}/js
+	FILES ${CSS} ${JS}
+	COMPONENT html
+	DESTINATION ${CMAKE_INSTALL_DOCDIR}
 )
 
-setg(CPACK_COMPONENT_DOCS_DISPLAY_NAME "Documentation")
-setg(CPACK_COMPONENT_DOCS_DESCRIPTION "User guide and JavaScript API.")
-setg(CPACK_COMPONENT_DOCS_GROUP "Documentation")
+setg(CPACK_COMPONENT_HTML_DISPLAY_NAME "Documentation")
+setg(CPACK_COMPONENT_HTML_DESCRIPTION "User guide and JavaScript API.")
+setg(CPACK_COMPONENT_HTML_GROUP "HTML Documentation")

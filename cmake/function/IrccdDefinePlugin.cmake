@@ -136,12 +136,13 @@ function(irccd_define_plugin)
 		setg(IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME}_MSG "Yes")
 
 		# Optional documentation.
-		if (PLG_DOCS AND HAVE_HTML)
+		if (PLG_DOCS)
 			irccd_build_html(
 				SOURCE ${PLG_DOCS}
-				OUTPUT plugin/${PLG_NAME}
 				COMPONENT ${PLG_NAME}
+				OUTPUT_DIR plugin/${PLG_NAME}
 				OUTPUT_VAR PLG_OUTPUT_DOC
+				TEMPLATE ${html_SOURCE_DIR}/template.html
 			)
 		endif ()
 

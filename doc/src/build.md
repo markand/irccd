@@ -1,7 +1,3 @@
-% building from sources
-% David Demelier
-% 2017-12-08
-
 You should use the irccd version provided by your package manger if possible. If
 irccd is not available, you can build it from sources.
 
@@ -9,13 +5,12 @@ irccd is not available, you can build it from sources.
 
 To build from sources, you need the following installed on your system:
 
-  - [CMake](http://www.cmake.org),
-  - [OpenSSL](https://www.openssl.org) (Optional) for connecting with SSL,
-  - [Pandoc](http://pandoc.org) (Optional) for building the documentation,
-  - At least **GCC 5.1** or **clang 3.4**
-
-**Warning**: don't even try to compile with GCC 4.x, it will not work due to
-             missing C++14 features.
+- Compiler C++17 support,
+- [Boost](http://boost.org),
+- [CMake](http://www.cmake.org),
+- [OpenSSL](https://www.openssl.org) (Optional) for connecting with SSL,
+- [libedit](https://thrysoee.dk/editline) (Optional) for auto-completion,
+- [doxygen](http://www.doxygen.org) (Optional) for C++ documentation.
 
 # Running the build
 
@@ -46,7 +41,7 @@ You can disable JavaScript support.
 You can disable OpenSSL support, it is automatically unset if OpenSSL is not
 found.
 
-**Warning**: this is not recommended.
+Warning: this is not recommended.
 
     $ cmake .. -DIRCCD_WITH_SSL=Off
 
@@ -57,20 +52,19 @@ disable it.
 
     $ cmake .. -DIRCCD_WITH_LIBEDIT=Off
 
-## Disabling all documentation
-
-You can disable all the documentation.
-
-    $ cmake .. -DIRCCD_WITH_DOCS=Off
-
-See below to disable only specific parts of the documentation.
-
 ## Disabling HTML documentation
 
 By default if Pandoc is available, the HTML documentation is built, you can
 disable it.
 
-    $ cmake .. -DWITH_HTML=Off
+    $ cmake .. -DIRCCD_WITH_HTML=Off
+
+## Disable doxygen documentation
+
+Doxygen documentation is built for C++ API. It is disabled if doxygen was not
+found.
+
+    $ cmake .. -DIRCCD_WITH_DOXYGEN=Off
 
 ## Disabling man pages
 
@@ -90,10 +84,11 @@ To change this, use the following:
 
     $ cmake .. -DCMAKE_INSTALL_PREFIX=/opt/some/directory
 
-## Manual pages path
+You can also control the installation of individual directories through the
+[GNUInstallDirs][] CMake module.
 
-By default, irccd use **${CMAKE_INSTALL_PREFIX}/share/man** for manual pages.
+Example:
 
-For example, on FreeBSD the typical use would be:
+    $ cmake .. -DCMAKE_INSTALL_DOCDIR=doc/irccd
 
-    $ cmake .. -DIRCCD_WITH_MANDIR=/usr/local/man
+GNUInstallDirs: https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html

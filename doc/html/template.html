@@ -1,192 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <meta name="description" content="IRC Client Daemon">
-    <meta name="author" content="David Demelier">
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>#{title}</title>
+		<link rel="stylesheet" href="#{baseurl}bulma.min.css">
+		<link rel="stylesheet" href="#{baseurl}github-gist.css">
+		<script src="#{baseurl}/highlight.min.js"></script>
+	</head>
 
-    <title>$title$</title>
+	<body>
+		<section class="section">
+			<div class="container">
+				<h1 class="title is-1">
+					#{title}
+				</h1>
+				#{body}
+			</div>
+		</section>
+	</body>
 
-    <!-- CSS -->
-    <link href="$baseurl$css/bootstrap.min.css" rel="stylesheet">
-    <link href="$baseurl$css/tomorrow.css" rel="stylesheet">
-    <link href="$baseurl$css/doc.css" rel="stylesheet">
-
-$if(guide)$
-    <link href="$baseurl$css/doc-guide.css" rel="stylesheet">
-$endif$
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-  </head>
-
-  <body>
-  <div class="container-fluid">
-
-  <div class="row">
-    <!-- Side bar -->
-    <div class="col-sm-1 col-md-2 sidebar">
-    <!-- Side bar for JavaScript -->
-$if(js)$
-      <h3>Events</h3>
-      <ul class="nav nav-sidebar sidebar-list">
-        <li><a href="$baseurl$api/event/onCommand.html">onCommand</a></li>
-        <li><a href="$baseurl$api/event/onConnect.html">onConnect</a></li>
-        <li><a href="$baseurl$api/event/onDisconnect.html">onDisconnect</a></li>
-        <li><a href="$baseurl$api/event/onInvite.html">onInvite</a></li>
-        <li><a href="$baseurl$api/event/onJoin.html">onJoin</a></li>
-        <li><a href="$baseurl$api/event/onKick.html">onKick</a></li>
-        <li><a href="$baseurl$api/event/onLoad.html">onLoad</a></li>
-        <li><a href="$baseurl$api/event/onMe.html">onMe</a></li>
-        <li><a href="$baseurl$api/event/onMessage.html">onMessage</a></li>
-        <li><a href="$baseurl$api/event/onMode.html">onMode</a></li>
-        <li><a href="$baseurl$api/event/onNames.html">onNames</a></li>
-        <li><a href="$baseurl$api/event/onNick.html">onNick</a></li>
-        <li><a href="$baseurl$api/event/onNotice.html">onNotice</a></li>
-        <li><a href="$baseurl$api/event/onPart.html">onPart</a></li>
-        <li><a href="$baseurl$api/event/onReload.html">onReload</a></li>
-        <li><a href="$baseurl$api/event/onTopic.html">onTopic</a></li>
-        <li><a href="$baseurl$api/event/onUnload.html">onUnload</a></li>
-        <li><a href="$baseurl$api/event/onWhois.html">onWhois</a></li>
-      </ul>
-      <h3>Modules</h3>
-      <ul class="nav nav-sidebar sidebar-list">
-        <li><a href="$baseurl$api/module/Irccd/index.html">Irccd</a></li>
-        <li><a href="$baseurl$api/module/Irccd.Directory/index.html">Irccd.Directory</a></li>
-        <li><a href="$baseurl$api/module/Irccd.ElapsedTimer/index.html">Irccd.ElapsedTimer</a></li>
-        <li><a href="$baseurl$api/module/Irccd.File/index.html">Irccd.File</a></li>
-        <li><a href="$baseurl$api/module/Irccd.Logger/index.html">Irccd.Logger</a></li>
-        <li><a href="$baseurl$api/module/Irccd.Plugin/index.html">Irccd.Plugin</a></li>
-        <li><a href="$baseurl$api/module/Irccd.Server/index.html">Irccd.Server</a></li>
-        <li><a href="$baseurl$api/module/Irccd.System/index.html">Irccd.System</a></li>
-        <li><a href="$baseurl$api/module/Irccd.Timer/index.html">Irccd.Timer</a></li>
-        <li><a href="$baseurl$api/module/Irccd.Unicode/index.html">Irccd.Unicode</a></li>
-        <li><a href="$baseurl$api/module/Irccd.Util/index.html">Irccd.Util</a></li>
-      </ul>
-$endif$ <!-- endif js -->
-
-    <!-- Side bar for guide -->
-$if(guide)$
-<nav id="toc">
-$toc$
-</nav>
-$endif$ <!-- endif guide -->
-
-    </div><!-- Side bar -->
-
-    <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-      <ol class="breadcrumb">
-$for(parents)$
-        $if(parents.active)$
-        <li><a href="$parents.path$">$parents.name$</a></li>
-        $else$
-        <li>$parents.name$</li>
-        $endif$
-$endfor$
-        <li class="active">$basename$</li>
-      </ol><!-- !breadcrumb -->
-
-    <!-- Page body for JavaScript -->
-$if(js)$
-    <!-- Page header, may be: event | module | function | method -->
-    <!-- Event -->
-    $if(event)$
-    <h1 class="page-header">Event: $event$</h1>
-    $endif$
-
-    <!-- Module -->
-    $if(module)$
-    <h1 class="page-header">Module: $module$</h1>
-    $endif$
-
-    <!-- Function -->
-    $if(function)$
-    <h1 class="page-header">Function: $function$</h1>
-    $endif$
-
-    <!-- Method -->
-    $if(method)$
-    <h1 class="page-header">Method: $method$</h1>
-    $endif$
-    <!-- End of page header -->
-
-    <div class="table-responsive">
-$summary$
-
-$if(synopsis)$
-        <h2>Synopsis</h2>
-
-        <!-- Javascript function signature -->
-        <pre><code class="javascript">$synopsis$</code></pre>
-$endif$ <!-- endif synopsis -->
-
-        <!-- Arguments -->
-$if(arguments)$
-        <h2>Arguments</h2>
-        <ul>
-$for(arguments)$
-          <li>$arguments$</li>
-$endfor$
-        </ul>
-$endif$ <!-- endif arguments -->
-
-$if(returns)$
-        <h2>Returns</h2>
-        <p>$returns$</p>
-$endif$ <!-- endif returns -->
-
-        <!-- Throws -->
-$if(throws)$
-        <h2>Throws</h2>
-        <ul>
-$for(throws)$
-          <li>$throws$</li>
-$endfor$
-        </ul>
-$endif$ <!-- endif throws -->
-
-$body$
-        <!-- !Body -->
-    </div><!-- !table-responsive -->
-$endif$ <!-- endif js -->
-
-    <!-- Page body for guide -->
-$if(guide)$
-    <div class="table-responsive">
-    <!-- Generic header -->
-    $if(header)$
-    <h1 class="page-header">$header$</h1>
-    $endif$
-
-$body$
-    </div><!-- !table-responsive -->
-$endif$ <!-- endif guide -->
-    </div><!-- !column -->
-  </div><!-- !row -->
-
-  <hr>
-  <footer>
-    <p>&copy; 2013-2017 David Demelier.</p>
-  </footer>
-</div> <!-- !container -->
-
-    <!-- Bootstrap core JavaScript
-    ================================================== -->
-    <!-- Placed at the end of the document so the pages load faster -->
-    <script src="$baseurl$js/jquery.min.js"></script>
-    <script src="$baseurl$js/bootstrap.min.js"></script>
-
-    <script src="$baseurl$js/highlight.min.js"></script>
-    <script>hljs.initHighlightingOnLoad();</script>
-    <script>jQuery("table").addClass("table");</script>
-    <script>jQuery("#toc").addClass("nav");</script>
-    <script>jQuery("#toc").addClass("nav-sidebar");</script>
-    <script>jQuery("nav ul").addClass("nav");</script>
-  </body>
+	<script>hljs.initHighlightingOnLoad();</script>
+	<style>
+	pre {
+		background-color: transparent;
+	}
+	</style>
 </html>

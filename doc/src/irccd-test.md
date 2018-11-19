@@ -1,7 +1,3 @@
-% irccd-test
-% David Demelier
-% 2017-12-21
-
 The `irccd-test` program is a simple utility to test plugins on the command
 line.
 
@@ -24,29 +20,29 @@ line instead of sending them through IRC.
 
 The following options are available:
 
-  - `-c, --config file`: specify the configuration file.
+- -c, --config file: specify the configuration file.
 
 # Commands
 
 List of available commands:
 
-  - onCommand server origin channel message
-  - onConnect server
-  - onInvite server origin channel target
-  - onJoin server origin channel
-  - onKick server origin channel reason
-  - onLoad
-  - onMe server origin channel message
-  - onMessage server origin channel message
-  - onMode server origin channel mode limit user mask
-  - onNames server channel nick1 nick2 nickN
-  - onNick server origin nickname
-  - onNotice server origin channel nickname
-  - onPart server origin channel reason
-  - onReload
-  - onTopic server origin channel topic
-  - onUnload
-  - onWhois server nick user host realname chan1 chan2 chanN
+- onCommand server origin channel message
+- onConnect server
+- onInvite server origin channel target
+- onJoin server origin channel
+- onKick server origin channel reason
+- onLoad
+- onMe server origin channel message
+- onMessage server origin channel message
+- onMode server origin channel mode limit user mask
+- onNames server channel nick1 nick2 nickN
+- onNick server origin nickname
+- onNotice server origin channel nickname
+- onPart server origin channel reason
+- onReload
+- onTopic server origin channel topic
+- onUnload
+- onWhois server nick user host realname chan1 chan2 chanN
 
 # Example
 
@@ -54,10 +50,10 @@ Example by testing the **ask** plugin.
 
     $ irccd-test ask
     > onCommand local #test jean will I be rich?
-	local: connect
-	local: message jean #test, No
-	> onCommand local #test jean are you sure?
-	local: message jean #test, Yes
+    local: connect
+    local: message jean #test, No
+    > onCommand local #test jean are you sure?
+    local: message jean #test, Yes
 
 As you can see in this example, the first onCommand generates two server
 commands, the first connect attempt is being made because irccd-test creates a
@@ -68,4 +64,4 @@ Then, the server sent a message on the **#test** channel and said **No**. The
 second onCommand event did not generate a connect event because the local server
 was already present. It said on the same server **No** though.
 
-[libedit]: http://thrysoee.dk/editline/
+[libedit]: http://thrysoee.dk/editline
