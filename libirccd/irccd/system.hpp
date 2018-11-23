@@ -24,14 +24,14 @@
  * \brief System dependant functions
  */
 
+#include "sysconfig.hpp"
+
 #include <cstdint>
 #include <string>
 #include <string_view>
 #include <vector>
 
 #include <boost/filesystem.hpp>
-
-#include "sysconfig.hpp"
 
 /**
  * \brief Namespace for system functions.

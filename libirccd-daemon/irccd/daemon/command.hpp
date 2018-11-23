@@ -54,12 +54,12 @@ public:
 	/**
 	 * \brief Command constructor factory.
 	 */
-	using constructor = std::function<auto () -> std::unique_ptr<command>>;
+	using constructor = std::function<std::unique_ptr<command> ()>;
 
 	/**
 	 * \brief Registry of all commands.
 	 */
-	static const std::vector<constructor> registry;
+	static auto registry() noexcept -> const std::vector<constructor>&;
 
 	/**
 	 * Default destructor virtual.

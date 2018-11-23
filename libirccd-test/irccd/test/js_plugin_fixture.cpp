@@ -57,7 +57,7 @@ js_plugin_fixture::js_plugin_fixture(std::string path)
 	server_->set_nickname("irccd");
 	server_->clear();
 
-	for (const auto& f : js::js_api::registry)
+	for (const auto& f : js::js_api::registry())
 		f()->load(bot_, plugin_);
 
 	plugin_->open();

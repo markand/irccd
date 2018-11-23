@@ -24,6 +24,8 @@
  * \brief Plugin service.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <cassert>
 #include <memory>
 #include <string>

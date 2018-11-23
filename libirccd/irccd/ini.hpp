@@ -105,6 +105,8 @@
  * ````
  */
 
+#include "sysconfig.hpp"
+
 #include <algorithm>
 #include <exception>
 #include <stdexcept>

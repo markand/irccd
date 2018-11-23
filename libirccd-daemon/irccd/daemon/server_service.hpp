@@ -24,6 +24,8 @@
  * \brief Server service.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <memory>
 #include <system_error>
 #include <vector>

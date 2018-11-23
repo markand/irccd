@@ -16,9 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <boost/predef/os.h>
-
 #include "sysconfig.hpp"
+
+#include <boost/predef/os.h>
 
 #if defined(IRCCD_HAVE_POPEN)
 #	include <array>
@@ -382,7 +382,7 @@ auto format(std::string text, const subst& params) -> std::string
 
 auto strip(std::string str) noexcept -> std::string
 {
-	const auto test = [] (auto c) noexcept { return !std::isspace(c); };
+	const auto test = [] (auto c) noexcept { return !std::isspace(c, {}); };
 
 	str.erase(str.begin(), std::find_if(str.begin(), str.end(), test));
 	str.erase(std::find_if(str.rbegin(), str.rend(), test).base(), str.end());

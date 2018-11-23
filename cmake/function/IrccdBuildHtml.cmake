@@ -71,80 +71,78 @@ else ()
 endif ()
 
 macro(irccd_build_html)
-	if (NOT IRCCD_HAVE_HTML)
-		return ()
-	endif ()
+	if (IRCCD_HAVE_HTML)
+		set(options "")
+		set(oneValueArgs "COMPONENT;OUTPUT_DIR;OUTPUT_VAR;SOURCE;TEMPLATE")
+		set(multiValueArgs "VARIABLES")
 
-	set(options "")
-	set(oneValueArgs "COMPONENT;OUTPUT_DIR;OUTPUT_VAR;SOURCE;TEMPLATE")
-	set(multiValueArgs "VARIABLES")
+		cmake_parse_arguments(HTML "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-	cmake_parse_arguments(HTML "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+		if (NOT HTML_SOURCE)
+			message(FATAL_ERROR "Missing SOURCE parameter")
+		endif ()
+		if (NOT HTML_TEMPLATE)
+			message(FATAL_ERROR "Missing TEMPLATE parameter")
+		endif ()
+		if (IS_ABSOLUTE ${HTML_OUTPUT_DIR})
+			message(FATAL_ERROR "OUTPUT_DIR variable must not be absolute")
+		endif ()
 
-	if (NOT HTML_SOURCE)
-		message(FATAL_ERROR "Missing SOURCE parameter")
-	endif ()
-	if (NOT HTML_TEMPLATE)
-		message(FATAL_ERROR "Missing TEMPLATE parameter")
-	endif ()
-	if (IS_ABSOLUTE ${HTML_OUTPUT_DIR})
-		message(FATAL_ERROR "OUTPUT_DIR variable must not be absolute")
-	endif ()
+		#
+		# Get the basename, use string REGEX REPLACE because
+		# get_filename_component will remove all extensions while we only want
+		# to remove md. (e.g. irccd.conf.md becomes irccd.conf).
+		#
+		get_filename_component(filename ${HTML_SOURCE} NAME)
+		string(REGEX REPLACE "^(.*)\\.md$" "\\1" filename ${filename})
 
-	#
-	# Get the basename, use string REGEX REPLACE because
-	# get_filename_component will remove all extensions while we only want
-	# to remove md. (e.g. irccd.conf.md becomes irccd.conf).
-	#
-	get_filename_component(filename ${HTML_SOURCE} NAME)
-	string(REGEX REPLACE "^(.*)\\.md$" "\\1" filename ${filename})
-
-	# Compute baseurl.
-	file(
-		RELATIVE_PATH
-		baseurl
-		${CMAKE_BINARY_DIR}/html/${HTML_OUTPUT_DIR}
-		${CMAKE_BINARY_DIR}/html
-	)
-
-	if (baseurl STREQUAL "")
-		set(baseurl "./")
-	endif ()
-	if (NOT HTML_OUTPUT_DIR OR HTML_OUTPUT_DIR STREQUAL "")
-		set(HTML_OUTPUT_DIR ".")
-	endif ()
-
-	# Filname path to output directory and files.
-	set(outputdir ${CMAKE_BINARY_DIR}/html/${HTML_OUTPUT_DIR})
-	set(output ${outputdir}/${filename}.html)
-
-	# Build arguments.
-	if (HTML_TEMPLATE)
-		set(args -t ${HTML_TEMPLATE} -v baseurl="${baseurl}")
-	endif ()
-
-	add_custom_command(
-		OUTPUT ${output}
-		COMMAND
-			${CMAKE_COMMAND} -E make_directory ${outputdir}
-		COMMAND
-			$<TARGET_FILE:marker::marker> ${args} ${HTML_VARIABLES}
-			$<TARGET_FILE:marker::libmarker-bulma> ${output} ${HTML_SOURCE}
-		DEPENDS
-			${HTML_SOURCE}
-			${HTML_TEMPLATE}
-	)
-
-	# Install the documentation file as component if provided.
-	if (HTML_COMPONENT)
-		install(
-			FILES ${output}
-			COMPONENT ${HTML_COMPONENT}
-			DESTINATION ${CMAKE_INSTALL_DOCDIR}/${HTML_OUTPUT_DIR}
+		# Compute baseurl.
+		file(
+			RELATIVE_PATH
+			baseurl
+			${CMAKE_BINARY_DIR}/html/${HTML_OUTPUT_DIR}
+			${CMAKE_BINARY_DIR}/html
 		)
-	endif ()
 
-	if (HTML_OUTPUT_VAR)
-		set(${HTML_OUTPUT_VAR} ${output})
+		if (baseurl STREQUAL "")
+			set(baseurl "./")
+		endif ()
+		if (NOT HTML_OUTPUT_DIR OR HTML_OUTPUT_DIR STREQUAL "")
+			set(HTML_OUTPUT_DIR ".")
+		endif ()
+
+		# Filname path to output directory and files.
+		set(outputdir ${CMAKE_BINARY_DIR}/html/${HTML_OUTPUT_DIR})
+		set(output ${outputdir}/${filename}.html)
+
+		# Build arguments.
+		if (HTML_TEMPLATE)
+			set(args -t ${HTML_TEMPLATE} -v baseurl="${baseurl}")
+		endif ()
+
+		add_custom_command(
+			OUTPUT ${output}
+			COMMAND
+				${CMAKE_COMMAND} -E make_directory ${outputdir}
+			COMMAND
+				$<TARGET_FILE:marker::marker> ${args} ${HTML_VARIABLES}
+				$<TARGET_FILE:marker::libmarker-bulma> ${output} ${HTML_SOURCE}
+			DEPENDS
+				${HTML_SOURCE}
+				${HTML_TEMPLATE}
+		)
+
+		# Install the documentation file as component if provided.
+		if (HTML_COMPONENT)
+			install(
+				FILES ${output}
+				COMPONENT ${HTML_COMPONENT}
+				DESTINATION ${CMAKE_INSTALL_DOCDIR}/${HTML_OUTPUT_DIR}
+			)
+		endif ()
+
+		if (HTML_OUTPUT_VAR)
+			set(${HTML_OUTPUT_VAR} ${output})
+		endif ()
 	endif ()
 endmacro ()

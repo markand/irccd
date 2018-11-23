@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <algorithm>
 
 #include <irccd/config.hpp>

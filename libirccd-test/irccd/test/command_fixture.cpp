@@ -72,7 +72,7 @@ command_fixture::command_fixture()
 	auto connector = std::make_unique<ip_connector>(bot_.get_service(), "127.0.0.1", service, true, false);
 
 	// 1. Add all commands.
-	for (const auto& f : command::registry)
+	for (const auto& f : command::registry())
 		bot_.transports().get_commands().push_back(f());
 
 	// 2. Create controller and transport server.

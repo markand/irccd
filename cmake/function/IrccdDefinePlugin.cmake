@@ -154,6 +154,14 @@ function(irccd_define_plugin)
 			message(FATAL_ERROR "Invalid TYPE given, must be JS or NATIVE")
 		endif ()
 
+		# Put under "plugins".
+		set_target_properties(
+			plugin-${PLG_NAME}
+			PROPERTIES
+				FOLDER "plugins"
+				PROJECT_NAME ${PLG_NAME}
+		)
+
 		# Component grouping in installer.
 		setg(CPACK_COMPONENT_${PLG_UPPER_NAME}_GROUP "Plugins")
 		setg(CPACK_COMPONENT_${PLG_UPPER_NAME}_DESCRIPTION "Install ${PLG_NAME} plugin.")

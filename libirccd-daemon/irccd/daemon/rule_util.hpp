@@ -24,6 +24,8 @@
  * \brief Rule utilities.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <json.hpp>
 
 namespace irccd {

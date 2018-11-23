@@ -24,6 +24,8 @@
  * \brief Read .ini configuration file for irccd
  */
 
+#include "sysconfig.hpp"
+
 #include <optional>
 #include <string_view>
 

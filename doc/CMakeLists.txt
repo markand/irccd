@@ -18,8 +18,6 @@
 
 project(doc)
 
-add_custom_target(docs ALL COMMENT "Generating documentation")
-
 if (IRCCD_HAVE_DOXYGEN)
 	add_subdirectory(doxygen)
 endif ()

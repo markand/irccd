@@ -227,10 +227,7 @@ public:
 	 *
 	 * \param obj the JSON object
 	 */
-	deserializer(const nlohmann::json& obj)
-		: nlohmann::json(obj)
-	{
-	}
+	deserializer(const nlohmann::json& obj);
 
 	/**
 	 * Get a value from the document object.

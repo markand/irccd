@@ -24,6 +24,8 @@
  * \brief Server side transport clients.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <deque>
 #include <memory>
 #include <string_view>

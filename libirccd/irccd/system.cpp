@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include "sysconfig.hpp"
+
 #include <cassert>
 #include <cerrno>
 #include <cstdlib>
@@ -27,8 +29,6 @@
 #include <boost/dll.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/predef/os.h>
-
-#include "sysconfig.hpp"
 
 #if BOOST_OS_WINDOWS
 #	include <sys/timeb.h>

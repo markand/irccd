@@ -131,6 +131,11 @@ auto type_traits<std::uint64_t>::get(const json& value) noexcept -> std::optiona
 	return value.get<std::uint64_t>();
 }
 
+deserializer::deserializer(const nlohmann::json& obj)
+	: nlohmann::json(obj)
+{
+}
+
 auto pretty(const json& value, int indent) -> std::string
 {
 	switch (value.type()) {

@@ -24,6 +24,8 @@
  * \brief Transport service.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <memory>
 #include <vector>
 

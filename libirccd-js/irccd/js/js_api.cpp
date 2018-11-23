@@ -33,7 +33,7 @@ namespace irccd::js {
 namespace {
 
 template <typename T>
-auto bind() noexcept -> js_api::factory
+auto bind() noexcept -> js_api::constructor
 {
 	return [] () noexcept {
 		return std::make_unique<T>();
@@ -42,19 +42,24 @@ auto bind() noexcept -> js_api::factory
 
 } // !namespace
 
-const std::vector<js_api::factory> js_api::registry{
-	// Irccd API must be loaded first.
-	bind<irccd_js_api>(),
-	bind<directory_js_api>(),
-	bind<elapsed_timer_js_api>(),
-	bind<file_js_api>(),
-	bind<logger_js_api>(),
-	bind<plugin_js_api>(),
-	bind<server_js_api>(),
-	bind<system_js_api>(),
-	bind<timer_js_api>(),
-	bind<unicode_js_api>(),
-	bind<util_js_api>()
-};
+auto js_api::registry() noexcept -> const std::vector<constructor>&
+{
+	static const std::vector<constructor> list {
+		// Irccd API must be loaded first.
+		bind<irccd_js_api>(),
+		bind<directory_js_api>(),
+		bind<elapsed_timer_js_api>(),
+		bind<file_js_api>(),
+		bind<logger_js_api>(),
+		bind<plugin_js_api>(),
+		bind<server_js_api>(),
+		bind<system_js_api>(),
+		bind<timer_js_api>(),
+		bind<unicode_js_api>(),
+		bind<util_js_api>()
+	};
+
+	return list;
+}
 
 } // !irccd::js

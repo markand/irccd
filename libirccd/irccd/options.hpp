@@ -24,6 +24,8 @@
  * \brief Basic Unix options parser.
  */
 
+#include "sysconfig.hpp"
+
 #include <exception>
 #include <map>
 #include <string>

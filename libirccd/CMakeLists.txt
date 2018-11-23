@@ -18,7 +18,7 @@
 
 project(libirccd)
 
-find_package(Boost 1.60 REQUIRED QUIET COMPONENTS filesystem system)
+find_package(Boost 1.60 REQUIRED QUIET COMPONENTS date_time filesystem system)
 
 set(
 	SOURCES
@@ -49,6 +49,9 @@ set(
 	${CMAKE_DL_LIBS}
 	libjson
 	Threads::Threads
+	Boost::disable_autolinking
+	Boost::dynamic_linking
+	Boost::date_time
 	Boost::filesystem
 	Boost::system
 )

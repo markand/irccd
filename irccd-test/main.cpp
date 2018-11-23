@@ -647,7 +647,7 @@ void load(int argc, char** argv)
 #if defined(IRCCD_HAVE_JS)
 	auto loader = std::make_unique<js_plugin_loader>(*daemon);
 
-	for (const auto& f : js_api::registry)
+	for (const auto& f : js_api::registry())
 		loader->get_modules().push_back(f());
 
 	daemon->plugins().add_loader(std::move(loader));

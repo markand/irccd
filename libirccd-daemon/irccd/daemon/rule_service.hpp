@@ -24,6 +24,8 @@
  * \brief Rule service.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <vector>
 
 #include <json.hpp>

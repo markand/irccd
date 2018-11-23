@@ -178,7 +178,7 @@ int main(int argc, char** argv)
 	init(argc, argv);
 
 	// 1. Load commands.
-	for (const auto& f : command::registry)
+	for (const auto& f : command::registry())
 		instance->transports().get_commands().push_back(f());
 
 	// 2. Load plugin loaders.
@@ -187,7 +187,7 @@ int main(int argc, char** argv)
 #if defined(IRCCD_HAVE_JS)
 	auto loader = std::make_unique<js::js_plugin_loader>(*instance);
 
-	for (const auto& f : js::js_api::registry)
+	for (const auto& f : js::js_api::registry())
 		loader->get_modules().push_back(f());
 
 	instance->plugins().add_loader(std::move(loader));

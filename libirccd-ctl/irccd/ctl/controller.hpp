@@ -24,6 +24,8 @@
  * \brief Main irccdctl interface.
  */
 
+#include "sysconfig.hpp"
+
 #include <cassert>
 
 #include <irccd/connector.hpp>

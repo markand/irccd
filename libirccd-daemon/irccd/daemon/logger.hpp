@@ -276,7 +276,6 @@ public:
  * \ingroup daemon-loggers
  */
 class filter {
-private:
 public:
 	/**
 	 * Virtual destructor defaulted.

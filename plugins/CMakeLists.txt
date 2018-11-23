@@ -19,37 +19,30 @@
 project(plugins)
 
 set(
-	IRCCD_JAVASCRIPT_PLUGINS
+	IRCCD_PLUGINS
 	ask
 	auth
 	hangman
 	history
 	joke
+	links
 	logger
 	plugin
 	roulette
 	tictactoe
+	CACHE INTERNAL "All plugins"
 )
 
-set(
-	IRCCD_NATIVE_PLUGINS
-	links
-)
-
-set(
-	IRCCD_PLUGINS
-	${IRCCD_JAVASCRIPT_PLUGINS}
-	${IRCCD_NATIVE_PLUGINS}
-	CACHE INTERNAL ""
-)
-
-foreach (plugin ${IRCCD_JAVASCRIPT_PLUGINS})
-	irccd_define_plugin(
-		NAME ${plugin}
-		TYPE JS
-		SCRIPT ${plugins_SOURCE_DIR}/${plugin}/${plugin}.js
-		DOCS ${plugins_SOURCE_DIR}/${plugin}/${plugin}.md
-	)
-endforeach ()
+if (IRCCD_HAVE_JS)
+	add_subdirectory(ask)
+	add_subdirectory(auth)
+	add_subdirectory(hangman)
+	add_subdirectory(history)
+	add_subdirectory(joke)
+	add_subdirectory(logger)
+	add_subdirectory(plugin)
+	add_subdirectory(roulette)
+	add_subdirectory(tictactoe)
+endif ()
 
 add_subdirectory(links)

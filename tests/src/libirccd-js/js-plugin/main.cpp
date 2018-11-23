@@ -45,7 +45,7 @@ protected:
 	{
 		plugin_ = std::make_unique<js_plugin>("test", path);
 
-		for (const auto& f : js_api::registry)
+		for (const auto& f : js_api::registry())
 			f()->load(bot_, plugin_);
 
 		plugin_->open();
@@ -111,7 +111,7 @@ protected:
 
 		auto loader = std::make_unique<js::js_plugin_loader>(bot_);
 
-		for (const auto& f : js::js_api::registry)
+		for (const auto& f : js::js_api::registry())
 			loader->get_modules().push_back(f());
 
 		bot_.plugins().add_loader(std::move(loader));

@@ -52,21 +52,27 @@
 cmake_minimum_required(VERSION 3.10)
 project(irccd)
 
+include(GNUInstallDirs)
+
 # Helper to set global internal variables.
 function(setg var value)
 	set("${var}" "${value}" CACHE INTERNAL "")
 endfunction ()
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${irccd_SOURCE_DIR}/cmake/packages)
-set(CMAKE_POSITION_INDEPENDENT_CODE On)
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED On)
-set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS On)
-
 set_property(GLOBAL PROPERTY USE_FOLDERS On)
 
-include(CMakeParseArguments)
-include(GNUInstallDirs)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED On)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${irccd_SOURCE_DIR}/cmake/packages)
+set(CMAKE_POSITION_INDEPENDENT_CODE On)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS On)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+foreach (cfg ${CMAKE_CONFIGURATION_TYPES})
+	string(TOUPPER CFG ${cfg})
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CFG} ${CMAKE_BINARY_DIR}/bin/${cfg})
+endforeach ()
 
 include(cmake/function/IrccdBuildHtml.cmake)
 include(cmake/function/IrccdDefineExecutable.cmake)
@@ -99,12 +105,8 @@ add_subdirectory(irccd)
 add_subdirectory(irccdctl)
 add_subdirectory(irccd-test)
 add_subdirectory(systemd)
+add_subdirectory(plugins)
 
-if (IRCCD_HAVE_JS)
-	add_subdirectory(plugins)
-endif ()
-
-# Tests.
 if (IRCCD_WITH_TESTS)
 	include(CTest)
 	add_subdirectory(tests)
@@ -157,16 +159,3 @@ endif ()
 
 include(cmake/IrccdPackage.cmake)
 include(CPack)
-
-# Metadata files
-add_custom_target(
-	metadata
-	SOURCES
-		${CMAKE_SOURCE_DIR}/CHANGES.md
-		${CMAKE_SOURCE_DIR}/CONTRIBUTE.md
-		${CMAKE_SOURCE_DIR}/CREDITS.md
-		${CMAKE_SOURCE_DIR}/INSTALL.md
-		${CMAKE_SOURCE_DIR}/MIGRATING.md
-		${CMAKE_SOURCE_DIR}/README.md
-		${CMAKE_SOURCE_DIR}/STYLE.md
-)

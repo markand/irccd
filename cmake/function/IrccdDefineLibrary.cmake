@@ -47,7 +47,11 @@ function(irccd_define_library)
 	endif ()
 
 	add_library(${LIB_TARGET} ${LIB_SOURCES} ${LIB_HEADERS})
-	target_include_directories(${LIB_TARGET} PRIVATE ${LIB_LOCAL_INCLUDES} PUBLIC ${LIB_PUBLIC_INCLUDES})
+	target_include_directories(
+		${LIB_TARGET}
+		PRIVATE ${LIB_LOCAL_INCLUDES}
+		PUBLIC ${LIB_PUBLIC_INCLUDES}
+	)
 	target_compile_definitions(
 		${LIB_TARGET}
 		PRIVATE
@@ -61,16 +65,8 @@ function(irccd_define_library)
 		${LIB_TARGET}
 		PROPERTIES
 			PREFIX ""
-			RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+			IMPORT_PREFIX ""
 	)
-	foreach (c ${CMAKE_CONFIGURATION_TYPES})
-		string(TOUPPER ${c} cu)
-		set_target_properties(
-			${LIB_TARGET}
-			PROPERTIES
-				RUNTIME_OUTPUT_DIRECTORY_${cu} ${CMAKE_BINARY_DIR}/bin/${c}
-		)
-	endforeach()
 
 	if (${LIB_EXPORT})
 		install(

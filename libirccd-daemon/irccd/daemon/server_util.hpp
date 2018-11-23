@@ -24,6 +24,8 @@
  * \brief Server utilities.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <memory>
 #include <string_view>
 

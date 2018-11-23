@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <algorithm>
 
 #include <boost/dll.hpp>
@@ -40,6 +42,9 @@ using boost::str;
 namespace irccd::daemon {
 
 namespace {
+
+using abisym_func_type = version ();
+using initsym_func_type = std::unique_ptr<plugin> (std::string);
 
 auto symbol(std::string_view path) -> std::pair<std::string, std::string>
 {
@@ -72,12 +77,7 @@ auto dynlib_plugin_loader::open(std::string_view id, std::string_view path) -> s
 {
 	const std::string idstr(id);
 	const std::string pathstr(path);
-
 	const auto [ abisym, initsym ] = symbol(pathstr);
-
-	using abisym_func_type = version ();
-	using initsym_func_type = std::unique_ptr<plugin> (std::string);
-
 	const auto abi = boost::dll::import_alias<abisym_func_type>(pathstr, abisym);
 	const auto init = boost::dll::import_alias<initsym_func_type>(pathstr, initsym);
 
@@ -96,7 +96,7 @@ auto dynlib_plugin_loader::open(std::string_view id, std::string_view path) -> s
 	 * We need to keep a reference to `init' variable for the whole plugin
 	 * lifetime.
 	 */
-	return std::shared_ptr<plugin>(plg.release(), [init] (auto ptr) mutable {
+	return std::shared_ptr<plugin>(plg.release(), [init] (plugin* ptr) mutable {
 		delete ptr;
 	});
 }

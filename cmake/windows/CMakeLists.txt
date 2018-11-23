@@ -16,12 +16,6 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-#
-# This file consists of installing required .dll files for Windows.
-#
-# It currently only supports MinGW.
-#
-
 project(windows)
 
 #
@@ -30,21 +24,71 @@ project(windows)
 #
 
 if (MINGW)
-	if (IRCCD_64BITS)
-		set(LIBGCC_DLL libgcc_s_seh-1.dll)
-	else ()
-		set(LIBGCC_DLL libgcc_s_sjlj-1.dll)
-	endif ()
+	# debug libraries
+	set(BOOST_CHRONO_DLL_DEBUG libboost_chrono-mt.dll)
+	set(BOOST_DATE_TIME_DLL_DEBUG libboost_date_time-mt.dll)
+	set(BOOST_FILESYSTEM_DLL_DEBUG libboost_filesystem-mt.dll)
+	set(BOOST_SYSTEM_DLL_DEBUG libboost_system-mt.dll)
+	set(BOOST_TIMER_DLL_DEBUG libboost_timer-mt.dll)
+	set(BOOST_UNIT_TEST_FRAMEWORK_DLL_DEBUG libboost_unit_test_framework-mt.dll)
+	set(CRYPTO_DLL_DEBUG libcrypto-1_1-x64.dll)
+	set(SSL_DLL_DEBUG libssl-1_1-x64.dll)
 
-	set(LIBWINPTHREAD_DLL libwinpthread-1.dll)
-	set(LIBSTDCPP_DLL libstdc++-6.dll)
+	# MinGW specific.
+	set(LIBGCC_DLL_DEBUG libgcc_s_seh-1.dll)
+	set(LIBWINPTHREAD_DLL_DEBUG libwinpthread-1.dll)
+	set(LIBSTDCPP_DLL_DEBUG libstdc++-6.dll)
 	list(APPEND DLLS LIBGCC_DLL LIBWINPTHREAD_DLL LIBSTDCPP_DLL)
 
-	if (IRCCD_HAVE_SSL)
-		set(CRYPTO_DLL libcrypto.dll)
-		set(SSL_DLL libssl.dll)
-		list(APPEND DLLS CRYPTO_DLL SSL_DLL)
-	endif ()
+	# release libraries use the same.
+	set(BOOST_CHRONO_DLL_RELEASE ${BOOST_CHRONO_DLL_DEBUG})
+	set(BOOST_DATE_TIME_DLL_RELEASE ${BOOST_DATE_TIME_DLL_DEBUG})
+	set(BOOST_FILESYSTEM_DLL_RELEASE ${BOOST_FILESYSTEM_DLL_DEBUG})
+	set(BOOST_SYSTEM_DLL_RELEASE ${BOOST_SYSTEM_DLL_DEBUG})
+	set(BOOST_TIMER_DLL_RELEASE ${BOOST_TIMER_DLL_DEBUG})
+	set(BOOST_UNIT_TEST_FRAMEWORK_DLL_RELEASE ${BOOST_UNIT_TEST_FRAMEWORK_DLL_DEBUG})
+	set(CRYPTO_DLL_RELEASE ${CRYPTO_DLL_DEBUG})
+	set(SSL_DLL_RELEASE ${SSL_DLL_DEBUG})
+	set(LIBGCC_DLL_RELEASE ${LIBGCC_DLL_DEBUG})
+	set(LIBWINPTHREAD_DLL_RELEASE ${LIBWINPTHREAD_DLL_DEBUG})
+	set(LIBSTDCPP_DLL_RELEASE ${LIBSTDCPP_DLL_DEBUG})
+elseif (MSVC)
+	# debug libraries
+	set(BOOST_CHRONO_DLL_DEBUG boost_chrono-vc141-mt-gd-x64-1_68.dll)
+	set(BOOST_DATE_TIME_DLL_DEBUG boost_date_time-vc141-mt-gd-x64-1_68.dll)
+	set(BOOST_FILESYSTEM_DLL_DEBUG boost_filesystem-vc141-mt-gd-x64-1_68.dll)
+	set(BOOST_SYSTEM_DLL_DEBUG boost_system-vc141-mt-gd-x64-1_68.dll)
+	set(BOOST_TIMER_DLL_DEBUG boost_timer-vc141-mt-gd-x64-1_68.dll)
+	set(BOOST_UNIT_TEST_FRAMEWORK_DLL_DEBUG boost_unit_test_framework-vc141-mt-gd-x64-1_68.dll)
+	set(CRYPTO_DLL_DEBUG libcrypto-1_1-x64.dll)
+	set(SSL_DLL_DEBUG libssl-1_1-x64.dll)
+
+	# release libraries
+	set(BOOST_CHRONO_DLL_RELEASE boost_chrono-vc141-mt-x64-1_68.dll)
+	set(BOOST_DATE_TIME_DLL_RELEASE boost_date_time-vc141-mt-x64-1_68.dll)
+	set(BOOST_FILESYSTEM_DLL_RELEASE boost_filesystem-vc141-mt-x64-1_68.dll)
+	set(BOOST_SYSTEM_DLL_RELEASE boost_system-vc141-mt-x64-1_68.dll)
+	set(BOOST_TIMER_DLL_RELEASE boost_timer-vc141-mt-x64-1_68.dll)
+	set(BOOST_UNIT_TEST_FRAMEWORK_DLL_RELEASE boost_unit_test_framework-vc141-mt-x64-1_68.dll)
+	set(CRYPTO_DLL_RELEASE libcrypto-1_1-x64.dll)
+	set(SSL_DLL_RELEASE libssl-1_1-x64.dll)
+endif ()
+
+list(
+	APPEND
+	DLLS
+	BOOST_CHRONO_DLL
+	BOOST_DATE_TIME_DLL
+	BOOST_FILESYSTEM_DLL
+	BOOST_SYSTEM_DLL
+	BOOST_UNIT_TEST_FRAMEWORK_DLL
+)
+
+if (IRCCD_HAVE_SSL)
+	list(APPEND DLLS CRYPTO_DLL SSL_DLL)
+endif ()
+if (IRCCD_HAVE_JS)
+	list(APPEND DLLS BOOST_TIMER_DLL)
 endif ()
 
 #
@@ -61,26 +105,38 @@ endif ()
 
 foreach (name ${DLLS})
 	find_program(
-		IRCCD_WITH_${name}
-		NAMES ${${name}}
-		DOC "Path to ${name} DLL"
+		IRCCD_WITH_${name}_DEBUG
+		NAMES ${${name}_DEBUG}
+		DOC "Path to ${name} DLL (Debug)"
+	)
+	find_program(
+		IRCCD_WITH_${name}_RELEASE
+		NAMES ${${name}_RELEASE}
+		DOC "Path to ${name} DLL (Release)"
 	)
 
-	if (EXISTS ${IRCCD_WITH_${name}})
-		file(
-			COPY ${IRCCD_WITH_${name}}
-			DESTINATION ${CMAKE_BINARY_DIR}/bin
-		)
+	if (EXISTS ${IRCCD_WITH_${name}_DEBUG})
 		install(
-			PROGRAMS ${IRCCD_WITH_${name}}
+			PROGRAMS
+				$<$<CONFIG:Debug>:${IRCCD_WITH_${name}_DEBUG}>
 			COMPONENT libirccd
 			DESTINATION bin
 		)
-		list(APPEND FOUND IRCCD_WITH_${name})
+		list(APPEND FOUND IRCCD_WITH_${name}_DEBUG)
 	else ()
-		setg(IRCCD_PACKAGE Off)
-		setg(IRCCD_PACKAGE_MSG "No (some .dll were not found)")
-		list(APPEND NOT_FOUND IRCCD_WITH_${name})
+		list(APPEND NOT_FOUND IRCCD_WITH_${name}_DEBUG)
+	endif ()
+
+	if (EXISTS ${IRCCD_WITH_${name}_RELEASE})
+		install(
+			PROGRAMS
+				$<$<CONFIG:Release>:${IRCCD_WITH_${name}_RELEASE}>
+			COMPONENT libirccd
+			DESTINATION bin
+		)
+		list(APPEND FOUND IRCCD_WITH_${name}_RELEASE)
+	else ()
+		list(APPEND NOT_FOUND IRCCD_WITH_${name}_RELEASE)
 	endif ()
 endforeach ()
 

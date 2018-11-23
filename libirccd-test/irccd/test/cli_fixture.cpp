@@ -64,7 +64,7 @@ cli_fixture::cli_fixture(std::string irccdctl)
 
 	auto acceptor = std::make_unique<ip_acceptor>(bot_.get_service(), std::move(raw_acceptor));
 
-	for (const auto& f : command::registry)
+	for (const auto& f : command::registry())
 		bot_.transports().get_commands().push_back(f());
 
 	bot_.servers().add(server_);

@@ -52,12 +52,12 @@ public:
 	/**
 	 * \brief Command constructor factory.
 	 */
-	using factory = std::function<auto () -> std::unique_ptr<js_api>>;
+	using constructor = std::function<std::unique_ptr<js_api> ()>;
 
 	/**
 	 * \brief Registry of all commands.
 	 */
-	static const std::vector<factory> registry;
+	static auto registry() noexcept -> const std::vector<constructor>&;
 
 	/**
 	 * Default constructor.

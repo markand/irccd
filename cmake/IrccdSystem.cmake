@@ -27,14 +27,12 @@ include(CheckTypeSize)
 # -------------------------------------------------------------------
 #
 
-if (MINGW)
-	set(CMAKE_CXX_FLAGS "-D_WIN32_WINNT=0x0600 ${CMAKE_CXX_FLAGS}")
-endif ()
-
-if (CMAKE_SIZEOF_VOID_P MATCHES "8")
-	set(IRCCD_64BITS TRUE)
-else ()
-	set(IRCCD_64BITS FALSE)
+if (CMAKE_SYSTEM_NAME MATCHES "Windows")
+	if (CMAKE_CXX_COMPILER_ID MATCHES "GNU")
+		set(CMAKE_CXX_FLAGS "-DWINVER=0x0601 -D_WIN32_WINNT=0x0601 ${CMAKE_CXX_FLAGS}")
+	elseif (CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
+		set(CMAKE_CXX_FLAGS "/DWINVER=0x0601 /D_WIN32_WINNT=0x0601 /wd4244 /wd4267 /wd4996 ${CMAKE_CXX_FLAGS}")
+	endif ()
 endif ()
 
 #

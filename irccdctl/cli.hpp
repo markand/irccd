@@ -46,7 +46,7 @@ public:
 	/**
 	 * \brief Command constructor factory.
 	 */
-	using constructor = std::function<auto () -> std::unique_ptr<cli>>;
+	using constructor = std::function<std::unique_ptr<cli> ()>;
 
 	/**
 	 * \brief Registry of all commands.

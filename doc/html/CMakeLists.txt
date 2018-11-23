@@ -177,7 +177,7 @@ set(
 )
 
 add_custom_target(
-	html ALL
+	doc-html ALL
 	COMMAND
 		${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/html
 	COMMAND
@@ -187,6 +187,8 @@ add_custom_target(
 		${SOURCES}
 		${html_SOURCE_DIR}/template.html
 )
+
+set_target_properties(doc-html PROPERTIES FOLDER "doc")
 
 # Install resources files.
 install(

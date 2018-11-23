@@ -28,9 +28,12 @@
 #include <irccd/daemon/dynlib_plugin.hpp>
 #include <irccd/daemon/server.hpp>
 
+#include <irccd/test/mock_plugin.hpp>
+
 using irccd::daemon::bot;
 using irccd::daemon::dynlib_plugin_loader;
-using irccd::daemon::plugin;
+
+using irccd::test::mock_plugin;
 
 namespace irccd {
 
@@ -39,15 +42,17 @@ namespace {
 class fixture {
 protected:
 	boost::asio::io_service service_;
-	std::shared_ptr<plugin> plugin_;
+	std::shared_ptr<mock_plugin> plugin_;
 	bot bot_{service_};
 
 	fixture()
 	{
-		plugin_ = dynlib_plugin_loader({CMAKE_CURRENT_BINARY_DIR}).find("test-plugin");
+		auto plugin = dynlib_plugin_loader({CMAKE_CURRENT_BINARY_DIR}).find("sample-plugin");
 
-		if (!plugin_)
-			throw std::runtime_error("test plugin not found");
+		if (!plugin)
+			throw std::runtime_error("sample not found");
+
+		plugin_ = std::dynamic_pointer_cast<mock_plugin>(plugin);
 	}
 };
 
@@ -57,136 +62,119 @@ BOOST_AUTO_TEST_CASE(handle_command)
 {
 	plugin_->handle_command(bot_, {});
 
-	BOOST_TEST(plugin_->get_options().size() == 1U);
-	BOOST_TEST(plugin_->get_options()["command"] == "true");
+	BOOST_TEST(plugin_->find("handle_command").size() == 1U);
 }
 
 BOOST_AUTO_TEST_CASE(handle_connect)
 {
 	plugin_->handle_connect(bot_, {});
 
-	BOOST_TEST(plugin_->get_options().size() == 1U);
-	BOOST_TEST(plugin_->get_options()["connect"] == "true");
+	BOOST_TEST(plugin_->find("handle_connect").size() == 1U);
 }
 
 BOOST_AUTO_TEST_CASE(handle_invite)
 {
 	plugin_->handle_invite(bot_, {});
 
-	BOOST_TEST(plugin_->get_options().size() == 1U);
-	BOOST_TEST(plugin_->get_options()["invite"] == "true");
+	BOOST_TEST(plugin_->find("handle_invite").size() == 1U);
 }
 
 BOOST_AUTO_TEST_CASE(handle_join)
 {
 	plugin_->handle_join(bot_, {});
 
-	BOOST_TEST(plugin_->get_options().size() == 1U);
-	BOOST_TEST(plugin_->get_options()["join"] == "true");
+	BOOST_TEST(plugin_->find("handle_join").size() == 1U);
 }
 
 BOOST_AUTO_TEST_CASE(handle_kick)
 {
 	plugin_->handle_kick(bot_, {});
 
-	BOOST_TEST(plugin_->get_options().size() == 1U);
-	BOOST_TEST(plugin_->get_options()["kick"] == "true");
+	BOOST_TEST(plugin_->find("handle_kick").size() == 1U);
 }
 
 BOOST_AUTO_TEST_CASE(handle_load)
 {
 	plugin_->handle_load(bot_);
 
-	BOOST_TEST(plugin_->get_options().size() == 1U);
-	BOOST_TEST(plugin_->get_options()["load"] == "true");
+	BOOST_TEST(plugin_->find("handle_load").size() == 1U);
 }
 
 BOOST_AUTO_TEST_CASE(handle_message)
 {
 	plugin_->handle_message(bot_, {});
 
-	BOOST_TEST(plugin_->get_options().size() == 1U);
-	BOOST_TEST(plugin_->get_options()["message"] == "true");
+	BOOST_TEST(plugin_->find("handle_message").size() == 1U);
 }
 
 BOOST_AUTO_TEST_CASE(handle_me)
 {
 	plugin_->handle_me(bot_, {});
 
-	BOOST_TEST(plugin_->get_options().size() == 1U);
-	BOOST_TEST(plugin_->get_options()["me"] == "true");
+	BOOST_TEST(plugin_->find("handle_me").size() == 1U);
 }
 
 BOOST_AUTO_TEST_CASE(handle_mode)
 {
 	plugin_->handle_mode(bot_, {});
 
-	BOOST_TEST(plugin_->get_options().size() == 1U);
-	BOOST_TEST(plugin_->get_options()["mode"] == "true");
+	BOOST_TEST(plugin_->find("handle_mode").size() == 1U);
 }
 
 BOOST_AUTO_TEST_CASE(handle_names)
 {
 	plugin_->handle_names(bot_, {});
 
-	BOOST_TEST(plugin_->get_options().size() == 1U);
-	BOOST_TEST(plugin_->get_options()["names"] == "true");
+	BOOST_TEST(plugin_->find("handle_names").size() == 1U);
 }
 
 BOOST_AUTO_TEST_CASE(handle_nick)
 {
 	plugin_->handle_nick(bot_, {});
 
-	BOOST_TEST(plugin_->get_options().size() == 1U);
-	BOOST_TEST(plugin_->get_options()["nick"] == "true");
+	BOOST_TEST(plugin_->find("handle_nick").size() == 1U);
 }
 
 BOOST_AUTO_TEST_CASE(handle_notice)
 {
 	plugin_->handle_notice(bot_, {});
 
-	BOOST_TEST(plugin_->get_options().size() == 1U);
-	BOOST_TEST(plugin_->get_options()["notice"] == "true");
+	BOOST_TEST(plugin_->find("handle_notice").size() == 1U);
 }
 
 BOOST_AUTO_TEST_CASE(handle_part)
 {
 	plugin_->handle_part(bot_, {});
 
-	BOOST_TEST(plugin_->get_options().size() == 1U);
-	BOOST_TEST(plugin_->get_options()["part"] == "true");
+	BOOST_TEST(plugin_->find("handle_part").size() == 1U);
 }
 
 BOOST_AUTO_TEST_CASE(handle_reload)
 {
 	plugin_->handle_reload(bot_);
 
-	BOOST_TEST(plugin_->get_options().size() == 1U);
-	BOOST_TEST(plugin_->get_options()["reload"] == "true");
+	BOOST_TEST(plugin_->find("handle_reload").size() == 1U);
 }
 
 BOOST_AUTO_TEST_CASE(handle_topic)
 {
 	plugin_->handle_topic(bot_, {});
 
-	BOOST_TEST(plugin_->get_options().size() == 1U);
-	BOOST_TEST(plugin_->get_options()["topic"] == "true");
+	BOOST_TEST(plugin_->find("handle_topic").size() == 1U);
 }
 
 BOOST_AUTO_TEST_CASE(handle_unload)
 {
 	plugin_->handle_unload(bot_);
 
-	BOOST_TEST(plugin_->get_options().size() == 1U);
-	BOOST_TEST(plugin_->get_options()["unload"] == "true");
+	BOOST_TEST(plugin_->find("handle_unload").size() == 1U);
 }
 
 BOOST_AUTO_TEST_CASE(handle_whois)
 {
 	plugin_->handle_whois(bot_, {});
 
-	BOOST_TEST(plugin_->get_options().size() == 1U);
-	BOOST_TEST(plugin_->get_options()["whois"] == "true");
+	BOOST_TEST(plugin_->find("handle_whois").size() == 1U);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -29,6 +29,8 @@
  * \brief Transport utilities.
  */
 
+#include <irccd/sysconfig.hpp>
+
 #include <memory>
 
 #include <boost/asio/io_service.hpp>

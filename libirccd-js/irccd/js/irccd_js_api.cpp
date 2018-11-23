@@ -52,7 +52,7 @@ void do_raise(duk_context* ctx, const Error& ex)
 
 // {{{ Irccd.SystemError [constructor]
 
-auto constructor(duk_context* ctx) -> duk_ret_t
+auto SystemError_constructor(duk_context* ctx) -> duk_ret_t
 {
 	duk_push_this(ctx);
 	duk_push_int(ctx, duk_require_int(ctx, 0));
@@ -208,7 +208,7 @@ void irccd_js_api::load(bot& bot, std::shared_ptr<js_plugin> plugin)
 	duk_put_prop_string(plugin->get_context(), -2, "version");
 
 	// Create the system_error that inherits from Error.
-	duk_push_c_function(plugin->get_context(), constructor, 2);
+	duk_push_c_function(plugin->get_context(), SystemError_constructor, 2);
 
 	// Put errno codes into the irccd.system_error object.
 	for (const auto& [k, v] : errors) {
