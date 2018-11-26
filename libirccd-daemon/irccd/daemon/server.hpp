@@ -354,7 +354,6 @@ private:
 	void identify();
 	void handle_send(const std::error_code&);
 	void handle_recv(const std::error_code&, const irc::message&, const recv_handler&);
-	void handle_wait(const std::error_code&, const connect_handler&);
 	void handle_connect(const std::error_code&, const connect_handler&);
 
 public:
@@ -573,7 +572,15 @@ public:
 	/**
 	 * Force disconnection.
 	 */
-	virtual void disconnect() noexcept;
+	virtual void disconnect();
+
+	/**
+	 * Wait for reconnect delay.
+	 *
+	 * \pre another wait operation must not be running
+	 * \pre get_state() == state::disconnected
+	 */
+	virtual void wait(connect_handler handler);
 
 	/**
 	 * Receive next event.

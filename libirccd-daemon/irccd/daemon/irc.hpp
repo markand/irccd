@@ -1360,6 +1360,11 @@ public:
 	void connect(std::string_view hostname, std::string_view service, connect_handler handler);
 
 	/**
+	 * Force disconnection.
+	 */
+	void disconnect();
+
+	/**
 	 * Start receiving data.
 	 *
 	 * The handler must not throw exceptions and `this` must be valid in the

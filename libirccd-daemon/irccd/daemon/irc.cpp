@@ -103,7 +103,7 @@ auto message::parse(const string& line) -> message
 		if (*it == ':')
 			arg = string(++it, end);
 		else {
-			while (!isspace(*it) && it != end)
+			while (it != end && !isspace(*it))
 				arg.push_back(*it++);
 
 			// Skip space after param.
@@ -139,7 +139,7 @@ void connection::handshake(const connect_handler& handler)
 
 #if defined(IRCCD_HAVE_SSL)
 	ssl_socket_.async_handshake(stream_base::client, [handler] (auto code) {
-		handler(std::move(code));
+		handler(move(code));
 	});
 #endif
 }
@@ -219,6 +219,11 @@ void connection::connect(string_view hostname, string_view service, connect_hand
 	resolve(hostname, service, move(chain));
 }
 
+void connection::disconnect()
+{
+	socket_.close();
+}
+
 void connection::recv(recv_handler handler)
 {
 #if !defined(NDEBUG)
@@ -237,7 +242,7 @@ void connection::recv(recv_handler handler)
 			return handler(make_error_code(errc::argument_list_too_long), message());
 		if (code == boost::asio::error::eof || xfer == 0)
 			return handler(make_error_code(errc::connection_reset), message());
-		else if (code)
+		if (code)
 			return handler(move(code), message());
 
 		string data;

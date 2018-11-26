@@ -49,14 +49,15 @@ private:
 	bot& bot_;
 	std::vector<std::shared_ptr<server>> servers_;
 
-	void handle_error(const std::shared_ptr<server>&, const std::error_code&);
-	void handle_wait(const std::shared_ptr<server>&, const std::error_code&);
-	void handle_recv(const std::shared_ptr<server>&, const std::error_code&, const event&);
 	void handle_connect(const std::shared_ptr<server>&, const std::error_code&);
+	void handle_error(const std::shared_ptr<server>&, const std::error_code&);
+	void handle_recv(const std::shared_ptr<server>&, const std::error_code&, const event&);
+	void handle_wait(const std::shared_ptr<server>&, const std::error_code&);
 
-	void wait(const std::shared_ptr<server>&);
-	void recv(const std::shared_ptr<server>&);
 	void connect(const std::shared_ptr<server>&);
+	void disconnect(const std::shared_ptr<server>&);
+	void reconnect(const std::shared_ptr<server>&);
+	void recv(const std::shared_ptr<server>&);
 
 public:
 	/**
@@ -79,7 +80,7 @@ public:
 	 * \param name the name
 	 * \return true if exists
 	 */
-	auto has(const std::string& name) const noexcept -> bool;
+	auto has(std::string_view name) const noexcept -> bool;
 
 	/**
 	 * Add a new server to the application.

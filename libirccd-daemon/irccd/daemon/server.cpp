@@ -441,28 +441,47 @@ void server::handle_recv(const std::error_code& code,
 	 */
 	if (code) {
 		disconnect();
-		handler(std::move(code), event(std::monostate()));
+		handler(std::move(code), std::monostate{});
 	} else if (!dispatch(message, handler))
 		handler({}, std::monostate{});
 }
 
 void server::recv(recv_handler handler) noexcept
 {
+	assert(state_ == state::identifying || state_ == state::connected);
+
 	const auto self = shared_from_this();
 
+	timer_.expires_from_now(boost::posix_time::seconds(timeout_));
+	timer_.async_wait([this, handler, self, c = conn_] (auto code) {
+		if (c != conn_)
+			return;
+
+		if (!code) {
+			disconnect();
+			handler(make_error_code(std::errc::timed_out), std::monostate{});
+		}
+	});
+
 	conn_->recv([this, handler, self, c = conn_] (auto code, auto message) {
+		if (c != conn_)
+			return;
+
 		handle_recv(std::move(code), message, handler);
 	});
 }
 
 void server::flush()
 {
-	if (queue_.empty())
+	if (!conn_ || queue_.empty())
 		return;
 
 	const auto self = shared_from_this();
 
 	conn_->send(queue_.front(), [this, self, c = conn_] (auto code) {
+		if (c != conn_)
+			return;
+
 		handle_send(std::move(code));
 	});
 }
@@ -476,12 +495,6 @@ void server::identify()
 
 	send(str(format("NICK %1%") % nickname_));
 	send(str(format("USER %1% unknown unknown :%2%") % username_ % realname_));
-}
-
-void server::handle_wait(const std::error_code& code, const connect_handler& handler)
-{
-	if (code && code != std::errc::operation_canceled)
-		handler(code);
 }
 
 void server::handle_connect(const std::error_code& code, const connect_handler& handler)
@@ -668,22 +681,50 @@ void server::connect(connect_handler handler) noexcept
 	state_ = state::connecting;
 
 	timer_.expires_from_now(boost::posix_time::seconds(timeout_));
-	timer_.async_wait([this, handler] (auto code) {
-		handle_wait(code, handler);
+	timer_.async_wait([this, handler, c = conn_] (auto code) {
+		if (c != conn_)
+			return;
+
+		if (!code) {
+			disconnect();
+			handler(make_error_code(std::errc::timed_out));
+		}
 	});
 
 	const auto self = shared_from_this();
 
 	conn_->connect(hostname_, std::to_string(port_), [this, handler, c = conn_] (auto code) {
+		if (c != conn_)
+			return;
+
 		handle_connect(code, handler);
 	});
 }
 
-void server::disconnect() noexcept
+void server::disconnect()
 {
-	conn_ = nullptr;
 	state_ = state::disconnected;
+
+	if (conn_) {
+		conn_->disconnect();
+		conn_ = nullptr;
+	}
+
+	timer_.cancel();
 	queue_.clear();
+}
+
+void server::wait(connect_handler handler)
+{
+	assert(state_ == state::disconnected);
+
+	const auto self = shared_from_this();
+
+	timer_.expires_from_now(boost::posix_time::seconds(recodelay_));
+	timer_.async_wait([this, handler, self, c = conn_] (auto code) {
+		if (code != boost::asio::error::operation_aborted)
+			handler({});
+	});
 }
 
 void server::invite(std::string_view target, std::string_view channel)

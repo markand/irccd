@@ -458,58 +458,6 @@ void dispatcher::operator()(const whois_event& ev)
 
 } // !namespace
 
-void server_service::handle_error(const std::shared_ptr<server>& server,
-                                  const std::error_code& code)
-{
-	assert(server);
-
-	bot_.get_log().warning(*server) << code.message() << std::endl;
-
-	if ((server->get_options() & server::options::auto_reconnect) != server::options::auto_reconnect)
-		remove(server->get_id());
-	else {
-		bot_.get_log().info(*server) << "reconnecting in "
-			<< server->get_reconnect_delay() << " second(s)" << std::endl;
-		wait(server);
-	}
-}
-
-void server_service::handle_wait(const std::shared_ptr<server>& server, const std::error_code& code)
-{
-	/*
-	 * The timer runs on his own control, it will complete either if the delay
-	 * was reached, there was an error or if the io_context was called to cancel
-	 * all pending operations.
-	 *
-	 * This means while the timer is running someone may already have ask a
-	 * server for explicit reconnection (e.g. remote command, plugin). Thus we
-	 * check for server state and if it is still present in service.
-	 */
-	if (code && code != std::errc::operation_canceled) {
-		bot_.get_log().warning(*server) << code.message() << std::endl;
-		return;
-	}
-
-	if (server->get_state() == server::state::connected || !has(server->get_id()))
-		return;
-
-	connect(server);
-}
-
-void server_service::handle_recv(const std::shared_ptr<server>& server,
-                                 const std::error_code& code,
-                                 const event& event)
-{
-	assert(server);
-
-	if (code)
-		handle_error(server, code);
-	else {
-		recv(server);
-		std::visit(dispatcher(bot_), event);
-	}
-}
-
 void server_service::handle_connect(const std::shared_ptr<server>& server, const std::error_code& code)
 {
 	if (code)
@@ -518,25 +466,49 @@ void server_service::handle_connect(const std::shared_ptr<server>& server, const
 		recv(server);
 }
 
-void server_service::wait(const std::shared_ptr<server>& server)
+void server_service::handle_error(const std::shared_ptr<server>& server,
+                                  const std::error_code& code)
 {
 	assert(server);
 
-	auto timer = std::make_shared<boost::asio::deadline_timer>(bot_.get_service());
+	bot_.get_log().warning(*server) << code.message() << std::endl;
 
-	timer->expires_from_now(boost::posix_time::seconds(server->get_reconnect_delay()));
-	timer->async_wait([this, server, timer] (auto code) {
+	if ((server->get_options() & server::options::auto_reconnect) != server::options::auto_reconnect) {
+		remove(server->get_id());
+		return;
+	}
+
+	bot_.get_log().info(*server) << "reconnecting in " << server->get_reconnect_delay()
+	                             << " second(s)" << std::endl;
+
+	server->wait([this, server] (auto code) {
 		handle_wait(server, code);
 	});
+
+	dispatcher{bot_}(disconnect_event{server});
 }
 
-void server_service::recv(const std::shared_ptr<server>& server)
+void server_service::handle_recv(const std::shared_ptr<server>& server,
+                                 const std::error_code& code,
+                                 const event& event)
 {
 	assert(server);
 
-	server->recv([this, server] (auto code, auto event) {
-		handle_recv(server, code, event);
-	});
+	if (code) {
+		handle_error(server, code);
+		return;
+	}
+
+	recv(server);
+	std::visit(dispatcher(bot_), event);
+}
+
+void server_service::handle_wait(const std::shared_ptr<server>& server, const std::error_code& code)
+{
+	if (code == std::errc::operation_canceled || server->get_state() != server::state::disconnected)
+		return;
+
+	connect(server);
 }
 
 void server_service::connect(const std::shared_ptr<server>& server)
@@ -545,6 +517,34 @@ void server_service::connect(const std::shared_ptr<server>& server)
 
 	server->connect([this, server] (auto code) {
 		handle_connect(server, code);
+	});
+}
+
+void server_service::disconnect(const std::shared_ptr<server>& server)
+{
+	if (server->get_state() != server::state::disconnected) {
+		server->disconnect();
+		servers_.erase(std::find(servers_.begin(), servers_.end(), server), servers_.end());
+		dispatcher{bot_}(disconnect_event{server});
+	}
+}
+
+void server_service::reconnect(const std::shared_ptr<server>& server)
+{
+	disconnect(server);
+
+	if (has(server->get_id()))
+		connect(server);
+	else
+		add(server);
+}
+
+void server_service::recv(const std::shared_ptr<server>& server)
+{
+	assert(server);
+
+	server->recv([this, server] (auto code, auto event) {
+		handle_recv(server, code, event);
 	});
 }
 
@@ -558,7 +558,7 @@ auto server_service::list() const noexcept -> const std::vector<std::shared_ptr<
 	return servers_;
 }
 
-auto server_service::has(const std::string& name) const noexcept -> bool
+auto server_service::has(std::string_view name) const noexcept -> bool
 {
 	return std::count_if(servers_.begin(), servers_.end(), [&] (const auto& server) {
 		return server->get_id() == name;
@@ -601,25 +601,26 @@ auto server_service::require(std::string_view name) const -> std::shared_ptr<ser
 
 void server_service::disconnect(std::string_view id)
 {
-	const auto s = require(id);
-
-	s->disconnect();
-	dispatcher{bot_}(disconnect_event{s});
+	disconnect(require(id));
 }
 
 void server_service::reconnect(std::string_view id)
 {
-	disconnect(id);
-	connect(require(id));
+	const auto save = get(id);
+
+	if (!save)
+		return;
+
+	reconnect(save);
 }
 
 void server_service::reconnect()
 {
-	for (const auto& s : servers_) {
+	const auto save = servers_;
+
+	for (const auto& s : save) {
 		try {
-			s->disconnect();
-			dispatcher{bot_}(disconnect_event{s});
-			connect(s);
+			reconnect(s);
 		} catch (const server_error& ex) {
 			bot_.get_log().warning(*s) << ex.what() << std::endl;
 		}
@@ -641,13 +642,13 @@ void server_service::remove(std::string_view name)
 void server_service::clear() noexcept
 {
 	/*
-	 * Copy the array, because disconnect() may trigger on_die signal which
-	 * erase the server from itself.
+	 * Copy the array, because disconnect() interrupted signals may remove the
+	 * server from the array.
 	 */
 	const auto save = servers_;
 
 	for (const auto& server : save)
-		server->disconnect();
+		disconnect(server);
 
 	servers_.clear();
 }
