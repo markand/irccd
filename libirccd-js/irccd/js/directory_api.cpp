@@ -1,5 +1,5 @@
 /*
- * directory_js_api.cpp -- Irccd.Directory API
+ * directory_api.cpp -- Irccd.Directory API
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -30,9 +30,9 @@
 
 #include <irccd/fs_util.hpp>
 
-#include "directory_js_api.hpp"
-#include "irccd_js_api.hpp"
-#include "js_plugin.hpp"
+#include "directory_api.hpp"
+#include "irccd_api.hpp"
+#include "plugin.hpp"
 
 namespace fs = boost::filesystem;
 
@@ -370,14 +370,14 @@ const duk_number_list_entry constants[] = {
 
 } // !namespace
 
-// {{{ directory_js_api
+// {{{ directory_api
 
-auto directory_js_api::get_name() const noexcept -> std::string_view
+auto directory_api::get_name() const noexcept -> std::string_view
 {
 	return "Irccd.Directory";
 }
 
-void directory_js_api::load(daemon::bot&, std::shared_ptr<js_plugin> plugin)
+void directory_api::load(daemon::bot&, std::shared_ptr<plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 

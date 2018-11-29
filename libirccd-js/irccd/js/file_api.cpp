@@ -1,5 +1,5 @@
 /*
- * file_js_api.cpp -- Irccd.File API
+ * file_api.cpp -- Irccd.File API
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -26,9 +26,9 @@
 
 #include <irccd/fs_util.hpp>
 
-#include "file_js_api.hpp"
-#include "irccd_js_api.hpp"
-#include "js_plugin.hpp"
+#include "file_api.hpp"
+#include "irccd_api.hpp"
+#include "plugin.hpp"
 
 using irccd::daemon::bot;
 
@@ -676,14 +676,14 @@ const duk_number_list_entry constants[] = {
 
 } // !namespace
 
-// {{{ file_js_api
+// {{{ file_api
 
-auto file_js_api::get_name() const noexcept -> std::string_view
+auto file_api::get_name() const noexcept -> std::string_view
 {
 	return "Irccd.File";
 }
 
-void file_js_api::load(bot&, std::shared_ptr<js_plugin> plugin)
+void file_api::load(bot&, std::shared_ptr<plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 

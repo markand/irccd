@@ -1,5 +1,5 @@
 /*
- * js_plugin.cpp -- Javascript plugins for irccd
+ * plugin.cpp -- Javascript plugins for irccd
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -24,9 +24,9 @@
 
 #include <irccd/daemon/bot.hpp>
 
-#include "js_api.hpp"
-#include "js_plugin.hpp"
-#include "server_js_api.hpp"
+#include "api.hpp"
+#include "plugin.hpp"
+#include "server_api.hpp"
 
 using irccd::daemon::bot;
 using irccd::daemon::connect_event;
@@ -105,19 +105,19 @@ void set_table(duk::context& ctx, std::string_view name, const plugin::map& vars
 
 } // !namespace
 
-void js_plugin::push() noexcept
+void plugin::push() noexcept
 {
 }
 
 template <typename Value, typename... Args>
-void js_plugin::push(Value&& value, Args&&... args)
+void plugin::push(Value&& value, Args&&... args)
 {
 	duk::push(context_, std::forward<Value>(value));
 	push(std::forward<Args>(args)...);
 }
 
 template <typename... Args>
-void js_plugin::call(const std::string& func, Args&&... args)
+void plugin::call(const std::string& func, Args&&... args)
 {
 	duk::stack_guard sa(context_);
 
@@ -136,8 +136,8 @@ void js_plugin::call(const std::string& func, Args&&... args)
 	duk_pop(context_);
 }
 
-js_plugin::js_plugin(std::string id, std::string path)
-	: plugin(std::move(id))
+plugin::plugin(std::string id, std::string path)
+	: daemon::plugin(std::move(id))
 	, path_(path)
 {
 	duk::stack_guard sa(context_);
@@ -150,7 +150,7 @@ js_plugin::js_plugin(std::string id, std::string path)
 	 *   - Irccd.Plugin.format
 	 *   - Irccd.Plugin.paths
 	 *
-	 * In js_plugin_module.cpp.
+	 * In plugin_module.cpp.
 	 */
 	duk_push_object(context_);
 	duk_put_global_string(context_, config_property.data());
@@ -165,67 +165,67 @@ js_plugin::js_plugin(std::string id, std::string path)
 	duk_put_global_string(context_, DUK_HIDDEN_SYMBOL("path"));
 }
 
-auto js_plugin::get_context() noexcept -> duk::context&
+auto plugin::get_context() noexcept -> duk::context&
 {
 	return context_;
 }
 
-auto js_plugin::get_name() const noexcept -> std::string_view
+auto plugin::get_name() const noexcept -> std::string_view
 {
 	return get_metadata(context_, "name");
 }
 
-auto js_plugin::get_author() const noexcept -> std::string_view
+auto plugin::get_author() const noexcept -> std::string_view
 {
 	return get_metadata(context_, "author");
 }
 
-auto js_plugin::get_license() const noexcept -> std::string_view
+auto plugin::get_license() const noexcept -> std::string_view
 {
 	return get_metadata(context_, "license");
 }
 
-auto js_plugin::get_summary() const noexcept -> std::string_view
+auto plugin::get_summary() const noexcept -> std::string_view
 {
 	return get_metadata(context_, "summary");
 }
 
-auto js_plugin::get_version() const noexcept -> std::string_view
+auto plugin::get_version() const noexcept -> std::string_view
 {
 	return get_metadata(context_, "version");
 }
 
-auto js_plugin::get_options() const -> map
+auto plugin::get_options() const -> map
 {
 	return get_table(context_, config_property);
 }
 
-void js_plugin::set_options(const map& map)
+void plugin::set_options(const map& map)
 {
 	set_table(context_, config_property, map);
 }
 
-auto js_plugin::get_formats() const -> map
+auto plugin::get_formats() const -> map
 {
 	return get_table(context_, format_property);
 }
 
-void js_plugin::set_formats(const map& map)
+void plugin::set_formats(const map& map)
 {
 	set_table(context_, format_property, map);
 }
 
-auto js_plugin::get_paths() const -> map
+auto plugin::get_paths() const -> map
 {
 	return get_table(context_, paths_property);
 }
 
-void js_plugin::set_paths(const map& map)
+void plugin::set_paths(const map& map)
 {
 	set_table(context_, paths_property, map);
 }
 
-void js_plugin::open()
+void plugin::open()
 {
 	std::ifstream input(path_);
 
@@ -241,127 +241,127 @@ void js_plugin::open()
 		throw plugin_error(plugin_error::exec_error, get_name(), duk::get_stack(context_, -1).get_stack());
 }
 
-void js_plugin::handle_command(bot&, const message_event& event)
+void plugin::handle_command(bot&, const message_event& event)
 {
 	call("onCommand", event.server, event.origin, event.channel, event.message);
 }
 
-void js_plugin::handle_connect(bot&, const connect_event& event)
+void plugin::handle_connect(bot&, const connect_event& event)
 {
 	call("onConnect", event.server);
 }
 
-void js_plugin::handle_disconnect(bot&, const disconnect_event& event)
+void plugin::handle_disconnect(bot&, const disconnect_event& event)
 {
 	call("onDisconnect", event.server);
 }
 
-void js_plugin::handle_invite(bot&, const invite_event& event)
+void plugin::handle_invite(bot&, const invite_event& event)
 {
 	call("onInvite", event.server, event.origin, event.channel);
 }
 
-void js_plugin::handle_join(bot&, const join_event& event)
+void plugin::handle_join(bot&, const join_event& event)
 {
 	call("onJoin", event.server, event.origin, event.channel);
 }
 
-void js_plugin::handle_kick(bot&, const kick_event& event)
+void plugin::handle_kick(bot&, const kick_event& event)
 {
 	call("onKick", event.server, event.origin, event.channel, event.target, event.reason);
 }
 
-void js_plugin::handle_load(bot&)
+void plugin::handle_load(bot&)
 {
 	call("onLoad");
 }
 
-void js_plugin::handle_message(bot&, const message_event& event)
+void plugin::handle_message(bot&, const message_event& event)
 {
 	call("onMessage", event.server, event.origin, event.channel, event.message);
 }
 
-void js_plugin::handle_me(bot&, const me_event& event)
+void plugin::handle_me(bot&, const me_event& event)
 {
 	call("onMe", event.server, event.origin, event.channel, event.message);
 }
 
-void js_plugin::handle_mode(bot&, const mode_event& event)
+void plugin::handle_mode(bot&, const mode_event& event)
 {
 	call("onMode", event.server, event.origin, event.channel, event.mode,
 		event.limit, event.user, event.mask);
 }
 
-void js_plugin::handle_names(bot&, const names_event& event)
+void plugin::handle_names(bot&, const names_event& event)
 {
 	call("onNames", event.server, event.channel, event.names);
 }
 
-void js_plugin::handle_nick(bot&, const nick_event& event)
+void plugin::handle_nick(bot&, const nick_event& event)
 {
 	call("onNick", event.server, event.origin, event.nickname);
 }
 
-void js_plugin::handle_notice(bot&, const notice_event& event)
+void plugin::handle_notice(bot&, const notice_event& event)
 {
 	call("onNotice", event.server, event.origin, event.channel, event.message);
 }
 
-void js_plugin::handle_part(bot&, const part_event& event)
+void plugin::handle_part(bot&, const part_event& event)
 {
 	call("onPart", event.server, event.origin, event.channel, event.reason);
 }
 
-void js_plugin::handle_reload(bot&)
+void plugin::handle_reload(bot&)
 {
 	call("onReload");
 }
 
-void js_plugin::handle_topic(bot&, const topic_event& event)
+void plugin::handle_topic(bot&, const topic_event& event)
 {
 	call("onTopic", event.server, event.origin, event.channel, event.topic);
 }
 
-void js_plugin::handle_unload(bot&)
+void plugin::handle_unload(bot&)
 {
 	call("onUnload");
 }
 
-void js_plugin::handle_whois(bot&, const whois_event& event)
+void plugin::handle_whois(bot&, const whois_event& event)
 {
 	call("onWhois", event.server, event.whois);
 }
 
-js_plugin_loader::js_plugin_loader(bot& bot,
-                                   std::vector<std::string> directories,
-                                   std::vector<std::string> extensions) noexcept
-	: plugin_loader(std::move(directories), std::move(extensions))
+plugin_loader::plugin_loader(bot& bot,
+                             std::vector<std::string> directories,
+                             std::vector<std::string> extensions) noexcept
+	: daemon::plugin_loader(std::move(directories), std::move(extensions))
 	, bot_(bot)
 {
 }
 
-js_plugin_loader::~js_plugin_loader() noexcept = default;
+plugin_loader::~plugin_loader() noexcept = default;
 
-auto js_plugin_loader::get_modules() const noexcept -> const modules&
+auto plugin_loader::get_modules() const noexcept -> const modules&
 {
 	return modules_;
 }
 
-auto js_plugin_loader::get_modules() noexcept -> modules&
+auto plugin_loader::get_modules() noexcept -> modules&
 {
 	return modules_;
 }
 
-auto js_plugin_loader::open(std::string_view id, std::string_view path) -> std::shared_ptr<plugin>
+auto plugin_loader::open(std::string_view id, std::string_view path) -> std::shared_ptr<daemon::plugin>
 {
-	auto plugin = std::make_shared<js_plugin>(std::string(id), std::string(path));
+	auto plg = std::make_shared<plugin>(std::string(id), std::string(path));
 
 	for (const auto& mod : modules_)
-		mod->load(bot_, plugin);
+		mod->load(bot_, plg);
 
-	plugin->open();
+	plg->open();
 
-	return plugin;
+	return plg;
 }
 
 void duk::type_traits<whois_info>::push(duk_context* ctx, const whois_info& whois)

@@ -21,9 +21,9 @@
 namespace irccd::test {
 
 js_fixture::js_fixture(const std::string& path)
-	: plugin_(new js::js_plugin("test", path))
+	: plugin_(new js::plugin("test", path))
 {
-	for (const auto& f : js::js_api::registry())
+	for (const auto& f : js::api::registry())
 		f()->load(bot_, plugin_);
 
 	if (!path.empty())

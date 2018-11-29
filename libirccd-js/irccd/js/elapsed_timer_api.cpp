@@ -1,5 +1,5 @@
 /*
- * elapsed_timer_js_api.cpp -- Irccd.ElapsedTimer API
+ * elapsed_timer_api.cpp -- Irccd.ElapsedTimer API
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -18,8 +18,8 @@
 
 #include <boost/timer/timer.hpp>
 
-#include "elapsed_timer_js_api.hpp"
-#include "js_plugin.hpp"
+#include "elapsed_timer_api.hpp"
+#include "plugin.hpp"
 
 using irccd::daemon::bot;
 
@@ -155,14 +155,14 @@ const duk_function_list_entry methods[] = {
 
 } // !namespace
 
-// {{{ elapsed_timer_js_api
+// {{{ elapsed_timer_api
 
-auto elapsed_timer_js_api::get_name() const noexcept -> std::string_view
+auto elapsed_timer_api::get_name() const noexcept -> std::string_view
 {
 	return "Irccd.ElapsedTimer";
 }
 
-void elapsed_timer_js_api::load(bot&, std::shared_ptr<js_plugin> plugin)
+void elapsed_timer_api::load(bot&, std::shared_ptr<plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 

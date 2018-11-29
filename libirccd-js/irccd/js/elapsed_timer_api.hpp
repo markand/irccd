@@ -1,5 +1,5 @@
 /*
- * directory_js_api.hpp -- Irccd.Directory API
+ * elapsed_timer_api.hpp -- Irccd.ElapsedTimer API
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -16,35 +16,35 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_DIRECTORY_JS_API_HPP
-#define IRCCD_JS_DIRECTORY_JS_API_HPP
+#ifndef IRCCD_JS_ELAPSED_TIMER_API_HPP
+#define IRCCD_JS_ELAPSED_TIMER_API_HPP
 
 /**
- * \file directory_js_api.hpp
- * \brief Irccd.Directory Javascript API.
+ * \file elapsed_timer_api.hpp
+ * \brief Irccd.ElapsedTimer Javascript API.
  */
 
-#include "js_api.hpp"
+#include "api.hpp"
 
 namespace irccd::js {
 
 /**
- * \brief Irccd.Directory Javascript API.
  * \ingroup js-api
+ * \brief Irccd.ElapsedTimer Javascript API.
  */
-class directory_js_api : public js_api {
+class elapsed_timer_api : public api {
 public:
 	/**
-	 * \copydoc js_api::get_name
+	 * \copydoc api::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc js_api::load
+	 * \copydoc api::load
 	 */
-	void load(daemon::bot& bot, std::shared_ptr<js_plugin> plugin) override;
+	void load(daemon::bot& bot, std::shared_ptr<plugin> plugin) override;
 };
 
 } // !irccd::js
 
-#endif // !IRCCD_JS_DIRECTORY_JS_API_HPP
+#endif // !IRCCD_JS_ELAPSED_TIMER_API_HPP

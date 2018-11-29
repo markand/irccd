@@ -1,5 +1,5 @@
 /*
- * server_js_api.cpp -- Irccd.Server API
+ * server_api.cpp -- Irccd.Server API
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -24,9 +24,9 @@
 #include <irccd/daemon/server_service.hpp>
 #include <irccd/daemon/server_util.hpp>
 
-#include "irccd_js_api.hpp"
-#include "js_plugin.hpp"
-#include "server_js_api.hpp"
+#include "irccd_api.hpp"
+#include "plugin.hpp"
+#include "server_api.hpp"
 
 using irccd::daemon::bot;
 using irccd::daemon::server;
@@ -816,12 +816,12 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-auto server_js_api::get_name() const noexcept -> std::string_view
+auto server_api::get_name() const noexcept -> std::string_view
 {
 	return "Irccd.Server";
 }
 
-void server_js_api::load(bot&, std::shared_ptr<js_plugin> plugin)
+void server_api::load(bot&, std::shared_ptr<plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 

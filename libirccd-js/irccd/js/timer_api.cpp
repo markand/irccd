@@ -1,5 +1,5 @@
 /*
- * timer_js_api.cpp -- Irccd.timer API
+ * timer_api.cpp -- Irccd.timer API
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -22,15 +22,14 @@
 #include <irccd/daemon/logger.hpp>
 #include <irccd/daemon/plugin_service.hpp>
 
-#include "irccd_js_api.hpp"
-#include "js_plugin.hpp"
-#include "plugin_js_api.hpp"
-#include "timer_js_api.hpp"
+#include "irccd_api.hpp"
+#include "plugin.hpp"
+#include "plugin_api.hpp"
+#include "timer_api.hpp"
 
 namespace asio = boost::asio;
 
 using irccd::daemon::bot;
-using irccd::daemon::plugin;
 
 namespace irccd::js {
 
@@ -50,7 +49,7 @@ public:
 
 private:
 	boost::asio::deadline_timer handle_;
-	js_plugin& plugin_;
+	plugin& plugin_;
 
 	std::string key_;
 	type type_;
@@ -62,7 +61,7 @@ private:
 	void handle();
 
 public:
-	timer(boost::asio::io_service&, js_plugin&, type, int);
+	timer(boost::asio::io_service&, plugin&, type, int);
 
 	auto key() const noexcept -> const std::string&;
 
@@ -84,13 +83,13 @@ void timer::handle()
 	if (duk_pcall(plugin_.get_context(), 0)) {
 		auto& log = duk::type_traits<bot>::self(plugin_.get_context()).get_log();
 
-		log.warning(static_cast<const plugin&>(plugin_)) << "timer error:" << std::endl;
-		log.warning(static_cast<const plugin&>(plugin_)) << "  " << duk::get_stack(plugin_.get_context(), -1).what() << std::endl;
+		log.warning(static_cast<const daemon::plugin&>(plugin_)) << "timer error:" << std::endl;
+		log.warning(static_cast<const daemon::plugin&>(plugin_)) << "  " << duk::get_stack(plugin_.get_context(), -1).what() << std::endl;
 	} else
 		duk_pop(plugin_.get_context());
 }
 
-timer::timer(boost::asio::io_service& service, js_plugin& plugin, type type, int delay)
+timer::timer(boost::asio::io_service& service, plugin& plugin, type type, int delay)
 	: handle_(service)
 	, plugin_(plugin)
 	, type_(type)
@@ -250,9 +249,9 @@ auto Timer_constructor(duk_context* ctx) -> duk_ret_t
 		if (!duk_is_callable(ctx, 2))
 			duk_error(ctx, DUK_ERR_TYPE_ERROR, "missing callback function");
 
-		auto& plugin = duk::type_traits<js_plugin>::self(ctx);
+		auto& plg = duk::type_traits<plugin>::self(ctx);
 		auto& daemon = duk::type_traits<bot>::self(ctx);
-		auto object = new timer(daemon.get_service(), plugin, static_cast<timer::type>(type), delay);
+		auto object = new timer(daemon.get_service(), plg, static_cast<timer::type>(type), delay);
 
 		duk_push_this(ctx);
 		duk_push_pointer(ctx, object);
@@ -291,12 +290,12 @@ const duk_number_list_entry constants[] = {
 
 } // !namespace
 
-auto timer_js_api::get_name() const noexcept -> std::string_view
+auto timer_api::get_name() const noexcept -> std::string_view
 {
 	return "Irccd.Timer";
 }
 
-void timer_js_api::load(bot&, std::shared_ptr<js_plugin> plugin)
+void timer_api::load(bot&, std::shared_ptr<plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 

@@ -1,5 +1,5 @@
 /*
- * unicode_js_api.hpp -- Irccd.Unicode API
+ * util_api.hpp -- Irccd.Util API
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -16,35 +16,35 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_UNICODE_JS_API_HPP
-#define IRCCD_JS_UNICODE_JS_API_HPP
+#ifndef IRCCD_JS_UTIL_API_HPP
+#define IRCCD_JS_UTIL_API_HPP
 
 /**
- * \file unicode_js_api.hpp
- * \brief Irccd.Unicode Javascript API.
+ * \file util_api.hpp
+ * \brief Irccd.Util Javascript API.
  */
 
-#include "js_api.hpp"
+#include "api.hpp"
 
 namespace irccd::js {
 
 /**
  * \ingroup js-api
- * \brief Irccd.Unicode Javascript API.
+ * \brief Irccd.Util Javascript API.
  */
-class unicode_js_api : public js_api {
+class util_api : public api {
 public:
 	/**
-	 * \copydoc js_api::get_name
+	 * \copydoc api::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc js_api::load
+	 * \copydoc api::load
 	 */
-	void load(daemon::bot& bot, std::shared_ptr<js_plugin> plugin) override;
+	void load(daemon::bot& bot, std::shared_ptr<plugin> plugin) override;
 };
 
 } // !irccd::js
 
-#endif // !IRCCD_JS_UNICODE_JS_API_HPP
+#endif // !IRCCD_JS_UTIL_API_HPP

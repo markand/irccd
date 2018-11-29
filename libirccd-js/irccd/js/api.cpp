@@ -1,5 +1,5 @@
 /*
- * js_api.cpp -- Javascript API module
+ * api.cpp -- Javascript API module
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -16,24 +16,24 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "directory_js_api.hpp"
-#include "elapsed_timer_js_api.hpp"
-#include "file_js_api.hpp"
-#include "irccd_js_api.hpp"
-#include "logger_js_api.hpp"
-#include "plugin_js_api.hpp"
-#include "server_js_api.hpp"
-#include "system_js_api.hpp"
-#include "timer_js_api.hpp"
-#include "unicode_js_api.hpp"
-#include "util_js_api.hpp"
+#include "directory_api.hpp"
+#include "elapsed_timer_api.hpp"
+#include "file_api.hpp"
+#include "irccd_api.hpp"
+#include "logger_api.hpp"
+#include "plugin_api.hpp"
+#include "server_api.hpp"
+#include "system_api.hpp"
+#include "timer_api.hpp"
+#include "unicode_api.hpp"
+#include "util_api.hpp"
 
 namespace irccd::js {
 
 namespace {
 
 template <typename T>
-auto bind() noexcept -> js_api::constructor
+auto bind() noexcept -> api::constructor
 {
 	return [] () noexcept {
 		return std::make_unique<T>();
@@ -42,21 +42,21 @@ auto bind() noexcept -> js_api::constructor
 
 } // !namespace
 
-auto js_api::registry() noexcept -> const std::vector<constructor>&
+auto api::registry() noexcept -> const std::vector<constructor>&
 {
 	static const std::vector<constructor> list {
 		// Irccd API must be loaded first.
-		bind<irccd_js_api>(),
-		bind<directory_js_api>(),
-		bind<elapsed_timer_js_api>(),
-		bind<file_js_api>(),
-		bind<logger_js_api>(),
-		bind<plugin_js_api>(),
-		bind<server_js_api>(),
-		bind<system_js_api>(),
-		bind<timer_js_api>(),
-		bind<unicode_js_api>(),
-		bind<util_js_api>()
+		bind<irccd_api>(),
+		bind<directory_api>(),
+		bind<elapsed_timer_api>(),
+		bind<file_api>(),
+		bind<logger_api>(),
+		bind<plugin_api>(),
+		bind<server_api>(),
+		bind<system_api>(),
+		bind<timer_api>(),
+		bind<unicode_api>(),
+		bind<util_api>()
 	};
 
 	return list;

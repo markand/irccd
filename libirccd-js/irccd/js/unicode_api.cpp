@@ -1,5 +1,5 @@
 /*
- * unicode_js_api.cpp -- Irccd.Unicode API
+ * unicode_api.cpp -- Irccd.Unicode API
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -16,9 +16,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "js_plugin.hpp"
+#include "plugin.hpp"
 #include "unicode.hpp"
-#include "unicode_js_api.hpp"
+#include "unicode_api.hpp"
 
 using irccd::daemon::bot;
 
@@ -146,12 +146,12 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-auto unicode_js_api::get_name() const noexcept -> std::string_view
+auto unicode_api::get_name() const noexcept -> std::string_view
 {
 	return "Irccd.Unicode";
 }
 
-void unicode_js_api::load(bot&, std::shared_ptr<js_plugin> plugin)
+void unicode_api::load(bot&, std::shared_ptr<plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 

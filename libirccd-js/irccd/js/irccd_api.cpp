@@ -1,5 +1,5 @@
 /*
- * irccd_js_api.cpp -- Irccd API
+ * irccd_api.cpp -- Irccd API
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -22,8 +22,8 @@
 #include <string>
 #include <unordered_map>
 
-#include "irccd_js_api.hpp"
-#include "js_plugin.hpp"
+#include "irccd_api.hpp"
+#include "plugin.hpp"
 
 using irccd::daemon::bot;
 
@@ -185,12 +185,12 @@ void duk::type_traits<boost::system::system_error>::raise(duk_context* ctx, cons
 	do_raise(ctx, ex);
 }
 
-auto irccd_js_api::get_name() const noexcept -> std::string_view
+auto irccd_api::get_name() const noexcept -> std::string_view
 {
 	return "Irccd";
 }
 
-void irccd_js_api::load(bot& bot, std::shared_ptr<js_plugin> plugin)
+void irccd_api::load(bot& bot, std::shared_ptr<plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 

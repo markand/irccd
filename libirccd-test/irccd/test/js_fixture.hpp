@@ -26,10 +26,10 @@
 
 #include "irccd_fixture.hpp"
 
-#include <irccd/js/js_plugin.hpp>
-#include <irccd/js/js_api.hpp>
+#include <irccd/js/plugin.hpp>
+#include <irccd/js/api.hpp>
 
-#include <irccd/js/irccd_js_api.hpp>
+#include <irccd/js/irccd_api.hpp>
 
 namespace irccd::test {
 
@@ -41,7 +41,7 @@ protected:
 	/**
 	 * \brief Javascript plugin.
 	 */
-	std::shared_ptr<js::js_plugin> plugin_;
+	std::shared_ptr<js::plugin> plugin_;
 
 	/**
 	 * Constructor.

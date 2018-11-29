@@ -21,17 +21,15 @@
 
 #include <irccd/daemon/plugin_service.hpp>
 
-#include <irccd/js/js_api.hpp>
-#include <irccd/js/js_plugin.hpp>
+#include <irccd/js/api.hpp>
+#include <irccd/js/plugin.hpp>
 
 #include <irccd/test/irccd_fixture.hpp>
 
-using irccd::daemon::plugin;
-
 using irccd::test::irccd_fixture;
 
-using irccd::js::js_plugin;
-using irccd::js::js_api;
+using irccd::js::plugin;
+using irccd::js::api;
 
 namespace irccd {
 
@@ -39,13 +37,13 @@ namespace {
 
 class js_plugin_fixture : public irccd_fixture {
 protected:
-	std::shared_ptr<js_plugin> plugin_;
+	std::shared_ptr<plugin> plugin_;
 
 	void load(const std::string& path)
 	{
-		plugin_ = std::make_unique<js_plugin>("test", path);
+		plugin_ = std::make_unique<plugin>("test", path);
 
-		for (const auto& f : js_api::registry())
+		for (const auto& f : api::registry())
 			f()->load(bot_, plugin_);
 
 		plugin_->open();
@@ -103,15 +101,15 @@ BOOST_AUTO_TEST_SUITE_END()
 
 class js_plugin_loader_fixture : public irccd_fixture {
 protected:
-	std::shared_ptr<plugin> plugin_;
+	std::shared_ptr<daemon::plugin> plugin_;
 
 	js_plugin_loader_fixture()
 	{
 		bot_.set_config(config(CMAKE_CURRENT_SOURCE_DIR "/irccd.conf"));
 
-		auto loader = std::make_unique<js::js_plugin_loader>(bot_);
+		auto loader = std::make_unique<js::plugin_loader>(bot_);
 
-		for (const auto& f : js::js_api::registry())
+		for (const auto& f : js::api::registry())
 			loader->get_modules().push_back(f());
 
 		bot_.plugins().add_loader(std::move(loader));

@@ -1,5 +1,5 @@
 /*
- * js_api.hpp -- Javascript API module
+ * api.hpp -- Javascript API module
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_JS_API_HPP
-#define IRCCD_JS_JS_API_HPP
+#ifndef IRCCD_JS_API_HPP
+#define IRCCD_JS_API_HPP
 
 /**
- * \file js_api.hpp
+ * \file api.hpp
  * \brief Javascript API module.
  */
 
@@ -41,18 +41,18 @@ class bot;
 
 namespace js {
 
-class js_plugin;
+class plugin;
 
 /**
  * \ingroup js-api
  * \brief Javascript API module.
  */
-class js_api {
+class api {
 public:
 	/**
 	 * \brief Command constructor factory.
 	 */
-	using constructor = std::function<std::unique_ptr<js_api> ()>;
+	using constructor = std::function<std::unique_ptr<api> ()>;
 
 	/**
 	 * \brief Registry of all commands.
@@ -62,12 +62,12 @@ public:
 	/**
 	 * Default constructor.
 	 */
-	js_api() noexcept = default;
+	api() noexcept = default;
 
 	/**
 	 * Virtual destructor defaulted.
 	 */
-	virtual ~js_api() noexcept = default;
+	virtual ~api() noexcept = default;
 
 	/**
 	 * Get the module name.
@@ -82,11 +82,11 @@ public:
 	 * \param bot the irccd instance
 	 * \param plugin the plugin
 	 */
-	virtual void load(daemon::bot& bot, std::shared_ptr<js_plugin> plugin) = 0;
+	virtual void load(daemon::bot& bot, std::shared_ptr<plugin> plugin) = 0;
 };
 
 } // !js
 
 } // !irccd
 
-#endif // !IRCCD_JS_JS_API_HPP
+#endif // !IRCCD_JS_API_HPP

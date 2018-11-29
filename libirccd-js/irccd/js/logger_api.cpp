@@ -1,5 +1,5 @@
 /*
- * logger_js_api.cpp -- Irccd.Logger API
+ * logger_api.cpp -- Irccd.Logger API
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -20,13 +20,12 @@
 #include <irccd/daemon/logger.hpp>
 #include <irccd/daemon/plugin_service.hpp>
 
-#include "irccd_js_api.hpp"
-#include "js_plugin.hpp"
-#include "logger_js_api.hpp"
-#include "plugin_js_api.hpp"
+#include "irccd_api.hpp"
+#include "plugin.hpp"
+#include "logger_api.hpp"
+#include "plugin_api.hpp"
 
 using irccd::daemon::bot;
-using irccd::daemon::plugin;
 
 namespace irccd::js {
 
@@ -40,17 +39,17 @@ auto print(duk_context* ctx, unsigned level) -> duk_ret_t
 
 	try {
 		auto& sink = duk::type_traits<bot>::self(ctx).get_log();
-		auto& self = duk::type_traits<js_plugin>::self(ctx);
+		auto& self = duk::type_traits<plugin>::self(ctx);
 
 		switch (level) {
 		case 0:
-			sink.debug<plugin>(self) << duk_require_string(ctx, 0) << std::endl;
+			sink.debug<daemon::plugin>(self) << duk_require_string(ctx, 0) << std::endl;
 			break;
 		case 1:
-			sink.info<plugin>(self) << duk_require_string(ctx, 0) << std::endl;
+			sink.info<daemon::plugin>(self) << duk_require_string(ctx, 0) << std::endl;
 			break;
 		default:
-			sink.warning<plugin>(self) << duk_require_string(ctx, 0) << std::endl;
+			sink.warning<daemon::plugin>(self) << duk_require_string(ctx, 0) << std::endl;
 			break;
 		}
 	} catch (const std::exception& ex) {
@@ -131,12 +130,12 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-auto logger_js_api::get_name() const noexcept -> std::string_view
+auto logger_api::get_name() const noexcept -> std::string_view
 {
 	return "Irccd.Logger";
 }
 
-void logger_js_api::load(bot&, std::shared_ptr<js_plugin> plugin)
+void logger_api::load(bot&, std::shared_ptr<plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 

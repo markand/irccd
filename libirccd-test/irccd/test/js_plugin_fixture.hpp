@@ -26,7 +26,7 @@
 
 #include <irccd/daemon/bot.hpp>
 
-#include <irccd/js/js_plugin.hpp>
+#include <irccd/js/plugin.hpp>
 
 #include "mock_server.hpp"
 
@@ -41,7 +41,7 @@ class js_plugin_fixture {
 protected:
 	boost::asio::io_service service_;               //!< The I/O service.
 	daemon::bot bot_{service_};                     //!< The irccd instance.
-	std::shared_ptr<js::js_plugin> plugin_;         //!< The plugin to test.
+	std::shared_ptr<js::plugin> plugin_;            //!< The plugin to test.
 	std::shared_ptr<mock_server> server_;           //!< A mock server.
 
 public:

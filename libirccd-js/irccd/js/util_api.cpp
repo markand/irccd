@@ -1,5 +1,5 @@
 /*
- * util_js_api.cpp -- Irccd.Util API
+ * util_api.cpp -- Irccd.Util API
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -20,9 +20,9 @@
 
 #include <irccd/string_util.hpp>
 
-#include "irccd_js_api.hpp"
-#include "js_plugin.hpp"
-#include "util_js_api.hpp"
+#include "irccd_api.hpp"
+#include "plugin.hpp"
+#include "util_api.hpp"
 
 using irccd::daemon::bot;
 using irccd::daemon::irc::user;
@@ -335,12 +335,12 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-auto util_js_api::get_name() const noexcept -> std::string_view
+auto util_api::get_name() const noexcept -> std::string_view
 {
 	return "Irccd.Util";
 }
 
-void util_js_api::load(bot&, std::shared_ptr<js_plugin> plugin)
+void util_api::load(bot&, std::shared_ptr<plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 

@@ -1,5 +1,5 @@
 /*
- * js_plugin.hpp -- JavaScript plugins for irccd
+ * plugin.hpp -- JavaScript plugins for irccd
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -20,7 +20,7 @@
 #define IRCCD_JS_PLUGIN_HPP
 
 /**
- * \file js_plugin.hpp
+ * \file plugin.hpp
  * \brief JavaScript plugins for irccd.
  */
 
@@ -34,14 +34,14 @@
  */
 namespace irccd::js {
 
-class js_api;
+class api;
 
 /**
  * \ingroup js
  * \ingroup daemon-plugins
  * \brief JavaScript plugins for irccd.
  */
-class js_plugin : public daemon::plugin {
+class plugin : public daemon::plugin {
 public:
 	/**
 	 * Global property where to read/write plugin configuration (object).
@@ -80,7 +80,7 @@ public:
 	 * \param id the plugin id
 	 * \param path the path to the plugin
 	 */
-	js_plugin(std::string id, std::string path);
+	plugin(std::string id, std::string path);
 
 	/**
 	 * Access the Duktape context.
@@ -244,12 +244,12 @@ public:
  * \ingroup plugins
  * \brief Implementation for searching Javascript plugins.
  */
-class js_plugin_loader : public daemon::plugin_loader {
+class plugin_loader : public daemon::plugin_loader {
 public:
 	/**
 	 * \brief The list of Javascript API modules.
 	 */
-	using modules = std::vector<std::unique_ptr<js_api>>;
+	using modules = std::vector<std::unique_ptr<api>>;
 
 private:
 	daemon::bot& bot_;
@@ -263,14 +263,14 @@ public:
 	 * \param directories directories to search
 	 * \param extensions extensions to search
 	 */
-	js_plugin_loader(daemon::bot& bot,
-	                 std::vector<std::string> directories = {},
-	                 std::vector<std::string> extensions = {".js"}) noexcept;
+	plugin_loader(daemon::bot& bot,
+	              std::vector<std::string> directories = {},
+	              std::vector<std::string> extensions = {".js"}) noexcept;
 
 	/**
 	 * Destructor defaulted.
 	 */
-	~js_plugin_loader() noexcept;
+	~plugin_loader() noexcept;
 
 	/**
 	 * Get the list of modules.

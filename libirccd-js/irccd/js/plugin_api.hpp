@@ -1,5 +1,5 @@
 /*
- * plugin_js_api.hpp -- Irccd.Plugin API
+ * plugin_api.hpp -- Irccd.Plugin API
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -16,16 +16,16 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_PLUGIN_JS_API_HPP
-#define IRCCD_JS_PLUGIN_JS_API_HPP
+#ifndef IRCCD_JS_PLUGIN_API_HPP
+#define IRCCD_JS_PLUGIN_API_HPP
 
 /**
- * \file plugin_js_api.hpp
+ * \file plugin_api.hpp
  * \brief Irccd.Plugin Javascript API.
  */
 
-#include "js_api.hpp"
-#include "js_plugin.hpp"
+#include "api.hpp"
+#include "plugin.hpp"
 
 namespace irccd::js {
 
@@ -33,17 +33,17 @@ namespace irccd::js {
  * \ingroup js-api
  * \brief Irccd.Plugin Javascript API.
  */
-class plugin_js_api : public js_api {
+class plugin_api : public api {
 public:
 	/**
-	 * \copydoc js_api::get_name
+	 * \copydoc api::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc js_api::load
+	 * \copydoc api::load
 	 */
-	void load(daemon::bot& bot, std::shared_ptr<js_plugin> plugin) override;
+	void load(daemon::bot& bot, std::shared_ptr<plugin> plugin) override;
 };
 
 namespace duk {
@@ -52,14 +52,14 @@ namespace duk {
  * \brief Specialize dukx_type_traits for plugin.
  */
 template <>
-struct type_traits<js_plugin> {
+struct type_traits<plugin> {
 	/**
 	 * Access the plugin stored in this context.
 	 *
 	 * \param ctx the context
 	 * \return the plugin
 	 */
-	static auto self(duk_context* ctx) -> js_plugin&;
+	static auto self(duk_context* ctx) -> plugin&;
 };
 
 /**
@@ -80,4 +80,4 @@ struct type_traits<daemon::plugin_error> {
 
 } // !irccd::js
 
-#endif // !IRCCD_JS_PLUGIN_JS_API_HPP
+#endif // !IRCCD_JS_PLUGIN_API_HPP

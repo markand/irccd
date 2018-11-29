@@ -18,7 +18,7 @@ Features
   - Can connect to multiple servers,
   - Support multiple identities,
   - Can be controlled by sockets and irccdctl,
-  - Runs on Linux, Windows and *BSD,
+  - Runs on Linux, Windows and \*BSD,
   - Extremely well documented,
   - Clean and powerful JavaScript API,
   - Very fast and light.

@@ -1,5 +1,5 @@
 /*
- * system_js_api.cpp -- Irccd.System API
+ * system_api.cpp -- Irccd.System API
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -28,10 +28,10 @@
 
 #include <irccd/system.hpp>
 
-#include "file_js_api.hpp"
-#include "irccd_js_api.hpp"
-#include "js_plugin.hpp"
-#include "system_js_api.hpp"
+#include "file_api.hpp"
+#include "irccd_api.hpp"
+#include "plugin.hpp"
+#include "system_api.hpp"
 
 using irccd::daemon::bot;
 
@@ -313,12 +313,12 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-auto system_js_api::get_name() const noexcept -> std::string_view
+auto system_api::get_name() const noexcept -> std::string_view
 {
 	return "Irccd.System";
 }
 
-void system_js_api::load(bot&, std::shared_ptr<js_plugin> plugin)
+void system_api::load(bot&, std::shared_ptr<plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 

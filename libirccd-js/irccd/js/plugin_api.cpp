@@ -1,5 +1,5 @@
 /*
- * plugin_js_api.cpp -- Irccd.Plugin API
+ * plugin_api.cpp -- Irccd.Plugin API
  *
  * Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
  *
@@ -19,13 +19,12 @@
 #include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/plugin_service.hpp>
 
-#include "irccd_js_api.hpp"
-#include "js_plugin.hpp"
-#include "plugin_js_api.hpp"
+#include "irccd_api.hpp"
+#include "plugin.hpp"
+#include "plugin_api.hpp"
 
 using irccd::daemon::bot;
 using irccd::daemon::plugin_error;
-using irccd::daemon::plugin;
 
 namespace irccd::js {
 
@@ -125,7 +124,7 @@ auto get(duk_context* ctx, std::string_view name) -> duk_ret_t
  */
 auto set_config(duk_context* ctx) -> duk_ret_t
 {
-	return set(ctx, js_plugin::config_property);
+	return set(ctx, plugin::config_property);
 }
 
 /*
@@ -136,7 +135,7 @@ auto set_config(duk_context* ctx) -> duk_ret_t
  */
 auto get_config(duk_context* ctx) -> duk_ret_t
 {
-	return get(ctx, js_plugin::config_property);
+	return get(ctx, plugin::config_property);
 }
 
 /*
@@ -147,7 +146,7 @@ auto get_config(duk_context* ctx) -> duk_ret_t
  */
 auto set_format(duk_context* ctx) -> duk_ret_t
 {
-	return set(ctx, js_plugin::format_property);
+	return set(ctx, plugin::format_property);
 }
 
 /*
@@ -158,7 +157,7 @@ auto set_format(duk_context* ctx) -> duk_ret_t
  */
 auto get_format(duk_context* ctx) -> duk_ret_t
 {
-	return get(ctx, js_plugin::format_property);
+	return get(ctx, plugin::format_property);
 }
 
 /*
@@ -169,7 +168,7 @@ auto get_format(duk_context* ctx) -> duk_ret_t
  */
 auto set_paths(duk_context* ctx) -> duk_ret_t
 {
-	return set(ctx, js_plugin::paths_property);
+	return set(ctx, plugin::paths_property);
 }
 
 /*
@@ -180,7 +179,7 @@ auto set_paths(duk_context* ctx) -> duk_ret_t
  */
 auto get_paths(duk_context* ctx) -> duk_ret_t
 {
-	return get(ctx, js_plugin::paths_property);
+	return get(ctx, plugin::paths_property);
 }
 
 // {{{ Irccd.Plugin.info
@@ -210,26 +209,26 @@ auto get_paths(duk_context* ctx) -> duk_ret_t
 auto Plugin_info(duk_context* ctx) -> duk_idx_t
 {
 	return wrap(ctx, [&] {
-		plugin* plugin;
+		daemon::plugin* plg;
 
 		if (duk_get_top(ctx) >= 1)
-			plugin = duk::type_traits<bot>::self(ctx).plugins().get(duk_require_string(ctx, 0)).get();
+			plg = duk::type_traits<bot>::self(ctx).plugins().get(duk_require_string(ctx, 0)).get();
 		else
-			plugin = std::addressof(duk::type_traits<js_plugin>::self(ctx));
+			plg = std::addressof(duk::type_traits<plugin>::self(ctx));
 
-		if (!plugin)
+		if (!plg)
 			return 0;
 
 		duk_push_object(ctx);
-		duk::push(ctx, plugin->get_name());
+		duk::push(ctx, plg->get_name());
 		duk_put_prop_string(ctx, -2, "name");
-		duk::push(ctx, plugin->get_author());
+		duk::push(ctx, plg->get_author());
 		duk_put_prop_string(ctx, -2, "author");
-		duk::push(ctx, plugin->get_license());
+		duk::push(ctx, plg->get_license());
 		duk_put_prop_string(ctx, -2, "license");
-		duk::push(ctx, plugin->get_summary());
+		duk::push(ctx, plg->get_summary());
 		duk_put_prop_string(ctx, -2, "summary");
-		duk::push(ctx, plugin->get_version());
+		duk::push(ctx, plg->get_version());
 		duk_put_prop_string(ctx, -2, "version");
 
 		return 1;
@@ -381,12 +380,12 @@ const duk_function_list_entry functions[] = {
 
 } // !namespace
 
-auto plugin_js_api::get_name() const noexcept -> std::string_view
+auto plugin_api::get_name() const noexcept -> std::string_view
 {
 	return "Irccd.Plugin";
 }
 
-void plugin_js_api::load(bot&, std::shared_ptr<js_plugin> plugin)
+void plugin_api::load(bot&, std::shared_ptr<plugin> plugin)
 {
 	duk::stack_guard sa(plugin->get_context());
 
@@ -432,15 +431,15 @@ void plugin_js_api::load(bot&, std::shared_ptr<js_plugin> plugin)
 
 namespace duk {
 
-auto type_traits<js_plugin>::self(duk_context* ctx) -> js_plugin&
+auto type_traits<plugin>::self(duk_context* ctx) -> plugin&
 {
 	duk::stack_guard sa(ctx);
 
 	duk_get_global_string(ctx, signature.data());
-	auto plugin = static_cast<js_plugin*>(duk_to_pointer(ctx, -1));
+	auto plg = static_cast<plugin*>(duk_to_pointer(ctx, -1));
 	duk_pop(ctx);
 
-	return *plugin;
+	return *plg;
 }
 
 void type_traits<plugin_error>::raise(duk_context* ctx, const plugin_error& ex)
