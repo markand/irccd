@@ -70,7 +70,6 @@ cli_fixture::cli_fixture(std::string irccdctl)
 	bot_.servers().add(server_);
 	bot_.transports().add(std::make_unique<transport_server>(std::move(acceptor)));
 	bot_.plugins().add_loader(std::make_unique<test_plugin_loader>());
-	server_->disconnect();
 	server_->clear();
 }
 

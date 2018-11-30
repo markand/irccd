@@ -522,11 +522,12 @@ void server_service::connect(const std::shared_ptr<server>& server)
 
 void server_service::disconnect(const std::shared_ptr<server>& server)
 {
-	if (server->get_state() != server::state::disconnected) {
-		server->disconnect();
-		servers_.erase(std::find(servers_.begin(), servers_.end(), server), servers_.end());
-		dispatcher{bot_}(disconnect_event{server});
-	}
+	if (server->get_state() == server::state::disconnected)
+		return;
+
+	server->disconnect();
+	servers_.erase(std::find(servers_.begin(), servers_.end(), server), servers_.end());
+	dispatcher{bot_}(disconnect_event{server});
 }
 
 void server_service::reconnect(const std::shared_ptr<server>& server)
@@ -606,12 +607,7 @@ void server_service::disconnect(std::string_view id)
 
 void server_service::reconnect(std::string_view id)
 {
-	const auto save = get(id);
-
-	if (!save)
-		return;
-
-	reconnect(save);
+	reconnect(require(id));
 }
 
 void server_service::reconnect()
@@ -642,8 +638,8 @@ void server_service::remove(std::string_view name)
 void server_service::clear() noexcept
 {
 	/*
-	 * Copy the array, because disconnect() interrupted signals may remove the
-	 * server from the array.
+	 * Copy the array, because disconnect() interrupts signals and may
+	 * remove the server from the array.
 	 */
 	const auto save = servers_;
 

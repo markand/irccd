@@ -26,38 +26,70 @@
 #include "command_fixture.hpp"
 
 using boost::asio::ip::tcp;
+using boost::asio::deadline_timer;
+
+using boost::posix_time::seconds;
 
 using irccd::daemon::command;
 using irccd::daemon::transport_server;
 
 namespace irccd::test {
 
-template <typename Condition>
-void command_fixture::wait_for(Condition&& cond)
-{
-	ctx_.reset();
-
-	while (!cond())
-		ctx_.poll();
-}
-
-auto command_fixture::request(nlohmann::json json) -> result
+auto command_fixture::recv(deadline_timer& timer) -> result
 {
 	result r;
 
-	ctl_->send(std::move(json), [] (auto code) {
-		if (code)
-			throw std::system_error(std::move(code));
-	});
 	ctl_->recv([&] (auto code, auto message) {
 		r.first = message;
 		r.second = code;
 	});
-	wait_for([&] {
-		return r.second || r.first.is_object();
-	});
+
+	while (!r.first.is_object() && !r.second) {
+		ctx_.poll();
+		ctx_.reset();
+	}
+
+	timer.cancel();
 
 	return r;
+}
+
+auto command_fixture::wait_command(const std::string& cmd) -> result
+{
+	result r;
+	deadline_timer timer(bot_.get_service());
+
+	timer.expires_from_now(seconds(30));
+	timer.async_wait([] (auto code) {
+		if (code != boost::asio::error::operation_aborted)
+			throw std::runtime_error("operation timed out");
+	});
+
+	for (;;) {
+		r = recv(timer);
+
+		if (r.second)
+			break;
+		if (r.first.is_object() &&
+		    r.first["command"].is_string() &&
+		    r.first["command"].get<std::string>() == cmd)
+			break;
+
+		ctx_.poll();
+		ctx_.reset();
+	}
+
+	return r;
+}
+
+auto command_fixture::request(nlohmann::json json) -> result
+{
+	ctl_->send(json, [] (auto code) {
+		if (code)
+			throw std::system_error(std::move(code));
+	});
+
+	return wait_command(json["command"].get<std::string>());
 }
 
 command_fixture::command_fixture()

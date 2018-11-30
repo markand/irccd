@@ -39,6 +39,7 @@ BOOST_FIXTURE_TEST_SUITE(server_info_suite, server_info_fixture)
 
 BOOST_AUTO_TEST_CASE(output)
 {
+	server_->disconnect();
 	server_->set_username("francis");
 	server_->set_nickname("francis");
 	start();

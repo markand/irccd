@@ -43,15 +43,27 @@ namespace irccd::test {
  * and added to the respective services.
  */
 class command_fixture : public irccd_fixture {
-private:
-	template <typename Condition>
-	void wait_for(Condition&&);
-
 protected:
 	/**
 	 * \brief Result for request function.
 	 */
 	using result = std::pair<nlohmann::json, std::error_code>;
+
+	/**
+	 * Block for the next message.
+	 *
+	 * \param timer the timer to cancel on completion
+	 * \return the next message
+	 */
+	auto recv(boost::asio::deadline_timer& timer) -> result;
+
+	/**
+	 * Block for the next command with a maximum timeout.
+	 *
+	 * \return the result
+	 * \throw std::runtime_error after 30 seconds
+	 */
+	auto wait_command(const std::string& cmd) -> result;
 
 	/**
 	 * \brief Irccd controller
