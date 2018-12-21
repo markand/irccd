@@ -57,6 +57,8 @@
 # uppercase NAME value.
 #
 
+include(${CMAKE_CURRENT_LIST_DIR}/IrccdInstallDependencies.cmake)
+
 function(_irccd_define_javascript_plugin)
 	if (NOT PLG_SCRIPT)
 		message(FATAL_ERROR "Missing SCRIPT parameter")
@@ -114,6 +116,8 @@ function(_irccd_define_native_plugin)
 		COMPONENT ${PLG_NAME}
 		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}/irccd
 	)
+
+	irccd_install_dependencies(plugin-${PLG_NAME})
 endfunction()
 
 function(irccd_define_plugin)

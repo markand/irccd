@@ -33,6 +33,8 @@
 # Create an executable that can be installed or not.
 #
 
+include(${CMAKE_CURRENT_LIST_DIR}/IrccdInstallDependencies.cmake)
+
 function(irccd_define_executable)
 	set(options EXPORT)
 	set(oneValueArgs DESCRIPTION TARGET)
@@ -41,13 +43,13 @@ function(irccd_define_executable)
 	cmake_parse_arguments(EXE "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
 	if (NOT EXE_TARGET)
-		message(FATAL_ERROR "Please set TARGET")
+		message(FATAL_ERROR "Argument TARGET required")
 	endif ()
 	if (NOT EXE_SOURCES)
-		message(FATAL_ERROR "Please set SOURCES")
+		message(FATAL_ERROR "Argument SOURCES required")
 	endif ()
 	if (NOT EXE_DESCRIPTION)
-		message(FATAL_ERROR "DESCRIPTION required")
+		message(FATAL_ERROR "Argument DESCRIPTION required")
 	endif ()
 
 	add_executable(${EXE_TARGET} ${EXE_SOURCES})
@@ -84,4 +86,6 @@ function(irccd_define_executable)
 	setg(CPACK_COMPONENT_${CMP}_DISPLAY_NAME "${EXE_TARGET} executable")
 	setg(CPACK_COMPONENT_${CMP}_DESCRIPTION ${EXE_DESCRIPTION})
 	setg(CPACK_COMPONENT_${CMP}_GROUP "Applications")
+
+	irccd_install_dependencies(${EXE_TARGET})
 endfunction()

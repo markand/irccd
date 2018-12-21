@@ -32,6 +32,8 @@
 # )
 #
 
+include(${CMAKE_CURRENT_LIST_DIR}/IrccdInstallDependencies.cmake)
+
 function(irccd_define_library)
 	set(options EXPORT)
 	set(oneValueArgs TARGET)
@@ -76,6 +78,8 @@ function(irccd_define_library)
 			ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 			LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 		)
+
+		irccd_install_dependencies(${LIB_TARGET})
 	endif ()
 
 	if (LIB_HEADERS)

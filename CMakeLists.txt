@@ -53,6 +53,7 @@ cmake_minimum_required(VERSION 3.10)
 project(irccd)
 
 include(GNUInstallDirs)
+include(InstallRequiredSystemLibraries)
 
 # Helper to set global internal variables.
 function(setg var value)
@@ -66,7 +67,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED On)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${irccd_SOURCE_DIR}/cmake/packages)
 set(CMAKE_POSITION_INDEPENDENT_CODE On)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS On)
-
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 foreach (cfg ${CMAKE_CONFIGURATION_TYPES})
@@ -114,10 +114,6 @@ endif ()
 
 add_subdirectory(cmake/export)
 
-if (CMAKE_SYSTEM_NAME MATCHES "Windows")
-	add_subdirectory(cmake/windows)
-endif ()
-
 message("Compiling with the following flags:")
 message("       General flags:  ${CMAKE_CXX_FLAGS}")
 message("       Debug flags:    ${CMAKE_CXX_FLAGS_DEBUG}")
@@ -140,22 +136,6 @@ foreach (plugin ${IRCCD_PLUGINS})
 	irccd_indent_message("       ${plugin}: " "${IRCCD_WITH_PLUGIN_${name}_MSG}" 22)
 endforeach ()
 message("")
-
-if (CMAKE_SYSTEM_NAME MATCHES "Windows")
-	message("Installing these DLLs:")
-	foreach (name ${IRCCD_DLLS})
-		irccd_indent_message("       ${name}: " "${${name}}" 30)
-	endforeach ()
-	message("")
-
-	if (IRCCD_DLLS_NOT_FOUND)
-		message("The following DLLs were not found:")
-		foreach (name ${IRCCD_DLLS_NOT_FOUND})
-			message("       ${name}")
-		endforeach ()
-		message("")
-	endif ()
-endif ()
 
 include(cmake/IrccdPackage.cmake)
 include(CPack)
