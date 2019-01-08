@@ -136,6 +136,8 @@ function(irccd_define_plugin)
 
 	if (NOT IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME})
 		setg(IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME}_MSG "No (disabled by user)")
+	elseif (NOT IRCCD_WITH_JS AND PLG_TYPE MATCHES "JS")
+		setg(IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME}_MSG "No (Javascript disabled)")
 	else ()
 		setg(IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME}_MSG "Yes")
 

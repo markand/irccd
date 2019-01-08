@@ -59,8 +59,9 @@ using irccd::daemon::server;
 using irccd::daemon::whois_event;
 using irccd::daemon::dynlib_plugin_loader;
 
-using irccd::js::plugin_loader;
-using irccd::js::api;
+#if defined(IRCCD_HAVE_JS)
+namespace js = irccd::js;
+#endif
 
 namespace irccd::test {
 
@@ -645,9 +646,9 @@ void load(int argc, char** argv)
 	daemon->plugins().add_loader(std::make_unique<dynlib_plugin_loader>());
 
 #if defined(IRCCD_HAVE_JS)
-	auto loader = std::make_unique<plugin_loader>(*daemon);
+	auto loader = std::make_unique<js::plugin_loader>(*daemon);
 
-	for (const auto& f : api::registry())
+	for (const auto& f : js::api::registry())
 		loader->get_modules().push_back(f());
 
 	daemon->plugins().add_loader(std::move(loader));
