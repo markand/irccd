@@ -1,5 +1,5 @@
 /*
- * command.hpp -- remote command
+ * transport_command.hpp -- remote command
  *
  * Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
  *
@@ -16,11 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_DAEMON_COMMAND_HPP
-#define IRCCD_DAEMON_COMMAND_HPP
+#ifndef IRCCD_DAEMON_TRANSPORT_COMMAND_HPP
+#define IRCCD_DAEMON_TRANSPORT_COMMAND_HPP
 
 /**
- * \file command.hpp
+ * \file transport_command.hpp
  * \brief Remote commands.
  */
 
@@ -38,13 +38,13 @@ namespace irccd::daemon {
 class bot;
 class transport_client;
 
-// {{{ command
+// {{{ transport_command
 
 /**
  * \brief Server side remote command
  * \ingroup transports
  */
-class command {
+class transport_command {
 public:
 	/**
 	 * \brief Convenient alias.
@@ -54,7 +54,7 @@ public:
 	/**
 	 * \brief Command constructor factory.
 	 */
-	using constructor = std::function<std::unique_ptr<command> ()>;
+	using constructor = std::function<std::unique_ptr<transport_command> ()>;
 
 	/**
 	 * \brief Registry of all commands.
@@ -64,7 +64,7 @@ public:
 	/**
 	 * Default destructor virtual.
 	 */
-	virtual ~command() = default;
+	virtual ~transport_command() = default;
 
 	/**
 	 * Return the command name, must not have spaces.
@@ -101,7 +101,7 @@ public:
  *
  * - plugin_error::not_found
  */
-class plugin_config_command : public command {
+class plugin_config_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -126,7 +126,7 @@ public:
  *
  * - plugin_error::not_found
  */
-class plugin_info_command : public command {
+class plugin_info_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -147,7 +147,7 @@ public:
  * \brief Implementation of plugin-list transport command.
  * \ingroup transports
  */
-class plugin_list_command : public command {
+class plugin_list_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -174,7 +174,7 @@ public:
  * - plugin_error::not_found
  * - plugin_error::exec_error
  */
-class plugin_load_command : public command {
+class plugin_load_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -200,7 +200,7 @@ public:
  * - plugin_error::not_found
  * - plugin_error::exec_error
  */
-class plugin_reload_command : public command {
+class plugin_reload_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -226,7 +226,7 @@ public:
  * - plugin_error::not_found
  * - plugin_error::exec_error
  */
-class plugin_unload_command : public command {
+class plugin_unload_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -251,7 +251,7 @@ public:
  *
  * - rule_error::invalid_action
  */
-class rule_add_command : public command {
+class rule_add_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -277,7 +277,7 @@ public:
  * - rule_error::invalid_index
  * - rule_error::invalid_action
  */
-class rule_edit_command : public command {
+class rule_edit_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -302,7 +302,7 @@ public:
  *
  * - rule_error::invalid_index
  */
-class rule_info_command : public command {
+class rule_info_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -323,7 +323,7 @@ public:
  * \brief Implementation of rule-list transport command.
  * \ingroup transports
  */
-class rule_list_command : public command {
+class rule_list_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -348,7 +348,7 @@ public:
  *
  * - rule_error::invalid_index
  */
-class rule_move_command : public command {
+class rule_move_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -373,7 +373,7 @@ public:
  *
  * - rule_error::invalid_index
  */
-class rule_remove_command : public command {
+class rule_remove_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -402,7 +402,7 @@ public:
  * - server_error::invalid_port_number,
  * - server_error::ssl_disabled.
  */
-class server_connect_command : public command {
+class server_connect_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -428,7 +428,7 @@ public:
  * - server_error::invalid_identifier,
  * - server_error::not_found.
  */
-class server_disconnect_command : public command {
+class server_disconnect_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -454,7 +454,7 @@ public:
  * - server_error::invalid_identifier,
  * - server_error::not_found.
  */
-class server_info_command : public command {
+class server_info_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -482,7 +482,7 @@ public:
  * - server_error::invalid_nickname,
  * - server_error::not_found.
  */
-class server_invite_command : public command {
+class server_invite_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -509,7 +509,7 @@ public:
  * - server_error::invalid_identifier,
  * - server_error::not_found.
  */
-class server_join_command : public command {
+class server_join_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -537,7 +537,7 @@ public:
  * - server_error::invalid_nickname,
  * - server_error::not_found.
  */
-class server_kick_command : public command {
+class server_kick_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -558,7 +558,7 @@ public:
  * \brief Implementation of server-list transport command.
  * \ingroup transports
  */
-class server_list_command : public command {
+class server_list_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -585,7 +585,7 @@ public:
  * - server_error::invalid_identifier,
  * - server_error::not_found.
  */
-class server_me_command : public command {
+class server_me_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -612,7 +612,7 @@ public:
  * - server_error::invalid_identifier,
  * - server_error::not_found.
  */
-class server_message_command : public command {
+class server_message_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -640,7 +640,7 @@ public:
  * - server_error::invalid_mode,
  * - server_error::not_found.
  */
-class server_mode_command : public command {
+class server_mode_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -667,7 +667,7 @@ public:
  * - server_error::invalid_nickname,
  * - server_error::not_found.
  */
-class server_nick_command : public command {
+class server_nick_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -694,7 +694,7 @@ public:
  * - server_error::invalid_identifier,
  * - server_error::not_found.
  */
-class server_notice_command : public command {
+class server_notice_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -721,7 +721,7 @@ public:
  * - server_error::invalid_identifier,
  * - server_error::not_found.
  */
-class server_part_command : public command {
+class server_part_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -747,7 +747,7 @@ public:
  * - server_error::invalid_identifier,
  * - server_error::not_found.
  */
-class server_reconnect_command : public command {
+class server_reconnect_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name
@@ -774,7 +774,7 @@ public:
  * - server_error::invalid_identifier,
  * - server_error::not_found.
  */
-class server_topic_command : public command {
+class server_topic_command : public transport_command {
 public:
 	/**
 	 * \copydoc command::get_name

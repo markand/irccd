@@ -24,7 +24,7 @@
 #include <irccd/string_util.hpp>
 #include <irccd/acceptor.hpp>
 
-#include <irccd/daemon/command.hpp>
+#include <irccd/daemon/transport_command.hpp>
 #include <irccd/daemon/transport_service.hpp>
 #include <irccd/daemon/transport_server.hpp>
 
@@ -32,10 +32,6 @@
 #include "test_plugin_loader.hpp"
 
 namespace proc = boost::process;
-
-using irccd::daemon::bot;
-using irccd::daemon::command;
-using irccd::daemon::transport_server;
 
 namespace irccd::test {
 
@@ -64,11 +60,11 @@ cli_fixture::cli_fixture(std::string irccdctl)
 
 	auto acceptor = std::make_unique<ip_acceptor>(bot_.get_service(), std::move(raw_acceptor));
 
-	for (const auto& f : command::registry())
+	for (const auto& f : daemon::transport_command::registry())
 		bot_.transports().get_commands().push_back(f());
 
 	bot_.servers().add(server_);
-	bot_.transports().add(std::make_unique<transport_server>(std::move(acceptor)));
+	bot_.transports().add(std::make_unique<daemon::transport_server>(std::move(acceptor)));
 	bot_.plugins().add_loader(std::make_unique<test_plugin_loader>());
 	server_->clear();
 }

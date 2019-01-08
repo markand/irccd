@@ -23,8 +23,6 @@ set(
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon.hpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/bot.cpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/bot.hpp
-	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/command.cpp
-	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/command.hpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/dynlib_plugin.cpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/dynlib_plugin.hpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/irc.cpp
@@ -49,6 +47,8 @@ set(
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/server_util.hpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/transport_client.cpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/transport_client.hpp
+	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/transport_command.cpp
+	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/transport_command.hpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/transport_server.cpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/transport_server.hpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/transport_service.cpp

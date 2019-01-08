@@ -21,7 +21,6 @@
 #include <irccd/string_util.hpp>
 
 #include "bot.hpp"
-#include "command.hpp"
 #include "plugin.hpp"
 #include "plugin_service.hpp"
 #include "rule.hpp"
@@ -31,6 +30,7 @@
 #include "server_service.hpp"
 #include "server_util.hpp"
 #include "transport_client.hpp"
+#include "transport_command.hpp"
 
 using namespace std::string_literals;
 
@@ -81,7 +81,7 @@ void exec_get(transport_client& client, plugin& plugin, const nlohmann::json& ar
 }
 
 template <typename T>
-auto bind() noexcept -> command::constructor
+auto bind() noexcept -> transport_command::constructor
 {
 	return [] () noexcept {
 		return std::make_unique<T>();
@@ -90,9 +90,9 @@ auto bind() noexcept -> command::constructor
 
 } // !namespace
 
-auto command::registry() noexcept -> const std::vector<constructor>&
+auto transport_command::registry() noexcept -> const std::vector<constructor>&
 {
-	static const std::vector<command::constructor> list{
+	static const std::vector<transport_command::constructor> list{
 		bind<plugin_config_command>(),
 		bind<plugin_info_command>(),
 		bind<plugin_list_command>(),

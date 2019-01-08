@@ -38,8 +38,8 @@ class config;
 namespace daemon {
 
 class bot;
-class command;
 class transport_client;
+class transport_command;
 class transport_server;
 
 /**
@@ -52,7 +52,7 @@ public:
 	/**
 	 * \brief the list of transport commands.
 	 */
-	using commands = std::vector<std::unique_ptr<command>>;
+	using commands = std::vector<std::unique_ptr<transport_command>>;
 
 	/**
 	 * \brief The list of transport acceptors.

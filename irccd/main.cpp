@@ -27,11 +27,11 @@
 #include <irccd/options.hpp>
 #include <irccd/system.hpp>
 
-#include <irccd/daemon/command.hpp>
 #include <irccd/daemon/dynlib_plugin.hpp>
 #include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/logger.hpp>
 #include <irccd/daemon/plugin_service.hpp>
+#include <irccd/daemon/transport_command.hpp>
 #include <irccd/daemon/transport_service.hpp>
 
 #if defined(IRCCD_HAVE_JS)
@@ -178,7 +178,7 @@ int main(int argc, char** argv)
 	init(argc, argv);
 
 	// 1. Load commands.
-	for (const auto& f : command::registry())
+	for (const auto& f : transport_command::registry())
 		instance->transports().get_commands().push_back(f());
 
 	// 2. Load plugin loaders.

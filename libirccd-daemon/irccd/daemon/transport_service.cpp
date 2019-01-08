@@ -23,9 +23,9 @@
 #include <irccd/json_util.hpp>
 
 #include "bot.hpp"
-#include "command.hpp"
 #include "logger.hpp"
 #include "transport_client.hpp"
+#include "transport_command.hpp"
 #include "transport_server.hpp"
 #include "transport_service.hpp"
 #include "transport_util.hpp"

@@ -19,23 +19,18 @@
 #include <irccd/acceptor.hpp>
 #include <irccd/connector.hpp>
 
-#include <irccd/daemon/command.hpp>
+#include <irccd/daemon/transport_command.hpp>
 #include <irccd/daemon/transport_server.hpp>
 #include <irccd/daemon/transport_service.hpp>
 
 #include "command_fixture.hpp"
 
-using boost::asio::ip::tcp;
-using boost::asio::deadline_timer;
-
-using boost::posix_time::seconds;
-
-using irccd::daemon::command;
-using irccd::daemon::transport_server;
+namespace asio = boost::asio;
+namespace posix_time = boost::posix_time;
 
 namespace irccd::test {
 
-auto command_fixture::recv(deadline_timer& timer) -> result
+auto command_fixture::recv(asio::deadline_timer& timer) -> result
 {
 	result r;
 
@@ -57,11 +52,11 @@ auto command_fixture::recv(deadline_timer& timer) -> result
 auto command_fixture::wait_command(const std::string& cmd) -> result
 {
 	result r;
-	deadline_timer timer(bot_.get_service());
+	asio::deadline_timer timer(bot_.get_service());
 
-	timer.expires_from_now(seconds(30));
+	timer.expires_from_now(posix_time::seconds(30));
 	timer.async_wait([] (auto code) {
-		if (code != boost::asio::error::operation_aborted)
+		if (code != asio::error::operation_aborted)
 			throw std::runtime_error("operation timed out");
 	});
 
@@ -96,27 +91,27 @@ command_fixture::command_fixture()
 	: server_(new mock_server(ctx_, "test", "localhost"))
 	, plugin_(new mock_plugin("test"))
 {
-	tcp::endpoint ep(tcp::v4(), 0U);
-	tcp::acceptor raw_acceptor(bot_.get_service(), std::move(ep));
+	asio::ip::tcp::endpoint ep(asio::ip::tcp::v4(), 0U);
+	asio::ip::tcp::acceptor raw_acceptor(bot_.get_service(), std::move(ep));
 
 	auto service = std::to_string(raw_acceptor.local_endpoint().port());
 	auto acceptor = std::make_unique<ip_acceptor>(bot_.get_service(), std::move(raw_acceptor));
 	auto connector = std::make_unique<ip_connector>(bot_.get_service(), "127.0.0.1", service, true, false);
 
 	// 1. Add all commands.
-	for (const auto& f : command::registry())
+	for (const auto& f : daemon::transport_command::registry())
 		bot_.transports().get_commands().push_back(f());
 
 	// 2. Create controller and transport server.
 	ctl_ = std::make_unique<ctl::controller>(std::move(connector));
-	bot_.transports().add(std::make_unique<transport_server>(std::move(acceptor)));
+	bot_.transports().add(std::make_unique<daemon::transport_server>(std::move(acceptor)));
 
 	// 3. Wait for controller to connect.
-	boost::asio::deadline_timer timer(ctx_);
+	asio::deadline_timer timer(ctx_);
 
-	timer.expires_from_now(boost::posix_time::seconds(10));
+	timer.expires_from_now(posix_time::seconds(10));
 	timer.async_wait([] (auto code) {
-		if (code && code != boost::asio::error::operation_aborted)
+		if (code && code != asio::error::operation_aborted)
 			throw std::system_error(make_error_code(std::errc::timed_out));
 	});
 
