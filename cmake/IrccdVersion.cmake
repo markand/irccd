@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013-2018 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -41,10 +41,10 @@ set(IRCCD_VERSION_SHLIB "1")
 # IRCCD_RELEASE_DATE_MONTH      2 digits (01 = January)
 # IRCCD_RELEASE_DATE_DAY        2 digits (01 = first day of month)
 #
-set(IRCCD_RELEASE_DATE_YEAR 2018)
+set(IRCCD_RELEASE_DATE_YEAR 2019)
 set(IRCCD_RELEASE_DATE_MONTH 09)
 set(IRCCD_RELEASE_DATE_DAY 26)
 set(IRCCD_RELEASE_DATE "${IRCCD_RELEASE_DATE_YEAR}-${IRCCD_RELEASE_DATE_MONTH}-${IRCCD_RELEASE_DATE_DAY}")
 
 # Irccd release data (manual version).
-set(IRCCD_MAN_DATE "September 26, 2018")
+set(IRCCD_MAN_DATE "September 26, 2019")
