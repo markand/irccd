@@ -128,6 +128,7 @@ message("       Tests:          ${IRCCD_WITH_TESTS_MSG}")
 message("       User docs:      ${IRCCD_WITH_HTML_MSG}")
 message("       Doxygen:        ${IRCCD_WITH_DOXYGEN_MSG}")
 message("       Package:        ${IRCCD_PACKAGE_MSG}")
+message("       Systemd:        ${IRCCD_WITH_SYSTEMD_MSG}")
 message("")
 
 message("Installing plugins:")

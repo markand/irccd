@@ -1,5 +1,5 @@
 #
-# Options.cmake -- CMake build system for irccd
+# IrccdOptions.cmake -- CMake build system for irccd
 #
 # Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
 #
@@ -28,7 +28,6 @@
 # IRCCD_WITH_PKGCONFIG      Install pkg-config files (default: on, off for Windows (except MinGW))
 # IRCCD_WITH_PLUGIN_<NAME>  Enable or disable the specified plugin (default: on)
 # IRCCD_WITH_SSL            Enable OpenSSL (default: on)
-# IRCCD_WITH_SYSTEMD        Install systemd service (default: on for Linux)
 # IRCCD_WITH_TESTS          Enable unit testing (default: off)
 #
 # Note: the option() commands for IRCCD_WITH_PLUGIN_<name> variables are
@@ -40,13 +39,6 @@ if (WIN32)
 	set(DEFAULT_MAN "No")
 else ()
 	set(DEFAULT_MAN "Yes")
-endif ()
-
-# Systemd unit file
-if (CMAKE_SYSTEM_NAME MATCHES "Linux")
-	set(DEFAULT_SYSTEMD "Yes")
-else ()
-	set(DEFAULT_SYSTEMD "No")
 endif ()
 
 # pkg-config is only relevant on UNIX or MinGW
@@ -64,7 +56,6 @@ option(IRCCD_WITH_LIBEDIT "Enable libedit support" On)
 option(IRCCD_WITH_MAN "Install man pages" ${DEFAULT_MAN})
 option(IRCCD_WITH_PKGCONFIG "Enable pkg-config file" ${DEFAULT_PKGCONFIG})
 option(IRCCD_WITH_SSL "Enable SSL" On)
-option(IRCCD_WITH_SYSTEMD "Install systemd service" ${DEFAULT_SYSTEMD})
 option(IRCCD_WITH_TESTS "Enable unit testing" Off)
 
 #

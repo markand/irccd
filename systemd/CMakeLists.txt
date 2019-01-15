@@ -16,9 +16,19 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(contrib)
+project(systemd)
+
+if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+	set(DEFAULT_SYSTEMD "Yes")
+else ()
+	set(DEFAULT_SYSTEMD "No")
+endif ()
+
+option(IRCCD_WITH_SYSTEMD "Install systemd service" ${DEFAULT_SYSTEMD})
 
 if (IRCCD_WITH_SYSTEMD)
+	setg(IRCCD_WITH_SYSTEMD_MSG "Yes")
+
 	set(PATH "${CMAKE_INSTALL_FULL_BINDIR}/irccd")
 
 	configure_file(
@@ -30,4 +40,6 @@ if (IRCCD_WITH_SYSTEMD)
 		FILES ${CMAKE_CURRENT_BINARY_DIR}/irccd.service
 		DESTINATION "/usr/lib/systemd/system"
 	)
+else ()
+	setg(IRCCD_WITH_SYSTEMD_MSG "No (disabled by user)")
 endif()
