@@ -17,6 +17,10 @@
  */
 
 #include <regex>
+#include <string_view>
+#include <unordered_map>
+
+#include <boost/algorithm/string/trim_all.hpp>
 
 #include <irccd/daemon/server.hpp>
 
@@ -67,6 +71,50 @@ using irccd::daemon::server;
 
 namespace irccd {
 
+namespace {
+
+auto unentities(const std::string& input) -> std::string
+{
+	static const std::unordered_map<std::string_view, char> predef{
+		{ "quot",       '"'     },
+		{ "amp",        '&'     },
+		{ "apos",       '\''    },
+		{ "lt",         '<'     },
+		{ "gt",         '>'     }
+	};
+
+	std::string output;
+	std::string entity;
+
+	output.reserve(input.size());
+	entity.reserve(6);
+
+	for (auto it = input.begin(); it != input.end(); ) {
+		if (*it != '&') {
+			output.push_back(*it++);
+			continue;
+		}
+
+		entity.clear();
+
+		for (++it; it != input.end() && *it != ';'; ++it)
+			entity.push_back(*it);
+		if (const auto e = predef.find(entity); e != predef.end())
+			output.push_back(e->second);
+		if (it != input.end())
+			++it;
+	}
+
+	return output;
+}
+
+auto trim(std::string input) -> std::string
+{
+	return boost::algorithm::trim_all_copy(input);
+}
+
+} // !namespace
+
 void requester::notify(const string& title)
 {
 	subst subst;
@@ -91,8 +139,13 @@ void requester::parse()
 	string data(res_.body().data());
 	smatch match;
 
-	if (regex_search(data, match, regex))
-		notify(match[1]);
+	// Remove XML predefined entities.
+	if (regex_search(data, match, regex)) {
+		const auto title = trim(unentities(match[1]));
+
+		if (title.size() > 0)
+			notify(title);
+	}
 }
 
 void requester::handle_read(const error_code& code)
