@@ -178,14 +178,19 @@ void from_json_load_options(server& sv, const deserializer& parser)
 	if (!ipv4 || !ipv6)
 		throw server_error(server_error::invalid_family);
 
-	toggle(sv, server::options::ipv4, *ipv4);
-	toggle(sv, server::options::ipv6, *ipv6);
-	toggle(sv, server::options::auto_rejoin, *auto_rejoin);
-	toggle(sv, server::options::join_invite, *join_invite);
-	toggle(sv, server::options::ssl, *ssl);
+	if (ipv4)
+		toggle(sv, server::options::ipv4, *ipv4);
+	if (ipv6)
+		toggle(sv, server::options::ipv6, *ipv6);
+	if (auto_rejoin)
+		toggle(sv, server::options::auto_rejoin, *auto_rejoin);
+	if (join_invite)
+		toggle(sv, server::options::join_invite, *join_invite);
+	if (ssl)
+		toggle(sv, server::options::ssl, *ssl);
 
 #if !defined(IRCCD_HAVE_SSL)
-	if ((server::get_options() & server::options::ssl) == server::options::ssl)
+	if ((sv.get_options() & server::options::ssl) == server::options::ssl)
 		throw server_error(server_error::ssl_disabled);
 #endif
 
