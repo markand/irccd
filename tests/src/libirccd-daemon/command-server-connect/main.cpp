@@ -21,21 +21,15 @@
 
 #include <irccd/test/command_fixture.hpp>
 
-using irccd::test::command_fixture;
-using irccd::test::mock_server;
-
-using irccd::daemon::server;
-using irccd::daemon::server_error;
-
 namespace irccd {
 
 namespace {
 
-BOOST_FIXTURE_TEST_SUITE(server_connect_fixture_suite, command_fixture)
+BOOST_FIXTURE_TEST_SUITE(server_connect_fixture_suite, test::command_fixture)
 
 BOOST_AUTO_TEST_CASE(minimal)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "server-connect"    },
 		{ "name",       "local"             },
 		{ "hostname",   "irc.example.org"   }
@@ -43,7 +37,8 @@ BOOST_AUTO_TEST_CASE(minimal)
 
 	const auto s = bot_.servers().get("local");
 
-	BOOST_TEST(!code);
+	BOOST_TEST(json.size() == 1U);
+	BOOST_TEST(json["command"].get<std::string>() == "server-connect");
 	BOOST_TEST(s);
 	BOOST_TEST(s->get_id() == "local");
 	BOOST_TEST(s->get_hostname() == "irc.example.org");
@@ -54,7 +49,7 @@ BOOST_AUTO_TEST_CASE(minimal)
 
 BOOST_AUTO_TEST_CASE(full)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",            "server-connect"        },
 		{ "name",               "local2"                },
 		{ "hostname",           "irc.example2.org"      },
@@ -66,7 +61,7 @@ BOOST_AUTO_TEST_CASE(full)
 		{ "ipv6",               true                    },
 		{ "ctcpVersion",        "ultra bot"             },
 		{ "commandChar",        "::"                    },
-		{ "port",               18000                   },
+		{ "port",               18000U                  },
 		{ "ssl",                true                    },
 		{ "sslVerify",          true                    },
 		{ "autoRejoin",         true                    },
@@ -75,7 +70,8 @@ BOOST_AUTO_TEST_CASE(full)
 
 	const auto s = bot_.servers().get("local2");
 
-	BOOST_TEST(!code);
+	BOOST_TEST(json.size() == 1U);
+	BOOST_TEST(json["command"].get<std::string>() == "server-connect");
 	BOOST_TEST(s);
 	BOOST_TEST(s->get_id() == "local2");
 	BOOST_TEST(s->get_hostname() == "irc.example2.org");
@@ -86,11 +82,11 @@ BOOST_AUTO_TEST_CASE(full)
 	BOOST_TEST(s->get_username() == "frc");
 	BOOST_TEST(s->get_command_char() == "::");
 	BOOST_TEST(s->get_ctcp_version() == "ultra bot");
-	BOOST_TEST(!static_cast<bool>(s->get_options() & server::options::ipv4));
-	BOOST_TEST(static_cast<bool>(s->get_options() & server::options::ipv6));
-	BOOST_TEST(static_cast<bool>(s->get_options() & server::options::ssl));
-	BOOST_TEST(static_cast<bool>(s->get_options() & server::options::auto_rejoin));
-	BOOST_TEST(static_cast<bool>(s->get_options() & server::options::join_invite));
+	BOOST_TEST(!static_cast<bool>(s->get_options() & daemon::server::options::ipv4));
+	BOOST_TEST(static_cast<bool>(s->get_options() & daemon::server::options::ipv6));
+	BOOST_TEST(static_cast<bool>(s->get_options() & daemon::server::options::ssl));
+	BOOST_TEST(static_cast<bool>(s->get_options() & daemon::server::options::auto_rejoin));
+	BOOST_TEST(static_cast<bool>(s->get_options() & daemon::server::options::join_invite));
 }
 
 #endif // !IRCCD_HAVE_SSL
@@ -99,109 +95,117 @@ BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(already_exists)
 {
-	bot_.servers().add(std::make_unique<mock_server>(ctx_, "local"));
+	bot_.servers().add(std::make_unique<test::mock_server>(ctx_, "local"));
 
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "server-connect"        },
 		{ "name",       "local"                 },
 		{ "hostname",   "127.0.0.1"             }
 	});
 
-	BOOST_TEST(code == server_error::already_exists);
-	BOOST_TEST(json["error"].get<int>() == server_error::already_exists);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "server-connect");
+	BOOST_TEST(json["error"].get<int>() == daemon::server_error::already_exists);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_hostname_1)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "server-connect"        },
 		{ "name",       "new"                   },
 	});
 
-	BOOST_TEST(code == server_error::invalid_hostname);
-	BOOST_TEST(json["error"].get<int>() == server_error::invalid_hostname);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "server-connect");
+	BOOST_TEST(json["error"].get<int>() == daemon::server_error::invalid_hostname);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_hostname_2)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "server-connect"        },
 		{ "name",       "new"                   },
 		{ "hostname",   123456                  }
 	});
 
-	BOOST_TEST(code == server_error::invalid_hostname);
-	BOOST_TEST(json["error"].get<int>() == server_error::invalid_hostname);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "server-connect");
+	BOOST_TEST(json["error"].get<int>() == daemon::server_error::invalid_hostname);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_identifier_1)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "server-connect"        },
 		{ "name",       ""                      },
 		{ "hostname",   "127.0.0.1"             }
 	});
 
-	BOOST_TEST(code == server_error::invalid_identifier);
-	BOOST_TEST(json["error"].get<int>() == server_error::invalid_identifier);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "server-connect");
+	BOOST_TEST(json["error"].get<int>() == daemon::server_error::invalid_identifier);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_identifier_2)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "server-connect"        },
 		{ "name",       123456                  },
 		{ "hostname",   "127.0.0.1"             }
 	});
 
-	BOOST_TEST(code == server_error::invalid_identifier);
-	BOOST_TEST(json["error"].get<int>() == server_error::invalid_identifier);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "server-connect");
+	BOOST_TEST(json["error"].get<int>() == daemon::server_error::invalid_identifier);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_port_1)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "server-connect"        },
 		{ "name",       "new"                   },
 		{ "hostname",   "127.0.0.1"             },
 		{ "port",       "notaint"               }
 	});
 
-	BOOST_TEST(code == server_error::invalid_port);
-	BOOST_TEST(json["error"].get<int>() == server_error::invalid_port);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "server-connect");
+	BOOST_TEST(json["error"].get<int>() == daemon::server_error::invalid_port);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_port_2)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "server-connect"        },
 		{ "name",       "new"                   },
 		{ "hostname",   "127.0.0.1"             },
 		{ "port",       -123                    }
 	});
 
-	BOOST_TEST(code == server_error::invalid_port);
-	BOOST_TEST(json["error"].get<int>() == server_error::invalid_port);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "server-connect");
+	BOOST_TEST(json["error"].get<int>() == daemon::server_error::invalid_port);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_port_3)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "server-connect"        },
 		{ "name",       "new"                   },
 		{ "hostname",   "127.0.0.1"             },
-		{ "port",       1000000                 }
+		{ "port",       1000000U                }
 	});
 
-	BOOST_TEST(code == server_error::invalid_port);
-	BOOST_TEST(json["error"].get<int>() == server_error::invalid_port);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "server-connect");
+	BOOST_TEST(json["error"].get<int>() == daemon::server_error::invalid_port);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
@@ -209,15 +213,16 @@ BOOST_AUTO_TEST_CASE(invalid_port_3)
 
 BOOST_AUTO_TEST_CASE(ssl_disabled)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "server-connect"        },
 		{ "name",       "new"                   },
 		{ "hostname",   "127.0.0.1"             },
 		{ "ssl",        true                    }
 	});
 
-	BOOST_TEST(code == server_error::ssl_disabled);
-	BOOST_TEST(json["error"].get<int>() == server_error::ssl_disabled);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "server-connect");
+	BOOST_TEST(json["error"].get<int>() == daemon::server_error::ssl_disabled);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
@@ -225,31 +230,33 @@ BOOST_AUTO_TEST_CASE(ssl_disabled)
 
 BOOST_AUTO_TEST_CASE(invalid_family_1)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "server-connect"        },
 		{ "name",       "new"                   },
 		{ "hostname",   "127.0.0.1"             },
-		{ "port",       6667                    },
+		{ "port",       6667U                   },
 		{ "ipv4",       "invalid"               }
 	});
 
-	BOOST_TEST(code == server_error::invalid_family);
-	BOOST_TEST(json["error"].get<int>() == server_error::invalid_family);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "server-connect");
+	BOOST_TEST(json["error"].get<int>() == daemon::server_error::invalid_family);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_family_2)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "server-connect"        },
 		{ "name",       "new"                   },
 		{ "hostname",   "127.0.0.1"             },
-		{ "port",       6667                    },
+		{ "port",       6667U                   },
 		{ "ipv6",       1234                    }
 	});
 
-	BOOST_TEST(code == server_error::invalid_family);
-	BOOST_TEST(json["error"].get<int>() == server_error::invalid_family);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "server-connect");
+	BOOST_TEST(json["error"].get<int>() == daemon::server_error::invalid_family);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 

@@ -21,20 +21,17 @@
 
 #include <irccd/test/command_fixture.hpp>
 
-using irccd::test::command_fixture;
-using irccd::test::mock_plugin;
-
 namespace irccd {
 
 namespace {
 
-class plugin_list_fixture : public command_fixture {
+class plugin_list_fixture : public test::command_fixture {
 public:
 	plugin_list_fixture()
 	{
 		bot_.plugins().clear();
-		bot_.plugins().add(std::make_unique<mock_plugin>("t1"));
-		bot_.plugins().add(std::make_unique<mock_plugin>("t2"));
+		bot_.plugins().add(std::make_unique<test::mock_plugin>("t1"));
+		bot_.plugins().add(std::make_unique<test::mock_plugin>("t2"));
 	}
 };
 
@@ -42,12 +39,12 @@ BOOST_FIXTURE_TEST_SUITE(plugin_list_fixture_suite, plugin_list_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command", "plugin-list" }
 	});
 
-	BOOST_TEST(!code);
-	BOOST_TEST(json.is_object());
+	BOOST_TEST(json.size() == 2U);
+	BOOST_TEST(json["command"].get<std::string>() == "plugin-list");
 	BOOST_TEST(json["list"][0].get<std::string>() == "t1");
 	BOOST_TEST(json["list"][1].get<std::string>() == "t2");
 }

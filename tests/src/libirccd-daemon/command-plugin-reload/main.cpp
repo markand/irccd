@@ -22,28 +22,19 @@
 #include <irccd/test/broken_plugin.hpp>
 #include <irccd/test/command_fixture.hpp>
 
-using irccd::test::broken_plugin;
-using irccd::test::command_fixture;
-using irccd::test::mock_plugin;
-
-using irccd::daemon::bot;
-using irccd::daemon::plugin;
-using irccd::daemon::plugin_error;
-using irccd::daemon::plugin_loader;
-
 namespace irccd {
 
 namespace {
 
-class plugin_reload_fixture : public command_fixture {
+class plugin_reload_fixture : public test::command_fixture {
 protected:
-	std::shared_ptr<mock_plugin> plugin_{new mock_plugin("test")};
+	std::shared_ptr<test::mock_plugin> plugin_{new test::mock_plugin("test")};
 
 	plugin_reload_fixture()
 	{
 		bot_.plugins().clear();
 		bot_.plugins().add(plugin_);
-		bot_.plugins().add(std::make_unique<broken_plugin>("broken"));
+		bot_.plugins().add(std::make_unique<test::broken_plugin>("broken"));
 	}
 };
 
@@ -51,12 +42,13 @@ BOOST_FIXTURE_TEST_SUITE(plugin_reload_fixture_suite, plugin_reload_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "plugin-reload" },
 		{ "plugin",     "test"          }
 	});
 
-	BOOST_TEST(!code);
+	BOOST_TEST(json.size() == 1U);
+	BOOST_TEST(json["command"].get<std::string>() == "plugin-reload");
 	BOOST_TEST(plugin_->find("handle_reload").size() == 1U);
 }
 
@@ -64,36 +56,39 @@ BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command", "plugin-reload" }
 	});
 
-	BOOST_TEST(code == plugin_error::invalid_identifier);
-	BOOST_TEST(json["error"].get<int>() == plugin_error::invalid_identifier);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "plugin-reload");
+	BOOST_TEST(json["error"].get<int>() == daemon::plugin_error::invalid_identifier);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "plugin-reload" },
 		{ "plugin",     "unknown"       }
 	});
 
-	BOOST_TEST(code == plugin_error::not_found);
-	BOOST_TEST(json["error"].get<int>() == plugin_error::not_found);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "plugin-reload");
+	BOOST_TEST(json["error"].get<int>() == daemon::plugin_error::not_found);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_CASE(exec_error)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "plugin-reload" },
 		{ "plugin",     "broken"        }
 	});
 
-	BOOST_TEST(code == plugin_error::exec_error);
-	BOOST_TEST(json["error"].get<int>() == plugin_error::exec_error);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "plugin-reload");
+	BOOST_TEST(json["error"].get<int>() == daemon::plugin_error::exec_error);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 

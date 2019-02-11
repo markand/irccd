@@ -21,25 +21,21 @@
 
 #include <irccd/test/command_fixture.hpp>
 
-using irccd::test::command_fixture;
-using irccd::test::mock_plugin;
-
-using irccd::daemon::plugin_error;
-
 namespace irccd {
 
 namespace {
 
-BOOST_FIXTURE_TEST_SUITE(plugin_info_test_suite, command_fixture)
+BOOST_FIXTURE_TEST_SUITE(plugin_info_test_suite, test::command_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "plugin-info"   },
 		{ "plugin",     "test"          },
 	});
 
-	BOOST_TEST(!code);
+	BOOST_TEST(json.size() == 5U);
+	BOOST_TEST(json["command"].get<std::string>() == "plugin-info");
 	BOOST_TEST(json["author"].get<std::string>() == "David Demelier <markand@malikania.fr>");
 	BOOST_TEST(json["license"].get<std::string>() == "ISC");
 	BOOST_TEST(json["summary"].get<std::string>() == "mock plugin");
@@ -50,24 +46,26 @@ BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command", "plugin-info" }
 	});
 
-	BOOST_TEST(code == plugin_error::invalid_identifier);
-	BOOST_TEST(json["error"].get<int>() == plugin_error::invalid_identifier);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "plugin-info");
+	BOOST_TEST(json["error"].get<int>() == daemon::plugin_error::invalid_identifier);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "plugin-info"   },
 		{ "plugin",     "unknown"       }
 	});
 
-	BOOST_TEST(code == plugin_error::not_found);
-	BOOST_TEST(json["error"].get<int>() == plugin_error::not_found);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "plugin-info");
+	BOOST_TEST(json["error"].get<int>() == daemon::plugin_error::not_found);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
 }
 

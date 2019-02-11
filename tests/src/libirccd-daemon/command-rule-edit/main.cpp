@@ -23,26 +23,21 @@
 
 #include <irccd/test/command_fixture.hpp>
 
-using irccd::test::command_fixture;
-
-using irccd::daemon::rule;
-using irccd::daemon::rule_error;
-
 namespace irccd {
 
 namespace {
 
-class rule_edit_fixture : public command_fixture {
+class rule_edit_fixture : public test::command_fixture {
 public:
 	rule_edit_fixture()
 	{
-		bot_.rules().add(rule{
+		bot_.rules().add(daemon::rule{
 			{ "s1", "s2" },
 			{ "c1", "c2" },
 			{ "o1", "o2" },
 			{ "p1", "p2" },
 			{ "onMessage", "onCommand" },
-			rule::action_type::drop
+			daemon::rule::action_type::drop
 		});
 	}
 };
@@ -54,16 +49,18 @@ BOOST_AUTO_TEST_CASE(add_server)
 	request({
 		{ "command",        "rule-edit"     },
 		{ "add-servers",    { "new-s3" }    },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	const auto [json, code] = request({
+	stream_->clear();
+
+	const auto json = request({
 		{ "command",        "rule-info"     },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	BOOST_TEST(!code);
-	BOOST_TEST(json.is_object());
+	BOOST_TEST(json.size() == 7U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-info");
 	BOOST_TEST(json_util::contains(json["servers"], "s1"));
 	BOOST_TEST(json_util::contains(json["servers"], "s2"));
 	BOOST_TEST(json_util::contains(json["servers"], "new-s3"));
@@ -81,16 +78,18 @@ BOOST_AUTO_TEST_CASE(add_channel)
 	request({
 		{ "command",        "rule-edit"     },
 		{ "add-channels",   { "new-c3" }    },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	const auto [json, code] = request({
+	stream_->clear();
+
+	const auto json = request({
 		{ "command",        "rule-info"     },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	BOOST_TEST(!code);
-	BOOST_TEST(json.is_object());
+	BOOST_TEST(json.size() == 7U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-info");
 	BOOST_TEST(json_util::contains(json["servers"], "s1"));
 	BOOST_TEST(json_util::contains(json["servers"], "s2"));
 	BOOST_TEST(json_util::contains(json["channels"], "c1"));
@@ -108,16 +107,18 @@ BOOST_AUTO_TEST_CASE(add_plugin)
 	request({
 		{ "command",        "rule-edit"     },
 		{ "add-plugins",    { "new-p3" }    },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	const auto [json, code] = request({
+	stream_->clear();
+
+	const auto json = request({
 		{ "command",        "rule-info"     },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	BOOST_TEST(!code);
-	BOOST_TEST(json.is_object());
+	BOOST_TEST(json.size() == 7U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-info");
 	BOOST_TEST(json_util::contains(json["servers"], "s1"));
 	BOOST_TEST(json_util::contains(json["servers"], "s2"));
 	BOOST_TEST(json_util::contains(json["channels"], "c1"));
@@ -135,16 +136,18 @@ BOOST_AUTO_TEST_CASE(add_event)
 	request({
 		{ "command",        "rule-edit"     },
 		{ "add-events",     { "onQuery" }   },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	const auto [json, code] = request({
+	stream_->clear();
+
+	const auto json = request({
 		{ "command",        "rule-info"     },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	BOOST_TEST(!code);
-	BOOST_TEST(json.is_object());
+	BOOST_TEST(json.size() == 7U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-info");
 	BOOST_TEST(json_util::contains(json["servers"], "s1"));
 	BOOST_TEST(json_util::contains(json["servers"], "s2"));
 	BOOST_TEST(json_util::contains(json["channels"], "c1"));
@@ -163,16 +166,18 @@ BOOST_AUTO_TEST_CASE(add_event_and_server)
 		{ "command",        "rule-edit"     },
 		{ "add-servers",    { "new-s3" }    },
 		{ "add-events",     { "onQuery" }   },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	const auto [json, code] = request({
+	stream_->clear();
+
+	const auto json = request({
 		{ "command",        "rule-info"     },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	BOOST_TEST(!code);
-	BOOST_TEST(json.is_object());
+	BOOST_TEST(json.size() == 7U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-info");
 	BOOST_TEST(json_util::contains(json["servers"], "s1"));
 	BOOST_TEST(json_util::contains(json["servers"], "s2"));
 	BOOST_TEST(json_util::contains(json["servers"], "new-s3"));
@@ -191,16 +196,18 @@ BOOST_AUTO_TEST_CASE(change_action)
 	request({
 		{ "command",        "rule-edit"     },
 		{ "action",         "accept"        },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	const auto [json, code] = request({
+	stream_->clear();
+
+	const auto json = request({
 		{ "command",        "rule-info"     },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	BOOST_TEST(!code);
-	BOOST_TEST(json.is_object());
+	BOOST_TEST(json.size() == 7U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-info");
 	BOOST_TEST(json_util::contains(json["servers"], "s1"));
 	BOOST_TEST(json_util::contains(json["servers"], "s2"));
 	BOOST_TEST(json_util::contains(json["channels"], "c1"));
@@ -217,16 +224,18 @@ BOOST_AUTO_TEST_CASE(remove_server)
 	request({
 		{ "command",        "rule-edit"     },
 		{ "remove-servers", { "s2" }        },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	const auto [json, code] = request({
+	stream_->clear();
+
+	const auto json = request({
 		{ "command",        "rule-info"     },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	BOOST_TEST(!code);
-	BOOST_TEST(json.is_object());
+	BOOST_TEST(json.size() == 7U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-info");
 	BOOST_TEST(json_util::contains(json["servers"], "s1"));
 	BOOST_TEST(!json_util::contains(json["servers"], "s2"));
 	BOOST_TEST(json_util::contains(json["channels"], "c1"));
@@ -243,16 +252,18 @@ BOOST_AUTO_TEST_CASE(remove_channel)
 	request({
 		{ "command",        "rule-edit"     },
 		{ "remove-channels", { "c2" }       },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	const auto [json, code] = request({
+	stream_->clear();
+
+	const auto json = request({
 		{ "command",        "rule-info"     },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	BOOST_TEST(!code);
-	BOOST_TEST(json.is_object());
+	BOOST_TEST(json.size() == 7U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-info");
 	BOOST_TEST(json_util::contains(json["servers"], "s1"));
 	BOOST_TEST(json_util::contains(json["servers"], "s2"));
 	BOOST_TEST(json_util::contains(json["channels"], "c1"));
@@ -269,16 +280,18 @@ BOOST_AUTO_TEST_CASE(remove_plugin)
 	request({
 		{ "command",        "rule-edit"     },
 		{ "remove-plugins", { "p2" }        },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	const auto [json, code] = request({
+	stream_->clear();
+
+	const auto json = request({
 		{ "command",        "rule-info"     },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	BOOST_TEST(!code);
-	BOOST_TEST(json.is_object());
+	BOOST_TEST(json.size() == 7U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-info");
 	BOOST_TEST(json_util::contains(json["servers"], "s1"));
 	BOOST_TEST(json_util::contains(json["servers"], "s2"));
 	BOOST_TEST(json_util::contains(json["channels"], "c1"));
@@ -295,16 +308,18 @@ BOOST_AUTO_TEST_CASE(remove_event)
 	request({
 		{ "command",        "rule-edit"     },
 		{ "remove-events",  { "onCommand" } },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	const auto [json, code] = request({
+	stream_->clear();
+
+	const auto json = request({
 		{ "command",        "rule-info"     },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	BOOST_TEST(!code);
-	BOOST_TEST(json.is_object());
+	BOOST_TEST(json.size() == 7U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-info");
 	BOOST_TEST(json_util::contains(json["servers"], "s1"));
 	BOOST_TEST(json_util::contains(json["servers"], "s2"));
 	BOOST_TEST(json_util::contains(json["channels"], "c1"));
@@ -322,16 +337,18 @@ BOOST_AUTO_TEST_CASE(remove_event_and_server)
 		{ "command",        "rule-edit"     },
 		{ "remove-servers", { "s2" }        },
 		{ "remove-events",  { "onCommand" } },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	const auto [json, code] = request({
+	stream_->clear();
+
+	const auto json = request({
 		{ "command",        "rule-info"     },
-		{ "index",          0               }
+		{ "index",          0U              }
 	});
 
-	BOOST_TEST(!code);
-	BOOST_TEST(json.is_object());
+	BOOST_TEST(json.size() == 7U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-info");
 	BOOST_TEST(json_util::contains(json["servers"], "s1"));
 	BOOST_TEST(!json_util::contains(json["servers"], "s2"));
 	BOOST_TEST(json_util::contains(json["channels"], "c1"));
@@ -347,53 +364,57 @@ BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_index_1)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "rule-edit" },
 		{ "index",      -100        },
 		{ "action",     "drop"      }
 	});
 
-	BOOST_TEST(code == rule_error::invalid_index);
-	BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-edit");
+	BOOST_TEST(json["error"].get<int>() == daemon::rule_error::invalid_index);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_2)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "rule-edit" },
-		{ "index",      100         },
+		{ "index",      100U        },
 		{ "action",     "drop"      }
 	});
 
-	BOOST_TEST(code == rule_error::invalid_index);
-	BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-edit");
+	BOOST_TEST(json["error"].get<int>() == daemon::rule_error::invalid_index);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_index_3)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "rule-edit" },
 		{ "index",      "notaint"   },
 		{ "action",     "drop"      }
 	});
 
-	BOOST_TEST(code == rule_error::invalid_index);
-	BOOST_TEST(json["error"].get<int>() == rule_error::invalid_index);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-edit");
+	BOOST_TEST(json["error"].get<int>() == daemon::rule_error::invalid_index);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
 BOOST_AUTO_TEST_CASE(invalid_action)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "rule-edit" },
-		{ "index",      0           },
+		{ "index",      0U          },
 		{ "action",     "unknown"   }
 	});
 
-	BOOST_TEST(code == rule_error::invalid_action);
-	BOOST_TEST(json["error"].get<int>() == rule_error::invalid_action);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-edit");
+	BOOST_TEST(json["error"].get<int>() == daemon::rule_error::invalid_action);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 

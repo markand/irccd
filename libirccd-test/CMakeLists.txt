@@ -37,6 +37,8 @@ set(
 	${libirccd-test_SOURCE_DIR}/irccd/test/mock_plugin.hpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/mock_server.cpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/mock_server.hpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/mock_stream.cpp
+	${libirccd-test_SOURCE_DIR}/irccd/test/mock_stream.hpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/test_plugin_loader.cpp
 	${libirccd-test_SOURCE_DIR}/irccd/test/test_plugin_loader.hpp
 )

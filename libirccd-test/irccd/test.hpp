@@ -36,6 +36,7 @@
 #include "test/mock.hpp"
 #include "test/mock_plugin.hpp"
 #include "test/mock_server.hpp"
+#include "test/mock_stream.hpp"
 #include "test/test_plugin_loader.hpp"
 
 #endif // !IRCCD_TEST_HPP

@@ -27,12 +27,12 @@
 #include <irccd/daemon/plugin_service.hpp>
 #include <irccd/daemon/rule_service.hpp>
 #include <irccd/daemon/server_service.hpp>
-
-#include <irccd/ctl/controller.hpp>
+#include <irccd/daemon/transport_client.hpp>
 
 #include "irccd_fixture.hpp"
 #include "mock_server.hpp"
 #include "mock_plugin.hpp"
+#include "mock_stream.hpp"
 
 namespace irccd::test {
 
@@ -45,32 +45,6 @@ namespace irccd::test {
 class command_fixture : public irccd_fixture {
 protected:
 	/**
-	 * \brief Result for request function.
-	 */
-	using result = std::pair<nlohmann::json, std::error_code>;
-
-	/**
-	 * Block for the next message.
-	 *
-	 * \param timer the timer to cancel on completion
-	 * \return the next message
-	 */
-	auto recv(boost::asio::deadline_timer& timer) -> result;
-
-	/**
-	 * Block for the next command with a maximum timeout.
-	 *
-	 * \return the result
-	 * \throw std::runtime_error after 30 seconds
-	 */
-	auto wait_command(const std::string& cmd) -> result;
-
-	/**
-	 * \brief Irccd controller
-	 */
-	std::unique_ptr<ctl::controller> ctl_;
-
-	/**
 	 * \brief Mock server object.
 	 */
 	std::shared_ptr<mock_server> server_;
@@ -81,6 +55,15 @@ protected:
 	std::shared_ptr<mock_plugin> plugin_;
 
 	/**
+	 * \brief The fake transport_client stream.
+	 */
+	std::shared_ptr<mock_stream> stream_;
+	/**
+	 * \brief Client sending request.
+	 */
+	std::shared_ptr<daemon::transport_client> client_;
+
+	/**
 	 * Constructor.
 	 */
 	command_fixture();
@@ -89,9 +72,9 @@ protected:
 	 * Get result from irccd.
 	 *
 	 * \param json the request
-	 * \return the result/error pair
+	 * \return the json message sent (if any)
 	 */
-	auto request(nlohmann::json json) -> result;
+	auto request(nlohmann::json json) -> nlohmann::json;
 };
 
 } // !irccd::test

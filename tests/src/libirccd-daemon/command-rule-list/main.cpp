@@ -23,34 +23,29 @@
 
 #include <irccd/test/command_fixture.hpp>
 
-using irccd::test::command_fixture;
-
-using irccd::daemon::rule;
-using irccd::daemon::rule_error;
-
 namespace irccd {
 
 namespace {
 
-class rule_list_fixture : public command_fixture {
+class rule_list_fixture : public test::command_fixture {
 public:
 	rule_list_fixture()
 	{
-		bot_.rules().add(rule{
+		bot_.rules().add(daemon::rule{
 			{ "s1", "s2" },
 			{ "c1", "c2" },
 			{ "o1", "o2" },
 			{ "p1", "p2" },
 			{ "onMessage", "onCommand" },
-			rule::action_type::drop
+			daemon::rule::action_type::drop
 		});
-		bot_.rules().add(rule{
+		bot_.rules().add(daemon::rule{
 			{ "s1", },
 			{ "c1", },
 			{ "o1", },
 			{ "p1", },
 			{ "onMessage", },
-			rule::action_type::accept
+			daemon::rule::action_type::accept
 		});
 	}
 };
@@ -59,10 +54,10 @@ BOOST_FIXTURE_TEST_SUITE(rule_list_fixture_suite, rule_list_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
-	const auto [json, code] = request({{ "command", "rule-list" }});
+	const auto json = request({{ "command", "rule-list" }});
 
-	BOOST_TEST(!code);
-	BOOST_TEST(json.is_object());
+	BOOST_TEST(json.size() == 2U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-list");
 	BOOST_TEST(json["list"].is_array());
 	BOOST_TEST(json["list"].size() == 2U);
 
@@ -104,10 +99,10 @@ BOOST_AUTO_TEST_CASE(empty)
 	bot_.rules().remove(0);
 	bot_.rules().remove(0);
 
-	const auto [json, code] = request({{ "command", "rule-list" }});
+	const auto json = request({{ "command", "rule-list" }});
 
-	BOOST_TEST(!code);
-	BOOST_TEST(json.is_object());
+	BOOST_TEST(json.size() == 2U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-list");
 	BOOST_TEST(json["list"].is_array());
 	BOOST_TEST(json["list"].empty());
 }

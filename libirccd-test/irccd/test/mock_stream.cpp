@@ -1,5 +1,5 @@
 /*
- * daemon.hpp -- libirccd-daemon convenience header
+ * mock_stream.cpp -- mock stream
  *
  * Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
  *
@@ -16,32 +16,19 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_DAEMON_HPP
-#define IRCCD_DAEMON_HPP
+#include "mock_stream.hpp"
 
-/**
- * \file daemon.hpp
- * \brief libirccd-daemon convenience header.
- */
+namespace irccd::test {
 
-#include "sysconfig.hpp"
+void mock_stream::recv(recv_handler handler)
+{
+	push("recv", {handler});
+}
 
-#include "daemon/bot.hpp"
-#include "daemon/dynlib_plugin.hpp"
-#include "daemon/irc.hpp"
-#include "daemon/logger.hpp"
-#include "daemon/plugin.hpp"
-#include "daemon/plugin_service.hpp"
-#include "daemon/rule.hpp"
-#include "daemon/rule_service.hpp"
-#include "daemon/rule_util.hpp"
-#include "daemon/server.hpp"
-#include "daemon/server_service.hpp"
-#include "daemon/server_util.hpp"
-#include "daemon/transport_client.hpp"
-#include "daemon/transport_command.hpp"
-#include "daemon/transport_server.hpp"
-#include "daemon/transport_service.hpp"
-#include "daemon/transport_util.hpp"
+void mock_stream::send(const nlohmann::json& json, send_handler handler)
+{
+	push("send", {json.dump(0), handler});
+	handler({});
+}
 
-#endif // !IRCCD_DAEMON_HPP
+} // !irccd::test

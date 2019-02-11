@@ -21,24 +21,18 @@
 
 #include <irccd/test/command_fixture.hpp>
 
-using irccd::test::command_fixture;
-using irccd::test::mock_server;
-
-using irccd::daemon::server;
-using irccd::daemon::server_error;
-
 namespace irccd {
 
 namespace {
 
-class server_disconnect_fixture : public command_fixture {
+class server_disconnect_fixture : public test::command_fixture {
 protected:
-	std::shared_ptr<mock_server> s1_;
-	std::shared_ptr<mock_server> s2_;
+	std::shared_ptr<test::mock_server> s1_;
+	std::shared_ptr<test::mock_server> s2_;
 
 	server_disconnect_fixture()
-		: s1_(new mock_server(ctx_, "s1", "localhost"))
-		, s2_(new mock_server(ctx_, "s2", "localhost"))
+		: s1_(new test::mock_server(ctx_, "s1", "localhost"))
+		, s2_(new test::mock_server(ctx_, "s2", "localhost"))
 	{
 		bot_.servers().add(s1_);
 		bot_.servers().add(s2_);
@@ -49,12 +43,12 @@ BOOST_FIXTURE_TEST_SUITE(server_disconnect_fixture_suite, server_disconnect_fixt
 
 BOOST_AUTO_TEST_CASE(one)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "server-disconnect"     },
 		{ "server",     "s1"                    }
 	});
 
-	BOOST_TEST(!code);
+	BOOST_TEST(json.size() == 1U);
 	BOOST_TEST(json["command"].get<std::string>() == "server-disconnect");
 	BOOST_TEST(s1_->find("disconnect").size() == 1U);
 	BOOST_TEST(!bot_.servers().has("s1"));
@@ -63,9 +57,9 @@ BOOST_AUTO_TEST_CASE(one)
 
 BOOST_AUTO_TEST_CASE(all)
 {
-	const auto [json, code] = request({{ "command", "server-disconnect" }});
+	const auto json = request({{ "command", "server-disconnect" }});
 
-	BOOST_TEST(!code);
+	BOOST_TEST(json.size() == 1U);
 	BOOST_TEST(json["command"].get<std::string>() == "server-disconnect");
 	BOOST_TEST(s1_->find("disconnect").size() == 1U);
 	BOOST_TEST(s2_->find("disconnect").size() == 1U);
@@ -77,25 +71,27 @@ BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_identifier)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "server-disconnect"     },
 		{ "server",     123456                  }
 	});
 
-	BOOST_TEST(code == server_error::invalid_identifier);
-	BOOST_TEST(json["error"].get<int>() == server_error::invalid_identifier);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "server-disconnect");
+	BOOST_TEST(json["error"].get<int>() == daemon::server_error::invalid_identifier);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 
 BOOST_AUTO_TEST_CASE(not_found)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "server-disconnect"     },
 		{ "server",     "unknown"               }
 	});
 
-	BOOST_TEST(code == server_error::not_found);
-	BOOST_TEST(json["error"].get<int>() == server_error::not_found);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "server-disconnect");
+	BOOST_TEST(json["error"].get<int>() == daemon::server_error::not_found);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "server");
 }
 

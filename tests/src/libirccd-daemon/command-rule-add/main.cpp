@@ -23,15 +23,11 @@
 
 #include <irccd/test/command_fixture.hpp>
 
-using irccd::test::command_fixture;
-
-using irccd::daemon::rule_error;
-
 namespace irccd {
 
 namespace {
 
-BOOST_FIXTURE_TEST_SUITE(rule_add_fixture_suite, command_fixture)
+BOOST_FIXTURE_TEST_SUITE(rule_add_fixture_suite, test::command_fixture)
 
 BOOST_AUTO_TEST_CASE(basic)
 {
@@ -42,15 +38,17 @@ BOOST_AUTO_TEST_CASE(basic)
 		{ "plugins",    { "p1", "p2" }      },
 		{ "events",     { "onMessage" }     },
 		{ "action",     "accept"            },
-		{ "index",      0                   }
+		{ "index",      0U                  }
 	});
 
-	const auto [json, code] = request({
+	stream_->clear();
+
+	const auto json = request({
 		{ "command", "rule-list" }
 	});
 
-	BOOST_TEST(!code);
-	BOOST_TEST(json.is_object());
+	BOOST_TEST(json.size() == 2U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-list");
 
 	auto servers = json["list"][0]["servers"];
 	auto channels = json["list"][0]["channels"];
@@ -76,7 +74,7 @@ BOOST_AUTO_TEST_CASE(append)
 		{ "plugins",    { "p1" }            },
 		{ "events",     { "onMessage" }     },
 		{ "action",     "accept"            },
-		{ "index",      0                   }
+		{ "index",      0U                  }
 	});
 
 	request({
@@ -86,15 +84,17 @@ BOOST_AUTO_TEST_CASE(append)
 		{ "plugins",    { "p2" }            },
 		{ "events",     { "onMessage" }     },
 		{ "action",     "drop"              },
-		{ "index",      1                   }
+		{ "index",      1U                  }
 	});
 
-	const auto [json, code] = request({
+	stream_->clear();
+
+	const auto json = request({
 		{ "command", "rule-list" }
 	});
 
-	BOOST_TEST(!code);
-	BOOST_TEST(json.is_object());
+	BOOST_TEST(json.size() == 2U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-list");
 	BOOST_TEST(json["list"].size() == 2U);
 
 	// Rule 0.
@@ -130,13 +130,14 @@ BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_action)
 {
-	const auto [json, code] = request({
+	const auto json = request({
 		{ "command",    "rule-add"  },
 		{ "action",     "unknown"   }
 	});
 
-	BOOST_TEST(code == rule_error::invalid_action);
-	BOOST_TEST(json["error"].get<int>() == rule_error::invalid_action);
+	BOOST_TEST(json.size() == 4U);
+	BOOST_TEST(json["command"].get<std::string>() == "rule-add");
+	BOOST_TEST(json["error"].get<int>() == daemon::rule_error::invalid_action);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "rule");
 }
 
