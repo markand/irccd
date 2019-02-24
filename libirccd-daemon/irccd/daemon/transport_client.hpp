@@ -45,6 +45,11 @@ class transport_server;
 class transport_client : public std::enable_shared_from_this<transport_client> {
 public:
 	/**
+	 * Handler for handshaking.
+	 */
+	using handshake_handler = std::function<void (std::error_code)>;
+
+	/**
 	 * Client state.
 	 */
 	enum class state {
@@ -59,6 +64,7 @@ private:
 	std::shared_ptr<stream> stream_;
 	std::deque<std::pair<nlohmann::json, stream::send_handler>> queue_;
 
+	void auth(handshake_handler);
 	void flush();
 	void erase();
 
@@ -86,6 +92,14 @@ public:
 	 * \param state the new state
 	 */
 	void set_state(state state) noexcept;
+
+	/**
+	 * Do greetings and authentication if required.
+	 *
+	 * This function should be called after a new client has been accepted
+	 * by a transport_server.
+	 */
+	void handshake(handshake_handler);
 
 	/**
 	 * Start receiving if not closed.

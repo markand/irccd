@@ -20,10 +20,48 @@
 
 #include <cassert>
 
+#include <irccd/json_util.hpp>
+
+#include "bot.hpp"
 #include "transport_client.hpp"
 #include "transport_server.hpp"
 
 namespace irccd::daemon {
+
+void transport_client::auth(handshake_handler handler)
+{
+	assert(handler);
+
+	const auto self = shared_from_this();
+
+	read([this, self, handler] (auto code, auto message) {
+		auto parent = parent_.lock();
+
+		if (code) {
+			handler(std::move(code));
+			return;
+		}
+
+		const json_util::deserializer doc(message);
+		const auto command = doc.get<std::string>("command");
+		const auto password = doc.get<std::string>("password");
+
+		if (!command || *command != "auth") {
+			code = bot_error::auth_required;
+			error(bot_error::auth_required);
+		} else if (!password || *password != parent->get_password()) {
+			code = bot_error::invalid_auth;
+			error(bot_error::invalid_auth);
+		} else {
+			code = bot_error::no_error;
+			state_ = state::ready;
+			success("auth");
+			parent->get_clients().insert(self);
+		}
+
+		handler(std::move(code));
+	});
+}
 
 void transport_client::flush()
 {
@@ -69,6 +107,46 @@ auto transport_client::get_state() const noexcept -> state
 void transport_client::set_state(state state) noexcept
 {
 	state_ = state;
+}
+
+void transport_client::handshake(handshake_handler handler)
+{
+	assert(handler);
+
+	const auto greetings = nlohmann::json({
+		{ "program",    "irccd"                 },
+		{ "major",      IRCCD_VERSION_MAJOR     },
+		{ "minor",      IRCCD_VERSION_MINOR     },
+		{ "patch",      IRCCD_VERSION_PATCH     },
+#if defined(IRCCD_HAVE_JS)
+		{ "javascript", true                    },
+#endif
+#if defined(IRCCD_HAVE_SSL)
+		{ "ssl",        true                    },
+#endif
+	});
+
+	const auto self = shared_from_this();
+
+	write(greetings, [this, self, handler] (auto code) {
+		auto parent = parent_.lock();
+
+		if (!parent)
+			return;
+
+		if (code) {
+			handler(std::move(code));
+			return;
+		}
+
+		if (!parent->get_password().empty())
+			auth(std::move(handler));
+		else {
+			state_ = state::ready;
+			parent->get_clients().insert(self);
+			handler(std::move(code));
+		}
+	});
 }
 
 void transport_client::read(stream::recv_handler handler)

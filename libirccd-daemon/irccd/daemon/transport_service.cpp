@@ -32,7 +32,7 @@
 
 namespace irccd::daemon {
 
-void transport_service::handle_command(std::shared_ptr<transport_client> tc, const nlohmann::json& object)
+void transport_service::handle_command(std::shared_ptr<transport_client> client, const nlohmann::json& object)
 {
 	assert(object.is_object());
 
@@ -40,7 +40,7 @@ void transport_service::handle_command(std::shared_ptr<transport_client> tc, con
 	const auto name = doc.get<std::string>("command");
 
 	if (!name) {
-		tc->error(bot_error::invalid_message);
+		client->error(bot_error::invalid_message);
 		return;
 	}
 
@@ -49,12 +49,12 @@ void transport_service::handle_command(std::shared_ptr<transport_client> tc, con
 	});
 
 	if (cmd == commands_.end())
-		tc->error(bot_error::invalid_command, *name);
+		client->error(bot_error::invalid_command, *name);
 	else {
 		try {
-			(*cmd)->exec(bot_, *tc, doc);
+			(*cmd)->exec(bot_, *client, doc);
 		} catch (const std::system_error& ex) {
-			tc->error(ex.code(), (*cmd)->get_name());
+			client->error(ex.code(), (*cmd)->get_name());
 		} catch (const std::exception& ex) {
 			bot_.get_log().warning("transport", "")
 				<< "unknown error not reported: "
@@ -63,23 +63,23 @@ void transport_service::handle_command(std::shared_ptr<transport_client> tc, con
 	}
 }
 
-void transport_service::do_recv(std::shared_ptr<transport_client> tc)
+void transport_service::recv(std::shared_ptr<transport_client> client)
 {
-	tc->read([this, tc] (auto code, auto json) {
+	client->read([this, client] (auto code, auto json) {
 		switch (static_cast<std::errc>(code.value())) {
 		case std::errc::not_connected:
 			bot_.get_log().info("transport", "") << "client disconnected" << std::endl;
 			break;
 		case std::errc::invalid_argument:
-			tc->error(bot_error::invalid_message);
+			client->error(bot_error::invalid_message);
 			break;
 		default:
 			// Other errors.
 			if (!code) {
-				handle_command(tc, json);
+				handle_command(client, json);
 
-				if (tc->get_state() == transport_client::state::ready)
-					do_recv(std::move(tc));
+				if (client->get_state() == transport_client::state::ready)
+					recv(std::move(client));
 			}
 
 			break;
@@ -87,12 +87,25 @@ void transport_service::do_recv(std::shared_ptr<transport_client> tc)
 	});
 }
 
-void transport_service::do_accept(transport_server& ts)
+void transport_service::handshake(std::shared_ptr<transport_client> client)
+{
+	client->handshake([this, client] (auto code) {
+		if (code)
+			bot_.get_log().warning("transport", "")
+				<< "error while handshaking: " << code.message() << std::endl;
+		else {
+			bot_.get_log().info("transport", "") << "client ready" << std::endl;
+			recv(std::move(client));
+		}
+	});
+}
+
+void transport_service::accept(transport_server& ts)
 {
 	ts.accept([this, &ts] (auto code, auto client) {
 		if (!code) {
-			do_accept(ts);
-			do_recv(std::move(client));
+			accept(ts);
+			handshake(std::move(client));
 
 			bot_.get_log().info("transport", "") << "new client connected" << std::endl;
 		}
@@ -120,7 +133,7 @@ void transport_service::add(std::shared_ptr<transport_server> ts)
 {
 	assert(ts);
 
-	do_accept(*ts);
+	accept(*ts);
 	servers_.push_back(std::move(ts));
 }
 

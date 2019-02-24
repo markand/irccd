@@ -21,79 +21,10 @@
 #include <cassert>
 #include <system_error>
 
-#include <irccd/json_util.hpp>
-
-#include "bot.hpp"
 #include "transport_client.hpp"
 #include "transport_server.hpp"
 
 namespace irccd::daemon {
-
-void transport_server::do_auth(std::shared_ptr<transport_client> client, accept_handler handler)
-{
-	assert(client);
-	assert(handler);
-
-	client->read([this, client, handler] (auto code, auto message) {
-		if (code) {
-			handler(std::move(code), std::move(client));
-			return;
-		}
-
-		const json_util::deserializer doc(message);
-		const auto command = doc.get<std::string>("command");
-		const auto password = doc.get<std::string>("password");
-
-		if (!command || *command != "auth") {
-			client->error(bot_error::auth_required);
-			code = bot_error::auth_required;
-		} else if (!password || *password != password_) {
-			client->error(bot_error::invalid_auth);
-			code = bot_error::invalid_auth;
-		} else {
-			clients_.insert(client);
-			client->set_state(transport_client::state::ready);
-			client->success("auth");
-			code = bot_error::no_error;
-		}
-
-		handler(std::move(code), std::move(client));
-	});
-}
-
-void transport_server::do_greetings(std::shared_ptr<transport_client> client, accept_handler handler)
-{
-	assert(client);
-	assert(handler);
-
-	const auto greetings = nlohmann::json({
-		{ "program",    "irccd"                 },
-		{ "major",      IRCCD_VERSION_MAJOR     },
-		{ "minor",      IRCCD_VERSION_MINOR     },
-		{ "patch",      IRCCD_VERSION_PATCH     },
-#if defined(IRCCD_HAVE_JS)
-		{ "javascript", true                    },
-#endif
-#if defined(IRCCD_HAVE_SSL)
-		{ "ssl",        true                    },
-#endif
-	});
-
-	client->write(greetings, [this, client, handler] (auto code) {
-		if (code) {
-			handler(std::move(code), std::move(client));
-			return;
-		}
-
-		if (!password_.empty())
-			do_auth(std::move(client), std::move(handler));
-		else {
-			clients_.insert(client);
-			client->set_state(transport_client::state::ready);
-			handler(std::move(code), std::move(client));
-		}
-	});
-}
 
 transport_server::transport_server(std::unique_ptr<acceptor> acceptor) noexcept
 	: acceptor_(std::move(acceptor))
@@ -124,15 +55,10 @@ void transport_server::set_password(std::string password) noexcept
 void transport_server::accept(accept_handler handler)
 {
 	acceptor_->accept([this, handler] (auto code, auto stream) {
-		if (code) {
+		if (code)
 			handler(code, nullptr);
-			return;
-		}
-
-		do_greetings(
-			std::make_shared<transport_client>(shared_from_this(), std::move(stream)),
-			std::move(handler)
-		);
+		else
+			handler(code, std::make_shared<transport_client>(shared_from_this(), std::move(stream)));
 	});
 }
 
