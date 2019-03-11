@@ -300,11 +300,14 @@ auto server::dispatch_privmsg(const irc::message& msg, const recv_handler& handl
 	assert(msg.command == "PRIVMSG");
 
 	if (msg.is_ctcp(1)) {
-		auto cmd = msg.ctcp(1);
+		const auto cmd = msg.ctcp(1);
 
 		if (cmd.compare(0, 6, "ACTION") == 0)
 			handler({}, me_event{shared_from_this(), msg.prefix, msg.get(0), cmd.substr(7)});
-		else
+		else if (cmd.compare(0, 7, "VERSION") == 0 && !ctcpversion_.empty()) {
+			send(str(format("NOTICE %s :\x01VERSION %s\x01") % msg.prefix % ctcpversion_));
+			return false;
+		} else
 			return false;
 	} else
 		handler({}, message_event{shared_from_this(), msg.prefix, msg.get(0), msg.get(1)});
