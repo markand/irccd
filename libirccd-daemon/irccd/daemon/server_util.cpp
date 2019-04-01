@@ -88,8 +88,18 @@ void from_config_load_flags(server& sv, const ini::section& sc)
 	const auto ipv4 = sc.find("ipv4");
 	const auto ipv6 = sc.find("ipv6");
 
+#if defined(IRCCD_HAVE_SSL)
 	if (ssl != sc.end())
 		toggle(sv, server::options::ssl, string_util::is_boolean(ssl->get_value()));
+#else
+	if (ssl != sc.end()) {
+		if (string_util::is_boolean(ssl->get_value()))
+			throw server_error(server_error::ssl_disabled);
+		else
+			sv.set_options(sv.get_options() & server::options::ssl);
+	}
+#endif
+
 	if (auto_rejoin != sc.end())
 		toggle(sv, server::options::auto_rejoin, string_util::is_boolean(auto_rejoin->get_value()));
 	if (auto_reconnect != sc.end())
@@ -186,11 +196,12 @@ void from_json_load_options(server& sv, const deserializer& parser)
 		toggle(sv, server::options::auto_rejoin, *auto_rejoin);
 	if (join_invite)
 		toggle(sv, server::options::join_invite, *join_invite);
+
+#if defined(IRCCD_HAVE_SSL)
 	if (ssl)
 		toggle(sv, server::options::ssl, *ssl);
-
-#if !defined(IRCCD_HAVE_SSL)
-	if ((sv.get_options() & server::options::ssl) == server::options::ssl)
+#else
+	if (ssl && *ssl)
 		throw server_error(server_error::ssl_disabled);
 #endif
 
