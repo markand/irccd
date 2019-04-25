@@ -24,7 +24,7 @@ js_fixture::js_fixture(const std::string& path)
 	: plugin_(new js::plugin("test", path))
 {
 	for (const auto& f : js::api::registry())
-		f()->load(bot_, plugin_);
+		f()->load(bot_, *plugin_);
 
 	if (!path.empty())
 		plugin_->open();

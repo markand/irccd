@@ -295,22 +295,22 @@ auto timer_api::get_name() const noexcept -> std::string_view
 	return "Irccd.Timer";
 }
 
-void timer_api::load(bot&, std::shared_ptr<plugin> plugin)
+void timer_api::load(bot&, plugin& plugin)
 {
-	duk::stack_guard sa(plugin->get_context());
+	duk::stack_guard sa(plugin.get_context());
 
-	duk_get_global_string(plugin->get_context(), "Irccd");
-	duk_push_c_function(plugin->get_context(), Timer_constructor, 3);
-	duk_put_number_list(plugin->get_context(), -1, constants);
-	duk_push_object(plugin->get_context());
-	duk_put_function_list(plugin->get_context(), -1, methods);
-	duk_put_prop_string(plugin->get_context(), -2, "prototype");
-	duk_put_prop_string(plugin->get_context(), -2, "Timer");
-	duk_pop(plugin->get_context());
-	duk_push_global_stash(plugin->get_context());
-	duk_push_object(plugin->get_context());
-	duk_put_prop_string(plugin->get_context(), -2, table.data());
-	duk_pop(plugin->get_context());
+	duk_get_global_string(plugin.get_context(), "Irccd");
+	duk_push_c_function(plugin.get_context(), Timer_constructor, 3);
+	duk_put_number_list(plugin.get_context(), -1, constants);
+	duk_push_object(plugin.get_context());
+	duk_put_function_list(plugin.get_context(), -1, methods);
+	duk_put_prop_string(plugin.get_context(), -2, "prototype");
+	duk_put_prop_string(plugin.get_context(), -2, "Timer");
+	duk_pop(plugin.get_context());
+	duk_push_global_stash(plugin.get_context());
+	duk_push_object(plugin.get_context());
+	duk_put_prop_string(plugin.get_context(), -2, table.data());
+	duk_pop(plugin.get_context());
 }
 
 } // !irccd::js

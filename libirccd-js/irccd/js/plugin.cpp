@@ -357,7 +357,7 @@ auto plugin_loader::open(std::string_view id, std::string_view path) -> std::sha
 	auto plg = std::make_shared<plugin>(std::string(id), std::string(path));
 
 	for (const auto& mod : modules_)
-		mod->load(bot_, plg);
+		mod->load(bot_, *plg);
 
 	plg->open();
 

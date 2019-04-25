@@ -135,15 +135,15 @@ auto logger_api::get_name() const noexcept -> std::string_view
 	return "Irccd.Logger";
 }
 
-void logger_api::load(bot&, std::shared_ptr<plugin> plugin)
+void logger_api::load(bot&, plugin& plugin)
 {
-	duk::stack_guard sa(plugin->get_context());
+	duk::stack_guard sa(plugin.get_context());
 
-	duk_get_global_string(plugin->get_context(), "Irccd");
-	duk_push_object(plugin->get_context());
-	duk_put_function_list(plugin->get_context(), -1, functions);
-	duk_put_prop_string(plugin->get_context(), -2, "Logger");
-	duk_pop(plugin->get_context());
+	duk_get_global_string(plugin.get_context(), "Irccd");
+	duk_push_object(plugin.get_context());
+	duk_put_function_list(plugin.get_context(), -1, functions);
+	duk_put_prop_string(plugin.get_context(), -2, "Logger");
+	duk_pop(plugin.get_context());
 }
 
 } // !irccd::js

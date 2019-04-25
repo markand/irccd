@@ -82,7 +82,7 @@ public:
 	 * \param bot the irccd instance
 	 * \param plugin the plugin
 	 */
-	virtual void load(daemon::bot& bot, std::shared_ptr<plugin> plugin) = 0;
+	virtual void load(daemon::bot& bot, js::plugin& plugin) = 0;
 };
 
 } // !js

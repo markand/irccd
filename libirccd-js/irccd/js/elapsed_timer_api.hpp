@@ -42,7 +42,7 @@ public:
 	/**
 	 * \copydoc api::load
 	 */
-	void load(daemon::bot& bot, std::shared_ptr<plugin> plugin) override;
+	void load(daemon::bot& bot, js::plugin& plugin) override;
 };
 
 } // !irccd::js

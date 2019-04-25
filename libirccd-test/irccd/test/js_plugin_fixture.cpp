@@ -58,7 +58,7 @@ js_plugin_fixture::js_plugin_fixture(std::string path)
 	server_->clear();
 
 	for (const auto& f : js::api::registry())
-		f()->load(bot_, plugin_);
+		f()->load(bot_, *plugin_);
 
 	plugin_->open();
 }

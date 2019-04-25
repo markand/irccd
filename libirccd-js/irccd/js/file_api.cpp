@@ -683,23 +683,23 @@ auto file_api::get_name() const noexcept -> std::string_view
 	return "Irccd.File";
 }
 
-void file_api::load(bot&, std::shared_ptr<plugin> plugin)
+void file_api::load(bot&, plugin& plugin)
 {
-	duk::stack_guard sa(plugin->get_context());
+	duk::stack_guard sa(plugin.get_context());
 
-	duk_get_global_string(plugin->get_context(), "Irccd");
-	duk_push_c_function(plugin->get_context(), File_constructor, 2);
-	duk_put_number_list(plugin->get_context(), -1, constants);
-	duk_put_function_list(plugin->get_context(), -1, functions);
-	duk_push_object(plugin->get_context());
-	duk_put_function_list(plugin->get_context(), -1, methods);
-	duk_push_c_function(plugin->get_context(), File_destructor, 1);
-	duk_set_finalizer(plugin->get_context(), -2);
-	duk_dup(plugin->get_context(), -1);
-	duk_put_global_string(plugin->get_context(), prototype.data());
-	duk_put_prop_string(plugin->get_context(), -2, "prototype");
-	duk_put_prop_string(plugin->get_context(), -2, "File");
-	duk_pop(plugin->get_context());
+	duk_get_global_string(plugin.get_context(), "Irccd");
+	duk_push_c_function(plugin.get_context(), File_constructor, 2);
+	duk_put_number_list(plugin.get_context(), -1, constants);
+	duk_put_function_list(plugin.get_context(), -1, functions);
+	duk_push_object(plugin.get_context());
+	duk_put_function_list(plugin.get_context(), -1, methods);
+	duk_push_c_function(plugin.get_context(), File_destructor, 1);
+	duk_set_finalizer(plugin.get_context(), -2);
+	duk_dup(plugin.get_context(), -1);
+	duk_put_global_string(plugin.get_context(), prototype.data());
+	duk_put_prop_string(plugin.get_context(), -2, "prototype");
+	duk_put_prop_string(plugin.get_context(), -2, "File");
+	duk_pop(plugin.get_context());
 }
 
 // }}}

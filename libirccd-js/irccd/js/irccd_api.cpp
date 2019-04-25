@@ -190,46 +190,46 @@ auto irccd_api::get_name() const noexcept -> std::string_view
 	return "Irccd";
 }
 
-void irccd_api::load(bot& bot, std::shared_ptr<plugin> plugin)
+void irccd_api::load(bot& bot, plugin& plugin)
 {
-	duk::stack_guard sa(plugin->get_context());
+	duk::stack_guard sa(plugin.get_context());
 
 	// irccd.
-	duk_push_object(plugin->get_context());
+	duk_push_object(plugin.get_context());
 
 	// Version.
-	duk_push_object(plugin->get_context());
-	duk::push(plugin->get_context(), IRCCD_VERSION_MAJOR);
-	duk_put_prop_string(plugin->get_context(), -2, "major");
-	duk::push(plugin->get_context(), IRCCD_VERSION_MINOR);
-	duk_put_prop_string(plugin->get_context(), -2, "minor");
-	duk::push(plugin->get_context(), IRCCD_VERSION_PATCH);
-	duk_put_prop_string(plugin->get_context(), -2, "patch");
-	duk_put_prop_string(plugin->get_context(), -2, "version");
+	duk_push_object(plugin.get_context());
+	duk::push(plugin.get_context(), IRCCD_VERSION_MAJOR);
+	duk_put_prop_string(plugin.get_context(), -2, "major");
+	duk::push(plugin.get_context(), IRCCD_VERSION_MINOR);
+	duk_put_prop_string(plugin.get_context(), -2, "minor");
+	duk::push(plugin.get_context(), IRCCD_VERSION_PATCH);
+	duk_put_prop_string(plugin.get_context(), -2, "patch");
+	duk_put_prop_string(plugin.get_context(), -2, "version");
 
 	// Create the system_error that inherits from Error.
-	duk_push_c_function(plugin->get_context(), SystemError_constructor, 2);
+	duk_push_c_function(plugin.get_context(), SystemError_constructor, 2);
 
 	// Put errno codes into the irccd.system_error object.
 	for (const auto& [k, v] : errors) {
-		duk_push_int(plugin->get_context(), v);
-		duk_put_prop_string(plugin->get_context(), -2, k.c_str());
+		duk_push_int(plugin.get_context(), v);
+		duk_put_prop_string(plugin.get_context(), -2, k.c_str());
 	}
 
-	duk_push_object(plugin->get_context());
-	duk_get_global_string(plugin->get_context(), "Error");
-	duk_get_prop_string(plugin->get_context(), -1, "prototype");
-	duk_remove(plugin->get_context(), -2);
-	duk_set_prototype(plugin->get_context(), -2);
-	duk_put_prop_string(plugin->get_context(), -2, "prototype");
-	duk_put_prop_string(plugin->get_context(), -2, "SystemError");
+	duk_push_object(plugin.get_context());
+	duk_get_global_string(plugin.get_context(), "Error");
+	duk_get_prop_string(plugin.get_context(), -1, "prototype");
+	duk_remove(plugin.get_context(), -2);
+	duk_set_prototype(plugin.get_context(), -2);
+	duk_put_prop_string(plugin.get_context(), -2, "prototype");
+	duk_put_prop_string(plugin.get_context(), -2, "SystemError");
 
 	// Set irccd as global.
-	duk_put_global_string(plugin->get_context(), "Irccd");
+	duk_put_global_string(plugin.get_context(), "Irccd");
 
 	// Store global instance.
-	duk_push_pointer(plugin->get_context(), &bot);
-	duk_put_global_string(plugin->get_context(), DUK_HIDDEN_SYMBOL("irccd-ref"));
+	duk_push_pointer(plugin.get_context(), &bot);
+	duk_put_global_string(plugin.get_context(), DUK_HIDDEN_SYMBOL("irccd-ref"));
 }
 
 auto duk::type_traits<bot>::self(duk_context *ctx) -> bot&

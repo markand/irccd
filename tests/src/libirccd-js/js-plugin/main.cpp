@@ -44,7 +44,7 @@ protected:
 		plugin_ = std::make_unique<plugin>("test", path);
 
 		for (const auto& f : api::registry())
-			f()->load(bot_, plugin_);
+			f()->load(bot_, *plugin_);
 
 		plugin_->open();
 	}

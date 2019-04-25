@@ -385,48 +385,48 @@ auto plugin_api::get_name() const noexcept -> std::string_view
 	return "Irccd.Plugin";
 }
 
-void plugin_api::load(bot&, std::shared_ptr<plugin> plugin)
+void plugin_api::load(bot&, plugin& plugin)
 {
-	duk::stack_guard sa(plugin->get_context());
+	duk::stack_guard sa(plugin.get_context());
 
 	// Store plugin.
-	duk_push_pointer(plugin->get_context(), plugin.get());
-	duk_put_global_string(plugin->get_context(), signature.data());
+	duk_push_pointer(plugin.get_context(), &plugin);
+	duk_put_global_string(plugin.get_context(), signature.data());
 
-	duk_get_global_string(plugin->get_context(), "Irccd");
-	duk_push_object(plugin->get_context());
-	duk_put_function_list(plugin->get_context(), -1, functions);
+	duk_get_global_string(plugin.get_context(), "Irccd");
+	duk_push_object(plugin.get_context());
+	duk_put_function_list(plugin.get_context(), -1, functions);
 
 	// 'config' property.
-	duk_push_string(plugin->get_context(), "config");
-	duk_push_c_function(plugin->get_context(), get_config, 0);
-	duk_push_c_function(plugin->get_context(), set_config, 1);
-	duk_def_prop(plugin->get_context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
+	duk_push_string(plugin.get_context(), "config");
+	duk_push_c_function(plugin.get_context(), get_config, 0);
+	duk_push_c_function(plugin.get_context(), set_config, 1);
+	duk_def_prop(plugin.get_context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
 
 	// 'format' property.
-	duk_push_string(plugin->get_context(), "format");
-	duk_push_c_function(plugin->get_context(), get_format, 0);
-	duk_push_c_function(plugin->get_context(), set_format, 1);
-	duk_def_prop(plugin->get_context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
+	duk_push_string(plugin.get_context(), "format");
+	duk_push_c_function(plugin.get_context(), get_format, 0);
+	duk_push_c_function(plugin.get_context(), set_format, 1);
+	duk_def_prop(plugin.get_context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
 
 	// 'format' property.
-	duk_push_string(plugin->get_context(), "paths");
-	duk_push_c_function(plugin->get_context(), get_paths, 0);
-	duk_push_c_function(plugin->get_context(), set_paths, 1);
-	duk_def_prop(plugin->get_context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
+	duk_push_string(plugin.get_context(), "paths");
+	duk_push_c_function(plugin.get_context(), get_paths, 0);
+	duk_push_c_function(plugin.get_context(), set_paths, 1);
+	duk_def_prop(plugin.get_context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
 
 	// PluginError function.
-	duk_push_c_function(plugin->get_context(), PluginError_constructor, 2);
-	duk_push_object(plugin->get_context());
-	duk_get_global_string(plugin->get_context(), "Error");
-	duk_get_prop_string(plugin->get_context(), -1, "prototype");
-	duk_remove(plugin->get_context(), -2);
-	duk_set_prototype(plugin->get_context(), -2);
-	duk_put_prop_string(plugin->get_context(), -2, "prototype");
-	duk_put_prop_string(plugin->get_context(), -2, "PluginError");
+	duk_push_c_function(plugin.get_context(), PluginError_constructor, 2);
+	duk_push_object(plugin.get_context());
+	duk_get_global_string(plugin.get_context(), "Error");
+	duk_get_prop_string(plugin.get_context(), -1, "prototype");
+	duk_remove(plugin.get_context(), -2);
+	duk_set_prototype(plugin.get_context(), -2);
+	duk_put_prop_string(plugin.get_context(), -2, "prototype");
+	duk_put_prop_string(plugin.get_context(), -2, "PluginError");
 
-	duk_put_prop_string(plugin->get_context(), -2, "Plugin");
-	duk_pop(plugin->get_context());
+	duk_put_prop_string(plugin.get_context(), -2, "Plugin");
+	duk_pop(plugin.get_context());
 }
 
 namespace duk {

@@ -821,34 +821,34 @@ auto server_api::get_name() const noexcept -> std::string_view
 	return "Irccd.Server";
 }
 
-void server_api::load(bot&, std::shared_ptr<plugin> plugin)
+void server_api::load(bot&, plugin& plugin)
 {
-	duk::stack_guard sa(plugin->get_context());
+	duk::stack_guard sa(plugin.get_context());
 
-	duk_get_global_string(plugin->get_context(), "Irccd");
+	duk_get_global_string(plugin.get_context(), "Irccd");
 
 	// ServerError function.
-	duk_push_c_function(plugin->get_context(), ServerError_constructor, 2);
-	duk_push_object(plugin->get_context());
-	duk_get_global_string(plugin->get_context(), "Error");
-	duk_get_prop_string(plugin->get_context(), -1, "prototype");
-	duk_remove(plugin->get_context(), -2);
-	duk_set_prototype(plugin->get_context(), -2);
-	duk_put_prop_string(plugin->get_context(), -2, "prototype");
-	duk_put_prop_string(plugin->get_context(), -2, "ServerError");
+	duk_push_c_function(plugin.get_context(), ServerError_constructor, 2);
+	duk_push_object(plugin.get_context());
+	duk_get_global_string(plugin.get_context(), "Error");
+	duk_get_prop_string(plugin.get_context(), -1, "prototype");
+	duk_remove(plugin.get_context(), -2);
+	duk_set_prototype(plugin.get_context(), -2);
+	duk_put_prop_string(plugin.get_context(), -2, "prototype");
+	duk_put_prop_string(plugin.get_context(), -2, "ServerError");
 
 	// Server constructor.
-	duk_push_c_function(plugin->get_context(), Server_constructor, 1);
-	duk_put_function_list(plugin->get_context(), -1, functions);
-	duk_push_object(plugin->get_context());
-	duk_put_function_list(plugin->get_context(), -1, methods);
-	duk_push_c_function(plugin->get_context(), Server_destructor, 1);
-	duk_set_finalizer(plugin->get_context(), -2);
-	duk_dup_top(plugin->get_context());
-	duk_put_global_string(plugin->get_context(), prototype.data());
-	duk_put_prop_string(plugin->get_context(), -2, "prototype");
-	duk_put_prop_string(plugin->get_context(), -2, "Server");
-	duk_pop(plugin->get_context());
+	duk_push_c_function(plugin.get_context(), Server_constructor, 1);
+	duk_put_function_list(plugin.get_context(), -1, functions);
+	duk_push_object(plugin.get_context());
+	duk_put_function_list(plugin.get_context(), -1, methods);
+	duk_push_c_function(plugin.get_context(), Server_destructor, 1);
+	duk_set_finalizer(plugin.get_context(), -2);
+	duk_dup_top(plugin.get_context());
+	duk_put_global_string(plugin.get_context(), prototype.data());
+	duk_put_prop_string(plugin.get_context(), -2, "prototype");
+	duk_put_prop_string(plugin.get_context(), -2, "Server");
+	duk_pop(plugin.get_context());
 }
 
 namespace duk {
