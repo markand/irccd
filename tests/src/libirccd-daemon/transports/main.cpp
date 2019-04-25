@@ -21,7 +21,7 @@
 
 #include <irccd/daemon/transport_server.hpp>
 
-namespace asio = boost::asio;
+using namespace std::chrono_literals;
 
 namespace irccd::daemon {
 
@@ -29,9 +29,11 @@ namespace {
 
 BOOST_AUTO_TEST_CASE(fix_995)
 {
-	asio::io_context ctx;
-	asio::ip::tcp::socket cl1(ctx);
-	asio::ip::tcp::socket cl2(ctx);
+	boost::asio::io_context ctx;
+	boost::asio::deadline_timer t1(ctx);
+	boost::asio::deadline_timer t2(ctx);
+	boost::asio::ip::tcp::socket cl1(ctx);
+	boost::asio::ip::tcp::socket cl2(ctx);
 
 	/*
 	 * a server that waits for authentication, the client does not send
@@ -40,24 +42,34 @@ BOOST_AUTO_TEST_CASE(fix_995)
 	auto acc = std::make_unique<ip_acceptor>(ctx, "*", 0, true, false);
 	auto ep = acc->get_acceptor().local_endpoint();
 	auto tpt = std::make_shared<transport_server>(std::move(acc));
-	auto accepted = false;
 	auto connected1 = false;
 	auto connected2 = false;
 
+	for (auto timer : {&t1, &t2}) {
+		timer->expires_from_now(boost::posix_time::seconds(3));
+		timer->async_wait([] (auto code) {
+			if (code != boost::asio::error::operation_aborted)
+				throw std::system_error(std::make_error_code(std::errc::timed_out));
+		});
+	}
+
 	tpt->set_password("test");
-	tpt->accept([&accepted] (auto, auto) {
-		accepted = true;
-	});
-	cl1.async_connect(ep, [&connected1] (auto) {
+	tpt->accept([] (auto, auto) {});
+	cl1.async_connect(ep, [&connected1, &t1] (auto) {
 		connected1 = true;
+		t1.cancel();
 	});
-	cl2.async_connect(ep, [&connected2] (auto) {
+	cl2.async_connect(ep, [&connected2, &t2] (auto) {
 		connected2 = true;
+		t2.cancel();
 	});
 
-	ctx.run();
+	while (!connected1 && !connected2) {
+		ctx.reset();
+		ctx.poll();
+		std::this_thread::sleep_for(1s);
+	}
 
-	BOOST_TEST(accepted);
 	BOOST_TEST(connected1);
 	BOOST_TEST(connected2);
 }
