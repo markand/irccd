@@ -40,6 +40,7 @@ namespace irccd::daemon {
 
 namespace logger {
 
+class filter;
 class sink;
 
 } // !logger
@@ -65,6 +66,7 @@ private:
 
 	// Custom logger.
 	std::unique_ptr<logger::sink> sink_;
+	std::unique_ptr<logger::filter> filter_;
 
 	// Services.
 	std::unique_ptr<server_service> server_service_;

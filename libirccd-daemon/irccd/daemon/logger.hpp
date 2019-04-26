@@ -26,7 +26,6 @@
 
 #include <irccd/sysconfig.hpp>
 
-#include <memory>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -121,7 +120,7 @@ private:
 
 	// User options.
 	bool verbose_{false};
-	std::unique_ptr<filter> filter_;
+	filter* filter_{nullptr};
 
 protected:
 	/**
@@ -182,10 +181,9 @@ public:
 	/**
 	 * Set an optional filter.
 	 *
-	 * \pre filter must not be null
 	 * \param filter the filter
 	 */
-	void set_filter(std::unique_ptr<filter> filter) noexcept;
+	void set_filter(filter& filter) noexcept;
 
 	/**
 	 * Get the stream for informational messages.

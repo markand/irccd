@@ -177,11 +177,12 @@ void bot::load_formats()
 	if (sc.empty())
 		return;
 
-	sink_->set_filter(std::make_unique<format_filter>(
+	filter_ = std::make_unique<format_filter>(
 		sc.get("info").get_value(),
 		sc.get("warning").get_value(),
 		sc.get("debug").get_value()
-	));
+	);
+	sink_->set_filter(*filter_);
 }
 
 bot::bot(boost::asio::io_service& service, std::string config)

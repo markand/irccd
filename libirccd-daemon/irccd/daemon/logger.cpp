@@ -186,11 +186,9 @@ void sink::set_verbose(bool mode) noexcept
 	verbose_ = mode;
 }
 
-void sink::set_filter(std::unique_ptr<filter> filter) noexcept
+void sink::set_filter(filter& filter) noexcept
 {
-	assert(filter);
-
-	filter_ = std::move(filter);
+	filter_ = &filter;
 }
 
 auto sink::info(std::string_view category, std::string_view component) -> logger

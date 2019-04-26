@@ -83,10 +83,11 @@ public:
 class logger_test {
 public:
 	sample_sink log_;
+	sample_filter filter_;
 
 	logger_test()
 	{
-		log_.set_filter(std::make_unique<sample_filter>());
+		log_.set_filter(filter_);
 		log_.set_verbose(true);
 	}
 };
