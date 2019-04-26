@@ -210,13 +210,12 @@ public:
 	 * \param args the arguments to pass
 	 */
 	template <typename Func, typename... Args>
-	void exec(std::shared_ptr<plugin> plugin, Func fn, Args&&... args)
+	void exec(std::shared_ptr<plugin> plugin, Func&& fn, Args&&... args)
 	{
 		assert(plugin);
 
-		// TODO: replace with C++17 std::invoke.
 		try {
-			((*plugin).*(fn))(std::forward<Args>(args)...);
+			std::invoke(std::forward<Func>(fn), *plugin, std::forward<Args>(args)...);
 		} catch (const std::exception& ex) {
 			throw plugin_error(plugin_error::exec_error, plugin->get_name(), ex.what());
 		} catch (...) {
