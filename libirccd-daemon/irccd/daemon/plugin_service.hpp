@@ -231,14 +231,14 @@ public:
 	 * \param args the arguments to pass
 	 */
 	template <typename Func, typename... Args>
-	void exec(const std::string& name, Func fn, Args&&... args)
+	void exec(std::string_view name, Func&& fn, Args&&... args)
 	{
 		auto plugin = find(name);
 
 		if (!plugin)
 			throw plugin_error(plugin_error::not_found, plugin->get_name());
 
-		exec(plugin, fn, std::forward<Args>(args)...);
+		exec(std::move(plugin), std::forward<Func>(fn), std::forward<Args>(args)...);
 	}
 
 	/**

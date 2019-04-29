@@ -35,7 +35,7 @@ namespace irccd::daemon {
 
 namespace {
 
-auto to_map(const config& conf, const std::string& section) -> plugin::map
+auto to_map(const config& conf, std::string_view section) -> plugin::map
 {
 	plugin::map ret;
 
