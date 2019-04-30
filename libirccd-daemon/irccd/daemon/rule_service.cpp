@@ -45,21 +45,21 @@ void rule_service::add(rule rule)
 	rules_.push_back(std::move(rule));
 }
 
-void rule_service::insert(rule rule, unsigned position)
+void rule_service::insert(rule rule, std::size_t position)
 {
 	assert(position <= rules_.size());
 
 	rules_.insert(rules_.begin() + position, std::move(rule));
 }
 
-void rule_service::remove(unsigned position)
+void rule_service::remove(std::size_t position)
 {
 	assert(position < rules_.size());
 
 	rules_.erase(rules_.begin() + position);
 }
 
-auto rule_service::require(unsigned position) const -> const rule&
+auto rule_service::require(std::size_t position) const -> const rule&
 {
 	if (position >= rules_.size())
 		throw rule_error(rule_error::invalid_index);
@@ -67,7 +67,7 @@ auto rule_service::require(unsigned position) const -> const rule&
 	return rules_[position];
 }
 
-auto rule_service::require(unsigned position) -> rule&
+auto rule_service::require(std::size_t position) -> rule&
 {
 	if (position >= rules_.size())
 		throw rule_error(rule_error::invalid_index);

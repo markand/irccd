@@ -535,7 +535,7 @@ void rule_add_cli::exec(ctl::controller& ctl, const std::vector<std::string>& ar
 	}
 
 	// Index.
-	std::optional<unsigned> index;
+	std::optional<std::size_t> index;
 
 	if (result.count("-i") > 0 && !(index = string_util::to_uint(result.find("-i")->second)))
 		throw std::invalid_argument("invalid index argument");

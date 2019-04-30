@@ -77,7 +77,7 @@ public:
 	 * \param rule the rule
 	 * \param position the position
 	 */
-	void insert(rule rule, unsigned position);
+	void insert(rule rule, std::size_t position);
 
 	/**
 	 * Remove a new rule from the specified position.
@@ -85,7 +85,7 @@ public:
 	 * \pre position must be valid
 	 * \param position the position
 	 */
-	void remove(unsigned position);
+	void remove(std::size_t position);
 
 	/**
 	 * Get a rule at the specified index or throw an exception if not found.
@@ -94,14 +94,14 @@ public:
 	 * \return the rule
 	 * \throw std::out_of_range if position is invalid
 	 */
-	auto require(unsigned position) const -> const rule&;
+	auto require(std::size_t position) const -> const rule&;
 
 	/**
 	 * Overloaded function.
 	 *
 	 * \copydoc require
 	 */
-	auto require(unsigned position) -> rule&;
+	auto require(std::size_t position) -> rule&;
 
 	/**
 	 * Resolve the action to execute with the specified list of rules.
