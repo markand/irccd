@@ -41,7 +41,7 @@ BOOST_FIXTURE_TEST_SUITE(rule_list_suite, rule_list_fixture)
 
 BOOST_AUTO_TEST_CASE(simple)
 {
-	bot_.rules().add({
+	bot_.get_rules().add({
 		{ "s1", "s2" },
 		{ "c1", "c2" },
 		{ "o1", "o2" },

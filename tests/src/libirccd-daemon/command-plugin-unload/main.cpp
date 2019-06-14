@@ -32,9 +32,9 @@ protected:
 
 	plugin_unload_fixture()
 	{
-		bot_.plugins().clear();
-		bot_.plugins().add(plugin_);
-		bot_.plugins().add(std::make_unique<test::broken_plugin>("broken"));
+		bot_.get_plugins().clear();
+		bot_.get_plugins().add(plugin_);
+		bot_.get_plugins().add(std::make_unique<test::broken_plugin>("broken"));
 	}
 };
 
@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE(exec_error)
 	BOOST_TEST(json["command"].get<std::string>() == "plugin-unload");
 	BOOST_TEST(json["error"].get<int>() == daemon::plugin_error::exec_error);
 	BOOST_TEST(json["errorCategory"].get<std::string>() == "plugin");
-	BOOST_TEST(!bot_.plugins().has("broken"));
+	BOOST_TEST(!bot_.get_plugins().has("broken"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

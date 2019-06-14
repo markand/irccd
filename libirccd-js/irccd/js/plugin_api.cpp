@@ -212,7 +212,7 @@ auto Plugin_info(duk_context* ctx) -> duk_idx_t
 		daemon::plugin* plg;
 
 		if (duk_get_top(ctx) >= 1)
-			plg = duk::type_traits<bot>::self(ctx).plugins().get(duk_require_string(ctx, 0)).get();
+			plg = duk::type_traits<bot>::self(ctx).get_plugins().get(duk_require_string(ctx, 0)).get();
 		else
 			plg = std::addressof(duk::type_traits<plugin>::self(ctx));
 
@@ -254,7 +254,7 @@ auto Plugin_list(duk_context* ctx) -> duk_idx_t
 
 	duk_push_array(ctx);
 
-	for (const auto& plg : duk::type_traits<bot>::self(ctx).plugins().list()) {
+	for (const auto& plg : duk::type_traits<bot>::self(ctx).get_plugins().list()) {
 		duk::push(ctx, plg->get_id());
 		duk_put_prop_index(ctx, -2, i++);
 	}
@@ -282,7 +282,7 @@ auto Plugin_list(duk_context* ctx) -> duk_idx_t
 auto Plugin_load(duk_context* ctx) -> duk_idx_t
 {
 	return wrap(ctx, [&] {
-		duk::type_traits<bot>::self(ctx).plugins().load(
+		duk::type_traits<bot>::self(ctx).get_plugins().load(
 			duk::require<std::string_view>(ctx, 0), "");
 
 		return 0;
@@ -308,7 +308,7 @@ auto Plugin_load(duk_context* ctx) -> duk_idx_t
 auto Plugin_reload(duk_context* ctx) -> duk_idx_t
 {
 	return wrap(ctx, [&] {
-		duk::type_traits<bot>::self(ctx).plugins().reload(duk::require<std::string>(ctx, 0));
+		duk::type_traits<bot>::self(ctx).get_plugins().reload(duk::require<std::string>(ctx, 0));
 
 		return 0;
 	});
@@ -333,7 +333,7 @@ auto Plugin_reload(duk_context* ctx) -> duk_idx_t
 auto Plugin_unload(duk_context* ctx) -> duk_idx_t
 {
 	return wrap(ctx, [&] {
-		duk::type_traits<bot>::self(ctx).plugins().unload(duk::require<std::string>(ctx, 0));
+		duk::type_traits<bot>::self(ctx).get_plugins().unload(duk::require<std::string>(ctx, 0));
 
 		return 0;
 	});

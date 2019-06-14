@@ -61,11 +61,11 @@ cli_fixture::cli_fixture(std::string irccdctl)
 	auto acceptor = std::make_unique<ip_acceptor>(bot_.get_service(), std::move(raw_acceptor));
 
 	for (const auto& f : daemon::transport_command::registry())
-		bot_.transports().get_commands().push_back(f());
+		bot_.get_transports().get_commands().push_back(f());
 
-	bot_.servers().add(server_);
-	bot_.transports().add(std::make_unique<daemon::transport_server>(std::move(acceptor)));
-	bot_.plugins().add_loader(std::make_unique<test_plugin_loader>());
+	bot_.get_servers().add(server_);
+	bot_.get_transports().add(std::make_unique<daemon::transport_server>(std::move(acceptor)));
+	bot_.get_plugins().add_loader(std::make_unique<test_plugin_loader>());
 	server_->clear();
 }
 

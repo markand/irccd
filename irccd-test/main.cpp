@@ -142,11 +142,11 @@ auto get_server(std::string name) -> std::shared_ptr<server>
 	if (name.empty())
 		name = "test";
 
-	auto s = daemon->servers().get(name);
+	auto s = daemon->get_servers().get(name);
 
 	if (!s) {
 		s = std::make_shared<debug_server>(io, std::move(name), "localhost");
-		daemon->servers().add(s);
+		daemon->get_servers().add(s);
 	}
 
 	return s;
@@ -598,8 +598,8 @@ void load_plugins(int argc, char** argv)
 	if (argc <= 0)
 		usage();
 
-	daemon->plugins().load("test", boost::filesystem::exists(argv[0]) ? argv[0] : "");
-	plugin = daemon->plugins().get("test");
+	daemon->get_plugins().load("test", boost::filesystem::exists(argv[0]) ? argv[0] : "");
+	plugin = daemon->get_plugins().get("test");
 }
 
 // }}}
@@ -643,7 +643,7 @@ void load_options(int& argc, char**& argv)
 void load(int argc, char** argv)
 {
 	daemon = std::make_unique<bot>(io);
-	daemon->plugins().add_loader(std::make_unique<dynlib_plugin_loader>());
+	daemon->get_plugins().add_loader(std::make_unique<dynlib_plugin_loader>());
 
 #if defined(IRCCD_HAVE_JS)
 	auto loader = std::make_unique<js::plugin_loader>(*daemon);
@@ -651,7 +651,7 @@ void load(int argc, char** argv)
 	for (const auto& f : js::api::registry())
 		loader->get_modules().push_back(f());
 
-	daemon->plugins().add_loader(std::move(loader));
+	daemon->get_plugins().add_loader(std::move(loader));
 #endif
 
 	load_options(argc, argv);

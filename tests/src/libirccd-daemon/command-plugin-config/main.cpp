@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE(set)
 		{ "value",      "falsy"         }
 	});
 
-	const auto config = bot_.plugins().require("test")->get_options();
+	const auto config = bot_.get_plugins().require("test")->get_options();
 
 	BOOST_TEST(json.size() == 1U);
 	BOOST_TEST(json["command"].get<std::string>() == "plugin-config");
@@ -57,8 +57,8 @@ BOOST_AUTO_TEST_CASE(get)
 		{ "x1", "10" },
 		{ "x2", "20" }
 	});
-	bot_.plugins().clear();
-	bot_.plugins().add(std::move(plugin));
+	bot_.get_plugins().clear();
+	bot_.get_plugins().add(std::move(plugin));
 
 	const auto json = request({
 		{ "command",    "plugin-config" },
@@ -80,8 +80,8 @@ BOOST_AUTO_TEST_CASE(getall)
 		{ "x1", "10" },
 		{ "x2", "20" }
 	});
-	bot_.plugins().clear();
-	bot_.plugins().add(std::move(plugin));
+	bot_.get_plugins().clear();
+	bot_.get_plugins().add(std::move(plugin));
 
 	const auto json = request({
 		{ "command",    "plugin-config" },

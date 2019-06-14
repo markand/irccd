@@ -34,7 +34,7 @@ public:
 	rule_edit_fixture()
 		: cli_fixture(IRCCDCTL_EXECUTABLE)
 	{
-		bot_.rules().add({
+		bot_.get_rules().add({
 			{ "s1", "s2" },
 			{ "c1", "c2" },
 			{ "o1", "o2" },

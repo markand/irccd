@@ -67,9 +67,9 @@ void dispatcher::dispatch(std::string_view server,
                           EventNameFunc&& name_func,
                           ExecFunc exec_func)
 {
-	for (const auto& plugin : bot_.plugins().list()) {
+	for (const auto& plugin : bot_.get_plugins().list()) {
 		const auto eventname = name_func(*plugin);
-		const auto allowed = bot_.rules().solve(server, target, origin, plugin->get_name(), eventname);
+		const auto allowed = bot_.get_rules().solve(server, target, origin, plugin->get_name(), eventname);
 
 		if (!allowed) {
 			bot_.get_log().debug("rule", "") << "event skipped on match" << std::endl;
@@ -98,7 +98,7 @@ void dispatcher::operator()(const std::monostate&)
 void dispatcher::operator()(const connect_event& ev)
 {
 	bot_.get_log().debug(*ev.server) << "event onConnect" << std::endl;
-	bot_.transports().broadcast(nlohmann::json::object({
+	bot_.get_transports().broadcast(nlohmann::json::object({
 		{ "event",      "onConnect"             },
 		{ "server",     ev.server->get_id()     }
 	}));
@@ -116,7 +116,7 @@ void dispatcher::operator()(const connect_event& ev)
 void dispatcher::operator()(const disconnect_event& ev)
 {
 	bot_.get_log().debug(*ev.server) << "event onDisconnect" << std::endl;
-	bot_.transports().broadcast(nlohmann::json::object({
+	bot_.get_transports().broadcast(nlohmann::json::object({
 		{ "event",      "onDisconnect"          },
 		{ "server",     ev.server->get_id()     }
 	}));
@@ -138,7 +138,7 @@ void dispatcher::operator()(const invite_event& ev)
 	bot_.get_log().debug(*ev.server) << "  channel: " << ev.channel << std::endl;
 	bot_.get_log().debug(*ev.server) << "  target: " << ev.nickname << std::endl;
 
-	bot_.transports().broadcast(nlohmann::json::object({
+	bot_.get_transports().broadcast(nlohmann::json::object({
 		{ "event",      "onInvite"              },
 		{ "server",     ev.server->get_id()     },
 		{ "origin",     ev.origin               },
@@ -161,7 +161,7 @@ void dispatcher::operator()(const join_event& ev)
 	bot_.get_log().debug(*ev.server) << "  origin: " << ev.origin << std::endl;
 	bot_.get_log().debug(*ev.server) << "  channel: " << ev.channel << std::endl;
 
-	bot_.transports().broadcast(nlohmann::json::object({
+	bot_.get_transports().broadcast(nlohmann::json::object({
 		{ "event",      "onJoin"                },
 		{ "server",     ev.server->get_id()     },
 		{ "origin",     ev.origin               },
@@ -186,7 +186,7 @@ void dispatcher::operator()(const kick_event& ev)
 	bot_.get_log().debug(*ev.server) << "  target: " << ev.target << std::endl;
 	bot_.get_log().debug(*ev.server) << "  reason: " << ev.reason << std::endl;
 
-	bot_.transports().broadcast(nlohmann::json::object({
+	bot_.get_transports().broadcast(nlohmann::json::object({
 		{ "event",      "onKick"                },
 		{ "server",     ev.server->get_id()     },
 		{ "origin",     ev.origin               },
@@ -212,7 +212,7 @@ void dispatcher::operator()(const message_event& ev)
 	bot_.get_log().debug(*ev.server) << "  channel: " << ev.channel << std::endl;
 	bot_.get_log().debug(*ev.server) << "  message: " << ev.message << std::endl;
 
-	bot_.transports().broadcast(nlohmann::json::object({
+	bot_.get_transports().broadcast(nlohmann::json::object({
 		{ "event",      "onMessage"             },
 		{ "server",     ev.server->get_id()     },
 		{ "origin",     ev.origin               },
@@ -253,7 +253,7 @@ void dispatcher::operator()(const me_event& ev)
 	bot_.get_log().debug(*ev.server) << "  target: " << ev.channel << std::endl;
 	bot_.get_log().debug(*ev.server) << "  message: " << ev.message << std::endl;
 
-	bot_.transports().broadcast(nlohmann::json::object({
+	bot_.get_transports().broadcast(nlohmann::json::object({
 		{ "event",      "onMe"                  },
 		{ "server",     ev.server->get_id()     },
 		{ "origin",     ev.origin               },
@@ -281,7 +281,7 @@ void dispatcher::operator()(const mode_event& ev)
 	bot_.get_log().debug(*ev.server) << "  user: " << ev.user << std::endl;
 	bot_.get_log().debug(*ev.server) << "  mask: " << ev.mask << std::endl;
 
-	bot_.transports().broadcast(nlohmann::json::object({
+	bot_.get_transports().broadcast(nlohmann::json::object({
 		{ "event",      "onMode"                },
 		{ "server",     ev.server->get_id()     },
 		{ "origin",     ev.origin               },
@@ -313,7 +313,7 @@ void dispatcher::operator()(const names_event& ev)
 	for (const auto& v : ev.names)
 		names.push_back(v);
 
-	bot_.transports().broadcast(nlohmann::json::object({
+	bot_.get_transports().broadcast(nlohmann::json::object({
 		{ "event",      "onNames"               },
 		{ "server",     ev.server->get_id()     },
 		{ "channel",    ev.channel              },
@@ -336,7 +336,7 @@ void dispatcher::operator()(const nick_event& ev)
 	bot_.get_log().debug(*ev.server) << "  origin: " << ev.origin << std::endl;
 	bot_.get_log().debug(*ev.server) << "  nickname: " << ev.nickname << std::endl;
 
-	bot_.transports().broadcast(nlohmann::json::object({
+	bot_.get_transports().broadcast(nlohmann::json::object({
 		{ "event",      "onNick"                },
 		{ "server",     ev.server->get_id()     },
 		{ "origin",     ev.origin               },
@@ -360,7 +360,7 @@ void dispatcher::operator()(const notice_event& ev)
 	bot_.get_log().debug(*ev.server) << "  channel: " << ev.channel << std::endl;
 	bot_.get_log().debug(*ev.server) << "  message: " << ev.message << std::endl;
 
-	bot_.transports().broadcast(nlohmann::json::object({
+	bot_.get_transports().broadcast(nlohmann::json::object({
 		{ "event",      "onNotice"              },
 		{ "server",     ev.server->get_id()     },
 		{ "origin",     ev.origin               },
@@ -385,7 +385,7 @@ void dispatcher::operator()(const part_event& ev)
 	bot_.get_log().debug(*ev.server) << "  channel: " << ev.channel << std::endl;
 	bot_.get_log().debug(*ev.server) << "  reason: " << ev.reason << std::endl;
 
-	bot_.transports().broadcast(nlohmann::json::object({
+	bot_.get_transports().broadcast(nlohmann::json::object({
 		{ "event",      "onPart"                },
 		{ "server",     ev.server->get_id()     },
 		{ "origin",     ev.origin               },
@@ -410,7 +410,7 @@ void dispatcher::operator()(const topic_event& ev)
 	bot_.get_log().debug(*ev.server) << "  channel: " << ev.channel << std::endl;
 	bot_.get_log().debug(*ev.server) << "  topic: " << ev.topic << std::endl;
 
-	bot_.transports().broadcast(nlohmann::json::object({
+	bot_.get_transports().broadcast(nlohmann::json::object({
 		{ "event",      "onTopic"               },
 		{ "server",     ev.server->get_id()     },
 		{ "origin",     ev.origin               },
@@ -437,7 +437,7 @@ void dispatcher::operator()(const whois_event& ev)
 	bot_.get_log().debug(*ev.server) << "  realname: " << ev.whois.realname << std::endl;
 	bot_.get_log().debug(*ev.server) << "  channels: " << string_util::join(ev.whois.channels, ", ") << std::endl;
 
-	bot_.transports().broadcast(nlohmann::json::object({
+	bot_.get_transports().broadcast(nlohmann::json::object({
 		{ "event",      "onWhois"               },
 		{ "server",     ev.server->get_id()     },
 		{ "nickname",   ev.whois.nick           },
@@ -500,7 +500,7 @@ void server_service::handle_recv(const std::shared_ptr<server>& server,
 	}
 
 	recv(server);
-	std::visit(dispatcher(bot_), event);
+	std::visit(dispatcher{bot_}, event);
 }
 
 void server_service::handle_wait(const std::shared_ptr<server>& server, const std::error_code& code)

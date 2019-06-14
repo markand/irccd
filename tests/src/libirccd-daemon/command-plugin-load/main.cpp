@@ -29,8 +29,8 @@ class plugin_load_fixture : public test::command_fixture {
 public:
 	plugin_load_fixture()
 	{
-		bot_.plugins().clear();
-		bot_.plugins().add(std::make_unique<test::mock_plugin>("already"));
+		bot_.get_plugins().clear();
+		bot_.get_plugins().add(std::make_unique<test::mock_plugin>("already"));
 	}
 };
 
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE(basic)
 
 	BOOST_TEST(json.size() == 1U);
 	BOOST_TEST(json["command"].get<std::string>() == "plugin-load");
-	BOOST_TEST(bot_.plugins().has("mock"));
+	BOOST_TEST(bot_.get_plugins().has("mock"));
 }
 
 BOOST_AUTO_TEST_SUITE(errors)

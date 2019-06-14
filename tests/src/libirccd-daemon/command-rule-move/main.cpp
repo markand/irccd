@@ -31,7 +31,7 @@ class rule_move_fixture : public test::command_fixture {
 public:
 	rule_move_fixture()
 	{
-		bot_.rules().add(daemon::rule{
+		bot_.get_rules().add(daemon::rule{
 			{ "s0" },
 			{ "c0" },
 			{ "o0" },
@@ -39,7 +39,7 @@ public:
 			{ "onMessage" },
 			daemon::rule::action_type::drop
 		});
-		bot_.rules().add(daemon::rule{
+		bot_.get_rules().add(daemon::rule{
 			{ "s1", },
 			{ "c1", },
 			{ "o1", },
@@ -47,7 +47,7 @@ public:
 			{ "onMessage", },
 			daemon::rule::action_type::accept
 		});
-		bot_.rules().add(daemon::rule{
+		bot_.get_rules().add(daemon::rule{
 			{ "s2", },
 			{ "c2", },
 			{ "o2", },

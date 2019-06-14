@@ -39,7 +39,7 @@ protected:
 	plugin_reload_fixture()
 		: cli_fixture(IRCCDCTL_EXECUTABLE)
 	{
-		bot_.plugins().add(plugin_);
+		bot_.get_plugins().add(plugin_);
 	}
 };
 

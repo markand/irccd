@@ -40,8 +40,8 @@ BOOST_AUTO_TEST_CASE(basic)
 	server->set_command_char("@");
 	server->set_ping_timeout(20000);
 
-	bot_.servers().clear();
-	bot_.servers().add(std::move(server));
+	bot_.get_servers().clear();
+	bot_.get_servers().add(std::move(server));
 
 	const auto json = request({
 		{ "command",    "server-info"   },

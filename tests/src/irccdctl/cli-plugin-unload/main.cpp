@@ -39,7 +39,7 @@ protected:
 	plugin_unload_fixture()
 		: cli_fixture(IRCCDCTL_EXECUTABLE)
 	{
-		bot_.plugins().add(plugin_);
+		bot_.get_plugins().add(plugin_);
 	}
 };
 
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(simple)
 	BOOST_TEST(out.size() == 0U);
 	BOOST_TEST(err.size() == 0U);
 	BOOST_TEST(plugin_->find("handle_unload").size() == 1U);
-	BOOST_TEST(!bot_.plugins().has("p"));
+	BOOST_TEST(!bot_.get_plugins().has("p"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()

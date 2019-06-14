@@ -671,7 +671,7 @@ auto Server_destructor(duk_context* ctx) -> duk_ret_t
 auto Server_add(duk_context* ctx) -> duk_ret_t
 {
 	return wrap(ctx, [] (auto ctx) {
-		duk::type_traits<bot>::self(ctx).servers().add(
+		duk::type_traits<bot>::self(ctx).get_servers().add(
 			duk::require<std::shared_ptr<server>>(ctx, 0));
 
 		return 0;
@@ -699,7 +699,7 @@ auto Server_find(duk_context* ctx) -> duk_ret_t
 {
 	return wrap(ctx, [] (auto ctx) {
 		auto id = duk::require<std::string>(ctx, 0);
-		auto server = duk::type_traits<bot>::self(ctx).servers().get(id);
+		auto server = duk::type_traits<bot>::self(ctx).get_servers().get(id);
 
 		if (!server)
 			return 0;
@@ -727,7 +727,7 @@ auto Server_list(duk_context* ctx) -> duk_ret_t
 {
 	duk_push_object(ctx);
 
-	for (const auto& server : duk::type_traits<bot>::self(ctx).servers().list()) {
+	for (const auto& server : duk::type_traits<bot>::self(ctx).get_servers().list()) {
 		duk::push(ctx, server);
 		duk_put_prop_string(ctx, -2, server->get_id().c_str());
 	}
@@ -751,7 +751,7 @@ auto Server_list(duk_context* ctx) -> duk_ret_t
  */
 auto Server_remove(duk_context* ctx) -> duk_ret_t
 {
-	duk::type_traits<bot>::self(ctx).servers().remove(duk_require_string(ctx, 0));
+	duk::type_traits<bot>::self(ctx).get_servers().remove(duk_require_string(ctx, 0));
 
 	return 0;
 }

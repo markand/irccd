@@ -34,10 +34,10 @@ command_fixture::command_fixture()
 {
 	// 1. Add all commands.
 	for (const auto& f : daemon::transport_command::registry())
-		bot_.transports().get_commands().push_back(f());
+		bot_.get_transports().get_commands().push_back(f());
 
-	bot_.servers().add(server_);
-	bot_.plugins().add(plugin_);
+	bot_.get_servers().add(server_);
+	bot_.get_plugins().add(plugin_);
 	server_->disconnect();
 	server_->clear();
 	plugin_->clear();
@@ -45,7 +45,7 @@ command_fixture::command_fixture()
 
 auto command_fixture::request(nlohmann::json json) -> nlohmann::json
 {
-	const auto& list = bot_.transports().get_commands();
+	const auto& list = bot_.get_transports().get_commands();
 	const auto cmd = std::find_if(list.begin(), list.end(), [&] (const auto& c) {
 		return c->get_name() == json["command"].template get<std::string>();
 	});

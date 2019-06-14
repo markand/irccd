@@ -112,13 +112,13 @@ protected:
 		for (const auto& f : js::api::registry())
 			loader->get_modules().push_back(f());
 
-		bot_.plugins().add_loader(std::move(loader));
+		bot_.get_plugins().add_loader(std::move(loader));
 	}
 
 	void load(std::string name, std::string path)
 	{
-		bot_.plugins().load(name, path);
-		plugin_ = bot_.plugins().require(name);
+		bot_.get_plugins().load(name, path);
+		plugin_ = bot_.get_plugins().require(name);
 	}
 };
 

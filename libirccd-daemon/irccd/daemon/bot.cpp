@@ -228,22 +228,22 @@ auto bot::get_log() noexcept -> logger::sink&
 	return *sink_;
 }
 
-auto bot::servers() noexcept -> server_service&
+auto bot::get_servers() noexcept -> server_service&
 {
 	return *server_service_;
 }
 
-auto bot::transports() noexcept -> transport_service&
+auto bot::get_transports() noexcept -> transport_service&
 {
 	return *tpt_service_;
 }
 
-auto bot::rules() noexcept -> rule_service&
+auto bot::get_rules() noexcept -> rule_service&
 {
 	return *rule_service_;
 }
 
-auto bot::plugins() noexcept -> plugin_service&
+auto bot::get_plugins() noexcept -> plugin_service&
 {
 	return *plugin_service_;
 }

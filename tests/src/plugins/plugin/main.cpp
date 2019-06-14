@@ -74,7 +74,7 @@ public:
 	test_fixture()
 		: js_plugin_fixture(PLUGIN_PATH)
 	{
-		bot_.plugins().add(std::make_shared<fake_plugin>("fake"));
+		bot_.get_plugins().add(std::make_shared<fake_plugin>("fake"));
 
 		plugin_->set_formats({
 			{ "usage", "usage=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}" },
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE(format_not_found)
 BOOST_AUTO_TEST_CASE(format_too_long)
 {
 	for (int i = 0; i < 100; ++i)
-		bot_.plugins().add(std::make_shared<fake_plugin>(str(format("plugin-n-%1%") % i)));
+		bot_.get_plugins().add(std::make_shared<fake_plugin>(str(format("plugin-n-%1%") % i)));
 
 	plugin_->handle_command(bot_, { server_, "jean!jean@localhost", "#staff", "list" });
 

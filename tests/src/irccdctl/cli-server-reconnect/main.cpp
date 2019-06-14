@@ -42,8 +42,8 @@ BOOST_AUTO_TEST_CASE(one)
 	const auto s1 = std::make_shared<mock_server>(bot_.get_service(), "s1", "localhost");
 	const auto s2 = std::make_shared<mock_server>(bot_.get_service(), "s2", "localhost");
 
-	bot_.servers().add(s1);
-	bot_.servers().add(s2);
+	bot_.get_servers().add(s1);
+	bot_.get_servers().add(s2);
 	s1->clear();
 	s2->clear();
 	start();
@@ -66,8 +66,8 @@ BOOST_AUTO_TEST_CASE(all)
 	const auto s1 = std::make_shared<mock_server>(bot_.get_service(), "s1", "localhost");
 	const auto s2 = std::make_shared<mock_server>(bot_.get_service(), "s2", "localhost");
 
-	bot_.servers().add(s1);
-	bot_.servers().add(s2);
+	bot_.get_servers().add(s1);
+	bot_.get_servers().add(s2);
 	s1->clear();
 	s2->clear();
 	start();

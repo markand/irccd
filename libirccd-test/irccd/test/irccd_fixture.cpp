@@ -31,7 +31,7 @@ namespace irccd::test {
 irccd_fixture::irccd_fixture()
 {
 	bot_.set_log(make_unique<silent_sink>());
-	bot_.plugins().add_loader(make_unique<test_plugin_loader>());
+	bot_.get_plugins().add_loader(make_unique<test_plugin_loader>());
 }
 
 } // !irccd

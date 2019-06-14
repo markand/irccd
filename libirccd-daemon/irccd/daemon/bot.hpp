@@ -160,28 +160,28 @@ public:
 	 *
 	 * \return the service
 	 */
-	auto servers() noexcept -> server_service&;
+	auto get_servers() noexcept -> server_service&;
 
 	/**
 	 * Access the transport service.
 	 *
 	 * \return the service
 	 */
-	auto transports() noexcept -> transport_service&;
+	auto get_transports() noexcept -> transport_service&;
 
 	/**
 	 * Access the rule service.
 	 *
 	 * \return the service
 	 */
-	auto rules() noexcept -> rule_service&;
+	auto get_rules() noexcept -> rule_service&;
 
 	/**
 	 * Access the plugin service.
 	 *
 	 * \return the service
 	 */
-	auto plugins() noexcept -> plugin_service&;
+	auto get_plugins() noexcept -> plugin_service&;
 
 	/**
 	 * Load and re-apply the configuration to the daemon.

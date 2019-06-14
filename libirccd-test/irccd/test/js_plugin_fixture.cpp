@@ -50,8 +50,8 @@ js_plugin_fixture::js_plugin_fixture(std::string path)
 
 	bot_.set_log(std::make_unique<silent_sink>());
 	bot_.get_log().set_verbose(false);
-	bot_.plugins().add(plugin_);
-	bot_.servers().add(server_);
+	bot_.get_plugins().add(plugin_);
+	bot_.get_servers().add(server_);
 
 	server_->disconnect();
 	server_->set_nickname("irccd");

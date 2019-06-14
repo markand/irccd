@@ -40,8 +40,8 @@ BOOST_FIXTURE_TEST_SUITE(plugin_list_suite, plugin_list_fixture)
 
 BOOST_AUTO_TEST_CASE(output)
 {
-	bot_.plugins().add(std::make_unique<mock_plugin>("p1"));
-	bot_.plugins().add(std::make_unique<mock_plugin>("p2"));
+	bot_.get_plugins().add(std::make_unique<mock_plugin>("p1"));
+	bot_.get_plugins().add(std::make_unique<mock_plugin>("p2"));
 	start();
 
 	const auto [code, out, err] = exec({ "plugin-list" });

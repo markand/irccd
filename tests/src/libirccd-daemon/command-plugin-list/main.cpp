@@ -29,9 +29,9 @@ class plugin_list_fixture : public test::command_fixture {
 public:
 	plugin_list_fixture()
 	{
-		bot_.plugins().clear();
-		bot_.plugins().add(std::make_unique<test::mock_plugin>("t1"));
-		bot_.plugins().add(std::make_unique<test::mock_plugin>("t2"));
+		bot_.get_plugins().clear();
+		bot_.get_plugins().add(std::make_unique<test::mock_plugin>("t1"));
+		bot_.get_plugins().add(std::make_unique<test::mock_plugin>("t2"));
 	}
 };
 

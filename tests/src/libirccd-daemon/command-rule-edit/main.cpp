@@ -31,7 +31,7 @@ class rule_edit_fixture : public test::command_fixture {
 public:
 	rule_edit_fixture()
 	{
-		bot_.rules().add(daemon::rule{
+		bot_.get_rules().add(daemon::rule{
 			{ "s1", "s2" },
 			{ "c1", "c2" },
 			{ "o1", "o2" },

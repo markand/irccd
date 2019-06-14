@@ -41,8 +41,8 @@ public:
 			{ "v2", "456" }
 		});
 
-		bot_.plugins().add(std::move(conf1));
-		bot_.plugins().add(std::move(conf2));
+		bot_.get_plugins().add(std::move(conf1));
+		bot_.get_plugins().add(std::move(conf2));
 	}
 };
 

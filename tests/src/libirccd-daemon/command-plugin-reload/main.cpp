@@ -32,9 +32,9 @@ protected:
 
 	plugin_reload_fixture()
 	{
-		bot_.plugins().clear();
-		bot_.plugins().add(plugin_);
-		bot_.plugins().add(std::make_unique<test::broken_plugin>("broken"));
+		bot_.get_plugins().clear();
+		bot_.get_plugins().add(plugin_);
+		bot_.get_plugins().add(std::make_unique<test::broken_plugin>("broken"));
 	}
 };
 

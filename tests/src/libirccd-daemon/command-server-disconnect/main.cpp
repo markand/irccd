@@ -34,8 +34,8 @@ protected:
 		: s1_(new test::mock_server(ctx_, "s1", "localhost"))
 		, s2_(new test::mock_server(ctx_, "s2", "localhost"))
 	{
-		bot_.servers().add(s1_);
-		bot_.servers().add(s2_);
+		bot_.get_servers().add(s1_);
+		bot_.get_servers().add(s2_);
 	}
 };
 
@@ -51,8 +51,8 @@ BOOST_AUTO_TEST_CASE(one)
 	BOOST_TEST(json.size() == 1U);
 	BOOST_TEST(json["command"].get<std::string>() == "server-disconnect");
 	BOOST_TEST(s1_->find("disconnect").size() == 1U);
-	BOOST_TEST(!bot_.servers().has("s1"));
-	BOOST_TEST(bot_.servers().has("s2"));
+	BOOST_TEST(!bot_.get_servers().has("s1"));
+	BOOST_TEST(bot_.get_servers().has("s2"));
 }
 
 BOOST_AUTO_TEST_CASE(all)
@@ -63,8 +63,8 @@ BOOST_AUTO_TEST_CASE(all)
 	BOOST_TEST(json["command"].get<std::string>() == "server-disconnect");
 	BOOST_TEST(s1_->find("disconnect").size() == 1U);
 	BOOST_TEST(s2_->find("disconnect").size() == 1U);
-	BOOST_TEST(!bot_.servers().has("s1"));
-	BOOST_TEST(!bot_.servers().has("s2"));
+	BOOST_TEST(!bot_.get_servers().has("s1"));
+	BOOST_TEST(!bot_.get_servers().has("s2"));
 }
 
 BOOST_AUTO_TEST_SUITE(errors)

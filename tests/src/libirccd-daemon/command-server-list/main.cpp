@@ -29,9 +29,9 @@ class server_list_fixture : public test::command_fixture {
 protected:
 	server_list_fixture()
 	{
-		bot_.servers().clear();
-		bot_.servers().add(std::make_unique<test::mock_server>(ctx_, "s1", "localhost"));
-		bot_.servers().add(std::make_unique<test::mock_server>(ctx_, "s2", "localhost"));
+		bot_.get_servers().clear();
+		bot_.get_servers().add(std::make_unique<test::mock_server>(ctx_, "s1", "localhost"));
+		bot_.get_servers().add(std::make_unique<test::mock_server>(ctx_, "s2", "localhost"));
 	}
 };
 

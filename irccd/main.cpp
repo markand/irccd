@@ -179,10 +179,10 @@ int main(int argc, char** argv)
 
 	// 1. Load commands.
 	for (const auto& f : transport_command::registry())
-		instance->transports().get_commands().push_back(f());
+		instance->get_transports().get_commands().push_back(f());
 
 	// 2. Load plugin loaders.
-	instance->plugins().add_loader(std::make_unique<dynlib_plugin_loader>());
+	instance->get_plugins().add_loader(std::make_unique<dynlib_plugin_loader>());
 
 #if defined(IRCCD_HAVE_JS)
 	auto loader = std::make_unique<js::plugin_loader>(*instance);
@@ -190,7 +190,7 @@ int main(int argc, char** argv)
 	for (const auto& f : js::api::registry())
 		loader->get_modules().push_back(f());
 
-	instance->plugins().add_loader(std::move(loader));
+	instance->get_plugins().add_loader(std::move(loader));
 #endif
 
 	const auto options = parse(argc, argv);

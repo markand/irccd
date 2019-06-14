@@ -34,7 +34,7 @@ public:
 	rule_move_fixture()
 		: cli_fixture(IRCCDCTL_EXECUTABLE)
 	{
-		bot_.rules().add({
+		bot_.get_rules().add({
 			{ "s1" },
 			{ "c1" },
 			{ "o1" },
@@ -42,7 +42,7 @@ public:
 			{ "onTopic" },
 			rule::action_type::accept
 		});
-		bot_.rules().add({
+		bot_.get_rules().add({
 			{ "s2" },
 			{ "c2" },
 			{ "o2" },
@@ -50,7 +50,7 @@ public:
 			{ "onCommand" },
 			rule::action_type::drop
 		});
-		bot_.rules().add({
+		bot_.get_rules().add({
 			{ "s3" },
 			{ "c3" },
 			{ "o3" },

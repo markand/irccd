@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(minimal)
 		{ "hostname",   "irc.example.org"   }
 	});
 
-	const auto s = bot_.servers().get("local");
+	const auto s = bot_.get_servers().get("local");
 
 	BOOST_TEST(json.size() == 1U);
 	BOOST_TEST(json["command"].get<std::string>() == "server-connect");
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_CASE(full)
 		{ "joinInvite",         true                    }
 	});
 
-	const auto s = bot_.servers().get("local2");
+	const auto s = bot_.get_servers().get("local2");
 
 	BOOST_TEST(json.size() == 1U);
 	BOOST_TEST(json["command"].get<std::string>() == "server-connect");
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(already_exists)
 {
-	bot_.servers().add(std::make_unique<test::mock_server>(ctx_, "local"));
+	bot_.get_servers().add(std::make_unique<test::mock_server>(ctx_, "local"));
 
 	const auto json = request({
 		{ "command",    "server-connect"        },

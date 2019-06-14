@@ -34,9 +34,9 @@ protected:
 		: s1_(new test::mock_server(ctx_, "s1", "localhost"))
 		, s2_(new test::mock_server(ctx_, "s2", "localhost"))
 	{
-		bot_.servers().clear();
-		bot_.servers().add(s1_);
-		bot_.servers().add(s2_);
+		bot_.get_servers().clear();
+		bot_.get_servers().add(s1_);
+		bot_.get_servers().add(s2_);
 		s1_->clear();
 		s2_->clear();
 	}

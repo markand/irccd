@@ -27,6 +27,7 @@
 #include <irccd/sysconfig.hpp>
 
 #include <cassert>
+#include <functional>
 #include <memory>
 #include <string>
 #include <string_view>

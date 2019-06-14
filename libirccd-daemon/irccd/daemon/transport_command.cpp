@@ -140,7 +140,7 @@ void plugin_config_command::exec(bot& bot, transport_client& client, const docum
 	if (!id || !string_util::is_identifier(*id))
 		throw plugin_error(plugin_error::invalid_identifier);
 
-	const auto plugin = bot.plugins().require(*id);
+	const auto plugin = bot.get_plugins().require(*id);
 
 	if (args.count("value") > 0)
 		exec_set(client, *plugin, args);
@@ -164,7 +164,7 @@ void plugin_info_command::exec(bot& bot, transport_client& client, const documen
 	if (!id || !string_util::is_identifier(*id))
 		throw plugin_error(plugin_error::invalid_identifier);
 
-	const auto plugin = bot.plugins().require(*id);
+	const auto plugin = bot.get_plugins().require(*id);
 
 	client.write({
 		{ "command",    "plugin-info"                           },
@@ -188,7 +188,7 @@ void plugin_list_command::exec(bot& bot, transport_client& client, const documen
 {
 	auto list = nlohmann::json::array();
 
-	for (const auto& plg : bot.plugins().list())
+	for (const auto& plg : bot.get_plugins().list())
 		list += plg->get_id();
 
 	client.write({
@@ -213,7 +213,7 @@ void plugin_load_command::exec(bot& bot, transport_client& client, const documen
 	if (!id || !string_util::is_identifier(*id))
 		throw plugin_error(plugin_error::invalid_identifier);
 
-	bot.plugins().load(*id, "");
+	bot.get_plugins().load(*id, "");
 	client.success("plugin-load");
 }
 
@@ -233,7 +233,7 @@ void plugin_reload_command::exec(bot& bot, transport_client& client, const docum
 	if (!id || !string_util::is_identifier(*id))
 		throw plugin_error(plugin_error::invalid_identifier);
 
-	bot.plugins().reload(*id);
+	bot.get_plugins().reload(*id);
 	client.success("plugin-reload");
 }
 
@@ -253,7 +253,7 @@ void plugin_unload_command::exec(bot& bot, transport_client& client, const docum
 	if (!id || !string_util::is_identifier(*id))
 		throw plugin_error(plugin_error::invalid_identifier);
 
-	bot.plugins().unload(*id);
+	bot.get_plugins().unload(*id);
 	client.success("plugin-unload");
 }
 
@@ -268,12 +268,12 @@ auto rule_add_command::get_name() const noexcept -> std::string_view
 
 void rule_add_command::exec(bot& bot, transport_client& client, const document& args)
 {
-	const auto index = args.optional<std::size_t>("index", bot.rules().list().size());
+	const auto index = args.optional<std::size_t>("index", bot.get_rules().list().size());
 
-	if (!index || *index > bot.rules().list().size())
+	if (!index || *index > bot.get_rules().list().size())
 		throw rule_error(rule_error::error::invalid_index);
 
-	bot.rules().insert(rule_util::from_json(args), *index);
+	bot.get_rules().insert(rule_util::from_json(args), *index);
 	client.success("rule-add");
 }
 
@@ -305,7 +305,7 @@ void rule_edit_command::exec(bot& bot, transport_client& client, const document&
 		throw rule_error(rule_error::invalid_index);
 
 	// Create a copy to avoid incomplete edition in case of errors.
-	auto rule = bot.rules().require(*index);
+	auto rule = bot.get_rules().require(*index);
 
 	updateset(rule.channels, args, "channels");
 	updateset(rule.events, args, "events");
@@ -327,7 +327,7 @@ void rule_edit_command::exec(bot& bot, transport_client& client, const document&
 	}
 
 	// All done, sync the rule.
-	bot.rules().require(*index) = rule;
+	bot.get_rules().require(*index) = rule;
 	client.success("rule-edit");
 }
 
@@ -347,7 +347,7 @@ void rule_info_command::exec(bot& bot, transport_client& client, const document&
 	if (!index)
 		throw rule_error(rule_error::invalid_index);
 
-	auto json = rule_util::to_json(bot.rules().require(*index));
+	auto json = rule_util::to_json(bot.get_rules().require(*index));
 
 	json.push_back({"command", "rule-info"});
 	client.write(std::move(json));
@@ -366,7 +366,7 @@ void rule_list_command::exec(bot& bot, transport_client& client, const document&
 {
 	auto array = nlohmann::json::array();
 
-	for (const auto& rule : bot.rules().list())
+	for (const auto& rule : bot.get_rules().list())
 		array.push_back(rule_util::to_json(rule));
 
 	client.write({
@@ -428,13 +428,13 @@ void rule_move_command::exec(bot& bot, transport_client& client, const document&
 		return;
 	}
 
-	if (*from >= bot.rules().list().size())
+	if (*from >= bot.get_rules().list().size())
 		throw rule_error(rule_error::error::invalid_index);
 
-	const auto save = bot.rules().list()[*from];
+	const auto save = bot.get_rules().list()[*from];
 
-	bot.rules().remove(*from);
-	bot.rules().insert(save, *to > bot.rules().list().size() ? bot.rules().list().size() : *to);
+	bot.get_rules().remove(*from);
+	bot.get_rules().insert(save, *to > bot.get_rules().list().size() ? bot.get_rules().list().size() : *to);
 	client.success("rule-move");
 }
 
@@ -451,10 +451,10 @@ void rule_remove_command::exec(bot& bot, transport_client& client, const documen
 {
 	const auto index = args.get<std::size_t>("index");
 
-	if (!index || *index >= bot.rules().list().size())
+	if (!index || *index >= bot.get_rules().list().size())
 		throw rule_error(rule_error::invalid_index);
 
-	bot.rules().remove(*index);
+	bot.get_rules().remove(*index);
 	client.success("rule-remove");
 }
 
@@ -471,10 +471,10 @@ void server_connect_command::exec(bot& bot, transport_client& client, const docu
 {
 	auto server = server_util::from_json(bot.get_service(), args);
 
-	if (bot.servers().has(server->get_id()))
+	if (bot.get_servers().has(server->get_id()))
 		throw server_error(server_error::already_exists);
 
-	bot.servers().add(std::move(server));
+	bot.get_servers().add(std::move(server));
 	client.success("server-connect");
 }
 
@@ -492,15 +492,15 @@ void server_disconnect_command::exec(bot& bot, transport_client& client, const d
 	const auto it = args.find("server");
 
 	if (it == args.end())
-		bot.servers().clear();
+		bot.get_servers().clear();
 	else {
 		if (!it->is_string() || !string_util::is_identifier(it->get<std::string>()))
 			throw server_error(server_error::invalid_identifier);
 
 		const auto name = it->get<std::string>();
 
-		bot.servers().require(name);
-		bot.servers().remove(name);
+		bot.get_servers().require(name);
+		bot.get_servers().remove(name);
 	}
 
 	client.success("server-disconnect");
@@ -522,7 +522,7 @@ void server_info_command::exec(bot& bot, transport_client& client, const documen
 	if (!id || !string_util::is_identifier(*id))
 		throw server_error(server_error::invalid_identifier);
 
-	const auto server = bot.servers().require(*id);
+	const auto server = bot.get_servers().require(*id);
 
 	// Construct the JSON response.
 	auto response = document::object();
@@ -567,7 +567,7 @@ void server_invite_command::exec(bot& bot, transport_client& client, const docum
 	if (!channel || channel->empty())
 		throw server_error(server_error::invalid_channel);
 
-	bot.servers().require(*id)->invite(*target, *channel);
+	bot.get_servers().require(*id)->invite(*target, *channel);
 	client.success("server-invite");
 }
 
@@ -593,7 +593,7 @@ void server_join_command::exec(bot& bot, transport_client& client, const documen
 	if (!password)
 		throw server_error(server_error::invalid_password);
 
-	bot.servers().require(*id)->join(*channel, *password);
+	bot.get_servers().require(*id)->join(*channel, *password);
 	client.success("server-join");
 }
 
@@ -622,7 +622,7 @@ void server_kick_command::exec(bot& bot, transport_client& client, const documen
 	if (!reason)
 		throw server_error(server_error::invalid_message);
 
-	bot.servers().require(*id)->kick(*target, *channel, *reason);
+	bot.get_servers().require(*id)->kick(*target, *channel, *reason);
 	client.success("server-kick");
 }
 
@@ -640,7 +640,7 @@ void server_list_command::exec(bot& bot, transport_client& client, const documen
 	auto json = nlohmann::json::object();
 	auto list = nlohmann::json::array();
 
-	for (const auto& server : bot.servers().list())
+	for (const auto& server : bot.get_servers().list())
 		list.push_back(server->get_id());
 
 	client.write({
@@ -671,7 +671,7 @@ void server_me_command::exec(bot& bot, transport_client& client, const document&
 	if (!message)
 		throw server_error(server_error::invalid_message);
 
-	bot.servers().require(*id)->me(*channel, *message);
+	bot.get_servers().require(*id)->me(*channel, *message);
 	client.success("server-me");
 }
 
@@ -697,7 +697,7 @@ void server_message_command::exec(bot& bot, transport_client& client, const docu
 	if (!message)
 		throw server_error(server_error::invalid_message);
 
-	bot.servers().require(*id)->message(*channel, *message);
+	bot.get_servers().require(*id)->message(*channel, *message);
 	client.success("server-message");
 }
 
@@ -728,7 +728,7 @@ void server_mode_command::exec(bot& bot, transport_client& client, const documen
 	if (!limit || !user || !mask)
 		throw server_error(server_error::invalid_mode);
 
-	bot.servers().require(*id)->mode(*channel, *mode, *limit, *user, *mask);
+	bot.get_servers().require(*id)->mode(*channel, *mode, *limit, *user, *mask);
 	client.success("server-mode");
 }
 
@@ -751,7 +751,7 @@ void server_nick_command::exec(bot& bot, transport_client& client, const documen
 	if (!nick || nick->empty())
 		throw server_error(server_error::invalid_nickname);
 
-	bot.servers().require(*id)->set_nickname(*nick);
+	bot.get_servers().require(*id)->set_nickname(*nick);
 	client.success("server-nick");
 }
 
@@ -777,7 +777,7 @@ void server_notice_command::exec(bot& bot, transport_client& client, const docum
 	if (!message)
 		throw server_error(server_error::invalid_message);
 
-	bot.servers().require(*id)->notice(*channel, *message);
+	bot.get_servers().require(*id)->notice(*channel, *message);
 	client.success("server-notice");
 }
 
@@ -803,7 +803,7 @@ void server_part_command::exec(bot& bot, transport_client& client, const documen
 	if (!reason)
 		throw server_error(server_error::invalid_message);
 
-	bot.servers().require(*id)->part(*channel, *reason);
+	bot.get_servers().require(*id)->part(*channel, *reason);
 	client.success("server-part");
 }
 
@@ -821,12 +821,12 @@ void server_reconnect_command::exec(bot& bot, transport_client& client, const do
 	const auto it = args.find("server");
 
 	if (it == args.end())
-		bot.servers().reconnect();
+		bot.get_servers().reconnect();
 	else {
 		if (!it->is_string() || !string_util::is_identifier(it->get<std::string>()))
 			throw server_error(server_error::invalid_identifier);
 
-		bot.servers().reconnect(it->get<std::string>());
+		bot.get_servers().reconnect(it->get<std::string>());
 	}
 
 	client.success("server-reconnect");
@@ -854,7 +854,7 @@ void server_topic_command::exec(bot& bot, transport_client& client, const docume
 	if (!topic)
 		throw server_error(server_error::invalid_message);
 
-	bot.servers().require(*id)->topic(*channel, *topic);
+	bot.get_servers().require(*id)->topic(*channel, *topic);
 	client.success("server-topic");
 }
 
