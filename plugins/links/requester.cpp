@@ -158,13 +158,12 @@ void requester::handle_read(const error_code& code)
 	// Request again in case of relocation.
 	if (const auto it = res_.find(field::location); it != res_.end() && level_ < 32U) {
 		const string location(it->value().data(), it->value().size());
-		auto& io = timer_.get_io_service();
 		auto uri = uri::parse(location);
 
 		if (!uri)
 			return;
 
-		shared_ptr<requester>(new requester(io, server_, channel_, origin_, move(*uri), level_ + 1))->start();
+		shared_ptr<requester>(new requester(service_, server_, channel_, origin_, move(*uri), level_ + 1))->start();
 	} else if (res_.result() == status::ok)
 		parse();
 }
@@ -328,10 +327,10 @@ void requester::timer()
 void requester::start()
 {
 	if (uri_.scheme == "http")
-		socket_.emplace<tcp::socket>(resolver_.get_io_service());
+		socket_.emplace<tcp::socket>(service_);
 #if defined(IRCCD_HAVE_SSL)
 	else if (uri_.scheme == "https")
-		socket_.emplace<stream<tcp::socket>>(resolver_.get_io_service(), ctx_);
+		socket_.emplace<stream<tcp::socket>>(service_, ctx_);
 #endif
 
 	// Only do the resolve if scheme is correct.
@@ -350,6 +349,7 @@ requester::requester(io_context& io,
 	, channel_(move(channel))
 	, origin_(move(origin))
 	, uri_(move(uri))
+	, service_(io)
 	, timer_(io)
 	, resolver_(io)
 {
