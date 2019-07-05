@@ -52,7 +52,7 @@ protected:
 		if (!plugin)
 			throw std::runtime_error("sample not found");
 
-		plugin_ = std::dynamic_pointer_cast<mock_plugin>(plugin);
+		plugin_ = std::static_pointer_cast<mock_plugin>(plugin);
 	}
 };
 
