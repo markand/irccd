@@ -26,6 +26,7 @@ else ()
 	irccd_define_plugin(
 		NAME links
 		TYPE NATIVE
+		MAN ${plugin-links_SOURCE_DIR}/links.7
 		SOURCES
 			${plugin-links_SOURCE_DIR}/links.cpp
 			${plugin-links_SOURCE_DIR}/links.hpp

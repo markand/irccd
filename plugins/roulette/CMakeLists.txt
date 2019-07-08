@@ -22,5 +22,5 @@ irccd_define_plugin(
 	NAME roulette
 	TYPE JS
 	SCRIPT ${plugin-roulette_SOURCE_DIR}/roulette.js
-	DOCS ${plugin-roulette_SOURCE_DIR}/roulette.md
+	MAN ${plugin-roulette_SOURCE_DIR}/roulette.7
 )

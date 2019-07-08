@@ -1,0 +1,103 @@
+.\"
+.\" Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-PLUGIN-JOKE 7
+.Os
+.\" NAME
+.Sh NAME
+.Nm joke
+.Nd irccd joke plugin
+.\" DESCRIPTION
+.Sh DESCRIPTION
+The
+.Nm
+plugin is a convenient command to display jokes in a random order without
+displaying always the same.
+.Pp
+It loads jokes per channel/server pair and display a unique joke each time it is
+invoked.
+.\" INSTALLATION
+.Sh INSTALLATION
+The plugin
+.Nm
+is distributed with irccd. To enable it add the following to your plugins
+section:
+.Pp
+.Bd -literal
+[plugins]
+joke = ""
+.Ed
+.\" USAGE
+.Sh USAGE
+The
+.Nm
+plugin requires a database of jokes file, it consists of a plain JSON file of
+array of array of strings.
+.Pp
+Example of jokes.json file:
+.Bd -literal -offset Ds
+[
+    [
+        "Tip to generate a good random password:",
+        "Ask a Windows user to quit vim."
+    ],
+    [
+        "Have you tried turning it off and on again?"
+    ]
+]
+.Ed
+.Pp
+This file contains two jokes, the first one will be printed on two lines while
+the second only has one.
+.Pp
+Then, invoke the plugin:
+.Bd -literal -offset Ds
+markand: !joke
+irccd: Have you tried turning it off and on again?
+markand: !joke
+irccd: Tip to generate a good random password:
+irccd: Ask a Windows user to quit vim.
+.Ed
+.\" CONFIGURATION
+.Sh CONFIGURATION
+The following options are available under the
+.Va [plugin.joke]
+section:
+.Bl -tag -width 14n -offset Ds
+.It Va file No (string)
+path to the JSON jokes files (Optional: defaults to data directory/jokes.json).
+Keywords:
+.Em channel , server
+.Pp
+Warning: if you use keywords in the **file** parameter, you won't have a default
+joke database anymore.
+.El
+.\" TEMPLATES
+.Sh TEMPLATES
+The
+.Nm
+plugin supports the following templates in
+.Va [templates.joke]
+section:
+.Bl -tag -width 14n -offset Ds
+.It Va error
+Template when an internal error occured. Keywords:
+.Em channel , nickname , origin , server .
+.El
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd 1 ,
+.Xr irccd-templates 7

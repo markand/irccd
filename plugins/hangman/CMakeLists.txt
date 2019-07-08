@@ -22,5 +22,5 @@ irccd_define_plugin(
 	NAME hangman
 	TYPE JS
 	SCRIPT ${plugin-hangman_SOURCE_DIR}/hangman.js
-	DOCS ${plugin-hangman_SOURCE_DIR}/hangman.md
+	MAN ${plugin-hangman_SOURCE_DIR}/hangman.7
 )

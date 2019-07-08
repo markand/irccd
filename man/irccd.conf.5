@@ -1,0 +1,345 @@
+.\"
+.\" Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD.CONF 5
+.Os
+.\" NAME
+.Sh NAME
+.Nm irccd
+.Nd irccd configuration file
+.\" DESCRIPTION
+.Sh DESCRIPTION
+Both
+.Nm irccd
+and
+.Nm irccdctl
+use configuration file in a extended INI format. This section will briefly
+explain the additional extensions to the INI format.
+.Pp
+The file syntax has following rules:
+.Bl -enum
+.It
+Each option is stored in a section,
+.It
+Some sections may be redefined multiple times,
+.It
+Empty option must have quotes (e.g. option = "").
+.El
+.Ss The @include and @tryinclude statements
+Irccd adds an extension to this format by adding an
+.\" @include and @tryinclude
+.Ar @include keyword which
+let you splitting your configuration file.
+.Pp
+Note: this @include statement must be at the beginning of the file and must be
+      surrounded by quotes if the file name has spaces.
+.Pp
+You can use both relative or absolute paths. If relative paths are used, they
+are relative to the current file being parsed.
+.Pp
+The alternative
+.Ar @tryinclude
+keyword is similar but does not fails if the requested file is not found.
+.Pp
+Example of includes:
+.Bd -literal -offset Ds
+@include "rules.conf"
+@include "servers.conf"
+
+[mysection]
+myoption = "1"
+.Ed
+.\" lists
+.Ss The list construct
+When requested, an option can have multiples values in a list. The syntax uses
+parentheses and values are separated by commas.
+.Pp
+If the list have only one value, you can just use a simple string.
+.Pp
+Example of lists:
+.Bd -literal -offset Ds
+[rule]
+servers = ( "server1", "server2" )
+
+[rule]
+servers = "only-one-server"
+.Ed
+.Pp
+Note: spaces are completely optional.
+.\" identifiers
+.Ss Identifiers
+Some sections require an identifier (specified as id) as parameter. They must be
+unique, not empty and can only contain characters, numbers, '-' and '_'.
+.Pp
+Example: both
+.Ar abc
+and
+.Ar server-tz2
+are valid.
+.\" CONFIGURATION SECTIONS
+.Sh CONFIGURATION SECTIONS
+Configuration are always stored in dedicated section in the form
+.Ar [name]
+where name is one of the section defined below and are case-sensitive.
+.\" [logs]
+.Ss logs
+This section can let you configure how irccd should log the messages.
+.Pp
+Available options:
+.Bl -tag -offset Ds -width indent-xxxxxxxxxxxxxxxxxxx
+.It Va verbose No (bool)
+be verbose (Optional, default: false).
+.It Va type No (string)
+which kind of logging, console, file or syslog (Optional, default: console).
+.Pp
+The additional options for
+.Ar file
+type:
+.Bl -tag -width indent-xxxxxxxxxxxxx
+.It Va path-logs No (string)
+path to the normal messages.
+.It Va path-errors No (string)
+path to the error messages.
+.El
+.Pp
+Note: syslog is not available on all platforms.
+.El
+.\" [format]
+.Ss format
+The format section let you change the irccd's output. It uses the templates
+system (see
+.Xr irccd-format 7
+for more information about templates)
+.Pp
+Only one keyword is defined, message which contains the message that irccd
+wants to output.
+.Pp
+Note: colors and attributes are not supported on Windows.
+.Pp
+Available options:
+.Bl -tag -offset Ds -width indent-xxxxxxxxxxxxxxxxxxx
+.It Va debug No (string)
+template to use to format debug messages (Optional, default: none).
+.It Va info No (string)
+template to use to format information messages (Optional, default: none).
+.It Va warning No (string)
+template to use to format warnings (Optional, default: none).
+.El
+.\" [server]
+.Ss server
+This section is used to connect to one or more server.
+.Pp
+Available options:
+.Bl -tag -offset Ds -width indent-xxxxxxxxxxxxxxxxxxx
+.It Va name No (identifier)
+the unique id.
+.It Va hostname No (string)
+the server address or IP.
+.It Va port No (int)
+the server port (Optional, default: 6667).
+.It Va password No (string)
+an optional server password (Optional, default: none).
+.It Va join-invite No (bool)
+automatically join channels upon invitation (Optional, default: false).
+.It Va channels No (list)
+list of channels to auto join (Optional, default: empty).
+.Pp
+Note: if a channel requires a password, add it after a colon
+      (e.g. #channel:password).
+.It Va command-char No (string)
+the prefix for invoking special commands (Optional, default: !).
+.It Va ssl No (bool)
+enable or disable SSL (Optional, default: false).
+.It Va auto-reconnect No (bool)
+enable reconnection after failure (Optional, default: true).
+.It Va auto-reconnect-delay No (int)
+number of seconds to wait before retrying (Optional, default: 30).
+.It Va ping-timeout No (int)
+number of seconds before ping timeout (Optional, default: 300).
+.It Va nickname No (string)
+the nickname (Optional, default: irccd).
+.It Va realname No (string)
+the realname (Optional, default: IRC Client Daemon).
+.It Va username No (string)
+the username name (Optional, default: irccd).
+.It Va ctcp-version No (string)
+what version to respond to CTCP VERSION (Optional, default: IRC Client Daemon).
+.El
+.\" [paths]
+.Ss paths
+The paths section defines common paths used as defaults for all plugins.
+.Pp
+Any option in this section can be defined altough the following are used as
+common convention used in all plugins:
+.Pp
+Available options:
+.Bl -tag -offset Ds -width indent-xxxxxxxxxxxxxxxxxxx
+.It Va cache No (string)
+path for data files written by the plugin.
+.It Va data No (string)
+path for data files provided by the user.
+.It Va config No (string)
+path for additional configuration from the user.
+.El
+.Pp
+For each of these paths, plugin/name is appended with the appropriate plugin
+name when used.
+.Pp
+The section is redefinable per plugin basis using the
+.Va [paths.<plugin>]
+syntax.
+.Ss plugins
+This section is used to load plugins.
+.Pp
+Just add any key you like to load a plugin. If the value is not specified, the
+plugin is searched through the standard directories, otherwise, provide the full
+path (including the .js extension).
+.Pp
+Warning: remember to add an empty string for searching plugins.
+.\" [transport]
+.Ss transport
+This section defines transports that are used to communicate through clients
+connected to irccd and to perform requests to irccd.
+.Pp
+With transports, you can may ask irccd to send a message, a notice or even
+kicking someone from a channel. Irccd will also notify all clients connected to
+this transport on IRC events.
+.Pp
+There are two type of listeners availables:
+.Bl -bullet
+.It
+Internet sockets, IPv4 and IPv6,
+.It
+Unix sockets, based on files (not available on Windows).
+.El
+.Pp
+If SSL support was built in, both internet and unix sockets can be set to use
+encrypted connections.
+.Pp
+Available options:
+.Bl -tag -offset Ds -width indent-xxxxxxxxxxxxxxxxxxx
+.It Va type No (string)
+type of listener "ip" or "unix".
+.It Va password No (string)
+an authentication password (Optional, default: none).
+.It Va ssl No (bool)
+enable SSL (Optional, default: false),
+.It Va key No (string)
+path to private key file (Required if ssl is true)
+.It Va certificate No (string)
+path to certificate (Required if ssl is true)
+.Pp
+The additional options for ip type:
+.Bl -tag -width indent-xxxxxxxxx
+.It Va port No (int)
+port number.
+.It Va address No (string)
+address to bind or * for any (Optional, default: *).
+.It Va ipv4 No (bool)
+bind on IPv4 (Optional, default true).
+.It Va ipv6 No (bool)
+bind on IPv6 (Optional, default true).
+.El
+.Pp
+The additional options for unix type:
+.Bl -tag -width indent-xxxxxxxxx
+.It Va path No (string)
+the file path to the socket.
+.El
+.El
+.Pp
+Warning: consider using internet sockets with care, especially if you are
+         running your bot on a server with multiple users. If your bot has
+         operator rights and you bind on any address, almost every users
+         can do a kick or a ban.
+.\" [rule]
+.Ss rule
+The rule section is one of the most powerful within irccd configuration. It let
+you enable or disable plugins and IRC events for specific criterias. For
+instance, you may want to disable a plugin only for a specific channel on a
+specific server. And because rules are evaluated in the order they are defined,
+you can override rules.
+.Pp
+Available options:
+.Bl -tag -offset Ds -width indent-xxxxxxxxxxxxxxxxxxx
+.It Va servers No (list)
+a list of servers that will match the rule (Optional, default: empty).
+.It Va channels No (list)
+a list of channel (Optional, default: empty).
+.It Va origins No (list)
+a list of nicknames to check (Optional, default: empty).
+.It Va plugins No (list)
+which plugins (Optional, default: empty),
+.It Va events No (list)
+which events like onCommand, onMessage (Optional, default: empty).
+.It Va action No (string)
+set to accept or drop.
+.El
+.Pp
+Warning: don't make sensitive rules on origins option, irccd does not have any
+         kind of nickname authentication. Thus, it may be very easy for someone
+         to use a temporary nickname.
+.Sh EXAMPLE
+Full example of configuration file
+.Bd -literal
+# Add a transport that bind only to IPv6.
+[transport]
+type = ip
+ipv4 = false
+ipv6 = true
+family = ipv6
+port = 12000
+
+# A transport that binds to both IPv4 and IPv6.
+[transport]
+type = ip
+port = 15000
+
+# A server.
+[server]
+name = "foo"
+host = "irc.foo.org"
+port = "6667"
+nickname = "superbot"
+realname = "SuperBot v1.0"
+username = "sp"
+
+# An other server.
+[server]
+name = "wanadoo"
+host = "chat.wanadoo.fr"
+port = "6667"
+
+# Load some plugins.
+[plugins]
+ask = ""                               # Search ask
+myplugin = /path/to/myplugin.js        # Use absolute path
+
+# This first rule disable the plugin reboot on all servers and channels.
+[rule]
+plugins = "reboot"
+action = drop
+
+# This rule enable the reboot plugin again on the server localhost,
+# channel #staff.
+[rule]
+servers = "localhost"
+channels = "#staff"
+plugins = "reboot"
+action = accept
+.Ed
+.Sh SEE ALSO
+.Xr irccd 1

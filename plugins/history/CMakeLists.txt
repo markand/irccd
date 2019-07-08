@@ -22,5 +22,5 @@ irccd_define_plugin(
 	NAME history
 	TYPE JS
 	SCRIPT ${plugin-history_SOURCE_DIR}/history.js
-	DOCS ${plugin-history_SOURCE_DIR}/history.md
+	MAN ${plugin-history_SOURCE_DIR}/history.7
 )

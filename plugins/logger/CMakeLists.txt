@@ -22,5 +22,5 @@ irccd_define_plugin(
 	NAME logger
 	TYPE JS
 	SCRIPT ${plugin-logger_SOURCE_DIR}/logger.js
-	DOCS ${plugin-logger_SOURCE_DIR}/logger.md
+	MAN ${plugin-logger_SOURCE_DIR}/logger.7
 )

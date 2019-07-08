@@ -22,5 +22,5 @@ irccd_define_plugin(
 	NAME plugin
 	TYPE JS
 	SCRIPT ${plugin-plugin_SOURCE_DIR}/plugin.js
-	DOCS ${plugin-plugin_SOURCE_DIR}/plugin.md
+	MAN ${plugin-plugin_SOURCE_DIR}/plugin.7
 )

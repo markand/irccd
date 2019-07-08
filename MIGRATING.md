@@ -56,7 +56,7 @@ Directories
 -----------
 
 - The default plugins path has been changed from **share/irccd/plugins** to
-  **lib64/irccd**.
+  **lib(arch)/irccd**.
 
 Javascript API
 --------------

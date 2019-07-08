@@ -19,9 +19,7 @@
 #
 # Options that controls the build:
 #
-# IRCCD_WITH_DOCS           Enable building of all documentation (default: on)
 # IRCCD_WITH_DOXYGEN        Enable internal irccd documentation (default: on)
-# IRCCD_WITH_HTML           Enable HTML documentation
 # IRCCD_WITH_JS             Enable JavaScript (default: on)
 # IRCCD_WITH_LIBEDIT        Enable libedit support (default: on)
 # IRCCD_WITH_MAN            Install manpages (default: on, off for Windows)
@@ -48,9 +46,7 @@ else ()
 	set(DEFAULT_PKGCONFIG "No")
 endif ()
 
-option(IRCCD_WITH_DOCS "Enable building of all documentation" On)
 option(IRCCD_WITH_DOXYGEN "Enable doxygen" Off)
-option(IRCCD_WITH_HTML "Enable building of HTML documentation" On)
 option(IRCCD_WITH_JS "Enable embedded Duktape" On)
 option(IRCCD_WITH_LIBEDIT "Enable libedit support" On)
 option(IRCCD_WITH_MAN "Install man pages" ${DEFAULT_MAN})
@@ -84,7 +80,6 @@ endif ()
 
 find_package(Doxygen)
 find_package(OpenSSL)
-find_package(marker)
 find_package(Editline)
 
 if (IRCCD_WITH_LIBEDIT)
@@ -118,6 +113,13 @@ if (IRCCD_WITH_DOXYGEN)
 	endif ()
 else ()
 	set(IRCCD_WITH_DOXYGEN_MSG "No (disabled by user)")
+endif ()
+
+if (IRCCD_WITH_MAN)
+	set(IRCCD_HAVE_MAN On)
+	set(IRCCD_WITH_MAN_MSG "Yes")
+else ()
+	set(IRCCD_WITH_MAN_MSG "No (disabled by user)")
 endif ()
 
 #

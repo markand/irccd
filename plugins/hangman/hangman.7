@@ -1,0 +1,149 @@
+.\"
+.\" Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-PLUGIN-HANGMAN 7
+.Os
+.\" NAME
+.Sh NAME
+.Nm hangman
+.Nd irccd hangman plugin
+.\" DESCRIPTION
+.Sh DESCRIPTION
+The
+.Nm
+plugin lets you play the hangman game on IRC.
+.\" INSTALLATION
+.Sh INSTALLATION
+The plugin
+.Nm
+is distributed with irccd. To enable it add the following to your plugins
+section:
+.Pp
+.Bd -literal
+[plugins]
+hangman = ""
+.Ed
+.\" USAGE
+.Sh USAGE
+The
+.Nm
+plugin starts when a user execute its special command with no arguments.
+.Bd -literal -offset Ds
+markand: !hangman
+irccd: markand, the game is started, the word to find is: _ _ _ _ _ _ _ _ _ _ _
+.Ed
+.Pp
+If a game is already running, the same command shows the current word.
+.Bd -literal -offset Ds
+markand: !hangman
+irccd: markand, the game is already running and the word is: s _ _,
+.Ed
+.Pp
+There are two ways for proposing a response to the game. You can either just ask
+for a letter or for a whole word.
+.Ss By letter
+When asking a letter, the message must be one letter.
+.Bd -literal -offset Ds
+markand: c
+irccd: markand, nice! the word is now c _ _ _ _
+jean: k
+irccd: jean, there is no 'k'.
+.Ed
+.Ss By full word
+When asking by a word, just put one word as command argument. Note that in
+contrast to the letter proposal we have used command invocation rather than
+normal message to avoid possible propositions by mistake.
+.Bd -literal -offset Ds
+markand: !hangman couch
+irccd: markand, this is not the word.
+jean: !hangman candy
+irccd: jean, congratulations, the word is candy.
+.Ed
+.\" CONFIGURATION
+.Sh CONFIGURATION
+The following options are available under the
+.Va [plugin.hangman]
+section:
+.Bl -tag -width 20n -offset Ds
+.It Va file No (string)
+The path to the database file.
+.Pp
+The file must contains one word per line, it must be saved as UTF-8 and words
+must only contains UTF-8 characters, any other entry will be ignored.
+.Pp
+Example:
+.Bd -literal -offset Ds
+sky
+irccd
+FreeBSD
+door
+cat
+.Ed
+.It Va collaborative No (bool)
+Set to true to enable collaborative mode, a player can't propose two
+consecutives proposals (Optional, default: true).
+.El
+.\" TEMPLATES
+.Sh TEMPLATES
+The
+.Nm
+plugin supports the following templates in
+.Va [templates.hangman]
+section:
+.Bl -tag -width 22n -offset Ds
+.It Va asked
+When a letter has been already asked but present in the word. Keywords:
+.Em letter .
+.It Va dead
+When the man was hung. Keywords:
+.Em word .
+.It Va found
+When a correct letter has been placed. Keywords:
+.Em word .
+.It Va running
+When a game is requested but it's already running. Keywords:
+.Em word .
+.It Va start
+When the game starts. Keywords:
+.Em word .
+.It Va win
+When the game succeeded. Keywords:
+.Em word .
+.It Va wrong-word
+When a word proposal is wrong. Keywords:
+.Em word .
+.It Va wrong-letter
+When a letter proposal is wrong. Keywords:
+.Em letter .
+.El
+.Pp
+All templates support the following standard keywords:
+.Em channel , command , nickname , origin , plugin , server .
+.\" EXAMPLES
+.Sh EXAMPLES
+Example of configuration file:
+.Bd -literal
+[plugin.hangman]
+file = "/var/srv/db/words.txt"
+
+[templates.hangman]
+win = "nice job, the word was #{word}!"
+wrong-letter = "please try again, there is no #{letter}"
+.Ed
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd 1 ,
+.Xr irccd-templates 7

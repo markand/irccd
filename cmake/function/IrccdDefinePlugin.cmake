@@ -25,7 +25,7 @@
 # irccd_define_plugin(
 #   NAME        canonical plugin name
 #   TYPE        JS
-#   DOCS        documentation files in markdown
+#   MAN         manual page
 #   SCRIPT      absolute path to the Javascript file (ending with .js)
 # )
 #
@@ -34,7 +34,7 @@
 # irccd_define_plugin(
 #   NAME        canonical plugin name
 #   TYPE        NATIVE
-#   DOCS        documentation files in markdown
+#   MAN         manual page
 #   SOURCES     c++ source files
 #   INCLUDES    additional includes
 #   LIBRARIES   additional libraries
@@ -50,8 +50,8 @@
 # must be given as SCRIPT parameter. For native plugins, any source files can
 # be given as SOURCES parameter.
 #
-# Additional documentation can be built in markdown and installed along the
-# plugin using DOCS parameter.
+# Additional documentation in manual page format can be specified with the MAN
+# parameter.
 #
 # A CMake option is also created in the form OPTION_<PLG> where PLG is the
 # uppercase NAME value.
@@ -81,7 +81,7 @@ function(_irccd_define_javascript_plugin)
 		plugin-${PLG_NAME}
 		ALL
 		DEPENDS ${PLG_OUTPUT_DOC}
-		SOURCES ${PLG_SCRIPT} ${PLG_DOCS}
+		SOURCES ${PLG_SCRIPT} ${PLG_MAN}
 	)
 endfunction()
 
@@ -90,7 +90,7 @@ function(_irccd_define_native_plugin)
 		message(FATAL_ERROR "Missing SOURCES parameter")
 	endif ()
 
-	add_library(plugin-${PLG_NAME} MODULE ${PLG_SOURCES} ${PLG_OUTPUT_DOC} ${PLG_DOCS})
+	add_library(plugin-${PLG_NAME} MODULE ${PLG_SOURCES} ${PLG_OUTPUT_DOC} ${PLG_MAN})
 	target_link_libraries(plugin-${PLG_NAME} libirccd-daemon ${PLG_LIBRARIES})
 	target_include_directories(plugin-${PLG_NAME} PRIVATE ${PLG_INCLUDES})
 
@@ -122,8 +122,8 @@ endfunction()
 
 function(irccd_define_plugin)
 	set(options "")
-	set(oneValueArgs NAME DOCS TYPE SCRIPT)
-	set(multiValueArgs SOURCES INCLUDES LIBRARIES)
+	set(oneValueArgs "NAME;MAN;TYPE;SCRIPT")
+	set(multiValueArgs "SOURCES;INCLUDES;LIBRARIES")
 
 	cmake_parse_arguments(PLG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -142,13 +142,13 @@ function(irccd_define_plugin)
 		setg(IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME}_MSG "Yes")
 
 		# Optional documentation.
-		if (PLG_DOCS)
-			irccd_build_html(
-				SOURCE ${PLG_DOCS}
-				COMPONENT ${PLG_NAME}
-				OUTPUT_DIR plugin/${PLG_NAME}
-				OUTPUT_VAR PLG_OUTPUT_DOC
-				TEMPLATE ${html_SOURCE_DIR}/template.html
+		if (PLG_MAN)
+			get_filename_component(man ${PLG_MAN} NAME)
+
+			irccd_define_man(
+				INPUT ${PLG_MAN}
+				OUTPUT irccd-plugin-${man}
+				SECTION man7
 			)
 		endif ()
 

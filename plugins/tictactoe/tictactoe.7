@@ -1,0 +1,127 @@
+.\"
+.\" Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-PLUGIN-TICTACTOE 7
+.Os
+.\" NAME
+.Sh NAME
+.Nm tictactoe
+.Nd irccd tictactoe plugin
+.\" DESCRIPTION
+.Sh DESCRIPTION
+The
+.Nm
+plugin let you play tictactoe over IRC.
+.Pp
+Warning: this plugin is extremely verbose, don't enable it blindly.
+.\" INSTALLATION
+.Sh INSTALLATION
+The plugin
+.Nm
+is distributed with irccd. To enable it add the following to your plugins
+section:
+.Pp
+.Bd -literal
+[plugins]
+tictactoe = ""
+.Ed
+.\" USAGE
+.Sh USAGE
+Use the special command with the target opponent nickname. Then each player send
+a message in the form
+.Ar "x y"
+where x targets the column and y the row.
+.Pp
+To verify target opponent, this plugins first requests the names on the channel
+to ensures a valid player.
+.Pp
+If one of the players leaves the channel (either by kick or part) the game is
+aborted silently.
+.Pp
+Example when starting a game:
+.Bd -literal -offset Ds
+markand: !tictactoe francis
+irccd:   a b c
+irccd: 1 . . .
+irccd: 2 . . .
+irccd: 3 . . .
+irccd: markand, it's your turn
+.Ed
+.Pp
+And then, placing tokens:
+.Bd -literal -offset Ds
+20:27 < markand> a 1
+20:27 < irccd>   a b c
+20:27 < irccd> 1 x . .
+20:27 < irccd> 2 . . .
+20:27 < irccd> 3 . . .
+20:27 < irccd> francis, it's your turn
+20:27 <@francis> c 1
+20:27 < irccd>   a b c
+20:27 < irccd> 1 x . o
+20:27 < irccd> 2 . . .
+20:27 < irccd> 3 . . .
+20:27 < irccd> markand, it's your turn
+20:27 < markand> a 2
+20:27 < irccd>   a b c
+20:27 < irccd> 1 x . o
+20:27 < irccd> 2 x . .
+20:27 < irccd> 3 . . .
+20:27 < irccd> francis, it's your turn
+20:27 <@francis> c 3
+20:27 < irccd>   a b c
+20:27 < irccd> 1 x . o
+20:27 < irccd> 2 x . .
+20:27 < irccd> 3 . . o
+20:27 < irccd> markand, it's your turn
+20:27 < markand> a 3
+20:27 < irccd>   a b c
+20:27 < irccd> 1 x . o
+20:27 < irccd> 2 x . .
+20:27 < irccd> 3 x . o
+20:27 < irccd> francis, it's your turn
+20:27 < irccd> markand, congratulations, you won!
+.Ed
+.\" TEMPLATES
+.Sh TEMPLATES
+The
+.Nm
+plugin supports the following templates in
+.Va [templates.tictactoe]
+section:
+.Bl -tag -width 8n -offset Ds
+.It Va draw
+When the game ended with no winner.
+.It Va invalid
+The opponent does not exist or is not valid. Keywords:
+.Em origin .
+.It Va running
+The game is already running. Keywords:
+.Em origin .
+.It Va turn
+Message sent when current player change.
+.It Va used
+The cell requested is already used.
+.It Va win
+Game ended with a winner.
+.El
+.Pp
+All templates support the following standard keywords:
+.Em channel , command , nickname , plugin , server .
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd 1 ,
+.Xr irccd-templates 7

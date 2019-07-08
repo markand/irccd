@@ -1,0 +1,98 @@
+.\"
+.\" Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-PLUGIN-PLUGIN 7
+.Os
+.\" NAME
+.Sh NAME
+.Nm plugin
+.Nd irccd plugin plugin
+.\" DESCRIPTION
+.Sh DESCRIPTION
+The
+.Nm
+plugin let you inspect loaded plugins.
+.\" INSTALLATION
+.Sh INSTALLATION
+The plugin
+.Nm
+is distributed with irccd. To enable it add the following to your plugins
+section:
+.Pp
+.Bd -literal
+[plugins]
+plugin = ""
+.Ed
+.\" USAGE
+.Sh USAGE
+The
+.Nm
+plugin only reacts to the special command. It understands
+.Ar info
+and
+.Ar list
+sub commands.
+.Pp
+.Bl -bullet -compact
+.It
+The sub command
+.Ar info
+shows information about a plugin.
+.It
+The sub command
+.Ar list
+shows loaded plugins (see configuration for limits).
+.El
+.Pp
+Both commands work in a channel or as private message with irccd.
+.\" CONFIGURATION
+.Sh CONFIGURATION
+The following options are available under the
+.Va [plugin.plugin]
+section:
+.Bl -tag -width 22n -offset Ds
+.It Va max-list-lines No (int)
+max number of lines allowed for the
+.Ar list
+sub command (Optional, default: 3).
+.It Va max-list-columns No (int)
+max number of columns allowed per lines (Optional, default: 80).
+.\" TEMPLATES
+.Sh TEMPLATES
+The
+.Nm
+plugin supports the following templates in
+.Va [templates.plugin]
+section:
+.Bl -tag -width 14n -offset Ds
+.It Va usage
+Message to show on invalid usage.
+.It Va info
+Plugin information message to show. Keywords:
+.Em author , license , name , summary , version .
+.It Va not-found
+Message to show if a plugin does not exist. Keywords:
+.Em name .
+.It Va too-long
+Message to show if the list of plugin is too long.
+.El
+.Pp
+All templates support the following standard keywords:
+.Em channel , command , nickname , origin , plugin , server.
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd 1 ,
+.Xr irccd-templates 7

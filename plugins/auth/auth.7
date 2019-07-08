@@ -1,0 +1,81 @@
+.\"
+.\" Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-PLUGIN-AUTH 7
+.Os
+.\" NAME
+.Sh NAME
+.Nm auth
+.Nd irccd auth plugin
+.\" DESCRIPTION
+.Sh DESCRIPTION
+The plugin
+.Nm
+provides generic authentication to the most popular services.
+.Pp
+For the moment,
+.Nm auth
+supports the following backends:
+.Bl -tag -width 12n -offset Ds
+.It nickserv
+the NickServ service, using /msg NickServ identify user pass
+.It quakenet
+the quakenet.org service, using /msg Q@CServe.quakenet.org AUTH user pass
+.\" INSTALLATION
+.Sh INSTALLATION
+The plugin
+.Nm
+is distributed with irccd. To enable it add the following to your plugins
+section:
+.Pp
+.Bd -literal
+[plugins]
+auth = ""
+.Ed
+.\" USAGE
+.Sh USAGE
+You must configure the file to enable authentication.
+.\" CONFIGURATION
+.Sh CONFIGURATION
+In your irccd.conf file, add the
+.Va [plugin.auth]
+section and fill with the following parameters:
+.Bl -tag -width 24n
+.It Va server.type No (string)
+must be
+.Em nickserv
+or
+.Em quakenet .
+.It Va server.password No (string)
+the password.
+.It Va server.username No (string)
+the username to use. Required for quakenet, optional for nickserv.
+.El
+.Pp
+Note: you must replace server with one defined in a
+.Va [server]
+section.
+.Pp
+Example of configuration:
+.Bd -literal -offset Ds
+[plugin.auth]
+freenode.type = "nickserv"
+freenode.password = "mysecretpassword"
+freenode.username = "jeanfrancois"
+
+wanadoo.type = "nickserv"
+wanadoo.password = "wanadoo is dead"
+.Ed

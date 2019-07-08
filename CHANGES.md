@@ -46,6 +46,10 @@ internal:
   (#594), (#595), (#681), (#697),
 - The libircclient has been replaced by a simple homemade library (#581).
 
+misc:
+
+- The documentation is in pure manual pages now (#1674).
+
 plugins:
 
 - Introduce brand new joke plugin (#609),

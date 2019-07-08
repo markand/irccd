@@ -1,0 +1,114 @@
+.\"
+.\" Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-PLUGIN-HISTORY 7
+.Os
+.\" NAME
+.Sh NAME
+.Nm history
+.Nd irccd history plugin
+.\" DESCRIPTION
+.Sh DESCRIPTION
+The
+.Nm
+plugin is used to check when someone has been seen for the last time on a
+channel. For that purpose, irccd needs to be on that channel forever if
+possible.
+.\" INSTALLATION
+.Sh INSTALLATION
+The plugin
+.Nm
+is distributed with irccd. To enable it add the following to your plugins
+section:
+.Pp
+.Bd -literal
+[plugins]
+history = ""
+.Ed
+.\" USAGE
+.Sh USAGE
+The plugin
+.Nm history
+only reacts to the special command. It understands
+.Ar seen
+and
+.Ar said
+sub commands.
+.Pp
+.Bl -bullet -compact
+.It
+The sub command
+.Ar seen
+tells you when the user has been seen for the last time.
+.It
+The sub command
+.Ar said
+tells you what the user has said for the last time.
+.El
+.Pp
+Example
+.Bd -literal -offset Ds
+markand: !history seen jean
+irccd: markand, the last time I've seen jean was on 18/01/1989 at 20:55
+markand: !history said jean
+irccd: markand, the last thing that jean said was: hello world
+.Ed
+.\" CONFIGURATION
+.Sh CONFIGURATION
+The following options are available under the
+.Va [plugin.history]
+section:
+.Bl -tag -width 14n -offset Ds
+.It Va file No (string)
+path to the JSON file for saving information (Optional. default to cache
+directory).
+.El
+.\" TEMPLATES
+.Sh TEMPLATES
+The
+.Nm
+plugin supports the following templates in
+.Va [templates.history]
+section:
+.Bl -tag -width 14n -offset Ds
+.It Va error
+Template when an internal error occured. Keywords:
+.It Va seen
+Template for showing last seen. Keywords:
+.Em target , (date) .
+.It Va said
+Template for showing the last message. Keywords:
+.Em message , target , (date) .
+.It Va unknown
+Template when the user has never been seen. Keywords:
+.Em target .
+.It Va usage
+Template to show the plugin usage.
+.El
+.Pp
+All templates support the following standard keywords:
+.Em channel , command , nickname , origin , plugin , server .
+.\" EXAMPLES
+.Sh EXAMPLES
+Example of configuration file:
+.Bd -literal
+[templates.history]
+seen = "#{target} has been seen on #{channel} the last time on: %d/%m/%Y %H:%M"
+.Ed
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd 1 ,
+.Xr irccd-templates 7

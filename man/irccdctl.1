@@ -1,0 +1,438 @@
+.\"
+.\" Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD 1
+.Os
+.\" NAME
+.Sh NAME
+.Nm irccdctl
+.Nd irccd controller agent
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.Nm
+.\" plugin-config
+.Cm plugin-config
+.Ar id
+.Op Ar variable
+.Op Ar value
+.\" plugin-info
+.Nm
+.Cm plugin-info
+.Ar id
+.\" plugin-list
+.Nm
+.Cm plugin-list
+.\" plugin-load
+.Nm
+.Cm plugin-load
+.Ar name
+.\" plugin-reload
+.Nm
+.Cm plugin-reload
+.Ar plugin
+.\" plugin-unload
+.Cm plugin-unload
+.Ar plugin
+.\" rule-add
+.Nm
+.Cm rule-add
+.Op Fl c Ar channel
+.Op Fl e Ar event
+.Op Fl i Ar index
+.Op Fl o Ar origin
+.Op Fl s Ar server
+.Ar accept|drop
+.\" rule-edit
+.Nm
+.Cm rule-edit
+.Op Fl a Ar accept|drop
+.Op Fl c|C Ar channel
+.Op Fl e|E Ar event
+.Op Fl o|O Ar origin
+.Op Fl s|S Ar server
+.Ar index
+.\" rule-info
+.Nm
+.Cm rule-info
+.Ar index
+.\" rule-list
+.Nm
+.Cm rule-list
+.\" rule-move
+.Nm
+.Cm rule-move
+.Ar from
+.Ar to
+.\" rule-remove
+.Nm
+.Cm rule-remove
+.Ar index
+.\" server-connect
+.Nm
+.Cm server-connect
+.Op Fl 46s
+.Op Fl n Ar nickname
+.Op Fl r Ar realname
+.Op Fl u Ar username
+.Ar id
+.Ar hostname
+.Op Ar port
+.\" server-disconnect
+.Nm
+.Cm server-disconnect
+.Op Ar server
+.\" server-info
+.Nm
+.Cm server-info
+.Ar server
+.\" server-invite
+.Nm
+.Cm server-invite
+.Ar server
+.Ar target
+.Ar channel
+.\" server-join
+.Nm
+.Cm server-join
+.Ar server
+.Ar channel
+.Op Ar password
+.\" server-kick
+.Nm
+.Cm server-kick
+.Ar server
+.Ar target
+.Ar channel
+.Op Ar reason
+.\" server-list
+.Nm
+.Cm server-list
+.\" server-me
+.Nm
+.Cm server-me
+.Ar server
+.Ar target
+.Ar message
+.\" server-message
+.Nm
+.Cm server-message
+.Ar server
+.Ar target
+.Ar message
+.\" server-mode
+.Nm
+.Cm server-mode
+.Ar server
+.Ar target
+.Ar mode
+.Op Ar limit
+.Op Ar user
+.Op Ar mask
+.\" server-nick
+.Nm
+.Cm server-nick
+.Ar server
+.Ar nickname
+.\" server-notice
+.Nm
+.Cm server-notice
+.Ar server
+.Ar target
+.Ar message
+.\" server-part
+.Nm
+.Cm server-part
+.Ar server
+.Ar channel
+.Op Ar reason
+.\" server-reconnect
+.Nm
+.Cm server-reconnect
+.Op Ar server
+.\" server-topic
+.Nm
+.Cm server-topic
+.Ar server
+.Ar channel
+.Ar topic
+.\" watch
+.Nm
+.Cm watch
+.Op Fl f Ar native|json
+.\" DESCRIPTION
+.Sh DESCRIPTION
+The
+.Nm irccdctl
+is the official utility that let you control a running irccd instance. It uses
+JSON messages over TCP/IP or UNIX sockets with optional SSL layer to send
+requests. For more information see
+.Xr irccd-ipc 7 .
+.Pp
+The general syntax for running an irccdctl command is:
+.Bd -literal -offset Ds
+irccdctl command options arg1 arg2 arg3 ... argn
+.Ed
+.\" COMMANDS
+.Sh COMMANDS
+.Bl -tag -width xxxxxxxx-yyyyyyyyy
+.\" plugin-config
+.It Cm plugin-config
+Manipulate a configuration variable for the plugin specified by
+.Ar id .
+.Pp
+If both
+.Ar variable
+and
+.Ar value
+are provided, sets the plugin configuration to the
+respective variable name and value.
+.Pp
+If only
+.Ar variable
+is specified, shows its current value. Otherwise, list all variables and their
+values.
+.\" plugin-info
+.It Cm plugin-info
+Get plugin information specified by
+.Ar id .
+.\" plugin-list
+.It Cm plugin-list
+Get the list of all loaded plugins.
+.It Cm plugin-load
+Load a plugin into the irccd instance.
+.Pp
+Note: since irccdctl can be used remotely, the argument
+.Ar name
+will always be evaluated as plugin name and not as a filesystem path. Therefore,
+the plugin will be searched through the irccd directories.
+.\" plugin-reload
+.It Cm plugin-reload
+Reload a plugin specified by
+.Ar id
+by calling the appropriate onReload event, the plugin is not unloaded and must
+be already loaded.
+.\" plugin-unload
+.It Cm plugin-unload
+Unload the plugin
+.Ar id
+from the irccd instance.
+.\" rule-add
+.It Cm rule-add
+Add a new rule to irccd.
+.Pp
+If no index is specified, the rule is added to the end.
+.Pp
+Available options:
+.Bl -tag -width 12n
+.It Fl c Ar channel
+match a channel.
+.It Fl e Ar event
+match an event.
+.It Fl i Ar index
+rule position.
+.It Fl o Ar origin
+match an origin.
+.It Fl p Ar plugin
+match a plugin.
+.It Fl s Ar server
+match a server.
+.El
+.Pp
+Note: all options (except
+.Fl i )
+may be specified multiple times.
+.\" rule-edit
+.It Cm rule-edit
+Edit an existing rule in irccd.
+.Pp
+Available options:
+.Bl -tag -width 14n
+.It Fl a Ar accept|drop
+set action.
+.It Fl c|C Ar channel
+match or unmatch a channel respectively.
+.It Fl e|E Ar event
+match or unmatch an event respectively.
+.It Fl o|O Ar origin
+match or unmatch an origin respectively.
+.It Fl p|P Ar plugin
+match or unmatch a plugin respectively.
+.It Fl s|S Ar server
+match or unmatch a server respectively.
+.El
+.Pp
+Note: all options (except
+.Fl a )
+may be specified multiple times.
+.\" rule-info
+.It Cm rule-info
+Show information about the rule specified by
+.Ar index .
+.\" rule-list
+.It Cm rule-list
+List all rules.
+.\" rule-move
+.It Cm rule-move
+Move a rule from the index
+.Ar from
+at the index specified by
+.Ar to .
+.Pp
+The rule will replace the existing one at the given destination moving
+down every other rules. If destination is greater or equal the number of rules,
+the rule is moved to the end.
+.\" rule-remove
+.It Cm rule-remove
+Remove the existing rule at the given
+.Ar index .
+.\" server-connect
+.It Cm server-connect
+Add and connect to a new IRC server. Server with identifier
+.Ar id
+must not be already present. The argument
+.Ar hostname
+can be a hostname or IP address. If the
+.Ar port
+number is not specified, the default value of 6667 is used instead.
+.Pp
+Available options:
+.Bl -tag -width 12n
+.It Fl c Ar character
+specify the command character prefix.
+.It Fl n Ar nickname
+specify a nickname.
+.It Fl r Ar realname
+specify a real name.
+.It Fl u Ar username
+specify a user name.
+.El
+.\" server-disconnect
+.It Cm server-disconnect
+Disconnect and remove
+.Ar server
+from the irccd registry. If
+.Ar server
+is not specified, disconnect and remove all servers
+.\" server-info
+.It Cm server-info
+Get information about
+.Ar server .
+.\" server-invite
+.It Cm server-invite
+Invite the specified
+.Ar target
+on the
+.Ar channel .
+.\" server-join
+.It Cm server-join
+Join the specified
+.Ar channel ,
+the
+.Ar password
+is optional.
+.\" server-kick
+.It Cm server-kick
+Kick the specified
+.Ar target
+from the
+.Ar channel ,
+the
+.Ar reason
+is optional.
+.\" server-list
+.It Cm server-list
+Get the list of all registered servers.
+.\" server-me
+.It Cm server-me
+Send an action emote to the
+.Ar target
+with the given
+.Ar message .
+.\" server-message
+.It Cm server-message
+Send a
+.Ar message
+to the specified
+.Ar target .
+.\" server-mode
+.It Cm server-mode
+Set
+.Ar target
+or irccd's user mode.
+.Pp
+When
+.Ar target
+is the bot's nickname, the command change its mode. Otherwise it applies to a
+channel and modes are treated differently.
+.Pp
+The arguments
+.Ar limit , user , mask
+are usually only used with channel modes.
+.\" server-nick
+.It Cm server-nick
+Change irccd's
+.Ar nickname .
+.\" server-notice
+.It Cm server-notice
+Send a private notice to the specified
+.Ar target .
+.\" server-part
+.It Cm server-part
+Leave the specified
+.Ar channel ,
+the
+.Ar reason
+is optional.
+.Pp
+Warning: while rare, not all IRC servers support giving a reason to leave a
+channel, do not specify it if you require portability.
+.\" server-reconnect
+.It Cm server-reconnect
+Force reconnection of all servers unless
+.Ar server
+is specified.
+.\" server-topic
+.It Cm server-topic
+Set the
+.Ar channel
+new
+.Ar topic .
+.\" watch
+Start watching irccd events. This command will indefinitely wait for new events
+to arrive from irccd.
+.Pp
+Available options:
+.Bl -tag -width 14n
+.It Fl f Ar native|json
+use JSON or native (human readable) format.
+.El
+.El
+.\" BUGS
+.Sh BUGS
+Some shells may discard arguments if they begins with a hash. For instance,
+bash will not understand the following command:
+.Bd -literal -offset Ds
+irccdctl server-join localhost #staff
+.Ed
+.Pp
+Instead, enclose the arguments with quotes
+.Bd -literal -offset Ds
+irccdctl server-join localhost "#staff"
+.Ed
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd 1 ,
+.Xr irccdctl.conf 5

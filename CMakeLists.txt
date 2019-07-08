@@ -44,6 +44,7 @@
 # libirccd-daemon           - The irccd bot library.
 # irccd                     - The irccd executable.
 # irccdctl                  - The irccdctl utility.
+# man                       - Manual pages.
 # plugins                   - Official irccd plugins.
 # systemd                   - Unit file for systemd.
 # tests                     - The unit tests.
@@ -74,7 +75,6 @@ foreach (cfg ${CMAKE_CONFIGURATION_TYPES})
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CFG} ${CMAKE_BINARY_DIR}/bin/${cfg})
 endforeach ()
 
-include(cmake/function/IrccdBuildHtml.cmake)
 include(cmake/function/IrccdDefineExecutable.cmake)
 include(cmake/function/IrccdDefineLibrary.cmake)
 include(cmake/function/IrccdDefineMan.cmake)
@@ -106,6 +106,7 @@ add_subdirectory(irccdctl)
 add_subdirectory(irccd-test)
 add_subdirectory(systemd)
 add_subdirectory(plugins)
+add_subdirectory(man)
 
 if (IRCCD_WITH_TESTS)
 	include(CTest)
@@ -114,18 +115,18 @@ endif ()
 
 add_subdirectory(cmake/export)
 
-message("Compiling with the following flags:")
+message("Building with the following flags:")
 message("       General flags:  ${CMAKE_CXX_FLAGS}")
 message("       Debug flags:    ${CMAKE_CXX_FLAGS_DEBUG}")
 message("       Release flags:  ${CMAKE_CXX_FLAGS_RELEASE}")
 message("")
 
-message("Compiling irccd with following options:")
+message("Building irccd with following options:")
 message("       Libedit:        ${IRCCD_WITH_LIBEDIT_MSG}")
 message("       OpenSSL:        ${IRCCD_WITH_SSL_MSG}")
 message("       Javascript:     ${IRCCD_WITH_JS_MSG}")
 message("       Tests:          ${IRCCD_WITH_TESTS_MSG}")
-message("       User docs:      ${IRCCD_WITH_HTML_MSG}")
+message("       Man pages:      ${IRCCD_WITH_MAN_MSG}")
 message("       Doxygen:        ${IRCCD_WITH_DOXYGEN_MSG}")
 message("       Package:        ${IRCCD_PACKAGE_MSG}")
 message("       Systemd:        ${IRCCD_WITH_SYSTEMD_MSG}")

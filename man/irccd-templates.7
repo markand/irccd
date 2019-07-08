@@ -1,0 +1,230 @@
+.\"
+.\" Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-TEMPLATES 7
+.Os
+.\" NAME
+.Sh NAME
+.Nm irccd-templates
+.Nd irccd formatting and common patterns
+.\" DESCRIPTION
+.Sh DESCRIPTION
+Plugins can be configured using a powerful template syntax, this allows editing
+the plugin messages to override them.
+.Pp
+The syntax is
+.Ar \&?{}
+where
+.Ar \&?
+is replaced by one of the token defined below. Braces are mandatory and cannot
+be ommited. To write a literal template construct, prepend the token twice.
+.Pp
+The following templates are available:
+.Bl -tag -width 14n
+.It Ar %
+date and time (see Time section).
+.It Ar #{name}
+name will be substituted from the keywords (see Keywords section).
+.It Ar ${name}
+name will be substituted from the environment variable (see Environment
+variables).
+.It Ar @{attributes}
+the attributes will be substituted to IRC colors (see Attributes).
+.El
+.\" TIME
+.Sh TIME
+The date and time format may be used just like
+.Xr strftime 3
+so for the hours and minutes, you can write %H:%M.
+.\" ENVIRONMENT VARIABLES
+.Sh ENVIRONMENT VARIABLES
+If supported, you can use environment variables like ${HOME}. Please note
+that braces are mandatory.
+.\" IRC ATTRIBUTES
+.Sh IRC ATTRIBUTES
+The attribute format is composed of three parts, foreground, background and
+modifiers, each separated by a comma.
+.Pp
+Note: attributes and colors are not supported by all IRC clients.
+.Pp
+Warning: do not use colors and attributes outside IRC (e.g. for storing text in
+files) because escape codes are only valid in IRC context.
+.Ss Available colors
+.Bl -bullet -compact
+.It
+white
+.It
+black
+.It
+blue
+.It
+green
+.It
+red
+.It
+brown
+.It
+purple
+.It
+orange
+.It
+yellow
+.It
+lightgreen
+.It
+cyan
+.It
+lightcyan
+.It
+lightblue
+.It
+pink
+.It
+grey
+.It
+lightgrey
+.El
+.Ss Available attributes
+.Bl -bullet -compact
+.It
+bold
+.It
+italic
+.It
+strike
+.It
+reset
+.It
+underline
+.It
+underline2
+.It
+reverse
+.El
+.\" SHELL ATTRIBUTES
+.Sh SHELL ATTRIBUTES
+Like IRC attributes, it's possible to specify colors and attributes in some
+places such as logger configuration.
+.Pp
+Warning: colors are not supported on all platforms.
+.Ss Available colors
+.Bl -bullet -compact
+.It
+black
+.It
+red
+.It
+green
+.It
+orange
+.It
+blue
+.It
+purple
+.It
+cyan
+.It
+white
+.It
+default
+.El
+.Ss Available attributes
+.Bl -bullet -compact
+.It
+bold
+.It
+dim
+.It
+underline
+.It
+blink
+.It
+reverse
+.It
+hidden
+.El
+.\" KEYWORDS
+.Sh KEYWORDS
+Keywords are arbitrary names that are replaced depending on the context. They
+are usually available to configure plugins.
+.Ss Predefined keywords
+Here's the list of keywords that a lot of plugins uses:
+.Bl -tag -width 12n
+.It Va #{channel}
+the channel name,
+.It Va #{command}
+the command to invoke the plugin, e.g. `!ask`,
+.It Va #{message}
+a message (depending on context),
+.It Va #{origin}
+the full user, e.g. `markand!~mkd@localhost`,
+.It Va #{nickname}
+the short nickname,
+.It Va #{plugin}
+the plugin name,
+.It Va #{server}
+the current server name,
+.It Va #{topic}
+the topic,
+.It Va #{target}
+a target, e.g. a person who gets kicked.
+.El
+.Pp
+Warning: these keywords can be overriden by plugins.
+.\" EXAMPLES
+.Sh EXAMPLES
+Valid constructs:
+.Bl -tag -width 20n -offset Ds
+.It #{target}, welcome
+if target is set to "irccd", becomes "irccd, welcome".
+.It @{red}#{target}
+if target is specified, it is written in red.
+.El
+.Pp
+Invalid or literals constructs:
+.Bl -tag -width 20n -offset Ds
+.It #{target}
+will output "#{target}".
+.It ##
+will output "##".
+.It #target
+will output "#target".
+.It #{target
+will cause an error.
+.El
+.Pp
+Colors & attributes:
+.Bl -tag -width 20n -offset Ds
+.It @{red,blue}
+will write text red on blue background,
+.It @{default,yellow}
+will write default color text on yellow background,
+.It @{white,black,bold,underline}
+will write white text on black in both bold and underline.
+.El
+.Pp
+For instance, using the logger plugin, it's possible to customize the pattern to
+use when someone joins a channel like that:
+.Bd -literal -offset Ds
+#{origin} joined #{channel}
+.Ed
+.Pp
+The keyword #{origin} will be substituted to the nickname and #{channel} to the
+channel name.
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd 1 ,
+.Xr irccd.conf 5

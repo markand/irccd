@@ -1,0 +1,601 @@
+.\"
+.\" Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-API 7
+.Os
+.\" NAME
+.Sh NAME
+.Nm irccd-api
+.Nd irccd network protocol
+.\" DESCRIPTION
+.Sh DESCRIPTION
+This guide will help you controlling irccd via sockets.
+.Pp
+For this to work, you need to define at least one transport in your
+.Pa irccd.conf
+file, for more information see
+.Xr irccd.conf 5 .
+.Pp
+Most of the commands are similar to
+.Nm irccdctl
+and mapped to the same network command. For more detailed information about each
+command, take a look at
+.Xr irccdctl 1
+before.
+.\" SYNTAX
+.Sh SYNTAX
+Irccd use JSON as protocol for sending and receiving data. A message must ends
+with
+.Em \er\en\er\en
+to be complete, thus it's possible to write JSON messages in multiple lines.
+.Pp
+For example, this buffer will be parsed as two different messages.
+.Bd -literal -offset Ds
+{
+  "param1": "value1"
+}
+
+{
+  "param1": "value1"
+}
+.Ed
+.Pp
+Warning: please note that the \er\en\er\en characters are the escape characters
+of line feed and new line, not the concatenation of \e and r.
+.\" RESPONSES
+.Sh RESPONSES
+All commands emit a response with the following properties:
+.Pp
+.Bl -tag -width 24n -offset Ds
+.It Va command No (string)
+the result of the issued command.
+.It Va error No (int)
+the error error code, not defined on success.
+.It Va errorCategory No (string)
+the error category (example: server, plugin).
+.It Va errorMessage No (string)
+the arbitrary error message.
+.El
+.Pp
+Example with a successful message:
+.Bd -literal -offset Ds
+{
+  "command": "server-message",
+}
+.Ed
+.Pp
+Example with an error:
+.Bd -literal -offset Ds
+{
+  "command": "server-message",
+  "error": 1,
+  "errorCagegory": "server",
+  "errorMessage": "server not found"
+}
+.Ed
+.Sh COMMANDS
+.\" COMMANDS
+The following commands are available.
+.Bl -tag -width xxxxxxxx-yyyyyyyyy
+.\" plugin-config
+.It Cm plugin-config
+Set or get values to a plugin.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Em plugin-config .
+.It Va plugin No (string)
+plugin identifier.
+.It Va variable No (string)
+the variable (Optional, default: undefined).
+.It Va value No (string)
+the value (Optional, default: undefined)
+.El
+.Pp
+The following properties are available in a successful response when getting a
+value:
+.Pp
+.Bl -tag -width 20n
+.It Va variables No (list)
+All values or unique variable.
+.El
+.\" plugin-info
+.It Cm plugin-info
+Retrieve plugin information.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Em plugin-info .
+.It Va plugin No (string)
+plugin identifier.
+.El
+.Pp
+The following properties are available in a successful response:
+.Bl -tag -width 20n
+.It Va author No (string)
+author name.
+.It Va license No (string)
+plugin license.
+.It Va summary No (string)
+plugin description.
+.It Va version No (string)
+arbitrary version.
+.El
+.\" plugin-list
+.It Cm plugin-list
+Get the list of all loaded plugins.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Em plugin-list .
+.El
+.Pp
+The following properties are available in a successful response:
+.Bl -tag -width 20n
+.It Va list No (list)
+a list of plugin names.
+.El
+.\" plugin-load
+.It Cm plugin-load
+Load a plugin by searching it.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Em plugin-load .
+.It Va plugin No (identifier)
+the plugin identifier.
+.El
+.\" plugin-reload
+.It Cm plugin-reload
+Reload a plugin.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Em plugin-reload .
+.It Va plugin No (identifier)
+the plugin identifier.
+.El
+.\" plugin-unload
+.It Cm plugin-unload
+Unload a plugin.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Em plugin-unload .
+.It Va plugin No (identifier)
+the plugin identifier.
+.El
+.\" rule-add
+.It Cm rule-add
+Add a new rule.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Em rule-add .
+.It Va channels No (list)
+a list of channels to match (Optional, default: undefined).
+.It Va events No (list)
+a list of events to match (Optional, default: undefined).
+.It Va origins No (list)
+a list of origins to match (Optional, default: undefined).
+.It Va plugins No (list)
+a list of plugins to match (Optional, default: undefined).
+.It Va servers No (list)
+a list of servers to match (Optional, default: undefined).
+.It Va action No (string)
+must be accept or drop.
+.It Va index No (unsigned)
+rule index (Optional, default: undefined).
+.El
+.\" rule-edit
+.It Cm rule-edit
+Edit a rule in place.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Em rule-edit .
+.It Va add-channels No (list)
+a list of channels to match (Optional, default: undefined).
+.It Va add-events No (list)
+a list of events to match (Optional, default: undefined).
+.It Va add-origins No (list)
+a list of origins to match (Optional, default: undefined).
+.It Va add-plugins No (list)
+a list of plugins to match (Optional, default: undefined).
+.It Va add-servers No (list)
+a list of servers to match (Optional, default: undefined).
+.It Va remove-channels No (list)
+a list of channels to unmatch (Optional, default: undefined).
+.It Va remove-events No (list)
+a list of events to unmatch (Optional, default: undefined).
+.It Va remove-origins No (list)
+a list of origins to unmatch (Optional, default: undefined).
+.It Va remove-plugins No (list)
+a list of plugins to unmatch (Optional, default: undefined).
+.It Va remove-servers No (list)
+a list of servers to unmatch (Optional, default: undefined).
+.It Va action No (string)
+can be accept or drop (Optional, default: undefined).
+.It Va index No (unsigned)
+rule index.
+.El
+.\" rule-info
+.It Cm rule-info
+Show information about a rule.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Em rule-info .
+.It Va index No (unsigned)
+rule index.
+.El
+.Pp
+The following properties are available in a successful response:
+.Bl -tag -width 20n
+.It Va servers No (list)
+a list of servers matched.
+.It Va channels No (list)
+a list of channels matched.
+.It Va origins No (list)
+a list of origins matched.
+.It Va plugins No (list)
+a list of plugins matched.
+.It Va events No (list)
+a list of events matched.
+.It Va action No (string)
+rule action, accept or drop.
+.El
+.\" rule-list
+.It Cm rule-list
+Get a list of rules.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Em rule-list .
+.El
+.Pp
+The following properties are available in a successful response:
+.Bl -tag -width 20n
+.It Va list (list)
+a list of object that contain the same information as
+.Cm rule-info
+command was invoked.
+.El
+.\" rule-move
+.It Cm rule-move
+Move a rule.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Em rule-move .
+.It Va from No (int)
+the source index.
+.It Va to No (int)
+the destination index.
+.El
+.\" rule-remove
+.It Cm rule-remove
+Remove a rule.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Em rule-remove .
+.It Va index No (int)
+rule index.
+.El
+.\" server-connect
+.It Cm server-connect
+Connect to a server.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Em server-connect .
+.It Va name No (string)
+the server unique id.
+.It Va hostname No (string)
+the host address.
+.It Va port No (int)
+the port number (Optional, default: 6667).
+.It Va ssl No (bool)
+use SSL (Optional, default: false).
+.It Va nickname No (string)
+the nickname to use (Optional, default: irccd).
+.It Va username No (string)
+the user name to use (Optional, default: irccd).
+.It Va realname No (string)
+the real name to use. (Optional, default: IRC Client Daemon).
+.It Va ctcpVersion No (string)
+the CTCP Version to answer. (Optional, default: the irccd's version),
+.It Va commandChar No (string)
+the command character to use to invoke command. (Optional, default: !).
+.El
+.\" server-disconnect
+.It Cm server-disconnect
+Disconnect from a server.
+.Pp
+If server is not specified, irccd disconnects all servers.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Ar server-disconnect .
+.It Va server No (string)
+the server unique id (Optional, default: none).
+.El
+.\" server-info
+.It Cm server-info
+Get server information.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Ar server-info .
+.It Va server No (string)
+the server unique id.
+.El
+.Pp
+The following properties are available in a successful response:
+.Bl -tag -width 20n
+.It Va name No (string)
+the server unique id.
+.It Va hostname No (string)
+the server hostname.
+.It Va port No (int)
+the port.
+.It Va ipv4 No (bool)
+true if using IPv6.
+.It Va ipv6 No (bool)
+true if using IPv6.
+.It Va ssl No (bool)
+true if connection is using SSL.
+.It Va channels No (list)
+list of channels.
+.It Va nickname No (string)
+the current nickname in use.
+.It Va username No (string)
+the username in use.
+.It Va realname No (string)
+the realname in use.
+.El
+.\" server-invite
+.It Cm server-invite
+Invite the specified target on the channel.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Ar server-invite .
+.It Va server No (string)
+the server unique id.
+.It Va target No (string)
+the nickname to invite.
+.It Va channel No (string)
+the channel.
+.El
+.\" server-join
+.It Cm server-join
+Join the specified channel.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Ar server-join .
+.It Va server No (string)
+the server unique id.
+.It Va channel No (string)
+the channel to join.
+.It Va password No (string)
+the password (Optional, default: none).
+.El
+.\" server-kick
+.It Cm server-kick
+Kick the specified target from the channel.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Ar server-kick .
+.It Va server No (string)
+the server unique id.
+.It Va target No (string)
+the target nickname.
+.It Va channel No (string)
+the channel.
+.It Va reason No (string)
+the reason (Optional, default: none).
+.El
+.\" server-list
+.It Cm server-list
+Get the list of all connected servers.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Ar server-list .
+.El
+.Pp
+The following properties are available in a successful response:
+.Pp
+.Bl -tag -width 20n
+.It Va list No (list)
+the list of all server unique ids as integers.
+.El
+.\" server-me
+.It Cm server-me
+Send an action emote.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Ar server-me .
+.It Va server No (string)
+the server unique id.
+.It Va target No (string)
+the target or channel.
+.It Va message No (string)
+the message.
+.El
+.\" server-message
+.It Cm server-message
+Send a message to the specified target or channel.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Ar server-message .
+.It Va server No (string)
+the server unique id.
+.It Va target No (string)
+the target or channel.
+.It Va message No (string)
+the message.
+.El
+.\" server-mode
+.It Cm server-mode
+Change channel or bot mode.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Ar server-mode .
+.It Va server No (string)
+the server unique id.
+.It Va channel No (string)
+the channel or irccd's nickname
+.It Va mode No (string)
+the mode.
+.It Va limit No (string)
+a optional limit.
+.It Va user No (string)
+a optional user.
+.It Va mask No (string)
+a optional mask.
+.El
+.\" server-nick
+.It Cm server-nick
+Change irccd's nickname.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Ar server-nick .
+.It Va server No (string)
+the server unique id.
+.It Va nickname No (string)
+the new nickname.
+.El
+.\" server-notice
+.It Cm server-notice
+Send a private notice to the specified target.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Ar server-notice .
+.It Va server No (string)
+the server unique id.
+.It Va target No (string)
+the target.
+.It Va message No (string)
+the notice message.
+.El
+.\" server-part
+.It Cm server-part
+Leave the specified channel.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Ar server-part .
+.It Va server No (string)
+the unique server id.
+.It Va channel No (string)
+the channel to leave.
+.It Va reason No (string)
+the reason (Optional, default: none).
+.El
+.\" server-reconnect
+.It Cm server-reconnect
+Force reconnection of one or all servers.
+.Pp
+If server is not specified, all servers will try to reconnect.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Ar server-reconnect .
+.It Va server No (string)
+the server unique id (Optional, default: none).
+.El
+.\" server-topic
+.It Cm server-topic
+Change the topic of the specified channel.
+.Pp
+Available properties:
+.Bl -tag -width 20n
+.It Va command No (string)
+must be
+.Ar server-topic .
+.It Va server No (string)
+the unique server id.
+.It Va channel No (string)
+the channel.
+.It Va topic No (string)
+the new topic.
+.El
+.El
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd 1

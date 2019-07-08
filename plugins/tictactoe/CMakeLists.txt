@@ -22,5 +22,5 @@ irccd_define_plugin(
 	NAME tictactoe
 	TYPE JS
 	SCRIPT ${plugin-tictactoe_SOURCE_DIR}/tictactoe.js
-	DOCS ${plugin-tictactoe_SOURCE_DIR}/tictactoe.md
+	MAN ${plugin-tictactoe_SOURCE_DIR}/tictactoe.7
 )

@@ -22,5 +22,5 @@ irccd_define_plugin(
 	NAME auth
 	TYPE JS
 	SCRIPT ${plugin-auth_SOURCE_DIR}/auth.js
-	DOCS ${plugin-auth_SOURCE_DIR}/auth.md
+	MAN ${plugin-auth_SOURCE_DIR}/auth.7
 )

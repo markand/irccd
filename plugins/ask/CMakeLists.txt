@@ -22,5 +22,5 @@ irccd_define_plugin(
 	NAME ask
 	TYPE JS
 	SCRIPT ${plugin-ask_SOURCE_DIR}/ask.js
-	DOCS ${plugin-ask_SOURCE_DIR}/ask.md
+	MAN ${plugin-ask_SOURCE_DIR}/ask.7
 )

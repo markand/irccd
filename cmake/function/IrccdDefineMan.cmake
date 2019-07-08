@@ -20,20 +20,44 @@
 # irccd_define_man
 # ----------------
 #
-# irccd_define_man(file, man)
-#
-# Parameters:
-#   file        The file name to build
-#   man         The man section
+# irccd_define_man(
+#   INPUT       file path to the input man page
+#   SECTION     section (e.g. man1 man3)
+#   OUTPUT      (Optional) file name to rename
+# )
 #
 # This function configure the manual and install it if IRCCD_WITH_MAN is set.
 #
 
-function(irccd_define_man file man)
+function(irccd_define_man)
+	set(options "")
+	set(oneValueArgs "INPUT;OUTPUT;SECTION")
+	set(multiValueArgs "")
+
+	cmake_parse_arguments(MAN "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+
+	if (NOT MAN_INPUT)
+		message(FATAL_ERROR "Argument INPUT required")
+	endif ()
+	if (NOT MAN_SECTION)
+		message(FATAL_ERROR "Argument SECTION required")
+	endif ()
+
+	if (NOT MAN_OUTPUT)
+		get_filename_component(output ${MAN_INPUT} NAME)
+	else ()
+		set(output ${MAN_OUTPUT})
+	endif ()
+
 	if (IRCCD_WITH_MAN)
-		set(input ${doc_SOURCE_DIR}/man/${file}.in)
-		set(output ${CMAKE_CURRENT_BINARY_DIR}/${file})
-		configure_file(${input} ${output} @ONLY)
-		install(FILES ${output} DESTINATION ${CMAKE_INSTALL_MANDIR}/${man})
+		configure_file(
+			${MAN_INPUT}
+			${CMAKE_BINARY_DIR}/man/${output}
+			@ONLY
+		)
+		install(
+			FILES ${CMAKE_BINARY_DIR}/man/${output}
+			DESTINATION ${CMAKE_INSTALL_MANDIR}/${MAN_SECTION}
+		)
 	endif ()
 endfunction()

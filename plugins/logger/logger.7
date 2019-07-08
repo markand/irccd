@@ -1,0 +1,120 @@
+.\"
+.\" Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-PLUGIN-LOGGER 7
+.Os
+.\" NAME
+.Sh NAME
+.Nm logger
+.Nd irccd logger plugin
+.\" DESCRIPTION
+.Sh DESCRIPTION
+The
+.Nm
+plugin may be used to log everything you want. It supports the following events:
+.Bl -bullet -compact
+.It
+onJoin.
+.It
+onKick.
+.It
+onMe.
+.It
+onMessage.
+.It
+onMode.
+.It
+onNotice.
+.It
+onPart.
+.It
+onTopic.
+.El
+.\" INSTALLATION
+.Sh INSTALLATION
+The plugin
+.Nm
+is distributed with irccd. To enable it add the following to your plugins
+section:
+.Pp
+.Bd -literal
+[plugins]
+logger = ""
+.Ed
+.\" USAGE
+.Sh USAGE
+The
+.Nm
+plugin has no direct commands.
+.\" CONFIGURATION
+.Sh CONFIGURATION
+The following options are available under the
+.Va [plugin.logger]
+section:
+.Bl -tag -width 14n -offset Ds
+.It Va path No (string)
+The path to the file where to store logs. Keywords:
+.Em channel , server , (date) .
+.El
+.\" TEMPLATES
+.Sh TEMPLATES
+The
+.Nm
+plugin supports the following templates in
+.Va [templates.logger]
+section:
+.Bl -tag -width 14n -offset Ds
+.It Va join
+Format when someone joins a channel.
+.It Va kick
+Format when someone has been kicked. Keywords: 
+.Em reason , target .
+.It Va me
+Format for emote actions. Keywords: 
+.Em message .
+.It Va message
+Format for channel messages. Keywords: 
+.Em message .
+.It Va mode
+Format for user mode change. Keywords: 
+.Em mode , limit , user , mask .
+.It Va notice
+Format on private notices. Keywords: 
+.Em message .
+.It Va part
+Format when someone leaves a channel. Keywords: 
+.Em reason .
+.It Va topic
+Format when a topic is changed. Keywords: 
+.Em topic .
+.El
+.Pp
+All templates support the following standard keywords:
+.Em channel , nickname , origin , server .
+.\" EXAMPLES
+.Sh EXAMPLES
+Example of configuration file:
+.Bd -literal
+[plugin.logger]
+path = "/var/log/irccd/#{server}/%y/%m/%d/#{channel}.txt"
+
+[format.logger]
+join = "user #{nickname} joined #{channel}"
+.Ed
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd 1 ,
+.Xr irccd-templates 7

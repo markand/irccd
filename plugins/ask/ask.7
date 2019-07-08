@@ -1,0 +1,77 @@
+.\"
+.\" Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-PLUGIN-ASK 7
+.Os
+.\" NAME
+.Sh NAME
+.Nm ask
+.Nd irccd ask plugin
+.\" DESCRIPTION
+.Sh DESCRIPTION
+The plugin
+.Nm
+is funny script that helps you in your life. It will tell you if you will be
+rich, famous and so on.
+.\" INSTALLATION
+.Sh INSTALLATION
+The plugin
+.Nm
+is distributed with irccd. To enable it add the following to your plugins
+section:
+.Pp
+.Bd -literal
+[plugins]
+ask = ""
+.Ed
+.\" USAGE
+.Sh USAGE
+The plugin
+.Nm
+reacts to special command, you just need to do !ask the question and it will
+give you a response.
+.Pp
+Example:
+.Bd -literal
+markand: !ask will I be rich?
+irccd: markand, No.
+.Ed
+.\" FILE
+.Sh FILE
+By default,
+.Nm ask
+will only answer yes or no. It's possible to add any answers you want in the
+file
+.Pa answers.conf
+located in the ask configuration directory.
+.Pp
+Just add one line per answer like this (e.g.
+.Pa ~/.config/irccd/plugin/ask/answers.conf ) .
+.Bd -literal -offset Ds
+Stop dreaming,
+Definitely sure!
+Maybe
+.Ed
+.\" CONFIGURATION
+.Sh CONFIGURATION
+The following options are available under the
+.Va [plugin.ask]
+section:
+.Bl -tag -width 14n
+.It Va file No (string)
+the path to the database file (Optional, default: answers.conf in configuration
+directory).
+.El
