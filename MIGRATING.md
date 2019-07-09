@@ -4,9 +4,10 @@ IRC Client Daemon MIGRATING
 This document is a small guide to help you migrating to a next major version.
 
 Migrating from 2.x to 3.x
--------------------------
+=========================
 
-### Irccd
+Irccd
+-----
 
 - The option `reconnect-tries` has been removed from `[server]` section, use
   `auto-reconnect` boolean option instead,
@@ -14,7 +15,8 @@ Migrating from 2.x to 3.x
 - The section `[identity]` has been removed, instead move those values inside
   each server in their `[server]` section.
 
-### Irccdctl
+Irccdctl
+--------
 
 - The functions `server-cnotice` and `server-cmode` have been removed, use
   `server-notice` and `server-mode` instead,
@@ -23,15 +25,16 @@ Migrating from 2.x to 3.x
 - The output style has been unified,
 - Options `-S` and `--ssl-verify` in server-connect have been removed.
 
-### Plugins
+Plugins
+-------
 
-#### Logger
+### Logger
 
 - The keyword `source` has been removed and replaced by `channel`,
 - The keyword `origin` has been added,
 - Formats `cnotice`, `cmode`, `query` have been removed.
 
-### Network API
+## Network API
 
 - The requests `server-cnotice` and `server-cmode` have been removed, use
   `server-notice` and `server-mode` instead,
@@ -41,21 +44,24 @@ Migrating from 2.x to 3.x
 - The request `server-info` sends `hostname` property instead of `host`,
 - The event `onWhois` sends `hostname` property instead of `host`,
 
-### CMake options
+CMake options
+-------------
 
 - All options are now starting with `IRCCD_` for better compatibility with
   external projects,
 - CMake now use GNUInstallDirs module to specify installation paths, all
   IRCCD\_WITH\_ options have been replaced by CMAKE\_INSTALL\_ equivalents.
 
-### Paths
+Directories
+-----------
 
 - The default plugins path has been changed from **share/irccd/plugins** to
   **lib64/irccd**.
 
-### Javascript API
+Javascript API
+--------------
 
-#### Events
+### Events
 
 - The events `onChannelMode` and `onChannelNotice` have been removed, plugins
   must use `Server.isSelf(target)` to determine a channel/private message,
@@ -64,7 +70,7 @@ Migrating from 2.x to 3.x
 - The object information in `onWhois` event now has `hostname` property instead
   of `host`.
 
-#### Module Server
+### Module Server
 
 - The methods `Server.cmode` and `Server.cnotice` have been removed, use
   `Server.mode` and `Server.notice` instead,
@@ -75,16 +81,16 @@ Migrating from 2.x to 3.x
   `hostname`,
 - The property `sslVerify` in `Server` constructor has been removed.
 
-#### Module ElapsedTimer
+### Module ElapsedTimer
 
 - The method ElapsedTimer.reset has been removed, just use `start` instead
   when you want to accumulate time.
 
-#### Module Directory
+### Module Directory
 
 - The property `Directory.count` has been removed.
 
-#### Module Plugin
+### Module Plugin
 
 The following properties in `Irccd.Plugin` has been renamed:
 
@@ -95,11 +101,11 @@ The following properties in `Irccd.Plugin` has been renamed:
 Note: these paths are no more automatically detected and set with the new
       `[paths]` and `[paths.<name>]` sections.
 
-#### Module Server
+### Module Server
 
 - The property `host` in the function `Irccd.Server` has been renamed to
   `hostname`.
 
-#### Module System
+### Module System
 
 - The function `Irccd.System.name` has now well defined return value.
