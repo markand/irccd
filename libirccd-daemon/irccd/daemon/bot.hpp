@@ -85,7 +85,7 @@ private:
 	void load_logs_file(const ini::section&);
 	void load_logs_syslog();
 	void load_logs();
-	void load_formats();
+	void load_templates();
 
 public:
 	/**

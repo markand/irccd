@@ -63,7 +63,7 @@ public:
 	/**
 	 * Map for key/value pairs.
 	 *
-	 * Used in options, formats and paths.
+	 * Used in options, templates and paths.
 	 */
 	using map = std::unordered_map<std::string, std::string>;
 
@@ -141,18 +141,18 @@ public:
 	virtual void set_options(const map& map);
 
 	/**
-	 * Get all formats.
+	 * Get all templates.
 	 *
-	 * \return formats
+	 * \return the templates
 	 */
-	virtual auto get_formats() const -> map;
+	virtual auto get_templates() const -> map;
 
 	/**
-	 * Set all formats.
+	 * Set all templates.
 	 *
-	 * \param map the formats
+	 * \param map the templates
 	 */
-	virtual void set_formats(const map& map);
+	virtual void set_templates(const map& map);
 
 	/**
 	 * Get all paths.

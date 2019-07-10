@@ -76,9 +76,9 @@ public:
 	void set_options(const map&) override;
 
 	/**
-	 * \copydoc plugin::set_formats
+	 * \copydoc plugin::set_templates
 	 */
-	void set_formats(const map&) override;
+	void set_templates(const map&) override;
 
 	/**
 	 * \copydoc plugin::handle_message

@@ -34,7 +34,7 @@ var Util = Irccd.Util;
 /**
  * Formats for writing.
  */
-Plugin.format = {
+Plugin.templates = {
 	"lucky":        "#{nickname}, you're lucky this time",
 	"shot":         "HEADSHOT"
 };
@@ -110,10 +110,10 @@ function onCommand(server, origin, channel)
 		game = Gun.create(server, channel);
 
 	if (game.shot()) {
-		server.kick(Util.splituser(origin), channel, Util.format(Plugin.format["shot"], kw));
+		server.kick(Util.splituser(origin), channel, Util.format(Plugin.templates["shot"], kw));
 		Gun.remove(game);
 	} else {
 		kw.count = (6 - game.index).toString();
-		server.message(channel, Util.format(Plugin.format["lucky"], kw));
+		server.message(channel, Util.format(Plugin.templates["lucky"], kw));
 	}
 }

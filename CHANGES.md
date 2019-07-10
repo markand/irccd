@@ -14,7 +14,8 @@ irccd:
 - Local transports support SSL (#939),
 - The origin in rule is now first class value (#947),
 - New option `ipv4` in `[transport]` (#945),
-- New option `ipv4` in `[server]` (#945).
+- New option `ipv4` in `[server]` (#945),
+- Section `[format]` is renamed to `[templates]` (#1671).
 
 irccdctl:
 

@@ -136,12 +136,12 @@ public:
 	auto get_options(std::string_view id) -> plugin::map;
 
 	/**
-	 * Get the formats for the specified plugin.
+	 * Get the templates for the specified plugin.
 	 *
 	 * \param id the plugin id
 	 * \return the formats
 	 */
-	auto get_formats(std::string_view id) -> plugin::map;
+	auto get_templates(std::string_view id) -> plugin::map;
 
 	/**
 	 * Get the paths for the specified plugin.

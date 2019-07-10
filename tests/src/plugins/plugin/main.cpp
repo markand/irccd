@@ -76,7 +76,7 @@ public:
 	{
 		bot_.get_plugins().add(std::make_shared<fake_plugin>("fake"));
 
-		plugin_->set_formats({
+		plugin_->set_templates({
 			{ "usage", "usage=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}" },
 			{ "info", "info=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{author}:#{license}:#{name}:#{summary}:#{version}" },
 			{ "not-found", "not-found=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{name}" },
@@ -88,7 +88,7 @@ public:
 
 BOOST_FIXTURE_TEST_SUITE(test_fixture_suite, test_fixture)
 
-BOOST_AUTO_TEST_CASE(format_usage)
+BOOST_AUTO_TEST_CASE(template_usage)
 {
 	plugin_->handle_command(bot_, { server_, "jean!jean@localhost", "#staff", "" });
 
@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(format_usage)
 	BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "usage=plugin:!plugin:test:#staff:jean!jean@localhost:jean");
 }
 
-BOOST_AUTO_TEST_CASE(format_info)
+BOOST_AUTO_TEST_CASE(template_info)
 {
 	plugin_->handle_command(bot_, { server_, "jean!jean@localhost", "#staff", "info fake" });
 
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(format_info)
 	BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "info=plugin:!plugin:test:#staff:jean!jean@localhost:jean:jean:BEER:fake:Fake White Beer 2000:0.0.0.0.0.1");
 }
 
-BOOST_AUTO_TEST_CASE(format_not_found)
+BOOST_AUTO_TEST_CASE(template_not_found)
 {
 	plugin_->handle_command(bot_, { server_, "jean!jean@localhost", "#staff", "info doesnotexistsihope" });
 
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(format_not_found)
 	BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "not-found=plugin:!plugin:test:#staff:jean!jean@localhost:jean:doesnotexistsihope");
 }
 
-BOOST_AUTO_TEST_CASE(format_too_long)
+BOOST_AUTO_TEST_CASE(template_too_long)
 {
 	for (int i = 0; i < 100; ++i)
 		bot_.get_plugins().add(std::make_shared<fake_plugin>(str(format("plugin-n-%1%") % i)));

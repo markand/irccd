@@ -32,7 +32,7 @@ var Plugin = Irccd.Plugin;
 var Util = Irccd.Util;
 
 Plugin.config["max-list-lines"] = 5;
-Plugin.format["error"] = "#{nickname}: no jokes available";
+Plugin.templates["error"] = "#{nickname}: no jokes available";
 
 /**
  * Map of server/channel to list of jokes.
@@ -171,7 +171,7 @@ function onCommand(server, origin, channel, message)
 			table[i] = load(server, channel);
 		} catch (e) {
 			Logger.warning(e.message);
-			server.message(channel, Util.format(Plugin.format.error, {
+			server.message(channel, Util.format(Plugin.templates.error, {
 				server: server.toString(),
 				channel: channel,
 				origin: origin,

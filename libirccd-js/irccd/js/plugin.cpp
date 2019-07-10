@@ -143,11 +143,11 @@ plugin::plugin(std::string id, std::string path)
 	duk::stack_guard sa(context_);
 
 	/*
-	 * Create two special tables for configuration and formats, they are
+	 * Create two special tables for configuration and templates, they are
 	 * referenced later as
 	 *
 	 *   - Irccd.Plugin.config
-	 *   - Irccd.Plugin.format
+	 *   - Irccd.Plugin.templates
 	 *   - Irccd.Plugin.paths
 	 *
 	 * In plugin_module.cpp.
@@ -155,7 +155,7 @@ plugin::plugin(std::string id, std::string path)
 	duk_push_object(context_);
 	duk_put_global_string(context_, config_property.data());
 	duk_push_object(context_);
-	duk_put_global_string(context_, format_property.data());
+	duk_put_global_string(context_, templates_property.data());
 	duk_push_object(context_);
 	duk_put_global_string(context_, paths_property.data());
 
@@ -205,14 +205,14 @@ void plugin::set_options(const map& map)
 	set_table(context_, config_property, map);
 }
 
-auto plugin::get_formats() const -> map
+auto plugin::get_templates() const -> map
 {
-	return get_table(context_, format_property);
+	return get_table(context_, templates_property);
 }
 
-void plugin::set_formats(const map& map)
+void plugin::set_templates(const map& map)
 {
-	set_table(context_, format_property, map);
+	set_table(context_, templates_property, map);
 }
 
 auto plugin::get_paths() const -> map

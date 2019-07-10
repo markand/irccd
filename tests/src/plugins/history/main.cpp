@@ -39,7 +39,7 @@ public:
 	history_test()
 		: js_plugin_fixture(PLUGIN_PATH)
 	{
-		plugin_->set_formats({
+		plugin_->set_templates({
 			{ "error", "error=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}" },
 			{ "seen", "seen=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}:%H:%M" },
 			{ "said", "said=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}:#{message}:%H:%M" },
@@ -60,7 +60,7 @@ public:
 
 BOOST_FIXTURE_TEST_SUITE(history_test_suite, history_test)
 
-BOOST_AUTO_TEST_CASE(format_error)
+BOOST_AUTO_TEST_CASE(template_error)
 {
 	load({{"file", CMAKE_CURRENT_SOURCE_DIR "/error.json"}});
 
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE(format_error)
 	BOOST_TEST(std::any_cast<std::string>(cmd[1]) == "error=history:!history:test:#history:jean!jean@localhost:jean");
 }
 
-BOOST_AUTO_TEST_CASE(format_seen)
+BOOST_AUTO_TEST_CASE(template_seen)
 {
 	static const std::regex rule("seen=history:!history:test:#history:destructor!dst@localhost:destructor:jean:\\d{2}:\\d{2}");
 
@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_CASE(format_seen)
 	BOOST_TEST(std::regex_match(std::any_cast<std::string>(cmd[1]), rule));
 }
 
-BOOST_AUTO_TEST_CASE(format_said)
+BOOST_AUTO_TEST_CASE(template_said)
 {
 	std::regex rule("said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:\\d{2}:\\d{2}");
 
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE(format_said)
 	BOOST_TEST(std::regex_match(std::any_cast<std::string>(cmd[1]), rule));
 }
 
-BOOST_AUTO_TEST_CASE(format_unknown)
+BOOST_AUTO_TEST_CASE(template_unknown)
 {
 	remove(CMAKE_CURRENT_BINARY_DIR "/unknown.json");
 	load({{ "file", CMAKE_CURRENT_BINARY_DIR "/unknown.json" }});

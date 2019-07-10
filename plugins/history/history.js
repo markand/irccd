@@ -33,7 +33,7 @@ var Plugin = Irccd.Plugin;
 var Server = Irccd.Server;
 var Util = Irccd.Util;
 
-Plugin.format = {
+Plugin.templates = {
 	"error":        "#{nickname}, I'm sorry, something went wrong.",
 	"seen":         "#{nickname}, I've seen #{target} for the last time the %d-%m-%Y %H:%M",
 	"said":         "#{nickname}, #{target} said on %d-%m-%Y %H:%M: #{message}",
@@ -132,12 +132,12 @@ function onCommand(server, origin, channel, message)
 	};
 
 	if (args.length !== 2 || args[0].length === 0 || args[1].length === 0) {
-		server.message(channel, Util.format(Plugin.format.usage, kw));
+		server.message(channel, Util.format(Plugin.templates.usage, kw));
 		return;
 	}
 
 	if (args[0] !== "seen" && args[0] !== "said") {
-		server.message(channel, Util.format(Plugin.format.usage, kw));
+		server.message(channel, Util.format(Plugin.templates.usage, kw));
 		return;
 	}
 
@@ -152,16 +152,16 @@ function onCommand(server, origin, channel, message)
 		kw.target = args[1];
 
 		if (!info) {
-			server.message(channel, Util.format(Plugin.format.unknown, kw));
+			server.message(channel, Util.format(Plugin.templates.unknown, kw));
 			return;
 		}
 
 		kw.date = info.timestamp;
 		kw.message = info.message ? info.message : "";
 
-		server.message(channel, Util.format(Plugin.format[args[0] == "seen" ? "seen" : "said"], kw));
+		server.message(channel, Util.format(Plugin.templates[args[0] == "seen" ? "seen" : "said"], kw));
 	} catch (e) {
-		server.message(channel, Util.format(Plugin.format["error"], kw));
+		server.message(channel, Util.format(Plugin.templates["error"], kw));
 	}
 }
 

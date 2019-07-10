@@ -52,11 +52,11 @@ auto wrap(duk_context* ctx, Handler handler) -> duk_idx_t
  * set
  * ------------------------------------------------------------------
  *
- * This setter is used to replace the Irccd.Plugin.(config|format|paths)
+ * This setter is used to replace the Irccd.Plugin.(config|templates|paths)
  * property when the plugin assign a new one.
  *
  * Because the plugin configuration always has higher priority, when a new
- * object is assigned to 'config' or to the 'format' property, the plugin
+ * object is assigned to 'config' or to the 'templates' property, the plugin
  * configuration is merged to the assigned one, adding or replacing any values.
  *
  * Example:
@@ -107,7 +107,7 @@ auto set(duk_context* ctx, std::string_view name) -> duk_ret_t
  * get
  * ------------------------------------------------------------------
  *
- * Get the Irccd.Plugin.(config|format|paths) property.
+ * Get the Irccd.Plugin.(config|templates|paths) property.
  */
 auto get(duk_context* ctx, std::string_view name) -> duk_ret_t
 {
@@ -139,32 +139,32 @@ auto get_config(duk_context* ctx) -> duk_ret_t
 }
 
 /*
- * set_format
+ * set_template
  * ------------------------------------------------------------------
  *
- * Wrap setter for Irccd.Plugin.format property.
+ * Wrap setter for Irccd.Plugin.templates property.
  */
-auto set_format(duk_context* ctx) -> duk_ret_t
+auto set_template(duk_context* ctx) -> duk_ret_t
 {
-	return set(ctx, plugin::format_property);
+	return set(ctx, plugin::templates_property);
 }
 
 /*
- * get_format
+ * get_template
  * ------------------------------------------------------------------
  *
- * Wrap getter for Irccd.Plugin.format property.
+ * Wrap getter for Irccd.Plugin.templates property.
  */
-auto get_format(duk_context* ctx) -> duk_ret_t
+auto get_template(duk_context* ctx) -> duk_ret_t
 {
-	return get(ctx, plugin::format_property);
+	return get(ctx, plugin::templates_property);
 }
 
 /*
  * set_paths
  * ------------------------------------------------------------------
  *
- * Wrap setter for Irccd.Plugin.format property.
+ * Wrap setter for Irccd.Plugin.paths property.
  */
 auto set_paths(duk_context* ctx) -> duk_ret_t
 {
@@ -175,7 +175,7 @@ auto set_paths(duk_context* ctx) -> duk_ret_t
  * get_paths
  * ------------------------------------------------------------------
  *
- * Wrap getter for Irccd.Plugin.format property.
+ * Wrap getter for Irccd.Plugin.paths property.
  */
 auto get_paths(duk_context* ctx) -> duk_ret_t
 {
@@ -403,13 +403,13 @@ void plugin_api::load(bot&, plugin& plugin)
 	duk_push_c_function(plugin.get_context(), set_config, 1);
 	duk_def_prop(plugin.get_context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
 
-	// 'format' property.
-	duk_push_string(plugin.get_context(), "format");
-	duk_push_c_function(plugin.get_context(), get_format, 0);
-	duk_push_c_function(plugin.get_context(), set_format, 1);
+	// 'templates' property.
+	duk_push_string(plugin.get_context(), "templates");
+	duk_push_c_function(plugin.get_context(), get_template, 0);
+	duk_push_c_function(plugin.get_context(), set_template, 1);
 	duk_def_prop(plugin.get_context(), -4, DUK_DEFPROP_HAVE_GETTER | DUK_DEFPROP_HAVE_SETTER);
 
-	// 'format' property.
+	// 'paths' property.
 	duk_push_string(plugin.get_context(), "paths");
 	duk_push_c_function(plugin.get_context(), get_paths, 0);
 	duk_push_c_function(plugin.get_context(), set_paths, 1);

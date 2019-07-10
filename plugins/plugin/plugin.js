@@ -29,7 +29,7 @@ info = {
 var Util = Irccd.Util;
 var Plugin = Irccd.Plugin;
 
-Plugin.format = {
+Plugin.templates = {
 	"usage":        "#{nickname}, usage: #{command} list | info plugin",
 	"info":         "#{nickname}, #{name}: #{summary}, version #{version} by #{author} (#{license} license).",
 	"not-found":    "#{nickname}, plugin #{name} does not exist.",
@@ -81,7 +81,7 @@ var commands = {
 		}
 
 		if (!query && maxl > 0 && lines.length > maxl) {
-			server.message(target, Util.format(Plugin.format["too-long"], kw));
+			server.message(target, Util.format(Plugin.templates["too-long"], kw));
 		} else {
 			for (var i = 0; i < lines.length; ++i) {
 				server.message(target, lines[i]);
@@ -103,16 +103,16 @@ var commands = {
 			kw.summary = info.summary;
 			kw.version = info.version;
 
-			str = Util.format(Plugin.format["info"], kw);
+			str = Util.format(Plugin.templates["info"], kw);
 		} else
-			str = Util.format(Plugin.format["not-found"], kw);
+			str = Util.format(Plugin.templates["not-found"], kw);
 
 		server.message(target, str);
 	},
 
 	usage: function (server, origin, target)
 	{
-		server.message(target, Util.format(Plugin.format["usage"], commands.keywords(server, target, origin)));
+		server.message(target, Util.format(Plugin.templates["usage"], commands.keywords(server, target, origin)));
 	},
 
 	execute: function (server, origin, target, message, query)

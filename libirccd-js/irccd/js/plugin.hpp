@@ -49,9 +49,9 @@ public:
 	static inline const std::string_view config_property{DUK_HIDDEN_SYMBOL("config")};
 
 	/**
-	 * Global property where to read/write plugin formats (object).
+	 * Global property where to read/write plugin templates (object).
 	 */
-	static inline const std::string_view format_property{DUK_HIDDEN_SYMBOL("formats")};
+	static inline const std::string_view templates_property{DUK_HIDDEN_SYMBOL("templates")};
 
 	/**
 	 * Global property where paths are defined (object).
@@ -130,14 +130,14 @@ public:
 	void set_options(const map& map) override;
 
 	/**
-	 * \copydoc daemon::plugin::get_formats
+	 * \copydoc daemon::plugin::get_templates
 	 */
-	auto get_formats() const -> map override;
+	auto get_templates() const -> map override;
 
 	/**
-	 * \copydoc daemon::plugin::set_formats
+	 * \copydoc daemon::plugin::set_templates
 	 */
-	void set_formats(const map& map) override;
+	void set_templates(const map& map) override;
 
 	/**
 	 * \copydoc daemon::plugin::get_paths

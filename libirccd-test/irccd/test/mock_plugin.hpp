@@ -36,7 +36,7 @@ namespace irccd::test {
 class mock_plugin : public daemon::plugin, public mock {
 private:
 	map options_;
-	map formats_;
+	map templates_;
 	map paths_;
 
 public:
@@ -78,14 +78,14 @@ public:
 	void set_options(const map& map) override;
 
 	/**
-	 * \copydoc daemon::plugin::get_formats
+	 * \copydoc daemon::plugin::get_templates
 	 */
-	auto get_formats() const -> map override;
+	auto get_templates() const -> map override;
 
 	/**
-	 * \copydoc daemon::plugin::set_formats
+	 * \copydoc daemon::plugin::set_templates
 	 */
-	void set_formats(const map& map) override;
+	void set_templates(const map& map) override;
 
 	/**
 	 * \copydoc daemon::plugin::get_paths

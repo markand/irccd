@@ -114,7 +114,7 @@ auto plugin_service::get_options(std::string_view id) -> plugin::map
 	return to_map(bot_.get_config(), str(format("plugin.%1%") % id));
 }
 
-auto plugin_service::get_formats(std::string_view id) -> plugin::map
+auto plugin_service::get_templates(std::string_view id) -> plugin::map
 {
 	return to_map(bot_.get_config(), str(format("format.%1%") % id));
 }
@@ -203,7 +203,7 @@ void plugin_service::load(std::string_view id, std::string_view path)
 
 	try {
 		plugin->set_options(get_options(id));
-		plugin->set_formats(get_formats(id));
+		plugin->set_templates(get_templates(id));
 		plugin->set_paths(get_paths(id));
 	} catch (...) {
 		throw plugin_error(plugin_error::exec_error, id);
@@ -267,7 +267,7 @@ void plugin_service::load(const config& cfg) noexcept
 		// Reload the plugin if already loaded.
 		if (p) {
 			p->set_options(get_options(id));
-			p->set_formats(get_formats(id));
+			p->set_templates(get_templates(id));
 			p->set_paths(get_paths(id));
 		} else {
 			try {

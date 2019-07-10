@@ -74,12 +74,12 @@ void broken_plugin::set_options(const map&)
 	throw std::runtime_error("broken");
 }
 
-auto broken_plugin::get_formats() const -> map
+auto broken_plugin::get_templates() const -> map
 {
 	throw std::runtime_error("broken");
 }
 
-void broken_plugin::set_formats(const map&)
+void broken_plugin::set_templates(const map&)
 {
 	throw std::runtime_error("broken");
 }

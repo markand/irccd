@@ -50,7 +50,7 @@ public:
 	{
 		remove(CMAKE_CURRENT_BINARY_DIR "/log.txt");
 
-		plugin_->set_formats({
+		plugin_->set_templates({
 			{ "join", "join=#{server}:#{channel}:#{origin}:#{nickname}" },
 			{ "kick", "kick=#{server}:#{channel}:#{origin}:#{nickname}:#{target}:#{reason}" },
 			{ "me", "me=#{server}:#{channel}:#{origin}:#{nickname}:#{message}" },
@@ -75,7 +75,7 @@ public:
 
 BOOST_FIXTURE_TEST_SUITE(logger_test_suite, logger_test)
 
-BOOST_AUTO_TEST_CASE(format_join)
+BOOST_AUTO_TEST_CASE(template_join)
 {
 	load();
 
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE(format_join)
 	BOOST_REQUIRE_EQUAL("join=test:#staff:jean!jean@localhost:jean\n", last());
 }
 
-BOOST_AUTO_TEST_CASE(format_kick)
+BOOST_AUTO_TEST_CASE(template_kick)
 {
 	load();
 
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE(format_kick)
 	BOOST_REQUIRE_EQUAL("kick=test:#staff:jean!jean@localhost:jean:badboy:please do not flood\n", last());
 }
 
-BOOST_AUTO_TEST_CASE(format_me)
+BOOST_AUTO_TEST_CASE(template_me)
 {
 	load();
 
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(format_me)
 	BOOST_REQUIRE_EQUAL("me=test:#staff:jean!jean@localhost:jean:is drinking water\n", last());
 }
 
-BOOST_AUTO_TEST_CASE(format_message)
+BOOST_AUTO_TEST_CASE(template_message)
 {
 	load();
 
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(format_message)
 	BOOST_REQUIRE_EQUAL("message=test:#staff:jean!jean@localhost:jean:hello guys\n", last());
 }
 
-BOOST_AUTO_TEST_CASE(format_mode)
+BOOST_AUTO_TEST_CASE(template_mode)
 {
 	load();
 
@@ -120,7 +120,7 @@ BOOST_AUTO_TEST_CASE(format_mode)
 	BOOST_REQUIRE_EQUAL("mode=test:jean!jean@localhost:chris:+i:l:u:m\n", last());
 }
 
-BOOST_AUTO_TEST_CASE(format_notice)
+BOOST_AUTO_TEST_CASE(template_notice)
 {
 	load();
 
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(format_notice)
 	BOOST_REQUIRE_EQUAL("notice=test:jean!jean@localhost:chris:tu veux voir mon chat ?\n", last());
 }
 
-BOOST_AUTO_TEST_CASE(format_part)
+BOOST_AUTO_TEST_CASE(template_part)
 {
 	load();
 
@@ -138,7 +138,7 @@ BOOST_AUTO_TEST_CASE(format_part)
 	BOOST_REQUIRE_EQUAL("part=test:#staff:jean!jean@localhost:jean:too noisy here\n", last());
 }
 
-BOOST_AUTO_TEST_CASE(format_topic)
+BOOST_AUTO_TEST_CASE(template_topic)
 {
 	load();
 

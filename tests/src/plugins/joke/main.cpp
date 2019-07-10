@@ -34,7 +34,7 @@ public:
 	joke_test()
 		: js_plugin_fixture(PLUGIN_PATH)
 	{
-		plugin_->set_formats({
+		plugin_->set_templates({
 			{ "error", "error=#{server}:#{channel}:#{origin}:#{nickname}" }
 		});
 	}

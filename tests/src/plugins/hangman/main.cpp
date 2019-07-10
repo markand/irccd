@@ -40,7 +40,7 @@ public:
 	hangman_test()
 		: js_plugin_fixture(PLUGIN_PATH)
 	{
-		plugin_->set_formats({
+		plugin_->set_templates({
 			{ "asked", "asked=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{letter}" },
 			{ "dead", "dead=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{word}" },
 			{ "found", "found=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{word}" },
@@ -327,7 +327,7 @@ BOOST_AUTO_TEST_CASE(issue_644)
 	};
 	std::unordered_set<unsigned> found;
 
-	plugin_->set_formats({
+	plugin_->set_templates({
 		{ "start", "#{word}" }
 	});
 

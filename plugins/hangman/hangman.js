@@ -37,7 +37,7 @@ var Util = Irccd.Util;
 Plugin.config["collaborative"] = "true";
 
 // Formats.
-Plugin.format = {
+Plugin.templates = {
 	"asked":        "#{nickname}, '#{letter}' was already asked.",
 	"dead":         "#{nickname}, fail the word was: #{word}.",
 	"found":        "#{nickname}, nice! the word is now #{word}",
@@ -284,7 +284,7 @@ function propose(server, channel, origin, game, proposition)
 	switch (st) {
 	case "found":
 		kw.word = game.formatWord();
-		server.message(channel, Util.format(Plugin.format["found"], kw));
+		server.message(channel, Util.format(Plugin.templates["found"], kw));
 		break;
 	case "wrong-letter":
 	case "wrong-player":
@@ -292,12 +292,12 @@ function propose(server, channel, origin, game, proposition)
 		kw.word = proposition;
 	case "asked":
 		kw.letter = String.fromCharCode(proposition);
-		server.message(channel, Util.format(Plugin.format[st], kw));
+		server.message(channel, Util.format(Plugin.templates[st], kw));
 		break;
 	case "dead":
 	case "win":
 		kw.word = game.word;
-		server.message(channel, Util.format(Plugin.format[st], kw));
+		server.message(channel, Util.format(Plugin.templates[st], kw));
 
 		// Remove the game.
 		Hangman.remove(game);
@@ -331,7 +331,7 @@ function onCommand(server, origin, channel, message)
 
 		if (list.length === 0 || String(list[0]).length === 0) {
 			kw.word = game.formatWord();
-			server.message(channel, Util.format(Plugin.format["running"], kw));
+			server.message(channel, Util.format(Plugin.templates["running"], kw));
 		} else {
 			var word = String(list[0]);
 
@@ -342,7 +342,7 @@ function onCommand(server, origin, channel, message)
 		game = Hangman.create(server, channel);
 		game.query = isquery;
 		kw.word = game.formatWord();
-		server.message(channel, Util.format(Plugin.format["start"], kw));
+		server.message(channel, Util.format(Plugin.templates["start"], kw));
 	}
 
 	return game;

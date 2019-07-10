@@ -30,7 +30,7 @@ var Plugin = Irccd.Plugin;
 var Util = Irccd.Util;
 
 // Formats.
-Plugin.format = {
+Plugin.templates = {
 	"draw":         "nobody won",
 	"invalid":      "#{nickname}, please select a valid opponent",
 	"running":      "#{nickname}, the game is already running",
@@ -194,11 +194,11 @@ Game.prototype.show = function ()
 	this.server.message(this.channel, "3 " + this.grid[2].join(" "));
 
 	if (this.hasWinner())
-		this.server.message(this.channel, Util.format(Plugin.format.win, kw));
+		this.server.message(this.channel, Util.format(Plugin.templates.win, kw));
 	else if (this.hasDraw())
-		this.server.message(this.channel, Util.format(Plugin.format.draw, kw));
+		this.server.message(this.channel, Util.format(Plugin.templates.draw, kw));
 	else
-		this.server.message(this.channel, Util.format(Plugin.format.turn, kw));
+		this.server.message(this.channel, Util.format(Plugin.templates.turn, kw));
 }
 
 /**
@@ -229,7 +229,7 @@ Game.prototype.place = function (column, row, origin)
 	var kw = Game.keywords(this.server, this.channel, origin);
 
 	if (this.grid[row][column] !== '.') {
-		this.server.message(this.channel, Util.format(Plugin.format.used, kw));
+		this.server.message(this.channel, Util.format(Plugin.templates.used, kw));
 		return false;
 	}
 
@@ -300,7 +300,7 @@ function onNames(server, channel, list)
 
 	// Not a valid target? destroy the game.
 	if (list.indexOf(game.target) < 0)
-		server.message(channel, Util.format(Plugin.format.invalid,
+		server.message(channel, Util.format(Plugin.templates.invalid,
 			Game.keywords(server, channel, game.origin)));
 	else {
 		Game.map[id] = game;
@@ -316,9 +316,9 @@ function onCommand(server, origin, channel, message)
 	var nickname = Util.splituser(origin);
 
 	if (Game.exists(server, channel))
-		server.message(channel, Util.format(Plugin.format.running, Game.keywords(server, channel, origin)));
+		server.message(channel, Util.format(Plugin.templates.running, Game.keywords(server, channel, origin)));
 	else if (target === "" || target === nickname || target === server.info().nickname)
-		server.message(channel, Util.format(Plugin.format.invalid, Game.keywords(server, channel, origin)));
+		server.message(channel, Util.format(Plugin.templates.invalid, Game.keywords(server, channel, origin)));
 	else
 		Game.postpone(server, channel, origin, message);
 }

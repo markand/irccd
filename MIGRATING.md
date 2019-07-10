@@ -14,6 +14,8 @@ Irccd
 - The option `reconnect-timeout` has been renamed to `auto-reconnect-delay`.
 - The section `[identity]` has been removed, instead move those values inside
   each server in their `[server]` section.
+- The section `[format]` and their respective plugin counterparts are renamed to
+  `[templates]`.
 
 Irccdctl
 --------

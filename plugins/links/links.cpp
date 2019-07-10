@@ -69,7 +69,7 @@ void links_plugin::set_options(const map& conf)
 			conf_timeout = *v;
 }
 
-void links_plugin::set_formats(const map& formats)
+void links_plugin::set_templates(const map& formats)
 {
 	if (const auto it = formats.find("info"); it != formats.end())
 		format_info = it->second;

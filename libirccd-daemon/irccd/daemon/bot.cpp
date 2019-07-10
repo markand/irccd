@@ -36,7 +36,7 @@ namespace irccd::daemon {
 
 namespace {
 
-class format_filter : public logger::filter {
+class template_filter : public logger::filter {
 private:
 	std::string info_;
 	std::string warning_;
@@ -48,7 +48,7 @@ private:
 	             std::string_view) const -> std::string;
 
 public:
-	format_filter(std::string info, std::string warning, std::string debug) noexcept;
+	template_filter(std::string info, std::string warning, std::string debug) noexcept;
 
 	auto pre_debug(std::string_view,
 	               std::string_view,
@@ -63,7 +63,7 @@ public:
 	                 std::string_view) const -> std::string override;
 };
 
-auto format_filter::convert(const std::string& tmpl,
+auto template_filter::convert(const std::string& tmpl,
                             std::string_view category,
                             std::string_view component,
                             std::string_view message) const -> std::string
@@ -82,28 +82,28 @@ auto format_filter::convert(const std::string& tmpl,
 	return string_util::format(tmpl, params);
 }
 
-format_filter::format_filter(std::string info, std::string warning, std::string debug) noexcept
+template_filter::template_filter(std::string info, std::string warning, std::string debug) noexcept
 	: info_(std::move(info))
 	, warning_(std::move(warning))
 	, debug_(std::move(debug))
 {
 }
 
-auto format_filter::pre_debug(std::string_view category,
+auto template_filter::pre_debug(std::string_view category,
                               std::string_view component,
                               std::string_view message) const -> std::string
 {
 	return convert(debug_, category, component, message);
 }
 
-auto format_filter::pre_info(std::string_view category,
+auto template_filter::pre_info(std::string_view category,
                              std::string_view component,
                              std::string_view message) const -> std::string
 {
 	return convert(info_, category, component, message);
 }
 
-auto format_filter::pre_warning(std::string_view category,
+auto template_filter::pre_warning(std::string_view category,
                                 std::string_view component,
                                 std::string_view message) const -> std::string
 {
@@ -170,14 +170,14 @@ void bot::load_logs()
 	}
 }
 
-void bot::load_formats()
+void bot::load_templates()
 {
-	const auto sc = config_.get("format");
+	const auto sc = config_.get("templates");
 
 	if (sc.empty())
 		return;
 
-	filter_ = std::make_unique<format_filter>(
+	filter_ = std::make_unique<template_filter>(
 		sc.get("info").get_value(),
 		sc.get("warning").get_value(),
 		sc.get("debug").get_value()
@@ -264,9 +264,9 @@ void bot::load() noexcept
 	 *    loading errors.
 	 */
 
-	// [logs] and [format] sections.
+	// [logs] and [templates] sections.
 	load_logs();
-	load_formats();
+	load_templates();
 
 	if (!loaded_)
 		sink_->info("irccd", "") << "loading configuration from " << config_.get_path() << std::endl;

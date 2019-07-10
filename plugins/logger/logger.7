@@ -80,25 +80,25 @@ section:
 .It Va join
 Format when someone joins a channel.
 .It Va kick
-Format when someone has been kicked. Keywords: 
+Format when someone has been kicked. Keywords:
 .Em reason , target .
 .It Va me
-Format for emote actions. Keywords: 
+Format for emote actions. Keywords:
 .Em message .
 .It Va message
-Format for channel messages. Keywords: 
+Format for channel messages. Keywords:
 .Em message .
 .It Va mode
-Format for user mode change. Keywords: 
+Format for user mode change. Keywords:
 .Em mode , limit , user , mask .
 .It Va notice
-Format on private notices. Keywords: 
+Format on private notices. Keywords:
 .Em message .
 .It Va part
-Format when someone leaves a channel. Keywords: 
+Format when someone leaves a channel. Keywords:
 .Em reason .
 .It Va topic
-Format when a topic is changed. Keywords: 
+Format when a topic is changed. Keywords:
 .Em topic .
 .El
 .Pp
@@ -111,7 +111,7 @@ Example of configuration file:
 [plugin.logger]
 path = "/var/log/irccd/#{server}/%y/%m/%d/#{channel}.txt"
 
-[format.logger]
+[templates.logger]
 join = "user #{nickname} joined #{channel}"
 .Ed
 .\" SEE ALSO

@@ -33,9 +33,9 @@ var Plugin = Irccd.Plugin;
 var Util = Irccd.Util;
 
 /**
- * All available formats.
+ * All available templates.
  */
-Plugin.format = {
+Plugin.templates = {
 	"join":         "%H:%M:%S >> #{nickname} joined #{channel}",
 	"kick":         "%H:%M:%S :: #{target} has been kicked by #{nickname} [reason: #{reason}]",
 	"me":           "%H:%M:%S * #{nickname} #{message}",
@@ -75,7 +75,7 @@ function write(fmt, args)
 
 	Logger.debug("opening: " + path);
 
-	var str = Util.format(Plugin.format[fmt], args);
+	var str = Util.format(Plugin.templates[fmt], args);
 	var file = new File(path, "a");
 
 	file.write(str + "\n");

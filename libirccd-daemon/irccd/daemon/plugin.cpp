@@ -70,12 +70,12 @@ void plugin::set_options(const map&)
 {
 }
 
-auto plugin::get_formats() const -> map
+auto plugin::get_templates() const -> map
 {
 	return {};
 }
 
-void plugin::set_formats(const map&)
+void plugin::set_templates(const map&)
 {
 }
 

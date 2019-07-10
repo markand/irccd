@@ -88,18 +88,18 @@ void mock_plugin::set_options(const map& map)
 	options_ = map;
 }
 
-auto mock_plugin::get_formats() const -> map
+auto mock_plugin::get_templates() const -> map
 {
-	push("get_formats");
+	push("get_templates");
 
-	return formats_;
+	return templates_;
 }
 
-void mock_plugin::set_formats(const map& map)
+void mock_plugin::set_templates(const map& map)
 {
-	push("set_formats", { map });
+	push("set_templates", { map });
 
-	formats_ = map;
+	templates_ = map;
 }
 
 auto mock_plugin::get_paths() const -> map

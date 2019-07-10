@@ -38,7 +38,7 @@ public:
 	test_fixture()
 		: js_plugin_fixture(PLUGIN_PATH)
 	{
-		plugin_->set_formats({
+		plugin_->set_templates({
 			{ "draw", "draw=#{channel}:#{command}:#{nickname}:#{plugin}:#{server}" },
 			{ "invalid", "invalid=#{channel}:#{command}:#{nickname}:#{origin}:#{plugin}:#{server}" },
 			{ "running", "running=#{channel}:#{command}:#{nickname}:#{origin}:#{plugin}:#{server}" },
