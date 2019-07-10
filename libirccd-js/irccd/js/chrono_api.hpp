@@ -1,5 +1,5 @@
 /*
- * elapsed_timer_api.hpp -- Irccd.ElapsedTimer API
+ * chrono_api.hpp -- Irccd.Chrono API
  *
  * Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_ELAPSED_TIMER_API_HPP
-#define IRCCD_JS_ELAPSED_TIMER_API_HPP
+#ifndef IRCCD_JS_CHRONO_API_HPP
+#define IRCCD_JS_CHRONO_API_HPP
 
 /**
- * \file elapsed_timer_api.hpp
- * \brief Irccd.ElapsedTimer Javascript API.
+ * \file chrono_api.hpp
+ * \brief Irccd.Chrono Javascript API.
  */
 
 #include "api.hpp"
@@ -30,9 +30,9 @@ namespace irccd::js {
 
 /**
  * \ingroup js-api
- * \brief Irccd.ElapsedTimer Javascript API.
+ * \brief Irccd.Chrono Javascript API.
  */
-class elapsed_timer_api : public api {
+class chrono_api : public api {
 public:
 	/**
 	 * \copydoc api::get_name
@@ -47,4 +47,4 @@ public:
 
 } // !irccd::js
 
-#endif // !IRCCD_JS_ELAPSED_TIMER_API_HPP
+#endif // !IRCCD_JS_CHRONO_API_HPP

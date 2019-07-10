@@ -25,20 +25,20 @@ set(
 	${PROJECT_SOURCE_DIR}/irccd/js.hpp
 	${PROJECT_SOURCE_DIR}/irccd/js/api.cpp
 	${PROJECT_SOURCE_DIR}/irccd/js/api.hpp
+	${PROJECT_SOURCE_DIR}/irccd/js/chrono_api.cpp
+	${PROJECT_SOURCE_DIR}/irccd/js/chrono_api.hpp
 	${PROJECT_SOURCE_DIR}/irccd/js/directory_api.cpp
 	${PROJECT_SOURCE_DIR}/irccd/js/directory_api.hpp
 	${PROJECT_SOURCE_DIR}/irccd/js/duk.cpp
 	${PROJECT_SOURCE_DIR}/irccd/js/duk.hpp
-	${PROJECT_SOURCE_DIR}/irccd/js/elapsed_timer_api.cpp
-	${PROJECT_SOURCE_DIR}/irccd/js/elapsed_timer_api.hpp
 	${PROJECT_SOURCE_DIR}/irccd/js/file_api.cpp
 	${PROJECT_SOURCE_DIR}/irccd/js/file_api.hpp
 	${PROJECT_SOURCE_DIR}/irccd/js/irccd_api.cpp
 	${PROJECT_SOURCE_DIR}/irccd/js/irccd_api.hpp
-	${PROJECT_SOURCE_DIR}/irccd/js/plugin.cpp
-	${PROJECT_SOURCE_DIR}/irccd/js/plugin.hpp
 	${PROJECT_SOURCE_DIR}/irccd/js/logger_api.cpp
 	${PROJECT_SOURCE_DIR}/irccd/js/logger_api.hpp
+	${PROJECT_SOURCE_DIR}/irccd/js/plugin.cpp
+	${PROJECT_SOURCE_DIR}/irccd/js/plugin.hpp
 	${PROJECT_SOURCE_DIR}/irccd/js/plugin_api.cpp
 	${PROJECT_SOURCE_DIR}/irccd/js/plugin_api.hpp
 	${PROJECT_SOURCE_DIR}/irccd/js/server_api.cpp

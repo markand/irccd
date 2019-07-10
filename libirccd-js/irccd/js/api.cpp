@@ -17,7 +17,7 @@
  */
 
 #include "directory_api.hpp"
-#include "elapsed_timer_api.hpp"
+#include "chrono_api.hpp"
 #include "file_api.hpp"
 #include "irccd_api.hpp"
 #include "logger_api.hpp"
@@ -48,7 +48,7 @@ auto api::registry() noexcept -> const std::vector<constructor>&
 		// Irccd API must be loaded first.
 		bind<irccd_api>(),
 		bind<directory_api>(),
-		bind<elapsed_timer_api>(),
+		bind<chrono_api>(),
 		bind<file_api>(),
 		bind<logger_api>(),
 		bind<plugin_api>(),

@@ -70,6 +70,18 @@ Javascript API
 - The object information in `onWhois` event now has `hostname` property instead
   of `host`.
 
+### Module Chrono
+
+- The module `ElapsedTimer` has been renamed to `Chrono`,
+- The method `Chrono.restart` has been renamed to `Chrono.resume` to reduce
+  ambiguity,
+- The method `Chrono.reset` has been removed, just use `Chrono.start` instead
+  when you want to start accumulate time again.
+
+### Module Directory
+
+- The property `Directory.count` has been removed.
+
 ### Module Server
 
 - The methods `Server.cmode` and `Server.cnotice` have been removed, use
@@ -80,15 +92,6 @@ Javascript API
 - The property `host` in constructor `Server` has been renamed to
   `hostname`,
 - The property `sslVerify` in `Server` constructor has been removed.
-
-### Module ElapsedTimer
-
-- The method ElapsedTimer.reset has been removed, just use `start` instead
-  when you want to accumulate time.
-
-### Module Directory
-
-- The property `Directory.count` has been removed.
 
 ### Module Plugin
 

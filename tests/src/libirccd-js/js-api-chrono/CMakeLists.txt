@@ -17,7 +17,7 @@
 #
 
 irccd_define_test(
-	NAME js-api-elapsedtimer
+	NAME js-api-chrono
 	SOURCES main.cpp
 	LIBRARIES libirccd-js
 )

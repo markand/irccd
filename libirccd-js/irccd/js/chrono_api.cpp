@@ -1,5 +1,5 @@
 /*
- * elapsed_timer_api.cpp -- Irccd.ElapsedTimer API
+ * chrono_api.cpp -- Irccd.Chrono API
  *
  * Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
  *
@@ -18,7 +18,7 @@
 
 #include <boost/timer/timer.hpp>
 
-#include "elapsed_timer_api.hpp"
+#include "chrono_api.hpp"
 #include "plugin.hpp"
 
 using irccd::daemon::bot;
@@ -27,7 +27,7 @@ namespace irccd::js {
 
 namespace {
 
-const std::string_view signature(DUK_HIDDEN_SYMBOL("Irccd.ElapsedTimer"));
+const std::string_view signature(DUK_HIDDEN_SYMBOL("Irccd.Chrono"));
 
 // {{{ self
 
@@ -41,22 +41,22 @@ auto self(duk_context* ctx) -> boost::timer::cpu_timer*
 	duk_pop_2(ctx);
 
 	if (!ptr)
-		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not an ElapsedTimer object");
+		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not an Chrono object");
 
 	return ptr;
 }
 
 // }}}
 
-// {{{ Irccd.ElapsedTimer.prototype.pause
+// {{{ Irccd.Chrono.prototype.pause
 
 /*
- * Method: ElapsedTimer.prototype.pause
+ * Method: Chrono.prototype.pause
  * ------------------------------------------------------------------
  *
  * Pause the timer, without resetting the current elapsed time stored.
  */
-auto ElapsedTimer_prototype_pause(duk_context* ctx) -> duk_ret_t
+auto Chrono_prototype_pause(duk_context* ctx) -> duk_ret_t
 {
 	self(ctx)->stop();
 
@@ -65,15 +65,15 @@ auto ElapsedTimer_prototype_pause(duk_context* ctx) -> duk_ret_t
 
 // }}}
 
-// {{{ Irccd.ElapsedTimer.prototype.restart
+// {{{ Irccd.Chrono.prototype.resume
 
 /*
- * Method: Irccd.ElapsedTimer.prototype.restart
+ * Method: Irccd.Chrono.prototype.resume
  * ------------------------------------------------------------------
  *
  * Restart the timer without resetting the current elapsed time.
  */
-auto ElapsedTimer_prototype_restart(duk_context* ctx) -> duk_ret_t
+auto Chrono_prototype_resume(duk_context* ctx) -> duk_ret_t
 {
 	self(ctx)->resume();
 
@@ -82,10 +82,10 @@ auto ElapsedTimer_prototype_restart(duk_context* ctx) -> duk_ret_t
 
 // }}}
 
-// {{{ Irccd.ElapsedTimer.prototype.elapsed
+// {{{ Irccd.Chrono.prototype.elapsed
 
 /*
- * Method: ElapsedTimer.prototype.elapsed
+ * Method: Chrono.prototype.elapsed
  * ------------------------------------------------------------------
  *
  * Get the number of elapsed milliseconds.
@@ -93,7 +93,7 @@ auto ElapsedTimer_prototype_restart(duk_context* ctx) -> duk_ret_t
  * Returns:
  *   The time elapsed.
  */
-auto ElapsedTimer_prototype_elapsed(duk_context* ctx) -> duk_ret_t
+auto Chrono_prototype_elapsed(duk_context* ctx) -> duk_ret_t
 {
 	duk_push_uint(ctx, self(ctx)->elapsed().wall / 1000000LL);
 
@@ -102,15 +102,32 @@ auto ElapsedTimer_prototype_elapsed(duk_context* ctx) -> duk_ret_t
 
 // }}}
 
-// {{{ Irccd.ElapsedTimer [constructor]
+// {{{ Irccd.Chrono.prototype.start
 
 /*
- * Function: Irccd.ElapsedTimer [constructor]
+ * Method: Chrono.prototype.start
  * ------------------------------------------------------------------
  *
- * Construct a new ElapsedTimer object.
+ * Starts or restarts accumulating time.
  */
-auto ElapsedTimer_constructor(duk_context* ctx) -> duk_ret_t
+auto Chrono_prototype_start(duk_context* ctx) -> duk_ret_t
+{
+	self(ctx)->start();
+
+	return 0;
+}
+
+// }}}
+
+// {{{ Irccd.Chrono [constructor]
+
+/*
+ * Function: Irccd.Chrono [constructor]
+ * ------------------------------------------------------------------
+ *
+ * Construct a new Chrono object.
+ */
+auto Chrono_constructor(duk_context* ctx) -> duk_ret_t
 {
 	duk_push_this(ctx);
 	duk_push_pointer(ctx, new boost::timer::cpu_timer);
@@ -122,15 +139,15 @@ auto ElapsedTimer_constructor(duk_context* ctx) -> duk_ret_t
 
 // }}}
 
-// {{{ Irccd.ElapsedTimer [destructor]
+// {{{ Irccd.Chrono [destructor]
 
 /*
- * Function: Irccd.ElapsedTimer [destructor]
+ * Function: Irccd.Chrono [destructor]
  * ------------------------------------------------------------------
  *
  * Delete the property.
  */
-auto ElapsedTimer_destructor(duk_context* ctx) -> duk_ret_t
+auto Chrono_destructor(duk_context* ctx) -> duk_ret_t
 {
 	duk_get_prop_string(ctx, 0, signature.data());
 	delete static_cast<boost::timer::cpu_timer*>(duk_to_pointer(ctx, -1));
@@ -145,9 +162,10 @@ auto ElapsedTimer_destructor(duk_context* ctx) -> duk_ret_t
 // {{{ definitions
 
 const duk_function_list_entry methods[] = {
-	{ "elapsed",    ElapsedTimer_prototype_elapsed, 0 },
-	{ "pause",      ElapsedTimer_prototype_pause,   0 },
-	{ "restart",    ElapsedTimer_prototype_restart, 0 },
+	{ "elapsed",    Chrono_prototype_elapsed,       0 },
+	{ "pause",      Chrono_prototype_pause,         0 },
+	{ "resume",     Chrono_prototype_resume,        0 },
+	{ "start",      Chrono_prototype_start,         0 },
 	{ nullptr,      nullptr,                        0 }
 };
 
@@ -155,25 +173,25 @@ const duk_function_list_entry methods[] = {
 
 } // !namespace
 
-// {{{ elapsed_timer_api
+// {{{ chrono_api
 
-auto elapsed_timer_api::get_name() const noexcept -> std::string_view
+auto chrono_api::get_name() const noexcept -> std::string_view
 {
-	return "Irccd.ElapsedTimer";
+	return "Irccd.Chrono";
 }
 
-void elapsed_timer_api::load(bot&, plugin& plugin)
+void chrono_api::load(bot&, plugin& plugin)
 {
 	duk::stack_guard sa(plugin.get_context());
 
 	duk_get_global_string(plugin.get_context(), "Irccd");
-	duk_push_c_function(plugin.get_context(), ElapsedTimer_constructor, 0);
+	duk_push_c_function(plugin.get_context(), Chrono_constructor, 0);
 	duk_push_object(plugin.get_context());
 	duk_put_function_list(plugin.get_context(), -1, methods);
-	duk_push_c_function(plugin.get_context(), ElapsedTimer_destructor, 1);
+	duk_push_c_function(plugin.get_context(), Chrono_destructor, 1);
 	duk_set_finalizer(plugin.get_context(), -2);
 	duk_put_prop_string(plugin.get_context(), -2, "prototype");
-	duk_put_prop_string(plugin.get_context(), -2, "ElapsedTimer");
+	duk_put_prop_string(plugin.get_context(), -2, "Chrono");
 	duk_pop(plugin.get_context());
 }
 

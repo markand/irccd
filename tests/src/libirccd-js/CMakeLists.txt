@@ -17,7 +17,7 @@
 #
 
 add_subdirectory(js-plugin)
-add_subdirectory(js-api-elapsedtimer)
+add_subdirectory(js-api-chrono)
 add_subdirectory(js-api-directory)
 add_subdirectory(js-api-file)
 add_subdirectory(js-api-irccd)

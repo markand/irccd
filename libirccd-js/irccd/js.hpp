@@ -27,9 +27,9 @@
 #include "sysconfig.hpp"
 
 #include "js/api.hpp"
+#include "js/chrono_api.hpp"
 #include "js/directory_api.hpp"
 #include "js/duk.hpp"
-#include "js/elapsed_timer_api.hpp"
 #include "js/file_api.hpp"
 #include "js/irccd_api.hpp"
 #include "js/logger_api.hpp"
