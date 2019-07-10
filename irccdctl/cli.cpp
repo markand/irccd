@@ -705,7 +705,7 @@ auto rule_list_cli::get_name() const noexcept -> std::string_view
 void rule_list_cli::exec(ctl::controller& ctl, const std::vector<std::string>&)
 {
 	request(ctl, {{ "command", "rule-list" }}, [] (auto result) {
-		auto pos = 0;
+		auto pos = 0U;
 		auto length = result["list"].size();
 
 		for (const auto& obj : result["list"]) {

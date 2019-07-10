@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(home)
 BOOST_AUTO_TEST_CASE(popen)
 {
 	auto ret = duk_peval_string(plugin_->get_context(),
-		"f = Irccd.System.popen(\"" IRCCD_EXECUTABLE " --version\", \"r\");"
+		"f = Irccd.System.popen(\"" IRCCD_EXECUTABLE " version\", \"r\");"
 		"r = f.readline();"
 	);
 

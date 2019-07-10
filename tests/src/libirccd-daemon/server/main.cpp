@@ -125,7 +125,7 @@ BOOST_AUTO_TEST_CASE(not_connected_yet)
 {
 	accept();
 
-	server_->connect([] (auto code) {
+	server_->connect([] (auto) {
 		BOOST_FAIL("handler called (not expected");
 	});
 	server_->disconnect();

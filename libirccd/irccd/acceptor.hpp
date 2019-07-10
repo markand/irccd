@@ -236,9 +236,9 @@ inline void basic_socket_acceptor<Acceptor>::accept(Socket& sc, Handler handler)
  */
 class ip_acceptor : public basic_socket_acceptor<boost::asio::ip::tcp::acceptor> {
 private:
-	void open(bool ipv4, bool ipv6);
+	void open(bool ipv6);
 	void set(bool ipv4, bool ipv6);
-	void bind(const std::string& address, std::uint16_t port, bool ipv4, bool ipv6);
+	void bind(const std::string& address, std::uint16_t port, bool ipv6);
 
 public:
 	/**
@@ -278,7 +278,7 @@ public:
 	void accept(handler handler) override;
 };
 
-inline void ip_acceptor::open(bool ipv4, bool ipv6)
+inline void ip_acceptor::open(bool ipv6)
 {
 	using boost::asio::ip::tcp;
 
@@ -299,7 +299,7 @@ inline void ip_acceptor::set(bool ipv4, bool ipv6)
 	acceptor_.set_option(socket_base::reuse_address(true));
 }
 
-inline void ip_acceptor::bind(const std::string& address, std::uint16_t port, bool ipv4, bool ipv6)
+inline void ip_acceptor::bind(const std::string& address, std::uint16_t port, bool ipv6)
 {
 	using boost::asio::ip::make_address_v4;
 	using boost::asio::ip::make_address_v6;
@@ -325,9 +325,11 @@ inline ip_acceptor::ip_acceptor(boost::asio::io_context& service,
                                 bool ipv6)
 	: basic_socket_acceptor(service)
 {
-	open(ipv4, ipv6);
+	assert(ipv4 || ipv6);
+
+	open(ipv6);
 	set(ipv4, ipv6);
-	bind(address, port, ipv4, ipv6);
+	bind(address, port, ipv6);
 }
 
 inline void ip_acceptor::accept(handler handler)

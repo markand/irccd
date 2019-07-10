@@ -23,7 +23,7 @@
 #include <irccd/daemon/server_service.hpp>
 
 #include <irccd/js/directory_api.hpp>
-#include <irccd/js/elapsed_timer_api.hpp>
+#include <irccd/js/chrono_api.hpp>
 #include <irccd/js/file_api.hpp>
 #include <irccd/js/irccd_api.hpp>
 #include <irccd/js/plugin.hpp>

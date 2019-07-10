@@ -724,7 +724,7 @@ void server::wait(connect_handler handler)
 	const auto self = shared_from_this();
 
 	timer_.expires_from_now(boost::posix_time::seconds(recodelay_));
-	timer_.async_wait([this, handler, self, c = conn_] (auto code) {
+	timer_.async_wait([handler, self, c = conn_] (auto code) {
 		if (code != boost::asio::error::operation_aborted)
 			handler({});
 	});
