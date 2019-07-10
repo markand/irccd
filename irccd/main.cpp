@@ -49,39 +49,46 @@ std::unique_ptr<bot> instance;
 
 void usage()
 {
-	std::cerr << "usage: irccd [options...]\n\n";
+	std::cerr << "usage: irccd [options...]\n";
+	std::cerr << "       irccd info\n";
+	std::cerr << "       irccd version\n\n";
 	std::cerr << "Available options:\n";
 	std::cerr << "  -c, --config file       specify the configuration file\n";
 	std::cerr << "  -h, --help              show this help\n";
 	std::cerr << "  -v, --verbose           be verbose\n";
-	std::cerr << "      --version           show the version\n";
 	std::exit(1);
+}
+
+// }}}
+
+// {{{ info
+
+void info()
+{
+	bool ssl = false;
+	bool js = false;
+
+#if defined(IRCCD_HAVE_SSL)
+	ssl = true;
+#endif
+#if defined(IRCCD_HAVE_JS)
+	js = true;
+#endif
+
+	std::cout << std::boolalpha;
+	std::cout << "ssl:              " << ssl << std::endl;
+	std::cout << "javascript:       " << js << std::endl;
+
+	std::exit(0);
 }
 
 // }}}
 
 // {{{ version
 
-void version(const option::result& options)
+void version()
 {
 	std::cout << IRCCD_VERSION << std::endl;
-
-	if (options.count("-v") > 0 || options.count("--verbose") > 0) {
-		bool ssl = false;
-		bool js = false;
-
-#if defined(IRCCD_HAVE_SSL)
-		ssl = true;
-#endif
-#if defined(IRCCD_HAVE_JS)
-		js = true;
-#endif
-
-		std::cout << std::boolalpha << std::endl;
-		std::cout << "ssl:		  " << ssl << std::endl;
-		std::cout << "javascript:   " << js << std::endl;
-	}
-
 	std::exit(0);
 }
 
@@ -117,7 +124,6 @@ auto parse(int& argc, char**& argv) -> option::result
 			{ "--help",     false   },
 			{ "-v",         false   },
 			{ "--verbose",  false   },
-			{ "--version",  false   }
 		};
 
 		result = option::read(argc, argv, options);
@@ -125,9 +131,6 @@ auto parse(int& argc, char**& argv) -> option::result
 		for (const auto& pair : result) {
 			if (pair.first == "-h" || pair.first == "--help")
 				usage();
-				// NOTREACHED
-			if (pair.first == "--version")
-				version(result);
 				// NOTREACHED
 			if (pair.first == "-v" || pair.first == "--verbose")
 				instance->get_log().set_verbose(true);
@@ -194,6 +197,16 @@ int main(int argc, char** argv)
 #endif
 
 	const auto options = parse(argc, argv);
+
+	if (argc > 0) {
+		if (std::strcmp(argv[0], "info") == 0)
+			irccd::daemon::info();
+			// NOTREACHED
+		if (std::strcmp(argv[0], "version") == 0)
+			irccd::daemon::version();
+			// NOTREACHED
+	}
+
 
 	try {
 		instance->set_config(open(options));

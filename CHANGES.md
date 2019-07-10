@@ -15,7 +15,8 @@ irccd:
 - The origin in rule is now first class value (#947),
 - New option `ipv4` in `[transport]` (#945),
 - New option `ipv4` in `[server]` (#945),
-- Section `[format]` is renamed to `[templates]` (#1671).
+- Section `[format]` is renamed to `[templates]` (#1671),
+- New commands are available as irccd arguments `info` and `version` (#1672).
 
 irccdctl:
 
