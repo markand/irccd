@@ -87,7 +87,7 @@ auto cli_fixture::exec(const std::vector<std::string>& args) -> result
 {
 	std::ostringstream oss;
 
-	oss << irccdctl_ << " -t ip --hostname 127.0.0.1 -p " << port_ << " ";
+	oss << irccdctl_ << " -h 127.0.0.1 -p " << port_ << " ";
 	oss << string_util::join(args, " ");
 
 	proc::ipstream stream_out, stream_err;

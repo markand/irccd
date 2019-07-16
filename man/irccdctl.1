@@ -87,9 +87,9 @@
 .Op Fl n Ar nickname
 .Op Fl r Ar realname
 .Op Fl u Ar username
+.Op Fl p Ar port
 .Ar id
 .Ar hostname
-.Op Ar port
 .\" server-disconnect
 .Nm
 .Cm server-disconnect
@@ -183,8 +183,43 @@ requests. For more information see
 .Pp
 The general syntax for running an irccdctl command is:
 .Bd -literal -offset Ds
-irccdctl command options arg1 arg2 arg3 ... argn
+irccdctl global-options command command-options command-arguments
 .Ed
+.Pp
+The following
+.Ar global-options
+are available
+.Em before
+the
+.Ar command
+name:
+.Bl -tag -width 12n
+.It Fl 4
+Try to connect using IPv4. Specifying this option
+unset
+.Fl 6
+option, set it explicitly to enable both families.
+.It Fl 6
+Try to connect using IPv6. Specifying this option will
+unset
+.Fl 4
+option, set it explicitly to enable both families.
+.It Fl h Ar hostname
+Connect to the IP address or hostname.
+.It Fl p Ar port
+Use the
+.Ar port
+number or service name.
+.It Fl P Ar path
+Connect to the UNIX local socket specified by
+.Ar path .
+.El
+.Pp
+Note: options
+.Fl h
+and
+.Fl P
+are mutually exclusive.
 .\" COMMANDS
 .Sh COMMANDS
 .Bl -tag -width xxxxxxxx-yyyyyyyyy
@@ -304,9 +339,7 @@ Add and connect to a new IRC server. Server with identifier
 .Ar id
 must not be already present. The argument
 .Ar hostname
-can be a hostname or IP address. If the
-.Ar port
-number is not specified, the default value of 6667 is used instead.
+can be a hostname or IP address.
 .Pp
 Available options:
 .Bl -tag -width 12n
@@ -318,6 +351,8 @@ specify a nickname.
 specify a real name.
 .It Fl u Ar username
 specify a user name.
+.It Fl p Ar port
+use the specific port, otherwise 6667 is used.
 .El
 .\" server-disconnect
 .It Cm server-disconnect

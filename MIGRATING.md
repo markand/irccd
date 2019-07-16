@@ -26,6 +26,8 @@ Irccdctl
 - The option `--host` has been renamed to `--hostname`,
 - The output style has been unified,
 - Options `-S` and `--ssl-verify` in server-connect have been removed.
+- Connection options are now order dependant and must be set before the command
+  name.
 
 Plugins
 -------

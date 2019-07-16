@@ -34,7 +34,6 @@ set(
 	${libirccd_SOURCE_DIR}/irccd/ini_util.hpp
 	${libirccd_SOURCE_DIR}/irccd/json_util.cpp
 	${libirccd_SOURCE_DIR}/irccd/json_util.hpp
-	${libirccd_SOURCE_DIR}/irccd/options.cpp
 	${libirccd_SOURCE_DIR}/irccd/options.hpp
 	${libirccd_SOURCE_DIR}/irccd/stream.hpp
 	${libirccd_SOURCE_DIR}/irccd/string_util.cpp

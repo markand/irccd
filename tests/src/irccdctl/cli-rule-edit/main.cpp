@@ -53,8 +53,8 @@ BOOST_AUTO_TEST_CASE(server)
 
 	{
 		const auto [code, out, err] = exec({ "rule-edit",
-			"-s ts1",   "--add-server ts2",
-			"-S s1",    "--remove-server s2",
+			"-s ts1",   "-s ts2",
+			"-S s1",    "-S s2",
 			"0"
 		});
 
@@ -84,8 +84,8 @@ BOOST_AUTO_TEST_CASE(channel)
 
 	{
 		const auto [code, out, err] = exec({ "rule-edit",
-			"-c tc1",   "--add-channel tc2",
-			"-C c1",    "--remove-channel c2",
+			"-c tc1",   "-c tc2",
+			"-C c1",    "-C c2",
 			"0"
 		});
 
@@ -115,8 +115,8 @@ BOOST_AUTO_TEST_CASE(plugin)
 
 	{
 		const auto [code, out, err] = exec({ "rule-edit",
-			"-p tp1",   "--add-plugin tp2",
-			"-P p1",    "--remove-plugin p2",
+			"-p tp1",   "-p tp2",
+			"-P p1",    "-P p2",
 			"0"
 		});
 
@@ -146,8 +146,8 @@ BOOST_AUTO_TEST_CASE(event)
 
 	{
 		const auto [code, out, err] = exec({ "rule-edit",
-			"-e onKick",    "--add-event onNickname",
-			"-E onMessage", "--remove-event onCommand",
+			"-e onKick",    "-e onNickname",
+			"-E onMessage", "-E onCommand",
 			"0"
 		});
 
@@ -198,32 +198,6 @@ BOOST_AUTO_TEST_CASE(action_1)
 	}
 }
 
-BOOST_AUTO_TEST_CASE(action_2)
-{
-	start();
-
-	{
-		const auto [code, out, err] = exec({ "rule-edit", "--action accept", "0" });
-
-		BOOST_TEST(out.size() == 0U);
-		BOOST_TEST(err.size() == 0U);
-	}
-
-	{
-		const auto [code, out, err] = exec({ "rule-list" });
-
-		BOOST_TEST(!code);
-		BOOST_TEST(out.size() == 6U);
-		BOOST_TEST(err.size() == 0U);
-		BOOST_TEST(out[0]  == "rule:           0");
-		BOOST_TEST(out[1]  == "servers:        s1 s2 ");
-		BOOST_TEST(out[2]  == "channels:       c1 c2 ");
-		BOOST_TEST(out[3]  == "plugins:        p1 p2 ");
-		BOOST_TEST(out[4]  == "events:         onCommand onMessage ");
-		BOOST_TEST(out[5]  == "action:         accept");
-	}
-}
-
 BOOST_AUTO_TEST_SUITE(errors)
 
 BOOST_AUTO_TEST_CASE(invalid_index_1)
@@ -254,7 +228,7 @@ BOOST_AUTO_TEST_CASE(invalid_action)
 {
 	start();
 
-	const auto [code, out, err] = exec({ "rule-edit", "--action break", "0" });
+	const auto [code, out, err] = exec({ "rule-edit", "-a break", "0" });
 
 	BOOST_TEST(code);
 	BOOST_TEST(out.size() == 0U);

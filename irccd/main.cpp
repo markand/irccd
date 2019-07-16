@@ -47,15 +47,12 @@ std::unique_ptr<bot> instance;
 
 // {{{ usage
 
+[[noreturn]]
 void usage()
 {
-	std::cerr << "usage: irccd [options...]\n";
+	std::cerr << "usage: irccd [-v] [-c config]\n";
 	std::cerr << "       irccd info\n";
-	std::cerr << "       irccd version\n\n";
-	std::cerr << "Available options:\n";
-	std::cerr << "  -c, --config file       specify the configuration file\n";
-	std::cerr << "  -h, --help              show this help\n";
-	std::cerr << "  -v, --verbose           be verbose\n";
+	std::cerr << "       irccd version\n";
 	std::exit(1);
 }
 
@@ -96,45 +93,29 @@ void version()
 
 // {{{ init
 
-void init(int& argc, char**& argv)
+void init()
 {
 	// Needed for some components.
 	sys::set_program_name("irccd");
 
 	// Default logging to console.
 	instance->get_log().set_verbose(false);
-
-	-- argc;
-	++ argv;
 }
 
 // }}}
 
 // {{{ parse
 
-auto parse(int& argc, char**& argv) -> option::result
+auto parse(int argc, char** argv) -> options::pack
 {
-	option::result result;
+	options::pack result;
 
 	try {
-		option::options options{
-			{ "-c",         true    },
-			{ "--config",   true    },
-			{ "-h",         false   },
-			{ "--help",     false   },
-			{ "-v",         false   },
-			{ "--verbose",  false   },
-		};
+		result = options::parse(argc, argv, "c:v");
 
-		result = option::read(argc, argv, options);
-
-		for (const auto& pair : result) {
-			if (pair.first == "-h" || pair.first == "--help")
-				usage();
-				// NOTREACHED
-			if (pair.first == "-v" || pair.first == "--verbose")
+		for (const auto& [ opt, _ ] : std::get<1>(result))
+			if (opt == 'v')
 				instance->get_log().set_verbose(true);
-		}
 	} catch (const std::exception& ex) {
 		instance->get_log().warning("irccd", "") << "abort: " << ex.what() << std::endl;
 		usage();
@@ -147,11 +128,11 @@ auto parse(int& argc, char**& argv) -> option::result
 
 // {{{ open
 
-auto open(const option::result& result) -> config
+auto open(const options::pack& result) -> config
 {
-	auto it = result.find("-c");
+	const auto& [ _, options ] = result;
 
-	if (it != result.end() || (it = result.find("--config")) != result.end())
+	if (const auto it = options.find('c'); it != options.end())
 		return config(it->second);
 
 	const auto cfg = config::search("irccd.conf");
@@ -170,6 +151,9 @@ auto open(const option::result& result) -> config
 
 int main(int argc, char** argv)
 {
+	--argc;
+	++argv;
+
 	using namespace irccd;
 	using namespace irccd::daemon;
 
@@ -178,7 +162,7 @@ int main(int argc, char** argv)
 
 	instance = std::make_unique<bot>(service);
 
-	init(argc, argv);
+	init();
 
 	// 1. Load commands.
 	for (const auto& f : transport_command::registry())

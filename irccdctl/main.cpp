@@ -69,8 +69,36 @@ std::vector<std::function<void ()>> requests;
  * -------------------------------------------------------------------
  */
 
+[[noreturn]]
 void usage()
 {
+	std::cerr << "usage: irccdctl plugin-config id [variable] [value]\n";
+	std::cerr << "       irccdctl plugin-info id\n";
+	std::cerr << "       irccdctl plugin-list\n";
+	std::cerr << "       irccdctl plugin-load name\n";
+	std::cerr << "       irccdctl plugin-reload plugin plugin-unload plugin\n";
+	std::cerr << "       irccdctl rule-add [-c channel] [-e event] [-i index] [-o origin] [-s server] accept|drop\n";
+	std::cerr << "       irccdctl rule-edit [-a accept|drop] [-c|C channel] [-e|E event] [-o|O origin] [-s|S server] index\n";
+	std::cerr << "       irccdctl rule-info index\n";
+	std::cerr << "       irccdctl rule-list\n";
+	std::cerr << "       irccdctl rule-move from to\n";
+	std::cerr << "       irccdctl rule-remove index\n";
+	std::cerr << "       irccdctl server-connect [-46s] [-n nickname] [-r realname] [-u username] [-p port] id hostname\n";
+	std::cerr << "       irccdctl server-disconnect [server]\n";
+	std::cerr << "       irccdctl server-info server\n";
+	std::cerr << "       irccdctl server-invite server target channel\n";
+	std::cerr << "       irccdctl server-join server channel [password]\n";
+	std::cerr << "       irccdctl server-kick server target channel [reason]\n";
+	std::cerr << "       irccdctl server-list\n";
+	std::cerr << "       irccdctl server-me server target message\n";
+	std::cerr << "       irccdctl server-message server target message\n";
+	std::cerr << "       irccdctl server-mode server target mode [limit] [user] [mask]\n";
+	std::cerr << "       irccdctl server-nick server nickname\n";
+	std::cerr << "       irccdctl server-notice server target message\n";
+	std::cerr << "       irccdctl server-part server channel [reason]\n";
+	std::cerr << "       irccdctl server-reconnect [server]\n";
+	std::cerr << "       irccdctl server-topic server channel topic\n";
+	std::cerr << "       irccdctl watch [-f native|json]\n";
 	std::exit(1);
 }
 
@@ -277,31 +305,35 @@ void read(const config& cfg)
  *
  * Parse internet connection from command line.
  *
- * -t ip | ipv6
- * -h hostname or ip
- * -p port
+ * -h hostname or ip address
+ * -p port (can be a string)
+ * -4 enable IPv4 (default)
+ * -6 enable IPv6 (default)
  */
-auto parse_connect_ip(std::string_view type, const option::result& options) -> std::unique_ptr<connector>
+auto parse_connect_ip(const options::pack& result) -> std::unique_ptr<connector>
 {
-	option::result::const_iterator it;
+	const auto& [ _, options ] = result;
+	const auto hostname = options.find('h');
+	const auto port = options.find('p');
 
-	// Host (-h or --host).
-	if ((it = options.find("-h")) == options.end() && (it = options.find("--hostname")) == options.end())
+	/*
+	 * Both are to true by default, setting one disable the second unless
+	 * it is also specified.
+	 */
+	bool ipv4 = true;
+	bool ipv6 = true;
+
+	if (options.count('4'))
+		ipv6 = options.count('6');
+	else if (options.count('6'))
+		ipv4 = options.count('4');
+
+	if (hostname == options.end() || hostname->second.empty())
 		throw transport_error(transport_error::invalid_hostname);
-
-	const auto hostname = it->second;
-
-	// Port (-p or --port).
-	if ((it = options.find("-p")) == options.end() && (it = options.find("--port")) == options.end())
+	if (port == options.end() || port->second.empty())
 		throw transport_error(transport_error::invalid_port);
 
-	const auto port = it->second;
-
-	// Type (-t or --type).
-	const auto ipv4 = type == "ip";
-	const auto ipv6 = type == "ipv6";
-
-	return std::make_unique<ip_connector>(service, hostname, port, ipv4, ipv6);
+	return std::make_unique<ip_connector>(service, hostname->second, port->second, ipv4, ipv6);
 }
 
 /*
@@ -312,19 +344,18 @@ auto parse_connect_ip(std::string_view type, const option::result& options) -> s
  *
  * -P file
  */
-auto parse_connect_local(const option::result& options) -> std::unique_ptr<connector>
+auto parse_connect_local([[maybe_unused]] const options::pack& options) -> std::unique_ptr<connector>
 {
 #if !BOOST_OS_WINDOWS
-	option::result::const_iterator it;
+	const auto& [ _, options ] = result;
+	const auto path = options.find('P');
 
-	if ((it = options.find("-P")) == options.end() && (it = options.find("--path")) == options.end())
-		throw std::invalid_argument("missing path parameter (-P or --path)");
+	if (path == options.end() || path->second.empty())
+		throw transport_error(transport_error::invalid_path);
 
 	return std::make_unique<local_connector>(service, it->second);
 #else
-	(void)options;
-
-	throw std::invalid_argument("unix connection not supported on Windows");
+	throw transport_error(transport_error::not_supported);
 #endif
 }
 
@@ -334,60 +365,38 @@ auto parse_connect_local(const option::result& options) -> std::unique_ptr<conne
  *
  * Generic parsing of command line option for connection.
  */
-void parse_connect(const option::result& options)
+void parse_connect(const options::pack& options)
 {
-	assert(options.count("-t") > 0 || options.count("--type") > 0);
+	const auto hflag = std::get<1>(options).count('h') > 0;
+	const auto pflag = std::get<1>(options).count('P') > 0;
 
-	auto it = options.find("-t");
+	if (hflag && pflag)
+		throw std::invalid_argument("-h and -P are mutually exclusive");
 
-	if (it == options.end())
-		it = options.find("--type");
-
-	std::unique_ptr<connector> connector;
-
-	if (it->second == "ip" || it->second == "ipv6")
-		connector = parse_connect_ip(it->second, options);
-	else if (it->second == "unix")
-		connector = parse_connect_local(options);
-	else
-		throw std::invalid_argument(str(format("invalid type given: %1%") % it->second));
-
-	if (connector)
-		ctl = std::make_unique<controller>(std::move(connector));
+	if (hflag)
+		ctl = std::make_unique<controller>(parse_connect_ip(options));
+	else if (pflag)
+		ctl = std::make_unique<controller>(parse_connect_local(options));
 }
 
-auto parse(int& argc, char**& argv) -> option::result
+auto parse(std::vector<std::string>& args) -> options::pack
 {
-	// 1. Parse command line options.
-	option::options def{
-		{ "-c",         true    },
-		{ "--config",   true    },
-		{ "-h",         true    },
-		{ "--help",     false   },
-		{ "--hostname", true    },
-		{ "-p",         true    },
-		{ "--port",     true    },
-		{ "-P",         true    },
-		{ "--path",     true    },
-		{ "-t",         true    },
-		{ "--type",     true    },
-		{ "-v",         false   },
-		{ "--verbose",  false   }
-	};
-
-	option::result result;
+	options::pack result;
 
 	try {
-		result = option::read(argc, argv, def);
+		// 1. Collect the options before the command name.
+		auto begin = args.begin();
+		auto end = args.end();
 
-		if (result.count("--help") > 0 || result.count("-h") > 0)
-			usage();
-			// NOTREACHED
+		result = options::parse(begin, end, "c:h:p:P:v!");
+	
+		for (const auto& [ opt, _ ] : std::get<1>(result))
+			if (opt == 'v')
+				verbose = true;
 
-		if (result.count("-v") != 0 || result.count("--verbose") != 0)
-			verbose = true;
+		args.erase(args.begin(), begin);
 	} catch (const std::exception& ex) {
-		std::cerr << "irccdctl: " << ex.what() << std::endl;
+		std::cerr << "abort: " << ex.what() << std::endl;
 		usage();
 	}
 
@@ -458,12 +467,9 @@ void enqueue(std::vector<std::string> args)
 		throw std::invalid_argument("no alias or command named " + name);
 }
 
-void init(int &argc, char **&argv)
+void init()
 {
 	sys::set_program_name("irccdctl");
-
-	-- argc;
-	++ argv;
 
 	for (const auto& f : cli::registry) {
 		auto c = f();
@@ -498,13 +504,8 @@ void do_connect()
 	service.reset();
 }
 
-void do_exec(int argc, char** argv)
+void do_exec(const std::vector<std::string>& args)
 {
-	std::vector<std::string> args;
-
-	for (int i = 0; i < argc; ++i)
-		args.push_back(argv[i]);
-
 	enqueue(args);
 
 	for (const auto& req : requests) {
@@ -520,10 +521,20 @@ void do_exec(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-	irccd::ctl::init(argc, argv);
+	--argc;
+	++argv;
+
+	// 0. Keep track of parsed arguments.
+	std::vector<std::string> cli(argc);
+
+	for (int i = 0; i < argc; ++i)
+		cli[i] = argv[i];
+
+	irccd::ctl::init();
 
 	// 1. Read command line arguments.
-	const auto result = irccd::ctl::parse(argc, argv);
+	const auto result = irccd::ctl::parse(cli);
+	const auto& [ args, options ] = result;
 
 	/*
 	 * 2. Open optional config by command line or by searching it
@@ -535,23 +546,18 @@ int main(int argc, char** argv)
 	 * 3. From the configuration file searched through directories
 	 */
 	try {
-		if (result.count("-t") > 0 || result.count("--type") > 0)
-			irccd::ctl::parse_connect(result);
+		irccd::ctl::parse_connect(result);
 
-		auto it = result.find("-c");
-
-		if (it != result.end() || (it = result.find("--config")) != result.end())
+		if (const auto it = options.find('c'); it != options.end())
 			irccd::ctl::read(it->second);
-		else {
-			if (auto conf = irccd::config::search("irccdctl.conf"))
-				irccd::ctl::read(*conf);
-		}
+		else if (const auto conf = irccd::config::search("irccdctl.conf"))
+			irccd::ctl::read(*conf);
 	} catch (const std::exception& ex) {
 		std::cerr << "abort: " << ex.what() << std::endl;
 		return 1;
 	}
 
-	if (argc <= 0)
+	if (cli.size() <= 0)
 		irccd::ctl::usage();
 		// NOTREACHED
 
@@ -562,7 +568,7 @@ int main(int argc, char** argv)
 
 	try {
 		irccd::ctl::do_connect();
-		irccd::ctl::do_exec(argc, argv);
+		irccd::ctl::do_exec(cli);
 	} catch (const std::system_error& ex) {
 		std::cerr << "abort: " << ex.code().message() << std::endl;
 		return 1;

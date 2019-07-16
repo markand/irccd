@@ -8,7 +8,6 @@ irccd:
 
 - New sections `[paths]` and `[paths.plugin]` have been added to control
   standard paths for both irccd and plugins (#611),
-- If Mercurial is found, the version is bundled in `irccd --version`,
 - Irccd no longer supports uid, gid, pid and daemon features (#846),
 - Sections `[identity]` and `[server]` have been merged (#905),
 - Local transports support SSL (#939),
@@ -50,7 +49,8 @@ internal:
 
 misc:
 
-- The documentation is in pure manual pages now (#1674).
+- The documentation is in pure manual pages now (#1674),
+- All command line options are now in short form only (#1673).
 
 plugins:
 

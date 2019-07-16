@@ -27,6 +27,7 @@
 #include <irccd/ctl/controller.hpp>
 
 #include <irccd/daemon/rule_service.hpp>
+#include <irccd/daemon/server.hpp>
 
 #include "cli.hpp"
 
@@ -34,6 +35,7 @@ using irccd::json_util::deserializer;
 using irccd::json_util::pretty;
 
 using irccd::daemon::rule_error;
+using irccd::daemon::server_error;
 
 namespace irccd::ctl {
 
@@ -56,21 +58,6 @@ auto bind() noexcept -> cli::constructor
 	return [] () noexcept {
 		return std::make_unique<T>();
 	};
-}
-
-auto format(std::vector<std::string> args) -> std::string
-{
-	auto result = option::read(args, {
-		{ "-f",         true },
-		{ "--format",   true }
-	});
-
-	if (result.count("-f") > 0)
-		return result.find("-f")->second;
-	if (result.count("--format") > 0)
-		return result.find("--format")->second;
-
-	return "native";
 }
 
 auto align(std::string_view topic) -> std::ostream&
@@ -228,26 +215,6 @@ void get_event(ctl::controller& ctl, std::string fmt)
 
 		get_event(ctl, std::move(fmt));
 	});
-}
-
-auto parse(std::vector<std::string> &args) -> option::result
-{
-	option::options options{
-		{ "-4",                 false   },
-                { "-6",                 false   },
-		{ "-c",                 true    },
-		{ "--command",          true    },
-		{ "-n",                 true    },
-		{ "--nickname",         true    },
-		{ "-r",                 true    },
-		{ "--realname",         true    },
-		{ "-s",                 false   },
-		{ "--ssl",              false   },
-		{ "-u",                 true    },
-		{ "--username",         true    }
-	};
-
-	return option::read(args, options);
 }
 
 } // !namespace
@@ -493,25 +460,11 @@ auto rule_add_cli::get_name() const noexcept -> std::string_view
 	return "rule-add";
 }
 
-void rule_add_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
+void rule_add_cli::exec(ctl::controller& ctl, const std::vector<std::string>& argv)
 {
-	static const option::options options{
-		{ "-c",                 true },
-		{ "--add-channel",      true },
-		{ "-e",                 true },
-		{ "--add-event",        true },
-		{ "-i",                 true },
-		{ "--index",            true },
-		{ "-p",                 true },
-		{ "--add-plugin",       true },
-		{ "-s",                 true },
-		{ "--add-server",       true }
-	};
+	const auto [ args, options ] = options::parse(argv.begin(), argv.end(), "c:e:i:p:s:");
 
-	auto copy = args;
-	auto result = option::read(copy, options);
-
-	if (copy.size() < 1)
+	if (args.size() < 1U)
 		throw std::invalid_argument("rule-add requires at least 1 argument");
 
 	auto json = nlohmann::json::object({
@@ -523,29 +476,31 @@ void rule_add_cli::exec(ctl::controller& ctl, const std::vector<std::string>& ar
 	});
 
 	// All sets.
-	for (const auto& pair : result) {
-		if (pair.first == "-c" || pair.first == "--add-channel")
-			json["channels"].push_back(pair.second);
-		if (pair.first == "-e" || pair.first == "--add-event")
-			json["events"].push_back(pair.second);
-		if (pair.first == "-p" || pair.first == "--add-plugin")
-			json["plugins"].push_back(pair.second);
-		if (pair.first == "-s" || pair.first == "--add-server")
-			json["servers"].push_back(pair.second);
+	for (const auto& [ option, value ] : options) {
+		switch (option) {
+		case 'c':
+			json["channels"].push_back(value);
+			break;
+		case 'e':
+			json["events"].push_back(value);
+			break;
+		case 'p':
+			json["plugins"].push_back(value);
+			break;
+		case 's':
+			json["servers"].push_back(value);
+			break;
+		case 'i':
+			if (const auto index = string_util::to_uint(value); index)
+				json["index"] = *index;
+			else
+				throw std::invalid_argument("invalid index argument");
+		default:
+			break;
+		}
 	}
 
-	// Index.
-	std::optional<std::size_t> index;
-
-	if (result.count("-i") > 0 && !(index = string_util::to_uint(result.find("-i")->second)))
-		throw std::invalid_argument("invalid index argument");
-	if (result.count("--index") > 0 && !(index = string_util::to_uint(result.find("--index")->second)))
-		throw std::invalid_argument("invalid index argument");
-
-	if (index)
-		json["index"] = *index;
-
-	json["action"] = copy[0];
+	json["action"] = args[0];
 
 	request(ctl, json);
 }
@@ -559,33 +514,11 @@ auto rule_edit_cli::get_name() const noexcept -> std::string_view
 	return "rule-edit";
 }
 
-void rule_edit_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
+void rule_edit_cli::exec(ctl::controller& ctl, const std::vector<std::string>& argv)
 {
-	static const option::options options{
-		{ "-a",                 true },
-		{ "--action",           true },
-		{ "-c",                 true },
-		{ "--add-channel",      true },
-		{ "-C",                 true },
-		{ "--remove-channel",   true },
-		{ "-e",                 true },
-		{ "--add-event",        true },
-		{ "-E",                 true },
-		{ "--remove-event",     true },
-		{ "-p",                 true },
-		{ "--add-plugin",       true },
-		{ "-P",                 true },
-		{ "--remove-plugin",    true },
-		{ "-s",                 true },
-		{ "--add-server",       true },
-		{ "-S",                 true },
-		{ "--remove-server",    true },
-	};
+	const auto [ args, options ] = options::parse(argv.begin(), argv.end(), "a:c:C:e:E:p:P:s:S:");
 
-	auto copy = args;
-	auto result = option::read(copy, options);
-
-	if (copy.size() < 1)
+	if (args.size() < 1U)
 		throw std::invalid_argument("rule-edit requires at least 1 argument");
 
 	auto json = nlohmann::json::object({
@@ -596,39 +529,43 @@ void rule_edit_cli::exec(ctl::controller& ctl, const std::vector<std::string>& a
 		{ "servers",    nlohmann::json::array() }
 	});
 
-	for (const auto& pair : result) {
-		// Action.
-		if (pair.first == "-a" || pair.first == "--action")
-			json["action"] = pair.second;
-
-		// Additions.
-		if (pair.first == "-c" || pair.first == "--add-channel")
-			json["add-channels"].push_back(pair.second);
-		if (pair.first == "-e" || pair.first == "--add-event")
-			json["add-events"].push_back(pair.second);
-		if (pair.first == "-p" || pair.first == "--add-plugin")
-			json["add-plugins"].push_back(pair.second);
-		if (pair.first == "-s" || pair.first == "--add-server")
-			json["add-servers"].push_back(pair.second);
-
-		// Removals.
-		if (pair.first == "-C" || pair.first == "--remove-channel")
-			json["remove-channels"].push_back(pair.second);
-		if (pair.first == "-E" || pair.first == "--remove-event")
-			json["remove-events"].push_back(pair.second);
-		if (pair.first == "-P" || pair.first == "--remove-plugin")
-			json["remove-plugins"].push_back(pair.second);
-		if (pair.first == "-S" || pair.first == "--remove-server")
-			json["remove-servers"].push_back(pair.second);
+	for (const auto& [ option, value ] : options) {
+		switch (option) {
+		case 'a':
+			json["action"] = value;
+			break;
+		case 'c':
+			json["add-channels"].push_back(value);
+			break;
+		case 'e':
+			json["add-events"].push_back(value);
+			break;
+		case 'p':
+			json["add-plugins"].push_back(value);
+			break;
+		case 's':
+			json["add-servers"].push_back(value);
+			break;
+		case 'C':
+			json["remove-channels"].push_back(value);
+			break;
+		case 'E':
+			json["remove-events"].push_back(value);
+			break;
+		case 'P':
+			json["remove-plugins"].push_back(value);
+			break;
+		case 'S':
+			json["remove-servers"].push_back(value);
+		default:
+			break;
+		}
 	}
 
-	// Index.
-	const auto index = string_util::to_uint(copy[0]);
-
-	if (!index)
+	if (const auto index = string_util::to_uint(args[0]); index)
+		json["index"] = *index;
+	else
 		throw rule_error(rule_error::invalid_index);
-
-	json["index"] = *index;
 
 	request(ctl, json);
 }
@@ -783,45 +720,49 @@ auto server_connect_cli::get_name() const noexcept -> std::string_view
 	return "server-connect";
 }
 
-void server_connect_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
+void server_connect_cli::exec(ctl::controller& ctl, const std::vector<std::string>& argv)
 {
-	std::vector<std::string> copy(args);
+	const auto [ args, options ] = options::parse(argv.begin(), argv.end(), "46c:n:r:su:p:");
 
-	option::result result = parse(copy);
-	option::result::const_iterator it;
-
-	if (copy.size() < 2)
+	if (args.size() < 2)
 		throw std::invalid_argument("server-connect requires at least 2 arguments");
 
 	auto object = nlohmann::json::object({
 		{ "command",    "server-connect"        },
-		{ "name",       copy[0]                 },
-		{ "hostname",   copy[1]                 },
+		{ "name",       args[0]                 },
+		{ "hostname",   args[1]                 },
 	});
 
-	if (copy.size() == 3) {
-		const auto port = string_util::to_int(copy[2]);
+	for (const auto& [ option, value ] : options) {
+		switch (option) {
+		case 'p':
+			if (const auto port = string_util::to_int(value); port)
+				object["port"] = *port;
+			else
+				throw server_error(server_error::invalid_port);
 
-		if (!port)
-			throw std::invalid_argument("invalid port given");
-
-		object["port"] = *port;
+			break;
+		case 's':
+			object["ssl"] = true;
+			break;
+		case 'n':
+			object["nickname"] = value;
+			break;
+		case 'r':
+			object["realname"] = value;
+			break;
+		case 'u':
+			object["username"] = value;
+			break;
+		case '4':
+			object["ipv4"] = true;
+			break;
+		case '6':
+			object["ipv6"] = true;
+		default:
+			break;
+		}
 	}
-
-	if (result.count("-s") > 0 || result.count("--ssl") > 0)
-		object["ssl"] = true;
-	if ((it = result.find("-n")) != result.end() || (it = result.find("--nickname")) != result.end())
-		object["nickname"] = it->second;
-	if ((it = result.find("-r")) != result.end() || (it = result.find("--realname")) != result.end())
-		object["realname"] = it->second;
-	if ((it = result.find("-u")) != result.end() || (it = result.find("--username")) != result.end())
-		object["username"] = it->second;
-
-        // Mutually exclusive.
-        if ((it = result.find("-4")) != result.end())
-                object["family"] = nlohmann::json::array({ "ipv4" });
-        if ((it = result.find("-6")) != result.end())
-                object["family"] = nlohmann::json::array({ "ipv6" });
 
 	request(ctl, object);
 }
@@ -1179,7 +1120,12 @@ auto watch_cli::get_name() const noexcept -> std::string_view
 
 void watch_cli::exec(ctl::controller& ctl, const std::vector<std::string>& args)
 {
-	const auto fmt = format(args);
+	std::string fmt = "native";
+
+	const auto [ _, options ] = options::parse(args.begin(), args.end(), "f:");
+
+	if (const auto it = options.find('f'); it != options.end())
+		fmt = it->second;
 
 	if (fmt != "native" && fmt != "json")
 		throw std::invalid_argument("invalid format given: " + fmt);

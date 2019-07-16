@@ -43,10 +43,10 @@ BOOST_AUTO_TEST_CASE(all)
 
 	{
 		const auto [code, out, err] = exec({ "rule-add",
-			"-c c1",        "--add-channel c2",
-			"-e onMessage", "--add-event onCommand",
-			"-p p1",        "--add-plugin p2",
-			"-s s1",        "--add-server s2",
+			"-c c1",        "-c c2",
+			"-e onMessage", "-e onCommand",
+			"-p p1",        "-p p2",
+			"-s s1",        "-s s2",
 			"drop"
 		});
 
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE(server)
 	start();
 
 	{
-		const auto [code, out, err] = exec({ "rule-add", "-s s1", "--add-server s2", "drop" });
+		const auto [code, out, err] = exec({ "rule-add", "-s s1", "-s s2", "drop" });
 
 		BOOST_TEST(!code);
 		BOOST_TEST(out.size() == 0U);
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(channel)
 	start();
 
 	{
-		const auto [code, out, err] = exec({ "rule-add", "-c c1", "--add-channel c2", "drop" });
+		const auto [code, out, err] = exec({ "rule-add", "-c c1", "-c c2", "drop" });
 
 		BOOST_TEST(!code);
 		BOOST_TEST(out.size() == 0U);
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE(plugin)
 	start();
 
 	{
-		const auto [code, out, err] = exec({ "rule-add", "-p p1", "--add-plugin p2", "drop" });
+		const auto [code, out, err] = exec({ "rule-add", "-p p1", "-p p2", "drop" });
 
 		BOOST_TEST(!code);
 		BOOST_TEST(out.size() == 0U);
@@ -156,7 +156,7 @@ BOOST_AUTO_TEST_CASE(event)
 	start();
 
 	{
-		const auto [code, out, err] = exec({ "rule-add", "-e onMessage", "--add-event onCommand", "drop" });
+		const auto [code, out, err] = exec({ "rule-add", "-e onMessage", "-e onCommand", "drop" });
 
 		BOOST_TEST(!code);
 		BOOST_TEST(out.size() == 0U);
@@ -184,7 +184,7 @@ BOOST_AUTO_TEST_CASE(invalid_action)
 {
 	start();
 
-	const auto [code, out, err] = exec({ "rule-add", "-p p1", "--add-plugin p2", "break" });
+	const auto [code, out, err] = exec({ "rule-add", "-p p1", "-p p2", "break" });
 
 	BOOST_TEST(code);
 	BOOST_TEST(out.size() == 0U);

@@ -125,6 +125,7 @@ static const functions list{
 
 // {{{ usage
 
+[[noreturn]]
 void usage()
 {
 	std::cerr << "usage: irccd-test [-c config] plugin-name" << std::endl;
@@ -593,12 +594,15 @@ void run()
 
 // {{{ load_plugins
 
-void load_plugins(int argc, char** argv)
+void load_plugins(const options::pack& result)
 {
-	if (argc <= 0)
-		usage();
+	const auto& [ args, _ ] = result;
 
-	daemon->get_plugins().load("test", boost::filesystem::exists(argv[0]) ? argv[0] : "");
+	if (args.size() != 1U)
+		usage();
+		// NOTREACHED
+
+	daemon->get_plugins().load("test", boost::filesystem::exists(args[0]) ? args[0] : "");
 	plugin = daemon->get_plugins().get("test");
 }
 
@@ -606,33 +610,28 @@ void load_plugins(int argc, char** argv)
 
 // {{{ load_config
 
-auto load_config(const option::result& result) -> config
+auto load_config(const options::pack& result) -> config
 {
-	auto it = result.find("-c");
+	const auto& [ _, options ] = result;
 
-	if (it != result.end() || (it = result.find("--config")) != result.end())
+	if (const auto it = options.find('c'); it != options.end())
 		return config(it->second);
 
-	auto cfg = config::search("irccd.conf");
-
-	return *cfg;
+	return config::search("irccd.conf").value_or(config());
 }
 
 // }}}
 
-// {{{ load_options
+// {{{ load_cli
 
-void load_options(int& argc, char**& argv)
+auto load_cli(int argc, char** argv) -> options::pack
 {
-	static const option::options def{
-		{ "-c",		 true	},
-		{ "--config",   true	}
-	};
-
 	try {
-		daemon->set_config(load_config(option::read(argc, argv, def)));
+		return options::parse(argc, argv, "c:");
 	} catch (const std::exception& ex) {
-		throw std::runtime_error(str(format("%1%") % ex.what()));
+		std::cerr << "abort: " << ex.what() << std::endl;
+		usage();
+		// NOTREACHED
 	}
 }
 
@@ -654,8 +653,17 @@ void load(int argc, char** argv)
 	daemon->get_plugins().add_loader(std::move(loader));
 #endif
 
-	load_options(argc, argv);
-	load_plugins(argc, argv);
+	const auto pack = load_cli(argc, argv);
+
+	puts("ARGS");
+	for (const auto& a : std::get<0>(pack))
+		std::cout << a << std::endl;
+	puts("OPTIONS");
+	for (const auto& [k,v] : std::get<1>(pack))
+		std::cout << k << " = " << v << std::endl;
+
+	load_config(pack);
+	load_plugins(pack);
 }
 
 // }}}
