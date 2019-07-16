@@ -9,6 +9,7 @@ Migrating from 2.x to 3.x
 Irccd
 -----
 
+- Long options have been removed.
 - The option `reconnect-tries` has been removed from `[server]` section, use
   `auto-reconnect` boolean option instead,
 - The option `reconnect-timeout` has been renamed to `auto-reconnect-delay`.
@@ -20,12 +21,13 @@ Irccd
 Irccdctl
 --------
 
+- Long options have been removed.
 - The functions `server-cnotice` and `server-cmode` have been removed, use
   `server-notice` and `server-mode` instead,
 - The option `connect.host` has been renamed to `connect.hostname`,
-- The option `--host` has been renamed to `--hostname`,
 - The output style has been unified,
-- Options `-S` and `--ssl-verify` in server-connect have been removed.
+- Options `-S` in server-connect have been removed, also
+  the port option is now specified with `-p` instead of a positional argument.
 - Connection options are now order dependant and must be set before the command
   name.
 
