@@ -79,21 +79,23 @@ BOOST_AUTO_TEST_CASE(simple)
 		const auto [code, out, err] = exec({ "rule-list" });
 
 		BOOST_TEST(!code);
-		BOOST_TEST(out.size() == 13U);
+		BOOST_TEST(out.size() == 15U);
 		BOOST_TEST(err.size() == 0U);
 		BOOST_TEST(out[0]  == "rule:           0");
 		BOOST_TEST(out[1]  == "servers:        s2 ");
 		BOOST_TEST(out[2]  == "channels:       c2 ");
-		BOOST_TEST(out[3]  == "plugins:        p2 ");
-		BOOST_TEST(out[4]  == "events:         onCommand ");
-		BOOST_TEST(out[5]  == "action:         drop");
-		BOOST_TEST(out[6]  == "");
-		BOOST_TEST(out[7]  == "rule:           1");
-		BOOST_TEST(out[8]  == "servers:        s3 ");
-		BOOST_TEST(out[9]  == "channels:       c3 ");
-		BOOST_TEST(out[10] == "plugins:        p3 ");
-		BOOST_TEST(out[11] == "events:         onMessage ");
-		BOOST_TEST(out[12] == "action:         accept");
+		BOOST_TEST(out[3]  == "origins:        o2 ");
+		BOOST_TEST(out[4]  == "plugins:        p2 ");
+		BOOST_TEST(out[5]  == "events:         onCommand ");
+		BOOST_TEST(out[6]  == "action:         drop");
+		BOOST_TEST(out[7]  == "");
+		BOOST_TEST(out[8]  == "rule:           1");
+		BOOST_TEST(out[9]  == "servers:        s3 ");
+		BOOST_TEST(out[10] == "channels:       c3 ");
+		BOOST_TEST(out[11] == "origins:        o3 ");
+		BOOST_TEST(out[12] == "plugins:        p3 ");
+		BOOST_TEST(out[13] == "events:         onMessage ");
+		BOOST_TEST(out[14] == "action:         accept");
 	}
 }
 

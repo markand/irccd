@@ -19,7 +19,9 @@ irccd:
 
 irccdctl:
 
-- New option `ipv4` in `[connect]` (#945).
+- New option `ipv4` in `[connect]` (#945),
+- New option `-o` in `rule-add` (#947),
+- New option `-o` and `-O` in `rule-edit` (#947).
 
 irccd-test:
 

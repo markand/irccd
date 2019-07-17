@@ -311,6 +311,7 @@ void rule_edit_command::exec(bot& bot, transport_client& client, const document&
 	updateset(rule.events, args, "events");
 	updateset(rule.plugins, args, "plugins");
 	updateset(rule.servers, args, "servers");
+	updateset(rule.origins, args, "origins");
 
 	auto action = args.find("action");
 

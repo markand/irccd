@@ -655,13 +655,6 @@ void load(int argc, char** argv)
 
 	const auto pack = load_cli(argc, argv);
 
-	puts("ARGS");
-	for (const auto& a : std::get<0>(pack))
-		std::cout << a << std::endl;
-	puts("OPTIONS");
-	for (const auto& [k,v] : std::get<1>(pack))
-		std::cout << k << " = " << v << std::endl;
-
 	load_config(pack);
 	load_plugins(pack);
 }

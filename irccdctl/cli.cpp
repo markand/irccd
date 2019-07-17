@@ -462,7 +462,7 @@ auto rule_add_cli::get_name() const noexcept -> std::string_view
 
 void rule_add_cli::exec(ctl::controller& ctl, const std::vector<std::string>& argv)
 {
-	const auto [ args, options ] = options::parse(argv.begin(), argv.end(), "c:e:i:p:s:");
+	const auto [ args, options ] = options::parse(argv.begin(), argv.end(), "c:e:i:o:p:s:");
 
 	if (args.size() < 1U)
 		throw std::invalid_argument("rule-add requires at least 1 argument");
@@ -472,7 +472,8 @@ void rule_add_cli::exec(ctl::controller& ctl, const std::vector<std::string>& ar
 		{ "channels",   nlohmann::json::array() },
 		{ "events",     nlohmann::json::array() },
 		{ "plugins",    nlohmann::json::array() },
-		{ "servers",    nlohmann::json::array() }
+		{ "servers",    nlohmann::json::array() },
+		{ "origins",    nlohmann::json::array() }
 	});
 
 	// All sets.
@@ -483,6 +484,9 @@ void rule_add_cli::exec(ctl::controller& ctl, const std::vector<std::string>& ar
 			break;
 		case 'e':
 			json["events"].push_back(value);
+			break;
+		case 'o':
+			json["origins"].push_back(value);
 			break;
 		case 'p':
 			json["plugins"].push_back(value);
@@ -516,7 +520,7 @@ auto rule_edit_cli::get_name() const noexcept -> std::string_view
 
 void rule_edit_cli::exec(ctl::controller& ctl, const std::vector<std::string>& argv)
 {
-	const auto [ args, options ] = options::parse(argv.begin(), argv.end(), "a:c:C:e:E:p:P:s:S:");
+	const auto [ args, options ] = options::parse(argv.begin(), argv.end(), "a:c:C:e:E:o:O:p:P:s:S:");
 
 	if (args.size() < 1U)
 		throw std::invalid_argument("rule-edit requires at least 1 argument");
@@ -526,7 +530,8 @@ void rule_edit_cli::exec(ctl::controller& ctl, const std::vector<std::string>& a
 		{ "channels",   nlohmann::json::array() },
 		{ "events",     nlohmann::json::array() },
 		{ "plugins",    nlohmann::json::array() },
-		{ "servers",    nlohmann::json::array() }
+		{ "servers",    nlohmann::json::array() },
+		{ "origins",    nlohmann::json::array() }
 	});
 
 	for (const auto& [ option, value ] : options) {
@@ -539,6 +544,12 @@ void rule_edit_cli::exec(ctl::controller& ctl, const std::vector<std::string>& a
 			break;
 		case 'e':
 			json["add-events"].push_back(value);
+			break;
+		case 'o':
+			json["add-origins"].push_back(value);
+			break;
+		case 'O':
+			json["remove-origins"].push_back(value);
 			break;
 		case 'p':
 			json["add-plugins"].push_back(value);
@@ -600,6 +611,7 @@ void rule_info_cli::print(const nlohmann::json& json, int index)
 	align("rule:") << index << std::endl;
 	align("servers:") << unjoin(json["servers"]) << std::endl;
 	align("channels:") << unjoin(json["channels"]) << std::endl;
+	align("origins:") << unjoin(json["origins"]) << std::endl;
 	align("plugins:") << unjoin(json["plugins"]) << std::endl;
 	align("events:") << unjoin(json["events"]) << std::endl;
 	align("action:") << unstr(json["action"]) << std::endl;
