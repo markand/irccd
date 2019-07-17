@@ -344,16 +344,16 @@ auto parse_connect_ip(const options::pack& result) -> std::unique_ptr<connector>
  *
  * -P file
  */
-auto parse_connect_local([[maybe_unused]] const options::pack& options) -> std::unique_ptr<connector>
+auto parse_connect_local([[maybe_unused]] const options::pack& pack) -> std::unique_ptr<connector>
 {
 #if !BOOST_OS_WINDOWS
-	const auto& [ _, options ] = result;
+	const auto& [ _, options ] = pack;
 	const auto path = options.find('P');
 
 	if (path == options.end() || path->second.empty())
 		throw transport_error(transport_error::invalid_path);
 
-	return std::make_unique<local_connector>(service, it->second);
+	return std::make_unique<local_connector>(service, path->second);
 #else
 	throw transport_error(transport_error::not_supported);
 #endif
@@ -389,7 +389,7 @@ auto parse(std::vector<std::string>& args) -> options::pack
 		auto end = args.end();
 
 		result = options::parse(begin, end, "c:h:p:P:v!");
-	
+
 		for (const auto& [ opt, _ ] : std::get<1>(result))
 			if (opt == 'v')
 				verbose = true;
