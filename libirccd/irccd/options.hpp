@@ -125,7 +125,7 @@ inline auto parse(InputIt&& it, InputIt&& end, std::string_view fmt) -> pack
 			 * The value is adjacent to the option (e.g.
 			 * -csuper.conf).
 			 */
-			if (idx + 1U < sub.size()) {
+			if (i + 1U < sub.size()) {
 				std::get<1>(result).emplace(sub[i], std::string(sub.substr(i + 1)));
 				break;
 			}
