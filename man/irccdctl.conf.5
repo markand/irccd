@@ -36,9 +36,9 @@ where name is one of the section defined below and are case-sensitive.
 This section defines the global irccdctl parameters.
 .Pp
 Available options:
-.Bl -tag -offset Ds -width 18n
+.Bl -tag -width 18n
 .It Va verbose No (bool)
-enable verbose message (Optional, default: false).
+Enable verbose message (Optional, default: false).
 .El
 .\" [connect]
 .Ss connect
@@ -47,36 +47,36 @@ only one must be defined. Just like transports you can connect to Unix or
 internet sockets.
 .Pp
 Available options:
-.Bl -tag -offset Ds -width 18n
+.Bl -tag -width 18n
 .It Va type No (string)
-connection type, must be set to
-.Ar ip
+Connection type, must be set to
+.Dq ip
 or
-.Ar unix .
+.Dq unix .
 .It Va password No (string)
-an authentication password (Optional, default: none).
+An authentication password (Optional, default: none).
+.El
 .Pp
-The additional options for
+The following options are available for the
 .Ar ip
 type:
 .Bl -tag -width 18n
 .It Va hostname No (string)
-host to connect.
+Host to connect.
 .It Va port No (int)
-port number.
+Port number.
 .It Va ipv4 No (bool)
-try to connect with ipv4 (Optional: default true).
+Try to connect with ipv4 (Optional: default true).
 .It Va ipv6 No (bool)
-try to connect with ipv6 (Optional: default true).
+Try to connect with ipv6 (Optional: default true).
 .El
 .Pp
-The additional options for
+The following options are available for the
 .Ar unix
 type:
 .Bl -tag -width 18n
 .It Va path No (string)
 The file path to the socket.
-.El
 .El
 .\" [alias]
 .Ss alias
@@ -96,7 +96,9 @@ say-hello = ( "server-message", "localhost", "#staff", "hello world!" )
 warning = ( "server-me", "localhost", "#staff", "is a bot")
 .Ed
 .Pp
-This example defines an alias `present` that will:
+This alias
+.Cm present
+will do:
 .Bl -enum
 .It
 Send a message on the channel #staff in the server localhost
