@@ -59,6 +59,12 @@ BOOST_AUTO_TEST_CASE(all)
 	{
 		const auto [code, out, err] = exec({ "rule-list" });
 
+		std::cout << code << std::endl;
+		for (auto o : out)
+			std::cout << o << std::endl;
+		for (auto e : err)
+			std::cout << e << std::endl;
+
 		BOOST_TEST(!code);
 		BOOST_TEST(out.size() == 7U);
 		BOOST_TEST(err.size() == 0U);
@@ -133,7 +139,7 @@ BOOST_AUTO_TEST_CASE(origin)
 	start();
 
 	{
-		const auto [code, out, err] = exec({ "rule-add", "-o c1", "-o c2", "drop" });
+		const auto [code, out, err] = exec({ "rule-add", "-o o1", "-o o2", "drop" });
 
 		BOOST_TEST(!code);
 		BOOST_TEST(out.size() == 0U);
