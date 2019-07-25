@@ -37,7 +37,7 @@ namespace irccd::daemon {
 
 class bot;
 
-} // !irccd
+} // !daemon
 
 namespace irccd::js {
 
@@ -48,12 +48,12 @@ namespace irccd::js {
 class irccd_api : public api {
 public:
 	/**
-	 * \copydoc api::get_name
+	 * \copydoc js::api::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc api::load
+	 * \copydoc js::api::load
 	 */
 	void load(daemon::bot& bot, js::plugin& plugin) override;
 };

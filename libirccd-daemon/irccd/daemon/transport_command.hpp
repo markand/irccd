@@ -104,12 +104,12 @@ public:
 class plugin_config_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -129,12 +129,12 @@ public:
 class plugin_info_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -150,12 +150,12 @@ public:
 class plugin_list_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -177,12 +177,12 @@ public:
 class plugin_load_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -203,12 +203,12 @@ public:
 class plugin_reload_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -229,12 +229,12 @@ public:
 class plugin_unload_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -254,12 +254,12 @@ public:
 class rule_add_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -280,12 +280,12 @@ public:
 class rule_edit_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -305,12 +305,12 @@ public:
 class rule_info_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -326,12 +326,12 @@ public:
 class rule_list_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -351,12 +351,12 @@ public:
 class rule_move_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -376,12 +376,12 @@ public:
 class rule_remove_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -405,12 +405,12 @@ public:
 class server_connect_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -431,12 +431,12 @@ public:
 class server_disconnect_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -457,12 +457,12 @@ public:
 class server_info_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -485,12 +485,12 @@ public:
 class server_invite_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -512,12 +512,12 @@ public:
 class server_join_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -540,12 +540,12 @@ public:
 class server_kick_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -561,12 +561,12 @@ public:
 class server_list_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -588,12 +588,12 @@ public:
 class server_me_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -615,12 +615,12 @@ public:
 class server_message_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -643,12 +643,12 @@ public:
 class server_mode_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -670,12 +670,12 @@ public:
 class server_nick_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -697,12 +697,12 @@ public:
 class server_notice_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -724,12 +724,12 @@ public:
 class server_part_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -750,12 +750,12 @@ public:
 class server_reconnect_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };
@@ -777,12 +777,12 @@ public:
 class server_topic_command : public transport_command {
 public:
 	/**
-	 * \copydoc command::get_name
+	 * \copydoc transport_command::get_name
 	 */
 	auto get_name() const noexcept -> std::string_view override;
 
 	/**
-	 * \copydoc command::exec
+	 * \copydoc transport_command::exec
 	 */
 	void exec(bot& bot, transport_client& client, const document& args) override;
 };

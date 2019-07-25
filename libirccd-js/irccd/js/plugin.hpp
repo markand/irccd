@@ -20,7 +20,7 @@
 #define IRCCD_JS_PLUGIN_HPP
 
 /**
- * \file plugin.hpp
+ * \file irccd/js/plugin.hpp
  * \brief JavaScript plugins for irccd.
  */
 

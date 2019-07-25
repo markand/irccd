@@ -147,12 +147,22 @@ public:
 	auto get_socket() noexcept -> Socket&;
 
 	/**
-	 * \copydoc stream::recv
+	 * Default implementation for Boost.Asio sockets.
+	 *
+	 * \pre another read operation must not be running
+	 * \pre handler != nullptr
+	 * \param handler the handler
 	 */
 	void recv(recv_handler handler) override;
 
 	/**
-	 * \copydoc stream::send
+	 * Default implementation for Boost.Asio sockets.
+	 *
+	 * \pre json.is_object()
+	 * \pre another write operation must not be running
+	 * \pre handler != nullptr
+	 * \param json the JSON message
+	 * \param handler the handler
 	 */
 	void send(const nlohmann::json& json, send_handler handler) override;
 };

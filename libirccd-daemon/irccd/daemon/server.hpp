@@ -878,10 +878,6 @@ public:
 };
 
 /**
- * \cond IRCCD_HIDDEN_SYMBOLS
- */
-
-/**
  * Get the server error category singleton.
  *
  * \return the singleton
@@ -897,6 +893,10 @@ auto server_category() -> const std::error_category&;
 auto make_error_code(server_error::error e) -> std::error_code;
 
 } // !irccd::daemon
+
+/**
+ * \cond IRCCD_HIDDEN_SYMBOLS
+ */
 
 namespace std {
 

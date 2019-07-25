@@ -20,7 +20,7 @@
 #define IRCCD_DAEMON_PLUGIN_HPP
 
 /**
- * \file plugin.hpp
+ * \file irccd/daemon/plugin.hpp
  * \brief irccd plugins
  */
 

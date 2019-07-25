@@ -49,7 +49,7 @@ enum class err {
 	/**
 	 * ERR_NOSUCHNICK
 	 *
-	 * "<nickname> :No such nick/channel"
+	 *     "<nickname> :No such nick/channel"
 	 *
 	 * Used to indicate the nickname parameter supplied to a
 	 * command is currently unused.
@@ -59,7 +59,7 @@ enum class err {
 	/**
 	 * ERR_NOSUCHSERVER
 	 *
-	 * "<server name> :No such server"
+	 *     "<server name> :No such server"
 	 *
 	 * Used to indicate the server name given currently
 	 * doesn't exist.
@@ -69,7 +69,7 @@ enum class err {
 	/**
 	 * ERR_NOSUCHCHANNEL
 	 *
-	 * "<channel name> :No such channel"
+	 *     "<channel name> :No such channel"
 	 *
 	 * Used to indicate the given channel name is invalid.
 	 */
@@ -78,7 +78,7 @@ enum class err {
 	/**
 	 * ERR_CANNOTSENDTOCHAN
 	 *
-	 * "<channel name> :Cannot send to channel"
+	 *     "<channel name> :Cannot send to channel"
 	 *
 	 * Sent to a user who is either (a) not on a channel
 	 * which is mode +n or (b) not a chanop (or mode +v) on
@@ -90,7 +90,7 @@ enum class err {
 	/**
 	 * ERR_TOOMANYCHANNELS
 	 *
-	 * "<channel name> :You have joined too many channels"
+	 *     "<channel name> :You have joined too many channels"
 	 *
 	 * Sent to a user when they have joined the maximum
 	 * number of allowed channels and they try to join
@@ -101,7 +101,7 @@ enum class err {
 	/**
 	 * ERR_WASNOSUCHNICK
 	 *
-	 * "<nickname> :There was no such nickname"
+	 *     "<nickname> :There was no such nickname"
 	 *
 	 * Returned by WHOWAS to indicate there is no history
 	 * information for that nickname.
@@ -111,18 +111,18 @@ enum class err {
 	/**
 	 * ERR_TOOMANYTARGETS
 	 *
-	 * "<target> :Duplicate recipients. No message delivered"
+	 *     "<target> :Duplicate recipients. No message delivered"
 	 *
 	 * Returned to a client which is attempting to send a
-	 * PRIVMSG/NOTICE using the user@host destination format
-	 * and for a user@host which has several occurrences.
+	 * PRIVMSG/NOTICE using the user\@host destination format
+	 * and for a user\@host which has several occurrences.
 	 */
 	toomanytargets = 407,
 
 	/**
 	 * ERR_NOORIGIN
 	 *
-	 * ":No origin specified"
+	 *     ":No origin specified"
 	 *
 	 * PING or PONG message missing the originator parameter
 	 * which is required since these commands must work
@@ -133,28 +133,28 @@ enum class err {
 	/**
 	 * ERR_NORECIPIENT
 	 *
-	 * ":No recipient given (<command>)"
+	 *     ":No recipient given (<command>)"
 	 */
 	norecipient = 411,
 
 	/**
 	 * ERR_NOTEXTTOSEND
 	 *
-	 * ":No text to send"
+	 *     ":No text to send"
 	 */
 	notexttosend = 412,
 
 	/**
 	 * ERR_NOTOPLEVEL
 	 *
-	 * "<mask> :No toplevel domain specified"
+	 *     "<mask> :No toplevel domain specified"
 	 */
 	notoplevel = 413,
 
 	/**
 	 * ERR_WILDTOPLEVEL
 	 *
-	 * "<mask> :Wildcard in toplevel domain"
+	 *     "<mask> :Wildcard in toplevel domain"
 	 *
 	 * are returned by PRIVMSG to indicate that
 	 * the message wasn't delivered for some reason.
@@ -167,7 +167,7 @@ enum class err {
 	/**
 	 * ERR_UNKNOWNCOMMAND
 	 *
-	 * "<command> :Unknown command"
+	 *     "<command> :Unknown command"
 	 *
 	 * Returned to a registered client to indicate that the
 	 * command sent is unknown by the server.
@@ -177,7 +177,7 @@ enum class err {
 	/**
 	 * ERR_NOMOTD
 	 *
-	 * ":MOTD File is missing"
+	 *     ":MOTD File is missing"
 	 *
 	 * Server's MOTD file could not be opened by the server.
 	 */
@@ -186,7 +186,7 @@ enum class err {
 	/**
 	 * ERR_NOADMININFO
 	 *
-	 * "<server> :No administrative info available"
+	 *     "<server> :No administrative info available"
 	 *
 	 * Returned by a server in response to an ADMIN message
 	 * when there is an error in finding the appropriate
@@ -197,7 +197,7 @@ enum class err {
 	/**
 	 * ERR_FILEERROR
 	 *
-	 * ":File error doing <file op> on <file>"
+	 *     ":File error doing <file op> on <file>"
 	 *
 	 * Generic error message used to report a failed file
 	 * operation during the processing of a message.
@@ -207,7 +207,7 @@ enum class err {
 	/**
 	 * ERR_NONICKNAMEGIVEN
 	 *
-	 * ":No nickname given"
+	 *     ":No nickname given"
 	 *
 	 * Returned when a nickname parameter expected for a
 	 * command and isn't found.
@@ -217,7 +217,7 @@ enum class err {
 	/**
 	 * ERR_ERRONEUSNICKNAME
 	 *
-	 * "<nick> :Erroneus nickname"
+	 *     "<nick> :Erroneus nickname"
 	 *
 	 * Returned after receiving a NICK message which contains
 	 * characters which do not fall in the defined set.  See
@@ -228,7 +228,7 @@ enum class err {
 	/**
 	 * ERR_NICKNAMEINUSE
 	 *
-	 * "<nick> :Nickname is already in use"
+	 *     "<nick> :Nickname is already in use"
 	 *
 	 * Returned when a NICK message is processed that results
 	 * in an attempt to change to a currently existing
@@ -239,7 +239,7 @@ enum class err {
 	/**
 	 * ERR_NICKCOLLISION
 	 *
-	 * "<nick> :Nickname collision KILL"
+	 *     "<nick> :Nickname collision KILL"
 	 *
 	 * Returned by a server to a client when it detects a
 	 * nickname collision (registered of a NICK that
@@ -250,7 +250,7 @@ enum class err {
 	/**
 	 * ERR_USERNOTINCHANNEL
 	 *
-	 * "<nick> <channel> :They aren't on that channel"
+	 *     "<nick> <channel> :They aren't on that channel"
 	 *
 	 * Returned by the server to indicate that the target
 	 * user of the command is not on the given channel.
@@ -260,7 +260,7 @@ enum class err {
 	/**
 	 * ERR_NOTONCHANNEL
 	 *
-	 * "<channel> :You're not on that channel"
+	 *     "<channel> :You're not on that channel"
 	 *
 	 * Returned by the server whenever a client tries to
 	 * perform a channel effecting command for which the
@@ -271,7 +271,7 @@ enum class err {
 	/**
 	 * ERR_USERONCHANNEL
 	 *
-	 * "<user> <channel> :is already on channel"
+	 *     "<user> <channel> :is already on channel"
 	 *
 	 * Returned when a client tries to invite a user to a
 	 * channel they are already on.
@@ -281,7 +281,7 @@ enum class err {
 	/**
 	 * ERR_NOLOGIN
 	 *
-	 * "<user> :User not logged in"
+	 *     "<user> :User not logged in"
 	 *
 	 * Returned by the summon after a SUMMON command for a
 	 * user was unable to be performed since they were not
@@ -292,7 +292,7 @@ enum class err {
 	/**
 	 * ERR_SUMMONDISABLED
 	 *
-	 * ":SUMMON has been disabled"
+	 *     ":SUMMON has been disabled"
 	 *
 	 * Returned as a response to the SUMMON command.  Must be
 	 * returned by any server which does not implement it.
@@ -302,7 +302,7 @@ enum class err {
 	/**
 	 * ERR_USERSDISABLED
 	 *
-	 * ":USERS has been disabled"
+	 *     ":USERS has been disabled"
 	 *
 	 * Returned as a response to the USERS command.  Must be
 	 * returned by any server which does not implement it.
@@ -312,7 +312,7 @@ enum class err {
 	/**
 	 * ERR_NOTREGISTERED
 	 *
-	 * ":You have not registered"
+	 *     ":You have not registered"
 	 *
 	 * Returned by the server to indicate that the client
 	 * must be registered before the server will allow it
@@ -323,7 +323,7 @@ enum class err {
 	/**
 	 * ERR_NEEDMOREPARAMS
 	 *
-	 * "<command> :Not enough parameters"
+	 *     "<command> :Not enough parameters"
 	 *
 	 * Returned by the server by numerous commands to
 	 * indicate to the client that it didn't supply enough
@@ -334,7 +334,7 @@ enum class err {
 	/**
 	 * ERR_ALREADYREGISTRED
 	 *
-	 * ":You may not reregister"
+	 *     ":You may not reregister"
 	 *
 	 * Returned by the server to any link which tries to
 	 * change part of the registered details (such as
@@ -345,7 +345,7 @@ enum class err {
 	/**
 	 * ERR_NOPERMFORHOST
 	 *
-	 * ":Your host isn't among the privileged"
+	 *     ":Your host isn't among the privileged"
 	 *
 	 * Returned to a client which attempts to register with
 	 * a server which does not been setup to allow
@@ -357,7 +357,7 @@ enum class err {
 	/**
 	 * ERR_PASSWDMISMATCH
 	 *
-	 * ":Password incorrect"
+	 *     ":Password incorrect"
 	 *
 	 * Returned to indicate a failed attempt at registering
 	 * a connection for which a password was required and
@@ -368,7 +368,7 @@ enum class err {
 	/**
 	 * ERR_YOUREBANNEDCREEP
 	 *
-	 * ":You are banned from this server"
+	 *     ":You are banned from this server"
 	 *
 	 * Returned after an attempt to connect and register
 	 * yourself with a server which has been setup to
@@ -379,49 +379,49 @@ enum class err {
 	/**
 	 * ERR_KEYSET
 	 *
-	 * "<channel> :Channel key already set"
+	 *     "<channel> :Channel key already set"
 	 */
 	keyset = 467,
 
 	/**
 	 * ERR_CHANNELISFULL
 	 *
-	 * "<channel> :Cannot join channel (+l)"
+	 *     "<channel> :Cannot join channel (+l)"
 	 */
 	channelisfull = 471,
 
 	/**
 	 * ERR_UNKNOWNMODE
 	 *
-	 * "<char> :is unknown mode char to me"
+	 *     "<char> :is unknown mode char to me"
 	 */
 	unknownmode = 472,
 
 	/**
 	 * ERR_INVITEONLYCHAN
 	 *
-	 * "<channel> :Cannot join channel (+i)"
+	 *     "<channel> :Cannot join channel (+i)"
 	 */
 	inviteonlychan = 473,
 
 	/**
 	 * ERR_BANNEDFROMCHAN
 	 *
-	 * "<channel> :Cannot join channel (+b)"
+	 *     "<channel> :Cannot join channel (+b)"
 	 */
 	bannedfromchan = 474,
 
 	/**
 	 * ERR_BADCHANNELKEY
 	 *
-	 * "<channel> :Cannot join channel (+k)"
+	 *     "<channel> :Cannot join channel (+k)"
 	 */
 	badchannelkey = 475,
 
 	/**
 	 * ERR_NOPRIVILEGES
 	 *
-	 * ":Permission Denied- You're not an IRC operator"
+	 *     ":Permission Denied- You're not an IRC operator"
 	 *
 	 * Any command requiring operator privileges to operate
 	 * must return this error to indicate the attempt was
@@ -432,7 +432,7 @@ enum class err {
 	/**
 	 * ERR_CHANOPRIVSNEEDED
 	 *
-	 * "<channel> :You're not channel operator"
+	 *     "<channel> :You're not channel operator"
 	 *
 	 * Any command requiring 'chanop' privileges (such as
 	 * MODE messages) must return this error if the client
@@ -444,7 +444,7 @@ enum class err {
 	/**
 	 * ERR_CANTKILLSERVER
 	 *
-	 * ":You cant kill a server!"
+	 *     ":You cant kill a server!"
 	 *
 	 * Any attempts to use the KILL command on a server
 	 * are to be refused and this error returned directly
@@ -455,7 +455,7 @@ enum class err {
 	/**
 	 * ERR_NOOPERHOST
 	 *
-	 * ":No O-lines for your host"
+	 *     ":No O-lines for your host"
 	 *
 	 * If a client sends an OPER message and the server has
 	 * not been configured to allow connections from the
@@ -467,7 +467,7 @@ enum class err {
 	/**
 	 * ERR_UMODEUNKNOWNFLAG
 	 *
-	 * ":Unknown MODE flag"
+	 *     ":Unknown MODE flag"
 	 *
 	 * Returned by the server to indicate that a MODE
 	 * message was sent with a nickname parameter and that
@@ -478,7 +478,7 @@ enum class err {
 	/**
 	 * ERR_USERSDONTMATCH
 	 *
-	 * ":Cant change mode for other users"
+	 *     ":Cant change mode for other users"
 	 *
 	 * Error sent to any user trying to view or change the
 	 * user mode for a user other than themselves.
@@ -502,13 +502,13 @@ enum class rpl {
 	/**
 	 * RPL_USERHOST
 	 *
-	 * ":[<reply>{<space><reply>}]"
+	 *     ":[<reply>{<space><reply>}]"
 	 *
 	 * Reply format used by USERHOST to list replies to
 	 * the query list.  The reply string is composed as
 	 * follows:
 	 *
-	 * <reply> ::= <nick>['*'] '=' <'+'|'-'><hostname>
+	 *     <reply> ::= <nick>['*'] '=' <'+'|'-'><hostname>
 	 *
 	 * The '*' indicates whether the client has registered
 	 * as an Operator.  The '-' or '+' characters represent
@@ -520,7 +520,7 @@ enum class rpl {
 	/**
 	 * RPL_ISON
 	 *
-	 * ":[<nick> {<space><nick>}]"
+	 *     ":[<nick> {<space><nick>}]"
 	 *
 	 * Reply format used by ISON to list replies to the
 	 * query list.
@@ -530,21 +530,21 @@ enum class rpl {
 	/**
 	 * RPL_AWAY
 	 *
-	 * "<nick> :<away message>"
+	 *     "<nick> :<away message>"
 	 */
 	away = 301,
 
 	/**
 	 * RPL_UNAWAY
 	 *
-	 * ":You are no longer marked as being away"
+	 *     ":You are no longer marked as being away"
 	 */
 	unaway = 305,
 
 	/**
 	 * RPL_NOWAWAY
 	 *
-	 * ":You have been marked as being away"
+	 *     ":You have been marked as being away"
 	 *
 	 * These replies are used with the AWAY command (if
 	 * allowed).  RPL_AWAY is sent to any client sending a
@@ -558,42 +558,42 @@ enum class rpl {
 	/**
 	 * RPL_WHOISUSER
 	 *
-	 * "<nick> <user> <host> * :<real name>"
+	 *     "<nick> <user> <host> * :<real name>"
 	 */
 	whoisuser = 311,
 
 	/**
 	 * RPL_WHOISSERVER
 	 *
-	 * "<nick> <server> :<server info>"
+	 *     "<nick> <server> :<server info>"
 	 */
 	whoisserver = 312,
 
 	/**
 	 * RPL_WHOISOPERATOR
 	 *
-	 * "<nick> :is an IRC operator"
+	 *     "<nick> :is an IRC operator"
 	 */
 	whoisoperator = 313,
 
 	/**
 	 * RPL_WHOISIDLE
 	 *
-	 * "<nick> <integer> :seconds idle"
+	 *     "<nick> <integer> :seconds idle"
 	 */
 	whoisidle = 317,
 
 	/**
 	 * RPL_ENDOFWHOIS
 	 *
-	 * "<nick> :End of /WHOIS list"
+	 *     "<nick> :End of /WHOIS list"
 	 */
 	endofwhois = 318,
 
 	/**
 	 * RPL_WHOISCHANNELS
 	 *
-	 * "<nick> :{[@|+]<channel><space>}"
+	 *     "<nick> :{[@|+]<channel><space>}"
 	 *
 	 * Replies 311 - 313, 317 - 319 are all replies
 	 * generated in response to a WHOIS message.  Given that
@@ -615,14 +615,14 @@ enum class rpl {
 	/**
 	 * RPL_WHOWASUSER
 	 *
-	 * "<nick> <user> <host> * :<real name>"
+	 *     "<nick> <user> <host> * :<real name>"
 	 */
 	whowasuser = 314,
 
 	/**
 	 * RPL_ENDOFWHOWAS
 	 *
-	 * "<nick> :End of WHOWAS"
+	 *     "<nick> :End of WHOWAS"
 	 *
 	 * When replying to a WHOWAS message, a server must use
 	 * the replies RPL_WHOWASUSER, RPL_WHOISSERVER or
@@ -636,21 +636,21 @@ enum class rpl {
 	/**
 	 * RPL_LISTSTART
 	 *
-	 * "Channel :Users  Name"
+	 *     "Channel :Users  Name"
 	 */
 	liststart = 321,
 
 	/**
 	 * RPL_LIST
 	 *
-	 * "<channel> <# visible> :<topic>"
+	 *     "<channel> <# visible> :<topic>"
 	 */
 	list = 322,
 
 	/**
 	 * RPL_LISTEND
 	 *
-	 * ":End of /LIST"
+	 *     ":End of /LIST"
 	 *
 	 * Replies RPL_LISTSTART, RPL_LIST, RPL_LISTEND mark
 	 * the start, actual replies with data and end of the
@@ -663,21 +663,21 @@ enum class rpl {
 	/**
 	 * RPL_CHANNELMODEIS
 	 *
-	 * "<channel> <mode> <mode params>"
+	 *     "<channel> <mode> <mode params>"
 	 */
 	channelmodeis = 324,
 
 	/**
 	 * RPL_NOTOPIC
 	 *
-	 * "<channel> :No topic is set"
+	 *     "<channel> :No topic is set"
 	 */
 	notopic = 331,
 
 	/**
 	 * RPL_TOPIC
 	 *
-	 * "<channel> :<topic>"
+	 *     "<channel> :<topic>"
 	 *
 	 * When sending a TOPIC message to determine the
 	 * channel topic, one of two replies is sent.  If
@@ -689,7 +689,7 @@ enum class rpl {
 	/**
 	 * RPL_INVITING
 	 *
-	 * "<channel> <nick>"
+	 *     "<channel> <nick>"
 	 *
 	 * Returned by the server to indicate that the
 	 * attempted INVITE message was successful and is
@@ -700,7 +700,7 @@ enum class rpl {
 	/**
 	 * RPL_SUMMONING
 	 *
-	 * "<user> :Summoning user to IRC"
+	 *     "<user> :Summoning user to IRC"
 	 *
 	 * Returned by a server answering a SUMMON message to
 	 * indicate that it is summoning that user.
@@ -710,12 +710,12 @@ enum class rpl {
 	/**
 	 * RPL_VERSION
 	 *
-	 * "<version>.<debuglevel> <server> :<comments>"
+	 *     "<version>.<debuglevel> <server> :<comments>"
 	 *
 	 * Reply by the server showing its version details.
-	 * The <version> is the version of the software being
+	 * The \<version> is the version of the software being
 	 * used (including any patchlevel revisions) and the
-	 * <debuglevel> is used to indicate if the server is
+	 * \<debuglevel> is used to indicate if the server is
 	 * running in "debug mode".
 	 *
 	 * The "comments" field may contain any comments about
@@ -726,22 +726,22 @@ enum class rpl {
 	/**
 	 * RPL_WHOREPLY
 	 *
-	 * "<channel> <user> <host> <server> <nick> \
-	 *  <H|G>[*][@|+] :<hopcount> <real name>"
+	 *     "<channel> <user> <host> <server> <nick> \
+	 *      <H|G>[*][@|+] :<hopcount> <real name>"
 	 */
 	whoreply = 352,
 
 	/**
 	 * RPL_ENDOFWHO
 	 *
-	 * "<name> :End of /WHO list"
+	 *     "<name> :End of /WHO list"
 	 *
 	 * The RPL_WHOREPLY and RPL_ENDOFWHO pair are used
 	 * to answer a WHO message.  The RPL_WHOREPLY is only
 	 * sent if there is an appropriate match to the WHO
 	 * query.  If there is a list of parameters supplied
 	 * with a WHO message, a RPL_ENDOFWHO must be sent
-	 * after processing each list item with <name> being
+	 * after processing each list item with \<name> being
 	 * the item.
 	 */
 	endofwho = 315,
@@ -749,14 +749,14 @@ enum class rpl {
 	/**
 	 * RPL_NAMREPLY
 	 *
-	 * "<channel> :[[@|+]<nick> [[@|+]<nick> [...]]]"
+	 *     "<channel> :[[@|+]<nick> [[@|+]<nick> [...]]]"
 	 */
 	namreply = 353,
 
 	/**
 	 * RPL_ENDOFNAMES
 	 *
-	 * "<channel> :End of /NAMES list"
+	 *     "<channel> :End of /NAMES list"
 	 *
 	 * To reply to a NAMES message, a reply pair consisting
 	 * of RPL_NAMREPLY and RPL_ENDOFNAMES is sent by the
@@ -773,14 +773,14 @@ enum class rpl {
 	/**
 	 * RPL_LINKS
 	 *
-	 * "<mask> <server> :<hopcount> <server info>"
+	 *     "<mask> <server> :<hopcount> <server info>"
 	 */
 	links = 364,
 
 	/**
 	 * RPL_ENDOFLINKS
 	 *
-	 * "<mask> :End of /LINKS list"
+	 *     "<mask> :End of /LINKS list"
 	 *
 	 * In replying to the LINKS message, a server must send
 	 * replies back using the RPL_LINKS numeric and mark the
@@ -791,14 +791,14 @@ enum class rpl {
 	/**
 	 * RPL_BANLIST
 	 *
-	 * "<channel> <banid>"
+	 *     "<channel> <banid>"
 	 */
 	banlist = 367,
 
 	/**
 	 * RPL_ENDOFBANLIST
 	 *
-	 * "<channel> :End of channel ban list"
+	 *     "<channel> :End of channel ban list"
 	 *
 	 * When listing the active 'bans' for a given channel,
 	 * a server is required to send the list back using the
@@ -812,14 +812,14 @@ enum class rpl {
 	/**
 	 * RPL_INFO
 	 *
-	 * ":<string>"
+	 *     ":<string>"
 	 */
 	info = 371,
 
 	/**
 	 * RPL_ENDOFINFO
 	 *
-	 * ":End of /INFO list"
+	 *     ":End of /INFO list"
 	 *
 	 * A server responding to an INFO message is required to
 	 * send all its 'info' in a series of RPL_INFO messages
@@ -831,21 +831,21 @@ enum class rpl {
 	/**
 	 * RPL_MOTDSTART
 	 *
-	 * ":- <server> Message of the day - "
+	 *     ":- <server> Message of the day - "
 	 */
 	motdstart = 375,
 
 	/**
 	 * RPL_MOTD
 	 *
-	 * ":- <text>"
+	 *     ":- <text>"
 	 */
 	motd = 372,
 
 	/**
 	 * RPL_ENDOFMOTD
 	 *
-	 * ":End of /MOTD command"
+	 *     ":End of /MOTD command"
 	 *
 	 * When responding to the MOTD message and the MOTD file
 	 * is found, the file is displayed line by line, with
@@ -859,7 +859,7 @@ enum class rpl {
 	/**
 	 * RPL_YOUREOPER
 	 *
-	 * ":You are now an IRC operator"
+	 *     ":You are now an IRC operator"
 	 *
 	 * RPL_YOUREOPER is sent back to a client which has
 	 * just successfully issued an OPER message and gained
@@ -870,7 +870,7 @@ enum class rpl {
 	/**
 	 * RPL_REHASHING
 	 *
-	 * "<config file> :Rehashing"
+	 *     "<config file> :Rehashing"
 	 *
 	 * If the REHASH option is used and an operator sends
 	 * a REHASH message, an RPL_REHASHING is sent back to
@@ -881,7 +881,7 @@ enum class rpl {
 	/**
 	 * RPL_TIME
 	 *
-	 * "<server> :<string showing server's local time>"
+	 *     "<server> :<string showing server's local time>"
 	 *
 	 * When replying to the TIME message, a server must send
 	 * the reply using the RPL_TIME format above.  The string
@@ -894,28 +894,28 @@ enum class rpl {
 	/**
 	 * RPL_USERSSTART
 	 *
-	 * ":UserID   Terminal  Host"
+	 *     ":UserID   Terminal  Host"
 	 */
 	userstart = 392,
 
 	/**
 	 * RPL_USERS
 	 *
-	 * ":%-8s %-9s %-8s"
+	 *     ":%-8s %-9s %-8s"
 	 */
 	users = 393,
 
 	/**
 	 * RPL_ENDOFUSERS
 	 *
-	 * ":End of users"
+	 *     ":End of users"
 	 */
 	endofusers = 394,
 
 	/**
 	 * RPL_NOUSERS
 	 *
-	 * ":Nobody logged in"
+	 *     ":Nobody logged in"
 	 *
 	 * If the USERS message is handled by a server, the
 	 * replies RPL_USERSTART, RPL_USERS, RPL_ENDOFUSERS and
@@ -929,64 +929,64 @@ enum class rpl {
 	/**
 	 * RPL_TRACELINK
 	 *
-	 * "Link <version & debug level> <destination> <next server>"
+	 *     "Link <version & debug level> <destination> <next server>"
 	 */
 	tracelink = 200,
 
 	/**
 	 * RPL_TRACECONNECTING
 	 *
-	 * "Try. <class> <server>"
+	 *     "Try. <class> <server>"
 	 */
 	traceconnecting = 201,
 
 	/**
 	 * RPL_TRACEHANDSHAKE
 	 *
-	 * "H.S. <class> <server>"
+	 *     "H.S. <class> <server>"
 	 */
 	tracehandshake = 202,
 
 	/**
 	 * RPL_TRACEUNKNOWN
 	 *
-	 * "???? <class> [<client IP address in dot form>]"
+	 *     "???? <class> [<client IP address in dot form>]"
 	 */
 	traceunknown = 203,
 
 	/**
 	 * RPL_TRACEOPERATOR
 	 *
-	 * "Oper <class> <nick>"
+	 *     "Oper <class> <nick>"
 	 */
 	traceoperator = 204,
 
 	/**
 	 * RPL_TRACEUSER
 	 *
-	 * "User <class> <nick>"
+	 *     "User <class> <nick>"
 	 */
 	traceuser = 205,
 
 	/**
 	 * RPL_TRACESERVER
 	 *
-	 * "Serv <class> <int>S <int>C <server> \
-	 *  <nick!user|*!*>@<host|server>
+	 *     "Serv <class> <int>S <int>C <server> \
+	 *      <nick!user|*!*>@<host|server>
 	 */
 	traceserver = 206,
 
 	/**
 	 * RPL_TRACENEWTYPE
 	 *
-	 * "<newtype> 0 <client name>"
+	 *     "<newtype> 0 <client name>"
 	 */
 	tracenewtype = 208,
 
 	/**
 	 * RPL_TRACELOG
 	 *
-	 * "File <logfile> <debug level>"
+	 *     "File <logfile> <debug level>"
 	 *
 	 * The RPL_TRACE* are all returned by the server in
 	 * response to the TRACE message.  How many are
@@ -1013,93 +1013,93 @@ enum class rpl {
 	/**
 	 * RPL_STATSLINKINFO
 	 *
-	 * "<linkname> <sendq> <sent messages> \
-	 *  <sent bytes> <received messages> \
-	 *  <received bytes> <time open>"
+	 *     "<linkname> <sendq> <sent messages> \
+	 *      <sent bytes> <received messages> \
+	 *      <received bytes> <time open>"
 	 */
 	statslinkinfo = 211,
 
 	/**
 	 * RPL_STATSCOMMANDS
 	 *
-	 * "<command> <count>"
+	 *     "<command> <count>"
 	 */
 	statscommands = 212,
 
 	/**
 	 * RPL_STATSCLINE
 	 *
-	 * "C <host> * <name> <port> <class>"
+	 *     "C <host> * <name> <port> <class>"
 	 */
 	statscline = 213,
 
 	/**
 	 * RPL_STATSNLINE
 	 *
-	 * "N <host> * <name> <port> <class>"
+	 *     "N <host> * <name> <port> <class>"
 	 */
 	statsnline = 214,
 
 	/**
 	 * RPL_STATSILINE
 	 *
-	 * "I <host> * <host> <port> <class>"
+	 *     "I <host> * <host> <port> <class>"
 	 */
 	statsiline = 215,
 
 	/**
 	 * RPL_STATSKLINE
 	 *
-	 * K <host> * <username> <port> <class>"
+	 *     K <host> * <username> <port> <class>"
 	 */
 	statskline = 216,
 
 	/**
 	 * RPL_STATSYLINE
 	 *
-	 * "Y <class> <ping frequency> <connect frequency> <max sendq>"
+	 *     "Y <class> <ping frequency> <connect frequency> <max sendq>"
 	 */
 	statsyline = 218,
 
 	/**
 	 * RPL_ENDOFSTATS
 	 *
-	 * "<stats letter> :End of /STATS report"
+	 *     "<stats letter> :End of /STATS report"
 	 */
 	endofstats = 219,
 
 	/**
 	 * RPL_STATSLLINE
 	 *
-	 * "L <hostmask> * <servername> <maxdepth>"
+	 *     "L <hostmask> * <servername> <maxdepth>"
 	 */
 	statslline = 241,
 
 	/**
 	 * RPL_STATSUPTIME
 	 *
-	 * ":Server Up %d days %d:%02d:%02d"
+	 *     ":Server Up %d days %d:%02d:%02d"
 	 */
 	statsuptime = 242,
 
 	/**
 	 * RPL_STATSOLINE
 	 *
-	 * "O <hostmask> * <name>"
+	 *     "O <hostmask> * <name>"
 	 */
 	statsoline = 243,
 
 	/**
 	 * RPL_STATSHLINE
 	 *
-	 * "H <hostmask> * <servername>"
+	 *     "H <hostmask> * <servername>"
 	 */
 	statshline = 244,
 
 	/**
 	 * RPL_UMODEIS
 	 *
-	 * "<user mode string>"
+	 *     "<user mode string>"
 	 *
 	 * To answer a query about a client's own mode,
 	 * RPL_UMODEIS is sent back.
@@ -1109,36 +1109,36 @@ enum class rpl {
 	/**
 	 * RPL_LUSERCLIENT
 	 *
-	 * ":There are <integer> users and <integer> \
-	 *  invisible on <integer> servers"
+	 *     ":There are <integer> users and <integer> \
+	 *      invisible on <integer> servers"
 	 */
 	luserclient = 251,
 
 	/**
 	 * RPL_LUSEROP
 	 *
-	 * "<integer> :operator(s) online"
+	 *     "<integer> :operator(s) online"
 	 */
 	luserop = 252,
 
 	/**
 	 * RPL_LUSERUNKNOWN
 	 *
-	 * "<integer> :unknown connection(s)"
+	 *     "<integer> :unknown connection(s)"
 	 */
 	luserunknown = 253,
 
 	/**
 	 * RPL_LUSERCHANNELS
 	 *
-	 * "<integer> :channels formed"
+	 *     "<integer> :channels formed"
 	 */
 	luserchannels = 254,
 
 	/**
 	 * RPL_LUSERME
 	 *
-	 * ":I have <integer> clients and <integer> servers"
+	 *     ":I have <integer> clients and <integer> servers"
 	 *
 	 * In processing an LUSERS message, the server
 	 * sends a set of replies from RPL_LUSERCLIENT,
@@ -1154,28 +1154,28 @@ enum class rpl {
 	/**
 	 * RPL_ADMINME
 	 *
-	 * "<server> :Administrative info"
+	 *     "<server> :Administrative info"
 	 */
 	adminme = 256,
 
 	/**
 	 * RPL_ADMINLOC1
 	 *
-	 * ":<admin info>"
+	 *     ":<admin info>"
 	 */
 	adminloc1 = 257,
 
 	/**
 	 * RPL_ADMINLOC2
 	 *
-	 * ":<admin info>"
+	 *     ":<admin info>"
 	 */
 	adminloc2 = 258,
 
 	/**
 	 * RPL_ADMINEMAIL
 	 *
-	 * ":<admin info>"
+	 *     ":<admin info>"
 	 *
 	 * When replying to an ADMIN message, a server
 	 * is expected to use replies RLP_ADMINME
