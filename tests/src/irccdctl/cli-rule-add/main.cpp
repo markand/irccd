@@ -59,12 +59,6 @@ BOOST_AUTO_TEST_CASE(all)
 	{
 		const auto [code, out, err] = exec({ "rule-list" });
 
-		std::cout << code << std::endl;
-		for (auto o : out)
-			std::cout << o << std::endl;
-		for (auto e : err)
-			std::cout << e << std::endl;
-
 		BOOST_TEST(!code);
 		BOOST_TEST(out.size() == 7U);
 		BOOST_TEST(err.size() == 0U);
