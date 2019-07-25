@@ -22,7 +22,7 @@
 # IRCCD_WITH_DOXYGEN        Enable internal irccd documentation (default: on)
 # IRCCD_WITH_JS             Enable JavaScript (default: on)
 # IRCCD_WITH_LIBEDIT        Enable libedit support (default: on)
-# IRCCD_WITH_MAN            Install manpages (default: on, off for Windows)
+# IRCCD_WITH_MAN            Install manpages (default: on)
 # IRCCD_WITH_PKGCONFIG      Install pkg-config files (default: on, off for Windows (except MinGW))
 # IRCCD_WITH_PLUGIN_<NAME>  Enable or disable the specified plugin (default: on)
 # IRCCD_WITH_SSL            Enable OpenSSL (default: on)
@@ -32,13 +32,6 @@
 # defined automatically from the IRCCD_PLUGINS list.
 #
 
-# Manual pages on Windows are pretty useless.
-if (WIN32)
-	set(DEFAULT_MAN "No")
-else ()
-	set(DEFAULT_MAN "Yes")
-endif ()
-
 # pkg-config is only relevant on UNIX or MinGW
 if (MINGW OR UNIX)
 	set(DEFAULT_PKGCONFIG "Yes")
@@ -46,10 +39,9 @@ else ()
 	set(DEFAULT_PKGCONFIG "No")
 endif ()
 
-option(IRCCD_WITH_DOXYGEN "Enable doxygen" Off)
+option(IRCCD_WITH_DOXYGEN "Enable doxygen" On)
 option(IRCCD_WITH_JS "Enable embedded Duktape" On)
 option(IRCCD_WITH_LIBEDIT "Enable libedit support" On)
-option(IRCCD_WITH_MAN "Install man pages" ${DEFAULT_MAN})
 option(IRCCD_WITH_PKGCONFIG "Enable pkg-config file" ${DEFAULT_PKGCONFIG})
 option(IRCCD_WITH_SSL "Enable SSL" On)
 option(IRCCD_WITH_TESTS "Enable unit testing" Off)
@@ -120,30 +112,4 @@ if (IRCCD_WITH_MAN)
 	set(IRCCD_WITH_MAN_MSG "Yes")
 else ()
 	set(IRCCD_WITH_MAN_MSG "No (disabled by user)")
-endif ()
-
-#
-# Determine if allowed to package.
-# -------------------------------------------------------------------
-#
-# Do not move this section because irccd's CMake functions requires the IRCCD_PACKAGE value.
-#
-
-set(IRCCD_PACKAGE FALSE)
-
-if (NOT WITH_HTML)
-	set(IRCCD_PACKAGE_MSG "No (HTML documentation disabled)")
-else ()
-	# Now check that a plugin has not been disabled.
-	set(IRCCD_PACKAGE TRUE)
-	set(IRCCD_PACKAGE_MSG "Yes")
-
-	foreach (plugin ${IRCCD_PLUGINS})
-		string(TOUPPER ${plugin} optname)
-
-		if (NOT IRCCD_WITH_PLUGIN_${optname})
-			set(IRCCD_PACKAGE FALSE)
-			set(IRCCD_PACKAGE_MSG "No (Plugin ${plugin} disabled)")
-		endif ()
-	endforeach ()
 endif ()

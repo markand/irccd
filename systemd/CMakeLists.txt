@@ -27,7 +27,7 @@ endif ()
 option(IRCCD_WITH_SYSTEMD "Install systemd service" ${DEFAULT_SYSTEMD})
 
 if (IRCCD_WITH_SYSTEMD)
-	setg(IRCCD_WITH_SYSTEMD_MSG "Yes")
+	irccd_set_global(IRCCD_WITH_SYSTEMD_MSG "Yes")
 
 	set(PATH "${CMAKE_INSTALL_FULL_BINDIR}/irccd")
 
@@ -41,5 +41,5 @@ if (IRCCD_WITH_SYSTEMD)
 		DESTINATION "/usr/lib/systemd/system"
 	)
 else ()
-	setg(IRCCD_WITH_SYSTEMD_MSG "No (disabled by user)")
+	irccd_set_global(IRCCD_WITH_SYSTEMD_MSG "No (disabled by user)")
 endif()

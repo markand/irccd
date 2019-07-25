@@ -29,6 +29,8 @@
 # This function configure the manual and install it if IRCCD_WITH_MAN is set.
 #
 
+option(IRCCD_WITH_MAN "Install man pages" On)
+
 function(irccd_define_man)
 	set(options "")
 	set(oneValueArgs "INPUT;OUTPUT;SECTION")

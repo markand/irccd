@@ -68,6 +68,8 @@ function(irccd_define_library)
 		PROPERTIES
 			PREFIX ""
 			IMPORT_PREFIX ""
+			CXX_STANDARD 17
+			CXX_STANDARD_REQUIRED On
 	)
 
 	if (${LIB_EXPORT})

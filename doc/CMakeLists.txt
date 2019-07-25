@@ -23,8 +23,3 @@ if (IRCCD_HAVE_DOXYGEN)
 endif ()
 
 add_subdirectory(examples)
-#add_subdirectory(man)
-
-if (IRCCD_HAVE_HTML)
-	add_subdirectory(html)
-endif ()

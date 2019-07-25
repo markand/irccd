@@ -21,7 +21,7 @@ project(plugin-links)
 find_package(Uriparser)
 
 if (NOT Uriparser_FOUND)
-	setg(IRCCD_WITH_PLUGIN_LINKS_MSG "No (uriparser not found)")
+	irccd_set_global(IRCCD_WITH_PLUGIN_LINKS_MSG "No (uriparser not found)")
 else ()
 	irccd_define_plugin(
 		NAME links

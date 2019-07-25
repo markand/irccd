@@ -61,6 +61,8 @@ function(irccd_define_executable)
 	set_target_properties(
 		${EXE_TARGET}
 		PROPERTIES
+			CXX_STANDARD 17
+			CXX_STANDARD_REQUIRED On
 			RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 	)
 	foreach (c ${CMAKE_CONFIGURATION_TYPES})
@@ -83,9 +85,8 @@ function(irccd_define_executable)
 
 	# Put the application into a cpack group.
 	string(TOUPPER ${EXE_TARGET} CMP)
-	setg(CPACK_COMPONENT_${CMP}_DISPLAY_NAME "${EXE_TARGET} executable")
-	setg(CPACK_COMPONENT_${CMP}_DESCRIPTION ${EXE_DESCRIPTION})
-	setg(CPACK_COMPONENT_${CMP}_GROUP "Applications")
-
+	irccd_set_global(CPACK_COMPONENT_${CMP}_DISPLAY_NAME "${EXE_TARGET} executable")
+	irccd_set_global(CPACK_COMPONENT_${CMP}_DESCRIPTION ${EXE_DESCRIPTION})
+	irccd_set_global(CPACK_COMPONENT_${CMP}_GROUP "Applications")
 	irccd_install_dependencies(${EXE_TARGET})
 endfunction()

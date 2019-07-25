@@ -1,5 +1,5 @@
 #
-# CMakeLists.txt -- CMake build system for irccd
+# IrccdSetGlobal.cmake -- CMake build system for irccd
 #
 # Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
 #
@@ -16,16 +16,16 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-include(CMakeFindDependencyMacro)
+#
+# irccd_set_global
+# ----------------
+#
+# irccd_set_global(var value)
+#
+# Set a global cache internal variable.
+#
 
-find_dependency(Boost COMPONENTS date_time filesystem system timer)
-find_dependency(Threads)
-find_dependency(OpenSSL)
+function(irccd_set_global var value)
+	set("${var}" "${value}" CACHE INTERNAL "")
+endfunction ()
 
-include("${CMAKE_CURRENT_LIST_DIR}/irccd-targets.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/IrccdSetGlobal.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/IrccdDefinePlugin.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/IrccdDefineMan.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/IrccdDefineExecutable.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/IrccdDefineLibrary.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/IrccdDefineMan.cmake")

@@ -36,6 +36,6 @@ install(
 	DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}
 )
 
-setg(CPACK_COMPONENT_EXAMPLES_HIDDEN On)
-setg(CPACK_COMPONENT_EXAMPLES_DESCRIPTION "Install examples of configuration files")
-setg(CPACK_COMPONENT_EXAMPLES_GROUP "Documentation")
+irccd_set_global(CPACK_COMPONENT_EXAMPLES_HIDDEN On)
+irccd_set_global(CPACK_COMPONENT_EXAMPLES_DESCRIPTION "Install examples of configuration files")
+irccd_set_global(CPACK_COMPONENT_EXAMPLES_GROUP "Documentation")

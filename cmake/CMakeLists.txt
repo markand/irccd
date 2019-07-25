@@ -16,16 +16,18 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-include(CMakeFindDependencyMacro)
+project(cmake)
 
-find_dependency(Boost COMPONENTS date_time filesystem system timer)
-find_dependency(Threads)
-find_dependency(OpenSSL)
-
-include("${CMAKE_CURRENT_LIST_DIR}/irccd-targets.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/IrccdSetGlobal.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/IrccdDefinePlugin.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/IrccdDefineMan.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/IrccdDefineExecutable.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/IrccdDefineLibrary.cmake")
-include("${CMAKE_CURRENT_LIST_DIR}/IrccdDefineMan.cmake")
+install(
+	FILES
+		${cmake_SOURCE_DIR}/function/IrccdSetGlobal.cmake
+		${cmake_SOURCE_DIR}/function/IrccdDefineExecutable.cmake
+		${cmake_SOURCE_DIR}/function/IrccdDefineLibrary.cmake
+		${cmake_SOURCE_DIR}/function/IrccdDefineMan.cmake
+		${cmake_SOURCE_DIR}/function/IrccdDefinePlugin.cmake
+		${cmake_SOURCE_DIR}/function/IrccdIndentMessage.cmake
+		${cmake_SOURCE_DIR}/function/IrccdInstallDependencies.cmake
+		${cmake_SOURCE_DIR}/function/dependencies.cmake.in
+	DESTINATION
+		${CMAKE_INSTALL_LIBDIR}/cmake/irccd
+)

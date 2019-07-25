@@ -56,11 +56,6 @@ project(irccd)
 include(GNUInstallDirs)
 include(InstallRequiredSystemLibraries)
 
-# Helper to set global internal variables.
-function(setg var value)
-	set("${var}" "${value}" CACHE INTERNAL "")
-endfunction ()
-
 set_property(GLOBAL PROPERTY USE_FOLDERS On)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -75,6 +70,9 @@ foreach (cfg ${CMAKE_CONFIGURATION_TYPES})
 	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_${CFG} ${CMAKE_BINARY_DIR}/bin/${cfg})
 endforeach ()
 
+include(cmake/check/PutTime.cmake)
+
+include(cmake/function/IrccdSetGlobal.cmake)
 include(cmake/function/IrccdDefineExecutable.cmake)
 include(cmake/function/IrccdDefineLibrary.cmake)
 include(cmake/function/IrccdDefineMan.cmake)
@@ -82,14 +80,13 @@ include(cmake/function/IrccdDefinePlugin.cmake)
 include(cmake/function/IrccdDefineTest.cmake)
 include(cmake/function/IrccdIndentMessage.cmake)
 
-include(cmake/check/PutTime.cmake)
-
 include(cmake/IrccdVersion.cmake)
 include(cmake/IrccdOptions.cmake)
 include(cmake/IrccdSystem.cmake)
 
 find_package(Threads REQUIRED)
 
+add_subdirectory(cmake)
 add_subdirectory(extern/json)
 add_subdirectory(doc)
 add_subdirectory(libirccd)
@@ -128,7 +125,6 @@ message("       Javascript:     ${IRCCD_WITH_JS_MSG}")
 message("       Tests:          ${IRCCD_WITH_TESTS_MSG}")
 message("       Man pages:      ${IRCCD_WITH_MAN_MSG}")
 message("       Doxygen:        ${IRCCD_WITH_DOXYGEN_MSG}")
-message("       Package:        ${IRCCD_PACKAGE_MSG}")
 message("       Systemd:        ${IRCCD_WITH_SYSTEMD_MSG}")
 message("")
 

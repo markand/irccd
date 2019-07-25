@@ -89,6 +89,8 @@ function(irccd_define_test)
 			PROJECT_LABEL ${TEST_NAME}
 			FOLDER test
 			RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
+			CXX_STANDARD 17
+			CXX_STANDARD_REQUIRED On
 	)
 	foreach (c ${CMAKE_CONFIGURATION_TYPES})
 		string(TOUPPER ${c} cu)

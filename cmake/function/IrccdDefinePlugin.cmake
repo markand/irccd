@@ -91,7 +91,7 @@ function(_irccd_define_native_plugin)
 	endif ()
 
 	add_library(plugin-${PLG_NAME} MODULE ${PLG_SOURCES} ${PLG_OUTPUT_DOC} ${PLG_MAN})
-	target_link_libraries(plugin-${PLG_NAME} libirccd-daemon ${PLG_LIBRARIES})
+	target_link_libraries(plugin-${PLG_NAME} irccd::libirccd-daemon ${PLG_LIBRARIES})
 	target_include_directories(plugin-${PLG_NAME} PRIVATE ${PLG_INCLUDES})
 
 	# Change output name.
@@ -100,6 +100,8 @@ function(_irccd_define_native_plugin)
 		PROPERTIES
 			PREFIX ""
 			OUTPUT_NAME ${PLG_NAME}
+			CXX_STANDARD 17
+			CXX_STANDARD_REQUIRED On
 	)
 	foreach (cfg ${CMAKE_CONFIGURATION_TYPES})
 		string(TOUPPER ${cfg} CFG)
@@ -135,11 +137,11 @@ function(irccd_define_plugin)
 	option(IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME} "Enable ${PLG_NAME} plugin" On)
 
 	if (NOT IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME})
-		setg(IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME}_MSG "No (disabled by user)")
+		irccd_set_global(IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME}_MSG "No (disabled by user)")
 	elseif (NOT IRCCD_WITH_JS AND PLG_TYPE MATCHES "JS")
-		setg(IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME}_MSG "No (Javascript disabled)")
+		irccd_set_global(IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME}_MSG "No (Javascript disabled)")
 	else ()
-		setg(IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME}_MSG "Yes")
+		irccd_set_global(IRCCD_WITH_PLUGIN_${PLG_UPPER_NAME}_MSG "Yes")
 
 		# Optional documentation.
 		if (PLG_MAN)
@@ -169,7 +171,7 @@ function(irccd_define_plugin)
 		)
 
 		# Component grouping in installer.
-		setg(CPACK_COMPONENT_${PLG_UPPER_NAME}_GROUP "Plugins")
-		setg(CPACK_COMPONENT_${PLG_UPPER_NAME}_DESCRIPTION "Install ${PLG_NAME} plugin.")
+		irccd_set_global(CPACK_COMPONENT_${PLG_UPPER_NAME}_GROUP "Plugins")
+		irccd_set_global(CPACK_COMPONENT_${PLG_UPPER_NAME}_DESCRIPTION "Install ${PLG_NAME} plugin.")
 	endif ()
 endfunction()

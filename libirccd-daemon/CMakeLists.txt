@@ -65,3 +65,6 @@ irccd_define_library(
 	LIBRARIES libirccd
 	PUBLIC_INCLUDES $<BUILD_INTERFACE:${libirccd-daemon_SOURCE_DIR}>
 )
+
+# Add an alias for the irccd_define_plugin macro.
+add_library(irccd::libirccd-daemon ALIAS libirccd-daemon)
