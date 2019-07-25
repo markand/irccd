@@ -22,17 +22,19 @@
 .Nd IRC Client Daemon
 .\" SYNOPSIS
 .Sh SYNOPSIS
-.Nm irccd
+.Nm
 .Op Fl c Ar file
 .Op Fl v
-.Nm irccd
+.Nm
+.Ar info
+.Nm
 .Ar version
 .\" DESCRIPTION
 .Sh DESCRIPTION
 The
 .Nm
 program is an IRC bot which connects to one or more severs and
-dispatches events to plugins.
+dispatches events to plugins and connected clients.
 .Pp
 The following options are available:
 .Bl -tag -width indent-xxx
@@ -40,6 +42,20 @@ The following options are available:
 specify the configuration file.
 .It Fl v
 be verbose.
+.El
+.Pp
+When ran without arguments,
+.Nm
+will read your configuration file and dispatch IRC events to the plugins and
+connected clients indefinitely.
+.Pp
+Otherwise, the following commands are available:
+.Bl -tag -width 12n
+.It Cm info
+Show in a scriptable manner the options that were selected during irccd's build.
+.It Cm version
+Get the irccd version. if Mercurial was available when building irccd then the
+current revision is bundled in the output.
 .El
 .\" PLUGINS
 .Sh PLUGINS
@@ -195,7 +211,7 @@ manual page.
 uses different types of paths depending on the context.
 .Pp
 Paths prefixed by (W) means they are only used on Windows, others prefixed by
-(U) means they are used on UNIX systems
+(U) means they are used on UNIX systems.
 .Pp
 .Ss Configuration
 The following directories are searched in the specified order for configuration
