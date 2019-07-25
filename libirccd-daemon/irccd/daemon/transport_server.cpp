@@ -108,7 +108,7 @@ auto transport_category() noexcept -> const std::error_category&
 	} category;
 
 	return category;
-};
+}
 
 auto make_error_code(transport_error::error e) noexcept -> std::error_code
 {

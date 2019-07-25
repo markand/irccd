@@ -124,7 +124,7 @@ auto transport_command::registry() noexcept -> const std::vector<constructor>&
 	};
 
 	return list;
-};
+}
 
 // {{{ plugin_config_command
 
