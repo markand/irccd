@@ -39,6 +39,7 @@ Plugins
 - The keyword `source` has been removed and replaced by `channel`,
 - The keyword `origin` has been added,
 - Formats `cnotice`, `cmode`, `query` have been removed.
+- The option `path` has been renamed to `file`.
 
 ## Network API
 

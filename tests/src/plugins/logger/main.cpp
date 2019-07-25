@@ -65,8 +65,8 @@ public:
 
 	void load(plugin::map config = {})
 	{
-		if (config.count("path") == 0)
-			config.emplace("path", CMAKE_CURRENT_BINARY_DIR "/log.txt");
+		if (config.count("file") == 0)
+			config.emplace("file", CMAKE_CURRENT_BINARY_DIR "/log.txt");
 
 		plugin_->set_options(config);
 		plugin_->handle_load(bot_);

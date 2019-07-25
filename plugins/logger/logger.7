@@ -65,7 +65,7 @@ The following options are available under the
 .Va [plugin.logger]
 section:
 .Bl -tag -width 14n -offset Ds
-.It Va path No (string)
+.It Va file No (string)
 The path to the file where to store logs. Keywords:
 .Em channel , server , (date) .
 .El
@@ -109,7 +109,7 @@ All templates support the following standard keywords:
 Example of configuration file:
 .Bd -literal
 [plugin.logger]
-path = "/var/log/irccd/#{server}/%y/%m/%d/#{channel}.txt"
+file = "/var/log/irccd/#{server}/%y/%m/%d/#{channel}.txt"
 
 [templates.logger]
 join = "user #{nickname} joined #{channel}"
