@@ -80,13 +80,13 @@ public:
 	virtual void connect(handler handler) = 0;
 };
 
-// {{{ socket_connector_base
+// {{{ basic_socket_connector
 
 /**
  * \brief Provide convenient functions for connectors.
  * \ingroup core-connectors
  */
-class socket_connector_base : public connector {
+class basic_socket_connector : public connector {
 protected:
 	/**
 	 * \brief The I/O service.
@@ -99,7 +99,7 @@ public:
 	 *
 	 * \param service the service
 	 */
-	socket_connector_base(boost::asio::io_context& service);
+	basic_socket_connector(boost::asio::io_context& service);
 
 	/**
 	 * Get the I/O service.
@@ -116,17 +116,17 @@ public:
 	auto get_service() noexcept -> boost::asio::io_context&;
 };
 
-inline socket_connector_base::socket_connector_base(boost::asio::io_context& service)
+inline basic_socket_connector::basic_socket_connector(boost::asio::io_context& service)
 	: service_(service)
 {
 }
 
-inline auto socket_connector_base::get_service() const noexcept -> const boost::asio::io_context&
+inline auto basic_socket_connector::get_service() const noexcept -> const boost::asio::io_context&
 {
 	return service_;
 }
 
-inline auto socket_connector_base::get_service() noexcept -> boost::asio::io_context&
+inline auto basic_socket_connector::get_service() noexcept -> boost::asio::io_context&
 {
 	return service_;
 }
@@ -139,7 +139,7 @@ inline auto socket_connector_base::get_service() noexcept -> boost::asio::io_con
  * \brief TCP/IP connector.
  * \ingroup core-connectors
  */
-class ip_connector : public socket_connector_base {
+class ip_connector : public basic_socket_connector {
 public:
 	/**
 	 * Underlying socket type.
@@ -213,7 +213,7 @@ inline ip_connector::ip_connector(boost::asio::io_context& service,
                                   std::string port,
                                   bool ipv4,
                                   bool ipv6) noexcept
-	: socket_connector_base(service)
+	: basic_socket_connector(service)
 	, resolver_(service)
 	, hostname_(std::move(hostname))
 	, port_(std::move(port))
@@ -273,7 +273,7 @@ inline void ip_connector::connect(handler handler)
  * \brief Unix domain connector.
  * \ingroup core-connectors
  */
-class local_connector : public socket_connector_base {
+class local_connector : public basic_socket_connector {
 public:
 	/**
 	 * Underlying socket type.
@@ -315,7 +315,7 @@ public:
 
 inline local_connector::local_connector(boost::asio::io_context& service,
                                         boost::filesystem::path path) noexcept
-	: socket_connector_base(service)
+	: basic_socket_connector(service)
 	, path_(std::move(path))
 {
 }

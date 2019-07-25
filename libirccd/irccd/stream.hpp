@@ -44,6 +44,8 @@
 
 namespace irccd {
 
+// {{{ stream
+
 /**
  * \brief Abstract stream interface
  * \ingroup core-streams
@@ -96,17 +98,17 @@ public:
 	virtual void send(const nlohmann::json& json, send_handler handler) = 0;
 };
 
-// {{{ socket_stream_base
+// }}}
+
+// {{{ basic_socket_stream
 
 /**
- * \brief Abstract base interface for Boost.Asio sockets.
+ * \brief Complete implementation for basic sockets
  * \ingroup core-streams
- *
- * This class provides convenient functions for underlying sockets.
- *
- * \see basic_socket_stream
+ * \tparam Socket Boost.Asio socket (e.g. boost::asio::ip::tcp::socket)
  */
-class socket_stream_base : public stream {
+template <typename Socket>
+class basic_socket_stream : public stream {
 private:
 	boost::asio::streambuf input_{2048};
 	boost::asio::streambuf output_;
@@ -119,30 +121,65 @@ private:
 	void handle_recv(boost::system::error_code, std::size_t, recv_handler);
 	void handle_send(boost::system::error_code, std::size_t, send_handler);
 
-protected:
+	Socket socket_;
+
+public:
 	/**
-	 * Convenient function for receiving for the underlying socket.
+	 * Construct a socket stream.
 	 *
-	 * \param sc the socket
-	 * \param handler the handler
+	 * \param args the arguments to pass to the constructor
 	 */
-	template <typename Socket>
-	void recv(Socket& sc, recv_handler handler);
+	template <typename... Args>
+	basic_socket_stream(Args&&... args);
 
 	/**
-	 * Convenient function for sending for the underlying socket.
+	 * Get the underlying socket.
 	 *
-	 * \param json the JSON object
-	 * \param sc the socket
-	 * \param handler the handler
+	 * \return the socket
 	 */
-	template <typename Socket>
-	void send(const nlohmann::json& json, Socket& sc, send_handler handler);
+	auto get_socket() const noexcept -> const Socket&;
+
+	/**
+	 * Overloaded function.
+	 *
+	 * \return the socket
+	 */
+	auto get_socket() noexcept -> Socket&;
+
+	/**
+	 * \copydoc stream::recv
+	 */
+	void recv(recv_handler handler) override;
+
+	/**
+	 * \copydoc stream::send
+	 */
+	void send(const nlohmann::json& json, send_handler handler) override;
 };
 
-inline void socket_stream_base::handle_recv(boost::system::error_code code,
-                                            std::size_t xfer,
-                                            recv_handler handler)
+template <typename Socket>
+template <typename... Args>
+inline basic_socket_stream<Socket>::basic_socket_stream(Args&&... args)
+	: socket_(std::forward<Args>(args)...)
+{
+}
+
+template <typename Socket>
+inline auto basic_socket_stream<Socket>::get_socket() const noexcept -> const Socket&
+{
+	return socket_;
+}
+
+template <typename Socket>
+inline auto basic_socket_stream<Socket>::get_socket() noexcept -> Socket&
+{
+	return socket_;
+}
+
+template <typename Socket>
+inline void basic_socket_stream<Socket>::handle_recv(boost::system::error_code code,
+                                                     std::size_t xfer,
+                                                     recv_handler handler)
 {
 #if !defined(NDEBUG)
 	is_receiving_ = false;
@@ -192,9 +229,10 @@ inline void socket_stream_base::handle_recv(boost::system::error_code code,
 		handler(std::error_code(), std::move(doc));
 }
 
-inline void socket_stream_base::handle_send(boost::system::error_code code,
-                                            std::size_t xfer,
-                                            send_handler handler)
+template <typename Socket>
+inline void basic_socket_stream<Socket>::handle_send(boost::system::error_code code,
+                                                     std::size_t xfer,
+                                                     send_handler handler)
 {
 #if !defined(NDEBUG)
 	is_sending_ = false;
@@ -209,7 +247,7 @@ inline void socket_stream_base::handle_send(boost::system::error_code code,
 }
 
 template <typename Socket>
-inline void socket_stream_base::recv(Socket& sc, recv_handler handler)
+inline void basic_socket_stream<Socket>::recv(recv_handler handler)
 {
 #if !defined(NDEBUG)
 	assert(!is_receiving_);
@@ -219,13 +257,13 @@ inline void socket_stream_base::recv(Socket& sc, recv_handler handler)
 
 	assert(handler);
 
-	async_read_until(sc, input_, "\r\n\r\n", [this, handler] (auto code, auto xfer) {
+	async_read_until(socket_, input_, "\r\n\r\n", [this, handler] (auto code, auto xfer) {
 		handle_recv(code, xfer, handler);
 	});
 }
 
 template <typename Socket>
-inline void socket_stream_base::send(const nlohmann::json& json, Socket& sc, send_handler handler)
+inline void basic_socket_stream<Socket>::send(const nlohmann::json& json, send_handler handler)
 {
 #if !defined(NDEBUG)
 	assert(!is_sending_);
@@ -242,86 +280,9 @@ inline void socket_stream_base::send(const nlohmann::json& json, Socket& sc, sen
 	out << "\r\n\r\n";
 	out << std::flush;
 
-	async_write(sc, output_, [this, handler] (auto code, auto xfer) {
+	async_write(socket_, output_, [this, handler] (auto code, auto xfer) {
 		handle_send(code, xfer, handler);
 	});
-}
-
-// }}}
-
-// {{{ basic_socket_stream
-
-/**
- * \brief Complete implementation for basic sockets
- * \ingroup core-streams
- * \tparam Socket Boost.Asio socket (e.g. boost::asio::ip::tcp::socket)
- */
-template <typename Socket>
-class basic_socket_stream : public socket_stream_base {
-private:
-	Socket socket_;
-
-public:
-	/**
-	 * Construct a socket stream.
-	 *
-	 * \param service the I/O service
-	 */
-	basic_socket_stream(boost::asio::io_context& service);
-
-	/**
-	 * Get the underlying socket.
-	 *
-	 * \return the socket
-	 */
-	auto get_socket() const noexcept -> const Socket&;
-
-	/**
-	 * Overloaded function.
-	 *
-	 * \return the socket
-	 */
-	auto get_socket() noexcept -> Socket&;
-
-	/**
-	 * \copydoc stream::recv
-	 */
-	void recv(recv_handler handler) override;
-
-	/**
-	 * \copydoc stream::send
-	 */
-	void send(const nlohmann::json& json, send_handler handler) override;
-};
-
-template <typename Socket>
-inline basic_socket_stream<Socket>::basic_socket_stream(boost::asio::io_context& ctx)
-	: socket_(ctx)
-{
-}
-
-template <typename Socket>
-inline auto basic_socket_stream<Socket>::get_socket() const noexcept -> const Socket&
-{
-	return socket_;
-}
-
-template <typename Socket>
-inline auto basic_socket_stream<Socket>::get_socket() noexcept -> Socket&
-{
-	return socket_;
-}
-
-template <typename Socket>
-inline void basic_socket_stream<Socket>::recv(recv_handler handler)
-{
-	socket_stream_base::recv(socket_, handler);
-}
-
-template <typename Socket>
-inline void basic_socket_stream<Socket>::send(const nlohmann::json& json, send_handler handler)
-{
-	socket_stream_base::send(json, socket_, handler);
 }
 
 // }}}
@@ -360,10 +321,12 @@ using local_stream = basic_socket_stream<boost::asio::local::stream_protocol::so
  * \tparam Socket the Boost.Asio compatible socket.
  */
 template <typename Socket>
-class tls_stream : public socket_stream_base {
+class tls_stream : public basic_socket_stream<boost::asio::ssl::stream<Socket>> {
 private:
-	boost::asio::ssl::stream<Socket> socket_;
 	std::shared_ptr<boost::asio::ssl::context> context_;
+
+	using recv_handler = stream::recv_handler;
+	using send_handler = stream::send_handler;
 
 public:
 	/**
@@ -373,61 +336,13 @@ public:
 	 * \param ctx the shared context
 	 */
 	tls_stream(boost::asio::io_context& service, std::shared_ptr<boost::asio::ssl::context> ctx);
-
-	/**
-	 * Get the SSL socket.
-	 *
-	 * \return the socket
-	 */
-	auto get_socket() const noexcept -> const boost::asio::ssl::stream<Socket>&;
-
-	/**
-	 * Overloaded function.
-	 *
-	 * \return the socket
-	 */
-	auto get_socket() noexcept -> boost::asio::ssl::stream<Socket>&;
-
-	/**
-	 * \copydoc stream::recv
-	 */
-	void recv(recv_handler handler) override;
-
-	/**
-	 * \copydoc stream::send
-	 */
-	void send(const nlohmann::json& json, send_handler handler) override;
 };
 
 template <typename Socket>
 inline tls_stream<Socket>::tls_stream(boost::asio::io_context& service, std::shared_ptr<boost::asio::ssl::context> ctx)
-	: socket_(service, *ctx)
+	: basic_socket_stream<boost::asio::ssl::stream<Socket>>(service, *ctx)
 	, context_(std::move(ctx))
 {
-}
-
-template <typename Socket>
-inline auto tls_stream<Socket>::get_socket() const noexcept -> const boost::asio::ssl::stream<Socket>&
-{
-	return socket_;
-}
-
-template <typename Socket>
-inline auto tls_stream<Socket>::get_socket() noexcept -> boost::asio::ssl::stream<Socket>&
-{
-	return socket_;
-}
-
-template <typename Socket>
-inline void tls_stream<Socket>::recv(recv_handler handler)
-{
-	socket_stream_base::recv(socket_, handler);
-}
-
-template <typename Socket>
-inline void tls_stream<Socket>::send(const nlohmann::json& json, send_handler handler)
-{
-	socket_stream_base::send(json, socket_, handler);
 }
 
 /**
