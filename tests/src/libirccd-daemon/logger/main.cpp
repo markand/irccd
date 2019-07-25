@@ -17,11 +17,14 @@
  */
 
 #include <algorithm>
+#include <fstream>
 
 #define BOOST_TEST_MODULE "Logger"
-#include <boost/test/unit_test.hpp>
+#include <boost/asio.hpp>
 #include <boost/format.hpp>
+#include <boost/test/unit_test.hpp>
 
+#include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/logger.hpp>
 
 using boost::format;
@@ -34,8 +37,7 @@ namespace irccd {
 
 namespace {
 
-class sample_sink : public sink {
-public:
+struct sample_sink : public sink {
 	std::string line_debug;
 	std::string line_info;
 	std::string line_warning;
@@ -56,8 +58,7 @@ public:
 	}
 };
 
-class sample_filter : public filter {
-public:
+struct sample_filter : public filter {
 	auto pre_debug(std::string_view category,
 	               std::string_view component,
 	               std::string_view message) const -> std::string override
@@ -125,6 +126,41 @@ BOOST_AUTO_TEST_CASE(warning)
 	log_.warning("test", "warning") << "success" << std::endl;
 
 	BOOST_TEST(log_.line_warning == "WARN test:warning:success");
+}
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE(logger_config_test_suite)
+
+BOOST_AUTO_TEST_CASE(files)
+{
+	boost::asio::io_context context;
+	daemon::bot bot{context, CMAKE_CURRENT_BINARY_DIR "/logs-files.conf"};
+
+	unlink(CMAKE_CURRENT_BINARY_DIR "/normal.txt");
+	unlink(CMAKE_CURRENT_BINARY_DIR "/errors.txt");
+
+	bot.load();
+	bot.get_log().info("INFO", "123") << "this is an info" << std::endl;
+	bot.get_log().warning("WARNING", "456") << "this is a warning" << std::endl;
+
+	{
+		std::ifstream info(CMAKE_CURRENT_BINARY_DIR "/normal.txt");
+		std::string line;
+
+		// First line is too early to detect templates.
+		std::getline(info, line);
+		std::getline(info, line);
+		BOOST_TEST(line == "info: INFO=this is an info");
+	}
+
+	{
+		std::ifstream info(CMAKE_CURRENT_BINARY_DIR "/errors.txt");
+		std::string line;
+
+		std::getline(info, line);
+		BOOST_TEST(line == "warning: WARNING=this is a warning");
+	}
 }
 
 BOOST_AUTO_TEST_SUITE_END()

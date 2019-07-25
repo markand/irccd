@@ -155,8 +155,6 @@ void bot::load_logs()
 	if (sc.empty())
 		return;
 
-	sink_->set_verbose(string_util::is_identifier(sc.get("verbose").get_value()));
-
 	const auto type = sc.get("type").get_value();
 
 	if (!type.empty()) {
@@ -168,6 +166,8 @@ void bot::load_logs()
 		else if (type != "console")
 			sink_->warning("logs", "") << "invalid log type '" << type << std::endl;
 	}
+
+	sink_->set_verbose(string_util::is_boolean(sc.get("verbose").get_value()));
 }
 
 void bot::load_templates()

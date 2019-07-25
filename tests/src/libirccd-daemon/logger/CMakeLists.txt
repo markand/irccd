@@ -21,3 +21,8 @@ irccd_define_test(
 	SOURCES main.cpp
 	LIBRARIES libirccd
 )
+
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/logs-files.conf
+	${CMAKE_CURRENT_BINARY_DIR}/logs-files.conf
+)
