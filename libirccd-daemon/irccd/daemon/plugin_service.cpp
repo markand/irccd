@@ -116,7 +116,7 @@ auto plugin_service::get_options(std::string_view id) -> plugin::map
 
 auto plugin_service::get_templates(std::string_view id) -> plugin::map
 {
-	return to_map(bot_.get_config(), str(format("format.%1%") % id));
+	return to_map(bot_.get_config(), str(format("templates.%1%") % id));
 }
 
 auto plugin_service::get_paths(std::string_view id) -> plugin::map

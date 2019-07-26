@@ -156,8 +156,8 @@ public:
 	/**
 	 * Generic function for opening the plugin at the given path.
 	 *
-	 * This function will search for every pluginLoader and call open() on it,
-	 * the first one that success will be returned.
+	 * This function will search for every plugin_loader and call open() on
+	 * it the first one that success will be returned.
 	 *
 	 * \param id the plugin id
 	 * \param path the path to the file
