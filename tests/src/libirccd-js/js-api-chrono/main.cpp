@@ -45,8 +45,8 @@ BOOST_AUTO_TEST_CASE(simple)
 		throw duk::get_stack(plugin_->get_context(), -1);
 
 	BOOST_REQUIRE(duk_get_global_string(plugin_->get_context(), "result"));
-	BOOST_REQUIRE_GE(duk_get_int(plugin_->get_context(), -1), 250);
-	BOOST_REQUIRE_LE(duk_get_int(plugin_->get_context(), -1), 350);
+	BOOST_REQUIRE_GE(duk_get_int(plugin_->get_context(), -1), 200);
+	BOOST_REQUIRE_LE(duk_get_int(plugin_->get_context(), -1), 400);
 }
 
 BOOST_AUTO_TEST_CASE(pause)
@@ -88,8 +88,8 @@ BOOST_AUTO_TEST_CASE(resume)
 		throw duk::get_stack(plugin_->get_context(), -1);
 
 	BOOST_REQUIRE(duk_get_global_string(plugin_->get_context(), "result"));
-	BOOST_REQUIRE_GE(duk_get_int(plugin_->get_context(), -1), 950);
-	BOOST_REQUIRE_LE(duk_get_int(plugin_->get_context(), -1), 1050);
+	BOOST_REQUIRE_GE(duk_get_int(plugin_->get_context(), -1), 900);
+	BOOST_REQUIRE_LE(duk_get_int(plugin_->get_context(), -1), 1100);
 }
 
 BOOST_AUTO_TEST_CASE(start)
@@ -113,8 +113,8 @@ BOOST_AUTO_TEST_CASE(start)
 		throw duk::get_stack(plugin_->get_context(), -1);
 
 	BOOST_REQUIRE(duk_get_global_string(plugin_->get_context(), "result"));
-	BOOST_REQUIRE_GE(duk_get_int(plugin_->get_context(), -1), 950);
-	BOOST_REQUIRE_LE(duk_get_int(plugin_->get_context(), -1), 1050);
+	BOOST_REQUIRE_GE(duk_get_int(plugin_->get_context(), -1), 900);
+	BOOST_REQUIRE_LE(duk_get_int(plugin_->get_context(), -1), 1100);
 }
 
 BOOST_AUTO_TEST_SUITE_END()
