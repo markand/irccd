@@ -569,7 +569,9 @@ auto server_service::has(std::string_view name) const noexcept -> bool
 void server_service::add(std::shared_ptr<server> server)
 {
 	assert(server);
-	assert(!has(server->get_id()));
+
+	if (has(server->get_id()))
+		throw server_error(server_error::already_exists);
 
 	servers_.push_back(server);
 	connect(server);
@@ -603,6 +605,19 @@ auto server_service::require(std::string_view name) const -> std::shared_ptr<ser
 void server_service::disconnect(std::string_view id)
 {
 	disconnect(require(id));
+}
+
+void server_service::disconnect()
+{
+	const auto save = servers_;
+
+	for (const auto& s : save) {
+		try {
+			disconnect(s);
+		} catch (const server_error& ex) {
+			bot_.get_log().warning(*s) << ex.what() << std::endl;
+		}
+	}
 }
 
 void server_service::reconnect(std::string_view id)

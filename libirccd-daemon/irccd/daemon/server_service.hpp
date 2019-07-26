@@ -27,6 +27,7 @@
 #include <irccd/sysconfig.hpp>
 
 #include <memory>
+#include <string_view>
 #include <system_error>
 #include <vector>
 
@@ -43,6 +44,9 @@ class bot;
 /**
  * \brief Manage IRC servers.
  * \ingroup services
+ *
+ * This class holds servers and wait for IRC events to come and then are
+ * dispatched through the plugins.
  */
 class server_service {
 private:
@@ -77,48 +81,53 @@ public:
 	/**
 	 * Check if a server exists.
 	 *
-	 * \param name the name
+	 * \param id the server identifier
 	 * \return true if exists
 	 */
-	auto has(std::string_view name) const noexcept -> bool;
+	auto has(std::string_view id) const noexcept -> bool;
 
 	/**
 	 * Add a new server to the application.
 	 *
-	 * \pre hasServer must return false
 	 * \param sv the server
+	 * \throw server_error on errors
 	 */
 	void add(std::shared_ptr<server> sv);
 
 	/**
 	 * Get a server or empty one if not found
 	 *
-	 * \param name the server name
+	 * \param id the server identifier
 	 * \return the server or empty one if not found
 	 */
-	auto get(std::string_view name) const noexcept -> std::shared_ptr<server>;
+	auto get(std::string_view id) const noexcept -> std::shared_ptr<server>;
 
 	/**
 	 * Find a server from a JSON object.
 	 *
-	 * \param name the server name
+	 * \param id the server identifier
 	 * \return the server
 	 * \throw server_error on errors
 	 */
-	auto require(std::string_view name) const -> std::shared_ptr<server>;
+	auto require(std::string_view id) const -> std::shared_ptr<server>;
 
 	/**
 	 * Force disconnection, this also call plugin::handle_disconnect handler.
 	 *
-	 * \param id the server id
+	 * \param id the server identifier
 	 * \throw server_error on errors
 	 */
 	void disconnect(std::string_view id);
 
 	/**
+	 * Disconnect all servers.
+	 */
+	void disconnect();
+
+	/**
 	 * Force reconnection, this also call plugin::handle_disconnect handler.
 	 *
-	 * \param id the server id
+	 * \param id the server identifier
 	 * \return the server
 	 * \throw server_error on errors
 	 */
@@ -134,9 +143,9 @@ public:
 	 *
 	 * The server if any, will be disconnected.
 	 *
-	 * \param name the server name
+	 * \param id the server identifier
 	 */
-	void remove(std::string_view name);
+	void remove(std::string_view id);
 
 	/**
 	 * Remove all servers.
