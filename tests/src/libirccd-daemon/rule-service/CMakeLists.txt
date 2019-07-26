@@ -17,7 +17,7 @@
 #
 
 irccd_define_test(
-	NAME rules
+	NAME rule-service
 	SOURCES main.cpp
-	LIBRARIES libirccd
+	LIBRARIES libirccd-daemon
 )

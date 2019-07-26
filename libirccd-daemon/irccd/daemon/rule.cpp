@@ -49,6 +49,21 @@ auto rule::match(std::string_view server,
 	       match_set(events, std::string(event));
 }
 
+auto operator==(const rule& lhs, const rule& rhs) noexcept -> bool
+{
+	return lhs.servers == rhs.servers &&
+	       lhs.channels == rhs.channels &&
+	       lhs.origins == rhs.origins &&
+	       lhs.plugins == rhs.plugins &&
+	       lhs.events == rhs.events &&
+	       lhs.action == rhs.action;
+}
+
+auto operator!=(const rule& lhs, const rule& rhs) noexcept -> bool
+{
+	return !(lhs == rhs);
+}
+
 auto rule_category() -> const std::error_category&
 {
 	static const class category : public std::error_category {

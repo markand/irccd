@@ -50,11 +50,11 @@ struct rule {
 		drop            //!< The event is dropped
 	};
 
-	set servers;            //!< The list of servers
-	set channels;           //!< The list of channels
-	set origins;            //!< The list of originators
-	set plugins;            //!< The list of plugins
-	set events;             //!< The list of events
+	set servers{};          //!< The list of servers
+	set channels{};         //!< The list of channels
+	set origins{};          //!< The list of originators
+	set plugins{};          //!< The list of plugins
+	set events{};           //!< The list of events
 
 	/**
 	 * The action.
@@ -87,6 +87,24 @@ struct rule {
 	           std::string_view plugin,
 	           std::string_view event) const noexcept -> bool;
 };
+
+/**
+ * Equality operator.
+ *
+ * \param lhs the left side
+ * \param rhs the right side
+ * \return true if they equals
+ */
+auto operator==(const rule& lhs, const rule& rhs) noexcept -> bool;
+
+/**
+ * Equality operator.
+ *
+ * \param lhs the left side
+ * \param rhs the right side
+ * \return false if they equals
+ */
+auto operator!=(const rule& lhs, const rule& rhs) noexcept -> bool;
 
 /**
  * \brief Rule error.

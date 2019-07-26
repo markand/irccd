@@ -1,5 +1,5 @@
 /*
- * main.cpp -- test irccd rules
+ * main.cpp -- test rule_service object
  *
  * Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
  *
@@ -16,23 +16,77 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#define BOOST_TEST_MODULE "Rules"
+#define BOOST_TEST_MODULE "rule_service"
 #include <boost/test/unit_test.hpp>
 
-#include <irccd/daemon/bot.hpp>
 #include <irccd/daemon/logger.hpp>
 #include <irccd/daemon/rule_service.hpp>
 
-using boost::asio::io_context;
+#include <irccd/test/irccd_fixture.hpp>
 
-using irccd::daemon::bot;
-using irccd::daemon::logger::silent_sink;
-using irccd::daemon::rule;
-using irccd::daemon::rule_service;
+namespace test = irccd::test;
 
-namespace irccd {
+BOOST_TEST_DONT_PRINT_LOG_VALUE(irccd::daemon::rule)
+
+namespace irccd::daemon {
 
 namespace {
+
+BOOST_FIXTURE_TEST_SUITE(rule_service_test_suite, test::irccd_fixture)
+
+BOOST_AUTO_TEST_CASE(add)
+{
+	rule r1{{"s1"}};
+	rule r2{{"s2"}};
+
+	bot_.get_rules().add(r1);
+	bot_.get_rules().add(r2);
+
+	BOOST_TEST(bot_.get_rules().list().size() == 2U);
+	BOOST_TEST(bot_.get_rules().list()[0] == r1);
+	BOOST_TEST(bot_.get_rules().list()[1] == r2);
+}
+
+BOOST_AUTO_TEST_CASE(insert)
+{
+	rule r1{{"s1"}};
+	rule r2{{"s2"}};
+
+	bot_.get_rules().insert(r1, 0);
+	bot_.get_rules().insert(r2, 0);
+
+	BOOST_TEST(bot_.get_rules().list().size() == 2U);
+	BOOST_TEST(bot_.get_rules().list()[0] == r2);
+	BOOST_TEST(bot_.get_rules().list()[1] == r1);
+}
+
+BOOST_AUTO_TEST_CASE(remove)
+{
+	rule r1{{"s1"}};
+	rule r2{{"s2"}};
+
+	bot_.get_rules().add(r1);
+	bot_.get_rules().add(r2);
+	bot_.get_rules().remove(1);
+
+	BOOST_TEST(bot_.get_rules().list().size() == 1U);
+	BOOST_TEST(bot_.get_rules().list()[0] == r1);
+}
+
+BOOST_AUTO_TEST_CASE(require)
+{
+	rule r1{{"s1"}};
+	rule r2{{"s2"}};
+
+	bot_.get_rules().add(r1);
+	bot_.get_rules().add(r2);
+
+	BOOST_TEST(bot_.get_rules().require(0) == r1);
+	BOOST_TEST(bot_.get_rules().require(1) == r2);
+	BOOST_REQUIRE_THROW(bot_.get_rules().require(500), rule_error);
+}
+
+BOOST_AUTO_TEST_SUITE_END()
 
 /*
  * Simulate the following rules configuration:
@@ -74,19 +128,15 @@ namespace {
  * events       = "onMessage onCommand"
  * action       = accept
  */
-class rules_test {
+class solving_test : public test::irccd_fixture {
 protected:
-	io_context service_;
-	bot bot_{service_};
-	rule_service rules_{bot_};
-
-	rules_test()
+	solving_test()
 	{
-		bot_.set_log(std::make_unique<silent_sink>());
+		bot_.set_log(std::make_unique<logger::silent_sink>());
 
 		// #1
 		{
-			rules_.add({
+			bot_.get_rules().add({
 				rule::set{                }, // Servers
 				rule::set{ "#staff"       }, // Channels
 				rule::set{                }, // Origins
@@ -98,7 +148,7 @@ protected:
 
 		// #2
 		{
-			rules_.add({
+			bot_.get_rules().add({
 				rule::set{ "unsafe"       },
 				rule::set{ "#staff"       },
 				rule::set{                },
@@ -110,7 +160,7 @@ protected:
 
 		// #3-1
 		{
-			rules_.add({
+			bot_.get_rules().add({
 				rule::set{},
 				rule::set{},
 				rule::set{},
@@ -122,7 +172,7 @@ protected:
 
 		// #3-2
 		{
-			rules_.add({
+			bot_.get_rules().add({
 				rule::set{ "malikania", "localhost"   },
 				rule::set{ "#games"                   },
 				rule::set{                            },
@@ -134,7 +184,7 @@ protected:
 	}
 };
 
-BOOST_FIXTURE_TEST_SUITE(rules_test_suite, rules_test)
+BOOST_FIXTURE_TEST_SUITE(solving_test_suite, solving_test)
 
 BOOST_AUTO_TEST_CASE(basic_match1)
 {
@@ -230,49 +280,49 @@ BOOST_AUTO_TEST_CASE(origin_match)
 BOOST_AUTO_TEST_CASE(basic_solve)
 {
 	/* Allowed */
-	BOOST_TEST(rules_.solve("malikania", "#staff", "", "a", "onMessage"));
+	BOOST_TEST(bot_.get_rules().solve("malikania", "#staff", "", "a", "onMessage"));
 
 	/* Allowed */
-	BOOST_TEST(rules_.solve("freenode", "#staff", "", "b", "onTopic"));
+	BOOST_TEST(bot_.get_rules().solve("freenode", "#staff", "", "b", "onTopic"));
 
 	/* Not allowed */
-	BOOST_TEST(!rules_.solve("malikania", "#staff", "", "", "onCommand"));
+	BOOST_TEST(!bot_.get_rules().solve("malikania", "#staff", "", "", "onCommand"));
 
 	/* Not allowed */
-	BOOST_TEST(!rules_.solve("freenode", "#staff", "", "c", "onCommand"));
+	BOOST_TEST(!bot_.get_rules().solve("freenode", "#staff", "", "c", "onCommand"));
 
 	/* Allowed */
-	BOOST_TEST(rules_.solve("unsafe", "#staff", "", "c", "onCommand"));
+	BOOST_TEST(bot_.get_rules().solve("unsafe", "#staff", "", "c", "onCommand"));
 }
 
 BOOST_AUTO_TEST_CASE(games_solve)
 {
 	/* Allowed */
-	BOOST_TEST(rules_.solve("malikania", "#games", "", "game", "onMessage"));
+	BOOST_TEST(bot_.get_rules().solve("malikania", "#games", "", "game", "onMessage"));
 
 	/* Allowed */
-	BOOST_TEST(rules_.solve("localhost", "#games", "", "game", "onMessage"));
+	BOOST_TEST(bot_.get_rules().solve("localhost", "#games", "", "game", "onMessage"));
 
 	/* Allowed */
-	BOOST_TEST(rules_.solve("malikania", "#games", "", "game", "onCommand"));
+	BOOST_TEST(bot_.get_rules().solve("malikania", "#games", "", "game", "onCommand"));
 
 	/* Not allowed */
-	BOOST_TEST(!rules_.solve("malikania", "#games", "", "game", "onQuery"));
+	BOOST_TEST(!bot_.get_rules().solve("malikania", "#games", "", "game", "onQuery"));
 
 	/* Not allowed */
-	BOOST_TEST(!rules_.solve("freenode", "#no", "", "game", "onMessage"));
+	BOOST_TEST(!bot_.get_rules().solve("freenode", "#no", "", "game", "onMessage"));
 
 	/* Not allowed */
-	BOOST_TEST(!rules_.solve("malikania", "#test", "", "game", "onMessage"));
+	BOOST_TEST(!bot_.get_rules().solve("malikania", "#test", "", "game", "onMessage"));
 }
 
 BOOST_AUTO_TEST_CASE(fix_645)
 {
-	BOOST_TEST(!rules_.solve("MALIKANIA", "#STAFF", "", "SYSTEM", "onCommand"));
+	BOOST_TEST(!bot_.get_rules().solve("MALIKANIA", "#STAFF", "", "SYSTEM", "onCommand"));
 }
 
 BOOST_AUTO_TEST_SUITE_END()
 
 } // !namespace
 
-} // !irccd
+} // !irccd::daemon
