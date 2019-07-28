@@ -138,7 +138,7 @@ void plugin_config_command::exec(bot& bot, transport_client& client, const docum
 	const auto id = args.get<std::string>("plugin");
 
 	if (!id || !string_util::is_identifier(*id))
-		throw plugin_error(plugin_error::invalid_identifier);
+		throw plugin_error(plugin_error::invalid_identifier, id.value_or(""));
 
 	const auto plugin = bot.get_plugins().require(*id);
 
@@ -162,7 +162,7 @@ void plugin_info_command::exec(bot& bot, transport_client& client, const documen
 	const auto id = args.get<std::string>("plugin");
 
 	if (!id || !string_util::is_identifier(*id))
-		throw plugin_error(plugin_error::invalid_identifier);
+		throw plugin_error(plugin_error::invalid_identifier, id.value_or(""));
 
 	const auto plugin = bot.get_plugins().require(*id);
 
@@ -211,7 +211,7 @@ void plugin_load_command::exec(bot& bot, transport_client& client, const documen
 	const auto id = args.get<std::string>("plugin");
 
 	if (!id || !string_util::is_identifier(*id))
-		throw plugin_error(plugin_error::invalid_identifier);
+		throw plugin_error(plugin_error::invalid_identifier, id.value_or(""));
 
 	bot.get_plugins().load(*id, "");
 	client.success("plugin-load");
@@ -231,7 +231,7 @@ void plugin_reload_command::exec(bot& bot, transport_client& client, const docum
 	const auto id = args.get<std::string>("plugin");
 
 	if (!id || !string_util::is_identifier(*id))
-		throw plugin_error(plugin_error::invalid_identifier);
+		throw plugin_error(plugin_error::invalid_identifier, id.value_or(""));
 
 	bot.get_plugins().reload(*id);
 	client.success("plugin-reload");
@@ -251,7 +251,7 @@ void plugin_unload_command::exec(bot& bot, transport_client& client, const docum
 	const auto id = args.get<std::string>("plugin");
 
 	if (!id || !string_util::is_identifier(*id))
-		throw plugin_error(plugin_error::invalid_identifier);
+		throw plugin_error(plugin_error::invalid_identifier, id.value_or(""));
 
 	bot.get_plugins().unload(*id);
 	client.success("plugin-unload");

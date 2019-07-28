@@ -90,7 +90,7 @@ auto plugin_service::require(std::string_view id) const -> std::shared_ptr<plugi
 	auto plugin = get(id);
 
 	if (!plugin)
-		throw plugin_error(plugin_error::not_found, id);
+		throw plugin_error(plugin_error::not_found, std::string(id));
 
 	return plugin;
 }
@@ -185,7 +185,7 @@ auto plugin_service::find(std::string_view id) -> std::shared_ptr<plugin>
 void plugin_service::load(std::string_view id, std::string_view path)
 {
 	if (has(id))
-		throw plugin_error(plugin_error::already_exists, id);
+		throw plugin_error(plugin_error::already_exists, std::string(id));
 
 	std::shared_ptr<plugin> plugin;
 
@@ -195,18 +195,18 @@ void plugin_service::load(std::string_view id, std::string_view path)
 		else
 			plugin = open(id, std::move(path));
 	} catch (...) {
-		throw plugin_error(plugin_error::exec_error, id);
+		throw plugin_error(plugin_error::exec_error, std::string(id));
 	}
 
 	if (!plugin)
-		throw plugin_error(plugin_error::not_found, id);
+		throw plugin_error(plugin_error::not_found, std::string(id));
 
 	try {
 		plugin->set_options(get_options(id));
 		plugin->set_templates(get_templates(id));
 		plugin->set_paths(get_paths(id));
 	} catch (...) {
-		throw plugin_error(plugin_error::exec_error, id);
+		throw plugin_error(plugin_error::exec_error, std::string(id));
 	}
 
 	exec(plugin, &plugin::handle_load, bot_);
@@ -219,7 +219,7 @@ void plugin_service::reload(std::string_view id)
 	auto plugin = get(id);
 
 	if (!plugin)
-		throw plugin_error(plugin_error::not_found, id);
+		throw plugin_error(plugin_error::not_found, std::string(id));
 
 	exec(plugin, &plugin::handle_reload, bot_);
 }
@@ -233,7 +233,7 @@ void plugin_service::unload(std::string_view id)
 	const auto it = std::find_if(plugins_.begin(), plugins_.end(), find);
 
 	if (it == plugins_.end())
-		throw plugin_error(plugin_error::not_found, id);
+		throw plugin_error(plugin_error::not_found, std::string(id));
 
 	// Erase first, in case of throwing.
 	const auto save = *it;

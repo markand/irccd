@@ -408,7 +408,7 @@ public:
 	};
 
 private:
-	std::string name_;
+	std::string id_;
 	std::string message_;
 	std::string what_;
 
@@ -417,17 +417,17 @@ public:
 	 * Constructor.
 	 *
 	 * \param code the error code
-	 * \param name the plugin name
+	 * \param id the plugin id
 	 * \param message the optional message (e.g. error from plugin)
 	 */
-	plugin_error(error code, std::string_view name = "", std::string_view message = "");
+	plugin_error(error code, std::string id, std::string message = "");
 
 	/**
-	 * Get the plugin name.
+	 * Get the plugin identifier.
 	 *
-	 * \return the name
+	 * \return the id
 	 */
-	auto get_name() const noexcept -> const std::string&;
+	auto get_id() const noexcept -> const std::string&;
 
 	/**
 	 * Get the additional message.

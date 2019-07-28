@@ -218,9 +218,9 @@ public:
 		try {
 			std::invoke(std::forward<Func>(fn), *plugin, std::forward<Args>(args)...);
 		} catch (const std::exception& ex) {
-			throw plugin_error(plugin_error::exec_error, plugin->get_name(), ex.what());
+			throw plugin_error(plugin_error::exec_error, plugin->get_id(), ex.what());
 		} catch (...) {
-			throw plugin_error(plugin_error::exec_error, plugin->get_name());
+			throw plugin_error(plugin_error::exec_error, plugin->get_id());
 		}
 	}
 
@@ -237,7 +237,7 @@ public:
 		auto plugin = find(name);
 
 		if (!plugin)
-			throw plugin_error(plugin_error::not_found, plugin->get_name());
+			throw plugin_error(plugin_error::not_found, plugin->get_id());
 
 		exec(std::move(plugin), std::forward<Func>(fn), std::forward<Args>(args)...);
 	}

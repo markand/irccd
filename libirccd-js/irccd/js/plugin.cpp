@@ -131,7 +131,7 @@ void plugin::call(const std::string& func, Args&&... args)
 	push(std::forward<Args>(args)...);
 
 	if (duk_pcall(context_, sizeof... (Args)) != 0)
-		throw plugin_error(plugin_error::exec_error, get_name(), duk::get_stack(context_, -1).get_stack());
+		throw plugin_error(plugin_error::exec_error, get_id(), duk::get_stack(context_, -1).get_stack());
 
 	duk_pop(context_);
 }
@@ -230,7 +230,7 @@ void plugin::open()
 	std::ifstream input(path_);
 
 	if (!input)
-		throw plugin_error(plugin_error::exec_error, get_name(), std::strerror(errno));
+		throw plugin_error(plugin_error::exec_error, get_id(), std::strerror(errno));
 
 	std::string data(
 		std::istreambuf_iterator<char>(input.rdbuf()),
@@ -238,7 +238,7 @@ void plugin::open()
 	);
 
 	if (duk_peval_string(context_, data.c_str()))
-		throw plugin_error(plugin_error::exec_error, get_name(), duk::get_stack(context_, -1).get_stack());
+		throw plugin_error(plugin_error::exec_error, get_id(), duk::get_stack(context_, -1).get_stack());
 }
 
 void plugin::handle_command(bot&, const message_event& event)

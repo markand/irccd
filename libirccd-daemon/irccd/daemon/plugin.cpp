@@ -209,9 +209,9 @@ auto plugin_loader::find(std::string_view name) -> std::shared_ptr<plugin>
 	return nullptr;
 }
 
-plugin_error::plugin_error(error errc, std::string_view name, std::string_view message)
+plugin_error::plugin_error(error errc, std::string id, std::string message)
 	: system_error(make_error_code(errc))
-	, name_(std::move(name))
+	, id_(std::move(id))
 	, message_(std::move(message))
 {
 	std::ostringstream oss;
@@ -227,9 +227,9 @@ plugin_error::plugin_error(error errc, std::string_view name, std::string_view m
 	what_ = oss.str();
 }
 
-auto plugin_error::get_name() const noexcept -> const std::string&
+auto plugin_error::get_id() const noexcept -> const std::string&
 {
-	return name_;
+	return id_;
 }
 
 auto plugin_error::get_message() const noexcept -> const std::string&
