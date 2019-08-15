@@ -364,7 +364,7 @@
  *   HEADERS             (Optional) directory of headers to install
  *   FLAGS               (Optional) C/C++ flags (without -D)
  *   LIBRARIES           (Optional) libraries to link
- *   LOCAL_INCLUDES      (Optional) local includes for the target only
+ *   PRIVATE_INCLUDES    (Optional) local includes for the target only
  *   PUBLIC_INCLUDES     (Optional) includes to share with target dependencies
  * )
  * ```
@@ -378,8 +378,9 @@
  * The argument SOURCES should contains the C++ source files and HEADERS should
  * points to a directory to be installed verbatim in the include directory.
  *
- * Optional argument FLAGS, LOCAL_INCLUDES, PUBLIC_INCLUDES may be passed to set
- * compile flags, private includes, public includes and libraries respectively.
+ * Optional argument FLAGS, PRIVATE_INCLUDES, PUBLIC_INCLUDES may be passed to
+ * set compile flags, private includes, public includes and libraries
+ * respectively.
  *
  * If export boolean parameter is set, the library is exported and installed.
  *
