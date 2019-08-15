@@ -1,9 +1,9 @@
 -Ibuild
 -Ibuild/irccd
--Iextern/duktape
--Iextern/json
--Ilibirccd-core
+-Iextern/libduktape
+-Iextern/libjson
 -Ilibirccd
--Ilibirccdctl
+-Ilibirccd-ctl
+-Ilibirccd-daemon
 -Ilibirccd-js
 -Ilibirccd-test
