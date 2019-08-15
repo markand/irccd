@@ -34,7 +34,7 @@
 namespace irccd::daemon {
 
 /**
- * \ingroup plugins
+ * \ingroup daemon-plugins
  * \brief Implementation for searching native plugins.
  */
 class dynlib_plugin_loader : public plugin_loader {

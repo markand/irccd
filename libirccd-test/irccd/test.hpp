@@ -39,4 +39,15 @@
 #include "test/mock_stream.hpp"
 #include "test/test_plugin_loader.hpp"
 
+namespace irccd {
+
+/**
+ * \brief Namespace for unit tests.
+ */
+namespace test {
+
+} // !test
+
+} // !irccd
+
 #endif // !IRCCD_TEST_HPP

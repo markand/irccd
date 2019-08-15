@@ -45,8 +45,7 @@ class bot;
 
 /**
  * \brief Manage plugins.
- * \ingroup plugins
- * \ingroup services
+ * \ingroup daemon-services
  */
 class plugin_service {
 public:
@@ -262,7 +261,7 @@ struct type_traits;
 
 /**
  * \brief Implement Loggable traits for plugin.
- * \ingroup logger-traits
+ * \ingroup daemon-loggers-traits
  */
 template <>
 struct type_traits<plugin> {

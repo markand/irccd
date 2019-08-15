@@ -28,9 +28,21 @@
  */
 
 /**
+ * \defgroup daemon-transport-commands commands
+ * \ingroup daemon-transports
+ * \brief Predefined transport commands available.
+ */
+
+/**
  * \defgroup daemon-servers servers
  * \ingroup daemon
  * \brief IRC server, events and functions.
+ */
+
+/**
+ * \defgroup daemon-server-events events
+ * \ingroup daemon-servers
+ * \brief IRC structures for events.
  */
 
 /**
@@ -57,17 +69,10 @@
  * \ingroup daemon-loggers
  */
 
-
 /**
  * \defgroup daemon-rules rules
  * \ingroup daemon
  * \brief Rule objects.
- */
-
-/**
- * \defgroup daemon-utilites utilities
- * \ingroup daemon
- * \brief Utilities.
  */
 
 /**

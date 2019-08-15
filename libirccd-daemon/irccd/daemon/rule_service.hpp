@@ -42,7 +42,7 @@ class bot;
 
 /**
  * \brief Store and solve rules.
- * \ingroup services
+ * \ingroup daemon-services
  */
 class rule_service {
 private:
@@ -134,7 +134,7 @@ struct type_traits;
 
 /**
  * \brief Specialization for rule.
- * \ingroup logger-traits
+ * \ingroup daemon-loggers-traits
  */
 template <>
 struct type_traits<rule> {

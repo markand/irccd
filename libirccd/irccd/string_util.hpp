@@ -38,10 +38,12 @@
 #include <unordered_map>
 #include <vector>
 
+namespace irccd {
+
 /**
  * \brief String utilities.
  */
-namespace irccd::string_util {
+namespace string_util {
 
 // {{{ subst
 
@@ -397,6 +399,8 @@ auto to_uint(const std::string& str,
 
 // }}}
 
-} // !irccd::string_util
+} // !string_util
+
+} // !irccd
 
 #endif // !IRCCD_STRING_UTIL_HPP

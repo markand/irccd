@@ -40,4 +40,11 @@
 #include "ini_util.hpp"
 #include "xdg.hpp"
 
+/**
+ * \brief Parent namespace.
+ */
+namespace irccd {
+
+} // !irccd
+
 #endif // !IRCCD_CORE_HPP

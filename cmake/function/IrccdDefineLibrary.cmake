@@ -20,16 +20,34 @@
 # irccd_define_library
 # --------------------
 #
+# Synopsis:
+#
 # irccd_define_library(
 #   TARGET              target name
 #   SOURCES             src1, src2, srcn
 #   EXPORT              (Optional) set to true to export library through irccd
+#                       and install it
 #   HEADERS             (Optional) directory of headers to install
 #   FLAGS               (Optional) C/C++ flags (without -D)
 #   LIBRARIES           (Optional) libraries to link
 #   LOCAL_INCLUDES      (Optional) local includes for the target only
 #   PUBLIC_INCLUDES     (Optional) includes to share with target dependencies
 # )
+#
+# Create a library and optionally install it.
+#
+# The function create a new library named with the parameter TARGET, you should
+# prefix it with "lib" as its the convention within irccd (e.g. libfoo), the
+# prefix is automatically removed.
+#
+# The argument SOURCES should contains the C++ source files and HEADERS should
+# points to a directory to be installed verbatim in the include directory.
+#
+# Optional argument FLAGS, LOCAL_INCLUDES, PUBLIC_INCLUDES, LIBRARIES may be
+# passed to set compile flags, private includes, public includes and libraries
+# respectively.
+#
+# If export boolean parameter is set, the library is exported and installed.
 #
 
 include(${CMAKE_CURRENT_LIST_DIR}/IrccdInstallDependencies.cmake)

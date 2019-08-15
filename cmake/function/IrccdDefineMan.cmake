@@ -20,6 +20,8 @@
 # irccd_define_man
 # ----------------
 #
+# Synopsis:
+#
 # irccd_define_man(
 #   INPUT       file path to the input man page
 #   SECTION     section (e.g. man1 man3)

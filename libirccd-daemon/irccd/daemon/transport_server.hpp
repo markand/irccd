@@ -265,6 +265,10 @@ auto make_error_code(transport_error::error e) noexcept -> std::error_code;
 
 } // !irccd::daemon
 
+/**
+ * \cond IRCCD_HIDDEN_SYMBOLS
+ */
+
 namespace std {
 
 template <>
@@ -272,5 +276,9 @@ struct is_error_code_enum<irccd::daemon::transport_error::error> : public std::t
 };
 
 } // !std
+
+/**
+ * \endcond
+ */
 
 #endif // !IRCCD_DAEMON_TRANSPORT_SERVER_HPP

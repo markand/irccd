@@ -33,10 +33,12 @@
 
 #include <irccd/config.hpp>
 
+namespace irccd {
+
 /**
  * \brief Main irccd namespace
  */
-namespace irccd::daemon {
+namespace daemon {
 
 namespace logger {
 
@@ -244,7 +246,9 @@ auto bot_category() noexcept -> const std::error_category&;
  */
 auto make_error_code(bot_error::error e) noexcept -> std::error_code;
 
-} // !irccd::daemon
+} // !daemon
+
+} // !irccd
 
 namespace std {
 

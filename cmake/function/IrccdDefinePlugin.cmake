@@ -53,8 +53,8 @@
 # Additional documentation in manual page format can be specified with the MAN
 # parameter.
 #
-# A CMake option is also created in the form OPTION_<PLG> where PLG is the
-# uppercase NAME value.
+# A CMake option is also created in the form IRCCD_WITH_OPTION_<PLG> where PLG
+# is the uppercase NAME value.
 #
 
 include(${CMAKE_CURRENT_LIST_DIR}/IrccdInstallDependencies.cmake)

@@ -43,7 +43,7 @@ class bot;
 
 /**
  * \brief Manage IRC servers.
- * \ingroup services
+ * \ingroup daemon-services
  *
  * This class holds servers and wait for IRC events to come and then are
  * dispatched through the plugins.
@@ -169,7 +169,7 @@ struct type_traits;
 
 /**
  * \brief Specialization for server.
- * \ingroup logger-traits
+ * \ingroup daemon-loggers-traits
  */
 template <>
 struct type_traits<server> {

@@ -31,7 +31,12 @@
 #include <irccd/connector.hpp>
 #include <irccd/stream.hpp>
 
-namespace irccd::ctl {
+namespace irccd {
+
+/**
+ * \brief Namespace for irccdctl utilities.
+ */
+namespace ctl {
 
 /**
  * \brief Main irccdctl interface.
@@ -121,6 +126,8 @@ public:
 	void send(nlohmann::json message, stream::send_handler handler);
 };
 
-} // !irccd::ctl
+} // !ctl
+
+} // !irccd
 
 #endif // !IRCCD_CTL_CONTROLLER_HPP

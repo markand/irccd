@@ -44,8 +44,7 @@ class transport_server;
 
 /**
  * \brief Manage transport servers and clients.
- * \ingroup services
- * \ingroup transports
+ * \ingroup daemon-services
  */
 class transport_service {
 public:

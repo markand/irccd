@@ -114,10 +114,12 @@
 #include <string_view>
 #include <vector>
 
+namespace irccd {
+
 /**
  * \brief Namespace for ini related classes.
  */
-namespace irccd::ini {
+namespace ini {
 
 class document;
 
@@ -490,6 +492,8 @@ auto read_string(const std::string& buffer) -> document;
  */
 void dump(const tokens& tokens);
 
-} // !irccd::ini
+} // !ini
+
+} // !irccd
 
 #endif // !IRCCD_INI_HPP

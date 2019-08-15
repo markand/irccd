@@ -33,13 +33,15 @@
 
 #include "api.hpp"
 
-namespace irccd::daemon {
+namespace irccd {
+
+namespace daemon {
 
 class bot;
 
 } // !daemon
 
-namespace irccd::js {
+namespace js {
 
 /**
  * \ingroup js-api
@@ -104,6 +106,8 @@ struct type_traits<boost::system::system_error> {
 
 } // !duk
 
-} // !irccd::js
+} // !js
+
+} // !irccd
 
 #endif // !IRCCD_JS_IRCCD_API_HPP

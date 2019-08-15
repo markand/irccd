@@ -67,7 +67,7 @@ struct channel {
 
 /**
  * \brief Describe a whois information.
- * \ingroup daemon-events
+ * \ingroup daemon-server-events
  */
 struct whois_info {
 	std::string nick;                       //!< user's nickname
@@ -79,7 +79,7 @@ struct whois_info {
 
 /**
  * \brief Connection success event.
- * \ingroup daemon-events
+ * \ingroup daemon-server-events
  */
 struct connect_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -87,7 +87,7 @@ struct connect_event {
 
 /**
  * \brief Connection success event.
- * \ingroup daemon-events
+ * \ingroup daemon-server-events
  */
 struct disconnect_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -95,7 +95,7 @@ struct disconnect_event {
 
 /**
  * \brief Invite event.
- * \ingroup daemon-events
+ * \ingroup daemon-server-events
  */
 struct invite_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -106,7 +106,7 @@ struct invite_event {
 
 /**
  * \brief Join event.
- * \ingroup daemon-events
+ * \ingroup daemon-server-events
  */
 struct join_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -116,7 +116,7 @@ struct join_event {
 
 /**
  * \brief Kick event.
- * \ingroup daemon-events
+ * \ingroup daemon-server-events
  */
 struct kick_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -128,7 +128,7 @@ struct kick_event {
 
 /**
  * \brief Message event.
- * \ingroup daemon-events
+ * \ingroup daemon-server-events
  */
 struct message_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -139,7 +139,7 @@ struct message_event {
 
 /**
  * \brief CTCP action event.
- * \ingroup daemon-events
+ * \ingroup daemon-server-events
  */
 struct me_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -150,7 +150,7 @@ struct me_event {
 
 /**
  * \brief Mode event.
- * \ingroup daemon-events
+ * \ingroup daemon-server-events
  */
 struct mode_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -164,7 +164,7 @@ struct mode_event {
 
 /**
  * \brief Names listing event.
- * \ingroup daemon-events
+ * \ingroup daemon-server-events
  */
 struct names_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -174,7 +174,7 @@ struct names_event {
 
 /**
  * \brief Nick change event.
- * \ingroup daemon-events
+ * \ingroup daemon-server-events
  */
 struct nick_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -184,7 +184,7 @@ struct nick_event {
 
 /**
  * \brief Notice event.
- * \ingroup daemon-events
+ * \ingroup daemon-server-events
  */
 struct notice_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -195,7 +195,7 @@ struct notice_event {
 
 /**
  * \brief Part event.
- * \ingroup daemon-events
+ * \ingroup daemon-server-events
  */
 struct part_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -206,7 +206,7 @@ struct part_event {
 
 /**
  * \brief Topic event.
- * \ingroup daemon-events
+ * \ingroup daemon-server-events
  */
 struct topic_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -217,7 +217,7 @@ struct topic_event {
 
 /**
  * \brief Whois event.
- * \ingroup daemon-events
+ * \ingroup daemon-server-events
  */
 struct whois_event {
 	std::shared_ptr<class server> server;   //!< The server.
@@ -226,7 +226,7 @@ struct whois_event {
 
 /**
  * \brief Store all possible events.
- * \ingroup daemon-events
+ * \ingroup daemon-server-events
  */
 using event = std::variant<
 	std::monostate,
@@ -248,7 +248,7 @@ using event = std::variant<
 
 /**
  * \brief The class that connect to a IRC server.
- * \ingroup server
+ * \ingroup daemon-servers
  *
  * This class is higher level than irc connection, it does identify process,
  * parsing message, translating messages and queue'ing user requests.
@@ -797,6 +797,7 @@ inline auto operator^=(server::options& v1, server::options v2) noexcept -> serv
 
 /**
  * \brief Server error.
+ * \ingroup daemon-servers
  */
 class server_error : public std::system_error {
 public:

@@ -20,17 +20,27 @@
 # irccd_define_executable
 # -----------------------
 #
+# Synopsis:
+#
 # irccd_define_executable(
 #   TARGET      target name
-#   EXPORT      (Optional) export executable through CMake
 #   DESCRIPTION short description (Required if installed)
 #   SOURCES     src1, src2, srcn
+#   EXPORT      (Optional) export executable through CMake
 #   FLAGS       (Optional) C/C++ flags (without -D)
 #   LIBRARIES   (Optional) libraries to link
 #   INCLUDES    (Optional) includes for the target
 # )
 #
-# Create an executable that can be installed or not.
+# Create an executable and optionally install it.
+#
+# The function create a new executable named with the parameter TARGET. The
+# argument SOURCES should contains the C++ source files and headers.
+#
+# Optional argument FLAGS, INCLUDES, LIBRARIES may be passed to set compile
+# flags, private libraries and public libraries respectively.
+#
+# If export boolean parameter is set, the executable is exported and installed.
 #
 
 include(${CMAKE_CURRENT_LIST_DIR}/IrccdInstallDependencies.cmake)

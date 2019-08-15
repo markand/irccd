@@ -42,4 +42,15 @@
 #include "js/unicode_api.hpp"
 #include "js/util_api.hpp"
 
+namespace irccd {
+
+/**
+ * \brief Javascript namespace.
+ */
+namespace js {
+
+} // !js
+
+} // !irccd
+
 #endif // !IRCCD_JS_HPP

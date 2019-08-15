@@ -30,10 +30,12 @@
 
 #include <json.hpp>
 
+namespace irccd {
+
 /**
  * \brief Utilities for JSON.
  */
-namespace irccd::json_util {
+namespace json_util {
 
 /**
  * \brief Describe how to convert a JSON value.
@@ -287,6 +289,8 @@ auto pretty(const nlohmann::json& value, int indent = 4) -> std::string;
  */
 auto contains(const nlohmann::json& array, const nlohmann::json& value) noexcept -> bool;
 
-} // !irccd::json_util
+} // !json_util
+
+} // !irccd
 
 #endif // !IRCCD_JSON_UTIL_HPP

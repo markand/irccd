@@ -38,7 +38,14 @@
 #	include <boost/asio/ssl.hpp>
 #endif
 
-namespace irccd::daemon::irc {
+namespace irccd {
+
+namespace daemon {
+
+/**
+ * \brief IRC related classes.
+ */
+namespace irc {
 
 /**
  * \brief Describe errors.
@@ -1390,6 +1397,10 @@ public:
 	void send(std::string_view message, send_handler handler);
 };
 
-} // !irccd::daemon::irc
+} // !irc
+
+} // !daemon
+
+} // !irccd
 
 #endif // !IRCCD_IRC_HPP

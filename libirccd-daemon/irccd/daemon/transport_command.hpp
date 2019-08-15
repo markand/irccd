@@ -42,7 +42,7 @@ class transport_client;
 
 /**
  * \brief Server side remote command
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  */
 class transport_command {
 public:
@@ -95,7 +95,7 @@ public:
 
 /**
  * \brief Implementation of plugin-config transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -120,7 +120,7 @@ public:
 
 /**
  * \brief Implementation of plugin-info transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -145,7 +145,7 @@ public:
 
 /**
  * \brief Implementation of plugin-list transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  */
 class plugin_list_command : public transport_command {
 public:
@@ -166,7 +166,7 @@ public:
 
 /**
  * \brief Implementation of plugin-load transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -193,7 +193,7 @@ public:
 
 /**
  * \brief Implementation of plugin-reload transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -219,7 +219,7 @@ public:
 
 /**
  * \brief Implementation of plugin-unload transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -245,7 +245,7 @@ public:
 
 /**
  * \brief Implementation of rule-add transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -270,7 +270,7 @@ public:
 
 /**
  * \brief Implementation of rule-edit transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -296,7 +296,7 @@ public:
 
 /**
  * \brief Implementation of rule-info transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -321,7 +321,7 @@ public:
 
 /**
  * \brief Implementation of rule-list transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  */
 class rule_list_command : public transport_command {
 public:
@@ -342,7 +342,7 @@ public:
 
 /**
  * \brief Implementation of rule-move transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -367,7 +367,7 @@ public:
 
 /**
  * \brief Implementation of rule-remove transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -392,7 +392,7 @@ public:
 
 /**
  * \brief Implementation of server-connect transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -421,7 +421,7 @@ public:
 
 /**
  * \brief Implementation of server-disconnect transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -447,7 +447,7 @@ public:
 
 /**
  * \brief Implementation of server-info transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -473,7 +473,7 @@ public:
 
 /**
  * \brief Implementation of server-invite transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -501,7 +501,7 @@ public:
 
 /**
  * \brief Implementation of server-join transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -528,7 +528,7 @@ public:
 
 /**
  * \brief Implementation of server-kick transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -556,7 +556,7 @@ public:
 
 /**
  * \brief Implementation of server-list transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  */
 class server_list_command : public transport_command {
 public:
@@ -577,7 +577,7 @@ public:
 
 /**
  * \brief Implementation of server-me transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -604,7 +604,7 @@ public:
 
 /**
  * \brief Implementation of server-message transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -631,7 +631,7 @@ public:
 
 /**
  * \brief Implementation of server-mode transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -659,7 +659,7 @@ public:
 
 /**
  * \brief Implementation of server-nick transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -686,7 +686,7 @@ public:
 
 /**
  * \brief Implementation of server-notice transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -713,7 +713,7 @@ public:
 
 /**
  * \brief Implementation of server-part transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -740,7 +740,7 @@ public:
 
 /**
  * \brief Implementation of server-reconnect transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *
@@ -766,7 +766,7 @@ public:
 
 /**
  * \brief Implementation of server-topic transport command.
- * \ingroup transports
+ * \ingroup daemon-transport-commands
  *
  * Replies:
  *

@@ -34,10 +34,14 @@
 
 #include "duktape.h"
 
+namespace irccd {
+
+namespace js {
+
 /**
  * \brief Miscellaneous Duktape extras.
  */
-namespace irccd::js::duk {
+namespace duk {
 
 // {{{ stack_guard
 
@@ -884,6 +888,10 @@ struct type_traits<std::vector<T>> : public std::true_type {
 
 // }}}
 
-} // !irccd::js::duk
+} // !duk
+
+} // !js
+
+} // !irccd
 
 #endif // !IRCCD_JS_DUK_HPP

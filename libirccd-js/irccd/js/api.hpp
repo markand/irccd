@@ -44,6 +44,7 @@ namespace js {
 class plugin;
 
 /**
+ * \ingroup js
  * \ingroup js-api
  * \brief Javascript API module.
  */

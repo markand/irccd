@@ -53,7 +53,7 @@ struct topic_event;
 struct whois_event;
 
 /**
- * \ingroup plugins
+ * \ingroup daemon-plugins
  * \brief Abstract plugin.
  *
  * A plugin is identified by name and can be loaded and unloaded at runtime.
@@ -313,7 +313,7 @@ public:
 };
 
 /**
- * \ingroup plugins
+ * \ingroup daemon-plugins
  * \brief Abstract interface for searching plugins.
  *
  * This class is used to make loading of plugins extensible, the plugin_service
@@ -382,7 +382,7 @@ public:
 };
 
 /**
- * \ingroup plugins
+ * \ingroup daemon-plugins
  * \brief Plugin error.
  */
 class plugin_error : public std::system_error {

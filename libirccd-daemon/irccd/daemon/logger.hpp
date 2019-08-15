@@ -31,7 +31,14 @@
 #include <string_view>
 #include <utility>
 
-namespace irccd::daemon::logger {
+namespace irccd {
+
+namespace daemon {
+
+/**
+ * \brief Loggers, sinks and filters.
+ */
+namespace logger {
 
 class filter;
 class sink;
@@ -449,6 +456,10 @@ public:
 
 #endif // !IRCCD_HAVE_SYSLOG
 
-} // !irccd::daemon::logger
+} // !logger
+
+} // !daemon
+
+} // !irccd
 
 #endif // !IRCCD_DAEMON_LOGGER_HPP

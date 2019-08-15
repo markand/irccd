@@ -39,7 +39,7 @@ class api;
 /**
  * \ingroup js
  * \ingroup daemon-plugins
- * \brief JavaScript plugins for irccd.
+ * \brief Javascript plugins for irccd.
  */
 class plugin : public daemon::plugin {
 public:
@@ -241,7 +241,8 @@ public:
 };
 
 /**
- * \ingroup plugins
+ * \ingroup js
+ * \ingroup daemon-plugins
  * \brief Implementation for searching Javascript plugins.
  */
 class plugin_loader : public daemon::plugin_loader {

@@ -278,3 +278,148 @@
  *
  * This abstract class defines an operation to perform.
  */
+
+/**
+ * \page CMake CMake usage
+ * \brief Using CMake to extend irccd.
+ *
+ * Irccd is built with CMake and also provide configuration package files and
+ * macros once installed. You may use these macros to create plugins, link to
+ * irccd and such.
+ *
+ * ## Usage
+ *
+ * You should use the main `irccd` configuration package, it already exports
+ * everything.
+ *
+ * ```cmake
+ * find_package(irccd REQUIRED)
+ * ```
+ *
+ * ## Targets
+ *
+ * The same targets are available as described in the mainpage, so you can link
+ * to libirccd like this:
+ *
+ * ```cmake
+ * find_package(irccd REQUIRED)
+ * target_link_libraries(foo irccd::libirccd)
+ * ```
+ *
+ * ## Macros
+ *
+ * Several macros are available to help you in the process of creating a plugin
+ * and installing it.
+ *
+ * ### irccd_define_plugin
+ *
+ * Create a Javascript or native plugin.
+ *
+ * The NAME parameter identifies the plugin. The same name will be used for the
+ * plugin filename.
+ *
+ * Both Javascript and native plugins are supported specified by the TYPE
+ * parameter to JS or NATIVE respectively. For Javascript plugin, a unique file
+ * must be given as SCRIPT parameter. For native plugins, any source files can
+ * be given as SOURCES parameter.
+ *
+ * Additional documentation in manual page format can be specified with the MAN
+ * parameter.
+ *
+ * A CMake option is also created in the form IRCCD_WITH_OPTION_<PLG> where PLG
+ * is the uppercase NAME value.
+ *
+ * ```
+ * irccd_define_plugin(
+ *   NAME        canonical plugin name
+ *   TYPE        JS
+ *   MAN         manual page
+ *   SCRIPT      absolute path to the Javascript file (ending with .js)
+ * )
+ * ```
+ *
+ * Synopsis for native plugins.
+ *
+ * ```
+ * irccd_define_plugin(
+ *   NAME        canonical plugin name
+ *   TYPE        NATIVE
+ *   MAN         manual page
+ *   SOURCES     c++ source files
+ *   INCLUDES    additional includes
+ *   LIBRARIES   additional libraries
+ * )
+ * ```
+ *
+ * ### irccd_define_library
+ *
+ * Synopsis:
+ *
+ * ```
+ * irccd_define_library(
+ *   TARGET              target name
+ *   SOURCES             src1, src2, srcn
+ *   EXPORT              (Optional) set to true to export library through irccd
+ *                       and install it
+ *   HEADERS             (Optional) directory of headers to install
+ *   FLAGS               (Optional) C/C++ flags (without -D)
+ *   LIBRARIES           (Optional) libraries to link
+ *   LOCAL_INCLUDES      (Optional) local includes for the target only
+ *   PUBLIC_INCLUDES     (Optional) includes to share with target dependencies
+ * )
+ * ```
+ *
+ * Create a library and optionally install it.
+ *
+ * The function create a new library named with the parameter TARGET, you should
+ * prefix it with "lib" as its the convention within irccd (e.g. libfoo), the
+ * prefix is automatically removed.
+ *
+ * The argument SOURCES should contains the C++ source files and HEADERS should
+ * points to a directory to be installed verbatim in the include directory.
+ *
+ * Optional argument FLAGS, LOCAL_INCLUDES, PUBLIC_INCLUDES may be passed to set
+ * compile flags, private includes, public includes and libraries respectively.
+ *
+ * If export boolean parameter is set, the library is exported and installed.
+ *
+ * ### irccd_define_executable
+ *
+ * Synopsis:
+ *
+ * ```
+ * irccd_define_executable(
+ *   TARGET      target name
+ *   DESCRIPTION short description (Required if installed)
+ *   SOURCES     src1, src2, srcn
+ *   EXPORT      (Optional) export executable through CMake
+ *   FLAGS       (Optional) C/C++ flags (without -D)
+ *   LIBRARIES   (Optional) libraries to link
+ *   INCLUDES    (Optional) includes for the target
+ * )
+ * ```
+ *
+ * Create an executable and optionally install it.
+ *
+ * The function create a new executable named with the parameter TARGET. The
+ * argument SOURCES should contains the C++ source files and headers.
+ *
+ * Optional argument FLAGS, INCLUDES, LIBRARIES may be passed to set compile
+ * flags, private libraries and public libraries respectively.
+ *
+ * If export boolean parameter is set, the executable is exported and installed.
+ *
+ * ### irccd_define_man
+ *
+ * Synopsis:
+ *
+ * ```
+ * irccd_define_man(
+ *   INPUT       file path to the input man page
+ *   SECTION     section (e.g. man1 man3)
+ *   OUTPUT      (Optional) file name to rename
+ * )
+ * ```
+ *
+ * This function configure the manual and install it if IRCCD_WITH_MAN is set.
+ */
