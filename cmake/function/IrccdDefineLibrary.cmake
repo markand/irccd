@@ -30,7 +30,7 @@
 #   HEADERS             (Optional) directory of headers to install
 #   FLAGS               (Optional) C/C++ flags (without -D)
 #   LIBRARIES           (Optional) libraries to link
-#   LOCAL_INCLUDES      (Optional) local includes for the target only
+#   PRIVATE_INCLUDES    (Optional) local includes for the target only
 #   PUBLIC_INCLUDES     (Optional) includes to share with target dependencies
 # )
 #
@@ -43,7 +43,7 @@
 # The argument SOURCES should contains the C++ source files and HEADERS should
 # points to a directory to be installed verbatim in the include directory.
 #
-# Optional argument FLAGS, LOCAL_INCLUDES, PUBLIC_INCLUDES, LIBRARIES may be
+# Optional argument FLAGS, PRIVATE_INCLUDES, PUBLIC_INCLUDES, LIBRARIES may be
 # passed to set compile flags, private includes, public includes and libraries
 # respectively.
 #
@@ -55,7 +55,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/IrccdInstallDependencies.cmake)
 function(irccd_define_library)
 	set(options EXPORT)
 	set(oneValueArgs TARGET)
-	set(multiValueArgs HEADERS SOURCES FLAGS LIBRARIES LOCAL_INCLUDES PUBLIC_INCLUDES)
+	set(multiValueArgs HEADERS SOURCES FLAGS LIBRARIES PRIVATE_INCLUDES PUBLIC_INCLUDES)
 
 	cmake_parse_arguments(LIB "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -69,7 +69,7 @@ function(irccd_define_library)
 	add_library(${LIB_TARGET} ${LIB_SOURCES} ${LIB_HEADERS})
 	target_include_directories(
 		${LIB_TARGET}
-		PRIVATE ${LIB_LOCAL_INCLUDES}
+		PRIVATE ${LIB_PRIVATE_INCLUDES}
 		PUBLIC ${LIB_PUBLIC_INCLUDES}
 	)
 	target_compile_definitions(

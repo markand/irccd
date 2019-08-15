@@ -1,7 +1,7 @@
 IRC Client Daemon CHANGES
 =========================
 
-irccd current
+irccd 3.0.0 2019-08-15
 ----------------------
 
 irccd:
