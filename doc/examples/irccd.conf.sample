@@ -60,7 +60,7 @@ port = "5980"
 # command-char = "!"            # (string) the prefix for invoking special commands (Optional, default: !),
 # ssl = false                   # (bool) enable or disable SSL (Optional, default: false),
 # auto-reconnect = true         # (bool) enable reconnection after failure (Optional, default: true),
-# auto-reconnect-timeout = 5    # (int) number of seconds to wait before retrying (Optional, default: 30).
+# auto-reconnect-delay = 5      # (int) number of seconds to wait before retrying (Optional, default: 30).
 
 [server]
 name = "localhost"
@@ -139,9 +139,9 @@ port = 6667
 # To format general messages:
 #
 # [templates]
-# debug = "DD #{messages}       # (string) debug messages.
-# info = "II #{messages}        # (string) information messages.
-# warning = "WW #{messages}     # (string) warning messages.
+# debug = "DD #{message}        # (string) debug messages.
+# info = "II #{message}         # (string) information messages.
+# warning = "WW #{message}      # (string) warning messages.
 #
 # To format specific plugins:
 #

@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(escape)
 	BOOST_TEST(string_util::format("#") == "#");
 	BOOST_TEST(string_util::format(" # ") == " # ");
 	BOOST_TEST(string_util::format("#@") == "#@");
-	BOOST_TEST(string_util::format("##") == "##");
+	BOOST_TEST(string_util::format("##") == "#");
 	BOOST_TEST(string_util::format("#!") == "#!");
 	BOOST_TEST(string_util::format("##{target}") == "#{target}");
 	BOOST_TEST(string_util::format("@#{target}", params) == "@hello");
@@ -150,6 +150,17 @@ BOOST_AUTO_TEST_CASE(env_missing)
 	std::string result = string_util::format("value is ${HOPE_THIS_VAR_NOT_EXIST}");
 
 	BOOST_TEST(expected == result);
+}
+
+BOOST_AUTO_TEST_CASE(fix_2250)
+{
+	string_util::subst params;
+
+	params.keywords.insert({"target", "irccd"});
+
+	BOOST_TEST(string_util::format("abc##xyz") == "abc#xyz");
+	BOOST_TEST(string_util::format("abc###xyz") == "abc##xyz");
+	BOOST_TEST(string_util::format("###{target}", params) == "#irccd");
 }
 
 BOOST_AUTO_TEST_SUITE_END()

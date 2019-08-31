@@ -189,7 +189,8 @@ Warning: these keywords can be overriden by plugins.
 Valid constructs:
 .Bl -tag -width 20n -offset Ds
 .It #{target}, welcome
-if target is set to "irccd", becomes "irccd, welcome".
+if target is set to "irccd", becomes
+.Dq "irccd, welcome" .
 .It @{red}#{target}
 if target is specified, it is written in red.
 .El
@@ -197,13 +198,21 @@ if target is specified, it is written in red.
 Invalid or literals constructs:
 .Bl -tag -width 20n -offset Ds
 .It ##{target}
-will output "#{target}".
-.It ##
-will output "##".
+will output
+.Dq #{target} .
+.It abc##xyz
+will output
+.Dq abc#xyz .
 .It #target
-will output "#target".
+will output
+.Dq #target .
 .It #{target
 will cause an error.
+.It @#{message}
+will output
+.Dq @bar
+if message keyword is set to
+.Dq bar .
 .El
 .Pp
 Colors & attributes:

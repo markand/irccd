@@ -1,6 +1,12 @@
 IRC Client Daemon CHANGES
 =========================
 
+irccd 3.0.1 2019-09-01
+----------------------
+
+- Fixed an invalid template escape sequence (#2250),
+- Updated the default configuration files (#2249).
+
 irccd 3.0.0 2019-08-15
 ----------------------
 
