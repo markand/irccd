@@ -27,6 +27,7 @@ endif ()
 
 irccd_define_executable(
 	TARGET irccd-test
+	EXPORT
 	LIBRARIES libirccd-test ${LIBRARIES}
 	INCLUDES ${INCLUDES}
 	DESCRIPTION "Plugin tester"
