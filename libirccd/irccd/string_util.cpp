@@ -327,7 +327,7 @@ auto format(std::string text, const subst& params) -> std::string
 	std::ostringstream oss;
 
 	for (auto it = text.cbegin(), end = text.cend(); it != end; ) {
-		auto token = *it;
+		const auto token = *it;
 
 		// Is the current character a reserved token or not?
 		if (!is_reserved(token)) {
@@ -341,36 +341,22 @@ auto format(std::string text, const subst& params) -> std::string
 			continue;
 		}
 
-		// The token is declaring a template variable, substitute it.
-		if (*it == '{') {
+		/*
+		 * ## -> #
+		 * #{key} -> value (if key == value)
+		 * ##{key} -> #{key}
+		 * ###{key} -> #value (if key == value)
+		 * @#{key} -> @vlalue (if key == value)
+		 */
+
+		if (*it == '{')
 			oss << substitute(++it, end, token, params);
-			continue;
-		}
+		else {
+			if (*it == token)
+				++it;
 
-		/*
-		 * If the next token is different from the previous one, just let the
-		 * next iteration parse the string because we can have the following
-		 * constructs.
-		 *
-		 * "@#{var}" -> "@value"
-		 */
-		if (*it != token) {
 			oss << token;
-			continue;
 		}
-
-		/*
-		 * Write the token only if it's not a variable because at this step we
-		 * may have the following constructs.
-		 *
-		 * "##" -> "##"
-		 * "##hello" -> "##hello"
-		 * "##{hello}" -> "#{hello}"
-		 */
-		if (++it == end)
-			oss << token << token;
-		else if (*it == '{')
-			oss << token;
 	}
 
 	return oss.str();

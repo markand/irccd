@@ -8,7 +8,6 @@
 # [general]
 # verbose = false               # (bool) enable verbose message (Optional, default: false).
 
-
 [general]
 
 # Section connect:
@@ -32,3 +31,16 @@
 type = "ip"
 host = "localhost"
 port = "5980"
+
+# Section alias:
+#    This section defines aliases to be used with irccdctl(1). Create a section
+#    per alias and add any command you need. You may use %n as placeholders for
+#    arguments to be provided on the command line.
+#
+#    The option name has no meaning and is only there as self documentation.
+#
+# [alias.cycle]
+# leave = ( "server-part", "%0", "%1", "coming back soon" )
+# join = ( "server-join", "%0", "%1" )
+#
+# Use this alias with: irccdctl cycle wanadoo "#games"

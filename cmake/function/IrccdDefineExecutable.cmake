@@ -68,9 +68,12 @@ function(irccd_define_executable)
 	target_compile_options(${EXE_TARGET} PRIVATE ${EXE_OPTIONS})
 	target_link_libraries(${EXE_TARGET} ${EXE_LIBRARIES})
 
+	file(RELATIVE_PATH RPATH ${CMAKE_INSTALL_FULL_BINDIR} ${CMAKE_INSTALL_FULL_LIBDIR}/irccd)
+
 	set_target_properties(
 		${EXE_TARGET}
 		PROPERTIES
+			INSTALL_RPATH "$ORIGIN/${RPATH}"
 			CXX_STANDARD 17
 			CXX_STANDARD_REQUIRED On
 			RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
