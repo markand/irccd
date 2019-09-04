@@ -70,7 +70,7 @@ auto message::ctcp(unsigned short index) const -> string
 {
 	assert(is_ctcp(index));
 
-	return args[index].substr(1, args[index].size() - 1);
+	return args[index].substr(1, args[index].size() - 2);
 }
 
 auto message::parse(const string& line) -> message
