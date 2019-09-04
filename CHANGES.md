@@ -5,7 +5,8 @@ irccd 3.0.2 ????-??-??
 ----------------------
 
 - Added *IRCCD_WITH_JS* CMake variable in irccd package (#2340),
-- Fixed trailing CTCP escape code (#2339).
+- Fixed trailing CTCP escape code (#2339),
+- Fixed invalid parameters in topic event (#2341).
 
 irccd 3.0.1 2019-09-01
 ----------------------
