@@ -31,6 +31,7 @@
 #include <boost/asio.hpp>
 
 #include <irccd/daemon/bot.hpp>
+#include <irccd/daemon/hook_service.hpp>
 #include <irccd/daemon/plugin_service.hpp>
 #include <irccd/daemon/rule_service.hpp>
 #include <irccd/daemon/server_service.hpp>

@@ -22,15 +22,17 @@
 #include <irccd/json_util.hpp>
 
 #include <irccd/daemon/bot.hpp>
-#include <irccd/daemon/server.hpp>
+#include <irccd/daemon/hook.hpp>
 #include <irccd/daemon/plugin.hpp>
 #include <irccd/daemon/rule.hpp>
+#include <irccd/daemon/server.hpp>
 
 #include "controller.hpp"
 
 using irccd::json_util::deserializer;
 
 using irccd::daemon::bot_error;
+using irccd::daemon::hook_error;
 using irccd::daemon::plugin_error;
 using irccd::daemon::rule_error;
 using irccd::daemon::server_error;
@@ -138,6 +140,8 @@ void controller::recv(stream::recv_handler handler)
 				code = make_error_code(static_cast<plugin_error::error>(*e));
 			else if (*c == "rule")
 				code = make_error_code(static_cast<rule_error::error>(*e));
+			else if (*c == "hook")
+				code = make_error_code(static_cast<hook_error::error>(*e));
 		}
 
 		handler(std::move(code), std::move(msg));

@@ -224,6 +224,9 @@ void get_event(ctl::controller& ctl, std::string fmt)
 // {{{ cli
 
 const std::vector<cli::constructor> cli::registry{
+	bind<hook_add_cli>(),
+	bind<hook_list_cli>(),
+	bind<hook_remove_cli>(),
 	bind<plugin_config_cli>(),
 	bind<plugin_info_cli>(),
 	bind<plugin_list_cli>(),
@@ -277,6 +280,74 @@ void cli::request(ctl::controller& ctl, nlohmann::json req, handler_t handler)
 
 		recv_response(ctl, std::move(req), std::move(handler));
 	});
+}
+
+// }}}
+
+// {{{ hook_add_cli
+
+auto hook_add_cli::get_name() const noexcept -> std::string_view
+{
+	return "hook-add";
+}
+
+void hook_add_cli::exec(ctl::controller& ctl, const std::vector<std::string>& argv)
+{
+	if (argv.size() < 2U)
+		throw std::invalid_argument("hook-add requires 2 arguments");
+
+	request(ctl, nlohmann::json::object({
+		{ "command",    "hook-add"              },
+		{ "id",         argv[0]                 },
+		{ "path",       argv[1]                 }
+	}));
+}
+
+// }}}
+
+// {{{ hook_list_cli
+
+auto hook_list_cli::get_name() const noexcept -> std::string_view
+{
+	return "hook-list";
+}
+
+void hook_list_cli::exec(ctl::controller& ctl, const std::vector<std::string>&)
+{
+	request(ctl, {{ "command", "hook-list" }}, [] (auto result) {
+		for (const auto& obj : result["list"]) {
+			if (!obj.is_object())
+				continue;
+
+			const deserializer document(obj);
+
+			std::cout << std::setw(16) << std::left;
+			std::cout << document.get<std::string>("id").value_or("(unknown)");
+			std::cout << " ";
+			std::cout << document.get<std::string>("path").value_or("(unknown)");
+			std::cout << std::endl;
+		}
+	});
+}
+
+// }}}
+
+// {{{ hook_remove_cli
+
+auto hook_remove_cli::get_name() const noexcept -> std::string_view
+{
+	return "hook-remove";
+}
+
+void hook_remove_cli::exec(ctl::controller& ctl, const std::vector<std::string>& argv)
+{
+	if (argv.size() < 1U)
+		throw std::invalid_argument("hook-remove requires 1 argument");
+
+	request(ctl, nlohmann::json::object({
+		{ "command",    "hook-remove"   },
+		{ "id",         argv[0]         },
+	}));
 }
 
 // }}}

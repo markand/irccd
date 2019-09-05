@@ -28,6 +28,7 @@
 #include <irccd/daemon/rule_service.hpp>
 #include <irccd/daemon/server_service.hpp>
 #include <irccd/daemon/transport_client.hpp>
+#include <irccd/daemon/hook_service.hpp>
 
 #include "irccd_fixture.hpp"
 #include "mock_server.hpp"
@@ -58,6 +59,7 @@ protected:
 	 * \brief The fake transport_client stream.
 	 */
 	std::shared_ptr<mock_stream> stream_;
+
 	/**
 	 * \brief Client sending request.
 	 */

@@ -21,6 +21,7 @@
 #include <irccd/string_util.hpp>
 
 #include "bot.hpp"
+#include "hook_service.hpp"
 #include "plugin.hpp"
 #include "plugin_service.hpp"
 #include "rule.hpp"
@@ -93,6 +94,9 @@ auto bind() noexcept -> transport_command::constructor
 auto transport_command::registry() noexcept -> const std::vector<constructor>&
 {
 	static const std::vector<transport_command::constructor> list{
+		bind<hook_add_command>(),
+		bind<hook_list_command>(),
+		bind<hook_remove_command>(),
 		bind<plugin_config_command>(),
 		bind<plugin_info_command>(),
 		bind<plugin_list_command>(),
@@ -125,6 +129,84 @@ auto transport_command::registry() noexcept -> const std::vector<constructor>&
 
 	return list;
 }
+
+// {{{ hook_add_command
+
+auto hook_add_command::get_name() const noexcept -> std::string_view
+{
+	return "hook-add";
+}
+
+void hook_add_command::exec(bot& bot, transport_client& client, const document& args)
+{
+	const auto id = args.get<std::string>("id");
+	const auto path = args.get<std::string>("path");
+
+	if (!id || !string_util::is_identifier(*id))
+		throw hook_error(hook_error::invalid_identifier, id.value_or(""));
+	if (!path || path->empty())
+		throw hook_error(hook_error::invalid_path, *id, path.value_or(""));
+
+	// The add function may throws already_exists
+	bot.get_hooks().add(hook(*id, *path));
+	client.success("hook-add");
+}
+
+// }}}
+
+// {{{ hook_list_command
+
+auto hook_list_command::get_name() const noexcept -> std::string_view
+{
+	return "hook-list";
+}
+
+void hook_list_command::exec(bot& bot, transport_client& client, const document&)
+{
+	auto array = nlohmann::json::array();
+
+	for (const auto& hook : bot.get_hooks().list())
+		array.push_back(nlohmann::json::object({
+			{ "id",         hook.get_id()   },
+			{ "path",       hook.get_path() }
+		}));
+
+	client.write({
+		{ "command",    "hook-list"             },
+		{ "list",       std::move(array)        }
+	});
+}
+
+// }}}
+
+// {{{ hook_remove_command
+
+auto hook_remove_command::get_name() const noexcept -> std::string_view
+{
+	return "hook-remove";
+}
+
+void hook_remove_command::exec(bot& bot, transport_client& client, const document& args)
+{
+	const auto id = args.get<std::string>("id");
+
+	if (!id || !string_util::is_identifier(*id))
+		throw hook_error(hook_error::invalid_identifier, id.value_or(""));
+
+	// We don't use hook_service::remove because it never fails.
+	auto& hooks = bot.get_hooks().list();
+	auto it = std::find_if(hooks.begin(), hooks.end(), [&] (const auto& hook) {
+		return hook.get_id() == *id;
+	});
+
+	if (it == hooks.end())
+		throw hook_error(hook_error::not_found, *id);
+
+	hooks.erase(it);
+	client.success("hook-remove");
+}
+
+// }}}
 
 // {{{ plugin_config_command
 

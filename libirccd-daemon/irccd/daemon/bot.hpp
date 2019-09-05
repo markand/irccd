@@ -47,6 +47,7 @@ class sink;
 
 } // !logger
 
+class hook_service;
 class plugin_service;
 class rule_service;
 class server_service;
@@ -71,6 +72,7 @@ private:
 	std::unique_ptr<logger::filter> filter_;
 
 	// Services.
+	std::unique_ptr<hook_service> hook_service_;
 	std::unique_ptr<server_service> server_service_;
 	std::unique_ptr<transport_service> tpt_service_;
 	std::unique_ptr<rule_service> rule_service_;
@@ -88,6 +90,7 @@ private:
 	void load_logs_syslog();
 	void load_logs();
 	void load_templates();
+	void load_hooks();
 
 public:
 	/**
@@ -156,6 +159,13 @@ public:
 	 * \param sink the new sink
 	 */
 	void set_log(std::unique_ptr<logger::sink> sink) noexcept;
+
+	/**
+	 * Access the hook service.
+	 *
+	 * \return the service
+	 */
+	auto get_hooks() noexcept -> hook_service&;
 
 	/**
 	 * Access the server service.

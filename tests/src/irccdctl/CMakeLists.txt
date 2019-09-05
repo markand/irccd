@@ -25,6 +25,10 @@ if (IRCCD_HAVE_JS)
 	add_subdirectory(cli-plugin-unload)
 endif ()
 
+add_subdirectory(cli-hook-add)
+add_subdirectory(cli-hook-list)
+add_subdirectory(cli-hook-remove)
+
 add_subdirectory(cli-rule-add)
 add_subdirectory(cli-rule-edit)
 add_subdirectory(cli-rule-info)

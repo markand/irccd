@@ -105,6 +105,66 @@ public:
 
 // }}}
 
+// {{{ hook_add_cli
+
+/**
+ * \brief Implementation of irccdctl hook-add.
+ */
+class hook_add_cli : public cli {
+public:
+	/**
+	 * \copydoc cli::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
+
+	/**
+	 * \copydoc cli::exec
+	 */
+	void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ hook_list_cli
+
+/**
+ * \brief Implementation of irccdctl hook-list.
+ */
+class hook_list_cli : public cli {
+public:
+	/**
+	 * \copydoc cli::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
+
+	/**
+	 * \copydoc cli::exec
+	 */
+	void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ hook_remove_cli
+
+/**
+ * \brief Implementation of irccdctl hook-remove.
+ */
+class hook_remove_cli : public cli {
+public:
+	/**
+	 * \copydoc cli::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
+
+	/**
+	 * \copydoc cli::exec
+	 */
+	void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
 // {{{ plugin_config_cli
 
 /**

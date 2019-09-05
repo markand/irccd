@@ -22,6 +22,7 @@
 #include <irccd/string_util.hpp>
 
 #include "bot.hpp"
+#include "hook_service.hpp"
 #include "logger.hpp"
 #include "plugin_service.hpp"
 #include "rule_service.hpp"
@@ -102,6 +103,7 @@ void dispatcher::operator()(const connect_event& ev)
 		{ "event",      "onConnect"             },
 		{ "server",     ev.server->get_id()     }
 	}));
+	bot_.get_hooks().dispatch(&hook::handle_connect, ev);
 
 	dispatch(ev.server->get_id(), /* origin */ "", /* channel */ "",
 		[=] (plugin&) -> std::string {
@@ -120,6 +122,7 @@ void dispatcher::operator()(const disconnect_event& ev)
 		{ "event",      "onDisconnect"          },
 		{ "server",     ev.server->get_id()     }
 	}));
+	bot_.get_hooks().dispatch(&hook::handle_disconnect, ev);
 
 	dispatch(ev.server->get_id(), /* origin */ "", /* channel */ "",
 		[=] (plugin&) -> std::string {
@@ -144,6 +147,7 @@ void dispatcher::operator()(const invite_event& ev)
 		{ "origin",     ev.origin               },
 		{ "channel",    ev.channel              }
 	}));
+	bot_.get_hooks().dispatch(&hook::handle_invite, ev);
 
 	dispatch(ev.server->get_id(), ev.origin, ev.channel,
 		[=] (plugin&) -> std::string {
@@ -167,6 +171,7 @@ void dispatcher::operator()(const join_event& ev)
 		{ "origin",     ev.origin               },
 		{ "channel",    ev.channel              }
 	}));
+	bot_.get_hooks().dispatch(&hook::handle_join, ev);
 
 	dispatch(ev.server->get_id(), ev.origin, ev.channel,
 		[=] (plugin&) -> std::string {
@@ -194,6 +199,7 @@ void dispatcher::operator()(const kick_event& ev)
 		{ "target",     ev.target               },
 		{ "reason",     ev.reason               }
 	}));
+	bot_.get_hooks().dispatch(&hook::handle_kick, ev);
 
 	dispatch(ev.server->get_id(), ev.origin, ev.channel,
 		[=] (plugin&) -> std::string {
@@ -219,6 +225,7 @@ void dispatcher::operator()(const message_event& ev)
 		{ "channel",    ev.channel              },
 		{ "message",    ev.message              }
 	}));
+	bot_.get_hooks().dispatch(&hook::handle_message, ev);
 
 	dispatch(ev.server->get_id(), ev.origin, ev.channel,
 		[=] (plugin& plugin) -> std::string {
@@ -260,6 +267,7 @@ void dispatcher::operator()(const me_event& ev)
 		{ "target",     ev.channel              },
 		{ "message",    ev.message              }
 	}));
+	bot_.get_hooks().dispatch(&hook::handle_me, ev);
 
 	dispatch(ev.server->get_id(), ev.origin, ev.channel,
 		[=] (plugin&) -> std::string {
@@ -291,6 +299,7 @@ void dispatcher::operator()(const mode_event& ev)
 		{ "user",       ev.user                 },
 		{ "mask",       ev.mask                 }
 	}));
+	bot_.get_hooks().dispatch(&hook::handle_mode, ev);
 
 	dispatch(ev.server->get_id(), ev.origin, /* channel */ "",
 		[=] (plugin &) -> std::string {
@@ -342,6 +351,7 @@ void dispatcher::operator()(const nick_event& ev)
 		{ "origin",     ev.origin               },
 		{ "nickname",   ev.nickname             }
 	}));
+	bot_.get_hooks().dispatch(&hook::handle_nick, ev);
 
 	dispatch(ev.server->get_id(), ev.origin, /* channel */ "",
 		[=] (plugin&) -> std::string {
@@ -367,6 +377,7 @@ void dispatcher::operator()(const notice_event& ev)
 		{ "channel",    ev.channel              },
 		{ "message",    ev.message              }
 	}));
+	bot_.get_hooks().dispatch(&hook::handle_notice, ev);
 
 	dispatch(ev.server->get_id(), ev.origin, /* channel */ "",
 		[=] (plugin&) -> std::string {
@@ -392,6 +403,7 @@ void dispatcher::operator()(const part_event& ev)
 		{ "channel",    ev.channel              },
 		{ "reason",     ev.reason               }
 	}));
+	bot_.get_hooks().dispatch(&hook::handle_part, ev);
 
 	dispatch(ev.server->get_id(), ev.origin, ev.channel,
 		[=] (plugin&) -> std::string {
@@ -417,6 +429,7 @@ void dispatcher::operator()(const topic_event& ev)
 		{ "channel",    ev.channel              },
 		{ "topic",      ev.topic                }
 	}));
+	bot_.get_hooks().dispatch(&hook::handle_topic, ev);
 
 	dispatch(ev.server->get_id(), ev.origin, ev.channel,
 		[=] (plugin&) -> std::string {

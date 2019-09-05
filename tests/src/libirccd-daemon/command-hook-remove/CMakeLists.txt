@@ -16,31 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(examples)
-
-configure_file(
-	${examples_SOURCE_DIR}/irccd.conf.sample
-	${examples_BINARY_DIR}/irccd.conf
+irccd_define_test(
+	NAME command-hook-remove
+	SOURCES main.cpp
+	LIBRARIES libirccd libirccd-ctl
 )
-
-configure_file(
-	${examples_SOURCE_DIR}/irccdctl.conf.sample
-	${examples_BINARY_DIR}/irccdctl.conf
-)
-
-install(
-	FILES
-		${examples_SOURCE_DIR}/irccd.conf.sample
-		${examples_SOURCE_DIR}/irccdctl.conf.sample
-	COMPONENT examples
-	DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}
-)
-
-install(
-	FILES ${examples_SOURCE_DIR}/sample-hook.sh
-	DESTINATION ${CMAKE_INSTALL_DOCDIR}/examples
-)
-
-irccd_set_global(CPACK_COMPONENT_EXAMPLES_HIDDEN On)
-irccd_set_global(CPACK_COMPONENT_EXAMPLES_DESCRIPTION "Install examples of configuration files")
-irccd_set_global(CPACK_COMPONENT_EXAMPLES_GROUP "Documentation")

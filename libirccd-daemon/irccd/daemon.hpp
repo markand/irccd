@@ -28,6 +28,8 @@
 
 #include "daemon/bot.hpp"
 #include "daemon/dynlib_plugin.hpp"
+#include "daemon/hook.hpp"
+#include "daemon/hook_service.hpp"
 #include "daemon/irc.hpp"
 #include "daemon/logger.hpp"
 #include "daemon/plugin.hpp"

@@ -72,7 +72,10 @@ std::vector<std::function<void ()>> requests;
 [[noreturn]]
 void usage()
 {
-	std::cerr << "usage: irccdctl plugin-config id [variable] [value]\n";
+	std::cerr << "usage: irccdctl hook-add id path\n";
+	std::cerr << "       irccdctl hook-list\n";
+	std::cerr << "       irccdctl hook-remove id\n";
+	std::cerr << "       irccdctl plugin-config id [variable] [value]\n";
 	std::cerr << "       irccdctl plugin-info id\n";
 	std::cerr << "       irccdctl plugin-list\n";
 	std::cerr << "       irccdctl plugin-load name\n";

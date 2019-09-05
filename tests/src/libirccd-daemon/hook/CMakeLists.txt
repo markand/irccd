@@ -16,31 +16,33 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(examples)
+find_package(Boost REQUIRED QUIET)
 
-configure_file(
-	${examples_SOURCE_DIR}/irccd.conf.sample
-	${examples_BINARY_DIR}/irccd.conf
+add_executable(sample-hook sample_hook.cpp)
+
+set_target_properties(
+	sample-hook
+	PROPERTIES
+		PREFIX ""
+		FOLDER "test"
+		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+		LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-configure_file(
-	${examples_SOURCE_DIR}/irccdctl.conf.sample
-	${examples_BINARY_DIR}/irccdctl.conf
-)
+foreach (cfg ${CMAKE_CONFIGURATION_TYPES})
+	string(TOUPPER ${cfg} cfg)
+	set_target_properties(
+		sample-hook
+		PROPERTIES
+			RUNTIME_OUTPUT_DIRECTORY_${cfg} ${CMAKE_CURRENT_BINARY_DIR}
+			LIBRARY_OUTPUT_DIRECTORY_${cfg} ${CMAKE_CURRENT_BINARY_DIR}
+	)
+endforeach ()
 
-install(
-	FILES
-		${examples_SOURCE_DIR}/irccd.conf.sample
-		${examples_SOURCE_DIR}/irccdctl.conf.sample
-	COMPONENT examples
-	DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}
+irccd_define_test(
+	NAME hook
+	SOURCES main.cpp
+	LIBRARIES libirccd libirccd-test
+	DEPENDS sample-hook
+	FLAGS HOOK_FILE="$<TARGET_FILE:sample-hook>"
 )
-
-install(
-	FILES ${examples_SOURCE_DIR}/sample-hook.sh
-	DESTINATION ${CMAKE_INSTALL_DOCDIR}/examples
-)
-
-irccd_set_global(CPACK_COMPONENT_EXAMPLES_HIDDEN On)
-irccd_set_global(CPACK_COMPONENT_EXAMPLES_DESCRIPTION "Install examples of configuration files")
-irccd_set_global(CPACK_COMPONENT_EXAMPLES_GROUP "Documentation")
