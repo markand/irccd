@@ -54,23 +54,16 @@ public:
 	using list = vector<string>;
 
 private:
-	list debug_;
 	list warning_;
 	list info_;
 
 public:
-	auto get_debug() const noexcept -> const list&;
 	auto get_info() const noexcept -> const list&;
 	auto get_warning() const noexcept -> const list&;
 	void write_debug(const std::string& line) override;
 	void write_info(const std::string& line) override;
 	void write_warning(const std::string& line) override;
 };
-
-auto memory_sink::get_debug() const noexcept -> const list&
-{
-	return debug_;
-}
 
 auto memory_sink::get_info() const noexcept -> const list&
 {
@@ -82,9 +75,8 @@ auto memory_sink::get_warning() const noexcept -> const list&
 	return warning_;
 }
 
-void memory_sink::write_debug(const std::string& line)
+void memory_sink::write_debug(const std::string&)
 {
-	debug_.push_back(line);
 }
 
 void memory_sink::write_info(const std::string& line)
