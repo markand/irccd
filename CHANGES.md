@@ -1,12 +1,13 @@
 IRC Client Daemon CHANGES
 =========================
 
-irccd 3.0.2 ????-??-??
+irccd 3.0.2 2019-09-22
 ----------------------
 
 - Added *IRCCD_WITH_JS* CMake variable in irccd package (#2340),
 - Fixed trailing CTCP escape code (#2339),
-- Fixed invalid parameters in topic event (#2341).
+- Fixed invalid parameters in topic event (#2341),
+- Fixed invalid documentation of Irccd.System.usleep function (#2262).
 
 irccd 3.0.1 2019-09-01
 ----------------------
