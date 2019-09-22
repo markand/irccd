@@ -440,7 +440,7 @@ auto datadir() -> boost::filesystem::path
 
 auto sysconfdir() -> boost::filesystem::path
 {
-	return system_directory(IRCCD_INSTALL_SYSCONFDIR) / "irccd";
+	return system_directory(IRCCD_INSTALL_SYSCONFDIR);
 }
 
 // }}}
