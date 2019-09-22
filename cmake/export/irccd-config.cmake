@@ -22,6 +22,8 @@ find_dependency(Boost COMPONENTS date_time filesystem system timer)
 find_dependency(Threads)
 find_dependency(OpenSSL)
 
+set(IRCCD_WITH_JS @IRCCD_WITH_JS@)
+
 include("${CMAKE_CURRENT_LIST_DIR}/irccd-targets.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/IrccdSetGlobal.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/IrccdDefinePlugin.cmake")

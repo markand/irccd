@@ -32,9 +32,15 @@ install(
 	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/irccd
 )
 
+configure_file(
+	${CMAKE_CURRENT_SOURCE_DIR}/irccd-config.cmake
+	${CMAKE_CURRENT_BINARY_DIR}/irccd-config.cmake
+	@ONLY
+)
+
 install(
 	FILES
-		${CMAKE_CURRENT_SOURCE_DIR}/irccd-config.cmake
+		${CMAKE_CURRENT_BINARY_DIR}/irccd-config.cmake
 		${CMAKE_CURRENT_BINARY_DIR}/irccd-config-version.cmake
 	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/irccd
 	COMPONENT Devel

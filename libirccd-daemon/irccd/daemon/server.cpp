@@ -319,7 +319,7 @@ auto server::dispatch_topic(const irc::message& msg, const recv_handler& handler
 {
 	assert(msg.command == "TOPIC");
 
-	handler({}, topic_event{shared_from_this(), msg.get(0), msg.get(1), msg.get(2)});
+	handler({}, topic_event{shared_from_this(), msg.prefix, msg.get(0), msg.get(1)});
 
 	return true;
 }

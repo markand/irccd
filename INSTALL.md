@@ -14,7 +14,7 @@ Optional:
 
 - [OpenSSL](http://openssl.org), Used for SSL connections to IRC servers,
   recommended,
-- [UriParser](), Required for the links plugin,
+- [UriParser](https://uriparser.github.io), Required for the links plugin,
 - [Doxygen](http://www.stack.nl/~dimitri/doxygen), For the documentation about
   irccd internals.
 
