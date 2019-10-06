@@ -1,7 +1,7 @@
 IRC Client Daemon
 =================
 
-IRC Client Daemon aka irccd is a full featured IRC bot written in C++14. It runs
+IRC Client Daemon aka irccd is a full featured IRC bot written in C++17. It runs
 as a daemon waiting for events. It's also possible to connect to more than one
 server.
 
@@ -37,6 +37,6 @@ The irccd application was written by David Demelier <markand@malikania.fr>
 Contributors
 ------------
 
-  - Pierre Choffet,
-  - Yoan Giraud,
-  - Léo Villeveygoux.
+- Pierre Choffet,
+- Yoan Giraud,
+- Léo Villeveygoux.

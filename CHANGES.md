@@ -9,6 +9,12 @@ irccd:
 - Added a new hook system. Hooks consist of an alternative approach to plugins
   to extend irccd in any language (#2342).
 
+irccd 3.0.3 2019-10-06
+----------------------
+
+- Fix errors in irccdctl.conf example file (#2398),
+- Add example of password in irccdctl.conf and irccd.conf (#2407).
+
 irccd 3.0.2 2019-09-22
 ----------------------
 
