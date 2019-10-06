@@ -13,6 +13,11 @@
 # Section connect:
 #    This section is used to connect to a irccd transport.
 #
+# Common options:
+#
+# [connect]
+# password = "SuperPassword"    # (string) a password (Optional, default: empty),
+#
 # For internet sockets:
 #
 # [connect]

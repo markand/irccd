@@ -21,6 +21,11 @@
 #    sockets are supported. UNIX are used for file based sockets while internet
 #    bind to standard address plus a specific port.
 #
+# Common options:
+#
+# [transport]
+# password = "SuperPassword"    # (string) a password (Optional, default: empty),
+#
 # For internet sockets:
 #
 # [transport]
