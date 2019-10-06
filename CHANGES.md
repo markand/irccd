@@ -1,6 +1,12 @@
 IRC Client Daemon CHANGES
 =========================
 
+irccd 3.0.3 2019-10-06
+----------------------
+
+- Fix errors in irccdctl.conf example file (#2398),
+- Add example of password in irccdctl.conf and irccd.conf (#2407).
+
 irccd 3.0.2 2019-09-22
 ----------------------
 

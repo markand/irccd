@@ -13,13 +13,19 @@
 # Section connect:
 #    This section is used to connect to a irccd transport.
 #
+# Common options:
+#
+# [connect]
+# password = "SuperPassword"    # (string) a password (Optional, default: empty),
+#
 # For internet sockets:
 #
 # [connect]
 # type = "ip"
-# host = "localhost"            # (string) host to connect,
+# hostname = "localhost"        # (string) hostname to connect,
 # port = "1234"                 # (int) port number,
-# family = "ipv4" or "ipv6"     # (string) internet family: ipv6 or ipv4 (Optional, default: ipv4).
+# ipv4 = true                   # (bool) enable IPv4 (Optional, default: true),
+# ipv6 = true                   # (bool) enable IPv6 (Optional, default: true),
 #
 # For unix sockets:
 #
@@ -29,7 +35,7 @@
 
 [connect]
 type = "ip"
-host = "localhost"
+hostname = "localhost"
 port = "5980"
 
 # Section alias:
