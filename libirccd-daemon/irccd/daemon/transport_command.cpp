@@ -350,7 +350,7 @@ auto rule_add_command::get_name() const noexcept -> std::string_view
 
 void rule_add_command::exec(bot& bot, transport_client& client, const document& args)
 {
-	const auto index = args.optional<std::size_t>("index", bot.get_rules().list().size());
+	const auto index = args.optional<std::uint64_t>("index", bot.get_rules().list().size());
 
 	if (!index || *index > bot.get_rules().list().size())
 		throw rule_error(rule_error::error::invalid_index);
@@ -381,7 +381,7 @@ void rule_edit_command::exec(bot& bot, transport_client& client, const document&
 		}
 	};
 
-	const auto index = args.get<std::size_t>("index");
+	const auto index = args.get<std::uint64_t>("index");
 
 	if (!index)
 		throw rule_error(rule_error::invalid_index);
@@ -425,7 +425,7 @@ auto rule_info_command::get_name() const noexcept -> std::string_view
 
 void rule_info_command::exec(bot& bot, transport_client& client, const document& args)
 {
-	const auto index = args.get<std::size_t>("index");
+	const auto index = args.get<std::uint64_t>("index");
 
 	if (!index)
 		throw rule_error(rule_error::invalid_index);
@@ -469,8 +469,8 @@ auto rule_move_command::get_name() const noexcept -> std::string_view
 
 void rule_move_command::exec(bot& bot, transport_client& client, const document& args)
 {
-	const auto from = args.get<std::size_t>("from");
-	const auto to = args.get<std::size_t>("to");
+	const auto from = args.get<std::uint64_t>("from");
+	const auto to = args.get<std::uint64_t>("to");
 
 	if (!from || !to)
 		throw rule_error(rule_error::invalid_index);
@@ -532,7 +532,7 @@ auto rule_remove_command::get_name() const noexcept -> std::string_view
 
 void rule_remove_command::exec(bot& bot, transport_client& client, const document& args)
 {
-	const auto index = args.get<std::size_t>("index");
+	const auto index = args.get<std::uint64_t>("index");
 
 	if (!index || *index >= bot.get_rules().list().size())
 		throw rule_error(rule_error::invalid_index);
