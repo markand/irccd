@@ -30,8 +30,6 @@
 
 #if BOOST_OS_WINDOWS
 #	define DYNLIB_EXTENSION ".dll"
-#elif BOOST_OS_MACOS
-#	define DYNLIB_EXTENSION ".dylib"
 #else
 #	define DYNLIB_EXTENSION ".so"
 #endif
