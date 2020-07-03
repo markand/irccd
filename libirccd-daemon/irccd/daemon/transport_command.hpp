@@ -1,7 +1,7 @@
 /*
  * transport_command.hpp -- remote command
  *
- * Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -87,6 +87,80 @@ public:
 	 * \param args the client arguments
 	 */
 	virtual void exec(bot& bot, transport_client& client, const document& args) = 0;
+};
+
+// }}}
+
+// {{{ hook_add_command
+
+/**
+ * \brief Implementation of hook-add transport command.
+ * \ingroup daemon-transport-commands
+ *
+ * Replies:
+ *
+ * - hook_error::already_exists
+ * - hook_error::invalid_identifier
+ * - hook_error::invalid_path
+ */
+class hook_add_command : public transport_command {
+public:
+	/**
+	 * \copydoc transport_command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
+
+	/**
+	 * \copydoc transport_command::exec
+	 */
+	void exec(bot& bot, transport_client& client, const document& args) override;
+};
+
+// }}}
+
+// {{{ hook_list_command
+
+/**
+ * \brief Implementation of hook-list transport command.
+ * \ingroup daemon-transport-commands
+ */
+class hook_list_command : public transport_command {
+public:
+	/**
+	 * \copydoc transport_command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
+
+	/**
+	 * \copydoc transport_command::exec
+	 */
+	void exec(bot& bot, transport_client& client, const document& args) override;
+};
+
+// }}}
+
+// {{{ hook_remove_command
+
+/**
+ * \brief Implementation of hook-remove transport command.
+ * \ingroup daemon-transport-commands
+ *
+ * Replies:
+ *
+ * - hook_error::invalid_identifier
+ * - hook_error::not_found
+ */
+class hook_remove_command : public transport_command {
+public:
+	/**
+	 * \copydoc transport_command::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
+
+	/**
+	 * \copydoc transport_command::exec
+	 */
+	void exec(bot& bot, transport_client& client, const document& args) override;
 };
 
 // }}}

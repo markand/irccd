@@ -1,7 +1,7 @@
 /*
  * dynlib_plugin.cpp -- native plugin implementation
  *
- * Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,8 +30,6 @@
 
 #if BOOST_OS_WINDOWS
 #	define DYNLIB_EXTENSION ".dll"
-#elif BOOST_OS_MACOS
-#	define DYNLIB_EXTENSION ".dylib"
 #else
 #	define DYNLIB_EXTENSION ".so"
 #endif

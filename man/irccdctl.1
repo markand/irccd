@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+.\" Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
 .\"
 .\" Permission to use, copy, modify, and/or distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -22,8 +22,20 @@
 .Nd irccd controller agent
 .\" SYNOPSIS
 .Sh SYNOPSIS
+.\" hook-add
 .Nm
+.Cm hook-add
+.Ar id
+.Ar path
+.\" hook-list
+.Nm
+.Cm hook-list
+.\" hook-remove
+.Nm
+.Cm hook-remove
+.Ar id
 .\" plugin-config
+.Nm
 .Cm plugin-config
 .Ar id
 .Op Ar variable
@@ -223,6 +235,20 @@ are mutually exclusive.
 .\" COMMANDS
 .Sh COMMANDS
 .Bl -tag -width xxxxxxxx-yyyyyyyyy
+.\" hook-add
+.It Cm hook-add
+Add a new hook with
+.Ar id
+as unique identifier and
+.Ar path
+as local path (on the machine where irccd is running).
+.\" hook-list
+.It Cm hook-list
+List active hooks.
+.\" hook-remove
+.It Cm hook-remove
+Remove a hook with identifier
+.Ar id .
 .\" plugin-config
 .It Cm plugin-config
 Manipulate a configuration variable for the plugin specified by

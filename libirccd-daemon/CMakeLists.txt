@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -25,6 +25,10 @@ set(
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/bot.hpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/dynlib_plugin.cpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/dynlib_plugin.hpp
+	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/hook.cpp
+	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/hook.hpp
+	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/hook_service.cpp
+	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/hook_service.hpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/irc.cpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/irc.hpp
 	${libirccd-daemon_SOURCE_DIR}/irccd/daemon/logger.cpp

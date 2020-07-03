@@ -1,7 +1,7 @@
 /*
  * daemon.hpp -- libirccd-daemon convenience header
  *
- * Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -28,6 +28,8 @@
 
 #include "daemon/bot.hpp"
 #include "daemon/dynlib_plugin.hpp"
+#include "daemon/hook.hpp"
+#include "daemon/hook_service.hpp"
 #include "daemon/irc.hpp"
 #include "daemon/logger.hpp"
 #include "daemon/plugin.hpp"

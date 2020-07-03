@@ -1,7 +1,7 @@
 /*
  * bot.cpp -- main bot class
  *
- * Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -26,6 +26,7 @@
 #include <irccd/system.hpp>
 
 #include "bot.hpp"
+#include "hook_service.hpp"
 #include "logger.hpp"
 #include "plugin_service.hpp"
 #include "rule_service.hpp"
@@ -185,10 +186,25 @@ void bot::load_templates()
 	sink_->set_filter(*filter_);
 }
 
+void bot::load_hooks()
+{
+	const auto sc = config_.get("hooks");
+
+	for (const auto& opt : sc) {
+		if (!string_util::is_identifier(opt.get_key()))
+			throw hook_error(hook_error::invalid_identifier, opt.get_key(), "");
+		if (opt.get_value().empty())
+			throw hook_error(hook_error::invalid_path, opt.get_key(), "");
+
+		hook_service_->add(hook(opt.get_key(), opt.get_value()));
+	}
+}
+
 bot::bot(boost::asio::io_service& service, std::string config)
 	: config_(std::move(config))
 	, service_(service)
 	, sink_(std::make_unique<logger::console_sink>())
+	, hook_service_(std::make_unique<hook_service>(*this))
 	, server_service_(std::make_unique<server_service>(*this))
 	, tpt_service_(std::make_unique<transport_service>(*this))
 	, rule_service_(std::make_unique<rule_service>(*this))
@@ -226,6 +242,11 @@ auto bot::get_log() const noexcept -> const logger::sink&
 auto bot::get_log() noexcept -> logger::sink&
 {
 	return *sink_;
+}
+
+auto bot::get_hooks() noexcept -> hook_service&
+{
+	return *hook_service_;
 }
 
 auto bot::get_servers() noexcept -> server_service&
@@ -267,6 +288,7 @@ void bot::load() noexcept
 	// [logs] and [templates] sections.
 	load_logs();
 	load_templates();
+	load_hooks();
 
 	if (!loaded_)
 		sink_->info("irccd", "") << "loading configuration from " << config_.get_path() << std::endl;

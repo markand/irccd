@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -16,18 +16,24 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+add_subdirectory(command-hook-add)
+add_subdirectory(command-hook-list)
+add_subdirectory(command-hook-remove)
+
 add_subdirectory(command-plugin-config)
 add_subdirectory(command-plugin-info)
 add_subdirectory(command-plugin-list)
 add_subdirectory(command-plugin-load)
 add_subdirectory(command-plugin-reload)
 add_subdirectory(command-plugin-unload)
+
 add_subdirectory(command-rule-add)
 add_subdirectory(command-rule-edit)
 add_subdirectory(command-rule-info)
 add_subdirectory(command-rule-list)
 add_subdirectory(command-rule-move)
 add_subdirectory(command-rule-remove)
+
 add_subdirectory(command-server-connect)
 add_subdirectory(command-server-disconnect)
 add_subdirectory(command-server-info)
@@ -45,12 +51,13 @@ add_subdirectory(command-server-reconnect)
 add_subdirectory(command-server-topic)
 
 add_subdirectory(dynlib-plugin)
+add_subdirectory(hook)
 add_subdirectory(irc)
 add_subdirectory(logger)
 add_subdirectory(plugin-service)
 add_subdirectory(rule-service)
 add_subdirectory(rule-util)
 add_subdirectory(server)
-add_subdirectory(server-util)
 add_subdirectory(server-service)
+add_subdirectory(server-util)
 add_subdirectory(transports)

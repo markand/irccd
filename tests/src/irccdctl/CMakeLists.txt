@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -24,6 +24,10 @@ if (IRCCD_HAVE_JS)
 	add_subdirectory(cli-plugin-reload)
 	add_subdirectory(cli-plugin-unload)
 endif ()
+
+add_subdirectory(cli-hook-add)
+add_subdirectory(cli-hook-list)
+add_subdirectory(cli-hook-remove)
 
 add_subdirectory(cli-rule-add)
 add_subdirectory(cli-rule-edit)

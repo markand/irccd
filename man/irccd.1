@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+.\" Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
 .\"
 .\" Permission to use, copy, modify, and/or distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -61,7 +61,7 @@ current revision is bundled in the output.
 .Sh PLUGINS
 The
 .Nm
-program can runs plugins once IRC events are received. For example, if someone
+program can run plugins once IRC events are received. For example, if someone
 sends you a private message plugins will be invoked with that event. Both native
 plugins written in C++ and Javascript are supported (if enabled at compile
 time).
@@ -173,6 +173,38 @@ tictactoe
 See additional documentation in their own manual page in the form
 .Xr irccd-plugin-name 7
 where name is the actual plugin name.
+.\" HOOKS
+.Sh HOOKS
+Hooks are a different and more lightweight approach to plugins, they are
+executed upon incoming events and spawned each time a new event arrives.
+.Pp
+In contrast to plugins, differences are:
+.Pp
+.Bl -bullet -compact
+.It
+Hooks can not be filtered with rules.
+.It
+Hooks does not support all events. These events are not supported:
+.Em onLoad , onUnload , onReload , onCommand , onNames , onWhois .
+.It
+Hooks can be written in any language.
+.It
+Execution may be slower since scripting languages require to fire up the
+interpreter each time a new event is available.
+.El
+.Pp
+Each hook will receive as positional argument the event name (similar to plugin
+events) and the event arguments.
+.Pp
+An example of hook in shell script is available as
+.Pa @CMAKE_INSTALL_FULL_DOCDIR@/examples/sample-hook.sh
+file.
+.Pp
+See also the section
+.Va [hooks]
+in
+.Xr irccd.conf 5
+manual page to enable hooks.
 .\" TRANSPORTS
 .Sh TRANSPORTS
 The daemon can be controlled at runtime using the dedicated

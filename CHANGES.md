@@ -1,6 +1,14 @@
 IRC Client Daemon CHANGES
 =========================
 
+irccd current
+----------------------
+
+irccd:
+
+- Added a new hook system. Hooks consist of an alternative approach to plugins
+  to extend irccd in any language (#2342).
+
 irccd 3.0.3 2019-10-06
 ----------------------
 

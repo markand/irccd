@@ -1,7 +1,7 @@
 #
 # CMakeLists.txt -- CMake build system for irccd
 #
-# Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+# Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -34,6 +34,11 @@ install(
 		${examples_SOURCE_DIR}/irccdctl.conf.sample
 	COMPONENT examples
 	DESTINATION ${CMAKE_INSTALL_SYSCONFDIR}
+)
+
+install(
+	FILES ${examples_SOURCE_DIR}/sample-hook.sh
+	DESTINATION ${CMAKE_INSTALL_DOCDIR}/examples
 )
 
 irccd_set_global(CPACK_COMPONENT_EXAMPLES_HIDDEN On)

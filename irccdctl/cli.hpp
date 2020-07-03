@@ -1,7 +1,7 @@
 /*
  * cli.hpp -- command line for irccdctl
  *
- * Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -101,6 +101,66 @@ public:
 	 * \param args the user arguments
 	 */
 	virtual void exec(ctl::controller& ctl, const std::vector<std::string>& args) = 0;
+};
+
+// }}}
+
+// {{{ hook_add_cli
+
+/**
+ * \brief Implementation of irccdctl hook-add.
+ */
+class hook_add_cli : public cli {
+public:
+	/**
+	 * \copydoc cli::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
+
+	/**
+	 * \copydoc cli::exec
+	 */
+	void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ hook_list_cli
+
+/**
+ * \brief Implementation of irccdctl hook-list.
+ */
+class hook_list_cli : public cli {
+public:
+	/**
+	 * \copydoc cli::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
+
+	/**
+	 * \copydoc cli::exec
+	 */
+	void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
+};
+
+// }}}
+
+// {{{ hook_remove_cli
+
+/**
+ * \brief Implementation of irccdctl hook-remove.
+ */
+class hook_remove_cli : public cli {
+public:
+	/**
+	 * \copydoc cli::get_name
+	 */
+	auto get_name() const noexcept -> std::string_view override;
+
+	/**
+	 * \copydoc cli::exec
+	 */
+	void exec(ctl::controller& irccdctl, const std::vector<std::string>& args) override;
 };
 
 // }}}

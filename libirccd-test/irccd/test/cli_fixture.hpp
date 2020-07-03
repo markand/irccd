@@ -1,7 +1,7 @@
 /*
  * cli_fixture.hpp -- test fixture for irccdctl frontend
  *
- * Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -31,6 +31,7 @@
 #include <boost/asio.hpp>
 
 #include <irccd/daemon/bot.hpp>
+#include <irccd/daemon/hook_service.hpp>
 #include <irccd/daemon/plugin_service.hpp>
 #include <irccd/daemon/rule_service.hpp>
 #include <irccd/daemon/server_service.hpp>

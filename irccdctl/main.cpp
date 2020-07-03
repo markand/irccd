@@ -1,7 +1,7 @@
 /*
  * main.cpp -- irccd controller main
  *
- * Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -72,7 +72,10 @@ std::vector<std::function<void ()>> requests;
 [[noreturn]]
 void usage()
 {
-	std::cerr << "usage: irccdctl plugin-config id [variable] [value]\n";
+	std::cerr << "usage: irccdctl hook-add id path\n";
+	std::cerr << "       irccdctl hook-list\n";
+	std::cerr << "       irccdctl hook-remove id\n";
+	std::cerr << "       irccdctl plugin-config id [variable] [value]\n";
 	std::cerr << "       irccdctl plugin-info id\n";
 	std::cerr << "       irccdctl plugin-list\n";
 	std::cerr << "       irccdctl plugin-load name\n";

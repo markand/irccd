@@ -1,7 +1,7 @@
 /*
  * command_fixture.hpp -- test fixture helper for transport commands
  *
- * Copyright (c) 2013-2019 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -28,6 +28,7 @@
 #include <irccd/daemon/rule_service.hpp>
 #include <irccd/daemon/server_service.hpp>
 #include <irccd/daemon/transport_client.hpp>
+#include <irccd/daemon/hook_service.hpp>
 
 #include "irccd_fixture.hpp"
 #include "mock_server.hpp"
@@ -58,6 +59,7 @@ protected:
 	 * \brief The fake transport_client stream.
 	 */
 	std::shared_ptr<mock_stream> stream_;
+
 	/**
 	 * \brief Client sending request.
 	 */

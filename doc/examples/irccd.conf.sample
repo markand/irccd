@@ -152,3 +152,10 @@ port = 6667
 #
 # [templates.hangman]
 # win = "you win!"
+
+# Section hooks:
+#    This sections lets you define hooks that are executed each time an IRC
+#    event arrives.
+#
+# [hooks]
+# mail = "/path/to/mail.py"
