@@ -1,6 +1,11 @@
 IRC Client Daemon CHANGES
 =========================
 
+irccd current
+----------------------
+
+- Synchronize `ping-timeout` option in `[server]` to 900 seconds by default.
+
 irccd 3.1.0 2020-07-03
 ----------------------
 

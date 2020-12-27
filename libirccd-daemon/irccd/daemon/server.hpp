@@ -317,7 +317,7 @@ private:
 	// Settings.
 	std::string command_char_{"!"};
 	std::uint16_t recodelay_{30};
-	std::uint16_t timeout_{1000};
+	std::uint16_t timeout_{900};
 
 	// Server information.
 	std::map<channel_mode, char> modes_;
