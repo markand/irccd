@@ -1,10 +1,12 @@
 IRC Client Daemon CHANGES
 =========================
 
-irccd current
+irccd 3.1.1 2021-01-04
 ----------------------
 
-- Synchronize `ping-timeout` option in `[server]` to 900 seconds by default.
+- Synchronize `ping-timeout` option in `[server]` to 1800 seconds by default,
+- Enable `auto-reconnect` option in `[server]` by default as specified in the
+  manual page.
 
 irccd 3.1.0 2020-07-03
 ----------------------

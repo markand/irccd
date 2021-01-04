@@ -515,7 +515,7 @@ void server::handle_connect(const std::error_code& code, const connect_handler& 
 server::server(boost::asio::io_service& service, std::string id, std::string hostname)
 	: id_(std::move(id))
 	, hostname_(std::move(hostname))
-	, options_(options::ipv4 | options::ipv6)
+	, options_(options::auto_reconnect | options::ipv4 | options::ipv6)
 	, service_(service)
 	, timer_(service)
 {
