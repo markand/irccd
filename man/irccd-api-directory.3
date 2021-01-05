@@ -1,0 +1,145 @@
+.\"
+.\" Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-API-DIRECTORY 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm Irccd.Directory
+.Nd directory iteration and inspection API
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.Vt Irccd.Directory.Dot
+.Vt Irccd.Directory.DotDot
+.Vt Irccd.Directory.TypeDir
+.Vt Irccd.Directory.TypeFile
+.Vt Irccd.Directory.TypeLink
+.Vt Irccd.Directory.TypeUnknown
+.Fn Irccd.Directory "path, flags"
+.Fn Irccd.Directory.find "path, pattern, recursive = false"
+.Fn Irccd.Directory.mkdir "path, mode = 0700"
+.Fn Irccd.Directory.remove "path, recursive = false"
+.Fn Irccd.Directory.prototype.find "pattern, recursive"
+.Fn Irccd.Directory.prototype.remove "recursive = false"
+.\" DESCRIPTION
+.Sh DESCRIPTION
+This module can be used to iterate, find, remove or create directories.
+.Pp
+Use this module with care.
+.\" CONSTANTS
+.Sh CONSTANTS
+The following constants properties are defined:
+.Pp
+.Bl -tag -width 18n
+.It Va Dot No (int)
+List "." directory.
+.It Va DotDot No (int)
+List ".." directory.
+.It Va TypeDir No (int)
+Entry is a directory.
+.It Va TypeFile No (int)
+Entry is a file.
+.It Va TypeLink No (int)
+Entry is a link.
+.It Va TypeUnknown No (int)
+Unknown type file.
+.El
+.\" METHODS
+.Sh METHODS
+.\" Irccd.Directory.find
+The
+.Fn Irccd.Directory.find
+method finds an entry at root
+.Fa path
+by a pattern or a regular expression depending on the object
+.Fa pattern .
+The optional boolean argument
+.Fa recursive
+can be set to true to recursively find. Returns the path to the file if found.
+.Pp
+.\" Irccd.Directory.mkdir
+The
+.Fn Irccd.Directory.mkdir
+method creates the directory
+.Fa path
+and all its parents.
+.\" Irccd.Directory.remove
+.Pp
+The
+.Fn Irccd.Directory.remove
+method removes the directory
+.Fa path
+optionally recursively if boolean argument
+.Fa recursive
+is true.
+.Pp
+.\" Irccd.Directory [constructor]
+The
+.Fn Irccd.Directory
+function constructor opens a directory at the given
+.Fa path .
+The optional
+.Fa flags
+argument is a bitwise integer containing either
+.Vt Irccd.Directory.Dot , Irccd.Directory.DotDot
+to respectively list directories
+.Pa \&.
+and
+.Pa .. .
+When constructed successfully, the object has the following properties:
+.Pp
+.Bl -tag -width 18n -offset indent -compact
+.It Va path No (string)
+the path to the directory.
+.It Va entries No (array)
+an array for each entry. See below
+.El
+.Pp
+For each entry found, the array
+.Va entries
+contains as many objects with the following properties:
+.Pp
+.Bl -tag -width 14n -offset indent-two -compact
+.It Va name No (string)
+the base file name.
+.It Va type No (int)
+the type of file (Irccd.Directory.Type*).
+.El
+.Pp
+.\" Irccd.Directory.prototype.find
+The
+.Fn Irccd.Directory.prototype.find
+method is the synonym of
+.Fn Irccd.Directory.find
+method but the path is taken from the directory object.
+.Pp
+.\" Irccd.Directory.prototype.remove
+The
+.Fn Irccd.Directory.prototype.remove
+method is a synonym of
+.Fn Irccd.Directory.remove
+method but the path is taken from the directory object.
+.\" EXCEPTIONS
+.Sh EXCEPTIONS
+.Bl -tag -width 20n
+.It Bq Er Irccd.SystemError
+On I/O errors.
+.It Bq Er Error
+On other errors.
+.El
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd-api 3

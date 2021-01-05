@@ -1,0 +1,126 @@
+.\"
+.\" Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-API-UTIL 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm Irccd.Util
+.Nd irccd utilities API
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.Fn Irccd.Util.cut "data, maxc, maxl"
+.Fn Irccd.Util.format "input, parameters"
+.Fn Irccd.Util.splithost "user"
+.Fn Irccd.Util.splituser "user"
+.\" DESCRIPTION
+.Sh DESCRIPTION
+This module provides various utilities.
+.\" METHODS
+.Sh METHODS
+.\" Irccd.Util.Cut
+The
+.Fn Irccd.Util.cut
+method splits the
+.Fa data
+into several lines returned as an array of strings. It may be a string or an
+array of strings.
+.Pp
+The argument
+.Fa maxc
+controls the maximum of characters allowed per line, it can be a positive
+integer. If undefined is given, a default of 72 is used.
+.Pp
+The argument
+.Fa maxl
+controls the maximum of lines allowed. It can be a positive integer or undefined
+for an infinite list.
+.Pp
+If
+.Fa maxl
+is used as a limit and the data can not fit within the bounds,
+undefined is returned.
+.Pp
+An empty list may be returned if empty strings were found.
+.Pp
+.\" Irccd.Util.format
+The
+.Fn Irccd.Util.format
+method formats the string
+.Fa input
+according to the template system. The object
+.Fa parameters
+should be filled for each keyword to replace in the input. The reserved keyword
+.Dq date
+must be used to replace a date if necessary and should contain an integer
+timestamp. The function returns the converted text.
+.Pp
+Be very careful when you use this function with untrusted input. Do never pass
+untrusted content (e.g. user message) as input parameter.
+.Pp
+For example, the following code is unsafe:
+.Bd -literal -offset Ds
+function onMessage(server, channel, origin, message)
+{
+	// DON'T DO THIS.
+	server.message(channel, Irccd.Util.format("@{red}" + message + "@{}");
+}
+.Ed
+.Pp
+If a user sends a message like ${HOME}, it will prints the user home directory,
+which is a high security issue if you have environment variables with passwords.
+.Pp
+Instead, always use a literal string using a replacement with the user input:
+.Bd -literal -offset Ds
+function onMessage(server, channel, origin, message)
+{
+	// CORRECT.
+	server.message(channel, Irccd.Util.format("@{red}#{message}@{}", {
+		message: message
+	});
+}
+.Ed
+.Pp
+.\" Irccd.Util.splithost
+The
+.Fn Irccd.Util.splithost
+method returns the host component from the specified
+.Fa user
+string.
+.Pp
+.\" Irccd.Util.splituser
+The
+.Fn Irccd.Util.splituser
+method returns the user component from the specified
+.Fa user
+string.
+.\" EXCEPTIONS
+.Sh EXCEPTIONS
+.Bl -tag -width Er
+.It Bq Er RangeError
+If
+.Fa maxl
+or
+.Fa maxc
+are negative numbers.
+.It Bq Er RangeError
+If one word length was bigger than
+.Fa maxc .
+.It Bq Er TypeError
+If
+.Fa data
+is not a string or a list of strings.
+.El

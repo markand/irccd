@@ -1,0 +1,232 @@
+.\"
+.\" Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-API-FILE 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm Irccd.File
+.Nd file I/O API
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.Vt Irccd.File.SeekCur
+.Vt Irccd.File.SeekEnd
+.Vt Irccd.File.SeekSet
+.Fn Irccd.File.basename "path"
+.Fn Irccd.File.dirname "path"
+.Fn Irccd.File.exists "path"
+.Fn Irccd.File.remove "path"
+.Fn Irccd.File.stat "path"
+.Fn Irccd.File "path, mode"
+.Fn Irccd.File.prototype.basename
+.Fn Irccd.File.prototype.close
+.Fn Irccd.File.prototype.dirname
+.Fn Irccd.File.prototype.lines
+.Fn Irccd.File.prototype.read "amount = undefined"
+.Fn Irccd.File.prototype.readline
+.Fn Irccd.File.prototype.remove
+.Fn Irccd.File.prototype.seek "type, amount"
+.Fn Irccd.File.prototype.stat
+.Fn Irccd.File.prototype.tell
+.Fn Irccd.File.prototype.write "data"
+.\" DESCRIPTION
+.Sh DESCRIPTION
+This module provides routines for opening and writing files on the disk.
+.Pp
+For convenience, some functions are available as static functions and some as
+object methods.
+.\" CONSTANTS
+.Sh CONSTANTS
+The following constants properties are defined:
+.Pp
+.Bl -tag
+.It Va Irccd.File.SeekCur No (int)
+Seek from the current file position.
+.It Va Irccd.File.SeekEnd No (int)
+Seek from end of the file.
+.It Va Irccd.File.SeekSet No (int)
+Seek from beginning of the file.
+.El
+.\" METHODS
+.Sh METHODS
+.\" Irccd.File.basename
+The
+.Fn Irccd.File.basename
+method returns the file basename from
+.Fa path
+as specified in
+.Xr basename 3
+POSIX function.
+.Pp
+.\" Irccd.File.dirname
+The
+.Fn Irccd.File.dirname
+method returns the file directory name from
+.Fa path
+as specified in
+.Xr dirname 3
+POSIX function.
+.Pp
+.\" Irccd.File.exists
+The
+.Fn Irccd.File.exists
+method checks if the file specified by
+.Fa path
+exists and returns true to indicate success. Warning: using this function is
+usually discouraged as it may introduce a possible race condition.
+.Pp
+.\" Irccd.File.remove
+The
+.Fn Irccd.File.remove
+method removes the file at the given
+.Fa path .
+.Pp
+.\" Irccd.File.stat
+The optional
+.Fn Irccd.File.stat
+method returns information from the file at the specified
+.Fa path .
+The returned object has the following properties. Not all properties are
+available and you must check its presence before using it.
+.Pp
+.Bl -tag -width 20n -compact -offset Ds
+.It Va atime No (int)
+The last access time.
+.It Va blksize No (int)
+The block size.
+.It Va blocks No (int)
+The number of blocks.
+.It Va ctime No (int)
+The creation time.
+.It Va dev No (int)
+The device.
+.It Va gid No (int)
+The group numeric id.
+.It Va ino No (int)
+The inode.
+.It Va mode No (int)
+The mode.
+.It Va mtime No (int)
+The modification time.
+.It Va nlink No (int)
+The number of hard links.
+.It Va rdev No (int)
+No description available.
+.It Va size No (int)
+The file size.
+.It Va uid No (int)
+The user numeric id.
+.El
+.Pp
+.\" Irccd.File
+The
+.Fn Irccd.File
+function constructor opens a file specified by
+.Fa path
+with the specified
+.Fa mode
+similar to
+.Xr fopen 3
+C standard function.
+.Pp
+.\" Irccd.File.prototype.basename
+The
+.Fn Irccd.File.prototype.basename
+method is the synonym of
+.Fn Irccd.File.basename
+method but the path is taken from the file object.
+.Pp
+.\" Irccd.File.prototype.close
+The
+.Fn Irccd.File.prototype.close
+method closes the file. It is usually not required as already closed in the
+destructor.
+.Pp
+.\" Irccd.File.prototype.dirname
+The
+.Fn Irccd.File.prototype.dirname
+method is the synonym of
+.Fn Irccd.File.dirname
+method but the path is taken from the file object.
+.Pp
+.\" Irccd.File.prototype.lines
+The
+.Fn Irccd.File.prototype.lines
+method reads all lines and return an array.
+.Pp
+.\" Irccd.File.prototype.read
+The
+.Fn Irccd.File.prototype.read
+method reads the specified
+.Fa amount
+of characters or the whole file if undefined.
+.Pp
+.\" Irccd.File.prototype.readline
+The
+.Fn Irccd.File.prototype.readline
+method reads the next line available and returns it. If EOF was reached,
+returns undefined. Warning: this method is slow and its usage is discouraged on
+large files. Consider using
+.Fn Irccd.File.prototype.lines
+function if you want to read a file line per line.
+.Pp
+.\" Irccd.File.prototype.remove
+The
+.Fn Irccd.File.prototype.remove
+method is the synonym of
+.Fn Irccd.File.remove
+method but the path is taken from the file object.
+.Pp
+.\" Irccd.File.prototype.seek
+The
+.Fn Irccd.File.prototype.seek
+method sets the position in the file to the position
+.Fa amount .
+The type argument must be one of
+.Vt Irccd.File.SeekCur , Irccd.File.SeekEnd
+or
+.Vt Irccd.File.SeekSet .
+.Pp
+.\" Irccd.File.prototype.stat
+The optional
+.Fn Irccd.File.prototype.stat
+method is the synonym of
+.Fn Irccd.File.stat
+method but the path is taken from the file object.
+.Pp
+.\" Irccd.File.prototype.tell
+The
+.Fn Irccd.File.prototype.tell
+methods returns the current position in the file.
+.Pp
+.\" Irccd.File.prototype.write
+The
+.Fn Irccd.File.prototype.write
+method writes the string
+.Fa data
+to the file.
+.Pp
+.\" EXCEPTIONS
+.Sh EXCEPTIONS
+.Bl -tag -width 20n
+.It Bq Er Irccd.SystemError
+On I/O errors.
+.It Bq Er Error
+On other errors.
+.El
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd-api 3

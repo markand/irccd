@@ -20,7 +20,17 @@ project(man)
 
 set(
 	MANPAGES
-	irccd-api.7
+	irccd-api-chrono.3
+	irccd-api-directory.3
+	irccd-api-file.3
+	irccd-api-logger.3
+	irccd-api-plugin.3
+	irccd-api-server.3
+	irccd-api-system.3
+	irccd-api-timer.3
+	irccd-api-unicode.3
+	irccd-api-util.3
+	irccd-api.3
 	irccd-ipc.7
 	irccd-templates.7
 	irccd-test.1

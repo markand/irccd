@@ -1,0 +1,79 @@
+.\"
+.\" Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-API-UNICODE 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm Irccd.Unicode
+.Nd unicode management API
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.Fn Irccd.Unicode.isDigit "code"
+.Fn Irccd.Unicode.isLetter "code"
+.Fn Irccd.Unicode.isLower "code"
+.Fn Irccd.Unicode.isSpace "code"
+.Fn Irccd.Unicode.isTitle "code"
+.Fn Irccd.Unicode.isUpper "code"
+.\" DESCRIPTION
+.Sh DESCRIPTION
+Inspect unicode character classes.
+.\" METHODS
+.Sh METHODS
+.\" Irccd.Unicode.isDigit
+The
+.Fn Irccd.Unicode.isDigit
+method returns true if the code point
+.Fa code
+is a digit.
+.Pp
+.\" Irccd.Unicode.isLetter
+The
+.Fn Irccd.Unicode.isLetter
+method returns true if code point
+.Fa code
+is a letter.
+.Pp
+.\" Irccd.Unicode.isLower
+The
+.Fn Irccd.Unicode.isLower
+method returns true if the code point
+.Fa code
+is lower cased.
+.Pp
+.\" Irccd.Unicode.isSpace
+The
+.Fn Irccd.Unicode.isSpace
+method returns true if the code point
+.Fa code
+is a space.
+.Pp
+.\" Irccd.Unicode.isTitle
+The
+.Fn Irccd.Unicode.isTitle
+method returns true if the code point
+.Fa code
+is considered title case.
+.Pp
+.\" Irccd.Unicode.isUpper
+The
+.Fn Irccd.Unicode.isUpper
+method returns true if the code point
+.Fa code
+is upper cased.
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd-api 3

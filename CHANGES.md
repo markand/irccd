@@ -1,6 +1,12 @@
 IRC Client Daemon CHANGES
 =========================
 
+irccd current
+----------------------
+
+- Split irccd-api manual page into individual irccd-api-<module> for a better
+  readability.
+
 irccd 3.1.1 2021-01-04
 ----------------------
 

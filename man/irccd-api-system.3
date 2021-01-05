@@ -1,0 +1,147 @@
+.\"
+.\" Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-API-SYSTEM 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm Irccd.System
+.Nd system inspection API
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.Fn Irccd.System.env "name"
+.Fn Irccd.System.exec "cmd"
+.Fn Irccd.System.home
+.Fn Irccd.System.name
+.Fn Irccd.System.popen "cmd, mode"
+.Fn Irccd.System.sleep "seconds"
+.Fn Irccd.System.ticks
+.Fn Irccd.System.uptime
+.Fn Irccd.System.usleep "microseconds"
+.Fn Irccd.System.version
+.\" DESCRIPTION
+.Sh DESCRIPTION
+System inspection and utilities.
+.\" METHODS
+.Sh METHODS
+.\" Irccd.System.env
+The
+.Fn Irccd.System.env
+method returns the value of the environment variable
+.Fa name
+or undefined if empty.
+.Pp
+.\" Irccd.System.exec
+The
+.Fn Irccd.System.exec
+method executes the command
+.Fa cmd
+as if invoked with the standard C
+.Xr system 3
+function.
+.Pp
+.\" Irccd.System.home
+The
+.Fn Irccd.System.home
+returns the home directory. This function should be used with care, plugin
+should not use user's home to store files.
+.Pp
+.\" Irccd.System.name
+The
+.Fn Irccd.System.name
+returns the operating system name. Returns one of:
+.Pp
+.Bl -bullet -compact -offset Ds
+.It
+Linux
+.It
+Windows
+.It
+FreeBSD
+.It
+DragonFlyBSD
+.It
+OpenBSD
+.It
+NetBSD
+.It
+macOS
+.It
+Android
+.It
+Aix
+.It
+Haiku
+.It
+iOS
+.It
+Solaris
+.It
+Unknown
+.El
+.Pp
+.\" Irccd.System.popen
+The
+.Fn Irccd.System.popen
+method is a wrapper for
+.Xr popen 3 .
+It opens the command
+.Fa cmd
+with the given
+.Fa mode
+and returns a
+.Vt Irccd.File
+object. This function is optional.
+.Pp
+.\" Irccd.System.sleep
+The
+.Fn Irccd.System.sleep
+method suspends the execution thread for the given amount of
+.Fa seconds .
+.Pp
+.\" Irccd.System.ticks
+The
+.Fn Irccd.System.ticks
+method returns the time spent since irccd startup in milliseconds.
+.Pp
+.\" Irccd.System.uptime
+The
+.Fn Irccd.System.uptime
+returns the system uptime in seconds.
+.Pp
+.\" Irccd.System.usleep
+The
+.Fn Irccd.System.usleep
+method suspends the execution thread for the given amount of
+.Fa microseconds .
+.Pp
+.\" Irccd.System.version
+The
+.Fn Irccd.System.version
+function returns the operating system version as a string. Result of this
+function is system dependant.
+.\" EXCEPTIONS
+.Sh EXCEPTIONS
+.Bl -tag -width 20n
+.It Bq Er Irccd.SystemError
+On system errors.
+.It Bq Er Error
+On other errors.
+.El
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd-api 3 ,
+.Xr irccd-api-file 3

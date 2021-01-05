@@ -1,0 +1,89 @@
+.\"
+.\" Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-API-TIMER 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm Irccd.Timer
+.Nd irccd timer API
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.Vt Irccd.Timer.Single
+.Vt Irccd.Timer.Repeat
+.Fn Irccd.Timer "type, delay, callback"
+.Fn Irccd.Timer.prototype.start
+.Fn Irccd.Timer.prototype.stop
+.\" DESCRIPTION
+.Sh DESCRIPTION
+This API provides periodic timers.
+.Pp
+Even though they are generated at periodic interval they do run in the same
+thread and do not require special user mutexes.
+.\" CONSTANTS
+.Sh CONSTANTS
+The following constants properties are defined:
+.Pp
+.Bl -tag
+.It Va Irccd.Timer.Single No (int)
+The timer is single-shot.
+.It Va Irccd.Timer.Repeat No (int)
+The timer is looping.
+.El
+.\" METHODS
+.Sh METHODS
+.\" Irccd.Timer()
+The
+.Fn Irccd.Timer
+constructor function creates a new timer object with the given
+.Fa delay
+expressed in milliseconds and the function
+.Fa callback
+to be called when the timer expires. The argument
+.Fa type
+is either
+.Vt Irccd.Timer.Single
+to create a one-shot timer or
+.Vt Irccd.Timer.Repeat
+to make a infinite timer.
+.Pp
+.\" Irccd.Timer.prototype.start
+The
+.Fn Irccd.Timer.prototype.start
+method will effectively start the timer. It does nothing if the timer is
+already running.
+.Pp
+.\" Irccd.Timer.prototype.stop
+The
+.Fn Irccd.Timer.prototype.stop
+will stop the timer. It does nothing if the timer is already stopped.
+.\" EXAMPLES
+.Sh EXAMPLES
+Create a timer that will repeat every 1 second.
+.Bd -literal
+var t = new Irccd.Timer(Irccd.Timer.Repeat, 1000, function () {
+	// Do your action, this will be called every 1 second.
+});
+.Ed
+.\" EXCEPTIONS
+.Sh EXCEPTIONS
+.Bl -tag -width Er
+.It Bq Er Error
+On other errors.
+.El
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd-api 3

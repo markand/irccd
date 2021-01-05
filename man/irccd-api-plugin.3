@@ -1,0 +1,114 @@
+.\"
+.\" Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-API-PLUGIN 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm Irccd.Plugin
+.Nd irccd plugin API
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.Vt Irccd.Plugin.config
+.Vt Irccd.Plugin.paths
+.Vt Irccd.Plugin.templates
+.Fn Irccd.Plugin.info "name"
+.Fn Irccd.Plugin.list
+.Fn Irccd.Plugin.load "name"
+.Fn Irccd.Plugin.reload "name"
+.Fn Irccd.Plugin.unload "name"
+.\" DESCRIPTION
+.Sh DESCRIPTION
+This module let you manage plugins.
+.Pp
+.\" CONSTANTS
+.Sh CONSTANTS
+The following constants properties are defined and contain each key-value pairs
+from the user
+.Xr irccd.conf 5
+file.
+.Pp
+.Bl -tag
+.It Va config No (Object)
+Contains the
+.Va [plugin.<name>]
+section.
+.It Va paths No (Object)
+Contains the
+.Va [paths.<name>]
+section.
+.It Va templates No (Object)
+Contains the
+.Va [templates.<name>]
+section.
+.El
+.\" METHODS
+.Sh METHODS
+.\" Irccd.Plugin.info
+The
+.Fn Irccd.Plugin.info
+method returns the information about a plugin as an object.
+.Pp
+The returned object if the plugin was found has the following properties:
+.Pp
+.Bl -tag -width 20n -compact -offset Ds
+.It Va name No (string)
+The plugin identifier.
+.It Va author No (string)
+The author.
+.It Va license No (string)
+The license.
+.It Va summary No (string)
+A short description.
+.It Va version No (string)
+The version.
+.El
+.Pp
+.\" Irccd.Plugin.list
+The
+.Fn Irccd.Plugin.list
+method returns an array of string containing all plugin names.
+.Pp
+.\" Irccd.Plugin.load
+The
+.Fn Irccd.Plugin.load
+method loads a plugin by its
+.Fa name .
+This function will search through the standard directories.
+.Pp
+.\" Irccd.Plugin.reload
+The
+.Fn Irccd.Plugin.reload
+method reloads a plugin by its
+.Fa name .
+.Pp
+.\" Irccd.Plugin.unload
+The
+.Fn Irccd.Plugin.unload
+method unloads a plugin by its
+.Fa name
+and removes it.
+.\" EXCEPTIONS
+.Sh EXCEPTIONS
+.Bl -tag -width Er
+.It Bq Er ReferenceError
+If the plugin was not found.
+.It Bq Er Error
+On other errors.
+.El
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd-api 3

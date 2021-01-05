@@ -1,0 +1,356 @@
+.\"
+.\" Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-API 7
+.Os
+.\" NAME
+.Sh NAME
+.Nm irccd-api
+.Nd irccd Javascript API
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.Ss Modules
+.Vt Irccd
+.Vt Irccd.Chrono
+.Vt Irccd.Directory
+.Vt Irccd.File
+.Vt Irccd.Logger
+.Vt Irccd.Plugin
+.Vt Irccd.Server
+.Vt Irccd.System
+.Vt Irccd.Timer
+.Vt Irccd.Unicode
+.Vt Irccd.Util
+.Ss Events
+.Fn onCommand "server, origin, channel, message"
+.Fn onConnect "server"
+.Fn onDisonnect "server"
+.Fn onInvite "server, origin, channel"
+.Fn onJoin "server, origin, channel"
+.Fn onKick "server, origin, channel, target, reason"
+.Fn onLoad "
+.Fn onMe "server, origin, channel, message"
+.Fn onMessage "server, origin, channel, message"
+.Fn onMode "server, origin, channel, mode, limit, user, mask"
+.Fn onNames "server, channel, list"
+.Fn onNick "server, origin, nickname"
+.Fn onNotice "server, origin, notice"
+.Fn onPart "server, origin, channel, reason"
+.Fn onReload "
+.Fn onTopic "server, origin, channel, topic"
+.Fn onUnload "
+.Fn onWhois "server, info"
+.El
+.\" DESCRIPTION
+.Sh DESCRIPTION
+This documentation shows the API reference for the official irccd Javascript
+API.
+.Pp
+Any function that is indicated as
+.Em optional
+in square brackets means it may not exist on your platform. A quick check in
+Javascript will let you test its presence.
+.\" EVENTS
+.Sh EVENTS
+The following is a list of events that Javascript plugins support. All functions
+are completely optional and may be omitted. If you want to support a function
+just implement it as global Javascript function.
+.\" onCommand
+.Ss onCommand
+Special commands are not real IRC events. They are called from channel messages
+with a specific syntax using a delimiter and the plugin name.
+.Pp
+For instance, with default irccd parameters, saying on a channel
+.Ar "!ask foo"
+will call the special command of the plugin named
+.Nm ask .
+.Pp
+Arguments
+.Bl -tag -width 20n -compact -offset Ds
+.It Fa server No (Server)
+The current server.
+.It Fa origin No (string)
+Who invoked the command.
+.It Fa channel No (string)
+The channel where the message comes from.
+.It Fa message No (string)
+The real message, without the ! part.
+.El
+.\" onConnect
+.Ss onConnect
+This callback is called when the irccd instance successfully connect to a
+server.
+.Pp
+Arguments
+.Bl -tag -width 20n -compact -offset Ds
+.It Fa server No (Server)
+The current server.
+.El
+.\" onDisconnect
+.Ss onDisconnect
+This callback is called when a server has been disconnected by any way.
+.Pp
+Arguments
+.Bl -tag -width 20n -compact -offset Ds
+.It Fa server No (Server)
+The current server.
+.El
+.\" onInvite
+.Ss onInvite
+This event is called when someone is inviting you to a channel.
+.Pp
+Arguments
+.Bl -tag -width 20n -compact -offset Ds
+.It Fa server No (Server)
+The current server.
+.It Fa origin No (string)
+Who invited you.
+.It Fa channel No (string)
+On which channel you are invited to.
+.El
+.\" onJoin
+.Ss onJoin
+User join events, this function is called when someone joins a channel.
+.Pp
+Arguments
+.Bl -tag -width 20n -compact -offset Ds
+.It Fa server No (Server)
+The current server.
+.It Fa origin No (string)
+The person who joined the channel.
+.It Fa channel No (string)
+The channel the user has joined.
+.El
+.\" onKick
+.Ss onKick
+This event is triggered when someone has been kicked from a channel.
+.Pp
+Arguments
+.Bl -tag -width 20n -compact -offset Ds
+.It Fa server No (Server)
+The current server.
+.It Fa origin No (string)
+Who kicked the person.
+.It Fa channel No (string)
+The channel.
+.It Fa target No (string)
+The kicked person.
+.It Fa reason No (string)
+An optional reason.
+.El
+.\" onLoad
+.Ss onLoad
+This function is called when irccd instance load a plugin. If this function
+throws an error, the script is not loaded.
+.\" onMe
+.Ss onMe
+Action emote.
+.Pp
+Arguments
+.Bl -tag -width 20n -compact -offset Ds
+.It Fa server No (Server)
+The current server.
+.It Fa origin No (string)
+The person who said something.
+.It Fa channel No (string)
+The channel.
+.It Fa message No (string)
+The message sent.
+.El
+.\" onMessage
+.Ss onMessage
+This event is triggered when someone said something on a specific channel.
+.Pp
+Arguments
+.Bl -tag -width 20n -compact -offset Ds
+.It Fa server No (Server)
+The current server.
+.It Fa origin No (string)
+The person who said something.
+.It Fa channel No (string)
+The channel.
+.It Fa message No (string)
+The message sent.
+.El
+.\" onMode
+.Ss onMode
+This event is triggered when the server changed a channel mode or your mode.
+.Pp
+Arguments
+.Bl -tag -width 20n -compact -offset Ds
+.It Fa server No (Server)
+The current server.
+.It Fa origin No (string)
+The person who changed the mode.
+.It Fa mode No (string)
+The new mode.
+.El
+.\" onNames
+.Ss onNames
+This event is triggered when a list of names has come.
+.Pp
+Arguments
+.Bl -tag -width 20n -compact -offset Ds
+.It Fa server No (Server)
+The current server.
+.It Fa channel No (string)
+Which channel.
+.It Fa list No (string)
+A sequence with all users.
+.El
+.\" onNick
+.Ss onNick
+This event is triggered when someone changed its nickname.
+.Pp
+Arguments
+.Bl -tag -width 20n -compact -offset Ds
+.It Fa server No (Server)
+The current server.
+.It Fa origin No (string)
+The old nickname.
+.It Fa nickname No (string)
+The new nickname.
+.El
+.\" onNotice
+.Ss onNotice
+This event is triggered when someone sent a notice to you.
+.Pp
+Arguments
+.Bl -tag -width 20n -compact -offset Ds
+.It Fa server No (Server)
+The current server.
+.It Fa origin No (string)
+The one who sent the notice.
+.It Fa message No (string)
+The notice message.
+.El
+.\" onPart
+.Ss onPart
+This event is triggered when someone has left a specific channel.
+.Pp
+Arguments
+.Bl -tag -width 20n -compact -offset Ds
+.It Fa server No (Server)
+The current server.
+.It Fa origin No (string)
+The person who left the channel.
+.It Fa channel No (string)
+The channel.
+.It Fa reason No (string)
+An optional reason.
+.El
+.\" onReload
+.Ss onReload
+Request to reload the plugin.
+.Pp
+This function does nothing in the irccd internals, it just calls a function that
+you can use to reload some data.
+.\" onTopic
+.Ss onTopic
+This event is triggered when someone changed the channel's topic.
+.Pp
+Arguments
+.Bl -tag -width 20n -compact -offset Ds
+.It Fa server No (Server)
+The current server.
+.It Fa origin No (string)
+The person who changed the topic.
+.It Fa channel No (string)
+The channel.
+.It Fa topic No (string)
+The new topic (may be empty).
+.El
+.\" onUnload
+.Ss onUnload
+This event is triggered when the plugin is about to be unloaded.
+.\" onWhois
+.Ss onWhois
+This event is triggered when irccd gets information about a user.
+.Pp
+Arguments
+.Bl -tag -width 20n -compact -offset Ds
+.It Fa server No (Server)
+The current server.
+.It Fa info No (Object)
+The whois information.
+.El
+.Pp
+The
+.Fa info
+is an object with the following properties:
+.Bl -tag -width 20n -compact -offset Ds
+.It Fa nickname No (string)
+The user nickname.
+.It Fa user No (string)
+The user name.
+.It Fa host No (string)
+The hostname.
+.It Fa realname No (string)
+The real name used.
+.It Fa channels No (array)
+An optional list of channels joined.
+.El
+.\" MODULES
+.Sh MODULES
+The following modules are part of the official Javascript API. They are all
+accessible as global function, variables and objects.
+.Pp
+All modules are categorized into pseudo namespaces that are placed into the
+global
+.Va Irccd
+object. (e.g.
+.Va Irccd.Directory , Irccd.File ) .
+See dedicated manual pages for information of all submodules.
+.\" CONSTANTS
+.Sh CONSTANTS
+.\" Constants
+The following constants properties are defined:
+.Pp
+.Bl -tag
+.It Va Irccd.version No (object)
+See below.
+.It Va Irccd.version.major No (int)
+The major irccd version.
+.It Va Irccd.version.minor No (int)
+The minor irccd version.
+.It Va Irccd.version.patch No (int)
+The patch irccd version.
+.El
+.Pp
+.\" EXCEPTIONS
+.Sh EXCEPTIONS
+The following exceptions are defined:
+.Bl -tag
+.It Va Irccd.SystemError
+An exception inheriting Error thrown by some filesystem functions.
+.It Va Irccd.ServerError
+Thrown from Irccd.Server module.
+.It Va Irccd.PluginError
+Throw from Irccd.Plugin module.
+.El
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd 1
+.Xr irccd-api-chrono 3 ,
+.Xr irccd-api-directory 3 ,
+.Xr irccd-api-file 3 ,
+.Xr irccd-api-logger 3 ,
+.Xr irccd-api-plugin 3 ,
+.Xr irccd-api-server 3 ,
+.Xr irccd-api-system 3 ,
+.Xr irccd-api-timer 3 ,
+.Xr irccd-api-unicode 3 ,
+.Xr irccd-api-util 3

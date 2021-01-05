@@ -1,0 +1,63 @@
+.\"
+.\" Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-API-CHRONO 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm Irccd.Chrono
+.Nd irccd chrono API
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.Fn Irccd.Chrono
+.Fn Irccd.Chrono.prototype.elapsed
+.Fn Irccd.Chrono.prototype.pause
+.Fn Irccd.Chrono.prototype.resume
+.Fn Irccd.Chrono.prototype.start
+.\" DESCRIPTION
+.Sh DESCRIPTION
+This module keeps track of elapsed time.
+.\" METHODS
+.Sh METHODS
+.\" Irccd.Chrono
+The
+.Fn Irccd.Chrono
+constructor function creates a chrono object at the current time.
+.Pp
+.\" Irccd.Chrono.prototype.elapsed
+The
+.Fn Irccd.Chrono.prototype.elapsed
+method returns the number of milliseconds elapsed since last the object was
+started or constructed.
+.Pp
+.\" Irccd.Chrono.prototype.pause
+The
+.Fn Irccd.Chrono.prototype.pause
+method pauses the timer, without resetting the current elapsed time stored.
+.Pp
+.\" Irccd.Chrono.prototype.resume
+The
+.Fn Irccd.Chrono.prototype.resume
+method resume accumulating additional time. Has no effect if the timer is
+already running.
+.Pp
+.\" Irccd.Chrono.prototype.start
+The
+.Fn Irccd.Chrono.prototype.start
+method starts or restarts accumulating time.
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd-api 3

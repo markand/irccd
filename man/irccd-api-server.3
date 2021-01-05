@@ -1,0 +1,264 @@
+.\"
+.\" Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-API-SERVER 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm Irccd.Unicode
+.Nd server management
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.Fn Irccd.Server.add "server"
+.Fn Irccd.Server.find "name"
+.Fn Irccd.Server.list
+.Fn Irccd.Server.remove "name"
+.Fn Irccd.Server "parameters"
+.Fn Irccd.Server.prototype.info
+.Fn Irccd.Server.prototype.invite "target, channel"
+.Fn Irccd.Server.prototype.isSelf "nickname"
+.Fn Irccd.Server.prototype.join "channel, password = undefined"
+.Fn Irccd.Server.prototype.kick "target, channel, reason = undefined"
+.Fn Irccd.Server.prototype.me "target, message"
+.Fn Irccd.Server.prototype.message "target, message"
+.Fn Irccd.Server.prototype.mode "target, mode, limit, user, mode"
+.Fn Irccd.Server.prototype.names "channel"
+.Fn Irccd.Server.prototype.nick "nickname"
+.Fn Irccd.Server.prototype.notice "target, message"
+.Fn Irccd.Server.prototype.part "channel, reason = undefined"
+.Fn Irccd.Server.prototype.toString
+.Fn Irccd.Server.prototype.topic "target, topic"
+.Fn Irccd.Server.prototype.whois "target"
+.\" DESCRIPTION
+.Sh DESCRIPTION
+This module is the object that you received in almost all IRC event (e.g.
+onConnect). You can use its methods to do your required actions on the server.
+.\" METHODS
+.Sh METHODS
+.\" Irccd.Server.add
+The
+.Fn Irccd.Server.add
+method adds the new
+.Fa server
+into the irccd instance.
+.Pp
+.\" Irccd.Server.find
+The
+.Fn Irccd.Server.find
+method finds a server by its
+.Fa name
+and returns it.
+.Pp
+.\" Irccd.Server.list
+The
+.Fn Irccd.Server.list
+method returns a map of all running servers. The table of all servers as
+key-value pairs where key is the server identifier and value the object itself.
+.Pp
+.\" Irccd.Server.remove
+The
+.Fn Irccd.Server.remove
+method removes the server specified by
+.Fa name
+from the irccd instance and disconnects it.
+.Pp
+.\" Irccd.Server
+The
+.Fn Irccd.Server
+constructor function creates a new server with settings in the
+.Fa parameters
+object which may have the following properties:
+.Pp
+.Bl -tag -width 20n -compact -offset Ds
+.It Fa name No (string)
+The unique identifier name.
+.It Fa hostname No (string)
+The host or IP address.
+.It Fa ipv4 No (bool)
+Enable ipv4 (Optional, default: true).
+.It Fa ipv6 No (bool)
+Enable ipv6, (Optional, default: true).
+.It Fa port No (int)
+The port number, (Optional, default: 6667).
+.It Fa password No (string)
+The password, (Optional, default: undefined).
+.It Fa channels No (array)
+Array of channels (Optional, default: empty).
+.It Fa ssl No (bool)
+True to use ssl (Optional, default: false).
+.It Fa nickname No (string)
+Nickname, (Optional, default: irccd).
+.It Fa username No (string)
+User name, (Optional, default: irccd).
+.It Fa realname No (string)
+Real name, (Optional, default: IRC Client Daemon).
+.It Fa commandChar No (string)
+Plugin prefix character, (Optional, default: "!").
+.El
+.Pp
+.\" Irccd.Server.prototype.info
+The
+.Fn Irccd.Server.prototype.info
+method returns the server information. The object have the following
+properties:
+.Pp
+.Bl -tag -width 20n -compact -offset Ds
+.It Va name No (string)
+The server unique name.
+.It Va hostname No (string)
+The host name.
+.It Va port No (int)
+The port number.
+.It Va ssl No (bool)
+True if using ssl.
+.It Va channels No (array)
+An array of all channels.
+.It Va realname No (string)
+The current real name.
+.It Va username No (string)
+The user name.
+.It Va nickname No (string)
+The current nickname.
+.El
+.Pp
+.\" Irccd.Server.prototype.invite
+The
+.Fn Irccd.Server.prototype.invite
+method invites the specified
+.Fa target
+on the given
+.Fa channel .
+.Pp
+.\" Irccd.Server.prototype.isSelf
+The
+.Fn Irccd.Server.prototype.isSelf
+method returns true if
+.Fa nickname
+targets the bot.
+.Pp
+.\" Irccd.Server.prototype.join
+The
+.Fn Irccd.Server.prototype.join
+method joins the specified
+.Fa channel
+with an optional
+.Fa password .
+.Pp
+.\" Irccd.Server.prototype.kick
+The
+.Fn Irccd.Server.prototype.kick
+method kicks the specified
+.Fa target
+from the
+.Fa channel ,
+the
+.Fa reason
+is optional.
+.Pp
+.\" Irccd.Server.prototype.me
+The
+.Fn Irccd.Server.prototype.me
+method sends an action emote
+.Fa message
+to the given
+.Fa target .
+.Pp
+.\" Irccd.Server.prototype.message
+The
+.Fn Irccd.Server.prototype.message
+method sends the
+.Fa message
+to the specified
+.Fa target .
+.Pp
+.\" Irccd.Server.prototype.mode
+The
+.Fn Irccd.Server.prototype.mode
+method changes irccd's user mode or a channel mode. If the
+.Fa target
+is the bot's nickname, it changes its
+.Fa mode .
+otherwise it changes the channel one.
+The optional argument
+.Fa limit , user
+and
+.Fa mask
+are required depending on the mode mask. See IRC specification for more
+details.
+.Pp
+.\" Irccd.Server.prototype.names
+The
+.Fn Irccd.Server.prototype.names
+method requests a list of names for the given
+.Fa channel .
+This function will generate the onNames event.
+.Pp
+.\" Irccd.Server.prototype.nick
+The
+.Fn Irccd.Server.prototype.nick
+method changes the bot's
+.Fa nickname .
+.Pp
+.\" Irccd.Server.prototype.notice
+The
+.Fn Irccd.Server.prototype.notice
+method sends a private notice
+.Fa message
+to the specified
+.Fa target .
+.Pp
+.\" Irccd.Server.prototype.part
+The
+.Fn Irccd.Server.prototype.part
+method leaves the specified
+.Fa channel ,
+using an optional
+.Fa reason
+if not null.
+.Pp
+.\" Irccd.Server.prototype.toString
+The
+.Fn Irccd.Server.prototype.toString
+method converts the server to string by returning its unique identifier.
+Because each server has a unique identifier, this method allows adding a server
+as property key in maps.
+.Pp
+.\" Irccd.Server.prototype.topic
+The
+.Fn Irccd.Server.prototype.topic
+method sets the topic to
+.Fa topic
+in the given
+.Fa channel .
+.Pp
+.\" Irccd.Server.prototype.whois
+The
+.Fn Irccd.Server.prototype.whois
+method requests whois information for the
+.Fa target .
+This function will generate onWhois event.
+.Pp
+.\" EXCEPTIONS
+.Sh EXCEPTIONS
+.Bl -tag -width 22n
+.It Bq Er Irccd.ServerError
+Thrown on server errors. Usually on invalid arguments.
+.It Bq Er Error
+On other errors.
+.El
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd-api 3
