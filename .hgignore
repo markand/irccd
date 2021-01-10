@@ -11,5 +11,20 @@
 \.swp$
 \.swo$
 
+# libcompat.
+^extern/libcompat/src/.*\.h$
+^extern/libcompat/trycompile$
+^extern/libcompat/tryinclude$
+^extern/libcompat/trylib$
+
+# temporary files.
+\.a$
+\.o$
+\.d$
+
+# tests.
+^tests/test-util$
+
 # macOS specific.
 \.DS_Store$
+\.dSYM

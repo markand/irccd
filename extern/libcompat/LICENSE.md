@@ -1,7 +1,16 @@
-IRC Client Daemon ISC LICENSE
-=============================
+libcompat LICENSES
+==================
 
-Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
+Some files in this projects are licensed under different licenses and must be
+checked individually. Few files are kindly borrowed from OpenBSD and other
+projects.
+
+Other home made code in this repository is licensed under the following license:
+
+ISC
+---
+
+Copyright (c) 2020 David Demelier <markand@malikania.fr>
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
