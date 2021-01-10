@@ -25,12 +25,14 @@ include config.mk
 
 IRCCD=          irccd/irccd
 IRCCD_SRCS=     extern/libduktape/duktape.c     \
+                irccd/log.c                     \
                 irccd/subst.c                   \
                 irccd/util.c
 IRCCD_OBJS=     ${IRCCD_SRCS:.c=.o}
 IRCCD_DEPS=     ${IRCCD_SRCS:.c=.d}
 
-TESTS=          tests/test-util.c               \
+TESTS=          tests/test-log.c                \
+                tests/test-util.c               \
                 tests/test-subst.c
 TESTS_OBJS=     ${TESTS:.c=}
 

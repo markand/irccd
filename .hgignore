@@ -17,12 +17,16 @@
 ^extern/libcompat/tryinclude$
 ^extern/libcompat/trylib$
 
+# executables.
+irccd/irccd
+
 # temporary files.
 \.a$
 \.o$
 \.d$
 
 # tests.
+^tests/test-log$
 ^tests/test-subst$
 ^tests/test-util$
 
