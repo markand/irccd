@@ -25,11 +25,13 @@ include config.mk
 
 IRCCD=          irccd/irccd
 IRCCD_SRCS=     extern/libduktape/duktape.c     \
+                irccd/subst.c                   \
                 irccd/util.c
 IRCCD_OBJS=     ${IRCCD_SRCS:.c=.o}
 IRCCD_DEPS=     ${IRCCD_SRCS:.c=.d}
 
-TESTS=          tests/test-util.c
+TESTS=          tests/test-util.c               \
+                tests/test-subst.c
 TESTS_OBJS=     ${TESTS:.c=}
 
 FLAGS=          -D_BSD_SOURCE                   \

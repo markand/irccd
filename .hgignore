@@ -23,6 +23,7 @@
 \.d$
 
 # tests.
+^tests/test-subst$
 ^tests/test-util$
 
 # macOS specific.
