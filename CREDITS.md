@@ -14,17 +14,5 @@ Libraries and projects
 - Duktape, http://duktape.org
   Absolutely awesome JavaScript engine written in C by a super nice author.
 
-- CMake, http://cmake.org
-  The best build system ever.
-
-- Pandoc, http://pandoc.org
-  Powerful document converter.
-
-- Niels Lohmann JSON library, https://github.com/nlohmann/json
-  The best C++ JSON library.
-
-- Boost, http://boost.org
-  Powerful and portable libraries.
-
 - uriparser, https://uriparser.github.io
   Simple URI parser.

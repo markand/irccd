@@ -1,9 +1,0 @@
-{
-	"name": "localhost",
-	"hostname": "irc.localhost",
-	"port": 3344,
-	"password": "secret",
-	"nickname": "superbot",
-	"username": "sp",
-	"realname": "SuperBot 2000 NT"
-}
