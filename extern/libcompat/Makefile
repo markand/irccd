@@ -57,7 +57,7 @@ LIBS_SRCS=      lib/libm.a \
 FUNCTIONS_OBJS= ${FUNCTIONS_SRCS:.c=.o}
 FUNCTIONS_HDRS= ${FUNCTIONS_SRCS:.c=.h}
 
-LIB=            libcompat.a
+LIB=            libirccd-compat.a
 
 all: ${LIB}
 
@@ -69,7 +69,7 @@ all: ${LIB}
 	@CC="${CC}" CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" ./trycompile -c ${*F}
 
 .c.h:
-	@CC="${CC}" CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" ./trycompile ${*F}
+	CC="${CC}" CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" ./trycompile ${*F}
 
 ${FUNCTIONS_HDRS} ${FUNCTIONS_OBJS}: trycompile
 

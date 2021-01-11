@@ -16,58 +16,107 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-.POSIX:
-
 .SUFFIXES:
 .SUFFIXES: .o .c
 
 include config.mk
 
-IRCCD=          irccd/irccd
-IRCCD_SRCS=     extern/libduktape/duktape.c     \
-                irccd/log.c                     \
-                irccd/server.c                  \
-                irccd/subst.c                   \
-                irccd/util.c
-IRCCD_OBJS=     ${IRCCD_SRCS:.c=.o}
-IRCCD_DEPS=     ${IRCCD_SRCS:.c=.d}
+IRCCD=                  irccd/irccd
+IRCCD_SRCS=             irccd/main.c
+IRCCD_OBJS=             ${IRCCD_SRCS:.c=.o}
+IRCCD_DEPS=             ${IRCCD_SRCS:.c=.d}
 
-TESTS=          tests/test-log.c                \
-                tests/test-util.c               \
-                tests/test-subst.c
-TESTS_OBJS=     ${TESTS:.c=}
+LIBCOMPAT=              extern/libcompat/libirccd-compat.a
 
-FLAGS=          -D_BSD_SOURCE                   \
-                -I extern/libduktape            \
-                -I extern/libgreatest           \
-                -I extern/libcompat/include     \
-                -I .
+ifeq (${WITH_JS},yes)
+LIBDUKTAPE=             extern/libduktape/libirccd-duktape.a
+endif
+
+LIBIRCCD=               lib/libirccd.a
+LIBIRCCD_SRCS=          lib/irccd/dl-plugin.c
+LIBIRCCD_SRCS+=         lib/irccd/log.c
+LIBIRCCD_SRCS+=         lib/irccd/plugin.c
+LIBIRCCD_SRCS+=         lib/irccd/server.c
+LIBIRCCD_SRCS+=         lib/irccd/subst.c
+LIBIRCCD_SRCS+=         lib/irccd/util.c
+LIBIRCCD_OBJS=          ${LIBIRCCD_SRCS:.c=.o}
+LIBIRCCD_DEPS=          ${LIBIRCCD_SRCS:.c=.d}
+
+TESTS=                  tests/test-dl-plugin.c
+TESTS+=                 tests/test-log.c
+TESTS+=                 tests/test-util.c
+TESTS+=                 tests/test-subst.c
+TESTS_OBJS=             ${TESTS:.c=}
+
+DEFINES=                -D_BSD_SOURCE
+DEFINES+=               -DSOURCEDIR=\"`pwd`\"
+
+INCS=                   -I extern/libcompat/include
+ifeq (${WITH_JS},yes)
+INCS+=                  -I extern/libduktape
+endif
+INCS+=                  -I extern/libgreatest
+INCS+=                  -I lib
+
+LIBS=                   -L extern/libcompat
+ifeq (${WITH_JS},yes)
+LIBS+=                  -L extern/libduktape
+endif
+LIBS+=                  -L lib
+
+LIBS+=                  -l irccd-compat
+ifeq (${WITH_JS},yes)
+LIBS+=                  -l irccd-duktape
+endif
+LIBS+=                  -l irccd
 
 all: ${IRCCD}
 
 .c.o:
-	${CC} -MMD ${FLAGS} ${CFLAGS} -c $< -o $@
+	${CMD.cc}
 
-.c:
-	${CC} ${FLAGS} ${CFLAGS} $< -o $@ extern/libcompat/libcompat.a ${IRCCD_OBJS} ${LDFLAGS}
-
+-include ${LIBIRCCD_DEPS}
 -include ${IRCCD_DEPS}
 
-extern/libcompat/libcompat.a:
-	${MAKE} -C extern/libcompat
+${LIBCOMPAT}:
+	${MAKE} CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" -C extern/libcompat
 
-${IRCCD_OBJS}: extern/libcompat/libcompat.a
+ifeq (${WITH_JS},yes)
+${LIBDUKTAPE}:
+	${MAKE} CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" -C extern/libduktape
+endif
 
-${IRCCD}: irccd/main.o ${IRCCD_OBJS}
-	${CC} -o $@ extern/libcompat/libcompat.a irccd/main.o ${IRCCD_OBJS} ${LDFLAGS}
+${LIBIRCCD_OBJS}: ${LIBCOMPAT}
 
-clean:
-	${MAKE} -C extern/libcompat clean
-	rm -f irccd/main.o irccd/main.d ${IRCCD} ${IRCCD_OBJS} ${IRCCD_DEPS}
+${LIBIRCCD}: ${LIBIRCCD_OBJS}
+	${CMD.ar}
 
-${TESTS_OBJS}: ${IRCCD_OBJS}
+${IRCCD}: ${IRCCD_OBJS} ${LIBCOMPAT} ${LIBDUKTAPE} ${LIBIRCCD}
+	${CMD.ccld}
+
+# Unit tests.
+tests/test-%.o: tests/test-%.c
+	${CMD.cc}
+tests/test-%: tests/test-%.o ${LIBCOMPAT} ${IRCCD_OBJS}
+	${CMD.ccld}
+
+${TESTS_OBJS}: ${LIBIRCCD}
+
+# Sample plugin for test-dl-plugin.
+tests/example-dl-plugin${EXT.shared}: tests/example-dl-plugin.o
+	${CMD.ld-shared}
+
+tests/test-dl-plugin: tests/example-dl-plugin${EXT.shared}
 
 tests: ${TESTS_OBJS}
 	for t in ${TESTS_OBJS}; do ./$$t; done
+
+clean:
+	${MAKE} -C extern/libcompat clean
+	${MAKE} -C extern/libduktape clean
+	rm -f ${LIBIRCCD} ${LIBIRCCD_OBJS} ${LIBIRCCD_DEPS}
+	rm -f ${IRCCD} ${IRCCD_OBJS} ${IRCCD_DEPS}
+	rm -f tests/example-dl-plugin${EXT.shared} tests/example-dl-plugin.o tests/example-dl-plugin.d
+	rm -f ${TESTS_OBJS}
 
 .PHONY: all clean tests

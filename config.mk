@@ -16,8 +16,30 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-CC=             cc
+# Build tools.
+CC=                     cc
+AR=                     ar
 
-# Disable in release.
-CFLAGS=         -Wall -Wextra -g -O0 -fsanitize=address,undefined
-LDFLAGS=        -fsanitize=address,undefined
+# Installation paths.
+PREFIX=                 /usr/local
+BINDIR=                 bin
+
+# User options.
+WITH_JS=                yes
+
+# System dependant macros.
+OS:=                    $(shell uname -s)
+
+# Standard commands.
+CMD.cc=                 ${CC} ${DEFINES} ${INCS} ${CFLAGS} -MMD -c $< -o $@
+CMD.ccld=               ${CC} ${DEFINES} ${INCS} ${CFLAGS} -o $@ $< ${LIBS} ${LDFLAGS}
+CMD.ar=                 ${AR} -rc $@ $^
+
+# Determine shared library extension and command to generate.
+ifeq (Darwin,${OS})
+EXT.shared=             .dylib
+CMD.ld-shared=          ${CC} -dynamiclib -o $@ $^ ${LDFLAGS}
+else
+EXT.shared=             .so
+CMD.ld-shared=          ${CC} -shared -o $@ $^ ${LDFLAGS}
+endif

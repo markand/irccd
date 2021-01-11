@@ -20,8 +20,8 @@
 #include <stdio.h>
 #include <err.h>
 
-#include "event.h"
-#include "server.h"
+#include <irccd/event.h>
+#include <irccd/server.h>
 
 int
 main(int argc, char **argv)
@@ -58,6 +58,8 @@ main(int argc, char **argv)
 			case IRC_EVENT_ME:
 				printf("me, origin=%s,channel=%s,message=%s\n",
 				    ev.me.origin,ev.me.channel, ev.me.message);
+				break;
+			default:
 				break;
 			}
 		}

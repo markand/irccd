@@ -24,8 +24,11 @@ irccd/irccd
 \.a$
 \.o$
 \.d$
+\.so$
+\.dylib$
 
 # tests.
+^tests/test-dl-plugin$
 ^tests/test-log$
 ^tests/test-subst$
 ^tests/test-util$
