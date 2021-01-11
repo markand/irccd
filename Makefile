@@ -26,6 +26,7 @@ include config.mk
 IRCCD=          irccd/irccd
 IRCCD_SRCS=     extern/libduktape/duktape.c     \
                 irccd/log.c                     \
+                irccd/server.c                  \
                 irccd/subst.c                   \
                 irccd/util.c
 IRCCD_OBJS=     ${IRCCD_SRCS:.c=.o}
@@ -62,7 +63,7 @@ ${IRCCD}: irccd/main.o ${IRCCD_OBJS}
 
 clean:
 	${MAKE} -C extern/libcompat clean
-	rm -f irccd/main.o ${IRCCD} ${IRCCD_OBJS} ${IRCCD_DEPS}
+	rm -f irccd/main.o irccd/main.d ${IRCCD} ${IRCCD_OBJS} ${IRCCD_DEPS}
 
 ${TESTS_OBJS}: ${IRCCD_OBJS}
 
