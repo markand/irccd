@@ -1,5 +1,5 @@
 /*
- * limits.h -- irccd limits
+ * jsapi-server.c -- Irccd.Server API
  *
  * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
  *
@@ -16,27 +16,17 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_LIMITS_H
-#define IRCCD_LIMITS_H
+#ifndef IRCCD_JSAPI_SERVER_H
+#define IRCCD_JSAPI_SERVER_H
 
-/* IRC limits. */
-#define IRC_NICKNAME_MAX        32
-#define IRC_USERNAME_MAX        32
-#define IRC_REALNAME_MAX        64
-#define IRC_CHANNEL_MAX         64
-#define IRC_PASSWORD_MAX        64
-#define IRC_CTCPVERSION_MAX     128
-#define IRC_USERMODES_MAX       16
+#include <duktape.h>
 
-#define IRC_MESSAGE_MAX         512
-#define IRC_ARGS_MAX            16
+struct irc_server;
 
-/* Network limits. */
-#define IRC_HOST_MAX            32
-#define IRC_BUF_MAX             8192
+void
+irc_jsapi_server_push(duk_context *, struct irc_server *);
 
-/* Types limits. */
-#define IRC_NAME_MAX            16
-#define IRC_COMMANDCHAR_MAX     8
+void
+irc_jsapi_server_load(duk_context *);
 
-#endif /* !IRCCD_LIMITS_H */
+#endif /* IRCCD_JSAPI_SERVER_H */

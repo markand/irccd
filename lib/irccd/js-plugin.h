@@ -1,5 +1,5 @@
 /*
- * limits.h -- irccd limits
+ * js-plugin.h -- Javascript plugins
  *
  * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
  *
@@ -16,27 +16,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_LIMITS_H
-#define IRCCD_LIMITS_H
+#ifndef IRCCD_JS_PLUGIN_H
+#define IRCCD_JS_PLUGIN_H
 
-/* IRC limits. */
-#define IRC_NICKNAME_MAX        32
-#define IRC_USERNAME_MAX        32
-#define IRC_REALNAME_MAX        64
-#define IRC_CHANNEL_MAX         64
-#define IRC_PASSWORD_MAX        64
-#define IRC_CTCPVERSION_MAX     128
-#define IRC_USERMODES_MAX       16
+#include <stdbool.h>
 
-#define IRC_MESSAGE_MAX         512
-#define IRC_ARGS_MAX            16
+struct irc_plugin;
 
-/* Network limits. */
-#define IRC_HOST_MAX            32
-#define IRC_BUF_MAX             8192
+bool
+irc_js_plugin_open(struct irc_plugin *, const char *);
 
-/* Types limits. */
-#define IRC_NAME_MAX            16
-#define IRC_COMMANDCHAR_MAX     8
-
-#endif /* !IRCCD_LIMITS_H */
+#endif /* !IRCCD_JS_PLUGIN_H */

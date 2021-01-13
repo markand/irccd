@@ -437,6 +437,7 @@ parse(struct irc_server *s, struct irc_event *ev, const char *line)
 static void
 clear(struct irc_server *s)
 {
+	puts("clear...");
 	s->state = IRC_SERVER_STATE_DISCONNECTED;
 
 	if (s->fd != 0) {
@@ -473,7 +474,7 @@ lookup(struct irc_server *s)
 
 	snprintf(service, sizeof (service), "%hu", s->port);
 
-	if ((ret = getaddrinfo(s->host, service, &hints, &s->ai)) != 0)
+	if ((ret = getaddrinfo(s->hostname, service, &hints, &s->ai)) != 0)
 		irc_log_warn("server %s: %s", s->name, gai_strerror(ret));
 
 	s->aip = s->ai;
@@ -783,6 +784,7 @@ irc_server_disconnect(struct irc_server *s)
 {
 	assert(s);
 
+	puts("HERE?!");
 	clear(s);
 }
 
@@ -799,6 +801,9 @@ irc_server_prepare(const struct irc_server *s, struct pollfd *pfd)
 void
 irc_server_flush(struct irc_server *s, const struct pollfd *pfd)
 {
+	if (pfd->fd != s->fd)
+		return;
+
 	if (io_table[s->state].flush)
 		io_table[s->state].flush(s, pfd);
 }
@@ -872,6 +877,16 @@ irc_server_send(struct irc_server *s, const char *fmt, ...)
 }
 
 bool
+irc_server_invite(struct irc_server *s, const char *target, const char *channel)
+{
+	assert(s);
+	assert(target);
+	assert(channel);
+
+	return irc_server_send(s, "INVITE %s %s", target, channel);
+}
+
+bool
 irc_server_join(struct irc_server *s, const char *name, const char *pass)
 {
 	assert(s);
@@ -894,6 +909,23 @@ irc_server_join(struct irc_server *s, const char *name, const char *pass)
 		else
 			ret = irc_server_send(s, "JOIN %s", name);
 	}
+
+	return ret;
+}
+
+bool
+irc_server_kick(struct irc_server *s, const char *target, const char *channel, const char *reason)
+{
+	assert(s);
+	assert(target);
+	assert(channel);
+
+	bool ret;
+
+	if (reason)
+		ret = irc_server_send(s, "KICK %s %s :%s", channel, target, reason);
+	else
+		ret = irc_server_send(s, "KICK %s %s", channel, target);
 
 	return ret;
 }
@@ -942,6 +974,34 @@ irc_server_me(struct irc_server *s, const char *chan, const char *message)
 	assert(message);
 
 	return irc_server_send(s, "PRIVMSG %s :\001ACTION %s\001", chan, message);
+}
+
+bool
+irc_server_mode(struct irc_server *s,
+                const char *channel,
+                const char *mode,
+                const char *limit,
+                const char *user,
+                const char *mask)
+{
+	assert(s);
+	assert(channel);
+	assert(mode);
+
+	return irc_server_send(s, "MODE %s %s %s %s %s", channel, mode,
+	    limit ? limit : "",
+	    user ? user : "",
+	    mask ? mask : "");
+}
+
+bool
+irc_server_notice(struct irc_server *s, const char *target, const char *message)
+{
+	assert(s);
+	assert(target);
+	assert(message);
+
+	return irc_server_send(s, "NOTICE %s: %s", target, message);
 }
 
 void

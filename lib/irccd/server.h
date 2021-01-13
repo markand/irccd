@@ -70,9 +70,12 @@ enum irc_server_ssl_state {
 struct irc_server {
 	/* Connection settings. */
 	char name[IRC_NAME_MAX];
-	char host[IRC_HOST_MAX];
+	char hostname[IRC_HOST_MAX];
 	unsigned short port;
 	enum irc_server_flags flags;
+
+	/* Plugin prefix. */
+	char commandchar[IRC_COMMANDCHAR_MAX];
 
 	/* IRC identity. */
 	char nickname[IRC_NICKNAME_MAX];
@@ -127,7 +130,13 @@ bool
 irc_server_send(struct irc_server *, const char *, ...);
 
 bool
+irc_server_invite(struct irc_server *, const char *, const char *);
+
+bool
 irc_server_join(struct irc_server *, const char *, const char *);
+
+bool
+irc_server_kick(struct irc_server *, const char *, const char *, const char *);
 
 bool
 irc_server_part(struct irc_server *, const char *, const char *);
@@ -140,6 +149,17 @@ irc_server_message(struct irc_server *, const char *, const char *);
 
 bool
 irc_server_me(struct irc_server *, const char *, const char *);
+
+bool
+irc_server_mode(struct irc_server *,
+                const char *,
+                const char *,
+                const char *,
+                const char *,
+                const char *);
+
+bool
+irc_server_notice(struct irc_server *, const char *, const char *);
 
 void
 irc_server_finish(struct irc_server *);

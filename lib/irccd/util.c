@@ -53,7 +53,7 @@ irc_util_realloc(void *ptr, size_t size)
 {
 	void *ret;
 
-	if (!(ret = realloc(ptr, size)) && ptr)
+	if (!(ret = realloc(ptr, size)) && size)
 		err(1, "realloc");
 
 	return ret;

@@ -16,52 +16,48 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <poll.h>
 #include <stdio.h>
 #include <err.h>
 
 #include <irccd/event.h>
+#include <irccd/irccd.h>
+#include <irccd/js-plugin.h>
+#include <irccd/plugin.h>
+#include <irccd/log.h>
 #include <irccd/server.h>
+
+static struct irc_plugin js = {
+	.name = "example"
+};
 
 int
 main(int argc, char **argv)
 {
 	struct irc_server s = {
 		.name = "malikania",
-		.host = "malikania.fr",
+		.hostname = "malikania.fr",
 		.port = 6667,
 		.nickname = "circ",
 		.username = "circ",
 		.realname = "circ"
 	};
-	struct irc_event ev;
+	struct irc_server freenode = {
+		.name = "freenode",
+		.hostname = "chat.freenode.net",
+		.port = 6667,
+		.nickname = "circ",
+		.username = "circ",
+		.realname = "circ"
+	};
 
-	struct pollfd fd;
-
-	irc_server_connect(&s);
+	irc_init();
+	irc_log_set_verbose(true);
 	irc_server_join(&s, "#test", NULL);
-
-	for (;;) {
-		irc_server_prepare(&s, &fd);
-
-		if (poll(&fd, 1, -1) < 0)
-			err(1, "poll");
-
-		irc_server_flush(&s, &fd);
-
-		while (irc_server_poll(&s, &ev)) {
-			switch (ev.type) {
-			case IRC_EVENT_MESSAGE:
-				printf("message, origin=%s,channel=%s,message=%s\n",
-				    ev.message.origin,ev.message.channel, ev.message.message);
-				break;
-			case IRC_EVENT_ME:
-				printf("me, origin=%s,channel=%s,message=%s\n",
-				    ev.me.origin,ev.me.channel, ev.me.message);
-				break;
-			default:
-				break;
-			}
-		}
-	}
+	//irc_server_join(&freenode, "#irccd", NULL);
+	irc_add_server(&s);
+	irc_add_server(&freenode);
+	if (!irc_js_plugin_open(&js, "/Users/markand/Dev/irccd-4/test.js"))
+		return 1;
+	irc_add_plugin(&js);
+	irc_run();
 }

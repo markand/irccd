@@ -34,11 +34,27 @@ endif
 
 LIBIRCCD=               lib/libirccd.a
 LIBIRCCD_SRCS=          lib/irccd/dl-plugin.c
+LIBIRCCD_SRCS+=         lib/irccd/irccd.c
 LIBIRCCD_SRCS+=         lib/irccd/log.c
 LIBIRCCD_SRCS+=         lib/irccd/plugin.c
 LIBIRCCD_SRCS+=         lib/irccd/server.c
 LIBIRCCD_SRCS+=         lib/irccd/subst.c
 LIBIRCCD_SRCS+=         lib/irccd/util.c
+
+ifeq (${WITH_JS},yes)
+LIBIRCCD_SRCS+=         lib/irccd/js-plugin.c
+LIBIRCCD_SRCS+=         lib/irccd/jsapi-chrono.c
+LIBIRCCD_SRCS+=         lib/irccd/jsapi-file.c
+LIBIRCCD_SRCS+=         lib/irccd/jsapi-irccd.c
+LIBIRCCD_SRCS+=         lib/irccd/jsapi-logger.c
+LIBIRCCD_SRCS+=         lib/irccd/jsapi-plugin.c
+LIBIRCCD_SRCS+=         lib/irccd/jsapi-server.c
+LIBIRCCD_SRCS+=         lib/irccd/jsapi-system.c
+LIBIRCCD_SRCS+=         lib/irccd/jsapi-timer.c
+LIBIRCCD_SRCS+=         lib/irccd/jsapi-unicode.c
+LIBIRCCD_SRCS+=         lib/irccd/unicode.c
+endif
+
 LIBIRCCD_OBJS=          ${LIBIRCCD_SRCS:.c=.o}
 LIBIRCCD_DEPS=          ${LIBIRCCD_SRCS:.c=.d}
 

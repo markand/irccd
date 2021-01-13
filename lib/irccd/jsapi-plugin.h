@@ -1,5 +1,5 @@
 /*
- * limits.h -- irccd limits
+ * jsapi-plugin.h -- Javascript plugins
  *
  * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
  *
@@ -16,27 +16,21 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_LIMITS_H
-#define IRCCD_LIMITS_H
+#ifndef IRCCD_JSAPI_PLUGIN_H
+#define IRCCD_JSAPI_PLUGIN_H
 
-/* IRC limits. */
-#define IRC_NICKNAME_MAX        32
-#define IRC_USERNAME_MAX        32
-#define IRC_REALNAME_MAX        64
-#define IRC_CHANNEL_MAX         64
-#define IRC_PASSWORD_MAX        64
-#define IRC_CTCPVERSION_MAX     128
-#define IRC_USERMODES_MAX       16
+#include <duktape.h>
 
-#define IRC_MESSAGE_MAX         512
-#define IRC_ARGS_MAX            16
+#define IRC_JSAPI_PLUGIN_PROP_OPTIONS   DUK_HIDDEN_SYMBOL("options")
+#define IRC_JSAPI_PLUGIN_PROP_TEMPLATES DUK_HIDDEN_SYMBOL("templates")
+#define IRC_JSAPI_PLUGIN_PROP_PATHS     DUK_HIDDEN_SYMBOL("paths")
 
-/* Network limits. */
-#define IRC_HOST_MAX            32
-#define IRC_BUF_MAX             8192
+struct irc_plugin;
 
-/* Types limits. */
-#define IRC_NAME_MAX            16
-#define IRC_COMMANDCHAR_MAX     8
+void
+irc_jsapi_plugin_load(duk_context *, struct irc_plugin *);
 
-#endif /* !IRCCD_LIMITS_H */
+struct irc_plugin *
+irc_jsapi_plugin_self(duk_context *);
+
+#endif /* !IRCCD_JSAPI_PLUGIN_H */

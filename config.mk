@@ -20,6 +20,9 @@
 CC=                     cc
 AR=                     ar
 
+CFLAGS=                 -g -O0 -fsanitize=address,undefined
+LDFLAGS=                -fsanitize=address,undefined
+
 # Installation paths.
 PREFIX=                 /usr/local
 BINDIR=                 bin

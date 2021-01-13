@@ -21,10 +21,12 @@
 
 #include <stdbool.h>
 
+#include "limits.h"
+
 struct irc_event;
 
 struct irc_plugin {
-	const char *name;
+	char name[IRC_NAME_MAX];
 	const char *license;
 	const char *version;
 	const char *author;
