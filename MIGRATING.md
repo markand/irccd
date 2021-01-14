@@ -3,6 +3,56 @@ IRC Client Daemon MIGRATING
 
 This document is a small guide to help you migrating to a next major version.
 
+Migrating from 3.x to 4.x
+=========================
+
+Irccd
+-----
+
+- The `irccd.conf` is now using a custom syntax.
+- There are no longer TCP/IP transports. SSL support for transports has been
+  removed too. Only clear UNIX socket are available, use file permissions
+  instead of a password.
+
+Irccdctl
+--------
+
+The `irccdctl.conf` is now using a custom syntax.
+
+Build system and platform support
+---------------------------------
+
+The build system has been switched from CMake to GNU make. Windows support is
+now completely obsolescent because the code make excessive use of POSIX
+specification.
+
+Network API
+-----------
+
+The network protocol no longer uses JSON but a plain text syntax with one line
+per command.
+
+Example:
+
+    SERVER-MESSAGE freenode #staff hello world
+    SERVER-LIST
+
+Javascript API
+--------------
+
+### Module File
+
+- The method `File.readline` is no longer marked as slow.
+
+### Module Chrono
+
+- The `Chrono.elapsed()` method is now a property named `elapsed`.
+- All methods have been removed except `Chrono.reset`.
+
+### Module Util
+
+- The method `Util.ticks` as been removed.
+
 Migrating from 2.x to 3.x
 =========================
 
@@ -41,7 +91,8 @@ Plugins
 - Formats `cnotice`, `cmode`, `query` have been removed.
 - The option `path` has been renamed to `file`.
 
-## Network API
+Network API
+-----------
 
 - The requests `server-cnotice` and `server-cmode` have been removed, use
   `server-notice` and `server-mode` instead,

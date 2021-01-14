@@ -1,11 +1,20 @@
 IRC Client Daemon CHANGES
 =========================
 
-irccd current
+irccd 4.0.0 ????-??-??
 ----------------------
+
+This is a major release. See MIGRATING.md file for more information.
+
+The biggest change is the rewrite from C++ to C. The only runtime dependency
+required is OpenSSL (if built with SSL support).
 
 - Split irccd-api manual page into individual irccd-api-<module> for a better
   readability.
+- Network protocol uses plain text again.
+- Transports uses clear UNIX sockets only.
+- New `irccd.conf` and `irccdctl.conf` syntax.
+- New network protocol.
 
 irccd 3.1.1 2021-01-04
 ----------------------
