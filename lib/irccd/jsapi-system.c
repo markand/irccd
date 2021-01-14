@@ -122,7 +122,7 @@ System_name(duk_context *ctx)
 #elif defined(sun)
 	duk_push_string(ctx, "Solaris");
 #else
-	return "Unknown";
+	duk_push_string(ctx, "Unknown");
 #endif
 
 	return 1;
