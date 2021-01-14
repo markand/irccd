@@ -29,6 +29,7 @@ BINDIR=                 bin
 
 # User options.
 WITH_JS=                yes
+WITH_SSL=               no
 
 # System dependant macros.
 OS:=                    $(shell uname -s)

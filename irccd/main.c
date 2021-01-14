@@ -25,6 +25,7 @@
 #include <irccd/plugin.h>
 #include <irccd/log.h>
 #include <irccd/server.h>
+#include <irccd/transport.h>
 
 static struct irc_plugin js = {
 	.name = "example"
@@ -53,11 +54,13 @@ main(int argc, char **argv)
 	irc_init();
 	irc_log_set_verbose(true);
 	irc_server_join(&s, "#test", NULL);
-	//irc_server_join(&freenode, "#irccd", NULL);
+	irc_transport_bind("/tmp/irccd.sock");
 	irc_add_server(&s);
 	irc_add_server(&freenode);
+#if 0
 	if (!irc_js_plugin_open(&js, "/Users/markand/Dev/irccd-4/test.js"))
 		return 1;
 	irc_add_plugin(&js);
+#endif
 	irc_run();
 }

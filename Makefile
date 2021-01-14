@@ -21,6 +21,10 @@
 
 include config.mk
 
+MAJOR=                  4
+MINOR=                  0
+PATCH=                  0
+
 IRCCD=                  irccd/irccd
 IRCCD_SRCS=             irccd/main.c
 IRCCD_OBJS=             ${IRCCD_SRCS:.c=.o}
@@ -36,9 +40,11 @@ LIBIRCCD=               lib/libirccd.a
 LIBIRCCD_SRCS=          lib/irccd/dl-plugin.c
 LIBIRCCD_SRCS+=         lib/irccd/irccd.c
 LIBIRCCD_SRCS+=         lib/irccd/log.c
+LIBIRCCD_SRCS+=         lib/irccd/peer.c
 LIBIRCCD_SRCS+=         lib/irccd/plugin.c
 LIBIRCCD_SRCS+=         lib/irccd/server.c
 LIBIRCCD_SRCS+=         lib/irccd/subst.c
+LIBIRCCD_SRCS+=         lib/irccd/transport.c
 LIBIRCCD_SRCS+=         lib/irccd/util.c
 
 ifeq (${WITH_JS},yes)
@@ -86,6 +92,10 @@ LIBS+=                  -l irccd-duktape
 endif
 LIBS+=                  -l irccd
 
+ifeq (${WITH_SSL},yes)
+LIBS+=                  -l ssl -l crypto
+endif
+
 all: ${IRCCD}
 
 .c.o:
@@ -102,7 +112,21 @@ ${LIBDUKTAPE}:
 	${MAKE} CFLAGS="${CFLAGS}" LDFLAGS="${LDFLAGS}" -C extern/libduktape
 endif
 
-${LIBIRCCD_OBJS}: ${LIBCOMPAT}
+ifneq (${WITH_JS},yes)
+EXTRA_SEDS+=    -e "/IRCCD_WITH_JS/d"
+endif
+
+ifneq (${WITH_SSL},yes)
+EXTRA_SEDS+=    -e "/IRCCD_WITH_SSL/d"
+endif
+
+lib/irccd/config.h: lib/irccd/config.h.in Makefile config.mk
+	sed -e "s/@IRCCD_VERSION_MAJOR@/${MAJOR}/" \
+	    -e "s/@IRCCD_VERSION_MINOR@/${MINOR}/" \
+	    -e "s/@IRCCD_VERSION_PATCH@/${PATCH}/" \
+	    ${EXTRA_SEDS} < $< > $@
+
+${LIBIRCCD_OBJS}: ${LIBCOMPAT} lib/irccd/config.h
 
 ${LIBIRCCD}: ${LIBIRCCD_OBJS}
 	${CMD.ar}

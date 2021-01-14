@@ -21,6 +21,7 @@
 irccd/irccd
 
 # temporary files.
+^lib/irccd/config\.h$
 \.a$
 \.o$
 \.d$

@@ -437,7 +437,6 @@ parse(struct irc_server *s, struct irc_event *ev, const char *line)
 static void
 clear(struct irc_server *s)
 {
-	puts("clear...");
 	s->state = IRC_SERVER_STATE_DISCONNECTED;
 
 	if (s->fd != 0) {
@@ -784,7 +783,6 @@ irc_server_disconnect(struct irc_server *s)
 {
 	assert(s);
 
-	puts("HERE?!");
 	clear(s);
 }
 
@@ -855,7 +853,7 @@ irc_server_send(struct irc_server *s, const char *fmt, ...)
 	assert(s);
 	assert(fmt);
 
-	char buf[sizeof (s->out)];
+	char buf[IRC_BUF_MAX];
 	va_list ap;
 	size_t len, avail, required;
 
@@ -877,11 +875,11 @@ irc_server_send(struct irc_server *s, const char *fmt, ...)
 }
 
 bool
-irc_server_invite(struct irc_server *s, const char *target, const char *channel)
+irc_server_invite(struct irc_server *s, const char *channel, const char *target)
 {
 	assert(s);
-	assert(target);
 	assert(channel);
+	assert(target);
 
 	return irc_server_send(s, "INVITE %s %s", target, channel);
 }
@@ -914,11 +912,11 @@ irc_server_join(struct irc_server *s, const char *name, const char *pass)
 }
 
 bool
-irc_server_kick(struct irc_server *s, const char *target, const char *channel, const char *reason)
+irc_server_kick(struct irc_server *s, const char *channel, const char *target, const char *reason)
 {
 	assert(s);
-	assert(target);
 	assert(channel);
+	assert(target);
 
 	bool ret;
 
@@ -931,29 +929,29 @@ irc_server_kick(struct irc_server *s, const char *target, const char *channel, c
 }
 
 bool
-irc_server_part(struct irc_server *s, const char *name, const char *reason)
+irc_server_part(struct irc_server *s, const char *channel, const char *reason)
 {
 	assert(s);
-	assert(name);
+	assert(channel);
 
 	bool ret;
 
 	if (reason && strlen(reason) > 0)
-		ret = irc_server_send(s, "PART %s :%s", name, reason);
+		ret = irc_server_send(s, "PART %s :%s", channel, reason);
 	else
-		ret = irc_server_send(s, "PART %s", name);
+		ret = irc_server_send(s, "PART %s", channel);
 
 	return ret;
 }
 
 bool
-irc_server_topic(struct irc_server *s, const char *name, const char *topic)
+irc_server_topic(struct irc_server *s, const char *channel, const char *topic)
 {
 	assert(s);
-	assert(name);
+	assert(channel);
 	assert(topic);
 
-	return irc_server_send(s, "TOPIC %s :%s", name, topic);
+	return irc_server_send(s, "TOPIC %s :%s", channel, topic);
 }
 
 bool
@@ -995,13 +993,13 @@ irc_server_mode(struct irc_server *s,
 }
 
 bool
-irc_server_notice(struct irc_server *s, const char *target, const char *message)
+irc_server_notice(struct irc_server *s, const char *channel, const char *message)
 {
 	assert(s);
-	assert(target);
+	assert(channel);
 	assert(message);
 
-	return irc_server_send(s, "NOTICE %s: %s", target, message);
+	return irc_server_send(s, "NOTICE %s: %s", channel, message);
 }
 
 void
