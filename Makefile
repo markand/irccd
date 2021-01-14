@@ -30,6 +30,11 @@ IRCCD_SRCS=             irccd/main.c
 IRCCD_OBJS=             ${IRCCD_SRCS:.c=.o}
 IRCCD_DEPS=             ${IRCCD_SRCS:.c=.d}
 
+IRCCDCTL=               irccdctl/irccdctl
+IRCCDCTL_SRCS=          irccdctl/main.c
+IRCCDCTL_OBJS=          ${IRCCDCTL_SRCS:.c=.o}
+IRCCDCTL_DEPS=          ${IRCCDCTL_SRCS:.c=.d}
+
 LIBCOMPAT=              extern/libcompat/libirccd-compat.a
 
 ifeq (${WITH_JS},yes)
@@ -96,7 +101,7 @@ ifeq (${WITH_SSL},yes)
 LIBS+=                  -l ssl -l crypto
 endif
 
-all: ${IRCCD}
+all: ${IRCCD} ${IRCCDCTL}
 
 .c.o:
 	${CMD.cc}
@@ -132,6 +137,9 @@ ${LIBIRCCD}: ${LIBIRCCD_OBJS}
 	${CMD.ar}
 
 ${IRCCD}: ${IRCCD_OBJS} ${LIBCOMPAT} ${LIBDUKTAPE} ${LIBIRCCD}
+	${CMD.ccld}
+
+${IRCCDCTL}: ${IRCCDCTL_OBJS}
 	${CMD.ccld}
 
 # Unit tests.

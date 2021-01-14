@@ -75,11 +75,19 @@ require_server(struct irc_peer *p, const char *id)
 	return s;
 }
 
+static int
+ok(struct irc_peer *p)
+{
+	irc_peer_send(p, "OK");
+
+	return 0;
+}
+
 /*
  * MESSAGE server channel message
  */
 static int
-cmd_message(struct irc_peer *p, char *line)
+cmd_server_message(struct irc_peer *p, char *line)
 {
 	const char *args[3] = {0};
 	struct irc_server *s;
@@ -91,14 +99,14 @@ cmd_message(struct irc_peer *p, char *line)
 
 	irc_server_message(s, args[1], args[2]);
 
-	return 0;
+	return ok(p);
 }
 
 /*
  * ME server channel message
  */
 static int
-cmd_me(struct irc_peer *p, char *line)
+cmd_server_me(struct irc_peer *p, char *line)
 {
 	const char *args[3] = {0};
 	struct irc_server *s;
@@ -110,14 +118,14 @@ cmd_me(struct irc_peer *p, char *line)
 
 	irc_server_me(s, args[1], args[2]);
 
-	return 0;
+	return ok(p);
 }
 
 /*
  * MODE server channel mode [limit] [user] [mask]
  */
 static int
-cmd_mode(struct irc_peer *p, char *line)
+cmd_server_mode(struct irc_peer *p, char *line)
 {
 	const char *args[6] = {0};
 	struct irc_server *s;
@@ -133,14 +141,14 @@ cmd_mode(struct irc_peer *p, char *line)
 	    args[5][0] ? args[5] : NULL
 	);
 
-	return 0;
+	return ok(p);
 }
 
 /*
  * NOTICE server channel message
  */
 static int
-cmd_notice(struct irc_peer *p, char *line)
+cmd_server_notice(struct irc_peer *p, char *line)
 {
 	const char *args[3] = {0};
 	struct irc_server *s;
@@ -152,14 +160,14 @@ cmd_notice(struct irc_peer *p, char *line)
 
 	irc_server_notice(s, args[1], args[2]);
 
-	return 0;
+	return ok(p);
 }
 
 /*
  * INVITE server channel target
  */
 static int
-cmd_invite(struct irc_peer *p, char *line)
+cmd_server_invite(struct irc_peer *p, char *line)
 {
 	const char *args[3] = {0};
 	struct irc_server *s;
@@ -171,14 +179,14 @@ cmd_invite(struct irc_peer *p, char *line)
 
 	irc_server_invite(s, args[1], args[2]);
 
-	return 0;
+	return ok(p);
 }
 
 /*
  * JOIN server channel [password]
  */
 static int
-cmd_join(struct irc_peer *p, char *line)
+cmd_server_join(struct irc_peer *p, char *line)
 {
 	const char *args[3] = {0};
 	struct irc_server *s;
@@ -190,14 +198,14 @@ cmd_join(struct irc_peer *p, char *line)
 
 	irc_server_join(s, args[1], args[2][0] ? args[2] : NULL);
 
-	return 0;
+	return ok(p);
 }
 
 /*
  * KICK server channel target [reason]
  */
 static int
-cmd_kick(struct irc_peer *p, char *line)
+cmd_server_kick(struct irc_peer *p, char *line)
 {
 	const char *args[4] = {0};
 	struct irc_server *s;
@@ -209,6 +217,23 @@ cmd_kick(struct irc_peer *p, char *line)
 
 	irc_server_kick(s, args[1], args[2], args[3][0] ? args[3] : NULL);
 
+	return ok(p);
+}
+
+static int
+cmd_server_list(struct irc_peer *p, char *line)
+{
+	char out[IRC_BUF_MAX] = "OK ";
+
+	for (size_t i = 0; i < irc.serversz; ++i) {
+		if (strlcat(out, irc.servers[i].name, sizeof (out)) >= sizeof (out))
+			return EMSGSIZE;
+		if (i + 1 < irc.serversz && strlcat(out, " ", sizeof (out)) >= sizeof (out))
+			return EMSGSIZE;
+	}
+
+	irc_peer_send(p, out);
+
 	return 0;
 }
 
@@ -216,7 +241,7 @@ cmd_kick(struct irc_peer *p, char *line)
  * PART server channel [reason]
  */
 static int
-cmd_part(struct irc_peer *p, char *line)
+cmd_server_part(struct irc_peer *p, char *line)
 {
 	const char *args[3] = {0};
 	struct irc_server *s;
@@ -224,18 +249,18 @@ cmd_part(struct irc_peer *p, char *line)
 	if (parse(line, args, 3) < 2)
 		return EINVAL;
 	if (!(s = require_server(p, args[0])))
-		return -10;
+		return 0;
 
 	irc_server_part(s, args[1], args[2][0] ? args[2] : NULL);
 
-	return 0;
+	return ok(p);
 }
 
 /*
  * TOPIC server channel topic
  */
 static int
-cmd_topic(struct irc_peer *p, char *line)
+cmd_server_topic(struct irc_peer *p, char *line)
 {
 	const char *args[3] = {0};
 	struct irc_server *s;
@@ -247,22 +272,23 @@ cmd_topic(struct irc_peer *p, char *line)
 
 	irc_server_topic(s, args[1], args[2]);
 
-	return 0;
+	return ok(p);
 }
 
 static const struct cmd {
 	const char *name;
 	int (*call)(struct irc_peer *, char *);
 } cmds[] = {
-	{ "INVITE",     cmd_invite      },
-	{ "JOIN",       cmd_join        },
-	{ "KICK",       cmd_kick        },
-	{ "ME",         cmd_me          },
-	{ "MESSAGE",    cmd_message     },
-	{ "MODE",       cmd_mode        },
-	{ "NOTICE",     cmd_notice      },
-	{ "PART",       cmd_part        },
-	{ "TOPIC",      cmd_topic       },
+	{ "SERVER-INVITE",      cmd_server_invite       },
+	{ "SERVER-JOIN",        cmd_server_join         },
+	{ "SERVER-KICK",        cmd_server_kick         },
+	{ "SERVER-LIST",        cmd_server_list         },
+	{ "SERVER-ME",          cmd_server_me           },
+	{ "SERVER-MESSAGE",     cmd_server_message      },
+	{ "SERVER-MODE",        cmd_server_mode         },
+	{ "SERVER-NOTICE",      cmd_server_notice       },
+	{ "SERVER-PART",        cmd_server_part         },
+	{ "SERVER-TOPIC",       cmd_server_topic        },
 };
 
 static int
@@ -271,7 +297,7 @@ cmp_cmd(const void *d1, const void *d2)
 	const char *key = d1;
 	const struct cmd *cmd = d2;
 
-	return strncmp(cmd->name, key, strlen(cmd->name));
+	return strncmp(key, cmd->name, strlen(cmd->name));
 }
 
 static const struct cmd *
@@ -288,10 +314,8 @@ invoke(struct irc_peer *p, char *line)
 
 	if (!c)
 		irc_peer_send(p, "command not found");
-	else if ((er = c->call(p, line)) != 0 && er != -1)
+	else if ((er = c->call(p, line)) != 0)
 		irc_peer_send(p, "%s", strerror(errno));
-	else
-		irc_peer_send(p, "OK");
 }
 
 static void

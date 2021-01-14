@@ -18,7 +18,8 @@
 ^extern/libcompat/trylib$
 
 # executables.
-irccd/irccd
+^irccd/irccd$
+^irccdctl/irccdctl$
 
 # temporary files.
 ^lib/irccd/config\.h$

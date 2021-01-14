@@ -40,12 +40,14 @@ irc_transport_bind(const char *path)
 {
 	assert(path);
 
-	/* Silently remove the file first. */
+	addr.sun_family = PF_LOCAL;
+
 	if (strlcpy(addr.sun_path, path, sizeof (addr.sun_path)) >= sizeof (addr.sun_path)) {
 		errno = ENAMETOOLONG;
 		goto err;
 	}
 
+	/* Silently remove the file first. */
 	unlink(addr.sun_path);
 
 	if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0)) < 0)
