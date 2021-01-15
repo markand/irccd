@@ -34,10 +34,11 @@
 #       include <openssl/err.h>
 #endif
 
+#include "channel.h"
 #include "event.h"
 #include "log.h"
 #include "server.h"
-#include "channel.h"
+#include "set.h"
 #include "util.h"
 
 struct origin {
@@ -74,12 +75,9 @@ ctcp(char *line)
 }
 
 static int
-compare_chan(const void *d1, const void *d2)
+cmp_channel(const struct irc_channel *c1, const struct irc_channel *c2)
 {
-	return strcmp(
-		((const struct irc_channel *)d1)->name,
-		((const struct irc_channel *)d2)->name
-	);
+	return strcmp(c1->name, c2->name);
 }
 
 static const struct origin *
@@ -98,12 +96,6 @@ parse_origin(const char *prefix)
 	return &origin;
 }
 
-static inline void
-sort(struct irc_server *s)
-{
-	qsort(s->channels, s->channelsz, sizeof (*s->channels), compare_chan);
-}
-
 static struct irc_channel *
 add_channel(struct irc_server *s, const char *name, const char *password, bool joined)
 {
@@ -116,10 +108,7 @@ add_channel(struct irc_server *s, const char *name, const char *password, bool j
 	if (password)
 		strlcpy(ch.password, password, sizeof (ch.password));
 
-	s->channels = irc_util_reallocarray(s->channels, ++s->channelsz, sizeof (ch));
-
-	memcpy(&s->channels[s->channelsz - 1], &ch, sizeof (ch));
-	sort(s);
+	IRC_SET_ALLOC_PUSH(&s->channels, &s->channelsz, &ch, cmp_channel);
 
 	return irc_server_find(s, name);
 }
@@ -127,11 +116,7 @@ add_channel(struct irc_server *s, const char *name, const char *password, bool j
 static void
 remove_channel(struct irc_server *s, struct irc_channel *ch)
 {
-	/* Null channel name will be moved at the end. */
-	memset(ch, 0, sizeof (*ch));
-
-	s->channels = irc_util_reallocarray(s->channels, --s->channelsz, sizeof (*ch));
-	sort(s);
+	IRC_SET_ALLOC_REMOVE(&s->channels, &s->channelsz, ch);
 }
 
 static void
@@ -842,7 +827,7 @@ irc_server_find(struct irc_server *s, const char *name)
 
 	strlcpy(key.name, name, sizeof (key.name));
 
-	return bsearch(&key, s->channels, s->channelsz, sizeof (key), compare_chan);
+	return IRC_SET_FIND(s->channels, s->channelsz, &key, cmp_channel);
 }
 
 bool

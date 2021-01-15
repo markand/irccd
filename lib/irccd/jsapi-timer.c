@@ -148,11 +148,10 @@ timer_routine(void *data)
 	 * 2. It has been stopped by the user (tm->stopped is true).
 	 * 3. The plugin is shutting down (tm->kill is true).
 	 */
-	printf("FINISHED: %d, %d\n", rc, tm->status);
 	if (rc == ETIMEDOUT && tm->status == TIMER_ACTIVE)
-		irc_post(timer_expired, tm);
+		irc_bot_post(timer_expired, tm);
 	else
-		irc_post(timer_aborted, tm);
+		irc_bot_post(timer_aborted, tm);
 
 	return NULL;
 }

@@ -27,30 +27,13 @@
 #include "event.h"
 #include "irccd.h"
 #include "log.h"
-#include "plugin.h"
-#include "server.h"
 #include "peer.h"
-#include "transport.h"
+#include "plugin.h"
 #include "rule.h"
+#include "server.h"
+#include "set.h"
+#include "transport.h"
 #include "util.h"
-
-#define APPEND(a, l, o, f)                                              \
-do {                                                                    \
-        a = irc_util_reallocarray(a, ++l, sizeof (*o));                 \
-        memcpy(&a[l - 1], o, sizeof (*o));                              \
-        qsort(a, l, sizeof (*o), f);                                    \
-} while (0)
-
-#define REMOVE(a, l, f)                                                 \
-do {                                                                    \
-        if (--l == 0) {                                                 \
-                free(a);                                                \
-                a = NULL;                                               \
-        } else {                                                        \
-                qsort(a, l + 1, sizeof (*a), f);                        \
-                a = irc_util_reallocarray(a, --l, sizeof (*a));         \
-        }                                                               \
-} while (0)
 
 struct pkg {
 	struct pollfd *fds;
@@ -67,39 +50,21 @@ struct irc irc;
 static int pipes[2];
 
 static int
-cmp_server(const void *d1, const void *d2)
+cmp_server(const struct irc_server *s1, const struct irc_server *s2)
 {
-	return strcmp(
-		((const struct irc_server *)d1)->name,
-		((const struct irc_server *)d2)->name
-	);
+	return strcmp(s1->name, s2->name);
 }
 
 static int
-cmp_plugin(const void *d1, const void *d2)
+cmp_plugin(const struct irc_plugin *p1, const struct irc_plugin *p2)
 {
-	return strcmp(
-		((const struct irc_plugin *)d1)->name,
-		((const struct irc_plugin *)d2)->name
-	);
+	return strcmp(p1->name, p2->name);
 }
 
 static int
-cmp_peer(const void *d1, const void *d2)
+cmp_peer(const struct irc_peer *p1, const struct irc_peer *p2)
 {
-	return ((const struct irc_peer *)d2)->fd - ((const struct irc_peer *)d1)->fd;
-}
-
-static int
-cmp_server_name(const void *d1, const void *d2)
-{
-	return strcmp(d1, ((const struct irc_server *)d2)->name);
-}
-
-static int
-cmp_plugin_name(const void *d1, const void *d2)
-{
-	return strcmp(d1, ((const struct irc_plugin *)d2)->name);
+	return p1->fd - p2->fd;
 }
 
 static struct pkg
@@ -174,14 +139,15 @@ process(struct pkg *pkg)
 
 		/* Accept new transport client. */
 		if (irc_transport_flush(&pkg->fds[i], &peer))
-			APPEND(irc.peers, irc.peersz, &peer, cmp_peer);
+			IRC_SET_ALLOC_PUSH(&irc.peers, &irc.peersz, &peer, cmp_peer);
 
 		/* Flush clients. */
-		for (size_t p = 0; p < irc.peersz; ++p) {
+		for (size_t p = 0; p < irc.peersz; ) {
 			if (!irc_peer_flush(&irc.peers[p], &pkg->fds[i])) {
 				irc_peer_finish(&irc.peers[p]);
-				REMOVE(irc.peers, irc.peersz, cmp_peer);
-			}
+				IRC_SET_ALLOC_REMOVE(&irc.peers, &irc.peersz, &irc.peers[p]);
+			} else
+				++p;
 		}
 	}
 
@@ -204,7 +170,7 @@ clean(struct pkg *pkg)
 }
 
 void
-irc_init(void)
+irc_bot_init(void)
 {
 	irc_log_to_console();
 
@@ -213,28 +179,30 @@ irc_init(void)
 }
 
 void
-irc_add_server(const struct irc_server *s)
+irc_bot_add_server(const struct irc_server *s)
 {
 	assert(s);
 
-	APPEND(irc.servers, irc.serversz, s, cmp_server);
-
+	IRC_SET_ALLOC_PUSH(&irc.servers, &irc.serversz, s, cmp_server);
 	irc_server_connect(&irc.servers[irc.serversz - 1]);
 }
 
 struct irc_server *
-irc_find_server(const char *name)
+irc_bot_find_server(const char *name)
 {
-	return bsearch(name, irc.servers, irc.serversz, sizeof (*irc.servers),
-	    cmp_server_name);
+	struct irc_server key = {0};
+
+	strlcpy(key.name, name, sizeof (key.name));
+
+	return IRC_SET_FIND(irc.servers, irc.serversz, &key, cmp_server);
 }
 
 void
-irc_del_server(const char *name)
+irc_bot_remove_server(const char *name)
 {
 	struct irc_server *s;
 
-	if (!(s = irc_find_server(name)))
+	if (!(s = irc_bot_find_server(name)))
 		return;
 
 	irc_server_disconnect(s);
@@ -246,15 +214,15 @@ irc_del_server(const char *name)
 	});
 
 	/* Finally remove from array. */
-	REMOVE(irc.servers, irc.serversz, cmp_server);
+	IRC_SET_ALLOC_REMOVE(&irc.servers, &irc.serversz, s);
 }
 
 void
-irc_add_plugin(const struct irc_plugin *p)
+irc_bot_add_plugin(const struct irc_plugin *p)
 {
 	assert(p);
 
-	APPEND(irc.plugins, irc.pluginsz, p, cmp_plugin);
+	IRC_SET_ALLOC_PUSH(&irc.plugins, &irc.pluginsz, p, cmp_plugin);
 
 	irc_log_info("plugin %s: %s", p->name, p->description);
 	irc_log_info("plugin %s: version %s, from %s (%s license)", p->name,
@@ -264,24 +232,27 @@ irc_add_plugin(const struct irc_plugin *p)
 }
 
 struct irc_plugin *
-irc_find_plugin(const char *name)
+irc_bot_find_plugin(const char *name)
 {
-	return bsearch(name, irc.plugins, irc.pluginsz, sizeof (*irc.plugins),
-	    cmp_plugin_name);
+	struct irc_plugin key = {0};
+
+	strlcpy(key.name, name, sizeof (key.name));
+
+	return IRC_SET_FIND(irc.plugins, irc.pluginsz, &key, cmp_plugin);
 }
 
 void
-irc_del_plugin(const char *name)
+irc_bot_remove_plugin(const char *name)
 {
 	struct irc_plugin *p;
 
-	if (!(p = irc_find_plugin(name)))
+	if (!(p = irc_bot_find_plugin(name)))
 		return;
 
 	irc_plugin_unload(p);
 	irc_plugin_finish(p);
 
-	REMOVE(irc.plugins, irc.pluginsz, cmp_plugin);
+	IRC_SET_ALLOC_REMOVE(&irc.plugins, &irc.pluginsz, p);
 }
 
 bool
@@ -315,7 +286,7 @@ irc_bot_remove_rule(size_t i)
 }
 
 void
-irc_post(void (*exec)(void *), void *data)
+irc_bot_post(void (*exec)(void *), void *data)
 {
 	struct defer df = {
 		.exec = exec,
@@ -327,7 +298,7 @@ irc_post(void (*exec)(void *), void *data)
 }
 
 void
-irc_run(void)
+irc_bot_run(void)
 {
 	struct pkg pkg;
 

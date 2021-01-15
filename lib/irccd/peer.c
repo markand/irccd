@@ -67,7 +67,7 @@ require_server(struct irc_peer *p, const char *id)
 {
 	struct irc_server *s;
 
-	if (!(s = irc_find_server(id))) {
+	if (!(s = irc_bot_find_server(id))) {
 		irc_peer_send(p, "server %s not found", id);
 		return NULL;
 	}

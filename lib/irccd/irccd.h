@@ -43,25 +43,25 @@ extern struct irc {
 } irc;
 
 void
-irc_init(void);
+irc_bot_init(void);
 
 void
-irc_add_server(const struct irc_server *);
+irc_bot_add_server(const struct irc_server *);
 
 struct irc_server *
-irc_find_server(const char *);
+irc_bot_find_server(const char *);
 
 void
-irc_del_server(const char *);
+irc_bot_remove_server(const char *);
 
 void
-irc_add_plugin(const struct irc_plugin *);
+irc_bot_add_plugin(const struct irc_plugin *);
 
 struct irc_plugin *
-irc_find_plugin(const char *);
+irc_bot_find_plugin(const char *);
 
 void
-irc_del_plugin(const char *);
+irc_bot_remove_plugin(const char *);
 
 bool
 irc_bot_insert_rule(const struct irc_rule *, size_t);
@@ -70,9 +70,9 @@ void
 irc_bot_remove_rule(size_t);
 
 void
-irc_post(void (*)(void *), void *);
+irc_bot_post(void (*)(void *), void *);
 
 void
-irc_run(void);
+irc_bot_run(void);
 
 #endif /* !IRCCD_H */

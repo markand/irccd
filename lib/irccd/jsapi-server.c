@@ -38,7 +38,7 @@ self(duk_context *ctx)
 
 	duk_push_this(ctx);
 	duk_get_prop_string(ctx, -1, SIGNATURE);
-	sv = irc_find_server(duk_to_string(ctx, -1));
+	sv = irc_bot_find_server(duk_to_string(ctx, -1));
 	duk_pop_2(ctx);
 
 	if (!sv)
@@ -56,7 +56,7 @@ require(duk_context *ctx, duk_idx_t index)
 		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Server object");
 
 	duk_get_prop_string(ctx, index, SIGNATURE);
-	sv = irc_find_server(duk_to_string(ctx, -1));
+	sv = irc_bot_find_server(duk_to_string(ctx, -1));
 	duk_pop(ctx);
 
 	return sv;

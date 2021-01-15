@@ -136,7 +136,7 @@ Plugin_info(duk_context *ctx)
 	struct irc_plugin *p;
 
 	if (duk_get_top(ctx) >= 1)
-		p = irc_find_plugin(duk_require_string(ctx, 0));
+		p = irc_bot_find_plugin(duk_require_string(ctx, 0));
 	else
 		p = irc_jsapi_plugin_self(ctx);
 

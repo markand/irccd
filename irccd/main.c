@@ -36,9 +36,8 @@ main(int argc, char **argv)
 
 	irc_server_join(&s, "#test", NULL);
 
-	irc_init();
 	irc_log_set_verbose(true);
-	irc_add_server(&s);
-	irc_run();
-
+	irc_bot_init();
+	irc_bot_add_server(&s);
+	irc_bot_run();
 }
