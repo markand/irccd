@@ -37,6 +37,7 @@
 #include "event.h"
 #include "log.h"
 #include "server.h"
+#include "channel.h"
 #include "util.h"
 
 struct origin {
@@ -76,8 +77,8 @@ static int
 compare_chan(const void *d1, const void *d2)
 {
 	return strcmp(
-		((const struct irc_server_channel *)d1)->name,
-		((const struct irc_server_channel *)d2)->name
+		((const struct irc_channel *)d1)->name,
+		((const struct irc_channel *)d2)->name
 	);
 }
 
@@ -103,10 +104,10 @@ sort(struct irc_server *s)
 	qsort(s->channels, s->channelsz, sizeof (*s->channels), compare_chan);
 }
 
-static struct irc_server_channel *
+static struct irc_channel *
 add_channel(struct irc_server *s, const char *name, const char *password, bool joined)
 {
-	struct irc_server_channel ch = {
+	struct irc_channel ch = {
 		.joined = joined
 	};
 
@@ -124,7 +125,7 @@ add_channel(struct irc_server *s, const char *name, const char *password, bool j
 }
 
 static void
-remove_channel(struct irc_server *s, struct irc_server_channel *ch)
+remove_channel(struct irc_server *s, struct irc_channel *ch)
 {
 	/* Null channel name will be moved at the end. */
 	memset(ch, 0, sizeof (*ch));
@@ -190,7 +191,7 @@ static void
 convert_join(struct irc_server *s, struct irc_event *ev)
 {
 	const struct origin *origin = parse_origin(ev->args[0]);
-	struct irc_server_channel *ch;
+	struct irc_channel *ch;
 
 	ev->type = IRC_EVENT_JOIN;
 	ev->server = s;
@@ -221,7 +222,7 @@ convert_kick(struct irc_server *s, struct irc_event *ev)
 	 * rejoin it automatically if the option is set.
 	 */
 	if (strcmp(ev->args[3], s->nickname) == 0) {
-		struct irc_server_channel *ch = irc_server_find(s, ev->args[2]);
+		struct irc_channel *ch = irc_server_find(s, ev->args[2]);
 
 		if (ch) {
 			ch->joined = false;
@@ -241,22 +242,13 @@ convert_mode(struct irc_server *s, struct irc_event *ev)
 	for (size_t i = 0; i < ev->argsz; ++i) {
 		printf("MODE: %zu=%s\n", i, ev->args[i]);
 	}
-
-#if 0
-	if (strcmp(m->args[0], s->nickname) == 0) {
-		/* Own user modes. */
-		strlcpy(s->usermodes, m->args[1], sizeof (s->usermodes);
-	} else {
-		/* TODO: channel modes. */
-	}
-#endif
 }
 
 static void
 convert_part(struct irc_server *s, struct irc_event *ev)
 {
 	const struct origin *origin = parse_origin(ev->args[0]);
-	struct irc_server_channel *ch = irc_server_find(s, ev->args[2]);
+	struct irc_channel *ch = irc_server_find(s, ev->args[2]);
 
 	ev->type = IRC_EVENT_PART;
 	ev->server = s;
@@ -331,7 +323,7 @@ convert_names(struct irc_server *s, struct irc_event *ev)
 	(void)s;
 	(void)ev;
 #if 0
-	struct irc_server_channel *chan;
+	struct irc_channel *chan;
 	char *p, *n;
 
 	if (m->argsz < 3 || !(chan = irc_server_find(s, m->args[2])))
@@ -582,6 +574,8 @@ dial(struct irc_server *s)
 	}
 
 	for (; s->aip; s->aip = s->aip->ai_next) {
+		int cflags;
+
 		/* We may need to close a socket that was open earlier. */
 		if (s->fd != 0)
 			close(s->fd);
@@ -594,8 +588,12 @@ dial(struct irc_server *s)
 			continue;
 		}
 
-		/* TODO: is F_GETFL required before? */
-		fcntl(s->fd, F_SETFL, O_NONBLOCK);
+		if ((cflags = fcntl(s->fd, F_GETFL)) < 0) {
+			irc_log_warn("server %s: %s", s->name, strerror(errno));
+			continue;
+		}
+
+		fcntl(s->fd, F_SETFL, cflags | O_NONBLOCK);
 
 		/*
 		 * With some luck, the connection completes immediately,
@@ -834,13 +832,13 @@ irc_server_poll(struct irc_server *s, struct irc_event *ev)
 	return true;
 }
 
-struct irc_server_channel *
+struct irc_channel *
 irc_server_find(struct irc_server *s, const char *name)
 {
 	assert(s);
 	assert(name);
 
-	struct irc_server_channel key = {0};
+	struct irc_channel key = {0};
 
 	strlcpy(key.name, name, sizeof (key.name));
 
@@ -890,7 +888,7 @@ irc_server_join(struct irc_server *s, const char *name, const char *pass)
 	assert(s);
 	assert(name);
 
-	struct irc_server_channel *ch;
+	struct irc_channel *ch;
 	bool ret = true;
 
 	/*

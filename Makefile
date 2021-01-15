@@ -42,7 +42,8 @@ LIBDUKTAPE=             extern/libduktape/libirccd-duktape.a
 endif
 
 LIBIRCCD=               lib/libirccd.a
-LIBIRCCD_SRCS=          lib/irccd/dl-plugin.c
+LIBIRCCD_SRCS=          lib/irccd/channel.c
+LIBIRCCD_SRCS+=         lib/irccd/dl-plugin.c
 LIBIRCCD_SRCS+=         lib/irccd/irccd.c
 LIBIRCCD_SRCS+=         lib/irccd/log.c
 LIBIRCCD_SRCS+=         lib/irccd/peer.c
@@ -70,7 +71,8 @@ endif
 LIBIRCCD_OBJS=          ${LIBIRCCD_SRCS:.c=.o}
 LIBIRCCD_DEPS=          ${LIBIRCCD_SRCS:.c=.d}
 
-TESTS=                  tests/test-dl-plugin.c
+TESTS=                  tests/test-channel.c
+TESTS+=                 tests/test-dl-plugin.c
 TESTS+=                 tests/test-log.c
 TESTS+=                 tests/test-rule.c
 TESTS+=                 tests/test-subst.c

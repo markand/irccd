@@ -20,6 +20,7 @@
 
 #include <duktape.h>
 
+#include "channel.h"
 #include "irccd.h"
 #include "server.h"
 

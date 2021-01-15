@@ -30,6 +30,7 @@
 \.dylib$
 
 # tests.
+^tests/test-channel$
 ^tests/test-dl-plugin$
 ^tests/test-log$
 ^tests/test-rule$

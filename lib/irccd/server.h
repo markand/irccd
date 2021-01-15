@@ -30,13 +30,8 @@
 
 struct pollfd;
 
+struct irc_channel;
 struct irc_event;
-
-struct irc_server_channel {
-	char name[IRC_CHANNEL_MAX];
-	char password[IRC_PASSWORD_MAX];
-	bool joined;
-};
 
 enum irc_server_state {
 	IRC_SERVER_STATE_DISCONNECTED,
@@ -82,10 +77,9 @@ struct irc_server {
 	char username[IRC_USERNAME_MAX];
 	char realname[IRC_REALNAME_MAX];
 	char ctcpversion[IRC_CTCPVERSION_MAX];
-	char usermodes[IRC_USERMODES_MAX];
 
 	/* Joined channels. */
-	struct irc_server_channel *channels;
+	struct irc_channel *channels;
 	size_t channelsz;
 
 	/* Network connectivity. */
@@ -123,7 +117,7 @@ irc_server_flush(struct irc_server *, const struct pollfd *);
 bool
 irc_server_poll(struct irc_server *, struct irc_event *);
 
-struct irc_server_channel *
+struct irc_channel *
 irc_server_find(struct irc_server *, const char *);
 
 bool

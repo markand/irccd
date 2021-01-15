@@ -19,57 +19,26 @@
 #include <stdio.h>
 #include <err.h>
 
-#include <irccd/event.h>
 #include <irccd/irccd.h>
-#include <irccd/js-plugin.h>
-#include <irccd/plugin.h>
 #include <irccd/log.h>
 #include <irccd/server.h>
-#include <irccd/transport.h>
-
-#include <irccd/rule.h>
-
-static struct irc_plugin js = {
-	.name = "example"
-};
-
-#include <string.h>
-
-static void
-dump(void)
-{
-	for (size_t i = 0; i < irc.rulesz; ++i) {
-		printf("== rule %zd ==\n", i);
-		printf("servers => %s\n", irc.rules[i].servers);
-	}
-}
 
 int
 main(int argc, char **argv)
 {
-	struct irc_rule r = {0};
+	struct irc_server s = {
+		.name = "malikania",
+		.username = "circ",
+		.nickname = "circ",
+		.hostname = "malikania.fr",
+		.port = 6667
+	};
 
-	irc_rule_add(r.servers, "malikania");
-	//irc_rule_add(r.servers, "freenode");
+	irc_server_join(&s, "#test", NULL);
 
-	printf("%d\n", irc_rule_match(&r, "malikania", "", "", "", ""));
-
-#if 0
-	irc_rule_add(r.servers, "malikania");
-	irc_bot_insert_rule(&r, 0);
-	strcpy(r.servers, "freenode:");
-	irc_bot_insert_rule(&r, 15);
-	strcpy(r.servers, "oftc:");
-	irc_bot_insert_rule(&r, 0);
-	strcpy(r.servers, "jean:");
-	irc_bot_insert_rule(&r, 1);
-
-	puts("BEFORE");
-	dump();
-	irc_bot_remove_rule(3);
-	puts("AFTER");
-	dump();
-#endif
-
+	irc_init();
+	irc_log_set_verbose(true);
+	irc_add_server(&s);
+	irc_run();
 
 }
