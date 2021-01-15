@@ -19,11 +19,17 @@
 #ifndef IRCCD_H
 #define IRCCD_H
 
+#include <stdbool.h>
 #include <stddef.h>
+
+#include "rule.h"
 
 struct irc_server;
 struct irc_plugin;
 struct irc_peer;
+
+
+#define IRC_BOT_RULE_MAX 256
 
 extern struct irc {
 	struct irc_peer *peers;
@@ -32,6 +38,8 @@ extern struct irc {
 	size_t pluginsz;
 	struct irc_server *servers;
 	size_t serversz;
+	struct irc_rule rules[IRC_BOT_RULE_MAX];
+	size_t rulesz;
 } irc;
 
 void
@@ -54,6 +62,12 @@ irc_find_plugin(const char *);
 
 void
 irc_del_plugin(const char *);
+
+bool
+irc_bot_insert_rule(const struct irc_rule *, size_t);
+
+void
+irc_bot_remove_rule(size_t);
 
 void
 irc_post(void (*)(void *), void *);

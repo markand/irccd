@@ -27,40 +27,49 @@
 #include <irccd/server.h>
 #include <irccd/transport.h>
 
+#include <irccd/rule.h>
+
 static struct irc_plugin js = {
 	.name = "example"
 };
 
+#include <string.h>
+
+static void
+dump(void)
+{
+	for (size_t i = 0; i < irc.rulesz; ++i) {
+		printf("== rule %zd ==\n", i);
+		printf("servers => %s\n", irc.rules[i].servers);
+	}
+}
+
 int
 main(int argc, char **argv)
 {
-	struct irc_server s = {
-		.name = "malikania",
-		.hostname = "malikania.fr",
-		.port = 6667,
-		.nickname = "circ",
-		.username = "circ",
-		.realname = "circ"
-	};
-	struct irc_server freenode = {
-		.name = "freenode",
-		.hostname = "chat.freenode.net",
-		.port = 6667,
-		.nickname = "circ",
-		.username = "circ",
-		.realname = "circ"
-	};
+	struct irc_rule r = {0};
 
-	irc_init();
-	irc_log_set_verbose(true);
-	irc_server_join(&s, "#test", NULL);
-	irc_transport_bind("/tmp/irccd.sock");
-	irc_add_server(&s);
-	irc_add_server(&freenode);
+	irc_rule_add(r.servers, "malikania");
+	//irc_rule_add(r.servers, "freenode");
+
+	printf("%d\n", irc_rule_match(&r, "malikania", "", "", "", ""));
+
 #if 0
-	if (!irc_js_plugin_open(&js, "/Users/markand/Dev/irccd-4/test.js"))
-		return 1;
-	irc_add_plugin(&js);
+	irc_rule_add(r.servers, "malikania");
+	irc_bot_insert_rule(&r, 0);
+	strcpy(r.servers, "freenode:");
+	irc_bot_insert_rule(&r, 15);
+	strcpy(r.servers, "oftc:");
+	irc_bot_insert_rule(&r, 0);
+	strcpy(r.servers, "jean:");
+	irc_bot_insert_rule(&r, 1);
+
+	puts("BEFORE");
+	dump();
+	irc_bot_remove_rule(3);
+	puts("AFTER");
+	dump();
 #endif
-	irc_run();
+
+
 }

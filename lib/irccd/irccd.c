@@ -18,6 +18,7 @@
 
 #include <assert.h>
 #include <err.h>
+#include <errno.h>
 #include <poll.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,10 +31,8 @@
 #include "server.h"
 #include "peer.h"
 #include "transport.h"
+#include "rule.h"
 #include "util.h"
-
-/* TODO: TMP */
-#include <stdio.h>
 
 #define APPEND(a, l, o, f)                                              \
 do {                                                                    \
@@ -283,6 +282,36 @@ irc_del_plugin(const char *name)
 	irc_plugin_finish(p);
 
 	REMOVE(irc.plugins, irc.pluginsz, cmp_plugin);
+}
+
+bool
+irc_bot_insert_rule(const struct irc_rule *rule, size_t i)
+{
+	assert(rule);
+
+	if (irc.rulesz >= IRC_RULE_MAX) {
+		errno = ENOMEM;
+		return false;
+	}
+
+	if (i >= irc.rulesz)
+		i = irc.rulesz;
+
+	memmove(&irc.rules[i + 1], &irc.rules[i], sizeof (*irc.rules) * (irc.rulesz++ - i));
+	memcpy(&irc.rules[i], rule, sizeof (*rule));
+
+	return true;
+}
+
+void
+irc_bot_remove_rule(size_t i)
+{
+	assert(i < irc.rulesz);
+
+	if (i + 1 >= irc.rulesz)
+		irc.rulesz--;
+	else
+		memmove(&irc.rules[i], &irc.rules[i + 1], sizeof (*irc.rules) * (irc.rulesz-- - i));
 }
 
 void

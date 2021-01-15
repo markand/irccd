@@ -47,6 +47,7 @@ LIBIRCCD_SRCS+=         lib/irccd/irccd.c
 LIBIRCCD_SRCS+=         lib/irccd/log.c
 LIBIRCCD_SRCS+=         lib/irccd/peer.c
 LIBIRCCD_SRCS+=         lib/irccd/plugin.c
+LIBIRCCD_SRCS+=         lib/irccd/rule.c
 LIBIRCCD_SRCS+=         lib/irccd/server.c
 LIBIRCCD_SRCS+=         lib/irccd/subst.c
 LIBIRCCD_SRCS+=         lib/irccd/transport.c
@@ -71,8 +72,9 @@ LIBIRCCD_DEPS=          ${LIBIRCCD_SRCS:.c=.d}
 
 TESTS=                  tests/test-dl-plugin.c
 TESTS+=                 tests/test-log.c
-TESTS+=                 tests/test-util.c
+TESTS+=                 tests/test-rule.c
 TESTS+=                 tests/test-subst.c
+TESTS+=                 tests/test-util.c
 TESTS_OBJS=             ${TESTS:.c=}
 
 DEFINES=                -D_BSD_SOURCE
@@ -133,7 +135,7 @@ lib/irccd/config.h: lib/irccd/config.h.in Makefile config.mk
 
 ${LIBIRCCD_OBJS}: ${LIBCOMPAT} lib/irccd/config.h
 
-${LIBIRCCD}: ${LIBIRCCD_OBJS}
+${LIBIRCCD}: ${LIBIRCCD_OBJS} ${LIBDUKTAPE}
 	${CMD.ar}
 
 ${IRCCD}: ${IRCCD_OBJS} ${LIBCOMPAT} ${LIBDUKTAPE} ${LIBIRCCD}
@@ -143,10 +145,8 @@ ${IRCCDCTL}: ${IRCCDCTL_OBJS}
 	${CMD.ccld}
 
 # Unit tests.
-tests/test-%.o: tests/test-%.c
-	${CMD.cc}
-tests/test-%: tests/test-%.o ${LIBCOMPAT} ${IRCCD_OBJS}
-	${CMD.ccld}
+tests/test-%: tests/test-%.c
+	${CC} ${DEFINES} ${INCS} ${CFLAGS} -o $@ $< ${LIBS} ${LDFLAGS}
 
 ${TESTS_OBJS}: ${LIBIRCCD}
 

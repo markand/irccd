@@ -32,6 +32,7 @@
 # tests.
 ^tests/test-dl-plugin$
 ^tests/test-log$
+^tests/test-rule$
 ^tests/test-subst$
 ^tests/test-util$
 
