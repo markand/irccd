@@ -24,12 +24,11 @@
 
 #include "rule.h"
 
+#define IRC_BOT_RULE_MAX 256
+
 struct irc_server;
 struct irc_plugin;
 struct irc_peer;
-
-
-#define IRC_BOT_RULE_MAX 256
 
 extern struct irc {
 	struct irc_peer *peers;
@@ -46,13 +45,16 @@ void
 irc_bot_init(void);
 
 void
-irc_bot_add_server(const struct irc_server *);
+irc_bot_add_server(struct irc_server *);
 
 struct irc_server *
 irc_bot_find_server(const char *);
 
 void
 irc_bot_remove_server(const char *);
+
+void
+irc_bot_clear_servers(void);
 
 void
 irc_bot_add_plugin(const struct irc_plugin *);

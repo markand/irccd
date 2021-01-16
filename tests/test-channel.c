@@ -31,6 +31,11 @@ basics_add(void)
 	GREATEST_ASSERT_EQ(ch.users[0].mode, '@');
 	GREATEST_ASSERT_STR_EQ(ch.users[0].nickname, "markand");
 
+	irc_channel_add(&ch, "markand", '@');
+	GREATEST_ASSERT_EQ(ch.usersz, 1U);
+	GREATEST_ASSERT_EQ(ch.users[0].mode, '@');
+	GREATEST_ASSERT_STR_EQ(ch.users[0].nickname, "markand");
+
 	irc_channel_add(&ch, "jean", 0);
 	GREATEST_ASSERT_EQ(ch.usersz, 2U);
 	GREATEST_ASSERT_EQ(ch.users[0].mode, 0);

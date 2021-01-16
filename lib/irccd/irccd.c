@@ -89,9 +89,8 @@ prepare(void)
 
 	for (size_t p = 0; p < irc.peersz; ++p)
 		irc_peer_prepare(&irc.peers[p], &pkg.fds[i++]);
-
-	for (size_t s = 0; s < irc.serversz; ++s)
-		irc_server_prepare(&irc.servers[s], &pkg.fds[i++]);
+	for (struct irc_server *s = irc.servers; s; s = s->next)
+		irc_server_prepare(s, &pkg.fds[i++]);
 
 	return pkg;
 }
@@ -134,8 +133,13 @@ process(struct pkg *pkg)
 
 		pipe_flush(&pkg->fds[i]);
 
+#if 0
 		for (size_t s = 0; s < irc.serversz; ++s)
-			irc_server_flush(&irc.servers[s], &pkg->fds[i]);
+			irc_server_flush(irc.servers[s], &pkg->fds[i]);
+#endif
+		for (struct irc_server *s = irc.servers; s; s = s->next)
+			irc_server_flush(s, &pkg->fds[i]);
+
 
 		/* Accept new transport client. */
 		if (irc_transport_flush(&pkg->fds[i], &peer))
@@ -155,10 +159,10 @@ process(struct pkg *pkg)
 	 * For every server, poll any kind of new event and pass them to the
 	 * plugin unless the rules explicitly disallow us to do so.
 	 */
-	for (size_t s = 0; s < irc.serversz; ++s) {
+	for (struct irc_server *s = irc.servers; s; s = s->next) {
 		struct irc_event ev;
 
-		while (irc_server_poll(&irc.servers[s], &ev))
+		while (irc_server_poll(s, &ev))
 			invoke(&ev);
 	}
 }
@@ -179,28 +183,34 @@ irc_bot_init(void)
 }
 
 void
-irc_bot_add_server(const struct irc_server *s)
+irc_bot_add_server(struct irc_server *s)
 {
 	assert(s);
 
-	IRC_SET_ALLOC_PUSH(&irc.servers, &irc.serversz, s, cmp_server);
-	irc_server_connect(&irc.servers[irc.serversz - 1]);
+	irc_server_incref(s);
+	irc_server_connect(s);
+
+	s->next = irc.servers;
+	irc.servers = s;
+	irc.serversz++;
 }
 
 struct irc_server *
 irc_bot_find_server(const char *name)
 {
-	struct irc_server key = {0};
+	struct irc_server *s;
 
-	strlcpy(key.name, name, sizeof (key.name));
+	for (s = irc.servers; s; s = s->next)
+		if (strcmp(s->name, name) == 0)
+			return s;
 
-	return IRC_SET_FIND(irc.servers, irc.serversz, &key, cmp_server);
+	return NULL;
 }
 
 void
 irc_bot_remove_server(const char *name)
 {
-	struct irc_server *s;
+	struct irc_server *s, *p;
 
 	if (!(s = irc_bot_find_server(name)))
 		return;
@@ -213,8 +223,35 @@ irc_bot_remove_server(const char *name)
 		.server = s
 	});
 
-	/* Finally remove from array. */
-	IRC_SET_ALLOC_REMOVE(&irc.servers, &irc.serversz, s);
+	if (s == irc.servers)
+		irc.servers = irc.servers->next;
+	else {
+		/* x -> y -> z */
+		/*      ^      */
+		/*      s      */
+		for (p = irc.servers->next; p->next != s; p = p->next)
+			continue;
+
+		p->next = s->next;
+	}
+
+	irc_server_decref(s);
+	irc.serversz--;
+}
+
+void
+irc_bot_clear_servers(void)
+{
+	struct irc_server *s, *next;
+
+	if (!(s = irc.servers))
+		return;
+
+	while (s) {
+		next = s->next;
+		irc_bot_remove_server(s->name);
+		s = next;
+	}
 }
 
 void

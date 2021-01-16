@@ -22,7 +22,9 @@
 
 #include "channel.h"
 #include "irccd.h"
+#include "jsapi-server.h"
 #include "server.h"
+#include "util.h"
 
 #define SIGNATURE DUK_HIDDEN_SYMBOL("Irccd.Server")
 #define PROTOTYPE DUK_HIDDEN_SYMBOL("Irccd.Server.prototype")
@@ -30,15 +32,11 @@
 static struct irc_server *
 self(duk_context *ctx)
 {
-	/*
-	 * Server are stored using their identifiers and searched in the
-	 * registry as they may be removed at runtime.
-	 */
 	struct irc_server *sv;
 
 	duk_push_this(ctx);
 	duk_get_prop_string(ctx, -1, SIGNATURE);
-	sv = irc_bot_find_server(duk_to_string(ctx, -1));
+	sv = duk_to_pointer(ctx, -1);
 	duk_pop_2(ctx);
 
 	if (!sv)
@@ -56,7 +54,7 @@ require(duk_context *ctx, duk_idx_t index)
 		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Server object");
 
 	duk_get_prop_string(ctx, index, SIGNATURE);
-	sv = irc_bot_find_server(duk_to_string(ctx, -1));
+	sv = duk_to_pointer(ctx, -1);
 	duk_pop(ctx);
 
 	return sv;
@@ -87,9 +85,28 @@ Server_prototype_info(duk_context *ctx)
 
 	duk_push_array(ctx);
 
-	for (size_t i = 0; i < s->channelsz; ++i) {
-		duk_push_string(ctx, s->channels[i].name);
-		duk_put_prop_index(ctx, -2, i);
+	for (size_t c = 0; c < s->channelsz; ++c) {
+		duk_push_object(ctx);
+		duk_push_string(ctx, s->channels[c].name);
+		duk_put_prop_string(ctx, -2, "name");
+		duk_push_boolean(ctx, s->channels[c].joined);
+		duk_put_prop_string(ctx, -2, "joined");
+		duk_push_array(ctx);
+
+		for (size_t n = 0; n < s->channels[c].usersz; ++n) {
+			duk_push_object(ctx);
+			duk_push_string(ctx, s->channels[c].users[n].nickname);
+			duk_put_prop_string(ctx, -2, "nickname");
+			if (s->channels[c].users[n].mode)
+				duk_push_sprintf(ctx, "%c", s->channels[c].users[n].mode);
+			else
+				duk_push_null(ctx);
+			duk_put_prop_string(ctx, -2, "mode");
+			duk_put_prop_index(ctx, -2, n);
+		}
+
+		duk_put_prop_string(ctx, -2, "users");
+		duk_put_prop_index(ctx, -2, c);
 	}
 
 	duk_put_prop_string(ctx, -2, "channels");
@@ -232,9 +249,7 @@ Server_prototype_names(duk_context *ctx)
 		throw server_error(server_error::invalid_channel);
 #endif
 
-#if 0
-	duk_push_boolean(ctx, irc_server_names(channel));
-#endif
+	duk_push_boolean(ctx, irc_server_names(s, channel));
 
 	return 1;
 }
@@ -250,11 +265,9 @@ Server_prototype_nick(duk_context *ctx)
 		throw server_error(server_error::invalid_nickname);
 #endif
 
-#if 0
-	duk_push_boolean(set_nickname(std::move(nickname));
-#endif
+	duk_push_boolean(ctx, irc_server_nick(s, nickname));
 
-	return 0;
+	return 1;
 }
 
 static duk_ret_t
@@ -350,93 +363,175 @@ Server_prototype_toString(duk_context *ctx)
 	return 1;
 }
 
+static inline void
+get_name(duk_context *ctx, struct irc_server *s)
+{
+	duk_get_prop_string(ctx, 0, "name");
+
+	if (!duk_is_string(ctx, -1))
+		duk_error(ctx, DUK_ERR_ERROR, "invalid 'name' property");
+
+	strlcpy(s->name, duk_to_string(ctx, -1), sizeof (s->name));
+	duk_pop(ctx);
+}
+
+static inline void
+get_port(duk_context *ctx, struct irc_server *s)
+{
+	duk_get_prop_string(ctx, 0, "port");
+
+	if (!duk_is_number(ctx, -1))
+		duk_error(ctx, DUK_ERR_ERROR, "invalid 'port' property");
+
+	s->port = duk_to_int(ctx, -1);
+	duk_pop(ctx);
+}
+
+static inline void
+get_ip(duk_context *ctx, struct irc_server *s)
+{
+	enum irc_server_flags flags = IRC_SERVER_FLAGS_IPV4 |
+	                              IRC_SERVER_FLAGS_IPV6;
+
+	duk_get_prop_string(ctx, 0, "ipv4");
+	duk_get_prop_string(ctx, 0, "ipv6");
+
+	if (duk_is_boolean(ctx, -1) && !duk_to_boolean(ctx, -1))
+		flags &= ~(IRC_SERVER_FLAGS_IPV4);
+	if (duk_is_boolean(ctx, -2) && !duk_to_boolean(ctx, -2))
+		flags &= ~(IRC_SERVER_FLAGS_IPV6);
+
+	s->flags |= flags;
+	duk_pop_n(ctx, 2);
+}
+
+static inline void
+get_ssl(duk_context *ctx, struct irc_server *s)
+{
+	duk_get_prop_string(ctx, 0, "ssl");
+
+	if (duk_is_boolean(ctx, -1) && duk_to_boolean(ctx, -1))
+		s->flags |= IRC_SERVER_FLAGS_SSL;
+
+	duk_pop(ctx);
+}
+
+static inline void
+get_string(duk_context *ctx, const char *n, char *dst, size_t dstsz)
+{
+	duk_get_prop_string(ctx, 0, n);
+
+	if (duk_is_string(ctx, -1) && duk_is_string(ctx ,-1))
+		strlcpy(dst, duk_to_string(ctx, -1), dstsz);
+
+	duk_pop(ctx);
+}
+
+static inline void
+get_channels(duk_context *ctx, struct irc_server *s)
+{
+	duk_get_prop_string(ctx, 0, "channels");
+
+	for (duk_enum(ctx, -1, 0); duk_next(ctx, -1, true); ) {
+		duk_get_prop_string(ctx, -1, "name");
+		duk_get_prop_string(ctx, -2, "password");
+
+		if (!duk_is_string(ctx, -2))
+			duk_error(ctx, DUK_ERR_ERROR, "invalid channel 'name' property");
+
+		irc_server_join(s, duk_to_string(ctx, -2), duk_opt_string(ctx, -1, NULL));
+		duk_pop_n(ctx, 4);
+	}
+
+	duk_pop_n(ctx, 2);
+}
+
 static duk_ret_t
 Server_constructor(duk_context *ctx)
 {
-#if 0
-	return wrap(ctx, [] (auto ctx) {
-		if (!duk_is_constructor_call(ctx))
-			return 0;
+	struct irc_server s = {0}, *p;
 
-		duk_check_type(ctx, 0, DUK_TYPE_OBJECT);
+	duk_require_object(ctx, 0);
 
-		auto json = nlohmann::json::parse(duk_json_encode(ctx, 0));
-		auto s = from_json(duk::type_traits<bot>::self(ctx).get_service(), json);
+	get_name(ctx, &s);
+	get_port(ctx, &s);
+	get_ip(ctx, &s);
+	get_ssl(ctx, &s);
+	get_string(ctx, "nickname", s.nickname, sizeof (s.nickname));
+	get_string(ctx, "username", s.username, sizeof (s.username));
+	get_string(ctx, "realname", s.realname, sizeof (s.realname));
+	get_string(ctx, "commandChar", s.commandchar, sizeof (s.commandchar));
+	get_channels(ctx, &s);
 
-		duk_push_this(ctx);
-		duk_push_pointer(ctx, new std::shared_ptr<server>(std::move(s)));
-		duk_put_prop_string(ctx, -2, signature.data());
-		duk_pop(ctx);
+	p = irc_util_memdup(&s, sizeof (s));
+	irc_server_incref(p);
 
-		return 0;
-	});
-#endif
+	duk_push_this(ctx);
+	duk_push_pointer(ctx, p);
+	duk_put_prop_string(ctx, -2, SIGNATURE);
+	duk_pop(ctx);
+
 	return 0;
 }
 
-#if 0
+static duk_ret_t
+Server_destructor(duk_context *ctx)
+{
+	struct irc_server *sv;
+
+	duk_get_prop_string(ctx, 0, SIGNATURE);
+
+	if ((sv = duk_to_pointer(ctx, -1)))
+		irc_server_decref(sv);
+
+	duk_pop(ctx);
+	duk_del_prop_string(ctx, 0, SIGNATURE);
+
+	return 0;
+}
 
 static duk_ret_t
 Server_add(duk_context *ctx)
 {
-	return wrap(ctx, [] (auto ctx) {
-		duk::type_traits<bot>::self(ctx).get_servers().add(
-			duk::require<std::shared_ptr<server>>(ctx, 0));
+	struct irc_server *sv = require(ctx, 0);
 
-		return 0;
-	});
+	return 0;
 }
-
-#endif
-
-#if 0
 
 static duk_ret_t
 Server_find(duk_context *ctx)
 {
-	return wrap(ctx, [] (auto ctx) {
-		auto id = duk::require<std::string>(ctx, 0);
-		auto server = duk::type_traits<bot>::self(ctx).get_servers().get(id);
+	const char *name = duk_require_string(ctx, 0);
+	struct irc_server *s = irc_bot_find_server(name);
 
-		if (!server)
-			return 0;
+	if (!s)
+		return 0;
 
-		duk::push(ctx, server);
+	irc_jsapi_server_push(ctx, s);
 
-		return 1;
-	});
+	return 1;
 }
-
-#endif
-
-#if 0
 
 static duk_ret_t
 Server_list(duk_context *ctx)
 {
 	duk_push_object(ctx);
 
-	for (const auto& server : duk::type_traits<bot>::self(ctx).get_servers().list()) {
-		duk::push(ctx, server);
-		duk_put_prop_string(ctx, -2, server->get_id().c_str());
+	for (struct irc_server *s = irc.servers; s; s = s->next) {
+		irc_jsapi_server_push(ctx, s);
+		duk_put_prop_string(ctx, -2, s->name);
 	}
 
 	return 1;
 }
 
-#endif
-
-#if 0
-
 static duk_ret_t
 Server_remove(duk_context *ctx)
 {
-	duk::type_traits<bot>::self(ctx).get_servers().remove(duk_require_string(ctx, 0));
+	irc_bot_remove_server(duk_require_string(ctx, 0));
 
 	return 0;
 }
-
-#endif
 
 static const duk_function_list_entry methods[] = {
 	{ "info",       Server_prototype_info,          0               },
@@ -459,12 +554,10 @@ static const duk_function_list_entry methods[] = {
 };
 
 static const duk_function_list_entry functions[] = {
-#if 0
 	{ "add",        Server_add,                     1               },
 	{ "find",       Server_find,                    1               },
 	{ "list",       Server_list,                    0               },
 	{ "remove",     Server_remove,                  1               },
-#endif
 	{ NULL,         NULL,                           0               }
 };
 
@@ -491,6 +584,8 @@ irc_jsapi_server_push(duk_context *ctx, struct irc_server *s)
 {
 	assert(ctx);
 	assert(s);
+
+	irc_server_incref(s);
 
 	duk_push_object(ctx);
 	duk_push_string(ctx, s->name);

@@ -46,6 +46,9 @@ irc_channel_add(struct irc_channel *ch, const char *nick, char mode)
 	assert(ch);
 	assert(nick);
 
+	if (find(ch, nick))
+		return;
+
 	struct irc_channel_user u = {0};
 
 	strlcpy(u.nickname, nick, sizeof (u.nickname));

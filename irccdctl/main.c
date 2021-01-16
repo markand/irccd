@@ -132,6 +132,17 @@ ok(void)
 }
 
 static void
+cmd_server_disconnect(int argc, char **argv)
+{
+	if (argc == 1)
+		req("SERVER-DISCONNECT %s", argv[0]);
+	else
+		req("SERVER-DISCONNECT");
+
+	ok();
+}
+
+static void
 cmd_server_list(int argc, char **argv)
 {
 	(void)argc;
@@ -221,6 +232,7 @@ static const struct cmd {
 	void (*exec)(int, char **);
 } cmds[] = {
 	/* name                 min     max     exec                   */
+	{ "server-disconnect",  0,      1,      cmd_server_disconnect   },
 	{ "server-list",        0,      0,      cmd_server_list         },
 	{ "server-me",          3,      3,      cmd_server_me           },
 	{ "server-message",     3,      3,      cmd_server_message      },

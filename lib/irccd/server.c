@@ -96,6 +96,22 @@ parse_origin(const char *prefix)
 	return &origin;
 }
 
+static void
+add_nick(const struct irc_server *s, struct irc_channel *ch, const char *nick)
+{
+	char mode = 0;
+
+	for (size_t i = 0; i < IRC_UTIL_SIZE(s->prefixes); ++i) {
+		if (nick[0] == s->prefixes[i].token) {
+			mode = s->prefixes[i].mode;
+			++nick;
+			break;
+		}
+	}
+
+	irc_channel_add(ch, nick, mode);
+}
+
 static struct irc_channel *
 add_channel(struct irc_server *s, const char *name, const char *password, bool joined)
 {
@@ -176,25 +192,26 @@ static void
 convert_join(struct irc_server *s, struct irc_event *ev)
 {
 	const struct origin *origin = parse_origin(ev->args[0]);
-	struct irc_channel *ch;
+	struct irc_channel *ch = NULL;
 
 	ev->type = IRC_EVENT_JOIN;
 	ev->server = s;
 	ev->join.origin = ev->args[0];
 	ev->join.channel = ev->args[2];
 
-	/* Also add a channel if the bot joined. */
-	if (strcmp(s->nickname, origin->nickname)) {
-		if ((ch = irc_server_find(s, ev->args[2])))
-			ch->joined = true;
-		else
-			add_channel(s, ev->args[2], NULL, true);
-	}
+	if (!(ch = irc_server_find(s, ev->args[2])))
+		ch = add_channel(s, ev->args[2], NULL, true);
+	else
+		ch->joined = true;
+
+	irc_channel_add(ch, origin->nickname, 0);
 }
 
 static void
 convert_kick(struct irc_server *s, struct irc_event *ev)
 {
+	struct irc_channel *ch = irc_server_find(s, ev->args[2]);
+
 	ev->type = IRC_EVENT_KICK;
 	ev->server = s;
 	ev->kick.origin = ev->args[0];
@@ -206,16 +223,14 @@ convert_kick(struct irc_server *s, struct irc_event *ev)
 	 * If the bot was kicked itself mark the channel as not joined and
 	 * rejoin it automatically if the option is set.
 	 */
-	if (strcmp(ev->args[3], s->nickname) == 0) {
-		struct irc_channel *ch = irc_server_find(s, ev->args[2]);
+	if (strcmp(ev->args[3], s->nickname) == 0 && ch) {
+		ch->joined = false;
+		irc_channel_clear(ch);
 
-		if (ch) {
-			ch->joined = false;
-
-			if (s->flags & IRC_SERVER_FLAGS_AUTO_REJOIN)
-				irc_server_join(s, ch->name, ch->password);
-		}
-	}
+		if (s->flags & IRC_SERVER_FLAGS_AUTO_REJOIN)
+			irc_server_join(s, ch->name, ch->password);
+	} else
+		irc_channel_remove(ch, ev->args[3]);
 }
 
 static void
@@ -305,27 +320,35 @@ convert_ping(struct irc_server *s, struct irc_event *ev)
 static void
 convert_names(struct irc_server *s, struct irc_event *ev)
 {
-	(void)s;
-	(void)ev;
-#if 0
-	struct irc_channel *chan;
+	struct irc_channel *ch;
 	char *p, *n;
 
-	if (m->argsz < 3 || !(chan = irc_server_find(s, m->args[2])))
+	if (ev->argsz < 6)
 		return;
 
-	/*
-	 * Message arguments are as following:
-	 * 0------- 1 2------- 3--------------------
-	 * yourself = #channel nick1 nick2 nick3 ...
-	 */
-	for (p = m->args[3]; p; p = n ? n + 1 : NULL) {
-		if ((n = strpbrk(p, " ")))
-			*n = 0;
+	/* TODO: create if not exist */
+	ch = irc_server_find(s, ev->args[4]);
 
-		channel_add(chan, s, p);
+	for (p = ev->args[5]; p; ) {
+		n = strchr(p, ' ');
+
+		if (n)
+			*n = '\0';
+		if (strlen(p) > 0)
+			add_nick(s, ch, p);
+
+		p = n ? n + 1 : NULL;
 	}
-#endif
+}
+
+static void
+convert_endofnames(struct irc_server *s, struct irc_event *ev)
+{
+	for (size_t i = 0; i < ev->argsz; ++i)
+		printf("%zd: %s\n", i, ev->args[i]);
+	ev->type = IRC_EVENT_NAMES;
+	ev->server = s;
+	ev->names.channel = irc_server_find(s, ev->args[3]);
 }
 
 static const struct convert {
@@ -336,6 +359,7 @@ static const struct convert {
 	{ "001",        convert_connect          },
 	{ "005",        convert_support          },
 	{ "353",        convert_names            },
+	{ "366",        convert_endofnames       },
 	{ "JOIN",       convert_join             },
 	{ "KICK",       convert_kick             },
 	{ "MODE",       convert_mode             },
@@ -976,6 +1000,26 @@ irc_server_mode(struct irc_server *s,
 }
 
 bool
+irc_server_names(struct irc_server *s, const char *channel)
+{
+	return irc_server_send(s, "NAMES %s", channel);
+}
+
+bool
+irc_server_nick(struct irc_server *s, const char *nick)
+{
+	assert(s);
+	assert(nick);
+
+	if (s->state == IRC_SERVER_STATE_DISCONNECTED) {
+		strlcpy(s->nickname, nick, sizeof (s->nickname));
+		return true;
+	}
+
+	return irc_server_send(s, "NICK %s", nick);
+}
+
+bool
 irc_server_notice(struct irc_server *s, const char *channel, const char *message)
 {
 	assert(s);
@@ -986,11 +1030,22 @@ irc_server_notice(struct irc_server *s, const char *channel, const char *message
 }
 
 void
-irc_server_finish(struct irc_server *s)
+irc_server_incref(struct irc_server *s)
 {
 	assert(s);
 
-	clear(s);
-	free(s->channels);
-	memset(s, 0, sizeof (*s));
+	s->refc++;
+}
+
+void
+irc_server_decref(struct irc_server *s)
+{
+	assert(s);
+	assert(s->refc >= 1);
+
+	if (--s->refc == 0) {
+		clear(s);
+		free(s->channels);
+		free(s);
+	}
 }

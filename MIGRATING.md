@@ -53,6 +53,15 @@ Javascript API
 
 - The method `Util.ticks` as been removed.
 
+### Module Server
+
+- The property `channels` in the object returned from `Server.info` is now an
+  array of objects which also contain a list of nicknames present in the
+  channel.
+- The property `channels` in the object for the `Server` constructor now takes
+  an array of objects containing two properties each: `name` and `password`
+  which must be string (password is optional).
+
 Migrating from 2.x to 3.x
 =========================
 

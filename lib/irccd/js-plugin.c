@@ -26,6 +26,7 @@
 
 #include <duktape.h>
 
+#include "channel.h"
 #include "event.h"
 #include "js-plugin.h"
 #include "jsapi-file.h"
@@ -80,6 +81,17 @@ metadata(duk_context *ctx, const char *name)
 	duk_pop(ctx);
 
 	return ret ? ret : irc_util_strdup("unknown");
+}
+
+static void
+push_names(duk_context *ctx, const struct irc_channel *ch)
+{
+	duk_push_array(ctx);
+
+	for (size_t i = 0; i < ch->usersz; ++i) {
+		duk_push_string(ctx, ch->users[i].nickname);
+		duk_put_prop_index(ctx, -2, i);
+	}
 }
 
 static const char **
@@ -207,73 +219,52 @@ get_options(struct irc_plugin *plg)
 }
 
 static void
-vcall(duk_context *ctx, const char *function, const char *fmt, va_list ap)
+vcall(struct irc_plugin *plg, const char *function, const char *fmt, va_list ap)
 {
+	struct self *self = plg->data;
 	int nargs = 0;
 
-	printf("obtain %s\n", function);
-	duk_get_global_string(ctx, function);
+	duk_get_global_string(self->ctx, function);
 
-	if (!duk_is_function(ctx, -1)) {
-		puts("not callable...");
-		duk_pop(ctx);
+	if (!duk_is_function(self->ctx, -1)) {
+		duk_pop(self->ctx);
 		return;
 	}
 
 	for (const char *f = fmt; *f; ++f) {
-		bool array = false;
 		void (*push)(duk_context *, void *);
 
 		switch (*f) {
-		case '>':
-			array = true;
-			break;
 		case 'S':
-			nargs++;
-			irc_jsapi_server_push(ctx, va_arg(ap, struct irc_server *));
+			irc_jsapi_server_push(self->ctx, va_arg(ap, struct irc_server *));
 			break;
 		case 's':
-			if (array) {
-				const char **list = va_arg(ap, const char **), **p;
-				int i = 0;
-
-				duk_push_array(ctx);
-
-				for (p = list; *p; ++p) {
-					nargs++;
-					duk_push_string(ctx, *p);
-					duk_put_prop_index(ctx, -2, i++);
-				};
-			} else {
-				nargs++;
-				duk_push_string(ctx, va_arg(ap, const char *));
-			}
+			duk_push_string(self->ctx, va_arg(ap, const char *));
 			break;
 		case 'x':
-			nargs++;
 			push = va_arg(ap, void (*)(duk_context *, void *));
-			push(ctx, va_arg(ap, void *));
+			push(self->ctx, va_arg(ap, void *));
 			break;
 		default:
-			break;
+			continue;
 		}
+
+		++nargs;
 	}
 
-	if (duk_pcall(ctx, nargs) != 0) {
-		printf("errro: %s\n", duk_to_string(ctx, -1));
-	}
+	if (duk_pcall(self->ctx, nargs) != 0)
+		irc_log_warn("plugin %s: %s\n", duk_to_string(self->ctx, -1));
 
-	duk_pop(ctx);
+	duk_pop(self->ctx);
 }
 
 static void
 call(struct irc_plugin *plg, const char *function, const char *fmt, ...)
 {
-	struct self *self = plg->data;
 	va_list ap;
 
 	va_start(ap, fmt);
-	vcall(self->ctx, function, fmt, ap);
+	vcall(plg, function, fmt, ap);
 	va_end(ap);
 }
 
@@ -311,12 +302,10 @@ handle(struct irc_plugin *plg, const struct irc_event *ev)
 		call(plg, "onMode", "Sssssss", ev->server, ev->mode.origin, ev->mode.channel,
 		    ev->mode.mode, ev->mode.limit, ev->mode.user, ev->mode.mask);
 		break;
-#if 0
 	case IRC_EVENT_NAMES:
-		call(plg, "onNames", "Ss>s", ev->names.server, ev->names.channel,
-		    ev->names.names);
+		call(plg, "onNames", "Ssx", ev->server, ev->names.channel->name,
+		    push_names, ev->names.channel);
 		break;
-#endif
 	case IRC_EVENT_NICK:
 		call(plg, "onNick", "Sss", ev->server, ev->nick.origin, ev->nick.nickname);
 		break;

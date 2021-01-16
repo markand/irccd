@@ -84,6 +84,27 @@ ok(struct irc_peer *p)
 }
 
 /*
+ * DISCONNECT [server]
+ */
+static int
+cmd_server_disconnect(struct irc_peer *p, char *line)
+{
+	const char *args[1] = {0};
+	struct irc_server *s;
+
+	if (parse(line, args, 1) == 1) {
+		if (!(s = require_server(p, args[0])))
+			return 0;
+
+		irc_server_disconnect(s);
+	} else
+		for (struct irc_server *s = irc.servers; s; s = s->next)
+			irc_server_disconnect(s);
+
+	return ok(p);
+}
+
+/*
  * MESSAGE server channel message
  */
 static int
@@ -225,10 +246,10 @@ cmd_server_list(struct irc_peer *p, char *line)
 {
 	char out[IRC_BUF_MAX] = "OK ";
 
-	for (size_t i = 0; i < irc.serversz; ++i) {
-		if (strlcat(out, irc.servers[i].name, sizeof (out)) >= sizeof (out))
+	for (struct irc_server *s = irc.servers; s; s = s->next) {
+		if (strlcat(out, s->name, sizeof (out)) >= sizeof (out))
 			return EMSGSIZE;
-		if (i + 1 < irc.serversz && strlcat(out, " ", sizeof (out)) >= sizeof (out))
+		if (s->next && strlcat(out, " ", sizeof (out)) >= sizeof (out))
 			return EMSGSIZE;
 	}
 

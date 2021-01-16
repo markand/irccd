@@ -44,7 +44,9 @@ enum irc_server_state {
 
 enum irc_server_flags {
 	IRC_SERVER_FLAGS_SSL           = (1 << 0),
-	IRC_SERVER_FLAGS_AUTO_REJOIN   = (1 << 1)
+	IRC_SERVER_FLAGS_AUTO_REJOIN   = (1 << 1),
+	IRC_SERVER_FLAGS_IPV4          = (1 << 2),
+	IRC_SERVER_FLAGS_IPV6          = (1 << 3)
 };
 
 struct irc_server_prefix {
@@ -96,6 +98,10 @@ struct irc_server {
 	SSL *ssl;
 	enum irc_server_ssl_state ssl_state;
 #endif
+
+	/* Reference count. */
+	size_t refc;
+	struct irc_server *next;
 
 	/* IRC server settings. */
 	char chantypes[8];
@@ -153,9 +159,18 @@ irc_server_mode(struct irc_server *,
                 const char *);
 
 bool
+irc_server_names(struct irc_server *, const char *);
+
+bool
+irc_server_nick(struct irc_server *, const char *);
+
+bool
 irc_server_notice(struct irc_server *, const char *, const char *);
 
 void
-irc_server_finish(struct irc_server *);
+irc_server_incref(struct irc_server *);
+
+void
+irc_server_decref(struct irc_server *);
 
 #endif /* !IRCCD_SERVER_H */

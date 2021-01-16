@@ -50,6 +50,8 @@ struct irc_event {
 	/*
 	 * Raw arguments.
 	 *   [0]: prefix
+	 *   [1]: origin
+	 *   [2 to argsz]: arguments
 	 */
 	char args[IRC_ARGS_MAX][IRC_MESSAGE_MAX];
 	size_t argsz;
@@ -99,6 +101,10 @@ struct irc_event {
 			char *origin;
 			char *nickname;
 		} nick;
+
+		struct {
+			struct irc_channel *channel;
+		} names;
 
 		struct {
 			char *origin;
