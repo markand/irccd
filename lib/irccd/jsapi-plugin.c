@@ -172,18 +172,24 @@ Plugin_list(duk_context *ctx)
 static duk_ret_t
 Plugin_load(duk_context *ctx)
 {
+	(void)ctx;
+
 	return 0;
 }
 
 static duk_ret_t
 Plugin_reload(duk_context *ctx)
 {
+	(void)ctx;
+
 	return 0;
 }
 
 static duk_ret_t
 Plugin_unload(duk_context *ctx)
 {
+	(void)ctx;
+
 	return 0;
 }
 

@@ -1,5 +1,5 @@
 #
-# Makefile -- POSIX makefile for irccd
+# CMakeLists.txt -- CMake build for irccd
 #
 # Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
 #
@@ -16,17 +16,21 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-include ../../config.mk
+project(tests)
 
-all: libirccd-duktape.a
+set(
+	TESTS
+	test-channel
+	#test-dl-plugin
+	test-log
+	test-rule
+	test-subst
+	test-util
+)
 
-duktape.o: duktape.c duktape.h duk_config.h
-	${CC} ${CFLAGS} -c $< -o $@
-
-libirccd-duktape.a: duktape.o
-	${CMD.ar}
-
-clean:
-	rm -f libirccd-duktape.a duktape.o
-
-.PHONY: clean
+foreach (t ${TESTS})
+	add_executable(${t} ${t}.c)
+	add_test(${t} ${t})
+	target_link_libraries(${t} libirccd libirccd-greatest)
+	set_target_properties(${t} PROPERTIES FOLDER "tests")
+endforeach ()

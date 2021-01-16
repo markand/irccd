@@ -453,7 +453,6 @@ irc_js_plugin_open(struct irc_plugin *plg, const char *path)
 	assert(plg);
 	assert(path);
 
-	bool ret = false;
 	char *script = NULL;
 
 	if (!(script = eat(path))) {

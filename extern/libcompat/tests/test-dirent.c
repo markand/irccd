@@ -1,7 +1,7 @@
 /*
- * jsapi-system.h -- Irccd.System API
+ * dirent.c -- test opendir/readdir
  *
- * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2020 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,17 +16,26 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JSAPI_SYSTEM_H
-#define IRCCD_JSAPI_SYSTEM_H
+#include <dirent.h>
+#include <errno.h>
+#include <stdio.h>
+#include <string.h>
 
-#include <stdnoreturn.h>
+int
+main(void)
+{
+	DIR *dp;
+	struct dirent *entry;
 
-#include <duktape.h>
+	if (!(dp = opendir(DIRECTORY))) {
+		fprintf(stderr, "abort: %s\n", strerror(errno));
+		return 1;
+	}
 
-void noreturn
-irc_jsapi_system_raise(duk_context *);
+	while ((entry = readdir(dp)))
+		printf("%s\n", entry->d_name);
 
-void
-irc_jsapi_system_load(duk_context *);
+	closedir(dp);
 
-#endif /* !IRCCD_JSAPI_SYSTEM_H */
+	return 0;
+}

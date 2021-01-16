@@ -1,7 +1,7 @@
 /*
- * jsapi-system.h -- Irccd.System API
+ * test-dlfcn.c -- test dlopen/dlsym/dlclose
  *
- * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2020 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,17 +16,38 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JSAPI_SYSTEM_H
-#define IRCCD_JSAPI_SYSTEM_H
+#include <dlfcn.h>
+#include <stdio.h>
 
-#include <stdnoreturn.h>
+#if defined(_WIN32)
+#       define EXPORT __declspec(dllexport)
+#else
+#       define EXPORT
+#endif
 
-#include <duktape.h>
+EXPORT int
+hello(void)
+{
+	return 0;
+}
 
-void noreturn
-irc_jsapi_system_raise(duk_context *);
+int
+main(void)
+{
+	void *handle;
+	int (*func)(void);
+	int ret = 1;
 
-void
-irc_jsapi_system_load(duk_context *);
+	if (!(handle = dlopen(NULL, RTLD_NOW)) ||
+	    !(func = dlsym(handle, "hello"))) {
+		fprintf(stderr, "%s\n", dlerror());
+		goto end;
+	}
 
-#endif /* !IRCCD_JSAPI_SYSTEM_H */
+	ret = func();
+
+	dlclose(handle);
+
+end:
+	return ret;
+}

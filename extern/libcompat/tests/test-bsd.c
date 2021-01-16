@@ -1,7 +1,7 @@
 /*
- * jsapi-system.h -- Irccd.System API
+ * test-bsd.c -- test BSD extensions
  *
- * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2020 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,17 +16,35 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JSAPI_SYSTEM_H
-#define IRCCD_JSAPI_SYSTEM_H
+#define _BSD_SOURCE
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
-#include <stdnoreturn.h>
+#include <compat.h>
 
-#include <duktape.h>
+int
+main(void)
+{
+	int *ints = NULL;
+	char buf[BUFSIZ];
+	char *token, *p;
 
-void noreturn
-irc_jsapi_system_raise(duk_context *);
+	pledge("stdio", NULL);
 
-void
-irc_jsapi_system_load(duk_context *);
+	ints = reallocarray(ints, 5, sizeof (*ints));
+	ints = recallocarray(ints, 5, 10, sizeof (*ints));
 
-#endif /* !IRCCD_JSAPI_SYSTEM_H */
+	strlcpy(buf, "Hello", sizeof (buf));
+	strlcat(buf, " world", sizeof (buf));
+
+	p = token = buf;
+
+	while ((token = strsep(&p, " \t")))
+		printf("%s\n", token);
+
+	free(ints);
+
+	return 0;
+}

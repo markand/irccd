@@ -1,7 +1,7 @@
 /*
- * jsapi-system.h -- Irccd.System API
+ * vsyslog.c -- fallback implementation
  *
- * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
+ * Copyright (c) 2020 David Demelier <markand@malikania.fr>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -16,17 +16,24 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JSAPI_SYSTEM_H
-#define IRCCD_JSAPI_SYSTEM_H
+#include "compat.h"
 
-#include <stdnoreturn.h>
+#if defined(COMPAT_HAVE_SYSLOG_H)
 
-#include <duktape.h>
-
-void noreturn
-irc_jsapi_system_raise(duk_context *);
+#include <assert.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <syslog.h>
 
 void
-irc_jsapi_system_load(duk_context *);
+vsyslog(int priority, const char *msg, va_list ap)
+{
+	assert(msg);
 
-#endif /* !IRCCD_JSAPI_SYSTEM_H */
+	char buf[1024] = {0};
+
+	if (vsnprintf(buf, sizeof (buf), fmt, ap) >= 0)
+		syslog(priority, "%s", buf);
+}
+
+#endif

@@ -25,6 +25,7 @@
 
 #include <duktape.h>
 
+#include "compat.h"
 #include "jsapi-file.h"
 #include "jsapi-system.h"
 #include "util.h"
@@ -96,56 +97,56 @@ push_stat(duk_context *ctx, const struct stat *st)
 {
 	duk_push_object(ctx);
 
-#if defined(IRCCD_HAVE_STAT_ST_ATIME)
-	duk_push_int(ctx, st.st_atime);
+#if defined(COMPAT_HAVE_STAT_ST_ATIME)
+	duk_push_int(ctx, st->st_atime);
 	duk_put_prop_string(ctx, -2, "atime");
 #endif
-#if defined(IRCCD_HAVE_STAT_ST_BLKSIZE)
-	duk_push_int(ctx, st.st_blksize);
+#if defined(COMPAT_HAVE_STAT_ST_BLKSIZE)
+	duk_push_int(ctx, st->st_blksize);
 	duk_put_prop_string(ctx, -2, "blksize");
 #endif
-#if defined(IRCCD_HAVE_STAT_ST_BLOCKS)
-	duk_push_int(ctx, st.st_blocks);
+#if defined(COMPAT_HAVE_STAT_ST_BLOCKS)
+	duk_push_int(ctx, st->st_blocks);
 	duk_put_prop_string(ctx, -2, "blocks");
 #endif
-#if defined(IRCCD_HAVE_STAT_ST_CTIME)
-	duk_push_int(ctx, st.st_ctime);
+#if defined(COMPAT_HAVE_STAT_ST_CTIME)
+	duk_push_int(ctx, st->st_ctime);
 	duk_put_prop_string(ctx, -2, "ctime");
 #endif
-#if defined(IRCCD_HAVE_STAT_ST_DEV)
-	duk_push_int(ctx, st.st_dev);
+#if defined(COMPAT_HAVE_STAT_ST_DEV)
+	duk_push_int(ctx, st->st_dev);
 	duk_put_prop_string(ctx, -2, "dev");
 #endif
-#if defined(IRCCD_HAVE_STAT_ST_GID)
-	duk_push_int(ctx, st.st_gid);
+#if defined(COMPAT_HAVE_STAT_ST_GID)
+	duk_push_int(ctx, st->st_gid);
 	duk_put_prop_string(ctx, -2, "gid");
 #endif
-#if defined(IRCCD_HAVE_STAT_ST_INO)
-	duk_push_int(ctx, st.st_ino);
+#if defined(COMPAT_HAVE_STAT_ST_INO)
+	duk_push_int(ctx, st->st_ino);
 	duk_put_prop_string(ctx, -2, "ino");
 #endif
-#if defined(IRCCD_HAVE_STAT_ST_MODE)
-	duk_push_int(ctx, st.st_mode);
+#if defined(COMPAT_HAVE_STAT_ST_MODE)
+	duk_push_int(ctx, st->st_mode);
 	duk_put_prop_string(ctx, -2, "mode");
 #endif
-#if defined(IRCCD_HAVE_STAT_ST_MTIME)
-	duk_push_int(ctx, st.st_mtime);
+#if defined(COMPAT_HAVE_STAT_ST_MTIME)
+	duk_push_int(ctx, st->st_mtime);
 	duk_put_prop_string(ctx, -2, "mtime");
 #endif
-#if defined(IRCCD_HAVE_STAT_ST_NLINK)
-	duk_push_int(ctx, st.st_nlink);
+#if defined(COMPAT_HAVE_STAT_ST_NLINK)
+	duk_push_int(ctx, st->st_nlink);
 	duk_put_prop_string(ctx, -2, "nlink");
 #endif
-#if defined(IRCCD_HAVE_STAT_ST_RDEV)
-	duk_push_int(ctx, st.st_rdev);
+#if defined(COMPAT_HAVE_STAT_ST_RDEV)
+	duk_push_int(ctx, st->st_rdev);
 	duk_put_prop_string(ctx, -2, "rdev");
 #endif
-#if defined(IRCCD_HAVE_STAT_ST_SIZE)
-	duk_push_int(ctx, st.st_size);
+#if defined(COMPAT_HAVE_STAT_ST_SIZE)
+	duk_push_int(ctx, st->st_size);
 	duk_put_prop_string(ctx, -2, "size");
 #endif
-#if defined(IRCCD_HAVE_STAT_ST_UID)
-	duk_push_int(ctx, st.st_uid);
+#if defined(COMPAT_HAVE_STAT_ST_UID)
+	duk_push_int(ctx, st->st_uid);
 	duk_put_prop_string(ctx, -2, "uid");
 #endif
 }
@@ -239,7 +240,7 @@ File_prototype_read(duk_context *ctx)
 		irc_jsapi_system_raise(ctx);
 	}
 
-	return amount == -1
+	return amount == -1U
 	    ? read_until_eof(ctx, file)
 	    : read_amount(ctx, file, amount);
 }

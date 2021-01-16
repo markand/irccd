@@ -1,7 +1,7 @@
 #
-# CMakeLists.txt -- CMake build system for libgreatest
+# CMakeLists.txt -- CMake build system for libcompat
 #
-# Copyright (c) 2016-2019 David Demelier <markand@malikania.fr>
+# Copyright (c) 2020 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -16,12 +16,23 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-cmake_minimum_required(VERSION 3.0)
-project(libirccd-greatest)
-add_library(libirccd-greatest INTERFACE)
-target_include_directories(
-	libirccd-greatest
-	INTERFACE
-		$<BUILD_INTERFACE:${libirccd-greatest_SOURCE_DIR}>
-)
-target_sources(libirccd-greatest INTERFACE ${libirccd-greatest_SOURCE_DIR}/greatest.h)
+project(tests)
+
+function(define_test name)
+	add_executable(test-${name} test-${name}.c)
+	add_test(NAME test-${name} COMMAND test-${name})
+	target_link_libraries(test-${name} libcompat)
+endfunction()
+
+# POSIX dlfcn/dlopen/dlsym.
+define_test(dlfcn)
+set_target_properties(test-dlfcn PROPERTIES ENABLE_EXPORTS On)
+target_link_libraries(test-dlfcn dl)
+
+# POSIX opendir/readdir.
+define_test(dirent)
+target_compile_definitions(test-dirent PRIVATE DIRECTORY="${tests_SOURCE_DIR}")
+
+# BSD and POSIX functions.
+define_test(bsd)
+define_test(posix)

@@ -1,5 +1,5 @@
 #
-# CMakeLists.txt -- CMake build system for libgreatest
+# CMakeLists.txt -- CMake build system for duktape
 #
 # Copyright (c) 2016-2019 David Demelier <markand@malikania.fr>
 #
@@ -17,11 +17,15 @@
 #
 
 cmake_minimum_required(VERSION 3.0)
-project(libirccd-greatest)
-add_library(libirccd-greatest INTERFACE)
+project(libirccd-duktape)
+add_library(libirccd-duktape duk_config.h duktape.c duktape.h)
 target_include_directories(
-	libirccd-greatest
-	INTERFACE
-		$<BUILD_INTERFACE:${libirccd-greatest_SOURCE_DIR}>
+	libirccd-duktape
+	PUBLIC
+		$<BUILD_INTERFACE:${libirccd-duktape_SOURCE_DIR}>
 )
-target_sources(libirccd-greatest INTERFACE ${libirccd-greatest_SOURCE_DIR}/greatest.h)
+if (BUILD_SHARED_LIBS)
+	target_compile_definitions(libirccd-duktape PUBLIC DUK_F_DLL_BUILD)
+endif ()
+
+set_target_properties(libirccd-duktape PROPERTIES PREFIX "")

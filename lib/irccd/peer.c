@@ -244,6 +244,8 @@ cmd_server_kick(struct irc_peer *p, char *line)
 static int
 cmd_server_list(struct irc_peer *p, char *line)
 {
+	(void)line;
+
 	char out[IRC_BUF_MAX] = "OK ";
 
 	for (struct irc_server *s = irc.servers; s; s = s->next) {
@@ -300,6 +302,7 @@ static const struct cmd {
 	const char *name;
 	int (*call)(struct irc_peer *, char *);
 } cmds[] = {
+	{ "SERVER-DISCONNECT",  cmd_server_disconnect   },
 	{ "SERVER-INVITE",      cmd_server_invite       },
 	{ "SERVER-JOIN",        cmd_server_join         },
 	{ "SERVER-KICK",        cmd_server_kick         },
@@ -389,7 +392,7 @@ output(struct irc_peer *p)
 	if ((ns = send(p->fd, p->out, len, 0)) < 0)
 		return false;
 
-	if (ns >= len)
+	if ((size_t)ns >= len)
 		memset(p->out, 0, sizeof (p->out));
 	else
 		memmove(p->out, p->out + ns, sizeof (p->out) - ns);
@@ -442,8 +445,6 @@ irc_peer_flush(struct irc_peer *p, const struct pollfd *fd)
 {
 	assert(p);
 	assert(fd);
-
-	char buf[IRC_BUF_MAX];
 
 	if (fd->fd != p->fd)
 		return true;

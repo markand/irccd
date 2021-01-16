@@ -136,6 +136,7 @@ Server_prototype_invite(duk_context *ctx)
 static duk_ret_t
 Server_prototype_isSelf(duk_context *ctx)
 {
+	(void)ctx;
 #if 0
 	return wrap(ctx, [] (auto ctx) {
 		return duk::push(ctx, self(ctx)->is_self(duk::require<std::string>(ctx, 0)));
@@ -340,9 +341,7 @@ Server_prototype_topic(duk_context *ctx)
 static duk_ret_t
 Server_prototype_whois(duk_context *ctx)
 {
-	struct irc_server *s = self(ctx);
-	const char *target = duk_require_string(ctx, 0);
-
+	(void)ctx;
 #if 0
 	if (target.empty())
 		throw server_error(server_error::invalid_nickname);
@@ -474,6 +473,8 @@ Server_constructor(duk_context *ctx)
 	return 0;
 }
 
+#if 0
+
 static duk_ret_t
 Server_destructor(duk_context *ctx)
 {
@@ -490,10 +491,14 @@ Server_destructor(duk_context *ctx)
 	return 0;
 }
 
+#endif
+
 static duk_ret_t
 Server_add(duk_context *ctx)
 {
 	struct irc_server *sv = require(ctx, 0);
+
+	irc_bot_add_server(sv);
 
 	return 0;
 }

@@ -50,12 +50,6 @@ struct irc irc;
 static int pipes[2];
 
 static int
-cmp_server(const struct irc_server *s1, const struct irc_server *s2)
-{
-	return strcmp(s1->name, s2->name);
-}
-
-static int
 cmp_plugin(const struct irc_plugin *p1, const struct irc_plugin *p2)
 {
 	return strcmp(p1->name, p2->name);
