@@ -45,9 +45,9 @@ main(int argc, char **argv)
 	irc_bot_init();
 
 	irc_transport_bind("/tmp/irccd.sock");
-	irc_server_join(&s, "#test", NULL);
-	irc_js_plugin_open(&p, "test.js");
-	irc_bot_add_server(irc_util_memdup(&s, sizeof (s)));
+	//irc_server_join(&s, "#test", NULL);
+	irc_js_plugin_open(&p, "/Users/markand/test.js");
+	//irc_bot_add_server(irc_util_memdup(&s, sizeof (s)));
 	irc_bot_add_plugin(&p);
 	irc_bot_run();
 }

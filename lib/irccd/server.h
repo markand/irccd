@@ -102,6 +102,7 @@ struct irc_server {
 	/* Reference count. */
 	size_t refc;
 	struct irc_server *next;
+	struct irc_server *prev;
 
 	/* IRC server settings. */
 	char chantypes[8];

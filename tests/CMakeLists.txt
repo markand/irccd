@@ -20,6 +20,7 @@ project(tests)
 
 set(
 	TESTS
+	test-bot
 	test-channel
 	#test-dl-plugin
 	test-log

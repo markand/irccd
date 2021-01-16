@@ -573,6 +573,26 @@ secure_connect(struct irc_server *s)
 	}
 }
 
+static bool
+set_nonblock(struct irc_server *s)
+{
+	int cflags = 0;
+
+	if ((cflags = fcntl(s->fd, F_GETFL)) < 0 || fcntl(s->fd, F_SETFL, cflags | O_NONBLOCK) < 0)
+		return false;
+
+	return true;
+}
+
+static bool
+create(struct irc_server *s)
+{
+	s->fd = socket(s->aip->ai_family, s->aip->ai_socktype,
+	    s->aip->ai_protocol);
+
+	return set_nonblock(s);
+}
+
 static void
 dial(struct irc_server *s)
 {
@@ -583,26 +603,14 @@ dial(struct irc_server *s)
 	}
 
 	for (; s->aip; s->aip = s->aip->ai_next) {
-		int cflags;
-
 		/* We may need to close a socket that was open earlier. */
 		if (s->fd != 0)
 			close(s->fd);
 
-		s->fd = socket(s->aip->ai_family, s->aip->ai_socktype,
-		    s->aip->ai_protocol);
-
-		if (s->fd < 0) {
+		if (!create(s)) {
 			irc_log_warn("server %s: %s", s->name, strerror(errno));
 			continue;
 		}
-
-		if ((cflags = fcntl(s->fd, F_GETFL)) < 0) {
-			irc_log_warn("server %s: %s", s->name, strerror(errno));
-			continue;
-		}
-
-		fcntl(s->fd, F_SETFL, cflags | O_NONBLOCK);
 
 		/*
 		 * With some luck, the connection completes immediately,

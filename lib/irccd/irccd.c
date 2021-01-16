@@ -26,6 +26,7 @@
 
 #include "event.h"
 #include "irccd.h"
+#include "list.h"
 #include "log.h"
 #include "peer.h"
 #include "plugin.h"
@@ -113,6 +114,9 @@ pipe_flush(struct pollfd *fd)
 static void
 process(struct pkg *pkg)
 {
+	struct irc_server *s;
+	struct irc_peer peer;
+	struct irc_event ev;
 
 	if (poll(pkg->fds, pkg->fdsz, 1000) < 0)
 		err(1, "poll");
@@ -123,17 +127,10 @@ process(struct pkg *pkg)
 	 * not.
 	 */
 	for (size_t i = 0; i < pkg->fdsz; ++i) {
-		struct irc_peer peer;
-
 		pipe_flush(&pkg->fds[i]);
 
-#if 0
-		for (size_t s = 0; s < irc.serversz; ++s)
-			irc_server_flush(irc.servers[s], &pkg->fds[i]);
-#endif
-		for (struct irc_server *s = irc.servers; s; s = s->next)
+		IRC_LIST_FOREACH(irc.servers, s)
 			irc_server_flush(s, &pkg->fds[i]);
-
 
 		/* Accept new transport client. */
 		if (irc_transport_flush(&pkg->fds[i], &peer))
@@ -153,12 +150,9 @@ process(struct pkg *pkg)
 	 * For every server, poll any kind of new event and pass them to the
 	 * plugin unless the rules explicitly disallow us to do so.
 	 */
-	for (struct irc_server *s = irc.servers; s; s = s->next) {
-		struct irc_event ev;
-
+	IRC_LIST_FOREACH(irc.servers, s)
 		while (irc_server_poll(s, &ev))
 			invoke(&ev);
-	}
 }
 
 static void
@@ -184,8 +178,8 @@ irc_bot_add_server(struct irc_server *s)
 	irc_server_incref(s);
 	irc_server_connect(s);
 
-	s->next = irc.servers;
-	irc.servers = s;
+	IRC_LIST_ADD(irc.servers, s);
+
 	irc.serversz++;
 }
 
@@ -204,7 +198,7 @@ irc_bot_find_server(const char *name)
 void
 irc_bot_remove_server(const char *name)
 {
-	struct irc_server *s, *p;
+	struct irc_server *s;
 
 	if (!(s = irc_bot_find_server(name)))
 		return;
@@ -217,17 +211,7 @@ irc_bot_remove_server(const char *name)
 		.server = s
 	});
 
-	if (s == irc.servers)
-		irc.servers = irc.servers->next;
-	else {
-		/* x -> y -> z */
-		/*      ^      */
-		/*      s      */
-		for (p = irc.servers->next; p->next != s; p = p->next)
-			continue;
-
-		p->next = s->next;
-	}
+	IRC_LIST_REMOVE(irc.servers, s);
 
 	irc_server_decref(s);
 	irc.serversz--;
@@ -238,14 +222,8 @@ irc_bot_clear_servers(void)
 {
 	struct irc_server *s, *next;
 
-	if (!(s = irc.servers))
-		return;
-
-	while (s) {
-		next = s->next;
+	IRC_LIST_FOREACH_SAFE(irc.servers, s, next)
 		irc_bot_remove_server(s->name);
-		s = next;
-	}
 }
 
 void

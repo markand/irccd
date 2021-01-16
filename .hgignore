@@ -11,31 +11,9 @@
 \.swp$
 \.swo$
 
-# libcompat.
-^extern/libcompat/src/.*\.h$
-^extern/libcompat/trycompile$
-^extern/libcompat/tryinclude$
-^extern/libcompat/trylib$
-
 # executables.
 ^irccd/irccd$
 ^irccdctl/irccdctl$
-
-# temporary files.
-^lib/irccd/config\.h$
-\.a$
-\.o$
-\.d$
-\.so$
-\.dylib$
-
-# tests.
-^tests/test-channel$
-^tests/test-dl-plugin$
-^tests/test-log$
-^tests/test-rule$
-^tests/test-subst$
-^tests/test-util$
 
 # macOS specific.
 \.DS_Store$

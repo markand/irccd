@@ -41,6 +41,7 @@ set(
 	irccd/server.c
 	irccd/server.h
 	irccd/set.h
+	irccd/list.h
 	irccd/subst.c
 	irccd/subst.h
 	irccd/transport.c

@@ -23,6 +23,7 @@
 #include "channel.h"
 #include "irccd.h"
 #include "jsapi-server.h"
+#include "list.h"
 #include "server.h"
 #include "util.h"
 
@@ -58,6 +59,79 @@ require(duk_context *ctx, duk_idx_t index)
 	duk_pop(ctx);
 
 	return sv;
+}
+
+static inline void
+get_port(duk_context *ctx, struct irc_server *s)
+{
+	duk_get_prop_string(ctx, 0, "port");
+
+	if (!duk_is_number(ctx, -1))
+		duk_error(ctx, DUK_ERR_ERROR, "invalid 'port' property");
+
+	s->port = duk_to_int(ctx, -1);
+	duk_pop(ctx);
+}
+
+static inline void
+get_ip(duk_context *ctx, struct irc_server *s)
+{
+	enum irc_server_flags flags = IRC_SERVER_FLAGS_IPV4 |
+				      IRC_SERVER_FLAGS_IPV6;
+
+	duk_get_prop_string(ctx, 0, "ipv4");
+	duk_get_prop_string(ctx, 0, "ipv6");
+
+	if (duk_is_boolean(ctx, -1) && !duk_to_boolean(ctx, -1))
+		flags &= ~(IRC_SERVER_FLAGS_IPV4);
+	if (duk_is_boolean(ctx, -2) && !duk_to_boolean(ctx, -2))
+		flags &= ~(IRC_SERVER_FLAGS_IPV6);
+
+	s->flags |= flags;
+	duk_pop_n(ctx, 2);
+}
+
+static inline void
+get_ssl(duk_context *ctx, struct irc_server *s)
+{
+	duk_get_prop_string(ctx, 0, "ssl");
+
+	if (duk_is_boolean(ctx, -1) && duk_to_boolean(ctx, -1))
+		s->flags |= IRC_SERVER_FLAGS_SSL;
+
+	duk_pop(ctx);
+}
+
+static inline void
+get_string(duk_context *ctx, const char *n, bool required, char *dst, size_t dstsz)
+{
+	duk_get_prop_string(ctx, 0, n);
+
+	if (duk_is_string(ctx, -1))
+		strlcpy(dst, duk_to_string(ctx, -1), dstsz);
+	else if (required)
+		duk_error(ctx, DUK_ERR_ERROR, "invalid or missing '%s' property", n);
+
+	duk_pop(ctx);
+}
+
+static inline void
+get_channels(duk_context *ctx, struct irc_server *s)
+{
+	duk_get_prop_string(ctx, 0, "channels");
+
+	for (duk_enum(ctx, -1, 0); duk_next(ctx, -1, true); ) {
+		duk_get_prop_string(ctx, -1, "name");
+		duk_get_prop_string(ctx, -2, "password");
+
+		if (!duk_is_string(ctx, -2))
+			duk_error(ctx, DUK_ERR_ERROR, "invalid channel 'name' property");
+
+		irc_server_join(s, duk_to_string(ctx, -2), duk_opt_string(ctx, -1, NULL));
+		duk_pop_n(ctx, 4);
+	}
+
+	duk_pop_n(ctx, 2);
 }
 
 static duk_ret_t
@@ -362,89 +436,6 @@ Server_prototype_toString(duk_context *ctx)
 	return 1;
 }
 
-static inline void
-get_name(duk_context *ctx, struct irc_server *s)
-{
-	duk_get_prop_string(ctx, 0, "name");
-
-	if (!duk_is_string(ctx, -1))
-		duk_error(ctx, DUK_ERR_ERROR, "invalid 'name' property");
-
-	strlcpy(s->name, duk_to_string(ctx, -1), sizeof (s->name));
-	duk_pop(ctx);
-}
-
-static inline void
-get_port(duk_context *ctx, struct irc_server *s)
-{
-	duk_get_prop_string(ctx, 0, "port");
-
-	if (!duk_is_number(ctx, -1))
-		duk_error(ctx, DUK_ERR_ERROR, "invalid 'port' property");
-
-	s->port = duk_to_int(ctx, -1);
-	duk_pop(ctx);
-}
-
-static inline void
-get_ip(duk_context *ctx, struct irc_server *s)
-{
-	enum irc_server_flags flags = IRC_SERVER_FLAGS_IPV4 |
-	                              IRC_SERVER_FLAGS_IPV6;
-
-	duk_get_prop_string(ctx, 0, "ipv4");
-	duk_get_prop_string(ctx, 0, "ipv6");
-
-	if (duk_is_boolean(ctx, -1) && !duk_to_boolean(ctx, -1))
-		flags &= ~(IRC_SERVER_FLAGS_IPV4);
-	if (duk_is_boolean(ctx, -2) && !duk_to_boolean(ctx, -2))
-		flags &= ~(IRC_SERVER_FLAGS_IPV6);
-
-	s->flags |= flags;
-	duk_pop_n(ctx, 2);
-}
-
-static inline void
-get_ssl(duk_context *ctx, struct irc_server *s)
-{
-	duk_get_prop_string(ctx, 0, "ssl");
-
-	if (duk_is_boolean(ctx, -1) && duk_to_boolean(ctx, -1))
-		s->flags |= IRC_SERVER_FLAGS_SSL;
-
-	duk_pop(ctx);
-}
-
-static inline void
-get_string(duk_context *ctx, const char *n, char *dst, size_t dstsz)
-{
-	duk_get_prop_string(ctx, 0, n);
-
-	if (duk_is_string(ctx, -1) && duk_is_string(ctx ,-1))
-		strlcpy(dst, duk_to_string(ctx, -1), dstsz);
-
-	duk_pop(ctx);
-}
-
-static inline void
-get_channels(duk_context *ctx, struct irc_server *s)
-{
-	duk_get_prop_string(ctx, 0, "channels");
-
-	for (duk_enum(ctx, -1, 0); duk_next(ctx, -1, true); ) {
-		duk_get_prop_string(ctx, -1, "name");
-		duk_get_prop_string(ctx, -2, "password");
-
-		if (!duk_is_string(ctx, -2))
-			duk_error(ctx, DUK_ERR_ERROR, "invalid channel 'name' property");
-
-		irc_server_join(s, duk_to_string(ctx, -2), duk_opt_string(ctx, -1, NULL));
-		duk_pop_n(ctx, 4);
-	}
-
-	duk_pop_n(ctx, 2);
-}
-
 static duk_ret_t
 Server_constructor(duk_context *ctx)
 {
@@ -452,14 +443,15 @@ Server_constructor(duk_context *ctx)
 
 	duk_require_object(ctx, 0);
 
-	get_name(ctx, &s);
+	get_string(ctx, "name", true, s.name, sizeof (s.name));
+	get_string(ctx, "hostname", true, s.hostname, sizeof (s.hostname));
 	get_port(ctx, &s);
 	get_ip(ctx, &s);
 	get_ssl(ctx, &s);
-	get_string(ctx, "nickname", s.nickname, sizeof (s.nickname));
-	get_string(ctx, "username", s.username, sizeof (s.username));
-	get_string(ctx, "realname", s.realname, sizeof (s.realname));
-	get_string(ctx, "commandChar", s.commandchar, sizeof (s.commandchar));
+	get_string(ctx, "nickname", false, s.nickname, sizeof (s.nickname));
+	get_string(ctx, "username", false, s.username, sizeof (s.username));
+	get_string(ctx, "realname", false, s.realname, sizeof (s.realname));
+	get_string(ctx, "commandChar", false, s.commandchar, sizeof (s.commandchar));
 	get_channels(ctx, &s);
 
 	p = irc_util_memdup(&s, sizeof (s));
@@ -472,8 +464,6 @@ Server_constructor(duk_context *ctx)
 
 	return 0;
 }
-
-#if 0
 
 static duk_ret_t
 Server_destructor(duk_context *ctx)
@@ -490,8 +480,6 @@ Server_destructor(duk_context *ctx)
 
 	return 0;
 }
-
-#endif
 
 static duk_ret_t
 Server_add(duk_context *ctx)
@@ -520,9 +508,11 @@ Server_find(duk_context *ctx)
 static duk_ret_t
 Server_list(duk_context *ctx)
 {
+	struct irc_server *s;
+
 	duk_push_object(ctx);
 
-	for (struct irc_server *s = irc.servers; s; s = s->next) {
+	IRC_LIST_FOREACH(irc.servers, s) {
 		irc_jsapi_server_push(ctx, s);
 		duk_put_prop_string(ctx, -2, s->name);
 	}
@@ -577,6 +567,8 @@ irc_jsapi_server_load(duk_context *ctx)
 	duk_put_function_list(ctx, -1, functions);
 	duk_push_object(ctx);
 	duk_put_function_list(ctx, -1, methods);
+	duk_push_c_function(ctx, Server_destructor, 1);
+	duk_set_finalizer(ctx, -2);
 	duk_dup_top(ctx);
 	duk_put_global_string(ctx, PROTOTYPE);
 	duk_put_prop_string(ctx, -2, "prototype");
