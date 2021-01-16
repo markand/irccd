@@ -30,7 +30,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#if defined(IRCCD_HAVE_SSL)
+#include "config.h"
+
+#if defined(IRCCD_WITH_SSL)
 #       include <openssl/err.h>
 #endif
 
@@ -451,7 +453,7 @@ clear(struct irc_server *s)
 		s->aip = NULL;
 	}
 
-#if defined(IRCCD_HAVE_SSL)
+#if defined(IRCCD_WITH_SSL)
 	if (s->ssl) {
 		SSL_free(s->ssl);
 		s->ssl = NULL;
@@ -493,10 +495,10 @@ auth(struct irc_server *s)
 	/* TODO: server password as well. */
 }
 
-#if defined(IRCCD_HAVE_SSL)
+#if defined(IRCCD_WITH_SSL)
 
 static void
-secure_update(struct irc_server *s, int ret)
+update(struct irc_server *s, int ret)
 {
 	(void)s;
 	(void)ret;
@@ -505,21 +507,21 @@ secure_update(struct irc_server *s, int ret)
 
 	int r;
 
-	if (!(s->flags & SERVER_FL_SSL))
+	if (!(s->flags & IRC_SERVER_FLAGS_SSL))
 		return;
 
 	switch ((r = SSL_get_error(s->ssl, ret))) {
 	case SSL_ERROR_WANT_READ:
-		s->ssl_state = SERVER_SSL_NEED_READ;
+		s->ssl_state = IRC_SERVER_SSL_NEED_READ;
 		break;
 	case SSL_ERROR_WANT_WRITE:
-		s->ssl_state = SERVER_SSL_NEED_WRITE;
+		s->ssl_state = IRC_SERVER_SSL_NEED_WRITE;
 		break;
 	case SSL_ERROR_SSL:
 		clear(s);
 		break;
 	default:
-		s->ssl_state = SERVER_SSL_NONE;
+		s->ssl_state = IRC_SERVER_SSL_NONE;
 		break;
 	}
 }
@@ -534,28 +536,28 @@ handshake(struct irc_server *s)
 	if (!(s->flags & IRC_SERVER_FLAGS_SSL))
 		auth(s);
 	else {
-#if defined(IRCCD_HAVE_SSL)
+#if defined(IRCCD_WITH_SSL)
 		int r;
 
-		s->state = SERVER_ST_HANDSHAKING;
+		s->state = IRC_SERVER_STATE_HANDSHAKING;
 
 		if ((r = SSL_do_handshake(s->ssl)) > 0)
 			auth(s);
 
-		secure_update(s, r);
+		update(s, r);
 #endif
 	}
 }
 
 static void
-secure_connect(struct irc_server *s)
+try_connect(struct irc_server *s)
 {
 	assert(s);
 
 	if (!(s->flags & IRC_SERVER_FLAGS_SSL))
 		handshake(s);
 	else {
-#if defined(IRCCD_HAVE_SSL)
+#if defined(IRCCD_WITH_SSL)
 		int r;
 
 		if (!s->ctx)
@@ -566,9 +568,9 @@ secure_connect(struct irc_server *s)
 		}
 
 		if ((r = SSL_connect(s->ssl)) > 0)
-			ssl_handshake(s);
+			handshake(s);
 
-		secure_update(s, r);
+		update(s, r);
 #endif
 	}
 }
@@ -617,7 +619,7 @@ dial(struct irc_server *s)
 		 * otherwise we will need to wait until the socket is writable.
 		 */
 		if (connect(s->fd, s->aip->ai_addr, s->aip->ai_addrlen) == 0) {
-			secure_connect(s);
+			try_connect(s);
 			break;
 		}
 
@@ -641,9 +643,9 @@ input(struct irc_server *s)
 	ssize_t nr = 0;
 
 	if (s->flags & IRC_SERVER_FLAGS_SSL) {
-#if defined(IRCCD_HAVE_SSL)
+#if defined(IRCCD_WITH_SSL)
 		nr = SSL_read(s->ssl, buf, sizeof (buf) - 1);
-		secure_update(s, nr);
+		update(s, nr);
 #endif
 	} else {
 		if ((nr = recv(s->fd, buf, sizeof (buf) - 1, 0)) < 0)
@@ -664,9 +666,9 @@ output(struct irc_server *s)
 	ssize_t ns = 0;
 
 	if (s->flags & IRC_SERVER_FLAGS_SSL) {
-#if defined(IRCCD_HAVE_SSL)
-		ns = SSL_write(s->ssl, s->out.data, s->out.size);
-		secure_update(s, ns);
+#if defined(IRCCD_WITH_SSL)
+		ns = SSL_write(s->ssl, s->out, strlen(s->out));
+		update(s, ns);
 #endif
 	} else if ((ns = send(s->fd, s->out, strlen(s->out), 0)) <= 0)
 		clear(s);
@@ -685,7 +687,7 @@ prepare_connecting(const struct irc_server *s, struct pollfd *pfd)
 {
 	(void)s;
 
-#if defined(IRCCD_HAVE_SSL)
+#if defined(IRCCD_WITH_SSL)
 	if (s->flags & IRC_SERVER_FLAGS_SSL && s->ssl && s->ctx) {
 		switch (s->ssl_state) {
 		case IRC_SERVER_SSL_NEED_READ:
@@ -705,13 +707,13 @@ prepare_connecting(const struct irc_server *s, struct pollfd *pfd)
 static void
 prepare_ready(const struct irc_server *s, struct pollfd *pfd)
 {
-#if defined(IRCCD_HAVE_SSL)
+#if defined(IRCCD_WITH_SSL)
 	if (s->flags & IRC_SERVER_FLAGS_SSL && s->ssl_state) {
 		switch (s->ssl_state) {
-		case SERVER_SSL_NEED_READ:
+		case IRC_SERVER_SSL_NEED_READ:
 			pfd->events |= POLLIN;
 			break;
-		case SERVER_SSL_NEED_WRITE:
+		case IRC_SERVER_SSL_NEED_WRITE:
 			pfd->events |= POLLOUT;
 			break;
 		default:
@@ -723,7 +725,7 @@ prepare_ready(const struct irc_server *s, struct pollfd *pfd)
 
 		if (s->out[0])
 			pfd->events |= POLLOUT;
-#if defined(IRCCD_HAVE_SSL)
+#if defined(IRCCD_WITH_SSL)
 	}
 #endif
 }
@@ -740,7 +742,7 @@ flush_connecting(struct irc_server *s, const struct pollfd *pfd)
 		irc_log_warn("server %s: %s", s->name, strerror(res ? err : errno));
 		dial(s);
 	} else
-		secure_connect(s);
+		try_connect(s);
 }
 
 static void

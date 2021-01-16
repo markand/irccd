@@ -22,7 +22,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 
-#if defined(IRC_HAVE_SSL)
+#include "config.h"
+
+#if defined(IRCCD_WITH_SSL)
 #       include <openssl/ssl.h>
 #endif
 
@@ -54,7 +56,7 @@ struct irc_server_prefix {
 	char token;
 };
 
-#if defined(IRCCD_HAVE_SSL)
+#if defined(IRCCD_WITH_SSL)
 
 enum irc_server_ssl_state {
 	IRC_SERVER_SSL_NONE,
@@ -93,7 +95,7 @@ struct irc_server {
 	enum irc_server_state state;
 
 	/* OpenSSL support. */
-#if defined(IRCCD_HAVE_SSL)
+#if defined(IRCCD_WITH_SSL)
 	SSL_CTX *ctx;
 	SSL *ssl;
 	enum irc_server_ssl_state ssl_state;

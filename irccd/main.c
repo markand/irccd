@@ -20,9 +20,7 @@
 #include <err.h>
 
 #include <irccd/irccd.h>
-#include <irccd/js-plugin.h>
 #include <irccd/log.h>
-#include <irccd/plugin.h>
 #include <irccd/server.h>
 #include <irccd/transport.h>
 #include <irccd/util.h>
@@ -30,24 +28,23 @@
 int
 main(int argc, char **argv)
 {
+	(void)argc;
+	(void)argv;
+
 	struct irc_server s = {
 		.name = "malikania",
 		.username = "circ",
 		.nickname = "circ",
 		.hostname = "malikania.fr",
-		.port = 6667
-	};
-	struct irc_plugin p = {
-		.name = "fuck"
+		.port = 6697,
+		.flags = IRC_SERVER_FLAGS_SSL
 	};
 
 	irc_log_set_verbose(true);
 	irc_bot_init();
 
 	irc_transport_bind("/tmp/irccd.sock");
-	//irc_server_join(&s, "#test", NULL);
-	irc_js_plugin_open(&p, "/Users/markand/test.js");
-	//irc_bot_add_server(irc_util_memdup(&s, sizeof (s)));
-	irc_bot_add_plugin(&p);
+	irc_server_join(&s, "#test", NULL);
+	irc_bot_add_server(irc_util_memdup(&s, sizeof (s)));
 	irc_bot_run();
 }

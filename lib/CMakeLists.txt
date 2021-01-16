@@ -90,12 +90,13 @@ target_include_directories(
 	libirccd
 	PUBLIC
 		$<BUILD_INTERFACE:${libirccd_SOURCE_DIR}>
-		$<BUILD_INTERFACE:${libirccd_BINARY_DIR}>
-	PRIVATE
 		$<BUILD_INTERFACE:${libirccd_BINARY_DIR}>/irccd
 )
 target_link_libraries(libirccd libirccd-compat)
 
+if (IRCCD_WITH_SSL)
+	target_link_libraries(libirccd OpenSSL::SSL OpenSSL::Crypto)
+endif ()
 if (IRCCD_WITH_JS)
 	target_link_libraries(libirccd libirccd-duktape)
 endif ()

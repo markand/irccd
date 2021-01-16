@@ -37,6 +37,10 @@ endif ()
 
 include(GNUInstallDirs)
 
+if (IRCCD_WITH_SSL)
+	find_package(OpenSSL REQUIRED)
+endif ()
+
 add_subdirectory(extern/libcompat)
 
 if (IRCCD_WITH_JS)

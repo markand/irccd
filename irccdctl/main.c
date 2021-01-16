@@ -186,6 +186,8 @@ cmd_server_me(int argc, char **argv)
 static void
 cmd_server_mode(int argc, char **argv)
 {
+	(void)argc;
+	(void)argv;
 #if 0
 	req("MODE %s %s %s%c%s%c%s%c%s", argv[0], argv[1], argv[2],
 		argc >= 4 ? ' ', argv[3] : "",
@@ -198,6 +200,8 @@ cmd_server_mode(int argc, char **argv)
 static void
 cmd_server_nick(int argc, char **argv)
 {
+	(void)argc;
+
 	req("SERVER-NICK %s %s", argv[0], argv[1]);
 	ok();
 }
@@ -205,6 +209,8 @@ cmd_server_nick(int argc, char **argv)
 static void
 cmd_server_notice(int argc, char **argv)
 {
+	(void)argc;
+
 	req("SERVER-NOTICE %s %s %s", argv[0], argv[1], argv[2]);
 	ok();
 }
@@ -212,6 +218,8 @@ cmd_server_notice(int argc, char **argv)
 static void
 cmd_server_part(int argc, char **argv)
 {
+	(void)argc;
+
 	/* Let's advertise irccd a bit. */
 	req("SERVER-PART %s %s %s", argv[0], argv[1],
 	    argc >= 3 ? argv[2] : "irccd is shutting down");
@@ -221,14 +229,16 @@ cmd_server_part(int argc, char **argv)
 static void
 cmd_server_topic(int argc, char **argv)
 {
+	(void)argc;
+
 	req("SERVER-TOPIC %s %s %s", argv[0], argv[1], argv[2]);
 	ok();
 }
 
 static const struct cmd {
 	const char *name;
-	unsigned int minargs;
-	unsigned int maxargs;
+	int minargs;
+	int maxargs;
 	void (*exec)(int, char **);
 } cmds[] = {
 	/* name                 min     max     exec                   */
