@@ -21,6 +21,7 @@
 
 #include <duktape.h>
 
+#include "config.h"
 #include "util.h"
 
 static duk_ret_t
@@ -289,7 +290,6 @@ irc_jsapi_load(duk_context *ctx)
 	duk_push_object(ctx);
 
 	/* Irccd.version (property) */
-#if 0
 	duk_push_object(ctx);
 	duk_push_int(ctx, IRCCD_VERSION_MAJOR);
 	duk_put_prop_string(ctx, -2, "major");
@@ -298,7 +298,6 @@ irc_jsapi_load(duk_context *ctx)
 	duk_push_int(ctx, IRCCD_VERSION_PATCH);
 	duk_put_prop_string(ctx, -2, "patch");
 	duk_put_prop_string(ctx, -2, "version");
-#endif
 
 	/* Create the system_error that inherits from Error. */
 	duk_push_c_function(ctx, SystemError_constructor, 2);
