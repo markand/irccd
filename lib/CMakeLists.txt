@@ -100,3 +100,5 @@ endif ()
 if (IRCCD_WITH_JS)
 	target_link_libraries(libirccd libirccd-duktape)
 endif ()
+
+source_group(TREE ${libirccd_SOURCE_DIR} FILES ${SOURCES})

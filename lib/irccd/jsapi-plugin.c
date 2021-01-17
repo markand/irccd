@@ -130,13 +130,25 @@ get_paths(duk_context *ctx)
 	return get(ctx, IRC_JSAPI_PLUGIN_PROP_PATHS);
 }
 
+static struct irc_plugin *
+find(duk_context *ctx)
+{
+	const char *name = duk_require_string(ctx, 0);
+	struct irc_plugin *plg = irc_bot_find_plugin(name);
+
+	if (!plg)
+		duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "plugin %s not found", name);
+
+	return plg;
+}
+
 static duk_ret_t
 Plugin_info(duk_context *ctx)
 {
 	struct irc_plugin *p;
 
 	if (duk_get_top(ctx) >= 1)
-		p = irc_bot_find_plugin(duk_require_string(ctx, 0));
+		p = find(ctx);
 	else
 		p = irc_jsapi_plugin_self(ctx);
 
@@ -180,7 +192,7 @@ Plugin_load(duk_context *ctx)
 static duk_ret_t
 Plugin_reload(duk_context *ctx)
 {
-	(void)ctx;
+	irc_plugin_reload(find(ctx));
 
 	return 0;
 }
@@ -188,7 +200,8 @@ Plugin_reload(duk_context *ctx)
 static duk_ret_t
 Plugin_unload(duk_context *ctx)
 {
-	(void)ctx;
+	/* Use find so it can raise ReferenceError if not found. */
+	irc_bot_remove_plugin(find(ctx)->name);
 
 	return 0;
 }
