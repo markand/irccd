@@ -16,8 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCD_LIST_H
-#define IRCD_LIST_H
+#ifndef IRCCD_LIST_H
+#define IRCCD_LIST_H
 
 #define IRC_LIST_ADD(h, o)                                              \
 do {                                                                    \
@@ -38,11 +38,10 @@ do {                                                                    \
         (o)->next = (o)->prev = NULL;                                   \
 } while (0)
 
-
 #define IRC_LIST_FOREACH(h, s)                                          \
-	for ((s) = (h); (s); (s) = (s)->next)
+        for ((s) = (h); (s); (s) = (s)->next)
 
 #define IRC_LIST_FOREACH_SAFE(h, s, tmp)                                \
         for ((s) = (h); s && ((tmp) = (s)->next, 1); (s) = (tmp))
 
-#endif /* IRC_LIST_H */
+#endif /* IRCCD_LIST_H */

@@ -47,8 +47,9 @@ enum irc_server_state {
 enum irc_server_flags {
 	IRC_SERVER_FLAGS_SSL           = (1 << 0),
 	IRC_SERVER_FLAGS_AUTO_REJOIN   = (1 << 1),
-	IRC_SERVER_FLAGS_IPV4          = (1 << 2),
-	IRC_SERVER_FLAGS_IPV6          = (1 << 3)
+	IRC_SERVER_FLAGS_JOIN_INVITE   = (1 << 2),
+	IRC_SERVER_FLAGS_IPV4          = (1 << 3),
+	IRC_SERVER_FLAGS_IPV6          = (1 << 4)
 };
 
 struct irc_server_prefix {
@@ -70,6 +71,7 @@ struct irc_server {
 	/* Connection settings. */
 	char name[IRC_NAME_MAX];
 	char hostname[IRC_HOST_MAX];
+	char password[IRC_PASSWORD_MAX];
 	unsigned short port;
 	enum irc_server_flags flags;
 

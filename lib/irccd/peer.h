@@ -27,6 +27,7 @@ struct pollfd;
 
 struct irc_peer {
 	int fd;
+	bool is_watching;
 	char in[IRC_BUF_MAX];
 	char out[IRC_BUF_MAX];
 };

@@ -24,6 +24,8 @@
 #include <irccd/server.h>
 #include <irccd/transport.h>
 #include <irccd/util.h>
+#include <irccd/plugin.h>
+#include <irccd/js-plugin.h>
 
 int
 main(int argc, char **argv)
@@ -37,8 +39,9 @@ main(int argc, char **argv)
 		.nickname = "circ",
 		.hostname = "malikania.fr",
 		.port = 6697,
-		.flags = IRC_SERVER_FLAGS_SSL
+		.flags = IRC_SERVER_FLAGS_SSL | IRC_SERVER_FLAGS_JOIN_INVITE
 	};
+	struct irc_plugin p = {0};
 
 	irc_log_set_verbose(true);
 	irc_bot_init();
@@ -46,5 +49,7 @@ main(int argc, char **argv)
 	irc_transport_bind("/tmp/irccd.sock");
 	irc_server_join(&s, "#test", NULL);
 	irc_bot_add_server(irc_util_memdup(&s, sizeof (s)));
+	irc_js_plugin_open(&p, "/Users/markand/test.js");
+	irc_bot_add_plugin(&p);
 	irc_bot_run();
 }

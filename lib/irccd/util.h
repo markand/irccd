@@ -47,4 +47,7 @@ irc_util_basename(const char *);
 char *
 irc_util_dirname(const char *);
 
+size_t
+irc_util_split(char *, const char **, size_t);
+
 #endif /* !IRCCD_UTIL_H */

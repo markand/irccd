@@ -298,6 +298,16 @@ cmd_server_topic(struct irc_peer *p, char *line)
 	return ok(p);
 }
 
+static int
+cmd_watch(struct irc_peer *p, char *line)
+{
+	(void)line;
+
+	p->is_watching = true;
+
+	return ok(p);
+}
+
 static const struct cmd {
 	const char *name;
 	int (*call)(struct irc_peer *, char *);
@@ -313,6 +323,7 @@ static const struct cmd {
 	{ "SERVER-NOTICE",      cmd_server_notice       },
 	{ "SERVER-PART",        cmd_server_part         },
 	{ "SERVER-TOPIC",       cmd_server_topic        },
+	{ "WATCH",              cmd_watch               }
 };
 
 static int

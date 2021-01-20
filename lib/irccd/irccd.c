@@ -90,7 +90,20 @@ prepare(void)
 	return pkg;
 }
 
-static void
+static inline void
+broadcast(const struct irc_event *ev)
+{
+	char buf[IRC_MESSAGE_MAX];
+
+	if (!irc_event_str(ev, buf, sizeof (buf)))
+		return;
+
+	for (size_t i = 0; i < irc.peersz; ++i)
+		if (irc.peers[i].is_watching)
+			irc_peer_send(&irc.peers[i], buf);
+}
+
+static inline void
 invoke(const struct irc_event *ev)
 {
 	for (size_t i = 0; i < irc.pluginsz; ++i)
@@ -118,7 +131,7 @@ process(struct pkg *pkg)
 	struct irc_peer peer;
 	struct irc_event ev;
 
-	if (poll(pkg->fds, pkg->fdsz, 1000) < 0)
+	if (poll(pkg->fds, pkg->fdsz, 1000) < 0 && errno != EINTR)
 		err(1, "poll");
 
 	/*
@@ -150,9 +163,12 @@ process(struct pkg *pkg)
 	 * For every server, poll any kind of new event and pass them to the
 	 * plugin unless the rules explicitly disallow us to do so.
 	 */
-	IRC_LIST_FOREACH(irc.servers, s)
-		while (irc_server_poll(s, &ev))
+	IRC_LIST_FOREACH(irc.servers, s) {
+		while (irc_server_poll(s, &ev)) {
+			broadcast(&ev);
 			invoke(&ev);
+		}
+	}
 }
 
 static void

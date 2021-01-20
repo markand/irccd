@@ -19,6 +19,7 @@
 #ifndef IRCCD_EVENT_H
 #define IRCCD_EVENT_H
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #include "limits.h"
@@ -43,95 +44,29 @@ enum irc_event_type {
 	IRC_EVENT_WHOIS
 };
 
+struct irc_event_msg {
+	char *prefix;
+	char *cmd;
+	char *args[IRC_ARGS_MAX];
+	char buf[IRC_MESSAGE_MAX];
+};
+
 struct irc_event {
 	enum irc_event_type type;
 	struct irc_server *server;
-
-	/*
-	 * Raw arguments.
-	 *   [0]: prefix
-	 *   [1]: origin
-	 *   [2 to argsz]: arguments
-	 */
-	char args[IRC_ARGS_MAX][IRC_MESSAGE_MAX];
-	size_t argsz;
-
-	/* Conveniently organized union depending on the type. */
-	union {
-		struct {
-			char *origin;
-			char *channel;
-			char *nickname;
-		} invite;
-
-		struct {
-			char *origin;
-			char *channel;
-		} join;
-
-		struct {
-			char *origin;
-			char *channel;
-			char *target;
-			char *reason;
-		} kick;
-
-		struct {
-			char *origin;
-			char *channel;
-			char *message;
-		} me;
-
-		struct {
-			char *origin;
-			char *channel;
-			char *message;
-		} message;
-
-		struct {
-			char *origin;
-			char *channel;
-			char *mode;
-			char *limit;
-			char *user;
-			char *mask;
-		} mode;
-
-		struct {
-			char *origin;
-			char *nickname;
-		} nick;
-
-		struct {
-			struct irc_channel *channel;
-		} names;
-
-		struct {
-			char *origin;
-			char *channel;
-			char *message;
-		} notice;
-
-		struct {
-			char *origin;
-			char *channel;
-			char *reason;
-		} part;
-
-		struct {
-			char *origin;
-			char *channel;
-			char *topic;
-		} topic;
-
-		struct {
-			char *nick;
-			char *user;
-			char *hostname;
-			char *realname;
-			char **channels;
-		} whois;
-	};
+	struct irc_event_msg msg;
 };
+
+bool
+irc_event_is_ctcp(const char *);
+
+char *
+irc_event_ctcp(char *);
+
+bool
+irc_event_parse(struct irc_event_msg *, const char *);
+
+bool
+irc_event_str(const struct irc_event *, char *, size_t);
 
 #endif /* !IRCCD_EVENT_H */

@@ -26,6 +26,7 @@ set(
 	irccd/config.h.in
 	irccd/dl-plugin.c
 	irccd/dl-plugin.h
+	irccd/event.c
 	irccd/event.h
 	irccd/irccd.c
 	irccd/irccd.h

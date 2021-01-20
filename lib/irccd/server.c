@@ -49,33 +49,6 @@ struct origin {
 	char host[IRC_HOST_MAX];
 };
 
-static bool
-is_ctcp(const char *line)
-{
-	assert(line);
-
-	const size_t length = strlen(line);
-
-	if (length < 2)
-		return false;
-
-	return line[0] == 0x1 && line[length - 1] == 0x1;
-}
-
-static char *
-ctcp(char *line)
-{
-	assert(line);
-
-	/* Remove last \001. */
-	line[strcspn(line, "\001")] = 0;
-
-	if (strncmp(line, "ACTION ", 7) == 0)
-		line += 7;
-
-	return line;
-}
-
 static int
 cmp_channel(const struct irc_channel *c1, const struct irc_channel *c2)
 {
@@ -117,16 +90,21 @@ add_nick(const struct irc_server *s, struct irc_channel *ch, const char *nick)
 static struct irc_channel *
 add_channel(struct irc_server *s, const char *name, const char *password, bool joined)
 {
-	struct irc_channel ch = {
-		.joined = joined
-	};
+	struct irc_channel chnew = {0}, *ch;
 
-	strlcpy(ch.name, name, sizeof (ch.name));
+	if ((ch = irc_server_find(s, name))) {
+		ch->joined = joined;
+		return ch;
+	}
+
+	strlcpy(chnew.name, name, sizeof (chnew.name));
 
 	if (password)
-		strlcpy(ch.password, password, sizeof (ch.password));
+		strlcpy(chnew.password, password, sizeof (chnew.password));
 
-	IRC_SET_ALLOC_PUSH(&s->channels, &s->channelsz, &ch, cmp_channel);
+	chnew.joined = joined;
+
+	IRC_SET_ALLOC_PUSH(&s->channels, &s->channelsz, &chnew, cmp_channel);
 
 	return irc_server_find(s, name);
 }
@@ -134,14 +112,15 @@ add_channel(struct irc_server *s, const char *name, const char *password, bool j
 static void
 remove_channel(struct irc_server *s, struct irc_channel *ch)
 {
+	irc_channel_clear(ch);
 	IRC_SET_ALLOC_REMOVE(&s->channels, &s->channelsz, ch);
 }
 
 static void
 read_support_prefix(struct irc_server *s, const char *value)
 {
-	char modes[16 + 1] = { 0 };
-	char tokens[16 + 1] = { 0 };
+	char modes[16 + 1] = {0};
+	char tokens[16 + 1] = {0};
 
 	if (sscanf(value, "(%16[^)])%16s", modes, tokens) == 2) {
 		char *pm = modes;
@@ -161,26 +140,27 @@ read_support_chantypes(struct irc_server *s, const char *value)
 }
 
 static void
-convert_connect(struct irc_server *s, struct irc_event *ev)
+handle_connect(struct irc_server *s, struct irc_event *ev)
 {
 	s->state = IRC_SERVER_STATE_CONNECTED;
-
-	ev->type = IRC_EVENT_CONNECT;
-	ev->server = s;
 
 	/* Now join all channels that were requested. */
 	for (size_t i = 0; i < s->channelsz; ++i)
 		irc_server_join(s, s->channels[i].name, s->channels[i].password);
+
+	ev->type = IRC_EVENT_CONNECT;
 }
 
 static void
-convert_support(struct irc_server *s, struct irc_event *ev)
+handle_support(struct irc_server *s, struct irc_event *ev)
 {
+	(void)ev;
+
 	char key[64];
 	char value[64];
 
-	for (size_t i = 4; i < ev->argsz; ++i) {
-		if (sscanf(ev->args[i], "%63[^=]=%63s", key, value) != 2)
+	for (size_t i = 2; ev->msg.args[i]; ++i) {
+		if (sscanf(ev->msg.args[i], "%63[^=]=%63s", key, value) != 2)
 			continue;
 
 		if (strcmp(key, "PREFIX") == 0)
@@ -191,85 +171,68 @@ convert_support(struct irc_server *s, struct irc_event *ev)
 }
 
 static void
-convert_join(struct irc_server *s, struct irc_event *ev)
+handle_invite(struct irc_server *s, struct irc_event *ev)
 {
-	const struct origin *origin = parse_origin(ev->args[0]);
-	struct irc_channel *ch = NULL;
+	if (strcmp(ev->msg.args[0], s->nickname) == 0 && s->flags & IRC_SERVER_FLAGS_JOIN_INVITE)
+		irc_server_join(s, ev->msg.args[1], NULL);
 
-	ev->type = IRC_EVENT_JOIN;
-	ev->server = s;
-	ev->join.origin = ev->args[0];
-	ev->join.channel = ev->args[2];
-
-	if (!(ch = irc_server_find(s, ev->args[2])))
-		ch = add_channel(s, ev->args[2], NULL, true);
-	else
-		ch->joined = true;
-
-	irc_channel_add(ch, origin->nickname, 0);
+	ev->type = IRC_EVENT_INVITE;
 }
 
 static void
-convert_kick(struct irc_server *s, struct irc_event *ev)
+handle_join(struct irc_server *s, struct irc_event *ev)
 {
-	struct irc_channel *ch = irc_server_find(s, ev->args[2]);
+	add_channel(s, ev->msg.args[0], NULL, true);
 
-	ev->type = IRC_EVENT_KICK;
-	ev->server = s;
-	ev->kick.origin = ev->args[0];
-	ev->kick.channel = ev->args[2];
-	ev->kick.target = ev->args[3];
-	ev->kick.reason = ev->args[4];
+	ev->type = IRC_EVENT_JOIN;
+}
+
+static void
+handle_kick(struct irc_server *s, struct irc_event *ev)
+{
+	struct irc_channel *ch = add_channel(s, ev->msg.args[0], NULL, true);
 
 	/*
 	 * If the bot was kicked itself mark the channel as not joined and
 	 * rejoin it automatically if the option is set.
 	 */
-	if (strcmp(ev->args[3], s->nickname) == 0 && ch) {
+	if (strcmp(ev->msg.args[1], s->nickname) == 0) {
 		ch->joined = false;
 		irc_channel_clear(ch);
 
 		if (s->flags & IRC_SERVER_FLAGS_AUTO_REJOIN)
 			irc_server_join(s, ch->name, ch->password);
 	} else
-		irc_channel_remove(ch, ev->args[3]);
+		irc_channel_remove(ch, ev->msg.args[1]);
+
+	ev->type = IRC_EVENT_KICK;
 }
 
 static void
-convert_mode(struct irc_server *s, struct irc_event *ev)
+handle_mode(struct irc_server *s, struct irc_event *ev)
 {
 	(void)s;
 	(void)ev;
 
-	for (size_t i = 0; i < ev->argsz; ++i) {
-		printf("MODE: %zu=%s\n", i, ev->args[i]);
-	}
+	ev->type = IRC_EVENT_MODE;
 }
 
 static void
-convert_part(struct irc_server *s, struct irc_event *ev)
+handle_part(struct irc_server *s, struct irc_event *ev)
 {
-	const struct origin *origin = parse_origin(ev->args[0]);
-	struct irc_channel *ch = irc_server_find(s, ev->args[2]);
+	const struct origin *origin = parse_origin(ev->msg.prefix);
+	struct irc_channel *ch = add_channel(s, ev->msg.args[0], NULL, true);
+
+	if (strcmp(origin->nickname, s->nickname) == 0)
+		remove_channel(s, ch);
 
 	ev->type = IRC_EVENT_PART;
-	ev->server = s;
-	ev->part.origin = ev->args[0];
-	ev->part.channel = ev->args[2];
-	ev->part.reason = ev->args[3];
-
-	if (ch && strcmp(origin->nickname, s->nickname) == 0)
-		remove_channel(s, ch);
 }
 
 static void
-convert_msg(struct irc_server *s, struct irc_event *ev)
+handle_msg(struct irc_server *s, struct irc_event *ev)
 {
-	ev->type = IRC_EVENT_MESSAGE;
-	ev->server = s;
-	ev->message.origin = ev->args[0];
-	ev->message.channel = ev->args[2];
-	ev->message.message = ev->args[3];
+	(void)s;
 
 	/*
 	 * Detect CTCP commands which are PRIVMSG with a special boundaries.
@@ -277,164 +240,104 @@ convert_msg(struct irc_server *s, struct irc_event *ev)
 	 * Example:
 	 * PRIVMSG jean :\001ACTION I'm eating\001.
 	 */
-	if (is_ctcp(ev->args[3])) {
+	if (irc_event_is_ctcp(ev->msg.args[1])) {
 		ev->type = IRC_EVENT_ME;
-		ev->message.message = ctcp(ev->args[3] + 1);
-	}
+		ev->msg.args[1] = irc_event_ctcp(ev->msg.args[1]);
+	} else
+		ev->type = IRC_EVENT_MESSAGE;
 }
 
 static void
-convert_nick(struct irc_server *s, struct irc_event *ev)
+handle_nick(struct irc_server *s, struct irc_event *ev)
 {
-	const struct origin *origin = parse_origin(ev->args[0]);
+	const struct origin *origin = parse_origin(ev->msg.prefix);
 
 	/* Update nickname if it is myself. */
 	if (strcmp(origin->nickname, s->nickname) == 0)
-		strlcpy(s->nickname, ev->args[2], sizeof (s->nickname));
+		strlcpy(s->nickname, ev->msg.args[0], sizeof (s->nickname));
+
+	ev->type = IRC_EVENT_NICK;
 }
 
 static void
-convert_notice(struct irc_server *s, struct irc_event *ev)
+handle_notice(struct irc_server *s, struct irc_event *ev)
 {
+	(void)s;
+
 	ev->type = IRC_EVENT_NOTICE;
-	ev->server = s;
-	ev->notice.origin = ev->args[0];
-	ev->notice.channel = ev->args[2];
-	ev->notice.message = ev->args[3];
 }
 
 static void
-convert_topic(struct irc_server *s, struct irc_event *ev)
+handle_topic(struct irc_server *s, struct irc_event *ev)
 {
+	(void)s;
+
 	ev->type = IRC_EVENT_TOPIC;
-	ev->server = s;
-	ev->topic.origin = ev->args[0];
-	ev->topic.channel = ev->args[2];
-	ev->topic.topic = ev->args[3];
 }
 
 static void
-convert_ping(struct irc_server *s, struct irc_event *ev)
+handle_ping(struct irc_server *s, struct irc_event *ev)
 {
-	irc_server_send(s, "PONG %s", ev->args[0]);
+	irc_server_send(s, "PONG %s", ev->msg.args[0]);
 }
 
 static void
-convert_names(struct irc_server *s, struct irc_event *ev)
+handle_names(struct irc_server *s, struct irc_event *ev)
 {
 	struct irc_channel *ch;
-	char *p, *n;
+	char *p, *token;
 
-	if (ev->argsz < 6)
-		return;
+	ch = add_channel(s, ev->msg.args[2], NULL, true);
 
-	/* TODO: create if not exist */
-	ch = irc_server_find(s, ev->args[4]);
-
-	for (p = ev->args[5]; p; ) {
-		n = strchr(p, ' ');
-
-		if (n)
-			*n = '\0';
-		if (strlen(p) > 0)
-			add_nick(s, ch, p);
-
-		p = n ? n + 1 : NULL;
-	}
+	/* TODO: libcompat for strtok_r. */
+	for (p = ev->msg.args[3]; (token = strtok_r(p, " ", &p)); )
+		if (strlen(token) > 0)
+			add_nick(s, ch, token);
 }
 
 static void
-convert_endofnames(struct irc_server *s, struct irc_event *ev)
+handle_endofnames(struct irc_server *s, struct irc_event *ev)
 {
-	for (size_t i = 0; i < ev->argsz; ++i)
-		printf("%zd: %s\n", i, ev->args[i]);
+	(void)s;
+
 	ev->type = IRC_EVENT_NAMES;
-	ev->server = s;
-	ev->names.channel = irc_server_find(s, ev->args[3]);
 }
 
-static const struct convert {
+static const struct handler {
 	const char *command;
-	void (*convert)(struct irc_server *, struct irc_event *);
-} converters[] = {
+	void (*handle)(struct irc_server *, struct irc_event *);
+} handlers[] = {
 	/* Must be kept ordered. */
-	{ "001",        convert_connect          },
-	{ "005",        convert_support          },
-	{ "353",        convert_names            },
-	{ "366",        convert_endofnames       },
-	{ "JOIN",       convert_join             },
-	{ "KICK",       convert_kick             },
-	{ "MODE",       convert_mode             },
-	{ "NICK",       convert_nick             },
-	{ "NOTICE",     convert_notice           },
-	{ "PART",       convert_part             },
-	{ "PING",       convert_ping             },
-	{ "PRIVMSG",    convert_msg              },
-	{ "TOPIC",      convert_topic            }
+	{ "001",        handle_connect          },
+	{ "005",        handle_support          },
+	{ "353",        handle_names            },
+	{ "366",        handle_endofnames       },
+	{ "INVITE",     handle_invite           },
+	{ "JOIN",       handle_join             },
+	{ "KICK",       handle_kick             },
+	{ "MODE",       handle_mode             },
+	{ "NICK",       handle_nick             },
+	{ "NOTICE",     handle_notice           },
+	{ "PART",       handle_part             },
+	{ "PING",       handle_ping             },
+	{ "PRIVMSG",    handle_msg              },
+	{ "TOPIC",      handle_topic            }
 };
 
 static int
-compare_converter(const void *d1, const void *d2)
+compare_handler(const void *d1, const void *d2)
 {
-	return strcmp(d1, ((const struct convert *)d2)->command);
+	return strcmp(d1, ((const struct handler *)d2)->command);
 }
 
 static void
-convert(struct irc_server *s, struct irc_event *ev)
+handle(struct irc_server *s, struct irc_event *ev)
 {
-	const struct convert *c = bsearch(ev->args[1], converters, IRC_UTIL_SIZE(converters),
-	    sizeof (*c), &(compare_converter));
+	const struct handler *c = bsearch(ev->msg.cmd, handlers, IRC_UTIL_SIZE(handlers),
+	    sizeof (*c), &(compare_handler));
 
 	if (c)
-		c->convert(s, ev);
-}
-
-static inline bool
-scan(struct irc_event *ev, const char **line)
-{
-	const char *p = *line;
-	size_t i = 0;
-
-	/* Copy argument. */
-	while (i < IRC_MESSAGE_MAX && *p && !isspace(*p))
-		ev->args[ev->argsz][i++] = *p++;
-
-	/* Skip optional spaces. */
-	while (*p && isspace(*p))
-		++p;
-
-	if (i >= IRC_MESSAGE_MAX)
-		return false;
-
-	*line = p;
-	ev->argsz++;
-
-	return true;
-}
-
-static void
-parse(struct irc_server *s, struct irc_event *ev, const char *line)
-{
-	if (!*line || *line++ != ':')
-		return;
-	if (!scan(ev, &line))   /* Prefix */
-		return;
-	if (!scan(ev, &line))   /* Command */
-		return;
-
-	/* Arguments. */
-	while (*line && ev->argsz < IRC_ARGS_MAX) {
-		/* Last argument: read until end. */
-		if (*line == ':') {
-			strlcpy(ev->args[ev->argsz++], ++line, IRC_MESSAGE_MAX);
-			break;
-		}
-
-		if (!scan(ev, &line))
-			return;
-	}
-
-	convert(s, ev);
+		c->handle(s, ev);
 }
 
 static void
@@ -489,10 +392,12 @@ auth(struct irc_server *s)
 {
 	s->state = IRC_SERVER_STATE_CONNECTED;
 
+	if (s->password[0])
+		irc_server_send(s, "PASS %s", s->password);
+
 	irc_server_send(s, "NICK %s", s->nickname);
 	irc_server_send(s, "USER %s %s %s :%s", s->username,
 		s->username, s->username, s->realname);
-	/* TODO: server password as well. */
 }
 
 #if defined(IRCCD_WITH_SSL)
@@ -756,8 +661,11 @@ flush_handshaking(struct irc_server *s, const struct pollfd *pfd)
 static void
 flush_ready(struct irc_server *s, const struct pollfd *pfd)
 {
-	if (pfd->revents & POLLERR || pfd->revents & POLLHUP)
+	if (pfd->revents & POLLERR || pfd->revents & POLLHUP) {
 		clear(s);
+		return;
+	}
+
 	if (pfd->revents & POLLIN)
 		input(s);
 	if (pfd->revents & POLLOUT)
@@ -843,8 +751,8 @@ irc_server_poll(struct irc_server *s, struct irc_event *ev)
 	memset(ev, 0, sizeof (*ev));
 	ev->type = IRC_EVENT_UNKNOWN;
 
-	if (length > 0)
-		parse(s, ev, s->in);
+	if (length > 0 && irc_event_parse(&ev->msg, s->in))
+		handle(s, ev);
 
 	memmove(s->in, pos + 2, sizeof (s->in) - (length + 2));
 

@@ -235,6 +235,74 @@ cmd_server_topic(int argc, char **argv)
 	ok();
 }
 
+static void
+show_invite(char *line)
+{
+	const char *args[5] = {0};
+
+	if (irc_util_split(line, args, 5) == 5) {
+		printf("event:     onInvite\n");
+		printf("server:    %s", args[1]);
+		printf("origin:    %s", args[2]);
+		printf("channel:   %s", args[3]);
+		printf("nickname:  %s", args[4]);
+	}
+}
+
+static void
+show_message(char *line)
+{
+	const char *args[5] = {0};
+
+	if (irc_util_split(line, args, 5) == 5) {
+		printf("event:     onMessage\n");
+		printf("server:    %s\n", args[1]);
+		printf("origin:    %s\n", args[2]);
+		printf("channel:   %s\n", args[3]);
+		printf("message:   %s\n", args[4]);
+	}
+}
+
+static const struct {
+	const char *event;
+	void (*show)(char *);
+} watchtable[] = {
+	{ "EVENT-INVITE", show_invite },
+	{ "EVENT-MESSAGE", show_message }
+};
+
+static void
+show(char *ev)
+{
+	for (size_t i = 0; i < IRC_UTIL_SIZE(watchtable); ++i) {
+		if (strncmp(watchtable[i].event, ev, strlen(watchtable[i].event)) == 0) {
+			watchtable[i].show(ev);
+			break;
+		}
+	}
+}
+
+static void
+cmd_watch(int argc, char **argv)
+{
+	(void)argc;
+	(void)argv;
+
+	struct timeval tv = {0};
+	char *ev;
+
+	/* Enable watch. */
+	req("WATCH");
+	ok();
+
+	/* Turn off timeout to receive indefinitely. */
+	if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof (tv)) < 0)
+		err(1, "setsockopt");
+
+	while ((ev = poll()))
+		show(ev);
+}
+
 static const struct cmd {
 	const char *name;
 	int minargs;
@@ -250,7 +318,8 @@ static const struct cmd {
 	{ "server-nick",        2,      2,      cmd_server_nick         },
 	{ "server-notice",      3,      3,      cmd_server_notice       },
 	{ "server-part",        3,      3,      cmd_server_part         },
-	{ "server-topic",       3,      3,      cmd_server_topic        }
+	{ "server-topic",       3,      3,      cmd_server_topic        },
+	{ "watch",              0,      0,      cmd_watch               }
 };
 
 static int

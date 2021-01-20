@@ -115,3 +115,27 @@ irc_util_dirname(const char *str)
 
 	return ret;
 }
+
+size_t
+irc_util_split(char *line, const char **args, size_t max)
+{
+	size_t idx;
+
+	if (!*line)
+		return 0;
+
+	for (idx = 0; idx < max; ++idx) {
+		char *sp = strchr(line, ' ');
+
+		if (!sp || idx + 1 >= max) {
+			args[idx++] = line;
+			break;
+		}
+
+		*sp = '\0';
+		args[idx] = line;
+		line = sp + 1;
+	}
+
+	return idx;
+}
