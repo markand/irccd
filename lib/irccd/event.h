@@ -28,6 +28,7 @@ struct irc_server;
 
 enum irc_event_type {
 	IRC_EVENT_UNKNOWN,
+	IRC_EVENT_COMMAND,
 	IRC_EVENT_CONNECT,
 	IRC_EVENT_DISCONNECT,
 	IRC_EVENT_INVITE,

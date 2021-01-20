@@ -336,8 +336,10 @@ handle(struct irc_server *s, struct irc_event *ev)
 	const struct handler *c = bsearch(ev->msg.cmd, handlers, IRC_UTIL_SIZE(handlers),
 	    sizeof (*c), &(compare_handler));
 
-	if (c)
+	if (c) {
+		ev->server = s;
 		c->handle(s, ev);
+	}
 }
 
 static void

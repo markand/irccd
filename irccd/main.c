@@ -38,10 +38,13 @@ main(int argc, char **argv)
 		.username = "circ",
 		.nickname = "circ",
 		.hostname = "malikania.fr",
+		.commandchar = "!",
 		.port = 6697,
 		.flags = IRC_SERVER_FLAGS_SSL | IRC_SERVER_FLAGS_JOIN_INVITE
 	};
-	struct irc_plugin p = {0};
+	struct irc_plugin p = {
+		.name = "test"
+	};
 
 	irc_log_set_verbose(true);
 	irc_bot_init();

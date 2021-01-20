@@ -278,6 +278,10 @@ handle(struct irc_plugin *plg, const struct irc_event *ev)
 	(void)ev;
 
 	switch (ev->type) {
+	case IRC_EVENT_COMMAND:
+		call(plg, "onCommand", "Ss ss", ev->server, ev->msg.prefix,
+		    ev->msg.args[0], ev->msg.args[1]);
+		break;
 	case IRC_EVENT_CONNECT:
 		call(plg, "onConnect", "S", ev->server);
 		break;

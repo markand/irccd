@@ -17,6 +17,7 @@
  */
 
 #include <assert.h>
+#include <ctype.h>
 #include <err.h>
 #include <errno.h>
 #include <poll.h>
@@ -43,7 +44,7 @@ struct pkg {
 
 struct defer {
 	void (*exec)(void *);
-	void (*data);
+	void *data;
 };
 
 struct irc irc;
@@ -60,6 +61,39 @@ static int
 cmp_peer(const struct irc_peer *p1, const struct irc_peer *p2)
 {
 	return p1->fd - p2->fd;
+}
+
+static bool
+is_command(const struct irc_plugin *p, const struct irc_event *ev)
+{
+	const char *cc;
+	size_t ccsz;
+
+	if (ev->type != IRC_EVENT_MESSAGE)
+		return false;
+
+	/* Get the command prefix (e.g !)*/
+	cc = ev->server->commandchar;
+	ccsz = strlen(cc);
+
+	return strncmp(ev->msg.args[1], cc, ccsz) == 0 &&
+	       strncmp(ev->msg.args[1] + ccsz, p->name, strlen(p->name)) == 0;
+}
+
+static struct irc_event *
+to_command(const struct irc_plugin *p, struct irc_event *ev)
+{
+	char *s;
+
+	ev->type = IRC_EVENT_COMMAND;
+	ev->msg.args[1] = ev->msg.args[1] + strlen(ev->server->commandchar) + strlen(p->name);
+
+	for (s = ev->msg.args[1]; *s && isspace(*s); )
+		++s;
+
+	ev->msg.args[1] = s;
+
+	return ev;
 }
 
 static struct pkg
@@ -103,11 +137,34 @@ broadcast(const struct irc_event *ev)
 			irc_peer_send(&irc.peers[i], buf);
 }
 
-static inline void
-invoke(const struct irc_event *ev)
+static void
+invoke(struct irc_event *ev)
 {
-	for (size_t i = 0; i < irc.pluginsz; ++i)
-		irc_plugin_handle(&irc.plugins[i], ev);
+	struct irc_plugin *plgcmd = NULL;
+
+	/*
+	 * Invoke for every plugin the event verbatim. Then, the event may match
+	 * a plugin name command in that case we need to modify the event but
+	 * only one plugin can match by its identifier. For example, the
+	 * following plugins are loaded:
+	 *
+	 * - ask
+	 * - hangman
+	 * - logger
+	 *
+	 * If the message is "!ask will I be reach?" then it will invoke
+	 * onMessage for hangman and logger but onCommand for ask. As such call
+	 * hangman and logger first and modify event before ask.
+	 */
+	for (size_t i = 0; i < irc.pluginsz; ++i) {
+		if (is_command(&irc.plugins[i], ev))
+			plgcmd = &irc.plugins[i];
+		else
+			irc_plugin_handle(&irc.plugins[i], ev);
+	}
+
+	if (plgcmd)
+		irc_plugin_handle(plgcmd, to_command(plgcmd, ev));
 }
 
 static void
@@ -222,7 +279,7 @@ irc_bot_remove_server(const char *name)
 	irc_server_disconnect(s);
 
 	/* Don't forget to notify plugins. */
-	invoke(&(const struct irc_event) {
+	invoke(&(struct irc_event) {
 		.type = IRC_EVENT_DISCONNECT,
 		.server = s
 	});

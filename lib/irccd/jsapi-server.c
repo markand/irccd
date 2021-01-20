@@ -585,7 +585,7 @@ irc_jsapi_server_push(duk_context *ctx, struct irc_server *s)
 	irc_server_incref(s);
 
 	duk_push_object(ctx);
-	duk_push_string(ctx, s->name);
+	duk_push_pointer(ctx, s);
 	duk_put_prop_string(ctx, -2, SIGNATURE);
 	duk_get_global_string(ctx, PROTOTYPE);
 	duk_set_prototype(ctx, -2);
