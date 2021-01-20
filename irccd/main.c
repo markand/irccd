@@ -26,6 +26,7 @@
 #include <irccd/util.h>
 #include <irccd/plugin.h>
 #include <irccd/js-plugin.h>
+#include <irccd/rule.h>
 
 int
 main(int argc, char **argv)
@@ -45,10 +46,15 @@ main(int argc, char **argv)
 	struct irc_plugin p = {
 		.name = "test"
 	};
+	struct irc_rule r = {
+		.action = IRC_RULE_DROP
+	};
+
+	irc_rule_add(r.events, "onMe");
 
 	irc_log_set_verbose(true);
 	irc_bot_init();
-
+	irc_bot_insert_rule(&r, 0);
 	irc_transport_bind("/tmp/irccd.sock");
 	irc_server_join(&s, "#test", NULL);
 	irc_bot_add_server(irc_util_memdup(&s, sizeof (s)));

@@ -96,6 +96,60 @@ to_command(const struct irc_plugin *p, struct irc_event *ev)
 	return ev;
 }
 
+static bool
+invokable(const struct irc_plugin *p, const struct irc_event *ev)
+{
+	switch (ev->type) {
+	case IRC_EVENT_COMMAND:
+		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		    ev->msg.args[0], ev->msg.prefix, p->name, "onCommand");
+	case IRC_EVENT_CONNECT:
+		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		    NULL, NULL, p->name, "onConnect");
+	case IRC_EVENT_DISCONNECT:
+		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		    NULL, NULL, p->name, "onDisconnect");
+	case IRC_EVENT_INVITE:
+		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		    ev->msg.args[1], ev->msg.prefix, p->name, "onInvite");
+	case IRC_EVENT_JOIN:
+		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		    ev->msg.args[0], ev->msg.prefix, p->name, "onJoin");
+	case IRC_EVENT_KICK:
+		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		    ev->msg.args[0], ev->msg.prefix, p->name, "onKick");
+		break;
+	case IRC_EVENT_ME:
+		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		    ev->msg.args[0], ev->msg.prefix, p->name, "onMe");
+	case IRC_EVENT_MESSAGE:
+		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		    ev->msg.args[0], ev->msg.prefix, p->name, "onMessage");
+	case IRC_EVENT_MODE:
+		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		    ev->msg.args[0], ev->msg.prefix, p->name, "onMode");
+	case IRC_EVENT_NAMES:
+		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		    ev->msg.args[0], NULL, p->name, "onNames");
+	case IRC_EVENT_NICK:
+		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		    NULL, ev->msg.prefix, p->name, "onNick");
+	case IRC_EVENT_NOTICE:
+		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		    ev->msg.args[0], ev->msg.prefix, p->name, "onNotice");
+	case IRC_EVENT_PART:
+		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		    ev->msg.args[0], ev->msg.prefix, p->name, "onPart");
+	case IRC_EVENT_TOPIC:
+		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		    ev->msg.args[0], ev->msg.prefix, p->name, "onTopic");
+	case IRC_EVENT_WHOIS:
+		return true;
+	default:
+		return true;
+	}
+}
+
 static struct pkg
 prepare(void)
 {
@@ -159,11 +213,11 @@ invoke(struct irc_event *ev)
 	for (size_t i = 0; i < irc.pluginsz; ++i) {
 		if (is_command(&irc.plugins[i], ev))
 			plgcmd = &irc.plugins[i];
-		else
+		else if (invokable(&irc.plugins[i], ev))
 			irc_plugin_handle(&irc.plugins[i], ev);
 	}
 
-	if (plgcmd)
+	if (plgcmd && invokable(plgcmd, ev))
 		irc_plugin_handle(plgcmd, to_command(plgcmd, ev));
 }
 
@@ -228,7 +282,7 @@ process(struct pkg *pkg)
 	}
 }
 
-static void
+static inline void
 clean(struct pkg *pkg)
 {
 	free(pkg->fds);

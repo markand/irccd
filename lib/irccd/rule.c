@@ -52,12 +52,12 @@ find(const char *str, const char *value)
 static inline bool
 match(const char *str, const char *value)
 {
-	size_t len = strlen(value);
+	size_t len;
 	const char *p;
 
 	if (!str[0])
 		return true;
-	if (len == 0 || !(p = find(str, value)))
+	if (!value || (len = strlen(value)) == 0 || !(p = find(str, value)))
 		return false;
 
 	/*
