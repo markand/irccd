@@ -19,6 +19,7 @@
 #ifndef IRCCD_PLUGIN_H
 #define IRCCD_PLUGIN_H
 
+#include <sys/queue.h>
 #include <stdbool.h>
 
 #include "limits.h"
@@ -26,7 +27,7 @@
 struct irc_event;
 
 struct irc_plugin {
-	char name[IRC_NAME_MAX];
+	char name[IRC_ID_LEN];
 	const char *license;
 	const char *version;
 	const char *author;
@@ -51,7 +52,11 @@ struct irc_plugin {
 	void (*handle)(struct irc_plugin *, const struct irc_event *);
 
 	void (*finish)(struct irc_plugin *);
+
+	LIST_ENTRY(irc_plugin) link;
 };
+
+LIST_HEAD(irc_plugin_list, irc_plugin);
 
 void
 irc_plugin_set_template(struct irc_plugin *, const char *, const char *);

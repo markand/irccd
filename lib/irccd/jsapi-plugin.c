@@ -134,7 +134,7 @@ static struct irc_plugin *
 find(duk_context *ctx)
 {
 	const char *name = duk_require_string(ctx, 0);
-	struct irc_plugin *plg = irc_bot_find_plugin(name);
+	struct irc_plugin *plg = irc_bot_plugin_find(name);
 
 	if (!plg)
 		duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "plugin %s not found", name);
@@ -171,10 +171,13 @@ Plugin_info(duk_context *ctx)
 static duk_ret_t
 Plugin_list(duk_context *ctx)
 {
+	size_t i = 0;
+	struct irc_plugin *p;
+
 	duk_push_array(ctx);
 
-	for (size_t i = 0; i < irc.pluginsz; ++i) {
-		duk_push_string(ctx, irc.plugins[i].name);
+	LIST_FOREACH(p, &irc.plugins, link) {
+		duk_push_string(ctx, p->name);
 		duk_put_prop_index(ctx, -2, i++);
 	}
 
@@ -201,7 +204,7 @@ static duk_ret_t
 Plugin_unload(duk_context *ctx)
 {
 	/* Use find so it can raise ReferenceError if not found. */
-	irc_bot_remove_plugin(find(ctx)->name);
+	irc_bot_plugin_remove(find(ctx)->name);
 
 	return 0;
 }

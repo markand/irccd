@@ -24,33 +24,51 @@
 GREATEST_TEST
 basics_add(void)
 {
-	struct irc_channel ch = {0};
+	struct irc_channel *ch;
+	struct irc_channel_user *user;
 
-	irc_channel_add(&ch, "markand", '@');
-	GREATEST_ASSERT_EQ(ch.usersz, 1U);
-	GREATEST_ASSERT_EQ(ch.users[0].mode, '@');
-	GREATEST_ASSERT_STR_EQ(ch.users[0].nickname, "markand");
+	ch = irc_channel_new("#test", NULL, true);
+	GREATEST_ASSERT_STR_EQ("#test", ch->name);
+	GREATEST_ASSERT_STR_EQ("", ch->password);
+	GREATEST_ASSERT(ch->joined);
 
-	irc_channel_add(&ch, "markand", '@');
-	GREATEST_ASSERT_EQ(ch.usersz, 1U);
-	GREATEST_ASSERT_EQ(ch.users[0].mode, '@');
-	GREATEST_ASSERT_STR_EQ(ch.users[0].nickname, "markand");
+	irc_channel_add(ch, "markand", 'o', '@');
+	user = LIST_FIRST(&ch->users);
+	GREATEST_ASSERT_EQ('o', user->mode);
+	GREATEST_ASSERT_EQ('@', user->symbol);
+	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
 
-	irc_channel_add(&ch, "jean", 0);
-	GREATEST_ASSERT_EQ(ch.usersz, 2U);
-	GREATEST_ASSERT_EQ(ch.users[0].mode, 0);
-	GREATEST_ASSERT_STR_EQ(ch.users[0].nickname, "jean");
-	GREATEST_ASSERT_EQ(ch.users[1].mode, '@');
-	GREATEST_ASSERT_STR_EQ(ch.users[1].nickname, "markand");
+	irc_channel_add(ch, "markand", '+', '@');
+	user = LIST_FIRST(&ch->users);
+	GREATEST_ASSERT_EQ('o', user->mode);
+	GREATEST_ASSERT_EQ('@', user->symbol);
+	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
 
-	irc_channel_add(&ch, "zoe", 0);
-	GREATEST_ASSERT_EQ(ch.usersz, 3U);
-	GREATEST_ASSERT_EQ(ch.users[0].mode, 0);
-	GREATEST_ASSERT_STR_EQ(ch.users[0].nickname, "jean");
-	GREATEST_ASSERT_EQ(ch.users[1].mode, '@');
-	GREATEST_ASSERT_STR_EQ(ch.users[1].nickname, "markand");
-	GREATEST_ASSERT_EQ(ch.users[2].mode, 0);
-	GREATEST_ASSERT_STR_EQ(ch.users[2].nickname, "zoe");
+	irc_channel_add(ch, "jean", 'h', '+');
+	user = LIST_FIRST(&ch->users);
+	GREATEST_ASSERT_EQ('h', user->mode);
+	GREATEST_ASSERT_EQ('+', user->symbol);
+	GREATEST_ASSERT_STR_EQ("jean", user->nickname);
+	user = LIST_NEXT(user, link);
+	GREATEST_ASSERT_EQ('o', user->mode);
+	GREATEST_ASSERT_EQ('@', user->symbol);
+	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
+
+	irc_channel_add(ch, "zoe", 0, 0);
+	user = LIST_FIRST(&ch->users);
+	GREATEST_ASSERT_EQ(0, user->mode);
+	GREATEST_ASSERT_EQ(0, user->symbol);
+	GREATEST_ASSERT_STR_EQ("zoe", user->nickname);
+	user = LIST_NEXT(user, link);
+	GREATEST_ASSERT_EQ('h', user->mode);
+	GREATEST_ASSERT_EQ('+', user->symbol);
+	GREATEST_ASSERT_STR_EQ("jean", user->nickname);
+	user = LIST_NEXT(user, link);
+	GREATEST_ASSERT_EQ('o', user->mode);
+	GREATEST_ASSERT_EQ('@', user->symbol);
+	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
+
+	irc_channel_finish(ch);
 
 	GREATEST_PASS();
 }
@@ -58,58 +76,65 @@ basics_add(void)
 GREATEST_TEST
 basics_remove(void)
 {
-	struct irc_channel ch = {0};
+	struct irc_channel *ch;
+	struct irc_channel_user *user;
 
-	irc_channel_add(&ch, "markand", '@');
-	irc_channel_add(&ch, "jean", 0);
-	irc_channel_add(&ch, "zoe", 0);
+	ch = irc_channel_new("#test", NULL, true);
 
-	irc_channel_remove(&ch, "jean");
-	GREATEST_ASSERT_EQ(ch.usersz, 2U);
-	GREATEST_ASSERT_EQ(ch.users[0].mode, '@');
-	GREATEST_ASSERT_STR_EQ(ch.users[0].nickname, "markand");
-	GREATEST_ASSERT_EQ(ch.users[1].mode, 0);
-	GREATEST_ASSERT_STR_EQ(ch.users[1].nickname, "zoe");
+	irc_channel_add(ch, "markand", 'o', '@');
+	irc_channel_add(ch, "jean", 0, 0);
+	irc_channel_add(ch, "zoe", 0, 0);
 
-	irc_channel_remove(&ch, "zoe");
-	GREATEST_ASSERT_EQ(ch.usersz, 1U);
-	GREATEST_ASSERT_EQ(ch.users[0].mode, '@');
-	GREATEST_ASSERT_STR_EQ(ch.users[0].nickname, "markand");
+	irc_channel_remove(ch, "jean");
+	user = LIST_FIRST(&ch->users);
+	GREATEST_ASSERT_EQ(0, user->mode);
+	GREATEST_ASSERT_EQ(0, user->symbol);
+	GREATEST_ASSERT_STR_EQ("zoe", user->nickname);
+	user = LIST_NEXT(user, link);
+	GREATEST_ASSERT_EQ('o', user->mode);
+	GREATEST_ASSERT_EQ('@', user->symbol);
+	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
 
-	irc_channel_remove(&ch, "markand");
-	GREATEST_ASSERT_EQ(ch.usersz, 0U);
-	GREATEST_ASSERT(!ch.users);
+	irc_channel_remove(ch, "zoe");
+	user = LIST_FIRST(&ch->users);
+	GREATEST_ASSERT_EQ('o', user->mode);
+	GREATEST_ASSERT_EQ('@', user->symbol);
+	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
+
+	irc_channel_remove(ch, "markand");
+	GREATEST_ASSERT(!LIST_FIRST(&ch->users));
+
+	irc_channel_finish(ch);
 
 	GREATEST_PASS();
 }
 
 GREATEST_TEST
-basics_set_mode(void)
+basics_update(void)
 {
-	struct irc_channel ch = {0};
+	struct irc_channel *ch;
+	struct irc_channel_user *user;
 
-	irc_channel_add(&ch, "jean", '@');
-	irc_channel_set_user_mode(&ch, "jean", '+');
-	irc_channel_set_user_mode(&ch, "nobody", '+');
+	ch = irc_channel_new("#test", NULL, true);
 
-	GREATEST_ASSERT_EQ(ch.usersz, 1);
-	GREATEST_ASSERT_EQ(ch.users[0].mode, '+');
-	GREATEST_ASSERT_STR_EQ(ch.users[0].nickname, "jean");
-	GREATEST_PASS();
-}
+	irc_channel_add(ch, "markand", 'o', '@');
+	irc_channel_add(ch, "jean", 0, 0);
+	irc_channel_add(ch, "zoe", 0, 0);
+	
+	irc_channel_update(ch, "zoe", NULL, 'o', '@');
+	user = LIST_FIRST(&ch->users);
+	GREATEST_ASSERT_EQ('o', user->mode);
+	GREATEST_ASSERT_EQ('@', user->symbol);
+	GREATEST_ASSERT_STR_EQ("zoe", user->nickname);
 
-GREATEST_TEST
-basics_set_nick(void)
-{
-	struct irc_channel ch = {0};
+	irc_channel_update(ch, "zoe", "eoz", -1, -1);
+	user = LIST_FIRST(&ch->users);
+	GREATEST_ASSERT_EQ('o', user->mode);
+	GREATEST_ASSERT_EQ('@', user->symbol);
+	GREATEST_ASSERT_STR_EQ("eoz", user->nickname);
 
-	irc_channel_add(&ch, "jean", '@');
-	irc_channel_set_user_nick(&ch, "jean", "francis");
-	irc_channel_set_user_nick(&ch, "nobody", "francis");
+	irc_channel_finish(ch);
 
-	GREATEST_ASSERT_EQ(ch.usersz, 1);
-	GREATEST_ASSERT_EQ(ch.users[0].mode, '@');
-	GREATEST_ASSERT_STR_EQ(ch.users[0].nickname, "francis");
 	GREATEST_PASS();
 }
 
@@ -117,8 +142,7 @@ GREATEST_SUITE(suite_basics)
 {
 	GREATEST_RUN_TEST(basics_add);
 	GREATEST_RUN_TEST(basics_remove);
-	GREATEST_RUN_TEST(basics_set_mode);
-	GREATEST_RUN_TEST(basics_set_nick);
+	GREATEST_RUN_TEST(basics_update);
 }
 
 GREATEST_MAIN_DEFS();

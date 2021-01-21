@@ -22,64 +22,76 @@
 
 #include "channel.h"
 #include "util.h"
-#include "set.h"
-
-static inline int
-cmp(const struct irc_channel_user *u1, const struct irc_channel_user *u2)
-{
-	return strcmp(u1->nickname, u2->nickname);
-}
 
 static inline struct irc_channel_user *
-find(const struct irc_channel *ch, const char *nick)
+find(const struct irc_channel *ch, const char *nickname)
 {
-	struct irc_channel_user key = {0};
+	struct irc_channel_user *u;
 
-	strlcpy(key.nickname, nick, sizeof (key.nickname));
+	LIST_FOREACH(u, &ch->users, link)
+		if (strcmp(u->nickname, nickname) == 0)
+			return u;
 
-	return IRC_SET_FIND(ch->users, ch->usersz, &key, cmp);
+	return NULL;
+}
+
+struct irc_channel *
+irc_channel_new(const char *name, const char *password, bool joined)
+{
+	assert(name);
+
+	struct irc_channel *ch;
+
+	ch = irc_util_calloc(1, sizeof (*ch));
+	ch->joined = joined;
+
+	strlcpy(ch->name, name, sizeof (ch->name));
+	strlcpy(ch->password, password ? password : "", sizeof (ch->password));
+
+	LIST_INIT(&ch->users);
+
+	return ch;
 }
 
 void
-irc_channel_add(struct irc_channel *ch, const char *nick, char mode)
+irc_channel_add(struct irc_channel *ch, const char *nickname, char mode, char symbol)
 {
 	assert(ch);
-	assert(nick);
+	assert(nickname);
 
-	if (find(ch, nick))
+	struct irc_channel_user *user;
+
+	if (find(ch, nickname))
 		return;
 
-	struct irc_channel_user u = {0};
+	user = irc_util_malloc(sizeof (*user));
+	user->mode = mode;
+	user->symbol = symbol;
+	strlcpy(user->nickname, nickname, sizeof (user->nickname));
 
-	strlcpy(u.nickname, nick, sizeof (u.nickname));
-	u.mode = mode;
-
-	IRC_SET_ALLOC_PUSH(&ch->users, &ch->usersz, &u, cmp);
+	LIST_INSERT_HEAD(&ch->users, user, link);
 }
 
 void
-irc_channel_set_user_mode(struct irc_channel *ch, const char *nick, char mode)
+irc_channel_update(struct irc_channel *ch,
+                   const char *nickname,
+                   const char *newnickname,
+                   char mode,
+                   char symbol)
 {
 	assert(ch);
-	assert(nick);
+	assert(nickname);
 
 	struct irc_channel_user *user;
 
-	if ((user = find(ch, nick)))
-		user->mode = mode;
-}
-
-void
-irc_channel_set_user_nick(struct irc_channel *ch, const char *nick, const char *newnick)
-{
-	assert(ch);
-	assert(nick);
-	assert(newnick);
-
-	struct irc_channel_user *user;
-
-	if ((user = find(ch, nick)))
-		strlcpy(user->nickname, newnick, sizeof (user->nickname));
+	if ((user = find(ch, nickname))) {
+		if (newnickname)
+			strlcpy(user->nickname, newnickname, sizeof (user->nickname));
+		if (mode != -1 && symbol != -1) {
+			user->mode = mode;
+			user->symbol = symbol;
+		}
+	}
 }
 
 void
@@ -87,8 +99,11 @@ irc_channel_clear(struct irc_channel *ch)
 {
 	assert(ch);
 
-	free(ch->users);
-	ch->users = 0;
+	struct irc_channel_user *user, *tmp;
+
+	LIST_FOREACH_SAFE(user, &ch->users, link, tmp)
+		free(user);
+	LIST_INIT(&ch->users);
 }
 
 void
@@ -100,7 +115,7 @@ irc_channel_remove(struct irc_channel *ch, const char *nick)
 	struct irc_channel_user *user;
 
 	if ((user = find(ch, nick)))
-		IRC_SET_ALLOC_REMOVE(&ch->users, &ch->usersz, user);
+		LIST_REMOVE(user, link);
 }
 
 void
@@ -109,5 +124,5 @@ irc_channel_finish(struct irc_channel *ch)
 	assert(ch);
 
 	irc_channel_clear(ch);
-	memset(ch, 0, sizeof (*ch));
+	free(ch);
 }

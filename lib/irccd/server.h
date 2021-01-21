@@ -19,6 +19,7 @@
 #ifndef IRCCD_SERVER_H
 #define IRCCD_SERVER_H
 
+#include <sys/queue.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -75,31 +76,29 @@ struct irc_server_namemode {
 
 struct irc_server {
 	/* Connection settings. */
-	char name[IRC_NAME_MAX];
-	char hostname[IRC_HOST_MAX];
-	char password[IRC_PASSWORD_MAX];
+	char name[IRC_ID_LEN];
+	char hostname[IRC_HOST_LEN];
+	char password[IRC_PASSWORD_LEN];
 	unsigned short port;
 	enum irc_server_flags flags;
 
 	/* Plugin prefix. */
-	char commandchar[IRC_COMMANDCHAR_MAX];
+	char commandchar[IRC_CMDCHAR_LEN];
 
 	/* IRC identity. */
-	char nickname[IRC_NICKNAME_MAX];
-	char username[IRC_USERNAME_MAX];
-	char realname[IRC_REALNAME_MAX];
-	char ctcpversion[IRC_CTCPVERSION_MAX];
+	char nickname[IRC_NICKNAME_LEN];
+	char username[IRC_USERNAME_LEN];
+	char realname[IRC_REALNAME_LEN];
+	char ctcpversion[IRC_CTCPVERSION_LEN];
 
-	/* Joined channels. */
-	struct irc_channel *channels;
-	size_t channelsz;
+	LIST_HEAD(, irc_channel) channels;
 
 	/* Network connectivity. */
 	int fd;
 	struct addrinfo *ai;
 	struct addrinfo *aip;
-	char in[IRC_BUF_MAX];
-	char out[IRC_BUF_MAX];
+	char in[IRC_BUF_LEN];
+	char out[IRC_BUF_LEN];
 	enum irc_server_state state;
 
 	/* OpenSSL support. */
@@ -113,13 +112,23 @@ struct irc_server {
 
 	/* Reference count. */
 	size_t refc;
-	struct irc_server *next;
-	struct irc_server *prev;
 
 	/* IRC server settings. */
 	char chantypes[8];
 	struct irc_server_prefix prefixes[16];
+
+	LIST_ENTRY(irc_server) link;
 };
+
+LIST_HEAD(irc_server_list, irc_server);
+
+struct irc_server *
+irc_server_new(const char *,
+               const char *,
+               const char *,
+               const char *,
+               const char *,
+               unsigned int);
 
 void
 irc_server_connect(struct irc_server *);

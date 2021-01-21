@@ -40,17 +40,17 @@ static struct sockaddr_un sockaddr = {
 	.sun_family = PF_LOCAL,
 	.sun_path = "/tmp/irccd.sock"
 };
-static char in[IRC_BUF_MAX];
-static char out[IRC_BUF_MAX];
+static char in[IRC_BUF_LEN];
+static char out[IRC_BUF_LEN];
 
 static char *
 poll(void)
 {
-	static char ret[IRC_BUF_MAX];
+	static char ret[IRC_BUF_LEN];
 	char *nl;
 
 	while (!(nl = strstr(in, "\n"))) {
-		char buf[IRC_BUF_MAX] = {0};
+		char buf[IRC_BUF_LEN] = {0};
 		ssize_t nr;
 
 		if ((nr = recv(sock, buf, sizeof (buf) - 1, 0)) <= 0)
@@ -97,7 +97,7 @@ check(void)
 static void
 req(const char *fmt, ...)
 {
-	char buf[IRC_BUF_MAX];
+	char buf[IRC_BUF_LEN];
 	va_list ap;
 
 	va_start(ap, fmt);
@@ -404,7 +404,7 @@ static void
 show_whois(char *line)
 {
 	const char *args[6] = {0};
-	char *p, *token;
+	//char *p, *token;
 
 	if (irc_util_split(line, args, 6) >= 4) {
 		printf("event:     onWhois\n");
@@ -413,9 +413,7 @@ show_whois(char *line)
 		printf("username:  %s\n", args[3]);
 		printf("hostname:  %s\n", args[4]);
 		printf("username:  %s\n", args[5]);
-		printf("channels:  ");
-
-		
+		//printf("channels:  %s\n", args[6]);
 	}
 }
 

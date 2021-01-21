@@ -27,13 +27,11 @@
 
 #include "event.h"
 #include "irccd.h"
-#include "list.h"
 #include "log.h"
 #include "peer.h"
 #include "plugin.h"
 #include "rule.h"
 #include "server.h"
-#include "set.h"
 #include "transport.h"
 #include "util.h"
 
@@ -47,21 +45,14 @@ struct defer {
 	void *data;
 };
 
-struct irc irc;
+struct irc irc = {
+	.servers = LIST_HEAD_INITIALIZER(),
+	.peers = LIST_HEAD_INITIALIZER(),
+	.plugins = LIST_HEAD_INITIALIZER(),
+	.rules = TAILQ_HEAD_INITIALIZER(irc.rules)
+};
 
 static int pipes[2];
-
-static int
-cmp_plugin(const struct irc_plugin *p1, const struct irc_plugin *p2)
-{
-	return strcmp(p1->name, p2->name);
-}
-
-static int
-cmp_peer(const struct irc_peer *p1, const struct irc_peer *p2)
-{
-	return p1->fd - p2->fd;
-}
 
 static bool
 is_command(const struct irc_plugin *p, const struct irc_event *ev)
@@ -105,67 +96,80 @@ invokable(const struct irc_plugin *p, const struct irc_event *ev)
 {
 	switch (ev->type) {
 	case IRC_EVENT_COMMAND:
-		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		return irc_rule_matchlist(&irc.rules, ev->server->name,
 		    ev->message.channel, ev->message.origin, p->name, "onCommand");
 	case IRC_EVENT_CONNECT:
-		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		return irc_rule_matchlist(&irc.rules, ev->server->name,
 		    NULL, NULL, p->name, "onConnect");
 	case IRC_EVENT_DISCONNECT:
-		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		return irc_rule_matchlist(&irc.rules, ev->server->name,
 		    NULL, NULL, p->name, "onDisconnect");
 	case IRC_EVENT_INVITE:
-		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		return irc_rule_matchlist(&irc.rules, ev->server->name,
 		    ev->invite.channel, ev->invite.origin, p->name, "onInvite");
 	case IRC_EVENT_JOIN:
-		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		return irc_rule_matchlist(&irc.rules, ev->server->name,
 		    ev->join.channel, ev->join.origin, p->name, "onJoin");
 	case IRC_EVENT_KICK:
-		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		return irc_rule_matchlist(&irc.rules, ev->server->name,
 		    ev->kick.channel, ev->kick.origin, p->name, "onKick");
 		break;
 	case IRC_EVENT_ME:
-		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		return irc_rule_matchlist(&irc.rules, ev->server->name,
 		    ev->message.channel, ev->message.origin, p->name, "onMe");
 	case IRC_EVENT_MESSAGE:
-		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		return irc_rule_matchlist(&irc.rules, ev->server->name,
 		    ev->message.channel, ev->message.origin, p->name, "onMessage");
 	case IRC_EVENT_MODE:
-		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		return irc_rule_matchlist(&irc.rules, ev->server->name,
 		    ev->mode.channel, ev->mode.origin, p->name, "onMode");
 	case IRC_EVENT_NAMES:
-		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		return irc_rule_matchlist(&irc.rules, ev->server->name,
 		    ev->names.channel, NULL, p->name, "onNames");
 	case IRC_EVENT_NICK:
-		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		return irc_rule_matchlist(&irc.rules, ev->server->name,
 		    NULL, ev->nick.origin, p->name, "onNick");
 	case IRC_EVENT_NOTICE:
-		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		return irc_rule_matchlist(&irc.rules, ev->server->name,
 		    ev->notice.channel, ev->notice.origin, p->name, "onNotice");
 	case IRC_EVENT_PART:
-		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		return irc_rule_matchlist(&irc.rules, ev->server->name,
 		    ev->part.channel, ev->part.origin, p->name, "onPart");
 	case IRC_EVENT_TOPIC:
-		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		return irc_rule_matchlist(&irc.rules, ev->server->name,
 		    ev->topic.channel, ev->topic.origin, p->name, "onTopic");
 	case IRC_EVENT_WHOIS:
-		return irc_rule_matchlist(irc.rules, irc.rulesz, ev->server->name,
+		return irc_rule_matchlist(&irc.rules, ev->server->name,
 		    NULL, NULL, p->name, "onWhois");
 	default:
 		return true;
 	}
 }
 
+static inline size_t
+pollable(void)
+{
+	const struct irc_server *s;
+	const struct irc_peer *p;
+	size_t i = 2;                   /* pipe + transport. */
+
+	LIST_FOREACH(s, &irc.servers, link)
+		++i;
+	LIST_FOREACH(p, &irc.peers, link)
+		++i;
+
+	return i;
+}
+
 static struct pkg
 prepare(void)
 {
+	struct irc_peer *p;
+	struct irc_server *s;
 	struct pkg pkg = {0};
 	size_t i = 0;
 
-	pkg.fdsz += 1;                  /* pipe  */
-	pkg.fdsz += 1;                  /* transport fd */
-	pkg.fdsz += irc.serversz;       /* servers */
-	pkg.fdsz += irc.peersz;         /* transport peers */
-
+	pkg.fdsz = pollable();
 	pkg.fds = irc_util_calloc(pkg.fdsz, sizeof (*pkg.fds));
 
 	/* pipe */
@@ -175,9 +179,9 @@ prepare(void)
 	/* transport */
 	irc_transport_prepare(&pkg.fds[i++]);
 
-	for (size_t p = 0; p < irc.peersz; ++p)
-		irc_peer_prepare(&irc.peers[p], &pkg.fds[i++]);
-	for (struct irc_server *s = irc.servers; s; s = s->next)
+	LIST_FOREACH(p, &irc.peers, link)
+		irc_peer_prepare(p, &pkg.fds[i++]);
+	LIST_FOREACH(s, &irc.servers, link)
 		irc_server_prepare(s, &pkg.fds[i++]);
 
 	return pkg;
@@ -186,20 +190,21 @@ prepare(void)
 static inline void
 broadcast(const struct irc_event *ev)
 {
-	char buf[IRC_MESSAGE_MAX];
+	char buf[IRC_BUF_LEN];
+	struct irc_peer *p;
 
 	if (!irc_event_str(ev, buf, sizeof (buf)))
 		return;
 
-	for (size_t i = 0; i < irc.peersz; ++i)
-		if (irc.peers[i].is_watching)
-			irc_peer_send(&irc.peers[i], buf);
+	LIST_FOREACH(p, &irc.peers, link)
+		if (p->is_watching)
+			irc_peer_send(p, buf);
 }
 
 static void
 invoke(struct irc_event *ev)
 {
-	struct irc_plugin *plgcmd = NULL;
+	struct irc_plugin *p, *tmp, *plgcmd = NULL;
 
 	/*
 	 * Invoke for every plugin the event verbatim. Then, the event may match
@@ -215,11 +220,11 @@ invoke(struct irc_event *ev)
 	 * onMessage for hangman and logger but onCommand for ask. As such call
 	 * hangman and logger first and modify event before ask.
 	 */
-	for (size_t i = 0; i < irc.pluginsz; ++i) {
-		if (is_command(&irc.plugins[i], ev))
-			plgcmd = &irc.plugins[i];
-		else if (invokable(&irc.plugins[i], ev))
-			irc_plugin_handle(&irc.plugins[i], ev);
+	LIST_FOREACH_SAFE(p, &irc.plugins, link, tmp) {
+		if (is_command(p, ev))
+			plgcmd = p;
+		else if (invokable(p, ev))
+			irc_plugin_handle(p, ev);
 	}
 
 	if (plgcmd && invokable(plgcmd, ev))
@@ -244,7 +249,7 @@ static void
 process(struct pkg *pkg)
 {
 	struct irc_server *s;
-	struct irc_peer peer;
+	struct irc_peer *p, *ptmp;
 	struct irc_event ev;
 
 	if (poll(pkg->fds, pkg->fdsz, 1000) < 0 && errno != EINTR)
@@ -258,20 +263,19 @@ process(struct pkg *pkg)
 	for (size_t i = 0; i < pkg->fdsz; ++i) {
 		pipe_flush(&pkg->fds[i]);
 
-		IRC_LIST_FOREACH(irc.servers, s)
+		LIST_FOREACH(s, &irc.servers, link)
 			irc_server_flush(s, &pkg->fds[i]);
 
 		/* Accept new transport client. */
-		if (irc_transport_flush(&pkg->fds[i], &peer))
-			IRC_SET_ALLOC_PUSH(&irc.peers, &irc.peersz, &peer, cmp_peer);
+		if ((p = irc_transport_flush(&pkg->fds[i])))
+			LIST_INSERT_HEAD(&irc.peers, p, link);
 
 		/* Flush clients. */
-		for (size_t p = 0; p < irc.peersz; ) {
-			if (!irc_peer_flush(&irc.peers[p], &pkg->fds[i])) {
-				irc_peer_finish(&irc.peers[p]);
-				IRC_SET_ALLOC_REMOVE(&irc.peers, &irc.peersz, &irc.peers[p]);
-			} else
-				++p;
+		LIST_FOREACH_SAFE(p, &irc.peers, link, ptmp) {
+			if (!irc_peer_flush(p, &pkg->fds[i])) {
+				irc_peer_finish(p);
+				LIST_REMOVE(p, link);
+			}
 		}
 	}
 
@@ -279,7 +283,7 @@ process(struct pkg *pkg)
 	 * For every server, poll any kind of new event and pass them to the
 	 * plugin unless the rules explicitly disallow us to do so.
 	 */
-	IRC_LIST_FOREACH(irc.servers, s) {
+	LIST_FOREACH(s, &irc.servers, link) {
 		while (irc_server_poll(s, &ev)) {
 			broadcast(&ev);
 			invoke(&ev);
@@ -294,6 +298,18 @@ clean(struct pkg *pkg)
 	free(pkg->fds);
 }
 
+static inline size_t
+rulescount(void)
+{
+	const struct irc_rule *r;
+	size_t total = 0;
+
+	TAILQ_FOREACH(r, &irc.rules, link)
+		total++;
+
+	return total;
+}
+
 void
 irc_bot_init(void)
 {
@@ -304,24 +320,22 @@ irc_bot_init(void)
 }
 
 void
-irc_bot_add_server(struct irc_server *s)
+irc_bot_server_add(struct irc_server *s)
 {
 	assert(s);
 
 	irc_server_incref(s);
 	irc_server_connect(s);
 
-	IRC_LIST_ADD(irc.servers, s);
-
-	irc.serversz++;
+	LIST_INSERT_HEAD(&irc.servers, s, link);
 }
 
 struct irc_server *
-irc_bot_find_server(const char *name)
+irc_bot_server_find(const char *name)
 {
 	struct irc_server *s;
 
-	for (s = irc.servers; s; s = s->next)
+	LIST_FOREACH(s, &irc.servers, link)
 		if (strcmp(s->name, name) == 0)
 			return s;
 
@@ -329,11 +343,11 @@ irc_bot_find_server(const char *name)
 }
 
 void
-irc_bot_remove_server(const char *name)
+irc_bot_server_remove(const char *name)
 {
 	struct irc_server *s;
 
-	if (!(s = irc_bot_find_server(name)))
+	if (!(s = irc_bot_server_find(name)))
 		return;
 
 	irc_server_disconnect(s);
@@ -344,43 +358,43 @@ irc_bot_remove_server(const char *name)
 		.server = s
 	});
 
-	IRC_LIST_REMOVE(irc.servers, s);
-
+	LIST_REMOVE(s, link);
 	irc_server_decref(s);
-	irc.serversz--;
 }
 
 void
-irc_bot_clear_servers(void)
+irc_bot_server_clear(void)
 {
-	struct irc_server *s, *next;
+	struct irc_server *s, *tmp;
 
-	IRC_LIST_FOREACH_SAFE(irc.servers, s, next)
-		irc_bot_remove_server(s->name);
+	LIST_FOREACH_SAFE(s, &irc.servers, link, tmp)
+		irc_bot_server_remove(s->name);
 }
 
 void
-irc_bot_add_plugin(const struct irc_plugin *p)
+irc_bot_add_plugin(struct irc_plugin *p)
 {
 	assert(p);
 
-	IRC_SET_ALLOC_PUSH(&irc.plugins, &irc.pluginsz, p, cmp_plugin);
+	LIST_INSERT_HEAD(&irc.plugins, p, link);
 
 	irc_log_info("plugin %s: %s", p->name, p->description);
 	irc_log_info("plugin %s: version %s, from %s (%s license)", p->name,
 	    p->version, p->author, p->license);
 
-	irc_plugin_load(&irc.plugins[irc.pluginsz - 1]);
+	irc_plugin_load(p);
 }
 
 struct irc_plugin *
 irc_bot_find_plugin(const char *name)
 {
-	struct irc_plugin key = {0};
+	struct irc_plugin *p;
 
-	strlcpy(key.name, name, sizeof (key.name));
+	LIST_FOREACH(p, &irc.plugins, link)
+		if (strcmp(p->name, name) == 0)
+			return p;
 
-	return IRC_SET_FIND(irc.plugins, irc.pluginsz, &key, cmp_plugin);
+	return NULL;
 }
 
 void
@@ -394,37 +408,49 @@ irc_bot_remove_plugin(const char *name)
 	irc_plugin_unload(p);
 	irc_plugin_finish(p);
 
-	IRC_SET_ALLOC_REMOVE(&irc.plugins, &irc.pluginsz, p);
-}
-
-bool
-irc_bot_insert_rule(const struct irc_rule *rule, size_t i)
-{
-	assert(rule);
-
-	if (irc.rulesz >= IRC_RULE_MAX) {
-		errno = ENOMEM;
-		return false;
-	}
-
-	if (i >= irc.rulesz)
-		i = irc.rulesz;
-
-	memmove(&irc.rules[i + 1], &irc.rules[i], sizeof (*irc.rules) * (irc.rulesz++ - i));
-	memcpy(&irc.rules[i], rule, sizeof (*rule));
-
-	return true;
+	LIST_REMOVE(p, link);
 }
 
 void
-irc_bot_remove_rule(size_t i)
+irc_bot_rule_insert(struct irc_rule *rule, size_t index)
 {
-	assert(i < irc.rulesz);
+	assert(rule);
 
-	if (i + 1 >= irc.rulesz)
-		irc.rulesz--;
-	else
-		memmove(&irc.rules[i], &irc.rules[i + 1], sizeof (*irc.rules) * (irc.rulesz-- - i));
+	if (index == 0)
+		TAILQ_INSERT_HEAD(&irc.rules, rule, link);
+	else if (index >= rulescount())
+		TAILQ_INSERT_TAIL(&irc.rules, rule, link);
+	else {
+		struct irc_rule *pos = TAILQ_FIRST(&irc.rules);
+
+		for (size_t i = 0; i < index; ++i)
+			pos = TAILQ_NEXT(pos, link);
+
+		TAILQ_INSERT_AFTER(&irc.rules, pos, rule, link);
+	}
+}
+
+void
+irc_bot_rule_remove(size_t index)
+{
+	assert(index < rulescount());
+
+	struct irc_rule *pos = TAILQ_FIRST(&irc.rules);
+
+	for (size_t i = 0; i < index; ++i)
+		pos = TAILQ_NEXT(pos, link);
+
+	TAILQ_REMOVE(&irc.rules, pos, link);
+}
+
+void
+irc_bot_rule_clear(void)
+{
+	struct irc_rule *r, *tmp;
+
+	TAILQ_FOREACH_SAFE(r, &irc.rules, link, tmp)
+		irc_rule_finish(r);
+	TAILQ_INIT(&irc.rules);
 }
 
 void

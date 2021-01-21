@@ -17,8 +17,7 @@
  */
 
 #include <assert.h>
-#include <stddef.h>
-#include <string.h>
+#include <stdlib.h>
 
 #include "plugin.h"
 
@@ -169,5 +168,5 @@ irc_plugin_finish(struct irc_plugin *plg)
 	if (plg->finish)
 		plg->finish(plg);
 
-	memset(plg, 0, sizeof (*plg));
+	free(plg);
 }

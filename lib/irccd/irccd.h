@@ -19,57 +19,52 @@
 #ifndef IRCCD_H
 #define IRCCD_H
 
-#include <stdbool.h>
-#include <stddef.h>
+#include <sys/queue.h>
 
+#include "peer.h"
+#include "plugin.h"
 #include "rule.h"
-
-#define IRC_BOT_RULE_MAX 256
-
-struct irc_server;
-struct irc_plugin;
-struct irc_peer;
+#include "server.h"
 
 extern struct irc {
-	struct irc_peer *peers;
-	size_t peersz;
-	struct irc_plugin *plugins;
-	size_t pluginsz;
-	struct irc_server *servers;
-	size_t serversz;
-	struct irc_rule rules[IRC_BOT_RULE_MAX];
-	size_t rulesz;
+	struct irc_server_list servers;
+	struct irc_peer_list peers;
+	struct irc_plugin_list plugins;
+	struct irc_rule_list rules;
 } irc;
 
 void
 irc_bot_init(void);
 
 void
-irc_bot_add_server(struct irc_server *);
+irc_bot_server_add(struct irc_server *);
 
 struct irc_server *
-irc_bot_find_server(const char *);
+irc_bot_server_find(const char *);
 
 void
-irc_bot_remove_server(const char *);
+irc_bot_server_remove(const char *);
 
 void
-irc_bot_clear_servers(void);
+irc_bot_server_clear(void);
 
 void
-irc_bot_add_plugin(const struct irc_plugin *);
+irc_bot_plugin_add(struct irc_plugin *);
 
 struct irc_plugin *
-irc_bot_find_plugin(const char *);
+irc_bot_plugin_find(const char *);
 
 void
-irc_bot_remove_plugin(const char *);
-
-bool
-irc_bot_insert_rule(const struct irc_rule *, size_t);
+irc_bot_plugin_remove(const char *);
 
 void
-irc_bot_remove_rule(size_t);
+irc_bot_rule_insert(struct irc_rule *, size_t);
+
+void
+irc_bot_rule_remove(size_t);
+
+void
+irc_bot_rule_clear(void);
 
 void
 irc_bot_post(void (*)(void *), void *);

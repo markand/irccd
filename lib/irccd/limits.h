@@ -19,27 +19,24 @@
 #ifndef IRCCD_LIMITS_H
 #define IRCCD_LIMITS_H
 
-/*
- * Those were IRC limits but not strictly following RFC 1459 because lots of
- * servers allow higher limits.
- */
-#define IRC_NICKNAME_MAX        32
-#define IRC_USERNAME_MAX        32
-#define IRC_REALNAME_MAX        64
-#define IRC_CHANNEL_MAX         64
-#define IRC_PASSWORD_MAX        64
-#define IRC_CTCPVERSION_MAX     128
-#define IRC_USERMODES_MAX       16
-
-#define IRC_MESSAGE_MAX         512
-#define IRC_ARGS_MAX            32
+/* Server limits. */
+#define IRC_NICKNAME_LEN        32      /* Nickname. */
+#define IRC_USERNAME_LEN        32      /* User name. */
+#define IRC_REALNAME_LEN        64      /* Real name. */
+#define IRC_CHANNEL_LEN         64      /* Channel name. */
+#define IRC_PASSWORD_LEN        64      /* Password length. */
+#define IRC_CTCPVERSION_LEN     64      /* Custom CTCP version answer. */
+#define IRC_USERMODES_LEN       8       /* Number of modes (e.g. ohv). */
+#define IRC_CMDCHAR_LEN         4       /* Prefix for plugin commands (e.g. !). */
 
 /* Network limits. */
-#define IRC_HOST_MAX            32
-#define IRC_BUF_MAX             128000
+#define IRC_HOST_LEN            64      /* Hostname length.. */
+#define IRC_BUF_LEN             128000  /* Network buffer input/output. */
 
-/* Types limits. */
-#define IRC_NAME_MAX            16
-#define IRC_COMMANDCHAR_MAX     8
+/* Generic limits. */
+#define IRC_ID_LEN              16      /* Plugin/server identifiers. */
+
+/* Rule limits. */
+#define IRC_RULE_LEN            1024    /* Space-separated list of values. */
 
 #endif /* !IRCCD_LIMITS_H */

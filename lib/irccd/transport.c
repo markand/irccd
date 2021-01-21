@@ -31,6 +31,7 @@
 #include "log.h"
 #include "transport.h"
 #include "peer.h"
+#include "util.h"
 
 static struct sockaddr_un addr;
 static int fd = -1;
@@ -85,27 +86,29 @@ irc_transport_prepare(struct pollfd *pfd)
 	pfd->events = POLLIN;
 }
 
-bool
-irc_transport_flush(const struct pollfd *pfd, struct irc_peer *peer)
+struct irc_peer *
+irc_transport_flush(const struct pollfd *pfd)
 {
 	assert(pfd);
-	assert(peer);
+
+	struct irc_peer *peer;
+	int newfd;
 
 	if (fd < 0 || pfd->fd != fd || !(pfd->revents & POLLIN))
-		return false;
+		return NULL;
 
-	memset(peer, 0, sizeof (*peer));
-
-	if ((peer->fd = accept(fd, NULL, NULL)) < 0) {
+	if ((newfd = accept(fd, NULL, NULL)) < 0) {
 		irc_log_warn("transport: %s", strerror(errno));
-		return false;
+		return NULL;
 	}
+
+	peer = irc_peer_new(newfd);
 
 	irc_log_info("transport: new client connected");
 	irc_peer_send(peer, "IRCCD %d.%d.%d", IRCCD_VERSION_MAJOR,
 	    IRCCD_VERSION_MINOR, IRCCD_VERSION_PATCH);
 
-	return true;
+	return peer;
 }
 
 void

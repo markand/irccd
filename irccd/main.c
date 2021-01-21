@@ -34,31 +34,4 @@ main(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 
-	struct irc_server s = {
-		.name = "malikania",
-		.username = "circ",
-		.nickname = "circ",
-		.hostname = "malikania.fr",
-		.commandchar = "!",
-		.port = 6697,
-		.flags = IRC_SERVER_FLAGS_SSL | IRC_SERVER_FLAGS_JOIN_INVITE
-	};
-	struct irc_plugin p = {
-		.name = "test"
-	};
-	struct irc_rule r = {
-		.action = IRC_RULE_DROP
-	};
-
-	irc_rule_add(r.events, "onMe");
-
-	irc_log_set_verbose(true);
-	irc_bot_init();
-	irc_bot_insert_rule(&r, 0);
-	irc_transport_bind("/tmp/irccd.sock");
-	irc_server_join(&s, "#test", NULL);
-	irc_bot_add_server(irc_util_memdup(&s, sizeof (s)));
-	irc_js_plugin_open(&p, "/Users/markand/test.js");
-	irc_bot_add_plugin(&p);
-	irc_bot_run();
 }

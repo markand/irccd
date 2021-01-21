@@ -19,32 +19,35 @@
 #ifndef IRCCD_CHANNEL_H
 #define IRCCD_CHANNEL_H
 
+#include <sys/queue.h>
 #include <stdbool.h>
 #include <stddef.h>
 
 #include "limits.h"
 
 struct irc_channel_user {
-	char nickname[IRC_NICKNAME_MAX];
+	char nickname[IRC_NICKNAME_LEN];
 	char mode;
+	char symbol;
+	LIST_ENTRY(irc_channel_user) link;
 };
 
 struct irc_channel {
-	char name[IRC_CHANNEL_MAX];
-	char password[IRC_PASSWORD_MAX];
-	struct irc_channel_user *users;
-	size_t usersz;
+	char name[IRC_CHANNEL_LEN];
+	char password[IRC_PASSWORD_LEN];
 	bool joined;
+	LIST_HEAD(, irc_channel_user) users;
+	LIST_ENTRY(irc_channel) link;
 };
 
-void
-irc_channel_add(struct irc_channel *, const char *, char);
+struct irc_channel *
+irc_channel_new(const char *, const char *, bool);
 
 void
-irc_channel_set_user_mode(struct irc_channel *, const char *, char);
+irc_channel_add(struct irc_channel *, const char *, char, char);
 
 void
-irc_channel_set_user_nick(struct irc_channel *, const char *, const char *);
+irc_channel_update(struct irc_channel *, const char *, const char *, char, char);
 
 void
 irc_channel_clear(struct irc_channel *);

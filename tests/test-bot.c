@@ -25,66 +25,52 @@
 #include <irccd/server.h>
 #include <irccd/util.h>
 
-static struct irc_server *
-server_new(const char *name)
-{
-	struct irc_server *s;
-
-	s = irc_util_calloc(1, sizeof (*s));
-	strlcpy(s->name, name, sizeof (s->name));
-
-	return s;
-}
-
 static void
 clean(void *udata)
 {
 	(void)udata;
 
-	irc_bot_clear_servers();
+	irc_bot_server_clear();
 }
 
 GREATEST_TEST
 servers_add(void)
 {
-	struct irc_server *s1, *s2, *s3;
+	struct irc_server *s, *s1, *s2, *s3;
 
-	s1 = server_new("malikania");
-	s2 = server_new("freenode");
-	s3 = server_new("oftc");
+	s1 = irc_server_new("malikania", "x", "x", "x", "localhost", 6667);
+	s2 = irc_server_new("freenode", "x", "x", "x", "localhost", 6667);
+	s3 = irc_server_new("oftc", "x", "x", "x", "localhost", 6667);
 
 	/* irc.servers -> s1 */
-	irc_bot_add_server(s1);
-	GREATEST_ASSERT_EQ(1, irc.serversz);
-	GREATEST_ASSERT_EQ(1, s1->refc);
-	GREATEST_ASSERT_EQ(s1, irc.servers);
-	GREATEST_ASSERT_EQ(NULL, s1->prev);
-	GREATEST_ASSERT_EQ(NULL, s1->next);
+	irc_bot_server_add(s1);
+	s = LIST_FIRST(&irc.servers);
+	GREATEST_ASSERT_EQ(1, s->refc);
+	GREATEST_ASSERT_EQ(s, s1);
+	s = LIST_NEXT(s, link);
+	GREATEST_ASSERT(!s);
 
 	/* irc.servers -> s2 -> s1 */
-	irc_bot_add_server(s2);
-	GREATEST_ASSERT_EQ(2, irc.serversz);
-	GREATEST_ASSERT_EQ(1, s1->refc);
-	GREATEST_ASSERT_EQ(1, s2->refc);
-	GREATEST_ASSERT_EQ(s2, irc.servers);
-	GREATEST_ASSERT_EQ(s1, s2->next);
-	GREATEST_ASSERT_EQ(NULL, s2->prev);
-	GREATEST_ASSERT_EQ(NULL, s1->next);
-	GREATEST_ASSERT_EQ(s2, s1->prev);
+	irc_bot_server_add(s2);
+	s = LIST_FIRST(&irc.servers);
+	GREATEST_ASSERT_EQ(1, s->refc);
+	GREATEST_ASSERT_EQ(s, s2);
+	s = LIST_NEXT(s, link);
+	GREATEST_ASSERT_EQ(s, s1);
+	s = LIST_NEXT(s, link);
+	GREATEST_ASSERT(!s);
 
 	/* irc.servers -> s3 -> s2 -> s1 */
-	irc_bot_add_server(s3);
-	GREATEST_ASSERT_EQ(3, irc.serversz);
-	GREATEST_ASSERT_EQ(1, s1->refc);
-	GREATEST_ASSERT_EQ(1, s2->refc);
-	GREATEST_ASSERT_EQ(1, s3->refc);
-	GREATEST_ASSERT_EQ(s3, irc.servers);
-	GREATEST_ASSERT_EQ(s2, s3->next);
-	GREATEST_ASSERT_EQ(NULL, s3->prev);
-	GREATEST_ASSERT_EQ(s1, s2->next);
-	GREATEST_ASSERT_EQ(s3, s2->prev);
-	GREATEST_ASSERT_EQ(NULL, s1->next);
-	GREATEST_ASSERT_EQ(s2, s1->prev);
+	irc_bot_server_add(s3);
+	s = LIST_FIRST(&irc.servers);
+	GREATEST_ASSERT_EQ(1, s->refc);
+	GREATEST_ASSERT_EQ(s, s3);
+	s = LIST_NEXT(s, link);
+	GREATEST_ASSERT_EQ(s, s2);
+	s = LIST_NEXT(s, link);
+	GREATEST_ASSERT_EQ(s, s1);
+	s = LIST_NEXT(s, link);
+	GREATEST_ASSERT(!s);
 
 	GREATEST_PASS();
 }
@@ -92,11 +78,11 @@ servers_add(void)
 GREATEST_TEST
 servers_remove(void)
 {
-	struct irc_server *s1, *s2, *s3;
+	struct irc_server *s, *s1, *s2, *s3;
 
-	s1 = server_new("1");
-	s2 = server_new("2");
-	s3 = server_new("3");
+	s1 = irc_server_new("1", "x", "x", "x", "localhost", 6667);
+	s2 = irc_server_new("2", "x", "x", "x", "localhost", 6667);
+	s3 = irc_server_new("3", "x", "x", "x", "localhost", 6667);
 
 	/* Protect deletion from irc_bot_remove_server. */
 	irc_server_incref(s1);
@@ -104,46 +90,42 @@ servers_remove(void)
 	irc_server_incref(s3);
 
 	/* irc.servers -> s3 -> s2 -> s1 */
-	irc_bot_add_server(s1);
-	irc_bot_add_server(s2);
-	irc_bot_add_server(s3);
+	irc_bot_server_add(s1);
+	irc_bot_server_add(s2);
+	irc_bot_server_add(s3);
 
 	/* irc.servers -> s3 -> [s2] -> s1 */
 	/* irc.servers -> s3 -> s1 */
-	irc_bot_remove_server(s2->name);
-	GREATEST_ASSERT_EQ(2, irc.serversz);
+	irc_bot_server_remove(s2->name);
 	GREATEST_ASSERT_EQ(2, s1->refc);
 	GREATEST_ASSERT_EQ(1, s2->refc);
 	GREATEST_ASSERT_EQ(2, s3->refc);
-	GREATEST_ASSERT_EQ(NULL, s2->next);
-	GREATEST_ASSERT_EQ(NULL, s2->prev);
-	GREATEST_ASSERT_EQ(s1, s3->next);
-	GREATEST_ASSERT_EQ(NULL, s3->prev);
-	GREATEST_ASSERT_EQ(NULL, s1->next);
-	GREATEST_ASSERT_EQ(s3, s1->prev);
+	s = LIST_FIRST(&irc.servers);
+	GREATEST_ASSERT_EQ(s, s3);
+	s = LIST_NEXT(s, link);
+	GREATEST_ASSERT_EQ(s, s1);
+	s = LIST_NEXT(s, link);
+	GREATEST_ASSERT(!s);
 
 	/* irc.servers -> s3 -> [s1] */
 	/* irc.servers -> s3 */
-	irc_bot_remove_server(s1->name);
-	GREATEST_ASSERT_EQ(1, irc.serversz);
+	irc_bot_server_remove(s1->name);
 	GREATEST_ASSERT_EQ(1, s1->refc);
 	GREATEST_ASSERT_EQ(1, s2->refc);
 	GREATEST_ASSERT_EQ(2, s3->refc);
-	GREATEST_ASSERT_EQ(NULL, s1->next);
-	GREATEST_ASSERT_EQ(NULL, s1->prev);
-	GREATEST_ASSERT_EQ(NULL, s3->next);
-	GREATEST_ASSERT_EQ(NULL, s3->prev);
+	s = LIST_FIRST(&irc.servers);
+	GREATEST_ASSERT_EQ(s, s3);
+	s = LIST_NEXT(s, link);
+	GREATEST_ASSERT(!s);
 
 	/* irc.servers -> [s3] */
 	/* irc.servers -> NULL */
-	irc_bot_remove_server(s3->name);
-	GREATEST_ASSERT_EQ(0, irc.serversz);
-	GREATEST_ASSERT_EQ(NULL, irc.servers);
+	irc_bot_server_remove(s3->name);
 	GREATEST_ASSERT_EQ(1, s1->refc);
 	GREATEST_ASSERT_EQ(1, s2->refc);
 	GREATEST_ASSERT_EQ(1, s3->refc);
-	GREATEST_ASSERT_EQ(NULL, s3->next);
-	GREATEST_ASSERT_EQ(NULL, s3->prev);
+	s = LIST_FIRST(&irc.servers);
+	GREATEST_ASSERT(!s);
 
 	irc_server_decref(s1);
 	irc_server_decref(s2);
@@ -157,31 +139,24 @@ servers_clear(void)
 {
 	struct irc_server *s1, *s2, *s3;
 
-	s1 = server_new("1");
-	s2 = server_new("2");
-	s3 = server_new("3");
+	s1 = irc_server_new("1", "x", "x", "x", "localhost", 6667);
+	s2 = irc_server_new("2", "x", "x", "x", "localhost", 6667);
+	s3 = irc_server_new("3", "x", "x", "x", "localhost", 6667);
 
 	/* Protect deletion from irc_bot_remove_server. */
 	irc_server_incref(s1);
 	irc_server_incref(s2);
 	irc_server_incref(s3);
 
-	irc_bot_add_server(s1);
-	irc_bot_add_server(s2);
-	irc_bot_add_server(s3);
-	irc_bot_clear_servers();
+	irc_bot_server_add(s1);
+	irc_bot_server_add(s2);
+	irc_bot_server_add(s3);
+	irc_bot_server_clear();
 
-	GREATEST_ASSERT_EQ(0, irc.serversz);
-	GREATEST_ASSERT_EQ(NULL, irc.servers);
 	GREATEST_ASSERT_EQ(1, s1->refc);
-	GREATEST_ASSERT_EQ(NULL, s1->next);
-	GREATEST_ASSERT_EQ(NULL, s1->prev);
 	GREATEST_ASSERT_EQ(1, s2->refc);
-	GREATEST_ASSERT_EQ(NULL, s2->next);
-	GREATEST_ASSERT_EQ(NULL, s2->prev);
 	GREATEST_ASSERT_EQ(1, s3->refc);
-	GREATEST_ASSERT_EQ(NULL, s3->next);
-	GREATEST_ASSERT_EQ(NULL, s3->prev);
+	GREATEST_ASSERT(!LIST_FIRST(&irc.servers));
 	GREATEST_PASS();
 }
 

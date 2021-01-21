@@ -40,20 +40,19 @@
 #include "event.h"
 #include "log.h"
 #include "server.h"
-#include "set.h"
 #include "util.h"
 
 struct origin {
-	char nickname[IRC_NICKNAME_MAX];
-	char username[IRC_USERNAME_MAX];
-	char host[IRC_HOST_MAX];
+	char nickname[IRC_NICKNAME_LEN];
+	char username[IRC_USERNAME_LEN];
+	char host[IRC_HOST_LEN];
 };
 
 struct message {
 	char *prefix;
 	char *cmd;
-	char *args[IRC_ARGS_MAX];
-	char buf[IRC_MESSAGE_MAX];
+	char *args[32];
+	char buf[512];
 };
 
 static inline void
@@ -88,7 +87,7 @@ parse(struct message *msg, const char *line)
 	scan(&ptr, &msg->cmd);                         /* command */
 
 	/* And finally arguments. */
-	for (a = 0; *ptr && a < IRC_ARGS_MAX; ++a) {
+	for (a = 0; *ptr && a < IRC_UTIL_SIZE(msg->args); ++a) {
 		if (*ptr == ':') {
 			msg->args[a] = ptr + 1;
 			ptr = strchr(ptr, '\0');
@@ -96,7 +95,7 @@ parse(struct message *msg, const char *line)
 			scan(&ptr, &msg->args[a]);
 	}
 
-	if (a >= IRC_ARGS_MAX)
+	if (a >= IRC_UTIL_SIZE(msg->args))
 		return errno = EMSGSIZE, false;
 	if (msg->cmd == NULL)
 		return errno = EBADMSG, false;
@@ -118,12 +117,6 @@ static inline bool
 is_self(const struct irc_server *s, const char *nick)
 {
 	return strncmp(s->nickname, nick, strlen(s->nickname)) == 0;
-}
-
-static int
-cmp_channel(const struct irc_channel *c1, const struct irc_channel *c2)
-{
-	return strcmp(c1->name, c2->name);
 }
 
 #if 0
@@ -149,46 +142,48 @@ parse_origin(const char *prefix)
 static void
 add_nick(const struct irc_server *s, struct irc_channel *ch, const char *nick)
 {
-	char mode = 0;
+	char mode = 0, symbol = 0;
 
 	for (size_t i = 0; i < IRC_UTIL_SIZE(s->prefixes); ++i) {
 		if (nick[0] == s->prefixes[i].token) {
 			mode = s->prefixes[i].mode;
+			symbol = s->prefixes[i].token;
 			++nick;
 			break;
 		}
 	}
 
-	irc_channel_add(ch, nick, mode);
+	irc_channel_add(ch, nick, mode, symbol);
 }
 
 static struct irc_channel *
 add_channel(struct irc_server *s, const char *name, const char *password, bool joined)
 {
-	struct irc_channel chnew = {0}, *ch;
+	struct irc_channel *ch;
 
 	if ((ch = irc_server_find(s, name))) {
 		ch->joined = joined;
 		return ch;
 	}
 
-	strlcpy(chnew.name, name, sizeof (chnew.name));
+	ch = irc_util_calloc(1, sizeof (*ch));
+	ch->joined = joined;
+	strlcpy(ch->name, name, sizeof (ch->name));
 
 	if (password)
-		strlcpy(chnew.password, password, sizeof (chnew.password));
+		strlcpy(ch->password, password, sizeof (ch->password));
 
-	chnew.joined = joined;
+	LIST_INIT(&ch->users);
+	LIST_INSERT_HEAD(&s->channels, ch, link);
 
-	IRC_SET_ALLOC_PUSH(&s->channels, &s->channelsz, &chnew, cmp_channel);
-
-	return irc_server_find(s, name);
+	return ch;
 }
 
 static void
-remove_channel(struct irc_server *s, struct irc_channel *ch)
+remove_channel(struct irc_channel *ch)
 {
-	irc_channel_clear(ch);
-	IRC_SET_ALLOC_REMOVE(&s->channels, &s->channelsz, ch);
+	irc_channel_finish(ch);
+	LIST_REMOVE(ch, link);
 }
 
 bool
@@ -248,11 +243,13 @@ handle_connect(struct irc_server *s, struct irc_event *ev, struct message *msg)
 {
 	(void)msg;
 
+	struct irc_channel *ch;
+
 	s->state = IRC_SERVER_STATE_CONNECTED;
 
 	/* Now join all channels that were requested. */
-	for (size_t i = 0; i < s->channelsz; ++i)
-		irc_server_join(s, s->channels[i].name, s->channels[i].password);
+	LIST_FOREACH(ch, &s->channels, link)
+		irc_server_join(s, ch->name, ch->password);
 
 	ev->type = IRC_EVENT_CONNECT;
 }
@@ -354,7 +351,7 @@ handle_part(struct irc_server *s, struct irc_event *ev, struct message *msg)
 	ch = add_channel(s, ev->part.channel, NULL, true);
 
 	if (is_self(s, ev->part.origin) == 0)
-		remove_channel(s, ch);
+		remove_channel(ch);
 	else
 		irc_channel_remove(ch, ev->part.origin);
 }
@@ -452,8 +449,9 @@ handle_endofnames(struct irc_server *s, struct irc_event *ev, struct message *ms
 	(void)msg;
 
 	FILE *fp;
-	const struct irc_channel *ch;
 	size_t length;
+	const struct irc_channel *ch;
+	const struct irc_channel_user *u;
 
 	ev->type = IRC_EVENT_NAMES;
 	ev->names.channel = strdup(msg->args[1]);
@@ -462,15 +460,13 @@ handle_endofnames(struct irc_server *s, struct irc_event *ev, struct message *ms
 	ch = irc_server_find(s, ev->names.channel);
 	fp = open_memstream(&ev->names.names, &length);
 
-	for (size_t i = 0; i < ch->usersz; ++i) {
-		const struct irc_channel_user *u = &ch->users[i];
-
+	LIST_FOREACH(u, &ch->users, link) {
 		if (u->mode)
 			fprintf(fp, "%c", sym(s, u->mode));
 
 		fprintf(fp, "%s", u->nickname);
 
-		if (i + 1 < ch->usersz)
+		if (LIST_NEXT(u, link))
 			fputc(' ', fp);
 	}
 
@@ -481,6 +477,7 @@ static void
 handle_whoisuser(struct irc_server *s, struct irc_event *ev, struct message *msg)
 {
 	(void)s;
+	(void)ev;
 	(void)msg;
 
 	s->bufwhois.nickname = strdup(msg->args[1]);
@@ -581,6 +578,8 @@ handle(struct irc_server *s, struct irc_event *ev, struct message *msg)
 static void
 clear(struct irc_server *s)
 {
+	struct irc_channel *ch, *tmp;
+
 	s->state = IRC_SERVER_STATE_DISCONNECTED;
 
 	if (s->fd != 0) {
@@ -604,6 +603,12 @@ clear(struct irc_server *s)
 		s->ctx = NULL;
 	}
 #endif
+
+	LIST_FOREACH_SAFE(ch, &s->channels, link, tmp) {
+		irc_channel_finish(ch);
+		free(ch);
+	}
+	LIST_INIT(&s->channels);
 }
 
 static bool
@@ -945,6 +950,36 @@ static const struct {
 	},
 };
 
+struct irc_server *
+irc_server_new(const char *name,
+               const char *nickname,
+               const char *username,
+               const char *realname,
+               const char *hostname,
+               unsigned int port)
+{
+	assert(name);
+	assert(nickname);
+	assert(username);
+	assert(realname);
+	assert(hostname);
+
+	struct irc_server *s;
+
+	s = irc_util_calloc(1, sizeof (*s));
+	s->port = port;
+
+	strlcpy(s->name, name, sizeof (s->name));
+	strlcpy(s->nickname, nickname, sizeof (s->nickname));
+	strlcpy(s->username, username, sizeof (s->username));
+	strlcpy(s->realname, realname, sizeof (s->realname));
+	strlcpy(s->hostname, hostname, sizeof (s->hostname));
+
+	LIST_INIT(&s->channels);
+
+	return s;
+}
+
 void
 irc_server_connect(struct irc_server *s)
 {
@@ -1017,11 +1052,13 @@ irc_server_find(struct irc_server *s, const char *name)
 	assert(s);
 	assert(name);
 
-	struct irc_channel key = {0};
+	struct irc_channel *ch;
 
-	strlcpy(key.name, name, sizeof (key.name));
+	LIST_FOREACH(ch, &s->channels, link)
+		if (strcmp(ch->name, name) == 0)
+			return ch;
 
-	return IRC_SET_FIND(s->channels, s->channelsz, &key, cmp_channel);
+	return NULL;
 }
 
 bool
@@ -1030,7 +1067,7 @@ irc_server_send(struct irc_server *s, const char *fmt, ...)
 	assert(s);
 	assert(fmt);
 
-	char buf[IRC_BUF_MAX];
+	char buf[IRC_BUF_LEN];
 	va_list ap;
 	size_t len, avail, required;
 
@@ -1251,8 +1288,6 @@ irc_server_decref(struct irc_server *s)
 
 	if (--s->refc == 0) {
 		clear(s);
-		//free(s->whois.channels);
-		free(s->channels);
 		free(s);
 	}
 }

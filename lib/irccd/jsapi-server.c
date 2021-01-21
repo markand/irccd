@@ -23,7 +23,6 @@
 #include "channel.h"
 #include "irccd.h"
 #include "jsapi-server.h"
-#include "list.h"
 #include "server.h"
 #include "util.h"
 
@@ -138,6 +137,9 @@ static duk_ret_t
 Server_prototype_info(duk_context *ctx)
 {
 	const struct irc_server *s = self(ctx);
+	const struct irc_channel *c;
+	const struct irc_channel_user *u;
+	size_t ci = 0, ui = 0;
 
 	duk_push_object(ctx);
 	duk_push_string(ctx, s->name);
@@ -159,28 +161,28 @@ Server_prototype_info(duk_context *ctx)
 
 	duk_push_array(ctx);
 
-	for (size_t c = 0; c < s->channelsz; ++c) {
+	LIST_FOREACH(c, &s->channels, link) {
 		duk_push_object(ctx);
-		duk_push_string(ctx, s->channels[c].name);
+		duk_push_string(ctx, c->name);
 		duk_put_prop_string(ctx, -2, "name");
-		duk_push_boolean(ctx, s->channels[c].joined);
+		duk_push_boolean(ctx, c->joined);
 		duk_put_prop_string(ctx, -2, "joined");
 		duk_push_array(ctx);
 
-		for (size_t n = 0; n < s->channels[c].usersz; ++n) {
+		LIST_FOREACH(u, &c->users, link) {
 			duk_push_object(ctx);
-			duk_push_string(ctx, s->channels[c].users[n].nickname);
+			duk_push_string(ctx, u->nickname);
 			duk_put_prop_string(ctx, -2, "nickname");
-			if (s->channels[c].users[n].mode)
-				duk_push_sprintf(ctx, "%c", s->channels[c].users[n].mode);
+			if (u->mode)
+				duk_push_sprintf(ctx, "%c", u->mode);
 			else
 				duk_push_null(ctx);
 			duk_put_prop_string(ctx, -2, "mode");
-			duk_put_prop_index(ctx, -2, n);
+			duk_put_prop_index(ctx, -2, ui++);
 		}
 
 		duk_put_prop_string(ctx, -2, "users");
-		duk_put_prop_index(ctx, -2, c);
+		duk_put_prop_index(ctx, -2, ci++);
 	}
 
 	duk_put_prop_string(ctx, -2, "channels");
@@ -484,9 +486,7 @@ Server_destructor(duk_context *ctx)
 static duk_ret_t
 Server_add(duk_context *ctx)
 {
-	struct irc_server *sv = require(ctx, 0);
-
-	irc_bot_add_server(sv);
+	irc_bot_server_add(require(ctx, 0));
 
 	return 0;
 }
@@ -495,7 +495,7 @@ static duk_ret_t
 Server_find(duk_context *ctx)
 {
 	const char *name = duk_require_string(ctx, 0);
-	struct irc_server *s = irc_bot_find_server(name);
+	struct irc_server *s = irc_bot_server_find(name);
 
 	if (!s)
 		return 0;
@@ -512,7 +512,7 @@ Server_list(duk_context *ctx)
 
 	duk_push_object(ctx);
 
-	IRC_LIST_FOREACH(irc.servers, s) {
+	LIST_FOREACH(s, &irc.servers, link) {
 		irc_jsapi_server_push(ctx, s);
 		duk_put_prop_string(ctx, -2, s->name);
 	}
@@ -523,7 +523,7 @@ Server_list(duk_context *ctx)
 static duk_ret_t
 Server_remove(duk_context *ctx)
 {
-	irc_bot_remove_server(duk_require_string(ctx, 0));
+	irc_bot_server_remove(duk_require_string(ctx, 0));
 
 	return 0;
 }

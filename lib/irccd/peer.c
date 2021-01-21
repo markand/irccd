@@ -67,7 +67,7 @@ require_server(struct irc_peer *p, const char *id)
 {
 	struct irc_server *s;
 
-	if (!(s = irc_bot_find_server(id))) {
+	if (!(s = irc_bot_server_find(id))) {
 		irc_peer_send(p, "server %s not found", id);
 		return NULL;
 	}
@@ -98,8 +98,7 @@ cmd_server_disconnect(struct irc_peer *p, char *line)
 
 		irc_server_disconnect(s);
 	} else
-		for (struct irc_server *s = irc.servers; s; s = s->next)
-			irc_server_disconnect(s);
+		irc_bot_server_clear();
 
 	return ok(p);
 }
@@ -246,16 +245,25 @@ cmd_server_list(struct irc_peer *p, char *line)
 {
 	(void)line;
 
-	char out[IRC_BUF_MAX] = "OK ";
+	struct irc_server *s;
+	FILE *fp;
+	char *out;
+	size_t outsz;
 
-	for (struct irc_server *s = irc.servers; s; s = s->next) {
-		if (strlcat(out, s->name, sizeof (out)) >= sizeof (out))
-			return EMSGSIZE;
-		if (s->next && strlcat(out, " ", sizeof (out)) >= sizeof (out))
-			return EMSGSIZE;
+	fp = open_memstream(&out, &outsz);
+
+	fprintf(fp, "OK ");
+
+	LIST_FOREACH(s, &irc.servers, link) {
+		fprintf(fp, "%s", s->name);
+
+		if (LIST_NEXT(s, link))
+			fputc(' ', fp);
 	}
 
+	fclose(fp);
 	irc_peer_send(p, out);
+	free(out);
 
 	return 0;
 }
@@ -411,13 +419,24 @@ output(struct irc_peer *p)
 	return true;
 }
 
+struct irc_peer *
+irc_peer_new(int fd)
+{
+	struct irc_peer *p;
+
+	p = irc_util_calloc(1, sizeof (*p));
+	p->fd = fd;
+
+	return p;
+}
+
 bool
 irc_peer_send(struct irc_peer *p, const char *fmt, ...)
 {
 	assert(p);
 	assert(fmt);
 
-	char buf[IRC_BUF_MAX];
+	char buf[IRC_BUF_LEN];
 	va_list ap;
 	size_t len, avail, required;
 
@@ -474,5 +493,5 @@ irc_peer_finish(struct irc_peer *p)
 	assert(p);
 
 	close(p->fd);
-	memset(p, 0, sizeof (*p));
+	free(p);
 }

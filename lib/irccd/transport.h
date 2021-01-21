@@ -33,8 +33,8 @@ irc_transport_bind(const char *);
 void
 irc_transport_prepare(struct pollfd *);
 
-bool
-irc_transport_flush(const struct pollfd *, struct irc_peer *);
+struct irc_peer *
+irc_transport_flush(const struct pollfd *);
 
 void
 irc_transport_finish(void);

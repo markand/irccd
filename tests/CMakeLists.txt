@@ -22,7 +22,7 @@ set(
 	TESTS
 	test-bot
 	test-channel
-	test-event
+	#test-event
 	#test-dl-plugin
 	test-log
 	test-rule

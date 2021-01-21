@@ -20,24 +20,25 @@
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <strings.h>
 
 #include "rule.h"
 #include "util.h"
 
-static void
+static inline void
 lower(char *dst, const char *src)
 {
 	while (*src)
 		*dst++ = tolower(*src++);
 }
 
-static inline char *
+static char *
 find(const char *str, const char *value)
 {
-	char strlower[IRC_RULE_MAX] = {0};
-	char valuelower[IRC_RULE_MAX] = {0};
+	char strlower[IRC_RULE_LEN] = {0};
+	char valuelower[IRC_RULE_LEN] = {0};
 	char *p;
 
 	lower(strlower, str);
@@ -49,7 +50,7 @@ find(const char *str, const char *value)
 	return NULL;
 }
 
-static inline bool
+static bool
 match(const char *str, const char *value)
 {
 	size_t len;
@@ -75,6 +76,17 @@ match(const char *str, const char *value)
 	return strncasecmp(p, value, len) == 0;
 }
 
+struct irc_rule *
+irc_rule_new(enum irc_rule_action action)
+{
+	struct irc_rule *r;
+
+	r = irc_util_calloc(1, sizeof (*r));
+	r->action = action;
+
+	return r;
+}
+
 bool
 irc_rule_add(char *str, const char *value)
 {
@@ -86,7 +98,7 @@ irc_rule_add(char *str, const char *value)
 	slen = strlen(str);
 	vlen = strlen(value);
 
-	if (vlen + 1 >= IRC_RULE_MAX - slen) {
+	if (vlen + 1 >= IRC_RULE_LEN - slen) {
 		errno = ENOMEM;
 		return false;
 	}
@@ -109,7 +121,7 @@ irc_rule_remove(char *str, const char *value)
 	vlen = strlen(value) + 1;       /* includes ':' */
 
 	assert(pos[vlen - 1] == ':');
-	memmove(&pos[0], &pos[vlen], IRC_RULE_MAX - (&pos[vlen] - str));
+	memmove(&pos[0], &pos[vlen], IRC_RULE_LEN - (&pos[vlen] - str));
 }
 
 bool
@@ -128,8 +140,7 @@ irc_rule_match(const struct irc_rule *rule,
 }
 
 bool
-irc_rule_matchlist(const struct irc_rule *rules,
-                   size_t rulesz,
+irc_rule_matchlist(const struct irc_rule_list *rules,
                    const char *server,
                    const char *channel,
                    const char *origin,
@@ -137,10 +148,11 @@ irc_rule_matchlist(const struct irc_rule *rules,
                    const char *event)
 {
 	bool result = true;
+	struct irc_rule *r;
 
-	for (size_t i = 0; i < rulesz; ++i)
-		if (irc_rule_match(&rules[i], server, channel, origin, plugin, event))
-			result = rules[i].action == IRC_RULE_ACCEPT;
+	TAILQ_FOREACH(r, rules, link)
+		if (irc_rule_match(r, server, channel, origin, plugin, event))
+			result = r->action == IRC_RULE_ACCEPT;
 
 	return result;
 }
@@ -150,5 +162,5 @@ irc_rule_finish(struct irc_rule *rule)
 {
 	assert(rule);
 
-	memset(rule, 0, sizeof (*rule));
+	free(rule);
 }

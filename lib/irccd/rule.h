@@ -19,10 +19,11 @@
 #ifndef IRCCD_RULE_H
 #define IRCCD_RULE_H
 
+#include <sys/queue.h>
 #include <stdbool.h>
 #include <stddef.h>
 
-#define IRC_RULE_MAX 1024
+#include "limits.h"
 
 enum irc_rule_action {
 	IRC_RULE_ACCEPT,
@@ -31,12 +32,18 @@ enum irc_rule_action {
 
 struct irc_rule {
 	enum irc_rule_action action;
-	char servers[IRC_RULE_MAX];
-	char channels[IRC_RULE_MAX];
-	char origins[IRC_RULE_MAX];
-	char plugins[IRC_RULE_MAX];
-	char events[IRC_RULE_MAX];
+	char servers[IRC_RULE_LEN];
+	char channels[IRC_RULE_LEN];
+	char origins[IRC_RULE_LEN];
+	char plugins[IRC_RULE_LEN];
+	char events[IRC_RULE_LEN];
+	TAILQ_ENTRY(irc_rule) link;
 };
+
+TAILQ_HEAD(irc_rule_list, irc_rule);
+
+struct irc_rule *
+irc_rule_new(enum irc_rule_action);
 
 bool
 irc_rule_add(char *, const char *);
@@ -53,8 +60,7 @@ irc_rule_match(const struct irc_rule *,
                const char *);
 
 bool
-irc_rule_matchlist(const struct irc_rule *,
-                   size_t,
+irc_rule_matchlist(const struct irc_rule_list *,
                    const char *,
                    const char *,
                    const char *,

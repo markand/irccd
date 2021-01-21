@@ -19,6 +19,7 @@
 #ifndef IRCCD_PEER_H
 #define IRCCD_PEER_H
 
+#include <sys/queue.h>
 #include <stdbool.h>
 
 #include "limits.h"
@@ -28,9 +29,15 @@ struct pollfd;
 struct irc_peer {
 	int fd;
 	bool is_watching;
-	char in[IRC_BUF_MAX];
-	char out[IRC_BUF_MAX];
+	char in[IRC_BUF_LEN];
+	char out[IRC_BUF_LEN];
+	LIST_ENTRY(irc_peer) link;
 };
+
+LIST_HEAD(irc_peer_list, irc_peer);
+
+struct irc_peer *
+irc_peer_new(int);
 
 bool
 irc_peer_send(struct irc_peer *, const char *, ...);
