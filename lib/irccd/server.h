@@ -28,12 +28,12 @@
 #       include <openssl/ssl.h>
 #endif
 
+#include "event.h"
 #include "limits.h"
 
 struct pollfd;
 
 struct irc_channel;
-struct irc_event;
 
 enum irc_server_state {
 	IRC_SERVER_STATE_DISCONNECTED,
@@ -67,16 +67,10 @@ enum irc_server_ssl_state {
 
 #endif
 
-struct irc_server_whois {
-	char nickname[IRC_NICKNAME_MAX];
-	char username[IRC_USERNAME_MAX];
-	char realname[IRC_REALNAME_MAX];
-	char hostname[IRC_HOST_MAX];
-	struct {
-		char channel[IRC_CHANNEL_MAX];
-		char mode;
-	} *channels;
-	size_t channelsz;
+struct irc_server_namemode {
+	char mode;
+	char sym;
+	char *name;
 };
 
 struct irc_server {
@@ -115,8 +109,7 @@ struct irc_server {
 	enum irc_server_ssl_state ssl_state;
 #endif
 
-	/* Whois being stored. */
-	struct irc_server_whois whois;
+	struct irc_event_whois bufwhois;
 
 	/* Reference count. */
 	size_t refc;
@@ -189,6 +182,9 @@ irc_server_notice(struct irc_server *, const char *, const char *);
 
 bool
 irc_server_whois(struct irc_server *, const char *);
+
+struct irc_server_namemode
+irc_server_strip(const struct irc_server *, const char *);
 
 void
 irc_server_incref(struct irc_server *);

@@ -23,6 +23,9 @@
 
 #define IRC_UTIL_SIZE(x) (sizeof (x) / sizeof (x[0]))
 
+/* Suitable convenient typedef for bsearch/qsort. */
+typedef int (*irc_cmp)(const void *, const void *);
+
 void *
 irc_util_malloc(size_t);
 

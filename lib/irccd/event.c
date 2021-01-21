@@ -24,86 +24,6 @@
 #include "event.h"
 #include "server.h"
 
-static inline void
-scan(char **line, char **str)
-{
-	char *p = strchr(*line, ' ');
-
-	if (p)
-		*p = '\0';
-
-	*str = *line;
-	*line = p ? p + 1 : strchr(*line, '\0');
-}
-
-bool
-irc_event_is_ctcp(const char *line)
-{
-	size_t length;
-
-	if (!line)
-		return false;
-	if ((length = strlen(line)) < 2)
-		return false;
-
-	return line[0] == 0x1 && line[length - 1] == 0x1;
-}
-
-char *
-irc_event_ctcp(char *line)
-{
-	/* Skip first \001. */
-	if (*line == '\001')
-		line++;
-
-	/* Remove last \001. */
-	line[strcspn(line, "\001")] = '\0';
-
-	if (strncmp(line, "ACTION ", 7) == 0)
-		line += 7;
-
-	return line;
-}
-
-bool
-irc_event_parse(struct irc_event_msg *ev, const char *line)
-{
-	assert(ev);
-	assert(line);
-
-	char *ptr = ev->buf;
-	size_t a;
-
-	memset(ev, 0, sizeof (*ev));
-	strlcpy(ev->buf, line, sizeof (ev->buf));
-
-	/*
-	 * IRC message is defined as following:
-	 *
-	 * [:prefix] command arg1 arg2 [:last-argument]
-	 */
-	if (*line == ':')
-		scan((++ptr, &ptr), &ev->prefix);     /* prefix */
-
-	scan(&ptr, &ev->cmd);                         /* command */
-
-	/* And finally arguments. */
-	for (a = 0; *ptr && a < IRC_ARGS_MAX; ++a) {
-		if (*ptr == ':') {
-			ev->args[a] = ptr + 1;
-			ptr = strchr(ptr, '\0');
-		} else
-			scan(&ptr, &ev->args[a]);
-	}
-
-	if (a >= IRC_ARGS_MAX)
-		return errno = EMSGSIZE, false;
-	if (ev->cmd == NULL)
-		return errno = EBADMSG, false;
-
-	return true;
-}
-
 bool
 irc_event_str(const struct irc_event *ev, char *str, size_t strsz)
 {
@@ -114,82 +34,144 @@ irc_event_str(const struct irc_event *ev, char *str, size_t strsz)
 
 	switch (ev->type) {
 	case IRC_EVENT_CONNECT:
-		written = snprintf(str, strsz, "EVENT-CONNECT %s", ev->server->name);
+		written = snprintf(str, strsz, "EVENT-CONNECT %s",
+		    ev->server->name);
 		break;
 	case IRC_EVENT_DISCONNECT:
-		written = snprintf(str, strsz, "EVENT-DISCONNECT %s", ev->server->name);
+		written = snprintf(str, strsz, "EVENT-DISCONNECT %s",
+		    ev->server->name);
 		break;
 	case IRC_EVENT_INVITE:
-		written = snprintf(str, strsz, "EVENT-INVITE %s %s %s %s", ev->server->name,
-		    ev->msg.prefix, ev->msg.args[0], ev->msg.args[1]);
+		written = snprintf(str, strsz, "EVENT-INVITE %s %s %s %s",
+		    ev->server->name, ev->invite.origin, ev->invite.channel,
+		    ev->invite.target);
 		break;
 	case IRC_EVENT_JOIN:
-		written = snprintf(str, strsz, "EVENT-JOIN %s %s %s", ev->server->name,
-		    ev->msg.prefix, ev->msg.args[0]);
+		written = snprintf(str, strsz, "EVENT-JOIN %s %s %s",
+		    ev->server->name, ev->join.origin, ev->join.channel);
 		break;
 	case IRC_EVENT_KICK:
-		written = snprintf(str, strsz, "EVENT-KICK %s %s %s %s %s", ev->server->name,
-		    ev->msg.prefix, ev->msg.args[0], ev->msg.args[1],
-		    ev->msg.args[2] ? ev->msg.args[2] : "");
+		written = snprintf(str, strsz, "EVENT-KICK %s %s %s %s %s",
+		    ev->server->name, ev->kick.origin, ev->kick.channel,
+		    ev->kick.target, ev->kick.reason ? ev->kick.reason : "");
 		break;
 	case IRC_EVENT_ME:
-		written = snprintf(str, strsz, "EVENT-ME %s %s %s %s", ev->server->name,
-		    ev->msg.prefix, ev->msg.args[0], ev->msg.args[1]);
+		written = snprintf(str, strsz, "EVENT-ME %s %s %s %s",
+		    ev->server->name, ev->message.origin, ev->message.channel,
+		    ev->message.message);
 		break;
 	case IRC_EVENT_MESSAGE:
-		written = snprintf(str, strsz, "EVENT-MESSAGE %s %s %s %s", ev->server->name,
-		    ev->msg.prefix, ev->msg.args[0], ev->msg.args[1]);
+		written = snprintf(str, strsz, "EVENT-MESSAGE %s %s %s %s",
+		    ev->server->name, ev->message.origin, ev->message.channel,
+		    ev->message.message);
 		break;
 	case IRC_EVENT_MODE:
 		written = snprintf(str, strsz, "EVENT-MODE %s %s %s %s %s %s %s",
-		    ev->server->name, ev->msg.prefix, ev->msg.args[0],
-		    ev->msg.args[1] ? ev->msg.args[1] : "",
-		    ev->msg.args[2] ? ev->msg.args[2] : "",
-		    ev->msg.args[3] ? ev->msg.args[3] : "",
-		    ev->msg.args[4] ? ev->msg.args[4] : "");
+		    ev->server->name, ev->mode.origin, ev->mode.channel,
+		    ev->mode.mode,
+		    ev->mode.limit ? ev->mode.limit : "",
+		    ev->mode.user  ? ev->mode.user  : "",
+		    ev->mode.mask  ? ev->mode.mask  : "");
 		break;
 	case IRC_EVENT_NICK:
-		written = snprintf(str, strsz, "EVENT-NICK %s %s %s", ev->server->name,
-		    ev->msg.prefix, ev->msg.args[0]);
+		written = snprintf(str, strsz, "EVENT-NICK %s %s %s",
+		    ev->server->name, ev->nick.origin, ev->nick.nickname);
 		break;
 	case IRC_EVENT_NOTICE:
-		written = snprintf(str, strsz, "EVENT-NOTICE %s %s %s %s", ev->server->name,
-		    ev->msg.prefix, ev->msg.args[0], ev->msg.args[1]);
+		written = snprintf(str, strsz, "EVENT-NOTICE %s %s %s %s",
+		    ev->server->name, ev->notice.origin, ev->notice.channel,
+		    ev->notice.notice);
 		break;
 	case IRC_EVENT_PART:
-		written = snprintf(str, strsz, "EVENT-PART %s %s %s %s", ev->server->name,
-		    ev->msg.prefix, ev->msg.args[0],
-		    ev->msg.args[1] ? ev->msg.args[1] : "");
+		written = snprintf(str, strsz, "EVENT-PART %s %s %s %s",
+		    ev->server->name, ev->part.origin, ev->part.channel,
+		    ev->part.reason ? ev->part.reason : "");
 		break;
 	case IRC_EVENT_TOPIC:
-		written = snprintf(str, strsz, "EVENT-TOPIC %s %s %s %s", ev->server->name,
-		    ev->msg.prefix, ev->msg.args[0], ev->msg.args[1]);
+		written = snprintf(str, strsz, "EVENT-TOPIC %s %s %s %s",
+		    ev->server->name, ev->topic.origin, ev->topic.channel,
+		    ev->topic.topic);
 		break;
 	case IRC_EVENT_WHOIS:
-		snprintf(str, strsz, "EVENT-WHOIS %s %s %s %s %s ",
-		    ev->server->name, ev->whois->nickname, ev->whois->username,
-		    ev->whois->realname, ev->whois->hostname);
-
-		for (size_t i = 0; i < ev->whois->channelsz; ++i) {
-			size_t s;
-
-			/* Concat channel and their modes. */
-			strlcat(str, (char []) {ev->whois->channels[i].mode, '\0' }, strsz);
-			strlcat(str, ev->whois->channels[i].channel, strsz);
-
-			if ((s = strlcat(str, " ", strsz)) >= strsz)
-				goto emsgsize;
-
-			written = s;
-		}
+		snprintf(str, strsz, "EVENT-WHOIS %s %s %s %s %s %s",
+		    ev->server->name, ev->whois.nickname, ev->whois.username,
+		    ev->whois.realname, ev->whois.hostname, ev->whois.channels);
 		break;
 	default:
 		break;
 	}
 
 	return written > 0;
+}
 
-emsgsize:
-	errno = EMSGSIZE;
-	return false;
+void
+irc_event_finish(struct irc_event *ev)
+{
+	assert(ev);
+
+	switch (ev->type) {
+	case IRC_EVENT_INVITE:
+		free(ev->invite.origin);
+		free(ev->invite.channel);
+		break;
+	case IRC_EVENT_JOIN:
+		free(ev->join.origin);
+		free(ev->join.channel);
+		break;
+	case IRC_EVENT_KICK:
+		free(ev->kick.origin);
+		free(ev->kick.channel);
+		free(ev->kick.target);
+		free(ev->kick.reason);
+		break;
+	case IRC_EVENT_COMMAND:
+	case IRC_EVENT_ME:
+	case IRC_EVENT_MESSAGE:
+		free(ev->message.origin);
+		free(ev->message.channel);
+		free(ev->message.message);
+		break;
+	case IRC_EVENT_MODE:
+		free(ev->mode.origin);
+		free(ev->mode.channel);
+		free(ev->mode.mode);
+		free(ev->mode.limit);
+		free(ev->mode.user);
+		free(ev->mode.mask);
+		break;
+	case IRC_EVENT_NAMES:
+		free(ev->names.channel);
+		free(ev->names.names);
+		break;
+	case IRC_EVENT_NICK:
+		free(ev->nick.origin);
+		free(ev->nick.nickname);
+		break;
+	case IRC_EVENT_NOTICE:
+		free(ev->notice.origin);
+		free(ev->notice.channel);
+		free(ev->notice.notice);
+		break;
+	case IRC_EVENT_PART:
+		free(ev->part.origin);
+		free(ev->part.channel);
+		free(ev->part.reason);
+		break;
+	case IRC_EVENT_TOPIC:
+		free(ev->topic.origin);
+		free(ev->topic.channel);
+		free(ev->topic.topic);
+		break;
+	case IRC_EVENT_WHOIS:
+		free(ev->whois.nickname);
+		free(ev->whois.username);
+		free(ev->whois.realname);
+		free(ev->whois.hostname);
+		free(ev->whois.channels);
+		break;
+	default:
+		break;
+	}
+
+	memset(ev, 0, sizeof (*ev));
 }

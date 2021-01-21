@@ -87,12 +87,12 @@ metadata(duk_context *ctx, const char *name)
 static void
 push_names(duk_context *ctx, const struct irc_event *ev)
 {
-	const struct irc_channel *ch = irc_server_find(ev->server, ev->msg.args[0]);
+	char *token, *p = ev->names.names;
 
 	duk_push_array(ctx);
 
-	for (size_t i = 0; i < ch->usersz; ++i) {
-		duk_push_string(ctx, ch->users[i].nickname);
+	for (size_t i = 0; (token = strtok_r(p, " ", &p)); ++i) {
+		duk_push_string(ctx, irc_server_strip(ev->server, token).name);
 		duk_put_prop_index(ctx, -2, i);
 	}
 }
@@ -100,22 +100,25 @@ push_names(duk_context *ctx, const struct irc_event *ev)
 static void
 push_whois(duk_context *ctx, const struct irc_event *ev)
 {
+	char *token, *p = ev->whois.channels;
+	struct irc_server_namemode nm;
+
 	duk_push_object(ctx);
-	duk_push_string(ctx, ev->whois->nickname);
+	duk_push_string(ctx, ev->whois.nickname);
 	duk_put_prop_string(ctx, -2, "nickname");
-	duk_push_string(ctx, ev->whois->username);
+	duk_push_string(ctx, ev->whois.username);
 	duk_put_prop_string(ctx, -2, "username");
-	duk_push_string(ctx, ev->whois->realname);
+	duk_push_string(ctx, ev->whois.realname);
 	duk_put_prop_string(ctx, -2, "realname");
-	duk_push_string(ctx, ev->whois->hostname);
+	duk_push_string(ctx, ev->whois.hostname);
 	duk_put_prop_string(ctx, -2, "hostname");
 	duk_push_array(ctx);
-	for (size_t i = 0; i < ev->whois->channelsz; ++i) {
-		printf("[%s] = [%c]\n", ev->whois->channels[i].channel, ev->whois->channels[i].mode);
+	for (size_t i = 0; (token = strtok_r(p, " ", &p)); ++i) {
+		nm = irc_server_strip(ev->server, token);
 		duk_push_object(ctx);
-		duk_push_string(ctx, ev->whois->channels[i].channel);
+		duk_push_string(ctx, nm.name);
 		duk_put_prop_string(ctx, -2, "channel");
-		duk_push_sprintf(ctx, "%c", ev->whois->channels[i].mode);
+		duk_push_sprintf(ctx, "%c", nm.mode);
 		duk_put_prop_string(ctx, -2, "mode");
 		duk_put_prop_index(ctx, -2, i);
 	}
@@ -304,8 +307,8 @@ handle(struct irc_plugin *plg, const struct irc_event *ev)
 
 	switch (ev->type) {
 	case IRC_EVENT_COMMAND:
-		call(plg, "onCommand", "Ss ss", ev->server, ev->msg.prefix,
-		    ev->msg.args[0], ev->msg.args[1]);
+		call(plg, "onCommand", "Ss ss", ev->server, ev->message.origin,
+		    ev->message.channel, ev->message.message);
 		break;
 	case IRC_EVENT_CONNECT:
 		call(plg, "onConnect", "S", ev->server);
@@ -314,49 +317,49 @@ handle(struct irc_plugin *plg, const struct irc_event *ev)
 		call(plg, "onDisconnect", "S", ev->server);
 		break;
 	case IRC_EVENT_INVITE:
-		call(plg, "onInvite", "Ss s", ev->server, ev->msg.prefix,
-		     ev->msg.args[1]);
+		call(plg, "onInvite", "Ss s", ev->server, ev->invite.origin,
+		     ev->invite.channel);
 		break;
 	case IRC_EVENT_JOIN:
-		call(plg, "onJoin", "Ss s", ev->server, ev->msg.prefix,
-		    ev->msg.args[0]);
+		call(plg, "onJoin", "Ss s", ev->server, ev->join.origin,
+		    ev->join.channel);
 		break;
 	case IRC_EVENT_KICK:
-		call(plg, "onKick", "Ss sss", ev->server, ev->msg.prefix,
-		    ev->msg.args[0], ev->msg.args[1], ev->msg.args[2]);
+		call(plg, "onKick", "Ss sss", ev->server, ev->kick.origin,
+		    ev->kick.channel, ev->kick.target, ev->kick.reason);
 		break;
 	case IRC_EVENT_ME:
-		call(plg, "onMe", "Ss ss", ev->server, ev->msg.prefix,
-		    ev->msg.args[0], ev->msg.args[1]);
+		call(plg, "onMe", "Ss ss", ev->server, ev->message.origin,
+		    ev->message.channel, ev->message.message);
 		break;
 	case IRC_EVENT_MESSAGE:
-		call(plg, "onMessage", "Ss ss", ev->server, ev->msg.prefix,
-		    ev->msg.args[0], ev->msg.args[1]);
+		call(plg, "onMessage", "Ss ss", ev->server, ev->message.origin,
+		    ev->message.channel, ev->message.message);
 		break;
 	case IRC_EVENT_MODE:
-		call(plg, "onMode", "Ss sss ss", ev->server, ev->msg.prefix,
-		    ev->msg.args[0], ev->msg.args[1], ev->msg.args[2],
-		    ev->msg.args[3], ev->msg.args[4]);
+		call(plg, "onMode", "Ss sss ss", ev->server, ev->mode.origin,
+		    ev->mode.channel, ev->mode.mode, ev->mode.limit,
+		    ev->mode.user, ev->mode.mask);
 		break;
 	case IRC_EVENT_NAMES:
-		call(plg, "onNames", "Ss x", ev->server, ev->msg.args[1],
+		call(plg, "onNames", "Ss x", ev->server, ev->names.channel,
 		    push_names, ev);
 		break;
 	case IRC_EVENT_NICK:
-		call(plg, "onNick", "Ss s", ev->server, ev->msg.prefix,
-		    ev->msg.args[0]);
+		call(plg, "onNick", "Ss s", ev->server, ev->nick.origin,
+		    ev->nick.nickname);
 		break;
 	case IRC_EVENT_NOTICE:
-		call(plg, "onNotice", "Ss ss", ev->server, ev->msg.prefix,
-		    ev->msg.args[0], ev->msg.args[1]);
+		call(plg, "onNotice", "Ss ss", ev->server, ev->notice.origin,
+		    ev->notice.channel, ev->notice.notice);
 		break;
 	case IRC_EVENT_PART:
-		call(plg, "onPart", "Ss ss", ev->server, ev->msg.prefix,
-		    ev->msg.args[0], ev->msg.args[1]);
+		call(plg, "onPart", "Ss ss", ev->server, ev->part.origin,
+		    ev->part.channel, ev->part.reason);
 		break;
 	case IRC_EVENT_TOPIC:
-		call(plg, "onTopic", "Ss ss", ev->server, ev->msg.prefix,
-		    ev->msg.args[0], ev->msg.args[1]);
+		call(plg, "onTopic", "Ss ss", ev->server, ev->topic.origin,
+		    ev->topic.channel, ev->topic.topic);
 		break;
 	case IRC_EVENT_WHOIS:
 		call(plg, "onWhois", "Sx", ev->server, push_whois, ev);
