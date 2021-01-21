@@ -303,6 +303,56 @@ handle_endofnames(struct irc_server *s, struct irc_event *ev)
 	ev->type = IRC_EVENT_NAMES;
 }
 
+static void
+handle_whoisuser(struct irc_server *s, struct irc_event *ev)
+{
+	(void)ev;
+
+	strlcpy(s->whois.nickname, ev->msg.args[1], sizeof (s->whois.nickname));
+	strlcpy(s->whois.username, ev->msg.args[2], sizeof (s->whois.username));
+	strlcpy(s->whois.hostname, ev->msg.args[3], sizeof (s->whois.hostname));
+	strlcpy(s->whois.realname, ev->msg.args[5], sizeof (s->whois.realname));
+}
+
+static void
+add_whois_channel(struct irc_server *s, const char *channel)
+{
+	char mode = 0;
+
+	s->whois.channels = irc_util_reallocarray(s->whois.channels,
+	    ++s->whois.channelsz, sizeof (*s->whois.channels));
+
+	/* TODO: split this to refactor add_nick. */
+	for (size_t i = 0; i < IRC_UTIL_SIZE(s->prefixes); ++i) {
+		if (channel[0] == s->prefixes[i].token) {
+			mode = s->prefixes[i].mode;
+			++channel;
+			break;
+		}
+	}
+
+	s->whois.channels[s->whois.channelsz - 1].mode = mode;
+	strlcpy(s->whois.channels[s->whois.channelsz - 1].channel, channel,
+	    sizeof (s->whois.channels[0].channel));
+}
+
+static void
+handle_whoischannels(struct irc_server *s, struct irc_event *ev)
+{
+	char *p, *token;
+
+	for (p = ev->msg.args[2]; (token = strtok_r(p, " ", &p)); )
+		if (strlen(token) > 0)
+			add_whois_channel(s, token);
+}
+
+static void
+handle_endofwhois(struct irc_server *s, struct irc_event *ev)
+{
+	ev->type = IRC_EVENT_WHOIS;
+	ev->whois = &s->whois;
+}
+
 static const struct handler {
 	const char *command;
 	void (*handle)(struct irc_server *, struct irc_event *);
@@ -310,6 +360,9 @@ static const struct handler {
 	/* Must be kept ordered. */
 	{ "001",        handle_connect          },
 	{ "005",        handle_support          },
+	{ "311",        handle_whoisuser        },
+	{ "318",        handle_endofwhois       },
+	{ "319",        handle_whoischannels    },
 	{ "353",        handle_names            },
 	{ "366",        handle_endofnames       },
 	{ "INVITE",     handle_invite           },
@@ -419,9 +472,11 @@ update(struct irc_server *s, int ret)
 
 	switch ((r = SSL_get_error(s->ssl, ret))) {
 	case SSL_ERROR_WANT_READ:
+		printf("new ssl state: %d\n", s->ssl_state);
 		s->ssl_state = IRC_SERVER_SSL_NEED_READ;
 		break;
 	case SSL_ERROR_WANT_WRITE:
+		printf("new ssl state: %d\n", s->ssl_state);
 		s->ssl_state = IRC_SERVER_SSL_NEED_WRITE;
 		break;
 	case SSL_ERROR_SSL:
@@ -465,8 +520,6 @@ try_connect(struct irc_server *s)
 		handshake(s);
 	else {
 #if defined(IRCCD_WITH_SSL)
-		int r;
-
 		if (!s->ctx)
 			s->ctx = SSL_CTX_new(TLS_method());
 		if (!s->ssl) {
@@ -474,10 +527,8 @@ try_connect(struct irc_server *s)
 			SSL_set_fd(s->ssl, s->fd);
 		}
 
-		if ((r = SSL_connect(s->ssl)) > 0)
-			handshake(s);
-
-		update(s, r);
+		SSL_set_connect_state(s->ssl);
+		handshake(s);
 #endif
 	}
 }
@@ -543,28 +594,50 @@ dial(struct irc_server *s)
 	}
 }
 
+static size_t
+input_ssl(struct irc_server *s, char *dst, size_t dstsz)
+{
+	int nr;
+
+	if ((nr = SSL_read(s->ssl, dst, dstsz)) <= 0) {
+		update(s, nr);
+		return 0;
+	}
+
+	s->ssl_state = IRC_SERVER_SSL_NONE;
+
+	return nr;
+}
+
+static size_t
+input_clear(struct irc_server *s, char *buf, size_t bufsz)
+{
+	ssize_t nr;
+
+	if ((nr = recv(s->fd, buf, bufsz, 0)) <= 0) {
+		clear(s);
+		return 0;
+	}
+
+	return nr;
+}
+
 static void
 input(struct irc_server *s)
 {
-	char buf[IRC_MESSAGE_MAX] = {0};
-	ssize_t nr = 0;
+	size_t len = strlen(s->in);
+	size_t cap = sizeof (s->in) - len - 1;
+	size_t nr = 0;
 
 	if (s->flags & IRC_SERVER_FLAGS_SSL) {
 #if defined(IRCCD_WITH_SSL)
-		nr = SSL_read(s->ssl, buf, sizeof (buf) - 1);
-		update(s, nr);
+		nr = input_ssl(s, s->in + len, cap);
 #endif
-	} else {
-		if ((nr = recv(s->fd, buf, sizeof (buf) - 1, 0)) < 0)
-			clear(s);
-	}
+	} else
+		nr = input_clear(s, s->in + len, cap);
 
-	if (nr > 0) {
-		if (strlcat(s->in, buf, sizeof (s->in)) >= sizeof (s->in)) {
-			irc_log_warn("server %s: input buffer too long", s->name);
-			clear(s);
-		}
-	}
+	if (nr > 0)
+		s->in[len + nr] = '\0';
 }
 
 static void
@@ -949,6 +1022,19 @@ irc_server_notice(struct irc_server *s, const char *channel, const char *message
 	return irc_server_send(s, "NOTICE %s: %s", channel, message);
 }
 
+bool
+irc_server_whois(struct irc_server *s, const char *target)
+{
+	assert(s);
+	assert(target);
+
+	/* Cleanup previous result. */
+	free(s->whois.channels);
+	memset(&s->whois, 0, sizeof (s->whois));
+
+	return irc_server_send(s, "WHOIS %s", target);
+}
+
 void
 irc_server_incref(struct irc_server *s)
 {
@@ -965,6 +1051,7 @@ irc_server_decref(struct irc_server *s)
 
 	if (--s->refc == 0) {
 		clear(s);
+		free(s->whois.channels);
 		free(s->channels);
 		free(s);
 	}

@@ -24,9 +24,6 @@
 
 #include "limits.h"
 
-#define IRC_CHANNEL_NAME_MAX            128
-#define IRC_CHANNEL_PASSWORD_MAX        128
-
 struct irc_channel_user {
 	char nickname[IRC_NICKNAME_MAX];
 	char mode;

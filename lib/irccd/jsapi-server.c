@@ -415,15 +415,15 @@ Server_prototype_topic(duk_context *ctx)
 static duk_ret_t
 Server_prototype_whois(duk_context *ctx)
 {
-	(void)ctx;
+	struct irc_server *s = self(ctx);
+	const char *target = duk_require_string(ctx, 0);
+
 #if 0
 	if (target.empty())
 		throw server_error(server_error::invalid_nickname);
 #endif
 
-#if 0
 	duk_push_boolean(ctx, irc_server_whois(s, target));
-#endif
 
 	return 1;
 }

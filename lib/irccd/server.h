@@ -67,6 +67,18 @@ enum irc_server_ssl_state {
 
 #endif
 
+struct irc_server_whois {
+	char nickname[IRC_NICKNAME_MAX];
+	char username[IRC_USERNAME_MAX];
+	char realname[IRC_REALNAME_MAX];
+	char hostname[IRC_HOST_MAX];
+	struct {
+		char channel[IRC_CHANNEL_MAX];
+		char mode;
+	} *channels;
+	size_t channelsz;
+};
+
 struct irc_server {
 	/* Connection settings. */
 	char name[IRC_NAME_MAX];
@@ -102,6 +114,9 @@ struct irc_server {
 	SSL *ssl;
 	enum irc_server_ssl_state ssl_state;
 #endif
+
+	/* Whois being stored. */
+	struct irc_server_whois whois;
 
 	/* Reference count. */
 	size_t refc;
@@ -171,6 +186,9 @@ irc_server_nick(struct irc_server *, const char *);
 
 bool
 irc_server_notice(struct irc_server *, const char *, const char *);
+
+bool
+irc_server_whois(struct irc_server *, const char *);
 
 void
 irc_server_incref(struct irc_server *);

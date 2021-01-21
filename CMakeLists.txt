@@ -32,7 +32,7 @@ option(IRCCD_WITH_IRCCDCTL "Enable irccdctl utility" On)
 option(IRCCD_WITH_TESTS "Enable unit tests" Off)
 
 if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-	set(CMAKE_C_FLAGS "-Wall -Wextra")
+	set(CMAKE_C_FLAGS "-Wall -Wextra ${CMAKE_C_FLAGS}")
 endif ()
 
 include(GNUInstallDirs)

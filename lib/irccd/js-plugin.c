@@ -97,6 +97,31 @@ push_names(duk_context *ctx, const struct irc_event *ev)
 	}
 }
 
+static void
+push_whois(duk_context *ctx, const struct irc_event *ev)
+{
+	duk_push_object(ctx);
+	duk_push_string(ctx, ev->whois->nickname);
+	duk_put_prop_string(ctx, -2, "nickname");
+	duk_push_string(ctx, ev->whois->username);
+	duk_put_prop_string(ctx, -2, "username");
+	duk_push_string(ctx, ev->whois->realname);
+	duk_put_prop_string(ctx, -2, "realname");
+	duk_push_string(ctx, ev->whois->hostname);
+	duk_put_prop_string(ctx, -2, "hostname");
+	duk_push_array(ctx);
+	for (size_t i = 0; i < ev->whois->channelsz; ++i) {
+		printf("[%s] = [%c]\n", ev->whois->channels[i].channel, ev->whois->channels[i].mode);
+		duk_push_object(ctx);
+		duk_push_string(ctx, ev->whois->channels[i].channel);
+		duk_put_prop_string(ctx, -2, "channel");
+		duk_push_sprintf(ctx, "%c", ev->whois->channels[i].mode);
+		duk_put_prop_string(ctx, -2, "mode");
+		duk_put_prop_index(ctx, -2, i);
+	}
+	duk_put_prop_string(ctx, -2, "channels");
+}
+
 static const char **
 get_table(duk_context *ctx, const char *name, char ***ptable)
 {
@@ -315,7 +340,7 @@ handle(struct irc_plugin *plg, const struct irc_event *ev)
 		break;
 	case IRC_EVENT_NAMES:
 		call(plg, "onNames", "Ss x", ev->server, ev->msg.args[1],
-		    push_names);
+		    push_names, ev);
 		break;
 	case IRC_EVENT_NICK:
 		call(plg, "onNick", "Ss s", ev->server, ev->msg.prefix,
@@ -334,6 +359,7 @@ handle(struct irc_plugin *plg, const struct irc_event *ev)
 		    ev->msg.args[0], ev->msg.args[1]);
 		break;
 	case IRC_EVENT_WHOIS:
+		call(plg, "onWhois", "Sx", ev->server, push_whois, ev);
 		break;
 	default:
 		break;

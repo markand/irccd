@@ -19,7 +19,10 @@
 #ifndef IRCCD_LIMITS_H
 #define IRCCD_LIMITS_H
 
-/* IRC limits. */
+/*
+ * Those were IRC limits but not strictly following RFC 1459 because lots of
+ * servers allow higher limits.
+ */
 #define IRC_NICKNAME_MAX        32
 #define IRC_USERNAME_MAX        32
 #define IRC_REALNAME_MAX        64
@@ -29,11 +32,11 @@
 #define IRC_USERMODES_MAX       16
 
 #define IRC_MESSAGE_MAX         512
-#define IRC_ARGS_MAX            16
+#define IRC_ARGS_MAX            32
 
 /* Network limits. */
 #define IRC_HOST_MAX            32
-#define IRC_BUF_MAX             8192
+#define IRC_BUF_MAX             128000
 
 /* Types limits. */
 #define IRC_NAME_MAX            16

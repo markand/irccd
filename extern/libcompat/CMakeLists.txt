@@ -60,6 +60,7 @@ set(
 	strdup
 	strndup
 	strnlen
+	strtok_r
 )
 
 set(

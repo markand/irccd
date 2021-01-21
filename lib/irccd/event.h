@@ -55,7 +55,10 @@ struct irc_event_msg {
 struct irc_event {
 	enum irc_event_type type;
 	struct irc_server *server;
-	struct irc_event_msg msg;
+	union {
+		struct irc_event_msg msg;
+		struct irc_server_whois *whois;
+	};
 };
 
 bool

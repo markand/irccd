@@ -51,9 +51,10 @@ poll(void)
 
 	while (!(nl = strstr(in, "\n"))) {
 		char buf[IRC_BUF_MAX] = {0};
+		ssize_t nr;
 
-		if (recv(sock, buf, sizeof (buf) - 1, 0) <= 0)
-			err(1, "abort");
+		if ((nr = recv(sock, buf, sizeof (buf) - 1, 0)) <= 0)
+			errc(1, nr == 0 ? ECONNRESET : errno, "abort");
 		if (strlcat(in, buf, sizeof (in)) >= sizeof (in))
 			errc(1, EMSGSIZE, "abort");
 	}
@@ -236,16 +237,80 @@ cmd_server_topic(int argc, char **argv)
 }
 
 static void
+show_connect(char *line)
+{
+	const char *args[2] = {0};
+
+	if (irc_util_split(line, args, 2) == 2) {
+		printf("event:     onConnect\n");
+		printf("server:    %s\n", args[0]);
+	}
+}
+
+static void
+show_disconnect(char *line)
+{
+	const char *args[2] = {0};
+
+	if (irc_util_split(line, args, 2) == 2) {
+		printf("event:     onDisonnect\n");
+		printf("server:    %s\n", args[0]);
+	}
+}
+
+static void
 show_invite(char *line)
 {
 	const char *args[5] = {0};
 
 	if (irc_util_split(line, args, 5) == 5) {
 		printf("event:     onInvite\n");
-		printf("server:    %s", args[1]);
-		printf("origin:    %s", args[2]);
-		printf("channel:   %s", args[3]);
-		printf("nickname:  %s", args[4]);
+		printf("server:    %s\n", args[1]);
+		printf("origin:    %s\n", args[2]);
+		printf("channel:   %s\n", args[3]);
+		printf("nickname:  %s\n", args[4]);
+	}
+}
+
+static void
+show_join(char *line)
+{
+	const char *args[4] = {0};
+
+	if (irc_util_split(line, args, 4) == 4) {
+		printf("event:     onJoin\n");
+		printf("server:    %s\n", args[1]);
+		printf("origin:    %s\n", args[2]);
+		printf("channel:   %s\n", args[3]);
+	}
+}
+
+static void
+show_kick(char *line)
+{
+	const char *args[6] = {0};
+
+	if (irc_util_split(line, args, 6) >= 5) {
+		printf("event:     onKick\n");
+		printf("server:    %s\n", args[1]);
+		printf("origin:    %s\n", args[2]);
+		printf("channel:   %s\n", args[3]);
+		printf("target:    %s\n", args[4]);
+		printf("reason:    %s\n", args[5] ? args[5] : "");
+	}
+}
+
+static void
+show_me(char *line)
+{
+	const char *args[5] = {0};
+
+	if (irc_util_split(line, args, 5) == 5) {
+		printf("event:     onMe\n");
+		printf("server:    %s\n", args[1]);
+		printf("origin:    %s\n", args[2]);
+		printf("channel:   %s\n", args[3]);
+		printf("message:   %s\n", args[4]);
 	}
 }
 
@@ -263,12 +328,114 @@ show_message(char *line)
 	}
 }
 
+static void
+show_mode(char *line)
+{
+	const char *args[8] = {0};
+
+	if (irc_util_split(line, args, 8) >= 5) {
+		printf("event:     onMode\n");
+		printf("server:    %s\n", args[1]);
+		printf("origin:    %s\n", args[2]);
+		printf("channel:   %s\n", args[3]);
+		printf("mode:      %s\n", args[4]);
+		printf("limit:     %s\n", (args[5] ? args[5] : ""));
+		printf("user:      %s\n", (args[6] ? args[6] : ""));
+		printf("mask:      %s\n", (args[7] ? args[7] : ""));
+	}
+}
+
+static void
+show_nick(char *line)
+{
+	const char *args[4] = {0};
+
+	if (irc_util_split(line, args, 4) == 4) {
+		printf("event:     onNick\n");
+		printf("server:    %s\n", args[1]);
+		printf("origin:    %s\n", args[2]);
+		printf("nickname:  %s\n", args[3]);
+	}
+}
+
+static void
+show_notice(char *line)
+{
+	const char *args[5] = {0};
+
+	if (irc_util_split(line, args, 5) == 5) {
+		printf("event:     onNotice\n");
+		printf("server:    %s\n", args[1]);
+		printf("origin:    %s\n", args[2]);
+		printf("channel:   %s\n", args[3]);
+		printf("message:   %s\n", args[4]);
+	}
+}
+
+static void
+show_part(char *line)
+{
+	const char *args[5] = {0};
+
+	if (irc_util_split(line, args, 5) >= 4) {
+		printf("event:     onPart\n");
+		printf("server:    %s\n", args[1]);
+		printf("origin:    %s\n", args[2]);
+		printf("channel:   %s\n", args[3]);
+		printf("reason:    %s\n", (args[4] ? args[4] : ""));
+	}
+}
+
+static void
+show_topic(char *line)
+{
+	const char *args[5] = {0};
+
+	if (irc_util_split(line, args, 5) >= 4) {
+		printf("event:     onTopic\n");
+		printf("server:    %s\n", args[1]);
+		printf("origin:    %s\n", args[2]);
+		printf("channel:   %s\n", args[3]);
+		printf("topic:     %s\n", args[4]);
+	}
+}
+
+static void
+show_whois(char *line)
+{
+	const char *args[6] = {0};
+	char *p, *token;
+
+	if (irc_util_split(line, args, 6) >= 4) {
+		printf("event:     onWhois\n");
+		printf("server:    %s\n", args[1]);
+		printf("nickname:  %s\n", args[2]);
+		printf("username:  %s\n", args[3]);
+		printf("hostname:  %s\n", args[4]);
+		printf("username:  %s\n", args[5]);
+		printf("channels:  ");
+
+		
+	}
+}
+
 static const struct {
 	const char *event;
 	void (*show)(char *);
 } watchtable[] = {
-	{ "EVENT-INVITE", show_invite },
-	{ "EVENT-MESSAGE", show_message }
+	{ "EVENT-CONNECT",      show_connect    },
+	{ "EVENT-DISCONNECT",   show_disconnect },
+	{ "EVENT-INVITE",       show_invite     },
+	{ "EVENT-JOIN",         show_join       },
+	{ "EVENT-KICK",         show_kick       },
+	{ "EVENT-MESSAGE",      show_message    },
+	{ "EVENT-ME",           show_me         },
+	{ "EVENT-MODE",         show_mode       },
+	{ "EVENT-NICK",         show_nick       },
+	{ "EVENT-NOTICE",       show_notice     },
+	{ "EVENT-PART",         show_part       },
+	{ "EVENT-TOPIC",        show_topic      },
+	{ "EVENT-WHOIS",        show_whois      }
 };
 
 static void
@@ -277,6 +444,7 @@ show(char *ev)
 	for (size_t i = 0; i < IRC_UTIL_SIZE(watchtable); ++i) {
 		if (strncmp(watchtable[i].event, ev, strlen(watchtable[i].event)) == 0) {
 			watchtable[i].show(ev);
+			printf("\n");
 			break;
 		}
 	}

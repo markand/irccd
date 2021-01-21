@@ -16,6 +16,7 @@
 #cmakedefine COMPAT_HAVE_STRNDUP
 #cmakedefine COMPAT_HAVE_STRNLEN
 #cmakedefine COMPAT_HAVE_STRSEP
+#cmakedefine COMPAT_HAVE_STRTOK_R
 #cmakedefine COMPAT_HAVE_VERR
 #cmakedefine COMPAT_HAVE_VERRC
 #cmakedefine COMPAT_HAVE_VERRX
@@ -167,6 +168,11 @@ strnlen(const char *, size_t);
 #ifndef COMPAT_HAVE_STRSEP
 char *
 strsep(char **, const char *);
+#endif
+
+#ifndef COMPAT_HAVE_STRTOK_R
+char *
+strtok_r(char *, const char *, char **);
 #endif
 
 #endif /* !LIBCOMPAT_COMPAT_H */
