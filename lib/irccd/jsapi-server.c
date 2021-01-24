@@ -60,16 +60,36 @@ require(duk_context *ctx, duk_idx_t index)
 	return sv;
 }
 
-static inline void
-get_port(duk_context *ctx, struct irc_server *s)
+static inline unsigned short
+get_port(duk_context *ctx)
 {
+	unsigned short port;
+
 	duk_get_prop_string(ctx, 0, "port");
 
 	if (!duk_is_number(ctx, -1))
 		duk_error(ctx, DUK_ERR_ERROR, "invalid 'port' property");
 
-	s->port = duk_to_int(ctx, -1);
+	port = duk_to_int(ctx, -1);
 	duk_pop(ctx);
+
+	return port;
+}
+
+static inline const char *
+get_string(duk_context *ctx, const char *n)
+{
+	const char *ret;
+
+	duk_get_prop_string(ctx, 0, n);
+
+	if (!duk_is_string(ctx, -1))
+		duk_error(ctx, DUK_ERR_ERROR, "invalid or missing '%s' property", n);
+
+	ret = duk_to_string(ctx, -1);
+	duk_pop(ctx);
+
+	return ret;
 }
 
 static inline void
@@ -97,19 +117,6 @@ get_ssl(duk_context *ctx, struct irc_server *s)
 
 	if (duk_is_boolean(ctx, -1) && duk_to_boolean(ctx, -1))
 		s->flags |= IRC_SERVER_FLAGS_SSL;
-
-	duk_pop(ctx);
-}
-
-static inline void
-get_string(duk_context *ctx, const char *n, bool required, char *dst, size_t dstsz)
-{
-	duk_get_prop_string(ctx, 0, n);
-
-	if (duk_is_string(ctx, -1))
-		strlcpy(dst, duk_to_string(ctx, -1), dstsz);
-	else if (required)
-		duk_error(ctx, DUK_ERR_ERROR, "invalid or missing '%s' property", n);
 
 	duk_pop(ctx);
 }
@@ -144,19 +151,19 @@ Server_prototype_info(duk_context *ctx)
 	duk_push_object(ctx);
 	duk_push_string(ctx, s->name);
 	duk_put_prop_string(ctx, -2, "name");
-	duk_push_string(ctx, s->hostname);
+	duk_push_string(ctx, s->conn.hostname);
 	duk_put_prop_string(ctx, -2, "hostname");
-	duk_push_uint(ctx, s->port);
+	duk_push_uint(ctx, s->conn.port);
 	duk_put_prop_string(ctx, -2, "port");
 	duk_push_boolean(ctx, s->flags & IRC_SERVER_FLAGS_SSL);
 	duk_put_prop_string(ctx, -2, "ssl");
 	duk_push_string(ctx, s->commandchar);
 	duk_put_prop_string(ctx, -2, "commandChar");
-	duk_push_string(ctx, s->realname);
+	duk_push_string(ctx, s->ident.realname);
 	duk_put_prop_string(ctx, -2, "realname");
-	duk_push_string(ctx, s->nickname);
+	duk_push_string(ctx, s->ident.nickname);
 	duk_put_prop_string(ctx, -2, "nickname");
-	duk_push_string(ctx, s->username);
+	duk_push_string(ctx, s->ident.username);
 	duk_put_prop_string(ctx, -2, "username");
 
 	duk_push_array(ctx);
@@ -441,26 +448,27 @@ Server_prototype_toString(duk_context *ctx)
 static duk_ret_t
 Server_constructor(duk_context *ctx)
 {
-	struct irc_server s = {0}, *p;
+	struct irc_server *s;
 
 	duk_require_object(ctx, 0);
 
-	get_string(ctx, "name", true, s.name, sizeof (s.name));
-	get_string(ctx, "hostname", true, s.hostname, sizeof (s.hostname));
-	get_port(ctx, &s);
-	get_ip(ctx, &s);
-	get_ssl(ctx, &s);
-	get_string(ctx, "nickname", false, s.nickname, sizeof (s.nickname));
-	get_string(ctx, "username", false, s.username, sizeof (s.username));
-	get_string(ctx, "realname", false, s.realname, sizeof (s.realname));
-	get_string(ctx, "commandChar", false, s.commandchar, sizeof (s.commandchar));
-	get_channels(ctx, &s);
+	s = irc_server_new(
+	    get_string(ctx, "name"),
+	    get_string(ctx, "nickname"),
+	    get_string(ctx, "username"),
+	    get_string(ctx, "realname"),
+	    get_string(ctx, "hostname"),
+	    get_port(ctx)
+	);
 
-	p = irc_util_memdup(&s, sizeof (s));
-	irc_server_incref(p);
+	get_ip(ctx, s);
+	get_ssl(ctx, s);
+	get_channels(ctx, s);
+
+	irc_server_incref(s);
 
 	duk_push_this(ctx);
-	duk_push_pointer(ctx, p);
+	duk_push_pointer(ctx, s);
 	duk_put_prop_string(ctx, -2, SIGNATURE);
 	duk_pop(ctx);
 

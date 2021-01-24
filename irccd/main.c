@@ -34,4 +34,12 @@ main(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 
+	struct irc_server *s;
+
+	irc_bot_init();
+
+	s = irc_server_new("mlk", "circ", "circ", "circ", "malikania.fr", 6667);
+	irc_server_join(s, "#test", NULL);
+	irc_bot_server_add(s);
+	irc_bot_run();
 }

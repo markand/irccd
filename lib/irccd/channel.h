@@ -40,6 +40,8 @@ struct irc_channel {
 	LIST_ENTRY(irc_channel) link;
 };
 
+LIST_HEAD(irc_channel_list, irc_channel);
+
 struct irc_channel *
 irc_channel_new(const char *, const char *, bool);
 

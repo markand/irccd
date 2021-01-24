@@ -16,19 +16,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <assert.h>
-#include <ctype.h>
 #include <errno.h>
-#include <fcntl.h>
-#include <netdb.h>
 #include <poll.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include "config.h"
 
@@ -42,84 +36,48 @@
 #include "server.h"
 #include "util.h"
 
-struct origin {
-	char nickname[IRC_NICKNAME_LEN];
-	char username[IRC_USERNAME_LEN];
-	char host[IRC_HOST_LEN];
-};
-
-struct message {
-	char *prefix;
-	char *cmd;
-	char *args[32];
-	char buf[512];
-};
-
 static inline void
-scan(char **line, char **str)
+clear_channels(struct irc_server *s, bool free)
 {
-	char *p = strchr(*line, ' ');
+	struct irc_channel *c, *tmp;
 
-	if (p)
-		*p = '\0';
-
-	*str = *line;
-	*line = p ? p + 1 : strchr(*line, '\0');
-}
-
-static bool
-parse(struct message *msg, const char *line)
-{
-	char *ptr = msg->buf;
-	size_t a;
-
-	memset(msg, 0, sizeof (*msg));
-	strlcpy(msg->buf, line, sizeof (msg->buf));
-
-	/*
-	 * IRC message is defined as following:
-	 *
-	 * [:prefix] command arg1 arg2 [:last-argument]
-	 */
-	if (*ptr == ':')
-		scan((++ptr, &ptr), &msg->prefix);     /* prefix */
-
-	scan(&ptr, &msg->cmd);                         /* command */
-
-	/* And finally arguments. */
-	for (a = 0; *ptr && a < IRC_UTIL_SIZE(msg->args); ++a) {
-		if (*ptr == ':') {
-			msg->args[a] = ptr + 1;
-			ptr = strchr(ptr, '\0');
-		} else
-			scan(&ptr, &msg->args[a]);
+	LIST_FOREACH_SAFE(c, &s->channels, link, tmp) {
+		if (free)
+			irc_channel_finish(c);
+		else
+			irc_channel_clear(c);
 	}
 
-	if (a >= IRC_UTIL_SIZE(msg->args))
-		return errno = EMSGSIZE, false;
-	if (msg->cmd == NULL)
-		return errno = EBADMSG, false;
-
-	return true;
+	if (free)
+		LIST_INIT(&s->channels);
 }
 
-static inline char
-sym(const struct irc_server *s, char mode)
+static inline void
+clear_server(struct irc_server *s)
 {
-	for (size_t i = 0; i < sizeof (s->prefixes); ++i)
-		if (s->prefixes[i].mode == mode)
-			return s->prefixes[i].token;
+	free(s->bufwhois.nickname);
+	free(s->bufwhois.username);
+	free(s->bufwhois.realname);
+	free(s->bufwhois.hostname);
+	free(s->bufwhois.channels);
 
-	return '?';
+	memset(&s->params, 0, sizeof (s->params));
+	memset(&s->bufwhois, 0, sizeof (s->bufwhois));
 }
 
 static inline bool
 is_self(const struct irc_server *s, const char *nick)
 {
-	return strncmp(s->nickname, nick, strlen(s->nickname)) == 0;
+	return strncmp(s->ident.nickname, nick, strlen(s->ident.nickname)) == 0;
 }
 
 #if 0
+
+struct origin {
+	char nickname[IRC_NICKNAME_LEN];
+	char username[IRC_USERNAME_LEN];
+	char host[IRC_HOST_LEN];
+};
 
 static const struct origin *
 parse_origin(const char *prefix)
@@ -142,18 +100,10 @@ parse_origin(const char *prefix)
 static void
 add_nick(const struct irc_server *s, struct irc_channel *ch, const char *nick)
 {
-	char mode = 0, symbol = 0;
+	char mode = 0, prefix = 0;
 
-	for (size_t i = 0; i < IRC_UTIL_SIZE(s->prefixes); ++i) {
-		if (nick[0] == s->prefixes[i].token) {
-			mode = s->prefixes[i].mode;
-			symbol = s->prefixes[i].token;
-			++nick;
-			break;
-		}
-	}
-
-	irc_channel_add(ch, nick, mode, symbol);
+	irc_server_strip(s, &nick, &mode, &prefix);
+	irc_channel_add(ch, nick, mode, prefix);
 }
 
 static struct irc_channel *
@@ -218,16 +168,20 @@ ctcp(char *line)
 static void
 read_support_prefix(struct irc_server *s, const char *value)
 {
-	char modes[16 + 1] = {0};
-	char tokens[16 + 1] = {0};
+	char modes[IRC_UTIL_SIZE(s->params.prefixes) + 1] = {0};
+	char tokens[IRC_UTIL_SIZE(s->params.prefixes) + 1] = {0};
+	char fmt[32] = {0};
 
-	if (sscanf(value, "(%16[^)])%16s", modes, tokens) == 2) {
+	snprintf(fmt, sizeof (fmt), "(%%%zu[^)])%%%zus",
+	    sizeof (modes) - 1, sizeof (tokens) - 1);
+
+	if (sscanf(value, fmt, modes, tokens) == 2) {
 		char *pm = modes;
 		char *tk = tokens;
 
-		for (size_t i = 0; i < 16 && *pm && *tk; ++i) {
-			s->prefixes[i].mode = *pm++;
-			s->prefixes[i].token = *tk++;
+		for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes) && *pm && *tk; ++i) {
+			s->params.prefixes[i].mode = *pm++;
+			s->params.prefixes[i].token = *tk++;
 		}
 	}
 }
@@ -235,11 +189,11 @@ read_support_prefix(struct irc_server *s, const char *value)
 static void
 read_support_chantypes(struct irc_server *s, const char *value)
 {
-	strlcpy(s->chantypes, value, sizeof (s->chantypes));
+	strlcpy(s->params.chantypes, value, sizeof (s->params.chantypes));
 }
 
 static void
-handle_connect(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle_connect(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	(void)msg;
 
@@ -255,7 +209,15 @@ handle_connect(struct irc_server *s, struct irc_event *ev, struct message *msg)
 }
 
 static void
-handle_support(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle_disconnect(struct irc_server *s, struct irc_event *ev)
+{
+	s->state = IRC_SERVER_STATE_NONE;
+	ev->type = IRC_EVENT_DISCONNECT;
+	ev->server = s;
+}
+
+static void
+handle_support(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	(void)ev;
 
@@ -274,7 +236,7 @@ handle_support(struct irc_server *s, struct irc_event *ev, struct message *msg)
 }
 
 static void
-handle_invite(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle_invite(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	ev->type = IRC_EVENT_INVITE;
 	ev->invite.origin = strdup(msg->args[0]);
@@ -286,7 +248,7 @@ handle_invite(struct irc_server *s, struct irc_event *ev, struct message *msg)
 }
 
 static void
-handle_join(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle_join(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	ev->type = IRC_EVENT_JOIN;
 	ev->join.origin = strdup(msg->prefix);
@@ -296,7 +258,7 @@ handle_join(struct irc_server *s, struct irc_event *ev, struct message *msg)
 }
 
 static void
-handle_kick(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle_kick(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	ev->type = IRC_EVENT_KICK;
 	ev->kick.origin = strdup(msg->prefix);
@@ -321,7 +283,7 @@ handle_kick(struct irc_server *s, struct irc_event *ev, struct message *msg)
 }
 
 static void
-handle_mode(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle_mode(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	(void)s;
 	(void)ev;
@@ -339,7 +301,7 @@ handle_mode(struct irc_server *s, struct irc_event *ev, struct message *msg)
 }
 
 static void
-handle_part(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle_part(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	struct irc_channel *ch;
 
@@ -357,7 +319,7 @@ handle_part(struct irc_server *s, struct irc_event *ev, struct message *msg)
 }
 
 static void
-handle_msg(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle_msg(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	(void)s;
 
@@ -380,7 +342,7 @@ handle_msg(struct irc_server *s, struct irc_event *ev, struct message *msg)
 }
 
 static void
-handle_nick(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle_nick(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	ev->type = IRC_EVENT_NICK;
 	ev->nick.origin = strdup(msg->prefix);
@@ -388,11 +350,11 @@ handle_nick(struct irc_server *s, struct irc_event *ev, struct message *msg)
 
 	/* Update nickname if it is myself. */
 	if (is_self(s, ev->nick.origin) == 0)
-		strlcpy(s->nickname, ev->nick.nickname, sizeof (s->nickname));
+		strlcpy(s->ident.nickname, ev->nick.nickname, sizeof (s->ident.nickname));
 }
 
 static void
-handle_notice(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle_notice(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	(void)s;
 
@@ -403,7 +365,7 @@ handle_notice(struct irc_server *s, struct irc_event *ev, struct message *msg)
 }
 
 static void
-handle_topic(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle_topic(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	(void)s;
 
@@ -414,17 +376,17 @@ handle_topic(struct irc_server *s, struct irc_event *ev, struct message *msg)
 }
 
 static void
-handle_ping(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle_ping(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	(void)s;
 	(void)ev;
 	(void)msg;
 
-	//irc_server_send(s, "PONG %s", args[1]);
+	irc_server_send(s, "PONG %s", msg->args[1]);
 }
 
 static void
-handle_names(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle_names(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	(void)s;
 	(void)ev;
@@ -442,7 +404,7 @@ handle_names(struct irc_server *s, struct irc_event *ev, struct message *msg)
 }
 
 static void
-handle_endofnames(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle_endofnames(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	(void)s;
 	(void)ev;
@@ -461,8 +423,8 @@ handle_endofnames(struct irc_server *s, struct irc_event *ev, struct message *ms
 	fp = open_memstream(&ev->names.names, &length);
 
 	LIST_FOREACH(u, &ch->users, link) {
-		if (u->mode)
-			fprintf(fp, "%c", sym(s, u->mode));
+		if (u->symbol)
+			fprintf(fp, "%c", u->symbol);
 
 		fprintf(fp, "%s", u->nickname);
 
@@ -474,7 +436,7 @@ handle_endofnames(struct irc_server *s, struct irc_event *ev, struct message *ms
 }
 
 static void
-handle_whoisuser(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle_whoisuser(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	(void)s;
 	(void)ev;
@@ -487,7 +449,7 @@ handle_whoisuser(struct irc_server *s, struct irc_event *ev, struct message *msg
 }
 
 static void
-handle_whoischannels(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle_whoischannels(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	(void)ev;
 
@@ -514,7 +476,7 @@ handle_whoischannels(struct irc_server *s, struct irc_event *ev, struct message 
 }
 
 static void
-handle_endofwhois(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle_endofwhois(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	(void)msg;
 
@@ -526,7 +488,7 @@ handle_endofwhois(struct irc_server *s, struct irc_event *ev, struct message *ms
 
 static const struct handler {
 	const char *command;
-	void (*handle)(struct irc_server *, struct irc_event *, struct message *);
+	void (*handle)(struct irc_server *, struct irc_event *, struct irc_conn_msg *);
 } handlers[] = {
 	/* Must be kept ordered. */
 	{ "001",        handle_connect          },
@@ -562,7 +524,7 @@ find_handler(const char *name)
 }
 
 static void
-handle(struct irc_server *s, struct irc_event *ev, struct message *msg)
+handle(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	const struct handler *h;
 
@@ -576,379 +538,17 @@ handle(struct irc_server *s, struct irc_event *ev, struct message *msg)
 }
 
 static void
-clear(struct irc_server *s)
-{
-	struct irc_channel *ch, *tmp;
-
-	s->state = IRC_SERVER_STATE_DISCONNECTED;
-
-	if (s->fd != 0) {
-		close(s->fd);
-		s->fd = 0;
-	}
-
-	if (s->ai) {
-		freeaddrinfo(s->ai);
-		s->ai = NULL;
-		s->aip = NULL;
-	}
-
-#if defined(IRCCD_WITH_SSL)
-	if (s->ssl) {
-		SSL_free(s->ssl);
-		s->ssl = NULL;
-	}
-	if (s->ctx) {
-		SSL_CTX_free(s->ctx);
-		s->ctx = NULL;
-	}
-#endif
-
-	LIST_FOREACH_SAFE(ch, &s->channels, link, tmp) {
-		irc_channel_finish(ch);
-		free(ch);
-	}
-	LIST_INIT(&s->channels);
-}
-
-static bool
-lookup(struct irc_server *s)
-{
-	struct addrinfo hints = {
-		.ai_socktype = SOCK_STREAM,
-	};
-	char service[16];
-	int ret;
-
-	snprintf(service, sizeof (service), "%hu", s->port);
-
-	if ((ret = getaddrinfo(s->hostname, service, &hints, &s->ai)) != 0)
-		irc_log_warn("server %s: %s", s->name, gai_strerror(ret));
-
-	s->aip = s->ai;
-
-	return true;
-}
-
-static void
 auth(struct irc_server *s)
 {
 	s->state = IRC_SERVER_STATE_CONNECTED;
 
-	if (s->password[0])
-		irc_server_send(s, "PASS %s", s->password);
+	if (s->ident.password[0])
+		irc_server_send(s, "PASS %s", s->ident.password);
 
-	irc_server_send(s, "NICK %s", s->nickname);
-	irc_server_send(s, "USER %s %s %s :%s", s->username,
-		s->username, s->username, s->realname);
+	irc_server_send(s, "USER %s %s %s :%s", s->ident.username,
+	    s->ident.username, s->ident.username, s->ident.realname);
+	irc_server_send(s, "NICK %s", s->ident.nickname);
 }
-
-#if defined(IRCCD_WITH_SSL)
-
-static void
-update(struct irc_server *s, int ret)
-{
-	(void)s;
-	(void)ret;
-
-	assert(s);
-
-	if (!(s->flags & IRC_SERVER_FLAGS_SSL))
-		return;
-
-	switch (SSL_get_error(s->ssl, ret)) {
-	case SSL_ERROR_WANT_READ:
-		s->ssl_state = IRC_SERVER_SSL_NEED_READ;
-		break;
-	case SSL_ERROR_WANT_WRITE:
-		s->ssl_state = IRC_SERVER_SSL_NEED_WRITE;
-		break;
-	case SSL_ERROR_SSL:
-		clear(s);
-		break;
-	default:
-		s->ssl_state = IRC_SERVER_SSL_NONE;
-		break;
-	}
-}
-
-#endif
-
-static void
-handshake(struct irc_server *s)
-{
-	assert(s);
-
-	if (!(s->flags & IRC_SERVER_FLAGS_SSL))
-		auth(s);
-	else {
-#if defined(IRCCD_WITH_SSL)
-		int r;
-
-		s->state = IRC_SERVER_STATE_HANDSHAKING;
-
-		if ((r = SSL_do_handshake(s->ssl)) > 0)
-			auth(s);
-
-		update(s, r);
-#endif
-	}
-}
-
-static void
-try_connect(struct irc_server *s)
-{
-	assert(s);
-
-	if (!(s->flags & IRC_SERVER_FLAGS_SSL))
-		handshake(s);
-	else {
-#if defined(IRCCD_WITH_SSL)
-		if (!s->ctx)
-			s->ctx = SSL_CTX_new(TLS_method());
-		if (!s->ssl) {
-			s->ssl = SSL_new(s->ctx);
-			SSL_set_fd(s->ssl, s->fd);
-		}
-
-		SSL_set_connect_state(s->ssl);
-		handshake(s);
-#endif
-	}
-}
-
-static bool
-set_nonblock(struct irc_server *s)
-{
-	int cflags = 0;
-
-	if ((cflags = fcntl(s->fd, F_GETFL)) < 0 ||
-	    fcntl(s->fd, F_SETFL, cflags | O_NONBLOCK) < 0)
-		return false;
-
-	return true;
-}
-
-static bool
-create(struct irc_server *s)
-{
-	s->fd = socket(s->aip->ai_family, s->aip->ai_socktype,
-	    s->aip->ai_protocol);
-
-	return set_nonblock(s);
-}
-
-static void
-dial(struct irc_server *s)
-{
-	/* No more address available. */
-	if (s->aip == NULL) {
-		clear(s);
-		return;
-	}
-
-	for (; s->aip; s->aip = s->aip->ai_next) {
-		/* We may need to close a socket that was open earlier. */
-		if (s->fd != 0)
-			close(s->fd);
-
-		if (!create(s)) {
-			irc_log_warn("server %s: %s", s->name, strerror(errno));
-			continue;
-		}
-
-		/*
-		 * With some luck, the connection completes immediately,
-		 * otherwise we will need to wait until the socket is writable.
-		 */
-		if (connect(s->fd, s->aip->ai_addr, s->aip->ai_addrlen) == 0) {
-			try_connect(s);
-			break;
-		}
-
-		/* Connect failed, check why. */
-		switch (errno) {
-		case EINPROGRESS:
-		case EAGAIN:
-			/* Let the writable state to determine. */
-			return;
-		default:
-			irc_log_warn("server %s: %s", s->name, strerror(errno));
-			break;
-		}
-	}
-}
-
-static size_t
-input_ssl(struct irc_server *s, char *dst, size_t dstsz)
-{
-	int nr;
-
-	if ((nr = SSL_read(s->ssl, dst, dstsz)) <= 0) {
-		update(s, nr);
-		return 0;
-	}
-
-	s->ssl_state = IRC_SERVER_SSL_NONE;
-
-	return nr;
-}
-
-static size_t
-input_clear(struct irc_server *s, char *buf, size_t bufsz)
-{
-	ssize_t nr;
-
-	if ((nr = recv(s->fd, buf, bufsz, 0)) <= 0) {
-		clear(s);
-		return 0;
-	}
-
-	return nr;
-}
-
-static void
-input(struct irc_server *s)
-{
-	size_t len = strlen(s->in);
-	size_t cap = sizeof (s->in) - len - 1;
-	size_t nr = 0;
-
-	if (s->flags & IRC_SERVER_FLAGS_SSL) {
-#if defined(IRCCD_WITH_SSL)
-		nr = input_ssl(s, s->in + len, cap);
-#endif
-	} else
-		nr = input_clear(s, s->in + len, cap);
-
-	if (nr > 0)
-		s->in[len + nr] = '\0';
-}
-
-static void
-output(struct irc_server *s)
-{
-	ssize_t ns = 0;
-
-	if (s->flags & IRC_SERVER_FLAGS_SSL) {
-#if defined(IRCCD_WITH_SSL)
-		ns = SSL_write(s->ssl, s->out, strlen(s->out));
-		update(s, ns);
-#endif
-	} else if ((ns = send(s->fd, s->out, strlen(s->out), 0)) <= 0)
-		clear(s);
-
-	if (ns > 0) {
-		/* Optimize if everything was sent. */
-		if ((size_t)ns >= sizeof (s->out))
-			s->out[0] = '\0';
-		else
-			memmove(s->out, s->out + ns, sizeof (s->out) - ns);
-	}
-}
-
-static void
-prepare_connecting(const struct irc_server *s, struct pollfd *pfd)
-{
-	(void)s;
-
-#if defined(IRCCD_WITH_SSL)
-	if (s->flags & IRC_SERVER_FLAGS_SSL && s->ssl && s->ctx) {
-		switch (s->ssl_state) {
-		case IRC_SERVER_SSL_NEED_READ:
-			pfd->events |= POLLIN;
-			break;
-		case IRC_SERVER_SSL_NEED_WRITE:
-			pfd->events |= POLLOUT;
-			break;
-		default:
-			break;
-		}
-	} else
-#endif
-		pfd->events |= POLLOUT;
-}
-
-static void
-prepare_ready(const struct irc_server *s, struct pollfd *pfd)
-{
-#if defined(IRCCD_WITH_SSL)
-	if (s->flags & IRC_SERVER_FLAGS_SSL && s->ssl_state) {
-		switch (s->ssl_state) {
-		case IRC_SERVER_SSL_NEED_READ:
-			pfd->events |= POLLIN;
-			break;
-		case IRC_SERVER_SSL_NEED_WRITE:
-			pfd->events |= POLLOUT;
-			break;
-		default:
-			break;
-		}
-	} else {
-#endif
-		pfd->events |= POLLIN;
-
-		if (s->out[0])
-			pfd->events |= POLLOUT;
-#if defined(IRCCD_WITH_SSL)
-	}
-#endif
-}
-
-static void
-flush_connecting(struct irc_server *s, const struct pollfd *pfd)
-{
-	(void)pfd;
-
-	int res, err = -1;
-	socklen_t len = sizeof (int);
-
-	if ((res = getsockopt(s->fd, SOL_SOCKET, SO_ERROR, &err, &len)) < 0 || err) {
-		irc_log_warn("server %s: %s", s->name, strerror(res ? err : errno));
-		dial(s);
-	} else
-		try_connect(s);
-}
-
-static void
-flush_handshaking(struct irc_server *s, const struct pollfd *pfd)
-{
-	(void)pfd;
-
-	handshake(s);
-}
-
-static void
-flush_ready(struct irc_server *s, const struct pollfd *pfd)
-{
-	if (pfd->revents & POLLERR || pfd->revents & POLLHUP) {
-		clear(s);
-		return;
-	}
-
-	if (pfd->revents & POLLIN)
-		input(s);
-	if (pfd->revents & POLLOUT)
-		output(s);
-}
-
-static const struct {
-	void (*prepare)(const struct irc_server *, struct pollfd *);
-	void (*flush)(struct irc_server *, const struct pollfd *);
-} io_table[] = {
-	[IRC_SERVER_STATE_CONNECTING] = {
-		prepare_connecting,
-		flush_connecting
-	},
-	[IRC_SERVER_STATE_HANDSHAKING] = {
-		prepare_ready,
-		flush_handshaking
-	},
-	[IRC_SERVER_STATE_CONNECTED] = {
-		prepare_ready,
-		flush_ready
-	},
-};
 
 struct irc_server *
 irc_server_new(const char *name,
@@ -967,14 +567,18 @@ irc_server_new(const char *name,
 	struct irc_server *s;
 
 	s = irc_util_calloc(1, sizeof (*s));
-	s->port = port;
 
+	/* Connection. */
+	s->conn.port = port;
+	strlcpy(s->conn.hostname, hostname, sizeof (s->conn.hostname));
+
+	/* Identity. */
+	strlcpy(s->ident.nickname, nickname, sizeof (s->ident.nickname));
+	strlcpy(s->ident.username, username, sizeof (s->ident.username));
+	strlcpy(s->ident.realname, realname, sizeof (s->ident.realname));
+
+	/* Server itslf. */
 	strlcpy(s->name, name, sizeof (s->name));
-	strlcpy(s->nickname, nickname, sizeof (s->nickname));
-	strlcpy(s->username, username, sizeof (s->username));
-	strlcpy(s->realname, realname, sizeof (s->realname));
-	strlcpy(s->hostname, hostname, sizeof (s->hostname));
-
 	LIST_INIT(&s->channels);
 
 	return s;
@@ -985,12 +589,10 @@ irc_server_connect(struct irc_server *s)
 {
 	assert(s);
 
-	s->state = IRC_SERVER_STATE_CONNECTING;
-
-	if (!lookup(s))
-		clear(s);
+	if (irc_conn_connect(&s->conn))
+		s->state = IRC_SERVER_STATE_CONNECTING;
 	else
-		dial(s);
+		s->state = IRC_SERVER_STATE_DISCONNECTED;
 }
 
 void
@@ -998,27 +600,45 @@ irc_server_disconnect(struct irc_server *s)
 {
 	assert(s);
 
-	clear(s);
+	s->state = IRC_SERVER_STATE_DISCONNECTED;
+
+	irc_conn_disconnect(&s->conn);
+
+	clear_channels(s, false);
+	clear_server(s);
 }
 
 void
 irc_server_prepare(const struct irc_server *s, struct pollfd *pfd)
 {
-	pfd->fd = s->fd;
-	pfd->events = 0;
+	assert(s);
+	assert(pfd);
 
-	if (io_table[s->state].prepare)
-		io_table[s->state].prepare(s, pfd);
+	irc_conn_prepare(&s->conn, pfd);
 }
 
 void
 irc_server_flush(struct irc_server *s, const struct pollfd *pfd)
 {
-	if (pfd->fd != s->fd)
+	assert(s);
+	assert(pfd);
+
+	if (!irc_conn_flush(&s->conn, pfd))
+		return irc_server_disconnect(s);
+	if (s->conn.state != IRC_CONN_STATE_READY)
 		return;
 
-	if (io_table[s->state].flush)
-		io_table[s->state].flush(s, pfd);
+	switch (s->state) {
+	case IRC_SERVER_STATE_CONNECTING:
+		/*
+		 * Now the conn object is ready which means the server has
+		 * to authenticate.
+		 */
+		auth(s);
+		break;
+	default:
+		break;
+	}
 }
 
 bool
@@ -1027,23 +647,14 @@ irc_server_poll(struct irc_server *s, struct irc_event *ev)
 	assert(s);
 	assert(ev);
 
-	struct message msg;
-	char *pos;
-	size_t length;
+	struct irc_conn_msg msg = {0};
 
-	if (!(pos = strstr(s->in, "\r\n")))
-		return false;
+	if (irc_conn_poll(&s->conn, &msg))
+		return handle(s, ev, &msg), true;
+	if (s->state == IRC_SERVER_STATE_DISCONNECTED)
+		return handle_disconnect(s, ev), true;
 
-	/* Turn end of the string at delimiter. */
-	*pos = 0;
-	length = pos - s->in;
-
-	if (length > 0 && parse(&msg, s->in))
-		handle(s, ev, &msg);
-
-	memmove(s->in, pos + 2, sizeof (s->in) - (length + 2));
-
-	return true;
+	return false;
 }
 
 struct irc_channel *
@@ -1069,23 +680,12 @@ irc_server_send(struct irc_server *s, const char *fmt, ...)
 
 	char buf[IRC_BUF_LEN];
 	va_list ap;
-	size_t len, avail, required;
 
 	va_start(ap, fmt);
-	required = vsnprintf(buf, sizeof (buf), fmt, ap);
+	vsnprintf(buf, sizeof (buf), fmt, ap);
 	va_end(ap);
 
-	len = strlen(s->out);
-	avail = sizeof (s->out) - len;
-
-	/* Don't forget \r\n. */
-	if (required + 2 >= avail)
-		return false;
-
-	strlcat(s->out, buf, sizeof (s->out));
-	strlcat(s->out, "\r\n", sizeof (s->out));
-
-	return true;
+	return irc_conn_send(&s->conn, buf);
 }
 
 bool
@@ -1218,8 +818,8 @@ irc_server_nick(struct irc_server *s, const char *nick)
 	assert(s);
 	assert(nick);
 
-	if (s->state == IRC_SERVER_STATE_DISCONNECTED) {
-		strlcpy(s->nickname, nick, sizeof (s->nickname));
+	if (s->state <= IRC_SERVER_STATE_DISCONNECTED) {
+		strlcpy(s->ident.nickname, nick, sizeof (s->ident.nickname));
 		return true;
 	}
 
@@ -1242,34 +842,28 @@ irc_server_whois(struct irc_server *s, const char *target)
 	assert(s);
 	assert(target);
 
-#if 0
-	/* Cleanup previous result. */
-	free(s->whois.channels);
-	memset(&s->whois, 0, sizeof (s->whois));
-#endif
-
 	return irc_server_send(s, "WHOIS %s", target);
 }
 
-struct irc_server_namemode
-irc_server_strip(const struct irc_server *s, const char *item)
+void
+irc_server_strip(const struct irc_server *s, const char **nick, char *mode, char *prefix)
 {
 	assert(s);
-	assert(item);
+	assert(*nick);
 
-	struct irc_server_namemode ret = {0};
+	if (mode)
+		*mode = 0;
+	if (prefix)
+		*mode = 0;
 
-	for (size_t i = 0; i < IRC_UTIL_SIZE(s->prefixes); ++i) {
-		if (item[0] == s->prefixes[i].token) {
-			ret.mode = s->prefixes[i].mode;
-			++item;
+	for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes); ++i) {
+		if (**nick == s->params.prefixes[i].token) {
+			*mode = s->params.prefixes[i].mode;
+			*prefix = s->params.prefixes[i].token;
+			*nick += 1;
 			break;
 		}
 	}
-
-	ret.name = (char *)item;
-
-	return ret;
 }
 
 void
@@ -1287,7 +881,7 @@ irc_server_decref(struct irc_server *s)
 	assert(s->refc >= 1);
 
 	if (--s->refc == 0) {
-		clear(s);
+		clear_channels(s, true);
 		free(s);
 	}
 }

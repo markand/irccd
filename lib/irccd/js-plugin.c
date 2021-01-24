@@ -87,12 +87,14 @@ metadata(duk_context *ctx, const char *name)
 static void
 push_names(duk_context *ctx, const struct irc_event *ev)
 {
-	char *token, *p = ev->names.names;
+	const char *token;
+	char *p = ev->names.names;
 
 	duk_push_array(ctx);
 
 	for (size_t i = 0; (token = strtok_r(p, " ", &p)); ++i) {
-		duk_push_string(ctx, irc_server_strip(ev->server, token).name);
+		irc_server_strip(ev->server, &token, NULL, NULL);
+		duk_push_string(ctx, token);
 		duk_put_prop_index(ctx, -2, i);
 	}
 }
@@ -100,8 +102,8 @@ push_names(duk_context *ctx, const struct irc_event *ev)
 static void
 push_whois(duk_context *ctx, const struct irc_event *ev)
 {
-	char *token, *p = ev->whois.channels;
-	struct irc_server_namemode nm;
+	const char *token;
+	char *p = ev->whois.channels;
 
 	duk_push_object(ctx);
 	duk_push_string(ctx, ev->whois.nickname);
@@ -114,12 +116,16 @@ push_whois(duk_context *ctx, const struct irc_event *ev)
 	duk_put_prop_string(ctx, -2, "hostname");
 	duk_push_array(ctx);
 	for (size_t i = 0; (token = strtok_r(p, " ", &p)); ++i) {
-		nm = irc_server_strip(ev->server, token);
+		char mode = 0, prefix = 0;
+
+		irc_server_strip(ev->server, &token, &mode, &prefix);
 		duk_push_object(ctx);
-		duk_push_string(ctx, nm.name);
+		duk_push_string(ctx, token);
 		duk_put_prop_string(ctx, -2, "channel");
-		duk_push_sprintf(ctx, "%c", nm.mode);
+		duk_push_sprintf(ctx, "%c", mode);
 		duk_put_prop_string(ctx, -2, "mode");
+		duk_push_sprintf(ctx, "%c", prefix);
+		duk_put_prop_string(ctx, -2, "prefix");
 		duk_put_prop_index(ctx, -2, i);
 	}
 	duk_put_prop_string(ctx, -2, "channels");

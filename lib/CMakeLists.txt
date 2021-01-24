@@ -24,6 +24,8 @@ set(
 	irccd/channel.c
 	irccd/channel.h
 	irccd/config.h.in
+	irccd/conn.c
+	irccd/conn.h
 	irccd/dl-plugin.c
 	irccd/dl-plugin.h
 	irccd/event.c

@@ -27,7 +27,10 @@
 #define IRC_PASSWORD_LEN        64      /* Password length. */
 #define IRC_CTCPVERSION_LEN     64      /* Custom CTCP version answer. */
 #define IRC_USERMODES_LEN       8       /* Number of modes (e.g. ohv). */
+#define IRC_CHANTYPES_LEN       8
 #define IRC_CMDCHAR_LEN         4       /* Prefix for plugin commands (e.g. !). */
+#define IRC_MESSAGE_LEN         512     /* Official length per message. */
+#define IRC_ARGS_MAX            32      /* Own supported number of arguments per message. */
 
 /* Network limits. */
 #define IRC_HOST_LEN            64      /* Hostname length.. */
