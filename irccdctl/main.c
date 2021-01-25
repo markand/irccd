@@ -16,7 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <compat.h>
+
 #include <sys/socket.h>
+#include <sys/time.h>
 #include <sys/un.h>
 #include <assert.h>
 #include <err.h>

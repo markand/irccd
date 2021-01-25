@@ -19,11 +19,9 @@
 #ifndef IRCCD_JSAPI_SYSTEM_H
 #define IRCCD_JSAPI_SYSTEM_H
 
-#include <stdnoreturn.h>
-
 #include <duktape.h>
 
-void noreturn
+void
 irc_jsapi_system_raise(duk_context *);
 
 void

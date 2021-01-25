@@ -40,7 +40,7 @@ self(duk_context *ctx)
 	duk_pop_2(ctx);
 
 	if (!sv)
-		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Server object");
+		(void)duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Server object");
 
 	return sv;
 }
@@ -51,7 +51,7 @@ require(duk_context *ctx, duk_idx_t index)
 	struct irc_server *sv;
 
 	if (!duk_is_object(ctx, index) || !duk_has_prop_string(ctx, index, SIGNATURE))
-		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Server object");
+		(void)duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Server object");
 
 	duk_get_prop_string(ctx, index, SIGNATURE);
 	sv = duk_to_pointer(ctx, -1);
@@ -68,7 +68,7 @@ get_port(duk_context *ctx)
 	duk_get_prop_string(ctx, 0, "port");
 
 	if (!duk_is_number(ctx, -1))
-		duk_error(ctx, DUK_ERR_ERROR, "invalid 'port' property");
+		(void)duk_error(ctx, DUK_ERR_ERROR, "invalid 'port' property");
 
 	port = duk_to_int(ctx, -1);
 	duk_pop(ctx);
@@ -84,7 +84,7 @@ get_string(duk_context *ctx, const char *n)
 	duk_get_prop_string(ctx, 0, n);
 
 	if (!duk_is_string(ctx, -1))
-		duk_error(ctx, DUK_ERR_ERROR, "invalid or missing '%s' property", n);
+		(void)duk_error(ctx, DUK_ERR_ERROR, "invalid or missing '%s' property", n);
 
 	ret = duk_to_string(ctx, -1);
 	duk_pop(ctx);
@@ -131,7 +131,7 @@ get_channels(duk_context *ctx, struct irc_server *s)
 		duk_get_prop_string(ctx, -2, "password");
 
 		if (!duk_is_string(ctx, -2))
-			duk_error(ctx, DUK_ERR_ERROR, "invalid channel 'name' property");
+			(void)duk_error(ctx, DUK_ERR_ERROR, "invalid channel 'name' property");
 
 		irc_server_join(s, duk_to_string(ctx, -2), duk_opt_string(ctx, -1, NULL));
 		duk_pop_n(ctx, 4);

@@ -62,7 +62,7 @@ set(duk_context *ctx, const char *name)
 {
 	/* This is the object received in argument from the property setter. */
 	if (!duk_is_object(ctx, 0))
-		duk_error(ctx, DUK_ERR_TYPE_ERROR, "'%s' property must be object", name);
+		return duk_error(ctx, DUK_ERR_TYPE_ERROR, "'%s' property must be object", name);
 
 	/* Merge old table with new one. */
 	duk_get_global_string(ctx, name);
@@ -137,7 +137,7 @@ find(duk_context *ctx)
 	struct irc_plugin *plg = irc_bot_plugin_find(name);
 
 	if (!plg)
-		duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "plugin %s not found", name);
+		(void)duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "plugin %s not found", name);
 
 	return plg;
 }

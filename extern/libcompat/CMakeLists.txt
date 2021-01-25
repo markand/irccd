@@ -122,6 +122,17 @@ if (NOT COMPAT_HAVE_DIRENT_H)
 	endif ()
 endif ()
 
+# Specific BSD sys/queue.h file
+check_include_file(sys/queue.h COMPAT_HAVE_SYS_QUEUE_H)
+
+if (NOT COMPAT_HAVE_SYS_QUEUE_H)
+	target_include_directories(
+		libirccd-compat
+		PUBLIC
+			$<BUILD_INTERFACE:${libirccd-compat_SOURCE_DIR}/extern/queue>
+	)
+endif ()
+
 # Math library
 find_library(COMPAT_HAVE_LIBM m)
 

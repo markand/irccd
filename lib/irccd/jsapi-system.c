@@ -226,7 +226,7 @@ static const duk_function_list_entry functions[] = {
 	{ NULL,         NULL,           0 }
 };
 
-void noreturn
+void
 irc_jsapi_system_raise(duk_context *ctx)
 {
 	duk_get_global_string(ctx, "Irccd");

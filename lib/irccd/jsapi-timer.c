@@ -205,7 +205,7 @@ self(duk_context *ctx)
 	duk_pop_2(ctx);
 
 	if (!tm)
-		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Timer object");
+		(void)duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Timer object");
 
 	return tm;
 }
@@ -270,9 +270,9 @@ Timer_constructor(duk_context *ctx)
 	tm.duration = duk_require_uint(ctx, 1);
 
 	if (tm.type < 0 || tm.type >= TIMER_NUM)
-		duk_error(ctx, DUK_ERR_TYPE_ERROR, "invalid timer type");
+		return duk_error(ctx, DUK_ERR_TYPE_ERROR, "invalid timer type");
 	if (!duk_is_callable(ctx, 2))
-		duk_error(ctx, DUK_ERR_TYPE_ERROR, "missing callback function");
+		return duk_error(ctx, DUK_ERR_TYPE_ERROR, "missing callback function");
 
 	/* Create this. */
 	duk_push_this(ctx);

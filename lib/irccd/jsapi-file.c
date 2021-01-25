@@ -162,7 +162,7 @@ self(duk_context *ctx)
 	duk_pop_2(ctx);
 
 	if (!file)
-		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a File object");
+		(void)duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a File object");
 
 	return file;
 }

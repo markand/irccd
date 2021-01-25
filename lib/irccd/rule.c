@@ -112,12 +112,11 @@ void
 irc_rule_remove(char *str, const char *value)
 {
 	char *pos;
-	size_t vlen, slen;
+	size_t vlen;
 
 	if (!(pos = find(str, value)))
 		return;
 
-	slen = strlen(str);
 	vlen = strlen(value) + 1;       /* includes ':' */
 
 	assert(pos[vlen - 1] == ':');
