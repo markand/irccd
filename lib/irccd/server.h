@@ -49,6 +49,12 @@ enum irc_server_flags {
 	IRC_SERVER_FLAGS_IPV6          = (1 << 4)
 };
 
+struct irc_server_user {
+	char nickname[IRC_NICKNAME_LEN];
+	char username[IRC_USERNAME_LEN];
+	char host[IRC_HOST_LEN];
+};
+
 struct irc_server_ident {
 	char nickname[IRC_NICKNAME_LEN];
 	char username[IRC_USERNAME_LEN];
@@ -153,6 +159,9 @@ irc_server_whois(struct irc_server *, const char *);
 
 void
 irc_server_strip(const struct irc_server *, const char **, char *, char *);
+
+void
+irc_server_split(const char *, struct irc_server_user *);
 
 void
 irc_server_incref(struct irc_server *);

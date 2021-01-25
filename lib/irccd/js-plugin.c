@@ -38,6 +38,7 @@
 #include "jsapi-system.h"
 #include "jsapi-timer.h"
 #include "jsapi-unicode.h"
+#include "jsapi-util.h"
 #include "log.h"
 #include "plugin.h"
 #include "server.h"
@@ -441,6 +442,7 @@ init(struct irc_plugin *plg, const char *script)
 	irc_jsapi_system_load(js.ctx);
 	irc_jsapi_timer_load(js.ctx);
 	irc_jsapi_unicode_load(js.ctx);
+	irc_jsapi_util_load(js.ctx);
 
 	if (duk_peval_string(js.ctx, script) != 0) {
 		irc_log_warn("plugin %s: %s", plg->name, duk_to_string(js.ctx, -1));
@@ -491,22 +493,23 @@ finish(struct irc_plugin *plg)
 	memset(self, 0, sizeof (*self));
 }
 
-bool
-irc_js_plugin_open(struct irc_plugin *plg, const char *path)
+struct irc_plugin *
+irc_js_plugin_open(const char *path)
 {
-	assert(plg);
 	assert(path);
 
 	char *script = NULL;
+	struct irc_plugin *plg = irc_util_calloc(1, sizeof (*plg));
 
 	if (!(script = eat(path))) {
 		irc_log_warn("plugin: %s", strerror(errno));
-		return false;
+		return NULL;
 	}
 
 	if (!(init(plg, script))) {
 		free(script);
-		return false;
+		free(plg);
+		return NULL;
 	}
 
 	plg->set_template = set_template;
@@ -527,6 +530,5 @@ irc_js_plugin_open(struct irc_plugin *plg, const char *path)
 	/* No longer needed. */
 	free(script);
 
-	/* If error occured, init() has logged. */
-	return plg->data != NULL;
+	return plg;
 }

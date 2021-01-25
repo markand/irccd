@@ -76,6 +76,8 @@ if (IRCCD_WITH_JS)
 		irccd/jsapi-timer.h
 		irccd/jsapi-unicode.c
 		irccd/jsapi-unicode.h
+		irccd/jsapi-util.c
+		irccd/jsapi-util.h
 	)
 endif ()
 

@@ -372,7 +372,7 @@ irc_bot_server_clear(void)
 }
 
 void
-irc_bot_add_plugin(struct irc_plugin *p)
+irc_bot_plugin_add(struct irc_plugin *p)
 {
 	assert(p);
 
@@ -386,7 +386,7 @@ irc_bot_add_plugin(struct irc_plugin *p)
 }
 
 struct irc_plugin *
-irc_bot_find_plugin(const char *name)
+irc_bot_plugin_find(const char *name)
 {
 	struct irc_plugin *p;
 
@@ -398,11 +398,11 @@ irc_bot_find_plugin(const char *name)
 }
 
 void
-irc_bot_remove_plugin(const char *name)
+irc_bot_plugin_remove(const char *name)
 {
 	struct irc_plugin *p;
 
-	if (!(p = irc_bot_find_plugin(name)))
+	if (!(p = irc_bot_plugin_find(name)))
 		return;
 
 	irc_plugin_unload(p);

@@ -41,5 +41,6 @@ main(int argc, char **argv)
 	s = irc_server_new("mlk", "circ", "circ", "circ", "malikania.fr", 6667);
 	irc_server_join(s, "#test", NULL);
 	irc_bot_server_add(s);
+	irc_bot_plugin_add(irc_js_plugin_open("/Users/markand/test.js"));
 	irc_bot_run();
 }

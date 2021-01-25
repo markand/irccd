@@ -71,32 +71,6 @@ is_self(const struct irc_server *s, const char *nick)
 	return strncmp(s->ident.nickname, nick, strlen(s->ident.nickname)) == 0;
 }
 
-#if 0
-
-struct origin {
-	char nickname[IRC_NICKNAME_LEN];
-	char username[IRC_USERNAME_LEN];
-	char host[IRC_HOST_LEN];
-};
-
-static const struct origin *
-parse_origin(const char *prefix)
-{
-	static struct origin origin;
-	char fmt[128];
-
-	memset(&origin, 0, sizeof (origin));
-	snprintf(fmt, sizeof (fmt), "%%%zu[^!]!%%%zu[^@]@%%%zus",
-	    sizeof (origin.nickname) - 1,
-	    sizeof (origin.username) - 1,
-	    sizeof (origin.host) - 1);
-	sscanf(prefix, fmt, origin.nickname, origin.username, origin.host);
-
-	return &origin;
-}
-
-#endif
-
 static void
 add_nick(const struct irc_server *s, struct irc_channel *ch, const char *nick)
 {
@@ -854,7 +828,7 @@ irc_server_strip(const struct irc_server *s, const char **nick, char *mode, char
 	if (mode)
 		*mode = 0;
 	if (prefix)
-		*mode = 0;
+		*prefix = 0;
 
 	for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes); ++i) {
 		if (**nick == s->params.prefixes[i].token) {
@@ -864,6 +838,22 @@ irc_server_strip(const struct irc_server *s, const char **nick, char *mode, char
 			break;
 		}
 	}
+}
+
+void
+irc_server_split(const char *prefix, struct irc_server_user *user)
+{
+	assert(prefix);
+	assert(user);
+
+	char fmt[128];
+
+	memset(user, 0, sizeof (*user));
+	snprintf(fmt, sizeof (fmt), "%%%zu[^!]!%%%zu[^@]@%%%zus",
+	    sizeof (user->nickname) - 1,
+	    sizeof (user->username) - 1,
+	    sizeof (user->host) - 1);
+	sscanf(prefix, fmt, user->nickname, user->username, user->host);
 }
 
 void
