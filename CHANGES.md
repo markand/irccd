@@ -9,12 +9,22 @@ This is a major release. See MIGRATING.md file for more information.
 The biggest change is the rewrite from C++ to C. The only runtime dependency
 required is OpenSSL (if built with SSL support).
 
+irccd:
+
+- Irccd keeps track of nicknames in channels by capturing join/part/kick and
+  mode changes. It is now more convenient from the plugins to quickly inspect if
+  someone is present on a channel.
+
+misc:
+
 - Split irccd-api manual page into individual irccd-api-<module> for a better
   readability.
-- Network protocol uses plain text again.
-- Transports uses clear UNIX sockets only.
 - New `irccd.conf` and `irccdctl.conf` syntax.
-- New network protocol.
+
+network API:
+
+- Network protocol uses plain text again.
+- Transport uses clear UNIX sockets only without passwords.
 
 irccd 3.1.1 2021-01-04
 ----------------------
@@ -55,6 +65,8 @@ irccd 3.0.1 2019-09-01
 
 irccd 3.0.0 2019-08-15
 ----------------------
+
+This is a major release. See MIGRATING.md file for more information.
 
 irccd:
 

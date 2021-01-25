@@ -19,12 +19,11 @@ Irccdctl
 
 The `irccdctl.conf` is now using a custom syntax.
 
-Build system and platform support
----------------------------------
+Platform support
+----------------
 
-The build system has been switched from CMake to GNU make. Windows support is
-now completely obsolescent because the code make excessive use of POSIX
-specification.
+Windows support is now completely obsolescent because the code make excessive
+use of POSIX APIs.
 
 Network API
 -----------
