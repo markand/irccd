@@ -42,6 +42,8 @@ Javascript API
 ### Module File
 
 - The method `File.readline` is no longer marked as slow.
+- Methods `File.lines`, `File.read`, `File.readline` and `File.seek`,  now throw
+  an exception if the file was closed.
 
 ### Module Chrono
 
@@ -51,6 +53,8 @@ Javascript API
 ### Module Util
 
 - The method `Util.ticks` as been removed.
+- The method `Util.cut` now throws a `RangeError` exception if the number of
+  lines exceed `maxl` argument instead of returning null.
 
 ### Module Server
 

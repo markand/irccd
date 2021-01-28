@@ -60,6 +60,8 @@ if (IRCCD_WITH_JS)
 		irccd/js-plugin.h
 		irccd/jsapi-chrono.c
 		irccd/jsapi-chrono.h
+		irccd/jsapi-directory.c
+		irccd/jsapi-directory.h
 		irccd/jsapi-file.c
 		irccd/jsapi-file.h
 		irccd/jsapi-irccd.c

@@ -30,9 +30,31 @@ set(
 	test-util
 )
 
+if (IRCCD_WITH_JS)
+	list(
+		APPEND TESTS
+		test-jsapi-chrono
+		test-jsapi-directory
+		test-jsapi-file
+		test-jsapi-irccd
+		test-jsapi-system
+		test-jsapi-timer
+		test-jsapi-unicode
+		test-jsapi-util
+	)
+endif ()
+
 foreach (t ${TESTS})
 	add_executable(${t} ${t}.c)
 	add_test(${t} ${t})
 	target_link_libraries(${t} libirccd libirccd-greatest)
 	set_target_properties(${t} PROPERTIES FOLDER "tests")
+	target_compile_definitions(
+		${t}
+		PRIVATE
+			IRCCD_EXECUTABLE="$<TARGET_FILE:irccd>"
+			BINARY="${tests_BINARY_DIR}"
+			SOURCE="${tests_SOURCE_DIR}"
+	)
+	add_dependencies(${t} irccd)
 endforeach ()

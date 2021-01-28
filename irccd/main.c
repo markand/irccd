@@ -28,19 +28,23 @@
 #include <irccd/js-plugin.h>
 #include <irccd/rule.h>
 
+static int
+run(int argc, char **argv)
+{
+	(void)argc;
+
+	if (strcmp(argv[0], "version") == 0)
+		puts(IRCCD_VERSION);
+
+	return 0;
+}
+
 int
 main(int argc, char **argv)
 {
-	(void)argc;
-	(void)argv;
+	--argc;
+	++argv;
 
-	struct irc_server *s;
-
-	irc_bot_init();
-
-	s = irc_server_new("mlk", "circ", "circ", "circ", "malikania.fr", 6667);
-	irc_server_join(s, "#test", NULL);
-	irc_bot_server_add(s);
-	irc_bot_plugin_add(irc_js_plugin_open("/Users/markand/test.js"));
-	irc_bot_run();
+	if (argc > 0)
+		return run(argc, argv);
 }

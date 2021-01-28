@@ -1,5 +1,5 @@
 /*
- * config.h.h -- irccd configuration
+ * jsapi-directory.h -- Irccd.Directory API
  *
  * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
  *
@@ -16,15 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_CONFIG_H
-#define IRCCD_CONFIG_H
+#ifndef IRCCD_JSAPI_DIRECTORY_H
+#define IRCCD_JSAPI_DIRECTORY_H
 
-#define IRCCD_VERSION_MAJOR     @IRCCD_VERSION_MAJOR@
-#define IRCCD_VERSION_MINOR     @IRCCD_VERSION_MINOR@
-#define IRCCD_VERSION_PATCH     @IRCCD_VERSION_PATCH@
-#define IRCCD_VERSION           "@IRCCD_VERSION_MAJOR@.@IRCCD_VERSION_MINOR@.@IRCCD_VERSION_PATCH@"
+#include <duktape.h>
 
-#cmakedefine IRCCD_WITH_JS
-#cmakedefine IRCCD_WITH_SSL
+void
+irc_jsapi_directory_load(duk_context *);
 
-#endif /* !IRCCD_CONFIG_H */
+#endif /* !IRCCD_JSAPI_DIRECTORY_H */

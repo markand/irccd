@@ -159,18 +159,20 @@ split(duk_context *ctx, duk_idx_t index, struct stringlist *list)
 }
 
 static int
-limit(duk_context *ctx, duk_idx_t index, const char *name, int value)
+limit(duk_context *ctx, duk_idx_t index, const char *name, size_t value)
 {
+	int newvalue;
+
 	if (duk_get_top(ctx) < index || !duk_is_number(ctx, index))
 		return value;
 
-	value = duk_to_int(ctx, index);
+	newvalue = duk_to_int(ctx, index);
 
-	if (value <= 0)
+	if (newvalue <= 0)
 		(void)duk_error(ctx, DUK_ERR_RANGE_ERROR,
 		    "argument %d (%s) must be positive", index, name);
 
-	return value;
+	return newvalue;
 }
 
 static char *
@@ -178,7 +180,7 @@ join(duk_context *ctx, size_t maxc, size_t maxl, const struct stringlist *tokens
 {
 	FILE *fp;
 	char *out = NULL;
-	size_t outsz = 0, linesz = 0, tokensz;
+	size_t outsz = 0, linesz = 0, tokensz, lineavail = maxl;
 	struct string *token;
 
 	if (!(fp = open_memstream(&out, &outsz)))
@@ -187,10 +189,10 @@ join(duk_context *ctx, size_t maxc, size_t maxl, const struct stringlist *tokens
 	TAILQ_FOREACH(token, tokens, link) {
 		tokensz = strlen(token->value);
 
-		if (tokensz >= maxc) {
+		if (tokensz > maxc) {
 			fclose(fp);
 			duk_push_error_object(ctx, DUK_ERR_RANGE_ERROR,
-			    "token '%s' could not fit in maxc (%zu)", token, maxc);
+			    "token '%s' could not fit in maxc limit (%zu)", token->value, maxc);
 			return NULL;
 		}
 
@@ -207,15 +209,14 @@ join(duk_context *ctx, size_t maxc, size_t maxl, const struct stringlist *tokens
 		 * a "new" one.
 		 */
 		if (linesz + tokensz > maxc) {
-			if (maxl == 0) {
+			if (--lineavail == 0) {
 				fclose(fp);
-				duk_push_error_object(ctx, "lines exceeds maxl (%zu)", maxl);
+				duk_push_error_object(ctx, DUK_ERR_RANGE_ERROR, "number of lines exceeds maxl (%zu)", maxl);
 				return NULL;
 			}
 
 			fputc('\n', fp);
 			linesz = 0;
-			maxl -= 1;
 		}
 
 		linesz += fprintf(fp, "%s%s", linesz > 0 ? " " : "", token->value);

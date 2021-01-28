@@ -24,7 +24,7 @@
 #include "config.h"
 #include "util.h"
 
-static duk_ret_t
+static int
 SystemError_constructor(duk_context *ctx)
 {
 	duk_push_this(ctx);
@@ -283,6 +283,14 @@ static const struct {
 
 /* }}} */
 
+static int
+print(duk_context *ctx)
+{
+	puts(duk_require_string(ctx, 0));
+
+	return 0;
+}
+
 void
 irc_jsapi_load(duk_context *ctx)
 {
@@ -318,4 +326,8 @@ irc_jsapi_load(duk_context *ctx)
 
 	/* Set Irccd as global. */
 	duk_put_global_string(ctx, "Irccd");
+
+	/* Convenient global "print" function. */
+	duk_push_c_function(ctx, print, 1);
+	duk_put_global_string(ctx, "print");
 }

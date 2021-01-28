@@ -257,8 +257,12 @@ File_prototype_readline(duk_context *ctx)
 		irc_jsapi_system_raise(ctx);
 	}
 
-	if (getline(&line, &linesz, file->fp) < 0 || ferror(file->fp)) {
+	if (getline(&line, &linesz, file->fp) < 0) {
 		free(line);
+
+		if (feof(file->fp))
+			return 0;
+
 		irc_jsapi_system_raise(ctx);
 	}
 
@@ -312,7 +316,7 @@ File_prototype_tell(duk_context *ctx)
 	long position;
 
 	if (!file->fp || (position = ftell(file->fp)) < 0)
-		irc_jsapi_system_raise(ctx);
+		return irc_jsapi_system_raise(ctx), 0;
 
 	duk_push_number(ctx, position);
 

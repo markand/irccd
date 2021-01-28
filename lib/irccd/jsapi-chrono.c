@@ -73,18 +73,18 @@ Chrono_constructor(duk_context *ctx)
 {
 	struct timer *timer;
 
-	timer = irc_util_calloc(1, sizeof (*self));
+	timer = irc_util_calloc(1, sizeof (*timer));
 	timespec_get(&timer->start, TIME_UTC);
 
 	duk_push_this(ctx);
 	duk_push_pointer(ctx, timer);
 	duk_put_prop_string(ctx, -2, SIGNATURE);
-	duk_pop(ctx);
 
 	/* this.elapsed property. */
 	duk_push_string(ctx, "elapsed");
 	duk_push_c_function(ctx, Chrono_prototype_elapsed, 0);
 	duk_def_prop(ctx, -3, DUK_DEFPROP_HAVE_GETTER);
+	duk_pop(ctx);
 
 	return 0;
 }
@@ -106,7 +106,7 @@ static const duk_function_list_entry methods[] = {
 };
 
 void
-irc_js_chrono_load(duk_context *ctx)
+irc_jsapi_chrono_load(duk_context *ctx)
 {
 	duk_get_global_string(ctx, "Irccd");
 	duk_push_c_function(ctx, Chrono_constructor, 0);

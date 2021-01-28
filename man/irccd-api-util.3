@@ -42,19 +42,11 @@ array of strings.
 The argument
 .Fa maxc
 controls the maximum of characters allowed per line, it can be a positive
-integer. If undefined is given, a default of 72 is used.
-.Pp
-The argument
+integer. If undefined is given, a default of 72 is used. The argument
 .Fa maxl
-controls the maximum of lines allowed. It can be a positive integer or undefined
-for an infinite list.
-.Pp
-If
-.Fa maxl
-is used as a limit and the data can not fit within the bounds,
-undefined is returned.
-.Pp
-An empty list may be returned if empty strings were found.
+controls the maximum of lines allowed. It can be a positive integer or
+undefined for an infinite list. An empty list may be returned if empty strings
+were found.
 .Pp
 .\" Irccd.Util.format
 The
@@ -118,7 +110,10 @@ or
 are negative numbers.
 .It Bq Er RangeError
 If one word length was bigger than
-.Fa maxc .
+.Fa maxc
+or the number of lines would exceed
+.Fa maxl
+argument.
 .It Bq Er TypeError
 If
 .Fa data

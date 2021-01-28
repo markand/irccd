@@ -21,7 +21,20 @@
 
 #include <stdbool.h>
 
+#include <duktape.h>
+
 struct irc_plugin;
+
+struct irc_js_plugin_data {
+	duk_context *ctx;
+	char **options;
+	char **templates;
+	char **paths;
+	char *license;
+	char *version;
+	char *author;
+	char *description;
+};
 
 struct irc_plugin *
 irc_js_plugin_open(const char *);
