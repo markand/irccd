@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <err.h>
 
+#include <irccd/dl-plugin.h>
 #include <irccd/irccd.h>
 #include <irccd/log.h>
 #include <irccd/server.h>
@@ -47,4 +48,14 @@ main(int argc, char **argv)
 
 	if (argc > 0)
 		return run(argc, argv);
+
+	irc_bot_init();
+
+	/* TODO: temp. */
+	irc_log_set_verbose(true);
+
+	irc_bot_plugin_loader_add(irc_dl_plugin_loader_new());
+	irc_bot_plugin_loader_add(irc_js_plugin_loader_new());
+	irc_bot_plugin_find("foo");
+
 }

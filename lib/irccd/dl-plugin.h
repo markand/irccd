@@ -19,9 +19,8 @@
 #ifndef IRCCD_DL_PLUGIN_H
 #define IRCCD_DL_PLUGIN_H
 
-#include <stdbool.h>
-
 struct irc_plugin;
+struct irc_plugin_loader;
 
 #if defined(_WIN32)
 #       define IRC_DL_EXPORT __declspec(dllexport)
@@ -29,13 +28,10 @@ struct irc_plugin;
 #       define IRC_DL_EXPORT
 #endif
 
-#if defined(__APPLE__)
-#       define IRC_DL_EXT ".dylib"
-#else
-#       define IRC_DL_EXT ".so"
-#endif
+struct irc_plugin *
+irc_dl_plugin_open(const char *);
 
-bool
-irc_dl_plugin_open(struct irc_plugin *, const char *);
+struct irc_plugin_loader *
+irc_dl_plugin_loader_new(void);
 
 #endif /* !IRCCD_DL_PLUGIN_H */

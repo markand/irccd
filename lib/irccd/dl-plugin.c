@@ -16,13 +16,16 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <sys/stat.h>
 #include <assert.h>
 #include <ctype.h>
 #include <dlfcn.h>
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
+#include "config.h"
 #include "dl-plugin.h"
 #include "log.h"
 #include "plugin.h"
@@ -38,6 +41,7 @@ do {                                                                            
 } while (0)
 
 struct self {
+	struct irc_plugin plugin;
 	char prefix[32];
 	void *handle;
 };
@@ -164,57 +168,98 @@ finish(struct irc_plugin *plg)
 	if (self->handle)
 		dlclose(self->handle);
 
+	free(self);
 	memset(self, 0, sizeof (*self));
 }
 
-static bool
-init(struct self *self, const char *path)
+static struct self *
+init(const char *path)
 {
-	memset(self, 0, sizeof (*self));
+	struct self self;
+	struct stat st;
 
-	if (!(self->handle = dlopen(path, RTLD_NOW))) {
-		irc_log_warn("plugin: %s: %s", strerror(errno));
-		return false;
+	/*
+	 * It's not possible to get the exact error code when loading a plugin
+	 * using dlopen, since we're trying a lot of files that potentially not
+	 * exist we check presence before even though there's a possible
+	 * condition but at least we can print an error message if there are
+	 * other errors than missing file.
+	 */
+	if (stat(path, &st) < 0 && errno == ENOENT)
+		return NULL;
+
+	if (!(self.handle = dlopen(path, RTLD_NOW))) {
+		irc_log_warn("plugin: %s: %s", path, dlerror());
+		return NULL;
 	}
 
 	/* Compute prefix name */
-	strlcpy(self->prefix, irc_util_basename(path), sizeof (self->prefix));
+	strlcpy(self.prefix, irc_util_basename(path), sizeof (self.prefix));
 
 	/* Remove plugin extension. */
-	self->prefix[strcspn(self->prefix, ".")] = '\0';
+	self.prefix[strcspn(self.prefix, ".")] = '\0';
 
 	/* Remove every invalid identifiers. */
-	for (char *p = self->prefix; *p; ++p)
+	for (char *p = self.prefix; *p; ++p)
 		if (!isalnum(*p))
 			*p = '_';
 
-	return true;
+	return irc_util_memdup(&self, sizeof (self));
 }
 
-bool
-irc_dl_plugin_open(struct irc_plugin *plg, const char *path)
+static struct irc_plugin *
+wrap_open(struct irc_plugin_loader *ldr, const char *path)
 {
-	struct self self;
+	(void)ldr;
 
-	if (!init(&self, path))
+	return irc_dl_plugin_open(path);
+}
+
+struct irc_plugin *
+irc_dl_plugin_open(const char *path)
+{
+	struct self *self;
+
+	if (!(self = init(path)))
 		return false;
 
 	/* Data and all callbacks. */
-	plg->data = irc_util_memdup(&self, sizeof (self));
-	plg->set_template = set_template;
-	plg->get_template = get_template;
-	plg->get_templates = get_templates;
-	plg->set_path = set_path;
-	plg->get_path = get_path;
-	plg->get_paths = get_paths;
-	plg->set_option = set_option;
-	plg->get_option = get_option;
-	plg->get_options = get_options;
-	plg->load = load;
-	plg->reload = reload;
-	plg->unload = unload;
-	plg->handle = handle;
-	plg->finish = finish;
+	self->plugin.data = self;
+	self->plugin.set_template = set_template;
+	self->plugin.get_template = get_template;
+	self->plugin.get_templates = get_templates;
+	self->plugin.set_path = set_path;
+	self->plugin.get_path = get_path;
+	self->plugin.get_paths = get_paths;
+	self->plugin.set_option = set_option;
+	self->plugin.get_option = get_option;
+	self->plugin.get_options = get_options;
+	self->plugin.load = load;
+	self->plugin.reload = reload;
+	self->plugin.unload = unload;
+	self->plugin.handle = handle;
+	self->plugin.finish = finish;
 
-	return true;
+	return &self->plugin;
+}
+
+struct irc_plugin_loader *
+irc_dl_plugin_loader_new(void)
+{
+	struct irc_plugin_loader *ldr;
+
+	ldr = irc_util_calloc(1, sizeof (*ldr));
+	ldr->open = wrap_open;
+
+#if defined(_WIN32)
+	strlcpy(ldr->extensions, "dll", sizeof (ldr->extensions));
+#elif defined(__APPLE__)
+	strlcpy(ldr->extensions, "so:dylib", sizeof (ldr->extensions));
+#else
+	strlcpy(ldr->extensions, "so", sizeof (ldr->extensions));
+#endif
+
+	strlcpy(ldr->paths, IRCCD_LIBDIR "/irccd", sizeof (ldr->paths));
+
+	return ldr;
 }

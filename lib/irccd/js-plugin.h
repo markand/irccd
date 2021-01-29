@@ -19,13 +19,12 @@
 #ifndef IRCCD_JS_PLUGIN_H
 #define IRCCD_JS_PLUGIN_H
 
-#include <stdbool.h>
-
 #include <duktape.h>
 
-struct irc_plugin;
+#include "plugin.h"
 
 struct irc_js_plugin_data {
+	struct irc_plugin plugin;
 	duk_context *ctx;
 	char **options;
 	char **templates;
@@ -38,5 +37,8 @@ struct irc_js_plugin_data {
 
 struct irc_plugin *
 irc_js_plugin_open(const char *);
+
+struct irc_plugin_loader *
+irc_js_plugin_loader_new(void);
 
 #endif /* !IRCCD_JS_PLUGIN_H */

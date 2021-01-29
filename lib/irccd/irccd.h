@@ -19,8 +19,6 @@
 #ifndef IRCCD_H
 #define IRCCD_H
 
-#include <sys/queue.h>
-
 #include "peer.h"
 #include "plugin.h"
 #include "rule.h"
@@ -30,6 +28,7 @@ extern struct irc {
 	struct irc_server_list servers;
 	struct irc_peer_list peers;
 	struct irc_plugin_list plugins;
+	struct irc_plugin_loader_list plugin_loaders;
 	struct irc_rule_list rules;
 } irc;
 
@@ -51,11 +50,17 @@ irc_bot_server_clear(void);
 void
 irc_bot_plugin_add(struct irc_plugin *);
 
-struct irc_plugin *
+void
 irc_bot_plugin_find(const char *);
+
+struct irc_plugin *
+irc_bot_plugin_get(const char *);
 
 void
 irc_bot_plugin_remove(const char *);
+
+void
+irc_bot_plugin_loader_add(struct irc_plugin_loader *);
 
 void
 irc_bot_rule_insert(struct irc_rule *, size_t);

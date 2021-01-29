@@ -385,8 +385,56 @@ irc_bot_plugin_add(struct irc_plugin *p)
 	irc_plugin_load(p);
 }
 
-struct irc_plugin *
+static struct irc_plugin *
+find_plugin(struct irc_plugin_loader *ldr, const char *base, const char *name)
+{
+	char path[PATH_MAX], buf[IRC_EXTENSIONS_LEN], *t, *ext;
+	struct irc_plugin *p;
+
+	strlcpy(buf, ldr->extensions, sizeof (buf));
+
+	for (t = buf; (ext = strtok_r(t, ":", &t)); ) {
+		snprintf(path, sizeof (path), "%s/%s.%s", base, name, ext);
+		irc_log_info("irccd: trying %s", path);
+
+		if ((p = irc_plugin_loader_open(ldr, path)))
+			return p;
+	}
+
+	return NULL;
+}
+
+void
 irc_bot_plugin_find(const char *name)
+{
+	char buf[IRC_PATHS_LEN], *t, *token;
+	struct irc_plugin *p = NULL;
+	struct irc_plugin_loader *ldr;
+
+	irc_log_info("irccd: trying to find plugin %s", name);
+
+	SLIST_FOREACH(ldr, &irc.plugin_loaders, link) {
+		/* Copy the paths to tokenize it. */
+		strlcpy(buf, ldr->paths, sizeof (buf));
+
+		/*
+		 * For every directory (separated by colon) call find_plugin
+		 * which will append the extension and try to open it.
+		 */
+		for (t = buf; (token = strtok_r(t, ":", &t)); ) {
+			if ((p = find_plugin(ldr, token, name)))
+				break;
+		}
+	}
+
+	if (p)
+		irc_bot_plugin_add(p);
+	else
+		irc_log_warn("irccd: could not find plugin %s", name);
+}
+
+struct irc_plugin *
+irc_bot_plugin_get(const char *name)
 {
 	struct irc_plugin *p;
 
@@ -402,13 +450,21 @@ irc_bot_plugin_remove(const char *name)
 {
 	struct irc_plugin *p;
 
-	if (!(p = irc_bot_plugin_find(name)))
+	if (!(p = irc_bot_plugin_get(name)))
 		return;
 
 	irc_plugin_unload(p);
 	irc_plugin_finish(p);
 
 	LIST_REMOVE(p, link);
+}
+
+void
+irc_bot_plugin_loader_add(struct irc_plugin_loader *ldr)
+{
+	assert(ldr);
+
+	SLIST_INSERT_HEAD(&irc.plugin_loaders, ldr, link);
 }
 
 void

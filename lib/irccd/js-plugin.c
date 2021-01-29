@@ -386,7 +386,9 @@ eat(const char *path)
 	return ret;
 
 err:
-	close(fd);
+	if (fd != -1)
+		close(fd);
+
 	free(ret);
 
 	return false;
@@ -416,38 +418,39 @@ wrap_free(void *udata, void *ptr)
 	free(ptr);
 }
 
-static bool
-init(struct irc_plugin *plg, const char *script)
+static struct irc_js_plugin_data *
+init(const char *path, const char *script)
 {
-	struct irc_js_plugin_data js = {0};
+	struct irc_js_plugin_data *js;
 
-	/* Load all modules. */
-	js.ctx = duk_create_heap(wrap_malloc, wrap_realloc, wrap_free, NULL, NULL);
-	irc_jsapi_load(js.ctx);
-	irc_jsapi_chrono_load(js.ctx);
-	irc_jsapi_directory_load(js.ctx);
-	irc_jsapi_file_load(js.ctx);
-	irc_jsapi_logger_load(js.ctx);
-	irc_jsapi_plugin_load(js.ctx, plg);
-	irc_jsapi_server_load(js.ctx);
-	irc_jsapi_system_load(js.ctx);
-	irc_jsapi_timer_load(js.ctx);
-	irc_jsapi_unicode_load(js.ctx);
-	irc_jsapi_util_load(js.ctx);
+	js = irc_util_calloc(1, sizeof (*js));
+	js->ctx = duk_create_heap(wrap_malloc, wrap_realloc, wrap_free, NULL, NULL);
 
-	if (duk_peval_string(js.ctx, script) != 0) {
-		irc_log_warn("plugin %s: %s", plg->name, duk_to_string(js.ctx, -1));
-		duk_destroy_heap(js.ctx);
-		return false;
+	irc_jsapi_load(js->ctx);
+	irc_jsapi_chrono_load(js->ctx);
+	irc_jsapi_directory_load(js->ctx);
+	irc_jsapi_file_load(js->ctx);
+	irc_jsapi_logger_load(js->ctx);
+	irc_jsapi_plugin_load(js->ctx, &js->plugin);
+	irc_jsapi_server_load(js->ctx);
+	irc_jsapi_system_load(js->ctx);
+	irc_jsapi_timer_load(js->ctx);
+	irc_jsapi_unicode_load(js->ctx);
+	irc_jsapi_util_load(js->ctx);
+
+	if (duk_peval_string(js->ctx, script) != 0) {
+		irc_log_warn("plugin: %s: %s", path, duk_to_string(js->ctx, -1));
+		duk_destroy_heap(js->ctx);
+		free(js);
+		return NULL;
 	}
 
-	plg->license = js.license = metadata(js.ctx, "license");
-	plg->version = js.version = metadata(js.ctx, "version");
-	plg->author = js.author = metadata(js.ctx, "author");
-	plg->description = js.description = metadata(js.ctx, "summary");
-	plg->data = irc_util_memdup(&js, sizeof (js));
+	js->plugin.license = js->license = metadata(js->ctx, "license");
+	js->plugin.version = js->version = metadata(js->ctx, "version");
+	js->plugin.author = js->author = metadata(js->ctx, "author");
+	js->plugin.description = js->description = metadata(js->ctx, "summary");
 
-	return true;
+	return js;
 }
 
 static void
@@ -476,12 +479,23 @@ finish(struct irc_plugin *plg)
 	if (self->ctx)
 		duk_destroy_heap(self->ctx);
 
+	freelist(self->options);
+	freelist(self->templates);
+	freelist(self->paths);
+
 	free(self->license);
 	free(self->version);
 	free(self->author);
 	free(self->description);
+	free(self);
+}
 
-	memset(self, 0, sizeof (*self));
+static struct irc_plugin *
+wrap_open(struct irc_plugin_loader *ldr, const char *path)
+{
+	(void)ldr;
+
+	return irc_js_plugin_open(path);
 }
 
 struct irc_plugin *
@@ -490,36 +504,56 @@ irc_js_plugin_open(const char *path)
 	assert(path);
 
 	char *script = NULL;
-	struct irc_plugin *plg = irc_util_calloc(1, sizeof (*plg));
+	struct irc_js_plugin_data *self;
 
+	/*
+	 * Duktape can't open script from file path so we need to read the
+	 * whole script at once.
+	 */
 	if (!(script = eat(path))) {
-		irc_log_warn("plugin: %s", strerror(errno));
+		if (errno != ENOENT)
+			irc_log_warn("irccd: %s: %s", path, strerror(errno));
+
 		return NULL;
 	}
 
-	if (!(init(plg, script))) {
+	/* Init already log errors. */
+	if (!(self = init(path, script))) {
 		free(script);
-		free(plg);
 		return NULL;
 	}
 
-	plg->set_template = set_template;
-	plg->get_template = get_template;
-	plg->get_templates = get_templates;
-	plg->set_path = set_path;
-	plg->get_path = get_path;
-	plg->get_paths = get_paths;
-	plg->set_option = set_option;
-	plg->get_option = get_option;
-	plg->get_options = get_options;
-	plg->load = load;
-	plg->reload = reload;
-	plg->unload = unload;
-	plg->handle = handle;
-	plg->finish = finish;
+	self->plugin.data = self;
+	self->plugin.set_template = set_template;
+	self->plugin.get_template = get_template;
+	self->plugin.get_templates = get_templates;
+	self->plugin.set_path = set_path;
+	self->plugin.get_path = get_path;
+	self->plugin.get_paths = get_paths;
+	self->plugin.set_option = set_option;
+	self->plugin.get_option = get_option;
+	self->plugin.get_options = get_options;
+	self->plugin.load = load;
+	self->plugin.reload = reload;
+	self->plugin.unload = unload;
+	self->plugin.handle = handle;
+	self->plugin.finish = finish;
 
 	/* No longer needed. */
 	free(script);
 
-	return plg;
+	return &self->plugin;
+}
+
+struct irc_plugin_loader *
+irc_js_plugin_loader_new(void)
+{
+	struct irc_plugin_loader *ldr;
+
+	ldr = irc_util_calloc(1, sizeof (*ldr));
+	ldr->open = wrap_open;
+	strlcpy(ldr->extensions, "js", sizeof (ldr->extensions));
+	strlcpy(ldr->paths, IRCCD_LIBDIR "/irccd", sizeof (ldr->paths));
+
+	return ldr;
 }

@@ -170,3 +170,21 @@ irc_plugin_finish(struct irc_plugin *plg)
 
 	free(plg);
 }
+
+struct irc_plugin *
+irc_plugin_loader_open(struct irc_plugin_loader *ldr, const char *path)
+{
+	assert(ldr);
+	assert(path);
+
+	return ldr->open(ldr, path);
+}
+
+void
+irc_plugin_loader_finish(struct irc_plugin_loader *ldr)
+{
+	assert(ldr);
+
+	if (ldr->finish)
+		ldr->finish(ldr);
+}

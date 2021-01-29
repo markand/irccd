@@ -134,7 +134,7 @@ static struct irc_plugin *
 find(duk_context *ctx)
 {
 	const char *name = duk_require_string(ctx, 0);
-	struct irc_plugin *plg = irc_bot_plugin_find(name);
+	struct irc_plugin *plg = irc_bot_plugin_get(name);
 
 	if (!plg)
 		(void)duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "plugin %s not found", name);

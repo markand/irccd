@@ -58,6 +58,17 @@ struct irc_plugin {
 
 LIST_HEAD(irc_plugin_list, irc_plugin);
 
+struct irc_plugin_loader {
+	char paths[IRC_PATHS_LEN];
+	char extensions[IRC_EXTENSIONS_LEN];
+	struct irc_plugin *(*open)(struct irc_plugin_loader *, const char *);
+	void (*finish)(struct irc_plugin_loader *);
+	void *data;
+	SLIST_ENTRY(irc_plugin_loader) link;
+};
+
+SLIST_HEAD(irc_plugin_loader_list, irc_plugin_loader);
+
 void
 irc_plugin_set_template(struct irc_plugin *, const char *, const char *);
 
@@ -99,5 +110,11 @@ irc_plugin_handle(struct irc_plugin *, const struct irc_event *);
 
 void
 irc_plugin_finish(struct irc_plugin *);
+
+struct irc_plugin *
+irc_plugin_loader_open(struct irc_plugin_loader *, const char *);
+
+void
+irc_plugin_loader_finish(struct irc_plugin_loader *);
 
 #endif /* !IRCCD_PLUGIN_H */
