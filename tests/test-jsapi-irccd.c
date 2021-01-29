@@ -28,15 +28,15 @@
 #include <irccd/plugin.h>
 
 static struct irc_plugin *plugin;
-static struct irc_js_plugin_data *data;
+static duk_context *ctx;
 
 static void
 setup(void *udata)
 {
 	(void)udata;
 
-	plugin = irc_js_plugin_open(SOURCE "/data/example-plugin.js");
-	data = plugin->data;
+	plugin = js_plugin_open(SOURCE "/data/example-plugin.js");
+	ctx = js_plugin_get_context(plugin);
 }
 
 static void
@@ -47,14 +47,14 @@ teardown(void *udata)
 	irc_plugin_finish(plugin);
 
 	plugin = NULL;
-	data = NULL;
+	ctx = NULL;
 }
 
 static int
 throw(duk_context *ctx)
 {
 	errno = EINVAL;
-	irc_jsapi_system_raise(ctx);
+	jsapi_system_raise(ctx);
 
 	return 0;
 }
@@ -62,7 +62,7 @@ throw(duk_context *ctx)
 GREATEST_TEST
 basics_version(void)
 {
-	const int ret = duk_peval_string(data->ctx,
+	const int ret = duk_peval_string(ctx,
 		"major = Irccd.version.major;"
 		"minor = Irccd.version.minor;"
 		"patch = Irccd.version.patch;"
@@ -71,12 +71,12 @@ basics_version(void)
 	if (ret != 0)
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "major"));
-	GREATEST_ASSERT_EQ(IRCCD_VERSION_MAJOR, duk_get_int(data->ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "minor"));
-	GREATEST_ASSERT_EQ(IRCCD_VERSION_MINOR, duk_get_int(data->ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "patch"));
-	GREATEST_ASSERT_EQ(IRCCD_VERSION_PATCH, duk_get_int(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "major"));
+	GREATEST_ASSERT_EQ(IRCCD_VERSION_MAJOR, duk_get_int(ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "minor"));
+	GREATEST_ASSERT_EQ(IRCCD_VERSION_MINOR, duk_get_int(ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "patch"));
+	GREATEST_ASSERT_EQ(IRCCD_VERSION_PATCH, duk_get_int(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -84,7 +84,7 @@ basics_version(void)
 GREATEST_TEST
 basics_system_error_from_js(void)
 {
-	const int ret = duk_peval_string(data->ctx,
+	const int ret = duk_peval_string(ctx,
 		"try {"
 		"  throw new Irccd.SystemError(1, 'test');"
 		"} catch (e) {"
@@ -99,16 +99,16 @@ basics_system_error_from_js(void)
 	if (ret != 0)
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "errno"));
-	GREATEST_ASSERT_EQ(1, duk_get_int(data->ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "name"));
-	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(data->ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "message"));
-	GREATEST_ASSERT_STR_EQ("test", duk_get_string(data->ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "v1"));
-	GREATEST_ASSERT(duk_get_boolean(data->ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "v2"));
-	GREATEST_ASSERT(duk_get_boolean(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "errno"));
+	GREATEST_ASSERT_EQ(1, duk_get_int(ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "name"));
+	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "message"));
+	GREATEST_ASSERT_STR_EQ("test", duk_get_string(ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "v1"));
+	GREATEST_ASSERT(duk_get_boolean(ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "v2"));
+	GREATEST_ASSERT(duk_get_boolean(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -116,10 +116,10 @@ basics_system_error_from_js(void)
 GREATEST_TEST
 basics_system_error_from_c(void)
 {
-	duk_push_c_function(data->ctx, throw, 0);
-	duk_put_global_string(data->ctx, "f");
+	duk_push_c_function(ctx, throw, 0);
+	duk_put_global_string(ctx, "f");
 
-	const int ret = duk_peval_string(data->ctx,
+	const int ret = duk_peval_string(ctx,
 		"try {"
 		"  f();"
 		"} catch (e) {"
@@ -133,14 +133,14 @@ basics_system_error_from_c(void)
 	if (ret != 0)
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "errno"));
-	GREATEST_ASSERT_EQ(EINVAL, duk_get_int(data->ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "name"));
-	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(data->ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "v1"));
-	GREATEST_ASSERT(duk_get_boolean(data->ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "v2"));
-	GREATEST_ASSERT(duk_get_boolean(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "errno"));
+	GREATEST_ASSERT_EQ(EINVAL, duk_get_int(ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "name"));
+	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "v1"));
+	GREATEST_ASSERT(duk_get_boolean(ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "v2"));
+	GREATEST_ASSERT(duk_get_boolean(ctx, -1));
 
 	GREATEST_PASS();
 }

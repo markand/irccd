@@ -18,9 +18,10 @@
 
 #include <stdbool.h>
 
-#include "irccd.h"
+#include <irccd/irccd.h>
+#include <irccd/plugin.h>
+
 #include "jsapi-plugin.h"
-#include "plugin.h"
 
 #define SIGNATURE DUK_HIDDEN_SYMBOL("Irccd.Plugin")
 
@@ -97,37 +98,37 @@ get(duk_context *ctx, const char *name)
 static duk_ret_t
 set_config(duk_context *ctx)
 {
-	return set(ctx, IRC_JSAPI_PLUGIN_PROP_OPTIONS);
+	return set(ctx, JSAPI_PLUGIN_PROP_OPTIONS);
 }
 
 static duk_ret_t
 get_config(duk_context *ctx)
 {
-	return get(ctx, IRC_JSAPI_PLUGIN_PROP_OPTIONS);
+	return get(ctx, JSAPI_PLUGIN_PROP_OPTIONS);
 }
 
 static duk_ret_t
 set_template(duk_context *ctx)
 {
-	return set(ctx, IRC_JSAPI_PLUGIN_PROP_TEMPLATES);
+	return set(ctx, JSAPI_PLUGIN_PROP_TEMPLATES);
 }
 
 static duk_ret_t
 get_template(duk_context *ctx)
 {
-	return get(ctx, IRC_JSAPI_PLUGIN_PROP_TEMPLATES);
+	return get(ctx, JSAPI_PLUGIN_PROP_TEMPLATES);
 }
 
 static duk_ret_t
 set_paths(duk_context *ctx)
 {
-	return set(ctx, IRC_JSAPI_PLUGIN_PROP_PATHS);
+	return set(ctx, JSAPI_PLUGIN_PROP_PATHS);
 }
 
 static duk_ret_t
 get_paths(duk_context *ctx)
 {
-	return get(ctx, IRC_JSAPI_PLUGIN_PROP_PATHS);
+	return get(ctx, JSAPI_PLUGIN_PROP_PATHS);
 }
 
 static struct irc_plugin *
@@ -150,7 +151,7 @@ Plugin_info(duk_context *ctx)
 	if (duk_get_top(ctx) >= 1)
 		p = find(ctx);
 	else
-		p = irc_jsapi_plugin_self(ctx);
+		p = jsapi_plugin_self(ctx);
 
 	if (!p)
 		return 0;
@@ -219,7 +220,7 @@ static const duk_function_list_entry functions[] = {
 };
 
 void
-irc_jsapi_plugin_load(duk_context *ctx, struct irc_plugin *p)
+jsapi_plugin_load(duk_context *ctx, struct irc_plugin *p)
 {
 	/* Store plugin. */
 	duk_push_pointer(ctx, p);
@@ -252,7 +253,7 @@ irc_jsapi_plugin_load(duk_context *ctx, struct irc_plugin *p)
 }
 
 struct irc_plugin *
-irc_jsapi_plugin_self(duk_context *ctx)
+jsapi_plugin_self(duk_context *ctx)
 {
 	struct irc_plugin *p;
 

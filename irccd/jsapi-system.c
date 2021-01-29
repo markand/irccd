@@ -136,9 +136,9 @@ System_popen(duk_context *ctx)
 	FILE *fp;
 
 	if (!(fp = popen(cmd, mode)))
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 
-	irc_jsapi_file_push(ctx, NULL, fp, pclose);
+	jsapi_file_push(ctx, NULL, fp, pclose);
 
 	return 1;
 }
@@ -174,7 +174,7 @@ System_uptime(duk_context *ctx)
 	time_t bsec, csec;
 
 	if (sysctl(mib, 2, &boottime, &length, NULL, 0) < 0)
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 
 	bsec = boottime.tv_sec;
 	csec = time(NULL);
@@ -206,7 +206,7 @@ System_version(duk_context *ctx)
 	struct utsname uts;
 
 	if (uname(&uts) < 0)
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 
 	duk_push_string(ctx, uts.release);
 #endif
@@ -227,7 +227,7 @@ static const duk_function_list_entry functions[] = {
 };
 
 void
-irc_jsapi_system_raise(duk_context *ctx)
+jsapi_system_raise(duk_context *ctx)
 {
 	duk_get_global_string(ctx, "Irccd");
 	duk_get_prop_string(ctx, -1, "SystemError");
@@ -240,7 +240,7 @@ irc_jsapi_system_raise(duk_context *ctx)
 }
 
 void
-irc_jsapi_system_load(duk_context *ctx)
+jsapi_system_load(duk_context *ctx)
 {
 	duk_get_global_string(ctx, "Irccd");
 	duk_push_object(ctx);

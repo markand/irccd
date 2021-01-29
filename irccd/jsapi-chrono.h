@@ -1,5 +1,5 @@
 /*
- * jsapi-unicode.h -- Irccd.Unicode API
+ * jsapi-chrono.h -- Irccd.Chrono API
  *
  * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JSAPI_UNICODE_H
-#define IRCCD_JSAPI_UNICODE_H
+#ifndef IRCCD_JSAPI_CHRONO_H
+#define IRCCD_JSAPI_CHRONO_H
 
 #include <duktape.h>
 
 void
-irc_jsapi_unicode_load(duk_context *);
+jsapi_chrono_load(duk_context *);
 
-#endif /* !IRCCD_JSAPI_UNICODE_H */
+#endif /* !IRCCD_JSAPI_CHRONO_H */

@@ -1,5 +1,5 @@
 /*
- * jsapi-directory.h -- Irccd.Directory API
+ * js-plugin.h -- Javascript plugins
  *
  * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,20 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JSAPI_DIRECTORY_H
-#define IRCCD_JSAPI_DIRECTORY_H
+#ifndef IRCCD_JS_PLUGIN_H
+#define IRCCD_JS_PLUGIN_H
 
 #include <duktape.h>
 
-void
-irc_jsapi_directory_load(duk_context *);
+struct irc_plugin;
 
-#endif /* !IRCCD_JSAPI_DIRECTORY_H */
+duk_context *
+js_plugin_get_context(struct irc_plugin *);
+
+struct irc_plugin *
+js_plugin_open(const char *);
+
+struct irc_plugin_loader *
+js_plugin_loader_new(void);
+
+#endif /* !IRCCD_JS_PLUGIN_H */

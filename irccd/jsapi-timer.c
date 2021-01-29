@@ -24,10 +24,11 @@
 
 #include <duktape.h>
 
-#include "irccd.h"
+#include <irccd/irccd.h>
+#include <irccd/log.h>
+#include <irccd/util.h>
+
 #include "jsapi-system.h"
-#include "log.h"
-#include "util.h"
 
 #define SIGNATURE       DUK_HIDDEN_SYMBOL("Irccd.Timer")
 #define TABLE           DUK_HIDDEN_SYMBOL("Irccd.Timer.callbacks")
@@ -181,7 +182,7 @@ cond_err:
 
 mutex_err:
 	tm->status = TIMER_INACTIVE;
-	irc_jsapi_system_raise(tm->ctx);
+	jsapi_system_raise(tm->ctx);
 }
 
 static void
@@ -307,7 +308,7 @@ static const duk_number_list_entry constants[] = {
 };
 
 void
-irc_jsapi_timer_load(duk_context *ctx)
+jsapi_timer_load(duk_context *ctx)
 {
 	duk_get_global_string(ctx, "Irccd");
 	duk_push_c_function(ctx, Timer_constructor, 3);

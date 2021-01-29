@@ -22,7 +22,7 @@
 static duk_ret_t
 Unicode_isDigit(duk_context *ctx)
 {
-	duk_push_boolean(ctx, irc_uni_isdigit(duk_get_int(ctx, 0)));
+	duk_push_boolean(ctx, uni_isdigit(duk_get_int(ctx, 0)));
 
 	return 1;
 }
@@ -30,7 +30,7 @@ Unicode_isDigit(duk_context *ctx)
 static duk_ret_t
 Unicode_isLetter(duk_context *ctx)
 {
-	duk_push_boolean(ctx, irc_uni_isalpha(duk_get_int(ctx, 0)));
+	duk_push_boolean(ctx, uni_isalpha(duk_get_int(ctx, 0)));
 
 	return 1;
 }
@@ -38,7 +38,7 @@ Unicode_isLetter(duk_context *ctx)
 static duk_ret_t
 Unicode_isLower(duk_context *ctx)
 {
-	duk_push_boolean(ctx, irc_uni_islower(duk_get_int(ctx, 0)));
+	duk_push_boolean(ctx, uni_islower(duk_get_int(ctx, 0)));
 
 	return 1;
 }
@@ -46,7 +46,7 @@ Unicode_isLower(duk_context *ctx)
 static duk_ret_t
 Unicode_isSpace(duk_context *ctx)
 {
-	duk_push_boolean(ctx, irc_uni_isspace(duk_get_int(ctx, 0)));
+	duk_push_boolean(ctx, uni_isspace(duk_get_int(ctx, 0)));
 
 	return 1;
 }
@@ -54,7 +54,7 @@ Unicode_isSpace(duk_context *ctx)
 static duk_ret_t
 Unicode_isTitle(duk_context *ctx)
 {
-	duk_push_boolean(ctx, irc_uni_istitle(duk_get_int(ctx, 0)));
+	duk_push_boolean(ctx, uni_istitle(duk_get_int(ctx, 0)));
 
 	return 1;
 }
@@ -62,7 +62,7 @@ Unicode_isTitle(duk_context *ctx)
 static duk_ret_t
 Unicode_isUpper(duk_context *ctx)
 {
-	duk_push_boolean(ctx, irc_uni_isupper(duk_get_int(ctx, 0)));
+	duk_push_boolean(ctx, uni_isupper(duk_get_int(ctx, 0)));
 
 	return 1;
 }
@@ -78,7 +78,7 @@ static const duk_function_list_entry functions[] = {
 };
 
 void
-irc_jsapi_unicode_load(duk_context *ctx)
+jsapi_unicode_load(duk_context *ctx)
 {
 	duk_get_global_string(ctx, "Irccd");
 	duk_push_object(ctx);

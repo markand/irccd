@@ -18,14 +18,15 @@
 
 #include <duktape.h>
 
+#include <irccd/plugin.h>
+#include <irccd/log.h>
+
 #include "jsapi-logger.h"
 #include "jsapi-plugin.h"
-#include "plugin.h"
-#include "log.h"
 
 #define LOG(c, f)                                                       \
 do {                                                                    \
-        const struct irc_plugin *p = irc_jsapi_plugin_self(c);          \
+        const struct irc_plugin *p = jsapi_plugin_self(c);              \
         const char *message = duk_require_string(c, 0);                 \
                                                                         \
         f("plugin %s: %s", p->name, message);                           \
@@ -63,7 +64,7 @@ static const duk_function_list_entry functions[] = {
 };
 
 void
-irc_jsapi_logger_load(duk_context *ctx)
+jsapi_logger_load(duk_context *ctx)
 {
 	duk_get_global_string(ctx, "Irccd");
 	duk_push_object(ctx);

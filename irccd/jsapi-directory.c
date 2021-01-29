@@ -238,10 +238,10 @@ rm_helper(duk_context *ctx, const char *base, bool recursive)
 	};
 
 	if (stat(base, &st) < 0)
-		return irc_jsapi_system_raise(ctx), 0;
+		return jsapi_system_raise(ctx), 0;
 	else if (!S_ISDIR(st.st_mode)) {
 		errno = ENOTDIR;
-		return irc_jsapi_system_raise(ctx), 0;
+		return jsapi_system_raise(ctx), 0;
 	}
 
 	if (recursive)
@@ -259,10 +259,10 @@ mkpath(duk_context *ctx, const char *path)
 	/* TODO: convert code to errno. */
 	if (!CreateDirectoryA(path, NULL) && GetLastError() != ERROR_ALREADY_EXISTS) {
 		errno = EPERM;
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 #else
 	if (mkdir(path, 0755) < 0 && errno != EEXIST)
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 #endif
 }
 
@@ -306,7 +306,7 @@ Directory_constructor(duk_context *ctx)
 	duk_push_array(ctx);
 
 	if (!(dp = opendir(path)))
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 
 	for (int i = 0; (entry = readdir(dp)); ) {
 		if (strcmp(entry->d_name, ".") == 0 && !(flags & LIST_DOT))
@@ -409,7 +409,7 @@ static const duk_number_list_entry constants[] = {
 };
 
 void
-irc_jsapi_directory_load(duk_context *ctx)
+jsapi_directory_load(duk_context *ctx)
 {
 	assert(ctx);
 

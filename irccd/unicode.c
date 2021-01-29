@@ -67,7 +67,7 @@ static const uint32_t isspacer[] = {
 };
 
 bool
-irc_uni_isspace(uint32_t c)
+uni_isspace(uint32_t c)
 {
 	const uint32_t *p;
 
@@ -133,7 +133,7 @@ static const uint32_t isdigitr[] = {
 };
 
 bool
-irc_uni_isdigit(uint32_t c)
+uni_isdigit(uint32_t c)
 {
 	const uint32_t *p;
 
@@ -689,7 +689,7 @@ static const uint32_t isalphas[] = {
 };
 
 bool
-irc_uni_isalpha(uint32_t c)
+uni_isalpha(uint32_t c)
 {
 	const uint32_t *p;
 
@@ -1340,7 +1340,7 @@ static const uint32_t isuppers[] = {
 };
 
 bool
-irc_uni_isupper(uint32_t c)
+uni_isupper(uint32_t c)
 {
 	const uint32_t *p;
 
@@ -1991,7 +1991,7 @@ static const uint32_t islowers[] = {
 };
 
 bool
-irc_uni_islower(uint32_t c)
+uni_islower(uint32_t c)
 {
 	const uint32_t *p;
 
@@ -2595,7 +2595,7 @@ static const uint32_t istitles[] = {
 };
 
 bool
-irc_uni_istitle(uint32_t c)
+uni_istitle(uint32_t c)
 {
 	const uint32_t *p;
 
@@ -3263,7 +3263,7 @@ static const uint32_t touppers[] = {
 };
 
 uint32_t
-irc_uni_toupper(uint32_t c)
+uni_toupper(uint32_t c)
 {
 	const uint32_t *p;
 
@@ -3923,7 +3923,7 @@ static const uint32_t tolowers[] = {
 };
 
 uint32_t
-irc_uni_tolower(uint32_t c)
+uni_tolower(uint32_t c)
 {
 	const uint32_t *p;
 
@@ -4591,7 +4591,7 @@ static const uint32_t totitles[] = {
 };
 
 uint32_t
-irc_uni_totitle(uint32_t c)
+uni_totitle(uint32_t c)
 {
 	const uint32_t *p;
 
@@ -4609,13 +4609,13 @@ irc_uni_totitle(uint32_t c)
 }
 
 size_t
-irc_uni8_encode(uint8_t dst[], size_t dstsz, uint32_t point)
+uni8_encode(uint8_t dst[], size_t dstsz, uint32_t point)
 {
 	assert(dst);
 
 	size_t written;
 
-	switch ((written = irc_uni32_sizeof(point))) {
+	switch ((written = uni32_sizeof(point))) {
 	case 1:
 		if (dstsz < 1)
 			goto erange;
@@ -4659,14 +4659,14 @@ erange:
 }
 
 size_t
-irc_uni8_decode(const uint8_t src[], uint32_t *point)
+uni8_decode(const uint8_t src[], uint32_t *point)
 {
 	assert(src);
 	assert(point);
 
 	size_t parsed;
 
-	switch ((parsed = irc_uni8_sizeof(*src))) {
+	switch ((parsed = uni8_sizeof(*src))) {
 	case 1:
 		*point = src[0];
 		break;
@@ -4707,7 +4707,7 @@ eilseq:
 }
 
 size_t
-irc_uni8_sizeof(uint8_t c)
+uni8_sizeof(uint8_t c)
 {
 	if (c <= 127)
 		return 1;
@@ -4723,14 +4723,14 @@ irc_uni8_sizeof(uint8_t c)
 }
 
 size_t
-irc_uni8_length(const uint8_t src[])
+uni8_length(const uint8_t src[])
 {
 	assert(src);
 
 	size_t total = 0, gap;
 
 	while (*src) {
-		if ((gap = irc_uni8_sizeof(*src)) == (size_t)-1)
+		if ((gap = uni8_sizeof(*src)) == (size_t)-1)
 			return -1;
 
 		total += gap;
@@ -4741,7 +4741,7 @@ irc_uni8_length(const uint8_t src[])
 }
 
 size_t
-irc_uni8_to32(const uint8_t src[], uint32_t dst[], size_t dstsz)
+uni8_to32(const uint8_t src[], uint32_t dst[], size_t dstsz)
 {
 	assert(src);
 	assert(dst);
@@ -4749,7 +4749,7 @@ irc_uni8_to32(const uint8_t src[], uint32_t dst[], size_t dstsz)
 	size_t nwritten = 0, gap;
 
 	for (; *src && dstsz; --dstsz) {
-		if ((gap = irc_uni8_decode(src, dst++)) == (size_t)-1)
+		if ((gap = uni8_decode(src, dst++)) == (size_t)-1)
 			return -1;
 
 		src += gap;
@@ -4768,7 +4768,7 @@ irc_uni8_to32(const uint8_t src[], uint32_t dst[], size_t dstsz)
 }
 
 size_t
-irc_uni32_sizeof(uint32_t c)
+uni32_sizeof(uint32_t c)
 {
 	if (c <= 0x7F)
 		return 1;
@@ -4784,7 +4784,7 @@ irc_uni32_sizeof(uint32_t c)
 }
 
 size_t
-irc_uni32_length(const uint32_t src[])
+uni32_length(const uint32_t src[])
 {
 	assert(src);
 
@@ -4797,14 +4797,14 @@ irc_uni32_length(const uint32_t src[])
 }
 
 size_t
-irc_uni32_requires(const uint32_t src[])
+uni32_requires(const uint32_t src[])
 {
 	assert(src);
 
 	size_t total = 0, gap;
 
 	while (*src) {
-		if ((gap = irc_uni32_sizeof(*src++)) == (size_t)-1)
+		if ((gap = uni32_sizeof(*src++)) == (size_t)-1)
 			return -1;
 		if (gap >= SIZE_MAX - total) {
 			errno = ERANGE;
@@ -4818,7 +4818,7 @@ irc_uni32_requires(const uint32_t src[])
 }
 
 size_t
-irc_uni32_to8(const uint32_t src[], uint8_t dst[], size_t dstsz)
+uni32_to8(const uint32_t src[], uint8_t dst[], size_t dstsz)
 {
 	assert(src);
 	assert(dst);
@@ -4826,7 +4826,7 @@ irc_uni32_to8(const uint32_t src[], uint8_t dst[], size_t dstsz)
 	size_t nwritten = 0, gap;
 
 	while (*src && dstsz) {
-		if ((gap = irc_uni8_encode(dst, dstsz, *src++)) == (size_t)-1)
+		if ((gap = uni8_encode(dst, dstsz, *src++)) == (size_t)-1)
 			return -1;
 
 		dst += gap;

@@ -21,8 +21,9 @@
 
 #include <duktape.h>
 
+#include <irccd/util.h>
+
 #include "config.h"
-#include "util.h"
 
 static int
 SystemError_constructor(duk_context *ctx)
@@ -292,7 +293,7 @@ print(duk_context *ctx)
 }
 
 void
-irc_jsapi_load(duk_context *ctx)
+jsapi_load(duk_context *ctx)
 {
 	/* Irccd (global object) */
 	duk_push_object(ctx);

@@ -19,15 +19,16 @@
 #include <stdio.h>
 #include <err.h>
 
-#include <irccd/dl-plugin.h>
 #include <irccd/irccd.h>
 #include <irccd/log.h>
 #include <irccd/server.h>
 #include <irccd/transport.h>
 #include <irccd/util.h>
 #include <irccd/plugin.h>
-#include <irccd/js-plugin.h>
 #include <irccd/rule.h>
+
+#include "dl-plugin.h"
+#include "js-plugin.h"
 
 static int
 run(int argc, char **argv)
@@ -54,8 +55,9 @@ main(int argc, char **argv)
 	/* TODO: temp. */
 	irc_log_set_verbose(true);
 
-	irc_bot_plugin_loader_add(irc_dl_plugin_loader_new());
-	irc_bot_plugin_loader_add(irc_js_plugin_loader_new());
+	irc_bot_plugin_loader_add(dl_plugin_loader_new());
+	irc_bot_plugin_loader_add(js_plugin_loader_new());
+
 	irc_bot_plugin_find("foo");
 
 }

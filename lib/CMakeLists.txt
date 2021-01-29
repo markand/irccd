@@ -26,8 +26,6 @@ set(
 	irccd/config.h.in
 	irccd/conn.c
 	irccd/conn.h
-	irccd/dl-plugin.c
-	irccd/dl-plugin.h
 	irccd/event.c
 	irccd/event.h
 	irccd/irccd.c
@@ -51,38 +49,6 @@ set(
 	irccd/util.h
 )
 
-if (IRCCD_WITH_JS)
-	list(
-		APPEND SOURCES
-		irccd/unicode.c
-		irccd/unicode.h
-		irccd/js-plugin.c
-		irccd/js-plugin.h
-		irccd/jsapi-chrono.c
-		irccd/jsapi-chrono.h
-		irccd/jsapi-directory.c
-		irccd/jsapi-directory.h
-		irccd/jsapi-file.c
-		irccd/jsapi-file.h
-		irccd/jsapi-irccd.c
-		irccd/jsapi-irccd.h
-		irccd/jsapi-logger.c
-		irccd/jsapi-logger.h
-		irccd/jsapi-plugin.c
-		irccd/jsapi-plugin.h
-		irccd/jsapi-server.c
-		irccd/jsapi-server.h
-		irccd/jsapi-system.c
-		irccd/jsapi-system.h
-		irccd/jsapi-timer.c
-		irccd/jsapi-timer.h
-		irccd/jsapi-unicode.c
-		irccd/jsapi-unicode.h
-		irccd/jsapi-util.c
-		irccd/jsapi-util.h
-	)
-endif ()
-
 configure_file(
 	${libirccd_SOURCE_DIR}/irccd/config.h.in
 	${libirccd_BINARY_DIR}/irccd/config.h
@@ -101,9 +67,6 @@ target_link_libraries(libirccd libirccd-compat)
 
 if (IRCCD_WITH_SSL)
 	target_link_libraries(libirccd OpenSSL::SSL OpenSSL::Crypto)
-endif ()
-if (IRCCD_WITH_JS)
-	target_link_libraries(libirccd libirccd-duktape)
 endif ()
 
 source_group(TREE ${libirccd_SOURCE_DIR} FILES ${SOURCES})

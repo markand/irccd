@@ -25,11 +25,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "config.h"
+#include <config.h>
+
+#include <irccd/log.h>
+#include <irccd/plugin.h>
+#include <irccd/util.h>
+
 #include "dl-plugin.h"
-#include "log.h"
-#include "plugin.h"
-#include "util.h"
 
 #define INVOKE(pg, name, sig, ...)                                              \
 do {                                                                            \
@@ -212,11 +214,11 @@ wrap_open(struct irc_plugin_loader *ldr, const char *path)
 {
 	(void)ldr;
 
-	return irc_dl_plugin_open(path);
+	return dl_plugin_open(path);
 }
 
 struct irc_plugin *
-irc_dl_plugin_open(const char *path)
+dl_plugin_open(const char *path)
 {
 	struct self *self;
 
@@ -244,7 +246,7 @@ irc_dl_plugin_open(const char *path)
 }
 
 struct irc_plugin_loader *
-irc_dl_plugin_loader_new(void)
+dl_plugin_loader_new(void)
 {
 	struct irc_plugin_loader *ldr;
 

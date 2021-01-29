@@ -1,5 +1,5 @@
 /*
- * jsapi-server.c -- Irccd.Server API
+ * jsapi-util.h -- Irccd.Util API
  *
  * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
  *
@@ -16,17 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JSAPI_SERVER_H
-#define IRCCD_JSAPI_SERVER_H
+#ifndef IRCCD_JSAPI_UTIL_H
+#define IRCCD_JSAPI_UTIL_H
 
 #include <duktape.h>
 
-struct irc_server;
-
 void
-irc_jsapi_server_push(duk_context *, struct irc_server *);
+jsapi_util_load(duk_context *ctx);
 
-void
-irc_jsapi_server_load(duk_context *);
-
-#endif /* IRCCD_JSAPI_SERVER_H */
+#endif /* !IRCCD_JSAPI_UTIL_H */

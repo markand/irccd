@@ -21,7 +21,7 @@
 
 #include <duktape.h>
 
-#include "util.h"
+#include <irccd/util.h>
 
 #define SIGNATURE DUK_HIDDEN_SYMBOL("Irccd.Chrono")
 
@@ -106,7 +106,7 @@ static const duk_function_list_entry methods[] = {
 };
 
 void
-irc_jsapi_chrono_load(duk_context *ctx)
+jsapi_chrono_load(duk_context *ctx)
 {
 	duk_get_global_string(ctx, "Irccd");
 	duk_push_c_function(ctx, Chrono_constructor, 0);

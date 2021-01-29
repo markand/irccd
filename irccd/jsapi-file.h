@@ -1,5 +1,5 @@
 /*
- * js-plugin.h -- Javascript plugins
+ * jsapi-file.h -- Irccd.File API
  *
  * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
  *
@@ -16,29 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JS_PLUGIN_H
-#define IRCCD_JS_PLUGIN_H
+#ifndef IRCCD_JSAPI_FILE_H
+#define IRCCD_JSAPI_FILE_H
 
 #include <duktape.h>
 
-#include "plugin.h"
+void
+jsapi_file_load(duk_context *);
 
-struct irc_js_plugin_data {
-	struct irc_plugin plugin;
-	duk_context *ctx;
-	char **options;
-	char **templates;
-	char **paths;
-	char *license;
-	char *version;
-	char *author;
-	char *description;
-};
+void
+jsapi_file_push(duk_context *, const char *, FILE *, int (*)(FILE *));
 
-struct irc_plugin *
-irc_js_plugin_open(const char *);
-
-struct irc_plugin_loader *
-irc_js_plugin_loader_new(void);
-
-#endif /* !IRCCD_JS_PLUGIN_H */
+#endif /* !IRCCD_JSAPI_FILE_H */

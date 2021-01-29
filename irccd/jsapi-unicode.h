@@ -1,5 +1,5 @@
 /*
- * jsapi-file.h -- Irccd.File API
+ * jsapi-unicode.h -- Irccd.Unicode API
  *
  * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
  *
@@ -16,15 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JSAPI_FILE_H
-#define IRCCD_JSAPI_FILE_H
+#ifndef IRCCD_JSAPI_UNICODE_H
+#define IRCCD_JSAPI_UNICODE_H
 
 #include <duktape.h>
 
 void
-irc_jsapi_file_load(duk_context *);
+jsapi_unicode_load(duk_context *);
 
-void
-irc_jsapi_file_push(duk_context *, const char *, FILE *, int (*)(FILE *));
-
-#endif /* !IRCCD_JSAPI_FILE_H */
+#endif /* !IRCCD_JSAPI_UNICODE_H */

@@ -47,7 +47,7 @@ endif ()
 foreach (t ${TESTS})
 	add_executable(${t} ${t}.c)
 	add_test(${t} ${t})
-	target_link_libraries(${t} libirccd libirccd-greatest)
+	target_link_libraries(${t} irccd-fe libirccd-greatest)
 	set_target_properties(${t} PROPERTIES FOLDER "tests")
 	target_compile_definitions(
 		${t}

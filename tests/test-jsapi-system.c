@@ -26,15 +26,15 @@
 #include <irccd/plugin.h>
 
 static struct irc_plugin *plugin;
-static struct irc_js_plugin_data *data;
+static duk_context *ctx;
 
 static void
 setup(void *udata)
 {
 	(void)udata;
 
-	plugin = irc_js_plugin_open(SOURCE "/data/example-plugin.js");
-	data = plugin->data;
+	plugin = js_plugin_open(SOURCE "/data/example-plugin.js");
+	ctx = js_plugin_get_context(plugin);
 }
 
 static void
@@ -45,13 +45,13 @@ teardown(void *udata)
 	irc_plugin_finish(plugin);
 
 	plugin = NULL;
-	data = NULL;
+	ctx = NULL;
 }
 
 GREATEST_TEST
 basics_popen(void)
 {
-	int ret = duk_peval_string(data->ctx,
+	int ret = duk_peval_string(ctx,
 		"f = Irccd.System.popen(\"" IRCCD_EXECUTABLE " version\", \"r\");"
 		"r = f.readline();"
 	);
@@ -59,8 +59,8 @@ basics_popen(void)
 	if (ret != 0)
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "r"));
-	GREATEST_ASSERT_STR_EQ(IRCCD_VERSION, duk_get_string(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "r"));
+	GREATEST_ASSERT_STR_EQ(IRCCD_VERSION, duk_get_string(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -72,7 +72,7 @@ basics_sleep(void)
 
 	start = time(NULL);
 
-	if (duk_peval_string(data->ctx, "Irccd.System.sleep(2)") != 0)
+	if (duk_peval_string(ctx, "Irccd.System.sleep(2)") != 0)
 		GREATEST_FAIL();
 
 	now = time(NULL);
@@ -89,7 +89,7 @@ basics_usleep(void)
 
 	start = time(NULL);
 
-	if (duk_peval_string(data->ctx, "Irccd.System.usleep(2000000)") != 0)
+	if (duk_peval_string(ctx, "Irccd.System.usleep(2000000)") != 0)
 		GREATEST_FAIL();
 
 	now = time(NULL);

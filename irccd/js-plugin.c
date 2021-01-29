@@ -24,8 +24,13 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "channel.h"
-#include "event.h"
+#include <irccd/channel.h>
+#include <irccd/event.h>
+#include <irccd/log.h>
+#include <irccd/plugin.h>
+#include <irccd/server.h>
+#include <irccd/util.h>
+
 #include "js-plugin.h"
 #include "jsapi-chrono.h"
 #include "jsapi-directory.h"
@@ -39,14 +44,26 @@
 #include "jsapi-timer.h"
 #include "jsapi-unicode.h"
 #include "jsapi-util.h"
-#include "log.h"
-#include "plugin.h"
-#include "server.h"
-#include "util.h"
+
+
+struct self {
+	struct irc_plugin plugin;
+	duk_context *ctx;
+	char **options;
+	char **templates;
+	char **paths;
+	char *license;
+	char *version;
+	char *author;
+	char *description;
+};
 
 static void
 freelist(char **table)
 {
+	if (!table)
+		return;
+
 	for (char **p = table; *p; ++p)
 		free(*p);
 
@@ -176,79 +193,79 @@ get_value(duk_context *ctx, const char *table, const char *key)
 static void
 set_template(struct irc_plugin *plg, const char *key, const char *value)
 {
-	struct irc_js_plugin_data *js = plg->data;
+	struct self *js = plg->data;
 
-	set_key_value(js->ctx, IRC_JSAPI_PLUGIN_PROP_TEMPLATES, key, value);
+	set_key_value(js->ctx, JSAPI_PLUGIN_PROP_TEMPLATES, key, value);
 }
 
 static const char *
 get_template(struct irc_plugin *plg, const char *key)
 {
-	struct irc_js_plugin_data *js = plg->data;
+	struct self *js = plg->data;
 
-	return get_value(js->ctx, IRC_JSAPI_PLUGIN_PROP_TEMPLATES, key);
+	return get_value(js->ctx, JSAPI_PLUGIN_PROP_TEMPLATES, key);
 }
 
 static const char **
 get_templates(struct irc_plugin *plg)
 {
-	struct irc_js_plugin_data *js = plg->data;
+	struct self *js = plg->data;
 
-	return get_table(js->ctx, IRC_JSAPI_PLUGIN_PROP_TEMPLATES, &js->templates);
+	return get_table(js->ctx, JSAPI_PLUGIN_PROP_TEMPLATES, &js->templates);
 }
 
 static void
 set_path(struct irc_plugin *plg, const char *key, const char *value)
 {
-	struct irc_js_plugin_data *js = plg->data;
+	struct self *js = plg->data;
 
-	set_key_value(js->ctx, IRC_JSAPI_PLUGIN_PROP_PATHS, key, value);
+	set_key_value(js->ctx, JSAPI_PLUGIN_PROP_PATHS, key, value);
 }
 
 static const char *
 get_path(struct irc_plugin *plg, const char *key)
 {
-	struct irc_js_plugin_data *js = plg->data;
+	struct self *js = plg->data;
 
-	return get_value(js->ctx, IRC_JSAPI_PLUGIN_PROP_PATHS, key);
+	return get_value(js->ctx, JSAPI_PLUGIN_PROP_PATHS, key);
 }
 
 static const char **
 get_paths(struct irc_plugin *plg)
 {
-	struct irc_js_plugin_data *js = plg->data;
+	struct self *js = plg->data;
 
-	return get_table(js->ctx, IRC_JSAPI_PLUGIN_PROP_PATHS, &js->paths);
+	return get_table(js->ctx, JSAPI_PLUGIN_PROP_PATHS, &js->paths);
 }
 
 static void
 set_option(struct irc_plugin *plg, const char *key, const char *value)
 {
-	struct irc_js_plugin_data *js = plg->data;
+	struct self *js = plg->data;
 
-	set_key_value(js->ctx, IRC_JSAPI_PLUGIN_PROP_OPTIONS, key, value);
+	set_key_value(js->ctx, JSAPI_PLUGIN_PROP_OPTIONS, key, value);
 }
 
 static const char *
 get_option(struct irc_plugin *plg, const char *key)
 {
-	struct irc_js_plugin_data *js = plg->data;
+	struct self *js = plg->data;
 
-	return get_value(js->ctx, IRC_JSAPI_PLUGIN_PROP_OPTIONS, key);
+	return get_value(js->ctx, JSAPI_PLUGIN_PROP_OPTIONS, key);
 }
 
 static const char **
 get_options(struct irc_plugin *plg)
 {
-	struct irc_js_plugin_data *js = plg->data;
+	struct self *js = plg->data;
 
-	return get_table(js->ctx, IRC_JSAPI_PLUGIN_PROP_OPTIONS, &js->options);
+	return get_table(js->ctx, JSAPI_PLUGIN_PROP_OPTIONS, &js->options);
 }
 
 static void
 vcall(struct irc_plugin *plg, const char *function, const char *fmt, va_list ap)
 {
-	struct irc_js_plugin_data *self = plg->data;
+	struct self *self = plg->data;
 	int nargs = 0;
 
 	duk_get_global_string(self->ctx, function);
@@ -263,7 +280,7 @@ vcall(struct irc_plugin *plg, const char *function, const char *fmt, va_list ap)
 
 		switch (*f) {
 		case 'S':
-			irc_jsapi_server_push(self->ctx, va_arg(ap, struct irc_server *));
+			jsapi_server_push(self->ctx, va_arg(ap, struct irc_server *));
 			break;
 		case 's':
 			duk_push_string(self->ctx, va_arg(ap, const char *));
@@ -418,25 +435,25 @@ wrap_free(void *udata, void *ptr)
 	free(ptr);
 }
 
-static struct irc_js_plugin_data *
+static struct self *
 init(const char *path, const char *script)
 {
-	struct irc_js_plugin_data *js;
+	struct self *js;
 
 	js = irc_util_calloc(1, sizeof (*js));
 	js->ctx = duk_create_heap(wrap_malloc, wrap_realloc, wrap_free, NULL, NULL);
 
-	irc_jsapi_load(js->ctx);
-	irc_jsapi_chrono_load(js->ctx);
-	irc_jsapi_directory_load(js->ctx);
-	irc_jsapi_file_load(js->ctx);
-	irc_jsapi_logger_load(js->ctx);
-	irc_jsapi_plugin_load(js->ctx, &js->plugin);
-	irc_jsapi_server_load(js->ctx);
-	irc_jsapi_system_load(js->ctx);
-	irc_jsapi_timer_load(js->ctx);
-	irc_jsapi_unicode_load(js->ctx);
-	irc_jsapi_util_load(js->ctx);
+	jsapi_load(js->ctx);
+	jsapi_chrono_load(js->ctx);
+	jsapi_directory_load(js->ctx);
+	jsapi_file_load(js->ctx);
+	jsapi_logger_load(js->ctx);
+	jsapi_plugin_load(js->ctx, &js->plugin);
+	jsapi_server_load(js->ctx);
+	jsapi_system_load(js->ctx);
+	jsapi_timer_load(js->ctx);
+	jsapi_unicode_load(js->ctx);
+	jsapi_util_load(js->ctx);
 
 	if (duk_peval_string(js->ctx, script) != 0) {
 		irc_log_warn("plugin: %s: %s", path, duk_to_string(js->ctx, -1));
@@ -474,7 +491,7 @@ unload(struct irc_plugin *plg)
 static void
 finish(struct irc_plugin *plg)
 {
-	struct irc_js_plugin_data *self = plg->data;
+	struct self *self = plg->data;
 
 	if (self->ctx)
 		duk_destroy_heap(self->ctx);
@@ -495,16 +512,24 @@ wrap_open(struct irc_plugin_loader *ldr, const char *path)
 {
 	(void)ldr;
 
-	return irc_js_plugin_open(path);
+	return js_plugin_open(path);
+}
+
+duk_context *
+js_plugin_get_context(struct irc_plugin *js)
+{
+	struct self *self = js->data;
+
+	return self->ctx;
 }
 
 struct irc_plugin *
-irc_js_plugin_open(const char *path)
+js_plugin_open(const char *path)
 {
 	assert(path);
 
 	char *script = NULL;
-	struct irc_js_plugin_data *self;
+	struct self *self;
 
 	/*
 	 * Duktape can't open script from file path so we need to read the
@@ -546,7 +571,7 @@ irc_js_plugin_open(const char *path)
 }
 
 struct irc_plugin_loader *
-irc_js_plugin_loader_new(void)
+js_plugin_loader_new(void)
 {
 	struct irc_plugin_loader *ldr;
 

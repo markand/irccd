@@ -1,5 +1,5 @@
 /*
- * jsapi-timer.h -- Irccd.Timer API
+ * jsapi-server.c -- Irccd.Server API
  *
  * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,17 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JSAPI_TIMER_H
-#define IRCCD_JSAPI_TIMER_H
+#ifndef IRCCD_JSAPI_SERVER_H
+#define IRCCD_JSAPI_SERVER_H
 
 #include <duktape.h>
 
-void
-irc_jsapi_timer_load(duk_context *);
+struct irc_server;
 
-#endif /* !IRCCD_JSAPI_TIMER_H */
+void
+jsapi_server_push(duk_context *, struct irc_server *);
+
+void
+jsapi_server_load(duk_context *);
+
+#endif /* IRCCD_JSAPI_SERVER_H */

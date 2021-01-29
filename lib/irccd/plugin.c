@@ -167,8 +167,6 @@ irc_plugin_finish(struct irc_plugin *plg)
 
 	if (plg->finish)
 		plg->finish(plg);
-
-	free(plg);
 }
 
 struct irc_plugin *

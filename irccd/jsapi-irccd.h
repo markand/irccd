@@ -1,5 +1,5 @@
 /*
- * jsapi-logger.h -- Irccd.Logger API
+ * jsapi-irccd.h -- Irccd API
  *
  * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JSAPI_LOGGER_H
-#define IRCCD_JSAPI_LOGGER_H
+#ifndef IRCCD_JSAPI_IRCCD_H
+#define IRCCD_JSAPI_IRCCD_H
 
 #include <duktape.h>
 
 void
-irc_jsapi_logger_load(duk_context *);
+jsapi_load(duk_context *);
 
-#endif /* !IRCCD_JSAPI_LOGGER_H */
+#endif /* !IRCCD_JSAPI_IRCCD_H */

@@ -1,5 +1,5 @@
 /*
- * jsapi-plugin.h -- Javascript plugins
+ * dl-plugin.c -- native C plugins for irccd
  *
  * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
  *
@@ -16,21 +16,16 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JSAPI_PLUGIN_H
-#define IRCCD_JSAPI_PLUGIN_H
-
-#include <duktape.h>
-
-#define IRC_JSAPI_PLUGIN_PROP_OPTIONS   DUK_HIDDEN_SYMBOL("options")
-#define IRC_JSAPI_PLUGIN_PROP_TEMPLATES DUK_HIDDEN_SYMBOL("templates")
-#define IRC_JSAPI_PLUGIN_PROP_PATHS     DUK_HIDDEN_SYMBOL("paths")
+#ifndef IRCCD_DL_PLUGIN_H
+#define IRCCD_DL_PLUGIN_H
 
 struct irc_plugin;
-
-void
-irc_jsapi_plugin_load(duk_context *, struct irc_plugin *);
+struct irc_plugin_loader;
 
 struct irc_plugin *
-irc_jsapi_plugin_self(duk_context *);
+dl_plugin_open(const char *);
 
-#endif /* !IRCCD_JSAPI_PLUGIN_H */
+struct irc_plugin_loader *
+dl_plugin_loader_new(void);
+
+#endif /* !IRCCD_DL_PLUGIN_H */

@@ -25,15 +25,15 @@
 #include <irccd/plugin.h>
 
 static struct irc_plugin *plugin;
-static struct irc_js_plugin_data *data;
+static duk_context *ctx;
 
 static void
 setup(void *udata)
 {
 	(void)udata;
 
-	plugin = irc_js_plugin_open(SOURCE "/data/example-plugin.js");
-	data = plugin->data;
+	plugin = js_plugin_open(SOURCE "/data/example-plugin.js");
+	ctx = js_plugin_get_context(plugin);
 }
 
 static void
@@ -44,23 +44,23 @@ teardown(void *udata)
 	irc_plugin_finish(plugin);
 
 	plugin = NULL;
-	data = NULL;
+	ctx = NULL;
 }
 
 GREATEST_TEST
 basics_simple(void)
 {
-	if (duk_peval_string(data->ctx, "timer = new Irccd.Chrono();") != 0)
+	if (duk_peval_string(ctx, "timer = new Irccd.Chrono();") != 0)
 		GREATEST_FAIL();
 
 	sleep(1);
 
-	if (duk_peval_string(data->ctx, "result = timer.elapsed;") != 0)
+	if (duk_peval_string(ctx, "result = timer.elapsed;") != 0)
 		GREATEST_FAIL();
 
-	duk_get_global_string(data->ctx, "result");
+	duk_get_global_string(ctx, "result");
 
-	GREATEST_ASSERT_IN_RANGE(1000U, duk_get_uint(data->ctx, -1), 100);
+	GREATEST_ASSERT_IN_RANGE(1000U, duk_get_uint(ctx, -1), 100);
 	GREATEST_PASS();
 }
 
@@ -72,22 +72,22 @@ basics_reset(void)
 	 * start to reset its value and wait for 1s. The elapsed time must not
 	 * be greater than 1s.
 	 */
-	if (duk_peval_string(data->ctx, "timer = new Irccd.Chrono()") != 0)
+	if (duk_peval_string(ctx, "timer = new Irccd.Chrono()") != 0)
 		GREATEST_FAIL();
 
 	sleep(1);
 
-	if (duk_peval_string(data->ctx, "timer.reset();") != 0)
+	if (duk_peval_string(ctx, "timer.reset();") != 0)
 		GREATEST_FAIL();
 
 	sleep(1);
 
-	if (duk_peval_string(data->ctx, "result = timer.elapsed") != 0)
+	if (duk_peval_string(ctx, "result = timer.elapsed") != 0)
 		GREATEST_FAIL();
 
-	duk_get_global_string(data->ctx, "result");
+	duk_get_global_string(ctx, "result");
 
-	GREATEST_ASSERT_IN_RANGE(1000U, duk_get_uint(data->ctx, -1), 100);
+	GREATEST_ASSERT_IN_RANGE(1000U, duk_get_uint(ctx, -1), 100);
 	GREATEST_PASS();
 }
 

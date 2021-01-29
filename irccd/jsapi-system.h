@@ -1,5 +1,5 @@
 /*
- * jsapi-util.h -- Irccd.Util API
+ * jsapi-system.h -- Irccd.System API
  *
  * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
  *
@@ -16,12 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_JSAPI_UTIL_H
-#define IRCCD_JSAPI_UTIL_H
+#ifndef IRCCD_JSAPI_SYSTEM_H
+#define IRCCD_JSAPI_SYSTEM_H
 
 #include <duktape.h>
 
 void
-irc_jsapi_util_load(duk_context *ctx);
+jsapi_system_raise(duk_context *);
 
-#endif /* !IRCCD_JSAPI_UTIL_H */
+void
+jsapi_system_load(duk_context *);
+
+#endif /* !IRCCD_JSAPI_SYSTEM_H */

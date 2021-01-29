@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <compat.h>
+
 #include <sys/stat.h>
 #include <assert.h>
 #include <errno.h>
@@ -25,10 +27,10 @@
 
 #include <duktape.h>
 
-#include "compat.h"
+#include <irccd/util.h>
+
 #include "jsapi-file.h"
 #include "jsapi-system.h"
-#include "util.h"
 
 #define SIGNATURE DUK_HIDDEN_SYMBOL("Irccd.File")
 #define PROTOTYPE DUK_HIDDEN_SYMBOL("Irccd.File.prototype")
@@ -53,7 +55,7 @@ read_until_eof(duk_context *ctx, struct file *file)
 	while ((nread = fread(buf, 1, sizeof (buf), file->fp)) > 0) {
 		if (!(newret = realloc(ret, retsz + nread))) {
 			free(ret);
-			irc_jsapi_system_raise(ctx);
+			jsapi_system_raise(ctx);
 		}
 
 		ret = newret;
@@ -63,7 +65,7 @@ read_until_eof(duk_context *ctx, struct file *file)
 
 	if (ferror(file->fp)) {
 		free(ret);
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 	}
 
 	duk_push_lstring(ctx, ret, retsz);
@@ -79,11 +81,11 @@ read_amount(duk_context *ctx, struct file *file, unsigned int amount)
 	size_t nread;
 
 	if (!(ret = malloc(amount)))
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 
 	if ((nread = fread(ret, 1, amount, file->fp)) <= 0 || ferror(file->fp)) {
 		free(ret);
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 	}
 
 	duk_push_lstring(ctx, ret, nread);
@@ -209,7 +211,7 @@ File_prototype_lines(duk_context *ctx)
 
 	if (!file->fp) {
 		errno = EBADF;
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 	}
 
 	duk_push_array(ctx);
@@ -224,7 +226,7 @@ File_prototype_lines(duk_context *ctx)
 	free(line);
 
 	if (ferror(file->fp))
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 
 	return 1;
 }
@@ -237,7 +239,7 @@ File_prototype_read(duk_context *ctx)
 
 	if (!file->fp) {
 		errno = EBADF;
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 	}
 
 	return amount == -1U
@@ -254,7 +256,7 @@ File_prototype_readline(duk_context *ctx)
 
 	if (!file->fp) {
 		errno = EBADF;
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 	}
 
 	if (getline(&line, &linesz, file->fp) < 0) {
@@ -263,7 +265,7 @@ File_prototype_readline(duk_context *ctx)
 		if (feof(file->fp))
 			return 0;
 
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 	}
 
 	line[strcspn(line, "\r\n")] = 0;
@@ -277,7 +279,7 @@ static duk_ret_t
 File_prototype_remove(duk_context *ctx)
 {
 	if (remove(self(ctx)->path) < 0)
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 
 	return 0;
 }
@@ -290,7 +292,7 @@ File_prototype_seek(duk_context *ctx)
 	const long offset = duk_require_int(ctx, 1);
 
 	if (!file->fp || fseek(file->fp, offset, type) < 0)
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 
 	return 0;
 }
@@ -302,7 +304,7 @@ File_prototype_stat(duk_context *ctx)
 	struct stat st;
 
 	if (!file->fp || fstat(fileno(file->fp), &st) < 0)
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 
 	push_stat(ctx, &st);
 
@@ -316,7 +318,7 @@ File_prototype_tell(duk_context *ctx)
 	long position;
 
 	if (!file->fp || (position = ftell(file->fp)) < 0)
-		return irc_jsapi_system_raise(ctx), 0;
+		return jsapi_system_raise(ctx), 0;
 
 	duk_push_number(ctx, position);
 
@@ -331,12 +333,12 @@ File_prototype_write(duk_context *ctx)
 	const char *data = duk_require_lstring(ctx, 0, &datasz);
 
 	if (!file->fp)
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 
 	written = fwrite(data, 1, datasz, file->fp);
 
 	if (ferror(file->fp))
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 
 	duk_push_uint(ctx, written);
 
@@ -355,7 +357,7 @@ File_constructor(duk_context *ctx)
 		return 0;
 
 	if (!(fp = fopen(path, mode)))
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 
 	file = irc_util_calloc(1, sizeof (*file));
 	file->fp = fp;
@@ -426,7 +428,7 @@ File_remove(duk_context *ctx)
 	const char *path = duk_require_string(ctx, 0);
 
 	if (remove(path) < 0)
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 
 	return 0;
 }
@@ -438,7 +440,7 @@ File_stat(duk_context *ctx)
 	struct stat st;
 
 	if (stat(path, &st) < 0)
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 
 	push_stat(ctx, &st);
 
@@ -477,7 +479,7 @@ static const duk_number_list_entry constants[] = {
 };
 
 void
-irc_jsapi_file_load(duk_context *ctx)
+jsapi_file_load(duk_context *ctx)
 {
 	assert(ctx);
 
@@ -497,7 +499,7 @@ irc_jsapi_file_load(duk_context *ctx)
 }
 
 void
-irc_jsapi_file_push(duk_context *ctx, const char *path, FILE *fp, int (*finalizer)(FILE *))
+jsapi_file_push(duk_context *ctx, const char *path, FILE *fp, int (*finalizer)(FILE *))
 {
 	assert(ctx);
 	assert(fp);

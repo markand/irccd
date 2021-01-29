@@ -20,11 +20,12 @@
 
 #include <duktape.h>
 
-#include "channel.h"
-#include "irccd.h"
+#include <irccd/channel.h>
+#include <irccd/irccd.h>
+#include <irccd/server.h>
+#include <irccd/util.h>
+
 #include "jsapi-server.h"
-#include "server.h"
-#include "util.h"
 
 #define SIGNATURE DUK_HIDDEN_SYMBOL("Irccd.Server")
 #define PROTOTYPE DUK_HIDDEN_SYMBOL("Irccd.Server.prototype")
@@ -508,7 +509,7 @@ Server_find(duk_context *ctx)
 	if (!s)
 		return 0;
 
-	irc_jsapi_server_push(ctx, s);
+	jsapi_server_push(ctx, s);
 
 	return 1;
 }
@@ -521,7 +522,7 @@ Server_list(duk_context *ctx)
 	duk_push_object(ctx);
 
 	LIST_FOREACH(s, &irc.servers, link) {
-		irc_jsapi_server_push(ctx, s);
+		jsapi_server_push(ctx, s);
 		duk_put_prop_string(ctx, -2, s->name);
 	}
 
@@ -565,7 +566,7 @@ static const duk_function_list_entry functions[] = {
 };
 
 void
-irc_jsapi_server_load(duk_context *ctx)
+jsapi_server_load(duk_context *ctx)
 {
 	assert(ctx);
 
@@ -585,7 +586,7 @@ irc_jsapi_server_load(duk_context *ctx)
 }
 
 void
-irc_jsapi_server_push(duk_context *ctx, struct irc_server *s)
+jsapi_server_push(duk_context *ctx, struct irc_server *s)
 {
 	assert(ctx);
 	assert(s);

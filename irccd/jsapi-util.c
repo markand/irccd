@@ -20,10 +20,11 @@
 
 #include <string.h>
 
+#include <irccd/server.h>
+#include <irccd/subst.h>
+#include <irccd/util.h>
+
 #include "jsapi-util.h"
-#include "server.h"
-#include "subst.h"
-#include "util.h"
 
 struct subspack {
 	struct irc_subst_keyword *kw;
@@ -306,7 +307,7 @@ static const duk_function_list_entry functions[] = {
 };
 
 void
-irc_jsapi_util_load(duk_context *ctx)
+jsapi_util_load(duk_context *ctx)
 {
 	duk_get_global_string(ctx, "Irccd");
 	duk_push_object(ctx);

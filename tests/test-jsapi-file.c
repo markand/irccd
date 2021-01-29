@@ -26,21 +26,21 @@
 #include <irccd/plugin.h>
 
 static struct irc_plugin *plugin;
-static struct irc_js_plugin_data *data;
+static duk_context *ctx;
 
 static void
 setup(void *udata)
 {
 	(void)udata;
 
-	plugin = irc_js_plugin_open(SOURCE "/data/example-plugin.js");
-	data = plugin->data;
+	plugin = js_plugin_open(SOURCE "/data/example-plugin.js");
+	ctx = js_plugin_get_context(plugin);
 
-	duk_push_string(data->ctx, SOURCE);
-	duk_put_global_string(data->ctx, "SOURCE");
+	duk_push_string(ctx, SOURCE);
+	duk_put_global_string(ctx, "SOURCE");
 
-	duk_push_string(data->ctx, BINARY);
-	duk_put_global_string(data->ctx, "BINARY");
+	duk_push_string(ctx, BINARY);
+	duk_put_global_string(ctx, "BINARY");
 }
 
 static void
@@ -51,17 +51,17 @@ teardown(void *udata)
 	irc_plugin_finish(plugin);
 
 	plugin = NULL;
-	data = NULL;
+	ctx = NULL;
 }
 
 GREATEST_TEST
 free_basename(void)
 {
-	if (duk_peval_string(data->ctx, "result = Irccd.File.basename('/usr/local/etc/irccd.conf');"))
+	if (duk_peval_string(ctx, "result = Irccd.File.basename('/usr/local/etc/irccd.conf');"))
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "result"));
-	GREATEST_ASSERT_STR_EQ("irccd.conf", duk_get_string(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
+	GREATEST_ASSERT_STR_EQ("irccd.conf", duk_get_string(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -69,11 +69,11 @@ free_basename(void)
 GREATEST_TEST
 free_dirname(void)
 {
-	if (duk_peval_string(data->ctx, "result = Irccd.File.dirname('/usr/local/etc/irccd.conf');"))
+	if (duk_peval_string(ctx, "result = Irccd.File.dirname('/usr/local/etc/irccd.conf');"))
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "result"));
-	GREATEST_ASSERT_STR_EQ("/usr/local/etc", duk_get_string(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
+	GREATEST_ASSERT_STR_EQ("/usr/local/etc", duk_get_string(ctx, -1));
 	
 	GREATEST_PASS();
 }
@@ -81,11 +81,11 @@ free_dirname(void)
 GREATEST_TEST
 free_exists(void)
 {
-	if (duk_peval_string(data->ctx, "result = Irccd.File.exists(SOURCE + '/data/root/file-1.txt')"))
+	if (duk_peval_string(ctx, "result = Irccd.File.exists(SOURCE + '/data/root/file-1.txt')"))
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "result"));
-	GREATEST_ASSERT(duk_get_boolean(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
+	GREATEST_ASSERT(duk_get_boolean(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -93,11 +93,11 @@ free_exists(void)
 GREATEST_TEST
 free_exists2(void)
 {
-	if (duk_peval_string(data->ctx, "result = Irccd.File.exists('file_which_does_not_exist.txt')"))
+	if (duk_peval_string(ctx, "result = Irccd.File.exists('file_which_does_not_exist.txt')"))
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "result"));
-	GREATEST_ASSERT(!duk_get_boolean(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
+	GREATEST_ASSERT(!duk_get_boolean(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -113,7 +113,7 @@ free_remove(void)
 
 	fclose(fp);
 
-	if (duk_peval_string(data->ctx, "Irccd.File.remove(BINARY + '/test.bin')") != 0)
+	if (duk_peval_string(ctx, "Irccd.File.remove(BINARY + '/test.bin')") != 0)
 		GREATEST_FAIL();
 
 	GREATEST_ASSERT(stat(BINARY "/test.bin", &st) < 0);
@@ -135,7 +135,7 @@ GREATEST_SUITE(suite_free)
 GREATEST_TEST
 object_basename(void)
 {
-	const int ret = duk_peval_string(data->ctx,
+	const int ret = duk_peval_string(ctx,
 		"f = new Irccd.File(SOURCE + '/data/root/file-1.txt', 'r');"
 		"result = f.basename();"
 	);
@@ -143,8 +143,8 @@ object_basename(void)
 	if (ret != 0)
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "result"));
-	GREATEST_ASSERT_STR_EQ("file-1.txt", duk_get_string(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
+	GREATEST_ASSERT_STR_EQ("file-1.txt", duk_get_string(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -152,7 +152,7 @@ object_basename(void)
 GREATEST_TEST
 object_basename_closed(void)
 {
-	const int ret = duk_peval_string(data->ctx,
+	const int ret = duk_peval_string(ctx,
 		"f = new Irccd.File(SOURCE + '/data/root/file-1.txt', 'r');"
 		"f.close();"
 		"result = f.basename();"
@@ -161,8 +161,8 @@ object_basename_closed(void)
 	if (ret != 0)
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "result"));
-	GREATEST_ASSERT_STR_EQ("file-1.txt", duk_get_string(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
+	GREATEST_ASSERT_STR_EQ("file-1.txt", duk_get_string(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -170,7 +170,7 @@ object_basename_closed(void)
 GREATEST_TEST
 object_dirname(void)
 {
-	const int ret = duk_peval_string(data->ctx,
+	const int ret = duk_peval_string(ctx,
 		"f = new Irccd.File(SOURCE + '/data/root/file-1.txt', 'r');"
 		"result = f.dirname();"
 	);
@@ -178,8 +178,8 @@ object_dirname(void)
 	if (ret != 0)
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "result"));
-	GREATEST_ASSERT_STR_EQ(SOURCE "/data/root", duk_get_string(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
+	GREATEST_ASSERT_STR_EQ(SOURCE "/data/root", duk_get_string(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -187,7 +187,7 @@ object_dirname(void)
 GREATEST_TEST
 object_dirname_closed(void)
 {
-	const int ret = duk_peval_string(data->ctx,
+	const int ret = duk_peval_string(ctx,
 		"f = new Irccd.File(SOURCE + '/data/root/file-1.txt', 'r');"
 		"f.close();"
 		"result = f.dirname();"
@@ -196,8 +196,8 @@ object_dirname_closed(void)
 	if (ret != 0)
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "result"));
-	GREATEST_ASSERT_STR_EQ(SOURCE "/data/root", duk_get_string(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
+	GREATEST_ASSERT_STR_EQ(SOURCE "/data/root", duk_get_string(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -205,21 +205,21 @@ object_dirname_closed(void)
 GREATEST_TEST
 object_lines(void)
 {
-	const int ret = duk_peval_string(data->ctx,
+	const int ret = duk_peval_string(ctx,
 		"result = new Irccd.File(SOURCE + '/data/root/lines.txt', 'r').lines();"
 	);
 
 	if (ret != 0)
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "result"));
-	GREATEST_ASSERT_EQ(3, duk_get_length(data->ctx, -1));
-	GREATEST_ASSERT(duk_get_prop_index(data->ctx, -1, 0));
-	GREATEST_ASSERT_STR_EQ("a", duk_get_string(data->ctx, -1));
-	GREATEST_ASSERT(duk_get_prop_index(data->ctx, -2, 1));
-	GREATEST_ASSERT_STR_EQ("b", duk_get_string(data->ctx, -1));
-	GREATEST_ASSERT(duk_get_prop_index(data->ctx, -3, 2));
-	GREATEST_ASSERT_STR_EQ("c", duk_get_string(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
+	GREATEST_ASSERT_EQ(3, duk_get_length(ctx, -1));
+	GREATEST_ASSERT(duk_get_prop_index(ctx, -1, 0));
+	GREATEST_ASSERT_STR_EQ("a", duk_get_string(ctx, -1));
+	GREATEST_ASSERT(duk_get_prop_index(ctx, -2, 1));
+	GREATEST_ASSERT_STR_EQ("b", duk_get_string(ctx, -1));
+	GREATEST_ASSERT(duk_get_prop_index(ctx, -3, 2));
+	GREATEST_ASSERT_STR_EQ("c", duk_get_string(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -227,7 +227,7 @@ object_lines(void)
 GREATEST_TEST
 object_lines_closed(void)
 {
-	const int ret = duk_peval_string(data->ctx,
+	const int ret = duk_peval_string(ctx,
 		"try {"
 		"  f = new Irccd.File(SOURCE + '/data/root/lines.txt', 'r');"
 		"  f.close();"
@@ -240,8 +240,8 @@ object_lines_closed(void)
 	if (ret != 0)
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "name"));
-	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "name"));
+	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -249,7 +249,7 @@ object_lines_closed(void)
 GREATEST_TEST
 object_seek1(void)
 {
-	const int ret = duk_peval_string(data->ctx,
+	const int ret = duk_peval_string(ctx,
 		"f = new Irccd.File(SOURCE + '/data/root/file-1.txt', 'r');"
 		"f.seek(Irccd.File.SeekSet, 6);"
 		"result = f.read(1);"
@@ -258,8 +258,8 @@ object_seek1(void)
 	if (ret != 0)
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "result"));
-	GREATEST_ASSERT_STR_EQ(".", duk_get_string(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
+	GREATEST_ASSERT_STR_EQ(".", duk_get_string(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -267,7 +267,7 @@ object_seek1(void)
 GREATEST_TEST
 object_seek2(void)
 {
-	const int ret = duk_peval_string(data->ctx,
+	const int ret = duk_peval_string(ctx,
 		"f = new Irccd.File(SOURCE + '/data/root/file-1.txt', 'r');"
 		"f.seek(Irccd.File.SeekSet, 2);"
 		"f.seek(Irccd.File.SeekCur, 4);"
@@ -277,8 +277,8 @@ object_seek2(void)
 	if (ret != 0)
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "result"));
-	GREATEST_ASSERT_STR_EQ(".", duk_get_string(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
+	GREATEST_ASSERT_STR_EQ(".", duk_get_string(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -286,7 +286,7 @@ object_seek2(void)
 GREATEST_TEST
 object_seek3(void)
 {
-	const int ret = duk_peval_string(data->ctx,
+	const int ret = duk_peval_string(ctx,
 		"f = new Irccd.File(SOURCE + '/data/root/file-1.txt', 'r');"
 		"f.seek(Irccd.File.SeekEnd, -2);"
 		"result = f.read(1);"
@@ -295,8 +295,8 @@ object_seek3(void)
 	if (ret != 0)
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "result"));
-	GREATEST_ASSERT_STR_EQ("t", duk_get_string(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
+	GREATEST_ASSERT_STR_EQ("t", duk_get_string(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -304,7 +304,7 @@ object_seek3(void)
 GREATEST_TEST
 object_seek_closed(void)
 {
-	const int ret = duk_peval_string(data->ctx,
+	const int ret = duk_peval_string(ctx,
 		"try {"
 		"  f = new Irccd.File(SOURCE + '/data/root/file-1.txt', 'r');"
 		"  f.close();"
@@ -317,8 +317,8 @@ object_seek_closed(void)
 	if (ret != 0)
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "name"));
-	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "name"));
+	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -326,7 +326,7 @@ object_seek_closed(void)
 GREATEST_TEST
 object_read(void)
 {
-	const int ret = duk_peval_string(data->ctx,
+	const int ret = duk_peval_string(ctx,
 		"f = new Irccd.File(SOURCE + '/data/root/file-1.txt', 'r');"
 		"result = f.read();"
 	);
@@ -334,8 +334,8 @@ object_read(void)
 	if (ret != 0)
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "result"));
-	GREATEST_ASSERT_STR_EQ("file-1.txt\n", duk_get_string(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
+	GREATEST_ASSERT_STR_EQ("file-1.txt\n", duk_get_string(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -343,7 +343,7 @@ object_read(void)
 GREATEST_TEST
 object_read_closed(void)
 {
-	const int ret = duk_peval_string(data->ctx,
+	const int ret = duk_peval_string(ctx,
 		"try {"
 		"  f = new Irccd.File(SOURCE + '/data/root/file-1.txt', 'r');"
 		"  f.close();"
@@ -356,8 +356,8 @@ object_read_closed(void)
 	if (ret != 0)
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "name"));
-	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "name"));
+	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -365,7 +365,7 @@ object_read_closed(void)
 GREATEST_TEST
 object_readline(void)
 {
-	const int ret = duk_peval_string(data->ctx,
+	const int ret = duk_peval_string(ctx,
 		"result = [];"
 		"f = new Irccd.File(SOURCE + '/data/root/lines.txt', 'r');"
 		"for (var s; s = f.readline(); ) {"
@@ -374,18 +374,18 @@ object_readline(void)
 	);
 
 	if (ret != 0) {
-		puts(duk_to_string(data->ctx, -1));
+		puts(duk_to_string(ctx, -1));
 		GREATEST_FAIL();
 	}
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "result"));
-	GREATEST_ASSERT_EQ(3, duk_get_length(data->ctx, -1));
-	GREATEST_ASSERT(duk_get_prop_index(data->ctx, -1, 0));
-	GREATEST_ASSERT_STR_EQ("a", duk_get_string(data->ctx, -1));
-	GREATEST_ASSERT(duk_get_prop_index(data->ctx, -2, 1));
-	GREATEST_ASSERT_STR_EQ("b", duk_get_string(data->ctx, -1));
-	GREATEST_ASSERT(duk_get_prop_index(data->ctx, -3, 2));
-	GREATEST_ASSERT_STR_EQ("c", duk_get_string(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
+	GREATEST_ASSERT_EQ(3, duk_get_length(ctx, -1));
+	GREATEST_ASSERT(duk_get_prop_index(ctx, -1, 0));
+	GREATEST_ASSERT_STR_EQ("a", duk_get_string(ctx, -1));
+	GREATEST_ASSERT(duk_get_prop_index(ctx, -2, 1));
+	GREATEST_ASSERT_STR_EQ("b", duk_get_string(ctx, -1));
+	GREATEST_ASSERT(duk_get_prop_index(ctx, -3, 2));
+	GREATEST_ASSERT_STR_EQ("c", duk_get_string(ctx, -1));
 
 	GREATEST_PASS();
 }
@@ -393,7 +393,7 @@ object_readline(void)
 GREATEST_TEST
 object_readline_closed(void)
 {
-	const int ret = duk_peval_string(data->ctx,
+	const int ret = duk_peval_string(ctx,
 		"try {"
 		"  result = [];"
 		"  f = new Irccd.File(SOURCE + '/data/root/lines.txt', 'r');"
@@ -410,10 +410,10 @@ object_readline_closed(void)
 	if (ret != 0)
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "result"));
-	GREATEST_ASSERT_EQ(0, duk_get_length(data->ctx, -1));
-	GREATEST_ASSERT(duk_get_global_string(data->ctx, "name"));
-	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(data->ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "result"));
+	GREATEST_ASSERT_EQ(0, duk_get_length(ctx, -1));
+	GREATEST_ASSERT(duk_get_global_string(ctx, "name"));
+	GREATEST_ASSERT_STR_EQ("SystemError", duk_get_string(ctx, -1));
 
 	GREATEST_PASS();
 }
