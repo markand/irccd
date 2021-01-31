@@ -28,11 +28,12 @@
 
 #include <assert.h>
 
-#include "irccd.h"
-#include "log.h"
+#include <irccd/irccd.h>
+#include <irccd/log.h>
+#include <irccd/server.h>
+#include <irccd/util.h>
+
 #include "peer.h"
-#include "server.h"
-#include "util.h"
 
 static size_t
 parse(char *line, const char **args, size_t max)
@@ -63,12 +64,12 @@ parse(char *line, const char **args, size_t max)
 }
 
 static struct irc_server *
-require_server(struct irc_peer *p, const char *id)
+require_server(struct peer *p, const char *id)
 {
 	struct irc_server *s;
 
 	if (!(s = irc_bot_server_find(id))) {
-		irc_peer_send(p, "server %s not found", id);
+		peer_send(p, "server %s not found", id);
 		return NULL;
 	}
 
@@ -76,9 +77,9 @@ require_server(struct irc_peer *p, const char *id)
 }
 
 static int
-ok(struct irc_peer *p)
+ok(struct peer *p)
 {
-	irc_peer_send(p, "OK");
+	peer_send(p, "OK");
 
 	return 0;
 }
@@ -87,7 +88,7 @@ ok(struct irc_peer *p)
  * DISCONNECT [server]
  */
 static int
-cmd_server_disconnect(struct irc_peer *p, char *line)
+cmd_server_disconnect(struct peer *p, char *line)
 {
 	const char *args[1] = {0};
 	struct irc_server *s;
@@ -107,7 +108,7 @@ cmd_server_disconnect(struct irc_peer *p, char *line)
  * MESSAGE server channel message
  */
 static int
-cmd_server_message(struct irc_peer *p, char *line)
+cmd_server_message(struct peer *p, char *line)
 {
 	const char *args[3] = {0};
 	struct irc_server *s;
@@ -126,7 +127,7 @@ cmd_server_message(struct irc_peer *p, char *line)
  * ME server channel message
  */
 static int
-cmd_server_me(struct irc_peer *p, char *line)
+cmd_server_me(struct peer *p, char *line)
 {
 	const char *args[3] = {0};
 	struct irc_server *s;
@@ -145,7 +146,7 @@ cmd_server_me(struct irc_peer *p, char *line)
  * MODE server channel mode [limit] [user] [mask]
  */
 static int
-cmd_server_mode(struct irc_peer *p, char *line)
+cmd_server_mode(struct peer *p, char *line)
 {
 	const char *args[6] = {0};
 	struct irc_server *s;
@@ -168,7 +169,7 @@ cmd_server_mode(struct irc_peer *p, char *line)
  * NOTICE server channel message
  */
 static int
-cmd_server_notice(struct irc_peer *p, char *line)
+cmd_server_notice(struct peer *p, char *line)
 {
 	const char *args[3] = {0};
 	struct irc_server *s;
@@ -187,7 +188,7 @@ cmd_server_notice(struct irc_peer *p, char *line)
  * INVITE server channel target
  */
 static int
-cmd_server_invite(struct irc_peer *p, char *line)
+cmd_server_invite(struct peer *p, char *line)
 {
 	const char *args[3] = {0};
 	struct irc_server *s;
@@ -206,7 +207,7 @@ cmd_server_invite(struct irc_peer *p, char *line)
  * JOIN server channel [password]
  */
 static int
-cmd_server_join(struct irc_peer *p, char *line)
+cmd_server_join(struct peer *p, char *line)
 {
 	const char *args[3] = {0};
 	struct irc_server *s;
@@ -225,7 +226,7 @@ cmd_server_join(struct irc_peer *p, char *line)
  * KICK server channel target [reason]
  */
 static int
-cmd_server_kick(struct irc_peer *p, char *line)
+cmd_server_kick(struct peer *p, char *line)
 {
 	const char *args[4] = {0};
 	struct irc_server *s;
@@ -241,7 +242,7 @@ cmd_server_kick(struct irc_peer *p, char *line)
 }
 
 static int
-cmd_server_list(struct irc_peer *p, char *line)
+cmd_server_list(struct peer *p, char *line)
 {
 	(void)line;
 
@@ -262,7 +263,7 @@ cmd_server_list(struct irc_peer *p, char *line)
 	}
 
 	fclose(fp);
-	irc_peer_send(p, out);
+	peer_send(p, out);
 	free(out);
 
 	return 0;
@@ -272,7 +273,7 @@ cmd_server_list(struct irc_peer *p, char *line)
  * PART server channel [reason]
  */
 static int
-cmd_server_part(struct irc_peer *p, char *line)
+cmd_server_part(struct peer *p, char *line)
 {
 	const char *args[3] = {0};
 	struct irc_server *s;
@@ -291,7 +292,7 @@ cmd_server_part(struct irc_peer *p, char *line)
  * TOPIC server channel topic
  */
 static int
-cmd_server_topic(struct irc_peer *p, char *line)
+cmd_server_topic(struct peer *p, char *line)
 {
 	const char *args[3] = {0};
 	struct irc_server *s;
@@ -307,7 +308,7 @@ cmd_server_topic(struct irc_peer *p, char *line)
 }
 
 static int
-cmd_watch(struct irc_peer *p, char *line)
+cmd_watch(struct peer *p, char *line)
 {
 	(void)line;
 
@@ -318,7 +319,7 @@ cmd_watch(struct irc_peer *p, char *line)
 
 static const struct cmd {
 	const char *name;
-	int (*call)(struct irc_peer *, char *);
+	int (*call)(struct peer *, char *);
 } cmds[] = {
 	{ "SERVER-DISCONNECT",  cmd_server_disconnect   },
 	{ "SERVER-INVITE",      cmd_server_invite       },
@@ -350,19 +351,19 @@ find(const char *line)
 }
 
 static void
-invoke(struct irc_peer *p, char *line)
+invoke(struct peer *p, char *line)
 {
 	const struct cmd *c = find(line);
 	int er;
 
 	if (!c)
-		irc_peer_send(p, "command not found");
+		peer_send(p, "command not found");
 	else if ((er = c->call(p, line)) != 0)
-		irc_peer_send(p, "%s", strerror(errno));
+		peer_send(p, "%s", strerror(errno));
 }
 
 static void
-dispatch(struct irc_peer *p)
+dispatch(struct peer *p)
 {
 	char *pos;
 	size_t length;
@@ -379,50 +380,50 @@ dispatch(struct irc_peer *p)
 	}
 }
 
-static bool
-input(struct irc_peer *p)
+static int
+input(struct peer *p)
 {
 	char buf[BUFSIZ + 1];
 	ssize_t nr;
 
 	if ((nr = recv(p->fd, buf, BUFSIZ, 0)) <= 0) {
 		irc_log_info("transport: client disconnect");
-		return false;
+		return -1;
 	}
 
 	buf[nr] = '\0';
 
 	if (strlcat(p->in, buf, sizeof (p->in)) >= sizeof (p->in)) {
 		errno = EMSGSIZE;
-		return false;
+		return -1;
 	}
 
 	dispatch(p);
 
-	return true;
+	return 0;
 }
 
-static bool
-output(struct irc_peer *p)
+static int
+output(struct peer *p)
 {
 	ssize_t ns;
 	size_t len = strlen(p->out);
 
 	if ((ns = send(p->fd, p->out, len, 0)) < 0)
-		return false;
+		return -1;
 
 	if ((size_t)ns >= len)
 		memset(p->out, 0, sizeof (p->out));
 	else
 		memmove(p->out, p->out + ns, sizeof (p->out) - ns);
 
-	return true;
+	return 0;
 }
 
-struct irc_peer *
-irc_peer_new(int fd)
+struct peer *
+peer_new(int fd)
 {
-	struct irc_peer *p;
+	struct peer *p;
 
 	p = irc_util_calloc(1, sizeof (*p));
 	p->fd = fd;
@@ -430,8 +431,8 @@ irc_peer_new(int fd)
 	return p;
 }
 
-bool
-irc_peer_send(struct irc_peer *p, const char *fmt, ...)
+int
+peer_send(struct peer *p, const char *fmt, ...)
 {
 	assert(p);
 	assert(fmt);
@@ -449,16 +450,16 @@ irc_peer_send(struct irc_peer *p, const char *fmt, ...)
 
 	/* Don't forget \n. */
 	if (required + 1 >= avail)
-		return false;
+		return -1;
 
 	strlcat(p->out, buf, sizeof (p->out));
 	strlcat(p->out, "\n", sizeof (p->out));
 
-	return true;
+	return 0;
 }
 
 void
-irc_peer_prepare(struct irc_peer *p, struct pollfd *fd)
+peer_prepare(struct peer *p, struct pollfd *fd)
 {
 	assert(p);
 	assert(fd);
@@ -470,25 +471,24 @@ irc_peer_prepare(struct irc_peer *p, struct pollfd *fd)
 		fd->events |= POLLOUT;
 }
 
-bool
-irc_peer_flush(struct irc_peer *p, const struct pollfd *fd)
+int
+peer_flush(struct peer *p, const struct pollfd *fd)
 {
 	assert(p);
 	assert(fd);
 
 	if (fd->fd != p->fd)
-		return true;
+		return -1;
+	if (fd->revents & POLLIN && input(p) < 0)
+		return -1;
+	if (fd->revents & POLLOUT && output(p) < 0)
+		return -1;
 
-	if (fd->revents & POLLIN && !input(p))
-		return false;
-	if (fd->revents & POLLOUT && !output(p))
-		return false;
-
-	return true;
+	return 0;
 }
 
 void
-irc_peer_finish(struct irc_peer *p)
+peer_finish(struct peer *p)
 {
 	assert(p);
 

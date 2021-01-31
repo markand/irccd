@@ -27,17 +27,19 @@
 #include <sys/un.h>
 #include <unistd.h>
 
-#include "config.h"
-#include "log.h"
-#include "transport.h"
+#include <config.h>
+
+#include <irccd/log.h>
+#include <irccd/transport.h>
+#include <irccd/util.h>
+
 #include "peer.h"
-#include "util.h"
 
 static struct sockaddr_un addr;
 static int fd = -1;
 
-bool
-irc_transport_bind(const char *path)
+int
+transport_bind(const char *path)
 {
 	assert(path);
 
@@ -75,7 +77,7 @@ err:
 }
 
 void
-irc_transport_prepare(struct pollfd *pfd)
+transport_prepare(struct pollfd *pfd)
 {
 	assert(pfd);
 
@@ -86,12 +88,12 @@ irc_transport_prepare(struct pollfd *pfd)
 	pfd->events = POLLIN;
 }
 
-struct irc_peer *
-irc_transport_flush(const struct pollfd *pfd)
+struct peer *
+transport_flush(const struct pollfd *pfd)
 {
 	assert(pfd);
 
-	struct irc_peer *peer;
+	struct peer *peer;
 	int newfd;
 
 	if (fd < 0 || pfd->fd != fd || !(pfd->revents & POLLIN))
@@ -102,17 +104,17 @@ irc_transport_flush(const struct pollfd *pfd)
 		return NULL;
 	}
 
-	peer = irc_peer_new(newfd);
+	peer = peer_new(newfd);
 
 	irc_log_info("transport: new client connected");
-	irc_peer_send(peer, "IRCCD %d.%d.%d", IRCCD_VERSION_MAJOR,
+	peer_send(peer, "IRCCD %d.%d.%d", IRCCD_VERSION_MAJOR,
 	    IRCCD_VERSION_MINOR, IRCCD_VERSION_PATCH);
 
 	return peer;
 }
 
 void
-irc_transport_finish(void)
+transport_finish(void)
 {
 	/* Connection socket. */
 	if (fd != -1)

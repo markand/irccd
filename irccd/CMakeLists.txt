@@ -22,6 +22,10 @@ set(
 	SOURCES
 	${irccd_SOURCE_DIR}/dl-plugin.c
 	${irccd_SOURCE_DIR}/dl-plugin.h
+	${irccd_SOURCE_DIR}/peer.c
+	${irccd_SOURCE_DIR}/peer.h
+	${irccd_SOURCE_DIR}/transport.c
+	${irccd_SOURCE_DIR}/transport.h
 )
 
 if (IRCCD_WITH_JS)

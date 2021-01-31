@@ -33,8 +33,6 @@ set(
 	irccd/limits.h
 	irccd/log.c
 	irccd/log.h
-	irccd/peer.c
-	irccd/peer.h
 	irccd/plugin.c
 	irccd/plugin.h
 	irccd/rule.c
@@ -43,8 +41,6 @@ set(
 	irccd/server.h
 	irccd/subst.c
 	irccd/subst.h
-	irccd/transport.c
-	irccd/transport.h
 	irccd/util.c
 	irccd/util.h
 )

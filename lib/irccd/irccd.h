@@ -19,14 +19,14 @@
 #ifndef IRCCD_H
 #define IRCCD_H
 
-#include "peer.h"
+#include <stddef.h>
+
 #include "plugin.h"
 #include "rule.h"
 #include "server.h"
 
 extern struct irc {
 	struct irc_server_list servers;
-	struct irc_peer_list peers;
 	struct irc_plugin_list plugins;
 	struct irc_plugin_loader_list plugin_loaders;
 	struct irc_rule_list rules;
@@ -71,10 +71,19 @@ irc_bot_rule_remove(size_t);
 void
 irc_bot_rule_clear(void);
 
-void
-irc_bot_post(void (*)(void *), void *);
+size_t
+irc_bot_poll_count(void);
 
 void
-irc_bot_run(void);
+irc_bot_prepare(struct pollfd *);
+
+void
+irc_bot_flush(const struct pollfd *);
+
+int
+irc_bot_dequeue(struct irc_event *);
+
+void
+irc_bot_post(void (*)(void *), void *);
 
 #endif /* !IRCCD_H */

@@ -1,5 +1,5 @@
 /*
- * peer.h -- client connected to irccd
+ * transport.h -- remote command support
  *
  * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
  *
@@ -16,39 +16,25 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_PEER_H
-#define IRCCD_PEER_H
-
-#include <sys/queue.h>
-#include <stdbool.h>
+#ifndef IRCCD_TRANSPORT_H
+#define IRCCD_TRANSPORT_H
 
 #include "limits.h"
 
 struct pollfd;
 
-struct irc_peer {
-	int fd;
-	bool is_watching;
-	char in[IRC_BUF_LEN];
-	char out[IRC_BUF_LEN];
-	LIST_ENTRY(irc_peer) link;
-};
+struct peer;
 
-LIST_HEAD(irc_peer_list, irc_peer);
-
-struct irc_peer *
-irc_peer_new(int);
-
-bool
-irc_peer_send(struct irc_peer *, const char *, ...);
+int
+transport_bind(const char *);
 
 void
-irc_peer_prepare(struct irc_peer *, struct pollfd *);
+transport_prepare(struct pollfd *);
 
-bool
-irc_peer_flush(struct irc_peer *, const struct pollfd *);
+struct peer *
+transport_flush(const struct pollfd *);
 
 void
-irc_peer_finish(struct irc_peer *);
+transport_finish(void);
 
-#endif /* !IRCCD_PEER_H */
+#endif /* !IRCCD_TRANSPORT_H */

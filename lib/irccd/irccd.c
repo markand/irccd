@@ -28,17 +28,10 @@
 #include "event.h"
 #include "irccd.h"
 #include "log.h"
-#include "peer.h"
 #include "plugin.h"
 #include "rule.h"
 #include "server.h"
-#include "transport.h"
 #include "util.h"
-
-struct pkg {
-	struct pollfd *fds;
-	size_t fdsz;
-};
 
 struct defer {
 	void (*exec)(void *);
@@ -47,7 +40,6 @@ struct defer {
 
 struct irc irc = {
 	.servers = LIST_HEAD_INITIALIZER(),
-	.peers = LIST_HEAD_INITIALIZER(),
 	.plugins = LIST_HEAD_INITIALIZER(),
 	.rules = TAILQ_HEAD_INITIALIZER(irc.rules)
 };
@@ -146,61 +138,6 @@ invokable(const struct irc_plugin *p, const struct irc_event *ev)
 	}
 }
 
-static inline size_t
-pollable(void)
-{
-	const struct irc_server *s;
-	const struct irc_peer *p;
-	size_t i = 2;                   /* pipe + transport. */
-
-	LIST_FOREACH(s, &irc.servers, link)
-		++i;
-	LIST_FOREACH(p, &irc.peers, link)
-		++i;
-
-	return i;
-}
-
-static struct pkg
-prepare(void)
-{
-	struct irc_peer *p;
-	struct irc_server *s;
-	struct pkg pkg = {0};
-	size_t i = 0;
-
-	pkg.fdsz = pollable();
-	pkg.fds = irc_util_calloc(pkg.fdsz, sizeof (*pkg.fds));
-
-	/* pipe */
-	pkg.fds[i].fd = pipes[0];
-	pkg.fds[i++].events = POLLIN;
-
-	/* transport */
-	irc_transport_prepare(&pkg.fds[i++]);
-
-	LIST_FOREACH(p, &irc.peers, link)
-		irc_peer_prepare(p, &pkg.fds[i++]);
-	LIST_FOREACH(s, &irc.servers, link)
-		irc_server_prepare(s, &pkg.fds[i++]);
-
-	return pkg;
-}
-
-static inline void
-broadcast(const struct irc_event *ev)
-{
-	char buf[IRC_BUF_LEN];
-	struct irc_peer *p;
-
-	if (!irc_event_str(ev, buf, sizeof (buf)))
-		return;
-
-	LIST_FOREACH(p, &irc.peers, link)
-		if (p->is_watching)
-			irc_peer_send(p, buf);
-}
-
 static void
 invoke(struct irc_event *ev)
 {
@@ -232,7 +169,7 @@ invoke(struct irc_event *ev)
 }
 
 static void
-pipe_flush(struct pollfd *fd)
+pipe_flush(const struct pollfd *fd)
 {
 	struct defer df = {0};
 
@@ -245,6 +182,7 @@ pipe_flush(struct pollfd *fd)
 	df.exec(df.data);
 }
 
+#if 0
 static void
 process(struct pkg *pkg)
 {
@@ -292,11 +230,7 @@ process(struct pkg *pkg)
 	}
 }
 
-static inline void
-clean(struct pkg *pkg)
-{
-	free(pkg->fds);
-}
+#endif
 
 static inline size_t
 rulescount(void)
@@ -509,6 +443,59 @@ irc_bot_rule_clear(void)
 	TAILQ_INIT(&irc.rules);
 }
 
+size_t
+irc_bot_poll_count(void)
+{
+	size_t i = 1;
+	struct irc_server *s;
+
+	LIST_FOREACH(s, &irc.servers, link)
+		++i;
+
+	return i;
+}
+
+void
+irc_bot_prepare(struct pollfd *fds)
+{
+	assert(fds);
+
+	struct irc_server *s;
+	size_t i = 1;
+
+	fds[0].fd = pipes[0];
+	fds[0].events = POLLIN;
+
+	LIST_FOREACH(s, &irc.servers, link)
+		irc_server_prepare(s, &fds[i++]);
+}
+
+void
+irc_bot_flush(const struct pollfd *fds)
+{
+	assert(fds);
+
+	struct irc_server *s;
+	size_t i = 1;
+
+	pipe_flush(&fds[0]);
+
+	LIST_FOREACH(s, &irc.servers, link)
+		irc_server_flush(s, &fds[i++]);
+}
+
+int
+irc_bot_dequeue(struct irc_event *ev)
+{
+	struct irc_server *s;
+
+	LIST_FOREACH(s, &irc.servers, link)
+		if (irc_server_poll(s, ev))
+			return 1;
+
+	return 0;
+}
+
 void
 irc_bot_post(void (*exec)(void *), void *data)
 {
@@ -519,16 +506,4 @@ irc_bot_post(void (*exec)(void *), void *data)
 
 	if (write(pipes[1], &df, sizeof (df)) != sizeof (df))
 		err(1, "write");
-}
-
-void
-irc_bot_run(void)
-{
-	struct pkg pkg;
-
-	for (;;) {
-		pkg = prepare();
-		process(&pkg);
-		clean(&pkg);
-	}
 }
