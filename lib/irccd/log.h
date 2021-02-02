@@ -28,7 +28,7 @@ void
 irc_log_to_console(void);
 
 void
-irc_log_to_files(const char *, const char *);
+irc_log_to_file(const char *);
 
 void
 irc_log_to_null(void);

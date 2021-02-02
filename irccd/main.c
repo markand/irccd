@@ -16,9 +16,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <config.h>
+#include <compat.h>
+
+#include <err.h>
 #include <poll.h>
 #include <stdio.h>
-#include <err.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include <irccd/irccd.h>
 #include <irccd/log.h>
@@ -32,9 +37,14 @@
 #include "js-plugin.h"
 #include "peer.h"
 
+static const char *config = IRCCD_SYSCONFDIR "/irccd.conf";
 static struct peers peers;
 static int running = 1;
 static int has_transport;
+
+/* conf.y */
+void
+config_open(const char *);
 
 static void
 broadcast(const struct irc_event *ev)
@@ -80,6 +90,11 @@ static inline void
 init(void)
 {
 	irc_bot_init();
+	irc_bot_plugin_loader_add(dl_plugin_loader_new());
+
+#if defined(IRCCD_WITH_JS)
+	irc_bot_plugin_loader_add(js_plugin_loader_new());
+#endif
 }
 
 static void
@@ -114,9 +129,16 @@ flush(const struct pollfd *fd)
 	}
 }
 
+static inline void
+load(void)
+{
+	config_open(config);
+}
+
 static void
 loop(void)
 {
+#if 0
 	struct irc_event ev;
 	struct pollfd *fds;
 	size_t botcount, owncount;
@@ -133,6 +155,8 @@ loop(void)
 		irc_bot_prepare(fds);
 		prepare(&fds[botcount]);
 
+		if (poll(fds,
+
 		irc_bot_flush(fds);
 		flush(&fds[botcount]);
 
@@ -141,6 +165,7 @@ loop(void)
 
 		free(fds);
 	}
+#endif
 }
 
 static inline void
@@ -154,16 +179,40 @@ finish(void)
 	transport_finish();
 }
 
+static void
+usage(void)
+{
+	fprintf(stderr, "usage: %s [-c config]\n", getprogname());
+	exit(1);
+}
+
 int
 main(int argc, char **argv)
 {
-	--argc;
-	++argv;
+	int ch;
+
+	setprogname(argv[0]);
+
+	while ((ch = getopt(argc, argv, "c:")) != -1) {
+		switch (ch) {
+		case 'c':
+			config = optarg;
+			break;
+		default:
+			usage();
+			break;
+			/* NOTREACHED */
+		}
+	}
+
+	argc -= optind;
+	argv += optind;
 
 	if (argc > 0)
 		return run(argc, argv);
 
 	init();
+	load();
 	loop();
 	finish();
 }

@@ -106,14 +106,12 @@ irc_log_to_console(void)
 }
 
 void
-irc_log_to_files(const char *stdout, const char *stderr)
+irc_log_to_file(const char *file)
 {
 	irc_log_finish();
 
-	if (!(out = fopen(stdout, "a")))
-		irc_log_warn("%s: %s", stdout, strerror(errno));
-	if (!(err = fopen(stderr, "a")))
-		irc_log_warn("%s: %s", stdout, strerror(errno));
+	if (!(out = err = fopen(file, "a")))
+		irc_log_warn("%s: %s", file, strerror(errno));
 
 	handler = handler_files;
 	finalizer = finalizer_files;

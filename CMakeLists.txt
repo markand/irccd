@@ -37,6 +37,9 @@ endif ()
 
 include(GNUInstallDirs)
 
+find_package(FLEX REQUIRED)
+find_package(BISON REQUIRED)
+
 if (IRCCD_WITH_SSL)
 	find_package(OpenSSL REQUIRED)
 endif ()

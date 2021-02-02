@@ -338,7 +338,7 @@ find_plugin(struct irc_plugin_loader *ldr, const char *base, const char *name)
 	return NULL;
 }
 
-void
+struct irc_plugin *
 irc_bot_plugin_find(const char *name)
 {
 	char buf[IRC_PATHS_LEN], *t, *token;
@@ -361,10 +361,10 @@ irc_bot_plugin_find(const char *name)
 		}
 	}
 
-	if (p)
-		irc_bot_plugin_add(p);
-	else
+	if (!p)
 		irc_log_warn("irccd: could not find plugin %s", name);
+
+	return p;
 }
 
 struct irc_plugin *

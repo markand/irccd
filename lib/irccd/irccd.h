@@ -50,7 +50,7 @@ irc_bot_server_clear(void);
 void
 irc_bot_plugin_add(struct irc_plugin *);
 
-void
+struct irc_plugin *
 irc_bot_plugin_find(const char *);
 
 struct irc_plugin *

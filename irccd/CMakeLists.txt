@@ -63,13 +63,29 @@ endif ()
 # This is required for unit tests.
 add_library(irccd-fe OBJECT ${SOURCES})
 target_link_libraries(irccd-fe libirccd)
-target_include_directories(irccd-fe PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>)
+target_include_directories(
+	irccd-fe
+	PUBLIC
+		$<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
+		$<BUILD_INTERFACE:${irccd_SOURCE_DIR}>
+)
 
 if (IRCCD_WITH_JS)
 	target_link_libraries(irccd-fe libirccd-duktape)
 endif ()
 
-add_executable(irccd ${irccd_SOURCE_DIR}/main.c)
+flex_target(irccd-lex ${irccd_SOURCE_DIR}/lex.l ${irccd_BINARY_DIR}/lex.c)
+bison_target(irccd-conf ${irccd_SOURCE_DIR}/conf.y ${irccd_BINARY_DIR}/conf.c)
+add_flex_bison_dependency(irccd-lex irccd-conf)
+
+add_executable(
+	irccd
+	${irccd_SOURCE_DIR}/main.c
+	${irccd_SOURCE_DIR}/lex.l
+	${irccd_SOURCE_DIR}/conf.y
+	${BISON_irccd-conf_OUTPUTS}
+	${FLEX_irccd-lex_OUTPUTS}
+)
 target_link_libraries(irccd irccd-fe)
 
 source_group(TREE ${irccd_SOURCE_DIR} FILES ${SOURCES})
