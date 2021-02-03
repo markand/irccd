@@ -166,8 +166,10 @@ loop(void)
 
 		flush(&pb);
 
-		while (irc_bot_dequeue(&ev))
+		while (irc_bot_dequeue(&ev)) {
 			broadcast(&ev);
+			irc_event_finish(&ev);
+		}
 
 		free(pb.fds);
 	}

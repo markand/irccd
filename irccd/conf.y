@@ -346,6 +346,8 @@ rule
 			string_list_finish($3->events);
 		}
 
+		irc_bot_rule_insert(rule, -1);
+
 		free($3);
 	}
 	;
