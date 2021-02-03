@@ -229,7 +229,7 @@ join(duk_context *ctx, size_t maxc, size_t maxl, const struct stringlist *tokens
 	return out;
 }
 
-static duk_ret_t
+static int
 Util_cut(duk_context *ctx)
 {
 	struct stringlist tokens;
@@ -261,7 +261,7 @@ Util_cut(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Util_format(duk_context *ctx)
 {
 	const char *str = duk_require_string(ctx, 0);
@@ -276,7 +276,7 @@ Util_format(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Util_splituser(duk_context *ctx)
 {
 	struct irc_server_user user;
@@ -287,7 +287,7 @@ Util_splituser(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Util_splithost(duk_context *ctx)
 {
 	struct irc_server_user user;

@@ -169,7 +169,7 @@ self(duk_context *ctx)
 	return file;
 }
 
-static duk_ret_t
+static int
 File_prototype_basename(duk_context *ctx)
 {
 	const struct file *file = self(ctx);
@@ -179,7 +179,7 @@ File_prototype_basename(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 File_prototype_close(duk_context *ctx)
 {
 	struct file *file = self(ctx);
@@ -192,7 +192,7 @@ File_prototype_close(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 File_prototype_dirname(duk_context *ctx)
 {
 	const struct file *file = self(ctx);
@@ -202,7 +202,7 @@ File_prototype_dirname(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 File_prototype_lines(duk_context *ctx)
 {
 	struct file *file = self(ctx);
@@ -231,7 +231,7 @@ File_prototype_lines(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 File_prototype_read(duk_context *ctx)
 {
 	struct file *file = self(ctx);
@@ -247,7 +247,7 @@ File_prototype_read(duk_context *ctx)
 	    : read_amount(ctx, file, amount);
 }
 
-static duk_ret_t
+static int
 File_prototype_readline(duk_context *ctx)
 {
 	const struct file *file = self(ctx);
@@ -275,7 +275,7 @@ File_prototype_readline(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 File_prototype_remove(duk_context *ctx)
 {
 	if (remove(self(ctx)->path) < 0)
@@ -284,7 +284,7 @@ File_prototype_remove(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 File_prototype_seek(duk_context *ctx)
 {
 	const struct file *file = self(ctx);
@@ -297,7 +297,7 @@ File_prototype_seek(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 File_prototype_stat(duk_context *ctx)
 {
 	const struct file *file = self(ctx);
@@ -311,7 +311,7 @@ File_prototype_stat(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 File_prototype_tell(duk_context *ctx)
 {
 	const struct file *file = self(ctx);
@@ -325,7 +325,7 @@ File_prototype_tell(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 File_prototype_write(duk_context *ctx)
 {
 	const struct file *file = self(ctx);
@@ -345,7 +345,7 @@ File_prototype_write(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 File_constructor(duk_context *ctx)
 {
 	const char *path = duk_require_string(ctx, 0);
@@ -372,7 +372,7 @@ File_constructor(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 File_destructor(duk_context *ctx)
 {
 	struct file *file;
@@ -391,7 +391,7 @@ File_destructor(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 File_basename(duk_context *ctx)
 {
 	const char *path = duk_require_string(ctx, 0);
@@ -401,7 +401,7 @@ File_basename(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 File_dirname(duk_context *ctx)
 {
 	const char *path = duk_require_string(ctx, 0);
@@ -411,7 +411,7 @@ File_dirname(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 File_exists(duk_context *ctx)
 {
 	const char *path = duk_require_string(ctx, 0);
@@ -422,7 +422,7 @@ File_exists(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 File_remove(duk_context *ctx)
 {
 	const char *path = duk_require_string(ctx, 0);
@@ -433,7 +433,7 @@ File_remove(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 File_stat(duk_context *ctx)
 {
 	const char *path = duk_require_string(ctx, 0);

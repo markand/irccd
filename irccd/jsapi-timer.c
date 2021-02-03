@@ -210,7 +210,7 @@ self(duk_context *ctx)
 	return tm;
 }
 
-static duk_ret_t
+static int
 Timer_prototype_start(duk_context *ctx)
 {
 	timer_start(self(ctx));
@@ -218,7 +218,7 @@ Timer_prototype_start(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 Timer_prototype_stop(duk_context *ctx)
 {
 	timer_stop(self(ctx), TIMER_MUST_STOP);
@@ -226,7 +226,7 @@ Timer_prototype_stop(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 Timer_destructor(duk_context *ctx)
 {
 	struct timer *tm;
@@ -255,7 +255,7 @@ Timer_destructor(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 Timer_constructor(duk_context *ctx)
 {
 	struct timer *ptr, tm = {

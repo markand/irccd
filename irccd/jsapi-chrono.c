@@ -44,7 +44,7 @@ self(duk_context *ctx)
 	return self;
 }
 
-static duk_ret_t
+static int
 Chrono_prototype_elapsed(duk_context *ctx)
 {
 	struct timer *timer = self(ctx);
@@ -59,7 +59,7 @@ Chrono_prototype_elapsed(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Chrono_prototype_reset(duk_context *ctx)
 {
 	timespec_get(&self(ctx)->start, TIME_UTC);
@@ -67,7 +67,7 @@ Chrono_prototype_reset(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 Chrono_constructor(duk_context *ctx)
 {
 	struct timer *timer;
@@ -88,7 +88,7 @@ Chrono_constructor(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 Chrono_destructor(duk_context *ctx)
 {
 	duk_get_prop_string(ctx, 0, SIGNATURE);

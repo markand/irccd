@@ -141,7 +141,7 @@ get_channels(duk_context *ctx, struct irc_server *s)
 	duk_pop_n(ctx, 2);
 }
 
-static duk_ret_t
+static int
 Server_prototype_info(duk_context *ctx)
 {
 	const struct irc_server *s = self(ctx);
@@ -198,7 +198,7 @@ Server_prototype_info(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Server_prototype_invite(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
@@ -217,7 +217,7 @@ Server_prototype_invite(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Server_prototype_isSelf(duk_context *ctx)
 {
 	(void)ctx;
@@ -230,7 +230,7 @@ Server_prototype_isSelf(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 Server_prototype_join(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
@@ -247,7 +247,7 @@ Server_prototype_join(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Server_prototype_kick(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
@@ -267,7 +267,7 @@ Server_prototype_kick(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Server_prototype_me(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
@@ -284,7 +284,7 @@ Server_prototype_me(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Server_prototype_message(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
@@ -301,7 +301,7 @@ Server_prototype_message(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Server_prototype_mode(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
@@ -323,7 +323,7 @@ Server_prototype_mode(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Server_prototype_names(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
@@ -339,7 +339,7 @@ Server_prototype_names(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Server_prototype_nick(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
@@ -355,7 +355,7 @@ Server_prototype_nick(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Server_prototype_notice(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
@@ -372,7 +372,7 @@ Server_prototype_notice(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Server_prototype_part(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
@@ -389,7 +389,7 @@ Server_prototype_part(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Server_prototype_send(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
@@ -405,7 +405,7 @@ Server_prototype_send(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Server_prototype_topic(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
@@ -422,7 +422,7 @@ Server_prototype_topic(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Server_prototype_whois(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
@@ -438,7 +438,7 @@ Server_prototype_whois(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Server_prototype_toString(duk_context *ctx)
 {
 	duk_push_string(ctx, self(ctx)->name);
@@ -446,7 +446,7 @@ Server_prototype_toString(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Server_constructor(duk_context *ctx)
 {
 	struct irc_server *s;
@@ -476,7 +476,7 @@ Server_constructor(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 Server_destructor(duk_context *ctx)
 {
 	struct irc_server *sv;
@@ -492,7 +492,7 @@ Server_destructor(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 Server_add(duk_context *ctx)
 {
 	irc_bot_server_add(require(ctx, 0));
@@ -500,7 +500,7 @@ Server_add(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 Server_find(duk_context *ctx)
 {
 	const char *name = duk_require_string(ctx, 0);
@@ -514,7 +514,7 @@ Server_find(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Server_list(duk_context *ctx)
 {
 	struct irc_server *s;
@@ -529,7 +529,7 @@ Server_list(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Server_remove(duk_context *ctx)
 {
 	irc_bot_server_remove(duk_require_string(ctx, 0));

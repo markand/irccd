@@ -56,7 +56,7 @@
  *     path: "/var"
  * };
  */
-static duk_ret_t
+static int
 set(duk_context *ctx, const char *name)
 {
 	/* This is the object received in argument from the property setter. */
@@ -79,7 +79,7 @@ set(duk_context *ctx, const char *name)
 	return 0;
 }
 
-static duk_ret_t
+static int
 get(duk_context *ctx, const char *name)
 {
 	duk_get_global_string(ctx, name);
@@ -87,37 +87,37 @@ get(duk_context *ctx, const char *name)
 	return 1;
 }
 
-static duk_ret_t
+static int
 set_config(duk_context *ctx)
 {
 	return set(ctx, JSAPI_PLUGIN_PROP_OPTIONS);
 }
 
-static duk_ret_t
+static int
 get_config(duk_context *ctx)
 {
 	return get(ctx, JSAPI_PLUGIN_PROP_OPTIONS);
 }
 
-static duk_ret_t
+static int
 set_template(duk_context *ctx)
 {
 	return set(ctx, JSAPI_PLUGIN_PROP_TEMPLATES);
 }
 
-static duk_ret_t
+static int
 get_template(duk_context *ctx)
 {
 	return get(ctx, JSAPI_PLUGIN_PROP_TEMPLATES);
 }
 
-static duk_ret_t
+static int
 set_paths(duk_context *ctx)
 {
 	return set(ctx, JSAPI_PLUGIN_PROP_PATHS);
 }
 
-static duk_ret_t
+static int
 get_paths(duk_context *ctx)
 {
 	return get(ctx, JSAPI_PLUGIN_PROP_PATHS);
@@ -135,7 +135,7 @@ find(duk_context *ctx)
 	return plg;
 }
 
-static duk_ret_t
+static int
 Plugin_info(duk_context *ctx)
 {
 	struct irc_plugin *p;
@@ -161,7 +161,7 @@ Plugin_info(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Plugin_list(duk_context *ctx)
 {
 	size_t i = 0;
@@ -177,7 +177,7 @@ Plugin_list(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Plugin_load(duk_context *ctx)
 {
 	(void)ctx;
@@ -185,7 +185,7 @@ Plugin_load(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 Plugin_reload(duk_context *ctx)
 {
 	irc_plugin_reload(find(ctx));
@@ -193,7 +193,7 @@ Plugin_reload(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 Plugin_unload(duk_context *ctx)
 {
 	/* Use find so it can raise ReferenceError if not found. */

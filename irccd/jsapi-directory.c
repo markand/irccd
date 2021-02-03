@@ -333,7 +333,7 @@ Directory_constructor(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 Directory_find(duk_context *ctx)
 {
 	const char *path = duk_require_string(ctx, 0);
@@ -342,13 +342,13 @@ Directory_find(duk_context *ctx)
 	return find_helper(ctx, path, recursive, 1);
 }
 
-static duk_ret_t
+static int
 Directory_remove(duk_context* ctx)
 {
 	return rm_helper(ctx, duk_require_string(ctx, 0), duk_opt_boolean(ctx, 1, 0));
 }
 
-static duk_ret_t
+static int
 Directory_mkdir(duk_context* ctx)
 {
 	char path[PATH_MAX], *p;

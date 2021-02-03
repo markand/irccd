@@ -32,7 +32,7 @@ do {                                                                    \
         f("plugin %s: %s", p->name, message);                           \
 } while (0)                                                             \
 
-static duk_ret_t
+static int
 Logger_info(duk_context *ctx)
 {
 	LOG(ctx, irc_log_info);
@@ -40,7 +40,7 @@ Logger_info(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 Logger_warning(duk_context *ctx)
 {
 	LOG(ctx, irc_log_warn);
@@ -48,7 +48,7 @@ Logger_warning(duk_context *ctx)
 	return 0;
 }
 
-static duk_ret_t
+static int
 Logger_debug(duk_context *ctx)
 {
 	LOG(ctx, irc_log_debug);

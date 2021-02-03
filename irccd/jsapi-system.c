@@ -40,7 +40,7 @@
 #include "jsapi-file.h"
 #include "jsapi-system.h"
 
-static duk_ret_t
+static int
 nsleep(unsigned long ns)
 {
 	struct timespec ts = {
@@ -53,7 +53,7 @@ nsleep(unsigned long ns)
 	return 0;
 }
 
-static duk_ret_t
+static int
 System_env(duk_context *ctx)
 {
 	const char *name = duk_require_string(ctx, 0);
@@ -67,7 +67,7 @@ System_env(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 System_exec(duk_context *ctx)
 {
 	duk_push_uint(ctx, system(duk_require_string(ctx, 0)));
@@ -75,7 +75,7 @@ System_exec(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 System_home(duk_context *ctx)
 {
 #if defined(_WIN32)
@@ -96,7 +96,7 @@ System_home(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 System_name(duk_context *ctx)
 {
 #if defined(__linux__)
@@ -128,7 +128,7 @@ System_name(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 System_popen(duk_context *ctx)
 {
 	const char *cmd = duk_require_string(ctx, 0);
@@ -143,19 +143,19 @@ System_popen(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 System_sleep(duk_context *ctx)
 {
 	return nsleep(duk_require_uint(ctx, 0) * 1000000000L);
 }
 
-static duk_ret_t
+static int
 System_usleep(duk_context *ctx)
 {
 	return nsleep(duk_require_uint(ctx, 0) * 1000);
 }
 
-static duk_ret_t
+static int
 System_uptime(duk_context *ctx)
 {
 #if defined(_WIN32)
@@ -193,7 +193,7 @@ System_uptime(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 System_version(duk_context *ctx)
 {
 #if defined(_WIN32)

@@ -19,7 +19,7 @@
 #include "jsapi-unicode.h"
 #include "unicode.h"
 
-static duk_ret_t
+static int
 Unicode_isDigit(duk_context *ctx)
 {
 	duk_push_boolean(ctx, uni_isdigit(duk_get_int(ctx, 0)));
@@ -27,7 +27,7 @@ Unicode_isDigit(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Unicode_isLetter(duk_context *ctx)
 {
 	duk_push_boolean(ctx, uni_isalpha(duk_get_int(ctx, 0)));
@@ -35,7 +35,7 @@ Unicode_isLetter(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Unicode_isLower(duk_context *ctx)
 {
 	duk_push_boolean(ctx, uni_islower(duk_get_int(ctx, 0)));
@@ -43,7 +43,7 @@ Unicode_isLower(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Unicode_isSpace(duk_context *ctx)
 {
 	duk_push_boolean(ctx, uni_isspace(duk_get_int(ctx, 0)));
@@ -51,7 +51,7 @@ Unicode_isSpace(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Unicode_isTitle(duk_context *ctx)
 {
 	duk_push_boolean(ctx, uni_istitle(duk_get_int(ctx, 0)));
@@ -59,7 +59,7 @@ Unicode_isTitle(duk_context *ctx)
 	return 1;
 }
 
-static duk_ret_t
+static int
 Unicode_isUpper(duk_context *ctx)
 {
 	duk_push_boolean(ctx, uni_isupper(duk_get_int(ctx, 0)));
