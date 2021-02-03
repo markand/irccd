@@ -155,7 +155,7 @@ get_table(duk_context *ctx, const char *name, char ***ptable)
 
 	duk_enum(ctx, -1, 0);
 
-	for (size_t i = 0; i < listsz && duk_next(ctx, -1, true); ++i) {
+	for (size_t i = 0; i < listsz && duk_next(ctx, -1, 1); ++i) {
 		list[i] = irc_util_strdup(duk_to_string(ctx, -2));
 		duk_pop_n(ctx, 2);
 	}
@@ -408,7 +408,7 @@ err:
 
 	free(ret);
 
-	return false;
+	return NULL;
 }
 
 static void *

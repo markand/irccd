@@ -22,7 +22,6 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <regex.h>
-#include <stdbool.h>
 #include <unistd.h>
 
 #if defined(_WIN32)
@@ -41,9 +40,9 @@ enum {
 struct cursor {
 	char path[PATH_MAX];
 	char entry[FILENAME_MAX];
-	bool recursive;
+	int recursive;
 	void *data;
-	bool (*fn)(const struct cursor *);
+	int (*fn)(const struct cursor *);
 };
 
 struct finder {
@@ -155,7 +154,7 @@ path(duk_context *ctx)
 	return ret;
 }
 
-static bool
+static int
 find_regex(const struct cursor *curs)
 {
 	const struct finder *fd = curs->data;
@@ -163,7 +162,7 @@ find_regex(const struct cursor *curs)
 	return regexec(&fd->regex, curs->entry, 0, NULL, 0) == 0;
 }
 
-static bool
+static int
 find_name(const struct cursor *curs)
 {
 	const struct finder *fd = curs->data;
@@ -178,7 +177,7 @@ find_regex_finish(struct finder *fd)
 }
 
 static int
-find_helper(duk_context *ctx, const char *base, bool recursive, int pattern_index)
+find_helper(duk_context *ctx, const char *base, int recursive, int pattern_index)
 {
 	struct finder finder = {
 		.curs = {
@@ -222,18 +221,18 @@ find_helper(duk_context *ctx, const char *base, bool recursive, int pattern_inde
 	return 1;
 }
 
-static bool
+static int
 rm(const struct cursor *curs)
 {
-	return remove(curs->path), false;
+	return remove(curs->path), 0;
 }
 
 static int
-rm_helper(duk_context *ctx, const char *base, bool recursive)
+rm_helper(duk_context *ctx, const char *base, int recursive)
 {
 	struct stat st;
 	struct cursor curs = {
-		.recursive = true,
+		.recursive = 1,
 		.fn = rm
 	};
 
@@ -279,13 +278,13 @@ normalize(char *str)
 static int
 Directory_prototype_find(duk_context *ctx)
 {
-	return find_helper(ctx, path(ctx), duk_opt_boolean(ctx, 1, false), 0);
+	return find_helper(ctx, path(ctx), duk_opt_boolean(ctx, 1, 0), 0);
 }
 
 static int
 Directory_prototype_remove(duk_context *ctx)
 {
-	return rm_helper(ctx, path(ctx), duk_opt_boolean(ctx, 0, false));
+	return rm_helper(ctx, path(ctx), duk_opt_boolean(ctx, 0, 0));
 }
 
 static int
@@ -338,7 +337,7 @@ static duk_ret_t
 Directory_find(duk_context *ctx)
 {
 	const char *path = duk_require_string(ctx, 0);
-	bool recursive = duk_opt_boolean(ctx, 2, false);
+	int recursive = duk_opt_boolean(ctx, 2, 0);
 
 	return find_helper(ctx, path, recursive, 1);
 }
@@ -346,7 +345,7 @@ Directory_find(duk_context *ctx)
 static duk_ret_t
 Directory_remove(duk_context* ctx)
 {
-	return rm_helper(ctx, duk_require_string(ctx, 0), duk_opt_boolean(ctx, 1, false));
+	return rm_helper(ctx, duk_require_string(ctx, 0), duk_opt_boolean(ctx, 1, 0));
 }
 
 static duk_ret_t

@@ -60,7 +60,7 @@ subspack_parse(duk_context *ctx, duk_idx_t index, struct subspack *pkg)
 
 	duk_enum(ctx, index, 0);
 
-	while (duk_next(ctx, -1, true)) {
+	while (duk_next(ctx, -1, 1)) {
 		if (strcmp(duk_get_string(ctx, -2), "date") == 0) {
 			pkg->subst.time = duk_get_number(ctx, -1);
 			continue;
@@ -185,7 +185,7 @@ join(duk_context *ctx, size_t maxc, size_t maxl, const struct stringlist *tokens
 	struct string *token;
 
 	if (!(fp = open_memstream(&out, &outsz)))
-		return false;
+		return NULL;
 
 	TAILQ_FOREACH(token, tokens, link) {
 		tokensz = strlen(token->value);

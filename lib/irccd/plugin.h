@@ -20,7 +20,6 @@
 #define IRCCD_PLUGIN_H
 
 #include <sys/queue.h>
-#include <stdbool.h>
 
 #include "limits.h"
 

@@ -27,7 +27,7 @@ basics_add(void)
 	struct irc_channel *ch;
 	struct irc_channel_user *user;
 
-	ch = irc_channel_new("#test", NULL, true);
+	ch = irc_channel_new("#test", NULL, 1);
 	GREATEST_ASSERT_STR_EQ("#test", ch->name);
 	GREATEST_ASSERT_STR_EQ("", ch->password);
 	GREATEST_ASSERT(ch->joined);
@@ -79,7 +79,7 @@ basics_remove(void)
 	struct irc_channel *ch;
 	struct irc_channel_user *user;
 
-	ch = irc_channel_new("#test", NULL, true);
+	ch = irc_channel_new("#test", NULL, 1);
 
 	irc_channel_add(ch, "markand", 'o', '@');
 	irc_channel_add(ch, "jean", 0, 0);
@@ -115,7 +115,7 @@ basics_update(void)
 	struct irc_channel *ch;
 	struct irc_channel_user *user;
 
-	ch = irc_channel_new("#test", NULL, true);
+	ch = irc_channel_new("#test", NULL, 1);
 
 	irc_channel_add(ch, "markand", 'o', '@');
 	irc_channel_add(ch, "jean", 0, 0);

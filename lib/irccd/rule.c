@@ -50,16 +50,16 @@ find(const char *str, const char *value)
 	return NULL;
 }
 
-static bool
+static int
 match(const char *str, const char *value)
 {
 	size_t len;
 	const char *p;
 
 	if (!str[0])
-		return true;
+		return 1;
 	if (!value || (len = strlen(value)) == 0 || !(p = find(str, value)))
-		return false;
+		return 0;
 
 	/*
 	 * Consider the following scenario:
@@ -87,25 +87,25 @@ irc_rule_new(enum irc_rule_action action)
 	return r;
 }
 
-bool
+int
 irc_rule_add(char *str, const char *value)
 {
 	size_t slen, vlen;
 
 	if (find(str, value))
-		return true;
+		return 0;
 
 	slen = strlen(str);
 	vlen = strlen(value);
 
 	if (vlen + 1 >= IRC_RULE_LEN - slen) {
 		errno = ENOMEM;
-		return false;
+		return -1;
 	}
 
 	sprintf(&str[slen], "%s:", value);
 
-	return true;
+	return 0;
 }
 
 void
@@ -123,7 +123,7 @@ irc_rule_remove(char *str, const char *value)
 	memmove(&pos[0], &pos[vlen], IRC_RULE_LEN - (&pos[vlen] - str));
 }
 
-bool
+int
 irc_rule_match(const struct irc_rule *rule,
                const char *server,
                const char *channel,
@@ -138,7 +138,7 @@ irc_rule_match(const struct irc_rule *rule,
 	       match(rule->events, event);
 }
 
-bool
+int
 irc_rule_matchlist(const struct irc_rule_list *rules,
                    const char *server,
                    const char *channel,
@@ -146,7 +146,7 @@ irc_rule_matchlist(const struct irc_rule_list *rules,
                    const char *plugin,
                    const char *event)
 {
-	bool result = true;
+	int result = 1;
 	struct irc_rule *r;
 
 	TAILQ_FOREACH(r, rules, link)

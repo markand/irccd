@@ -19,8 +19,6 @@
 #ifndef IRCCD_LOG_H
 #define IRCCD_LOG_H
 
-#include <stdbool.h>
-
 void
 irc_log_to_syslog(void);
 
@@ -34,7 +32,7 @@ void
 irc_log_to_null(void);
 
 void
-irc_log_set_verbose(bool);
+irc_log_set_verbose(int);
 
 void
 irc_log_info(const char *, ...);

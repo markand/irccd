@@ -48,14 +48,14 @@ struct irc irc = {
 
 static int pipes[2];
 
-static bool
+static int
 is_command(const struct irc_plugin *p, const struct irc_event *ev)
 {
 	const char *cc;
 	size_t ccsz;
 
 	if (ev->type != IRC_EVENT_MESSAGE)
-		return false;
+		return 0;
 
 	/* Get the command prefix (e.g !)*/
 	cc = ev->server->commandchar;
@@ -85,7 +85,7 @@ to_command(const struct irc_plugin *p, struct irc_event *ev)
 	return ev;
 }
 
-static bool
+static int
 invokable(const struct irc_plugin *p, const struct irc_event *ev)
 {
 	switch (ev->type) {
@@ -136,7 +136,7 @@ invokable(const struct irc_plugin *p, const struct irc_event *ev)
 		return irc_rule_matchlist(&irc.rules, ev->server->name,
 		    NULL, NULL, p->name, "onWhois");
 	default:
-		return true;
+		return 1;
 	}
 }
 

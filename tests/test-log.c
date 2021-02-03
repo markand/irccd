@@ -38,18 +38,17 @@ clean(void *udata)
 GREATEST_TEST
 basics_info_verbose_off(void)
 {
-	FILE *fpout, *fperr;
+	FILE *fpout;
 	char out[128] = {0}, err[128] = {0};
 
 	/* Default is quiet, should not log. */
-	irc_log_to_files("stdout.txt", "stderr.txt");
+	irc_log_to_file("stdout.txt");
 	irc_log_info("hello world!");
 
-	if (!(fpout = fopen("stdout.txt", "r")) || !(fperr = fopen("stderr.txt", "r")))
+	if (!(fpout = fopen("stdout.txt", "r")))
 		GREATEST_FAIL();
 
 	fgets(out, sizeof (out), fpout);
-	fgets(err, sizeof (err), fperr);
 
 	GREATEST_ASSERT_STR_EQ("", out);
 	GREATEST_ASSERT_STR_EQ("", err);
@@ -60,15 +59,15 @@ basics_info_verbose_off(void)
 GREATEST_TEST
 basics_info_verbose_on(void)
 {
-	FILE *fpout, *fperr;
-	char out[128] = {0}, err[128] = {0};
+	FILE *fpout;
+	char out[128] = {0};
 
-	irc_log_set_verbose(true);
-	irc_log_to_files("stdout.txt", "stderr.txt");
+	irc_log_set_verbose(1);
+	irc_log_to_file("stdout.txt");
 	irc_log_info("hello world!");
 	irc_log_info("what's up?");
 
-	if (!(fpout = fopen("stdout.txt", "r")) || !(fperr = fopen("stderr.txt", "r")))
+	if (!(fpout = fopen("stdout.txt", "r")))
 		GREATEST_FAIL();
 
 	GREATEST_ASSERT(fgets(out, sizeof (out), fpout));
@@ -76,10 +75,6 @@ basics_info_verbose_on(void)
 	GREATEST_ASSERT(fgets(out, sizeof (out), fpout));
 	GREATEST_ASSERT_STR_EQ("what's up?\n", out);
 
-	GREATEST_ASSERT(!fgets(err, sizeof (err), fperr));
-	GREATEST_ASSERT_STR_EQ("", err);
-	GREATEST_ASSERT(!fgets(err, sizeof (err), fperr));
-	GREATEST_ASSERT_STR_EQ("", err);
 
 	GREATEST_PASS();
 }
@@ -87,27 +82,23 @@ basics_info_verbose_on(void)
 GREATEST_TEST
 basics_warn(void)
 {
-	FILE *fpout, *fperr;
-	char out[128] = {0}, err[128] = {0};
+	FILE *fpout;
+	char out[128] = {0};
 
 	/* Warning messages are printed even without verbosity. */
-	irc_log_set_verbose(false);
-	irc_log_to_files("stdout.txt", "stderr.txt");
+	irc_log_set_verbose(0);
+	irc_log_to_file("stdout.txt");
+	irc_log_info("this is not printed");
 	irc_log_warn("error line 1");
 	irc_log_warn("error line 2");
 
-	if (!(fpout = fopen("stdout.txt", "r")) || !(fperr = fopen("stderr.txt", "r")))
+	if (!(fpout = fopen("stdout.txt", "r")))
 		GREATEST_FAIL();
 
-	GREATEST_ASSERT(!fgets(out, sizeof (out), fpout));
-	GREATEST_ASSERT_STR_EQ("", out);
-	GREATEST_ASSERT(!fgets(out, sizeof (out), fpout));
-	GREATEST_ASSERT_STR_EQ("", out);
-
-	GREATEST_ASSERT(fgets(err, sizeof (err), fperr));
-	GREATEST_ASSERT_STR_EQ("error line 1\n", err);
-	GREATEST_ASSERT(fgets(err, sizeof (err), fperr));
-	GREATEST_ASSERT_STR_EQ("error line 2\n", err);
+	GREATEST_ASSERT(fgets(out, sizeof (out), fpout));
+	GREATEST_ASSERT_STR_EQ("error line 1\n", out);
+	GREATEST_ASSERT(fgets(out, sizeof (out), fpout));
+	GREATEST_ASSERT_STR_EQ("error line 2\n", out);
 
 	GREATEST_PASS();
 }
@@ -116,27 +107,22 @@ GREATEST_TEST
 basics_debug(void)
 {
 #if !defined(NDEBUG)
-	FILE *fpout, *fperr;
-	char out[128] = {0}, err[128] = {0};
+	FILE *fpout;
+	char out[128] = {0};
 
 	/* Debug messages are printed even without verbosity but requires to be built in debug. */
-	irc_log_set_verbose(false);
-	irc_log_to_files("stdout.txt", "stderr.txt");
+	irc_log_set_verbose(0);
+	irc_log_to_file("stdout.txt");
 	irc_log_debug("startup!");
 	irc_log_debug("shutdown!");
 
-	if (!(fpout = fopen("stdout.txt", "r")) || !(fperr = fopen("stderr.txt", "r")))
+	if (!(fpout = fopen("stdout.txt", "r")))
 		GREATEST_FAIL();
 
 	GREATEST_ASSERT(fgets(out, sizeof (out), fpout));
 	GREATEST_ASSERT_STR_EQ("startup!\n", out);
 	GREATEST_ASSERT(fgets(out, sizeof (out), fpout));
 	GREATEST_ASSERT_STR_EQ("shutdown!\n", out);
-
-	GREATEST_ASSERT(!fgets(err, sizeof (err), fperr));
-	GREATEST_ASSERT_STR_EQ("", err);
-	GREATEST_ASSERT(!fgets(err, sizeof (err), fperr));
-	GREATEST_ASSERT_STR_EQ("", err);
 #endif
 	GREATEST_PASS();
 }

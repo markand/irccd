@@ -19,7 +19,6 @@
 #ifndef IRCCD_EVENT_H
 #define IRCCD_EVENT_H
 
-#include <stdbool.h>
 #include <stddef.h>
 
 #include "limits.h"
@@ -141,7 +140,7 @@ struct irc_event {
 	};
 };
 
-bool
+int
 irc_event_str(const struct irc_event *, char *, size_t);
 
 void

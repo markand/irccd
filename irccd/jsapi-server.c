@@ -127,7 +127,7 @@ get_channels(duk_context *ctx, struct irc_server *s)
 {
 	duk_get_prop_string(ctx, 0, "channels");
 
-	for (duk_enum(ctx, -1, 0); duk_next(ctx, -1, true); ) {
+	for (duk_enum(ctx, -1, 0); duk_next(ctx, -1, 1); ) {
 		duk_get_prop_string(ctx, -1, "name");
 		duk_get_prop_string(ctx, -2, "password");
 

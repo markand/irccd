@@ -312,7 +312,7 @@ cmd_watch(struct peer *p, char *line)
 {
 	(void)line;
 
-	p->is_watching = true;
+	p->is_watching = 1;
 
 	return ok(p);
 }

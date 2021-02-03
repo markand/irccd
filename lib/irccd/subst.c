@@ -18,7 +18,7 @@
 
 #include <assert.h>
 #include <errno.h>
-#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -103,41 +103,39 @@ static const struct pair shell_attrs[] = {
 	{ NULL,         NULL    }
 };
 
-static inline bool
+static inline int
 is_reserved(char token)
 {
 	return token == '#' || token == '@' || token == '$' || token == '!';
 }
 
-static inline bool
+static inline int
 scat(char **out, size_t *outsz, const char *value)
 {
 	size_t written;
 
-	if ((written = strlcpy(*out, value, *outsz)) >= *outsz) {
-		errno = ENOMEM;
-		return false;
-	}
+	if ((written = strlcpy(*out, value, *outsz)) >= *outsz)
+		return errno = ENOMEM, -1;
 
 	*out += written;
 	*outsz -= written;
 
-	return true;
+	return 0;
 }
 
-static inline bool
+static inline int
 ccat(char **out, size_t *outsz, char c)
 {
 	if (*outsz == 0)
-		return false;
+		return -1;
 
 	*(*out)++ = c;
 	*(outsz) -= 1;
 
-	return true;
+	return 0;
 }
 
-static inline void
+static void
 attributes_parse(const char *key, struct attributes *attrs)
 {
 	char attributes[64] = {0};
@@ -170,25 +168,25 @@ find(const struct pair *pairs, const char *key)
 	return NULL;
 }
 
-static bool
+static int
 subst_date(char *out, size_t outsz, const char *input, const struct irc_subst *subst)
 {
 	struct tm *tm;
 
 	if (!(subst->flags & IRC_SUBST_DATE))
-		return true;
+		return 0;
 
 	tm = localtime(&subst->time);
 
 	if (strftime(out, outsz, input, tm) == 0) {
 		errno = ENOMEM;
-		return false;
+		return -1;
 	}
 
-	return true;
+	return 0;
 }
 
-static bool
+static int
 subst_keyword(const char *key, char **out, size_t *outsz, const struct irc_subst *subst)
 {
 	const char *value = NULL;
@@ -201,23 +199,23 @@ subst_keyword(const char *key, char **out, size_t *outsz, const struct irc_subst
 	}
 
 	if (!value)
-		return true;
+		return 0;
 
 	return scat(out, outsz, value);
 }
 
-static bool
+static int
 subst_env(const char *key, char **out, size_t *outsz)
 {
 	const char *value;
 
 	if (!(value = getenv(key)))
-		return true;
+		return 0;
 
 	return scat(out, outsz, value);
 }
 
-static bool
+static void
 subst_shell(const char *key, char **out, size_t *outsz)
 {
 	FILE *fp;
@@ -225,7 +223,7 @@ subst_shell(const char *key, char **out, size_t *outsz)
 
 	/* Accept silently. */
 	if (!(fp = popen(key, "r")))
-		return true;
+		return;
 
 	/*
 	 * Since we cannot determine the number of bytes that must be read, read until the end of
@@ -245,11 +243,9 @@ subst_shell(const char *key, char **out, size_t *outsz)
 	}
 
 	pclose(fp);
-
-	return true;
 }
 
-static bool
+static int
 subst_irc_attrs(const char *key, char **out, size_t *outsz)
 {
 	const char *value;
@@ -261,31 +257,31 @@ subst_irc_attrs(const char *key, char **out, size_t *outsz)
 	attributes_parse(key, &attrs);
 
 	if (attrs.fg[0] || attrs.attrs[0]) {
-		if (!ccat(out, outsz, '\x03'))
-			return false;
+		if (ccat(out, outsz, '\x03') < 0)
+			return -1;
 
 		/* Foreground. */
-		if ((value = find(irc_colors, attrs.fg)) && !scat(out, outsz, value))
-			return false;
+		if ((value = find(irc_colors, attrs.fg)) && scat(out, outsz, value) < 0)
+			return -1;
 
 		/* Background. */
 		if (attrs.bg[0]) {
-			if (!ccat(out, outsz, ','))
-				return false;
-			if ((value = find(irc_colors, attrs.bg)) && !scat(out, outsz, value))
-				return false;
+			if (ccat(out, outsz, ',') < 0)
+				return -1;
+			if ((value = find(irc_colors, attrs.bg)) && scat(out, outsz, value) < 0)
+				return -1;
 		}
 
 		/* Attributes. */
 		for (size_t i = 0; i < attrs.attrsz; ++i)
-			if ((value = find(irc_attrs, attrs.attrs[i])) && !scat(out, outsz, value))
-				return false;
+			if ((value = find(irc_attrs, attrs.attrs[i])) && scat(out, outsz, value) < 0)
+				return -1;
 	}
 
-	return true;
+	return 0;
 }
 
-static bool
+static int
 subst_shell_attrs(char *key, char **out, size_t *outsz)
 {
 	const char *value;
@@ -297,67 +293,63 @@ subst_shell_attrs(char *key, char **out, size_t *outsz)
 
 	attributes_parse(key, &attrs);
 
-	if (!scat(out, outsz, "\033["))
-		return false;
+	if (scat(out, outsz, "\033[") < 0)
+		return -1;
 
 	/* Attributes first. */
 	for (size_t i = 0; i < attrs.attrsz; ++i) {
-		if ((value = find(shell_attrs, attrs.attrs[i])) && !scat(out, outsz, value))
-			return false;
+		if ((value = find(shell_attrs, attrs.attrs[i])) && scat(out, outsz, value) < 0)
+			return -1;
 
 		/* Need to append ; if we have still more attributes or colors next. */
-		if ((i < attrs.attrsz || attrs.fg[0] || attrs.bg[0]) && !ccat(out, outsz, ';'))
-			return false;
+		if ((i < attrs.attrsz || attrs.fg[0] || attrs.bg[0]) && ccat(out, outsz, ';') < 0)
+			return -1;
 	}
 
 	/* Foreground. */
 	if (attrs.fg[0]) {
-		if ((value = find(shell_fg, attrs.fg)) && !scat(out, outsz, value))
-			return false;
-		if (attrs.bg[0] && !ccat(out, outsz, ';'))
-			return false;
+		if ((value = find(shell_fg, attrs.fg)) && scat(out, outsz, value) < 0)
+			return -1;
+		if (attrs.bg[0] && ccat(out, outsz, ';') < 0)
+			return -1;
 	}
 
 	/* Background. */
 	if (attrs.bg[0]) {
-		if ((value = find(shell_bg, attrs.bg)) && !scat(out, outsz, value))
-			return false;
+		if ((value = find(shell_bg, attrs.bg)) && scat(out, outsz, value) < 0)
+			return -1;
 	}
 
 	return ccat(out, outsz, 'm');
 }
 
-static bool
+static int
 subst_default(const char **p, char **out, size_t *outsz, const char *key)
 {
-	return ccat(out, outsz, (*p)[-2]) &&
-	       ccat(out, outsz, '{') &&
-	       scat(out, outsz, key) &&
-	       ccat(out, outsz, '}');
+	return ccat(out, outsz, (*p)[-2]) == 0 &&
+	       ccat(out, outsz, '{') == 0 &&
+	       scat(out, outsz, key) == 0 &&
+	       ccat(out, outsz, '}') == 0;
 }
 
-static bool
+static int
 substitute(const char **p, char **out, size_t *outsz, const struct irc_subst *subst)
 {
 	char key[64] = {0};
 	size_t keysz;
 	char *end;
-	bool replaced = true;
+	int replaced = 1;
 
 	if (!**p)
-		return true;
+		return 0;
 
 	/* Find end of construction. */
-	if (!(end = strchr(*p, '}'))) {
-		errno = EINVAL;
-		return false;
-	}
+	if (!(end = strchr(*p, '}')))
+		return errno = EINVAL, -1;
 
 	/* Copy key. */
-	if ((keysz = end - *p) >= sizeof (key)) {
-		errno = ENOMEM;
-		return false;
-	}
+	if ((keysz = end - *p) >= sizeof (key))
+		return errno = ENOMEM, -1;
 
 	memcpy(key, *p, keysz);
 
@@ -365,50 +357,49 @@ substitute(const char **p, char **out, size_t *outsz, const struct irc_subst *su
 	case '@':
 		/* attributes */
 		if (subst->flags & IRC_SUBST_IRC_ATTRS) {
-			if (!subst_irc_attrs(key, out, outsz))
-				return false;
+			if (subst_irc_attrs(key, out, outsz) < 0)
+				return -1;
 		} else if (subst->flags & IRC_SUBST_SHELL_ATTRS) {
-			if (!subst_shell_attrs(key, out, outsz))
-				return false;
+			if (subst_shell_attrs(key, out, outsz) < 0)
+				return -1;
 		} else
-			replaced = false;
+			replaced = 0;
 		break;
 	case '#':
 		/* keyword */
 		if (subst->flags & IRC_SUBST_KEYWORDS) {
-			if (!subst_keyword(key, out, outsz, subst))
-				return false;
+			if (subst_keyword(key, out, outsz, subst) < 0)
+				return -1;
 		} else
-			replaced = false;
+			replaced = 0;
 		break;
 	case '$':
 		/* environment variable */
 		if (subst->flags & IRC_SUBST_ENV) {
-			if (!subst_env(key, out, outsz))
-				return false;
+			if (subst_env(key, out, outsz) < 0)
+				return -1;
 		} else
-			replaced = false;
+			replaced = 0;
 		break;
 	case '!':
 		/* shell */
-		if (subst->flags & IRC_SUBST_SHELL) {
-			if (!subst_shell(key, out, outsz))
-				return false;
-		} else
-			replaced = false;
+		if (subst->flags & IRC_SUBST_SHELL)
+			subst_shell(key, out, outsz);
+		else
+			replaced = 0;
 		break;
 	default:
 		break;
 	}
 
 	/* If substitution was disabled, put the token verbatim. */
-	if (!replaced && !subst_default(p, out, outsz, key))
-		return false;
+	if (!replaced && subst_default(p, out, outsz, key) < 0)
+		return -1;
 
 	/* Move after '}' */
 	*p = end + 1;
 
-	return true;
+	return 0;
 }
 
 ssize_t
@@ -420,10 +411,10 @@ irc_subst(char *out, size_t outsz, const char *input, const struct irc_subst *su
 	char *o = out;
 
 	if (!outsz)
-		return true;
+		return 0;
 
 	/* Always start with the date first. */
-	if (!subst_date(out, outsz, input, subst))
+	if (subst_date(out, outsz, input, subst) < 0)
 		goto err;
 
 	for (const char *i = input; *i && outsz; ) {
@@ -436,7 +427,7 @@ irc_subst(char *out, size_t outsz, const char *input, const struct irc_subst *su
 		 *   "abc #"  -> keyword sequence interrupted, kept as-is.
 		 */
 		if (!is_reserved(*i)) {
-			if (!ccat(&o, &outsz, *i++))
+			if (ccat(&o, &outsz, *i++) < 0)
 				goto err;
 			continue;
 		}
@@ -459,12 +450,12 @@ irc_subst(char *out, size_t outsz, const char *input, const struct irc_subst *su
 			/* Skip '{'. */
 			++i;
 
-			if (!substitute(&i, &o, &outsz, subst))
+			if (substitute(&i, &o, &outsz, subst) < 0)
 				goto err;
 		} else {
 			if (*i == i[-1])
 				++i;
-			if (!ccat(&o, &outsz, i[-1]))
+			if (ccat(&o, &outsz, i[-1]) < 0)
 				goto err;
 		}
 	}

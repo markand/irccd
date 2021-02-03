@@ -26,7 +26,6 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdarg.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <stdnoreturn.h>
 #include <string.h>
@@ -37,7 +36,7 @@
 #include <irccd/limits.h>
 #include <irccd/util.h>
 
-static bool verbose;
+static int verbose;
 static int sock;
 static struct sockaddr_un sockaddr = {
 	.sun_family = PF_LOCAL,
@@ -520,7 +519,7 @@ run(int argc, char **argv)
 	c->exec(argc, argv);
 }
 
-static noreturn void
+noreturn static void
 usage(void)
 {
 	fprintf(stderr, "usage: %s [-v] [-s sock] command [arguments...]\n", getprogname());
@@ -538,7 +537,7 @@ main(int argc, char **argv)
 			strlcpy(sockaddr.sun_path, optarg, sizeof (sockaddr.sun_path));
 			break;
 		case 'v':
-			verbose = true;
+			verbose = 1;
 			break;
 		default:
 			break;

@@ -32,7 +32,7 @@ enum level {
 };
 
 static FILE *out, *err;
-static bool verbosity;
+static int verbosity;
 
 static void
 handler_files(enum level level, const char *fmt, va_list ap)
@@ -127,7 +127,7 @@ irc_log_to_null(void)
 }
 
 void
-irc_log_set_verbose(bool mode)
+irc_log_set_verbose(int mode)
 {
 	verbosity = mode;
 }

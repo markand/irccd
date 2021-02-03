@@ -236,7 +236,7 @@ handle_join(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 	ev->join.origin = strdup(msg->prefix);
 	ev->join.channel = strdup(msg->args[0]);
 
-	add_channel(s, ev->join.channel, NULL, true);
+	add_channel(s, ev->join.channel, NULL, 1);
 
 	if (is_self(s, ev->join.origin))
 		irc_log_info("server %s: joined channel %s", s->name, ev->join.channel);
@@ -251,7 +251,7 @@ handle_kick(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 	ev->kick.target = strdup(msg->args[1]);
 	ev->kick.reason = msg->args[2] ? strdup(msg->args[2]) : NULL;
 
-	struct irc_channel *ch = add_channel(s, ev->kick.channel, NULL, true);
+	struct irc_channel *ch = add_channel(s, ev->kick.channel, NULL, 1);
 
 	/*
 	 * If the bot was kicked itself mark the channel as not joined and
@@ -297,7 +297,7 @@ handle_part(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 	ev->part.channel = strdup(msg->args[0]);
 	ev->part.reason = msg->args[1] ? strdup(msg->args[1]) : NULL;
 
-	ch = add_channel(s, ev->part.channel, NULL, true);
+	ch = add_channel(s, ev->part.channel, NULL, 1);
 
 	if (is_self(s, ev->part.origin) == 0) {
 		remove_channel(ch);
@@ -386,7 +386,7 @@ handle_names(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *ms
 	struct irc_channel *ch;
 	char *p, *token;
 
-	ch = add_channel(s, msg->args[2], NULL, true);
+	ch = add_channel(s, msg->args[2], NULL, 1);
 
 	/* Track existing nicknames into the given channel. */
 	for (p = msg->args[3]; (token = strtok_r(p, " ", &p)); )
@@ -597,7 +597,7 @@ irc_server_disconnect(struct irc_server *s)
 
 	irc_conn_disconnect(&s->conn);
 
-	clear_channels(s, false);
+	clear_channels(s, 0);
 	clear_server(s);
 }
 
@@ -706,7 +706,7 @@ irc_server_join(struct irc_server *s, const char *name, const char *pass)
 	assert(name);
 
 	struct irc_channel *ch;
-	bool ret = true;
+	int ret = 1;
 
 	/*
 	 * Search if there is already a channel pending or joined. If the
@@ -898,7 +898,7 @@ irc_server_decref(struct irc_server *s)
 	assert(s->refc >= 1);
 
 	if (--s->refc == 0) {
-		clear_channels(s, true);
+		clear_channels(s, 1);
 		free(s);
 	}
 }

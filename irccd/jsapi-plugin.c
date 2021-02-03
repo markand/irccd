@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <stdbool.h>
-
 #include <irccd/irccd.h>
 #include <irccd/plugin.h>
 
@@ -69,7 +67,7 @@ set(duk_context *ctx, const char *name)
 	duk_get_global_string(ctx, name);
 	duk_enum(ctx, -1, 0);
 
-	while (duk_next(ctx, -1, true))
+	while (duk_next(ctx, -1, 1))
 		duk_put_prop(ctx, 0);
 
 	/* Pop enum and old table. */

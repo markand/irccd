@@ -25,7 +25,7 @@
 #include "event.h"
 #include "server.h"
 
-bool
+int
 irc_event_str(const struct irc_event *ev, char *str, size_t strsz)
 {
 	assert(ev);

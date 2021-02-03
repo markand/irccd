@@ -63,7 +63,7 @@ transport_bind(const char *path)
 	irc_log_info("transport: listening on %s", path);
 	irc_log_debug("transport: file descriptor %d", fd);
 
-	return true;
+	return 0;
 
 err:
 	irc_log_warn("transport: %s: %s", path, strerror(errno));

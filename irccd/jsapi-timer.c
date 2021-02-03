@@ -17,7 +17,6 @@
  */
 
 #include <pthread.h>
-#include <stdbool.h>
 #include <stdatomic.h>
 #include <time.h>
 #include <errno.h>
@@ -135,10 +134,10 @@ timer_routine(void *data)
 	ts.tv_sec += tm->duration / 1000;
 	ts.tv_nsec += (tm->duration % 1000) * 1000;
 
-	/* Wait at most time unless I'm getting kill. */
 	if (pthread_mutex_lock(&tm->mtx) != 0)
 		tm->status = TIMER_MUST_STOP;
 
+	/* Wait at most time unless I'm getting kill. */
 	while (tm->status == TIMER_ACTIVE && rc == 0)
 		rc = pthread_cond_timedwait(&tm->cv, &tm->mtx, &ts);
 
@@ -146,8 +145,8 @@ timer_routine(void *data)
 	 * When the thread ends, there are several possibilities:
 	 *
 	 * 1. It has completed without being aborted.
-	 * 2. It has been stopped by the user (tm->stopped is true).
-	 * 3. The plugin is shutting down (tm->kill is true).
+	 * 2. It has been stopped by the user.
+	 * 3. The plugin is shutting down.
 	 */
 	if (rc == ETIMEDOUT && tm->status == TIMER_ACTIVE)
 		irc_bot_post(timer_expired, tm);
@@ -239,7 +238,6 @@ Timer_destructor(duk_context *ctx)
 	duk_del_prop_string(ctx, -2, SIGNATURE);
 
 	/* Remove callback from timer table. */
-	puts("DELETE");
 	duk_push_global_stash(tm->ctx);
 	duk_get_prop_string(tm->ctx, -1, TABLE);
 	duk_remove(tm->ctx, -2);

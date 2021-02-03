@@ -20,8 +20,6 @@
 #define IRCCD_RULE_H
 
 #include <sys/queue.h>
-#include <stdbool.h>
-#include <stddef.h>
 
 #include "limits.h"
 
@@ -45,13 +43,13 @@ TAILQ_HEAD(irc_rule_list, irc_rule);
 struct irc_rule *
 irc_rule_new(enum irc_rule_action);
 
-bool
+int
 irc_rule_add(char *, const char *);
 
 void
 irc_rule_remove(char *, const char *);
 
-bool
+int
 irc_rule_match(const struct irc_rule *,
                const char *,
                const char *,
@@ -59,7 +57,7 @@ irc_rule_match(const struct irc_rule *,
                const char *,
                const char *);
 
-bool
+int
 irc_rule_matchlist(const struct irc_rule_list *,
                    const char *,
                    const char *,
