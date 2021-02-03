@@ -39,7 +39,7 @@ void
 irc_bot_server_add(struct irc_server *);
 
 struct irc_server *
-irc_bot_server_find(const char *);
+irc_bot_server_get(const char *);
 
 void
 irc_bot_server_remove(const char *);
@@ -51,13 +51,16 @@ void
 irc_bot_plugin_add(struct irc_plugin *);
 
 struct irc_plugin *
-irc_bot_plugin_find(const char *);
+irc_bot_plugin_find(const char *, const char *);
 
 struct irc_plugin *
 irc_bot_plugin_get(const char *);
 
 void
 irc_bot_plugin_remove(const char *);
+
+void
+irc_bot_plugin_clear(void);
 
 void
 irc_bot_plugin_loader_add(struct irc_plugin_loader *);
@@ -85,5 +88,8 @@ irc_bot_dequeue(struct irc_event *);
 
 void
 irc_bot_post(void (*)(void *), void *);
+
+void
+irc_bot_finish(void);
 
 #endif /* !IRCCD_H */

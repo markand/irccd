@@ -16,9 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <assert.h>
 #include <err.h>
 #include <libgen.h>
 #include <limits.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -138,4 +140,20 @@ irc_util_split(char *line, const char **args, size_t max)
 	}
 
 	return idx;
+}
+
+char *
+irc_util_printf(char *buf, size_t bufsz, const char *fmt, ...)
+{
+	assert(buf);
+	assert(bufsz);
+	assert(fmt);
+
+	va_list ap;
+
+	va_start(ap, fmt);
+	vsnprintf(buf, bufsz, fmt, ap);
+	va_end(ap);
+
+	return buf;
 }

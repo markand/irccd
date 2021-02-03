@@ -53,4 +53,7 @@ irc_util_dirname(const char *);
 size_t
 irc_util_split(char *, const char **, size_t);
 
+char *
+irc_util_printf(char *, size_t, const char *, ...);
+
 #endif /* !IRCCD_UTIL_H */

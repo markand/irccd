@@ -443,6 +443,15 @@ init(const char *path, const char *script)
 	js = irc_util_calloc(1, sizeof (*js));
 	js->ctx = duk_create_heap(wrap_malloc, wrap_realloc, wrap_free, NULL, NULL);
 
+	/* Tables used to retrieve data. */
+	duk_push_object(js->ctx);
+	duk_put_global_string(js->ctx, JSAPI_PLUGIN_PROP_OPTIONS);
+	duk_push_object(js->ctx);
+	duk_put_global_string(js->ctx, JSAPI_PLUGIN_PROP_TEMPLATES);
+	duk_push_object(js->ctx);
+	duk_put_global_string(js->ctx, JSAPI_PLUGIN_PROP_PATHS);
+
+	/* Load Javascript APIs. */
 	jsapi_load(js->ctx);
 	jsapi_chrono_load(js->ctx);
 	jsapi_directory_load(js->ctx);
@@ -455,6 +464,7 @@ init(const char *path, const char *script)
 	jsapi_unicode_load(js->ctx);
 	jsapi_util_load(js->ctx);
 
+	/* Finally execute the script. */
 	if (duk_peval_string(js->ctx, script) != 0) {
 		irc_log_warn("plugin: %s: %s", path, duk_to_string(js->ctx, -1));
 		duk_destroy_heap(js->ctx);

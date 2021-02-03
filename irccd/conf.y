@@ -514,18 +514,20 @@ plugin
 	{
 		struct irc_plugin *p;
 		struct pair *kv;
+		const char *location = $3 ? $3->location : NULL;
 
-		if (!(p = irc_bot_plugin_find($2)))
+		if (!(p = irc_bot_plugin_find($2, location)))
 			goto cleanup;
 
-		if ($3) {
+		if ($3 && $3->templates)
 			SLIST_FOREACH(kv, $3->templates, link)
 				irc_plugin_set_template(p, kv->key, kv->value);
+		if ($3 && $3->config)
 			SLIST_FOREACH(kv, $3->config, link)
 				irc_plugin_set_option(p, kv->key, kv->value);
+		if ($3 && $3->paths)
 			SLIST_FOREACH(kv, $3->paths, link)
 				irc_plugin_set_path(p, kv->key, kv->value);
-		}
 
 		irc_bot_plugin_add(p);
 

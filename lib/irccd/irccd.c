@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <config.h>
+
 #include <assert.h>
 #include <ctype.h>
 #include <err.h>
@@ -182,55 +184,30 @@ pipe_flush(const struct pollfd *fd)
 	df.exec(df.data);
 }
 
-#if 0
-static void
-process(struct pkg *pkg)
+static struct irc_plugin *
+find_plugin(struct irc_plugin_loader *ldr, const char *base, const char *name)
 {
-	struct irc_server *s;
-	struct irc_peer *p, *ptmp;
-	struct irc_event ev;
+	char path[PATH_MAX], buf[IRC_EXTENSIONS_LEN], *t, *ext;
+	struct irc_plugin *p;
 
-	if (poll(pkg->fds, pkg->fdsz, 1000) < 0 && errno != EINTR)
-		err(1, "poll");
+	strlcpy(buf, ldr->extensions, sizeof (buf));
 
-	/*
-	 * We can't to what file descriptors belong to so pass every file to
-	 * all services and they must check if they are associated to it or
-	 * not.
-	 */
-	for (size_t i = 0; i < pkg->fdsz; ++i) {
-		pipe_flush(&pkg->fds[i]);
+	for (t = buf; (ext = strtok_r(t, ":", &t)); ) {
+		snprintf(path, sizeof (path), "%s/%s.%s", base, name, ext);
+		irc_log_info("irccd: trying %s", path);
 
-		LIST_FOREACH(s, &irc.servers, link)
-			irc_server_flush(s, &pkg->fds[i]);
-
-		/* Accept new transport client. */
-		if ((p = irc_transport_flush(&pkg->fds[i])))
-			LIST_INSERT_HEAD(&irc.peers, p, link);
-
-		/* Flush clients. */
-		LIST_FOREACH_SAFE(p, &irc.peers, link, ptmp) {
-			if (!irc_peer_flush(p, &pkg->fds[i])) {
-				irc_peer_finish(p);
-				LIST_REMOVE(p, link);
-			}
-		}
+		if ((p = irc_plugin_loader_open(ldr, path)))
+			return p;
 	}
 
-	/*
-	 * For every server, poll any kind of new event and pass them to the
-	 * plugin unless the rules explicitly disallow us to do so.
-	 */
-	LIST_FOREACH(s, &irc.servers, link) {
-		while (irc_server_poll(s, &ev)) {
-			broadcast(&ev);
-			invoke(&ev);
-			irc_event_finish(&ev);
-		}
-	}
+	return NULL;
 }
 
-#endif
+static inline struct irc_plugin *
+open_plugin(struct irc_plugin_loader *ldr, const char *path)
+{
+	return irc_plugin_loader_open(ldr, path);
+}
 
 static inline size_t
 rulescount(void)
@@ -258,6 +235,8 @@ irc_bot_server_add(struct irc_server *s)
 {
 	assert(s);
 
+	irc_log_info("irccd: added new server: %s", s->name);
+
 	irc_server_incref(s);
 	irc_server_connect(s);
 
@@ -265,7 +244,7 @@ irc_bot_server_add(struct irc_server *s)
 }
 
 struct irc_server *
-irc_bot_server_find(const char *name)
+irc_bot_server_get(const char *name)
 {
 	struct irc_server *s;
 
@@ -281,7 +260,7 @@ irc_bot_server_remove(const char *name)
 {
 	struct irc_server *s;
 
-	if (!(s = irc_bot_server_find(name)))
+	if (!(s = irc_bot_server_get(name)))
 		return;
 
 	irc_server_disconnect(s);
@@ -303,6 +282,7 @@ irc_bot_server_clear(void)
 
 	LIST_FOREACH_SAFE(s, &irc.servers, link, tmp)
 		irc_bot_server_remove(s->name);
+	LIST_INIT(&irc.servers);
 }
 
 void
@@ -312,57 +292,58 @@ irc_bot_plugin_add(struct irc_plugin *p)
 
 	LIST_INSERT_HEAD(&irc.plugins, p, link);
 
-	irc_log_info("plugin %s: %s", p->name, p->description);
-	irc_log_info("plugin %s: version %s, from %s (%s license)", p->name,
+	irc_log_info("irccd: add new plugin: %s", p->name, p->description);
+	irc_log_info("irccd: %s: version %s, from %s (%s license)", p->name,
 	    p->version, p->author, p->license);
 
 	irc_plugin_load(p);
 }
 
-static struct irc_plugin *
-find_plugin(struct irc_plugin_loader *ldr, const char *base, const char *name)
-{
-	char path[PATH_MAX], buf[IRC_EXTENSIONS_LEN], *t, *ext;
-	struct irc_plugin *p;
-
-	strlcpy(buf, ldr->extensions, sizeof (buf));
-
-	for (t = buf; (ext = strtok_r(t, ":", &t)); ) {
-		snprintf(path, sizeof (path), "%s/%s.%s", base, name, ext);
-		irc_log_info("irccd: trying %s", path);
-
-		if ((p = irc_plugin_loader_open(ldr, path)))
-			return p;
-	}
-
-	return NULL;
-}
-
 struct irc_plugin *
-irc_bot_plugin_find(const char *name)
+irc_bot_plugin_find(const char *name, const char *path)
 {
-	char buf[IRC_PATHS_LEN], *t, *token;
+	assert(name);
+
+	char buf[IRC_PATHS_LEN], pathbuf[PATH_MAX], *t, *token;
 	struct irc_plugin *p = NULL;
 	struct irc_plugin_loader *ldr;
 
-	irc_log_info("irccd: trying to find plugin %s", name);
+	if (!path)
+		irc_log_info("irccd: trying to find plugin %s", name);
+	else
+		irc_log_info("irccd: opening plugin %s", name);
 
 	SLIST_FOREACH(ldr, &irc.plugin_loaders, link) {
-		/* Copy the paths to tokenize it. */
-		strlcpy(buf, ldr->paths, sizeof (buf));
-
-		/*
-		 * For every directory (separated by colon) call find_plugin
-		 * which will append the extension and try to open it.
-		 */
-		for (t = buf; (token = strtok_r(t, ":", &t)); ) {
-			if ((p = find_plugin(ldr, token, name)))
+		if (path) {
+			if ((p = open_plugin(ldr, path)))
 				break;
+		} else {
+			/* Copy the paths to tokenize it. */
+			strlcpy(buf, ldr->paths, sizeof (buf));
+
+			/*
+			 * For every directory (separated by colon) call find_plugin
+			 * which will append the extension and try to open it.
+			 */
+			for (t = buf; (token = strtok_r(t, ":", &t)); ) {
+				if ((p = find_plugin(ldr, token, name)))
+					break;
+			}
 		}
 	}
 
 	if (!p)
 		irc_log_warn("irccd: could not find plugin %s", name);
+
+	strlcpy(p->name, name, sizeof (p->name));
+
+	/* Set default paths if they are not set. */
+	irc_plugin_set_path(p, "cache", irc_util_printf(pathbuf, sizeof (pathbuf),
+	    "%s/plugin/%s", IRCCD_CACHEDIR, p->name));
+	irc_plugin_set_path(p, "data", irc_util_printf(pathbuf, sizeof (pathbuf),
+	    "%s/plugin/%s", IRCCD_DATADIR, p->name));
+	irc_plugin_set_path(p, "config", irc_util_printf(pathbuf, sizeof (pathbuf),
+	    "%s/irccd/plugin/%s", IRCCD_SYSCONFDIR, p->name));
 
 	return p;
 }
@@ -399,6 +380,16 @@ irc_bot_plugin_loader_add(struct irc_plugin_loader *ldr)
 	assert(ldr);
 
 	SLIST_INSERT_HEAD(&irc.plugin_loaders, ldr, link);
+}
+
+void
+irc_bot_plugin_clear(void)
+{
+	struct irc_plugin *p, *tmp;
+
+	LIST_FOREACH_SAFE(p, &irc.plugins, link, tmp)
+		irc_bot_plugin_remove(p->name);
+	LIST_INIT(&irc.plugins);
 }
 
 void
@@ -506,4 +497,21 @@ irc_bot_post(void (*exec)(void *), void *data)
 
 	if (write(pipes[1], &df, sizeof (df)) != sizeof (df))
 		err(1, "write");
+}
+
+void
+irc_bot_finish(void)
+{
+	struct irc_plugin_loader *ld, *ldtmp;
+
+	/*
+	 * First remove all loaders to mkae sure plugins won't try to load
+	 * new plugins.
+	 */
+	SLIST_FOREACH_SAFE(ld, &irc.plugin_loaders, link, ldtmp)
+		irc_plugin_loader_finish(ld);
+
+	irc_bot_server_clear();
+	irc_bot_plugin_clear();
+	irc_bot_rule_clear();
 }

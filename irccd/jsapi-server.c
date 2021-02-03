@@ -504,7 +504,7 @@ static duk_ret_t
 Server_find(duk_context *ctx)
 {
 	const char *name = duk_require_string(ctx, 0);
-	struct irc_server *s = irc_bot_server_find(name);
+	struct irc_server *s = irc_bot_server_get(name);
 
 	if (!s)
 		return 0;

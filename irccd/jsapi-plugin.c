@@ -81,12 +81,6 @@ set(duk_context *ctx, const char *name)
 	return 0;
 }
 
-/*
- * get
- * ------------------------------------------------------------------
- *
- * Get the Irccd.Plugin.(config|templates|paths) property.
- */
 static duk_ret_t
 get(duk_context *ctx, const char *name)
 {

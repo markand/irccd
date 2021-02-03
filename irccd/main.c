@@ -20,6 +20,7 @@
 #include <compat.h>
 
 #include <err.h>
+#include <errno.h>
 #include <poll.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,10 +38,16 @@
 #include "js-plugin.h"
 #include "peer.h"
 
+struct pollables {
+	struct pollfd *fds;
+	size_t fdsz;
+	size_t botsz;
+	size_t localsz;
+};
+
 static const char *config = IRCCD_SYSCONFDIR "/irccd.conf";
 static struct peers peers;
 static int running = 1;
-static int has_transport;
 
 /* conf.y */
 void
@@ -65,9 +72,6 @@ poll_count(void)
 {
 	struct peer *p;
 	size_t i = 1;
-
-	if (!has_transport)
-		return 0;
 
 	LIST_FOREACH(p, &peers, link)
 		++i;
@@ -98,13 +102,12 @@ init(void)
 }
 
 static void
-prepare(struct pollfd *fd)
+prepare(struct pollables *pb)
 {
 	struct peer *p;
+	struct pollfd *fd = pb->fds + pb->botsz;
 
-	if (!has_transport)
-		return;
-
+	irc_bot_prepare(pb->fds);
 	transport_prepare(fd++);
 
 	LIST_FOREACH(p, &peers, link)
@@ -112,13 +115,12 @@ prepare(struct pollfd *fd)
 }
 
 static void
-flush(const struct pollfd *fd)
+flush(const struct pollables *pb)
 {
 	struct peer *peer, *tmp;
+	struct pollfd *fd = pb->fds + pb->botsz;
 
-	if (!has_transport)
-		return;
-
+	irc_bot_flush(pb->fds);
 	transport_flush(fd++);
 
 	LIST_FOREACH_SAFE(peer, &peers, link, tmp) {
@@ -135,37 +137,40 @@ load(void)
 	config_open(config);
 }
 
+static struct pollables
+pollables(void)
+{
+	struct pollables pb = {0};
+
+	pb.botsz = irc_bot_poll_count();
+	pb.localsz = poll_count();
+	pb.fdsz = pb.botsz + pb.localsz;
+	pb.fds = irc_util_calloc(pb.fdsz, sizeof (*pb.fds));
+
+	prepare(&pb);
+
+	return pb;
+}
+
 static void
 loop(void)
 {
-#if 0
+	struct pollables pb;
 	struct irc_event ev;
-	struct pollfd *fds;
-	size_t botcount, owncount;
 
 	while (running) {
-		/*
-		 * Compute how much fd the bot requires and append our own
-		 * transport and peers.
-		 */
-		botcount = irc_bot_poll_count();
-		owncount = poll_count();
-		fds = irc_util_calloc(botcount + owncount, sizeof (*fds));
+		pb = pollables();
 
-		irc_bot_prepare(fds);
-		prepare(&fds[botcount]);
+		if (poll(pb.fds, pb.fdsz, 1000) < 0 && errno != EINTR)
+			err(1, "poll");
 
-		if (poll(fds,
-
-		irc_bot_flush(fds);
-		flush(&fds[botcount]);
+		flush(&pb);
 
 		while (irc_bot_dequeue(&ev))
 			broadcast(&ev);
 
-		free(fds);
+		free(pb.fds);
 	}
-#endif
 }
 
 static inline void
@@ -177,6 +182,7 @@ finish(void)
 		peer_finish(peer);
 
 	transport_finish();
+	irc_bot_finish();
 }
 
 static void
