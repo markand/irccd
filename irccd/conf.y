@@ -432,6 +432,7 @@ server
 			string_list_finish($4->channels);
 		}
 
+		s->flags = $4->flags;
 		irc_bot_server_add(s);
 
 		free($2);

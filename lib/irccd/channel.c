@@ -36,7 +36,7 @@ find(const struct irc_channel *ch, const char *nickname)
 }
 
 struct irc_channel *
-irc_channel_new(const char *name, const char *password, bool joined)
+irc_channel_new(const char *name, const char *password, int joined)
 {
 	assert(name);
 

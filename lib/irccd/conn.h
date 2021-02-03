@@ -19,8 +19,6 @@
 #ifndef IRCCD_CONN_H
 #define IRCCD_CONN_H
 
-#include <stdbool.h>
-
 #include "config.h"
 
 #if defined(IRCCD_WITH_SSL)
@@ -45,10 +43,10 @@ enum irc_conn_flags {
 
 #if defined(IRCCD_WITH_SSL)
 
-enum irc_conn_ssl_state {
-	IRC_CONN_SSL_STATE_NONE,
-	IRC_CONN_SSL_STATE_NEED_READ,
-	IRC_CONN_SSL_STATE_NEED_WRITE,
+enum irc_conn_ssl_act {
+	IRC_CONN_SSL_ACT_NONE,
+	IRC_CONN_SSL_ACT_READ,
+	IRC_CONN_SSL_ACT_WRITE,
 };
 
 #endif
@@ -67,7 +65,8 @@ struct irc_conn {
 #if defined(IRCCD_WITH_SSL)
 	SSL_CTX *ctx;
 	SSL *ssl;
-	enum irc_conn_ssl_state ssl_state;
+	enum irc_conn_ssl_act ssl_cond;
+	enum irc_conn_ssl_act ssl_step;
 #endif
 };
 
@@ -78,7 +77,7 @@ struct irc_conn_msg {
 	char buf[IRC_MESSAGE_LEN];
 };
 
-bool
+int
 irc_conn_connect(struct irc_conn *);
 
 void
@@ -87,13 +86,13 @@ irc_conn_disconnect(struct irc_conn *);
 void
 irc_conn_prepare(const struct irc_conn *, struct pollfd *);
 
-bool
+int
 irc_conn_flush(struct irc_conn *, const struct pollfd *);
 
-bool
+int
 irc_conn_poll(struct irc_conn *, struct irc_conn_msg *);
 
-bool
+int
 irc_conn_send(struct irc_conn *, const char *);
 
 void

@@ -20,7 +20,6 @@
 #define IRCCD_CHANNEL_H
 
 #include <sys/queue.h>
-#include <stdbool.h>
 #include <stddef.h>
 
 #include "limits.h"
@@ -35,7 +34,7 @@ struct irc_channel_user {
 struct irc_channel {
 	char name[IRC_CHANNEL_LEN];
 	char password[IRC_PASSWORD_LEN];
-	bool joined;
+	int joined;
 	LIST_HEAD(, irc_channel_user) users;
 	LIST_ENTRY(irc_channel) link;
 };
@@ -43,7 +42,7 @@ struct irc_channel {
 LIST_HEAD(irc_channel_list, irc_channel);
 
 struct irc_channel *
-irc_channel_new(const char *, const char *, bool);
+irc_channel_new(const char *, const char *, int);
 
 void
 irc_channel_add(struct irc_channel *, const char *, char, char);

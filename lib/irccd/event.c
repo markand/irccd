@@ -43,9 +43,8 @@ irc_event_str(const struct irc_event *ev, char *str, size_t strsz)
 		    ev->server->name);
 		break;
 	case IRC_EVENT_INVITE:
-		written = snprintf(str, strsz, "EVENT-INVITE %s %s %s %s",
-		    ev->server->name, ev->invite.origin, ev->invite.channel,
-		    ev->invite.target);
+		written = snprintf(str, strsz, "EVENT-INVITE %s %s %s",
+		    ev->server->name, ev->invite.origin, ev->invite.channel);
 		break;
 	case IRC_EVENT_JOIN:
 		written = snprintf(str, strsz, "EVENT-JOIN %s %s %s",

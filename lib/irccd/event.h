@@ -58,7 +58,6 @@ enum irc_event_type {
 struct irc_event_invite {
 	char *origin;
 	char *channel;
-	char *target;
 };
 
 struct irc_event_join {

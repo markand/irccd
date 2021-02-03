@@ -20,7 +20,6 @@
 #define IRCCD_SERVER_H
 
 #include <sys/queue.h>
-#include <stdbool.h>
 #include <stddef.h>
 
 #include "channel.h"
@@ -107,37 +106,37 @@ irc_server_prepare(const struct irc_server *, struct pollfd *);
 void
 irc_server_flush(struct irc_server *, const struct pollfd *);
 
-bool
+int
 irc_server_poll(struct irc_server *, struct irc_event *);
 
 struct irc_channel *
 irc_server_find(struct irc_server *, const char *);
 
-bool
+int
 irc_server_send(struct irc_server *, const char *, ...);
 
-bool
+int
 irc_server_invite(struct irc_server *, const char *, const char *);
 
-bool
+int
 irc_server_join(struct irc_server *, const char *, const char *);
 
-bool
+int
 irc_server_kick(struct irc_server *, const char *, const char *, const char *);
 
-bool
+int
 irc_server_part(struct irc_server *, const char *, const char *);
 
-bool
+int
 irc_server_topic(struct irc_server *, const char *, const char *);
 
-bool
+int
 irc_server_message(struct irc_server *, const char *, const char *);
 
-bool
+int
 irc_server_me(struct irc_server *, const char *, const char *);
 
-bool
+int
 irc_server_mode(struct irc_server *,
                 const char *,
                 const char *,
@@ -145,16 +144,16 @@ irc_server_mode(struct irc_server *,
                 const char *,
                 const char *);
 
-bool
+int
 irc_server_names(struct irc_server *, const char *);
 
-bool
+int
 irc_server_nick(struct irc_server *, const char *);
 
-bool
+int
 irc_server_notice(struct irc_server *, const char *, const char *);
 
-bool
+int
 irc_server_whois(struct irc_server *, const char *);
 
 void
