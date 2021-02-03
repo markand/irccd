@@ -1,5 +1,5 @@
 /*
- * compat.c -- dummy file to avoid stupid empty library warnings
+ * getprogname.c -- getprogname implementation
  *
  * Copyright (c) 2020-2021 David Demelier <markand@malikania.fr>
  *
@@ -16,8 +16,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-int
-libcompat_presence(void)
+extern const char *libcompat_progname;
+
+const char *
+getprogname(void)
 {
-	return 1;
+	return libcompat_progname;
 }

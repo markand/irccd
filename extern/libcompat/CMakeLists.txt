@@ -37,9 +37,11 @@ set(
 	err
 	errc
 	errx
+	getprogname
 	pledge
 	reallocarray
 	recallocarray
+	setprogname
 	strlcat
 	strlcpy
 	strsep

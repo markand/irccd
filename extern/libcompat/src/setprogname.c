@@ -1,5 +1,5 @@
 /*
- * compat.c -- dummy file to avoid stupid empty library warnings
+ * setprogname.c -- setprogname implementation
  *
  * Copyright (c) 2020-2021 David Demelier <markand@malikania.fr>
  *
@@ -16,8 +16,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-int
-libcompat_presence(void)
+#include <stdio.h>
+
+static char libcompat_progname_buf[64] = "";
+
+const char *libcompat_progname = libcompat_progname_buf;
+
+void
+setprogname(const char *name)
 {
-	return 1;
+	snprintf(libcompat_progname_buf, sizeof (libcompat_progname_buf), "%s", name);
 }

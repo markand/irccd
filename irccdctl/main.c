@@ -523,14 +523,15 @@ run(int argc, char **argv)
 static noreturn void
 usage(void)
 {
-	/* TODO: getprogname() */
-	fprintf(stderr, "usage: irccdctl [-v] [-s sock] command [arguments...]\n");
+	fprintf(stderr, "usage: %s [-v] [-s sock] command [arguments...]\n", getprogname());
 	exit(1);
 }
 
 int
 main(int argc, char **argv)
 {
+	setprogname("irccdctl");
+
 	for (int ch; (ch = getopt(argc, argv, "s:v")) != -1; ) {
 		switch (ch) {
 		case 's':

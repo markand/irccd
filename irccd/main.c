@@ -197,7 +197,7 @@ main(int argc, char **argv)
 {
 	int ch;
 
-	setprogname(argv[0]);
+	setprogname("irccd");
 
 	while ((ch = getopt(argc, argv, "c:")) != -1) {
 		switch (ch) {

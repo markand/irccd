@@ -7,9 +7,11 @@
 #cmakedefine COMPAT_HAVE_ERRC
 #cmakedefine COMPAT_HAVE_ERRX
 #cmakedefine COMPAT_HAVE_GETOPT
+#cmakedefine COMPAT_HAVE_GETPROGNAME
 #cmakedefine COMPAT_HAVE_PLEDGE
 #cmakedefine COMPAT_HAVE_REALLOCARRAY
 #cmakedefine COMPAT_HAVE_RECALLOCARRAY
+#cmakedefine COMPAT_HAVE_SETPROGNAME
 #cmakedefine COMPAT_HAVE_STRDUP
 #cmakedefine COMPAT_HAVE_STRLCAT
 #cmakedefine COMPAT_HAVE_STRLCPY
@@ -125,6 +127,11 @@ int
 getopt(int, char **, const char *);
 #endif
 
+#ifndef COMPAT_HAVE_GETPROGNAME
+const char *
+getprogname(void);
+#endif
+
 #ifndef COMPAT_HAVE_PLEDGE
 int
 pledge(const char *, const char *);
@@ -138,6 +145,11 @@ reallocarray(void *, size_t, size_t);
 #ifndef COMPAT_HAVE_RECALLOCARRAY
 void *
 recallocarray(void *, size_t, size_t, size_t);
+#endif
+
+#ifndef COMPAT_HAVE_SETPROGNAME
+void
+setprogname(const char *);
 #endif
 
 #ifndef COMPAT_HAVE_STRDUP
