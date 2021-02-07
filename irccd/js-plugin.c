@@ -141,26 +141,23 @@ push_whois(duk_context *ctx, const struct irc_event *ev)
 static const char **
 get_table(duk_context *ctx, const char *name, char ***ptable)
 {
-	char **list;
-	size_t listsz;
+	char **list = NULL;
+	size_t listsz = 0;
 
 	duk_get_global_string(ctx, name);
-
-	if (!(listsz = duk_get_length(ctx, -1))) {
-		duk_pop(ctx);
-		return NULL;
-	}
-
-	list = irc_util_calloc(listsz + 1, sizeof (char *));
-
 	duk_enum(ctx, -1, 0);
 
-	for (size_t i = 0; i < listsz && duk_next(ctx, -1, 1); ++i) {
+	for (size_t i = 0; duk_next(ctx, -1, 1); ++i) {
+		list = irc_util_reallocarray(list, ++listsz, sizeof (char *));
 		list[i] = irc_util_strdup(duk_to_string(ctx, -2));
 		duk_pop_n(ctx, 2);
 	}
 
 	duk_pop_n(ctx, 2);
+
+	/* Add a NULL sentinel value. */
+	list = irc_util_reallocarray(list, listsz + 1, sizeof (char *));
+	list[listsz] = NULL;
 
 	freelist(*ptable);
 	*ptable = list;

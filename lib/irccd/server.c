@@ -106,8 +106,8 @@ add_channel(struct irc_server *s, const char *name, const char *password, int jo
 static void
 remove_channel(struct irc_channel *ch)
 {
-	irc_channel_finish(ch);
 	LIST_REMOVE(ch, link);
+	irc_channel_finish(ch);
 }
 
 static int
@@ -156,10 +156,6 @@ read_support_prefix(struct irc_server *s, const char *value)
 		for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes) && *pm && *tk; ++i) {
 			s->params.prefixes[i].mode = *pm++;
 			s->params.prefixes[i].token = *tk++;
-
-			irc_log_info("server %s: supports prefix %c=%c", s->name,
-			    s->params.prefixes[i].mode,
-			    s->params.prefixes[i].token);
 		}
 	}
 }
@@ -168,7 +164,6 @@ static void
 read_support_chantypes(struct irc_server *s, const char *value)
 {
 	strlcpy(s->params.chantypes, value, sizeof (s->params.chantypes));
-	irc_log_info("server %s: supports channel types: %s", s->name, s->params.chantypes);
 }
 
 static void
@@ -194,6 +189,7 @@ handle_disconnect(struct irc_server *s, struct irc_event *ev)
 	s->state = IRC_SERVER_STATE_NONE;
 	ev->type = IRC_EVENT_DISCONNECT;
 	ev->server = s;
+
 	irc_log_info("server %s: connection lost", s->name);
 }
 
@@ -209,10 +205,44 @@ handle_support(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *
 		if (sscanf(msg->args[i], "%63[^=]=%63s", key, value) != 2)
 			continue;
 
-		if (strcmp(key, "PREFIX") == 0)
+		if (strcmp(key, "PREFIX") == 0) {
 			read_support_prefix(s, value);
-		if (strcmp(key, "CHANTYPES") == 0)
+			irc_log_info("server %s: prefixes:           %s",
+			    s->name, value);
+		} else if (strcmp(key, "CHANTYPES") == 0) {
 			read_support_chantypes(s, value);
+			irc_log_info("server %s: channel types:      %s",
+			    s->name, value);
+		} else if (strcmp(key, "CHANNELLEN") == 0) {
+			s->params.chanlen = atoi(value);
+			irc_log_info("server %s: channel name limit: %u",
+			    s->name, s->params.chanlen);
+		} else if (strcmp(key, "NICKLEN") == 0) {
+			s->params.nicklen = atoi(value);
+			irc_log_info("server %s: nickname limit:     %u",
+			    s->name, s->params.nicklen);
+		} else if (strcmp(key, "TOPICLEN") == 0) {
+			s->params.topiclen = atoi(value);
+			irc_log_info("server %s: topic limit:        %u",
+			    s->name, s->params.topiclen);
+		} else if (strcmp(key, "AWAYLEN") == 0) {
+			s->params.awaylen = atoi(value);
+			irc_log_info("server %s: away message limit: %u",
+			    s->name, s->params.awaylen);
+		} else if (strcmp(key, "KICKLEN") == 0) {
+			s->params.kicklen = atoi(value);
+			irc_log_info("server %s: kick reason limit:  %u",
+			    s->name, s->params.kicklen);
+		}
+		else if (strcmp(key, "CHARSET") == 0) {
+			strlcpy(s->params.charset, value, sizeof (s->params.charset));
+			irc_log_info("server %s: charset:            %s",
+			    s->name, s->params.charset);
+		} else if (strcmp(key, "CASEMAPPING") == 0) {
+			strlcpy(s->params.casemapping, value, sizeof (s->params.casemapping));
+			irc_log_info("server %s: case mapping:       %s",
+			    s->name, s->params.casemapping);
+		}
 	}
 }
 
@@ -299,7 +329,7 @@ handle_part(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 
 	ch = add_channel(s, ev->part.channel, NULL, 1);
 
-	if (is_self(s, ev->part.origin) == 0) {
+	if (is_self(s, ev->part.origin)) {
 		remove_channel(ch);
 		irc_log_info("server %s: leaving channel %s", s->name, ev->part.channel);
 	} else

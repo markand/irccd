@@ -22,6 +22,7 @@
 #include <sys/time.h>
 #include <sys/un.h>
 #include <assert.h>
+#include <ctype.h>
 #include <err.h>
 #include <errno.h>
 #include <limits.h>
@@ -125,13 +126,365 @@ req(const char *fmt, ...)
 	}
 }
 
-static void
+static char *
 ok(void)
 {
-	const char *response = poll();
+	char *response = poll();
 
-	if (strcmp(response, "OK") != 0)
+	if (strncmp(response, "OK", 2) != 0)
 		errx(1, "abort: %s", response);
+
+	/* Skip "OK". */
+	response += 2;
+
+	while (*response && isspace(*response))
+		response++;
+
+	return response;
+}
+
+static void
+show_connect(char *line)
+{
+	const char *args[2] = {0};
+
+	if (irc_util_split(line, args, 2) == 2) {
+		printf("%-16s: %s\n", "event", "onConnect");
+		printf("%-16s: %s\n", "server", args[0]);
+	}
+}
+
+static void
+show_disconnect(char *line)
+{
+	const char *args[2] = {0};
+
+	if (irc_util_split(line, args, 2) == 2) {
+		printf("%-16s: %s\n", "event", "onDisonnect");
+		printf("%-16s: %s\n", "server", args[0]);
+	}
+}
+
+static void
+show_invite(char *line)
+{
+	const char *args[5] = {0};
+
+	if (irc_util_split(line, args, 5) == 5) {
+		printf("%-16s: %s\n", "event", "onInvite");
+		printf("%-16s: %s\n", "server", args[1]);
+		printf("%-16s: %s\n", "origin", args[2]);
+		printf("%-16s: %s\n", "channel", args[3]);
+		printf("%-16s: %s\n", "nickname", args[4]);
+	}
+}
+
+static void
+show_join(char *line)
+{
+	const char *args[4] = {0};
+
+	if (irc_util_split(line, args, 4) == 4) {
+		printf("%-16s: %s\n", "event", "onJoin");
+		printf("%-16s: %s\n", "server", args[1]);
+		printf("%-16s: %s\n", "origin", args[2]);
+		printf("%-16s: %s\n", "channel", args[3]);
+	}
+}
+
+static void
+show_kick(char *line)
+{
+	const char *args[6] = {0};
+
+	if (irc_util_split(line, args, 6) >= 5) {
+		printf("%-16s: %s\n", "event", "onKick");
+		printf("%-16s: %s\n", "server", args[1]);
+		printf("%-16s: %s\n", "origin", args[2]);
+		printf("%-16s: %s\n", "channel", args[3]);
+		printf("%-16s: %s\n", "target", args[4]);
+		printf("%-16s: %s\n", "reason", args[5] ? args[5] : "");
+	}
+}
+
+static void
+show_me(char *line)
+{
+	const char *args[5] = {0};
+
+	if (irc_util_split(line, args, 5) == 5) {
+		printf("%-16s: %s\n", "event", "onMe");
+		printf("%-16s: %s\n", "server", args[1]);
+		printf("%-16s: %s\n", "origin", args[2]);
+		printf("%-16s: %s\n", "channel", args[3]);
+		printf("%-16s: %s\n", "message", args[4]);
+	}
+}
+
+static void
+show_message(char *line)
+{
+	const char *args[5] = {0};
+
+	if (irc_util_split(line, args, 5) == 5) {
+		printf("%-16s: %s\n", "event", "onMessage");
+		printf("%-16s: %s\n", "server", args[1]);
+		printf("%-16s: %s\n", "origin", args[2]);
+		printf("%-16s: %s\n", "channel", args[3]);
+		printf("%-16s: %s\n", "message", args[4]);
+	}
+}
+
+static void
+show_mode(char *line)
+{
+	const char *args[8] = {0};
+
+	if (irc_util_split(line, args, 8) >= 5) {
+		printf("%-16s: %s\n", "event", "onMode");
+		printf("%-16s: %s\n", "server", args[1]);
+		printf("%-16s: %s\n", "origin", args[2]);
+		printf("%-16s: %s\n", "channel", args[3]);
+		printf("%-16s: %s\n", "mode", args[4]);
+		printf("%-16s: %s\n", "limit", (args[5] ? args[5] : ""));
+		printf("%-16s: %s\n", "user", (args[6] ? args[6] : ""));
+		printf("%-16s: %s\n", "mask", (args[7] ? args[7] : ""));
+	}
+}
+
+static void
+show_nick(char *line)
+{
+	const char *args[4] = {0};
+
+	if (irc_util_split(line, args, 4) == 4) {
+		printf("%-16s: %s\n", "event", "onNick");
+		printf("%-16s: %s\n", "server", args[1]);
+		printf("%-16s: %s\n", "origin", args[2]);
+		printf("%-16s: %s\n", "nickname", args[3]);
+	}
+}
+
+static void
+show_notice(char *line)
+{
+	const char *args[5] = {0};
+
+	if (irc_util_split(line, args, 5) == 5) {
+		printf("%-16s: %s\n", "event", "onNotice");
+		printf("%-16s: %s\n", "server", args[1]);
+		printf("%-16s: %s\n", "origin", args[2]);
+		printf("%-16s: %s\n", "channel", args[3]);
+		printf("%-16s: %s\n", "message", args[4]);
+	}
+}
+
+static void
+show_part(char *line)
+{
+	const char *args[5] = {0};
+
+	if (irc_util_split(line, args, 5) >= 4) {
+		printf("%-16s: %s\n", "event", "onPart");
+		printf("%-16s: %s\n", "server", args[1]);
+		printf("%-16s: %s\n", "origin", args[2]);
+		printf("%-16s: %s\n", "channel", args[3]);
+		printf("%-16s: %s\n", "reason", (args[4] ? args[4] : ""));
+	}
+}
+
+static void
+show_topic(char *line)
+{
+	const char *args[5] = {0};
+
+	if (irc_util_split(line, args, 5) >= 4) {
+		printf("%-16s: %s\n", "event", "onTopic");
+		printf("%-16s: %s\n", "server", args[1]);
+		printf("%-16s: %s\n", "origin", args[2]);
+		printf("%-16s: %s\n", "channel", args[3]);
+		printf("%-16s: %s\n", "topic", args[4]);
+	}
+}
+
+static void
+show_whois(char *line)
+{
+	const char *args[6] = {0};
+	//char *p, *token;
+
+	if (irc_util_split(line, args, 6) >= 4) {
+		printf("%-16s: %s\n", "event", "onWhois");
+		printf("%-16s: %s\n", "server", args[1]);
+		printf("%-16s: %s\n", "nickname", args[2]);
+		printf("%-16s: %s\n", "username", args[3]);
+		printf("%-16s: %s\n", "hostname", args[4]);
+		printf("%-16s: %s\n", "username", args[5]);
+		//printf("channels:  %s\n", args[6]);
+	}
+}
+
+static const struct {
+	const char *event;
+	void (*show)(char *);
+} watchtable[] = {
+	{ "EVENT-CONNECT",      show_connect    },
+	{ "EVENT-DISCONNECT",   show_disconnect },
+	{ "EVENT-INVITE",       show_invite     },
+	{ "EVENT-JOIN",         show_join       },
+	{ "EVENT-KICK",         show_kick       },
+	{ "EVENT-MESSAGE",      show_message    },
+	{ "EVENT-ME",           show_me         },
+	{ "EVENT-MODE",         show_mode       },
+	{ "EVENT-NICK",         show_nick       },
+	{ "EVENT-NOTICE",       show_notice     },
+	{ "EVENT-PART",         show_part       },
+	{ "EVENT-TOPIC",        show_topic      },
+	{ "EVENT-WHOIS",        show_whois      }
+};
+
+static void
+show(char *ev)
+{
+	for (size_t i = 0; i < IRC_UTIL_SIZE(watchtable); ++i) {
+		if (strncmp(watchtable[i].event, ev, strlen(watchtable[i].event)) == 0) {
+			watchtable[i].show(ev);
+			printf("\n");
+			break;
+		}
+	}
+}
+
+static void
+plugin_list_set(int argc, char **argv, const char *cmd)
+{
+	char *line, *p;
+	size_t num = 0;
+
+	if (argc == 3) {
+		req("%s %s %s %s", cmd, argv[0], argv[1], argv[2]);
+		ok();
+		return;
+	}
+
+	if (argc == 2)
+		req("%s %s %s", cmd, argv[0], argv[1]);
+	else
+		req("%s %s", cmd, argv[0]);
+
+	if (sscanf(line = ok(), "%zu", &num) != 1)
+		errx(1, "could not retrieve list");
+
+	if (argc == 2)
+		puts(poll());
+	else {
+		while (num-- != 0 && (line = poll())) {
+			if (!(p = strchr(line, '=')))
+				continue;
+
+			*p = '\0';
+			printf("%-16s: %s\n", line, p + 1);
+		}
+	}
+
+}
+
+static void
+cmd_plugin_config(int argc, char **argv)
+{
+	return plugin_list_set(argc, argv, "PLUGIN-CONFIG");
+}
+
+/*
+ * Response:
+ *
+ *     OK name
+ *     summary
+ *     version
+ *     license
+ *     author
+ */
+static void
+cmd_plugin_info(int argc, char **argv)
+{
+	(void)argc;
+
+	const char *response;
+
+	req("PLUGIN-INFO %s", argv[0]);
+
+	if (strncmp((response = poll()), "OK ", 3) != 0)
+		errx(1, "failed to retrieve plugin information");
+
+	printf("%-16s: %s\n", "name", response + 3);
+	printf("%-16s: %s\n", "summary", poll());
+	printf("%-16s: %s\n", "version", poll());
+	printf("%-16s: %s\n", "license", poll());
+	printf("%-16s: %s\n", "author", poll());
+}
+
+static void
+cmd_plugin_list(int argc, char **argv)
+{
+	(void)argc;
+	(void)argv;
+
+	char *list;
+
+	req("PLUGIN-LIST");
+
+	if (strncmp(list = poll(), "OK ", 3) != 0)
+		errx(1, "failed to retrieve plugin list");
+
+	list += 3;
+
+	for (char *p; (p = strchr(list, ' ')); )
+		*p = '\n';
+
+	puts(list);
+}
+
+static void
+cmd_plugin_load(int argc, char **argv)
+{
+	(void)argc;
+
+	req("PLUGIN-LOAD %s", argv[0]);
+	ok();
+}
+
+static void
+cmd_plugin_path(int argc, char **argv)
+{
+	return plugin_list_set(argc, argv, "PLUGIN-PATH");
+}
+
+static void
+cmd_plugin_reload(int argc, char **argv)
+{
+	if (argc == 1)
+		req("PLUGIN-RELOAD %s", argv[0]);
+	else
+		req("PLUGIN-RELOAD");
+
+	ok();
+}
+
+static void
+cmd_plugin_template(int argc, char **argv)
+{
+	return plugin_list_set(argc, argv, "PLUGIN-TEMPLATE");
+}
+
+static void
+cmd_plugin_unload(int argc, char **argv)
+{
+	if (argc == 1)
+		req("PLUGIN-UNLOAD %s", argv[0]);
+	else
+		req("PLUGIN-UNLOAD");
+
+	ok();
 }
 
 static void
@@ -141,6 +494,58 @@ cmd_server_disconnect(int argc, char **argv)
 		req("SERVER-DISCONNECT %s", argv[0]);
 	else
 		req("SERVER-DISCONNECT");
+
+	ok();
+}
+
+/*
+ * Response:
+ *
+ *     OK name
+ *     hostname port [ssl]
+ *     nickname username realname
+ *     chan1 chan2 chanN
+ */
+static void
+cmd_server_info(int argc, char **argv)
+{
+	(void)argc;
+
+	char *list;
+	const char *args[16] = {0};
+
+	req("SERVER-INFO %s", argv[0]);
+
+	if (strncmp(list = poll(), "OK ", 3) != 0)
+		errx(1, "failed to retrieve server information");
+
+	printf("%-16s: %s\n", "name", list + 3);
+
+	if (irc_util_split((list = poll()), args, 3) < 2)
+		errx(1, "malformed server connection");
+
+	printf("%-16s: %s\n", "hostname", args[0]);
+	printf("%-16s: %s\n", "port", args[1]);
+
+	if (args[2])
+		printf("%-16s: %s\n", "ssl", "true");
+
+	if (irc_util_split((list = poll()), args, 3) != 3)
+		errx(1, "malformed server ident");
+
+	printf("%-16s: %s\n", "nickname", args[0]);
+	printf("%-16s: %s\n", "username", args[0]);
+	printf("%-16s: %s\n", "realname", args[0]);
+	printf("%-16s: %s\n", "channels", poll());
+}
+
+static void
+cmd_server_join(int argc, char **argv)
+{
+	if (argc >= 3)
+		req("SERVER-JOIN %s %s %s", argv[0], argv[1], argv[2]);
+	else
+		req("SERVER-JOIN %s %s", argv[0], argv[1]);
 
 	ok();
 }
@@ -239,218 +644,6 @@ cmd_server_topic(int argc, char **argv)
 }
 
 static void
-show_connect(char *line)
-{
-	const char *args[2] = {0};
-
-	if (irc_util_split(line, args, 2) == 2) {
-		printf("event:     onConnect\n");
-		printf("server:    %s\n", args[0]);
-	}
-}
-
-static void
-show_disconnect(char *line)
-{
-	const char *args[2] = {0};
-
-	if (irc_util_split(line, args, 2) == 2) {
-		printf("event:     onDisonnect\n");
-		printf("server:    %s\n", args[0]);
-	}
-}
-
-static void
-show_invite(char *line)
-{
-	const char *args[5] = {0};
-
-	if (irc_util_split(line, args, 5) == 5) {
-		printf("event:     onInvite\n");
-		printf("server:    %s\n", args[1]);
-		printf("origin:    %s\n", args[2]);
-		printf("channel:   %s\n", args[3]);
-		printf("nickname:  %s\n", args[4]);
-	}
-}
-
-static void
-show_join(char *line)
-{
-	const char *args[4] = {0};
-
-	if (irc_util_split(line, args, 4) == 4) {
-		printf("event:     onJoin\n");
-		printf("server:    %s\n", args[1]);
-		printf("origin:    %s\n", args[2]);
-		printf("channel:   %s\n", args[3]);
-	}
-}
-
-static void
-show_kick(char *line)
-{
-	const char *args[6] = {0};
-
-	if (irc_util_split(line, args, 6) >= 5) {
-		printf("event:     onKick\n");
-		printf("server:    %s\n", args[1]);
-		printf("origin:    %s\n", args[2]);
-		printf("channel:   %s\n", args[3]);
-		printf("target:    %s\n", args[4]);
-		printf("reason:    %s\n", args[5] ? args[5] : "");
-	}
-}
-
-static void
-show_me(char *line)
-{
-	const char *args[5] = {0};
-
-	if (irc_util_split(line, args, 5) == 5) {
-		printf("event:     onMe\n");
-		printf("server:    %s\n", args[1]);
-		printf("origin:    %s\n", args[2]);
-		printf("channel:   %s\n", args[3]);
-		printf("message:   %s\n", args[4]);
-	}
-}
-
-static void
-show_message(char *line)
-{
-	const char *args[5] = {0};
-
-	if (irc_util_split(line, args, 5) == 5) {
-		printf("event:     onMessage\n");
-		printf("server:    %s\n", args[1]);
-		printf("origin:    %s\n", args[2]);
-		printf("channel:   %s\n", args[3]);
-		printf("message:   %s\n", args[4]);
-	}
-}
-
-static void
-show_mode(char *line)
-{
-	const char *args[8] = {0};
-
-	if (irc_util_split(line, args, 8) >= 5) {
-		printf("event:     onMode\n");
-		printf("server:    %s\n", args[1]);
-		printf("origin:    %s\n", args[2]);
-		printf("channel:   %s\n", args[3]);
-		printf("mode:      %s\n", args[4]);
-		printf("limit:     %s\n", (args[5] ? args[5] : ""));
-		printf("user:      %s\n", (args[6] ? args[6] : ""));
-		printf("mask:      %s\n", (args[7] ? args[7] : ""));
-	}
-}
-
-static void
-show_nick(char *line)
-{
-	const char *args[4] = {0};
-
-	if (irc_util_split(line, args, 4) == 4) {
-		printf("event:     onNick\n");
-		printf("server:    %s\n", args[1]);
-		printf("origin:    %s\n", args[2]);
-		printf("nickname:  %s\n", args[3]);
-	}
-}
-
-static void
-show_notice(char *line)
-{
-	const char *args[5] = {0};
-
-	if (irc_util_split(line, args, 5) == 5) {
-		printf("event:     onNotice\n");
-		printf("server:    %s\n", args[1]);
-		printf("origin:    %s\n", args[2]);
-		printf("channel:   %s\n", args[3]);
-		printf("message:   %s\n", args[4]);
-	}
-}
-
-static void
-show_part(char *line)
-{
-	const char *args[5] = {0};
-
-	if (irc_util_split(line, args, 5) >= 4) {
-		printf("event:     onPart\n");
-		printf("server:    %s\n", args[1]);
-		printf("origin:    %s\n", args[2]);
-		printf("channel:   %s\n", args[3]);
-		printf("reason:    %s\n", (args[4] ? args[4] : ""));
-	}
-}
-
-static void
-show_topic(char *line)
-{
-	const char *args[5] = {0};
-
-	if (irc_util_split(line, args, 5) >= 4) {
-		printf("event:     onTopic\n");
-		printf("server:    %s\n", args[1]);
-		printf("origin:    %s\n", args[2]);
-		printf("channel:   %s\n", args[3]);
-		printf("topic:     %s\n", args[4]);
-	}
-}
-
-static void
-show_whois(char *line)
-{
-	const char *args[6] = {0};
-	//char *p, *token;
-
-	if (irc_util_split(line, args, 6) >= 4) {
-		printf("event:     onWhois\n");
-		printf("server:    %s\n", args[1]);
-		printf("nickname:  %s\n", args[2]);
-		printf("username:  %s\n", args[3]);
-		printf("hostname:  %s\n", args[4]);
-		printf("username:  %s\n", args[5]);
-		//printf("channels:  %s\n", args[6]);
-	}
-}
-
-static const struct {
-	const char *event;
-	void (*show)(char *);
-} watchtable[] = {
-	{ "EVENT-CONNECT",      show_connect    },
-	{ "EVENT-DISCONNECT",   show_disconnect },
-	{ "EVENT-INVITE",       show_invite     },
-	{ "EVENT-JOIN",         show_join       },
-	{ "EVENT-KICK",         show_kick       },
-	{ "EVENT-MESSAGE",      show_message    },
-	{ "EVENT-ME",           show_me         },
-	{ "EVENT-MODE",         show_mode       },
-	{ "EVENT-NICK",         show_nick       },
-	{ "EVENT-NOTICE",       show_notice     },
-	{ "EVENT-PART",         show_part       },
-	{ "EVENT-TOPIC",        show_topic      },
-	{ "EVENT-WHOIS",        show_whois      }
-};
-
-static void
-show(char *ev)
-{
-	for (size_t i = 0; i < IRC_UTIL_SIZE(watchtable); ++i) {
-		if (strncmp(watchtable[i].event, ev, strlen(watchtable[i].event)) == 0) {
-			watchtable[i].show(ev);
-			printf("\n");
-			break;
-		}
-	}
-}
-
-static void
 cmd_watch(int argc, char **argv)
 {
 	(void)argc;
@@ -478,7 +671,17 @@ static const struct cmd {
 	void (*exec)(int, char **);
 } cmds[] = {
 	/* name                 min     max     exec                   */
+	{ "plugin-config",      1,      3,      cmd_plugin_config       },
+	{ "plugin-info",        1,      1,      cmd_plugin_info         },
+	{ "plugin-list",        0,      0,      cmd_plugin_list         },
+	{ "plugin-load",        1,      1,      cmd_plugin_load         },
+	{ "plugin-path",        0,      3,      cmd_plugin_path         },
+	{ "plugin-reload",      0,      1,      cmd_plugin_reload       },
+	{ "plugin-template",    1,      3,      cmd_plugin_template     },
+	{ "plugin-unload",      0,      1,      cmd_plugin_unload       },
 	{ "server-disconnect",  0,      1,      cmd_server_disconnect   },
+	{ "server-info",        1,      1,      cmd_server_info         },
+	{ "server-join",        2,      3,      cmd_server_join         },
 	{ "server-list",        0,      0,      cmd_server_list         },
 	{ "server-me",          3,      3,      cmd_server_me           },
 	{ "server-message",     3,      3,      cmd_server_message      },

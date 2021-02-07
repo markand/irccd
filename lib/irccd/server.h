@@ -64,6 +64,13 @@ struct irc_server_ident {
 
 struct irc_server_params {
 	char chantypes[IRC_CHANTYPES_LEN];
+	char charset[IRC_CHARSET_LEN];
+	char casemapping[IRC_CASEMAPPING_LEN];
+	unsigned int chanlen;
+	unsigned int nicklen;
+	unsigned int topiclen;
+	unsigned int awaylen;
+	unsigned int kicklen;
 	struct {
 		char mode;              /* Mode (e.g. ov). */
 		char token;             /* Symbol used (e.g. @+). */

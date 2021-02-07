@@ -17,7 +17,12 @@ Irccd
 Irccdctl
 --------
 
-The `irccdctl.conf` is now using a custom syntax.
+- There is no longer configuration file because it now use a plain UNIX socket
+  to */tmp/irccd.sock* by default (may be changed through the `-s` option).
+- Aliases have been removed, please use shell scripts or aliases instead.
+- The `watch` command no longer produce JSON output but only the original
+  "human" format but may be used for scripts as it is honored through the
+  semantic versioning.
 
 Platform support
 ----------------

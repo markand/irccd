@@ -46,7 +46,7 @@ struct pollables {
 };
 
 static const char *config = IRCCD_SYSCONFDIR "/irccd.conf";
-static struct peers peers;
+static struct peers peers = LIST_HEAD_INITIALIZER();
 static int running = 1;
 
 /* conf.y */
@@ -118,10 +118,9 @@ static void
 flush(const struct pollables *pb)
 {
 	struct peer *peer, *tmp;
-	struct pollfd *fd = pb->fds + pb->botsz;
+	struct pollfd *fd = pb->fds + pb->botsz + 1;
 
 	irc_bot_flush(pb->fds);
-	transport_flush(fd++);
 
 	LIST_FOREACH_SAFE(peer, &peers, link, tmp) {
 		if (peer_flush(peer, fd++) < 0) {
@@ -129,6 +128,13 @@ flush(const struct pollables *pb)
 			peer_finish(peer);
 		}
 	}
+
+	/*
+	 * Add a new client only now because we would iterate over a list
+	 * of pollfd that is smaller than the client list.
+	 */
+	if ((peer = transport_flush(pb->fds + pb->botsz)))
+		LIST_INSERT_HEAD(&peers, peer, link);
 }
 
 static inline void

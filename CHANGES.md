@@ -15,6 +15,12 @@ irccd:
   mode changes. It is now more convenient from the plugins to quickly inspect if
   someone is present on a channel.
 
+irccdctl:
+
+- Commands `plugin-reload` and `plugin-unload` can be invoked without arguments.
+- New `plugin-template` and `plugin-path` command which are synonyms of
+  `plugin-config` but for templates and paths respectively.
+
 misc:
 
 - Split irccd-api manual page into individual irccd-api-<module> for a better
@@ -25,6 +31,10 @@ network API:
 
 - Network protocol uses plain text again.
 - Transport uses clear UNIX sockets only without passwords.
+
+javascript API:
+
+- Brand new Irccd.Rule API to inspect and manage rules.
 
 irccd 3.1.1 2021-01-04
 ----------------------
