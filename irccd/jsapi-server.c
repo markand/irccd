@@ -158,8 +158,8 @@ Server_prototype_info(duk_context *ctx)
 	duk_put_prop_string(ctx, -2, "port");
 	duk_push_boolean(ctx, s->flags & IRC_SERVER_FLAGS_SSL);
 	duk_put_prop_string(ctx, -2, "ssl");
-	duk_push_string(ctx, s->commandchar);
-	duk_put_prop_string(ctx, -2, "commandChar");
+	duk_push_string(ctx, s->prefix);
+	duk_put_prop_string(ctx, -2, "prefix");
 	duk_push_string(ctx, s->ident.realname);
 	duk_put_prop_string(ctx, -2, "realname");
 	duk_push_string(ctx, s->ident.nickname);

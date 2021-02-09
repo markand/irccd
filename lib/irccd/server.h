@@ -81,7 +81,7 @@ struct irc_server_params {
 
 struct irc_server {
 	char name[IRC_ID_LEN];
-	char commandchar[IRC_CMDCHAR_LEN];
+	char prefix[IRC_PREFIX_LEN];
 	struct irc_server_ident ident;
 	struct irc_server_params params;
 	enum irc_server_state state;

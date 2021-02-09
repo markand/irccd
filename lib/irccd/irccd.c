@@ -60,7 +60,7 @@ is_command(const struct irc_plugin *p, const struct irc_event *ev)
 		return 0;
 
 	/* Get the command prefix (e.g !)*/
-	cc = ev->server->commandchar;
+	cc = ev->server->prefix;
 	ccsz = strlen(cc);
 
 	return strncmp(ev->message.message, cc, ccsz) == 0 &&
@@ -75,7 +75,7 @@ to_command(const struct irc_plugin *p, const struct irc_event *ev)
 	/* Convert "!test foo bar" to "foo bar" */
 	memcpy(&cev, ev, sizeof (*ev));
 	cev.type = IRC_EVENT_COMMAND;
-	cev.message.message += strlen(cev.server->commandchar) + strlen(p->name);
+	cev.message.message += strlen(cev.server->prefix) + strlen(p->name);
 
 	while (*cev.message.message && isspace(*cev.message.message))
 		++cev.message.message;

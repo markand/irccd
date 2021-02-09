@@ -71,6 +71,8 @@ Javascript API
 - The property `channels` in the object for the `Server` constructor now takes
   an array of objects containing two properties each: `name` and `password`
   which must be string (password is optional).
+- The property `commandChar` which is provided in both the `Server` constructor
+  and the `Server.info` returned object has been renamed to `prefix`.
 
 Migrating from 2.x to 3.x
 =========================

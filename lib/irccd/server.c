@@ -659,7 +659,7 @@ irc_server_new(const char *name,
 	LIST_INIT(&s->channels);
 
 	/* Default options. */
-	strlcpy(s->commandchar, "!", sizeof (s->commandchar));
+	strlcpy(s->prefix, "!", sizeof (s->prefix));
 
 	return s;
 }

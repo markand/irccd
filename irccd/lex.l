@@ -44,6 +44,7 @@ origins         origins
 paths           paths
 plugin          plugin
 plugins         plugins
+prefix          prefix
 port            port
 rule            rule
 rule_action     accept|drop
@@ -86,6 +87,7 @@ string          \"([^\\\"]|\\.)*\"
 {paths}                 return T_PATHS;
 {plugins}               return T_PLUGINS;
 {plugin}                return T_PLUGIN;
+{prefix}                return T_PREFIX;
 {port}                  return T_PORT;
 {semicolon}             return T_SEMICOLON;
 {servers}               return T_SERVERS;

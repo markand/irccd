@@ -62,6 +62,7 @@ struct server_params {
 	char *nickname;
 	char *username;
 	char *realname;
+	char *prefix;
 	struct string_list *channels;
 };
 
@@ -147,6 +148,7 @@ yyerror(const char *);
 %token T_PATHS
 %token T_PLUGIN
 %token T_PLUGINS
+%token T_PREFIX
 %token T_PORT
 %token T_RULE
 %token T_SEMICOLON
@@ -382,6 +384,11 @@ server_params
 		$$ = $3;
 		$$->flags |= IRC_SERVER_FLAGS_SSL;
 	}
+	| T_PREFIX T_STRING server_params
+	{
+		$$ = $3;
+		$$->prefix = $2;
+	}
 	| T_OPTIONS string_list T_SEMICOLON server_params
 	{
 		struct string *s;
@@ -438,6 +445,9 @@ server
 			string_list_finish($4->channels);
 		}
 
+		if ($4->prefix)
+			strlcpy(s->prefix, $4->prefix, sizeof (s->prefix));
+
 		s->flags = $4->flags;
 		irc_bot_server_add(s);
 
@@ -446,6 +456,7 @@ server
 		free($4->nickname);
 		free($4->username);
 		free($4->realname);
+		free($4->prefix);
 		free($4);
 	}
 	;

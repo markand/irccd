@@ -30,7 +30,7 @@
 #define IRC_CTCPVERSION_LEN     64              /* Custom CTCP version answer. */
 #define IRC_USERMODES_LEN       8               /* Number of modes (e.g. ohv). */
 #define IRC_CHANTYPES_LEN       8               /* Channel types. */
-#define IRC_CMDCHAR_LEN         4               /* Prefix for plugin commands (e.g. !). */
+#define IRC_PREFIX_LEN          4               /* Prefix for plugin commands (e.g. !). */
 #define IRC_CHARSET_LEN         16              /* Charset name max. */
 #define IRC_CASEMAPPING_LEN     16              /* Maximum case mapping length. */
 #define IRC_MESSAGE_LEN         512             /* Official length per message. */
