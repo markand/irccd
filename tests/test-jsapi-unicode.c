@@ -37,7 +37,7 @@ setup(void *udata)
 {
 	(void)udata;
 
-	plugin = js_plugin_open(SOURCE "/data/example-plugin.js");
+	plugin = js_plugin_open("example", SOURCE "/data/example-plugin.js");
 	ctx = js_plugin_get_context(plugin);
 }
 
