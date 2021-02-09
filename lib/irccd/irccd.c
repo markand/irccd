@@ -209,18 +209,6 @@ open_plugin(struct irc_plugin_loader *ldr, const char *path)
 	return irc_plugin_loader_open(ldr, path);
 }
 
-static inline size_t
-rulescount(void)
-{
-	const struct irc_rule *r;
-	size_t total = 0;
-
-	TAILQ_FOREACH(r, &irc.rules, link)
-		total++;
-
-	return total;
-}
-
 void
 irc_bot_init(void)
 {
@@ -399,22 +387,62 @@ irc_bot_rule_insert(struct irc_rule *rule, size_t index)
 
 	if (index == 0)
 		TAILQ_INSERT_HEAD(&irc.rules, rule, link);
-	else if (index >= rulescount())
+	else if (index >= irc_bot_rule_size())
 		TAILQ_INSERT_TAIL(&irc.rules, rule, link);
 	else {
-		struct irc_rule *pos = TAILQ_FIRST(&irc.rules);
+		struct irc_rule *pos;
 
-		for (size_t i = 0; i < index; ++i)
+		for (pos = TAILQ_FIRST(&irc.rules); --index; )
 			pos = TAILQ_NEXT(pos, link);
 
 		TAILQ_INSERT_AFTER(&irc.rules, pos, rule, link);
 	}
 }
 
+struct irc_rule *
+irc_bot_rule_get(size_t index)
+{
+	assert(index < irc_bot_rule_size());
+
+	struct irc_rule *rule;
+
+	for (rule = TAILQ_FIRST(&irc.rules); index-- != 0; )
+		rule = TAILQ_NEXT(rule, link);
+
+	return rule;
+}
+
+void
+irc_bot_rule_move(size_t from, size_t to)
+{
+	assert(from < irc_bot_rule_size());
+
+	struct irc_rule *f, *t;
+
+	if (from == to)
+		return;
+
+	f = t = TAILQ_FIRST(&irc.rules);
+
+	while (from--)
+		f = TAILQ_NEXT(f, link);
+
+	TAILQ_REMOVE(&irc.rules, f, link);
+
+	if (to == 0)
+		TAILQ_INSERT_HEAD(&irc.rules, f, link);
+	else {
+		while (TAILQ_NEXT(t, link) && to--)
+			t = TAILQ_NEXT(t, link);
+
+		TAILQ_INSERT_AFTER(&irc.rules, t, f, link);
+	}
+}
+
 void
 irc_bot_rule_remove(size_t index)
 {
-	assert(index < rulescount());
+	assert(index < irc_bot_rule_size());
 
 	struct irc_rule *pos = TAILQ_FIRST(&irc.rules);
 
@@ -422,6 +450,18 @@ irc_bot_rule_remove(size_t index)
 		pos = TAILQ_NEXT(pos, link);
 
 	TAILQ_REMOVE(&irc.rules, pos, link);
+}
+
+size_t
+irc_bot_rule_size(void)
+{
+	const struct irc_rule *r;
+	size_t total = 0;
+
+	TAILQ_FOREACH(r, &irc.rules, link)
+		total++;
+
+	return total;
 }
 
 void

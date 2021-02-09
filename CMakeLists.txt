@@ -45,6 +45,7 @@ if (IRCCD_WITH_SSL)
 endif ()
 
 add_subdirectory(extern/libcompat)
+add_subdirectory(extern/libketopt)
 
 if (IRCCD_WITH_JS)
 	add_subdirectory(extern/libduktape)

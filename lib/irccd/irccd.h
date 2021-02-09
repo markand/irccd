@@ -68,8 +68,17 @@ irc_bot_plugin_loader_add(struct irc_plugin_loader *);
 void
 irc_bot_rule_insert(struct irc_rule *, size_t);
 
+struct irc_rule *
+irc_bot_rule_get(size_t);
+
+void
+irc_bot_rule_move(size_t, size_t);
+
 void
 irc_bot_rule_remove(size_t);
+
+size_t
+irc_bot_rule_size(void);
 
 void
 irc_bot_rule_clear(void);

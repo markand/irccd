@@ -93,10 +93,26 @@ require_plugin(struct peer *p, const char *id)
 	return plg;
 }
 
-static int
+static inline int
 ok(struct peer *p)
 {
 	peer_send(p, "OK");
+
+	return 0;
+}
+
+static inline int
+error(struct peer *p, const char *fmt, ...)
+{
+	char buf[IRC_BUF_LEN] = {0};
+	va_list ap;
+
+	va_start(ap, fmt);
+	vsnprintf(buf, sizeof (buf), fmt, ap);
+	va_end(ap);
+
+	if (buf[0])
+		peer_send(p, "ERROR %s", buf);
 
 	return 0;
 }
@@ -148,6 +164,20 @@ plugin_list_set(struct peer *p,
 	peer_send(p, out);
 
 	return 0;
+}
+
+static const char *
+rule_list_to_spaces(const char *value)
+{
+	static char buf[IRC_RULE_LEN];
+
+	strlcpy(buf, value, sizeof (buf));
+
+	for (char *p = buf; *p; ++p)
+		if (*p == ':')
+			*p = ' ';
+
+	return buf;
 }
 
 /*
@@ -275,6 +305,254 @@ cmd_plugin_unload(struct peer *p, char *line)
 		irc_bot_plugin_clear();
 	else
 		irc_bot_plugin_remove(args[0]);
+
+	return ok(p);
+}
+
+/*
+ * RULE-ADD accept|drop [(ceiops)=value ...]
+ */
+static int
+cmd_rule_add(struct peer *p, char *line)
+{
+	const char *errstr;
+	char *token, *ptr, *dst, key;
+	enum irc_rule_action act;
+	struct irc_rule *rule;
+	size_t index = -1;
+
+	if (sscanf(line, "RULE-ADD %*s") == EOF)
+		return EINVAL;
+		
+	line += strlen("RULE-ADD ");
+
+	if (strncmp(line, "accept", 6) == 0)
+		act = IRC_RULE_ACCEPT;
+	else if (strncmp(line, "drop", 4) == 0)
+		act = IRC_RULE_DROP;
+	else
+		return error(p, "invalid action");
+
+	rule = irc_rule_new(act);
+
+	/* Skip action value. */
+	while (*line && !isspace(*line))
+		++line;
+	while (*line && isspace(*line))
+		++line;
+
+	for (ptr = line; (token = strtok_r(ptr, " ", &ptr)); ) {
+		dst = NULL;
+
+		if (sscanf(token, "%c=%*s", &key) != 1) {
+			errno = EINVAL;
+			goto fail;
+		}
+
+		switch (*token) {
+		case 'c':
+			dst = rule->channels;
+			break;
+		case 'e':
+			dst = rule->events;
+			break;
+		case 'i':
+			if ((index = strtonum(token + 2, 0, LLONG_MAX, &errstr)) == 0 && errstr)
+				goto fail;
+			break;
+		case 'o':
+			dst = rule->origins;
+			break;
+		case 'p':
+			dst = rule->plugins;
+			break;
+		case 's':
+			dst = rule->servers;
+			break;
+		default:
+			/* TODO: error here. */
+			break;
+		}
+
+		if (dst && irc_rule_add(dst, token + 2) < 0)
+			goto fail;
+	}
+
+	irc_bot_rule_insert(rule, index);
+
+	return ok(p);
+
+fail:
+	irc_rule_finish(rule);
+
+	return error(p, strerror(errno));
+}
+
+/*
+ * RULE-EDIT index [((ceops)(+-)value)|(a=accept|drop) ...]
+ */
+static int
+cmd_rule_edit(struct peer *p, char *line)
+{
+	char *token, *ptr, *dst, key, attr;
+	struct irc_rule *rule;
+	size_t index = -1;
+
+	/*
+	 * Looks like strtonum does not accept when there is text after the
+	 * number.
+	 */
+	if (sscanf(line, "RULE-EDIT %zu", &index) != 1)
+		return EINVAL;
+
+	if (index >= irc_bot_rule_size())
+		return ERANGE;
+
+	/* Skip command and index value. */
+	line += strlen("RULE-EDIT ");
+
+	while (*line && !isspace(*line))
+		++line;
+	while (*line && isspace(*line))
+		++line;
+
+	rule = irc_bot_rule_get(index);
+
+	for (ptr = line; (token = strtok_r(ptr, " ", &ptr)); ) {
+		key = attr = 0;
+
+		if (sscanf(token, "%c%c%*s", &key, &attr) != 2)
+			return EINVAL;
+	
+		if (key == 'a') {
+			if (attr != '=')
+				return EINVAL;
+
+			if (strncmp(token + 2, "accept", 6) == 0)
+				rule->action = IRC_RULE_ACCEPT;
+			else if (strncmp(token + 2, "drop", 4) == 0)
+				rule->action = IRC_RULE_DROP;
+			else
+				return error(p, "invalid action");
+		} else {
+			dst = NULL;
+
+			switch (key) {
+			case 'c':
+				dst = rule->channels;
+				break;
+			case 'e':
+				dst = rule->events;
+				break;
+			case 'o':
+				dst = rule->origins;
+				break;
+			case 'p':
+				dst = rule->plugins;
+				break;
+			case 's':
+				dst = rule->servers;
+				break;
+			default:
+				return EINVAL;
+			}
+
+			if (attr == '+') {
+				if (irc_rule_add(dst, token + 2) < 0)
+					return errno;
+			} else if (attr == '-')
+				irc_rule_remove(dst, token + 2);
+			else
+				return EINVAL;
+		}
+	}
+
+	return ok(p);
+}
+
+/*
+ * RULE-LIST
+ */
+static int
+cmd_rule_list(struct peer *p, char *line)
+{
+	(void)line;
+
+	struct irc_rule *rule;
+	char out[IRC_BUF_LEN];
+	FILE *fp;
+	size_t rulesz = 0;
+
+	if (!(fp = fmemopen(out, sizeof (out), "w")))
+		return error(p, "%s", strerror(errno));
+
+	TAILQ_FOREACH(rule, &irc.rules, link)
+		rulesz++;
+
+	fprintf(fp, "OK %zu\n", rulesz);
+
+	TAILQ_FOREACH(rule, &irc.rules, link) {
+		/* Convert : to spaces. */
+		fprintf(fp, "%s\n", rule->action == IRC_RULE_ACCEPT ? "accept" : "drop");
+		fprintf(fp, "%s\n", rule_list_to_spaces(rule->servers));
+		fprintf(fp, "%s\n", rule_list_to_spaces(rule->channels));
+		fprintf(fp, "%s\n", rule_list_to_spaces(rule->origins));
+		fprintf(fp, "%s\n", rule_list_to_spaces(rule->plugins));
+		fprintf(fp, "%s\n", rule_list_to_spaces(rule->events));
+	}
+
+	if (feof(fp) || ferror(fp)) {
+		fclose(fp);
+		return EMSGSIZE;
+	}
+
+	fclose(fp);
+	peer_send(p, "%s", out);
+
+	return 0;
+}
+
+/*
+ * RULE-MOVE from to
+ */
+static int
+cmd_rule_move(struct peer *p, char *line)
+{
+	const char *args[2], *errstr;
+	unsigned long long from, to;
+
+	if (parse(line, args, 2) != 2)
+		return EINVAL;
+	if ((from = strtonum(args[0], 0, LLONG_MAX, &errstr)) == 0 && errstr)
+		return ERANGE;
+	if ((to = strtonum(args[1], 0, LLONG_MAX, &errstr)) == 0 && errstr)
+		return ERANGE;
+	if (from >= irc_bot_rule_size())
+		return ERANGE;
+
+	irc_bot_rule_move(from, to);
+
+	return ok(p);
+}
+
+/*
+ * RULE-REMOVE index
+ */
+static int
+cmd_rule_remove(struct peer *p, char *line)
+{
+	const char *args[1] = {0};
+	size_t index;
+
+	if (parse(line, args, 1) != 1)
+		return EINVAL;
+
+	index = strtoull(args[0], NULL, 10);
+
+	if (index >= irc_bot_rule_size())
+		return ERANGE;
+
+	irc_bot_rule_remove(index);
 
 	return ok(p);
 }
@@ -564,6 +842,11 @@ static const struct cmd {
 	{ "PLUGIN-RELOAD",      cmd_plugin_reload       },
 	{ "PLUGIN-TEMPLATE",    cmd_plugin_template     },
 	{ "PLUGIN-UNLOAD",      cmd_plugin_unload       },
+	{ "RULE-ADD",           cmd_rule_add            },
+	{ "RULE-EDIT",          cmd_rule_edit           },
+	{ "RULE-LIST",          cmd_rule_list           },
+	{ "RULE-MOVE",          cmd_rule_move           },
+	{ "RULE-REMOVE",        cmd_rule_remove         },
 	{ "SERVER-DISCONNECT",  cmd_server_disconnect   },
 	{ "SERVER-INFO",        cmd_server_info         },
 	{ "SERVER-INVITE",      cmd_server_invite       },
@@ -601,7 +884,7 @@ invoke(struct peer *p, char *line)
 	if (!c)
 		peer_send(p, "command not found");
 	else if ((er = c->call(p, line)) != 0)
-		peer_send(p, "%s", strerror(errno));
+		peer_send(p, "%s", strerror(er));
 }
 
 static void

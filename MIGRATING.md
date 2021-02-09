@@ -23,6 +23,8 @@ Irccdctl
 - The `watch` command no longer produce JSON output but only the original
   "human" format but may be used for scripts as it is honored through the
   semantic versioning.
+- The command `rule-info` has been removed because it is mostly the same as
+  `rule-list`.
 
 Platform support
 ----------------

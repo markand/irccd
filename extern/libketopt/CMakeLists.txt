@@ -1,7 +1,7 @@
 #
-# CMakeLists.txt -- CMake build for irccd
+# CMakeLists.txt -- CMake build system for ketopt
 #
-# Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
+# Copyright (c) 2016-2021 David Demelier <markand@malikania.fr>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -16,6 +16,11 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(irccdctl)
-add_executable(irccdctl main.c)
-target_link_libraries(irccdctl libirccd libirccd-ketopt)
+cmake_minimum_required(VERSION 3.0)
+project(libirccd-ketopt)
+add_library(libirccd-ketopt INTERFACE ketopt.h)
+target_include_directories(
+	libirccd-ketopt
+	INTERFACE
+		$<BUILD_INTERFACE:${libirccd-ketopt_SOURCE_DIR}>
+)

@@ -45,6 +45,7 @@ set(
 	strlcat
 	strlcpy
 	strsep
+	strtonum
 	verr
 	verrc
 	verrx

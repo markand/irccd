@@ -27,12 +27,13 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdarg.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <stdnoreturn.h>
 #include <string.h>
 #include <unistd.h>
 
-#include <stdio.h>
+#include <ketopt.h>
 
 #include <irccd/limits.h>
 #include <irccd/util.h>
@@ -488,6 +489,131 @@ cmd_plugin_unload(int argc, char **argv)
 }
 
 static void
+cmd_rule_add(int argc, char **argv)
+{
+	ketopt_t ko = KETOPT_INIT;
+	FILE *fp;
+	char out[IRC_BUF_LEN];
+
+	if (!(fp = fmemopen(out, sizeof (out) - 1, "w")))
+		err(1, "fmemopen");
+
+	/* TODO: invalid option. */
+	for (int ch; (ch = ketopt(&ko, argc, argv, 0, "c:e:i:o:p:s:", NULL)) != -1; )
+		fprintf(fp, "%c=%s ", ch, ko.arg);
+
+	argc -= ko.ind;
+	argv += ko.ind;
+
+	if (argc < 1)
+		errx(1, "missing accept or drop rule action");
+
+	fprintf(fp, "%s", argv[0]);
+
+	if (ferror(fp) || feof(fp))
+		err(1, "fprintf");
+
+	fclose(fp);
+	req("RULE-ADD %s %s", argv[0], out);
+	ok();
+}
+
+static void
+cmd_rule_edit(int argc, char **argv)
+{
+	ketopt_t ko = KETOPT_INIT;
+	FILE *fp;
+	char out[IRC_BUF_LEN];
+
+	if (!(fp = fmemopen(out, sizeof (out) - 1, "w")))
+		err(1, "fmemopen");
+
+	/* TODO: invalid option. */
+	for (int ch; (ch = ketopt(&ko, argc, argv, 0, "a:C:c:E:e:O:o:P:p:S:s:", NULL)) != -1; ) {
+		if (ch == 'a')
+			fprintf(fp, "a=%s ", ko.arg);
+		else
+			fprintf(fp, "%c%c%s ", tolower(ch), isupper(ch) ? '-' : '+', ko.arg);
+	}
+
+	argc -= ko.ind;
+	argv += ko.ind;
+
+	if (argc < 1)
+		errx(1, "missing rule index");
+
+	if (ferror(fp) || feof(fp))
+		err(1, "fprintf");
+
+	fclose(fp);
+	req("RULE-EDIT %s %s", argv[0], out);
+	ok();
+}
+
+/*
+ * Response:
+ *
+ *     OK <n>
+ *     accept
+ *     server1 server2 server3 ...
+ *     channel1 channel2 channel3 ...
+ *     origin1 origin2 origin3 ...
+ *     plugin1 plugin2 plugin3 ...
+ *     event1 event2 plugin3 ...
+ *     (repeat for every rule in <n>)
+ */
+static void
+cmd_rule_list(int argc, char **argv)
+{
+	(void)argc;
+	(void)argv;
+
+	size_t num = 0;
+
+	req("RULE-LIST");
+
+	if (sscanf(ok(), "%zu", &num) != 1)
+		errx(1, "could not retrieve rule list");
+
+	for (size_t i = 0; i < num; ++i) {
+		printf("%-16s: %zu\n", "index", i);
+		printf("%-16s: %s\n", "action", poll());
+		printf("%-16s: %s\n", "servers", poll());
+		printf("%-16s: %s\n", "channels", poll());
+		printf("%-16s: %s\n", "origins", poll());
+		printf("%-16s: %s\n", "plugins", poll());
+		printf("%-16s: %s\n", "events", poll());
+		printf("\n");
+	}
+}
+
+static void
+cmd_rule_move(int argc, char **argv)
+{
+	(void)argc;
+
+	long long from, to;
+	const char *errstr;
+
+	if ((from = strtonum(argv[0], 0, LLONG_MAX, &errstr)) == 0 && errstr)
+		err(1, "%s", argv[0]);
+	if ((to = strtonum(argv[1], 0, LLONG_MAX, &errstr)) == 0 && errstr)
+		err(1, "%s", argv[1]);
+
+	req("RULE-MOVE %lld %lld", from, to);
+	ok();
+}
+
+static void
+cmd_rule_remove(int argc, char **argv)
+{
+	(void)argc;
+
+	req("RULE-REMOVE %s", argv[0]);
+	ok();
+}
+
+static void
 cmd_server_disconnect(int argc, char **argv)
 {
 	if (argc == 1)
@@ -679,6 +805,11 @@ static const struct cmd {
 	{ "plugin-reload",      0,      1,      cmd_plugin_reload       },
 	{ "plugin-template",    1,      3,      cmd_plugin_template     },
 	{ "plugin-unload",      0,      1,      cmd_plugin_unload       },
+	{ "rule-add",          -1,     -1,      cmd_rule_add            },
+	{ "rule-edit",         -1,     -1,      cmd_rule_edit           },
+	{ "rule-list",          0,      0,      cmd_rule_list           },
+	{ "rule-move",          2,      2,      cmd_rule_move           },
+	{ "rule-remove",        1,      1,      cmd_rule_remove         },
 	{ "server-disconnect",  0,      1,      cmd_server_disconnect   },
 	{ "server-info",        1,      1,      cmd_server_info         },
 	{ "server-join",        2,      3,      cmd_server_join         },
@@ -716,7 +847,7 @@ run(int argc, char **argv)
 	--argc;
 	++argv;
 
-	if (argc < c->minargs || argc > c->maxargs)
+	if ((c->minargs != -1 && argc < c->minargs) || (c->minargs != -1 && argc > c->maxargs))
 		errx(1, "abort: invalid number of arguments");
 
 	c->exec(argc, argv);
@@ -725,16 +856,59 @@ run(int argc, char **argv)
 noreturn static void
 usage(void)
 {
-	fprintf(stderr, "usage: %s [-v] [-s sock] command [arguments...]\n", getprogname());
+	fprintf(stderr, "usage: %s [-v] [-s sock] command [options...] [arguments...]\n", getprogname());
+	exit(1);
+}
+
+noreturn static void
+help(void)
+{
+	fprintf(stderr, "usage: %s hook-add name path\n", getprogname());
+	fprintf(stderr, "       %s hook-list\n", getprogname());
+	fprintf(stderr, "       %s hook-remove id\n", getprogname());
+	fprintf(stderr, "       %s plugin-config id [variable [value]]\n", getprogname());
+	fprintf(stderr, "       %s plugin-info id\n", getprogname());
+	fprintf(stderr, "       %s plugin-list\n", getprogname());
+	fprintf(stderr, "       %s plugin-load name\n", getprogname());
+	fprintf(stderr, "       %s plugin-path [variable [value]]\n", getprogname());
+	fprintf(stderr, "       %s plugin-template [variable [value]]\n", getprogname());
+	fprintf(stderr, "       %s plugin-reload [plugin]\n", getprogname());
+	fprintf(stderr, "       %s plugin-unload [plugin]\n", getprogname());
+	fprintf(stderr, "       %s rule-add [-c channel] [-e event] [-i index] [-o origin] [-p plugin] [-s server] accept|drop\n", getprogname());
+	fprintf(stderr, "       %s rule-edit [-a accept|drop] [-c|C channel] [-e|E event] [-o|O origin] [-s|S server] index\n", getprogname());
+	fprintf(stderr, "       %s rule-list\n", getprogname());
+	fprintf(stderr, "       %s rule-move from to\n", getprogname());
+	fprintf(stderr, "       %s rule-remove index\n", getprogname());
+	fprintf(stderr, "       %s server-connect [-n nickname] [-r realname] [-u username] [-p port] id hostname\n", getprogname());
+	fprintf(stderr, "       %s server-disconnect [server]\n", getprogname());
+	fprintf(stderr, "       %s server-info server\n", getprogname());
+	fprintf(stderr, "       %s server-invite server target channel\n", getprogname());
+	fprintf(stderr, "       %s server-join server channel [password]\n", getprogname());
+	fprintf(stderr, "       %s server-kick server target channel [reason]\n", getprogname());
+	fprintf(stderr, "       %s server-list\n", getprogname());
+	fprintf(stderr, "       %s server-me server target message\n", getprogname());
+	fprintf(stderr, "       %s server-message server target message\n", getprogname());
+	fprintf(stderr, "       %s server-mode server target mode [limit] [user] [mask]\n", getprogname());
+	fprintf(stderr, "       %s server-nick server nickname\n", getprogname());
+	fprintf(stderr, "       %s server-notice server target message\n", getprogname());
+	fprintf(stderr, "       %s server-part server channel [reason]\n", getprogname());
+	fprintf(stderr, "       %s server-reconnect [server]\n", getprogname());
+	fprintf(stderr, "       %s server-topic server channel topic\n", getprogname());
+	fprintf(stderr, "       %s watch\n", getprogname());
 	exit(1);
 }
 
 int
 main(int argc, char **argv)
 {
+	ketopt_t ko = KETOPT_INIT;
+
 	setprogname("irccdctl");
 
-	for (int ch; (ch = getopt(argc, argv, "s:v")) != -1; ) {
+	--argc;
+	++argv;
+
+	for (int ch; (ch = ketopt(&ko, argc, argv, 0, "s:v", NULL)) != -1; ) {
 		switch (ch) {
 		case 's':
 			strlcpy(sockaddr.sun_path, optarg, sizeof (sockaddr.sun_path));
@@ -743,15 +917,18 @@ main(int argc, char **argv)
 			verbose = 1;
 			break;
 		default:
+			usage();
 			break;
 		}
 	}
 
-	argc -= optind;
-	argv += optind;
+	argc -= ko.ind;
+	argv += ko.ind;
 
 	if (argc < 1)
 		usage();
+	else if (strcmp(argv[0], "help") == 0)
+		help();
 
 	dial();
 	check();
