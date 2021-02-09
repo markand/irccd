@@ -45,6 +45,8 @@ if (IRCCD_WITH_JS)
 		${irccd_SOURCE_DIR}/jsapi-logger.h
 		${irccd_SOURCE_DIR}/jsapi-plugin.c
 		${irccd_SOURCE_DIR}/jsapi-plugin.h
+		${irccd_SOURCE_DIR}/jsapi-rule.c
+		${irccd_SOURCE_DIR}/jsapi-rule.h
 		${irccd_SOURCE_DIR}/jsapi-server.c
 		${irccd_SOURCE_DIR}/jsapi-server.h
 		${irccd_SOURCE_DIR}/jsapi-system.c

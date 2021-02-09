@@ -38,13 +38,12 @@
 #include "jsapi-irccd.h"
 #include "jsapi-logger.h"
 #include "jsapi-plugin.h"
-#include "jsapi-plugin.h"
+#include "jsapi-rule.h"
 #include "jsapi-server.h"
 #include "jsapi-system.h"
 #include "jsapi-timer.h"
 #include "jsapi-unicode.h"
 #include "jsapi-util.h"
-
 
 struct self {
 	struct irc_plugin plugin;
@@ -455,6 +454,7 @@ init(const char *path, const char *script)
 	jsapi_file_load(js->ctx);
 	jsapi_logger_load(js->ctx);
 	jsapi_plugin_load(js->ctx, &js->plugin);
+	jsapi_rule_load(js->ctx);
 	jsapi_server_load(js->ctx);
 	jsapi_system_load(js->ctx);
 	jsapi_timer_load(js->ctx);
