@@ -21,6 +21,7 @@
 
 #include <sys/queue.h>
 #include <stddef.h>
+#include <time.h>
 
 #include "channel.h"
 #include "conn.h"
@@ -44,8 +45,9 @@ enum irc_server_flags {
 	IRC_SERVER_FLAGS_SSL           = (1 << 0),
 	IRC_SERVER_FLAGS_AUTO_REJOIN   = (1 << 1),
 	IRC_SERVER_FLAGS_JOIN_INVITE   = (1 << 2),
-	IRC_SERVER_FLAGS_IPV4          = (1 << 3),
-	IRC_SERVER_FLAGS_IPV6          = (1 << 4)
+	IRC_SERVER_FLAGS_AUTO_RECO     = (1 << 3),
+	IRC_SERVER_FLAGS_IPV4          = (1 << 4),
+	IRC_SERVER_FLAGS_IPV6          = (1 << 5)
 };
 
 struct irc_server_user {
@@ -88,6 +90,7 @@ struct irc_server {
 	struct irc_event_whois bufwhois;
 	struct irc_conn conn;
 	size_t refc;
+	time_t lost_tp, last_tp;
 	LIST_ENTRY(irc_server) link;
 };
 

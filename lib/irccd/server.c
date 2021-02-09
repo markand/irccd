@@ -39,6 +39,9 @@
 #include "server.h"
 #include "util.h"
 
+#define DELAY   30      /* Seconds to wait before reconnecting. */
+#define TIMEOUT 1800    /* Seconds before marking a server as dead. */
+
 static inline void
 clear_channels(struct irc_server *s, int free)
 {
@@ -58,6 +61,8 @@ clear_channels(struct irc_server *s, int free)
 static inline void
 clear_server(struct irc_server *s)
 {
+	irc_conn_finish(&s->conn);
+
 	free(s->bufwhois.nickname);
 	free(s->bufwhois.username);
 	free(s->bufwhois.realname);
@@ -170,6 +175,22 @@ read_support_chantypes(struct irc_server *s, const char *value)
 }
 
 static void
+fail(struct irc_server *s)
+{
+	clear_channels(s, 0);
+	clear_server(s);
+
+	if (s->flags & IRC_SERVER_FLAGS_AUTO_RECO) {
+		irc_log_info("server %s: waiting %u seconds before reconnecting", s->name, DELAY);
+		s->state = IRC_SERVER_STATE_WAITING;
+	} else
+		s->state = IRC_SERVER_STATE_DISCONNECTED;
+
+	/* Time point when we lose signal from the server. */
+	s->lost_tp = time(NULL);
+}
+
+static void
 handle_connect(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	(void)msg;
@@ -189,10 +210,10 @@ handle_connect(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *
 static void
 handle_disconnect(struct irc_server *s, struct irc_event *ev)
 {
-	s->state = IRC_SERVER_STATE_NONE;
 	ev->type = IRC_EVENT_DISCONNECT;
 	ev->server = s;
 
+	fail(s);
 	irc_log_info("server %s: connection lost", s->name);
 }
 
@@ -402,7 +423,6 @@ handle_topic(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *ms
 static void
 handle_ping(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
-	(void)s;
 	(void)ev;
 	(void)msg;
 
@@ -554,6 +574,9 @@ handle(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	const struct handler *h;
 
+	/* Update last message time to detect non-notified disconnection. */
+	s->last_tp = time(NULL);
+
 	if (!(h = find_handler(msg->cmd)))
 		return;
 
@@ -621,9 +644,16 @@ irc_server_connect(struct irc_server *s)
 		s->conn.flags |= IRC_CONN_SSL;
 
 	if (irc_conn_connect(&s->conn) < 0)
-		s->state = IRC_SERVER_STATE_DISCONNECTED;
+		fail(s);
 	else
 		s->state = IRC_SERVER_STATE_CONNECTING;
+
+	/*
+	 * Assume the last time we received a message was now, so that
+	 * irc_server_flush don't think the server is already dead while we
+	 * didn't have any answer from it.
+	 */
+	s->last_tp = time(NULL);
 }
 
 void
@@ -632,8 +662,6 @@ irc_server_disconnect(struct irc_server *s)
 	assert(s);
 
 	s->state = IRC_SERVER_STATE_DISCONNECTED;
-
-	irc_conn_disconnect(&s->conn);
 
 	clear_channels(s, 0);
 	clear_server(s);
@@ -654,12 +682,18 @@ irc_server_flush(struct irc_server *s, const struct pollfd *pfd)
 	assert(s);
 	assert(pfd);
 
-	if (irc_conn_flush(&s->conn, pfd) < 0)
-		return irc_server_disconnect(s);
-	if (s->conn.state != IRC_CONN_STATE_READY)
-		return;
-
 	switch (s->state) {
+	case IRC_SERVER_STATE_WAITING:
+		if (difftime(time(NULL), s->lost_tp) >= DELAY)
+			irc_server_connect(s);
+		break;
+	case IRC_SERVER_STATE_CONNECTED:
+		if (difftime(time(NULL), s->last_tp) >= TIMEOUT) {
+			irc_log_warn("server %s: no message in more than %u seconds", s->name, TIMEOUT);
+			fail(s);
+		} else if (irc_conn_flush(&s->conn, pfd) < 0)
+			return fail(s);
+		break;
 	case IRC_SERVER_STATE_CONNECTING:
 		/*
 		 * Now the conn object is ready which means the server has
@@ -687,8 +721,11 @@ irc_server_poll(struct irc_server *s, struct irc_event *ev)
 	 * this function is called again, we immediately change the state to
 	 * something else.
 	 */
-	if (s->state == IRC_SERVER_STATE_DISCONNECTED)
-		return handle_disconnect(s, ev), 1;
+	if (s->state == IRC_SERVER_STATE_DISCONNECTED) {
+		handle_disconnect(s, ev);
+		s->state = IRC_SERVER_STATE_NONE;
+		return 1;
+	}
 
 	if (irc_conn_poll(&s->conn, &msg))
 		return handle(s, ev, &msg), 1;
