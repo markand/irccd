@@ -21,6 +21,7 @@
 
 #include <stddef.h>
 
+#include "hook.h"
 #include "plugin.h"
 #include "rule.h"
 #include "server.h"
@@ -30,6 +31,7 @@ extern struct irc {
 	struct irc_plugin_list plugins;
 	struct irc_plugin_loader_list plugin_loaders;
 	struct irc_rule_list rules;
+	struct irc_hook_list hooks;
 } irc;
 
 void
@@ -82,6 +84,18 @@ irc_bot_rule_size(void);
 
 void
 irc_bot_rule_clear(void);
+
+void
+irc_bot_hook_add(struct irc_hook *);
+
+struct irc_hook *
+irc_bot_hook_get(const char *);
+
+void
+irc_bot_hook_remove(const char *);
+
+void
+irc_bot_hook_clear(void);
 
 size_t
 irc_bot_poll_count(void);

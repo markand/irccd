@@ -32,6 +32,7 @@
 channels        channels
 config          config
 events          events
+hook            hook
 hostname        hostname
 ident           ident
 location        location
@@ -75,6 +76,7 @@ string          \"([^\\\"]|\\.)*\"
 {comma}                 return T_COMMA;
 {config}                return T_CONFIG;
 {events}                return T_EVENTS;
+{hook}                  return T_HOOK;
 {hostname}              return T_HOSTNAME;
 {ident}                 return T_IDENT;
 {location}              return T_LOCATION;

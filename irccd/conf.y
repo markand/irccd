@@ -137,6 +137,7 @@ yyerror(const char *);
 %token T_COMMA
 %token T_CONFIG
 %token T_EVENTS
+%token T_HOOK
 %token T_HOSTNAME
 %token T_IDENT
 %token T_LOCATION
@@ -181,6 +182,7 @@ config
 	| transport
 	| rule
 	| plugin
+	| hook
 	;
 
 log_verbosity
@@ -544,6 +546,16 @@ plugin
 
 		free($2);
 		free($3);
+	}
+	;
+
+hook
+	: T_HOOK T_STRING T_TO T_STRING
+	{
+		irc_bot_hook_add(irc_hook_new($2, $4));
+
+		free($2);
+		free($4);
 	}
 	;
 

@@ -181,6 +181,72 @@ rule_list_to_spaces(const char *value)
 }
 
 /*
+ * HOOK-ADD name path	fprintf(fp, "OK ");
+ 
+ LIST_FOREACH(s, &irc.servers, link) {
+		fprintf(fp, "%s", s->name);
+
+		if (LIST_NEXT(s, link))
+			fputc(' ', fp);
+	}
+ */
+static int
+cmd_hook_add(struct peer *p, char *line)
+{
+	const char *args[2] = {0};
+
+	if (parse(line, args, 2) != 2)
+		return EINVAL;
+	if (irc_bot_hook_get(args[0]))
+		return EEXIST;
+
+	irc_bot_hook_add(irc_hook_new(args[0], args[1]));
+
+	return ok(p);
+}
+
+/*
+ * HOOK-LIST
+ */
+static int
+cmd_hook_list(struct peer *p, char *line)
+{
+	(void)line;
+
+	struct irc_hook *h;
+	char out[IRC_BUF_LEN];
+	FILE *fp;
+
+	if (!(fp = fmemopen(out, sizeof (out) - 1, "w")))
+		return errno;
+
+	fprintf(fp, "OK ");
+
+	LIST_FOREACH(h, &irc.hooks, link) {
+		fprintf(fp, "%s", h->name);
+
+		if (LIST_NEXT(h, link))
+			fputc(' ', fp);
+	}
+
+	fclose(fp);
+	peer_send(p, out);
+
+	return 0;
+}
+
+/*
+ * HOOK-REMOVE name
+ */
+static int
+cmd_hook_remove(struct peer *p, char *line)
+{
+	irc_bot_hook_remove(line);
+
+	return ok(p);
+}
+
+/*
  * PLUGIN-CONFIG plugin [var [value]]
  */
 static int
@@ -834,6 +900,9 @@ static const struct cmd {
 	const char *name;
 	int (*call)(struct peer *, char *);
 } cmds[] = {
+	{ "HOOK-ADD",           cmd_hook_add            },
+	{ "HOOK-LIST",          cmd_hook_list           },
+	{ "HOOK-REMOVE",        cmd_hook_remove         },
 	{ "PLUGIN-CONFIG",      cmd_plugin_config       },
 	{ "PLUGIN-INFO",        cmd_plugin_info         },
 	{ "PLUGIN-LIST",        cmd_plugin_list         },

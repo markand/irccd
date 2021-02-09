@@ -23,6 +23,7 @@
 #include <err.h>
 #include <errno.h>
 #include <poll.h>
+#include <signal.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -47,6 +48,7 @@ struct irc irc = {
 };
 
 static int pipes[2];
+static struct sigaction sa;
 
 static int
 is_command(const struct irc_plugin *p, const struct irc_event *ev)
@@ -66,23 +68,19 @@ is_command(const struct irc_plugin *p, const struct irc_event *ev)
 }
 
 static struct irc_event *
-to_command(const struct irc_plugin *p, struct irc_event *ev)
+to_command(const struct irc_plugin *p, const struct irc_event *ev)
 {
-	char *action;
+	static struct irc_event cev;
 
 	/* Convert "!test foo bar" to "foo bar" */
-	action = ev->message.message + strlen(ev->server->commandchar) + strlen(p->name);
+	memcpy(&cev, ev, sizeof (*ev));
+	cev.type = IRC_EVENT_COMMAND;
+	cev.message.message += strlen(cev.server->commandchar) + strlen(p->name);
 
-	while (*action && isspace(*action))
-		++action;
+	while (*cev.message.message && isspace(*cev.message.message))
+		++cev.message.message;
 
-	action = strdup(action);
-	free(ev->message.message);
-
-	ev->type = IRC_EVENT_COMMAND;
-	ev->message.message = action;
-
-	return ev;
+	return &cev;
 }
 
 static int
@@ -141,9 +139,13 @@ invokable(const struct irc_plugin *p, const struct irc_event *ev)
 }
 
 static void
-invoke(struct irc_event *ev)
+invoke(const struct irc_event *ev)
 {
-	struct irc_plugin *p, *tmp, *plgcmd = NULL;
+	struct irc_plugin *p, *ptmp, *plgcmd = NULL;
+	struct irc_hook *h, *htmp;
+
+	LIST_FOREACH_SAFE(h, &irc.hooks, link, htmp)
+		irc_hook_invoke(h, ev);
 
 	/*
 	 * Invoke for every plugin the event verbatim. Then, the event may match
@@ -159,7 +161,7 @@ invoke(struct irc_event *ev)
 	 * onMessage for hangman and logger but onCommand for ask. As such call
 	 * hangman and logger first and modify event before ask.
 	 */
-	LIST_FOREACH_SAFE(p, &irc.plugins, link, tmp) {
+	LIST_FOREACH_SAFE(p, &irc.plugins, link, ptmp) {
 		if (is_command(p, ev))
 			plgcmd = p;
 		else if (invokable(p, ev))
@@ -209,6 +211,29 @@ open_plugin(struct irc_plugin_loader *ldr, const char *path)
 	return irc_plugin_loader_open(ldr, path);
 }
 
+static void
+handle_sigchld(int signum, siginfo_t *sinfo, void *unused)
+{
+	(void)signum;
+	(void)unused;
+
+	int status;
+
+	if (sinfo->si_code != CLD_EXITED)
+		return;
+
+	if (waitpid(sinfo->si_pid, &status, 0) < 0) {
+		irc_log_warn("irccd: %s", strerror(errno));
+		return;
+	}
+
+	if (WIFEXITED(status))
+		irc_log_debug("irccd: hook %d terminated correctly", sinfo->si_pid);
+	else
+		irc_log_debug("irccd: hook process %d terminated abnormally: %d",
+		    sinfo->si_pid, WEXITSTATUS(status));
+}
+
 void
 irc_bot_init(void)
 {
@@ -216,6 +241,14 @@ irc_bot_init(void)
 
 	if (pipe(pipes) < 0)
 		err(1, "pipe");
+
+	sa.sa_flags = SA_SIGINFO;
+	sa.sa_sigaction = handle_sigchld;
+
+	sigemptyset(&sa.sa_mask);
+
+	if (sigaction(SIGCHLD, &sa, NULL) < 0)
+		err(1, "sigaction");
 }
 
 void
@@ -474,6 +507,50 @@ irc_bot_rule_clear(void)
 	TAILQ_INIT(&irc.rules);
 }
 
+void
+irc_bot_hook_add(struct irc_hook *h)
+{
+	assert(h);
+	assert(!irc_bot_hook_get(h->name));
+
+	LIST_INSERT_HEAD(&irc.hooks, h, link);
+}
+
+struct irc_hook *
+irc_bot_hook_get(const char *name)
+{
+	struct irc_hook *h;
+
+	LIST_FOREACH(h, &irc.hooks, link)
+		if (strcmp(h->name, name) == 0)
+			return h;
+
+	return NULL;
+}
+
+void
+irc_bot_hook_remove(const char *name)
+{
+	assert(name);
+
+	struct irc_hook *h;
+
+	if ((h = irc_bot_hook_get(name))) {
+		LIST_REMOVE(h, link);
+		irc_hook_finish(h);
+	}
+}
+
+void
+irc_bot_hook_clear(void)
+{
+	struct irc_hook *h, *tmp;
+
+	LIST_FOREACH_SAFE(h, &irc.hooks, link, tmp)
+		irc_hook_finish(h);
+	LIST_INIT(&irc.hooks);
+}
+
 size_t
 irc_bot_poll_count(void)
 {
@@ -520,9 +597,12 @@ irc_bot_dequeue(struct irc_event *ev)
 {
 	struct irc_server *s;
 
-	LIST_FOREACH(s, &irc.servers, link)
-		if (irc_server_poll(s, ev))
+	LIST_FOREACH(s, &irc.servers, link) {
+		if (irc_server_poll(s, ev)) {
+			invoke(ev);
 			return 1;
+		}
+	}
 
 	return 0;
 }

@@ -28,6 +28,8 @@ set(
 	irccd/conn.h
 	irccd/event.c
 	irccd/event.h
+	irccd/hook.c
+	irccd/hook.h
 	irccd/irccd.c
 	irccd/irccd.h
 	irccd/limits.h
