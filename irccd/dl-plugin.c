@@ -175,10 +175,12 @@ finish(struct irc_plugin *plg)
 }
 
 static struct self *
-init(const char *path)
+init(const char *name, const char *path)
 {
 	struct self self;
 	struct stat st;
+
+	strlcpy(self.plugin.name, name, sizeof (self.plugin.name));
 
 	/*
 	 * It's not possible to get the exact error code when loading a plugin
@@ -210,19 +212,19 @@ init(const char *path)
 }
 
 static struct irc_plugin *
-wrap_open(struct irc_plugin_loader *ldr, const char *path)
+wrap_open(struct irc_plugin_loader *ldr, const char *name, const char *path)
 {
 	(void)ldr;
 
-	return dl_plugin_open(path);
+	return dl_plugin_open(name, path);
 }
 
 struct irc_plugin *
-dl_plugin_open(const char *path)
+dl_plugin_open(const char *name, const char *path)
 {
 	struct self *self;
 
-	if (!(self = init(path)))
+	if (!(self = init(name, path)))
 		return false;
 
 	/* Data and all callbacks. */

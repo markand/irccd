@@ -23,7 +23,7 @@ struct irc_plugin;
 struct irc_plugin_loader;
 
 struct irc_plugin *
-dl_plugin_open(const char *);
+dl_plugin_open(const char *, const char *);
 
 struct irc_plugin_loader *
 dl_plugin_loader_new(void);

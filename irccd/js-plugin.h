@@ -27,7 +27,7 @@ duk_context *
 js_plugin_get_context(struct irc_plugin *);
 
 struct irc_plugin *
-js_plugin_open(const char *);
+js_plugin_open(const char *, const char *);
 
 struct irc_plugin_loader *
 js_plugin_loader_new(void);

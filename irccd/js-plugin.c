@@ -16,10 +16,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <compat.h>
+
 #include <sys/stat.h>
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <string.h>
 #include <unistd.h>
@@ -49,6 +52,7 @@
 struct self {
 	struct irc_plugin plugin;
 	duk_context *ctx;
+	char location[PATH_MAX];
 	char **options;
 	char **templates;
 	char **paths;
@@ -136,6 +140,35 @@ push_whois(duk_context *ctx, const struct irc_event *ev)
 		duk_put_prop_index(ctx, -2, i);
 	}
 	duk_put_prop_string(ctx, -2, "channels");
+}
+
+static void
+log_trace(struct self *self)
+{
+	const char *name, *message;
+	char *stack, *token, *p;
+	int linenumber;
+
+	duk_get_prop_string(self->ctx, -1, "name");
+	name = duk_get_string(self->ctx, -1);
+	duk_pop(self->ctx);
+	duk_get_prop_string(self->ctx, -1, "message");
+	message = duk_get_string(self->ctx, -1);
+	duk_pop(self->ctx);
+	duk_get_prop_string(self->ctx, -1, "stack");
+	stack = strdup(duk_opt_string(self->ctx, -1, ""));
+	duk_pop(self->ctx);
+	duk_get_prop_string(self->ctx, -1, "lineNumber");
+	linenumber = duk_get_int(self->ctx, -1);
+	duk_pop(self->ctx);
+
+	irc_log_warn("plugin %s: %s:%d", self->plugin.name, self->location, linenumber);
+
+	/* We can't put a '\n' in irc_log_warn so loop for them. */
+	for (p = stack; *stack && (token = strtok_r(p, "\n", &p)); )
+		irc_log_warn("plugin %s: %s", self->plugin.name, token);
+
+	free(stack);
 }
 
 static const char **
@@ -294,7 +327,7 @@ vcall(struct irc_plugin *plg, const char *function, const char *fmt, va_list ap)
 	}
 
 	if (duk_pcall(self->ctx, nargs) != 0)
-		irc_log_warn("plugin %s: %s\n", duk_to_string(self->ctx, -1));
+		log_trace(plg->data);
 
 	duk_pop(self->ctx);
 }
@@ -433,12 +466,16 @@ wrap_free(void *udata, void *ptr)
 }
 
 static struct self *
-init(const char *path, const char *script)
+init(const char *name, const char *path, const char *script)
 {
 	struct self *js;
 
 	js = irc_util_calloc(1, sizeof (*js));
 	js->ctx = duk_create_heap(wrap_malloc, wrap_realloc, wrap_free, NULL, NULL);
+	strlcpy(js->plugin.name, name, sizeof (js->plugin.name));
+
+	/* Copy path because Duktape has no notions of it. */
+	strlcpy(js->location, path, sizeof (js->location));
 
 	/* Tables used to retrieve data. */
 	duk_push_object(js->ctx);
@@ -465,7 +502,7 @@ init(const char *path, const char *script)
 
 	/* Finally execute the script. */
 	if (duk_peval_string(js->ctx, script) != 0) {
-		irc_log_warn("plugin: %s: %s", path, duk_to_string(js->ctx, -1));
+		log_trace(js);
 		duk_destroy_heap(js->ctx);
 		free(js);
 		return NULL;
@@ -517,11 +554,11 @@ finish(struct irc_plugin *plg)
 }
 
 static struct irc_plugin *
-wrap_open(struct irc_plugin_loader *ldr, const char *path)
+wrap_open(struct irc_plugin_loader *ldr, const char *name, const char *path)
 {
 	(void)ldr;
 
-	return js_plugin_open(path);
+	return js_plugin_open(name, path);
 }
 
 duk_context *
@@ -533,7 +570,7 @@ js_plugin_get_context(struct irc_plugin *js)
 }
 
 struct irc_plugin *
-js_plugin_open(const char *path)
+js_plugin_open(const char *name, const char *path)
 {
 	assert(path);
 
@@ -546,13 +583,13 @@ js_plugin_open(const char *path)
 	 */
 	if (!(script = eat(path))) {
 		if (errno != ENOENT)
-			irc_log_warn("irccd: %s: %s", path, strerror(errno));
+			irc_log_warn("plugin: %s: %s", path, strerror(errno));
 
 		return NULL;
 	}
 
 	/* Init already log errors. */
-	if (!(self = init(path, script))) {
+	if (!(self = init(name, path, script))) {
 		free(script);
 		return NULL;
 	}

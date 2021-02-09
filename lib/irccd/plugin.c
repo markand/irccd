@@ -170,12 +170,12 @@ irc_plugin_finish(struct irc_plugin *plg)
 }
 
 struct irc_plugin *
-irc_plugin_loader_open(struct irc_plugin_loader *ldr, const char *path)
+irc_plugin_loader_open(struct irc_plugin_loader *ldr, const char *name, const char *path)
 {
 	assert(ldr);
 	assert(path);
 
-	return ldr->open(ldr, path);
+	return ldr->open(ldr, name, path);
 }
 
 void

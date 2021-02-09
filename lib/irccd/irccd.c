@@ -198,7 +198,7 @@ find_plugin(struct irc_plugin_loader *ldr, const char *base, const char *name)
 		snprintf(path, sizeof (path), "%s/%s.%s", base, name, ext);
 		irc_log_info("irccd: trying %s", path);
 
-		if ((p = irc_plugin_loader_open(ldr, path)))
+		if ((p = irc_plugin_loader_open(ldr, name, path)))
 			return p;
 	}
 
@@ -206,9 +206,9 @@ find_plugin(struct irc_plugin_loader *ldr, const char *base, const char *name)
 }
 
 static inline struct irc_plugin *
-open_plugin(struct irc_plugin_loader *ldr, const char *path)
+open_plugin(struct irc_plugin_loader *ldr, const char *name, const char *path)
 {
-	return irc_plugin_loader_open(ldr, path);
+	return irc_plugin_loader_open(ldr, name, path);
 }
 
 static void
@@ -232,6 +232,26 @@ handle_sigchld(int signum, siginfo_t *sinfo, void *unused)
 	else
 		irc_log_debug("irccd: hook process %d terminated abnormally: %d",
 		    sinfo->si_pid, WEXITSTATUS(status));
+}
+
+static inline int
+is_extension_valid(const struct irc_plugin_loader *ldr, const char *path)
+{
+	char exts[IRC_EXTENSIONS_LEN], *token, *p, *ext;
+
+	strlcpy(exts, ldr->extensions, sizeof (exts));
+
+	/* If we're unable to find an extension, assume it's allowed. */
+	if (!(ext = strrchr(path, '.')))
+		return 1;
+
+	ext++;
+
+	for (p = exts; (token = strtok_r(p, ":", &p)); )
+		if (strcmp(token, ext) == 0)
+			return 1;
+
+	return 0;
 }
 
 void
@@ -336,7 +356,9 @@ irc_bot_plugin_find(const char *name, const char *path)
 
 	SLIST_FOREACH(ldr, &irc.plugin_loaders, link) {
 		if (path) {
-			if ((p = open_plugin(ldr, path)))
+			if (!is_extension_valid(ldr, path))
+				continue;
+			if ((p = open_plugin(ldr, name, path)))
 				break;
 		} else {
 			/* Copy the paths to tokenize it. */
@@ -354,9 +376,7 @@ irc_bot_plugin_find(const char *name, const char *path)
 	}
 
 	if (!p)
-		irc_log_warn("irccd: could not find plugin %s", name);
-
-	strlcpy(p->name, name, sizeof (p->name));
+		return irc_log_warn("irccd: could not find plugin %s", name), NULL;
 
 	/* Set default paths if they are not set. */
 	irc_plugin_set_path(p, "cache", irc_util_printf(pathbuf, sizeof (pathbuf),
