@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <assert.h>
 #include <pthread.h>
 #include <stdatomic.h>
 #include <time.h>
@@ -308,6 +309,8 @@ static const duk_number_list_entry constants[] = {
 void
 jsapi_timer_load(duk_context *ctx)
 {
+	assert(ctx);
+
 	duk_get_global_string(ctx, "Irccd");
 	duk_push_c_function(ctx, Timer_constructor, 3);
 	duk_put_number_list(ctx, -1, constants);

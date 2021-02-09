@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -229,6 +230,8 @@ static const duk_function_list_entry functions[] = {
 void
 jsapi_system_raise(duk_context *ctx)
 {
+	assert(ctx);
+
 	duk_get_global_string(ctx, "Irccd");
 	duk_get_prop_string(ctx, -1, "SystemError");
 	duk_remove(ctx, -2);
@@ -242,6 +245,8 @@ jsapi_system_raise(duk_context *ctx)
 void
 jsapi_system_load(duk_context *ctx)
 {
+	assert(ctx);
+
 	duk_get_global_string(ctx, "Irccd");
 	duk_push_object(ctx);
 	duk_put_function_list(ctx, -1, functions);

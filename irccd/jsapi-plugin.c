@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <assert.h>
+
 #include <irccd/irccd.h>
 #include <irccd/plugin.h>
 
@@ -214,6 +216,9 @@ static const duk_function_list_entry functions[] = {
 void
 jsapi_plugin_load(duk_context *ctx, struct irc_plugin *p)
 {
+	assert(ctx);
+	assert(p);
+
 	/* Store plugin. */
 	duk_push_pointer(ctx, p);
 	duk_put_global_string(ctx, SIGNATURE);
@@ -247,6 +252,8 @@ jsapi_plugin_load(duk_context *ctx, struct irc_plugin *p)
 struct irc_plugin *
 jsapi_plugin_self(duk_context *ctx)
 {
+	assert(ctx);
+
 	struct irc_plugin *p;
 
 	duk_get_global_string(ctx, SIGNATURE);

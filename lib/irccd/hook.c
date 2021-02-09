@@ -129,6 +129,9 @@ irc_hook_new(const char *name, const char *path)
 void
 irc_hook_invoke(struct irc_hook *h, const struct irc_event *ev)
 {
+	assert(h);
+	assert(ev);
+
 	char **args;
 	pid_t child;
 
@@ -142,6 +145,7 @@ irc_hook_invoke(struct irc_hook *h, const struct irc_event *ev)
 	case 0:
 		execv(h->path, args);
 		irc_log_warn("hook %s: %s", h->name, strerror(errno));
+		exit(1);
 		break;
 	default:
 		/* We wait for signal handler using SIGCHLD. */
@@ -154,5 +158,7 @@ irc_hook_invoke(struct irc_hook *h, const struct irc_event *ev)
 void
 irc_hook_finish(struct irc_hook *h)
 {
+	assert(h);
+
 	free(h);
 }

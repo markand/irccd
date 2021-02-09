@@ -16,6 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <assert.h>
+
 #include "jsapi-unicode.h"
 #include "unicode.h"
 
@@ -80,6 +82,8 @@ static const duk_function_list_entry functions[] = {
 void
 jsapi_unicode_load(duk_context *ctx)
 {
+	assert(ctx);
+
 	duk_get_global_string(ctx, "Irccd");
 	duk_push_object(ctx);
 	duk_put_function_list(ctx, -1, functions);

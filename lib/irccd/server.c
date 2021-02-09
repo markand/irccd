@@ -42,6 +42,25 @@
 #define DELAY   30      /* Seconds to wait before reconnecting. */
 #define TIMEOUT 1800    /* Seconds before marking a server as dead. */
 
+static inline const char *
+statename(enum irc_server_state st)
+{
+	switch (st) {
+	case IRC_SERVER_STATE_NONE:
+		return "none";
+	case IRC_SERVER_STATE_DISCONNECTED:
+		return "disconnected";
+	case IRC_SERVER_STATE_CONNECTING:
+		return "connecting";
+	case IRC_SERVER_STATE_CONNECTED:
+		return "connected";
+	case IRC_SERVER_STATE_WAITING:
+		return "waiting";
+	default:
+		return "unknown";
+	}
+}
+
 static inline void
 clear_channels(struct irc_server *s, int free)
 {
@@ -181,10 +200,15 @@ fail(struct irc_server *s)
 	clear_server(s);
 
 	if (s->flags & IRC_SERVER_FLAGS_AUTO_RECO) {
+		irc_log_debug("server %s: state %s -> %s", s->name,
+		    statename(s->state), statename(IRC_SERVER_STATE_WAITING));
 		irc_log_info("server %s: waiting %u seconds before reconnecting", s->name, DELAY);
 		s->state = IRC_SERVER_STATE_WAITING;
-	} else
+	} else {
+		irc_log_debug("server %s: state %s -> %s", s->name,
+		    statename(s->state), statename(IRC_SERVER_STATE_DISCONNECTED));
 		s->state = IRC_SERVER_STATE_DISCONNECTED;
+	}
 
 	/* Time point when we lose signal from the server. */
 	s->lost_tp = time(NULL);
@@ -201,6 +225,8 @@ handle_connect(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *
 	LIST_FOREACH(ch, &s->channels, link)
 		irc_server_join(s, ch->name, ch->password);
 
+	irc_log_debug("server %s: state %s -> %s", s->name,
+	    statename(s->state), statename(IRC_SERVER_STATE_CONNECTED));
 	s->state = IRC_SERVER_STATE_CONNECTED;
 	ev->type = IRC_EVENT_CONNECT;
 
@@ -589,6 +615,9 @@ handle(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 static void
 auth(struct irc_server *s)
 {
+	irc_log_debug("server %s: state %s -> %s", s->name,
+	    statename(s->state), statename(IRC_SERVER_STATE_CONNECTED));
+
 	s->state = IRC_SERVER_STATE_CONNECTED;
 
 	if (s->ident.password[0])
@@ -645,8 +674,11 @@ irc_server_connect(struct irc_server *s)
 
 	if (irc_conn_connect(&s->conn) < 0)
 		fail(s);
-	else
+	else {
+		irc_log_debug("server %s: state %s -> %s", s->name,
+		    statename(s->state), statename(IRC_SERVER_STATE_CONNECTING));
 		s->state = IRC_SERVER_STATE_CONNECTING;
+	}
 
 	/*
 	 * Assume the last time we received a message was now, so that
@@ -661,6 +693,8 @@ irc_server_disconnect(struct irc_server *s)
 {
 	assert(s);
 
+	irc_log_debug("server %s: state %s -> %s", s->name,
+	    statename(s->state), statename(IRC_SERVER_STATE_DISCONNECTED));
 	s->state = IRC_SERVER_STATE_DISCONNECTED;
 
 	clear_channels(s, 0);
@@ -691,8 +725,10 @@ irc_server_flush(struct irc_server *s, const struct pollfd *pfd)
 		if (difftime(time(NULL), s->last_tp) >= TIMEOUT) {
 			irc_log_warn("server %s: no message in more than %u seconds", s->name, TIMEOUT);
 			fail(s);
-		} else if (irc_conn_flush(&s->conn, pfd) < 0)
+		} else if (irc_conn_flush(&s->conn, pfd) < 0) {
+			irc_log_warn("server %s: %s", s->name, strerror(errno));
 			return fail(s);
+		}
 		break;
 	case IRC_SERVER_STATE_CONNECTING:
 		/*
@@ -722,6 +758,8 @@ irc_server_poll(struct irc_server *s, struct irc_event *ev)
 	 * something else.
 	 */
 	if (s->state == IRC_SERVER_STATE_DISCONNECTED) {
+		irc_log_debug("server %s: state %s -> %s", s->name,
+		    statename(s->state), statename(IRC_SERVER_STATE_NONE));
 		handle_disconnect(s, ev);
 		s->state = IRC_SERVER_STATE_NONE;
 		return 1;

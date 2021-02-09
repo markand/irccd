@@ -1,5 +1,5 @@
 /*
- * jsapi-logger.c -- Irccd.Logger API
+ * jsapi-hook.c -- Irccd.Hook API
  *
  * Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
  *
@@ -18,61 +18,68 @@
 
 #include <assert.h>
 
-#include <duktape.h>
+#include <irccd/hook.h>
+#include <irccd/irccd.h>
 
-#include <irccd/plugin.h>
-#include <irccd/log.h>
-
-#include "jsapi-logger.h"
-#include "jsapi-plugin.h"
-
-#define LOG(c, f)                                                       \
-do {                                                                    \
-        const struct irc_plugin *p = jsapi_plugin_self(c);              \
-        const char *message = duk_require_string(c, 0);                 \
-                                                                        \
-        f("plugin %s: %s", p->name, message);                           \
-} while (0)                                                             \
+#include "jsapi-hook.h"
 
 static int
-Logger_info(duk_context *ctx)
+Hook_add(duk_context *ctx)
 {
-	LOG(ctx, irc_log_info);
+	const char *name = duk_require_string(ctx, 0);
+	const char *path = duk_require_string(ctx, 1);
+
+	if (irc_bot_hook_get(name))
+		return duk_error(ctx, DUK_ERR_ERROR, "hook %s already exists", name);
+
+	irc_bot_hook_add(irc_hook_new(name, path));
 
 	return 0;
 }
 
 static int
-Logger_warning(duk_context *ctx)
+Hook_list(duk_context *ctx)
 {
-	LOG(ctx, irc_log_warn);
+	struct irc_hook *h;
+	size_t i = 0;
 
-	return 0;
+	duk_push_array(ctx);
+
+	LIST_FOREACH(h, &irc.hooks, link) {
+		duk_push_object(ctx);
+		duk_push_string(ctx, h->name);
+		duk_put_prop_string(ctx, -2, "name");
+		duk_push_string(ctx, h->path);
+		duk_put_prop_string(ctx, -2, "path");
+		duk_put_prop_index(ctx, -2, i++);
+	}
+
+	return 1;
 }
 
 static int
-Logger_debug(duk_context *ctx)
+Hook_remove(duk_context *ctx)
 {
-	LOG(ctx, irc_log_debug);
+	irc_bot_hook_remove(duk_require_string(ctx, 0));
 
 	return 0;
 }
 
 static const duk_function_list_entry functions[] = {
-	{ "info",       Logger_info,    1 },
-	{ "warning",    Logger_warning, 1 },
-	{ "debug",      Logger_debug,   1 },
+	{ "add",        Hook_add,       2 },
+	{ "list",       Hook_list,      0 },
+	{ "remove",     Hook_remove,    1 },
 	{ NULL,         NULL,           0 }
 };
 
 void
-jsapi_logger_load(duk_context *ctx)
+jsapi_hook_load(duk_context *ctx)
 {
 	assert(ctx);
 
 	duk_get_global_string(ctx, "Irccd");
 	duk_push_object(ctx);
 	duk_put_function_list(ctx, -1, functions);
-	duk_put_prop_string(ctx, -2, "Logger");
+	duk_put_prop_string(ctx, -2, "Hook");
 	duk_pop(ctx);
 }

@@ -18,6 +18,7 @@
 
 #include <compat.h>
 
+#include <assert.h>
 #include <string.h>
 
 #include <irccd/irccd.h>
@@ -153,6 +154,8 @@ static const duk_function_list_entry functions[] = {
 void
 jsapi_rule_load(duk_context *ctx)
 {
+	assert(ctx);
+
 	duk_get_global_string(ctx, "Irccd");
 	duk_push_object(ctx);
 	duk_put_number_list(ctx, -1, actions);

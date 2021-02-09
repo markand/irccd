@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <assert.h>
 #include <errno.h>
 #include <string.h>
 
@@ -295,6 +296,8 @@ print(duk_context *ctx)
 void
 jsapi_load(duk_context *ctx)
 {
+	assert(ctx);
+
 	/* Irccd (global object) */
 	duk_push_object(ctx);
 

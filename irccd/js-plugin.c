@@ -35,6 +35,7 @@
 #include "jsapi-chrono.h"
 #include "jsapi-directory.h"
 #include "jsapi-file.h"
+#include "jsapi-hook.h"
 #include "jsapi-irccd.h"
 #include "jsapi-logger.h"
 #include "jsapi-plugin.h"
@@ -452,6 +453,7 @@ init(const char *path, const char *script)
 	jsapi_chrono_load(js->ctx);
 	jsapi_directory_load(js->ctx);
 	jsapi_file_load(js->ctx);
+	jsapi_hook_load(js->ctx);
 	jsapi_logger_load(js->ctx);
 	jsapi_plugin_load(js->ctx, &js->plugin);
 	jsapi_rule_load(js->ctx);

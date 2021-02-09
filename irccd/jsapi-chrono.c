@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <assert.h>
 #include <time.h>
 
 #include <duktape.h>
@@ -107,6 +108,8 @@ static const duk_function_list_entry methods[] = {
 void
 jsapi_chrono_load(duk_context *ctx)
 {
+	assert(ctx);
+
 	duk_get_global_string(ctx, "Irccd");
 	duk_push_c_function(ctx, Chrono_constructor, 0);
 	duk_push_object(ctx);

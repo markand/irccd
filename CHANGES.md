@@ -35,6 +35,7 @@ network API:
 javascript API:
 
 - Brand new Irccd.Rule API to inspect and manage rules.
+- Brand new Irccd.Hook API to inspect and manage hooks.
 
 irccd 3.1.1 2021-01-04
 ----------------------
