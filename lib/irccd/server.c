@@ -597,9 +597,12 @@ irc_server_new(const char *name,
 	strlcpy(s->ident.username, username, sizeof (s->ident.username));
 	strlcpy(s->ident.realname, realname, sizeof (s->ident.realname));
 
-	/* Server itslf. */
+	/* Server itself. */
 	strlcpy(s->name, name, sizeof (s->name));
 	LIST_INIT(&s->channels);
+
+	/* Default options. */
+	strlcpy(s->commandchar, "!", sizeof (s->commandchar));
 
 	return s;
 }
