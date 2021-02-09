@@ -387,7 +387,52 @@ plugin_list_set(int argc, char **argv, const char *cmd)
 			printf("%-16s: %s\n", line, p + 1);
 		}
 	}
+}
 
+static void
+response_list(const char *cmd)
+{
+	char *list;
+
+	req(cmd);
+
+	if (strncmp(list = poll(), "OK ", 3) != 0)
+		errx(1, "failed to retrieve plugin list");
+
+	list += 3;
+
+	for (char *p; (p = strchr(list, ' ')); )
+		*p = '\n';
+
+	if (*list)
+		puts(list);
+}
+
+static void
+cmd_hook_add(int argc, char **argv)
+{
+	(void)argc;
+
+	req("HOOK-ADD %s %s", argv[0], argv[1]);
+	ok();
+}
+
+static void
+cmd_hook_list(int argc, char **argv)
+{
+	(void)argc;
+	(void)argv;
+
+	response_list("HOOK-LIST");
+}
+
+static void
+cmd_hook_remove(int argc, char **argv)
+{
+	(void)argc;
+
+	req("HOOK-REMOVE %s", argv[0]);
+	ok();
 }
 
 static void
@@ -430,19 +475,7 @@ cmd_plugin_list(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 
-	char *list;
-
-	req("PLUGIN-LIST");
-
-	if (strncmp(list = poll(), "OK ", 3) != 0)
-		errx(1, "failed to retrieve plugin list");
-
-	list += 3;
-
-	for (char *p; (p = strchr(list, ' ')); )
-		*p = '\n';
-
-	puts(list);
+	response_list("PLUGIN-LIST");
 }
 
 static void
@@ -682,21 +715,7 @@ cmd_server_list(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 
-	char *list;
-
-	req("SERVER-LIST");
-
-	if (strncmp(list = poll(), "OK ", 3) != 0)
-		errx(1, "failed to retrieve server list");
-
-	/* Skip "OK " */
-	list += 3;
-
-	/* Since list is separated by spaces, just convert them to \n */
-	for (char *p; (p = strchr(list, ' ')); )
-		*p = '\n';
-
-	puts(list);
+	response_list("SERVER-LIST");
 }
 
 static void
@@ -797,6 +816,9 @@ static const struct cmd {
 	void (*exec)(int, char **);
 } cmds[] = {
 	/* name                 min     max     exec                   */
+	{ "hook-add",           2,      2,      cmd_hook_add            },
+	{ "hook-list",          0,      0,      cmd_hook_list           },
+	{ "hook-remove",        1,      1,      cmd_hook_remove         },
 	{ "plugin-config",      1,      3,      cmd_plugin_config       },
 	{ "plugin-info",        1,      1,      cmd_plugin_info         },
 	{ "plugin-list",        0,      0,      cmd_plugin_list         },

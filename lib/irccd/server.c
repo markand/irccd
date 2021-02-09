@@ -16,8 +16,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <compat.h>
+
 #include <assert.h>
 #include <errno.h>
+#include <err.h>
 #include <poll.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -441,7 +444,9 @@ handle_endofnames(struct irc_server *s, struct irc_event *ev, struct irc_conn_ms
 
 	/* Construct a string list for every user in the channel. */
 	ch = irc_server_find(s, ev->names.channel);
-	fp = open_memstream(&ev->names.names, &length);
+
+	if (!(fp = open_memstream(&ev->names.names, &length)))
+		err(1, "open_memstream");
 
 	LIST_FOREACH(u, &ch->users, link) {
 		if (u->symbol)

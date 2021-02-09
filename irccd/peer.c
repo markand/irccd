@@ -134,8 +134,8 @@ plugin_list_set(struct peer *p,
 		return EINVAL;
 	if (!(plg = require_plugin(p, args[0])))
 		return 0;
-
-	fp = fmemopen(out, sizeof (out) - 1, "w");
+	if (!(fp = fmemopen(out, sizeof (out) - 1, "w")))
+		return errno;
 
 	if (argsz == 3) {
 		set(plg, args[1], args[2]);
@@ -241,7 +241,12 @@ cmd_hook_list(struct peer *p, char *line)
 static int
 cmd_hook_remove(struct peer *p, char *line)
 {
-	irc_bot_hook_remove(line);
+	const char *args[1] = {0};
+
+	if (parse(line, args, 1) != 1)
+		return EINVAL;
+
+	irc_bot_hook_remove(args[0]);
 
 	return ok(p);
 }
@@ -315,7 +320,8 @@ cmd_plugin_list(struct peer *p, char *line)
 	FILE *fp;
 	char out[IRC_BUF_LEN];
 
-	fp = fmemopen(out, sizeof (out) - 1, "w");
+	if (!(fp = fmemopen(out, sizeof (out) - 1, "w")))
+		return errno;
 
 	fprintf(fp, "OK ");
 
@@ -739,8 +745,8 @@ cmd_server_info(struct peer *p, char *line)
 		return EINVAL;
 	if (!(s = require_server(p, args[0])))
 		return 0;
-
-	fp = fmemopen(out, sizeof (out) - 1, "w");
+	if (!(fp = fmemopen(out, sizeof (out) - 1, "w")))
+		return errno;
 
 	fprintf(fp, "OK %s\n", s->name);
 	fprintf(fp, "%s %u%s\n", s->conn.hostname, s->conn.port,
@@ -826,11 +832,11 @@ cmd_server_list(struct peer *p, char *line)
 	(void)line;
 
 	struct irc_server *s;
+	char out[IRC_BUF_LEN];
 	FILE *fp;
-	char *out;
-	size_t outsz;
 
-	fp = open_memstream(&out, &outsz);
+	if (!(fp = fmemopen(out, sizeof (out), "w")))
+		return error(p, "%s", strerror(errno));
 
 	fprintf(fp, "OK ");
 
@@ -843,7 +849,6 @@ cmd_server_list(struct peer *p, char *line)
 
 	fclose(fp);
 	peer_send(p, out);
-	free(out);
 
 	return 0;
 }
