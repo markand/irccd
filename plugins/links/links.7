@@ -1,0 +1,83 @@
+.\"
+.\" Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-PLUGIN-LINKS 7
+.Os
+.\" NAME
+.Sh NAME
+.Nm links
+.Nd irccd links plugin
+.\" DESCRIPTION
+.Sh DESCRIPTION
+The
+.Nm
+is used to analyze links sent on channels. It will load the web page and extract
+its title on the same channel.
+.\" INSTALLATION
+.Sh INSTALLATION
+The plugin
+.Nm
+is distributed with irccd. To enable it add the following to your plugins
+section:
+.Pp
+.Bd -literal
+[plugins]
+links = ""
+.Ed
+.\" USAGE
+.Sh USAGE
+The plugin will automatically fetch web page titles on message that contains
+either http://something or https://something.
+.Pp
+Example of possible output:
+.Bd -literal -offset Ds
+markand: http://example.org
+irccd: Example Domain
+.Ed
+.\" CONFIGURATION
+.Sh CONFIGURATION
+The following options are available under the
+.Va [plugin.links]
+section:
+.Bl -tag -width 14n -offset Ds
+.It Va timeout No (int)
+Timeout in seconds before dropping a request (default: 30).
+.El
+.\" TEMPLATES
+.Sh TEMPLATES
+The
+.Nm
+plugin supports the following templates in
+.Va [templates.links]
+section:
+.Bl -tag -width 14n -offset Ds
+.It Va info
+Message to be written when title has been retrieved successfully. Keywords:
+.Em channel , nickname , origin , server , title .
+.El
+.\" BUGS
+.Sh BUGS
+As HTML pages are not always correct and not openable with a XML parser,
+.Nm
+actually searches for a <title></title> tag using a regular expression. While
+this is not ideal, it usually works in most situations.
+.Pp
+Only a few set of HTML entity characters are converted to the human readable
+format.
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd 1 ,
+.Xr irccd-templates 7

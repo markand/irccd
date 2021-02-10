@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-/* Requires strnlen. */
 #include "compat.h"
 
 char *
@@ -36,7 +35,8 @@ strndup(const char *src, size_t max)
 	if (!(ret = malloc(length + 1)))
 		return NULL;
 
+	memcpy(ret, src, length);
 	ret[length] = '\0';
 
-	return memcpy(ret, src, length);
+	return ret;
 }

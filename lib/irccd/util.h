@@ -45,6 +45,9 @@ char *
 irc_util_strdup(const char *);
 
 char *
+irc_util_strndup(const char *, size_t);
+
+char *
 irc_util_basename(const char *);
 
 char *

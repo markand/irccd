@@ -16,16 +16,13 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-if (IRCCD_WITH_JS)
-	add_subdirectory(ask)
-	add_subdirectory(auth)
-	add_subdirectory(hangman)
-	add_subdirectory(history)
-	add_subdirectory(joke)
-	add_subdirectory(logger)
-	add_subdirectory(plugin)
-	add_subdirectory(roulette)
-	add_subdirectory(tictactoe)
-endif ()
+project(links)
 
-add_subdirectory(links)
+find_package(CURL REQUIRED)
+
+irccd_define_c_plugin(
+	NAME links
+	MAN ${links_SOURCE_DIR}/links.7
+	SOURCES ${links_SOURCE_DIR}/links.c
+	LIBRARIES CURL::libcurl
+)

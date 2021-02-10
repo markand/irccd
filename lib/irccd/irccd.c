@@ -361,7 +361,7 @@ irc_bot_plugin_find(const char *name, const char *path)
 		if (path) {
 			if (!is_extension_valid(ldr, path))
 				continue;
-	
+
 			p = open_plugin(ldr, name, path);
 		} else {
 			/* Copy the paths to tokenize it. */

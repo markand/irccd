@@ -67,7 +67,7 @@ symbol(const struct self *self, const char *func)
 {
 	static char sym[128];
 
-	snprintf(sym, sizeof (sym), "%s_%s",self->prefix, func);
+	snprintf(sym, sizeof (sym), "%s_%s", self->prefix, func);
 
 	return sym;
 }
@@ -180,6 +180,7 @@ init(const char *name, const char *path)
 	struct self self;
 	struct stat st;
 
+	memset(&self, 0, sizeof (self));
 	strlcpy(self.plugin.name, name, sizeof (self.plugin.name));
 
 	/*

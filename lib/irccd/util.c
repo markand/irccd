@@ -95,6 +95,19 @@ irc_util_strdup(const char *src)
 }
 
 char *
+irc_util_strndup(const char *src, size_t n)
+{
+	assert(src);
+
+	char *ret;
+
+	if (!(ret = strndup(src, n)))
+		err(1, "strndup");
+
+	return ret;
+}
+
+char *
 irc_util_basename(const char *str)
 {
 	static char ret[PATH_MAX];
