@@ -236,7 +236,7 @@ dl_plugin_open(const char *name, const char *path)
 	struct self *self;
 
 	if (!(self = init(name, path)))
-		return false;
+		return NULL;
 
 	/* Data and all callbacks. */
 	self->plugin.data = self;

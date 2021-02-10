@@ -85,7 +85,7 @@ recursedir(int dirfd, struct cursor *cs)
 			strlcat(cs->path, "/", sizeof (cs->path));
 
 			entrylen += 1;
-	
+
 			if ((childfd = openat(dirfd, entry->d_name, O_RDONLY | O_DIRECTORY)) < 0)
 				continue;
 			if ((ret = recursedir(childfd, cs))) {
@@ -142,12 +142,12 @@ path(duk_context *ctx)
 	duk_get_prop_string(ctx, -1, "path");
 
 	if (duk_get_type(ctx, -1) != DUK_TYPE_STRING)
-		duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Directory object");
+		(void)duk_error(ctx, DUK_ERR_TYPE_ERROR, "not a Directory object");
 
 	ret = duk_get_string(ctx, -1);
 
 	if (!ret || !ret[0])
-		duk_error(ctx, DUK_ERR_TYPE_ERROR, "directory object has empty path");
+		(void)duk_error(ctx, DUK_ERR_TYPE_ERROR, "directory object has empty path");
 
 	duk_pop_n(ctx, 2);
 

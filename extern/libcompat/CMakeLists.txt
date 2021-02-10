@@ -92,6 +92,7 @@ add_library(libirccd-compat STATIC ${SOURCES})
 target_include_directories(
 	libirccd-compat
 	PUBLIC
+		$<BUILD_INTERFACE:${libirccd-compat_BINARY_DIR}>
 		$<BUILD_INTERFACE:${libirccd-compat_BINARY_DIR}/irccd>
 )
 set_target_properties(libirccd-compat PROPERTIES PREFIX "")

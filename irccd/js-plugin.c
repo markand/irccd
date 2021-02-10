@@ -145,16 +145,9 @@ push_whois(duk_context *ctx, const struct irc_event *ev)
 static void
 log_trace(struct self *self)
 {
-	const char *name, *message;
 	char *stack, *token, *p;
 	int linenumber;
 
-	duk_get_prop_string(self->ctx, -1, "name");
-	name = duk_get_string(self->ctx, -1);
-	duk_pop(self->ctx);
-	duk_get_prop_string(self->ctx, -1, "message");
-	message = duk_get_string(self->ctx, -1);
-	duk_pop(self->ctx);
 	duk_get_prop_string(self->ctx, -1, "stack");
 	stack = strdup(duk_opt_string(self->ctx, -1, ""));
 	duk_pop(self->ctx);

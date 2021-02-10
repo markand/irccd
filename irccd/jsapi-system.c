@@ -165,7 +165,7 @@ System_uptime(duk_context *ctx)
 	struct sysinfo info;
 
 	if (sysinfo(&info) < 0)
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 
 	duk_push_uint(ctx, info.uptime);
 #elif defined(__APPLE__)
@@ -186,7 +186,7 @@ System_uptime(duk_context *ctx)
 
 	/* Mostly POSIX compliant (CLOCK_UPTIME isn't POSIX though). */
 	if (clock_gettime(CLOCK_UPTIME, &ts) < 0)
-		irc_jsapi_system_raise(ctx);
+		jsapi_system_raise(ctx);
 
 	duk_push_uint(ctx, ts.tv_sec);
 #endif

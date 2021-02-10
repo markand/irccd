@@ -18,6 +18,7 @@
 
 #include <config.h>
 
+#include <sys/wait.h>
 #include <assert.h>
 #include <ctype.h>
 #include <err.h>

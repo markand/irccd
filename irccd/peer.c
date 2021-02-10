@@ -28,6 +28,7 @@
 
 #include <assert.h>
 
+#include <irccd/compat.h>
 #include <irccd/irccd.h>
 #include <irccd/log.h>
 #include <irccd/server.h>
@@ -182,7 +183,7 @@ rule_list_to_spaces(const char *value)
 
 /*
  * HOOK-ADD name path	fprintf(fp, "OK ");
- 
+
  LIST_FOREACH(s, &irc.servers, link) {
 		fprintf(fp, "%s", s->name);
 
@@ -395,7 +396,7 @@ cmd_rule_add(struct peer *p, char *line)
 
 	if (sscanf(line, "RULE-ADD %*s") == EOF)
 		return EINVAL;
-		
+
 	line += strlen("RULE-ADD ");
 
 	if (strncmp(line, "accept", 6) == 0)
@@ -495,7 +496,7 @@ cmd_rule_edit(struct peer *p, char *line)
 
 		if (sscanf(token, "%c%c%*s", &key, &attr) != 2)
 			return EINVAL;
-	
+
 		if (key == 'a') {
 			if (attr != '=')
 				return EINVAL;

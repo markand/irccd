@@ -253,7 +253,7 @@ Util_cut(duk_context *ctx)
 	/* Join as new lines with a limit of maximum columns and lines. */
 	if (!(lines = join(ctx, maxc, maxl, &tokens))) {
 		stringlist_finish(&tokens);
-		duk_throw(ctx);
+		return duk_throw(ctx);
 	}
 
 	duk_push_array(ctx);

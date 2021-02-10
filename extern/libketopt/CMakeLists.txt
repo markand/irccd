@@ -18,7 +18,8 @@
 
 cmake_minimum_required(VERSION 3.0)
 project(libirccd-ketopt)
-add_library(libirccd-ketopt INTERFACE ketopt.h)
+add_library(libirccd-ketopt INTERFACE)
+target_sources(libirccd-ketopt INTERFACE ${libirccd-ketopt_SOURCE_DIR}/ketopt.h)
 target_include_directories(
 	libirccd-ketopt
 	INTERFACE
