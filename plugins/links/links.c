@@ -262,3 +262,8 @@ links_get_templates(void)
 
 	return keys;
 }
+
+const char *links_description = "Parse links from messages";
+const char *links_version = IRCCD_VERSION;
+const char *links_license = "ISC";
+const char *links_author = "David Demelier <markand@malikania.fr>";

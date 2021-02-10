@@ -62,7 +62,7 @@ typedef void            (*set_option_fn)(const char *, const char *);
 typedef void            (*set_path_fn)(const char *, const char *);
 typedef void            (*set_template_fn)(const char *, const char *);
 
-static const char *
+static inline const char *
 symbol(const struct self *self, const char *func)
 {
 	static char sym[128];
@@ -70,6 +70,17 @@ symbol(const struct self *self, const char *func)
 	snprintf(sym, sizeof (sym), "%s_%s", self->prefix, func);
 
 	return sym;
+}
+
+static inline const char *
+metadata(struct self *self, const char *name)
+{
+	char **addr;
+
+	if (!(addr = dlsym(self->handle, symbol(self, name))))
+		return NULL;
+
+	return *addr;
 }
 
 static void
@@ -244,6 +255,12 @@ dl_plugin_open(const char *name, const char *path)
 	self->plugin.unload = unload;
 	self->plugin.handle = handle;
 	self->plugin.finish = finish;
+
+	/* Metadata variables. */
+	self->plugin.author = metadata(self, "author");
+	self->plugin.description = metadata(self, "description");
+	self->plugin.version = metadata(self, "version");
+	self->plugin.license = metadata(self, "license");
 
 	return &self->plugin;
 }
