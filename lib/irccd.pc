@@ -1,0 +1,5 @@
+Name: irccd
+Description: Native C interface for irccd plugins
+Version: @IRCCD_VERSION_MAJOR@
+Cflags: -I@CMAKE_INSTALL_FULL_INCLUDEDIR@ -I@CMAKE_INSTALL_FULL_INCLUDEDIR@/irccd/extern -I@OPENSSL_INCLUDE_DIR@
+Libs: @EXTRA_LIBS@

@@ -75,6 +75,29 @@ target_include_directories(libirccd INTERFACE
 	${OPENSSL_INCLUDE_DIR}
 )
 
+target_include_directories(
+	libirccd-static
+	PUBLIC
+		$<BUILD_INTERFACE:${libirccd_BINARY_DIR}/irccd>
+		$<BUILD_INTERFACE:${libirccd_SOURCE_DIR}>
+		$<BUILD_INTERFACE:${libirccd_BINARY_DIR}>
+)
+target_link_libraries(libirccd-static libirccd-compat)
+
+if (IRCCD_WITH_SSL)
+	target_link_libraries(libirccd-static OpenSSL::SSL OpenSSL::Crypto)
+endif ()
+
+# pkg-config file
+if (APPLE)
+	set(EXTRA_LIBS "-undefined dynamic_lookup")
+endif ()
+
+configure_file(
+	${libirccd_SOURCE_DIR}/irccd.pc
+	${libirccd_BINARY_DIR}/irccd.pc
+)
+
 write_basic_package_version_file(${libirccd_BINARY_DIR}/IrccdConfigVersion.cmake
 	VERSION ${IRCCD_VERSION}
 	COMPATIBILITY SameMajorVersion
@@ -103,17 +126,9 @@ install(
 	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/irccd
 )
 
-target_include_directories(
-	libirccd-static
-	PUBLIC
-		$<BUILD_INTERFACE:${libirccd_BINARY_DIR}/irccd>
-		$<BUILD_INTERFACE:${libirccd_SOURCE_DIR}>
-		$<BUILD_INTERFACE:${libirccd_BINARY_DIR}>
+install(
+	FILES ${libirccd_BINARY_DIR}/irccd.pc
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
 )
-target_link_libraries(libirccd-static libirccd-compat)
-
-if (IRCCD_WITH_SSL)
-	target_link_libraries(libirccd-static OpenSSL::SSL OpenSSL::Crypto)
-endif ()
 
 source_group(TREE ${libirccd_SOURCE_DIR} FILES ${SOURCES})
