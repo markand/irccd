@@ -58,6 +58,8 @@ enum {
 	TPL_INFO
 };
 
+static unsigned long timeout = 30;
+
 static char templates[][512] = {
 	[TPL_INFO] = "#{nickname}, voici le lien: #{title}"
 };
@@ -193,6 +195,7 @@ req_new(struct irc_server *server, const char *origin, const char *channel, char
 	curl_easy_setopt(req->curl, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(req->curl, CURLOPT_WRITEFUNCTION, callback);
 	curl_easy_setopt(req->curl, CURLOPT_WRITEDATA, req);
+	curl_easy_setopt(req->curl, CURLOPT_TIMEOUT, timeout);
 
 	return req;
 
@@ -259,6 +262,34 @@ const char **
 links_get_templates(void)
 {
 	static const char *keys[] = { "info", NULL };
+
+	return keys;
+}
+
+void
+links_set_option(const char *key, const char *value)
+{
+	if (strcmp(key, "timeout") == 0)
+		timeout = atol(value);
+}
+
+const char *
+links_get_option(const char *key)
+{
+	static char out[32];
+
+	if (strcmp(key, "timeout") == 0) {
+		snprintf(out, sizeof (out), "%lu", timeout);
+		return out;
+	}
+
+	return NULL;
+}
+
+const char **
+links_get_options(void)
+{
+	static const char *keys[] = { "timeout", NULL };
 
 	return keys;
 }
