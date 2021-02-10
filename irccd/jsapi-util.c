@@ -69,6 +69,9 @@ subspack_parse(duk_context *ctx, duk_idx_t index, struct subspack *pkg)
 	if (!duk_is_object(ctx, index))
 		return;
 
+	/* Use current time by default. */
+	pkg->subst.time = time(NULL);
+
 	duk_enum(ctx, index, 0);
 
 	while (duk_next(ctx, -1, 1)) {
