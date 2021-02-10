@@ -92,7 +92,7 @@ add_library(libirccd-compat STATIC ${SOURCES})
 target_include_directories(
 	libirccd-compat
 	PUBLIC
-		$<BUILD_INTERFACE:${libirccd-compat_BINARY_DIR}>
+		$<BUILD_INTERFACE:${libirccd-compat_BINARY_DIR}/irccd>
 )
 set_target_properties(libirccd-compat PROPERTIES PREFIX "")
 
@@ -109,6 +109,11 @@ foreach (i ${INCLUDES})
 
 	if (NOT COMPAT_HAVE_${var})
 		file(WRITE ${libirccd-compat_BINARY_DIR}/${i} "/* Empty stub for ${i}. */\n")
+
+		install(
+			FILES ${libirccd-compat_BINARY_DIR}/${i}
+			DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/irccd/extern
+		)
 	endif ()
 endforeach ()
 
@@ -133,6 +138,11 @@ if (NOT COMPAT_HAVE_SYS_QUEUE_H)
 		libirccd-compat
 		PUBLIC
 			$<BUILD_INTERFACE:${libirccd-compat_SOURCE_DIR}/extern/queue>
+	)
+
+	install(
+		FILES ${libirccd-compat_SOURCE_DIR}/extern/queue/sys/queue.h
+		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/irccd/extern/sys
 	)
 endif ()
 
@@ -181,5 +191,10 @@ endif ()
 
 configure_file(
 	${libirccd-compat_SOURCE_DIR}/src/compat.h.in
-	${libirccd-compat_BINARY_DIR}/compat.h
+	${libirccd-compat_BINARY_DIR}/irccd/compat.h
+)
+
+install(
+	FILES ${libirccd-compat_BINARY_DIR}/irccd/compat.h
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/irccd
 )

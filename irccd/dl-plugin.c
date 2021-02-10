@@ -25,8 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <config.h>
-
+#include <irccd/config.h>
 #include <irccd/log.h>
 #include <irccd/plugin.h>
 #include <irccd/util.h>

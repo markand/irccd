@@ -16,7 +16,5 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-project(irccdctl)
-add_executable(irccdctl main.c)
-target_link_libraries(irccdctl libirccd-static libirccd-ketopt)
-install(TARGETS irccdctl DESTINATION ${CMAKE_INSTALL_BINDIR})
+include("${CMAKE_CURRENT_LIST_DIR}/IrccdTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/IrccdDefinePlugin.cmake")

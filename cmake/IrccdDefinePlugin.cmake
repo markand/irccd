@@ -16,6 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+include(GNUInstallDirs)
+
 function(_idp_install_man file)
 	get_filename_component(basename ${file} NAME)
 	configure_file(${file} ${CMAKE_CURRENT_BINARY_DIR}/${basename})
@@ -75,17 +77,7 @@ function(irccd_define_c_plugin)
 	endif ()
 
 	add_library(irccd-plugin-${PLG_NAME} MODULE ${PLG_SOURCES} ${PLG_MAN})
-	get_target_property(LIBIRCCD_INCLUDES libirccd INCLUDE_DIRECTORIES)
-	get_target_property(LIBCOMPAT_INCLUDES libirccd-compat INCLUDE_DIRECTORIES)
-	target_include_directories(
-		irccd-plugin-${PLG_NAME}
-		PRIVATE
-			${PLG_INCLUDES}
-			${LIBIRCCD_INCLUDES}
-			${LIBCOMPAT_INCLUDES}
-			${OPENSSL_INCLUDE_DIR}
-	)
-	target_link_libraries(irccd-plugin-${PLG_NAME} ${PLG_LIBRARIES})
+	target_link_libraries(irccd-plugin-${PLG_NAME} irccd::libirccd ${PLG_LIBRARIES})
 	set_target_properties(irccd-plugin-${PLG_NAME}
 		PROPERTIES
 			PREFIX ""

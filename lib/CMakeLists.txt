@@ -18,33 +18,39 @@
 
 project(libirccd)
 
+include(CMakePackageConfigHelpers)
+
+set(
+	HEADERS
+	irccd/channel.h
+	irccd/conn.h
+	irccd/event.h
+	irccd/hook.h
+	irccd/irccd.h
+	irccd/limits.h
+	irccd/log.h
+	irccd/plugin.h
+	irccd/rule.h
+	irccd/server.h
+	irccd/subst.h
+	irccd/util.h
+)
+
 set(
 	SOURCES
 	CMakeLists.txt
 	irccd/channel.c
-	irccd/channel.h
 	irccd/config.h.in
 	irccd/conn.c
-	irccd/conn.h
 	irccd/event.c
-	irccd/event.h
 	irccd/hook.c
-	irccd/hook.h
 	irccd/irccd.c
-	irccd/irccd.h
-	irccd/limits.h
 	irccd/log.c
-	irccd/log.h
 	irccd/plugin.c
-	irccd/plugin.h
 	irccd/rule.c
-	irccd/rule.h
 	irccd/server.c
-	irccd/server.h
 	irccd/subst.c
-	irccd/subst.h
 	irccd/util.c
-	irccd/util.h
 )
 
 configure_file(
@@ -52,19 +58,62 @@ configure_file(
 	${libirccd_BINARY_DIR}/irccd/config.h
 )
 
-add_library(libirccd ${SOURCES})
-set_target_properties(libirccd PROPERTIES PREFIX "")
+add_library(libirccd-static ${SOURCES})
+set_target_properties(libirccd-static PROPERTIES PREFIX "")
+
+# This is what we export to the world.
+add_library(libirccd INTERFACE)
+add_library(irccd::libirccd ALIAS libirccd)
+
+target_include_directories(libirccd INTERFACE
+	$<BUILD_INTERFACE:${libirccd-compat_BINARY_DIR}>
+	$<BUILD_INTERFACE:${libirccd_SOURCE_DIR}>
+	$<BUILD_INTERFACE:${libirccd_BINARY_DIR}>
+	$<BUILD_INTERFACE:${libirccd_BINARY_DIR}/irccd>
+	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/irccd/extern>
+	${OPENSSL_INCLUDE_DIR}
+)
+
+write_basic_package_version_file(${libirccd_BINARY_DIR}/IrccdConfigVersion.cmake
+	VERSION ${IRCCD_VERSION}
+	COMPATIBILITY SameMajorVersion
+)
+
+install(TARGETS libirccd EXPORT IrccdTargets)
+install(
+	EXPORT IrccdTargets
+	FILE IrccdTargets.cmake
+	NAMESPACE
+		irccd::
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/irccd
+)
+install(
+	FILES
+		${CMAKE_SOURCE_DIR}/cmake/IrccdDefinePlugin.cmake
+		${libirccd_SOURCE_DIR}/IrccdConfig.cmake
+		${libirccd_BINARY_DIR}/IrccdConfigVersion.cmake
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/irccd
+)
+
+install(
+	FILES
+		${HEADERS}
+		${libirccd_BINARY_DIR}/irccd/config.h
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/irccd
+)
 
 target_include_directories(
-	libirccd
+	libirccd-static
 	PUBLIC
+		$<BUILD_INTERFACE:${libirccd_BINARY_DIR}/irccd>
 		$<BUILD_INTERFACE:${libirccd_SOURCE_DIR}>
-		$<BUILD_INTERFACE:${libirccd_BINARY_DIR}>/irccd
+		$<BUILD_INTERFACE:${libirccd_BINARY_DIR}>
 )
-target_link_libraries(libirccd libirccd-compat)
+target_link_libraries(libirccd-static libirccd-compat)
 
 if (IRCCD_WITH_SSL)
-	target_link_libraries(libirccd OpenSSL::SSL OpenSSL::Crypto)
+	target_link_libraries(libirccd-static OpenSSL::SSL OpenSSL::Crypto)
 endif ()
 
 source_group(TREE ${libirccd_SOURCE_DIR} FILES ${SOURCES})

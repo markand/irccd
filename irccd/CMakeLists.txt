@@ -66,7 +66,7 @@ endif ()
 
 # This is required for unit tests.
 add_library(irccd-fe OBJECT ${SOURCES})
-target_link_libraries(irccd-fe libirccd)
+target_link_libraries(irccd-fe libirccd-static)
 target_include_directories(
 	irccd-fe
 	PUBLIC
@@ -91,5 +91,6 @@ add_executable(
 	${FLEX_irccd-lex_OUTPUTS}
 )
 target_link_libraries(irccd irccd-fe)
+install(TARGETS irccd DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 source_group(TREE ${irccd_SOURCE_DIR} FILES ${SOURCES})
