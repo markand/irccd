@@ -37,6 +37,8 @@ endif ()
 
 include(GNUInstallDirs)
 
+include(cmake/IrccdDefinePlugin.cmake)
+
 find_package(FLEX REQUIRED)
 find_package(BISON REQUIRED)
 
@@ -54,6 +56,7 @@ endif ()
 add_subdirectory(lib)
 add_subdirectory(irccd)
 add_subdirectory(irccdctl)
+add_subdirectory(plugins)
 
 if (IRCCD_WITH_TESTS)
 	enable_testing()

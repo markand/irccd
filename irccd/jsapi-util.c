@@ -38,6 +38,17 @@ struct string {
 
 TAILQ_HEAD(stringlist, string);
 
+static inline void
+subspack_finish(struct subspack *subst)
+{
+	for (size_t i = 0; i < subst->subst.keywordsz; ++i) {
+		free((char *)subst->kw[i].key);
+		free((char *)subst->kw[i].value);
+	}
+
+	free(subst->kw);
+}
+
 /*
  * Read parameters for Irccd.Util.format function, the object is defined as
  * following:
@@ -61,6 +72,11 @@ subspack_parse(duk_context *ctx, duk_idx_t index, struct subspack *pkg)
 	duk_enum(ctx, index, 0);
 
 	while (duk_next(ctx, -1, 1)) {
+		if (!duk_is_string(ctx, -2)) {
+			subspack_finish(pkg);
+			(void)duk_error(ctx, DUK_ERR_TYPE_ERROR, "keyword name must be a string");
+		}
+
 		if (strcmp(duk_get_string(ctx, -2), "date") == 0) {
 			pkg->subst.time = duk_get_number(ctx, -1);
 			continue;
@@ -69,9 +85,9 @@ subspack_parse(duk_context *ctx, duk_idx_t index, struct subspack *pkg)
 		pkg->kw = irc_util_reallocarray(pkg->kw, ++pkg->subst.keywordsz,
 		    sizeof (*pkg->kw));
 		pkg->kw[pkg->subst.keywordsz - 1].key =
-		    irc_util_strdup(duk_opt_string(ctx, -2, ""));
+		    irc_util_strdup(duk_get_string_default(ctx, -2, ""));
 		pkg->kw[pkg->subst.keywordsz - 1].value =
-		    irc_util_strdup(duk_opt_string(ctx, -1, ""));
+		    irc_util_strdup(duk_get_string_default(ctx, -1, ""));
 
 		duk_pop_n(ctx, 2);
 	}
@@ -81,17 +97,6 @@ subspack_parse(duk_context *ctx, duk_idx_t index, struct subspack *pkg)
 	                   IRC_SUBST_ENV |
 	                   IRC_SUBST_IRC_ATTRS;
 	pkg->subst.keywords = pkg->kw;
-}
-
-static inline void
-subspack_finish(struct subspack *subst)
-{
-	for (size_t i = 0; i < subst->subst.keywordsz; ++i) {
-		free((char *)subst->kw[i].key);
-		free((char *)subst->kw[i].value);
-	}
-
-	free(subst->kw);
 }
 
 static struct string *

@@ -24,6 +24,7 @@
 #include <string.h>
 
 #include "subst.h"
+#include "util.h"
 
 struct pair {
 	const char *key;
@@ -171,12 +172,7 @@ find(const struct pair *pairs, const char *key)
 static int
 subst_date(char *out, size_t outsz, const char *input, const struct irc_subst *subst)
 {
-	struct tm *tm;
-
-	if (!(subst->flags & IRC_SUBST_DATE))
-		return 0;
-
-	tm = localtime(&subst->time);
+	struct tm *tm = tm = localtime(&subst->time);
 
 	if (strftime(out, outsz, input, tm) == 0) {
 		errno = ENOMEM;
@@ -403,21 +399,33 @@ substitute(const char **p, char **out, size_t *outsz, const struct irc_subst *su
 }
 
 ssize_t
-irc_subst(char *out, size_t outsz, const char *input, const struct irc_subst *subst)
+irc_subst(char *out, size_t outsz, const char *in, const struct irc_subst *subst)
 {
+	assert(in);
 	assert(out);
 	assert(subst);
 
-	char *o = out;
+	char *o = out, *inalloc = NULL;
 
 	if (!outsz)
 		return 0;
 
-	/* Always start with the date first. */
-	if (subst_date(out, outsz, input, subst) < 0)
-		goto err;
+	/*
+	 * Always start with the date. To do that, we need to update the input
+	 * to transform the strftime tokens. Then we use that new string as
+	 * input. Since the final size must not exceed outsz, we use this as
+	 * temporary buffer.
+	 */
+	if (subst->flags & IRC_SUBST_DATE) {
+		inalloc = irc_util_calloc(1, outsz + 1);
 
-	for (const char *i = input; *i && outsz; ) {
+		if (subst_date(inalloc, outsz, in, subst) < 0)
+			goto err;
+
+		in = inalloc;
+	}
+
+	for (const char *i = in; *i && outsz; ) {
 		/*
 		 * Check if this is a reserved character, if it isn't go to the next character to
 		 * see if it's valid otherwise we print it as last token.
@@ -465,11 +473,13 @@ irc_subst(char *out, size_t outsz, const char *input, const struct irc_subst *su
 		goto err;
 	}
 
+	free(inalloc);
 	*o = '\0';
 
 	return o - out;
 
 err:
+	free(inalloc);
 	out[0] = '\0';
 
 	return -1;

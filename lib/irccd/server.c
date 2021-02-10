@@ -300,7 +300,7 @@ static void
 handle_invite(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	ev->type = IRC_EVENT_INVITE;
-	ev->invite.origin = strdup(msg->args[0]);
+	ev->invite.origin = strdup(msg->prefix);
 	ev->invite.channel = strdup(msg->args[1]);
 
 	if (s->flags & IRC_SERVER_FLAGS_JOIN_INVITE) {
@@ -795,6 +795,11 @@ irc_server_send(struct irc_server *s, const char *fmt, ...)
 	char buf[IRC_BUF_LEN];
 	va_list ap;
 
+	if (s->state != IRC_SERVER_STATE_CONNECTED) {
+		errno = ENOTCONN;
+		return -1;
+	}
+
 	va_start(ap, fmt);
 	vsnprintf(buf, sizeof (buf), fmt, ap);
 	va_end(ap);
@@ -972,8 +977,10 @@ irc_server_strip(const struct irc_server *s, const char **nick, char *mode, char
 
 	for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes); ++i) {
 		if (**nick == s->params.prefixes[i].token) {
-			*mode = s->params.prefixes[i].mode;
-			*prefix = s->params.prefixes[i].token;
+			if (mode)
+				*mode = s->params.prefixes[i].mode;
+			if (prefix)
+				*prefix = s->params.prefixes[i].token;
 			*nick += 1;
 			break;
 		}

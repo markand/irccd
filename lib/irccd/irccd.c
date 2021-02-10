@@ -355,11 +355,14 @@ irc_bot_plugin_find(const char *name, const char *path)
 		irc_log_info("irccd: opening plugin %s", name);
 
 	SLIST_FOREACH(ldr, &irc.plugin_loaders, link) {
+		if (p)
+			break;
+
 		if (path) {
 			if (!is_extension_valid(ldr, path))
 				continue;
-			if ((p = open_plugin(ldr, name, path)))
-				break;
+	
+			p = open_plugin(ldr, name, path);
 		} else {
 			/* Copy the paths to tokenize it. */
 			strlcpy(buf, ldr->paths, sizeof (buf));
@@ -409,10 +412,9 @@ irc_bot_plugin_remove(const char *name)
 	if (!(p = irc_bot_plugin_get(name)))
 		return;
 
+	LIST_REMOVE(p, link);
 	irc_plugin_unload(p);
 	irc_plugin_finish(p);
-
-	LIST_REMOVE(p, link);
 }
 
 void

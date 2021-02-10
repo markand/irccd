@@ -40,7 +40,8 @@ Plugin.templates = {
 	"kick":         "%H:%M:%S :: #{target} has been kicked by #{nickname} [reason: #{reason}]",
 	"me":           "%H:%M:%S * #{nickname} #{message}",
 	"message":      "%H:%M:%S #{nickname}: #{message}",
-	"mode":         "%H:%M:%S :: #{nickname} set mode #{mode} to #{arg}",
+	"invite":       "%H:%M:%S #{nickname} invited you on #{channel}",
+	"mode":         "%H:%M:%S :: #{nickname} set mode #{channel} #{mode} #{limit} #{user} #{mask}",
 	"notice":       "%H:%M:%S [notice] #{channel} (#{nickname}) #{message}",
 	"part":         "%H:%M:%S << #{nickname} left #{channel} [#{reason}]",
 	"query":        "%H:%M:%S #{nickname}: #{message}",
@@ -109,8 +110,8 @@ function onKick(server, origin, channel, target, reason)
 	channel = channel.toLowerCase();
 
 	write("kick", keywords(server, channel, origin, {
-		"target":   target,
-		"reason":   reason
+		"target":       target,
+		"reason":       reason
 	}));
 }
 
@@ -120,7 +121,7 @@ function onMe(server, origin, channel, message)
 	channel = channel.toLowerCase();
 
 	write("me", keywords(server, channel, origin, {
-		"message":  message,
+		"message": message,
 	}));
 }
 
@@ -130,7 +131,7 @@ function onMessage(server, origin, channel, message)
 	channel = channel.toLowerCase();
 
 	write("message", keywords(server, channel, origin, {
-		"message":  message,
+		"message": message,
 	}));
 }
 
@@ -139,10 +140,10 @@ function onMode(server, origin, channel, mode, limit, user, mask)
 	origin = origin.toLowerCase();
 
 	write("mode", keywords(server, channel, origin, {
-		"mode":	 mode,
-		"limit":	limit,
-		"user":	 user,
-		"mask":	 mask
+		"mode":         mode,
+		"limit":        limit,
+		"user":         user,
+		"mask":         mask
 	}));
 }
 
@@ -156,7 +157,7 @@ function onNotice(server, origin, channel, notice)
 	origin = origin.toLowerCase();
 
 	write("notice", keywords(server, channel, origin, {
-		"message":  notice,
+		"message": notice,
 	}));
 }
 
@@ -166,7 +167,7 @@ function onPart(server, origin, channel, reason)
 	channel = channel.toLowerCase();
 
 	write("part", keywords(server, channel, origin, {
-		"reason":   reason,
+		"reason": reason,
 	}));
 }
 
@@ -176,6 +177,6 @@ function onTopic(server, origin, channel, topic)
 	channel = channel.toLowerCase();
 
 	write("topic", keywords(server, channel, origin, {
-		"topic":	topic
+		"topic": topic
 	}));
 }
