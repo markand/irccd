@@ -16,6 +16,17 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+function(_idp_install_man file)
+	get_filename_component(basename ${file} NAME)
+	configure_file(${file} ${CMAKE_CURRENT_BINARY_DIR}/${basename})
+
+	install(
+		FILES ${CMAKE_CURRENT_BINARY_DIR}/${basename}
+		DESTINATION ${CMAKE_INSTALL_MANDIR}/man7
+		RENAME irccd-plugin-${basename}
+	)
+endfunction ()
+
 function(irccd_define_js_plugin)
 	set(options "")
 	set(oneValueArgs MAN NAME SCRIPT)
@@ -29,6 +40,13 @@ function(irccd_define_js_plugin)
 		message(FATAL_ERROR "Missing SCRIPT argument")
 	endif ()
 
+	# Create a dummy custom target just to get it through the IDE.
+	add_custom_target(
+		irccd-plugin-${PLG_NAME}
+		SOURCES ${PLG_SCRIPT} ${PLG_MAN}
+	)
+	set_target_properties(irccd-plugin-${PLG_NAME} PROPERTIES FOLDER "plugins")
+
 	# Install script.
 	get_filename_component(basename ${PLG_SCRIPT} NAME)
 	configure_file(${PLG_SCRIPT} ${CMAKE_CURRENT_BINARY_DIR}/${basename})
@@ -38,23 +56,15 @@ function(irccd_define_js_plugin)
 		DESTINATION ${CMAKE_INSTALL_LIBDIR}/irccd
 	)
 
-	# Install manual page.
 	if (PLG_MAN)
-		get_filename_component(basename ${PLG_MAN} NAME)
-		configure_file(${PLG_MAN} ${CMAKE_CURRENT_BINARY_DIR}/${basename})
-
-		install(
-			FILES ${CMAKE_CURRENT_BINARY_DIR}/${basename}
-			DESTINATION ${CMAKE_INSTALL_MANDIR}/man7
-			RENAME irccd-plugin-${basename}
-		)
+		_idp_install_man(${PLG_MAN})
 	endif ()
 endfunction()
 
 function(irccd_define_c_plugin)
 	set(options "")
 	set(oneValueArgs NAME MAN)
-	set(multiValueArgs LIBRARIES SOURCES)
+	set(multiValueArgs INCLUDES LIBRARIES SOURCES)
 
 	cmake_parse_arguments(PLG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -64,35 +74,46 @@ function(irccd_define_c_plugin)
 		message(FATAL_ERROR "Missing SOURCES argument")
 	endif ()
 
-	add_library(${PLG_NAME} MODULE ${PLG_SOURCES})
+	add_library(irccd-plugin-${PLG_NAME} MODULE ${PLG_SOURCES} ${PLG_MAN})
 	get_target_property(LIBIRCCD_INCLUDES libirccd INCLUDE_DIRECTORIES)
 	get_target_property(LIBCOMPAT_INCLUDES libirccd-compat INCLUDE_DIRECTORIES)
 	target_include_directories(
-		${PLG_NAME}
+		irccd-plugin-${PLG_NAME}
 		PRIVATE
+			${PLG_INCLUDES}
 			${LIBIRCCD_INCLUDES}
 			${LIBCOMPAT_INCLUDES}
 			${OPENSSL_INCLUDE_DIR}
 	)
-	target_link_libraries(${PLG_NAME} ${PLG_LIBRARIES})
-	set_target_properties(${PLG_NAME} PROPERTIES PREFIX "")
+	target_link_libraries(irccd-plugin-${PLG_NAME} ${PLG_LIBRARIES})
+	set_target_properties(irccd-plugin-${PLG_NAME}
+		PROPERTIES
+			PREFIX ""
+			PROJECT_LABEL "irccd"
+			FOLDER "plugins"
+			OUTPUT_NAME ${PLG_NAME}
+			RUNTIME_OUTPUT_NAME_${c} ${PLG_NAME}
+	)
+	install(TARGETS irccd-plugin-${PLG_NAME} DESTINATION ${CMAKE_INSTALL_LIBDIR}/irccd)
+
+	foreach (c ${CMAKE_CONFIGURATION_TYPES})
+		string(TOUPPER ${c} c)
+		set_target_properties(irccd-plugin-${PLG_NAME}
+			PROPERTIES
+				OUTPUT_NAME_${c} ${PLG_NAME}
+				RUNTIME_OUTPUT_NAME_${c} ${PLG_NAME}
+		)
+	endforeach ()
 
 	#
 	# This is required but not enabled by default, otherwise we get
 	# undefined errors from any libirccd functions.
 	#
 	if (APPLE)
-		set_target_properties(${PLG_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+		set_target_properties(irccd-plugin-${PLG_NAME} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
 	endif ()
 
 	if (PLG_MAN)
-		get_filename_component(basename ${PLG_MAN} NAME)
-		configure_file(${PLG_MAN} ${CMAKE_CURRENT_BINARY_DIR}/${basename})
-
-		install(
-			FILES ${CMAKE_CURRENT_BINARY_DIR}/${basename}
-			DESTINATION ${CMAKE_INSTALL_MANDIR}/man7
-			RENAME irccd-plugin-${basename}
-		)
+		_idp_install_man(${PLG_MAN})
 	endif ()
 endfunction()
