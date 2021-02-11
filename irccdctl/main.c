@@ -149,7 +149,7 @@ show_connect(char *line)
 {
 	const char *args[2] = {0};
 
-	if (irc_util_split(line, args, 2) == 2) {
+	if (irc_util_split(line, args, 2, ' ') == 2) {
 		printf("%-16s: %s\n", "event", "onConnect");
 		printf("%-16s: %s\n", "server", args[0]);
 	}
@@ -160,7 +160,7 @@ show_disconnect(char *line)
 {
 	const char *args[2] = {0};
 
-	if (irc_util_split(line, args, 2) == 2) {
+	if (irc_util_split(line, args, 2, ' ') == 2) {
 		printf("%-16s: %s\n", "event", "onDisonnect");
 		printf("%-16s: %s\n", "server", args[0]);
 	}
@@ -171,7 +171,7 @@ show_invite(char *line)
 {
 	const char *args[5] = {0};
 
-	if (irc_util_split(line, args, 5) == 5) {
+	if (irc_util_split(line, args, 5, ' ') == 5) {
 		printf("%-16s: %s\n", "event", "onInvite");
 		printf("%-16s: %s\n", "server", args[1]);
 		printf("%-16s: %s\n", "origin", args[2]);
@@ -185,7 +185,7 @@ show_join(char *line)
 {
 	const char *args[4] = {0};
 
-	if (irc_util_split(line, args, 4) == 4) {
+	if (irc_util_split(line, args, 4, ' ') == 4) {
 		printf("%-16s: %s\n", "event", "onJoin");
 		printf("%-16s: %s\n", "server", args[1]);
 		printf("%-16s: %s\n", "origin", args[2]);
@@ -198,7 +198,7 @@ show_kick(char *line)
 {
 	const char *args[6] = {0};
 
-	if (irc_util_split(line, args, 6) >= 5) {
+	if (irc_util_split(line, args, 6, ' ') >= 5) {
 		printf("%-16s: %s\n", "event", "onKick");
 		printf("%-16s: %s\n", "server", args[1]);
 		printf("%-16s: %s\n", "origin", args[2]);
@@ -213,7 +213,7 @@ show_me(char *line)
 {
 	const char *args[5] = {0};
 
-	if (irc_util_split(line, args, 5) == 5) {
+	if (irc_util_split(line, args, 5, ' ') == 5) {
 		printf("%-16s: %s\n", "event", "onMe");
 		printf("%-16s: %s\n", "server", args[1]);
 		printf("%-16s: %s\n", "origin", args[2]);
@@ -227,7 +227,7 @@ show_message(char *line)
 {
 	const char *args[5] = {0};
 
-	if (irc_util_split(line, args, 5) == 5) {
+	if (irc_util_split(line, args, 5, ' ') == 5) {
 		printf("%-16s: %s\n", "event", "onMessage");
 		printf("%-16s: %s\n", "server", args[1]);
 		printf("%-16s: %s\n", "origin", args[2]);
@@ -241,7 +241,7 @@ show_mode(char *line)
 {
 	const char *args[8] = {0};
 
-	if (irc_util_split(line, args, 8) >= 5) {
+	if (irc_util_split(line, args, 8, ' ') >= 5) {
 		printf("%-16s: %s\n", "event", "onMode");
 		printf("%-16s: %s\n", "server", args[1]);
 		printf("%-16s: %s\n", "origin", args[2]);
@@ -258,7 +258,7 @@ show_nick(char *line)
 {
 	const char *args[4] = {0};
 
-	if (irc_util_split(line, args, 4) == 4) {
+	if (irc_util_split(line, args, 4, ' ') == 4) {
 		printf("%-16s: %s\n", "event", "onNick");
 		printf("%-16s: %s\n", "server", args[1]);
 		printf("%-16s: %s\n", "origin", args[2]);
@@ -271,7 +271,7 @@ show_notice(char *line)
 {
 	const char *args[5] = {0};
 
-	if (irc_util_split(line, args, 5) == 5) {
+	if (irc_util_split(line, args, 5, ' ') == 5) {
 		printf("%-16s: %s\n", "event", "onNotice");
 		printf("%-16s: %s\n", "server", args[1]);
 		printf("%-16s: %s\n", "origin", args[2]);
@@ -285,7 +285,7 @@ show_part(char *line)
 {
 	const char *args[5] = {0};
 
-	if (irc_util_split(line, args, 5) >= 4) {
+	if (irc_util_split(line, args, 5, ' ') >= 4) {
 		printf("%-16s: %s\n", "event", "onPart");
 		printf("%-16s: %s\n", "server", args[1]);
 		printf("%-16s: %s\n", "origin", args[2]);
@@ -299,7 +299,7 @@ show_topic(char *line)
 {
 	const char *args[5] = {0};
 
-	if (irc_util_split(line, args, 5) >= 4) {
+	if (irc_util_split(line, args, 5, ' ') >= 4) {
 		printf("%-16s: %s\n", "event", "onTopic");
 		printf("%-16s: %s\n", "server", args[1]);
 		printf("%-16s: %s\n", "origin", args[2]);
@@ -314,7 +314,7 @@ show_whois(char *line)
 	const char *args[6] = {0};
 	//char *p, *token;
 
-	if (irc_util_split(line, args, 6) >= 4) {
+	if (irc_util_split(line, args, 6, ' ') >= 4) {
 		printf("%-16s: %s\n", "event", "onWhois");
 		printf("%-16s: %s\n", "server", args[1]);
 		printf("%-16s: %s\n", "nickname", args[2]);
@@ -680,7 +680,7 @@ cmd_server_info(int argc, char **argv)
 
 	printf("%-16s: %s\n", "name", list + 3);
 
-	if (irc_util_split((list = poll()), args, 3) < 2)
+	if (irc_util_split((list = poll()), args, 3, ' ') < 2)
 		errx(1, "malformed server connection");
 
 	printf("%-16s: %s\n", "hostname", args[0]);
@@ -689,7 +689,7 @@ cmd_server_info(int argc, char **argv)
 	if (args[2])
 		printf("%-16s: %s\n", "ssl", "true");
 
-	if (irc_util_split((list = poll()), args, 3) != 3)
+	if (irc_util_split((list = poll()), args, 3, ' ') != 3)
 		errx(1, "malformed server ident");
 
 	printf("%-16s: %s\n", "nickname", args[0]);
