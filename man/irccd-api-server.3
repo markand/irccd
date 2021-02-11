@@ -82,21 +82,21 @@ constructor function creates a new server with settings in the
 .Fa parameters
 object which may have the following properties:
 .Pp
-.Bl -tag -width 20n -compact -offset Ds
+.Bl -tag -compact -width "hostname (string)"
 .It Fa name No (string)
 The unique identifier name.
 .It Fa hostname No (string)
 The host or IP address.
-.It Fa ipv4 No (bool)
-Enable ipv4 (Optional, default: true).
-.It Fa ipv6 No (bool)
-Enable ipv6, (Optional, default: true).
 .It Fa port No (int)
 The port number, (Optional, default: 6667).
 .It Fa password No (string)
 The password, (Optional, default: undefined).
 .It Fa channels No (array)
-Array of channels (Optional, default: empty).
+Array of channels as object of two properties:
+.Fa name
+and
+.Fa password (optional)
+as channel name and password respectively. (Optional, default: empty).
 .It Fa ssl No (bool)
 True to use ssl (Optional, default: false).
 .It Fa nickname No (string)
@@ -105,7 +105,7 @@ Nickname, (Optional, default: irccd).
 User name, (Optional, default: irccd).
 .It Fa realname No (string)
 Real name, (Optional, default: IRC Client Daemon).
-.It Fa commandChar No (string)
+.It Fa prefix No (string)
 Plugin prefix character, (Optional, default: "!").
 .El
 .Pp
@@ -115,7 +115,7 @@ The
 method returns the server information. The object have the following
 properties:
 .Pp
-.Bl -tag -width 20n -compact -offset Ds
+.Bl -tag -compact -width "hostname (string)"
 .It Va name No (string)
 The server unique name.
 .It Va hostname No (string)
@@ -125,7 +125,21 @@ The port number.
 .It Va ssl No (bool)
 True if using ssl.
 .It Va channels No (array)
-An array of all channels.
+An array of all channels. Each channel in the returned array contain the
+following properties:
+.Bl -tag -width xxx
+.It Va name No (string)
+The channel name.
+.It Va joined No (bool)
+True if the daemon is actually present on this channel.
+.It Va users No (array)
+An array of users that consists of objects with three properties:
+.Va nickname , mode
+and
+.Va symbol
+as their nickname, the channel mode and the symbol representing this mode.
+.El
+.Pp
 .It Va realname No (string)
 The current real name.
 .It Va username No (string)

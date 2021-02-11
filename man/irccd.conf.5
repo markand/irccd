@@ -22,349 +22,300 @@
 .Nd irccd configuration file
 .\" DESCRIPTION
 .Sh DESCRIPTION
-Both
-.Nm irccd
-and
-.Nm irccdctl
-use configuration file in a extended INI format. This section will briefly
-explain the additional extensions to the INI format.
+The
+.Nm
+uses a custom configuration file to setup the IRC daemon.
+.\" SYNTAX
+.Sh SYNTAX
+The file consists of several directives that are evaluated in order of
+appearance. It is advised to follow the same directive order as described in
+this document.
 .Pp
-The file syntax has following rules:
-.Bl -enum
-.It
-Each option is stored in a section,
-.It
-Some sections may be redefined multiple times,
-.It
-Empty option must have quotes (e.g. option = "").
-.El
-.Ss The @include and @tryinclude statements
-Irccd adds an extension to this format by adding an
-.\" @include and @tryinclude
-.Ar @include keyword
-which let you splitting your configuration file.
+The below sections describe the supported syntax.
+.\" Comments
+.Ss Comments
+Comments start when a # is found and continue until the next line.
+.\" Strings
+.Ss Strings
+String are either written in pure ASCII strings or enclosed between double
+quotes. Because some reserved tokens may collide with your values, it is
+recommended to use double quoted strings in user values (such as identifiers,
+channels names and such). Also, double quotes are required when string contain
+spaces.
 .Pp
-Note: this @include statement must be at the beginning of the file and must be
-surrounded by quotes if the file name has spaces.
-.Pp
-You can use both relative or absolute paths. If relative paths are used, they
-are relative to the current file being parsed.
-.Pp
-The alternative
-.Ar @tryinclude
-keyword is similar but does not fails if the requested file is not found.
-.Pp
-Example of includes:
-.Bd -literal -offset Ds
-@include "rules.conf"
-@include "servers.conf"
-
-[mysection]
-myoption = "1"
+Example:
+.Bd -literal -offset indent
+String
+"This is a double quoted string"
 .Ed
-.\" lists
-.Ss The list construct
-When requested, an option can have multiples values in a list. The syntax uses
-parentheses and values are separated by commas.
-.Pp
-If the list have only one value, you can just use a simple string.
-.Pp
-Example of lists:
-.Bd -literal -offset Ds
-[rule]
-servers = ( "server1", "server2" )
-
-[rule]
-servers = "only-one-server"
-.Ed
-.Pp
-Note: spaces are completely optional.
-.\" identifiers
+.\" Identifiers
 .Ss Identifiers
 Some sections require an identifier (specified as id) as parameter. They must be
-unique, not empty and can only contain characters, numbers, '-' and '_'.
+unique, not empty and can only contain characters, numbers,
+.Dq -
+and
+.Dq _ .
 .Pp
 Example: both
 .Ar abc
 and
 .Ar server-tz2
 are valid.
+.\" Blocks
+.Ss Blocks
+For configuration sections that are more complex, block using braces are
+required and each directive between the enclosing block require a trailing
+semicolon.
+.Pp
+Example:
+.Bd -literal -offset indent
+block {
+	option;
+	key and value;
+}
+.Ed
+.\" Lists
+.Ss Lists
+Lists are separated by a comma.
+.Pp
+Example:
+.Bd -literal -offset indent
+one, two, three
+.Ed
 .\" CONFIGURATION SECTIONS
 .Sh CONFIGURATION SECTIONS
-Configuration are always stored in dedicated section in the form
-.Ar [name]
-where name is one of the section defined below and are case-sensitive.
-.\" [logs]
+The following sections describe what is allowed in the configuration file.
+.\" logs
 .Ss logs
 This section can let you configure how irccd should log the messages.
-.Pp
-Available options:
-.Bl -tag -width 20n
-.It Va verbose No (bool)
-Be verbose (Optional, default: false).
-.It Va type No (string)
-Which kind of logging, valid values are
-.Dq console ,
-.Dq file
-or
-.Dq syslog
-(Optional, default: console).
-.Pp
-Note: syslog is not available on all platforms.
+.Bl -tag
+.It Ar logs [verbose|quiet] to console
+Use the standard output and error to log content. This the default.
+.It Ar logs [verbose|quiet] to syslog
+Use the
+.Xr syslog 3
+daemon to log information.
+.It Ar logs [verbose|quiet] to file path
+Use
+.Pa path
+to logs every entries.
 .El
 .Pp
-The following options are available for the
-.Ar file
-type:
-.Bl -tag -width 20n
-.It Va path-logs No (string)
-Path to the normal messages.
-.It Va path-errors No (string)
-Path to the error messages.
-.El
-.\" [templates]
-.Ss templates
-The templates section let you change the irccd's output. It uses the templates
-system (see
-.Xr irccd-templates 7
-for more information about templates)
+The optional self explained
+.Op verbose|quiet
+argument controls either if verbose logging should be enabled or not. Only
+informative messages are affected by this setting. Warnings and debugging
+messages are stored independently from this setting.
+.\" transport
+.Ss transport
+Enable transport to interract with the
+.Nm irccdctl
+utility or any networking program that can communicate through a UNIX domain
+socket.
 .Pp
-Only one keyword is defined, message which contains the message that irccd
-wants to output.
+.Ar transport to path
 .Pp
-Note: colors and attributes are not supported on Windows.
-.Pp
-Available options:
-.Bl -tag -width 18n
-.It Va debug No (string)
-Template to use to format debug messages (Optional, default: none).
-.It Va info No (string)
-Template to use to format information messages (Optional, default: none).
-.It Va warning No (string)
-Template to use to format warnings (Optional, default: none).
-.El
-.\" [server]
+Enable transport on
+.Pa path .
+.\" server
 .Ss server
 This section is used to connect to one or more server. Create a new server
-section for each IRC server you want to connect to.
+section block for each IRC server you want to connect to.
 .Pp
-Available options:
-.Bl -tag -width 26n
-.It Va name No (identifier)
-The unique id.
-.It Va hostname No (string)
-The server address or IP.
-.It Va port No (int)
-The server port (Optional, default: 6667).
-.It Va password No (string)
-An optional server password (Optional, default: none).
-.It Va join-invite No (bool)
-Automatically join channels upon invitation (Optional, default: false).
-.It Va channels No (list)
-List of channels to auto join (Optional, default: empty).
+.Ar server id { options }
 .Pp
-Note: if a channel requires a password, add it after a colon (e.g.
-.Dq #channel:password ) .
-.It Va command-char No (string)
-The prefix for invoking special commands (Optional, default: !).
-.It Va ssl No (bool)
-Enable or disable SSL (Optional, default: false).
-.It Va auto-reconnect No (bool)
-Enable reconnection after failure (Optional, default: true).
-.It Va auto-reconnect-delay No (int)
-Number of seconds to wait before retrying (Optional, default: 30).
-.It Va ping-timeout No (int)
-Number of seconds before ping timeout (Optional, default: 1800).
-.It Va nickname No (string)
-The nickname (Optional, default: irccd).
-.It Va realname No (string)
-The realname (Optional, default: IRC Client Daemon).
-.It Va username No (string)
-The username name (Optional, default: irccd).
-.It Va ctcp-version No (string)
-What version to respond to CTCP VERSION (Optional, default: IRC Client Daemon).
+The following directives are allowed in the
+.Em options
+block:
+.Bl -tag -width "hostname value"
+.It Ar hostname value
+Connect to the
+.Ar value
+hostname. This can be either a DNS name or a IP address.
+.It Ar port value
+Use
+.Ar value
+number as IP port to connect to.
+.It Ar ident nick user realname
+Specify the IRC identity to use by using the three arguments
+.Ar nick , user
+and
+.Ar realname
+as nickname, user name and your real name respectively.
+.Pp
+Note: this is not a list of strings but three arguments separated by a space. If
+you want to use a real name with spaces, don't forget the double quotes.
+.It Ar ssl
+Enable SSL. Only available if built with OpenSSL support.
+.It Ar channels list
+List of channels to join automatically when the server is connected
+successfully. This is a list of strings where each element is the channel name
+to join prepended by a optional
+.Ar password@
+if required. You must use double quotes if the channel starts with a hash (#)
+otherwise it would be detected as a comment.
+.It Ar options list
+Use specific server features. This is a list of string which can be one of
+following:
+.Bl -tag -width "AUTO-RECONNECT"
+.It Ar AUTO-RECONNECT
+Reconnect automatically to a server upon disconnection.
+.It Ar AUTO-REJOIN
+Automatically rejoin a channel if the bot was kicked from.
+.It Ar JOIN-INVITE
+Automatically join a channel upon invitation.
 .El
-.\" [paths]
-.Ss paths
-The paths section defines common paths used as defaults for all plugins.
-.Pp
-Any option in this section can be defined altough the following are used as
-common convention used in all plugins:
-.Pp
-Available options:
-.Bl -tag -width 16n
-.It Va cache No (string)
-Path for data files written by the plugin.
-.It Va data No (string)
-Path for data files provided by the user.
-.It Va config No (string)
-Path for additional configuration from the user.
+.It Ar prefix value
+Use
+.Ar value
+as command prefix for plugins (Optional, default:
+.Dq \&! ) .
 .El
-.Pp
-For each of these paths,
-.Dq plugin/name
-is appended with the appropriate plugin name when used.
-.Pp
-The section is redefinable per plugin basis using the
-.Va [paths.<plugin>]
-syntax.
-.\" [plugins]
-.Ss plugins
-This section is used to load plugins.
-.Pp
-Just add any key you like to load a plugin. If the value is not specified, the
-plugin is searched through the standard directories, otherwise, provide the full
-path (including the .js extension).
-.Pp
-Warning: remember to add an empty string for searching plugins.
-.\" [hooks]
-.Ss hooks
-This sections stores every hooks in key-value pairs. The option key denotes the
-hook id and the value must be a path to the actual hook file.
-.\" [transport]
-.Ss transport
-This section defines transports that are used to communicate through clients
-connected to irccd and to perform requests to irccd.
-.Pp
-With transports, you may ask irccd to send a message, a notice or even to kick
-someone from a channel. Irccd will also notify all clients connected to this
-transport on IRC events.
-.Pp
-There are two types of transport availables:
-.Bl -bullet
-.It
-Internet sockets, IPv4 and IPv6,
-.It
-Unix sockets, based on files (not available on Windows).
-.El
-.Pp
-If SSL support was built in, both internet and unix sockets can be set to use
-encrypted connections.
-.Pp
-Available options:
-.Bl -tag -width 18n
-.It Va type No (string)
-Type of transport
-.Dq ip
-or
-.Dq unix .
-.It Va password No (string)
-An authentication password (Optional, default: none).
-.It Va ssl No (bool)
-Enable SSL (Optional, default: false),
-.It Va key No (string)
-Path to private key file (Required if ssl is true)
-.It Va certificate No (string)
-Path to certificate (Required if ssl is true)
-.El
-.Pp
-The following options are available for the
-.Ar ip
-type:
-.Bl -tag -width 18n
-.It Va port No (int)
-Port number.
-.It Va address No (string)
-Address to bind or
-.Dq *
-for any (Optional, default:
-.Dq * ) .
-.It Va ipv4 No (bool)
-Bind on IPv4 (Optional, default true).
-.It Va ipv6 No (bool)
-Bind on IPv6 (Optional, default true).
-.El
-.Pp
-The following options are available for the
-.Ar unix
-type:
-.Bl -tag -width 18n
-.It Va path No (string)
-The file path to the socket.
-.El
-.\" [rule]
+.\" rule
 .Ss rule
 The rule section is one of the most powerful within irccd configuration. It lets
-you enable or disable plugins and IRC events for specific criterias. For
+you enable or disable plugins and IRC events for specific criteria. For
 instance, you may want to disable a plugin only for a specific channel on a
 specific server. And because rules are evaluated in the order they are defined,
 you can override rules.
 .Pp
-Available options:
-.Bl -tag -width 15n
-.It Va servers No (list)
-A list of servers that will match the rule (Optional, default: empty).
-.It Va channels No (list)
-A list of channel (Optional, default: empty).
-.It Va origins No (list)
-A list of nicknames to check (Optional, default: empty).
-.It Va plugins No (list)
-Which plugins (Optional, default: empty),
-.It Va events No (list)
-Which events like onCommand, onMessage (Optional, default: empty).
-.It Va action No (string)
-Set to
-.Dq accept
+When you don't specify any value into the corresponding criteria the rule is
+considered as matched.
+.Pp
+.Ar rule accept|drop { criteria }
+.Pp
+Create a rule that either
+.Ar accept
 or
-.Dq drop .
+.Ar drop
+the current event.
+.Pp
+The following directives are allowed in the
+.Em options
+block:
+.Bl -tag -width "channels list"
+.It Ar servers list
+List of servers to match by their ids.
+.It Ar channels list
+List of channel to match. This can be used to match user nicknames as well.
+.It Ar origins list
+List of originators to match.
+.It Ar events list
+List of events to match (in the form onCommand, onMessage, etc). See the
+.Xr irccd 1
+manual page for the allowed names here.
+.It Ar plugins list
+List of plugins to match by their ids.
 .El
 .Pp
 Warning: don't make sensitive rules on origins option, irccd does not have any
 kind of nickname authentication. Thus, it may be very easy for someone
 to use a temporary nickname.
+.\" hooks
+.Ss hooks
+This section loads hooks. The configuration does not test if the file is
+actually executable nor present on the filesystem and will be tried as long as
+the daemon is running.
+.Pp
+.Ar hook id to path
+.Pp
+Load the hook with name
+.Ar id
+from the given
+.Pa path .
+.\" plugins
+.Ss plugins
+This section is used to load plugins.
+.Pp
+To load plugin with default values, you can just use the declaration without
+block of options. Otherwise, use a block to add additional options,
+.Pp
+.Ar plugin id { options }
+.Pp
+The following directives are allowed in the
+.Em options
+block:
+.Bl -tag -width "hostname value"
+.It Ar location path
+Specify an absolute
+.Pa path
+to the plugin.
+.It Ar config { key value }
+Specify a list of options to the plugin as key-value pair. Each entry consist of
+two arguments, the option name and its value both as strings. See
+.Xr EXAMPLES
+for usage.
+.It Ar template { key value }
+Same as
+.Ar config
+but for templates. See
+.Xr irccd-templates 7
+for more details about this section.
+.It Ar paths { key value }
+Same as
+.Ar config
+but for additional paths. Individual plugins may accept special paths but the
+following are reserved by irccd and always set when loading the plugin unless
+explicitly overriden in this section:
+.Bl -tag
+.It Ar cache
+Directory for temporary files.
+.It Ar data
+Directory for additional data.
+.It Ar config
+Directory to additional configuration files.
+.El
+.El
 .\" EXAMPLES
 .Sh EXAMPLES
 Full example of configuration file
 .Bd -literal
-# Add a transport that bind only to IPv6.
-[transport]
-type = ip
-ipv4 = false
-ipv6 = true
-port = 12000
+# Logs to syslog instead of console (which is the default).
+logs verbose to syslog
 
-# A transport that binds to both IPv4 and IPv6.
-[transport]
-type = ip
-port = 15000
+#
+# Create a server "example" that connect to example.org using "fr" as nickname,
+# "francis" as username and "Francis Meyer" as realname.
+#
+# This channel will automatically join "#test" on connection and the password
+# protected "#nightclub" channel with password "secret"
+#
+server example {
+	hostname example.org;
+	port 6667;
+	ident fr francis "Francis Meyer";
+	channels "#test", "secret@#nightclub";
+}
 
-# A server.
-[server]
-name = "foo"
-host = "irc.foo.org"
-port = "6667"
-nickname = "superbot"
-realname = "SuperBot v1.0"
-username = "sp"
+# Load several plugins with their default values and locations.
+plugin ask
+plugin plugin
 
-# An other server.
-[server]
-name = "wanadoo"
-host = "chat.wanadoo.fr"
-port = "6667"
-
-# Load some plugins.
-[plugins]
-ask = ""                               # Search ask
-myplugin = /path/to/myplugin.js        # Use absolute path
+# Configure the plugin hangman to change templates and the path to the words.
+plugin hangman {
+	templates {
+		win "Success, the word was #{word}!";
+	}
+	config {
+		file "/var/irccd/hard-words.txt";
+	}
+}
 
 # This first rule disable the plugin reboot on all servers and channels.
-[rule]
-plugins = "reboot"
-action = drop
+rule drop {
+	plugins "reboot";
+}
 
 # This rule enable the reboot plugin again on the server localhost,
 # channel #staff.
-[rule]
-servers = "localhost"
-channels = "#staff"
-plugins = "reboot"
-action = accept
+rule accept {
+	servers "localhost";
+	channels "#staff";
+	plugins "reboot";
+}
 
-# Example of hooks
 # This create an hook named "mail" with the given path.
-[hooks]
-mail = "/path/to/mail.py"
+hook mail to "/path/to/mail.py"
 .Ed
 .\" SEE ALSO
 .Sh SEE ALSO

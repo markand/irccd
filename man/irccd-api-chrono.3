@@ -23,10 +23,7 @@
 .\" SYNOPSIS
 .Sh SYNOPSIS
 .Fn Irccd.Chrono
-.Fn Irccd.Chrono.prototype.elapsed
-.Fn Irccd.Chrono.prototype.pause
-.Fn Irccd.Chrono.prototype.resume
-.Fn Irccd.Chrono.prototype.start
+.Fn Irccd.Chrono.prototype.reset
 .\" DESCRIPTION
 .Sh DESCRIPTION
 This module keeps track of elapsed time.
@@ -37,26 +34,16 @@ The
 .Fn Irccd.Chrono
 constructor function creates a chrono object at the current time.
 .Pp
-.\" Irccd.Chrono.prototype.elapsed
-The
-.Fn Irccd.Chrono.prototype.elapsed
-method returns the number of milliseconds elapsed since last the object was
-started or constructed.
+When constructed successfully, the object has the following properties:
 .Pp
-.\" Irccd.Chrono.prototype.pause
-The
-.Fn Irccd.Chrono.prototype.pause
-method pauses the timer, without resetting the current elapsed time stored.
+.Bl -tag -width 18n -offset indent -compact
+.It Va elapsed No (int)
+Return the number of milliseconds since creation or last call to
+.El
 .Pp
-.\" Irccd.Chrono.prototype.resume
+.\" Irccd.Chrono.prototype.reset
 The
-.Fn Irccd.Chrono.prototype.resume
-method resume accumulating additional time. Has no effect if the timer is
-already running.
-.Pp
-.\" Irccd.Chrono.prototype.start
-The
-.Fn Irccd.Chrono.prototype.start
+.Fn Irccd.Chrono.prototype.reset
 method starts or restarts accumulating time.
 .\" SEE ALSO
 .Sh SEE ALSO
