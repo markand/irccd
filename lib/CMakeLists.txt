@@ -58,7 +58,7 @@ configure_file(
 	${libirccd_BINARY_DIR}/irccd/config.h
 )
 
-add_library(libirccd-static ${SOURCES})
+add_library(libirccd-static ${SOURCES} ${HEADERS})
 set_target_properties(libirccd-static PROPERTIES PREFIX "")
 
 # This is what we export to the world.

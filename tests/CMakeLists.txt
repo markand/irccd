@@ -41,6 +41,14 @@ if (IRCCD_WITH_JS)
 		test-jsapi-timer
 		test-jsapi-unicode
 		test-jsapi-util
+		test-plugin-ask
+		test-plugin-auth
+		test-plugin-hangman
+		test-plugin-history
+		test-plugin-joke
+		test-plugin-logger
+		test-plugin-plugin
+		test-plugin-tictactoe
 	)
 endif ()
 
@@ -53,6 +61,8 @@ foreach (t ${TESTS})
 		${t}
 		PRIVATE
 			IRCCD_EXECUTABLE="$<TARGET_FILE:irccd>"
+			CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+			# TODO: change those names.
 			BINARY="${tests_BINARY_DIR}"
 			SOURCE="${tests_SOURCE_DIR}"
 	)

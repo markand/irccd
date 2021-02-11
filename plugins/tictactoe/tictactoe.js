@@ -95,24 +95,6 @@ Game.find = function (server, channel)
 }
 
 /**
- * Request a game after the name list gets received.
- *
- * @param server the server object
- * @param channel the channel
- * @param origin the originator
- * @return the object or undefined if not running
- */
-Game.postpone = function (server, channel, origin, target)
-{
-	/*
-	 * Get list of users on the channel to avoid playing against a non existing
-	 * target.
-	 */
-	Game.requests[Game.id(server, channel)] = new Game(server, channel, origin, target);
-	server.names(channel);
-}
-
-/**
  * Populate a set of keywords.
  *
  * @param server the server object
@@ -124,7 +106,7 @@ Game.keywords = function (server, channel, origin)
 {
 	var kw = {
 		channel: channel,
-		command: server.info().commandChar + Plugin.info().name,
+		command: server.info().prefix + Plugin.info().name,
 		plugin: Plugin.info().name,
 		server: server.info().name
 	};
@@ -176,6 +158,37 @@ Game.clear = function (server, user, channel)
 
 	if (game && (game.players[0] === nickname || game.players[1] === nickname))
 		Game.remove(server, channel);
+}
+
+/**
+ * Check if the target is valid.
+ *
+ * @param server the server object
+ * @param channel the channel string
+ * @param nickname the nickname who requested the game
+ * @param target the opponent
+ * @return true if target is valid
+ */
+Game.isValid = function (server, channel, nickname, target)
+{
+	if (target === "" || target === nickname || target === server.info().nickname)
+		return false;
+
+	var channels = server.info().channels;
+	var ch;
+	
+	for (var i = 0; i < channels.length; ++i) {
+		if (channels[i].name === channel) {
+			ch = channels[i];
+			break;
+		}
+	}
+
+	for (var i = 0; i < ch.users.length; ++i)
+		if (ch.users[i].nickname === target)
+			return true;
+
+	return false;
 }
 
 /**
@@ -289,42 +302,29 @@ Game.prototype.hasDraw = function ()
 	return true;
 }
 
-function onNames(server, channel, list)
-{
-	var id = Game.id(server, channel);
-	var game = Game.requests[id];
-
-	// Names can come from any other plugin/event.
-	if (!game)
-		return;
-
-	// Not a valid target? destroy the game.
-	if (list.indexOf(game.target) < 0)
-		server.message(channel, Util.format(Plugin.templates.invalid,
-			Game.keywords(server, channel, game.origin)));
-	else {
-		Game.map[id] = game;
-		game.show();
-	}
-
-	delete Game.requests[id];
-}
-
 function onCommand(server, origin, channel, message)
 {
+	channel = channel.toLowerCase();
+
 	var target = message.trim();
 	var nickname = Util.splituser(origin);
 
 	if (Game.exists(server, channel))
 		server.message(channel, Util.format(Plugin.templates.running, Game.keywords(server, channel, origin)));
-	else if (target === "" || target === nickname || target === server.info().nickname)
+	else if (!Game.isValid(server, channel, nickname, target))
 		server.message(channel, Util.format(Plugin.templates.invalid, Game.keywords(server, channel, origin)));
-	else
-		Game.postpone(server, channel, origin, message);
+	else {
+		var game = new Game(server, channel, origin, target);
+
+		Game.map[Game.id(server, channel)] = game;
+		game.show();
+	}
 }
 
 function onMessage(server, origin, channel, message)
 {
+	channel = channel.toLowerCase();
+
 	var nickname = Util.splituser(origin);
 	var game = Game.find(server, channel);
 
@@ -351,10 +351,10 @@ function onDisconnect(server)
 
 function onKick(server, origin, channel, target)
 {
-	Game.clear(server, target, channel);
+	Game.clear(server, target, channel.toLowerCase());
 }
 
 function onPart(server, origin, channel)
 {
-	Game.clear(server, origin, channel);
+	Game.clear(server, origin, channel.toLowerCase());
 }

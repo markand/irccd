@@ -128,13 +128,7 @@ get_paths(duk_context *ctx)
 static struct irc_plugin *
 find(duk_context *ctx)
 {
-	const char *name = duk_require_string(ctx, 0);
-	struct irc_plugin *plg = irc_bot_plugin_get(name);
-
-	if (!plg)
-		(void)duk_error(ctx, DUK_ERR_REFERENCE_ERROR, "plugin %s not found", name);
-
-	return plg;
+	return irc_bot_plugin_get(duk_require_string(ctx, 0));
 }
 
 static int
@@ -151,6 +145,8 @@ Plugin_info(duk_context *ctx)
 		return 0;
 
 	duk_push_object(ctx);
+	duk_push_string(ctx, p->name);
+	duk_put_prop_string(ctx, -2, "name");
 	duk_push_string(ctx, p->author);
 	duk_put_prop_string(ctx, -2, "author");
 	duk_push_string(ctx, p->license);

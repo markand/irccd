@@ -136,10 +136,12 @@ Hangman.loadWords = function ()
 		path = Plugin.paths.config + "/words.conf";
 
 	try {
-		Logger.info("loading words...");
+		Logger.info("loading words from " + path);
 
 		var file = new File(path, "r");
 		var line;
+
+		Hangman.words.all = [];
 
 		while ((line = file.readline()) !== undefined)
 			if (Hangman.isWord(line))
@@ -272,7 +274,7 @@ function propose(server, channel, origin, game, proposition)
 {
 	var kw = {
 		channel: channel,
-		command: server.info().commandChar + Plugin.info().name,
+		command: server.info().prefix + Plugin.info().name,
 		nickname: Util.splituser(origin),
 		origin: origin,
 		plugin: Plugin.info().name,
@@ -319,7 +321,7 @@ function onCommand(server, origin, channel, message)
 	var game = Hangman.find(server, channel);
 	var kw = {
 		channel: channel,
-		command: server.info().commandChar + Plugin.info().name,
+		command: server.info().prefix + Plugin.info().name,
 		nickname: Util.splituser(origin),
 		origin: origin,
 		plugin: Plugin.info().name,

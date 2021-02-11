@@ -48,7 +48,7 @@ function isSelf(server, origin)
 
 function command(server)
 {
-	return server.info().commandChar + "history";
+	return server.info().prefix + "history";
 }
 
 function path(server, channel)
@@ -193,11 +193,20 @@ function onTopic(server, origin, channel)
 
 function onLoad()
 {
+	/*
+	 * If the plugin is loaded on-demand, we ask a name list for every
+	 * server and every channel of them to update our database.
+	 */
 	var table = Server.list();
 
-	for (var k in table)
-		for (var c in table[k].info().channels)
-			table[k].names(c);
+	for (var k in table) {
+		var channels = table[k].info().channels;
+
+		for (var i = 0; i < channels.length; ++i) {
+			if (channels[i].joined)
+				table[k].names(channels[i].name);
+		}
+	}
 }
 
 function onNames(server, channel, list)

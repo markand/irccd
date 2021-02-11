@@ -80,17 +80,16 @@ subspack_parse(duk_context *ctx, duk_idx_t index, struct subspack *pkg)
 			(void)duk_error(ctx, DUK_ERR_TYPE_ERROR, "keyword name must be a string");
 		}
 
-		if (strcmp(duk_get_string(ctx, -2), "date") == 0) {
+		if (strcmp(duk_get_string(ctx, -2), "date") == 0)
 			pkg->subst.time = duk_get_number(ctx, -1);
-			continue;
+		else {
+			pkg->kw = irc_util_reallocarray(pkg->kw, ++pkg->subst.keywordsz,
+			    sizeof (*pkg->kw));
+			pkg->kw[pkg->subst.keywordsz - 1].key =
+			    irc_util_strdup(duk_get_string_default(ctx, -2, ""));
+			pkg->kw[pkg->subst.keywordsz - 1].value =
+			    irc_util_strdup(duk_get_string_default(ctx, -1, ""));
 		}
-
-		pkg->kw = irc_util_reallocarray(pkg->kw, ++pkg->subst.keywordsz,
-		    sizeof (*pkg->kw));
-		pkg->kw[pkg->subst.keywordsz - 1].key =
-		    irc_util_strdup(duk_get_string_default(ctx, -2, ""));
-		pkg->kw[pkg->subst.keywordsz - 1].value =
-		    irc_util_strdup(duk_get_string_default(ctx, -1, ""));
 
 		duk_pop_n(ctx, 2);
 	}

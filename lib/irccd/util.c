@@ -132,7 +132,7 @@ irc_util_dirname(const char *str)
 }
 
 size_t
-irc_util_split(char *line, const char **args, size_t max)
+irc_util_split(char *line, const char **args, size_t max, char delim)
 {
 	size_t idx;
 
@@ -140,7 +140,7 @@ irc_util_split(char *line, const char **args, size_t max)
 		return 0;
 
 	for (idx = 0; idx < max; ++idx) {
-		char *sp = strchr(line, ' ');
+		char *sp = strchr(line, delim);
 
 		if (!sp || idx + 1 >= max) {
 			args[idx++] = line;

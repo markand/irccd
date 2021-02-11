@@ -172,6 +172,8 @@ function onCommand(server, origin, channel, message)
 		} catch (e) {
 			Logger.warning(e.message);
 			server.message(channel, Util.format(Plugin.templates.error, {
+				plugin: Plugin.info().name,
+				command: server.info().prefix + Plugin.info().name,
 				server: server.toString(),
 				channel: channel,
 				origin: origin,

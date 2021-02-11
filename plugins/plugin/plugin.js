@@ -46,7 +46,7 @@ var commands = {
 	{
 		return {
 			channel: channel,
-			command: server.info().commandChar + Plugin.info().name,
+			command: server.info().prefix + Plugin.info().name,
 			nickname: Util.splituser(origin),
 			origin: origin,
 			plugin: Plugin.info().name,

@@ -220,14 +220,12 @@ Server_prototype_invite(duk_context *ctx)
 static int
 Server_prototype_isSelf(duk_context *ctx)
 {
-	(void)ctx;
-#if 0
-	return wrap(ctx, [] (auto ctx) {
-		return duk::push(ctx, self(ctx)->is_self(duk::require<std::string>(ctx, 0)));
-	});
-#endif
+	const struct irc_server *s = self(ctx);
+	const char *target = duk_require_string(ctx, 0);
 
-	return 0;
+	duk_push_boolean(ctx, strncmp(target, s->ident.nickname, strlen(s->ident.nickname)) == 0);
+
+	return 1;
 }
 
 static int
