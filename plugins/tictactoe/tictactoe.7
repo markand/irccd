@@ -35,8 +35,7 @@ is distributed with irccd. To enable it add the following to your plugins
 section:
 .Pp
 .Bd -literal
-[plugins]
-tictactoe = ""
+plugin tictactoe
 .Ed
 .\" USAGE
 .Sh USAGE
@@ -45,11 +44,9 @@ a message in the form
 .Ar "x y"
 where x targets the column and y the row.
 .Pp
-To verify target opponent, this plugins first requests the names on the channel
-to ensures a valid player.
-.Pp
 If one of the players leaves the channel (either by kick or part) the game is
-aborted silently.
+aborted silently. If the player don't play in the delay of five minutes, the
+game is aborted to let another game starts.
 .Pp
 Example when starting a game:
 .Bd -literal -offset Ds
@@ -99,9 +96,7 @@ And then, placing tokens:
 .Sh TEMPLATES
 The
 .Nm
-plugin supports the following templates in
-.Va [templates.tictactoe]
-section:
+plugin supports the following templates:
 .Bl -tag -width 8n -offset Ds
 .It Va draw
 When the game ended with no winner.
@@ -111,6 +106,8 @@ The opponent does not exist or is not valid. Keywords:
 .It Va running
 The game is already running. Keywords:
 .Em origin .
+.It Va timeout
+The player didn't play within its turn after a certain amount of time.
 .It Va turn
 Message sent when current player change.
 .It Va used

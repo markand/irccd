@@ -28,15 +28,17 @@ info = {
 // Modules.
 var Plugin = Irccd.Plugin;
 var Util = Irccd.Util;
+var Timer = Irccd.Timer;
 
 // Formats.
 Plugin.templates = {
-	"draw":         "nobody won",
-	"invalid":      "#{nickname}, please select a valid opponent",
-	"running":      "#{nickname}, the game is already running",
-	"turn":         "#{nickname}, it's your turn",
-	"used":         "#{nickname}, this square is already used",
-	"win":          "#{nickname}, congratulations, you won!"
+	"draw":         "Nobody won.",
+	"invalid":      "#{nickname}, please select a valid opponent.",
+	"running":      "#{nickname}, the game is already running.",
+	"turn":         "#{nickname}, it's your turn.",
+	"used":         "#{nickname}, this square is already used.",
+	"win":          "#{nickname}, congratulations, you won!",
+	"timeout":      "Aborted due to #{nickname} inactivity."
 };
 
 /**
@@ -176,7 +178,7 @@ Game.isValid = function (server, channel, nickname, target)
 
 	var channels = server.info().channels;
 	var ch;
-	
+
 	for (var i = 0; i < channels.length; ++i) {
 		if (channels[i].name === channel) {
 			ch = channels[i];
@@ -192,11 +194,26 @@ Game.isValid = function (server, channel, nickname, target)
 }
 
 /**
+ * Function called when a timeout occured.
+ *
+ * @param game the game to destroy
+ */
+Game.timeout = function (game)
+{
+	var kw = Game.keywords(game.server, game.channel);
+
+	kw.nickname = game.players[game.player];
+	game.server.message(game.channel, Util.format(Plugin.templates.timeout, kw));
+	Game.remove(game.server, game.channel);
+}
+
+/**
  * Show the game grid and the next player line.
  */
 Game.prototype.show = function ()
 {
 	var kw = Game.keywords(this.server, this.channel);
+	var self = this;
 
 	// nickname is the current player.
 	kw.nickname = this.players[this.player];
@@ -212,6 +229,12 @@ Game.prototype.show = function ()
 		this.server.message(this.channel, Util.format(Plugin.templates.draw, kw));
 	else
 		this.server.message(this.channel, Util.format(Plugin.templates.turn, kw));
+
+	// Create a timer in case of inactivity (5 minutes).
+	this.timer = new Irccd.Timer(Irccd.Timer.Single, 300000, function () {
+		Game.timeout(self);
+	});
+	this.timer.start();
 }
 
 /**
@@ -246,6 +269,7 @@ Game.prototype.place = function (column, row, origin)
 		return false;
 	}
 
+	this.timer.stop();
 	this.grid[row][column] = this.player === 0 ? 'x' : 'o';
 
 	// Do not change if game is finished.

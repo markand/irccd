@@ -21,6 +21,10 @@ irccdctl:
 - New `plugin-template` and `plugin-path` command which are synonyms of
   `plugin-config` but for templates and paths respectively.
 
+plugins:
+
+- tictactoe: now has a timeout in case of inactivity.
+
 misc:
 
 - Split irccd-api manual page into individual irccd-api-<module> for a better
