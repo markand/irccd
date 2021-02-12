@@ -508,6 +508,17 @@ handle_endofnames(struct irc_server *s, struct irc_event *ev, struct irc_conn_ms
 }
 
 static void
+handle_error(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
+{
+	ev->type = IRC_EVENT_DISCONNECT;
+
+	if (msg->args[0])
+		irc_log_warn("server %s: %s", s->name, msg->args[0]);
+
+	fail(s);
+}
+
+static void
 handle_whoisuser(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	(void)s;
@@ -570,6 +581,7 @@ static const struct handler {
 	{ "319",        handle_whoischannels    },
 	{ "353",        handle_names            },
 	{ "366",        handle_endofnames       },
+	{ "ERROR",      handle_error            },
 	{ "INVITE",     handle_invite           },
 	{ "JOIN",       handle_join             },
 	{ "KICK",       handle_kick             },
@@ -623,9 +635,9 @@ auth(struct irc_server *s)
 	if (s->ident.password[0])
 		irc_server_send(s, "PASS %s", s->ident.password);
 
+	irc_server_send(s, "NICK %s", s->ident.nickname);
 	irc_server_send(s, "USER %s %s %s :%s", s->ident.username,
 	    s->ident.username, s->ident.username, s->ident.realname);
-	irc_server_send(s, "NICK %s", s->ident.nickname);
 }
 
 struct irc_server *

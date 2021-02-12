@@ -41,6 +41,7 @@ log_verbosity   quiet|verbose
 logs            logs
 options         options
 origins         origins
+password        password
 paths           paths
 plugin          plugin
 plugins         plugins
@@ -84,6 +85,7 @@ string          \"([^\\\"]|\\.)*\"
 {logs}                  return T_LOGS;
 {options}               return T_OPTIONS;
 {origins}               return T_ORIGINS;
+{password}              return T_PASSWORD;
 {paths}                 return T_PATHS;
 {plugins}               return T_PLUGINS;
 {plugin}                return T_PLUGIN;

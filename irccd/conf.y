@@ -57,6 +57,7 @@ struct rule_params {
 
 struct server_params {
 	char *hostname;
+	char *password;
 	int port;
 	int flags;
 	char *nickname;
@@ -145,6 +146,7 @@ yyerror(const char *);
 %token T_LOGS
 %token T_OPTIONS
 %token T_ORIGINS
+%token T_PASSWORD
 %token T_PATHS
 %token T_PLUGIN
 %token T_PLUGINS
@@ -384,6 +386,11 @@ server_params
 		$$ = $3;
 		$$->flags |= IRC_SERVER_FLAGS_SSL;
 	}
+	| T_PASSWORD T_STRING T_SEMICOLON server_params
+	{
+		$$ = $4;
+		$$->password = $2;
+	}
 	| T_PREFIX T_STRING server_params
 	{
 		$$ = $3;
@@ -447,6 +454,8 @@ server
 
 		if ($4->prefix)
 			strlcpy(s->prefix, $4->prefix, sizeof (s->prefix));
+		if ($4->password)
+			strlcpy(s->ident.password, $4->password, sizeof (s->ident.password));
 
 		s->flags = $4->flags;
 		irc_bot_server_add(s);
@@ -457,6 +466,7 @@ server
 		free($4->username);
 		free($4->realname);
 		free($4->prefix);
+		free($4->password);
 		free($4);
 	}
 	;
