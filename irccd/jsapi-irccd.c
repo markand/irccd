@@ -304,12 +304,12 @@ jsapi_load(duk_context *ctx)
 	/* Irccd.version (property) */
 	duk_push_object(ctx);
 	duk_push_int(ctx, IRCCD_VERSION_MAJOR);
-	duk_put_prop_string(ctx, -2, "major");
+	duk_put_prop_string(ctx, -2, "Major");
 	duk_push_int(ctx, IRCCD_VERSION_MINOR);
-	duk_put_prop_string(ctx, -2, "minor");
+	duk_put_prop_string(ctx, -2, "Minor");
 	duk_push_int(ctx, IRCCD_VERSION_PATCH);
-	duk_put_prop_string(ctx, -2, "patch");
-	duk_put_prop_string(ctx, -2, "version");
+	duk_put_prop_string(ctx, -2, "Patch");
+	duk_put_prop_string(ctx, -2, "Version");
 
 	/* Create the system_error that inherits from Error. */
 	duk_push_c_function(ctx, SystemError_constructor, 2);

@@ -46,6 +46,11 @@ Example:
 Javascript API
 --------------
 
+### Module Irccd
+
+- The property `Irccd.version` and their properties have been renamed to
+  `CamelCase` for consistency with other constants from other modules.
+
 ### Module File
 
 - The method `File.readline` is no longer marked as slow.

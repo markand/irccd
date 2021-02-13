@@ -29,8 +29,10 @@ set(
 	${man_SOURCE_DIR}/irccd-api-chrono.3
 	${man_SOURCE_DIR}/irccd-api-directory.3
 	${man_SOURCE_DIR}/irccd-api-file.3
+	${man_SOURCE_DIR}/irccd-api-hook.3
 	${man_SOURCE_DIR}/irccd-api-logger.3
 	${man_SOURCE_DIR}/irccd-api-plugin.3
+	${man_SOURCE_DIR}/irccd-api-rule.3
 	${man_SOURCE_DIR}/irccd-api-server.3
 	${man_SOURCE_DIR}/irccd-api-system.3
 	${man_SOURCE_DIR}/irccd-api-timer.3

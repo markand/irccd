@@ -27,8 +27,10 @@
 .Vt Irccd.Chrono
 .Vt Irccd.Directory
 .Vt Irccd.File
+.Vt Irccd.Hook
 .Vt Irccd.Logger
 .Vt Irccd.Plugin
+.Vt Irccd.Rule
 .Vt Irccd.Server
 .Vt Irccd.System
 .Vt Irccd.Timer
@@ -320,13 +322,13 @@ See dedicated manual pages for information of all submodules.
 The following constants properties are defined:
 .Pp
 .Bl -tag
-.It Va Irccd.version No (object)
+.It Va Irccd.Version No (object)
 See below.
-.It Va Irccd.version.major No (int)
+.It Va Irccd.Version.Major No (int)
 The major irccd version.
-.It Va Irccd.version.minor No (int)
+.It Va Irccd.Version.Minor No (int)
 The minor irccd version.
-.It Va Irccd.version.patch No (int)
+.It Va Irccd.Version.Patch No (int)
 The patch irccd version.
 .El
 .Pp
@@ -336,10 +338,6 @@ The following exceptions are defined:
 .Bl -tag
 .It Va Irccd.SystemError
 An exception inheriting Error thrown by some filesystem functions.
-.It Va Irccd.ServerError
-Thrown from Irccd.Server module.
-.It Va Irccd.PluginError
-Throw from Irccd.Plugin module.
 .El
 .\" SEE ALSO
 .Sh SEE ALSO
@@ -347,8 +345,10 @@ Throw from Irccd.Plugin module.
 .Xr irccd-api-chrono 3 ,
 .Xr irccd-api-directory 3 ,
 .Xr irccd-api-file 3 ,
+.Xr irccd-api-hook 3 ,
 .Xr irccd-api-logger 3 ,
 .Xr irccd-api-plugin 3 ,
+.Xr irccd-api-rule 3 ,
 .Xr irccd-api-server 3 ,
 .Xr irccd-api-system 3 ,
 .Xr irccd-api-timer 3 ,

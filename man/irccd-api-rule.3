@@ -1,0 +1,96 @@
+.\"
+.\" Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-API-RULE 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm Irccd.Rule
+.Nd irccd rule API
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.Vt Irccd.Rule.Accept
+.Vt Irccd.Rule.Drop
+.Fn Irccd.Rule.add "index, rule"
+.Fn Irccd.Rule.clear
+.Fn Irccd.Rule.list
+.Fn Irccd.Rule.remove "index"
+.\" DESCRIPTION
+.Sh DESCRIPTION
+This module let you inspect, manage and/or create or delete rules.
+.Pp
+Rules are created and obtained in JSON form with the following properties:
+.Pp
+.Bl -tag -compact -width "channels (array)"
+.It Va action No (int)
+Action to do for this rule. Must be either
+.Fa Irccd.Rule.Accept
+or
+.Fa Irccd.Rule.Drop .
+.It Va servers No (array)
+List of servers to match as array of strings targeting server identifiers.
+.It Va channels No (array)
+List of channels to match
+.It Va origins No (array)
+List of origins (the full nickname and user hostname) to match.
+.It Va events No (array)
+List of events to match. See
+.Xr irccd 1
+manual page for available values.
+.It Va plugins No (array)
+List of plugins to match as array of string targeting plugin identifiers.
+.El
+.\" METHODS
+.Sh METHODS
+.\" Irccd.Rule.add
+The
+.Fn Irccd.Rule.add
+method adds the new
+.Ar rule
+at the given
+.Ar index
+which can be null, in this case the rule is added to the end.
+.Pp
+.\" Irccd.Rule.clear
+The
+.Fn Irccd.Rule.clear
+method remove all rules.
+.Pp
+.\" Irccd.Rule.list
+The
+.Fn Irccd.Rule.list
+method returns all rules as an array of JSON description.
+.Pp
+.\" Irccd.Rule.remove
+The
+.Fn Irccd.Rule.remove
+function removes the rule at the given
+.Ar index .
+.\" EXCEPTIONS
+.Sh EXCEPTIONS
+.Bl -tag -width Er
+.It Bq Er RangeError
+Thrown in
+.Fn Irccd.Rule.remove
+if the
+.Ar index
+value was out of bounds.
+.It Bq Er TypeError
+If the rule action was invalid.
+.El
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd-api 3

@@ -1,5 +1,5 @@
 .\"
-.\" Copyright (c) 2013-2020 David Demelier <markand@malikania.fr>
+.\" Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
 .\"
 .\" Permission to use, copy, modify, and/or distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -14,38 +14,57 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .Dd @IRCCD_MAN_DATE@
-.Dt IRCCD-API-CHRONO 3
+.Dt IRCCD-API-HOOK 3
 .Os
 .\" NAME
 .Sh NAME
-.Nm Irccd.Chrono
-.Nd irccd chrono API
+.Nm Irccd.Hook
+.Nd irccd hook API
 .\" SYNOPSIS
 .Sh SYNOPSIS
-.Fn Irccd.Chrono
-.Vt Irccd.Chrono.prototype.elapsed
-.Fn Irccd.Chrono.prototype.reset
+.Fn Irccd.Hook.add "name, path"
+.Fn Irccd.Hook.list
+.Fn irccd.Hook.remove "name"
 .\" DESCRIPTION
 .Sh DESCRIPTION
-This module keeps track of elapsed time.
+Add, remove and list hooks.
 .\" METHODS
 .Sh METHODS
-.\" Irccd.Chrono
+.\" Irccd.Hook.add
 The
-.Fn Irccd.Chrono
-constructor function creates a chrono object at the current time.
+.Fn Irccd.Hook.add
+method adds the rule specified by
+.Fa path
+with the identifier
+.Fa name .
+The API does not check the presence of the hook file and therefore can be used
+before the hook actually exists on the filesystem.
 .Pp
-When constructed successfully, the object has the following properties:
+.\" Irccd.Hook.list
+The
+.Fn Irccd.Hook.list
+method return an array of object for all hooks loaded. Each entry consists of
+two properties:
+.Fa name
+and
+.Fa path
+which denotes the hook's name and its filesystem path respectively.
 .Pp
-.Bl -tag -width 18n -offset indent -compact
-.It Va elapsed No (int)
-Return the number of milliseconds since creation or last call to
+.\" Irccd.Hook.remove
+The
+.Fn Irccd.Hook.remove
+method removes the hook specified by
+.Fa name .
+.\" EXCEPTIONS
+.Sh EXCEPTIONS
+.Bl -tag -width Er
+.It Bq Er Error
+Thrown from
+.Fn Irccd.Hook.add
+if a hook with
+.Fa name
+already exists.
 .El
-.Pp
-.\" Irccd.Chrono.prototype.reset
-The
-.Fn Irccd.Chrono.prototype.reset
-method starts or restarts accumulating time.
 .\" SEE ALSO
 .Sh SEE ALSO
 .Xr irccd-api 3
