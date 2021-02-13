@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <irccd/compat.h>
 #include <irccd/irccd.h>
 #include <irccd/log.h>
 #include <irccd/rule.h>

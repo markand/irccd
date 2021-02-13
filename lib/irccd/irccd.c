@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <config.h>
-
 #include <sys/wait.h>
 #include <assert.h>
 #include <ctype.h>
@@ -29,6 +27,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "compat.h"
+#include "config.h"
 #include "event.h"
 #include "irccd.h"
 #include "log.h"

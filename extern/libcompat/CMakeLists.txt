@@ -24,6 +24,7 @@ option(COMPAT_WITH_TESTS "Enable tests" Off)
 include(CheckFunctionExists)
 include(CheckIncludeFile)
 include(CheckStructHasMember)
+include(CheckSymbolExists)
 
 set(
 	SOURCES
@@ -145,6 +146,26 @@ if (NOT COMPAT_HAVE_SYS_QUEUE_H)
 		FILES ${libirccd-compat_SOURCE_DIR}/extern/queue/sys/queue.h
 		DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/irccd/extern/sys
 	)
+else ()
+	#
+	# Make sure it has at least _SAFE macros because some implementations
+	# may provide terribly outdated queue.h (e.g. glibc).
+	#
+	check_symbol_exists(LIST_FOREACH_SAFE sys/queue.h COMPAT_HAVE_LIST_FOREACH_SAFE)
+	check_symbol_exists(SLIST_FOREACH_SAFE sys/queue.h COMPAT_HAVE_SLIST_FOREACH_SAFE)
+	check_symbol_exists(STAILQ_FOREACH_SAFE sys/queue.h COMPAT_HAVE_STAILQ_FOREACH_SAFE)
+	check_symbol_exists(TAILQ_FOREACH_SAFE sys/queue.h COMPAT_HAVE_TAILQ_FOREACH_SAFE)
+
+	if (NOT COMPAT_HAVE_LIST_FOREACH_SAFE OR
+	    NOT COMPAT_HAVE_SLIST_FOREACH_SAFE OR
+	    NOT COMPAT_HAVE_STAILQ_FOREACH_SAFE OR
+	    NOT COMPAT_HAVE_TAILQ_FOREACH_SAFE)
+		target_include_directories(
+			libirccd-compat
+			PUBLIC
+				$<BUILD_INTERFACE:${libirccd-compat_SOURCE_DIR}/extern/queue>
+		)
+	endif ()
 endif ()
 
 # Math library

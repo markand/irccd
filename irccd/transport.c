@@ -27,8 +27,8 @@
 #include <sys/un.h>
 #include <unistd.h>
 
-#include <config.h>
-
+#include <irccd/compat.h>
+#include <irccd/config.h>
 #include <irccd/log.h>
 #include <irccd/transport.h>
 #include <irccd/util.h>

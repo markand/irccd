@@ -24,6 +24,8 @@ target_include_directories(
 	PUBLIC
 		$<BUILD_INTERFACE:${libirccd-duktape_SOURCE_DIR}>
 )
+target_link_libraries(libirccd-duktape m)
+
 if (BUILD_SHARED_LIBS)
 	target_compile_definitions(libirccd-duktape PUBLIC DUK_F_DLL_BUILD)
 endif ()

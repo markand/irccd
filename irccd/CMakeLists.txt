@@ -75,7 +75,7 @@ target_include_directories(
 )
 
 if (IRCCD_WITH_JS)
-	target_link_libraries(irccd-fe libirccd-duktape)
+	target_link_libraries(irccd-fe libirccd-duktape -pthread ${CMAKE_DL_LIBS})
 endif ()
 
 flex_target(irccd-lex ${irccd_SOURCE_DIR}/lex.l ${irccd_BINARY_DIR}/lex.c)

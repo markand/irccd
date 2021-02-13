@@ -16,13 +16,13 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-
 #include <err.h>
 
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
 #include <irccd/compat.h>
+#include <irccd/irccd.h>
 #include <irccd/js-plugin.h>
 #include <irccd/log.h>
 #include <irccd/plugin.h>
@@ -69,7 +69,7 @@ setup(void *udata)
 	if (!plugin)
 		errx(1, "could not load plugin");
 
-	irc_log_to_console();
+	irc_bot_init();
 	irc_server_incref(server);
 	irc_plugin_set_template(plugin, "draw", "draw=#{channel}:#{command}:#{nickname}:#{plugin}:#{server}");
 	irc_plugin_set_template(plugin, "invalid", "invalid=#{channel}:#{command}:#{nickname}:#{origin}:#{plugin}:#{server}");
@@ -83,7 +83,7 @@ setup(void *udata)
 	irc_server_join(server, "#tictactoe", NULL);
 	irc_channel_add(LIST_FIRST(&server->channels), "a", 0, 0);
 	irc_channel_add(LIST_FIRST(&server->channels), "b", 0, 0);
-	
+
 	/* Fake server connected to send data. */
 	server->state = IRC_SERVER_STATE_CONNECTED;
 }
@@ -261,7 +261,7 @@ basics_disconnect(void)
 
 	play("a 1");
 	GREATEST_ASSERT_STR_EQ("", server->conn.out);
-	
+
 	GREATEST_PASS();
 }
 

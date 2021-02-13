@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "channel.h"
+#include "compat.h"
 #include "util.h"
 
 static inline struct irc_channel_user *

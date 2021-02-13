@@ -54,10 +54,9 @@ handler_files(enum level level, const char *fmt, va_list ap)
 static void
 finalizer_files(void)
 {
+	/* Out and err are the same. */
 	if (out)
 		fclose(out);
-	if (err)
-		fclose(err);
 }
 
 static void
