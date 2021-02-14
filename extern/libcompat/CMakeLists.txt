@@ -96,7 +96,7 @@ target_include_directories(
 		$<BUILD_INTERFACE:${libirccd-compat_BINARY_DIR}>
 		$<BUILD_INTERFACE:${libirccd-compat_BINARY_DIR}/irccd>
 )
-set_target_properties(libirccd-compat PROPERTIES PREFIX "")
+set_target_properties(libirccd-compat PROPERTIES PREFIX "" FOLDER extern)
 
 # Remove useless C4996 warning about "deprecated" functions from MSVC.
 if (CMAKE_C_COMPILER_ID MATCHES MSVC)

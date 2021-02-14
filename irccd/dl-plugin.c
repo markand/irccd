@@ -182,7 +182,6 @@ finish(struct irc_plugin *plg)
 		dlclose(self->handle);
 
 	free(self);
-	memset(self, 0, sizeof (*self));
 }
 
 static struct self *

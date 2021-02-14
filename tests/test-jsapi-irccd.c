@@ -63,9 +63,9 @@ GREATEST_TEST
 basics_version(void)
 {
 	const int ret = duk_peval_string(ctx,
-		"major = Irccd.version.major;"
-		"minor = Irccd.version.minor;"
-		"patch = Irccd.version.patch;"
+		"major = Irccd.Version.Major;"
+		"minor = Irccd.Version.Minor;"
+		"patch = Irccd.Version.Match;"
 	);
 
 	if (ret != 0)

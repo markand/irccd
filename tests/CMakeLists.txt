@@ -22,8 +22,8 @@ set(
 	TESTS
 	test-bot
 	test-channel
-	#test-event
-	#test-dl-plugin
+	test-event
+	test-dl-plugin
 	test-log
 	test-rule
 	test-subst
@@ -52,6 +52,19 @@ if (IRCCD_WITH_JS)
 	)
 endif ()
 
+add_library(example-dl-plugin MODULE ${tests_SOURCE_DIR}/data/example-dl-plugin.c)
+target_link_libraries(example-dl-plugin libirccd)
+
+if (APPLE)
+	set_target_properties(example-dl-plugin PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
+endif ()
+
+set_target_properties(example-dl-plugin
+	PROPERTIES
+		FOLDER tests/test-dl-plugin
+		PREFIX ""
+)
+
 foreach (t ${TESTS})
 	add_executable(${t} ${t}.c)
 	add_test(${t} ${t})
@@ -60,11 +73,12 @@ foreach (t ${TESTS})
 	target_compile_definitions(
 		${t}
 		PRIVATE
+			EXAMPLE_DL_PLUGIN="$<TARGET_FILE:example-dl-plugin>"
 			IRCCD_EXECUTABLE="$<TARGET_FILE:irccd>"
 			CMAKE_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
 			# TODO: change those names.
 			BINARY="${tests_BINARY_DIR}"
 			SOURCE="${tests_SOURCE_DIR}"
 	)
-	add_dependencies(${t} irccd)
+	add_dependencies(${t} irccd example-dl-plugin)
 endforeach ()

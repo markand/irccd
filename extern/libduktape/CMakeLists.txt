@@ -30,4 +30,4 @@ if (BUILD_SHARED_LIBS)
 	target_compile_definitions(libirccd-duktape PUBLIC DUK_F_DLL_BUILD)
 endif ()
 
-set_target_properties(libirccd-duktape PROPERTIES PREFIX "")
+set_target_properties(libirccd-duktape PROPERTIES PREFIX "" FOLDER extern)

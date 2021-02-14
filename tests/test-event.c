@@ -19,17 +19,19 @@
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
+#include <irccd/conn.h>
 #include <irccd/event.h>
-#include <irccd/server.h>
 
 GREATEST_TEST
 basics_parse_simple(void)
 {
 	/* This is a TOPIC message. */
-	char str[] = ":malikania.fr 332 boris #test :Welcome to #test :: a testing channel";
-	struct irc_event_msg msg;
+	struct irc_conn conn = {
+		.in = ":malikania.fr 332 boris #test :Welcome to #test :: a testing channel\r\n"
+	};
+	struct irc_conn_msg msg = {0};
 
-	irc_event_parse(&msg, str);
+	irc_conn_poll(&conn, &msg);
 
 	GREATEST_ASSERT_STR_EQ("malikania.fr", msg.prefix);
 	GREATEST_ASSERT_STR_EQ("332", msg.cmd);
@@ -44,10 +46,12 @@ GREATEST_TEST
 basics_parse_noprefix(void)
 {
 	/* Ping messages usually don't have a prefix. */
-	char str[] = "PING :malikania.fr";
-	struct irc_event_msg msg;
+	struct irc_conn conn = {
+		.in = "PING :malikania.fr\r\n"
+	};
+	struct irc_conn_msg msg = {0};
 
-	irc_event_parse(&msg, str);
+	irc_conn_poll(&conn, &msg);
 
 	GREATEST_ASSERT(!msg.prefix);
 	GREATEST_ASSERT_STR_EQ("PING", msg.cmd);

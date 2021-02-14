@@ -18,8 +18,8 @@
 
 #include <string.h>
 
-#include <irccd/dl-plugin.h>
 #include <irccd/event.h>
+#include <irccd/server.h>
 #include <irccd/util.h>
 
 struct kw {
@@ -84,77 +84,77 @@ get(const struct kw *table, size_t tablesz, const char *key)
 	return NULL;
 }
 
-IRC_DL_EXPORT void
+void
 example_dl_plugin_set_option(const char *key, const char *value)
 {
 	set(options, IRC_UTIL_SIZE(options), key, value);
 }
 
-IRC_DL_EXPORT const char *
+const char *
 example_dl_plugin_get_option(const char *key)
 {
 	return get(options, IRC_UTIL_SIZE(options), key);
 }
 
-IRC_DL_EXPORT const char **
+const char **
 example_dl_plugin_get_options(void)
 {
 	return options_list;
 }
 
-IRC_DL_EXPORT void
+void
 example_dl_plugin_set_template(const char *key, const char *value)
 {
 	set(templates, IRC_UTIL_SIZE(templates), key, value);
 }
 
-IRC_DL_EXPORT const char *
+const char *
 example_dl_plugin_get_template(const char *key)
 {
 	return get(templates, IRC_UTIL_SIZE(templates), key);
 }
 
-IRC_DL_EXPORT const char **
+const char **
 example_dl_plugin_get_templates(void)
 {
 	return templates_list;
 }
 
-IRC_DL_EXPORT void
+void
 example_dl_plugin_set_path(const char *key, const char *value)
 {
 	set(paths, IRC_UTIL_SIZE(paths), key, value);
 }
 
-IRC_DL_EXPORT const char *
+const char *
 example_dl_plugin_get_path(const char *key)
 {
 	return get(paths, IRC_UTIL_SIZE(paths), key);
 }
 
-IRC_DL_EXPORT const char **
+const char **
 example_dl_plugin_get_paths(void)
 {
 	return paths_list;
 }
 
-IRC_DL_EXPORT void
+void
 example_dl_plugin_event(const struct irc_event *ev)
 {
-	(void)ev;
+	irc_server_send(ev->server, "EVENT");
 }
 
-IRC_DL_EXPORT void
+void
 example_dl_plugin_load(void)
 {
 }
 
-IRC_DL_EXPORT void
+void
 example_dl_plugin_reload(void)
 {
 }
 
-IRC_DL_EXPORT void
+void
 example_dl_plugin_unload(void)
 {
 }
