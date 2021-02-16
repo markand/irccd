@@ -65,6 +65,8 @@ set_target_properties(libirccd-static PROPERTIES PREFIX "")
 add_library(libirccd INTERFACE)
 add_library(irccd::libirccd ALIAS libirccd)
 
+get_target_property(COMPAT_INCS libirccd-compat INCLUDE_DIRECTORIES)
+
 target_include_directories(libirccd INTERFACE
 	$<BUILD_INTERFACE:${libirccd-compat_BINARY_DIR}>
 	$<BUILD_INTERFACE:${libirccd_SOURCE_DIR}>
@@ -73,6 +75,7 @@ target_include_directories(libirccd INTERFACE
 	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/irccd/extern>
 	${OPENSSL_INCLUDE_DIR}
+	${COMPAT_INCS}
 )
 
 target_include_directories(

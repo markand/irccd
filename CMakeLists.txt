@@ -36,6 +36,8 @@ if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 	set(CMAKE_C_FLAGS "-Wall -Wextra ${CMAKE_C_FLAGS}")
 endif ()
 
+set(CMAKE_POSITION_INDEPENDENT_CODE On)
+
 include(GNUInstallDirs)
 
 include(cmake/IrccdDefinePlugin.cmake)

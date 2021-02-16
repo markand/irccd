@@ -90,6 +90,8 @@ add_executable(
 	${BISON_irccd-conf_OUTPUTS}
 	${FLEX_irccd-lex_OUTPUTS}
 )
+
+set_target_properties(irccd PROPERTIES ENABLE_EXPORTS On)
 target_link_libraries(irccd irccd-fe)
 install(TARGETS irccd DESTINATION ${CMAKE_INSTALL_BINDIR})
 

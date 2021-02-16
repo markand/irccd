@@ -203,7 +203,7 @@ init(const char *name, const char *path)
 	if (stat(path, &st) < 0 && errno == ENOENT)
 		return NULL;
 
-	if (!(self.handle = dlopen(path, RTLD_NOW))) {
+	if (!(self.handle = dlopen(path, RTLD_NOW | RTLD_GLOBAL))) {
 		irc_log_warn("plugin: %s: %s", path, dlerror());
 		return NULL;
 	}
