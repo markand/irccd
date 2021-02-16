@@ -60,7 +60,7 @@ enum {
 static unsigned long timeout = 30;
 
 static char templates[][512] = {
-	[TPL_INFO] = "#{nickname}, voici le lien: #{title}"
+	[TPL_INFO] = "link from #{nickname}: #{title}"
 };
 
 static size_t
@@ -159,6 +159,7 @@ req_finish(struct req *req)
 	if (req->fp)
 		fclose(req->fp);
 
+	free(req->link);
 	free(req->chan);
 	free(req->nickname);
 	free(req->origin);
