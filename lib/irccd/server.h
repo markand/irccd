@@ -75,7 +75,7 @@ struct irc_server_params {
 	unsigned int kicklen;
 	struct {
 		char mode;              /* Mode (e.g. ov). */
-		char token;             /* Symbol used (e.g. @+). */
+		char symbol;            /* Symbol used (e.g. @+). */
 	} prefixes[IRC_USERMODES_LEN];
 };
 
@@ -166,8 +166,8 @@ irc_server_notice(struct irc_server *, const char *, const char *);
 int
 irc_server_whois(struct irc_server *, const char *);
 
-void
-irc_server_strip(const struct irc_server *, const char **, char *, char *);
+int
+irc_server_strip(const struct irc_server *, const char **);
 
 void
 irc_server_split(const char *, struct irc_server_user *);

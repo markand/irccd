@@ -167,6 +167,24 @@ Server_prototype_info(duk_context *ctx)
 	duk_push_string(ctx, s->ident.username);
 	duk_put_prop_string(ctx, -2, "username");
 
+	/* Prefixes. */
+	duk_push_array(ctx);
+
+	for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes); ++i) {
+		if (s->params.prefixes[i].mode == 0)
+			continue;
+
+		duk_push_object(ctx);
+		duk_push_string(ctx, (char []) { s->params.prefixes[i].mode, '\0' });
+		duk_put_prop_string(ctx, -2, "mode");
+		duk_push_string(ctx, (char []) { s->params.prefixes[i].symbol, '\0' });
+		duk_put_prop_string(ctx, -2, "symbol");
+		duk_put_prop_index(ctx, -2, i);
+	}
+
+	duk_put_prop_string(ctx, -2, "prefixes");
+
+	/* Channels. */
 	duk_push_array(ctx);
 
 	LIST_FOREACH(c, &s->channels, link) {
@@ -181,11 +199,8 @@ Server_prototype_info(duk_context *ctx)
 			duk_push_object(ctx);
 			duk_push_string(ctx, u->nickname);
 			duk_put_prop_string(ctx, -2, "nickname");
-			if (u->mode)
-				duk_push_sprintf(ctx, "%c", u->mode);
-			else
-				duk_push_null(ctx);
-			duk_put_prop_string(ctx, -2, "mode");
+			duk_push_int(ctx, u->modes);
+			duk_put_prop_string(ctx, -2, "modes");
 			duk_put_prop_index(ctx, -2, ui++);
 		}
 

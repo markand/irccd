@@ -66,12 +66,13 @@ irc_event_str(const struct irc_event *ev, char *str, size_t strsz)
 		    ev->message.message);
 		break;
 	case IRC_EVENT_MODE:
-		written = snprintf(str, strsz, "EVENT-MODE %s %s %s %s %s %s %s",
+		snprintf(str, strsz, "EVENT-MODE %s %s %s %s ",
 		    ev->server->name, ev->mode.origin, ev->mode.channel,
-		    ev->mode.mode,
-		    ev->mode.limit ? ev->mode.limit : "",
-		    ev->mode.user  ? ev->mode.user  : "",
-		    ev->mode.mask  ? ev->mode.mask  : "");
+		    ev->mode.mode);
+
+		for (char **mode = ev->mode.args; *mode; ++mode)
+			written = strlcat(str, *mode, strsz);
+
 		break;
 	case IRC_EVENT_NICK:
 		written = snprintf(str, strsz, "EVENT-NICK %s %s %s",
@@ -93,9 +94,11 @@ irc_event_str(const struct irc_event *ev, char *str, size_t strsz)
 		    ev->topic.topic);
 		break;
 	case IRC_EVENT_WHOIS:
+#if 0
 		snprintf(str, strsz, "EVENT-WHOIS %s %s %s %s %s %s",
 		    ev->server->name, ev->whois.nickname, ev->whois.username,
 		    ev->whois.realname, ev->whois.hostname, ev->whois.channels);
+#endif
 		break;
 	default:
 		break;
@@ -135,9 +138,9 @@ irc_event_finish(struct irc_event *ev)
 		free(ev->mode.origin);
 		free(ev->mode.channel);
 		free(ev->mode.mode);
-		free(ev->mode.limit);
-		free(ev->mode.user);
-		free(ev->mode.mask);
+		for (char **p = ev->mode.args; p && *p; ++p)
+			free(*p);
+		free(ev->mode.args);
 		break;
 	case IRC_EVENT_NAMES:
 		free(ev->names.channel);
@@ -167,6 +170,8 @@ irc_event_finish(struct irc_event *ev)
 		free(ev->whois.username);
 		free(ev->whois.realname);
 		free(ev->whois.hostname);
+		for (size_t i = 0; i < ev->whois.channelsz; ++i)
+			free(ev->whois.channels[i].name);
 		free(ev->whois.channels);
 		break;
 	default:

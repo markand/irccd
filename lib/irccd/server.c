@@ -79,15 +79,6 @@ is_self(const struct irc_server *s, const char *nick)
 	return strncmp(s->ident.nickname, nick, strlen(s->ident.nickname)) == 0;
 }
 
-static void
-add_nick(const struct irc_server *s, struct irc_channel *ch, const char *nick)
-{
-	char mode = 0, prefix = 0;
-
-	irc_server_strip(s, &nick, &mode, &prefix);
-	irc_channel_add(ch, nick, mode, prefix);
-}
-
 static struct irc_channel *
 add_channel(struct irc_server *s, const char *name, const char *password, int joined)
 {
@@ -147,6 +138,16 @@ ctcp(char *line)
 	return line;
 }
 
+static inline int
+find_mode(struct irc_server *s, int mode)
+{
+	for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes); ++i)
+		if (s->params.prefixes[i].mode == mode)
+			return i;
+
+	return 0;
+}
+
 static void
 read_support_prefix(struct irc_server *s, const char *value)
 {
@@ -159,11 +160,11 @@ read_support_prefix(struct irc_server *s, const char *value)
 
 	if (sscanf(value, fmt, modes, tokens) == 2) {
 		char *pm = modes;
-		char *tk = tokens;
+		char *sm = tokens;
 
-		for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes) && *pm && *tk; ++i) {
+		for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes) && *pm && *sm; ++i) {
 			s->params.prefixes[i].mode = *pm++;
-			s->params.prefixes[i].token = *tk++;
+			s->params.prefixes[i].symbol = *sm++;
 		}
 	}
 }
@@ -331,15 +332,64 @@ handle_mode(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 	(void)ev;
 	(void)msg;
 
-	ev->type = IRC_EVENT_MODE;
-	ev->mode.origin = strdup(msg->prefix);
-	ev->mode.channel = strdup(msg->args[0]);
-	ev->mode.mode = strdup(msg->args[1]);
-	ev->mode.limit = msg->args[2] ? strdup(msg->args[2]) : NULL;
-	ev->mode.user = msg->args[3] ? strdup(msg->args[3]) : NULL;
-	ev->mode.mask = msg->args[4] ? strdup(msg->args[4]) : NULL;
+	int action = 0, mode;
+	size_t nelem = 0, argindex = 2;
+	struct irc_channel *ch;
+	struct irc_channel_user *u;
 
-	/* TODO: update nickname modes. */
+	ev->type = IRC_EVENT_MODE;
+	ev->mode.origin = irc_util_strdup(msg->prefix);
+	ev->mode.channel = irc_util_strdup(msg->args[0]);
+	ev->mode.mode = irc_util_strdup(msg->args[1]);
+
+	/* Create a NULL-sentineled list of arguments. */
+	for (size_t i = 2; i < IRC_ARGS_MAX && msg->args[i]; ++i) {
+		ev->mode.args = irc_util_reallocarray(ev->mode.args, nelem + 1, sizeof (char *));
+		ev->mode.args[nelem++] = irc_util_strdup(msg->args[i]);
+	}
+
+	/* Add the NULL sentinel. */
+	ev->mode.args = irc_util_reallocarray(ev->mode.args, nelem + 1, sizeof (char *));
+	ev->mode.args[nelem] = NULL;
+
+	if (!(ch = irc_server_find(s, ev->mode.channel)))
+		return;
+
+	for (const char *p = ev->mode.mode; *p; ++p) {
+		/* Determine if we're adding or removing a mode. */
+		if (*p == '+' || *p == '-') {
+			action = *p;
+			continue;
+		}
+
+		/* All these mode require an argument but we don't use. */
+		switch (*p) {
+		case 'b':
+		case 'k':
+		case 'l':
+		case 'e':
+		case 'I':
+			++argindex;
+			continue;
+		}
+
+		/* Find which mode this symbol is (e.g. o=@). */
+		if ((mode = find_mode(s, *p)) == 0) {
+			++argindex;
+			continue;
+		}
+		if (!msg->args[argindex] || !(u = irc_channel_find(ch, msg->args[argindex]))) {
+			++argindex;
+			continue;
+		}
+
+		++argindex;
+
+		if (action == '+')
+			u->modes |= (1 << mode);
+		else
+			u->modes &= ~(1 << mode);
+	}
 }
 
 static void
@@ -433,35 +483,34 @@ handle_ping(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 static void
 handle_names(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
-	(void)s;
 	(void)ev;
-	(void)msg;
 
 	struct irc_channel *ch;
 	char *p, *token;
+	int modes = 0;
 
 	ch = add_channel(s, msg->args[2], NULL, 1);
 
 	/* Track existing nicknames into the given channel. */
-	for (p = msg->args[3]; (token = strtok_r(p, " ", &p)); )
-		if (strlen(token) > 0)
-			add_nick(s, ch, token);
+	for (p = msg->args[3]; (token = strtok_r(p, " ", &p)); ) {
+		if (strlen(token) == 0)
+			continue;
+
+		modes = irc_server_strip(s, (const char **)&token);
+		irc_channel_add(ch, token, modes);
+	}
 }
 
 static void
 handle_endofnames(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
-	(void)s;
-	(void)ev;
-	(void)msg;
-
 	FILE *fp;
 	size_t length;
 	const struct irc_channel *ch;
 	const struct irc_channel_user *u;
 
 	ev->type = IRC_EVENT_NAMES;
-	ev->names.channel = strdup(msg->args[1]);
+	ev->names.channel = irc_util_strdup(msg->args[1]);
 
 	/* Construct a string list for every user in the channel. */
 	ch = irc_server_find(s, ev->names.channel);
@@ -470,8 +519,9 @@ handle_endofnames(struct irc_server *s, struct irc_event *ev, struct irc_conn_ms
 		err(1, "open_memstream");
 
 	LIST_FOREACH(u, &ch->users, link) {
-		if (u->symbol)
-			fprintf(fp, "%c", u->symbol);
+		for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes); ++i)
+			if (u->modes & (1 << i))
+				fprintf(fp, "%c", s->params.prefixes[i].symbol);
 
 		fprintf(fp, "%s", u->nickname);
 
@@ -521,26 +571,23 @@ handle_whoischannels(struct irc_server *s, struct irc_event *ev, struct irc_conn
 {
 	(void)ev;
 
-	size_t curlen, reqlen;
+	char *token, *p;
+	int modes;
 
-	curlen = s->bufwhois.channels ? strlen(s->bufwhois.channels) : 0;
-	reqlen = strlen(msg->args[2]);
+	if (!msg->args[2])
+		return;
 
-	/*
-	 * If there is already something, add a space at the end of the current
-	 * buffer.
-	 */
-	if (curlen > 0)
-		reqlen++;
+	for (p = msg->args[2]; (token = strtok_r(p, " ", &p)); ) {
+		modes = irc_server_strip(s, (const char **)&token);
+		s->bufwhois.channels = irc_util_reallocarray(
+		    s->bufwhois.channels,
+		    s->bufwhois.channelsz + 1,
+		    sizeof (*s->bufwhois.channels)
+		);
 
-	/* Now, don't forget */
-	s->bufwhois.channels = irc_util_realloc(s->bufwhois.channels, reqlen + 1);
-
-	if (curlen > 0) {
-		strcat(s->bufwhois.channels, " ");
-		strcat(s->bufwhois.channels, msg->args[2]);
-	} else
-		strcpy(s->bufwhois.channels, msg->args[2]);
+		s->bufwhois.channels[s->bufwhois.channelsz].name = irc_util_strdup(token);
+		s->bufwhois.channels[s->bufwhois.channelsz++].modes = modes;
+	}
 }
 
 static void
@@ -615,12 +662,21 @@ auth(struct irc_server *s)
 {
 	s->state = IRC_SERVER_STATE_CONNECTED;
 
+	/*
+	 * Use multi-prefix extension to keep track of all combined "modes" in
+	 * a channel.
+	 *
+	 * https://ircv3.net/specs/extensions/multi-prefix-3.1.html
+	 */
+	irc_server_send(s, "CAP REQ :multi-prefix");
+
 	if (s->ident.password[0])
 		irc_server_send(s, "PASS %s", s->ident.password);
 
 	irc_server_send(s, "NICK %s", s->ident.nickname);
 	irc_server_send(s, "USER %s %s %s :%s", s->ident.username,
 	    s->ident.username, s->ident.username, s->ident.realname);
+	irc_server_send(s, "CAP END");
 }
 
 struct irc_server *
@@ -666,6 +722,8 @@ irc_server_connect(struct irc_server *s)
 
 	if (s->flags & IRC_SERVER_FLAGS_SSL)
 		s->conn.flags |= IRC_CONN_SSL;
+
+	s->conn.sv = s;
 
 	if (irc_conn_connect(&s->conn) < 0)
 		fail(s);
@@ -952,27 +1010,22 @@ irc_server_whois(struct irc_server *s, const char *target)
 	return irc_server_send(s, "WHOIS %s", target);
 }
 
-void
-irc_server_strip(const struct irc_server *s, const char **nick, char *mode, char *prefix)
+int
+irc_server_strip(const struct irc_server *s, const char **what)
 {
 	assert(s);
-	assert(*nick);
+	assert(*what);
 
-	if (mode)
-		*mode = 0;
-	if (prefix)
-		*prefix = 0;
+	int modes = 0;
 
 	for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes); ++i) {
-		if (**nick == s->params.prefixes[i].token) {
-			if (mode)
-				*mode = s->params.prefixes[i].mode;
-			if (prefix)
-				*prefix = s->params.prefixes[i].token;
-			*nick += 1;
-			break;
+		if (**what == s->params.prefixes[i].symbol) {
+			modes |= 1 << i;
+			*what += 1;
 		}
 	}
+
+	return modes;
 }
 
 void

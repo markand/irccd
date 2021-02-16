@@ -30,6 +30,8 @@
 struct addrinfo;
 struct pollfd;
 
+struct irc_server;
+
 enum irc_conn_state {
 	IRC_CONN_STATE_NONE,            /* Nothing, default. */
 	IRC_CONN_STATE_CONNECTING,      /* Pending connect(2) call. */
@@ -61,6 +63,7 @@ struct irc_conn {
 	char out[IRC_BUF_LEN];
 	enum irc_conn_state state;
 	enum irc_conn_flags flags;
+	struct irc_server *sv;
 
 #if defined(IRCCD_WITH_SSL)
 	SSL_CTX *ctx;

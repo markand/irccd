@@ -33,10 +33,3 @@ Author
 ------
 
 The irccd application was written by David Demelier <markand@malikania.fr>
-
-Contributors
-------------
-
-- Pierre Choffet,
-- Yoan Giraud,
-- Léo Villeveygoux.

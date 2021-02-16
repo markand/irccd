@@ -16,3 +16,17 @@ Libraries and projects
 
 - uriparser, https://uriparser.github.io
   Simple URI parser.
+
+Individual
+----------
+
+People for using, commenting and reporting errors:
+
+- Pierre Choffet,
+- Yoan Giraud,
+- Léo Villeveygoux.
+
+Some people on the *##irc* channel on freenode for their detailed information:
+
+- Andrio,
+- jackal.

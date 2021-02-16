@@ -81,9 +81,7 @@ struct irc_event_mode {
 	char *origin;
 	char *channel;
 	char *mode;
-	char *limit;
-	char *user;
-	char *mask;
+	char **args;
 };
 
 struct irc_event_names {
@@ -119,7 +117,11 @@ struct irc_event_whois {
 	char *username;
 	char *realname;
 	char *hostname;
-	char *channels;
+	struct {
+		char *name;
+		int modes;
+	} *channels;
+	size_t channelsz;
 };
 
 struct irc_event {

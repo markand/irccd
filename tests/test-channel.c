@@ -32,40 +32,33 @@ basics_add(void)
 	GREATEST_ASSERT_STR_EQ("", ch->password);
 	GREATEST_ASSERT(ch->joined);
 
-	irc_channel_add(ch, "markand", 'o', '@');
+	irc_channel_add(ch, "markand", 1);
 	user = LIST_FIRST(&ch->users);
-	GREATEST_ASSERT_EQ('o', user->mode);
-	GREATEST_ASSERT_EQ('@', user->symbol);
+	GREATEST_ASSERT_EQ(1, user->modes);
 	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
 
-	irc_channel_add(ch, "markand", '+', '@');
+	irc_channel_add(ch, "markand", 2);
 	user = LIST_FIRST(&ch->users);
-	GREATEST_ASSERT_EQ('o', user->mode);
-	GREATEST_ASSERT_EQ('@', user->symbol);
+	GREATEST_ASSERT_EQ(1, user->modes);
 	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
 
-	irc_channel_add(ch, "jean", 'h', '+');
+	irc_channel_add(ch, "jean", 4);
 	user = LIST_FIRST(&ch->users);
-	GREATEST_ASSERT_EQ('h', user->mode);
-	GREATEST_ASSERT_EQ('+', user->symbol);
+	GREATEST_ASSERT_EQ(4, user->modes);
 	GREATEST_ASSERT_STR_EQ("jean", user->nickname);
 	user = LIST_NEXT(user, link);
-	GREATEST_ASSERT_EQ('o', user->mode);
-	GREATEST_ASSERT_EQ('@', user->symbol);
+	GREATEST_ASSERT_EQ(1, user->modes);
 	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
 
-	irc_channel_add(ch, "zoe", 0, 0);
+	irc_channel_add(ch, "zoe", 0);
 	user = LIST_FIRST(&ch->users);
-	GREATEST_ASSERT_EQ(0, user->mode);
-	GREATEST_ASSERT_EQ(0, user->symbol);
+	GREATEST_ASSERT_EQ(0, user->modes);
 	GREATEST_ASSERT_STR_EQ("zoe", user->nickname);
 	user = LIST_NEXT(user, link);
-	GREATEST_ASSERT_EQ('h', user->mode);
-	GREATEST_ASSERT_EQ('+', user->symbol);
+	GREATEST_ASSERT_EQ(4, user->modes);
 	GREATEST_ASSERT_STR_EQ("jean", user->nickname);
 	user = LIST_NEXT(user, link);
-	GREATEST_ASSERT_EQ('o', user->mode);
-	GREATEST_ASSERT_EQ('@', user->symbol);
+	GREATEST_ASSERT_EQ(1, user->modes);
 	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
 
 	irc_channel_finish(ch);
@@ -81,24 +74,21 @@ basics_remove(void)
 
 	ch = irc_channel_new("#test", NULL, 1);
 
-	irc_channel_add(ch, "markand", 'o', '@');
-	irc_channel_add(ch, "jean", 0, 0);
-	irc_channel_add(ch, "zoe", 0, 0);
+	irc_channel_add(ch, "markand", 1);
+	irc_channel_add(ch, "jean", 0);
+	irc_channel_add(ch, "zoe", 0);
 
 	irc_channel_remove(ch, "jean");
 	user = LIST_FIRST(&ch->users);
-	GREATEST_ASSERT_EQ(0, user->mode);
-	GREATEST_ASSERT_EQ(0, user->symbol);
+	GREATEST_ASSERT_EQ(0, user->modes);
 	GREATEST_ASSERT_STR_EQ("zoe", user->nickname);
 	user = LIST_NEXT(user, link);
-	GREATEST_ASSERT_EQ('o', user->mode);
-	GREATEST_ASSERT_EQ('@', user->symbol);
+	GREATEST_ASSERT_EQ(1, user->modes);
 	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
 
 	irc_channel_remove(ch, "zoe");
 	user = LIST_FIRST(&ch->users);
-	GREATEST_ASSERT_EQ('o', user->mode);
-	GREATEST_ASSERT_EQ('@', user->symbol);
+	GREATEST_ASSERT_EQ(1, user->modes);
 	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
 
 	irc_channel_remove(ch, "markand");
@@ -109,40 +99,10 @@ basics_remove(void)
 	GREATEST_PASS();
 }
 
-GREATEST_TEST
-basics_update(void)
-{
-	struct irc_channel *ch;
-	struct irc_channel_user *user;
-
-	ch = irc_channel_new("#test", NULL, 1);
-
-	irc_channel_add(ch, "markand", 'o', '@');
-	irc_channel_add(ch, "jean", 0, 0);
-	irc_channel_add(ch, "zoe", 0, 0);
-	
-	irc_channel_update(ch, "zoe", NULL, 'o', '@');
-	user = LIST_FIRST(&ch->users);
-	GREATEST_ASSERT_EQ('o', user->mode);
-	GREATEST_ASSERT_EQ('@', user->symbol);
-	GREATEST_ASSERT_STR_EQ("zoe", user->nickname);
-
-	irc_channel_update(ch, "zoe", "eoz", -1, -1);
-	user = LIST_FIRST(&ch->users);
-	GREATEST_ASSERT_EQ('o', user->mode);
-	GREATEST_ASSERT_EQ('@', user->symbol);
-	GREATEST_ASSERT_STR_EQ("eoz", user->nickname);
-
-	irc_channel_finish(ch);
-
-	GREATEST_PASS();
-}
-
 GREATEST_SUITE(suite_basics)
 {
 	GREATEST_RUN_TEST(basics_add);
 	GREATEST_RUN_TEST(basics_remove);
-	GREATEST_RUN_TEST(basics_update);
 }
 
 GREATEST_MAIN_DEFS();

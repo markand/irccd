@@ -41,7 +41,7 @@ Plugin.templates = {
 	"me":           "%H:%M:%S * #{nickname} #{message}",
 	"message":      "%H:%M:%S #{nickname}: #{message}",
 	"invite":       "%H:%M:%S #{nickname} invited you on #{channel}",
-	"mode":         "%H:%M:%S :: #{nickname} set mode #{channel} #{mode} #{limit} #{user} #{mask}",
+	"mode":         "%H:%M:%S :: #{nickname} set mode #{channel} #{mode} #{args}",
 	"notice":       "%H:%M:%S [notice] #{channel} (#{nickname}) #{message}",
 	"part":         "%H:%M:%S << #{nickname} left #{channel} [#{reason}]",
 	"query":        "%H:%M:%S #{nickname}: #{message}",
@@ -135,15 +135,14 @@ function onMessage(server, origin, channel, message)
 	}));
 }
 
-function onMode(server, origin, channel, mode, limit, user, mask)
+function onMode(server, origin, channel, mode, args)
 {
 	origin = origin.toLowerCase();
+	channel = channel.toLowerCase();
 
 	write("mode", keywords(server, channel, origin, {
 		"mode":         mode,
-		"limit":        limit,
-		"user":         user,
-		"mask":         mask
+		"args":         args.join(" "),
 	}));
 }
 
@@ -155,6 +154,7 @@ function onNick(server, origin, nickname)
 function onNotice(server, origin, channel, notice)
 {
 	origin = origin.toLowerCase();
+	channel = channel.toLowerCase();
 
 	write("notice", keywords(server, channel, origin, {
 		"message": notice,

@@ -46,7 +46,7 @@
 .Fn onLoad "
 .Fn onMe "server, origin, channel, message"
 .Fn onMessage "server, origin, channel, message"
-.Fn onMode "server, origin, channel, mode, limit, user, mask"
+.Fn onMode "server, origin, channel, mode, args"
 .Fn onNames "server, channel, list"
 .Fn onNick "server, origin, nickname"
 .Fn onNotice "server, origin, notice"
@@ -199,6 +199,8 @@ The current server.
 The person who changed the mode.
 .It Fa mode No (string)
 The new mode.
+.It Fa args No (array)
+List of mode arguments as strings.
 .El
 .\" onNames
 .Ss onNames
@@ -293,7 +295,7 @@ The whois information.
 The
 .Fa info
 is an object with the following properties:
-.Bl -tag -width 20n -compact -offset Ds
+.Bl -tag -width "nickname (string)"
 .It Fa nickname No (string)
 The user nickname.
 .It Fa user No (string)
@@ -303,7 +305,14 @@ The hostname.
 .It Fa realname No (string)
 The real name used.
 .It Fa channels No (array)
-An optional list of channels joined.
+An optional list of channels joined by the user. Objects in the array are
+defined using the following properties:
+.Bl -tag -width "name (string)"
+.It Fa name No (string)
+The name of the channel.
+.It Fa modes No (int)
+A bitwise mask of modes applied the user has on this channel.
+.El
 .El
 .\" MODULES
 .Sh MODULES

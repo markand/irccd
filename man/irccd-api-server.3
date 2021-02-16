@@ -82,7 +82,7 @@ constructor function creates a new server with settings in the
 .Fa parameters
 object which may have the following properties:
 .Pp
-.Bl -tag -compact -width "hostname (string)"
+.Bl -tag -width "hostname (string)"
 .It Fa name No (string)
 The unique identifier name.
 .It Fa hostname No (string)
@@ -115,7 +115,7 @@ The
 method returns the server information. The object have the following
 properties:
 .Pp
-.Bl -tag -compact -width "hostname (string)"
+.Bl -tag -width "hostname (string)"
 .It Va name No (string)
 The server unique name.
 .It Va hostname No (string)
@@ -125,19 +125,17 @@ The port number.
 .It Va ssl No (bool)
 True if using ssl.
 .It Va channels No (array)
-An array of all channels. Each channel in the returned array contain the
-following properties:
-.Bl -tag -width xxx
+An array of all channels as objects. Each channel in the returned array contain
+the following properties:
+.Bl -tag -width "name (string)"
 .It Va name No (string)
 The channel name.
 .It Va joined No (bool)
 True if the daemon is actually present on this channel.
 .It Va users No (array)
-An array of users that consists of objects with three properties:
-.Va nickname , mode
-and
-.Va symbol
-as their nickname, the channel mode and the symbol representing this mode.
+An array of users that consists of objects with two properties:
+.Va nickname No (string) and modes Fa (int)
+as their nickname and modes as bitwise mask for this channel.
 .El
 .Pp
 .It Va realname No (string)

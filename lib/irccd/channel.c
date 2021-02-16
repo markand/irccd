@@ -24,18 +24,6 @@
 #include "compat.h"
 #include "util.h"
 
-static inline struct irc_channel_user *
-find(const struct irc_channel *ch, const char *nickname)
-{
-	struct irc_channel_user *u;
-
-	LIST_FOREACH(u, &ch->users, link)
-		if (strcmp(u->nickname, nickname) == 0)
-			return u;
-
-	return NULL;
-}
-
 struct irc_channel *
 irc_channel_new(const char *name, const char *password, int joined)
 {
@@ -55,44 +43,33 @@ irc_channel_new(const char *name, const char *password, int joined)
 }
 
 void
-irc_channel_add(struct irc_channel *ch, const char *nickname, char mode, char symbol)
+irc_channel_add(struct irc_channel *ch, const char *nickname, int modes)
 {
 	assert(ch);
 	assert(nickname);
 
 	struct irc_channel_user *user;
 
-	if (find(ch, nickname))
+	if (irc_channel_find(ch, nickname))
 		return;
 
 	user = irc_util_malloc(sizeof (*user));
-	user->mode = mode;
-	user->symbol = symbol;
+	user->modes = modes;
 	strlcpy(user->nickname, nickname, sizeof (user->nickname));
 
 	LIST_INSERT_HEAD(&ch->users, user, link);
 }
 
-void
-irc_channel_update(struct irc_channel *ch,
-                   const char *nickname,
-                   const char *newnickname,
-                   char mode,
-                   char symbol)
+struct irc_channel_user *
+irc_channel_find(struct irc_channel *ch, const char *nickname)
 {
-	assert(ch);
-	assert(nickname);
+	struct irc_channel_user *u;
 
-	struct irc_channel_user *user;
+	LIST_FOREACH(u, &ch->users, link)
+		if (strcmp(u->nickname, nickname) == 0)
+			return u;
 
-	if ((user = find(ch, nickname))) {
-		if (newnickname)
-			strlcpy(user->nickname, newnickname, sizeof (user->nickname));
-		if (mode != -1 && symbol != -1) {
-			user->mode = mode;
-			user->symbol = symbol;
-		}
-	}
+	return NULL;
 }
 
 void
@@ -115,8 +92,10 @@ irc_channel_remove(struct irc_channel *ch, const char *nick)
 
 	struct irc_channel_user *user;
 
-	if ((user = find(ch, nick)))
+	if ((user = irc_channel_find(ch, nick))) {
 		LIST_REMOVE(user, link);
+		free(user);
+	}
 }
 
 void

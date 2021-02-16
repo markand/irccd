@@ -81,8 +81,8 @@ setup(void *udata)
 
 	/* We need tw players on a channel to play the game. */
 	irc_server_join(server, "#tictactoe", NULL);
-	irc_channel_add(LIST_FIRST(&server->channels), "a", 0, 0);
-	irc_channel_add(LIST_FIRST(&server->channels), "b", 0, 0);
+	irc_channel_add(LIST_FIRST(&server->channels), "a", 0);
+	irc_channel_add(LIST_FIRST(&server->channels), "b", 0);
 
 	/* Fake server connected to send data. */
 	server->state = IRC_SERVER_STATE_CONNECTED;

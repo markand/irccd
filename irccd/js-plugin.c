@@ -96,6 +96,19 @@ metadata(duk_context *ctx, const char *name)
 }
 
 static void
+push_modes(duk_context *ctx, char **modes)
+{
+	size_t i = 0;
+
+	duk_push_array(ctx);
+
+	for (char **mode = modes; mode && *mode; ++mode) {
+		duk_push_string(ctx, *mode);
+		duk_put_prop_index(ctx, -2, i++);
+	}
+}
+
+static void
 push_names(duk_context *ctx, const struct irc_event *ev)
 {
 	const char *token;
@@ -104,7 +117,7 @@ push_names(duk_context *ctx, const struct irc_event *ev)
 	duk_push_array(ctx);
 
 	for (size_t i = 0; (token = strtok_r(p, " ", &p)); ++i) {
-		irc_server_strip(ev->server, &token, NULL, NULL);
+		irc_server_strip(ev->server, &token);
 		duk_push_string(ctx, token);
 		duk_put_prop_index(ctx, -2, i);
 	}
@@ -113,9 +126,6 @@ push_names(duk_context *ctx, const struct irc_event *ev)
 static void
 push_whois(duk_context *ctx, const struct irc_event *ev)
 {
-	const char *token;
-	char *p = ev->whois.channels;
-
 	duk_push_object(ctx);
 	duk_push_string(ctx, ev->whois.nickname);
 	duk_put_prop_string(ctx, -2, "nickname");
@@ -126,19 +136,16 @@ push_whois(duk_context *ctx, const struct irc_event *ev)
 	duk_push_string(ctx, ev->whois.hostname);
 	duk_put_prop_string(ctx, -2, "hostname");
 	duk_push_array(ctx);
-	for (size_t i = 0; (token = strtok_r(p, " ", &p)); ++i) {
-		char mode = 0, prefix = 0;
 
-		irc_server_strip(ev->server, &token, &mode, &prefix);
+	for (size_t i = 0; i < ev->whois.channelsz; ++i) {
 		duk_push_object(ctx);
-		duk_push_string(ctx, token);
+		duk_push_string(ctx, ev->whois.channels[i].name);
 		duk_put_prop_string(ctx, -2, "channel");
-		duk_push_sprintf(ctx, "%c", mode);
-		duk_put_prop_string(ctx, -2, "mode");
-		duk_push_sprintf(ctx, "%c", prefix);
-		duk_put_prop_string(ctx, -2, "prefix");
+		duk_push_int(ctx, ev->whois.channels[i].modes);
+		duk_put_prop_string(ctx, -2, "modes");
 		duk_put_prop_index(ctx, -2, i);
 	}
+
 	duk_put_prop_string(ctx, -2, "channels");
 }
 
@@ -373,9 +380,8 @@ handle(struct irc_plugin *plg, const struct irc_event *ev)
 		    ev->message.channel, ev->message.message);
 		break;
 	case IRC_EVENT_MODE:
-		call(plg, "onMode", "Ss sss ss", ev->server, ev->mode.origin,
-		    ev->mode.channel, ev->mode.mode, ev->mode.limit,
-		    ev->mode.user, ev->mode.mask);
+		call(plg, "onMode", "Ss ssx", ev->server, ev->mode.origin,
+		    ev->mode.channel, ev->mode.mode, push_modes, ev->mode.args);
 		break;
 	case IRC_EVENT_NAMES:
 		call(plg, "onNames", "Ss x", ev->server, ev->names.channel,

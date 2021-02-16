@@ -26,8 +26,7 @@
 
 struct irc_channel_user {
 	char nickname[IRC_NICKNAME_LEN];
-	char mode;
-	char symbol;
+	int modes;
 	LIST_ENTRY(irc_channel_user) link;
 };
 
@@ -45,10 +44,10 @@ struct irc_channel *
 irc_channel_new(const char *, const char *, int);
 
 void
-irc_channel_add(struct irc_channel *, const char *, char, char);
+irc_channel_add(struct irc_channel *, const char *, int);
 
-void
-irc_channel_update(struct irc_channel *, const char *, const char *, char, char);
+struct irc_channel_user *
+irc_channel_find(struct irc_channel *, const char *);
 
 void
 irc_channel_clear(struct irc_channel *);

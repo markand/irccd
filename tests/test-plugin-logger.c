@@ -43,13 +43,12 @@ setup(void *udata)
 	if (!plugin)
 		errx(1, "could not load plugin");
 
-	irc_log_to_console();
 	irc_server_incref(server);
 	irc_plugin_set_template(plugin, "join", "join=#{server}:#{channel}:#{origin}:#{nickname}");
 	irc_plugin_set_template(plugin, "kick", "kick=#{server}:#{channel}:#{origin}:#{nickname}:#{target}:#{reason}");
 	irc_plugin_set_template(plugin, "me", "me=#{server}:#{channel}:#{origin}:#{nickname}:#{message}");
 	irc_plugin_set_template(plugin, "message", "message=#{server}:#{channel}:#{origin}:#{nickname}:#{message}");
-	irc_plugin_set_template(plugin, "mode", "mode=#{server}:#{origin}:#{channel}:#{mode}:#{limit}:#{user}:#{mask}");
+	irc_plugin_set_template(plugin, "mode", "mode=#{server}:#{origin}:#{channel}:#{mode}:#{args}");
 	irc_plugin_set_template(plugin, "notice", "notice=#{server}:#{origin}:#{channel}:#{message}");
 	irc_plugin_set_template(plugin, "part", "part=#{server}:#{channel}:#{origin}:#{nickname}:#{reason}");
 	irc_plugin_set_template(plugin, "query", "query=#{server}:#{origin}:#{nickname}:#{message}");
@@ -166,15 +165,13 @@ basics_mode(void)
 		.server = server,
 		.mode = {
 			.origin = "jean!jean@localhost",
-			.channel = "chris",
-			.mode = "+i",
-			.limit = "l",
-			.user = "u",
-			.mask = "m"
+			.channel = "#staff",
+			.mode = "+ov",
+			.args = (char *[]) { "francis", "benoit", NULL }
 		}
 	});
 
-	GREATEST_ASSERT_STR_EQ("mode=test:jean!jean@localhost:chris:+i:l:u:m", last());
+	GREATEST_ASSERT_STR_EQ("mode=test:jean!jean@localhost:#staff:+ov:francis benoit", last());
 	GREATEST_PASS();
 }
 

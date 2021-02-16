@@ -27,6 +27,8 @@
 
 #include "compat.h"
 #include "conn.h"
+#include "log.h"
+#include "server.h"
 #include "util.h"
 
 static void
@@ -122,9 +124,13 @@ update_ssl_state(struct irc_conn *conn, int ret)
 {
 	switch (SSL_get_error(conn->ssl, ret)) {
 	case SSL_ERROR_WANT_READ:
+		irc_log_debug("server %s: step %d now needs read condition",
+		    conn->sv->name, conn->ssl_step);
 		conn->ssl_cond = IRC_CONN_SSL_ACT_READ;
 		break;
 	case SSL_ERROR_WANT_WRITE:
+		irc_log_debug("server %s: step %d now needs write condition",
+		    conn->sv->name, conn->ssl_step);
 		conn->ssl_cond = IRC_CONN_SSL_ACT_WRITE;
 		break;
 	case SSL_ERROR_SSL:
@@ -142,9 +148,13 @@ input_ssl(struct irc_conn *conn, char *dst, size_t dstsz)
 	int nr;
 
 	if ((nr = SSL_read(conn->ssl, dst, dstsz)) <= 0) {
+		irc_log_debug("server %s: SSL read incomplete", conn->sv->name);
 		conn->ssl_step = IRC_CONN_SSL_ACT_READ;
 		return update_ssl_state(conn, nr);
 	}
+
+	if (conn->ssl_cond)
+		irc_log_debug("server %s: condition back to normal", conn->sv->name);
 
 	conn->ssl_cond = IRC_CONN_SSL_ACT_NONE;
 	conn->ssl_step = IRC_CONN_SSL_ACT_NONE;
@@ -189,9 +199,13 @@ output_ssl(struct irc_conn *conn)
 	int ns;
 
 	if ((ns = SSL_write(conn->ssl, conn->out, strlen(conn->out))) <= 0) {
+		irc_log_debug("server %s: SSL write incomplete", conn->sv->name);
 		conn->ssl_step = IRC_CONN_SSL_ACT_WRITE;
 		return update_ssl_state(conn, ns);
 	}
+
+	if (conn->ssl_cond)
+		irc_log_debug("server %s: condition back to normal", conn->sv->name);
 
 	conn->ssl_cond = IRC_CONN_SSL_ACT_NONE;
 	conn->ssl_step = IRC_CONN_SSL_ACT_NONE;
@@ -271,8 +285,10 @@ static int
 dial(struct irc_conn *conn)
 {
 	/* No more address available. */
-	if (conn->aip == NULL)
+	if (conn->aip == NULL) {
+		irc_log_warn("server %s: could not connect", conn->sv->name);
 		return irc_conn_disconnect(conn), -1;
+	}
 
 	for (; conn->aip; conn->aip = conn->aip->ai_next) {
 		if (create(conn) < 0)
@@ -308,7 +324,7 @@ lookup(struct irc_conn *conn)
 	snprintf(service, sizeof (service), "%hu", conn->port);
 
 	if ((ret = getaddrinfo(conn->hostname, service, &hints, &conn->ai)) != 0) {
-		// irc_log_warn gai_strerror(ret)
+		irc_log_warn("server %s: %s", conn->sv->name, gai_strerror(ret));
 		return -1;
 	}
 
@@ -336,9 +352,11 @@ prepare_ssl(const struct irc_conn *conn, struct pollfd *pfd)
 #if defined(IRCCD_WITH_SSL)
 	switch (conn->ssl_cond) {
 	case IRC_CONN_SSL_ACT_READ:
+		irc_log_debug("server %s: need read condition", conn->sv->name);
 		pfd->events |= POLLIN;
 		break;
 	case IRC_CONN_SSL_ACT_WRITE:
+		irc_log_debug("server %s: need write condition", conn->sv->name);
 		pfd->events |= POLLOUT;
 		break;
 	default:
@@ -352,6 +370,8 @@ prepare_ssl(const struct irc_conn *conn, struct pollfd *pfd)
 static inline int
 renegotiate(struct irc_conn *conn)
 {
+	irc_log_debug("server %s: renegociate step=%d", conn->sv->name, conn->ssl_step);
+
 	return conn->ssl_step == IRC_CONN_SSL_ACT_READ
 		? input(conn)
 		: output(conn);
@@ -417,12 +437,16 @@ irc_conn_flush(struct irc_conn *conn, const struct pollfd *pfd)
 	case IRC_CONN_STATE_READY:
 		if (pfd->revents & (POLLERR | POLLHUP))
 			return irc_conn_disconnect(conn), -1;
-		if (conn->ssl_cond && renegotiate(conn) < 0)
-			return irc_conn_disconnect(conn), -1;
-		if (pfd->revents & POLLIN && input(conn) < 0)
-			return irc_conn_disconnect(conn), -1;
-		if (pfd->revents & POLLOUT && output(conn) < 0)
-			return irc_conn_disconnect(conn), -1;
+
+		if (conn->ssl_cond) {
+			if (renegotiate(conn) < 0)
+				return irc_conn_disconnect(conn), -1;
+		} else {
+			if (pfd->revents & POLLIN && input(conn) < 0)
+				return irc_conn_disconnect(conn), -1;
+			if (pfd->revents & POLLOUT && output(conn) < 0)
+				return irc_conn_disconnect(conn), -1;
+		}
 		break;
 	default:
 		break;

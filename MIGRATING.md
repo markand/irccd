@@ -78,6 +78,16 @@ Javascript API
   which must be string (password is optional).
 - The property `commandChar` which is provided in both the `Server` constructor
   and the `Server.info` returned object has been renamed to `prefix`.
+- The event `onMode` now takes four arguments: server, channel, mode and list
+  of arguments to the mode. The previous signature was mostly unusable.
+
+Plugins
+-------
+
+**logger**
+
+- Due to the `onMode` change the template `mode` no longer takes `limit`,
+  `user` and `mask` but a string `args` instead.
 
 Migrating from 2.x to 3.x
 =========================

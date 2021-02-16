@@ -52,6 +52,27 @@ alloc(const struct irc_hook *h, size_t n, ...)
 }
 
 static char **
+alloc_mode(const struct irc_hook *h, const struct irc_event *ev)
+{
+	size_t n = 6;
+	char **ret;
+
+	/* Ret contains now 6 values. */
+	ret = alloc(h, 5, "onMode", ev->server->name, ev->mode.origin,
+	    ev->mode.channel, ev->mode.mode);
+
+	for (char **mode = ev->mode.args; *mode; ++mode) {
+		ret = irc_util_reallocarray(ret, n + 1, sizeof (char *));
+		ret[n++] = *mode;
+	};
+
+	ret = irc_util_reallocarray(ret, n + 1, sizeof (char *));
+	ret[n] = NULL;
+
+	return ret;
+}
+
+static char **
 make_args(const struct irc_hook *h, const struct irc_event *ev)
 {
 	char **ret;
@@ -64,44 +85,42 @@ make_args(const struct irc_hook *h, const struct irc_event *ev)
 		ret = alloc(h, 2, "onDisconnect", ev->server->name);
 		break;
 	case IRC_EVENT_INVITE:
-		ret = alloc(h, 3, "onInvite", ev->server->name, ev->invite.origin,
+		ret = alloc(h, 4, "onInvite", ev->server->name, ev->invite.origin,
 		    ev->invite.channel);
 		break;
 	case IRC_EVENT_JOIN:
-		ret = alloc(h, 3, "onJoin", ev->server->name, ev->join.origin,
+		ret = alloc(h, 4, "onJoin", ev->server->name, ev->join.origin,
 		    ev->join.channel);
 		break;
 	case IRC_EVENT_KICK:
-		ret = alloc(h, 5, "onKick", ev->server->name, ev->kick.origin,
+		ret = alloc(h, 6, "onKick", ev->server->name, ev->kick.origin,
 		    ev->kick.channel, ev->kick.target, ev->kick.reason);
 		break;
 	case IRC_EVENT_ME:
-		ret = alloc(h, 4, "onMe", ev->server->name, ev->message.origin,
+		ret = alloc(h, 5, "onMe", ev->server->name, ev->message.origin,
 		    ev->message.channel, ev->message.message);
 		break;
 	case IRC_EVENT_MESSAGE:
-		ret = alloc(h, 4, "onMessage", ev->server->name, ev->message.origin,
+		ret = alloc(h, 5, "onMessage", ev->server->name, ev->message.origin,
 		    ev->message.channel, ev->message.message);
 		break;
 	case IRC_EVENT_MODE:
-		ret = alloc(h, 7, "onMode", ev->server->name, ev->mode.origin,
-		    ev->mode.channel, ev->mode.mode, ev->mode.limit,
-		    ev->mode.user, ev->mode.mask);
+		ret = alloc_mode(h, ev);
 		break;
 	case IRC_EVENT_NICK:
-		ret = alloc(h, 3, "onNick", ev->server->name, ev->nick.origin,
+		ret = alloc(h, 4, "onNick", ev->server->name, ev->nick.origin,
 		    ev->nick.nickname);
 		break;
 	case IRC_EVENT_NOTICE:
-		ret = alloc(h, 4, "onNotice", ev->server->name, ev->notice.origin,
+		ret = alloc(h, 5, "onNotice", ev->server->name, ev->notice.origin,
 		    ev->notice.channel, ev->notice.notice);
 		break;
 	case IRC_EVENT_PART:
-		ret = alloc(h, 4, "onPart", ev->server->name, ev->part.origin,
+		ret = alloc(h, 5, "onPart", ev->server->name, ev->part.origin,
 		    ev->part.channel, ev->part.reason);
 		break;
 	case IRC_EVENT_TOPIC:
-		ret = alloc(h, 4, "onTopic", ev->server->name, ev->topic.origin,
+		ret = alloc(h, 5, "onTopic", ev->server->name, ev->topic.origin,
 		    ev->topic.channel, ev->topic.topic);
 		break;
 	default:
