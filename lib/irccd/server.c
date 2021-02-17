@@ -277,8 +277,8 @@ static void
 handle_invite(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	ev->type = IRC_EVENT_INVITE;
-	ev->invite.origin = strdup(msg->prefix);
-	ev->invite.channel = strdup(msg->args[1]);
+	ev->invite.origin = irc_util_strdup(msg->prefix);
+	ev->invite.channel = irc_util_strdup(msg->args[1]);
 
 	if (s->flags & IRC_SERVER_FLAGS_JOIN_INVITE) {
 		irc_server_join(s, ev->invite.channel, NULL);
@@ -290,8 +290,8 @@ static void
 handle_join(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	ev->type = IRC_EVENT_JOIN;
-	ev->join.origin = strdup(msg->prefix);
-	ev->join.channel = strdup(msg->args[0]);
+	ev->join.origin = irc_util_strdup(msg->prefix);
+	ev->join.channel = irc_util_strdup(msg->args[0]);
 
 	add_channel(s, ev->join.channel, NULL, 1);
 
@@ -303,10 +303,10 @@ static void
 handle_kick(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	ev->type = IRC_EVENT_KICK;
-	ev->kick.origin = strdup(msg->prefix);
-	ev->kick.channel = strdup(msg->args[0]);
-	ev->kick.target = strdup(msg->args[1]);
-	ev->kick.reason = msg->args[2] ? strdup(msg->args[2]) : NULL;
+	ev->kick.origin = irc_util_strdup(msg->prefix);
+	ev->kick.channel = irc_util_strdup(msg->args[0]);
+	ev->kick.target = irc_util_strdup(msg->args[1]);
+	ev->kick.reason = msg->args[2] ? irc_util_strdup(msg->args[2]) : NULL;
 
 	struct irc_channel *ch = add_channel(s, ev->kick.channel, NULL, 1);
 
@@ -399,9 +399,9 @@ handle_part(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 	struct irc_channel *ch;
 
 	ev->type = IRC_EVENT_PART;
-	ev->part.origin = strdup(msg->prefix);
-	ev->part.channel = strdup(msg->args[0]);
-	ev->part.reason = msg->args[1] ? strdup(msg->args[1]) : NULL;
+	ev->part.origin = irc_util_strdup(msg->prefix);
+	ev->part.channel = irc_util_strdup(msg->args[0]);
+	ev->part.reason = msg->args[1] ? irc_util_strdup(msg->args[1]) : NULL;
 
 	ch = add_channel(s, ev->part.channel, NULL, 1);
 
@@ -417,8 +417,8 @@ handle_msg(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	(void)s;
 
-	ev->message.origin = strdup(msg->prefix);
-	ev->message.channel = strdup(msg->args[0]);
+	ev->message.origin = irc_util_strdup(msg->prefix);
+	ev->message.channel = irc_util_strdup(msg->args[0]);
 
 	/*
 	 * Detect CTCP commands which are PRIVMSG with a special boundaries.
@@ -428,10 +428,10 @@ handle_msg(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 	 */
 	if (is_ctcp(msg->args[1])) {
 		ev->type = IRC_EVENT_ME;
-		ev->message.message = strdup(ctcp(msg->args[1]));
+		ev->message.message = irc_util_strdup(ctcp(msg->args[1]));
 	} else {
 		ev->type = IRC_EVENT_MESSAGE;
-		ev->message.message = strdup(msg->args[1]);
+		ev->message.message = irc_util_strdup(msg->args[1]);
 	}
 }
 
@@ -439,8 +439,8 @@ static void
 handle_nick(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	ev->type = IRC_EVENT_NICK;
-	ev->nick.origin = strdup(msg->prefix);
-	ev->nick.nickname = strdup(msg->args[0]);
+	ev->nick.origin = irc_util_strdup(msg->prefix);
+	ev->nick.nickname = irc_util_strdup(msg->args[0]);
 
 	/* Update nickname if it is myself. */
 	if (is_self(s, ev->nick.origin) == 0) {
@@ -456,9 +456,9 @@ handle_notice(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *m
 	(void)s;
 
 	ev->type = IRC_EVENT_NOTICE;
-	ev->notice.origin = strdup(msg->prefix);
-	ev->notice.channel = strdup(msg->args[0]);
-	ev->notice.notice = strdup(msg->args[1]);
+	ev->notice.origin = irc_util_strdup(msg->prefix);
+	ev->notice.channel = irc_util_strdup(msg->args[0]);
+	ev->notice.notice = irc_util_strdup(msg->args[1]);
 }
 
 static void
@@ -467,9 +467,9 @@ handle_topic(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *ms
 	(void)s;
 
 	ev->type = IRC_EVENT_TOPIC;
-	ev->topic.origin = strdup(msg->prefix);
-	ev->topic.channel = strdup(msg->args[0]);
-	ev->topic.topic = strdup(msg->args[1]);
+	ev->topic.origin = irc_util_strdup(msg->prefix);
+	ev->topic.channel = irc_util_strdup(msg->args[0]);
+	ev->topic.topic = irc_util_strdup(msg->args[1]);
 }
 
 static void
@@ -561,10 +561,10 @@ handle_whoisuser(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg
 	(void)ev;
 	(void)msg;
 
-	s->bufwhois.nickname = strdup(msg->args[1]);
-	s->bufwhois.username = strdup(msg->args[2]);
-	s->bufwhois.hostname = strdup(msg->args[3]);
-	s->bufwhois.realname = strdup(msg->args[5]);
+	s->bufwhois.nickname = irc_util_strdup(msg->args[1]);
+	s->bufwhois.username = irc_util_strdup(msg->args[2]);
+	s->bufwhois.hostname = irc_util_strdup(msg->args[3]);
+	s->bufwhois.realname = irc_util_strdup(msg->args[5]);
 }
 
 static void
