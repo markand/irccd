@@ -16,16 +16,42 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+set(
+	JS_PLUGINS
+	ask
+	auth
+	hangman
+	history
+	joke
+	logger
+	plugin
+	roulette
+	tictactoe
+)
+
+set(
+	C_PLUGINS
+	links
+)
+
+foreach (p ${C_PLUGINS} ${JS_PLUGINS})
+	string(TOUPPER ${p} opt)
+	option(IRCCD_WITH_PLUGIN_${opt} "Enable ${p} plugin" On)
+endforeach ()
+
 if (IRCCD_WITH_JS)
-	add_subdirectory(ask)
-	add_subdirectory(auth)
-	add_subdirectory(hangman)
-	add_subdirectory(history)
-	add_subdirectory(joke)
-	add_subdirectory(logger)
-	add_subdirectory(plugin)
-	add_subdirectory(roulette)
-	add_subdirectory(tictactoe)
+	foreach (p ${JS_PLUGINS})
+		string(TOUPPER ${p} p)
+		if (IRCCD_WITH_PLUGIN_${p})
+			add_subdirectory(${p})
+		endif ()
+	endforeach ()
 endif ()
 
-add_subdirectory(links)
+foreach (p ${C_PLUGINS})
+	string(TOUPPER ${p} p)
+
+	if (IRCCD_WITH_PLUGIN_${p})
+		add_subdirectory(links)
+	endif ()
+endforeach ()

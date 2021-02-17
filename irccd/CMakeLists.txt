@@ -94,5 +94,6 @@ add_executable(
 set_target_properties(irccd PROPERTIES ENABLE_EXPORTS On)
 target_link_libraries(irccd irccd-fe)
 install(TARGETS irccd DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(FILES irccd.conf DESTINATION ${CMAKE_INSTALL_SYSCONFDIR} RENAME irccd.conf.sample)
 
 source_group(TREE ${irccd_SOURCE_DIR} FILES ${SOURCES})

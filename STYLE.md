@@ -1,12 +1,12 @@
-IRC Client Daemon CODING STYLE
-==============================
+irccd CODING STYLE
+==================
 
 File content
 ============
 
 - Use UTF-8 charset,
 - Use Unix line endings,
-- Never write two blank consecutives blank lines.
+- Never write two consecutives blank lines.
 
 Indent
 ======
@@ -49,14 +49,13 @@ Example of incorrect usage:
 
 This example will not align correctly if tabstops are not set to 8.
 
-C++
-===
+C
+=
 
 Style
 -----
 
-- Do not exceed 120 columns for lines of code,
-- Do not exceed 80 columns for comments,
+- Do not exceed 80 columns.
 
 ### Braces
 
@@ -65,7 +64,7 @@ function definitions.
 
 Do not put braces for single line statements.
 
-```cpp
+```c
 if (condition) {
 	apply();
 	add();
@@ -82,19 +81,14 @@ if (foo)
 
 Functions require braces on their own lines.
 
-```cpp
-void function()
+```c
+void
+function()
 {
 }
 ```
 
-And a lambda has its braces on the same lines too:
-
-```cpp
-sort([&] (auto&) {
-	return true;
-});
-```
+Note: the type of a function is broken into its own line.
 
 ### Spaces
 
@@ -103,75 +97,73 @@ its argument.
 
 Normal function calls do not require it.
 
-```cpp
+```c
 if (foo)
 	destroy(sizeof (int));
 ```
 
-### References and pointers
+### Pointers
 
-References and pointers are always next to the type name and not the variable.
+Pointers are always next variable name.
 
-```cpp
-auto get(const std::string& name) -> T&;
-
-int* p = &x;
+```c
+void
+cleanup(struct owner *owner);
 ```
 
-### Trailing return syntax
+### Typedefs
 
-We use trailing return syntax everywhere, it has the following benefits:
+Do not use typedef for non-opaque objects. It is allowed for function pointers.
 
-- Inner types don't need to be prefixed by class name,
-- Functions are kept aligned correctly, focusing on the function name.
+```c
+struct pack {
+	int x;
+	int y;
+};
 
-```cpp
-auto func() -> std::string;
+typedef void (*logger)(const char *line);
 ```
+
+Note: do never add `_t` suffix to typedef's.
 
 ### Naming
 
 - English names,
-- Member variables have trailing underscore (e.g foo\_bar\_),
-- No hungarian notation.
+- No hungarian notation,
 
-Everything is in `underscore_case` except template parameters and macros.
+Almost everything is in `underscore_case` except macros and enumeration
+constants.
 
-```cpp
+```c
 #if defined(FOO)
 #	include <foo.hpp>
 #endif
 
-namespace baz {
+#define MAJOR 1
+#define MINOR 0
+#define PATCH 0
 
-class object {
-private:
-	std::string name_;
-
-public:
-	auto name() const noexcept -> const std::string&;
+enum color {
+	COLOR_RED,
+	COLOR_GREEN,
+	COLOR_BLUE
 };
 
-template <typename Archive>
-void open(const Archive& ar)
-{
-	bool is_valid = false;
-}
-
-} // !baz
+void
+add_widget(const struct widget *widget_to_add);
 ```
 
 ### Header guards
 
 Do not use `#pragma once`.
 
-Header guards are usually named `PROJECT_COMPONENT_FILENAME_HPP`.
+Header guards are usually named `PROJECT_COMPONENT_FILENAME_H`.
 
-```cpp
-#ifndef FOO_COMMON_UTIL_HPP
-#define FOO_COMMON_UTIL_HPP
+```c
+#ifndef FOO_COMMON_UTIL_H
+#define FOO_COMMON_UTIL_H
 
-#endif // !FOO_COMMON_UTIL_HPP
+#endif /* !FOO_COMMON_UTIL_HPP */
 ```
 
 ### Enums
@@ -179,13 +171,13 @@ Header guards are usually named `PROJECT_COMPONENT_FILENAME_HPP`.
 Enumerations constants are always defined in separate line to allow commenting
 them as doxygen.
 
-Enum class are encouraged.
+Note: enumeration constants are prefixed with its name.
 
-```cpp
-enum class color {
-	blue,
-	red,
-	green
+```c
+enum color {
+	COLOR_RED,
+	COLOR_GREEN,
+	COLOR_BLUE
 };
 ```
 
@@ -194,7 +186,7 @@ enum class color {
 In a switch case statement, you **must** not declare variables and not indent
 cases.
 
-```cpp
+```c
 switch (variable) {
 case foo:
 	do_some_stuff();
@@ -206,27 +198,26 @@ default:
 
 ### Files
 
-- Use `.cpp` and `.hpp` as file extensions,
+- Use `.c` and `.h` as file extensions,
 - Filenames are all lowercase.
 
 ### Comments
 
 Avoid useless comments in source files. Comment complex things or why it is done
-like this. However any public function in the .hpp **must** be documented as
-doxygen without exception.
+like this. Do not use `//` style comments in C.
 
-```cpp
+```c
 /*
  * Multi line comments look like
  * this.
  */
 
-// Short comment
+/* Short comment. */
 ```
 
 Use `#if 0` to comment blocks of code.
 
-```cpp
+```c
 #if 0
 	broken_stuff();
 #endif
@@ -236,193 +227,51 @@ Use `#if 0` to comment blocks of code.
 
 The includes should always come in the following order.
 
-1. C++ headers
+1. System headers (POSIX mostly)
 2. C header
 3. Third party libraries
 4. Application headers in ""
 
-```cpp
-#include <cstring>
-#include <cerrno>
-
+```c
+#include <sys/types.h>
 #include <sys/stat.h>
+#include <string.h>
 
 #include <libircclient.h>
 
 #include "foo.h"
 ```
 
-Note: always use C++ headers for C equivalent, stdio.h -> cstdio, etc.
-
 Programming
 -----------
 
-### C language
+### C Standard
 
-Do not use old C stuff like `void*`, `srand/rand`, `printf` or anything that
-can be rewritten in modern C++.
-
-### RTTI
-
-Usage of `dynamic_cast` and `typeid` are completely disallowed in any shape of
-form.
-
-### Arguments
-
-It is recommended to pass parameters by value or const reference. Usage of
-non-const reference as output parameter is **discouraged** and should be avoided
-in many case because it does not allow chaining of expressions like:
-
-```cpp
-std::cout << reverse(upper(clean("  hello world!  "))) << std::endl;
-```
-
-If your function is designed to return a modified value passed as argument, it
-is better to take it by value and modify it directly.
-
-```cpp
-auto clean(std::string input) -> std::string
-{
-	if (!input.empty() && input.back() == '\r')
-		input.pop_back();
-
-	return input;
-}
-```
-
-Never pass primitive types as const value.
+Use C11 standard without extensions.
 
 ### Assertions
 
-Use the `assert` macro from the cassert header file to verify programming
+Use the `assert` macro from the assert.h header file to verify programming
 errors.
 
 For example, you may use `assert` to verify that the developer access the data
 between the bounds of an array:
 
-```cpp
-auto operator[](unsigned index) -> T&
+```c
+int
+get(struct data *data, unsigned index)
 {
-	assert(index < length_);
+	assert(index < data->length);
 
-	return data_[index];
+	return data->buffer[index];
 }
 ```
 
 The `assert` macro is not meant to check that a function succeeded, this code
 must not be written that way:
 
-```cpp
+```c
 assert(listen(10));
-```
-
-### Exceptions
-
-You must use exceptions to indicate an error that was unexpected such as:
-
-- Failing to open a file,
-- I/O unexpected errors,
-- Parsing errors,
-- User errors.
-
-You may use the C++ standard exceptions defined in the stdexcept header but if
-you need to carry more data within your exception, you should derive from
-`std::exception`.
-
-### Error code
-
-You should not use error codes to indicate errors, instead use exceptions.
-Error codes are allowed in Boost.Asio though.
-
-### Free functions
-
-Basic utility functions should be defined in a namespace as a free function not
-as a static member function, we're doing C++ not Java.
-
-Example:
-
-```cpp
-namespace util {
-
-auto clean(std::string input) -> std::string;
-
-} // !util
-```
-
-### Variables initialization
-
-Use parentheses to initialize non primitive types:
-
-```cpp
-throw std::runtime_error("foo");
-
-my_class obj("bar");
-```
-
-Use brace initialization when you want to use an initializer list, type
-elision:
-
-```cpp
-std::vector<int> v{1, 2, 3};
-
-foo({1, 2});					// type deduced
-
-return { "true", false };	   // std::pair returned
-```
-
-Use the assignment for primitive types:
-
-```cpp
-int x = 123;
-bool is_valid = true;
-```
-
-### Classes
-
-Classes are usually defined in the following order:
-
-1. Public inner types (enums, classes),
-2. Protected/private members and functions
-3. Public static functions.
-3. Public member functions
-4. Public virtual functions.
-
-```cpp
-class foo {
-public:
-	enum class type {
-		a,
-		b
-	};
-
-private:
-	int member_{0};
-
-public:
-	void some_function();
-};
-```
-
-### Structs
-
-Use structs for objects that only need to store public data and have no
-invariants. For example PODs and traits match this criteria:
-
-```cpp
-struct point {
-	int x{0};
-	int y{0};
-};
-
-template <>
-struct info_traits<point> {
-	template <typename Archive>
-	static void serialize(Archive& ar, const point& point)
-	{
-		ar.write(point.x);
-		ar.write(point.y);
-	}
-};
 ```
 
 ### Return
@@ -432,18 +281,16 @@ more linear and not highly indented.
 
 This code is preferred:
 
-```cpp
+```c
 if (a_condition_is_not_valid)
-	return nullptr;
+	return false;
 if (an_other_condition)
-	return nullptr;
+	return false;
 
-auto x = std::make_shared<object>();
+start();
+save();
 
-x->start();
-x->save();
-
-return x;
+return true;
 ```
 
 Additional rules:
@@ -451,61 +298,63 @@ Additional rules:
 - Do never put parentheses between the returned value,
 - Do not put a else branch after a return.
 
-### Auto
+Shell
+=====
 
-We encorage usage of `auto`, it reduces code maintainance as you don't need to
-change your code when your rename types.
+Write POSIX shell only with no bash, zsh or any extension.
 
-```cpp
-auto it = std::find_if(v.begin(), v.end(), [&] (const auto& obj) {
-	return obj.key() == "foo";
-});
+Style
+-----
 
-for (const auto& pair : a_map)
-	std::cout << pair.first << " = " << pair.second << std::endl;
-```
+- Try to keep lines shorter than 80 columns
 
-But do not use `auto` to write code like in python, this is not acceptable:
+Functions
+---------
 
-```cpp
-auto o = my_object("foo");
-```
+Don't use `function` keyword, just keep the function name.
 
-### String views
-
-Use `std::string_view` each time you need a string that you will not own, this
-includes: temporary arguments, return values, compile time constants.
-
-```cpp
-const std::string_view version("1.0");
-
-void load(std::string_view id, std::string_view path)
+```sh
+usage()
 {
-	std::cout << "loading: " << id << " from path: " << path << std::endl;
 }
 ```
 
-### Optional values
+It's usually recommended to prefix functions names with the program name to
+avoid collisions with global commands.
 
-Use `std::optional` to indicate a null value considered as valid. For example,
-searching a value that may not exist.
-
-```cpp
-auto find(std::string_view id) -> std::optional<int>
+```sh
+foo_clean()
 {
-	if (auto it = foo.find(id); it != foo.end())
-		return it->second;
+}
 
-	return std::nullopt;
+foo_process()
+{
 }
 ```
 
-### Avoid definitions in headers
+Options
+-------
 
-Try to avoid as much as possible function definition in header file. It slow
-down compilation because the compiler has to parse the syntax over and over.
-It's even worse as you may need to recompile a lot of files when you change a
-header rather than a source file.
+For options, use `getopts` and prefer short options to long unless necessary.
+Also set OPTERR=0 to avoid printing errors and do it yourself for UX
+consistency.
+
+```sh
+OPTERR=0
+while getopts "v" arg; do
+	case $arg in
+	v)
+		verbose=1
+		;;
+	esac
+done
+```
+
+Naming
+------
+
+Use `UPPERCASE` variables for global variables and `lowercase` for temporary or
+local variables.
 
 CMake
 =====
@@ -513,7 +362,7 @@ CMake
 Style
 -----
 
-- Try to keep line shorter than 80 columns
+- Try to keep lines shorter than 80 columns
 
 ### Spaces
 
@@ -674,7 +523,7 @@ Code blocks
 -----------
 
 You can use three backticks and the language specifier or just indent a block by
-for leading spaces if you don't need syntax.
+for leading tabs if you don't need syntax.
 
 	```cpp
 	std::cout << "hello world" << std::endl;
