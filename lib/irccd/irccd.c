@@ -277,6 +277,7 @@ void
 irc_bot_server_add(struct irc_server *s)
 {
 	assert(s);
+	assert(!irc_bot_server_get(s->name));
 
 	irc_log_info("irccd: added new server: %s", s->name);
 
@@ -332,6 +333,7 @@ void
 irc_bot_plugin_add(struct irc_plugin *p)
 {
 	assert(p);
+	assert(!irc_bot_plugin_get(p->name));
 
 	LIST_INSERT_HEAD(&irc.plugins, p, link);
 

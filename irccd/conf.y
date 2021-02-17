@@ -430,6 +430,8 @@ server
 		struct string *str;
 		char *at;
 
+		if (irc_bot_server_get($2))
+			errx(1, "server %s already exists", $2);
 		if (!$4->hostname)
 			errx(1, "missing server hostname");
 		if (!$4->nickname)
@@ -546,6 +548,8 @@ plugin
 		struct pair *kv;
 		const char *location = $3 ? $3->location : NULL;
 
+		if (irc_bot_plugin_get($2))
+			errx(1, "plugin %s already exists", $2);
 		if (!(p = irc_bot_plugin_find($2, location)))
 			goto cleanup;
 
@@ -577,6 +581,9 @@ plugin
 hook
 	: T_HOOK T_STRING T_TO T_STRING
 	{
+		if (irc_bot_hook_get($2))
+			errx(1, "hook %s already exists", $2);
+
 		irc_bot_hook_add(irc_hook_new($2, $4));
 
 		free($2);
