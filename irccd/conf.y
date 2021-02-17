@@ -19,6 +19,7 @@
 %{
 
 #include <err.h>
+#include <limits.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -33,6 +34,7 @@
 #include "transport.h"
 
 extern FILE *yyin;
+extern int yylineno;
 
 struct pair {
 	char *key;
@@ -108,6 +110,8 @@ string_list_finish(struct string_list *list)
 
 	free(list);
 }
+
+static char confpath[PATH_MAX];
 
 int
 yylex(void);
@@ -596,7 +600,7 @@ hook
 void
 yyerror(const char *err)
 {
-	errx(1, "%s", err);
+	errx(1, "%s:%d: %s", confpath, yylineno, err);
 }
 
 void
@@ -605,6 +609,7 @@ config_open(const char *path)
 	if (!(yyin = fopen(path, "r")))
 		err(1, "%s", path);
 
+	strlcpy(confpath, path, sizeof (confpath));
 	yyparse();
 	fclose(yyin);
 }
