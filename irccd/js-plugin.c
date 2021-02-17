@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <compat.h>
-
 #include <sys/stat.h>
 #include <assert.h>
 #include <errno.h>
@@ -28,6 +26,8 @@
 #include <unistd.h>
 
 #include <irccd/channel.h>
+#include <irccd/compat.h>
+#include <irccd/config.h>
 #include <irccd/event.h>
 #include <irccd/log.h>
 #include <irccd/plugin.h>

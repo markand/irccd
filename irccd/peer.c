@@ -29,6 +29,7 @@
 #include <assert.h>
 
 #include <irccd/compat.h>
+#include <irccd/conn.h>
 #include <irccd/irccd.h>
 #include <irccd/log.h>
 #include <irccd/server.h>
@@ -750,7 +751,7 @@ cmd_server_info(struct peer *p, char *line)
 		return errno;
 
 	fprintf(fp, "OK %s\n", s->name);
-	fprintf(fp, "%s %u%s\n", s->conn.hostname, s->conn.port,
+	fprintf(fp, "%s %u%s\n", s->conn->hostname, s->conn->port,
 	    s->flags & IRC_SERVER_FLAGS_SSL ? " ssl" : "");
 	fprintf(fp, "%s %s %s\n", s->ident.nickname, s->ident.username, s->ident.realname);
 

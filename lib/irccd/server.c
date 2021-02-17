@@ -34,6 +34,7 @@
 #endif
 
 #include "channel.h"
+#include "conn.h"
 #include "event.h"
 #include "log.h"
 #include "server.h"
@@ -61,7 +62,7 @@ clear_channels(struct irc_server *s, int free)
 static inline void
 clear_server(struct irc_server *s)
 {
-	irc_conn_finish(&s->conn);
+	irc_conn_finish(s->conn);
 
 	free(s->bufwhois.nickname);
 	free(s->bufwhois.username);
@@ -697,8 +698,11 @@ irc_server_new(const char *name,
 
 	/* Connection. */
 	s = irc_util_calloc(1, sizeof (*s));
-	s->conn.port = port;
-	strlcpy(s->conn.hostname, hostname, sizeof (s->conn.hostname));
+
+	/* Hide implementation to get rid of OpenSSL headers in public API. */
+	s->conn = irc_util_calloc(1, sizeof (*s->conn));
+	s->conn->port = port;
+	strlcpy(s->conn->hostname, hostname, sizeof (s->conn->hostname));
 
 	/* Identity. */
 	strlcpy(s->ident.nickname, nickname, sizeof (s->ident.nickname));
@@ -721,11 +725,11 @@ irc_server_connect(struct irc_server *s)
 	assert(s);
 
 	if (s->flags & IRC_SERVER_FLAGS_SSL)
-		s->conn.flags |= IRC_CONN_SSL;
+		s->conn->flags |= IRC_CONN_SSL;
 
-	s->conn.sv = s;
+	s->conn->sv = s;
 
-	if (irc_conn_connect(&s->conn) < 0)
+	if (irc_conn_connect(s->conn) < 0)
 		fail(s);
 	else
 		s->state = IRC_SERVER_STATE_CONNECTING;
@@ -755,7 +759,7 @@ irc_server_prepare(const struct irc_server *s, struct pollfd *pfd)
 	assert(s);
 	assert(pfd);
 
-	irc_conn_prepare(&s->conn, pfd);
+	irc_conn_prepare(s->conn, pfd);
 }
 
 void
@@ -773,7 +777,7 @@ irc_server_flush(struct irc_server *s, const struct pollfd *pfd)
 		if (difftime(time(NULL), s->last_tp) >= TIMEOUT) {
 			irc_log_warn("server %s: no message in more than %u seconds", s->name, TIMEOUT);
 			fail(s);
-		} else if (irc_conn_flush(&s->conn, pfd) < 0) {
+		} else if (irc_conn_flush(s->conn, pfd) < 0) {
 			irc_log_warn("server %s: %s", s->name, strerror(errno));
 			return fail(s);
 		}
@@ -811,7 +815,7 @@ irc_server_poll(struct irc_server *s, struct irc_event *ev)
 		return 1;
 	}
 
-	if (irc_conn_poll(&s->conn, &msg))
+	if (irc_conn_poll(s->conn, &msg))
 		return handle(s, ev, &msg), 1;
 
 	return 0;
@@ -850,7 +854,7 @@ irc_server_send(struct irc_server *s, const char *fmt, ...)
 	vsnprintf(buf, sizeof (buf), fmt, ap);
 	va_end(ap);
 
-	return irc_conn_send(&s->conn, buf);
+	return irc_conn_send(s->conn, buf);
 }
 
 int
@@ -1061,5 +1065,6 @@ irc_server_decref(struct irc_server *s)
 	if (--s->refc == 0) {
 		clear_channels(s, 1);
 		free(s);
+		free(s->conn);
 	}
 }

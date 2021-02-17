@@ -23,7 +23,6 @@ include(CMakePackageConfigHelpers)
 set(
 	HEADERS
 	irccd/channel.h
-	irccd/conn.h
 	irccd/event.h
 	irccd/hook.h
 	irccd/irccd.h
@@ -74,7 +73,6 @@ target_include_directories(libirccd INTERFACE
 	$<BUILD_INTERFACE:${libirccd_BINARY_DIR}/irccd>
 	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 	$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/irccd/extern>
-	${OPENSSL_INCLUDE_DIR}
 	${COMPAT_INCS}
 )
 

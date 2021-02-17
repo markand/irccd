@@ -20,6 +20,7 @@
 #include <ctype.h>
 #include <err.h>
 #include <errno.h>
+#include <pthread.h>
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,6 +29,7 @@
 #include <curl/curl.h>
 
 #include <irccd/compat.h>
+#include <irccd/config.h>
 #include <irccd/irccd.h>
 #include <irccd/limits.h>
 #include <irccd/server.h>

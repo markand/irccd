@@ -21,6 +21,7 @@
 #include <duktape.h>
 
 #include <irccd/channel.h>
+#include <irccd/conn.h>
 #include <irccd/irccd.h>
 #include <irccd/server.h>
 #include <irccd/util.h>
@@ -152,9 +153,9 @@ Server_prototype_info(duk_context *ctx)
 	duk_push_object(ctx);
 	duk_push_string(ctx, s->name);
 	duk_put_prop_string(ctx, -2, "name");
-	duk_push_string(ctx, s->conn.hostname);
+	duk_push_string(ctx, s->conn->hostname);
 	duk_put_prop_string(ctx, -2, "hostname");
-	duk_push_uint(ctx, s->conn.port);
+	duk_push_uint(ctx, s->conn->port);
 	duk_put_prop_string(ctx, -2, "port");
 	duk_push_boolean(ctx, s->flags & IRC_SERVER_FLAGS_SSL);
 	duk_put_prop_string(ctx, -2, "ssl");

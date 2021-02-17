@@ -21,6 +21,7 @@
 #include <err.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <irccd/compat.h>
 #include <irccd/irccd.h>

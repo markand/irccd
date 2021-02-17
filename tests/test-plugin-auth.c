@@ -22,6 +22,7 @@
 #include <greatest.h>
 
 #include <irccd/compat.h>
+#include <irccd/conn.h>
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
 #include <irccd/server.h>
@@ -83,7 +84,7 @@ basics_nickserv1(void)
 		.server = servers[0]
 	});
 
-	GREATEST_ASSERT_STR_EQ("PRIVMSG NickServ :identify plopation\r\n", servers[0]->conn.out);
+	GREATEST_ASSERT_STR_EQ("PRIVMSG NickServ :identify plopation\r\n", servers[0]->conn->out);
 	GREATEST_PASS();
 }
 
@@ -95,7 +96,7 @@ basics_nickserv2(void)
 		.server = servers[1]
 	});
 
-	GREATEST_ASSERT_STR_EQ("PRIVMSG NickServ :identify jean something\r\n", servers[1]->conn.out);
+	GREATEST_ASSERT_STR_EQ("PRIVMSG NickServ :identify jean something\r\n", servers[1]->conn->out);
 	GREATEST_PASS();
 }
 
@@ -107,7 +108,7 @@ basics_quakenet(void)
 		.server = servers[2]
 	});
 
-	GREATEST_ASSERT_STR_EQ("PRIVMSG Q@CServe.quakenet.org :AUTH mario hello\r\n", servers[2]->conn.out);
+	GREATEST_ASSERT_STR_EQ("PRIVMSG Q@CServe.quakenet.org :AUTH mario hello\r\n", servers[2]->conn->out);
 	GREATEST_PASS();
 }
 

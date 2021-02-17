@@ -22,35 +22,36 @@
 #include <greatest.h>
 
 #include <irccd/compat.h>
+#include <irccd/conn.h>
 #include <irccd/js-plugin.h>
 #include <irccd/log.h>
 #include <irccd/plugin.h>
 #include <irccd/server.h>
 
 #define CALL(t, m) do {                                                 \
-	memset(server->conn.out, 0, sizeof (server->conn.out));         \
-	irc_plugin_handle(plugin, &(const struct irc_event) {           \
-		.type = t,                                              \
-		.server = server,                                       \
-			.message = {                                    \
-			.origin = "jean!jean@localhost",                \
-			.channel = "#history",                          \
-			.message = m                                    \
-		}                                                       \
-	});                                                             \
+        memset(server->conn->out, 0, sizeof (server->conn->out));       \
+        irc_plugin_handle(plugin, &(const struct irc_event) {           \
+                .type = t,                                              \
+                .server = server,                                       \
+                        .message = {                                    \
+                        .origin = "jean!jean@localhost",                \
+                        .channel = "#history",                          \
+                        .message = m                                    \
+                }                                                       \
+        });                                                             \
 } while (0)
 
 #define CALL_EX(t, o, c, m) do {                                        \
-	memset(server->conn.out, 0, sizeof (server->conn.out));         \
-	irc_plugin_handle(plugin, &(const struct irc_event) {           \
-		.type = t,                                              \
-		.server = server,                                       \
-			.message = {                                    \
-			.origin = o,                                    \
-			.channel = c,                                   \
-			.message = m                                    \
-		}                                                       \
-	});                                                             \
+        memset(server->conn->out, 0, sizeof (server->conn->out));         \
+        irc_plugin_handle(plugin, &(const struct irc_event) {           \
+                .type = t,                                              \
+                .server = server,                                       \
+                        .message = {                                    \
+                        .origin = o,                                    \
+                        .channel = c,                                   \
+                        .message = m                                    \
+                }                                                       \
+        });                                                             \
 } while (0)
 
 static struct irc_server *server;
@@ -96,7 +97,7 @@ basics_error(void)
 {
 	irc_plugin_set_option(plugin, "file", SOURCE "/data/error.json");
 	CALL(IRC_EVENT_COMMAND, "seen francis");
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #history :error=history:!history:test:#history:jean!jean@localhost:jean\r\n", server->conn.out);
+	GREATEST_ASSERT_STR_EQ("PRIVMSG #history :error=history:!history:test:#history:jean!jean@localhost:jean\r\n", server->conn->out);
 	GREATEST_PASS();
 }
 
@@ -108,7 +109,7 @@ basics_seen(void)
 	CALL_EX(IRC_EVENT_MESSAGE, "jean!jean@localhost", "#history", "hello");
 	CALL_EX(IRC_EVENT_COMMAND, "francis!francis@localhost", "#history", "seen jean");
 
-	GREATEST_ASSERT_EQ(2, sscanf(server->conn.out, "PRIVMSG #history :seen=history:!history:test:#history:francis!francis@localhost:francis:jean:%d:%d\r\n", &d1, &d2));
+	GREATEST_ASSERT_EQ(2, sscanf(server->conn->out, "PRIVMSG #history :seen=history:!history:test:#history:francis!francis@localhost:francis:jean:%d:%d\r\n", &d1, &d2));
 
 	GREATEST_PASS();
 }
@@ -121,7 +122,7 @@ basics_said(void)
 	CALL_EX(IRC_EVENT_MESSAGE, "jean!jean@localhost", "#history", "hello");
 	CALL_EX(IRC_EVENT_COMMAND, "francis!francis@localhost", "#history", "said jean");
 
-	GREATEST_ASSERT_EQ(2, sscanf(server->conn.out, "PRIVMSG #history :said=history:!history:test:#history:francis!francis@localhost:francis:jean:hello:%d:%d", &d1, &d2));
+	GREATEST_ASSERT_EQ(2, sscanf(server->conn->out, "PRIVMSG #history :said=history:!history:test:#history:francis!francis@localhost:francis:jean:hello:%d:%d", &d1, &d2));
 
 	GREATEST_PASS();
 }
@@ -132,7 +133,7 @@ basics_unknown(void)
 	CALL_EX(IRC_EVENT_MESSAGE, "jean!jean@localhost", "#history", "hello");
 	CALL_EX(IRC_EVENT_COMMAND, "francis!francis@localhost", "#history", "said nobody");
 
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #history :unknown=history:!history:test:#history:francis!francis@localhost:francis:nobody\r\n", server->conn.out);
+	GREATEST_ASSERT_STR_EQ("PRIVMSG #history :unknown=history:!history:test:#history:francis!francis@localhost:francis:nobody\r\n", server->conn->out);
 	GREATEST_PASS();
 }
 
@@ -144,10 +145,10 @@ basics_case_insensitive(void)
 	CALL_EX(IRC_EVENT_MESSAGE, "JeaN!JeaN@localhost", "#history", "hello");
 
 	CALL_EX(IRC_EVENT_COMMAND, "destructor!dst@localhost", "#HISTORY", "said JEAN");
-	GREATEST_ASSERT_EQ(2, sscanf(server->conn.out, "PRIVMSG #history :said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:%d:%d\r\n", &d1, &d2));
+	GREATEST_ASSERT_EQ(2, sscanf(server->conn->out, "PRIVMSG #history :said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:%d:%d\r\n", &d1, &d2));
 
 	CALL_EX(IRC_EVENT_COMMAND, "destructor!dst@localhost", "#HiSToRy", "said JeaN");
-	GREATEST_ASSERT_EQ(2, sscanf(server->conn.out, "PRIVMSG #history :said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:%d:%d\r\n", &d1, &d2));
+	GREATEST_ASSERT_EQ(2, sscanf(server->conn->out, "PRIVMSG #history :said=history:!history:test:#history:destructor!dst@localhost:destructor:jean:hello:%d:%d\r\n", &d1, &d2));
 
 	GREATEST_PASS();
 }

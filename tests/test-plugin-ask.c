@@ -22,6 +22,7 @@
 #include <greatest.h>
 
 #include <irccd/compat.h>
+#include <irccd/conn.h>
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
 #include <irccd/server.h>
@@ -77,12 +78,12 @@ basics_simple(void)
 			}
 		});
 
-		if (strcmp(server->conn.out, "PRIVMSG #test :jean, NO\r\n") == 0)
+		if (strcmp(server->conn->out, "PRIVMSG #test :jean, NO\r\n") == 0)
 			yes = 1;
-		else if (strcmp(server->conn.out, "PRIVMSG #test :jean, YES\r\n") == 0)
+		else if (strcmp(server->conn->out, "PRIVMSG #test :jean, YES\r\n") == 0)
 			no = 1;
 
-		memset(server->conn.out, 0, sizeof (server->conn.out));
+		memset(server->conn->out, 0, sizeof (server->conn->out));
 	}
 
 	GREATEST_ASSERT(no);

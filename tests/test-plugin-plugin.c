@@ -23,6 +23,7 @@
 #include <greatest.h>
 
 #include <irccd/compat.h>
+#include <irccd/conn.h>
 #include <irccd/irccd.h>
 #include <irccd/js-plugin.h>
 #include <irccd/log.h>
@@ -31,16 +32,16 @@
 #include <irccd/util.h>
 
 #define CALL(t, m) do {                                                 \
-	memset(server->conn.out, 0, sizeof (server->conn.out));         \
-	irc_plugin_handle(plugin, &(const struct irc_event) {           \
-		.type = t,                                              \
-		.server = server,                                       \
-			.message = {                                    \
-			.origin = "jean!jean@localhost",                \
-			.channel = "#plugin",                           \
-			.message = m                                    \
-		}                                                       \
-	});                                                             \
+        memset(server->conn->out, 0, sizeof (server->conn->out));       \
+        irc_plugin_handle(plugin, &(const struct irc_event) {           \
+                .type = t,                                              \
+                .server = server,                                       \
+                        .message = {                                    \
+                        .origin = "jean!jean@localhost",                \
+                        .channel = "#plugin",                           \
+                        .message = m                                    \
+                }                                                       \
+        });                                                             \
 } while (0)
 
 static struct irc_server *server;
@@ -105,13 +106,13 @@ GREATEST_TEST
 basics_usage(void)
 {
 	CALL(IRC_EVENT_COMMAND, "");
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean\r\n", server->conn.out);
+	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean\r\n", server->conn->out);
 
 	CALL(IRC_EVENT_COMMAND, "fail");
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean\r\n", server->conn.out);
+	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean\r\n", server->conn->out);
 
 	CALL(IRC_EVENT_COMMAND, "info");
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean\r\n", server->conn.out);
+	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :usage=plugin:!plugin:test:#plugin:jean!jean@localhost:jean\r\n", server->conn->out);
 
 	GREATEST_PASS();
 }
@@ -120,7 +121,7 @@ GREATEST_TEST
 basics_info(void)
 {
 	CALL(IRC_EVENT_COMMAND, "info fake");
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :info=plugin:!plugin:test:#plugin:jean!jean@localhost:jean:David:BEER:fake:Fake White Beer 2000:0.0.0.0.0.0.1\r\n", server->conn.out);
+	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :info=plugin:!plugin:test:#plugin:jean!jean@localhost:jean:David:BEER:fake:Fake White Beer 2000:0.0.0.0.0.0.1\r\n", server->conn->out);
 
 	GREATEST_PASS();
 }
@@ -129,7 +130,7 @@ GREATEST_TEST
 basics_not_found(void)
 {
 	CALL(IRC_EVENT_COMMAND, "info doesnotexist");
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :not-found=plugin:!plugin:test:#plugin:jean!jean@localhost:jean:doesnotexist\r\n", server->conn.out);
+	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :not-found=plugin:!plugin:test:#plugin:jean!jean@localhost:jean:doesnotexist\r\n", server->conn->out);
 
 	GREATEST_PASS();
 }
@@ -141,7 +142,7 @@ basics_too_long(void)
 		irc_bot_plugin_add(fake_new(i));
 
 	CALL(IRC_EVENT_COMMAND, "list");
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :too-long=plugin:!plugin:test:#plugin:jean!jean@localhost:jean\r\n", server->conn.out);
+	GREATEST_ASSERT_STR_EQ("PRIVMSG #plugin :too-long=plugin:!plugin:test:#plugin:jean!jean@localhost:jean\r\n", server->conn->out);
 
 	GREATEST_PASS();
 }

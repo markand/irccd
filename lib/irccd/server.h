@@ -24,12 +24,12 @@
 #include <time.h>
 
 #include "channel.h"
-#include "conn.h"
 #include "event.h"
 #include "limits.h"
 
 struct pollfd;
 
+struct irc_conn;
 struct irc_channel;
 
 enum irc_server_state {
@@ -88,7 +88,7 @@ struct irc_server {
 	enum irc_server_flags flags;
 	struct irc_channel_list channels;
 	struct irc_event_whois bufwhois;
-	struct irc_conn conn;
+	struct irc_conn *conn;
 	size_t refc;
 	time_t lost_tp, last_tp;
 	LIST_ENTRY(irc_server) link;

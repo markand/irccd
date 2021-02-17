@@ -22,21 +22,22 @@
 #include <greatest.h>
 
 #include <irccd/compat.h>
+#include <irccd/conn.h>
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
 #include <irccd/server.h>
 
 #define CALL() do {                                                     \
-	memset(server->conn.out, 0, sizeof (server->conn.out));         \
-	irc_plugin_handle(plugin, &(const struct irc_event) {           \
-		.type = IRC_EVENT_COMMAND,                              \
-		.server = server,                                       \
-			.message = {                                    \
-			.origin = "jean!jean@localhost",                \
-			.channel = "#joke",                             \
-			.message = ""                                   \
-		}                                                       \
-	});                                                             \
+        memset(server->conn->out, 0, sizeof (server->conn->out));       \
+        irc_plugin_handle(plugin, &(const struct irc_event) {           \
+                .type = IRC_EVENT_COMMAND,                              \
+                .server = server,                                       \
+                        .message = {                                    \
+                        .origin = "jean!jean@localhost",                \
+                        .channel = "#joke",                             \
+                        .message = ""                                   \
+                }                                                       \
+        });                                                             \
 } while (0)
 
 static struct irc_server *server;
@@ -90,9 +91,9 @@ basics_simple(void)
 	for (int i = 0; i < 2; ++i) {
 		CALL();
 
-		if (strcmp(server->conn.out, "PRIVMSG #joke :aaa\r\n") == 0)
+		if (strcmp(server->conn->out, "PRIVMSG #joke :aaa\r\n") == 0)
 			aaa = 1;
-		else if (strcmp(server->conn.out, "PRIVMSG #joke :bbbb\r\nPRIVMSG #joke :bbbb\r\n") == 0)
+		else if (strcmp(server->conn->out, "PRIVMSG #joke :bbbb\r\nPRIVMSG #joke :bbbb\r\n") == 0)
 			bbbb = 1;
 	}
 
@@ -114,7 +115,7 @@ errors_toobig(void)
 
 	for (int i = 0; i < 64; ++i) {
 		CALL();
-		GREATEST_ASSERT_STR_EQ("PRIVMSG #joke :a\r\n", server->conn.out);
+		GREATEST_ASSERT_STR_EQ("PRIVMSG #joke :a\r\n", server->conn->out);
 	}
 
 	GREATEST_PASS();
@@ -129,7 +130,7 @@ errors_invalid(void)
 
 	for (int i = 0; i < 64; ++i) {
 		CALL();
-		GREATEST_ASSERT_STR_EQ("PRIVMSG #joke :a\r\n", server->conn.out);
+		GREATEST_ASSERT_STR_EQ("PRIVMSG #joke :a\r\n", server->conn->out);
 	}
 
 	GREATEST_PASS();
@@ -141,7 +142,7 @@ errors_not_found(void)
 	irc_plugin_set_option(plugin, "file", "doesnotexist.json");
 
 	CALL();
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #joke :error=joke:!joke:test:#joke:jean!jean@localhost:jean\r\n", server->conn.out);
+	GREATEST_ASSERT_STR_EQ("PRIVMSG #joke :error=joke:!joke:test:#joke:jean!jean@localhost:jean\r\n", server->conn->out);
 
 	GREATEST_PASS();
 }
@@ -152,7 +153,7 @@ errors_not_array(void)
 	irc_plugin_set_option(plugin, "file", SOURCE "/data/joke/error-not-array.json");
 
 	CALL();
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #joke :error=joke:!joke:test:#joke:jean!jean@localhost:jean\r\n", server->conn.out);
+	GREATEST_ASSERT_STR_EQ("PRIVMSG #joke :error=joke:!joke:test:#joke:jean!jean@localhost:jean\r\n", server->conn->out);
 
 	GREATEST_PASS();
 }
@@ -163,7 +164,7 @@ errors_empty(void)
 	irc_plugin_set_option(plugin, "file", SOURCE "/data/joke/error-empty.json");
 
 	CALL();
-	GREATEST_ASSERT_STR_EQ("PRIVMSG #joke :error=joke:!joke:test:#joke:jean!jean@localhost:jean\r\n", server->conn.out);
+	GREATEST_ASSERT_STR_EQ("PRIVMSG #joke :error=joke:!joke:test:#joke:jean!jean@localhost:jean\r\n", server->conn->out);
 
 	GREATEST_PASS();
 }

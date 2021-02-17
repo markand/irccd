@@ -22,6 +22,7 @@
 #include <greatest.h>
 
 #include <irccd/compat.h>
+#include <irccd/conn.h>
 #include <irccd/irccd.h>
 #include <irccd/js-plugin.h>
 #include <irccd/log.h>
@@ -30,29 +31,29 @@
 #include <irccd/util.h>
 
 #define CALL(t, m) do {                                                 \
-	memset(server->conn.out, 0, sizeof (server->conn.out));         \
-	irc_plugin_handle(plugin, &(const struct irc_event) {           \
-		.type = t,                                              \
-		.server = server,                                       \
-			.message = {                                    \
-			.origin = "jean!jean@localhost",                \
-			.channel = "#hangman",                          \
-			.message = m                                    \
-		}                                                       \
-	});                                                             \
+        memset(server->conn->out, 0, sizeof (server->conn->out));       \
+        irc_plugin_handle(plugin, &(const struct irc_event) {           \
+                .type = t,                                              \
+                .server = server,                                       \
+                        .message = {                                    \
+                        .origin = "jean!jean@localhost",                \
+                        .channel = "#hangman",                          \
+                        .message = m                                    \
+                }                                                       \
+        });                                                             \
 } while (0)
 
 #define CALL_EX(t, o, c, m) do {                                        \
-	memset(server->conn.out, 0, sizeof (server->conn.out));         \
-	irc_plugin_handle(plugin, &(const struct irc_event) {           \
-		.type = t,                                              \
-		.server = server,                                       \
-			.message = {                                    \
-			.origin = o,                                    \
-			.channel = c,                                   \
-			.message = m                                    \
-		}                                                       \
-	});                                                             \
+        memset(server->conn->out, 0, sizeof (server->conn->out));       \
+        irc_plugin_handle(plugin, &(const struct irc_event) {           \
+                .type = t,                                              \
+                .server = server,                                       \
+                        .message = {                                    \
+                        .origin = o,                                    \
+                        .channel = c,                                   \
+                        .message = m                                    \
+                }                                                       \
+        });                                                             \
 } while (0)
 
 static struct irc_server *server;
@@ -104,7 +105,7 @@ next(void)
 	char player = 0, *buf;
 
 	/* We need to skip 4 lines.*/
-	buf = irc_util_strdup(server->conn.out);
+	buf = irc_util_strdup(server->conn->out);
 	irc_util_split(buf, lines, 5, '\n');
 
 	if (!lines[4] || sscanf(lines[4], "PRIVMSG #tictactoe :turn=#tictactoe:!tictactoe:%c:tictactoe:test\r\n", &player) != 1)
@@ -137,7 +138,7 @@ basics_win(void)
 	play("b2");
 	play("a3");
 
-	GREATEST_ASSERT_EQ(5U, irc_util_split(server->conn.out, lines, 5, '\n'));
+	GREATEST_ASSERT_EQ(5U, irc_util_split(server->conn->out, lines, 5, '\n'));
 	GREATEST_ASSERT_EQ(0, sscanf(lines[0], "PRIVMSG #tictactoe :  a b c\r"));
 	GREATEST_ASSERT_EQ(2, sscanf(lines[1], "PRIVMSG #tictactoe :1 %c %c .\r", &k1, &k2));
 	GREATEST_ASSERT_EQ(2, sscanf(lines[2], "PRIVMSG #tictactoe :2 %c %c .\r", &k1, &k2));
@@ -171,7 +172,7 @@ basics_draw(void)
 	play("a 1");
 	play("b 1");
 
-	GREATEST_ASSERT_EQ(5U, irc_util_split(server->conn.out, lines, 5, '\n'));
+	GREATEST_ASSERT_EQ(5U, irc_util_split(server->conn->out, lines, 5, '\n'));
 	GREATEST_ASSERT_EQ(0, sscanf(lines[0], "PRIVMSG #tictactoe :  a b c\r"));
 	GREATEST_ASSERT_EQ(3, sscanf(lines[1], "PRIVMSG #tictactoe :1 %c %c %c\r", &k1, &k2, &k3));
 	GREATEST_ASSERT_EQ(3, sscanf(lines[2], "PRIVMSG #tictactoe :2 %c %c %c\r", &k1, &k2, &k3));
@@ -191,7 +192,7 @@ basics_used(void)
 	play("a 1");
 	play("a 1");
 
-	GREATEST_ASSERT_EQ(2, sscanf(server->conn.out, "PRIVMSG #tictactoe :used=#tictactoe:!tictactoe:%c:%c:tictactoe:test\r\n", &k1, &k2));
+	GREATEST_ASSERT_EQ(2, sscanf(server->conn->out, "PRIVMSG #tictactoe :used=#tictactoe:!tictactoe:%c:%c:tictactoe:test\r\n", &k1, &k2));
 
 	GREATEST_PASS();
 }
@@ -203,15 +204,15 @@ basics_invalid(void)
 
 	/* Player select itself. */
 	CALL_EX(IRC_EVENT_COMMAND, "a", "#tictactoe", "a");
-	GREATEST_ASSERT_EQ(2, sscanf(server->conn.out, "PRIVMSG #tictactoe :invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test\r\n", &k1, &k2));
+	GREATEST_ASSERT_EQ(2, sscanf(server->conn->out, "PRIVMSG #tictactoe :invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test\r\n", &k1, &k2));
 
 	/* Player select the bot. */
 	CALL_EX(IRC_EVENT_COMMAND, "a", "#tictactoe", "t");
-	GREATEST_ASSERT_EQ(2, sscanf(server->conn.out, "PRIVMSG #tictactoe :invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test\r\n", &k1, &k2));
+	GREATEST_ASSERT_EQ(2, sscanf(server->conn->out, "PRIVMSG #tictactoe :invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test\r\n", &k1, &k2));
 
 	/* Someone not on the channel. */
 	CALL_EX(IRC_EVENT_COMMAND, "a", "#tictactoe", "jean");
-	GREATEST_ASSERT_EQ(2, sscanf(server->conn.out, "PRIVMSG #tictactoe :invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test\r\n", &k1, &k2));
+	GREATEST_ASSERT_EQ(2, sscanf(server->conn->out, "PRIVMSG #tictactoe :invalid=#tictactoe:!tictactoe:%c:%c:tictactoe:test\r\n", &k1, &k2));
 
 	GREATEST_PASS();
 }
@@ -260,7 +261,7 @@ basics_disconnect(void)
 	});
 
 	play("a 1");
-	GREATEST_ASSERT_STR_EQ("", server->conn.out);
+	GREATEST_ASSERT_STR_EQ("", server->conn->out);
 
 	GREATEST_PASS();
 }
@@ -282,7 +283,7 @@ basics_kick(void)
 	});
 
 	play("a 1");
-	GREATEST_ASSERT_STR_EQ("", server->conn.out);
+	GREATEST_ASSERT_STR_EQ("", server->conn->out);
 
 	GREATEST_PASS();
 }
@@ -303,7 +304,7 @@ basics_part(void)
 	});
 
 	play("a 1");
-	GREATEST_ASSERT_STR_EQ("", server->conn.out);
+	GREATEST_ASSERT_STR_EQ("", server->conn->out);
 
 	GREATEST_PASS();
 }
