@@ -18,7 +18,6 @@
 
 // Plugin information.
 info = {
-	name: "hangman",
 	author: "David Demelier <markand@malikania.fr>",
 	license: "ISC",
 	summary: "A hangman game for IRC",

@@ -18,7 +18,6 @@
 
 // Plugin information.
 info = {
-	name: "joke",
 	author: "David Demelier <markand@malikania.fr>",
 	license: "ISC",
 	summary: "display some jokes",

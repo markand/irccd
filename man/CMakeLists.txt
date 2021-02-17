@@ -18,6 +18,15 @@
 
 project(man)
 
+function(man file section)
+	get_filename_component(basename ${file} NAME)
+	configure_file(${file} ${man_BINARY_DIR}/${basename})
+	install(
+		FILES ${man_BINARY_DIR}/${basename}
+		DESTINATION ${CMAKE_INSTALL_MANDIR}/${section}
+	)
+endfunction()
+
 set(
 	MAN1
 	${man_SOURCE_DIR}/irccd.1
@@ -26,20 +35,26 @@ set(
 
 set(
 	MAN3
-	${man_SOURCE_DIR}/irccd-api-chrono.3
-	${man_SOURCE_DIR}/irccd-api-directory.3
-	${man_SOURCE_DIR}/irccd-api-file.3
-	${man_SOURCE_DIR}/irccd-api-hook.3
-	${man_SOURCE_DIR}/irccd-api-logger.3
-	${man_SOURCE_DIR}/irccd-api-plugin.3
-	${man_SOURCE_DIR}/irccd-api-rule.3
-	${man_SOURCE_DIR}/irccd-api-server.3
-	${man_SOURCE_DIR}/irccd-api-system.3
-	${man_SOURCE_DIR}/irccd-api-timer.3
-	${man_SOURCE_DIR}/irccd-api-unicode.3
-	${man_SOURCE_DIR}/irccd-api-util.3
-	${man_SOURCE_DIR}/irccd-api.3
 )
+
+if (IRCCD_WITH_JS)
+	list(
+		APPEND MAN3
+		${man_SOURCE_DIR}/irccd-api-chrono.3
+		${man_SOURCE_DIR}/irccd-api-directory.3
+		${man_SOURCE_DIR}/irccd-api-file.3
+		${man_SOURCE_DIR}/irccd-api-hook.3
+		${man_SOURCE_DIR}/irccd-api-logger.3
+		${man_SOURCE_DIR}/irccd-api-plugin.3
+		${man_SOURCE_DIR}/irccd-api-rule.3
+		${man_SOURCE_DIR}/irccd-api-server.3
+		${man_SOURCE_DIR}/irccd-api-system.3
+		${man_SOURCE_DIR}/irccd-api-timer.3
+		${man_SOURCE_DIR}/irccd-api-unicode.3
+		${man_SOURCE_DIR}/irccd-api-util.3
+		${man_SOURCE_DIR}/irccd-api.3
+	)
+endif ()
 
 set(
 	MAN5
@@ -53,17 +68,17 @@ set(
 )
 
 foreach (m ${MAN1})
-	install(FILES ${m} DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
+	man(${m} man1)
 endforeach ()
 
 foreach (m ${MAN3})
-	install(FILES ${m} DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
+	man(${m} man3)
 endforeach ()
 
 foreach (m ${MAN5})
-	install(FILES ${m} DESTINATION ${CMAKE_INSTALL_MANDIR}/man5)
+	man(${m} man5)
 endforeach ()
 
 foreach (m ${MAN7})
-	install(FILES ${m} DESTINATION ${CMAKE_INSTALL_MANDIR}/man7)
+	man(${m} man7)
 endforeach ()

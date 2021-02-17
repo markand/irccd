@@ -65,6 +65,25 @@ Any function that is indicated as
 .Em optional
 in square brackets means it may not exist on your platform. A quick check in
 Javascript will let you test its presence.
+.Pp
+An example of plugin can be found at
+.Pa @CMAKE_INSTALL_FULL_DATADIR@/irccd/sample-plugin.js
+.\" INFO
+.Sh INFO
+The global
+.Vt info
+object in the plugin can contain the following strings which identifies the
+plugin information:
+.Bl -tag
+.It Vt license
+Plugin license.
+.It Vt version
+Arbitraty version.
+.It Vt author
+Author.
+.It Vt summary
+A short description about the plugin.
+.El
 .\" EVENTS
 .Sh EVENTS
 The following is a list of events that Javascript plugins support. All functions

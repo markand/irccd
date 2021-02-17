@@ -18,7 +18,6 @@
 
 // Plugin information.
 info = {
-	name: "logger",
 	author: "David Demelier <markand@malikania.fr>",
 	license: "ISC",
 	summary: "A plugin to log everything",

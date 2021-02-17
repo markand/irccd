@@ -59,6 +59,7 @@ endif ()
 add_subdirectory(lib)
 add_subdirectory(irccd)
 add_subdirectory(irccdctl)
+add_subdirectory(examples)
 add_subdirectory(plugins)
 add_subdirectory(man)
 
