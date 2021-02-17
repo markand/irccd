@@ -41,6 +41,7 @@ set(
 	${man_SOURCE_DIR}/libirccd-log.3
 	${man_SOURCE_DIR}/libirccd-rule.3
 	${man_SOURCE_DIR}/libirccd-util.3
+	${man_SOURCE_DIR}/libirccd-subst.3
 	${man_SOURCE_DIR}/libirccd.3
 )
 
