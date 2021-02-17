@@ -126,12 +126,12 @@ is_ctcp(const char *line)
 static char *
 ctcp(char *line)
 {
-	/* Skip first \001. */
-	if (*line == '\001')
+	/* Skip first \x01. */
+	if (*line == '\x01')
 		line++;
 
 	/* Remove last \001. */
-	line[strcspn(line, "\001")] = '\0';
+	line[strcspn(line, "\x01")] = '\0';
 
 	if (strncmp(line, "ACTION ", 7) == 0)
 		line += 7;
@@ -417,20 +417,38 @@ handle_msg(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 {
 	(void)s;
 
-	ev->message.origin = irc_util_strdup(msg->prefix);
-	ev->message.channel = irc_util_strdup(msg->args[0]);
-
 	/*
 	 * Detect CTCP commands which are PRIVMSG with a special boundaries.
 	 *
 	 * Example:
-	 * PRIVMSG jean :\001ACTION I'm eating\001.
+	 * PRIVMSG jean :\001ACTION I'm eating\001
+	 * PRIVMSG jean :\001VERSION\001
 	 */
 	if (is_ctcp(msg->args[1])) {
-		ev->type = IRC_EVENT_ME;
-		ev->message.message = irc_util_strdup(ctcp(msg->args[1]));
+		if (strcmp(msg->args[1], "\x01""CLIENTINFO\x01") == 0)
+			irc_server_notice(s, msg->prefix, "\x01""CLIENTINFO ACTION CLIENTINFO SOURCE TIME VERSION\x01");
+		else if (strcmp(msg->args[1], "\x01""SOURCE\x01") == 0)
+			irc_server_notice(s, msg->prefix, "\x01""http://hg.malikania.fr/irccd\x01");
+		else if (strcmp(msg->args[1], "\x01""TIME\x01") == 0) {
+			time_t now = time(NULL);
+
+			irc_server_send(s, "NOTICE %s :\x01""TIME %s\x01",
+			    msg->prefix, ctime(&now));
+		} else if (strcmp(msg->args[1], "\x01""VERSION\x01") == 0) {
+			/* Send a CTCP VERSION answer. */
+			if (strlen(s->ident.ctcpversion) != 0)
+				irc_server_send(s, "NOTICE %s :\x01""VERSION %s\x01",
+				    msg->prefix, s->ident.ctcpversion);
+		} else if (strncmp(msg->args[1], "\x01""ACTION\x01", 8) == 0) {
+			ev->type = IRC_EVENT_ME;
+			ev->message.origin = irc_util_strdup(msg->prefix);
+			ev->message.channel = irc_util_strdup(msg->args[0]);
+			ev->message.message = irc_util_strdup(ctcp(msg->args[1]));
+		}
 	} else {
 		ev->type = IRC_EVENT_MESSAGE;
+		ev->message.origin = irc_util_strdup(msg->prefix);
+		ev->message.channel = irc_util_strdup(msg->args[0]);
 		ev->message.message = irc_util_strdup(msg->args[1]);
 	}
 }
@@ -708,6 +726,7 @@ irc_server_new(const char *name,
 	strlcpy(s->ident.nickname, nickname, sizeof (s->ident.nickname));
 	strlcpy(s->ident.username, username, sizeof (s->ident.username));
 	strlcpy(s->ident.realname, realname, sizeof (s->ident.realname));
+	strlcpy(s->ident.ctcpversion, "IRC Client Daemon " IRCCD_VERSION, sizeof (s->ident.ctcpversion));
 
 	/* Server itself. */
 	strlcpy(s->name, name, sizeof (s->name));
@@ -1002,7 +1021,7 @@ irc_server_notice(struct irc_server *s, const char *channel, const char *message
 	assert(channel);
 	assert(message);
 
-	return irc_server_send(s, "NOTICE %s: %s", channel, message);
+	return irc_server_send(s, "NOTICE %s :%s", channel, message);
 }
 
 int
