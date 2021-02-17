@@ -1,0 +1,187 @@
+.\"
+.\" Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt LIBIRCCD-UTIL 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm libirccd-util
+.Nd various utilities
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.In irccd/util.h
+.Fd #define IRC_UTIL_SIZE(array)
+.Ft void *
+.Fn irc_util_malloc "size_t size"
+.Ft void *
+.Fn irc_util_calloc "size_t n, size_t width"
+.Ft void *
+.Fn irc_util_realloc "void *ptr, size_t size"
+.Ft void *
+.Fn irc_util_reallocarray "void *ptr, size_t n, size_t width"
+.Ft char *
+.Fn irc_util_strdup "const char *src"
+.Ft char *
+.Fn irc_util_strndup "const char *src, size_t len"
+.Ft void *
+.Fn irc_util_memdup "const void *ptr, size_t size"
+.Ft char *
+.Fn irc_util_basename "const char *path"
+.Ft char *
+.Fn irc_util_dirname "const char *path"
+.Ft size_t
+.Fn irc_util_split "char *str, const char **args, size_t max, char delimiter"
+.Ft char *
+.Fn irc_util_printf "char *str, size_t strsz, const char *fmt, ..."
+.\" DESCRIPTION
+.Sh DESCRIPTION
+This header provides several function for memory management and basic string
+handling.
+.Pp
+Every memory allocation function exits on error and are usually recommended for
+small piece of data that should never fail and where the out of memory
+consequence is unrecoverable. They are not recommended for reading large piece
+of data where the standard C functions are preferred in this place.
+.Pp
+The
+.Fn IRC_UTIL_SIZE
+macro expands the compile time size of the argument
+.Fa array
+which must be constant array.
+.Pp
+The
+.Fn irc_util_malloc ,
+.Fn irc_util_calloc ,
+.Fn irc_util_realloc ,
+are exactly the same as the standard C functions except they write an error
+message if allocation fails.
+.Pp
+The
+.Fn irc_util_reallocarray
+function is similar to the OpenBSD
+.Fn reallocarray
+function which should reallocate the pointer
+.Fa ptr
+of
+.Fa n
+elements of given
+.Fa width
+size each. It always returns the new region otherwise writes an error message
+and exits.
+.Pp
+The
+.Fn irc_util_strdup ,
+.Fn irc_util_strndup
+are similar to the POSIX functions but also write an error message if fails to
+allocate the required size.
+.Pp
+The
+.Fn irc_util_memdup
+function allocate
+.Fa size
+bytes and copy the verbatim
+.Fa ptr
+into a new region returned.
+.Pp
+The
+.Fn irc_util_basename
+and
+.Fn irc_util_dirname
+are similar to the POSIX function of the same names but they don't modify the
+original
+.Fa path
+argument and returns an independent string instead. The returned string is
+static to each function and will be overwritten by subsequent calls.
+.Pp
+The
+.Fn irc_util_split
+function tokenize the
+.Fa str
+string input and store them into the array of string
+.Fa args
+according to the
+.Fa delimiter .
+The array
+.Fa args
+must be at least
+.Fa max
+long to store every tokens. The original
+.Fa str
+argument will be modified by this function to avoid dynamic allocation and as
+such never fails. If the number of tokens parsed was greater than
+.Fa max
+then the last value is left
+.Dq uncut
+otherwise if the number of tokens is smaller than
+.Fa max
+then the
+.Fa args
+values will not be initialized. The user must make sure to initialize the array
+itself or to check the return value of this function.
+.Pp
+Example,
+.Fa max
+argument is smaller than available tokens.
+.Bd -literal
+char str[] = "hello world what's up?";
+const char *args[3] = {0};
+
+/* Will return 3. */
+irc_util_split(str, args, 3, ' ');
+/* args[0] == "hello" */
+/* args[1] == "world" */
+/* args[2] == "what's up?" */
+.Ed
+.Pp
+Now, the same example while requesting more token than available.
+.Bd -literal
+char str[] = "hello world what's up?";
+const char *args[16] = {0};
+
+/* Will return 4. */
+irc_util_split(str, args, 16, ' ');
+/* args[0] == "hello" */
+/* args[1] == "world" */
+/* args[2] == "what's" */
+/* args[3] == "up?" */
+.Ed
+.Pp
+In the above case, arguments from 4 to 15 are set to NULL because we explicitly
+did before calling
+.Fn irc_util_split .
+.Pp
+The
+.Fn irc_util_printf
+is similar to standard C
+.Xr snprintf 3
+signature except that it returns the
+.Fa str
+argument for convenience.
+.\" RETURN VALUES
+.Sh RETURN VALUELS
+All memory functions
+.Fn irc_util_malloc ,
+.Fn irc_util_calloc ,
+.Fn irc_util_realloc ,
+.Fn irc_util_reallocarray ,
+.Fn irc_util_strdup ,
+.Fn irc_util_strndup
+and
+.Fn irc_util_memdup
+never return NULL.
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr libirccd 3

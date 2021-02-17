@@ -1,0 +1,205 @@
+.\"
+.\" Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt LIBIRCCD-RULE 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm libirccd-rule
+.Nd create and match rules
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.In irccd/rule.h
+.Ft struct irc_rule *
+.Fn irc_rule_new "enum irc_rule_action action"
+.Ft int
+.Fn irc_rule_add "char *list, const char *value"
+.Ft void
+.Fn irc_rule_remove "char *list, const char *value"
+.Ft int
+.Fo irc_rule_match
+.Fa "const struct irc_rule *rule"
+.Fa "const char *server"
+.Fa "const char *channel"
+.Fa "const char *origin"
+.Fa "const char *plugin"
+.Fa "const char *event"
+.Fc
+.Ft int
+.Fo irc_rule_matchlist
+.Fa "const struct irc_rule_list *list"
+.Fa "const char *server"
+.Fa "const char *channel"
+.Fa "const char *origin"
+.Fa "const char *plugin"
+.Fa "const char *event"
+.Fc
+.Ft void
+.Fn irc_rule_finish "struct irc_rule *rule"
+.\" DESCRIPTION
+.Sh DESCRIPTION
+The function in this header provides rule matching for filtering plugins
+depending on IRC events.
+.Pp
+Rules are defined in the
+.Vt "struct irc_rule"
+declared as following:
+.Bd -literal
+struct irc_rule {
+	enum irc_rule_action action;
+	char servers[IRC_RULE_LEN];
+	char channels[IRC_RULE_LEN];
+	char origins[IRC_RULE_LEN];
+	char plugins[IRC_RULE_LEN];
+	char events[IRC_RULE_LEN];
+	TAILQ_ENTRY(irc_rule) link;
+};
+.Ed
+.Pp
+The fields of
+.Vt "struct irc_rule"
+are:
+.Bl -tag -width channels
+.It Va action
+One of the
+.Vt enum irc_rule_action
+enumeration.
+.It Va servers
+A colon separated list of servers identifiers to match.
+.It Va channels
+A colon separated list of channels to match.
+.It Va origins
+A colon separated list of origins to match.
+.It Va plugins
+A colon separated list of plugins to match.
+.It Va events
+A colon separated list of events to match.
+.It Va link
+Abstract entry to be used with the
+.Xr sys/queue 3
+macros.
+.El
+.Pp
+The
+.Vt "struct irc_rule_list"
+is an abstract type declared with
+.Fn TAILQ_HEAD
+from
+.Xr queue 3
+macros.
+.Pp
+The
+.Vt "enum irc_rule_action"
+is declared as:
+.Bd -literal
+enum irc_rule_action {
+	IRC_RULE_ACCEPT,
+	IRC_RULE_DROP
+};
+.Ed
+.Pp
+The following enumerators are available:
+.Bl -tag -width IRC_RULE_ACCEPT
+.It Dv IRC_RULE_ACCEPT
+Allows the current event.
+.It Dv IRC_RULE_DROP
+Drop the current event.
+.El
+.Pp
+The
+.Fn irc_rule_new
+allocates a new rule with the given
+.Fa action
+and return it.
+.Pp
+The
+.Fn irc_rule_add
+function adds the new
+.Fa value
+to the char array
+.Fa list
+which should be one of the member field from the
+.Vt struct irc_rule .
+.Pp
+The
+.Fn irc_rule_remove
+removes the existing
+.Fa value
+from the char array
+.Fa list .
+.Pp
+The
+.Fn irc_rule_match
+function tests if the criteria given as arguments is allowed for this
+.Fa rule .
+All of
+.Fa server ,
+.Fa channel ,
+.Fa origin ,
+.Fa plugin ,
+and
+.Fa event
+can be NULL, in that case the rule is considered as not matching only if the
+rule does not contain a criterion for one of each. For example, if the rule must
+match a server
+.Dq example
+and argument
+.Fa server
+is NULL, then the rule will not match. Otherwise, if the rule does not have a
+server criterion then argument
+.Fa server
+is ignored entirely and this specific server criterion matches.
+.Pp
+The
+.Fn irc_rule_matchlist
+function is similar to
+.Fn irc_rule_match
+except that it analyze the whole linked
+.Fa list
+instead.
+.Pp
+The
+.Fn irc_rule_finish
+clears resources allocated for the
+.Fa rule .
+Make sure to remove it from the linked list where it is attached to before
+calling this function.
+.\" RETURN VALUES
+.Sh RETURN VALUES
+The function
+.Fn irc_rule_add
+returns 0 on success and -1 on errors. In that case
+.Va errno
+is set to indicate the error.
+.Pp
+The functions
+.Fn irc_rule_match
+and
+.Fn irc_rule_matchlist
+returns non-zero if the rule is allowed.
+.\" ERRORS
+.Sh ERRORS
+The function
+.Fn irc_rule_add
+may set one of the following error:
+.Bl -tag -width Er
+.It Bq Er ENOMEM
+When the limit of a rule criterion has been reached, which is
+.Dv IRC_RULE_LEN .
+.El
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr libirccd 3

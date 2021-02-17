@@ -1,0 +1,213 @@
+.\"
+.\" Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt LIBIRCCD 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm libirccd
+.Nd irccd C interface
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.Vt const char *<prefix>_author;
+.Vt const char *<prefix>_description;
+.Vt const char *<prefix>_version;
+.Vt const char *<prefix>_license;
+.Ft void
+.Fn <prefix>_set_option "const char *key, const char *value"
+.Ft void
+.Fn <prefix>_set_template "const char *key, const char *value"
+.Ft void
+.Fn <prefix>_set_path "const char *key, const char *value"
+.Ft const char *
+.Fn <prefix>_get_option "const char *key"
+.Ft const char *
+.Fn <prefix>_get_template "const char *key"
+.Ft const char *
+.Fn <prefix>_get_path "const char *key"
+.Ft const char **
+.Fn <prefix>_get_options "void"
+.Ft const char **
+.Fn <prefix>_get_templates "void"
+.Ft const char **
+.Fn <prefix>_get_paths "void"
+.Ft void
+.Fn <prefix>_load "void"
+.Ft void
+.Fn <prefix>_reload "void"
+.Ft void
+.Fn <prefix>_unload "void"
+.Ft void
+.Fn <prefix>_event "const struct irc_event *ev"
+.\" DESCRIPTION
+.Sh DESCRIPTION
+The
+.Nm
+library is a set of functions available from the
+.Xr irccd 1
+daemon when writing native C plugins. It isn't shipped as a library because it
+opens plugins dynamically and exports its own set of symbols through it. Plugins
+don't need any kind of link when built.
+.Pp
+The API offers various utilities to control the daemon by inspecting servers,
+rules, plugins or hooks. It also offers various miscellaneous utilities along
+with some compatibility shims.
+.Pp
+This documentation only shows a quick overview of what is available,
+documentation of very modules is done through the set of
+.Xr libirccd-MODULE-NAME 3
+manual pages.
+.Pp
+For
+.Dq namespace
+issue, every symbol or macros are prefixed by irc_ or IRC_.
+.Pp
+An example of plugin can be found at
+.Pa @CMAKE_INSTALL_FULL_DATADIR@/irccd/sample-plugin.c
+.\" PLUGIN INTERFACE
+.Sh PLUGIN INTERFACE
+To be opened by
+.Xr irccd 1
+the plugin has to match a specific ABI. Several variables and functions should
+be exported using a specific prefix and variable names.
+.Pp
+The
+.Em <prefix>
+as shown in the
+.Xr SYNOPSIS
+section is computed using the plugin base file name and translating every non C
+character to an
+.Dq _ .
+For example, if the plugin is named
+.Pa irc-notify.so
+then the prefix will be
+.Em irc_notify
+and subsequent function to implement should be named
+.Fn irc_notify_event ,
+.Fn irc_notify_get_option
+and so on.
+.Pp
+Every variable and function are completely optional.
+.Pp
+.\" Variables
+.Ss Variables
+The
+.Va <prefix>_author ,
+.Va <prefix>_description ,
+.Va <prefix>_version ,
+and
+.Va <prefix>_license
+variables can be declared as plugin metadata to inform about the plugin author,
+a short description, its version and the license respectively.
+.\" Functions
+.Ss Functions
+The following functions can be implemented in the plugin and called from
+.Xr irccd 1
+upon certain circumstances.
+.Pp
+The
+.Fn <prefix>_set_option ,
+.Fn <prefix>_set_template
+and
+.Fn <prefix>_set_path
+are called when the user wants to change the property
+.Fa key
+to the new
+.Fa value .
+If the key isn't supported by the plugin, no action should be taken. They alter
+the plugin options, user templates and predefined paths respectively.
+.Pp
+The
+.Fn <prefix>_get_option ,
+.Fn <prefix>_get_template
+and
+.Fn <prefix>_get_path
+are the exact opposite of their
+.Em set_*
+counterparts, they should return the value associated with the
+.Fa key
+argument. If the plugin does not support the given
+.Fa key
+it should return NULL to indicate it.
+.Pp
+The
+.Fn <prefix>_get_options ,
+.Fn <prefix>_get_templates
+and
+.Fn <prefix>_get_paths
+should return a NULL terminated array of strings that the plugin supports for
+options, templates and paths respectively. The returned array isn't free'd so
+the user may return a static array for convenience.
+.Pp
+The
+.Fn <prefix>_load
+function is called when the plugin is being loaded and add to the daemon.
+.Pp
+The
+.Fn <prefix>_reload
+is called when the user requests to reload the plugin.
+.Pp
+The
+.Fn <prefix>_unload
+is called when the plugin is about to be removed.
+.Pp
+The
+.Fn <prefix>_event
+is called upon reception of a new IRC server message. See the
+.Xr libirccd-event 3
+module about how to use the argument
+.Fa ev .
+.\" MODULES
+.Sh MODULES
+The following APIs are available
+.Bl -tag
+.It Xr libirccd-server 3
+Manipulate servers. This module is probably the one you will use the most while
+writing plugins. It lets you send messages through an IRC server.
+.It Xr libirccd-channel 3
+Channel information.
+.It Xr libirccd-compat 3
+Compatibility layer offered for various BSD and POSIX extensions if not
+available on your system.
+.It Xr libirccd-event 3
+Information about an IRC event received.
+.It Xr libirccd-hook 3
+Create new hooks.
+.It Xr libirccd-irccd 3
+General functions to manipulate the running daemon.
+.It Xr libirccd-log 3
+Functions for logging messages through the configured logger adapter.
+.It Xr libirccd-plugin 3
+Create new plugins.
+.It Xr libirccd-rule 3
+Create or match rules.
+.It Xr libirccd-subst 3
+The substitution mechanism to create user plugin templates.
+.It Xr libirccd-util 3
+Various utilities.
+.El
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr libirccd-channel 3 ,
+.Xr libirccd-compat 3 ,
+.Xr libirccd-event 3 ,
+.Xr libirccd-hook 3 ,
+.Xr libirccd-irccd 3 ,
+.Xr libirccd-log 3 ,
+.Xr libirccd-plugin 3 ,
+.Xr libirccd-rule 3 ,
+.Xr libirccd-server 3 ,
+.Xr libirccd-util 3

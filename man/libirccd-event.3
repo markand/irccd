@@ -1,0 +1,257 @@
+.\"
+.\" Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt LIBIRCCD-EVENT 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm libirccd-event
+.Nd IRC events
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.In irccd/event.h
+.\" DESCRIPTION
+.Sh DESCRIPTION
+The event structure is defined as a generic IRC event that contains every
+supported events into a anonymous union.
+.Pp
+It is passed through the plugin upon reception of a new IRC event. The user must
+not modify the event.
+.Pp
+The
+.Vt "struct irc_event"
+is declared as:
+.Bd -literal
+struct irc_event {
+	enum irc_event_type type;
+	struct irc_server *server;
+	union {
+		struct irc_event_invite invite;
+		struct irc_event_join join;
+		struct irc_event_kick kick;
+		struct irc_event_message message;
+		struct irc_event_mode mode;
+		struct irc_event_names names;
+		struct irc_event_nick nick;
+		struct irc_event_notice notice;
+		struct irc_event_part part;
+		struct irc_event_topic topic;
+		struct irc_event_whois whois;
+	};
+};
+.Ed
+.Pp
+The fields of
+.Vt "struct irc_event"
+are:
+.Bl -tag -width server
+.It Va type
+The IRC event generated. Depending on this value you may access one of the event
+in the anonymous union.
+.It Va server
+The server object that generated the event.
+.El
+.Pp
+The
+.Vt "enum irc_event_type"
+is declared as:
+.Bd -literal
+enum irc_event_type {
+	IRC_EVENT_UNKNOWN,      /* Unknown or private use.      */
+	IRC_EVENT_COMMAND,      /* Use irc_event_message.       */
+	IRC_EVENT_CONNECT,      /* No specific data.            */
+	IRC_EVENT_DISCONNECT,   /* No specific data.            */
+	IRC_EVENT_INVITE,       /* Use irc_event_invite.        */
+	IRC_EVENT_JOIN,         /* Use irc_event_join.          */
+	IRC_EVENT_KICK,         /* Use irc_event_kick.          */
+	IRC_EVENT_ME,           /* Use irc_event_message        */
+	IRC_EVENT_MESSAGE,      /* Use irc_event_message.       */
+	IRC_EVENT_MODE,         /* Use irc_event_mode.          */
+	IRC_EVENT_NAMES,        /* Use irc_event_names.         */
+	IRC_EVENT_NICK,         /* Use irc_event_nick.          */
+	IRC_EVENT_NOTICE,       /* Use irc_event_notice.        */
+	IRC_EVENT_PART,         /* Use irc_event_part.          */
+	IRC_EVENT_TOPIC,        /* Use irc_event_topic.         */
+	IRC_EVENT_WHOIS         /* Use irc_event_whois.         */
+};
+.Ed
+.Pp
+The following enumerators are available:
+.Bl -tag -width IRC_EVENT_DISCONNECT
+.It Dv IRC_EVENT_UNKNOWN
+An IRC event was received but not usable for plugins. Plugins usually never get
+called when this is generated.
+.It Dv IRC_EVENT_COMMAND
+Specific plugin invocation. This is happening when a user invoke a plugin by
+combining the server prefix and plugin identifier like
+.Dq !plugin list .
+The
+.Va message
+field may be used with this event.
+.It Dv IRC_EVENT_CONNECT
+Generated when a server was successfully connected.
+.It Dv IRC_EVENT_DISCONNECT
+When a server got disconnected.
+.It Dv IRC_EVENT_INVITE
+Received upon reception of an invite. The
+.Va invite
+field may be used.
+.It Dv IRC_EVENT_JOIN
+When someone (including the daemon) joined a channel. The
+.Va join
+field may be used.
+.It Dv IRC_EVENT_KICK
+When someone was kicked from a channel. The
+.Va kick
+field may be used.
+.It Dv IRC_EVENT_ME
+Event about CTCP ACTION (also known as /me) received. The
+.Va message
+field may be used.
+.It Dv IRC_EVENT_MESSAGE
+Message event from a channel or a nickname. The
+.Va message
+field may be used.
+.It Dv IRC_EVENT_MODE
+When a channel mode or the daemon own modes were changed. The
+.Va mode
+field may be used.
+.It Dv IRC_EVENT_NAMES
+Upon reception of a channel name listing. The
+.Va names
+field may be used.
+.It Dv IRC_EVENT_NICK
+When someone (including the daemon) changed its nickname. The
+.Va nick
+field may be used.
+.It Dv IRC_EVENT_NOTICE
+Notice message received either from a channel or a direct nickname. The
+.Va notice
+field may be used.
+.It Dv IRC_EVENT_PART
+When someone (including the daemon) leaves a channel. The
+.Va part
+field may be used.
+.It Dv IRC_EVENT_TOPIC
+If a channel topic was changed. The
+.Va topic
+field may be used.
+.It Dv IRC_EVENT_WHOIS
+When a whois information about a user was received.  This event is usually never
+generated from the server itself but mostly from client requests. The
+.Va whois
+field may be used.
+.El
+.Pp
+Then, for each event that has arguments, the anonymous union contains one of the
+following declared structures with their self explanatory commented fields:
+.Bd -literal
+struct irc_event_invite {
+	char *origin;
+	char *channel;
+};
+.Ed
+.Bd -literal
+struct irc_event_join {
+	char *origin;
+	char *channel;
+};
+.Ed
+.Bd -literal
+struct irc_event_kick {
+	char *origin;
+	char *channel;
+	char *target;
+	char *reason;
+};
+.Ed
+.Bd -literal
+struct irc_event_message {
+	char *origin;
+	char *channel;
+	char *message;
+};
+.Ed
+.Bd -literal
+struct irc_event_mode {
+	char *origin;
+	char *channel;
+	char *mode;
+	char **args;
+};
+.Ed
+.Bd -literal
+struct irc_event_names {
+	char *channel;
+	char *names;    /* Space separated list of nicknames. */
+};
+.Ed
+.Bd -literal
+struct irc_event_nick {
+	char *origin;
+	char *nickname;
+};
+.Ed
+.Bd -literal
+struct irc_event_notice {
+	char *origin;
+	char *channel;
+	char *notice;
+};
+.Ed
+.Bd -literal
+struct irc_event_part {
+	char *origin;
+	char *channel;
+	char *reason;
+};
+.Ed
+.Bd -literal
+struct irc_event_topic {
+	char *origin;
+	char *channel;
+	char *topic;
+};
+.Ed
+.Bd -literal
+struct irc_event_whois {
+	char *nickname;
+	char *username;
+	char *realname;
+	char *hostname;
+	struct {
+		char *name;     /* Channel name joined from this user. */
+		int modes;      /* Bitmask of modes applied for the user. */
+	} *channels;
+	size_t channelsz;       /* The number of items in channels. */
+};
+.Ed
+.Pp
+The
+.Va modes
+field contains a bit mask of modes because
+.Xr irccd 1
+separates the prefixes from channel and nicknames from
+.Dq @+#staff
+to
+.Dq #staff
+but to offer the possibility to know which modes are applied, they are marked as
+bitmask of indices and stored in the server information. See the
+.Xr libirccd-server 3
+manual page for more information about how to use it.
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr libirccd 3

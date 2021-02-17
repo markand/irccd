@@ -1,0 +1,99 @@
+.\"
+.\" Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt LIBIRCCD-LOG 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm libirccd-log
+.Nd loggers
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.In irccd/log.h
+.Ft void
+.Fn irc_log_to_syslog "void"
+.Ft void
+.Fn irc_log_to_console "void"
+.Ft void
+.Fn irc_log_to_file "const char *path"
+.Ft void
+.Fn irc_log_to_null "void"
+.Ft void
+.Fn irc_log_set_verbose "int verbose"
+.Ft void
+.Fn irc_log_info "const char *fmt, ..."
+.Ft void
+.Fn irc_log_warn "const char *fmt, ..."
+.Ft void
+.Fn irc_log_debug "const char *fmt, ..."
+.Ft void
+.Fn irc_log_finish "void"
+.\" DESCRIPTION
+.Sh DESCRIPTION
+This header provides functions to log messages into the configured
+.Xr irccd 1
+loggers.
+.Pp
+Messages should always be prefixed by its component. For example, server
+messages start with
+.Dq server <id>:
+and plugins
+.Dq plugin <id>: .
+.Pp
+The
+.Fn irc_log_to_syslog ,
+.Fn irc_log_to_console
+and
+.Fn irc_log_to_null
+set the logger to the
+.Xr syslog 3
+mechanism, standard output/error and completely quiet respectively. The
+.Fn irc_log_to_file
+uses the file specified by
+.Pa path
+to log everything. All those functions will close the current adapter before
+changing it.
+.Pp
+The
+.Fn irc_log_set_verbose
+change the verbosity to on if
+.Fa verbose
+is greater than 0 (which is the default).
+.Pp
+The
+.Fn irc_log_info
+uses the
+.Xr printf 3
+like format to log information messages. Thoses messages are ignored if the
+verbosity is null.
+.Pp
+The
+.Fn irc_log_warn
+function logs a warning message, it is always written even if verbosity is null.
+.Pp
+The
+.Fn irc_log_debug
+only write messages if the daemon was built in
+.Dq debug
+mode, it also ignores the verbosity level.
+.Pp
+The
+.Fn irc_log_finish
+function closes the current adapter. It is usually not required from the user
+itself.
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr libirccd 3

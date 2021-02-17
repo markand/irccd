@@ -1,0 +1,132 @@
+.\"
+.\" Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt LIBIRCCD-COMPAT 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm libirccd
+.Nd compatibility layer
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.In irccd/compat.h
+.\" DESCRIPTION
+.Sh DESCRIPTION
+While
+.Xr irccd 1
+daemon focuses on POSIX systems, it also uses various BSD extensions that may
+not be shipped on every platform. Therefore, it transparently incorporate glue
+code with the same signature or headers files when these functions are missing.
+This means that a user is able to call many BSD extensions without any user
+requirement but including this header file.
+.Pp
+For example,
+.Xr irccd 1
+uses the BSD
+.Xr err 3
+set of functions and if functions are unavailable then a empty stub
+.In err.h
+file is provided in a private irccd directory and declarations are present in
+the
+.In irccd/compat.h file .
+This means that the user may include the
+.In err.h
+file even though it is not present in the platform include directories.
+.Pp
+The following BSD functions are available:
+.Bl -bullet -compact -offset indent
+.Pp
+.It
+.Fn err
+.It
+.Fn errc
+.It
+.Fn errx
+.It
+.Fn getprogname
+.It
+.Fn pledge
+.It
+.Fn reallocarray
+.It
+.Fn recallocarray
+.It
+.Fn setprogname
+.It
+.Fn strlcat
+.It
+.Fn strlcpy
+.It
+.Fn strtonum
+.It
+.Fn verr
+.It
+.Fn verrc
+.It
+.Fn verrx
+.It
+.Fn vsyslog
+.It
+.Fn vwarn
+.It
+.Fn vwarnc
+.It
+.Fn vwarnx
+.It
+.Fn warn
+.It
+.Fn warnc
+.It
+.Fn warnx
+.El
+.Pp
+The following POSIX functions are also available if the platform don't
+implement them:
+.Bl -bullet -compact -offset indent
+.Pp
+.It
+.Fn basename
+.It
+.Fn dirname
+.It
+.Fn getopt
+.It
+.Fn strdup
+.It
+.Fn strndup
+.It
+.Fn strnlen
+.It
+.Fn strtok_r
+.El
+.Pp
+And in addition to that, the following headers files are either provided as
+compatibility shims or as empty stubs:
+.Bl -bullet -compact -offset indent
+.Pp
+.It
+.In sys/queue.h
+.It
+.In dirent.h
+.It
+.In err.h
+.It
+.In libgen.h
+.It
+.In unistd.h
+.El
+.Sh SEE ALSO
+.Xr libirccd 3

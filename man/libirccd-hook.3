@@ -1,0 +1,85 @@
+.\"
+.\" Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt LIBIRCCD-HOOK 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm libirccd-hook
+.Nd manipulate hooks
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.In irccd/hook.h
+.Ft struct irc_hook *
+.Fn irc_hook_new "const char *name, const char *path"
+.Ft void
+.Fn irc_hook_invoke "struct irc_hook *hook, const struct irc_event *ev"
+.Ft void
+.Fn irc_hook_finish "struct irc_hook *"
+.\" DESCRIPTION
+.Sh DESCRIPTION
+This header provides functions to create new hook or to invoke them.
+.Pp
+The
+.Vt "struct irc_hook"
+is declared as:
+.Bd -literal
+struct irc_hook {
+	char name[IRC_ID_LEN];
+	char path[PATH_MAX];
+	LIST_ENTRY(irc_hook) link;
+};
+.Ed
+.Pp
+The fields of
+.Vt "struct irc_hook"
+are:
+.Bl -tag -width name
+.It Va name
+Name to identify this hook.
+.It Va path
+Absolute path to the hook.
+.It Va link
+Abstract entry to be used with the
+.Xr queue 3
+macros.
+.El
+.Pp
+The
+.Fn irc_hook_new
+allocates a new hook with the identifer
+.Fa name
+on the given
+.Fa path .
+Those arguments will be copied into the returned structure fields of the same
+name.
+.Pp
+The
+.Fn irc_hook_invoke
+will invoke the
+.Fa hook
+with the current IRC event pointed by
+.Fa ev .
+.Pp
+The
+.Fn irc_hook_finish
+clears resources allocated for the
+.Fa hook .
+Make sure to remove it from the linked list where it is attached to before
+calling this function.
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr libirccd 3

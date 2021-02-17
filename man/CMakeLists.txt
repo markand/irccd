@@ -35,6 +35,13 @@ set(
 
 set(
 	MAN3
+	${man_SOURCE_DIR}/libirccd-compat.3
+	${man_SOURCE_DIR}/libirccd-event.3
+	${man_SOURCE_DIR}/libirccd-hook.3
+	${man_SOURCE_DIR}/libirccd-log.3
+	${man_SOURCE_DIR}/libirccd-rule.3
+	${man_SOURCE_DIR}/libirccd-util.3
+	${man_SOURCE_DIR}/libirccd.3
 )
 
 if (IRCCD_WITH_JS)
