@@ -30,12 +30,12 @@ rich, famous and so on.
 .Sh INSTALLATION
 The plugin
 .Nm
-is distributed with irccd. To enable it add the following to your plugins
-section:
+is distributed with irccd. To enable it add it into your
+.Xr irccd.conf 5
+configuration file.
 .Pp
-.Bd -literal
-[plugins]
-ask = ""
+.Bd -literal -offset indent
+plugin "ask"
 .Ed
 .\" USAGE
 .Sh USAGE

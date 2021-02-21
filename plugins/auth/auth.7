@@ -29,53 +29,58 @@ provides generic authentication to the most popular services.
 For the moment,
 .Nm auth
 supports the following backends:
-.Bl -tag -width 12n -offset Ds
+.Bl -tag -width nickserv
 .It nickserv
 the NickServ service, using /msg NickServ identify user pass
 .It quakenet
 the quakenet.org service, using /msg Q@CServe.quakenet.org AUTH user pass
+.El
 .\" INSTALLATION
 .Sh INSTALLATION
 The plugin
 .Nm
-is distributed with irccd. To enable it add the following to your plugins
-section:
+is distributed with irccd. To enable it add it into your
+.Xr irccd.conf 5
+configuration file.
 .Pp
-.Bd -literal
-[plugins]
-auth = ""
+.Bd -literal -offset indent
+plugin "auth"
 .Ed
 .\" USAGE
 .Sh USAGE
 You must configure the file to enable authentication.
 .\" CONFIGURATION
 .Sh CONFIGURATION
-In your irccd.conf file, add the
-.Va [plugin.auth]
-section and fill with the following parameters:
-.Bl -tag -width 24n
+The plugin
+.Nm
+support the following configuration properties:
+.Bl -tag -width "server.password (string)"
 .It Va server.type No (string)
-must be
+Must be
 .Em nickserv
 or
 .Em quakenet .
 .It Va server.password No (string)
-the password.
+The password.
 .It Va server.username No (string)
-the username to use. Required for quakenet, optional for nickserv.
+The username to use. Required for quakenet, optional for nickserv.
 .El
 .Pp
-Note: you must replace server with one defined in a
-.Va [server]
-section.
+Note: you must replace server prefix with the server identifier you refer to in
+the
+.Xr irccd.conf 5
+file.
 .Pp
 Example of configuration:
-.Bd -literal -offset Ds
-[plugin.auth]
-freenode.type = "nickserv"
-freenode.password = "mysecretpassword"
-freenode.username = "jeanfrancois"
+.Bd -literal
+plugin "auth" {
+  config {
+    "freenode.type"     "nickserv";
+    "freenode.password" "mysecretpassword";
+    "freenode.username" "jeanfrancois";
 
-wanadoo.type = "nickserv"
-wanadoo.password = "wanadoo is dead"
+    "wanadoo.type"      "nickserv";
+    "wanadoo.password"  "wanadoo is dead";
+  }
+}
 .Ed

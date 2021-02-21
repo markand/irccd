@@ -29,13 +29,12 @@ plugin let you play tictactoe over IRC.
 Warning: this plugin is extremely verbose, don't enable it blindly.
 .\" INSTALLATION
 .Sh INSTALLATION
-The plugin
-.Nm
-is distributed with irccd. To enable it add the following to your plugins
-section:
+is distributed with irccd. To enable it add it into your
+.Xr irccd.conf 5
+configuration file.
 .Pp
-.Bd -literal
-plugin tictactoe
+.Bd -literal -offset indent
+plugin "tictactoe"
 .Ed
 .\" USAGE
 .Sh USAGE
@@ -94,10 +93,10 @@ And then, placing tokens:
 .Ed
 .\" TEMPLATES
 .Sh TEMPLATES
-The
+The plugin
 .Nm
-plugin supports the following templates:
-.Bl -tag -width 8n -offset Ds
+support the following templates properties:
+.Bl -tag -width running
 .It Va draw
 When the game ended with no winner.
 .It Va invalid

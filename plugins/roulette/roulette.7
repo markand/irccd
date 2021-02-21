@@ -33,12 +33,12 @@ be sure to have channel operator mode set on irccd.
 .Sh INSTALLATION
 The plugin
 .Nm
-is distributed with irccd. To enable it add the following to your plugins
-section:
+is distributed with irccd. To enable it add it into your
+.Xr irccd.conf 5
+configuration file.
 .Pp
-.Bd -literal
-[plugins]
-roulette = ""
+.Bd -literal -offset indent
+plugin "roulette"
 .Ed
 .\" USAGE
 .Sh USAGE
@@ -55,12 +55,10 @@ markand was kicked by irccd [markand, HEADSHOT]
 .Ed
 .\" TEMPLATES
 .Sh TEMPLATES
-The
+The plugin
 .Nm
-plugin supports the following templates in
-.Va [templates.hangman]
-section:
-.Bl -tag -width 8n -offset Ds
+support the following templates properties:
+.Bl -tag -width lucky
 .It Va lucky
 The text to show on luck. Keywords:
 .Em count
@@ -75,9 +73,12 @@ All templates support the following standard keywords:
 .Sh EXAMPLES
 Example of configuration file:
 .Bd -literal
-[templates.roulette]
-lucky = "#{nickname} you're gonna get shot"
-shot = "BIM"
+plugin "roulette" {
+  templates {
+    lucky "#{nickname} you're gonna get shot";
+    shot  "BIM";
+  }
+}
 .Ed
 .\" SEE ALSO
 .Sh SEE ALSO

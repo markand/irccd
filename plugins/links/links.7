@@ -30,12 +30,12 @@ its title on the same channel.
 .Sh INSTALLATION
 The plugin
 .Nm
-is distributed with irccd. To enable it add the following to your plugins
-section:
+is distributed with irccd. To enable it add it into your
+.Xr irccd.conf 5
+configuration file.
 .Pp
-.Bd -literal
-[plugins]
-links = ""
+.Bd -literal -offset indent
+plugin "links"
 .Ed
 .\" USAGE
 .Sh USAGE
@@ -47,23 +47,12 @@ Example of possible output:
 markand: http://example.org
 irccd: Example Domain
 .Ed
-.\" CONFIGURATION
-.Sh CONFIGURATION
-The following options are available under the
-.Va [plugin.links]
-section:
-.Bl -tag -width 14n -offset Ds
-.It Va timeout No (int)
-Timeout in seconds before dropping a request (default: 30).
-.El
 .\" TEMPLATES
 .Sh TEMPLATES
-The
+The plugin
 .Nm
-plugin supports the following templates in
-.Va [templates.links]
-section:
-.Bl -tag -width 14n -offset Ds
+support the following template properties:
+.Bl -tag -width info
 .It Va info
 Message to be written when title has been retrieved successfully. Keywords:
 .Em channel , nickname , origin , server , title .

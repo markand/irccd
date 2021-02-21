@@ -33,12 +33,12 @@ invoked.
 .Sh INSTALLATION
 The plugin
 .Nm
-is distributed with irccd. To enable it add the following to your plugins
-section:
+is distributed with irccd. To enable it add it into your
+.Xr irccd.conf 5
+configuration file.
 .Pp
-.Bd -literal
-[plugins]
-joke = ""
+.Bd -literal -offset indent
+plugin "joke"
 .Ed
 .\" USAGE
 .Sh USAGE
@@ -48,7 +48,7 @@ plugin requires a database of jokes file, it consists of a plain JSON file of
 array of array of strings.
 .Pp
 Example of jokes.json file:
-.Bd -literal -offset Ds
+.Bd -literal
 [
     [
         "Tip to generate a good random password:",
@@ -73,26 +73,28 @@ irccd: Ask a Windows user to quit vim.
 .Ed
 .\" CONFIGURATION
 .Sh CONFIGURATION
-The following options are available under the
-.Va [plugin.joke]
-section:
-.Bl -tag -width 14n -offset Ds
+The plugin
+.Nm
+support the following configuration properties:
+.Bl -tag -width "file (string)"
 .It Va file No (string)
 path to the JSON jokes files (Optional: defaults to data directory/jokes.json).
 Keywords:
 .Em channel , server
 .Pp
-Warning: if you use keywords in the **file** parameter, you won't have a default
+Warning: if you use keywords in the
+.Va file
+parameter, you won't have a default
 joke database anymore.
 .El
 .\" TEMPLATES
 .Sh TEMPLATES
 The
 .Nm
-plugin supports the following templates in
-.Va [templates.joke]
-section:
-.Bl -tag -width 14n -offset Ds
+The plugin
+.Nm
+support the following template properties:
+.Bl -tag -width error
 .It Va error
 Template when an internal error occured. Keywords:
 .Em channel , command , nickname , origin , plugin , server .

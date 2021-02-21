@@ -29,12 +29,12 @@ plugin let you inspect loaded plugins.
 .Sh INSTALLATION
 The plugin
 .Nm
-is distributed with irccd. To enable it add the following to your plugins
-section:
+is distributed with irccd. To enable it add it into your
+.Xr irccd.conf 5
+configuration file.
 .Pp
-.Bd -literal
-[plugins]
-plugin = ""
+.Bd -literal -offset indent
+plugin "plugin"
 .Ed
 .\" USAGE
 .Sh USAGE
@@ -60,24 +60,23 @@ shows loaded plugins (see configuration for limits).
 Both commands work in a channel or as private message with irccd.
 .\" CONFIGURATION
 .Sh CONFIGURATION
-The following options are available under the
-.Va [plugin.plugin]
-section:
-.Bl -tag -width 22n -offset Ds
+The plugin
+.Nm
+support the following configuration properties:
+.Bl -tag -width "max-list-columns (int)"
 .It Va max-list-lines No (int)
 max number of lines allowed for the
 .Ar list
 sub command (Optional, default: 3).
 .It Va max-list-columns No (int)
 max number of columns allowed per lines (Optional, default: 80).
+.El
 .\" TEMPLATES
 .Sh TEMPLATES
-The
+The plugin
 .Nm
-plugin supports the following templates in
-.Va [templates.plugin]
-section:
-.Bl -tag -width 14n -offset Ds
+support the following templates properties:
+.Bl -tag -width not-found
 .It Va usage
 Message to show on invalid usage.
 .It Va info
