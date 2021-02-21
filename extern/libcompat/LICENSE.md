@@ -10,7 +10,7 @@ Other home made code in this repository is licensed under the following license:
 ISC
 ---
 
-Copyright (c) 2020 David Demelier <markand@malikania.fr>
+Copyright (c) 2020-2021 David Demelier <markand@malikania.fr>
 
 Permission to use, copy, modify, and/or distribute this software for any
 purpose with or without fee is hereby granted, provided that the above
