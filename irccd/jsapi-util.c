@@ -81,7 +81,7 @@ subspack_parse(duk_context *ctx, duk_idx_t index, struct subspack *pkg)
 		}
 
 		if (strcmp(duk_get_string(ctx, -2), "date") == 0)
-			pkg->subst.time = duk_get_number(ctx, -1);
+			pkg->subst.time = duk_get_number(ctx, -1) / 1000;
 		else {
 			pkg->kw = irc_util_reallocarray(pkg->kw, ++pkg->subst.keywordsz,
 			    sizeof (*pkg->kw));
