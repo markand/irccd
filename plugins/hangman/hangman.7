@@ -76,16 +76,16 @@ irccd: jean, congratulations, the word is candy.
 .Sh CONFIGURATION
 The plugin
 .Nm
-support the following configuration properties:
+supports the following configuration properties:
 .Bl -tag -width "collaborative (bool)"
 .It Va file No (string)
 The path to the database file.
 .Pp
-The file must contains one word per line, it must be saved as UTF-8 and words
-must only contains UTF-8 characters, any other entry will be ignored.
+The file must contain one word per line, it must be saved as UTF-8 and words
+must consist of UTF-8 characters, any other entry will be ignored.
 .Pp
 Example:
-.Bd -literal -offset Ds
+.Bd -literal
 sky
 irccd
 FreeBSD
@@ -100,7 +100,7 @@ consecutives proposals (Optional, default: true).
 .Sh TEMPLATES
 The plugin
 .Nm
-support the following template properties:
+supports the following template properties:
 .Bl -tag -width wrong-letter
 .It Va asked
 When a letter has been already asked but present in the word. Keywords:
@@ -136,12 +136,12 @@ Example of configuration file:
 .Bd -literal
 plugin "hangman" {
   config {
-    file "/var/srv/db/words.txt";
+    "file" "/var/srv/db/words.txt";
   }
 
   templates {
-    win          "nice job, the word was #{word}!";
-    wrong-letter "please try again, there is no #{letter}";
+    "win"          "nice job, the word was #{word}!";
+    "wrong-letter" "please try again, there is no #{letter}";
   }
 }
 .Ed

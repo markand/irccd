@@ -59,7 +59,7 @@ file
 located in the ask configuration directory.
 .Pp
 Just add one line per answer like this (e.g.
-.Pa ~/.config/irccd/plugin/ask/answers.conf ) .
+.Pa @CMAKE_INSTALL_FULL_SYSCONFDIR@/irccd/plugin/ask/answers.conf ) .
 .Bd -literal -offset Ds
 Stop dreaming,
 Definitely sure!
@@ -67,11 +67,15 @@ Maybe
 .Ed
 .\" CONFIGURATION
 .Sh CONFIGURATION
-The following options are available under the
-.Va [plugin.ask]
-section:
-.Bl -tag -width 14n
+The plugin
+.Nm
+supports the following configuration properties:
+.Bl -tag -width "file (string)"
 .It Va file No (string)
 the path to the database file (Optional, default: answers.conf in configuration
 directory).
 .El
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr irccd 1 ,
+.Xr irccd-templates 7

@@ -57,7 +57,7 @@ markand was kicked by irccd [markand, HEADSHOT]
 .Sh TEMPLATES
 The plugin
 .Nm
-support the following templates properties:
+supports the following templates properties:
 .Bl -tag -width lucky
 .It Va lucky
 The text to show on luck. Keywords:
@@ -67,7 +67,7 @@ The text to show on luck. Keywords:
 The text to show on shot.
 .El
 .Pp
-All templates support the following standard keywords:
+All templates supports the following standard keywords:
 .Em channel , command , nickname , origin , plugin , server .
 .\" EXAMPLES
 .Sh EXAMPLES
@@ -75,8 +75,8 @@ Example of configuration file:
 .Bd -literal
 plugin "roulette" {
   templates {
-    lucky "#{nickname} you're gonna get shot";
-    shot  "BIM";
+    "lucky" "#{nickname} you're gonna get shot";
+    "shot"  "BIM";
   }
 }
 .Ed
