@@ -276,7 +276,7 @@ Server_prototype_kick(duk_context *ctx)
 		throw server_error(server_error::invalid_channel);
 #endif
 
-	duk_push_boolean(ctx, irc_server_kick(s, target, channel, reason));
+	duk_push_boolean(ctx, irc_server_kick(s, channel, target, reason));
 
 	return 1;
 }
