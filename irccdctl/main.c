@@ -933,7 +933,7 @@ main(int argc, char **argv)
 	for (int ch; (ch = ketopt(&ko, argc, argv, 0, "s:v", NULL)) != -1; ) {
 		switch (ch) {
 		case 's':
-			strlcpy(sockaddr.sun_path, optarg, sizeof (sockaddr.sun_path));
+			strlcpy(sockaddr.sun_path, ko.arg, sizeof (sockaddr.sun_path));
 			break;
 		case 'v':
 			verbose = 1;
