@@ -113,10 +113,18 @@ Enable transport to interract with the
 utility or any networking program that can communicate through a UNIX domain
 socket.
 .Pp
-.Ar transport to path
+.Ar transport to path [with uid value gid value]
 .Pp
-Enable transport on
+Create the UNIX domain socket on
 .Pa path .
+.Pp
+The optional
+.Ar uid
+and
+.Ar gid
+keywords can take an optional
+.Ar value
+to change socket owner and group respectively, it can be a string or a number.
 .\" server
 .Ss server
 This section is used to connect to one or more server. Create a new server
@@ -276,6 +284,9 @@ Full example of configuration file
 .Bd -literal
 # Logs to syslog instead of console (which is the default).
 logs verbose to syslog
+
+# Enable transport with default permissions.
+transport to "/tmp/irccd.sock"
 
 #
 # Create a server "example" that connect to example.org using "fr" as nickname,

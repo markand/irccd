@@ -23,6 +23,8 @@
 
 %{
 
+#include <sys/types.h>
+
 #include <irccd/limits.h>
 #include <irccd/rule.h>
 
@@ -33,6 +35,7 @@
 channels        channels
 config          config
 events          events
+gid             gid
 hook            hook
 hostname        hostname
 ident           ident
@@ -56,6 +59,8 @@ ssl             ssl
 templates       templates
 to              to
 transport       transport
+uid             uid
+with            with
 
 brace_open      \{
 brace_close     \}
@@ -79,6 +84,7 @@ string          \"([^\\\"]|\\.)*\"
 {comma}                 return T_COMMA;
 {config}                return T_CONFIG;
 {events}                return T_EVENTS;
+{gid}                   return T_GID;
 {hook}                  return T_HOOK;
 {hostname}              return T_HOSTNAME;
 {ident}                 return T_IDENT;
@@ -98,6 +104,8 @@ string          \"([^\\\"]|\\.)*\"
 {ssl}                   return T_SSL;
 {templates}             return T_TEMPLATES;
 {to}                    return T_TO;
+{uid}                   return T_UID;
+{with}                  return T_WITH;
 
 {log_verbosity}         {
                                 if (strcmp(yytext, "quiet") == 0)

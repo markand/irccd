@@ -15,6 +15,8 @@ irccd
 - Irccd keeps track of nicknames in channels by capturing join/part/kick and
   mode changes. It is now more convenient from the plugins to quickly inspect if
   someone is present on a channel.
+- It is now possible to change uid/gid of the transport socket file. The file is
+  also created with permissions 664.
 
 irccdctl
 --------

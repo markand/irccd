@@ -19,6 +19,8 @@
 #ifndef IRCCD_TRANSPORT_H
 #define IRCCD_TRANSPORT_H
 
+#include <sys/types.h>
+
 #include "limits.h"
 
 struct pollfd;
@@ -27,6 +29,9 @@ struct peer;
 
 int
 transport_bind(const char *);
+
+int
+transport_bindp(const char *, uid_t, gid_t);
 
 void
 transport_prepare(struct pollfd *);

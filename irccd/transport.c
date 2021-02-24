@@ -17,6 +17,7 @@
  */
 
 #include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <assert.h>
 #include <errno.h>
@@ -39,9 +40,11 @@ static struct sockaddr_un addr;
 static int fd = -1;
 
 int
-transport_bind(const char *path)
+wrap_bind(const char *path, uid_t *uid, gid_t *gid)
 {
 	assert(path);
+
+	int oldumask;
 
 	addr.sun_family = PF_LOCAL;
 
@@ -51,17 +54,29 @@ transport_bind(const char *path)
 	}
 
 	/* Silently remove the file first. */
-	unlink(addr.sun_path);
+	unlink(path);
 
 	if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0)) < 0)
 		goto err;
+
+	/* -ux, -gx, -owx */
+	oldumask = umask(S_IXUSR | S_IXGRP | S_IWOTH | S_IXOTH);
+
 	if (bind(fd, (const struct sockaddr *)&addr, sizeof (addr)) < 0)
 		goto err;
+	if (uid && gid && chown(path, *uid, *gid) < 0)
+		goto err;
+
+	umask(oldumask);
+
 	if (listen(fd, 16) < 0)
 		goto err;
 
 	irc_log_info("transport: listening on %s", path);
 	irc_log_debug("transport: file descriptor %d", fd);
+
+	if (uid && gid)
+		irc_log_info("transport: uid=%d, gid=%d", (int)*uid, (int)*gid);
 
 	return 0;
 
@@ -74,6 +89,18 @@ err:
 	}
 
 	return -1;
+}
+
+int
+transport_bind(const char *path)
+{
+	return wrap_bind(path, NULL, NULL);
+}
+
+int
+transport_bindp(const char *path, uid_t uid, gid_t gid)
+{
+	return wrap_bind(path, &uid, &gid);
 }
 
 void

@@ -19,7 +19,9 @@
 %{
 
 #include <err.h>
+#include <grp.h>
 #include <limits.h>
+#include <pwd.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -57,6 +59,11 @@ struct rule_params {
 	struct string_list *origins;
 	struct string_list *plugins;
 	struct string_list *events;
+};
+
+struct transport_params {
+	uid_t uid;
+	gid_t gid;
 };
 
 struct server_params {
@@ -124,6 +131,8 @@ yyerror(const char *);
 %union {
 	int ival;
 	char *sval;
+	uid_t uid;
+	gid_t gid;
 
 	struct pair *pair;
 	struct pair_list *pair_list;
@@ -134,6 +143,7 @@ yyerror(const char *);
 	struct server_params *server;
 	struct plugin_params *plugin;
 	struct rule_params *rule;
+	struct transport_params *tpt;
 };
 
 %token <ival> T_NUMBER T_LOG_VERBOSITY T_RULE_ACTION
@@ -145,6 +155,7 @@ yyerror(const char *);
 %token T_COMMA
 %token T_CONFIG
 %token T_EVENTS
+%token T_GID
 %token T_HOOK
 %token T_HOSTNAME
 %token T_IDENT
@@ -166,12 +177,17 @@ yyerror(const char *);
 %token T_TEMPLATES
 %token T_TO
 %token T_TRANSPORT
+%token T_UID
+%token T_WITH
 
 %type <ival> log_verbosity
 %type <sval> plugin_location
 %type <plugin> plugin_params plugin_params_opt
 %type <rule> rule_params rule_params_opt
 %type <server> server_params
+%type <uid> transport_params_uid
+%type <gid> transport_params_gid
+%type <tpt> transport_params
 
 %type <pair> pair
 %type <pair_list> pair_list plugin_templates plugin_config plugin_paths
@@ -193,50 +209,6 @@ config
 	| rule
 	| plugin
 	| hook
-	;
-
-log_verbosity
-	: T_LOG_VERBOSITY
-	{
-		$$ = $1;
-	}
-	|
-	{
-		$$ = 0;
-	}
-	;
-
-logs
-	: T_LOGS log_verbosity
-	{
-		irc_log_set_verbose($2);
-	}
-	| T_LOGS log_verbosity T_TO T_LOG_TYPE
-	{
-		irc_log_set_verbose($2);
-
-		if (strcmp($4, "console") == 0)
-			irc_log_to_console();
-		else if (strcmp($4, "syslog") == 0)
-			irc_log_to_syslog();
-		else
-			errx(1, "missing log file path");
-
-		free($4);
-	}
-	| T_LOGS log_verbosity T_TO T_LOG_TYPE T_STRING
-	{
-		irc_log_to_file($4);
-		free($4);
-	}
-	;
-
-transport
-	: T_TRANSPORT T_TO T_STRING
-	{
-		transport_bind($3);
-		free($3);
-	}
 	;
 
 string
@@ -280,6 +252,102 @@ pair_list
 	{
 		$$ = $3;
 		SLIST_INSERT_HEAD($$, $1, link);
+	}
+	;
+
+log_verbosity
+	: T_LOG_VERBOSITY
+	{
+		$$ = $1;
+	}
+	|
+	{
+		$$ = 0;
+	}
+	;
+
+logs
+	: T_LOGS log_verbosity
+	{
+		irc_log_set_verbose($2);
+	}
+	| T_LOGS log_verbosity T_TO T_LOG_TYPE
+	{
+		irc_log_set_verbose($2);
+
+		if (strcmp($4, "console") == 0)
+			irc_log_to_console();
+		else if (strcmp($4, "syslog") == 0)
+			irc_log_to_syslog();
+		else
+			errx(1, "missing log file path");
+
+		free($4);
+	}
+	| T_LOGS log_verbosity T_TO T_LOG_TYPE T_STRING
+	{
+		irc_log_to_file($4);
+		free($4);
+	}
+	;
+
+transport_params_uid
+	: T_UID T_NUMBER
+	{
+		$$ = (uid_t)$2;
+	}
+	| T_UID T_STRING
+	{
+		struct passwd *pwd;
+
+		if (!(pwd = getpwnam($2)))
+			errx(1, "invalid uid: %s", $2);
+
+		free($2);
+		$$ = pwd->pw_uid;
+	}
+	;
+
+transport_params_gid
+	: T_GID T_NUMBER
+	{
+		$$ = (gid_t)$2;
+	}
+	| T_GID T_STRING
+	{
+		struct group *grp;
+
+		if (!(grp = getgrnam($2)))
+			errx(1, "invalid uid: %s", $2);
+
+		free($2);
+		$$ = grp->gr_gid;
+	}
+	;
+
+transport_params
+	: T_WITH transport_params_uid transport_params_gid
+	{
+		$$ = irc_util_malloc(sizeof (*$$));
+		$$->uid = $2;
+		$$->gid = $3;
+	}
+	|
+	{
+		$$ = NULL;
+	}
+	;
+
+transport
+	: T_TRANSPORT T_TO T_STRING transport_params
+	{
+		if ($4)
+			transport_bindp($3, $4->uid, $4->gid);
+		else
+			transport_bind($3);
+
+		free($3);
+		free($4);
 	}
 	;
 
