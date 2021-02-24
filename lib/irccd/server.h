@@ -27,6 +27,10 @@
 #include "event.h"
 #include "limits.h"
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 struct pollfd;
 
 struct irc_conn;
@@ -177,5 +181,9 @@ irc_server_incref(struct irc_server *);
 
 void
 irc_server_decref(struct irc_server *);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* !IRCCD_SERVER_H */

@@ -24,6 +24,10 @@
 
 #include "limits.h"
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 struct irc_event;
 
 struct irc_hook {
@@ -42,5 +46,9 @@ irc_hook_invoke(struct irc_hook *, const struct irc_event *);
 
 void
 irc_hook_finish(struct irc_hook *);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* !IRCCD_HOOK_H */

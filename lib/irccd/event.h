@@ -23,6 +23,10 @@
 
 #include "limits.h"
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 struct irc_server;
 
 /*
@@ -147,5 +151,9 @@ irc_event_str(const struct irc_event *, char *, size_t);
 
 void
 irc_event_finish(struct irc_event *);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* !IRCCD_EVENT_H */

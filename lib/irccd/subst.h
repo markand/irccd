@@ -23,6 +23,10 @@
 #include <stddef.h>
 #include <time.h>
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 enum irc_subst_flags {
 	IRC_SUBST_DATE          = (1 << 0),
 	IRC_SUBST_KEYWORDS      = (1 << 1),
@@ -46,5 +50,9 @@ struct irc_subst {
 
 ssize_t
 irc_subst(char *, size_t, const char *, const struct irc_subst *);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* !IRCCD_SUBST_H */

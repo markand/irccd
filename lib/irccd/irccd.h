@@ -26,6 +26,10 @@
 #include "rule.h"
 #include "server.h"
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 extern struct irc {
 	struct irc_server_list servers;
 	struct irc_plugin_list plugins;
@@ -114,5 +118,9 @@ irc_bot_post(void (*)(void *), void *);
 
 void
 irc_bot_finish(void);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* !IRCCD_H */

@@ -21,6 +21,10 @@
 
 #include <stddef.h>
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 #define IRC_UTIL_SIZE(x) (sizeof (x) / sizeof (x[0]))
 
 /* Suitable convenient typedef for bsearch/qsort. */
@@ -58,5 +62,9 @@ irc_util_split(char *, const char **, size_t, char);
 
 char *
 irc_util_printf(char *, size_t, const char *, ...);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* !IRCCD_UTIL_H */

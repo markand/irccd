@@ -23,6 +23,10 @@
 
 #include "limits.h"
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 struct irc_event;
 
 struct irc_plugin {
@@ -115,5 +119,9 @@ irc_plugin_loader_open(struct irc_plugin_loader *, const char *, const char *);
 
 void
 irc_plugin_loader_finish(struct irc_plugin_loader *);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* !IRCCD_PLUGIN_H */

@@ -24,6 +24,10 @@
 
 #include "limits.h"
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 struct irc_channel_user {
 	char nickname[IRC_NICKNAME_LEN];
 	int modes;
@@ -57,5 +61,9 @@ irc_channel_remove(struct irc_channel *, const char *);
 
 void
 irc_channel_finish(struct irc_channel *);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* !IRCCD_CHANNEL_H */

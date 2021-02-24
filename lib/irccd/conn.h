@@ -27,6 +27,10 @@
 
 #include "limits.h"
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 struct addrinfo;
 struct pollfd;
 
@@ -100,5 +104,9 @@ irc_conn_send(struct irc_conn *, const char *);
 
 void
 irc_conn_finish(struct irc_conn *);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* !IRCCD_CONN_H */

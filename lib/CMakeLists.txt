@@ -23,6 +23,7 @@ include(CMakePackageConfigHelpers)
 set(
 	HEADERS
 	irccd/channel.h
+	irccd/conn.h
 	irccd/event.h
 	irccd/hook.h
 	irccd/irccd.h

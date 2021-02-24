@@ -19,6 +19,10 @@
 #ifndef IRCCD_LOG_H
 #define IRCCD_LOG_H
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 void
 irc_log_to_syslog(void);
 
@@ -45,5 +49,9 @@ irc_log_debug(const char *, ...);
 
 void
 irc_log_finish(void);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* !IRCCD_LOG_H */

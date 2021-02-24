@@ -23,6 +23,10 @@
 
 #include "limits.h"
 
+#if defined(__cplusplus)
+extern "C" {
+#endif
+
 enum irc_rule_action {
 	IRC_RULE_ACCEPT,
 	IRC_RULE_DROP
@@ -67,5 +71,9 @@ irc_rule_matchlist(const struct irc_rule_list *,
 
 void
 irc_rule_finish(struct irc_rule *);
+
+#if defined(__cplusplus)
+}
+#endif
 
 #endif /* !IRCCD_RULE_H */
