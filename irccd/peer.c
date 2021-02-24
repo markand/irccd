@@ -941,13 +941,18 @@ static const struct cmd {
 static int
 cmp_cmd(const char *key, const struct cmd *cmd)
 {
-	return strncmp(key, cmd->name, strlen(cmd->name));
+	return strcmp(key, cmd->name);
 }
 
 static const struct cmd *
 find(const char *line)
 {
-	return bsearch(line, cmds, IRC_UTIL_SIZE(cmds),
+	char cmd[32] = {0};
+
+	/* Extract the initial part of the line. */
+	sscanf(line, "%31s", cmd);
+
+	return bsearch(cmd, cmds, IRC_UTIL_SIZE(cmds),
 	    sizeof (cmds[0]), (irc_cmp)cmp_cmd);
 }
 
