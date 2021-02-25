@@ -756,6 +756,13 @@ cmd_server_info(struct peer *p, char *line)
 	fprintf(fp, "%s %s %s\n", s->ident.nickname, s->ident.username, s->ident.realname);
 
 	LIST_FOREACH(c, &s->channels, link) {
+		const struct irc_channel_user *user = irc_channel_find(c, s->ident.nickname);
+
+		/* Prefix all our own modes on this channel. */
+		for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes); ++i)
+			if (user && (user->modes & 1 << i))
+				fputc(s->params.prefixes[i].symbol, fp);
+
 		fprintf(fp, "%s", c->name);
 
 		if (LIST_NEXT(c, link))

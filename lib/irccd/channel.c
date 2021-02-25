@@ -61,7 +61,7 @@ irc_channel_add(struct irc_channel *ch, const char *nickname, int modes)
 }
 
 struct irc_channel_user *
-irc_channel_find(struct irc_channel *ch, const char *nickname)
+irc_channel_find(const struct irc_channel *ch, const char *nickname)
 {
 	struct irc_channel_user *u;
 

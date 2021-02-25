@@ -51,7 +51,7 @@ void
 irc_channel_add(struct irc_channel *, const char *, int);
 
 struct irc_channel_user *
-irc_channel_find(struct irc_channel *, const char *);
+irc_channel_find(const struct irc_channel *, const char *);
 
 void
 irc_channel_clear(struct irc_channel *);
