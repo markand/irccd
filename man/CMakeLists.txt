@@ -90,3 +90,9 @@ endforeach ()
 foreach (m ${MAN7})
 	man(${m} man7)
 endforeach ()
+
+add_custom_target(
+	man
+	COMMENT "Manual pages"
+	SOURCES ${MAN1} ${MAN3} ${MAN5} ${MAN7}
+)

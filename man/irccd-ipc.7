@@ -14,17 +14,89 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .Dd @IRCCD_MAN_DATE@
-.Dt IRCCD-API 7
+.Dt IRCCD-IPC 7
 .Os
 .\" NAME
 .Sh NAME
-.Nm irccd-api
+.Nm irccd-ipc
 .Nd irccd network protocol
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.Nm HOOK-ADD
+.Ar name Ar path
+.Nm HOOK-LIST
+.Nm PLUGIN-CONFIG
+.Ar name Op Ar variable Op Ar value
+.Nm PLUGIN-INFO
+.Ar name
+.Nm PLUGIN-LOAD
+.Ar name
+.Nm PLUGIN-PATH
+.Ar name Op Ar variable Op Ar value
+.Nm PLUGIN-LIST
+.Nm PLUGIN-RELOAD
+.Ar name
+.Nm PLUGIN-TEMPLATE
+.Ar name Op Ar variable Op Ar value
+.Nm PLUGIN-UNLOAD
+.Ar name
+.Nm RULE-ADD
+.Ar accept|drop
+.Op ceiops=value
+.Nm RULE-EDIT
+.Ar index
+.Op ceops(+|-)value
+.Op a=accept|drop
+.Nm RULE-LIST
+.Nm RULE-MOVE
+.Ar from
+.Ar to
+.Nm RULE-REMOVE
+.Ar index
+.Nm SERVER-DISCONNECT
+.Op name
+.Nm SERVER-MESSAGE
+.Ar name
+.Ar channel
+.Ar message
+.Nm SERVER-ME
+.Ar name
+.Ar channel
+.Ar message
+.Nm SERVER-NOTICE
+.Ar name
+.Ar channel
+.Ar notice
+.Nm SERVER-INFO
+.Ar name
+.Nm SERVER-INVITE
+.Ar name
+.Ar channel
+.Ar target
+.Nm SERVER-JOIN
+.Ar name
+.Ar channel
+.Op Ar password
+.Nm SERVER-KICK
+.Ar name
+.Ar channel
+.Ar target
+.Op Ar reason
+.Nm SERVER-LIST
+.Nm SERVER-PART
+.Ar name
+.Ar channel
+.Op Ar reason
+.Nm SERVER-TOPIC
+.Ar name
+.Ar channel
+.Ar topic
+.Nm WATCH
 .\" DESCRIPTION
 .Sh DESCRIPTION
 This guide will help you controlling irccd via sockets.
 .Pp
-For this to work, you need to define at least one transport in your
+For this to work, you need to define a transport in your
 .Pa irccd.conf
 file, for more information see
 .Xr irccd.conf 5 .
@@ -37,565 +109,314 @@ command, take a look at
 before.
 .\" SYNTAX
 .Sh SYNTAX
-Irccd use JSON as protocol for sending and receiving data. A message must ends
-with
-.Em \er\en\er\en
-to be complete, thus it's possible to write JSON messages in multiple lines.
+The irccd program uses plain text for networking messages that consist of a
+command name, its arguments and ends with a CRLF delimiter.
 .Pp
-For example, this buffer will be parsed as two different messages.
-.Bd -literal -offset Ds
-{
-  "param1": "value1"
-}
-
-{
-  "param1": "value1"
-}
+Example of command:
+.Bd -literal -offset indent
+SERVER-MESSAGE malikania #test Hello world!
 .Ed
-.Pp
-Warning: please note that the \er\en\er\en characters are the escape characters
-of line feed and new line, not the concatenation of \e and r.
 .\" RESPONSES
 .Sh RESPONSES
-All commands emit a response with the following properties:
-.Pp
-.Bl -tag -width 24n -offset Ds
-.It Va command No (string)
-the result of the issued command.
-.It Va error No (int)
-the error error code, not defined on success.
-.It Va errorCategory No (string)
-the error category (example: server, plugin).
-.It Va errorMessage No (string)
-the arbitrary error message.
-.El
+All command emit a response even though if they don't produce output. If a
+command succeeds, a plain
+.Dq OK
+is returned, otherwise
+.Dq ERROR
+followed by a message is sent instead.
 .Pp
 Example with a successful message:
-.Bd -literal -offset Ds
-{
-  "command": "server-message",
-}
+.Bd -literal -offset indent
+OK
 .Ed
 .Pp
-Example with an error:
-.Bd -literal -offset Ds
-{
-  "command": "server-message",
-  "error": 1,
-  "errorCagegory": "server",
-  "errorMessage": "server not found"
-}
+Example of error:
+.Bd -literal -offset indent
+ERROR server not found
+.Ed
+.Pp
+Some command may produce more output that are printed under several lines for an
+easier interpretation client side. In that case commands usually return
+.Dq OK
+followed by the number of lines provided.
+.Pp
+Example with
+.Ar PLUGIN-CONFIG :
+.Bd -literal -offset indent
+OK 2
+collaborative=true
+level=hard
 .Ed
 .Sh COMMANDS
 .\" COMMANDS
 The following commands are available.
-.Bl -tag -width xxxxxxxx-yyyyyyyyy
-.\" plugin-config
-.It Cm plugin-config
-Set or get values to a plugin.
+.Bl -tag -width "SERVER-DISCONNECT"
+.\" HOOK-ADD
+.It Cm HOOK-ADD
+Add the hook
+.Ar name
+at the given
+.Ar path .
+.\" HOOK-LIST
+.It Cm HOOK-LIST
+Returns the list of hooks by their names separated by a space immediately after
+.Dq OK
+status.
 .Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Em plugin-config .
-.It Va plugin No (string)
-plugin identifier.
-.It Va variable No (string)
-the variable (Optional, default: undefined).
-.It Va value No (string)
-the value (Optional, default: undefined)
-.El
+Example:
+.Bd -literal -offset indent
+OK irc-notify mail-notify
+.Ed
+.\" PLUGIN-CONFIG
+.It Cm PLUGIN-CONFIG
+Set or get
+.Ar variable
+and its
+.Ar value
+if specified for the plugin
+.Ar name .
+Returns the list of configuration variables if there were only the plugin
+.Ar name
+or return only the value if
+.Ar variable
+was specified.
 .Pp
-The following properties are available in a successful response when getting a
-value:
+Example if
+.Ar variable
+was specified:
+.Bd -literal -offset indent
+OK 1
+current value
+.Ed
 .Pp
-.Bl -tag -width 20n
-.It Va variables No (list)
-All values or unique variable.
-.El
-.\" plugin-info
-.It Cm plugin-info
-Retrieve plugin information.
+Example if
+.Ar variable
+was not specified:
+.Bd -literal -offset indent
+OK 2
+collaborative=true
+level=hard
+.Ed
+.\" PLUGIN-INFO
+.It Cm PLUGIN-INFO
+Return the information about the plugin
+.Ar name
+in the form:
 .Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Em plugin-info .
-.It Va plugin No (string)
-plugin identifier.
-.El
+.Bd -literal -offset indent
+OK 5
+name
+long description
+version
+license
+author
+.Ed
+.\" PLUGIN-LOAD
+.It Cm PLUGIN-LOAD
+Find and load the plugin specified by
+.Ar name .
+.\" PLUGIN-PATH
+.It Cm PLUGIN-PATH
+Exactly the same usage as
+.Cm PLUGIN-CONFIG
+but for the plugin paths.
+.\" PLUGIN-LIST
+.It Cm PLUGIN-LIST
+Returns the list of plugins by their names separated by a space immediately
+after
+.Dq OK
+status.
 .Pp
-The following properties are available in a successful response:
-.Bl -tag -width 20n
-.It Va author No (string)
-author name.
-.It Va license No (string)
-plugin license.
-.It Va summary No (string)
-plugin description.
-.It Va version No (string)
-arbitrary version.
-.El
-.\" plugin-list
-.It Cm plugin-list
-Get the list of all loaded plugins.
+Example:
+.Bd -literal -offset indent
+OK ask auth hangman
+.Ed
+.\" PLUGIN-RELOAD
+.It Cm PLUGIN-RELOAD
+Reload the plugin specified by
+.Ar name .
+.\" PLUGIN-TEMPLATE
+.It Cm PLUGIN-TEMPLATE
+Exactly the same usage as
+.Cm PLUGIN-CONFIG
+but for the plugin paths.
+.\" PLUGIN-UNLOAD
+.It Cm PLUGIN-UNLOAD
+Unload and remove the plugin
+.Ar name .
+.\" RULE-ADD
+.It Cm RULE-ADD
+Add a new rule with matching action to
+.Ar accept
+or
+.Ar drop .
+Then by a list separated by spaces, add any key=value pair where the key
+defines the criterion to set from
+.Dq ceops
+which adds a channel, event, origin, plugin or server respectively. The
+.Ar i
+character is the optional index where to insert the new rule.
 .Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Em plugin-list .
-.El
+Example of client request:
+.Bd -literal -offset indent
+RULE-ADD accept c=#test s=example i=1
+.Ed
+.\" RULE-EDIT
+.It Cm RULE-EDIT
+Edit the rule at the given
+.Ar index .
+Similarly to
+.Cm RULE-ADD
+command, you can specify a criterion modification using the
+.Dq ceops
+characters followed by a minus or plus string to either remove or add the
+criterion respectively. It is also possible to change the rule action with the
+key value pair
+.Ar a=accept
+Or
+.Ar a=drop
 .Pp
-The following properties are available in a successful response:
-.Bl -tag -width 20n
-.It Va list No (list)
-a list of plugin names.
-.El
-.\" plugin-load
-.It Cm plugin-load
-Load a plugin by searching it.
+Example of client request:
+.Bd -literal -offset indent
+RULE-EDIT c-#staff s+example a=drop
+.Ed
+.\" RULE-LIST
+.It Cm RULE-LIST
+Return the list of rules loaded in the form:
 .Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Em plugin-load .
-.It Va plugin No (identifier)
-the plugin identifier.
-.El
-.\" plugin-reload
-.It Cm plugin-reload
-Reload a plugin.
+.Bd -literal -offset indent
+OK 1
+accept
+list of servers
+list of channels
+list of origins
+list of plugins
+list of events
+.Ed
 .Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Em plugin-reload .
-.It Va plugin No (identifier)
-the plugin identifier.
-.El
-.\" plugin-unload
-.It Cm plugin-unload
-Unload a plugin.
+For each rule, the block of 6 lines is repeated for every rule returned in the
+.Dq OK
+response. So if you have 4 rules, you'll have to read 24 lines total.
+.\" RULE-MOVE
+.It Cm RULE-MOVE
+Move the rule at the position
+.Ar from
+to the position specified by
+.Ar to .
+.\" RULE-REMOVE
+.It Cm RULE-REMOVE
+Remove the rule at the given
+.Ar index .
+.\" SERVER-DISCONNECT
+.It Cm SERVER-DISCONNECT
+Disconnect and remove the server specified by
+.Ar name
+if specified otherwise, remove all.
+.\" SERVER-MESSAGE
+.It Cm SERVER-MESSAGE
+Send the private
+.Ar message
+to the
+.Ar channel
+into the server
+.Ar name .
+.\" SERVER-ME
+.It Cm SERVER-ME
+Send an action emote
+.Ar message
+to the
+.Ar channel
+into the server
+.Ar name .
+.\" SERVER-NOTICE
+.It Cm SERVER-NOTICE
+Send the
+.Ar notice
+to the
+.Ar channel
+into the server
+.Ar name .
+.\" SERVER-INFO
+.It Cm SERVER-INFO
+Get the information about the server
+.Ar name
+in the form:
+.Bd -literal -offset indent
+OK name
+hostname port [ssl]
+nickname username real name
+#channels #channels...
+.Ed
+.\" SERVER-INVITE
+.It Cm SERVER-INVITE
+Invite the
+.Ar target
+to the
+.Ar channel
+into the server
+.Ar name .
+.\" SERVER-JOIN
+.It Cm SERVER-JOIN
+Join a
+.Ar channel
+into the server
+.Ar name
+using an optional
+.Ar password .
+.\" SERVER-KICK
+.It Cm SERVER-KICK
+Kick the
+.Ar target
+from the
+.Ar channel
+in the server
+.Ar name
+using an optional
+.Ar reason .
+.\" SERVER-LIST
+.It Cm SERVER-LIST
+Returns the list of servers by their names separated by a space immediately
+after
+.Dq OK
+status.
 .Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Em plugin-unload .
-.It Va plugin No (identifier)
-the plugin identifier.
-.El
-.\" rule-add
-.It Cm rule-add
-Add a new rule.
+Example:
+.Bd -literal -offset indent
+OK caramail wanadoo
+.Ed
+.\" SERVER-PART
+.It Cm SERVER-PART
+Leaves the
+.Ar channel
+from the server
+.Ar name
+using an optional
+.Ar reason .
+.\" SERVER-TOPIC
+.It Cm SERVER-TOPIC
+Sets the new
+.Ar topic
+to the
+.Ar channel
+into the server
+.Ar name .
+.\" WATCH
+.It Cm WATCH
+Enable watch mode.
 .Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Em rule-add .
-.It Va channels No (list)
-a list of channels to match (Optional, default: undefined).
-.It Va events No (list)
-a list of events to match (Optional, default: undefined).
-.It Va origins No (list)
-a list of origins to match (Optional, default: undefined).
-.It Va plugins No (list)
-a list of plugins to match (Optional, default: undefined).
-.It Va servers No (list)
-a list of servers to match (Optional, default: undefined).
-.It Va action No (string)
-must be accept or drop.
-.It Va index No (unsigned)
-rule index (Optional, default: undefined).
-.El
-.\" rule-edit
-.It Cm rule-edit
-Edit a rule in place.
+When set, irccd will notify the client about new IRC event incoming using the
+syntax:
+.Bd -literal -offset indent
+EVENT-<NAME> arguments...
+.Ed
 .Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Em rule-edit .
-.It Va add-channels No (list)
-a list of channels to match (Optional, default: undefined).
-.It Va add-events No (list)
-a list of events to match (Optional, default: undefined).
-.It Va add-origins No (list)
-a list of origins to match (Optional, default: undefined).
-.It Va add-plugins No (list)
-a list of plugins to match (Optional, default: undefined).
-.It Va add-servers No (list)
-a list of servers to match (Optional, default: undefined).
-.It Va remove-channels No (list)
-a list of channels to unmatch (Optional, default: undefined).
-.It Va remove-events No (list)
-a list of events to unmatch (Optional, default: undefined).
-.It Va remove-origins No (list)
-a list of origins to unmatch (Optional, default: undefined).
-.It Va remove-plugins No (list)
-a list of plugins to unmatch (Optional, default: undefined).
-.It Va remove-servers No (list)
-a list of servers to unmatch (Optional, default: undefined).
-.It Va action No (string)
-can be accept or drop (Optional, default: undefined).
-.It Va index No (unsigned)
-rule index.
-.El
-.\" rule-info
-.It Cm rule-info
-Show information about a rule.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Em rule-info .
-.It Va index No (unsigned)
-rule index.
-.El
-.Pp
-The following properties are available in a successful response:
-.Bl -tag -width 20n
-.It Va servers No (list)
-a list of servers matched.
-.It Va channels No (list)
-a list of channels matched.
-.It Va origins No (list)
-a list of origins matched.
-.It Va plugins No (list)
-a list of plugins matched.
-.It Va events No (list)
-a list of events matched.
-.It Va action No (string)
-rule action, accept or drop.
-.El
-.\" rule-list
-.It Cm rule-list
-Get a list of rules.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Em rule-list .
-.El
-.Pp
-The following properties are available in a successful response:
-.Bl -tag -width 20n
-.It Va list (list)
-a list of object that contain the same information as
-.Cm rule-info
-command was invoked.
-.El
-.\" rule-move
-.It Cm rule-move
-Move a rule.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Em rule-move .
-.It Va from No (int)
-the source index.
-.It Va to No (int)
-the destination index.
-.El
-.\" rule-remove
-.It Cm rule-remove
-Remove a rule.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Em rule-remove .
-.It Va index No (int)
-rule index.
-.El
-.\" server-connect
-.It Cm server-connect
-Connect to a server.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Em server-connect .
-.It Va name No (string)
-the server unique id.
-.It Va hostname No (string)
-the host address.
-.It Va port No (int)
-the port number (Optional, default: 6667).
-.It Va ssl No (bool)
-use SSL (Optional, default: false).
-.It Va nickname No (string)
-the nickname to use (Optional, default: irccd).
-.It Va username No (string)
-the user name to use (Optional, default: irccd).
-.It Va realname No (string)
-the real name to use. (Optional, default: IRC Client Daemon).
-.It Va ctcpVersion No (string)
-the CTCP Version to answer. (Optional, default: the irccd's version),
-.It Va commandChar No (string)
-the command character to use to invoke command. (Optional, default: !).
-.El
-.\" server-disconnect
-.It Cm server-disconnect
-Disconnect from a server.
-.Pp
-If server is not specified, irccd disconnects all servers.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Ar server-disconnect .
-.It Va server No (string)
-the server unique id (Optional, default: none).
-.El
-.\" server-info
-.It Cm server-info
-Get server information.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Ar server-info .
-.It Va server No (string)
-the server unique id.
-.El
-.Pp
-The following properties are available in a successful response:
-.Bl -tag -width 20n
-.It Va name No (string)
-the server unique id.
-.It Va hostname No (string)
-the server hostname.
-.It Va port No (int)
-the port.
-.It Va ipv4 No (bool)
-true if using IPv6.
-.It Va ipv6 No (bool)
-true if using IPv6.
-.It Va ssl No (bool)
-true if connection is using SSL.
-.It Va channels No (list)
-list of channels.
-.It Va nickname No (string)
-the current nickname in use.
-.It Va username No (string)
-the username in use.
-.It Va realname No (string)
-the realname in use.
-.El
-.\" server-invite
-.It Cm server-invite
-Invite the specified target on the channel.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Ar server-invite .
-.It Va server No (string)
-the server unique id.
-.It Va target No (string)
-the nickname to invite.
-.It Va channel No (string)
-the channel.
-.El
-.\" server-join
-.It Cm server-join
-Join the specified channel.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Ar server-join .
-.It Va server No (string)
-the server unique id.
-.It Va channel No (string)
-the channel to join.
-.It Va password No (string)
-the password (Optional, default: none).
-.El
-.\" server-kick
-.It Cm server-kick
-Kick the specified target from the channel.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Ar server-kick .
-.It Va server No (string)
-the server unique id.
-.It Va target No (string)
-the target nickname.
-.It Va channel No (string)
-the channel.
-.It Va reason No (string)
-the reason (Optional, default: none).
-.El
-.\" server-list
-.It Cm server-list
-Get the list of all connected servers.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Ar server-list .
-.El
-.Pp
-The following properties are available in a successful response:
-.Pp
-.Bl -tag -width 20n
-.It Va list No (list)
-the list of all server unique ids as integers.
-.El
-.\" server-me
-.It Cm server-me
-Send an action emote.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Ar server-me .
-.It Va server No (string)
-the server unique id.
-.It Va target No (string)
-the target or channel.
-.It Va message No (string)
-the message.
-.El
-.\" server-message
-.It Cm server-message
-Send a message to the specified target or channel.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Ar server-message .
-.It Va server No (string)
-the server unique id.
-.It Va target No (string)
-the target or channel.
-.It Va message No (string)
-the message.
-.El
-.\" server-mode
-.It Cm server-mode
-Change channel or bot mode.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Ar server-mode .
-.It Va server No (string)
-the server unique id.
-.It Va channel No (string)
-the channel or irccd's nickname
-.It Va mode No (string)
-the mode.
-.It Va limit No (string)
-a optional limit.
-.It Va user No (string)
-a optional user.
-.It Va mask No (string)
-a optional mask.
-.El
-.\" server-nick
-.It Cm server-nick
-Change irccd's nickname.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Ar server-nick .
-.It Va server No (string)
-the server unique id.
-.It Va nickname No (string)
-the new nickname.
-.El
-.\" server-notice
-.It Cm server-notice
-Send a private notice to the specified target.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Ar server-notice .
-.It Va server No (string)
-the server unique id.
-.It Va target No (string)
-the target.
-.It Va message No (string)
-the notice message.
-.El
-.\" server-part
-.It Cm server-part
-Leave the specified channel.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Ar server-part .
-.It Va server No (string)
-the unique server id.
-.It Va channel No (string)
-the channel to leave.
-.It Va reason No (string)
-the reason (Optional, default: none).
-.El
-.\" server-reconnect
-.It Cm server-reconnect
-Force reconnection of one or all servers.
-.Pp
-If server is not specified, all servers will try to reconnect.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Ar server-reconnect .
-.It Va server No (string)
-the server unique id (Optional, default: none).
-.El
-.\" server-topic
-.It Cm server-topic
-Change the topic of the specified channel.
-.Pp
-Available properties:
-.Bl -tag -width 20n
-.It Va command No (string)
-must be
-.Ar server-topic .
-.It Va server No (string)
-the unique server id.
-.It Va channel No (string)
-the channel.
-.It Va topic No (string)
-the new topic.
-.El
+Example:
+.Bd -literal -offset indent
+EVENT-CONNECT wanadoo
+EVENT-MESSAGE wanadoo jean!jean@caramail.com #games hello guys!
+.Ed
 .El
 .\" SEE ALSO
 .Sh SEE ALSO
-.Xr irccd 1
+.Xr irccd 1 ,
+.Xr irccdctl 1
