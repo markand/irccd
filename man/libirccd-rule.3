@@ -190,6 +190,26 @@ The functions
 and
 .Fn irc_rule_matchlist
 returns non-zero if the rule is allowed.
+.\" EXAMPLES
+.Sh EXAMPLES
+Create a rule that matches servers
+.Dq example
+or
+.Dq wanadoo
+on channel
+.Dq #staff
+for the plugin
+.Dq hangman
+and drop it.
+.Bd -literal -offset indent
+struct irc_rule *r;
+
+r = irc_rule_new(IRC_RULE_DROP);
+irc_rule_add(r->servers, "example");
+irc_rule_add(r->servers, "wanadoo");
+irc_rule_add(r->channels, "#staff");
+irc_rule_add(r->plugins, "hangman");
+.Ed
 .\" ERRORS
 .Sh ERRORS
 The function
