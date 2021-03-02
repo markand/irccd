@@ -83,7 +83,7 @@ parse(struct req *req)
 	regmatch_t match[2];
 	char *ret = NULL;
 
-	if (regcomp(&regex, "<title>([^<]+)<\\/title>",	REG_EXTENDED | REG_ICASE) != 0)
+	if (regcomp(&regex, "<title>([^<]+)<\\/title>", REG_EXTENDED | REG_ICASE) != 0)
 		return NULL;
 
 	if (regexec(&regex, req->buf, 2, match, 0) == 0) {
