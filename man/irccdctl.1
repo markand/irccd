@@ -50,6 +50,16 @@
 .Nm
 .Cm plugin-load
 .Ar name
+.\" plugin-path
+.Nm
+.Cm plugin-path
+.Ar id
+.Op Ar variable Op Ar value
+.\" plugin-template
+.Nm
+.Cm plugin-template
+.Ar id
+.Op Ar variable Op Ar value
 .\" plugin-reload
 .Nm
 .Cm plugin-reload
@@ -147,11 +157,9 @@
 .Nm
 .Cm server-mode
 .Ar server
-.Ar target
+.Ar channel
 .Ar mode
-.Op Ar limit
-.Op Ar user
-.Op Ar mask
+.Op Ar args
 .\" server-nick
 .Nm
 .Cm server-nick
@@ -182,18 +190,19 @@
 .\" watch
 .Nm
 .Cm watch
-.Op Fl f Ar native|json
 .\" DESCRIPTION
 .Sh DESCRIPTION
 The
 .Nm irccdctl
-is the official utility that let you control a running irccd instance. It uses
-JSON messages over TCP/IP or UNIX sockets with optional SSL layer to send
-requests. For more information see
-.Xr irccd-ipc 7 .
+utility is the official utility that let you control a running irccd instance.
+It connects to the UNIX domain socket opened by
+.Xr irccd 1
+to make requests through the
+.Xr irccd-ipc 7
+protocol.
 .Pp
 The general syntax for running an irccdctl command is:
-.Bd -literal -offset Ds
+.Bd -literal -offset indent
 irccdctl global-options command command-options command-arguments
 .Ed
 .Pp
@@ -204,33 +213,13 @@ are available
 the
 .Ar command
 name:
-.Bl -tag -width 12n
-.It Fl 4
-Try to connect using IPv4. Specifying this option
-unset
-.Fl 6
-option, set it explicitly to enable both families.
-.It Fl 6
-Try to connect using IPv6. Specifying this option will
-unset
-.Fl 4
-option, set it explicitly to enable both families.
-.It Fl h Ar hostname
-Connect to the IP address or hostname.
-.It Fl p Ar port
-Use the
-.Ar port
-number or service name.
-.It Fl P Ar path
+.Bl -tag "path"
+.It Fl s Ar path
 Connect to the UNIX local socket specified by
 .Ar path .
+.It Fl v
+Be more verbose.
 .El
-.Pp
-Note: options
-.Fl h
-and
-.Fl P
-are mutually exclusive.
 .\" COMMANDS
 .Sh COMMANDS
 .Bl -tag -width xxxxxxxx-yyyyyyyyy
@@ -271,6 +260,7 @@ Get plugin information specified by
 .\" plugin-list
 .It Cm plugin-list
 Get the list of all loaded plugins.
+.\" plugin-load
 .It Cm plugin-load
 Load a plugin into the irccd instance.
 .Pp
@@ -278,6 +268,16 @@ Note: since irccdctl can be used remotely, the argument
 .Ar name
 will always be evaluated as plugin name and not as a filesystem path. Therefore,
 the plugin will be searched through the irccd directories.
+.\" plugin-path
+.It Cm plugin-path
+Exactly the same usage as
+.Cm plugin-config
+but for plugin paths.
+.\" plugin-template
+.It Cm plugin-template
+Exactly the same usage as
+.Cm plugin-config
+but for plugin templates.
 .\" plugin-reload
 .It Cm plugin-reload
 Reload a plugin specified by
@@ -431,16 +431,20 @@ to the specified
 .It Cm server-mode
 Set
 .Ar target
-or irccd's user mode.
+or irccd's user
+.Ar mode .
 .Pp
 When
 .Ar target
 is the bot's nickname, the command change its mode. Otherwise it applies to a
 channel and modes are treated differently.
 .Pp
-The arguments
-.Ar limit , user , mask
-are usually only used with channel modes.
+The optional
+.Ar args
+contains additional mode arguments usually separated by spaces. Make sure to
+quote them in the shell to detect as a single argument, otherwise
+.Nm
+will not understand the command usage.
 .\" server-nick
 .It Cm server-nick
 Change irccd's
@@ -471,14 +475,9 @@ Set the
 new
 .Ar topic .
 .\" watch
+.It Cm watch
 Start watching irccd events. This command will indefinitely wait for new events
 to arrive from irccd.
-.Pp
-Available options:
-.Bl -tag -width 14n
-.It Fl f Ar native|json
-use JSON or native (human readable) format.
-.El
 .El
 .\" BUGS
 .Sh BUGS
@@ -494,8 +493,7 @@ irccdctl server-join localhost "#staff"
 .Ed
 .\" SEE ALSO
 .Sh SEE ALSO
-.Xr irccd 1 ,
-.Xr irccdctl.conf 5
+.Xr irccd 1
 .\" AUTHORS
 .Sh AUTHORS
 .Nm

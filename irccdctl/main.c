@@ -739,15 +739,10 @@ cmd_server_me(int argc, char **argv)
 static void
 cmd_server_mode(int argc, char **argv)
 {
-	(void)argc;
-	(void)argv;
-#if 0
-	req("MODE %s %s %s%c%s%c%s%c%s", argv[0], argv[1], argv[2],
-		argc >= 4 ? ' ', argv[3] : "",
-		argc >= 5 ? ' ', argv[4] : "",
-		argc >= 6 ? ' ', argv[5] : "");
+	req("SERVER-MODE %s %s %s%c%s", argv[0], argv[1], argv[2],
+	    argc >= 4 ? ' '     : '\0',
+	    argc >= 4 ? argv[3] : "");
 	ok();
-#endif
 }
 
 static void
@@ -838,7 +833,7 @@ static const struct cmd {
 	{ "server-list",        0,      0,      cmd_server_list         },
 	{ "server-me",          3,      3,      cmd_server_me           },
 	{ "server-message",     3,      3,      cmd_server_message      },
-	{ "server-mode",        3,      6,      cmd_server_mode         },
+	{ "server-mode",        3,      4,      cmd_server_mode         },
 	{ "server-nick",        2,      2,      cmd_server_nick         },
 	{ "server-notice",      3,      3,      cmd_server_notice       },
 	{ "server-part",        3,      3,      cmd_server_part         },
@@ -910,7 +905,7 @@ help(void)
 	fprintf(stderr, "       %s server-list\n", getprogname());
 	fprintf(stderr, "       %s server-me server target message\n", getprogname());
 	fprintf(stderr, "       %s server-message server target message\n", getprogname());
-	fprintf(stderr, "       %s server-mode server target mode [limit] [user] [mask]\n", getprogname());
+	fprintf(stderr, "       %s server-mode server target mode [args]\n", getprogname());
 	fprintf(stderr, "       %s server-nick server nickname\n", getprogname());
 	fprintf(stderr, "       %s server-notice server target message\n", getprogname());
 	fprintf(stderr, "       %s server-part server channel [reason]\n", getprogname());

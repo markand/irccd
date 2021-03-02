@@ -50,7 +50,7 @@ irc_channel_add(struct irc_channel *ch, const char *nickname, int modes)
 
 	struct irc_channel_user *user;
 
-	if (irc_channel_find(ch, nickname))
+	if (irc_channel_get(ch, nickname))
 		return;
 
 	user = irc_util_malloc(sizeof (*user));
@@ -61,7 +61,7 @@ irc_channel_add(struct irc_channel *ch, const char *nickname, int modes)
 }
 
 struct irc_channel_user *
-irc_channel_find(const struct irc_channel *ch, const char *nickname)
+irc_channel_get(const struct irc_channel *ch, const char *nickname)
 {
 	struct irc_channel_user *u;
 
@@ -92,7 +92,7 @@ irc_channel_remove(struct irc_channel *ch, const char *nick)
 
 	struct irc_channel_user *user;
 
-	if ((user = irc_channel_find(ch, nick))) {
+	if ((user = irc_channel_get(ch, nick))) {
 		LIST_REMOVE(user, link);
 		free(user);
 	}

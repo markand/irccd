@@ -151,12 +151,7 @@ int
 irc_server_me(struct irc_server *, const char *, const char *);
 
 int
-irc_server_mode(struct irc_server *,
-                const char *,
-                const char *,
-                const char *,
-                const char *,
-                const char *);
+irc_server_mode(struct irc_server *, const char *, const char *, const char *);
 
 int
 irc_server_names(struct irc_server *, const char *);

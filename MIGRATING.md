@@ -25,6 +25,8 @@ Irccdctl
   semantic versioning.
 - The command `rule-info` has been removed because it is mostly the same as
   `rule-list`.
+- The command `server-mode` signature has changed because it was mostly unusable
+  before.
 
 Platform support
 ----------------
@@ -80,6 +82,8 @@ Javascript API
   and the `Server.info` returned object has been renamed to `prefix`.
 - The event `onMode` now takes four arguments: server, channel, mode and list
   of arguments to the mode. The previous signature was mostly unusable.
+- The method `Server.mode` has a different signature because it was mostly
+  unusable.
 
 Plugins
 -------

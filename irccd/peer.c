@@ -183,14 +183,7 @@ rule_list_to_spaces(const char *value)
 }
 
 /*
- * HOOK-ADD name path	fprintf(fp, "OK ");
-
- LIST_FOREACH(s, &irc.servers, link) {
-		fprintf(fp, "%s", s->name);
-
-		if (LIST_NEXT(s, link))
-			fputc(' ', fp);
-	}
+ * HOOK-ADD name path
  */
 static int
 cmd_hook_add(struct peer *p, char *line)
@@ -277,7 +270,7 @@ cmd_plugin_info(struct peer *p, char *line)
 	if (!(plg = require_plugin(p, args[0])))
 		return 0;
 
-	peer_send(p, "OK %s\n%s\n%s\n%s\n%s", plg->name, plg->description,
+	peer_send(p, "OK 5%s\n%s\n%s\n%s\n%s", plg->name, plg->description,
 	    plg->version, plg->license, plg->author);
 
 	return 0;
@@ -690,24 +683,20 @@ cmd_server_me(struct peer *p, char *line)
 }
 
 /*
- * SERVER-MODE server channel mode [limit] [user] [mask]
+ * SERVER-MODE server channel mode [args...]
  */
 static int
 cmd_server_mode(struct peer *p, char *line)
 {
-	const char *args[6] = {0};
+	const char *args[4] = {0};
 	struct irc_server *s;
 
-	if (parse(line, args, 6) < 3)
+	if (parse(line, args, 4) < 3)
 		return EINVAL;
 	if (!(s = require_server(p, args[0])))
 		return 0;
 
-	irc_server_mode(s, args[1], args[2],
-	    args[3][0] ? args[3] : NULL,
-	    args[4][0] ? args[4] : NULL,
-	    args[5][0] ? args[5] : NULL
-	);
+	irc_server_mode(s, args[1], args[2], args[3]);
 
 	return ok(p);
 }
@@ -756,7 +745,7 @@ cmd_server_info(struct peer *p, char *line)
 	fprintf(fp, "%s %s %s\n", s->ident.nickname, s->ident.username, s->ident.realname);
 
 	LIST_FOREACH(c, &s->channels, link) {
-		const struct irc_channel_user *user = irc_channel_find(c, s->ident.nickname);
+		const struct irc_channel_user *user = irc_channel_get(c, s->ident.nickname);
 
 		/* Prefix all our own modes on this channel. */
 		for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes); ++i)

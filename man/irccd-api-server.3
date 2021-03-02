@@ -34,7 +34,7 @@
 .Fn Irccd.Server.prototype.kick "target, channel, reason = undefined"
 .Fn Irccd.Server.prototype.me "target, message"
 .Fn Irccd.Server.prototype.message "target, message"
-.Fn Irccd.Server.prototype.mode "target, mode, limit, user, mode"
+.Fn Irccd.Server.prototype.mode "target, mode, args"
 .Fn Irccd.Server.prototype.names "channel"
 .Fn Irccd.Server.prototype.nick "nickname"
 .Fn Irccd.Server.prototype.notice "target, message"
@@ -205,11 +205,8 @@ is the bot's nickname, it changes its
 .Fa mode .
 otherwise it changes the channel one.
 The optional argument
-.Fa limit , user
-and
-.Fa mask
-are required depending on the mode mask. See IRC specification for more
-details.
+.Fa args
+contains additional mode arguments.
 .Pp
 .\" Irccd.Server.prototype.names
 The

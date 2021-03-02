@@ -135,7 +135,7 @@ get_channels(duk_context *ctx, struct irc_server *s)
 		if (!duk_is_string(ctx, -2))
 			(void)duk_error(ctx, DUK_ERR_ERROR, "invalid channel 'name' property");
 
-		irc_server_join(s, duk_to_string(ctx, -2), duk_opt_string(ctx, -1, NULL));
+		irc_server_join(s, duk_to_string(ctx, -2), duk_get_string_default(ctx, -1, NULL));
 		duk_pop_n(ctx, 4);
 	}
 
@@ -221,13 +221,6 @@ Server_prototype_invite(duk_context *ctx)
 	const char *target = duk_require_string(ctx, 0);
 	const char *channel = duk_require_string(ctx, 1);
 
-#if 0
-	if (!*target || !*channel)
-		throw server_error(server_error::invalid_nickname);
-	if (channel.empty())
-		throw server_error(server_error::invalid_channel);
-#endif
-
 	duk_push_boolean(ctx, irc_server_invite(s, target, channel));
 
 	return 1;
@@ -249,12 +242,7 @@ Server_prototype_join(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
 	const char *channel = duk_require_string(ctx, 0);
-	const char *password = duk_opt_string(ctx, 1, NULL);
-
-#if 0
-	if (channel.empty())
-		throw server_error(server_error::invalid_channel);
-#endif
+	const char *password = duk_get_string_default(ctx, 1, NULL);
 
 	duk_push_boolean(ctx, irc_server_join(s, channel, password));
 
@@ -267,14 +255,7 @@ Server_prototype_kick(duk_context *ctx)
 	struct irc_server *s = self(ctx);
 	const char *target = duk_require_string(ctx, 0);
 	const char *channel = duk_require_string(ctx, 1);
-	const char *reason = duk_opt_string(ctx, 2, NULL);
-
-#if 0
-	if (target.empty())
-		throw server_error(server_error::invalid_nickname);
-	if (channel.empty())
-		throw server_error(server_error::invalid_channel);
-#endif
+	const char *reason = duk_get_string_default(ctx, 2, NULL);
 
 	duk_push_boolean(ctx, irc_server_kick(s, channel, target, reason));
 
@@ -288,11 +269,6 @@ Server_prototype_me(duk_context *ctx)
 	const char *target = duk_require_string(ctx, 0);
 	const char *message = duk_require_string(ctx, 1);
 
-#if 0
-	if (target.empty())
-		throw server_error(server_error::invalid_nickname);
-#endif
-
 	duk_push_boolean(ctx, irc_server_me(s, target, message));
 
 	return 1;
@@ -305,11 +281,6 @@ Server_prototype_message(duk_context *ctx)
 	const char *target = duk_require_string(ctx, 0);
 	const char *message = duk_require_string(ctx, 1);
 
-#if 0
-	if (target.empty())
-		throw server_error(server_error::invalid_nickname);
-#endif
-
 	duk_push_boolean(ctx, irc_server_message(s, target, message));
 
 	return 1;
@@ -321,18 +292,9 @@ Server_prototype_mode(duk_context *ctx)
 	struct irc_server *s = self(ctx);
 	const char *channel = duk_require_string(ctx, 0);
 	const char *mode = duk_require_string(ctx, 1);
-	const char *limit = duk_opt_string(ctx, 2, NULL);
-	const char *user = duk_opt_string(ctx, 3, NULL);
-	const char *mask = duk_opt_string(ctx, 4, NULL);
+	const char *args = duk_get_string_default(ctx, 2, NULL);
 
-#if 0
-	if (channel.empty())
-		throw server_error(server_error::invalid_channel);
-	if (mode.empty())
-		throw server_error(server_error::invalid_mode);
-#endif
-
-	duk_push_boolean(ctx, irc_server_mode(s, channel, mode, limit, user, mask));
+	duk_push_boolean(ctx, irc_server_mode(s, channel, mode, args));
 
 	return 1;
 }
@@ -342,11 +304,6 @@ Server_prototype_names(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
 	const char *channel = duk_require_string(ctx, 0);
-
-#if 0
-	if (channel.empty())
-		throw server_error(server_error::invalid_channel);
-#endif
 
 	duk_push_boolean(ctx, irc_server_names(s, channel));
 
@@ -359,11 +316,6 @@ Server_prototype_nick(duk_context *ctx)
 	struct irc_server *s = self(ctx);
 	const char *nickname = duk_require_string(ctx, 0);
 
-#if 0
-	if (nickname.empty())
-		throw server_error(server_error::invalid_nickname);
-#endif
-
 	duk_push_boolean(ctx, irc_server_nick(s, nickname));
 
 	return 1;
@@ -374,12 +326,7 @@ Server_prototype_notice(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
 	const char *target = duk_require_string(ctx, 0);
-	const char *message = duk_opt_string(ctx, 1, NULL);
-
-#if 0
-	if (target.empty())
-		throw server_error(server_error::invalid_nickname);
-#endif
+	const char *message = duk_get_string_default(ctx, 1, NULL);
 
 	duk_push_boolean(ctx, irc_server_notice(s, target, message));
 
@@ -391,12 +338,7 @@ Server_prototype_part(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
 	const char *channel = duk_require_string(ctx, 0);
-	const char *reason = duk_opt_string(ctx, 1, NULL);
-
-#if 0
-	if (channel.empty())
-		throw server_error(server_error::invalid_channel);
-#endif
+	const char *reason = duk_get_string_default(ctx, 1, NULL);
 
 	duk_push_boolean(ctx, irc_server_part(s, channel, reason));
 
@@ -408,11 +350,6 @@ Server_prototype_send(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
 	const char *raw = duk_require_string(ctx, 0);
-
-#if 0
-	if (raw.empty())
-		throw server_error(server_error::invalid_message);
-#endif
 
 	duk_push_boolean(ctx, irc_server_send(s, raw));
 
@@ -426,11 +363,6 @@ Server_prototype_topic(duk_context *ctx)
 	const char *channel = duk_require_string(ctx, 0);
 	const char *topic = duk_require_string(ctx, 1);
 
-#if 0
-	if (channel.empty())
-		throw server_error(server_error::invalid_channel);
-#endif
-
 	duk_push_boolean(ctx, irc_server_topic(s, channel, topic));
 
 	return 1;
@@ -441,11 +373,6 @@ Server_prototype_whois(duk_context *ctx)
 {
 	struct irc_server *s = self(ctx);
 	const char *target = duk_require_string(ctx, 0);
-
-#if 0
-	if (target.empty())
-		throw server_error(server_error::invalid_nickname);
-#endif
 
 	duk_push_boolean(ctx, irc_server_whois(s, target));
 

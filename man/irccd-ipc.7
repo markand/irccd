@@ -25,6 +25,8 @@
 .Nm HOOK-ADD
 .Ar name Ar path
 .Nm HOOK-LIST
+.Nm HOOK-REMOVE
+.Ar name
 .Nm PLUGIN-CONFIG
 .Ar name Op Ar variable Op Ar value
 .Nm PLUGIN-INFO
@@ -63,6 +65,11 @@
 .Ar name
 .Ar channel
 .Ar message
+.Nm SERVER-MODE
+.Ar name
+.Ar channel
+.Ar mode
+.Op Ar args
 .Nm SERVER-NOTICE
 .Ar name
 .Ar channel
@@ -167,6 +174,10 @@ Example:
 .Bd -literal -offset indent
 OK irc-notify mail-notify
 .Ed
+.\" HOOK-REMOVE
+.It Cm HOOK-REMOVE
+Removes the hook specified by
+.Ar name .
 .\" PLUGIN-CONFIG
 .It Cm PLUGIN-CONFIG
 Set or get
@@ -328,6 +339,14 @@ to the
 .Ar channel
 into the server
 .Ar name .
+.\" SERVER-MODE
+.It Cm SERVER-MODE
+Change
+.Ar channel
+to the new
+.Ar mode
+with optional list of mode arguments specified by
+.Ar args .
 .\" SERVER-NOTICE
 .It Cm SERVER-NOTICE
 Send the

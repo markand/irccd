@@ -379,7 +379,7 @@ handle_mode(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 			++argindex;
 			continue;
 		}
-		if (!msg->args[argindex] || !(u = irc_channel_find(ch, msg->args[argindex]))) {
+		if (!msg->args[argindex] || !(u = irc_channel_get(ch, msg->args[argindex]))) {
 			++argindex;
 			continue;
 		}
@@ -977,21 +977,15 @@ irc_server_me(struct irc_server *s, const char *chan, const char *message)
 }
 
 int
-irc_server_mode(struct irc_server *s,
-                const char *channel,
-                const char *mode,
-                const char *limit,
-                const char *user,
-                const char *mask)
+irc_server_mode(struct irc_server *s, const char *channel, const char *mode, const char *args)
 {
 	assert(s);
 	assert(channel);
 	assert(mode);
 
-	return irc_server_send(s, "MODE %s %s %s %s %s", channel, mode,
-	    limit ? limit : "",
-	    user ? user : "",
-	    mask ? mask : "");
+	args = args ? args : "";
+
+	return irc_server_send(s, "MODE %s %s %s", channel, mode, args);
 }
 
 int
