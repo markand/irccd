@@ -65,6 +65,18 @@ static char templates[][512] = {
 	[TPL_INFO] = "link from #{nickname}: #{title}"
 };
 
+static const struct {
+	const char *key;
+	int repl;
+} entities[] = {
+	{ "quot",       '"'     },
+	{ "amp",        '&'     },
+	{ "apos",       '\''    },
+	{ "lt",         '<'     },
+	{ "gt",         '>'     },
+	{ NULL,         0       }
+};
+
 static size_t
 callback(char *ptr, size_t size, size_t nmemb, struct req *req)
 {
@@ -76,7 +88,7 @@ callback(char *ptr, size_t size, size_t nmemb, struct req *req)
 	return size * nmemb;
 }
 
-static const char *
+static char *
 parse(struct req *req)
 {
 	regex_t regex;
@@ -96,10 +108,67 @@ parse(struct req *req)
 	return ret;
 }
 
+static int
+find_entity(const char *key)
+{
+	for (size_t i = 0; entities[i].key; ++i)
+		if (strcmp(entities[i].key, key) == 0)
+			return entities[i].repl;
+
+	return EOF;
+}
+
 static const char *
-fmt(const struct req *req, const char *title)
+untitle(char *title)
+{
+	static char ret[256] = {0};
+	char *save;
+	int repl;
+	FILE *fp = NULL;
+
+	if (!(fp = fmemopen(ret, sizeof (ret) - 1, "w")))
+		goto fallback;
+
+	for (char *p = title; *p; ) {
+		/* Standard character. */
+		if (*p != '&') {
+			if (fputc(*p++, fp) == EOF)
+				goto fallback;
+
+			continue;
+		}
+
+		/* HTML entity. */
+		save = ++p;
+
+		while (*p && *p != ';')
+			++p;
+
+		/* Found an entity. */
+		if (*p == ';') {
+			*p++ = '\0';
+
+			if ((repl = find_entity(save)) != EOF)
+				fputc(repl, fp);
+		}
+	}
+
+	fclose(fp);
+
+	return ret;
+
+fallback:
+	if (fp)
+		fclose(fp);
+
+	return title;
+}
+
+static const char *
+fmt(const struct req *req, char *title)
 {
 	static char line[IRC_MESSAGE_LEN];
+
 	struct irc_subst subst = {
 		.time = time(NULL),
 		.flags = IRC_SUBST_DATE | IRC_SUBST_KEYWORDS | IRC_SUBST_IRC_ATTRS,
@@ -108,7 +177,7 @@ fmt(const struct req *req, const char *title)
 			{ "nickname",   req->nickname           },
 			{ "origin",     req->origin             },
 			{ "server",     req->server->name       },
-			{ "title",      title                   }
+			{ "title",      untitle(title)          }
 		},
 		.keywordsz = 5
 	};
@@ -124,7 +193,7 @@ req_finish(struct req *);
 static void
 complete(struct req *req)
 {
-	const char *title;
+	char *title;
 
 	if (req->status && (title = parse(req)))
 		irc_server_message(req->server, req->chan, fmt(req, title));
