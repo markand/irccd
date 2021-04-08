@@ -625,6 +625,36 @@ cmd_rule_remove(struct peer *p, char *line)
 }
 
 /*
+ * SERVER-CONNECT server host [+]port nickname username realname
+ */
+static int
+cmd_server_connect(struct peer *p, char *line)
+{
+	const char *args[6] = {0};
+	int ssl;
+	struct irc_server *s;
+
+	if (parse(line, args, 6) != 6)
+		return EINVAL;
+	if (irc_bot_server_get(args[0]))
+		return EEXIST;
+
+	/* If port starts with +, it means SSL support. */
+	if ((ssl = args[2][0] == '+'))
+		++args[2];
+
+	s = irc_server_new(args[0], args[3], args[4], args[5], args[1], atoi(args[2]));
+	s->flags |= IRC_SERVER_FLAGS_AUTO_RECO;
+
+	if (ssl)
+		s->flags |= IRC_SERVER_FLAGS_SSL;
+
+	irc_bot_server_add(s);
+
+	return ok(p);
+}
+
+/*
  * SERVER-DISCONNECT [server]
  */
 static int
@@ -919,6 +949,7 @@ static const struct cmd {
 	{ "RULE-LIST",          cmd_rule_list           },
 	{ "RULE-MOVE",          cmd_rule_move           },
 	{ "RULE-REMOVE",        cmd_rule_remove         },
+	{ "SERVER-CONNECT",     cmd_server_connect      },
 	{ "SERVER-DISCONNECT",  cmd_server_disconnect   },
 	{ "SERVER-INFO",        cmd_server_info         },
 	{ "SERVER-INVITE",      cmd_server_invite       },

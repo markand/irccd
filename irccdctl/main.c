@@ -647,6 +647,49 @@ cmd_rule_remove(int argc, char **argv)
 }
 
 static void
+cmd_server_connect(int argc, char **argv)
+{
+	ketopt_t ko = KETOPT_INIT;
+	int ssl = 0;
+	const char *nickname = "irccd",
+	           *username = "irccd",
+	           *realname = "IRC Client Daemon",
+	           *port = "6667";
+
+	for (int ch; (ch = ketopt(&ko, argc, argv, 0, "sn:r:u:p:", NULL)) != -1; ) {
+		switch (ch) {
+		case 's':
+			ssl = 1;
+			break;
+		case 'n':
+			nickname = ko.arg;
+			break;
+		case 'r':
+			realname = ko.arg;
+			break;
+		case 'u':
+			username = ko.arg;
+			break;
+		case 'p':
+			port = ko.arg;
+			break;
+		default:
+			break;
+		}
+	}
+
+	argc -= ko.ind;
+	argv += ko.ind;
+
+	if (argc < 2)
+		errx(1, "missing id and/or host");
+
+	req("SERVER-CONNECT %s %s %s%s %s %s %s", argv[0], argv[1], (ssl ? "+" : ""),
+	    port, nickname, username, realname);
+	ok();
+}
+
+static void
 cmd_server_disconnect(int argc, char **argv)
 {
 	if (argc == 1)
@@ -827,6 +870,7 @@ static const struct cmd {
 	{ "rule-list",          0,      0,      cmd_rule_list           },
 	{ "rule-move",          2,      2,      cmd_rule_move           },
 	{ "rule-remove",        1,      1,      cmd_rule_remove         },
+	{ "server-connect",    -1,     -1,      cmd_server_connect      },
 	{ "server-disconnect",  0,      1,      cmd_server_disconnect   },
 	{ "server-info",        1,      1,      cmd_server_info         },
 	{ "server-join",        2,      3,      cmd_server_join         },
