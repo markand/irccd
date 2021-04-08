@@ -37,9 +37,12 @@ The following templates are available:
 .It Ar %
 date and time (see Time section).
 .It Ar #{name}
-name will be substituted from the keywords (see Keywords section).
-.It Ar ${name}
-name will be substituted from the environment variable (see Environment
+name will be substituted from the keywords (see
+.Xr KEYWORDS
+section).
+.It Ar \&${name}
+name will be substituted from the environment variable (see
+.Xr "ENVIRONMENT VARIABLES"
 variables).
 .It Ar @{attributes}
 the attributes will be substituted to IRC colors (see Attributes).
@@ -51,7 +54,7 @@ The date and time format may be used just like
 so for the hours and minutes, you can write %H:%M.
 .\" ENVIRONMENT VARIABLES
 .Sh ENVIRONMENT VARIABLES
-If supported, you can use environment variables like ${HOME}. Please note
+If supported, you can use environment variables like \&${HOME}. Please note
 that braces are mandatory.
 .\" IRC ATTRIBUTES
 .Sh IRC ATTRIBUTES
