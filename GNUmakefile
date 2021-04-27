@@ -141,6 +141,9 @@ endif
 
 TESTS_OBJS=     ${TESTS:.c=}
 
+# Per system commands.
+OS:=            $(shell uname -s)
+
 # Compile flags.
 DEFS=           -D_BSD_SOURCE -DLIBBSD_OVERLAY -DTOP=\"`pwd`\"
 
@@ -159,6 +162,13 @@ INCS+=          -I extern/libduktape
 endif
 
 # Whole libraries for every binaries.
+LIBS+=          -l pthread
+LIBS+=          -l m
+
+ifeq (${OS},Linux)
+LIBS+=          -l dl
+endif
+
 LIBS+=          $(shell pkg-config --libs libbsd-overlay)
 
 ifeq (${SSL},1)
@@ -178,8 +188,6 @@ else
 SED.js=         /@define WITH_JS@/d
 endif
 
-# Per system commands.
-OS:=            $(shell uname -s)
 
 ifeq (${OS},Darwin)
 SHFLAGS=        -undefined dynamic_lookup
