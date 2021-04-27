@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <compat.h>
-
 #include <sys/wait.h>
 #include <assert.h>
 #include <errno.h>
@@ -37,7 +35,7 @@ alloc(const struct irc_hook *h, size_t n, ...)
 {
 	char **ret;
 	va_list ap;
-	
+
 	ret = irc_util_calloc(n + 2, sizeof (*ret));
 	ret[0] = (char *)h->path;
 

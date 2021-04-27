@@ -23,7 +23,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "compat.h"
 #include "subst.h"
 #include "util.h"
 

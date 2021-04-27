@@ -28,13 +28,12 @@
 #include <sys/un.h>
 #include <unistd.h>
 
-#include <irccd/compat.h>
 #include <irccd/config.h>
 #include <irccd/log.h>
-#include <irccd/transport.h>
 #include <irccd/util.h>
 
 #include "peer.h"
+#include "transport.h"
 
 static struct sockaddr_un addr;
 static int fd = -1;

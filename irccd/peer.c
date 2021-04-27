@@ -28,7 +28,6 @@
 
 #include <assert.h>
 
-#include <irccd/compat.h>
 #include <irccd/conn.h>
 #include <irccd/irccd.h>
 #include <irccd/log.h>

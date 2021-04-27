@@ -25,7 +25,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <irccd/compat.h>
 #include <irccd/config.h>
 #include <irccd/log.h>
 #include <irccd/plugin.h>
@@ -204,6 +203,7 @@ init(const char *name, const char *path)
 		return NULL;
 
 	if (!(self.handle = dlopen(path, RTLD_NOW | RTLD_GLOBAL))) {
+		printf("==> %s\n", dlerror());
 		irc_log_warn("plugin: %s: %s", path, dlerror());
 		return NULL;
 	}

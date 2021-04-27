@@ -1,0 +1,5 @@
+Name: irccd
+Description: Native C interface for irccd plugins
+Version: @MAJOR@.@MINOR@.@PATCH@
+Cflags: -I@INCDIR@
+Libs: @SHFLAGS@

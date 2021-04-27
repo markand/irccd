@@ -21,7 +21,6 @@
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
-#include <irccd/compat.h>
 #include <irccd/conn.h>
 #include <irccd/js-plugin.h>
 #include <irccd/log.h>
@@ -62,10 +61,10 @@ setup(void *udata)
 {
 	(void)udata;
 
-	remove(BINARY "/seen.json");
+	remove(TOP "/tests/seen.json");
 
 	server = irc_server_new("test", "t", "t", "t", "127.0.0.1", 6667);
-	plugin = js_plugin_open("history", CMAKE_SOURCE_DIR "/plugins/history/history.js");
+	plugin = js_plugin_open("history", TOP "/plugins/history/history.js");
 
 	if (!plugin)
 		errx(1, "could not load plugin");
@@ -76,7 +75,7 @@ setup(void *udata)
 	irc_plugin_set_template(plugin, "seen", "seen=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}:%H:%M");
 	irc_plugin_set_template(plugin, "said", "said=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}:#{message}:%H:%M");
 	irc_plugin_set_template(plugin, "unknown", "unknown=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{target}");
-	irc_plugin_set_option(plugin, "file", BINARY "/seen.json");
+	irc_plugin_set_option(plugin, "file", TOP "/tests/seen.json");
 	irc_plugin_load(plugin);
 
 	/* Fake server connected to send data. */
@@ -88,6 +87,8 @@ teardown(void *udata)
 {
 	(void)udata;
 
+	remove(TOP "/tests/seen.json");
+
 	irc_plugin_finish(plugin);
 	irc_server_decref(server);
 }
@@ -95,7 +96,7 @@ teardown(void *udata)
 GREATEST_TEST
 basics_error(void)
 {
-	irc_plugin_set_option(plugin, "file", SOURCE "/data/error.json");
+	irc_plugin_set_option(plugin, "file", TOP "/tests/data/error.json");
 	CALL(IRC_EVENT_COMMAND, "seen francis");
 	GREATEST_ASSERT_STR_EQ("PRIVMSG #history :error=history:!history:test:#history:jean!jean@localhost:jean\r\n", server->conn->out);
 	GREATEST_PASS();

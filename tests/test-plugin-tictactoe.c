@@ -21,7 +21,6 @@
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
-#include <irccd/compat.h>
 #include <irccd/conn.h>
 #include <irccd/irccd.h>
 #include <irccd/js-plugin.h>
@@ -65,7 +64,7 @@ setup(void *udata)
 	(void)udata;
 
 	server = irc_server_new("test", "t", "t", "t", "127.0.0.1", 6667);
-	plugin = js_plugin_open("tictactoe", CMAKE_SOURCE_DIR "/plugins/tictactoe/tictactoe.js");
+	plugin = js_plugin_open("tictactoe", TOP "/plugins/tictactoe/tictactoe.js");
 
 	if (!plugin)
 		errx(1, "could not load plugin");

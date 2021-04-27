@@ -22,7 +22,6 @@
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
-#include <irccd/compat.h>
 #include <irccd/conn.h>
 #include <irccd/irccd.h>
 #include <irccd/js-plugin.h>
@@ -64,7 +63,7 @@ setup(void *udata)
 	(void)udata;
 
 	server = irc_server_new("test", "t", "t", "t", "127.0.0.1", 6667);
-	plugin = js_plugin_open("plugin", CMAKE_SOURCE_DIR "/plugins/plugin/plugin.js");
+	plugin = js_plugin_open("plugin", TOP "/plugins/plugin/plugin.js");
 
 	if (!plugin)
 		errx(1, "could not load plugin");

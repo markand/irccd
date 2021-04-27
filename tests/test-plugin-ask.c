@@ -21,7 +21,6 @@
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
-#include <irccd/compat.h>
 #include <irccd/conn.h>
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
@@ -36,13 +35,13 @@ setup(void *udata)
 	(void)udata;
 
 	server = irc_server_new("test", "t", "t", "t", "127.0.0.1", 6667);
-	plugin = js_plugin_open("test", CMAKE_SOURCE_DIR "/plugins/ask/ask.js");
+	plugin = js_plugin_open("test", TOP "/plugins/ask/ask.js");
 
 	if (!plugin)
 		errx(1, "could not load plugin");
 
 	irc_server_incref(server);
-	irc_plugin_set_option(plugin, "file", SOURCE "/data/answers.conf");
+	irc_plugin_set_option(plugin, "file", TOP "/tests/data/answers.conf");
 	irc_plugin_load(plugin);
 
 	/* Fake server connected to send data. */

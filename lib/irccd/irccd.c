@@ -28,7 +28,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "compat.h"
 #include "config.h"
 #include "event.h"
 #include "irccd.h"

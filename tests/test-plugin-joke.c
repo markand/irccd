@@ -21,7 +21,6 @@
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
-#include <irccd/compat.h>
 #include <irccd/conn.h>
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
@@ -49,7 +48,7 @@ setup(void *udata)
 	(void)udata;
 
 	server = irc_server_new("test", "t", "t", "t", "127.0.0.1", 6667);
-	plugin = js_plugin_open("joke", CMAKE_SOURCE_DIR "/plugins/joke/joke.js");
+	plugin = js_plugin_open("joke", TOP "/plugins/joke/joke.js");
 
 	if (!plugin)
 		errx(1, "could not load plugin");
@@ -57,7 +56,7 @@ setup(void *udata)
 	irc_server_incref(server);
 	irc_plugin_set_template(plugin, "error", "error=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}");
 
-	irc_plugin_set_option(plugin, "file", SOURCE "/data/joke/jokes.json");
+	irc_plugin_set_option(plugin, "file", TOP "/tests/data/joke/jokes.json");
 	irc_plugin_load(plugin);
 
 	/* Fake server connected to send data. */
@@ -110,7 +109,7 @@ errors_toobig(void)
 	 * The jokes "xxx" and "yyy" are both 3-lines which we disallow. only a
 	 * must be said.
 	 */
-	irc_plugin_set_option(plugin, "file", SOURCE "/data/joke/error-toobig.json");
+	irc_plugin_set_option(plugin, "file", TOP "/tests/data/joke/error-toobig.json");
 	irc_plugin_set_option(plugin, "max-list-lines", "2");
 
 	for (int i = 0; i < 64; ++i) {
@@ -125,7 +124,7 @@ GREATEST_TEST
 errors_invalid(void)
 {
 	/* Only a is the valid joke in this file. */
-	irc_plugin_set_option(plugin, "file", SOURCE "/data/joke/error-invalid.json");
+	irc_plugin_set_option(plugin, "file", TOP "/tests/data/joke/error-invalid.json");
 	irc_plugin_set_option(plugin, "max-list-lines", "2");
 
 	for (int i = 0; i < 64; ++i) {
@@ -150,7 +149,7 @@ errors_not_found(void)
 GREATEST_TEST
 errors_not_array(void)
 {
-	irc_plugin_set_option(plugin, "file", SOURCE "/data/joke/error-not-array.json");
+	irc_plugin_set_option(plugin, "file", TOP "/tests/data/joke/error-not-array.json");
 
 	CALL();
 	GREATEST_ASSERT_STR_EQ("PRIVMSG #joke :error=joke:!joke:test:#joke:jean!jean@localhost:jean\r\n", server->conn->out);
@@ -161,7 +160,7 @@ errors_not_array(void)
 GREATEST_TEST
 errors_empty(void)
 {
-	irc_plugin_set_option(plugin, "file", SOURCE "/data/joke/error-empty.json");
+	irc_plugin_set_option(plugin, "file", TOP "/tests/data/joke/error-empty.json");
 
 	CALL();
 	GREATEST_ASSERT_STR_EQ("PRIVMSG #joke :error=joke:!joke:test:#joke:jean!jean@localhost:jean\r\n", server->conn->out);

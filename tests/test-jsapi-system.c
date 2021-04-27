@@ -19,9 +19,7 @@
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
-// TODO: irccd/
-#include <config.h>
-
+#include <irccd/config.h>
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
 
@@ -33,7 +31,7 @@ setup(void *udata)
 {
 	(void)udata;
 
-	plugin = js_plugin_open("example", SOURCE "/data/example-plugin.js");
+	plugin = js_plugin_open("example", TOP "/tests/data/example-plugin.js");
 	ctx = js_plugin_get_context(plugin);
 }
 
@@ -52,7 +50,7 @@ GREATEST_TEST
 basics_popen(void)
 {
 	int ret = duk_peval_string(ctx,
-		"f = Irccd.System.popen(\"" IRCCD_EXECUTABLE " version\", \"r\");"
+		"f = Irccd.System.popen(\"" TOP "/irccd/irccd version\", \"r\");"
 		"r = f.readline();"
 	);
 

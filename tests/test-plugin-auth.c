@@ -21,7 +21,6 @@
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
-#include <irccd/compat.h>
 #include <irccd/conn.h>
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
@@ -43,7 +42,7 @@ setup(void *udata)
 	servers[0] = irc_server_new("nickserv1", "t", "t", "t", "127.0.0.1", 6667);
 	servers[1] = irc_server_new("nickserv2", "t", "t", "t", "127.0.0.1", 6667);
 	servers[2] = irc_server_new("quakenet", "t", "t", "t", "127.0.0.1", 6667);
-	plugin = js_plugin_open("test", CMAKE_SOURCE_DIR "/plugins/auth/auth.js");
+	plugin = js_plugin_open("test", TOP "/plugins/auth/auth.js");
 
 	if (!plugin)
 		errx(1, "could not load plugin");

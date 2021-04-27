@@ -22,8 +22,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <compat.h>
-
 #include "event.h"
 #include "server.h"
 

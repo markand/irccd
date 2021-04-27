@@ -18,8 +18,6 @@
 
 #include <string.h>
 
-#include <compat.h>
-
 #include <irccd/event.h>
 #include <irccd/server.h>
 #include <irccd/util.h>

@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <compat.h>
-
 #include <sys/stat.h>
 #include <assert.h>
 #include <errno.h>
@@ -99,58 +97,32 @@ push_stat(duk_context *ctx, const struct stat *st)
 {
 	duk_push_object(ctx);
 
-#if defined(COMPAT_HAVE_STAT_ST_ATIME)
 	duk_push_int(ctx, st->st_atime);
 	duk_put_prop_string(ctx, -2, "atime");
-#endif
-#if defined(COMPAT_HAVE_STAT_ST_BLKSIZE)
 	duk_push_int(ctx, st->st_blksize);
 	duk_put_prop_string(ctx, -2, "blksize");
-#endif
-#if defined(COMPAT_HAVE_STAT_ST_BLOCKS)
 	duk_push_int(ctx, st->st_blocks);
 	duk_put_prop_string(ctx, -2, "blocks");
-#endif
-#if defined(COMPAT_HAVE_STAT_ST_CTIME)
 	duk_push_int(ctx, st->st_ctime);
 	duk_put_prop_string(ctx, -2, "ctime");
-#endif
-#if defined(COMPAT_HAVE_STAT_ST_DEV)
 	duk_push_int(ctx, st->st_dev);
 	duk_put_prop_string(ctx, -2, "dev");
-#endif
-#if defined(COMPAT_HAVE_STAT_ST_GID)
 	duk_push_int(ctx, st->st_gid);
 	duk_put_prop_string(ctx, -2, "gid");
-#endif
-#if defined(COMPAT_HAVE_STAT_ST_INO)
 	duk_push_int(ctx, st->st_ino);
 	duk_put_prop_string(ctx, -2, "ino");
-#endif
-#if defined(COMPAT_HAVE_STAT_ST_MODE)
 	duk_push_int(ctx, st->st_mode);
 	duk_put_prop_string(ctx, -2, "mode");
-#endif
-#if defined(COMPAT_HAVE_STAT_ST_MTIME)
 	duk_push_int(ctx, st->st_mtime);
 	duk_put_prop_string(ctx, -2, "mtime");
-#endif
-#if defined(COMPAT_HAVE_STAT_ST_NLINK)
 	duk_push_int(ctx, st->st_nlink);
 	duk_put_prop_string(ctx, -2, "nlink");
-#endif
-#if defined(COMPAT_HAVE_STAT_ST_RDEV)
 	duk_push_int(ctx, st->st_rdev);
 	duk_put_prop_string(ctx, -2, "rdev");
-#endif
-#if defined(COMPAT_HAVE_STAT_ST_SIZE)
 	duk_push_int(ctx, st->st_size);
 	duk_put_prop_string(ctx, -2, "size");
-#endif
-#if defined(COMPAT_HAVE_STAT_ST_UID)
 	duk_push_int(ctx, st->st_uid);
 	duk_put_prop_string(ctx, -2, "uid");
-#endif
 }
 
 static struct file *

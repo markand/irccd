@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <compat.h>
-
 #include <assert.h>
 #include <errno.h>
 #include <err.h>

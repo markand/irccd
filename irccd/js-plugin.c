@@ -26,7 +26,6 @@
 #include <unistd.h>
 
 #include <irccd/channel.h>
-#include <irccd/compat.h>
 #include <irccd/config.h>
 #include <irccd/event.h>
 #include <irccd/log.h>

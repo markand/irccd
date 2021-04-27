@@ -21,7 +21,6 @@
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
-#include <irccd/compat.h>
 #include <irccd/conn.h>
 #include <irccd/dl-plugin.h>
 #include <irccd/event.h>
@@ -36,7 +35,7 @@ setup(void *udata)
 	(void)udata;
 
 	/* TODO: No idea how to stop greatest from here. */
-	if ((plugin = dl_plugin_open("example", EXAMPLE_DL_PLUGIN)) == NULL)
+	if ((plugin = dl_plugin_open("example", TOP "/tests/data/example-dl-plugin.so")) == NULL)
 		err(1, "dlopen");
 }
 

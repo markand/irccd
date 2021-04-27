@@ -30,8 +30,6 @@
 
 #include <duktape.h>
 
-#include <irccd/compat.h>
-
 #include "jsapi-system.h"
 
 enum {

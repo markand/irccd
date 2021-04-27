@@ -24,8 +24,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <compat.h>
-
 #include "util.h"
 
 void *

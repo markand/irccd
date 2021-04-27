@@ -21,7 +21,6 @@
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
-#include <irccd/compat.h>
 #include <irccd/js-plugin.h>
 #include <irccd/log.h>
 #include <irccd/plugin.h>
@@ -35,10 +34,10 @@ setup(void *udata)
 {
 	(void)udata;
 
-	remove(BINARY "/log");
+	remove(TOP "/tests/log");
 
 	server = irc_server_new("test", "t", "t", "t", "127.0.0.1", 6667);
-	plugin = js_plugin_open("logger", CMAKE_SOURCE_DIR "/plugins/logger/logger.js");
+	plugin = js_plugin_open("logger", TOP "/plugins/logger/logger.js");
 
 	if (!plugin)
 		errx(1, "could not load plugin");
@@ -53,7 +52,7 @@ setup(void *udata)
 	irc_plugin_set_template(plugin, "part", "part=#{server}:#{channel}:#{origin}:#{nickname}:#{reason}");
 	irc_plugin_set_template(plugin, "query", "query=#{server}:#{origin}:#{nickname}:#{message}");
 	irc_plugin_set_template(plugin, "topic", "topic=#{server}:#{channel}:#{origin}:#{nickname}:#{topic}");
-	irc_plugin_set_option(plugin, "file", BINARY "/log");
+	irc_plugin_set_option(plugin, "file", TOP "/tests/log");
 	irc_plugin_load(plugin);
 
 	/* Fake server connected to send data. */
@@ -64,6 +63,8 @@ static void
 teardown(void *udata)
 {
 	(void)udata;
+
+	remove(TOP "/tests/log");
 
 	irc_plugin_finish(plugin);
 	irc_server_decref(server);
@@ -77,7 +78,7 @@ last(void)
 
 	buf[0] = '\0';
 
-	if (!(fp = fopen(BINARY "/log", "r")))
+	if (!(fp = fopen(TOP "/tests/log", "r")))
 		err(1, "fopen");
 	if (!(fgets(buf, sizeof (buf), fp)))
 		err(1, "fgets");

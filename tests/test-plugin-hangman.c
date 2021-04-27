@@ -21,7 +21,6 @@
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
-#include <irccd/compat.h>
 #include <irccd/conn.h>
 #include <irccd/js-plugin.h>
 #include <irccd/log.h>
@@ -63,7 +62,7 @@ setup(void *udata)
 	(void)udata;
 
 	server = irc_server_new("test", "t", "t", "t", "127.0.0.1", 6667);
-	plugin = js_plugin_open("hangman", CMAKE_SOURCE_DIR "/plugins/hangman/hangman.js");
+	plugin = js_plugin_open("hangman", TOP "/plugins/hangman/hangman.js");
 
 	if (!plugin)
 		errx(1, "could not load plugin");
@@ -79,7 +78,7 @@ setup(void *udata)
 	irc_plugin_set_template(plugin, "wrong-letter", "wrong-letter=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{letter}");
 	irc_plugin_set_template(plugin, "wrong-player", "wrong-player=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{letter}");
 	irc_plugin_set_template(plugin, "wrong-word", "wrong-word=#{plugin}:#{command}:#{server}:#{channel}:#{origin}:#{nickname}:#{word}");
-	irc_plugin_set_option(plugin, "file", SOURCE "/data/words.conf");
+	irc_plugin_set_option(plugin, "file", TOP "/tests/data/words.conf");
 	irc_plugin_set_option(plugin, "collaborative", "false");
 	irc_plugin_load(plugin);
 

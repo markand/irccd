@@ -25,7 +25,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "compat.h"
 #include "conn.h"
 #include "log.h"
 #include "server.h"

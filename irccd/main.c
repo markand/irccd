@@ -16,27 +16,30 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <config.h>
-#include <compat.h>
-
 #include <err.h>
 #include <errno.h>
 #include <poll.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
+#include <irccd/config.h>
 #include <irccd/irccd.h>
 #include <irccd/log.h>
-#include <irccd/server.h>
-#include <irccd/transport.h>
-#include <irccd/util.h>
 #include <irccd/plugin.h>
 #include <irccd/rule.h>
+#include <irccd/server.h>
+#include <irccd/util.h>
 
 #include "dl-plugin.h"
-#include "js-plugin.h"
+
 #include "peer.h"
+#include "transport.h"
+
+#if defined(IRCCD_WITH_JS)
+#       include "js-plugin.h"
+#endif
 
 struct pollables {
 	struct pollfd *fds;

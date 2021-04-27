@@ -28,7 +28,6 @@
 
 #include <curl/curl.h>
 
-#include <irccd/compat.h>
 #include <irccd/config.h>
 #include <irccd/irccd.h>
 #include <irccd/limits.h>

@@ -22,9 +22,8 @@
 
 #include <duktape.h>
 
+#include <irccd/config.h>
 #include <irccd/util.h>
-
-#include "config.h"
 
 static int
 SystemError_constructor(duk_context *ctx)
