@@ -148,8 +148,8 @@ show_connect(char *line)
 	const char *args[2] = {0};
 
 	if (irc_util_split(line, args, 2, ' ') == 2) {
-		printf("%-16s: %s\n", "event", "onConnect");
-		printf("%-16s: %s\n", "server", args[0]);
+		printf("%-16s%s\n", "event:", "onConnect");
+		printf("%-16s%s\n", "server:", args[0]);
 	}
 }
 
@@ -159,8 +159,8 @@ show_disconnect(char *line)
 	const char *args[2] = {0};
 
 	if (irc_util_split(line, args, 2, ' ') == 2) {
-		printf("%-16s: %s\n", "event", "onDisonnect");
-		printf("%-16s: %s\n", "server", args[0]);
+		printf("%-16s%s\n", "event:", "onDisonnect");
+		printf("%-16s%s\n", "server:", args[0]);
 	}
 }
 
@@ -170,11 +170,11 @@ show_invite(char *line)
 	const char *args[5] = {0};
 
 	if (irc_util_split(line, args, 5, ' ') == 5) {
-		printf("%-16s: %s\n", "event", "onInvite");
-		printf("%-16s: %s\n", "server", args[1]);
-		printf("%-16s: %s\n", "origin", args[2]);
-		printf("%-16s: %s\n", "channel", args[3]);
-		printf("%-16s: %s\n", "nickname", args[4]);
+		printf("%-16s%s\n", "event:", "onInvite");
+		printf("%-16s%s\n", "server:", args[1]);
+		printf("%-16s%s\n", "origin:", args[2]);
+		printf("%-16s%s\n", "channel:", args[3]);
+		printf("%-16s%s\n", "nickname:", args[4]);
 	}
 }
 
@@ -184,10 +184,10 @@ show_join(char *line)
 	const char *args[4] = {0};
 
 	if (irc_util_split(line, args, 4, ' ') == 4) {
-		printf("%-16s: %s\n", "event", "onJoin");
-		printf("%-16s: %s\n", "server", args[1]);
-		printf("%-16s: %s\n", "origin", args[2]);
-		printf("%-16s: %s\n", "channel", args[3]);
+		printf("%-16s%s\n", "event:", "onJoin");
+		printf("%-16s%s\n", "server:", args[1]);
+		printf("%-16s%s\n", "origin:", args[2]);
+		printf("%-16s%s\n", "channel:", args[3]);
 	}
 }
 
@@ -197,12 +197,12 @@ show_kick(char *line)
 	const char *args[6] = {0};
 
 	if (irc_util_split(line, args, 6, ' ') >= 5) {
-		printf("%-16s: %s\n", "event", "onKick");
-		printf("%-16s: %s\n", "server", args[1]);
-		printf("%-16s: %s\n", "origin", args[2]);
-		printf("%-16s: %s\n", "channel", args[3]);
-		printf("%-16s: %s\n", "target", args[4]);
-		printf("%-16s: %s\n", "reason", args[5] ? args[5] : "");
+		printf("%-16s%s\n", "event:", "onKick");
+		printf("%-16s%s\n", "server:", args[1]);
+		printf("%-16s%s\n", "origin:", args[2]);
+		printf("%-16s%s\n", "channel:", args[3]);
+		printf("%-16s%s\n", "target:", args[4]);
+		printf("%-16s%s\n", "reason:", args[5] ? args[5] : "");
 	}
 }
 
@@ -212,11 +212,11 @@ show_me(char *line)
 	const char *args[5] = {0};
 
 	if (irc_util_split(line, args, 5, ' ') == 5) {
-		printf("%-16s: %s\n", "event", "onMe");
-		printf("%-16s: %s\n", "server", args[1]);
-		printf("%-16s: %s\n", "origin", args[2]);
-		printf("%-16s: %s\n", "channel", args[3]);
-		printf("%-16s: %s\n", "message", args[4]);
+		printf("%-16s%s\n", "event:", "onMe");
+		printf("%-16s%s\n", "server:", args[1]);
+		printf("%-16s%s\n", "origin:", args[2]);
+		printf("%-16s%s\n", "channel:", args[3]);
+		printf("%-16s%s\n", "message:", args[4]);
 	}
 }
 
@@ -226,11 +226,11 @@ show_message(char *line)
 	const char *args[5] = {0};
 
 	if (irc_util_split(line, args, 5, ' ') == 5) {
-		printf("%-16s: %s\n", "event", "onMessage");
-		printf("%-16s: %s\n", "server", args[1]);
-		printf("%-16s: %s\n", "origin", args[2]);
-		printf("%-16s: %s\n", "channel", args[3]);
-		printf("%-16s: %s\n", "message", args[4]);
+		printf("%-16s%s\n", "event:", "onMessage");
+		printf("%-16s%s\n", "server:", args[1]);
+		printf("%-16s%s\n", "origin:", args[2]);
+		printf("%-16s%s\n", "channel:", args[3]);
+		printf("%-16s%s\n", "message:", args[4]);
 	}
 }
 
@@ -240,14 +240,15 @@ show_mode(char *line)
 	const char *args[8] = {0};
 
 	if (irc_util_split(line, args, 8, ' ') >= 5) {
-		printf("%-16s: %s\n", "event", "onMode");
-		printf("%-16s: %s\n", "server", args[1]);
-		printf("%-16s: %s\n", "origin", args[2]);
-		printf("%-16s: %s\n", "channel", args[3]);
-		printf("%-16s: %s\n", "mode", args[4]);
-		printf("%-16s: %s\n", "limit", (args[5] ? args[5] : ""));
-		printf("%-16s: %s\n", "user", (args[6] ? args[6] : ""));
-		printf("%-16s: %s\n", "mask", (args[7] ? args[7] : ""));
+		printf("%-16s%s\n", "event:", "onMode");
+		printf("%-16s%s\n", "server:", args[1]);
+		printf("%-16s%s\n", "origin:", args[2]);
+		printf("%-16s%s\n", "channel:", args[3]);
+		printf("%-16s%s\n", "mode:", args[4]);
+		/* TODO: no longer limit user mask */
+		printf("%-16s%s\n", "limit:", (args[5] ? args[5] : ""));
+		printf("%-16s%s\n", "user:", (args[6] ? args[6] : ""));
+		printf("%-16s%s\n", "mask:", (args[7] ? args[7] : ""));
 	}
 }
 
@@ -257,10 +258,10 @@ show_nick(char *line)
 	const char *args[4] = {0};
 
 	if (irc_util_split(line, args, 4, ' ') == 4) {
-		printf("%-16s: %s\n", "event", "onNick");
-		printf("%-16s: %s\n", "server", args[1]);
-		printf("%-16s: %s\n", "origin", args[2]);
-		printf("%-16s: %s\n", "nickname", args[3]);
+		printf("%-16s%s\n", "event:", "onNick");
+		printf("%-16s%s\n", "server:", args[1]);
+		printf("%-16s%s\n", "origin:", args[2]);
+		printf("%-16s%s\n", "nickname:", args[3]);
 	}
 }
 
@@ -270,11 +271,11 @@ show_notice(char *line)
 	const char *args[5] = {0};
 
 	if (irc_util_split(line, args, 5, ' ') == 5) {
-		printf("%-16s: %s\n", "event", "onNotice");
-		printf("%-16s: %s\n", "server", args[1]);
-		printf("%-16s: %s\n", "origin", args[2]);
-		printf("%-16s: %s\n", "channel", args[3]);
-		printf("%-16s: %s\n", "message", args[4]);
+		printf("%-16s%s\n", "event:", "onNotice");
+		printf("%-16s%s\n", "server:", args[1]);
+		printf("%-16s%s\n", "origin:", args[2]);
+		printf("%-16s%s\n", "channel:", args[3]);
+		printf("%-16s%s\n", "message:", args[4]);
 	}
 }
 
@@ -284,11 +285,11 @@ show_part(char *line)
 	const char *args[5] = {0};
 
 	if (irc_util_split(line, args, 5, ' ') >= 4) {
-		printf("%-16s: %s\n", "event", "onPart");
-		printf("%-16s: %s\n", "server", args[1]);
-		printf("%-16s: %s\n", "origin", args[2]);
-		printf("%-16s: %s\n", "channel", args[3]);
-		printf("%-16s: %s\n", "reason", (args[4] ? args[4] : ""));
+		printf("%-16s%s\n", "event:", "onPart");
+		printf("%-16s%s\n", "server:", args[1]);
+		printf("%-16s%s\n", "origin:", args[2]);
+		printf("%-16s%s\n", "channel:", args[3]);
+		printf("%-16s%s\n", "reason:", (args[4] ? args[4] : ""));
 	}
 }
 
@@ -298,11 +299,11 @@ show_topic(char *line)
 	const char *args[5] = {0};
 
 	if (irc_util_split(line, args, 5, ' ') >= 4) {
-		printf("%-16s: %s\n", "event", "onTopic");
-		printf("%-16s: %s\n", "server", args[1]);
-		printf("%-16s: %s\n", "origin", args[2]);
-		printf("%-16s: %s\n", "channel", args[3]);
-		printf("%-16s: %s\n", "topic", args[4]);
+		printf("%-16s%s\n", "event:", "onTopic");
+		printf("%-16s%s\n", "server:", args[1]);
+		printf("%-16s%s\n", "origin:", args[2]);
+		printf("%-16s%s\n", "channel:", args[3]);
+		printf("%-16s%s\n", "topic:", args[4]);
 	}
 }
 
@@ -310,16 +311,14 @@ static void
 show_whois(char *line)
 {
 	const char *args[6] = {0};
-	//char *p, *token;
 
 	if (irc_util_split(line, args, 6, ' ') >= 4) {
-		printf("%-16s: %s\n", "event", "onWhois");
-		printf("%-16s: %s\n", "server", args[1]);
-		printf("%-16s: %s\n", "nickname", args[2]);
-		printf("%-16s: %s\n", "username", args[3]);
-		printf("%-16s: %s\n", "hostname", args[4]);
-		printf("%-16s: %s\n", "username", args[5]);
-		//printf("channels:  %s\n", args[6]);
+		printf("%-16s%s\n", "event:", "onWhois");
+		printf("%-16s%s\n", "server:", args[1]);
+		printf("%-16s%s\n", "nickname:", args[2]);
+		printf("%-16s%s\n", "username:", args[3]);
+		printf("%-16s%s\n", "hostname:", args[4]);
+		printf("%-16s%s\n", "username:", args[5]);
 	}
 }
 
@@ -357,7 +356,7 @@ show(char *ev)
 static void
 plugin_list_set(int argc, char **argv, const char *cmd)
 {
-	char *line, *p;
+	char *line, *p, name[16];
 	size_t num = 0;
 
 	if (argc == 3) {
@@ -382,7 +381,9 @@ plugin_list_set(int argc, char **argv, const char *cmd)
 				continue;
 
 			*p = '\0';
-			printf("%-16s: %s\n", line, p + 1);
+			name[0] = '\0';
+			snprintf(name, sizeof (name), "%s:", line);
+			printf("%-16s%s\n", name, p + 1);
 		}
 	}
 }
@@ -460,11 +461,11 @@ cmd_plugin_info(int argc, char **argv)
 	if (strncmp((response = poll()), "OK ", 3) != 0)
 		errx(1, "failed to retrieve plugin information");
 
-	printf("%-16s: %s\n", "name", response + 3);
-	printf("%-16s: %s\n", "summary", poll());
-	printf("%-16s: %s\n", "version", poll());
-	printf("%-16s: %s\n", "license", poll());
-	printf("%-16s: %s\n", "author", poll());
+	printf("%-16s%s\n", "name:", response + 3);
+	printf("%-16s%s\n", "summary:", poll());
+	printf("%-16s%s\n", "version:", poll());
+	printf("%-16s%s\n", "license:", poll());
+	printf("%-16s%s\n", "author:", poll());
 }
 
 static void
@@ -607,14 +608,16 @@ cmd_rule_list(int argc, char **argv)
 		errx(1, "could not retrieve rule list");
 
 	for (size_t i = 0; i < num; ++i) {
-		printf("%-16s: %zu\n", "index", i);
-		printf("%-16s: %s\n", "action", poll());
-		printf("%-16s: %s\n", "servers", poll());
-		printf("%-16s: %s\n", "channels", poll());
-		printf("%-16s: %s\n", "origins", poll());
-		printf("%-16s: %s\n", "plugins", poll());
-		printf("%-16s: %s\n", "events", poll());
-		printf("\n");
+		printf("%-16s%zu\n", "index:", i);
+		printf("%-16s%s\n", "action:", poll());
+		printf("%-16s%s\n", "servers:", poll());
+		printf("%-16s%s\n", "channels:", poll());
+		printf("%-16s%s\n", "origins:", poll());
+		printf("%-16s%s\n", "plugins:", poll());
+		printf("%-16s%s\n", "events:", poll());
+
+		if (i + 1 < num)
+			printf("\n");
 	}
 }
 
@@ -719,24 +722,24 @@ cmd_server_info(int argc, char **argv)
 	if (strncmp(list = poll(), "OK ", 3) != 0)
 		errx(1, "failed to retrieve server information");
 
-	printf("%-16s: %s\n", "name", list + 3);
+	printf("%-16s%s\n", "name:", list + 3);
 
 	if (irc_util_split((list = poll()), args, 3, ' ') < 2)
 		errx(1, "malformed server connection");
 
-	printf("%-16s: %s\n", "hostname", args[0]);
-	printf("%-16s: %s\n", "port", args[1]);
+	printf("%-16s%s\n", "hostname:", args[0]);
+	printf("%-16s%s\n", "port:", args[1]);
 
 	if (args[2])
-		printf("%-16s: %s\n", "ssl", "true");
+		printf("%-16s%s\n", "ssl:", "true");
 
 	if (irc_util_split((list = poll()), args, 3, ' ') != 3)
 		errx(1, "malformed server ident");
 
-	printf("%-16s: %s\n", "nickname", args[0]);
-	printf("%-16s: %s\n", "username", args[0]);
-	printf("%-16s: %s\n", "realname", args[0]);
-	printf("%-16s: %s\n", "channels", poll());
+	printf("%-16s%s\n", "nickname:", args[0]);
+	printf("%-16s%s\n", "username:", args[0]);
+	printf("%-16s%s\n", "realname:", args[0]);
+	printf("%-16s%s\n", "channels:", poll());
 }
 
 static void

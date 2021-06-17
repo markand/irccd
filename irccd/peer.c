@@ -269,7 +269,7 @@ cmd_plugin_info(struct peer *p, char *line)
 	if (!(plg = require_plugin(p, args[0])))
 		return 0;
 
-	peer_send(p, "OK 5%s\n%s\n%s\n%s\n%s", plg->name, plg->description,
+	peer_send(p, "OK %s\n%s\n%s\n%s\n%s", plg->name, plg->description,
 	    plg->version, plg->license, plg->author);
 
 	return 0;
