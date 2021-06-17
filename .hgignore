@@ -2,9 +2,11 @@
 \.a$
 \.d$
 \.o$
+\.so$
 
 # vim/emacs specific.
 ^tags$
+^cscope\.out$
 ^tags\.lock$
 ^tags\.temp$
 \.swp$
@@ -27,11 +29,13 @@
 # tests files.
 ^tests/test-bot$
 ^tests/test-channel$
+^tests/test-dl-plugin$
 ^tests/test-event$
 ^tests/test-jsapi-chrono$
 ^tests/test-jsapi-directory$
 ^tests/test-jsapi-file$
 ^tests/test-jsapi-irccd$
+^tests/test-jsapi-system$
 ^tests/test-jsapi-timer$
 ^tests/test-jsapi-unicode$
 ^tests/test-jsapi-util$
