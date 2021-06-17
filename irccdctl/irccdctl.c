@@ -819,6 +819,17 @@ cmd_server_part(int argc, char **argv)
 }
 
 static void
+cmd_server_reconnect(int argc, char **argv)
+{
+	if (argc == 1)
+		req("SERVER-RECONNECT %s", argv[0]);
+	else
+		req("SERVER-RECONNECT");
+
+	ok();
+}
+
+static void
 cmd_server_topic(int argc, char **argv)
 {
 	(void)argc;
@@ -882,6 +893,7 @@ static const struct cmd {
 	{ "server-nick",        2,      2,      cmd_server_nick         },
 	{ "server-notice",      3,      3,      cmd_server_notice       },
 	{ "server-part",        3,      3,      cmd_server_part         },
+	{ "server-reconnect",   0,      1,      cmd_server_reconnect    },
 	{ "server-topic",       3,      3,      cmd_server_topic        },
 	{ "watch",              0,      0,      cmd_watch               }
 };

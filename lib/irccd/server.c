@@ -771,6 +771,15 @@ irc_server_disconnect(struct irc_server *s)
 }
 
 void
+irc_server_reconnect(struct irc_server *s)
+{
+	assert(s);
+
+	irc_server_disconnect(s);
+	irc_server_connect(s);
+}
+
+void
 irc_server_prepare(const struct irc_server *s, struct pollfd *pfd)
 {
 	assert(s);

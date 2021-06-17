@@ -900,6 +900,27 @@ cmd_server_part(struct peer *p, char *line)
 }
 
 /*
+ * SERVER-RECONNECT [server]
+ */
+static int
+cmd_server_reconnect(struct peer *p, char *line)
+{
+	const char *args;
+	struct irc_server *s;
+
+	if (parse(line, &args, 1) == 1) {
+		if (!(s = require_server(p, args)))
+			return 0;
+
+		irc_server_reconnect(s);
+	} else
+		LIST_FOREACH(s, &irc.servers, link)
+			irc_server_reconnect(s);
+
+	return ok(p);
+}
+
+/*
  * SERVER-TOPIC server channel topic
  */
 static int
@@ -960,6 +981,7 @@ static const struct cmd {
 	{ "SERVER-MODE",        cmd_server_mode         },
 	{ "SERVER-NOTICE",      cmd_server_notice       },
 	{ "SERVER-PART",        cmd_server_part         },
+	{ "SERVER-RECONNECT",   cmd_server_reconnect    },
 	{ "SERVER-TOPIC",       cmd_server_topic        },
 	{ "WATCH",              cmd_watch               }
 };

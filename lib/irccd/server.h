@@ -115,6 +115,9 @@ void
 irc_server_disconnect(struct irc_server *);
 
 void
+irc_server_reconnect(struct irc_server *);
+
+void
 irc_server_prepare(const struct irc_server *, struct pollfd *);
 
 void
