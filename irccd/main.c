@@ -87,8 +87,23 @@ run(int argc, char **argv)
 {
 	(void)argc;
 
+#if defined(IRCCD_WITH_JS)
+	const char *with_js = "yes";
+#else
+	const char *with_js = "no";
+#endif
+#if defined(IRCCD_WITH_SSL)
+	const char *with_ssl = "yes";
+#else
+	const char *with_ssl = "no";
+#endif
+
 	if (strcmp(argv[0], "version") == 0)
 		puts(IRCCD_VERSION);
+	else if (strcmp(argv[0], "info") == 0) {
+		printf("%-16s%s\n", "javascript:", with_js);
+		printf("%-16s%s\n", "ssl:", with_ssl);
+	}
 
 	return 0;
 }
