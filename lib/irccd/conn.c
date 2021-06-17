@@ -25,6 +25,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <openssl/err.h>
+
 #include "conn.h"
 #include "log.h"
 #include "server.h"
@@ -121,7 +123,10 @@ create(struct irc_conn *conn)
 static inline int
 update_ssl_state(struct irc_conn *conn, int ret)
 {
-	switch (SSL_get_error(conn->ssl, ret)) {
+	char error[1024];
+	int num;
+
+	switch ((num = SSL_get_error(conn->ssl, ret))) {
 	case SSL_ERROR_WANT_READ:
 		irc_log_debug("server %s: step %d now needs read condition",
 		    conn->sv->name, conn->ssl_step);
@@ -133,6 +138,8 @@ update_ssl_state(struct irc_conn *conn, int ret)
 		conn->ssl_cond = IRC_CONN_SSL_ACT_WRITE;
 		break;
 	case SSL_ERROR_SSL:
+		irc_log_warn("server %s: SSL error: %s", conn->sv->name,
+		    ERR_error_string(num, error));
 		return irc_conn_disconnect(conn), -1;
 	default:
 		break;
@@ -267,7 +274,19 @@ handshake(struct irc_conn *conn)
 			SSL_set_connect_state(conn->ssl);
 		}
 
-		if ((r = SSL_do_handshake(conn->ssl)) <= 0)
+		/*
+		 * From SSL_do_handshake manual page:
+		 *  < 0 -> fatal error
+		 * == 0 -> incomplete handshake
+		 * == 1 -> success
+		 */
+		if ((r = SSL_do_handshake(conn->ssl)) < 0) {
+			irc_log_warn("server %s: handshake failed (is the port SSL?)", conn->sv->name);
+			irc_conn_disconnect(conn);
+			return -1;
+		}
+
+		if (r == 0)
 			return update_ssl_state(conn, r);
 
 		conn->state = IRC_CONN_STATE_READY;
