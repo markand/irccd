@@ -63,7 +63,7 @@ and
 are valid.
 .\" Blocks
 .Ss Blocks
-For configuration sections that are more complex, block using braces are
+For configuration sections that are more complex, blocks using braces are
 required and each directive between the enclosing block require a trailing
 semicolon.
 .Pp
@@ -87,7 +87,7 @@ one, two, three
 The following sections describe what is allowed in the configuration file.
 .\" logs
 .Ss logs
-This section can let you configure how irccd should log the messages.
+This section let you configure how irccd should log the messages.
 .Bl -tag
 .It Ar logs [verbose|quiet] [template string] to console
 Use the standard output and error to log content. This the default.
@@ -111,7 +111,16 @@ The option
 .Ar template
 can be used to format the output log entries using
 .Ar string
-as template. See
+as template. This template enable shell attributes, environment variable, date
+and has the following keywords:
+.Bl -tag -width unknown
+.It Va message
+The message line.
+.It Va level
+The level of message (debug, info or warning).
+.El
+.Pp
+See
 .Xr irccd-templates 7
 for more details.
 .\" transport
@@ -292,6 +301,9 @@ Full example of configuration file
 .Bd -literal
 # Logs to syslog instead of console (which is the default).
 logs verbose to syslog
+
+# Logs using a specific format string (console is recommended for colors).
+logs verbose template "%H:%M @{orange}#{level}@{} #{message}"
 
 # Enable transport with default permissions.
 transport to "/tmp/irccd.sock"

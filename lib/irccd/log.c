@@ -25,6 +25,7 @@
 
 #include "log.h"
 #include "subst.h"
+#include "util.h"
 
 #define DEFAULT_TEMPLATE "#{message}"
 
@@ -84,12 +85,19 @@ finalizer_syslog(void)
 static void (*handler)(enum level, const char *);
 static void (*finalizer)(void);
 
+static const char *levelstr[] = {
+	[LEVEL_DEBUG]   = "debug",
+	[LEVEL_INFO]    = "info",
+	[LEVEL_WARN]    = "warning"
+};
+
 static void
 wrap(enum level level, const char *fmt, va_list ap)
 {
 	char formatted[1024] = {0}, line[1024] = {0};
 	struct irc_subst_keyword kw[] = {
-		{ "message", line }
+		{ "message",    line            },
+		{ "level",      levelstr[level] }
 	};
 	struct irc_subst subst = {
 		.time = time(NULL),
@@ -99,7 +107,7 @@ wrap(enum level level, const char *fmt, va_list ap)
 		         IRC_SUBST_SHELL |
 		         IRC_SUBST_SHELL_ATTRS,
 		.keywords = kw,
-		.keywordsz = 1
+		.keywordsz = IRC_UTIL_SIZE(kw)
 	};
 
 	vsnprintf(line, sizeof (line), fmt, ap);
