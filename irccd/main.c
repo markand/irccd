@@ -19,6 +19,7 @@
 #include <err.h>
 #include <errno.h>
 #include <poll.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -108,15 +109,31 @@ run(int argc, char **argv)
 	return 0;
 }
 
-static inline void
+static void
+stop(int signum)
+{
+	irc_log_info("irccd: stopping on signal %d", signum);
+	running = 0;
+}
+
+static void
 init(void)
 {
+	struct sigaction sig;
+
 	irc_bot_init();
 	irc_bot_plugin_loader_add(dl_plugin_loader_new());
 
 #if defined(IRCCD_WITH_JS)
 	irc_bot_plugin_loader_add(js_plugin_loader_new());
 #endif
+
+	sig.sa_handler = stop;
+	sig.sa_flags = SA_RESTART;
+	sigemptyset(&sig.sa_mask);
+
+	if (sigaction(SIGINT, &sig, NULL) < 0 || sigaction(SIGTERM, &sig, NULL) < 0)
+		err(1, "sigaction");
 }
 
 static void
