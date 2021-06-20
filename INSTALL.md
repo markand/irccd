@@ -60,6 +60,8 @@ when you change options).
 
 - `SSL`: set to 1 or 0 to enable/disable OpenSSL (default: 1).
 - `JS`: set to 1 or 0 to disable Javascript (default: 1).
+- `DEBUG`: set to 1 or 0 to build with debug symbols and optimizations disabled
+  (default: 0).
 
 You can tweak the installation directories by changing the following variables
 (note: all paths must be absolute):

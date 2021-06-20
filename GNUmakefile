@@ -17,7 +17,7 @@
 #
 
 CC=             cc
-CFLAGS=         -O0 -DNDEBUG -Wall -Wextra -Wno-cpp -g -fPIC
+CFLAGS=         -Wall -Wextra -Wno-cpp
 
 PREFIX=         /usr/local
 BINDIR=         ${PREFIX}/bin
@@ -146,6 +146,12 @@ OS:=            $(shell uname -s)
 
 # Compile flags.
 DEFS=           -D_BSD_SOURCE -DLIBBSD_OVERLAY -DTOP=\"`pwd`\"
+
+ifeq (${DEBUG},1)
+CFLAGS+=        -O0 -g
+else
+CFLAGS+=        -O0 -g
+endif
 
 # Include directories.
 INCS=           -I lib/
