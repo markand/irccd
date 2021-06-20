@@ -30,6 +30,9 @@
 
 #include "conf.h"
 
+void
+yyerror(const char *);
+
 %}
 
 channels        channels
@@ -70,8 +73,9 @@ semicolon       ;
 ws              [ \t\n]+
 comment         #.*$
 number          [0-9]+
-word            [A-Za-z_][A-Za-z0-9_-]+
+word            [A-Za-z_][^{};,"\r\n\t ]*
 string          \"([^\\\"]|\\.)*\"
+catchall        .
 
 %%
 
@@ -146,6 +150,11 @@ string          \"([^\\\"]|\\.)*\"
 {number}                {
                                 yylval.ival = atoi(yytext);
                                 return T_NUMBER;
+                        }
+
+{catchall}              {
+                                yyerror("unexpected token");
+                                return -1;
                         }
 
 %%
