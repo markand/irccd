@@ -62,6 +62,8 @@ when you change options).
 - `JS`: set to 1 or 0 to disable Javascript (default: 1).
 - `DEBUG`: set to 1 or 0 to build with debug symbols and optimizations disabled
   (default: 0).
+- `USER`: user to use for transport and init scripts (default: nobody).
+- `GROUP`: group to use for transport and init scripts (default: nobody).
 
 You can tweak the installation directories by changing the following variables
 (note: all paths must be absolute):
@@ -74,6 +76,9 @@ You can tweak the installation directories by changing the following variables
 - `SHAREDIR`: data files (default: ${PREFIX}/share).
 - `MANDIR`: path to manual pages (default: ${PREFIX}/share/man).
 - `VARDIR`: local cache files (default: ${PREFIX}/var).
+
+For any options, make sure to specify them for any make targets (e.g. `install`)
+because they can be translated at install time too.
 
 [Bison]: https://www.gnu.org/software/bison
 [GNU Make]: http://www.cmake.org
