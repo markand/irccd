@@ -196,7 +196,7 @@ irc_log_warn(const char *fmt, ...)
 void
 irc_log_debug(const char *fmt, ...)
 {
-#if !defined(NDBEUG)
+#if !defined(NDEBUG)
 	assert(fmt);
 
 	va_list ap;

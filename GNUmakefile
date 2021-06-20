@@ -152,7 +152,7 @@ DEFS=           -D_BSD_SOURCE -DLIBBSD_OVERLAY -DTOP=\"`pwd`\"
 ifeq (${DEBUG},1)
 CFLAGS+=        -O0 -g
 else
-CFLAGS+=        -O0 -g
+CFLAGS+=        -DNDEBUG -O3
 endif
 
 # Include directories.
