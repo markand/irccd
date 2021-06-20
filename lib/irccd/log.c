@@ -24,6 +24,7 @@
 #include <syslog.h>
 
 #include "log.h"
+#include "subst.h"
 
 enum level {
 	LEVEL_INFO,
@@ -33,19 +34,18 @@ enum level {
 
 static FILE *out, *err;
 static int verbosity;
+static char tmpl[512] = "#{message}";
 
 static void
-handler_files(enum level level, const char *fmt, va_list ap)
+handler_files(enum level level, const char *line)
 {
 	switch (level) {
 	case LEVEL_WARN:
-		vfprintf(err, fmt, ap);
-		putc('\n', err);
+		fprintf(err, "%s\n", line);
 		fflush(err);
 		break;
 	default:
-		vfprintf(out, fmt, ap);
-		putc('\n', out);
+		fprintf(out, "%s\n", line);
 		fflush(out);
 		break;
 	}
@@ -57,10 +57,12 @@ finalizer_files(void)
 	/* Out and err are the same. */
 	if (out)
 		fclose(out);
+
+	out = err = NULL;
 }
 
 static void
-handler_syslog(enum level level, const char *fmt, va_list ap)
+handler_syslog(enum level level, const char *line)
 {
 	static const int table[] = {
 		[LEVEL_INFO] = LOG_INFO,
@@ -68,8 +70,7 @@ handler_syslog(enum level level, const char *fmt, va_list ap)
 		[LEVEL_DEBUG] = LOG_DEBUG
 	};
 
-	/* TODO: add compatibility shim for vsyslog. */
-	vsyslog(table[level], fmt, ap);
+	syslog(table[level], "%s", line);
 }
 
 static void
@@ -78,8 +79,31 @@ finalizer_syslog(void)
 	closelog();
 }
 
-static void (*handler)(enum level, const char *, va_list);
+static void (*handler)(enum level, const char *);
 static void (*finalizer)(void);
+
+static void
+wrap(enum level level, const char *fmt, va_list ap)
+{
+	char formatted[1024] = {0}, line[1024] = {0};
+	struct irc_subst_keyword kw[] = {
+		{ "message", line }
+	};
+	struct irc_subst subst = {
+		.time = time(NULL),
+		.flags = IRC_SUBST_DATE |
+		         IRC_SUBST_KEYWORDS |
+		         IRC_SUBST_ENV |
+		         IRC_SUBST_SHELL |
+		         IRC_SUBST_SHELL_ATTRS,
+		.keywords = kw,
+		.keywordsz = 1
+	};
+
+	vsnprintf(line, sizeof (line), fmt, ap);
+	irc_subst(formatted, sizeof (formatted), tmpl, &subst);
+	handler(level, formatted);
+}
 
 void
 irc_log_to_syslog(void)
@@ -132,6 +156,12 @@ irc_log_set_verbose(int mode)
 }
 
 void
+irc_log_set_template(const char *fmt)
+{
+	strlcpy(tmpl, fmt, sizeof (tmpl));
+}
+
+void
 irc_log_info(const char *fmt, ...)
 {
 	assert(fmt);
@@ -141,7 +171,7 @@ irc_log_info(const char *fmt, ...)
 	va_start(ap, fmt);
 
 	if (verbosity && handler)
-		handler(LEVEL_INFO, fmt, ap);
+		wrap(LEVEL_INFO, fmt, ap);
 
 	va_end(ap);
 }
@@ -156,7 +186,7 @@ irc_log_warn(const char *fmt, ...)
 	va_start(ap, fmt);
 
 	if (handler)
-		handler(LEVEL_WARN, fmt, ap);
+		wrap(LEVEL_WARN, fmt, ap);
 
 	va_end(ap);
 }
@@ -172,7 +202,7 @@ irc_log_debug(const char *fmt, ...)
 	va_start(ap, fmt);
 
 	if (handler)
-		handler(LEVEL_DEBUG, fmt, ap);
+		wrap(LEVEL_DEBUG, fmt, ap);
 
 	va_end(ap);
 #else

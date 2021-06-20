@@ -39,6 +39,9 @@ void
 irc_log_set_verbose(int);
 
 void
+irc_log_set_template(const char *);
+
+void
 irc_log_info(const char *, ...);
 
 void

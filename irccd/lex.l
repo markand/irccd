@@ -43,6 +43,7 @@ hook            hook
 hostname        hostname
 ident           ident
 location        location
+log_template    template
 log_type        console|syslog|file
 log_verbosity   quiet|verbose
 logs            logs
@@ -93,6 +94,7 @@ catchall        .
 {hostname}              return T_HOSTNAME;
 {ident}                 return T_IDENT;
 {location}              return T_LOCATION;
+{log_template}          return T_LOG_TEMPLATE;
 {logs}                  return T_LOGS;
 {options}               return T_OPTIONS;
 {origins}               return T_ORIGINS;

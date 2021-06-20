@@ -160,6 +160,7 @@ yyerror(const char *);
 %token T_IDENT
 %token T_LOCATION
 %token T_LOGS
+%token T_LOG_TEMPLATE
 %token T_OPTIONS
 %token T_ORIGINS
 %token T_PASSWORD
@@ -180,7 +181,7 @@ yyerror(const char *);
 %token T_WITH
 
 %type <ival> log_verbosity
-%type <sval> plugin_location
+%type <sval> plugin_location log_template
 %type <plugin> plugin_params plugin_params_opt
 %type <rule> rule_params rule_params_opt
 %type <server> server_params
@@ -265,28 +266,45 @@ log_verbosity
 	}
 	;
 
-logs
-	: T_LOGS log_verbosity
+log_template
+	: T_LOG_TEMPLATE T_STRING
 	{
-		irc_log_set_verbose($2);
+		$$ = $2;
 	}
-	| T_LOGS log_verbosity T_TO T_LOG_TYPE
+	|
+	{
+		$$ = NULL;
+	}
+	;
+
+logs
+	: T_LOGS log_verbosity log_template
 	{
 		irc_log_set_verbose($2);
+		irc_log_set_template($3);
+		free($3);
+	}
+	| T_LOGS log_verbosity log_template T_TO T_LOG_TYPE
+	{
+		irc_log_set_verbose($2);
+		irc_log_set_template($3);
 
-		if (strcmp($4, "console") == 0)
+		if (strcmp($5, "console") == 0)
 			irc_log_to_console();
-		else if (strcmp($4, "syslog") == 0)
+		else if (strcmp($5, "syslog") == 0)
 			irc_log_to_syslog();
 		else
 			errx(1, "missing log file path");
 
-		free($4);
+		free($3);
+		free($5);
 	}
-	| T_LOGS log_verbosity T_TO T_LOG_TYPE T_STRING
+	| T_LOGS log_verbosity log_template T_TO T_LOG_TYPE T_STRING
 	{
-		irc_log_to_file($4);
-		free($4);
+		irc_log_to_file($6);
+		irc_log_set_template($3);
+		free($3);
+		free($6);
 	}
 	;
 

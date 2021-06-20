@@ -89,13 +89,13 @@ The following sections describe what is allowed in the configuration file.
 .Ss logs
 This section can let you configure how irccd should log the messages.
 .Bl -tag
-.It Ar logs [verbose|quiet] to console
+.It Ar logs [verbose|quiet] [template string] to console
 Use the standard output and error to log content. This the default.
-.It Ar logs [verbose|quiet] to syslog
+.It Ar logs [verbose|quiet] [template string] to syslog
 Use the
 .Xr syslog 3
 daemon to log information.
-.It Ar logs [verbose|quiet] to file path
+.It Ar logs [verbose|quiet] [template string] to file path
 Use
 .Pa path
 to logs every entries.
@@ -106,6 +106,14 @@ The optional self explained
 argument controls either if verbose logging should be enabled or not. Only
 informative messages are affected by this setting. Warnings and debugging
 messages are stored independently from this setting.
+.Pp
+The option
+.Ar template
+can be used to format the output log entries using
+.Ar string
+as template. See
+.Xr irccd-templates 7
+for more details.
 .\" transport
 .Ss transport
 Enable transport to interract with the
