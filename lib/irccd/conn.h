@@ -25,6 +25,8 @@
 #       include <openssl/ssl.h>
 #endif
 
+#include <time.h>
+
 #include "limits.h"
 
 #if defined(__cplusplus)
@@ -68,6 +70,7 @@ struct irc_conn {
 	enum irc_conn_state state;
 	enum irc_conn_flags flags;
 	struct irc_server *sv;
+	time_t statetime;
 
 #if defined(IRCCD_WITH_SSL)
 	SSL_CTX *ctx;

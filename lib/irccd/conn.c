@@ -275,20 +275,23 @@ handshake(struct irc_conn *conn)
 		}
 
 		/*
-		 * From SSL_do_handshake manual page:
-		 *  < 0 -> fatal error
-		 * == 0 -> incomplete handshake
-		 * == 1 -> success
+		 * AFAIK, there is no way to detect that we're discussing with
+		 * a non SSL server, as a consequence SSL_get_error will return
+		 * SSL_ERROR_WANT_READ indefinitely. What we do is to detect
+		 * the failure to complete SSL_do_handshake in the amount of
+		 * three seconds before indicating that we've failed to
+		 * connect.
 		 */
-		if ((r = SSL_do_handshake(conn->ssl)) < 0) {
-			irc_log_warn("server %s: handshake failed (is the port SSL?)", conn->sv->name);
-			irc_conn_disconnect(conn);
-			return -1;
+		if ((r = SSL_do_handshake(conn->ssl)) <= 0) {
+			if (difftime(time(NULL), conn->statetime) >= 3)
+				return irc_log_warn("server %s: unable to complete handshake", conn->sv->name), -1;
+
+			irc_log_debug("server %s: handshake incomplete", conn->sv->name);
+
+			return update_ssl_state(conn, r);
 		}
 
-		if (r == 0)
-			return update_ssl_state(conn, r);
-
+		conn->statetime = time(NULL);
 		conn->state = IRC_CONN_STATE_READY;
 		conn->ssl_cond = IRC_CONN_SSL_ACT_NONE;
 		conn->ssl_step = IRC_CONN_SSL_ACT_NONE;
@@ -399,6 +402,8 @@ int
 irc_conn_connect(struct irc_conn *conn)
 {
 	assert(conn);
+
+	conn->statetime = time(NULL);
 
 	if (lookup(conn) < 0)
 		return irc_conn_disconnect(conn), -1;
