@@ -46,6 +46,8 @@ name will be substituted from the environment variable (see
 variables).
 .It Ar @{attributes}
 the attributes will be substituted to IRC colors (see Attributes).
+.It Ar !{command}
+execute the shell command (see Shell).
 .El
 .\" TIME
 .Sh TIME
@@ -159,6 +161,12 @@ reverse
 .It
 hidden
 .El
+.\" SHELL
+.Sh SHELL
+This format executes the command enclosed in the braces verbatim using the
+.Xr popen 3
+function. It only captures the standard input so you may need to redirect the
+error somewhere else if you need to capture it.
 .\" KEYWORDS
 .Sh KEYWORDS
 Keywords are arbitrary names that are replaced depending on the context. They
@@ -236,6 +244,15 @@ use when someone joins a channel like that:
 .Pp
 The keyword #{origin} will be substituted to the nickname and #{channel} to the
 channel name.
+.Pp
+Shell:
+.Bl -tag -width 20n -offset Ds
+.It !{uptime}
+will return the status of the command.
+.El
+.Pp
+Be very cautious with user input as they may access your file system if you use
+direct user input in this.
 .\" SEE ALSO
 .Sh SEE ALSO
 .Xr irccd 1 ,
