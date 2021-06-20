@@ -58,8 +58,8 @@ wrap_bind(const char *path, uid_t *uid, gid_t *gid)
 	if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0)) < 0)
 		goto err;
 
-	/* -ux, -gx, -owx */
-	oldumask = umask(S_IXUSR | S_IXGRP | S_IWOTH | S_IXOTH);
+	/* -ux, -gx, -orwx */
+	oldumask = umask(S_IXUSR | S_IXGRP | S_IRWXO);
 
 	if (bind(fd, (const struct sockaddr *)&addr, sizeof (addr)) < 0)
 		goto err;
