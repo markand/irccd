@@ -27,6 +27,8 @@ LIBDIR=         ${PREFIX}/lib
 MANDIR=         ${PREFIX}/share/man
 SHAREDIR=       ${PREFIX}/share
 VARDIR=         ${PREFIX}/var
+USER=           nobody
+GROUP=          nobody
 
 SSL=            1
 JS=             1
@@ -173,6 +175,7 @@ LIBS+=          -l m
 
 ifeq (${OS},Linux)
 LIBS+=          -l dl
+CFLAGS+=        -fPIC
 endif
 
 LIBS+=          $(shell pkg-config --libs libbsd-overlay)
@@ -193,7 +196,6 @@ SED.js=         s/@define WITH_JS@/\#define IRCCD_WITH_JS/
 else
 SED.js=         /@define WITH_JS@/d
 endif
-
 
 ifeq (${OS},Darwin)
 SHFLAGS=        -undefined dynamic_lookup
@@ -310,6 +312,8 @@ install-plugins: ${PLUGINS.inst}
 install-systemd:
 	mkdir -p ${DESTDIR}${LIBDIR}/systemd/system
 	sed -e "s,@PATH@,${BINDIR}/irccd," \
+		-e "s,@USER@,${USER}," \
+		-e "s,@GROUP@,${GROUP}," \
 		< systemd/irccd.service \
 		> ${DESTDIR}${LIBDIR}/systemd/system/irccd.service
 
