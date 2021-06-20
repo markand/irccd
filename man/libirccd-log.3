@@ -34,6 +34,8 @@
 .Ft void
 .Fn irc_log_set_verbose "int verbose"
 .Ft void
+.Fn irc_log_set_template "const char *tmpl"
+.Ft void
 .Fn irc_log_info "const char *fmt, ..."
 .Ft void
 .Fn irc_log_warn "const char *fmt, ..."
@@ -69,9 +71,18 @@ changing it.
 .Pp
 The
 .Fn irc_log_set_verbose
-change the verbosity to on if
+changes the verbosity to on if
 .Fa verbose
 is greater than 0 (which is the default).
+.Pp
+The
+.Fn irc_log_set_template
+changes the format string used to log entries with the help of
+.Xr libirccd-subst 3
+routines. Passing NULL as
+.Ar tmpl
+resets the default format to
+.Dq #{message}
 .Pp
 The
 .Fn irc_log_info

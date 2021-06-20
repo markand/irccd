@@ -26,6 +26,8 @@
 #include "log.h"
 #include "subst.h"
 
+#define DEFAULT_TEMPLATE "#{message}"
+
 enum level {
 	LEVEL_INFO,
 	LEVEL_WARN,
@@ -34,7 +36,7 @@ enum level {
 
 static FILE *out, *err;
 static int verbosity;
-static char tmpl[512] = "#{message}";
+static char tmpl[512] = DEFAULT_TEMPLATE;
 
 static void
 handler_files(enum level level, const char *line)
@@ -158,7 +160,7 @@ irc_log_set_verbose(int mode)
 void
 irc_log_set_template(const char *fmt)
 {
-	strlcpy(tmpl, fmt, sizeof (tmpl));
+	strlcpy(tmpl, fmt ? fmt : DEFAULT_TEMPLATE, sizeof (tmpl));
 }
 
 void
