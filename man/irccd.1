@@ -62,9 +62,9 @@ current revision is bundled in the output.
 The
 .Nm
 program can run plugins once IRC events are received. For example, if someone
-sends you a private message plugins will be invoked with that event. Both native
-plugins written in C++ and Javascript are supported (if enabled at compile
-time).
+sends you a private message plugins will be invoked with that event. Both
+native plugins written in C or C++ and Javascript are supported (if enabled at
+compile time).
 .Pp
 The following IRC events are supported:
 .Bl -tag -width 12n
@@ -84,8 +84,8 @@ plugin, one may use !hangman to start a game.
 See also
 .Xr irccd.conf 5
 on how to change the command character prefix under a
-.Va [server]
-section.
+.Va server
+section block.
 .\" onConnect
 .It onConnect
 When a server successfully connects to an IRC server.
@@ -196,12 +196,8 @@ interpreter each time a new event is available.
 Each hook will receive as positional argument the event name (similar to plugin
 events) and the event arguments.
 .Pp
-An example of hook in shell script is available as
-.Pa @CMAKE_INSTALL_FULL_DOCDIR@/examples/sample-hook.sh
-file.
-.Pp
 See also the section
-.Va [hooks]
+.Va hooks
 in
 .Xr irccd.conf 5
 manual page to enable hooks.
@@ -209,13 +205,10 @@ manual page to enable hooks.
 .Sh TRANSPORTS
 The daemon can be controlled at runtime using the dedicated
 .Nm irccdctl
-tool or using sockets.
-.Pp
-Both TCP/IP and UNIX sockets are supported and SSL layer may be enabled over it
-for a secure connection. If authentication is desired, it can be enabled too.
+tool or using raw TCP messages on a UNIX domain socket file.
 .Pp
 See also the
-.Va [transport]
+.Va transport
 section in the
 .Xr irccd.conf 5
 manual page.
@@ -233,33 +226,10 @@ section above. For example, to disable a private message event you must use the
 value.
 .Pp
 See also the
-.Va [rule]
+.Va rule
 section in the
 .Xr irccd.conf 5
 manual page.
-.\" DIRECTORIES
-.Sh DIRECTORIES
-.Nm
-uses different types of paths depending on the context.
-.Pp
-Paths prefixed by (W) means they are only used on Windows, others prefixed by
-(U) means they are used on UNIX systems.
-.Pp
-.Ss Configuration
-The following directories are searched in the specified order for configuration
-files. For example, the files
-.Pa irccd.conf
-and
-.Pa irccdctl.conf
-will be searched there.
-.Bl -bullet
-.It
-(W) %APPDATA%/irccd/config
-.It
-(U) ${XDG_CONFIG_HOME}/irccd
-.It
-(U) ${HOME}/.config/irccd (if XDG_CONFIG_HOME is not set)
-.El
 .\" SEE ALSO
 .Sh SEE ALSO
 .Xr irccd-api 7 ,
