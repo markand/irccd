@@ -156,25 +156,25 @@ CFLAGS+=        -DNDEBUG -O3
 endif
 
 # Include directories.
-INCS=           -I lib/
-INCS+=          -I ./
-INCS+=          -I extern/libgreatest/
-INCS+=          -I extern/libketopt/
+INCS=           -Ilib/
+INCS+=          -I./
+INCS+=          -Iextern/libgreatest/
+INCS+=          -Iextern/libketopt/
 INCS+=          $(shell pkg-config --cflags libbsd-overlay)
 
 ifeq (${SSL},1)
 INCS+=          $(shell pkg-config --cflags openssl)
 endif
 ifeq (${JS},1)
-INCS+=          -I extern/libduktape
+INCS+=          -Iextern/libduktape
 endif
 
 # Whole libraries for every binaries.
-LIBS+=          -l pthread
-LIBS+=          -l m
+LIBS+=          -lpthread
+LIBS+=          -lm
 
 ifeq (${OS},Linux)
-LIBS+=          -l dl
+LIBS+=          -ldl
 CFLAGS+=        -fPIC
 endif
 
