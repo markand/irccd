@@ -415,9 +415,8 @@ irc_conn_connect(struct irc_conn *conn)
 {
 	assert(conn);
 
-<<<<<<< dest
 	conn->statetime = time(NULL);
-=======
+
 #if !defined(IRCCD_WITH_SSL)
 	if (conn->flags & IRC_CONN_SSL) {
 		irc_log_warn("server %s: SSL requested but not available", conn->sv->name);
@@ -426,7 +425,6 @@ irc_conn_connect(struct irc_conn *conn)
 		return -1;
 	}
 #endif
->>>>>>> source
 
 	if (lookup(conn) < 0)
 		return irc_conn_disconnect(conn), -1;
