@@ -101,6 +101,7 @@ MAN3=           man/irccd-api-chrono.3 \
                 man/libirccd-hook.3 \
                 man/libirccd-log.3 \
                 man/libirccd-rule.3 \
+                man/libirccd-server.3 \
                 man/libirccd-subst.3 \
                 man/libirccd-util.3 \
                 man/libirccd.3

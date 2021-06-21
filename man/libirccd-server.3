@@ -1,0 +1,412 @@
+.\"
+.\" Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt LIBIRCCD-SERVER 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm libirccd-server
+.Nd IRC server functions
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.In irccd/server.h
+.Ft "struct irc_server *"
+.Fo irc_server_new
+.Fa "const char *id"
+.Fa "const char *nickname"
+.Fa "const char *username"
+.Fa "const char *realname"
+.Fa "const char *hostname"
+.Fa "unsigned int port"
+.Fc
+.Ft void
+.Fn irc_server_connect "struct irc_server *s"
+.Ft void
+.Fn irc_server_disconnect "struct irc_server *s"
+.Ft void
+.Fn irc_server_reconnect "struct irc_server *s"
+.Ft void
+.Fn irc_server_prepare "const struct irc_server *, struct pollfd *fd"
+.Ft void
+.Fn irc_server_flush "struct irc_server *s, const struct pollfd *fd"
+.Ft int
+.Fn irc_server_poll "struct irc_server *s, struct irc_event *ev"
+.Ft struct irc_channel *
+.Fn irc_server_find "struct irc_server *s, const char *channel"
+.Ft int
+.Fn irc_server_send "struct irc_server *s, const char *fmt, ..."
+.Ft int
+.Fn irc_server_invite "struct irc_server *s, const char *channel, const char *target"
+.Ft int
+.Fn irc_server_join "struct irc_server *s, const char *channel, const char *pass"
+.Ft int
+.Fn irc_server_kick "struct irc_server *s, const char *channel, const char *target, const char *reason"
+.Ft int
+.Fn irc_server_part "struct irc_server *s, const char *channel, const char *reason"
+.Ft int
+.Fn irc_server_topic "struct irc_server *s, const char *channel, const char *topic"
+.Ft int
+.Fn irc_server_message "struct irc_server *s, const char *channel, const char *message"
+.Ft int
+.Fn irc_server_me "struct irc_server *s, const char *channel, const char *message"
+.Ft int
+.Fn irc_server_mode "struct irc_server *s, const char *channel, const char *mode, const char *args"
+.Ft int
+.Fn irc_server_names "struct irc_server *s, const char *channel"
+.Ft int
+.Fn irc_server_nick "struct irc_server *s, const char *nick"
+.Ft int
+.Fn irc_server_notice "struct irc_server *s, const char *channel, const char *message"
+.Ft int
+.Fn irc_server_whois "struct irc_server *s, const char *nickname"
+.Ft int
+.Fn irc_server_strip "const struct irc_server *s, const char **string"
+.Ft void
+.Fn irc_server_split "const char *string, struct irc_server_user *ident"
+.Ft void
+.Fn irc_server_incref "struct irc_server *s"
+.Ft void
+.Fn irc_server_decref "struct irc_server *s"
+.\" DESCRIPTION
+.Sh DESCRIPTION
+This API provides functions to operate with an IRC server. When servers are
+managed through the irccd instance they are automatically connected, reconnected
+and removed when needed.
+.Pp
+It also have a large set of functions to send messages, change channel topics,
+join channels and such.
+.Pp
+A server by itself is asynchronous, any function in the API will never block
+because it is queued into local buffers. To accomplish this feature the server
+relies on the user to use
+.Xr poll 2
+and indicate the server that a network event happened. This is normally never
+needed from the user side as long as the server is managed through irccd. See
+.Xr libirccd-irccd 3
+for more details.
+.Pp
+The header exposes the following structures:
+.Bd -literal
+struct irc_server_user {
+	char nickname[IRC_NICKNAME_LEN];        /* IRC nickname */
+	char username[IRC_USERNAME_LEN];        /* IRC username */
+	char host[IRC_HOST_LEN];                /* hostname part */
+};
+.Ed
+.Pp
+This structure describes an IRC user.
+.Bd -literal
+struct irc_server_ident {
+	char nickname[IRC_NICKNAME_LEN];        /* desired nickname */
+	char password[IRC_PASSWORD_LEN];        /* server password */
+	char ctcpversion[IRC_CTCPVERSION_LEN];  /* CTCP VERSION to reply */
+};
+.Ed
+.Pp
+This structure holds the informations about the credentials for connecting to
+the IRC server.
+.Bd -literal
+struct irc_server_params {
+	char chantypes[IRC_CHANTYPES_LEN];      /* channel types prefixes */
+	char charset[IRC_CHARSET_LEN];          /* charset recommended */
+	char casemapping[IRC_CASEMAPPING_LEN];  /* case mapping */
+	unsigned int chanlen;                   /* maximum channel length */
+	unsigned int nicklen;                   /* maximum nickname length */
+	unsigned int topiclen;                  /* maximum topic length */
+	unsigned int awaylen;                   /* maximum away message length */
+	unsigned int kicklen;                   /* maximum kick message length */
+	struct {
+		char mode;                      /* mode (e.g. ov). */
+		char symbol;                    /* symbol used (e.g. @+). */
+	} prefixes[IRC_USERMODES_LEN];
+};
+.Ed
+.Pp
+This structure holds readonly information about the server. It is filled once a
+server is connected and updated depending on IRC event. User modification on
+this structure has no effects.
+.Bd -literal
+struct irc_server {
+	char name[IRC_ID_LEN];                  /* server identifier */
+	char prefix[IRC_PREFIX_LEN];            /* prefix for plugin commands */
+	struct irc_server_ident ident;          /* identity to use */
+	struct irc_server_params params;        /* server parameters */
+	enum irc_server_flags flags;            /* optional user flags */
+	struct irc_channel_list channels;       /* list of channels */
+	LIST_ENTRY(irc_server) link;
+};
+.Ed
+.Pp
+This structure is a connection to the IRC server. It is implemented as a state
+machine and requires read/write steps from the main loop. They are usually
+managed directly from the
+.Xr irccd 1
+daemon and should not require user actions.
+The
+.Vt struct irc_server
+is implemented as linked list through the
+.Va link
+field usable through
+.Xr queue 3
+macros.
+.Pp
+Note: few other private fields are not listed as they must not be used by the
+user.
+.Pp
+.\" irc_server_new
+The
+.Fn irc_server_new
+function heap allocates a new server object in disconnected state. The argument
+.Fa id
+must be a valid unique identifier. Arguments
+.Fa nickname , username , realname
+refer to the IRC identity. The argument
+.Fa hostname
+and
+.Fa port
+specifies the IRC server address (or hostname) and its port. This function never
+return NULL.
+.Pp
+.\" irc_server_connect
+The
+.Fn irc_server_connect
+function starts connecting the server
+.Fa s .
+Connection does not happen immediately because the server is setup in
+non-blocking mode, as such several steps are required and are performed with the
+help of the
+.Fn irc_server_prepare
+and
+.Fn irc_server_flush .
+.Pp
+.\" irc_server_disconnect
+The
+.Fn irc_server_disconnect
+function immediately shuts down the connection to
+.Ar s
+server by closing the socket. It is possible to reconnect again using
+.Fn irc_server_connect .
+.Pp
+.\" irc_server_reconnect
+The
+.Fn irc_server_reconnect
+function closes the connection on the server
+.Ar s
+and reconnect immediately.
+.Pp
+.\" irc_server_prepare
+.\" irc_server_flush
+The
+.Fn irc_server_prepare
+function fills the
+.Xr poll 2
+structure specified by
+.Fa fd
+about events that the server requires depending on read/write conditions from
+the server
+.Fa s .
+Then, the
+.Fn irc_server_flush
+function performs any pending read/write operation depending on the result of the
+.Fa fd
+structure which should have been listened with
+.Xr poll 2
+from user side. Both functions are usually never required to be called manually
+as long as the servers are put into the irccd instance. See
+.Xr libirccd-irccd 3
+for more details.
+.Pp
+.\" irc_server_poll
+The
+.Fn irc_server_poll
+function seeks for any pending IRC event in server
+.Fa s .
+It should be called periodically in the main loop to remove pending events. This
+function is usually never required to be called manually from the user.
+.Pp
+.\" irc_server_send
+The function
+.Fn irc_server_send
+sends a raw unparsed message to the server
+.Fa s
+with a
+.Xr printf 3
+format like. The CRLF delimiter is automatically appended.
+.Pp
+.\" irc_server_invite
+The
+.Fn irc_server_invite
+function invites
+.Fa target
+to the
+.Fa channel
+on the server
+.Fa s .
+.Pp
+.\" irc_server_join
+The
+.Fn irc_server_join
+creates a request to join
+.Fa channel
+using an optional
+.Fa pass
+if not NULL on the server
+.Fa s .
+If the server is not yet connected, it is appended to the list of channels to
+join and they will be joined once connected.
+.Pp
+.\" irc_server_kick
+The
+.Fn irc_server_kick
+function kicks
+.Fa target
+from channel
+.Fa channel
+using a specified
+.Fa reason
+if not NULL from the server
+.Fa s .
+.Pp
+.\" irc_server_part
+The
+.Fn irc_server_part
+leaves
+.Fa channel
+using a specified
+.Fa reason
+if not NULL from the server
+.Fa s .
+.Pp
+.\" irc_server_topic
+The
+.Fn irc_server_topic
+sets
+.Fa topic
+into the specified
+.Fa channel
+from the server
+.Fa s .
+.\" irc_server_message
+The
+.Fn irc_server_message
+sends a private
+.Fa message
+to
+.Fa channel
+into the server
+.Fa s .
+The argument
+.Fa channel
+can be a nickname as well.
+.Pp
+.\" irc_server_me
+The
+.Fn irc_server_me
+sends an action emote
+.Fa message
+to
+.Fa channel
+into the server
+.Fa s .
+The argument
+.Fa channel
+can be a nickname as well. This is also known as /me in popular IRC clients.
+.Pp
+.\" irc_server_mode
+The
+.Fn irc_server_mode
+function sets
+.Fa mode
+and its
+.Fa args
+into the specified
+.Fa channel
+on the server
+.Fa s .
+.Pp
+.\" irc_server_names
+The
+.Fn irc_server_names
+requests a name listing on the specified
+.Fa channel
+from the server
+.Fa s .
+Names are incoming asynchronously using a names event. See
+.Xr libirccd-event 3
+for more details.
+.Pp
+.\" irc_server_nick
+The
+.Fn irc_server_nick
+change the bots nickname to
+.Fa nick
+on the server
+.Fa s .
+If the server is not already connected this operation is immediate, otherwise a
+request is sent and the nick change can fail (e.g. if already used).
+.Pp
+.\" irc_server_notice
+The
+.Fn irc_server_notice
+sends a private
+.Fa notice
+to
+.Fa channel
+into the server
+.Fa s .
+The argument
+.Fa channel
+can be a nickname as well.
+.Pp
+.\" irc_server_whois
+The
+.Fn irc_server_whois
+sends an asynchronous request to obtain whois information about
+.Fa nickname
+from the server
+.Fa s .
+.Pp
+.\" irc_server_strip
+The
+.Fn irc_server_strip
+function can be used to extract user modes from
+.Fa string
+and return modes that is has (e.g. voice, op, halfop). The
+.Fa string
+pointer will be incremented for each prefix found at the start of the string.
+Example: if a string
+.Dq @+francis
+is passed, the function will increase the pointer to a result of
+.Dq francis
+and both voice and op will be returned as OR'ed flags. The server
+.Fa s
+has to be specified because some IRC server may use different symbol prefixes
+and those are detected at connection time.
+.Pp
+.\" irc_server_incref
+.\" irc_server_decref
+Both
+.Fn irc_server_incref
+and
+.Fn irc_server_decref
+increment or decrement respectively the usage count of the server
+.Fa s .
+It allows the storage of servers inside plugins so they still refer to a valid
+memory area even if user decide to disconnect some servers.
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr libirccd 3 ,
+.Xr libirccd-irccd 3
