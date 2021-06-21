@@ -96,7 +96,6 @@ MAN3=           man/irccd-api-chrono.3 \
                 man/irccd-api-util.3 \
                 man/irccd-api.3 \
                 man/libirccd-channel.3 \
-                man/libirccd-compat.3 \
                 man/libirccd-event.3 \
                 man/libirccd-hook.3 \
                 man/libirccd-log.3 \
