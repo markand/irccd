@@ -120,6 +120,8 @@ create(struct irc_conn *conn)
 	return 0;
 }
 
+#if defined(IRCCD_WITH_SSL)
+
 static inline int
 update_ssl_state(struct irc_conn *conn, int ret)
 {
@@ -168,6 +170,8 @@ input_ssl(struct irc_conn *conn, char *dst, size_t dstsz)
 	return nr;
 }
 
+#endif
+
 static inline ssize_t
 input_clear(struct irc_conn *conn, char *buf, size_t bufsz)
 {
@@ -188,9 +192,11 @@ input(struct irc_conn *conn)
 	size_t cap = sizeof (conn->in) - len - 1;
 	ssize_t nr = 0;
 
+#if defined(IRCCD_WITH_SSL)
 	if (conn->flags & IRC_CONN_SSL)
 		nr = input_ssl(conn, conn->in + len, cap);
 	else
+#endif
 		nr = input_clear(conn, conn->in + len, cap);
 
 	if (nr > 0)
@@ -198,6 +204,8 @@ input(struct irc_conn *conn)
 
 	return nr;
 }
+
+#if defined(IRCCD_WITH_SSL)
 
 static inline ssize_t
 output_ssl(struct irc_conn *conn)
@@ -219,6 +227,8 @@ output_ssl(struct irc_conn *conn)
 	return ns;
 }
 
+#endif
+
 static inline ssize_t
 output_clear(struct irc_conn *conn)
 {
@@ -235,9 +245,11 @@ output(struct irc_conn *conn)
 {
 	ssize_t ns = 0;
 
+#if defined(IRCCD_WITH_SSL)
 	if (conn->flags & IRC_CONN_SSL)
 		ns = output_ssl(conn);
 	else
+#endif
 		ns = output_clear(conn);
 
 	if (ns > 0) {
@@ -254,8 +266,8 @@ output(struct irc_conn *conn)
 static int
 handshake(struct irc_conn *conn)
 {
-	if (conn->flags & IRC_CONN_SSL) {
 #if defined(IRCCD_WITH_SSL)
+	if (conn->flags & IRC_CONN_SSL) {
 		int r;
 
 		conn->state = IRC_CONN_STATE_HANDSHAKING;
@@ -295,8 +307,8 @@ handshake(struct irc_conn *conn)
 		conn->state = IRC_CONN_STATE_READY;
 		conn->ssl_cond = IRC_CONN_SSL_ACT_NONE;
 		conn->ssl_step = IRC_CONN_SSL_ACT_NONE;
-#endif
 	} else
+#endif
 		conn->state = IRC_CONN_STATE_READY;
 
 	return 0;
@@ -367,10 +379,11 @@ check_connect(struct irc_conn *conn)
 	return handshake(conn);
 }
 
+#if defined(IRCCD_WITH_SSL)
+
 static inline void
 prepare_ssl(const struct irc_conn *conn, struct pollfd *pfd)
 {
-#if defined(IRCCD_WITH_SSL)
 	switch (conn->ssl_cond) {
 	case IRC_CONN_SSL_ACT_READ:
 		irc_log_debug("server %s: need read condition", conn->sv->name);
@@ -383,9 +396,6 @@ prepare_ssl(const struct irc_conn *conn, struct pollfd *pfd)
 	default:
 		break;
 	}
-#else
-	(void)conn;
-#endif
 }
 
 static inline int
@@ -398,12 +408,25 @@ renegotiate(struct irc_conn *conn)
 		: output(conn);
 }
 
+#endif
+
 int
 irc_conn_connect(struct irc_conn *conn)
 {
 	assert(conn);
 
+<<<<<<< dest
 	conn->statetime = time(NULL);
+=======
+#if !defined(IRCCD_WITH_SSL)
+	if (conn->flags & IRC_CONN_SSL) {
+		irc_log_warn("server %s: SSL requested but not available", conn->sv->name);
+		errno = EINVAL;
+
+		return -1;
+	}
+#endif
+>>>>>>> source
 
 	if (lookup(conn) < 0)
 		return irc_conn_disconnect(conn), -1;
@@ -427,9 +450,11 @@ irc_conn_prepare(const struct irc_conn *conn, struct pollfd *pfd)
 
 	pfd->fd = conn->fd;
 
+#if defined(IRCCD_WITH_SSL)
 	if (conn->ssl_cond)
 		prepare_ssl(conn, pfd);
 	else {
+#endif
 		switch (conn->state) {
 		case IRC_CONN_STATE_CONNECTING:
 			pfd->events = POLLOUT;
@@ -443,7 +468,9 @@ irc_conn_prepare(const struct irc_conn *conn, struct pollfd *pfd)
 		default:
 			break;
 		}
+#if defined(IRCCD_WITH_SSL)
 	}
+#endif
 }
 
 int
@@ -461,15 +488,19 @@ irc_conn_flush(struct irc_conn *conn, const struct pollfd *pfd)
 		if (pfd->revents & (POLLERR | POLLHUP))
 			return irc_conn_disconnect(conn), -1;
 
+#if defined(IRCCD_WITH_SSL)
 		if (conn->ssl_cond) {
 			if (renegotiate(conn) < 0)
 				return irc_conn_disconnect(conn), -1;
 		} else {
+#endif
 			if (pfd->revents & POLLIN && input(conn) < 0)
 				return irc_conn_disconnect(conn), -1;
 			if (pfd->revents & POLLOUT && output(conn) < 0)
 				return irc_conn_disconnect(conn), -1;
+#if defined(IRCCD_WITH_SSL)
 		}
+#endif
 		break;
 	default:
 		break;
