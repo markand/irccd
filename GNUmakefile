@@ -147,7 +147,7 @@ TESTS_OBJS=     ${TESTS:.c=}
 OS:=            $(shell uname -s)
 
 # Compile flags.
-DEFS=           -D_BSD_SOURCE -DLIBBSD_OVERLAY -DTOP=\"`pwd`\"
+DEFS=           -D_BSD_SOURCE -DTOP=\"$(shell pwd)\" -fPIC
 
 ifeq (${DEBUG},1)
 CFLAGS+=        -O0 -g
@@ -160,11 +160,8 @@ INCS=           -Ilib/
 INCS+=          -I./
 INCS+=          -Iextern/libgreatest/
 INCS+=          -Iextern/libketopt/
-INCS+=          $(shell pkg-config --cflags libbsd-overlay)
+INCS+=          $(shell pkg-config --silence-errors --cflags libbsd-overlay)
 
-ifeq (${SSL},1)
-INCS+=          $(shell pkg-config --cflags openssl)
-endif
 ifeq (${JS},1)
 INCS+=          -Iextern/libduktape
 endif
@@ -178,10 +175,10 @@ LIBS+=          -ldl
 CFLAGS+=        -fPIC
 endif
 
-LIBS+=          $(shell pkg-config --libs libbsd-overlay)
+LIBS+=          $(shell pkg-config --silence-errors --libs libbsd-overlay)
 
 ifeq (${SSL},1)
-LIBS+=          $(shell pkg-config --libs openssl)
+LIBS+=          -lssl -lcrypto
 endif
 
 # For config.h file.
