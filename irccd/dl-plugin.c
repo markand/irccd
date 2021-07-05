@@ -54,7 +54,7 @@ typedef const char **   (*get_options_fn)(void);
 typedef const char **   (*get_paths_fn)(void);
 typedef const char **   (*get_templates_fn)(void);
 typedef void            (*event_fn)(const struct irc_event *);
-typedef void            (*load_fn)(void);
+typedef int             (*load_fn)(void);
 typedef void            (*reload_fn)(void);
 typedef void            (*unload_fn)(void);
 typedef void            (*set_option_fn)(const char *, const char *);
@@ -148,10 +148,12 @@ get_options(struct irc_plugin *plg)
 	return NULL;
 }
 
-static void
+static int
 load(struct irc_plugin *plg)
 {
 	INVOKE(plg, "load", load_fn);
+
+	return 0;
 }
 
 static void

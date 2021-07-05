@@ -334,13 +334,13 @@ irc_bot_plugin_add(struct irc_plugin *p)
 	assert(p);
 	assert(!irc_bot_plugin_get(p->name));
 
-	LIST_INSERT_HEAD(&irc.plugins, p, link);
-
-	irc_log_info("irccd: add new plugin: %s", p->name, p->description);
-	irc_log_info("irccd: %s: version %s, from %s (%s license)", p->name,
-	    p->version, p->author, p->license);
-
-	irc_plugin_load(p);
+	if (irc_plugin_load(p) == 0) {
+		LIST_INSERT_HEAD(&irc.plugins, p, link);
+		irc_log_info("irccd: add new plugin: %s", p->name, p->description);
+		irc_log_info("irccd: %s: version %s, from %s (%s license)", p->name,
+		    p->version, p->author, p->license);
+	} else
+		irc_log_warn("irccd: plugin %s failed to load", p->name);
 }
 
 struct irc_plugin *

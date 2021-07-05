@@ -44,7 +44,7 @@
 .Fn <prefix>_get_templates "void"
 .Ft const char **
 .Fn <prefix>_get_paths "void"
-.Ft void
+.Ft int
 .Fn <prefix>_load "void"
 .Ft void
 .Fn <prefix>_reload "void"
@@ -154,7 +154,9 @@ the user may return a static array for convenience.
 .Pp
 The
 .Fn <prefix>_load
-function is called when the plugin is being loaded and add to the daemon.
+function is called when the plugin is being loaded before being added to the
+daemon. If the function returns non-zero it is treated as an error an not
+loaded.
 .Pp
 The
 .Fn <prefix>_reload

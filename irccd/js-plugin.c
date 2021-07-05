@@ -291,17 +291,17 @@ get_options(struct irc_plugin *plg)
 	return get_table(js->ctx, JSAPI_PLUGIN_PROP_OPTIONS, &js->options);
 }
 
-static void
+static int
 vcall(struct irc_plugin *plg, const char *function, const char *fmt, va_list ap)
 {
 	struct self *self = plg->data;
-	int nargs = 0;
+	int nargs = 0, ret = 0;
 
 	duk_get_global_string(self->ctx, function);
 
 	if (!duk_is_function(self->ctx, -1)) {
 		duk_pop(self->ctx);
-		return;
+		return ret;
 	}
 
 	for (const char *f = fmt; *f; ++f) {
@@ -325,20 +325,27 @@ vcall(struct irc_plugin *plg, const char *function, const char *fmt, va_list ap)
 		++nargs;
 	}
 
-	if (duk_pcall(self->ctx, nargs) != 0)
+	if (duk_pcall(self->ctx, nargs) != 0) {
 		log_trace(plg->data);
+		ret = -1;
+	}
 
 	duk_pop(self->ctx);
+
+	return ret;
 }
 
-static void
+static int
 call(struct irc_plugin *plg, const char *function, const char *fmt, ...)
 {
 	va_list ap;
+	int ret;
 
 	va_start(ap, fmt);
-	vcall(plg, function, fmt, ap);
+	ret = vcall(plg, function, fmt, ap);
 	va_end(ap);
+
+	return ret;
 }
 
 static void
@@ -514,10 +521,10 @@ init(const char *name, const char *path, const char *script)
 	return js;
 }
 
-static void
+static int
 load(struct irc_plugin *plg)
 {
-	call(plg, "onLoad", "");
+	return call(plg, "onLoad", "");
 }
 
 static void

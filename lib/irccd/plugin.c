@@ -123,13 +123,15 @@ irc_plugin_get_options(struct irc_plugin *plg)
 	return NULL;
 }
 
-void
+int
 irc_plugin_load(struct irc_plugin *plg)
 {
 	assert(plg);
 
 	if (plg->load)
-		plg->load(plg);
+		return plg->load(plg);
+
+	return 0;
 }
 
 void

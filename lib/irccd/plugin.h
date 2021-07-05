@@ -49,7 +49,7 @@ struct irc_plugin {
 	const char *(*get_option)(struct irc_plugin *, const char *);
 	const char **(*get_options)(struct irc_plugin *);
 
-	void (*load)(struct irc_plugin *);
+	int (*load)(struct irc_plugin *);
 	void (*reload)(struct irc_plugin *);
 	void (*unload)(struct irc_plugin *);
 	void (*handle)(struct irc_plugin *, const struct irc_event *);
@@ -99,7 +99,7 @@ irc_plugin_get_option(struct irc_plugin *, const char *);
 const char **
 irc_plugin_get_options(struct irc_plugin *);
 
-void
+int
 irc_plugin_load(struct irc_plugin *);
 
 void
