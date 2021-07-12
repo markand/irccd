@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <err.h>
-
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
@@ -25,6 +23,7 @@
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
 #include <irccd/server.h>
+#include <irccd/util.h>
 
 static struct irc_server *server;
 static struct irc_plugin *plugin;
@@ -38,7 +37,7 @@ setup(void *udata)
 	plugin = js_plugin_open("test", TOP "/plugins/ask/ask.js");
 
 	if (!plugin)
-		errx(1, "could not load plugin");
+		irc_util_die("could not load plugin\n");
 
 	irc_server_incref(server);
 	irc_plugin_set_option(plugin, "file", TOP "/tests/data/answers.conf");

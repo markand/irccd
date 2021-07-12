@@ -16,7 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <err.h>
 #include <string.h>
 
 #define GREATEST_USE_ABBREVS 0
@@ -66,7 +65,7 @@ setup(void *udata)
 	plugin = js_plugin_open("plugin", TOP "/plugins/plugin/plugin.js");
 
 	if (!plugin)
-		errx(1, "could not load plugin");
+		irc_util_die("could not load plugin\n");
 
 	/* Prepare a fake plugin. */
 	fake = irc_util_calloc(1, sizeof (*fake));

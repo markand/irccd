@@ -16,7 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <err.h>
+#include <errno.h>
+#include <string.h>
 
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
@@ -25,6 +26,7 @@
 #include <irccd/log.h>
 #include <irccd/plugin.h>
 #include <irccd/server.h>
+#include <irccd/util.h>
 
 static struct irc_server *server;
 static struct irc_plugin *plugin;
@@ -40,7 +42,7 @@ setup(void *udata)
 	plugin = js_plugin_open("logger", TOP "/plugins/logger/logger.js");
 
 	if (!plugin)
-		errx(1, "could not load plugin");
+		irc_util_die("could not load plugin\n");
 
 	irc_server_incref(server);
 	irc_plugin_set_template(plugin, "join", "join=#{server}:#{channel}:#{origin}:#{nickname}");
@@ -79,9 +81,9 @@ last(void)
 	buf[0] = '\0';
 
 	if (!(fp = fopen(TOP "/tests/log", "r")))
-		err(1, "fopen");
+		irc_util_die("fopen: %s\n", strerror(errno));
 	if (!(fgets(buf, sizeof (buf), fp)))
-		err(1, "fgets");
+		irc_util_die("fgets: %s\n", strerror(errno));
 
 	fclose(fp);
 

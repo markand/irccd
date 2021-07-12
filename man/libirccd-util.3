@@ -46,6 +46,8 @@
 .Fn irc_util_split "char *str, const char **args, size_t max, char delimiter"
 .Ft char *
 .Fn irc_util_printf "char *str, size_t strsz, const char *fmt, ..."
+.Ft noreturn void
+.Fn irc_util_die "const char *fmt, ..."
 .\" DESCRIPTION
 .Sh DESCRIPTION
 This header provides several function for memory management and basic string
@@ -170,8 +172,15 @@ is similar to standard C
 signature except that it returns the
 .Fa str
 argument for convenience.
+.Pp
+The
+.Fn irc_util_die
+function is a function that writes a message format using the same signature as
+.Xr printf 3
+and exits with code 1. It is meant to be used when the program is unable to
+recover from a fatal error and should be avoided in library code.
 .\" RETURN VALUES
-.Sh RETURN VALUELS
+.Sh RETURN VALUES
 All memory functions
 .Fn irc_util_malloc ,
 .Fn irc_util_calloc ,

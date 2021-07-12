@@ -16,7 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <err.h>
 #include <errno.h>
 #include <poll.h>
 #include <signal.h>
@@ -133,7 +132,7 @@ init(void)
 	sigemptyset(&sig.sa_mask);
 
 	if (sigaction(SIGINT, &sig, NULL) < 0 || sigaction(SIGTERM, &sig, NULL) < 0)
-		err(1, "sigaction");
+		irc_util_die("sigaction: %s\n", strerror(errno));
 }
 
 static void
@@ -203,7 +202,7 @@ loop(void)
 		pb = pollables();
 
 		if (poll(pb.fds, pb.fdsz, 1000) < 0 && errno != EINTR)
-			err(1, "poll");
+			irc_util_die("poll: %s\n", strerror(errno));
 
 		flush(&pb);
 

@@ -18,13 +18,13 @@
 
 %{
 
-#include <err.h>
+#include <errno.h>
 #include <grp.h>
 #include <limits.h>
 #include <pwd.h>
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <irccd/irccd.h>
 #include <irccd/log.h>
@@ -294,7 +294,7 @@ logs
 		else if (strcmp($5, "syslog") == 0)
 			irc_log_to_syslog();
 		else
-			errx(1, "missing log file path");
+			irc_util_die("missing log file path\n");
 
 		free($3);
 		free($5);
@@ -318,7 +318,7 @@ transport_params_uid
 		struct passwd *pwd;
 
 		if (!(pwd = getpwnam($2)))
-			errx(1, "invalid uid: %s", $2);
+			irc_util_die("invalid uid: %s\n", $2);
 
 		free($2);
 		$$ = pwd->pw_uid;
@@ -335,7 +335,7 @@ transport_params_gid
 		struct group *grp;
 
 		if (!(grp = getgrnam($2)))
-			errx(1, "invalid uid: %s", $2);
+			irc_util_die("invalid uid: %s\n", $2);
 
 		free($2);
 		$$ = grp->gr_gid;
@@ -501,7 +501,7 @@ server_params
 			else if (strcmp(s->value, "AUTO-RECONNECT") == 0)
 				$$->flags |= IRC_SERVER_FLAGS_AUTO_RECO;
 			else
-				errx(1, "invalid server option: %s", s->value);
+				irc_util_die("invalid server option: %s\n", s->value);
 		}
 
 		string_list_finish($2);
@@ -520,15 +520,15 @@ server
 		char *at;
 
 		if (irc_bot_server_get($2))
-			errx(1, "server %s already exists", $2);
+			irc_util_die("server %s already exists\n", $2);
 		if (!$4->hostname)
-			errx(1, "missing server hostname");
+			irc_util_die("missing server hostname\n");
 		if (!$4->nickname)
-			errx(1, "missing server nickname");
+			irc_util_die("missing server nickname\n");
 		if (!$4->username)
-			errx(1, "missing server username");
+			irc_util_die("missing server username\n");
 		if (!$4->realname)
-			errx(1, "missing server realname");
+			irc_util_die("missing server realname\n");
 
 		s = irc_server_new($2, $4->nickname, $4->username, $4->realname,
 			$4->hostname, $4->port);
@@ -638,7 +638,7 @@ plugin
 		const char *location = $3 ? $3->location : NULL;
 
 		if (irc_bot_plugin_get($2))
-			errx(1, "plugin %s already exists", $2);
+			irc_util_die("plugin %s already exists\n", $2);
 		if (!(p = irc_bot_plugin_find($2, location)))
 			goto cleanup;
 
@@ -671,7 +671,7 @@ hook
 	: T_HOOK T_STRING T_TO T_STRING
 	{
 		if (irc_bot_hook_get($2))
-			errx(1, "hook %s already exists", $2);
+			irc_util_die("hook %s already exists\n", $2);
 
 		irc_bot_hook_add(irc_hook_new($2, $4));
 
@@ -685,14 +685,14 @@ hook
 void
 yyerror(const char *err)
 {
-	errx(1, "%s:%d: %s", confpath, yylineno, err);
+	irc_util_die("%s:%d: %s\n", confpath, yylineno, err);
 }
 
 void
 config_open(const char *path)
 {
 	if (!(yyin = fopen(path, "r")))
-		err(1, "%s", path);
+		irc_util_die("%s: %s\n", path, strerror(errno));
 
 	strlcpy(confpath, path, sizeof (confpath));
 	yyparse();

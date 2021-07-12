@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <err.h>
-
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
@@ -25,6 +23,7 @@
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
 #include <irccd/server.h>
+#include <irccd/util.h>
 
 /*
  * 0 -> nickserv without nickname
@@ -45,7 +44,7 @@ setup(void *udata)
 	plugin = js_plugin_open("test", TOP "/plugins/auth/auth.js");
 
 	if (!plugin)
-		errx(1, "could not load plugin");
+		irc_util_die("could not load plugin\n");
 
 	irc_server_incref(servers[0]);
 	irc_server_incref(servers[1]);

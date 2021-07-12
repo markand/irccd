@@ -19,7 +19,6 @@
 #include <sys/wait.h>
 #include <assert.h>
 #include <ctype.h>
-#include <err.h>
 #include <errno.h>
 #include <poll.h>
 #include <signal.h>
@@ -181,10 +180,10 @@ pipe_flush(const struct pollfd *fd)
 	if (fd->fd != pipes[0] || !(fd->revents & POLLIN))
 		return;
 
-	if (read(fd->fd, &df, sizeof (df)) != sizeof (df))
-		err(1, "read");
-
-	df.exec(df.data);
+	if (read(fd->fd, &df, sizeof (df)) == sizeof (df))
+		df.exec(df.data);
+	else
+		irc_log_warn("irccd: %s", strerror(errno));
 }
 
 static struct irc_plugin *
@@ -261,7 +260,7 @@ irc_bot_init(void)
 	irc_log_to_console();
 
 	if (pipe(pipes) < 0)
-		err(1, "pipe");
+		irc_util_die("pipe: %s\n", strerror(errno));
 
 	sa.sa_flags = SA_SIGINFO;
 	sa.sa_sigaction = handle_sigchld;
@@ -269,7 +268,7 @@ irc_bot_init(void)
 	sigemptyset(&sa.sa_mask);
 
 	if (sigaction(SIGCHLD, &sa, NULL) < 0)
-		err(1, "sigaction");
+		irc_util_die("sigaction: %s\n", strerror(errno));
 }
 
 void
@@ -641,7 +640,7 @@ irc_bot_post(void (*exec)(void *), void *data)
 	};
 
 	if (write(pipes[1], &df, sizeof (df)) != sizeof (df))
-		err(1, "write");
+		irc_log_warn("write: %s\n", strerror(errno));
 }
 
 void

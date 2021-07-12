@@ -18,7 +18,6 @@
 
 #include <assert.h>
 #include <errno.h>
-#include <err.h>
 #include <poll.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -533,7 +532,7 @@ handle_endofnames(struct irc_server *s, struct irc_event *ev, struct irc_conn_ms
 	ch = irc_server_find(s, ev->names.channel);
 
 	if (!(fp = open_memstream(&ev->names.names, &length)))
-		err(1, "open_memstream");
+		return;
 
 	LIST_FOREACH(u, &ch->users, link) {
 		for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes); ++i)

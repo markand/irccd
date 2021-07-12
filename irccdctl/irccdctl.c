@@ -21,7 +21,6 @@
 #include <sys/un.h>
 #include <assert.h>
 #include <ctype.h>
-#include <err.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdarg.h>
@@ -56,9 +55,9 @@ poll(void)
 		ssize_t nr;
 
 		if ((nr = recv(sock, buf, sizeof (buf) - 1, 0)) <= 0)
-			errc(1, nr == 0 ? ECONNRESET : errno, "abort");
+			irc_util_die("abort: %s\n", strerror(nr == 0 ? ECONNRESET : errno));
 		if (strlcat(in, buf, sizeof (in)) >= sizeof (in))
-			errc(1, EMSGSIZE, "abort");
+			irc_util_die("abort: %s\n", strerror(EMSGSIZE));
 	}
 
 	*nl = '\0';
@@ -76,12 +75,12 @@ dial(void)
 	};
 
 	if ((sock = socket(PF_LOCAL, SOCK_STREAM, 0)) < 0)
-		err(1, "socket");
+		irc_util_die("abort: socket: %s\n", strerror(errno));
 	if (setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof (tv)) < 0 ||
 	    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof (tv)) < 0)
-		err(1, "setsockopt");
+		irc_util_die("abort: setsockopt: %s\n", strerror(errno));
 	if (connect(sock, (const struct sockaddr *)&sockaddr, SUN_LEN(&sockaddr)) < 0)
-		err(1, "connect");
+		irc_util_die("abort: connect: %s\n", strerror(errno));
 }
 
 static void
@@ -91,7 +90,7 @@ check(void)
 	int major, minor, patch;
 
 	if ((sscanf(poll(), "IRCCD %d.%d.%d", &major, &minor, &patch) != 3))
-		errx(1, "abort: not irccd instance");
+		irc_util_die("abort: not irccd instance\n");
 	if (verbose)
 		printf("connected to irccd %d.%d.%d\n", major, minor, patch);
 }
@@ -108,7 +107,7 @@ req(const char *fmt, ...)
 
 	if (strlcat(out, buf, sizeof (out)) >= sizeof (out) ||
 	    strlcat(out, "\n", sizeof (out)) >= sizeof (out))
-		errc(1, EMSGSIZE, "abort");
+		irc_util_die("abort: %s\n", strerror(EMSGSIZE));
 
 	while (out[0]) {
 		ssize_t ns, len;
@@ -116,7 +115,7 @@ req(const char *fmt, ...)
 		len = strlen(out);
 
 		if ((ns = send(sock, out, len, MSG_NOSIGNAL)) <= 0)
-			err(1, "send");
+			irc_util_die("abort: send: %s\n", strerror(errno));
 
 		if (ns >= len)
 			memset(out, 0, sizeof (out));
@@ -131,7 +130,7 @@ ok(void)
 	char *response = poll();
 
 	if (strncmp(response, "OK", 2) != 0)
-		errx(1, "abort: %s", response);
+		irc_util_die("abort: %s\n", response);
 
 	/* Skip "OK". */
 	response += 2;
@@ -371,7 +370,7 @@ plugin_list_set(int argc, char **argv, const char *cmd)
 		req("%s %s", cmd, argv[0]);
 
 	if (sscanf(line = ok(), "%zu", &num) != 1)
-		errx(1, "could not retrieve list");
+		irc_util_die("abort: could not retrieve list\n");
 
 	if (argc == 2)
 		puts(poll());
@@ -396,7 +395,7 @@ response_list(const char *cmd)
 	req(cmd);
 
 	if (strncmp(list = poll(), "OK ", 3) != 0)
-		errx(1, "failed to retrieve plugin list");
+		irc_util_die("abort: failed to retrieve plugin list\n");
 
 	list += 3;
 
@@ -459,7 +458,7 @@ cmd_plugin_info(int argc, char **argv)
 	req("PLUGIN-INFO %s", argv[0]);
 
 	if (strncmp((response = poll()), "OK ", 3) != 0)
-		errx(1, "failed to retrieve plugin information");
+		irc_util_die("abort: failed to retrieve plugin information\n");
 
 	printf("%-16s%s\n", "name:", response + 3);
 	printf("%-16s%s\n", "summary:", poll());
@@ -528,7 +527,7 @@ cmd_rule_add(int argc, char **argv)
 	char out[IRC_BUF_LEN];
 
 	if (!(fp = fmemopen(out, sizeof (out) - 1, "w")))
-		err(1, "fmemopen");
+		irc_util_die("abort: fmemopen: %s\n", strerror(errno));
 
 	/* TODO: invalid option. */
 	for (int ch; (ch = ketopt(&ko, argc, argv, 0, "c:e:i:o:p:s:", NULL)) != -1; )
@@ -538,12 +537,12 @@ cmd_rule_add(int argc, char **argv)
 	argv += ko.ind;
 
 	if (argc < 1)
-		errx(1, "missing accept or drop rule action");
+		irc_util_die("abort: missing accept or drop rule action\n");
 
 	fprintf(fp, "%s", argv[0]);
 
 	if (ferror(fp) || feof(fp))
-		err(1, "fprintf");
+		irc_util_die("abort: fprintf: %s\n", strerror(errno));
 
 	fclose(fp);
 	req("RULE-ADD %s %s", argv[0], out);
@@ -558,7 +557,7 @@ cmd_rule_edit(int argc, char **argv)
 	char out[IRC_BUF_LEN];
 
 	if (!(fp = fmemopen(out, sizeof (out) - 1, "w")))
-		err(1, "fmemopen");
+		irc_util_die("abort: fmemopen: %s\n", strerror(errno));
 
 	/* TODO: invalid option. */
 	for (int ch; (ch = ketopt(&ko, argc, argv, 0, "a:C:c:E:e:O:o:P:p:S:s:", NULL)) != -1; ) {
@@ -572,10 +571,9 @@ cmd_rule_edit(int argc, char **argv)
 	argv += ko.ind;
 
 	if (argc < 1)
-		errx(1, "missing rule index");
-
+		irc_util_die("abort: missing rule index\n");
 	if (ferror(fp) || feof(fp))
-		err(1, "fprintf");
+		irc_util_die("abort: fprintf: %s\n", strerror(errno));
 
 	fclose(fp);
 	req("RULE-EDIT %s %s", argv[0], out);
@@ -605,7 +603,7 @@ cmd_rule_list(int argc, char **argv)
 	req("RULE-LIST");
 
 	if (sscanf(ok(), "%zu", &num) != 1)
-		errx(1, "could not retrieve rule list");
+		irc_util_die("abort: could not retrieve rule list\n");
 
 	for (size_t i = 0; i < num; ++i) {
 		printf("%-16s%zu\n", "index:", i);
@@ -630,9 +628,9 @@ cmd_rule_move(int argc, char **argv)
 	const char *errstr;
 
 	if ((from = strtonum(argv[0], 0, LLONG_MAX, &errstr)) == 0 && errstr)
-		err(1, "%s", argv[0]);
+		irc_util_die("abort: %s: %s\n", argv[0], errstr);
 	if ((to = strtonum(argv[1], 0, LLONG_MAX, &errstr)) == 0 && errstr)
-		err(1, "%s", argv[1]);
+		irc_util_die("abort: %s: %s\n", argv[1], errstr);
 
 	req("RULE-MOVE %lld %lld", from, to);
 	ok();
@@ -683,7 +681,7 @@ cmd_server_connect(int argc, char **argv)
 	argv += ko.ind;
 
 	if (argc < 2)
-		errx(1, "missing id and/or host");
+		irc_util_die("abort: missing id and/or host\n");
 
 	req("SERVER-CONNECT %s %s %s%s %s %s %s", argv[0], argv[1], (ssl ? "+" : ""),
 	    port, nickname, username, realname);
@@ -720,12 +718,12 @@ cmd_server_info(int argc, char **argv)
 	req("SERVER-INFO %s", argv[0]);
 
 	if (strncmp(list = poll(), "OK ", 3) != 0)
-		errx(1, "failed to retrieve server information");
+		irc_util_die("abort: failed to retrieve server information\n");
 
 	printf("%-16s%s\n", "name:", list + 3);
 
 	if (irc_util_split((list = poll()), args, 3, ' ') < 2)
-		errx(1, "malformed server connection");
+		irc_util_die("abort: malformed server connection\n");
 
 	printf("%-16s%s\n", "hostname:", args[0]);
 	printf("%-16s%s\n", "port:", args[1]);
@@ -734,7 +732,7 @@ cmd_server_info(int argc, char **argv)
 		printf("%-16s%s\n", "ssl:", "true");
 
 	if (irc_util_split((list = poll()), args, 3, ' ') != 3)
-		errx(1, "malformed server ident");
+		irc_util_die("abort: malformed server ident\n");
 
 	printf("%-16s%s\n", "nickname:", args[0]);
 	printf("%-16s%s\n", "username:", args[0]);
@@ -853,7 +851,7 @@ cmd_watch(int argc, char **argv)
 
 	/* Turn off timeout to receive indefinitely. */
 	if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof (tv)) < 0)
-		err(1, "setsockopt");
+		irc_util_die("abort: setsockopt: %s\n", strerror(errno));
 
 	while ((ev = poll()))
 		show(ev);
@@ -916,13 +914,13 @@ run(int argc, char **argv)
 	const struct cmd *c;
 
 	if (!(c = find_cmd(argv[0])))
-		errx(1, "abort: command not found");
+		irc_util_die("abort: command not found\n");
 
 	--argc;
 	++argv;
 
 	if ((c->minargs != -1 && argc < c->minargs) || (c->minargs != -1 && argc > c->maxargs))
-		errx(1, "abort: invalid number of arguments");
+		irc_util_die("abort: invalid number of arguments\n");
 
 	c->exec(argc, argv);
 }

@@ -16,7 +16,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <err.h>
+#include <errno.h>
+#include <string.h>
 
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
@@ -26,6 +27,7 @@
 #include <irccd/event.h>
 #include <irccd/plugin.h>
 #include <irccd/server.h>
+#include <irccd/util.h>
 
 static struct irc_plugin *plugin;
 
@@ -36,7 +38,7 @@ setup(void *udata)
 
 	/* TODO: No idea how to stop greatest from here. */
 	if ((plugin = dl_plugin_open("example", TOP "/tests/data/example-dl-plugin.so")) == NULL)
-		err(1, "dlopen");
+		irc_util_die("dlopen: %s\n", strerror(errno));
 }
 
 static void

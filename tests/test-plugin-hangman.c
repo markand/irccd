@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <err.h>
-
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
@@ -26,6 +24,7 @@
 #include <irccd/log.h>
 #include <irccd/plugin.h>
 #include <irccd/server.h>
+#include <irccd/util.h>
 
 #define CALL(t, m) do {                                                 \
         memset(server->conn->out, 0, sizeof (server->conn->out));       \
@@ -65,7 +64,7 @@ setup(void *udata)
 	plugin = js_plugin_open("hangman", TOP "/plugins/hangman/hangman.js");
 
 	if (!plugin)
-		errx(1, "could not load plugin");
+		irc_util_die("could not load plugin\n");
 
 	irc_log_to_console();
 	irc_server_incref(server);

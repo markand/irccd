@@ -16,8 +16,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <err.h>
-
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
@@ -67,7 +65,7 @@ setup(void *udata)
 	plugin = js_plugin_open("tictactoe", TOP "/plugins/tictactoe/tictactoe.js");
 
 	if (!plugin)
-		errx(1, "could not load plugin");
+		irc_util_die("could not load plugin\n");
 
 	irc_bot_init();
 	irc_server_incref(server);
@@ -108,7 +106,7 @@ next(void)
 	irc_util_split(buf, lines, 5, '\n');
 
 	if (!lines[4] || sscanf(lines[4], "PRIVMSG #tictactoe :turn=#tictactoe:!tictactoe:%c:tictactoe:test\r\n", &player) != 1)
-		errx(1, "could not determine player");
+		irc_util_die("could not determine player\n");
 
 	free(buf);
 

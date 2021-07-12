@@ -17,7 +17,7 @@
  */
 
 #include <assert.h>
-#include <err.h>
+#include <errno.h>
 #include <libgen.h>
 #include <limits.h>
 #include <stdarg.h>
@@ -33,7 +33,7 @@ irc_util_malloc(size_t size)
 	void *ret;
 
 	if (!(ret = malloc(size)))
-		err(1, "malloc");
+		irc_util_die("malloc: %s\n", strerror(errno));
 
 	return ret;
 }
@@ -44,7 +44,7 @@ irc_util_calloc(size_t n, size_t size)
 	void *ret;
 
 	if (!(ret = calloc(n, size)))
-		err(1, "calloc");
+		irc_util_die("calloc: %s\n", strerror(errno));
 
 	return ret;
 }
@@ -55,7 +55,7 @@ irc_util_realloc(void *ptr, size_t size)
 	void *ret;
 
 	if (!(ret = realloc(ptr, size)) && size)
-		err(1, "realloc");
+		irc_util_die("realloc: %s\n", strerror(errno));
 
 	return ret;
 }
@@ -66,7 +66,7 @@ irc_util_reallocarray(void *ptr, size_t n, size_t size)
 	void *ret;
 
 	if (!(ret = reallocarray(ptr, n, size)))
-		err(1, "reallocarray");
+		irc_util_die("reallocarray: %s\n", strerror(errno));
 
 	return ret;
 }
@@ -74,12 +74,9 @@ irc_util_reallocarray(void *ptr, size_t n, size_t size)
 void *
 irc_util_memdup(const void *ptr, size_t size)
 {
-	void *ret;
+	assert(ptr);
 
-	if (!(ret = malloc(size)))
-		err(1, "malloc");
-
-	return memcpy(ret, ptr, size);
+	return memcpy(irc_util_malloc(size), ptr, size);
 }
 
 char *
@@ -88,7 +85,7 @@ irc_util_strdup(const char *src)
 	char *ret;
 
 	if (!(ret = strdup(src)))
-		err(1, "strdup");
+		irc_util_die("strdup: %s\n", strerror(errno));
 
 	return ret;
 }
@@ -101,7 +98,7 @@ irc_util_strndup(const char *src, size_t n)
 	char *ret;
 
 	if (!(ret = strndup(src, n)))
-		err(1, "strndup");
+		irc_util_die("strndup: %s\n", strerror(errno));
 
 	return ret;
 }
@@ -168,4 +165,17 @@ irc_util_printf(char *buf, size_t bufsz, const char *fmt, ...)
 	va_end(ap);
 
 	return buf;
+}
+
+noreturn void
+irc_util_die(const char *fmt, ...)
+{
+	assert(fmt);
+
+	va_list ap;
+
+	va_start(ap, fmt);
+	vfprintf(stderr, fmt, ap);
+	va_end(ap);
+	exit(1);
 }
