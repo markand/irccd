@@ -43,11 +43,7 @@ struct defer {
 	void *data;
 };
 
-struct irc irc = {
-	.servers = LIST_HEAD_INITIALIZER(),
-	.plugins = LIST_HEAD_INITIALIZER(),
-	.rules = TAILQ_HEAD_INITIALIZER(irc.rules)
-};
+struct irc irc = {0};
 
 static int pipes[2];
 static struct sigaction sa;
@@ -163,7 +159,7 @@ invoke(const struct irc_event *ev)
 	 * onMessage for hangman and logger but onCommand for ask. As such call
 	 * hangman and logger first and modify event before ask.
 	 */
-	LIST_FOREACH_SAFE(p, &irc.plugins, link, ptmp) {
+	LL_FOREACH_SAFE(irc.plugins, p, ptmp) {
 		if (is_command(p, ev))
 			plgcmd = p;
 		else if (invokable(p, ev))
@@ -336,7 +332,7 @@ irc_bot_plugin_add(struct irc_plugin *p)
 	assert(!irc_bot_plugin_get(p->name));
 
 	if (irc_plugin_load(p) == 0) {
-		LIST_INSERT_HEAD(&irc.plugins, p, link);
+		LL_PREPEND(irc.plugins, p);
 		irc_log_info("irccd: add new plugin: %s", p->name, p->description);
 		irc_log_info("irccd: %s: version %s, from %s (%s license)", p->name,
 		    p->version, p->author, p->license);
@@ -358,7 +354,7 @@ irc_bot_plugin_find(const char *name, const char *path)
 	else
 		irc_log_info("irccd: opening plugin %s", name);
 
-	SLIST_FOREACH(ldr, &irc.plugin_loaders, link) {
+	LL_FOREACH(irc.plugin_loaders, ldr) {
 		if (p)
 			break;
 
@@ -401,7 +397,7 @@ irc_bot_plugin_get(const char *name)
 {
 	struct irc_plugin *p;
 
-	LIST_FOREACH(p, &irc.plugins, link)
+	LL_FOREACH(irc.plugins, p)
 		if (strcmp(p->name, name) == 0)
 			return p;
 
@@ -416,7 +412,7 @@ irc_bot_plugin_remove(const char *name)
 	if (!(p = irc_bot_plugin_get(name)))
 		return;
 
-	LIST_REMOVE(p, link);
+	LL_DELETE(irc.plugins, p);
 	irc_plugin_unload(p);
 	irc_plugin_finish(p);
 }
@@ -426,7 +422,7 @@ irc_bot_plugin_loader_add(struct irc_plugin_loader *ldr)
 {
 	assert(ldr);
 
-	SLIST_INSERT_HEAD(&irc.plugin_loaders, ldr, link);
+	LL_PREPEND(irc.plugin_loaders, ldr);
 }
 
 void
@@ -434,9 +430,10 @@ irc_bot_plugin_clear(void)
 {
 	struct irc_plugin *p, *tmp;
 
-	LIST_FOREACH_SAFE(p, &irc.plugins, link, tmp)
+	LL_FOREACH_SAFE(irc.plugins, p, tmp)
 		irc_bot_plugin_remove(p->name);
-	LIST_INIT(&irc.plugins);
+
+	irc.plugins = NULL;
 }
 
 void
@@ -655,7 +652,7 @@ irc_bot_finish(void)
 	 * First remove all loaders to mkae sure plugins won't try to load
 	 * new plugins.
 	 */
-	SLIST_FOREACH_SAFE(ld, &irc.plugin_loaders, link, ldtmp)
+	LL_FOREACH_SAFE(irc.plugin_loaders, ld, ldtmp)
 		irc_plugin_loader_finish(ld);
 
 	irc_bot_server_clear();

@@ -18,6 +18,8 @@
 
 #include <assert.h>
 
+#include <utlist.h>
+
 #include <irccd/irccd.h>
 #include <irccd/plugin.h>
 
@@ -167,7 +169,7 @@ Plugin_list(duk_context *ctx)
 
 	duk_push_array(ctx);
 
-	LIST_FOREACH(p, &irc.plugins, link) {
+	LL_FOREACH(irc.plugins, p) {
 		duk_push_string(ctx, p->name);
 		duk_put_prop_index(ctx, -2, i++);
 	}

@@ -19,8 +19,6 @@
 #ifndef IRCCD_PLUGIN_H
 #define IRCCD_PLUGIN_H
 
-#include <sys/queue.h>
-
 #include "limits.h"
 
 #if defined(__cplusplus)
@@ -36,6 +34,7 @@ struct irc_plugin {
 	const char *author;
 	const char *description;
 	void *data;
+	struct irc_plugin *next;
 
 	void (*set_template)(struct irc_plugin *, const char *, const char *);
 	const char *(*get_template)(struct irc_plugin *, const char *);
@@ -55,11 +54,7 @@ struct irc_plugin {
 	void (*handle)(struct irc_plugin *, const struct irc_event *);
 
 	void (*finish)(struct irc_plugin *);
-
-	LIST_ENTRY(irc_plugin) link;
 };
-
-LIST_HEAD(irc_plugin_list, irc_plugin);
 
 struct irc_plugin_loader {
 	char paths[IRC_PATHS_LEN];
@@ -67,10 +62,8 @@ struct irc_plugin_loader {
 	struct irc_plugin *(*open)(struct irc_plugin_loader *, const char *, const char *);
 	void (*finish)(struct irc_plugin_loader *);
 	void *data;
-	SLIST_ENTRY(irc_plugin_loader) link;
+	struct irc_plugin_loader *next;
 };
-
-SLIST_HEAD(irc_plugin_loader_list, irc_plugin_loader);
 
 void
 irc_plugin_set_template(struct irc_plugin *, const char *, const char *);

@@ -320,10 +320,10 @@ cmd_plugin_list(struct peer *p, char *line)
 
 	fprintf(fp, "OK ");
 
-	LIST_FOREACH(plg, &irc.plugins, link) {
+	LL_FOREACH(irc.plugins, plg) {
 		fprintf(fp, "%s", plg->name);
 
-		if (LIST_NEXT(plg, link))
+		if (plg->next)
 			fputc(' ', fp);
 	}
 
