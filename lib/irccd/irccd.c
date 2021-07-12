@@ -27,6 +27,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <utlist.h>
+
 #include "config.h"
 #include "event.h"
 #include "irccd.h"
@@ -144,7 +146,7 @@ invoke(const struct irc_event *ev)
 	struct irc_plugin *p, *ptmp, *plgcmd = NULL;
 	struct irc_hook *h, *htmp;
 
-	LIST_FOREACH_SAFE(h, &irc.hooks, link, htmp)
+	LL_FOREACH_SAFE(irc.hooks, h, htmp)
 		irc_hook_invoke(h, ev);
 
 	/*
@@ -537,7 +539,7 @@ irc_bot_hook_add(struct irc_hook *h)
 	assert(h);
 	assert(!irc_bot_hook_get(h->name));
 
-	LIST_INSERT_HEAD(&irc.hooks, h, link);
+	LL_PREPEND(irc.hooks, h);
 }
 
 struct irc_hook *
@@ -545,7 +547,7 @@ irc_bot_hook_get(const char *name)
 {
 	struct irc_hook *h;
 
-	LIST_FOREACH(h, &irc.hooks, link)
+	LL_FOREACH(irc.hooks, h)
 		if (strcmp(h->name, name) == 0)
 			return h;
 
@@ -560,7 +562,7 @@ irc_bot_hook_remove(const char *name)
 	struct irc_hook *h;
 
 	if ((h = irc_bot_hook_get(name))) {
-		LIST_REMOVE(h, link);
+		LL_DELETE(irc.hooks, h);
 		irc_hook_finish(h);
 	}
 }
@@ -570,9 +572,10 @@ irc_bot_hook_clear(void)
 {
 	struct irc_hook *h, *tmp;
 
-	LIST_FOREACH_SAFE(h, &irc.hooks, link, tmp)
+	LL_FOREACH_SAFE(irc.hooks, h, tmp)
 		irc_hook_finish(h);
-	LIST_INIT(&irc.hooks);
+
+	irc.hooks = NULL;
 }
 
 size_t

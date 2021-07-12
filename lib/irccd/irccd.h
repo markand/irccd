@@ -35,7 +35,7 @@ extern struct irc {
 	struct irc_plugin_list plugins;
 	struct irc_plugin_loader_list plugin_loaders;
 	struct irc_rule_list rules;
-	struct irc_hook_list hooks;
+	struct irc_hook *hooks;
 } irc;
 
 void

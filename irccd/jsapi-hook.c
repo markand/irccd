@@ -18,6 +18,8 @@
 
 #include <assert.h>
 
+#include <utlist.h>
+
 #include <irccd/hook.h>
 #include <irccd/irccd.h>
 
@@ -45,7 +47,7 @@ Hook_list(duk_context *ctx)
 
 	duk_push_array(ctx);
 
-	LIST_FOREACH(h, &irc.hooks, link) {
+	LL_FOREACH(irc.hooks, h) {
 		duk_push_object(ctx);
 		duk_push_string(ctx, h->name);
 		duk_put_prop_string(ctx, -2, "name");

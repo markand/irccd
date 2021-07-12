@@ -19,7 +19,6 @@
 #ifndef IRCCD_HOOK_H
 #define IRCCD_HOOK_H
 
-#include <sys/queue.h>
 #include <limits.h>
 
 #include "limits.h"
@@ -33,10 +32,8 @@ struct irc_event;
 struct irc_hook {
 	char name[IRC_ID_LEN];
 	char path[PATH_MAX];
-	LIST_ENTRY(irc_hook) link;
+	struct irc_hook *next;
 };
-
-LIST_HEAD(irc_hook_list, irc_hook);
 
 struct irc_hook *
 irc_hook_new(const char *, const char *);

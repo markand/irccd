@@ -17,6 +17,7 @@
  */
 
 #include <sys/socket.h>
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <poll.h>
@@ -26,7 +27,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <assert.h>
+#include <utlist.h>
 
 #include <irccd/conn.h>
 #include <irccd/irccd.h>
@@ -216,10 +217,10 @@ cmd_hook_list(struct peer *p, char *line)
 
 	fprintf(fp, "OK ");
 
-	LIST_FOREACH(h, &irc.hooks, link) {
+	LL_FOREACH(irc.hooks, h) {
 		fprintf(fp, "%s", h->name);
 
-		if (LIST_NEXT(h, link))
+		if (h->next)
 			fputc(' ', fp);
 	}
 
