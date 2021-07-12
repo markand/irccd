@@ -30,10 +30,8 @@ struct peer {
 	int is_watching;
 	char in[IRC_BUF_LEN];
 	char out[IRC_BUF_LEN];
-	LIST_ENTRY(peer) link;
+	struct peer *next;
 };
-
-LIST_HEAD(peers, peer);
 
 struct peer *
 peer_new(int);

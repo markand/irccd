@@ -160,6 +160,7 @@ INCS=           -Ilib/
 INCS+=          -I./
 INCS+=          -Iextern/libgreatest/
 INCS+=          -Iextern/libketopt/
+INCS+=          -Iextern/libutlist/
 INCS+=          $(shell pkg-config --silence-errors --cflags libbsd-overlay)
 
 ifeq (${JS},1)

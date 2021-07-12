@@ -25,6 +25,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <utlist.h>
+
 #include <irccd/config.h>
 #include <irccd/irccd.h>
 #include <irccd/log.h>
@@ -50,7 +52,7 @@ struct pollables {
 };
 
 static const char *config = IRCCD_SYSCONFDIR "/irccd.conf";
-static struct peers peers = LIST_HEAD_INITIALIZER();
+static struct peer *peers;
 static int running = 1;
 
 /* conf.y */
@@ -66,7 +68,7 @@ broadcast(const struct irc_event *ev)
 	if (!irc_event_str(ev, buf, sizeof (buf)))
 		return;
 
-	LIST_FOREACH(p, &peers, link)
+	LL_FOREACH(peers, p)
 		if (p->is_watching)
 			peer_send(p, buf);
 }
@@ -77,7 +79,7 @@ poll_count(void)
 	struct peer *p;
 	size_t i = 1;
 
-	LIST_FOREACH(p, &peers, link)
+	LL_FOREACH(peers, p)
 		++i;
 
 	return i;
@@ -145,7 +147,7 @@ prepare(struct pollables *pb)
 	irc_bot_prepare(pb->fds);
 	transport_prepare(fd++);
 
-	LIST_FOREACH(p, &peers, link)
+	LL_FOREACH(peers, p)
 		peer_prepare(p, fd++);
 }
 
@@ -157,9 +159,9 @@ flush(const struct pollables *pb)
 
 	irc_bot_flush(pb->fds);
 
-	LIST_FOREACH_SAFE(peer, &peers, link, tmp) {
+	LL_FOREACH_SAFE(peers, peer, tmp) {
 		if (peer_flush(peer, fd++) < 0) {
-			LIST_REMOVE(peer, link);
+			LL_DELETE(peers, peer);
 			peer_finish(peer);
 		}
 	}
@@ -169,7 +171,7 @@ flush(const struct pollables *pb)
 	 * of pollfd that is smaller than the client list.
 	 */
 	if ((peer = transport_flush(pb->fds + pb->botsz)))
-		LIST_INSERT_HEAD(&peers, peer, link);
+		LL_PREPEND(peers, peer);
 }
 
 static inline void
@@ -221,7 +223,7 @@ finish(void)
 {
 	struct peer *peer, *tmp;
 
-	LIST_FOREACH_SAFE(peer, &peers, link, tmp)
+	LL_FOREACH_SAFE(peers, peer, tmp)
 		peer_finish(peer);
 
 	transport_finish();
