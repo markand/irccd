@@ -20,6 +20,8 @@
 
 #include <duktape.h>
 
+#include <utlist.h>
+
 #include <irccd/channel.h>
 #include <irccd/conn.h>
 #include <irccd/irccd.h>
@@ -188,7 +190,7 @@ Server_prototype_info(duk_context *ctx)
 	/* Channels. */
 	duk_push_array(ctx);
 
-	LIST_FOREACH(c, &s->channels, link) {
+	LL_FOREACH(s->channels, c) {
 		duk_push_object(ctx);
 		duk_push_string(ctx, c->name);
 		duk_put_prop_string(ctx, -2, "name");
@@ -196,7 +198,7 @@ Server_prototype_info(duk_context *ctx)
 		duk_put_prop_string(ctx, -2, "joined");
 		duk_push_array(ctx);
 
-		LIST_FOREACH(u, &c->users, link) {
+		LL_FOREACH(c->users, u) {
 			duk_push_object(ctx);
 			duk_push_string(ctx, u->nickname);
 			duk_put_prop_string(ctx, -2, "nickname");

@@ -774,7 +774,7 @@ cmd_server_info(struct peer *p, char *line)
 	    s->flags & IRC_SERVER_FLAGS_SSL ? " ssl" : "");
 	fprintf(fp, "%s %s %s\n", s->ident.nickname, s->ident.username, s->ident.realname);
 
-	LIST_FOREACH(c, &s->channels, link) {
+	LL_FOREACH(s->channels, c) {
 		const struct irc_channel_user *user = irc_channel_get(c, s->ident.nickname);
 
 		/* Prefix all our own modes on this channel. */
@@ -784,7 +784,7 @@ cmd_server_info(struct peer *p, char *line)
 
 		fprintf(fp, "%s", c->name);
 
-		if (LIST_NEXT(c, link))
+		if (c->next)
 			fputc(' ', fp);
 	}
 

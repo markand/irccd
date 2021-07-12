@@ -33,31 +33,31 @@ basics_add(void)
 	GREATEST_ASSERT(ch->joined);
 
 	irc_channel_add(ch, "markand", 1);
-	user = LIST_FIRST(&ch->users);
+	user = ch->users;
 	GREATEST_ASSERT_EQ(1, user->modes);
 	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
 
 	irc_channel_add(ch, "markand", 2);
-	user = LIST_FIRST(&ch->users);
+	user = ch->users;
 	GREATEST_ASSERT_EQ(1, user->modes);
 	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
 
 	irc_channel_add(ch, "jean", 4);
-	user = LIST_FIRST(&ch->users);
+	user = ch->users;
 	GREATEST_ASSERT_EQ(4, user->modes);
 	GREATEST_ASSERT_STR_EQ("jean", user->nickname);
-	user = LIST_NEXT(user, link);
+	user = user->next;
 	GREATEST_ASSERT_EQ(1, user->modes);
 	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
 
 	irc_channel_add(ch, "zoe", 0);
-	user = LIST_FIRST(&ch->users);
+	user = ch->users;
 	GREATEST_ASSERT_EQ(0, user->modes);
 	GREATEST_ASSERT_STR_EQ("zoe", user->nickname);
-	user = LIST_NEXT(user, link);
+	user = user->next;
 	GREATEST_ASSERT_EQ(4, user->modes);
 	GREATEST_ASSERT_STR_EQ("jean", user->nickname);
-	user = LIST_NEXT(user, link);
+	user = user->next;
 	GREATEST_ASSERT_EQ(1, user->modes);
 	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
 
@@ -79,20 +79,20 @@ basics_remove(void)
 	irc_channel_add(ch, "zoe", 0);
 
 	irc_channel_remove(ch, "jean");
-	user = LIST_FIRST(&ch->users);
+	user = ch->users;
 	GREATEST_ASSERT_EQ(0, user->modes);
 	GREATEST_ASSERT_STR_EQ("zoe", user->nickname);
-	user = LIST_NEXT(user, link);
+	user = user->next;
 	GREATEST_ASSERT_EQ(1, user->modes);
 	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
 
 	irc_channel_remove(ch, "zoe");
-	user = LIST_FIRST(&ch->users);
+	user = ch->users;
 	GREATEST_ASSERT_EQ(1, user->modes);
 	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
 
 	irc_channel_remove(ch, "markand");
-	GREATEST_ASSERT(!LIST_FIRST(&ch->users));
+	GREATEST_ASSERT(!ch->users);
 
 	irc_channel_finish(ch);
 

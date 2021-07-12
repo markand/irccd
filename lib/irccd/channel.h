@@ -19,7 +19,6 @@
 #ifndef IRCCD_CHANNEL_H
 #define IRCCD_CHANNEL_H
 
-#include <sys/queue.h>
 #include <stddef.h>
 
 #include "limits.h"
@@ -31,18 +30,16 @@ extern "C" {
 struct irc_channel_user {
 	char nickname[IRC_NICKNAME_LEN];
 	int modes;
-	LIST_ENTRY(irc_channel_user) link;
+	struct irc_channel_user *next;
 };
 
 struct irc_channel {
 	char name[IRC_CHANNEL_LEN];
 	char password[IRC_PASSWORD_LEN];
 	int joined;
-	LIST_HEAD(, irc_channel_user) users;
-	LIST_ENTRY(irc_channel) link;
+	struct irc_channel_user *users;
+	struct irc_channel *next;
 };
-
-LIST_HEAD(irc_channel_list, irc_channel);
 
 struct irc_channel *
 irc_channel_new(const char *, const char *, int);

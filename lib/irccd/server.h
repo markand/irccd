@@ -90,7 +90,7 @@ struct irc_server {
 	struct irc_server_params params;
 	enum irc_server_state state;
 	enum irc_server_flags flags;
-	struct irc_channel_list channels;
+	struct irc_channel *channels;
 	struct irc_event_whois bufwhois;
 	struct irc_conn *conn;
 	size_t refc;

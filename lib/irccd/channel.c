@@ -20,6 +20,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <utlist.h>
+
 #include "channel.h"
 #include "util.h"
 
@@ -35,8 +37,6 @@ irc_channel_new(const char *name, const char *password, int joined)
 
 	strlcpy(ch->name, name, sizeof (ch->name));
 	strlcpy(ch->password, password ? password : "", sizeof (ch->password));
-
-	LIST_INIT(&ch->users);
 
 	return ch;
 }
@@ -56,7 +56,7 @@ irc_channel_add(struct irc_channel *ch, const char *nickname, int modes)
 	user->modes = modes;
 	strlcpy(user->nickname, nickname, sizeof (user->nickname));
 
-	LIST_INSERT_HEAD(&ch->users, user, link);
+	LL_PREPEND(ch->users, user);
 }
 
 struct irc_channel_user *
@@ -64,7 +64,7 @@ irc_channel_get(const struct irc_channel *ch, const char *nickname)
 {
 	struct irc_channel_user *u;
 
-	LIST_FOREACH(u, &ch->users, link)
+	LL_FOREACH(ch->users, u)
 		if (strcmp(u->nickname, nickname) == 0)
 			return u;
 
@@ -78,9 +78,10 @@ irc_channel_clear(struct irc_channel *ch)
 
 	struct irc_channel_user *user, *tmp;
 
-	LIST_FOREACH_SAFE(user, &ch->users, link, tmp)
+	LL_FOREACH_SAFE(ch->users, user, tmp)
 		free(user);
-	LIST_INIT(&ch->users);
+
+	ch->users = NULL;
 }
 
 void
@@ -92,7 +93,7 @@ irc_channel_remove(struct irc_channel *ch, const char *nick)
 	struct irc_channel_user *user;
 
 	if ((user = irc_channel_get(ch, nick))) {
-		LIST_REMOVE(user, link);
+		LL_DELETE(ch->users, user);
 		free(user);
 	}
 }

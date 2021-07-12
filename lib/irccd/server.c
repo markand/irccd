@@ -24,6 +24,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <utlist.h>
+
 #include "config.h"
 
 #if defined(IRCCD_WITH_SSL)
@@ -45,7 +47,7 @@ clear_channels(struct irc_server *s, int free)
 {
 	struct irc_channel *c, *tmp;
 
-	LIST_FOREACH_SAFE(c, &s->channels, link, tmp) {
+	LL_FOREACH_SAFE(s->channels, c, tmp) {
 		if (free)
 			irc_channel_finish(c);
 		else
@@ -53,7 +55,7 @@ clear_channels(struct irc_server *s, int free)
 	}
 
 	if (free)
-		LIST_INIT(&s->channels);
+		s->channels = NULL;
 }
 
 static inline void
@@ -94,16 +96,15 @@ add_channel(struct irc_server *s, const char *name, const char *password, int jo
 	if (password)
 		strlcpy(ch->password, password, sizeof (ch->password));
 
-	LIST_INIT(&ch->users);
-	LIST_INSERT_HEAD(&s->channels, ch, link);
+	LL_PREPEND(s->channels, ch);
 
 	return ch;
 }
 
 static void
-remove_channel(struct irc_channel *ch)
+remove_channel(struct irc_server *s, struct irc_channel *ch)
 {
-	LIST_REMOVE(ch, link);
+	LL_DELETE(s->channels, ch);
 	irc_channel_finish(ch);
 }
 
@@ -198,7 +199,7 @@ handle_connect(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *
 	struct irc_channel *ch;
 
 	/* Now join all channels that were requested. */
-	LIST_FOREACH(ch, &s->channels, link)
+	LL_FOREACH(s->channels, ch)
 		irc_server_join(s, ch->name, ch->password);
 
 	s->state = IRC_SERVER_STATE_CONNECTED;
@@ -403,7 +404,7 @@ handle_part(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 	ch = add_channel(s, ev->part.channel, NULL, 1);
 
 	if (is_self(s, ev->part.origin)) {
-		remove_channel(ch);
+		remove_channel(s, ch);
 		irc_log_info("server %s: leaving channel %s", s->name, ev->part.channel);
 	} else
 		irc_channel_remove(ch, ev->part.origin);
@@ -534,14 +535,14 @@ handle_endofnames(struct irc_server *s, struct irc_event *ev, struct irc_conn_ms
 	if (!(fp = open_memstream(&ev->names.names, &length)))
 		return;
 
-	LIST_FOREACH(u, &ch->users, link) {
+	LL_FOREACH(ch->users, u) {
 		for (size_t i = 0; i < IRC_UTIL_SIZE(s->params.prefixes); ++i)
 			if (u->modes & (1 << i))
 				fprintf(fp, "%c", s->params.prefixes[i].symbol);
 
 		fprintf(fp, "%s", u->nickname);
 
-		if (LIST_NEXT(u, link))
+		if (u->next)
 			fputc(' ', fp);
 	}
 
@@ -727,7 +728,6 @@ irc_server_new(const char *name,
 
 	/* Server itself. */
 	strlcpy(s->name, name, sizeof (s->name));
-	LIST_INIT(&s->channels);
 
 	/* Default options. */
 	strlcpy(s->prefix, "!", sizeof (s->prefix));
@@ -854,7 +854,7 @@ irc_server_find(struct irc_server *s, const char *name)
 
 	struct irc_channel *ch;
 
-	LIST_FOREACH(ch, &s->channels, link)
+	LL_FOREACH(s->channels, ch)
 		if (strcmp(ch->name, name) == 0)
 			return ch;
 
