@@ -928,45 +928,45 @@ run(int argc, char **argv)
 noreturn static void
 usage(void)
 {
-	fprintf(stderr, "usage: %s [-v] [-s sock] command [options...] [arguments...]\n", getprogname());
+	fprintf(stderr, "usage: irccdctl [-v] [-s sock] command [options...] [arguments...]\n");
 	exit(1);
 }
 
 noreturn static void
 help(void)
 {
-	fprintf(stderr, "usage: %s hook-add name path\n", getprogname());
-	fprintf(stderr, "       %s hook-list\n", getprogname());
-	fprintf(stderr, "       %s hook-remove id\n", getprogname());
-	fprintf(stderr, "       %s plugin-config id [variable [value]]\n", getprogname());
-	fprintf(stderr, "       %s plugin-info id\n", getprogname());
-	fprintf(stderr, "       %s plugin-list\n", getprogname());
-	fprintf(stderr, "       %s plugin-load name\n", getprogname());
-	fprintf(stderr, "       %s plugin-path [variable [value]]\n", getprogname());
-	fprintf(stderr, "       %s plugin-template [variable [value]]\n", getprogname());
-	fprintf(stderr, "       %s plugin-reload [plugin]\n", getprogname());
-	fprintf(stderr, "       %s plugin-unload [plugin]\n", getprogname());
-	fprintf(stderr, "       %s rule-add [-c channel] [-e event] [-i index] [-o origin] [-p plugin] [-s server] accept|drop\n", getprogname());
-	fprintf(stderr, "       %s rule-edit [-a accept|drop] [-c|C channel] [-e|E event] [-o|O origin] [-s|S server] index\n", getprogname());
-	fprintf(stderr, "       %s rule-list\n", getprogname());
-	fprintf(stderr, "       %s rule-move from to\n", getprogname());
-	fprintf(stderr, "       %s rule-remove index\n", getprogname());
-	fprintf(stderr, "       %s server-connect [-n nickname] [-r realname] [-u username] [-p port] id hostname\n", getprogname());
-	fprintf(stderr, "       %s server-disconnect [server]\n", getprogname());
-	fprintf(stderr, "       %s server-info server\n", getprogname());
-	fprintf(stderr, "       %s server-invite server target channel\n", getprogname());
-	fprintf(stderr, "       %s server-join server channel [password]\n", getprogname());
-	fprintf(stderr, "       %s server-kick server target channel [reason]\n", getprogname());
-	fprintf(stderr, "       %s server-list\n", getprogname());
-	fprintf(stderr, "       %s server-me server target message\n", getprogname());
-	fprintf(stderr, "       %s server-message server target message\n", getprogname());
-	fprintf(stderr, "       %s server-mode server target mode [args]\n", getprogname());
-	fprintf(stderr, "       %s server-nick server nickname\n", getprogname());
-	fprintf(stderr, "       %s server-notice server target message\n", getprogname());
-	fprintf(stderr, "       %s server-part server channel [reason]\n", getprogname());
-	fprintf(stderr, "       %s server-reconnect [server]\n", getprogname());
-	fprintf(stderr, "       %s server-topic server channel topic\n", getprogname());
-	fprintf(stderr, "       %s watch\n", getprogname());
+	fprintf(stderr, "usage: irccdctl hook-add name path\n");
+	fprintf(stderr, "       irccdctl hook-list\n");
+	fprintf(stderr, "       irccdctl hook-remove id\n");
+	fprintf(stderr, "       irccdctl plugin-config id [variable [value]]\n");
+	fprintf(stderr, "       irccdctl plugin-info id\n");
+	fprintf(stderr, "       irccdctl plugin-list\n");
+	fprintf(stderr, "       irccdctl plugin-load name\n");
+	fprintf(stderr, "       irccdctl plugin-path [variable [value]]\n");
+	fprintf(stderr, "       irccdctl plugin-template [variable [value]]\n");
+	fprintf(stderr, "       irccdctl plugin-reload [plugin]\n");
+	fprintf(stderr, "       irccdctl plugin-unload [plugin]\n");
+	fprintf(stderr, "       irccdctl rule-add [-c channel] [-e event] [-i index] [-o origin] [-p plugin] [-s server] accept|drop\n");
+	fprintf(stderr, "       irccdctl rule-edit [-a accept|drop] [-c|C channel] [-e|E event] [-o|O origin] [-s|S server] index\n");
+	fprintf(stderr, "       irccdctl rule-list\n");
+	fprintf(stderr, "       irccdctl rule-move from to\n");
+	fprintf(stderr, "       irccdctl rule-remove index\n");
+	fprintf(stderr, "       irccdctl server-connect [-n nickname] [-r realname] [-u username] [-p port] id hostname\n");
+	fprintf(stderr, "       irccdctl server-disconnect [server]\n");
+	fprintf(stderr, "       irccdctl server-info server\n");
+	fprintf(stderr, "       irccdctl server-invite server target channel\n");
+	fprintf(stderr, "       irccdctl server-join server channel [password]\n");
+	fprintf(stderr, "       irccdctl server-kick server target channel [reason]\n");
+	fprintf(stderr, "       irccdctl server-list\n");
+	fprintf(stderr, "       irccdctl server-me server target message\n");
+	fprintf(stderr, "       irccdctl server-message server target message\n");
+	fprintf(stderr, "       irccdctl server-mode server target mode [args]\n");
+	fprintf(stderr, "       irccdctl server-nick server nickname\n");
+	fprintf(stderr, "       irccdctl server-notice server target message\n");
+	fprintf(stderr, "       irccdctl server-part server channel [reason]\n");
+	fprintf(stderr, "       irccdctl server-reconnect [server]\n");
+	fprintf(stderr, "       irccdctl server-topic server channel topic\n");
+	fprintf(stderr, "       irccdctl watch\n");
 	exit(1);
 }
 

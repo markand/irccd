@@ -21,6 +21,7 @@
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdnoreturn.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -227,10 +228,10 @@ finish(void)
 	irc_bot_finish();
 }
 
-static void
+noreturn static void
 usage(void)
 {
-	fprintf(stderr, "usage: %s [-c config]\n", getprogname());
+	fprintf(stderr, "usage: irccd [-c config]\n");
 	exit(1);
 }
 
@@ -238,8 +239,6 @@ int
 main(int argc, char **argv)
 {
 	int ch;
-
-	setprogname("irccd");
 
 	while ((ch = getopt(argc, argv, "c:")) != -1) {
 		switch (ch) {
