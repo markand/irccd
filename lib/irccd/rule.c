@@ -24,6 +24,8 @@
 #include <string.h>
 #include <strings.h>
 
+#include <utlist.h>
+
 #include "rule.h"
 #include "util.h"
 
@@ -139,7 +141,7 @@ irc_rule_match(const struct irc_rule *rule,
 }
 
 int
-irc_rule_matchlist(const struct irc_rule_list *rules,
+irc_rule_matchlist(const struct irc_rule *rules,
                    const char *server,
                    const char *channel,
                    const char *origin,
@@ -147,9 +149,9 @@ irc_rule_matchlist(const struct irc_rule_list *rules,
                    const char *event)
 {
 	int result = 1;
-	struct irc_rule *r;
+	const struct irc_rule *r;
 
-	TAILQ_FOREACH(r, rules, link)
+	DL_FOREACH(rules, r)
 		if (irc_rule_match(r, server, channel, origin, plugin, event))
 			result = r->action == IRC_RULE_ACCEPT;
 

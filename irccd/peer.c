@@ -553,12 +553,12 @@ cmd_rule_list(struct peer *p, char *line)
 	if (!(fp = fmemopen(out, sizeof (out), "w")))
 		return error(p, "%s", strerror(errno));
 
-	TAILQ_FOREACH(rule, &irc.rules, link)
+	DL_FOREACH(irc.rules, rule)
 		rulesz++;
 
 	fprintf(fp, "OK %zu\n", rulesz);
 
-	TAILQ_FOREACH(rule, &irc.rules, link) {
+	DL_FOREACH(irc.rules, rule) {
 		/* Convert : to spaces. */
 		fprintf(fp, "%s\n", rule->action == IRC_RULE_ACCEPT ? "accept" : "drop");
 		fprintf(fp, "%s\n", rule_list_to_spaces(rule->servers));

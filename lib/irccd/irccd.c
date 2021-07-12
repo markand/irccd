@@ -86,50 +86,50 @@ invokable(const struct irc_plugin *p, const struct irc_event *ev)
 {
 	switch (ev->type) {
 	case IRC_EVENT_COMMAND:
-		return irc_rule_matchlist(&irc.rules, ev->server->name,
+		return irc_rule_matchlist(irc.rules, ev->server->name,
 		    ev->message.channel, ev->message.origin, p->name, "onCommand");
 	case IRC_EVENT_CONNECT:
-		return irc_rule_matchlist(&irc.rules, ev->server->name,
+		return irc_rule_matchlist(irc.rules, ev->server->name,
 		    NULL, NULL, p->name, "onConnect");
 	case IRC_EVENT_DISCONNECT:
-		return irc_rule_matchlist(&irc.rules, ev->server->name,
+		return irc_rule_matchlist(irc.rules, ev->server->name,
 		    NULL, NULL, p->name, "onDisconnect");
 	case IRC_EVENT_INVITE:
-		return irc_rule_matchlist(&irc.rules, ev->server->name,
+		return irc_rule_matchlist(irc.rules, ev->server->name,
 		    ev->invite.channel, ev->invite.origin, p->name, "onInvite");
 	case IRC_EVENT_JOIN:
-		return irc_rule_matchlist(&irc.rules, ev->server->name,
+		return irc_rule_matchlist(irc.rules, ev->server->name,
 		    ev->join.channel, ev->join.origin, p->name, "onJoin");
 	case IRC_EVENT_KICK:
-		return irc_rule_matchlist(&irc.rules, ev->server->name,
+		return irc_rule_matchlist(irc.rules, ev->server->name,
 		    ev->kick.channel, ev->kick.origin, p->name, "onKick");
 		break;
 	case IRC_EVENT_ME:
-		return irc_rule_matchlist(&irc.rules, ev->server->name,
+		return irc_rule_matchlist(irc.rules, ev->server->name,
 		    ev->message.channel, ev->message.origin, p->name, "onMe");
 	case IRC_EVENT_MESSAGE:
-		return irc_rule_matchlist(&irc.rules, ev->server->name,
+		return irc_rule_matchlist(irc.rules, ev->server->name,
 		    ev->message.channel, ev->message.origin, p->name, "onMessage");
 	case IRC_EVENT_MODE:
-		return irc_rule_matchlist(&irc.rules, ev->server->name,
+		return irc_rule_matchlist(irc.rules, ev->server->name,
 		    ev->mode.channel, ev->mode.origin, p->name, "onMode");
 	case IRC_EVENT_NAMES:
-		return irc_rule_matchlist(&irc.rules, ev->server->name,
+		return irc_rule_matchlist(irc.rules, ev->server->name,
 		    ev->names.channel, NULL, p->name, "onNames");
 	case IRC_EVENT_NICK:
-		return irc_rule_matchlist(&irc.rules, ev->server->name,
+		return irc_rule_matchlist(irc.rules, ev->server->name,
 		    NULL, ev->nick.origin, p->name, "onNick");
 	case IRC_EVENT_NOTICE:
-		return irc_rule_matchlist(&irc.rules, ev->server->name,
+		return irc_rule_matchlist(irc.rules, ev->server->name,
 		    ev->notice.channel, ev->notice.origin, p->name, "onNotice");
 	case IRC_EVENT_PART:
-		return irc_rule_matchlist(&irc.rules, ev->server->name,
+		return irc_rule_matchlist(irc.rules, ev->server->name,
 		    ev->part.channel, ev->part.origin, p->name, "onPart");
 	case IRC_EVENT_TOPIC:
-		return irc_rule_matchlist(&irc.rules, ev->server->name,
+		return irc_rule_matchlist(irc.rules, ev->server->name,
 		    ev->topic.channel, ev->topic.origin, p->name, "onTopic");
 	case IRC_EVENT_WHOIS:
-		return irc_rule_matchlist(&irc.rules, ev->server->name,
+		return irc_rule_matchlist(irc.rules, ev->server->name,
 		    NULL, NULL, p->name, "onWhois");
 	default:
 		return 1;
@@ -442,16 +442,16 @@ irc_bot_rule_insert(struct irc_rule *rule, size_t index)
 	assert(rule);
 
 	if (index == 0)
-		TAILQ_INSERT_HEAD(&irc.rules, rule, link);
+		DL_PREPEND(irc.rules, rule);
 	else if (index >= irc_bot_rule_size())
-		TAILQ_INSERT_TAIL(&irc.rules, rule, link);
+		DL_APPEND(irc.rules, rule);
 	else {
 		struct irc_rule *pos;
 
-		for (pos = TAILQ_FIRST(&irc.rules); --index; )
-			pos = TAILQ_NEXT(pos, link);
+		for (pos = irc.rules; --index; )
+			pos = pos->next;
 
-		TAILQ_INSERT_AFTER(&irc.rules, pos, rule, link);
+		DL_APPEND_ELEM(irc.rules, pos, rule);
 	}
 }
 
@@ -462,8 +462,8 @@ irc_bot_rule_get(size_t index)
 
 	struct irc_rule *rule;
 
-	for (rule = TAILQ_FIRST(&irc.rules); index-- != 0; )
-		rule = TAILQ_NEXT(rule, link);
+	for (rule = irc.rules; index-- != 0; )
+		rule = rule->next;
 
 	return rule;
 }
@@ -478,20 +478,20 @@ irc_bot_rule_move(size_t from, size_t to)
 	if (from == to)
 		return;
 
-	f = t = TAILQ_FIRST(&irc.rules);
+	f = t = irc.rules;
 
 	while (from--)
-		f = TAILQ_NEXT(f, link);
+		f = f->next;
 
-	TAILQ_REMOVE(&irc.rules, f, link);
+	DL_DELETE(irc.rules, f);
 
 	if (to == 0)
-		TAILQ_INSERT_HEAD(&irc.rules, f, link);
+		DL_PREPEND(irc.rules, f);
 	else {
-		while (TAILQ_NEXT(t, link) && to--)
-			t = TAILQ_NEXT(t, link);
+		while (t && to--)
+			t = t->next;
 
-		TAILQ_INSERT_AFTER(&irc.rules, t, f, link);
+		DL_APPEND_ELEM(irc.rules, t, f);
 	}
 }
 
@@ -500,12 +500,12 @@ irc_bot_rule_remove(size_t index)
 {
 	assert(index < irc_bot_rule_size());
 
-	struct irc_rule *pos = TAILQ_FIRST(&irc.rules);
+	struct irc_rule *pos = irc.rules;
 
 	for (size_t i = 0; i < index; ++i)
-		pos = TAILQ_NEXT(pos, link);
+		pos = pos->next;
 
-	TAILQ_REMOVE(&irc.rules, pos, link);
+	DL_DELETE(irc.rules, pos);
 }
 
 size_t
@@ -514,7 +514,7 @@ irc_bot_rule_size(void)
 	const struct irc_rule *r;
 	size_t total = 0;
 
-	TAILQ_FOREACH(r, &irc.rules, link)
+	DL_FOREACH(irc.rules, r)
 		total++;
 
 	return total;
@@ -525,9 +525,10 @@ irc_bot_rule_clear(void)
 {
 	struct irc_rule *r, *tmp;
 
-	TAILQ_FOREACH_SAFE(r, &irc.rules, link, tmp)
+	DL_FOREACH_SAFE(irc.rules, r, tmp)
 		irc_rule_finish(r);
-	TAILQ_INIT(&irc.rules);
+
+	irc.rules = NULL;
 }
 
 void

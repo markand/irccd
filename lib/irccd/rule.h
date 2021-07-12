@@ -19,8 +19,6 @@
 #ifndef IRCCD_RULE_H
 #define IRCCD_RULE_H
 
-#include <sys/queue.h>
-
 #include "limits.h"
 
 #if defined(__cplusplus)
@@ -39,10 +37,9 @@ struct irc_rule {
 	char origins[IRC_RULE_LEN];
 	char plugins[IRC_RULE_LEN];
 	char events[IRC_RULE_LEN];
-	TAILQ_ENTRY(irc_rule) link;
+	struct irc_rule *next;
+	struct irc_rule *prev;
 };
-
-TAILQ_HEAD(irc_rule_list, irc_rule);
 
 struct irc_rule *
 irc_rule_new(enum irc_rule_action);
@@ -62,7 +59,7 @@ irc_rule_match(const struct irc_rule *,
                const char *);
 
 int
-irc_rule_matchlist(const struct irc_rule_list *,
+irc_rule_matchlist(const struct irc_rule *,
                    const char *,
                    const char *,
                    const char *,

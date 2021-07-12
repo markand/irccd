@@ -19,6 +19,8 @@
 #include <assert.h>
 #include <string.h>
 
+#include <utlist.h>
+
 #include <irccd/irccd.h>
 #include <irccd/rule.h>
 
@@ -107,7 +109,7 @@ Rule_list(duk_context *ctx)
 
 	duk_push_array(ctx);
 
-	TAILQ_FOREACH(rule, &irc.rules, link) {
+	DL_FOREACH(irc.rules, rule) {
 		duk_push_object(ctx);
 		duk_push_int(ctx, rule->action);
 		duk_put_prop_string(ctx, -2, "action");
