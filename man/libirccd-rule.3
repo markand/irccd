@@ -65,7 +65,8 @@ struct irc_rule {
 	char origins[IRC_RULE_LEN];
 	char plugins[IRC_RULE_LEN];
 	char events[IRC_RULE_LEN];
-	TAILQ_ENTRY(irc_rule) link;
+	struct irc_rule *next;
+	struct irc_rule *prev;
 };
 .Ed
 .Pp
@@ -87,19 +88,11 @@ A colon separated list of origins to match.
 A colon separated list of plugins to match.
 .It Va events
 A colon separated list of events to match.
-.It Va link
-Abstract entry to be used with the
-.Xr sys/queue 3
-macros.
+.It Va next
+Pointer to the next rule.
+.It Va perv
+Pointer to the previous rule.
 .El
-.Pp
-The
-.Vt "struct irc_rule_list"
-is an abstract type declared with
-.Fn TAILQ_HEAD
-from
-.Xr queue 3
-macros.
 .Pp
 The
 .Vt "enum irc_rule_action"

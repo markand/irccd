@@ -146,7 +146,7 @@ struct irc_server {
 	struct irc_server_params params;        /* server parameters */
 	enum irc_server_flags flags;            /* optional user flags */
 	struct irc_channel_list channels;       /* list of channels */
-	LIST_ENTRY(irc_server) link;
+	struct irc_server *next;                /* next server */
 };
 .Ed
 .Pp
@@ -158,10 +158,8 @@ daemon and should not require user actions.
 The
 .Vt struct irc_server
 is implemented as linked list through the
-.Va link
-field usable through
-.Xr queue 3
-macros.
+.Va next
+field.
 .Pp
 Note: few other private fields are not listed as they must not be used by the
 user.

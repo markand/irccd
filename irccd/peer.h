@@ -19,8 +19,6 @@
 #ifndef IRCCD_PEER_H
 #define IRCCD_PEER_H
 
-#include <sys/queue.h>
-
 #include <irccd/limits.h>
 
 struct pollfd;

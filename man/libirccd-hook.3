@@ -40,7 +40,7 @@ is declared as:
 struct irc_hook {
 	char name[IRC_ID_LEN];
 	char path[PATH_MAX];
-	LIST_ENTRY(irc_hook) link;
+	struct irc_hook *next;
 };
 .Ed
 .Pp
@@ -52,10 +52,8 @@ are:
 Name to identify this hook.
 .It Va path
 Absolute path to the hook.
-.It Va link
-Abstract entry to be used with the
-.Xr queue 3
-macros.
+.It Va next
+Pointer to the next hook.
 .El
 .Pp
 The
