@@ -382,11 +382,10 @@ cmd_plugin_unload(struct peer *p, char *line)
 static int
 cmd_rule_add(struct peer *p, char *line)
 {
-	const char *errstr;
 	char *token, *ptr, *dst, key;
 	enum irc_rule_action act;
 	struct irc_rule *rule;
-	size_t index = -1;
+	unsigned long long index = -1;
 
 	if (sscanf(line, "RULE-ADD %*s") == EOF)
 		return EINVAL;
@@ -424,7 +423,7 @@ cmd_rule_add(struct peer *p, char *line)
 			dst = rule->events;
 			break;
 		case 'i':
-			if ((index = strtonum(token + 2, 0, LLONG_MAX, &errstr)) == 0 && errstr)
+			if (irc_util_stou(token + 2, &index) < 0)
 				goto fail;
 			break;
 		case 'o':
@@ -585,14 +584,14 @@ cmd_rule_list(struct peer *p, char *line)
 static int
 cmd_rule_move(struct peer *p, char *line)
 {
-	const char *args[2], *errstr;
+	const char *args[2];
 	unsigned long long from, to;
 
 	if (parse(line, args, 2) != 2)
 		return EINVAL;
-	if ((from = strtonum(args[0], 0, LLONG_MAX, &errstr)) == 0 && errstr)
+	if (irc_util_stou(args[0], &from) < 0)
 		return ERANGE;
-	if ((to = strtonum(args[1], 0, LLONG_MAX, &errstr)) == 0 && errstr)
+	if (irc_util_stou(args[1], &to) < 0)
 		return ERANGE;
 	if (from >= irc_bot_rule_size())
 		return ERANGE;
@@ -609,14 +608,11 @@ static int
 cmd_rule_remove(struct peer *p, char *line)
 {
 	const char *args[1] = {0};
-	size_t index;
+	unsigned long long index;
 
 	if (parse(line, args, 1) != 1)
 		return EINVAL;
-
-	index = strtoull(args[0], NULL, 10);
-
-	if (index >= irc_bot_rule_size())
+	if (irc_util_stou(args[0], &index) < 0 || index >= irc_bot_rule_size())
 		return ERANGE;
 
 	irc_bot_rule_remove(index);

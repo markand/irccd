@@ -67,6 +67,12 @@ irc_util_printf(char *, size_t, const char *, ...);
 noreturn void
 irc_util_die(const char *, ...);
 
+int
+irc_util_stoi(const char *, long long *);
+
+int
+irc_util_stou(const char *, unsigned long long *);
+
 #if defined(__cplusplus)
 }
 #endif

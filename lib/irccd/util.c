@@ -179,3 +179,27 @@ irc_util_die(const char *fmt, ...)
 	va_end(ap);
 	exit(1);
 }
+
+int
+irc_util_stoi(const char *s, long long *i)
+{
+	assert(s);
+	assert(i);
+
+	errno = 0;
+	*i = strtoll(s, NULL, 10);
+
+	return errno == 0 ? 0 : -1;
+}
+
+int
+irc_util_stou(const char *s, unsigned long long *u)
+{
+	assert(s);
+	assert(u);
+
+	errno = 0;
+	*u = strtoull(s, NULL, 10);
+
+	return errno == 0 ? 0 : -1;
+}

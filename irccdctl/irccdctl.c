@@ -625,12 +625,11 @@ cmd_rule_move(int argc, char **argv)
 	(void)argc;
 
 	long long from, to;
-	const char *errstr;
 
-	if ((from = strtonum(argv[0], 0, LLONG_MAX, &errstr)) == 0 && errstr)
-		irc_util_die("abort: %s: %s\n", argv[0], errstr);
-	if ((to = strtonum(argv[1], 0, LLONG_MAX, &errstr)) == 0 && errstr)
-		irc_util_die("abort: %s: %s\n", argv[1], errstr);
+	if (irc_util_stoi(argv[0], &from) < 0)
+		irc_util_die("abort: %s: %s\n", argv[0], errno);
+	if (irc_util_stoi(argv[1], &to) < 0)
+		irc_util_die("abort: %s: %s\n", argv[1], errno);
 
 	req("RULE-MOVE %lld %lld", from, to);
 	ok();
@@ -974,8 +973,6 @@ int
 main(int argc, char **argv)
 {
 	ketopt_t ko = KETOPT_INIT;
-
-	setprogname("irccdctl");
 
 	--argc;
 	++argv;

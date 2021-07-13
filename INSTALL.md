@@ -6,10 +6,6 @@ This guide will help you to install irccd.
 Requirements
 ------------
 
-Runtime dependencies:
-
-- [libbsd][]: some BSD extensions.
-
 Build dependencies:
 
 - C99 and few features from C11 (stdatomics.h, stdnoreturn.h).

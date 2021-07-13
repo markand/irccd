@@ -161,7 +161,6 @@ INCS+=          -I./
 INCS+=          -Iextern/libgreatest/
 INCS+=          -Iextern/libketopt/
 INCS+=          -Iextern/libutlist/
-INCS+=          $(shell pkg-config --silence-errors --cflags libbsd-overlay)
 
 ifeq (${JS},1)
 INCS+=          -Iextern/libduktape
@@ -175,8 +174,6 @@ ifeq (${OS},Linux)
 LIBS+=          -ldl
 CFLAGS+=        -fPIC
 endif
-
-LIBS+=          $(shell pkg-config --silence-errors --libs libbsd-overlay)
 
 ifeq (${SSL},1)
 LIBS+=          -lssl -lcrypto
