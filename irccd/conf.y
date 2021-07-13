@@ -26,6 +26,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <utlist.h>
+
 #include <irccd/irccd.h>
 #include <irccd/log.h>
 #include <irccd/rule.h>
@@ -38,26 +40,22 @@ extern FILE *yyin;
 extern int yylineno;
 
 struct pair {
+	struct pair *next;
 	char *key;
 	char *value;
-	SLIST_ENTRY(pair) link;
 };
-
-SLIST_HEAD(pair_list, pair);
 
 struct string {
+	struct string *next;
 	char *value;
-	SLIST_ENTRY(string) link;
 };
 
-SLIST_HEAD(string_list, string);
-
 struct rule_params {
-	struct string_list *servers;
-	struct string_list *channels;
-	struct string_list *origins;
-	struct string_list *plugins;
-	struct string_list *events;
+	struct string *servers;
+	struct string *channels;
+	struct string *origins;
+	struct string *plugins;
+	struct string *events;
 };
 
 struct transport_params {
@@ -74,47 +72,43 @@ struct server_params {
 	char *username;
 	char *realname;
 	char *prefix;
-	struct string_list *channels;
+	struct string *channels;
 };
 
 struct plugin_params {
 	char *location;
-	struct pair_list *config;
-	struct pair_list *paths;
-	struct pair_list *templates;
+	struct pair *config;
+	struct pair *paths;
+	struct pair *templates;
 };
 
 static void
-pair_list_finish(struct pair_list *list)
+pair_list_finish(struct pair *list)
 {
 	struct pair *pair, *tmp;
 
 	if (!list)
 		return;
 
-	SLIST_FOREACH_SAFE(pair, list, link, tmp) {
+	LL_FOREACH_SAFE(list, pair, tmp) {
 		free(pair->key);
 		free(pair->value);
 		free(pair);
 	}
-
-	free(list);
 }
 
 static void
-string_list_finish(struct string_list *list)
+string_list_finish(struct string *list)
 {
 	struct string *string, *tmp;
 
 	if (!list)
 		return;
 
-	SLIST_FOREACH_SAFE(string, list, link, tmp) {
+	LL_FOREACH_SAFE(list, string, tmp) {
 		free(string->value);
 		free(string);
 	}
-
-	free(list);
 }
 
 static char confpath[PATH_MAX];
@@ -134,10 +128,10 @@ yyerror(const char *);
 	gid_t gid;
 
 	struct pair *pair;
-	struct pair_list *pair_list;
+	struct pair *pair_list;
 
 	struct string *string;
-	struct string_list *string_list;
+	struct string *string_list;
 
 	struct server_params *server;
 	struct plugin_params *plugin;
@@ -221,14 +215,12 @@ string
 string_list
 	: string
 	{
-		$$ = irc_util_calloc(1, sizeof (*$$));
-		SLIST_INIT($$);
-		SLIST_INSERT_HEAD($$, $1, link);
+		$$ = $1;
 	}
 	| string T_COMMA string_list
 	{
+		LL_PREPEND($3, $1);
 		$$ = $3;
-		SLIST_INSERT_HEAD($$, $1, link);
 	}
 	;
 
@@ -244,14 +236,12 @@ pair
 pair_list
 	: pair T_SEMICOLON
 	{
-		$$ = irc_util_calloc(1, sizeof (*$$));
-		SLIST_INIT($$);
-		SLIST_INSERT_HEAD($$, $1, link);
+		$$ = $1;
 	}
 	| pair T_SEMICOLON pair_list
 	{
+		LL_PREPEND($3, $1);
 		$$ = $3;
-		SLIST_INSERT_HEAD($$, $1, link);
 	}
 	;
 
@@ -420,21 +410,16 @@ rule
 		rule = irc_rule_new($2);
 
 		if ($3) {
-			if ($3->servers)
-				SLIST_FOREACH(string, $3->servers, link)
-					irc_rule_add(rule->servers, string->value);
-			if ($3->channels)
-				SLIST_FOREACH(string, $3->channels, link)
-					irc_rule_add(rule->channels, string->value);
-			if ($3->origins)
-				SLIST_FOREACH(string, $3->origins, link)
-					irc_rule_add(rule->origins, string->value);
-			if ($3->plugins)
-				SLIST_FOREACH(string, $3->plugins, link)
-					irc_rule_add(rule->plugins, string->value);
-			if ($3->events)
-				SLIST_FOREACH(string, $3->events, link)
-					irc_rule_add(rule->events, string->value);
+			LL_FOREACH($3->servers, string)
+				irc_rule_add(rule->servers, string->value);
+			LL_FOREACH($3->channels, string)
+				irc_rule_add(rule->channels, string->value);
+			LL_FOREACH($3->origins, string)
+				irc_rule_add(rule->origins, string->value);
+			LL_FOREACH($3->plugins, string)
+				irc_rule_add(rule->plugins, string->value);
+			LL_FOREACH($3->events, string)
+				irc_rule_add(rule->events, string->value);
 
 			string_list_finish($3->servers);
 			string_list_finish($3->channels);
@@ -493,7 +478,7 @@ server_params
 
 		$$ = $4;
 
-		SLIST_FOREACH(s, $2, link) {
+		LL_FOREACH($2, s) {
 			if (strcmp(s->value, "AUTO-REJOIN") == 0)
 				$$->flags |= IRC_SERVER_FLAGS_AUTO_REJOIN;
 			else if (strcmp(s->value, "JOIN-INVITE") == 0)
@@ -534,7 +519,7 @@ server
 			$4->hostname, $4->port);
 
 		if ($4->channels) {
-			SLIST_FOREACH(str, $4->channels, link) {
+			LL_FOREACH($4->channels, str) {
 				if ((at = strchr(str->value, '@'))) {
 					*at = 0;
 					irc_server_join(s, at + 1, str->value);
@@ -643,13 +628,13 @@ plugin
 			goto cleanup;
 
 		if ($3 && $3->templates)
-			SLIST_FOREACH(kv, $3->templates, link)
+			LL_FOREACH($3->templates, kv)
 				irc_plugin_set_template(p, kv->key, kv->value);
 		if ($3 && $3->config)
-			SLIST_FOREACH(kv, $3->config, link)
+			LL_FOREACH($3->config, kv)
 				irc_plugin_set_option(p, kv->key, kv->value);
 		if ($3 && $3->paths)
-			SLIST_FOREACH(kv, $3->paths, link)
+			LL_FOREACH($3->paths, kv)
 				irc_plugin_set_path(p, kv->key, kv->value);
 
 		irc_bot_plugin_add(p);

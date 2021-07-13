@@ -334,7 +334,7 @@ tests/%: tests/%.c
 	${CMD.cchost}
 
 tests: ${TESTS_OBJS}
-	for t in ${TESTS_OBJS}; do ./$$t -v; done
+	for t in ${TESTS_OBJS}; do echo "==> $$t <=="; ./$$t -v || exit 1; done
 
 clean:
 	rm -f lib/irccd/config.h ${LIB_OBJS} ${LIB_DEPS}

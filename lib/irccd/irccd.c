@@ -280,7 +280,7 @@ irc_bot_server_add(struct irc_server *s)
 	irc_server_incref(s);
 	irc_server_connect(s);
 
-	LIST_INSERT_HEAD(&irc.servers, s, link);
+	LL_PREPEND(irc.servers, s);
 }
 
 struct irc_server *
@@ -288,7 +288,7 @@ irc_bot_server_get(const char *name)
 {
 	struct irc_server *s;
 
-	LIST_FOREACH(s, &irc.servers, link)
+	DL_FOREACH(irc.servers, s)
 		if (strcmp(s->name, name) == 0)
 			return s;
 
@@ -311,7 +311,7 @@ irc_bot_server_remove(const char *name)
 		.server = s
 	});
 
-	LIST_REMOVE(s, link);
+	LL_DELETE(irc.servers, s);
 	irc_server_decref(s);
 }
 
@@ -320,9 +320,10 @@ irc_bot_server_clear(void)
 {
 	struct irc_server *s, *tmp;
 
-	LIST_FOREACH_SAFE(s, &irc.servers, link, tmp)
+	LL_FOREACH_SAFE(irc.servers, s, tmp)
 		irc_bot_server_remove(s->name);
-	LIST_INIT(&irc.servers);
+
+	irc.servers = NULL;
 }
 
 void
@@ -582,7 +583,7 @@ irc_bot_poll_count(void)
 	size_t i = 1;
 	struct irc_server *s;
 
-	LIST_FOREACH(s, &irc.servers, link)
+	LL_FOREACH(irc.servers, s)
 		++i;
 
 	return i;
@@ -599,7 +600,7 @@ irc_bot_prepare(struct pollfd *fds)
 	fds[0].fd = pipes[0];
 	fds[0].events = POLLIN;
 
-	LIST_FOREACH(s, &irc.servers, link)
+	LL_FOREACH(irc.servers, s)
 		irc_server_prepare(s, &fds[i++]);
 }
 
@@ -613,7 +614,7 @@ irc_bot_flush(const struct pollfd *fds)
 
 	pipe_flush(&fds[0]);
 
-	LIST_FOREACH(s, &irc.servers, link)
+	LL_FOREACH(irc.servers, s)
 		irc_server_flush(s, &fds[i++]);
 }
 
@@ -622,7 +623,7 @@ irc_bot_dequeue(struct irc_event *ev)
 {
 	struct irc_server *s;
 
-	LIST_FOREACH(s, &irc.servers, link) {
+	LL_FOREACH(irc.servers, s) {
 		if (irc_server_poll(s, ev)) {
 			invoke(ev);
 			return 1;

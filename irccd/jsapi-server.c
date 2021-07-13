@@ -464,7 +464,7 @@ Server_list(duk_context *ctx)
 
 	duk_push_object(ctx);
 
-	LIST_FOREACH(s, &irc.servers, link) {
+	DL_FOREACH(irc.servers, s) {
 		jsapi_server_push(ctx, s);
 		duk_put_prop_string(ctx, -2, s->name);
 	}

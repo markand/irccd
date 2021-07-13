@@ -31,7 +31,7 @@ extern "C" {
 #endif
 
 extern struct irc {
-	struct irc_server_list servers;
+	struct irc_server *servers;
 	struct irc_plugin *plugins;
 	struct irc_plugin_loader *plugin_loaders;
 	struct irc_rule *rules;

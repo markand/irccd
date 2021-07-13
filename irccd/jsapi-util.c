@@ -18,6 +18,8 @@
 
 #include <string.h>
 
+#include <utlist.h>
+
 #include <irccd/server.h>
 #include <irccd/subst.h>
 #include <irccd/util.h>
@@ -30,11 +32,10 @@ struct subspack {
 };
 
 struct string {
-	TAILQ_ENTRY(string) link;
+	struct string *next;
+	struct string *prev;
 	char value[];
 };
-
-TAILQ_HEAD(stringlist, string);
 
 static inline void
 subspack_finish(struct subspack *subst)
@@ -112,37 +113,36 @@ string_new(const char *v)
 }
 
 static void
-stringlist_finish(struct stringlist *list)
+stringlist_finish(struct string *list)
 {
 	struct string *s, *tmp;
 
-	TAILQ_FOREACH_SAFE(s, list, link, tmp)
+	DL_FOREACH_SAFE(list, s, tmp)
 		free(s);
 }
 
 static void
-stringlist_concat(struct stringlist *list, const char *value)
+stringlist_concat(struct string **list, const char *value)
 {
 	struct string *s;
 	char *str = irc_util_strdup(value), *token, *p = str;
 
 	while ((token = strtok_r(p, " \t\n", &p))) {
-		/* TODO: trim and check if empty. */
 		s = string_new(token);
-		TAILQ_INSERT_TAIL(list, s, link);
+		DL_APPEND(*list, s);
 	}
 
 	free(str);
 }
 
 static void
-split_from_string(duk_context *ctx, struct stringlist *list)
+split_from_string(duk_context *ctx, struct string **list)
 {
 	stringlist_concat(list, duk_require_string(ctx, 0));
 }
 
 static void
-split_from_array(duk_context *ctx, struct stringlist *list)
+split_from_array(duk_context *ctx, struct string **list)
 {
 	duk_enum(ctx, 0, DUK_ENUM_ARRAY_INDICES_ONLY);
 
@@ -153,10 +153,9 @@ split_from_array(duk_context *ctx, struct stringlist *list)
 }
 
 static void
-split(duk_context *ctx, duk_idx_t index, struct stringlist *list)
+split(duk_context *ctx, duk_idx_t index, struct string **list)
 {
 	duk_require_type_mask(ctx, index, DUK_TYPE_MASK_OBJECT | DUK_TYPE_MASK_STRING);
-	TAILQ_INIT(list);
 
 	if (duk_is_string(ctx, index))
 		split_from_string(ctx, list);
@@ -182,17 +181,17 @@ limit(duk_context *ctx, duk_idx_t index, const char *name, size_t value)
 }
 
 static char *
-join(duk_context *ctx, size_t maxc, size_t maxl, const struct stringlist *tokens)
+join(duk_context *ctx, size_t maxc, size_t maxl, const struct string *tokens)
 {
 	FILE *fp;
 	char *out = NULL;
 	size_t outsz = 0, linesz = 0, tokensz, lineavail = maxl;
-	struct string *token;
+	const struct string *token;
 
 	if (!(fp = open_memstream(&out, &outsz)))
 		return NULL;
 
-	TAILQ_FOREACH(token, tokens, link) {
+	DL_FOREACH(tokens, token) {
 		tokensz = strlen(token->value);
 
 		if (tokensz > maxc) {
@@ -237,7 +236,7 @@ join(duk_context *ctx, size_t maxc, size_t maxl, const struct stringlist *tokens
 static int
 Util_cut(duk_context *ctx)
 {
-	struct stringlist tokens;
+	struct string *tokens = NULL;
 	size_t maxc, maxl, i = 0;
 	char *lines, *line, *p;
 
@@ -248,8 +247,8 @@ Util_cut(duk_context *ctx)
 	split(ctx, 0, &tokens);
 
 	/* Join as new lines with a limit of maximum columns and lines. */
-	if (!(lines = join(ctx, maxc, maxl, &tokens))) {
-		stringlist_finish(&tokens);
+	if (!(lines = join(ctx, maxc, maxl, tokens))) {
+		stringlist_finish(tokens);
 		return duk_throw(ctx);
 	}
 
@@ -260,7 +259,7 @@ Util_cut(duk_context *ctx)
 		duk_put_prop_index(ctx, -2, i++);
 	}
 
-	stringlist_finish(&tokens);
+	stringlist_finish(tokens);
 	free(lines);
 
 	return 1;

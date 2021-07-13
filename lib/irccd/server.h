@@ -19,7 +19,6 @@
 #ifndef IRCCD_SERVER_H
 #define IRCCD_SERVER_H
 
-#include <sys/queue.h>
 #include <stddef.h>
 #include <time.h>
 
@@ -95,10 +94,8 @@ struct irc_server {
 	struct irc_conn *conn;
 	size_t refc;
 	time_t lost_tp, last_tp;
-	LIST_ENTRY(irc_server) link;
+	struct irc_server *next;
 };
-
-LIST_HEAD(irc_server_list, irc_server);
 
 struct irc_server *
 irc_server_new(const char *,

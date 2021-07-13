@@ -44,32 +44,32 @@ servers_add(void)
 
 	/* irc.servers -> s1 */
 	irc_bot_server_add(s1);
-	s = LIST_FIRST(&irc.servers);
+	s = irc.servers;
 	GREATEST_ASSERT_EQ(1, s->refc);
 	GREATEST_ASSERT_EQ(s, s1);
-	s = LIST_NEXT(s, link);
+	s = s->next;
 	GREATEST_ASSERT(!s);
 
 	/* irc.servers -> s2 -> s1 */
 	irc_bot_server_add(s2);
-	s = LIST_FIRST(&irc.servers);
+	s = irc.servers;
 	GREATEST_ASSERT_EQ(1, s->refc);
 	GREATEST_ASSERT_EQ(s, s2);
-	s = LIST_NEXT(s, link);
+	s = s->next;
 	GREATEST_ASSERT_EQ(s, s1);
-	s = LIST_NEXT(s, link);
+	s = s->next;
 	GREATEST_ASSERT(!s);
 
 	/* irc.servers -> s3 -> s2 -> s1 */
 	irc_bot_server_add(s3);
-	s = LIST_FIRST(&irc.servers);
+	s = irc.servers;
 	GREATEST_ASSERT_EQ(1, s->refc);
 	GREATEST_ASSERT_EQ(s, s3);
-	s = LIST_NEXT(s, link);
+	s = s->next;
 	GREATEST_ASSERT_EQ(s, s2);
-	s = LIST_NEXT(s, link);
+	s = s->next;
 	GREATEST_ASSERT_EQ(s, s1);
-	s = LIST_NEXT(s, link);
+	s = s->next;
 	GREATEST_ASSERT(!s);
 
 	GREATEST_PASS();
@@ -100,11 +100,11 @@ servers_remove(void)
 	GREATEST_ASSERT_EQ(2, s1->refc);
 	GREATEST_ASSERT_EQ(1, s2->refc);
 	GREATEST_ASSERT_EQ(2, s3->refc);
-	s = LIST_FIRST(&irc.servers);
+	s = irc.servers;
 	GREATEST_ASSERT_EQ(s, s3);
-	s = LIST_NEXT(s, link);
+	s = s->next;
 	GREATEST_ASSERT_EQ(s, s1);
-	s = LIST_NEXT(s, link);
+	s = s->next;
 	GREATEST_ASSERT(!s);
 
 	/* irc.servers -> s3 -> [s1] */
@@ -113,9 +113,9 @@ servers_remove(void)
 	GREATEST_ASSERT_EQ(1, s1->refc);
 	GREATEST_ASSERT_EQ(1, s2->refc);
 	GREATEST_ASSERT_EQ(2, s3->refc);
-	s = LIST_FIRST(&irc.servers);
+	s = irc.servers;
 	GREATEST_ASSERT_EQ(s, s3);
-	s = LIST_NEXT(s, link);
+	s = s->next;
 	GREATEST_ASSERT(!s);
 
 	/* irc.servers -> [s3] */
@@ -124,7 +124,7 @@ servers_remove(void)
 	GREATEST_ASSERT_EQ(1, s1->refc);
 	GREATEST_ASSERT_EQ(1, s2->refc);
 	GREATEST_ASSERT_EQ(1, s3->refc);
-	s = LIST_FIRST(&irc.servers);
+	s = irc.servers;
 	GREATEST_ASSERT(!s);
 
 	irc_server_decref(s1);
@@ -156,7 +156,7 @@ servers_clear(void)
 	GREATEST_ASSERT_EQ(1, s1->refc);
 	GREATEST_ASSERT_EQ(1, s2->refc);
 	GREATEST_ASSERT_EQ(1, s3->refc);
-	GREATEST_ASSERT(!LIST_FIRST(&irc.servers));
+	GREATEST_ASSERT(!irc.servers);
 	GREATEST_PASS();
 }
 

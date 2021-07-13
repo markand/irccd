@@ -868,10 +868,10 @@ cmd_server_list(struct peer *p, char *line)
 
 	fprintf(fp, "OK ");
 
-	LIST_FOREACH(s, &irc.servers, link) {
+	DL_FOREACH(irc.servers, s) {
 		fprintf(fp, "%s", s->name);
 
-		if (LIST_NEXT(s, link))
+		if (s->next)
 			fputc(' ', fp);
 	}
 
@@ -915,7 +915,7 @@ cmd_server_reconnect(struct peer *p, char *line)
 
 		irc_server_reconnect(s);
 	} else
-		LIST_FOREACH(s, &irc.servers, link)
+		DL_FOREACH(irc.servers, s)
 			irc_server_reconnect(s);
 
 	return ok(p);
