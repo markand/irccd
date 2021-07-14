@@ -146,6 +146,10 @@ TESTS_OBJS=     ${TESTS:.c=}
 # Per system commands.
 OS:=            $(shell uname -s)
 
+ifeq (${OS},Darwin)
+LIB_SRCS+=      extern/libbsd/reallocarray.c
+endif
+
 # Compile flags.
 DEFS=           -D_BSD_SOURCE -DTOP=\"$(shell pwd)\" -fPIC
 
@@ -176,7 +180,8 @@ CFLAGS+=        -fPIC
 endif
 
 ifeq (${SSL},1)
-LIBS+=          -lssl -lcrypto
+INCS+=          $(shell pkg-config --cflags libssl libcrypto)
+LIBS+=          $(shell pkg-config --libs libssl libcrypto)
 endif
 
 # For config.h file.
@@ -194,15 +199,18 @@ endif
 
 ifeq (${OS},Darwin)
 SHFLAGS=        -undefined dynamic_lookup
+ALLFLAGS=       -Wl,-all_load
 else
 SHFLAGS=        -shared
+ALLFLAGS=       -Wl,--whole-archive
+NOALLFLAGS=     -Wl,--no-whole-archive
+EXFLAGS=        -Wl,-E
 endif
 
 CMD.cc=         ${CC} ${DEFS} ${INCS} ${CFLAGS} -MMD -c $< -o $@
 CMD.ccld=       ${CC} ${DEFS} ${INCS} ${CFLAGS} -o $@ $^ ${LIBS} ${LDFLAGS}
-CMD.cchost=     ${CC} -Wl,-E -o $@ ${DEFS} ${INCS} ${CFLAGS} \
-	-Wl,--whole-archive $^ -Wl,--no-whole-archive ${LIBS} ${LDFLAGS}
-CMD.ccplg=      ${CC} ${DEFS} ${INCS} ${CFLAGS} ${SHFLAGS} -o $@ $^ ${LIBS} ${LDFLAGS}
+CMD.cchost=     ${CC} -o $@ ${DEFS} ${INCS} ${CFLAGS} ${EXFLAGS} ${ALLFLAGS} $^ ${NOALLFLAGS} ${LIBS} ${LDFLAGS}
+CMD.ccplg=      ${CC} ${DEFS} ${INCS} ${CFLAGS} ${SHFLAGS} -o $@ $< ${LIBS} ${LDFLAGS}
 
 .SUFFIXES:
 .SUFFIXES: .c .o .js
@@ -318,7 +326,7 @@ tests/data/example-dl-plugin.so: tests/data/example-dl-plugin.c
 ${TESTS_OBJS}: ${IRCCD_OBJS} ${LIB_OBJS} | irccd/irccd tests/data/example-dl-plugin.so
 
 # Generic plugin build command.
-plugins/%.so: plugins/%.c | ${IRCCD_OBJS}
+plugins/%.so: plugins/%.c ${IRCCD_OBJS}
 	${CMD.ccplg}
 
 # Plugin `links` require libcurl.

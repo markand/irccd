@@ -32,4 +32,12 @@
 @define WITH_JS@
 @define WITH_SSL@
 
+#if defined(__APPLE__)
+#       include <stddef.h>
+
+void *
+reallocarray(void *, size_t, size_t);
+
+#endif
+
 #endif /* !IRCCD_CONFIG_H */
