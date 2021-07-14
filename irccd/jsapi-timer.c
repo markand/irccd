@@ -89,14 +89,10 @@ timer_call(struct timer *tm)
 static void
 timer_destroy(struct timer *tm)
 {
-	if (tm->status == TIMER_MUST_STOP) {
-		puts("timer stopped");
+	if (tm->status == TIMER_MUST_STOP)
 		timer_clear(tm);
-	}
-	if (tm->status == TIMER_MUST_KILL) {
-		puts("timer fully freed");
+	if (tm->status == TIMER_MUST_KILL)
 		free(tm);
-	}
 }
 
 static void
