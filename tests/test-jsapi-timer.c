@@ -16,29 +16,25 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-/* TODO: We need proper bot function to dispatch */
-
-#if 0
+#include <poll.h>
 
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
 
-// TODO: irccd/
-#include <config.h>
-
+#include <irccd/irccd.h>
 #include <irccd/js-plugin.h>
 #include <irccd/plugin.h>
 
 static struct irc_plugin *plugin;
-static struct irc_js_plugin_data *data;
+static duk_context *ctx;
 
 static void
 setup(void *udata)
 {
 	(void)udata;
 
-	plugin = irc_js_plugin_open(SOURCE "/data/timer.js");
-	data = plugin->data;
+	plugin = js_plugin_open("timer", TOP "/tests/data/timer.js");
+	ctx = js_plugin_get_context(plugin);
 }
 
 static void
@@ -49,56 +45,77 @@ teardown(void *udata)
 	irc_plugin_finish(plugin);
 
 	plugin = NULL;
-	data = NULL;
+	ctx = NULL;
 }
 
 static void
 set_type(const char *name)
 {
-	duk_get_global_string(data->ctx, "Irccd");
-	duk_get_prop_string(data->ctx, -1, "Timer");
-	duk_get_prop_string(data->ctx, -1, name.c_str());
-	duk_put_global_string(data->ctx, "type");
-	duk_pop_n(data->ctx, 2);
+	duk_get_global_string(ctx, "Irccd");
+	duk_get_prop_string(ctx, -1, "Timer");
+	duk_get_prop_string(ctx, -1, name);
+	duk_put_global_string(ctx, "type");
+	duk_pop_n(ctx, 2);
 
-	plugin_->open();
-	plugin_->handle_load(bot_);
+	irc_plugin_load(plugin);
 }
 
-BOOST_AUTO_TEST_CASE(single)
+GREATEST_TEST
+basics_single(void)
 {
-	boost::timer::cpu_timer timer;
+	time_t start = time(NULL);
+	struct pollfd fd;
 
 	set_type("Single");
 
-	while (timer.elapsed().wall / 1000000LL < 3000) {
-		ctx_.reset();
-		ctx_.poll();
+	while (difftime(time(NULL), start) < 3) {
+		irc_bot_prepare(&fd);
+		poll(&fd, 1, 1);
+		irc_bot_flush(&fd);
 	}
 
-	BOOST_TEST(duk_get_global_string(data->ctx, "count"));
-	BOOST_TEST(duk_get_int(data->ctx, -1) == 1);
+	GREATEST_ASSERT(duk_get_global_string(ctx, "count"));
+	GREATEST_ASSERT_EQ(duk_get_int(ctx, -1), 1);
+	GREATEST_PASS();
 }
 
-BOOST_AUTO_TEST_CASE(repeat)
+GREATEST_TEST
+basics_repeat(void)
 {
-	boost::timer::cpu_timer timer;
+	time_t start = time(NULL);
+	struct pollfd fd;
 
 	set_type("Repeat");
 
-	while (timer.elapsed().wall / 1000000LL < 3000) {
-		ctx_.reset();
-		ctx_.poll();
+	while (difftime(time(NULL), start) < 3) {
+		irc_bot_prepare(&fd);
+		poll(&fd, 1, 1);
+		irc_bot_flush(&fd);
 	}
 
-	BOOST_TEST(duk_get_global_string(data->ctx, "count"));
-	BOOST_TEST(duk_get_int(data->ctx, -1) >= 5);
+	GREATEST_ASSERT(duk_get_global_string(ctx, "count"));
+	GREATEST_ASSERT(duk_get_int(ctx, -1) >= 5);
+	GREATEST_PASS();
 }
 
-#endif
+GREATEST_SUITE(suite_basics)
+{
+	GREATEST_SET_SETUP_CB(setup, NULL);
+	GREATEST_SET_TEARDOWN_CB(teardown, NULL);
+	GREATEST_RUN_TEST(basics_single);
+	GREATEST_RUN_TEST(basics_repeat);
+}
+
+GREATEST_MAIN_DEFS();
 
 int
-main(void)
+main(int argc, char **argv)
 {
-	
+	irc_bot_init();
+
+	GREATEST_MAIN_BEGIN();
+	GREATEST_RUN_SUITE(suite_basics);
+	GREATEST_MAIN_END();
+
+	return 0;
 }

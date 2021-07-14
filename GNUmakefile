@@ -17,7 +17,7 @@
 #
 
 CC=             cc
-CFLAGS=         -Wall -Wextra -Wno-cpp
+CFLAGS=         -Wall -Wextra -std=c11
 
 PREFIX=         /usr/local
 BINDIR=         ${PREFIX}/bin
