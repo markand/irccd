@@ -283,12 +283,16 @@ static int
 cmd_plugin_load(struct peer *p, char *line)
 {
 	struct irc_plugin *plg;
+	const char *args[1];
 
-	if (!(plg = irc_bot_plugin_find(line, NULL)))
+	if (parse(line, args, 1) != 1)
+		return EINVAL;
+	if (!(plg = irc_bot_plugin_find(args[0], NULL)))
 		peer_send(p, "could not load plugin: %s", strerror(errno));
-
-	/* TODO: report error if fails to open. */
-	irc_bot_plugin_add(plg);
+	else {
+		/* TODO: report error if fails to open. */
+		irc_bot_plugin_add(plg);
+	}
 
 	return ok(p);
 }
