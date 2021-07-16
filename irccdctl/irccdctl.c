@@ -56,12 +56,12 @@ poll(void)
 
 		if ((nr = recv(sock, buf, sizeof (buf) - 1, 0)) <= 0)
 			irc_util_die("abort: %s\n", strerror(nr == 0 ? ECONNRESET : errno));
-		if (strlcat(in, buf, sizeof (in)) >= sizeof (in))
+		if (irc_util_strlcat(in, buf, sizeof (in)) >= sizeof (in))
 			irc_util_die("abort: %s\n", strerror(EMSGSIZE));
 	}
 
 	*nl = '\0';
-	strlcpy(ret, in, sizeof (ret));
+	irc_util_strlcpy(ret, in, sizeof (ret));
 	memmove(in, nl + 1, sizeof (in) - (nl - in) - 1);
 
 	return ret;
@@ -105,8 +105,8 @@ req(const char *fmt, ...)
 	vsnprintf(buf, sizeof (buf), fmt, ap);
 	va_end(ap);
 
-	if (strlcat(out, buf, sizeof (out)) >= sizeof (out) ||
-	    strlcat(out, "\n", sizeof (out)) >= sizeof (out))
+	if (irc_util_strlcat(out, buf, sizeof (out)) >= sizeof (out) ||
+	    irc_util_strlcat(out, "\n", sizeof (out)) >= sizeof (out))
 		irc_util_die("abort: %s\n", strerror(EMSGSIZE));
 
 	while (out[0]) {
@@ -980,7 +980,7 @@ main(int argc, char **argv)
 	for (int ch; (ch = ketopt(&ko, argc, argv, 0, "s:v", NULL)) != -1; ) {
 		switch (ch) {
 		case 's':
-			strlcpy(sockaddr.sun_path, ko.arg, sizeof (sockaddr.sun_path));
+			irc_util_strlcpy(sockaddr.sun_path, ko.arg, sizeof (sockaddr.sun_path));
 			break;
 		case 'v':
 			verbose = 1;

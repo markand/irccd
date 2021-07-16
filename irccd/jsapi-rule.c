@@ -23,6 +23,7 @@
 
 #include <irccd/irccd.h>
 #include <irccd/rule.h>
+#include <irccd/util.h>
 
 #include "jsapi-rule.h"
 
@@ -32,7 +33,7 @@ push_list(duk_context *ctx, const char *value, const char *prop)
 	char tmp[IRC_RULE_LEN], *token, *p;
 	size_t i = 0;
 
-	strlcpy(tmp, value, sizeof (tmp));
+	irc_util_strlcpy(tmp, value, sizeof (tmp));
 	duk_push_array(ctx);
 
 	for (p = tmp; (token = strtok_r(p, ":", &p)); ) {

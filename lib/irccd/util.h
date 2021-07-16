@@ -73,6 +73,15 @@ irc_util_stoi(const char *, long long *);
 int
 irc_util_stou(const char *, unsigned long long *);
 
+void *
+irc_util_reallocarray(void *, size_t, size_t);
+
+size_t
+irc_util_strlcpy(char *, const char *, size_t);
+
+size_t
+irc_util_strlcat(char *, const char *, size_t);
+
 #if defined(__cplusplus)
 }
 #endif

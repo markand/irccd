@@ -173,7 +173,7 @@ rule_list_to_spaces(const char *value)
 {
 	static char buf[IRC_RULE_LEN];
 
-	strlcpy(buf, value, sizeof (buf));
+	irc_util_strlcpy(buf, value, sizeof (buf));
 
 	for (char *p = buf; *p; ++p)
 		if (*p == ':')
@@ -1048,7 +1048,7 @@ input(struct peer *p)
 
 	buf[nr] = '\0';
 
-	if (strlcat(p->in, buf, sizeof (p->in)) >= sizeof (p->in)) {
+	if (irc_util_strlcat(p->in, buf, sizeof (p->in)) >= sizeof (p->in)) {
 		errno = EMSGSIZE;
 		return -1;
 	}
@@ -1107,8 +1107,8 @@ peer_send(struct peer *p, const char *fmt, ...)
 	if (required + 1 >= avail)
 		return -1;
 
-	strlcat(p->out, buf, sizeof (p->out));
-	strlcat(p->out, "\n", sizeof (p->out));
+	irc_util_strlcat(p->out, buf, sizeof (p->out));
+	irc_util_strlcat(p->out, "\n", sizeof (p->out));
 
 	return 0;
 }

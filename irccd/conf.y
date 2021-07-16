@@ -531,9 +531,9 @@ server
 		}
 
 		if ($4->prefix)
-			strlcpy(s->prefix, $4->prefix, sizeof (s->prefix));
+			irc_util_strlcpy(s->prefix, $4->prefix, sizeof (s->prefix));
 		if ($4->password)
-			strlcpy(s->ident.password, $4->password, sizeof (s->ident.password));
+			irc_util_strlcpy(s->ident.password, $4->password, sizeof (s->ident.password));
 
 		s->flags = $4->flags;
 		irc_bot_server_add(s);
@@ -679,7 +679,7 @@ config_open(const char *path)
 	if (!(yyin = fopen(path, "r")))
 		irc_util_die("%s: %s\n", path, strerror(errno));
 
-	strlcpy(confpath, path, sizeof (confpath));
+	irc_util_strlcpy(confpath, path, sizeof (confpath));
 	yyparse();
 	fclose(yyin);
 }

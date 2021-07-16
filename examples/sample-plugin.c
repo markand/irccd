@@ -139,9 +139,9 @@ example_set_option(const char *key, const char *value)
 {
 	/* Assuming my_option_* variable exist. */
 	if (strcmp(key, "level") == 0)
-		strlcpy(my_option_level, value, sizeof (my_option_level));
+		irc_util_strlcpy(my_option_level, value, sizeof (my_option_level));
 	else if (strcmp(key, "language") == 0)
-		strlcpy(my_option_language, value, sizeof (my_option_language));
+		irc_util_strlcpy(my_option_language, value, sizeof (my_option_language));
 }
 
 void
@@ -149,9 +149,9 @@ example_set_template(const char *key)
 {
 	/* Assuming my_template_* variable exist. */
 	if (strcmp(key, "level") == 0)
-		strlcpy(my_template_level, value, sizeof (my_template_level));
+		irc_util_strlcpy(my_template_level, value, sizeof (my_template_level));
 	else if (strcmp(key, "language") == 0)
-		strlcpy(my_template_language, value, sizeof (my_template_language));
+		irc_util_strlcpy(my_template_language, value, sizeof (my_template_language));
 }
 
 /*

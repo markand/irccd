@@ -64,9 +64,12 @@ irc_util_realloc(void *ptr, size_t size)
 void *
 irc_util_reallocarray(void *ptr, size_t n, size_t size)
 {
+	/* extern/libbsd/reallocarray.c */
+	void *openbsd_reallocarray(void *, size_t, size_t);
+
 	void *ret;
 
-	if (!(ret = reallocarray(ptr, n, size)))
+	if (!(ret = openbsd_reallocarray(ptr, n, size)))
 		irc_util_die("reallocarray: %s\n", strerror(errno));
 
 	return ret;
@@ -110,8 +113,8 @@ irc_util_basename(const char *str)
 	static char ret[PATH_MAX];
 	char tmp[PATH_MAX];
 
-	strlcpy(tmp, str, sizeof (tmp));
-	strlcpy(ret, basename(tmp), sizeof (ret));
+	irc_util_strlcpy(tmp, str, sizeof (tmp));
+	irc_util_strlcpy(ret, basename(tmp), sizeof (ret));
 
 	return ret;
 }
@@ -122,8 +125,8 @@ irc_util_dirname(const char *str)
 	static char ret[PATH_MAX];
 	char tmp[PATH_MAX];
 
-	strlcpy(tmp, str, sizeof (tmp));
-	strlcpy(ret, dirname(tmp), sizeof (ret));
+	irc_util_strlcpy(tmp, str, sizeof (tmp));
+	irc_util_strlcpy(ret, dirname(tmp), sizeof (ret));
 
 	return ret;
 }

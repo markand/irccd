@@ -68,7 +68,7 @@ set(struct kw *table, size_t tablesz, const char *key, const char *value)
 {
 	for (size_t i = 0; i < tablesz; ++i) {
 		if (strcmp(table[i].key, key) == 0) {
-			strlcpy(table[i].value, value, sizeof (table[i].value));
+			irc_util_strlcpy(table[i].value, value, sizeof (table[i].value));
 			break;
 		}
 	}

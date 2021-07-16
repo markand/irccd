@@ -91,10 +91,10 @@ add_channel(struct irc_server *s, const char *name, const char *password, int jo
 
 	ch = irc_util_calloc(1, sizeof (*ch));
 	ch->joined = joined;
-	strlcpy(ch->name, name, sizeof (ch->name));
+	irc_util_strlcpy(ch->name, name, sizeof (ch->name));
 
 	if (password)
-		strlcpy(ch->password, password, sizeof (ch->password));
+		irc_util_strlcpy(ch->password, password, sizeof (ch->password));
 
 	LL_PREPEND(s->channels, ch);
 
@@ -171,7 +171,7 @@ read_support_prefix(struct irc_server *s, const char *value)
 static void
 read_support_chantypes(struct irc_server *s, const char *value)
 {
-	strlcpy(s->params.chantypes, value, sizeof (s->params.chantypes));
+	irc_util_strlcpy(s->params.chantypes, value, sizeof (s->params.chantypes));
 }
 
 static void
@@ -183,9 +183,8 @@ fail(struct irc_server *s)
 	if (s->flags & IRC_SERVER_FLAGS_AUTO_RECO) {
 		irc_log_info("server %s: waiting %u seconds before reconnecting", s->name, DELAY);
 		s->state = IRC_SERVER_STATE_WAITING;
-	} else {
+	} else
 		s->state = IRC_SERVER_STATE_DISCONNECTED;
-	}
 
 	/* Time point when we lose signal from the server. */
 	s->lost_tp = time(NULL);
@@ -260,11 +259,11 @@ handle_support(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *
 			    s->name, s->params.kicklen);
 		}
 		else if (strcmp(key, "CHARSET") == 0) {
-			strlcpy(s->params.charset, value, sizeof (s->params.charset));
+			irc_util_strlcpy(s->params.charset, value, sizeof (s->params.charset));
 			irc_log_info("server %s: charset:            %s",
 			    s->name, s->params.charset);
 		} else if (strcmp(key, "CASEMAPPING") == 0) {
-			strlcpy(s->params.casemapping, value, sizeof (s->params.casemapping));
+			irc_util_strlcpy(s->params.casemapping, value, sizeof (s->params.casemapping));
 			irc_log_info("server %s: case mapping:       %s",
 			    s->name, s->params.casemapping);
 		}
@@ -462,7 +461,7 @@ handle_nick(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 	if (is_self(s, ev->nick.origin) == 0) {
 		irc_log_info("server %s: nick change %s -> %s", s->name,
 		    s->ident.nickname, ev->nick.nickname);
-		strlcpy(s->ident.nickname, ev->nick.nickname, sizeof (s->ident.nickname));
+		irc_util_strlcpy(s->ident.nickname, ev->nick.nickname, sizeof (s->ident.nickname));
 	}
 }
 
@@ -718,19 +717,19 @@ irc_server_new(const char *name,
 	/* Hide implementation to get rid of OpenSSL headers in public API. */
 	s->conn = irc_util_calloc(1, sizeof (*s->conn));
 	s->conn->port = port;
-	strlcpy(s->conn->hostname, hostname, sizeof (s->conn->hostname));
+	irc_util_strlcpy(s->conn->hostname, hostname, sizeof (s->conn->hostname));
 
 	/* Identity. */
-	strlcpy(s->ident.nickname, nickname, sizeof (s->ident.nickname));
-	strlcpy(s->ident.username, username, sizeof (s->ident.username));
-	strlcpy(s->ident.realname, realname, sizeof (s->ident.realname));
-	strlcpy(s->ident.ctcpversion, "IRC Client Daemon " IRCCD_VERSION, sizeof (s->ident.ctcpversion));
+	irc_util_strlcpy(s->ident.nickname, nickname, sizeof (s->ident.nickname));
+	irc_util_strlcpy(s->ident.username, username, sizeof (s->ident.username));
+	irc_util_strlcpy(s->ident.realname, realname, sizeof (s->ident.realname));
+	irc_util_strlcpy(s->ident.ctcpversion, "IRC Client Daemon " IRCCD_VERSION, sizeof (s->ident.ctcpversion));
 
 	/* Server itself. */
-	strlcpy(s->name, name, sizeof (s->name));
+	irc_util_strlcpy(s->name, name, sizeof (s->name));
 
 	/* Default options. */
-	strlcpy(s->prefix, "!", sizeof (s->prefix));
+	irc_util_strlcpy(s->prefix, "!", sizeof (s->prefix));
 
 	return s;
 }
@@ -1007,7 +1006,7 @@ irc_server_nick(struct irc_server *s, const char *nick)
 	assert(nick);
 
 	if (s->state <= IRC_SERVER_STATE_DISCONNECTED) {
-		strlcpy(s->ident.nickname, nick, sizeof (s->ident.nickname));
+		irc_util_strlcpy(s->ident.nickname, nick, sizeof (s->ident.nickname));
 		return 1;
 	}
 

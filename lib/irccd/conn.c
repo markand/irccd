@@ -73,7 +73,7 @@ parse(struct irc_conn_msg *msg, const char *line)
 	size_t a;
 
 	memset(msg, 0, sizeof (*msg));
-	strlcpy(msg->buf, line, sizeof (msg->buf));
+	irc_util_strlcpy(msg->buf, line, sizeof (msg->buf));
 
 	/*
 	 * IRC message is defined as following:
@@ -538,9 +538,9 @@ irc_conn_send(struct irc_conn *conn, const char *data)
 	assert(conn);
 	assert(data);
 
-	if (strlcat(conn->out, data, sizeof (conn->out)) >= sizeof (conn->out))
+	if (irc_util_strlcat(conn->out, data, sizeof (conn->out)) >= sizeof (conn->out))
 		return errno = EMSGSIZE, -1;
-	if (strlcat(conn->out, "\r\n", sizeof (conn->out)) >= sizeof (conn->out))
+	if (irc_util_strlcat(conn->out, "\r\n", sizeof (conn->out)) >= sizeof (conn->out))
 		return errno = EMSGSIZE, -1;
 
 	return 0;

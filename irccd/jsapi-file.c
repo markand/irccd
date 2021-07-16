@@ -334,7 +334,7 @@ File_constructor(duk_context *ctx)
 	file = irc_util_calloc(1, sizeof (*file));
 	file->fp = fp;
 	file->finalizer = fclose;
-	strlcpy(file->path, path, sizeof (file->path));
+	irc_util_strlcpy(file->path, path, sizeof (file->path));
 
 	duk_push_this(ctx);
 	duk_push_pointer(ctx, file);
@@ -483,7 +483,7 @@ jsapi_file_push(duk_context *ctx, const char *path, FILE *fp, int (*finalizer)(F
 	};
 
 	if (path)
-		strlcpy(file.path, path, sizeof (file.path));
+		irc_util_strlcpy(file.path, path, sizeof (file.path));
 
 	duk_push_object(ctx);
 	duk_push_pointer(ctx, irc_util_memdup(&file, sizeof (file)));

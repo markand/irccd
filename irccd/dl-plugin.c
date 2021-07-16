@@ -192,7 +192,7 @@ init(const char *name, const char *path)
 	struct stat st;
 
 	memset(&self, 0, sizeof (self));
-	strlcpy(self.plugin.name, name, sizeof (self.plugin.name));
+	irc_util_strlcpy(self.plugin.name, name, sizeof (self.plugin.name));
 
 	/*
 	 * It's not possible to get the exact error code when loading a plugin
@@ -211,7 +211,7 @@ init(const char *name, const char *path)
 	}
 
 	/* Compute prefix name */
-	strlcpy(self.prefix, irc_util_basename(path), sizeof (self.prefix));
+	irc_util_strlcpy(self.prefix, irc_util_basename(path), sizeof (self.prefix));
 
 	/* Remove plugin extension. */
 	self.prefix[strcspn(self.prefix, ".")] = '\0';
@@ -275,14 +275,14 @@ dl_plugin_loader_new(void)
 	ldr->open = wrap_open;
 
 #if defined(_WIN32)
-	strlcpy(ldr->extensions, "dll", sizeof (ldr->extensions));
+	irc_util_strlcpy(ldr->extensions, "dll", sizeof (ldr->extensions));
 #elif defined(__APPLE__)
-	strlcpy(ldr->extensions, "so:dylib", sizeof (ldr->extensions));
+	irc_util_strlcpy(ldr->extensions, "so:dylib", sizeof (ldr->extensions));
 #else
-	strlcpy(ldr->extensions, "so", sizeof (ldr->extensions));
+	irc_util_strlcpy(ldr->extensions, "so", sizeof (ldr->extensions));
 #endif
 
-	strlcpy(ldr->paths, IRCCD_LIBDIR "/irccd", sizeof (ldr->paths));
+	irc_util_strlcpy(ldr->paths, IRCCD_LIBDIR "/irccd", sizeof (ldr->paths));
 
 	return ldr;
 }

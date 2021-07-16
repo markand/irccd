@@ -24,6 +24,7 @@
 
 #include "event.h"
 #include "server.h"
+#include "util.h"
 
 int
 irc_event_str(const struct irc_event *ev, char *str, size_t strsz)
@@ -71,7 +72,7 @@ irc_event_str(const struct irc_event *ev, char *str, size_t strsz)
 		    ev->mode.mode);
 
 		for (char **mode = ev->mode.args; *mode; ++mode)
-			written = strlcat(str, *mode, strsz);
+			written = irc_util_strlcat(str, *mode, strsz);
 
 		break;
 	case IRC_EVENT_NICK:

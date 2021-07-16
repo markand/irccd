@@ -137,8 +137,8 @@ irc_hook_new(const char *name, const char *path)
 	struct irc_hook *h;
 
 	h = irc_util_malloc(sizeof (*h));
-	strlcpy(h->name, name, sizeof (h->name));
-	strlcpy(h->path, path, sizeof (h->path));
+	irc_util_strlcpy(h->name, name, sizeof (h->name));
+	irc_util_strlcpy(h->path, path, sizeof (h->path));
 
 	return h;
 }

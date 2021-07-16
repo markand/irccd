@@ -45,9 +45,9 @@ wrap_bind(const char *path, uid_t *uid, gid_t *gid)
 
 	int oldumask;
 
-	addr.sun_family = PF_LOCAL;
+	addr.sun_family = AF_UNIX;
 
-	if (strlcpy(addr.sun_path, path, sizeof (addr.sun_path)) >= sizeof (addr.sun_path)) {
+	if (irc_util_strlcpy(addr.sun_path, path, sizeof (addr.sun_path)) >= sizeof (addr.sun_path)) {
 		errno = ENAMETOOLONG;
 		goto err;
 	}
@@ -55,7 +55,7 @@ wrap_bind(const char *path, uid_t *uid, gid_t *gid)
 	/* Silently remove the file first. */
 	unlink(path);
 
-	if ((fd = socket(PF_LOCAL, SOCK_STREAM, 0)) < 0)
+	if ((fd = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
 		goto err;
 
 	/* -ux, -gx, -orwx */

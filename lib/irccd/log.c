@@ -168,7 +168,7 @@ irc_log_set_verbose(int mode)
 void
 irc_log_set_template(const char *fmt)
 {
-	strlcpy(tmpl, fmt ? fmt : DEFAULT_TEMPLATE, sizeof (tmpl));
+	irc_util_strlcpy(tmpl, fmt ? fmt : DEFAULT_TEMPLATE, sizeof (tmpl));
 }
 
 void

@@ -35,8 +35,8 @@ irc_channel_new(const char *name, const char *password, int joined)
 	ch = irc_util_calloc(1, sizeof (*ch));
 	ch->joined = joined;
 
-	strlcpy(ch->name, name, sizeof (ch->name));
-	strlcpy(ch->password, password ? password : "", sizeof (ch->password));
+	irc_util_strlcpy(ch->name, name, sizeof (ch->name));
+	irc_util_strlcpy(ch->password, password ? password : "", sizeof (ch->password));
 
 	return ch;
 }
@@ -54,7 +54,7 @@ irc_channel_add(struct irc_channel *ch, const char *nickname, int modes)
 
 	user = irc_util_malloc(sizeof (*user));
 	user->modes = modes;
-	strlcpy(user->nickname, nickname, sizeof (user->nickname));
+	irc_util_strlcpy(user->nickname, nickname, sizeof (user->nickname));
 
 	LL_PREPEND(ch->users, user);
 }

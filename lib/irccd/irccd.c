@@ -190,7 +190,7 @@ find_plugin(struct irc_plugin_loader *ldr, const char *base, const char *name)
 	char path[PATH_MAX], buf[IRC_EXTENSIONS_LEN], *t, *ext;
 	struct irc_plugin *p;
 
-	strlcpy(buf, ldr->extensions, sizeof (buf));
+	irc_util_strlcpy(buf, ldr->extensions, sizeof (buf));
 
 	for (t = buf; (ext = strtok_r(t, ":", &t)); ) {
 		snprintf(path, sizeof (path), "%s/%s.%s", base, name, ext);
@@ -237,7 +237,7 @@ is_extension_valid(const struct irc_plugin_loader *ldr, const char *path)
 {
 	char exts[IRC_EXTENSIONS_LEN], *token, *p, *ext;
 
-	strlcpy(exts, ldr->extensions, sizeof (exts));
+	irc_util_strlcpy(exts, ldr->extensions, sizeof (exts));
 
 	/* If we're unable to find an extension, assume it's allowed. */
 	if (!(ext = strrchr(path, '.')))
@@ -366,7 +366,7 @@ irc_bot_plugin_find(const char *name, const char *path)
 			p = open_plugin(ldr, name, path);
 		} else {
 			/* Copy the paths to tokenize it. */
-			strlcpy(buf, ldr->paths, sizeof (buf));
+			irc_util_strlcpy(buf, ldr->paths, sizeof (buf));
 
 			/*
 			 * For every directory (separated by colon) call find_plugin

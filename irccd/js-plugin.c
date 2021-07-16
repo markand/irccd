@@ -477,10 +477,10 @@ init(const char *name, const char *path, const char *script)
 
 	js = irc_util_calloc(1, sizeof (*js));
 	js->ctx = duk_create_heap(wrap_malloc, wrap_realloc, wrap_free, NULL, NULL);
-	strlcpy(js->plugin.name, name, sizeof (js->plugin.name));
+	irc_util_strlcpy(js->plugin.name, name, sizeof (js->plugin.name));
 
 	/* Copy path because Duktape has no notions of it. */
-	strlcpy(js->location, path, sizeof (js->location));
+	irc_util_strlcpy(js->location, path, sizeof (js->location));
 
 	/* Tables used to retrieve data. */
 	duk_push_object(js->ctx);
@@ -628,8 +628,8 @@ js_plugin_loader_new(void)
 
 	ldr = irc_util_calloc(1, sizeof (*ldr));
 	ldr->open = wrap_open;
-	strlcpy(ldr->extensions, "js", sizeof (ldr->extensions));
-	strlcpy(ldr->paths, IRCCD_LIBDIR "/irccd", sizeof (ldr->paths));
+	irc_util_strlcpy(ldr->extensions, "js", sizeof (ldr->extensions));
+	irc_util_strlcpy(ldr->paths, IRCCD_LIBDIR "/irccd", sizeof (ldr->paths));
 
 	return ldr;
 }

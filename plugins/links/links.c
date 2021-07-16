@@ -315,7 +315,7 @@ void
 links_set_template(const char *key, const char *value)
 {
 	if (strcmp(key, "info") == 0)
-		strlcpy(templates[TPL_INFO], value, sizeof (templates[TPL_INFO]));
+		irc_util_strlcpy(templates[TPL_INFO], value, sizeof (templates[TPL_INFO]));
 }
 
 const char *

@@ -30,6 +30,8 @@
 
 #include <duktape.h>
 
+#include <irccd/util.h>
+
 #include "jsapi-system.h"
 
 enum {
@@ -78,11 +80,11 @@ recursedir(int dirfd, struct cursor *cs)
 		 * Append full path for the given entry.
 		 * e.g. /foo/bar/ -> /foo/bar/quux.txt
 		 */
-		strlcat(cs->path, entry->d_name, sizeof (cs->path));
+		irc_util_strlcat(cs->path, entry->d_name, sizeof (cs->path));
 
 		/* Go recursively if it's a directory and activated. */
 		if (S_ISDIR(st.st_mode) && cs->recursive) {
-			strlcat(cs->path, "/", sizeof (cs->path));
+			irc_util_strlcat(cs->path, "/", sizeof (cs->path));
 
 			entrylen += 1;
 
@@ -96,7 +98,7 @@ recursedir(int dirfd, struct cursor *cs)
 			close(childfd);
 		}
 
-		strlcpy(cs->entry, entry->d_name, sizeof (cs->entry));
+		irc_util_strlcpy(cs->entry, entry->d_name, sizeof (cs->entry));
 
 		if (cs->fn(cs)) {
 			ret = 1;
@@ -122,9 +124,9 @@ recurse(const char *path, struct cursor *cs)
 
 	pathlen = strlen(path);
 
-	if (strlcpy(cs->path, path, sizeof (cs->path)) >= sizeof (cs->path))
+	if (irc_util_strlcpy(cs->path, path, sizeof (cs->path)) >= sizeof (cs->path))
 		return errno = ENOMEM, -1;
-	if (cs->path[pathlen - 1] != '/' && strlcat(cs->path, "/", sizeof (cs->path)) >= sizeof (cs->path))
+	if (cs->path[pathlen - 1] != '/' && irc_util_strlcat(cs->path, "/", sizeof (cs->path)) >= sizeof (cs->path))
 		return errno = ENOMEM, -1;
 
 	ret = recursedir(fd, cs);
@@ -354,7 +356,7 @@ Directory_mkdir(duk_context* ctx)
 	char path[PATH_MAX], *p;
 
 	/* Copy the directory to normalize and iterate over '/'. */
-	strlcpy(path, duk_require_string(ctx, 0), sizeof (path));
+	irc_util_strlcpy(path, duk_require_string(ctx, 0), sizeof (path));
 	normalize(path);
 
 #if defined(_WIN32)

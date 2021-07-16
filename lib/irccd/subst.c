@@ -115,7 +115,7 @@ scat(char **out, size_t *outsz, const char *value)
 {
 	size_t written;
 
-	if ((written = strlcpy(*out, value, *outsz)) >= *outsz)
+	if ((written = irc_util_strlcpy(*out, value, *outsz)) >= *outsz)
 		return errno = ENOMEM, -1;
 
 	*out += written;
@@ -150,7 +150,7 @@ attributes_parse(const char *key, struct attributes *attrs)
 		if (p)
 			*p = 0;
 
-		strlcpy(attrs->attrs[attrs->attrsz++], attr, sizeof (attrs->attrs[0]));
+		irc_util_strlcpy(attrs->attrs[attrs->attrsz++], attr, sizeof (attrs->attrs[0]));
 
 		if (p)
 			attr = p + 1;

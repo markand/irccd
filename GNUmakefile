@@ -47,7 +47,10 @@ LIB_SRCS=       lib/irccd/channel.c \
                 lib/irccd/rule.c \
                 lib/irccd/server.c \
                 lib/irccd/subst.c \
-                lib/irccd/util.c
+                lib/irccd/util.c \
+                extern/libbsd/reallocarray.c \
+                extern/libbsd/strlcat.c \
+                extern/libbsd/strlcpy.c
 LIB_OBJS=       ${LIB_SRCS:.c=.o}
 LIB_DEPS=       ${LIB_SRCS:.c=.d}
 
@@ -146,12 +149,8 @@ TESTS_OBJS=     ${TESTS:.c=}
 # Per system commands.
 OS:=            $(shell uname -s)
 
-ifeq (${OS},Darwin)
-LIB_SRCS+=      extern/libbsd/reallocarray.c
-endif
-
 # Compile flags.
-DEFS=           -D_BSD_SOURCE -DTOP=\"$(shell pwd)\" -fPIC
+DEFS=           -DTOP=\"$(shell pwd)\" -fPIC
 
 ifeq (${DEBUG},1)
 CFLAGS+=        -O0 -g
