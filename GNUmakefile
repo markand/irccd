@@ -17,7 +17,7 @@
 #
 
 CC=             cc
-CFLAGS=         -Wall -Wextra -std=c11
+CFLAGS=         -Wall -Wextra -std=c11 -D_XOPEN_SOURCE=700
 
 PREFIX=         /usr/local
 BINDIR=         ${PREFIX}/bin

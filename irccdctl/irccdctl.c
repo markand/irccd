@@ -79,7 +79,7 @@ dial(void)
 	if (setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof (tv)) < 0 ||
 	    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof (tv)) < 0)
 		irc_util_die("abort: setsockopt: %s\n", strerror(errno));
-	if (connect(sock, (const struct sockaddr *)&sockaddr, SUN_LEN(&sockaddr)) < 0)
+	if (connect(sock, (const struct sockaddr *)&sockaddr, sizeof (sockaddr)) < 0)
 		irc_util_die("abort: connect: %s\n", strerror(errno));
 }
 

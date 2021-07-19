@@ -294,8 +294,10 @@ Directory_constructor(duk_context *ctx)
 {
 	const char *path = duk_require_string(ctx, 0);
 	const int flags = duk_opt_int(ctx, 1, 0);
+	int fd;
 	DIR *dp;
 	struct dirent *entry;
+	struct stat st;
 
 	if (!duk_is_constructor_call(ctx))
 		return 0;
@@ -306,8 +308,12 @@ Directory_constructor(duk_context *ctx)
 	duk_push_string(ctx, "entries");
 	duk_push_array(ctx);
 
-	if (!(dp = opendir(path)))
+	if ((fd = open(path, O_RDONLY | O_DIRECTORY)) < 0)
 		jsapi_system_raise(ctx);
+	if (!(dp = fdopendir(fd))) {
+		close(fd);
+		jsapi_system_raise(ctx);
+	}
 
 	for (int i = 0; (entry = readdir(dp)); ) {
 		if (strcmp(entry->d_name, ".") == 0 && !(flags & LIST_DOT))
@@ -318,12 +324,18 @@ Directory_constructor(duk_context *ctx)
 		duk_push_object(ctx);
 		duk_push_string(ctx, entry->d_name);
 		duk_put_prop_string(ctx, -2, "name");
-		duk_push_int(ctx, entry->d_type);
+
+		if (fstatat(fd, entry->d_name, &st, 0) < 0)
+			duk_push_int(ctx, 0);
+		else
+			duk_push_int(ctx, st.st_mode & S_IFMT);
+
 		duk_put_prop_string(ctx, -2, "type");
 		duk_put_prop_index(ctx, -2, i++);
 	}
 
 	closedir(dp);
+	close(fd);
 	duk_def_prop(ctx, -3, DUK_DEFPROP_ENUMERABLE | DUK_DEFPROP_HAVE_VALUE);
 
 	/* this.path property. */
@@ -398,14 +410,14 @@ static const duk_function_list_entry functions[] = {
 static const duk_number_list_entry constants[] = {
 	{ "Dot",                LIST_DOT        },
 	{ "DotDot",             LIST_DOT_DOT    },
-	{ "TypeFile",           DT_REG          },
-	{ "TypeDir",            DT_DIR          },
-	{ "TypeLink",           DT_LNK          },
-	{ "TypeBlock",          DT_BLK          },
-	{ "TypeCharacter",      DT_CHR          },
-	{ "TypeFifo",           DT_FIFO         },
-	{ "TypeSocket",         DT_SOCK         },
-	{ "TypeUnknown",        DT_UNKNOWN      },
+	{ "TypeFile",           S_IFREG         },
+	{ "TypeDir",            S_IFDIR         },
+	{ "TypeLink",           S_IFLNK         },
+	{ "TypeBlock",          S_IFBLK         },
+	{ "TypeCharacter",      S_IFCHR         },
+	{ "TypeFifo",           S_IFIFO         },
+	{ "TypeSocket",         S_IFSOCK        },
+	{ "TypeUnknown",        0               },
 	{ NULL,                 0               }
 };
 
