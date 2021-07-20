@@ -493,7 +493,8 @@ handle_ping(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 	(void)ev;
 	(void)msg;
 
-	irc_server_send(s, "PONG %s", msg->args[1]);
+	if (msg->args[0])
+		irc_server_send(s, "PONG :%s", msg->args[0]);
 }
 
 static void
