@@ -274,7 +274,7 @@ ${LIB_OBJS} ${IRCCD_OBJS} irccd/main.o: lib/irccd/config.h
 irccd/conf.c: irccd/conf.y
 	bison -d -o $@ $<
 
-irccd/lex.c: irccd/lex.l
+irccd/lex.c: irccd/lex.l irccd/conf.c
 	flex -o $@ $<
 
 irccd/irccd: irccd/main.o ${IRCCD_OBJS} ${LIB_OBJS}
