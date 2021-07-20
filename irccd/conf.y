@@ -467,9 +467,9 @@ server_params
 		$$ = $4;
 		$$->password = $2;
 	}
-	| T_PREFIX T_STRING server_params
+	| T_PREFIX T_STRING T_SEMICOLON server_params
 	{
-		$$ = $3;
+		$$ = $4;
 		$$->prefix = $2;
 	}
 	| T_OPTIONS string_list T_SEMICOLON server_params
