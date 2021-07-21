@@ -344,11 +344,14 @@ static int
 cmd_plugin_reload(struct peer *p, char *line)
 {
 	struct irc_plugin *plg;
+	const char *args[1] = {0};
 
-	if (!(plg = irc_bot_plugin_get(line)))
-		peer_send(p, "could not reload plugin: %s", strerror(errno));
+	if (parse(line, args, 1) != 1)
+		return EINVAL;
+	if (!(plg = irc_bot_plugin_get(args[0])))
+		return peer_send(p, "could not reload plugin: %s", strerror(ENOENT)), 0;
 
-	/* TODO: report error if fails to reload. */
+	irc_plugin_reload(plg);
 
 	return ok(p);
 }
