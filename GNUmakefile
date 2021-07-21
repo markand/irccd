@@ -16,27 +16,32 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-CC=             cc
-CFLAGS=         -Wall -Wextra -std=c11 -D_XOPEN_SOURCE=700
+CC:=            cc
+CFLAGS:=        -Wall -Wextra
 
-PREFIX=         /usr/local
-BINDIR=         ${PREFIX}/bin
-ETCDIR=         ${PREFIX}/etc
-INCDIR=         ${PREFIX}/include
-LIBDIR=         ${PREFIX}/lib
-MANDIR=         ${PREFIX}/share/man
-SHAREDIR=       ${PREFIX}/share
-VARDIR=         ${PREFIX}/var
-USER=           nobody
-GROUP=          nobody
+PREFIX:=        /usr/local
+BINDIR:=        ${PREFIX}/bin
+ETCDIR:=        ${PREFIX}/etc
+INCDIR:=        ${PREFIX}/include
+LIBDIR:=        ${PREFIX}/lib
+MANDIR:=        ${PREFIX}/share/man
+SHAREDIR:=      ${PREFIX}/share
+VARDIR:=        ${PREFIX}/var
 
-SSL=            1
-JS=             1
+USER:=          nobody
+GROUP:=         nobody
 
-MAJOR=          4
-MINOR=          0
-PATCH=          0
-VERSION=        ${MAJOR}.${MINOR}.${PATCH}
+SSL:=           1
+JS:=            1
+
+# No user options below this line.
+
+MAJOR:=         4
+MINOR:=         0
+PATCH:=         0
+VERSION:=       ${MAJOR}.${MINOR}.${PATCH}
+
+# {{{ common irccd objects (official C symbols).
 
 LIB_SRCS=       lib/irccd/channel.c \
                 lib/irccd/conn.c \
@@ -54,6 +59,10 @@ LIB_SRCS=       lib/irccd/channel.c \
                 extern/libbsd/strlcpy.c
 LIB_OBJS=       ${LIB_SRCS:.c=.o}
 LIB_DEPS=       ${LIB_SRCS:.c=.d}
+
+# }}}
+
+# {{{ irccd
 
 IRCCD_SRCS=     irccd/conf.c \
                 irccd/dl-plugin.c \
@@ -82,6 +91,10 @@ endif
 
 IRCCD_OBJS=     ${IRCCD_SRCS:.c=.o}
 IRCCD_DEPS=     ${IRCCD_SRCS:.c=.d}
+
+# }}}
+
+# {{{ manual pages
 
 MAN1=           man/irccd.1 \
                 man/irccdctl.1
@@ -114,8 +127,9 @@ MAN5=           man/irccd.conf.5
 MAN7=           man/irccd-ipc.7 \
                 man/irccd-templates.7
 
-PLUGINS.js=     ask auth hangman history joke logger plugin roulette tictactoe
-PLUGINS.c=      links
+# }}}
+
+# {{{ tests
 
 TESTS=          tests/test-bot.c                \
                 tests/test-channel.c            \
@@ -147,20 +161,26 @@ endif
 
 TESTS_OBJS=     ${TESTS:.c=}
 
+# }}}
+
+# {{{ per OS settings
+
 # Per system commands.
 OS:=            $(shell uname -s)
 
 # Compile flags.
-DEFS=           -DTOP=\"$(shell pwd)\" -fPIC
+DEFS:=          -std=c11
+DEFS+=          -DTOP=\"$(shell pwd)\"
+DEFS+=          -D_XOPEN_SOURCE=700
 
 ifeq (${DEBUG},1)
-CFLAGS+=        -O0 -g
+DEFS+=          -O0 -g
 else
-CFLAGS+=        -DNDEBUG -O3
+DEFS+=          -DNDEBUG -O3
 endif
 
 # Include directories.
-INCS=           -Ilib/
+INCS:=          -Ilib/
 INCS+=          -I./
 INCS+=          -Iextern/libgreatest/
 INCS+=          -Iextern/libketopt/
@@ -171,12 +191,12 @@ INCS+=          -Iextern/libduktape
 endif
 
 # Whole libraries for every binaries.
-LIBS+=          -lpthread
+LIBS:=          -lpthread
 LIBS+=          -lm
 
 ifeq (${OS},Linux)
 LIBS+=          -ldl
-CFLAGS+=        -fPIC
+DEFS+=          -fPIC
 endif
 
 ifeq (${SSL},1)
@@ -186,26 +206,27 @@ endif
 
 # For config.h file.
 ifeq (${SSL},1)
-SED.ssl=        s/@define WITH_SSL@/\#define IRCCD_WITH_SSL/
+SED.ssl:=       s/@define WITH_SSL@/\#define IRCCD_WITH_SSL/
 else
-SED.ssl=        /@define WITH_SSL@/d
-
+SED.ssl:=       /@define WITH_SSL@/d
 endif
+
 ifeq (${JS},1)
-SED.js=         s/@define WITH_JS@/\#define IRCCD_WITH_JS/
+SED.js:=        s/@define WITH_JS@/\#define IRCCD_WITH_JS/
 else
-SED.js=         /@define WITH_JS@/d
+SED.js:=        /@define WITH_JS@/d
 endif
 
+# Flags to export C symbols from libirccd.a as host application.
 ifeq (${OS},Darwin)
 DEFS+=          -D_DARWIN_C_SOURCE
-SHFLAGS=        -undefined dynamic_lookup
-ALLFLAGS=       -Wl,-all_load
+SHFLAGS:=       -undefined dynamic_lookup
+ALLFLAGS:=      -Wl,-all_load
 else
-SHFLAGS=        -shared
-ALLFLAGS=       -Wl,--whole-archive
-NOALLFLAGS=     -Wl,--no-whole-archive
-EXFLAGS=        -Wl,-E
+SHFLAGS:=       -shared
+ALLFLAGS:=      -Wl,--whole-archive
+NOALLFLAGS:=    -Wl,--no-whole-archive
+EXFLAGS:=       -Wl,-E
 endif
 
 CMD.cc=         ${CC} ${DEFS} ${INCS} ${CFLAGS} -MMD -c $< -o $@
@@ -213,8 +234,12 @@ CMD.ccld=       ${CC} ${DEFS} ${INCS} ${CFLAGS} -o $@ $^ ${LIBS} ${LDFLAGS}
 CMD.cchost=     ${CC} -o $@ ${DEFS} ${INCS} ${CFLAGS} ${EXFLAGS} ${ALLFLAGS} $^ ${NOALLFLAGS} ${LIBS} ${LDFLAGS}
 CMD.ccplg=      ${CC} ${DEFS} ${INCS} ${CFLAGS} ${SHFLAGS} -o $@ $< ${LIBS} ${LDFLAGS}
 
-.SUFFIXES:
-.SUFFIXES: .c .o .js
+# }}}
+
+# {{{ plugins
+
+PLUGINS.js=     ask auth hangman history joke logger plugin roulette tictactoe
+PLUGINS.c=      links
 
 # Template for Javascript plugins.
 define js-plugin =
@@ -248,6 +273,11 @@ install-plugin-${1}:
 	cp plugins/${1}/${1}.so ${DESTDIR}${LIBDIR}/irccd
 	cp plugins/${1}/${1}.7 ${DESTDIR}${MANDIR}/man7/irccd-plugin-${1}.7
 endef
+
+# }}}
+
+.SUFFIXES:
+.SUFFIXES: .c .o .js
 
 .c.o:
 	${CMD.cc}
