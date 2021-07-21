@@ -38,7 +38,7 @@
 static int verbose;
 static int sock;
 static struct sockaddr_un sockaddr = {
-	.sun_family = PF_LOCAL,
+	.sun_family = AF_UNIX,
 	.sun_path = "/tmp/irccd.sock"
 };
 static char in[IRC_BUF_LEN];
@@ -55,9 +55,9 @@ poll(void)
 		ssize_t nr;
 
 		if ((nr = recv(sock, buf, sizeof (buf) - 1, 0)) <= 0)
-			irc_util_die("abort: %s\n", strerror(nr == 0 ? ECONNRESET : errno));
+			irc_util_die("abort: recv: %s\n", strerror(nr == 0 ? ECONNRESET : errno));
 		if (irc_util_strlcat(in, buf, sizeof (in)) >= sizeof (in))
-			irc_util_die("abort: %s\n", strerror(EMSGSIZE));
+			irc_util_die("abort: recv: %s\n", strerror(EMSGSIZE));
 	}
 
 	*nl = '\0';
@@ -74,7 +74,7 @@ dial(void)
 		.tv_sec = 30
 	};
 
-	if ((sock = socket(PF_LOCAL, SOCK_STREAM, 0)) < 0)
+	if ((sock = socket(AF_UNIX, SOCK_STREAM, 0)) < 0)
 		irc_util_die("abort: socket: %s\n", strerror(errno));
 	if (setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof (tv)) < 0 ||
 	    setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof (tv)) < 0)
@@ -89,7 +89,7 @@ check(void)
 	/* Ensure we're talking to irccd. */
 	int major, minor, patch;
 
-	if ((sscanf(poll(), "IRCCD %d.%d.%d", &major, &minor, &patch) != 3))
+	if (sscanf(poll(), "IRCCD %d.%d.%d", &major, &minor, &patch) != 3)
 		irc_util_die("abort: not irccd instance\n");
 	if (verbose)
 		printf("connected to irccd %d.%d.%d\n", major, minor, patch);
@@ -395,7 +395,7 @@ response_list(const char *cmd)
 	req(cmd);
 
 	if (strncmp(list = poll(), "OK ", 3) != 0)
-		irc_util_die("abort: failed to retrieve plugin list\n");
+		irc_util_die("abort: failed to retrieve list\n");
 
 	list += 3;
 
