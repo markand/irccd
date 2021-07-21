@@ -233,19 +233,22 @@ finish(void)
 noreturn static void
 usage(void)
 {
-	fprintf(stderr, "usage: irccd [-c config]\n");
+	fprintf(stderr, "usage: irccd [-v] [-c config]\n");
 	exit(1);
 }
 
 int
 main(int argc, char **argv)
 {
-	int ch;
+	int ch, verbose = 0;
 
-	while ((ch = getopt(argc, argv, "c:")) != -1) {
+	while ((ch = getopt(argc, argv, "c:v")) != -1) {
 		switch (ch) {
 		case 'c':
 			config = optarg;
+			break;
+		case 'v':
+			verbose = 1;
 			break;
 		default:
 			usage();
@@ -262,6 +265,11 @@ main(int argc, char **argv)
 
 	init();
 	load();
+
+	/* We apply now so it overrides configuration file. */
+	if (verbose)
+		irc_log_set_verbose(1);
+
 	loop();
 	finish();
 }
