@@ -889,7 +889,7 @@ static const struct cmd {
 	{ "server-mode",        3,      4,      cmd_server_mode         },
 	{ "server-nick",        2,      2,      cmd_server_nick         },
 	{ "server-notice",      3,      3,      cmd_server_notice       },
-	{ "server-part",        3,      3,      cmd_server_part         },
+	{ "server-part",        2,      3,      cmd_server_part         },
 	{ "server-reconnect",   0,      1,      cmd_server_reconnect    },
 	{ "server-topic",       3,      3,      cmd_server_topic        },
 	{ "watch",              0,      0,      cmd_watch               }
