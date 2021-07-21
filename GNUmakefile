@@ -197,6 +197,7 @@ SED.js=         /@define WITH_JS@/d
 endif
 
 ifeq (${OS},Darwin)
+DEFS+=          -D_DARWIN_C_SOURCE
 SHFLAGS=        -undefined dynamic_lookup
 ALLFLAGS=       -Wl,-all_load
 else
