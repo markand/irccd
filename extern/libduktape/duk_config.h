@@ -62,6 +62,8 @@
 #if !defined(DUK_CONFIG_H_INCLUDED)
 #define DUK_CONFIG_H_INCLUDED
 
+#include <stdnoreturn.h>
+
 /*
  *  Intermediate helper defines
  */
@@ -1034,7 +1036,7 @@
 #define DUK_VA_COPY(dest,src) __va_copy(dest,src)
 #endif
 
-#define DUK_NORETURN(decl)  decl __attribute__((noreturn))
+#define DUK_NORETURN(decl)  noreturn decl
 
 #if defined(__clang__) && defined(__has_builtin)
 #if __has_builtin(__builtin_unreachable)
