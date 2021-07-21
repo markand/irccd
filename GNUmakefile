@@ -36,6 +36,7 @@ JS=             1
 MAJOR=          4
 MINOR=          0
 PATCH=          0
+VERSION=        ${MAJOR}.${MINOR}.${PATCH}
 
 LIB_SRCS=       lib/irccd/channel.c \
                 lib/irccd/conn.c \
@@ -227,7 +228,7 @@ plugin-${1}:
 install-plugin-${1}:
 	mkdir -p ${DESTDIR}${LIBDIR}/irccd
 	mkdir -p ${DESTDIR}${MANDIR}/man7
-	cp plugins/${1}/${1}.js ${DESTDIR}${LIBDIR}/irccd
+	sed "s,@IRCCD_VERSION@,${VERSION}," < plugins/${1}/${1}.js > ${DESTDIR}${LIBDIR}/irccd/${1}.js
 	cp plugins/${1}/${1}.7 ${DESTDIR}${MANDIR}/man7/irccd-plugin-${1}.7
 endef
 
