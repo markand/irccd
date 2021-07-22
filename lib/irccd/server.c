@@ -458,7 +458,7 @@ handle_nick(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg
 	ev->nick.nickname = irc_util_strdup(msg->args[0]);
 
 	/* Update nickname if it is myself. */
-	if (is_self(s, ev->nick.origin) == 0) {
+	if (is_self(s, ev->nick.origin)) {
 		irc_log_info("server %s: nick change %s -> %s", s->name,
 		    s->ident.nickname, ev->nick.nickname);
 		irc_util_strlcpy(s->ident.nickname, ev->nick.nickname, sizeof (s->ident.nickname));
