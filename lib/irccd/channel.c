@@ -82,6 +82,7 @@ irc_channel_clear(struct irc_channel *ch)
 		free(user);
 
 	ch->users = NULL;
+	ch->joined = 0;
 }
 
 void
