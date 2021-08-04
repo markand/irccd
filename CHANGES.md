@@ -137,8 +137,7 @@ javascript API
 internal
 --------
 
-- The code is now based on Boost for many internal parts of the core,,
- ,
+- The code is now based on Boost for many internal parts of the core,
 - The libircclient has been replaced by a simple homemade library.
 
 misc
