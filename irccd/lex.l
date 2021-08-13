@@ -37,6 +37,7 @@ yyerror(const char *);
 
 channels        channels
 config          config
+ctcp            ctcp
 events          events
 gid             gid
 hook            hook
@@ -53,8 +54,8 @@ password        password
 paths           paths
 plugin          plugin
 plugins         plugins
-prefix          prefix
 port            port
+prefix          prefix
 rule            rule
 rule_action     accept|drop
 server          server
@@ -88,6 +89,7 @@ catchall        .
 {channels}              return T_CHANNELS;
 {comma}                 return T_COMMA;
 {config}                return T_CONFIG;
+{ctcp}                  return T_CTCP;
 {events}                return T_EVENTS;
 {gid}                   return T_GID;
 {hook}                  return T_HOOK;
@@ -102,8 +104,8 @@ catchall        .
 {paths}                 return T_PATHS;
 {plugins}               return T_PLUGINS;
 {plugin}                return T_PLUGIN;
-{prefix}                return T_PREFIX;
 {port}                  return T_PORT;
+{prefix}                return T_PREFIX;
 {semicolon}             return T_SEMICOLON;
 {servers}               return T_SERVERS;
 {server}                return T_SERVER;

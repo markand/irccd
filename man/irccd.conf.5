@@ -183,6 +183,19 @@ to join prepended by a optional
 .Ar password@
 if required. You must use double quotes if the channel starts with a hash (#)
 otherwise it would be detected as a comment.
+.It Ar ctcp { key value }
+Specify a CTCP version reply to
+.Ar value
+for the given
+.Ar key
+which may be one of
+.Dq version
+or
+.Dq source .
+The possible
+.Ar key
+are overriding their uppercase CTCP queries. Each entry in this block
+should be terminated by a semicolon.
 .It Ar options list
 Use specific server features. This is a list of string which can be one of
 following:
@@ -315,11 +328,17 @@ transport to "/tmp/irccd.sock"
 # This channel will automatically join "#test" on connection and the password
 # protected "#nightclub" channel with password "secret"
 #
+# We also override the CTCP VERSION and SOURCE reply.
+#
 server example {
 	hostname example.org;
 	port 6667;
 	ident fr francis "Francis Meyer";
 	channels "#test", "secret@#nightclub";
+	ctcp {
+		version "custom CTCP VERSION reply";
+		source "custom SCM repository";
+	}
 }
 
 # Load several plugins with their default values and locations.

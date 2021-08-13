@@ -27,7 +27,7 @@
 #define IRC_REALNAME_LEN        64              /* Real name. */
 #define IRC_CHANNEL_LEN         64              /* Channel name. */
 #define IRC_PASSWORD_LEN        64              /* Password length. */
-#define IRC_CTCPVERSION_LEN     64              /* Custom CTCP version answer. */
+#define IRC_CTCP_LEN            64              /* Custom CTCP version answer. */
 #define IRC_USERMODES_LEN       8               /* Number of modes (e.g. ohv). */
 #define IRC_CHANTYPES_LEN       8               /* Channel types. */
 #define IRC_PREFIX_LEN          4               /* Prefix for plugin commands (e.g. !). */

@@ -64,7 +64,8 @@ struct irc_server_ident {
 	char username[IRC_USERNAME_LEN];
 	char realname[IRC_REALNAME_LEN];
 	char password[IRC_PASSWORD_LEN];
-	char ctcpversion[IRC_CTCPVERSION_LEN];
+	char ctcpversion[IRC_CTCP_LEN];
+	char ctcpsource[IRC_CTCP_LEN];
 };
 
 struct irc_server_params {

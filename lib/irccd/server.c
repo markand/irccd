@@ -422,21 +422,28 @@ handle_msg(struct irc_server *s, struct irc_event *ev, struct irc_conn_msg *msg)
 	 * PRIVMSG jean :\001VERSION\001
 	 */
 	if (is_ctcp(msg->args[1])) {
+		struct irc_server_user user;
+
+		irc_server_split(msg->prefix, &user);
+
 		if (strcmp(msg->args[1], "\x01""CLIENTINFO\x01") == 0)
-			irc_server_notice(s, msg->prefix, "\x01""CLIENTINFO ACTION CLIENTINFO SOURCE TIME VERSION\x01");
+			irc_server_notice(s, user.nickname,
+			    "\x01""CLIENTINFO ACTION CLIENTINFO SOURCE TIME VERSION\x01");
 		else if (strcmp(msg->args[1], "\x01""SOURCE\x01") == 0)
-			irc_server_notice(s, msg->prefix, "\x01""http://hg.malikania.fr/irccd\x01");
+			irc_server_send(s, "NOTICE %s :\x01SOURCE %s\x01",
+			    user.nickname, s->ident.ctcpsource[0]
+			    ? s->ident.ctcpsource
+			    : "http://hg.malikania.fr/irccd");
 		else if (strcmp(msg->args[1], "\x01""TIME\x01") == 0) {
 			time_t now = time(NULL);
 
-			irc_server_send(s, "NOTICE %s :\x01""TIME %s\x01",
-			    msg->prefix, ctime(&now));
-		} else if (strcmp(msg->args[1], "\x01""VERSION\x01") == 0) {
-			/* Send a CTCP VERSION answer. */
+			irc_server_send(s, "NOTICE %s :\x01TIME %s\x01",
+			    user.nickname, ctime(&now));
+		} else if (strcmp(msg->args[1], "\x01VERSION\x01") == 0) {
 			if (strlen(s->ident.ctcpversion) != 0)
-				irc_server_send(s, "NOTICE %s :\x01""VERSION %s\x01",
-				    msg->prefix, s->ident.ctcpversion);
-		} else if (strncmp(msg->args[1], "\x01""ACTION\x01", 8) == 0) {
+				irc_server_send(s, "NOTICE %s :\x01VERSION %s\x01",
+				    user.nickname, s->ident.ctcpversion);
+		} else if (strncmp(msg->args[1], "\x01""ACTION", 7) == 0) {
 			ev->type = IRC_EVENT_ME;
 			ev->message.origin = irc_util_strdup(msg->prefix);
 			ev->message.channel = irc_util_strdup(msg->args[0]);

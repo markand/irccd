@@ -72,6 +72,8 @@ struct server_params {
 	char *username;
 	char *realname;
 	char *prefix;
+	char *ctcpversion;
+	char *ctcpsource;
 	struct string *channels;
 };
 
@@ -147,6 +149,7 @@ yyerror(const char *);
 %token T_CHANNELS
 %token T_COMMA
 %token T_CONFIG
+%token T_CTCP
 %token T_EVENTS
 %token T_GID
 %token T_HOOK
@@ -161,8 +164,8 @@ yyerror(const char *);
 %token T_PATHS
 %token T_PLUGIN
 %token T_PLUGINS
-%token T_PREFIX
 %token T_PORT
+%token T_PREFIX
 %token T_RULE
 %token T_SEMICOLON
 %token T_SERVER
@@ -491,6 +494,21 @@ server_params
 
 		string_list_finish($2);
 	}
+	| T_CTCP T_BRACE_OPEN pair_list T_BRACE_CLOSE server_params
+	{
+		$$ = $5;
+
+		for (struct pair *p = $3; p; p = p->next) {
+			if (strcmp(p->key, "version") == 0)
+				$$->ctcpversion = irc_util_strdup(p->value);
+			else if (strcmp(p->key, "source") == 0)
+				$$->ctcpsource = irc_util_strdup(p->value);
+			else
+				irc_util_die("invalid ctcp key: %s\n", p->key);
+		}
+
+		pair_list_finish($3);
+	}
 	|
 	{
 		$$ = irc_util_calloc(1, sizeof (*$$));
@@ -534,6 +552,10 @@ server
 			irc_util_strlcpy(s->prefix, $4->prefix, sizeof (s->prefix));
 		if ($4->password)
 			irc_util_strlcpy(s->ident.password, $4->password, sizeof (s->ident.password));
+		if ($4->ctcpversion)
+			irc_util_strlcpy(s->ident.ctcpversion, $4->ctcpversion, sizeof (s->ident.ctcpversion));
+		if ($4->ctcpsource)
+			irc_util_strlcpy(s->ident.ctcpsource, $4->ctcpsource, sizeof (s->ident.ctcpsource));
 
 		s->flags = $4->flags;
 		irc_bot_server_add(s);
@@ -545,6 +567,8 @@ server
 		free($4->realname);
 		free($4->prefix);
 		free($4->password);
+		free($4->ctcpversion);
+		free($4->ctcpsource);
 		free($4);
 	}
 	;
