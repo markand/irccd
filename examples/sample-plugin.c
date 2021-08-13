@@ -5,17 +5,6 @@
  * error will crash the whole daemon. It is also less convenient to share and
  * update.
  *
- * You can use CMake to build and install it to appropriate place using the
- * following code:
- *
- *   find_package(irccd REQUIRED)
- *   irccd_define_c_plugin(
- *     MAME myplugin
- *     SOURCES muplugin.c
- *   )
- *
- * You can also compile by hand using the pkg-config irccd file.
- *
  *   cc myplugin.c -o myplugin.so $(pkg-config --libs --cflags irccd)
  *
  * All symbols exported from the file must start with the plugin file basename
@@ -26,24 +15,29 @@
 
 /*
  * Include convention is using irccd/ prefix.
- *
- * The compat.h header contains additional BSD/POSIX extensions that may be
- * missing on your system. It is optional unless you explicitly use them.
  */
 
 #include <string.h>
 
-#include <irccd/compat.h>
 #include <irccd/event.h>
 #include <irccd/server.h>
+#include <irccd/util.h>
 
 /*
  * This is the plugin identifier, every variable are optional.
  */
-const char *example_description = "Example of C plugin"
+const char *example_description = "Example of C plugin";
 const char *example_version = "0.1.0";
 const char *example_license = "ISC";
 const char *example_author = "Name and optional email";
+
+/* Simulate user options. */
+static char my_option_level[16] = "hard";
+static char my_option_language[64] = "fr";
+
+/* Simulate user templates. */
+static char my_template_level[64] = "it's #{level}";
+static char my_template_language[64] = "using #{language} as language";
 
 /*
  * get_options | get_templates | get_paths
@@ -145,7 +139,7 @@ example_set_option(const char *key, const char *value)
 }
 
 void
-example_set_template(const char *key)
+example_set_template(const char *key, const char *value)
 {
 	/* Assuming my_template_* variable exist. */
 	if (strcmp(key, "level") == 0)

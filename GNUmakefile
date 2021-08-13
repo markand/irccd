@@ -333,6 +333,11 @@ install:
 	cp ${MAN7} ${DESTDIR}${MANDIR}/man7
 	mkdir -p ${DESTDIR}${ETCDIR}
 	cp irccd/irccd.conf ${DESTDIR}${ETCDIR}/irccd.conf.sample
+	mkdir -p ${DESTDIR}${INCDIR}/irccd
+	cp lib/irccd/channel.h lib/irccd/config.h lib/irccd/event.h lib/irccd/hook.h \
+		lib/irccd/irccd.h lib/irccd/limits.h lib/irccd/log.h lib/irccd/plugin.h \
+		lib/irccd/rule.h lib/irccd/server.h lib/irccd/subst.h lib/irccd/util.h \
+		${DESTDIR}${INCDIR}/irccd
 	mkdir -p ${DESTDIR}${LIBDIR}/pkgconfig
 	sed -e "s,@MAJOR@,${MAJOR}," \
 		-e "s,@MINOR@,${MINOR}," \
