@@ -17,12 +17,14 @@
  */
 
 #include <assert.h>
+#include <ctype.h>
 #include <errno.h>
 #include <poll.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 
 #include <utlist.h>
 
@@ -76,7 +78,7 @@ clear_server(struct irc_server *s)
 static inline int
 is_self(const struct irc_server *s, const char *nick)
 {
-	return strncmp(s->ident.nickname, nick, strlen(s->ident.nickname)) == 0;
+	return strncasecmp(s->ident.nickname, nick, strlen(s->ident.nickname)) == 0;
 }
 
 static struct irc_channel *
@@ -92,6 +94,10 @@ add_channel(struct irc_server *s, const char *name, const char *password, int jo
 	ch = irc_util_calloc(1, sizeof (*ch));
 	ch->joined = joined;
 	irc_util_strlcpy(ch->name, name, sizeof (ch->name));
+
+	/* Convert to lowercase */
+	for (char *c = ch->name; *c; ++c)
+		*c = tolower(*c);
 
 	if (password)
 		irc_util_strlcpy(ch->password, password, sizeof (ch->password));
@@ -862,7 +868,7 @@ irc_server_find(struct irc_server *s, const char *name)
 	struct irc_channel *ch;
 
 	LL_FOREACH(s->channels, ch)
-		if (strcmp(ch->name, name) == 0)
+		if (strcasecmp(ch->name, name) == 0)
 			return ch;
 
 	return NULL;

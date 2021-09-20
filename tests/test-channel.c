@@ -91,7 +91,8 @@ basics_remove(void)
 	GREATEST_ASSERT_EQ(1, user->modes);
 	GREATEST_ASSERT_STR_EQ("markand", user->nickname);
 
-	irc_channel_remove(ch, "markand");
+	/* Also test case sensitivity. */
+	irc_channel_remove(ch, "MaRKaND");
 	GREATEST_ASSERT(!ch->users);
 
 	irc_channel_finish(ch);

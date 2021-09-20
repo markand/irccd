@@ -18,7 +18,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include <string.h>
+#include <strings.h>
 
 #include <utlist.h>
 
@@ -65,7 +65,7 @@ irc_channel_get(const struct irc_channel *ch, const char *nickname)
 	struct irc_channel_user *u;
 
 	LL_FOREACH(ch->users, u)
-		if (strcmp(u->nickname, nickname) == 0)
+		if (strcasecmp(u->nickname, nickname) == 0)
 			return u;
 
 	return NULL;
