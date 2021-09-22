@@ -817,7 +817,7 @@ irc_server_flush(struct irc_server *s, const struct pollfd *pfd)
 			fail(s);
 		} else if (irc_conn_flush(s->conn, pfd) < 0) {
 			irc_log_warn("server %s: %s", s->name, strerror(errno));
-			return fail(s);
+			fail(s);
 		}
 		break;
 	case IRC_SERVER_STATE_CONNECTING:

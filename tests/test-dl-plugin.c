@@ -37,7 +37,7 @@ setup(void *udata)
 	(void)udata;
 
 	/* TODO: No idea how to stop greatest from here. */
-	if ((plugin = dl_plugin_open("example", TOP "/tests/data/example-dl-plugin.so")) == NULL)
+	if ((plugin = dl_plugin_open("example", EXAMPLE_DL_PLUGIN)) == NULL)
 		irc_util_die("dlopen: %s\n", strerror(errno));
 }
 

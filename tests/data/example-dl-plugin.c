@@ -85,76 +85,76 @@ get(const struct kw *table, size_t tablesz, const char *key)
 }
 
 void
-example_dl_plugin_set_option(const char *key, const char *value)
+plugin_dl_example_set_option(const char *key, const char *value)
 {
 	set(options, IRC_UTIL_SIZE(options), key, value);
 }
 
 const char *
-example_dl_plugin_get_option(const char *key)
+plugin_dl_example_get_option(const char *key)
 {
 	return get(options, IRC_UTIL_SIZE(options), key);
 }
 
 const char **
-example_dl_plugin_get_options(void)
+plugin_dl_example_get_options(void)
 {
 	return options_list;
 }
 
 void
-example_dl_plugin_set_template(const char *key, const char *value)
+plugin_dl_example_set_template(const char *key, const char *value)
 {
 	set(templates, IRC_UTIL_SIZE(templates), key, value);
 }
 
 const char *
-example_dl_plugin_get_template(const char *key)
+plugin_dl_example_get_template(const char *key)
 {
 	return get(templates, IRC_UTIL_SIZE(templates), key);
 }
 
 const char **
-example_dl_plugin_get_templates(void)
+plugin_dl_example_get_templates(void)
 {
 	return templates_list;
 }
 
 void
-example_dl_plugin_set_path(const char *key, const char *value)
+plugin_dl_example_set_path(const char *key, const char *value)
 {
 	set(paths, IRC_UTIL_SIZE(paths), key, value);
 }
 
 const char *
-example_dl_plugin_get_path(const char *key)
+plugin_dl_example_get_path(const char *key)
 {
 	return get(paths, IRC_UTIL_SIZE(paths), key);
 }
 
 const char **
-example_dl_plugin_get_paths(void)
+plugin_dl_example_get_paths(void)
 {
 	return paths_list;
 }
 
 void
-example_dl_plugin_event(const struct irc_event *ev)
+plugin_dl_example_event(const struct irc_event *ev)
 {
 	irc_server_send(ev->server, "EVENT");
 }
 
 void
-example_dl_plugin_load(void)
+plugin_dl_example_load(void)
 {
 }
 
 void
-example_dl_plugin_reload(void)
+plugin_dl_example_reload(void)
 {
 }
 
 void
-example_dl_plugin_unload(void)
+plugin_dl_example_unload(void)
 {
 }

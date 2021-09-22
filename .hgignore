@@ -1,53 +1,13 @@
-# temporary files.
-\.a$
-\.d$
-\.o$
-\.so$
+# CMake files.
+^build
 
 # vim/emacs specific.
 ^tags$
-^cscope\.out$
 ^tags\.lock$
 ^tags\.temp$
+^cscope\.out$
 \.swp$
 \.swo$
 
-# executables.
-^irccd/irccd$
-^irccdctl/irccdctl$
-
-# generated files.
-^irccd/conf\.c$
-^irccd/conf\.h$
-^irccd/lex\.c$
-^lib/irccd/config\.h$
-
 # macOS specific.
 \.DS_Store$
-\.dSYM
-
-# tests files.
-^tests/test-bot$
-^tests/test-channel$
-^tests/test-dl-plugin$
-^tests/test-event$
-^tests/test-jsapi-chrono$
-^tests/test-jsapi-directory$
-^tests/test-jsapi-file$
-^tests/test-jsapi-irccd$
-^tests/test-jsapi-system$
-^tests/test-jsapi-timer$
-^tests/test-jsapi-unicode$
-^tests/test-jsapi-util$
-^tests/test-log$
-^tests/test-plugin-ask$
-^tests/test-plugin-auth$
-^tests/test-plugin-hangman$
-^tests/test-plugin-history$
-^tests/test-plugin-joke$
-^tests/test-plugin-logger$
-^tests/test-plugin-plugin$
-^tests/test-plugin-tictactoe$
-^tests/test-rule$
-^tests/test-subst$
-^tests/test-util$
