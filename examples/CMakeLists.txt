@@ -26,3 +26,4 @@ set(
 
 add_custom_target(doc SOURCES ${FILES})
 install(FILES ${FILES} DESTINATION ${CMAKE_INSTALL_DOCDIR})
+source_group("" FILES ${FILES})

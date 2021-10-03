@@ -19,10 +19,14 @@
 project(libirccd)
 
 set(
-	SOURCES
+	LIBBSD_SOURCES
 	${irccd_SOURCE_DIR}/extern/libbsd/strlcpy.c
 	${irccd_SOURCE_DIR}/extern/libbsd/strlcat.c
 	${irccd_SOURCE_DIR}/extern/libbsd/reallocarray.c
+)
+
+set(
+	SOURCES
 	${libirccd_SOURCE_DIR}/irccd/channel.c
 	${libirccd_SOURCE_DIR}/irccd/channel.h
 	${libirccd_SOURCE_DIR}/irccd/conn.c
@@ -53,7 +57,7 @@ configure_file(
 	${libirccd_BINARY_DIR}/irccd/config.h
 )
 
-add_library(libirccd-static STATIC ${SOURCES})
+add_library(libirccd-static STATIC ${LIBBSD_SOURCES} ${SOURCES})
 target_link_libraries(libirccd-static PUBLIC libirccd-utlist)
 target_include_directories(
 	libirccd-static
@@ -72,3 +76,6 @@ endif ()
 if (IRCCD_WITH_SSL)
 	target_link_libraries(libirccd-static PUBLIC OpenSSL::SSL OpenSSL::Crypto)
 endif ()
+
+source_group(extern/libbsd FILES ${LIBBSD_SOURCES})
+source_group(irccd FILES ${SOURCES})
