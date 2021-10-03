@@ -163,7 +163,7 @@ set(void *udata)
 	irc_rule_add(r32->events, "onCommand");
 	irc_rule_add(r32->events, "onMessage");
 	irc_bot_rule_insert(r32, -1);
-};
+}
 
 GREATEST_TEST
 solve_match1(void)

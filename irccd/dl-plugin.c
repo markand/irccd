@@ -32,13 +32,44 @@
 
 #include "dl-plugin.h"
 
+/* Invoke with arguments and return value. */
 #define INVOKE(pg, name, sig, ...)                                              \
 do {                                                                            \
         struct self *self = pg->data;                                           \
         sig fn;                                                                 \
                                                                                 \
-        if (self->handle && (fn = dlsym(self->handle, symbol(self, name))))     \
+        if (self->handle && (fn = (sig)dlsym(self->handle, symbol(self, name))))\
                 return fn(__VA_ARGS__);                                         \
+} while (0)
+
+/* Invoke with argument and without return value. */
+#define INVOKE_NR(pg, name, sig, ...)                                           \
+do {                                                                            \
+        struct self *self = pg->data;                                           \
+        sig fn;                                                                 \
+                                                                                \
+        if (self->handle && (fn = (sig)dlsym(self->handle, symbol(self, name))))\
+                fn(__VA_ARGS__);                                                \
+} while (0)
+
+/* Invoke without arguments and with return value. */
+#define INVOKE_NA(pg, name, sig)                                                \
+do {                                                                            \
+        struct self *self = pg->data;                                           \
+        sig fn;                                                                 \
+                                                                                \
+        if (self->handle && (fn = (sig)dlsym(self->handle, symbol(self, name))))\
+                return fn();                                                    \
+} while (0)
+
+/* Invoke without arguments and without return value. */
+#define INVOKE_NA_NR(pg, name, sig)                                             \
+do {                                                                            \
+        struct self *self = pg->data;                                           \
+        sig fn;                                                                 \
+                                                                                \
+        if (self->handle && (fn = (sig)dlsym(self->handle, symbol(self, name))))\
+                fn();                                                           \
 } while (0)
 
 struct self {
@@ -85,7 +116,7 @@ metadata(struct self *self, const char *name)
 static void
 set_template(struct irc_plugin *plg, const char *key, const char *value)
 {
-	INVOKE(plg, "set_template", set_template_fn, key, value);
+	INVOKE_NR(plg, "set_template", set_template_fn, key, value);
 }
 
 static const char *
@@ -99,7 +130,7 @@ get_template(struct irc_plugin *plg, const char *key)
 static const char **
 get_templates(struct irc_plugin *plg)
 {
-	INVOKE(plg, "get_templates", get_templates_fn);
+	INVOKE_NA(plg, "get_templates", get_templates_fn);
 
 	return NULL;
 }
@@ -107,7 +138,7 @@ get_templates(struct irc_plugin *plg)
 static void
 set_path(struct irc_plugin *plg, const char *key, const char *value)
 {
-	INVOKE(plg, "set_path", set_path_fn, key, value);
+	INVOKE_NR(plg, "set_path", set_path_fn, key, value);
 }
 
 static const char *
@@ -121,7 +152,7 @@ get_path(struct irc_plugin *plg, const char *key)
 static const char **
 get_paths(struct irc_plugin *plg)
 {
-	INVOKE(plg, "get_paths", get_paths_fn);
+	INVOKE_NA(plg, "get_paths", get_paths_fn);
 
 	return NULL;
 }
@@ -129,7 +160,7 @@ get_paths(struct irc_plugin *plg)
 static void
 set_option(struct irc_plugin *plg, const char *key, const char *value)
 {
-	INVOKE(plg, "set_option", set_option_fn, key, value);
+	INVOKE_NR(plg, "set_option", set_option_fn, key, value);
 }
 
 static const char *
@@ -143,7 +174,7 @@ get_option(struct irc_plugin *plg, const char *key)
 static const char **
 get_options(struct irc_plugin *plg)
 {
-	INVOKE(plg, "get_options", get_options_fn);
+	INVOKE_NA(plg, "get_options", get_options_fn);
 
 	return NULL;
 }
@@ -151,7 +182,7 @@ get_options(struct irc_plugin *plg)
 static int
 load(struct irc_plugin *plg)
 {
-	INVOKE(plg, "load", load_fn);
+	INVOKE_NA(plg, "load", load_fn);
 
 	return 0;
 }
@@ -159,19 +190,19 @@ load(struct irc_plugin *plg)
 static void
 reload(struct irc_plugin *plg)
 {
-	INVOKE(plg, "reload", reload_fn);
+	INVOKE_NA_NR(plg, "reload", reload_fn);
 }
 
 static void
 unload(struct irc_plugin *plg)
 {
-	INVOKE(plg, "unload", unload_fn);
+	INVOKE_NA_NR(plg, "unload", unload_fn);
 }
 
 static void
 handle(struct irc_plugin *plg, const struct irc_event *ev)
 {
-	INVOKE(plg, "event", event_fn, ev);
+	INVOKE_NR(plg, "event", event_fn, ev);
 }
 
 static void

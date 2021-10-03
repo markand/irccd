@@ -436,7 +436,7 @@ cmd_hook_remove(int argc, char **argv)
 static void
 cmd_plugin_config(int argc, char **argv)
 {
-	return plugin_list_set(argc, argv, "PLUGIN-CONFIG");
+	plugin_list_set(argc, argv, "PLUGIN-CONFIG");
 }
 
 /*
@@ -488,7 +488,7 @@ cmd_plugin_load(int argc, char **argv)
 static void
 cmd_plugin_path(int argc, char **argv)
 {
-	return plugin_list_set(argc, argv, "PLUGIN-PATH");
+	plugin_list_set(argc, argv, "PLUGIN-PATH");
 }
 
 static void
@@ -505,7 +505,7 @@ cmd_plugin_reload(int argc, char **argv)
 static void
 cmd_plugin_template(int argc, char **argv)
 {
-	return plugin_list_set(argc, argv, "PLUGIN-TEMPLATE");
+	plugin_list_set(argc, argv, "PLUGIN-TEMPLATE");
 }
 
 static void
