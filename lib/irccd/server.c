@@ -1096,7 +1096,7 @@ irc_server_decref(struct irc_server *s)
 
 	if (--s->refc == 0) {
 		clear_channels(s, 1);
-		free(s);
 		free(s->conn);
+		free(s);
 	}
 }
