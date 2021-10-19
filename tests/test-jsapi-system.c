@@ -50,7 +50,7 @@ GREATEST_TEST
 basics_popen(void)
 {
 	int ret = duk_peval_string(ctx,
-		"f = Irccd.System.popen(\"" TOP "/irccd/irccd version\", \"r\");"
+		"f = Irccd.System.popen(\"" IRCCD_EXECUTABLE " version\", \"r\");"
 		"r = f.readline();"
 	);
 

@@ -51,7 +51,12 @@ foreach (t ${TESTS})
 	add_test(NAME test-${t} COMMAND test-${t})
 	set_target_properties(test-${t} PROPERTIES FOLDER tests ENABLE_EXPORTS On)
 	target_link_libraries(test-${t} irccd-static libirccd-greatest)
-	target_compile_definitions(test-${t} PRIVATE TOP="${CMAKE_SOURCE_DIR}")
+	target_compile_definitions(
+		test-${t}
+		PRIVATE
+			TOP="${CMAKE_SOURCE_DIR}"
+			IRCCD_EXECUTABLE="$<TARGET_FILE:irccd>"
+	)
 endforeach ()
 
 #
