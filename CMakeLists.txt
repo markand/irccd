@@ -54,6 +54,9 @@ if (IRCCD_WITH_JS)
 	add_subdirectory(extern/libduktape)
 endif ()
 
+# Check presence of POSIX m library
+find_library(M_LIBRARY m libm)
+
 add_subdirectory(extern/libutlist)
 add_subdirectory(extern/libketopt)
 

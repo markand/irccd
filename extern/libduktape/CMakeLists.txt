@@ -32,3 +32,7 @@ target_include_directories(
 		$<BUILD_INTERFACE:${libirccd-duktape_SOURCE_DIR}>
 )
 set_target_properties(libirccd-duktape PROPERTIES PREFIX "" FOLDER extern)
+
+if (M_LIBRARY)
+	target_link_libraries(libirccd-duktape ${M_LIBRARY})
+endif ()

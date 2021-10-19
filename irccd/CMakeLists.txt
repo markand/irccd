@@ -60,6 +60,7 @@ set(
 
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
+find_package(Threads REQUIRED)
 
 bison_target(yacc ${irccd_SOURCE_DIR}/conf.y
 	${irccd_BINARY_DIR}/conf.c
@@ -80,7 +81,7 @@ target_include_directories(irccd-static
 	PRIVATE $<BUILD_INTERFACE:${irccd_SOURCE_DIR}>
 	PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
 )
-target_link_libraries(irccd-static libirccd-static)
+target_link_libraries(irccd-static libirccd-static Threads::Threads)
 set_target_properties(irccd-static PROPERTIES PREFIX "")
 
 # Final irccd executable.
