@@ -46,13 +46,15 @@ systemd, it's possible to force the option using `IRCCD_WITH_SYSTEMD` to `On` or
 
 The following options are available:
 
-- `IRCCD_WITH_MAN`: disable installation of manpages.
-- `IRCCD_WITH_JS`: disable Javascript support (and all Javascript plugins).
-- `IRCCD_WITH_SSL`: disable OpenSSL support.
-- `IRCCD_WITH_TESTS`: disable building of tests.
-- `IRCCD_WITH_EXAMPLES`: disable plugin templates.
+- `IRCCD_WITH_MAN`: installation of manpages.
+- `IRCCD_WITH_JS`: Javascript support (and all Javascript plugins).
+- `IRCCD_WITH_SSL`: OpenSSL support.
+- `IRCCD_WITH_TESTS`: building of tests.
+- `IRCCD_WITH_EXAMPLES`: plugin templates.
+- `IRCCD_WITH_PKGCONFIG`: pkg-config file installation.
+- `IRCCD_WITH_PKGCONFIGDIR`: path to pkg-config directory installation.
 
-The following options control installation directories.
+The following standard CMake options control installation directories.
 
 - `CMAKE_INSTALL_PREFIX`: root directory for installing (default: /usr/local).
 - `CMAKE_INSTALL_BINDIR`: binaries (default: ${CMAKE_INSTALL_PREFIX}/bin).

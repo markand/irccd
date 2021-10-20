@@ -52,19 +52,22 @@ if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 	set(CMAKE_C_FLAGS "-Wall -Wextra -pedantic ${CMAKE_C_FLAGS}")
 endif ()
 
+include(GNUInstallDirs)
+
 option(IRCCD_WITH_EXAMPLES "Enable example files" On)
 option(IRCCD_WITH_JS "Enable Javascript" On)
 option(IRCCD_WITH_MAN "Enable manual pages" On)
 option(IRCCD_WITH_SSL "Enable SSL (requires OpenSSL)" On)
 option(IRCCD_WITH_TESTS "Enable unit tests" On)
+option(IRCCD_WITH_PKGCONFIG "Enable installation of pkg-config file" On)
 
 set(IRCCD_WITH_UID "irccd" CACHE STRING "Default uid to run irccd as")
 set(IRCCD_WITH_GID "irccd" CACHE STRING "Default gid to run irccd as")
+set(IRCCD_WITH_PKGCONFIGDIR "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
+	CACHE STRING "Directory for pkg-config files")
 
 # Check presence of POSIX m library
 find_library(M_LIBRARY m libm)
-
-include(GNUInstallDirs)
 
 include(cmake/IrccdDefinePlugin.cmake)
 

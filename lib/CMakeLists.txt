@@ -77,6 +77,16 @@ endif ()
 if (IRCCD_WITH_SSL)
 	target_link_libraries(libirccd PUBLIC OpenSSL::SSL OpenSSL::Crypto)
 endif ()
+if (IRCCD_WITH_PKGCONFIG)
+	configure_file(
+		${libirccd_SOURCE_DIR}/irccd.pc.in
+		${libirccd_BINARY_DIR}/irccd.pc
+	)
+	install(
+		FILES ${libirccd_BINARY_DIR}/irccd.pc
+		DESTINATION ${IRCCD_WITH_PKGCONFIGDIR}
+	)
+endif ()
 
 source_group(extern/libbsd FILES ${LIBBSD_SOURCES})
 source_group(irccd FILES ${SOURCES})
