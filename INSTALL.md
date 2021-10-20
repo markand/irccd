@@ -9,8 +9,8 @@ Requirements
 Build dependencies:
 
 - C99 and few features from C11 (stdatomics.h, stdnoreturn.h).
-- [Bison][] and [Flex][]: For configuration files.
-- [GNU Make][]: The GNU make utility.
+- [Bison][] and [Flex][]: for configuration files.
+- [CMake][]: the cross platform build utility.
 
 Optional runtime dependencies:
 
@@ -22,63 +22,48 @@ Basic installation
 
 This is the quick way to install irccd.
 
-    tar xvzf irccd-x.y.z-tar.xz
-    cd irccd-x.y.z
-    make
-    sudo make install
+	tar xvzf irccd-x.y.z-tar.xz
+	cmake -S irccd-x.y.z -B build
+	cmake --build build --target all
+	sudo cmake --build build --target install
 
-### Installing plugins
+### Disabling plugins
 
-And to install plugins you must build and use `plugins` and `install-plugins`
-targets:
+For every plugin, an option `IRCCD_WITH_PLUGIN_<NAME>` is presented and set to
+on by default. Substitute `<NAME>` with the plugin uppercase name (e.g. `ASK`).
 
-    make plugins
-    sudo make install-plugins
-
-Alternatively you can build and install plugins manually using `plugin-NAME` and
-`install-plugin-NAME` to install only wanted plugins.
-
-Example:
-
-    make plugin-ask plugin-links
-    sudo make install-plugin-ask plugin-links
+	cmake build -DIRCCD_WITH_PLUGIN_ASK=Off
 
 ### Systemd service
 
-A systemd service is available through the `install-systemd` target. The service
-file is named `irccd.service`.
+The systemd service file is installed by default if the machine is running
+systemd, it's possible to force the option using `IRCCD_WITH_SYSTEMD` to `On` or
+`Off`.
 
-Options
--------
+	cmake build -DIRCCD_WITH_SYSTEMD=Off
 
-The following options are available at build time (make sure to run `make clean`
-when you change options).
+### Other options
 
-- `SSL`: set to 1 or 0 to enable/disable OpenSSL (default: 1).
-- `JS`: set to 1 or 0 to disable Javascript (default: 1).
-- `DEBUG`: set to 1 or 0 to build with debug symbols and optimizations disabled
-  (default: 0).
-- `USER`: user to use for transport and init scripts (default: nobody).
-- `GROUP`: group to use for transport and init scripts (default: nobody).
+The following options are available:
 
-You can tweak the installation directories by changing the following variables
-(note: all paths must be absolute):
+- `IRCCD_WITH_MAN`: disable installation of manpages.
+- `IRCCD_WITH_JS`: disable Javascript support (and all Javascript plugins).
+- `IRCCD_WITH_SSL`: disable OpenSSL support.
+- `IRCCD_WITH_TESTS`: disable building of tests.
+- `IRCCD_WITH_EXAMPLES`: disable plugin templates.
 
-- `PREFIX`: root directory for installing (default: /usr/local).
-- `BINDIR`: binaries (default: ${PREFIX}/bin).
-- `ETCDIR`: config files (default: ${PREFIX}/etc).
-- `LIBDIR`: libraries (default: ${PREFIX}/lib).
-- `INCDIR`: header files (default: ${PREFIX}/include).
-- `SHAREDIR`: data files (default: ${PREFIX}/share).
-- `MANDIR`: path to manual pages (default: ${PREFIX}/share/man).
-- `VARDIR`: local cache files (default: ${PREFIX}/var).
+The following options control installation directories.
 
-For any options, make sure to specify them for any make targets (e.g. `install`)
-because they can be translated at install time too.
+- `CMAKE_INSTALL_PREFIX`: root directory for installing (default: /usr/local).
+- `CMAKE_INSTALL_BINDIR`: binaries (default: ${CMAKE_INSTALL_PREFIX}/bin).
+- `CMAKE_INSTALL_SYSCONFDIR`: config files (default: ${CMAKE_INSTALL_PREFIX}/etc).
+- `CMAKE_INSTALL_LIBDIR`: libraries (default: ${CMAKE_INSTALL_PREFIX}/lib).
+- `CMAKE_INSTALL_INCLUDEDIR`: header files (default: ${CMAKE_INSTALL_PREFIX}/include).
+- `CMAKE_INSTALL_SHAREDIR`: data files (default: ${CMAKE_INSTALL_PREFIX}/share).
+- `CMAKE_INSTALL_MANDIR`: path to manual pages (default: ${CMAKE_INSTALL_PREFIX}/share/man).
 
 [Bison]: https://www.gnu.org/software/bison
-[GNU Make]: http://www.cmake.org
+[CMake]: http://www.cmake.org
 [CURL]: https://curl.se
 [Flex]: https://github.com/westes/flex
 [OpenSSL]: http://openssl.org
-[libbsd]: https://libbsd.freedesktop.org/wiki

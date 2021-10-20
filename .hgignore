@@ -1,6 +1,3 @@
-# CMake files.
-^build
-
 # vim/emacs specific.
 ^tags$
 ^tags\.lock$

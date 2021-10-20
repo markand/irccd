@@ -1,0 +1,10 @@
+# vim/emacs specific.
+tags
+tags.lock
+tags.temp
+cscope.out
+.swp
+.swo
+
+# macOS specific.
+.DS_Store
