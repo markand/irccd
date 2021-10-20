@@ -16,6 +16,22 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+#
+# Overview of projects targets
+# ============================
+#
+# Irccd is a host program that loads C native plugins, to do so it exports the
+# public API by its own and plugins must not link to the library code itself.
+# But for unit testing the project we don't want to compile over and over the
+# same files that *must* link against the library code so we split:
+#
+# - libirccd (lib/, static library): contains the public API for C plugins.
+# - irccd-static (irccd/, object code): contains all irccd(1) code *without*
+#   the main entry point. This code isn't publicly exposed to the plugins.
+# - irccd (irccd/, executable): contains main and config parser code.
+# - irccdctl (irccdctl, executable): contain irccdctl(1) utility.
+#
+
 cmake_minimum_required(VERSION 2.20)
 cmake_policy(SET CMP0048 NEW)
 project(irccd
@@ -42,6 +58,9 @@ option(IRCCD_WITH_MAN "Enable manual pages" On)
 option(IRCCD_WITH_SSL "Enable SSL (requires OpenSSL)" On)
 option(IRCCD_WITH_TESTS "Enable unit tests" On)
 
+# Check presence of POSIX m library
+find_library(M_LIBRARY m libm)
+
 include(GNUInstallDirs)
 
 include(cmake/IrccdDefinePlugin.cmake)
@@ -54,8 +73,6 @@ if (IRCCD_WITH_JS)
 	add_subdirectory(extern/libduktape)
 endif ()
 
-# Check presence of POSIX m library
-find_library(M_LIBRARY m libm)
 
 add_subdirectory(extern/libutlist)
 add_subdirectory(extern/libketopt)

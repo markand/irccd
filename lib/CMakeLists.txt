@@ -57,11 +57,11 @@ configure_file(
 	${libirccd_BINARY_DIR}/irccd/config.h
 )
 
-add_library(libirccd-static STATIC ${LIBBSD_SOURCES} ${SOURCES})
-target_link_libraries(libirccd-static PUBLIC libirccd-utlist)
-target_compile_definitions(libirccd-static PUBLIC _XOPEN_SOURCE=700)
+add_library(libirccd STATIC ${LIBBSD_SOURCES} ${SOURCES})
+target_link_libraries(libirccd PUBLIC libirccd-utlist)
+target_compile_definitions(libirccd PUBLIC _XOPEN_SOURCE=700)
 target_include_directories(
-	libirccd-static
+	libirccd
 	PUBLIC
 		$<BUILD_INTERFACE:${libirccd_SOURCE_DIR}>
 		$<BUILD_INTERFACE:${libirccd_BINARY_DIR}>
@@ -69,13 +69,13 @@ target_include_directories(
 	PRIVATE
 		$<BUILD_INTERFACE:${libirccd_BINARY_DIR}/irccd>
 )
-set_target_properties(libirccd-static PROPERTIES PREFIX "")
+set_target_properties(libirccd PROPERTIES PREFIX "")
 
 if (IRCCD_WITH_JS)
-	target_link_libraries(libirccd-static PUBLIC libirccd-duktape)
+	target_link_libraries(libirccd PUBLIC libirccd-duktape)
 endif ()
 if (IRCCD_WITH_SSL)
-	target_link_libraries(libirccd-static PUBLIC OpenSSL::SSL OpenSSL::Crypto)
+	target_link_libraries(libirccd PUBLIC OpenSSL::SSL OpenSSL::Crypto)
 endif ()
 
 source_group(extern/libbsd FILES ${LIBBSD_SOURCES})

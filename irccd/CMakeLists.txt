@@ -16,19 +16,6 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-#
-# Overview of projects and targets here. Irccd is a host program that loads C
-# native plugins, to do so it exports the public API by its own and plugins
-# must not link to the library code itself. But for unit testing the project
-# we don't want to compile over and over the same files that *must* link
-# against the library code so we split:
-#
-# - libirccd-static (static library): contains the public API for C plugins.
-# - irccd-static (static library): contains all irccd(1) code *without* the
-#   main entry point. This code isn't publicly exposed to the plugins.
-# - irccd (executable): contains main and config parser code.
-#
-
 project(irccd)
 
 set(
@@ -83,7 +70,7 @@ flex_target(lex ${irccd_SOURCE_DIR}/lex.l ${irccd_BINARY_DIR}/lex.c)
 add_flex_bison_dependency(lex yacc)
 
 #
-# irccd-static
+# libirccd-static
 # -------------------------------------------------------------------
 #
 add_library(
@@ -101,7 +88,7 @@ target_link_libraries(
 	irccd-static
 	${CMAKE_DL_LIBS}
 	Threads::Threads
-	libirccd-static
+	libirccd
 )
 set_target_properties(irccd-static PROPERTIES PREFIX "")
 
