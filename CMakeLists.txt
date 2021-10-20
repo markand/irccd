@@ -58,6 +58,9 @@ option(IRCCD_WITH_MAN "Enable manual pages" On)
 option(IRCCD_WITH_SSL "Enable SSL (requires OpenSSL)" On)
 option(IRCCD_WITH_TESTS "Enable unit tests" On)
 
+set(IRCCD_WITH_UID "irccd" CACHE STRING "Default uid to run irccd as")
+set(IRCCD_WITH_GID "irccd" CACHE STRING "Default gid to run irccd as")
+
 # Check presence of POSIX m library
 find_library(M_LIBRARY m libm)
 
@@ -81,6 +84,7 @@ add_subdirectory(lib)
 add_subdirectory(irccd)
 add_subdirectory(irccdctl)
 add_subdirectory(plugins)
+add_subdirectory(systemd)
 
 if (IRCCD_WITH_EXAMPLES)
 	add_subdirectory(examples)
