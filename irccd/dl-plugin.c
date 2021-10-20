@@ -32,44 +32,50 @@
 
 #include "dl-plugin.h"
 
+#if defined(__GNUC__)
+#       define SYM(sig, f) (__extension__ (sig)(f))
+#else
+#       define SYM(sig, f) ((sig)(f))
+#endif
+
 /* Invoke with arguments and return value. */
-#define INVOKE(pg, name, sig, ...)                                              \
-do {                                                                            \
-        struct self *self = pg->data;                                           \
-        sig fn;                                                                 \
-                                                                                \
-        if (self->handle && (fn = (sig)dlsym(self->handle, symbol(self, name))))\
-                return fn(__VA_ARGS__);                                         \
+#define INVOKE(pg, name, sig, ...)                                                      \
+do {                                                                                    \
+        struct self *self = pg->data;                                                   \
+        sig fn;                                                                         \
+                                                                                        \
+        if (self->handle && (fn = SYM(sig, dlsym(self->handle, symbol(self, name)))))   \
+                return fn(__VA_ARGS__);                                                 \
 } while (0)
 
 /* Invoke with argument and without return value. */
-#define INVOKE_NR(pg, name, sig, ...)                                           \
-do {                                                                            \
-        struct self *self = pg->data;                                           \
-        sig fn;                                                                 \
-                                                                                \
-        if (self->handle && (fn = (sig)dlsym(self->handle, symbol(self, name))))\
-                fn(__VA_ARGS__);                                                \
+#define INVOKE_NR(pg, name, sig, ...)                                                   \
+do {                                                                                    \
+        struct self *self = pg->data;                                                   \
+        sig fn;                                                                         \
+                                                                                        \
+        if (self->handle && (fn = SYM(sig, dlsym(self->handle, symbol(self, name)))))   \
+                fn(__VA_ARGS__);                                                        \
 } while (0)
 
 /* Invoke without arguments and with return value. */
-#define INVOKE_NA(pg, name, sig)                                                \
-do {                                                                            \
-        struct self *self = pg->data;                                           \
-        sig fn;                                                                 \
-                                                                                \
-        if (self->handle && (fn = (sig)dlsym(self->handle, symbol(self, name))))\
-                return fn();                                                    \
+#define INVOKE_NA(pg, name, sig)                                                        \
+do {                                                                                    \
+        struct self *self = pg->data;                                                   \
+        sig fn;                                                                         \
+                                                                                        \
+        if (self->handle && (fn = SYM(sig, dlsym(self->handle, symbol(self, name)))))   \
+                return fn();                                                            \
 } while (0)
 
 /* Invoke without arguments and without return value. */
-#define INVOKE_NA_NR(pg, name, sig)                                             \
-do {                                                                            \
-        struct self *self = pg->data;                                           \
-        sig fn;                                                                 \
-                                                                                \
-        if (self->handle && (fn = (sig)dlsym(self->handle, symbol(self, name))))\
-                fn();                                                           \
+#define INVOKE_NA_NR(pg, name, sig)                                                     \
+do {                                                                                    \
+        struct self *self = pg->data;                                                   \
+        sig fn;                                                                         \
+                                                                                        \
+        if (self->handle && (fn = SYM(sig, dlsym(self->handle, symbol(self, name)))))   \
+                fn();                                                                   \
 } while (0)
 
 struct self {

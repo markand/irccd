@@ -59,7 +59,7 @@ configure_file(
 
 add_library(libirccd-static STATIC ${LIBBSD_SOURCES} ${SOURCES})
 target_link_libraries(libirccd-static PUBLIC libirccd-utlist)
-target_compile_definitions(libirccd-static PUBLIC _XOPEN_SOURCE=0700)
+target_compile_definitions(libirccd-static PUBLIC _XOPEN_SOURCE=700)
 target_include_directories(
 	libirccd-static
 	PUBLIC

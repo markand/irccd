@@ -16,6 +16,19 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+#
+# Overview of projects and targets here. Irccd is a host program that loads C
+# native plugins, to do so it exports the public API by its own and plugins
+# must not link to the library code itself. But for unit testing the project
+# we don't want to compile over and over the same files that *must* link
+# against the library code so we split:
+#
+# - libirccd-static (static library): contains the public API for C plugins.
+# - irccd-static (static library): contains all irccd(1) code *without* the
+#   main entry point. This code isn't publicly exposed to the plugins.
+# - irccd (executable): contains main and config parser code.
+#
+
 project(irccd)
 
 set(
@@ -69,7 +82,10 @@ bison_target(yacc ${irccd_SOURCE_DIR}/conf.y
 flex_target(lex ${irccd_SOURCE_DIR}/lex.l ${irccd_BINARY_DIR}/lex.c)
 add_flex_bison_dependency(lex yacc)
 
-# Intermediate library (for unit tests purposes).
+#
+# irccd-static
+# -------------------------------------------------------------------
+#
 add_library(
 	irccd-static OBJECT
 	${SOURCES}
@@ -81,10 +97,18 @@ target_include_directories(irccd-static
 	PRIVATE $<BUILD_INTERFACE:${irccd_SOURCE_DIR}>
 	PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
 )
-target_link_libraries(irccd-static libirccd-static Threads::Threads)
+target_link_libraries(
+	irccd-static
+	${CMAKE_DL_LIBS}
+	Threads::Threads
+	libirccd-static
+)
 set_target_properties(irccd-static PROPERTIES PREFIX "")
 
-# Final irccd executable.
+#
+# irccd(1)
+# -------------------------------------------------------------------
+#
 add_executable(irccd ${irccd_SOURCE_DIR}/main.c)
 target_link_libraries(irccd irccd-static)
 set_target_properties(irccd PROPERTIES ENABLE_EXPORTS On)
