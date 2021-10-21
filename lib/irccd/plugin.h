@@ -38,15 +38,15 @@ struct irc_plugin {
 
 	void (*set_template)(struct irc_plugin *, const char *, const char *);
 	const char *(*get_template)(struct irc_plugin *, const char *);
-	const char **(*get_templates)(struct irc_plugin *);
+	const char * const *(*get_templates)(struct irc_plugin *);
 
 	void (*set_path)(struct irc_plugin *, const char *, const char *);
 	const char *(*get_path)(struct irc_plugin *, const char *);
-	const char **(*get_paths)(struct irc_plugin *);
+	const char * const *(*get_paths)(struct irc_plugin *);
 
 	void (*set_option)(struct irc_plugin *, const char *, const char *);
 	const char *(*get_option)(struct irc_plugin *, const char *);
-	const char **(*get_options)(struct irc_plugin *);
+	const char * const *(*get_options)(struct irc_plugin *);
 
 	int (*load)(struct irc_plugin *);
 	void (*reload)(struct irc_plugin *);
@@ -71,7 +71,7 @@ irc_plugin_set_template(struct irc_plugin *, const char *, const char *);
 const char *
 irc_plugin_get_template(struct irc_plugin *, const char *);
 
-const char **
+const char * const *
 irc_plugin_get_templates(struct irc_plugin *);
 
 void
@@ -80,7 +80,7 @@ irc_plugin_set_path(struct irc_plugin *, const char *, const char *);
 const char *
 irc_plugin_get_path(struct irc_plugin *, const char *);
 
-const char **
+const char * const *
 irc_plugin_get_paths(struct irc_plugin *);
 
 void
@@ -89,7 +89,7 @@ irc_plugin_set_option(struct irc_plugin *, const char *, const char *);
 const char *
 irc_plugin_get_option(struct irc_plugin *, const char *);
 
-const char **
+const char * const *
 irc_plugin_get_options(struct irc_plugin *);
 
 int

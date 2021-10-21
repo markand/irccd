@@ -327,7 +327,7 @@ links_get_template(const char *key)
 	return NULL;
 }
 
-const char **
+const char * const *
 links_get_templates(void)
 {
 	static const char *keys[] = { "info", NULL };
@@ -355,7 +355,7 @@ links_get_option(const char *key)
 	return NULL;
 }
 
-const char **
+const char * const *
 links_get_options(void)
 {
 	static const char *keys[] = { "timeout", NULL };

@@ -39,7 +39,7 @@
 
 typedef void (*plugin_set_fn)(struct irc_plugin *, const char *, const char *);
 typedef const char * (*plugin_get_fn)(struct irc_plugin *, const char *);
-typedef const char ** (*plugin_list_fn)(struct irc_plugin *);
+typedef const char * const * (*plugin_list_fn)(struct irc_plugin *);
 
 static size_t
 parse(char *line, const char **args, size_t max)
@@ -126,7 +126,8 @@ plugin_list_set(struct peer *p,
                 plugin_get_fn get,
                 plugin_list_fn list)
 {
-	const char *args[3] = {0}, *value, **keys;
+	const char *args[3] = {0}, *value;
+	const char * const *keys;
 	char out[IRC_BUF_LEN];
 	FILE *fp;
 	struct irc_plugin *plg;
@@ -151,12 +152,12 @@ plugin_list_set(struct peer *p,
 		keys = list(plg);
 
 		/* Compute the number of keys found. */
-		for (const char **key = keys; key && *key; ++key)
+		for (const char * const *key = keys; key && *key; ++key)
 			keysz++;
 
 		fprintf(fp, "OK %zu\n", keysz);
 
-		for (const char **key = keys; key && *key; ++key) {
+		for (const char * const *key = keys; key && *key; ++key) {
 			value = get(plg, *key);
 			fprintf(fp, "%s=%s\n", *key, value ? value : "");
 		}

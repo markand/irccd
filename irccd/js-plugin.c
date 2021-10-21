@@ -170,7 +170,7 @@ log_trace(struct self *self)
 	free(stack);
 }
 
-static const char **
+static const char * const *
 get_table(duk_context *ctx, const char *name, char ***ptable)
 {
 	char **list = NULL;
@@ -194,7 +194,7 @@ get_table(duk_context *ctx, const char *name, char ***ptable)
 	freelist(*ptable);
 	*ptable = list;
 
-	return (const char **)list;
+	return (const char * const *)list;
 }
 
 static void
@@ -235,7 +235,7 @@ get_template(struct irc_plugin *plg, const char *key)
 	return get_value(js->ctx, JSAPI_PLUGIN_PROP_TEMPLATES, key);
 }
 
-static const char **
+static const char * const *
 get_templates(struct irc_plugin *plg)
 {
 	struct self *js = plg->data;
@@ -259,7 +259,7 @@ get_path(struct irc_plugin *plg, const char *key)
 	return get_value(js->ctx, JSAPI_PLUGIN_PROP_PATHS, key);
 }
 
-static const char **
+static const char * const *
 get_paths(struct irc_plugin *plg)
 {
 	struct self *js = plg->data;
@@ -283,7 +283,7 @@ get_option(struct irc_plugin *plg, const char *key)
 	return get_value(js->ctx, JSAPI_PLUGIN_PROP_OPTIONS, key);
 }
 
-static const char **
+static const char * const *
 get_options(struct irc_plugin *plg)
 {
 	struct self *js = plg->data;

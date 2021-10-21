@@ -61,7 +61,7 @@ options_set_get(void)
 GREATEST_TEST
 options_list(void)
 {
-	const char **options = irc_plugin_get_options(plugin);
+	const char * const *options = irc_plugin_get_options(plugin);
 
 	GREATEST_ASSERT_STR_EQ("option-1", options[0]);
 	GREATEST_ASSERT(!options[1]);
@@ -88,7 +88,7 @@ paths_set_get(void)
 GREATEST_TEST
 paths_list(void)
 {
-	const char **paths = irc_plugin_get_paths(plugin);
+	const char * const *paths = irc_plugin_get_paths(plugin);
 
 	GREATEST_ASSERT_STR_EQ("path-1", paths[0]);
 	GREATEST_ASSERT(!paths[1]);
@@ -115,7 +115,7 @@ templates_set_get(void)
 GREATEST_TEST
 templates_list(void)
 {
-	const char **templates = irc_plugin_get_templates(plugin);
+	const char * const *templates = irc_plugin_get_templates(plugin);
 
 	GREATEST_ASSERT_STR_EQ("template-1", templates[0]);
 	GREATEST_ASSERT(!templates[1]);

@@ -84,19 +84,19 @@ struct self {
 	void *handle;
 };
 
-typedef const char *    (*get_option_fn)(const char *);
-typedef const char *    (*get_path_fn)(const char *);
-typedef const char *    (*get_template_fn)(const char *);
-typedef const char **   (*get_options_fn)(void);
-typedef const char **   (*get_paths_fn)(void);
-typedef const char **   (*get_templates_fn)(void);
-typedef void            (*event_fn)(const struct irc_event *);
-typedef int             (*load_fn)(void);
-typedef void            (*reload_fn)(void);
-typedef void            (*unload_fn)(void);
-typedef void            (*set_option_fn)(const char *, const char *);
-typedef void            (*set_path_fn)(const char *, const char *);
-typedef void            (*set_template_fn)(const char *, const char *);
+typedef const char *            (*get_option_fn)(const char *);
+typedef const char *            (*get_path_fn)(const char *);
+typedef const char *            (*get_template_fn)(const char *);
+typedef const char * const *    (*get_options_fn)(void);
+typedef const char * const *    (*get_paths_fn)(void);
+typedef const char * const *    (*get_templates_fn)(void);
+typedef void                    (*event_fn)(const struct irc_event *);
+typedef int                     (*load_fn)(void);
+typedef void                    (*reload_fn)(void);
+typedef void                    (*unload_fn)(void);
+typedef void                    (*set_option_fn)(const char *, const char *);
+typedef void                    (*set_path_fn)(const char *, const char *);
+typedef void                    (*set_template_fn)(const char *, const char *);
 
 static inline const char *
 symbol(const struct self *self, const char *func)
@@ -133,7 +133,7 @@ get_template(struct irc_plugin *plg, const char *key)
 	return NULL;
 }
 
-static const char **
+static const char * const *
 get_templates(struct irc_plugin *plg)
 {
 	INVOKE_NA(plg, "get_templates", get_templates_fn);
@@ -155,7 +155,7 @@ get_path(struct irc_plugin *plg, const char *key)
 	return NULL;
 }
 
-static const char **
+static const char * const *
 get_paths(struct irc_plugin *plg)
 {
 	INVOKE_NA(plg, "get_paths", get_paths_fn);
@@ -177,7 +177,7 @@ get_option(struct irc_plugin *plg, const char *key)
 	return NULL;
 }
 
-static const char **
+static const char * const *
 get_options(struct irc_plugin *plg)
 {
 	INVOKE_NA(plg, "get_options", get_options_fn);

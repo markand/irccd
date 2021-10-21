@@ -44,7 +44,7 @@ irc_plugin_get_template(struct irc_plugin *plg, const char *key)
 	return NULL;
 }
 
-const char **
+const char * const *
 irc_plugin_get_templates(struct irc_plugin *plg)
 {
 	assert(plg);
@@ -78,7 +78,7 @@ irc_plugin_get_path(struct irc_plugin *plg, const char *key)
 	return NULL;
 }
 
-const char **
+const char * const *
 irc_plugin_get_paths(struct irc_plugin *plg)
 {
 	assert(plg);
@@ -112,7 +112,7 @@ irc_plugin_get_option(struct irc_plugin *plg, const char *key)
 	return NULL;
 }
 
-const char **
+const char * const *
 irc_plugin_get_options(struct irc_plugin *plg)
 {
 	assert(plg);
