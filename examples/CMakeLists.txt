@@ -19,11 +19,17 @@
 project(examples)
 
 set(
-	FILES
+	CONFIGS
+	${examples_SOURCE_DIR}/irccd.conf.sample
+)
+
+set(
+	PLUGINS
 	${examples_SOURCE_DIR}/sample-plugin.c
 	${examples_SOURCE_DIR}/sample-plugin.js
 )
 
-add_custom_target(doc SOURCES ${FILES})
-install(FILES ${FILES} DESTINATION ${CMAKE_INSTALL_DOCDIR})
-source_group("" FILES ${FILES})
+add_custom_target(doc SOURCES ${CONFIGS} ${PLUGINS})
+install(FILES ${CONFIGS} DESTINATION ${CMAKE_INSTALL_SYSCONFDIR})
+install(FILES ${PLUGINS} DESTINATION ${CMAKE_INSTALL_DOCDIR})
+source_group("" FILES ${CONFIGS} ${PLUGINS})
