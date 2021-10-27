@@ -18,9 +18,9 @@
 
 project(systemd)
 
-find_program(systemd SYSTEMD_EXECUTABLE)
+find_program(SYSTEMCTL_EXECUTABLE systemctl)
 
-if (SYSTEMD_EXECUTABLE)
+if (SYSTEMCTL_EXECUTABLE)
 	set(default On)
 else ()
 	set(default Off)
