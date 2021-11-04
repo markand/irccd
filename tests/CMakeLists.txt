@@ -24,27 +24,33 @@ set(
 	channel
 	dl-plugin
 	event
-	jsapi-chrono
-	jsapi-directory
-	jsapi-file
-	jsapi-irccd
-	jsapi-system
-	jsapi-timer
-	jsapi-unicode
-	jsapi-util
 	log
-	plugin-ask
-	plugin-auth
-	plugin-hangman
-	plugin-history
-	plugin-joke
-	plugin-logger
-	plugin-plugin
-	plugin-tictactoe
 	rule
 	subst
 	util
 )
+
+if (IRCCD_WITH_JS)
+	list(
+		APPEND TESTS
+		jsapi-chrono
+		jsapi-directory
+		jsapi-file
+		jsapi-irccd
+		jsapi-system
+		jsapi-timer
+		jsapi-unicode
+		jsapi-util
+		plugin-ask
+		plugin-auth
+		plugin-hangman
+		plugin-history
+		plugin-joke
+		plugin-logger
+		plugin-plugin
+		plugin-tictactoe
+	)
+endif ()
 
 foreach (t ${TESTS})
 	add_executable(test-${t} ${tests_SOURCE_DIR}/test-${t}.c)

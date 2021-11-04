@@ -22,34 +22,6 @@ set(
 	SOURCES
 	${irccd_SOURCE_DIR}/dl-plugin.c
 	${irccd_SOURCE_DIR}/dl-plugin.h
-	${irccd_SOURCE_DIR}/js-plugin.c
-	${irccd_SOURCE_DIR}/js-plugin.h
-	${irccd_SOURCE_DIR}/jsapi-chrono.c
-	${irccd_SOURCE_DIR}/jsapi-chrono.h
-	${irccd_SOURCE_DIR}/jsapi-directory.c
-	${irccd_SOURCE_DIR}/jsapi-directory.h
-	${irccd_SOURCE_DIR}/jsapi-file.c
-	${irccd_SOURCE_DIR}/jsapi-file.h
-	${irccd_SOURCE_DIR}/jsapi-hook.c
-	${irccd_SOURCE_DIR}/jsapi-hook.h
-	${irccd_SOURCE_DIR}/jsapi-irccd.c
-	${irccd_SOURCE_DIR}/jsapi-irccd.h
-	${irccd_SOURCE_DIR}/jsapi-logger.c
-	${irccd_SOURCE_DIR}/jsapi-logger.h
-	${irccd_SOURCE_DIR}/jsapi-plugin.c
-	${irccd_SOURCE_DIR}/jsapi-plugin.h
-	${irccd_SOURCE_DIR}/jsapi-rule.c
-	${irccd_SOURCE_DIR}/jsapi-rule.h
-	${irccd_SOURCE_DIR}/jsapi-server.c
-	${irccd_SOURCE_DIR}/jsapi-server.h
-	${irccd_SOURCE_DIR}/jsapi-system.c
-	${irccd_SOURCE_DIR}/jsapi-system.h
-	${irccd_SOURCE_DIR}/jsapi-timer.c
-	${irccd_SOURCE_DIR}/jsapi-timer.h
-	${irccd_SOURCE_DIR}/jsapi-unicode.c
-	${irccd_SOURCE_DIR}/jsapi-unicode.h
-	${irccd_SOURCE_DIR}/jsapi-util.c
-	${irccd_SOURCE_DIR}/jsapi-util.h
 	${irccd_SOURCE_DIR}/peer.c
 	${irccd_SOURCE_DIR}/peer.h
 	${irccd_SOURCE_DIR}/transport.c
@@ -57,6 +29,40 @@ set(
 	${irccd_SOURCE_DIR}/unicode.c
 	${irccd_SOURCE_DIR}/unicode.h
 )
+
+if (IRCCD_WITH_JS)
+	list(
+		APPEND SOURCES
+		${irccd_SOURCE_DIR}/js-plugin.c
+		${irccd_SOURCE_DIR}/js-plugin.h
+		${irccd_SOURCE_DIR}/jsapi-chrono.c
+		${irccd_SOURCE_DIR}/jsapi-chrono.h
+		${irccd_SOURCE_DIR}/jsapi-directory.c
+		${irccd_SOURCE_DIR}/jsapi-directory.h
+		${irccd_SOURCE_DIR}/jsapi-file.c
+		${irccd_SOURCE_DIR}/jsapi-file.h
+		${irccd_SOURCE_DIR}/jsapi-hook.c
+		${irccd_SOURCE_DIR}/jsapi-hook.h
+		${irccd_SOURCE_DIR}/jsapi-irccd.c
+		${irccd_SOURCE_DIR}/jsapi-irccd.h
+		${irccd_SOURCE_DIR}/jsapi-logger.c
+		${irccd_SOURCE_DIR}/jsapi-logger.h
+		${irccd_SOURCE_DIR}/jsapi-plugin.c
+		${irccd_SOURCE_DIR}/jsapi-plugin.h
+		${irccd_SOURCE_DIR}/jsapi-rule.c
+		${irccd_SOURCE_DIR}/jsapi-rule.h
+		${irccd_SOURCE_DIR}/jsapi-server.c
+		${irccd_SOURCE_DIR}/jsapi-server.h
+		${irccd_SOURCE_DIR}/jsapi-system.c
+		${irccd_SOURCE_DIR}/jsapi-system.h
+		${irccd_SOURCE_DIR}/jsapi-timer.c
+		${irccd_SOURCE_DIR}/jsapi-timer.h
+		${irccd_SOURCE_DIR}/jsapi-unicode.c
+		${irccd_SOURCE_DIR}/jsapi-unicode.h
+		${irccd_SOURCE_DIR}/jsapi-util.c
+		${irccd_SOURCE_DIR}/jsapi-util.h
+	)
+endif ()
 
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
