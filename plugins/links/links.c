@@ -189,8 +189,9 @@ static void
 req_finish(struct req *);
 
 static void
-complete(struct req *req)
+complete(void *data)
 {
+	struct req *req = data;
 	char *title;
 
 	if (req->status && (title = parse(req)))
@@ -204,14 +205,18 @@ complete(struct req *req)
  * This function is running in a separate thread.
  */
 static void *
-routine(struct req *req)
+routine(void *data)
 {
-	typedef void (*func_t)(void *);
+	struct req *req = data;
+	long code = 0;
 
-	if (curl_easy_perform(req->curl) == 0)
-		req->status = 1;
+	if (curl_easy_perform(req->curl) == 0) {
+		/* We only accept 200 result. */
+		curl_easy_getinfo(req->curl, CURLINFO_RESPONSE_CODE, &code);
+		req->status = code == 200;
+	}
 
-	irc_bot_post((func_t)complete, req);
+	irc_bot_post(complete, req);
 
 	return NULL;
 }
@@ -278,9 +283,7 @@ enomem:
 static void
 req_start(struct req *req)
 {
-	typedef void *(*func_t)(void *);
-
-	if (pthread_create(&req->thr, NULL, (func_t)routine, req) != 0)
+	if (pthread_create(&req->thr, NULL, routine, req) != 0)
 		req_finish(req);
 }
 
