@@ -26,30 +26,38 @@ set(
 )
 
 set(
-	SOURCES
-	${libirccd_SOURCE_DIR}/irccd/channel.c
+	HEADERS
 	${libirccd_SOURCE_DIR}/irccd/channel.h
-	${libirccd_SOURCE_DIR}/irccd/conn.c
-	${libirccd_SOURCE_DIR}/irccd/conn.h
-	${libirccd_SOURCE_DIR}/irccd/event.c
 	${libirccd_SOURCE_DIR}/irccd/event.h
-	${libirccd_SOURCE_DIR}/irccd/hook.c
 	${libirccd_SOURCE_DIR}/irccd/hook.h
-	${libirccd_SOURCE_DIR}/irccd/irccd.c
 	${libirccd_SOURCE_DIR}/irccd/irccd.h
 	${libirccd_SOURCE_DIR}/irccd/limits.h
-	${libirccd_SOURCE_DIR}/irccd/log.c
 	${libirccd_SOURCE_DIR}/irccd/log.h
-	${libirccd_SOURCE_DIR}/irccd/plugin.c
 	${libirccd_SOURCE_DIR}/irccd/plugin.h
-	${libirccd_SOURCE_DIR}/irccd/rule.c
 	${libirccd_SOURCE_DIR}/irccd/rule.h
-	${libirccd_SOURCE_DIR}/irccd/server.c
 	${libirccd_SOURCE_DIR}/irccd/server.h
-	${libirccd_SOURCE_DIR}/irccd/subst.c
 	${libirccd_SOURCE_DIR}/irccd/subst.h
-	${libirccd_SOURCE_DIR}/irccd/util.c
 	${libirccd_SOURCE_DIR}/irccd/util.h
+)
+
+set(
+	PRIVHEADERS
+	${libirccd_SOURCE_DIR}/irccd/conn.h
+)
+
+set(
+	SOURCES
+	${libirccd_SOURCE_DIR}/irccd/channel.c
+	${libirccd_SOURCE_DIR}/irccd/conn.c
+	${libirccd_SOURCE_DIR}/irccd/event.c
+	${libirccd_SOURCE_DIR}/irccd/hook.c
+	${libirccd_SOURCE_DIR}/irccd/irccd.c
+	${libirccd_SOURCE_DIR}/irccd/log.c
+	${libirccd_SOURCE_DIR}/irccd/plugin.c
+	${libirccd_SOURCE_DIR}/irccd/rule.c
+	${libirccd_SOURCE_DIR}/irccd/server.c
+	${libirccd_SOURCE_DIR}/irccd/subst.c
+	${libirccd_SOURCE_DIR}/irccd/util.c
 )
 
 configure_file(
@@ -57,7 +65,7 @@ configure_file(
 	${libirccd_BINARY_DIR}/irccd/config.h
 )
 
-add_library(libirccd STATIC ${LIBBSD_SOURCES} ${SOURCES})
+add_library(libirccd STATIC ${LIBBSD_SOURCES} ${SOURCES} ${HEADERS} ${PRIVHEADERS})
 target_link_libraries(libirccd PUBLIC libirccd-utlist)
 target_include_directories(
 	libirccd
@@ -86,6 +94,15 @@ if (IRCCD_WITH_PKGCONFIG)
 		DESTINATION ${IRCCD_WITH_PKGCONFIGDIR}
 	)
 endif ()
+
+install(
+	FILES ${HEADERS}
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/irccd
+)
+install(
+	FILES ${libirccd_BINARY_DIR}/irccd/config.h
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/irccd
+)
 
 source_group(extern/libbsd FILES ${LIBBSD_SOURCES})
 source_group(irccd FILES ${SOURCES})
