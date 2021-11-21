@@ -17,6 +17,7 @@ irccd
   someone is present on a channel.
 - It is now possible to change uid/gid of the transport socket file. The file is
   also created with permissions 664.
+- A new `paths` command has been added to show default paths.
 
 irccdctl
 --------

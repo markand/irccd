@@ -85,11 +85,9 @@ poll_count(void)
 	return i;
 }
 
-static int
-run(int argc, char **argv)
+static void
+run_info(void)
 {
-	(void)argc;
-
 #if defined(IRCCD_WITH_JS)
 	const char *with_js = "yes";
 #else
@@ -101,14 +99,71 @@ run(int argc, char **argv)
 	const char *with_ssl = "no";
 #endif
 
-	if (strcmp(argv[0], "version") == 0)
-		puts(IRCCD_VERSION);
-	else if (strcmp(argv[0], "info") == 0) {
-		printf("%-16s%s\n", "javascript:", with_js);
-		printf("%-16s%s\n", "ssl:", with_ssl);
+	printf("%-16s%s\n", "javascript:", with_js);
+	printf("%-16s%s\n", "ssl:", with_ssl);
+}
+
+static void
+run_paths(void)
+{
+	struct irc_plugin_loader *ld;
+	char paths[IRC_PATHS_LEN], extensions[IRC_EXTENSIONS_LEN], *p, *token;
+
+	printf("%-16s%s\n", "cache:", IRCCD_CACHEDIR);
+	printf("%-16s%s\n", "config:", IRCCD_SYSCONFDIR);
+	printf("%-16s%s\n", "lib:", IRCCD_LIBDIR);
+	printf("%-16s%s\n", "data:", IRCCD_DATADIR);
+	printf("\n");
+
+	LL_FOREACH(irc.plugin_loaders, ld) {
+		printf("Plugins with extensions:");
+		irc_util_strlcpy(extensions, ld->extensions, sizeof (extensions));
+		irc_util_strlcpy(paths, ld->paths, sizeof (paths));
+
+		for (p = extensions; (token = strtok_r(p, ":", &p)); )
+			printf(" %s", token);
+
+		printf("\n");
+
+		for (p = paths; (token = strtok_r(p, ":", &p)); )
+			printf("  %s\n", token);
+
+		if (ld->next)
+			printf("\n");
+	}
+}
+
+static void
+run_version(void)
+{
+	puts(IRCCD_VERSION);
+}
+
+static int
+run(int argc, char **argv)
+{
+	(void)argc;
+
+	static struct {
+		const char *name;
+		void (*exec)(void);
+	} cmds[] = {
+		{ "info",       run_info        },
+		{ "paths",      run_paths       },
+		{ "version",    run_version     },
+		{ NULL,         NULL            }
+	};
+
+	for (size_t i = 0; cmds[i].name; ++i) {
+		if (strcmp(cmds[i].name, argv[0]) == 0) {
+			cmds[i].exec();
+			return 0;
+		}
 	}
 
-	return 0;
+	irc_util_die("abort: unknown command: %s\n", argv[0]);
+
+	return 1;
 }
 
 static void
@@ -260,10 +315,11 @@ main(int argc, char **argv)
 	argc -= optind;
 	argv += optind;
 
+	init();
+
 	if (argc > 0)
 		return run(argc, argv);
 
-	init();
 	load();
 
 	/* We apply now so it overrides configuration file. */
