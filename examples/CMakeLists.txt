@@ -27,6 +27,7 @@ set(
 	PLUGINS
 	${examples_SOURCE_DIR}/sample-plugin.c
 	${examples_SOURCE_DIR}/sample-plugin.js
+	${examples_SOURCE_DIR}/sample-hook.sh
 )
 
 add_custom_target(doc SOURCES ${CONFIGS} ${PLUGINS})
