@@ -49,11 +49,7 @@ set(CMAKE_C_EXTENSIONS Off)
 set(CMAKE_POSITION_INDEPENDENT_CODE On)
 
 if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
-	set(CMAKE_C_FLAGS "-Wall -Wextra -pedantic -D_XOPEN_SOURCE=700 ${CMAKE_C_FLAGS}")
-endif ()
-
-if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
-	set(CMAKE_C_FLAGS "-D_DARWIN_C_SOURCE ${CMAKE_C_FLAGS}")
+	set(CMAKE_C_FLAGS "-Wall -Wextra -pedantic ${CMAKE_C_FLAGS}")
 endif ()
 
 include(GNUInstallDirs)
