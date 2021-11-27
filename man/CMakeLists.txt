@@ -42,6 +42,7 @@ set(
 	${man_SOURCE_DIR}/libirccd-channel.3
 	${man_SOURCE_DIR}/libirccd-event.3
 	${man_SOURCE_DIR}/libirccd-hook.3
+	${man_SOURCE_DIR}/libirccd-irccd.3
 	${man_SOURCE_DIR}/libirccd-log.3
 	${man_SOURCE_DIR}/libirccd-rule.3
 	${man_SOURCE_DIR}/libirccd-server.3

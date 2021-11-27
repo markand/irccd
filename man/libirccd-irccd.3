@@ -1,0 +1,299 @@
+.\"
+.\" Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt LIBIRCCD-IRCCD 3
+.Os
+.\" NAME
+.Sh NAME
+.Nm libirccd-irccd
+.Nd IRC daemon functions
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.In irccd/irccd.h
+.Bd -literal
+extern struct irc {
+	struct irc_server *servers;
+	struct irc_plugin *plugins;
+	struct irc_plugin_loader *plugin_loaders;
+	struct irc_rule *rules;
+	struct irc_hook *hooks;
+} irc;
+.Ed
+.Pp
+.Ft void
+.Fn irc_bot_init "void"
+.Ft void
+.Fn irc_bot_server_add "struct irc_server *s"
+.Ft struct irc_server *
+.Fn irc_bot_server_get "const char *id"
+.Ft void
+.Fn irc_bot_server_remove "const char *id"
+.Ft void
+.Fn irc_bot_server_clear "void"
+.Ft void
+.Fn irc_bot_plugin_add "struct irc_plugin *p"
+.Ft struct irc_plugin *
+.Fn irc_bot_plugin_find "const char *, const char *"
+.Ft struct irc_plugin *
+.Fn irc_bot_plugin_get "const char *id"
+.Ft void
+.Fn irc_bot_plugin_remove "const char *"
+.Ft void
+.Fn irc_bot_plugin_clear "void"
+.Ft void
+.Fn irc_bot_plugin_loader_add "struct irc_plugin_loader *ld"
+.Ft void
+.Fn irc_bot_rule_insert "struct irc_rule *r, size_t index"
+.Ft struct irc_rule *
+.Fn irc_bot_rule_get "size_t index"
+.Ft void
+.Fn irc_bot_rule_move "size_t from, size_t to"
+.Ft void
+.Fn irc_bot_rule_remove "size_t index"
+.Ft size_t
+.Fn irc_bot_rule_size "void"
+.Ft void
+.Fn irc_bot_rule_clear "void"
+.Ft void
+.Fn irc_bot_hook_add "struct irc_hook *hook
+.Ft struct irc_hook *
+.Fn irc_bot_hook_get "const char *id"
+.Ft void
+.Fn irc_bot_hook_remove "const char *id"
+.Ft void
+.Fn irc_bot_hook_clear "void"
+.Ft size_t
+.Fn irc_bot_poll_size "void"
+.Ft void
+.Fn irc_bot_prepare "struct pollfd *fds"
+.Ft void
+.Fn irc_bot_flush "const struct pollfd *fds"
+.Ft int
+.Fn irc_bot_dequeue "struct irc_event *ev"
+.Ft void
+.Fn irc_bot_post "void (*fn)(void *), void *data"
+.Ft void
+.Fn irc_bot_finish "void"
+.\" DESCRIPTION
+.Sh DESCRIPTION
+This API provides routines to manipulate the daemon itself. Some of the
+functions should be used with care.
+.Pp
+The global
+.Vt irc
+structure contains linked list of loaded elements:
+.Bl -tag -width ".Va plugin_loaders"
+.It Va servers
+Loaded servers (see
+.Xr libirccd-server 3) .
+.It Va plugins
+Loaded plugins (see
+.Xr libirccd-plugin 3) .
+.It Va plugin_loaders
+Objects that search for additional plugins when required (see
+.Xr libirccd-plugin 3) .
+.It Va rules
+Rules that filter incoming IRC events (see
+.Xr libirccd-rule 3) .
+.It Va hooks
+Optional IRC event hooks (see
+.Xr libirccd-hook 3) .
+.El
+.Pp
+The
+.Fn irc_bot_init
+function initializes the irccd globals and some of its APIs. This function does
+not need to be called from plugins.
+.Pp
+The
+.Fn irc_bot_server_add
+borrows the server
+.Fa s
+and adds it to the daemon. It is then connected and monitored for events.
+.Pp
+The
+.Fn irc_bot_server_get
+function searches for a server with the given
+.Fa id
+and returns it or NULL if it does not exists. The returned server must not be
+free'd nor close, use
+.Fn irc_bot_server_remove
+if you want to remove a server instead.
+.Pp
+The
+.Fn irc_bot_server_clear
+function disconnects and erases all servers from the daemon.
+.Pp
+The
+.Fn irc_bot_plugin_add
+function borrows the non-NULL
+.Fa p
+plugin and adds it to the daemon.
+.Pp
+The
+.Fn irc_bot_plugin_find
+searches through the plugin loader a plugin
+.Fa id
+unless a specific
+.Fa path
+is non-NULL. In that case it should points to an absolute file path with a
+proper file extension. It then adds it to the daemon and returns it.
+.Pp
+The
+.Fn irc_bot_plugin_get
+function searches for a plugin with the given
+.Fa id
+and returns it or NULL if it does not exist. The returned plugin most not be
+free'd nor close, use
+.Fn irc_bot_plugin_remove
+if you want to remove it instead.
+.Pp
+The
+.Fn irc_bot_plugin_clear
+removes all plugins currently loaded.
+.Pp
+The
+.Fn irc_bot_plugin_loader_add
+borrows the non-NULL
+.Fa ld
+plugin loader and adds it to the daemon.
+.Pp
+The
+.Fn irc_bot_rule_insert
+function borrows the rule
+.Fa r
+and insert it at the position
+.Fa index.
+If the
+.Fa index
+argument is larger than the number of actual rules, it is inserted at the end.
+.Pp
+The
+.Fn irc_bot_rule_move
+function swaps the rules between
+.Fa from
+and
+.Fa to
+indices. The argument
+.Fa to
+can be larger than the number of actual rules, in that case the rule is moved at
+the end. The argument
+.Fa from
+must be between 0 and
+.Fn irc_bot_rule_size
+minus one.
+.Pp
+The
+.Fn irc_bot_rule_remove
+function removes the rule at given
+.Fa index
+which must be valid.
+.Pp
+The
+.Fn irc_bot_rule_size
+returns the number of rules active.
+.Pp
+The
+.Fn irc_bot_rule_clear
+removes all rules.
+.Pp
+The
+.Fn irc_bot_hook_add
+borrows the
+.Fa hook
+and add it into the list.
+.Pp
+The
+.Fn irc_bot_hook_get
+function searched for a hook with the given
+.Fa id
+and returns it or NULL if it does not exist. The returned hook most not be
+free'd nor close, use
+.Fn irc_bot_hook_remove
+if you want to remove it instead.
+.Pp
+The
+.Fn irc_bot_hook_remove
+removes the hook with the given
+.Fa id .
+.Pp
+The
+.Fn irc_bot_hook_clear
+removes all hooks.
+.Pp
+The
+.Fn irc_bot_poll_size
+function returns the number of file descriptors opened and listened to. It is
+used in conjunction with
+.Fn irc_bot_prepare
+and
+.Fn irc_bot_flush
+to allocate a proper array of
+.Fa struct pollfd
+to create your own loop. All these functions are usually not required from
+plugins.
+.Pp
+The
+.Fn irc_bot_prepare
+and
+.Fn irc_bot_flush
+functions first fill the array specified by
+.Fa fds
+and then depending on the user call of
+.Fn poll ,
+the
+.Fn irc_bot_flush
+function will dispatch incoming I/O with the result obtained in
+.Fa fds .
+.Pp
+The
+.Fn irc_bot_dequeue
+function fills the event
+.Fa ev
+with the first incoming IRC event and returns 1 if any. Otherwise the function
+returns 0 and ev is kept untouched.
+.Pp
+The
+.Fn irc_bot_post
+append a function to be called within the irccd main thread. It is necessary
+since the whole irccd API isn't thread safe. You only need to post your own
+functions if you want to write threaded plugins. The non-NULL
+.Fa fn
+function will be called with
+.Fa data
+as first argument.
+.Pp
+The
+.Fn irc_bot_finish
+function cleanups any allocated resources.
+.Pp
+All of the following functions are usually not necessary in any plugin code:
+.Pp
+.Bl -bullet -compact
+.It
+.Fn irc_bot_dequeue
+.It
+.Fn irc_bot_finish
+.It
+.Fn irc_bot_flush
+.It
+.Fn irc_bot_init
+.It
+.Fn irc_bot_prepare
+.El
+.Pp
+They should be called only if your intent is to write your own bot with the
+whole irccd API.
