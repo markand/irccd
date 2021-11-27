@@ -240,7 +240,7 @@ pollables(void)
 {
 	struct pollables pb = {0};
 
-	pb.botsz = irc_bot_poll_count();
+	pb.botsz = irc_bot_poll_size();
 	pb.localsz = poll_count();
 	pb.fdsz = pb.botsz + pb.localsz;
 	pb.fds = irc_util_calloc(pb.fdsz, sizeof (*pb.fds));

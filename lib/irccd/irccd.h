@@ -102,7 +102,7 @@ void
 irc_bot_hook_clear(void);
 
 size_t
-irc_bot_poll_count(void);
+irc_bot_poll_size(void);
 
 void
 irc_bot_prepare(struct pollfd *);

@@ -578,7 +578,7 @@ irc_bot_hook_clear(void)
 }
 
 size_t
-irc_bot_poll_count(void)
+irc_bot_poll_size(void)
 {
 	size_t i = 1;
 	struct irc_server *s;
