@@ -174,6 +174,12 @@ stop(int signum)
 }
 
 static void
+nada(int signum)
+{
+	(void)signum;
+}
+
+static void
 init(void)
 {
 	struct sigaction sig;
@@ -185,9 +191,15 @@ init(void)
 	irc_bot_plugin_loader_add(js_plugin_loader_new());
 #endif
 
+	sigemptyset(&sig.sa_mask);
+	sig.sa_handler = nada;
+
+	/* Generated from threads. */
+	if (sigaction(SIGUSR1, &sig, NULL) < 0)
+		irc_util_die("sigaction: %s\n", strerror(errno));
+
 	sig.sa_handler = stop;
 	sig.sa_flags = SA_RESTART;
-	sigemptyset(&sig.sa_mask);
 
 	if (sigaction(SIGINT, &sig, NULL) < 0 || sigaction(SIGTERM, &sig, NULL) < 0)
 		irc_util_die("sigaction: %s\n", strerror(errno));

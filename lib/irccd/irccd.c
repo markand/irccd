@@ -16,16 +16,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <sys/wait.h>
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <poll.h>
+#include <pthread.h>
 #include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
 
 #include <utlist.h>
 
@@ -41,12 +40,14 @@
 struct defer {
 	void (*exec)(void *);
 	void *data;
+	struct defer *next;
 };
 
 struct irc irc = {0};
 
-static int pipes[2];
 static struct sigaction sa;
+static struct defer *queue;
+static pthread_t self;
 
 static int
 is_command(const struct irc_plugin *p, const struct irc_event *ev)
@@ -170,20 +171,6 @@ invoke(const struct irc_event *ev)
 		irc_plugin_handle(plgcmd, to_command(plgcmd, ev));
 }
 
-static void
-pipe_flush(const struct pollfd *fd)
-{
-	struct defer df = {0};
-
-	if (fd->fd != pipes[0] || !(fd->revents & POLLIN))
-		return;
-
-	if (read(fd->fd, &df, sizeof (df)) == sizeof (df))
-		df.exec(df.data);
-	else
-		irc_log_warn("irccd: %s", strerror(errno));
-}
-
 static struct irc_plugin *
 find_plugin(struct irc_plugin_loader *ldr, const char *base, const char *name)
 {
@@ -257,16 +244,14 @@ irc_bot_init(void)
 {
 	irc_log_to_console();
 
-	if (pipe(pipes) < 0)
-		irc_util_die("pipe: %s\n", strerror(errno));
-
+	sigemptyset(&sa.sa_mask);
 	sa.sa_flags = SA_SIGINFO;
 	sa.sa_sigaction = handle_sigchld;
 
-	sigemptyset(&sa.sa_mask);
-
 	if (sigaction(SIGCHLD, &sa, NULL) < 0)
 		irc_util_die("sigaction: %s\n", strerror(errno));
+
+	self = pthread_self();
 }
 
 void
@@ -580,7 +565,7 @@ irc_bot_hook_clear(void)
 size_t
 irc_bot_poll_size(void)
 {
-	size_t i = 1;
+	size_t i = 0;
 	struct irc_server *s;
 
 	LL_FOREACH(irc.servers, s)
@@ -595,13 +580,9 @@ irc_bot_prepare(struct pollfd *fds)
 	assert(fds);
 
 	struct irc_server *s;
-	size_t i = 1;
-
-	fds[0].fd = pipes[0];
-	fds[0].events = POLLIN;
 
 	LL_FOREACH(irc.servers, s)
-		irc_server_prepare(s, &fds[i++]);
+		irc_server_prepare(s, fds++);
 }
 
 void
@@ -610,12 +591,17 @@ irc_bot_flush(const struct pollfd *fds)
 	assert(fds);
 
 	struct irc_server *s;
-	size_t i = 1;
+	struct defer *d, *dtmp;
 
-	pipe_flush(&fds[0]);
+	LL_FOREACH_SAFE(queue, d, dtmp) {
+		d->exec(d->data);
+		free(d);
+	}
+
+	queue = NULL;
 
 	LL_FOREACH(irc.servers, s)
-		irc_server_flush(s, &fds[i++]);
+		irc_server_flush(s, fds);
 }
 
 int
@@ -636,13 +622,17 @@ irc_bot_dequeue(struct irc_event *ev)
 void
 irc_bot_post(void (*exec)(void *), void *data)
 {
-	struct defer df = {
-		.exec = exec,
-		.data = data
-	};
+	struct defer *d;
 
-	if (write(pipes[1], &df, sizeof (df)) != sizeof (df))
-		irc_log_warn("write: %s\n", strerror(errno));
+	d = irc_util_calloc(1, sizeof (*d));
+	d->exec = exec;
+	d->data = data;
+
+	LL_APPEND(queue, d);
+
+	/* Signal only if I'm not the same thread. */
+	if (!pthread_equal(pthread_self(), self))
+		pthread_kill(self, SIGUSR1);
 }
 
 void
