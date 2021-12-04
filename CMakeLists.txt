@@ -52,6 +52,7 @@ if (CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
 	set(CMAKE_C_FLAGS "-Wall -Wextra -pedantic ${CMAKE_C_FLAGS}")
 endif ()
 
+include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
 option(IRCCD_WITH_EXAMPLES "Enable example files" On)
@@ -79,7 +80,6 @@ if (IRCCD_WITH_JS)
 	add_subdirectory(extern/libduktape)
 endif ()
 
-
 add_subdirectory(extern/libutlist)
 add_subdirectory(extern/libketopt)
 
@@ -101,3 +101,24 @@ if (IRCCD_WITH_TESTS)
 	add_subdirectory(extern/libgreatest)
 	add_subdirectory(tests)
 endif ()
+
+# CMake packages.
+write_basic_package_version_file(
+	${PROJECT_BINARY_DIR}/irccd-config-version.cmake
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY SameMajorVersion
+)
+
+configure_file(
+	${PROJECT_SOURCE_DIR}/cmake/irccd-config.cmake.in
+	${PROJECT_BINARY_DIR}/irccd-config.cmake
+	@ONLY
+)
+
+install(
+	FILES
+		${PROJECT_BINARY_DIR}/irccd-config.cmake
+		${PROJECT_BINARY_DIR}/irccd-config-version.cmake
+		${PROJECT_SOURCE_DIR}/cmake/IrccdDefinePlugin.cmake
+	DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/irccd
+)

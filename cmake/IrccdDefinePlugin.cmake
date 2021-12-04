@@ -42,6 +42,10 @@ function(irccd_define_native_plugin)
 		target_link_libraries(irccd-plugin-${PLG_NAME} ${PLG_LIBRARIES})
 	endif ()
 
+	if (APPLE)
+		target_link_libraries(irccd-plugin-${PLG_NAME} "-undefined dynamic_lookup")
+	endif ()
+
 	set_target_properties(
 		irccd-plugin-${PLG_NAME}
 		PROPERTIES

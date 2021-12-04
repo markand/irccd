@@ -107,7 +107,10 @@ target_link_libraries(irccd irccd-static)
 set_target_properties(irccd PROPERTIES ENABLE_EXPORTS On)
 
 # Installation.
-install(TARGETS irccd RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(
+	TARGETS irccd
+	RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
 
 # Source grouping.
 source_group(TREE ${irccd_SOURCE_DIR} FILES ${SOURCES} ${irccd_SOURCE_DIR}/main.c)
