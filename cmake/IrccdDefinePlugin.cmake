@@ -16,6 +16,8 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
+include(GNUInstallDirs)
+
 function(irccd_define_native_plugin)
 	set(options "")
 	set(oneValueArgs "MAN;NAME")
