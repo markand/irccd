@@ -1,0 +1,143 @@
+.\"
+.\" Copyright (c) 2013-2021 David Demelier <markand@malikania.fr>
+.\"
+.\" Permission to use, copy, modify, and/or distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @IRCCD_MAN_DATE@
+.Dt IRCCD-CMAKE 7
+.Os
+.\" NAME
+.Sh NAME
+.Nm irccd-cmake
+.Nd CMake macros provided by irccd
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.Fn irccd_define_native_plugin
+.Fn irccd_define_javascript_plugin
+.\" DESCRIPTION
+.Sh DESCRIPTION
+A config package is provided with irccd and the following macros.
+.Pp
+To include irccd with your CMake project, first import
+.Em irccd
+CMake package.
+.Bd -literal -offset indent
+find_package(irccd 4.0.0 REQUIRED)
+.Ed
+.Pp
+No targets are exported because irccd provide its symbols through
+.Xr dlopen 3
+interface, as such native plugins don't have to link to irccd.
+.Pp
+.\" MACROS
+.Sh MACROS
+When available the following macros are available:
+.Ss irccd_define_native_plugin
+This macro creates a native C or C++ plugin with appropriate flags.
+.Pp
+Its usage is as follow:
+.Bd -literal -offset indent
+irccd_define_native_plugin(
+	NAME foo
+	SOURCES foo.c bar.c quux.c
+	[FLAGS compile-flags...]
+	[INCLUDES include-directories...]
+	[LIBRARIES link-libraries...]
+	[MAN manpage.7]
+)
+.Ed
+.Pp
+The other
+.Fa SOURCES
+argument contains the source code to compile which can be C or C++. See
+.Xr libirccd 3
+manual page on which symbols must at least be exported.
+.Pp
+The other
+.Fa FLAGS , INCLUDES
+and
+.Fa LIBRARIES
+control the compile flags, include directories and libraries to
+link respectively. Usually you don't need to pass the compiler option.
+.Ss irccd_define_javascript_plugin
+This macro creates a Javascript plugin.
+Its usage is as follow:
+.Bd -literal -offset indent
+irccd_define_javascript_plugin(
+	NAME foo
+	SCRIPT foo.js
+	[MAN manpage.7]
+)
+.Ed
+.Pp
+The
+.Fa SCRIPT
+argument contains a single Javascript file that should match the
+.Fa NAME
+argument.
+.Pp
+For both macros, the argument
+.Fa NAME
+must refer to the canical plugin name without any prefix or suffix. For
+example, use
+.Dq foo
+rather than
+.Dq libfoo
+or
+.Dq plugin-foo .
+.Pp
+The
+.Fa MAN
+argument contains a single manual page ending with .7 and should be the same
+name as the
+.Fa NAME
+argument.
+.Pp
+Both macro creates an install target for those and will be installed into the
+irccd plugin directory.
+.\" EXAMPLES
+.Sh EXAMPLES
+.Ss Example of native plugin
+In contrast to Javascript plugins, native plugins can have multiple sources.
+They can link to external libraries.
+.Pp
+The following plugin called
+.Dq translator
+uses the external libcurl library with several source files.
+.Bd -literal -offset indent
+find_package(CURL REQUIRED)
+find_package(irccd 4.0.0 REQUIRED)
+
+irccd_define_native_plugin(
+	NAME translator
+	MAN translator.7
+	SOURCES translator.c translator.h main.c
+	LIBRARIES CURL::libcurl
+	FLAGS _BSD_SOURCE
+)
+.Ed
+.Ss Example of Javascript plugin
+The following example creates a rpg plugin.
+.Bd -literal -offset indent
+find_package(irccd 4.0.0 REQUIRED)
+
+irccd_define_javascript_plugin(
+	NAME rpg
+	SCRIPT rpg.js
+	MAN rpg.7
+)
+.Ed
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr libirccd 3
+.Xr irccd-api 3

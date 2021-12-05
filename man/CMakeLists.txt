@@ -58,6 +58,7 @@ set(
 
 set(
 	MANPAGES_7
+	${man_SOURCE_DIR}/irccd-cmake.7
 	${man_SOURCE_DIR}/irccd-ipc.7
 	${man_SOURCE_DIR}/irccd-templates.7
 )
