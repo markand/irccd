@@ -16,6 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+#include <sys/wait.h>
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
