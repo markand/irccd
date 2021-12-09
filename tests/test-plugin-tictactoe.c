@@ -327,13 +327,6 @@ GREATEST_MAIN_DEFS();
 int
 main(int argc, char **argv)
 {
-	struct sigaction sa;
-
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = 0;
-	sa.sa_handler = SIG_IGN;
-	sigaction(SIGUSR1, &sa, NULL);
-
 	GREATEST_MAIN_BEGIN();
 	GREATEST_RUN_SUITE(suite_basics);
 	GREATEST_MAIN_END();
