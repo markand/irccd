@@ -64,9 +64,9 @@ timer_clear(struct timer *tm)
 {
 	tm->status = TIMER_INACTIVE;
 
+	pthread_join(tm->thr, NULL);
 	pthread_cond_destroy(&tm->cv);
 	pthread_mutex_destroy(&tm->mtx);
-	pthread_join(tm->thr, NULL);
 }
 
 static void
@@ -128,8 +128,12 @@ timer_routine(void *data)
 	/* Prepare maximum time to wait. */
 	timespec_get(&ts, TIME_UTC);
 
-	ts.tv_sec += tm->duration / 1000;
-	ts.tv_nsec += (tm->duration % 1000) * 1000;
+	ts.tv_sec  += tm->duration / 1000;
+	ts.tv_nsec += (tm->duration % 1000) * 1000000;
+
+	/* Readjust to avoid EINVAL. */
+	ts.tv_sec  += ts.tv_nsec / 1000000000;
+	ts.tv_nsec %= 1000000000;
 
 	if (pthread_mutex_lock(&tm->mtx) != 0)
 		tm->status = TIMER_MUST_STOP;
