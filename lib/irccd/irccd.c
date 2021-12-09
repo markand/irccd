@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <utlist.h>
 
@@ -48,7 +49,9 @@ struct irc irc = {0};
 
 static struct sigaction sa;
 static struct defer *queue;
+static int pipes[2];
 static pthread_t self;
+static pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
 
 static int
 is_command(const struct irc_plugin *p, const struct irc_event *ev)
@@ -240,6 +243,17 @@ is_extension_valid(const struct irc_plugin_loader *ldr, const char *path)
 	return 0;
 }
 
+static void
+pipe_flush(const struct pollfd *fd)
+{
+	int dummy;
+
+	if (fd->fd != pipes[0] || !(fd->revents & POLLIN))
+		return;
+	if (read(pipes[0], &dummy, sizeof (int)) != sizeof (int))
+		irc_util_die("read: %s\n", strerror(errno));
+}
+
 void
 irc_bot_init(void)
 {
@@ -251,6 +265,8 @@ irc_bot_init(void)
 
 	if (sigaction(SIGCHLD, &sa, NULL) < 0)
 		irc_util_die("sigaction: %s\n", strerror(errno));
+	if (pipe(pipes) < 0)
+		irc_util_die("pipe: %s\n", strerror(errno));
 
 	self = pthread_self();
 }
@@ -566,7 +582,7 @@ irc_bot_hook_clear(void)
 size_t
 irc_bot_poll_size(void)
 {
-	size_t i = 0;
+	size_t i = 1;
 	struct irc_server *s;
 
 	LL_FOREACH(irc.servers, s)
@@ -582,6 +598,10 @@ irc_bot_prepare(struct pollfd *fds)
 
 	struct irc_server *s;
 
+	fds->fd = pipes[0];
+	fds->events = POLLIN;
+	fds++;
+
 	LL_FOREACH(irc.servers, s)
 		irc_server_prepare(s, fds++);
 }
@@ -593,6 +613,8 @@ irc_bot_flush(const struct pollfd *fds)
 
 	struct irc_server *s;
 	struct defer *d, *dtmp;
+
+	pipe_flush(fds++);
 
 	LL_FOREACH_SAFE(queue, d, dtmp) {
 		d->exec(d->data);
@@ -624,6 +646,10 @@ void
 irc_bot_post(void (*exec)(void *), void *data)
 {
 	struct defer *d;
+	int dummy = 1;
+
+	if (pthread_mutex_lock(&mtx) < 0)
+		irc_util_die("pthread_mutex_lock: %s\n", strerror(errno));
 
 	d = irc_util_calloc(1, sizeof (*d));
 	d->exec = exec;
@@ -633,13 +659,21 @@ irc_bot_post(void (*exec)(void *), void *data)
 
 	/* Signal only if I'm not the same thread. */
 	if (!pthread_equal(pthread_self(), self))
-		pthread_kill(self, SIGUSR1);
+		if (write(pipes[1], &dummy, sizeof (int)) != sizeof (int))
+			irc_util_die("write: %s\n", strerror(errno));
+
+	if (pthread_mutex_unlock(&mtx) < 0)
+		irc_util_die("pthread_mutex_unlock: %s\n", strerror(errno));
 }
 
 void
 irc_bot_finish(void)
 {
 	struct irc_plugin_loader *ld, *ldtmp;
+	struct defer *d, *dtmp;
+
+	close(pipes[0]);
+	close(pipes[1]);
 
 	/*
 	 * First remove all loaders to mkae sure plugins won't try to load
@@ -648,7 +682,14 @@ irc_bot_finish(void)
 	LL_FOREACH_SAFE(irc.plugin_loaders, ld, ldtmp)
 		irc_plugin_loader_finish(ld);
 
+	/* Remove all deferred calls. */
+	LL_FOREACH_SAFE(queue, d, dtmp)
+		free(d);
+
+	queue = NULL;
 	irc_bot_server_clear();
 	irc_bot_plugin_clear();
 	irc_bot_rule_clear();
+
+	pthread_mutex_destroy(&mtx);
 }
