@@ -17,6 +17,7 @@
  */
 
 #include <poll.h>
+#include <signal.h>
 
 #define GREATEST_USE_ABBREVS 0
 #include <greatest.h>
@@ -111,6 +112,13 @@ GREATEST_MAIN_DEFS();
 int
 main(int argc, char **argv)
 {
+	struct sigaction sa;
+
+	sigemptyset(&sa.sa_mask);
+	sa.sa_flags = 0;
+	sa.sa_handler = SIG_IGN;
+	sigaction(SIGUSR1, &sa, NULL);
+
 	irc_bot_init();
 
 	GREATEST_MAIN_BEGIN();
