@@ -5,7 +5,7 @@
  * error will crash the whole daemon. It is also less convenient to share and
  * update.
  *
- *   cc myplugin.c -o myplugin.so $(pkg-config --libs --cflags irccd)
+ *   cc sample-plugin.c -o example.so $(pkg-config --libs --cflags irccd)
  *
  * All symbols exported from the file must start with the plugin file basename
  * without its extension and with every non allowed character translated to
@@ -54,11 +54,11 @@ static char my_template_language[64] = "using #{language} as language";
  * because irccd does not assume they are.
  */
 
-const char **
+const char * const *
 example_get_options(void)
 {
 	/* Indicate to irccd we support options `level' and `language' */
-	static const char *keys[] = {
+	static const char * const keys[] = {
 		"level",
 		"language",
 		NULL
@@ -67,11 +67,11 @@ example_get_options(void)
 	return keys;
 }
 
-const char **
+const char * const *
 example_get_templates(void)
 {
 	/* Indicate to irccd we support templates `start' and `finish' */
-	static const char *keys[] = {
+	static const char * const keys[] = {
 		"start",
 		"finish",
 		NULL
