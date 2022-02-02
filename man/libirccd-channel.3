@@ -19,5 +19,117 @@
 .\" NAME
 .Sh NAME
 .Nm libirccd-channel
-.Nd server joined channels
-
+.Nd channels and their users
+.\" SYNOPSIS
+.Sh SYNOPSIS
+.In irccd/channel.h
+.Ft "struct irc_channel *"
+.Fn irc_channel_new "const char *name, const char *password, int joined"
+.Ft void
+.Fn irc_channel_add "struct irc_channel *ch, const char *nickname, int modes"
+.Ft "struct irc_channel_user *"
+.Fn irc_channel_get "const struct irc_channel *ch, const char *nickname"
+.Ft void
+.Fn irc_channel_clear "struct irc_channel *ch"
+.Ft void
+.Fn irc_channel_remove "struct irc_channel *ch, const char *nickname"
+.Ft void
+.Fn irc_channel_finish "struct irc_channel *ch"
+.\" DESCRIPTION
+.Sh DESCRIPTION
+This family of functions provides channel inspection and their associated
+users. A channel consists of a set of users with their mode and a joined status.
+The daemon tracks nickname changes, channel modes and joining status.
+.Pp
+The header exposes the following structures:
+.Bd -literal
+struct irc_channel_user {
+	char nickname[IRC_NICKNAME_LEN];        /* IRC nickname */
+	int modes;                              /* Bitmask modes */
+	struct irc_channel_user *next;          /* next user */
+};
+.Ed
+.Pp
+This structure describe a user.
+.Pp
+The
+.Va modes
+field is a bitmask that contains all modes applied to a user in a channel. The
+.Vt irc_server_params
+struct (defined in
+.In irccd/server.h )
+contains the array
+.Va prefixes
+which describes every mode and their character prefix. For example, if a user is
+a channel operator and this prefix is the seconth in the
+.Va prefixes
+member, then the
+.Va modes
+field will be set to
+.Em 0x2 .
+.Bd -literal
+struct irc_channel {
+	char name[IRC_CHANNEL_LEN];             /* channel name */
+	char password[IRC_PASSWORD_LEN];        /* optional password */
+	int joined;                             /* 1 if joined, 0 otherwise */
+	struct irc_channel_user *users;         /* linked list of users */
+	struct irc_channel *next;               /* next channel */
+};
+.Ed
+.Pp
+This structure describe a channel and its users.
+.Pp
+The
+.Fn irc_channel_new
+function dynamically allocates a channel using
+.Ar name ,
+.Ar password
+and its
+.Ar joined
+status.
+.Pp
+The
+.Fn irc_channel_add
+function appends a new user as
+.Ar nickname
+into the channel
+.Ar ch
+if it does not already exist. The
+.Ar modes
+argument contains the bitmask modes applied to this user.
+.Pp
+The
+.Fn irc_channel_get
+searches for
+.Ar nickname
+user in the channel
+.Ar ch
+and returns it, NULL if not found.
+.Pp
+The
+.Fn irc_channel_clear
+removes all users from the channel
+.Ar ch .
+.Pp
+The
+.Fn irc_channel_remove
+function removes the user specified by
+.Ar nickname
+from the channel
+.Ar ch .
+.Pp
+The
+.Fn irc_channel_finish
+function deallocates all memory from the channel
+.Ar ch .
+.\" SEE ALSO
+.Sh SEE ALSO
+.Xr libirccd 3 ,
+.Xr libirccd-irccd 3 ,
+.Xr libirccd-server 3
+.\" AUTHORS
+.Sh AUTHORS
+The
+.Nm irccd
+daemon was written by
+.An David Demelier Aq Mt markand@malikania.fr .
