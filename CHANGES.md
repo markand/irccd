@@ -1,7 +1,7 @@
 IRC Client Daemon CHANGES
 =========================
 
-irccd 4.0.0 ????-??-??
+irccd 4.0.0 2022-02-03
 ======================
 
 This is a major release. See MIGRATING.md file for more information.

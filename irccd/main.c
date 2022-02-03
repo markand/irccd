@@ -289,6 +289,9 @@ noreturn static void
 usage(void)
 {
 	fprintf(stderr, "usage: irccd [-v] [-c config]\n");
+	fprintf(stderr, "       irccd info\n");
+	fprintf(stderr, "       irccd paths\n");
+	fprintf(stderr, "       irccd version\n");
 	exit(1);
 }
 

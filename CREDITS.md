@@ -8,6 +8,9 @@ Libraries and projects
   Very powerful and great C IRC library used until version 3.0.0, has been a
   source of inspiration.
 
+- curl, https://curl.se
+  Swiss army knife of file transfert protocol.
+
 - OpenSSL, http://openssl.org
   Free, open-source famous crypto library.
 
