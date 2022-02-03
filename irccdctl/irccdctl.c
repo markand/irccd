@@ -243,11 +243,12 @@ show_mode(char *line)
 		printf("%-16s%s\n", "server:", args[1]);
 		printf("%-16s%s\n", "origin:", args[2]);
 		printf("%-16s%s\n", "channel:", args[3]);
-		printf("%-16s%s\n", "mode:", args[4]);
-		/* TODO: no longer limit user mask */
-		printf("%-16s%s\n", "limit:", (args[5] ? args[5] : ""));
-		printf("%-16s%s\n", "user:", (args[6] ? args[6] : ""));
-		printf("%-16s%s\n", "mask:", (args[7] ? args[7] : ""));
+		printf("%-16s", "mode: ");
+
+		for (int i = 4; i < 8 && args[i]; ++i)
+			printf("%s ", args[i]);
+
+		printf("\n");
 	}
 }
 
