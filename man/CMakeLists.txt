@@ -72,7 +72,18 @@ add_custom_target(
 		${MANPAGES_7}
 )
 
-install(FILES ${MANPAGES_1} DESTINATION ${CMAKE_INSTALL_MANDIR}/man1)
-install(FILES ${MANPAGES_3} DESTINATION ${CMAKE_INSTALL_MANDIR}/man3)
-install(FILES ${MANPAGES_5} DESTINATION ${CMAKE_INSTALL_MANDIR}/man5)
-install(FILES ${MANPAGES_7} DESTINATION ${CMAKE_INSTALL_MANDIR}/man7)
+function(process section files)
+	foreach (m ${MANPAGES_${section}})
+		cmake_path(GET m FILENAME base)
+		configure_file(${m} ${CMAKE_BINARY_DIR}/${base} @ONLY)
+		install(
+			FILES ${CMAKE_BINARY_DIR}/${base}
+			DESTINATION ${CMAKE_INSTALL_MANDIR}/man${section}
+		)
+	endforeach ()
+endfunction()
+
+process(1 "${MANPAGES_1}")
+process(3 "${MANPAGES_3}")
+process(5 "${MANPAGES_5}")
+process(7 "${MANPAGES_7}")
