@@ -82,7 +82,6 @@ if (IRCCD_WITH_JS)
 endif ()
 
 add_subdirectory(extern/libutlist)
-add_subdirectory(extern/libketopt)
 
 add_subdirectory(lib)
 add_subdirectory(irccd)

@@ -30,8 +30,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#include <ketopt.h>
-
 #include <irccd/limits.h>
 #include <irccd/util.h>
 
@@ -359,6 +357,9 @@ plugin_list_set(int argc, char **argv, const char *cmd)
 	char *line, *p, name[16];
 	size_t num = 0;
 
+	--argc;
+	++argv;
+
 	if (argc == 3) {
 		req("%s %s %s %s", cmd, argv[0], argv[1], argv[2]);
 		ok();
@@ -410,7 +411,8 @@ response_list(const char *cmd)
 static void
 cmd_hook_add(int argc, char **argv)
 {
-	(void)argc;
+	--argc;
+	++argv;
 
 	req("HOOK-ADD %s %s", argv[0], argv[1]);
 	ok();
@@ -428,7 +430,8 @@ cmd_hook_list(int argc, char **argv)
 static void
 cmd_hook_remove(int argc, char **argv)
 {
-	(void)argc;
+	--argc;
+	++argv;
 
 	req("HOOK-REMOVE %s", argv[0]);
 	ok();
@@ -452,7 +455,8 @@ cmd_plugin_config(int argc, char **argv)
 static void
 cmd_plugin_info(int argc, char **argv)
 {
-	(void)argc;
+	--argc;
+	++argv;
 
 	const char *response;
 
@@ -480,7 +484,8 @@ cmd_plugin_list(int argc, char **argv)
 static void
 cmd_plugin_load(int argc, char **argv)
 {
-	(void)argc;
+	--argc;
+	++argv;
 
 	req("PLUGIN-LOAD %s", argv[0]);
 	ok();
@@ -495,6 +500,9 @@ cmd_plugin_path(int argc, char **argv)
 static void
 cmd_plugin_reload(int argc, char **argv)
 {
+	--argc;
+	++argv;
+
 	if (argc == 1)
 		req("PLUGIN-RELOAD %s", argv[0]);
 	else
@@ -512,6 +520,9 @@ cmd_plugin_template(int argc, char **argv)
 static void
 cmd_plugin_unload(int argc, char **argv)
 {
+	--argc;
+	++argv;
+
 	if (argc == 1)
 		req("PLUGIN-UNLOAD %s", argv[0]);
 	else
@@ -523,19 +534,19 @@ cmd_plugin_unload(int argc, char **argv)
 static void
 cmd_rule_add(int argc, char **argv)
 {
-	ketopt_t ko = KETOPT_INIT;
 	FILE *fp;
 	char out[IRC_BUF_LEN];
+	int ch;
 
 	if (!(fp = fmemopen(out, sizeof (out) - 1, "w")))
 		irc_util_die("abort: fmemopen: %s\n", strerror(errno));
 
 	/* TODO: invalid option. */
-	for (int ch; (ch = ketopt(&ko, argc, argv, 0, "c:e:i:o:p:s:", NULL)) != -1; )
-		fprintf(fp, "%c=%s ", ch, ko.arg);
+	while ((ch = getopt(argc, argv, "c:e:i:o:p:s:")) != -1)
+		fprintf(fp, "%c=%s ", ch, optarg);
 
-	argc -= ko.ind;
-	argv += ko.ind;
+	argc -= optind;
+	argv += optind;
 
 	if (argc < 1)
 		irc_util_die("abort: missing accept or drop rule action\n");
@@ -553,23 +564,23 @@ cmd_rule_add(int argc, char **argv)
 static void
 cmd_rule_edit(int argc, char **argv)
 {
-	ketopt_t ko = KETOPT_INIT;
 	FILE *fp;
 	char out[IRC_BUF_LEN];
+	int ch;
 
 	if (!(fp = fmemopen(out, sizeof (out) - 1, "w")))
 		irc_util_die("abort: fmemopen: %s\n", strerror(errno));
 
 	/* TODO: invalid option. */
-	for (int ch; (ch = ketopt(&ko, argc, argv, 0, "a:C:c:E:e:O:o:P:p:S:s:", NULL)) != -1; ) {
+	while ((ch = getopt(argc, argv, "a:C:c:E:e:O:o:P:p:S:s:")) != -1) {
 		if (ch == 'a')
-			fprintf(fp, "a=%s ", ko.arg);
+			fprintf(fp, "a=%s ", optarg);
 		else
-			fprintf(fp, "%c%c%s ", tolower(ch), isupper(ch) ? '-' : '+', ko.arg);
+			fprintf(fp, "%c%c%s ", tolower(ch), isupper(ch) ? '-' : '+', optarg);
 	}
 
-	argc -= ko.ind;
-	argv += ko.ind;
+	argc -= optind;
+	argv += optind;
 
 	if (argc < 1)
 		irc_util_die("abort: missing rule index\n");
@@ -623,7 +634,8 @@ cmd_rule_list(int argc, char **argv)
 static void
 cmd_rule_move(int argc, char **argv)
 {
-	(void)argc;
+	--argc;
+	++argv;
 
 	long long from, to;
 
@@ -639,7 +651,8 @@ cmd_rule_move(int argc, char **argv)
 static void
 cmd_rule_remove(int argc, char **argv)
 {
-	(void)argc;
+	--argc;
+	++argv;
 
 	req("RULE-REMOVE %s", argv[0]);
 	ok();
@@ -648,37 +661,36 @@ cmd_rule_remove(int argc, char **argv)
 static void
 cmd_server_connect(int argc, char **argv)
 {
-	ketopt_t ko = KETOPT_INIT;
-	int ssl = 0;
+	int ssl = 0, ch;
 	const char *nickname = "irccd",
 	           *username = "irccd",
 	           *realname = "IRC Client Daemon",
 	           *port = "6667";
 
-	for (int ch; (ch = ketopt(&ko, argc, argv, 0, "sn:r:u:p:", NULL)) != -1; ) {
+	while ((ch = getopt(argc, argv, "sn:r:u:p:")) != -1) {
 		switch (ch) {
 		case 's':
 			ssl = 1;
 			break;
 		case 'n':
-			nickname = ko.arg;
+			nickname = optarg;
 			break;
 		case 'r':
-			realname = ko.arg;
+			realname = optarg;
 			break;
 		case 'u':
-			username = ko.arg;
+			username = optarg;
 			break;
 		case 'p':
-			port = ko.arg;
+			port = optarg;
 			break;
 		default:
 			break;
 		}
 	}
 
-	argc -= ko.ind;
-	argv += ko.ind;
+	argc -= optind;
+	argv += optind;
 
 	if (argc < 2)
 		irc_util_die("abort: missing id and/or host\n");
@@ -691,6 +703,9 @@ cmd_server_connect(int argc, char **argv)
 static void
 cmd_server_disconnect(int argc, char **argv)
 {
+	--argc;
+	++argv;
+
 	if (argc == 1)
 		req("SERVER-DISCONNECT %s", argv[0]);
 	else
@@ -710,7 +725,8 @@ cmd_server_disconnect(int argc, char **argv)
 static void
 cmd_server_info(int argc, char **argv)
 {
-	(void)argc;
+	--argc;
+	++argv;
 
 	char *list;
 	const char *args[16] = {0};
@@ -743,6 +759,9 @@ cmd_server_info(int argc, char **argv)
 static void
 cmd_server_join(int argc, char **argv)
 {
+	--argc;
+	++argv;
+
 	if (argc >= 3)
 		req("SERVER-JOIN %s %s %s", argv[0], argv[1], argv[2]);
 	else
@@ -763,7 +782,8 @@ cmd_server_list(int argc, char **argv)
 static void
 cmd_server_message(int argc, char **argv)
 {
-	(void)argc;
+	--argc;
+	++argv;
 
 	req("SERVER-MESSAGE %s %s %s", argv[0], argv[1], argv[2]);
 	ok();
@@ -772,7 +792,8 @@ cmd_server_message(int argc, char **argv)
 static void
 cmd_server_me(int argc, char **argv)
 {
-	(void)argc;
+	--argc;
+	++argv;
 
 	req("SERVER-ME %s %s %s", argv[0], argv[1], argv[2]);
 	ok();
@@ -781,6 +802,9 @@ cmd_server_me(int argc, char **argv)
 static void
 cmd_server_mode(int argc, char **argv)
 {
+	--argc;
+	++argv;
+
 	req("SERVER-MODE %s %s %s%c%s", argv[0], argv[1], argv[2],
 	    argc >= 4 ? ' '     : '\0',
 	    argc >= 4 ? argv[3] : "");
@@ -790,7 +814,8 @@ cmd_server_mode(int argc, char **argv)
 static void
 cmd_server_nick(int argc, char **argv)
 {
-	(void)argc;
+	--argc;
+	++argv;
 
 	req("SERVER-NICK %s %s", argv[0], argv[1]);
 	ok();
@@ -799,7 +824,8 @@ cmd_server_nick(int argc, char **argv)
 static void
 cmd_server_notice(int argc, char **argv)
 {
-	(void)argc;
+	--argc;
+	++argv;
 
 	req("SERVER-NOTICE %s %s %s", argv[0], argv[1], argv[2]);
 	ok();
@@ -808,7 +834,8 @@ cmd_server_notice(int argc, char **argv)
 static void
 cmd_server_part(int argc, char **argv)
 {
-	(void)argc;
+	--argc;
+	++argv;
 
 	/* Let's advertise irccd a bit. */
 	req("SERVER-PART %s %s %s", argv[0], argv[1],
@@ -819,6 +846,9 @@ cmd_server_part(int argc, char **argv)
 static void
 cmd_server_reconnect(int argc, char **argv)
 {
+	--argc;
+	++argv;
+
 	if (argc == 1)
 		req("SERVER-RECONNECT %s", argv[0]);
 	else
@@ -830,7 +860,8 @@ cmd_server_reconnect(int argc, char **argv)
 static void
 cmd_server_topic(int argc, char **argv)
 {
-	(void)argc;
+	--argc;
+	++argv;
 
 	req("SERVER-TOPIC %s %s %s", argv[0], argv[1], argv[2]);
 	ok();
@@ -915,11 +946,7 @@ run(int argc, char **argv)
 
 	if (!(c = find_cmd(argv[0])))
 		irc_util_die("abort: command not found\n");
-
-	--argc;
-	++argv;
-
-	if ((c->minargs != -1 && argc < c->minargs) || (c->minargs != -1 && argc > c->maxargs))
+	if ((c->minargs != -1 && argc - 1 < c->minargs) || (c->minargs != -1 && argc - 1 > c->maxargs))
 		irc_util_die("abort: invalid number of arguments\n");
 
 	c->exec(argc, argv);
@@ -973,15 +1000,14 @@ help(void)
 int
 main(int argc, char **argv)
 {
-	ketopt_t ko = KETOPT_INIT;
+	int ch;
 
-	--argc;
-	++argv;
+	putenv("POSIXLY_CORRECT=1");
 
-	for (int ch; (ch = ketopt(&ko, argc, argv, 0, "s:v", NULL)) != -1; ) {
+	while ((ch = getopt(argc, argv, "s:v")) != -1) {
 		switch (ch) {
 		case 's':
-			irc_util_strlcpy(sockaddr.sun_path, ko.arg, sizeof (sockaddr.sun_path));
+			irc_util_strlcpy(sockaddr.sun_path, optarg, sizeof (sockaddr.sun_path));
 			break;
 		case 'v':
 			verbose = 1;
@@ -992,8 +1018,11 @@ main(int argc, char **argv)
 		}
 	}
 
-	argc -= ko.ind;
-	argv += ko.ind;
+	argc -= optind;
+	argv += optind;
+
+	/* Reset options for subcommands. */
+	optind = 1;
 
 	if (argc < 1)
 		usage();

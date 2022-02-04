@@ -19,6 +19,6 @@
 project(irccdctl)
 
 add_executable(irccdctl ${irccdctl_SOURCE_DIR}/irccdctl.c)
-target_link_libraries(irccdctl libirccd libirccd-ketopt)
+target_link_libraries(irccdctl libirccd)
 source_group(TREE ${irccdctl_SOURCE_DIR} FILES ${irccdctl_SOURCE_DIR}/irccdctl.c)
 install(TARGETS irccdctl DESTINATION ${CMAKE_INSTALL_BINDIR})
