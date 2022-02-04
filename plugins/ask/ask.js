@@ -21,7 +21,7 @@ info = {
 	author: "David Demelier <markand@malikania.fr>",
 	license: "ISC",
 	summary: "Crazy module for asking a medium",
-	version: "@IRCCD_VERSION@"
+	version: "@irccd_VERSION@"
 };
 
 // Modules.

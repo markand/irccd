@@ -79,7 +79,17 @@ function(irccd_define_javascript_plugin)
 
 	add_custom_target(irccd-plugin-${PLG_NAME} SOURCES ${PLG_SCRIPT})
 	set_target_properties(irccd-plugin-${PLG_NAME} PROPERTIES FOLDER plugins)
-	install(FILES ${PLG_SCRIPT} DESTINATION ${CMAKE_INSTALL_LIBDIR}/irccd)
+
+	cmake_path(GET PLG_SCRIPT FILENAME filename)
+	configure_file(
+		${PLG_SCRIPT}
+		${CMAKE_CURRENT_BINARY_DIR}/${filename}
+		@ONLY
+	)
+	install(
+		FILES ${CMAKE_CURRENT_BINARY_DIR}/${filename}
+		DESTINATION ${CMAKE_INSTALL_LIBDIR}/irccd
+	)
 
 	if (PLG_MAN)
 		install(
