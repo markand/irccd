@@ -812,6 +812,8 @@ irc_server_flush(struct irc_server *s, const struct pollfd *pfd)
 			irc_server_connect(s);
 		break;
 	case IRC_SERVER_STATE_CONNECTED:
+		assert(pfd->fd == s->conn->fd);
+
 		if (difftime(time(NULL), s->last_tp) >= TIMEOUT) {
 			irc_log_warn("server %s: no message in more than %u seconds", s->name, TIMEOUT);
 			fail(s);
@@ -821,6 +823,8 @@ irc_server_flush(struct irc_server *s, const struct pollfd *pfd)
 		}
 		break;
 	case IRC_SERVER_STATE_CONNECTING:
+		assert(pfd->fd == s->conn->fd);
+
 		/*
 		 * Now the conn object is ready which means the server has
 		 * to authenticate.
