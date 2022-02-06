@@ -107,6 +107,10 @@ User name, (Optional, default: irccd).
 Real name, (Optional, default: IRC Client Daemon).
 .It Fa prefix No (string)
 Plugin prefix character, (Optional, default: "!").
+.It Fa ctcp No (object)
+An object with CTCP variables to send, see
+.Fn Irccd.Server.prototype.info
+method for possible values.
 .El
 .Pp
 .\" Irccd.Server.prototype.info
@@ -144,6 +148,14 @@ The current real name.
 The user name.
 .It Va nickname No (string)
 The current nickname.
+.It Va ctcp No (object)
+An object with CTCP properties, currently:
+.Bl -tag -width "Va version"
+.It Va version
+User version.
+.It Va source
+SCM source.
+.El
 .El
 .Pp
 .\" Irccd.Server.prototype.invite

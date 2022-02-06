@@ -144,6 +144,30 @@ get_channels(duk_context *ctx, struct irc_server *s)
 	duk_pop_n(ctx, 2);
 }
 
+static inline void
+get_ctcp(duk_context *ctx, struct irc_server *s)
+{
+	duk_get_prop_string(ctx, 0, "ctcp");
+
+	if (!duk_is_object(ctx, -1)) {
+		duk_pop(ctx);
+		return;
+	}
+
+	duk_get_prop_string(ctx, -1, "version");
+
+	if (duk_is_string(ctx, -1))
+		irc_util_strlcpy(s->ident.ctcpversion, duk_to_string(ctx, -1), sizeof (s->ident.ctcpversion));
+
+	duk_pop(ctx);
+	duk_get_prop_string(ctx, -1, "source");
+
+	if (duk_is_string(ctx, -1))
+		irc_util_strlcpy(s->ident.ctcpsource, duk_to_string(ctx, -1), sizeof (s->ident.ctcpsource));
+
+	duk_pop_2(ctx);
+}
+
 static int
 Server_prototype_info(duk_context *ctx)
 {
@@ -169,6 +193,14 @@ Server_prototype_info(duk_context *ctx)
 	duk_put_prop_string(ctx, -2, "nickname");
 	duk_push_string(ctx, s->ident.username);
 	duk_put_prop_string(ctx, -2, "username");
+
+	/* CTCP. */
+	duk_push_object(ctx);
+	duk_push_string(ctx, s->ident.ctcpversion);
+	duk_put_prop_string(ctx, -2, "version");
+	duk_push_string(ctx, s->ident.ctcpsource);
+	duk_put_prop_string(ctx, -2, "source");
+	duk_put_prop_string(ctx, -2, "ctcp");
 
 	/* Prefixes. */
 	duk_push_array(ctx);
@@ -408,6 +440,7 @@ Server_constructor(duk_context *ctx)
 	get_ip(ctx, s);
 	get_ssl(ctx, s);
 	get_channels(ctx, s);
+	get_ctcp(ctx, s);
 
 	irc_server_incref(s);
 
