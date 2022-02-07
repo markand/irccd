@@ -50,25 +50,25 @@ servers_add(void)
 	s = s->next;
 	GREATEST_ASSERT(!s);
 
-	/* irc.servers -> s2 -> s1 */
+	/* irc.servers -> s1 -> s2 */
 	irc_bot_server_add(s2);
 	s = irc.servers;
 	GREATEST_ASSERT_EQ(1, s->refc);
-	GREATEST_ASSERT_EQ(s, s2);
-	s = s->next;
 	GREATEST_ASSERT_EQ(s, s1);
+	s = s->next;
+	GREATEST_ASSERT_EQ(s, s2);
 	s = s->next;
 	GREATEST_ASSERT(!s);
 
-	/* irc.servers -> s3 -> s2 -> s1 */
+	/* irc.servers -> s1 -> s2 -> s3 */
 	irc_bot_server_add(s3);
 	s = irc.servers;
 	GREATEST_ASSERT_EQ(1, s->refc);
-	GREATEST_ASSERT_EQ(s, s3);
+	GREATEST_ASSERT_EQ(s, s1);
 	s = s->next;
 	GREATEST_ASSERT_EQ(s, s2);
 	s = s->next;
-	GREATEST_ASSERT_EQ(s, s1);
+	GREATEST_ASSERT_EQ(s, s3);
 	s = s->next;
 	GREATEST_ASSERT(!s);
 
@@ -89,7 +89,7 @@ servers_remove(void)
 	irc_server_incref(s2);
 	irc_server_incref(s3);
 
-	/* irc.servers -> s3 -> s2 -> s1 */
+	/* irc.servers -> s1 -> s2 -> s3 */
 	irc_bot_server_add(s1);
 	irc_bot_server_add(s2);
 	irc_bot_server_add(s3);
@@ -101,9 +101,9 @@ servers_remove(void)
 	GREATEST_ASSERT_EQ(1, s2->refc);
 	GREATEST_ASSERT_EQ(2, s3->refc);
 	s = irc.servers;
-	GREATEST_ASSERT_EQ(s, s3);
-	s = s->next;
 	GREATEST_ASSERT_EQ(s, s1);
+	s = s->next;
+	GREATEST_ASSERT_EQ(s, s3);
 	s = s->next;
 	GREATEST_ASSERT(!s);
 

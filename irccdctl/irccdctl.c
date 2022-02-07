@@ -942,10 +942,10 @@ help(void)
 	fprintf(stderr, "       irccdctl plugin-info id\n");
 	fprintf(stderr, "       irccdctl plugin-list\n");
 	fprintf(stderr, "       irccdctl plugin-load name\n");
-	fprintf(stderr, "       irccdctl plugin-path [variable [value]]\n");
-	fprintf(stderr, "       irccdctl plugin-template [variable [value]]\n");
-	fprintf(stderr, "       irccdctl plugin-reload [plugin]\n");
-	fprintf(stderr, "       irccdctl plugin-unload [plugin]\n");
+	fprintf(stderr, "       irccdctl plugin-path id [variable [value]]\n");
+	fprintf(stderr, "       irccdctl plugin-template id [variable [value]]\n");
+	fprintf(stderr, "       irccdctl plugin-reload [id]\n");
+	fprintf(stderr, "       irccdctl plugin-unload [id]\n");
 	fprintf(stderr, "       irccdctl rule-add [-c channel] [-e event] [-i index] [-o origin] [-p plugin] [-s server] accept|drop\n");
 	fprintf(stderr, "       irccdctl rule-edit [-a accept|drop] [-c|C channel] [-e|E event] [-o|O origin] [-s|S server] index\n");
 	fprintf(stderr, "       irccdctl rule-list\n");
