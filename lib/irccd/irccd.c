@@ -282,7 +282,7 @@ irc_bot_server_add(struct irc_server *s)
 	irc_server_incref(s);
 	irc_server_connect(s);
 
-	LL_PREPEND(irc.servers, s);
+	LL_APPEND(irc.servers, s);
 }
 
 struct irc_server *
@@ -624,7 +624,7 @@ irc_bot_flush(const struct pollfd *fds)
 	queue = NULL;
 
 	LL_FOREACH(irc.servers, s)
-		irc_server_flush(s, fds);
+		irc_server_flush(s, fds++);
 }
 
 int

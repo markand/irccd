@@ -21,7 +21,7 @@ info = {
 	author: "David Demelier <markand@malikania.fr>",
 	license: "ISC",
 	summary: "display some jokes",
-	version: "@IRCCD_VERSION@"
+	version: "@irccd_VERSION@"
 };
 
 // Modules.

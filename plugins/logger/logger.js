@@ -21,7 +21,7 @@ info = {
 	author: "David Demelier <markand@malikania.fr>",
 	license: "ISC",
 	summary: "A plugin to log everything",
-	version: "@IRCCD_VERSION@"
+	version: "@irccd_VERSION@"
 };
 
 // Modules.

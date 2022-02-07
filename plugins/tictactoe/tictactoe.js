@@ -21,7 +21,7 @@ info = {
 	author: "David Demelier <markand@malikania.fr>",
 	license: "ISC",
 	summary: "A tictactoe game for IRC",
-	version: "@IRCCD_VERSION@"
+	version: "@irccd_VERSION@"
 };
 
 // Modules.

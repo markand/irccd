@@ -339,7 +339,7 @@ cmd_plugin_list(struct peer *p, char *line)
 }
 
 /*
- * PLUGIN-RELOAD plugin
+ * PLUGIN-RELOAD [plugin]
  */
 static int
 cmd_plugin_reload(struct peer *p, char *line)
@@ -347,12 +347,14 @@ cmd_plugin_reload(struct peer *p, char *line)
 	struct irc_plugin *plg;
 	const char *args[1] = {0};
 
-	if (parse(line, args, 1) != 1)
-		return EINVAL;
-	if (!(plg = irc_bot_plugin_get(args[0])))
-		return peer_send(p, "could not reload plugin: %s", strerror(ENOENT)), 0;
+	if (parse(line, args, 1) == 1) {
+		if (!(plg = irc_bot_plugin_get(args[0])))
+			return peer_send(p, "could not reload plugin: %s", strerror(ENOENT)), 0;
 
-	irc_plugin_reload(plg);
+		irc_plugin_reload(plg);
+	} else
+		DL_FOREACH(irc.plugins, plg)
+			irc_plugin_reload(plg);
 
 	return ok(p);
 }
