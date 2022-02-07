@@ -1,12 +1,13 @@
 IRC Client Daemon CHANGES
 =========================
 
-irccd 4.0.1 2022-02-??
+irccd 4.0.1 2022-02-07
 ======================
 
 - Fix disconnection with multiple servers.
 - Fix Javascript `Irccd.Server` constructor function.
 - Substitute the irccd version in Javascript plugins.
+- Fix `irccdctl plugin-reload` command without argument.
 
 irccd 4.0.0 2022-02-03
 ======================
