@@ -31,6 +31,14 @@ extern struct irc {
 	struct irc_rule *rules;
 	struct irc_hook *hooks;
 } irc;
+
+struct irc_pollable {
+	void  *data;
+	int  (*fd)(void *data);
+	void (*want)(int *frecv, int *fsend, void *data);
+	int  (*sync)(int frecv, int fsend, void *data);
+	void (*finish)(void *data);
+};
 .Ed
 .Pp
 .Ft void
@@ -86,6 +94,8 @@ extern struct irc {
 .Ft void
 .Fn irc_bot_post "void (*fn)(void *), void *data"
 .Ft void
+.Fn irc_bot_pollable_add "struct irc_pollable *pb"
+.Ft void
 .Fn irc_bot_finish "void"
 .\" DESCRIPTION
 .Sh DESCRIPTION
@@ -111,6 +121,44 @@ Rules that filter incoming IRC events (see
 .It Va hooks
 Optional IRC event hooks (see
 .Xr libirccd-hook 3) .
+.El
+.Pp
+The
+.Vt irc_pollable
+interface is an opaque structure that can be used to insert custom descriptors
+into the irccd main loop.
+.Pp
+All these functions takes as last argument the user data specified in the field
+.Va data .
+.Pp
+Available fields:
+.Bl -tag
+.It Va data
+Opaque user data, can be NULL.
+.It Va fd
+This function must return the user file descriptor to monitor.
+.It Va want
+This function must assign to the
+.Fa frecv
+and
+.Fa fsend
+arguments if the descriptor has to be selected for read or write condition
+respectively. They are set to 0 prior to the invocation.
+.It Va sync
+This function is called after polling for the file descriptors. The arguments
+.Fa frecv
+and
+.Fa fsend
+will be set to 1 if the condition were met similarly to the
+.Va want
+function.
+.Pp
+The function must return 0 on success and any other value on error.
+.It Va finish
+This optional function is called when the pollable is about to be finalized,
+this happens when the function
+.Va sync
+returned -1 or the bot is quitting.
 .El
 .Pp
 The
@@ -275,6 +323,15 @@ functions if you want to write threaded plugins. The non-NULL
 function will be called with
 .Fa data
 as first argument.
+.Pp
+The
+.Fn irc_bot_pollable_add
+function inserts the new
+.Fa pb
+to the list of custom descriptor to monitor in the irccd main's loop. Ownership
+is kept to the user and the address of
+.Fa pb
+must remain valid until it is no longer necessary.
 .Pp
 The
 .Fn irc_bot_finish

@@ -30,6 +30,14 @@
 extern "C" {
 #endif
 
+struct irc_pollable {
+	void *data;
+	int (*fd)(void *);
+	void (*want)(int *, int *, void *);
+	int (*sync)(int, int, void *);
+	void (*finish)(void *);
+};
+
 extern struct irc {
 	struct irc_server *servers;
 	struct irc_plugin *plugins;
@@ -115,6 +123,9 @@ irc_bot_dequeue(struct irc_event *);
 
 void
 irc_bot_post(void (*)(void *), void *);
+
+void
+irc_bot_pollable_add(struct irc_pollable *);
 
 void
 irc_bot_finish(void);
