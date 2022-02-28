@@ -19,7 +19,6 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
-#include <pthread.h>
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,6 +29,7 @@
 #include <irccd/config.h>
 #include <irccd/irccd.h>
 #include <irccd/limits.h>
+#include <irccd/log.h>
 #include <irccd/server.h>
 #include <irccd/subst.h>
 #include <irccd/util.h>
@@ -41,9 +41,10 @@
 #define PAGE_MAX 5242880
 
 struct req {
-	pthread_t thr;
 	CURL *curl;
+	CURLM *multi;
 	struct irc_server *server;
+	struct irc_pollable pollable;
 	int status;
 	char *link;
 	char *chan;
@@ -57,7 +58,7 @@ enum {
 	TPL_INFO
 };
 
-static unsigned long timeout = 30;
+static unsigned long timeout = 3;
 
 static char templates[][512] = {
 	[TPL_INFO] = "link from #{nickname}: #{title}"
@@ -170,7 +171,7 @@ fmt(const struct req *req, char *title)
 	struct irc_subst subst = {
 		.time = time(NULL),
 		.flags = IRC_SUBST_DATE | IRC_SUBST_KEYWORDS | IRC_SUBST_IRC_ATTRS,
-		.keywords = (struct irc_subst_keyword []) {
+		.keywords = (const struct irc_subst_keyword []) {
 			{ "channel",    req->chan               },
 			{ "nickname",   req->nickname           },
 			{ "origin",     req->origin             },
@@ -186,50 +187,32 @@ fmt(const struct req *req, char *title)
 }
 
 static void
-req_finish(struct req *);
-
-static void
-complete(void *data)
+complete(struct req *req)
 {
-	struct req *req = data;
 	char *title;
 
-	if (req->status && (title = parse(req)))
+	if ((title = parse(req)))
 		irc_server_message(req->server, req->chan, fmt(req, title));
-
-	pthread_join(req->thr, NULL);
-	req_finish(req);
-}
-
-/*
- * This function is running in a separate thread.
- */
-static void *
-routine(void *data)
-{
-	struct req *req = data;
-	long code = 0;
-
-	if (curl_easy_perform(req->curl) == 0) {
-		/* We only accept 200 result. */
-		curl_easy_getinfo(req->curl, CURLINFO_RESPONSE_CODE, &code);
-		req->status = code == 200;
-	}
-
-	irc_bot_post(complete, req);
-
-	return NULL;
 }
 
 static void
 req_finish(struct req *req)
 {
-	assert(req);
+	if (!req)
+		return;
 
 	if (req->server)
 		irc_server_decref(req->server);
-	if (req->curl)
+
+	if (req->curl) {
+		if (req->multi)
+			curl_multi_remove_handle(req->multi, req->curl);
+
 		curl_easy_cleanup(req->curl);
+	}
+	if (req->multi)
+		curl_multi_cleanup(req->multi);
+
 	if (req->fp)
 		fclose(req->fp);
 
@@ -240,58 +223,151 @@ req_finish(struct req *req)
 	free(req);
 }
 
-static struct req *
-req_new(struct irc_server *server, const char *origin, const char *channel, char *link)
+static int
+pollable_fd(void *data)
+{
+	struct req *r = data;
+	fd_set in, out, exc;
+	int fd = 0;
+
+	FD_ZERO(&in);
+	FD_ZERO(&out);
+	FD_ZERO(&exc);
+
+	curl_multi_fdset(r->multi, &in, &out, &exc, &fd);
+
+	return fd;
+}
+
+static void
+pollable_want(int *frecv, int *fsend, void *data)
+{
+	struct req *r = data;
+	fd_set in, out, exc;
+	int maxfd = 0;
+
+	FD_ZERO(&in);
+	FD_ZERO(&out);
+	FD_ZERO(&exc);
+
+	curl_multi_fdset(r->multi, &in, &out, &exc, &maxfd);
+
+	if (FD_ISSET(maxfd, &in))
+		*frecv = 1;
+	if (FD_ISSET(maxfd, &out))
+		*fsend = 1;
+}
+
+static int
+pollable_sync(int frecv, int fsend, void *data)
+{
+	(void)frecv;
+	(void)fsend;
+
+	CURLMsg *msg;
+	struct req *r = data;
+	int pending, msgsz;
+
+	/*
+	 * CURL does its own job reading/sending without taking action on what
+	 * have been found.
+	 */
+	if (curl_multi_perform(r->multi, &pending) < 0)
+		return -1;
+
+	/* We only have one handle so we can just assume 0 means complete. */
+	if (pending)
+		return 0;
+
+	while ((msg = curl_multi_info_read(r->multi, &msgsz))) {
+		if (msg->msg != CURLMSG_DONE)
+			continue;
+
+		switch (msg->data.result) {
+		case CURLE_OPERATION_TIMEDOUT:
+			irc_log_warn("links: %s timed out", r->link);
+			break;
+		case CURLE_OK:
+			complete(r);
+			break;
+		default:
+			break;
+		}
+	}
+
+	return -1;
+}
+
+static void
+pollable_finish(void *data)
+{
+	req_finish(data);
+}
+
+static void
+req(struct irc_server *server, const char *origin, const char *channel, char *link)
 {
 	assert(link);
 
 	struct req *req;
 	struct irc_server_user user;
+	int pending;
 
-	if (!(req = calloc(1, sizeof (*req) + PAGE_MAX + 1))) {
-		free(link);
-		return NULL;
-	}
+	if (!(req = calloc(1, sizeof (*req) + PAGE_MAX + 1)))
+		goto enomem;
 	if (!(req->curl = curl_easy_init()))
+		goto enomem;
+	if (!(req->multi = curl_multi_init()))
 		goto enomem;
 	if (!(req->fp = fmemopen(req->buf, PAGE_MAX, "w")))
 		goto enomem;
 
 	irc_server_incref(server);
 	irc_server_split(origin, &user);
+
 	req->link = link;
 	req->server = server;
-	req->chan = strdup(channel);
-	req->nickname = strdup(user.nickname);
-	req->origin = strdup(origin);
+	req->chan = irc_util_strdup(channel);
+	req->nickname = irc_util_strdup(user.nickname);
+	req->origin = irc_util_strdup(origin);
 
 	curl_easy_setopt(req->curl, CURLOPT_URL, link);
 	curl_easy_setopt(req->curl, CURLOPT_FOLLOWLOCATION, 1L);
 	curl_easy_setopt(req->curl, CURLOPT_WRITEFUNCTION, callback);
 	curl_easy_setopt(req->curl, CURLOPT_WRITEDATA, req);
 	curl_easy_setopt(req->curl, CURLOPT_TIMEOUT, timeout);
+	curl_easy_setopt(req->curl, CURLOPT_NOSIGNAL, 1L);
+	curl_multi_add_handle(req->multi, req->curl);
 
-	return req;
+	/*
+	 * Try immediately to create a socket, otherwise we would poll for a
+	 * long time before trying to fetch data.
+	 */
+	if (curl_multi_perform(req->multi, &pending) != CURLM_OK) {
+		req_finish(req);
+		return;
+	}
+
+	req->pollable.data = req;
+	req->pollable.fd = pollable_fd;
+	req->pollable.want = pollable_want;
+	req->pollable.sync = pollable_sync;
+	req->pollable.finish = pollable_finish;
+	irc_bot_pollable_add(&req->pollable);
+
+	return;
 
 enomem:
-	errno = ENOMEM;
+	free(link);
 	req_finish(req);
 
-	return NULL;
-}
-
-static void
-req_start(struct req *req)
-{
-	if (pthread_create(&req->thr, NULL, routine, req) != 0)
-		req_finish(req);
+	errno = ENOMEM;
 }
 
 void
 links_event(const struct irc_event *ev)
 {
-	struct req *req;
-	char *loc, *link, *end;
+	char *loc, *end;
 
 	if (ev->type != IRC_EVENT_MESSAGE)
 		return;
@@ -305,13 +381,8 @@ links_event(const struct irc_event *ev)
 	for (end = loc; *end && !isspace(*end); )
 		++end;
 
-	link = irc_util_strndup(loc, end - loc);
-
-	/* If the function fails, link is free'd anyway. */
-	if (!(req = req_new(ev->server, ev->message.origin, ev->message.channel, link)))
-		return;
-
-	req_start(req);
+	req(ev->server, ev->message.origin, ev->message.channel,
+	    irc_util_strndup(loc, end - loc));
 }
 
 void
