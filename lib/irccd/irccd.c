@@ -268,8 +268,6 @@ delpollable(struct pollable *pb)
 		pb->iface->finish(pb->iface->data);
 
 	LL_DELETE(pollables, pb);
-	free(pb);
-
 	pollablesz--;
 }
 
