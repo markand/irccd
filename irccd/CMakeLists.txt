@@ -75,6 +75,15 @@ bison_target(yacc ${irccd_SOURCE_DIR}/conf.y
 flex_target(lex ${irccd_SOURCE_DIR}/lex.l ${irccd_BINARY_DIR}/lex.c)
 add_flex_bison_dependency(lex yacc)
 
+if (IRCCD_WITH_HTTP AND IRCCD_WITH_JS)
+	find_package(CURL REQUIRED)
+	list(
+		APPEND SOURCES
+		${irccd_SOURCE_DIR}/jsapi-http.c
+		${irccd_SOURCE_DIR}/jsapi-http.h
+	)
+endif ()
+
 #
 # libirccd-static
 # -------------------------------------------------------------------
@@ -97,6 +106,10 @@ target_link_libraries(
 	libirccd
 )
 set_target_properties(irccd-static PROPERTIES PREFIX "")
+
+if (IRCCD_WITH_HTTP AND IRCCD_WITH_JS)
+	target_link_libraries(irccd-static CURL::libcurl)
+endif ()
 
 #
 # irccd(1)

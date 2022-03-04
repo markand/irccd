@@ -1,5 +1,5 @@
 /*
- * config.h.h -- irccd configuration
+ * jsapi-http.h -- Irccd.Http API
  *
  * Copyright (c) 2013-2022 David Demelier <markand@malikania.fr>
  *
@@ -16,21 +16,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef IRCCD_CONFIG_H
-#define IRCCD_CONFIG_H
+#ifndef IRCCD_JSAPI_HTTP_H
+#define IRCCD_JSAPI_HTTP_H
 
-#define IRCCD_VERSION_MAJOR     @irccd_VERSION_MAJOR@
-#define IRCCD_VERSION_MINOR     @irccd_VERSION_MINOR@
-#define IRCCD_VERSION_PATCH     @irccd_VERSION_PATCH@
-#define IRCCD_VERSION           "@irccd_VERSION@"
+#include <duktape.h>
 
-#define IRCCD_CACHEDIR          "@CMAKE_INSTALL_FULL_LOCALSTATEDIR@/cache/irccd"
-#define IRCCD_SYSCONFDIR        "@CMAKE_INSTALL_FULL_SYSCONFDIR@"
-#define IRCCD_LIBDIR            "@CMAKE_INSTALL_FULL_LIBDIR@"
-#define IRCCD_DATADIR           "@CMAKE_INSTALL_FULL_DATADIR@/irccd"
+void
+jsapi_http_load(duk_context *);
 
-#cmakedefine IRCCD_WITH_JS
-#cmakedefine IRCCD_WITH_SSL
-#cmakedefine IRCCD_WITH_HTTP
-
-#endif /* !IRCCD_CONFIG_H */
+#endif /* !IRCCD_JSAPI_HTTP_H */

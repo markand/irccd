@@ -55,6 +55,7 @@ endif ()
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
+option(IRCCD_WITH_HTTP "Enable HTTP support (requires libcurl)" On)
 option(IRCCD_WITH_EXAMPLES "Enable example files" On)
 option(IRCCD_WITH_JS "Enable Javascript" On)
 option(IRCCD_WITH_MAN "Enable manual pages" On)
